@@ -1,82 +1,75 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: [GIT PULL 0/1] EFI mixed mode fix for v4.18
-Date: Wed, 11 Jul 2018 17:37:37 +0200
-Message-ID: <20180711153736.GA4500@gmail.com>
-References: <20180711090235.9327-1-ard.biesheuvel@linaro.org>
- <20180711101303.GA8574@gmail.com>
- <CAKv+Gu8m4UgL0GyYDuu5z+dzEF=N--H4PkqoO_xqwyW2_A+RMA@mail.gmail.com>
- <20180711111427.GA27216@gmail.com>
- <CAKv+Gu_LJEu11NV5CVTPV9ieZ=XKkgW2qdkFJ+1iWk+F2jNPww@mail.gmail.com>
+From: Will Deacon <will.deacon@arm.com>
+Subject: Re: [RFC PATCH 0/2] efi: add contents of LinuxExtraArgs EFI var to
+ command line
+Date: Thu, 12 Jul 2018 18:01:34 +0100
+Message-ID: <20180712170134.GF26935@arm.com>
+References: <20180704154919.18564-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 Content-Disposition: inline
-In-Reply-To: <CAKv+Gu_LJEu11NV5CVTPV9ieZ=XKkgW2qdkFJ+1iWk+F2jNPww@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
+In-Reply-To: <20180704154919.18564-1-ard.biesheuvel@linaro.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: linux-efi <linux-efi@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Hans de Goede <hdegoede@redhat.com>, Wilfried Klaebe <linux-kernel@lebenslange-mailadresse.de>
+Cc: mark.rutland@arm.com, linux-efi@vger.kernel.org, Geoff Levand <geoff@infradead.org>, catalin.marinas@arm.com, Riku Voipio <riku.voipio@linaro.org>, Sudeep Holla <sudeep.holla@arm.com>, leif.lindholm@linaro.org, linux-acpi@vger.kernel.org, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, James Morse <james.morse@arm.com>, Hanjun Guo <hanjun.guo@linaro.org>, Mark Salter <msalter@redhat.com>, linux-arm-kernel@lists.infradead.org, Ian Campbell <ijc@debian.org>
 List-Id: linux-efi@vger.kernel.org
 
+Hi Ard,
 
-* Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
-
-> On 11 July 2018 at 13:14, Ingo Molnar <mingo@kernel.org> wrote:
-> >
-> > * Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
-> >
-> >> On 11 July 2018 at 12:13, Ingo Molnar <mingo@kernel.org> wrote:
-> >> >
-> >> > * Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
-> >> >
-> >> >> The following changes since commit 1e4b044d22517cae7047c99038abb444423243ca:
-> >> >>
-> >> >>   Linux 4.18-rc4 (2018-07-08 16:34:02 -0700)
-> >> >>
-> >> >> are available in the Git repository at:
-> >> >>
-> >> >>   git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-urgent
-> >> >>
-> >> >> for you to fetch changes up to d7f2e972e702d329fe11d6956df99dfc31211c25:
-> >> >>
-> >> >>   efi/x86: remove pointless call to PciIo->Attributes() (2018-07-11 10:52:46 +0200)
-> >> >>
-> >> >> ----------------------------------------------------------------
-> >> >> A single fix for the x86 PCI I/O protocol handling code that got
-> >> >> broken for mixed mode (64-bit Linux/x86 on 32-bit UEFI) after a
-> >> >> fix was applied in -rc2 to fix it for ordinary 64-bit Linux/x86.
-> >> >
-> >> > Just curious, because it's unclear from the changelog, what was the symptom, a
-> >> > boot hang, instant reboot, or some other misbehavior?
-> >>
-> >> Hans reported that his mixed mode tablet would not boot at all any
-> >> more, but enter a reboot loop without any logs printed by the kernel.
-> >>
-> >> > Also, what's the scope of
-> >> > the fix: were all 64-bit on 32-bit UEFI mixed-mode bootups affected, or only a
-> >> > certain subset?
-> >> >
-> >>
-> >> Any mixed mode system with PCI is likely to be affected. I have added
-> >> a QEMU mixed mode config to my boot test environment to catch errors
-> >> like this one.
-> >
-> > Ok, I've added this information to the commit - will be useful to backporters,
-> > to judge the severity of the bug fixed.
-> >
+On Wed, Jul 04, 2018 at 05:49:17PM +0200, Ard Biesheuvel wrote:
+> As noted by Ian, many DMI based quirks for x86 ACPI machines disable
+> features that can also be disabled via the kernel command line. Similarly,
+> a quirk is under discussion for a arm64 ACPI machine [0] that explodes
+> when enabling support for hardware error reporting via the ACPI HEST table.
 > 
-> Perhaps it wasn't clear from the commit log that only v4.18-rc2 and
-> later is affected by the mixed mode issue, since that is when a fix
-> for ordinary 64-bit x86 was applied that affected v4.18-rc1.
+> When support for DMI tables was introduced to arm64 and ARM, the agreement
+> was that they are informational only, i.e., provided to userland to describe
+> the platform, not for keying off of to enable quirks in the kernel.
+> 
+> There are a couple of reasons for this:
+> - Unlike the x86 architecture, where virtually all platforms are PC variants,
+>   and the presence of ACPI and DMI tables may be assumed, the arm64 architecture
+>   is much more heterogeneous, and none of UEFI, ACPI or DMI or actually mandated
+>   or especially common across arm64 platforms; using DMI only makes sense for
+>   working around a limited subset of platform issues that have to do with
+>   firmware running on platforms that bother to implement it in the first place.
+> - DMI is not initialized as early as it is on x86, and doing so is not trivial.
+>   This means that even on ACPI/DMI machines, some issues may require quirks that
+>   are enabled in a different way, or we need to refactor the DMI support so that
+>   we can enable it as early as x86 does.
+> - Using DMI tables fundamentally means quirking *after* the fact, which makes it
+>   a moving target. Some quirks may require the DMI match table to be updated if
+>   someone happens to change a string in the DMI tables when shipping a mostly
+>   identical platform.
+> 
+> So instead, let's provide these platforms with the facilities required to enable
+> such quirks at the platform level. Especially for UEFI systems, if upgrading
+> firmware is a reasonable prerequisite for being able to upgrade to the latest
+> kernel, having to run a script that sets a UEFI variable (either via the Linux
+> command line of from the UEFI shell) should not be an unreasonable requirement
+> either, and so we can solve part of this issue by configuring extra command line
+> arguments persistenly from the firmware environment. This solves all the above
+> issues in an unintrusive manner, given that the kernel command line is already
+> made available extremely early in the boot, and the fact that it already permits
+> a wide range of configuration options and overrides to be set, including the
+> 'hest_disable=1' option that works around the issue addressed by [0].
 
-Ah, ok. Still, if for whatever reason the commit that introduced the problem is 
-backported, this one will be too. The chain of sha1's seemed rather long, so 
-there's a chance for that.
+I'm torn on this one. Whilst I strongly agree that keying off DMI tables
+to detect firmware quirks is a bad idea on arm64, silently extending the
+kernel command-line also has its downsides. The command-line provides ways
+to override kernel defaults, so if a user has forced a feature on/off,
+then I think this should take precedence over quirks and we should taint
+instead, rather than silently override the option.
 
-> However, the EFI stub code is not expected to expand that much, and so for the 
-> time being, I'm fine with a combination of review and rigorous testing
+I'd be interested in other opinions on this.
 
-Fair enough!
-
-Thanks,
-
-	Ingo
+Will
