@@ -1,13 +1,13 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+From: Ian Campbell <ijc@debian.org>
 Subject: Re: [RFC PATCH 0/2] efi: add contents of LinuxExtraArgs EFI var to
  command line
-Date: Thu, 12 Jul 2018 19:39:49 +0200
-Message-ID: <40295986-7E31-46AC-8446-4DA1A787390D@linaro.org>
+Date: Thu, 12 Jul 2018 20:24:19 +0100
+Message-ID: <1531423459.3582.15.camel@debian.org>
 References: <20180704154919.18564-1-ard.biesheuvel@linaro.org>
  <20180712170134.GF26935@arm.com>
-Mime-Version: 1.0 (1.0)
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <20180712170134.GF26935@arm.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
@@ -19,68 +19,47 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Will Deacon <will.deacon@arm.com>
-Cc: mark.rutland@arm.com, linux-efi@vger.kernel.org, Geoff Levand <geoff@infradead.org>, catalin.marinas@arm.com, Riku Voipio <riku.voipio@linaro.org>, Sudeep Holla <sudeep.holla@arm.com>, leif.lindholm@linaro.org, linux-acpi@vger.kernel.org, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, James Morse <james.morse@arm.com>, Hanjun Guo <hanjun.guo@linaro.org>, Mark Salter <msalter@redhat.com>, linux-arm-kernel@lists.infradead.org, Ian Campbell <ijc@debian.org>
+To: Will Deacon <will.deacon@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: mark.rutland@arm.com, linux-efi@vger.kernel.org, Geoff Levand <geoff@infradead.org>, catalin.marinas@arm.com, Riku Voipio <riku.voipio@linaro.org>, Sudeep Holla <sudeep.holla@arm.com>, leif.lindholm@linaro.org, linux-acpi@vger.kernel.org, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, James Morse <james.morse@arm.com>, Hanjun Guo <hanjun.guo@linaro.org>, Mark Salter <msalter@redhat.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-Cj4gT24gMTIgSnVsIDIwMTgsIGF0IDE5OjAxLCBXaWxsIERlYWNvbiA8d2lsbC5kZWFjb25AYXJt
-LmNvbT4gd3JvdGU6Cj4gCj4gSGkgQXJkLAo+IAo+PiBPbiBXZWQsIEp1bCAwNCwgMjAxOCBhdCAw
-NTo0OToxN1BNICswMjAwLCBBcmQgQmllc2hldXZlbCB3cm90ZToKPj4gQXMgbm90ZWQgYnkgSWFu
-LCBtYW55IERNSSBiYXNlZCBxdWlya3MgZm9yIHg4NiBBQ1BJIG1hY2hpbmVzIGRpc2FibGUKPj4g
-ZmVhdHVyZXMgdGhhdCBjYW4gYWxzbyBiZSBkaXNhYmxlZCB2aWEgdGhlIGtlcm5lbCBjb21tYW5k
-IGxpbmUuIFNpbWlsYXJseSwKPj4gYSBxdWlyayBpcyB1bmRlciBkaXNjdXNzaW9uIGZvciBhIGFy
-bTY0IEFDUEkgbWFjaGluZSBbMF0gdGhhdCBleHBsb2Rlcwo+PiB3aGVuIGVuYWJsaW5nIHN1cHBv
-cnQgZm9yIGhhcmR3YXJlIGVycm9yIHJlcG9ydGluZyB2aWEgdGhlIEFDUEkgSEVTVCB0YWJsZS4K
-Pj4gCj4+IFdoZW4gc3VwcG9ydCBmb3IgRE1JIHRhYmxlcyB3YXMgaW50cm9kdWNlZCB0byBhcm02
-NCBhbmQgQVJNLCB0aGUgYWdyZWVtZW50Cj4+IHdhcyB0aGF0IHRoZXkgYXJlIGluZm9ybWF0aW9u
-YWwgb25seSwgaS5lLiwgcHJvdmlkZWQgdG8gdXNlcmxhbmQgdG8gZGVzY3JpYmUKPj4gdGhlIHBs
-YXRmb3JtLCBub3QgZm9yIGtleWluZyBvZmYgb2YgdG8gZW5hYmxlIHF1aXJrcyBpbiB0aGUga2Vy
-bmVsLgo+PiAKPj4gVGhlcmUgYXJlIGEgY291cGxlIG9mIHJlYXNvbnMgZm9yIHRoaXM6Cj4+IC0g
-VW5saWtlIHRoZSB4ODYgYXJjaGl0ZWN0dXJlLCB3aGVyZSB2aXJ0dWFsbHkgYWxsIHBsYXRmb3Jt
-cyBhcmUgUEMgdmFyaWFudHMsCj4+ICBhbmQgdGhlIHByZXNlbmNlIG9mIEFDUEkgYW5kIERNSSB0
-YWJsZXMgbWF5IGJlIGFzc3VtZWQsIHRoZSBhcm02NCBhcmNoaXRlY3R1cmUKPj4gIGlzIG11Y2gg
-bW9yZSBoZXRlcm9nZW5lb3VzLCBhbmQgbm9uZSBvZiBVRUZJLCBBQ1BJIG9yIERNSSBvciBhY3R1
-YWxseSBtYW5kYXRlZAo+PiAgb3IgZXNwZWNpYWxseSBjb21tb24gYWNyb3NzIGFybTY0IHBsYXRm
-b3JtczsgdXNpbmcgRE1JIG9ubHkgbWFrZXMgc2Vuc2UgZm9yCj4+ICB3b3JraW5nIGFyb3VuZCBh
-IGxpbWl0ZWQgc3Vic2V0IG9mIHBsYXRmb3JtIGlzc3VlcyB0aGF0IGhhdmUgdG8gZG8gd2l0aAo+
-PiAgZmlybXdhcmUgcnVubmluZyBvbiBwbGF0Zm9ybXMgdGhhdCBib3RoZXIgdG8gaW1wbGVtZW50
-IGl0IGluIHRoZSBmaXJzdCBwbGFjZS4KPj4gLSBETUkgaXMgbm90IGluaXRpYWxpemVkIGFzIGVh
-cmx5IGFzIGl0IGlzIG9uIHg4NiwgYW5kIGRvaW5nIHNvIGlzIG5vdCB0cml2aWFsLgo+PiAgVGhp
-cyBtZWFucyB0aGF0IGV2ZW4gb24gQUNQSS9ETUkgbWFjaGluZXMsIHNvbWUgaXNzdWVzIG1heSBy
-ZXF1aXJlIHF1aXJrcyB0aGF0Cj4+ICBhcmUgZW5hYmxlZCBpbiBhIGRpZmZlcmVudCB3YXksIG9y
-IHdlIG5lZWQgdG8gcmVmYWN0b3IgdGhlIERNSSBzdXBwb3J0IHNvIHRoYXQKPj4gIHdlIGNhbiBl
-bmFibGUgaXQgYXMgZWFybHkgYXMgeDg2IGRvZXMuCj4+IC0gVXNpbmcgRE1JIHRhYmxlcyBmdW5k
-YW1lbnRhbGx5IG1lYW5zIHF1aXJraW5nICphZnRlciogdGhlIGZhY3QsIHdoaWNoIG1ha2VzIGl0
-Cj4+ICBhIG1vdmluZyB0YXJnZXQuIFNvbWUgcXVpcmtzIG1heSByZXF1aXJlIHRoZSBETUkgbWF0
-Y2ggdGFibGUgdG8gYmUgdXBkYXRlZCBpZgo+PiAgc29tZW9uZSBoYXBwZW5zIHRvIGNoYW5nZSBh
-IHN0cmluZyBpbiB0aGUgRE1JIHRhYmxlcyB3aGVuIHNoaXBwaW5nIGEgbW9zdGx5Cj4+ICBpZGVu
-dGljYWwgcGxhdGZvcm0uCj4+IAo+PiBTbyBpbnN0ZWFkLCBsZXQncyBwcm92aWRlIHRoZXNlIHBs
-YXRmb3JtcyB3aXRoIHRoZSBmYWNpbGl0aWVzIHJlcXVpcmVkIHRvIGVuYWJsZQo+PiBzdWNoIHF1
-aXJrcyBhdCB0aGUgcGxhdGZvcm0gbGV2ZWwuIEVzcGVjaWFsbHkgZm9yIFVFRkkgc3lzdGVtcywg
-aWYgdXBncmFkaW5nCj4+IGZpcm13YXJlIGlzIGEgcmVhc29uYWJsZSBwcmVyZXF1aXNpdGUgZm9y
-IGJlaW5nIGFibGUgdG8gdXBncmFkZSB0byB0aGUgbGF0ZXN0Cj4+IGtlcm5lbCwgaGF2aW5nIHRv
-IHJ1biBhIHNjcmlwdCB0aGF0IHNldHMgYSBVRUZJIHZhcmlhYmxlIChlaXRoZXIgdmlhIHRoZSBM
-aW51eAo+PiBjb21tYW5kIGxpbmUgb2YgZnJvbSB0aGUgVUVGSSBzaGVsbCkgc2hvdWxkIG5vdCBi
-ZSBhbiB1bnJlYXNvbmFibGUgcmVxdWlyZW1lbnQKPj4gZWl0aGVyLCBhbmQgc28gd2UgY2FuIHNv
-bHZlIHBhcnQgb2YgdGhpcyBpc3N1ZSBieSBjb25maWd1cmluZyBleHRyYSBjb21tYW5kIGxpbmUK
-Pj4gYXJndW1lbnRzIHBlcnNpc3Rlbmx5IGZyb20gdGhlIGZpcm13YXJlIGVudmlyb25tZW50LiBU
-aGlzIHNvbHZlcyBhbGwgdGhlIGFib3ZlCj4+IGlzc3VlcyBpbiBhbiB1bmludHJ1c2l2ZSBtYW5u
-ZXIsIGdpdmVuIHRoYXQgdGhlIGtlcm5lbCBjb21tYW5kIGxpbmUgaXMgYWxyZWFkeQo+PiBtYWRl
-IGF2YWlsYWJsZSBleHRyZW1lbHkgZWFybHkgaW4gdGhlIGJvb3QsIGFuZCB0aGUgZmFjdCB0aGF0
-IGl0IGFscmVhZHkgcGVybWl0cwo+PiBhIHdpZGUgcmFuZ2Ugb2YgY29uZmlndXJhdGlvbiBvcHRp
-b25zIGFuZCBvdmVycmlkZXMgdG8gYmUgc2V0LCBpbmNsdWRpbmcgdGhlCj4+ICdoZXN0X2Rpc2Fi
-bGU9MScgb3B0aW9uIHRoYXQgd29ya3MgYXJvdW5kIHRoZSBpc3N1ZSBhZGRyZXNzZWQgYnkgWzBd
-Lgo+IAo+IEknbSB0b3JuIG9uIHRoaXMgb25lLiBXaGlsc3QgSSBzdHJvbmdseSBhZ3JlZSB0aGF0
-IGtleWluZyBvZmYgRE1JIHRhYmxlcwo+IHRvIGRldGVjdCBmaXJtd2FyZSBxdWlya3MgaXMgYSBi
-YWQgaWRlYSBvbiBhcm02NCwgc2lsZW50bHkgZXh0ZW5kaW5nIHRoZQo+IGtlcm5lbCBjb21tYW5k
-LWxpbmUgYWxzbyBoYXMgaXRzIGRvd25zaWRlcy4gVGhlIGNvbW1hbmQtbGluZSBwcm92aWRlcyB3
-YXlzCj4gdG8gb3ZlcnJpZGUga2VybmVsIGRlZmF1bHRzLCBzbyBpZiBhIHVzZXIgaGFzIGZvcmNl
-ZCBhIGZlYXR1cmUgb24vb2ZmLAo+IHRoZW4gSSB0aGluayB0aGlzIHNob3VsZCB0YWtlIHByZWNl
-ZGVuY2Ugb3ZlciBxdWlya3MgYW5kIHdlIHNob3VsZCB0YWludAo+IGluc3RlYWQsIHJhdGhlciB0
-aGFuIHNpbGVudGx5IG92ZXJyaWRlIHRoZSBvcHRpb24uCj4gCgpJc27igJl0IHRoYXQganVzdCBh
-IG1hdHRlciBvZiBwdXR0aW5nIHRoZSBjb250ZW50cyBvZiBMaW51eEV4dHJhQXJncyBmaXJzdCBv
-biB0aGUga2VybmVsIGNvbW1hbmQgbGluZT8KCj4gSSdkIGJlIGludGVyZXN0ZWQgaW4gb3RoZXIg
-b3BpbmlvbnMgb24gdGhpcy4KCisxCgoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX18KbGludXgtYXJtLWtlcm5lbCBtYWlsaW5nIGxpc3QKbGludXgtYXJtLWtl
-cm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQub3JnL21haWxt
-YW4vbGlzdGluZm8vbGludXgtYXJtLWtlcm5lbAo=
+On Thu, 2018-07-12 at 18:01 +0100, Will Deacon wrote:
+On Wed, Jul 04, 2018 at 05:49:17PM +0200, Ard Biesheuvel wrote:
+> >                                    Especially for UEFI systems, if upgrading
+> > firmware is a reasonable prerequisite for being able to upgrade to the latest
+
+Is it?
+
+There's zero chance that there will be new firmware for the system in
+question, but even if there were I'm not sure it should be considered a
+n at all reasonable thing to ask in the general case (I know that if
+x86 jumped off a cliff ARM wouldn't follow, but it certainly isn't
+considered reasonable in the common case in that world).
+
+> I'm torn on this one. Whilst I strongly agree that keying off DMI tables
+> to detect firmware quirks is a bad idea on arm64, silently extending the
+> kernel command-line also has its downsides. The command-line provides ways
+> to override kernel defaults, so if a user has forced a feature on/off,
+> then I think this should take precedence over quirks and we should taint
+> instead, rather than silently override the option.
+> 
+> I'd be interested in other opinions on this.
+
+FWIW it seems to me that if we aren't going to have these systems Just
+work with newer kernels and instead require users to perform some sort
+of reconfiguration (which seems like a great shame to me, but I'll let
+that horse lie[0]) then it seems like they can just as easily add this
+command line parameter via existing mechanisms (/etc/default/grub etc)
+without needing to invent some new way of doing so (one which is more
+obscure and perhaps harder to configure).
+
+Likewise distros, they can chose to either require their users to make
+those changes (see above), or they can choose not to support those
+systems any more or to not enable the config options which expose the
+issue.
+
+Ian.
+
+[0] OK, I will just mention that I don't believe it needs to be a DMI
+quirk -- if there were some other way to detect and make things just
+work then that would be great too. Now I'm done with the horse.
