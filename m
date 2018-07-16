@@ -1,56 +1,55 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: [PATCH 2/8] efi/x86: Use non-blocking SetVariable() for
- efi_delete_dummy_variable()
-Date: Mon, 16 Jul 2018 03:02:19 +0200
-Message-ID: <20180716010219.GA13742@gmail.com>
-References: <20180711094040.12506-1-ard.biesheuvel@linaro.org>
- <20180711094040.12506-3-ard.biesheuvel@linaro.org>
- <20180715223808.GB16209@gmail.com>
- <FFF73D592F13FD46B8700F0A279B802F46A3F83A@ORSMSX114.amr.corp.intel.com>
+From: Nick Desaulniers <ndesaulniers@google.com>
+Subject: Re: [PATCH v6 3/3] x86: paravirt: make native_save_fl extern inline
+Date: Mon, 16 Jul 2018 10:27:04 -0700
+Message-ID: <CAKwvOdmFVnSos71vAUnayuocBDhxLg76tvGF0y3sj+4+s7TCcw@mail.gmail.com>
+References: <20180621162324.36656-1-ndesaulniers@google.com>
+ <20180621162324.36656-4-ndesaulniers@google.com> <1e19dbef068b45a4a4e9eb4072e097be@AcuMS.aculab.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <FFF73D592F13FD46B8700F0A279B802F46A3F83A@ORSMSX114.amr.corp.intel.com>
+In-Reply-To: <1e19dbef068b45a4a4e9eb4072e097be@AcuMS.aculab.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: David.Laight@aculab.com
+Cc: mingo@redhat.com, Thomas Gleixner <tglx@linutronix.de>, Andrew Morton <akpm@linux-foundation.org>, hpa@zytor.com, linux-efi@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, x86@kernel.org, virtualization@lists.linux-foundation.org, Alistair Strachan <astrachan@google.com>, Manoj Gupta <manojgupta@google.com>, Greg Hackmann <ghackmann@google.com>, sedat.dilek@gmail.com, tstellar@redhat.com, Kees Cook <keescook@google.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, Linux Kbuild mailing list <linux-kbuild@vger.kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Will Deacon <will.deacon@arm.com>, mawilcox@microsoft.com, Arnd Bergmann <arnd@arndb.de>, David Rientjes <rientjes@google.com>, acme@redhat.com, Philippe
 List-Id: linux-efi@vger.kernel.org
 
+On Fri, Jul 13, 2018 at 3:15 AM David Laight <David.Laight@aculab.com> wrote:
+>
+> From: Nick Desaulniers
+> > Sent: 21 June 2018 17:23
+> >
+> > native_save_fl() is marked static inline, but by using it as
+> > a function pointer in arch/x86/kernel/paravirt.c, it MUST be outlined.
+> >
+> > paravirt's use of native_save_fl() also requires that no GPRs other than
+> > %rax are clobbered.
+> ...
+> > diff --git a/arch/x86/include/asm/irqflags.h b/arch/x86/include/asm/irqflags.h
+> > index 89f08955fff7..c4fc17220df9 100644
+> > --- a/arch/x86/include/asm/irqflags.h
+> > +++ b/arch/x86/include/asm/irqflags.h
+> > @@ -13,7 +13,7 @@
+> > * Interrupt control:
+> > */
+> >
+> > -static inline unsigned long native_save_fl(void)
+> > +extern inline unsigned long native_save_fl(void)
+>
+> This is generating a the compilation warning (that we treat as an error):
+> "no previous prototype for 'native_save_fl".
+> Fixable by replicating the line with an appended ;
 
-* Prakhya, Sai Praneeth <sai.praneeth.prakhya@intel.com> wrote:
+Thanks for the report and sorry for breaking things for you.  Just
+curious about more information to try to reproduce the issue to make
+sure I fix the issue correctly:
+* What compiler and compiler version are you using?
+* Are you setting any configs or enabling any warning CFLAGS to see this?
+* Do you see this warning for other `extern inline` functions? (It
+seems like the few other ones in the kernel are for non-x86 archs)
 
-> > > diff --git a/arch/x86/platform/efi/quirks.c
-> > > b/arch/x86/platform/efi/quirks.c index 36c1f8b9f7e0..6af39dc40325
-> > > 100644
-> > > --- a/arch/x86/platform/efi/quirks.c
-> > > +++ b/arch/x86/platform/efi/quirks.c
-> > > @@ -105,12 +105,11 @@ early_param("efi_no_storage_paranoia",
-> > > setup_storage_paranoia);  */  void efi_delete_dummy_variable(void)  {
-> > > -	efi.set_variable((efi_char16_t *)efi_dummy_name,
-> > > -			 &EFI_DUMMY_GUID,
-> > > -			 EFI_VARIABLE_NON_VOLATILE |
-> > > -			 EFI_VARIABLE_BOOTSERVICE_ACCESS |
-> > > -			 EFI_VARIABLE_RUNTIME_ACCESS,
-> > > -			 0, NULL);
-> > > +	efi.set_variable_nonblocking((efi_char16_t *)efi_dummy_name,
-> > > +				     &EFI_DUMMY_GUID,
-> > > +				     EFI_VARIABLE_NON_VOLATILE |
-> > > +				     EFI_VARIABLE_BOOTSERVICE_ACCESS |
-> > > +				     EFI_VARIABLE_RUNTIME_ACCESS, 0, NULL);
-> > >  }
-> > 
-> > Just wondering, what is the full stack trace of the splat? It sounds a bit surprising
-> > to me that such type of EFI code is used from the idle thread.
-> 
-> Sorry! for the confusing commit message. Kernel warns about scheduling from idle 
-> thread only when "efi_rts_wq" is used to invoke efi_runtime_services(). So, 
-> presently, this doesn't happen on mainline kernel. Support for "efi_rts_wq" is 
-> added by commit 3eb420e70d87 (efi: Use a work queue to invoke EFI Runtime 
-> Services).
-
-Ok, that makes a lot more sense!
-
+I would have guessed that extern inline functions with gnu_inline
+semantics (gnu89 behavior) should not have a previous declaration, but
+it probably doesn't hurt to add it.
+-- 
 Thanks,
-
-	Ingo
+~Nick Desaulniers
