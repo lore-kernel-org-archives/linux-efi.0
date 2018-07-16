@@ -1,55 +1,96 @@
-From: Nick Desaulniers <ndesaulniers@google.com>
-Subject: Re: [PATCH v6 3/3] x86: paravirt: make native_save_fl extern inline
-Date: Mon, 16 Jul 2018 10:27:04 -0700
-Message-ID: <CAKwvOdmFVnSos71vAUnayuocBDhxLg76tvGF0y3sj+4+s7TCcw@mail.gmail.com>
-References: <20180621162324.36656-1-ndesaulniers@google.com>
- <20180621162324.36656-4-ndesaulniers@google.com> <1e19dbef068b45a4a4e9eb4072e097be@AcuMS.aculab.com>
+From: Brijesh Singh <brijesh.singh@amd.com>
+Subject: Re: [PATCH] x86/efi: Access EFI MMIO data as unencrypted when SEV is
+ active
+Date: Mon, 16 Jul 2018 14:15:32 -0500
+Message-ID: <3b48a62e-8a5c-3e83-2935-03c9ab011403@amd.com>
+References: <1530624720-32004-1-git-send-email-brijesh.singh@amd.com>
+ <CAKv+Gu_3kD+7O4oR9751VH2CsG=+NmBY-Gypc25LFo9eT6m3RQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1e19dbef068b45a4a4e9eb4072e097be@AcuMS.aculab.com>
+In-Reply-To: <CAKv+Gu_3kD+7O4oR9751VH2CsG=+NmBY-Gypc25LFo9eT6m3RQ@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: David.Laight@aculab.com
-Cc: mingo@redhat.com, Thomas Gleixner <tglx@linutronix.de>, Andrew Morton <akpm@linux-foundation.org>, hpa@zytor.com, linux-efi@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, x86@kernel.org, virtualization@lists.linux-foundation.org, Alistair Strachan <astrachan@google.com>, Manoj Gupta <manojgupta@google.com>, Greg Hackmann <ghackmann@google.com>, sedat.dilek@gmail.com, tstellar@redhat.com, Kees Cook <keescook@google.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, Linux Kbuild mailing list <linux-kbuild@vger.kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Will Deacon <will.deacon@arm.com>, mawilcox@microsoft.com, Arnd Bergmann <arnd@arndb.de>, David Rientjes <rientjes@google.com>, acme@redhat.com, Philippe
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: brijesh.singh@amd.com, the arch/x86 maintainers <x86@kernel.org>, linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Tom Lendacky <thomas.lendacky@amd.com>, Thomas Gleixner <tglx@linutronix.de>, Borislav Petkov <bp@suse.de>, KVM devel mailing list <kvm@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Andy Lutomirski <luto@kernel.org>, "# 4 . 15 . x" <stable@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Jul 13, 2018 at 3:15 AM David Laight <David.Laight@aculab.com> wrote:
->
-> From: Nick Desaulniers
-> > Sent: 21 June 2018 17:23
-> >
-> > native_save_fl() is marked static inline, but by using it as
-> > a function pointer in arch/x86/kernel/paravirt.c, it MUST be outlined.
-> >
-> > paravirt's use of native_save_fl() also requires that no GPRs other than
-> > %rax are clobbered.
-> ...
-> > diff --git a/arch/x86/include/asm/irqflags.h b/arch/x86/include/asm/irqflags.h
-> > index 89f08955fff7..c4fc17220df9 100644
-> > --- a/arch/x86/include/asm/irqflags.h
-> > +++ b/arch/x86/include/asm/irqflags.h
-> > @@ -13,7 +13,7 @@
-> > * Interrupt control:
-> > */
-> >
-> > -static inline unsigned long native_save_fl(void)
-> > +extern inline unsigned long native_save_fl(void)
->
-> This is generating a the compilation warning (that we treat as an error):
-> "no previous prototype for 'native_save_fl".
-> Fixable by replicating the line with an appended ;
+Hi Ard,
 
-Thanks for the report and sorry for breaking things for you.  Just
-curious about more information to try to reproduce the issue to make
-sure I fix the issue correctly:
-* What compiler and compiler version are you using?
-* Are you setting any configs or enabling any warning CFLAGS to see this?
-* Do you see this warning for other `extern inline` functions? (It
-seems like the few other ones in the kernel are for non-x86 archs)
 
-I would have guessed that extern inline functions with gnu_inline
-semantics (gnu89 behavior) should not have a previous declaration, but
-it probably doesn't hurt to add it.
--- 
-Thanks,
-~Nick Desaulniers
+On 07/11/2018 05:00 AM, Ard Biesheuvel wrote:
+> On 3 July 2018 at 15:32, Brijesh Singh <brijesh.singh@amd.com> wrote:
+>> SEV guest fails to update the UEFI runtime variables stored in the
+>> flash. commit 1379edd59673 ("x86/efi: Access EFI data as encrypted
+>> when SEV is active") unconditionally maps all the UEFI runtime data
+>> as 'encrypted' (C=1). When SEV is active the UEFI runtime data marked
+>> as EFI_MEMORY_MAPPED_IO should be mapped as 'unencrypted' so that both
+>> guest and hypervisor can access the data.
+>>
+>> Fixes: 1379edd59673 (x86/efi: Access EFI data as encrypted ...)
+>> Cc: Tom Lendacky <thomas.lendacky@amd.com>
+>> Cc: Thomas Gleixner <tglx@linutronix.de>
+>> Cc: Borislav Petkov <bp@suse.de>
+>> Cc: linux-efi@vger.kernel.org
+>> Cc: kvm@vger.kernel.org
+>> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+>> Cc: Matt Fleming <matt@codeblueprint.co.uk>
+>> Cc: Andy Lutomirski <luto@kernel.org>
+>> Cc: <stable@vger.kernel.org> # 4.15.x
+>> Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
+>> ---
+>>   arch/x86/platform/efi/efi_64.c | 2 +-
+>>   1 file changed, 1 insertion(+), 1 deletion(-)
+>>
+>> diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+>> index 77873ce..5f2eb32 100644
+>> --- a/arch/x86/platform/efi/efi_64.c
+>> +++ b/arch/x86/platform/efi/efi_64.c
+>> @@ -417,7 +417,7 @@ static void __init __map_region(efi_memory_desc_t *md, u64 va)
+>>          if (!(md->attribute & EFI_MEMORY_WB))
+>>                  flags |= _PAGE_PCD;
+>>
+>> -       if (sev_active())
+>> +       if (sev_active() && md->type != EFI_MEMORY_MAPPED_IO)
+>>                  flags |= _PAGE_ENC;
+>>
+>>          pfn = md->phys_addr >> PAGE_SHIFT;
+> 
+> Is it safe to only update this occurrence and not the one in
+> efi_runtime_update_mappings() ?
+> 
+
+
+It's safe to update this occurrence only. The SEV support is added
+in recent EDK2 bios, and the version of bios provides the
+EFI_MEMORY_ATTRIBUTE_TABLE. Hence the efi_enabled(EFI_MEM_ATTR) check in 
+efi_runtime_update_mappings() will always be true. When EFI_MEM_ATTR is
+set the code updates the mapping and returns (see below)
+
+void __init efi_runtime_update_mappings(void)
+{
+    .....
+    .....
+
+    /*
+     * Use the EFI Memory Attribute Table for mapping permissions if it
+     * exists, since it is intended to supersede EFI_PROPERTIES_TABLE.
+     */
+     if (efi_enabled(EFI_MEM_ATTR)) {
+	efi_memattr_apply_permissions(NULL, efi_update_mem_attr);
+	return;
+     }
+
+
+    ...
+
+}
+
+The EFI_MEMORY_ATTRIBUTE_TABLE table does not include MMIO regions, the
+table describes the memory protections to EFI runtime code and data
+regions only. Both EFI runtime code and data should be mapped as
+encrypted. Hence I skipped updating the efi_runtime_update_mappings().
+
+
+thanks
