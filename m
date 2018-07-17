@@ -1,102 +1,32 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH] x86/efi: Access EFI MMIO data as unencrypted when SEV is active
-Date: Tue, 17 Jul 2018 11:12:38 +0800
-Message-ID: <CAKv+Gu9OmTgoREKxvvK57ybF1JUfkNeVNa8efAHSau0EFzvbNg@mail.gmail.com>
-References: <1530624720-32004-1-git-send-email-brijesh.singh@amd.com>
- <CAKv+Gu_3kD+7O4oR9751VH2CsG=+NmBY-Gypc25LFo9eT6m3RQ@mail.gmail.com> <3b48a62e-8a5c-3e83-2935-03c9ab011403@amd.com>
+From: David Laight <David.Laight@ACULAB.COM>
+Subject: RE: [PATCH v6 3/3] x86: paravirt: make native_save_fl extern inline
+Date: Tue, 17 Jul 2018 08:44:46 +0000
+Message-ID: <72ac0fad49214930a44f1e0288508e15@AcuMS.aculab.com>
+References: <20180621162324.36656-1-ndesaulniers@google.com>
+	<20180621162324.36656-4-ndesaulniers@google.com>
+	<1e19dbef068b45a4a4e9eb4072e097be@AcuMS.aculab.com>
+	<CAKwvOdmFVnSos71vAUnayuocBDhxLg76tvGF0y3sj+4+s7TCcw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <3b48a62e-8a5c-3e83-2935-03c9ab011403@amd.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Brijesh Singh <brijesh.singh@amd.com>
-Cc: the arch/x86 maintainers <x86@kernel.org>, linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Tom Lendacky <thomas.lendacky@amd.com>, Thomas Gleixner <tglx@linutronix.de>, Borislav Petkov <bp@suse.de>, KVM devel mailing list <kvm@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Andy Lutomirski <luto@kernel.org>, "# 4 . 15 . x" <stable@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <virtualization-bounces@lists.linux-foundation.org>
+In-Reply-To: <CAKwvOdmFVnSos71vAUnayuocBDhxLg76tvGF0y3sj+4+s7TCcw@mail.gmail.com>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/virtualization/>
+List-Post: <mailto:virtualization@lists.linux-foundation.org>
+List-Help: <mailto:virtualization-request@lists.linux-foundation.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=subscribe>
+Sender: virtualization-bounces@lists.linux-foundation.org
+Errors-To: virtualization-bounces@lists.linux-foundation.org
+To: 'Nick Desaulniers' <ndesaulniers@google.com>
+Cc: Kate Stewart <kstewart@linuxfoundation.org>, "andrea.parri@amarulasolutions.com" <andrea.parri@amarulasolutions.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "brijesh.singh@amd.com" <brijesh.singh@amd.com>, "J. Kiszka" <jan.kiszka@siemens.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Will Deacon <will.deacon@arm.com>, "jarkko.sakkinen@linux.intel.com" <jarkko.sakkinen@linux.intel.com>, "virtualization@lists.linux-foundation.org" <virtualization@lists.linux-foundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Manoj Gupta <manojgupta@google.com>, "hpa@zytor.com" <hpa@zytor.com>, "boris.ostrovsky@oracle.com" <boris.ostrovsky@oracle.com>, Thiebaud Weksteen <tweek@google.com>, "mawilcox@microsoft.com" <mawilcox@microsoft.com>, "x86@kernel.org" <x86@kernel.org>, "akataria@vmware.com" <akataria@vmware.com>, Greg Hackmann <ghackmann@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 17 July 2018 at 03:15, Brijesh Singh <brijesh.singh@amd.com> wrote:
-> Hi Ard,
->
->
->
-> On 07/11/2018 05:00 AM, Ard Biesheuvel wrote:
->>
->> On 3 July 2018 at 15:32, Brijesh Singh <brijesh.singh@amd.com> wrote:
->>>
->>> SEV guest fails to update the UEFI runtime variables stored in the
->>> flash. commit 1379edd59673 ("x86/efi: Access EFI data as encrypted
->>> when SEV is active") unconditionally maps all the UEFI runtime data
->>> as 'encrypted' (C=1). When SEV is active the UEFI runtime data marked
->>> as EFI_MEMORY_MAPPED_IO should be mapped as 'unencrypted' so that both
->>> guest and hypervisor can access the data.
->>>
->>> Fixes: 1379edd59673 (x86/efi: Access EFI data as encrypted ...)
->>> Cc: Tom Lendacky <thomas.lendacky@amd.com>
->>> Cc: Thomas Gleixner <tglx@linutronix.de>
->>> Cc: Borislav Petkov <bp@suse.de>
->>> Cc: linux-efi@vger.kernel.org
->>> Cc: kvm@vger.kernel.org
->>> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
->>> Cc: Matt Fleming <matt@codeblueprint.co.uk>
->>> Cc: Andy Lutomirski <luto@kernel.org>
->>> Cc: <stable@vger.kernel.org> # 4.15.x
->>> Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
->>> ---
->>>   arch/x86/platform/efi/efi_64.c | 2 +-
->>>   1 file changed, 1 insertion(+), 1 deletion(-)
->>>
->>> diff --git a/arch/x86/platform/efi/efi_64.c
->>> b/arch/x86/platform/efi/efi_64.c
->>> index 77873ce..5f2eb32 100644
->>> --- a/arch/x86/platform/efi/efi_64.c
->>> +++ b/arch/x86/platform/efi/efi_64.c
->>> @@ -417,7 +417,7 @@ static void __init __map_region(efi_memory_desc_t
->>> *md, u64 va)
->>>          if (!(md->attribute & EFI_MEMORY_WB))
->>>                  flags |= _PAGE_PCD;
->>>
->>> -       if (sev_active())
->>> +       if (sev_active() && md->type != EFI_MEMORY_MAPPED_IO)
->>>                  flags |= _PAGE_ENC;
->>>
->>>          pfn = md->phys_addr >> PAGE_SHIFT;
->>
->>
->> Is it safe to only update this occurrence and not the one in
->> efi_runtime_update_mappings() ?
->>
->
->
-> It's safe to update this occurrence only. The SEV support is added
-> in recent EDK2 bios, and the version of bios provides the
-> EFI_MEMORY_ATTRIBUTE_TABLE. Hence the efi_enabled(EFI_MEM_ATTR) check in
-> efi_runtime_update_mappings() will always be true. When EFI_MEM_ATTR is
-> set the code updates the mapping and returns (see below)
->
-> void __init efi_runtime_update_mappings(void)
-> {
->    .....
->    .....
->
->    /*
->     * Use the EFI Memory Attribute Table for mapping permissions if it
->     * exists, since it is intended to supersede EFI_PROPERTIES_TABLE.
->     */
->     if (efi_enabled(EFI_MEM_ATTR)) {
->         efi_memattr_apply_permissions(NULL, efi_update_mem_attr);
->         return;
->     }
->
->
->    ...
->
-> }
->
-> The EFI_MEMORY_ATTRIBUTE_TABLE table does not include MMIO regions, the
-> table describes the memory protections to EFI runtime code and data
-> regions only. Both EFI runtime code and data should be mapped as
-> encrypted. Hence I skipped updating the efi_runtime_update_mappings().
->
+-
+Registered Address Lakeside, Bramley Road, Mount Farm, Milton Keynes, MK1 1PT, UK
+Registration No: 1397386 (Wales)
 
-Ok, thanks for clearing that up
-
-Queued in efi/urgent
+Please consider the environment and don't print this e-mail unless you really need to
