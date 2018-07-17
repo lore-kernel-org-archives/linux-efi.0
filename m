@@ -1,123 +1,102 @@
-From: Dmitry Safonov <dima@arista.com>
-Subject: [RFC 2/2] compat: Cleanup in_compat_syscall() callers
-Date: Tue, 17 Jul 2018 01:50:04 +0100
-Message-ID: <20180717005004.25984-3-dima@arista.com>
-References: <20180717005004.25984-1-dima@arista.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH] x86/efi: Access EFI MMIO data as unencrypted when SEV is active
+Date: Tue, 17 Jul 2018 11:12:38 +0800
+Message-ID: <CAKv+Gu9OmTgoREKxvvK57ybF1JUfkNeVNa8efAHSau0EFzvbNg@mail.gmail.com>
+References: <1530624720-32004-1-git-send-email-brijesh.singh@amd.com>
+ <CAKv+Gu_3kD+7O4oR9751VH2CsG=+NmBY-Gypc25LFo9eT6m3RQ@mail.gmail.com> <3b48a62e-8a5c-3e83-2935-03c9ab011403@amd.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180717005004.25984-1-dima@arista.com>
+In-Reply-To: <3b48a62e-8a5c-3e83-2935-03c9ab011403@amd.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Dmitry Safonov <dima@arista.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "David S. Miller" <davem@davemloft.net>, Herbert Xu <herbert@gondor.apana.org.au>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, John Stultz <john.stultz@linaro.org>, "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>, Oleg Nesterov <oleg@redhat.com>, Steffen Klassert <steffen.klassert@secunet.com>, Stephen Boyd <sboyd@kernel.org>, Steven Rostedt <rostedt@goodmis.org>, Thomas Gleixner <tglx@linutronix.de>, x86@kernel.org, linux-efi@vger.kernel.org, netdev@vger.kernel.org, Dmitry Safonov <0x7f454c46@gmail.com>
+To: Brijesh Singh <brijesh.singh@amd.com>
+Cc: the arch/x86 maintainers <x86@kernel.org>, linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Tom Lendacky <thomas.lendacky@amd.com>, Thomas Gleixner <tglx@linutronix.de>, Borislav Petkov <bp@suse.de>, KVM devel mailing list <kvm@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Andy Lutomirski <luto@kernel.org>, "# 4 . 15 . x" <stable@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-Now that in_compat_syscall() == false on native i686, it's possible to
-remove some ifdeffery and no more needed helpers.
+On 17 July 2018 at 03:15, Brijesh Singh <brijesh.singh@amd.com> wrote:
+> Hi Ard,
+>
+>
+>
+> On 07/11/2018 05:00 AM, Ard Biesheuvel wrote:
+>>
+>> On 3 July 2018 at 15:32, Brijesh Singh <brijesh.singh@amd.com> wrote:
+>>>
+>>> SEV guest fails to update the UEFI runtime variables stored in the
+>>> flash. commit 1379edd59673 ("x86/efi: Access EFI data as encrypted
+>>> when SEV is active") unconditionally maps all the UEFI runtime data
+>>> as 'encrypted' (C=1). When SEV is active the UEFI runtime data marked
+>>> as EFI_MEMORY_MAPPED_IO should be mapped as 'unencrypted' so that both
+>>> guest and hypervisor can access the data.
+>>>
+>>> Fixes: 1379edd59673 (x86/efi: Access EFI data as encrypted ...)
+>>> Cc: Tom Lendacky <thomas.lendacky@amd.com>
+>>> Cc: Thomas Gleixner <tglx@linutronix.de>
+>>> Cc: Borislav Petkov <bp@suse.de>
+>>> Cc: linux-efi@vger.kernel.org
+>>> Cc: kvm@vger.kernel.org
+>>> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+>>> Cc: Matt Fleming <matt@codeblueprint.co.uk>
+>>> Cc: Andy Lutomirski <luto@kernel.org>
+>>> Cc: <stable@vger.kernel.org> # 4.15.x
+>>> Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
+>>> ---
+>>>   arch/x86/platform/efi/efi_64.c | 2 +-
+>>>   1 file changed, 1 insertion(+), 1 deletion(-)
+>>>
+>>> diff --git a/arch/x86/platform/efi/efi_64.c
+>>> b/arch/x86/platform/efi/efi_64.c
+>>> index 77873ce..5f2eb32 100644
+>>> --- a/arch/x86/platform/efi/efi_64.c
+>>> +++ b/arch/x86/platform/efi/efi_64.c
+>>> @@ -417,7 +417,7 @@ static void __init __map_region(efi_memory_desc_t
+>>> *md, u64 va)
+>>>          if (!(md->attribute & EFI_MEMORY_WB))
+>>>                  flags |= _PAGE_PCD;
+>>>
+>>> -       if (sev_active())
+>>> +       if (sev_active() && md->type != EFI_MEMORY_MAPPED_IO)
+>>>                  flags |= _PAGE_ENC;
+>>>
+>>>          pfn = md->phys_addr >> PAGE_SHIFT;
+>>
+>>
+>> Is it safe to only update this occurrence and not the one in
+>> efi_runtime_update_mappings() ?
+>>
+>
+>
+> It's safe to update this occurrence only. The SEV support is added
+> in recent EDK2 bios, and the version of bios provides the
+> EFI_MEMORY_ATTRIBUTE_TABLE. Hence the efi_enabled(EFI_MEM_ATTR) check in
+> efi_runtime_update_mappings() will always be true. When EFI_MEM_ATTR is
+> set the code updates the mapping and returns (see below)
+>
+> void __init efi_runtime_update_mappings(void)
+> {
+>    .....
+>    .....
+>
+>    /*
+>     * Use the EFI Memory Attribute Table for mapping permissions if it
+>     * exists, since it is intended to supersede EFI_PROPERTIES_TABLE.
+>     */
+>     if (efi_enabled(EFI_MEM_ATTR)) {
+>         efi_memattr_apply_permissions(NULL, efi_update_mem_attr);
+>         return;
+>     }
+>
+>
+>    ...
+>
+> }
+>
+> The EFI_MEMORY_ATTRIBUTE_TABLE table does not include MMIO regions, the
+> table describes the memory protections to EFI runtime code and data
+> regions only. Both EFI runtime code and data should be mapped as
+> encrypted. Hence I skipped updating the efi_runtime_update_mappings().
+>
 
-Signed-off-by: Dmitry Safonov <dima@arista.com>
----
- drivers/firmware/efi/efivars.c | 16 ++++------------
- kernel/time/time.c             |  2 +-
- net/xfrm/xfrm_state.c          |  2 --
- net/xfrm/xfrm_user.c           |  2 --
- 4 files changed, 5 insertions(+), 17 deletions(-)
+Ok, thanks for clearing that up
 
-diff --git a/drivers/firmware/efi/efivars.c b/drivers/firmware/efi/efivars.c
-index 3e626fd9bd4e..8061667a6765 100644
---- a/drivers/firmware/efi/efivars.c
-+++ b/drivers/firmware/efi/efivars.c
-@@ -229,14 +229,6 @@ sanity_check(struct efi_variable *var, efi_char16_t *name, efi_guid_t vendor,
- 	return 0;
- }
- 
--static inline bool is_compat(void)
--{
--	if (IS_ENABLED(CONFIG_COMPAT) && in_compat_syscall())
--		return true;
--
--	return false;
--}
--
- static void
- copy_out_compat(struct efi_variable *dst, struct compat_efi_variable *src)
- {
-@@ -263,7 +255,7 @@ efivar_store_raw(struct efivar_entry *entry, const char *buf, size_t count)
- 	u8 *data;
- 	int err;
- 
--	if (is_compat()) {
-+	if (in_compat_syscall()) {
- 		struct compat_efi_variable *compat;
- 
- 		if (count != sizeof(*compat))
-@@ -324,7 +316,7 @@ efivar_show_raw(struct efivar_entry *entry, char *buf)
- 			     &entry->var.DataSize, entry->var.Data))
- 		return -EIO;
- 
--	if (is_compat()) {
-+	if (in_compat_syscall()) {
- 		compat = (struct compat_efi_variable *)buf;
- 
- 		size = sizeof(*compat);
-@@ -418,7 +410,7 @@ static ssize_t efivar_create(struct file *filp, struct kobject *kobj,
- 	struct compat_efi_variable *compat = (struct compat_efi_variable *)buf;
- 	struct efi_variable *new_var = (struct efi_variable *)buf;
- 	struct efivar_entry *new_entry;
--	bool need_compat = is_compat();
-+	bool need_compat = in_compat_syscall();
- 	efi_char16_t *name;
- 	unsigned long size;
- 	u32 attributes;
-@@ -495,7 +487,7 @@ static ssize_t efivar_delete(struct file *filp, struct kobject *kobj,
- 	if (!capable(CAP_SYS_ADMIN))
- 		return -EACCES;
- 
--	if (is_compat()) {
-+	if (in_compat_syscall()) {
- 		if (count != sizeof(*compat))
- 			return -EINVAL;
- 
-diff --git a/kernel/time/time.c b/kernel/time/time.c
-index 2b41e8e2d31d..d59caa6d03e6 100644
---- a/kernel/time/time.c
-+++ b/kernel/time/time.c
-@@ -865,7 +865,7 @@ int get_timespec64(struct timespec64 *ts,
- 	ts->tv_sec = kts.tv_sec;
- 
- 	/* Zero out the padding for 32 bit systems or in compat mode */
--	if (IS_ENABLED(CONFIG_64BIT_TIME) && (!IS_ENABLED(CONFIG_64BIT) || in_compat_syscall()))
-+	if (IS_ENABLED(CONFIG_64BIT_TIME) && in_compat_syscall())
- 		kts.tv_nsec &= 0xFFFFFFFFUL;
- 
- 	ts->tv_nsec = kts.tv_nsec;
-diff --git a/net/xfrm/xfrm_state.c b/net/xfrm/xfrm_state.c
-index 8308281f3253..3f48a6925606 100644
---- a/net/xfrm/xfrm_state.c
-+++ b/net/xfrm/xfrm_state.c
-@@ -2057,10 +2057,8 @@ int xfrm_user_policy(struct sock *sk, int optname, u8 __user *optval, int optlen
- 	struct xfrm_mgr *km;
- 	struct xfrm_policy *pol = NULL;
- 
--#ifdef CONFIG_COMPAT
- 	if (in_compat_syscall())
- 		return -EOPNOTSUPP;
--#endif
- 
- 	if (!optval && !optlen) {
- 		xfrm_sk_policy_insert(sk, XFRM_POLICY_IN, NULL);
-diff --git a/net/xfrm/xfrm_user.c b/net/xfrm/xfrm_user.c
-index 080035f056d9..2677cb55b7a8 100644
---- a/net/xfrm/xfrm_user.c
-+++ b/net/xfrm/xfrm_user.c
-@@ -2546,10 +2546,8 @@ static int xfrm_user_rcv_msg(struct sk_buff *skb, struct nlmsghdr *nlh,
- 	const struct xfrm_link *link;
- 	int type, err;
- 
--#ifdef CONFIG_COMPAT
- 	if (in_compat_syscall())
- 		return -EOPNOTSUPP;
--#endif
- 
- 	type = nlh->nlmsg_type;
- 	if (type > XFRM_MSG_MAX)
--- 
-2.13.6
+Queued in efi/urgent
