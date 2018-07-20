@@ -1,65 +1,48 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.9 07/66] x86/paravirt: Make native_save_fl() extern inline
-Date: Fri, 20 Jul 2018 14:13:24 +0200
-Message-ID: <20180720121407.681090885@linuxfoundation.org>
-References: <20180720121407.228772286@linuxfoundation.org>
+Subject: [PATCH 4.14 01/92] compiler-gcc.h: Add __attribute__((gnu_inline)) to
+	all inline declarations
+Date: Fri, 20 Jul 2018 14:13:05 +0200
+Message-ID: <20180720121417.271717768@linuxfoundation.org>
+References: <20180720121417.206337808@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180720121407.228772286@linuxfoundation.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <virtualization-bounces@lists.linux-foundation.org>
+In-Reply-To: <20180720121417.206337808@linuxfoundation.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/virtualization/>
+List-Post: <mailto:virtualization@lists.linux-foundation.org>
+List-Help: <mailto:virtualization-request@lists.linux-foundation.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=subscribe>
+Sender: virtualization-bounces@lists.linux-foundation.org
+Errors-To: virtualization-bounces@lists.linux-foundation.org
 To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, "H. Peter Anvin" <hpa@zytor.com>, Tom Stellar <tstellar@redhat.com>, Sedat Dilek <sedat.dilek@gmail.com>, Nick Desaulniers <ndesaulniers@google.com>, Juergen Gross <jgross@suse.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, acme@redhat.com, akataria@vmware.com, akpm@linux-foundation.org, andrea.parri@amarulasolutions.com, ard.biesheuvel@linaro.org, aryabinin@virtuozzo.com, astrachan@google.com, boris.ostrovsky@oracle.com, brijesh.singh@amd.com, caoj.fnst@cn.fujitsu.com, geert@linux-m68k.org, ghackmann@google.com, jan.kiszka@siemens.com, jarkko.sakkinen@linux.intel.com, joe@
+Cc: andrea.parri@amarulasolutions.com, kstewart@linuxfoundation.org, linux-efi@vger.kernel.org, brijesh.singh@amd.com, Peter Zijlstra <peterz@infradead.org>, jan.kiszka@siemens.com, will.deacon@arm.com, jarkko.sakkinen@linux.intel.com, virtualization@lists.linux-foundation.org, yamada.masahiro@socionext.com, manojgupta@google.com, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, tweek@google.com, mawilcox@microsoft.com, akataria@vmware.com, ghackmann@google.com, Ingo Molnar <mingo@kernel.org>, mjg59@google.com, mka@chromium.org, geert@linux-m68k.org, rientjes@google.com, aryabinin@virtuozzo.com, thomas.lendacky@amd.com, Arnd Bergmann <arnd@arndb.de>, linux-kbuild@vger.kernel.org, pombredanne@nexb.com, rostedt@goodmis.org, acme@redhat.com, caoj.fnst@cn.fujitsu.com, jpoimboe@redhat.com, sedat.dilek@gmail.com, boris.ostrovsky@oracle.com, Juergen
 List-Id: linux-efi@vger.kernel.org
 
-4.9-stable review patch.  If anyone has any objections, please let me know.
+4.14-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
 From: Nick Desaulniers <ndesaulniers@google.com>
 
-commit d0a8d9378d16eb3c69bd8e6d23779fbdbee3a8c7 upstream.
+commit d03db2bc26f0e4a6849ad649a09c9c73fccdc656 upstream.
 
-native_save_fl() is marked static inline, but by using it as
-a function pointer in arch/x86/kernel/paravirt.c, it MUST be outlined.
+Functions marked extern inline do not emit an externally visible
+function when the gnu89 C standard is used. Some KBUILD Makefiles
+overwrite KBUILD_CFLAGS. This is an issue for GCC 5.1+ users as without
+an explicit C standard specified, the default is gnu11. Since c99, the
+semantics of extern inline have changed such that an externally visible
+function is always emitted. This can lead to multiple definition errors
+of extern inline functions at link time of compilation units whose build
+files have removed an explicit C standard compiler flag for users of GCC
+5.1+ or Clang.
 
-paravirt's use of native_save_fl() also requires that no GPRs other than
-%rax are clobbered.
-
-Compilers have different heuristics which they use to emit stack guard
-code, the emittance of which can break paravirt's callee saved assumption
-by clobbering %rcx.
-
-Marking a function definition extern inline means that if this version
-cannot be inlined, then the out-of-line version will be preferred. By
-having the out-of-line version be implemented in assembly, it cannot be
-instrumented with a stack protector, which might violate custom calling
-conventions that code like paravirt rely on.
-
-The semantics of extern inline has changed since gnu89. This means that
-folks using GCC versions >= 5.1 may see symbol redefinition errors at
-link time for subdirs that override KBUILD_CFLAGS (making the C standard
-used implicit) regardless of this patch. This has been cleaned up
-earlier in the patch set, but is left as a note in the commit message
-for future travelers.
-
-Reports:
- https://lkml.org/lkml/2018/5/7/534
- https://github.com/ClangBuiltLinux/linux/issues/16
-
-Discussion:
- https://bugs.llvm.org/show_bug.cgi?id=37512
- https://lkml.org/lkml/2018/5/24/1371
-
-Thanks to the many folks that participated in the discussion.
-
-Debugged-by: Alistair Strachan <astrachan@google.com>
-Debugged-by: Matthias Kaehlcke <mka@chromium.org>
 Suggested-by: Arnd Bergmann <arnd@arndb.de>
 Suggested-by: H. Peter Anvin <hpa@zytor.com>
-Suggested-by: Tom Stellar <tstellar@redhat.com>
-Reported-by: Sedat Dilek <sedat.dilek@gmail.com>
-Tested-by: Sedat Dilek <sedat.dilek@gmail.com>
+Suggested-by: Joe Perches <joe@perches.com>
 Signed-off-by: Nick Desaulniers <ndesaulniers@google.com>
 Acked-by: Juergen Gross <jgross@suse.com>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>
@@ -80,7 +63,6 @@ Cc: ghackmann@google.com
 Cc: gregkh@linuxfoundation.org
 Cc: jan.kiszka@siemens.com
 Cc: jarkko.sakkinen@linux.intel.com
-Cc: joe@perches.com
 Cc: jpoimboe@redhat.com
 Cc: keescook@google.com
 Cc: kirill.shutemov@linux.intel.com
@@ -95,68 +77,67 @@ Cc: mka@chromium.org
 Cc: pombredanne@nexb.com
 Cc: rientjes@google.com
 Cc: rostedt@goodmis.org
+Cc: sedat.dilek@gmail.com
 Cc: thomas.lendacky@amd.com
+Cc: tstellar@redhat.com
 Cc: tweek@google.com
 Cc: virtualization@lists.linux-foundation.org
 Cc: will.deacon@arm.com
 Cc: yamada.masahiro@socionext.com
-Link: http://lkml.kernel.org/r/20180621162324.36656-4-ndesaulniers@google.com
+Link: http://lkml.kernel.org/r/20180621162324.36656-2-ndesaulniers@google.com
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
 ---
- arch/x86/include/asm/irqflags.h |    2 +-
- arch/x86/kernel/Makefile        |    1 +
- arch/x86/kernel/irqflags.S      |   26 ++++++++++++++++++++++++++
- 3 files changed, 28 insertions(+), 1 deletion(-)
+ include/linux/compiler-gcc.h |   29 ++++++++++++++++++++++-------
+ 1 file changed, 22 insertions(+), 7 deletions(-)
 
---- a/arch/x86/include/asm/irqflags.h
-+++ b/arch/x86/include/asm/irqflags.h
-@@ -12,7 +12,7 @@
-  * Interrupt control:
+--- a/include/linux/compiler-gcc.h
++++ b/include/linux/compiler-gcc.h
+@@ -66,25 +66,40 @@
+ #endif
+ 
+ /*
++ * Feature detection for gnu_inline (gnu89 extern inline semantics). Either
++ * __GNUC_STDC_INLINE__ is defined (not using gnu89 extern inline semantics,
++ * and we opt in to the gnu89 semantics), or __GNUC_STDC_INLINE__ is not
++ * defined so the gnu89 semantics are the default.
++ */
++#ifdef __GNUC_STDC_INLINE__
++# define __gnu_inline	__attribute__((gnu_inline))
++#else
++# define __gnu_inline
++#endif
++
++/*
+  * Force always-inline if the user requests it so via the .config,
+  * or if gcc is too old.
+  * GCC does not warn about unused static inline functions for
+  * -Wunused-function.  This turns out to avoid the need for complex #ifdef
+  * directives.  Suppress the warning in clang as well by using "unused"
+  * function attribute, which is redundant but not harmful for gcc.
++ * Prefer gnu_inline, so that extern inline functions do not emit an
++ * externally visible function. This makes extern inline behave as per gnu89
++ * semantics rather than c99. This prevents multiple symbol definition errors
++ * of extern inline functions at link time.
++ * A lot of inline functions can cause havoc with function tracing.
   */
+ #if !defined(CONFIG_ARCH_SUPPORTS_OPTIMIZED_INLINING) ||		\
+     !defined(CONFIG_OPTIMIZE_INLINING) || (__GNUC__ < 4)
+-#define inline inline		__attribute__((always_inline,unused)) notrace
+-#define __inline__ __inline__	__attribute__((always_inline,unused)) notrace
+-#define __inline __inline	__attribute__((always_inline,unused)) notrace
++#define inline \
++	inline __attribute__((always_inline, unused)) notrace __gnu_inline
+ #else
+-/* A lot of inline functions can cause havoc with function tracing */
+-#define inline inline		__attribute__((unused)) notrace
+-#define __inline__ __inline__	__attribute__((unused)) notrace
+-#define __inline __inline	__attribute__((unused)) notrace
++#define inline inline		__attribute__((unused)) notrace __gnu_inline
+ #endif
  
--static inline unsigned long native_save_fl(void)
-+extern inline unsigned long native_save_fl(void)
- {
- 	unsigned long flags;
- 
---- a/arch/x86/kernel/Makefile
-+++ b/arch/x86/kernel/Makefile
-@@ -56,6 +56,7 @@ obj-y			+= alternative.o i8253.o pci-nom
- obj-y			+= tsc.o tsc_msr.o io_delay.o rtc.o
- obj-y			+= pci-iommu_table.o
- obj-y			+= resource.o
-+obj-y			+= irqflags.o
- 
- obj-y				+= process.o
- obj-y				+= fpu/
---- /dev/null
-+++ b/arch/x86/kernel/irqflags.S
-@@ -0,0 +1,26 @@
-+/* SPDX-License-Identifier: GPL-2.0 */
-+
-+#include <asm/asm.h>
-+#include <asm/export.h>
-+#include <linux/linkage.h>
-+
-+/*
-+ * unsigned long native_save_fl(void)
-+ */
-+ENTRY(native_save_fl)
-+	pushf
-+	pop %_ASM_AX
-+	ret
-+ENDPROC(native_save_fl)
-+EXPORT_SYMBOL(native_save_fl)
-+
-+/*
-+ * void native_restore_fl(unsigned long flags)
-+ * %eax/%rdi: flags
-+ */
-+ENTRY(native_restore_fl)
-+	push %_ASM_ARG1
-+	popf
-+	ret
-+ENDPROC(native_restore_fl)
-+EXPORT_SYMBOL(native_restore_fl)
++#define __inline__ inline
++#define __inline inline
+ #define __always_inline	inline __attribute__((always_inline))
+ #define  noinline	__attribute__((noinline))
