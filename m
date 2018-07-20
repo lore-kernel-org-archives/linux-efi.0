@@ -1,7 +1,7 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.9 06/66] x86/asm: Add _ASM_ARG* constants for argument registers to <asm/asm.h>
-Date: Fri, 20 Jul 2018 14:13:23 +0200
-Message-ID: <20180720121407.614332883@linuxfoundation.org>
+Subject: [PATCH 4.9 07/66] x86/paravirt: Make native_save_fl() extern inline
+Date: Fri, 20 Jul 2018 14:13:24 +0200
+Message-ID: <20180720121407.681090885@linuxfoundation.org>
 References: <20180720121407.228772286@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -9,25 +9,58 @@ Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180720121407.228772286@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, "H. Peter Anvin" <hpa@linux.intel.com>, Nick Desaulniers <ndesaulniers@google.com>, Sedat Dilek <sedat.dilek@gmail.com>, Juergen Gross <jgross@suse.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, acme@redhat.com, akataria@vmware.com, akpm@linux-foundation.org, andrea.parri@amarulasolutions.com, ard.biesheuvel@linaro.org, arnd@arndb.de, aryabinin@virtuozzo.com, astrachan@google.com, boris.ostrovsky@oracle.com, brijesh.singh@amd.com, caoj.fnst@cn.fujitsu.com, geert@linux-m68k.org, ghackmann@google.com, jan.kiszka@siemens.com, jarkko.sakkinen@linux.intel.com, joe@perches.com, jpoimboe@redhat.com, keescook@google.com
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, "H. Peter Anvin" <hpa@zytor.com>, Tom Stellar <tstellar@redhat.com>, Sedat Dilek <sedat.dilek@gmail.com>, Nick Desaulniers <ndesaulniers@google.com>, Juergen Gross <jgross@suse.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, acme@redhat.com, akataria@vmware.com, akpm@linux-foundation.org, andrea.parri@amarulasolutions.com, ard.biesheuvel@linaro.org, aryabinin@virtuozzo.com, astrachan@google.com, boris.ostrovsky@oracle.com, brijesh.singh@amd.com, caoj.fnst@cn.fujitsu.com, geert@linux-m68k.org, ghackmann@google.com, jan.kiszka@siemens.com, jarkko.sakkinen@linux.intel.com, joe@
 List-Id: linux-efi@vger.kernel.org
 
 4.9-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
-From: H. Peter Anvin <hpa@linux.intel.com>
+From: Nick Desaulniers <ndesaulniers@google.com>
 
-commit 0e2e160033283e20f688d8bad5b89460cc5bfcc4 upstream.
+commit d0a8d9378d16eb3c69bd8e6d23779fbdbee3a8c7 upstream.
 
-i386 and x86-64 uses different registers for arguments; make them
-available so we don't have to #ifdef in the actual code.
+native_save_fl() is marked static inline, but by using it as
+a function pointer in arch/x86/kernel/paravirt.c, it MUST be outlined.
 
-Native size and specified size (q, l, w, b) versions are provided.
+paravirt's use of native_save_fl() also requires that no GPRs other than
+%rax are clobbered.
 
-Signed-off-by: H. Peter Anvin <hpa@linux.intel.com>
+Compilers have different heuristics which they use to emit stack guard
+code, the emittance of which can break paravirt's callee saved assumption
+by clobbering %rcx.
+
+Marking a function definition extern inline means that if this version
+cannot be inlined, then the out-of-line version will be preferred. By
+having the out-of-line version be implemented in assembly, it cannot be
+instrumented with a stack protector, which might violate custom calling
+conventions that code like paravirt rely on.
+
+The semantics of extern inline has changed since gnu89. This means that
+folks using GCC versions >= 5.1 may see symbol redefinition errors at
+link time for subdirs that override KBUILD_CFLAGS (making the C standard
+used implicit) regardless of this patch. This has been cleaned up
+earlier in the patch set, but is left as a note in the commit message
+for future travelers.
+
+Reports:
+ https://lkml.org/lkml/2018/5/7/534
+ https://github.com/ClangBuiltLinux/linux/issues/16
+
+Discussion:
+ https://bugs.llvm.org/show_bug.cgi?id=37512
+ https://lkml.org/lkml/2018/5/24/1371
+
+Thanks to the many folks that participated in the discussion.
+
+Debugged-by: Alistair Strachan <astrachan@google.com>
+Debugged-by: Matthias Kaehlcke <mka@chromium.org>
+Suggested-by: Arnd Bergmann <arnd@arndb.de>
+Suggested-by: H. Peter Anvin <hpa@zytor.com>
+Suggested-by: Tom Stellar <tstellar@redhat.com>
+Reported-by: Sedat Dilek <sedat.dilek@gmail.com>
+Tested-by: Sedat Dilek <sedat.dilek@gmail.com>
 Signed-off-by: Nick Desaulniers <ndesaulniers@google.com>
-Reviewed-by: Sedat Dilek <sedat.dilek@gmail.com>
 Acked-by: Juergen Gross <jgross@suse.com>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>
 Cc: Peter Zijlstra <peterz@infradead.org>
@@ -37,7 +70,6 @@ Cc: akataria@vmware.com
 Cc: akpm@linux-foundation.org
 Cc: andrea.parri@amarulasolutions.com
 Cc: ard.biesheuvel@linaro.org
-Cc: arnd@arndb.de
 Cc: aryabinin@virtuozzo.com
 Cc: astrachan@google.com
 Cc: boris.ostrovsky@oracle.com
@@ -64,84 +96,67 @@ Cc: pombredanne@nexb.com
 Cc: rientjes@google.com
 Cc: rostedt@goodmis.org
 Cc: thomas.lendacky@amd.com
-Cc: tstellar@redhat.com
 Cc: tweek@google.com
 Cc: virtualization@lists.linux-foundation.org
 Cc: will.deacon@arm.com
 Cc: yamada.masahiro@socionext.com
-Link: http://lkml.kernel.org/r/20180621162324.36656-3-ndesaulniers@google.com
+Link: http://lkml.kernel.org/r/20180621162324.36656-4-ndesaulniers@google.com
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
 ---
- arch/x86/include/asm/asm.h |   59 +++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 59 insertions(+)
+ arch/x86/include/asm/irqflags.h |    2 +-
+ arch/x86/kernel/Makefile        |    1 +
+ arch/x86/kernel/irqflags.S      |   26 ++++++++++++++++++++++++++
+ 3 files changed, 28 insertions(+), 1 deletion(-)
 
---- a/arch/x86/include/asm/asm.h
-+++ b/arch/x86/include/asm/asm.h
-@@ -45,6 +45,65 @@
- #define _ASM_SI		__ASM_REG(si)
- #define _ASM_DI		__ASM_REG(di)
+--- a/arch/x86/include/asm/irqflags.h
++++ b/arch/x86/include/asm/irqflags.h
+@@ -12,7 +12,7 @@
+  * Interrupt control:
+  */
  
-+#ifndef __x86_64__
-+/* 32 bit */
+-static inline unsigned long native_save_fl(void)
++extern inline unsigned long native_save_fl(void)
+ {
+ 	unsigned long flags;
+ 
+--- a/arch/x86/kernel/Makefile
++++ b/arch/x86/kernel/Makefile
+@@ -56,6 +56,7 @@ obj-y			+= alternative.o i8253.o pci-nom
+ obj-y			+= tsc.o tsc_msr.o io_delay.o rtc.o
+ obj-y			+= pci-iommu_table.o
+ obj-y			+= resource.o
++obj-y			+= irqflags.o
+ 
+ obj-y				+= process.o
+ obj-y				+= fpu/
+--- /dev/null
++++ b/arch/x86/kernel/irqflags.S
+@@ -0,0 +1,26 @@
++/* SPDX-License-Identifier: GPL-2.0 */
 +
-+#define _ASM_ARG1	_ASM_AX
-+#define _ASM_ARG2	_ASM_DX
-+#define _ASM_ARG3	_ASM_CX
++#include <asm/asm.h>
++#include <asm/export.h>
++#include <linux/linkage.h>
 +
-+#define _ASM_ARG1L	eax
-+#define _ASM_ARG2L	edx
-+#define _ASM_ARG3L	ecx
++/*
++ * unsigned long native_save_fl(void)
++ */
++ENTRY(native_save_fl)
++	pushf
++	pop %_ASM_AX
++	ret
++ENDPROC(native_save_fl)
++EXPORT_SYMBOL(native_save_fl)
 +
-+#define _ASM_ARG1W	ax
-+#define _ASM_ARG2W	dx
-+#define _ASM_ARG3W	cx
-+
-+#define _ASM_ARG1B	al
-+#define _ASM_ARG2B	dl
-+#define _ASM_ARG3B	cl
-+
-+#else
-+/* 64 bit */
-+
-+#define _ASM_ARG1	_ASM_DI
-+#define _ASM_ARG2	_ASM_SI
-+#define _ASM_ARG3	_ASM_DX
-+#define _ASM_ARG4	_ASM_CX
-+#define _ASM_ARG5	r8
-+#define _ASM_ARG6	r9
-+
-+#define _ASM_ARG1Q	rdi
-+#define _ASM_ARG2Q	rsi
-+#define _ASM_ARG3Q	rdx
-+#define _ASM_ARG4Q	rcx
-+#define _ASM_ARG5Q	r8
-+#define _ASM_ARG6Q	r9
-+
-+#define _ASM_ARG1L	edi
-+#define _ASM_ARG2L	esi
-+#define _ASM_ARG3L	edx
-+#define _ASM_ARG4L	ecx
-+#define _ASM_ARG5L	r8d
-+#define _ASM_ARG6L	r9d
-+
-+#define _ASM_ARG1W	di
-+#define _ASM_ARG2W	si
-+#define _ASM_ARG3W	dx
-+#define _ASM_ARG4W	cx
-+#define _ASM_ARG5W	r8w
-+#define _ASM_ARG6W	r9w
-+
-+#define _ASM_ARG1B	dil
-+#define _ASM_ARG2B	sil
-+#define _ASM_ARG3B	dl
-+#define _ASM_ARG4B	cl
-+#define _ASM_ARG5B	r8b
-+#define _ASM_ARG6B	r9b
-+
-+#endif
-+
- /*
-  * Macros to generate condition code outputs from inline assembly,
-  * The output operand must be type "bool".
++/*
++ * void native_restore_fl(unsigned long flags)
++ * %eax/%rdi: flags
++ */
++ENTRY(native_restore_fl)
++	push %_ASM_ARG1
++	popf
++	ret
++ENDPROC(native_restore_fl)
++EXPORT_SYMBOL(native_restore_fl)
