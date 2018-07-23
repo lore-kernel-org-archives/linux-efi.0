@@ -1,18 +1,27 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.17 003/101] x86/paravirt: Make native_save_fl() extern inline
-Date: Fri, 20 Jul 2018 14:13:09 +0200
-Message-ID: <20180720121423.015279253@linuxfoundation.org>
-References: <20180720121422.837870592@linuxfoundation.org>
+Subject: [PATCH 4.4 018/107] x86/paravirt: Make native_save_fl() extern inline
+Date: Mon, 23 Jul 2018 14:41:12 +0200
+Message-ID: <20180723122413.797031305@linuxfoundation.org>
+References: <20180723122413.003644357@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180720121422.837870592@linuxfoundation.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <virtualization-bounces@lists.linux-foundation.org>
+In-Reply-To: <20180723122413.003644357@linuxfoundation.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/virtualization/>
+List-Post: <mailto:virtualization@lists.linux-foundation.org>
+List-Help: <mailto:virtualization-request@lists.linux-foundation.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=subscribe>
+Sender: virtualization-bounces@lists.linux-foundation.org
+Errors-To: virtualization-bounces@lists.linux-foundation.org
 To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, "H. Peter Anvin" <hpa@zytor.com>, Tom Stellar <tstellar@redhat.com>, Sedat Dilek <sedat.dilek@gmail.com>, Nick Desaulniers <ndesaulniers@google.com>, Juergen Gross <jgross@suse.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, acme@redhat.com, akataria@vmware.com, akpm@linux-foundation.org, andrea.parri@amarulasolutions.com, ard.biesheuvel@linaro.org, aryabinin@virtuozzo.com, astrachan@google.com, boris.ostrovsky@oracle.com, brijesh.singh@amd.com, caoj.fnst@cn.fujitsu.com, geert@linux-m68k.org, ghackmann@google.com, jan.kiszka@siemens.com, jarkko.sakkinen@linux.intel.com, joe@
+Cc: andrea.parri@amarulasolutions.com, kstewart@linuxfoundation.org, linux-efi@vger.kernel.org, brijesh.singh@amd.com, Peter Zijlstra <peterz@infradead.org>, jan.kiszka@siemens.com, will.deacon@arm.com, jarkko.sakkinen@linux.intel.com, virtualization@lists.linux-foundation.org, yamada.masahiro@socionext.com, manojgupta@google.com, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, tweek@google.com, mawilcox@microsoft.com, akataria@vmware.com, ghackmann@google.com, Ingo Molnar <mingo@kernel.org>, mjg59@google.com, mka@chromium.org, geert@linux-m68k.org, rientjes@google.com, aryabinin@virtuozzo.com, thomas.lendacky@amd.com, Arnd Bergmann <arnd@arndb.de>, linux-kbuild@vger.kernel.org, pombredanne@nexb.com, rostedt@goodmis.org, acme@redhat.com, caoj.fnst@cn.fujitsu.com, jpoimboe@redhat.com, Sedat Dilek <sedat.dilek@gmail.com>, boris.ostrovsky@oracle.com
 List-Id: linux-efi@vger.kernel.org
 
-4.17-stable review patch.  If anyone has any objections, please let me know.
+4.4-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
@@ -52,6 +61,13 @@ Discussion:
  https://lkml.org/lkml/2018/5/24/1371
 
 Thanks to the many folks that participated in the discussion.
+
+[Backport for 4.4. 4.4 is missing commit 784d5699eddc "x86: move exports to
+actual definitions" which doesn't apply cleanly, and not really worth
+backporting IMO. It's simpler to change this patch from upstream:
+  + #include <asm-generic/export.h>
+rather than
+  + #include <asm/export.h>]
 
 Debugged-by: Alistair Strachan <astrachan@google.com>
 Debugged-by: Matthias Kaehlcke <mka@chromium.org>
@@ -112,7 +128,7 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
 --- a/arch/x86/include/asm/irqflags.h
 +++ b/arch/x86/include/asm/irqflags.h
-@@ -13,7 +13,7 @@
+@@ -8,7 +8,7 @@
   * Interrupt control:
   */
  
@@ -123,7 +139,7 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
  
 --- a/arch/x86/kernel/Makefile
 +++ b/arch/x86/kernel/Makefile
-@@ -61,6 +61,7 @@ obj-y			+= alternative.o i8253.o hw_brea
+@@ -41,6 +41,7 @@ obj-y			+= alternative.o i8253.o pci-nom
  obj-y			+= tsc.o tsc_msr.o io_delay.o rtc.o
  obj-y			+= pci-iommu_table.o
  obj-y			+= resource.o
@@ -137,7 +153,7 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 +/* SPDX-License-Identifier: GPL-2.0 */
 +
 +#include <asm/asm.h>
-+#include <asm/export.h>
++#include <asm-generic/export.h>
 +#include <linux/linkage.h>
 +
 +/*
