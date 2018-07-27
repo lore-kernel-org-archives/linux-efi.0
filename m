@@ -1,36 +1,47 @@
-From: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
-Subject: Re: [PATCH RT] rtc: Disable RTC_DRV_EFI on RT
-Date: Thu, 26 Jul 2018 18:04:31 +0200
-Message-ID: <20180726160430.ser3j5pfxnjh2bla@linutronix.de>
-References: <20180726090449.hfvtey3ruzzhzdaz@linutronix.de>
- <CAKv+Gu_+t_VwY3xDq3nWbnOTfzBc6OtQeRD2GKsseO2uK-uruw@mail.gmail.com>
- <20180726121504.ba35z3j3wsesryy3@linutronix.de>
- <5052E25B-9942-40C1-BD53-86E3D7014557@linaro.org>
- <20180726124613.xgmidioqd4mcqpiw@linutronix.de>
- <8640BE46-B141-44F9-BD92-58A21A2B0EA7@linaro.org>
- <20180726131323.ffecgeqnry6th4mp@linutronix.de>
- <20180726131424.nqkalmmncnfcrh2q@linutronix.de>
- <CAKv+Gu8FgcPZDDKWnC03eWVFH2npJz5_XQDoOzkGdDxxSqCj8g@mail.gmail.com>
+From: Steffen Klassert <steffen.klassert@secunet.com>
+Subject: Re: [PATCH 00/18] xfrm: Add compat layer
+Date: Fri, 27 Jul 2018 09:37:47 +0200
+Message-ID: <20180727073747.h27dtojlnmc3k25v@gauss3.secunet.de>
+References: <20180726023144.31066-1-dima@arista.com>
+ <20180726084959.pzjvflfjq6a76du6@breakpoint.cc>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <netdev-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CAKv+Gu8FgcPZDDKWnC03eWVFH2npJz5_XQDoOzkGdDxxSqCj8g@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Steven Rostedt <rostedt@goodmis.org>, linux-rt-users@vger.kernel.org, Marc Zyngier <marc.zyngier@arm.com>, linux-efi <linux-efi@vger.kernel.org>, Anna-Maria Gleixner <anna-maria@linutronix.de>
+In-Reply-To: <20180726084959.pzjvflfjq6a76du6@breakpoint.cc>
+Sender: netdev-owner@vger.kernel.org
+To: Florian Westphal <fw@strlen.de>
+Cc: Dmitry Safonov <dima@arista.com>, linux-kernel@vger.kernel.org, "David S. Miller" <davem@davemloft.net>, Herbert Xu <herbert@gondor.apana.org.au>, Dmitry Safonov <0x7f454c46@gmail.com>, netdev@vger.kernel.org, Andy Lutomirski <luto@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, John Stultz <john.stultz@linaro.org>, "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>, Oleg Nesterov <oleg@redhat.com>, Stephen Boyd <sboyd@kernel.org>, Steven Rostedt <rostedt@goodmis.org>, Thomas Gleixner <tglx@linutronix.de>, x86@kernel.org, linux-efi@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Mauro Carvalho Chehab <mcheh>
 List-Id: linux-efi@vger.kernel.org
 
-On 2018-07-26 18:01:47 [+0200], Ard Biesheuvel wrote:
-> Yes, that's what I was thinking. This way, you can still reboot into
-> the same kernel occasionally with EFI runtime services enabled to,
-> e.g., use efibootmgr.
+On Thu, Jul 26, 2018 at 10:49:59AM +0200, Florian Westphal wrote:
+> Dmitry Safonov <dima@arista.com> wrote:
+> > So, here I add a compatible layer to xfrm.
+> > As xfrm uses netlink notifications, kernel should send them in ABI
+> > format that an application will parse. The proposed solution is
+> > to save the ABI of bind() syscall. The realization detail is
+> > to create kernel-hidden, non visible to userspace netlink groups
+> > for compat applications.
 > 
-> Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> Why not use exisiting netlink support?
+> Just add the 32bit skb to skb64->frag_list and let
+> netlink find if tasks needs 64 or 32 one.
 > 
-> for both patches if you queue them in the -rt tree. If you want them
-> in mainline, please resend them as proper patches once
-> CONFIG_PREEMPT_RT_BASE has been declared in mainline as well.
-Okay, thank you.
+> It only needs this small fix to properly signal the end of a dump:
+> https://marc.info/?l=linux-netdev&m=126625240303351&w=2
+> 
+> I had started a second attempt to make xfrm compat work,
+> but its still in early stage.
+> 
+> One link that might still have some value:
+> https://git.breakpoint.cc/cgit/fw/net-next.git/commit/?h=xfrm_config_compat_07&id=f64430e6d9e297f3990f485a4832e273751b9869
+> (compat structure definitions with BUILD_BUG_ON checking)
+> 
+> My plan was to make xfrm compat work strictly as shrinker (64->32)
+> and expander (32->64), i.e. no/little changes to exisiting code and
+> pass all "expanded" skbs through existing xfrm rcv functions.
 
-Sebastian
+I agree here with Florian. The code behind this ABI
+is already complicated. Please stay away from generic
+code a much as possible. Generic and compat code should
+be clearly separated.
