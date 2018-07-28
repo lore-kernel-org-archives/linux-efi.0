@@ -1,93 +1,83 @@
-From: kbuild test robot <lkp@intel.com>
-Subject: Re: [PATCH 4/4] x86/ima: define arch_get_ima_policy() for x86
-Date: Sat, 28 Jul 2018 20:22:27 +0800
-Message-ID: <201807282011.jTLIG5hy%fengguang.wu@intel.com>
-References: <20180725233200.761-5-erichte@linux.vnet.ibm.com>
+From: Dmitry Safonov <dima@arista.com>
+Subject: Re: [PATCH 00/18] xfrm: Add compat layer
+Date: Sat, 28 Jul 2018 17:26:55 +0100
+Message-ID: <1532795215.2679.27.camel@arista.com>
+References: <20180726023144.31066-1-dima@arista.com>
+         <20180726084959.pzjvflfjq6a76du6@breakpoint.cc>
+         <20180727073747.h27dtojlnmc3k25v@gauss3.secunet.de>
+         <1532700173.2679.18.camel@arista.com>
+         <20180727141936.uze6ohordx7ue3no@breakpoint.cc>
+         <1532703111.2679.20.camel@arista.com>
+         <CADhJOfam+cY8uD4XTGvZSEFQdAgTu49G6cg6c64NJoP3bNuBmw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20180725233200.761-5-erichte@linux.vnet.ibm.com>
+In-Reply-To: <CADhJOfam+cY8uD4XTGvZSEFQdAgTu49G6cg6c64NJoP3bNuBmw@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-Cc: kbuild-all@01.org, linux-integrity <linux-integrity@vger.kernel.org>, linux-security-module <linux-security-module@vger.kernel.org>, linux-efi <linux-efi@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, David Howells <dhowells@redhat.com>, Seth Forshee <seth.forshee@canonical.com>, Justin Forbes <jforbes@redhat.com>, Eric Richter <erichte@linux.vnet.ibm.com>
+To: Nathan Harold <nharold@google.com>
+Cc: Florian Westphal <fw@strlen.de>, Steffen Klassert <steffen.klassert@secunet.com>, linux-kernel@vger.kernel.org, "David S. Miller" <davem@davemloft.net>, Herbert Xu <herbert@gondor.apana.org.au>, Dmitry Safonov <0x7f454c46@gmail.com>, netdev@vger.kernel.org, Andy Lutomirski <luto@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, John Stultz <john.stultz@linaro.org>, "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>, Oleg Nesterov <oleg@redhat.com>, Stephen Boyd <sboyd@kernel.org>, Steven Rostedt <rostedt@goodmis.org>, Thomas Gleixner <tglx@linutronix.de>, x86@kernel.org, linux-efi@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Greg Kroah-Hartman <gregkh@linuxfou>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Eric,
+On Fri, 2018-07-27 at 09:48 -0700, Nathan Harold wrote:
+> We (Android) are very interested in removing the restriction for 32-
+> bit userspace processes accessing xfrm netlink on 64-bit kernels.
+> IPsec support is required to pass Android conformance tests, and any
+> manufacturer wishing to ship 32-bit userspace with a recent kernel
+> needs out-of-tree changes (removing the compat_task check) to do so.
 
-Thank you for the patch! Perhaps something to improve:
+Glad to hear - that justify my attempts more :)
 
-[auto build test WARNING on integrity/next-integrity]
-[also build test WARNING on next-20180727]
-[cannot apply to v4.18-rc6]
-[if your patch is applied to the wrong git tree, please drop us a note to help improve the system]
+> That said, it’s not difficult to work around alignment issues
+> directly in userspace, so maybe we could just remove the check and
+> make this the caller's responsibility? Here’s an example of the
+> workaround currently in the Android tree:
+> https://android.googlesource.com/platform/system/netd/+/refs/heads/ma
+> ster/server/XfrmController.h#257
 
-url:    https://github.com/0day-ci/linux/commits/Eric-Richter/ima-add-support-for-arch-specific-policies/20180728-072442
-base:   https://git.kernel.org/pub/scm/linux/kernel/git/zohar/linux-integrity.git next-integrity
+We've kinda same workarounds in our userspace..
+But I don't think reverting the check makes much sense - it'll make
+broken compat ABI in stone.
+If you're fine with disgraceful hacks and just want to get rid of
+additional non-mainstream patch - you can make 64-bit syscalls from 32-
+bit task (hint: examples in x86 selftests).
 
-smatch warnings:
-security/integrity/ima/ima_policy.c:522 ima_init_arch_policy() error: potential null dereference 'arch_policy_entry'.  (kcalloc returns null)
 
-vim +/arch_policy_entry +522 security/integrity/ima/ima_policy.c
+> We could also employ a (relatively simple) solution such as the one
+> above in the uapi XFRM header itself, though it would require a
+> caller to declare the target kernel ABI at compile time. Maybe that’s
+> not unthinkable for an uncommon case?
 
-b4c0791e Nayna Jain 2018-07-25  484  
-b4c0791e Nayna Jain 2018-07-25  485  /*
-b4c0791e Nayna Jain 2018-07-25  486   * ima_init_arch_policy - convert arch policy strings to rules
-b4c0791e Nayna Jain 2018-07-25  487   *
-b4c0791e Nayna Jain 2018-07-25  488   * Return number of arch specific rules.
-b4c0791e Nayna Jain 2018-07-25  489   */
-b4c0791e Nayna Jain 2018-07-25  490  static int __init ima_init_arch_policy(void)
-b4c0791e Nayna Jain 2018-07-25  491  {
-b4c0791e Nayna Jain 2018-07-25  492  	const char * const *arch_rules;
-b4c0791e Nayna Jain 2018-07-25  493  	const char * const *rules;
-b4c0791e Nayna Jain 2018-07-25  494  	int arch_entries = 0;
-b4c0791e Nayna Jain 2018-07-25  495  	int i = 0;
-b4c0791e Nayna Jain 2018-07-25  496  
-b4c0791e Nayna Jain 2018-07-25  497  	arch_rules = arch_get_ima_policy();
-b4c0791e Nayna Jain 2018-07-25  498  	if (!arch_rules) {
-b4c0791e Nayna Jain 2018-07-25  499  		pr_info("No architecture policy rules.\n");
-b4c0791e Nayna Jain 2018-07-25  500  		return arch_entries;
-b4c0791e Nayna Jain 2018-07-25  501  	}
-b4c0791e Nayna Jain 2018-07-25  502  
-b4c0791e Nayna Jain 2018-07-25  503  	/* Get number of rules */
-b4c0791e Nayna Jain 2018-07-25  504  	for (rules = arch_rules; *rules != NULL; rules++)
-b4c0791e Nayna Jain 2018-07-25  505  		arch_entries++;
-b4c0791e Nayna Jain 2018-07-25  506  
-b4c0791e Nayna Jain 2018-07-25  507  	arch_policy_rules = kcalloc(arch_entries + 1,
-b4c0791e Nayna Jain 2018-07-25  508  				    sizeof(*arch_policy_rules), GFP_KERNEL);
-b4c0791e Nayna Jain 2018-07-25  509  	if (!arch_policy_rules)
-b4c0791e Nayna Jain 2018-07-25  510  		return 0;
-b4c0791e Nayna Jain 2018-07-25  511  
-b4c0791e Nayna Jain 2018-07-25  512  	arch_policy_entry = kcalloc(arch_entries + 1,
-b4c0791e Nayna Jain 2018-07-25  513  				    sizeof(*arch_policy_entry), GFP_KERNEL);
-b4c0791e Nayna Jain 2018-07-25  514  
-b4c0791e Nayna Jain 2018-07-25  515  	/* Convert arch policy string rules to struct ima_rule_entry format */
-b4c0791e Nayna Jain 2018-07-25  516  	for (rules = arch_rules, i = 0; *rules != NULL; rules++) {
-b4c0791e Nayna Jain 2018-07-25  517  		char rule[255];
-b4c0791e Nayna Jain 2018-07-25  518  		int result;
-b4c0791e Nayna Jain 2018-07-25  519  
-b4c0791e Nayna Jain 2018-07-25  520  		result = strlcpy(rule, *rules, sizeof(rule));
-b4c0791e Nayna Jain 2018-07-25  521  
-b4c0791e Nayna Jain 2018-07-25 @522  		INIT_LIST_HEAD(&arch_policy_entry[i].list);
-b4c0791e Nayna Jain 2018-07-25  523  		result = ima_parse_rule(rule, &arch_policy_entry[i]);
-b4c0791e Nayna Jain 2018-07-25  524  		if (result) {
-b4c0791e Nayna Jain 2018-07-25  525  			pr_warn("Skipping unknown architecture policy rule: %s\n", rule);
-b4c0791e Nayna Jain 2018-07-25  526  			memset(&arch_policy_entry[i], 0,
-b4c0791e Nayna Jain 2018-07-25  527  			       sizeof(*arch_policy_entry));
-b4c0791e Nayna Jain 2018-07-25  528  			continue;
-b4c0791e Nayna Jain 2018-07-25  529  		}
-b4c0791e Nayna Jain 2018-07-25  530  		arch_policy_rules[i] = &arch_policy_entry[i];
-b4c0791e Nayna Jain 2018-07-25  531  		i++;
-b4c0791e Nayna Jain 2018-07-25  532  	}
-b4c0791e Nayna Jain 2018-07-25  533  	return i;
-b4c0791e Nayna Jain 2018-07-25  534  }
-b4c0791e Nayna Jain 2018-07-25  535  
+Well, I think, I'll rework my patches set according to critics and
+separate compat xfrm layer. I've already a selftest to check that 32/64
+bit xfrm works - so the most time-taking part is done.
+So, if you'll wait a week or two - you may help me to justify acception
+of mainstreaming those patches.
 
-:::::: The code at line 522 was first introduced by commit
-:::::: b4c0791e0facd968a3e0502a8a544390025a9a38 ima: add support for arch specific policies
+> On Fri, Jul 27, 2018 at 7:51 AM, Dmitry Safonov <dima@arista.com>
+> wrote:
+> > On Fri, 2018-07-27 at 16:19 +0200, Florian Westphal wrote:
+> > > Dmitry Safonov <dima@arista.com> wrote:
+> > > > 1. It will double copy netlink messages, making it O(n) instead
+> > of
+> > > > O(1), where n - is number of bind()s.. Probably we don't care
+> > much.
+> > > 
+> > > About those bind() patches, I don't understand why they are
+> > needed.
+> > > 
+> > > Why can't you just add the compat skb to the native skb when
+> > doing
+> > > the multicast call?
+> > > 
+> > > skb_shinfo(skb)->frag_list = compat_skb;
+> > > xfrm_nlmsg_multicast(net, skb, 0, ...
+> > 
+> > Oh yeah, sorry, I think I misread the patch - will try to add
+> > compat
+> > skb in the multicast call.
+> > 
 
-:::::: TO: Nayna Jain <nayna@linux.vnet.ibm.com>
-:::::: CC: 0day robot <lkp@intel.com>
-
----
-0-DAY kernel test infrastructure                Open Source Technology Center
-https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
+-- 
+Thanks,
+             Dmitry
