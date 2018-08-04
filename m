@@ -1,84 +1,63 @@
-From: Mimi Zohar <zohar@linux.ibm.com>
-Subject: Re: [PATCH 3/4] ima: add support for KEXEC_ORIG_KERNEL_CHECK
-Date: Fri, 03 Aug 2018 15:47:30 -0400
-Message-ID: <1533325650.4337.527.camel@linux.ibm.com>
-References: <20180725233200.761-1-erichte@linux.vnet.ibm.com>
-         <20180725233200.761-4-erichte@linux.vnet.ibm.com>
-         <20180803131129.GS3001@ubuntu-xps13>
-         <1533308099.4337.424.camel@linux.ibm.com>
-         <20180803161636.GX3001@ubuntu-xps13>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.17 17/31] x86/efi: Access EFI MMIO data as unencrypted when SEV is active
+Date: Sat,  4 Aug 2018 11:00:52 +0200
+Message-ID: <20180804082633.586381045@linuxfoundation.org>
+References: <20180804082632.304529527@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180803161636.GX3001@ubuntu-xps13>
+In-Reply-To: <20180804082632.304529527@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Seth Forshee <seth.forshee@canonical.com>
-Cc: Eric Richter <erichte@linux.vnet.ibm.com>, linux-integrity <linux-integrity@vger.kernel.org>, linux-security-module <linux-security-module@vger.kernel.org>, linux-efi <linux-efi@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, David Howells <dhowells@redhat.com>, Justin Forbes <jforbes@redhat.com>
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Brijesh Singh <brijesh.singh@amd.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Tom Lendacky <thomas.lendacky@amd.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 2018-08-03 at 11:16 -0500, Seth Forshee wrote:
-> On Fri, Aug 03, 2018 at 10:54:59AM -0400, Mimi Zohar wrote:
-> > On Fri, 2018-08-03 at 08:11 -0500, Seth Forshee wrote:
-> > > On Wed, Jul 25, 2018 at 06:31:59PM -0500, Eric Richter wrote:
-> > > > IMA can verify the signature of kernel images loaded with kexec_file_load,
-> > > > but can not verify images loaded with the regular kexec_load syscall.
-> > > > Therefore, the appraisal will automatically fail during kexec_load when an
-> > > > appraise policy rule is set for func=KEXEC_KERNEL_CHECK. This can be used
-> > > > to effectively disable the kexec_load syscall, while still allowing the
-> > > > kexec_file_load to operate so long as the target kernel image is signed.
-> > > > 
-> > > > However, this conflicts with CONFIG_KEXEC_VERIFY_SIG. If that option is
-> > > > enabled and there is an appraise rule set, then the target kernel would
-> > > > have to be verifiable by both IMA and the architecture specific kernel
-> > > > verification procedure.
-> > > > 
-> > > > This patch adds a new func= for IMA appraisal specifically for the original
-> > > > kexec_load syscall. Therefore, the kexec_load syscall can be effectively
-> > > > disabled via IMA policy, leaving the kexec_file_load syscall able to do its
-> > > > own signature verification, and not require it to be signed via IMA. To
-> > > > retain compatibility, the existing func=KEXEC_KERNEL_CHECK flag is
-> > > > unchanged, and thus enables appraisal for both kexec syscalls.
-> > > 
-> > > This seems like a roundabout way to disallow the kexec_load syscall.
-> > > Wouldn't it make more sense to simply disallow kexec_load any time
-> > > CONFIG_KEXEC_VERIFY_SIG is enabled, since it effectively renders that
-> > > option impotent? Or has that idea already been rejected?
-> > 
-> > Agreed!  We can modify the "case LOADING_KEXEC_IMAGE" in
-> > ima_load_data() to prevent the kexec_load based on
-> > CONFIG_KEXEC_VERIFY_SIG.
-> > 
-> > The architecture specific policy would only include the IMA appraise
-> > rule if CONFIG_KEXEC_VERIFY_SIG was not defined.
-> 
-> After looking at this some more I'm having second thoughts about my
-> suggestion. As a distro we produce a kernel that needs to be flexible
-> enough for a variety of scenarios, and if we completely close off the
-> ability to load an unsigned kernel for kexec that's almost certainly
-> going to end up breaking some use cases.
-> 
-> So I think it is necessary to make this a run-time decision rather than
-> a compile-time decision. The patch as provided does this based on
-> whether or not the kernel was booted under secure boot. That might be
-> reasonable, though I still find this mechanism kind of awkward.
+4.17-stable review patch.  If anyone has any objections, please let me know.
 
-Right, the above change is almost right.  Instead of preventing the
-kexec_load syscall based on CONFIG_KEXEC_VERIFY_SIG it should be based
-on a runtime secure boot flag.  Only if there is an arch specific
-secure boot function and the secure boot flag is enabled, would the
-kexec_load be disabled.
+------------------
 
-Without an architecture specific secure boot function, the existing
-IMA code would fail the kexec_load syscall.
+From: Brijesh Singh <brijesh.singh@amd.com>
 
->  It seems
-> like ideally there would instead be some logic that would accept the
-> image if the KEXEC_VERIFY_SIG verification had passed, and otherwise
-> require IMA signature verification.
+commit 9b788f32bee6b0b293a4bdfca4ad4bb0206407fb upstream.
 
-True, but for now to coordinate between the two signature verification
-methods, only if CONFIG_KEXEC_VERIFY_SIG is not enabled would an IMA
-architecture specific rule be defined.
+SEV guest fails to update the UEFI runtime variables stored in the
+flash.
 
-Mimi
+The following commit:
+
+  1379edd59673 ("x86/efi: Access EFI data as encrypted when SEV is active")
+
+unconditionally maps all the UEFI runtime data as 'encrypted' (C=1).
+
+When SEV is active the UEFI runtime data marked as EFI_MEMORY_MAPPED_IO
+should be mapped as 'unencrypted' so that both guest and hypervisor can
+access the data.
+
+Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Reviewed-by: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: <stable@vger.kernel.org> # 4.15.x
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Fixes: 1379edd59673 ("x86/efi: Access EFI data as encrypted ...")
+Link: http://lkml.kernel.org/r/20180720012846.23560-2-ard.biesheuvel@linaro.org
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+---
+ arch/x86/platform/efi/efi_64.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -417,7 +417,7 @@ static void __init __map_region(efi_memo
+ 	if (!(md->attribute & EFI_MEMORY_WB))
+ 		flags |= _PAGE_PCD;
+ 
+-	if (sev_active())
++	if (sev_active() && md->type != EFI_MEMORY_MAPPED_IO)
+ 		flags |= _PAGE_ENC;
+ 
+ 	pfn = md->phys_addr >> PAGE_SHIFT;
