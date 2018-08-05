@@ -1,63 +1,78 @@
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.17 17/31] x86/efi: Access EFI MMIO data as unencrypted when SEV is active
-Date: Sat,  4 Aug 2018 11:00:52 +0200
-Message-ID: <20180804082633.586381045@linuxfoundation.org>
-References: <20180804082632.304529527@linuxfoundation.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
+Subject: [PATCH 0/6][RFC] Add EFI secure key to key retention service
+Date: Sun,  5 Aug 2018 11:21:13 +0800
+Message-ID: <20180805032119.20485-1-jlee@suse.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180804082632.304529527@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Brijesh Singh <brijesh.singh@amd.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Tom Lendacky <thomas.lendacky@amd.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
+Cc: linux-efi@vger.kernel.org, x86@kernel.org, keyrings@vger.kernel.org, linux-integrity@vger.kernel.org, "Lee, Chun-Yi" <jlee@suse.com>, Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Pavel Machek <pavel@ucw.cz>, Chen Yu <yu.c.chen@intel.com>, Oliver Neukum <oneukum@suse.com>, Ryan Chen <yu.chen.surf@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, David Howells <dhowells@redhat.com>, Mimi Zohar <zohar@linux.vnet.ibm.com>
 List-Id: linux-efi@vger.kernel.org
 
-4.17-stable review patch.  If anyone has any objections, please let me know.
+When secure boot is enabled, only signed EFI binary can access
+EFI boot service variable before ExitBootService. Which means that
+the EFI boot service variable is secure.
+   
+This patch set add functions to EFI boot stub to generate a 512-bit
+random number that it can be used as a root key for encryption and
+authentication. This root key will be kept in EFI boot service variable.
+EFI boot stub will read and transfer ERK (efi root key) to kernel.
+    
+At runtime, the ERK can be used to encrypted/authentication other
+random number to generate EFI secure key. The EFI secure key can be
+a new master key type for encrypted key. It's useful for hibernation
+or evm.
 
-------------------
+Here is the proof of concept for using EFI secure key in hibernation:
+  https://github.com/joeyli/linux-s4sign/commit/6311e97038974bc5de8121769fb4d34470009566
 
-From: Brijesh Singh <brijesh.singh@amd.com>
-
-commit 9b788f32bee6b0b293a4bdfca4ad4bb0206407fb upstream.
-
-SEV guest fails to update the UEFI runtime variables stored in the
-flash.
-
-The following commit:
-
-  1379edd59673 ("x86/efi: Access EFI data as encrypted when SEV is active")
-
-unconditionally maps all the UEFI runtime data as 'encrypted' (C=1).
-
-When SEV is active the UEFI runtime data marked as EFI_MEMORY_MAPPED_IO
-should be mapped as 'unencrypted' so that both guest and hypervisor can
-access the data.
-
-Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Reviewed-by: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: <stable@vger.kernel.org> # 4.15.x
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Kees Cook <keescook@chromium.org>
 Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-efi@vger.kernel.org
-Fixes: 1379edd59673 ("x86/efi: Access EFI data as encrypted ...")
-Link: http://lkml.kernel.org/r/20180720012846.23560-2-ard.biesheuvel@linaro.org
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Ingo Molnar <mingo@redhat.com>
+Cc: "H. Peter Anvin" <hpa@zytor.com>
+Cc: "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>
+Cc: Pavel Machek <pavel@ucw.cz>
+Cc: Chen Yu <yu.c.chen@intel.com>
+Cc: Oliver Neukum <oneukum@suse.com>
+Cc: Ryan Chen <yu.chen.surf@gmail.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: David Howells <dhowells@redhat.com>
+Cc: Mimi Zohar <zohar@linux.vnet.ibm.com>
+Signed-off-by: "Lee, Chun-Yi" <jlee@suse.com>
 
----
- arch/x86/platform/efi/efi_64.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Lee, Chun-Yi (6):
+  x86/KASLR: make getting random long number function public
+  efi: the function transfers status to string
+  efi: generate efi root key in EFI boot stub
+  key: add EFI secure key type
+  key: add EFI secure key as a master key type
+  key: enforce the secure boot checking when loading efi root key
 
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -417,7 +417,7 @@ static void __init __map_region(efi_memo
- 	if (!(md->attribute & EFI_MEMORY_WB))
- 		flags |= _PAGE_PCD;
- 
--	if (sev_active())
-+	if (sev_active() && md->type != EFI_MEMORY_MAPPED_IO)
- 		flags |= _PAGE_ENC;
- 
- 	pfn = md->phys_addr >> PAGE_SHIFT;
+ Documentation/admin-guide/kernel-parameters.txt |   6 +
+ arch/x86/boot/compressed/Makefile               |   1 +
+ arch/x86/boot/compressed/cpuflags.c             |   2 +-
+ arch/x86/boot/compressed/eboot.c                |   2 +
+ arch/x86/boot/compressed/efi_root_key.c         | 212 +++++++
+ arch/x86/boot/compressed/kaslr.c                |  21 -
+ arch/x86/boot/compressed/misc.c                 |  17 +
+ arch/x86/boot/compressed/misc.h                 |  12 +-
+ arch/x86/include/asm/efi.h                      |  13 +
+ arch/x86/include/uapi/asm/bootparam.h           |   1 +
+ arch/x86/kernel/setup.c                         |   3 +
+ arch/x86/lib/kaslr.c                            |  61 +-
+ arch/x86/lib/random.c                           |  68 +++
+ drivers/firmware/efi/Kconfig                    |  31 +
+ drivers/firmware/efi/Makefile                   |   1 +
+ drivers/firmware/efi/efi-secure-key.c           | 748 ++++++++++++++++++++++++
+ include/keys/efi-type.h                         |  57 ++
+ include/linux/efi.h                             |  40 ++
+ include/linux/kernel.h                          |   3 +-
+ kernel/panic.c                                  |   1 +
+ security/keys/encrypted-keys/encrypted.c        |  10 +
+ 21 files changed, 1226 insertions(+), 84 deletions(-)
+ create mode 100644 arch/x86/boot/compressed/efi_root_key.c
+ create mode 100644 arch/x86/lib/random.c
+ create mode 100644 drivers/firmware/efi/efi-secure-key.c
+ create mode 100644 include/keys/efi-type.h
+
+-- 
+2.13.6
