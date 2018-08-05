@@ -1,7 +1,7 @@
 From: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
-Subject: [PATCH 5/6] key: add EFI secure key as a master key type
-Date: Sun,  5 Aug 2018 11:21:18 +0800
-Message-ID: <20180805032119.20485-6-jlee@suse.com>
+Subject: [PATCH 6/6] key: enforce the secure boot checking when loading efi root key
+Date: Sun,  5 Aug 2018 11:21:19 +0800
+Message-ID: <20180805032119.20485-7-jlee@suse.com>
 References: <20180805032119.20485-1-jlee@suse.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180805032119.20485-1-jlee@suse.com>
@@ -10,18 +10,21 @@ To: linux-kernel@vger.kernel.org
 Cc: linux-efi@vger.kernel.org, x86@kernel.org, keyrings@vger.kernel.org, linux-integrity@vger.kernel.org, "Lee, Chun-Yi" <jlee@suse.com>, Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Pavel Machek <pavel@ucw.cz>, Chen Yu <yu.c.chen@intel.com>, Oliver Neukum <oneukum@suse.com>, Ryan Chen <yu.chen.surf@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, David Howells <dhowells@redhat.com>, Mimi Zohar <zohar@linux.vnet.ibm.com>
 List-Id: linux-efi@vger.kernel.org
 
-EFI secure key can be a new master key type that it's used for
-generate encrypted key.
+The EFI root key is not completely secure insecure when the
+secure boot is disabled because it can be changed by unsigned EFI
+binary before system be handed over to kernel. But in some use
+case user does not want the EFI secure key functions be blocked
+when secure boot is disabled.
 
-Compared with trusted key or user key, the advantage of using
-EFI master key is that it doesn't need TPM or password from user
-space.
+Like the kernel module verification, this patch adds a enforce
+kernel configuration option that it can be used to enforce kernel
+to checking the secure boot before loading efi root key. And user
+can also use kernel parameter to enable it. When this option be
+enabled, the EFI root key will not be loaded by kernel when secure
+boot is diabled.
 
-As other master key types, keyctl can be used to create new encrypted
-key by EFI secure key. Using the "efi:" prefix string with master
-key name:
-
-e.g. keyctl add encrypted evm-key "new efi:kmk-efi 32" @u
+Without this option, kernel will be tainted but the EFI root key
+can still be loaded.
 
 Cc: Kees Cook <keescook@chromium.org>
 Cc: Thomas Gleixner <tglx@linutronix.de>
@@ -37,115 +40,147 @@ Cc: David Howells <dhowells@redhat.com>
 Cc: Mimi Zohar <zohar@linux.vnet.ibm.com>
 Signed-off-by: "Lee, Chun-Yi" <jlee@suse.com>
 ---
- drivers/firmware/efi/efi-secure-key.c    | 21 +++++++++++++++++++++
- include/keys/efi-type.h                  |  7 +++++++
- security/keys/encrypted-keys/encrypted.c | 10 ++++++++++
- 3 files changed, 38 insertions(+)
+ Documentation/admin-guide/kernel-parameters.txt |  6 +++++
+ drivers/firmware/efi/Kconfig                    |  8 ++++++
+ drivers/firmware/efi/efi-secure-key.c           | 33 ++++++++++++++++++++++---
+ include/linux/kernel.h                          |  3 ++-
+ kernel/panic.c                                  |  1 +
+ 5 files changed, 46 insertions(+), 5 deletions(-)
 
+diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
+index 533ff5c68970..7a9ac358793f 100644
+--- a/Documentation/admin-guide/kernel-parameters.txt
++++ b/Documentation/admin-guide/kernel-parameters.txt
+@@ -1122,6 +1122,12 @@
+ 			vendor GUIDs, all of them will be loaded. See
+ 			Documentation/acpi/ssdt-overlays.txt for details.
+ 
++	efi-secure-key.sb_enforce [EFI; X86]
++			When EFI_SECURE_KEY is set, this means that
++			EFI root key will not be loaded when secure boot is
++			not enabled. Note that if EFI_SECURE_KEY_SB_ENFORCE
++			is set, that is always true, so this option does
++			nothing.
+ 
+ 	eisa_irq_edge=	[PARISC,HW]
+ 			See header of drivers/parisc/eisa.c.
+diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+index 048cf91ae8e8..fba894a4e7b0 100644
+--- a/drivers/firmware/efi/Kconfig
++++ b/drivers/firmware/efi/Kconfig
+@@ -187,6 +187,14 @@ config EFI_SECURE_KEY
+ 
+ 	  If unsure, say N.
+ 
++config EFI_SECURE_KEY_SB_ENFORCE
++	bool "Force checking secure boot when loading EFI root key"
++	default y
++	depends on EFI_SECURE_KEY
++	help
++	  Skip EFI root key when secure boot is not enabled. Without this,
++	  EFI root key will simply taint the kernel when no secure boot.
++
+ endmenu
+ 
+ config UEFI_CPER
 diff --git a/drivers/firmware/efi/efi-secure-key.c b/drivers/firmware/efi/efi-secure-key.c
-index 5e72a8c9e13e..aa422ee87f70 100644
+index aa422ee87f70..417d73768887 100644
 --- a/drivers/firmware/efi/efi-secure-key.c
 +++ b/drivers/firmware/efi/efi-secure-key.c
-@@ -676,6 +676,27 @@ struct key_type key_type_efi = {
- };
- EXPORT_SYMBOL_GPL(key_type_efi);
- 
-+/*
-+ * request_efi_key - request the efi key
-+ */
-+struct key *request_efi_key(const char *master_desc,
-+			    const u8 **master_key, size_t *master_keylen)
-+{
-+	struct efi_key_payload *epayload;
-+	struct key *ekey;
-+
-+	ekey = request_key(&key_type_efi, master_desc, NULL);
-+	if (IS_ERR(ekey))
-+		goto error;
-+
-+	down_read(&ekey->sem);
-+	epayload = ekey->payload.data[0];
-+	*master_key = epayload->key;
-+	*master_keylen = epayload->key_len;
-+error:
-+	return ekey;
-+}
-+
- static int __init init_efi_secure_key(void)
- {
- 	int ret;
-diff --git a/include/keys/efi-type.h b/include/keys/efi-type.h
-index 57524b22d42f..bbe649f3eec0 100644
---- a/include/keys/efi-type.h
-+++ b/include/keys/efi-type.h
-@@ -39,12 +39,19 @@ extern struct key_type key_type_efi;
- #if defined(CONFIG_EFI_SECURE_KEY)
- extern long efi_read_blob(const struct key *key, char __user *buffer,
- 			  char *kbuffer, size_t buflen);
-+extern struct key *request_efi_key(const char *master_desc,
-+			const u8 **master_key, size_t *master_keylen);
- #else
- inline long efi_read_blob(const struct key *key, char __user *buffer,
- 			  char *kbuffer, size_t buflen)
- {
- 	return 0;
- }
-+static inline struct key *request_efi_key(const char *master_desc,
-+			const u8 **master_key, size_t *master_keylen)
-+{
-+	return ERR_PTR(-EOPNOTSUPP);
-+}
- #endif
- 
- #endif /* _KEYS_EFI_TYPE_H */
-diff --git a/security/keys/encrypted-keys/encrypted.c b/security/keys/encrypted-keys/encrypted.c
-index d92cbf9687c3..b396506afdfc 100644
---- a/security/keys/encrypted-keys/encrypted.c
-+++ b/security/keys/encrypted-keys/encrypted.c
-@@ -24,6 +24,7 @@
- #include <keys/user-type.h>
- #include <keys/trusted-type.h>
- #include <keys/encrypted-type.h>
-+#include <keys/efi-type.h>
- #include <linux/key-type.h>
+@@ -15,6 +15,7 @@
+ #include <linux/parser.h>
  #include <linux/random.h>
- #include <linux/rcupdate.h>
-@@ -40,6 +41,7 @@
+ #include <linux/scatterlist.h>
++#include <linux/moduleparam.h>
+ #include <keys/efi-type.h>
+ #include <keys/user-type.h>
+ #include <crypto/algapi.h>
+@@ -27,6 +28,9 @@ static unsigned long rkey_size;
+ static bool is_loaded;
+ static bool is_secure;
  
- static const char KEY_TRUSTED_PREFIX[] = "trusted:";
- static const char KEY_USER_PREFIX[] = "user:";
-+static const char KEY_EFI_PREFIX[] = "efi:";
- static const char hash_alg[] = "sha256";
- static const char hmac_alg[] = "hmac(sha256)";
- static const char blkcipher_alg[] = "cbc(aes)";
-@@ -50,6 +52,7 @@ static int blksize;
++static bool sb_enforce = IS_ENABLED(CONFIG_EFI_SECURE_KEY_SB_ENFORCE);
++module_param(sb_enforce, bool_enable_only, 0644);
++
+ static void __init
+ print_efi_rkey_setup_data(struct efi_rkey_setup_data *rkey_setup)
+ {
+@@ -59,11 +63,13 @@ void __init parse_efi_root_key_setup(u64 phys_addr, u32 data_len)
  
- #define KEY_TRUSTED_PREFIX_LEN (sizeof (KEY_TRUSTED_PREFIX) - 1)
- #define KEY_USER_PREFIX_LEN (sizeof (KEY_USER_PREFIX) - 1)
-+#define KEY_EFI_PREFIX_LEN (sizeof (KEY_EFI_PREFIX) - 1)
- #define KEY_ECRYPTFS_DESC_LEN 16
- #define HASH_SIZE SHA256_DIGEST_SIZE
- #define MAX_DATA_SIZE 4096
-@@ -142,6 +145,8 @@ static int valid_master_desc(const char *new_desc, const char *orig_desc)
- 		prefix_len = KEY_TRUSTED_PREFIX_LEN;
- 	else if (!strncmp(new_desc, KEY_USER_PREFIX, KEY_USER_PREFIX_LEN))
- 		prefix_len = KEY_USER_PREFIX_LEN;
-+	else if (!strncmp(new_desc, KEY_EFI_PREFIX, KEY_EFI_PREFIX_LEN))
-+		prefix_len = KEY_EFI_PREFIX_LEN;
- 	else
- 		return -EINVAL;
+ 	/* keep efi root key */
+ 	if (rkey_setup->final_status == EFI_SUCCESS) {
+-		memcpy(root_key, rkey_setup->root_key, rkey_setup->key_size);
+-		rkey_size = rkey_setup->key_size;
+-		is_loaded = true;
+ 		is_secure = rkey_setup->is_secure;
+-		pr_info("EFI root key is loaded.\n");
++		if (is_secure || !sb_enforce) {
++			memcpy(root_key, rkey_setup->root_key, rkey_setup->key_size);
++			rkey_size = rkey_setup->key_size;
++			is_loaded = true;
++			pr_info("EFI root key is loaded.\n");
++		}
+ 		if (!is_secure) {
+ 			pr_warn("EFI root key is insecure when no secure boot.\n");
+ 		}
+@@ -75,6 +81,14 @@ void __init parse_efi_root_key_setup(u64 phys_addr, u32 data_len)
+ 	early_iounmap(setup_data, data_len);
+ }
  
-@@ -434,6 +439,11 @@ static struct key *request_master_key(struct encrypted_key_payload *epayload,
- 		mkey = request_user_key(epayload->master_desc +
- 					KEY_USER_PREFIX_LEN,
- 					master_key, master_keylen);
-+	} else if (!strncmp(epayload->master_desc, KEY_EFI_PREFIX,
-+			    KEY_EFI_PREFIX_LEN)) {
-+		mkey = request_efi_key(epayload->master_desc +
-+					KEY_EFI_PREFIX_LEN,
-+					master_key, master_keylen);
- 	} else
- 		goto out;
++static void __init clean_efi_root_key(void)
++{
++	memzero_explicit(root_key, ROOT_KEY_SIZE);
++	rkey_size = 0;
++	is_loaded = false;
++	is_secure = false;
++}
++
+ #define ERK_HASH_SIZE SHA256_DIGEST_SIZE
+ #define HMAC_HASH_SIZE SHA256_DIGEST_SIZE
+ #define DKEY_SIZE SHA256_DIGEST_SIZE
+@@ -705,6 +719,17 @@ static int __init init_efi_secure_key(void)
+ 	if (!is_loaded)
+ 		return 0;
  
++	if (!is_secure) {
++		if (sb_enforce) {
++			clean_efi_root_key();
++			pr_info("EFI root key is unloaded because insecure.\n");
++			return 0;
++		} else {
++			add_taint(TAINT_INSECURE_KEY, LOCKDEP_STILL_OK);
++			pr_warn("Tainted kernel because EFI root key is insecure.\n");
++		}
++	}
++
+ 	hash_tfm = crypto_alloc_shash(hash_alg, 0, CRYPTO_ALG_ASYNC);
+ 	if (IS_ERR(hash_tfm)) {
+ 		pr_err("can't allocate %s transform: %ld\n",
+diff --git a/include/linux/kernel.h b/include/linux/kernel.h
+index 941dc0a5a877..b45716e54a97 100644
+--- a/include/linux/kernel.h
++++ b/include/linux/kernel.h
+@@ -565,7 +565,8 @@ extern enum system_states {
+ #define TAINT_LIVEPATCH			15
+ #define TAINT_AUX			16
+ #define TAINT_RANDSTRUCT		17
+-#define TAINT_FLAGS_COUNT		18
++#define TAINT_INSECURE_KEY		18
++#define TAINT_FLAGS_COUNT		19
+ 
+ struct taint_flag {
+ 	char c_true;	/* character printed when tainted */
+diff --git a/kernel/panic.c b/kernel/panic.c
+index 8b2e002d52eb..d641098a814d 100644
+--- a/kernel/panic.c
++++ b/kernel/panic.c
+@@ -327,6 +327,7 @@ const struct taint_flag taint_flags[TAINT_FLAGS_COUNT] = {
+ 	[ TAINT_LIVEPATCH ]		= { 'K', ' ', true },
+ 	[ TAINT_AUX ]			= { 'X', ' ', true },
+ 	[ TAINT_RANDSTRUCT ]		= { 'T', ' ', true },
++	[TAINT_INSECURE_KEY]		= { 'Y', ' ', false },
+ };
+ 
+ /**
 -- 
 2.13.6
