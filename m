@@ -1,81 +1,72 @@
-From: joeyli <jlee@suse.com>
-Subject: Re: [PATCH 0/6][RFC] Add EFI secure key to key retention service
-Date: Mon, 6 Aug 2018 14:00:11 +0800
-Message-ID: <20180806060011.GE27062@linux-l9pv.suse>
-References: <20180805032119.20485-1-jlee@suse.com>
- <CAKv+Gu81vEGNggcWv1NyPJsMeK0HRi_DanH2+Z_4metoNG=txA@mail.gmail.com>
- <1533491246.4087.1.camel@HansenPartnership.com>
+From: Geoff Levand <geoff@infradead.org>
+Subject: Re: [RFC PATCH 0/2] efi: add contents of LinuxExtraArgs EFI var to
+ command line
+Date: Mon, 6 Aug 2018 14:23:55 -0700
+Message-ID: <f7fa0a70-ee91-b228-1be1-d874826f71d1@infradead.org>
+References: <20180704154919.18564-1-ard.biesheuvel@linaro.org>
+ <4bd9bee6-f2b9-3197-c205-fec104fd1090@infradead.org>
+ <CAKv+Gu9+RYbtD8Ce_AW_1jvTei6dC5LwiiMgSUWDKLs8f7S+eA@mail.gmail.com>
+ <20180713095604.GD32020@arm.com>
+ <ac6bbefb-2754-4079-55a6-b9b91348a71a@infradead.org>
+ <cf544006-79c6-89ba-458d-57c1718c9fa7@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1533491246.4087.1.camel@HansenPartnership.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: James Bottomley <James.Bottomley@HansenPartnership.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Lee, Chun-Yi" <joeyli.kernel@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-efi <linux-efi@vger.kernel.org>, the arch/x86 maintainers <x86@kernel.org>, keyrings@vger.kernel.org, linux-integrity <linux-integrity@vger.kernel.org>, Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Pavel Machek <pavel@ucw.cz>, Chen Yu <yu.c.chen@intel.com>, Oliver Neukum <oneukum@suse.com>, Ryan Chen <yu.chen.surf@gmail.com>, David Howells <dhowells@redhat.com>, Mimi Zohar <zohar@linux.vnet.ibm.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <cf544006-79c6-89ba-458d-57c1718c9fa7@arm.com>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: James Morse <james.morse@arm.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Graeme Gregory <graeme.gregory@linaro.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, Riku Voipio <riku.voipio@linaro.org>, Mark Salter <msalter@redhat.com>, Will Deacon <will.deacon@arm.com>, Leif Lindholm <leif.lindholm@linaro.org>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, linux-efi <linux-efi@vger.kernel.org>, Hanjun Guo <hanjun.guo@linaro.org>, Sudeep Holla <sudeep.holla@arm.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Ian Campbell <ijc@debian.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi James,
+Hi All,
 
-On Sun, Aug 05, 2018 at 10:47:26AM -0700, James Bottomley wrote:
-> On Sun, 2018-08-05 at 09:25 +0200, Ard Biesheuvel wrote:
-> > Hello Chun,yi,
-> > 
-> > On 5 August 2018 at 05:21, Lee, Chun-Yi <joeyli.kernel@gmail.com>
-> > wrote:
-> > > When secure boot is enabled, only signed EFI binary can access
-> > > EFI boot service variable before ExitBootService. Which means that
-> > > the EFI boot service variable is secure.
-> > > 
-> > 
-> > No it, isn't, and this is a very dangerous assumption to make.
-> > 
-> > 'Secure' means different things to different people. 'Secure boot' is
-> > a misnomer, since it is too vague: it should be called 'authenticated
-> > boot', and the catch is that authentication using public-key crypto
-> > does not involve secrets at all.
-> 
-> Hang on, let's not throw the baby out with the bathwater here.
-> 
-> The design of "secure boot" is to create a boot time environment where
-> only trusted code may execute.  We rely on this trust guarantee when we
-> pivot from the EFI to the MoK root of trust in shim.
-> 
-> The reason we in Linux trust this guarantee is that it pertains to the
-> boot environment only, so any violation would allow Windows boot to be
-> compromised as well and we trust Microsoft's Business interests in
-> securing windows far enough to think this would be dealt with very
-> severely and it's an outcome the ODMs (who also add secure boot keys)
-> are worried enough about to be very careful.
-> 
-> The rub (and this is where I'm agreeing with Ard) is that any use case
-> we come up with where a violation wouldn't cause a problem in windows
-> is a use case where we cannot rely on the guarantee because Microsoft
-> no longer has a strong business interest in policing it.  This, for
-> instance, is why we don't populate the Linux trusted keyrings with the
-> secure boot keys (we may trust them in the boot environment where
-> compromise would be shared with windows but we can't trust them in the
-> Linux OS environment where it wouldn't).  So this means we have to be
-> very careful coming up with uses for secure boot that aren't strictly
-> rooted in the guarantee as enforced by the business interests of
-> Microsoft and the ODMs.
->
+On 08/01/2018 03:07 AM, James Morse wrote:
+> I did manage to borrow of one of these boxes to discover one additional piece of
+> information: this firmware bug doesn't exist in the latest released firmware.
 
-Thank you for providing the view point from Microsoft bussiness ineterests.
-I agreed with you. Honestly I didn't think this point before.
- 
-> >  The UEFI variable store was not designed with confidentiality in
-> > mind, and assuming [given the reputation of EFI on the implementation
-> > side] that you can use it to keep secrets is rather unwise imho.
-> 
-> Agree completely here: Microsoft doesn't use UEFI variables for
-> confidentiality, so we shouldn't either.  If you want confidentiality,
-> use a TPM (like Microsoft does for the bitlocker key).
->
+I went through and verified the info James provided.  The last Moonshot
+Component Pack to support the m400 was 2017.06.0.  Unfortunately, the
+2017.06.0 Release Notes are not available to the public, and so we
+cannot check the System ROM version released.  The previous Moonshot
+Component Pack, 017.04.0, from two months earlier, included System ROM
+v1.01 (10/02/2015).  It seems reasonable that since there had been no
+System ROM update for two years, the same System ROM v1.01 was included
+in the 2017.06.0 release. 
 
-OK~~ Then I will use TPM trusted key + encrypted key in hibernation
-encryption/authentication.
+For anyone interested, a summary of m400/Moonshot info:
 
-Thanks for James and Ard's comments.
+Moonshot Component Pack History
+	https://support.hpe.com/hpsc/swd/public/detail?swItemId=MTX_2ec80e32b5d44f328d1cf9c9c7#tab-history
 
-Joey Lee 
+Moonshot Component Pack 2017.08.0 (Release Notes)
+	https://support.hpe.com/hpsc/doc/public/display?docId=emr_na-a00018563en_us
+	Supersedes: MCP 2017.06.0
+	Components for the cartridges listed below have been removed from this
+	MCP. MCP 2017.06.0 was the last MCP to contain components for the
+	following cartridges: HP ProLiant m400 Server Cartridge
+
+Moonshot Component Pack 2017.06.0 (Announcement)
+	(No public Release Notes.)
+	* RECOMMENDED * Moonshot Component Pack 2017.06.0
+		https://support.hpe.com/hpsc/swd/public/detail?swItemId=MTX_2ec80e32b5d44f328d1cf9c9c7
+
+Moonshot Component Pack 2017.04.0 (Release Notes)
+	https://support.hpe.com/hpsc/doc/public/display?docId=c05335771
+	ProLiant_m400_Server_ROM_U02_2015_10_02.HPb - System ROM for ProLiant m400 ServerCartridge 10-02-2015
+	(BIOS Version: U02 v1.01 (10/02/2015))
+
+Supported Operating Systems for Edgeline, Moonshot, and IoT GatewaySystems
+	https://support.hpe.com/hpsc/doc/public/display?sp4ts.oid=null&docLocale=en_US&docId=emr_na-a00037370en_us
+	ProLiant m400 Server Cartridge: Ubuntu LTS 14.04
+
+-Geoff
