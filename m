@@ -1,7 +1,7 @@
 From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Subject: [PATCH V1 1/6] efi: Make efi_rts_work accessible to efi page fault handler
-Date: Wed,  8 Aug 2018 21:31:12 -0700
-Message-ID: <1533789077-16156-2-git-send-email-sai.praneeth.prakhya@intel.com>
+Subject: [PATCH V1 2/6] x86/efi: Remove __init attribute from memory mapping functions
+Date: Wed,  8 Aug 2018 21:31:13 -0700
+Message-ID: <1533789077-16156-3-git-send-email-sai.praneeth.prakhya@intel.com>
 References: <1533789077-16156-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1533789077-16156-1-git-send-email-sai.praneeth.prakhya@intel.com>
@@ -12,13 +12,21 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
 
-If the firmware illegally accesses any efi regions other than
-EFI_BOOT_SERVICES_<CODE/DATA>, the efi page fault handler would freeze
-efi_rts_wq and schedules a new process. To do this, the efi page fault
-handler needs efi_rts_work. Hence, make it accessible.
+Buggy firmware could illegally access EFI_BOOT_SERVICES_CODE/DATA
+regions even after the kernel has assumed control of the platform. When
+"CONFIG_EFI_WARN_ON_ILLEGAL_ACCESSES" is enabled, the efi page fault
+handler will detect/fixup these illegal accesses. The below modified
+functions are used by the page fault handler to fixup illegal accesses
+to EFI_BOOT_SERVICES_CODE/DATA regions. As the page fault handler is
+present during/after kernel boot it doesn't have an __init attribute,
+but the below functions have it and thus during kernel build, "WARNING:
+modpost: Found * section mismatch(es)" build warning is observed. To fix
+it, remove __init attribute for all these functions.
 
-There will be no race conditions in accessing this structure, because,
-all the calls to efi runtime services are already serialized.
+In order to not keep these functions needlessly when
+"CONFIG_EFI_WARN_ON_ILLEGAL_ACCESSES" is not selected, add a new
+__efi_init_fixup attribute whose value changes based on whether the
+config option is selected or not.
 
 Suggested-by: Matt Fleming <matt@codeblueprint.co.uk>
 Based-on-code-from: Ricardo Neri <ricardo.neri@intel.com>
@@ -32,146 +40,169 @@ Cc: Bhupesh Sharma <bhsharma@redhat.com>
 Cc: Peter Zijlstra <peterz@infradead.org>
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- drivers/firmware/efi/runtime-wrappers.c | 53 ++++++---------------------------
- include/linux/efi.h                     | 36 ++++++++++++++++++++++
- 2 files changed, 45 insertions(+), 44 deletions(-)
+ arch/x86/include/asm/efi.h     | 11 ++++++-----
+ arch/x86/platform/efi/efi.c    |  4 ++--
+ arch/x86/platform/efi/efi_32.c |  2 +-
+ arch/x86/platform/efi/efi_64.c |  9 +++++----
+ drivers/firmware/efi/efi.c     |  6 +++---
+ include/linux/efi.h            | 16 ++++++++++++++--
+ 6 files changed, 31 insertions(+), 17 deletions(-)
 
-diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
-index aa66cbf23512..b18b2d864c2c 100644
---- a/drivers/firmware/efi/runtime-wrappers.c
-+++ b/drivers/firmware/efi/runtime-wrappers.c
-@@ -45,39 +45,7 @@
- #define __efi_call_virt(f, args...) \
- 	__efi_call_virt_pointer(efi.systab->runtime, f, args)
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index cec5fae23eb3..9b70743400f3 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -103,8 +103,9 @@ struct efi_scratch {
+ 	preempt_enable();						\
+ })
  
--/* efi_runtime_service() function identifiers */
--enum efi_rts_ids {
--	GET_TIME,
--	SET_TIME,
--	GET_WAKEUP_TIME,
--	SET_WAKEUP_TIME,
--	GET_VARIABLE,
--	GET_NEXT_VARIABLE,
--	SET_VARIABLE,
--	QUERY_VARIABLE_INFO,
--	GET_NEXT_HIGH_MONO_COUNT,
--	UPDATE_CAPSULE,
--	QUERY_CAPSULE_CAPS,
--};
--
--/*
-- * efi_runtime_work:	Details of EFI Runtime Service work
-- * @arg<1-5>:		EFI Runtime Service function arguments
-- * @status:		Status of executing EFI Runtime Service
-- * @efi_rts_id:		EFI Runtime Service function identifier
-- * @efi_rts_comp:	Struct used for handling completions
-- */
--struct efi_runtime_work {
--	void *arg1;
--	void *arg2;
--	void *arg3;
--	void *arg4;
--	void *arg5;
--	efi_status_t status;
--	struct work_struct work;
--	enum efi_rts_ids efi_rts_id;
--	struct completion efi_rts_comp;
--};
-+struct efi_runtime_work efi_rts_work;
+-extern void __iomem *__init efi_ioremap(unsigned long addr, unsigned long size,
+-					u32 type, u64 attribute);
++extern void __iomem *__efi_init_fixup efi_ioremap(unsigned long addr,
++					      unsigned long size, u32 type,
++					      u64 attribute);
  
+ #ifdef CONFIG_KASAN
  /*
-  * efi_queue_work:	Queue efi_runtime_service() and wait until it's done
-@@ -91,7 +59,6 @@ struct efi_runtime_work {
-  */
- #define efi_queue_work(_rts, _arg1, _arg2, _arg3, _arg4, _arg5)		\
- ({									\
--	struct efi_runtime_work efi_rts_work;				\
- 	efi_rts_work.status = EFI_ABORTED;				\
- 									\
- 	init_completion(&efi_rts_work.efi_rts_comp);			\
-@@ -184,18 +151,16 @@ static DEFINE_SEMAPHORE(efi_runtime_lock);
-  */
- static void efi_call_rts(struct work_struct *work)
- {
--	struct efi_runtime_work *efi_rts_work;
- 	void *arg1, *arg2, *arg3, *arg4, *arg5;
- 	efi_status_t status = EFI_NOT_FOUND;
- 
--	efi_rts_work = container_of(work, struct efi_runtime_work, work);
--	arg1 = efi_rts_work->arg1;
--	arg2 = efi_rts_work->arg2;
--	arg3 = efi_rts_work->arg3;
--	arg4 = efi_rts_work->arg4;
--	arg5 = efi_rts_work->arg5;
-+	arg1 = efi_rts_work.arg1;
-+	arg2 = efi_rts_work.arg2;
-+	arg3 = efi_rts_work.arg3;
-+	arg4 = efi_rts_work.arg4;
-+	arg5 = efi_rts_work.arg5;
- 
--	switch (efi_rts_work->efi_rts_id) {
-+	switch (efi_rts_work.efi_rts_id) {
- 	case GET_TIME:
- 		status = efi_call_virt(get_time, (efi_time_t *)arg1,
- 				       (efi_time_cap_t *)arg2);
-@@ -253,8 +218,8 @@ static void efi_call_rts(struct work_struct *work)
- 		 */
- 		pr_err("Requested executing invalid EFI Runtime Service.\n");
+@@ -126,13 +127,13 @@ extern int __init efi_memblock_x86_reserve_range(void);
+ extern pgd_t * __init efi_call_phys_prolog(void);
+ extern void __init efi_call_phys_epilog(pgd_t *save_pgd);
+ extern void __init efi_print_memmap(void);
+-extern void __init efi_memory_uc(u64 addr, unsigned long size);
+-extern void __init efi_map_region(efi_memory_desc_t *md);
++extern void __efi_init_fixup efi_memory_uc(u64 addr, unsigned long size);
++extern void __efi_init_fixup efi_map_region(efi_memory_desc_t *md);
+ extern void __init efi_map_region_fixed(efi_memory_desc_t *md);
+ extern void efi_sync_low_kernel_mappings(void);
+ extern int __init efi_alloc_page_tables(void);
+ extern int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages);
+-extern void __init old_map_region(efi_memory_desc_t *md);
++extern void __efi_init_fixup old_map_region(efi_memory_desc_t *md);
+ extern void __init runtime_code_page_mkexec(void);
+ extern void __init efi_runtime_update_mappings(void);
+ extern void __init efi_dump_pagetable(void);
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 9061babfbc83..439c2c40bf03 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -572,7 +572,7 @@ void __init runtime_code_page_mkexec(void)
  	}
--	efi_rts_work->status = status;
--	complete(&efi_rts_work->efi_rts_comp);
-+	efi_rts_work.status = status;
-+	complete(&efi_rts_work.efi_rts_comp);
  }
  
- static efi_status_t virt_efi_get_time(efi_time_t *tm, efi_time_cap_t *tc)
+-void __init efi_memory_uc(u64 addr, unsigned long size)
++void __efi_init_fixup efi_memory_uc(u64 addr, unsigned long size)
+ {
+ 	unsigned long page_shift = 1UL << EFI_PAGE_SHIFT;
+ 	u64 npages;
+@@ -582,7 +582,7 @@ void __init efi_memory_uc(u64 addr, unsigned long size)
+ 	set_memory_uc(addr, npages);
+ }
+ 
+-void __init old_map_region(efi_memory_desc_t *md)
++void __efi_init_fixup old_map_region(efi_memory_desc_t *md)
+ {
+ 	u64 start_pfn, end_pfn, end;
+ 	unsigned long size;
+diff --git a/arch/x86/platform/efi/efi_32.c b/arch/x86/platform/efi/efi_32.c
+index 324b93328b37..8f31452bd204 100644
+--- a/arch/x86/platform/efi/efi_32.c
++++ b/arch/x86/platform/efi/efi_32.c
+@@ -58,7 +58,7 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 	return 0;
+ }
+ 
+-void __init efi_map_region(efi_memory_desc_t *md)
++void __efi_init_fixup efi_map_region(efi_memory_desc_t *md)
+ {
+ 	old_map_region(md);
+ }
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index 448267f1c073..a04298312fdd 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -408,7 +408,7 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 	return 0;
+ }
+ 
+-static void __init __map_region(efi_memory_desc_t *md, u64 va)
++static void __efi_init_fixup __map_region(efi_memory_desc_t *md, u64 va)
+ {
+ 	unsigned long flags = _PAGE_RW;
+ 	unsigned long pfn;
+@@ -426,7 +426,7 @@ static void __init __map_region(efi_memory_desc_t *md, u64 va)
+ 			   md->phys_addr, va);
+ }
+ 
+-void __init efi_map_region(efi_memory_desc_t *md)
++void __efi_init_fixup efi_map_region(efi_memory_desc_t *md)
+ {
+ 	unsigned long size = md->num_pages << PAGE_SHIFT;
+ 	u64 pa = md->phys_addr;
+@@ -488,8 +488,9 @@ void __init efi_map_region_fixed(efi_memory_desc_t *md)
+ 	__map_region(md, md->virt_addr);
+ }
+ 
+-void __iomem *__init efi_ioremap(unsigned long phys_addr, unsigned long size,
+-				 u32 type, u64 attribute)
++void __iomem *__efi_init_fixup efi_ioremap(unsigned long phys_addr,
++				       unsigned long size, u32 type,
++				       u64 attribute)
+ {
+ 	unsigned long last_map_pfn;
+ 
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index d8a33a781a57..7bc3fac7bfe0 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -768,7 +768,7 @@ int __init efi_get_fdt_params(struct efi_fdt_params *params)
+ }
+ #endif /* CONFIG_EFI_PARAMS_FROM_FDT */
+ 
+-static __initdata char memory_type_name[][20] = {
++static __efi_initdata_fixup char memory_type_name[][20] = {
+ 	"Reserved",
+ 	"Loader Code",
+ 	"Loader Data",
+@@ -786,8 +786,8 @@ static __initdata char memory_type_name[][20] = {
+ 	"Persistent Memory",
+ };
+ 
+-char * __init efi_md_typeattr_format(char *buf, size_t size,
+-				     const efi_memory_desc_t *md)
++char * __efi_init_fixup efi_md_typeattr_format(char *buf, size_t size,
++					       const efi_memory_desc_t *md)
+ {
+ 	char *pos;
+ 	int type_len;
 diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 401e4b254e30..855992b15269 100644
+index 855992b15269..169b5837c72c 100644
 --- a/include/linux/efi.h
 +++ b/include/linux/efi.h
-@@ -1659,7 +1659,43 @@ struct linux_efi_tpm_eventlog {
+@@ -1107,11 +1107,23 @@ extern int efi_memattr_apply_permissions(struct mm_struct *mm,
+ 	for_each_efi_memory_desc_in_map(&efi.memmap, md)
  
- extern int efi_tpm_eventlog_init(void);
- 
-+/* efi_runtime_service() function identifiers */
-+enum efi_rts_ids {
-+	GET_TIME,
-+	SET_TIME,
-+	GET_WAKEUP_TIME,
-+	SET_WAKEUP_TIME,
-+	GET_VARIABLE,
-+	GET_NEXT_VARIABLE,
-+	SET_VARIABLE,
-+	QUERY_VARIABLE_INFO,
-+	GET_NEXT_HIGH_MONO_COUNT,
-+	UPDATE_CAPSULE,
-+	QUERY_CAPSULE_CAPS,
-+};
+ /*
++ * __efi_init_fixup - if CONFIG_EFI_WARN_ON_ILLEGAL_ACCESSES is enabled,
++ *		  remove __init modifier.
++ */
++#ifdef CONFIG_EFI_WARN_ON_ILLEGAL_ACCESSES
++#define __efi_init_fixup
++#define __efi_initdata_fixup
++#else
++#define __efi_init_fixup __init
++#define __efi_initdata_fixup __initdata
++#endif
 +
 +/*
-+ * efi_runtime_work:	Details of EFI Runtime Service work
-+ * @arg<1-5>:		EFI Runtime Service function arguments
-+ * @status:		Status of executing EFI Runtime Service
-+ * @efi_rts_id:		EFI Runtime Service function identifier
-+ * @efi_rts_comp:	Struct used for handling completions
-+ */
-+struct efi_runtime_work {
-+	void *arg1;
-+	void *arg2;
-+	void *arg3;
-+	void *arg4;
-+	void *arg5;
-+	efi_status_t status;
-+	struct work_struct work;
-+	enum efi_rts_ids efi_rts_id;
-+	struct completion efi_rts_comp;
-+};
-+
- /* Workqueue to queue EFI Runtime Services */
- extern struct workqueue_struct *efi_rts_wq;
+  * Format an EFI memory descriptor's type and attributes to a user-provided
+  * character buffer, as per snprintf(), and return the buffer.
+  */
+-char * __init efi_md_typeattr_format(char *buf, size_t size,
+-				     const efi_memory_desc_t *md);
++char * __efi_init_fixup efi_md_typeattr_format(char *buf, size_t size,
++					       const efi_memory_desc_t *md);
  
-+extern struct efi_runtime_work efi_rts_work;
-+
- #endif /* _LINUX_EFI_H */
+ /**
+  * efi_range_is_wc - check the WC bit on an address range
 -- 
 2.7.4
