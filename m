@@ -1,64 +1,90 @@
-From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
-Subject: RE: [PATCH V1 6/6] x86/efi: Introduce EFI_WARN_ON_ILLEGAL_ACCESSES
-Date: Fri, 10 Aug 2018 17:34:04 +0000
-Message-ID: <FFF73D592F13FD46B8700F0A279B802F47CDA91A@ORSMSX114.amr.corp.intel.com>
+From: Bhupesh Sharma <bhsharma@redhat.com>
+Subject: Re: [PATCH V1 6/6] x86/efi: Introduce EFI_WARN_ON_ILLEGAL_ACCESSES
+Date: Sat, 11 Aug 2018 00:00:41 +0530
+Message-ID: <CACi5LpNESNVWFrfQLGi4-GehjO9GxV50sg7HUvxCHYS_z-yBGQ@mail.gmail.com>
 References: <1533789077-16156-1-git-send-email-sai.praneeth.prakhya@intel.com>
  <1533789077-16156-7-git-send-email-sai.praneeth.prakhya@intel.com>
- <CACi5LpPcaiHEHV9cFm=C4UB23jmfie16VR4m3ZAkZ9bVis5Dqg@mail.gmail.com>
+ <CACi5LpPcaiHEHV9cFm=C4UB23jmfie16VR4m3ZAkZ9bVis5Dqg@mail.gmail.com> <FFF73D592F13FD46B8700F0A279B802F47CDA91A@ORSMSX114.amr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CACi5LpPcaiHEHV9cFm=C4UB23jmfie16VR4m3ZAkZ9bVis5Dqg@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <FFF73D592F13FD46B8700F0A279B802F47CDA91A@ORSMSX114.amr.corp.intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Bhupesh Sharma <bhsharma@redhat.com>
+To: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
 Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "ricardo.ner@intel.com" <ricardo.ner@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Lee Chun-Yi <jlee@suse.com>, Al Stone <astone@redhat.com>, Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Peter Zijlstra <peterz@infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-PiA+ICtjb25maWcgRUZJX1dBUk5fT05fSUxMRUdBTF9BQ0NFU1NFUw0KPiANCj4gSG93IGFib3V0
-IHNob3J0ZW5pbmcgdGhlIG5hbWUgdG8ganVzdCAnRUZJX1dBUk5fT05fSUxMRUdBTF9BQ0NFU1Mn
-Pw0KPiANCg0KTWFrZXMgc2Vuc2UuLiBJIHdpbGwgc2hvcnRlbiBpdC4NCg0KPiA+ICsgICAgICAg
-Ym9vbCAiV2FybiBhYm91dCBpbGxlZ2FsIG1lbW9yeSBhY2Nlc3NlcyBieSBmaXJtd2FyZSINCj4g
-PiArICAgICAgIGRlcGVuZHMgb24gRUZJDQo+IA0KPiBGcm9tIGEgZGlzdHJpYnV0aW9uIHAtby12
-LCBJIHdvdWxkIHN1Z2dlc3QgdGhhdCB3ZSBzZXQgdGhpcyBDT05GSUcgb3B0aW9uIG9ubHkgaWYN
-Cj4gd2UgYXJlIGluIHRoZSBFWFBFUlQgbW9kZSwgYXMgdGhpcyBuZWVkIG1vcmUgdGhyYXNoaW5n
-IHdpdGggdGhlIGJlaGF2aW91ciB3ZQ0KPiBzZWUgb24gb2xkLCBidWdneSBFRkkgZmlybXdhcmVz
-IGF2YWlsYWJsZSBvbiB2ZXJ5IG9sZCB4ODYgbWFjaGluZXMuIFNvDQo+IHNvbWV0aGluZyBsaWtl
-Og0KPiAgICAgICAgICAgIGJvb2wgIldhcm4gYWJvdXQgaWxsZWdhbCBtZW1vcnkgYWNjZXNzZXMg
-YnkgZmlybXdhcmUiIGlmIEVYUEVSVA0KPiANCg0KQWdyZWVkLiBBbHRob3VnaCB0aGUgZmVhdHVy
-ZSBpcyBpbnRlbmRlZCB0byB3YXJuIGFib3V0IGFsbCB0aGVzZSBidWdneSBmaXJtd2FyZSdzDQpp
-bnN0ZWFkIG9mIHNpbGVudGx5IHdvcmtpbmcgYXJvdW5kIChhcyB3ZSBhcmUgZG9pbmcgcHJlc2Vu
-dGx5KSwgaXQgbmVlZHMgbW9yZSB0ZXN0aW5nLg0KSGVuY2UsIGFzIHlvdSBzYWlkLCBJIHRoaW5r
-IGl0J3Mgc2FmZSB0byBoYXZlIGl0IGFzIGFuIEVYUEVSVCBjb25maWcgb3B0aW9uLg0KDQo+ID4g
-KyAgICAgICBoZWxwDQo+ID4gKyAgICAgICAgIEVuYWJsZSB0aGlzIGRlYnVnIGZlYXR1cmUgc28g
-dGhhdCB0aGUga2VybmVsIGNhbiBkZXRlY3QgaWxsZWdhbA0KPiA+ICsgICAgICAgICBtZW1vcnkg
-YWNjZXNzZXMgYnkgZmlybXdhcmUgYW5kIGlzc3VlIGEgd2FybmluZy4gQWxzbywNCj4gPiArICAg
-ICAgICAgMS4gSWYgdGhlIGlsbGVnYWxseSBhY2Nlc3NlZCByZWdpb24gaXMgRUZJX0JPT1RfU0VS
-VklDRVNfPENPREUvREFUQT4sDQo+ID4gKyAgICAgICAgICAgIHRoZSBrZXJuZWwgZml4ZXMgaXQg
-dXAgYnkgbWFwcGluZyB0aGUgcmVxdWVzdGVkIHJlZ2lvbi4NCg0KWy4uLi5dDQoNCj4gPiBkaWZm
-IC0tZ2l0IGEvaW5pdC9tYWluLmMgYi9pbml0L21haW4uYyBpbmRleA0KPiA+IDNiNGFkYTExZWQ1
-Mi4uZGNlMDUyMDg2MWExIDEwMDY0NA0KPiA+IC0tLSBhL2luaXQvbWFpbi5jDQo+ID4gKysrIGIv
-aW5pdC9tYWluLmMNCj4gPiBAQCAtNzMwLDcgKzczMCw4IEBAIGFzbWxpbmthZ2UgX192aXNpYmxl
-IHZvaWQgX19pbml0IHN0YXJ0X2tlcm5lbCh2b2lkKQ0KPiA+ICAgICAgICAgYXJjaF9wb3N0X2Fj
-cGlfc3Vic3lzX2luaXQoKTsNCj4gPiAgICAgICAgIHNmaV9pbml0X2xhdGUoKTsNCj4gPg0KPiA+
-IC0gICAgICAgaWYgKGVmaV9lbmFibGVkKEVGSV9SVU5USU1FX1NFUlZJQ0VTKSkgew0KPiA+ICsg
-ICAgICAgaWYgKGVmaV9lbmFibGVkKEVGSV9SVU5USU1FX1NFUlZJQ0VTKSAmJg0KPiA+ICsgICAg
-ICAgICAgICFJU19FTkFCTEVEKENPTkZJR19FRklfV0FSTl9PTl9JTExFR0FMX0FDQ0VTU0VTKSkg
-ew0KPiANCj4gU2luY2UgdGhpcyBpcyBhbiBhcmNoIGFnbm9zdGljIGNvZGUgbGVnLCBkbyB3ZSBy
-ZWFsbHkgd2FudCB0byBpbnRyb2R1Y2UgYSBnZW5lcmljDQo+IGNoZWNrIGZvciBDT05GSUdfRUZJ
-X1dBUk5fT05fSUxMRUdBTF9BQ0NFU1NFUw0KPiBoZXJlLCB3aXRob3V0IGNoZWNraW5nIGZvciB3
-aGV0aGVyIHdlIGFyZSBhY3R1YWxseSBydW5uaW5nIHRoaXMgb24gYQ0KPiB4ODYgaGFyZHdhcmUs
-IG9yIGFsdGVybmF0aXZlbHkgd2UgY2FuIGNvbnNpZGVyIG1vdmluZw0KPiBDT05GSUdfRUZJX1dB
-Uk5fT05fSUxMRUdBTF9BQ0NFU1NFUyBvdXQgb2YgJ2FyY2gveDg2L0tjb25maWcnIHRvDQo+ICdh
-cmNoL0tjb25maWcnIHNvIHRoYXQgbGF0ZXIgaXQgY2FuIGJlIHVzZWQgb24gb3RoZXIgYXJjaHMg
-bGlrZSBBUk02NCBhcyB3ZWxsLg0KPiANCj4gSSB0aGluayB0aGUgbGF0ZXIgd291bGQgYmUgbW9y
-ZSB1c2VmdWwuLg0KDQpUaGFua3MgZm9yIGJyaW5naW5nIHRoaXMgdXAuIEkgc2VlIHlvdXIgcG9p
-bnQuIEkgd2lsbCByZWZyYWluIGZyb20gcG9sbHV0aW5nIGFyY2hpdGVjdHVyZQ0KYWdub3N0aWMg
-Y29kZS4gQXMgd2UgZG9uJ3QgbmVlZCBlZmlfZnJlZV9ib290X3NlcnZpY2VzKCkgYXQgYWxsLCBp
-ZiBFRklfV0FSTl9PTl9JTExFR0FMX0FDQ0VTU0VTDQppcyBlbmFibGVkLCBwcm9iYWJseSBtYWtp
-bmcgY2hhbmdlcyB0byBpbmNsdWRlL2xpbnV4L2VmaS5oIHdvdWxkIGJlIGJldHRlciwgSSBndWVz
-cy4uDQoNCk1vdmluZyB0aGlzIHRvIGFyY2gvS2NvbmZpZyBjb3VsZCBiZSB0b28gZnV0dXJpc3Rp
-Yy4uIEkgZ3Vlc3MuLiBiZWNhdXNlIEkgYW0gbm90IHN1cmUNCmlmIHRoaXMgcHJvYmxlbSBleGlz
-dHMgb24gQVJNIG1hY2hpbmVzLCBpZiBzbywgcHJvYmFibHkgQXJkIGNvdWxkIHN1Z2dlc3Qgc29t
-ZXRoaW5nIGhlcmUuDQoNClJlZ2FyZHMsDQpTYWkNCg==
+On Fri, Aug 10, 2018 at 11:04 PM, Prakhya, Sai Praneeth
+<sai.praneeth.prakhya@intel.com> wrote:
+>> > +config EFI_WARN_ON_ILLEGAL_ACCESSES
+>>
+>> How about shortening the name to just 'EFI_WARN_ON_ILLEGAL_ACCESS'?
+>>
+>
+> Makes sense.. I will shorten it.
+>
+>> > +       bool "Warn about illegal memory accesses by firmware"
+>> > +       depends on EFI
+>>
+>> From a distribution p-o-v, I would suggest that we set this CONFIG option only if
+>> we are in the EXPERT mode, as this need more thrashing with the behaviour we
+>> see on old, buggy EFI firmwares available on very old x86 machines. So
+>> something like:
+>>            bool "Warn about illegal memory accesses by firmware" if EXPERT
+>>
+>
+> Agreed. Although the feature is intended to warn about all these buggy firmware's
+> instead of silently working around (as we are doing presently), it needs more testing.
+> Hence, as you said, I think it's safe to have it as an EXPERT config option.
+>
+>> > +       help
+>> > +         Enable this debug feature so that the kernel can detect illegal
+>> > +         memory accesses by firmware and issue a warning. Also,
+>> > +         1. If the illegally accessed region is EFI_BOOT_SERVICES_<CODE/DATA>,
+>> > +            the kernel fixes it up by mapping the requested region.
+>
+> [....]
+>
+>> > diff --git a/init/main.c b/init/main.c index
+>> > 3b4ada11ed52..dce0520861a1 100644
+>> > --- a/init/main.c
+>> > +++ b/init/main.c
+>> > @@ -730,7 +730,8 @@ asmlinkage __visible void __init start_kernel(void)
+>> >         arch_post_acpi_subsys_init();
+>> >         sfi_init_late();
+>> >
+>> > -       if (efi_enabled(EFI_RUNTIME_SERVICES)) {
+>> > +       if (efi_enabled(EFI_RUNTIME_SERVICES) &&
+>> > +           !IS_ENABLED(CONFIG_EFI_WARN_ON_ILLEGAL_ACCESSES)) {
+>>
+>> Since this is an arch agnostic code leg, do we really want to introduce a generic
+>> check for CONFIG_EFI_WARN_ON_ILLEGAL_ACCESSES
+>> here, without checking for whether we are actually running this on a
+>> x86 hardware, or alternatively we can consider moving
+>> CONFIG_EFI_WARN_ON_ILLEGAL_ACCESSES out of 'arch/x86/Kconfig' to
+>> 'arch/Kconfig' so that later it can be used on other archs like ARM64 as well.
+>>
+>> I think the later would be more useful..
+>
+> Thanks for bringing this up. I see your point. I will refrain from polluting architecture
+> agnostic code. As we don't need efi_free_boot_services() at all, if EFI_WARN_ON_ILLEGAL_ACCESSES
+> is enabled, probably making changes to include/linux/efi.h would be better, I guess..
+>
+> Moving this to arch/Kconfig could be too futuristic.. I guess.. because I am not sure
+> if this problem exists on ARM machines, if so, probably Ard could suggest something here.
+
+I think Ard can comment better but let me chime in with my limited
+experience with Fedora arm64 implementations - we are already seeing
+EFI firmware implementations which are broken/are orphaned (not well
+supported anymore) on arm64 even though the hardware is still in-use.
+With arm64 EFI firmware implementations still catching up with ARM
+server SBBR specifications, we expect more x86 like broken EFI
+implementations on arm64 as well. So, I don't see that as a distant
+problem, in-fact this is something which has been on my Fedora to-do
+list for arm64 for some time.
+
+If there is a framework on x86 available, I can take a stab and
+extrapolate it for arm64 as well.
+
+Thanks,
+Bhupesh
