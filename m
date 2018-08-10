@@ -1,162 +1,64 @@
-From: Bhupesh Sharma <bhsharma@redhat.com>
-Subject: Re: [PATCH V1 6/6] x86/efi: Introduce EFI_WARN_ON_ILLEGAL_ACCESSES
-Date: Fri, 10 Aug 2018 17:12:37 +0530
-Message-ID: <CACi5LpPcaiHEHV9cFm=C4UB23jmfie16VR4m3ZAkZ9bVis5Dqg@mail.gmail.com>
-References: <1533789077-16156-1-git-send-email-sai.praneeth.prakhya@intel.com> <1533789077-16156-7-git-send-email-sai.praneeth.prakhya@intel.com>
+From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+Subject: RE: [PATCH V1 6/6] x86/efi: Introduce EFI_WARN_ON_ILLEGAL_ACCESSES
+Date: Fri, 10 Aug 2018 17:34:04 +0000
+Message-ID: <FFF73D592F13FD46B8700F0A279B802F47CDA91A@ORSMSX114.amr.corp.intel.com>
+References: <1533789077-16156-1-git-send-email-sai.praneeth.prakhya@intel.com>
+ <1533789077-16156-7-git-send-email-sai.praneeth.prakhya@intel.com>
+ <CACi5LpPcaiHEHV9cFm=C4UB23jmfie16VR4m3ZAkZ9bVis5Dqg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1533789077-16156-7-git-send-email-sai.praneeth.prakhya@intel.com>
+In-Reply-To: <CACi5LpPcaiHEHV9cFm=C4UB23jmfie16VR4m3ZAkZ9bVis5Dqg@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: linux-efi@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, ricardo.ner@intel.com, Matt Fleming <matt@codeblueprint.co.uk>, Lee Chun-Yi <jlee@suse.com>, Al Stone <astone@redhat.com>, Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Peter Zijlstra <peterz@infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+To: Bhupesh Sharma <bhsharma@redhat.com>
+Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "ricardo.ner@intel.com" <ricardo.ner@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Lee Chun-Yi <jlee@suse.com>, Al Stone <astone@redhat.com>, Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Peter Zijlstra <peterz@infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hello Sai,
-
-On Thu, Aug 9, 2018 at 10:01 AM, Sai Praneeth Prakhya
-<sai.praneeth.prakhya@intel.com> wrote:
-> From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
->
-> There may exist some buggy UEFI firmware implementations that might
-> access efi regions other than EFI_RUNTIME_SERVICES_<CODE/DATA> even
-> after the kernel has assumed control of the platform. This violates UEFI
-> specification.
->
-> If selected, this debug option will print a warning message if the UEFI
-> firmware tries to access any memory region which it shouldn't. Along
-> with the warning, the efi page fault handler will also try to
-> fixup/recover from the page fault triggered by the firmware so that the
-> machine doesn't hang.
->
-> To support this feature, two changes should be made to the existing efi
-> subsystem
-> 1. Map EFI_BOOT_SERVICES_<CODE/DATA> regions only when
->    EFI_WARN_ON_ILLEGAL_ACCESSES is disabled
->     Presently, the kernel maps EFI_BOOT_SERVICES_<CODE/DATA> regions as
->     a workaround for buggy firmware that accesses them even when they
->     shouldn't. With EFI_WARN_ON_ILLEGAL_ACCESSES enabled (and hence efi
->     page fault handler) kernel can now detect and handle such accesses
->     dynamically. Hence, rather than safely mapping
->     EFI_BOOT_SERVICES_<CODE/DATA> regions *all* the time, map them on
->     demand.
->
-> 2. If EFI_WARN_ON_ILLEGAL_ACCESSES is enabled don't call
->    efi_free_boot_services()
->     Presently, during early boot phase EFI_BOOT_SERVICES_<CODE/DATA>
->     regions are marked as reserved by kernel
->     (see efi_reserve_boot_services()) and are freed before entering
->     runtime (see efi_free_boot_services()). But, while dynamically
->     fixing page faults caused by the firmware, efi page fault handler
->     assumes that EFI_BOOT_SERVICES_<CODE/DATA> regions are still intact.
->     Hence, to make this assumption true, don't call
->     efi_free_boot_services() if EFI_WARN_ON_ILLEGAL_ACCESSES is enabled.
->
-> Suggested-by: Matt Fleming <matt@codeblueprint.co.uk>
-> Based-on-code-from: Ricardo Neri <ricardo.neri@intel.com>
-> Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-> Cc: Lee Chun-Yi <jlee@suse.com>
-> Cc: Al Stone <astone@redhat.com>
-> Cc: Borislav Petkov <bp@alien8.de>
-> Cc: Ingo Molnar <mingo@kernel.org>
-> Cc: Andy Lutomirski <luto@kernel.org>
-> Cc: Bhupesh Sharma <bhsharma@redhat.com>
-> Cc: Peter Zijlstra <peterz@infradead.org>
-> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> ---
->  arch/x86/Kconfig            | 21 +++++++++++++++++++++
->  arch/x86/platform/efi/efi.c |  4 ++++
->  init/main.c                 |  3 ++-
->  3 files changed, 27 insertions(+), 1 deletion(-)
->
-> diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
-> index f1dbb4ee19d7..278e5820e8dd 100644
-> --- a/arch/x86/Kconfig
-> +++ b/arch/x86/Kconfig
-> @@ -1957,6 +1957,27 @@ config EFI_MIXED
->
->            If unsure, say N.
->
-> +config EFI_WARN_ON_ILLEGAL_ACCESSES
-
-How about shortening the name to just 'EFI_WARN_ON_ILLEGAL_ACCESS'?
-
-> +       bool "Warn about illegal memory accesses by firmware"
-> +       depends on EFI
-
->From a distribution p-o-v, I would suggest that we set this CONFIG
-option only if we are in the EXPERT mode, as this need more thrashing
-with the behaviour we see on old, buggy EFI firmwares available on
-very old x86 machines. So something like:
-           bool "Warn about illegal memory accesses by firmware" if EXPERT
-
-> +       help
-> +         Enable this debug feature so that the kernel can detect illegal
-> +         memory accesses by firmware and issue a warning. Also,
-> +         1. If the illegally accessed region is EFI_BOOT_SERVICES_<CODE/DATA>,
-> +            the kernel fixes it up by mapping the requested region.
-> +         2. If the illegally accessed region is any other region (Eg:
-> +            EFI_CONVENTIONAL_MEMORY or EFI_LOADER_<CODE/DATA>), then the
-> +            kernel freezes efi_rts_wq and schedules a new process. Also, it
-> +            disables EFI Runtime Services, so that it will never again call
-> +            buggy firmware.
-> +         3. If the access is to any other efi region like above but if the
-> +            buggy efi runtime service is efi_reset_system(), then the
-> +            platform is rebooted through BIOS.
-> +         Please see the UEFI specification for details on the expectations
-> +         of memory usage.
-> +
-> +         If unsure, say N.
-> +
->  config SECCOMP
->         def_bool y
->         prompt "Enable seccomp to safely compute untrusted bytecode"
-> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-> index 7d18b7ed5d41..0ddb22a03d88 100644
-> --- a/arch/x86/platform/efi/efi.c
-> +++ b/arch/x86/platform/efi/efi.c
-> @@ -768,9 +768,13 @@ static bool should_map_region(efi_memory_desc_t *md)
->         /*
->          * Map boot services regions as a workaround for buggy
->          * firmware that accesses them even when they shouldn't.
-> +        * (only if CONFIG_EFI_WARN_ON_ILLEGAL_ACCESSES is disabled)
->          *
->          * See efi_{reserve,free}_boot_services().
->          */
-> +       if (IS_ENABLED(CONFIG_EFI_WARN_ON_ILLEGAL_ACCESSES))
-> +               return false;
-> +
->         if (md->type == EFI_BOOT_SERVICES_CODE ||
->             md->type == EFI_BOOT_SERVICES_DATA)
->                 return true;
-> diff --git a/init/main.c b/init/main.c
-> index 3b4ada11ed52..dce0520861a1 100644
-> --- a/init/main.c
-> +++ b/init/main.c
-> @@ -730,7 +730,8 @@ asmlinkage __visible void __init start_kernel(void)
->         arch_post_acpi_subsys_init();
->         sfi_init_late();
->
-> -       if (efi_enabled(EFI_RUNTIME_SERVICES)) {
-> +       if (efi_enabled(EFI_RUNTIME_SERVICES) &&
-> +           !IS_ENABLED(CONFIG_EFI_WARN_ON_ILLEGAL_ACCESSES)) {
-
-Since this is an arch agnostic code leg, do we really want to
-introduce a generic check for CONFIG_EFI_WARN_ON_ILLEGAL_ACCESSES
-here, without checking for whether we are actually running this on a
-x86 hardware, or alternatively we can consider moving
-CONFIG_EFI_WARN_ON_ILLEGAL_ACCESSES out of 'arch/x86/Kconfig' to
-'arch/Kconfig' so that later it can be used on other archs like ARM64
-as well.
-
-I think the later would be more useful..
-
-Thanks,
-Bhupesh
-
->                 efi_free_boot_services();
->         }
->
-> --
-> 2.7.4
->
+PiA+ICtjb25maWcgRUZJX1dBUk5fT05fSUxMRUdBTF9BQ0NFU1NFUw0KPiANCj4gSG93IGFib3V0
+IHNob3J0ZW5pbmcgdGhlIG5hbWUgdG8ganVzdCAnRUZJX1dBUk5fT05fSUxMRUdBTF9BQ0NFU1Mn
+Pw0KPiANCg0KTWFrZXMgc2Vuc2UuLiBJIHdpbGwgc2hvcnRlbiBpdC4NCg0KPiA+ICsgICAgICAg
+Ym9vbCAiV2FybiBhYm91dCBpbGxlZ2FsIG1lbW9yeSBhY2Nlc3NlcyBieSBmaXJtd2FyZSINCj4g
+PiArICAgICAgIGRlcGVuZHMgb24gRUZJDQo+IA0KPiBGcm9tIGEgZGlzdHJpYnV0aW9uIHAtby12
+LCBJIHdvdWxkIHN1Z2dlc3QgdGhhdCB3ZSBzZXQgdGhpcyBDT05GSUcgb3B0aW9uIG9ubHkgaWYN
+Cj4gd2UgYXJlIGluIHRoZSBFWFBFUlQgbW9kZSwgYXMgdGhpcyBuZWVkIG1vcmUgdGhyYXNoaW5n
+IHdpdGggdGhlIGJlaGF2aW91ciB3ZQ0KPiBzZWUgb24gb2xkLCBidWdneSBFRkkgZmlybXdhcmVz
+IGF2YWlsYWJsZSBvbiB2ZXJ5IG9sZCB4ODYgbWFjaGluZXMuIFNvDQo+IHNvbWV0aGluZyBsaWtl
+Og0KPiAgICAgICAgICAgIGJvb2wgIldhcm4gYWJvdXQgaWxsZWdhbCBtZW1vcnkgYWNjZXNzZXMg
+YnkgZmlybXdhcmUiIGlmIEVYUEVSVA0KPiANCg0KQWdyZWVkLiBBbHRob3VnaCB0aGUgZmVhdHVy
+ZSBpcyBpbnRlbmRlZCB0byB3YXJuIGFib3V0IGFsbCB0aGVzZSBidWdneSBmaXJtd2FyZSdzDQpp
+bnN0ZWFkIG9mIHNpbGVudGx5IHdvcmtpbmcgYXJvdW5kIChhcyB3ZSBhcmUgZG9pbmcgcHJlc2Vu
+dGx5KSwgaXQgbmVlZHMgbW9yZSB0ZXN0aW5nLg0KSGVuY2UsIGFzIHlvdSBzYWlkLCBJIHRoaW5r
+IGl0J3Mgc2FmZSB0byBoYXZlIGl0IGFzIGFuIEVYUEVSVCBjb25maWcgb3B0aW9uLg0KDQo+ID4g
+KyAgICAgICBoZWxwDQo+ID4gKyAgICAgICAgIEVuYWJsZSB0aGlzIGRlYnVnIGZlYXR1cmUgc28g
+dGhhdCB0aGUga2VybmVsIGNhbiBkZXRlY3QgaWxsZWdhbA0KPiA+ICsgICAgICAgICBtZW1vcnkg
+YWNjZXNzZXMgYnkgZmlybXdhcmUgYW5kIGlzc3VlIGEgd2FybmluZy4gQWxzbywNCj4gPiArICAg
+ICAgICAgMS4gSWYgdGhlIGlsbGVnYWxseSBhY2Nlc3NlZCByZWdpb24gaXMgRUZJX0JPT1RfU0VS
+VklDRVNfPENPREUvREFUQT4sDQo+ID4gKyAgICAgICAgICAgIHRoZSBrZXJuZWwgZml4ZXMgaXQg
+dXAgYnkgbWFwcGluZyB0aGUgcmVxdWVzdGVkIHJlZ2lvbi4NCg0KWy4uLi5dDQoNCj4gPiBkaWZm
+IC0tZ2l0IGEvaW5pdC9tYWluLmMgYi9pbml0L21haW4uYyBpbmRleA0KPiA+IDNiNGFkYTExZWQ1
+Mi4uZGNlMDUyMDg2MWExIDEwMDY0NA0KPiA+IC0tLSBhL2luaXQvbWFpbi5jDQo+ID4gKysrIGIv
+aW5pdC9tYWluLmMNCj4gPiBAQCAtNzMwLDcgKzczMCw4IEBAIGFzbWxpbmthZ2UgX192aXNpYmxl
+IHZvaWQgX19pbml0IHN0YXJ0X2tlcm5lbCh2b2lkKQ0KPiA+ICAgICAgICAgYXJjaF9wb3N0X2Fj
+cGlfc3Vic3lzX2luaXQoKTsNCj4gPiAgICAgICAgIHNmaV9pbml0X2xhdGUoKTsNCj4gPg0KPiA+
+IC0gICAgICAgaWYgKGVmaV9lbmFibGVkKEVGSV9SVU5USU1FX1NFUlZJQ0VTKSkgew0KPiA+ICsg
+ICAgICAgaWYgKGVmaV9lbmFibGVkKEVGSV9SVU5USU1FX1NFUlZJQ0VTKSAmJg0KPiA+ICsgICAg
+ICAgICAgICFJU19FTkFCTEVEKENPTkZJR19FRklfV0FSTl9PTl9JTExFR0FMX0FDQ0VTU0VTKSkg
+ew0KPiANCj4gU2luY2UgdGhpcyBpcyBhbiBhcmNoIGFnbm9zdGljIGNvZGUgbGVnLCBkbyB3ZSBy
+ZWFsbHkgd2FudCB0byBpbnRyb2R1Y2UgYSBnZW5lcmljDQo+IGNoZWNrIGZvciBDT05GSUdfRUZJ
+X1dBUk5fT05fSUxMRUdBTF9BQ0NFU1NFUw0KPiBoZXJlLCB3aXRob3V0IGNoZWNraW5nIGZvciB3
+aGV0aGVyIHdlIGFyZSBhY3R1YWxseSBydW5uaW5nIHRoaXMgb24gYQ0KPiB4ODYgaGFyZHdhcmUs
+IG9yIGFsdGVybmF0aXZlbHkgd2UgY2FuIGNvbnNpZGVyIG1vdmluZw0KPiBDT05GSUdfRUZJX1dB
+Uk5fT05fSUxMRUdBTF9BQ0NFU1NFUyBvdXQgb2YgJ2FyY2gveDg2L0tjb25maWcnIHRvDQo+ICdh
+cmNoL0tjb25maWcnIHNvIHRoYXQgbGF0ZXIgaXQgY2FuIGJlIHVzZWQgb24gb3RoZXIgYXJjaHMg
+bGlrZSBBUk02NCBhcyB3ZWxsLg0KPiANCj4gSSB0aGluayB0aGUgbGF0ZXIgd291bGQgYmUgbW9y
+ZSB1c2VmdWwuLg0KDQpUaGFua3MgZm9yIGJyaW5naW5nIHRoaXMgdXAuIEkgc2VlIHlvdXIgcG9p
+bnQuIEkgd2lsbCByZWZyYWluIGZyb20gcG9sbHV0aW5nIGFyY2hpdGVjdHVyZQ0KYWdub3N0aWMg
+Y29kZS4gQXMgd2UgZG9uJ3QgbmVlZCBlZmlfZnJlZV9ib290X3NlcnZpY2VzKCkgYXQgYWxsLCBp
+ZiBFRklfV0FSTl9PTl9JTExFR0FMX0FDQ0VTU0VTDQppcyBlbmFibGVkLCBwcm9iYWJseSBtYWtp
+bmcgY2hhbmdlcyB0byBpbmNsdWRlL2xpbnV4L2VmaS5oIHdvdWxkIGJlIGJldHRlciwgSSBndWVz
+cy4uDQoNCk1vdmluZyB0aGlzIHRvIGFyY2gvS2NvbmZpZyBjb3VsZCBiZSB0b28gZnV0dXJpc3Rp
+Yy4uIEkgZ3Vlc3MuLiBiZWNhdXNlIEkgYW0gbm90IHN1cmUNCmlmIHRoaXMgcHJvYmxlbSBleGlz
+dHMgb24gQVJNIG1hY2hpbmVzLCBpZiBzbywgcHJvYmFibHkgQXJkIGNvdWxkIHN1Z2dlc3Qgc29t
+ZXRoaW5nIGhlcmUuDQoNClJlZ2FyZHMsDQpTYWkNCg==
