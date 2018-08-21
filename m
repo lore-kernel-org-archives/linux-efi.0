@@ -1,48 +1,60 @@
-From: Greg KH <greg@kroah.com>
-Subject: Re: [PATCH] x86/mm: Simplify p[g4um]d_page() macros
-Date: Tue, 21 Aug 2018 07:20:00 +0200
-Message-ID: <20180821052000.GB23615@kroah.com>
-References: <20180820203705.16212-1-andi@firstfloor.org>
- <20180820203705.16212-2-andi@firstfloor.org>
- <CA+55aFyo_MFz2Qg3pEbLMf3zhvAQbpZf3mQf98bTRJx28drbeQ@mail.gmail.com>
- <20180820220422.7qrayn7wivmejr24@two.firstfloor.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH] efi/libstub: arm: support building with clang
+Date: Tue, 21 Aug 2018 15:34:53 +0200
+Message-ID: <CAKv+Gu_3ePOs=Ng-vjD4_LE5vF_wCXZ74c7anQ=6fnYvj-vQng@mail.gmail.com>
+References: <20180809164042.210675-1-astrachan@google.com> <32f5ce9b26a386e81857afcd7d135bad@agner.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <stable-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20180820220422.7qrayn7wivmejr24@two.firstfloor.org>
-Sender: stable-owner@vger.kernel.org
-To: Andi Kleen <andi@firstfloor.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, stable <stable@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Tom Lendacky <thomas.lendacky@amd.com>, Alexander Potapenko <glider@google.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Andrew Lutomirski <luto@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Borislav Petkov <bp@alien8.de>, Brijesh Singh <brijesh.singh@amd.com>, Dave Young <dyoung@redhat.com>, Dmitry Vyukov <dvyukov@google.com>, Jonathan Corbet <corbet@lwn.net>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Larry Woodman <lwoodman@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Michael S. Tsirkin" <mst@redhat.com>, Paolo Bonzini <pbonzini@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <32f5ce9b26a386e81857afcd7d135bad@agner.ch>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Stefan Agner <stefan@agner.ch>
+Cc: Alistair Strachan <astrachan@google.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Will Deacon <will.deacon@arm.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Russell King <linux@armlinux.org.uk>, linux-efi <linux-efi@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Aug 20, 2018 at 03:04:23PM -0700, Andi Kleen wrote:
-> On Mon, Aug 20, 2018 at 02:57:39PM -0700, Linus Torvalds wrote:
-> > On Mon, Aug 20, 2018 at 1:37 PM Andi Kleen <andi@firstfloor.org> wrote:
-> > >
-> > > From: Andi Kleen <ak@linux.intel.com>
-> > >
-> > > Create a pgd_pfn() macro similar to the p[4um]d_pfn() macros and then
-> > > use the p[g4um]d_pfn() macros in the p[g4um]d_page() macros instead of
-> > > duplicating the code.
-> > 
-> > When doing backports, _please_ explicitly specify which commit this is
-> > upstream too.
-> 
-> Ok.
-> 
-> > 
-> > Also, the original upstream patch is credited to Tom Lendacky.
-> 
-> Okay.
-> 
-> > 
-> > Or is there something I'm not seeing, and this is different from
-> > commit fd7e315988b7 ("x86/mm: Simplify p[g4um]d_page() macros")?
-> 
-> No it's Tom's patch just ported to the older tree with some minor
-> changes. I just fat fingered it while doing the commit
+On 11 August 2018 at 10:49, Stefan Agner <stefan@agner.ch> wrote:
+> On 09.08.2018 18:40, Alistair Strachan wrote:
+>> When building with CONFIG_EFI and CONFIG_EFI_STUB on ARM, the libstub
+>> Makefile would use -mno-single-pic-base without checking it was
+>> supported by the compiler. As the ARM (32-bit) clang backend does not
+>> support this flag, the build would fail.
+>>
+>> This changes the Makefile to check the compiler's support for
+>> -mno-single-pic-base before using it, similar to c1c386681bd7 ("ARM:
+>> 8767/1: add support for building ARM kernel with clang").
+>
+> Looks good to me:
+>
+> Reviewed-by: Stefan Agner <stefan@agner.ch>
+>
 
-Ok, I've fixed this up by hand now, please be more careful next time.
 
-greg k-h
+Thanks. I will queue this after the merge window closes
+
+>>
+>> Cc: Stefan Agner <stefan@agner.ch>
+>> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+>> Cc: Will Deacon <will.deacon@arm.com>
+>> Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+>> Cc: Russell King <linux@armlinux.org.uk>
+>> Cc: linux-efi@vger.kernel.org
+>> Cc: linux-arm-kernel@lists.infradead.org
+>> Signed-off-by: Alistair Strachan <astrachan@google.com>
+>> ---
+>>  drivers/firmware/efi/libstub/Makefile | 3 ++-
+>>  1 file changed, 2 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/firmware/efi/libstub/Makefile
+>> b/drivers/firmware/efi/libstub/Makefile
+>> index a34e9290a699..91339d13f2a1 100644
+>> --- a/drivers/firmware/efi/libstub/Makefile
+>> +++ b/drivers/firmware/efi/libstub/Makefile
+>> @@ -13,7 +13,8 @@ cflags-$(CONFIG_X86)                += -m$(BITS) -D__KERNEL__ -O2 \
+>>
+>>  cflags-$(CONFIG_ARM64)               := $(subst -pg,,$(KBUILD_CFLAGS)) -fpie
+>>  cflags-$(CONFIG_ARM)         := $(subst -pg,,$(KBUILD_CFLAGS)) \
+>> -                                -fno-builtin -fpic -mno-single-pic-base
+>> +                                -fno-builtin -fpic \
+>> +                                $(call cc-option,-mno-single-pic-base)
+>>
+>>  cflags-$(CONFIG_EFI_ARMSTUB) += -I$(srctree)/scripts/dtc/libfdt
