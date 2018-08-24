@@ -1,45 +1,41 @@
-From: Roland Dreier <roland@purestorage.com>
-Subject: Re: [PATCH 4.4 103/105] Revert "x86/mm/pat: Ensure cpa->pfn only
- contains page frame numbers"
-Date: Thu, 23 Aug 2018 09:37:28 -0700
-Message-ID: <CAL1RGDUxkWm+tSdLmptSZZ55mdWCR6i1GevMUx_K-a2BX74xdQ@mail.gmail.com>
-References: <20171215092305.994559179@linuxfoundation.org> <20171215092311.347628971@linuxfoundation.org>
- <CAL1RGDVgShymmT+TJ3mAHEL7n+qoisk6mQ=Tji_T=0d_QA=VKw@mail.gmail.com> <20180823061253.GA8803@kroah.com>
+From: Mike Galbraith <efault-Mmb7MZpHnFY@public.gmane.org>
+Subject: Re: [PATCH] x86, kdump: Fix efi=noruntime NULL pointer dereference
+Date: Fri, 24 Aug 2018 06:48:58 +0200
+Message-ID: <1535086138.4661.9.camel@gmx.de>
+References: <1533737025.4936.3.camel@gmx.de>
+ <20180809042153.GA4377@dhcp-128-65.nay.redhat.com>
+ <1533800010.5087.71.camel@gmx.de>
+ <20180809091333.GA8008@dhcp-128-65.nay.redhat.com>
+ <CAKv+Gu8KKwNkUdx7tSxEosRvydxmQ2yaasHRJn_LcHPs7p2UYQ@mail.gmail.com>
+ <20180822102310.GA19827@dhcp-128-65.nay.redhat.com>
+ <20180823035705.GA5743@dhcp-128-65.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20180823061253.GA8803@kroah.com>
-Sender: stable-owner@vger.kernel.org
-To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, matt@codeblueprint.co.uk, ben.hutchings@codethink.co.uk
-Cc: LKML <linux-kernel@vger.kernel.org>, stable@vger.kernel.org, bp@suse.de, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@amacapital.net>, luto@kernel.org, ard.biesheuvel@linaro.org, bp@alien8.de, brgerst@gmail.com, davej@codemonkey.org.uk, dvlasenk@redhat.com, "H. Peter Anvin" <hpa@zytor.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, sai.praneeth.prakhya@intel.com, sds@tycho.nsa.gov, Thomas Gleixner <tglx@linutronix.de>, toshi.kani@hp.com, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Yazen.Ghannam@amd.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <20180823035705.GA5743-0VdLhd/A9Pl+NNSt+8eSiB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/kexec/>
+List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Sebastian Andrzej Siewior <bigeasy-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Kexec Mailing List <kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, lkml <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-> > This is bad enough that 4.4.148 and all newer 4.4.y crash early in
-> > boot on some EFI systems that I have.
->
-> Ugh, not good.
->
-> > For now I am re-applying the "ensure cpa->pfn only contains page frame
-> > numbers" patch, ported on top of 4.4.151.
->
-> I can try to add it back and see what blows up, want me to attempt that?
+On Thu, 2018-08-23 at 11:57 +0800, Dave Young wrote:
+> 
+> Mike, since we are going this way, I'm working on a kexec code cleanup,
+> but it needs careful testing so still need some time.
+> 
+> Can you help test below efi fix and provide you tested-by if it works?
 
-Not sure what to say... the current state is obviously broken.  If you
-look at what 02ff2769edbc is doing, it's clear that we're now shifting
-cpa->pfn by PAGE_SHIFT where we weren't before, so we're putting bogus
-values in the page table.  And this is enough that my server system
-booting with EFI crashes early in boot efi_enter_virtual_mode() with
-the symptom that NX is improperly set on some pages (booting with
-"noexec=off" fixes things, although obviously I don't want to run that
-way).  FWIW I can confirm that reverting the single patch 02ff2769edbc
-fixes things, as does the cpa->pfn fix I mentioned above.
+While it averts the efi=noruntime oops on kdump kernel load, the kernel
+does not boot when kdump is triggered.  Bailing in setup_efi_state() in
+addition restores functionality.
 
-It's hard for me to make a call on applying "ensure cpa->pfn only
-contains page frame numbers" without knowing the problems it caused
-before.  The patch looks fine to me and I definitely need it, but
-maybe it exposes some other bug elsewhere?  Maybe Ben or Matt remember
-more above why this was reverted in 4.4.106?  Otherwise I'd say yeah,
-we should re-apply it, since I don't think we want to revert
-02ff2769edbc.
-
- - R.
+	-Mike
