@@ -1,67 +1,102 @@
-From: Guenter Roeck <linux@roeck-us.net>
-Subject: Re: [PATCH 4.4 103/105] Revert "x86/mm/pat: Ensure cpa->pfn only
- contains page frame numbers"
-Date: Sat, 25 Aug 2018 19:30:53 -0700
-Message-ID: <c2e61e43-6cd5-567a-8c3c-3cc3ff456c31@roeck-us.net>
-References: <20171215092305.994559179@linuxfoundation.org>
- <20171215092311.347628971@linuxfoundation.org>
- <CAL1RGDVgShymmT+TJ3mAHEL7n+qoisk6mQ=Tji_T=0d_QA=VKw@mail.gmail.com>
- <1535129126.2902.36.camel@codethink.co.uk>
- <CAL1RGDW1Lo+F5D479Jsi-AFsmjVpdDre_qOFSCwWubG6U=bxeQ@mail.gmail.com>
- <20180824191749.GA15489@kroah.com>
- <CAL1RGDXUx-frpWuuYyc-VrAEoOU2+irGQPRWvoBzO2ZxEPGrww@mail.gmail.com>
- <35e0f79b-6fac-5027-6377-67dbe2a293b9@roeck-us.net>
- <20180825150723.GA10230@kroah.com>
+From: Baoquan He <bhe@redhat.com>
+Subject: Re: [PATCH v5 2/4] x86/boot: Add acpitb.c to parse acpi tables
+Date: Mon, 27 Aug 2018 17:32:20 +0800
+Message-ID: <20180827093220.GF1748@MiWiFi-R3L-srv>
+References: <20180807065000.30958-1-fanc.fnst@cn.fujitsu.com>
+ <20180807065000.30958-3-fanc.fnst@cn.fujitsu.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180825150723.GA10230@kroah.com>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <20180807065000.30958-3-fanc.fnst@cn.fujitsu.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Roland Dreier <roland@purestorage.com>, Ben Hutchings <ben.hutchings@codethink.co.uk>, LKML <linux-kernel@vger.kernel.org>, stable@vger.kernel.org, matt@codeblueprint.co.uk, bp@suse.de, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@amacapital.net>, luto@kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, bp@alien8.de, brgerst@gmail.com, davej@codemonkey.org.uk, dvlasenk@redhat.com, "H. Peter Anvin" <hpa@zytor.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, sai.praneeth.prakhya@intel.com, sds@tycho.nsa.gov, Thomas Gleixner <tglx@linutronix.de>, toshi.kani@hp.com, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Yazen.Ghannam@amd.com
+To: Chao Fan <fanc.fnst@cn.fujitsu.com>
+Cc: tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, x86@kernel.org, linux-kernel@vger.kernel.org, keescook@chromium.org, n-horiguchi@ah.jp.nec.com, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com, douly.fnst@cn.fujitsu.com, rjw@rjwysocki.net, lenb@kernel.org, linux-acpi@vger.kernel.org, ard.biesheuvel@linaro.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On 08/25/2018 08:07 AM, Greg Kroah-Hartman wrote:
-> On Sat, Aug 25, 2018 at 06:52:32AM -0700, Guenter Roeck wrote:
->> Hi Roland,
->>
->> On 08/24/2018 01:04 PM, Roland Dreier wrote:
->>>> Ok, so what patch should be reverted?  I'm seeing other reports of
->>>> problems all around this same area, but I can't figure out exactly what
->>>> to do.
->>>
->>> Are any of those reports public?  If so can you point me at them, I'm
->>> curious if the symptoms match up.
->>>
->>> I don't think we want to revert anything.  I think you should pull in
->>> edc3b9129cec and at least the first three patches that Ben listed:
->>>
->>> 21cdb6b56843 x86/mm: Page align the '_end' symbol to avoid pfn conversion bugs
->>> b61a76f8850d x86/efi: Map RAM into the identity page table for mixed mode
->>> 753b11ef8e92 x86/efi: Setup separate EFI page tables in kexec paths
->>>
->>> the first patch takes a bit of massaging (mostly because some of it is
->>> already touched by 02ff2769edbc, which keeps the changes from
->>> edc3b9129cec, and so we can drop a good bit when applying).  The other
->>> three apply cleanly.
->>>
->>> I'm currently testing that and can send you the state of my tree in a bit.
->>>
->>
->> Have you made any progress ? On my side I am still out of luck since I can not
->> reproduce the problem.
+Hi Chao,
+
+On 08/07/18 at 02:49pm, Chao Fan wrote:
+
+I think better add acpi/efi maintainers to CC when you post.
+
+
+> +static acpi_physical_address get_rsdp_addr(void)
+> +{
+> +	acpi_physical_address pa = 0;
+> +	bool status = false;
+
+
+Here, I think you should make get_rsdp_addr() consistent with its
+counterpart acpi_os_get_root_pointer(). In acpi_os_get_root_pointer(),
+we take care of the case that acpi_rsdp passed in a value.
+> +
+> +	status = efi_get_rsdp_addr(&pa);
+> +
+> +	if (!status || pa == 0)
+> +		bios_get_rsdp_addr(&pa);
+> +
+> +	return pa;
+> +}
+> +
+> +struct acpi_table_header *get_acpi_srat_table(void)
+> +{
+> +	char *args = (char *)get_cmd_line_ptr();
+> +	acpi_physical_address acpi_table;
+> +	acpi_physical_address root_table;
+> +	struct acpi_table_header *header;
+> +	struct acpi_table_rsdp *rsdp;
+> +	char *signature;
+> +	u8 *entry;
+> +	u32 count;
+> +	u32 size;
+> +	int i, j;
+> +	u32 len;
+> +
+> +	rsdp = (struct acpi_table_rsdp *)get_rsdp_addr();
+> +	if (!rsdp)
+> +		return NULL;
+> +
+> +	/* Get rsdt or xsdt from rsdp. */
+> +	if (!strstr(args, "acpi=rsdt") &&
+> +	    rsdp->xsdt_physical_address && rsdp->revision > 1) {
+> +		root_table = rsdp->xsdt_physical_address;
+> +		size = ACPI_XSDT_ENTRY_SIZE;
+> +	} else {
+> +		root_table = rsdp->rsdt_physical_address;
+> +		size = ACPI_RSDT_ENTRY_SIZE;
+> +	}
+> +
+> +	/* Get ACPI root table from rsdt or xsdt.*/
+> +	header = (struct acpi_table_header *)root_table;
+> +	len = header->length;
+> +	count = (u32)((len - sizeof(struct acpi_table_header)) / size);
+> +	entry = ACPI_ADD_PTR(u8, header, sizeof(struct acpi_table_header));
+> +
+> +	for (i = 0; i < count; i++) {
+> +		u64 address64;
+> +
+> +		if (size == ACPI_RSDT_ENTRY_SIZE)
+> +			acpi_table = ((acpi_physical_address)
+> +				      (*ACPI_CAST_PTR(u32, entry)));
+> +		else {
+> +			*(u64 *)(void *)&address64 = *(u64 *)(void *)entry;
+> +			acpi_table = (acpi_physical_address) address64;
+> +		}
+> +
+> +		if (acpi_table) {
+> +			header = (struct acpi_table_header *)acpi_table;
+> +			signature = header->signature;
+> +
+> +			if (!strncmp(signature, "SRAT", 4))
+> +				return header;
+> +		}
+> +		entry += size;
+> +	}
+> +	return NULL;
+> +}
+> -- 
+> 2.17.1
 > 
-> Perhaps just the patch that Andi posted to the stable list helps out
-> here?
 > 
-
-For reference:
-
-https://www.spinics.net/lists/stable/msg253357.html
-
-That would be the most straightforward and simple fix, so I would prefer
-to go with it if it works.
-
-Guenter
+> 
