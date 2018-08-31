@@ -1,62 +1,55 @@
-From: Joerg Roedel <joro@8bytes.org>
-Subject: [PATCH] x86/efi: Load fixmap GDT in efi_call_phys_epilog()
-Date: Fri, 31 Aug 2018 10:05:38 +0200
-Message-ID: <1535702738-10971-1-git-send-email-joro@8bytes.org>
+From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Subject: [PATCH v1 2/4] x86/efi: Get rid of custom ICPU() macro
+Date: Fri, 31 Aug 2018 12:10:16 +0300
+Message-ID: <20180831091018.17543-2-andriy.shevchenko@linux.intel.com>
+References: <20180831091018.17543-1-andriy.shevchenko@linux.intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180831091018.17543-1-andriy.shevchenko@linux.intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>
-Cc: Michal Hocko <mhocko@suse.com>, Andi Kleen <ak@linux.intel.com>, Linus Torvalds <torvalds@linux-foundation.org>, Dave Hansen <dave.hansen@intel.com>, Pavel Machek <pavel@ucw.cz>, hpa@zytor.com, x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Joerg Roedel <jroedel@suse.de>
+To: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Joerg Roedel <jroedel@suse.de>
+Replace custom grown macro with generic INTEL_CPU_FAM_ANY() one.
 
-When PTI is enabled on x86-32 the kernel uses the GDT mapped
-in the fixmap for the simple reason that this address is
-also mapped for user-space.
+No functional change intended.
 
-The efi_call_phys_prolog()/efi_call_phys_epilog() wrappers
-change the GDT to call EFI runtime services and switch back
-to the kernel GDT when they return. But the switch-back uses
-the writable GDT, not the fixmap GDT.
-
-When that happened and and the CPU returns to user-space it
-switches to the user %cr3 and tries to restore user segment
-registers. This fails because the writable GDT is not mapped
-in the user page-table, and without a GDT the fault handlers
-also can't be launched. The result is a triple fault and
-reboot of the machine.
-
-Fix that by restoring the GDT back to the fixmap GDT which
-is also mapped in the user page-table.
-
-Fixes: 7757d607c6b3 x86/pti: ('Allow CONFIG_PAGE_TABLE_ISOLATION for x86_32')
-Reported-by: Guenter Roeck <linux@roeck-us.net>
-Tested-by: Guenter Roeck <linux@roeck-us.net>
-Signed-off-by: Joerg Roedel <jroedel@suse.de>
+Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 ---
- arch/x86/platform/efi/efi_32.c | 8 ++------
- 1 file changed, 2 insertions(+), 6 deletions(-)
+ arch/x86/include/asm/intel-family.h | 2 ++
+ arch/x86/platform/efi/quirks.c      | 6 +-----
+ 2 files changed, 3 insertions(+), 5 deletions(-)
 
-diff --git a/arch/x86/platform/efi/efi_32.c b/arch/x86/platform/efi/efi_32.c
-index 324b9332..05ca142 100644
---- a/arch/x86/platform/efi/efi_32.c
-+++ b/arch/x86/platform/efi/efi_32.c
-@@ -85,14 +85,10 @@ pgd_t * __init efi_call_phys_prolog(void)
+diff --git a/arch/x86/include/asm/intel-family.h b/arch/x86/include/asm/intel-family.h
+index 093014aceb65..be28519b2020 100644
+--- a/arch/x86/include/asm/intel-family.h
++++ b/arch/x86/include/asm/intel-family.h
+@@ -16,6 +16,8 @@
+  * that group keep the CPUID for the variants sorted by model number.
+  */
  
- void __init efi_call_phys_epilog(pgd_t *save_pgd)
- {
--	struct desc_ptr gdt_descr;
--
--	gdt_descr.address = (unsigned long)get_cpu_gdt_rw(0);
--	gdt_descr.size = GDT_SIZE - 1;
--	load_gdt(&gdt_descr);
--
- 	load_cr3(save_pgd);
- 	__flush_tlb_all();
++#define INTEL_FAM5_QUARK_X1000		0x09
 +
-+	load_fixmap_gdt(0);
+ #define INTEL_FAM6_CORE_YONAH		0x0E
+ 
+ #define INTEL_FAM6_CORE2_MEROM		0x0F
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index 844d31cb8a0c..cf8ea09cc52b 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -610,12 +610,8 @@ static int qrk_capsule_setup_info(struct capsule_info *cap_info, void **pkbuff,
+ 	return 1;
  }
  
- void __init efi_runtime_update_mappings(void)
+-#define ICPU(family, model, quirk_handler) \
+-	{ X86_VENDOR_INTEL, family, model, X86_FEATURE_ANY, \
+-	  (unsigned long)&quirk_handler }
+-
+ static const struct x86_cpu_id efi_capsule_quirk_ids[] = {
+-	ICPU(5, 9, qrk_capsule_setup_info),	/* Intel Quark X1000 */
++	INTEL_CPU_FAM_ANY(5, INTEL_FAM5_QUARK_X1000, &qrk_capsule_setup_info),
+ 	{ }
+ };
+ 
 -- 
-2.7.4
+2.18.0
