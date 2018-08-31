@@ -1,49 +1,62 @@
-From: Guillaume Tucker <guillaume.tucker@collabora.com>
-Subject: Re: [PATCH 4.4 103/105] Revert "x86/mm/pat: Ensure cpa->pfn only
- contains page frame numbers"
-Date: Fri, 31 Aug 2018 07:24:08 +0100
-Message-ID: <5dd63596-9f7f-f72a-37ad-b0d97580667e@collabora.com>
-References: <20171215092305.994559179@linuxfoundation.org>
- <20171215092311.347628971@linuxfoundation.org>
- <CAL1RGDVgShymmT+TJ3mAHEL7n+qoisk6mQ=Tji_T=0d_QA=VKw@mail.gmail.com>
- <1535129126.2902.36.camel@codethink.co.uk>
- <CAL1RGDW1Lo+F5D479Jsi-AFsmjVpdDre_qOFSCwWubG6U=bxeQ@mail.gmail.com>
- <20180824191749.GA15489@kroah.com>
- <CAL1RGDXUx-frpWuuYyc-VrAEoOU2+irGQPRWvoBzO2ZxEPGrww@mail.gmail.com>
- <20180824201025.GB18715@roeck-us.net>
- <CAL1RGDXa2POjmrr8UK-2oYyQtxYxiOs5t9BrpGUHRXqkDjMW5w@mail.gmail.com>
- <20180824203251.GD18715@roeck-us.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20180824203251.GD18715@roeck-us.net>
-Content-Language: en-US
-Sender: stable-owner@vger.kernel.org
-To: Guenter Roeck <linux@roeck-us.net>, Roland Dreier <roland@purestorage.com>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ben Hutchings <ben.hutchings@codethink.co.uk>, LKML <linux-kernel@vger.kernel.org>, stable@vger.kernel.org, matt@codeblueprint.co.uk, bp@suse.de, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@amacapital.net>, luto@kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, bp@alien8.de, brgerst@gmail.com, davej@codemonkey.org.uk, dvlasenk@redhat.com, "H. Peter Anvin" <hpa@zytor.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, sai.praneeth.prakhya@intel.com, sds@tycho.nsa.gov, Thomas Gleixner <tglx@linutronix.de>, toshi.kani@hp.com, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Yazen.Ghannam@amd.com
+From: Joerg Roedel <joro@8bytes.org>
+Subject: [PATCH] x86/efi: Load fixmap GDT in efi_call_phys_epilog()
+Date: Fri, 31 Aug 2018 10:05:38 +0200
+Message-ID: <1535702738-10971-1-git-send-email-joro@8bytes.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>
+Cc: Michal Hocko <mhocko@suse.com>, Andi Kleen <ak@linux.intel.com>, Linus Torvalds <torvalds@linux-foundation.org>, Dave Hansen <dave.hansen@intel.com>, Pavel Machek <pavel@ucw.cz>, hpa@zytor.com, x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Joerg Roedel <jroedel@suse.de>
 List-Id: linux-efi@vger.kernel.org
 
-On 24/08/18 21:32, Guenter Roeck wrote:
-> On Fri, Aug 24, 2018 at 01:16:18PM -0700, Roland Dreier wrote:
->>> Sounds great. I'll hold off with sending my RFT series and wait for your
->>> test results. I think we'll also need d367cef0a7f0c6 ("x86/mm/pat: Fix
->>> boot crash when 1GB pages are not supported by the CPU").
->>
->> Sure, makes sense - I don't have any EFI systems with CPUs old enough
->> not to support 1G pages but that looks reasonable.  I'll pull that
->> into my tree as well.
->>
-> kernelci reported a crash on a CPU which doesn't support 1G pages.
-> See https://kernelci.org/boot/id/5b7d39ea59b514c03796ba9c/
+From: Joerg Roedel <jroedel@suse.de>
 
-Looks like this has now been fixed with Andi's patch in 4.4.153:
+When PTI is enabled on x86-32 the kernel uses the GDT mapped
+in the fixmap for the simple reason that this address is
+also mapped for user-space.
 
-  "x86/mm/pat: Fix L1TF stable backport for CPA"
+The efi_call_phys_prolog()/efi_call_phys_epilog() wrappers
+change the GDT to call EFI runtime services and switch back
+to the kernel GDT when they return. But the switch-back uses
+the writable GDT, not the fixmap GDT.
 
-I can confirm this platform is now booting fine in kernelci:
+When that happened and and the CPU returns to user-space it
+switches to the user %cr3 and tries to restore user segment
+registers. This fails because the writable GDT is not mapped
+in the user page-table, and without a GDT the fault handlers
+also can't be launched. The result is a triple fault and
+reboot of the machine.
 
-  http://lava.streamtester.net/scheduler/job/146195
+Fix that by restoring the GDT back to the fixmap GDT which
+is also mapped in the user page-table.
 
-Thanks,
-Guillaume
+Fixes: 7757d607c6b3 x86/pti: ('Allow CONFIG_PAGE_TABLE_ISOLATION for x86_32')
+Reported-by: Guenter Roeck <linux@roeck-us.net>
+Tested-by: Guenter Roeck <linux@roeck-us.net>
+Signed-off-by: Joerg Roedel <jroedel@suse.de>
+---
+ arch/x86/platform/efi/efi_32.c | 8 ++------
+ 1 file changed, 2 insertions(+), 6 deletions(-)
+
+diff --git a/arch/x86/platform/efi/efi_32.c b/arch/x86/platform/efi/efi_32.c
+index 324b9332..05ca142 100644
+--- a/arch/x86/platform/efi/efi_32.c
++++ b/arch/x86/platform/efi/efi_32.c
+@@ -85,14 +85,10 @@ pgd_t * __init efi_call_phys_prolog(void)
+ 
+ void __init efi_call_phys_epilog(pgd_t *save_pgd)
+ {
+-	struct desc_ptr gdt_descr;
+-
+-	gdt_descr.address = (unsigned long)get_cpu_gdt_rw(0);
+-	gdt_descr.size = GDT_SIZE - 1;
+-	load_gdt(&gdt_descr);
+-
+ 	load_cr3(save_pgd);
+ 	__flush_tlb_all();
++
++	load_fixmap_gdt(0);
+ }
+ 
+ void __init efi_runtime_update_mappings(void)
+-- 
+2.7.4
