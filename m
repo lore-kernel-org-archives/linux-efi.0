@@ -1,7 +1,7 @@
 From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Subject: [PATCH V2 2/6] x86/efi: Remove __init attribute from memory mapping functions
-Date: Sun,  2 Sep 2018 02:46:30 -0700
-Message-ID: <1535881594-25469-3-git-send-email-sai.praneeth.prakhya@intel.com>
+Subject: [PATCH V2 5/6] x86/mm: If in_atomic(), allocate pages without sleeping
+Date: Sun,  2 Sep 2018 02:46:33 -0700
+Message-ID: <1535881594-25469-6-git-send-email-sai.praneeth.prakhya@intel.com>
 References: <1535881594-25469-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1535881594-25469-1-git-send-email-sai.praneeth.prakhya@intel.com>
@@ -12,21 +12,92 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
 
-Buggy firmware could illegally access EFI_BOOT_SERVICES_CODE/DATA
-regions even after the kernel has assumed control of the platform. When
-"CONFIG_EFI_WARN_ON_ILLEGAL_ACCESS" is enabled, the efi page fault
-handler will detect/fixup these illegal accesses. The below modified
-functions are used by the page fault handler to fixup illegal accesses
-to EFI_BOOT_SERVICES_CODE/DATA regions. As the page fault handler is
-present during/after kernel boot it doesn't have an __init attribute,
-but the below functions have it and thus during kernel build, "WARNING:
-modpost: Found * section mismatch(es)" build warning is observed. To fix
-it, remove __init attribute for all these functions.
+A page fault occurs when any EFI Runtime Service tries to reference a
+memory region which it shouldn't. If the illegally accessed region
+is EFI_BOOT_SERVICES_<CODE/DATA>, the efi specific page fault handler
+fixes it up by dynamically creating VA->PA mappings using
+efi_map_region().
 
-In order to not keep these functions needlessly when
-"CONFIG_EFI_WARN_ON_ILLEGAL_ACCESS" is not selected, add a new
-__efi_init_fixup attribute whose value changes based on whether the
-config option is selected or not.
+Originally, efi_map_region() and hence the functionality of creating
+mappings for efi regions was intended to be used *only* during boot time
+(please note __init modifier) and hence when called during runtime (i.e.
+from efi page fault handler), the page allocators complain. Calling
+efi_map_region() during runtime complains because "gfp_allowed_mask"
+value changes from boot time to runtime (GFP_BOOT_MASK to
+__GFP_BITS_MASK). During boot, even though efi_map_region() calls
+alloc_<pte/pmd>_page with GFP_KERNEL, the page allocator doesn't
+complain because "__GFP_RECLAIM" flag is cleared by "gfp_allowed_mask",
+but during runtime it isn't cleared and hence prints below stack trace.
+
+BUG: sleeping function called from invalid context at mm/page_alloc.c:4320
+in_atomic(): 1, irqs_disabled(): 1, pid: 2022, name: fwts
+1 lock held by fwts/2022:
+irq event stamp: 45714
+hardirqs last  enabled at (45713): [<ffffffff81c00a54>] restore_regs_and_return_to_kernel+0x0/0x2c
+hardirqs last disabled at (45714): [<ffffffff81c0112c>] error_entry+0x7c/0x100
+softirqs last  enabled at (44732): [<ffffffff81e00387>] __do_softirq+0x387/0x49a
+softirqs last disabled at (44707): [<ffffffff8106fabb>] irq_exit+0xbb/0xc0
+CPU: 0 PID: 2022 Comm: fwts Not tainted 4.17.0-rc4-efitest+ #405
+Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 0.0.0 02/06/2015
+Call Trace:
+dump_stack+0x5e/0x8b
+___might_sleep+0x20c/0x240
+__alloc_pages_nodemask+0xc2/0x330
+get_zeroed_page+0x12/0x40
+alloc_pmd_page+0x13/0x50
+populate_pmd+0xc0/0x2e0
+? __lock_acquire+0x439/0x740
+__cpa_process_fault+0x2e1/0x5d0
+__change_page_attr_set_clr+0x7c3/0xcd0
+? console_unlock+0x34d/0x660
+? kernel_map_pages_in_pgd+0x8c/0x160
+kernel_map_pages_in_pgd+0x8c/0x160
+? printk+0x43/0x4b
+? __map_region+0x3c/0x60
+__map_region+0x3c/0x60
+efi_map_region+0x83/0xd0
+efi_illegal_accesses_fixup+0x1ca/0x1e0
+no_context+0x112/0x390
+__do_page_fault+0xc7/0x4f0
+page_fault+0x1e/0x30
+RIP: 0010:0xfffffffeffc7ccf1
+RSP: 0018:ffffc9000075bbf0 EFLAGS: 00010282
+RAX: 0000000000000048 RBX: ffffc9000075be10 RCX: ffffc9000075bad0
+RDX: 00000000000003f8 RSI: ffffc9000075be10 RDI: fffffffeffc7cccf
+RBP: ffffc9000075bdc8 R08: 0000000000000048 R09: 0000000000000048
+R10: 00000000000003fd R11: 00000000000003f8 R12: ffff880032a92d80
+R13: 0000000000000003 R14: 00007ffcf1eb9d50 R15: 0000000000000000
+? efi_call+0xd1/0x160
+? __lock_acquire+0x439/0x740
+? _raw_spin_unlock+0x24/0x30
+? virt_efi_get_next_high_mono_count+0x77/0xf0
+? efi_test_ioctl+0x1ab/0xc20
+? selinux_file_ioctl+0x122/0x1c0
+? do_vfs_ioctl+0x92/0x6b0
+? do_vfs_ioctl+0x92/0x6b0
+? security_file_ioctl+0x3c/0x50
+? selinux_capable+0x20/0x20
+? ksys_ioctl+0x66/0x70
+? __x64_sys_ioctl+0x16/0x20
+? do_syscall_64+0x50/0x170
+? entry_SYSCALL_64_after_hwframe+0x49/0xbe
+
+Fix the above warning by conditionally changing the allocation from
+GFP_KERNEL to GFP_ATOMIC, so that efi page fault handler could use
+efi_map_region() during runtime. This change shouldn't effect any other
+generic page allocations because this allocation is used only by efi
+functions [1].
+
+[1] Comment in __cpa_process_fault() at arch/x86/mm/pageattr.c
+
+if (cpa->pgd) {
+	/*
+	 * Right now, we only execute this code path when mapping
+	 * the EFI virtual memory map regions, no other users
+	 * provide a ->pgd value. This may change in the future.
+	 */
+	return populate_pgd(cpa, vaddr);
+}
 
 Suggested-by: Matt Fleming <matt@codeblueprint.co.uk>
 Based-on-code-from: Ricardo Neri <ricardo.neri@intel.com>
@@ -40,169 +111,42 @@ Cc: Bhupesh Sharma <bhsharma@redhat.com>
 Cc: Peter Zijlstra <peterz@infradead.org>
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- arch/x86/include/asm/efi.h     | 11 ++++++-----
- arch/x86/platform/efi/efi.c    |  4 ++--
- arch/x86/platform/efi/efi_32.c |  2 +-
- arch/x86/platform/efi/efi_64.c |  9 +++++----
- drivers/firmware/efi/efi.c     |  6 +++---
- include/linux/efi.h            | 16 ++++++++++++++--
- 6 files changed, 31 insertions(+), 17 deletions(-)
+ arch/x86/mm/pageattr.c | 16 ++++++++++++++--
+ 1 file changed, 14 insertions(+), 2 deletions(-)
 
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index cec5fae23eb3..9b70743400f3 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -103,8 +103,9 @@ struct efi_scratch {
- 	preempt_enable();						\
- })
+diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
+index 3bded76e8d5c..1b28a333c8ce 100644
+--- a/arch/x86/mm/pageattr.c
++++ b/arch/x86/mm/pageattr.c
+@@ -926,7 +926,13 @@ static void unmap_pud_range(p4d_t *p4d, unsigned long start, unsigned long end)
  
--extern void __iomem *__init efi_ioremap(unsigned long addr, unsigned long size,
--					u32 type, u64 attribute);
-+extern void __iomem *__efi_init_fixup efi_ioremap(unsigned long addr,
-+					      unsigned long size, u32 type,
-+					      u64 attribute);
- 
- #ifdef CONFIG_KASAN
- /*
-@@ -126,13 +127,13 @@ extern int __init efi_memblock_x86_reserve_range(void);
- extern pgd_t * __init efi_call_phys_prolog(void);
- extern void __init efi_call_phys_epilog(pgd_t *save_pgd);
- extern void __init efi_print_memmap(void);
--extern void __init efi_memory_uc(u64 addr, unsigned long size);
--extern void __init efi_map_region(efi_memory_desc_t *md);
-+extern void __efi_init_fixup efi_memory_uc(u64 addr, unsigned long size);
-+extern void __efi_init_fixup efi_map_region(efi_memory_desc_t *md);
- extern void __init efi_map_region_fixed(efi_memory_desc_t *md);
- extern void efi_sync_low_kernel_mappings(void);
- extern int __init efi_alloc_page_tables(void);
- extern int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages);
--extern void __init old_map_region(efi_memory_desc_t *md);
-+extern void __efi_init_fixup old_map_region(efi_memory_desc_t *md);
- extern void __init runtime_code_page_mkexec(void);
- extern void __init efi_runtime_update_mappings(void);
- extern void __init efi_dump_pagetable(void);
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 9061babfbc83..439c2c40bf03 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -572,7 +572,7 @@ void __init runtime_code_page_mkexec(void)
- 	}
- }
- 
--void __init efi_memory_uc(u64 addr, unsigned long size)
-+void __efi_init_fixup efi_memory_uc(u64 addr, unsigned long size)
+ static int alloc_pte_page(pmd_t *pmd)
  {
- 	unsigned long page_shift = 1UL << EFI_PAGE_SHIFT;
- 	u64 npages;
-@@ -582,7 +582,7 @@ void __init efi_memory_uc(u64 addr, unsigned long size)
- 	set_memory_uc(addr, npages);
- }
- 
--void __init old_map_region(efi_memory_desc_t *md)
-+void __efi_init_fixup old_map_region(efi_memory_desc_t *md)
- {
- 	u64 start_pfn, end_pfn, end;
- 	unsigned long size;
-diff --git a/arch/x86/platform/efi/efi_32.c b/arch/x86/platform/efi/efi_32.c
-index 324b93328b37..8f31452bd204 100644
---- a/arch/x86/platform/efi/efi_32.c
-+++ b/arch/x86/platform/efi/efi_32.c
-@@ -58,7 +58,7 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- 	return 0;
- }
- 
--void __init efi_map_region(efi_memory_desc_t *md)
-+void __efi_init_fixup efi_map_region(efi_memory_desc_t *md)
- {
- 	old_map_region(md);
- }
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 448267f1c073..a04298312fdd 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -408,7 +408,7 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- 	return 0;
- }
- 
--static void __init __map_region(efi_memory_desc_t *md, u64 va)
-+static void __efi_init_fixup __map_region(efi_memory_desc_t *md, u64 va)
- {
- 	unsigned long flags = _PAGE_RW;
- 	unsigned long pfn;
-@@ -426,7 +426,7 @@ static void __init __map_region(efi_memory_desc_t *md, u64 va)
- 			   md->phys_addr, va);
- }
- 
--void __init efi_map_region(efi_memory_desc_t *md)
-+void __efi_init_fixup efi_map_region(efi_memory_desc_t *md)
- {
- 	unsigned long size = md->num_pages << PAGE_SHIFT;
- 	u64 pa = md->phys_addr;
-@@ -488,8 +488,9 @@ void __init efi_map_region_fixed(efi_memory_desc_t *md)
- 	__map_region(md, md->virt_addr);
- }
- 
--void __iomem *__init efi_ioremap(unsigned long phys_addr, unsigned long size,
--				 u32 type, u64 attribute)
-+void __iomem *__efi_init_fixup efi_ioremap(unsigned long phys_addr,
-+				       unsigned long size, u32 type,
-+				       u64 attribute)
- {
- 	unsigned long last_map_pfn;
- 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index d8a33a781a57..7bc3fac7bfe0 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -768,7 +768,7 @@ int __init efi_get_fdt_params(struct efi_fdt_params *params)
- }
- #endif /* CONFIG_EFI_PARAMS_FROM_FDT */
- 
--static __initdata char memory_type_name[][20] = {
-+static __efi_initdata_fixup char memory_type_name[][20] = {
- 	"Reserved",
- 	"Loader Code",
- 	"Loader Data",
-@@ -786,8 +786,8 @@ static __initdata char memory_type_name[][20] = {
- 	"Persistent Memory",
- };
- 
--char * __init efi_md_typeattr_format(char *buf, size_t size,
--				     const efi_memory_desc_t *md)
-+char * __efi_init_fixup efi_md_typeattr_format(char *buf, size_t size,
-+					       const efi_memory_desc_t *md)
- {
- 	char *pos;
- 	int type_len;
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 855992b15269..0ddd61b9a3e1 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1107,11 +1107,23 @@ extern int efi_memattr_apply_permissions(struct mm_struct *mm,
- 	for_each_efi_memory_desc_in_map(&efi.memmap, md)
- 
- /*
-+ * __efi_init_fixup - if CONFIG_EFI_WARN_ON_ILLEGAL_ACCESS is enabled,
-+ *		  remove __init modifier.
-+ */
-+#ifdef CONFIG_EFI_WARN_ON_ILLEGAL_ACCESS
-+#define __efi_init_fixup
-+#define __efi_initdata_fixup
-+#else
-+#define __efi_init_fixup __init
-+#define __efi_initdata_fixup __initdata
-+#endif
+-	pte_t *pte = (pte_t *)get_zeroed_page(GFP_KERNEL);
++	pte_t *pte;
 +
-+/*
-  * Format an EFI memory descriptor's type and attributes to a user-provided
-  * character buffer, as per snprintf(), and return the buffer.
-  */
--char * __init efi_md_typeattr_format(char *buf, size_t size,
--				     const efi_memory_desc_t *md);
-+char * __efi_init_fixup efi_md_typeattr_format(char *buf, size_t size,
-+					       const efi_memory_desc_t *md);
++	if (in_atomic())
++		pte = (pte_t *)get_zeroed_page(GFP_ATOMIC);
++	else
++		pte = (pte_t *)get_zeroed_page(GFP_KERNEL);
++
+ 	if (!pte)
+ 		return -1;
  
- /**
-  * efi_range_is_wc - check the WC bit on an address range
+@@ -936,7 +942,13 @@ static int alloc_pte_page(pmd_t *pmd)
+ 
+ static int alloc_pmd_page(pud_t *pud)
+ {
+-	pmd_t *pmd = (pmd_t *)get_zeroed_page(GFP_KERNEL);
++	pmd_t *pmd;
++
++	if (in_atomic())
++		pmd = (pmd_t *)get_zeroed_page(GFP_ATOMIC);
++	else
++		pmd = (pmd_t *)get_zeroed_page(GFP_KERNEL);
++
+ 	if (!pmd)
+ 		return -1;
+ 
 -- 
 2.7.4
