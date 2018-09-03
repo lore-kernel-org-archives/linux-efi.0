@@ -1,65 +1,36 @@
-From: Thomas Gleixner <tglx@linutronix.de>
-Subject: Re: [PATCH V2 4/6] x86/efi: Add efi page fault handler to fixup/recover
- from page faults caused by firmware
-Date: Mon, 3 Sep 2018 10:58:33 +0200 (CEST)
-Message-ID: <alpine.DEB.2.21.1809031053340.1349@nanos.tec.linutronix.de>
-References: <1535881594-25469-1-git-send-email-sai.praneeth.prakhya@intel.com> <1535881594-25469-5-git-send-email-sai.praneeth.prakhya@intel.com>
+From: David Herrmann <dh.herrmann@gmail.com>
+Subject: [REGRESSION] boot-screen override by "34db50e55656 efifb: Copy the
+ ACPI BGRT"
+Date: Mon, 3 Sep 2018 15:23:38 +0200
+Message-ID: <CANq1E4QwNg0VuAZZtatOTXspv7Y-z_HSa-9CHzK2Y28CGK8W4Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1535881594-25469-5-git-send-email-sai.praneeth.prakhya@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, ricardo.neri@intel.com, matt@codeblueprint.co.uk, Lee Chun-Yi <jlee@suse.com>, Al Stone <astone@redhat.com>, Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Bhupesh Sharma <bhsharma@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+To: linux-kernel <linux-kernel@vger.kernel.org>, linux-fbdev@vger.kernel.org, linux-efi@vger.kernel.org, Hans de Goede <hdegoede@redhat.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, dri-devel@lists.freedesktop.org
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, 2 Sep 2018, Sai Praneeth Prakhya wrote:
-> Kernel panics/hangs because the memory region requested by the firmware
-> isn't mapped, which causes a page fault in ring 0 and the kernel fails
-> to handle it, leading to die(). To save kernel from hanging, add an efi
-> specific page fault handler which detects illegal accesses by the
-> firmware and
-> 1. If the illegally accessed region is EFI_BOOT_SERVICES_<CODE/DATA>,
->    the efi page fault handler fixes it up by mapping the requested
->    region.
-> 2. If any other region (Eg: EFI_CONVENTIONAL_MEMORY or
->    EFI_LOADER_<CODE/DATA>), then the efi page fault handler freezes
->    efi_rts_wq and schedules a new process.
-> 3. If the access is to any other efi region like above but if the efi
->    runtime service is efi_reset_system(), then the efi page fault
->    handler will reboot the machine through BIOS.
-> 
-> Illegal accesses to EFI_BOOT_SERVICES_<CODE/DATA> and to other regions
-> are dealt differently in efi page fault handler because, *generally*
-> EFI_BOOT_SERVICES_<CODE/DATA> regions are smaller in size relative to
-> other efi regions and hence could be reserved and can be dynamically
-> mapped. But other EFI regions like EFI_CONVENTIONAL_MEMORY and
-> EFI_LOADER_<CODE/DATA> cannot be reserved as they are very huge in size
-> and reserving them will make the kernel un-bootable.
-> 
-> The efi specific page fault handler offers us two advantages:
-> 1. Avoid panics/hangs caused by buggy firmware.
-> 2. Shout loud that the firmware is buggy and hence is not a kernel bug.
-> 
-> Finally, this new mapping will not impact a reboot from kexec, as kexec
-> is only concerned about runtime memory regions.
+Hey
 
-No. This is just a horrible hack to make completely bogus firmware work and
-never fixed.
+Since this commit:
 
-The proper thing to do is to have a minimal page fault handler which does:
+    34db50e55656 efifb: Copy the ACPI BGRT
 
- 1) Yell loudly if that ever happens
+the kernel will override boot-splashs unasked. This breaks the
+graphical boot-process on our setups. In particular, we have a setup
+where an efi-boot-entry draws the early boot-splash on-screen, then
+hands-over to the linux-kernel + initrd. The boot-splash daemon in the
+initrd then takes over control of possible animations.
 
- 2) Handles the reboot request gracefully
+With the mentioned commit compiled in, the kernel will redraw the
+firmware logo on screen at a random time without any way to intervene.
 
- 3) Freeze and disable the EFI mess for all other cases
+What is the intention of this commit? Why is the kernel re-drawing the
+firmware logo unasked? If someone during the boot-process draws
+content on the screen, I would prefer if the kernel does not clear
+that on driver load.
 
-That does not require any hackery to make these mappings work from atomic
-context and keeps the mess confined to the EFI code where it belongs.
+Can we either provide an option to disable this feature, or revert the commit?
 
-Ideally we just blacklist the offending system and be done with it.
-
-Thanks,
-
-	tglx
+Thanks
+David
