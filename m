@@ -1,80 +1,52 @@
-From: David Herrmann <dh.herrmann@gmail.com>
-Subject: Re: [REGRESSION] boot-screen override by "34db50e55656 efifb: Copy
- the ACPI BGRT"
-Date: Mon, 3 Sep 2018 17:11:23 +0200
-Message-ID: <CANq1E4TiMSY=udGJWZoDzMhdsRjC==QCRFPO+Oja7KoyBX-6fg@mail.gmail.com>
-References: <CGME20180903132353epcas4p373e876f1b52dbed6df7bd3acc73fcdf4@epcas4p3.samsung.com>
- <CANq1E4QwNg0VuAZZtatOTXspv7Y-z_HSa-9CHzK2Y28CGK8W4Q@mail.gmail.com>
- <1982440.Fn0LzJ7a3l@amdc3058>
- <dc7f08d7-77fc-92ca-b6ec-f9d5a8f24cf3@redhat.com>
+From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+Subject: RE: [PATCH V2 5/6] x86/mm: If in_atomic(), allocate pages without
+ sleeping
+Date: Mon, 3 Sep 2018 17:07:03 +0000
+Message-ID: <FFF73D592F13FD46B8700F0A279B802F485B91FE@ORSMSX114.amr.corp.intel.com>
+References: <1535881594-25469-1-git-send-email-sai.praneeth.prakhya@intel.com>
+ <1535881594-25469-6-git-send-email-sai.praneeth.prakhya@intel.com>
+ <20180903083459.GT24124@hirez.programming.kicks-ass.net>
+ <alpine.DEB.2.21.1809031048430.1349@nanos.tec.linutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <dri-devel-bounces@lists.freedesktop.org>
-In-Reply-To: <dc7f08d7-77fc-92ca-b6ec-f9d5a8f24cf3@redhat.com>
-List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
-List-Post: <mailto:dri-devel@lists.freedesktop.org>
-List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: dri-devel-bounces@lists.freedesktop.org
-Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
-To: Hans de Goede <hdegoede@redhat.com>
-Cc: linux-fbdev@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel <linux-kernel@vger.kernel.org>, dri-devel@lists.freedesktop.org, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <alpine.DEB.2.21.1809031048430.1349@nanos.tec.linutronix.de>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Thomas Gleixner <tglx@linutronix.de>, Peter Zijlstra <peterz@infradead.org>
+Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Neri, Ricardo" <ricardo.neri@intel.com>, "matt@codeblueprint.co.uk" <matt@codeblueprint.co.uk>, Lee Chun-Yi <jlee@suse.com>, Al Stone <astone@redhat.com>, Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Bhupesh Sharma <bhsharma@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-SGV5CgpPbiBNb24sIFNlcCAzLCAyMDE4IGF0IDQ6NDcgUE0gSGFucyBkZSBHb2VkZSA8aGRlZ29l
-ZGVAcmVkaGF0LmNvbT4gd3JvdGU6Cj4KPiBIaSwKPgo+IE9uIDAzLTA5LTE4IDE2OjE2LCBCYXJ0
-bG9taWVqIFpvbG5pZXJraWV3aWN6IHdyb3RlOgo+ID4KPiA+IEhpLAo+ID4KPiA+IE9uIE1vbmRh
-eSwgU2VwdGVtYmVyIDAzLCAyMDE4IDAzOjIzOjM4IFBNIERhdmlkIEhlcnJtYW5uIHdyb3RlOgo+
-ID4+IEhleQo+ID4+Cj4gPj4gU2luY2UgdGhpcyBjb21taXQ6Cj4gPj4KPiA+PiAgICAgIDM0ZGI1
-MGU1NTY1NiBlZmlmYjogQ29weSB0aGUgQUNQSSBCR1JUCj4gPj4KPiA+PiB0aGUga2VybmVsIHdp
-bGwgb3ZlcnJpZGUgYm9vdC1zcGxhc2hzIHVuYXNrZWQuIFRoaXMgYnJlYWtzIHRoZQo+ID4+IGdy
-YXBoaWNhbCBib290LXByb2Nlc3Mgb24gb3VyIHNldHVwcy4gSW4gcGFydGljdWxhciwgd2UgaGF2
-ZSBhIHNldHVwCj4gPj4gd2hlcmUgYW4gZWZpLWJvb3QtZW50cnkgZHJhd3MgdGhlIGVhcmx5IGJv
-b3Qtc3BsYXNoIG9uLXNjcmVlbiwgdGhlbgo+ID4+IGhhbmRzLW92ZXIgdG8gdGhlIGxpbnV4LWtl
-cm5lbCArIGluaXRyZC4gVGhlIGJvb3Qtc3BsYXNoIGRhZW1vbiBpbiB0aGUKPiA+PiBpbml0cmQg
-dGhlbiB0YWtlcyBvdmVyIGNvbnRyb2wgb2YgcG9zc2libGUgYW5pbWF0aW9ucy4KPiA+Pgo+ID4+
-IFdpdGggdGhlIG1lbnRpb25lZCBjb21taXQgY29tcGlsZWQgaW4sIHRoZSBrZXJuZWwgd2lsbCBy
-ZWRyYXcgdGhlCj4gPj4gZmlybXdhcmUgbG9nbyBvbiBzY3JlZW4gYXQgYSByYW5kb20gdGltZSB3
-aXRob3V0IGFueSB3YXkgdG8gaW50ZXJ2ZW5lLgo+ID4KPiA+IFlvdSBoYXZlIENPTkZJR19GUkFN
-RUJVRkZFUl9DT05TT0xFX0RFRkVSUkVEX1RBS0VPVkVSPXkgKHRoZSBkZWZlcnJlZAo+ID4gY29u
-c29sZSB0YWtlb3ZlciBzdXBwb3J0IGludHJvZHVjZWQgaW4gdjQsMTktcmMxKS4gSSBhc3N1bWUg
-dGhhdCB0aGlzCj4gPiBpcyBpbnRlbmRlZD8KPiA+Cj4gPj4gV2hhdCBpcyB0aGUgaW50ZW50aW9u
-IG9mIHRoaXMgY29tbWl0PyBXaHkgaXMgdGhlIGtlcm5lbCByZS1kcmF3aW5nIHRoZQo+ID4+IGZp
-cm13YXJlIGxvZ28gdW5hc2tlZD8gSWYgc29tZW9uZSBkdXJpbmcgdGhlIGJvb3QtcHJvY2VzcyBk
-cmF3cwo+ID4+IGNvbnRlbnQgb24gdGhlIHNjcmVlbiwgSSB3b3VsZCBwcmVmZXIgaWYgdGhlIGtl
-cm5lbCBkb2VzIG5vdCBjbGVhcgo+ID4+IHRoYXQgb24gZHJpdmVyIGxvYWQuCj4gPgo+ID4gKy8q
-Cj4gPiArICogSWYgZmJjb24gZGVmZmVyZWQgY29uc29sZSB0YWtlb3ZlciBpcyBjb25maWd1cmVk
-LCB0aGUgaW50ZW50IGlzIGZvciB0aGUKPiA+ICsgKiBmcmFtZWJ1ZmZlciB0byBzaG93IHRoZSBi
-b290IGdyYXBoaWNzIChlLmcuIHZlbmRvciBsb2dvKSB1bnRpbCB0aGVyZSBpcyBzb21lCj4gPiAr
-ICogKGVycm9yKSBtZXNzYWdlIHRvIGRpc3BsYXkuIEJ1dCB0aGUgYm9vdCBncmFwaGljcyBtYXkg
-aGF2ZSBiZWVuIGRlc3Ryb3llZCBieQo+ID4gKyAqIGUuZy4gb3B0aW9uIFJPTSBvdXRwdXQsIGRl
-dGVjdCB0aGlzIGFuZCByZXN0b3JlIHRoZSBib290IGdyYXBoaWNzLgo+ID4gKyAqLwo+ID4gKyNp
-ZiBkZWZpbmVkIENPTkZJR19GUkFNRUJVRkZFUl9DT05TT0xFX0RFRkVSUkVEX1RBS0VPVkVSICYm
-IFwKPiA+ICsgICAgZGVmaW5lZCBDT05GSUdfQUNQSV9CR1JUCj4gPiAuLi4KPiA+ICtzdGF0aWMg
-dm9pZCBlZmlmYl9zaG93X2Jvb3RfZ3JhcGhpY3Moc3RydWN0IGZiX2luZm8gKmluZm8pCj4gPiAu
-Li4KPiA+ICsjZWxzZQo+ID4gK3N0YXRpYyBpbmxpbmUgdm9pZCBlZmlmYl9zaG93X2Jvb3RfZ3Jh
-cGhpY3Moc3RydWN0IGZiX2luZm8gKmluZm8pIHt9Cj4gPiArI2VuZGlmCj4gPgo+ID4+IENhbiB3
-ZSBlaXRoZXIgcHJvdmlkZSBhbiBvcHRpb24gdG8gZGlzYWJsZSB0aGlzIGZlYXR1cmUsIG9yIHJl
-dmVydCB0aGUgY29tbWl0Pwo+ID4KPiA+IEhhbnM/Cj4KPiBXZSB1c2UgdGhlIEFDUEkgYmdydCBl
-eHRlbnNpb24gdG8gZ2V0IHRoZSBsb2dvIHRvIGRyYXcgYW5kIHRoZW4KPiBkcmF3IGl0IHNpbmNl
-IHNvbWUgZGV2aWNlcyByZWx5IG9uIHRoZSBPUyB0byBkcmF3IGl0IGFuZCBvdGhlcndpc2Ugd2UK
-PiBqdXN0IGVuZCB1cCB3aXRoIGEgYmxhY2tzY3JlZW4gd2hlbiBkb2luZyBzaWxlbnQgLyBmbGlj
-a2VyZnJlZSBib290Lgo+Cj4gSWRlYWxseSB5b3Ugd291bGQgYmUgYWJsZSB0byBnZXQgeW91ciB2
-ZW5kb3IgdG8gcHV0IHRoZSBsb2dvIGluIGZpcm13YXJlCj4gaW4gdGhlIEFDUEkgYmdydCBleHRl
-bnNpb24sIHRoZW4geW91IGFsc28gZG8gbm90IG5lZWQgdG8gcGxheSBhbnkgdHJpY2tzCj4gd2l0
-aCBhbiBFRkkgYmluYXJ5IGRyYXdpbmcgeW91ciBvd24gbG9nby4gQnV0IEkgY2FuIHVuZGVyc3Rh
-bmQgaWYgeW91IGRvbid0Cj4gaGF2ZSBjb250cm9sIG92ZXIgdGhpcywgc28geW91IG5lZWQgdG8g
-ZG8gdGhpcyB3aXRoIHRoZSBFRkkgYmluYXJ5IHRyaWNrLgo+Cj4gSSBjYW4gYWxzbyB1bmRlcnN0
-YW5kIHRoYXQgeW91IHdhbnQgdG8gdXNlIGRlZmVycmVkIGNvbnNvbGUgdGFrZW92ZXIKPiBpbiBh
-IHNldHVwIGxpa2UgeW91cnMgdG8gYXZvaWQgZmJjb24gbWVzc2luZyB1cCB3aGF0IGlzIG9uIHRo
-ZSBkaXNwbGF5Cj4gZHVyaW5nIGJvb3QsIHRoYXQgaXMgZXhhY3RseSB3aGF0IGl0IGlzIGZvci4g
-U28gSSB0aGluayBhIHJlYXNvbmFibGUKPiBhcHByb2FjaCBoZXJlIGlzIHRvIGFkZCBhIGtlcm5l
-bCBjb21tYW5kbGluZSBvcHRpb24sIHNheToKPgo+IHZpZGVvPWVmaWZiOm5vYmdydAo+Cj4gRGF2
-aWQsIHdvdWxkIHRoYXQgd29yayBmb3IgeW91PwoKVGhhdCB3b3VsZCBiZSBwZXJmZWN0IQoKVGhh
-bmtzCkRhdmlkCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-CmRyaS1kZXZlbCBtYWlsaW5nIGxpc3QKZHJpLWRldmVsQGxpc3RzLmZyZWVkZXNrdG9wLm9yZwpo
-dHRwczovL2xpc3RzLmZyZWVkZXNrdG9wLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2RyaS1kZXZlbAo=
+> Thanks for CC'ing me. I wonder why the world and some more is on CC, but
+> x86@kernel.org is NOT.
+>
+
+Sorry! about that. I will CC you and x86 from V3.
+
+> > On Sun, Sep 02, 2018 at 02:46:33AM -0700, Sai Praneeth Prakhya wrote:
+> 
+> > > @@ -926,7 +926,13 @@ static void unmap_pud_range(p4d_t *p4d,
+> > > unsigned long start, unsigned long end)
+> > >
+> > >  static int alloc_pte_page(pmd_t *pmd)  {
+> > > -	pte_t *pte = (pte_t *)get_zeroed_page(GFP_KERNEL);
+> > > +	pte_t *pte;
+> > > +
+> > > +	if (in_atomic())
+> > > +		pte = (pte_t *)get_zeroed_page(GFP_ATOMIC);
+> > > +	else
+> > > +		pte = (pte_t *)get_zeroed_page(GFP_KERNEL);
+> > > +
+> > >  	if (!pte)
+> > >  		return -1;
+> > >
+> >
+> > This looks like tinkering to me..
+> 
+> Yes it is and it's not going to happen.
+
+Haha.. ok.. I will take your suggestion in the 4th patch and that should avoid this.
+
+Regards,
+Sai
