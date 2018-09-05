@@ -1,49 +1,61 @@
-From: Dave Young <dyoung@redhat.com>
-Subject: Re: [PATCH 2/5 V6] x86/ioremap: strengthen the logic in
- early_memremap_pgprot_adjust() to adjust encryption mask
-Date: Wed, 5 Sep 2018 14:46:58 +0800
-Message-ID: <20180905064658.GA10310@dhcp-128-65.nay.redhat.com>
-References: <20180831081930.31561-1-lijiang@redhat.com>
- <20180831081930.31561-3-lijiang@redhat.com>
- <20180903024512.GA2568@dhcp-128-65.nay.redhat.com>
- <d2229538-51d5-ead7-c7e5-f4afe5b53693@redhat.com>
- <20180904004417.GA9842@dhcp-128-65.nay.redhat.com>
- <20180904012902.GB9842@dhcp-128-65.nay.redhat.com>
- <20180904015131.GA10877@dhcp-128-65.nay.redhat.com>
- <3a9ae246-0c3a-753a-41e2-f2788a882c50@redhat.com>
+From: Peter Zijlstra <peterz@infradead.org>
+Subject: Re: [PATCH V3 3/5] x86/efi: Permanently save the EFI_MEMORY_MAP
+ passed by the firmware
+Date: Wed, 5 Sep 2018 13:48:33 +0200
+Message-ID: <20180905114833.GW24082@hirez.programming.kicks-ass.net>
+References: <1536099149-12564-1-git-send-email-sai.praneeth.prakhya@intel.com>
+ <1536099149-12564-4-git-send-email-sai.praneeth.prakhya@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <3a9ae246-0c3a-753a-41e2-f2788a882c50@redhat.com>
+In-Reply-To: <1536099149-12564-4-git-send-email-sai.praneeth.prakhya@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: lijiang <lijiang@redhat.com>
-Cc: linux-kernel@vger.kernel.org, mingo@redhat.com, tglx@linutronix.de, hpa@zytor.com, ebiederm@xmission.com, joro@8bytes.org, thomas.lendacky@amd.com, kexec@lists.infradead.org, iommu@lists.linux-foundation.org, bhe@redhat.com, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi <linux-efi@vger.kernel.org>
+To: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, ricardo.neri@intel.com, matt@codeblueprint.co.uk, Al Stone <astone@redhat.com>, Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Bhupesh Sharma <bhsharma@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-[snip]
-> 
-> As previously mentioned, there are also many differences between kexec and kdump. In general,
-> kexec needs to look at all of available physical memory, but kdump doesn't need.
-> 
-> For kexec, kexec-tools will read /sys/firmware/memmap and recreate the e820 ranges for the 2nd
-> kernel. If it fails, will use /proc/iomem.
-> 
-> For kdump, kexec-tools will read /proc/iomem and recreate the e820 ranges for kdump kernel.
-> BTW: we can not get the range of persistent memory from /proc/iomem. So e820 ranges don't contain
-> the persistent memory in kdump kernel, this is the real reason why i need to strengthen the logic
-> of adjusting memory encryption mask.
+On Tue, Sep 04, 2018 at 03:12:27PM -0700, Sai Praneeth Prakhya wrote:
+> +void __init efi_save_original_memmap(void)
+> +{
+> +	efi_memory_desc_t *md;
+> +	void *remapped_phys, *new_md;
+> +	phys_addr_t new_phys, new_size;
+> +
+> +	new_size = efi.memmap.desc_size * efi.memmap.nr_map;
+> +	new_phys = efi_memmap_alloc(efi.memmap.nr_map);
+> +	if (!new_phys) {
+> +		pr_err("Failed to allocate new EFI memmap\n");
+> +		return;
+> +	}
+> +
+> +	remapped_phys = memremap(new_phys, new_size, MEMREMAP_WB);
+> +	if (!remapped_phys) {
+> +		pr_err("Failed to remap new EFI memmap\n");
+> +		__free_pages(pfn_to_page(PHYS_PFN(new_phys)), get_order(new_size));
+> +		return;
+> +	}
+> +
+> +	new_md = remapped_phys;
+> +	for_each_efi_memory_desc(md) {
+> +		memcpy(new_md, md, efi.memmap.desc_size);
+> +		new_md += efi.memmap.desc_size;
+> +	}
 
-"persistent memory" is different, I think you meant about some reserved
-memory instead
+Should we ioremap_prot(remapped_phys, new_size, PROT_NONE), here? Such
+that nobody can accidentally use this thing?
 
+> +	original_memory_map.late = 1;
+> +	original_memory_map.phys_map = new_phys;
+> +	original_memory_map.map = remapped_phys;
+> +	original_memory_map.nr_map = efi.memmap.nr_map;
+> +	original_memory_map.desc_size = efi.memmap.desc_size;
+> +	original_memory_map.map_end = remapped_phys + new_size;
+> +	original_memory_map.desc_version = efi.memmap.desc_version;
+> +
+> +	original_memory_map_present = true;
+> +}
+> +#endif /* CONFIG_EFI_WARN_ON_ILLEGAL_ACCESS */
+> -- 
+> 2.7.4
 > 
-> If kexec-tools also use /sys/firmware/memmap for kdump(like kexec), kdump kernel can also work
-> without a fix, but the kexec-tools will have to be modified. Are you sure that you want me to
-> fix kexec-tools instead of kernel?
-
-Yes, please fix kexec-tools to pass reserved ranges in e820, you will
-not need this patch then.
-
-Thanks
-Dave
