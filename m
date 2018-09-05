@@ -1,57 +1,84 @@
-From: lijiang <lijiang@redhat.com>
-Subject: Re: [PATCH 2/5 V6] x86/ioremap: strengthen the logic in
- early_memremap_pgprot_adjust() to adjust encryption mask
-Date: Wed, 5 Sep 2018 22:04:49 +0800
-Message-ID: <a09a3a21-9156-ce96-b7ef-9f7e7cda12b3@redhat.com>
-References: <20180831081930.31561-1-lijiang@redhat.com>
- <20180831081930.31561-3-lijiang@redhat.com>
- <20180903024512.GA2568@dhcp-128-65.nay.redhat.com>
- <d2229538-51d5-ead7-c7e5-f4afe5b53693@redhat.com>
- <20180904004417.GA9842@dhcp-128-65.nay.redhat.com>
- <20180904012902.GB9842@dhcp-128-65.nay.redhat.com>
- <20180904015131.GA10877@dhcp-128-65.nay.redhat.com>
- <3a9ae246-0c3a-753a-41e2-f2788a882c50@redhat.com>
- <20180905064658.GA10310@dhcp-128-65.nay.redhat.com>
+From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+Subject: RE: [PATCH V3 3/5] x86/efi: Permanently save the EFI_MEMORY_MAP
+ passed by the firmware
+Date: Wed, 5 Sep 2018 17:53:22 +0000
+Message-ID: <FFF73D592F13FD46B8700F0A279B802F485B9A69@ORSMSX114.amr.corp.intel.com>
+References: <1536099149-12564-1-git-send-email-sai.praneeth.prakhya@intel.com>
+ <1536099149-12564-4-git-send-email-sai.praneeth.prakhya@intel.com>
+ <CAKv+Gu9mfWYww49OmBETutSsaTDfE6VFJjbf+LWAoXF=mNmDBA@mail.gmail.com>
+ <20180905125645.GX24082@hirez.programming.kicks-ass.net>
+ <CAKv+Gu_DC=+7_YmDGGJ9fYJkGSNbUK-eXOAGMuZ2B7XXPWvZ9g@mail.gmail.com>
+ <alpine.DEB.2.21.1809051505030.1416@nanos.tec.linutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180905064658.GA10310@dhcp-128-65.nay.redhat.com>
+In-Reply-To: <alpine.DEB.2.21.1809051505030.1416@nanos.tec.linutronix.de>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Dave Young <dyoung@redhat.com>
-Cc: linux-kernel@vger.kernel.org, mingo@redhat.com, tglx@linutronix.de, hpa@zytor.com, ebiederm@xmission.com, joro@8bytes.org, thomas.lendacky@amd.com, kexec@lists.infradead.org, iommu@lists.linux-foundation.org, bhe@redhat.com, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi <linux-efi@vger.kernel.org>
+To: Thomas Gleixner <tglx@linutronix.de>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Peter Zijlstra <peterz@infradead.org>, linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, the arch/x86 maintainers <x86@kernel.org>, "Neri, Ricardo" <ricardo.neri@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Al Stone <astone@redhat.com>, Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Bhupesh Sharma <bhsharma@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-在 2018年09月05日 14:46, Dave Young 写道:
-> [snip]
->>
->> As previously mentioned, there are also many differences between kexec and kdump. In general,
->> kexec needs to look at all of available physical memory, but kdump doesn't need.
->>
->> For kexec, kexec-tools will read /sys/firmware/memmap and recreate the e820 ranges for the 2nd
->> kernel. If it fails, will use /proc/iomem.
->>
->> For kdump, kexec-tools will read /proc/iomem and recreate the e820 ranges for kdump kernel.
->> BTW: we can not get the range of persistent memory from /proc/iomem. So e820 ranges don't contain
->> the persistent memory in kdump kernel, this is the real reason why i need to strengthen the logic
->> of adjusting memory encryption mask.
+> On Wed, 5 Sep 2018, Ard Biesheuvel wrote:
+> > On 5 September 2018 at 14:56, Peter Zijlstra <peterz@infradead.org> wrote:
+> > > On Wed, Sep 05, 2018 at 02:27:49PM +0200, Ard Biesheuvel wrote:
+> > >> Would we still need to preserve the old memory map in that case?
+> > >
+> > > I thought the reason for having this was being able to know the
+> > > fault is in an EFI area. But of course, I'm not wel versed in this
+> > > whole EFI crapola.
+> >
+> > I'm not entirely sure whether that really matters. The EFI services
+> > access the stack and can access byref/pointer arguments which are not
+> > covered by the EFI memory map as runtime services code/data, and so
+> > they can trigger page faults by running off the vmapped stack or
+> > writing to const byref arguments.
+> >
+> > EFI runtime services using boot services regions after they are no
+> > longer available are a known source of headaches, but I don't see why
+> > we should restrict ourselves to such cases if we bother to wire up
+> > fault handling specifically for EFI services calls.
+> >
+> > So any page or permission fault occurring in the context of a EFI
+> > runtime services invocation should be treated the same, I think.
 > 
-> "persistent memory" is different, I think you meant about some reserved
-> memory instead
-> 
->>
->> If kexec-tools also use /sys/firmware/memmap for kdump(like kexec), kdump kernel can also work
->> without a fix, but the kexec-tools will have to be modified. Are you sure that you want me to
->> fix kexec-tools instead of kernel?
-> 
-> Yes, please fix kexec-tools to pass reserved ranges in e820, you will
-> not need this patch then.
-> 
+> I agree. Keep it simple. If the EFI crap fails, then assist with the reboot and
+> otherwise just kill it.
 
-This might be a kexec-tools bug, i have posted a patch for kexec-tools(please check kexec@lists.infradead.org).
-Thanks.
+The reasons for saving old memory map are
+(in my view, these are the less important ones because they are very unlikely to happen)
 
-> Thanks
-> Dave
-> 
+1. Make sure that a memory descriptor exists for the physical address that was 
+faulted on (EFI Memory Map could sometime have holes). Assuming a case that the 
+physical address that caused page fault doesn't have a valid efi memory descriptor, the 
+efi page fault handler shouldn't take any action because it hasn't triaged the problem yet.
+
+2. Make sure that the faulted physical address is _not_ efi runtime service code/data region.
+Efi runtime service code/data regions are always mapped by kernel in efi_pgd and accesses 
+to these regions should _never_ page fault. Assuming that something like this happens, 
+efi page fault handler shouldn't take any action because it's not any illegal access by firmware 
+but it's a kernel bug.
+
+Generally, the above two scenarios should never happen. I am just being paranoid and wanted 
+to make sure that the efi page fault handler is fixing the right firmware bug that I came across 
+and not something else. I also agree that, we could make the patch set and efi page fault handler 
+much simpler by not saving old memory map. So, I am OK if we are not checking for the above 
+two scenarios. If they are really needed, we could add them later.
+
+That said, a more important reason (in my view) is to print out the memory descriptor that 
+we faulted on. This is a *proof* showing that it's buggy firmware that caused page fault and 
+hence is not a kernel bug. This proof is important because whenever a stack trace is printed 
+with some efi function, kernel is the usual suspect and hence we need to show that it's not 
+kernel fault. It could also help firmware engineers to fix the bug easily.
+
+dmesg would show something like this when buggy efi_reset_system() accesses reserved region:
+
+[  296.141511] efi: EFI Memory Descriptor for offending PA is:
+[  296.141844] efi: [Reserved           |   |  |  |  |  |  |  |   |WB|WT|WC|UC] range=[0x000000007e915000-0x000000007e933fff] (0MB)
+[  296.142522] efi: efi_reset_system() buggy! Reboot through BIOS
+
+So, I would be concerned if we miss this proof.
+
+Regards,
+Sai
