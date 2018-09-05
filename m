@@ -1,19 +1,22 @@
-From: Leif Lindholm <leif.lindholm@linaro.org>
+From: Alexander Graf <agraf@suse.de>
 Subject: Re: [PATCH] efi_stub: update documentation on dtb= parameter
-Date: Wed, 5 Sep 2018 20:30:28 +0100
-Message-ID: <20180905193028.4vhqtlwwgvqq6v26@bivouac.eciton.net>
+Date: Wed, 5 Sep 2018 21:39:51 +0200
+Message-ID: <8bed0e5b-cfb7-e1dd-199d-9643b964cb9d@suse.de>
 References: <20180905190750.4566-1-grant.likely@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
 In-Reply-To: <20180905190750.4566-1-grant.likely@arm.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Grant Likely <grant.likely@arm.com>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, olof@lixom.net, scott.branden@broadcom.com, catalin.marinas@arm.com, will.deacon@arm.com, arnd@arndb.de, agraf@suse.de, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Jonathan Corbet <corbet@lwn.net>
+To: Grant Likely <grant.likely@arm.com>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: olof@lixom.net, scott.branden@broadcom.com, catalin.marinas@arm.com, will.deacon@arm.com, arnd@arndb.de, leif.lindholm@linaro.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Jonathan Corbet <corbet@lwn.net>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Sep 05, 2018 at 08:07:50PM +0100, Grant Likely wrote:
+
+
+On 05.09.18 21:07, Grant Likely wrote:
 > The dtb= parameter is no longer the primary mechanism for providing a
 > devicetree to the kernel. Now either firmware or the boot selector (ex.
 > Grub) should provide the devicetree and dtb= should only be used for
@@ -24,7 +27,12 @@ On Wed, Sep 05, 2018 at 08:07:50PM +0100, Grant Likely wrote:
 > Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 > Cc: Jonathan Corbet <corbet@lwn.net>
 
-Acked-by: Leif Lindholm <leif.lindholm@linaro.org>
+Reviewed-by: Alexander Graf <agraf@suse.de>
+
+Btw, isn't the option missing from kernel-parameters.rst/txt?
+
+
+Alex
 
 > ---
 >  Documentation/efi-stub.txt | 17 ++++++++++++++---
@@ -60,3 +68,4 @@ Acked-by: Leif Lindholm <leif.lindholm@linaro.org>
 > 2.11.0
 > 
 > IMPORTANT NOTICE: The contents of this email and any attachments are confidential and may also be privileged. If you are not the intended recipient, please notify the sender immediately and do not disclose the contents to any other person, use it for any purpose, or store or copy the information in any medium. Thank you.
+> 
