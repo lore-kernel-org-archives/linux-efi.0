@@ -1,61 +1,148 @@
-From: Peter Zijlstra <peterz@infradead.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Subject: Re: [PATCH V3 3/5] x86/efi: Permanently save the EFI_MEMORY_MAP
  passed by the firmware
-Date: Wed, 5 Sep 2018 13:48:33 +0200
-Message-ID: <20180905114833.GW24082@hirez.programming.kicks-ass.net>
-References: <1536099149-12564-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <1536099149-12564-4-git-send-email-sai.praneeth.prakhya@intel.com>
+Date: Wed, 5 Sep 2018 14:27:49 +0200
+Message-ID: <CAKv+Gu9mfWYww49OmBETutSsaTDfE6VFJjbf+LWAoXF=mNmDBA@mail.gmail.com>
+References: <1536099149-12564-1-git-send-email-sai.praneeth.prakhya@intel.com> <1536099149-12564-4-git-send-email-sai.praneeth.prakhya@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
 In-Reply-To: <1536099149-12564-4-git-send-email-sai.praneeth.prakhya@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, ricardo.neri@intel.com, matt@codeblueprint.co.uk, Al Stone <astone@redhat.com>, Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Bhupesh Sharma <bhsharma@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, the arch/x86 maintainers <x86@kernel.org>, "Neri, Ricardo" <ricardo.neri@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Al Stone <astone@redhat.com>, Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Bhupesh Sharma <bhsharma@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Peter Zijlstra <peterz@infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Sep 04, 2018 at 03:12:27PM -0700, Sai Praneeth Prakhya wrote:
+On 5 September 2018 at 00:12, Sai Praneeth Prakhya
+<sai.praneeth.prakhya@intel.com> wrote:
+> From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
+>
+> The efi page fault handler that recovers from page faults caused by the
+> firmware needs the original memory map passed by the firmware. It looks
+> up this memory map to find the type of the memory region at which the
+> page fault occurred. Presently, EFI subsystem discards the original
+> memory map passed by the firmware and replaces it with a new memory map
+> that has only EFI_RUNTIME_SERVICES_<CODE/DATA> regions. But illegal
+> accesses by firmware can occur at any region. Hence, _only_ if
+> CONFIG_EFI_WARN_ON_ILLEGAL_ACCESS is defined, create a backup of the
+> original memory map passed by the firmware, so that efi page fault
+> handler could detect/recover from illegal accesses to *any* efi region.
+>
+
+Why do we care about the memory map at all when a fault occurs during
+the invocation of a EFI runtime service?
+
+I think reasoning about what went wrong and why, and distinguishing
+between allowable and non-allowable faults is a slippery slope, so
+[taking Thomas's feedback into account], I think we can simplify this
+series further and just block all subsequent EFI runtime services
+calls if any permission or page fault occurs while executing them.
+
+Would we still need to preserve the old memory map in that case?
+
+> Suggested-by: Matt Fleming <matt@codeblueprint.co.uk>
+> Based-on-code-from: Ricardo Neri <ricardo.neri@intel.com>
+> Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+> Cc: Al Stone <astone@redhat.com>
+> Cc: Borislav Petkov <bp@alien8.de>
+> Cc: Ingo Molnar <mingo@kernel.org>
+> Cc: Andy Lutomirski <luto@kernel.org>
+> Cc: Bhupesh Sharma <bhsharma@redhat.com>
+> Cc: Thomas Gleixner <tglx@linutronix.de>
+> Cc: Peter Zijlstra <peterz@infradead.org>
+> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> ---
+>  arch/x86/include/asm/efi.h     |  6 ++++++
+>  arch/x86/platform/efi/efi.c    |  2 ++
+>  arch/x86/platform/efi/quirks.c | 48 ++++++++++++++++++++++++++++++++++++++++++
+>  3 files changed, 56 insertions(+)
+>
+> diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+> index cec5fae23eb3..788ed4cbce22 100644
+> --- a/arch/x86/include/asm/efi.h
+> +++ b/arch/x86/include/asm/efi.h
+> @@ -141,6 +141,12 @@ extern int __init efi_reuse_config(u64 tables, int nr_tables);
+>  extern void efi_delete_dummy_variable(void);
+>  extern void efi_switch_mm(struct mm_struct *mm);
+>
+> +#ifdef CONFIG_EFI_WARN_ON_ILLEGAL_ACCESS
+> +extern void __init efi_save_original_memmap(void);
+> +#else
+> +static inline void __init efi_save_original_memmap(void) { }
+> +#endif /* CONFIG_EFI_WARN_ON_ILLEGAL_ACCESS */
+> +
+>  struct efi_setup_data {
+>         u64 fw_vendor;
+>         u64 runtime;
+> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+> index 9061babfbc83..7a3ea4cd5939 100644
+> --- a/arch/x86/platform/efi/efi.c
+> +++ b/arch/x86/platform/efi/efi.c
+> @@ -946,6 +946,8 @@ static void __init __efi_enter_virtual_mode(void)
+>
+>         pa = __pa(new_memmap);
+>
+> +       efi_save_original_memmap();
+> +
+>         /*
+>          * Unregister the early EFI memmap from efi_init() and install
+>          * the new EFI memory map that we are about to pass to the
+> diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+> index 844d31cb8a0c..36b0b042ba56 100644
+> --- a/arch/x86/platform/efi/quirks.c
+> +++ b/arch/x86/platform/efi/quirks.c
+> @@ -654,3 +654,51 @@ int efi_capsule_setup_info(struct capsule_info *cap_info, void *kbuff,
+>  }
+>
+>  #endif
+> +
+> +#ifdef CONFIG_EFI_WARN_ON_ILLEGAL_ACCESS
+> +
+> +static bool original_memory_map_present;
+> +static struct efi_memory_map original_memory_map;
+> +
+> +/*
+> + * The efi page fault handler that recovers from page faults caused by
+> + * buggy firmware needs original memory map passed by firmware. Hence,
+> + * build a new EFI memmap that has all entries and save it for later use.
+> + */
 > +void __init efi_save_original_memmap(void)
 > +{
-> +	efi_memory_desc_t *md;
-> +	void *remapped_phys, *new_md;
-> +	phys_addr_t new_phys, new_size;
+> +       efi_memory_desc_t *md;
+> +       void *remapped_phys, *new_md;
+> +       phys_addr_t new_phys, new_size;
 > +
-> +	new_size = efi.memmap.desc_size * efi.memmap.nr_map;
-> +	new_phys = efi_memmap_alloc(efi.memmap.nr_map);
-> +	if (!new_phys) {
-> +		pr_err("Failed to allocate new EFI memmap\n");
-> +		return;
-> +	}
+> +       new_size = efi.memmap.desc_size * efi.memmap.nr_map;
+> +       new_phys = efi_memmap_alloc(efi.memmap.nr_map);
+> +       if (!new_phys) {
+> +               pr_err("Failed to allocate new EFI memmap\n");
+> +               return;
+> +       }
 > +
-> +	remapped_phys = memremap(new_phys, new_size, MEMREMAP_WB);
-> +	if (!remapped_phys) {
-> +		pr_err("Failed to remap new EFI memmap\n");
-> +		__free_pages(pfn_to_page(PHYS_PFN(new_phys)), get_order(new_size));
-> +		return;
-> +	}
+> +       remapped_phys = memremap(new_phys, new_size, MEMREMAP_WB);
+> +       if (!remapped_phys) {
+> +               pr_err("Failed to remap new EFI memmap\n");
+> +               __free_pages(pfn_to_page(PHYS_PFN(new_phys)), get_order(new_size));
+> +               return;
+> +       }
 > +
-> +	new_md = remapped_phys;
-> +	for_each_efi_memory_desc(md) {
-> +		memcpy(new_md, md, efi.memmap.desc_size);
-> +		new_md += efi.memmap.desc_size;
-> +	}
-
-Should we ioremap_prot(remapped_phys, new_size, PROT_NONE), here? Such
-that nobody can accidentally use this thing?
-
-> +	original_memory_map.late = 1;
-> +	original_memory_map.phys_map = new_phys;
-> +	original_memory_map.map = remapped_phys;
-> +	original_memory_map.nr_map = efi.memmap.nr_map;
-> +	original_memory_map.desc_size = efi.memmap.desc_size;
-> +	original_memory_map.map_end = remapped_phys + new_size;
-> +	original_memory_map.desc_version = efi.memmap.desc_version;
+> +       new_md = remapped_phys;
+> +       for_each_efi_memory_desc(md) {
+> +               memcpy(new_md, md, efi.memmap.desc_size);
+> +               new_md += efi.memmap.desc_size;
+> +       }
 > +
-> +	original_memory_map_present = true;
+> +       original_memory_map.late = 1;
+> +       original_memory_map.phys_map = new_phys;
+> +       original_memory_map.map = remapped_phys;
+> +       original_memory_map.nr_map = efi.memmap.nr_map;
+> +       original_memory_map.desc_size = efi.memmap.desc_size;
+> +       original_memory_map.map_end = remapped_phys + new_size;
+> +       original_memory_map.desc_version = efi.memmap.desc_version;
+> +
+> +       original_memory_map_present = true;
 > +}
 > +#endif /* CONFIG_EFI_WARN_ON_ILLEGAL_ACCESS */
-> -- 
+> --
 > 2.7.4
-> 
+>
