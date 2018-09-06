@@ -1,38 +1,88 @@
-From: Jonathan Corbet <corbet@lwn.net>
-Subject: Re: [PATCH] efi_stub: update documentation on dtb= parameter
-Date: Thu, 6 Sep 2018 09:51:11 -0600
-Message-ID: <20180906095111.1a74dfcd@lwn.net>
-References: <20180905190750.4566-1-grant.likely@arm.com>
+From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+Subject: RE: [PATCH V3 3/5] x86/efi: Permanently save the EFI_MEMORY_MAP
+ passed by the firmware
+Date: Thu, 6 Sep 2018 17:34:18 +0000
+Message-ID: <FFF73D592F13FD46B8700F0A279B802F485B9F59@ORSMSX114.amr.corp.intel.com>
+References: <1536099149-12564-1-git-send-email-sai.praneeth.prakhya@intel.com>
+ <1536099149-12564-4-git-send-email-sai.praneeth.prakhya@intel.com>
+ <CAKv+Gu9mfWYww49OmBETutSsaTDfE6VFJjbf+LWAoXF=mNmDBA@mail.gmail.com>
+ <20180905125645.GX24082@hirez.programming.kicks-ass.net>
+ <CAKv+Gu_DC=+7_YmDGGJ9fYJkGSNbUK-eXOAGMuZ2B7XXPWvZ9g@mail.gmail.com>
+ <alpine.DEB.2.21.1809051505030.1416@nanos.tec.linutronix.de>
+ <FFF73D592F13FD46B8700F0A279B802F485B9A69@ORSMSX114.amr.corp.intel.com>
+ <CAKv+Gu91Dh3VN2VBhjX0UjpP2uSaprobeSCPvYA_GxxaKe2K4Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180905190750.4566-1-grant.likely@arm.com>
+In-Reply-To: <CAKv+Gu91Dh3VN2VBhjX0UjpP2uSaprobeSCPvYA_GxxaKe2K4Q@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Grant Likely <grant.likely@arm.com>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, olof@lixom.net, scott.branden@broadcom.com, catalin.marinas@arm.com, will.deacon@arm.com, arnd@arndb.de, leif.lindholm@linaro.org, agraf@suse.de, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>, Peter Zijlstra <peterz@infradead.org>, linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, the arch/x86 maintainers <x86@kernel.org>, "Neri, Ricardo" <ricardo.neri@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Al Stone <astone@redhat.com>, Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Bhupesh Sharma <bhsharma@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed,  5 Sep 2018 20:07:50 +0100
-Grant Likely <grant.likely@arm.com> wrote:
-
-> The dtb= parameter is no longer the primary mechanism for providing a
-> devicetree to the kernel. Now either firmware or the boot selector (ex.
-> Grub) should provide the devicetree and dtb= should only be used for
-> debug or when using firmware that doesn't understand DT.
-> Update the EFI stub documentation to reflect the current usage.
-
-So I hate to be obnoxious, but...
-
-> IMPORTANT NOTICE: The contents of this email and any attachments are
-> confidential and may also be privileged. If you are not the intended
-> recipient, please notify the sender immediately and do not disclose the
-> contents to any other person, use it for any purpose, or store or copy
-> the information in any medium. Thank you.
-
-Can I get a version of the patch without this language?  Then I'll be glad
-to apply it.
-
-Thanks,
-
-jon
+PiA+PiBJIGFncmVlLiBLZWVwIGl0IHNpbXBsZS4gSWYgdGhlIEVGSSBjcmFwIGZhaWxzLCB0aGVu
+IGFzc2lzdCB3aXRoIHRoZQ0KPiA+PiByZWJvb3QgYW5kIG90aGVyd2lzZSBqdXN0IGtpbGwgaXQu
+DQo+ID4NCj4gPiBUaGUgcmVhc29ucyBmb3Igc2F2aW5nIG9sZCBtZW1vcnkgbWFwIGFyZSAoaW4g
+bXkgdmlldywgdGhlc2UgYXJlIHRoZQ0KPiA+IGxlc3MgaW1wb3J0YW50IG9uZXMgYmVjYXVzZSB0
+aGV5IGFyZSB2ZXJ5IHVubGlrZWx5IHRvIGhhcHBlbikNCj4gPg0KPiA+IDEuIE1ha2Ugc3VyZSB0
+aGF0IGEgbWVtb3J5IGRlc2NyaXB0b3IgZXhpc3RzIGZvciB0aGUgcGh5c2ljYWwgYWRkcmVzcw0K
+PiA+IHRoYXQgd2FzIGZhdWx0ZWQgb24gKEVGSSBNZW1vcnkgTWFwIGNvdWxkIHNvbWV0aW1lIGhh
+dmUgaG9sZXMpLg0KPiA+IEFzc3VtaW5nIGEgY2FzZSB0aGF0IHRoZSBwaHlzaWNhbCBhZGRyZXNz
+IHRoYXQgY2F1c2VkIHBhZ2UgZmF1bHQNCj4gPiBkb2Vzbid0IGhhdmUgYSB2YWxpZCBlZmkgbWVt
+b3J5IGRlc2NyaXB0b3IsIHRoZSBlZmkgcGFnZSBmYXVsdCBoYW5kbGVyIHNob3VsZG4ndA0KPiB0
+YWtlIGFueSBhY3Rpb24gYmVjYXVzZSBpdCBoYXNuJ3QgdHJpYWdlZCB0aGUgcHJvYmxlbSB5ZXQu
+DQo+ID4NCj4gPiAyLiBNYWtlIHN1cmUgdGhhdCB0aGUgZmF1bHRlZCBwaHlzaWNhbCBhZGRyZXNz
+IGlzIF9ub3RfIGVmaSBydW50aW1lIHNlcnZpY2UNCj4gY29kZS9kYXRhIHJlZ2lvbi4NCj4gPiBF
+ZmkgcnVudGltZSBzZXJ2aWNlIGNvZGUvZGF0YSByZWdpb25zIGFyZSBhbHdheXMgbWFwcGVkIGJ5
+IGtlcm5lbCBpbg0KPiA+IGVmaV9wZ2QgYW5kIGFjY2Vzc2VzIHRvIHRoZXNlIHJlZ2lvbnMgc2hv
+dWxkIF9uZXZlcl8gcGFnZSBmYXVsdC4NCj4gPiBBc3N1bWluZyB0aGF0IHNvbWV0aGluZyBsaWtl
+IHRoaXMgaGFwcGVucywgZWZpIHBhZ2UgZmF1bHQgaGFuZGxlcg0KPiA+IHNob3VsZG4ndCB0YWtl
+IGFueSBhY3Rpb24gYmVjYXVzZSBpdCdzIG5vdCBhbnkgaWxsZWdhbCBhY2Nlc3MgYnkgZmlybXdh
+cmUgYnV0IGl0J3MNCj4gYSBrZXJuZWwgYnVnLg0KPiA+DQo+IA0KPiBXaGF0IGFib3V0IGF0dGVt
+cHRzIHRvIG1vZGlmeSBjb2RlIHJlZ2lvbnMgb3IgYXR0ZW1wdHMgdG8gZXhlY3V0ZSBkYXRhDQo+
+IHJlZ2lvbnM/IFdoYXQga2luZCBvZiBmYXVsdCB3aWxsIHRoYXQgdHJpZ2dlciwgYW5kIGFyZSB0
+aGV5IGJlaW5nIGhhbmRsZWQgYXQgdGhlDQo+IG1vbWVudD8NCg0KQUZBSUssIGF0IGxlYXN0IGlu
+IHRoZSB4ODYgd29ybGQsIGF0dGVtcHRzIHRvIHdyaXRlIHRvIHJlYWQgb25seSByZWdpb25zIG9y
+IGF0dGVtcHRzIA0KdG8gZXhlY3V0ZSBYUCAoZXhlY3V0ZSBwcm90ZWN0ZWQpIHBhZ2VzIHdpbGwg
+cmVzdWx0IGluIHBhZ2UgZmF1bHQgYW5kIEkgZG9uJ3QgdGhpbmsgDQp3ZSBhcmUgaGFuZGxpbmcg
+dGhlbS4NCg0KPiANCj4gQXMgSSBwb2ludGVkIG91dCwgRUZJIHJ1bnRpbWUgc2VydmljZXMgY29k
+ZSBtYXkgbGVnYWxseSBhY2Nlc3MgdGhlIHN0YWNrIG9yDQo+IGRlcmVmZXJlbmNlIHBvaW50ZXIg
+YXJndW1lbnRzLCBidXQgY291bGQgc3RpbGwgY29udGFpbiBidWdzIHRoYXQgcmVzdWx0IGluIG91
+dCBvZg0KPiBib3VuZHMgYWNjZXNzZXMgb3Igd3JpdGVzIHRvIHJlYWQtb25seSByZWdpb25zLg0K
+DQpZZXMsIGFncmVlZC4gSW4gZmFjdCwgSSBkaWQgc2VlIHRoZXNlIGJ1Z3MuDQoNCj4gU28gSSBk
+b24ndCByZWFsbHkgY2FyZSBhYm91dCB0aGUgYWRkcmVzcyBvZiB0aGUgaWxsZWdhbCBhY2Nlc3Ms
+IGFueSBmYXVsdCB0aGF0DQo+IG9jY3VycyB3aGlsZSBydW5uaW5nIGluIHRoZSBmaXJtd2FyZSBz
+aG91bGQgYmUgdHJlYXRlZCB0aGUgc2FtZS4NCg0KT2suLiBtYWtlcyBzZW5zZS4NCg0KPiBJbiBm
+YWN0LCBjcm9zcw0KPiByZWZlcmVuY2luZyB0aGUgdmFsdWUgb2YgSVAgd2l0aCBSdW50aW1lU2Vy
+dmljZXNDb2RlIHJlZ2lvbnMgbWF5IGJlIG1vcmUNCj4gdXNlZnVsDQoNClRoaXMgaXMgdG8gdmVy
+aWZ5IHRoYXQgZmlybXdhcmUgaXMgaW5kZWVkIGV4ZWN1dGluZyBjb2RlIGZyb20gUnVudGltZVNl
+cnZpY2VzQ29kZQ0KcmVnaW9ucyB3aGVuIGl0IGZhdWx0ZWQuIElzIHRoYXQgY29ycmVjdD8gT3Ig
+ZGlkIHlvdSBtZWFuIHNvbWV0aGluZyBlbHNlPw0KDQo+ID4gVGhhdCBzYWlkLCBhIG1vcmUgaW1w
+b3J0YW50IHJlYXNvbiAoaW4gbXkgdmlldykgaXMgdG8gcHJpbnQgb3V0IHRoZQ0KPiA+IG1lbW9y
+eSBkZXNjcmlwdG9yIHRoYXQgd2UgZmF1bHRlZCBvbi4gVGhpcyBpcyBhICpwcm9vZiogc2hvd2lu
+ZyB0aGF0DQo+ID4gaXQncyBidWdneSBmaXJtd2FyZSB0aGF0IGNhdXNlZCBwYWdlIGZhdWx0IGFu
+ZCBoZW5jZSBpcyBub3QgYSBrZXJuZWwNCj4gPiBidWcuIFRoaXMgcHJvb2YgaXMgaW1wb3J0YW50
+IGJlY2F1c2Ugd2hlbmV2ZXIgYSBzdGFjayB0cmFjZSBpcyBwcmludGVkDQo+ID4gd2l0aCBzb21l
+IGVmaSBmdW5jdGlvbiwga2VybmVsIGlzIHRoZSB1c3VhbCBzdXNwZWN0IGFuZCBoZW5jZSB3ZSBu
+ZWVkIHRvIHNob3cNCj4gdGhhdCBpdCdzIG5vdCBrZXJuZWwgZmF1bHQuIEl0IGNvdWxkIGFsc28g
+aGVscCBmaXJtd2FyZSBlbmdpbmVlcnMgdG8gZml4IHRoZSBidWcNCj4gZWFzaWx5Lg0KPiA+DQo+
+ID4gZG1lc2cgd291bGQgc2hvdyBzb21ldGhpbmcgbGlrZSB0aGlzIHdoZW4gYnVnZ3kgZWZpX3Jl
+c2V0X3N5c3RlbSgpDQo+IGFjY2Vzc2VzIHJlc2VydmVkIHJlZ2lvbjoNCj4gPg0KPiA+IFsgIDI5
+Ni4xNDE1MTFdIGVmaTogRUZJIE1lbW9yeSBEZXNjcmlwdG9yIGZvciBvZmZlbmRpbmcgUEEgaXM6
+DQo+ID4gWyAgMjk2LjE0MTg0NF0gZWZpOiBbUmVzZXJ2ZWQgICAgICAgICAgIHwgICB8ICB8ICB8
+ICB8ICB8ICB8ICB8ICAgfFdCfFdUfFdDfFVDXQ0KPiByYW5nZT1bMHgwMDAwMDAwMDdlOTE1MDAw
+LTB4MDAwMDAwMDA3ZTkzM2ZmZl0gKDBNQikNCj4gPiBbICAyOTYuMTQyNTIyXSBlZmk6IGVmaV9y
+ZXNldF9zeXN0ZW0oKSBidWdneSEgUmVib290IHRocm91Z2ggQklPUw0KPiA+DQo+ID4gU28sIEkg
+d291bGQgYmUgY29uY2VybmVkIGlmIHdlIG1pc3MgdGhpcyBwcm9vZi4NCj4gPg0KPiANCj4gWW91
+IGNhbiBkdW1wIHRoZSBlbnRpcmUgbWVtb3J5IG1hcCBieSBwdXR0aW5nIGVmaT1kZWJ1ZyBvbiB0
+aGUga2VybmVsDQo+IGNvbW1hbmQgbGluZSwgc28gYWxsIHdlIG5lZWQgdG8gZG8gaXMgcmVwb3J0
+IHRoZSBwaHlzaWNhbCBhZGRyZXNzLCBhbmQgeW91IGNhbg0KPiBlYXNpbHkgZmlndXJlIG91dCBm
+b3IgeW91cnNlbGYgd2hpY2ggbWVtb3J5IG1hcCBlbnRyeSBjb3ZlcnMgaXQuDQoNClRoYXQncyB0
+cnVlLiBJbiBmYWN0LCB0aGF0J3MgaG93IEkgZGVidWdnZWQgdGhpcyBpc3N1ZSBhbmQgaGVuY2Ug
+dGhvdWdodCB0aGF0IGl0IG1pZ2h0IGJlIA0KdXNlZnVsIHRvIGhhdmUgYWxsIHRoYXQgaW5mbyBh
+dCBvbmUgcGxhY2UgKGkuZS4gaW4gZWZpIHBhZ2UgZmF1bHQgaGFuZGxlcikuDQpCdXQsIGFzIHlv
+dSBzYWlkLCB0byBtYWtlIHRoZSBjb2RlIGxvb2sgc2ltcGxlciwgSSB3aWxsIHJvbGwgb3V0IGEg
+VjQgd2l0aG91dCBzYXZpbmcgDQpvcmlnaW5hbCBtZW1vcnkgbWFwLg0KDQpSZWdhcmRzLA0KU2Fp
+DQo=
