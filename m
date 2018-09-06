@@ -1,38 +1,68 @@
-From: Grant Likely <Grant.Likely@arm.com>
-Subject: Re: [PATCH] efi_stub: update documentation on dtb= parameter
-Date: Thu, 6 Sep 2018 17:52:06 +0000
-Message-ID: <BFA61ADA-2AD9-4383-ADAA-9D660881865B@arm.com>
-References: <20180905190750.4566-1-grant.likely@arm.com>,<20180906095111.1a74dfcd@lwn.net>
+From: Grant Likely <grant.likely@arm.com>
+Subject: [PATCH RESEND] efi_stub: update documentation on dtb= parameter
+Date: Thu,  6 Sep 2018 19:29:27 +0100
+Message-ID: <20180906182927.22318-1-grant.likely@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180906095111.1a74dfcd@lwn.net>
-Content-Language: en-GB
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jonathan Corbet <corbet@lwn.net>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "olof@lixom.net" <olof@lixom.net>, "scott.branden@broadcom.com" <scott.branden@broadcom.com>, Catalin Marinas <Catalin.Marinas@arm.com>, Will Deacon <Will.Deacon@arm.com>, "arnd@arndb.de" <arnd@arndb.de>, "leif.lindholm@linaro.org" <leif.lindholm@linaro.org>, "agraf@suse.de" <agraf@suse.de>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, nd <nd@arm.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Jonathan Corbet <corbet@lwn.net>, arnd@arndb.de, scott.branden@broadcom.com, catalin.marinas@arm.com, Ard Biesheuvel <ard.biesheuvel@linaro.org>, will.deacon@arm.com, agraf@suse.de, leif.lindholm@linaro.org, Grant Likely <grant.likely@arm.com>, olof@lixom.net, nd@arm.com
 List-Id: linux-efi@vger.kernel.org
 
-DQoNCj4gT24gNiBTZXAgMjAxOCwgYXQgMTY6NTEsIEpvbmF0aGFuIENvcmJldCA8Y29yYmV0QGx3
-bi5uZXQ+IHdyb3RlOg0KPiANCj4gT24gV2VkLCAgNSBTZXAgMjAxOCAyMDowNzo1MCArMDEwMA0K
-PiBHcmFudCBMaWtlbHkgPGdyYW50Lmxpa2VseUBhcm0uY29tPiB3cm90ZToNCj4gDQo+PiBUaGUg
-ZHRiPSBwYXJhbWV0ZXIgaXMgbm8gbG9uZ2VyIHRoZSBwcmltYXJ5IG1lY2hhbmlzbSBmb3IgcHJv
-dmlkaW5nIGENCj4+IGRldmljZXRyZWUgdG8gdGhlIGtlcm5lbC4gTm93IGVpdGhlciBmaXJtd2Fy
-ZSBvciB0aGUgYm9vdCBzZWxlY3RvciAoZXguDQo+PiBHcnViKSBzaG91bGQgcHJvdmlkZSB0aGUg
-ZGV2aWNldHJlZSBhbmQgZHRiPSBzaG91bGQgb25seSBiZSB1c2VkIGZvcg0KPj4gZGVidWcgb3Ig
-d2hlbiB1c2luZyBmaXJtd2FyZSB0aGF0IGRvZXNuJ3QgdW5kZXJzdGFuZCBEVC4NCj4+IFVwZGF0
-ZSB0aGUgRUZJIHN0dWIgZG9jdW1lbnRhdGlvbiB0byByZWZsZWN0IHRoZSBjdXJyZW50IHVzYWdl
-Lg0KPiANCj4gU28gSSBoYXRlIHRvIGJlIG9ibm94aW91cywgYnV0Li4uDQo+IA0KPj4gSU1QT1JU
-QU5UIE5PVElDRTogVGhlIGNvbnRlbnRzIG9mIHRoaXMgZW1haWwgYW5kIGFueSBhdHRhY2htZW50
-cyBhcmUNCj4+IGNvbmZpZGVudGlhbCBhbmQgbWF5IGFsc28gYmUgcHJpdmlsZWdlZC4gSWYgeW91
-IGFyZSBub3QgdGhlIGludGVuZGVkDQo+PiByZWNpcGllbnQsIHBsZWFzZSBub3RpZnkgdGhlIHNl
-bmRlciBpbW1lZGlhdGVseSBhbmQgZG8gbm90IGRpc2Nsb3NlIHRoZQ0KPj4gY29udGVudHMgdG8g
-YW55IG90aGVyIHBlcnNvbiwgdXNlIGl0IGZvciBhbnkgcHVycG9zZSwgb3Igc3RvcmUgb3IgY29w
-eQ0KPj4gdGhlIGluZm9ybWF0aW9uIGluIGFueSBtZWRpdW0uIFRoYW5rIHlvdS4NCj4gDQo+IENh
-biBJIGdldCBhIHZlcnNpb24gb2YgdGhlIHBhdGNoIHdpdGhvdXQgdGhpcyBsYW5ndWFnZT8gIFRo
-ZW4gSSdsbCBiZSBnbGFkDQo+IHRvIGFwcGx5IGl0Lg0KDQpVZ2guIFdlbGwgdGhhdCB3YXMgZHVt
-Yi4gVGhlcmUgaXMgYSBtYWdpYyB0cmljayBJIGhhdmUgdG8gcGVyZm9ybSB0byBnZXQgcmlkIG9m
-IHRoZSBkaXNjbGFpbWVyLCBidXQgaXQgZGlkbuKAmXQgd29yayB0aGlzIHRpbWUuIEnigJlsbCBm
-aXggYW5kIGdldCBhIG5ldyBvbmUgb3V0Lg0KDQpnLg0KDQo+IA0KPiBUaGFua3MsDQo+IA0KPiBq
-b24NCg==
+The dtb= parameter is no longer the primary mechanism for providing a
+devicetree to the kernel. Now either firmware or the boot selector (ex.
+Grub) should provide the devicetree and dtb= should only be used for
+debug or when using firmware that doesn't understand DT.
+Update the EFI stub documentation to reflect the current usage.
+
+Signed-off-by: Grant Likely <grant.likely@arm.com>
+Reviewed-by: Alexander Graf <agraf@suse.de>
+Acked-by: Leif Lindholm <leif.lindholm@linaro.org>
+Acked-by: Olof Johansson <olof@lixom.net>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Jonathan Corbet <corbet@lwn.net>
+---
+
+Resending because original post included Arm corporate disclaimer.
+
+ Documentation/efi-stub.txt | 17 ++++++++++++++---
+ 1 file changed, 14 insertions(+), 3 deletions(-)
+
+diff --git a/Documentation/efi-stub.txt b/Documentation/efi-stub.txt
+index 41df801f9a50..833edb0d0bc4 100644
+--- a/Documentation/efi-stub.txt
++++ b/Documentation/efi-stub.txt
+@@ -83,7 +83,18 @@ is passed to bzImage.efi.
+ The "dtb=" option
+ -----------------
+ 
+-For the ARM and arm64 architectures, we also need to be able to provide a
+-device tree to the kernel. This is done with the "dtb=" command line option,
+-and is processed in the same manner as the "initrd=" option that is
++For the ARM and arm64 architectures, a device tree must be provided to
++the kernel. Normally firmware shall supply the device tree via the
++EFI CONFIGURATION TABLE. However, the "dtb=" command line option can
++be used to override the firmware supplied device tree, or to supply
++one when firmware is unable to.
++
++Please note: Firmware adds runtime configuration information to the
++device tree before booting the kernel. If dtb= is used to override
++the device tree, then any runtime data provided by firmware will be
++lost. The dtb= option should only be used either as a debug tool, or
++as a last resort when a device tree is not provided in the EFI
++CONFIGURATION TABLE.
++
++"dtb=" is processed in the same manner as the "initrd=" option that is
+ described above.
+-- 
+2.11.0
