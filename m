@@ -1,64 +1,28 @@
 From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
-Subject: RE: [PATCH V4 2/3] x86/efi: Add efi page fault handler to recover
- from page faults caused by the firmware
-Date: Fri, 7 Sep 2018 18:29:07 +0000
-Message-ID: <FFF73D592F13FD46B8700F0A279B802F485BA5D7@ORSMSX114.amr.corp.intel.com>
+Subject: RE: [PATCH V4 0/3] Add efi page fault handler to recover from page
+Date: Fri, 7 Sep 2018 18:32:21 +0000
+Message-ID: <FFF73D592F13FD46B8700F0A279B802F485BA5E8@ORSMSX114.amr.corp.intel.com>
 References: <1536276468-28499-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <1536276468-28499-3-git-send-email-sai.praneeth.prakhya@intel.com>
- <20180907112147.GR24106@hirez.programming.kicks-ass.net>
+ <CAKv+Gu8F76ngzr_zgAXZhDPNb2SobYc4A8L3Rq-h1kMrbFqK+A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180907112147.GR24106@hirez.programming.kicks-ass.net>
+In-Reply-To: <CAKv+Gu8F76ngzr_zgAXZhDPNb2SobYc4A8L3Rq-h1kMrbFqK+A@mail.gmail.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Peter Zijlstra <peterz@infradead.org>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, "Neri, Ricardo" <ricardo.neri@intel.com>, "matt@codeblueprint.co.uk" <matt@codeblueprint.co.uk>, Al Stone <astone@redhat.com>, Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Bhupesh Sharma <bhsharma@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, the arch/x86 maintainers <x86@kernel.org>, "Neri, Ricardo" <ricardo.neri@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Al Stone <astone@redhat.com>, Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Bhupesh Sharma <bhsharma@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Peter Zijlstra <peterz@infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-> > +	if (efi_rts_work.efi_rts_id == RESET_SYSTEM) {
-> > +		pr_info("efi_reset_system() buggy! Reboot through BIOS\n");
-> > +		machine_real_restart(MRR_BIOS);
-> > +		return 0;
-> > +	}
-> > +
-> > +	/* Firmware has caused page fault, hence, freeze efi_rts_wq. */
-> > +	set_current_state(TASK_UNINTERRUPTIBLE);
-> 
-> This doesn't freeze it, as such, it just sets the state.
-
-True! Thanks for pointing it out. I will update the comment.
-
-> > +
-> > +	/*
-> > +	 * Before calling EFI Runtime Service, the kernel has switched the
-> > +	 * calling process to efi_mm. Hence, switch back to task_mm.
-> > +	 */
-> > +	arch_efi_call_virt_teardown();
-> > +
-> > +	/* Signal error status to the efi caller process */
-> > +	efi_rts_work.status = EFI_ABORTED;
-> > +	complete(&efi_rts_work.efi_rts_comp);
-> > +
-> > +	clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
-> > +	pr_info("Froze efi_rts_wq and disabled EFI Runtime Services\n");
-> 
-> > +	schedule();
-> 
-> So what happens when we get a spurious wakeup and return from this?
-> 
-> Quite possibly you want something like:
-> 
-> 	for (;;) {
-> 		set_current_state(TASK_IDLE);
-> 		schedule();
-> 	}
-> 
-> here. The TASK_UNINTERRUPTIBLE thing will cause the load-avg to spike; is that
-> what you want?
-
-Yes, makes sense. TASK_IDLE seems more appropriate. I will change it.
-
-Regards,
-Sai
+PiA+IFRoZSBlZmkgcGFnZSBmYXVsdCBoYW5kbGVyIHdpbGwgY2hlY2sgaWYgdGhlIGFjY2VzcyBp
+cyBieQ0KPiA+IGVmaV9yZXNldF9zeXN0ZW0oKS4NCj4gPiAxLiBJZiBzbywgdGhlbiB0aGUgZWZp
+IHBhZ2UgZmF1bHQgaGFuZGxlciB3aWxsIHJlYm9vdCB0aGUgbWFjaGluZQ0KPiA+ICAgIHRocm91
+Z2ggQklPUyBhbmQgbm90IHRocm91Z2ggZWZpX3Jlc2V0X3N5c3RlbSgpLg0KPiA+IDIuIElmIG5v
+dCwgdGhlbiB0aGUgZWZpIHBhZ2UgZmF1bHQgaGFuZGxlciB3aWxsIGZyZWV6ZSBlZmlfcnRzX3dx
+IGFuZA0KPiA+ICAgIHNjaGVkdWxlcyBhIG5ldyBwcm9jZXNzLg0KPiA+DQo+IA0KPiBUaGFua3Mg
+U2FpISBJIGFtIHByZXR0eSBoYXBweSBob3cgdGhpcyBwYXRjaCBzZXQgdHVybmVkIG91dC4gSXQg
+c3RpbGwgcmVxdWlyZXMgdGhlDQo+IGJsZXNzaW5nIG9mIHRoZSB4ODYgbWFpbnRhaW5lcnMsIG9m
+IGNvdXJzZSwgYnV0IGZyb20gbXkgcG92LCB0aGlzIGlzIGdvb2QgdG8gZ28NCj4gKGJ1dCBJIHdp
+bGwgZm9sZCBwYXRjaCAjMyBpbnRvICMyKQ0KDQpIb3BlZnVsbHksIHBhdGNoICMzIGdvZXMgYXdh
+eSB0b28uLiBpbiBWNS4NCg0KUmVnYXJkcywNClNhaQ0K
