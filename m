@@ -1,43 +1,49 @@
-From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
-Subject: RE: [PATCH V4 0/3] Add efi page fault handler to recover from page
-Date: Fri, 7 Sep 2018 19:13:55 +0000
-Message-ID: <FFF73D592F13FD46B8700F0A279B802F485BA631@ORSMSX114.amr.corp.intel.com>
-References: <1536276468-28499-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <CACi5LpP4=VprRuabhKVXWy+JmKB1WNri+OA3aMSw=Q7-obo_TA@mail.gmail.com>
+From: Thomas Gleixner <tglx@linutronix.de>
+Subject: RE: [PATCH V4 3/3] x86/efi: Introduce EFI_PAGE_FAULT_HANDLER
+Date: Fri, 7 Sep 2018 21:22:14 +0200 (CEST)
+Message-ID: <alpine.DEB.2.21.1809072116530.1402@nanos.tec.linutronix.de>
+References: <1536276468-28499-1-git-send-email-sai.praneeth.prakhya@intel.com> <1536276468-28499-4-git-send-email-sai.praneeth.prakhya@intel.com> <20180907112207.GS24106@hirez.programming.kicks-ass.net> <FFF73D592F13FD46B8700F0A279B802F485BA5C1@ORSMSX114.amr.corp.intel.com>
+ <e10acaa8-f5d8-85f3-219c-86fafd793a87@redhat.com> <FFF73D592F13FD46B8700F0A279B802F485BA620@ORSMSX114.amr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=US-ASCII
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CACi5LpP4=VprRuabhKVXWy+JmKB1WNri+OA3aMSw=Q7-obo_TA@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <FFF73D592F13FD46B8700F0A279B802F485BA620@ORSMSX114.amr.corp.intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Bhupesh Sharma <bhsharma@redhat.com>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, "Neri, Ricardo" <ricardo.neri@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Al Stone <astone@redhat.com>, Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Peter Zijlstra <peterz@infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+To: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+Cc: Bhupesh Sharma <bhsharma@redhat.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, "Neri, Ricardo" <ricardo.neri@intel.com>, "matt@codeblueprint.co.uk" <matt@codeblueprint.co.uk>, Al Stone <astone@redhat.com>, Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Peter Zijlstra <peterz@infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-PiBUaGFua3MgU2FpIGZvciB0aGlzIHdvcmsuIEkgdGhpbmsgdGhpcyBhIHN0ZXAgaW4gdGhlIHJp
-Z2h0IGRpcmVjdGlvbi4NCj4gSSB0ZXN0ZWQgdGhpcyBvbiBxZW11IHg4Nl82NCB3aXRoIE9WTUYg
-ZmlybXdhcmUgbW9kaWZpZWQgdG8gYWNjZXNzIHNvbWUNCj4gcmFuZG9tIGFkZHJlc3MgaW4gdGhl
-IEVGSV9SZXNlcnZlZF9SZWdpb24uIEkgd2FzIGFibGUgdG8gcmVib290IHRoZSBxZW11DQo+IGlu
-c3RhbmNlIHN1Y2Nlc3NmdWxseSB3aXRoIHRoZSBwYXRjaGVzIChzZWUgbG9ncyBiZWxvdykgd2hp
-bGUgd2l0aG91dCB0aGUNCj4gcGF0Y2hzZXQsIHJlYm9vdCBlYXJsaWVyIHVzZWQgdG8gZ2V0IHN0
-dWNrLg0KPiANCj4gU28sIGZlZWwgZnJlZSB0byBhZGQ6DQo+IFRlc3RlZC1ieTogQmh1cGVzaCBT
-aGFybWEgPGJoc2hhcm1hQHJlZGhhdC5jb20+DQo+IA0KDQpUaGFua3MgYSBsb3QgQmh1cGVzaCwg
-Zm9yIHRyeWluZyB0aGUgcGF0Y2hlcyBhbmQgYXMgeW91IHNhaWQsIHRoZSBwYXRjaGVzIG5lZWQg
-YSBsb3QgDQptb3JlIHRlc3Rpbmcgb24gcmVhbCBtYWNoaW5lcy4NCg0KPiBRZW11IENvbnNvbGUg
-TG9nczoNCj4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQo+IA0KPiAjIHJlYm9vdA0KPiAN
-Cj4gPHNuaXAuLj4NCj4gDQo+IFsgICAxMS40MDAwMDRdIC0tLS0tLS0tLS0tLVsgY3V0IGhlcmUg
-XS0tLS0tLS0tLS0tLQ0KPiBbICAgMTEuNDAwMTM3XSBbRmlybXdhcmUgQnVnXTogUGFnZSBmYXVs
-dCBjYXVzZWQgYnkgZmlybXdhcmUgYXQgUEE6IDB4N2U5MjQxMDANCj4gWyAgIDExLjQwMDQ4NF0g
-V0FSTklORzogQ1BVOiAwIFBJRDogMTExMSBhdA0KPiBhcmNoL3g4Ni9wbGF0Zm9ybS9lZmkvcXVp
-cmtzLmM6NjkxDQo+IGVmaV9yZWNvdmVyX2Zyb21fcGFnZV9mYXVsdCsweDNiLzB4ZjANCj4gWyAg
-IDExLjQwMDc1MV0gTW9kdWxlcyBsaW5rZWQgaW46DQo+IFsgICAxMS40MDA5OTJdIENQVTogMCBQ
-SUQ6IDExMTEgQ29tbTogaW5pdCBOb3QgdGFpbnRlZCA0LjE4LjAtcmM1KyAjMQ0KPiBbICAgMTEu
-NDAxMTQ2XSBIYXJkd2FyZSBuYW1lOiBRRU1VIFN0YW5kYXJkIFBDIChpNDQwRlggKyBQSUlYLCAx
-OTk2KSwNCj4gQklPUyAwLjAuMCAwMi8wNi8yMDE1DQo+IFsgICAxMS40MDEzOTddIFJJUDogMDAx
-MDplZmlfcmVjb3Zlcl9mcm9tX3BhZ2VfZmF1bHQrMHgzYi8weGYwDQoNCltzbmlwcGVkIHN0YWNr
-IHRyYWNlXQ0KDQo+IFsgICAxMS40MTAzNzhdICA/IGVudHJ5X1NZU0NBTExfNjRfYWZ0ZXJfaHdm
-cmFtZSsweDQ0LzB4YTkNCj4gWyAgIDExLjQxMDU1NF0gLS0tWyBlbmQgdHJhY2UgYWQzZDBhMjIw
-YTg4YTQ1YiBdLS0tDQo+IFsgICAxMS40MTA3NDJdIGVmaTogZWZpX3Jlc2V0X3N5c3RlbSgpIGJ1
-Z2d5ISBSZWJvb3QgdGhyb3VnaCBCSU9TDQoNClRoYW5rcyBmb3IgdGhlIGxvZywgaXQgbG9va3Mg
-Z29vZCB0byBtZS4NCg==
+On Fri, 7 Sep 2018, Prakhya, Sai Praneeth wrote:
+> > > So, if Thomas, Ingo, Andy, Ard and Boris are ok.. I will make it as
+> > > default (i.e. without config).
+
+Yes, that's the right thing to do.
+
+> > Also, some distributions already have specific ways to handle buggy
+> > firmwares which can be at times dependent on the underlying hardware
+> > and the firmware versions.
+
+If the distro patched their kernel to deal with buggy firmware, then:
+
+ 1) why did they not upstream it ?
+
+ 2) why should we worry about that ?
+
+> > I would suggest that we enable this under a CONFIG for the first round
+> > and once it is tested with wider variety of x86 machines which have
+> > buggy or orphaned firmware and linux (and reboot) works fine with them,
+> > we can drop the CONFIG option in future and enable this by default.
+
+Sure and then nobody enables it and the affected machines still crash or
+hang on reboot. The whole thing is simple enough now to make it
+unconditional.
+
+> Sounds fair to me, but, I would like to wait for someone experienced to
+> make the final call.
+
+Please get rid of that config knob. Buggy firmware exists and we better
+deal with it by default.
+
+Thanks,
+
+	tglx
