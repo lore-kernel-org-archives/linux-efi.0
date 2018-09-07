@@ -1,67 +1,103 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH RESEND] efi_stub: update documentation on dtb= parameter
-Date: Fri, 7 Sep 2018 12:43:25 +0200
-Message-ID: <CAKv+Gu_k5Yr-aRhE6atrtGQOVpw60XfevVdUb8BvH1G3mfoU+Q@mail.gmail.com>
-References: <20180906182927.22318-1-grant.likely@arm.com>
+From: Peter Zijlstra <peterz@infradead.org>
+Subject: Re: [PATCH V4 2/3] x86/efi: Add efi page fault handler to recover
+ from page faults caused by the firmware
+Date: Fri, 7 Sep 2018 13:21:48 +0200
+Message-ID: <20180907112147.GR24106@hirez.programming.kicks-ass.net>
+References: <1536276468-28499-1-git-send-email-sai.praneeth.prakhya@intel.com>
+ <1536276468-28499-3-git-send-email-sai.praneeth.prakhya@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180906182927.22318-1-grant.likely@arm.com>
+Content-Disposition: inline
+In-Reply-To: <1536276468-28499-3-git-send-email-sai.praneeth.prakhya@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Grant Likely <grant.likely@arm.com>
-Cc: linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Olof Johansson <olof@lixom.net>, Scott Branden <scott.branden@broadcom.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Arnd Bergmann <arnd@arndb.de>, Leif Lindholm <leif.lindholm@linaro.org>, Alexander Graf <agraf@suse.de>, nd <nd@arm.com>, Jonathan Corbet <corbet@lwn.net>
+To: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, ricardo.neri@intel.com, matt@codeblueprint.co.uk, Al Stone <astone@redhat.com>, Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Bhupesh Sharma <bhsharma@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 6 September 2018 at 20:29, Grant Likely <grant.likely@arm.com> wrote:
-> The dtb= parameter is no longer the primary mechanism for providing a
-> devicetree to the kernel. Now either firmware or the boot selector (ex.
-> Grub) should provide the devicetree and dtb= should only be used for
-> debug or when using firmware that doesn't understand DT.
-> Update the EFI stub documentation to reflect the current usage.
->
-> Signed-off-by: Grant Likely <grant.likely@arm.com>
-> Reviewed-by: Alexander Graf <agraf@suse.de>
-> Acked-by: Leif Lindholm <leif.lindholm@linaro.org>
-> Acked-by: Olof Johansson <olof@lixom.net>
-> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> Cc: Jonathan Corbet <corbet@lwn.net>
-
-Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-
-
-> ---
->
-> Resending because original post included Arm corporate disclaimer.
->
->  Documentation/efi-stub.txt | 17 ++++++++++++++---
->  1 file changed, 14 insertions(+), 3 deletions(-)
->
-> diff --git a/Documentation/efi-stub.txt b/Documentation/efi-stub.txt
-> index 41df801f9a50..833edb0d0bc4 100644
-> --- a/Documentation/efi-stub.txt
-> +++ b/Documentation/efi-stub.txt
-> @@ -83,7 +83,18 @@ is passed to bzImage.efi.
->  The "dtb=" option
->  -----------------
->
-> -For the ARM and arm64 architectures, we also need to be able to provide a
-> -device tree to the kernel. This is done with the "dtb=" command line option,
-> -and is processed in the same manner as the "initrd=" option that is
-> +For the ARM and arm64 architectures, a device tree must be provided to
-> +the kernel. Normally firmware shall supply the device tree via the
-> +EFI CONFIGURATION TABLE. However, the "dtb=" command line option can
-> +be used to override the firmware supplied device tree, or to supply
-> +one when firmware is unable to.
+On Thu, Sep 06, 2018 at 04:27:47PM -0700, Sai Praneeth Prakhya wrote:
+> @@ -790,6 +792,13 @@ no_context(struct pt_regs *regs, unsigned long error_code,
+>  		return;
+>  
+>  	/*
+> +	 * Buggy firmware could access regions which might page fault, try to
+> +	 * recover from such faults.
+> +	 */
+> +	if (efi_recover_from_page_fault(address))
+> +		return;
 > +
-> +Please note: Firmware adds runtime configuration information to the
-> +device tree before booting the kernel. If dtb= is used to override
-> +the device tree, then any runtime data provided by firmware will be
-> +lost. The dtb= option should only be used either as a debug tool, or
-> +as a last resort when a device tree is not provided in the EFI
-> +CONFIGURATION TABLE.
+> +	/*
+>  	 * Oops. The kernel tried to access some bad page. We'll have to
+>  	 * terminate things with extreme prejudice:
+>  	 */
+
+> +int efi_recover_from_page_fault(unsigned long phys_addr)
+> +{
+> +	/* Recover from page faults caused *only* by the firmware */
+> +	if (current->active_mm != &efi_mm)
+> +		return 0;
 > +
-> +"dtb=" is processed in the same manner as the "initrd=" option that is
->  described above.
-> --
-> 2.11.0
->
+> +	/*
+> +	 * Address range 0x0000 - 0x0fff is always mapped in the efi_pgd, so
+> +	 * page faulting on these addresses isn't expected.
+> +	 */
+> +	if (phys_addr >= 0x0000 && phys_addr <= 0x0fff)
+> +		return 0;
+> +
+> +	/*
+> +	 * Print stack trace as it might be useful to know which EFI Runtime
+> +	 * Service is buggy.
+> +	 */
+> +	WARN(1, FW_BUG "Page fault caused by firmware at PA: 0x%lx\n",
+> +	     phys_addr);
+> +
+> +	/*
+> +	 * Buggy efi_reset_system() is handled differently from other EFI
+> +	 * Runtime Services as it doesn't use efi_rts_wq. Although,
+> +	 * native_machine_emergency_restart() says that machine_real_restart()
+> +	 * could fail, it's better not to compilcate this fault handler
+> +	 * because this case occurs *very* rarely and hence could be improved
+> +	 * on a need by basis.
+> +	 */
+> +	if (efi_rts_work.efi_rts_id == RESET_SYSTEM) {
+> +		pr_info("efi_reset_system() buggy! Reboot through BIOS\n");
+> +		machine_real_restart(MRR_BIOS);
+> +		return 0;
+> +	}
+> +
+> +	/* Firmware has caused page fault, hence, freeze efi_rts_wq. */
+> +	set_current_state(TASK_UNINTERRUPTIBLE);
+
+This doesn't freeze it, as such, it just sets the state.
+
+> +
+> +	/*
+> +	 * Before calling EFI Runtime Service, the kernel has switched the
+> +	 * calling process to efi_mm. Hence, switch back to task_mm.
+> +	 */
+> +	arch_efi_call_virt_teardown();
+> +
+> +	/* Signal error status to the efi caller process */
+> +	efi_rts_work.status = EFI_ABORTED;
+> +	complete(&efi_rts_work.efi_rts_comp);
+> +
+> +	clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+> +	pr_info("Froze efi_rts_wq and disabled EFI Runtime Services\n");
+
+> +	schedule();
+
+So what happens when we get a spurious wakeup and return from this?
+
+Quite possibly you want something like:
+
+	for (;;) {
+		set_current_state(TASK_IDLE);
+		schedule();
+	}
+
+here. The TASK_UNINTERRUPTIBLE thing will cause the load-avg to spike;
+is that what you want?
+
+> +
+> +	return 0;
+> +}
