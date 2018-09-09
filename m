@@ -1,41 +1,33 @@
-From: Aaron Ma <aaron.ma@canonical.com>
-Subject: [PATCH] x86/efi: earlyprintk - Add 64bit efi fb address support
-Date: Sun,  9 Sep 2018 00:23:48 +0800
-Message-ID: <1536423828-5693-1-git-send-email-aaron.ma@canonical.com>
+From: Jonathan Corbet <corbet@lwn.net>
+Subject: Re: [PATCH RESEND] efi_stub: update documentation on dtb= parameter
+Date: Sun, 9 Sep 2018 14:47:11 -0600
+Message-ID: <20180909144711.12261570@lwn.net>
+References: <20180906182927.22318-1-grant.likely@arm.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180906182927.22318-1-grant.likely@arm.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: ard.biesheuvel@linaro.org, tglx@linutronix.de, x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, aaron.ma@canonical.com
+To: Grant Likely <grant.likely@arm.com>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, olof@lixom.net, scott.branden@broadcom.com, catalin.marinas@arm.com, will.deacon@arm.com, arnd@arndb.de, leif.lindholm@linaro.org, agraf@suse.de, nd@arm.com, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-EFI GOP uses 64-bit frame buffer address in some BIOS.
-Add 64bit address support in efi earlyprintk.
+On Thu,  6 Sep 2018 19:29:27 +0100
+Grant Likely <grant.likely@arm.com> wrote:
 
-Signed-off-by: Aaron Ma <aaron.ma@canonical.com>
----
- arch/x86/platform/efi/early_printk.c | 4 ++++
- 1 file changed, 4 insertions(+)
+> The dtb= parameter is no longer the primary mechanism for providing a
+> devicetree to the kernel. Now either firmware or the boot selector (ex.
+> Grub) should provide the devicetree and dtb= should only be used for
+> debug or when using firmware that doesn't understand DT.
+> Update the EFI stub documentation to reflect the current usage.
+> 
+> Signed-off-by: Grant Likely <grant.likely@arm.com>
+> Reviewed-by: Alexander Graf <agraf@suse.de>
+> Acked-by: Leif Lindholm <leif.lindholm@linaro.org>
+> Acked-by: Olof Johansson <olof@lixom.net>
+> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-diff --git a/arch/x86/platform/efi/early_printk.c b/arch/x86/platform/efi/early_printk.c
-index 5fdacb322ceb..c0ae25f59acd 100644
---- a/arch/x86/platform/efi/early_printk.c
-+++ b/arch/x86/platform/efi/early_printk.c
-@@ -32,6 +32,8 @@ static __init int early_efi_map_fb(void)
- 		return 0;
- 
- 	base = boot_params.screen_info.lfb_base;
-+	if (boot_params.screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
-+		base |= (u64)boot_params.screen_info.ext_lfb_base << 32;
- 	size = boot_params.screen_info.lfb_size;
- 	efi_fb = ioremap(base, size);
- 
-@@ -49,6 +51,8 @@ static __ref void *early_efi_map(unsigned long start, unsigned long len)
- 	unsigned long base;
- 
- 	base = boot_params.screen_info.lfb_base;
-+	if (boot_params.screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
-+		base |= (u64)boot_params.screen_info.ext_lfb_base << 32;
- 
- 	if (efi_fb)
- 		return (efi_fb + start);
--- 
-2.17.1
+Applied, thanks.
+
+jon
