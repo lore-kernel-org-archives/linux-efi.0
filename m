@@ -1,104 +1,178 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH] efi: take size of partition entry from GPT header
-Date: Mon, 10 Sep 2018 21:31:02 +0200
-Message-ID: <CAKv+Gu_Di8sb6g1Hm3zoih-031Y1yORwXxd+Te68-2PeUioTiQ@mail.gmail.com>
-References: <20180910190355.GA2166@vnote>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Subject: [PATCH V5 1/2] efi: Make efi_rts_work accessible to efi page fault handler
+Date: Mon, 10 Sep 2018 12:32:24 -0700
+Message-ID: <1536607945-22018-2-git-send-email-sai.praneeth.prakhya@intel.com>
+References: <1536607945-22018-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180910190355.GA2166@vnote>
+In-Reply-To: <1536607945-22018-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Eugene Korenevsky <ekorenevsky@gmail.com>, Davidlohr Bueso <dave@stgolabs.net>, linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org
+Cc: Sai Praneeth <sai.praneeth.prakhya@intel.com>, Al Stone <astone@redhat.com>, Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Bhupesh Sharma <bhsharma@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Peter Zijlstra <peterz@infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 10 September 2018 at 21:03, Eugene Korenevsky <ekorenevsky@gmail.com> wrote:
-> Use gpt_header.sizeof_partition_entry instead of sizeof(gpt_entry)
-> for GPT entry size.
-> According to UEFI spec, GPT entry size is specified in GPT header.
->
+From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
 
-I think this patch is probably correct, but could you please provide
-more information:
-- why do you need this patch
-- which UEFI spec section/paragraph are you quoting
+After the kernel has booted, if any accesses by firmware causes a page
+fault, the efi page fault handler would freeze efi_rts_wq and schedules
+a new process. To do this, the efi page fault handler needs
+efi_rts_work. Hence, make it accessible.
 
+There will be no race conditions in accessing this structure, because,
+all the calls to efi runtime services are already serialized.
 
-> Signed-off-by: Eugene Korenevsky <ekorenevsky@gmail.com>
-> ---
->  block/partitions/efi.c | 26 ++++++++++++--------------
->  1 file changed, 12 insertions(+), 14 deletions(-)
->
-> diff --git a/block/partitions/efi.c b/block/partitions/efi.c
-> index 39f70d968754..29f7ec585e1d 100644
-> --- a/block/partitions/efi.c
-> +++ b/block/partitions/efi.c
-> @@ -428,11 +428,6 @@ static int is_gpt_valid(struct parsed_partitions *state, u64 lba,
->                          (unsigned long long)le64_to_cpu((*gpt)->first_usable_lba));
->                 goto fail;
->         }
-> -       /* Check that sizeof_partition_entry has the correct value */
-> -       if (le32_to_cpu((*gpt)->sizeof_partition_entry) != sizeof(gpt_entry)) {
-> -               pr_debug("GUID Partition Entry Size check failed.\n");
-> -               goto fail;
-> -       }
->
+Tested-by: Bhupesh Sharma <bhsharma@redhat.com>
+Suggested-by: Matt Fleming <matt@codeblueprint.co.uk>
+Based-on-code-from: Ricardo Neri <ricardo.neri@intel.com>
+Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: Al Stone <astone@redhat.com>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Ingo Molnar <mingo@kernel.org>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Bhupesh Sharma <bhsharma@redhat.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ drivers/firmware/efi/runtime-wrappers.c | 53 ++++++---------------------------
+ include/linux/efi.h                     | 36 ++++++++++++++++++++++
+ 2 files changed, 45 insertions(+), 44 deletions(-)
 
-Shouldn't we assert that sizeof_partition_entry >= sizeof(gpt_entry) ?
-
->         /* Sanity check partition table size */
->         pt_size = (u64)le32_to_cpu((*gpt)->num_partition_entries) *
-> @@ -692,7 +687,7 @@ static int find_valid_gpt(struct parsed_partitions *state, gpt_header **gpt,
->  int efi_partition(struct parsed_partitions *state)
->  {
->         gpt_header *gpt = NULL;
-> -       gpt_entry *ptes = NULL;
-> +       gpt_entry *ptes = NULL, *pte;
->         u32 i;
->         unsigned ssz = bdev_logical_block_size(state->bdev) / 512;
->
-> @@ -704,13 +699,16 @@ int efi_partition(struct parsed_partitions *state)
->
->         pr_debug("GUID Partition Table is valid!  Yea!\n");
->
-> -       for (i = 0; i < le32_to_cpu(gpt->num_partition_entries) && i < state->limit-1; i++) {
-> +       pte = ptes;
-> +       for (i = 0; i < le32_to_cpu(gpt->num_partition_entries) && i < state->limit-1;
-> +                       i++,
-> +                       pte = (gpt_entry *)((u8*)pte + gpt->sizeof_partition_entry)) {
->                 struct partition_meta_info *info;
->                 unsigned label_count = 0;
->                 unsigned label_max;
-> -               u64 start = le64_to_cpu(ptes[i].starting_lba);
-> -               u64 size = le64_to_cpu(ptes[i].ending_lba) -
-> -                          le64_to_cpu(ptes[i].starting_lba) + 1ULL;
-> +               u64 start = le64_to_cpu(pte->starting_lba);
-> +               u64 size = le64_to_cpu(pte->ending_lba) -
-> +                          le64_to_cpu(pte->starting_lba) + 1ULL;
->
->                 if (!is_pte_valid(&ptes[i], last_lba(state->bdev)))
->                         continue;
-> @@ -718,18 +716,18 @@ int efi_partition(struct parsed_partitions *state)
->                 put_partition(state, i+1, start * ssz, size * ssz);
->
->                 /* If this is a RAID volume, tell md */
-> -               if (!efi_guidcmp(ptes[i].partition_type_guid, PARTITION_LINUX_RAID_GUID))
-> +               if (!efi_guidcmp(pte->partition_type_guid, PARTITION_LINUX_RAID_GUID))
->                         state->parts[i + 1].flags = ADDPART_FLAG_RAID;
->
->                 info = &state->parts[i + 1].info;
-> -               efi_guid_to_str(&ptes[i].unique_partition_guid, info->uuid);
-> +               efi_guid_to_str(&pte->unique_partition_guid, info->uuid);
->
->                 /* Naively convert UTF16-LE to 7 bits. */
->                 label_max = min(ARRAY_SIZE(info->volname) - 1,
-> -                               ARRAY_SIZE(ptes[i].partition_name));
-> +                               ARRAY_SIZE(pte->partition_name));
->                 info->volname[label_max] = 0;
->                 while (label_count < label_max) {
-> -                       u8 c = ptes[i].partition_name[label_count] & 0xff;
-> +                       u8 c = pte->partition_name[label_count] & 0xff;
->                         if (c && !isprint(c))
->                                 c = '!';
->                         info->volname[label_count] = c;
-> --
-> 2.18.0
+diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
+index aa66cbf23512..b18b2d864c2c 100644
+--- a/drivers/firmware/efi/runtime-wrappers.c
++++ b/drivers/firmware/efi/runtime-wrappers.c
+@@ -45,39 +45,7 @@
+ #define __efi_call_virt(f, args...) \
+ 	__efi_call_virt_pointer(efi.systab->runtime, f, args)
+ 
+-/* efi_runtime_service() function identifiers */
+-enum efi_rts_ids {
+-	GET_TIME,
+-	SET_TIME,
+-	GET_WAKEUP_TIME,
+-	SET_WAKEUP_TIME,
+-	GET_VARIABLE,
+-	GET_NEXT_VARIABLE,
+-	SET_VARIABLE,
+-	QUERY_VARIABLE_INFO,
+-	GET_NEXT_HIGH_MONO_COUNT,
+-	UPDATE_CAPSULE,
+-	QUERY_CAPSULE_CAPS,
+-};
+-
+-/*
+- * efi_runtime_work:	Details of EFI Runtime Service work
+- * @arg<1-5>:		EFI Runtime Service function arguments
+- * @status:		Status of executing EFI Runtime Service
+- * @efi_rts_id:		EFI Runtime Service function identifier
+- * @efi_rts_comp:	Struct used for handling completions
+- */
+-struct efi_runtime_work {
+-	void *arg1;
+-	void *arg2;
+-	void *arg3;
+-	void *arg4;
+-	void *arg5;
+-	efi_status_t status;
+-	struct work_struct work;
+-	enum efi_rts_ids efi_rts_id;
+-	struct completion efi_rts_comp;
+-};
++struct efi_runtime_work efi_rts_work;
+ 
+ /*
+  * efi_queue_work:	Queue efi_runtime_service() and wait until it's done
+@@ -91,7 +59,6 @@ struct efi_runtime_work {
+  */
+ #define efi_queue_work(_rts, _arg1, _arg2, _arg3, _arg4, _arg5)		\
+ ({									\
+-	struct efi_runtime_work efi_rts_work;				\
+ 	efi_rts_work.status = EFI_ABORTED;				\
+ 									\
+ 	init_completion(&efi_rts_work.efi_rts_comp);			\
+@@ -184,18 +151,16 @@ static DEFINE_SEMAPHORE(efi_runtime_lock);
+  */
+ static void efi_call_rts(struct work_struct *work)
+ {
+-	struct efi_runtime_work *efi_rts_work;
+ 	void *arg1, *arg2, *arg3, *arg4, *arg5;
+ 	efi_status_t status = EFI_NOT_FOUND;
+ 
+-	efi_rts_work = container_of(work, struct efi_runtime_work, work);
+-	arg1 = efi_rts_work->arg1;
+-	arg2 = efi_rts_work->arg2;
+-	arg3 = efi_rts_work->arg3;
+-	arg4 = efi_rts_work->arg4;
+-	arg5 = efi_rts_work->arg5;
++	arg1 = efi_rts_work.arg1;
++	arg2 = efi_rts_work.arg2;
++	arg3 = efi_rts_work.arg3;
++	arg4 = efi_rts_work.arg4;
++	arg5 = efi_rts_work.arg5;
+ 
+-	switch (efi_rts_work->efi_rts_id) {
++	switch (efi_rts_work.efi_rts_id) {
+ 	case GET_TIME:
+ 		status = efi_call_virt(get_time, (efi_time_t *)arg1,
+ 				       (efi_time_cap_t *)arg2);
+@@ -253,8 +218,8 @@ static void efi_call_rts(struct work_struct *work)
+ 		 */
+ 		pr_err("Requested executing invalid EFI Runtime Service.\n");
+ 	}
+-	efi_rts_work->status = status;
+-	complete(&efi_rts_work->efi_rts_comp);
++	efi_rts_work.status = status;
++	complete(&efi_rts_work.efi_rts_comp);
+ }
+ 
+ static efi_status_t virt_efi_get_time(efi_time_t *tm, efi_time_cap_t *tc)
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 401e4b254e30..855992b15269 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1659,7 +1659,43 @@ struct linux_efi_tpm_eventlog {
+ 
+ extern int efi_tpm_eventlog_init(void);
+ 
++/* efi_runtime_service() function identifiers */
++enum efi_rts_ids {
++	GET_TIME,
++	SET_TIME,
++	GET_WAKEUP_TIME,
++	SET_WAKEUP_TIME,
++	GET_VARIABLE,
++	GET_NEXT_VARIABLE,
++	SET_VARIABLE,
++	QUERY_VARIABLE_INFO,
++	GET_NEXT_HIGH_MONO_COUNT,
++	UPDATE_CAPSULE,
++	QUERY_CAPSULE_CAPS,
++};
++
++/*
++ * efi_runtime_work:	Details of EFI Runtime Service work
++ * @arg<1-5>:		EFI Runtime Service function arguments
++ * @status:		Status of executing EFI Runtime Service
++ * @efi_rts_id:		EFI Runtime Service function identifier
++ * @efi_rts_comp:	Struct used for handling completions
++ */
++struct efi_runtime_work {
++	void *arg1;
++	void *arg2;
++	void *arg3;
++	void *arg4;
++	void *arg5;
++	efi_status_t status;
++	struct work_struct work;
++	enum efi_rts_ids efi_rts_id;
++	struct completion efi_rts_comp;
++};
++
+ /* Workqueue to queue EFI Runtime Services */
+ extern struct workqueue_struct *efi_rts_wq;
+ 
++extern struct efi_runtime_work efi_rts_work;
++
+ #endif /* _LINUX_EFI_H */
+-- 
+2.7.4
