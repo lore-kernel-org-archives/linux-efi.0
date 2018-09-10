@@ -1,33 +1,26 @@
-From: Jonathan Corbet <corbet@lwn.net>
-Subject: Re: [PATCH RESEND] efi_stub: update documentation on dtb= parameter
-Date: Sun, 9 Sep 2018 14:47:11 -0600
-Message-ID: <20180909144711.12261570@lwn.net>
-References: <20180906182927.22318-1-grant.likely@arm.com>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: [PATCH] x86/efi: earlyprintk - Add 64bit efi fb address support
+Date: Mon, 10 Sep 2018 09:20:28 +0200
+Message-ID: <20180910072028.GA47768@gmail.com>
+References: <1536423828-5693-1-git-send-email-aaron.ma@canonical.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180906182927.22318-1-grant.likely@arm.com>
+Content-Disposition: inline
+In-Reply-To: <1536423828-5693-1-git-send-email-aaron.ma@canonical.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Grant Likely <grant.likely@arm.com>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, olof@lixom.net, scott.branden@broadcom.com, catalin.marinas@arm.com, will.deacon@arm.com, arnd@arndb.de, leif.lindholm@linaro.org, agraf@suse.de, nd@arm.com, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+To: Aaron Ma <aaron.ma@canonical.com>
+Cc: ard.biesheuvel@linaro.org, tglx@linutronix.de, x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu,  6 Sep 2018 19:29:27 +0100
-Grant Likely <grant.likely@arm.com> wrote:
 
-> The dtb= parameter is no longer the primary mechanism for providing a
-> devicetree to the kernel. Now either firmware or the boot selector (ex.
-> Grub) should provide the devicetree and dtb= should only be used for
-> debug or when using firmware that doesn't understand DT.
-> Update the EFI stub documentation to reflect the current usage.
-> 
-> Signed-off-by: Grant Likely <grant.likely@arm.com>
-> Reviewed-by: Alexander Graf <agraf@suse.de>
-> Acked-by: Leif Lindholm <leif.lindholm@linaro.org>
-> Acked-by: Olof Johansson <olof@lixom.net>
-> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+* Aaron Ma <aaron.ma@canonical.com> wrote:
 
-Applied, thanks.
+>  	if (efi_fb)
+>  		return (efi_fb + start);
 
-jon
+Just noticed this detail unrelated to your patch: return is not a function.
+
+Thanks,
+
+	Ingo
