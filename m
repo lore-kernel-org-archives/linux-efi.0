@@ -1,41 +1,28 @@
-From: Joerg Roedel <jroedel@suse.de>
+From: Linus Torvalds <torvalds@linux-foundation.org>
 Subject: Re: Random crashes with i386 and efi boots
-Date: Tue, 11 Sep 2018 19:41:58 +0200
-Message-ID: <20180911174158.7qu6f4vfnfzqqrcf@suse.de>
-References: <20180910215659.GA17966@roeck-us.net>
- <D213F8BC-5C8E-44A2-810F-918B915F0804@amacapital.net>
- <877118e5-beee-4551-28d3-79e7aa52f74e@roeck-us.net>
- <90A7FF2E-F186-49CF-A028-CDE317BE13E1@amacapital.net>
+Date: Tue, 11 Sep 2018 07:59:10 -1000
+Message-ID: <CA+55aFzZ2rBWPrYOSozf44HNDhPPm94GCnsVDwCtnTOJbvombQ@mail.gmail.com>
+References: <20180910215659.GA17966@roeck-us.net> <D213F8BC-5C8E-44A2-810F-918B915F0804@amacapital.net>
+ <877118e5-beee-4551-28d3-79e7aa52f74e@roeck-us.net> <90A7FF2E-F186-49CF-A028-CDE317BE13E1@amacapital.net>
+ <20180911174158.7qu6f4vfnfzqqrcf@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <90A7FF2E-F186-49CF-A028-CDE317BE13E1@amacapital.net>
+In-Reply-To: <20180911174158.7qu6f4vfnfzqqrcf@suse.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Andy Lutomirski <luto@amacapital.net>
-Cc: Guenter Roeck <linux@roeck-us.net>, linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Michal Hocko <mhocko@suse.com>, Andi Kleen <ak@linux.intel.com>, Linus Torvalds <torvalds@linux-foundation.org>, Dave Hansen <dave.hansen@intel.com>, Pavel Machek <pavel@ucw.cz>, linux-efi@vger.kernel.org, x86@kernel.org
+To: Joerg Roedel <jroedel@suse.de>
+Cc: Andy Lutomirski <luto@amacapital.net>, Guenter Roeck <linux@roeck-us.net>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Michal Hocko <mhocko@suse.com>, Andi Kleen <ak@linux.intel.com>, Dave Hansen <dave.hansen@intel.com>, Pavel Machek <pavel@ucw.cz>, linux-efi <linux-efi@vger.kernel.org>, the arch/x86 maintainers <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Sep 11, 2018 at 09:36:51AM -0700, Andy Lutomirski wrote:
-> >    save_pgd = efi_call_phys_prolog();
-> >    local_irq_save(flags);
-> >    status = efi_call_phys(...);
-> >        local_irq_restore(flags);
-> > 
-> >        efi_call_phys_epilog(save_pgd);
-> > 
-> > So, yes, interrupts are very much enabled.
-> 
-> Does fixing that solve the problem?  It seems more robust.
+On Tue, Sep 11, 2018 at 7:42 AM Joerg Roedel <jroedel@suse.de> wrote:
+>
+> So I am in favor of changing the order in efi_call_phys_epilog() too.
 
-The problem is still that in efi_call_phys_prolog() we load the gdt with
-its physical address, and when we reload the %cr3 in _epilog from
-initial_page_table to swapper_pg_dir again the gdt is no longer mapped.
-Blocking interrupts is more robust, but we can't block NMIs that way
-that would also trigger the issue, no?
+Yeah, the only reason the order was changed was that it seemed more
+logical to use the new cr3 to load the GDT. But that was clearly
+wrong.
 
-So I am in favor of changing the order in efi_call_phys_epilog() too.
+So ack on just changing the order, and my bad for suggesting the
+change in the first place.
 
-Regards,
-
-	Joerg
+            Linus
