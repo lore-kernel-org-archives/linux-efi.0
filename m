@@ -1,85 +1,104 @@
-From: Guenter Roeck <linux@roeck-us.net>
-Subject: Re: Random crashes with i386 and efi boots
-Date: Tue, 11 Sep 2018 06:30:22 -0700
-Message-ID: <877118e5-beee-4551-28d3-79e7aa52f74e@roeck-us.net>
-References: <20180910215659.GA17966@roeck-us.net>
- <D213F8BC-5C8E-44A2-810F-918B915F0804@amacapital.net>
+From: Eugene Korenevsky <ekorenevsky@gmail.com>
+Subject: [PATCH v2] efi: take size of partition entry from GPT header
+Date: Tue, 11 Sep 2018 19:15:27 +0300
+Message-ID: <20180911161527.GA30689@vnote>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <D213F8BC-5C8E-44A2-810F-918B915F0804@amacapital.net>
-Content-Language: en-US
+Content-Disposition: inline
 Sender: linux-kernel-owner@vger.kernel.org
-To: Andy Lutomirski <luto@amacapital.net>
-Cc: linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Joerg Roedel <jroedel@suse.de>, Thomas Gleixner <tglx@linutronix.de>, Michal Hocko <mhocko@suse.com>, Andi Kleen <ak@linux.intel.com>, Linus Torvalds <torvalds@linux-foundation.org>, Dave Hansen <dave.hansen@intel.com>, Pavel Machek <pavel@ucw.cz>, linux-efi@vger.kernel.org, x86@kernel.org
+To: Davidlohr Bueso <dave@stgolabs.net>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 09/11/2018 04:52 AM, Andy Lutomirski wrote:
-> 
-> 
->> On Sep 10, 2018, at 2:56 PM, Guenter Roeck <linux@roeck-us.net> wrote:
->>
->> Hi folks,
->>
->> even after commit eeb89e2bb1ac ("x86/efi: Load fixmap GDT in
->> efi_call_phys_epilog()"), my i386/efi qemu boot tests still crash randomly
->> (roughly 5-10% of the time). As before, I don't see much useful output in
->> the qemu log (this time it doesn't even complain about a triple fault).
->>
->> Debugging shows that the crash happens in efi_call_phys_epilog().
->> A sample log from a crashed test run is attached below. It appears that
->> the crash happens if there is an interrupt at a critical section of the
->> code.
->>
->> While playing with the code, I found a possible fix.
->>
->> diff --git a/arch/x86/platform/efi/efi_32.c b/arch/x86/platform/efi/efi_32.c
->> index 05ca14222463..9959657127f4 100644
->> --- a/arch/x86/platform/efi/efi_32.c
->> +++ b/arch/x86/platform/efi/efi_32.c
->> @@ -85,10 +85,9 @@ pgd_t * __init efi_call_phys_prolog(void)
->>
->> void __init efi_call_phys_epilog(pgd_t *save_pgd)
->> {
->> +    load_fixmap_gdt(0);
->>     load_cr3(save_pgd);
->>     __flush_tlb_all();
->> -
->> -    load_fixmap_gdt(0);
->> }
-> 
-> We have IRQs on here?  It seems plausible that we’re in a window where the EFI pgd doesn’t have cpu_entry_area mapped. Also, the hard coded CPU 0 is suspicious.
-> 
-The hard coded CPU 0 was always there. The call is ultimately from
-efi_enter_virtual_mode(), which is called from start_kernel().
-so presumably it is guaranteed to run on CPU 0.
+Use gpt_header.sizeof_partition_entry instead of sizeof(gpt_entry)
+for GPT entry size.
+According to UEFI 2.7 spec 5.3.1 "GPT overview":, the size of a GUID Partition
+Entry element is defined in the Size Of Partition Entry field of GPT header.
+The GPT with entries sized more than sizeof(gpt_entry) is not illegal.
+OVMF firmware from EDK2 perfectly works with it, see edk2-tianocore source
+code.
 
-> Maybe try instrumenting the code to check whether the clone_pgd_range calls in setup_percpu.c have happened yet?
-> 
-The crash is seen late in the boot process, so I am quite sure it happened,
-but I can add a check if needed. I think that might be a different problem,
-though.
+Changes since v1: refactoring (extract get_gpt_entry function),
+                    fix (&ptes[i] -> pte)
 
-> Your patch may well be correct, but, if we have IRQs on, we should really have cpu_entry_area mapped in both pgds.
-> 
-> Or we could turn off IRQs. Why on Earth are IRQs on in a context where the fixmap gdt is unusable?
-> 
+Signed-off-by: Eugene Korenevsky <ekorenevsky@gmail.com>
+---
+ block/partitions/efi.c | 32 ++++++++++++++++++--------------
+ 1 file changed, 18 insertions(+), 14 deletions(-)
 
- From arch/x86/platform/efi/efi.c:phys_efi_set_virtual_address_map():
-
-	save_pgd = efi_call_phys_prolog();
-	local_irq_save(flags);
-	status = efi_call_phys(...);
-         local_irq_restore(flags);
-
-         efi_call_phys_epilog(save_pgd);
-
-So, yes, interrupts are very much enabled.
-
-I ran several additional test sequences. With above patch, no failures with
-500 boots. Without it, failure rate (long term average) across 500 boots
-is around 10%. Another data point: Moving load_fixmap_gdt(0); after
-load_cr3(save_pgd); does not help; it has to come first.
-
-Guenter
+diff --git a/block/partitions/efi.c b/block/partitions/efi.c
+index 39f70d968754..724f7c0805a2 100644
+--- a/block/partitions/efi.c
++++ b/block/partitions/efi.c
+@@ -428,11 +428,6 @@ static int is_gpt_valid(struct parsed_partitions *state, u64 lba,
+ 			 (unsigned long long)le64_to_cpu((*gpt)->first_usable_lba));
+ 		goto fail;
+ 	}
+-	/* Check that sizeof_partition_entry has the correct value */
+-	if (le32_to_cpu((*gpt)->sizeof_partition_entry) != sizeof(gpt_entry)) {
+-		pr_debug("GUID Partition Entry Size check failed.\n");
+-		goto fail;
+-	}
+ 
+ 	/* Sanity check partition table size */
+ 	pt_size = (u64)le32_to_cpu((*gpt)->num_partition_entries) *
+@@ -670,6 +665,11 @@ static int find_valid_gpt(struct parsed_partitions *state, gpt_header **gpt,
+         return 0;
+ }
+ 
++static gpt_entry *get_gpt_entry(gpt_header *gpt_hdr, gpt_entry *ptes, u32 index)
++{
++	return (gpt_entry *)((u8 *)ptes + gpt->sizeof_partition_entry * index);
++}
++
+ /**
+  * efi_partition(struct parsed_partitions *state)
+  * @state: disk parsed partitions
+@@ -704,32 +704,36 @@ int efi_partition(struct parsed_partitions *state)
+ 
+ 	pr_debug("GUID Partition Table is valid!  Yea!\n");
+ 
+-	for (i = 0; i < le32_to_cpu(gpt->num_partition_entries) && i < state->limit-1; i++) {
++	for (i = 0;
++	     i < le32_to_cpu(gpt->num_partition_entries) && i < state->limit-1;
++	     i++) {
++		gpt_entry *pte = get_gpt_entry(gpt, ptes, i);
+ 		struct partition_meta_info *info;
+ 		unsigned label_count = 0;
+ 		unsigned label_max;
+-		u64 start = le64_to_cpu(ptes[i].starting_lba);
+-		u64 size = le64_to_cpu(ptes[i].ending_lba) -
+-			   le64_to_cpu(ptes[i].starting_lba) + 1ULL;
++		u64 start = le64_to_cpu(pte->starting_lba);
++		u64 size = le64_to_cpu(pte->ending_lba) -
++			   le64_to_cpu(pte->starting_lba) + 1ULL;
+ 
+-		if (!is_pte_valid(&ptes[i], last_lba(state->bdev)))
++		if (!is_pte_valid(pte, last_lba(state->bdev)))
+ 			continue;
+ 
+ 		put_partition(state, i+1, start * ssz, size * ssz);
+ 
+ 		/* If this is a RAID volume, tell md */
+-		if (!efi_guidcmp(ptes[i].partition_type_guid, PARTITION_LINUX_RAID_GUID))
++		if (!efi_guidcmp(
++		    pte->partition_type_guid, PARTITION_LINUX_RAID_GUID))
+ 			state->parts[i + 1].flags = ADDPART_FLAG_RAID;
+ 
+ 		info = &state->parts[i + 1].info;
+-		efi_guid_to_str(&ptes[i].unique_partition_guid, info->uuid);
++		efi_guid_to_str(&pte->unique_partition_guid, info->uuid);
+ 
+ 		/* Naively convert UTF16-LE to 7 bits. */
+ 		label_max = min(ARRAY_SIZE(info->volname) - 1,
+-				ARRAY_SIZE(ptes[i].partition_name));
++				ARRAY_SIZE(pte->partition_name));
+ 		info->volname[label_max] = 0;
+ 		while (label_count < label_max) {
+-			u8 c = ptes[i].partition_name[label_count] & 0xff;
++			u8 c = pte->partition_name[label_count] & 0xff;
+ 			if (c && !isprint(c))
+ 				c = '!';
+ 			info->volname[label_count] = c;
+-- 
+2.18.0
