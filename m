@@ -1,8 +1,10 @@
 From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Subject: [PATCH V6 0/2] Add efi page fault handler to recover from page
-Date: Tue, 11 Sep 2018 12:15:20 -0700
-Message-ID: <1536693322-8335-1-git-send-email-sai.praneeth.prakhya@intel.com>
+Subject: [PATCH V6 2/2] x86/efi: Add efi page fault handler to recover from page faults caused by the firmware
+Date: Tue, 11 Sep 2018 12:15:22 -0700
+Message-ID: <1536693322-8335-3-git-send-email-sai.praneeth.prakhya@intel.com>
+References: <1536693322-8335-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1536693322-8335-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org
 Cc: Sai Praneeth <sai.praneeth.prakhya@intel.com>, Al Stone <astone@redhat.com>, Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Bhupesh Sharma <bhsharma@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Peter Zijlstra <peterz@infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
@@ -10,110 +12,25 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
 
-There may exist some buggy UEFI firmware implementations that access efi
-memory regions other than EFI_RUNTIME_SERVICES_<CODE/DATA> even after
-the kernel has assumed control of the platform. This violates UEFI
-specification. Hence, provide a efi specific page fault handler which
-recovers from page faults caused by buggy firmware.
+As per the UEFI specification, after the call to ExitBootServices(),
+accesses by the firmware to any memory regions except
+EFI_RUNTIME_SERVICES_<CODE/DATA> regions is considered illegal. A buggy
+firmware could trigger these illegal accesses when an efi runtime
+service is invoked and if this happens when the kernel is up and
+running, the kernel hangs.
 
-Page faults triggered by firmware happen at ring 0 and if unhandled,
-hangs the kernel. So, provide an efi specific page fault handler to:
-1. Avoid panics/hangs caused by buggy firmware.
+Kernel hangs because the memory region requested by the firmware isn't
+mapped in efi_pgd, which causes a page fault in ring 0 and the kernel
+fails to handle it, leading to die(). To save kernel from hanging, add
+an efi specific page fault handler which recovers from such faults by
+1. If the efi runtime service is efi_reset_system(), reboot the machine
+   through BIOS.
+2. If the efi runtime service is _not_ efi_reset_system(), then, freeze
+   efi_rts_wq and schedule a new process.
+
+The efi page fault handler offers us two advantages:
+1. Recovers from potential hangs that could be caused by buggy firmware.
 2. Shout loud that the firmware is buggy and hence is not a kernel bug.
-
-The efi page fault handler will check if the access is by
-efi_reset_system().
-1. If so, then the efi page fault handler will reboot the machine
-   through BIOS and not through efi_reset_system().
-2. If not, then the efi page fault handler will freeze efi_rts_wq and
-   schedules a new process.
-
-This issue was reported by Al Stone when he saw that reboot via EFI hangs
-the machine. Upon debugging, I found that it's efi_reset_system() that's
-touching memory regions which it shouldn't. To reproduce the same
-behavior, I have hacked OVMF and made efi_reset_system() buggy. Along
-with efi_reset_system(), I have also modified get_next_high_mono_count()
-and set_virtual_address_map(). They illegally access both boot time and
-other efi regions.
-
-Testing the patch set:
-----------------------
-1. Download buggy firmware from here [1].
-2. Run a qemu instance with this buggy BIOS and boot mainline kernel.
-Add reboot=efi to the kernel command line arguments and after the kernel
-is up and running, type "reboot". The kernel should hang while rebooting.
-3. With the same setup, boot kernel after applying patches and the
-reboot should work fine. Also please notice warning/error messages
-printed by kernel.
-
-Changes from RFC to V1:
------------------------
-1. Drop "long jump" technique of dealing with illegal access and instead
-   use scheduling away from efi_rts_wq.
-
-Changes from V1 to V2:
-----------------------
-1. Shortened config name to CONFIG_EFI_WARN_ON_ILLEGAL_ACCESS from
-   CONFIG_EFI_WARN_ON_ILLEGAL_ACCESSES.
-2. Made the config option available only to expert users.
-3. efi_free_boot_services() should be called only when
-   CONFIG_EFI_WARN_ON_ILLEGAL_ACCESS is not enabled. Previously, this
-   was part of init/main.c file. As it is an architecture agnostic code,
-   moved the change to arch/x86/platform/efi/quirks.c file.
-
-Changes from V2 to V3:
-----------------------
-1. Drop treating illegal access to EFI_BOOT_SERVICES_<CODE/DATA> regions
-   separately from illegal accesses to other regions like
-   EFI_CONVENTIONAL_MEMORY or EFI_LOADER_<CODE/DATA>.
-   In previous versions, illegal access to EFI_BOOT_SERVICES_<CODE/DATA>
-   regions were handled by mapping requested region to efi_pgd but from
-   V3 they are handled similar to illegal access to other regions i.e by
-   freezing efi_rts_wq and scheduling new process.
-2. Change __efi_init_fixup attribute to __efi_init.
-
-Changes from V3 to V4:
-----------------------
-1. Drop saving original memory map passed by kernel. It also means less
-   checks in efi page fault handler.
-2. Change the config name to EFI_PAGE_FAULT_HANDLER to reflect it's
-   functionality more appropriately.
-
-Changes from V4 to V5:
-----------------------
-1. Drop config option that enables efi page fault handler, instead make
-   it default.
-2. Call schedule() in an infinite loop to account for spurious wake ups.
-3. Introduce "NONE" as an efi runtime service function identifier so that
-   it could be used in efi_recover_from_page_fault() to check if the page
-   fault was indeed triggered by an efi runtime service.
-
-Changes from V5 to V6:
-----------------------
-1. Thanks to 0-day for reporting build error when CONFIG_EFI is not
-   enabled. Fixed it by calling efi page fault handler only when
-   CONFIG_EFI is enabled.
-2. Change return type of efi page fault handler from int to void. void
-   return type should do (and int is not needed) because the efi page
-   fault handler returns only upon a failure to handle page fault.
-
-Note:
------
-Patch set based on "next" branch in efi tree.
-
-[1] https://drive.google.com/drive/folders/1VozKTms92ifyVHAT0ZDQe55ZYL1UE5wt
-
-Sai Praneeth (2):
-  efi: Make efi_rts_work accessible to efi page fault handler
-  x86/efi: Add efi page fault handler to recover from page faults caused
-        by the firmware
-
- arch/x86/include/asm/efi.h              |  1 +
- arch/x86/mm/fault.c                     |  9 ++++
- arch/x86/platform/efi/quirks.c          | 78 +++++++++++++++++++++++++++++++++
- drivers/firmware/efi/runtime-wrappers.c | 61 +++++++-------------------
- include/linux/efi.h                     | 42 ++++++++++++++++++
- 5 files changed, 147 insertions(+), 44 deletions(-)
 
 Tested-by: Bhupesh Sharma <bhsharma@redhat.com>
 Suggested-by: Matt Fleming <matt@codeblueprint.co.uk>
@@ -127,6 +44,212 @@ Cc: Bhupesh Sharma <bhsharma@redhat.com>
 Cc: Thomas Gleixner <tglx@linutronix.de>
 Cc: Peter Zijlstra <peterz@infradead.org>
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ arch/x86/include/asm/efi.h              |  1 +
+ arch/x86/mm/fault.c                     |  9 ++++
+ arch/x86/platform/efi/quirks.c          | 78 +++++++++++++++++++++++++++++++++
+ drivers/firmware/efi/runtime-wrappers.c |  8 ++++
+ include/linux/efi.h                     |  8 +++-
+ 5 files changed, 103 insertions(+), 1 deletion(-)
 
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index cec5fae23eb3..eea40d52ca78 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -140,6 +140,7 @@ extern void __init efi_apply_memmap_quirks(void);
+ extern int __init efi_reuse_config(u64 tables, int nr_tables);
+ extern void efi_delete_dummy_variable(void);
+ extern void efi_switch_mm(struct mm_struct *mm);
++extern void efi_recover_from_page_fault(unsigned long phys_addr);
+ 
+ struct efi_setup_data {
+ 	u64 fw_vendor;
+diff --git a/arch/x86/mm/fault.c b/arch/x86/mm/fault.c
+index 2aafa6ab6103..fd636c82d3c1 100644
+--- a/arch/x86/mm/fault.c
++++ b/arch/x86/mm/fault.c
+@@ -16,6 +16,7 @@
+ #include <linux/prefetch.h>		/* prefetchw			*/
+ #include <linux/context_tracking.h>	/* exception_enter(), ...	*/
+ #include <linux/uaccess.h>		/* faulthandler_disabled()	*/
++#include <linux/efi.h>			/* efi_recover_from_page_fault()*/
+ 
+ #include <asm/cpufeature.h>		/* boot_cpu_has, ...		*/
+ #include <asm/traps.h>			/* dotraplinkage, ...		*/
+@@ -24,6 +25,7 @@
+ #include <asm/vsyscall.h>		/* emulate_vsyscall		*/
+ #include <asm/vm86.h>			/* struct vm86			*/
+ #include <asm/mmu_context.h>		/* vma_pkey()			*/
++#include <asm/efi.h>			/* efi_recover_from_page_fault()*/
+ 
+ #define CREATE_TRACE_POINTS
+ #include <asm/trace/exceptions.h>
+@@ -790,6 +792,13 @@ no_context(struct pt_regs *regs, unsigned long error_code,
+ 		return;
+ 
+ 	/*
++	 * Buggy firmware could access regions which might page fault, try to
++	 * recover from such faults.
++	 */
++	if (IS_ENABLED(CONFIG_EFI))
++		efi_recover_from_page_fault(address);
++
++	/*
+ 	 * Oops. The kernel tried to access some bad page. We'll have to
+ 	 * terminate things with extreme prejudice:
+ 	 */
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index 844d31cb8a0c..669babcaf245 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -16,6 +16,7 @@
+ #include <asm/efi.h>
+ #include <asm/uv/uv.h>
+ #include <asm/cpu_device_id.h>
++#include <asm/reboot.h>
+ 
+ #define EFI_MIN_RESERVE 5120
+ 
+@@ -654,3 +655,80 @@ int efi_capsule_setup_info(struct capsule_info *cap_info, void *kbuff,
+ }
+ 
+ #endif
++
++/*
++ * If any access by any efi runtime service causes a page fault, then,
++ * 1. If it's efi_reset_system(), reboot through BIOS.
++ * 2. If any other efi runtime service, then
++ *    a. Return error status to the efi caller process.
++ *    b. Disable EFI Runtime Services forever and
++ *    c. Freeze efi_rts_wq and schedule new process.
++ *
++ * @return: Returns, if the page fault is not handled. This function
++ * will never return if the page fault is handled successfully.
++ */
++void efi_recover_from_page_fault(unsigned long phys_addr)
++{
++	if (!IS_ENABLED(CONFIG_X86_64))
++		return;
++
++	/*
++	 * Make sure that an efi runtime service caused the page fault.
++	 * "efi_mm" cannot be used to check if the page fault had occurred
++	 * in the firmware context because efi=old_map doesn't use efi_pgd.
++	 */
++	if (efi_rts_work.efi_rts_id == NONE)
++		return;
++
++	/*
++	 * Address range 0x0000 - 0x0fff is always mapped in the efi_pgd, so
++	 * page faulting on these addresses isn't expected.
++	 */
++	if (phys_addr >= 0x0000 && phys_addr <= 0x0fff)
++		return;
++
++	/*
++	 * Print stack trace as it might be useful to know which EFI Runtime
++	 * Service is buggy.
++	 */
++	WARN(1, FW_BUG "Page fault caused by firmware at PA: 0x%lx\n",
++	     phys_addr);
++
++	/*
++	 * Buggy efi_reset_system() is handled differently from other EFI
++	 * Runtime Services as it doesn't use efi_rts_wq. Although,
++	 * native_machine_emergency_restart() says that machine_real_restart()
++	 * could fail, it's better not to compilcate this fault handler
++	 * because this case occurs *very* rarely and hence could be improved
++	 * on a need by basis.
++	 */
++	if (efi_rts_work.efi_rts_id == RESET_SYSTEM) {
++		pr_info("efi_reset_system() buggy! Reboot through BIOS\n");
++		machine_real_restart(MRR_BIOS);
++		return;
++	}
++
++	/*
++	 * Before calling EFI Runtime Service, the kernel has switched the
++	 * calling process to efi_mm. Hence, switch back to task_mm.
++	 */
++	arch_efi_call_virt_teardown();
++
++	/* Signal error status to the efi caller process */
++	efi_rts_work.status = EFI_ABORTED;
++	complete(&efi_rts_work.efi_rts_comp);
++
++	clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
++	pr_info("Froze efi_rts_wq and disabled EFI Runtime Services\n");
++
++	/*
++	 * Call schedule() in an infinite loop, so that any spurious wake ups
++	 * will never run efi_rts_wq again.
++	 */
++	for (;;) {
++		set_current_state(TASK_IDLE);
++		schedule();
++	}
++
++	return;
++}
+diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
+index b18b2d864c2c..7455277a3b65 100644
+--- a/drivers/firmware/efi/runtime-wrappers.c
++++ b/drivers/firmware/efi/runtime-wrappers.c
+@@ -61,6 +61,11 @@ struct efi_runtime_work efi_rts_work;
+ ({									\
+ 	efi_rts_work.status = EFI_ABORTED;				\
+ 									\
++	if (!efi_enabled(EFI_RUNTIME_SERVICES)) {			\
++		pr_info("Aborting! EFI Runtime Services disabled\n");	\
++		goto exit;						\
++	}								\
++									\
+ 	init_completion(&efi_rts_work.efi_rts_comp);			\
+ 	INIT_WORK_ONSTACK(&efi_rts_work.work, efi_call_rts);		\
+ 	efi_rts_work.arg1 = _arg1;					\
+@@ -79,6 +84,8 @@ struct efi_runtime_work efi_rts_work;
+ 	else								\
+ 		pr_err("Failed to queue work to efi_rts_wq.\n");	\
+ 									\
++exit:									\
++	efi_rts_work.efi_rts_id = NONE;					\
+ 	efi_rts_work.status;						\
+ })
+ 
+@@ -393,6 +400,7 @@ static void virt_efi_reset_system(int reset_type,
+ 			"could not get exclusive access to the firmware\n");
+ 		return;
+ 	}
++	efi_rts_work.efi_rts_id = RESET_SYSTEM;
+ 	__efi_call_virt(reset_system, reset_type, status, data_size, data);
+ 	up(&efi_runtime_lock);
+ }
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 855992b15269..dea9e7bb5208 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1659,8 +1659,13 @@ struct linux_efi_tpm_eventlog {
+ 
+ extern int efi_tpm_eventlog_init(void);
+ 
+-/* efi_runtime_service() function identifiers */
++/*
++ * efi_runtime_service() function identifiers.
++ * "NONE" is used by efi_recover_from_page_fault() to check if the page
++ * fault happened while executing an efi runtime service.
++ */
+ enum efi_rts_ids {
++	NONE,
+ 	GET_TIME,
+ 	SET_TIME,
+ 	GET_WAKEUP_TIME,
+@@ -1670,6 +1675,7 @@ enum efi_rts_ids {
+ 	SET_VARIABLE,
+ 	QUERY_VARIABLE_INFO,
+ 	GET_NEXT_HIGH_MONO_COUNT,
++	RESET_SYSTEM,
+ 	UPDATE_CAPSULE,
+ 	QUERY_CAPSULE_CAPS,
+ };
 -- 
 2.7.4
