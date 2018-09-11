@@ -1,45 +1,46 @@
-From: Chao Fan <fanc.fnst@cn.fujitsu.com>
-Subject: Re: [RFC PATCH] x86/boot: get_acpi_srat_table() can be static
-Date: Tue, 11 Sep 2018 16:55:25 +0800
-Message-ID: <20180911085525.GF8519@localhost.localdomain>
-References: <20180910124015.18073-2-fanc.fnst@cn.fujitsu.com>
- <20180911085226.GA25670@athens>
+From: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Subject: Re: [PATCH v1 3/4] ACPI / LPSS: Get rid of custom ICPU() macro
+Date: Tue, 11 Sep 2018 13:02:50 +0200
+Message-ID: <2988878.r6y5agHKkI@aspire.rjw.lan>
+References: <20180831091018.17543-1-andriy.shevchenko@linux.intel.com> <20180831091018.17543-3-andriy.shevchenko@linux.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20180911085226.GA25670@athens>
+In-Reply-To: <20180831091018.17543-3-andriy.shevchenko@linux.intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: kbuild test robot <fengguang.wu@intel.com>
-Cc: kbuild-all@01.org, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, x86@kernel.org, linux-kernel@vger.kernel.org, keescook@chromium.org, bhe@redhat.com, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com, douly.fnst@cn.fujitsu.com, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Len Brown <lenb@kernel.org>, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Sep 11, 2018 at 04:52:26PM +0800, kbuild test robot wrote:
->
->Fixes: cc1a4e2a5474 ("x86/boot: Add acpitb.c to parse acpi tables")
->Signed-off-by: kbuild test robot <fengguang.wu@intel.com>
->---
-> acpitb.c |    2 +-
-> 1 file changed, 1 insertion(+), 1 deletion(-)
->
->diff --git a/arch/x86/boot/compressed/acpitb.c b/arch/x86/boot/compressed/acpitb.c
->index 66c5154..4ddd732 100644
->--- a/arch/x86/boot/compressed/acpitb.c
->+++ b/arch/x86/boot/compressed/acpitb.c
->@@ -279,7 +279,7 @@ static acpi_physical_address get_rsdp_addr(void)
-> 	return pa;
-> }
+On Friday, August 31, 2018 11:10:17 AM CEST Andy Shevchenko wrote:
+> Replace custom grown macro with generic INTEL_CPU_FAM6_NODATA() one.
 > 
->-struct acpi_table_header *get_acpi_srat_table(void)
->+static struct acpi_table_header *get_acpi_srat_table(void)
+> No functional change intended.
+> 
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+> ---
+>  drivers/acpi/acpi_lpss.c | 6 ++----
+>  1 file changed, 2 insertions(+), 4 deletions(-)
+> 
+> diff --git a/drivers/acpi/acpi_lpss.c b/drivers/acpi/acpi_lpss.c
+> index 9706613eecf9..c363e2a40f13 100644
+> --- a/drivers/acpi/acpi_lpss.c
+> +++ b/drivers/acpi/acpi_lpss.c
+> @@ -289,11 +289,9 @@ static const struct lpss_device_desc bsw_spi_dev_desc = {
+>  	.setup = lpss_deassert_reset,
+>  };
+>  
+> -#define ICPU(model)	{ X86_VENDOR_INTEL, 6, model, X86_FEATURE_ANY, }
+> -
+>  static const struct x86_cpu_id lpss_cpu_ids[] = {
+> -	ICPU(INTEL_FAM6_ATOM_SILVERMONT1),	/* Valleyview, Bay Trail */
+> -	ICPU(INTEL_FAM6_ATOM_AIRMONT),	/* Braswell, Cherry Trail */
+> +	INTEL_CPU_FAM6_NODATA(ATOM_SILVERMONT1),	/* Valleyview, Bay Trail */
+> +	INTEL_CPU_FAM6_NODATA(ATOM_AIRMONT),		/* Braswell, Cherry Trail */
+>  	{}
+>  };
+>  
+> 
 
-Good catch, will add it.
-
-Thanks,
-Chao Fan
-
-> {
-> 	char *args = (char *)get_cmd_line_ptr();
-> 	acpi_physical_address acpi_table;
->
->
+Acked-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
