@@ -1,57 +1,106 @@
-From: Aaron Ma <aaron.ma@canonical.com>
-Subject: [PATCH v2] x86/efi: earlyprintk - Add 64bit efi fb address support
-Date: Thu, 13 Sep 2018 02:00:08 +0800
-Message-ID: <1536775208-8064-1-git-send-email-aaron.ma@canonical.com>
-References: <1536423828-5693-1-git-send-email-aaron.ma@canonical.com>
+From: Eugene Korenevsky <ekorenevsky@gmail.com>
+Subject: [PATCH v3] efi: take size of partition entry from GPT header
+Date: Wed, 12 Sep 2018 21:35:19 +0300
+Message-ID: <20180912183519.GA31506@vnote>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1536423828-5693-1-git-send-email-aaron.ma@canonical.com>
+Content-Disposition: inline
 Sender: linux-kernel-owner@vger.kernel.org
-To: ard.biesheuvel@linaro.org, tglx@linutronix.de, x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, aaron.ma@canonical.com
+To: Davidlohr Bueso <dave@stgolabs.net>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-EFI GOP uses 64-bit frame buffer address in some BIOS.
-Add 64bit address support in efi earlyprintk.
+Use gpt_header.sizeof_partition_entry instead of sizeof(gpt_entry)
+for GPT entry size.
+According to UEFI 2.7 spec 5.3.1 "GPT overview":, the size of a GUID Partition
+Entry element is defined in the Size Of Partition Entry field of GPT header.
+The GPT with entries sized more than sizeof(gpt_entry) is not illegal.
+OVMF firmware from EDK2 perfectly works with it, see edk2-tianocore source
+code.
 
-V2:
-Fix type of address.
+Changes since v1: refactoring (extract get_gpt_entry function),
+                  fix (&ptes[i] -> pte)
+Changes since v2: use le32_to_cpu, fix typo, sanity check for
+                  sizeof_partition_entry
 
-Signed-off-by: Aaron Ma <aaron.ma@canonical.com>
+Signed-off-by: Eugene Korenevsky <ekorenevsky@gmail.com>
 ---
- arch/x86/platform/efi/early_printk.c | 8 ++++++--
- 1 file changed, 6 insertions(+), 2 deletions(-)
+ block/partitions/efi.c | 32 +++++++++++++++++++++-----------
+ 1 file changed, 21 insertions(+), 11 deletions(-)
 
-diff --git a/arch/x86/platform/efi/early_printk.c b/arch/x86/platform/efi/early_printk.c
-index 5fdacb322ceb..7476b3b097e1 100644
---- a/arch/x86/platform/efi/early_printk.c
-+++ b/arch/x86/platform/efi/early_printk.c
-@@ -26,12 +26,14 @@ static bool early_efi_keep;
-  */
- static __init int early_efi_map_fb(void)
- {
--	unsigned long base, size;
-+	u64 base, size;
+diff --git a/block/partitions/efi.c b/block/partitions/efi.c
+index 39f70d968754..c8ff7860973d 100644
+--- a/block/partitions/efi.c
++++ b/block/partitions/efi.c
+@@ -429,8 +429,8 @@ static int is_gpt_valid(struct parsed_partitions *state, u64 lba,
+ 		goto fail;
+ 	}
+ 	/* Check that sizeof_partition_entry has the correct value */
+-	if (le32_to_cpu((*gpt)->sizeof_partition_entry) != sizeof(gpt_entry)) {
+-		pr_debug("GUID Partition Entry Size check failed.\n");
++	if (le32_to_cpu((*gpt)->sizeof_partition_entry) < sizeof(gpt_entry)) {
++		pr_debug("GUID Partition Entry Size is too small.\n");
+ 		goto fail;
+ 	}
  
- 	if (!early_efi_keep)
- 		return 0;
+@@ -670,6 +670,12 @@ static int find_valid_gpt(struct parsed_partitions *state, gpt_header **gpt,
+         return 0;
+ }
  
- 	base = boot_params.screen_info.lfb_base;
-+	if (boot_params.screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
-+		base |= (u64)boot_params.screen_info.ext_lfb_base << 32;
- 	size = boot_params.screen_info.lfb_size;
- 	efi_fb = ioremap(base, size);
++static gpt_entry *get_gpt_entry(gpt_header *gpt, gpt_entry *ptes, u32 index)
++{
++	return (gpt_entry *)((u8 *)ptes +
++			le32_to_cpu(gpt->sizeof_partition_entry) * index);
++}
++
+ /**
+  * efi_partition(struct parsed_partitions *state)
+  * @state: disk parsed partitions
+@@ -704,32 +710,36 @@ int efi_partition(struct parsed_partitions *state)
  
-@@ -46,9 +48,11 @@ early_initcall(early_efi_map_fb);
-  */
- static __ref void *early_efi_map(unsigned long start, unsigned long len)
- {
--	unsigned long base;
-+	u64 base;
+ 	pr_debug("GUID Partition Table is valid!  Yea!\n");
  
- 	base = boot_params.screen_info.lfb_base;
-+	if (boot_params.screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
-+		base |= (u64)boot_params.screen_info.ext_lfb_base << 32;
+-	for (i = 0; i < le32_to_cpu(gpt->num_partition_entries) && i < state->limit-1; i++) {
++	for (i = 0;
++	     i < le32_to_cpu(gpt->num_partition_entries) && i < state->limit-1;
++	     i++) {
++		gpt_entry *pte = get_gpt_entry(gpt, ptes, i);
+ 		struct partition_meta_info *info;
+ 		unsigned label_count = 0;
+ 		unsigned label_max;
+-		u64 start = le64_to_cpu(ptes[i].starting_lba);
+-		u64 size = le64_to_cpu(ptes[i].ending_lba) -
+-			   le64_to_cpu(ptes[i].starting_lba) + 1ULL;
++		u64 start = le64_to_cpu(pte->starting_lba);
++		u64 size = le64_to_cpu(pte->ending_lba) -
++			   le64_to_cpu(pte->starting_lba) + 1ULL;
  
- 	if (efi_fb)
- 		return (efi_fb + start);
+-		if (!is_pte_valid(&ptes[i], last_lba(state->bdev)))
++		if (!is_pte_valid(pte, last_lba(state->bdev)))
+ 			continue;
+ 
+ 		put_partition(state, i+1, start * ssz, size * ssz);
+ 
+ 		/* If this is a RAID volume, tell md */
+-		if (!efi_guidcmp(ptes[i].partition_type_guid, PARTITION_LINUX_RAID_GUID))
++		if (!efi_guidcmp(
++		    pte->partition_type_guid, PARTITION_LINUX_RAID_GUID))
+ 			state->parts[i + 1].flags = ADDPART_FLAG_RAID;
+ 
+ 		info = &state->parts[i + 1].info;
+-		efi_guid_to_str(&ptes[i].unique_partition_guid, info->uuid);
++		efi_guid_to_str(&pte->unique_partition_guid, info->uuid);
+ 
+ 		/* Naively convert UTF16-LE to 7 bits. */
+ 		label_max = min(ARRAY_SIZE(info->volname) - 1,
+-				ARRAY_SIZE(ptes[i].partition_name));
++				ARRAY_SIZE(pte->partition_name));
+ 		info->volname[label_max] = 0;
+ 		while (label_count < label_max) {
+-			u8 c = ptes[i].partition_name[label_count] & 0xff;
++			u8 c = pte->partition_name[label_count] & 0xff;
+ 			if (c && !isprint(c))
+ 				c = '!';
+ 			info->volname[label_count] = c;
 -- 
-2.17.1
+2.18.0
