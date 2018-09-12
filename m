@@ -1,65 +1,61 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH v2] x86/efi: earlyprintk - Add 64bit efi fb address support
-Date: Wed, 12 Sep 2018 20:39:39 +0200
-Message-ID: <CAKv+Gu9D-qSYVxT7zgK5SBUoJfR-XJgGQrco6mfme_e049LA7A@mail.gmail.com>
-References: <1536423828-5693-1-git-send-email-aaron.ma@canonical.com> <1536775208-8064-1-git-send-email-aaron.ma@canonical.com>
+From: Davidlohr Bueso <dave@stgolabs.net>
+Subject: Re: [PATCH v3] efi: take size of partition entry from GPT header
+Date: Wed, 12 Sep 2018 11:55:17 -0700
+Message-ID: <20180912185517.GE3902@linux-r8p5>
+References: <20180912183519.GA31506@vnote>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii; format=flowed
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1536775208-8064-1-git-send-email-aaron.ma@canonical.com>
+Content-Disposition: inline
+In-Reply-To: <20180912183519.GA31506@vnote>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Aaron Ma <aaron.ma@canonical.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>, the arch/x86 maintainers <x86@kernel.org>, linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Eugene Korenevsky <ekorenevsky@gmail.com>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 12 September 2018 at 20:00, Aaron Ma <aaron.ma@canonical.com> wrote:
-> EFI GOP uses 64-bit frame buffer address in some BIOS.
-> Add 64bit address support in efi earlyprintk.
+On Wed, 12 Sep 2018, Eugene Korenevsky wrote:
+> /**
+>  * efi_partition(struct parsed_partitions *state)
+>  * @state: disk parsed partitions
+>@@ -704,32 +710,36 @@ int efi_partition(struct parsed_partitions *state)
 >
-> V2:
-> Fix type of address.
+> 	pr_debug("GUID Partition Table is valid!  Yea!\n");
 >
-> Signed-off-by: Aaron Ma <aaron.ma@canonical.com>
+>-	for (i = 0; i < le32_to_cpu(gpt->num_partition_entries) && i < state->limit-1; i++) {
+>+	for (i = 0;
+>+	     i < le32_to_cpu(gpt->num_partition_entries) && i < state->limit-1;
+>+	     i++) {
 
-Thanks. Queued in efi/next.
+Please rearrange this like:
 
-> ---
->  arch/x86/platform/efi/early_printk.c | 8 ++++++--
->  1 file changed, 6 insertions(+), 2 deletions(-)
+       for (i = 0;  < le32_to_cpu(gpt->num_partition_entries) &&
+       	      	      i < state->limit-1; i++)
+
+>+		gpt_entry *pte = get_gpt_entry(gpt, ptes, i);
+> 		struct partition_meta_info *info;
+> 		unsigned label_count = 0;
+> 		unsigned label_max;
+>-		u64 start = le64_to_cpu(ptes[i].starting_lba);
+>-		u64 size = le64_to_cpu(ptes[i].ending_lba) -
+>-			   le64_to_cpu(ptes[i].starting_lba) + 1ULL;
+>+		u64 start = le64_to_cpu(pte->starting_lba);
+>+		u64 size = le64_to_cpu(pte->ending_lba) -
+>+			   le64_to_cpu(pte->starting_lba) + 1ULL;
 >
-> diff --git a/arch/x86/platform/efi/early_printk.c b/arch/x86/platform/efi/early_printk.c
-> index 5fdacb322ceb..7476b3b097e1 100644
-> --- a/arch/x86/platform/efi/early_printk.c
-> +++ b/arch/x86/platform/efi/early_printk.c
-> @@ -26,12 +26,14 @@ static bool early_efi_keep;
->   */
->  static __init int early_efi_map_fb(void)
->  {
-> -       unsigned long base, size;
-> +       u64 base, size;
+>-		if (!is_pte_valid(&ptes[i], last_lba(state->bdev)))
+>+		if (!is_pte_valid(pte, last_lba(state->bdev)))
+> 			continue;
 >
->         if (!early_efi_keep)
->                 return 0;
+> 		put_partition(state, i+1, start * ssz, size * ssz);
 >
->         base = boot_params.screen_info.lfb_base;
-> +       if (boot_params.screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
-> +               base |= (u64)boot_params.screen_info.ext_lfb_base << 32;
->         size = boot_params.screen_info.lfb_size;
->         efi_fb = ioremap(base, size);
->
-> @@ -46,9 +48,11 @@ early_initcall(early_efi_map_fb);
->   */
->  static __ref void *early_efi_map(unsigned long start, unsigned long len)
->  {
-> -       unsigned long base;
-> +       u64 base;
->
->         base = boot_params.screen_info.lfb_base;
-> +       if (boot_params.screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
-> +               base |= (u64)boot_params.screen_info.ext_lfb_base << 32;
->
->         if (efi_fb)
->                 return (efi_fb + start);
-> --
-> 2.17.1
->
+> 		/* If this is a RAID volume, tell md */
+>-		if (!efi_guidcmp(ptes[i].partition_type_guid, PARTITION_LINUX_RAID_GUID))
+>+		if (!efi_guidcmp(
+>+		    pte->partition_type_guid, PARTITION_LINUX_RAID_GUID))
+
+This is ugly. If you are worried about 80-chars, please do:
+
+     	      	 if (!efi_guidcmp(pte->partition_type_guid,
+				PARTITION_LINUX_RAID_GUID))
+
+Thanks,
+Davidlohr
