@@ -1,40 +1,106 @@
-From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
-Subject: RE: [PATCH V6 2/2] x86/efi: Add efi page fault handler to recover
- from page faults caused by the firmware
-Date: Wed, 12 Sep 2018 19:02:58 +0000
-Message-ID: <FFF73D592F13FD46B8700F0A279B802F485BB609@ORSMSX114.amr.corp.intel.com>
-References: <1536693322-8335-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <1536693322-8335-3-git-send-email-sai.praneeth.prakhya@intel.com>
- <alpine.DEB.2.21.1809122055190.1473@nanos.tec.linutronix.de>
- <CAKv+Gu9yDEfUFkTK0orYLjRfs+=WXwPvr44a2q0ALiWMNEpmDg@mail.gmail.com>
+From: Eugene Korenevsky <ekorenevsky@gmail.com>
+Subject: [PATCH v4] efi: take size of partition entry from GPT header
+Date: Wed, 12 Sep 2018 23:09:14 +0300
+Message-ID: <20180912200914.GA16693@vnote>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu9yDEfUFkTK0orYLjRfs+=WXwPvr44a2q0ALiWMNEpmDg@mail.gmail.com>
-Content-Language: en-US
+Content-Disposition: inline
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, the arch/x86 maintainers <x86@kernel.org>, Al Stone <astone@redhat.com>, Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Bhupesh Sharma <bhsharma@redhat.com>, Peter Zijlstra <peterz@infradead.org>
+To: Davidlohr Bueso <dave@stgolabs.net>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-PiBPbiAxMiBTZXB0ZW1iZXIgMjAxOCBhdCAyMDo1NiwgVGhvbWFzIEdsZWl4bmVyIDx0Z2x4QGxp
-bnV0cm9uaXguZGU+IHdyb3RlOg0KPiA+IE9uIFR1ZSwgMTEgU2VwIDIwMTgsIFNhaSBQcmFuZWV0
-aCBQcmFraHlhIHdyb3RlOg0KPiA+PiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9maXJtd2FyZS9lZmkv
-cnVudGltZS13cmFwcGVycy5jDQo+IGIvZHJpdmVycy9maXJtd2FyZS9lZmkvcnVudGltZS13cmFw
-cGVycy5jDQo+ID4+IGluZGV4IGIxOGIyZDg2NGMyYy4uNzQ1NTI3N2EzYjY1IDEwMDY0NA0KPiA+
-PiAtLS0gYS9kcml2ZXJzL2Zpcm13YXJlL2VmaS9ydW50aW1lLXdyYXBwZXJzLmMNCj4gPj4gKysr
-IGIvZHJpdmVycy9maXJtd2FyZS9lZmkvcnVudGltZS13cmFwcGVycy5jDQo+ID4+IEBAIC02MSw2
-ICs2MSwxMSBAQCBzdHJ1Y3QgZWZpX3J1bnRpbWVfd29yayBlZmlfcnRzX3dvcms7DQo+ID4+ICAo
-eyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICBcDQo+ID4+ICAgICAgIGVmaV9ydHNfd29yay5zdGF0dXMgPSBFRklfQUJPUlRF
-RDsgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcDQo+ID4+ICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcDQo+
-ID4+ICsgICAgIGlmICghZWZpX2VuYWJsZWQoRUZJX1JVTlRJTUVfU0VSVklDRVMpKSB7ICAgICAg
-ICAgICAgICAgICAgICAgICBcDQo+ID4+ICsgICAgICAgICAgICAgcHJfaW5mbygiQWJvcnRpbmch
-IEVGSSBSdW50aW1lIFNlcnZpY2VzIGRpc2FibGVkXG4iKTsgICBcDQo+ID4NCj4gPiBUaGlzIHBy
-b2JhYnkgd2FudHMgdG8gYmUgcHJfaW5mb19pbmNlKCkuDQo+ID4NCg0KWWVzLi4gdGhhdCBtYWtl
-cyBzZW5zZS4NCg0KPiANCj4gSSBjYW4gZml4IHRoYXQgdXAgd2hlbiBhcHBseWluZy4NCj4NCg0K
-VGhhbmtzIGEgbG90ISBBcmQuDQogDQo+ID4gT3RoZXIgdGhhbiB0aGF0Og0KPiA+DQo+ID4gICAg
-ICAgUmV2aWV3ZWQtYnk6IFRob21hcyBHbGVpeG5lciA8dGdseEBsaW51dHJvbml4LmRlPg0KPiAN
-Cj4gVGhhbmtzISBJIHdpbGwgcXVldWUgdGhpcyB1cCBpbiBlZmkvbmV4dA0K
+Use gpt_header.sizeof_partition_entry instead of sizeof(gpt_entry)
+for GPT entry size.
+According to UEFI 2.7 spec 5.3.1 "GPT overview":, the size of a GUID Partition
+Entry element is defined in the Size Of Partition Entry field of GPT header.
+The GPT with entries sized more than sizeof(gpt_entry) is not illegal.
+OVMF firmware from EDK2 perfectly works with it, see edk2-tianocore source
+code.
+
+Changes since v1: refactoring (extract get_gpt_entry function),
+                  fix (&ptes[i] -> pte)
+Changes since v2: use le32_to_cpu, fix typo, sanity check for
+                  sizeof_partition_entry
+Changes since v3: style fixes
+
+Signed-off-by: Eugene Korenevsky <ekorenevsky@gmail.com>
+---
+ block/partitions/efi.c | 31 ++++++++++++++++++++-----------
+ 1 file changed, 20 insertions(+), 11 deletions(-)
+
+diff --git a/block/partitions/efi.c b/block/partitions/efi.c
+index 39f70d968754..0d10a582b5bc 100644
+--- a/block/partitions/efi.c
++++ b/block/partitions/efi.c
+@@ -429,8 +429,8 @@ static int is_gpt_valid(struct parsed_partitions *state, u64 lba,
+ 		goto fail;
+ 	}
+ 	/* Check that sizeof_partition_entry has the correct value */
+-	if (le32_to_cpu((*gpt)->sizeof_partition_entry) != sizeof(gpt_entry)) {
+-		pr_debug("GUID Partition Entry Size check failed.\n");
++	if (le32_to_cpu((*gpt)->sizeof_partition_entry) < sizeof(gpt_entry)) {
++		pr_debug("GUID Partition Entry Size is too small.\n");
+ 		goto fail;
+ 	}
+ 
+@@ -670,6 +670,12 @@ static int find_valid_gpt(struct parsed_partitions *state, gpt_header **gpt,
+         return 0;
+ }
+ 
++static gpt_entry *get_gpt_entry(gpt_header *gpt, gpt_entry *ptes, u32 index)
++{
++	return (gpt_entry *)((u8 *)ptes +
++			le32_to_cpu(gpt->sizeof_partition_entry) * index);
++}
++
+ /**
+  * efi_partition(struct parsed_partitions *state)
+  * @state: disk parsed partitions
+@@ -704,32 +710,35 @@ int efi_partition(struct parsed_partitions *state)
+ 
+ 	pr_debug("GUID Partition Table is valid!  Yea!\n");
+ 
+-	for (i = 0; i < le32_to_cpu(gpt->num_partition_entries) && i < state->limit-1; i++) {
++	for (i = 0; i < le32_to_cpu(gpt->num_partition_entries) &&
++		    i < state->limit-1; i++) {
++		gpt_entry *pte = get_gpt_entry(gpt, ptes, i);
+ 		struct partition_meta_info *info;
+ 		unsigned label_count = 0;
+ 		unsigned label_max;
+-		u64 start = le64_to_cpu(ptes[i].starting_lba);
+-		u64 size = le64_to_cpu(ptes[i].ending_lba) -
+-			   le64_to_cpu(ptes[i].starting_lba) + 1ULL;
++		u64 start = le64_to_cpu(pte->starting_lba);
++		u64 size = le64_to_cpu(pte->ending_lba) -
++			   le64_to_cpu(pte->starting_lba) + 1ULL;
+ 
+-		if (!is_pte_valid(&ptes[i], last_lba(state->bdev)))
++		if (!is_pte_valid(pte, last_lba(state->bdev)))
+ 			continue;
+ 
+ 		put_partition(state, i+1, start * ssz, size * ssz);
+ 
+ 		/* If this is a RAID volume, tell md */
+-		if (!efi_guidcmp(ptes[i].partition_type_guid, PARTITION_LINUX_RAID_GUID))
++		if (!efi_guidcmp(pte->partition_type_guid,
++				 PARTITION_LINUX_RAID_GUID))
+ 			state->parts[i + 1].flags = ADDPART_FLAG_RAID;
+ 
+ 		info = &state->parts[i + 1].info;
+-		efi_guid_to_str(&ptes[i].unique_partition_guid, info->uuid);
++		efi_guid_to_str(&pte->unique_partition_guid, info->uuid);
+ 
+ 		/* Naively convert UTF16-LE to 7 bits. */
+ 		label_max = min(ARRAY_SIZE(info->volname) - 1,
+-				ARRAY_SIZE(ptes[i].partition_name));
++				ARRAY_SIZE(pte->partition_name));
+ 		info->volname[label_max] = 0;
+ 		while (label_count < label_max) {
+-			u8 c = ptes[i].partition_name[label_count] & 0xff;
++			u8 c = pte->partition_name[label_count] & 0xff;
+ 			if (c && !isprint(c))
+ 				c = '!';
+ 			info->volname[label_count] = c;
+-- 
+2.18.0
