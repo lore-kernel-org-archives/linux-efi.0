@@ -1,57 +1,41 @@
-From: Aaron Ma <aaron.ma@canonical.com>
-Subject: Re: [PATCH] x86/efi: earlyprintk - Add 64bit efi fb address support
-Date: Wed, 12 Sep 2018 23:09:07 +0800
-Message-ID: <7b08c376-2c34-d462-9d6f-2a104ca48878@canonical.com>
-References: <1536423828-5693-1-git-send-email-aaron.ma@canonical.com>
- <CAKv+Gu_dfQUXDdvk99fe6-qW3wj8e=8wR2aqCtJj1GfkXirzRg@mail.gmail.com>
+From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+Subject: RE: [PATCH V6 0/2] Add efi page fault handler to recover from page
+Date: Wed, 12 Sep 2018 17:32:43 +0000
+Message-ID: <FFF73D592F13FD46B8700F0A279B802F485BB5A3@ORSMSX114.amr.corp.intel.com>
+References: <1536693322-8335-1-git-send-email-sai.praneeth.prakhya@intel.com>
+ <CAKv+Gu8zfM_iZ7T7P=5+1aXEHPaL3E2yQ_eWEsXCJA3zaAA6Yw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu_dfQUXDdvk99fe6-qW3wj8e=8wR2aqCtJj1GfkXirzRg@mail.gmail.com>
+In-Reply-To: <CAKv+Gu8zfM_iZ7T7P=5+1aXEHPaL3E2yQ_eWEsXCJA3zaAA6Yw@mail.gmail.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>, the arch/x86 maintainers <x86@kernel.org>, linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Cc: linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, the arch/x86 maintainers <x86@kernel.org>, Al Stone <astone@redhat.com>, Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Bhupesh Sharma <bhsharma@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Peter Zijlstra <peterz@infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 09/12/2018 11:00 PM, Ard Biesheuvel wrote:
-> On 8 September 2018 at 18:23, Aaron Ma <aaron.ma@canonical.com> wrote:
->> EFI GOP uses 64-bit frame buffer address in some BIOS.
->> Add 64bit address support in efi earlyprintk.
->>
->> Signed-off-by: Aaron Ma <aaron.ma@canonical.com>
->> ---
->>  arch/x86/platform/efi/early_printk.c | 4 ++++
->>  1 file changed, 4 insertions(+)
->>
->> diff --git a/arch/x86/platform/efi/early_printk.c b/arch/x86/platform/efi/early_printk.c
->> index 5fdacb322ceb..c0ae25f59acd 100644
->> --- a/arch/x86/platform/efi/early_printk.c
->> +++ b/arch/x86/platform/efi/early_printk.c
->> @@ -32,6 +32,8 @@ static __init int early_efi_map_fb(void)
->>                 return 0;
->>
->>         base = boot_params.screen_info.lfb_base;
->> +       if (boot_params.screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
->> +               base |= (u64)boot_params.screen_info.ext_lfb_base << 32;
->>         size = boot_params.screen_info.lfb_size;
->>         efi_fb = ioremap(base, size);
->>
->> @@ -49,6 +51,8 @@ static __ref void *early_efi_map(unsigned long start, unsigned long len)
->>         unsigned long base;
->>
->>         base = boot_params.screen_info.lfb_base;
->> +       if (boot_params.screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
->> +               base |= (u64)boot_params.screen_info.ext_lfb_base << 32;
->>
->>         if (efi_fb)
->>                 return (efi_fb + start);
-> Please fix this in a way that works on 32-bit x86/PAE as well (i.e.,
-> use a suitable type for base)
-> 
-
-Right, I will send a v2 patch.
-
-Thanks,
-Aaron
+PiA+IFRoaXMgaXNzdWUgd2FzIHJlcG9ydGVkIGJ5IEFsIFN0b25lIHdoZW4gaGUgc2F3IHRoYXQg
+cmVib290IHZpYSBFRkkNCj4gPiBoYW5ncyB0aGUgbWFjaGluZS4gVXBvbiBkZWJ1Z2dpbmcsIEkg
+Zm91bmQgdGhhdCBpdCdzDQo+ID4gZWZpX3Jlc2V0X3N5c3RlbSgpIHRoYXQncyB0b3VjaGluZyBt
+ZW1vcnkgcmVnaW9ucyB3aGljaCBpdCBzaG91bGRuJ3QuDQo+ID4gVG8gcmVwcm9kdWNlIHRoZSBz
+YW1lIGJlaGF2aW9yLCBJIGhhdmUgaGFja2VkIE9WTUYgYW5kIG1hZGUNCj4gPiBlZmlfcmVzZXRf
+c3lzdGVtKCkgYnVnZ3kuIEFsb25nIHdpdGggZWZpX3Jlc2V0X3N5c3RlbSgpLCBJIGhhdmUgYWxz
+bw0KPiA+IG1vZGlmaWVkIGdldF9uZXh0X2hpZ2hfbW9ub19jb3VudCgpIGFuZCBzZXRfdmlydHVh
+bF9hZGRyZXNzX21hcCgpLg0KPiA+IFRoZXkgaWxsZWdhbGx5IGFjY2VzcyBib3RoIGJvb3QgdGlt
+ZSBhbmQgb3RoZXIgZWZpIHJlZ2lvbnMuDQo+ID4NCj4gPiBUZXN0aW5nIHRoZSBwYXRjaCBzZXQ6
+DQo+ID4gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KPiA+IDEuIERvd25sb2FkIGJ1Z2d5IGZpcm13
+YXJlIGZyb20gaGVyZSBbMV0uDQo+ID4gMi4gUnVuIGEgcWVtdSBpbnN0YW5jZSB3aXRoIHRoaXMg
+YnVnZ3kgQklPUyBhbmQgYm9vdCBtYWlubGluZSBrZXJuZWwuDQo+ID4gQWRkIHJlYm9vdD1lZmkg
+dG8gdGhlIGtlcm5lbCBjb21tYW5kIGxpbmUgYXJndW1lbnRzIGFuZCBhZnRlciB0aGUNCj4gPiBr
+ZXJuZWwgaXMgdXAgYW5kIHJ1bm5pbmcsIHR5cGUgInJlYm9vdCIuIFRoZSBrZXJuZWwgc2hvdWxk
+IGhhbmcgd2hpbGUNCj4gcmVib290aW5nLg0KPiA+IDMuIFdpdGggdGhlIHNhbWUgc2V0dXAsIGJv
+b3Qga2VybmVsIGFmdGVyIGFwcGx5aW5nIHBhdGNoZXMgYW5kIHRoZQ0KPiA+IHJlYm9vdCBzaG91
+bGQgd29yayBmaW5lLiBBbHNvIHBsZWFzZSBub3RpY2Ugd2FybmluZy9lcnJvciBtZXNzYWdlcw0K
+PiA+IHByaW50ZWQgYnkga2VybmVsLg0KPiA+DQo+IA0KPiBEaWQgeW91IHRlc3QgdGhlc2UgcGF0
+Y2hlcyB3aXRoIG90aGVyIGJ1Z2d5IHJ1bnRpbWUgc2VydmljZXM/DQoNClllcywgSSBkaWQuIEkg
+aGF2ZSBtb2RpZmllZCBlZmkgcnVudGltZSBzZXJ2aWNlIEdldE5leHRIaWdoTW9ub3RvbmljQ291
+bnQgDQphbmQgbWFkZSBpdCBidWdneSwgd2hlbiBpbnZva2VkIGZyb20gRldUUyB0ZXN0IHN1aXRl
+cyB0aGUgZWZpIHBhZ2UgZmF1bHQgDQpoYW5kbGVyIHdvcmtzIGFzIGV4cGVjdGVkIChpLmUuIGZy
+ZWV6aW5nIGVmaV9ydHNfd3EgYW5kIGRpc2FibGluZyBlZmkgcnVudGltZSANCnNlcnZpY2VzIGZv
+cmV2ZXIpLg0KDQpSZWdhcmRzLA0KU2FpDQo=
