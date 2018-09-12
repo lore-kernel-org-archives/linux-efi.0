@@ -1,86 +1,142 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: Re: [REGRESSION] boot-screen override by "34db50e55656 efifb: Copy
- the ACPI BGRT"
-Date: Wed, 12 Sep 2018 11:13:35 +0200
-Message-ID: <9e9e269d-6ac7-7826-ecd5-acc164025429@redhat.com>
-References: <CGME20180903132353epcas4p373e876f1b52dbed6df7bd3acc73fcdf4@epcas4p3.samsung.com>
- <CANq1E4QwNg0VuAZZtatOTXspv7Y-z_HSa-9CHzK2Y28CGK8W4Q@mail.gmail.com>
- <1982440.Fn0LzJ7a3l@amdc3058>
- <dc7f08d7-77fc-92ca-b6ec-f9d5a8f24cf3@redhat.com>
- <CANq1E4TiMSY=udGJWZoDzMhdsRjC==QCRFPO+Oja7KoyBX-6fg@mail.gmail.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH V6 0/2] Add efi page fault handler to recover from page
+Date: Wed, 12 Sep 2018 16:37:50 +0200
+Message-ID: <CAKv+Gu8zfM_iZ7T7P=5+1aXEHPaL3E2yQ_eWEsXCJA3zaAA6Yw@mail.gmail.com>
+References: <1536693322-8335-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <dri-devel-bounces@lists.freedesktop.org>
-In-Reply-To: <CANq1E4TiMSY=udGJWZoDzMhdsRjC==QCRFPO+Oja7KoyBX-6fg@mail.gmail.com>
-Content-Language: en-US
-List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
-List-Post: <mailto:dri-devel@lists.freedesktop.org>
-List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: dri-devel-bounces@lists.freedesktop.org
-Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
-To: David Herrmann <dh.herrmann@gmail.com>
-Cc: linux-fbdev@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel <linux-kernel@vger.kernel.org>, dri-devel@lists.freedesktop.org, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1536693322-8335-1-git-send-email-sai.praneeth.prakhya@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, the arch/x86 maintainers <x86@kernel.org>, Al Stone <astone@redhat.com>, Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Bhupesh Sharma <bhsharma@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Peter Zijlstra <peterz@infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-SGksCgpPbiAwMy0wOS0xOCAxNzoxMSwgRGF2aWQgSGVycm1hbm4gd3JvdGU6Cj4gSGV5Cj4gCj4g
-T24gTW9uLCBTZXAgMywgMjAxOCBhdCA0OjQ3IFBNIEhhbnMgZGUgR29lZGUgPGhkZWdvZWRlQHJl
-ZGhhdC5jb20+IHdyb3RlOgo+Pgo+PiBIaSwKPj4KPj4gT24gMDMtMDktMTggMTY6MTYsIEJhcnRs
-b21pZWogWm9sbmllcmtpZXdpY3ogd3JvdGU6Cj4+Pgo+Pj4gSGksCj4+Pgo+Pj4gT24gTW9uZGF5
-LCBTZXB0ZW1iZXIgMDMsIDIwMTggMDM6MjM6MzggUE0gRGF2aWQgSGVycm1hbm4gd3JvdGU6Cj4+
-Pj4gSGV5Cj4+Pj4KPj4+PiBTaW5jZSB0aGlzIGNvbW1pdDoKPj4+Pgo+Pj4+ICAgICAgIDM0ZGI1
-MGU1NTY1NiBlZmlmYjogQ29weSB0aGUgQUNQSSBCR1JUCj4+Pj4KPj4+PiB0aGUga2VybmVsIHdp
-bGwgb3ZlcnJpZGUgYm9vdC1zcGxhc2hzIHVuYXNrZWQuIFRoaXMgYnJlYWtzIHRoZQo+Pj4+IGdy
-YXBoaWNhbCBib290LXByb2Nlc3Mgb24gb3VyIHNldHVwcy4gSW4gcGFydGljdWxhciwgd2UgaGF2
-ZSBhIHNldHVwCj4+Pj4gd2hlcmUgYW4gZWZpLWJvb3QtZW50cnkgZHJhd3MgdGhlIGVhcmx5IGJv
-b3Qtc3BsYXNoIG9uLXNjcmVlbiwgdGhlbgo+Pj4+IGhhbmRzLW92ZXIgdG8gdGhlIGxpbnV4LWtl
-cm5lbCArIGluaXRyZC4gVGhlIGJvb3Qtc3BsYXNoIGRhZW1vbiBpbiB0aGUKPj4+PiBpbml0cmQg
-dGhlbiB0YWtlcyBvdmVyIGNvbnRyb2wgb2YgcG9zc2libGUgYW5pbWF0aW9ucy4KPj4+Pgo+Pj4+
-IFdpdGggdGhlIG1lbnRpb25lZCBjb21taXQgY29tcGlsZWQgaW4sIHRoZSBrZXJuZWwgd2lsbCBy
-ZWRyYXcgdGhlCj4+Pj4gZmlybXdhcmUgbG9nbyBvbiBzY3JlZW4gYXQgYSByYW5kb20gdGltZSB3
-aXRob3V0IGFueSB3YXkgdG8gaW50ZXJ2ZW5lLgo+Pj4KPj4+IFlvdSBoYXZlIENPTkZJR19GUkFN
-RUJVRkZFUl9DT05TT0xFX0RFRkVSUkVEX1RBS0VPVkVSPXkgKHRoZSBkZWZlcnJlZAo+Pj4gY29u
-c29sZSB0YWtlb3ZlciBzdXBwb3J0IGludHJvZHVjZWQgaW4gdjQsMTktcmMxKS4gSSBhc3N1bWUg
-dGhhdCB0aGlzCj4+PiBpcyBpbnRlbmRlZD8KPj4+Cj4+Pj4gV2hhdCBpcyB0aGUgaW50ZW50aW9u
-IG9mIHRoaXMgY29tbWl0PyBXaHkgaXMgdGhlIGtlcm5lbCByZS1kcmF3aW5nIHRoZQo+Pj4+IGZp
-cm13YXJlIGxvZ28gdW5hc2tlZD8gSWYgc29tZW9uZSBkdXJpbmcgdGhlIGJvb3QtcHJvY2VzcyBk
-cmF3cwo+Pj4+IGNvbnRlbnQgb24gdGhlIHNjcmVlbiwgSSB3b3VsZCBwcmVmZXIgaWYgdGhlIGtl
-cm5lbCBkb2VzIG5vdCBjbGVhcgo+Pj4+IHRoYXQgb24gZHJpdmVyIGxvYWQuCj4+Pgo+Pj4gKy8q
-Cj4+PiArICogSWYgZmJjb24gZGVmZmVyZWQgY29uc29sZSB0YWtlb3ZlciBpcyBjb25maWd1cmVk
-LCB0aGUgaW50ZW50IGlzIGZvciB0aGUKPj4+ICsgKiBmcmFtZWJ1ZmZlciB0byBzaG93IHRoZSBi
-b290IGdyYXBoaWNzIChlLmcuIHZlbmRvciBsb2dvKSB1bnRpbCB0aGVyZSBpcyBzb21lCj4+PiAr
-ICogKGVycm9yKSBtZXNzYWdlIHRvIGRpc3BsYXkuIEJ1dCB0aGUgYm9vdCBncmFwaGljcyBtYXkg
-aGF2ZSBiZWVuIGRlc3Ryb3llZCBieQo+Pj4gKyAqIGUuZy4gb3B0aW9uIFJPTSBvdXRwdXQsIGRl
-dGVjdCB0aGlzIGFuZCByZXN0b3JlIHRoZSBib290IGdyYXBoaWNzLgo+Pj4gKyAqLwo+Pj4gKyNp
-ZiBkZWZpbmVkIENPTkZJR19GUkFNRUJVRkZFUl9DT05TT0xFX0RFRkVSUkVEX1RBS0VPVkVSICYm
-IFwKPj4+ICsgICAgZGVmaW5lZCBDT05GSUdfQUNQSV9CR1JUCj4+PiAuLi4KPj4+ICtzdGF0aWMg
-dm9pZCBlZmlmYl9zaG93X2Jvb3RfZ3JhcGhpY3Moc3RydWN0IGZiX2luZm8gKmluZm8pCj4+PiAu
-Li4KPj4+ICsjZWxzZQo+Pj4gK3N0YXRpYyBpbmxpbmUgdm9pZCBlZmlmYl9zaG93X2Jvb3RfZ3Jh
-cGhpY3Moc3RydWN0IGZiX2luZm8gKmluZm8pIHt9Cj4+PiArI2VuZGlmCj4+Pgo+Pj4+IENhbiB3
-ZSBlaXRoZXIgcHJvdmlkZSBhbiBvcHRpb24gdG8gZGlzYWJsZSB0aGlzIGZlYXR1cmUsIG9yIHJl
-dmVydCB0aGUgY29tbWl0Pwo+Pj4KPj4+IEhhbnM/Cj4+Cj4+IFdlIHVzZSB0aGUgQUNQSSBiZ3J0
-IGV4dGVuc2lvbiB0byBnZXQgdGhlIGxvZ28gdG8gZHJhdyBhbmQgdGhlbgo+PiBkcmF3IGl0IHNp
-bmNlIHNvbWUgZGV2aWNlcyByZWx5IG9uIHRoZSBPUyB0byBkcmF3IGl0IGFuZCBvdGhlcndpc2Ug
-d2UKPj4ganVzdCBlbmQgdXAgd2l0aCBhIGJsYWNrc2NyZWVuIHdoZW4gZG9pbmcgc2lsZW50IC8g
-ZmxpY2tlcmZyZWUgYm9vdC4KPj4KPj4gSWRlYWxseSB5b3Ugd291bGQgYmUgYWJsZSB0byBnZXQg
-eW91ciB2ZW5kb3IgdG8gcHV0IHRoZSBsb2dvIGluIGZpcm13YXJlCj4+IGluIHRoZSBBQ1BJIGJn
-cnQgZXh0ZW5zaW9uLCB0aGVuIHlvdSBhbHNvIGRvIG5vdCBuZWVkIHRvIHBsYXkgYW55IHRyaWNr
-cwo+PiB3aXRoIGFuIEVGSSBiaW5hcnkgZHJhd2luZyB5b3VyIG93biBsb2dvLiBCdXQgSSBjYW4g
-dW5kZXJzdGFuZCBpZiB5b3UgZG9uJ3QKPj4gaGF2ZSBjb250cm9sIG92ZXIgdGhpcywgc28geW91
-IG5lZWQgdG8gZG8gdGhpcyB3aXRoIHRoZSBFRkkgYmluYXJ5IHRyaWNrLgo+Pgo+PiBJIGNhbiBh
-bHNvIHVuZGVyc3RhbmQgdGhhdCB5b3Ugd2FudCB0byB1c2UgZGVmZXJyZWQgY29uc29sZSB0YWtl
-b3Zlcgo+PiBpbiBhIHNldHVwIGxpa2UgeW91cnMgdG8gYXZvaWQgZmJjb24gbWVzc2luZyB1cCB3
-aGF0IGlzIG9uIHRoZSBkaXNwbGF5Cj4+IGR1cmluZyBib290LCB0aGF0IGlzIGV4YWN0bHkgd2hh
-dCBpdCBpcyBmb3IuIFNvIEkgdGhpbmsgYSByZWFzb25hYmxlCj4+IGFwcHJvYWNoIGhlcmUgaXMg
-dG8gYWRkIGEga2VybmVsIGNvbW1hbmRsaW5lIG9wdGlvbiwgc2F5Ogo+Pgo+PiB2aWRlbz1lZmlm
-Yjpub2JncnQKPj4KPj4gRGF2aWQsIHdvdWxkIHRoYXQgd29yayBmb3IgeW91Pwo+IAo+IFRoYXQg
-d291bGQgYmUgcGVyZmVjdCEKCk9rLCBJIGp1c3Qgc2VuZCBvdXQgYSBwYXRjaCBmb3IgdGhpcyB3
-aXRoIHlvdSBpbiB0aGUgQ2MuCgpTb3JyeSBmb3IgdGFraW5nIGEgYml0IGxvbmcgdG8gd3JpdGUg
-dGhlIHBhdGNoLgoKUmVnYXJkcywKCkhhbnMKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fCmRyaS1kZXZlbCBtYWlsaW5nIGxpc3QKZHJpLWRldmVsQGxpc3Rz
-LmZyZWVkZXNrdG9wLm9yZwpodHRwczovL2xpc3RzLmZyZWVkZXNrdG9wLm9yZy9tYWlsbWFuL2xp
-c3RpbmZvL2RyaS1kZXZlbAo=
+On 11 September 2018 at 21:15, Sai Praneeth Prakhya
+<sai.praneeth.prakhya@intel.com> wrote:
+> From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
+>
+> There may exist some buggy UEFI firmware implementations that access efi
+> memory regions other than EFI_RUNTIME_SERVICES_<CODE/DATA> even after
+> the kernel has assumed control of the platform. This violates UEFI
+> specification. Hence, provide a efi specific page fault handler which
+> recovers from page faults caused by buggy firmware.
+>
+> Page faults triggered by firmware happen at ring 0 and if unhandled,
+> hangs the kernel. So, provide an efi specific page fault handler to:
+> 1. Avoid panics/hangs caused by buggy firmware.
+> 2. Shout loud that the firmware is buggy and hence is not a kernel bug.
+>
+> The efi page fault handler will check if the access is by
+> efi_reset_system().
+> 1. If so, then the efi page fault handler will reboot the machine
+>    through BIOS and not through efi_reset_system().
+> 2. If not, then the efi page fault handler will freeze efi_rts_wq and
+>    schedules a new process.
+>
+> This issue was reported by Al Stone when he saw that reboot via EFI hangs
+> the machine. Upon debugging, I found that it's efi_reset_system() that's
+> touching memory regions which it shouldn't. To reproduce the same
+> behavior, I have hacked OVMF and made efi_reset_system() buggy. Along
+> with efi_reset_system(), I have also modified get_next_high_mono_count()
+> and set_virtual_address_map(). They illegally access both boot time and
+> other efi regions.
+>
+> Testing the patch set:
+> ----------------------
+> 1. Download buggy firmware from here [1].
+> 2. Run a qemu instance with this buggy BIOS and boot mainline kernel.
+> Add reboot=efi to the kernel command line arguments and after the kernel
+> is up and running, type "reboot". The kernel should hang while rebooting.
+> 3. With the same setup, boot kernel after applying patches and the
+> reboot should work fine. Also please notice warning/error messages
+> printed by kernel.
+>
+
+Did you test these patches with other buggy runtime services?
+
+> Changes from RFC to V1:
+> -----------------------
+> 1. Drop "long jump" technique of dealing with illegal access and instead
+>    use scheduling away from efi_rts_wq.
+>
+> Changes from V1 to V2:
+> ----------------------
+> 1. Shortened config name to CONFIG_EFI_WARN_ON_ILLEGAL_ACCESS from
+>    CONFIG_EFI_WARN_ON_ILLEGAL_ACCESSES.
+> 2. Made the config option available only to expert users.
+> 3. efi_free_boot_services() should be called only when
+>    CONFIG_EFI_WARN_ON_ILLEGAL_ACCESS is not enabled. Previously, this
+>    was part of init/main.c file. As it is an architecture agnostic code,
+>    moved the change to arch/x86/platform/efi/quirks.c file.
+>
+> Changes from V2 to V3:
+> ----------------------
+> 1. Drop treating illegal access to EFI_BOOT_SERVICES_<CODE/DATA> regions
+>    separately from illegal accesses to other regions like
+>    EFI_CONVENTIONAL_MEMORY or EFI_LOADER_<CODE/DATA>.
+>    In previous versions, illegal access to EFI_BOOT_SERVICES_<CODE/DATA>
+>    regions were handled by mapping requested region to efi_pgd but from
+>    V3 they are handled similar to illegal access to other regions i.e by
+>    freezing efi_rts_wq and scheduling new process.
+> 2. Change __efi_init_fixup attribute to __efi_init.
+>
+> Changes from V3 to V4:
+> ----------------------
+> 1. Drop saving original memory map passed by kernel. It also means less
+>    checks in efi page fault handler.
+> 2. Change the config name to EFI_PAGE_FAULT_HANDLER to reflect it's
+>    functionality more appropriately.
+>
+> Changes from V4 to V5:
+> ----------------------
+> 1. Drop config option that enables efi page fault handler, instead make
+>    it default.
+> 2. Call schedule() in an infinite loop to account for spurious wake ups.
+> 3. Introduce "NONE" as an efi runtime service function identifier so that
+>    it could be used in efi_recover_from_page_fault() to check if the page
+>    fault was indeed triggered by an efi runtime service.
+>
+> Changes from V5 to V6:
+> ----------------------
+> 1. Thanks to 0-day for reporting build error when CONFIG_EFI is not
+>    enabled. Fixed it by calling efi page fault handler only when
+>    CONFIG_EFI is enabled.
+> 2. Change return type of efi page fault handler from int to void. void
+>    return type should do (and int is not needed) because the efi page
+>    fault handler returns only upon a failure to handle page fault.
+>
+> Note:
+> -----
+> Patch set based on "next" branch in efi tree.
+>
+> [1] https://drive.google.com/drive/folders/1VozKTms92ifyVHAT0ZDQe55ZYL1UE5wt
+>
+> Sai Praneeth (2):
+>   efi: Make efi_rts_work accessible to efi page fault handler
+>   x86/efi: Add efi page fault handler to recover from page faults caused
+>         by the firmware
+>
+>  arch/x86/include/asm/efi.h              |  1 +
+>  arch/x86/mm/fault.c                     |  9 ++++
+>  arch/x86/platform/efi/quirks.c          | 78 +++++++++++++++++++++++++++++++++
+>  drivers/firmware/efi/runtime-wrappers.c | 61 +++++++-------------------
+>  include/linux/efi.h                     | 42 ++++++++++++++++++
+>  5 files changed, 147 insertions(+), 44 deletions(-)
+>
+> Tested-by: Bhupesh Sharma <bhsharma@redhat.com>
+> Suggested-by: Matt Fleming <matt@codeblueprint.co.uk>
+> Based-on-code-from: Ricardo Neri <ricardo.neri@intel.com>
+> Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+> Cc: Al Stone <astone@redhat.com>
+> Cc: Borislav Petkov <bp@alien8.de>
+> Cc: Ingo Molnar <mingo@kernel.org>
+> Cc: Andy Lutomirski <luto@kernel.org>
+> Cc: Bhupesh Sharma <bhsharma@redhat.com>
+> Cc: Thomas Gleixner <tglx@linutronix.de>
+> Cc: Peter Zijlstra <peterz@infradead.org>
+> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+>
+> --
+> 2.7.4
+>
