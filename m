@@ -1,28 +1,86 @@
-From: Karel Zak <kzak@redhat.com>
-Subject: Re: [PATCH v2] efi: take size of partition entry from GPT header
-Date: Wed, 12 Sep 2018 10:38:44 +0200
-Message-ID: <20180912083844.iegei2kobcz4b7ag@ws.net.home>
-References: <20180911161527.GA30689@vnote>
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: Re: [REGRESSION] boot-screen override by "34db50e55656 efifb: Copy
+ the ACPI BGRT"
+Date: Wed, 12 Sep 2018 11:13:35 +0200
+Message-ID: <9e9e269d-6ac7-7826-ecd5-acc164025429@redhat.com>
+References: <CGME20180903132353epcas4p373e876f1b52dbed6df7bd3acc73fcdf4@epcas4p3.samsung.com>
+ <CANq1E4QwNg0VuAZZtatOTXspv7Y-z_HSa-9CHzK2Y28CGK8W4Q@mail.gmail.com>
+ <1982440.Fn0LzJ7a3l@amdc3058>
+ <dc7f08d7-77fc-92ca-b6ec-f9d5a8f24cf3@redhat.com>
+ <CANq1E4TiMSY=udGJWZoDzMhdsRjC==QCRFPO+Oja7KoyBX-6fg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20180911161527.GA30689@vnote>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Eugene Korenevsky <ekorenevsky@gmail.com>, Davidlohr Bueso <dave@stgolabs.net>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <dri-devel-bounces@lists.freedesktop.org>
+In-Reply-To: <CANq1E4TiMSY=udGJWZoDzMhdsRjC==QCRFPO+Oja7KoyBX-6fg@mail.gmail.com>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
+ <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
+List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
+List-Post: <mailto:dri-devel@lists.freedesktop.org>
+List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
+List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
+ <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
+Errors-To: dri-devel-bounces@lists.freedesktop.org
+Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
+To: David Herrmann <dh.herrmann@gmail.com>
+Cc: linux-fbdev@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel <linux-kernel@vger.kernel.org>, dri-devel@lists.freedesktop.org, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Sep 11, 2018 at 07:15:27PM +0300, Eugene Korenevsky wrote:
-> +static gpt_entry *get_gpt_entry(gpt_header *gpt_hdr, gpt_entry *ptes, u32 index)
-> +{
-> +	return (gpt_entry *)((u8 *)ptes + gpt->sizeof_partition_entry * index);
-
-I guess header use LE, so you need:
-
-               le32_to_cpu(gpt_hdr->sizeof_partition_entry)
-
-    Karel
-
--- 
- Karel Zak  <kzak@redhat.com>
- http://karelzak.blogspot.com
+SGksCgpPbiAwMy0wOS0xOCAxNzoxMSwgRGF2aWQgSGVycm1hbm4gd3JvdGU6Cj4gSGV5Cj4gCj4g
+T24gTW9uLCBTZXAgMywgMjAxOCBhdCA0OjQ3IFBNIEhhbnMgZGUgR29lZGUgPGhkZWdvZWRlQHJl
+ZGhhdC5jb20+IHdyb3RlOgo+Pgo+PiBIaSwKPj4KPj4gT24gMDMtMDktMTggMTY6MTYsIEJhcnRs
+b21pZWogWm9sbmllcmtpZXdpY3ogd3JvdGU6Cj4+Pgo+Pj4gSGksCj4+Pgo+Pj4gT24gTW9uZGF5
+LCBTZXB0ZW1iZXIgMDMsIDIwMTggMDM6MjM6MzggUE0gRGF2aWQgSGVycm1hbm4gd3JvdGU6Cj4+
+Pj4gSGV5Cj4+Pj4KPj4+PiBTaW5jZSB0aGlzIGNvbW1pdDoKPj4+Pgo+Pj4+ICAgICAgIDM0ZGI1
+MGU1NTY1NiBlZmlmYjogQ29weSB0aGUgQUNQSSBCR1JUCj4+Pj4KPj4+PiB0aGUga2VybmVsIHdp
+bGwgb3ZlcnJpZGUgYm9vdC1zcGxhc2hzIHVuYXNrZWQuIFRoaXMgYnJlYWtzIHRoZQo+Pj4+IGdy
+YXBoaWNhbCBib290LXByb2Nlc3Mgb24gb3VyIHNldHVwcy4gSW4gcGFydGljdWxhciwgd2UgaGF2
+ZSBhIHNldHVwCj4+Pj4gd2hlcmUgYW4gZWZpLWJvb3QtZW50cnkgZHJhd3MgdGhlIGVhcmx5IGJv
+b3Qtc3BsYXNoIG9uLXNjcmVlbiwgdGhlbgo+Pj4+IGhhbmRzLW92ZXIgdG8gdGhlIGxpbnV4LWtl
+cm5lbCArIGluaXRyZC4gVGhlIGJvb3Qtc3BsYXNoIGRhZW1vbiBpbiB0aGUKPj4+PiBpbml0cmQg
+dGhlbiB0YWtlcyBvdmVyIGNvbnRyb2wgb2YgcG9zc2libGUgYW5pbWF0aW9ucy4KPj4+Pgo+Pj4+
+IFdpdGggdGhlIG1lbnRpb25lZCBjb21taXQgY29tcGlsZWQgaW4sIHRoZSBrZXJuZWwgd2lsbCBy
+ZWRyYXcgdGhlCj4+Pj4gZmlybXdhcmUgbG9nbyBvbiBzY3JlZW4gYXQgYSByYW5kb20gdGltZSB3
+aXRob3V0IGFueSB3YXkgdG8gaW50ZXJ2ZW5lLgo+Pj4KPj4+IFlvdSBoYXZlIENPTkZJR19GUkFN
+RUJVRkZFUl9DT05TT0xFX0RFRkVSUkVEX1RBS0VPVkVSPXkgKHRoZSBkZWZlcnJlZAo+Pj4gY29u
+c29sZSB0YWtlb3ZlciBzdXBwb3J0IGludHJvZHVjZWQgaW4gdjQsMTktcmMxKS4gSSBhc3N1bWUg
+dGhhdCB0aGlzCj4+PiBpcyBpbnRlbmRlZD8KPj4+Cj4+Pj4gV2hhdCBpcyB0aGUgaW50ZW50aW9u
+IG9mIHRoaXMgY29tbWl0PyBXaHkgaXMgdGhlIGtlcm5lbCByZS1kcmF3aW5nIHRoZQo+Pj4+IGZp
+cm13YXJlIGxvZ28gdW5hc2tlZD8gSWYgc29tZW9uZSBkdXJpbmcgdGhlIGJvb3QtcHJvY2VzcyBk
+cmF3cwo+Pj4+IGNvbnRlbnQgb24gdGhlIHNjcmVlbiwgSSB3b3VsZCBwcmVmZXIgaWYgdGhlIGtl
+cm5lbCBkb2VzIG5vdCBjbGVhcgo+Pj4+IHRoYXQgb24gZHJpdmVyIGxvYWQuCj4+Pgo+Pj4gKy8q
+Cj4+PiArICogSWYgZmJjb24gZGVmZmVyZWQgY29uc29sZSB0YWtlb3ZlciBpcyBjb25maWd1cmVk
+LCB0aGUgaW50ZW50IGlzIGZvciB0aGUKPj4+ICsgKiBmcmFtZWJ1ZmZlciB0byBzaG93IHRoZSBi
+b290IGdyYXBoaWNzIChlLmcuIHZlbmRvciBsb2dvKSB1bnRpbCB0aGVyZSBpcyBzb21lCj4+PiAr
+ICogKGVycm9yKSBtZXNzYWdlIHRvIGRpc3BsYXkuIEJ1dCB0aGUgYm9vdCBncmFwaGljcyBtYXkg
+aGF2ZSBiZWVuIGRlc3Ryb3llZCBieQo+Pj4gKyAqIGUuZy4gb3B0aW9uIFJPTSBvdXRwdXQsIGRl
+dGVjdCB0aGlzIGFuZCByZXN0b3JlIHRoZSBib290IGdyYXBoaWNzLgo+Pj4gKyAqLwo+Pj4gKyNp
+ZiBkZWZpbmVkIENPTkZJR19GUkFNRUJVRkZFUl9DT05TT0xFX0RFRkVSUkVEX1RBS0VPVkVSICYm
+IFwKPj4+ICsgICAgZGVmaW5lZCBDT05GSUdfQUNQSV9CR1JUCj4+PiAuLi4KPj4+ICtzdGF0aWMg
+dm9pZCBlZmlmYl9zaG93X2Jvb3RfZ3JhcGhpY3Moc3RydWN0IGZiX2luZm8gKmluZm8pCj4+PiAu
+Li4KPj4+ICsjZWxzZQo+Pj4gK3N0YXRpYyBpbmxpbmUgdm9pZCBlZmlmYl9zaG93X2Jvb3RfZ3Jh
+cGhpY3Moc3RydWN0IGZiX2luZm8gKmluZm8pIHt9Cj4+PiArI2VuZGlmCj4+Pgo+Pj4+IENhbiB3
+ZSBlaXRoZXIgcHJvdmlkZSBhbiBvcHRpb24gdG8gZGlzYWJsZSB0aGlzIGZlYXR1cmUsIG9yIHJl
+dmVydCB0aGUgY29tbWl0Pwo+Pj4KPj4+IEhhbnM/Cj4+Cj4+IFdlIHVzZSB0aGUgQUNQSSBiZ3J0
+IGV4dGVuc2lvbiB0byBnZXQgdGhlIGxvZ28gdG8gZHJhdyBhbmQgdGhlbgo+PiBkcmF3IGl0IHNp
+bmNlIHNvbWUgZGV2aWNlcyByZWx5IG9uIHRoZSBPUyB0byBkcmF3IGl0IGFuZCBvdGhlcndpc2Ug
+d2UKPj4ganVzdCBlbmQgdXAgd2l0aCBhIGJsYWNrc2NyZWVuIHdoZW4gZG9pbmcgc2lsZW50IC8g
+ZmxpY2tlcmZyZWUgYm9vdC4KPj4KPj4gSWRlYWxseSB5b3Ugd291bGQgYmUgYWJsZSB0byBnZXQg
+eW91ciB2ZW5kb3IgdG8gcHV0IHRoZSBsb2dvIGluIGZpcm13YXJlCj4+IGluIHRoZSBBQ1BJIGJn
+cnQgZXh0ZW5zaW9uLCB0aGVuIHlvdSBhbHNvIGRvIG5vdCBuZWVkIHRvIHBsYXkgYW55IHRyaWNr
+cwo+PiB3aXRoIGFuIEVGSSBiaW5hcnkgZHJhd2luZyB5b3VyIG93biBsb2dvLiBCdXQgSSBjYW4g
+dW5kZXJzdGFuZCBpZiB5b3UgZG9uJ3QKPj4gaGF2ZSBjb250cm9sIG92ZXIgdGhpcywgc28geW91
+IG5lZWQgdG8gZG8gdGhpcyB3aXRoIHRoZSBFRkkgYmluYXJ5IHRyaWNrLgo+Pgo+PiBJIGNhbiBh
+bHNvIHVuZGVyc3RhbmQgdGhhdCB5b3Ugd2FudCB0byB1c2UgZGVmZXJyZWQgY29uc29sZSB0YWtl
+b3Zlcgo+PiBpbiBhIHNldHVwIGxpa2UgeW91cnMgdG8gYXZvaWQgZmJjb24gbWVzc2luZyB1cCB3
+aGF0IGlzIG9uIHRoZSBkaXNwbGF5Cj4+IGR1cmluZyBib290LCB0aGF0IGlzIGV4YWN0bHkgd2hh
+dCBpdCBpcyBmb3IuIFNvIEkgdGhpbmsgYSByZWFzb25hYmxlCj4+IGFwcHJvYWNoIGhlcmUgaXMg
+dG8gYWRkIGEga2VybmVsIGNvbW1hbmRsaW5lIG9wdGlvbiwgc2F5Ogo+Pgo+PiB2aWRlbz1lZmlm
+Yjpub2JncnQKPj4KPj4gRGF2aWQsIHdvdWxkIHRoYXQgd29yayBmb3IgeW91Pwo+IAo+IFRoYXQg
+d291bGQgYmUgcGVyZmVjdCEKCk9rLCBJIGp1c3Qgc2VuZCBvdXQgYSBwYXRjaCBmb3IgdGhpcyB3
+aXRoIHlvdSBpbiB0aGUgQ2MuCgpTb3JyeSBmb3IgdGFraW5nIGEgYml0IGxvbmcgdG8gd3JpdGUg
+dGhlIHBhdGNoLgoKUmVnYXJkcywKCkhhbnMKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fCmRyaS1kZXZlbCBtYWlsaW5nIGxpc3QKZHJpLWRldmVsQGxpc3Rz
+LmZyZWVkZXNrdG9wLm9yZwpodHRwczovL2xpc3RzLmZyZWVkZXNrdG9wLm9yZy9tYWlsbWFuL2xp
+c3RpbmZvL2RyaS1kZXZlbAo=
