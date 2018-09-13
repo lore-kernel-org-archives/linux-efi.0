@@ -1,106 +1,107 @@
-From: Eugene Korenevsky <ekorenevsky@gmail.com>
-Subject: [PATCH v4] efi: take size of partition entry from GPT header
-Date: Wed, 12 Sep 2018 23:09:14 +0300
-Message-ID: <20180912200914.GA16693@vnote>
+From: Chao Fan <fanc.fnst@cn.fujitsu.com>
+Subject: [PATCH v7 0/3] x86/boot/KASLR: Parse ACPI table and limit kaslr in immovable memory
+Date: Thu, 13 Sep 2018 18:46:26 +0800
+Message-ID: <20180913104629.5179-1-fanc.fnst@cn.fujitsu.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
 Sender: linux-kernel-owner@vger.kernel.org
-To: Davidlohr Bueso <dave@stgolabs.net>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+To: linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, x86@kernel.org, linux-kernel@vger.kernel.org, keescook@chromium.org, bhe@redhat.com
+Cc: rjw@rjwysocki.net, lenb@kernel.org, ard.biesheuvel@linaro.org, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com, Chao Fan <fanc.fnst@cn.fujitsu.com>
 List-Id: linux-efi@vger.kernel.org
 
-Use gpt_header.sizeof_partition_entry instead of sizeof(gpt_entry)
-for GPT entry size.
-According to UEFI 2.7 spec 5.3.1 "GPT overview":, the size of a GUID Partition
-Entry element is defined in the Size Of Partition Entry field of GPT header.
-The GPT with entries sized more than sizeof(gpt_entry) is not illegal.
-OVMF firmware from EDK2 perfectly works with it, see edk2-tianocore source
-code.
+***Background:
+People reported that kaslr may randomly chooses some positions
+which are located in movable memory regions. This will break memory
+hotplug feature and make the movable memory chosen by KASLR can't be
+removed.
 
-Changes since v1: refactoring (extract get_gpt_entry function),
-                  fix (&ptes[i] -> pte)
-Changes since v2: use le32_to_cpu, fix typo, sanity check for
-                  sizeof_partition_entry
-Changes since v3: style fixes
+***Solutions:
+There should be a method to limit kaslr to choosing immovable memory
+regions, so there are 2 solutions:
+1) Add a kernel parameter to specify the memory regions.
+2) Get the information of memory hot-remove, then kaslr will know the
+   right regions.
+In method 2, information about memory hot-remove is in ACPI
+tables, which will be parsed after start_kernel(), kaslr can't get
+the information.
+In method 1, users should know the regions address and specify in
+kernel parameter.
 
-Signed-off-by: Eugene Korenevsky <ekorenevsky@gmail.com>
----
- block/partitions/efi.c | 31 ++++++++++++++++++++-----------
- 1 file changed, 20 insertions(+), 11 deletions(-)
+In the earliest time, I tried to dig ACPI tabls to solve this problem.
+But I didn't splite the code in 'compressed/' and ACPI code, so the patch
+is hard to follow so refused by community.
+Somebody suggest to add a kernel parameter to specify the
+immovable memory so that limit kaslr in these regions. Then I make
+a new patchset. After several versions, Ingo gave a suggestion:
+https://www.mail-archive.com/linux-kernel@vger.kernel.org/msg1634024.html
+Follow Ingo's suggestion, imitate the ACPI code to parse the acpi
+tables, so that the kaslr can get necessary memory information in
+ACPI tables.
+I think ACPI code is an independent part, so copy the codes
+and functions to 'compressed/' directory, so that kaslr won't
+influence the initialization of ACPI.
 
-diff --git a/block/partitions/efi.c b/block/partitions/efi.c
-index 39f70d968754..0d10a582b5bc 100644
---- a/block/partitions/efi.c
-+++ b/block/partitions/efi.c
-@@ -429,8 +429,8 @@ static int is_gpt_valid(struct parsed_partitions *state, u64 lba,
- 		goto fail;
- 	}
- 	/* Check that sizeof_partition_entry has the correct value */
--	if (le32_to_cpu((*gpt)->sizeof_partition_entry) != sizeof(gpt_entry)) {
--		pr_debug("GUID Partition Entry Size check failed.\n");
-+	if (le32_to_cpu((*gpt)->sizeof_partition_entry) < sizeof(gpt_entry)) {
-+		pr_debug("GUID Partition Entry Size is too small.\n");
- 		goto fail;
- 	}
- 
-@@ -670,6 +670,12 @@ static int find_valid_gpt(struct parsed_partitions *state, gpt_header **gpt,
-         return 0;
- }
- 
-+static gpt_entry *get_gpt_entry(gpt_header *gpt, gpt_entry *ptes, u32 index)
-+{
-+	return (gpt_entry *)((u8 *)ptes +
-+			le32_to_cpu(gpt->sizeof_partition_entry) * index);
-+}
-+
- /**
-  * efi_partition(struct parsed_partitions *state)
-  * @state: disk parsed partitions
-@@ -704,32 +710,35 @@ int efi_partition(struct parsed_partitions *state)
- 
- 	pr_debug("GUID Partition Table is valid!  Yea!\n");
- 
--	for (i = 0; i < le32_to_cpu(gpt->num_partition_entries) && i < state->limit-1; i++) {
-+	for (i = 0; i < le32_to_cpu(gpt->num_partition_entries) &&
-+		    i < state->limit-1; i++) {
-+		gpt_entry *pte = get_gpt_entry(gpt, ptes, i);
- 		struct partition_meta_info *info;
- 		unsigned label_count = 0;
- 		unsigned label_max;
--		u64 start = le64_to_cpu(ptes[i].starting_lba);
--		u64 size = le64_to_cpu(ptes[i].ending_lba) -
--			   le64_to_cpu(ptes[i].starting_lba) + 1ULL;
-+		u64 start = le64_to_cpu(pte->starting_lba);
-+		u64 size = le64_to_cpu(pte->ending_lba) -
-+			   le64_to_cpu(pte->starting_lba) + 1ULL;
- 
--		if (!is_pte_valid(&ptes[i], last_lba(state->bdev)))
-+		if (!is_pte_valid(pte, last_lba(state->bdev)))
- 			continue;
- 
- 		put_partition(state, i+1, start * ssz, size * ssz);
- 
- 		/* If this is a RAID volume, tell md */
--		if (!efi_guidcmp(ptes[i].partition_type_guid, PARTITION_LINUX_RAID_GUID))
-+		if (!efi_guidcmp(pte->partition_type_guid,
-+				 PARTITION_LINUX_RAID_GUID))
- 			state->parts[i + 1].flags = ADDPART_FLAG_RAID;
- 
- 		info = &state->parts[i + 1].info;
--		efi_guid_to_str(&ptes[i].unique_partition_guid, info->uuid);
-+		efi_guid_to_str(&pte->unique_partition_guid, info->uuid);
- 
- 		/* Naively convert UTF16-LE to 7 bits. */
- 		label_max = min(ARRAY_SIZE(info->volname) - 1,
--				ARRAY_SIZE(ptes[i].partition_name));
-+				ARRAY_SIZE(pte->partition_name));
- 		info->volname[label_max] = 0;
- 		while (label_count < label_max) {
--			u8 c = ptes[i].partition_name[label_count] & 0xff;
-+			u8 c = pte->partition_name[label_count] & 0xff;
- 			if (c && !isprint(c))
- 				c = '!';
- 			info->volname[label_count] = c;
+PATCH 1/3 Add acpitb.c to provide functions to parse ACPI code.
+PATCH 2/3 If CONFIG_MEMORY_HOTREMOVE enabled, walk all nodes and
+          store the information of immovable memory regions.
+PATCH 3/3 According to the immovable memory regions, filter the
+          immovable regions which KASLR can choose.
+
+***Test results:
+ - I did a very simple test, and it can get the memory information in
+   bios and efi KVM guest machine, and put it by early printk. But no
+   more tests, so it's with RFC tag.
+
+v1->v2:
+ -  Simplify some code.
+Follow Baoquan He's suggestion:
+ - Reuse the head file of acpi code.
+
+v2->v3:
+ - Test in more conditions, so remove the 'RFC' tag.
+ - Change some comments.
+
+v3->v4:
+Follow Thomas Gleixner's suggetsion:
+ - Put the whole efi related function into #define CONFIG_EFI and return
+   false in the other stub.
+ - Simplify two functions in head file.
+
+v4->v5:
+Follow Dou Liyang's suggestion:
+ - Add more comments about some functions based on kernel code.
+ - Change some typo in comments.
+ - Clean useless variable.
+ - Add check for the boundary of array.
+ - Add check for 'movable_node' parameter
+
+v5->v6:
+Follow Baoquan He's suggestion:
+ - Change some log.
+ - Add the check for acpi_rsdp
+ - Change some code logical to make code clear
+
+v6->v7:
+Follow Rafael's suggestion:
+ - Add more comments and patch log.
+Follow test robot's suggestion:
+ - Add "static" tag for function
+
+Any comments will be welcome.
+
+
+Chao Fan (3):
+  x86/boot: Add acpitb.c to parse acpi tables
+  x86/boot/KASLR: Walk srat tables to filter immovable memory
+  x86/boot/KASLR: Limit kaslr to choosing the immovable memory
+
+ arch/x86/boot/compressed/Makefile |   4 +
+ arch/x86/boot/compressed/acpitb.c | 401 ++++++++++++++++++++++++++++++
+ arch/x86/boot/compressed/kaslr.c  |  76 +++++-
+ arch/x86/boot/compressed/misc.h   |   8 +
+ 4 files changed, 478 insertions(+), 11 deletions(-)
+ create mode 100644 arch/x86/boot/compressed/acpitb.c
+
 -- 
-2.18.0
+2.17.1
