@@ -1,41 +1,41 @@
-From: Chao Fan <fanc.fnst@cn.fujitsu.com>
-Subject: [PATCH v7 2/3] x86/boot/KASLR: Walk srat tables to filter immovable memory
-Date: Thu, 13 Sep 2018 18:46:28 +0800
-Message-ID: <20180913104629.5179-3-fanc.fnst@cn.fujitsu.com>
-References: <20180913104629.5179-1-fanc.fnst@cn.fujitsu.com>
+From: David Laight <David.Laight@ACULAB.COM>
+Subject: RE: [PATCH v2] efi: take size of partition entry from GPT header
+Date: Thu, 13 Sep 2018 13:06:13 +0000
+Message-ID: <6d349d22d37041c1a2942d8ed4c76b69@AcuMS.aculab.com>
+References: <20180911161527.GA30689@vnote>
+ <20180912083844.iegei2kobcz4b7ag@ws.net.home>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180913104629.5179-1-fanc.fnst@cn.fujitsu.com>
+In-Reply-To: <20180912083844.iegei2kobcz4b7ag@ws.net.home>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, x86@kernel.org, linux-kernel@vger.kernel.org, keescook@chromium.org, bhe@redhat.com
-Cc: rjw@rjwysocki.net, lenb@kernel.org, ard.biesheuvel@linaro.org, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com, Chao Fan <fanc.fnst@cn.fujitsu.com>
+To: 'Karel Zak' <kzak@redhat.com>, Eugene Korenevsky <ekorenevsky@gmail.com>, Davidlohr Bueso <dave@stgolabs.net>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-If CONFIG_MEMORY_HOTREMOVE enabled, walk through the acpi srat memory
-tables and store those immovable memory regions so that kaslr can get
-where to choose for randomization.
+From: Karel Zak
+> Sent: 12 September 2018 09:39
+> On Tue, Sep 11, 2018 at 07:15:27PM +0300, Eugene Korenevsky wrote:
+> > +static gpt_entry *get_gpt_entry(gpt_header *gpt_hdr, gpt_entry *ptes, u32 index)
+> > +{
+> > +	return (gpt_entry *)((u8 *)ptes + gpt->sizeof_partition_entry * index);
+> 
+> I guess header use LE, so you need:
+> 
+>                le32_to_cpu(gpt_hdr->sizeof_partition_entry)
 
-Signed-off-by: Chao Fan <fanc.fnst@cn.fujitsu.com>
----
- arch/x86/boot/compressed/kaslr.c | 5 +++++
- 1 file changed, 5 insertions(+)
+I suspect you also need a sanity check that the value isn't too small
+or stupidly large.
 
-diff --git a/arch/x86/boot/compressed/kaslr.c b/arch/x86/boot/compressed/kaslr.c
-index 9ed9709d9947..0c3567bc231c 100644
---- a/arch/x86/boot/compressed/kaslr.c
-+++ b/arch/x86/boot/compressed/kaslr.c
-@@ -417,6 +417,11 @@ static void mem_avoid_init(unsigned long input, unsigned long input_size,
- 	/* Mark the memmap regions we need to avoid */
- 	handle_mem_options();
- 
-+#ifdef CONFIG_MEMORY_HOTREMOVE
-+	/* Mark the immovable regions we need to choose */
-+	get_immovable_mem();
-+#endif
-+
- #ifdef CONFIG_X86_VERBOSE_BOOTUP
- 	/* Make sure video RAM can be used. */
- 	add_identity_map(0, PMD_SIZE);
--- 
-2.17.1
+In principle slightly short lengths presumably imply that the disk
+was formatted with an older standard - so the last fields should be
+ignored.
+They may not be any such disks - until the on-disk structure is extended
+and the kernel structure updated to match.
+
+	David
+
+-
+Registered Address Lakeside, Bramley Road, Mount Farm, Milton Keynes, MK1 1PT, UK
+Registration No: 1397386 (Wales)
