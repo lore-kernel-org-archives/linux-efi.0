@@ -1,14 +1,14 @@
 From: Sasha Levin <Alexander.Levin@microsoft.com>
-Subject: [PATCH AUTOSEL 4.9 09/34] efi/esrt: Only call efi_mem_reserve() for
+Subject: [PATCH AUTOSEL 4.14 18/57] efi/esrt: Only call efi_mem_reserve() for
  boot services memory
-Date: Sat, 15 Sep 2018 01:34:31 +0000
-Message-ID: <20180915013422.180023-9-alexander.levin@microsoft.com>
-References: <20180915013422.180023-1-alexander.levin@microsoft.com>
+Date: Sat, 15 Sep 2018 01:32:41 +0000
+Message-ID: <20180915013223.179909-18-alexander.levin@microsoft.com>
+References: <20180915013223.179909-1-alexander.levin@microsoft.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="iso-8859-1"
 Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180915013422.180023-1-alexander.levin@microsoft.com>
+In-Reply-To: <20180915013223.179909-1-alexander.levin@microsoft.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
 To: "stable@vger.kernel.org" <stable@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
@@ -58,7 +58,7 @@ Signed-off-by: Sasha Levin <alexander.levin@microsoft.com>
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/firmware/efi/esrt.c b/drivers/firmware/efi/esrt.c
-index 311c9d0e8cbb..241dd7c63d2c 100644
+index c47e0c6ec00f..f3c28777b8c6 100644
 --- a/drivers/firmware/efi/esrt.c
 +++ b/drivers/firmware/efi/esrt.c
 @@ -333,7 +333,8 @@ void __init efi_esrt_init(void)
