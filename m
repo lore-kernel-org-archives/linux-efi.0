@@ -1,32 +1,55 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [GIT PULL 0/1] EFI fix for v4.19-rc
-Date: Tue, 18 Sep 2018 14:36:51 -0700
-Message-ID: <20180918213652.5648-1-ard.biesheuvel@linaro.org>
+Subject: [PATCH 1/1] efi/libstub/arm: default EFI_ARMSTUB_DTB_LOADER to y
+Date: Tue, 18 Sep 2018 14:36:52 -0700
+Message-ID: <20180918213652.5648-2-ard.biesheuvel@linaro.org>
+References: <20180918213652.5648-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180918213652.5648-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Scott Branden <scott.branden@broadcom.com>
+Cc: Scott Branden <scott.branden@broadcom.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-The following changes since commit 11da3a7f84f19c26da6f86af878298694ede0804:
+From: Scott Branden <scott.branden@broadcom.com>
 
-  Linux 4.19-rc3 (2018-09-09 17:26:43 -0700)
+Default EFI_ARMSTUB_DTB_LOADER to y to allow the dtb= command
+line parameter to function with efi loader.
 
-are available in the Git repository at:
+Required for development purposes and to boot on existing bootloaders
+that do not support devicetree provided by the firmware or by the
+bootloader.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git efi-urgent
-
-for you to fetch changes up to d310959365942b100f79b56bcce859968fe7ca9c:
-
-  efi/libstub/arm: default EFI_ARMSTUB_DTB_LOADER to y (2018-09-12 16:41:41 +0200)
-
-----------------------------------------------------------------
-Apply a fix from Scott to make the ARM stub's DTB loader opt-out rather
-than opt-in.
-
-----------------------------------------------------------------
-Scott Branden (1):
-      efi/libstub/arm: default EFI_ARMSTUB_DTB_LOADER to y
-
+Fixes: 3d7ee348aa41 ("efi/libstub/arm: Add opt-in Kconfig option ...")
+Signed-off-by: Scott Branden <scott.branden@broadcom.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
  drivers/firmware/efi/Kconfig | 9 ++++++---
  1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+index d8e159feb573..89110dfc7127 100644
+--- a/drivers/firmware/efi/Kconfig
++++ b/drivers/firmware/efi/Kconfig
+@@ -90,14 +90,17 @@ config EFI_ARMSTUB
+ config EFI_ARMSTUB_DTB_LOADER
+ 	bool "Enable the DTB loader"
+ 	depends on EFI_ARMSTUB
++	default y
+ 	help
+ 	  Select this config option to add support for the dtb= command
+ 	  line parameter, allowing a device tree blob to be loaded into
+ 	  memory from the EFI System Partition by the stub.
+ 
+-	  The device tree is typically provided by the platform or by
+-	  the bootloader, so this option is mostly for development
+-	  purposes only.
++	  If the device tree is provided by the platform or by
++	  the bootloader this option may not be needed.
++	  But, for various development reasons and to maintain existing
++	  functionality for bootloaders that do not have such support
++	  this option is necessary.
+ 
+ config EFI_BOOTLOADER_CONTROL
+ 	tristate "EFI Bootloader Control"
+-- 
+2.17.1
