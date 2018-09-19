@@ -1,84 +1,98 @@
 From: Nayna Jain <nayna@linux.vnet.ibm.com>
-Subject: [PATCH v3 1/6] x86/ima: define arch_ima_get_secureboot
-Date: Wed, 19 Sep 2018 13:25:17 +0530
-Message-ID: <20180919075522.7684-2-nayna@linux.vnet.ibm.com>
-References: <20180919075522.7684-1-nayna@linux.vnet.ibm.com>
+Subject: [PATCH v3 0/6] Add support for architecture specific IMA policies
+Date: Wed, 19 Sep 2018 13:25:16 +0530
+Message-ID: <20180919075522.7684-1-nayna@linux.vnet.ibm.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180919075522.7684-1-nayna@linux.vnet.ibm.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-integrity@vger.kernel.org
 Cc: zohar@linux.ibm.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, jforbes@redhat.com, Nayna Jain <nayna@linux.vnet.ibm.com>
 List-Id: linux-efi@vger.kernel.org
 
-Distros are concerned about totally disabling the kexec_load syscall.
-As a compromise, the kexec_load syscall will only be disabled when
-CONFIG_KEXEC_VERIFY_SIG is configured and the system is booted with
-secureboot enabled.
+The architecture specific policy, introduced in this patch set, permits
+different architectures to define IMA policy rules based on kernel
+configuration and system runtime information.
 
-This patch defines the new arch specific function called
-arch_ima_get_secureboot() to retrieve the secureboot state of the system.
+For example, on x86, there are two methods of verifying the kexec'ed kernel
+image signature - CONFIG_KEXEC_VERIFY_SIG and IMA appraisal policy
+KEXEC_KERNEL_CHECK. CONFIG_KEXEC_VERIFY_SIG enforces the kexec_file_load
+syscall to verify file signatures, but does not prevent the kexec_load
+syscall. The IMA KEXEC_KERNEL_CHECK policy rule verifies the kexec'ed
+kernel image, loaded via the kexec_file_load syscall, is validly signed and
+prevents loading a kernel image via the kexec_load syscall. When secure
+boot is enabled, the kexec'ed kernel image needs to be signed and the
+signature verified. In this environment, either method of verifying the
+kexec'ed kernel image is acceptable, as long as the kexec_load syscall is
+disabled.
 
-Signed-off-by: Nayna Jain <nayna@linux.vnet.ibm.com>
-Suggested-by: Seth Forshee <seth.forshee@canonical.com>
----
- arch/x86/kernel/Makefile   |  2 ++
- arch/x86/kernel/ima_arch.c | 17 +++++++++++++++++
- include/linux/ima.h        |  9 +++++++++
- 3 files changed, 28 insertions(+)
+The previous version of this patchset introduced a new IMA policy rule to
+disable the kexec_load syscall, when CONFIG_KEXEC_VERIFY_SIG was enabled,
+however that is removed from this version by introducing a different
+mechanism.
+
+The patchset defines an arch_ima_get_secureboot() function to retrieve the
+secureboot state of the system. If secureboot is enabled and
+CONFIG_KEXEC_VERIFY_SIG is configured, it denies permission to kexec_load
+syscall.
+
+To support architecture specific policies, a new function
+arch_get_ima_policy() is defined. This patch set defines IMA
+KERNEL_KEXEC_POLICY rules for x86 only if CONFIG_KEXEC_VERIFY_SIG is
+disabled and secure boot is enabled.
+
+This patch set includes a patch, which refactors ima_init_policy() to
+remove code duplication.
+
+Changelog:
+
+v3:
+* x86/ima: define arch_ima_get_secureboot
+	- Edited subject line, added x86.
+
+* x86/ima: define arch_get_ima_policy() for x86
+	- Fixed the error reported by kbuild test robot. The error was
+	appearing when CONFIG_X86 is enabled, but CONFIG_IMA_ARCH_POLICY
+	is disabled.
+
+v2:
+* ima: define arch_ima_get_secureboot
+	- New Patch - to retrieve secureboot state of the system
+* ima: prevent kexec_load syscall based on runtime secureboot flag
+	- New Patch - disables kexec_load if KEXEC_VERIFY_SIG is
+	  configured and secureboot is enabled
+* ima: refactor ima_init_policy()
+	- New Patch - cleans up the code duplication in
+	  ima_init_policy(), adds new function add_rules()
+* ima: add support for arch specific policies
+	- modified ima_init_arch_policy() and ima_init_policy() to
+	  use add_rules() from previous patch.
+* ima: add support for external setting of ima_appraise
+	- sets ima_appraise flag explicitly for arch_specific setting
+* ima: add support for KEXEC_ORIG_KERNEL_CHECK
+	- deleted the patch based on Seth's feedback
+* x86/ima: define arch_get_ima_policy() for x86
+	- removes the policy KEXEC_ORIG_KERNEL_CHECK based on
+	  Seth's feedback.
+
+Eric Richter (1):
+  x86/ima: define arch_get_ima_policy() for x86
+
+Nayna Jain (5):
+  x86/ima: define arch_ima_get_secureboot
+  ima: prevent kexec_load syscall based on runtime secureboot flag
+  ima: refactor ima_init_policy()
+  ima: add support for arch specific policies
+  ima: add support for external setting of ima_appraise
+
+ arch/x86/kernel/Makefile              |   2 +
+ arch/x86/kernel/ima_arch.c            |  35 +++++++
+ include/linux/ima.h                   |  18 ++++
+ security/integrity/ima/Kconfig        |   8 ++
+ security/integrity/ima/ima.h          |   5 +
+ security/integrity/ima/ima_appraise.c |  11 ++-
+ security/integrity/ima/ima_main.c     |  17 ++--
+ security/integrity/ima/ima_policy.c   | 167 +++++++++++++++++++++++++---------
+ 8 files changed, 214 insertions(+), 49 deletions(-)
  create mode 100644 arch/x86/kernel/ima_arch.c
 
-diff --git a/arch/x86/kernel/Makefile b/arch/x86/kernel/Makefile
-index 02d6f5cf4e70..f32406e51424 100644
---- a/arch/x86/kernel/Makefile
-+++ b/arch/x86/kernel/Makefile
-@@ -149,3 +149,5 @@ ifeq ($(CONFIG_X86_64),y)
- 	obj-$(CONFIG_MMCONF_FAM10H)	+= mmconf-fam10h_64.o
- 	obj-y				+= vsmp_64.o
- endif
-+
-+obj-$(CONFIG_IMA)			+= ima_arch.o
-diff --git a/arch/x86/kernel/ima_arch.c b/arch/x86/kernel/ima_arch.c
-new file mode 100644
-index 000000000000..bb5a88d2b271
---- /dev/null
-+++ b/arch/x86/kernel/ima_arch.c
-@@ -0,0 +1,17 @@
-+/* SPDX-License-Identifier: GPL-2.0+ */
-+/*
-+ * Copyright (C) 2018 IBM Corporation
-+ */
-+#include <linux/efi.h>
-+#include <linux/ima.h>
-+
-+extern struct boot_params boot_params;
-+
-+bool arch_ima_get_secureboot(void)
-+{
-+	if (efi_enabled(EFI_BOOT) &&
-+		(boot_params.secure_boot == efi_secureboot_mode_enabled))
-+		return true;
-+	else
-+		return false;
-+}
-diff --git a/include/linux/ima.h b/include/linux/ima.h
-index 84806b54b50a..4852255aa4f4 100644
---- a/include/linux/ima.h
-+++ b/include/linux/ima.h
-@@ -30,6 +30,15 @@ extern void ima_post_path_mknod(struct dentry *dentry);
- extern void ima_add_kexec_buffer(struct kimage *image);
- #endif
- 
-+#ifdef CONFIG_X86
-+extern bool arch_ima_get_secureboot(void);
-+#else
-+static inline bool arch_ima_get_secureboot(void)
-+{
-+	return false;
-+}
-+#endif
-+
- #else
- static inline int ima_bprm_check(struct linux_binprm *bprm)
- {
 -- 
 2.13.6
