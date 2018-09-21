@@ -1,99 +1,73 @@
-From: Nayna Jain <nayna@linux.vnet.ibm.com>
-Subject: [PATCH v3 6/6] x86/ima: define arch_get_ima_policy() for x86
-Date: Wed, 19 Sep 2018 13:25:22 +0530
-Message-ID: <20180919075522.7684-7-nayna@linux.vnet.ibm.com>
-References: <20180919075522.7684-1-nayna@linux.vnet.ibm.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180919075522.7684-1-nayna@linux.vnet.ibm.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-integrity@vger.kernel.org
-Cc: zohar@linux.ibm.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, jforbes@redhat.com, Eric Richter <erichte@linux.vnet.ibm.com>, Nayna Jain <nayna@linux.vnet.ibm.com>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: Re: [PATCH v3 3/6] ima: refactor ima_init_policy()
+Date: Fri, 21 Sep 2018 11:34:29 +0300
+Message-ID: <20180921083429.c7sikis5bzxdifny@mwanda>
+References: <20180919075522.7684-4-nayna@linux.vnet.ibm.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kbuild-bounces@lists.01.org>
+Content-Disposition: inline
+In-Reply-To: <20180919075522.7684-4-nayna@linux.vnet.ibm.com>
+List-Unsubscribe: <https://lists.01.org/mailman/options/kbuild>,
+ <mailto:kbuild-request@lists.01.org?subject=unsubscribe>
+List-Archive: <http://lists.01.org/pipermail/kbuild/>
+List-Post: <mailto:kbuild@lists.01.org>
+List-Help: <mailto:kbuild-request@lists.01.org?subject=help>
+List-Subscribe: <https://lists.01.org/mailman/listinfo/kbuild>,
+ <mailto:kbuild-request@lists.01.org?subject=subscribe>
+Errors-To: kbuild-bounces@lists.01.org
+Sender: "kbuild" <kbuild-bounces@lists.01.org>
+To: kbuild@01.org
+Cc: linux-efi@vger.kernel.org, Nayna Jain <nayna@linux.vnet.ibm.com>, linux-kernel@vger.kernel.org, zohar@linux.ibm.com, dhowells@redhat.com, linux-security-module@vger.kernel.org, kbuild-all@01.org, jforbes@redhat.com, linux-integrity@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Eric Richter <erichte@linux.vnet.ibm.com>
+Hi Nayna,
 
-This patch implements an example arch-specific IMA policy for x86 to
-enable measurement and appraisal of any kernel image loaded for kexec,
-when CONFIG_KEXEC_VERIFY_SIG is not enabled.
+Thank you for the patch! Perhaps something to improve:
 
-For systems with CONFIG_KEXEC_VERIFY_SIG enabled, only the measurement
-rule is enabled, not the IMA-appraisal rule.
+url:    https://github.com/0day-ci/linux/commits/Nayna-Jain/Add-support-for-architecture-specific-IMA-policies/20180920-035110
 
-Signed-off-by: Eric Richter <erichte@linux.vnet.ibm.com>
-- Removed the policy KEXEC_ORIG_KERNEL_CHECK which was defined to
-  disable the kexec_load syscall.
-- arch_get_ima_policy() uses arch_ima_get_secureboot() to get secureboot
-  state
-Signed-off-by: Nayna Jain <nayna@linux.vnet.ibm.com>
----
- arch/x86/kernel/ima_arch.c     | 18 ++++++++++++++++++
- include/linux/ima.h            |  4 ++++
- security/integrity/ima/Kconfig |  8 ++++++++
- 3 files changed, 30 insertions(+)
+smatch warnings:
+security/integrity/ima/ima_policy.c:489 add_rules() warn: should this be a bitwise op?
 
-diff --git a/arch/x86/kernel/ima_arch.c b/arch/x86/kernel/ima_arch.c
-index bb5a88d2b271..245976e49a55 100644
---- a/arch/x86/kernel/ima_arch.c
-+++ b/arch/x86/kernel/ima_arch.c
-@@ -15,3 +15,21 @@ bool arch_ima_get_secureboot(void)
- 	else
- 		return false;
- }
-+
-+/* arch rules for audit and user mode */
-+static const char * const sb_arch_rules[] = {
-+#ifndef CONFIG_KEXEC_VERIFY_SIG
-+	"appraise func=KEXEC_KERNEL_CHECK appraise_type=imasig",
-+#endif /* CONFIG_KEXEC_VERIFY_SIG */
-+	"measure func=KEXEC_KERNEL_CHECK",
-+	NULL
-+};
-+
-+#ifdef CONFIG_IMA_ARCH_POLICY
-+const char * const *arch_get_ima_policy(void)
-+{
-+	if (arch_ima_get_secureboot())
-+		return sb_arch_rules;
-+	return NULL;
-+}
-+#endif
-diff --git a/include/linux/ima.h b/include/linux/ima.h
-index 350fa957f8a6..dabd3abdf671 100644
---- a/include/linux/ima.h
-+++ b/include/linux/ima.h
-@@ -39,10 +39,14 @@ static inline bool arch_ima_get_secureboot(void)
- }
- #endif
- 
-+#if defined(CONFIG_X86) && defined(CONFIG_IMA_ARCH_POLICY)
-+extern const char * const *arch_get_ima_policy(void);
-+#else
- static inline const char * const *arch_get_ima_policy(void)
- {
- 	return NULL;
- }
-+#endif
- 
- #else
- static inline int ima_bprm_check(struct linux_binprm *bprm)
-diff --git a/security/integrity/ima/Kconfig b/security/integrity/ima/Kconfig
-index 13b446328dda..97609a76aa14 100644
---- a/security/integrity/ima/Kconfig
-+++ b/security/integrity/ima/Kconfig
-@@ -157,6 +157,14 @@ config IMA_APPRAISE
- 	  <http://linux-ima.sourceforge.net>
- 	  If unsure, say N.
- 
-+config IMA_ARCH_POLICY
-+        bool "Enable loading an IMA architecture specific policy"
-+        depends on KEXEC_VERIFY_SIG || IMA_APPRAISE && INTEGRITY_ASYMMETRIC_KEYS
-+        default n
-+        help
-+          This option enables loading an IMA architecture specific policy
-+          based on run time secure boot flags.
-+
- config IMA_APPRAISE_BUILD_POLICY
- 	bool "IMA build time configured policy rules"
- 	depends on IMA_APPRAISE && INTEGRITY_ASYMMETRIC_KEYS
--- 
-2.13.6
+# https://github.com/0day-ci/linux/commit/84a2e186f940ebc6c34e6d276e55f665167a5bb8
+git remote add linux-review https://github.com/0day-ci/linux
+git remote update linux-review
+git checkout 84a2e186f940ebc6c34e6d276e55f665167a5bb8
+vim +489 security/integrity/ima/ima_policy.c
+
+6f0911a6 Mimi Zohar 2018-04-12  477  
+84a2e186 Nayna Jain 2018-09-19  478  static void add_rules(struct ima_rule_entry *entries, int count,
+84a2e186 Nayna Jain 2018-09-19  479  		      enum policy_rule_list file)
+84a2e186 Nayna Jain 2018-09-19  480  {
+84a2e186 Nayna Jain 2018-09-19  481  	int i = 0;
+84a2e186 Nayna Jain 2018-09-19  482  
+84a2e186 Nayna Jain 2018-09-19  483  	for (i = 0; i < count; i++) {
+84a2e186 Nayna Jain 2018-09-19  484  		struct ima_rule_entry *entry;
+84a2e186 Nayna Jain 2018-09-19  485  
+84a2e186 Nayna Jain 2018-09-19  486  		if (file && IMA_DEFAULT_POLICY)
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+84a2e186 Nayna Jain 2018-09-19  487  			list_add_tail(&entries[i].list, &ima_default_rules);
+84a2e186 Nayna Jain 2018-09-19  488  
+84a2e186 Nayna Jain 2018-09-19 @489  		if (file && IMA_CUSTOM_POLICY) {
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+It does look like it should be "if (file & IMA_CUSTOM_POLICY) {" but I
+haven't looked at the context besides what's here in this email.
+
+84a2e186 Nayna Jain 2018-09-19  490  			entry = kmemdup(&entries[i], sizeof(*entry),
+84a2e186 Nayna Jain 2018-09-19  491  					GFP_KERNEL);
+84a2e186 Nayna Jain 2018-09-19  492  			if (!entry)
+84a2e186 Nayna Jain 2018-09-19  493  				continue;
+84a2e186 Nayna Jain 2018-09-19  494  
+84a2e186 Nayna Jain 2018-09-19  495  			INIT_LIST_HEAD(&entry->list);
+84a2e186 Nayna Jain 2018-09-19  496  			list_add_tail(&entry->list, &ima_policy_rules);
+84a2e186 Nayna Jain 2018-09-19  497  		}
+84a2e186 Nayna Jain 2018-09-19  498  		if (entries[i].action == APPRAISE)
+84a2e186 Nayna Jain 2018-09-19  499  			temp_ima_appraise |= ima_appraise_flag(entries[i].func);
+84a2e186 Nayna Jain 2018-09-19  500  		if (entries[i].func == POLICY_CHECK)
+84a2e186 Nayna Jain 2018-09-19  501  			temp_ima_appraise |= IMA_APPRAISE_POLICY;
+84a2e186 Nayna Jain 2018-09-19  502  	}
+84a2e186 Nayna Jain 2018-09-19  503  }
+84a2e186 Nayna Jain 2018-09-19  504  
