@@ -1,73 +1,44 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: [PATCH v3 3/6] ima: refactor ima_init_policy()
-Date: Fri, 21 Sep 2018 11:34:29 +0300
-Message-ID: <20180921083429.c7sikis5bzxdifny@mwanda>
-References: <20180919075522.7684-4-nayna@linux.vnet.ibm.com>
+From: Kees Cook <keescook@chromium.org>
+Subject: Re: [PATCH v7 1/3] x86/boot: Add acpitb.c to parse acpi tables
+Date: Sat, 22 Sep 2018 08:45:12 -0700
+Message-ID: <CAGXu5j+LxEpoKAkEo8GQa-f729_Ebavgtnv+DA9bxf9XEz2QPQ@mail.gmail.com>
+References: <20180913104629.5179-1-fanc.fnst@cn.fujitsu.com> <20180913104629.5179-2-fanc.fnst@cn.fujitsu.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kbuild-bounces@lists.01.org>
-Content-Disposition: inline
-In-Reply-To: <20180919075522.7684-4-nayna@linux.vnet.ibm.com>
-List-Unsubscribe: <https://lists.01.org/mailman/options/kbuild>,
- <mailto:kbuild-request@lists.01.org?subject=unsubscribe>
-List-Archive: <http://lists.01.org/pipermail/kbuild/>
-List-Post: <mailto:kbuild@lists.01.org>
-List-Help: <mailto:kbuild-request@lists.01.org?subject=help>
-List-Subscribe: <https://lists.01.org/mailman/listinfo/kbuild>,
- <mailto:kbuild-request@lists.01.org?subject=subscribe>
-Errors-To: kbuild-bounces@lists.01.org
-Sender: "kbuild" <kbuild-bounces@lists.01.org>
-To: kbuild@01.org
-Cc: linux-efi@vger.kernel.org, Nayna Jain <nayna@linux.vnet.ibm.com>, linux-kernel@vger.kernel.org, zohar@linux.ibm.com, dhowells@redhat.com, linux-security-module@vger.kernel.org, kbuild-all@01.org, jforbes@redhat.com, linux-integrity@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180913104629.5179-2-fanc.fnst@cn.fujitsu.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chao Fan <fanc.fnst@cn.fujitsu.com>
+Cc: linux-efi <linux-efi@vger.kernel.org>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, X86 ML <x86@kernel.org>, LKML <linux-kernel@vger.kernel.org>, Baoquan He <bhe@redhat.com>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com
 List-Id: linux-efi@vger.kernel.org
 
-Hi Nayna,
+On Thu, Sep 13, 2018 at 3:46 AM, Chao Fan <fanc.fnst@cn.fujitsu.com> wrote:
+> There is a bug that kaslr may randomly chooses some positions
+> which are located in movable memory regions. This will break memory
+> hotplug feature and make the movable memory chosen by KASLR can't be
+> removed. So dig SRAT table from ACPI tables to get memory information.
+>
+> Imitate the ACPI code of parsing ACPI tables to dig and read ACPI
+> tables. Since some operations are not needed here, functions are
+> simplified. Functions will be used to dig only SRAT tables to get
+> information of memory, so that KASLR can the memory in immovable node.
+>
+> And also, these functions won't influence the initialization of
+> ACPI after start_kernel().
+>
+> Since use physical address directely, so acpi_os_map_memory()
+> and acpi_os_unmap_memory() are not needed.
+>
+> Signed-off-by: Chao Fan <fanc.fnst@cn.fujitsu.com>
+> ---
+>  arch/x86/boot/compressed/Makefile |   4 +
+>  arch/x86/boot/compressed/acpitb.c | 401 ++++++++++++++++++++++++++++++
 
-Thank you for the patch! Perhaps something to improve:
+Does this logic live anywhere else in the kernel already? (i.e. could
+other code be reused?)
 
-url:    https://github.com/0day-ci/linux/commits/Nayna-Jain/Add-support-for-architecture-specific-IMA-policies/20180920-035110
+-Kees
 
-smatch warnings:
-security/integrity/ima/ima_policy.c:489 add_rules() warn: should this be a bitwise op?
-
-# https://github.com/0day-ci/linux/commit/84a2e186f940ebc6c34e6d276e55f665167a5bb8
-git remote add linux-review https://github.com/0day-ci/linux
-git remote update linux-review
-git checkout 84a2e186f940ebc6c34e6d276e55f665167a5bb8
-vim +489 security/integrity/ima/ima_policy.c
-
-6f0911a6 Mimi Zohar 2018-04-12  477  
-84a2e186 Nayna Jain 2018-09-19  478  static void add_rules(struct ima_rule_entry *entries, int count,
-84a2e186 Nayna Jain 2018-09-19  479  		      enum policy_rule_list file)
-84a2e186 Nayna Jain 2018-09-19  480  {
-84a2e186 Nayna Jain 2018-09-19  481  	int i = 0;
-84a2e186 Nayna Jain 2018-09-19  482  
-84a2e186 Nayna Jain 2018-09-19  483  	for (i = 0; i < count; i++) {
-84a2e186 Nayna Jain 2018-09-19  484  		struct ima_rule_entry *entry;
-84a2e186 Nayna Jain 2018-09-19  485  
-84a2e186 Nayna Jain 2018-09-19  486  		if (file && IMA_DEFAULT_POLICY)
-                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
-84a2e186 Nayna Jain 2018-09-19  487  			list_add_tail(&entries[i].list, &ima_default_rules);
-84a2e186 Nayna Jain 2018-09-19  488  
-84a2e186 Nayna Jain 2018-09-19 @489  		if (file && IMA_CUSTOM_POLICY) {
-                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^
-
-It does look like it should be "if (file & IMA_CUSTOM_POLICY) {" but I
-haven't looked at the context besides what's here in this email.
-
-84a2e186 Nayna Jain 2018-09-19  490  			entry = kmemdup(&entries[i], sizeof(*entry),
-84a2e186 Nayna Jain 2018-09-19  491  					GFP_KERNEL);
-84a2e186 Nayna Jain 2018-09-19  492  			if (!entry)
-84a2e186 Nayna Jain 2018-09-19  493  				continue;
-84a2e186 Nayna Jain 2018-09-19  494  
-84a2e186 Nayna Jain 2018-09-19  495  			INIT_LIST_HEAD(&entry->list);
-84a2e186 Nayna Jain 2018-09-19  496  			list_add_tail(&entry->list, &ima_policy_rules);
-84a2e186 Nayna Jain 2018-09-19  497  		}
-84a2e186 Nayna Jain 2018-09-19  498  		if (entries[i].action == APPRAISE)
-84a2e186 Nayna Jain 2018-09-19  499  			temp_ima_appraise |= ima_appraise_flag(entries[i].func);
-84a2e186 Nayna Jain 2018-09-19  500  		if (entries[i].func == POLICY_CHECK)
-84a2e186 Nayna Jain 2018-09-19  501  			temp_ima_appraise |= IMA_APPRAISE_POLICY;
-84a2e186 Nayna Jain 2018-09-19  502  	}
-84a2e186 Nayna Jain 2018-09-19  503  }
-84a2e186 Nayna Jain 2018-09-19  504  
+-- 
+Kees Cook
+Pixel Security
