@@ -1,19 +1,19 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.9 079/111] efi/esrt: Only call efi_mem_reserve() for boot services memory
-Date: Mon, 24 Sep 2018 13:52:46 +0200
-Message-ID: <20180924113112.744539116@linuxfoundation.org>
-References: <20180924113103.337261320@linuxfoundation.org>
+Subject: [PATCH 4.14 122/173] efi/esrt: Only call efi_mem_reserve() for boot services memory
+Date: Mon, 24 Sep 2018 13:52:36 +0200
+Message-ID: <20180924113124.914120374@linuxfoundation.org>
+References: <20180924113114.334025954@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180924113103.337261320@linuxfoundation.org>
+In-Reply-To: <20180924113114.334025954@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Jones <pjones@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Sasha Levin <alexander.levin@microsoft.com>
 List-Id: linux-efi@vger.kernel.org
 
-4.9-stable review patch.  If anyone has any objections, please let me know.
+4.14-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
