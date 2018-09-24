@@ -1,79 +1,73 @@
-From: Nayna Jain <nayna@linux.vnet.ibm.com>
-Subject: Re: [PATCH v3 3/6] ima: refactor ima_init_policy()
-Date: Mon, 24 Sep 2018 16:40:39 +0530
-Message-ID: <83d87b89-d1df-5e13-23d9-1ee2e8c9a75f@linux.vnet.ibm.com>
-References: <20180921083429.c7sikis5bzxdifny@mwanda>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.9 079/111] efi/esrt: Only call efi_mem_reserve() for boot services memory
+Date: Mon, 24 Sep 2018 13:52:46 +0200
+Message-ID: <20180924113112.744539116@linuxfoundation.org>
+References: <20180924113103.337261320@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180921083429.c7sikis5bzxdifny@mwanda>
-Content-Language: en-US
+In-Reply-To: <20180924113103.337261320@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Dan Carpenter <dan.carpenter@oracle.com>, kbuild@01.org
-Cc: kbuild-all@01.org, linux-integrity@vger.kernel.org, zohar@linux.ibm.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, jforbes@redhat.com
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Jones <pjones@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Sasha Levin <alexander.levin@microsoft.com>
 List-Id: linux-efi@vger.kernel.org
 
+4.9-stable review patch.  If anyone has any objections, please let me know.
 
+------------------
 
-On 09/21/2018 02:04 PM, Dan Carpenter wrote:
-> Hi Nayna,
->
-> Thank you for the patch! Perhaps something to improve:
->
-> url:    https://github.com/0day-ci/linux/commits/Nayna-Jain/Add-support-for-architecture-specific-IMA-policies/20180920-035110
->
-> smatch warnings:
-> security/integrity/ima/ima_policy.c:489 add_rules() warn: should this be a bitwise op?
->
-> # https://github.com/0day-ci/linux/commit/84a2e186f940ebc6c34e6d276e55f665167a5bb8
-> git remote add linux-review https://github.com/0day-ci/linux
-> git remote update linux-review
-> git checkout 84a2e186f940ebc6c34e6d276e55f665167a5bb8
-> vim +489 security/integrity/ima/ima_policy.c
->
-> 6f0911a6 Mimi Zohar 2018-04-12  477
-> 84a2e186 Nayna Jain 2018-09-19  478  static void add_rules(struct ima_rule_entry *entries, int count,
-> 84a2e186 Nayna Jain 2018-09-19  479  		      enum policy_rule_list file)
-> 84a2e186 Nayna Jain 2018-09-19  480  {
-> 84a2e186 Nayna Jain 2018-09-19  481  	int i = 0;
-> 84a2e186 Nayna Jain 2018-09-19  482
-> 84a2e186 Nayna Jain 2018-09-19  483  	for (i = 0; i < count; i++) {
-> 84a2e186 Nayna Jain 2018-09-19  484  		struct ima_rule_entry *entry;
-> 84a2e186 Nayna Jain 2018-09-19  485
-> 84a2e186 Nayna Jain 2018-09-19  486  		if (file && IMA_DEFAULT_POLICY)
->                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^
-> 84a2e186 Nayna Jain 2018-09-19  487  			list_add_tail(&entries[i].list, &ima_default_rules);
-> 84a2e186 Nayna Jain 2018-09-19  488
-> 84a2e186 Nayna Jain 2018-09-19 @489  		if (file && IMA_CUSTOM_POLICY) {
->                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^
->
-> It does look like it should be "if (file & IMA_CUSTOM_POLICY) {" but I
-> haven't looked at the context besides what's here in this email.
-Thanks Dan for noticing this. Yes, I will fix it and post the v4 version.
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-Thanks & Regards,
-     - Nayna
+[ Upstream commit 61f0d55569463a1af897117ff47d202b0ccb2e24 ]
 
+The following commit:
 
->
-> 84a2e186 Nayna Jain 2018-09-19  490  			entry = kmemdup(&entries[i], sizeof(*entry),
-> 84a2e186 Nayna Jain 2018-09-19  491  					GFP_KERNEL);
-> 84a2e186 Nayna Jain 2018-09-19  492  			if (!entry)
-> 84a2e186 Nayna Jain 2018-09-19  493  				continue;
-> 84a2e186 Nayna Jain 2018-09-19  494
-> 84a2e186 Nayna Jain 2018-09-19  495  			INIT_LIST_HEAD(&entry->list);
-> 84a2e186 Nayna Jain 2018-09-19  496  			list_add_tail(&entry->list, &ima_policy_rules);
-> 84a2e186 Nayna Jain 2018-09-19  497  		}
-> 84a2e186 Nayna Jain 2018-09-19  498  		if (entries[i].action == APPRAISE)
-> 84a2e186 Nayna Jain 2018-09-19  499  			temp_ima_appraise |= ima_appraise_flag(entries[i].func);
-> 84a2e186 Nayna Jain 2018-09-19  500  		if (entries[i].func == POLICY_CHECK)
-> 84a2e186 Nayna Jain 2018-09-19  501  			temp_ima_appraise |= IMA_APPRAISE_POLICY;
-> 84a2e186 Nayna Jain 2018-09-19  502  	}
-> 84a2e186 Nayna Jain 2018-09-19  503  }
-> 84a2e186 Nayna Jain 2018-09-19  504
->
-> ---
-> 0-DAY kernel test infrastructure                Open Source Technology Center
-> https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
->
+  7e1550b8f208 ("efi: Drop type and attribute checks in efi_mem_desc_lookup()")
+
+refactored the implementation of efi_mem_desc_lookup() so that the type
+check is moved to the callers, one of which is the x86 version of
+efi_arch_mem_reserve(), where we added a modified check that only takes
+EFI_BOOT_SERVICES_DATA regions into account.
+
+This is reasonable, since it is the only memory type that requires this,
+but doing so uncovered some unexpected behavior in the ESRT code, which
+permits the ESRT table to reside in other types of memory than what the
+UEFI spec mandates (i.e., EFI_BOOT_SERVICES_DATA), and unconditionally
+calls efi_mem_reserve() on the region in question. This may result in
+errors such as
+
+  esrt: Reserving ESRT space from 0x000000009c810318 to 0x000000009c810350.
+  efi: Failed to lookup EFI memory descriptor for 0x000000009c810318
+
+when the ESRT table is not in EFI_BOOT_SERVICES_DATA memory, but we try
+to reserve it nonetheless.
+
+So make the call to efi_mem_reserve() conditional on the memory type.
+
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Peter Jones <pjones@redhat.com>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Sasha Levin <alexander.levin@microsoft.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+---
+ drivers/firmware/efi/esrt.c |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+--- a/drivers/firmware/efi/esrt.c
++++ b/drivers/firmware/efi/esrt.c
+@@ -333,7 +333,8 @@ void __init efi_esrt_init(void)
+ 
+ 	end = esrt_data + size;
+ 	pr_info("Reserving ESRT space from %pa to %pa.\n", &esrt_data, &end);
+-	efi_mem_reserve(esrt_data, esrt_data_size);
++	if (md.type == EFI_BOOT_SERVICES_DATA)
++		efi_mem_reserve(esrt_data, esrt_data_size);
+ 
+ 	pr_debug("esrt-init: loaded.\n");
+ err_memunmap:
