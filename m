@@ -1,19 +1,19 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.14 122/173] efi/esrt: Only call efi_mem_reserve() for boot services memory
-Date: Mon, 24 Sep 2018 13:52:36 +0200
-Message-ID: <20180924113124.914120374@linuxfoundation.org>
-References: <20180924113114.334025954@linuxfoundation.org>
+Subject: [PATCH 4.18 167/235] efi/esrt: Only call efi_mem_reserve() for boot services memory
+Date: Mon, 24 Sep 2018 13:52:33 +0200
+Message-ID: <20180924113121.683622359@linuxfoundation.org>
+References: <20180924113103.999624566@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180924113114.334025954@linuxfoundation.org>
+In-Reply-To: <20180924113103.999624566@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Jones <pjones@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Sasha Levin <alexander.levin@microsoft.com>
 List-Id: linux-efi@vger.kernel.org
 
-4.14-stable review patch.  If anyone has any objections, please let me know.
+4.18-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
@@ -61,7 +61,7 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
 --- a/drivers/firmware/efi/esrt.c
 +++ b/drivers/firmware/efi/esrt.c
-@@ -333,7 +333,8 @@ void __init efi_esrt_init(void)
+@@ -326,7 +326,8 @@ void __init efi_esrt_init(void)
  
  	end = esrt_data + size;
  	pr_info("Reserving ESRT space from %pa to %pa.\n", &esrt_data, &end);
@@ -70,4 +70,4 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 +		efi_mem_reserve(esrt_data, esrt_data_size);
  
  	pr_debug("esrt-init: loaded.\n");
- err_memunmap:
+ }
