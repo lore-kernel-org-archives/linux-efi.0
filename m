@@ -1,73 +1,110 @@
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.18 167/235] efi/esrt: Only call efi_mem_reserve() for boot services memory
-Date: Mon, 24 Sep 2018 13:52:33 +0200
-Message-ID: <20180924113121.683622359@linuxfoundation.org>
-References: <20180924113103.999624566@linuxfoundation.org>
+From: Chao Fan <fanc.fnst@cn.fujitsu.com>
+Subject: Re: [PATCH v7 3/3] x86/boot/KASLR: Limit kaslr to choosing the
+ immovable memory
+Date: Tue, 25 Sep 2018 09:04:11 +0800
+Message-ID: <20180925010411.GA12561@localhost.localdomain>
+References: <20180913104629.5179-1-fanc.fnst@cn.fujitsu.com>
+ <20180913104629.5179-4-fanc.fnst@cn.fujitsu.com>
+ <CAGXu5jK13F7EY--zAVWq-=P2-Lt7n-K05ctL-vH7S=rcWKQoOw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180924113103.999624566@linuxfoundation.org>
+Content-Disposition: inline
+In-Reply-To: <CAGXu5jK13F7EY--zAVWq-=P2-Lt7n-K05ctL-vH7S=rcWKQoOw@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Jones <pjones@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Sasha Levin <alexander.levin@microsoft.com>
+To: Kees Cook <keescook@chromium.org>
+Cc: linux-efi <linux-efi@vger.kernel.org>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, X86 ML <x86@kernel.org>, LKML <linux-kernel@vger.kernel.org>, Baoquan He <bhe@redhat.com>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com
 List-Id: linux-efi@vger.kernel.org
 
-4.18-stable review patch.  If anyone has any objections, please let me know.
+On Sat, Sep 22, 2018 at 08:48:53AM -0700, Kees Cook wrote:
+>On Thu, Sep 13, 2018 at 3:46 AM, Chao Fan <fanc.fnst@cn.fujitsu.com> wrote:
+>> +#ifdef CONFIG_MEMORY_HOTREMOVE
+>> +       /*
+>> +        * If immovable memory found, filter the intersection between
+>> +        * immovable memory and region to slots_count.
+>> +        * Otherwise, go on old code.
+>> +        */
+>> +       for (i = 0; i < num_immovable_mem; i++) {
+>> +               struct mem_vector entry;
+>> +               unsigned long long start, end, entry_end, region_end;
+>> +
+>> +               start = immovable_mem[i].start;
+>> +               end = start + immovable_mem[i].size;
+>> +               region_end = region->start + region->size;
+>> +
+>> +               entry.start = clamp(region->start, start, end);
+>> +               entry_end = clamp(region_end, start, end);
+>> +
+>> +               if (entry.start + image_size < entry_end) {
+>
+>Can this logic be rewritten to use the existing mem_overlaps() check
+>instead? I think that would make it much more readable.
+>
 
-------------------
+Sure, I will reuse mem_overlaps() instead of this logical.
 
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+>Otherwise, yes, this all looks fine.
 
-[ Upstream commit 61f0d55569463a1af897117ff47d202b0ccb2e24 ]
+Thank you for the review.
 
-The following commit:
+Thanks,
+Chao Fan
 
-  7e1550b8f208 ("efi: Drop type and attribute checks in efi_mem_desc_lookup()")
-
-refactored the implementation of efi_mem_desc_lookup() so that the type
-check is moved to the callers, one of which is the x86 version of
-efi_arch_mem_reserve(), where we added a modified check that only takes
-EFI_BOOT_SERVICES_DATA regions into account.
-
-This is reasonable, since it is the only memory type that requires this,
-but doing so uncovered some unexpected behavior in the ESRT code, which
-permits the ESRT table to reside in other types of memory than what the
-UEFI spec mandates (i.e., EFI_BOOT_SERVICES_DATA), and unconditionally
-calls efi_mem_reserve() on the region in question. This may result in
-errors such as
-
-  esrt: Reserving ESRT space from 0x000000009c810318 to 0x000000009c810350.
-  efi: Failed to lookup EFI memory descriptor for 0x000000009c810318
-
-when the ESRT table is not in EFI_BOOT_SERVICES_DATA memory, but we try
-to reserve it nonetheless.
-
-So make the call to efi_mem_reserve() conditional on the memory type.
-
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Peter Jones <pjones@redhat.com>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-efi@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Sasha Levin <alexander.levin@microsoft.com>
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
----
- drivers/firmware/efi/esrt.c |    3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
-
---- a/drivers/firmware/efi/esrt.c
-+++ b/drivers/firmware/efi/esrt.c
-@@ -326,7 +326,8 @@ void __init efi_esrt_init(void)
- 
- 	end = esrt_data + size;
- 	pr_info("Reserving ESRT space from %pa to %pa.\n", &esrt_data, &end);
--	efi_mem_reserve(esrt_data, esrt_data_size);
-+	if (md.type == EFI_BOOT_SERVICES_DATA)
-+		efi_mem_reserve(esrt_data, esrt_data_size);
- 
- 	pr_debug("esrt-init: loaded.\n");
- }
+>
+>-Kees
+>
+>> +                       entry.size = entry_end - entry.start;
+>> +                       slots_count(&entry, minimum, image_size);
+>> +
+>> +                       if (slot_area_index == MAX_SLOT_AREA) {
+>> +                               debug_putstr("Aborted e820/efi memmap scan (slot_areas full)!\n");
+>> +                               return 1;
+>> +                       }
+>> +               }
+>> +       }
+>> +       return 0;
+>> +#endif
+>> +}
+>> +
+>>  #ifdef CONFIG_EFI
+>>  /*
+>>   * Returns true if mirror region found (and must have been processed
+>> @@ -720,11 +775,8 @@ process_efi_entries(unsigned long minimum, unsigned long image_size)
+>>
+>>                 region.start = md->phys_addr;
+>>                 region.size = md->num_pages << EFI_PAGE_SHIFT;
+>> -               process_mem_region(&region, minimum, image_size);
+>> -               if (slot_area_index == MAX_SLOT_AREA) {
+>> -                       debug_putstr("Aborted EFI scan (slot_areas full)!\n");
+>> +               if (process_mem_region(&region, minimum, image_size))
+>>                         break;
+>> -               }
+>>         }
+>>         return true;
+>>  }
+>> @@ -751,11 +803,8 @@ static void process_e820_entries(unsigned long minimum,
+>>                         continue;
+>>                 region.start = entry->addr;
+>>                 region.size = entry->size;
+>> -               process_mem_region(&region, minimum, image_size);
+>> -               if (slot_area_index == MAX_SLOT_AREA) {
+>> -                       debug_putstr("Aborted e820 scan (slot_areas full)!\n");
+>> +               if (process_mem_region(&region, minimum, image_size))
+>>                         break;
+>> -               }
+>>         }
+>>  }
+>>
+>> --
+>> 2.17.1
+>>
+>>
+>>
+>
+>
+>
+>-- 
+>Kees Cook
+>Pixel Security
+>
+>
