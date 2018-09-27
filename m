@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 11/11] x86: boot: Fix EFI stub alignment
-Date: Thu, 27 Sep 2018 10:50:38 +0200
-Message-ID: <20180927085039.8391-12-ard.biesheuvel@linaro.org>
+Subject: [PATCH 06/11] efi: Make efi_rts_work accessible to efi page fault handler
+Date: Thu, 27 Sep 2018 10:50:33 +0200
+Message-ID: <20180927085039.8391-7-ard.biesheuvel@linaro.org>
 References: <20180927085039.8391-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180927085039.8391-1-ard.biesheuvel@linaro.org>
@@ -10,48 +10,161 @@ To: linux-kernel@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixne
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, Aaron Ma <aaron.ma@canonical.com>, Alistair Strachan <astrachan@google.com>, Ben Hutchings <ben@decadent.org.uk>, Bhupesh Sharma <bhsharma@redhat.com>, Hans de Goede <hdegoede@redhat.com>, Ivan Hu <ivan.hu@canonical.com>, Jeremy Linton <jeremy.linton@arm.com>, Marc Zyngier <marc.zyngier@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Robinson <pbrobinson@redhat.com>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Sebastian Andrzej Siewior <bigeasy@linutronix.de>, Stefan Agner <stefan@agner.ch>
 List-Id: linux-efi@vger.kernel.org
 
-From: Ben Hutchings <ben@decadent.org.uk>
+From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
 
-We currently align the end of the compressed image to a multiple of
-16.  However, the PE-COFF header included in the EFI stub says that
-the file alignment is 32 bytes, and when adding an EFI signature to
-the file it must first be padded to this alignment.
+After the kernel has booted, if any accesses by firmware causes a page
+fault, the efi page fault handler would freeze efi_rts_wq and schedules
+a new process. To do this, the efi page fault handler needs
+efi_rts_work. Hence, make it accessible.
 
-sbsigntool commands warn about this:
+There will be no race conditions in accessing this structure, because
+all the calls to efi runtime services are already serialized.
 
-  warning: file-aligned section .text extends beyond end of file
-  warning: checksum areas are greater than image size. Invalid section table?
-
-Worse, pesign -at least when creating a detached signature- uses the
-hash of the unpadded file, resulting in an invalid signature if
-padding is required.
-
-Avoid both these problems by increasing alignment to 32 bytes when
-CONFIG_EFI_STUB is enabled.
-
-Signed-off-by: Ben Hutchings <ben@decadent.org.uk>
+Tested-by: Bhupesh Sharma <bhsharma@redhat.com>
+Suggested-by: Matt Fleming <matt@codeblueprint.co.uk>
+Based-on-code-from: Ricardo Neri <ricardo.neri@intel.com>
+Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- arch/x86/boot/tools/build.c | 7 +++++++
- 1 file changed, 7 insertions(+)
+ drivers/firmware/efi/runtime-wrappers.c | 53 +++++--------------------
+ include/linux/efi.h                     | 36 +++++++++++++++++
+ 2 files changed, 45 insertions(+), 44 deletions(-)
 
-diff --git a/arch/x86/boot/tools/build.c b/arch/x86/boot/tools/build.c
-index d4e6cd4577e5..bf0e82400358 100644
---- a/arch/x86/boot/tools/build.c
-+++ b/arch/x86/boot/tools/build.c
-@@ -391,6 +391,13 @@ int main(int argc, char ** argv)
- 		die("Unable to mmap '%s': %m", argv[2]);
- 	/* Number of 16-byte paragraphs, including space for a 4-byte CRC */
- 	sys_size = (sz + 15 + 4) / 16;
-+#ifdef CONFIG_EFI_STUB
-+	/*
-+	 * COFF requires minimum 32-byte alignment of sections, and
-+	 * adding a signature is problematic without that alignment.
-+	 */
-+	sys_size = (sys_size + 1) & ~1;
-+#endif
+diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
+index aa66cbf23512..b18b2d864c2c 100644
+--- a/drivers/firmware/efi/runtime-wrappers.c
++++ b/drivers/firmware/efi/runtime-wrappers.c
+@@ -45,39 +45,7 @@
+ #define __efi_call_virt(f, args...) \
+ 	__efi_call_virt_pointer(efi.systab->runtime, f, args)
  
- 	/* Patch the setup code with the appropriate size parameters */
- 	buf[0x1f1] = setup_sectors-1;
+-/* efi_runtime_service() function identifiers */
+-enum efi_rts_ids {
+-	GET_TIME,
+-	SET_TIME,
+-	GET_WAKEUP_TIME,
+-	SET_WAKEUP_TIME,
+-	GET_VARIABLE,
+-	GET_NEXT_VARIABLE,
+-	SET_VARIABLE,
+-	QUERY_VARIABLE_INFO,
+-	GET_NEXT_HIGH_MONO_COUNT,
+-	UPDATE_CAPSULE,
+-	QUERY_CAPSULE_CAPS,
+-};
+-
+-/*
+- * efi_runtime_work:	Details of EFI Runtime Service work
+- * @arg<1-5>:		EFI Runtime Service function arguments
+- * @status:		Status of executing EFI Runtime Service
+- * @efi_rts_id:		EFI Runtime Service function identifier
+- * @efi_rts_comp:	Struct used for handling completions
+- */
+-struct efi_runtime_work {
+-	void *arg1;
+-	void *arg2;
+-	void *arg3;
+-	void *arg4;
+-	void *arg5;
+-	efi_status_t status;
+-	struct work_struct work;
+-	enum efi_rts_ids efi_rts_id;
+-	struct completion efi_rts_comp;
+-};
++struct efi_runtime_work efi_rts_work;
+ 
+ /*
+  * efi_queue_work:	Queue efi_runtime_service() and wait until it's done
+@@ -91,7 +59,6 @@ struct efi_runtime_work {
+  */
+ #define efi_queue_work(_rts, _arg1, _arg2, _arg3, _arg4, _arg5)		\
+ ({									\
+-	struct efi_runtime_work efi_rts_work;				\
+ 	efi_rts_work.status = EFI_ABORTED;				\
+ 									\
+ 	init_completion(&efi_rts_work.efi_rts_comp);			\
+@@ -184,18 +151,16 @@ static DEFINE_SEMAPHORE(efi_runtime_lock);
+  */
+ static void efi_call_rts(struct work_struct *work)
+ {
+-	struct efi_runtime_work *efi_rts_work;
+ 	void *arg1, *arg2, *arg3, *arg4, *arg5;
+ 	efi_status_t status = EFI_NOT_FOUND;
+ 
+-	efi_rts_work = container_of(work, struct efi_runtime_work, work);
+-	arg1 = efi_rts_work->arg1;
+-	arg2 = efi_rts_work->arg2;
+-	arg3 = efi_rts_work->arg3;
+-	arg4 = efi_rts_work->arg4;
+-	arg5 = efi_rts_work->arg5;
++	arg1 = efi_rts_work.arg1;
++	arg2 = efi_rts_work.arg2;
++	arg3 = efi_rts_work.arg3;
++	arg4 = efi_rts_work.arg4;
++	arg5 = efi_rts_work.arg5;
+ 
+-	switch (efi_rts_work->efi_rts_id) {
++	switch (efi_rts_work.efi_rts_id) {
+ 	case GET_TIME:
+ 		status = efi_call_virt(get_time, (efi_time_t *)arg1,
+ 				       (efi_time_cap_t *)arg2);
+@@ -253,8 +218,8 @@ static void efi_call_rts(struct work_struct *work)
+ 		 */
+ 		pr_err("Requested executing invalid EFI Runtime Service.\n");
+ 	}
+-	efi_rts_work->status = status;
+-	complete(&efi_rts_work->efi_rts_comp);
++	efi_rts_work.status = status;
++	complete(&efi_rts_work.efi_rts_comp);
+ }
+ 
+ static efi_status_t virt_efi_get_time(efi_time_t *tm, efi_time_cap_t *tc)
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 22e4de9d3700..a929d2bf41fa 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1662,6 +1662,42 @@ struct linux_efi_tpm_eventlog {
+ 
+ extern int efi_tpm_eventlog_init(void);
+ 
++/* efi_runtime_service() function identifiers */
++enum efi_rts_ids {
++	GET_TIME,
++	SET_TIME,
++	GET_WAKEUP_TIME,
++	SET_WAKEUP_TIME,
++	GET_VARIABLE,
++	GET_NEXT_VARIABLE,
++	SET_VARIABLE,
++	QUERY_VARIABLE_INFO,
++	GET_NEXT_HIGH_MONO_COUNT,
++	UPDATE_CAPSULE,
++	QUERY_CAPSULE_CAPS,
++};
++
++/*
++ * efi_runtime_work:	Details of EFI Runtime Service work
++ * @arg<1-5>:		EFI Runtime Service function arguments
++ * @status:		Status of executing EFI Runtime Service
++ * @efi_rts_id:		EFI Runtime Service function identifier
++ * @efi_rts_comp:	Struct used for handling completions
++ */
++struct efi_runtime_work {
++	void *arg1;
++	void *arg2;
++	void *arg3;
++	void *arg4;
++	void *arg5;
++	efi_status_t status;
++	struct work_struct work;
++	enum efi_rts_ids efi_rts_id;
++	struct completion efi_rts_comp;
++};
++
++extern struct efi_runtime_work efi_rts_work;
++
+ /* Workqueue to queue EFI Runtime Services */
+ extern struct workqueue_struct *efi_rts_wq;
+ 
 -- 
 2.18.0
