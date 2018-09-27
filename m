@@ -1,37 +1,94 @@
-From: Marc Zyngier <marc.zyngier@arm.com>
-Subject: Re: [GIT PULL 00/11] EFI updates for v4.20
-Date: Thu, 27 Sep 2018 10:07:23 +0100
-Message-ID: <7c25a402-0fc8-fe70-ac95-348a93f4fe69@arm.com>
-References: <20180927085039.8391-1-ard.biesheuvel@linaro.org>
+From: Mimi Zohar <zohar@linux.ibm.com>
+Subject: Re: [PATCH v4 1/6] x86/ima: define arch_ima_get_secureboot
+Date: Thu, 27 Sep 2018 07:33:01 -0400
+Message-ID: <1538047981.3459.74.camel@linux.ibm.com>
+References: <20180926122210.14642-1-nayna@linux.vnet.ibm.com>
+         <20180926122210.14642-2-nayna@linux.vnet.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180927085039.8391-1-ard.biesheuvel@linaro.org>
-Content-Language: en-GB
+In-Reply-To: <20180926122210.14642-2-nayna@linux.vnet.ibm.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-efi@vger.kernel.org, Aaron Ma <aaron.ma@canonical.com>, Alistair Strachan <astrachan@google.com>, Ben Hutchings <ben@decadent.org.uk>, Bhupesh Sharma <bhsharma@redhat.com>, Hans de Goede <hdegoede@redhat.com>, Ivan Hu <ivan.hu@canonical.com>, Jeremy Linton <jeremy.linton@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Robinson <pbrobinson@redhat.com>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Sebastian Andrzej Siewior <bigeasy@linutronix.de>, Stefan Agner <stefan@agner.ch>
+To: Nayna Jain <nayna@linux.vnet.ibm.com>, linux-integrity@vger.kernel.org
+Cc: linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, jforbes@redhat.com, Seth Forshee <seth.forshee@canonical.com>, kexec <kexec@lists.infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi all,
+[Cc'ing the kexec mailing list, and Seth]
 
-On 27/09/18 09:50, Ard Biesheuvel wrote:
-> Thomas, Ingo,
+On Wed, 2018-09-26 at 17:52 +0530, Nayna Jain wrote:
+> Distros are concerned about totally disabling the kexec_load syscall.
+> As a compromise, the kexec_load syscall will only be disabled when
+> CONFIG_KEXEC_VERIFY_SIG is configured and the system is booted with
+> secureboot enabled.
 > 
-> Please pull/cherry-pick the below. Note that the first three patches will
-> be depended upon by an irqchip series that Marc Zyngier has sent out last
-> week, and that targets the next release as well. So please advise how to
-> proceed with that: we could simply apply those patches first and use the
-> resulting commit in tip.git as a stable branch, I suppose, but I'll let
-> Marc chime in in case he has any other ideas.
+> This patch defines the new arch specific function called
+> arch_ima_get_secureboot() to retrieve the secureboot state of the system.
+> 
+> Signed-off-by: Nayna Jain <nayna@linux.vnet.ibm.com>
+> Suggested-by: Seth Forshee <seth.forshee@canonical.com>
 
-A stable branch with these three patches would be great. The irqchip 
-code will also end-up in tip, so it should all be quite easy to manage 
-anyway.
+Nice!
 
-Thanks,
+Mimi
 
-	M.
--- 
-Jazz is not dead. It just smells funny...
+> ---
+>  arch/x86/kernel/Makefile   |  2 ++
+>  arch/x86/kernel/ima_arch.c | 17 +++++++++++++++++
+>  include/linux/ima.h        |  9 +++++++++
+>  3 files changed, 28 insertions(+)
+>  create mode 100644 arch/x86/kernel/ima_arch.c
+> 
+> diff --git a/arch/x86/kernel/Makefile b/arch/x86/kernel/Makefile
+> index 02d6f5cf4e70..f32406e51424 100644
+> --- a/arch/x86/kernel/Makefile
+> +++ b/arch/x86/kernel/Makefile
+> @@ -149,3 +149,5 @@ ifeq ($(CONFIG_X86_64),y)
+>  	obj-$(CONFIG_MMCONF_FAM10H)	+= mmconf-fam10h_64.o
+>  	obj-y				+= vsmp_64.o
+>  endif
+> +
+> +obj-$(CONFIG_IMA)			+= ima_arch.o
+> diff --git a/arch/x86/kernel/ima_arch.c b/arch/x86/kernel/ima_arch.c
+> new file mode 100644
+> index 000000000000..bb5a88d2b271
+> --- /dev/null
+> +++ b/arch/x86/kernel/ima_arch.c
+> @@ -0,0 +1,17 @@
+> +/* SPDX-License-Identifier: GPL-2.0+ */
+> +/*
+> + * Copyright (C) 2018 IBM Corporation
+> + */
+> +#include <linux/efi.h>
+> +#include <linux/ima.h>
+> +
+> +extern struct boot_params boot_params;
+> +
+> +bool arch_ima_get_secureboot(void)
+> +{
+> +	if (efi_enabled(EFI_BOOT) &&
+> +		(boot_params.secure_boot == efi_secureboot_mode_enabled))
+> +		return true;
+> +	else
+> +		return false;
+> +}
+> diff --git a/include/linux/ima.h b/include/linux/ima.h
+> index 84806b54b50a..4852255aa4f4 100644
+> --- a/include/linux/ima.h
+> +++ b/include/linux/ima.h
+> @@ -30,6 +30,15 @@ extern void ima_post_path_mknod(struct dentry *dentry);
+>  extern void ima_add_kexec_buffer(struct kimage *image);
+>  #endif
+>  
+> +#ifdef CONFIG_X86
+> +extern bool arch_ima_get_secureboot(void);
+> +#else
+> +static inline bool arch_ima_get_secureboot(void)
+> +{
+> +	return false;
+> +}
+> +#endif
+> +
+>  #else
+>  static inline int ima_bprm_check(struct linux_binprm *bprm)
+>  {
