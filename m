@@ -1,111 +1,74 @@
-From: Mimi Zohar <zohar@linux.ibm.com>
-Subject: Re: [PATCH v4 6/6] x86/ima: define arch_get_ima_policy() for x86
-Date: Thu, 27 Sep 2018 09:31:42 -0400
-Message-ID: <1538055102.3459.112.camel@linux.ibm.com>
-References: <20180926122210.14642-1-nayna@linux.vnet.ibm.com>
-         <20180926122210.14642-7-nayna@linux.vnet.ibm.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+From: Maksym Kokhan <maksym.kokhan@globallogic.com>
+Subject: [PATCH 0/8] add generic builtin command line
+Date: Thu, 27 Sep 2018 19:55:08 +0300
+Message-ID: <1538067309-5711-1-git-send-email-maksym.kokhan@globallogic.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180926122210.14642-7-nayna@linux.vnet.ibm.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Nayna Jain <nayna@linux.vnet.ibm.com>, linux-integrity@vger.kernel.org
-Cc: linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, jforbes@redhat.com, Eric Richter <erichte@linux.vnet.ibm.com>
+To: Andrew Morton <akpm@linux-foundation.org>, Rob Herring <robh+dt@kernel.org>, Frank Rowand <frowand.list@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, Russell King <linux@armlinux.org.uk>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Ralf Baechle <ralf@linux-mips.org>, Paul Burton <paul.burton@mips.com>, James Hogan <jhogan@kernel.org>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>
+Cc: Daniel Walker <dwalker@fifo99.com>, Daniel Walker <danielwa@cisco.com>, Andrii Bordunov <aborduno@cisco.com>, Ruslan Bilovol <rbilovol@cisco.com>, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-mips@linux-mips.org, linuxppc-dev@lists.ozlabs.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi Eric, Nayna,
+There were series of patches [1] for 4.3.0-rc3, that allowed
+architectures to use a generic builtin command line. I have rebased
+these patches on kernel 4.19.0-rc4.
 
-On Wed, 2018-09-26 at 17:52 +0530, Nayna Jain wrote:
-> From: Eric Richter <erichte@linux.vnet.ibm.com>
+Things, modified in comparison with original patches:                            
+* There was some bug for mips, in the case when CONFIG_CMDLINE_PREPEND
+and CONFIG_CMDLINE_APPEND are empty and CMDLINE_OVERRIDE is not set,
+command line from bootloader was ignored, so I fixed it, modifying
+patch "add generic builtin command line".
 
-> This patch implements an example arch-specific IMA policy for x86 to
-> enable measurement and appraisal of any kernel image loaded for kexec,
-> when CONFIG_KEXEC_VERIFY_SIG is not enabled.
-> 
-> For systems with CONFIG_KEXEC_VERIFY_SIG enabled, only the measurement
-> rule is enabled, not the IMA-appraisal rule.
+* Implemented new patch to resolve conflict with new kernel, which
+modify EFI stub code. Unfortunately, I don't have capability to test
+this modification on real arm board with EFI.
 
-The patch itself looks good, but this patch description explains
-"what" the patch is doing, not "why".  Missing is the motivation for
-the patch.
+* Removed new realisation of mips builtin command line, which was
+created after 4.3.0-rc3.
 
-Mimi
+* Kernel 4.3.0-rc3 with original patches could not be compiled for
+powerpc due to prom_init.c checking by prom_init_check.sh. So I added
+strlcat (which is used by cmdline_add_builtin macro) to
+prom_init_check.sh whitelist.
 
-> 
-> Signed-off-by: Eric Richter <erichte@linux.vnet.ibm.com>
-> - Removed the policy KEXEC_ORIG_KERNEL_CHECK which was defined to
->   disable the kexec_load syscall.
-> - arch_get_ima_policy() uses arch_ima_get_secureboot() to get secureboot
->   state
-> Signed-off-by: Nayna Jain <nayna@linux.vnet.ibm.com>
-> ---
->  arch/x86/kernel/ima_arch.c     | 18 ++++++++++++++++++
->  include/linux/ima.h            |  4 ++++
->  security/integrity/ima/Kconfig |  8 ++++++++
->  3 files changed, 30 insertions(+)
-> 
-> diff --git a/arch/x86/kernel/ima_arch.c b/arch/x86/kernel/ima_arch.c
-> index bb5a88d2b271..245976e49a55 100644
-> --- a/arch/x86/kernel/ima_arch.c
-> +++ b/arch/x86/kernel/ima_arch.c
-> @@ -15,3 +15,21 @@ bool arch_ima_get_secureboot(void)
->  	else
->  		return false;
->  }
-> +
-> +/* arch rules for audit and user mode */
-> +static const char * const sb_arch_rules[] = {
-> +#ifndef CONFIG_KEXEC_VERIFY_SIG
-> +	"appraise func=KEXEC_KERNEL_CHECK appraise_type=imasig",
-> +#endif /* CONFIG_KEXEC_VERIFY_SIG */
-> +	"measure func=KEXEC_KERNEL_CHECK",
-> +	NULL
-> +};
-> +
-> +#ifdef CONFIG_IMA_ARCH_POLICY
-> +const char * const *arch_get_ima_policy(void)
-> +{
-> +	if (arch_ima_get_secureboot())
-> +		return sb_arch_rules;
-> +	return NULL;
-> +}
-> +#endif
-> diff --git a/include/linux/ima.h b/include/linux/ima.h
-> index 350fa957f8a6..dabd3abdf671 100644
-> --- a/include/linux/ima.h
-> +++ b/include/linux/ima.h
-> @@ -39,10 +39,14 @@ static inline bool arch_ima_get_secureboot(void)
->  }
->  #endif
->  
-> +#if defined(CONFIG_X86) && defined(CONFIG_IMA_ARCH_POLICY)
-> +extern const char * const *arch_get_ima_policy(void);
-> +#else
->  static inline const char * const *arch_get_ima_policy(void)
->  {
->  	return NULL;
->  }
-> +#endif
->  
->  #else
->  static inline int ima_bprm_check(struct linux_binprm *bprm)
-> diff --git a/security/integrity/ima/Kconfig b/security/integrity/ima/Kconfig
-> index 13b446328dda..97609a76aa14 100644
-> --- a/security/integrity/ima/Kconfig
-> +++ b/security/integrity/ima/Kconfig
-> @@ -157,6 +157,14 @@ config IMA_APPRAISE
->  	  <http://linux-ima.sourceforge.net>
->  	  If unsure, say N.
->  
-> +config IMA_ARCH_POLICY
-> +        bool "Enable loading an IMA architecture specific policy"
-> +        depends on KEXEC_VERIFY_SIG || IMA_APPRAISE && INTEGRITY_ASYMMETRIC_KEYS
-> +        default n
-> +        help
-> +          This option enables loading an IMA architecture specific policy
-> +          based on run time secure boot flags.
-> +
->  config IMA_APPRAISE_BUILD_POLICY
->  	bool "IMA build time configured policy rules"
->  	depends on IMA_APPRAISE && INTEGRITY_ASYMMETRIC_KEYS
+Patches have been tested in QEMU for x86, arm (little-endian), arm64
+(little-endian), mips (little-endian, 32-bit) and powerpc
+(big-endian, 64-bit), everything works perfectly. Also it was tested
+on linux-next (next-20180924 tag) for all listed above architectures.
+
+[1] : https://lore.kernel.org/patchwork/patch/604992/
+
+Daniel Walker (7):
+  add generic builtin command line
+  drivers: of: ifdef out cmdline section
+  x86: convert to generic builtin command line
+  arm: convert to generic builtin command line
+  arm64: convert to generic builtin command line
+  mips: convert to generic builtin command line
+  powerpc: convert to generic builtin command line
+
+Maksym Kokhan (1):
+  efi: modify EFI stub code for arm/arm64
+
+ arch/arm/Kconfig                        | 38 +-----------------
+ arch/arm/kernel/atags_parse.c           | 14 ++-----
+ arch/arm/kernel/devtree.c               |  2 +
+ arch/arm64/Kconfig                      | 17 +-------
+ arch/arm64/kernel/setup.c               |  3 ++
+ arch/mips/Kconfig                       | 24 +----------
+ arch/mips/Kconfig.debug                 | 47 ----------------------
+ arch/mips/kernel/setup.c                | 41 ++-----------------
+ arch/powerpc/Kconfig                    | 23 +----------
+ arch/powerpc/kernel/prom.c              |  4 ++
+ arch/powerpc/kernel/prom_init.c         |  8 ++--
+ arch/powerpc/kernel/prom_init_check.sh  |  2 +-
+ arch/x86/Kconfig                        | 44 +--------------------
+ arch/x86/kernel/setup.c                 | 19 ++-------
+ drivers/firmware/efi/libstub/arm-stub.c | 10 ++---
+ drivers/of/fdt.c                        |  2 +-
+ include/linux/cmdline.h                 | 70 +++++++++++++++++++++++++++++++++
+ init/Kconfig                            | 68 ++++++++++++++++++++++++++++++++
+ 18 files changed, 173 insertions(+), 263 deletions(-)
+ create mode 100644 include/linux/cmdline.h
+
+-- 
+2.7.4
