@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 08/11] efi/x86: drop task_lock() from efi_switch_mm()
-Date: Thu, 27 Sep 2018 10:50:35 +0200
-Message-ID: <20180927085039.8391-9-ard.biesheuvel@linaro.org>
+Subject: [PATCH 07/11] efi/x86: Handle page faults occurring while running EFI runtime services
+Date: Thu, 27 Sep 2018 10:50:34 +0200
+Message-ID: <20180927085039.8391-8-ard.biesheuvel@linaro.org>
 References: <20180927085039.8391-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180927085039.8391-1-ard.biesheuvel@linaro.org>
@@ -10,54 +10,241 @@ To: linux-kernel@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixne
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, Aaron Ma <aaron.ma@canonical.com>, Alistair Strachan <astrachan@google.com>, Ben Hutchings <ben@decadent.org.uk>, Bhupesh Sharma <bhsharma@redhat.com>, Hans de Goede <hdegoede@redhat.com>, Ivan Hu <ivan.hu@canonical.com>, Jeremy Linton <jeremy.linton@arm.com>, Marc Zyngier <marc.zyngier@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Robinson <pbrobinson@redhat.com>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Sebastian Andrzej Siewior <bigeasy@linutronix.de>, Stefan Agner <stefan@agner.ch>
 List-Id: linux-efi@vger.kernel.org
 
-From: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
 
-efi_switch_mm() is a wrapper around switch_mm() which saves current's
-->active_mm, sets the requests mm as ->active_mm and invokes
-switch_mm().
-I don't think that task_lock() is required during that procedure. It
-protects ->mm which isn't changed here.
+Memory accesses performed by UEFI runtime services should be limited to:
+- reading/executing from EFI_RUNTIME_SERVICES_CODE memory regions
+- reading/writing from/to EFI_RUNTIME_SERVICES_DATA memory regions
+- reading/writing by-ref arguments
+- reading/writing from/to the stack.
 
-It needs to be mentioned that during the whole procedure (switch to
-EFI's mm and back) the preemption needs to be disabled. A context switch
-at this point would reset the cr3 value based on current->mm. Also, this
-function may not be invoked at the same time on a different CPU because
-it would overwrite the efi_scratch.prev_mm information.
+Accesses outside these regions may cause the kernel to hang because the
+memory region requested by the firmware isn't mapped in efi_pgd, which
+causes a page fault in ring 0 and the kernel fails to handle it, leading
+to die(). To save kernel from hanging, add an EFI specific page fault
+handler which recovers from such faults by
+1. If the efi runtime service is efi_reset_system(), reboot the machine
+   through BIOS.
+2. If the efi runtime service is _not_ efi_reset_system(), then freeze
+   efi_rts_wq and schedule a new process.
 
-Remove task_lock() and also update the comment to reflect it.
+The EFI page fault handler offers us two advantages:
+1. Avoid potential hangs caused by buggy firmware.
+2. Shout loud that the firmware is buggy and hence is not a kernel bug.
 
-Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+Tested-by: Bhupesh Sharma <bhsharma@redhat.com>
+Suggested-by: Matt Fleming <matt@codeblueprint.co.uk>
+Based-on-code-from: Ricardo Neri <ricardo.neri@intel.com>
+Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Reviewed-by: Thomas Gleixner <tglx@linutronix.de>
+[ardb: clarify commit log]
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- arch/x86/platform/efi/efi_64.c | 10 ++++------
- 1 file changed, 4 insertions(+), 6 deletions(-)
+ arch/x86/include/asm/efi.h              |  1 +
+ arch/x86/mm/fault.c                     |  9 +++
+ arch/x86/platform/efi/quirks.c          | 78 +++++++++++++++++++++++++
+ drivers/firmware/efi/runtime-wrappers.c |  8 +++
+ include/linux/efi.h                     |  8 ++-
+ 5 files changed, 103 insertions(+), 1 deletion(-)
 
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index ee5d08f25ce4..e8da7f492970 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -619,18 +619,16 @@ void __init efi_dump_pagetable(void)
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index cec5fae23eb3..eea40d52ca78 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -140,6 +140,7 @@ extern void __init efi_apply_memmap_quirks(void);
+ extern int __init efi_reuse_config(u64 tables, int nr_tables);
+ extern void efi_delete_dummy_variable(void);
+ extern void efi_switch_mm(struct mm_struct *mm);
++extern void efi_recover_from_page_fault(unsigned long phys_addr);
  
- /*
-  * Makes the calling thread switch to/from efi_mm context. Can be used
-- * for SetVirtualAddressMap() i.e. current->active_mm == init_mm as well
-- * as during efi runtime calls i.e current->active_mm == current_mm.
-- * We are not mm_dropping()/mm_grabbing() any mm, because we are not
-- * losing/creating any references.
-+ * in a kernel thread and user context. Preemption needs to remain disabled
-+ * while the EFI-mm is borrowed. mmgrab()/mmdrop() is not used because the mm
-+ * can not change under us.
-+ * It should be ensured that there are no concurent calls to this function.
-  */
- void efi_switch_mm(struct mm_struct *mm)
- {
--	task_lock(current);
- 	efi_scratch.prev_mm = current->active_mm;
- 	current->active_mm = mm;
- 	switch_mm(efi_scratch.prev_mm, mm, NULL);
--	task_unlock(current);
+ struct efi_setup_data {
+ 	u64 fw_vendor;
+diff --git a/arch/x86/mm/fault.c b/arch/x86/mm/fault.c
+index 47bebfe6efa7..a5b9ddb0f1fe 100644
+--- a/arch/x86/mm/fault.c
++++ b/arch/x86/mm/fault.c
+@@ -16,6 +16,7 @@
+ #include <linux/prefetch.h>		/* prefetchw			*/
+ #include <linux/context_tracking.h>	/* exception_enter(), ...	*/
+ #include <linux/uaccess.h>		/* faulthandler_disabled()	*/
++#include <linux/efi.h>			/* efi_recover_from_page_fault()*/
+ #include <linux/mm_types.h>
+ 
+ #include <asm/cpufeature.h>		/* boot_cpu_has, ...		*/
+@@ -25,6 +26,7 @@
+ #include <asm/vsyscall.h>		/* emulate_vsyscall		*/
+ #include <asm/vm86.h>			/* struct vm86			*/
+ #include <asm/mmu_context.h>		/* vma_pkey()			*/
++#include <asm/efi.h>			/* efi_recover_from_page_fault()*/
+ 
+ #define CREATE_TRACE_POINTS
+ #include <asm/trace/exceptions.h>
+@@ -788,6 +790,13 @@ no_context(struct pt_regs *regs, unsigned long error_code,
+ 	if (is_errata93(regs, address))
+ 		return;
+ 
++	/*
++	 * Buggy firmware could access regions which might page fault, try to
++	 * recover from such faults.
++	 */
++	if (IS_ENABLED(CONFIG_EFI))
++		efi_recover_from_page_fault(address);
++
+ 	/*
+ 	 * Oops. The kernel tried to access some bad page. We'll have to
+ 	 * terminate things with extreme prejudice:
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index 844d31cb8a0c..669babcaf245 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -16,6 +16,7 @@
+ #include <asm/efi.h>
+ #include <asm/uv/uv.h>
+ #include <asm/cpu_device_id.h>
++#include <asm/reboot.h>
+ 
+ #define EFI_MIN_RESERVE 5120
+ 
+@@ -654,3 +655,80 @@ int efi_capsule_setup_info(struct capsule_info *cap_info, void *kbuff,
  }
  
- #ifdef CONFIG_EFI_MIXED
+ #endif
++
++/*
++ * If any access by any efi runtime service causes a page fault, then,
++ * 1. If it's efi_reset_system(), reboot through BIOS.
++ * 2. If any other efi runtime service, then
++ *    a. Return error status to the efi caller process.
++ *    b. Disable EFI Runtime Services forever and
++ *    c. Freeze efi_rts_wq and schedule new process.
++ *
++ * @return: Returns, if the page fault is not handled. This function
++ * will never return if the page fault is handled successfully.
++ */
++void efi_recover_from_page_fault(unsigned long phys_addr)
++{
++	if (!IS_ENABLED(CONFIG_X86_64))
++		return;
++
++	/*
++	 * Make sure that an efi runtime service caused the page fault.
++	 * "efi_mm" cannot be used to check if the page fault had occurred
++	 * in the firmware context because efi=old_map doesn't use efi_pgd.
++	 */
++	if (efi_rts_work.efi_rts_id == NONE)
++		return;
++
++	/*
++	 * Address range 0x0000 - 0x0fff is always mapped in the efi_pgd, so
++	 * page faulting on these addresses isn't expected.
++	 */
++	if (phys_addr >= 0x0000 && phys_addr <= 0x0fff)
++		return;
++
++	/*
++	 * Print stack trace as it might be useful to know which EFI Runtime
++	 * Service is buggy.
++	 */
++	WARN(1, FW_BUG "Page fault caused by firmware at PA: 0x%lx\n",
++	     phys_addr);
++
++	/*
++	 * Buggy efi_reset_system() is handled differently from other EFI
++	 * Runtime Services as it doesn't use efi_rts_wq. Although,
++	 * native_machine_emergency_restart() says that machine_real_restart()
++	 * could fail, it's better not to compilcate this fault handler
++	 * because this case occurs *very* rarely and hence could be improved
++	 * on a need by basis.
++	 */
++	if (efi_rts_work.efi_rts_id == RESET_SYSTEM) {
++		pr_info("efi_reset_system() buggy! Reboot through BIOS\n");
++		machine_real_restart(MRR_BIOS);
++		return;
++	}
++
++	/*
++	 * Before calling EFI Runtime Service, the kernel has switched the
++	 * calling process to efi_mm. Hence, switch back to task_mm.
++	 */
++	arch_efi_call_virt_teardown();
++
++	/* Signal error status to the efi caller process */
++	efi_rts_work.status = EFI_ABORTED;
++	complete(&efi_rts_work.efi_rts_comp);
++
++	clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
++	pr_info("Froze efi_rts_wq and disabled EFI Runtime Services\n");
++
++	/*
++	 * Call schedule() in an infinite loop, so that any spurious wake ups
++	 * will never run efi_rts_wq again.
++	 */
++	for (;;) {
++		set_current_state(TASK_IDLE);
++		schedule();
++	}
++
++	return;
++}
+diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
+index b18b2d864c2c..a19d845bdb06 100644
+--- a/drivers/firmware/efi/runtime-wrappers.c
++++ b/drivers/firmware/efi/runtime-wrappers.c
+@@ -61,6 +61,11 @@ struct efi_runtime_work efi_rts_work;
+ ({									\
+ 	efi_rts_work.status = EFI_ABORTED;				\
+ 									\
++	if (!efi_enabled(EFI_RUNTIME_SERVICES)) {			\
++		pr_warn_once("EFI Runtime Services are disabled!\n");	\
++		goto exit;						\
++	}								\
++									\
+ 	init_completion(&efi_rts_work.efi_rts_comp);			\
+ 	INIT_WORK_ONSTACK(&efi_rts_work.work, efi_call_rts);		\
+ 	efi_rts_work.arg1 = _arg1;					\
+@@ -79,6 +84,8 @@ struct efi_runtime_work efi_rts_work;
+ 	else								\
+ 		pr_err("Failed to queue work to efi_rts_wq.\n");	\
+ 									\
++exit:									\
++	efi_rts_work.efi_rts_id = NONE;					\
+ 	efi_rts_work.status;						\
+ })
+ 
+@@ -393,6 +400,7 @@ static void virt_efi_reset_system(int reset_type,
+ 			"could not get exclusive access to the firmware\n");
+ 		return;
+ 	}
++	efi_rts_work.efi_rts_id = RESET_SYSTEM;
+ 	__efi_call_virt(reset_system, reset_type, status, data_size, data);
+ 	up(&efi_runtime_lock);
+ }
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index a929d2bf41fa..845174e113ce 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1662,8 +1662,13 @@ struct linux_efi_tpm_eventlog {
+ 
+ extern int efi_tpm_eventlog_init(void);
+ 
+-/* efi_runtime_service() function identifiers */
++/*
++ * efi_runtime_service() function identifiers.
++ * "NONE" is used by efi_recover_from_page_fault() to check if the page
++ * fault happened while executing an efi runtime service.
++ */
+ enum efi_rts_ids {
++	NONE,
+ 	GET_TIME,
+ 	SET_TIME,
+ 	GET_WAKEUP_TIME,
+@@ -1673,6 +1678,7 @@ enum efi_rts_ids {
+ 	SET_VARIABLE,
+ 	QUERY_VARIABLE_INFO,
+ 	GET_NEXT_HIGH_MONO_COUNT,
++	RESET_SYSTEM,
+ 	UPDATE_CAPSULE,
+ 	QUERY_CAPSULE_CAPS,
+ };
 -- 
 2.18.0
