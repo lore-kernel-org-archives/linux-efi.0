@@ -1,98 +1,114 @@
-From: Joe Perches <joe@perches.com>
-Subject: Re: [PATCH] efi/fdt: Indentation fix
-Date: Tue, 02 Oct 2018 09:05:51 -0700
-Message-ID: <61d7bd590527166c58670b4c0ab65a08710f81cf.camel@perches.com>
-References: <1538389776-8432-1-git-send-email-julien.thierry@arm.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
+From: Nayna Jain <nayna@linux.vnet.ibm.com>
+Subject: [PATCH v5 0/6] Add support for architecture specific IMA policies
+Date: Fri,  5 Oct 2018 23:10:10 +0530
+Message-ID: <20181005174015.21939-1-nayna@linux.vnet.ibm.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1538389776-8432-1-git-send-email-julien.thierry@arm.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Julien Thierry <julien.thierry@arm.com>, linux-efi@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+To: linux-integrity@vger.kernel.org
+Cc: zohar@linux.ibm.com, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, jforbes@redhat.com, seth.forshee@canonical.com, kexec@lists.infradead.org, Nayna Jain <nayna@linux.ibm.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 2018-10-01 at 11:29 +0100, Julien Thierry wrote:
-> Closing bracket seems to end a for statement when it is actually ending
-> the contained if.
-> 
-> No functional change/fix, just fix the indentation.
-[]
-> diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
-[]
-> @@ -381,7 +381,7 @@ void *get_fdt(efi_system_table_t *sys_table, unsigned long *fdt_size)
->  			}
->  			*fdt_size = fdt_totalsize(fdt);
->  			break;
-> -	 }
-> +		}
-> 
->  	return fdt;
->  }
+From: Nayna Jain <nayna@linux.ibm.com>
 
-Hello Julian.
+The architecture specific policy, introduced in this patch set, permits
+different architectures to define IMA policy rules based on kernel
+configuration and system runtime information.
 
-[trivial style bikeshedding follows]
+For example, on x86, there are two methods of verifying the kexec'ed kernel
+image signature - CONFIG_KEXEC_VERIFY_SIG and IMA appraisal policy
+KEXEC_KERNEL_CHECK. CONFIG_KEXEC_VERIFY_SIG enforces the kexec_file_load
+syscall to verify file signatures, but does not prevent the kexec_load
+syscall. The IMA KEXEC_KERNEL_CHECK policy rule verifies the kexec'ed
+kernel image, loaded via the kexec_file_load syscall, is validly signed and
+prevents loading a kernel image via the kexec_load syscall. When secure
+boot is enabled, the kexec'ed kernel image needs to be signed and the
+signature verified. In this environment, either method of verifying the
+kexec'ed kernel image is acceptable, as long as the kexec_load syscall is
+disabled.
 
-I think it better to add braces to the for loop so
-this stands out better.
+The previous version of this patchset introduced a new IMA policy rule to
+disable the kexec_load syscall, when CONFIG_KEXEC_VERIFY_SIG was enabled,
+however that is removed from this version by introducing a different
+mechanism, as described below.
 
-Also, I would generally write this so the if test is
-reversed and uses a continue so the match block saves
-an indent level.
+The patchset defines an arch_ima_get_secureboot() function to retrieve the
+secureboot state of the system. If secureboot is enabled and
+CONFIG_KEXEC_VERIFY_SIG is configured, it denies permission to kexec_load
+syscall.
 
-This is the only use efi_guidcmp with a == test in
-drivers/firmware, so perhaps remove that and use ! as
-the other uses have no == or != test.
+To support architecture specific policies, a new function
+arch_get_ima_policy() is defined. This patch set defines IMA
+KERNEL_KEXEC_POLICY rules for x86 *only* if CONFIG_KEXEC_VERIFY_SIG is
+disabled and secure boot is enabled.
 
-Lastly, a direct return might be better and the return
-fdt could be removed and converted to return NULL.
+This patch set includes a patch, which refactors ima_init_policy() to
+remove code duplication.
 
-Something like:
----
- drivers/firmware/efi/libstub/fdt.c | 29 +++++++++++++++--------------
- 1 file changed, 15 insertions(+), 14 deletions(-)
+Changelog:
 
-diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
-index 8830fa601e45..2d0b895e2f67 100644
---- a/drivers/firmware/efi/libstub/fdt.c
-+++ b/drivers/firmware/efi/libstub/fdt.c
-@@ -366,22 +366,23 @@ void *get_fdt(efi_system_table_t *sys_table, unsigned long *fdt_size)
- {
- 	efi_guid_t fdt_guid = DEVICE_TREE_GUID;
- 	efi_config_table_t *tables;
--	void *fdt;
- 	int i;
- 
--	tables = (efi_config_table_t *) sys_table->tables;
--	fdt = NULL;
-+	tables = (efi_config_table_t *)sys_table->tables;
- 
--	for (i = 0; i < sys_table->nr_tables; i++)
--		if (efi_guidcmp(tables[i].guid, fdt_guid) == 0) {
--			fdt = (void *) tables[i].table;
--			if (fdt_check_header(fdt) != 0) {
--				pr_efi_err(sys_table, "Invalid header detected on UEFI supplied FDT, ignoring ...\n");
--				return NULL;
--			}
--			*fdt_size = fdt_totalsize(fdt);
--			break;
--	 }
-+	for (i = 0; i < sys_table->nr_tables; i++) {
-+		void *fdt;
-+
-+		if (efi_guidcmp(tables[i].guid, fdt_guid))
-+			continue;
-+		fdt = (void *)tables[i].table;
-+		if (fdt_check_header(fdt) != 0) {
-+			pr_efi_err(sys_table, "Invalid header detected on UEFI supplied FDT, ignoring ...\n");
-+			return NULL;
-+		}
-+		*fdt_size = fdt_totalsize(fdt);
-+		return fdt;
-+	}
- 
--	return fdt;
-+	return NULL;
- }
+v5:
+
+* ima: refactor ima_init_policy()
+	- Includes Mimi's feedback - updated patch description, and
+	code fixes. 
+* ima: add support for arch specific policies
+	- Includes Mimi's feedback - updated comment.
+* ima: add support for external setting of ima_appraise
+	- Includes Mimi's feedback - This patch is deleted. This is
+	handled by enabling IMA_APPRAISE_BOOTPARAM only if IMA_ARCH_POLICY
+	is not enabled. The change is done in the Patch 5/5.
+
+v4:
+* ima: refactor ima_init_policy()
+	- Fixed the issue reported by Dan Carpenter. Replaced logical
+	operator (&&) with bitwise operator (&).
+
+v3:
+* x86/ima: define arch_ima_get_secureboot
+	- Edited subject line, added x86.
+
+* x86/ima: define arch_get_ima_policy() for x86
+	- Fixed the error reported by kbuild test robot. The error was
+	appearing when CONFIG_X86 is enabled, but CONFIG_IMA_ARCH_POLICY
+	is disabled.
+
+v2:
+* ima: define arch_ima_get_secureboot
+	- New Patch - to retrieve secureboot state of the system
+* ima: prevent kexec_load syscall based on runtime secureboot flag
+	- New Patch - disables kexec_load if KEXEC_VERIFY_SIG is
+	  configured and secureboot is enabled
+* ima: refactor ima_init_policy()
+	- New Patch - cleans up the code duplication in
+	  ima_init_policy(), adds new function add_rules()
+* ima: add support for arch specific policies
+	- modified ima_init_arch_policy() and ima_init_policy() to
+	  use add_rules() from previous patch.
+* ima: add support for external setting of ima_appraise
+	- sets ima_appraise flag explicitly for arch_specific setting
+* ima: add support for KEXEC_ORIG_KERNEL_CHECK
+	- deleted the patch based on Seth's feedback
+* x86/ima: define arch_get_ima_policy() for x86
+	- removes the policy KEXEC_ORIG_KERNEL_CHECK based on
+	  Seth's feedback.
+
+Eric Richter (1):
+  x86/ima: define arch_get_ima_policy() for x86
+
+Nayna Jain (4):
+  x86/ima: define arch_ima_get_secureboot
+  ima: prevent kexec_load syscall based on runtime secureboot flag
+  ima: refactor ima_init_policy()
+  ima: add support for arch specific policies
+
+ arch/x86/kernel/Makefile            |   2 +
+ arch/x86/kernel/ima_arch.c          |  35 ++++++++
+ include/linux/ima.h                 |  18 ++++
+ security/integrity/ima/Kconfig      |  10 ++-
+ security/integrity/ima/ima_main.c   |  17 ++--
+ security/integrity/ima/ima_policy.c | 166 +++++++++++++++++++++++++++---------
+ 6 files changed, 199 insertions(+), 49 deletions(-)
+ create mode 100644 arch/x86/kernel/ima_arch.c
+
+-- 
+2.13.6
