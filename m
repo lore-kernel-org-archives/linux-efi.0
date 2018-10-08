@@ -1,60 +1,60 @@
-From: Mimi Zohar <zohar@linux.ibm.com>
-Subject: Re: [PATCH v5 0/6] Add support for architecture specific IMA
- policies
-Date: Mon, 08 Oct 2018 07:20:25 -0400
-Message-ID: <1538997625.15382.87.camel@linux.ibm.com>
-References: <20181005174015.21939-1-nayna@linux.vnet.ibm.com>
+From: Maksym Kokhan <maksym.kokhan@globallogic.com>
+Subject: Re: [PATCH 0/8] add generic builtin command line
+Date: Mon, 8 Oct 2018 21:01:28 +0300
+Message-ID: <CAMT6-xiQ0vGcKpA+SiWHQWQFwU9Oo9j=Zin+UXDoPqKTz5fbeA@mail.gmail.com>
+References: <1538067309-5711-1-git-send-email-maksym.kokhan@globallogic.com> <20180929181725.GB27441@fifo99.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181005174015.21939-1-nayna@linux.vnet.ibm.com>
+In-Reply-To: <20180929181725.GB27441@fifo99.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Nayna Jain <nayna@linux.vnet.ibm.com>, linux-integrity@vger.kernel.org
-Cc: linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, jforbes@redhat.com, seth.forshee@canonical.com, kexec@lists.infradead.org, Nayna Jain <nayna@linux.ibm.com>
+To: Daniel Walker <dwalker@fifo99.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>, Rob Herring <robh+dt@kernel.org>, Frank Rowand <frowand.list@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, Russell King <linux@armlinux.org.uk>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Ralf Baechle <ralf@linux-mips.org>, Paul Burton <paul.burton@mips.com>, James Hogan <jhogan@kernel.org>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, Daniel Walker <danielwa@cisco.com>, Andrii Bordunov <aborduno@cisco.com>, Ruslan Bilovol <rbil>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 2018-10-05 at 23:10 +0530, Nayna Jain wrote:
-> From: Nayna Jain <nayna@linux.ibm.com>
-> 
-> The architecture specific policy, introduced in this patch set, permits
-> different architectures to define IMA policy rules based on kernel
-> configuration and system runtime information.
-> 
-> For example, on x86, there are two methods of verifying the kexec'ed kernel
-> image signature - CONFIG_KEXEC_VERIFY_SIG and IMA appraisal policy
-> KEXEC_KERNEL_CHECK. CONFIG_KEXEC_VERIFY_SIG enforces the kexec_file_load
-> syscall to verify file signatures, but does not prevent the kexec_load
-> syscall. The IMA KEXEC_KERNEL_CHECK policy rule verifies the kexec'ed
-> kernel image, loaded via the kexec_file_load syscall, is validly signed and
-> prevents loading a kernel image via the kexec_load syscall. When secure
-> boot is enabled, the kexec'ed kernel image needs to be signed and the
-> signature verified. In this environment, either method of verifying the
-> kexec'ed kernel image is acceptable, as long as the kexec_load syscall is
-> disabled.
-> 
-> The previous version of this patchset introduced a new IMA policy rule to
-> disable the kexec_load syscall, when CONFIG_KEXEC_VERIFY_SIG was enabled,
-> however that is removed from this version by introducing a different
-> mechanism, as described below.
-> 
-> The patchset defines an arch_ima_get_secureboot() function to retrieve the
-> secureboot state of the system. If secureboot is enabled and
-> CONFIG_KEXEC_VERIFY_SIG is configured, it denies permission to kexec_load
-> syscall.
-> 
-> To support architecture specific policies, a new function
-> arch_get_ima_policy() is defined. This patch set defines IMA
-> KERNEL_KEXEC_POLICY rules for x86 *only* if CONFIG_KEXEC_VERIFY_SIG is
-> disabled and secure boot is enabled.
-> 
-> This patch set includes a patch, which refactors ima_init_policy() to
-> remove code duplication.
+Hi, Daniel
 
-Other than a couple of #ifdef's in .c files, which should be converted
-to use IS_ENABLED(<config-option>), the patch set is looking really
-good.
+On Sat, Sep 29, 2018 at 9:17 PM <dwalker@fifo99.com> wrote:
+>
+> On Thu, Sep 27, 2018 at 07:55:08PM +0300, Maksym Kokhan wrote:
+> > Daniel Walker (7):
+> >   add generic builtin command line
+> >   drivers: of: ifdef out cmdline section
+> >   x86: convert to generic builtin command line
+> >   arm: convert to generic builtin command line
+> >   arm64: convert to generic builtin command line
+> >   mips: convert to generic builtin command line
+> >   powerpc: convert to generic builtin command line
+> >
+>
+> When I originally submitted these I had a very good conversion with Rob Herring
+> on the device tree changes. It seemed fairly clear that my approach in these
+> changes could be done better. It effected specifically arm64, but a lot of other
+> platforms use the device tree integrally. With arm64 you can reduce the changes
+> down to only Kconfig changes, and that would likely be the case for many of the
+> other architecture. I made patches to do this a while back, but have not had
+> time to test them and push them out.
 
-thanks!
+Can you please share this patches? I could test them and use to improve this
+generic command line implementation.
 
-Mimi
+> In terms of mips I think there's a fair amount of work needed to pull out their
+> architecture specific mangling into something generic. Part of my motivation for
+> these was to take the architecture specific feature and open that up for all the
+> architecture. So it makes sense that the mips changes should become part of
+> that.
+
+This is really makes sense, and we have intentions to implement it
+afterward. It would be easier to initially merge this simple
+implementation and then develop it step by step.
+
+> The only changes which have no comments are the generic changes, x86, and
+> powerpc. Those patches have been used at Cisco for years with no issues.
+> I added those changes into my -next tree for a round of testing. Assuming there
+> are no issues I can work out the merging with the architecture maintainers.
+> As for the other changes I think they can be done in time, as long as the
+> generic parts of upstream the rest can be worked on by any of the architecture
+> developers.
+
+Thanks,
+Maksym
