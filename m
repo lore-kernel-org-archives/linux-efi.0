@@ -1,38 +1,40 @@
-From: Baoquan He <bhe@redhat.com>
+From: Borislav Petkov <bp@alien8.de>
 Subject: Re: [PATCH v8 0/3] x86/boot/KASLR: Parse ACPI table and limit kaslr
  in immovable memory
-Date: Wed, 10 Oct 2018 17:30:57 +0800
-Message-ID: <20181010093057.GA22088@MiWiFi-R3L-srv>
+Date: Wed, 10 Oct 2018 19:16:16 +0200
+Message-ID: <20181010171616.GD5533@zn.tnic>
 References: <20181010084119.17539-1-fanc.fnst@cn.fujitsu.com>
- <20181010085920.GB5533@zn.tnic>
- <20181010090620.GF25297@MiWiFi-R3L-srv>
- <alpine.DEB.2.21.1810101113070.10278@nanos.tec.linutronix.de>
- <20181010091923.GC5533@zn.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20181010091923.GC5533@zn.tnic>
+In-Reply-To: <20181010084119.17539-1-fanc.fnst@cn.fujitsu.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>, Thomas Gleixner <tglx@linutronix.de>
-Cc: Chao Fan <fanc.fnst@cn.fujitsu.com>, Ingo Molnar <mingo@kernel.org>, linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, mingo@redhat.com, hpa@zytor.com, keescook@chromium.org, rjw@rjwysocki.net, lenb@kernel.org, ard.biesheuvel@linaro.org, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com, Masayoshi Mizuma <msys.mizuma@gmail.com>
+To: Chao Fan <fanc.fnst@cn.fujitsu.com>
+Cc: linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, keescook@chromium.org, bhe@redhat.com, rjw@rjwysocki.net, lenb@kernel.org, ard.biesheuvel@linaro.org, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com
 List-Id: linux-efi@vger.kernel.org
 
-On 10/10/18 at 11:19am, Borislav Petkov wrote:
-> On Wed, Oct 10, 2018 at 11:14:26AM +0200, Thomas Gleixner wrote:
-> > Yes, it's different, but if the SRAT information is available early, then
-> > the command line parameter can go away because then the required
-> > information for Masa's problem is available as well.
-> 
-> Exactly. And I'd prefer we delayed the command line parameter until we
-> figure out we really need it and not expose it to upstream and then
-> remove it shortly after.
-> 
-> So I'd suggest we move Masa's patches to a separate branch and not send
-> it up this round.
+On Wed, Oct 10, 2018 at 04:41:16PM +0800, Chao Fan wrote:
+> In the earliest time, I tried to dig ACPI tabls to solve this problem.
+> But I didn't splite the code in 'compressed/' and ACPI code, so the patch
+> is hard to follow so refused by community.
+> Somebody suggest to add a kernel parameter to specify the
+> immovable memory so that limit kaslr in these regions. Then I make
+> a new patchset. After several versions, Ingo gave a suggestion:
+> https://www.mail-archive.com/linux-kernel@vger.kernel.org/msg1634024.html
+> Follow Ingo's suggestion, imitate the ACPI code to parse the acpi
+> tables, so that the kaslr can get necessary memory information in
+> ACPI tables.
+> I think ACPI code is an independent part, so copy the codes
+> and functions to 'compressed/' directory, so that kaslr won't
+> influence the initialization of ACPI.
 
-Yes, sounds more reasonable if we can reuse functions in Chao's patch 1/3
-to solve the padding issue.
+You say "copy". I'm still about to look at the code but can those
+functions be carved out in a separate compilation unit which ACPI *and*
+KASLR can both link with so that there's no duplication?
 
-Thanks
-Baoquan
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
