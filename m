@@ -1,138 +1,66 @@
-From: Chao Fan <fanc.fnst@cn.fujitsu.com>
-Subject: [PATCH v8 3/3] x86/boot/KASLR: Limit kaslr to choosing the immovable memory
-Date: Wed, 10 Oct 2018 16:41:19 +0800
-Message-ID: <20181010084119.17539-4-fanc.fnst@cn.fujitsu.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v8 0/3] x86/boot/KASLR: Parse ACPI table and limit kaslr
+ in immovable memory
+Date: Wed, 10 Oct 2018 10:59:20 +0200
+Message-ID: <20181010085920.GB5533@zn.tnic>
 References: <20181010084119.17539-1-fanc.fnst@cn.fujitsu.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
 In-Reply-To: <20181010084119.17539-1-fanc.fnst@cn.fujitsu.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, keescook@chromium.org, bhe@redhat.com
-Cc: rjw@rjwysocki.net, lenb@kernel.org, ard.biesheuvel@linaro.org, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com
+To: Chao Fan <fanc.fnst@cn.fujitsu.com>, Ingo Molnar <mingo@kernel.org>
+Cc: linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, keescook@chromium.org, bhe@redhat.com, rjw@rjwysocki.net, lenb@kernel.org, ard.biesheuvel@linaro.org, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com, Masayoshi Mizuma <msys.mizuma@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
-If CONFIG_MEMORY_HOTREMOVE enabled and the amount of immovable
-memory regions is not zero. Calculate the intersection between memory
-regions from e820/efi memory table and immovable memory regions.
+On Wed, Oct 10, 2018 at 04:41:16PM +0800, Chao Fan wrote:
+> ***Background:
+> People reported that kaslr may randomly chooses some positions
+> which are located in movable memory regions. This will break memory
+> hotplug feature and make the movable memory chosen by KASLR can't be
+> removed.
+> 
+> ***Solutions:
+> There should be a method to limit kaslr to choosing immovable memory
+> regions, so there are 2 solutions:
+> 1) Add a kernel parameter to specify the memory regions.
+> 2) Get the information of memory hot-remove, then kaslr will know the
+>    right regions.
+> In method 2, information about memory hot-remove is in ACPI
+> tables, which will be parsed after start_kernel(), kaslr can't get
+> the information.
+> In method 1, users should know the regions address and specify in
+> kernel parameter.
+> 
+> In the earliest time, I tried to dig ACPI tabls to solve this problem.
+> But I didn't splite the code in 'compressed/' and ACPI code, so the patch
+> is hard to follow so refused by community.
+> Somebody suggest to add a kernel parameter to specify the
+> immovable memory so that limit kaslr in these regions. Then I make
+> a new patchset. After several versions, Ingo gave a suggestion:
+> https://www.mail-archive.com/linux-kernel@vger.kernel.org/msg1634024.html
+> Follow Ingo's suggestion, imitate the ACPI code to parse the acpi
+> tables, so that the kaslr can get necessary memory information in
+> ACPI tables.
+> I think ACPI code is an independent part, so copy the codes
+> and functions to 'compressed/' directory, so that kaslr won't
+> influence the initialization of ACPI.
 
-Signed-off-by: Chao Fan <fanc.fnst@cn.fujitsu.com>
----
- arch/x86/boot/compressed/kaslr.c | 72 +++++++++++++++++++++++++++-----
- 1 file changed, 61 insertions(+), 11 deletions(-)
+... and we just picked up
 
-diff --git a/arch/x86/boot/compressed/kaslr.c b/arch/x86/boot/compressed/kaslr.c
-index 573e582e8709..61486aad39b6 100644
---- a/arch/x86/boot/compressed/kaslr.c
-+++ b/arch/x86/boot/compressed/kaslr.c
-@@ -101,6 +101,11 @@ static bool memmap_too_large;
- /* Store memory limit specified by "mem=nn[KMG]" or "memmap=nn[KMG]" */
- static unsigned long long mem_limit = ULLONG_MAX;
- 
-+#ifdef CONFIG_MEMORY_HOTREMOVE
-+/* Store the immovable memory regions */
-+extern struct mem_vector immovable_mem[MAX_NUMNODES*2];
-+#endif
-+
- 
- enum mem_avoid_index {
- 	MEM_AVOID_ZO_RANGE = 0,
-@@ -575,9 +580,9 @@ static unsigned long slots_fetch_random(void)
- 	return 0;
- }
- 
--static void process_mem_region(struct mem_vector *entry,
--			       unsigned long minimum,
--			       unsigned long image_size)
-+static void slots_count(struct mem_vector *entry,
-+			unsigned long minimum,
-+			unsigned long image_size)
- {
- 	struct mem_vector region, overlap;
- 	unsigned long start_orig, end;
-@@ -653,6 +658,57 @@ static void process_mem_region(struct mem_vector *entry,
- 	}
- }
- 
-+static bool process_mem_region(struct mem_vector *region,
-+			       unsigned long long minimum,
-+			       unsigned long long image_size)
-+{
-+	int i;
-+	/*
-+	 * If no immovable memory found, or MEMORY_HOTREMOVE disabled,
-+	 * walk all the regions, so use region directely.
-+	 */
-+	if (num_immovable_mem == 0) {
-+		slots_count(region, minimum, image_size);
-+
-+		if (slot_area_index == MAX_SLOT_AREA) {
-+			debug_putstr("Aborted e820/efi memmap scan (slot_areas full)!\n");
-+			return 1;
-+		}
-+		return 0;
-+	}
-+
-+#ifdef CONFIG_MEMORY_HOTREMOVE
-+	/*
-+	 * If immovable memory found, filter the intersection between
-+	 * immovable memory and region to slots_count.
-+	 * Otherwise, go on old code.
-+	 */
-+	for (i = 0; i < num_immovable_mem; i++) {
-+		struct mem_vector entry;
-+		unsigned long long start, end, entry_end, region_end;
-+
-+		if (!mem_overlaps(region, &immovable_mem[i]))
-+			continue;
-+
-+		start = immovable_mem[i].start;
-+		end = start + immovable_mem[i].size;
-+		region_end = region->start + region->size;
-+
-+		entry.start = clamp(region->start, start, end);
-+		entry_end = clamp(region_end, start, end);
-+		entry.size = entry_end - entry.start;
-+
-+		slots_count(&entry, minimum, image_size);
-+
-+		if (slot_area_index == MAX_SLOT_AREA) {
-+			debug_putstr("Aborted e820/efi memmap scan (slot_areas full)!\n");
-+			return 1;
-+		}
-+	}
-+	return 0;
-+#endif
-+}
-+
- #ifdef CONFIG_EFI
- /*
-  * Returns true if mirror region found (and must have been processed
-@@ -718,11 +774,8 @@ process_efi_entries(unsigned long minimum, unsigned long image_size)
- 
- 		region.start = md->phys_addr;
- 		region.size = md->num_pages << EFI_PAGE_SHIFT;
--		process_mem_region(&region, minimum, image_size);
--		if (slot_area_index == MAX_SLOT_AREA) {
--			debug_putstr("Aborted EFI scan (slot_areas full)!\n");
-+		if (process_mem_region(&region, minimum, image_size))
- 			break;
--		}
- 	}
- 	return true;
- }
-@@ -749,11 +802,8 @@ static void process_e820_entries(unsigned long minimum,
- 			continue;
- 		region.start = entry->addr;
- 		region.size = entry->size;
--		process_mem_region(&region, minimum, image_size);
--		if (slot_area_index == MAX_SLOT_AREA) {
--			debug_putstr("Aborted e820 scan (slot_areas full)!\n");
-+		if (process_mem_region(&region, minimum, image_size))
- 			break;
--		}
- 	}
- }
- 
+https://lkml.kernel.org/r/20181001140843.26137-1-msys.mizuma@gmail.com
+
+and without having looked at the rest of your stuff, if people accept
+your solution, we don't need the silly parameter anymore, right?
+
+Which means, we should not rush the whole thing yet until the whole
+KASLR vs movable memory gets solved properly.
+
+Ingo, Thomas?
+
 -- 
-2.17.1
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
