@@ -1,7 +1,7 @@
 From: Chao Fan <fanc.fnst@cn.fujitsu.com>
 Subject: Re: [PATCH v8 1/3] x86/boot: Add acpitb.c to parse acpi tables
-Date: Fri, 12 Oct 2018 09:56:11 +0800
-Message-ID: <20181012015611.GC6667@localhost.localdomain>
+Date: Fri, 12 Oct 2018 17:36:38 +0800
+Message-ID: <20181012093638.GA1898@localhost.localdomain>
 References: <20181010084119.17539-1-fanc.fnst@cn.fujitsu.com>
  <20181010084119.17539-2-fanc.fnst@cn.fujitsu.com>
  <20181011105708.GB25435@zn.tnic>
@@ -17,207 +17,7 @@ List-Id: linux-efi@vger.kernel.org
 
 On Thu, Oct 11, 2018 at 12:57:08PM +0200, Borislav Petkov wrote:
 >On Wed, Oct 10, 2018 at 04:41:17PM +0800, Chao Fan wrote:
->> There is a bug that kaslr may randomly chooses some positions
->> which are located in movable memory regions. This will break memory
->> hotplug feature and make the movable memory chosen by KASLR can't be
->> removed. So dig SRAT table from ACPI tables to get memory information.
->> 
->> Imitate the ACPI code of parsing ACPI tables to dig and read ACPI
->> tables. Since some operations are not needed here, functions are
->> simplified. Functions will be used to dig only SRAT tables to get
->> information of memory, so that KASLR can the memory in immovable node.
->> 
->> And also, these functions won't influence the initialization of
->> ACPI after start_kernel().
->> 
->> Since use physical address directely, so acpi_os_map_memory()
->> and acpi_os_unmap_memory() are not needed.
->> 
->> Signed-off-by: Chao Fan <fanc.fnst@cn.fujitsu.com>
->> ---
->>  arch/x86/boot/compressed/Makefile |   2 +
->>  arch/x86/boot/compressed/acpitb.c | 405 ++++++++++++++++++++++++++++++
->>  arch/x86/boot/compressed/misc.h   |   8 +
->>  3 files changed, 415 insertions(+)
->>  create mode 100644 arch/x86/boot/compressed/acpitb.c
->> 
->> diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
->> index 28764dacf018..1609e4efcaed 100644
->> --- a/arch/x86/boot/compressed/Makefile
->> +++ b/arch/x86/boot/compressed/Makefile
->> @@ -83,6 +83,8 @@ ifdef CONFIG_X86_64
->>  	vmlinux-objs-y += $(obj)/pgtable_64.o
->>  endif
->>  
->> +vmlinux-objs-$(CONFIG_RANDOMIZE_BASE) += $(obj)/acpitb.o
->
-
-So many thanks for your review.
-
->This should be CONFIG_MEMORY_HOTREMOVE *and* CONFIG_RANDOMIZE_BASE.
->Otherwise we don't need all that code.
-
-Thanks, I will add CONFIG_RANDOMIZE_BASE.
-In V7, I ever added CONFIG_MEMORY_HOTREMOVE, then I need add in kaslr.c:
-
-+#ifdef CONFIG_MEMORY_HOTREMOVE
-+       /* Mark the immovable regions we need to choose */
-+       get_immovable_mem();
-+#endif
-
-Then in V8, follow Kees Cook's suggestion, change the #ifdef to the
-definition of get_immovable_mem() in acpitb.c
-So I drop the CONFIG_MEMORY_HOTREMOVE.
-
-I will splite it to more patch in next version.
-
-Thanks,
-Chao Fan
-
->
->>  $(obj)/eboot.o: KBUILD_CFLAGS += -fshort-wchar -mno-red-zone
->>  
->>  vmlinux-objs-$(CONFIG_EFI_STUB) += $(obj)/eboot.o $(obj)/efi_stub_$(BITS).o \
->> diff --git a/arch/x86/boot/compressed/acpitb.c b/arch/x86/boot/compressed/acpitb.c
->> new file mode 100644
->> index 000000000000..6b869e3f9780
->> --- /dev/null
->> +++ b/arch/x86/boot/compressed/acpitb.c
->> @@ -0,0 +1,405 @@
->> +// SPDX-License-Identifier: GPL-2.0
->> +#define BOOT_CTYPE_H
->> +#include "misc.h"
->> +#include "error.h"
->> +
->> +#include <linux/efi.h>
->> +#include <asm/efi.h>
->> +#include <linux/numa.h>
->> +#include <linux/acpi.h>
->> +
->> +extern unsigned long get_cmd_line_ptr(void);
->> +
->> +#define STATIC
->> +#include <linux/decompress/mm.h>
->> +
->> +#ifdef CONFIG_MEMORY_HOTREMOVE
->> +struct mem_vector {
->> +	unsigned long long start;
->> +	unsigned long long size;
->> +};
->> +/* Store the immovable memory regions */
->> +struct mem_vector immovable_mem[MAX_NUMNODES*2];
->> +#endif
->> +
->> +#ifdef CONFIG_EFI
->> +/* Search EFI table for rsdp table. */
->> +static bool efi_get_rsdp_addr(acpi_physical_address *rsdp_addr)
->> +{
->> +	efi_system_table_t *systab;
->> +	bool find_rsdp = false;
->> +	bool efi_64 = false;
->> +	void *config_tables;
->> +	struct efi_info *e;
->> +	char *sig;
->> +	int size;
->> +	int i;
->> +
->> +	e = &boot_params->efi_info;
->> +	sig = (char *)&e->efi_loader_signature;
->> +
->> +	if (!strncmp(sig, EFI64_LOADER_SIGNATURE, 4))
->> +		efi_64 = true;
->> +	else if (!strncmp(sig, EFI32_LOADER_SIGNATURE, 4))
->> +		efi_64 = false;
->> +	else {
->> +		debug_putstr("Wrong EFI loader signature.\n");
->> +		return false;
->> +	}
->> +
->> +	/* Get systab from boot params. Based on efi_init(). */
->> +#ifdef CONFIG_X86_32
->
->Why the efi_64 detection above but the ifdeffery here? Why not test
->efi_64 instead?
-
-The efi_64 is used for the efi table size.
-
->
->> +	if (e->efi_systab_hi || e->efi_memmap_hi) {
->> +		debug_putstr("Table located above 4GB, disabling EFI.\n");
->
->Are you disabling EFI? Where?
->
->Ah, I see, this code is copied from arch/x86/platform/efi/efi.c.
->
->So when copying, fix the user-visible strings too.
-
-Will change it.
-
->
->> +		return false;
->> +	}
->> +	systab = (efi_system_table_t *)e->efi_systab;
->> +#else
->> +	systab = (efi_system_table_t *)(
->> +			e->efi_systab | ((__u64)e->efi_systab_hi<<32));
->> +#endif
->> +
->> +	if (systab == NULL)
->
->	if (!systab)
->
->Fix all other occurrences.
->
->> +		return false;
->> +
->> +	/*
->> +	 * Get EFI tables from systab. Based on efi_config_init() and
->> +	 * efi_config_parse_tables(). Only dig the config_table.
->
->					dig out
->
->> +	 */
->> +	size = efi_64 ? sizeof(efi_config_table_64_t) :
->> +			sizeof(efi_config_table_32_t);
->> +
->> +	for (i = 0; i < systab->nr_tables; i++) {
->> +		efi_guid_t guid;
->> +		unsigned long table;
->> +
->> +		config_tables = (void *)(systab->tables + size * i);
->> +		if (efi_64) {
->> +			efi_config_table_64_t *tmp_table;
->> +
->> +			tmp_table = (efi_config_table_64_t *)config_tables;
->> +			guid = tmp_table->guid;
->> +			table = tmp_table->table;
->> +#ifndef CONFIG_64BIT
->> +			if (table >> 32) {
->> +				debug_putstr("Table located above 4G, disabling EFI.\n");
->
->Fix that.
->
->> +				return false;
->> +			}
->> +#endif
->> +		} else {
->> +			efi_config_table_32_t *tmp_table;
->> +
->> +			tmp_table = (efi_config_table_32_t *)config_tables;
->> +			guid = tmp_table->guid;
->> +			table = tmp_table->table;
->> +		}
->> +
->> +		/*
->> +		 * Get rsdp from EFI tables.
->> +		 * If ACPI20 table found, use it and return true.
->
->You don't have to say "return true" in the comment - that is in the code
->already.
->
->Also, this function - just like get_acpi_rsdp() doesn't need to return
->bool but the pa directly.
->
+[...]
 >> +		 * If ACPI20 table not found, but ACPI table found,
 >> +		 * use the ACPI table and return true.
 >> +		 * If neither ACPI table nor ACPI20 table found,
@@ -250,7 +50,29 @@ Will change it.
 >#endif
 >}
 >
->
+
+Hi Borislav,
+
+Thank you for review the detail, but may I ask you why this style is better?
+
+Since the Documentation/process/coding-style.rst said:
+Instead,
+use such conditionals in a header file defining functions for use in those .c
+files, providing no-op stub versions in the #else case, and then call those
+functions unconditionally from .c files.  The compiler will avoid generating
+any code for the stub calls, producing identical results, but the logic will
+remain easy to follow.
+
+Prefer to compile out entire functions, rather than portions of functions or
+portions of expressions.  Rather than putting an ifdef in an expression, factor
+out part or all of the expression into a separate helper function and apply the
+conditional to that function.
+
+So I am puzzled. If my understanding is wrong, please let me know.
+
+Thanks,
+Chao Fan
+
 >> +
 >> +static u8 checksum(u8 *buffer, u32 length)
 >
