@@ -1,49 +1,61 @@
-From: Andy Lutomirski <luto@amacapital.net>
-Subject: Re: [RFC-resend 1/2] x86/compat: Adjust in_compat_syscall() to generic code under !COMPAT
-Date: Fri, 12 Oct 2018 07:57:50 -0700
-Message-ID: <6135DDE6-C8C1-420E-A264-7FD0AB60DE82@amacapital.net>
-References: <20181012134253.23266-1-dima@arista.com> <20181012134253.23266-2-dima@arista.com>
-Mime-Version: 1.0 (1.0)
-Content-Type: text/plain;
-        charset=us-ascii
-Content-Transfer-Encoding: 7bit
+From: Nathan Chancellor <natechancellor@gmail.com>
+Subject: [PATCH] efi/libstub: Disable some warnings for x86{,_64}
+Date: Fri, 12 Oct 2018 18:03:49 -0700
+Message-ID: <20181013010348.6740-1-natechancellor@gmail.com>
+Mime-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181012134253.23266-2-dima@arista.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Dmitry Safonov <dima@arista.com>
-Cc: linux-kernel@vger.kernel.org, Dmitry Safonov <0x7f454c46@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andy Lutomirsky <luto@kernel.org>, "David S. Miller" <davem@davemloft.net>, Herbert Xu <herbert@gondor.apana.org.au>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, John Stultz <john.stultz@linaro.org>, "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>, Oleg Nesterov <oleg@redhat.com>, Steffen Klassert <steffen.klassert@secunet.com>, Stephen Boyd <sboyd@kernel.org>, Steven Rostedt <rostedt@goodmis.org>, Thomas Gleixner <tglx@linutronix.de>, x86@kernel.org, linux-efi@vger.kernel.org, netdev@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Nick Desaulniers <ndesaulniers@google.com>, Nathan Chancellor <natechancellor@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
+When building the kernel with Clang, some disabled warnings appear
+because this Makefile overrides KBUILD_CFLAGS for x86{,_64}. Add them to
+this list so that the build is clean again.
 
+-Wpointer-sign was disabled for the whole kernel before the beginning
+of git history.
 
-> On Oct 12, 2018, at 6:42 AM, Dmitry Safonov <dima@arista.com> wrote:
-> 
-> The result of in_compat_syscall() can be pictured as:
-> 
-> x86 platform:
->    ---------------------------------------------------
->    |  Arch\syscall  |  64-bit  |   ia32   |   x32    |
->    |-------------------------------------------------|
->    |     x86_64     |  false   |   true   |   true   |
->    |-------------------------------------------------|
->    |      i686      |          |  <true>  |          |
->    ---------------------------------------------------
-> 
-> Other platforms:
->    -------------------------------------------
->    |  Arch\syscall  |  64-bit  |   compat    |
->    |-----------------------------------------|
->    |     64-bit     |  false   |    true     |
->    |-----------------------------------------|
->    |    32-bit(?)   |          |   <false>   |
->    -------------------------------------------
-> 
-> 
+-Waddress-of-packed-member was disabled for the whole kernel in
+commit bfb38988c51e ("kbuild: clang: Disable 'address-of-packed-member'
+warning") and for x86/boot/compressed in commit 20c6c1890455 ("x86/boot:
+Disable the address-of-packed-member compiler warning").
 
-Yikes. This is probably even my fault!
+-Wgnu was disabled for the whole kernel in commit 61163efae020 ("kbuild:
+LLVMLinux: Add Kbuild support for building kernel with Clang") and for
+x86/boot/compressed in commit 6c3b56b19730 ("x86/boot: Disable Clang
+warnings about GNU extensions").
 
-Reviewed-by: Andy Lutomirski <luto@kernel.org>
+Link: https://github.com/ClangBuiltLinux/linux/issues/112
+Signed-off-by: Nathan Chancellor <natechancellor@gmail.com>
+---
 
-And, if you want:
+Nick expressed concern that this Makefile is overwriting KBUILD_CFLAGS
+and suggested potentially rewriting the x86 portion of this Makefile to
+behave like the arm/arm64 one where problematic flags are filtered out.
+While that comes to fruition, it would be nice for this folder to behave
+like the rest of the kernel when it comes to this warnings so that the
+build is cleaner, thus this patch.
 
-Apologized-for-by: Andy Lutomirski <luto@kernel.org>
+ drivers/firmware/efi/libstub/Makefile | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index c51627660dbb..d9845099635e 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -9,7 +9,10 @@ cflags-$(CONFIG_X86_32)		:= -march=i386
+ cflags-$(CONFIG_X86_64)		:= -mcmodel=small
+ cflags-$(CONFIG_X86)		+= -m$(BITS) -D__KERNEL__ -O2 \
+ 				   -fPIC -fno-strict-aliasing -mno-red-zone \
+-				   -mno-mmx -mno-sse -fshort-wchar
++				   -mno-mmx -mno-sse -fshort-wchar \
++				   -Wno-pointer-sign \
++				   $(call cc-disable-warning, address-of-packed-member) \
++				   $(call cc-disable-warning, gnu)
+ 
+ # arm64 uses the full KBUILD_CFLAGS so it's necessary to explicitly
+ # disable the stackleak plugin
+-- 
+2.19.1
