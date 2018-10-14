@@ -1,55 +1,95 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v8 0/3] x86/boot/KASLR: Parse ACPI table and limit kaslr
- in immovable memory
-Date: Sun, 14 Oct 2018 00:05:41 +0200
-Message-ID: <20181013220541.GI31650@zn.tnic>
-References: <20181010090620.GF25297@MiWiFi-R3L-srv>
- <alpine.DEB.2.21.1810101113070.10278@nanos.tec.linutronix.de>
- <20181010091923.GC5533@zn.tnic>
- <20181010093057.GA22088@MiWiFi-R3L-srv>
- <20181010194443.sgdvplwdnltshwwi@gabell>
- <20181011002955.GJ25297@MiWiFi-R3L-srv>
- <20181011055154.GB6667@localhost.localdomain>
- <20181013201958.zfzv5ahhe3xz7bwi@gabell>
- <20181013203429.GE31650@zn.tnic>
- <20181013214550.ag5qzokhkrkwnzsy@gabell>
+From: Ben Hutchings <ben@decadent.org.uk>
+Subject: [PATCH 3.16 299/366] efi: Avoid potential crashes, fix the
+ 'struct efi_pci_io_protocol_32' definition for mixed mode
+Date: Sun, 14 Oct 2018 16:25:41 +0100
+Message-ID: <lsq.1539530741.263228050@decadent.org.uk>
+References: <lsq.1539530740.755408431@decadent.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20181013214550.ag5qzokhkrkwnzsy@gabell>
+In-Reply-To: <lsq.1539530740.755408431@decadent.org.uk>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Masayoshi Mizuma <msys.mizuma@gmail.com>
-Cc: Chao Fan <fanc.fnst@cn.fujitsu.com>, Baoquan He <bhe@redhat.com>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, mingo@redhat.com, hpa@zytor.com, keescook@chromium.org, rjw@rjwysocki.net, lenb@kernel.org, ard.biesheuvel@linaro.org, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: akpm@linux-foundation.org, Hans de Goede <hdegoede@redhat.com>, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Ingo Molnar <mingo@kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>, Thomas Gleixner <tglx@linutronix.de>, Peter Zijlstra <peterz@infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, Oct 13, 2018 at 05:45:51PM -0400, Masayoshi Mizuma wrote:
-> Yes, but I think we need to arrange the Chao's SRAT parsing to be used
-> from kernel_randomize_memory() because Chao's approach needs the SRAT
-> parsing before extract kernel and the padding size calculation needs
-> the parsing in start_kernel(), so they are living in different life
-> cycle and space.
+3.16.60-rc1 review patch.  If anyone has any objections, please let me know.
 
-Or you would like to pass some info from the compressed kernel to kernel
-proper?
+------------------
 
-For example, something like the passing in add_e820ext() and the consumtion
-in parse_setup_data():
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-                switch (data_type) {
-                case SETUP_E820_EXT:
-                        e820__memory_setup_extended(pa_data, data_len);
+commit 0b3225ab9407f557a8e20f23f37aa7236c10a9b1 upstream.
 
-So info you need for your padding gets collected in
-arch/x86/boot/compressed/acpitb.c and you consume it in
-kernel_randomize_memory()?
+Mixed mode allows a kernel built for x86_64 to interact with 32-bit
+EFI firmware, but requires us to define all struct definitions carefully
+when it comes to pointer sizes.
 
-Would that work?
+'struct efi_pci_io_protocol_32' currently uses a 'void *' for the
+'romimage' field, which will be interpreted as a 64-bit field
+on such kernels, potentially resulting in bogus memory references
+and subsequent crashes.
 
-:-)
+Tested-by: Hans de Goede <hdegoede@redhat.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Link: http://lkml.kernel.org/r/20180504060003.19618-13-ard.biesheuvel@linaro.org
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Ben Hutchings <ben@decadent.org.uk>
+---
+ arch/x86/boot/compressed/eboot.c | 6 ++++--
+ include/linux/efi.h              | 8 ++++----
+ 2 files changed, 8 insertions(+), 6 deletions(-)
 
--- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -358,7 +358,8 @@ __setup_efi_pci32(efi_pci_io_protocol_32
+ 	if (status != EFI_SUCCESS)
+ 		goto free_struct;
+ 
+-	memcpy(rom->romdata, pci->romimage, pci->romsize);
++	memcpy(rom->romdata, (void *)(unsigned long)pci->romimage,
++	       pci->romsize);
+ 	return status;
+ 
+ free_struct:
+@@ -460,7 +461,8 @@ __setup_efi_pci64(efi_pci_io_protocol_64
+ 	if (status != EFI_SUCCESS)
+ 		goto free_struct;
+ 
+-	memcpy(rom->romdata, pci->romimage, pci->romsize);
++	memcpy(rom->romdata, (void *)(unsigned long)pci->romimage,
++	       pci->romsize);
+ 	return status;
+ 
+ free_struct:
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -368,8 +368,8 @@ typedef struct {
+ 	u32 attributes;
+ 	u32 get_bar_attributes;
+ 	u32 set_bar_attributes;
+-	uint64_t romsize;
+-	void *romimage;
++	u64 romsize;
++	u32 romimage;
+ } efi_pci_io_protocol_32;
+ 
+ typedef struct {
+@@ -388,8 +388,8 @@ typedef struct {
+ 	u64 attributes;
+ 	u64 get_bar_attributes;
+ 	u64 set_bar_attributes;
+-	uint64_t romsize;
+-	void *romimage;
++	u64 romsize;
++	u64 romimage;
+ } efi_pci_io_protocol_64;
+ 
+ typedef struct {
