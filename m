@@ -1,52 +1,79 @@
-From: Masayoshi Mizuma <msys.mizuma@gmail.com>
-Subject: Re: [PATCH v8 0/3] x86/boot/KASLR: Parse ACPI table and limit kaslr
- in immovable memory
-Date: Sun, 14 Oct 2018 20:50:35 -0400
-Message-ID: <20181015005035.z3xym6nx43hogdge@gabell>
-References: <alpine.DEB.2.21.1810101113070.10278@nanos.tec.linutronix.de>
- <20181010091923.GC5533@zn.tnic>
- <20181010093057.GA22088@MiWiFi-R3L-srv>
- <20181010194443.sgdvplwdnltshwwi@gabell>
- <20181011002955.GJ25297@MiWiFi-R3L-srv>
- <20181011055154.GB6667@localhost.localdomain>
- <20181013201958.zfzv5ahhe3xz7bwi@gabell>
- <20181013203429.GE31650@zn.tnic>
- <20181013214550.ag5qzokhkrkwnzsy@gabell>
- <20181013220541.GI31650@zn.tnic>
+From: Nick Desaulniers <ndesaulniers@google.com>
+Subject: Re: [PATCH] efi/libstub: Disable some warnings for x86{,_64}
+Date: Mon, 15 Oct 2018 12:40:36 -0700
+Message-ID: <CAKwvOdk8HGTtQ=qb2THgRb3B6O=iErXFyrbKVoGDkMeFAdD3kA@mail.gmail.com>
+References: <20181013010348.6740-1-natechancellor@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20181013220541.GI31650@zn.tnic>
+In-Reply-To: <20181013010348.6740-1-natechancellor@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: Chao Fan <fanc.fnst@cn.fujitsu.com>, Baoquan He <bhe@redhat.com>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, mingo@redhat.com, hpa@zytor.com, keescook@chromium.org, rjw@rjwysocki.net, lenb@kernel.org, ard.biesheuvel@linaro.org, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com
+To: Nathan Chancellor <natechancellor@gmail.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, Oct 14, 2018 at 12:05:41AM +0200, Borislav Petkov wrote:
-> On Sat, Oct 13, 2018 at 05:45:51PM -0400, Masayoshi Mizuma wrote:
-> > Yes, but I think we need to arrange the Chao's SRAT parsing to be used
-> > from kernel_randomize_memory() because Chao's approach needs the SRAT
-> > parsing before extract kernel and the padding size calculation needs
-> > the parsing in start_kernel(), so they are living in different life
-> > cycle and space.
-> 
-> Or you would like to pass some info from the compressed kernel to kernel
-> proper?
-> 
-> For example, something like the passing in add_e820ext() and the consumtion
-> in parse_setup_data():
-> 
->                 switch (data_type) {
->                 case SETUP_E820_EXT:
->                         e820__memory_setup_extended(pa_data, data_len);
-> 
-> So info you need for your padding gets collected in
-> arch/x86/boot/compressed/acpitb.c and you consume it in
-> kernel_randomize_memory()?
-> 
-> Would that work?
+On Fri, Oct 12, 2018 at 6:06 PM Nathan Chancellor
+<natechancellor@gmail.com> wrote:
+>
+> When building the kernel with Clang, some disabled warnings appear
+> because this Makefile overrides KBUILD_CFLAGS for x86{,_64}. Add them to
+> this list so that the build is clean again.
+>
+> -Wpointer-sign was disabled for the whole kernel before the beginning
+> of git history.
+>
+> -Waddress-of-packed-member was disabled for the whole kernel in
+> commit bfb38988c51e ("kbuild: clang: Disable 'address-of-packed-member'
+> warning") and for x86/boot/compressed in commit 20c6c1890455 ("x86/boot:
+> Disable the address-of-packed-member compiler warning").
+>
+> -Wgnu was disabled for the whole kernel in commit 61163efae020 ("kbuild:
+> LLVMLinux: Add Kbuild support for building kernel with Clang") and for
+> x86/boot/compressed in commit 6c3b56b19730 ("x86/boot: Disable Clang
+> warnings about GNU extensions").
+>
+> Link: https://github.com/ClangBuiltLinux/linux/issues/112
+> Signed-off-by: Nathan Chancellor <natechancellor@gmail.com>
+> ---
+>
+> Nick expressed concern that this Makefile is overwriting KBUILD_CFLAGS
+> and suggested potentially rewriting the x86 portion of this Makefile to
+> behave like the arm/arm64 one where problematic flags are filtered out.
+> While that comes to fruition, it would be nice for this folder to behave
+> like the rest of the kernel when it comes to this warnings so that the
+> build is cleaner, thus this patch.
+>
+>  drivers/firmware/efi/libstub/Makefile | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+> index c51627660dbb..d9845099635e 100644
+> --- a/drivers/firmware/efi/libstub/Makefile
+> +++ b/drivers/firmware/efi/libstub/Makefile
+> @@ -9,7 +9,10 @@ cflags-$(CONFIG_X86_32)                := -march=i386
+>  cflags-$(CONFIG_X86_64)                := -mcmodel=small
+>  cflags-$(CONFIG_X86)           += -m$(BITS) -D__KERNEL__ -O2 \
+>                                    -fPIC -fno-strict-aliasing -mno-red-zone \
+> -                                  -mno-mmx -mno-sse -fshort-wchar
+> +                                  -mno-mmx -mno-sse -fshort-wchar \
+> +                                  -Wno-pointer-sign \
 
-It's nice idea! Thank you so much!
+Hi Nathan, thanks for this patch.
 
-- Masa
+Should this be:
+$(call cc-disable-warning, pointer-sign)
+as well?
+
+> +                                  $(call cc-disable-warning, address-of-packed-member) \
+> +                                  $(call cc-disable-warning, gnu)
+>
+>  # arm64 uses the full KBUILD_CFLAGS so it's necessary to explicitly
+>  # disable the stackleak plugin
+> --
+> 2.19.1
+>
+
+
+-- 
+Thanks,
+~Nick Desaulniers
