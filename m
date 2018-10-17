@@ -1,7 +1,7 @@
 From: Chao Fan <fanc.fnst@cn.fujitsu.com>
-Subject: [PATCH v9 4/8] x86/boot: Add bios_get_rsdp_addr() to search RSDP in memory
-Date: Wed, 17 Oct 2018 18:20:08 +0800
-Message-ID: <20181017102012.872-5-fanc.fnst@cn.fujitsu.com>
+Subject: [PATCH v9 2/8] x86/boot: Copy kstrtoull() to compressed period
+Date: Wed, 17 Oct 2018 18:20:06 +0800
+Message-ID: <20181017102012.872-3-fanc.fnst@cn.fujitsu.com>
 References: <20181017102012.872-1-fanc.fnst@cn.fujitsu.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,128 +12,126 @@ To: linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, lin
 Cc: indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com, fanc.fnst@cn.fujitsu.com
 List-Id: linux-efi@vger.kernel.org
 
-Imitate acpi_find_root_pointer() and acpi_tb_scan_memory_for_rsdp()
-to search RSDP table pointer in memory. This function only works
-when RSDP not found in EFI table.
+Copy kstrtoull() to 'compressed' directory so that
+we can use it to change the address in cmdline from
+string to unsigned long long.
 
 Signed-off-by: Chao Fan <fanc.fnst@cn.fujitsu.com>
 ---
- arch/x86/boot/compressed/acpitb.c | 106 ++++++++++++++++++++++++++++++
- 1 file changed, 106 insertions(+)
+ arch/x86/boot/compressed/misc.c | 88 +++++++++++++++++++++++++++++++++
+ arch/x86/boot/compressed/misc.h |  4 ++
+ 2 files changed, 92 insertions(+)
 
-diff --git a/arch/x86/boot/compressed/acpitb.c b/arch/x86/boot/compressed/acpitb.c
-index 56b54b0e0889..50fa65cf824d 100644
---- a/arch/x86/boot/compressed/acpitb.c
-+++ b/arch/x86/boot/compressed/acpitb.c
-@@ -94,3 +94,109 @@ static void efi_get_rsdp_addr(acpi_physical_address *rsdp_addr)
- 	}
- #endif
+diff --git a/arch/x86/boot/compressed/misc.c b/arch/x86/boot/compressed/misc.c
+index 8dd1d5ccae58..5b9b24949337 100644
+--- a/arch/x86/boot/compressed/misc.c
++++ b/arch/x86/boot/compressed/misc.c
+@@ -426,3 +426,91 @@ void fortify_panic(const char *name)
+ {
+ 	error("detected buffer overflow");
  }
 +
-+static u8 compute_checksum(u8 *buffer, u32 length)
++#define KSTRTOX_OVERFLOW        (1U << 31)
++
++static inline char _tolower(const char c)
 +{
-+	u8 sum = 0;
-+	u8 *end = buffer + length;
-+
-+	while (buffer < end)
-+		sum = (u8)(sum + *(buffer++));
-+
-+	return sum;
++	return c | 0x20;
 +}
 +
-+/*
-+ * Used to search a block of memory for the RSDP signature.
-+ * Return Pointer to the RSDP if found, otherwise NULL.
-+ * Based on acpi_tb_scan_memory_for_rsdp().
-+ */
-+static u8 *scan_mem_for_rsdp(u8 *start, u32 length)
++unsigned int
++_parse_integer(const char *s, unsigned int base, unsigned long long *p)
 +{
-+	struct acpi_table_rsdp *rsdp;
-+	u8 *end;
-+	u8 *rover;
++	unsigned long long res;
++	unsigned int rv;
 +
-+	end = start + length;
++	res = 0;
++	rv = 0;
++	while (1) {
++		unsigned int c = *s;
++		unsigned int lc = c | 0x20; /* don't tolower() this line */
++		unsigned int val;
 +
-+	/* Search from given start address for the requested length */
-+	for (rover = start; rover < end; rover += ACPI_RSDP_SCAN_STEP) {
++		if ('0' <= c && c <= '9')
++			val = c - '0';
++		else if ('a' <= lc && lc <= 'f')
++			val = lc - 'a' + 10;
++		else
++			break;
++
++		if (val >= base)
++			break;
 +		/*
-+		 * The RSDP signature and checksum must both be correct
-+		 * Note: Sometimes there exists more than one RSDP in memory;
-+		 * the valid RSDP has a valid checksum, all others have an
-+		 * invalid checksum.
++		 * Check for overflow only if we are within range of
++		 * it in the max base we support (16)
 +		 */
-+		rsdp = (struct acpi_table_rsdp *)rover;
-+
-+		/* Nope, BAD Signature */
-+		if (!ACPI_VALIDATE_RSDP_SIG(rsdp->signature))
-+			continue;
-+
-+		/* Check the standard checksum */
-+		if (compute_checksum((u8 *) rsdp, ACPI_RSDP_CHECKSUM_LENGTH))
-+			continue;
-+
-+		/* Check extended checksum if table version >= 2 */
-+		if ((rsdp->revision >= 2) &&
-+		    (compute_checksum((u8 *) rsdp, ACPI_RSDP_XCHECKSUM_LENGTH)))
-+			continue;
-+
-+		/* Sig and checksum valid, we have found a real RSDP */
-+		return rover;
-+	}
-+	return NULL;
-+}
-+
-+/*
-+ * Used to search RSDP physical address.
-+ * Based on acpi_find_root_pointer(). Since only use physical address
-+ * in this period, so there is no need to do the memory map jobs.
-+ */
-+static void bios_get_rsdp_addr(acpi_physical_address *rsdp_addr)
-+{
-+	struct acpi_table_rsdp *rsdp;
-+	u8 *table_ptr;
-+	u8 *mem_rover;
-+	u32 address;
-+
-+	/*
-+	 * Get the location of the Extended BIOS Data Area (EBDA)
-+	 * Since we use physical address directely, so
-+	 * acpi_os_map_memory() and acpi_os_unmap_memory() are
-+	 * not needed here.
-+	 */
-+	table_ptr = (u8 *)ACPI_EBDA_PTR_LOCATION;
-+	*(u32 *)(void *)&address = *(u16 *)(void *)table_ptr;
-+	address <<= 4;
-+	table_ptr = (u8 *)address;
-+
-+	/*
-+	 * Search EBDA paragraphs (EBDA is required to be a minimum of
-+	 * 1K length)
-+	 */
-+	if (address > 0x400) {
-+		mem_rover = scan_mem_for_rsdp(table_ptr, ACPI_EBDA_WINDOW_SIZE);
-+
-+		if (mem_rover) {
-+			address += (u32)ACPI_PTR_DIFF(mem_rover, table_ptr);
-+			*rsdp_addr = (acpi_physical_address)address;
-+			return;
++		if (unlikely(res & (~0ull << 60))) {
++			if (res > div_u64(ULLONG_MAX - val, base))
++				rv |= KSTRTOX_OVERFLOW;
 +		}
++		res = res * base + val;
++		rv++;
++		s++;
 +	}
-+
-+	table_ptr = (u8 *)ACPI_HI_RSDP_WINDOW_BASE;
-+	mem_rover = scan_mem_for_rsdp(table_ptr, ACPI_HI_RSDP_WINDOW_SIZE);
-+
-+	/*
-+	 * Search upper memory: 16-byte boundaries in E0000h-FFFFFh
-+	 * Since we use physical address directely, so
-+	 * acpi_os_map_memory() and acpi_os_unmap_memory() are
-+	 * not needed here.
-+	 */
-+	if (mem_rover) {
-+		address = (u32)(ACPI_HI_RSDP_WINDOW_BASE +
-+				ACPI_PTR_DIFF(mem_rover, table_ptr));
-+		*rsdp_addr = (acpi_physical_address)address;
-+	}
++	*p = res;
++	return rv;
 +}
++
++const char *_parse_integer_fixup_radix(const char *s, unsigned int *base)
++{
++	if (*base == 0) {
++		if (s[0] == '0') {
++			if (_tolower(s[1]) == 'x' && isxdigit(s[2]))
++				*base = 16;
++			else
++				*base = 8;
++		} else
++			*base = 10;
++	}
++	if (*base == 16 && s[0] == '0' && _tolower(s[1]) == 'x')
++		s += 2;
++	return s;
++}
++
++static int _kstrtoull(const char *s, unsigned int base, unsigned long long *res)
++{
++	unsigned long long _res;
++	unsigned int rv;
++
++	s = _parse_integer_fixup_radix(s, &base);
++	rv = _parse_integer(s, base, &_res);
++	if (rv & KSTRTOX_OVERFLOW)
++		return -ERANGE;
++	if (rv == 0)
++		return -EINVAL;
++	s += rv;
++	if (*s == '\n')
++		s++;
++	if (*s)
++		return -EINVAL;
++	*res = _res;
++	return 0;
++}
++
++int kstrtoull(const char *s, unsigned int base, unsigned long long *res)
++{
++	if (s[0] == '+')
++		s++;
++	return _kstrtoull(s, base, res);
++}
+diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
+index 008fdc47a29c..40378408d980 100644
+--- a/arch/x86/boot/compressed/misc.h
++++ b/arch/x86/boot/compressed/misc.h
+@@ -63,6 +63,10 @@ static inline void debug_puthex(const char *s)
+ 
+ #endif
+ 
++#if (defined CONFIG_RANDOMIZE_BASE) && (defined CONFIG_RANDOMIZE_BASE)
++int kstrtoull(const char *s, unsigned int base, unsigned long long *res);
++#endif
++
+ #if CONFIG_EARLY_PRINTK || CONFIG_RANDOMIZE_BASE
+ /* cmdline.c */
+ int cmdline_find_option(const char *option, char *buffer, int bufsize);
 -- 
 2.17.2
