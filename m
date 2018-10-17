@@ -1,48 +1,68 @@
 From: Chao Fan <fanc.fnst@cn.fujitsu.com>
-Subject: Re: [PATCH v8 1/3] x86/boot: Add acpitb.c to parse acpi tables
-Date: Wed, 17 Oct 2018 09:10:01 +0800
-Message-ID: <20181017011001.GB12871@localhost.localdomain>
-References: <20181010084119.17539-1-fanc.fnst@cn.fujitsu.com>
- <20181010084119.17539-2-fanc.fnst@cn.fujitsu.com>
- <20181011105708.GB25435@zn.tnic>
- <20181016024844.GA12871@localhost.localdomain>
- <20181016124036.GG5212@zn.tnic>
+Subject: [PATCH v9 1/8] x86/boot: Introduce cmdline_find_option_arg()to detect if option=arg in cmdline
+Date: Wed, 17 Oct 2018 18:20:05 +0800
+Message-ID: <20181017102012.872-2-fanc.fnst@cn.fujitsu.com>
+References: <20181017102012.872-1-fanc.fnst@cn.fujitsu.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20181016124036.GG5212@zn.tnic>
+In-Reply-To: <20181017102012.872-1-fanc.fnst@cn.fujitsu.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, keescook@chromium.org, bhe@redhat.com, rjw@rjwysocki.net, lenb@kernel.org, ard.biesheuvel@linaro.org, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com
+To: linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, bp@alien8.de, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, keescook@chromium.org, bhe@redhat.com, msys.mizuma@gmail.com
+Cc: indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com, fanc.fnst@cn.fujitsu.com
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Oct 16, 2018 at 02:40:36PM +0200, Borislav Petkov wrote:
->On Tue, Oct 16, 2018 at 10:48:44AM +0800, Chao Fan wrote:
->> Sorry for disturbing you again, I want to make sure this detail with you.
->> You mean that I need splite this as a function and put it to
->> cmdline.c, right?
->
->Extract that functionality into a generic helper so that
->handle_mem_options() and your get_acpi_rsdp() can call it instead
->of duplicating the code. Also, why aren't they both using
->cmdline_find_option() directly?
+Introduce a new function cmdline_find_option_arg() to detect whether
+option is in command line and the value is arg.
 
-Yes, I found cmdline_find_option() is enough for me.
+Signed-off-by: Chao Fan <fanc.fnst@cn.fujitsu.com>
+---
+ arch/x86/boot/compressed/cmdline.c | 15 +++++++++++++++
+ arch/x86/boot/compressed/misc.h    |  1 +
+ 2 files changed, 16 insertions(+)
 
-Thanks,
-Chao Fan
-
->
->If something's missing, extend cmdline_find_option() to serve your
->purposes too instead of copying the same code.
->
->Make more sense?
->
->-- 
->Regards/Gruss,
->    Boris.
->
->Good mailing practices for 400: avoid top-posting and trim the reply.
->
->
+diff --git a/arch/x86/boot/compressed/cmdline.c b/arch/x86/boot/compressed/cmdline.c
+index af6cda0b7900..61118c69feb8 100644
+--- a/arch/x86/boot/compressed/cmdline.c
++++ b/arch/x86/boot/compressed/cmdline.c
+@@ -1,5 +1,7 @@
+ // SPDX-License-Identifier: GPL-2.0
+ #include "misc.h"
++#define STATIC
++#include <linux/decompress/mm.h>
+ 
+ #if CONFIG_EARLY_PRINTK || CONFIG_RANDOMIZE_BASE || CONFIG_X86_5LEVEL
+ 
+@@ -30,5 +32,18 @@ int cmdline_find_option_bool(const char *option)
+ {
+ 	return __cmdline_find_option_bool(get_cmd_line_ptr(), option);
+ }
++bool cmdline_find_option_arg(const char *option, const char *arg, int argsize)
++{
++	char *buffer = malloc(argsize+1);
++	bool find = false;
++	int ret;
++
++	ret = cmdline_find_option(option, buffer, argsize+1);
++	if (ret == argsize && !strncmp(buffer, arg, argsize))
++		find = true;
++
++	free(buffer);
++	return find;
++}
+ 
+ #endif
+diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
+index a1d5918765f3..008fdc47a29c 100644
+--- a/arch/x86/boot/compressed/misc.h
++++ b/arch/x86/boot/compressed/misc.h
+@@ -67,6 +67,7 @@ static inline void debug_puthex(const char *s)
+ /* cmdline.c */
+ int cmdline_find_option(const char *option, char *buffer, int bufsize);
+ int cmdline_find_option_bool(const char *option);
++bool cmdline_find_option_arg(const char *option, const char *arg, int argsize);
+ #endif
+ 
+ 
+-- 
+2.17.2
