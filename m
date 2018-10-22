@@ -1,216 +1,82 @@
-From: Baoquan He <bhe@redhat.com>
-Subject: Re: [PATCH v9 6/8] x86/boot: Dig out SRAT table from RSDP and find
- immovable memory
-Date: Sun, 21 Oct 2018 10:34:58 +0800
-Message-ID: <20181021023458.GJ1885@192.168.1.4>
-References: <20181017102012.872-1-fanc.fnst@cn.fujitsu.com>
- <20181017102012.872-7-fanc.fnst@cn.fujitsu.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Subject: [PATCH 0/2] Unmap efi boot services code/data regions after boot.
+Date: Sun, 21 Oct 2018 18:35:43 -0700
+Message-ID: <1540172145-17134-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20181017102012.872-7-fanc.fnst@cn.fujitsu.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chao Fan <fanc.fnst@cn.fujitsu.com>
-Cc: linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, bp@alien8.de, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, keescook@chromium.org, msys.mizuma@gmail.com, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com
+To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org
+Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Dave Hansen <dave.hansen@intel.com>, Bhupesh Sharma <bhsharma@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Peter Zijlstra <peterz@infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 10/17/18 at 06:20pm, Chao Fan wrote:
-> Dig out SRAT table from RSDP, and then walk all memory to find
-> the immovable memory regions, and fill in the immovable_mem[].
-> So that we can use it to select memory for KASLR.
-> 
-> Signed-off-by: Chao Fan <fanc.fnst@cn.fujitsu.com>
-> ---
->  arch/x86/boot/compressed/Makefile |   4 +
->  arch/x86/boot/compressed/acpitb.c | 129 ++++++++++++++++++++++++++++++
->  arch/x86/boot/compressed/misc.h   |  10 +++
->  3 files changed, 143 insertions(+)
-> 
-> diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
-> index 28764dacf018..f67674d7d2bd 100644
-> --- a/arch/x86/boot/compressed/Makefile
-> +++ b/arch/x86/boot/compressed/Makefile
-> @@ -83,6 +83,10 @@ ifdef CONFIG_X86_64
->  	vmlinux-objs-y += $(obj)/pgtable_64.o
->  endif
->  
-> +#ifdef CONFIG_MEMORY_HOTREMOVE && CONFIG_RANDOMIZE_BASE
-> +vmlinux-objs-$(CONFIG_RANDOMIZE_BASE) += $(obj)/acpitb.o
-> +#endif
-> +
->  $(obj)/eboot.o: KBUILD_CFLAGS += -fshort-wchar -mno-red-zone
->  
->  vmlinux-objs-$(CONFIG_EFI_STUB) += $(obj)/eboot.o $(obj)/efi_stub_$(BITS).o \
-> diff --git a/arch/x86/boot/compressed/acpitb.c b/arch/x86/boot/compressed/acpitb.c
-> index 37b1f4407be8..d119663c05bb 100644
-> --- a/arch/x86/boot/compressed/acpitb.c
-> +++ b/arch/x86/boot/compressed/acpitb.c
-> @@ -11,6 +11,15 @@
->  #define STATIC
->  #include <linux/decompress/mm.h>
->  
-> +#ifdef CONFIG_MEMORY_HOTREMOVE
-> +struct mem_vector {
-> +	unsigned long long start;
-> +	unsigned long long size;
-> +};
+CC'ing x86 folks because this patch touches x86/mm which I am no expert of.
 
-Why not moving this definition to misc.h? There has been a mem_vector in
-boot/compressed/kaslr.c.
+[Copied from Patch 1]
+Ideally, after kernel assumes control of the platform firmware shouldn't
+access EFI Boot Services Code/Data regions. But, it's noticed that this
+is not so true in many x86 platforms. Hence, during boot, kernel
+reserves efi boot services code/data regions [1] and maps [2] them to
+efi_pgd so that call to set_virtual_address_map() doesn't fail. After
+returning from set_virtual_address_map(), kernel frees the reserved
+regions [3] but they still remain mapped.
 
-> +/* Store the immovable memory regions */
-> +struct mem_vector immovable_mem[MAX_NUMNODES*2];
-> +#endif
-> +
->  /* Search EFI table for RSDP table. */
->  static void efi_get_rsdp_addr(acpi_physical_address *rsdp_addr)
->  {
-> @@ -223,3 +232,123 @@ static void get_acpi_rsdp(acpi_physical_address *rsdp_addr)
->  	}
->  #endif
->  }
-> +
-> +/*
-> + * Used to dig RSDP table from EFI table or BIOS.
-> + * If RSDP table found in EFI table, use it. Or search BIOS.
-> + * Based on acpi_os_get_root_pointer().
-> + */
-> +static acpi_physical_address get_rsdp_addr(void)
-> +{
-> +	acpi_physical_address pa = 0;
-> +
-> +	get_acpi_rsdp(&pa);
-> +
-> +	if (!pa)
-> +		efi_get_rsdp_addr(&pa);
-> +
-> +	if (!pa)
-> +		bios_get_rsdp_addr(&pa);
-> +
-> +	return pa;
-> +}
-> +
-> +static struct acpi_table_header *get_acpi_srat_table(void)
-> +{
-> +	acpi_physical_address acpi_table;
-> +	acpi_physical_address root_table;
-> +	struct acpi_table_header *header;
-> +	struct acpi_table_rsdp *rsdp;
-> +	char *signature;
-> +	u8 *entry;
-> +	u32 count;
-> +	u32 size;
-> +	int i, j;
-> +	u32 len;
-> +
-> +	rsdp = (struct acpi_table_rsdp *)get_rsdp_addr();
-> +	if (!rsdp)
-> +		return NULL;
-> +
-> +	/* Get RSDT or XSDT from RSDP. */
-> +	if (!cmdline_find_option_arg("acpi", "rsdt", 4) &&
-> +	    rsdp->xsdt_physical_address && rsdp->revision > 1) {
-> +		root_table = rsdp->xsdt_physical_address;
-> +		size = ACPI_XSDT_ENTRY_SIZE;
-> +	} else {
-> +		root_table = rsdp->rsdt_physical_address;
-> +		size = ACPI_RSDT_ENTRY_SIZE;
-> +	}
-> +
-> +	/* Get ACPI root table from RSDT or XSDT.*/
-> +	header = (struct acpi_table_header *)root_table;
-> +	len = header->length;
-> +	count = (u32)((len - sizeof(struct acpi_table_header)) / size);
-> +	entry = ACPI_ADD_PTR(u8, header, sizeof(struct acpi_table_header));
-> +
-> +	for (i = 0; i < count; i++) {
-> +		u64 address64;
-> +
-> +		if (size == ACPI_RSDT_ENTRY_SIZE)
-> +			acpi_table = ((acpi_physical_address)
-> +				      (*ACPI_CAST_PTR(u32, entry)));
-> +		else {
-> +			*(u64 *)(void *)&address64 = *(u64 *)(void *)entry;
-> +			acpi_table = (acpi_physical_address) address64;
-> +		}
-> +
-> +		if (acpi_table) {
-> +			header = (struct acpi_table_header *)acpi_table;
-> +			signature = header->signature;
-> +
-> +			if (ACPI_COMPARE_NAME(header->signature, ACPI_SIG_SRAT))
-> +				return header;
-> +		}
-> +		entry += size;
-> +	}
-> +	return NULL;
-> +}
-> +
-> +/*
-> + * According to ACPI table, filter the immvoable memory regions
-> + * and store them in immovable_mem[].
-> + */
-> +void get_immovable_mem(void)
-> +{
-> +	struct acpi_table_header *table_header;
-> +	struct acpi_subtable_header *table;
-> +	struct acpi_srat_mem_affinity *ma;
-> +	unsigned long table_end;
-> +	int i = 0;
-> +
-> +	if (!cmdline_find_option_bool("movable_node") ||
-> +	    cmdline_find_option_arg("acpi", "off", 3))
-> +		return;
-> +
-> +	table_header = get_acpi_srat_table();
-> +	if (!table_header)
-> +		return;
-> +
-> +	table_end = (unsigned long)table_header + table_header->length;
-> +
-> +	table = (struct acpi_subtable_header *)
-> +		((unsigned long)table_header + sizeof(struct acpi_table_srat));
-> +
-> +	while (((unsigned long)table) +
-> +		       sizeof(struct acpi_subtable_header) < table_end) {
-> +		if (table->type == ACPI_SRAT_TYPE_MEMORY_AFFINITY) {
-> +			ma = (struct acpi_srat_mem_affinity *)table;
-> +			if (!(ma->flags & ACPI_SRAT_MEM_HOT_PLUGGABLE)) {
-> +				immovable_mem[i].start = ma->base_address;
-> +				immovable_mem[i].size = ma->length;
-> +				i++;
-> +			}
-> +
-> +			if (i >= MAX_NUMNODES*2)
-		No warning message printed in this case?
-> +				break;
-> +		}
-> +		table = (struct acpi_subtable_header *)
-> +			((unsigned long)table + table->length);
-> +	}
-> +	num_immovable_mem = i;
-> +}
-> diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
-> index 40378408d980..70c403e1444c 100644
-> --- a/arch/x86/boot/compressed/misc.h
-> +++ b/arch/x86/boot/compressed/misc.h
-> @@ -121,3 +121,13 @@ static inline void console_init(void)
->  void set_sev_encryption_mask(void);
->  
->  #endif
-> +
-> +/* acpitb.c */
-> +#ifdef CONFIG_RANDOMIZE_BASE
-> +int num_immovable_mem;
-> +#ifdef CONFIG_MEMORY_HOTREMOVE
-> +/* Store the amount of immovable memory regions */
-> +#define ACPI_MAX_TABLES                128
-> +void get_immovable_mem(void);
-> +#endif
-> +#endif
-> -- 
-> 2.17.2
-> 
-> 
-> 
+This means that any code that's running in efi_pgd address space (e.g:
+any efi runtime service) would still be able to access efi boot services
+code/data regions but the contents of these regions would have long been
+over written by someone else as they are freed by efi_free_boot_services().
+So, it's important to unmap these regions. After unmapping boot services
+code/data regions, any illegal access by buggy firmware to these regions
+would result in page fault which will be handled by efi specific fault
+handler.
+
+[1] Please see efi_reserve_boot_services()
+[2] Please see efi_map_region() -> __map_region()
+[3] Please see efi_free_boot_services()
+
+Testing the patch set:
+----------------------
+1. Download buggy firmware (which accesses boot regions even after kernel has
+booted) from here [1].
+2. Without the patch set, you shouldn't see any kernel warning/error
+messages (i.e. kernel allows accesses to efi boot services code/data
+regions even after call to set_virtual_address_map()).
+3. With the patch set, you should see a kernel warning about buggy
+firmware, efi_rts_wq beeing freezed and disabling runtime services forever.
+
+Please note that this patch will change kernel's existing behavior for
+some efi runtime services but I think it's OK because kernel should have
+never allowed those accesses in the first place.
+
+Also please note that this patch set needs lot of real time trashing as
+I just tested it out with OVMF.
+
+Note:
+-----
+Patch set based on "next" branch in efi tree.
+
+[1] https://drive.google.com/drive/folders/1VozKTms92ifyVHAT0ZDQe55ZYL1UE5wt
+
+Sai Praneeth (2):
+  x86/efi: Unmap efi boot services code/data regions from efi_pgd
+  x86/efi: Move efi_<reserve/free>_boot_services() to arch/x86
+
+ arch/x86/include/asm/efi.h           |  2 ++
+ arch/x86/include/asm/pgtable_types.h |  2 ++
+ arch/x86/mm/pageattr.c               | 21 +++++++++++++++++++++
+ arch/x86/platform/efi/efi.c          |  2 ++
+ arch/x86/platform/efi/quirks.c       | 26 ++++++++++++++++++++++++++
+ include/linux/efi.h                  |  3 ---
+ init/main.c                          |  4 ----
+ 7 files changed, 53 insertions(+), 7 deletions(-)
+
+Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Ingo Molnar <mingo@kernel.org>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Dave Hansen <dave.hansen@intel.com>
+Cc: Bhupesh Sharma <bhsharma@redhat.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+
+-- 
+2.7.4
