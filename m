@@ -1,7 +1,7 @@
 From: Chao Fan <fanc.fnst@cn.fujitsu.com>
-Subject: [PATCH v10 6/7] x86/boot: Dig out SRAT table from RSDP and find immovable memory
-Date: Mon, 22 Oct 2018 17:37:19 +0800
-Message-ID: <20181022093720.21426-7-fanc.fnst@cn.fujitsu.com>
+Subject: [PATCH v10 7/7] x86/boot/KASLR: Limit kaslr to choosing the immovable memory
+Date: Mon, 22 Oct 2018 17:37:20 +0800
+Message-ID: <20181022093720.21426-8-fanc.fnst@cn.fujitsu.com>
 References: <20181022093720.21426-1-fanc.fnst@cn.fujitsu.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,223 +12,144 @@ To: linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, lin
 Cc: indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com, fanc.fnst@cn.fujitsu.com
 List-Id: linux-efi@vger.kernel.org
 
-To avoid KASLR extracting kernel on movable memory, and slove the
-conflict between KASLR and movable_node feature, dig the SRAT tables
-from RSDP pointer. Walk the SRAT tables and store the immovable
-memory regions in immovable_mem[].
+If CONFIG_MEMORY_HOTREMOVE enabled, walk through the SRAT memory
+tables and store those immovable memory regions so that KASLR can get
+where to choose for randomization.
 
-The code is imitated from ACPI code, based on acpi_os_get_root_pointer().
-Process: RSDP->RSDT/XSDT->ACPI root table->SRAT.
+If the amount of immovable memory regions is not zero, which
+means the immovable memory regions existing. Calculate the intersection
+between memory regions from e820/efi memory table and immovable memory
+regions.
 
 Signed-off-by: Chao Fan <fanc.fnst@cn.fujitsu.com>
 ---
- arch/x86/boot/compressed/Makefile |   4 +
- arch/x86/boot/compressed/acpitb.c | 127 ++++++++++++++++++++++++++++++
- arch/x86/boot/compressed/kaslr.c  |   4 -
- arch/x86/boot/compressed/misc.h   |  15 ++++
- 4 files changed, 146 insertions(+), 4 deletions(-)
+ arch/x86/boot/compressed/kaslr.c | 77 +++++++++++++++++++++++++++-----
+ 1 file changed, 66 insertions(+), 11 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
-index 28764dacf018..0f631c5613d7 100644
---- a/arch/x86/boot/compressed/Makefile
-+++ b/arch/x86/boot/compressed/Makefile
-@@ -83,6 +83,10 @@ ifdef CONFIG_X86_64
- 	vmlinux-objs-y += $(obj)/pgtable_64.o
- endif
- 
-+#if (defined CONFIG_MEMORY_HOTREMOVE) && (defined CONFIG_RANDOMIZE_BASE)
-+vmlinux-objs-$(CONFIG_RANDOMIZE_BASE) += $(obj)/acpitb.o
-+#endif
-+
- $(obj)/eboot.o: KBUILD_CFLAGS += -fshort-wchar -mno-red-zone
- 
- vmlinux-objs-$(CONFIG_EFI_STUB) += $(obj)/eboot.o $(obj)/efi_stub_$(BITS).o \
-diff --git a/arch/x86/boot/compressed/acpitb.c b/arch/x86/boot/compressed/acpitb.c
-index fa63a584d7ec..a9dbd42e5ab9 100644
---- a/arch/x86/boot/compressed/acpitb.c
-+++ b/arch/x86/boot/compressed/acpitb.c
-@@ -11,6 +11,11 @@
- #define STATIC
- #include <linux/decompress/mm.h>
+diff --git a/arch/x86/boot/compressed/kaslr.c b/arch/x86/boot/compressed/kaslr.c
+index b251572e77af..174d2114045e 100644
+--- a/arch/x86/boot/compressed/kaslr.c
++++ b/arch/x86/boot/compressed/kaslr.c
+@@ -97,6 +97,11 @@ static bool memmap_too_large;
+ /* Store memory limit specified by "mem=nn[KMG]" or "memmap=nn[KMG]" */
+ static unsigned long long mem_limit = ULLONG_MAX;
  
 +#ifdef CONFIG_MEMORY_HOTREMOVE
 +/* Store the immovable memory regions */
-+struct mem_vector immovable_mem[MAX_NUMNODES*2];
++extern struct mem_vector immovable_mem[MAX_NUMNODES*2];
 +#endif
 +
- /* Search EFI table for RSDP table. */
- static void efi_get_rsdp_addr(acpi_physical_address *rsdp_addr)
- {
-@@ -223,3 +228,125 @@ static void get_acpi_rsdp(acpi_physical_address *rsdp_addr)
- 	}
- #endif
- }
-+
-+/*
-+ * Used to dig RSDP table from EFI table or BIOS.
-+ * If RSDP table found in EFI table, use it. Or search BIOS.
-+ * Based on acpi_os_get_root_pointer().
-+ */
-+static acpi_physical_address get_rsdp_addr(void)
-+{
-+	acpi_physical_address pa = 0;
-+
-+	get_acpi_rsdp(&pa);
-+
-+	if (!pa)
-+		efi_get_rsdp_addr(&pa);
-+
-+	if (!pa)
-+		bios_get_rsdp_addr(&pa);
-+
-+	return pa;
-+}
-+
-+static struct acpi_table_header *get_acpi_srat_table(void)
-+{
-+	acpi_physical_address acpi_table;
-+	acpi_physical_address root_table;
-+	struct acpi_table_header *header;
-+	struct acpi_table_rsdp *rsdp;
-+	char *signature;
-+	u8 *entry;
-+	u32 count;
-+	u32 size;
-+	int i, j;
-+	u32 len;
-+
-+	rsdp = (struct acpi_table_rsdp *)get_rsdp_addr();
-+	if (!rsdp)
-+		return NULL;
-+
-+	/* Get RSDT or XSDT from RSDP. */
-+	if (!cmdline_find_option_arg("acpi", "rsdt", 4) &&
-+	    rsdp->xsdt_physical_address && rsdp->revision > 1) {
-+		root_table = rsdp->xsdt_physical_address;
-+		size = ACPI_XSDT_ENTRY_SIZE;
-+	} else {
-+		root_table = rsdp->rsdt_physical_address;
-+		size = ACPI_RSDT_ENTRY_SIZE;
-+	}
-+
-+	/* Get ACPI root table from RSDT or XSDT.*/
-+	header = (struct acpi_table_header *)root_table;
-+	len = header->length;
-+	count = (u32)((len - sizeof(struct acpi_table_header)) / size);
-+	entry = ACPI_ADD_PTR(u8, header, sizeof(struct acpi_table_header));
-+
-+	for (i = 0; i < count; i++) {
-+		u64 address64;
-+
-+		if (size == ACPI_RSDT_ENTRY_SIZE)
-+			acpi_table = ((acpi_physical_address)
-+				      (*ACPI_CAST_PTR(u32, entry)));
-+		else {
-+			*(u64 *)(void *)&address64 = *(u64 *)(void *)entry;
-+			acpi_table = (acpi_physical_address) address64;
-+		}
-+
-+		if (acpi_table) {
-+			header = (struct acpi_table_header *)acpi_table;
-+			signature = header->signature;
-+
-+			if (ACPI_COMPARE_NAME(header->signature, ACPI_SIG_SRAT))
-+				return header;
-+		}
-+		entry += size;
-+	}
-+	return NULL;
-+}
-+
-+/*
-+ * According to ACPI table, filter the immvoable memory regions
-+ * and store them in immovable_mem[].
-+ */
-+void get_immovable_mem(void)
-+{
-+	struct acpi_table_header *table_header;
-+	struct acpi_subtable_header *table;
-+	struct acpi_srat_mem_affinity *ma;
-+	unsigned long table_end;
-+	int i = 0;
-+
-+	if (!cmdline_find_option_bool("movable_node") ||
-+	    cmdline_find_option_arg("acpi", "off", 3))
-+		return;
-+
-+	table_header = get_acpi_srat_table();
-+	if (!table_header)
-+		return;
-+
-+	table_end = (unsigned long)table_header + table_header->length;
-+
-+	table = (struct acpi_subtable_header *)
-+		((unsigned long)table_header + sizeof(struct acpi_table_srat));
-+
-+	while (((unsigned long)table) +
-+		       sizeof(struct acpi_subtable_header) < table_end) {
-+		if (table->type == ACPI_SRAT_TYPE_MEMORY_AFFINITY) {
-+			ma = (struct acpi_srat_mem_affinity *)table;
-+			if (!(ma->flags & ACPI_SRAT_MEM_HOT_PLUGGABLE)) {
-+				immovable_mem[i].start = ma->base_address;
-+				immovable_mem[i].size = ma->length;
-+				i++;
-+			}
-+
-+			if (i >= MAX_NUMNODES*2) {
-+				debug_putstr("Too many immovable memory regions, aborted.\n");
-+				break;
-+			}
-+		}
-+		table = (struct acpi_subtable_header *)
-+			((unsigned long)table + table->length);
-+	}
-+	num_immovable_mem = i;
-+}
-diff --git a/arch/x86/boot/compressed/kaslr.c b/arch/x86/boot/compressed/kaslr.c
-index 9ed9709d9947..b251572e77af 100644
---- a/arch/x86/boot/compressed/kaslr.c
-+++ b/arch/x86/boot/compressed/kaslr.c
-@@ -87,10 +87,6 @@ static unsigned long get_boot_seed(void)
- #define KASLR_COMPRESSED_BOOT
- #include "../../lib/kaslr.c"
  
--struct mem_vector {
--	unsigned long long start;
--	unsigned long long size;
--};
+ enum mem_avoid_index {
+ 	MEM_AVOID_ZO_RANGE = 0,
+@@ -413,6 +418,11 @@ static void mem_avoid_init(unsigned long input, unsigned long input_size,
+ 	/* Mark the memmap regions we need to avoid */
+ 	handle_mem_options();
  
- /* Only supporting at most 4 unusable memmap regions with kaslr */
- #define MAX_MEMMAP_REGIONS	4
-diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
-index 40378408d980..83075b9c6eea 100644
---- a/arch/x86/boot/compressed/misc.h
-+++ b/arch/x86/boot/compressed/misc.h
-@@ -82,6 +82,11 @@ void choose_random_location(unsigned long input,
- 			    unsigned long *output,
- 			    unsigned long output_size,
- 			    unsigned long *virt_addr);
-+struct mem_vector {
-+	unsigned long long start;
-+	unsigned long long size;
-+};
-+
- /* cpuflags.c */
- bool has_cpuflag(int flag);
- #else
-@@ -121,3 +126,13 @@ static inline void console_init(void)
- void set_sev_encryption_mask(void);
- 
- #endif
-+
-+/* acpitb.c */
-+#ifdef CONFIG_RANDOMIZE_BASE
-+int num_immovable_mem;
 +#ifdef CONFIG_MEMORY_HOTREMOVE
-+/* Store the amount of immovable memory regions */
-+#define ACPI_MAX_TABLES                128
-+void get_immovable_mem(void);
++	/* Mark the immovable regions we need to choose */
++	get_immovable_mem();
 +#endif
++
+ #ifdef CONFIG_X86_VERBOSE_BOOTUP
+ 	/* Make sure video RAM can be used. */
+ 	add_identity_map(0, PMD_SIZE);
+@@ -568,9 +578,9 @@ static unsigned long slots_fetch_random(void)
+ 	return 0;
+ }
+ 
+-static void process_mem_region(struct mem_vector *entry,
+-			       unsigned long minimum,
+-			       unsigned long image_size)
++static void slots_count(struct mem_vector *entry,
++			unsigned long minimum,
++			unsigned long image_size)
+ {
+ 	struct mem_vector region, overlap;
+ 	unsigned long start_orig, end;
+@@ -646,6 +656,57 @@ static void process_mem_region(struct mem_vector *entry,
+ 	}
+ }
+ 
++static bool process_mem_region(struct mem_vector *region,
++			       unsigned long long minimum,
++			       unsigned long long image_size)
++{
++	int i;
++	/*
++	 * If no immovable memory found, or MEMORY_HOTREMOVE disabled,
++	 * walk all the regions, so use region directely.
++	 */
++	if (num_immovable_mem == 0) {
++		slots_count(region, minimum, image_size);
++
++		if (slot_area_index == MAX_SLOT_AREA) {
++			debug_putstr("Aborted e820/efi memmap scan (slot_areas full)!\n");
++			return 1;
++		}
++		return 0;
++	}
++
++#ifdef CONFIG_MEMORY_HOTREMOVE
++	/*
++	 * If immovable memory found, filter the intersection between
++	 * immovable memory and region to slots_count.
++	 * Otherwise, go on old code.
++	 */
++	for (i = 0; i < num_immovable_mem; i++) {
++		struct mem_vector entry;
++		unsigned long long start, end, entry_end, region_end;
++
++		if (!mem_overlaps(region, &immovable_mem[i]))
++			continue;
++
++		start = immovable_mem[i].start;
++		end = start + immovable_mem[i].size;
++		region_end = region->start + region->size;
++
++		entry.start = clamp(region->start, start, end);
++		entry_end = clamp(region_end, start, end);
++		entry.size = entry_end - entry.start;
++
++		slots_count(&entry, minimum, image_size);
++
++		if (slot_area_index == MAX_SLOT_AREA) {
++			debug_putstr("Aborted e820/efi memmap scan (slot_areas full)!\n");
++			return 1;
++		}
++	}
++	return 0;
 +#endif
++}
++
+ #ifdef CONFIG_EFI
+ /*
+  * Returns true if mirror region found (and must have been processed
+@@ -711,11 +772,8 @@ process_efi_entries(unsigned long minimum, unsigned long image_size)
+ 
+ 		region.start = md->phys_addr;
+ 		region.size = md->num_pages << EFI_PAGE_SHIFT;
+-		process_mem_region(&region, minimum, image_size);
+-		if (slot_area_index == MAX_SLOT_AREA) {
+-			debug_putstr("Aborted EFI scan (slot_areas full)!\n");
++		if (process_mem_region(&region, minimum, image_size))
+ 			break;
+-		}
+ 	}
+ 	return true;
+ }
+@@ -742,11 +800,8 @@ static void process_e820_entries(unsigned long minimum,
+ 			continue;
+ 		region.start = entry->addr;
+ 		region.size = entry->size;
+-		process_mem_region(&region, minimum, image_size);
+-		if (slot_area_index == MAX_SLOT_AREA) {
+-			debug_putstr("Aborted e820 scan (slot_areas full)!\n");
++		if (process_mem_region(&region, minimum, image_size))
+ 			break;
+-		}
+ 	}
+ }
+ 
 -- 
 2.17.2
