@@ -1,7 +1,7 @@
 From: Chao Fan <fanc.fnst@cn.fujitsu.com>
-Subject: [PATCH v10 1/7] x86/boot: Introduce cmdline_find_option_arg()to detect if option=arg in cmdline
-Date: Mon, 22 Oct 2018 17:37:14 +0800
-Message-ID: <20181022093720.21426-2-fanc.fnst@cn.fujitsu.com>
+Subject: [PATCH v10 4/7] x86/boot: Add bios_get_rsdp_addr() to search RSDP in memory
+Date: Mon, 22 Oct 2018 17:37:17 +0800
+Message-ID: <20181022093720.21426-5-fanc.fnst@cn.fujitsu.com>
 References: <20181022093720.21426-1-fanc.fnst@cn.fujitsu.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,61 +12,134 @@ To: linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, lin
 Cc: indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com, fanc.fnst@cn.fujitsu.com
 List-Id: linux-efi@vger.kernel.org
 
-Now, there are cmdline_find_option() and cmdline_find_option_bool() in
-cmdline.c. Sometimes, when detecting such as whether 'acpi=off' is
-in cmdline, we need to cmdline_find_option() first, then compare
-the argument. Now splite the operation as a independent function.
-Introduce a new function cmdline_find_option_arg() to detect whether
-option is in command line and the value is arg.
+Imitate ACPI code to search RSDP pointer from memory.
+Walk memory and check the signature until get the RSDP signature.
+Based on acpi_tb_scan_memory_for_rsdp() and acpi_find_root_pointer().
+If didn't get RSDP from EFI table, will run this function.
+
+Used for later patch to dig out SRAT table and get the memory
+information. So that we can figure out the immovable memory regions
+to avoid KASLR extracts kernel on movable memory, so slove the
+conflict between KASLR and movable_node feature.
 
 Signed-off-by: Chao Fan <fanc.fnst@cn.fujitsu.com>
 ---
- arch/x86/boot/compressed/cmdline.c | 15 +++++++++++++++
- arch/x86/boot/compressed/misc.h    |  1 +
- 2 files changed, 16 insertions(+)
+ arch/x86/boot/compressed/acpitb.c | 106 ++++++++++++++++++++++++++++++
+ 1 file changed, 106 insertions(+)
 
-diff --git a/arch/x86/boot/compressed/cmdline.c b/arch/x86/boot/compressed/cmdline.c
-index af6cda0b7900..61118c69feb8 100644
---- a/arch/x86/boot/compressed/cmdline.c
-+++ b/arch/x86/boot/compressed/cmdline.c
-@@ -1,5 +1,7 @@
- // SPDX-License-Identifier: GPL-2.0
- #include "misc.h"
-+#define STATIC
-+#include <linux/decompress/mm.h>
- 
- #if CONFIG_EARLY_PRINTK || CONFIG_RANDOMIZE_BASE || CONFIG_X86_5LEVEL
- 
-@@ -30,5 +32,18 @@ int cmdline_find_option_bool(const char *option)
- {
- 	return __cmdline_find_option_bool(get_cmd_line_ptr(), option);
+diff --git a/arch/x86/boot/compressed/acpitb.c b/arch/x86/boot/compressed/acpitb.c
+index 56b54b0e0889..50fa65cf824d 100644
+--- a/arch/x86/boot/compressed/acpitb.c
++++ b/arch/x86/boot/compressed/acpitb.c
+@@ -94,3 +94,109 @@ static void efi_get_rsdp_addr(acpi_physical_address *rsdp_addr)
+ 	}
+ #endif
  }
-+bool cmdline_find_option_arg(const char *option, const char *arg, int argsize)
++
++static u8 compute_checksum(u8 *buffer, u32 length)
 +{
-+	char *buffer = malloc(argsize+1);
-+	bool find = false;
-+	int ret;
++	u8 sum = 0;
++	u8 *end = buffer + length;
 +
-+	ret = cmdline_find_option(option, buffer, argsize+1);
-+	if (ret == argsize && !strncmp(buffer, arg, argsize))
-+		find = true;
++	while (buffer < end)
++		sum = (u8)(sum + *(buffer++));
 +
-+	free(buffer);
-+	return find;
++	return sum;
 +}
- 
- #endif
-diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
-index a1d5918765f3..008fdc47a29c 100644
---- a/arch/x86/boot/compressed/misc.h
-+++ b/arch/x86/boot/compressed/misc.h
-@@ -67,6 +67,7 @@ static inline void debug_puthex(const char *s)
- /* cmdline.c */
- int cmdline_find_option(const char *option, char *buffer, int bufsize);
- int cmdline_find_option_bool(const char *option);
-+bool cmdline_find_option_arg(const char *option, const char *arg, int argsize);
- #endif
- 
- 
++
++/*
++ * Used to search a block of memory for the RSDP signature.
++ * Return Pointer to the RSDP if found, otherwise NULL.
++ * Based on acpi_tb_scan_memory_for_rsdp().
++ */
++static u8 *scan_mem_for_rsdp(u8 *start, u32 length)
++{
++	struct acpi_table_rsdp *rsdp;
++	u8 *end;
++	u8 *rover;
++
++	end = start + length;
++
++	/* Search from given start address for the requested length */
++	for (rover = start; rover < end; rover += ACPI_RSDP_SCAN_STEP) {
++		/*
++		 * The RSDP signature and checksum must both be correct
++		 * Note: Sometimes there exists more than one RSDP in memory;
++		 * the valid RSDP has a valid checksum, all others have an
++		 * invalid checksum.
++		 */
++		rsdp = (struct acpi_table_rsdp *)rover;
++
++		/* Nope, BAD Signature */
++		if (!ACPI_VALIDATE_RSDP_SIG(rsdp->signature))
++			continue;
++
++		/* Check the standard checksum */
++		if (compute_checksum((u8 *) rsdp, ACPI_RSDP_CHECKSUM_LENGTH))
++			continue;
++
++		/* Check extended checksum if table version >= 2 */
++		if ((rsdp->revision >= 2) &&
++		    (compute_checksum((u8 *) rsdp, ACPI_RSDP_XCHECKSUM_LENGTH)))
++			continue;
++
++		/* Sig and checksum valid, we have found a real RSDP */
++		return rover;
++	}
++	return NULL;
++}
++
++/*
++ * Used to search RSDP physical address.
++ * Based on acpi_find_root_pointer(). Since only use physical address
++ * in this period, so there is no need to do the memory map jobs.
++ */
++static void bios_get_rsdp_addr(acpi_physical_address *rsdp_addr)
++{
++	struct acpi_table_rsdp *rsdp;
++	u8 *table_ptr;
++	u8 *mem_rover;
++	u32 address;
++
++	/*
++	 * Get the location of the Extended BIOS Data Area (EBDA)
++	 * Since we use physical address directely, so
++	 * acpi_os_map_memory() and acpi_os_unmap_memory() are
++	 * not needed here.
++	 */
++	table_ptr = (u8 *)ACPI_EBDA_PTR_LOCATION;
++	*(u32 *)(void *)&address = *(u16 *)(void *)table_ptr;
++	address <<= 4;
++	table_ptr = (u8 *)address;
++
++	/*
++	 * Search EBDA paragraphs (EBDA is required to be a minimum of
++	 * 1K length)
++	 */
++	if (address > 0x400) {
++		mem_rover = scan_mem_for_rsdp(table_ptr, ACPI_EBDA_WINDOW_SIZE);
++
++		if (mem_rover) {
++			address += (u32)ACPI_PTR_DIFF(mem_rover, table_ptr);
++			*rsdp_addr = (acpi_physical_address)address;
++			return;
++		}
++	}
++
++	table_ptr = (u8 *)ACPI_HI_RSDP_WINDOW_BASE;
++	mem_rover = scan_mem_for_rsdp(table_ptr, ACPI_HI_RSDP_WINDOW_SIZE);
++
++	/*
++	 * Search upper memory: 16-byte boundaries in E0000h-FFFFFh
++	 * Since we use physical address directely, so
++	 * acpi_os_map_memory() and acpi_os_unmap_memory() are
++	 * not needed here.
++	 */
++	if (mem_rover) {
++		address = (u32)(ACPI_HI_RSDP_WINDOW_BASE +
++				ACPI_PTR_DIFF(mem_rover, table_ptr));
++		*rsdp_addr = (acpi_physical_address)address;
++	}
++}
 -- 
 2.17.2
