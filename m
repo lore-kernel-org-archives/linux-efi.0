@@ -1,7 +1,7 @@
 From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Subject: [PATCH 2/2] x86/efi: Move efi_<reserve/free>_boot_services() to arch/x86
-Date: Sun, 21 Oct 2018 18:35:45 -0700
-Message-ID: <1540172145-17134-3-git-send-email-sai.praneeth.prakhya@intel.com>
+Subject: [PATCH 1/2] x86/efi: Unmap efi boot services code/data regions from efi_pgd
+Date: Sun, 21 Oct 2018 18:35:44 -0700
+Message-ID: <1540172145-17134-2-git-send-email-sai.praneeth.prakhya@intel.com>
 References: <1540172145-17134-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1540172145-17134-1-git-send-email-sai.praneeth.prakhya@intel.com>
@@ -10,10 +10,26 @@ To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org
 Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Dave Hansen <dave.hansen@intel.com>, Bhupesh Sharma <bhsharma@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Peter Zijlstra <peterz@infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-efi_<reserve/free>_boot_services() are x86 specific quirks and as such
-should be in asm/efi.h, so move them from linux/efi.h. Also, call
-efi_free_boot_services() from __efi_enter_virtual_mode() as it is x86
-specific call and ideally shouldn't be part of init/main.c
+Ideally, after kernel assumes control of the platform firmware shouldn't
+access EFI Boot Services Code/Data regions. But, it's noticed that this
+is not so true in many x86 platforms. Hence, during boot, kernel
+reserves efi boot services code/data regions [1] and maps [2] them to
+efi_pgd so that call to set_virtual_address_map() doesn't fail. After
+returning from set_virtual_address_map(), kernel frees the reserved
+regions [3] but they still remain mapped.
+
+This means that any code that's running in efi_pgd address space (e.g:
+any efi runtime service) would still be able to access efi boot services
+code/data regions but the contents of these regions would have long been
+over written by someone else as they are freed by efi_free_boot_services().
+So, it's important to unmap these regions. After unmapping boot services
+code/data regions, any illegal access by buggy firmware to these regions
+would result in page fault which will be handled by efi specific fault
+handler.
+
+[1] Please see efi_reserve_boot_services()
+[2] Please see efi_map_region() -> __map_region()
+[3] Please see efi_free_boot_services()
 
 Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
 Cc: Borislav Petkov <bp@alien8.de>
@@ -25,78 +41,99 @@ Cc: Thomas Gleixner <tglx@linutronix.de>
 Cc: Peter Zijlstra <peterz@infradead.org>
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- arch/x86/include/asm/efi.h  | 2 ++
- arch/x86/platform/efi/efi.c | 2 ++
- include/linux/efi.h         | 3 ---
- init/main.c                 | 4 ----
- 4 files changed, 4 insertions(+), 7 deletions(-)
+ arch/x86/include/asm/pgtable_types.h |  2 ++
+ arch/x86/mm/pageattr.c               | 21 +++++++++++++++++++++
+ arch/x86/platform/efi/quirks.c       | 26 ++++++++++++++++++++++++++
+ 3 files changed, 49 insertions(+)
 
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index eea40d52ca78..d1e64ac80b9c 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -141,6 +141,8 @@ extern int __init efi_reuse_config(u64 tables, int nr_tables);
- extern void efi_delete_dummy_variable(void);
- extern void efi_switch_mm(struct mm_struct *mm);
- extern void efi_recover_from_page_fault(unsigned long phys_addr);
-+extern void efi_free_boot_services(void);
-+extern void efi_reserve_boot_services(void);
+diff --git a/arch/x86/include/asm/pgtable_types.h b/arch/x86/include/asm/pgtable_types.h
+index b64acb08a62b..796476f11151 100644
+--- a/arch/x86/include/asm/pgtable_types.h
++++ b/arch/x86/include/asm/pgtable_types.h
+@@ -566,6 +566,8 @@ extern pmd_t *lookup_pmd_address(unsigned long address);
+ extern phys_addr_t slow_virt_to_phys(void *__address);
+ extern int kernel_map_pages_in_pgd(pgd_t *pgd, u64 pfn, unsigned long address,
+ 				   unsigned numpages, unsigned long page_flags);
++extern int kernel_unmap_pages_in_pgd(pgd_t *pgd, u64 pfn, unsigned long address,
++				     unsigned long numpages);
+ #endif	/* !__ASSEMBLY__ */
  
- struct efi_setup_data {
- 	u64 fw_vendor;
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 9061babfbc83..93924a353e3b 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -994,6 +994,8 @@ static void __init __efi_enter_virtual_mode(void)
- 		panic("EFI call to SetVirtualAddressMap() failed!");
+ #endif /* _ASM_X86_PGTABLE_DEFS_H */
+diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
+index 51a5a69ecac9..b88ed8e91790 100644
+--- a/arch/x86/mm/pageattr.c
++++ b/arch/x86/mm/pageattr.c
+@@ -2147,6 +2147,27 @@ int kernel_map_pages_in_pgd(pgd_t *pgd, u64 pfn, unsigned long address,
+ 	return retval;
+ }
+ 
++int kernel_unmap_pages_in_pgd(pgd_t *pgd, u64 pfn, unsigned long address,
++			      unsigned long numpages)
++{
++	int retval;
++
++	struct cpa_data cpa = {
++		.vaddr = &address,
++		.pfn = pfn,
++		.pgd = pgd,
++		.numpages = numpages,
++		.mask_set = __pgprot(0),
++		.mask_clr = __pgprot(_PAGE_PRESENT | _PAGE_RW),
++		.flags = 0,
++	};
++
++	retval = __change_page_attr_set_clr(&cpa, 0);
++	__flush_tlb_all();
++
++	return retval;
++}
++
+ /*
+  * The testcases use internal knowledge of the implementation that shouldn't
+  * be exposed to the rest of the kernel. Include these directly here.
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index 669babcaf245..5a1ee9392fcf 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -370,6 +370,25 @@ void __init efi_reserve_boot_services(void)
+ 	}
+ }
+ 
++/*
++ * Apart from having VA mappings for efi boot services code/data regions,
++ * (duplicate) 1:1 mappings were also created as a catch for buggy firmware. So,
++ * unmap both 1:1 and VA mappings.
++ */
++static void __init efi_unmap_pages(efi_memory_desc_t *md)
++{
++	pgd_t *pgd = efi_mm.pgd;
++	u64 pfn = md->phys_addr >> PAGE_SHIFT;
++
++	if (kernel_unmap_pages_in_pgd(pgd, pfn, md->phys_addr, md->num_pages))
++		pr_err("Failed to unmap 1:1 mapping: PA 0x%llx -> VA 0x%llx!\n",
++		       md->phys_addr, md->virt_addr);
++
++	if (kernel_unmap_pages_in_pgd(pgd, pfn, md->virt_addr, md->num_pages))
++		pr_err("Failed to unmap VA mapping: PA 0x%llx -> VA 0x%llx!\n",
++		       md->phys_addr, md->virt_addr);
++}
++
+ void __init efi_free_boot_services(void)
+ {
+ 	phys_addr_t new_phys, new_size;
+@@ -415,6 +434,13 @@ void __init efi_free_boot_services(void)
+ 		}
+ 
+ 		free_bootmem_late(start, size);
++
++		/*
++		 * Before calling set_virtual_address_map(), boot services
++		 * code/data regions were mapped as a catch for buggy firmware.
++		 * Unmap them from efi_pgd as they have already been freed.
++		 */
++		efi_unmap_pages(md);
  	}
  
-+	efi_free_boot_services();
-+
- 	/*
- 	 * Now that EFI is in virtual mode, update the function
- 	 * pointers in the runtime service table to the new virtual addresses.
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 845174e113ce..ed2058073385 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1000,13 +1000,11 @@ extern void efi_memmap_walk (efi_freemem_callback_t callback, void *arg);
- extern void efi_gettimeofday (struct timespec64 *ts);
- extern void efi_enter_virtual_mode (void);	/* switch EFI to virtual mode, if possible */
- #ifdef CONFIG_X86
--extern void efi_free_boot_services(void);
- extern efi_status_t efi_query_variable_store(u32 attributes,
- 					     unsigned long size,
- 					     bool nonblocking);
- extern void efi_find_mirror(void);
- #else
--static inline void efi_free_boot_services(void) {}
- 
- static inline efi_status_t efi_query_variable_store(u32 attributes,
- 						    unsigned long size,
-@@ -1046,7 +1044,6 @@ extern void efi_mem_reserve(phys_addr_t addr, u64 size);
- extern int efi_mem_reserve_persistent(phys_addr_t addr, u64 size);
- extern void efi_initialize_iomem_resources(struct resource *code_resource,
- 		struct resource *data_resource, struct resource *bss_resource);
--extern void efi_reserve_boot_services(void);
- extern int efi_get_fdt_params(struct efi_fdt_params *params);
- extern struct kobject *efi_kobj;
- 
-diff --git a/init/main.c b/init/main.c
-index 18f8f0140fa0..174fb14196cc 100644
---- a/init/main.c
-+++ b/init/main.c
-@@ -731,10 +731,6 @@ asmlinkage __visible void __init start_kernel(void)
- 	arch_post_acpi_subsys_init();
- 	sfi_init_late();
- 
--	if (efi_enabled(EFI_RUNTIME_SERVICES)) {
--		efi_free_boot_services();
--	}
--
- 	/* Do the rest non-__init'ed, we're now alive */
- 	rest_init();
- }
+ 	if (!num_entries)
 -- 
 2.7.4
