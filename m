@@ -1,82 +1,42 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: [GIT PULL] EFI changes for v4.20
-Date: Tue, 23 Oct 2018 12:07:56 +0200
-Message-ID: <20181023100756.GA10989@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Waiman Long <longman@redhat.com>
+Subject: [PATCH] efi: Fix debugobjects warning on efi_rts_work
+Date: Tue, 23 Oct 2018 10:18:27 -0400
+Message-ID: <1540304307-2806-1-git-send-email-longman@redhat.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, linux-efi@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Andrew Morton <akpm@linux-foundation.org>, Borislav Petkov <bp@alien8.de>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Sai Praneeth <sai.praneeth.prakhya@intel.com>, Waiman Long <longman@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-Greg,
+The commit 9dbbedaa6171 ("efi: Make efi_rts_work accessible to efi
+page fault handler") converted efi_rts_work from an auto variable to a
+global variable. However, when submitting the work, INIT_WORK_ONSTACK()
+was still used causing the following complaint from debugobjects:
 
-Please pull the latest efi-core-for-linus git tree from:
+ODEBUG: object 00000000ed27b500 is NOT on stack 00000000c7d38760,
+but annotated.
 
-   git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git efi-core-for-linus
+Change the macro to just INIT_WORK() to eliminate the warning.
 
-   # HEAD: fa70f0d2ce96a892b38fbbaa60584af536f21f97 Merge tag 'efi-next' of git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi into efi/core
+Fixes: 9dbbedaa6171 ("efi: Make efi_rts_work accessible to efi page fault handler")
 
-The main changes are:
+Signed-off-by: Waiman Long <longman@redhat.com>
+---
+ drivers/firmware/efi/runtime-wrappers.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
- - Add support for enlisting the help of the EFI firmware to create 
-   memory reservations that persist across kexec.
-
- - Add page fault handling to the runtime services support code on x86 so
-   we can more gracefully recover from buggy EFI firmware.
-
- - Fix command line handling on x86 for the boot path that omits the stub's
-   PE/COFF entry point.
-
- - Other assorted fixes and updates.
-
- Thanks,
-
-	Ingo
-
------------------->
-Aaron Ma (1):
-      efi/x86: earlyprintk - Add 64bit efi fb address support
-
-Alistair Strachan (1):
-      efi/libstub: arm: support building with clang
-
-Ard Biesheuvel (3):
-      efi: honour memory reservations passed via a linux specific config table
-      efi/arm: libstub: add a root memreserve config table
-      efi: add API to reserve memory persistently across kexec reboot
-
-Ben Hutchings (1):
-      x86: boot: Fix EFI stub alignment
-
-Hans de Goede (1):
-      efi/x86: Call efi_parse_options() from efi_main()
-
-Ivan Hu (1):
-      efi/efi_test: add exporting ResetSystem runtime service
-
-Sai Praneeth (2):
-      efi: Make efi_rts_work accessible to efi page fault handler
-      efi/x86: Handle page faults occurring while running EFI runtime services
-
-Sebastian Andrzej Siewior (1):
-      efi/x86: drop task_lock() from efi_switch_mm()
-
-
- arch/x86/boot/compressed/eboot.c        | 10 +++++
- arch/x86/boot/tools/build.c             |  7 +++
- arch/x86/include/asm/efi.h              |  1 +
- arch/x86/mm/fault.c                     |  9 ++++
- arch/x86/platform/efi/early_printk.c    |  8 +++-
- arch/x86/platform/efi/efi_64.c          | 10 ++---
- arch/x86/platform/efi/quirks.c          | 78 +++++++++++++++++++++++++++++++++
- drivers/firmware/efi/efi.c              | 59 ++++++++++++++++++++++++-
- drivers/firmware/efi/libstub/Makefile   |  3 +-
- drivers/firmware/efi/libstub/arm-stub.c | 27 ++++++++++++
- drivers/firmware/efi/runtime-wrappers.c | 61 +++++++-------------------
- drivers/firmware/efi/test/efi_test.c    | 27 ++++++++++++
- drivers/firmware/efi/test/efi_test.h    | 10 +++++
- include/linux/efi.h                     | 51 +++++++++++++++++++++
- 14 files changed, 307 insertions(+), 54 deletions(-)
+diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
+index a19d845..8903b9c 100644
+--- a/drivers/firmware/efi/runtime-wrappers.c
++++ b/drivers/firmware/efi/runtime-wrappers.c
+@@ -67,7 +67,7 @@
+ 	}								\
+ 									\
+ 	init_completion(&efi_rts_work.efi_rts_comp);			\
+-	INIT_WORK_ONSTACK(&efi_rts_work.work, efi_call_rts);		\
++	INIT_WORK(&efi_rts_work.work, efi_call_rts);			\
+ 	efi_rts_work.arg1 = _arg1;					\
+ 	efi_rts_work.arg2 = _arg2;					\
+ 	efi_rts_work.arg3 = _arg3;					\
+-- 
+1.8.3.1
