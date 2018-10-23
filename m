@@ -1,45 +1,68 @@
-From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
-Subject: RE: [PATCH] efi: Fix debugobjects warning on efi_rts_work
-Date: Tue, 23 Oct 2018 16:43:29 +0000
-Message-ID: <FFF73D592F13FD46B8700F0A279B802F485D622C@ORSMSX114.amr.corp.intel.com>
-References: <1540304307-2806-1-git-send-email-longman@redhat.com>
+From: Nathan Chancellor <natechancellor@gmail.com>
+Subject: Re: [PATCH] efi/libstub: Disable some warnings for x86{,_64}
+Date: Tue, 23 Oct 2018 10:53:09 -0700
+Message-ID: <20181023175309.GA3384@flashbox>
+References: <20181013010348.6740-1-natechancellor@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1540304307-2806-1-git-send-email-longman@redhat.com>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <20181013010348.6740-1-natechancellor@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Waiman Long <longman@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Nick Desaulniers <ndesaulniers@google.com>, Sedat Dilek <sedat.dilek@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
-
-
-> -----Original Message-----
-> From: Waiman Long [mailto:longman@redhat.com]
-> Sent: Tuesday, October 23, 2018 7:18 AM
-> To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> Cc: linux-efi@vger.kernel.org; linux-kernel@vger.kernel.org; Prakhya, Sai
-> Praneeth <sai.praneeth.prakhya@intel.com>; Waiman Long
-> <longman@redhat.com>
-> Subject: [PATCH] efi: Fix debugobjects warning on efi_rts_work
+On Fri, Oct 12, 2018 at 06:03:49PM -0700, Nathan Chancellor wrote:
+> When building the kernel with Clang, some disabled warnings appear
+> because this Makefile overrides KBUILD_CFLAGS for x86{,_64}. Add them to
+> this list so that the build is clean again.
 > 
-> The commit 9dbbedaa6171 ("efi: Make efi_rts_work accessible to efi page fault
-> handler") converted efi_rts_work from an auto variable to a global variable.
-> However, when submitting the work, INIT_WORK_ONSTACK() was still used
-> causing the following complaint from debugobjects:
+> -Wpointer-sign was disabled for the whole kernel before the beginning
+> of git history.
 > 
-> ODEBUG: object 00000000ed27b500 is NOT on stack 00000000c7d38760, but
-> annotated.
+> -Waddress-of-packed-member was disabled for the whole kernel in
+> commit bfb38988c51e ("kbuild: clang: Disable 'address-of-packed-member'
+> warning") and for x86/boot/compressed in commit 20c6c1890455 ("x86/boot:
+> Disable the address-of-packed-member compiler warning").
 > 
-> Change the macro to just INIT_WORK() to eliminate the warning.
+> -Wgnu was disabled for the whole kernel in commit 61163efae020 ("kbuild:
+> LLVMLinux: Add Kbuild support for building kernel with Clang") and for
+> x86/boot/compressed in commit 6c3b56b19730 ("x86/boot: Disable Clang
+> warnings about GNU extensions").
 > 
-> Fixes: 9dbbedaa6171 ("efi: Make efi_rts_work accessible to efi page fault
-> handler")
+> Link: https://github.com/ClangBuiltLinux/linux/issues/112
+> Signed-off-by: Nathan Chancellor <natechancellor@gmail.com>
+> ---
+> 
+> Nick expressed concern that this Makefile is overwriting KBUILD_CFLAGS
+> and suggested potentially rewriting the x86 portion of this Makefile to
+> behave like the arm/arm64 one where problematic flags are filtered out.
+> While that comes to fruition, it would be nice for this folder to behave
+> like the rest of the kernel when it comes to this warnings so that the
+> build is cleaner, thus this patch.
+> 
+>  drivers/firmware/efi/libstub/Makefile | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+> index c51627660dbb..d9845099635e 100644
+> --- a/drivers/firmware/efi/libstub/Makefile
+> +++ b/drivers/firmware/efi/libstub/Makefile
+> @@ -9,7 +9,10 @@ cflags-$(CONFIG_X86_32)		:= -march=i386
+>  cflags-$(CONFIG_X86_64)		:= -mcmodel=small
+>  cflags-$(CONFIG_X86)		+= -m$(BITS) -D__KERNEL__ -O2 \
+>  				   -fPIC -fno-strict-aliasing -mno-red-zone \
+> -				   -mno-mmx -mno-sse -fshort-wchar
+> +				   -mno-mmx -mno-sse -fshort-wchar \
+> +				   -Wno-pointer-sign \
+> +				   $(call cc-disable-warning, address-of-packed-member) \
+> +				   $(call cc-disable-warning, gnu)
+>  
+>  # arm64 uses the full KBUILD_CFLAGS so it's necessary to explicitly
+>  # disable the stackleak plugin
+> -- 
+> 2.19.1
+> 
 
-Thanks for fixing this :)
-Looks good to me.
-
-Regards,
-Sai
++ Sedat for review/testing.
