@@ -1,36 +1,45 @@
-From: Russell King - ARM Linux <linux@armlinux.org.uk>
-Subject: Re: [PATCH 0/8] add generic builtin command line
-Date: Tue, 23 Oct 2018 15:48:16 +0100
-Message-ID: <20181023144815.GP30658@n2100.armlinux.org.uk>
-References: <1538067309-5711-1-git-send-email-maksym.kokhan@globallogic.com>
- <20180929181725.GB27441@fifo99.com>
- <CAMT6-xiQ0vGcKpA+SiWHQWQFwU9Oo9j=Zin+UXDoPqKTz5fbeA@mail.gmail.com>
- <CAMT6-xj1rjVAy1AWFiMHc5wH36eu=TUSMtdKU=-qRtUbwr9bkg@mail.gmail.com>
+From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+Subject: RE: [PATCH] efi: Fix debugobjects warning on efi_rts_work
+Date: Tue, 23 Oct 2018 16:43:29 +0000
+Message-ID: <FFF73D592F13FD46B8700F0A279B802F485D622C@ORSMSX114.amr.corp.intel.com>
+References: <1540304307-2806-1-git-send-email-longman@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAMT6-xj1rjVAy1AWFiMHc5wH36eu=TUSMtdKU=-qRtUbwr9bkg@mail.gmail.com>
+In-Reply-To: <1540304307-2806-1-git-send-email-longman@redhat.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Maksym Kokhan <maksym.kokhan@globallogic.com>
-Cc: Daniel Walker <dwalker@fifo99.com>, Andrew Morton <akpm@linux-foundation.org>, Rob Herring <robh+dt@kernel.org>, Frank Rowand <frowand.list@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Ralf Baechle <ralf@linux-mips.org>, Paul Burton <paul.burton@mips.com>, James Hogan <jhogan@kernel.org>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, Daniel Walker <danielwa@cisco.com>, Andrii Bordunov <aborduno@cisco.com>, Ruslan Bilovol <rbilov>
+To: Waiman Long <longman@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Oct 23, 2018 at 05:43:18PM +0300, Maksym Kokhan wrote:
-> We still have no response to patches for x86, arm, arm64 and powerpc.
-> Is current generic command line implementation appropriate for these
-> architectures?
-> Is it possible to merge these patches in the current form (for x86,
-> arm, arm64 and powerpc)?
 
-You may wish to consider your recipients - I seem to only have received
-the cover and patch 1 (which doesn't include any ARM specific bits).
-It may be that you're not getting responses because people haven't seen
-your patches.
 
-Thanks.
+> -----Original Message-----
+> From: Waiman Long [mailto:longman@redhat.com]
+> Sent: Tuesday, October 23, 2018 7:18 AM
+> To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> Cc: linux-efi@vger.kernel.org; linux-kernel@vger.kernel.org; Prakhya, Sai
+> Praneeth <sai.praneeth.prakhya@intel.com>; Waiman Long
+> <longman@redhat.com>
+> Subject: [PATCH] efi: Fix debugobjects warning on efi_rts_work
+> 
+> The commit 9dbbedaa6171 ("efi: Make efi_rts_work accessible to efi page fault
+> handler") converted efi_rts_work from an auto variable to a global variable.
+> However, when submitting the work, INIT_WORK_ONSTACK() was still used
+> causing the following complaint from debugobjects:
+> 
+> ODEBUG: object 00000000ed27b500 is NOT on stack 00000000c7d38760, but
+> annotated.
+> 
+> Change the macro to just INIT_WORK() to eliminate the warning.
+> 
+> Fixes: 9dbbedaa6171 ("efi: Make efi_rts_work accessible to efi page fault
+> handler")
 
--- 
-RMK's Patch system: http://www.armlinux.org.uk/developer/patches/
-FTTC broadband for 0.8mile line in suburbia: sync at 12.1Mbps down 622kbps up
-According to speedtest.net: 11.9Mbps down 500kbps up
+Thanks for fixing this :)
+Looks good to me.
+
+Regards,
+Sai
