@@ -1,83 +1,41 @@
-From: Sedat Dilek <sedat.dilek@gmail.com>
-Subject: Re: [PATCH] efi/libstub: Disable some warnings for x86{,_64}
-Date: Wed, 24 Oct 2018 09:22:01 +0200
-Message-ID: <CA+icZUXsS53RANWBNWw7_HcRRGyzVW1EepBU-K1pumrue6bYtg@mail.gmail.com>
-References: <20181013010348.6740-1-natechancellor@gmail.com> <20181023175309.GA3384@flashbox>
-Reply-To: sedat.dilek@gmail.com
+From: Maksym Kokhan <maksym.kokhan@globallogic.com>
+Subject: Re: [PATCH 0/8] add generic builtin command line
+Date: Wed, 24 Oct 2018 11:57:44 +0300
+Message-ID: <CAMT6-xhvqy5PeQmkQ8tsLRiML_pNJTxyq7dizRRvZTEqc7uzgg@mail.gmail.com>
+References: <1538067309-5711-1-git-send-email-maksym.kokhan@globallogic.com>
+ <20180929181725.GB27441@fifo99.com> <CAMT6-xiQ0vGcKpA+SiWHQWQFwU9Oo9j=Zin+UXDoPqKTz5fbeA@mail.gmail.com>
+ <CAMT6-xj1rjVAy1AWFiMHc5wH36eu=TUSMtdKU=-qRtUbwr9bkg@mail.gmail.com> <20181023144815.GP30658@n2100.armlinux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181023175309.GA3384@flashbox>
+In-Reply-To: <20181023144815.GP30658@n2100.armlinux.org.uk>
 Sender: linux-kernel-owner@vger.kernel.org
-To: natechancellor@gmail.com
-Cc: ard.biesheuvel@linaro.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Nick Desaulniers <ndesaulniers@google.com>
+To: Russell King <linux@armlinux.org.uk>
+Cc: Daniel Walker <dwalker@fifo99.com>, Andrew Morton <akpm@linux-foundation.org>, Rob Herring <robh+dt@kernel.org>, Frank Rowand <frowand.list@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Ralf Baechle <ralf@linux-mips.org>, Paul Burton <paul.burton@mips.com>, James Hogan <jhogan@kernel.org>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, Daniel Walker <danielwa@cisco.com>, Andrii Bordunov <aborduno@cisco.com>, Ruslan Bilovol <rbilov>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Oct 23, 2018 at 7:53 PM Nathan Chancellor
-<natechancellor@gmail.com> wrote:
+Do you mean, that you haven't seen patch for ARM, which I sent on
+September 27 along with cover and patch 1? It is strange, because
+you was the one from recipients. If so, you can see this patch here:
+https://lore.kernel.org/patchwork/patch/992779/
+On Tue, Oct 23, 2018 at 5:48 PM Russell King - ARM Linux
+<linux@armlinux.org.uk> wrote:
 >
-> On Fri, Oct 12, 2018 at 06:03:49PM -0700, Nathan Chancellor wrote:
-> > When building the kernel with Clang, some disabled warnings appear
-> > because this Makefile overrides KBUILD_CFLAGS for x86{,_64}. Add them to
-> > this list so that the build is clean again.
-> >
-> > -Wpointer-sign was disabled for the whole kernel before the beginning
-> > of git history.
-> >
-> > -Waddress-of-packed-member was disabled for the whole kernel in
-> > commit bfb38988c51e ("kbuild: clang: Disable 'address-of-packed-member'
-> > warning") and for x86/boot/compressed in commit 20c6c1890455 ("x86/boot:
-> > Disable the address-of-packed-member compiler warning").
-> >
-> > -Wgnu was disabled for the whole kernel in commit 61163efae020 ("kbuild:
-> > LLVMLinux: Add Kbuild support for building kernel with Clang") and for
-> > x86/boot/compressed in commit 6c3b56b19730 ("x86/boot: Disable Clang
-> > warnings about GNU extensions").
-> >
-> > Link: https://github.com/ClangBuiltLinux/linux/issues/112
-> > Signed-off-by: Nathan Chancellor <natechancellor@gmail.com>
-> > ---
-> >
-> > Nick expressed concern that this Makefile is overwriting KBUILD_CFLAGS
-> > and suggested potentially rewriting the x86 portion of this Makefile to
-> > behave like the arm/arm64 one where problematic flags are filtered out.
-> > While that comes to fruition, it would be nice for this folder to behave
-> > like the rest of the kernel when it comes to this warnings so that the
-> > build is cleaner, thus this patch.
-> >
-> >  drivers/firmware/efi/libstub/Makefile | 5 ++++-
-> >  1 file changed, 4 insertions(+), 1 deletion(-)
-> >
-> > diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-> > index c51627660dbb..d9845099635e 100644
-> > --- a/drivers/firmware/efi/libstub/Makefile
-> > +++ b/drivers/firmware/efi/libstub/Makefile
-> > @@ -9,7 +9,10 @@ cflags-$(CONFIG_X86_32)              := -march=i386
-> >  cflags-$(CONFIG_X86_64)              := -mcmodel=small
-> >  cflags-$(CONFIG_X86)         += -m$(BITS) -D__KERNEL__ -O2 \
-> >                                  -fPIC -fno-strict-aliasing -mno-red-zone \
-> > -                                -mno-mmx -mno-sse -fshort-wchar
-> > +                                -mno-mmx -mno-sse -fshort-wchar \
-> > +                                -Wno-pointer-sign \
-> > +                                $(call cc-disable-warning, address-of-packed-member) \
-> > +                                $(call cc-disable-warning, gnu)
-> >
-> >  # arm64 uses the full KBUILD_CFLAGS so it's necessary to explicitly
-> >  # disable the stackleak plugin
-> > --
-> > 2.19.1
-> >
+> On Tue, Oct 23, 2018 at 05:43:18PM +0300, Maksym Kokhan wrote:
+> > We still have no response to patches for x86, arm, arm64 and powerpc.
+> > Is current generic command line implementation appropriate for these
+> > architectures?
+> > Is it possible to merge these patches in the current form (for x86,
+> > arm, arm64 and powerpc)?
 >
-> + Sedat for review/testing.
-
-Thanks Nathan.
-
-Reviewed-by: Sedat Dilek <sedat.dilek@gmail.com>
-Tested-by: Sedat Dilek <sedat.dilek@gmail.com>
-[ Reported-by: Sedat Dilek <sedat.dilek@gmail.com> ]
-[ See duplicate "arch/x86/include/asm/processor.h: Warning
--Waddress-of-packed-member "
-<https://github.com/ClangBuiltLinux/linux/issues/234> ]
-
-Regards,
-- Sedat -
+> You may wish to consider your recipients - I seem to only have received
+> the cover and patch 1 (which doesn't include any ARM specific bits).
+> It may be that you're not getting responses because people haven't seen
+> your patches.
+>
+> Thanks.
+>
+> --
+> RMK's Patch system: http://www.armlinux.org.uk/developer/patches/
+> FTTC broadband for 0.8mile line in suburbia: sync at 12.1Mbps down 622kbps up
+> According to speedtest.net: 11.9Mbps down 500kbps up
