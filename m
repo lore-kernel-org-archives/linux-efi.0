@@ -1,68 +1,49 @@
-From: Julien Thierry <julien.thierry@arm.com>
-Subject: [PATCH v2 2/2] efi/fdt: Simplify get_fdt flow
-Date: Mon, 29 Oct 2018 10:15:42 +0000
-Message-ID: <1540808142-33208-3-git-send-email-julien.thierry@arm.com>
-References: <1540808142-33208-1-git-send-email-julien.thierry@arm.com>
+From: Will Deacon <will.deacon@arm.com>
+Subject: Re: [PATCH 0/8] add generic builtin command line
+Date: Mon, 29 Oct 2018 10:29:15 +0000
+Message-ID: <20181029102914.GA14127@arm.com>
+References: <1538067309-5711-1-git-send-email-maksym.kokhan@globallogic.com>
+ <20180929181725.GB27441@fifo99.com>
+ <CAMT6-xiQ0vGcKpA+SiWHQWQFwU9Oo9j=Zin+UXDoPqKTz5fbeA@mail.gmail.com>
+ <CAMT6-xj1rjVAy1AWFiMHc5wH36eu=TUSMtdKU=-qRtUbwr9bkg@mail.gmail.com>
+ <20181023144815.GP30658@n2100.armlinux.org.uk>
+ <CAMT6-xhvqy5PeQmkQ8tsLRiML_pNJTxyq7dizRRvZTEqc7uzgg@mail.gmail.com>
+ <20181024090732.GS30658@n2100.armlinux.org.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1540808142-33208-1-git-send-email-julien.thierry@arm.com>
+Content-Disposition: inline
+In-Reply-To: <20181024090732.GS30658@n2100.armlinux.org.uk>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, ard.biesheuvel@linaro.org, joe@perches.com, Julien Thierry <julien.thierry@arm.com>
+To: Russell King - ARM Linux <linux@armlinux.org.uk>
+Cc: Maksym Kokhan <maksym.kokhan@globallogic.com>, Daniel Walker <dwalker@fifo99.com>, Andrew Morton <akpm@linux-foundation.org>, Rob Herring <robh+dt@kernel.org>, Frank Rowand <frowand.list@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, Catalin Marinas <catalin.marinas@arm.com>, Ralf Baechle <ralf@linux-mips.org>, Paul Burton <paul.burton@mips.com>, James Hogan <jhogan@kernel.org>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, Daniel Walker <danielwa@cisco.com>, Andrii Bordunov <aborduno@cisco.com>, Ruslan
 List-Id: linux-efi@vger.kernel.org
 
-Reorganize get_fdt lookup loop, clearly showing that:
-- Nothing is done for table entries that do not have fdt_guid
-- Once an entry with fdt_guid is found, break out of the loop
+On Wed, Oct 24, 2018 at 10:07:32AM +0100, Russell King - ARM Linux wrote:
+> On Wed, Oct 24, 2018 at 11:57:44AM +0300, Maksym Kokhan wrote:
+> > Do you mean, that you haven't seen patch for ARM, which I sent on
+> > September 27 along with cover and patch 1? It is strange, because
+> > you was the one from recipients. If so, you can see this patch here:
+> > https://lore.kernel.org/patchwork/patch/992779/
+> 
+> It seems that I have received patch 5, _but_ it's not threaded with
+> the cover message and patch 1.  With 50k messages in my inbox, and 3k
+> messages since you sent the series, it's virtually impossible to find
+> it (I only found it by looking at my mail server logs from September
+> to find the subject, and then searching my mailbox for that subject.)
+> 
+> This is unnecessarily difficult.
 
-No functional changes.
+This comes up surprisingly often, and I think part of the issue is that
+different maintainers have different preferences. I also prefer to receive
+the entire series and cover-letter, but I've seen people object to being
+CC'd on the whole series as well (how they manage to review things in
+isolation is another question...!)
 
-Signed-off-by: Julien Thierry <julien.thierry@arm.com>
-Suggested-by: Joe Perches <joe@perches.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
- drivers/firmware/efi/libstub/fdt.c | 25 +++++++++++++------------
- 1 file changed, 13 insertions(+), 12 deletions(-)
+I wonder if we could have an entry in MAINTAINERS for this sort of
+preference?
 
-diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
-index 8b6696e..5b7e2b3 100644
---- a/drivers/firmware/efi/libstub/fdt.c
-+++ b/drivers/firmware/efi/libstub/fdt.c
-@@ -366,23 +366,24 @@ void *get_fdt(efi_system_table_t *sys_table, unsigned long *fdt_size)
- {
- 	efi_guid_t fdt_guid = DEVICE_TREE_GUID;
- 	efi_config_table_t *tables;
--	void *fdt;
- 	int i;
- 
--	tables = (efi_config_table_t *) sys_table->tables;
--	fdt = NULL;
-+	tables = (efi_config_table_t *)sys_table->tables;
- 
- 	for (i = 0; i < sys_table->nr_tables; i++) {
--		if (efi_guidcmp(tables[i].guid, fdt_guid) == 0) {
--			fdt = (void *) tables[i].table;
--			if (fdt_check_header(fdt) != 0) {
--				pr_efi_err(sys_table, "Invalid header detected on UEFI supplied FDT, ignoring ...\n");
--				return NULL;
--			}
--			*fdt_size = fdt_totalsize(fdt);
--			break;
-+		void *fdt;
-+
-+		if (efi_guidcmp(tables[i].guid, fdt_guid) != 0)
-+			continue;
-+
-+		fdt = (void *) tables[i].table;
-+		if (fdt_check_header(fdt) != 0) {
-+			pr_efi_err(sys_table, "Invalid header detected on UEFI supplied FDT, ignoring ...\n");
-+			return NULL;
- 		}
-+		*fdt_size = fdt_totalsize(fdt);
-+		return fdt;
- 	}
- 
--	return fdt;
-+	return NULL;
- }
--- 
-1.9.1
+Maksym: in the short term, please just stick me and Russell on CC for the
+entire thing.
+
+Will
