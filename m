@@ -1,50 +1,114 @@
-From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
-Subject: RE: [PATCH V2 1/2] x86/efi: Unmap EFI boot services code/data
- regions from efi_pgd
-Date: Mon, 29 Oct 2018 07:26:30 +0000
-Message-ID: <FFF73D592F13FD46B8700F0A279B802F485E101E@ORSMSX114.amr.corp.intel.com>
-References: <20181026213845.28166-1-sai.praneeth.prakhya@intel.com>
- <20181026213845.28166-2-sai.praneeth.prakhya@intel.com>
- <20181029060708.GB128403@gmail.com>
+From: Julien Thierry <julien.thierry@arm.com>
+Subject: Re: [PATCH] efi/fdt: Indentation fix
+Date: Mon, 29 Oct 2018 09:45:44 +0000
+Message-ID: <d7d0641b-f2a5-a51b-f52e-3db3b873f209@arm.com>
+References: <1538389776-8432-1-git-send-email-julien.thierry@arm.com>
+ <61d7bd590527166c58670b4c0ab65a08710f81cf.camel@perches.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181029060708.GB128403@gmail.com>
+In-Reply-To: <61d7bd590527166c58670b4c0ab65a08710f81cf.camel@perches.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>, "Hansen, Dave" <dave.hansen@intel.com>, Bhupesh Sharma <bhsharma@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Peter Zijlstra <peterz@infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+To: Joe Perches <joe@perches.com>, linux-efi@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-> > +int kernel_unmap_pages_in_pgd(pgd_t *pgd, unsigned long address,
-> > +			      unsigned long numpages)
-> > +{
-> > +	int retval;
-> > +
-> > +	/*
-> > +	 * The typical sequence for unmapping is to find a pte through
-> > +	 * lookup_address_in_pgd() (ideally, it should never return NULL
-> because
-> > +	 * the address is already mapped) and change it's protections.
-> > +	 * As pfn is the *target* of a mapping, it's not useful while unmapping.
-> > +	 */
-> > +	struct cpa_data cpa = {
-> > +		.vaddr		= &address,
-> > +		.pgd		= pgd,
-> > +		.numpages	= numpages,
-> > +		.mask_set	= __pgprot(0),
-> > +		.mask_clr	= __pgprot(_PAGE_PRESENT | _PAGE_RW),
-> > +		.flags		= 0,
-> > +	};
-> > +
-> > +	retval = __change_page_attr_set_clr(&cpa, 0);
-> > +	__flush_tlb_all();
+Hi Joe,
+
+On 02/10/18 17:05, Joe Perches wrote:
+> On Mon, 2018-10-01 at 11:29 +0100, Julien Thierry wrote:
+>> Closing bracket seems to end a for statement when it is actually ending
+>> the contained if.
+>>
+>> No functional change/fix, just fix the indentation.
+> []
+>> diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+> []
+>> @@ -381,7 +381,7 @@ void *get_fdt(efi_system_table_t *sys_table, unsigned long *fdt_size)
+>>   			}
+>>   			*fdt_size = fdt_totalsize(fdt);
+>>   			break;
+>> -	 }
+>> +		}
+>>
+>>   	return fdt;
+>>   }
 > 
-> So, just to clarify, 'pfn' is kept at 0 here? Might make sense to write it out
-> explicitly like 'flags', even if it's not used by __change_page_attr_set_clr().
+> Hello Julian.
+> 
+> [trivial style bikeshedding follows]
+> 
+> I think it better to add braces to the for loop so
+> this stands out better.
+> 
+> Also, I would generally write this so the if test is
+> reversed and uses a continue so the match block saves
+> an indent level.
+> 
+> This is the only use efi_guidcmp with a == test in
+> drivers/firmware, so perhaps remove that and use ! as
+> the other uses have no == or != test.
+> 
+> Lastly, a direct return might be better and the return
+> fdt could be removed and converted to return NULL.
+> 
 
-Sure! Makes sense. I will add it.
+The suggestions make sense, I'll respin this taking your remarks into 
+account.
 
-Regards,
-Sai
+Thanks,
+
+> Something like:
+> ---
+>   drivers/firmware/efi/libstub/fdt.c | 29 +++++++++++++++--------------
+>   1 file changed, 15 insertions(+), 14 deletions(-)
+> 
+> diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+> index 8830fa601e45..2d0b895e2f67 100644
+> --- a/drivers/firmware/efi/libstub/fdt.c
+> +++ b/drivers/firmware/efi/libstub/fdt.c
+> @@ -366,22 +366,23 @@ void *get_fdt(efi_system_table_t *sys_table, unsigned long *fdt_size)
+>   {
+>   	efi_guid_t fdt_guid = DEVICE_TREE_GUID;
+>   	efi_config_table_t *tables;
+> -	void *fdt;
+>   	int i;
+>   
+> -	tables = (efi_config_table_t *) sys_table->tables;
+> -	fdt = NULL;
+> +	tables = (efi_config_table_t *)sys_table->tables;
+>   
+> -	for (i = 0; i < sys_table->nr_tables; i++)
+> -		if (efi_guidcmp(tables[i].guid, fdt_guid) == 0) {
+> -			fdt = (void *) tables[i].table;
+> -			if (fdt_check_header(fdt) != 0) {
+> -				pr_efi_err(sys_table, "Invalid header detected on UEFI supplied FDT, ignoring ...\n");
+> -				return NULL;
+> -			}
+> -			*fdt_size = fdt_totalsize(fdt);
+> -			break;
+> -	 }
+> +	for (i = 0; i < sys_table->nr_tables; i++) {
+> +		void *fdt;
+> +
+> +		if (efi_guidcmp(tables[i].guid, fdt_guid))
+> +			continue;
+> +		fdt = (void *)tables[i].table;
+> +		if (fdt_check_header(fdt) != 0) {
+> +			pr_efi_err(sys_table, "Invalid header detected on UEFI supplied FDT, ignoring ...\n");
+> +			return NULL;
+> +		}
+> +		*fdt_size = fdt_totalsize(fdt);
+> +		return fdt;
+> +	}
+>   
+> -	return fdt;
+> +	return NULL;
+>   }
+> 
+> 
+
+-- 
+Julien Thierry
