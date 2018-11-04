@@ -1,7 +1,7 @@
 From: Eugene Korenevsky <ekorenevsky@gmail.com>
-Subject: [PATCH v5 1/2] efi: add sanity checks for GPT entries
-Date: Sun, 4 Nov 2018 22:50:55 +0300
-Message-ID: <20181104195055.GA15428@dnote>
+Subject: [PATCH v5 2/2] efi: take size of partition entry from GPT header
+Date: Sun, 4 Nov 2018 22:51:10 +0300
+Message-ID: <20181104195110.GA15437@dnote>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
@@ -10,124 +10,99 @@ Sender: linux-kernel-owner@vger.kernel.org
 To: Davidlohr Bueso <dave@stgolabs.net>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-Obvious sanity checks have been added for GPT entries.
-GPT entries should not:
-- collide with GPT header
-- collide with GPT partitions
-- override the disk size 
-These checks also ensure GPT entries are not too large.
+Use gpt_header.sizeof_partition_entry instead of sizeof(gpt_entry)
+for GPT entry size.
+According to UEFI 2.7 spec 5.3.1 "GPT overview":, the size of a GUID Partition
+Entry element is defined in the Size Of Partition Entry field of GPT header.
+The GPT with entries sized more than sizeof(gpt_entry) is not illegal.
+OVMF firmware from EDK2 perfectly works with it, see edk2-tianocore source
+code.
+
+Changes since v1: refactoring (extract get_gpt_entry function),
+                  fix (&ptes[i] -> pte)
+Changes since v2: use le32_to_cpu, fix typo, sanity check for
+                  sizeof_partition_entry
+Changes since v3: style fixes
+Changes since v4: sanity checks for GPT entries; split into
+patchset
 
 Signed-off-by: Eugene Korenevsky <ekorenevsky@gmail.com>
 ---
- block/partitions/efi.c | 61 +++++++++++++++++++++++++++++++++++-------
- 1 file changed, 51 insertions(+), 10 deletions(-)
+ block/partitions/efi.c | 31 ++++++++++++++++++++-----------
+ 1 file changed, 20 insertions(+), 11 deletions(-)
 
 diff --git a/block/partitions/efi.c b/block/partitions/efi.c
-index 39f70d968754..722117b32585 100644
+index 722117b32585..3858c042d3ac 100644
 --- a/block/partitions/efi.c
 +++ b/block/partitions/efi.c
-@@ -338,6 +338,24 @@ static gpt_header *alloc_read_gpt_header(struct parsed_partitions *state,
- 	return gpt;
+@@ -447,8 +447,8 @@ static int is_gpt_valid(struct parsed_partitions *state, u64 lba,
+ 		goto fail;
+ 	}
+ 	/* Check that sizeof_partition_entry has the correct value */
+-	if (le32_to_cpu((*gpt)->sizeof_partition_entry) != sizeof(gpt_entry)) {
+-		pr_debug("GUID Partition Entry Size check failed.\n");
++	if (le32_to_cpu((*gpt)->sizeof_partition_entry) < sizeof(gpt_entry)) {
++		pr_debug("GUID Partition Entry Size is too small.\n");
+ 		goto fail;
+ 	}
+ 
+@@ -711,6 +711,12 @@ static int find_valid_gpt(struct parsed_partitions *state, gpt_header **gpt,
+         return 0;
  }
  
-+/**
-+ * disk_regions_collide() - tests if two disk regions intersect or one region
-+ *			    contains other
-+ * @firstlba1: first LBA of the first region
-+ * @lastlba1: last LBA of the first region
-+ * @firstlba2: first LBA of the second region
-+ * @lastlba2: last LBA of the second region
-+ */
-+static bool disk_regions_collide(u64 firstlba1, u64 lastlba1,
-+				 u64 firstlba2, u64 lastlba2)
++static gpt_entry *get_gpt_entry(gpt_header *gpt, gpt_entry *ptes, u32 index)
 +{
-+	if (lastlba1 < firstlba2)
-+		return false;
-+	if (lastlba2 < firstlba1)
-+		return false;
-+	return true;
++	return (gpt_entry *)((u8 *)ptes +
++	       le32_to_cpu(gpt->sizeof_partition_entry) * index);
 +}
 +
  /**
-  * is_gpt_valid() - tests one GPT header and PTEs for validity
+  * efi_partition(struct parsed_partitions *state)
   * @state: disk parsed partitions
-@@ -352,7 +370,8 @@ static int is_gpt_valid(struct parsed_partitions *state, u64 lba,
- 			gpt_header **gpt, gpt_entry **ptes)
- {
- 	u32 crc, origcrc;
--	u64 lastlba, pt_size;
-+	unsigned short ssz;
-+	u64 pt_firstlba, pt_lastlba, disk_lastlba, pt_size;
+@@ -745,32 +751,35 @@ int efi_partition(struct parsed_partitions *state)
  
- 	if (!ptes)
- 		return 0;
-@@ -369,11 +388,10 @@ static int is_gpt_valid(struct parsed_partitions *state, u64 lba,
- 	}
+ 	pr_debug("GUID Partition Table is valid!  Yea!\n");
  
- 	/* Check the GUID Partition Table header size is too big */
--	if (le32_to_cpu((*gpt)->header_size) >
--			bdev_logical_block_size(state->bdev)) {
-+	ssz = bdev_logical_block_size(state->bdev);
-+	if (le32_to_cpu((*gpt)->header_size) > ssz) {
- 		pr_debug("GUID Partition Table Header size is too large: %u > %u\n",
--			le32_to_cpu((*gpt)->header_size),
--			bdev_logical_block_size(state->bdev));
-+			le32_to_cpu((*gpt)->header_size), ssz);
- 		goto fail;
- 	}
+-	for (i = 0; i < le32_to_cpu(gpt->num_partition_entries) && i < state->limit-1; i++) {
++	for (i = 0; i < le32_to_cpu(gpt->num_partition_entries) &&
++		    i < state->limit-1; i++) {
++		gpt_entry *pte = get_gpt_entry(gpt, ptes, i);
+ 		struct partition_meta_info *info;
+ 		unsigned label_count = 0;
+ 		unsigned label_max;
+-		u64 start = le64_to_cpu(ptes[i].starting_lba);
+-		u64 size = le64_to_cpu(ptes[i].ending_lba) -
+-			   le64_to_cpu(ptes[i].starting_lba) + 1ULL;
++		u64 start = le64_to_cpu(pte->starting_lba);
++		u64 size = le64_to_cpu(pte->ending_lba) -
++			   le64_to_cpu(pte->starting_lba) + 1ULL;
  
-@@ -409,17 +427,17 @@ static int is_gpt_valid(struct parsed_partitions *state, u64 lba,
- 	/* Check the first_usable_lba and last_usable_lba are
- 	 * within the disk.
- 	 */
--	lastlba = last_lba(state->bdev);
--	if (le64_to_cpu((*gpt)->first_usable_lba) > lastlba) {
-+	disk_lastlba = last_lba(state->bdev);
-+	if (le64_to_cpu((*gpt)->first_usable_lba) > disk_lastlba) {
- 		pr_debug("GPT: first_usable_lba incorrect: %lld > %lld\n",
- 			 (unsigned long long)le64_to_cpu((*gpt)->first_usable_lba),
--			 (unsigned long long)lastlba);
-+			 (unsigned long long)disk_lastlba);
- 		goto fail;
- 	}
--	if (le64_to_cpu((*gpt)->last_usable_lba) > lastlba) {
-+	if (le64_to_cpu((*gpt)->last_usable_lba) > disk_lastlba) {
- 		pr_debug("GPT: last_usable_lba incorrect: %lld > %lld\n",
- 			 (unsigned long long)le64_to_cpu((*gpt)->last_usable_lba),
--			 (unsigned long long)lastlba);
-+			 (unsigned long long)disk_lastlba);
- 		goto fail;
- 	}
- 	if (le64_to_cpu((*gpt)->last_usable_lba) < le64_to_cpu((*gpt)->first_usable_lba)) {
-@@ -443,6 +461,29 @@ static int is_gpt_valid(struct parsed_partitions *state, u64 lba,
- 		goto fail;
- 	}
+-		if (!is_pte_valid(&ptes[i], last_lba(state->bdev)))
++		if (!is_pte_valid(pte, last_lba(state->bdev)))
+ 			continue;
  
-+	pt_firstlba = le64_to_cpu((*gpt)->partition_entry_lba);
-+	pt_lastlba = pt_firstlba + (pt_size + ssz - 1) / ssz - 1;
-+
-+	/* Check GPT entries do not overwrite partitions */
-+	if (disk_regions_collide(pt_firstlba, pt_lastlba,
-+				 le64_to_cpu((*gpt)->first_usable_lba),
-+				 le64_to_cpu((*gpt)->last_usable_lba))) {
-+		pr_debug("Primary GPT entries overwrite partitions\n");
-+		goto fail;
-+	}
-+	/* Check GPT entries do not overwrite GPT header. Note: GPT header must
-+	 * reside in the single disk sector according to UEFI spec
-+	 */
-+	if (disk_regions_collide(pt_firstlba, pt_lastlba, lba, lba)) {
-+		pr_debug("Primary GPT entries overwrite GPT header\n");
-+		goto fail;
-+	}
-+	/* Check GPT entries are not beyond the end of the disk */
-+	if (pt_lastlba > disk_lastlba) {
-+		pr_debug("GPT entries are beyond the end of the disk\n");
-+		goto fail;
-+	}
-+
- 	if (!(*ptes = alloc_read_gpt_entries(state, *gpt)))
- 		goto fail;
+ 		put_partition(state, i+1, start * ssz, size * ssz);
  
+ 		/* If this is a RAID volume, tell md */
+-		if (!efi_guidcmp(ptes[i].partition_type_guid, PARTITION_LINUX_RAID_GUID))
++		if (!efi_guidcmp(pte->partition_type_guid,
++				 PARTITION_LINUX_RAID_GUID))
+ 			state->parts[i + 1].flags = ADDPART_FLAG_RAID;
+ 
+ 		info = &state->parts[i + 1].info;
+-		efi_guid_to_str(&ptes[i].unique_partition_guid, info->uuid);
++		efi_guid_to_str(&pte->unique_partition_guid, info->uuid);
+ 
+ 		/* Naively convert UTF16-LE to 7 bits. */
+ 		label_max = min(ARRAY_SIZE(info->volname) - 1,
+-				ARRAY_SIZE(ptes[i].partition_name));
++				ARRAY_SIZE(pte->partition_name));
+ 		info->volname[label_max] = 0;
+ 		while (label_count < label_max) {
+-			u8 c = ptes[i].partition_name[label_count] & 0xff;
++			u8 c = pte->partition_name[label_count] & 0xff;
+ 			if (c && !isprint(c))
+ 				c = '!';
+ 			info->volname[label_count] = c;
 -- 
 2.19.1
