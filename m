@@ -1,7 +1,7 @@
 From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Subject: [PATCH V3 3/3] x86/efi: Move efi_<reserve/free>_boot_services() to arch/x86
-Date: Sun,  4 Nov 2018 12:10:19 -0800
-Message-ID: <20181104201019.26142-4-sai.praneeth.prakhya@intel.com>
+Subject: [PATCH V3 1/3] x86/mm/pageattr: Introduce helper function to unmap EFI boot services
+Date: Sun,  4 Nov 2018 12:10:17 -0800
+Message-ID: <20181104201019.26142-2-sai.praneeth.prakhya@intel.com>
 References: <20181104201019.26142-1-sai.praneeth.prakhya@intel.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -12,13 +12,30 @@ To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org
 Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Dave Hansen <dave.hansen@intel.com>, Bhupesh Sharma <bhsharma@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Peter Zijlstra <peterz@infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-efi_<reserve/free>_boot_services() are x86 specific quirks and as such
-should be in asm/efi.h, so move them from linux/efi.h. Also, call
-efi_free_boot_services() from __efi_enter_virtual_mode() as it is x86
-specific call and ideally shouldn't be part of init/main.c
+Ideally, after kernel assumes control of the platform, firmware
+shouldn't access EFI boot services code/data regions. But, it's noticed
+that this is not so true in many x86 platforms. Hence, during boot,
+kernel reserves EFI boot services code/data regions [1] and maps [2]
+them to efi_pgd so that call to set_virtual_address_map() doesn't fail.
+After returning from set_virtual_address_map(), kernel frees the
+reserved regions [3] but they still remain mapped. Hence, introduce
+kernel_unmap_pages_in_pgd() which will later be used to unmap EFI boot
+services code/data regions.
+
+While at it modify kernel_map_pages_in_pgd() by
+1. Adding __init modifier because it's always used *only* during boot.
+2. Add a warning if it's used after SMP is initialized because it uses
+   __flush_tlb_all() which flushes mappings only on current CPU.
+
+Unmapping EFI boot services code/data regions will result in clearing
+PAGE_PRESENT bit and it shouldn't bother L1TF cases because it's already
+handled by protnone_mask() at arch/x86/include/asm/pgtable-invert.h.
+
+[1] efi_reserve_boot_services()
+[2] efi_map_region() -> __map_region() -> kernel_map_pages_in_pgd()
+[3] efi_free_boot_services()
 
 Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Acked-by: Thomas Gleixner <tglx@linutronix.de>
 Cc: Borislav Petkov <bp@alien8.de>
 Cc: Ingo Molnar <mingo@kernel.org>
 Cc: Andy Lutomirski <luto@kernel.org>
@@ -28,78 +45,93 @@ Cc: Thomas Gleixner <tglx@linutronix.de>
 Cc: Peter Zijlstra <peterz@infradead.org>
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- arch/x86/include/asm/efi.h  | 2 ++
- arch/x86/platform/efi/efi.c | 2 ++
- include/linux/efi.h         | 3 ---
- init/main.c                 | 4 ----
- 4 files changed, 4 insertions(+), 7 deletions(-)
+ arch/x86/include/asm/pgtable_types.h |  8 ++++++--
+ arch/x86/mm/pageattr.c               | 40 ++++++++++++++++++++++++++++++++++--
+ 2 files changed, 44 insertions(+), 4 deletions(-)
 
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index eea40d52ca78..d1e64ac80b9c 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -141,6 +141,8 @@ extern int __init efi_reuse_config(u64 tables, int nr_tables);
- extern void efi_delete_dummy_variable(void);
- extern void efi_switch_mm(struct mm_struct *mm);
- extern void efi_recover_from_page_fault(unsigned long phys_addr);
-+extern void efi_free_boot_services(void);
-+extern void efi_reserve_boot_services(void);
+diff --git a/arch/x86/include/asm/pgtable_types.h b/arch/x86/include/asm/pgtable_types.h
+index b64acb08a62b..79aa79bb2cfa 100644
+--- a/arch/x86/include/asm/pgtable_types.h
++++ b/arch/x86/include/asm/pgtable_types.h
+@@ -564,8 +564,12 @@ extern pte_t *lookup_address_in_pgd(pgd_t *pgd, unsigned long address,
+ 				    unsigned int *level);
+ extern pmd_t *lookup_pmd_address(unsigned long address);
+ extern phys_addr_t slow_virt_to_phys(void *__address);
+-extern int kernel_map_pages_in_pgd(pgd_t *pgd, u64 pfn, unsigned long address,
+-				   unsigned numpages, unsigned long page_flags);
++extern int __init kernel_map_pages_in_pgd(pgd_t *pgd, u64 pfn,
++					  unsigned long address,
++					  unsigned numpages,
++					  unsigned long page_flags);
++extern int __init kernel_unmap_pages_in_pgd(pgd_t *pgd, unsigned long address,
++					    unsigned long numpages);
+ #endif	/* !__ASSEMBLY__ */
  
- struct efi_setup_data {
- 	u64 fw_vendor;
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 9061babfbc83..93924a353e3b 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -994,6 +994,8 @@ static void __init __efi_enter_virtual_mode(void)
- 		panic("EFI call to SetVirtualAddressMap() failed!");
- 	}
+ #endif /* _ASM_X86_PGTABLE_DEFS_H */
+diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
+index 51a5a69ecac9..1b1d5a68c4b2 100644
+--- a/arch/x86/mm/pageattr.c
++++ b/arch/x86/mm/pageattr.c
+@@ -2111,8 +2111,8 @@ bool kernel_page_present(struct page *page)
  
-+	efi_free_boot_services();
+ #endif /* CONFIG_DEBUG_PAGEALLOC */
+ 
+-int kernel_map_pages_in_pgd(pgd_t *pgd, u64 pfn, unsigned long address,
+-			    unsigned numpages, unsigned long page_flags)
++int __init kernel_map_pages_in_pgd(pgd_t *pgd, u64 pfn, unsigned long address,
++				   unsigned numpages, unsigned long page_flags)
+ {
+ 	int retval = -EINVAL;
+ 
+@@ -2126,6 +2126,8 @@ int kernel_map_pages_in_pgd(pgd_t *pgd, u64 pfn, unsigned long address,
+ 		.flags = 0,
+ 	};
+ 
++	WARN_ONCE(num_online_cpus() > 1, "Don't call after initializing SMP");
 +
- 	/*
- 	 * Now that EFI is in virtual mode, update the function
- 	 * pointers in the runtime service table to the new virtual addresses.
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 845174e113ce..ed2058073385 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1000,13 +1000,11 @@ extern void efi_memmap_walk (efi_freemem_callback_t callback, void *arg);
- extern void efi_gettimeofday (struct timespec64 *ts);
- extern void efi_enter_virtual_mode (void);	/* switch EFI to virtual mode, if possible */
- #ifdef CONFIG_X86
--extern void efi_free_boot_services(void);
- extern efi_status_t efi_query_variable_store(u32 attributes,
- 					     unsigned long size,
- 					     bool nonblocking);
- extern void efi_find_mirror(void);
- #else
--static inline void efi_free_boot_services(void) {}
+ 	if (!(__supported_pte_mask & _PAGE_NX))
+ 		goto out;
  
- static inline efi_status_t efi_query_variable_store(u32 attributes,
- 						    unsigned long size,
-@@ -1046,7 +1044,6 @@ extern void efi_mem_reserve(phys_addr_t addr, u64 size);
- extern int efi_mem_reserve_persistent(phys_addr_t addr, u64 size);
- extern void efi_initialize_iomem_resources(struct resource *code_resource,
- 		struct resource *data_resource, struct resource *bss_resource);
--extern void efi_reserve_boot_services(void);
- extern int efi_get_fdt_params(struct efi_fdt_params *params);
- extern struct kobject *efi_kobj;
- 
-diff --git a/init/main.c b/init/main.c
-index 18f8f0140fa0..174fb14196cc 100644
---- a/init/main.c
-+++ b/init/main.c
-@@ -731,10 +731,6 @@ asmlinkage __visible void __init start_kernel(void)
- 	arch_post_acpi_subsys_init();
- 	sfi_init_late();
- 
--	if (efi_enabled(EFI_RUNTIME_SERVICES)) {
--		efi_free_boot_services();
--	}
--
- 	/* Do the rest non-__init'ed, we're now alive */
- 	rest_init();
+@@ -2148,6 +2150,40 @@ int kernel_map_pages_in_pgd(pgd_t *pgd, u64 pfn, unsigned long address,
  }
+ 
+ /*
++ * __flush_tlb_all() flushes mappings only on current CPU and hence this
++ * function shouldn't be used in an SMP environment. Presently, it's used only
++ * during boot (way before smp_init()) by EFI subsystem and hence is ok.
++ */
++int __init kernel_unmap_pages_in_pgd(pgd_t *pgd, unsigned long address,
++				     unsigned long numpages)
++{
++	int retval;
++
++	/*
++	 * The typical sequence for unmapping is to find a pte through
++	 * lookup_address_in_pgd() (ideally, it should never return NULL because
++	 * the address is already mapped) and change it's protections. As pfn is
++	 * the *target* of a mapping, it's not useful while unmapping.
++	 */
++	struct cpa_data cpa = {
++		.vaddr		= &address,
++		.pfn		= 0,
++		.pgd		= pgd,
++		.numpages	= numpages,
++		.mask_set	= __pgprot(0),
++		.mask_clr	= __pgprot(_PAGE_PRESENT | _PAGE_RW),
++		.flags		= 0,
++	};
++
++	WARN_ONCE(num_online_cpus() > 1, "Don't call after initializing SMP");
++
++	retval = __change_page_attr_set_clr(&cpa, 0);
++	__flush_tlb_all();
++
++	return retval;
++}
++
++/*
+  * The testcases use internal knowledge of the implementation that shouldn't
+  * be exposed to the rest of the kernel. Include these directly here.
+  */
 -- 
 2.7.4
