@@ -1,108 +1,99 @@
-From: Eugene Korenevsky <ekorenevsky@gmail.com>
-Subject: [PATCH v5 2/2] efi: take size of partition entry from GPT header
-Date: Sun, 4 Nov 2018 22:51:10 +0300
-Message-ID: <20181104195110.GA15437@dnote>
+From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Subject: [PATCH V3 0/3] Unmap EFI boot services code/data regions after boot.
+Date: Sun,  4 Nov 2018 12:10:16 -0800
+Message-ID: <20181104201019.26142-1-sai.praneeth.prakhya@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
 Sender: linux-kernel-owner@vger.kernel.org
-To: Davidlohr Bueso <dave@stgolabs.net>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org
+Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Dave Hansen <dave.hansen@intel.com>, Bhupesh Sharma <bhsharma@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Peter Zijlstra <peterz@infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-Use gpt_header.sizeof_partition_entry instead of sizeof(gpt_entry)
-for GPT entry size.
-According to UEFI 2.7 spec 5.3.1 "GPT overview":, the size of a GUID Partition
-Entry element is defined in the Size Of Partition Entry field of GPT header.
-The GPT with entries sized more than sizeof(gpt_entry) is not illegal.
-OVMF firmware from EDK2 perfectly works with it, see edk2-tianocore source
-code.
+CC'ing x86 folks because this patch set touches x86/mm which I am no expert of.
 
-Changes since v1: refactoring (extract get_gpt_entry function),
-                  fix (&ptes[i] -> pte)
-Changes since v2: use le32_to_cpu, fix typo, sanity check for
-                  sizeof_partition_entry
-Changes since v3: style fixes
-Changes since v4: sanity checks for GPT entries; split into
-patchset
+Ideally, after kernel assumes control of the platform, firmware shouldn't access
+EFI boot services code/data regions. But, it's noticed that this is not so true
+in many x86 platforms. Hence, during boot, kernel reserves EFI boot services
+code/data regions [1] and maps [2] them to efi_pgd so that call to
+set_virtual_address_map() doesn't fail. After returning from
+set_virtual_address_map(), kernel frees the reserved regions [3] but they still
+remain mapped.
 
-Signed-off-by: Eugene Korenevsky <ekorenevsky@gmail.com>
----
- block/partitions/efi.c | 31 ++++++++++++++++++++-----------
- 1 file changed, 20 insertions(+), 11 deletions(-)
+This means that any code that's running in efi_pgd address space (e.g: any EFI
+runtime service) would still be able to access EFI boot services code/data
+regions but the contents of these regions would have long been over written by
+someone else as they are freed by efi_free_boot_services(). So, it's important
+to unmap these regions. After unmapping EFI boot services code/data regions, any
+illegal access by buggy firmware to these regions would result in page fault
+which will be handled by efi specific fault handler.
 
-diff --git a/block/partitions/efi.c b/block/partitions/efi.c
-index 722117b32585..3858c042d3ac 100644
---- a/block/partitions/efi.c
-+++ b/block/partitions/efi.c
-@@ -447,8 +447,8 @@ static int is_gpt_valid(struct parsed_partitions *state, u64 lba,
- 		goto fail;
- 	}
- 	/* Check that sizeof_partition_entry has the correct value */
--	if (le32_to_cpu((*gpt)->sizeof_partition_entry) != sizeof(gpt_entry)) {
--		pr_debug("GUID Partition Entry Size check failed.\n");
-+	if (le32_to_cpu((*gpt)->sizeof_partition_entry) < sizeof(gpt_entry)) {
-+		pr_debug("GUID Partition Entry Size is too small.\n");
- 		goto fail;
- 	}
- 
-@@ -711,6 +711,12 @@ static int find_valid_gpt(struct parsed_partitions *state, gpt_header **gpt,
-         return 0;
- }
- 
-+static gpt_entry *get_gpt_entry(gpt_header *gpt, gpt_entry *ptes, u32 index)
-+{
-+	return (gpt_entry *)((u8 *)ptes +
-+	       le32_to_cpu(gpt->sizeof_partition_entry) * index);
-+}
-+
- /**
-  * efi_partition(struct parsed_partitions *state)
-  * @state: disk parsed partitions
-@@ -745,32 +751,35 @@ int efi_partition(struct parsed_partitions *state)
- 
- 	pr_debug("GUID Partition Table is valid!  Yea!\n");
- 
--	for (i = 0; i < le32_to_cpu(gpt->num_partition_entries) && i < state->limit-1; i++) {
-+	for (i = 0; i < le32_to_cpu(gpt->num_partition_entries) &&
-+		    i < state->limit-1; i++) {
-+		gpt_entry *pte = get_gpt_entry(gpt, ptes, i);
- 		struct partition_meta_info *info;
- 		unsigned label_count = 0;
- 		unsigned label_max;
--		u64 start = le64_to_cpu(ptes[i].starting_lba);
--		u64 size = le64_to_cpu(ptes[i].ending_lba) -
--			   le64_to_cpu(ptes[i].starting_lba) + 1ULL;
-+		u64 start = le64_to_cpu(pte->starting_lba);
-+		u64 size = le64_to_cpu(pte->ending_lba) -
-+			   le64_to_cpu(pte->starting_lba) + 1ULL;
- 
--		if (!is_pte_valid(&ptes[i], last_lba(state->bdev)))
-+		if (!is_pte_valid(pte, last_lba(state->bdev)))
- 			continue;
- 
- 		put_partition(state, i+1, start * ssz, size * ssz);
- 
- 		/* If this is a RAID volume, tell md */
--		if (!efi_guidcmp(ptes[i].partition_type_guid, PARTITION_LINUX_RAID_GUID))
-+		if (!efi_guidcmp(pte->partition_type_guid,
-+				 PARTITION_LINUX_RAID_GUID))
- 			state->parts[i + 1].flags = ADDPART_FLAG_RAID;
- 
- 		info = &state->parts[i + 1].info;
--		efi_guid_to_str(&ptes[i].unique_partition_guid, info->uuid);
-+		efi_guid_to_str(&pte->unique_partition_guid, info->uuid);
- 
- 		/* Naively convert UTF16-LE to 7 bits. */
- 		label_max = min(ARRAY_SIZE(info->volname) - 1,
--				ARRAY_SIZE(ptes[i].partition_name));
-+				ARRAY_SIZE(pte->partition_name));
- 		info->volname[label_max] = 0;
- 		while (label_count < label_max) {
--			u8 c = ptes[i].partition_name[label_count] & 0xff;
-+			u8 c = pte->partition_name[label_count] & 0xff;
- 			if (c && !isprint(c))
- 				c = '!';
- 			info->volname[label_count] = c;
+Unmapping EFI boot services code/data regions will result in clearing
+PAGE_PRESENT bit and it shouldn't bother L1TF cases because it's already handled
+by protnone_mask() at arch/x86/include/asm/pgtable-invert.h.
+
+[1] Please see efi_reserve_boot_services()
+[2] Please see efi_map_region() -> __map_region() -> kernel_map_pages_in_pgd()
+[3] Please see efi_free_boot_services()
+
+Testing the patch set:
+----------------------
+1. Download buggy firmware (which accesses boot regions even after kernel has
+booted) from here [1].
+2. Without the patch set, you shouldn't see any kernel warning/error messages
+(i.e. kernel allows accesses to EFI boot services code/data regions even after
+call to set_virtual_address_map()).
+3. With the patch set, you should see a kernel warning about buggy firmware,
+efi_rts_wq beeing freezed and disabling runtime services forever.
+
+Please note that this patch will change kernel's existing behavior for some EFI
+runtime services but I think it's OK because kernel should have never allowed
+those accesses in the first place.
+
+Also please note that this patch set needs lot of real time trashing as I just
+tested it out with OVMF.
+
+Note:
+-----
+Patch set based on "next" branch in efi tree.
+
+Changes from V2 -> V3:
+----------------------
+1. Expliclty set pfn to 0 in kernel_unmap_pages_in_pgd().
+2. Add __init modifier to kernel_<map/unmap>_pages_in_pgd().
+3. Warn if kernel_<map/unmap>_pages_in_pgd() are called after smp_init().
+4. Split efi_unmap_pages() into a separate patch.
+
+Changes from V1 -> V2:
+----------------------
+1. Rewrite the cpa initializer in a more readable fashion.
+2. Don't use cpa->pfn while unmapping, as it's not useful.
+3. Unmap regions before freeing them up.
+4. Fix spelling nits.
+
+Sai Praneeth (3):
+  x86/mm/pageattr: Introduce helper function to unmap EFI boot services
+  x86/efi: Unmap EFI boot services code/data regions from efi_pgd
+  x86/efi: Move efi_<reserve/free>_boot_services() to arch/x86
+
+ arch/x86/include/asm/efi.h           |  2 ++
+ arch/x86/include/asm/pgtable_types.h |  8 ++++++--
+ arch/x86/mm/pageattr.c               | 40 ++++++++++++++++++++++++++++++++++--
+ arch/x86/platform/efi/efi.c          |  2 ++
+ arch/x86/platform/efi/quirks.c       | 25 ++++++++++++++++++++++
+ include/linux/efi.h                  |  3 ---
+ init/main.c                          |  4 ----
+ 7 files changed, 73 insertions(+), 11 deletions(-)
+
+Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Ingo Molnar <mingo@kernel.org>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Dave Hansen <dave.hansen@intel.com>
+Cc: Bhupesh Sharma <bhsharma@redhat.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+
 -- 
-2.19.1
+2.7.4
