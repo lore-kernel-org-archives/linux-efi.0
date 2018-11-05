@@ -1,106 +1,86 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH V3 0/3] Unmap EFI boot services code/data regions after boot.
-Date: Mon, 5 Nov 2018 13:47:57 +0100
-Message-ID: <CAKv+Gu_2cPZ5HKo2oDeYsLGAXgnENzWskZOcT_Z509Shbct+2Q@mail.gmail.com>
-References: <20181104201019.26142-1-sai.praneeth.prakhya@intel.com>
+Subject: Re: [PATCH] efi/libstub: Disable some warnings for x86{,_64}
+Date: Mon, 5 Nov 2018 13:52:35 +0100
+Message-ID: <CAKv+Gu8eJxLcNkvSzzKf0P+gjhtGRdLQW9J+gcDRhhGCi-pHJg@mail.gmail.com>
+References: <20181013010348.6740-1-natechancellor@gmail.com>
+ <20181023175309.GA3384@flashbox> <CA+icZUXsS53RANWBNWw7_HcRRGyzVW1EepBU-K1pumrue6bYtg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181104201019.26142-1-sai.praneeth.prakhya@intel.com>
+In-Reply-To: <CA+icZUXsS53RANWBNWw7_HcRRGyzVW1EepBU-K1pumrue6bYtg@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, the arch/x86 maintainers <x86@kernel.org>, Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Dave Hansen <dave.hansen@intel.com>, Bhupesh Sharma <bhsharma@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Peter Zijlstra <peterz@infradead.org>
+To: sedat.dilek@gmail.com
+Cc: natechancellor@gmail.com, linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Nick Desaulniers <ndesaulniers@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 4 November 2018 at 21:10, Sai Praneeth Prakhya
-<sai.praneeth.prakhya@intel.com> wrote:
-> CC'ing x86 folks because this patch set touches x86/mm which I am no expert of.
+On 24 October 2018 at 09:22, Sedat Dilek <sedat.dilek@gmail.com> wrote:
+> On Tue, Oct 23, 2018 at 7:53 PM Nathan Chancellor
+> <natechancellor@gmail.com> wrote:
+>>
+>> On Fri, Oct 12, 2018 at 06:03:49PM -0700, Nathan Chancellor wrote:
+>> > When building the kernel with Clang, some disabled warnings appear
+>> > because this Makefile overrides KBUILD_CFLAGS for x86{,_64}. Add them to
+>> > this list so that the build is clean again.
+>> >
+>> > -Wpointer-sign was disabled for the whole kernel before the beginning
+>> > of git history.
+>> >
+>> > -Waddress-of-packed-member was disabled for the whole kernel in
+>> > commit bfb38988c51e ("kbuild: clang: Disable 'address-of-packed-member'
+>> > warning") and for x86/boot/compressed in commit 20c6c1890455 ("x86/boot:
+>> > Disable the address-of-packed-member compiler warning").
+>> >
+>> > -Wgnu was disabled for the whole kernel in commit 61163efae020 ("kbuild:
+>> > LLVMLinux: Add Kbuild support for building kernel with Clang") and for
+>> > x86/boot/compressed in commit 6c3b56b19730 ("x86/boot: Disable Clang
+>> > warnings about GNU extensions").
+>> >
+>> > Link: https://github.com/ClangBuiltLinux/linux/issues/112
+>> > Signed-off-by: Nathan Chancellor <natechancellor@gmail.com>
+>> > ---
+>> >
+>> > Nick expressed concern that this Makefile is overwriting KBUILD_CFLAGS
+>> > and suggested potentially rewriting the x86 portion of this Makefile to
+>> > behave like the arm/arm64 one where problematic flags are filtered out.
+>> > While that comes to fruition, it would be nice for this folder to behave
+>> > like the rest of the kernel when it comes to this warnings so that the
+>> > build is cleaner, thus this patch.
+>> >
+>> >  drivers/firmware/efi/libstub/Makefile | 5 ++++-
+>> >  1 file changed, 4 insertions(+), 1 deletion(-)
+>> >
+>> > diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+>> > index c51627660dbb..d9845099635e 100644
+>> > --- a/drivers/firmware/efi/libstub/Makefile
+>> > +++ b/drivers/firmware/efi/libstub/Makefile
+>> > @@ -9,7 +9,10 @@ cflags-$(CONFIG_X86_32)              := -march=i386
+>> >  cflags-$(CONFIG_X86_64)              := -mcmodel=small
+>> >  cflags-$(CONFIG_X86)         += -m$(BITS) -D__KERNEL__ -O2 \
+>> >                                  -fPIC -fno-strict-aliasing -mno-red-zone \
+>> > -                                -mno-mmx -mno-sse -fshort-wchar
+>> > +                                -mno-mmx -mno-sse -fshort-wchar \
+>> > +                                -Wno-pointer-sign \
+>> > +                                $(call cc-disable-warning, address-of-packed-member) \
+>> > +                                $(call cc-disable-warning, gnu)
+>> >
+>> >  # arm64 uses the full KBUILD_CFLAGS so it's necessary to explicitly
+>> >  # disable the stackleak plugin
+>> > --
+>> > 2.19.1
+>> >
+>>
+>> + Sedat for review/testing.
 >
-> Ideally, after kernel assumes control of the platform, firmware shouldn't access
-> EFI boot services code/data regions. But, it's noticed that this is not so true
-> in many x86 platforms. Hence, during boot, kernel reserves EFI boot services
-> code/data regions [1] and maps [2] them to efi_pgd so that call to
-> set_virtual_address_map() doesn't fail. After returning from
-> set_virtual_address_map(), kernel frees the reserved regions [3] but they still
-> remain mapped.
+> Thanks Nathan.
 >
-> This means that any code that's running in efi_pgd address space (e.g: any EFI
-> runtime service) would still be able to access EFI boot services code/data
-> regions but the contents of these regions would have long been over written by
-> someone else as they are freed by efi_free_boot_services(). So, it's important
-> to unmap these regions. After unmapping EFI boot services code/data regions, any
-> illegal access by buggy firmware to these regions would result in page fault
-> which will be handled by efi specific fault handler.
->
-> Unmapping EFI boot services code/data regions will result in clearing
-> PAGE_PRESENT bit and it shouldn't bother L1TF cases because it's already handled
-> by protnone_mask() at arch/x86/include/asm/pgtable-invert.h.
->
-> [1] Please see efi_reserve_boot_services()
-> [2] Please see efi_map_region() -> __map_region() -> kernel_map_pages_in_pgd()
-> [3] Please see efi_free_boot_services()
->
-> Testing the patch set:
-> ----------------------
-> 1. Download buggy firmware (which accesses boot regions even after kernel has
-> booted) from here [1].
-> 2. Without the patch set, you shouldn't see any kernel warning/error messages
-> (i.e. kernel allows accesses to EFI boot services code/data regions even after
-> call to set_virtual_address_map()).
-> 3. With the patch set, you should see a kernel warning about buggy firmware,
-> efi_rts_wq beeing freezed and disabling runtime services forever.
->
-> Please note that this patch will change kernel's existing behavior for some EFI
-> runtime services but I think it's OK because kernel should have never allowed
-> those accesses in the first place.
->
-> Also please note that this patch set needs lot of real time trashing as I just
-> tested it out with OVMF.
->
-> Note:
-> -----
-> Patch set based on "next" branch in efi tree.
->
-> Changes from V2 -> V3:
-> ----------------------
-> 1. Expliclty set pfn to 0 in kernel_unmap_pages_in_pgd().
-> 2. Add __init modifier to kernel_<map/unmap>_pages_in_pgd().
-> 3. Warn if kernel_<map/unmap>_pages_in_pgd() are called after smp_init().
-> 4. Split efi_unmap_pages() into a separate patch.
->
-> Changes from V1 -> V2:
-> ----------------------
-> 1. Rewrite the cpa initializer in a more readable fashion.
-> 2. Don't use cpa->pfn while unmapping, as it's not useful.
-> 3. Unmap regions before freeing them up.
-> 4. Fix spelling nits.
->
-> Sai Praneeth (3):
->   x86/mm/pageattr: Introduce helper function to unmap EFI boot services
->   x86/efi: Unmap EFI boot services code/data regions from efi_pgd
->   x86/efi: Move efi_<reserve/free>_boot_services() to arch/x86
->
->  arch/x86/include/asm/efi.h           |  2 ++
->  arch/x86/include/asm/pgtable_types.h |  8 ++++++--
->  arch/x86/mm/pageattr.c               | 40 ++++++++++++++++++++++++++++++++++--
->  arch/x86/platform/efi/efi.c          |  2 ++
->  arch/x86/platform/efi/quirks.c       | 25 ++++++++++++++++++++++
->  include/linux/efi.h                  |  3 ---
->  init/main.c                          |  4 ----
->  7 files changed, 73 insertions(+), 11 deletions(-)
->
-> Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-> Cc: Borislav Petkov <bp@alien8.de>
-> Cc: Ingo Molnar <mingo@kernel.org>
-> Cc: Andy Lutomirski <luto@kernel.org>
-> Cc: Dave Hansen <dave.hansen@intel.com>
-> Cc: Bhupesh Sharma <bhsharma@redhat.com>
-> Cc: Thomas Gleixner <tglx@linutronix.de>
-> Cc: Peter Zijlstra <peterz@infradead.org>
-> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> Reviewed-by: Sedat Dilek <sedat.dilek@gmail.com>
+> Tested-by: Sedat Dilek <sedat.dilek@gmail.com>
+> [ Reported-by: Sedat Dilek <sedat.dilek@gmail.com> ]
+> [ See duplicate "arch/x86/include/asm/processor.h: Warning
+> -Waddress-of-packed-member "
+> <https://github.com/ClangBuiltLinux/linux/issues/234> ]
 >
 
-Thanks Sai.
+Queued in efi/next
 
-I have queued these up in efi/next for now, but I'd still like a fresh
-ack from the x86 maintainers.
+Thanks
