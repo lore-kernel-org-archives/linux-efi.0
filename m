@@ -1,49 +1,51 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH] efi: Fix debugobjects warning on efi_rts_work
-Date: Mon, 5 Nov 2018 14:01:50 +0100
-Message-ID: <CAKv+Gu-JrZ+7VMbFt0u5_QWGJPJ=Dm+9FjbsKFEeHwfAwj_2wQ@mail.gmail.com>
-References: <1540304307-2806-1-git-send-email-longman@redhat.com> <FFF73D592F13FD46B8700F0A279B802F485D622C@ORSMSX114.amr.corp.intel.com>
+From: Thomas Gleixner <tglx@linutronix.de>
+Subject: Re: [PATCH V3 1/3] x86/mm/pageattr: Introduce helper function to
+ unmap EFI boot services
+Date: Mon, 5 Nov 2018 14:18:53 +0100 (CET)
+Message-ID: <alpine.DEB.2.21.1811051418340.1566@nanos.tec.linutronix.de>
+References: <20181104201019.26142-1-sai.praneeth.prakhya@intel.com> <20181104201019.26142-2-sai.praneeth.prakhya@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=US-ASCII
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <FFF73D592F13FD46B8700F0A279B802F485D622C@ORSMSX114.amr.corp.intel.com>
+In-Reply-To: <20181104201019.26142-2-sai.praneeth.prakhya@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
-Cc: Waiman Long <longman@redhat.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@kernel.org>, Andy Lutomirski <luto@kernel.org>, Dave Hansen <dave.hansen@intel.com>, Bhupesh Sharma <bhsharma@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 23 October 2018 at 18:43, Prakhya, Sai Praneeth
-<sai.praneeth.prakhya@intel.com> wrote:
->
->
->> -----Original Message-----
->> From: Waiman Long [mailto:longman@redhat.com]
->> Sent: Tuesday, October 23, 2018 7:18 AM
->> To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
->> Cc: linux-efi@vger.kernel.org; linux-kernel@vger.kernel.org; Prakhya, Sai
->> Praneeth <sai.praneeth.prakhya@intel.com>; Waiman Long
->> <longman@redhat.com>
->> Subject: [PATCH] efi: Fix debugobjects warning on efi_rts_work
->>
->> The commit 9dbbedaa6171 ("efi: Make efi_rts_work accessible to efi page fault
->> handler") converted efi_rts_work from an auto variable to a global variable.
->> However, when submitting the work, INIT_WORK_ONSTACK() was still used
->> causing the following complaint from debugobjects:
->>
->> ODEBUG: object 00000000ed27b500 is NOT on stack 00000000c7d38760, but
->> annotated.
->>
->> Change the macro to just INIT_WORK() to eliminate the warning.
->>
->> Fixes: 9dbbedaa6171 ("efi: Make efi_rts_work accessible to efi page fault
->> handler")
->
-> Thanks for fixing this :)
-> Looks good to me.
->
-> Regards,
-> Sai
+On Sun, 4 Nov 2018, Sai Praneeth Prakhya wrote:
 
-Thanks
+> Ideally, after kernel assumes control of the platform, firmware
+> shouldn't access EFI boot services code/data regions. But, it's noticed
+> that this is not so true in many x86 platforms. Hence, during boot,
+> kernel reserves EFI boot services code/data regions [1] and maps [2]
+> them to efi_pgd so that call to set_virtual_address_map() doesn't fail.
+> After returning from set_virtual_address_map(), kernel frees the
+> reserved regions [3] but they still remain mapped. Hence, introduce
+> kernel_unmap_pages_in_pgd() which will later be used to unmap EFI boot
+> services code/data regions.
+> 
+> While at it modify kernel_map_pages_in_pgd() by
+> 1. Adding __init modifier because it's always used *only* during boot.
+> 2. Add a warning if it's used after SMP is initialized because it uses
+>    __flush_tlb_all() which flushes mappings only on current CPU.
+> 
+> Unmapping EFI boot services code/data regions will result in clearing
+> PAGE_PRESENT bit and it shouldn't bother L1TF cases because it's already
+> handled by protnone_mask() at arch/x86/include/asm/pgtable-invert.h.
+> 
+> [1] efi_reserve_boot_services()
+> [2] efi_map_region() -> __map_region() -> kernel_map_pages_in_pgd()
+> [3] efi_free_boot_services()
+> 
+> Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+> Cc: Borislav Petkov <bp@alien8.de>
+> Cc: Ingo Molnar <mingo@kernel.org>
+> Cc: Andy Lutomirski <luto@kernel.org>
+> Cc: Dave Hansen <dave.hansen@intel.com>
+> Cc: Bhupesh Sharma <bhsharma@redhat.com>
+> Cc: Thomas Gleixner <tglx@linutronix.de>
+> Cc: Peter Zijlstra <peterz@infradead.org>
+> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-Queued in efi/urgent (with Sai's ack)
+Reviewed-by: Thomas Gleixner <tglx@linutronix.de>
