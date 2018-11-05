@@ -1,86 +1,49 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH] efi/libstub: Disable some warnings for x86{,_64}
-Date: Mon, 5 Nov 2018 13:52:35 +0100
-Message-ID: <CAKv+Gu8eJxLcNkvSzzKf0P+gjhtGRdLQW9J+gcDRhhGCi-pHJg@mail.gmail.com>
-References: <20181013010348.6740-1-natechancellor@gmail.com>
- <20181023175309.GA3384@flashbox> <CA+icZUXsS53RANWBNWw7_HcRRGyzVW1EepBU-K1pumrue6bYtg@mail.gmail.com>
+Subject: Re: [PATCH] efi: Fix debugobjects warning on efi_rts_work
+Date: Mon, 5 Nov 2018 14:01:50 +0100
+Message-ID: <CAKv+Gu-JrZ+7VMbFt0u5_QWGJPJ=Dm+9FjbsKFEeHwfAwj_2wQ@mail.gmail.com>
+References: <1540304307-2806-1-git-send-email-longman@redhat.com> <FFF73D592F13FD46B8700F0A279B802F485D622C@ORSMSX114.amr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CA+icZUXsS53RANWBNWw7_HcRRGyzVW1EepBU-K1pumrue6bYtg@mail.gmail.com>
+In-Reply-To: <FFF73D592F13FD46B8700F0A279B802F485D622C@ORSMSX114.amr.corp.intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: sedat.dilek@gmail.com
-Cc: natechancellor@gmail.com, linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Nick Desaulniers <ndesaulniers@google.com>
+To: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+Cc: Waiman Long <longman@redhat.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 24 October 2018 at 09:22, Sedat Dilek <sedat.dilek@gmail.com> wrote:
-> On Tue, Oct 23, 2018 at 7:53 PM Nathan Chancellor
-> <natechancellor@gmail.com> wrote:
+On 23 October 2018 at 18:43, Prakhya, Sai Praneeth
+<sai.praneeth.prakhya@intel.com> wrote:
+>
+>
+>> -----Original Message-----
+>> From: Waiman Long [mailto:longman@redhat.com]
+>> Sent: Tuesday, October 23, 2018 7:18 AM
+>> To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+>> Cc: linux-efi@vger.kernel.org; linux-kernel@vger.kernel.org; Prakhya, Sai
+>> Praneeth <sai.praneeth.prakhya@intel.com>; Waiman Long
+>> <longman@redhat.com>
+>> Subject: [PATCH] efi: Fix debugobjects warning on efi_rts_work
 >>
->> On Fri, Oct 12, 2018 at 06:03:49PM -0700, Nathan Chancellor wrote:
->> > When building the kernel with Clang, some disabled warnings appear
->> > because this Makefile overrides KBUILD_CFLAGS for x86{,_64}. Add them to
->> > this list so that the build is clean again.
->> >
->> > -Wpointer-sign was disabled for the whole kernel before the beginning
->> > of git history.
->> >
->> > -Waddress-of-packed-member was disabled for the whole kernel in
->> > commit bfb38988c51e ("kbuild: clang: Disable 'address-of-packed-member'
->> > warning") and for x86/boot/compressed in commit 20c6c1890455 ("x86/boot:
->> > Disable the address-of-packed-member compiler warning").
->> >
->> > -Wgnu was disabled for the whole kernel in commit 61163efae020 ("kbuild:
->> > LLVMLinux: Add Kbuild support for building kernel with Clang") and for
->> > x86/boot/compressed in commit 6c3b56b19730 ("x86/boot: Disable Clang
->> > warnings about GNU extensions").
->> >
->> > Link: https://github.com/ClangBuiltLinux/linux/issues/112
->> > Signed-off-by: Nathan Chancellor <natechancellor@gmail.com>
->> > ---
->> >
->> > Nick expressed concern that this Makefile is overwriting KBUILD_CFLAGS
->> > and suggested potentially rewriting the x86 portion of this Makefile to
->> > behave like the arm/arm64 one where problematic flags are filtered out.
->> > While that comes to fruition, it would be nice for this folder to behave
->> > like the rest of the kernel when it comes to this warnings so that the
->> > build is cleaner, thus this patch.
->> >
->> >  drivers/firmware/efi/libstub/Makefile | 5 ++++-
->> >  1 file changed, 4 insertions(+), 1 deletion(-)
->> >
->> > diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
->> > index c51627660dbb..d9845099635e 100644
->> > --- a/drivers/firmware/efi/libstub/Makefile
->> > +++ b/drivers/firmware/efi/libstub/Makefile
->> > @@ -9,7 +9,10 @@ cflags-$(CONFIG_X86_32)              := -march=i386
->> >  cflags-$(CONFIG_X86_64)              := -mcmodel=small
->> >  cflags-$(CONFIG_X86)         += -m$(BITS) -D__KERNEL__ -O2 \
->> >                                  -fPIC -fno-strict-aliasing -mno-red-zone \
->> > -                                -mno-mmx -mno-sse -fshort-wchar
->> > +                                -mno-mmx -mno-sse -fshort-wchar \
->> > +                                -Wno-pointer-sign \
->> > +                                $(call cc-disable-warning, address-of-packed-member) \
->> > +                                $(call cc-disable-warning, gnu)
->> >
->> >  # arm64 uses the full KBUILD_CFLAGS so it's necessary to explicitly
->> >  # disable the stackleak plugin
->> > --
->> > 2.19.1
->> >
+>> The commit 9dbbedaa6171 ("efi: Make efi_rts_work accessible to efi page fault
+>> handler") converted efi_rts_work from an auto variable to a global variable.
+>> However, when submitting the work, INIT_WORK_ONSTACK() was still used
+>> causing the following complaint from debugobjects:
 >>
->> + Sedat for review/testing.
+>> ODEBUG: object 00000000ed27b500 is NOT on stack 00000000c7d38760, but
+>> annotated.
+>>
+>> Change the macro to just INIT_WORK() to eliminate the warning.
+>>
+>> Fixes: 9dbbedaa6171 ("efi: Make efi_rts_work accessible to efi page fault
+>> handler")
 >
-> Thanks Nathan.
+> Thanks for fixing this :)
+> Looks good to me.
 >
-> Reviewed-by: Sedat Dilek <sedat.dilek@gmail.com>
-> Tested-by: Sedat Dilek <sedat.dilek@gmail.com>
-> [ Reported-by: Sedat Dilek <sedat.dilek@gmail.com> ]
-> [ See duplicate "arch/x86/include/asm/processor.h: Warning
-> -Waddress-of-packed-member "
-> <https://github.com/ClangBuiltLinux/linux/issues/234> ]
->
-
-Queued in efi/next
+> Regards,
+> Sai
 
 Thanks
+
+Queued in efi/urgent (with Sai's ack)
