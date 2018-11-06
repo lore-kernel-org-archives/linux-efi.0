@@ -1,56 +1,88 @@
-From: Masayoshi Mizuma <msys.mizuma@gmail.com>
-Subject: Re: [PATCH v8 0/3] x86/boot/KASLR: Parse ACPI table and limit kaslr
- in immovable memory
-Date: Tue, 6 Nov 2018 17:21:34 -0500
-Message-ID: <20181106222133.lb7674yzszivzihd@gabell>
-References: <20181016151353.punyk7exekut2543@gabell>
- <20181016191113.GI5212@zn.tnic>
- <20181016195429.tovdgqq77gz3eek2@gabell>
- <20181016195902.GK5212@zn.tnic>
- <20181022154204.kagmdb55jtoez4ca@gabell>
- <20181025103345.GF14020@nazgul.tnic>
- <20181025134050.ggiir77ehntikbwg@gabell>
- <20181106184519.GA16391@zn.tnic>
- <20181106193636.svyjwuwrlgnpuyyf@gabell>
- <20181106204511.GO13712@zn.tnic>
+From: Russell King - ARM Linux <linux@armlinux.org.uk>
+Subject: Re: [PATCH 2/4] efi/arm: defer persistent reservations until after
+ paging_init()
+Date: Tue, 6 Nov 2018 23:49:33 +0000
+Message-ID: <20181106234933.GO30658@n2100.armlinux.org.uk>
+References: <20181106113732.16351-1-ard.biesheuvel@linaro.org>
+ <20181106113732.16351-3-ard.biesheuvel@linaro.org>
+ <CAKv+Gu8OsFb7a5UTovN1yBXtSSY=ZtUBYUvNa_bPmcZGknNYQA@mail.gmail.com>
+ <20181106190817.GN30658@n2100.armlinux.org.uk>
+ <CAKv+Gu_r38Bk_SZW-5qvtM7cmQ4-09dcFwNz29AyMceucdhadQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 Content-Disposition: inline
-In-Reply-To: <20181106204511.GO13712@zn.tnic>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: Baoquan He <bhe@redhat.com>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Chao Fan <fanc.fnst@cn.fujitsu.com>, linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, mingo@redhat.com, hpa@zytor.com, keescook@chromium.org, rjw@rjwysocki.net, lenb@kernel.org, ard.biesheuvel@linaro.org, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com
+In-Reply-To: <CAKv+Gu_r38Bk_SZW-5qvtM7cmQ4-09dcFwNz29AyMceucdhadQ@mail.gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Mark Rutland <mark.rutland@arm.com>, linux-efi <linux-efi@vger.kernel.org>, Marc Zyngier <marc.zyngier@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, Will Deacon <will.deacon@arm.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Nov 06, 2018 at 09:45:11PM +0100, Borislav Petkov wrote:
-> On Tue, Nov 06, 2018 at 02:36:38PM -0500, Masayoshi Mizuma wrote:
-> > Yes, I think I can see what you are saying. However, I'm not sure how
-> > I use the setup_data in legacy BIOS environment.
+On Tue, Nov 06, 2018 at 09:06:56PM +0100, Ard Biesheuvel wrote:
+> On 6 November 2018 at 20:08, Russell King - ARM Linux
+> <linux@armlinux.org.uk> wrote:
+> > On Tue, Nov 06, 2018 at 08:02:58PM +0100, Ard Biesheuvel wrote:
+> >> On 6 November 2018 at 12:37, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
+> >> > The new memory EFI reservation feature we introduced to allow memory
+> >> > reservations to persist across kexec may trigger an unbounded number
+> >> > of calls to memblock_reserve(). The memblock subsystem can deal with
+> >> > this fine, but not before memblock resizing is enabled, which we can
+> >> > only do after paging_init(), when the memory we reallocate the array
+> >> > into is actually mapped.
+> >> >
+> >> > So break out the memreserve table processing into a separate function
+> >> > and call if after paging_init() on both arm64 and ARM.
+> >> >
+> >> > Cc: Russell King <linux@armlinux.org.uk>
+> >> > Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> >>
+> >> Russell,
+> >>
+> >> If you are ok with this patch, may I have your ack please? I would
+> >> like to send it out before the end of the week.
+> >
+> > You're not going to get a quick answer to this, because it needs me to
+> > investigate what the effect of this change actually is by code review.
+> > I can't guarantee when I'll get around to that.
+> >
 > 
-> What is "legacy BIOS environment" and what does that have to do with
-> setup_data?
+> Fair enough.
+> 
+> I will drop the ARM hunk for now then, and we'll fix ARM when you have
+> more time.
 
-My proposed patch [1] is useful only for EFI environment. The patch
-allocates a setup_date structure by efi_call_early() and store the
-KASLR data into the memory area.
+I don't see how you can do that - you're dropping the processing of
+reserved areas out of the efi_config_parse_tables() path, so that
+won't happen any more on ARM if you don't apply the ARM hunk.
 
-+static void setup_kaslr(struct boot_params *params)
-+{
-+	struct setup_data *kaslr_data = NULL;
-+	struct setup_data *data;
-+	unsigned long size;
-+	efi_status_t status;
-+
-+	size = sizeof(struct setup_data) + sizeof(unsigned long long);
-+
-+	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
-+			size, (void **)&kaslr_data);
+So what I see at the moment is that efi_config_parse_tables() is
+called prior to paging_init() - and prior to our memblock
+initialisation, and you're proposing to move the processing that
+marks blocks as reserved immediately after paging_init(), and
+to use the normal memremap() interface to map stuff.
 
-I'm not sure how I allocate such memory on no EFI environment.
-Am I missing something...?
+I'm not convinced this will work - the memory allocators have not
+been setup at this point, so using memremap() will try to allocate
+page tables and potentially fail.  If the normal allocators are
+setup, it's way too late to be calling memblock_reserve() - the
+memory will have been passed over to the page allocator according
+to which memblocks are available but not reserved.
 
-[1] https://lkml.kernel.org/r/20181022154204.kagmdb55jtoez4ca@gabell
+The normal page allocator is setup by mem_init(), which happens
+way after setup_arch() has returned.
 
-Thanks,
-Masa
+So, I don't see how your patch can be correct at the moment.
+
+-- 
+RMK's Patch system: http://www.armlinux.org.uk/developer/patches/
+FTTC broadband for 0.8mile line in suburbia: sync at 12.1Mbps down 622kbps up
+According to speedtest.net: 11.9Mbps down 500kbps up
