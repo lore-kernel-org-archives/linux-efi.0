@@ -1,55 +1,58 @@
-From: Russell King - ARM Linux <linux@armlinux.org.uk>
-Subject: Re: [PATCH 2/4] efi/arm: defer persistent reservations until after
- paging_init()
-Date: Tue, 6 Nov 2018 19:08:17 +0000
-Message-ID: <20181106190817.GN30658@n2100.armlinux.org.uk>
-References: <20181106113732.16351-1-ard.biesheuvel@linaro.org>
- <20181106113732.16351-3-ard.biesheuvel@linaro.org>
- <CAKv+Gu8OsFb7a5UTovN1yBXtSSY=ZtUBYUvNa_bPmcZGknNYQA@mail.gmail.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v10 2/7] x86/boot: Copy kstrtoull() to compressed period
+Date: Tue, 6 Nov 2018 20:13:03 +0100
+Message-ID: <20181106191303.GN13712@zn.tnic>
+References: <20181022093720.21426-1-fanc.fnst@cn.fujitsu.com>
+ <20181022093720.21426-3-fanc.fnst@cn.fujitsu.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CAKv+Gu8OsFb7a5UTovN1yBXtSSY=ZtUBYUvNa_bPmcZGknNYQA@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Mark Rutland <mark.rutland@arm.com>, linux-efi <linux-efi@vger.kernel.org>, Marc Zyngier <marc.zyngier@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, Will Deacon <will.deacon@arm.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
+In-Reply-To: <20181022093720.21426-3-fanc.fnst@cn.fujitsu.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chao Fan <fanc.fnst@cn.fujitsu.com>
+Cc: linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, keescook@chromium.org, bhe@redhat.com, msys.mizuma@gmail.com, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Nov 06, 2018 at 08:02:58PM +0100, Ard Biesheuvel wrote:
-> On 6 November 2018 at 12:37, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
-> > The new memory EFI reservation feature we introduced to allow memory
-> > reservations to persist across kexec may trigger an unbounded number
-> > of calls to memblock_reserve(). The memblock subsystem can deal with
-> > this fine, but not before memblock resizing is enabled, which we can
-> > only do after paging_init(), when the memory we reallocate the array
-> > into is actually mapped.
-> >
-> > So break out the memreserve table processing into a separate function
-> > and call if after paging_init() on both arm64 and ARM.
-> >
-> > Cc: Russell King <linux@armlinux.org.uk>
-> > Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> 
-> Russell,
-> 
-> If you are ok with this patch, may I have your ack please? I would
-> like to send it out before the end of the week.
+On Mon, Oct 22, 2018 at 05:37:15PM +0800, Chao Fan wrote:
+> kstrtoull() lives in 'uncompressed' period, used to
+> convert a string to an unsigned long long.
+> Copy to 'compressed' so that we can use it to
+> convert the memory address from sting to unsigned
 
-You're not going to get a quick answer to this, because it needs me to
-investigate what the effect of this change actually is by code review.
-I can't guarantee when I'll get around to that.
+sting?
+
+> long long in 'compressed' period.
+> 
+> Signed-off-by: Chao Fan <fanc.fnst@cn.fujitsu.com>
+> ---
+>  arch/x86/boot/compressed/misc.c | 88 +++++++++++++++++++++++++++++++++
+>  arch/x86/boot/compressed/misc.h |  4 ++
+>  2 files changed, 92 insertions(+)
+
+Why do you need to copy things?
+
+You can link that file into compressed/ as lib/kstrtox.c is a library or
+include it similar to what arch/x86/boot/compressed/cmdline.c does.
+
+Still better than copying the code.
+
+> diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
+> index 008fdc47a29c..40378408d980 100644
+> --- a/arch/x86/boot/compressed/misc.h
+> +++ b/arch/x86/boot/compressed/misc.h
+> @@ -63,6 +63,10 @@ static inline void debug_puthex(const char *s)
+>  
+>  #endif
+>  
+> +#if (defined CONFIG_RANDOMIZE_BASE) && (defined CONFIG_RANDOMIZE_BASE)
+
+CONFIG_RANDOMIZE_BASE twice huh? Once not enough?
+
+:-)
 
 -- 
-RMK's Patch system: http://www.armlinux.org.uk/developer/patches/
-FTTC broadband for 0.8mile line in suburbia: sync at 12.1Mbps down 622kbps up
-According to speedtest.net: 11.9Mbps down 500kbps up
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
