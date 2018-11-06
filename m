@@ -1,60 +1,70 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v8 0/3] x86/boot/KASLR: Parse ACPI table and limit kaslr
- in immovable memory
-Date: Tue, 6 Nov 2018 19:45:19 +0100
-Message-ID: <20181106184519.GA16391@zn.tnic>
-References: <20181013214550.ag5qzokhkrkwnzsy@gabell>
- <20181013220541.GI31650@zn.tnic>
- <20181015005035.z3xym6nx43hogdge@gabell>
- <20181016151353.punyk7exekut2543@gabell>
- <20181016191113.GI5212@zn.tnic>
- <20181016195429.tovdgqq77gz3eek2@gabell>
- <20181016195902.GK5212@zn.tnic>
- <20181022154204.kagmdb55jtoez4ca@gabell>
- <20181025103345.GF14020@nazgul.tnic>
- <20181025134050.ggiir77ehntikbwg@gabell>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH 0/4] arm/efi: fix memblock reallocation crash due to
+ persistent reservations
+Date: Tue, 6 Nov 2018 20:01:51 +0100
+Message-ID: <CAKv+Gu9MNHy4MQ=vBd_4v50gx+TgrqUO7w4J+QLoAWEVrJiSDA@mail.gmail.com>
+References: <20181106113732.16351-1-ard.biesheuvel@linaro.org>
+ <326d242e-e51b-c11f-8364-390d991488a6@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20181025134050.ggiir77ehntikbwg@gabell>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Masayoshi Mizuma <msys.mizuma@gmail.com>
-Cc: Baoquan He <bhe@redhat.com>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Chao Fan <fanc.fnst@cn.fujitsu.com>, linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, mingo@redhat.com, hpa@zytor.com, keescook@chromium.org, rjw@rjwysocki.net, lenb@kernel.org, ard.biesheuvel@linaro.org, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <326d242e-e51b-c11f-8364-390d991488a6@arm.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Marc Zyngier <marc.zyngier@arm.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, linux-efi <linux-efi@vger.kernel.org>, Will Deacon <will.deacon@arm.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Oct 25, 2018 at 09:40:51AM -0400, Masayoshi Mizuma wrote:
-> I have another idea to solve this issue. Adding a SRAT parsing code
-> to arch/x86/mm/kaslr.c. It is useful for both EFI and BIOS and
-> also we don't need a new kernel parameter...
-> Dose the idea make sense?
+On 6 November 2018 at 19:27, Marc Zyngier <marc.zyngier@arm.com> wrote:
+> Hi Ard,
+>
+> On 06/11/18 11:37, Ard Biesheuvel wrote:
+>> This series addresses the kexec/kdump crash on arm64 system with many CPUs
+>> that was reported by Bhupesh.
+>>
+>> Patches #1 and #2 fix the actual crash. Patches #3 and #4 optimize the
+>> EFI persistent memreserve infrastructure so that fewer memblock reservations
+>> are required.
+>>
+>> Ard Biesheuvel (4):
+>>   arm64: memblock: don't permit memblock resizing until linear mapping
+>>     is up
+>>   efi/arm: defer persistent reservations until after paging_init()
+>>   efi: permit multiple entries in persistent memreserve data structure
+>>   efi: reduce the amount of memblock reservations for persistent
+>>     allocations
+>>
+>>  arch/arm/kernel/setup.c                 |  1 +
+>>  arch/arm64/kernel/setup.c               |  1 +
+>>  arch/arm64/mm/init.c                    |  2 -
+>>  arch/arm64/mm/mmu.c                     |  2 +
+>>  drivers/firmware/efi/efi.c              | 59 ++++++++++++++------
+>>  drivers/firmware/efi/libstub/arm-stub.c |  2 +-
+>>  include/linux/efi.h                     | 23 +++++++-
+>>  7 files changed, 68 insertions(+), 22 deletions(-)
+>
+> I've just given these patches a go a a TX2 box (one of the 224 CPU
+> ones...), and kexec worked just fine (v4.20-rc1 vanilla didn't manage to
+> kexec on this box).
+>
+> There seem to be some additional userspace patches that are required for
+> the ACPI tables not to be corrupted in the secondary kernel, but that's
+> an orthogonal issue.
+>
+> Feel free to add
+>
+> Tested-by: Marc Zyngier <marc.zyngier@arm.com>
+>
 
-Ok, having swapped the whole thing back into my brain, forget what I
-said earlier today.
+Thanks Marc.
 
-Didn't we talk about passing info with setup_data to the later kernel
-stage? You even had a patch:
-
-https://lkml.kernel.org/r/20181022154204.kagmdb55jtoez4ca@gabell
-
-So what is that "idea" again about adding SRAT parsing code to
-arch/x86/mm/kaslr.c?!?!
-
-The intent of passing info with setup_data is to *avoid* parsing SRAT
-yet another time and duplicating that code one more time.
-
-IOW:
-
-* The first place that needs SRAT parsing, does the parsing - i.e., the
-compressed stage.
-
-* Later stages get information passed to them with setup_data. No second
-parsing.
-
-Ok?
-
--- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
+Any thoughts on whether patches #3 and #4 should be included as fixes?
+I'm leaning towards yes.
