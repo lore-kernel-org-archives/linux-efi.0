@@ -1,39 +1,56 @@
-From: Baoquan He <bhe@redhat.com>
-Subject: Re: [PATCH v8 0/3] x86/boot/KASLR: Parse ACPI table and limit kaslr
- in immovable memory
-Date: Tue, 6 Nov 2018 22:07:31 +0800
-Message-ID: <20181106140731.GO27491@MiWiFi-R3L-srv>
-References: <20181013220541.GI31650@zn.tnic>
- <20181015005035.z3xym6nx43hogdge@gabell>
- <20181016151353.punyk7exekut2543@gabell>
- <20181016191113.GI5212@zn.tnic>
- <20181016195429.tovdgqq77gz3eek2@gabell>
- <20181016195902.GK5212@zn.tnic>
- <20181022154204.kagmdb55jtoez4ca@gabell>
- <20181025103345.GF14020@nazgul.tnic>
- <20181025134050.ggiir77ehntikbwg@gabell>
- <20181106121023.GF13712@zn.tnic>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH 1/4] EFI stub: remove -fdata-sections
+Date: Tue, 6 Nov 2018 15:11:18 +0100
+Message-ID: <CAKv+Gu_-Vqa=TXDzmzorjcPVnxqO3BHvvDyJKViHFLCsnhfeEw@mail.gmail.com>
+References: <20181106133935.GB30658@n2100.armlinux.org.uk>
+ <E1gK1aT-0000oL-Nn@rmk-PC.armlinux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20181106121023.GF13712@zn.tnic>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Masayoshi Mizuma <msys.mizuma@gmail.com>, Borislav Petkov <bp@alien8.de>
-Cc: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Chao Fan <fanc.fnst@cn.fujitsu.com>, linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, mingo@redhat.com, hpa@zytor.com, keescook@chromium.org, rjw@rjwysocki.net, lenb@kernel.org, ard.biesheuvel@linaro.org, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <E1gK1aT-0000oL-Nn@rmk-PC.armlinux.org.uk>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Russell King <rmk+kernel@armlinux.org.uk>
+Cc: linux-efi <linux-efi@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 11/06/18 at 01:10pm, Borislav Petkov wrote:
-> > I have another idea to solve this issue. Adding a SRAT parsing code
-> > to arch/x86/mm/kaslr.c. It is useful for both EFI and BIOS and
-> > also we don't need a new kernel parameter...
-> > Dose the idea make sense?
-> 
-> The more automatic stuff we do and we don't have to involve the user,
-> the better.
-> 
-> However, lemme look at Chao's current patchset first - we should not go
-> nuts by putting SRAT parsing everywhere :)
+On 6 November 2018 at 14:40, Russell King <rmk+kernel@armlinux.org.uk> wrote:
+> Remove -fdata-sections from the EFI stub build as this causes problems
+> for the ARM decompressor code.
+>
+Just out of curiosity: what kind of problems?
 
-arch/x86/mm/ident_map.c is a good example, it's shared between
-arch/x86/boot/compressed and arch/x86/mm/init_64.c
+In any case: it doesn't make sense to obsess about .data size
+optimizations here, so
+
+Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+
+> Signed-off-by: Russell King <rmk+kernel@armlinux.org.uk>
+> ---
+>  drivers/firmware/efi/libstub/Makefile | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+> index c51627660dbb..98133d0577ab 100644
+> --- a/drivers/firmware/efi/libstub/Makefile
+> +++ b/drivers/firmware/efi/libstub/Makefile
+> @@ -15,7 +15,7 @@ cflags-$(CONFIG_X86)          += -m$(BITS) -D__KERNEL__ -O2 \
+>  # disable the stackleak plugin
+>  cflags-$(CONFIG_ARM64)         := $(subst -pg,,$(KBUILD_CFLAGS)) -fpie \
+>                                    $(DISABLE_STACKLEAK_PLUGIN)
+> -cflags-$(CONFIG_ARM)           := $(subst -pg,,$(KBUILD_CFLAGS)) \
+> +cflags-$(CONFIG_ARM)           := $(filter-out -pg -fdata-sections,$(KBUILD_CFLAGS)) \
+>                                    -fno-builtin -fpic \
+>                                    $(call cc-option,-mno-single-pic-base)
+>
+> --
+> 2.7.4
+>
