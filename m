@@ -1,58 +1,60 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v10 2/7] x86/boot: Copy kstrtoull() to compressed period
-Date: Tue, 6 Nov 2018 20:13:03 +0100
-Message-ID: <20181106191303.GN13712@zn.tnic>
-References: <20181022093720.21426-1-fanc.fnst@cn.fujitsu.com>
- <20181022093720.21426-3-fanc.fnst@cn.fujitsu.com>
+From: Masayoshi Mizuma <msys.mizuma@gmail.com>
+Subject: Re: [PATCH v8 0/3] x86/boot/KASLR: Parse ACPI table and limit kaslr
+ in immovable memory
+Date: Tue, 6 Nov 2018 14:36:38 -0500
+Message-ID: <20181106193636.svyjwuwrlgnpuyyf@gabell>
+References: <20181013220541.GI31650@zn.tnic>
+ <20181015005035.z3xym6nx43hogdge@gabell>
+ <20181016151353.punyk7exekut2543@gabell>
+ <20181016191113.GI5212@zn.tnic>
+ <20181016195429.tovdgqq77gz3eek2@gabell>
+ <20181016195902.GK5212@zn.tnic>
+ <20181022154204.kagmdb55jtoez4ca@gabell>
+ <20181025103345.GF14020@nazgul.tnic>
+ <20181025134050.ggiir77ehntikbwg@gabell>
+ <20181106184519.GA16391@zn.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20181022093720.21426-3-fanc.fnst@cn.fujitsu.com>
+In-Reply-To: <20181106184519.GA16391@zn.tnic>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Chao Fan <fanc.fnst@cn.fujitsu.com>
-Cc: linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, keescook@chromium.org, bhe@redhat.com, msys.mizuma@gmail.com, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com
+To: Borislav Petkov <bp@alien8.de>
+Cc: Baoquan He <bhe@redhat.com>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Chao Fan <fanc.fnst@cn.fujitsu.com>, linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, mingo@redhat.com, hpa@zytor.com, keescook@chromium.org, rjw@rjwysocki.net, lenb@kernel.org, ard.biesheuvel@linaro.org, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Oct 22, 2018 at 05:37:15PM +0800, Chao Fan wrote:
-> kstrtoull() lives in 'uncompressed' period, used to
-> convert a string to an unsigned long long.
-> Copy to 'compressed' so that we can use it to
-> convert the memory address from sting to unsigned
-
-sting?
-
-> long long in 'compressed' period.
+On Tue, Nov 06, 2018 at 07:45:19PM +0100, Borislav Petkov wrote:
+> Ok, having swapped the whole thing back into my brain, forget what I
+> said earlier today.
 > 
-> Signed-off-by: Chao Fan <fanc.fnst@cn.fujitsu.com>
-> ---
->  arch/x86/boot/compressed/misc.c | 88 +++++++++++++++++++++++++++++++++
->  arch/x86/boot/compressed/misc.h |  4 ++
->  2 files changed, 92 insertions(+)
+> Didn't we talk about passing info with setup_data to the later kernel
+> stage? You even had a patch:
+> 
+> https://lkml.kernel.org/r/20181022154204.kagmdb55jtoez4ca@gabell
+> 
+> So what is that "idea" again about adding SRAT parsing code to
+> arch/x86/mm/kaslr.c?!?!
+> 
+> The intent of passing info with setup_data is to *avoid* parsing SRAT
+> yet another time and duplicating that code one more time.
+> 
+> IOW:
+> 
+> * The first place that needs SRAT parsing, does the parsing - i.e., the
+> compressed stage.
+> 
+> * Later stages get information passed to them with setup_data. No second
+> parsing.
+> 
+> Ok?
 
-Why do you need to copy things?
+Yes, I think I can see what you are saying. However, I'm not sure how
+I use the setup_data in legacy BIOS environment. So, I said the another
+idea which adding the SRAT parsing code to arch/x86/mm/kaslr.c as well.
+Yes, as you said, that is not so good...
 
-You can link that file into compressed/ as lib/kstrtox.c is a library or
-include it similar to what arch/x86/boot/compressed/cmdline.c does.
+I would appreciate if you could help to use setup_data or something to
+pass the information to later kernel stage in BIOS environment.
 
-Still better than copying the code.
-
-> diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
-> index 008fdc47a29c..40378408d980 100644
-> --- a/arch/x86/boot/compressed/misc.h
-> +++ b/arch/x86/boot/compressed/misc.h
-> @@ -63,6 +63,10 @@ static inline void debug_puthex(const char *s)
->  
->  #endif
->  
-> +#if (defined CONFIG_RANDOMIZE_BASE) && (defined CONFIG_RANDOMIZE_BASE)
-
-CONFIG_RANDOMIZE_BASE twice huh? Once not enough?
-
-:-)
-
--- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
+Thanks,
+Masa
