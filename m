@@ -1,60 +1,37 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH 2/4] efi/arm: defer persistent reservations until after
- paging_init()
-Date: Tue, 6 Nov 2018 21:06:56 +0100
-Message-ID: <CAKv+Gu_r38Bk_SZW-5qvtM7cmQ4-09dcFwNz29AyMceucdhadQ@mail.gmail.com>
-References: <20181106113732.16351-1-ard.biesheuvel@linaro.org>
- <20181106113732.16351-3-ard.biesheuvel@linaro.org>
- <CAKv+Gu8OsFb7a5UTovN1yBXtSSY=ZtUBYUvNa_bPmcZGknNYQA@mail.gmail.com>
- <20181106190817.GN30658@n2100.armlinux.org.uk>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v8 0/3] x86/boot/KASLR: Parse ACPI table and limit kaslr
+ in immovable memory
+Date: Tue, 6 Nov 2018 21:45:11 +0100
+Message-ID: <20181106204511.GO13712@zn.tnic>
+References: <20181015005035.z3xym6nx43hogdge@gabell>
+ <20181016151353.punyk7exekut2543@gabell>
+ <20181016191113.GI5212@zn.tnic>
+ <20181016195429.tovdgqq77gz3eek2@gabell>
+ <20181016195902.GK5212@zn.tnic>
+ <20181022154204.kagmdb55jtoez4ca@gabell>
+ <20181025103345.GF14020@nazgul.tnic>
+ <20181025134050.ggiir77ehntikbwg@gabell>
+ <20181106184519.GA16391@zn.tnic>
+ <20181106193636.svyjwuwrlgnpuyyf@gabell>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20181106190817.GN30658@n2100.armlinux.org.uk>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Russell King - ARM Linux <linux@armlinux.org.uk>
-Cc: Mark Rutland <mark.rutland@arm.com>, linux-efi <linux-efi@vger.kernel.org>, Marc Zyngier <marc.zyngier@arm.com>, Bhupesh Sharma <bhsharma@redhat.com>, Will Deacon <will.deacon@arm.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20181106193636.svyjwuwrlgnpuyyf@gabell>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Masayoshi Mizuma <msys.mizuma@gmail.com>
+Cc: Baoquan He <bhe@redhat.com>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Chao Fan <fanc.fnst@cn.fujitsu.com>, linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, mingo@redhat.com, hpa@zytor.com, keescook@chromium.org, rjw@rjwysocki.net, lenb@kernel.org, ard.biesheuvel@linaro.org, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com
 List-Id: linux-efi@vger.kernel.org
 
-On 6 November 2018 at 20:08, Russell King - ARM Linux
-<linux@armlinux.org.uk> wrote:
-> On Tue, Nov 06, 2018 at 08:02:58PM +0100, Ard Biesheuvel wrote:
->> On 6 November 2018 at 12:37, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
->> > The new memory EFI reservation feature we introduced to allow memory
->> > reservations to persist across kexec may trigger an unbounded number
->> > of calls to memblock_reserve(). The memblock subsystem can deal with
->> > this fine, but not before memblock resizing is enabled, which we can
->> > only do after paging_init(), when the memory we reallocate the array
->> > into is actually mapped.
->> >
->> > So break out the memreserve table processing into a separate function
->> > and call if after paging_init() on both arm64 and ARM.
->> >
->> > Cc: Russell King <linux@armlinux.org.uk>
->> > Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
->>
->> Russell,
->>
->> If you are ok with this patch, may I have your ack please? I would
->> like to send it out before the end of the week.
->
-> You're not going to get a quick answer to this, because it needs me to
-> investigate what the effect of this change actually is by code review.
-> I can't guarantee when I'll get around to that.
->
+On Tue, Nov 06, 2018 at 02:36:38PM -0500, Masayoshi Mizuma wrote:
+> Yes, I think I can see what you are saying. However, I'm not sure how
+> I use the setup_data in legacy BIOS environment.
 
-Fair enough.
+What is "legacy BIOS environment" and what does that have to do with
+setup_data?
 
-I will drop the ARM hunk for now then, and we'll fix ARM when you have
-more time.
+-- 
+Regards/Gruss,
+    Boris.
 
-Thanks,
+Good mailing practices for 400: avoid top-posting and trim the reply.
