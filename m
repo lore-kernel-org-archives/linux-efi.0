@@ -1,108 +1,49 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 4/4] efi: reduce the amount of memblock reservations for
- persistent allocations
-Date: Tue,  6 Nov 2018 12:37:32 +0100
-Message-ID: <20181106113732.16351-5-ard.biesheuvel@linaro.org>
-References: <20181106113732.16351-1-ard.biesheuvel@linaro.org>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v8 0/3] x86/boot/KASLR: Parse ACPI table and limit kaslr
+ in immovable memory
+Date: Tue, 6 Nov 2018 13:10:23 +0100
+Message-ID: <20181106121023.GF13712@zn.tnic>
+References: <20181013214550.ag5qzokhkrkwnzsy@gabell>
+ <20181013220541.GI31650@zn.tnic>
+ <20181015005035.z3xym6nx43hogdge@gabell>
+ <20181016151353.punyk7exekut2543@gabell>
+ <20181016191113.GI5212@zn.tnic>
+ <20181016195429.tovdgqq77gz3eek2@gabell>
+ <20181016195902.GK5212@zn.tnic>
+ <20181022154204.kagmdb55jtoez4ca@gabell>
+ <20181025103345.GF14020@nazgul.tnic>
+ <20181025134050.ggiir77ehntikbwg@gabell>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20181106113732.16351-1-ard.biesheuvel@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: mark.rutland@arm.com, linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, marc.zyngier@arm.com, bhsharma@redhat.com, will.deacon@arm.com
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20181025134050.ggiir77ehntikbwg@gabell>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Masayoshi Mizuma <msys.mizuma@gmail.com>
+Cc: Baoquan He <bhe@redhat.com>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Chao Fan <fanc.fnst@cn.fujitsu.com>, linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, mingo@redhat.com, hpa@zytor.com, keescook@chromium.org, rjw@rjwysocki.net, lenb@kernel.org, ard.biesheuvel@linaro.org, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com
 List-Id: linux-efi@vger.kernel.org
 
-The current implementation of efi_mem_reserve_persistent() is rather
-naive, in the sense that for each invocation, it creates a separate
-linked list entry to describe the reservation. Since the linked list
-entries themselves need to persist across subsequent kexec reboots,
-every reservation created this way results in two memblock_reserve()
-calls at the next boot.
+On Thu, Oct 25, 2018 at 09:40:51AM -0400, Masayoshi Mizuma wrote:
+> My actual use case is for EFI boxes, however, I think it's better to useful
+> for legacy BIOS as well because memory hot-plug affinity in SRAT and KASLR
+> are available on legacy BIOS.
+> Actually, we can create such environment in qemu.
 
-On arm64 systems with 100s of CPUs, this may result in a excessive
-number of memblock reservations, and needless fragmentation.
+Ah, right, qemu. :)
 
-So instead, make use of the newly updated struct linux_efi_memreserve
-layout to put multiple reservations into a single linked list entry.
-This should get rid of the numerous tiny memblock reservations, and
-effectively cut the total number of reservations in half on arm64
-systems with many CPUs.
+> I have another idea to solve this issue. Adding a SRAT parsing code
+> to arch/x86/mm/kaslr.c. It is useful for both EFI and BIOS and
+> also we don't need a new kernel parameter...
+> Dose the idea make sense?
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
- drivers/firmware/efi/efi.c | 29 ++++++++++++++------
- include/linux/efi.h        |  3 ++
- 2 files changed, 24 insertions(+), 8 deletions(-)
+The more automatic stuff we do and we don't have to involve the user,
+the better.
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 85d2ec532816..2ca5a59f7568 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -978,22 +978,35 @@ static DEFINE_SPINLOCK(efi_mem_reserve_persistent_lock);
- int efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
- {
- 	struct linux_efi_memreserve *rsv, *parent;
--	int rsvsize = EFI_MEMRESERVE_SIZE(1);
-+	unsigned long prsv;
-+	int index;
- 
- 	if (efi.mem_reserve == EFI_INVALID_TABLE_ADDR)
- 		return -ENODEV;
- 
--	rsv = kmalloc(rsvsize, GFP_KERNEL);
--	if (!rsv)
--		return -ENOMEM;
--
- 	parent = memremap(efi.mem_reserve, sizeof(*rsv), MEMREMAP_WB);
--	if (!parent) {
--		kfree(rsv);
-+	if (!parent)
- 		return -ENOMEM;
-+
-+	/* first try to find a slot in an existing linked list entry */
-+	for (prsv = parent->next; prsv; prsv = rsv->next) {
-+		rsv = __va(prsv);
-+		index = atomic_fetch_add_unless(&rsv->count, 1, rsv->size);
-+		if (index < rsv->size) {
-+			rsv->entry[index].base = addr;
-+			rsv->entry[index].size = size;
-+
-+			memunmap(parent);
-+			return 0;
-+		}
- 	}
- 
--	rsv->size = 1;
-+	/* no slot found - allocate a new linked list entry */
-+	rsv = (struct linux_efi_memreserve *)__get_free_page(GFP_KERNEL);
-+	if (!rsv)
-+		return -ENOMEM;
-+
-+	rsv->size = EFI_MEMRESERVE_COUNT(PAGE_SIZE);
- 	atomic_set(&rsv->count, 1);
- 	rsv->entry[0].base = addr;
- 	rsv->entry[0].size = size;
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index dfce82b2ca8a..1a1a081f7244 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1727,4 +1727,7 @@ struct linux_efi_memreserve {
- #define EFI_MEMRESERVE_SIZE(count) (sizeof(struct linux_efi_memreserve) + \
- 	(count) * sizeof(((struct linux_efi_memreserve *)0)->entry[0]))
- 
-+#define EFI_MEMRESERVE_COUNT(size) (((size) - sizeof(struct linux_efi_memreserve)) \
-+	/ sizeof(((struct linux_efi_memreserve *)0)->entry[0]))
-+
- #endif /* _LINUX_EFI_H */
+However, lemme look at Chao's current patchset first - we should not go
+nuts by putting SRAT parsing everywhere :)
+
 -- 
-2.19.1
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
