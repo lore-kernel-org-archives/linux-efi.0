@@ -1,8 +1,8 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 3/4] efi: permit multiple entries in persistent memreserve
- data structure
-Date: Tue,  6 Nov 2018 12:37:31 +0100
-Message-ID: <20181106113732.16351-4-ard.biesheuvel@linaro.org>
+Subject: [PATCH 4/4] efi: reduce the amount of memblock reservations for
+ persistent allocations
+Date: Tue,  6 Nov 2018 12:37:32 +0100
+Message-ID: <20181106113732.16351-5-ard.biesheuvel@linaro.org>
 References: <20181106113732.16351-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,120 +22,86 @@ To: linux-arm-kernel@lists.infradead.org
 Cc: mark.rutland@arm.com, linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, marc.zyngier@arm.com, bhsharma@redhat.com, will.deacon@arm.com
 List-Id: linux-efi@vger.kernel.org
 
-In preparation of updating efi_mem_reserve_persistent() to cause less
-fragmentation when dealing with many persistent reservations, update
-the struct definition and the code that handles it currently so it
-can describe an arbitrary number of reservations using a single linked
-list entry. The actual optimization will be implemented in a subsequent
-patch.
+The current implementation of efi_mem_reserve_persistent() is rather
+naive, in the sense that for each invocation, it creates a separate
+linked list entry to describe the reservation. Since the linked list
+entries themselves need to persist across subsequent kexec reboots,
+every reservation created this way results in two memblock_reserve()
+calls at the next boot.
+
+On arm64 systems with 100s of CPUs, this may result in a excessive
+number of memblock reservations, and needless fragmentation.
+
+So instead, make use of the newly updated struct linux_efi_memreserve
+layout to put multiple reservations into a single linked list entry.
+This should get rid of the numerous tiny memblock reservations, and
+effectively cut the total number of reservations in half on arm64
+systems with many CPUs.
 
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- drivers/firmware/efi/efi.c              | 30 +++++++++++++-------
- drivers/firmware/efi/libstub/arm-stub.c |  2 +-
- include/linux/efi.h                     | 13 +++++++--
- 3 files changed, 31 insertions(+), 14 deletions(-)
+ drivers/firmware/efi/efi.c | 29 ++++++++++++++------
+ include/linux/efi.h        |  3 ++
+ 2 files changed, 24 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 55e4ea20bdc3..85d2ec532816 100644
+index 85d2ec532816..2ca5a59f7568 100644
 --- a/drivers/firmware/efi/efi.c
 +++ b/drivers/firmware/efi/efi.c
-@@ -602,18 +602,25 @@ int __init efi_apply_persistent_mem_reservations(void)
- 
- 		while (prsv) {
- 			struct linux_efi_memreserve *rsv;
-+			u8 *p;
-+			int i;
- 
--			/* reserve the entry itself */
--			memblock_reserve(prsv, sizeof(*rsv));
--
--			rsv = memremap(prsv, sizeof(*rsv), MEMREMAP_WB);
--			if (rsv == NULL) {
-+			p = memremap(ALIGN_DOWN(prsv, PAGE_SIZE), PAGE_SIZE,
-+				     MEMREMAP_WB);
-+			if (p == NULL) {
- 				pr_err("Could not map UEFI memreserve entry!\n");
- 				return -ENOMEM;
- 			}
- 
--			if (rsv->size)
--				memblock_reserve(rsv->base, rsv->size);
-+			rsv = (void *)(p + prsv % PAGE_SIZE);
-+
-+			/* reserve the entry itself */
-+			memblock_reserve(prsv, EFI_MEMRESERVE_SIZE(rsv->size));
-+
-+			for (i = 0; i < atomic_read(&rsv->count); i++) {
-+				memblock_reserve(rsv->entry[i].base,
-+						 rsv->entry[i].size);
-+			}
- 
- 			prsv = rsv->next;
- 			memunmap(rsv);
-@@ -971,11 +978,12 @@ static DEFINE_SPINLOCK(efi_mem_reserve_persistent_lock);
+@@ -978,22 +978,35 @@ static DEFINE_SPINLOCK(efi_mem_reserve_persistent_lock);
  int efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
  {
  	struct linux_efi_memreserve *rsv, *parent;
-+	int rsvsize = EFI_MEMRESERVE_SIZE(1);
+-	int rsvsize = EFI_MEMRESERVE_SIZE(1);
++	unsigned long prsv;
++	int index;
  
  	if (efi.mem_reserve == EFI_INVALID_TABLE_ADDR)
  		return -ENODEV;
  
--	rsv = kmalloc(sizeof(*rsv), GFP_KERNEL);
-+	rsv = kmalloc(rsvsize, GFP_KERNEL);
- 	if (!rsv)
+-	rsv = kmalloc(rsvsize, GFP_KERNEL);
+-	if (!rsv)
+-		return -ENOMEM;
+-
+ 	parent = memremap(efi.mem_reserve, sizeof(*rsv), MEMREMAP_WB);
+-	if (!parent) {
+-		kfree(rsv);
++	if (!parent)
  		return -ENOMEM;
- 
-@@ -985,8 +993,10 @@ int efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
- 		return -ENOMEM;
++
++	/* first try to find a slot in an existing linked list entry */
++	for (prsv = parent->next; prsv; prsv = rsv->next) {
++		rsv = __va(prsv);
++		index = atomic_fetch_add_unless(&rsv->count, 1, rsv->size);
++		if (index < rsv->size) {
++			rsv->entry[index].base = addr;
++			rsv->entry[index].size = size;
++
++			memunmap(parent);
++			return 0;
++		}
  	}
  
--	rsv->base = addr;
--	rsv->size = size;
-+	rsv->size = 1;
-+	atomic_set(&rsv->count, 1);
-+	rsv->entry[0].base = addr;
-+	rsv->entry[0].size = size;
- 
- 	spin_lock(&efi_mem_reserve_persistent_lock);
- 	rsv->next = parent->next;
-diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-index 30ac0c975f8a..5bcfa08e8bb1 100644
---- a/drivers/firmware/efi/libstub/arm-stub.c
-+++ b/drivers/firmware/efi/libstub/arm-stub.c
-@@ -83,8 +83,8 @@ void install_memreserve_table(efi_system_table_t *sys_table_arg)
- 	}
- 
- 	rsv->next = 0;
--	rsv->base = 0;
- 	rsv->size = 0;
-+	atomic_set(&rsv->count, 0);
- 
- 	status = efi_call_early(install_configuration_table,
- 				&memreserve_table_guid,
+-	rsv->size = 1;
++	/* no slot found - allocate a new linked list entry */
++	rsv = (struct linux_efi_memreserve *)__get_free_page(GFP_KERNEL);
++	if (!rsv)
++		return -ENOMEM;
++
++	rsv->size = EFI_MEMRESERVE_COUNT(PAGE_SIZE);
+ 	atomic_set(&rsv->count, 1);
+ 	rsv->entry[0].base = addr;
+ 	rsv->entry[0].size = size;
 diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 100ce4a4aff6..dfce82b2ca8a 100644
+index dfce82b2ca8a..1a1a081f7244 100644
 --- a/include/linux/efi.h
 +++ b/include/linux/efi.h
-@@ -1715,9 +1715,16 @@ extern struct efi_runtime_work efi_rts_work;
- extern struct workqueue_struct *efi_rts_wq;
+@@ -1727,4 +1727,7 @@ struct linux_efi_memreserve {
+ #define EFI_MEMRESERVE_SIZE(count) (sizeof(struct linux_efi_memreserve) + \
+ 	(count) * sizeof(((struct linux_efi_memreserve *)0)->entry[0]))
  
- struct linux_efi_memreserve {
--	phys_addr_t	next;
--	phys_addr_t	base;
--	phys_addr_t	size;
-+	int		size;			// allocated size of the array
-+	atomic_t	count;			// number of entries used
-+	phys_addr_t	next;			// pa of next struct instance
-+	struct {
-+		phys_addr_t	base;
-+		phys_addr_t	size;
-+	} entry[0];
- };
- 
-+#define EFI_MEMRESERVE_SIZE(count) (sizeof(struct linux_efi_memreserve) + \
-+	(count) * sizeof(((struct linux_efi_memreserve *)0)->entry[0]))
++#define EFI_MEMRESERVE_COUNT(size) (((size) - sizeof(struct linux_efi_memreserve)) \
++	/ sizeof(((struct linux_efi_memreserve *)0)->entry[0]))
 +
  #endif /* _LINUX_EFI_H */
 -- 
