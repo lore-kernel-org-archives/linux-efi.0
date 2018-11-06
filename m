@@ -1,11 +1,13 @@
-From: Russell King - ARM Linux <linux@armlinux.org.uk>
-Subject: [PATCH 0/4] Enable deadcode elimination at link time
-Date: Tue, 6 Nov 2018 13:39:35 +0000
-Message-ID: <20181106133935.GB30658@n2100.armlinux.org.uk>
+From: Russell King <rmk+kernel@armlinux.org.uk>
+Subject: [PATCH 1/4] EFI stub: remove -fdata-sections
+Date: Tue, 06 Nov 2018 13:40:09 +0000
+Message-ID: <E1gK1aT-0000oL-Nn@rmk-PC.armlinux.org.uk>
+References: <20181106133935.GB30658@n2100.armlinux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20181106133935.GB30658@n2100.armlinux.org.uk>
 Content-Disposition: inline
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
@@ -20,18 +22,26 @@ To: linux-arm-kernel@lists.infradead.org
 Cc: linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-This series enables elimination of dead code from the kernel at link
-time.  The changes are mostly ARM specific, except for one change in
-EFI as the EFI stub must not be compiled with -fdata-sections.
+Remove -fdata-sections from the EFI stub build as this causes problems
+for the ARM decompressor code.
 
- arch/arm/Kconfig                       |  1 +
- arch/arm/boot/compressed/vmlinux.lds.S |  2 +-
- arch/arm/kernel/vmlinux.lds.S          | 10 +++++-----
- arch/arm/kernel/vmlinux.lds.h          | 18 +++++++++---------
- drivers/firmware/efi/libstub/Makefile  |  2 +-
- 5 files changed, 17 insertions(+), 16 deletions(-)
+Signed-off-by: Russell King <rmk+kernel@armlinux.org.uk>
+---
+ drivers/firmware/efi/libstub/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index c51627660dbb..98133d0577ab 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -15,7 +15,7 @@ cflags-$(CONFIG_X86)		+= -m$(BITS) -D__KERNEL__ -O2 \
+ # disable the stackleak plugin
+ cflags-$(CONFIG_ARM64)		:= $(subst -pg,,$(KBUILD_CFLAGS)) -fpie \
+ 				   $(DISABLE_STACKLEAK_PLUGIN)
+-cflags-$(CONFIG_ARM)		:= $(subst -pg,,$(KBUILD_CFLAGS)) \
++cflags-$(CONFIG_ARM)		:= $(filter-out -pg -fdata-sections,$(KBUILD_CFLAGS)) \
+ 				   -fno-builtin -fpic \
+ 				   $(call cc-option,-mno-single-pic-base)
+ 
 -- 
-RMK's Patch system: http://www.armlinux.org.uk/developer/patches/
-FTTC broadband for 0.8mile line in suburbia: sync at 12.1Mbps down 622kbps up
-According to speedtest.net: 11.9Mbps down 500kbps up
+2.7.4
