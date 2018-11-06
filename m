@@ -1,8 +1,8 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 1/4] arm64: memblock: don't permit memblock resizing until
- linear mapping is up
-Date: Tue,  6 Nov 2018 12:37:29 +0100
-Message-ID: <20181106113732.16351-2-ard.biesheuvel@linaro.org>
+Subject: [PATCH 2/4] efi/arm: defer persistent reservations until after
+ paging_init()
+Date: Tue,  6 Nov 2018 12:37:30 +0100
+Message-ID: <20181106113732.16351-3-ard.biesheuvel@linaro.org>
 References: <20181106113732.16351-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -19,65 +19,110 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: linux-arm-kernel@lists.infradead.org
-Cc: mark.rutland@arm.com, linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, marc.zyngier@arm.com, bhsharma@redhat.com, will.deacon@arm.com
+Cc: mark.rutland@arm.com, linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, marc.zyngier@arm.com, bhsharma@redhat.com, will.deacon@arm.com, Russell King <linux@armlinux.org.uk>
 List-Id: linux-efi@vger.kernel.org
 
-Bhupesh reports that having numerous memblock reservations at early
-boot may result in the following crash:
+The new memory EFI reservation feature we introduced to allow memory
+reservations to persist across kexec may trigger an unbounded number
+of calls to memblock_reserve(). The memblock subsystem can deal with
+this fine, but not before memblock resizing is enabled, which we can
+only do after paging_init(), when the memory we reallocate the array
+into is actually mapped.
 
-  Unable to handle kernel paging request at virtual address ffff80003ffe0000
-  ...
-  Call trace:
-   __memcpy+0x110/0x180
-   memblock_add_range+0x134/0x2e8
-   memblock_reserve+0x70/0xb8
-   memblock_alloc_base_nid+0x6c/0x88
-   __memblock_alloc_base+0x3c/0x4c
-   memblock_alloc_base+0x28/0x4c
-   memblock_alloc+0x2c/0x38
-   early_pgtable_alloc+0x20/0xb0
-   paging_init+0x28/0x7f8
+So break out the memreserve table processing into a separate function
+and call if after paging_init() on both arm64 and ARM.
 
-This is caused by the fact that we permit memblock resizing before the
-linear mapping is up, and so the memblock_reserved() array is moved
-into memory that is not mapped yet.
-
-So let's ensure that this crash can no longer occur, by deferring to
-call to memblock_allow_resize() to after the linear mapping has been
-created.
-
-Reported-by: Bhupesh Sharma <bhsharma@redhat.com>
+Cc: Russell King <linux@armlinux.org.uk>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- arch/arm64/mm/init.c | 2 --
- arch/arm64/mm/mmu.c  | 2 ++
- 2 files changed, 2 insertions(+), 2 deletions(-)
+ arch/arm/kernel/setup.c    | 1 +
+ arch/arm64/kernel/setup.c  | 1 +
+ drivers/firmware/efi/efi.c | 8 ++++++--
+ include/linux/efi.h        | 7 +++++++
+ 4 files changed, 15 insertions(+), 2 deletions(-)
 
-diff --git a/arch/arm64/mm/init.c b/arch/arm64/mm/init.c
-index 9d9582cac6c4..9b432d9fcada 100644
---- a/arch/arm64/mm/init.c
-+++ b/arch/arm64/mm/init.c
-@@ -483,8 +483,6 @@ void __init arm64_memblock_init(void)
- 	high_memory = __va(memblock_end_of_DRAM() - 1) + 1;
+diff --git a/arch/arm/kernel/setup.c b/arch/arm/kernel/setup.c
+index ac7e08886863..e99f12eaf390 100644
+--- a/arch/arm/kernel/setup.c
++++ b/arch/arm/kernel/setup.c
+@@ -1117,6 +1117,7 @@ void __init setup_arch(char **cmdline_p)
+ 	early_ioremap_reset();
  
- 	dma_contiguous_reserve(arm64_dma_phys_limit);
--
--	memblock_allow_resize();
- }
+ 	paging_init(mdesc);
++	efi_apply_persistent_mem_reservations();
+ 	request_standard_resources(mdesc);
  
- void __init bootmem_init(void)
-diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
-index 394b8d554def..d1d6601b385d 100644
---- a/arch/arm64/mm/mmu.c
-+++ b/arch/arm64/mm/mmu.c
-@@ -659,6 +659,8 @@ void __init paging_init(void)
+ 	if (mdesc->restart)
+diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
+index 953e316521fc..f4fc1e0544b7 100644
+--- a/arch/arm64/kernel/setup.c
++++ b/arch/arm64/kernel/setup.c
+@@ -313,6 +313,7 @@ void __init setup_arch(char **cmdline_p)
+ 	arm64_memblock_init();
  
- 	memblock_free(__pa_symbol(init_pg_dir),
- 		      __pa_symbol(init_pg_end) - __pa_symbol(init_pg_dir));
+ 	paging_init();
++	efi_apply_persistent_mem_reservations();
+ 
+ 	acpi_table_upgrade();
+ 
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 249eb70691b0..55e4ea20bdc3 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -592,7 +592,11 @@ int __init efi_config_parse_tables(void *config_tables, int count, int sz,
+ 
+ 		early_memunmap(tbl, sizeof(*tbl));
+ 	}
++	return 0;
++}
+ 
++int __init efi_apply_persistent_mem_reservations(void)
++{
+ 	if (efi.mem_reserve != EFI_INVALID_TABLE_ADDR) {
+ 		unsigned long prsv = efi.mem_reserve;
+ 
+@@ -602,7 +606,7 @@ int __init efi_config_parse_tables(void *config_tables, int count, int sz,
+ 			/* reserve the entry itself */
+ 			memblock_reserve(prsv, sizeof(*rsv));
+ 
+-			rsv = early_memremap(prsv, sizeof(*rsv));
++			rsv = memremap(prsv, sizeof(*rsv), MEMREMAP_WB);
+ 			if (rsv == NULL) {
+ 				pr_err("Could not map UEFI memreserve entry!\n");
+ 				return -ENOMEM;
+@@ -612,7 +616,7 @@ int __init efi_config_parse_tables(void *config_tables, int count, int sz,
+ 				memblock_reserve(rsv->base, rsv->size);
+ 
+ 			prsv = rsv->next;
+-			early_memunmap(rsv, sizeof(*rsv));
++			memunmap(rsv);
+ 		}
+ 	}
+ 
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 845174e113ce..100ce4a4aff6 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1167,6 +1167,8 @@ static inline bool efi_enabled(int feature)
+ extern void efi_reboot(enum reboot_mode reboot_mode, const char *__unused);
+ 
+ extern bool efi_is_table_address(unsigned long phys_addr);
 +
-+	memblock_allow_resize();
++extern int efi_apply_persistent_mem_reservations(void);
+ #else
+ static inline bool efi_enabled(int feature)
+ {
+@@ -1185,6 +1187,11 @@ static inline bool efi_is_table_address(unsigned long phys_addr)
+ {
+ 	return false;
  }
++
++static inline int efi_apply_persistent_mem_reservations(void)
++{
++	return 0;
++}
+ #endif
  
- /*
+ extern int efi_status_to_err(efi_status_t status);
 -- 
 2.19.1
