@@ -1,37 +1,68 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v8 0/3] x86/boot/KASLR: Parse ACPI table and limit kaslr
- in immovable memory
-Date: Tue, 6 Nov 2018 21:45:11 +0100
-Message-ID: <20181106204511.GO13712@zn.tnic>
-References: <20181015005035.z3xym6nx43hogdge@gabell>
- <20181016151353.punyk7exekut2543@gabell>
- <20181016191113.GI5212@zn.tnic>
- <20181016195429.tovdgqq77gz3eek2@gabell>
- <20181016195902.GK5212@zn.tnic>
- <20181022154204.kagmdb55jtoez4ca@gabell>
- <20181025103345.GF14020@nazgul.tnic>
- <20181025134050.ggiir77ehntikbwg@gabell>
- <20181106184519.GA16391@zn.tnic>
- <20181106193636.svyjwuwrlgnpuyyf@gabell>
+From: Will Deacon <will.deacon@arm.com>
+Subject: Re: [PATCH 1/4] arm64: memblock: don't permit memblock resizing
+ until linear mapping is up
+Date: Tue, 6 Nov 2018 21:22:47 +0000
+Message-ID: <20181106212246.GA31298@brain-police>
+References: <20181106113732.16351-1-ard.biesheuvel@linaro.org>
+ <20181106113732.16351-2-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 Content-Disposition: inline
-In-Reply-To: <20181106193636.svyjwuwrlgnpuyyf@gabell>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Masayoshi Mizuma <msys.mizuma@gmail.com>
-Cc: Baoquan He <bhe@redhat.com>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Chao Fan <fanc.fnst@cn.fujitsu.com>, linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, mingo@redhat.com, hpa@zytor.com, keescook@chromium.org, rjw@rjwysocki.net, lenb@kernel.org, ard.biesheuvel@linaro.org, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com
+In-Reply-To: <20181106113732.16351-2-ard.biesheuvel@linaro.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: mark.rutland@arm.com, marc.zyngier@arm.com, bhsharma@redhat.com, linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Nov 06, 2018 at 02:36:38PM -0500, Masayoshi Mizuma wrote:
-> Yes, I think I can see what you are saying. However, I'm not sure how
-> I use the setup_data in legacy BIOS environment.
+On Tue, Nov 06, 2018 at 12:37:29PM +0100, Ard Biesheuvel wrote:
+> Bhupesh reports that having numerous memblock reservations at early
+> boot may result in the following crash:
+> 
+>   Unable to handle kernel paging request at virtual address ffff80003ffe0000
+>   ...
+>   Call trace:
+>    __memcpy+0x110/0x180
+>    memblock_add_range+0x134/0x2e8
+>    memblock_reserve+0x70/0xb8
+>    memblock_alloc_base_nid+0x6c/0x88
+>    __memblock_alloc_base+0x3c/0x4c
+>    memblock_alloc_base+0x28/0x4c
+>    memblock_alloc+0x2c/0x38
+>    early_pgtable_alloc+0x20/0xb0
+>    paging_init+0x28/0x7f8
+> 
+> This is caused by the fact that we permit memblock resizing before the
+> linear mapping is up, and so the memblock_reserved() array is moved
+> into memory that is not mapped yet.
+> 
+> So let's ensure that this crash can no longer occur, by deferring to
+> call to memblock_allow_resize() to after the linear mapping has been
+> created.
+> 
+> Reported-by: Bhupesh Sharma <bhsharma@redhat.com>
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> ---
+>  arch/arm64/mm/init.c | 2 --
+>  arch/arm64/mm/mmu.c  | 2 ++
+>  2 files changed, 2 insertions(+), 2 deletions(-)
 
-What is "legacy BIOS environment" and what does that have to do with
-setup_data?
+Thanks for posting this so quickly.
 
--- 
-Regards/Gruss,
-    Boris.
+Acked-by: Will Deacon <will.deacon@arm.com>
 
-Good mailing practices for 400: avoid top-posting and trim the reply.
+Bhupesh -- please can you give this series a spin and confirm that it fixes
+the problem you were seeing?
+
+Thanks,
+
+Will
