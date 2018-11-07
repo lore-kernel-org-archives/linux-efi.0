@@ -1,8 +1,8 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH v2 5/6] efi: permit multiple entries in persistent memreserve
- data structure
-Date: Wed,  7 Nov 2018 15:16:10 +0100
-Message-ID: <20181107141611.12076-6-ard.biesheuvel@linaro.org>
+Subject: [PATCH v2 2/6] ARM: mm: permit memblock resizing right after mapping
+ the linear region
+Date: Wed,  7 Nov 2018 15:16:07 +0100
+Message-ID: <20181107141611.12076-3-ard.biesheuvel@linaro.org>
 References: <20181107141611.12076-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,126 +22,50 @@ To: linux-arm-kernel@lists.infradead.org, linux@armlinux.org.uk
 Cc: marc.zyngier@arm.com, bhsharma@redhat.com, linux-efi@vger.kernel.org, will.deacon@arm.com, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-In preparation of updating efi_mem_reserve_persistent() to cause less
-fragmentation when dealing with many persistent reservations, update
-the struct definition and the code that handles it currently so it
-can describe an arbitrary number of reservations using a single linked
-list entry. The actual optimization will be implemented in a subsequent
-patch.
+The memblock arrays can be resized dynamically if needed, but this is
+only done after memblock_allow_resize() is called, since it is up to
+the architecture to decide at which point doing so is possible (i.e.,
+when all the memory that memblock describes is actually mapped)
 
-Tested-by: Marc Zyngier <marc.zyngier@arm.com>
+ARM grants this permission in bootmem_init(), but in order for the EFI
+persistent memory reservation code (which may create memblock
+reservations that trigger such a dynamic resize) to be able to be called
+before shutting down early fixmap (upon which the EFI code depends due
+to its use of early_memremap()), we need to do this earlier.
+
+So let's move the call to memblock_allow_resize() to right after the
+point where low memory is mapped and declared as the memory limit for
+memblock allocation.
+
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- drivers/firmware/efi/efi.c              | 32 +++++++++++++-------
- drivers/firmware/efi/libstub/arm-stub.c |  2 +-
- include/linux/efi.h                     | 13 ++++++--
- 3 files changed, 32 insertions(+), 15 deletions(-)
+ arch/arm/mm/init.c | 1 -
+ arch/arm/mm/mmu.c  | 1 +
+ 2 files changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 72a4da76d274..59f8ac93c759 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -602,21 +602,28 @@ int __init efi_apply_persistent_mem_reservations(void)
- 
- 		while (prsv) {
- 			struct linux_efi_memreserve *rsv;
-+			u8 *p;
-+			int i;
- 
--			/* reserve the entry itself */
--			memblock_reserve(prsv, sizeof(*rsv));
--
--			rsv = early_memremap(prsv, sizeof(*rsv));
--			if (rsv == NULL) {
-+			p = early_memremap(ALIGN_DOWN(prsv, PAGE_SIZE),
-+					   PAGE_SIZE);
-+			if (p == NULL) {
- 				pr_err("Could not map UEFI memreserve entry!\n");
- 				return -ENOMEM;
- 			}
- 
--			if (rsv->size)
--				memblock_reserve(rsv->base, rsv->size);
-+			rsv = (void *)(p + prsv % PAGE_SIZE);
-+
-+			/* reserve the entry itself */
-+			memblock_reserve(prsv, EFI_MEMRESERVE_SIZE(rsv->size));
-+
-+			for (i = 0; i < atomic_read(&rsv->count); i++) {
-+				memblock_reserve(rsv->entry[i].base,
-+						 rsv->entry[i].size);
-+			}
- 
- 			prsv = rsv->next;
--			early_memunmap(rsv, sizeof(*rsv));
-+			early_memunmap(p, PAGE_SIZE);
- 		}
- 	}
- 
-@@ -971,11 +978,12 @@ static DEFINE_SPINLOCK(efi_mem_reserve_persistent_lock);
- int efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
+diff --git a/arch/arm/mm/init.c b/arch/arm/mm/init.c
+index 32e4845af2b6..797fad2b16ee 100644
+--- a/arch/arm/mm/init.c
++++ b/arch/arm/mm/init.c
+@@ -304,7 +304,6 @@ void __init bootmem_init(void)
  {
- 	struct linux_efi_memreserve *rsv, *parent;
-+	int rsvsize = EFI_MEMRESERVE_SIZE(1);
+ 	unsigned long min, max_low, max_high;
  
- 	if (efi.mem_reserve == EFI_INVALID_TABLE_ADDR)
- 		return -ENODEV;
+-	memblock_allow_resize();
+ 	max_low = max_high = 0;
  
--	rsv = kmalloc(sizeof(*rsv), GFP_KERNEL);
-+	rsv = kmalloc(rsvsize, GFP_KERNEL);
- 	if (!rsv)
- 		return -ENOMEM;
- 
-@@ -985,8 +993,10 @@ int efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
- 		return -ENOMEM;
- 	}
- 
--	rsv->base = addr;
--	rsv->size = size;
-+	rsv->size = 1;
-+	atomic_set(&rsv->count, 1);
-+	rsv->entry[0].base = addr;
-+	rsv->entry[0].size = size;
- 
- 	spin_lock(&efi_mem_reserve_persistent_lock);
- 	rsv->next = parent->next;
-diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-index 30ac0c975f8a..5bcfa08e8bb1 100644
---- a/drivers/firmware/efi/libstub/arm-stub.c
-+++ b/drivers/firmware/efi/libstub/arm-stub.c
-@@ -83,8 +83,8 @@ void install_memreserve_table(efi_system_table_t *sys_table_arg)
- 	}
- 
- 	rsv->next = 0;
--	rsv->base = 0;
- 	rsv->size = 0;
-+	atomic_set(&rsv->count, 0);
- 
- 	status = efi_call_early(install_configuration_table,
- 				&memreserve_table_guid,
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 100ce4a4aff6..dfce82b2ca8a 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1715,9 +1715,16 @@ extern struct efi_runtime_work efi_rts_work;
- extern struct workqueue_struct *efi_rts_wq;
- 
- struct linux_efi_memreserve {
--	phys_addr_t	next;
--	phys_addr_t	base;
--	phys_addr_t	size;
-+	int		size;			// allocated size of the array
-+	atomic_t	count;			// number of entries used
-+	phys_addr_t	next;			// pa of next struct instance
-+	struct {
-+		phys_addr_t	base;
-+		phys_addr_t	size;
-+	} entry[0];
- };
- 
-+#define EFI_MEMRESERVE_SIZE(count) (sizeof(struct linux_efi_memreserve) + \
-+	(count) * sizeof(((struct linux_efi_memreserve *)0)->entry[0]))
-+
- #endif /* _LINUX_EFI_H */
+ 	find_limits(&min, &max_low, &max_high);
+diff --git a/arch/arm/mm/mmu.c b/arch/arm/mm/mmu.c
+index f5cc1ccfea3d..f6bf6686559d 100644
+--- a/arch/arm/mm/mmu.c
++++ b/arch/arm/mm/mmu.c
+@@ -1626,6 +1626,7 @@ void __init paging_init(const struct machine_desc *mdesc)
+ 	prepare_page_table();
+ 	map_lowmem();
+ 	memblock_set_current_limit(arm_lowmem_limit);
++	memblock_allow_resize();
+ 	dma_contiguous_remap();
+ 	early_fixmap_shutdown();
+ 	devicemaps_init(mdesc);
 -- 
 2.19.1
