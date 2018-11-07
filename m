@@ -1,12 +1,14 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH v2 0/6] arm/efi: fix memblock reallocation crash due to
- persistent reservations
-Date: Wed,  7 Nov 2018 15:16:05 +0100
-Message-ID: <20181107141611.12076-1-ard.biesheuvel@linaro.org>
+Subject: [PATCH v2 1/6] arm64: memblock: don't permit memblock resizing until
+ linear mapping is up
+Date: Wed,  7 Nov 2018 15:16:06 +0100
+Message-ID: <20181107141611.12076-2-ard.biesheuvel@linaro.org>
+References: <20181107141611.12076-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20181107141611.12076-1-ard.biesheuvel@linaro.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -20,48 +22,64 @@ To: linux-arm-kernel@lists.infradead.org, linux@armlinux.org.uk
 Cc: marc.zyngier@arm.com, bhsharma@redhat.com, linux-efi@vger.kernel.org, will.deacon@arm.com, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-This series addresses the kexec/kdump crash on arm64 system with many CPUs
-that was reported by Bhupesh.
+Bhupesh reports that having numerous memblock reservations at early
+boot may result in the following crash:
 
-Patch #1 fixes the actual crash, but may result in memblock_reserve() to
-fail. This is fixed in patch #4, where the point that the persistent
-reservations are applied is moved to after memblock_allow_resize() has
-been called.
+  Unable to handle kernel paging request at virtual address ffff80003ffe0000
+  ...
+  Call trace:
+   __memcpy+0x110/0x180
+   memblock_add_range+0x134/0x2e8
+   memblock_reserve+0x70/0xb8
+   memblock_alloc_base_nid+0x6c/0x88
+   __memblock_alloc_base+0x3c/0x4c
+   memblock_alloc_base+0x28/0x4c
+   memblock_alloc+0x2c/0x38
+   early_pgtable_alloc+0x20/0xb0
+   paging_init+0x28/0x7f8
 
-Patches #2 and #3 contain some minor preparatory changes that are
-required on ARM to ensure that efi_apply_persistent_mem_reservations()
-can be called at some point (i.e., when memblock resizing is already
-permitted and early memremap() is still usable)
+This is caused by the fact that we permit memblock resizing before the
+linear mapping is up, and so the memblock_reserved() array is moved
+into memory that is not mapped yet.
 
-Patches #5 and #6 optimize the EFI persistent memreserve infrastructure
-so that fewer memblock reservations are required.
+So let's ensure that this crash can no longer occur, by deferring to
+call to memblock_allow_resize() to after the linear mapping has been
+created.
 
-Changes since v1:
-- Russell pointed out that switching to ordinary memremap() was not
-  possible this early, and so I refactored the ARM early boot code
-  slightly so that we can keep using early_memremap().
+Reported-by: Bhupesh Sharma <bhsharma@redhat.com>
+Acked-by: Will Deacon <will.deacon@arm.com>
+Tested-by: Marc Zyngier <marc.zyngier@arm.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ arch/arm64/mm/init.c | 2 --
+ arch/arm64/mm/mmu.c  | 2 ++
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
-Ard Biesheuvel (6):
-  arm64: memblock: don't permit memblock resizing until linear mapping
-    is up
-  ARM: mm: permit memblock resizing right after mapping the linear
-    region
-  ARM: mm: permit early_memremap() to be used in paging_init()
-  efi/arm: defer persistent reservations until after paging_init()
-  efi: permit multiple entries in persistent memreserve data structure
-  efi: reduce the amount of memblock reservations for persistent
-    allocations
-
- arch/arm/kernel/setup.c                 |  2 -
- arch/arm/mm/init.c                      |  1 -
- arch/arm/mm/mmu.c                       |  5 ++
- arch/arm64/kernel/setup.c               |  1 +
- arch/arm64/mm/init.c                    |  2 -
- arch/arm64/mm/mmu.c                     |  2 +
- drivers/firmware/efi/efi.c              | 59 ++++++++++++++------
- drivers/firmware/efi/libstub/arm-stub.c |  2 +-
- include/linux/efi.h                     | 23 +++++++-
- 9 files changed, 72 insertions(+), 25 deletions(-)
-
+diff --git a/arch/arm64/mm/init.c b/arch/arm64/mm/init.c
+index 9d9582cac6c4..9b432d9fcada 100644
+--- a/arch/arm64/mm/init.c
++++ b/arch/arm64/mm/init.c
+@@ -483,8 +483,6 @@ void __init arm64_memblock_init(void)
+ 	high_memory = __va(memblock_end_of_DRAM() - 1) + 1;
+ 
+ 	dma_contiguous_reserve(arm64_dma_phys_limit);
+-
+-	memblock_allow_resize();
+ }
+ 
+ void __init bootmem_init(void)
+diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
+index d6d05c8c5c52..e1b2d58a311a 100644
+--- a/arch/arm64/mm/mmu.c
++++ b/arch/arm64/mm/mmu.c
+@@ -671,6 +671,8 @@ void __init paging_init(void)
+ 
+ 	memblock_free(__pa_symbol(init_pg_dir),
+ 		      __pa_symbol(init_pg_end) - __pa_symbol(init_pg_dir));
++
++	memblock_allow_resize();
+ }
+ 
+ /*
 -- 
 2.19.1
