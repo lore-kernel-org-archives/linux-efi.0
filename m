@@ -1,70 +1,61 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: BUG: sleeping function called from invalid context at mm/slab.h:421
-Date: Thu, 8 Nov 2018 18:25:22 +0100
-Message-ID: <CAKv+Gu_1ckSP_O6TdYRL=+dUbWDsogOaU3-nnWMKijtANw8t6Q@mail.gmail.com>
-References: <trinity-7128b38b-7a1d-4584-aa34-174a2906ec88-1541694235634@3c-app-mailcom-bs15>
- <trinity-73b7af5e-ab88-495b-932a-2ffd6dd81623-1541697732607@3c-app-mailcom-bs15>
+From: Catalin Marinas <catalin.marinas@arm.com>
+Subject: Re: [PATCH v2 1/6] arm64: memblock: don't permit memblock resizing
+ until linear mapping is up
+Date: Thu, 8 Nov 2018 17:53:54 +0000
+Message-ID: <20181108175354.GF144107@arrakis.emea.arm.com>
+References: <20181107141611.12076-1-ard.biesheuvel@linaro.org>
+ <20181107141611.12076-2-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <trinity-73b7af5e-ab88-495b-932a-2ffd6dd81623-1541697732607@3c-app-mailcom-bs15>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Qian Cai <cai@gmx.us>, Marc Zyngier <marc.zyngier@arm.com>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux-MM <linux-mm@kvack.org>, linux-efi <linux-efi@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <20181107141611.12076-2-ard.biesheuvel@linaro.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-efi@vger.kernel.org, marc.zyngier@arm.com, bhsharma@redhat.com, will.deacon@arm.com, linux@armlinux.org.uk, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-(+ Marc)
+On Wed, Nov 07, 2018 at 03:16:06PM +0100, Ard Biesheuvel wrote:
+> Bhupesh reports that having numerous memblock reservations at early
+> boot may result in the following crash:
+> 
+>   Unable to handle kernel paging request at virtual address ffff80003ffe0000
+>   ...
+>   Call trace:
+>    __memcpy+0x110/0x180
+>    memblock_add_range+0x134/0x2e8
+>    memblock_reserve+0x70/0xb8
+>    memblock_alloc_base_nid+0x6c/0x88
+>    __memblock_alloc_base+0x3c/0x4c
+>    memblock_alloc_base+0x28/0x4c
+>    memblock_alloc+0x2c/0x38
+>    early_pgtable_alloc+0x20/0xb0
+>    paging_init+0x28/0x7f8
+> 
+> This is caused by the fact that we permit memblock resizing before the
+> linear mapping is up, and so the memblock_reserved() array is moved
+> into memory that is not mapped yet.
+> 
+> So let's ensure that this crash can no longer occur, by deferring to
+> call to memblock_allow_resize() to after the linear mapping has been
+> created.
+> 
+> Reported-by: Bhupesh Sharma <bhsharma@redhat.com>
+> Acked-by: Will Deacon <will.deacon@arm.com>
+> Tested-by: Marc Zyngier <marc.zyngier@arm.com>
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-On 8 November 2018 at 18:22, Qian Cai <cai@gmx.us> wrote:
-> Looks like more of an EFI issue where it called efi_mem_reserve_persistent().
->
->> Sent: Thursday, November 08, 2018 at 11:23 AM
->> From: "Qian Cai" <cai@gmx.us>
->> To: linux-kernel@vger.kernel.org
->> Cc: linux-mm@kvack.org
->> Subject: BUG: sleeping function called from invalid context at mm/slab.h:421
->>
->> Just booting up the latest git master (b00d209) on an aarch64 server and saw this.
->>
->> Nov  8 11:06:36 huawei-t2280-03 kernel: BUG: sleeping function called from invalid context at mm/slab.h:421
->> Nov  8 11:06:36 huawei-t2280-03 kernel: in_atomic(): 1, irqs_disabled(): 128, pid: 0, name: swapper/1
->> Nov  8 11:06:36 huawei-t2280-03 kernel: no locks held by swapper/1/0.
->> Nov  8 11:06:36 huawei-t2280-03 kernel: irq event stamp: 0
->> Nov  8 11:06:36 huawei-t2280-03 kernel: hardirqs last  enabled at (0): [<0000000000000000>]           (null)
->> Nov  8 11:06:36 huawei-t2280-03 kernel: hardirqs last disabled at (0): [<ffff2000080e24ec>] copy_process.isra.32.part.33+0x460/0x1534
->> Nov  8 11:06:36 huawei-t2280-03 kernel: softirqs last  enabled at (0): [<ffff2000080e24ec>] copy_process.isra.32.part.33+0x460/0x1534
->> Nov  8 11:06:36 huawei-t2280-03 kernel: softirqs last disabled at (0): [<0000000000000000>]           (null)
->> Nov  8 11:06:36 huawei-t2280-03 kernel: CPU: 1 PID: 0 Comm: swapper/1 Not tainted 4.20.0-rc1+ #3
->> Nov  8 11:06:36 huawei-t2280-03 kernel: Call trace:
->> Nov  8 11:06:36 huawei-t2280-03 kernel: dump_backtrace+0x0/0x190
->> Nov  8 11:06:36 huawei-t2280-03 kernel: show_stack+0x24/0x2c
->> Nov  8 11:06:36 huawei-t2280-03 kernel: dump_stack+0xa4/0xe0
->> Nov  8 11:06:36 huawei-t2280-03 kernel: ___might_sleep+0x208/0x234
->> Nov  8 11:06:36 huawei-t2280-03 kernel: __might_sleep+0x58/0x8c
->> Nov  8 11:06:36 huawei-t2280-03 kernel: kmem_cache_alloc_trace+0x29c/0x420
->> Nov  8 11:06:36 huawei-t2280-03 kernel: efi_mem_reserve_persistent+0x50/0xe8
->> Nov  8 11:06:36 huawei-t2280-03 kernel: its_cpu_init_lpis+0x298/0x2e0
->> Nov  8 11:06:36 huawei-t2280-03 kernel: its_cpu_init+0x7c/0x1a8
->> Nov  8 11:06:36 huawei-t2280-03 kernel: gic_starting_cpu+0x28/0x34
->> Nov  8 11:06:36 huawei-t2280-03 kernel: cpuhp_invoke_callback+0x104/0xd04
->> Nov  8 11:06:36 huawei-t2280-03 kernel: notify_cpu_starting+0x60/0xa0
->> Nov  8 11:06:36 huawei-t2280-03 kernel: secondary_start_kernel+0xcc/0x178
->>
->> Any idea?
+I missed this patch (wasn't cc'ed) but Will pinged me on IRC, so queued
+for 4.20. Thanks.
 
-OK, so apparently, we are being invoked from atomic context
-
-Please try this
-
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 249eb70691b0..44ed6792de7c 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -971,7 +971,7 @@ int efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
-        if (efi.mem_reserve == EFI_INVALID_TABLE_ADDR)
-                return -ENODEV;
-
--       rsv = kmalloc(sizeof(*rsv), GFP_KERNEL);
-+       rsv = kmalloc(sizeof(*rsv), GFP_ATOMIC);
-        if (!rsv)
-                return -ENOMEM;
+-- 
+Catalin
