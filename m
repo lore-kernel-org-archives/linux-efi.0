@@ -1,61 +1,87 @@
-From: Catalin Marinas <catalin.marinas@arm.com>
-Subject: Re: [PATCH v2 1/6] arm64: memblock: don't permit memblock resizing
- until linear mapping is up
-Date: Thu, 8 Nov 2018 17:53:54 +0000
-Message-ID: <20181108175354.GF144107@arrakis.emea.arm.com>
-References: <20181107141611.12076-1-ard.biesheuvel@linaro.org>
- <20181107141611.12076-2-ard.biesheuvel@linaro.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [PATCH] efi: permit calling efi_mem_reserve_persistent from atomic context
+Date: Thu,  8 Nov 2018 19:05:11 +0100
+Message-ID: <20181108180511.30239-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <20181107141611.12076-2-ard.biesheuvel@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: linux-efi@vger.kernel.org, marc.zyngier@arm.com, bhsharma@redhat.com, will.deacon@arm.com, linux@armlinux.org.uk, linux-arm-kernel@lists.infradead.org
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-efi@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, cai@gmx.us, linux-mm@kvack.org, linux-kernel@vger.kernel.org, marc.zyngier@arm.com, will.deacon@arm.com, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Nov 07, 2018 at 03:16:06PM +0100, Ard Biesheuvel wrote:
-> Bhupesh reports that having numerous memblock reservations at early
-> boot may result in the following crash:
-> 
->   Unable to handle kernel paging request at virtual address ffff80003ffe0000
->   ...
->   Call trace:
->    __memcpy+0x110/0x180
->    memblock_add_range+0x134/0x2e8
->    memblock_reserve+0x70/0xb8
->    memblock_alloc_base_nid+0x6c/0x88
->    __memblock_alloc_base+0x3c/0x4c
->    memblock_alloc_base+0x28/0x4c
->    memblock_alloc+0x2c/0x38
->    early_pgtable_alloc+0x20/0xb0
->    paging_init+0x28/0x7f8
-> 
-> This is caused by the fact that we permit memblock resizing before the
-> linear mapping is up, and so the memblock_reserved() array is moved
-> into memory that is not mapped yet.
-> 
-> So let's ensure that this crash can no longer occur, by deferring to
-> call to memblock_allow_resize() to after the linear mapping has been
-> created.
-> 
-> Reported-by: Bhupesh Sharma <bhsharma@redhat.com>
-> Acked-by: Will Deacon <will.deacon@arm.com>
-> Tested-by: Marc Zyngier <marc.zyngier@arm.com>
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Currently, efi_mem_reserve_persistent() may not be called from atomic
+context, since both the kmalloc() call and the memremap() call may
+sleep.
 
-I missed this patch (wasn't cc'ed) but Will pinged me on IRC, so queued
-for 4.20. Thanks.
+The kmalloc() call is easy enough to fix, but the memremap() call
+needs to be moved into an init hook since we cannot control the
+memory allocation behavior of memremap() at the call site.
 
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ drivers/firmware/efi/efi.c | 31 +++++++++++++++++++------------
+ 1 file changed, 19 insertions(+), 12 deletions(-)
+
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 249eb70691b0..cfc876e0b67b 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -963,36 +963,43 @@ bool efi_is_table_address(unsigned long phys_addr)
+ }
+ 
+ static DEFINE_SPINLOCK(efi_mem_reserve_persistent_lock);
++static struct linux_efi_memreserve *efi_memreserve_root __ro_after_init;
+ 
+ int efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
+ {
+-	struct linux_efi_memreserve *rsv, *parent;
++	struct linux_efi_memreserve *rsv;
+ 
+-	if (efi.mem_reserve == EFI_INVALID_TABLE_ADDR)
++	if (!efi_memreserve_root)
+ 		return -ENODEV;
+ 
+-	rsv = kmalloc(sizeof(*rsv), GFP_KERNEL);
++	rsv = kmalloc(sizeof(*rsv), GFP_ATOMIC);
+ 	if (!rsv)
+ 		return -ENOMEM;
+ 
+-	parent = memremap(efi.mem_reserve, sizeof(*rsv), MEMREMAP_WB);
+-	if (!parent) {
+-		kfree(rsv);
+-		return -ENOMEM;
+-	}
+-
+ 	rsv->base = addr;
+ 	rsv->size = size;
+ 
+ 	spin_lock(&efi_mem_reserve_persistent_lock);
+-	rsv->next = parent->next;
+-	parent->next = __pa(rsv);
++	rsv->next = efi_memreserve_root->next;
++	efi_memreserve_root->next = __pa(rsv);
+ 	spin_unlock(&efi_mem_reserve_persistent_lock);
+ 
+-	memunmap(parent);
++	return 0;
++}
+ 
++static int __init efi_memreserve_root_init(void)
++{
++	if (efi.mem_reserve == EFI_INVALID_TABLE_ADDR)
++		return -ENODEV;
++
++	efi_memreserve_root = memremap(efi.mem_reserve,
++				       sizeof(*efi_memreserve_root),
++				       MEMREMAP_WB);
++	if (!efi_memreserve_root)
++		return -ENOMEM;
+ 	return 0;
+ }
++early_initcall(efi_memreserve_root_init);
+ 
+ #ifdef CONFIG_KEXEC
+ static int update_efi_random_seed(struct notifier_block *nb,
 -- 
-Catalin
+2.19.1
