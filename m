@@ -1,14 +1,16 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH v2 6/6] efi: reduce the amount of memblock reservations for
- persistent allocations
-Date: Wed,  7 Nov 2018 15:16:11 +0100
-Message-ID: <20181107141611.12076-7-ard.biesheuvel@linaro.org>
-References: <20181107141611.12076-1-ard.biesheuvel@linaro.org>
+From: Bhupesh Sharma <bhsharma@redhat.com>
+Subject: Re: [Bug Report] kdump crashes after latest EFI memblock changes on
+ arm64 machines with large number of CPUs
+Date: Thu, 8 Nov 2018 11:28:11 +0530
+Message-ID: <CACi5LpP3O2BeFaRku1uVgHwEN+JB9iL3Z7d1W5W+5QV8WmXM0w@mail.gmail.com>
+References: <CACi5LpOyy0YkhEzWWqt8hAQfKku2Vzp5+da_dGS23JMyHReNew@mail.gmail.com>
+ <20181106013022.GA27793@brain-police>
+ <CAKv+Gu-4f0uYrrc-eSd1YjJygGHVpB7maJ_3xpuY4vP-LfT0-w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20181107141611.12076-1-ard.biesheuvel@linaro.org>
+In-Reply-To: <CAKv+Gu-4f0uYrrc-eSd1YjJygGHVpB7maJ_3xpuY4vP-LfT0-w@mail.gmail.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -18,92 +20,91 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-arm-kernel@lists.infradead.org, linux@armlinux.org.uk
-Cc: marc.zyngier@arm.com, bhsharma@redhat.com, linux-efi@vger.kernel.org, will.deacon@arm.com, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Mark Rutland <mark.rutland@arm.com>, linux-efi@vger.kernel.org, Will Deacon <will.deacon@arm.com>, kexec mailing list <kexec@lists.infradead.org>, Bhupesh SHARMA <bhupesh.linux@gmail.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-The current implementation of efi_mem_reserve_persistent() is rather
-naive, in the sense that for each invocation, it creates a separate
-linked list entry to describe the reservation. Since the linked list
-entries themselves need to persist across subsequent kexec reboots,
-every reservation created this way results in two memblock_reserve()
-calls at the next boot.
+Hi All,
 
-On arm64 systems with 100s of CPUs, this may result in a excessive
-number of memblock reservations, and needless fragmentation.
+I am sorry for the delay. I was away for my Diwali holidays and came
+back to office today.
 
-So instead, make use of the newly updated struct linux_efi_memreserve
-layout to put multiple reservations into a single linked list entry.
-This should get rid of the numerous tiny memblock reservations, and
-effectively cut the total number of reservations in half on arm64
-systems with many CPUs.
+On Tue, Nov 6, 2018 at 2:14 PM Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
+>
+> On 6 November 2018 at 02:30, Will Deacon <will.deacon@arm.com> wrote:
+> > On Fri, Nov 02, 2018 at 02:44:10AM +0530, Bhupesh Sharma wrote:
+> >> With the latest EFI changes for memblock reservation across kdump
+> >> kernel from Ard (Commit 71e0940d52e107748b270213a01d3b1546657d74
+> >> ["efi: honour memory reservations passed via a linux specific config
+> >> table"]), we hit a panic while trying to boot the kdump kernel on
+> >> machines which have large number of CPUs.
+> >>
+> >> I have a arm64 board which has 224 CPUS:
+> >> # lscpu
+> >> <..snip..>
+> >> CPU(s):              224
+> >> On-line CPU(s) list: 0-223
+> >> <..snip..>
+> >>
+> >> Here are the crash logs in the kdump kernel on this machine:
+> >>
+> >> [    0.000000] Unable to handle kernel paging request at virtual
+> >> address ffff80003ffe0000
+> >> val____)nt EL), IL ata abort info:
+> >> [    0.or: Oops: 960000inted 4.18.0+ #3
+> >> [    0.000000] pstate: 20400089 (nzCv daIf +PAN -UAO)
+> >> [    0.000000] pc : __memcpy+0x110/0x180
+> >> [    0.000000] lr : memblock_double_array+0x240/0x348
+> >> [    0.000000] sp : ffff0000092efc80 x28: 00000000bffe0000
+> >> [    0.000000] x27: 0000000000001800 x26: ffff000009d59000
+> >> [    0.000000] x25: ffff80003ffe0000 x24: 0000000000000000
+> >> [    0.000000] x23: 0000000000010000 x22: ffff000009d594e8
+> >> [    0.000000] x21: ffff000009d594f4 x20: ffff0000093c7268
+> >> [    0.000000] x19: 0000000000000c00 x18: 0000000000000010
+> >> [    0.000000] x17: 0000000000000000 x16: 0000000000000000
+> >> [    0.000000] x15: ffffffffffffffff3: 0000000fc18d0000 x12: 0000000800000000
+> >> [    0.000000] x11: 0000000000000018 x10: 00000000ddab9e18
+> >> [    0.000000] x9 : 0000000800000000 x8 : 00000000000002c1
+> >> [    0.000000] x7 : 0000000091b90000 x6 : ffff80003ffe0000
+> >> [    0.000000] x5 : 0000000000000001 x4 : 0000000000000000
+> >> [    0.000000] x3 : 0000000000000000 x2 : 0000000000000b80
+> >> [    0.000000] x1 : ffff000009d59540 x0 : ffff80003ffe0000
+> >> [    0.000000] Process swapper)
+> >> [    0.000000] Call trace:
+> >> [    0.000000]  __memcpy+0x110/0x180
+> >> [    0.000000]  memblock_add_range+0x134/0x2e8
+> >> [    0.000000]  memblock_reserve+0x70/0xb8
+> >> [    0.000000]  memblock_alloc_base_nid+0x6c/0x88
+> >> [    0.000000]  __memblock_alloc_base+0x3c/0x4c
+> >> [    0.000000]  memblock_alloc_base+0x28/0x4c
+> >> [    0.000000]  memblock_alloc+0x2c/0x38
+> >> [    0.000000]  early_pgtable_alloc+0x20/0xb0
+> >
+> > Hmm, so this seems to be the crux of the issue: early_pgtable_alloc() relies
+> > on memblock to allocate page-table memory, but this can be called before the
+> > linear mapping is up and running (or even as part of creating the linear
+> > mapping itself!) so the use of __va in memblock_double_array() actually
+> > returns an unmapped address.
+> >
+>
+> OK, so this means we are calling memblock_allow_resize() too early in any case
+>
+> > So I guess we either need to implement early_pgtable_alloc() some other way
+> > (how?) or get memblock_double_array() to use a fixmap if it's called too
+> > early (yuck). Alternatively, would it be possible to postpone processing of
+> > the EFI mem_reserve entries until after we've created the linear mapping?
+> >
+>
+> We could move this until after paging_init(), I suppose. I'll cook something up.
+>
+> Bhupesh: any comments?
 
-Tested-by: Marc Zyngier <marc.zyngier@arm.com>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
- drivers/firmware/efi/efi.c | 29 ++++++++++++++------
- include/linux/efi.h        |  3 ++
- 2 files changed, 24 insertions(+), 8 deletions(-)
+Since Ard has already shared a patchset which seems to fix this issue
+[Thanks Ard :)], and my approach is still hackish, I will try to
+verify his v2 patchset on the system I was having issues with and get
+back with my results.
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 59f8ac93c759..347028cb392f 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -978,22 +978,35 @@ static DEFINE_SPINLOCK(efi_mem_reserve_persistent_lock);
- int efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
- {
- 	struct linux_efi_memreserve *rsv, *parent;
--	int rsvsize = EFI_MEMRESERVE_SIZE(1);
-+	unsigned long prsv;
-+	int index;
- 
- 	if (efi.mem_reserve == EFI_INVALID_TABLE_ADDR)
- 		return -ENODEV;
- 
--	rsv = kmalloc(rsvsize, GFP_KERNEL);
--	if (!rsv)
--		return -ENOMEM;
--
- 	parent = memremap(efi.mem_reserve, sizeof(*rsv), MEMREMAP_WB);
--	if (!parent) {
--		kfree(rsv);
-+	if (!parent)
- 		return -ENOMEM;
-+
-+	/* first try to find a slot in an existing linked list entry */
-+	for (prsv = parent->next; prsv; prsv = rsv->next) {
-+		rsv = __va(prsv);
-+		index = atomic_fetch_add_unless(&rsv->count, 1, rsv->size);
-+		if (index < rsv->size) {
-+			rsv->entry[index].base = addr;
-+			rsv->entry[index].size = size;
-+
-+			memunmap(parent);
-+			return 0;
-+		}
- 	}
- 
--	rsv->size = 1;
-+	/* no slot found - allocate a new linked list entry */
-+	rsv = (struct linux_efi_memreserve *)__get_free_page(GFP_KERNEL);
-+	if (!rsv)
-+		return -ENOMEM;
-+
-+	rsv->size = EFI_MEMRESERVE_COUNT(PAGE_SIZE);
- 	atomic_set(&rsv->count, 1);
- 	rsv->entry[0].base = addr;
- 	rsv->entry[0].size = size;
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index dfce82b2ca8a..1a1a081f7244 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1727,4 +1727,7 @@ struct linux_efi_memreserve {
- #define EFI_MEMRESERVE_SIZE(count) (sizeof(struct linux_efi_memreserve) + \
- 	(count) * sizeof(((struct linux_efi_memreserve *)0)->entry[0]))
- 
-+#define EFI_MEMRESERVE_COUNT(size) (((size) - sizeof(struct linux_efi_memreserve)) \
-+	/ sizeof(((struct linux_efi_memreserve *)0)->entry[0]))
-+
- #endif /* _LINUX_EFI_H */
--- 
-2.19.1
+Thanks for all the help.
+
+Regards,
+Bhupesh
