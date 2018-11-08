@@ -1,31 +1,27 @@
-From: Nick Desaulniers <ndesaulniers@google.com>
-Subject: Re: [PATCH] efi/libstub: Disable some warnings for x86{,_64}
-Date: Thu, 8 Nov 2018 12:42:41 -0800
-Message-ID: <CAKwvOdm5wv-DLqSYSq6NDTrKezTfS_DJXgcAmTcrX8ejpf7bsg@mail.gmail.com>
-References: <20181013010348.6740-1-natechancellor@gmail.com>
- <20181023175309.GA3384@flashbox> <CA+icZUXsS53RANWBNWw7_HcRRGyzVW1EepBU-K1pumrue6bYtg@mail.gmail.com>
- <CAKv+Gu8eJxLcNkvSzzKf0P+gjhtGRdLQW9J+gcDRhhGCi-pHJg@mail.gmail.com>
- <CA+icZUUK_B-_Brdr7LpiexEHJTytquhKN+4uidc+GmyMkJN8Og@mail.gmail.com> <CAKv+Gu_JdioRGRM5DiinK9a+2koK-NZLa858OAdap9PGe8vCtA@mail.gmail.com>
+From: Qian Cai <cai@gmx.us>
+Subject: Re: [PATCH] efi: permit calling efi_mem_reserve_persistent from
+ atomic context
+Date: Thu, 08 Nov 2018 15:48:37 -0500
+Message-ID: <1541710117.12945.3.camel@gmx.us>
+References: <20181108180511.30239-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu_JdioRGRM5DiinK9a+2koK-NZLa858OAdap9PGe8vCtA@mail.gmail.com>
+In-Reply-To: <20181108180511.30239-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: sedat.dilek@gmail.com, Nathan Chancellor <natechancellor@gmail.com>, linux-efi@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, linux-mm@kvack.org, linux-kernel@vger.kernel.org, marc.zyngier@arm.com, will.deacon@arm.com
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Nov 6, 2018 at 6:16 AM Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
->
-> On 6 November 2018 at 14:15, Sedat Dilek <sedat.dilek@gmail.com> wrote:
-> >
-> > Thanks Ard.
-> > This means efi-for-4.21 / efi-for-5.0?
-> >
->
-> Yes
-
-Thanks for picking up this patch, Ard.  Is there any way to get it into 4.20?
--- 
-Thanks,
-~Nick Desaulniers
+On Thu, 2018-11-08 at 19:05 +0100, Ard Biesheuvel wrote:
+> Currently, efi_mem_reserve_persistent() may not be called from atomic
+> context, since both the kmalloc() call and the memremap() call may
+> sleep.
+> 
+> The kmalloc() call is easy enough to fix, but the memremap() call
+> needs to be moved into an init hook since we cannot control the
+> memory allocation behavior of memremap() at the call site.
+> 
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Tested-by: Qian Cai <cai@gmx.us>
