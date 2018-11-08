@@ -1,61 +1,50 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v8 0/3] x86/boot/KASLR: Parse ACPI table and limit kaslr
- in immovable memory
-Date: Thu, 8 Nov 2018 11:51:29 +0100
-Message-ID: <20181108105129.GA7543@zn.tnic>
-References: <20181016191113.GI5212@zn.tnic>
- <20181016195429.tovdgqq77gz3eek2@gabell>
- <20181016195902.GK5212@zn.tnic>
- <20181022154204.kagmdb55jtoez4ca@gabell>
- <20181025103345.GF14020@nazgul.tnic>
- <20181025134050.ggiir77ehntikbwg@gabell>
- <20181106184519.GA16391@zn.tnic>
- <20181106193636.svyjwuwrlgnpuyyf@gabell>
- <20181106204511.GO13712@zn.tnic>
- <20181106222133.lb7674yzszivzihd@gabell>
+From: "Qian Cai" <cai@gmx.us>
+Subject: Re: BUG: sleeping function called from invalid context at
+ mm/slab.h:421
+Date: Thu, 8 Nov 2018 18:22:12 +0100
+Message-ID: <trinity-73b7af5e-ab88-495b-932a-2ffd6dd81623-1541697732607@3c-app-mailcom-bs15>
+References: <trinity-7128b38b-7a1d-4584-aa34-174a2906ec88-1541694235634@3c-app-mailcom-bs15>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20181106222133.lb7674yzszivzihd@gabell>
+In-Reply-To: <trinity-7128b38b-7a1d-4584-aa34-174a2906ec88-1541694235634@3c-app-mailcom-bs15>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Masayoshi Mizuma <msys.mizuma@gmail.com>
-Cc: Baoquan He <bhe@redhat.com>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Chao Fan <fanc.fnst@cn.fujitsu.com>, linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, mingo@redhat.com, hpa@zytor.com, keescook@chromium.org, rjw@rjwysocki.net, lenb@kernel.org, ard.biesheuvel@linaro.org, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com
+To: linux-kernel@vger.kernel.org
+Cc: linux-mm@kvack.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Nov 06, 2018 at 05:21:34PM -0500, Masayoshi Mizuma wrote:
-> On Tue, Nov 06, 2018 at 09:45:11PM +0100, Borislav Petkov wrote:
-> > On Tue, Nov 06, 2018 at 02:36:38PM -0500, Masayoshi Mizuma wrote:
-> > > Yes, I think I can see what you are saying. However, I'm not sure how
-> > > I use the setup_data in legacy BIOS environment.
-> > 
-> > What is "legacy BIOS environment" and what does that have to do with
-> > setup_data?
+Looks like more of an EFI issue where it called efi_mem_reserve_persistent().
+
+> Sent: Thursday, November 08, 2018 at 11:23 AM
+> From: "Qian Cai" <cai@gmx.us>
+> To: linux-kernel@vger.kernel.org
+> Cc: linux-mm@kvack.org
+> Subject: BUG: sleeping function called from invalid context at mm/slab.h:421
+>
+> Just booting up the latest git master (b00d209) on an aarch64 server and saw this.
 > 
-> My proposed patch [1] is useful only for EFI environment. The patch
-> allocates a setup_date structure by efi_call_early() and store the
-> KASLR data into the memory area.
+> Nov  8 11:06:36 huawei-t2280-03 kernel: BUG: sleeping function called from invalid context at mm/slab.h:421
+> Nov  8 11:06:36 huawei-t2280-03 kernel: in_atomic(): 1, irqs_disabled(): 128, pid: 0, name: swapper/1
+> Nov  8 11:06:36 huawei-t2280-03 kernel: no locks held by swapper/1/0.
+> Nov  8 11:06:36 huawei-t2280-03 kernel: irq event stamp: 0
+> Nov  8 11:06:36 huawei-t2280-03 kernel: hardirqs last  enabled at (0): [<0000000000000000>]           (null)
+> Nov  8 11:06:36 huawei-t2280-03 kernel: hardirqs last disabled at (0): [<ffff2000080e24ec>] copy_process.isra.32.part.33+0x460/0x1534
+> Nov  8 11:06:36 huawei-t2280-03 kernel: softirqs last  enabled at (0): [<ffff2000080e24ec>] copy_process.isra.32.part.33+0x460/0x1534
+> Nov  8 11:06:36 huawei-t2280-03 kernel: softirqs last disabled at (0): [<0000000000000000>]           (null)
+> Nov  8 11:06:36 huawei-t2280-03 kernel: CPU: 1 PID: 0 Comm: swapper/1 Not tainted 4.20.0-rc1+ #3
+> Nov  8 11:06:36 huawei-t2280-03 kernel: Call trace:
+> Nov  8 11:06:36 huawei-t2280-03 kernel: dump_backtrace+0x0/0x190
+> Nov  8 11:06:36 huawei-t2280-03 kernel: show_stack+0x24/0x2c
+> Nov  8 11:06:36 huawei-t2280-03 kernel: dump_stack+0xa4/0xe0
+> Nov  8 11:06:36 huawei-t2280-03 kernel: ___might_sleep+0x208/0x234
+> Nov  8 11:06:36 huawei-t2280-03 kernel: __might_sleep+0x58/0x8c
+> Nov  8 11:06:36 huawei-t2280-03 kernel: kmem_cache_alloc_trace+0x29c/0x420
+> Nov  8 11:06:36 huawei-t2280-03 kernel: efi_mem_reserve_persistent+0x50/0xe8
+> Nov  8 11:06:36 huawei-t2280-03 kernel: its_cpu_init_lpis+0x298/0x2e0
+> Nov  8 11:06:36 huawei-t2280-03 kernel: its_cpu_init+0x7c/0x1a8
+> Nov  8 11:06:36 huawei-t2280-03 kernel: gic_starting_cpu+0x28/0x34
+> Nov  8 11:06:36 huawei-t2280-03 kernel: cpuhp_invoke_callback+0x104/0xd04
+> Nov  8 11:06:36 huawei-t2280-03 kernel: notify_cpu_starting+0x60/0xa0
+> Nov  8 11:06:36 huawei-t2280-03 kernel: secondary_start_kernel+0xcc/0x178
 > 
-> +static void setup_kaslr(struct boot_params *params)
-> +{
-> +	struct setup_data *kaslr_data = NULL;
-> +	struct setup_data *data;
-> +	unsigned long size;
-> +	efi_status_t status;
-> +
-> +	size = sizeof(struct setup_data) + sizeof(unsigned long long);
-> +
-> +	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
-> +			size, (void **)&kaslr_data);
-> 
-> I'm not sure how I allocate such memory on no EFI environment.
-
-A global definition which doesn't need allocation?
-
-Maybe hpa would have another, better idea...
-
--- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
+> Any idea?
