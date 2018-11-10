@@ -1,96 +1,45 @@
-From: "Qian Cai" <cai@gmx.us>
-Subject: Re: [PATCH] efi: permit calling efi_mem_reserve_persistent from
- atomic context
-Date: Sat, 10 Nov 2018 03:45:14 +0100
-Message-ID: <trinity-d366cf7f-4a38-4193-a636-b695d34d6c47-1541817914119@msvc-mesg-gmx024>
-References: <20181108180511.30239-1-ard.biesheuvel@linaro.org>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v8 0/3] x86/boot/KASLR: Parse ACPI table and limit kaslr
+ in immovable memory
+Date: Sat, 10 Nov 2018 11:54:22 +0100
+Message-ID: <20181110105422.GA20023@zn.tnic>
+References: <20181016195429.tovdgqq77gz3eek2@gabell>
+ <20181016195902.GK5212@zn.tnic>
+ <20181022154204.kagmdb55jtoez4ca@gabell>
+ <20181025103345.GF14020@nazgul.tnic>
+ <20181025134050.ggiir77ehntikbwg@gabell>
+ <20181106184519.GA16391@zn.tnic>
+ <20181106193636.svyjwuwrlgnpuyyf@gabell>
+ <20181106204511.GO13712@zn.tnic>
+ <20181106222133.lb7674yzszivzihd@gabell>
+ <20181108105129.GA7543@zn.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181108180511.30239-1-ard.biesheuvel@linaro.org>
+Content-Disposition: inline
+In-Reply-To: <20181108105129.GA7543@zn.tnic>
 Sender: linux-kernel-owner@vger.kernel.org
-Cc: linux-mm@kvack.org, linux-efi@vger.kernel.org, will.deacon@arm.com, linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, marc.zyngier@arm.com, linux-arm-kernel@lists.infradead.org
+To: Masayoshi Mizuma <msys.mizuma@gmail.com>, "H. Peter Anvin" <hpa@zytor.com>
+Cc: Baoquan He <bhe@redhat.com>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Chao Fan <fanc.fnst@cn.fujitsu.com>, linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, mingo@redhat.com, keescook@chromium.org, rjw@rjwysocki.net, lenb@kernel.org, ard.biesheuvel@linaro.org, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com
 List-Id: linux-efi@vger.kernel.org
 
-
-On 11/8/18 at 1:05 PM, Ard Biesheuvel wrote:
-
-> Currently, efi_mem_reserve_persistent() may not be called from atomic
-> context, since both the kmalloc() call and the memremap() call may
-> sleep.
+On Thu, Nov 08, 2018 at 11:51:29AM +0100, Borislav Petkov wrote:
+> A global definition which doesn't need allocation?
 > 
-> The kmalloc() call is easy enough to fix, but the memremap() call
-> needs to be moved into an init hook since we cannot control the
-> memory allocation behavior of memremap() at the call site.
-> 
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> ---
->  drivers/firmware/efi/efi.c | 31 +++++++++++++++++++------------
->  1 file changed, 19 insertions(+), 12 deletions(-)
-> 
-> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-> index 249eb70691b0..cfc876e0b67b 100644
-> --- a/drivers/firmware/efi/efi.c
-> +++ b/drivers/firmware/efi/efi.c
-> @@ -963,36 +963,43 @@ bool efi_is_table_address(unsigned long phys_addr)
->  }
->  
->  static DEFINE_SPINLOCK(efi_mem_reserve_persistent_lock);
-> +static struct linux_efi_memreserve *efi_memreserve_root __ro_after_init;
->  
->  int efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
->  {
-> -	struct linux_efi_memreserve *rsv, *parent;
-> +	struct linux_efi_memreserve *rsv;
->  
-> -	if (efi.mem_reserve == EFI_INVALID_TABLE_ADDR)
-> +	if (!efi_memreserve_root)
->  		return -ENODEV;
->  
-> -	rsv = kmalloc(sizeof(*rsv), GFP_KERNEL);
-> +	rsv = kmalloc(sizeof(*rsv), GFP_ATOMIC);
->  	if (!rsv)
->  		return -ENOMEM;
->  
-> -	parent = memremap(efi.mem_reserve, sizeof(*rsv), MEMREMAP_WB);
-> -	if (!parent) {
-> -		kfree(rsv);
-> -		return -ENOMEM;
-> -	}
-> -
->  	rsv->base = addr;
->  	rsv->size = size;
->  
->  	spin_lock(&efi_mem_reserve_persistent_lock);
-> -	rsv->next = parent->next;
-> -	parent->next = __pa(rsv);
-> +	rsv->next = efi_memreserve_root->next;
-> +	efi_memreserve_root->next = __pa(rsv);
->  	spin_unlock(&efi_mem_reserve_persistent_lock);
->  
-> -	memunmap(parent);
-> +	return 0;
-> +}
->  
-> +static int __init efi_memreserve_root_init(void)
-> +{
-> +	if (efi.mem_reserve == EFI_INVALID_TABLE_ADDR)
-> +		return -ENODEV;
-> +
-> +	efi_memreserve_root = memremap(efi.mem_reserve,
-> +				       sizeof(*efi_memreserve_root),
-> +				       MEMREMAP_WB);
-> +	if (!efi_memreserve_root)
-> +		return -ENOMEM;
->  	return 0;
->  }
-> +early_initcall(efi_memreserve_root_init);
->  
->  #ifdef CONFIG_KEXEC
->  static int update_efi_random_seed(struct notifier_block *nb,
-> -- 
-> 2.19.1
-BTW, I won’t be able to apply this patch on top of this series [1]. After applied that series, the original BUG sleep from atomic is gone as well as two other GIC warnings. Do you think a new patch is needed here?
+> Maybe hpa would have another, better idea...
 
-[1] https://www.spinics.net/lists/arm-kernel/msg685751.html
+...and he has: just put that address in a new field in struct
+boot_params by converting one of the padding arrays there.
+
+Don't forget to document it in Documentation/x86/zero-page.txt
+
+This way you don't need any of the allocation fun or to use setup_data
+at all.
+
+HTH.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
