@@ -1,123 +1,137 @@
-From: Chao Fan <fanc.fnst@cn.fujitsu.com>
-Subject: Re: [PATCH v11 3/5] x86/boot: Add get_acpi_rsdp() to parse RSDP in
- cmdlien from kexec
-Date: Mon, 12 Nov 2018 17:50:51 +0800
-Message-ID: <20181112095051.GA7453@localhost.localdomain>
-References: <20181112094645.4879-1-fanc.fnst@cn.fujitsu.com>
- <20181112094645.4879-4-fanc.fnst@cn.fujitsu.com>
+From: "Qian Cai" <cai@gmx.us>
+Subject: Re: [PATCH] efi: permit calling efi_mem_reserve_persistent from
+ atomic context
+Date: Mon, 12 Nov 2018 13:14:14 +0100
+Message-ID: <trinity-1cb5fd22-242b-44e5-91dc-fabf1f276bdf-1542024854775@msvc-mesg-gmx024>
+References: <20181108180511.30239-1-ard.biesheuvel@linaro.org>
+ <trinity-d366cf7f-4a38-4193-a636-b695d34d6c47-1541817914119@msvc-mesg-gmx024>
+ <E591C777-E2A6-4624-ABCE-C08251F7484A@gmx.us>
+ <86muqeelvt.wl-marc.zyngier@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20181112094645.4879-4-fanc.fnst@cn.fujitsu.com>
+In-Reply-To: <86muqeelvt.wl-marc.zyngier@arm.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, bp@alien8.de, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, keescook@chromium.org, bhe@redhat.com, msys.mizuma@gmail.com
-Cc: indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com
+To: Marc Zyngier <marc.zyngier@arm.com>
+Cc: linux kernel <linux-kernel@vger.kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, will.deacon@arm.com, linux-mm@kvack.org, linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi Boris,
 
-I try to include lib/kstrtox.c in arch/x86/boot/string.c and
-define the kstrtoull() function in arch/x86/boot/string.h.
-But the definition problem is hard to solve, so I include
-it in arch/x86/boot/string.c directely.
-Then use BOOT_STRING tag to cover other functions and only
-kstrtoull() is exposed.
-I am not sure whether this is OK.
+On 11/12/18 at 3:32 AM, Marc Zyngier wrote:
 
-Thanks,
-Chao Fan
+> On Mon, 12 Nov 2018 02:45:48 +0000,
+> Qian Cai <cai@gmx.us> wrote:
+> > 
+> > 
+> > 
+> > > On Nov 9, 2018, at 9:45 PM, Qian Cai <cai@gmx.us> wrote:
+> > > 
+> > > 
+> > > On 11/8/18 at 1:05 PM, Ard Biesheuvel wrote:
+> > > 
+> > >> Currently, efi_mem_reserve_persistent() may not be called from atomic
+> > >> context, since both the kmalloc() call and the memremap() call may
+> > >> sleep.
+> > >> 
+> > >> The kmalloc() call is easy enough to fix, but the memremap() call
+> > >> needs to be moved into an init hook since we cannot control the
+> > >> memory allocation behavior of memremap() at the call site.
+> > >> 
+> > >> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> > >> ---
+> > >> drivers/firmware/efi/efi.c | 31 +++++++++++++++++++------------
+> > >> 1 file changed, 19 insertions(+), 12 deletions(-)
+> > >> 
+> > >> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+> > >> index 249eb70691b0..cfc876e0b67b 100644
+> > >> --- a/drivers/firmware/efi/efi.c
+> > >> +++ b/drivers/firmware/efi/efi.c
+> > >> @@ -963,36 +963,43 @@ bool efi_is_table_address(unsigned long phys_addr)
+> > >> }
+> > >> 
+> > >> static DEFINE_SPINLOCK(efi_mem_reserve_persistent_lock);
+> > >> +static struct linux_efi_memreserve *efi_memreserve_root __ro_after_init;
+> > >> 
+> > >> int efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
+> > >> {
+> > >> -	struct linux_efi_memreserve *rsv, *parent;
+> > >> +	struct linux_efi_memreserve *rsv;
+> > >> 
+> > >> -	if (efi.mem_reserve == EFI_INVALID_TABLE_ADDR)
+> > >> +	if (!efi_memreserve_root)
+> > >> 		return -ENODEV;
+> > >> 
+> > >> -	rsv = kmalloc(sizeof(*rsv), GFP_KERNEL);
+> > >> +	rsv = kmalloc(sizeof(*rsv), GFP_ATOMIC);
+> > >> 	if (!rsv)
+> > >> 		return -ENOMEM;
+> > >> 
+> > >> -	parent = memremap(efi.mem_reserve, sizeof(*rsv), MEMREMAP_WB);
+> > >> -	if (!parent) {
+> > >> -		kfree(rsv);
+> > >> -		return -ENOMEM;
+> > >> -	}
+> > >> -
+> > >> 	rsv->base = addr;
+> > >> 	rsv->size = size;
+> > >> 
+> > >> 	spin_lock(&efi_mem_reserve_persistent_lock);
+> > >> -	rsv->next = parent->next;
+> > >> -	parent->next = __pa(rsv);
+> > >> +	rsv->next = efi_memreserve_root->next;
+> > >> +	efi_memreserve_root->next = __pa(rsv);
+> > >> 	spin_unlock(&efi_mem_reserve_persistent_lock);
+> > >> 
+> > >> -	memunmap(parent);
+> > >> +	return 0;
+> > >> +}
+> > >> 
+> > >> +static int __init efi_memreserve_root_init(void)
+> > >> +{
+> > >> +	if (efi.mem_reserve == EFI_INVALID_TABLE_ADDR)
+> > >> +		return -ENODEV;
+> > >> +
+> > >> +	efi_memreserve_root = memremap(efi.mem_reserve,
+> > >> +				       sizeof(*efi_memreserve_root),
+> > >> +				       MEMREMAP_WB);
+> > >> +	if (!efi_memreserve_root)
+> > >> +		return -ENOMEM;
+> > >> 	return 0;
+> > >> }
+> > >> +early_initcall(efi_memreserve_root_init);
+> > >> 
+> > >> #ifdef CONFIG_KEXEC
+> > >> static int update_efi_random_seed(struct notifier_block *nb,
+> > >> -- 
+> > >> 2.19.1
+> > > BTW, I won’t be able to apply this patch on top of this series [1]. After applied that series, the original BUG sleep from atomic is gone as well as two other GIC warnings. Do you think a new patch is needed here?
+> > > 
+> > > [1] https://www.spinics.net/lists/arm-kernel/msg685751.html
+> > OK, I was able to apply this patch on top of latest mainline (ccda4af0f4b9)
+> > which also include one patch (1/6) from the above series,
+> > 
+> > However, the efi-related patches from the series (4/6, 5/6, and 6/6) are no
+> > longer able to be cleanly applied. 
+> > 
+> > As the results, the above patch did fix the original BUG: sleep from atomic,
+> > but it introduces 2 new warnings.
+> 
+> [...]
+> 
+> These are the warnings you've already reported, aren't they? And we've
+> established that if you apply the whole series, everything work as
+> intended at least on the GIC side (the timer issue is a different
+> story altogether).
+> 
+> Or am I missing something?
+The problem is that I am not able to apply the whole  
+series alone on top of the latest mainline (rc2) now to 
+verify  it. Also, I won’t be able to apply the series and 
+this patch together on top of rc1. There are conflicts 
+between this patch and 4-6 of the series.
 
-On Mon, Nov 12, 2018 at 05:46:43PM +0800, Chao Fan wrote:
->Imitate setup_acpi_rsdp() for the early_param of 'acpi_rsdp'.
->KEXEC writes the RSDP pointer to cmdline for EFI booting.
->So if 'acpi_rsdp' found in cmdline, use it directely.
->
->Since function kstrtoull() is needed, include it in
->arch/x86/boot/string.h. To solve the definition conflict
->problem, set BOOT_STRING tag to expose only kstrtoull() and
->functions used by it. Other functions in lib/kstrtox.c will
->be covered.
->
->Signed-off-by: Chao Fan <fanc.fnst@cn.fujitsu.com>
->---
-> arch/x86/boot/compressed/acpitb.c | 26 ++++++++++++++++++++++++++
-> arch/x86/boot/string.h            |  4 ++++
-> lib/kstrtox.c                     |  4 ++++
-> 3 files changed, 34 insertions(+)
->
->diff --git a/arch/x86/boot/compressed/acpitb.c b/arch/x86/boot/compressed/acpitb.c
->index 50fa65cf824d..5cfb4efa5a19 100644
->--- a/arch/x86/boot/compressed/acpitb.c
->+++ b/arch/x86/boot/compressed/acpitb.c
->@@ -8,6 +8,12 @@
-> #include <linux/numa.h>
-> #include <linux/acpi.h>
-> 
->+#define STATIC
->+#include <linux/decompress/mm.h>
->+
->+#define BOOT_STRING
->+#include "../string.h"
->+
-> /* Search EFI table for RSDP table. */
-> static void efi_get_rsdp_addr(acpi_physical_address *rsdp_addr)
-> {
->@@ -200,3 +206,23 @@ static void bios_get_rsdp_addr(acpi_physical_address *rsdp_addr)
-> 		*rsdp_addr = (acpi_physical_address)address;
-> 	}
-> }
->+
->+static void get_acpi_rsdp(acpi_physical_address *rsdp_addr)
->+{
->+#ifdef CONFIG_KEXEC
->+	unsigned long long res;
->+	int len = 0;
->+	char *val;
->+
->+	val = malloc(19);
->+	len = cmdline_find_option("acpi_rsdp", val, 19);
->+
->+	if (len == -1)
->+		return;
->+
->+	if (len > 0) {
->+		val[len] = 0;
->+		*rsdp_addr = (acpi_physical_address)kstrtoull(val, 16, &res);
->+	}
->+#endif
->+}
->diff --git a/arch/x86/boot/string.h b/arch/x86/boot/string.h
->index 3d78e27077f4..0ff3edb888e4 100644
->--- a/arch/x86/boot/string.h
->+++ b/arch/x86/boot/string.h
->@@ -30,3 +30,7 @@ extern unsigned long long simple_strtoull(const char *cp, char **endp,
-> 					  unsigned int base);
-> 
-> #endif /* BOOT_STRING_H */
->+
->+#ifdef BOOT_STRING
->+#include "../../../lib/kstrtox.c"
->+#endif
->diff --git a/lib/kstrtox.c b/lib/kstrtox.c
->index 1006bf70bf74..3804db9eed56 100644
->--- a/lib/kstrtox.c
->+++ b/lib/kstrtox.c
->@@ -126,6 +126,8 @@ int kstrtoull(const char *s, unsigned int base, unsigned long long *res)
-> }
-> EXPORT_SYMBOL(kstrtoull);
-> 
->+#ifndef BOOT_STRING
->+
-> /**
->  * kstrtoll - convert a string to a long long
->  * @s: The start of the string. The string must be null-terminated, and may also
->@@ -408,3 +410,5 @@ kstrto_from_user(kstrtou16_from_user,	kstrtou16,	u16);
-> kstrto_from_user(kstrtos16_from_user,	kstrtos16,	s16);
-> kstrto_from_user(kstrtou8_from_user,	kstrtou8,	u8);
-> kstrto_from_user(kstrtos8_from_user,	kstrtos8,	s8);
->+
->+#endif
->-- 
->2.19.1
->
+Originally, I said those GIC warnings are gone when
+testing rc1 + the series, but I am not sure if it is just
+dumb luck that also fix BUG: sleep from atomic. Make
+sense?
