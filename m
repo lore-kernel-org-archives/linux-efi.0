@@ -1,7 +1,7 @@
 From: Chao Fan <fanc.fnst@cn.fujitsu.com>
-Subject: [PATCH v11 1/5] x86/boot: Add efi_get_rsdp_addr() to dig out RSDP from EFI table
-Date: Mon, 12 Nov 2018 17:46:41 +0800
-Message-ID: <20181112094645.4879-2-fanc.fnst@cn.fujitsu.com>
+Subject: [PATCH v11 2/5] x86/boot: Add bios_get_rsdp_addr() to search RSDP in memory
+Date: Mon, 12 Nov 2018 17:46:42 +0800
+Message-ID: <20181112094645.4879-3-fanc.fnst@cn.fujitsu.com>
 References: <20181112094645.4879-1-fanc.fnst@cn.fujitsu.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
@@ -13,122 +13,134 @@ To: linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, lin
 Cc: indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com, fanc.fnst@cn.fujitsu.com
 List-Id: linux-efi@vger.kernel.org
 
-In order to parse SRAT table and get memory information, RSDP pointer
-should be found. In kernel, there are three methods to get RSDP:
-EFI condition, BIOS condition and KEXEC condition. The first works
-for EFI condition.
+Imitate ACPI code to search RSDP pointer from memory.
+Walk memory and check the signature until get the RSDP signature.
+Based on acpi_tb_scan_memory_for_rsdp() and acpi_find_root_pointer().
+If didn't get RSDP from EFI table, will run this function.
 
-Imitate ACPI code and EFI code to dig RSDP pointer from EFI tables.
-Process: boot_param->systab->efi_config_table->RSDP.
-Based on efi_init(), efi_config_init(), efi_config_parse_tables().
+Used for later patch to dig out SRAT table and get the memory
+information. And figure out the immovable memory regions
+to avoid KASLR extracts kernel on movable memory, slove the
+conflict between KASLR and movable_node feature.
 
 Signed-off-by: Chao Fan <fanc.fnst@cn.fujitsu.com>
 ---
- arch/x86/boot/compressed/acpitb.c | 96 +++++++++++++++++++++++++++++++
- 1 file changed, 96 insertions(+)
- create mode 100644 arch/x86/boot/compressed/acpitb.c
+ arch/x86/boot/compressed/acpitb.c | 106 ++++++++++++++++++++++++++++++
+ 1 file changed, 106 insertions(+)
 
 diff --git a/arch/x86/boot/compressed/acpitb.c b/arch/x86/boot/compressed/acpitb.c
-new file mode 100644
-index 000000000000..56b54b0e0889
---- /dev/null
+index 56b54b0e0889..50fa65cf824d 100644
+--- a/arch/x86/boot/compressed/acpitb.c
 +++ b/arch/x86/boot/compressed/acpitb.c
-@@ -0,0 +1,96 @@
-+// SPDX-License-Identifier: GPL-2.0
-+#define BOOT_CTYPE_H
-+#include "misc.h"
-+#include "error.h"
+@@ -94,3 +94,109 @@ static void efi_get_rsdp_addr(acpi_physical_address *rsdp_addr)
+ 	}
+ #endif
+ }
 +
-+#include <linux/efi.h>
-+#include <asm/efi.h>
-+#include <linux/numa.h>
-+#include <linux/acpi.h>
-+
-+/* Search EFI table for RSDP table. */
-+static void efi_get_rsdp_addr(acpi_physical_address *rsdp_addr)
++static u8 compute_checksum(u8 *buffer, u32 length)
 +{
-+#ifdef CONFIG_EFI
-+	efi_system_table_t *systab;
-+	bool efi_64 = false;
-+	void *config_tables;
-+	struct efi_info *e;
-+	char *sig;
-+	int size;
-+	int i;
++	u8 sum = 0;
++	u8 *end = buffer + length;
 +
-+	e = &boot_params->efi_info;
-+	sig = (char *)&e->efi_loader_signature;
++	while (buffer < end)
++		sum = (u8)(sum + *(buffer++));
 +
-+	if (!strncmp(sig, EFI64_LOADER_SIGNATURE, 4))
-+		efi_64 = true;
-+	else if (!strncmp(sig, EFI32_LOADER_SIGNATURE, 4))
-+		efi_64 = false;
-+	else {
-+		debug_putstr("Wrong EFI loader signature.\n");
-+		return;
++	return sum;
++}
++
++/*
++ * Used to search a block of memory for the RSDP signature.
++ * Return Pointer to the RSDP if found, otherwise NULL.
++ * Based on acpi_tb_scan_memory_for_rsdp().
++ */
++static u8 *scan_mem_for_rsdp(u8 *start, u32 length)
++{
++	struct acpi_table_rsdp *rsdp;
++	u8 *end;
++	u8 *rover;
++
++	end = start + length;
++
++	/* Search from given start address for the requested length */
++	for (rover = start; rover < end; rover += ACPI_RSDP_SCAN_STEP) {
++		/*
++		 * The RSDP signature and checksum must both be correct
++		 * Note: Sometimes there exists more than one RSDP in memory;
++		 * the valid RSDP has a valid checksum, all others have an
++		 * invalid checksum.
++		 */
++		rsdp = (struct acpi_table_rsdp *)rover;
++
++		/* Nope, BAD Signature */
++		if (!ACPI_VALIDATE_RSDP_SIG(rsdp->signature))
++			continue;
++
++		/* Check the standard checksum */
++		if (compute_checksum((u8 *) rsdp, ACPI_RSDP_CHECKSUM_LENGTH))
++			continue;
++
++		/* Check extended checksum if table version >= 2 */
++		if ((rsdp->revision >= 2) &&
++		    (compute_checksum((u8 *) rsdp, ACPI_RSDP_XCHECKSUM_LENGTH)))
++			continue;
++
++		/* Sig and checksum valid, we have found a real RSDP */
++		return rover;
 +	}
++	return NULL;
++}
 +
-+	/* Get systab from boot params. Based on efi_init(). */
-+#ifdef CONFIG_X86_64
-+	systab = (efi_system_table_t *)(
-+			e->efi_systab | ((__u64)e->efi_systab_hi<<32));
-+#else
-+	if (e->efi_systab_hi || e->efi_memmap_hi) {
-+		debug_putstr("Table located above 4GB. EFI should be disabled.\n");
-+		return;
-+	}
-+	systab = (efi_system_table_t *)e->efi_systab;
-+#endif
-+
-+	if (!systab)
-+		return;
++/*
++ * Used to search RSDP physical address.
++ * Based on acpi_find_root_pointer(). Since only use physical address
++ * in this period, so there is no need to do the memory map jobs.
++ */
++static void bios_get_rsdp_addr(acpi_physical_address *rsdp_addr)
++{
++	struct acpi_table_rsdp *rsdp;
++	u8 *table_ptr;
++	u8 *mem_rover;
++	u32 address;
 +
 +	/*
-+	 * Get EFI tables from systab. Based on efi_config_init() and
-+	 * efi_config_parse_tables(). Only dig out the config_table.
++	 * Get the location of the Extended BIOS Data Area (EBDA)
++	 * Since we use physical address directely, so
++	 * acpi_os_map_memory() and acpi_os_unmap_memory() are
++	 * not needed here.
 +	 */
-+	size = efi_64 ? sizeof(efi_config_table_64_t) :
-+			sizeof(efi_config_table_32_t);
++	table_ptr = (u8 *)ACPI_EBDA_PTR_LOCATION;
++	*(u32 *)(void *)&address = *(u16 *)(void *)table_ptr;
++	address <<= 4;
++	table_ptr = (u8 *)address;
 +
-+	for (i = 0; i < systab->nr_tables; i++) {
-+		efi_guid_t guid;
-+		unsigned long table;
++	/*
++	 * Search EBDA paragraphs (EBDA is required to be a minimum of
++	 * 1K length)
++	 */
++	if (address > 0x400) {
++		mem_rover = scan_mem_for_rsdp(table_ptr, ACPI_EBDA_WINDOW_SIZE);
 +
-+		config_tables = (void *)(systab->tables + size * i);
-+		if (efi_64) {
-+			efi_config_table_64_t *tmp_table;
-+
-+			tmp_table = (efi_config_table_64_t *)config_tables;
-+			guid = tmp_table->guid;
-+			table = tmp_table->table;
-+#ifndef CONFIG_64BIT
-+			if (table >> 32) {
-+				debug_putstr("Table located above 4G. EFI should be disabled.\n");
-+				return;
-+			}
-+#endif
-+		} else {
-+			efi_config_table_32_t *tmp_table;
-+
-+			tmp_table = (efi_config_table_32_t *)config_tables;
-+			guid = tmp_table->guid;
-+			table = tmp_table->table;
-+		}
-+
-+		/*
-+		 * Get RSDP from EFI tables.
-+		 * If ACPI20 table found, use it.
-+		 * If ACPI20 table not found, but ACPI table found,
-+		 * use the ACPI table.
-+		 */
-+		if (!(efi_guidcmp(guid, ACPI_TABLE_GUID))) {
-+			*rsdp_addr = (acpi_physical_address)table;
-+		} else if (!(efi_guidcmp(guid, ACPI_20_TABLE_GUID))) {
-+			*rsdp_addr = (acpi_physical_address)table;
++		if (mem_rover) {
++			address += (u32)ACPI_PTR_DIFF(mem_rover, table_ptr);
++			*rsdp_addr = (acpi_physical_address)address;
 +			return;
 +		}
 +	}
-+#endif
++
++	table_ptr = (u8 *)ACPI_HI_RSDP_WINDOW_BASE;
++	mem_rover = scan_mem_for_rsdp(table_ptr, ACPI_HI_RSDP_WINDOW_SIZE);
++
++	/*
++	 * Search upper memory: 16-byte boundaries in E0000h-FFFFFh
++	 * Since we use physical address directely, so
++	 * acpi_os_map_memory() and acpi_os_unmap_memory() are
++	 * not needed here.
++	 */
++	if (mem_rover) {
++		address = (u32)(ACPI_HI_RSDP_WINDOW_BASE +
++				ACPI_PTR_DIFF(mem_rover, table_ptr));
++		*rsdp_addr = (acpi_physical_address)address;
++	}
 +}
 -- 
 2.19.1
