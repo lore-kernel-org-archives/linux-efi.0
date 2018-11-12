@@ -1,8 +1,8 @@
 From: Masayoshi Mizuma <msys.mizuma@gmail.com>
 Subject: Re: [PATCH v11 4/5] x86/boot: Dig out SRAT table from RSDP and find
  immovable memory
-Date: Mon, 12 Nov 2018 15:52:54 -0500
-Message-ID: <20181112205253.ji3fm37haferjpqa@gabell>
+Date: Mon, 12 Nov 2018 16:51:59 -0500
+Message-ID: <20181112215158.55jcpbe4fa6jskb5@gabell>
 References: <20181112094645.4879-1-fanc.fnst@cn.fujitsu.com>
  <20181112094645.4879-5-fanc.fnst@cn.fujitsu.com>
 Mime-Version: 1.0
@@ -49,6 +49,13 @@ On Mon, Nov 12, 2018 at 05:46:44PM +0800, Chao Fan wrote:
 > +#if (defined CONFIG_MEMORY_HOTREMOVE) && (defined CONFIG_RANDOMIZE_BASE)
 > +vmlinux-objs-$(CONFIG_RANDOMIZE_BASE) += $(obj)/acpitb.o
 > +#endif
+
+'#' in Makefile means comment out...
+
+ifdef CONFIG_MEMORY_HOTREMOVE
+        vmlinux-objs-$(CONFIG_RANDOMIZE_BASE) += $(obj)/acpitb.o
+endif
+
 > +
 >  $(obj)/eboot.o: KBUILD_CFLAGS += -fshort-wchar -mno-red-zone
 >  
@@ -61,10 +68,19 @@ On Mon, Nov 12, 2018 at 05:46:44PM +0800, Chao Fan wrote:
 >  #define BOOT_STRING
 >  #include "../string.h"
 >  
+
 > +#ifdef CONFIG_MEMORY_HOTREMOVE
 > +/* Store the immovable memory regions */
 > +struct mem_vector immovable_mem[MAX_NUMNODES*2];
 > +#endif
+
+This #ifdef isn't needed.
+
+Could you please check the other #ifdef statement as well?
+
+Thanks,
+Masa
+
 > +
 >  /* Search EFI table for RSDP table. */
 >  static void efi_get_rsdp_addr(acpi_physical_address *rsdp_addr)
@@ -113,19 +129,10 @@ On Mon, Nov 12, 2018 at 05:46:44PM +0800, Chao Fan wrote:
 > +	rsdp = (struct acpi_table_rsdp *)get_rsdp_addr();
 > +	if (!rsdp)
 > +		return NULL;
-
 > +
 > +	ret = cmdline_find_option("acpi", arg, sizeof(arg));
 > +	if (ret == 4 && !strncmp(arg, "rsdt", 4))
 > +		acpi_use_rsdt = true;
-
-All have to do for ret is checking whether it's above 0, right?
-So how about the following?
-
-	if ((cmdline_find_option("acpi", arg, sizeof(arg)) > 0) &&
-		!strncmp(arg, "rsdt", 4))
-		acpi_use_rsdt = true;
-
 > +
 > +	/* Get RSDT or XSDT from RSDP. */
 > +	if (!acpi_use_rsdt &&
@@ -156,11 +163,7 @@ So how about the following?
 > +
 > +		if (acpi_table) {
 > +			header = (struct acpi_table_header *)acpi_table;
-
 > +			signature = header->signature;
-
-this isn't needed.
-
 > +
 > +			if (ACPI_COMPARE_NAME(header->signature, ACPI_SIG_SRAT))
 > +				return header;
@@ -184,24 +187,12 @@ this isn't needed.
 > +	int i = 0;
 > +	int ret;
 > +
-
 > +	ret = cmdline_find_option("acpi", arg, sizeof(arg));
 > +	if (ret == 3 && !strncmp(arg, "off", 3))
 > +		return;
-
-Same as above.
-
-	if ((cmdline_find_option("acpi", arg, sizeof(arg)) > 0) &&
-		!strncmp(arg, "off", 3))
-		return;
 > +
 > +	if (!cmdline_find_option_bool("movable_node"))
 > +		return;
-
-I think this check isn't needed.
-The SRAT parsing is needed to the kaslr issue which I'm trying
-to fix. The issue may happen even if movable_node isn't set.
-
 > +
 > +	table_header = get_acpi_srat_table();
 > +	if (!table_header)
@@ -224,13 +215,6 @@ to fix. The issue may happen even if movable_node isn't set.
 > +
 > +			if (i >= MAX_NUMNODES*2) {
 > +				debug_putstr("Too many immovable memory regions, aborted.\n");
-
-I'm not sure this statement gets true actually,
-but if so, should it be set 0 to fallback in process_mem_region()?
-
-Thanks,
-Masa
-
 > +				break;
 > +			}
 > +		}
