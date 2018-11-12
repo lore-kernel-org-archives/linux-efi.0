@@ -1,253 +1,134 @@
 From: Chao Fan <fanc.fnst@cn.fujitsu.com>
-Subject: [PATCH v11 4/5] x86/boot: Dig out SRAT table from RSDP and find immovable memory
-Date: Mon, 12 Nov 2018 17:46:44 +0800
-Message-ID: <20181112094645.4879-5-fanc.fnst@cn.fujitsu.com>
-References: <20181112094645.4879-1-fanc.fnst@cn.fujitsu.com>
+Subject: [PATCH v11 0/5] x86/boot/KASLR: Parse ACPI table and limit kaslr in immovable memory
+Date: Mon, 12 Nov 2018 17:46:40 +0800
+Message-ID: <20181112094645.4879-1-fanc.fnst@cn.fujitsu.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181112094645.4879-1-fanc.fnst@cn.fujitsu.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, bp@alien8.de, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, keescook@chromium.org, bhe@redhat.com, msys.mizuma@gmail.com
 Cc: indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com, fanc.fnst@cn.fujitsu.com
 List-Id: linux-efi@vger.kernel.org
 
-To avoid KASLR extracting kernel on movable memory, slove the
-conflict between KASLR and movable_node feature, dig the SRAT tables
-from RSDP pointer. Walk the SRAT tables and store the immovable
-memory regions in immovable_mem[].
+***Background:
+People reported that kaslr may randomly chooses some positions
+which are located in movable memory regions. This will break memory
+hotplug feature and make the movable memory chosen by KASLR can't be
+removed.
 
-There are three methods to get RSDP pointer: KEXEC condition,
-EFI confition, BIOS condition.
-If KEXEC add 'acpi_rsdp' to cmdline, use it.
-Otherwise, parse EFI table for RSDP.
-Then, search memory for RSDP.
+***Solutions:
+There should be a method to limit kaslr to choosing immovable memory
+regions, so there are 2 solutions:
+1) Add a kernel parameter to specify the memory regions.
+2) Get the information of memory hot-remove, then kaslr will know the
+   right regions.
+In method 2, information about memory hot-remove is in ACPI
+tables, which will be parsed after start_kernel(), kaslr can't get
+the information.
+In method 1, users should know the regions address and specify in
+kernel parameter.
 
-Imitate from ACPI code, based on acpi_os_get_root_pointer().
-Process: RSDP->RSDT/XSDT->ACPI root table->SRAT.
+In the earliest time, I tried to dig ACPI tabls to solve this problem.
+But I didn't splite the code in 'compressed/' and ACPI code, so the patch
+is hard to follow so refused by community.
+Somebody suggest to add a kernel parameter to specify the
+immovable memory so that limit kaslr in these regions. Then I make
+a new patchset. After several versions, Ingo gave a suggestion:
+https://www.mail-archive.com/linux-kernel@vger.kernel.org/msg1634024.html
+Follow Ingo's suggestion, imitate the ACPI code to parse the acpi
+tables, so that the kaslr can get necessary memory information in
+ACPI tables.
+I think ACPI code is an independent part, so imitate the codes
+and functions to 'compressed/' directory, so that kaslr won't
+influence the initialization of ACPI.
 
-Signed-off-by: Chao Fan <fanc.fnst@cn.fujitsu.com>
----
+PATCH 1/7 Add efi_get_rsdp_addr() to dig out RSDP from EFI table when
+          booting from EFI.
+PATCH 2/7 Add bios_get_rsdp_addr() to search RSDP in memory when EFI
+          table not found.
+PATCH 3/7 Add get_acpi_rsdp() to parse RSDP in cmdline from kexec
+PATCH 4/7 Dig out SRAT table from RSDP and walk SRAT table to store
+          the immovable memory regions.
+PATCH 5/7 Calculate the intersection between memory regions from e820/efi
+          memory table and immovable memory regions. Limit KASLR choose
+          these regions for randomization.
+
+v1->v2:
+ -  Simplify some code.
+Follow Baoquan He's suggestion:
+ - Reuse the head file of acpi code.
+
+v2->v3:
+ - Test in more conditions, so remove the 'RFC' tag.
+ - Change some comments.
+
+v3->v4:
+Follow Thomas Gleixner's suggetsion:
+ - Put the whole efi related function into #define CONFIG_EFI and return
+   false in the other stub.
+
+v4->v5:
+Follow Dou Liyang's suggestion:
+ - Add more comments about some functions based on kernel code.
+ - Change some typo in comments.
+ - Clean useless variable.
+ - Add check for the boundary of array.
+ - Add check for 'movable_node' parameter
+
+v5->v6:
+Follow Baoquan He's suggestion:
+ - Change some log.
+ - Add the check for acpi_rsdp
+ - Change some code logical to make code clear
+
+v6->v7:
+Follow Rafael's suggestion:
+ - Add more comments and patch log.
+Follow test robot's suggestion:
+ - Add "static" tag for function
+
+v7-v8:
+Follow Kees Cook's suggestion:
+ - Use mem_overlaps() to check memory region.
+ - Use #ifdef in the definition of function.
+
+v8-v9:
+Follow Boris' suggestion:
+ - Change code style.
+ - Splite PATCH 1/3 to more path.
+ - Introduce some new function
+ - Use existing function to rework some code
+Follow Masayoshi's suggetion:
+ - Make code more readable
+
+v9->v10:
+Follow Baoquan's suggestion:
+ - Change some log
+ - Merge last two patch together.
+
+v10->v11:
+Follow Boris' suggestion:
+ - Link kstrtoull() instead of copying it.
+ - Drop the useless wraped function.
+
+Any comments will be welcome.
+
+Chao Fan (5):
+  x86/boot: Add efi_get_rsdp_addr() to dig out RSDP from EFI table
+  x86/boot: Add bios_get_rsdp_addr() to search RSDP in memory
+  x86/boot: Add get_acpi_rsdp() to parse RSDP in cmdlien from kexec
+  x86/boot: Dig out SRAT table from RSDP and find immovable memory
+  x86/boot/KASLR: Walk srat tables to filter immovable memory
+
  arch/x86/boot/compressed/Makefile |   4 +
- arch/x86/boot/compressed/acpitb.c | 139 ++++++++++++++++++++++++++++++
- arch/x86/boot/compressed/kaslr.c  |   4 -
- arch/x86/boot/compressed/misc.h   |  15 ++++
- 4 files changed, 158 insertions(+), 4 deletions(-)
+ arch/x86/boot/compressed/acpitb.c | 367 ++++++++++++++++++++++++++++++
+ arch/x86/boot/compressed/kaslr.c  |  81 +++++--
+ arch/x86/boot/compressed/misc.h   |  15 ++
+ arch/x86/boot/string.h            |   4 +
+ lib/kstrtox.c                     |   4 +
+ 6 files changed, 460 insertions(+), 15 deletions(-)
+ create mode 100644 arch/x86/boot/compressed/acpitb.c
 
-diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
-index 466f66c8a7f8..b51f7629b8ef 100644
---- a/arch/x86/boot/compressed/Makefile
-+++ b/arch/x86/boot/compressed/Makefile
-@@ -84,6 +84,10 @@ ifdef CONFIG_X86_64
- 	vmlinux-objs-y += $(obj)/pgtable_64.o
- endif
- 
-+#if (defined CONFIG_MEMORY_HOTREMOVE) && (defined CONFIG_RANDOMIZE_BASE)
-+vmlinux-objs-$(CONFIG_RANDOMIZE_BASE) += $(obj)/acpitb.o
-+#endif
-+
- $(obj)/eboot.o: KBUILD_CFLAGS += -fshort-wchar -mno-red-zone
- 
- vmlinux-objs-$(CONFIG_EFI_STUB) += $(obj)/eboot.o $(obj)/efi_stub_$(BITS).o \
-diff --git a/arch/x86/boot/compressed/acpitb.c b/arch/x86/boot/compressed/acpitb.c
-index 5cfb4efa5a19..161f21a7fb3b 100644
---- a/arch/x86/boot/compressed/acpitb.c
-+++ b/arch/x86/boot/compressed/acpitb.c
-@@ -14,6 +14,11 @@
- #define BOOT_STRING
- #include "../string.h"
- 
-+#ifdef CONFIG_MEMORY_HOTREMOVE
-+/* Store the immovable memory regions */
-+struct mem_vector immovable_mem[MAX_NUMNODES*2];
-+#endif
-+
- /* Search EFI table for RSDP table. */
- static void efi_get_rsdp_addr(acpi_physical_address *rsdp_addr)
- {
-@@ -226,3 +231,137 @@ static void get_acpi_rsdp(acpi_physical_address *rsdp_addr)
- 	}
- #endif
- }
-+
-+/*
-+ * Used to dig RSDP table from EFI table or BIOS.
-+ * If RSDP table found in EFI table, use it. Or search BIOS.
-+ * Based on acpi_os_get_root_pointer().
-+ */
-+static acpi_physical_address get_rsdp_addr(void)
-+{
-+	acpi_physical_address pa = 0;
-+
-+	get_acpi_rsdp(&pa);
-+
-+	if (!pa)
-+		efi_get_rsdp_addr(&pa);
-+
-+	if (!pa)
-+		bios_get_rsdp_addr(&pa);
-+
-+	return pa;
-+}
-+
-+static struct acpi_table_header *get_acpi_srat_table(void)
-+{
-+	acpi_physical_address acpi_table;
-+	acpi_physical_address root_table;
-+	struct acpi_table_header *header;
-+	struct acpi_table_rsdp *rsdp;
-+	bool acpi_use_rsdt = false;
-+	char *signature;
-+	char arg[10];
-+	u8 *entry;
-+	u32 count;
-+	u32 size;
-+	int i, j;
-+	int ret;
-+	u32 len;
-+
-+	rsdp = (struct acpi_table_rsdp *)get_rsdp_addr();
-+	if (!rsdp)
-+		return NULL;
-+
-+	ret = cmdline_find_option("acpi", arg, sizeof(arg));
-+	if (ret == 4 && !strncmp(arg, "rsdt", 4))
-+		acpi_use_rsdt = true;
-+
-+	/* Get RSDT or XSDT from RSDP. */
-+	if (!acpi_use_rsdt &&
-+	    rsdp->xsdt_physical_address && rsdp->revision > 1) {
-+		root_table = rsdp->xsdt_physical_address;
-+		size = ACPI_XSDT_ENTRY_SIZE;
-+	} else {
-+		root_table = rsdp->rsdt_physical_address;
-+		size = ACPI_RSDT_ENTRY_SIZE;
-+	}
-+
-+	/* Get ACPI root table from RSDT or XSDT.*/
-+	header = (struct acpi_table_header *)root_table;
-+	len = header->length;
-+	count = (u32)((len - sizeof(struct acpi_table_header)) / size);
-+	entry = ACPI_ADD_PTR(u8, header, sizeof(struct acpi_table_header));
-+
-+	for (i = 0; i < count; i++) {
-+		u64 address64;
-+
-+		if (size == ACPI_RSDT_ENTRY_SIZE)
-+			acpi_table = ((acpi_physical_address)
-+				      (*ACPI_CAST_PTR(u32, entry)));
-+		else {
-+			*(u64 *)(void *)&address64 = *(u64 *)(void *)entry;
-+			acpi_table = (acpi_physical_address) address64;
-+		}
-+
-+		if (acpi_table) {
-+			header = (struct acpi_table_header *)acpi_table;
-+			signature = header->signature;
-+
-+			if (ACPI_COMPARE_NAME(header->signature, ACPI_SIG_SRAT))
-+				return header;
-+		}
-+		entry += size;
-+	}
-+	return NULL;
-+}
-+
-+/*
-+ * According to ACPI table, filter the immvoable memory regions
-+ * and store them in immovable_mem[].
-+ */
-+void get_immovable_mem(void)
-+{
-+	struct acpi_table_header *table_header;
-+	struct acpi_subtable_header *table;
-+	struct acpi_srat_mem_affinity *ma;
-+	unsigned long table_end;
-+	char arg[10];
-+	int i = 0;
-+	int ret;
-+
-+	ret = cmdline_find_option("acpi", arg, sizeof(arg));
-+	if (ret == 3 && !strncmp(arg, "off", 3))
-+		return;
-+
-+	if (!cmdline_find_option_bool("movable_node"))
-+		return;
-+
-+	table_header = get_acpi_srat_table();
-+	if (!table_header)
-+		return;
-+
-+	table_end = (unsigned long)table_header + table_header->length;
-+
-+	table = (struct acpi_subtable_header *)
-+		((unsigned long)table_header + sizeof(struct acpi_table_srat));
-+
-+	while (((unsigned long)table) +
-+		       sizeof(struct acpi_subtable_header) < table_end) {
-+		if (table->type == ACPI_SRAT_TYPE_MEMORY_AFFINITY) {
-+			ma = (struct acpi_srat_mem_affinity *)table;
-+			if (!(ma->flags & ACPI_SRAT_MEM_HOT_PLUGGABLE)) {
-+				immovable_mem[i].start = ma->base_address;
-+				immovable_mem[i].size = ma->length;
-+				i++;
-+			}
-+
-+			if (i >= MAX_NUMNODES*2) {
-+				debug_putstr("Too many immovable memory regions, aborted.\n");
-+				break;
-+			}
-+		}
-+		table = (struct acpi_subtable_header *)
-+			((unsigned long)table + table->length);
-+	}
-+	num_immovable_mem = i;
-+}
-diff --git a/arch/x86/boot/compressed/kaslr.c b/arch/x86/boot/compressed/kaslr.c
-index 9ed9709d9947..b251572e77af 100644
---- a/arch/x86/boot/compressed/kaslr.c
-+++ b/arch/x86/boot/compressed/kaslr.c
-@@ -87,10 +87,6 @@ static unsigned long get_boot_seed(void)
- #define KASLR_COMPRESSED_BOOT
- #include "../../lib/kaslr.c"
- 
--struct mem_vector {
--	unsigned long long start;
--	unsigned long long size;
--};
- 
- /* Only supporting at most 4 unusable memmap regions with kaslr */
- #define MAX_MEMMAP_REGIONS	4
-diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
-index a1d5918765f3..4a3645fda0ed 100644
---- a/arch/x86/boot/compressed/misc.h
-+++ b/arch/x86/boot/compressed/misc.h
-@@ -77,6 +77,11 @@ void choose_random_location(unsigned long input,
- 			    unsigned long *output,
- 			    unsigned long output_size,
- 			    unsigned long *virt_addr);
-+struct mem_vector {
-+	unsigned long long start;
-+	unsigned long long size;
-+};
-+
- /* cpuflags.c */
- bool has_cpuflag(int flag);
- #else
-@@ -116,3 +121,13 @@ static inline void console_init(void)
- void set_sev_encryption_mask(void);
- 
- #endif
-+
-+/* acpitb.c */
-+#ifdef CONFIG_RANDOMIZE_BASE
-+int num_immovable_mem;
-+#ifdef CONFIG_MEMORY_HOTREMOVE
-+/* Store the amount of immovable memory regions */
-+#define ACPI_MAX_TABLES                128
-+void get_immovable_mem(void);
-+#endif
-+#endif
 -- 
 2.19.1
