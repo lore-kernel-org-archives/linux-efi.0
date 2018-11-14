@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 2/5] efi: arm: revert deferred unmap of early memmap mapping
-Date: Wed, 14 Nov 2018 09:55:41 -0800
-Message-ID: <20181114175544.12860-3-ard.biesheuvel@linaro.org>
+Subject: [PATCH 5/5] efi: permit calling efi_mem_reserve_persistent from atomic context
+Date: Wed, 14 Nov 2018 09:55:44 -0800
+Message-ID: <20181114175544.12860-6-ard.biesheuvel@linaro.org>
 References: <20181114175544.12860-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20181114175544.12860-1-ard.biesheuvel@linaro.org>
@@ -10,67 +10,78 @@ To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Commit 3ea86495aef2 ("efi/arm: preserve early mapping of UEFI memory
-map longer for BGRT") deferred the unmap of the early mapping of the
-UEFI memory map to accommodate the ACPI BGRT code, which looks up the
-memory type that backs the BGRT table to validate it against the
-requirements of the UEFI spec.
+Currently, efi_mem_reserve_persistent() may not be called from atomic
+context, since both the kmalloc() call and the memremap() call may
+sleep.
 
-Unfortunately, this causes problems on ARM, which does not permit
-early mappings to persist after paging_init() is called, resulting
-in a WARN() splat. Since we don't support the BGRT table on ARM anway,
-let's revert ARM to the old behaviour, which is to take down the
-early mapping at the end of efi_init().
+The kmalloc() call is easy enough to fix, but the memremap() call
+needs to be moved into an init hook since we cannot control the
+memory allocation behavior of memremap() at the call site.
 
-Fixes: 3ea86495aef2 ("efi/arm: preserve early mapping of UEFI memory ...")
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- drivers/firmware/efi/arm-init.c    | 4 ++++
- drivers/firmware/efi/arm-runtime.c | 2 +-
- drivers/firmware/efi/memmap.c      | 3 +++
- 3 files changed, 8 insertions(+), 1 deletion(-)
+ drivers/firmware/efi/efi.c | 31 +++++++++++++++++++------------
+ 1 file changed, 19 insertions(+), 12 deletions(-)
 
-diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
-index 388a929baf95..1a6a77df8a5e 100644
---- a/drivers/firmware/efi/arm-init.c
-+++ b/drivers/firmware/efi/arm-init.c
-@@ -265,6 +265,10 @@ void __init efi_init(void)
- 				    (params.mmap & ~PAGE_MASK)));
- 
- 	init_screen_info();
-+
-+	/* ARM does not permit early mappings to persist across paging_init() */
-+	if (IS_ENABLED(CONFIG_ARM))
-+		efi_memmap_unmap();
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 72a4da76d274..fad7c62cfc0e 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -967,36 +967,43 @@ bool efi_is_table_address(unsigned long phys_addr)
  }
  
- static int __init register_gop_device(void)
-diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
-index 922cfb813109..a00934d263c5 100644
---- a/drivers/firmware/efi/arm-runtime.c
-+++ b/drivers/firmware/efi/arm-runtime.c
-@@ -110,7 +110,7 @@ static int __init arm_enable_runtime_services(void)
- {
- 	u64 mapsize;
+ static DEFINE_SPINLOCK(efi_mem_reserve_persistent_lock);
++static struct linux_efi_memreserve *efi_memreserve_root __ro_after_init;
  
--	if (!efi_enabled(EFI_BOOT) || !efi_enabled(EFI_MEMMAP)) {
-+	if (!efi_enabled(EFI_BOOT)) {
- 		pr_info("EFI services will not be available.\n");
- 		return 0;
- 	}
-diff --git a/drivers/firmware/efi/memmap.c b/drivers/firmware/efi/memmap.c
-index fa2904fb841f..38b686c67b17 100644
---- a/drivers/firmware/efi/memmap.c
-+++ b/drivers/firmware/efi/memmap.c
-@@ -118,6 +118,9 @@ int __init efi_memmap_init_early(struct efi_memory_map_data *data)
- 
- void __init efi_memmap_unmap(void)
+ int efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
  {
-+	if (!efi_enabled(EFI_MEMMAP))
-+		return;
+-	struct linux_efi_memreserve *rsv, *parent;
++	struct linux_efi_memreserve *rsv;
+ 
+-	if (efi.mem_reserve == EFI_INVALID_TABLE_ADDR)
++	if (!efi_memreserve_root)
+ 		return -ENODEV;
+ 
+-	rsv = kmalloc(sizeof(*rsv), GFP_KERNEL);
++	rsv = kmalloc(sizeof(*rsv), GFP_ATOMIC);
+ 	if (!rsv)
+ 		return -ENOMEM;
+ 
+-	parent = memremap(efi.mem_reserve, sizeof(*rsv), MEMREMAP_WB);
+-	if (!parent) {
+-		kfree(rsv);
+-		return -ENOMEM;
+-	}
+-
+ 	rsv->base = addr;
+ 	rsv->size = size;
+ 
+ 	spin_lock(&efi_mem_reserve_persistent_lock);
+-	rsv->next = parent->next;
+-	parent->next = __pa(rsv);
++	rsv->next = efi_memreserve_root->next;
++	efi_memreserve_root->next = __pa(rsv);
+ 	spin_unlock(&efi_mem_reserve_persistent_lock);
+ 
+-	memunmap(parent);
++	return 0;
++}
+ 
++static int __init efi_memreserve_root_init(void)
++{
++	if (efi.mem_reserve == EFI_INVALID_TABLE_ADDR)
++		return -ENODEV;
 +
- 	if (!efi.memmap.late) {
- 		unsigned long size;
++	efi_memreserve_root = memremap(efi.mem_reserve,
++				       sizeof(*efi_memreserve_root),
++				       MEMREMAP_WB);
++	if (!efi_memreserve_root)
++		return -ENOMEM;
+ 	return 0;
+ }
++early_initcall(efi_memreserve_root_init);
  
+ #ifdef CONFIG_KEXEC
+ static int update_efi_random_seed(struct notifier_block *nb,
 -- 
 2.17.1
