@@ -1,49 +1,53 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [GIT PULL 0/5] EFI fixes for v4.20
-Date: Wed, 14 Nov 2018 09:55:39 -0800
-Message-ID: <20181114175544.12860-1-ard.biesheuvel@linaro.org>
+Subject: [PATCH 3/5] efi/arm: libstub: pack FDT after populating it
+Date: Wed, 14 Nov 2018 09:55:42 -0800
+Message-ID: <20181114175544.12860-4-ard.biesheuvel@linaro.org>
+References: <20181114175544.12860-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20181114175544.12860-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Marc Zyngier <marc.zyngier@arm.com>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Waiman Long <longman@redhat.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-The following changes since commit ccda4af0f4b92f7b4c308d3acc262f4a7e3affad:
+Commit 24d7c494ce46 ("efi/arm-stub: Round up FDT allocation to mapping
+size") increased the allocation size for the FDT image created by the
+stub to a fixed value of 2 MB, to simplify the former code that made
+several attempts with increasing values for the size. This is reasonable
+given that the allocation is of type EFI_LOADER_DATA, which is released
+to the kernel unless it is explicitly memblock_reserve()d by the early
+boot code.
 
-  Linux 4.20-rc2 (2018-11-11 17:12:31 -0600)
+However, this allocation size leaked into the 'size' field of the FDT
+header metadata, and so the entire allocation remains occupied by the
+device tree binary, even if most of it is not used to store device tree
+information.
 
-are available in the Git repository at:
+So call fdt_pack() to shrink the FDT data structure to its minimum size
+after populating all the fields, so that the remaining memory is no
+longer wasted.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git efi-urgent
+Cc: <stable@vger.kernel.org> # v4.12+
+Fixes: 24d7c494ce46 ("efi/arm-stub: Round up FDT allocation to mapping size")
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ drivers/firmware/efi/libstub/fdt.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-for you to fetch changes up to 844d2592ed2f1903f8e38d8d395fd0d38ecdd536:
-
-  efi: permit calling efi_mem_reserve_persistent from atomic context (2018-11-14 05:49:28 -0800)
-
-----------------------------------------------------------------
-EFI fixes for v4.20:
-- fix incorrect 'on stack' annotation of efi_rts_work (all EFI arches)
-- revert deferred memory map unmapping on ARM
-- pack the FDT before handing over to the OS (ARM, arm64)
-- fixes for new persistent memreserve feature (ARM, arm64)
-
-----------------------------------------------------------------
-Ard Biesheuvel (4):
-      efi: arm: revert deferred unmap of early memmap mapping
-      efi/arm: libstub: pack FDT after populating it
-      efi/arm: defer persistent reservations until after paging_init()
-      efi: permit calling efi_mem_reserve_persistent from atomic context
-
-Waiman Long (1):
-      efi: Fix debugobjects warning on efi_rts_work
-
- arch/arm64/kernel/setup.c               |  1 +
- drivers/firmware/efi/arm-init.c         |  4 ++++
- drivers/firmware/efi/arm-runtime.c      |  2 +-
- drivers/firmware/efi/efi.c              | 35 ++++++++++++++++++++++-----------
- drivers/firmware/efi/libstub/arm-stub.c |  3 +++
- drivers/firmware/efi/libstub/fdt.c      |  4 ++++
- drivers/firmware/efi/memmap.c           |  3 +++
- drivers/firmware/efi/runtime-wrappers.c |  2 +-
- include/linux/efi.h                     |  7 +++++++
- 9 files changed, 47 insertions(+), 14 deletions(-)
+diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+index 8830fa601e45..0c0d2312f4a8 100644
+--- a/drivers/firmware/efi/libstub/fdt.c
++++ b/drivers/firmware/efi/libstub/fdt.c
+@@ -158,6 +158,10 @@ static efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+ 			return efi_status;
+ 		}
+ 	}
++
++	/* shrink the FDT back to its minimum size */
++	fdt_pack(fdt);
++
+ 	return EFI_SUCCESS;
+ 
+ fdt_set_fail:
+-- 
+2.17.1
