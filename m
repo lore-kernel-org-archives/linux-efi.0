@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 3/5] efi/arm: libstub: pack FDT after populating it
-Date: Wed, 14 Nov 2018 09:55:42 -0800
-Message-ID: <20181114175544.12860-4-ard.biesheuvel@linaro.org>
+Subject: [PATCH 2/5] efi: arm: revert deferred unmap of early memmap mapping
+Date: Wed, 14 Nov 2018 09:55:41 -0800
+Message-ID: <20181114175544.12860-3-ard.biesheuvel@linaro.org>
 References: <20181114175544.12860-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20181114175544.12860-1-ard.biesheuvel@linaro.org>
@@ -10,44 +10,67 @@ To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Commit 24d7c494ce46 ("efi/arm-stub: Round up FDT allocation to mapping
-size") increased the allocation size for the FDT image created by the
-stub to a fixed value of 2 MB, to simplify the former code that made
-several attempts with increasing values for the size. This is reasonable
-given that the allocation is of type EFI_LOADER_DATA, which is released
-to the kernel unless it is explicitly memblock_reserve()d by the early
-boot code.
+Commit 3ea86495aef2 ("efi/arm: preserve early mapping of UEFI memory
+map longer for BGRT") deferred the unmap of the early mapping of the
+UEFI memory map to accommodate the ACPI BGRT code, which looks up the
+memory type that backs the BGRT table to validate it against the
+requirements of the UEFI spec.
 
-However, this allocation size leaked into the 'size' field of the FDT
-header metadata, and so the entire allocation remains occupied by the
-device tree binary, even if most of it is not used to store device tree
-information.
+Unfortunately, this causes problems on ARM, which does not permit
+early mappings to persist after paging_init() is called, resulting
+in a WARN() splat. Since we don't support the BGRT table on ARM anway,
+let's revert ARM to the old behaviour, which is to take down the
+early mapping at the end of efi_init().
 
-So call fdt_pack() to shrink the FDT data structure to its minimum size
-after populating all the fields, so that the remaining memory is no
-longer wasted.
-
-Cc: <stable@vger.kernel.org> # v4.12+
-Fixes: 24d7c494ce46 ("efi/arm-stub: Round up FDT allocation to mapping size")
+Fixes: 3ea86495aef2 ("efi/arm: preserve early mapping of UEFI memory ...")
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- drivers/firmware/efi/libstub/fdt.c | 4 ++++
- 1 file changed, 4 insertions(+)
+ drivers/firmware/efi/arm-init.c    | 4 ++++
+ drivers/firmware/efi/arm-runtime.c | 2 +-
+ drivers/firmware/efi/memmap.c      | 3 +++
+ 3 files changed, 8 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
-index 8830fa601e45..0c0d2312f4a8 100644
---- a/drivers/firmware/efi/libstub/fdt.c
-+++ b/drivers/firmware/efi/libstub/fdt.c
-@@ -158,6 +158,10 @@ static efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
- 			return efi_status;
- 		}
- 	}
-+
-+	/* shrink the FDT back to its minimum size */
-+	fdt_pack(fdt);
-+
- 	return EFI_SUCCESS;
+diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
+index 388a929baf95..1a6a77df8a5e 100644
+--- a/drivers/firmware/efi/arm-init.c
++++ b/drivers/firmware/efi/arm-init.c
+@@ -265,6 +265,10 @@ void __init efi_init(void)
+ 				    (params.mmap & ~PAGE_MASK)));
  
- fdt_set_fail:
+ 	init_screen_info();
++
++	/* ARM does not permit early mappings to persist across paging_init() */
++	if (IS_ENABLED(CONFIG_ARM))
++		efi_memmap_unmap();
+ }
+ 
+ static int __init register_gop_device(void)
+diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
+index 922cfb813109..a00934d263c5 100644
+--- a/drivers/firmware/efi/arm-runtime.c
++++ b/drivers/firmware/efi/arm-runtime.c
+@@ -110,7 +110,7 @@ static int __init arm_enable_runtime_services(void)
+ {
+ 	u64 mapsize;
+ 
+-	if (!efi_enabled(EFI_BOOT) || !efi_enabled(EFI_MEMMAP)) {
++	if (!efi_enabled(EFI_BOOT)) {
+ 		pr_info("EFI services will not be available.\n");
+ 		return 0;
+ 	}
+diff --git a/drivers/firmware/efi/memmap.c b/drivers/firmware/efi/memmap.c
+index fa2904fb841f..38b686c67b17 100644
+--- a/drivers/firmware/efi/memmap.c
++++ b/drivers/firmware/efi/memmap.c
+@@ -118,6 +118,9 @@ int __init efi_memmap_init_early(struct efi_memory_map_data *data)
+ 
+ void __init efi_memmap_unmap(void)
+ {
++	if (!efi_enabled(EFI_MEMMAP))
++		return;
++
+ 	if (!efi.memmap.late) {
+ 		unsigned long size;
+ 
 -- 
 2.17.1
