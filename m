@@ -1,175 +1,243 @@
-From: Arend van Spriel <arend.vanspriel-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
-Subject: Re: [PATCH] firmware: efi: add NULL pointer checks in efivars api
- functions
-Date: Fri, 16 Nov 2018 22:30:24 +0100
-Message-ID: <c32a6efa-802b-880a-a1aa-46bfdcc5d814@broadcom.com>
-References: <1542142278-14352-1-git-send-email-arend.vanspriel@broadcom.com>
- <CAKv+Gu8FK7=gcRVg--GX3LMA9fmGtvMkxDuXF8UEWuGpKq4HTA@mail.gmail.com>
- <524197b4-4f2b-00d6-2509-22ed4b3b3f5d@broadcom.com>
- <CAKv+Gu8oQeMLZo=DtvS+D=7GcadSrqhSX2pndHOr-KTQQ2fxPw@mail.gmail.com>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: [GIT PULL] EFI fixes
+Date: Sat, 17 Nov 2018 11:51:15 +0100
+Message-ID: <20181117105115.GA11134@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu8oQeMLZo=DtvS+D=7GcadSrqhSX2pndHOr-KTQQ2fxPw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "<linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Kalle Valo <kvalo-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Borislav Petkov <bp@alien8.de>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Andrew Morton <akpm@linux-foundation.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 11/15/2018 2:54 PM, Ard Biesheuvel wrote:
-> On Tue, 13 Nov 2018 at 15:04, Arend van Spriel
-> <arend.vanspriel-dY08KVG/lbpWk0Htik3J/w@public.gmane.org> wrote:
->>
->> On 11/13/2018 11:50 PM, Ard Biesheuvel wrote:
->>> Hi Arend,
->>>
->>> On Tue, 13 Nov 2018 at 12:51, Arend van Spriel
->>> <arend.vanspriel-dY08KVG/lbpWk0Htik3J/w@public.gmane.org> wrote:
->>>>
->>>> Since commit ce2e6db554fa ("brcmfmac: Add support for getting nvram
->>>> contents from EFI variables") we have a device driver accessing the
->>>> efivars api (since next-20181107). Several functions in efivars api
->>>> assume __efivars is set, ie. will be accessed after efivars_register()
->>>> has been called. However, following NULL pointer access was reported
->>>> calling efivar_entry_size() from the brcmfmac device driver.
->>>>
->>>> [   14.177769] Unable to handle kernel NULL pointer dereference at
->>>>                 virtual address 00000008
->>>> [   14.197303] pgd = 60bfa5f1
->>>> [   14.211842] [00000008] *pgd=00000000
->>>> [   14.227373] Internal error: Oops: 5 [#1] SMP ARM
->>>> [   14.244244] Modules linked in: brcmfmac sha256_generic sha256_arm snd cfg80211 brcmutil soundcore snd_soc_tegra30_ahub tegra_wdt
->>>> [   14.269109] CPU: 1 PID: 114 Comm: kworker/1:2 Not tainted 4.20.0-rc1-next-20181107-gd881de3 #1
->>>> [   14.269114] Hardware name: NVIDIA Tegra SoC (Flattened Device Tree)
->>>> [   14.269154] Workqueue: events request_firmware_work_func
->>>> [   14.269177] PC is at efivar_entry_size+0x28/0x90
->>>> [   14.269362] LR is at brcmf_fw_complete_request+0x3f8/0x8d4 [brcmfmac]
->>>> [   14.269369] pc : [<c0c40718>]    lr : [<bf2a3ef4>]    psr: a00d0113
->>>> [   14.269374] sp : ede7fe28  ip : ee983410  fp : c1787f30
->>>> [   14.269378] r10: 00000000  r9 : 00000000  r8 : bf2b2258
->>>> [   14.269384] r7 : ee983000  r6 : c1604c48  r5 : ede7fe88  r4 : edf337c0
->>>> [   14.269389] r3 : 00000000  r2 : 00000000  r1 : ede7fe88  r0 : c17712c8
->>>> [   14.269398] Flags: NzCv  IRQs on  FIQs on  Mode SVC_32  ISA ARM  Segment none
->>>> [   14.269404] Control: 10c5387d  Table: ad16804a  DAC: 00000051
->>>>
->>>> Disassembly showed that the local static variable __efivars is NULL. Likely
->>>> because efivars_register() is not called on this Tegra platform. So adding
->>>> a NULL pointer check in efivar_entry_size() and similar functions while at
->>>> it. In efivars_register() a couple of sanity checks have been added.
->>>>
->>>> Cc: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->>>> Reported-by: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
->>>> Signed-off-by: Arend van Spriel <arend.vanspriel-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
->>>> ---
->>>>  drivers/firmware/efi/vars.c | 108 +++++++++++++++++++++++++++++++++++---------
->>>>  1 file changed, 87 insertions(+), 21 deletions(-)
->>>>
->>>> diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
->>>> index 9336ffd..5fbd8e7 100644
->>>> --- a/drivers/firmware/efi/vars.c
->>>> +++ b/drivers/firmware/efi/vars.c
->>>> @@ -318,7 +318,12 @@ struct variable_validate {
->>>>  static efi_status_t
->>>>  check_var_size(u32 attributes, unsigned long size)
->>>>  {
->>>> -       const struct efivar_operations *fops = __efivars->ops;
->>>> +       const struct efivar_operations *fops;
->>>> +
->>>> +       if (!__efivars)
->>>> +               return EFI_UNSUPPORTED;
->>>> +
->>>> +       fops = __efivars->ops;
->>>>
->>>>         if (!fops->query_variable_store)
->>>>                 return EFI_UNSUPPORTED;
->>>> @@ -329,7 +334,12 @@ struct variable_validate {
->>>>  static efi_status_t
->>>>  check_var_size_nonblocking(u32 attributes, unsigned long size)
->>>>  {
->>>> -       const struct efivar_operations *fops = __efivars->ops;
->>>> +       const struct efivar_operations *fops;
->>>> +
->>>> +       if (!__efivars)
->>>> +               return EFI_UNSUPPORTED;
->>>> +
->>>> +       fops = __efivars->ops;
->>>>
->>>>         if (!fops->query_variable_store)
->>>>                 return EFI_UNSUPPORTED;
->>>> @@ -429,13 +439,18 @@ static void dup_variable_bug(efi_char16_t *str16, efi_guid_t *vendor_guid,
->>>>  int efivar_init(int (*func)(efi_char16_t *, efi_guid_t, unsigned long, void *),
->>>>                 void *data, bool duplicates, struct list_head *head)
->>>>  {
->>>> -       const struct efivar_operations *ops = __efivars->ops;
->>>> +       const struct efivar_operations *ops;
->>>>         unsigned long variable_name_size = 1024;
->>>>         efi_char16_t *variable_name;
->>>>         efi_status_t status;
->>>>         efi_guid_t vendor_guid;
->>>>         int err = 0;
->>>>
->>>> +       if (!__efivars)
->>>> +               return -EFAULT;
->>>> +
->>>> +       ops = __efivars->ops;
->>>> +
->>>>         variable_name = kzalloc(variable_name_size, GFP_KERNEL);
->>>>         if (!variable_name) {
->>>>                 printk(KERN_ERR "efivars: Memory allocation failed.\n");
->>>> @@ -583,12 +598,14 @@ static void efivar_entry_list_del_unlock(struct efivar_entry *entry)
->>>>   */
->>>>  int __efivar_entry_delete(struct efivar_entry *entry)
->>>>  {
->>>> -       const struct efivar_operations *ops = __efivars->ops;
->>>>         efi_status_t status;
->>>>
->>>> -       status = ops->set_variable(entry->var.VariableName,
->>>> -                                  &entry->var.VendorGuid,
->>>> -                                  0, 0, NULL);
->>>> +       if (!__efivars)
->>>> +               return -EINVAL;
->>>> +
->>>> +       status = __efivars->ops->set_variable(entry->var.VariableName,
->>>> +                                             &entry->var.VendorGuid,
->>>> +                                             0, 0, NULL);
->>>>
->>>>         return efi_status_to_err(status);
->>>>  }
->>>> @@ -607,12 +624,17 @@ int __efivar_entry_delete(struct efivar_entry *entry)
->>>>   */
->>>>  int efivar_entry_delete(struct efivar_entry *entry)
->>>>  {
->>>> -       const struct efivar_operations *ops = __efivars->ops;
->>>> +       const struct efivar_operations *ops;
->>>>         efi_status_t status;
->>>>
->>>>         if (down_interruptible(&efivars_lock))
->>>>                 return -EINTR;
->>>>
->>>
->>> Any reason in particular you put the check after the lock is taken? Is
->>> this to ensure that __efivars does not change under your feet?
->>
->> That was my reasoning although I am not sure if that is likely. Is
->> efivars_register() always called before any drivers are started?
->>
->
-> First of all, efivars_register() is only called on EFI systems, and
-> this Tegra is not an EFI system. So in general, it would be better if
-> your code checks efi_enabled(EFI_RUNTIME_SERVICES) before attempting
-> to access any EFI APIs, especially since CONFIG_EFI support can be
-> compiled out (in which case efi_enabled() resolves to a build time
-> constant 'false') Something like
+Linus,
 
-That was my first stab at it, but felt that the API could be more robust 
-as well. I will create a patch for my driver as well.
->
-> Of course, that doesn't mean we should crash if you access the API
-> anyway, so I will queue this patch in efi/next as well. (I'll drop the
-> last hunk, though, if you don't mind - it returns with the lock held)
+Please pull the latest efi-urgent-for-linus git tree from:
 
-Works for me.
+   git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git efi-urgent-for-linus
 
-Thanks,
-Arend
+   # HEAD: 63eb322d89c8505af9b4a3d703e85e42281ebaa0 efi: Permit calling efi_mem_reserve_persistent() from atomic context
+
+Misc fixes: two warning splat fixes, a leak fix and persistent memory 
+allocation fixes for ARM.
+
+ Thanks,
+
+	Ingo
+
+------------------>
+Ard Biesheuvel (4):
+      efi/arm: Revert deferred unmap of early memmap mapping
+      efi/arm/libstub: Pack FDT after populating it
+      efi/arm: Defer persistent reservations until after paging_init()
+      efi: Permit calling efi_mem_reserve_persistent() from atomic context
+
+Waiman Long (1):
+      efi: Fix debugobjects warning on 'efi_rts_work'
+
+
+ arch/arm64/kernel/setup.c               |  1 +
+ drivers/firmware/efi/arm-init.c         |  4 ++++
+ drivers/firmware/efi/arm-runtime.c      |  2 +-
+ drivers/firmware/efi/efi.c              | 35 ++++++++++++++++++++++-----------
+ drivers/firmware/efi/libstub/arm-stub.c |  3 +++
+ drivers/firmware/efi/libstub/fdt.c      |  4 ++++
+ drivers/firmware/efi/memmap.c           |  3 +++
+ drivers/firmware/efi/runtime-wrappers.c |  2 +-
+ include/linux/efi.h                     |  7 +++++++
+ 9 files changed, 47 insertions(+), 14 deletions(-)
+
+diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
+index 953e316521fc..f4fc1e0544b7 100644
+--- a/arch/arm64/kernel/setup.c
++++ b/arch/arm64/kernel/setup.c
+@@ -313,6 +313,7 @@ void __init setup_arch(char **cmdline_p)
+ 	arm64_memblock_init();
+ 
+ 	paging_init();
++	efi_apply_persistent_mem_reservations();
+ 
+ 	acpi_table_upgrade();
+ 
+diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
+index 388a929baf95..1a6a77df8a5e 100644
+--- a/drivers/firmware/efi/arm-init.c
++++ b/drivers/firmware/efi/arm-init.c
+@@ -265,6 +265,10 @@ void __init efi_init(void)
+ 				    (params.mmap & ~PAGE_MASK)));
+ 
+ 	init_screen_info();
++
++	/* ARM does not permit early mappings to persist across paging_init() */
++	if (IS_ENABLED(CONFIG_ARM))
++		efi_memmap_unmap();
+ }
+ 
+ static int __init register_gop_device(void)
+diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
+index 922cfb813109..a00934d263c5 100644
+--- a/drivers/firmware/efi/arm-runtime.c
++++ b/drivers/firmware/efi/arm-runtime.c
+@@ -110,7 +110,7 @@ static int __init arm_enable_runtime_services(void)
+ {
+ 	u64 mapsize;
+ 
+-	if (!efi_enabled(EFI_BOOT) || !efi_enabled(EFI_MEMMAP)) {
++	if (!efi_enabled(EFI_BOOT)) {
+ 		pr_info("EFI services will not be available.\n");
+ 		return 0;
+ 	}
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 249eb70691b0..fad7c62cfc0e 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -592,7 +592,11 @@ int __init efi_config_parse_tables(void *config_tables, int count, int sz,
+ 
+ 		early_memunmap(tbl, sizeof(*tbl));
+ 	}
++	return 0;
++}
+ 
++int __init efi_apply_persistent_mem_reservations(void)
++{
+ 	if (efi.mem_reserve != EFI_INVALID_TABLE_ADDR) {
+ 		unsigned long prsv = efi.mem_reserve;
+ 
+@@ -963,36 +967,43 @@ bool efi_is_table_address(unsigned long phys_addr)
+ }
+ 
+ static DEFINE_SPINLOCK(efi_mem_reserve_persistent_lock);
++static struct linux_efi_memreserve *efi_memreserve_root __ro_after_init;
+ 
+ int efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
+ {
+-	struct linux_efi_memreserve *rsv, *parent;
++	struct linux_efi_memreserve *rsv;
+ 
+-	if (efi.mem_reserve == EFI_INVALID_TABLE_ADDR)
++	if (!efi_memreserve_root)
+ 		return -ENODEV;
+ 
+-	rsv = kmalloc(sizeof(*rsv), GFP_KERNEL);
++	rsv = kmalloc(sizeof(*rsv), GFP_ATOMIC);
+ 	if (!rsv)
+ 		return -ENOMEM;
+ 
+-	parent = memremap(efi.mem_reserve, sizeof(*rsv), MEMREMAP_WB);
+-	if (!parent) {
+-		kfree(rsv);
+-		return -ENOMEM;
+-	}
+-
+ 	rsv->base = addr;
+ 	rsv->size = size;
+ 
+ 	spin_lock(&efi_mem_reserve_persistent_lock);
+-	rsv->next = parent->next;
+-	parent->next = __pa(rsv);
++	rsv->next = efi_memreserve_root->next;
++	efi_memreserve_root->next = __pa(rsv);
+ 	spin_unlock(&efi_mem_reserve_persistent_lock);
+ 
+-	memunmap(parent);
++	return 0;
++}
+ 
++static int __init efi_memreserve_root_init(void)
++{
++	if (efi.mem_reserve == EFI_INVALID_TABLE_ADDR)
++		return -ENODEV;
++
++	efi_memreserve_root = memremap(efi.mem_reserve,
++				       sizeof(*efi_memreserve_root),
++				       MEMREMAP_WB);
++	if (!efi_memreserve_root)
++		return -ENOMEM;
+ 	return 0;
+ }
++early_initcall(efi_memreserve_root_init);
+ 
+ #ifdef CONFIG_KEXEC
+ static int update_efi_random_seed(struct notifier_block *nb,
+diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+index 30ac0c975f8a..3d36142cf812 100644
+--- a/drivers/firmware/efi/libstub/arm-stub.c
++++ b/drivers/firmware/efi/libstub/arm-stub.c
+@@ -75,6 +75,9 @@ void install_memreserve_table(efi_system_table_t *sys_table_arg)
+ 	efi_guid_t memreserve_table_guid = LINUX_EFI_MEMRESERVE_TABLE_GUID;
+ 	efi_status_t status;
+ 
++	if (IS_ENABLED(CONFIG_ARM))
++		return;
++
+ 	status = efi_call_early(allocate_pool, EFI_LOADER_DATA, sizeof(*rsv),
+ 				(void **)&rsv);
+ 	if (status != EFI_SUCCESS) {
+diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+index 8830fa601e45..0c0d2312f4a8 100644
+--- a/drivers/firmware/efi/libstub/fdt.c
++++ b/drivers/firmware/efi/libstub/fdt.c
+@@ -158,6 +158,10 @@ static efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+ 			return efi_status;
+ 		}
+ 	}
++
++	/* shrink the FDT back to its minimum size */
++	fdt_pack(fdt);
++
+ 	return EFI_SUCCESS;
+ 
+ fdt_set_fail:
+diff --git a/drivers/firmware/efi/memmap.c b/drivers/firmware/efi/memmap.c
+index fa2904fb841f..38b686c67b17 100644
+--- a/drivers/firmware/efi/memmap.c
++++ b/drivers/firmware/efi/memmap.c
+@@ -118,6 +118,9 @@ int __init efi_memmap_init_early(struct efi_memory_map_data *data)
+ 
+ void __init efi_memmap_unmap(void)
+ {
++	if (!efi_enabled(EFI_MEMMAP))
++		return;
++
+ 	if (!efi.memmap.late) {
+ 		unsigned long size;
+ 
+diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
+index a19d845bdb06..8903b9ccfc2b 100644
+--- a/drivers/firmware/efi/runtime-wrappers.c
++++ b/drivers/firmware/efi/runtime-wrappers.c
+@@ -67,7 +67,7 @@ struct efi_runtime_work efi_rts_work;
+ 	}								\
+ 									\
+ 	init_completion(&efi_rts_work.efi_rts_comp);			\
+-	INIT_WORK_ONSTACK(&efi_rts_work.work, efi_call_rts);		\
++	INIT_WORK(&efi_rts_work.work, efi_call_rts);			\
+ 	efi_rts_work.arg1 = _arg1;					\
+ 	efi_rts_work.arg2 = _arg2;					\
+ 	efi_rts_work.arg3 = _arg3;					\
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 845174e113ce..100ce4a4aff6 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1167,6 +1167,8 @@ static inline bool efi_enabled(int feature)
+ extern void efi_reboot(enum reboot_mode reboot_mode, const char *__unused);
+ 
+ extern bool efi_is_table_address(unsigned long phys_addr);
++
++extern int efi_apply_persistent_mem_reservations(void);
+ #else
+ static inline bool efi_enabled(int feature)
+ {
+@@ -1185,6 +1187,11 @@ static inline bool efi_is_table_address(unsigned long phys_addr)
+ {
+ 	return false;
+ }
++
++static inline int efi_apply_persistent_mem_reservations(void)
++{
++	return 0;
++}
+ #endif
+ 
+ extern int efi_status_to_err(efi_status_t status);
