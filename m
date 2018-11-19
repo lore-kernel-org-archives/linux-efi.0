@@ -1,19 +1,19 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.19 170/205] efi/arm/libstub: Pack FDT after populating it
-Date: Mon, 19 Nov 2018 17:27:57 +0100
-Message-ID: <20181119162640.388446693@linuxfoundation.org>
-References: <20181119162616.586062722@linuxfoundation.org>
+Subject: [PATCH 4.18 143/171] efi/arm/libstub: Pack FDT after populating it
+Date: Mon, 19 Nov 2018 17:28:59 +0100
+Message-ID: <20181119162639.062309813@linuxfoundation.org>
+References: <20181119162618.909354448@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181119162616.586062722@linuxfoundation.org>
+In-Reply-To: <20181119162618.909354448@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-4.19-stable review patch.  If anyone has any objections, please let me know.
+4.18-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
