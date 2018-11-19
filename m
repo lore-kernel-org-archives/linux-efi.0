@@ -1,71 +1,53 @@
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.14 106/124] efi/arm/libstub: Pack FDT after populating it
-Date: Mon, 19 Nov 2018 17:29:20 +0100
-Message-ID: <20181119162632.045038306@linuxfoundation.org>
-References: <20181119162612.951907286@linuxfoundation.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20181119162612.951907286@linuxfoundation.org>
-Sender: stable-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
+From: Mimi Zohar <zohar@linux.ibm.com>
+Subject: [PATCH 0/3] selftest/ima: fail kexec_load syscall
+Date: Mon, 19 Nov 2018 14:56:08 -0500
+Message-ID: <1542657371-7019-1-git-send-email-zohar@linux.ibm.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-integrity@vger.kernel.org
+Cc: Mimi Zohar <zohar@linux.ibm.com>, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, jforbes@redhat.com, seth.forshee@canonical.com, kexec@lists.infradead.org, Nayna Jain <nayna@linux.ibm.com>
 List-Id: linux-efi@vger.kernel.org
 
-4.14-stable review patch.  If anyone has any objections, please let me know.
+The "ima: add support for arch specific policies" patch set introduced
+architecture specific policies, including an x86 policy which prevents
+loading a kernel image via the kexec_load syscall.
 
-------------------
+This patch set preq's that patch set, adding a missing kexec_load
+syscall failure message, extending the existing support for detecting
+secureboot mode, and defining a kexec_load syscall selftest to
+simplify testing.
 
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+To run the kexec_load test requires root privileges.  Execute:
+	"sudo make TARGETS=ima kselftest".
 
-commit 72a58a63a164b4e9d2d914e65caeb551846883f1 upstream.
+With secure boot enabled, the kexec_load fails, but the test
+succeeds.
 
-Commit:
+selftests: ima: test_kexec_load.sh
+========================================
+./test_kexec_load.sh: kexec_load failed [PASS]
+ok 1..1 selftests: ima: test_kexec_load.sh [PASS]
 
-  24d7c494ce46 ("efi/arm-stub: Round up FDT allocation to mapping size")
 
-increased the allocation size for the FDT image created by the stub to a
-fixed value of 2 MB, to simplify the former code that made several
-attempts with increasing values for the size. This is reasonable
-given that the allocation is of type EFI_LOADER_DATA, which is released
-to the kernel unless it is explicitly memblock_reserve()d by the early
-boot code.
+Mimi
 
-However, this allocation size leaked into the 'size' field of the FDT
-header metadata, and so the entire allocation remains occupied by the
-device tree binary, even if most of it is not used to store device tree
-information.
+Mimi Zohar (3):
+  ima: add error mesage to kexec_load
+  selftests/ima: kexec_load syscall test
+  x86/ima: retry detecting secure boot mode
 
-So call fdt_pack() to shrink the FDT data structure to its minimum size
-after populating all the fields, so that the remaining memory is no
-longer wasted.
+ arch/x86/kernel/Makefile                       |  2 +
+ arch/x86/kernel/ima_arch.c                     | 46 +++++++++++++++++++++-
+ include/linux/ima.h                            |  2 +-
+ security/integrity/ima/ima_main.c              |  4 +-
+ tools/testing/selftests/Makefile               |  1 +
+ tools/testing/selftests/ima/Makefile           | 11 ++++++
+ tools/testing/selftests/ima/config             |  4 ++
+ tools/testing/selftests/ima/test_kexec_load.sh | 54 ++++++++++++++++++++++++++
+ 8 files changed, 120 insertions(+), 4 deletions(-)
+ create mode 100644 tools/testing/selftests/ima/Makefile
+ create mode 100644 tools/testing/selftests/ima/config
+ create mode 100755 tools/testing/selftests/ima/test_kexec_load.sh
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: <stable@vger.kernel.org> # v4.12+
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-efi@vger.kernel.org
-Fixes: 24d7c494ce46 ("efi/arm-stub: Round up FDT allocation to mapping size")
-Link: http://lkml.kernel.org/r/20181114175544.12860-4-ard.biesheuvel@linaro.org
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-
----
- drivers/firmware/efi/libstub/fdt.c |    4 ++++
- 1 file changed, 4 insertions(+)
-
---- a/drivers/firmware/efi/libstub/fdt.c
-+++ b/drivers/firmware/efi/libstub/fdt.c
-@@ -158,6 +158,10 @@ static efi_status_t update_fdt(efi_syste
- 			return efi_status;
- 		}
- 	}
-+
-+	/* shrink the FDT back to its minimum size */
-+	fdt_pack(fdt);
-+
- 	return EFI_SUCCESS;
- 
- fdt_set_fail:
+-- 
+2.7.5
