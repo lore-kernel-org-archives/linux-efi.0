@@ -1,16 +1,11 @@
-From: Marc Zyngier <marc.zyngier@arm.com>
-Subject: Re: [RFT PATCH] efi: map memreserve table before first use
-Date: Tue, 20 Nov 2018 18:44:32 +0000
-Message-ID: <c9b4effa-010b-e4ab-ac3e-57cc0c5e583d@arm.com>
-References: <20181120173542.31444-1-ard.biesheuvel@linaro.org>
- <a6374bfb-9848-c265-224a-dd77118277ad@arm.com>
- <CAKv+Gu8Z3NrCV+mq28PfHM4gv_JMZ2mj19DWdigunDxY9av6=Q@mail.gmail.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [RFT PATCH v2] efi: map memreserve table before first use
+Date: Tue, 20 Nov 2018 20:16:34 +0100
+Message-ID: <20181120191634.7376-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAKv+Gu8Z3NrCV+mq28PfHM4gv_JMZ2mj19DWdigunDxY9av6=Q@mail.gmail.com>
-Content-Language: en-US
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -20,101 +15,82 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: John Garry <john.garry@huawei.com>, linux-efi <linux-efi@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Jan.Glauber@cavium.com
+To: linux-efi@vger.kernel.org
+Cc: marc.zyngier@arm.com, john.garry@huawei.com, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-arm-kernel@lists.infradead.org, Jan.Glauber@cavium.com
 List-Id: linux-efi@vger.kernel.org
 
-On 20/11/2018 18:35, Ard Biesheuvel wrote:
-> On Tue, 20 Nov 2018 at 19:29, Marc Zyngier <marc.zyngier@arm.com> wrote:
->>
->> Hi Ard,
->>
->> On 20/11/2018 17:35, Ard Biesheuvel wrote:
->>> Mapping the MEMRESERVE EFI configuration table from an early initcall
->>> is too late: the GICv3 ITS code that creates persistent reservations
->>> for the boot CPU's LPI tables is invoked from init_IRQ(), which runs
->>> much earlier than the handling of the initcalls.
->>>
->>> So instead, move the initialization performed by the initcall into
->>> efi_mem_reserve_persistent() itself.
->>>
->>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
->>
->> I've just given it a go on one of my TX2s, and it boots just fine. So
->> for that:
->>
->> Tested-by: Marc Zyngier <marc.zyngier@arm.com>
->>
->> A comment below though:
->>
->>> ---
->>>  drivers/firmware/efi/efi.c | 26 ++++++++++----------------
->>>  1 file changed, 10 insertions(+), 16 deletions(-)
->>>
->>> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
->>> index fad7c62cfc0e..40de2f6734cc 100644
->>> --- a/drivers/firmware/efi/efi.c
->>> +++ b/drivers/firmware/efi/efi.c
->>> @@ -967,15 +967,23 @@ bool efi_is_table_address(unsigned long phys_addr)
->>>  }
->>>
->>>  static DEFINE_SPINLOCK(efi_mem_reserve_persistent_lock);
->>> -static struct linux_efi_memreserve *efi_memreserve_root __ro_after_init;
->>> +static struct linux_efi_memreserve *efi_memreserve_root;
->>>
->>>  int efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
->>>  {
->>>       struct linux_efi_memreserve *rsv;
->>>
->>> -     if (!efi_memreserve_root)
->>> +     if (efi.mem_reserve == EFI_INVALID_TABLE_ADDR)
->>>               return -ENODEV;
->>>
->>> +     if (!efi_memreserve_root) {
->>> +             efi_memreserve_root = memremap(efi.mem_reserve,
->>> +                                            sizeof(*efi_memreserve_root),
->>> +                                            MEMREMAP_WB);
->>> +             if (WARN_ON_ONCE(!efi_memreserve_root))
->>> +                     return -ENOMEM;
->>
->> This is now a bit racy if there is more than a single online CPU.
->>
->>> +     }
->>> +
->>>       rsv = kmalloc(sizeof(*rsv), GFP_ATOMIC);
->>>       if (!rsv)
->>>               return -ENOMEM;
->>> @@ -991,20 +999,6 @@ int efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
->>>       return 0;
->>>  }
->>>
->>> -static int __init efi_memreserve_root_init(void)
->>> -{
->>> -     if (efi.mem_reserve == EFI_INVALID_TABLE_ADDR)
->>> -             return -ENODEV;
->>> -
->>> -     efi_memreserve_root = memremap(efi.mem_reserve,
->>> -                                    sizeof(*efi_memreserve_root),
->>> -                                    MEMREMAP_WB);
->>> -     if (!efi_memreserve_root)
->>> -             return -ENOMEM;
->>> -     return 0;
->>> -}
->>> -early_initcall(efi_memreserve_root_init);
->>
->> But if we keep this (+ a check that the root is indeed NULL), we should
->> be able to make sure efi_memreserve_root is set before we enable a
->> secondary CPU. Still fragile though.
->>
-> 
-> Why is that stil fragile? It sure isn't pretty, but early initcalls
-> run before SMP boot so it should always work as expected no?
+Mapping the MEMRESERVE EFI configuration table from an early initcall
+is too late: the GICv3 ITS code that creates persistent reservations
+for the boot CPU's LPI tables is invoked from init_IRQ(), which runs
+much earlier than the handling of the initcalls.
 
-It is just me being paranoid about things happening without locking, but
-it should indeed work as expected.
+So instead, move the initialization performed by the initcall into
+efi_mem_reserve_persistent() itself, but keep the initcall as well
+so that the init is guaranteed to have been called before SMP boot.
 
-Thanks,
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ drivers/firmware/efi/efi.c | 34 ++++++++++++++++++++++++++--------
+ 1 file changed, 26 insertions(+), 8 deletions(-)
 
-	M.
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index fad7c62cfc0e..0e2d52a0c50e 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -969,13 +969,33 @@ bool efi_is_table_address(unsigned long phys_addr)
+ static DEFINE_SPINLOCK(efi_mem_reserve_persistent_lock);
+ static struct linux_efi_memreserve *efi_memreserve_root __ro_after_init;
+ 
+-int efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
++static int __init efi_memreserve_map_root(void)
++{
++	if (efi.mem_reserve == EFI_INVALID_TABLE_ADDR)
++		return -ENODEV;
++
++	efi_memreserve_root = memremap(efi.mem_reserve,
++				       sizeof(*efi_memreserve_root),
++				       MEMREMAP_WB);
++	if (WARN_ON_ONCE(!efi_memreserve_root))
++		return -ENOMEM;
++	return 0;
++}
++
++int __ref efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
+ {
+ 	struct linux_efi_memreserve *rsv;
++	int rc;
+ 
+-	if (!efi_memreserve_root)
++	if (efi_memreserve_root == (void *)ULONG_MAX)
+ 		return -ENODEV;
+ 
++	if (!efi_memreserve_root) {
++		rc = efi_memreserve_map_root();
++		if (rc)
++			return rc;
++	}
++
+ 	rsv = kmalloc(sizeof(*rsv), GFP_ATOMIC);
+ 	if (!rsv)
+ 		return -ENOMEM;
+@@ -993,14 +1013,12 @@ int efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
+ 
+ static int __init efi_memreserve_root_init(void)
+ {
+-	if (efi.mem_reserve == EFI_INVALID_TABLE_ADDR)
+-		return -ENODEV;
++	if (efi_memreserve_root)
++		return 0;
+ 
+-	efi_memreserve_root = memremap(efi.mem_reserve,
+-				       sizeof(*efi_memreserve_root),
+-				       MEMREMAP_WB);
++	efi_memreserve_map_root();
+ 	if (!efi_memreserve_root)
+-		return -ENOMEM;
++		efi_memreserve_root = (void *)ULONG_MAX;
+ 	return 0;
+ }
+ early_initcall(efi_memreserve_root_init);
 -- 
-Jazz is not dead. It just smells funny...
+2.17.1
