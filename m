@@ -1,7 +1,7 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.9 28/59] efi/libstub/arm64: Use hidden attribute for struct screen_info reference
-Date: Wed, 21 Nov 2018 20:06:43 +0100
-Message-ID: <20181121183509.360799865@linuxfoundation.org>
+Subject: [PATCH 4.9 30/59] efi/libstub: Preserve .debug sections after absolute relocation check
+Date: Wed, 21 Nov 2018 20:06:45 +0100
+Message-ID: <20181121183509.434200105@linuxfoundation.org>
 References: <20181121183508.262873520@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -10,7 +10,7 @@ Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20181121183508.262873520@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Matthias Kaehlcke <mka@chromium.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Nick Desaulniers <ndesaulniers@google.com>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Nick Desaulniers <ndesaulniers@google.com>
 List-Id: linux-efi@vger.kernel.org
 
 4.9-stable review patch.  If anyone has any objections, please let me know.
@@ -19,36 +19,86 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-commit 760b61d76da6d6a99eb245ab61abf71ca5415cea upstream.
+commit 696204faa6e8a318320ebb49d9fa69bc8275644d upstream.
 
-To prevent the compiler from emitting absolute references to screen_info
-when building position independent code, redeclare the symbol with hidden
-visibility.
+The build commands for the ARM and arm64 EFI stubs strip the .debug
+sections and other sections that may legally contain absolute relocations,
+in order to inspect the remaining sections for the presence of such
+relocations.
 
-Tested-by: Matthias Kaehlcke <mka@chromium.org>
+This leaves us without debugging symbols in the stub for no good reason,
+considering that these sections are omitted from the kernel binary anyway,
+and that these relocations are thus only consumed by users of the ELF
+binary, such as debuggers.
+
+So move to 'strip' for performing the relocation check, and if it succeeds,
+invoke objcopy as before, but leaving the .debug sections in place. Note
+that these sections may refer to ksymtab/kcrctab contents, so leave those
+in place as well.
+
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>
 Cc: Matt Fleming <matt@codeblueprint.co.uk>
 Cc: Peter Zijlstra <peterz@infradead.org>
 Cc: Thomas Gleixner <tglx@linutronix.de>
 Cc: linux-efi@vger.kernel.org
-Link: http://lkml.kernel.org/r/20170818194947.19347-3-ard.biesheuvel@linaro.org
+Link: http://lkml.kernel.org/r/1485868902-20401-11-git-send-email-ard.biesheuvel@linaro.org
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 Signed-off-by: Nick Desaulniers <ndesaulniers@google.com>
 Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 ---
- arch/arm64/include/asm/efi.h |    3 +++
- 1 file changed, 3 insertions(+)
+ drivers/firmware/efi/libstub/Makefile |   24 ++++++++++++++++--------
+ 1 file changed, 16 insertions(+), 8 deletions(-)
 
---- a/arch/arm64/include/asm/efi.h
-+++ b/arch/arm64/include/asm/efi.h
-@@ -54,6 +54,9 @@ int efi_set_mapping_permissions(struct m
- #define alloc_screen_info(x...)		&screen_info
- #define free_screen_info(x...)
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -11,7 +11,7 @@ cflags-$(CONFIG_X86)		+= -m$(BITS) -D__K
+ 				   -mno-mmx -mno-sse
  
-+/* redeclare as 'hidden' so the compiler will generate relative references */
-+extern struct screen_info screen_info __attribute__((__visibility__("hidden")));
-+
- static inline void efifb_setup_from_dmi(struct screen_info *si, const char *opt)
- {
- }
+ cflags-$(CONFIG_ARM64)		:= $(subst -pg,,$(KBUILD_CFLAGS))
+-cflags-$(CONFIG_ARM)		:= $(subst -pg,,$(KBUILD_CFLAGS)) -g0 \
++cflags-$(CONFIG_ARM)		:= $(subst -pg,,$(KBUILD_CFLAGS)) \
+ 				   -fno-builtin -fpic -mno-single-pic-base
+ 
+ cflags-$(CONFIG_EFI_ARMSTUB)	+= -I$(srctree)/scripts/dtc/libfdt
+@@ -60,7 +60,7 @@ CFLAGS_arm64-stub.o 		:= -DTEXT_OFFSET=$
+ extra-$(CONFIG_EFI_ARMSTUB)	:= $(lib-y)
+ lib-$(CONFIG_EFI_ARMSTUB)	:= $(patsubst %.o,%.stub.o,$(lib-y))
+ 
+-STUBCOPY_FLAGS-y		:= -R .debug* -R *ksymtab* -R *kcrctab*
++STUBCOPY_RM-y			:= -R *ksymtab* -R *kcrctab*
+ STUBCOPY_FLAGS-$(CONFIG_ARM64)	+= --prefix-alloc-sections=.init \
+ 				   --prefix-symbols=__efistub_
+ STUBCOPY_RELOC-$(CONFIG_ARM64)	:= R_AARCH64_ABS
+@@ -68,17 +68,25 @@ STUBCOPY_RELOC-$(CONFIG_ARM64)	:= R_AARC
+ $(obj)/%.stub.o: $(obj)/%.o FORCE
+ 	$(call if_changed,stubcopy)
+ 
++#
++# Strip debug sections and some other sections that may legally contain
++# absolute relocations, so that we can inspect the remaining sections for
++# such relocations. If none are found, regenerate the output object, but
++# this time, use objcopy and leave all sections in place.
++#
+ quiet_cmd_stubcopy = STUBCPY $@
+-      cmd_stubcopy = if $(OBJCOPY) $(STUBCOPY_FLAGS-y) $< $@; then	\
+-		     $(OBJDUMP) -r $@ | grep $(STUBCOPY_RELOC-y)	\
+-		     && (echo >&2 "$@: absolute symbol references not allowed in the EFI stub"; \
+-			 rm -f $@; /bin/false); else /bin/false; fi
++      cmd_stubcopy = if $(STRIP) --strip-debug $(STUBCOPY_RM-y) -o $@ $<; \
++		     then if $(OBJDUMP) -r $@ | grep $(STUBCOPY_RELOC-y); \
++		     then (echo >&2 "$@: absolute symbol references not allowed in the EFI stub"; \
++			   rm -f $@; /bin/false); 			  \
++		     else $(OBJCOPY) $(STUBCOPY_FLAGS-y) $< $@; fi	  \
++		     else /bin/false; fi
+ 
+ #
+ # ARM discards the .data section because it disallows r/w data in the
+ # decompressor. So move our .data to .data.efistub, which is preserved
+ # explicitly by the decompressor linker script.
+ #
+-STUBCOPY_FLAGS-$(CONFIG_ARM)	+= --rename-section .data=.data.efistub \
+-				   -R ___ksymtab+sort -R ___kcrctab+sort
++STUBCOPY_FLAGS-$(CONFIG_ARM)	+= --rename-section .data=.data.efistub
++STUBCOPY_RM-$(CONFIG_ARM)	+= -R ___ksymtab+sort -R ___kcrctab+sort
+ STUBCOPY_RELOC-$(CONFIG_ARM)	:= R_ARM_ABS
