@@ -1,10 +1,10 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.14 18/21] efi/arm: Revert deferred unmap of early memmap mapping
-Date: Thu, 22 Nov 2018 14:54:49 -0500
-Message-ID: <20181122195452.13520-18-sashal@kernel.org>
-References: <20181122195452.13520-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.9 14/15] efi/arm: Revert deferred unmap of early memmap mapping
+Date: Thu, 22 Nov 2018 14:56:20 -0500
+Message-ID: <20181122195621.13776-14-sashal@kernel.org>
+References: <20181122195621.13776-1-sashal@kernel.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181122195452.13520-1-sashal@kernel.org>
+In-Reply-To: <20181122195621.13776-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: stable@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.org>
@@ -44,10 +44,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  3 files changed, 8 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
-index a7c522eac640..312f9f32e168 100644
+index 1d1c9693ebfb..8ee91777abce 100644
 --- a/drivers/firmware/efi/arm-init.c
 +++ b/drivers/firmware/efi/arm-init.c
-@@ -265,6 +265,10 @@ void __init efi_init(void)
+@@ -256,6 +256,10 @@ void __init efi_init(void)
  				    (params.mmap & ~PAGE_MASK)));
  
  	init_screen_info();
@@ -59,10 +59,10 @@ index a7c522eac640..312f9f32e168 100644
  
  static int __init register_gop_device(void)
 diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
-index 8995a48bd067..ad1530aff633 100644
+index 4d788e0debfe..069c5a4479e6 100644
 --- a/drivers/firmware/efi/arm-runtime.c
 +++ b/drivers/firmware/efi/arm-runtime.c
-@@ -122,7 +122,7 @@ static int __init arm_enable_runtime_services(void)
+@@ -118,7 +118,7 @@ static int __init arm_enable_runtime_services(void)
  {
  	u64 mapsize;
  
@@ -72,10 +72,10 @@ index 8995a48bd067..ad1530aff633 100644
  		return 0;
  	}
 diff --git a/drivers/firmware/efi/memmap.c b/drivers/firmware/efi/memmap.c
-index 5fc70520e04c..1907db2b38d8 100644
+index 78686443cb37..3fd2b450c649 100644
 --- a/drivers/firmware/efi/memmap.c
 +++ b/drivers/firmware/efi/memmap.c
-@@ -118,6 +118,9 @@ int __init efi_memmap_init_early(struct efi_memory_map_data *data)
+@@ -117,6 +117,9 @@ int __init efi_memmap_init_early(struct efi_memory_map_data *data)
  
  void __init efi_memmap_unmap(void)
  {
