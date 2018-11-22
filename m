@@ -1,85 +1,89 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: [PATCH] x86: fix -Wmissing-prototypes warning
-Date: Thu, 22 Nov 2018 12:14:58 +0100
-Message-ID: <20181122111458.GA107823@gmail.com>
-References: <20181122084815.GA84118@gmail.com>
- <201811221904598072830@zte.com.cn>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <jailhouse-dev+bncBD7LZ45K3ECBBOE73LPQKGQEFPLYRQQ@googlegroups.com>
-Sender: Ingo Molnar <mingo.kernel.org@gmail.com>
-Content-Disposition: inline
-In-Reply-To: <201811221904598072830@zte.com.cn>
-List-Post: <https://groups.google.com/group/jailhouse-dev/post>, <mailto:jailhouse-dev@googlegroups.com>
-List-Help: <https://groups.google.com/support/>, <mailto:jailhouse-dev+help@googlegroups.com>
-List-Archive: <https://groups.google.com/group/jailhouse-dev
-List-Subscribe: <https://groups.google.com/group/jailhouse-dev/subscribe>, <mailto:jailhouse-dev+subscribe@googlegroups.com>
-List-Unsubscribe: <mailto:googlegroups-manage+175645748590+unsubscribe@googlegroups.com>,
- <https://groups.google.com/group/jailhouse-dev/subscribe>
-To: wang.yi59@zte.com.cn
-Cc: tglx@linutronix.de, mingo@redhat.com, bp@alien8.de, hpa@zytor.com, x86@kernel.org, linux-kernel@vger.kernel.org, ard.biesheuvel@linaro.org, linux-efi@vger.kernel.org, pbonzini@redhat.com, rkrcmar@redhat.com, kvm@vger.kernel.org, jgross@suse.com, akataria@vmware.com, virtualization@lists.linux-foundation.org, m.mizuma@jp.fujitsu.com, peterz@infradead.org, prarit@redhat.com, douly.fnst@cn.fujitsu.com, dwmw@amazon.co.uk, luto@kernel.org, pasha.tatashin@oracle.com, rajvi.jingar@intel.com, zhe.he@windriver.com, akpm@linux-foundation.org, dyoung@redhat.com, takahiro.akashi@linaro.org, ebiederm@xmission.com, bhe@redhat.com, ivan.gorinov@intel.com, robh@kernel.org, andy.shevchenko@gmail.com, frank.rowand@sony.com, jan.kiszka@siemens.com, jailhouse-dev@googlegroups.com, konrad.wilk@oracle.com, thomas.lendacky@amd.com, pravin.shedge4linux@gmail.com, namit@vmware.com, jroedel@sus
+From: Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 32/36] efi/arm: Revert deferred unmap of early memmap mapping
+Date: Thu, 22 Nov 2018 14:52:36 -0500
+Message-ID: <20181122195240.13123-32-sashal@kernel.org>
+References: <20181122195240.13123-1-sashal@kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20181122195240.13123-1-sashal@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: stable@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-* wang.yi59@zte.com.cn <wang.yi59@zte.com.cn> wrote:
+[ Upstream commit 33412b8673135b18ea42beb7f5117ed0091798b6 ]
 
-> Hi Ingo,
->=20
-> > * Yi Wang <wang.yi59@zte.com.cn> wrote:
-> >
-> > > We may get -Wmissing-prototypes warnings when building
-> > > kernel with W=3D1, it's better to fix them as global function
-> > > signature can be changed and caller who use the old unchanged
-> > > prototypes will be hosed.
-> > >
-> > > This patch fixes most of -Wmissing-prototypes warnings which
-> > > are in the root directory of arch/x86/kernel, not including
-> > > the subdirectories.
-> > >
-> > > These are the warnings fixed in this patch:
-> > > arch/x86/kernel/signal.c:865:17: warning: no previous prototype for =
-=E2=80=98sys32_x32_rt_sigreturn=E2=80=99 [-Wmissing-prototypes]
->=20
-> ......
->=20
-> > >  include/linux/ftrace.h             | 3 +++
-> > >  include/linux/kexec.h              | 1 +
-> > >  include/linux/of_fdt.h             | 1 +
-> > >  include/linux/ptrace.h             | 1 +
-> > >  24 files changed, 55 insertions(+), 3 deletions(-)
-> >
-> > Breaks 32-bit compilation:
-> >
-> > ../arch/x86/include/asm/setup.h: Assembler messages:
-> > ../arch/x86/include/asm/setup.h:30: Error: no such instruction: `unsign=
-ed long __startup_64(unsigned long physaddr,struct boot_params *bp)'
-> >
-> > I'll skip the setup.h bits - let's hope that's the only bug.
->=20
-> Sorry for the inconvenience, though I have checked carefully :-)
->=20
-> How do you produce this error? I tested this way but did not reproduce
-> that error:
-> # make allmodconfig
-> # make -j8
->=20
-> Thanks for your time again!
+Commit:
 
-I don't remember the exact config, but you could try the 32-bit=20
-allnoconfig and defconfig.
+  3ea86495aef2 ("efi/arm: preserve early mapping of UEFI memory map longer for BGRT")
 
-Note that the commands you used above will use the 64-bit kernel, not the=
-=20
-32-bit kernel.
+deferred the unmap of the early mapping of the UEFI memory map to
+accommodate the ACPI BGRT code, which looks up the memory type that
+backs the BGRT table to validate it against the requirements of the UEFI spec.
 
-Thanks,
+Unfortunately, this causes problems on ARM, which does not permit
+early mappings to persist after paging_init() is called, resulting
+in a WARN() splat. Since we don't support the BGRT table on ARM anway,
+let's revert ARM to the old behaviour, which is to take down the
+early mapping at the end of efi_init().
 
-	Ingo
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Fixes: 3ea86495aef2 ("efi/arm: preserve early mapping of UEFI memory ...")
+Link: http://lkml.kernel.org/r/20181114175544.12860-3-ard.biesheuvel@linaro.org
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ drivers/firmware/efi/arm-init.c    | 4 ++++
+ drivers/firmware/efi/arm-runtime.c | 2 +-
+ drivers/firmware/efi/memmap.c      | 3 +++
+ 3 files changed, 8 insertions(+), 1 deletion(-)
 
---=20
-You received this message because you are subscribed to the Google Groups "=
-Jailhouse" group.
-To unsubscribe from this group and stop receiving emails from it, send an e=
-mail to jailhouse-dev+unsubscribe@googlegroups.com.
-For more options, visit https://groups.google.com/d/optout.
+diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
+index 388a929baf95..1a6a77df8a5e 100644
+--- a/drivers/firmware/efi/arm-init.c
++++ b/drivers/firmware/efi/arm-init.c
+@@ -265,6 +265,10 @@ void __init efi_init(void)
+ 				    (params.mmap & ~PAGE_MASK)));
+ 
+ 	init_screen_info();
++
++	/* ARM does not permit early mappings to persist across paging_init() */
++	if (IS_ENABLED(CONFIG_ARM))
++		efi_memmap_unmap();
+ }
+ 
+ static int __init register_gop_device(void)
+diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
+index 922cfb813109..a00934d263c5 100644
+--- a/drivers/firmware/efi/arm-runtime.c
++++ b/drivers/firmware/efi/arm-runtime.c
+@@ -110,7 +110,7 @@ static int __init arm_enable_runtime_services(void)
+ {
+ 	u64 mapsize;
+ 
+-	if (!efi_enabled(EFI_BOOT) || !efi_enabled(EFI_MEMMAP)) {
++	if (!efi_enabled(EFI_BOOT)) {
+ 		pr_info("EFI services will not be available.\n");
+ 		return 0;
+ 	}
+diff --git a/drivers/firmware/efi/memmap.c b/drivers/firmware/efi/memmap.c
+index 5fc70520e04c..1907db2b38d8 100644
+--- a/drivers/firmware/efi/memmap.c
++++ b/drivers/firmware/efi/memmap.c
+@@ -118,6 +118,9 @@ int __init efi_memmap_init_early(struct efi_memory_map_data *data)
+ 
+ void __init efi_memmap_unmap(void)
+ {
++	if (!efi_enabled(EFI_MEMMAP))
++		return;
++
+ 	if (!efi.memmap.late) {
+ 		unsigned long size;
+ 
+-- 
+2.17.1
