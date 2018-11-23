@@ -1,89 +1,34 @@
-From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.9 14/15] efi/arm: Revert deferred unmap of early memmap mapping
-Date: Thu, 22 Nov 2018 14:56:20 -0500
-Message-ID: <20181122195621.13776-14-sashal@kernel.org>
-References: <20181122195621.13776-1-sashal@kernel.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [GIT PULL 0/1] EFI fix for v4.20
+Date: Fri, 23 Nov 2018 22:51:31 +0100
+Message-ID: <20181123215132.7951-1-ard.biesheuvel@linaro.org>
+Mime-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181122195621.13776-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: stable@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.org>
+To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Jan Glauber <jglauber@cavium.com>, John Garry <john.garry@huawei.com>, Marc Zyngier <marc.zyngier@arm.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+The following changes since commit 63eb322d89c8505af9b4a3d703e85e42281ebaa0:
 
-[ Upstream commit 33412b8673135b18ea42beb7f5117ed0091798b6 ]
+  efi: Permit calling efi_mem_reserve_persistent() from atomic context (2018-11-15 10:04:47 +0100)
 
-Commit:
+are available in the Git repository at:
 
-  3ea86495aef2 ("efi/arm: preserve early mapping of UEFI memory map longer for BGRT")
+  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-urgent
 
-deferred the unmap of the early mapping of the UEFI memory map to
-accommodate the ACPI BGRT code, which looks up the memory type that
-backs the BGRT table to validate it against the requirements of the UEFI spec.
+for you to fetch changes up to 57e56580724370056aadd0e4e331ec5445ebf9e1:
 
-Unfortunately, this causes problems on ARM, which does not permit
-early mappings to persist after paging_init() is called, resulting
-in a WARN() splat. Since we don't support the BGRT table on ARM anway,
-let's revert ARM to the old behaviour, which is to take down the
-early mapping at the end of efi_init().
+  efi: prevent GICv3 WARN() by mapping memreserve table before first use (2018-11-23 20:21:12 +0100)
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-efi@vger.kernel.org
-Fixes: 3ea86495aef2 ("efi/arm: preserve early mapping of UEFI memory ...")
-Link: http://lkml.kernel.org/r/20181114175544.12860-3-ard.biesheuvel@linaro.org
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- drivers/firmware/efi/arm-init.c    | 4 ++++
- drivers/firmware/efi/arm-runtime.c | 2 +-
- drivers/firmware/efi/memmap.c      | 3 +++
- 3 files changed, 8 insertions(+), 1 deletion(-)
+----------------------------------------------------------------
+Apply a fix on top of the efi_mem_reserve_persistent() fix that was
+merged last week to allow the function to be called earlier.
 
-diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
-index 1d1c9693ebfb..8ee91777abce 100644
---- a/drivers/firmware/efi/arm-init.c
-+++ b/drivers/firmware/efi/arm-init.c
-@@ -256,6 +256,10 @@ void __init efi_init(void)
- 				    (params.mmap & ~PAGE_MASK)));
- 
- 	init_screen_info();
-+
-+	/* ARM does not permit early mappings to persist across paging_init() */
-+	if (IS_ENABLED(CONFIG_ARM))
-+		efi_memmap_unmap();
- }
- 
- static int __init register_gop_device(void)
-diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
-index 4d788e0debfe..069c5a4479e6 100644
---- a/drivers/firmware/efi/arm-runtime.c
-+++ b/drivers/firmware/efi/arm-runtime.c
-@@ -118,7 +118,7 @@ static int __init arm_enable_runtime_services(void)
- {
- 	u64 mapsize;
- 
--	if (!efi_enabled(EFI_BOOT) || !efi_enabled(EFI_MEMMAP)) {
-+	if (!efi_enabled(EFI_BOOT)) {
- 		pr_info("EFI services will not be available.\n");
- 		return 0;
- 	}
-diff --git a/drivers/firmware/efi/memmap.c b/drivers/firmware/efi/memmap.c
-index 78686443cb37..3fd2b450c649 100644
---- a/drivers/firmware/efi/memmap.c
-+++ b/drivers/firmware/efi/memmap.c
-@@ -117,6 +117,9 @@ int __init efi_memmap_init_early(struct efi_memory_map_data *data)
- 
- void __init efi_memmap_unmap(void)
- {
-+	if (!efi_enabled(EFI_MEMMAP))
-+		return;
-+
- 	if (!efi.memmap.late) {
- 		unsigned long size;
- 
--- 
-2.17.1
+----------------------------------------------------------------
+Ard Biesheuvel (1):
+      efi: prevent GICv3 WARN() by mapping memreserve table before first use
+
+ drivers/firmware/efi/efi.c | 36 ++++++++++++++++++++++++++----------
+ 1 file changed, 26 insertions(+), 10 deletions(-)
