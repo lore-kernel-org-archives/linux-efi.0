@@ -1,95 +1,60 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 1/1] efi: prevent GICv3 WARN() by mapping memreserve table before first use
-Date: Fri, 23 Nov 2018 22:51:32 +0100
-Message-ID: <20181123215132.7951-2-ard.biesheuvel@linaro.org>
-References: <20181123215132.7951-1-ard.biesheuvel@linaro.org>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+From: Lianbo Jiang <lijiang@redhat.com>
+Subject: [PATCH 0/2 RESEND v7] add reserved e820 ranges to the kdump kernel e820 table
+Date: Sat, 24 Nov 2018 13:12:21 +0800
+Message-ID: <20181124051223.19994-1-lijiang@redhat.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181123215132.7951-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: kexec@lists.infradead.org, x86@kernel.org, linux-ia64@vger.kernel.org, linux-efi@vger.kernel.org, tglx@linutronix.de, mingo@redhat.com, bp@alien8.de, akpm@linux-foundation.org, dave.hansen@linux.intel.com, luto@kernel.org, peterz@infradead.org, ard.biesheuvel@linaro.org, tony.luck@intel.com, fenghua.yu@intel.com, dyoung@redhat.com, bhe@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-Mapping the MEMRESERVE EFI configuration table from an early initcall
-is too late: the GICv3 ITS code that creates persistent reservations
-for the boot CPU's LPI tables is invoked from init_IRQ(), which runs
-much earlier than the handling of the initcalls. This results in a
-WARN() splat because the LPI tables cannot be reserved persistently,
-which will result in silent memory corruption after a kexec reboot.
+These patches add the new I/O resource descriptor 'IORES_DESC_RESERVED'
+for the iomem resources search interfaces, and in order to make it still
+work after the new descriptor is added, these codes originally related
+to 'IORES_DESC_NONE' have been updated.
 
-So instead, invoke the initialization performed by the initcall from
-efi_mem_reserve_persistent() itself as well, but keep the initcall so
-that the init is guaranteed to have been called before SMP boot.
+In addition, for the MMCONFIG issue and the SME kdump issue, it is
+necessary to pass the e820 reserved ranges to kdump kernel.
 
-Fixes: 63eb322d89c8 ("efi: Permit calling efi_mem_reserve_persistent() ...")
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Tested-by: Marc Zyngier <marc.zyngier@arm.com>
-Tested-by: Jan Glauber <jglauber@cavium.com>
-Tested-by: John Garry <john.garry@huawei.com>
----
- drivers/firmware/efi/efi.c | 36 ++++++++++++++++++++++++++----------
- 1 file changed, 26 insertions(+), 10 deletions(-)
+Changes since v1:
+1. Modified the value of flags to "0", when walking through the whole
+tree for e820 reserved ranges.
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index fad7c62cfc0e..415849bab233 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -969,13 +969,33 @@ bool efi_is_table_address(unsigned long phys_addr)
- static DEFINE_SPINLOCK(efi_mem_reserve_persistent_lock);
- static struct linux_efi_memreserve *efi_memreserve_root __ro_after_init;
- 
--int efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
-+static int __init efi_memreserve_map_root(void)
-+{
-+	if (efi.mem_reserve == EFI_INVALID_TABLE_ADDR)
-+		return -ENODEV;
-+
-+	efi_memreserve_root = memremap(efi.mem_reserve,
-+				       sizeof(*efi_memreserve_root),
-+				       MEMREMAP_WB);
-+	if (WARN_ON_ONCE(!efi_memreserve_root))
-+		return -ENOMEM;
-+	return 0;
-+}
-+
-+int __ref efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
- {
- 	struct linux_efi_memreserve *rsv;
-+	int rc;
- 
--	if (!efi_memreserve_root)
-+	if (efi_memreserve_root == (void *)ULONG_MAX)
- 		return -ENODEV;
- 
-+	if (!efi_memreserve_root) {
-+		rc = efi_memreserve_map_root();
-+		if (rc)
-+			return rc;
-+	}
-+
- 	rsv = kmalloc(sizeof(*rsv), GFP_ATOMIC);
- 	if (!rsv)
- 		return -ENOMEM;
-@@ -993,14 +1013,10 @@ int efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
- 
- static int __init efi_memreserve_root_init(void)
- {
--	if (efi.mem_reserve == EFI_INVALID_TABLE_ADDR)
--		return -ENODEV;
--
--	efi_memreserve_root = memremap(efi.mem_reserve,
--				       sizeof(*efi_memreserve_root),
--				       MEMREMAP_WB);
--	if (!efi_memreserve_root)
--		return -ENOMEM;
-+	if (efi_memreserve_root)
-+		return 0;
-+	if (efi_memreserve_map_root())
-+		efi_memreserve_root = (void *)ULONG_MAX;
- 	return 0;
- }
- early_initcall(efi_memreserve_root_init);
+Changes since v2:
+1. Modified the value of flags to "0", when walking through the whole
+tree for e820 reserved ranges.
+2. Modified the invalid SOB chain issue.
+
+Changes since v3:
+1. Dropped [PATCH 1/3 v3] resource: fix an error which walks through iomem
+   resources. Please refer to this commit <010a93bf97c7> "resource: Fix
+   find_next_iomem_res() iteration issue"
+
+Changes since v4:
+1. Improve the patch log, and add kernel log.
+
+Changes since v5:
+1. Rewrite these patches log.
+
+Changes since v6:
+1. Modify the [PATCH 1/2], and add the new I/O resource descriptor
+   'IORES_DESC_RESERVED' for the iomem resources search interfaces,
+   and also updates these codes relates to 'IORES_DESC_NONE'.
+2. Modify the [PATCH 2/2], and walk through io resource based on the
+   new descriptor 'IORES_DESC_RESERVED'.
+3. Update patch log.
+
+Lianbo Jiang (2):
+  resource: add the new I/O resource descriptor 'IORES_DESC_RESERVED'
+  x86/kexec_file: add reserved e820 ranges to kdump kernel e820 table
+
+ arch/ia64/kernel/efi.c  | 4 ++++
+ arch/x86/kernel/crash.c | 6 ++++++
+ arch/x86/kernel/e820.c  | 2 +-
+ arch/x86/mm/ioremap.c   | 9 ++++++++-
+ include/linux/ioport.h  | 1 +
+ kernel/resource.c       | 6 +++---
+ 6 files changed, 23 insertions(+), 5 deletions(-)
+
 -- 
-2.19.1
+2.17.1
