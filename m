@@ -1,102 +1,52 @@
 From: Nayna Jain <nayna@linux.ibm.com>
-Subject: [PATCH 6/7] efi: Allow the "db" UEFI variable to be suppressed
-Date: Sun, 25 Nov 2018 20:44:59 +0530
-Message-ID: <20181125151500.8298-7-nayna@linux.ibm.com>
+Subject: [PATCH 7/7] ima: Support platform keyring for kernel appraisal
+Date: Sun, 25 Nov 2018 20:45:00 +0530
+Message-ID: <20181125151500.8298-8-nayna@linux.ibm.com>
 References: <20181125151500.8298-1-nayna@linux.ibm.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20181125151500.8298-1-nayna@linux.ibm.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-integrity@vger.kernel.org
-Cc: linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, zohar@linux.ibm.com, dhowells@redhat.com, jforbes@redhat.com, seth.forshee@canonical.com, kexec@lists.infradead.org, keyrings@vger.kernel.org, vgoyal@redhat.com, ebiederm@xmission.com, mpe@ellerman.id.au, Josh Boyer <jwboyer@fedoraproject.org>
+Cc: linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, zohar@linux.ibm.com, dhowells@redhat.com, jforbes@redhat.com, seth.forshee@canonical.com, kexec@lists.infradead.org, keyrings@vger.kernel.org, vgoyal@redhat.com, ebiederm@xmission.com, mpe@ellerman.id.au, Nayna Jain <nayna@linux.ibm.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Josh Boyer <jwboyer@fedoraproject.org>
+On secure boot enabled systems, the bootloader verifies the kernel
+image and possibly the initramfs signatures based on a set of keys. A
+soft reboot(kexec) of the system, with the same kernel image and
+initramfs, requires access to the original keys to verify the
+signatures.
 
-If a user tells shim to not use the certs/hashes in the UEFI db variable
-for verification purposes, shim will set a UEFI variable called
-MokIgnoreDB. Have the uefi import code look for this and ignore the db
-variable if it is found.
+This patch allows IMA-appraisal access to those original keys, now
+loaded on the platform keyring, needed for verifying the kernel image
+and initramfs signatures.
 
-Signed-off-by: Josh Boyer <jwboyer@fedoraproject.org>
-Signed-off-by: David Howells <dhowells@redhat.com>
-Acked-by: Nayna Jain <nayna@linux.ibm.com>
+Signed-off-by: Nayna Jain <nayna@linux.ibm.com>
+Reviewed-by: Mimi Zohar <zohar@linux.ibm.com>
 ---
-Changelog:
+ security/integrity/ima/ima_appraise.c | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
 
-v0:
-- No changes
-
- security/integrity/platform_certs/load_uefi.c | 44 +++++++++++++++++++++------
- 1 file changed, 34 insertions(+), 10 deletions(-)
-
-diff --git a/security/integrity/platform_certs/load_uefi.c b/security/integrity/platform_certs/load_uefi.c
-index dbccb45147ef..978c8d0dc151 100644
---- a/security/integrity/platform_certs/load_uefi.c
-+++ b/security/integrity/platform_certs/load_uefi.c
-@@ -13,6 +13,26 @@ static __initdata efi_guid_t efi_cert_x509_sha256_guid = EFI_CERT_X509_SHA256_GU
- static __initdata efi_guid_t efi_cert_sha256_guid = EFI_CERT_SHA256_GUID;
- 
- /*
-+ * Look to see if a UEFI variable called MokIgnoreDB exists and return true if
-+ * it does.
-+ *
-+ * This UEFI variable is set by the shim if a user tells the shim to not use
-+ * the certs/hashes in the UEFI db variable for verification purposes.  If it
-+ * is set, we should ignore the db variable also and the true return indicates
-+ * this.
-+ */
-+static __init bool uefi_check_ignore_db(void)
-+{
-+	efi_status_t status;
-+	unsigned int db = 0;
-+	unsigned long size = sizeof(db);
-+	efi_guid_t guid = EFI_SHIM_LOCK_GUID;
-+
-+	status = efi.get_variable(L"MokIgnoreDB", &guid, NULL, &size, &db);
-+	return status == EFI_SUCCESS;
-+}
-+
-+/*
-  * Get a certificate list blob from the named EFI variable.
-  */
- static __init void *get_cert_list(efi_char16_t *name, efi_guid_t *guid,
-@@ -113,7 +133,9 @@ static __init efi_element_handler_t get_handler_for_dbx(const efi_guid_t *sig_ty
- }
- 
- /*
-- * Load the certs contained in the UEFI databases
-+ * Load the certs contained in the UEFI databases into the secondary trusted
-+ * keyring and the UEFI blacklisted X.509 cert SHA256 hashes into the blacklist
-+ * keyring.
-  */
- static int __init load_uefi_certs(void)
- {
-@@ -129,15 +151,17 @@ static int __init load_uefi_certs(void)
- 	/* Get db, MokListRT, and dbx.  They might not exist, so it isn't
- 	 * an error if we can't get them.
- 	 */
--	db = get_cert_list(L"db", &secure_var, &dbsize);
--	if (!db) {
--		pr_err("Couldn't get UEFI db list\n");
--	} else {
--		rc = parse_efi_signature_list("UEFI:db",
--					      db, dbsize, get_handler_for_db);
--		if (rc)
--			pr_err("Couldn't parse db signatures: %d\n", rc);
--		kfree(db);
-+	if (!uefi_check_ignore_db()) {
-+		db = get_cert_list(L"db", &secure_var, &dbsize);
-+		if (!db) {
-+			pr_err("MODSIGN: Couldn't get UEFI db list\n");
-+		} else {
-+			rc = parse_efi_signature_list("UEFI:db",
-+					db, dbsize, get_handler_for_db);
-+			if (rc)
-+				pr_err("Couldn't parse db signatures: %d\n", rc);
-+			kfree(db);
+diff --git a/security/integrity/ima/ima_appraise.c b/security/integrity/ima/ima_appraise.c
+index deec1804a00a..9c13585e7d3e 100644
+--- a/security/integrity/ima/ima_appraise.c
++++ b/security/integrity/ima/ima_appraise.c
+@@ -294,7 +294,16 @@ int ima_appraise_measurement(enum ima_hooks func,
+ 					     iint->ima_hash->length);
+ 		if (rc == -EOPNOTSUPP) {
+ 			status = INTEGRITY_UNKNOWN;
+-		} else if (rc) {
++			break;
 +		}
- 	}
- 
- 	mok = get_cert_list(L"MokListRT", &mok_var, &moksize);
++		if (rc && func == KEXEC_KERNEL_CHECK)
++			rc = integrity_digsig_verify(
++					INTEGRITY_KEYRING_PLATFORM,
++					(const char *)xattr_value,
++					xattr_len,
++					iint->ima_hash->digest,
++					iint->ima_hash->length);
++		if (rc) {
+ 			cause = "invalid-signature";
+ 			status = INTEGRITY_FAIL;
+ 		} else {
 -- 
 2.13.6
