@@ -1,7 +1,7 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.4 18/70] efi/libstub/arm64: Force hidden visibility for section markers
-Date: Mon, 26 Nov 2018 11:50:33 +0100
-Message-ID: <20181126105048.599872098@linuxfoundation.org>
+Subject: [PATCH 4.4 19/70] efi/libstub/arm64: Set -fpie when building the EFI stub
+Date: Mon, 26 Nov 2018 11:50:34 +0100
+Message-ID: <20181126105048.681817537@linuxfoundation.org>
 References: <20181126105046.722096341@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -19,11 +19,21 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-commit 0426a4e68f18d75515414361de9e3e1445d2644e upstream.
+commit 91ee5b21ee026c49e4e7483de69b55b8b47042be upstream.
 
-To prevent the compiler from emitting absolute references to the section
-markers when running in PIC mode, override the visibility to 'hidden' for
-all contents of asm/sections.h
+Clang may emit absolute symbol references when building in non-PIC mode,
+even when using the default 'small' code model, which is already mostly
+position independent to begin with, due to its use of adrp/add pairs
+that have a relative range of +/- 4 GB. The remedy is to pass the -fpie
+flag, which can be done safely now that the code has been updated to avoid
+GOT indirections (which may be emitted due to the compiler assuming that
+the PIC/PIE code may end up in a shared library that is subject to ELF
+symbol preemption)
+
+Passing -fpie when building code that needs to execute at an a priori
+unknown offset is arguably an improvement in any case, and given that
+the recent visibility changes allow the PIC build to pass with GCC as
+well, let's add -fpie for all arm64 builds rather than only for Clang.
 
 Tested-by: Matthias Kaehlcke <mka@chromium.org>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
@@ -32,33 +42,22 @@ Cc: Matt Fleming <matt@codeblueprint.co.uk>
 Cc: Peter Zijlstra <peterz@infradead.org>
 Cc: Thomas Gleixner <tglx@linutronix.de>
 Cc: linux-efi@vger.kernel.org
-Link: http://lkml.kernel.org/r/20170818194947.19347-4-ard.biesheuvel@linaro.org
+Link: http://lkml.kernel.org/r/20170818194947.19347-5-ard.biesheuvel@linaro.org
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
-[nc: Fix conflict due to lack of commit 42b55734030c1 in linux-4.4.y]
 Signed-off-by: Nathan Chancellor <natechancellor@gmail.com>
 Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 ---
- drivers/firmware/efi/libstub/arm64-stub.c |   10 +++++++++-
- 1 file changed, 9 insertions(+), 1 deletion(-)
+ drivers/firmware/efi/libstub/Makefile |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
---- a/drivers/firmware/efi/libstub/arm64-stub.c
-+++ b/drivers/firmware/efi/libstub/arm64-stub.c
-@@ -9,9 +9,17 @@
-  * published by the Free Software Foundation.
-  *
-  */
-+
-+/*
-+ * To prevent the compiler from emitting GOT-indirected (and thus absolute)
-+ * references to the section markers, override their visibility as 'hidden'
-+ */
-+#pragma GCC visibility push(hidden)
-+#include <asm/sections.h>
-+#pragma GCC visibility pop
-+
- #include <linux/efi.h>
- #include <asm/efi.h>
--#include <asm/sections.h>
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -10,7 +10,7 @@ cflags-$(CONFIG_X86)		+= -m$(BITS) -D__K
+ 				   -fPIC -fno-strict-aliasing -mno-red-zone \
+ 				   -mno-mmx -mno-sse -DDISABLE_BRANCH_PROFILING
  
- efi_status_t __init handle_kernel_image(efi_system_table_t *sys_table_arg,
- 					unsigned long *image_addr,
+-cflags-$(CONFIG_ARM64)		:= $(subst -pg,,$(KBUILD_CFLAGS))
++cflags-$(CONFIG_ARM64)		:= $(subst -pg,,$(KBUILD_CFLAGS)) -fpie
+ cflags-$(CONFIG_ARM)		:= $(subst -pg,,$(KBUILD_CFLAGS)) \
+ 				   -fno-builtin -fpic -mno-single-pic-base
+ 
