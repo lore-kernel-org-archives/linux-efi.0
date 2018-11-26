@@ -1,43 +1,34 @@
-From: Borislav Petkov <bp@alien8.de>
+From: Dave Hansen <dave.hansen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Subject: Re: [PATCH 0/2 RESEND v7] add reserved e820 ranges to the kdump
  kernel e820 table
-Date: Mon, 26 Nov 2018 19:04:55 +0100
-Message-ID: <20181126180455.GI4843@zn.tnic>
+Date: Mon, 26 Nov 2018 10:54:26 -0800
+Message-ID: <35e8ade5-d5a8-b5e4-180b-44b4ff0a83b1@intel.com>
 References: <20181124051223.19994-1-lijiang@redhat.com>
- <d457ed46-d983-20b2-ad7f-9eaa6d98f2bf@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <d457ed46-d983-20b2-ad7f-9eaa6d98f2bf@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Dave Hansen <dave.hansen@intel.com>
-Cc: Lianbo Jiang <lijiang@redhat.com>, linux-kernel@vger.kernel.org, kexec@lists.infradead.org, x86@kernel.org, linux-ia64@vger.kernel.org, linux-efi@vger.kernel.org, tglx@linutronix.de, mingo@redhat.com, akpm@linux-foundation.org, dave.hansen@linux.intel.com, luto@kernel.org, peterz@infradead.org, ard.biesheuvel@linaro.org, tony.luck@intel.com, fenghua.yu@intel.com, dyoung@redhat.com, bhe@redhat.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <20181124051223.19994-1-lijiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/kexec/>
+List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Lianbo Jiang <lijiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, dave.hansen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Nov 26, 2018 at 09:44:46AM -0800, Dave Hansen wrote:
-> On 11/23/18 9:12 PM, Lianbo Jiang wrote:
-> > These patches add the new I/O resource descriptor 'IORES_DESC_RESERVED'
-> > for the iomem resources search interfaces, and in order to make it still
-> > work after the new descriptor is added, these codes originally related
-> > to 'IORES_DESC_NONE' have been updated.
-> 
-> I'm having a really hard time figuring out what problem these patches solve.
-> 
-> What end-user visible behavior does this set change?
+On 11/23/18 9:12 PM, Lianbo Jiang wrote:
+> These patches add the new I/O resource descriptor 'IORES_DESC_RESERVED'
+> for the iomem resources search interfaces, and in order to make it still
+> work after the new descriptor is added, these codes originally related
+> to 'IORES_DESC_NONE' have been updated.
 
-Yeah, that was a long process of digging out the "why".
-
-I'd recommend reading the previous threads and, more specifically:
-
-https://lkml.kernel.org/r/CABhMZUUscS3jUZUSM5Y6EYJK6weo7Mjj5-EAKGvbw0qEe%2B38zw@mail.gmail.com
-
-in short: we need to export e820 reserved ranges to the second kernel so
-that it can talk to PCI devices properly. (And I'm wondering how it did
-work until now...)
-
--- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
+This is rather anemic "0/" text.  Could you please include some more
+background in here?  The 2/2 patch is pretty good in this regard, but it
+needs to be here, too.
