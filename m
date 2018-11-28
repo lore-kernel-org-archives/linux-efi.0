@@ -1,56 +1,100 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH 5/5] efi: permit calling efi_mem_reserve_persistent from
- atomic context
-Date: Tue, 27 Nov 2018 20:16:47 +0100
-Message-ID: <CAKv+Gu8HFq0EnQv6PBVXqO5=WCBqA=ztwb+-otrpBz+J9SnHfA@mail.gmail.com>
-References: <20181114175544.12860-1-ard.biesheuvel@linaro.org>
- <20181114175544.12860-6-ard.biesheuvel@linaro.org> <a8346212-70cb-0bbb-9e29-e21fa2ee5040@arm.com>
+From: lijiang <lijiang@redhat.com>
+Subject: Re: [PATCH 1/2 RESEND v7] resource: add the new I/O resource
+ descriptor 'IORES_DESC_RESERVED'
+Date: Wed, 28 Nov 2018 11:51:03 +0800
+Message-ID: <d84fbefb-f856-c600-5207-c63f48b1b308@redhat.com>
+References: <20181124051223.19994-1-lijiang@redhat.com>
+ <20181124051223.19994-2-lijiang@redhat.com>
+ <ae405fe9-94fd-3fb7-decd-c7821cf95b7d@intel.com>
+ <460c5552-a48e-3523-275a-7f94d0f08f9b@redhat.com>
+ <703ce20d-be09-9b8d-d457-5b002a50dff7@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <a8346212-70cb-0bbb-9e29-e21fa2ee5040@arm.com>
+In-Reply-To: <703ce20d-be09-9b8d-d457-5b002a50dff7@intel.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jeremy Linton <jeremy.linton@arm.com>
-Cc: linux-efi <linux-efi@vger.kernel.org>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Dave Hansen <dave.hansen@intel.com>, linux-kernel@vger.kernel.org
+Cc: kexec@lists.infradead.org, x86@kernel.org, linux-ia64@vger.kernel.org, linux-efi@vger.kernel.org, tglx@linutronix.de, mingo@redhat.com, bp@alien8.de, akpm@linux-foundation.org, dave.hansen@linux.intel.com, luto@kernel.org, peterz@infradead.org, ard.biesheuvel@linaro.org, tony.luck@intel.com, fenghua.yu@intel.com, dyoung@redhat.com, bhe@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 27 Nov 2018 at 19:59, Jeremy Linton <jeremy.linton@arm.com> wrote:
->
-> Hi Ard,
->
->
-> On 11/14/2018 11:55 AM, Ard Biesheuvel wrote:
-> > Currently, efi_mem_reserve_persistent() may not be called from atomic
-> > context, since both the kmalloc() call and the memremap() call may
-> > sleep.
-> >
-> > The kmalloc() call is easy enough to fix, but the memremap() call
-> > needs to be moved into an init hook since we cannot control the
-> > memory allocation behavior of memremap() at the call site.
->
-> So, at first glance this looks correct until I noticed that
-> its_cpu_init_lpis() is being called before the early_initcalls are run.
->
-> This results in the WARN_ON triggering with the following backtrace:
->
-> [    0.000000]  its_cpu_init_lpis+0x1d4/0x2e0
-> [    0.000000]  its_cpu_init+0x78/0x1b4
-> [    0.000000]  gic_init_bases+0x2c4/0x2e0
-> [    0.000000]  gic_acpi_init+0x158/0x270
-> [    0.000000]  acpi_match_madt+0x4c/0x84
-> [    0.000000]  acpi_table_parse_entries_array+0x140/0x218
-> [    0.000000]  acpi_table_parse_entries+0x70/0x98
-> [    0.000000]  acpi_table_parse_madt+0x40/0x50
-> [    0.000000]  __acpi_probe_device_table+0x88/0xe0
-> [    0.000000]  irqchip_init+0x38/0x40
-> [    0.000000]  init_IRQ+0xfc/0x130
-> [    0.000000]  start_kernel+0x344/0x4cc
->
-> due to the efi_memreserve_root not yet being set.
->
+在 2018年11月27日 23:34, Dave Hansen 写道:
+> On 11/27/18 2:04 AM, lijiang wrote:
+>> What happens if we don't modify this functions
+>> __ioremap_check_desc_other()? -When SEV is active, it might map these
+>> reserved regions with the encryption mask. That is incorrect. 
+> 
+> This is missing another sentence or two to "connect the dots".
+> 
+> SEV uses data that comes from the e820 table to tell whether or not the
+> memory should be encrypted?  If we don't reflect these reserved areas in
+> the e820 table, the SEV code will set up encrypted mappings for device
+> memory, for instance?
+> 
 
-Yup
+For the convenience of description, here copy some code fragments and put them at the end.
+Please refer to these codes.
 
-https://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git/commit/?h=efi/urgent&id=976b489120cdab2b1b3a41ffa14661db43d58190
+When the SEV is active, the page being mapped will determine whether to use the memory
+encryption attribute for mapping based on the 'mem_flags.desc_other'.
 
-That should fix it. Please let me know if it doesn't work for you
+But the value of 'mem_flags.desc_other' is set according to the returned result of this
+function __ioremap_check_desc_other().
+
+Originally, the 'E820_TYPE_RESERVED' type is converted to the descriptor 'IORES_DESC_NONE',
+therefore, for the e820 reserved type, the value of 'mem_flags.desc_other' is equal to
+'false'.
+
+But now, the 'E820_TYPE_RESERVED' type is converted to the descriptor 'IORES_DESC_RESERVED'
+instead of 'IORES_DESC_NONE', it has been changed and the value of 'mem_flags.desc_other'
+is equal to 'true'. This is wrong.
+
+So that would be nice to keep it the same as before, that is to say, this function has to
+be improved like this.
+static int __ioremap_check_desc_other(struct resource *res)
+{
+    return ((res->desc != IORES_DESC_NONE) &&
+            (res->desc != IORES_DESC_RESERVED));
+}
+
+
+Please look at the following function __ioremap_caller(), and also list the call trace path.
+
+Call trace path:
+   __ioremap_caller()->
+__ioremap_check_mem()->
+       walk_mem_res()->
+__ioremap_res_check()-> 
+__ioremap_check_desc_other()
+
+static void __iomem *__ioremap_caller(resource_size_t phys_addr,
+                unsigned long size, enum page_cache_mode pcm,
+                void *caller, bool encrypted)
+{
+        unsigned long offset, vaddr;
+        resource_size_t last_addr;
+        const resource_size_t unaligned_phys_addr = phys_addr;
+        const unsigned long unaligned_size = size;
+        struct ioremap_mem_flags mem_flags;
+
+	/* skip some codes...*/
+
+        __ioremap_check_mem(phys_addr, size, &mem_flags);
+
+	/* skip some codes...*/
+
+	/*
+         * If the page being mapped is in memory and SEV is active then
+         * make sure the memory encryption attribute is enabled in the
+         * resulting mapping.
+         */
+        prot = PAGE_KERNEL_IO;
+        if ((sev_active() && mem_flags.desc_other) || encrypted)
+                prot = pgprot_encrypted(prot);
+
+	/* skip some codes...*/
+}
+
+Thanks.
+Lianbo
