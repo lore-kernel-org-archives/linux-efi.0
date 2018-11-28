@@ -1,39 +1,94 @@
-From: Dave Hansen <dave.hansen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH 1/2 RESEND v7] resource: add the new I/O resource
- descriptor 'IORES_DESC_RESERVED'
-Date: Wed, 28 Nov 2018 08:02:26 -0800
-Message-ID: <4ff951f6-c1bf-ff98-b70b-a138e54488af@intel.com>
-References: <20181124051223.19994-1-lijiang@redhat.com>
- <20181124051223.19994-2-lijiang@redhat.com>
- <ae405fe9-94fd-3fb7-decd-c7821cf95b7d@intel.com>
- <460c5552-a48e-3523-275a-7f94d0f08f9b@redhat.com>
- <703ce20d-be09-9b8d-d457-5b002a50dff7@intel.com>
- <d84fbefb-f856-c600-5207-c63f48b1b308@redhat.com>
+From: Mimi Zohar <zohar@linux.ibm.com>
+Subject: Re: [PATCH 0/7] add platform/firmware keys support for kernel
+ verification by IMA
+Date: Wed, 28 Nov 2018 11:45:27 -0500
+Message-ID: <1543423527.3902.239.camel@linux.ibm.com>
+References: <20181125151500.8298-1-nayna@linux.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <d84fbefb-f856-c600-5207-c63f48b1b308-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/kexec/>
-List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: lijiang <lijiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, dave.hansen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20181125151500.8298-1-nayna@linux.ibm.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Nayna Jain <nayna@linux.ibm.com>, linux-integrity@vger.kernel.org
+Cc: linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, jforbes@redhat.com, seth.forshee@canonical.com, kexec@lists.infradead.org, keyrings@vger.kernel.org, vgoyal@redhat.com, ebiederm@xmission.com, mpe@ellerman.id.au
 List-Id: linux-efi@vger.kernel.org
 
-On 11/27/18 7:51 PM, lijiang wrote:
-> But now, the 'E820_TYPE_RESERVED' type is converted to the descriptor 'IORES_DESC_RESERVED'
-> instead of 'IORES_DESC_NONE', it has been changed and the value of 'mem_flags.desc_other'
-> is equal to 'true'. This is wrong.
+Hi Nayna,
 
-Thanks for the improved description of the problem.  Seems to all make
-sense now.
+On Sun, 2018-11-25 at 20:44 +0530, Nayna Jain wrote:
+> On secure boot enabled systems, a verified kernel may need to kexec
+> additional kernels. For example, it may be used as a bootloader needing
+> to kexec a target kernel or it may need to kexec a crashdump kernel.
+> In such cases, it may want to verify the signature of the next kernel
+> image.
+> 
+> It is possible that the new kernel image is signed with third party keys
+> which are stored as platform or firmware keys in the 'db' variable. The
+> kernel, however, can not directly verify these platform keys, and an
+> administrator may therefore not want to trust them for arbitrary usage.
+> In order to differentiate platform keys from other keys and provide the
+> necessary separation of trust the kernel needs an additional keyring to
+> store platform/firmware keys.
+> 
+> The secure boot key database is expected to store the keys as EFI
+> Signature List(ESL). The patch set uses David Howells and Josh Boyer's
+> patch to access and parse the ESL to extract the certificates and load
+> them onto the platform keyring.
+> 
+> The last patch in this patch set adds support for IMA-appraisal to
+> verify the kexec'ed kernel image based on keys stored in the platform
+> keyring.
+> 
+> Changelog:
+> 
+> v0:
+> - The original patches loaded the certificates onto the secondary
+>   trusted keyring. This patch set defines a new keyring named
+>   ".platform" and adds the certificates to this new keyring  
+> - removed CONFIG EFI_SIGNATURE_LIST_PARSER and LOAD_UEFI_KEYS
+> - moved files from certs/ to security/integrity/platform_certs/
 
-Could you include this in the changelog for the next version?
+This patch set is looking really good!  There are a couple of
+checkpatch.pl warnings that need to be addressed before these patches
+can be upstreamed.  I'd also like to see some Reviews/Acks for them as
+well.
+
+For the time being these patches are queued in the #next-integrity-
+queued branch.
+
+https://git.kernel.org/pub/scm/linux/kernel/git/zohar/linux-integrity.
+git/
+
+thanks!
+
+Mimi
+
+> 
+> Dave Howells (2):
+>   efi: Add EFI signature data types
+>   efi: Add an EFI signature blob parser
+> 
+> Josh Boyer (2):
+>   efi: Import certificates from UEFI Secure Boot
+>   efi: Allow the "db" UEFI variable to be suppressed
+> 
+> Nayna Jain (3):
+>   integrity: define a trusted platform keyring
+>   integrity: load certs to the platform keyring
+>   ima: support platform keyring for kernel appraisal
+> 
+>  include/linux/efi.h                                |  34 ++++
+>  security/integrity/Kconfig                         |  11 ++
+>  security/integrity/Makefile                        |   5 +
+>  security/integrity/digsig.c                        | 115 ++++++++----
+>  security/integrity/ima/ima_appraise.c              |  11 +-
+>  security/integrity/integrity.h                     |  23 ++-
+>  security/integrity/platform_certs/efi_parser.c     | 112 ++++++++++++
+>  security/integrity/platform_certs/load_uefi.c      | 192 +++++++++++++++++++++
+>  .../integrity/platform_certs/platform_keyring.c    |  62 +++++++
+>  9 files changed, 527 insertions(+), 38 deletions(-)
+>  create mode 100644 security/integrity/platform_certs/efi_parser.c
+>  create mode 100644 security/integrity/platform_certs/load_uefi.c
+>  create mode 100644 security/integrity/platform_certs/platform_keyring.c
+> 
