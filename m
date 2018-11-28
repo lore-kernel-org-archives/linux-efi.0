@@ -1,53 +1,206 @@
 From: Mimi Zohar <zohar@linux.ibm.com>
-Subject: Re: [PATCH 5/7] efi: Import certificates from UEFI Secure Boot
-Date: Wed, 28 Nov 2018 10:46:28 -0500
-Message-ID: <1543419988.3902.216.camel@linux.ibm.com>
+Subject: Re: [PATCH 4/7] efi: Add an EFI signature blob parser
+Date: Wed, 28 Nov 2018 10:52:10 -0500
+Message-ID: <1543420330.3902.220.camel@linux.ibm.com>
 References: <20181125151500.8298-1-nayna@linux.ibm.com>
-         <20181125151500.8298-6-nayna@linux.ibm.com>
+         <20181125151500.8298-5-nayna@linux.ibm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181125151500.8298-6-nayna@linux.ibm.com>
+In-Reply-To: <20181125151500.8298-5-nayna@linux.ibm.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Nayna Jain <nayna@linux.ibm.com>, Josh Boyer <jwboyer@fedoraproject.org>, linux-integrity@vger.kernel.org
-Cc: linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, jforbes@redhat.com, seth.forshee@canonical.com, kexec@lists.infradead.org, keyrings@vger.kernel.org, vgoyal@redhat.com, ebiederm@xmission.com, mpe@ellerman.id.au
+To: Nayna Jain <nayna@linux.ibm.com>, David Howells <dhowells@redhat.com>, linux-integrity <linux-integrity@vger.kernel.org>
+Cc: linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel <linux-kernel@vger.kernel.org>, jforbes@redhat.com, seth.forshee@canonical.com, kexec@lists.infradead.org, keyrings@vger.kernel.org, vgoyal@redhat.com, ebiederm@xmission.com, mpe@ellerman.id.au
 List-Id: linux-efi@vger.kernel.org
 
 On Sun, 2018-11-25 at 20:44 +0530, Nayna Jain wrote:
-> From: Josh Boyer <jwboyer@fedoraproject.org>
+> From: Dave Howells <dhowells@redhat.com>
 > 
-> New Patch Description:
-> ======================
+> Add a function to parse an EFI signature blob looking for elements of
+> interest. A list is made up of a series of sublists, where all the
+> elements in a sublist are of the same type, but sublists can be of
+> different types.
 > 
-> Secure Boot stores a list of allowed certificates in the 'db' variable.
-> This patch imports those certificates into the platform keyring. The shim
-> UEFI bootloader has a similar certificate list stored in the 'MokListRT'
-> variable. We import those as well.
+> For each sublist encountered, the function pointed to by the
+> get_handler_for_guid argument is called with the type specifier GUID and
+> returns either a pointer to a function to handle elements of that type or
+> NULL if the type is not of interest.
 > 
-> Secure Boot also maintains a list of disallowed certificates in the 'dbx'
-> variable. We load those certificates into the system blacklist keyring
-> and forbid any kernel signed with those from loading.
-> 
-> Original Patch Description:
-> ============================
-> 
-> Secure Boot stores a list of allowed certificates in the 'db' variable.
-> This imports those certificates into the system trusted keyring.  This
-> allows for a third party signing certificate to be used in conjunction
-> with signed modules. By importing the public certificate into the 'db'
-> variable, a user can allow a module signed with that certificate to
-> load. The shim UEFI bootloader has a similar certificate list stored
-> in the 'MokListRT' variable. We import those as well.
-> 
-> Secure Boot also maintains a list of disallowed certificates in the 'dbx'
-> variable. We load those certificates into the newly introduced system
-> blacklist keyring and forbid any module signed with those from loading and
-> forbid the use within the kernel of any key with a matching hash.
-> 
-> This facility is enabled by setting CONFIG_LOAD_UEFI_KEYS.
+> If the sublist is of interest, each element is passed to the handler
+> function in turn.
 
-There are quite a few checkpatch.pl warnings that need to be
+There are a few checkpatch.pl warnings that need to be
 addressed, including the missing SPDX license.
 
 Mimi
+
+> 
+> Signed-off-by: David Howells <dhowells@redhat.com>
+> Signed-off-by: Nayna Jain <nayna@linux.ibm.com>
+> ---
+> Changelog:
+> 
+> v0:
+> - removed the CONFIG EFI_SIGNATURE_LIST_PARSER
+> - moved efi_parser.c from certs to security/integrity/platform_certs
+>   directory
+> 
+>  include/linux/efi.h                            |   9 ++
+>  security/integrity/Makefile                    |   3 +-
+>  security/integrity/platform_certs/efi_parser.c | 112 +++++++++++++++++++++++++
+>  3 files changed, 123 insertions(+), 1 deletion(-)
+>  create mode 100644 security/integrity/platform_certs/efi_parser.c
+> 
+> diff --git a/include/linux/efi.h b/include/linux/efi.h
+> index 99cba6fe1234..2016145e2d6d 100644
+> --- a/include/linux/efi.h
+> +++ b/include/linux/efi.h
+> @@ -1138,6 +1138,15 @@ extern int efi_memattr_apply_permissions(struct mm_struct *mm,
+>  char * __init efi_md_typeattr_format(char *buf, size_t size,
+>  				     const efi_memory_desc_t *md);
+>  
+> +
+> +typedef void (*efi_element_handler_t)(const char *source,
+> +				      const void *element_data,
+> +				      size_t element_size);
+> +extern int __init parse_efi_signature_list(
+> +	const char *source,
+> +	const void *data, size_t size,
+> +	efi_element_handler_t (*get_handler_for_guid)(const efi_guid_t *));
+> +
+>  /**
+>   * efi_range_is_wc - check the WC bit on an address range
+>   * @start: starting kvirt address
+> diff --git a/security/integrity/Makefile b/security/integrity/Makefile
+> index 046ffc1bb42d..6ee9058866cd 100644
+> --- a/security/integrity/Makefile
+> +++ b/security/integrity/Makefile
+> @@ -9,7 +9,8 @@ integrity-y := iint.o
+>  integrity-$(CONFIG_INTEGRITY_AUDIT) += integrity_audit.o
+>  integrity-$(CONFIG_INTEGRITY_SIGNATURE) += digsig.o
+>  integrity-$(CONFIG_INTEGRITY_ASYMMETRIC_KEYS) += digsig_asymmetric.o
+> -integrity-$(CONFIG_INTEGRITY_PLATFORM_KEYRING) += platform_certs/platform_keyring.o
+> +integrity-$(CONFIG_INTEGRITY_PLATFORM_KEYRING) += platform_certs/platform_keyring.o \
+> +						  platform_certs/efi_parser.o
+>  
+>  subdir-$(CONFIG_IMA)			+= ima
+>  obj-$(CONFIG_IMA)			+= ima/
+> diff --git a/security/integrity/platform_certs/efi_parser.c b/security/integrity/platform_certs/efi_parser.c
+> new file mode 100644
+> index 000000000000..4e396f98f5c7
+> --- /dev/null
+> +++ b/security/integrity/platform_certs/efi_parser.c
+> @@ -0,0 +1,112 @@
+> +/* EFI signature/key/certificate list parser
+> + *
+> + * Copyright (C) 2012, 2016 Red Hat, Inc. All Rights Reserved.
+> + * Written by David Howells (dhowells@redhat.com)
+> + *
+> + * This program is free software; you can redistribute it and/or
+> + * modify it under the terms of the GNU General Public Licence
+> + * as published by the Free Software Foundation; either version
+> + * 2 of the Licence, or (at your option) any later version.
+> + */
+> +
+> +#define pr_fmt(fmt) "EFI: "fmt
+> +#include <linux/module.h>
+> +#include <linux/printk.h>
+> +#include <linux/err.h>
+> +#include <linux/efi.h>
+> +
+> +/**
+> + * parse_efi_signature_list - Parse an EFI signature list for certificates
+> + * @source: The source of the key
+> + * @data: The data blob to parse
+> + * @size: The size of the data blob
+> + * @get_handler_for_guid: Get the handler func for the sig type (or NULL)
+> + *
+> + * Parse an EFI signature list looking for elements of interest.  A list is
+> + * made up of a series of sublists, where all the elements in a sublist are of
+> + * the same type, but sublists can be of different types.
+> + *
+> + * For each sublist encountered, the @get_handler_for_guid function is called
+> + * with the type specifier GUID and returns either a pointer to a function to
+> + * handle elements of that type or NULL if the type is not of interest.
+> + *
+> + * If the sublist is of interest, each element is passed to the handler
+> + * function in turn.
+> + *
+> + * Error EBADMSG is returned if the list doesn't parse correctly and 0 is
+> + * returned if the list was parsed correctly.  No error can be returned from
+> + * the @get_handler_for_guid function or the element handler function it
+> + * returns.
+> + */
+> +int __init parse_efi_signature_list(
+> +	const char *source,
+> +	const void *data, size_t size,
+> +	efi_element_handler_t (*get_handler_for_guid)(const efi_guid_t *))
+> +{
+> +	efi_element_handler_t handler;
+> +	unsigned offs = 0;
+> +
+> +	pr_devel("-->%s(,%zu)\n", __func__, size);
+> +
+> +	while (size > 0) {
+> +		const efi_signature_data_t *elem;
+> +		efi_signature_list_t list;
+> +		size_t lsize, esize, hsize, elsize;
+> +
+> +		if (size < sizeof(list))
+> +			return -EBADMSG;
+> +
+> +		memcpy(&list, data, sizeof(list));
+> +		pr_devel("LIST[%04x] guid=%pUl ls=%x hs=%x ss=%x\n",
+> +			 offs,
+> +			 list.signature_type.b, list.signature_list_size,
+> +			 list.signature_header_size, list.signature_size);
+> +
+> +		lsize = list.signature_list_size;
+> +		hsize = list.signature_header_size;
+> +		esize = list.signature_size;
+> +		elsize = lsize - sizeof(list) - hsize;
+> +
+> +		if (lsize > size) {
+> +			pr_devel("<--%s() = -EBADMSG [overrun @%x]\n",
+> +				 __func__, offs);
+> +			return -EBADMSG;
+> +		}
+> +
+> +		if (lsize < sizeof(list) ||
+> +		    lsize - sizeof(list) < hsize ||
+> +		    esize < sizeof(*elem) ||
+> +		    elsize < esize ||
+> +		    elsize % esize != 0) {
+> +			pr_devel("- bad size combo @%x\n", offs);
+> +			return -EBADMSG;
+> +		}
+> +
+> +		handler = get_handler_for_guid(&list.signature_type);
+> +		if (!handler) {
+> +			data += lsize;
+> +			size -= lsize;
+> +			offs += lsize;
+> +			continue;
+> +		}
+> +
+> +		data += sizeof(list) + hsize;
+> +		size -= sizeof(list) + hsize;
+> +		offs += sizeof(list) + hsize;
+> +
+> +		for (; elsize > 0; elsize -= esize) {
+> +			elem = data;
+> +
+> +			pr_devel("ELEM[%04x]\n", offs);
+> +			handler(source,
+> +				&elem->signature_data,
+> +				esize - sizeof(*elem));
+> +
+> +			data += esize;
+> +			size -= esize;
+> +			offs += esize;
+> +		}
+> +	}
+> +
+> +	return 0;
+> +}
