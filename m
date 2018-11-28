@@ -1,100 +1,53 @@
-From: lijiang <lijiang@redhat.com>
-Subject: Re: [PATCH 1/2 RESEND v7] resource: add the new I/O resource
- descriptor 'IORES_DESC_RESERVED'
-Date: Wed, 28 Nov 2018 11:51:03 +0800
-Message-ID: <d84fbefb-f856-c600-5207-c63f48b1b308@redhat.com>
-References: <20181124051223.19994-1-lijiang@redhat.com>
- <20181124051223.19994-2-lijiang@redhat.com>
- <ae405fe9-94fd-3fb7-decd-c7821cf95b7d@intel.com>
- <460c5552-a48e-3523-275a-7f94d0f08f9b@redhat.com>
- <703ce20d-be09-9b8d-d457-5b002a50dff7@intel.com>
+From: Mimi Zohar <zohar@linux.ibm.com>
+Subject: Re: [PATCH 5/7] efi: Import certificates from UEFI Secure Boot
+Date: Wed, 28 Nov 2018 10:46:28 -0500
+Message-ID: <1543419988.3902.216.camel@linux.ibm.com>
+References: <20181125151500.8298-1-nayna@linux.ibm.com>
+         <20181125151500.8298-6-nayna@linux.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <703ce20d-be09-9b8d-d457-5b002a50dff7@intel.com>
-Content-Language: en-US
+In-Reply-To: <20181125151500.8298-6-nayna@linux.ibm.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Dave Hansen <dave.hansen@intel.com>, linux-kernel@vger.kernel.org
-Cc: kexec@lists.infradead.org, x86@kernel.org, linux-ia64@vger.kernel.org, linux-efi@vger.kernel.org, tglx@linutronix.de, mingo@redhat.com, bp@alien8.de, akpm@linux-foundation.org, dave.hansen@linux.intel.com, luto@kernel.org, peterz@infradead.org, ard.biesheuvel@linaro.org, tony.luck@intel.com, fenghua.yu@intel.com, dyoung@redhat.com, bhe@redhat.com
+To: Nayna Jain <nayna@linux.ibm.com>, Josh Boyer <jwboyer@fedoraproject.org>, linux-integrity@vger.kernel.org
+Cc: linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, jforbes@redhat.com, seth.forshee@canonical.com, kexec@lists.infradead.org, keyrings@vger.kernel.org, vgoyal@redhat.com, ebiederm@xmission.com, mpe@ellerman.id.au
 List-Id: linux-efi@vger.kernel.org
 
-在 2018年11月27日 23:34, Dave Hansen 写道:
-> On 11/27/18 2:04 AM, lijiang wrote:
->> What happens if we don't modify this functions
->> __ioremap_check_desc_other()? -When SEV is active, it might map these
->> reserved regions with the encryption mask. That is incorrect. 
+On Sun, 2018-11-25 at 20:44 +0530, Nayna Jain wrote:
+> From: Josh Boyer <jwboyer@fedoraproject.org>
 > 
-> This is missing another sentence or two to "connect the dots".
+> New Patch Description:
+> ======================
 > 
-> SEV uses data that comes from the e820 table to tell whether or not the
-> memory should be encrypted?  If we don't reflect these reserved areas in
-> the e820 table, the SEV code will set up encrypted mappings for device
-> memory, for instance?
+> Secure Boot stores a list of allowed certificates in the 'db' variable.
+> This patch imports those certificates into the platform keyring. The shim
+> UEFI bootloader has a similar certificate list stored in the 'MokListRT'
+> variable. We import those as well.
 > 
+> Secure Boot also maintains a list of disallowed certificates in the 'dbx'
+> variable. We load those certificates into the system blacklist keyring
+> and forbid any kernel signed with those from loading.
+> 
+> Original Patch Description:
+> ============================
+> 
+> Secure Boot stores a list of allowed certificates in the 'db' variable.
+> This imports those certificates into the system trusted keyring.  This
+> allows for a third party signing certificate to be used in conjunction
+> with signed modules. By importing the public certificate into the 'db'
+> variable, a user can allow a module signed with that certificate to
+> load. The shim UEFI bootloader has a similar certificate list stored
+> in the 'MokListRT' variable. We import those as well.
+> 
+> Secure Boot also maintains a list of disallowed certificates in the 'dbx'
+> variable. We load those certificates into the newly introduced system
+> blacklist keyring and forbid any module signed with those from loading and
+> forbid the use within the kernel of any key with a matching hash.
+> 
+> This facility is enabled by setting CONFIG_LOAD_UEFI_KEYS.
 
-For the convenience of description, here copy some code fragments and put them at the end.
-Please refer to these codes.
+There are quite a few checkpatch.pl warnings that need to be
+addressed, including the missing SPDX license.
 
-When the SEV is active, the page being mapped will determine whether to use the memory
-encryption attribute for mapping based on the 'mem_flags.desc_other'.
-
-But the value of 'mem_flags.desc_other' is set according to the returned result of this
-function __ioremap_check_desc_other().
-
-Originally, the 'E820_TYPE_RESERVED' type is converted to the descriptor 'IORES_DESC_NONE',
-therefore, for the e820 reserved type, the value of 'mem_flags.desc_other' is equal to
-'false'.
-
-But now, the 'E820_TYPE_RESERVED' type is converted to the descriptor 'IORES_DESC_RESERVED'
-instead of 'IORES_DESC_NONE', it has been changed and the value of 'mem_flags.desc_other'
-is equal to 'true'. This is wrong.
-
-So that would be nice to keep it the same as before, that is to say, this function has to
-be improved like this.
-static int __ioremap_check_desc_other(struct resource *res)
-{
-    return ((res->desc != IORES_DESC_NONE) &&
-            (res->desc != IORES_DESC_RESERVED));
-}
-
-
-Please look at the following function __ioremap_caller(), and also list the call trace path.
-
-Call trace path:
-   __ioremap_caller()->
-__ioremap_check_mem()->
-       walk_mem_res()->
-__ioremap_res_check()-> 
-__ioremap_check_desc_other()
-
-static void __iomem *__ioremap_caller(resource_size_t phys_addr,
-                unsigned long size, enum page_cache_mode pcm,
-                void *caller, bool encrypted)
-{
-        unsigned long offset, vaddr;
-        resource_size_t last_addr;
-        const resource_size_t unaligned_phys_addr = phys_addr;
-        const unsigned long unaligned_size = size;
-        struct ioremap_mem_flags mem_flags;
-
-	/* skip some codes...*/
-
-        __ioremap_check_mem(phys_addr, size, &mem_flags);
-
-	/* skip some codes...*/
-
-	/*
-         * If the page being mapped is in memory and SEV is active then
-         * make sure the memory encryption attribute is enabled in the
-         * resulting mapping.
-         */
-        prot = PAGE_KERNEL_IO;
-        if ((sev_active() && mem_flags.desc_other) || encrypted)
-                prot = pgprot_encrypted(prot);
-
-	/* skip some codes...*/
-}
-
-Thanks.
-Lianbo
+Mimi
