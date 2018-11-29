@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 01/11] x86/efi: Allocate e820 buffer before calling efi_exit_boot_service
-Date: Thu, 29 Nov 2018 18:12:20 +0100
-Message-ID: <20181129171230.18699-2-ard.biesheuvel@linaro.org>
+Subject: [PATCH 02/11] efi/fdt: Indentation fix
+Date: Thu, 29 Nov 2018 18:12:21 +0100
+Message-ID: <20181129171230.18699-3-ard.biesheuvel@linaro.org>
 References: <20181129171230.18699-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -12,149 +12,42 @@ To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Andy Lutomirski <luto@kernel.org>, Arend van Spriel <arend.vanspriel@broadcom.com>, Bhupesh Sharma <bhsharma@redhat.com>, Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@intel.com>, Eric Snowberg <eric.snowberg@oracle.com>, Hans de Goede <hdegoede@redhat.com>, Joe Perches <joe@perches.com>, Jon Hunter <jonathanh@nvidia.com>, Julien Thierry <julien.thierry@arm.com>, Marc Zyngier <marc.zyngier@arm.com>, Nathan Chancellor <natechancellor@gmail.com>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Sedat Dilek <sedat.dilek@gmail.com>, YiFei Zhu <zhuyifei1999@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Eric Snowberg <eric.snowberg@oracle.com>
+From: Julien Thierry <julien.thierry@arm.com>
 
-Commit d64934019f6c ("x86/efi: Use efi_exit_boot_services()")
-introduced a regression on systems with large memory maps
-causing them to hang on boot. The first "goto get_map" that was removed
-from exit_boot insured there was enough room for the memory map when
-efi_call_early(exit_boot_services) was called. This happens when
-(nr_desc > ARRAY_SIZE(params->e820_table).
+Closing bracket seems to end a for statement when it is actually ending
+the contained if. Add some brackets to have clear delimitation of each
+scope.
 
-Chain of events:
-  exit_boot()
-    efi_exit_boot_services()
-      efi_get_memory_map <- at this point the mm can't grow over 8 desc
-      priv_func()
-        exit_boot_func()
-          allocate_e820ext() <- new mm grows over 8 desc from e820 alloc
-      efi_call_early(exit_boot_services) <- mm key doesn't match so retry
-      efi_call_early(get_memory_map) <- not enough room for new mm
-      system hangs
+No functional change/fix, just fix the indentation.
 
-This patch allocates the e820 buffer before calling efi_exit_boot_services
-and fixes the regression.
-
-Signed-off-by: Eric Snowberg <eric.snowberg@oracle.com>
+Signed-off-by: Julien Thierry <julien.thierry@arm.com>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- arch/x86/boot/compressed/eboot.c | 65 ++++++++++++++++++++------------
- 1 file changed, 41 insertions(+), 24 deletions(-)
+ drivers/firmware/efi/libstub/fdt.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index 8b4c5e001157..f7bad07bb251 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -1,3 +1,4 @@
-+
- /* -----------------------------------------------------------------------
-  *
-  *   Copyright 2011 Intel Corporation; author Matt Fleming
-@@ -634,37 +635,54 @@ static efi_status_t alloc_e820ext(u32 nr_desc, struct setup_data **e820ext,
- 	return status;
- }
+diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+index 0c0d2312f4a8..a3614f9b5f75 100644
+--- a/drivers/firmware/efi/libstub/fdt.c
++++ b/drivers/firmware/efi/libstub/fdt.c
+@@ -376,7 +376,7 @@ void *get_fdt(efi_system_table_t *sys_table, unsigned long *fdt_size)
+ 	tables = (efi_config_table_t *) sys_table->tables;
+ 	fdt = NULL;
  
-+static efi_status_t allocate_e820(struct boot_params *params,
-+				  struct setup_data **e820ext,
-+				  u32 *e820ext_size)
-+{
-+	unsigned long map_size, desc_size, buff_size;
-+	struct efi_boot_memmap boot_map;
-+	efi_memory_desc_t *map;
-+	efi_status_t status;
-+	__u32 nr_desc;
-+
-+	boot_map.map =		&map;
-+	boot_map.map_size =	&map_size;
-+	boot_map.desc_size =	&desc_size;
-+	boot_map.desc_ver =	NULL;
-+	boot_map.key_ptr =	NULL;
-+	boot_map.buff_size =	&buff_size;
-+
-+	status = efi_get_memory_map(sys_table, &boot_map);
-+	if (status != EFI_SUCCESS)
-+		return status;
-+
-+	nr_desc = buff_size / desc_size;
-+
-+	if (nr_desc > ARRAY_SIZE(params->e820_table)) {
-+		u32 nr_e820ext = nr_desc - ARRAY_SIZE(params->e820_table);
-+
-+		status = alloc_e820ext(nr_e820ext, e820ext, e820ext_size);
-+		if (status != EFI_SUCCESS)
-+			return status;
+-	for (i = 0; i < sys_table->nr_tables; i++)
++	for (i = 0; i < sys_table->nr_tables; i++) {
+ 		if (efi_guidcmp(tables[i].guid, fdt_guid) == 0) {
+ 			fdt = (void *) tables[i].table;
+ 			if (fdt_check_header(fdt) != 0) {
+@@ -385,7 +385,8 @@ void *get_fdt(efi_system_table_t *sys_table, unsigned long *fdt_size)
+ 			}
+ 			*fdt_size = fdt_totalsize(fdt);
+ 			break;
+-	 }
++		}
 +	}
-+
-+	return EFI_SUCCESS;
-+}
-+
- struct exit_boot_struct {
- 	struct boot_params	*boot_params;
- 	struct efi_info		*efi;
--	struct setup_data	*e820ext;
--	__u32			e820ext_size;
- };
  
- static efi_status_t exit_boot_func(efi_system_table_t *sys_table_arg,
- 				   struct efi_boot_memmap *map,
- 				   void *priv)
- {
--	static bool first = true;
- 	const char *signature;
- 	__u32 nr_desc;
- 	efi_status_t status;
- 	struct exit_boot_struct *p = priv;
- 
--	if (first) {
--		nr_desc = *map->buff_size / *map->desc_size;
--		if (nr_desc > ARRAY_SIZE(p->boot_params->e820_table)) {
--			u32 nr_e820ext = nr_desc -
--					ARRAY_SIZE(p->boot_params->e820_table);
--
--			status = alloc_e820ext(nr_e820ext, &p->e820ext,
--					       &p->e820ext_size);
--			if (status != EFI_SUCCESS)
--				return status;
--		}
--		first = false;
--	}
--
- 	signature = efi_is_64bit() ? EFI64_LOADER_SIGNATURE
- 				   : EFI32_LOADER_SIGNATURE;
- 	memcpy(&p->efi->efi_loader_signature, signature, sizeof(__u32));
-@@ -687,8 +705,8 @@ static efi_status_t exit_boot(struct boot_params *boot_params, void *handle)
- {
- 	unsigned long map_sz, key, desc_size, buff_size;
- 	efi_memory_desc_t *mem_map;
--	struct setup_data *e820ext;
--	__u32 e820ext_size;
-+	struct setup_data *e820ext = NULL;
-+	__u32 e820ext_size = 0;
- 	efi_status_t status;
- 	__u32 desc_version;
- 	struct efi_boot_memmap map;
-@@ -702,8 +720,10 @@ static efi_status_t exit_boot(struct boot_params *boot_params, void *handle)
- 	map.buff_size		= &buff_size;
- 	priv.boot_params	= boot_params;
- 	priv.efi		= &boot_params->efi_info;
--	priv.e820ext		= NULL;
--	priv.e820ext_size	= 0;
-+
-+	status = allocate_e820(boot_params, &e820ext, &e820ext_size);
-+	if (status != EFI_SUCCESS)
-+		return status;
- 
- 	/* Might as well exit boot services now */
- 	status = efi_exit_boot_services(sys_table, handle, &map, &priv,
-@@ -711,9 +731,6 @@ static efi_status_t exit_boot(struct boot_params *boot_params, void *handle)
- 	if (status != EFI_SUCCESS)
- 		return status;
- 
--	e820ext			= priv.e820ext;
--	e820ext_size		= priv.e820ext_size;
--
- 	/* Historic? */
- 	boot_params->alt_mem_k	= 32 * 1024;
- 
+ 	return fdt;
+ }
 -- 
 2.19.1
