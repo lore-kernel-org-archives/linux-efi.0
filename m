@@ -1,60 +1,64 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 07/11] efi/libstub: Disable some warnings for x86{,_64}
-Date: Thu, 29 Nov 2018 18:12:26 +0100
-Message-ID: <20181129171230.18699-8-ard.biesheuvel@linaro.org>
+From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+Subject: RE: [GIT PULL 00/11] EFI updates
+Date: Thu, 29 Nov 2018 18:27:43 +0000
+Message-ID: <FFF73D592F13FD46B8700F0A279B802F485F14B8@ORSMSX114.amr.corp.intel.com>
 References: <20181129171230.18699-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20181129171230.18699-1-ard.biesheuvel@linaro.org>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Andy Lutomirski <luto@kernel.org>, Arend van Spriel <arend.vanspriel@broadcom.com>, Bhupesh Sharma <bhsharma@redhat.com>, Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@intel.com>, Eric Snowberg <eric.snowberg@oracle.com>, Hans de Goede <hdegoede@redhat.com>, Joe Perches <joe@perches.com>, Jon Hunter <jonathanh@nvidia.com>, Julien Thierry <julien.thierry@arm.com>, Marc Zyngier <marc.zyngier@arm.com>, Nathan Chancellor <natechancellor@gmail.com>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Sedat Dilek <sedat.dilek@gmail.com>, YiFei Zhu <zhuyifei1999@gmail.com>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Andy Lutomirski <luto@kernel.org>, Arend van Spriel <arend.vanspriel@broadcom.com>, Bhupesh Sharma <bhsharma@redhat.com>, Borislav Petkov <bp@alien8.de>, "Hansen, Dave" <dave.hansen@intel.com>, Eric Snowberg <eric.snowberg@oracle.com>, Hans de Goede <hdegoede@redhat.com>, Joe Perches <joe@perches.com>, Jon Hunter <jonathanh@nvidia.com>, Julien Thierry <julien.thierry@arm.com>, Marc Zyngier <marc.zyngier@arm.com>, Nathan Chancellor <natechancellor@gmail.com>, Peter Zijlstra <peterz@infradead.org>, Sedat Dilek <sedat.dilek@gmail.com>, YiFei Zhu <zhuyifei1999@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Nathan Chancellor <natechancellor@gmail.com>
+Hi Ard,
 
-When building the kernel with Clang, some disabled warnings appear
-because this Makefile overrides KBUILD_CFLAGS for x86{,_64}. Add them to
-this list so that the build is clean again.
+While building from next branch of efi tree, I noticed the below warning. Could you please check the same on your side?
 
--Wpointer-sign was disabled for the whole kernel before the beginning
-of git history.
+  CC      lib/list_debug.o
+drivers/firmware/efi/efi.c: In function 'efi_mem_reserve_persistent':
+drivers/firmware/efi/efi.c:1000:6: warning: unused variable 'rsvsize' [-Wunused-variable]
+  int rsvsize = EFI_MEMRESERVE_SIZE(1);
+      ^~~~~~~
+  CC      lib/bitrev.o
+  CC      net/core/sock_reuseport.o
 
--Waddress-of-packed-member was disabled for the whole kernel in
-commit bfb38988c51e ("kbuild: clang: Disable 'address-of-packed-member'
-warning") and for x86/boot/compressed in commit 20c6c1890455 ("x86/boot:
-Disable the address-of-packed-member compiler warning").
+> -----Original Message-----
+> From: Ard Biesheuvel [mailto:ard.biesheuvel@linaro.org]
+> Sent: Thursday, November 29, 2018 9:12 AM
+> To: linux-efi@vger.kernel.org; Ingo Molnar <mingo@kernel.org>; Thomas
+> Gleixner <tglx@linutronix.de>
+> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>; linux-kernel@vger.kernel.org;
+> Andy Lutomirski <luto@kernel.org>; Arend van Spriel
+> <arend.vanspriel@broadcom.com>; Bhupesh Sharma <bhsharma@redhat.com>;
+> Borislav Petkov <bp@alien8.de>; Hansen, Dave <dave.hansen@intel.com>; Eric
+> Snowberg <eric.snowberg@oracle.com>; Hans de Goede
+> <hdegoede@redhat.com>; Joe Perches <joe@perches.com>; Jon Hunter
+> <jonathanh@nvidia.com>; Julien Thierry <julien.thierry@arm.com>; Marc
+> Zyngier <marc.zyngier@arm.com>; Nathan Chancellor
+> <natechancellor@gmail.com>; Peter Zijlstra <peterz@infradead.org>; Prakhya,
+> Sai Praneeth <sai.praneeth.prakhya@intel.com>; Sedat Dilek
+> <sedat.dilek@gmail.com>; YiFei Zhu <zhuyifei1999@gmail.com>
+> Subject: [GIT PULL 00/11] EFI updates
+> 
+> The following changes since commit
+> 976b489120cdab2b1b3a41ffa14661db43d58190:
+> 
+>   efi: Prevent GICv3 WARN() by mapping the memreserve table before first use
+> (2018-11-27 13:50:20 +0100)
+> 
+> are available in the Git repository at:
+> 
+>   git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next
+> 
+> for you to fetch changes up to 1d29afdbf7ae878a23627ebee81efcd213f11749:
+> 
+>   efi/x86: earlyprintk - Fix infinite loop on some screen widths (2018-11-28
+> 17:58:42 +0100)
+>
 
--Wgnu was disabled for the whole kernel in commit 61163efae020 ("kbuild:
-LLVMLinux: Add Kbuild support for building kernel with Clang") and for
-x86/boot/compressed in commit 6c3b56b19730 ("x86/boot: Disable Clang
-warnings about GNU extensions").
-
-Link: https://github.com/ClangBuiltLinux/linux/issues/112
-Signed-off-by: Nathan Chancellor <natechancellor@gmail.com>
-Reviewed-by: Sedat Dilek <sedat.dilek@gmail.com>
-Tested-by: Sedat Dilek <sedat.dilek@gmail.com>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
- drivers/firmware/efi/libstub/Makefile | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index c51627660dbb..d9845099635e 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -9,7 +9,10 @@ cflags-$(CONFIG_X86_32)		:= -march=i386
- cflags-$(CONFIG_X86_64)		:= -mcmodel=small
- cflags-$(CONFIG_X86)		+= -m$(BITS) -D__KERNEL__ -O2 \
- 				   -fPIC -fno-strict-aliasing -mno-red-zone \
--				   -mno-mmx -mno-sse -fshort-wchar
-+				   -mno-mmx -mno-sse -fshort-wchar \
-+				   -Wno-pointer-sign \
-+				   $(call cc-disable-warning, address-of-packed-member) \
-+				   $(call cc-disable-warning, gnu)
- 
- # arm64 uses the full KBUILD_CFLAGS so it's necessary to explicitly
- # disable the stackleak plugin
--- 
-2.19.1
+Regards,
+Sai
