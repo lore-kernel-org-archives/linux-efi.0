@@ -1,64 +1,69 @@
-From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
-Subject: RE: [GIT PULL 00/11] EFI updates
-Date: Thu, 29 Nov 2018 18:27:43 +0000
-Message-ID: <FFF73D592F13FD46B8700F0A279B802F485F14B8@ORSMSX114.amr.corp.intel.com>
-References: <20181129171230.18699-1-ard.biesheuvel@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Qian Cai <cai@gmx.us>
+Subject: [PATCH] efi: let kmemleak ignore false positives
+Date: Thu, 29 Nov 2018 13:45:52 -0500
+Message-ID: <1543517152-23969-1-git-send-email-cai@gmx.us>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181129171230.18699-1-ard.biesheuvel@linaro.org>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Andy Lutomirski <luto@kernel.org>, Arend van Spriel <arend.vanspriel@broadcom.com>, Bhupesh Sharma <bhsharma@redhat.com>, Borislav Petkov <bp@alien8.de>, "Hansen, Dave" <dave.hansen@intel.com>, Eric Snowberg <eric.snowberg@oracle.com>, Hans de Goede <hdegoede@redhat.com>, Joe Perches <joe@perches.com>, Jon Hunter <jonathanh@nvidia.com>, Julien Thierry <julien.thierry@arm.com>, Marc Zyngier <marc.zyngier@arm.com>, Nathan Chancellor <natechancellor@gmail.com>, Peter Zijlstra <peterz@infradead.org>, Sedat Dilek <sedat.dilek@gmail.com>, YiFei Zhu <zhuyifei1999@gmail.com>
+To: ard.biesheuvel@linaro.org
+Cc: marc.zyngier@arm.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Qian Cai <cai@gmx.us>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Ard,
+unreferenced object 0xffff8096c1acf580 (size 128):
+  comm "swapper/63", pid 0, jiffies 4294937418 (age 1201.230s)
+  hex dump (first 32 bytes):
+    80 87 b5 c1 96 00 00 00 00 00 cc c2 16 00 00 00  ................
+    00 00 01 00 00 00 00 00 6b 6b 6b 6b 6b 6b 6b 6b  ........kkkkkkkk
+  backtrace:
+    [<000000001d2549ba>] kmem_cache_alloc_trace+0x430/0x500
+    [<0000000093a6dfab>] efi_mem_reserve_persistent+0x50/0xf8
+    [<000000000a730828>] its_cpu_init_lpis+0x394/0x4b8
+    [<00000000edf04e07>] its_cpu_init+0x104/0x150
+    [<000000004d0342c5>] gic_starting_cpu+0x34/0x40
+    [<000000005d9da772>] cpuhp_invoke_callback+0x228/0x1d68
+    [<0000000061eace9b>] notify_cpu_starting+0xc0/0x118
+    [<0000000048bc2dc5>] secondary_start_kernel+0x23c/0x3b0
+    [<0000000015137d6a>] 0xffffffffffffffff
 
-While building from next branch of efi tree, I noticed the below warning. Could you please check the same on your side?
+efi_mem_reserve_persistent+0x50/0xf8:
+kmalloc at include/linux/slab.h:546
+(inlined by) efi_mem_reserve_persistent at drivers/firmware/efi/efi.c:979
 
-  CC      lib/list_debug.o
-drivers/firmware/efi/efi.c: In function 'efi_mem_reserve_persistent':
-drivers/firmware/efi/efi.c:1000:6: warning: unused variable 'rsvsize' [-Wunused-variable]
-  int rsvsize = EFI_MEMRESERVE_SIZE(1);
-      ^~~~~~~
-  CC      lib/bitrev.o
-  CC      net/core/sock_reuseport.o
+This line,
 
-> -----Original Message-----
-> From: Ard Biesheuvel [mailto:ard.biesheuvel@linaro.org]
-> Sent: Thursday, November 29, 2018 9:12 AM
-> To: linux-efi@vger.kernel.org; Ingo Molnar <mingo@kernel.org>; Thomas
-> Gleixner <tglx@linutronix.de>
-> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>; linux-kernel@vger.kernel.org;
-> Andy Lutomirski <luto@kernel.org>; Arend van Spriel
-> <arend.vanspriel@broadcom.com>; Bhupesh Sharma <bhsharma@redhat.com>;
-> Borislav Petkov <bp@alien8.de>; Hansen, Dave <dave.hansen@intel.com>; Eric
-> Snowberg <eric.snowberg@oracle.com>; Hans de Goede
-> <hdegoede@redhat.com>; Joe Perches <joe@perches.com>; Jon Hunter
-> <jonathanh@nvidia.com>; Julien Thierry <julien.thierry@arm.com>; Marc
-> Zyngier <marc.zyngier@arm.com>; Nathan Chancellor
-> <natechancellor@gmail.com>; Peter Zijlstra <peterz@infradead.org>; Prakhya,
-> Sai Praneeth <sai.praneeth.prakhya@intel.com>; Sedat Dilek
-> <sedat.dilek@gmail.com>; YiFei Zhu <zhuyifei1999@gmail.com>
-> Subject: [GIT PULL 00/11] EFI updates
-> 
-> The following changes since commit
-> 976b489120cdab2b1b3a41ffa14661db43d58190:
-> 
->   efi: Prevent GICv3 WARN() by mapping the memreserve table before first use
-> (2018-11-27 13:50:20 +0100)
-> 
-> are available in the Git repository at:
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next
-> 
-> for you to fetch changes up to 1d29afdbf7ae878a23627ebee81efcd213f11749:
-> 
->   efi/x86: earlyprintk - Fix infinite loop on some screen widths (2018-11-28
-> 17:58:42 +0100)
->
+rsv = kmalloc(sizeof(*rsv), GFP_ATOMIC);
 
-Regards,
-Sai
+Kmemleak has a known limitation that can only track pointers in the kernel
+virtual space. Hence, it will report false positives due to "rsv" will only
+reference to other physical addresses,
+
+rsv->next = efi_memreserve_root->next;
+efi_memreserve_root->next = __pa(rsv);
+
+Signed-off-by: Qian Cai <cai@gmx.us>
+---
+ drivers/firmware/efi/efi.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index fad7c62..0b69bb6 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -31,6 +31,7 @@
+ #include <linux/acpi.h>
+ #include <linux/ucs2_string.h>
+ #include <linux/memblock.h>
++#include <linux/kmemleak.h>
+ 
+ #include <asm/early_ioremap.h>
+ 
+@@ -980,6 +981,8 @@ int efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
+ 	if (!rsv)
+ 		return -ENOMEM;
+ 
++	kmemleak_ignore(rsv);
++
+ 	rsv->base = addr;
+ 	rsv->size = size;
+ 
+-- 
+1.8.3.1
