@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 02/11] efi/fdt: Indentation fix
-Date: Thu, 29 Nov 2018 18:12:21 +0100
-Message-ID: <20181129171230.18699-3-ard.biesheuvel@linaro.org>
+Subject: [PATCH 04/11] x86/mm/pageattr: Introduce helper function to unmap EFI boot services
+Date: Thu, 29 Nov 2018 18:12:23 +0100
+Message-ID: <20181129171230.18699-5-ard.biesheuvel@linaro.org>
 References: <20181129171230.18699-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -12,42 +12,128 @@ To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Andy Lutomirski <luto@kernel.org>, Arend van Spriel <arend.vanspriel@broadcom.com>, Bhupesh Sharma <bhsharma@redhat.com>, Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@intel.com>, Eric Snowberg <eric.snowberg@oracle.com>, Hans de Goede <hdegoede@redhat.com>, Joe Perches <joe@perches.com>, Jon Hunter <jonathanh@nvidia.com>, Julien Thierry <julien.thierry@arm.com>, Marc Zyngier <marc.zyngier@arm.com>, Nathan Chancellor <natechancellor@gmail.com>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Sedat Dilek <sedat.dilek@gmail.com>, YiFei Zhu <zhuyifei1999@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Julien Thierry <julien.thierry@arm.com>
+From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
 
-Closing bracket seems to end a for statement when it is actually ending
-the contained if. Add some brackets to have clear delimitation of each
-scope.
+Ideally, after kernel assumes control of the platform, firmware
+shouldn't access EFI boot services code/data regions. But, it's noticed
+that this is not so true in many x86 platforms. Hence, during boot,
+kernel reserves EFI boot services code/data regions [1] and maps [2]
+them to efi_pgd so that call to set_virtual_address_map() doesn't fail.
+After returning from set_virtual_address_map(), kernel frees the
+reserved regions [3] but they still remain mapped. Hence, introduce
+kernel_unmap_pages_in_pgd() which will later be used to unmap EFI boot
+services code/data regions.
 
-No functional change/fix, just fix the indentation.
+While at it modify kernel_map_pages_in_pgd() by
+1. Adding __init modifier because it's always used *only* during boot.
+2. Add a warning if it's used after SMP is initialized because it uses
+   __flush_tlb_all() which flushes mappings only on current CPU.
 
-Signed-off-by: Julien Thierry <julien.thierry@arm.com>
+Unmapping EFI boot services code/data regions will result in clearing
+PAGE_PRESENT bit and it shouldn't bother L1TF cases because it's already
+handled by protnone_mask() at arch/x86/include/asm/pgtable-invert.h.
+
+[1] efi_reserve_boot_services()
+[2] efi_map_region() -> __map_region() -> kernel_map_pages_in_pgd()
+[3] efi_free_boot_services()
+
+Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Ingo Molnar <mingo@kernel.org>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Dave Hansen <dave.hansen@intel.com>
+Cc: Bhupesh Sharma <bhsharma@redhat.com>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Reviewed-by: Thomas Gleixner <tglx@linutronix.de>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- drivers/firmware/efi/libstub/fdt.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+ arch/x86/include/asm/pgtable_types.h |  8 ++++--
+ arch/x86/mm/pageattr.c               | 40 ++++++++++++++++++++++++++--
+ 2 files changed, 44 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
-index 0c0d2312f4a8..a3614f9b5f75 100644
---- a/drivers/firmware/efi/libstub/fdt.c
-+++ b/drivers/firmware/efi/libstub/fdt.c
-@@ -376,7 +376,7 @@ void *get_fdt(efi_system_table_t *sys_table, unsigned long *fdt_size)
- 	tables = (efi_config_table_t *) sys_table->tables;
- 	fdt = NULL;
+diff --git a/arch/x86/include/asm/pgtable_types.h b/arch/x86/include/asm/pgtable_types.h
+index 106b7d0e2dae..d6ff0bbdb394 100644
+--- a/arch/x86/include/asm/pgtable_types.h
++++ b/arch/x86/include/asm/pgtable_types.h
+@@ -564,8 +564,12 @@ extern pte_t *lookup_address_in_pgd(pgd_t *pgd, unsigned long address,
+ 				    unsigned int *level);
+ extern pmd_t *lookup_pmd_address(unsigned long address);
+ extern phys_addr_t slow_virt_to_phys(void *__address);
+-extern int kernel_map_pages_in_pgd(pgd_t *pgd, u64 pfn, unsigned long address,
+-				   unsigned numpages, unsigned long page_flags);
++extern int __init kernel_map_pages_in_pgd(pgd_t *pgd, u64 pfn,
++					  unsigned long address,
++					  unsigned numpages,
++					  unsigned long page_flags);
++extern int __init kernel_unmap_pages_in_pgd(pgd_t *pgd, unsigned long address,
++					    unsigned long numpages);
+ #endif	/* !__ASSEMBLY__ */
  
--	for (i = 0; i < sys_table->nr_tables; i++)
-+	for (i = 0; i < sys_table->nr_tables; i++) {
- 		if (efi_guidcmp(tables[i].guid, fdt_guid) == 0) {
- 			fdt = (void *) tables[i].table;
- 			if (fdt_check_header(fdt) != 0) {
-@@ -385,7 +385,8 @@ void *get_fdt(efi_system_table_t *sys_table, unsigned long *fdt_size)
- 			}
- 			*fdt_size = fdt_totalsize(fdt);
- 			break;
--	 }
-+		}
-+	}
+ #endif /* _ASM_X86_PGTABLE_DEFS_H */
+diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
+index db7a10082238..bac35001d896 100644
+--- a/arch/x86/mm/pageattr.c
++++ b/arch/x86/mm/pageattr.c
+@@ -2338,8 +2338,8 @@ bool kernel_page_present(struct page *page)
  
- 	return fdt;
+ #endif /* CONFIG_DEBUG_PAGEALLOC */
+ 
+-int kernel_map_pages_in_pgd(pgd_t *pgd, u64 pfn, unsigned long address,
+-			    unsigned numpages, unsigned long page_flags)
++int __init kernel_map_pages_in_pgd(pgd_t *pgd, u64 pfn, unsigned long address,
++				   unsigned numpages, unsigned long page_flags)
+ {
+ 	int retval = -EINVAL;
+ 
+@@ -2353,6 +2353,8 @@ int kernel_map_pages_in_pgd(pgd_t *pgd, u64 pfn, unsigned long address,
+ 		.flags = 0,
+ 	};
+ 
++	WARN_ONCE(num_online_cpus() > 1, "Don't call after initializing SMP");
++
+ 	if (!(__supported_pte_mask & _PAGE_NX))
+ 		goto out;
+ 
+@@ -2374,6 +2376,40 @@ int kernel_map_pages_in_pgd(pgd_t *pgd, u64 pfn, unsigned long address,
+ 	return retval;
  }
+ 
++/*
++ * __flush_tlb_all() flushes mappings only on current CPU and hence this
++ * function shouldn't be used in an SMP environment. Presently, it's used only
++ * during boot (way before smp_init()) by EFI subsystem and hence is ok.
++ */
++int __init kernel_unmap_pages_in_pgd(pgd_t *pgd, unsigned long address,
++				     unsigned long numpages)
++{
++	int retval;
++
++	/*
++	 * The typical sequence for unmapping is to find a pte through
++	 * lookup_address_in_pgd() (ideally, it should never return NULL because
++	 * the address is already mapped) and change it's protections. As pfn is
++	 * the *target* of a mapping, it's not useful while unmapping.
++	 */
++	struct cpa_data cpa = {
++		.vaddr		= &address,
++		.pfn		= 0,
++		.pgd		= pgd,
++		.numpages	= numpages,
++		.mask_set	= __pgprot(0),
++		.mask_clr	= __pgprot(_PAGE_PRESENT | _PAGE_RW),
++		.flags		= 0,
++	};
++
++	WARN_ONCE(num_online_cpus() > 1, "Don't call after initializing SMP");
++
++	retval = __change_page_attr_set_clr(&cpa, 0);
++	__flush_tlb_all();
++
++	return retval;
++}
++
+ /*
+  * The testcases use internal knowledge of the implementation that shouldn't
+  * be exposed to the rest of the kernel. Include these directly here.
 -- 
 2.19.1
