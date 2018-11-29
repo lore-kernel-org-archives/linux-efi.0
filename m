@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 06/11] x86/efi: Move efi_<reserve/free>_boot_services() to arch/x86
-Date: Thu, 29 Nov 2018 18:12:25 +0100
-Message-ID: <20181129171230.18699-7-ard.biesheuvel@linaro.org>
+Subject: [PATCH 08/11] firmware: efi: add NULL pointer checks in efivars api functions
+Date: Thu, 29 Nov 2018 18:12:27 +0100
+Message-ID: <20181129171230.18699-9-ard.biesheuvel@linaro.org>
 References: <20181129171230.18699-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -12,95 +12,295 @@ To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Andy Lutomirski <luto@kernel.org>, Arend van Spriel <arend.vanspriel@broadcom.com>, Bhupesh Sharma <bhsharma@redhat.com>, Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@intel.com>, Eric Snowberg <eric.snowberg@oracle.com>, Hans de Goede <hdegoede@redhat.com>, Joe Perches <joe@perches.com>, Jon Hunter <jonathanh@nvidia.com>, Julien Thierry <julien.thierry@arm.com>, Marc Zyngier <marc.zyngier@arm.com>, Nathan Chancellor <natechancellor@gmail.com>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Sedat Dilek <sedat.dilek@gmail.com>, YiFei Zhu <zhuyifei1999@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+From: Arend van Spriel <arend.vanspriel@broadcom.com>
 
-efi_<reserve/free>_boot_services() are x86 specific quirks and as such
-should be in asm/efi.h, so move them from linux/efi.h. Also, call
-efi_free_boot_services() from __efi_enter_virtual_mode() as it is x86
-specific call and ideally shouldn't be part of init/main.c
+Since commit:
 
-Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Ingo Molnar <mingo@kernel.org>
-Cc: Andy Lutomirski <luto@kernel.org>
-Cc: Dave Hansen <dave.hansen@intel.com>
-Cc: Bhupesh Sharma <bhsharma@redhat.com>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Acked-by: Thomas Gleixner <tglx@linutronix.de>
+   ce2e6db554fa ("brcmfmac: Add support for getting nvram contents from
+                 EFI variables")
+
+we have a device driver accessing the efivars API. Several functions in
+the efivars API assume __efivars is set, i.e., that they will be accessed
+only after efivars_register() has been called. However, the following NULL
+pointer access was reported calling efivar_entry_size() from the brcmfmac
+device driver.
+
+  Unable to handle kernel NULL pointer dereference at virtual address 00000008
+  pgd = 60bfa5f1
+  [00000008] *pgd=00000000
+  Internal error: Oops: 5 [#1] SMP ARM
+  ...
+  Hardware name: NVIDIA Tegra SoC (Flattened Device Tree)
+  Workqueue: events request_firmware_work_func
+  PC is at efivar_entry_size+0x28/0x90
+  LR is at brcmf_fw_complete_request+0x3f8/0x8d4 [brcmfmac]
+  pc : [<c0c40718>]    lr : [<bf2a3ef4>]    psr: a00d0113
+  sp : ede7fe28  ip : ee983410  fp : c1787f30
+  r10: 00000000  r9 : 00000000  r8 : bf2b2258
+  r7 : ee983000  r6 : c1604c48  r5 : ede7fe88  r4 : edf337c0
+  r3 : 00000000  r2 : 00000000  r1 : ede7fe88  r0 : c17712c8
+  Flags: NzCv  IRQs on  FIQs on  Mode SVC_32  ISA ARM  Segment none
+  Control: 10c5387d  Table: ad16804a  DAC: 00000051
+
+Disassembly showed that the local static variable __efivars is NULL,
+which is not entirely unexpected given that it is a non-EFI platform.
+So add a NULL pointer check to efivar_entry_size(), and to related
+functions while at it. In efivars_register() a couple of sanity checks
+are added as well.
+
+Cc: Hans de Goede <hdegoede@redhat.com>
+Reported-by: Jon Hunter <jonathanh@nvidia.com>
+Signed-off-by: Arend van Spriel <arend.vanspriel@broadcom.com>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- arch/x86/include/asm/efi.h  | 2 ++
- arch/x86/platform/efi/efi.c | 2 ++
- include/linux/efi.h         | 3 ---
- init/main.c                 | 4 ----
- 4 files changed, 4 insertions(+), 7 deletions(-)
+ drivers/firmware/efi/vars.c | 99 +++++++++++++++++++++++++++++--------
+ 1 file changed, 78 insertions(+), 21 deletions(-)
 
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index eea40d52ca78..d1e64ac80b9c 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -141,6 +141,8 @@ extern int __init efi_reuse_config(u64 tables, int nr_tables);
- extern void efi_delete_dummy_variable(void);
- extern void efi_switch_mm(struct mm_struct *mm);
- extern void efi_recover_from_page_fault(unsigned long phys_addr);
-+extern void efi_free_boot_services(void);
-+extern void efi_reserve_boot_services(void);
+diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
+index 9336ffdf6e2c..fceaafd67ec6 100644
+--- a/drivers/firmware/efi/vars.c
++++ b/drivers/firmware/efi/vars.c
+@@ -318,7 +318,12 @@ EXPORT_SYMBOL_GPL(efivar_variable_is_removable);
+ static efi_status_t
+ check_var_size(u32 attributes, unsigned long size)
+ {
+-	const struct efivar_operations *fops = __efivars->ops;
++	const struct efivar_operations *fops;
++
++	if (!__efivars)
++		return EFI_UNSUPPORTED;
++
++	fops = __efivars->ops;
  
- struct efi_setup_data {
- 	u64 fw_vendor;
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 7ae939e353cd..e1cb01a22fa8 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -993,6 +993,8 @@ static void __init __efi_enter_virtual_mode(void)
- 		panic("EFI call to SetVirtualAddressMap() failed!");
+ 	if (!fops->query_variable_store)
+ 		return EFI_UNSUPPORTED;
+@@ -329,7 +334,12 @@ check_var_size(u32 attributes, unsigned long size)
+ static efi_status_t
+ check_var_size_nonblocking(u32 attributes, unsigned long size)
+ {
+-	const struct efivar_operations *fops = __efivars->ops;
++	const struct efivar_operations *fops;
++
++	if (!__efivars)
++		return EFI_UNSUPPORTED;
++
++	fops = __efivars->ops;
+ 
+ 	if (!fops->query_variable_store)
+ 		return EFI_UNSUPPORTED;
+@@ -429,13 +439,18 @@ static void dup_variable_bug(efi_char16_t *str16, efi_guid_t *vendor_guid,
+ int efivar_init(int (*func)(efi_char16_t *, efi_guid_t, unsigned long, void *),
+ 		void *data, bool duplicates, struct list_head *head)
+ {
+-	const struct efivar_operations *ops = __efivars->ops;
++	const struct efivar_operations *ops;
+ 	unsigned long variable_name_size = 1024;
+ 	efi_char16_t *variable_name;
+ 	efi_status_t status;
+ 	efi_guid_t vendor_guid;
+ 	int err = 0;
+ 
++	if (!__efivars)
++		return -EFAULT;
++
++	ops = __efivars->ops;
++
+ 	variable_name = kzalloc(variable_name_size, GFP_KERNEL);
+ 	if (!variable_name) {
+ 		printk(KERN_ERR "efivars: Memory allocation failed.\n");
+@@ -583,12 +598,14 @@ static void efivar_entry_list_del_unlock(struct efivar_entry *entry)
+  */
+ int __efivar_entry_delete(struct efivar_entry *entry)
+ {
+-	const struct efivar_operations *ops = __efivars->ops;
+ 	efi_status_t status;
+ 
+-	status = ops->set_variable(entry->var.VariableName,
+-				   &entry->var.VendorGuid,
+-				   0, 0, NULL);
++	if (!__efivars)
++		return -EINVAL;
++
++	status = __efivars->ops->set_variable(entry->var.VariableName,
++					      &entry->var.VendorGuid,
++					      0, 0, NULL);
+ 
+ 	return efi_status_to_err(status);
+ }
+@@ -607,12 +624,17 @@ EXPORT_SYMBOL_GPL(__efivar_entry_delete);
+  */
+ int efivar_entry_delete(struct efivar_entry *entry)
+ {
+-	const struct efivar_operations *ops = __efivars->ops;
++	const struct efivar_operations *ops;
+ 	efi_status_t status;
+ 
+ 	if (down_interruptible(&efivars_lock))
+ 		return -EINTR;
+ 
++	if (!__efivars) {
++		up(&efivars_lock);
++		return -EINVAL;
++	}
++	ops = __efivars->ops;
+ 	status = ops->set_variable(entry->var.VariableName,
+ 				   &entry->var.VendorGuid,
+ 				   0, 0, NULL);
+@@ -650,13 +672,19 @@ EXPORT_SYMBOL_GPL(efivar_entry_delete);
+ int efivar_entry_set(struct efivar_entry *entry, u32 attributes,
+ 		     unsigned long size, void *data, struct list_head *head)
+ {
+-	const struct efivar_operations *ops = __efivars->ops;
++	const struct efivar_operations *ops;
+ 	efi_status_t status;
+ 	efi_char16_t *name = entry->var.VariableName;
+ 	efi_guid_t vendor = entry->var.VendorGuid;
+ 
+ 	if (down_interruptible(&efivars_lock))
+ 		return -EINTR;
++
++	if (!__efivars) {
++		up(&efivars_lock);
++		return -EINVAL;
++	}
++	ops = __efivars->ops;
+ 	if (head && efivar_entry_find(name, vendor, head, false)) {
+ 		up(&efivars_lock);
+ 		return -EEXIST;
+@@ -687,12 +715,17 @@ static int
+ efivar_entry_set_nonblocking(efi_char16_t *name, efi_guid_t vendor,
+ 			     u32 attributes, unsigned long size, void *data)
+ {
+-	const struct efivar_operations *ops = __efivars->ops;
++	const struct efivar_operations *ops;
+ 	efi_status_t status;
+ 
+ 	if (down_trylock(&efivars_lock))
+ 		return -EBUSY;
+ 
++	if (!__efivars) {
++		up(&efivars_lock);
++		return -EINVAL;
++	}
++
+ 	status = check_var_size_nonblocking(attributes,
+ 					    size + ucs2_strsize(name, 1024));
+ 	if (status != EFI_SUCCESS) {
+@@ -700,6 +733,7 @@ efivar_entry_set_nonblocking(efi_char16_t *name, efi_guid_t vendor,
+ 		return -ENOSPC;
  	}
  
-+	efi_free_boot_services();
++	ops = __efivars->ops;
+ 	status = ops->set_variable_nonblocking(name, &vendor, attributes,
+ 					       size, data);
+ 
+@@ -727,9 +761,13 @@ efivar_entry_set_nonblocking(efi_char16_t *name, efi_guid_t vendor,
+ int efivar_entry_set_safe(efi_char16_t *name, efi_guid_t vendor, u32 attributes,
+ 			  bool block, unsigned long size, void *data)
+ {
+-	const struct efivar_operations *ops = __efivars->ops;
++	const struct efivar_operations *ops;
+ 	efi_status_t status;
+ 
++	if (!__efivars)
++		return -EINVAL;
++
++	ops = __efivars->ops;
+ 	if (!ops->query_variable_store)
+ 		return -ENOSYS;
+ 
+@@ -829,13 +867,18 @@ EXPORT_SYMBOL_GPL(efivar_entry_find);
+  */
+ int efivar_entry_size(struct efivar_entry *entry, unsigned long *size)
+ {
+-	const struct efivar_operations *ops = __efivars->ops;
++	const struct efivar_operations *ops;
+ 	efi_status_t status;
+ 
+ 	*size = 0;
+ 
+ 	if (down_interruptible(&efivars_lock))
+ 		return -EINTR;
++	if (!__efivars) {
++		up(&efivars_lock);
++		return -EINVAL;
++	}
++	ops = __efivars->ops;
+ 	status = ops->get_variable(entry->var.VariableName,
+ 				   &entry->var.VendorGuid, NULL, size, NULL);
+ 	up(&efivars_lock);
+@@ -861,12 +904,14 @@ EXPORT_SYMBOL_GPL(efivar_entry_size);
+ int __efivar_entry_get(struct efivar_entry *entry, u32 *attributes,
+ 		       unsigned long *size, void *data)
+ {
+-	const struct efivar_operations *ops = __efivars->ops;
+ 	efi_status_t status;
+ 
+-	status = ops->get_variable(entry->var.VariableName,
+-				   &entry->var.VendorGuid,
+-				   attributes, size, data);
++	if (!__efivars)
++		return -EINVAL;
++
++	status = __efivars->ops->get_variable(entry->var.VariableName,
++					      &entry->var.VendorGuid,
++					      attributes, size, data);
+ 
+ 	return efi_status_to_err(status);
+ }
+@@ -882,14 +927,19 @@ EXPORT_SYMBOL_GPL(__efivar_entry_get);
+ int efivar_entry_get(struct efivar_entry *entry, u32 *attributes,
+ 		     unsigned long *size, void *data)
+ {
+-	const struct efivar_operations *ops = __efivars->ops;
+ 	efi_status_t status;
+ 
+ 	if (down_interruptible(&efivars_lock))
+ 		return -EINTR;
+-	status = ops->get_variable(entry->var.VariableName,
+-				   &entry->var.VendorGuid,
+-				   attributes, size, data);
++
++	if (!__efivars) {
++		up(&efivars_lock);
++		return -EINVAL;
++	}
++
++	status = __efivars->ops->get_variable(entry->var.VariableName,
++					      &entry->var.VendorGuid,
++					      attributes, size, data);
+ 	up(&efivars_lock);
+ 
+ 	return efi_status_to_err(status);
+@@ -921,7 +971,7 @@ EXPORT_SYMBOL_GPL(efivar_entry_get);
+ int efivar_entry_set_get_size(struct efivar_entry *entry, u32 attributes,
+ 			      unsigned long *size, void *data, bool *set)
+ {
+-	const struct efivar_operations *ops = __efivars->ops;
++	const struct efivar_operations *ops;
+ 	efi_char16_t *name = entry->var.VariableName;
+ 	efi_guid_t *vendor = &entry->var.VendorGuid;
+ 	efi_status_t status;
+@@ -940,6 +990,11 @@ int efivar_entry_set_get_size(struct efivar_entry *entry, u32 attributes,
+ 	if (down_interruptible(&efivars_lock))
+ 		return -EINTR;
+ 
++	if (!__efivars) {
++		err = -EINVAL;
++		goto out;
++	}
 +
  	/*
- 	 * Now that EFI is in virtual mode, update the function
- 	 * pointers in the runtime service table to the new virtual addresses.
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 100ce4a4aff6..2b3b33c83b05 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1000,13 +1000,11 @@ extern void efi_memmap_walk (efi_freemem_callback_t callback, void *arg);
- extern void efi_gettimeofday (struct timespec64 *ts);
- extern void efi_enter_virtual_mode (void);	/* switch EFI to virtual mode, if possible */
- #ifdef CONFIG_X86
--extern void efi_free_boot_services(void);
- extern efi_status_t efi_query_variable_store(u32 attributes,
- 					     unsigned long size,
- 					     bool nonblocking);
- extern void efi_find_mirror(void);
- #else
--static inline void efi_free_boot_services(void) {}
+ 	 * Ensure that the available space hasn't shrunk below the safe level
+ 	 */
+@@ -956,6 +1011,8 @@ int efivar_entry_set_get_size(struct efivar_entry *entry, u32 attributes,
+ 		}
+ 	}
  
- static inline efi_status_t efi_query_variable_store(u32 attributes,
- 						    unsigned long size,
-@@ -1046,7 +1044,6 @@ extern void efi_mem_reserve(phys_addr_t addr, u64 size);
- extern int efi_mem_reserve_persistent(phys_addr_t addr, u64 size);
- extern void efi_initialize_iomem_resources(struct resource *code_resource,
- 		struct resource *data_resource, struct resource *bss_resource);
--extern void efi_reserve_boot_services(void);
- extern int efi_get_fdt_params(struct efi_fdt_params *params);
- extern struct kobject *efi_kobj;
- 
-diff --git a/init/main.c b/init/main.c
-index ee147103ba1b..ccefcd8e855f 100644
---- a/init/main.c
-+++ b/init/main.c
-@@ -737,10 +737,6 @@ asmlinkage __visible void __init start_kernel(void)
- 	arch_post_acpi_subsys_init();
- 	sfi_init_late();
- 
--	if (efi_enabled(EFI_RUNTIME_SERVICES)) {
--		efi_free_boot_services();
--	}
--
- 	/* Do the rest non-__init'ed, we're now alive */
- 	arch_call_rest_init();
- }
++	ops = __efivars->ops;
++
+ 	status = ops->set_variable(name, vendor, attributes, *size, data);
+ 	if (status != EFI_SUCCESS) {
+ 		err = efi_status_to_err(status);
 -- 
 2.19.1
