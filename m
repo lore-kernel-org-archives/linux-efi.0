@@ -1,62 +1,75 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH 4.9 39/92] efi/arm: Revert deferred unmap of early memmap mapping
-Date: Thu, 29 Nov 2018 16:03:49 +0100
-Message-ID: <CAKv+Gu9PwKALUChvihoSASMzwo4d4N+YXLoDovRKgG9A2WZsSw@mail.gmail.com>
-References: <20181129140106.520639693@linuxfoundation.org> <20181129140109.438834361@linuxfoundation.org>
- <CAKv+Gu8cPOQaYY_KH3dq+2U517z7j67Od+Cxe+wB4gkEOqnQTA@mail.gmail.com> <20181129150221.GB22451@kroah.com>
+Subject: [GIT PULL 00/11] EFI updates
+Date: Thu, 29 Nov 2018 18:12:19 +0100
+Message-ID: <20181129171230.18699-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181129150221.GB22451@kroah.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, stable <stable@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi <linux-efi@vger.kernel.org>, Ingo Molnar <mingo@kernel.org>, sashal@kernel.org
+To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Andy Lutomirski <luto@kernel.org>, Arend van Spriel <arend.vanspriel@broadcom.com>, Bhupesh Sharma <bhsharma@redhat.com>, Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@intel.com>, Eric Snowberg <eric.snowberg@oracle.com>, Hans de Goede <hdegoede@redhat.com>, Joe Perches <joe@perches.com>, Jon Hunter <jonathanh@nvidia.com>, Julien Thierry <julien.thierry@arm.com>, Marc Zyngier <marc.zyngier@arm.com>, Nathan Chancellor <natechancellor@gmail.com>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Sedat Dilek <sedat.dilek@gmail.com>, YiFei Zhu <zhuyifei1999@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 29 Nov 2018 at 16:02, Greg Kroah-Hartman
-<gregkh@linuxfoundation.org> wrote:
->
-> On Thu, Nov 29, 2018 at 03:28:44PM +0100, Ard Biesheuvel wrote:
-> > On Thu, 29 Nov 2018 at 15:21, Greg Kroah-Hartman
-> > <gregkh@linuxfoundation.org> wrote:
-> > >
-> > > 4.9-stable review patch.  If anyone has any objections, please let me know.
-> > >
-> > > ------------------
-> > >
-> > > [ Upstream commit 33412b8673135b18ea42beb7f5117ed0091798b6 ]
-> > >
-> > > Commit:
-> > >
-> > >   3ea86495aef2 ("efi/arm: preserve early mapping of UEFI memory map longer for BGRT")
-> > >
-> > > deferred the unmap of the early mapping of the UEFI memory map to
-> > > accommodate the ACPI BGRT code, which looks up the memory type that
-> > > backs the BGRT table to validate it against the requirements of the UEFI spec.
-> > >
-> > > Unfortunately, this causes problems on ARM, which does not permit
-> > > early mappings to persist after paging_init() is called, resulting
-> > > in a WARN() splat. Since we don't support the BGRT table on ARM anway,
-> > > let's revert ARM to the old behaviour, which is to take down the
-> > > early mapping at the end of efi_init().
-> > >
-> > > Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> > > Cc: Linus Torvalds <torvalds@linux-foundation.org>
-> > > Cc: Peter Zijlstra <peterz@infradead.org>
-> > > Cc: Thomas Gleixner <tglx@linutronix.de>
-> > > Cc: linux-efi@vger.kernel.org
-> > > Fixes: 3ea86495aef2 ("efi/arm: preserve early mapping of UEFI memory ...")
-> >
-> > This commit is only in v4.19 as far as I know. Does it even apply?
->
-> This commit is in the following releases:
->         4.9.129 4.14.72 4.18.10 4.19
->
-> so it should apply :)
->
+The following changes since commit 976b489120cdab2b1b3a41ffa14661db43d58190:
 
-Ah, of course.
+  efi: Prevent GICv3 WARN() by mapping the memreserve table before first use (2018-11-27 13:50:20 +0100)
 
-I didn't realize (or failed to remember) that it had been taken into -stable.
+are available in the Git repository at:
 
-Thanks,
+  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next
+
+for you to fetch changes up to 1d29afdbf7ae878a23627ebee81efcd213f11749:
+
+  efi/x86: earlyprintk - Fix infinite loop on some screen widths (2018-11-28 17:58:42 +0100)
+
+----------------------------------------------------------------
+EFI updates for v4.21:
+- Allocate the E820 buffer before doing the GetMemoryMap/ExitBootServices
+  dance so we don't run out of space (Eric)
+- Clear EFI boot services mappings when freeing the memory (Sai)
+- Harden efivars against callers that invoke it on non-EFI boots (Arend)
+- Reduce the number of memblock reservations resulting from extensive
+  use of the new efi_mem_reserve_persistent() API (Ard)
+- Other assorted fixes and cleanups.
+
+----------------------------------------------------------------
+Ard Biesheuvel (2):
+      efi: permit multiple entries in persistent memreserve data structure
+      efi: reduce the amount of memblock reservations for persistent allocations
+
+Arend van Spriel (1):
+      firmware: efi: add NULL pointer checks in efivars api functions
+
+Eric Snowberg (1):
+      x86/efi: Allocate e820 buffer before calling efi_exit_boot_service
+
+Julien Thierry (2):
+      efi/fdt: Indentation fix
+      efi/fdt: Simplify get_fdt flow
+
+Nathan Chancellor (1):
+      efi/libstub: Disable some warnings for x86{,_64}
+
+Sai Praneeth Prakhya (3):
+      x86/mm/pageattr: Introduce helper function to unmap EFI boot services
+      x86/efi: Unmap EFI boot services code/data regions from efi_pgd
+      x86/efi: Move efi_<reserve/free>_boot_services() to arch/x86
+
+YiFei Zhu (1):
+      efi/x86: earlyprintk - Fix infinite loop on some screen widths
+
+ arch/x86/boot/compressed/eboot.c        | 65 ++++++++++++++--------
+ arch/x86/include/asm/efi.h              |  2 +
+ arch/x86/include/asm/pgtable_types.h    |  8 ++-
+ arch/x86/mm/pageattr.c                  | 40 ++++++++++++-
+ arch/x86/platform/efi/early_printk.c    |  2 +-
+ arch/x86/platform/efi/efi.c             |  2 +
+ arch/x86/platform/efi/quirks.c          | 25 +++++++++
+ drivers/firmware/efi/efi.c              | 55 +++++++++++++-----
+ drivers/firmware/efi/libstub/Makefile   |  5 +-
+ drivers/firmware/efi/libstub/arm-stub.c |  2 +-
+ drivers/firmware/efi/libstub/fdt.c      | 30 +++++-----
+ drivers/firmware/efi/vars.c             | 99 ++++++++++++++++++++++++++-------
+ include/linux/efi.h                     | 19 +++++--
+ init/main.c                             |  4 --
+ 14 files changed, 269 insertions(+), 89 deletions(-)
