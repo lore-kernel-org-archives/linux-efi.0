@@ -1,39 +1,40 @@
-From: lijiang <lijiang@redhat.com>
-Subject: Re: [PATCH 1/2 RESEND v7] resource: add the new I/O resource
- descriptor 'IORES_DESC_RESERVED'
-Date: Thu, 29 Nov 2018 10:14:14 +0800
-Message-ID: <4e072e7c-52d2-9ead-2494-4c90b5465ea1@redhat.com>
-References: <20181124051223.19994-1-lijiang@redhat.com>
- <20181124051223.19994-2-lijiang@redhat.com>
- <ae405fe9-94fd-3fb7-decd-c7821cf95b7d@intel.com>
- <460c5552-a48e-3523-275a-7f94d0f08f9b@redhat.com>
- <703ce20d-be09-9b8d-d457-5b002a50dff7@intel.com>
- <d84fbefb-f856-c600-5207-c63f48b1b308@redhat.com>
- <4ff951f6-c1bf-ff98-b70b-a138e54488af@intel.com>
+From: Qian Cai <cai@gmx.us>
+Subject: kmemleak reports leaking in efi_mem_reserve_persistent()
+Date: Wed, 28 Nov 2018 22:47:19 -0500
+Message-ID: <983f2d06-04d1-e309-c3a6-965aa6b61eb4@gmx.us>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <4ff951f6-c1bf-ff98-b70b-a138e54488af@intel.com>
 Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Dave Hansen <dave.hansen@intel.com>, linux-kernel@vger.kernel.org
-Cc: kexec@lists.infradead.org, x86@kernel.org, linux-ia64@vger.kernel.org, linux-efi@vger.kernel.org, tglx@linutronix.de, mingo@redhat.com, bp@alien8.de, akpm@linux-foundation.org, dave.hansen@linux.intel.com, luto@kernel.org, peterz@infradead.org, ard.biesheuvel@linaro.org, tony.luck@intel.com, fenghua.yu@intel.com, dyoung@redhat.com, bhe@redhat.com
+To: ard.biesheuvel@linaro.org
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-在 2018年11月29日 00:02, Dave Hansen 写道:
-> On 11/27/18 7:51 PM, lijiang wrote:
->> But now, the 'E820_TYPE_RESERVED' type is converted to the descriptor 'IORES_DESC_RESERVED'
->> instead of 'IORES_DESC_NONE', it has been changed and the value of 'mem_flags.desc_other'
->> is equal to 'true'. This is wrong.
-> 
-> Thanks for the improved description of the problem.  Seems to all make
-> sense now.
-> 
-> Could you include this in the changelog for the next version?
-> 
+unreferenced object 0xffff8096c1acf580 (size 128):
+  comm "swapper/63", pid 0, jiffies 4294937418 (age 1201.230s)
+  hex dump (first 32 bytes):
+    80 87 b5 c1 96 00 00 00 00 00 cc c2 16 00 00 00  ................
+    00 00 01 00 00 00 00 00 6b 6b 6b 6b 6b 6b 6b 6b  ........kkkkkkkk
+  backtrace:
+    [<000000001d2549ba>] kmem_cache_alloc_trace+0x430/0x500
+    [<0000000093a6dfab>] efi_mem_reserve_persistent+0x50/0xf8
+    [<000000000a730828>] its_cpu_init_lpis+0x394/0x4b8
+    [<00000000edf04e07>] its_cpu_init+0x104/0x150
+    [<000000004d0342c5>] gic_starting_cpu+0x34/0x40
+    [<000000005d9da772>] cpuhp_invoke_callback+0x228/0x1d68
+    [<0000000061eace9b>] notify_cpu_starting+0xc0/0x118
+    [<0000000048bc2dc5>] secondary_start_kernel+0x23c/0x3b0
+    [<0000000015137d6a>] 0xffffffffffffffff
 
-Ok, i will include these changes in patch v8. Also thanks for your advice.
+# ./scripts/faddr2line vmlinux efi_mem_reserve_persistent+0x50/0xf8
+efi_mem_reserve_persistent+0x50/0xf8:
+kmalloc at include/linux/slab.h:546
+(inlined by) efi_mem_reserve_persistent at drivers/firmware/efi/efi.c:979
 
-Regards,
-Lianbo
+This line,
+
+rsv = kmalloc(sizeof(*rsv), GFP_ATOMIC);
+
+I didn't see anything obviously. Is it just a false positive?
