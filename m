@@ -1,19 +1,19 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.9 39/92] efi/arm: Revert deferred unmap of early memmap mapping
-Date: Thu, 29 Nov 2018 15:12:08 +0100
-Message-ID: <20181129140109.438834361@linuxfoundation.org>
-References: <20181129140106.520639693@linuxfoundation.org>
+Subject: [PATCH 4.14 061/100] efi/arm: Revert deferred unmap of early memmap mapping
+Date: Thu, 29 Nov 2018 15:12:31 +0100
+Message-ID: <20181129140104.314798959@linuxfoundation.org>
+References: <20181129140058.768942700@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181129140106.520639693@linuxfoundation.org>
+In-Reply-To: <20181129140058.768942700@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-4.9-stable review patch.  If anyone has any objections, please let me know.
+4.14-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
@@ -49,10 +49,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  3 files changed, 8 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
-index 1d1c9693ebfb..8ee91777abce 100644
+index a7c522eac640..312f9f32e168 100644
 --- a/drivers/firmware/efi/arm-init.c
 +++ b/drivers/firmware/efi/arm-init.c
-@@ -256,6 +256,10 @@ void __init efi_init(void)
+@@ -265,6 +265,10 @@ void __init efi_init(void)
  				    (params.mmap & ~PAGE_MASK)));
  
  	init_screen_info();
@@ -64,10 +64,10 @@ index 1d1c9693ebfb..8ee91777abce 100644
  
  static int __init register_gop_device(void)
 diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
-index 4d788e0debfe..069c5a4479e6 100644
+index 8995a48bd067..ad1530aff633 100644
 --- a/drivers/firmware/efi/arm-runtime.c
 +++ b/drivers/firmware/efi/arm-runtime.c
-@@ -118,7 +118,7 @@ static int __init arm_enable_runtime_services(void)
+@@ -122,7 +122,7 @@ static int __init arm_enable_runtime_services(void)
  {
  	u64 mapsize;
  
@@ -77,10 +77,10 @@ index 4d788e0debfe..069c5a4479e6 100644
  		return 0;
  	}
 diff --git a/drivers/firmware/efi/memmap.c b/drivers/firmware/efi/memmap.c
-index 78686443cb37..3fd2b450c649 100644
+index 5fc70520e04c..1907db2b38d8 100644
 --- a/drivers/firmware/efi/memmap.c
 +++ b/drivers/firmware/efi/memmap.c
-@@ -117,6 +117,9 @@ int __init efi_memmap_init_early(struct efi_memory_map_data *data)
+@@ -118,6 +118,9 @@ int __init efi_memmap_init_early(struct efi_memory_map_data *data)
  
  void __init efi_memmap_unmap(void)
  {
