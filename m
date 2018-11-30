@@ -1,93 +1,70 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: [PATCH] efi/fdt: More cleanups
-Date: Fri, 30 Nov 2018 10:48:49 +0100
-Message-ID: <20181130094849.GA128917@gmail.com>
-References: <20181129171230.18699-1-ard.biesheuvel@linaro.org>
- <20181129171230.18699-3-ard.biesheuvel@linaro.org>
- <20181130075658.GB16084@gmail.com>
- <CAKv+Gu8dLTwQp-FemEB0Bhzc3KEYDqpP_Pke3Q+miCh3h2xxbw@mail.gmail.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [GIT PULL 00/11] EFI updates
+Date: Fri, 30 Nov 2018 13:01:43 +0100
+Message-ID: <CAKv+Gu9wYBoLUsioOvsx+ggg6DanqWd3VKVP8nxZ+=zqOqzM3w@mail.gmail.com>
+References: <20181129171230.18699-1-ard.biesheuvel@linaro.org> <FFF73D592F13FD46B8700F0A279B802F485F14B8@ORSMSX114.amr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu8dLTwQp-FemEB0Bhzc3KEYDqpP_Pke3Q+miCh3h2xxbw@mail.gmail.com>
+In-Reply-To: <FFF73D592F13FD46B8700F0A279B802F485F14B8@ORSMSX114.amr.corp.intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: linux-efi <linux-efi@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Andy Lutomirski <luto@kernel.org>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Bhupesh Sharma <bhsharma@redhat.com>, Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@intel.com>, Eric Snowberg <eric.snowberg@oracle.com>, Hans de Goede <hdegoede@redhat.com>, Joe Perches <joe@perches.com>, Jon Hunter <jonathanh@nvidia.com>, Julien Thierry <julien.thierry@arm.com>, Marc Zyngier <marc.zyngier@arm.com>, Nathan Chancellor <natechancellor@gmail.com>, Peter Zijlstra <peterz@infradead.org>, "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>, Sedat Dilek <sedat.dilek@gmail.com>, YiFei Zhu <zhuyifei1999>
+To: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+Cc: linux-efi <linux-efi@vger.kernel.org>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Andy Lutomirski <luto@kernel.org>, Arend Van Spriel <arend.vanspriel@broadcom.com>, Bhupesh Sharma <bhsharma@redhat.com>, Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@intel.com>, Eric Snowberg <eric.snowberg@oracle.com>, Hans de Goede <hdegoede@redhat.com>, Joe Perches <joe@perches.com>, Jon Hunter <jonathanh@nvidia.com>, Julien Thierry <julien.thierry@arm.com>, Marc Zyngier <marc.zyngier@arm.com>, Nathan Chancellor <natechancellor@gmail.com>, Peter Zijlstra <peterz@infradead.org>, Sedat Dilek <sedat.dilek@gmail.com>, YiFei Zhu <zhuyifei1999@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
+On Thu, 29 Nov 2018 at 19:27, Prakhya, Sai Praneeth
+<sai.praneeth.prakhya@intel.com> wrote:
+>
+> Hi Ard,
+>
+> While building from next branch of efi tree, I noticed the below warning. Could you please check the same on your side?
+>
+>   CC      lib/list_debug.o
+> drivers/firmware/efi/efi.c: In function 'efi_mem_reserve_persistent':
+> drivers/firmware/efi/efi.c:1000:6: warning: unused variable 'rsvsize' [-Wunused-variable]
+>   int rsvsize = EFI_MEMRESERVE_SIZE(1);
+>       ^~~~~~~
+>   CC      lib/bitrev.o
+>   CC      net/core/sock_reuseport.o
+>
 
-* Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
+Thanks Sai
 
-> On Fri, 30 Nov 2018 at 08:57, Ingo Molnar <mingo@kernel.org> wrote:
-> >
-> >
-> > * Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
-> >
-> > > From: Julien Thierry <julien.thierry@arm.com>
-> > >
-> > > Closing bracket seems to end a for statement when it is actually ending
-> > > the contained if. Add some brackets to have clear delimitation of each
-> > > scope.
-> > >
-> > > No functional change/fix, just fix the indentation.
-> > >
-> > > Signed-off-by: Julien Thierry <julien.thierry@arm.com>
-> > > Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> > > ---
-> > >  drivers/firmware/efi/libstub/fdt.c | 5 +++--
-> > >  1 file changed, 3 insertions(+), 2 deletions(-)
-> > >
-> > > diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
-> > > index 0c0d2312f4a8..a3614f9b5f75 100644
-> > > --- a/drivers/firmware/efi/libstub/fdt.c
-> > > +++ b/drivers/firmware/efi/libstub/fdt.c
-> > > @@ -376,7 +376,7 @@ void *get_fdt(efi_system_table_t *sys_table, unsigned long *fdt_size)
-> > >       tables = (efi_config_table_t *) sys_table->tables;
-> > >       fdt = NULL;
-> > >
-> > > -     for (i = 0; i < sys_table->nr_tables; i++)
-> > > +     for (i = 0; i < sys_table->nr_tables; i++) {
-> > >               if (efi_guidcmp(tables[i].guid, fdt_guid) == 0) {
-> > >                       fdt = (void *) tables[i].table;
-> > >                       if (fdt_check_header(fdt) != 0) {
-> > > @@ -385,7 +385,8 @@ void *get_fdt(efi_system_table_t *sys_table, unsigned long *fdt_size)
-> > >                       }
-> > >                       *fdt_size = fdt_totalsize(fdt);
-> > >                       break;
-> > > -      }
-> > > +             }
-> > > +     }
-> >
-> > So if we are doing trivial cleanups, how about the patch below on top? It
-> > cleans up this file for good. Only minimally build tested.
-> >
-> > Thanks,
-> >
-> >         Ingo
-> >
-> > ======================>
-> > Subject: efi/fdt: More cleanups
-> > From: Ingo Molnar <mingo@kernel.org>
-> >
-> > Apply a number of cleanups:
-> >
-> >  - Introduce fdt_setprop_*var() helper macros to simplify and shorten repetitive
-> >    sequences - this also makes it less likely that the wrong variable size is
-> >    passed in. This change makes a lot of the property-setting calls single-line
-> >    and easier to read.
-> >
-> 
-> This change looks fine to me, but scripts/dtc/libfdt/libfdt.h is part
-> of an external library, so we'd either need to contribute it there or
-> define the macro in a local header.
+Ingo spotted it as well and fixed it up before merging.
 
-Whichever variant you prefer. If the external library has a different 
-license that requires a separate permission then for that too feel free 
-to add:
-
-  Signed-off-by: Ingo Molnar <mingo@kernel.org>
-
-Thanks,
-
-	Ingo
+> > -----Original Message-----
+> > From: Ard Biesheuvel [mailto:ard.biesheuvel@linaro.org]
+> > Sent: Thursday, November 29, 2018 9:12 AM
+> > To: linux-efi@vger.kernel.org; Ingo Molnar <mingo@kernel.org>; Thomas
+> > Gleixner <tglx@linutronix.de>
+> > Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>; linux-kernel@vger.kernel.org;
+> > Andy Lutomirski <luto@kernel.org>; Arend van Spriel
+> > <arend.vanspriel@broadcom.com>; Bhupesh Sharma <bhsharma@redhat.com>;
+> > Borislav Petkov <bp@alien8.de>; Hansen, Dave <dave.hansen@intel.com>; Eric
+> > Snowberg <eric.snowberg@oracle.com>; Hans de Goede
+> > <hdegoede@redhat.com>; Joe Perches <joe@perches.com>; Jon Hunter
+> > <jonathanh@nvidia.com>; Julien Thierry <julien.thierry@arm.com>; Marc
+> > Zyngier <marc.zyngier@arm.com>; Nathan Chancellor
+> > <natechancellor@gmail.com>; Peter Zijlstra <peterz@infradead.org>; Prakhya,
+> > Sai Praneeth <sai.praneeth.prakhya@intel.com>; Sedat Dilek
+> > <sedat.dilek@gmail.com>; YiFei Zhu <zhuyifei1999@gmail.com>
+> > Subject: [GIT PULL 00/11] EFI updates
+> >
+> > The following changes since commit
+> > 976b489120cdab2b1b3a41ffa14661db43d58190:
+> >
+> >   efi: Prevent GICv3 WARN() by mapping the memreserve table before first use
+> > (2018-11-27 13:50:20 +0100)
+> >
+> > are available in the Git repository at:
+> >
+> >   git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next
+> >
+> > for you to fetch changes up to 1d29afdbf7ae878a23627ebee81efcd213f11749:
+> >
+> >   efi/x86: earlyprintk - Fix infinite loop on some screen widths (2018-11-28
+> > 17:58:42 +0100)
+> >
+>
+> Regards,
+> Sai
