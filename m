@@ -1,64 +1,155 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH] pstore: Convert buf_lock to semaphore
-Date: Mon, 3 Dec 2018 17:26:11 +0100
-Message-ID: <CAK8P3a1mAg-XDie7ekN36WQGwVLoPW_nYCkcGmCDMmscCSRFNA@mail.gmail.com>
-References: <20181130224736.GA38485@beast> <CAK8P3a0YGyKf_0wg_sNhN2z-zVvv1N1_Yc=+2AL=8FZT+CRLxQ@mail.gmail.com>
- <CAGXu5jKXEEHbxdG2VzYhUWEPEEJYdCLEY1oF+zm8wOUfdS0v+A@mail.gmail.com>
- <CAK8P3a3xUMnWrSsW6gNwc5y0z-wR23v8Q6TGH+yNpDJq65FeMw@mail.gmail.com> <20181203111826.ri2csbxs33j34dvo@linutronix.de>
+From: tip-bot for Sebastian Andrzej Siewior <tipbot@zytor.com>
+Subject: [tip:x86/fpu] x86/fpu: Don't export __kernel_fpu_{begin,end}()
+Date: Mon, 3 Dec 2018 13:04:25 -0800
+Message-ID: <tip-7d79adb87fa79e4a4c59424fd5b5a922861fc5f6@git.kernel.org>
+References: <20181129150210.2k4mawt37ow6c2vq@linutronix.de>
+Reply-To: dave.hansen@linux.intel.com, mingo@redhat.com, x86@kernel.org,
+          nstange@suse.de, riel@surriel.com, bigeasy@linutronix.de,
+          kvm@vger.kernel.org, Jason@zx2c4.com,
+          linux-kernel@vger.kernel.org, mingo@kernel.org,
+          rkrcmar@redhat.com, hpa@zytor.com, tglx@linutronix.de,
+          ard.biesheuvel@linaro.org, luto@kernel.org, bp@suse.de,
+          linux-efi@vger.kernel.org, pbonzini@redhat.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181203111826.ri2csbxs33j34dvo@linutronix.de>
+In-Reply-To: <20181129150210.2k4mawt37ow6c2vq@linutronix.de>
+Content-Disposition: inline
 Sender: linux-kernel-owner@vger.kernel.org
-To: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
-Cc: Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, Borislav Petkov <bp@alien8.de>, linux-efi <linux-efi@vger.kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Anton Vorontsov <anton@enomsg.org>, Colin Cross <ccross@android.com>, Tony Luck <tony.luck@intel.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: linux-tip-commits@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, mingo@kernel.org, rkrcmar@redhat.com, tglx@linutronix.de, hpa@zytor.com, ard.biesheuvel@linaro.org, bp@suse.de, luto@kernel.org, linux-efi@vger.kernel.org, pbonzini@redhat.com, dave.hansen@linux.intel.com, x86@kernel.org, riel@surriel.com, mingo@redhat.com, nstange@suse.de, bigeasy@linutronix.de, kvm@vger.kernel.org, Jason@zx2c4.com
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Dec 3, 2018 at 12:18 PM Sebastian Andrzej Siewior
-<bigeasy@linutronix.de> wrote:
->
-> On 2018-12-01 09:42:38 [+0100], Arnd Bergmann wrote:
-> > You are right that you can't take (or release) a mutex from interrupt
-> > context. However, I don't think converting a spinlock to a semaphore
-> > is going to help here either.
->
-> you can acquire a semaphore with a try_lock from interrupts context but
-> you can't do that with a mutex. You can also a acquire a semaphore in
-> one context and release in another.
+Commit-ID:  7d79adb87fa79e4a4c59424fd5b5a922861fc5f6
+Gitweb:     https://git.kernel.org/tip/7d79adb87fa79e4a4c59424fd5b5a922861fc5f6
+Author:     Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+AuthorDate: Thu, 29 Nov 2018 16:02:10 +0100
+Committer:  Borislav Petkov <bp@suse.de>
+CommitDate: Mon, 3 Dec 2018 19:37:27 +0100
 
-Right, that is the obvious part.
+x86/fpu: Don't export __kernel_fpu_{begin,end}()
 
-> I haven't looked a general picture yet, will try to do so later today or
-> tomorrow.
+There is one user of __kernel_fpu_begin() and before invoking it,
+it invokes preempt_disable(). So it could invoke kernel_fpu_begin()
+right away. The 32bit version of arch_efi_call_virt_setup() and
+arch_efi_call_virt_teardown() does this already.
 
-To speed this up, the problem I'm referring to is in
-virt_efi_query_variable_info() and efi_queue_work(),
-as in the original BUG_ON() that Kees quoted:
+The comment above *kernel_fpu*() claims that before invoking
+__kernel_fpu_begin() preemption should be disabled and that KVM is a
+good example of doing it. Well, KVM doesn't do that since commit
 
-> BUG: sleeping function called from invalid context at kernel/sched/completion.c:99
-> |in_atomic(): 1, irqs_disabled(): 1, pid: 2236, name: sig-xstate-bum
-> |Preemption disabled at:
-> |[<ffffffff99d60512>] pstore_dump+0x72/0x330
-> |CPU: 26 PID: 2236 Comm: sig-xstate-bum Tainted: G      D           4.20.0-rc3 #45
-> |Call Trace:
-> | dump_stack+0x4f/0x6a
-> | ___might_sleep.cold.91+0xd3/0xe4
-> | __might_sleep+0x50/0x90
-> | wait_for_completion+0x32/0x130
-> | virt_efi_query_variable_info+0x14e/0x160
-> | efi_query_variable_store+0x51/0x1a0
-> | efivar_entry_set_safe+0xa3/0x1b0
-> | efi_pstore_write+0x109/0x140
-> | pstore_dump+0x11c/0x330
-> | kmsg_dump+0xa4/0xd0
-> | oops_exit+0x22/0x30
+  f775b13eedee2 ("x86,kvm: move qemu/guest FPU switching out to vcpu_run")
 
-This will no longer happen when pstore is called from process
-context with his patch, but we still get the same thing if we call
-pstore from interrupt context, unless both the down_interruptible
-and wait_for_completion in there are also changed to
-nonblocking calls. However, once they are no longer blocking,
-we don't need the outer lock to be changed from spinlock
-to semaphore any more either.
+so it is not an example anymore.
 
-        Arnd
+With EFI gone as the last user of __kernel_fpu_{begin|end}(), both can
+be made static and not exported anymore.
+
+Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+Signed-off-by: Borislav Petkov <bp@suse.de>
+Reviewed-by: Rik van Riel <riel@surriel.com>
+Cc: "H. Peter Anvin" <hpa@zytor.com>
+Cc: "Jason A. Donenfeld" <Jason@zx2c4.com>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Dave Hansen <dave.hansen@linux.intel.com>
+Cc: Ingo Molnar <mingo@redhat.com>
+Cc: Nicolai Stange <nstange@suse.de>
+Cc: Paolo Bonzini <pbonzini@redhat.com>
+Cc: Radim Krčmář <rkrcmar@redhat.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: kvm ML <kvm@vger.kernel.org>
+Cc: linux-efi <linux-efi@vger.kernel.org>
+Cc: x86-ml <x86@kernel.org>
+Link: https://lkml.kernel.org/r/20181129150210.2k4mawt37ow6c2vq@linutronix.de
+---
+ arch/x86/include/asm/efi.h     |  6 ++----
+ arch/x86/include/asm/fpu/api.h | 16 ++++++----------
+ arch/x86/kernel/fpu/core.c     |  6 ++----
+ 3 files changed, 10 insertions(+), 18 deletions(-)
+
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index eea40d52ca78..45864898f7e5 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -82,8 +82,7 @@ struct efi_scratch {
+ #define arch_efi_call_virt_setup()					\
+ ({									\
+ 	efi_sync_low_kernel_mappings();					\
+-	preempt_disable();						\
+-	__kernel_fpu_begin();						\
++	kernel_fpu_begin();						\
+ 	firmware_restrict_branch_speculation_start();			\
+ 									\
+ 	if (!efi_enabled(EFI_OLD_MEMMAP))				\
+@@ -99,8 +98,7 @@ struct efi_scratch {
+ 		efi_switch_mm(efi_scratch.prev_mm);			\
+ 									\
+ 	firmware_restrict_branch_speculation_end();			\
+-	__kernel_fpu_end();						\
+-	preempt_enable();						\
++	kernel_fpu_end();						\
+ })
+ 
+ extern void __iomem *__init efi_ioremap(unsigned long addr, unsigned long size,
+diff --git a/arch/x86/include/asm/fpu/api.h b/arch/x86/include/asm/fpu/api.h
+index a9caac9d4a72..e368d8d94ca6 100644
+--- a/arch/x86/include/asm/fpu/api.h
++++ b/arch/x86/include/asm/fpu/api.h
+@@ -12,17 +12,13 @@
+ #define _ASM_X86_FPU_API_H
+ 
+ /*
+- * Careful: __kernel_fpu_begin/end() must be called with preempt disabled
+- * and they don't touch the preempt state on their own.
+- * If you enable preemption after __kernel_fpu_begin(), preempt notifier
+- * should call the __kernel_fpu_end() to prevent the kernel/user FPU
+- * state from getting corrupted. KVM for example uses this model.
+- *
+- * All other cases use kernel_fpu_begin/end() which disable preemption
+- * during kernel FPU usage.
++ * Use kernel_fpu_begin/end() if you intend to use FPU in kernel context. It
++ * disables preemption so be careful if you intend to use it for long periods
++ * of time.
++ * If you intend to use the FPU in softirq you need to check first with
++ * irq_fpu_usable() if it is possible.
++ * Using the FPU in hardirq is not allowed.
+  */
+-extern void __kernel_fpu_begin(void);
+-extern void __kernel_fpu_end(void);
+ extern void kernel_fpu_begin(void);
+ extern void kernel_fpu_end(void);
+ extern bool irq_fpu_usable(void);
+diff --git a/arch/x86/kernel/fpu/core.c b/arch/x86/kernel/fpu/core.c
+index 2ea85b32421a..2e5003fef51a 100644
+--- a/arch/x86/kernel/fpu/core.c
++++ b/arch/x86/kernel/fpu/core.c
+@@ -93,7 +93,7 @@ bool irq_fpu_usable(void)
+ }
+ EXPORT_SYMBOL(irq_fpu_usable);
+ 
+-void __kernel_fpu_begin(void)
++static void __kernel_fpu_begin(void)
+ {
+ 	struct fpu *fpu = &current->thread.fpu;
+ 
+@@ -111,9 +111,8 @@ void __kernel_fpu_begin(void)
+ 		__cpu_invalidate_fpregs_state();
+ 	}
+ }
+-EXPORT_SYMBOL(__kernel_fpu_begin);
+ 
+-void __kernel_fpu_end(void)
++static void __kernel_fpu_end(void)
+ {
+ 	struct fpu *fpu = &current->thread.fpu;
+ 
+@@ -122,7 +121,6 @@ void __kernel_fpu_end(void)
+ 
+ 	kernel_fpu_enable();
+ }
+-EXPORT_SYMBOL(__kernel_fpu_end);
+ 
+ void kernel_fpu_begin(void)
+ {
