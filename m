@@ -1,34 +1,83 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [tip:x86/fpu] x86/fpu: Don't export __kernel_fpu_{begin,end}()
-Date: Mon, 3 Dec 2018 23:08:41 +0100
-Message-ID: <20181203220841.GB4794@zn.tnic>
-References: <20181129150210.2k4mawt37ow6c2vq@linutronix.de>
- <tip-7d79adb87fa79e4a4c59424fd5b5a922861fc5f6@git.kernel.org>
- <CAKv+Gu-s59fSWrMevmbJWyBtNVYLkF7FATALGBD470CWsN9C1Q@mail.gmail.com>
+From: Kees Cook <keescook@chromium.org>
+Subject: Re: [PATCH] pstore: Convert buf_lock to semaphore
+Date: Mon, 3 Dec 2018 16:28:15 -0800
+Message-ID: <CAGXu5jLsHU0sRsnoynt==bZuagvohfAOGUu_i54Jy8BCFTvitQ@mail.gmail.com>
+References: <20181130224736.GA38485@beast> <CAK8P3a0YGyKf_0wg_sNhN2z-zVvv1N1_Yc=+2AL=8FZT+CRLxQ@mail.gmail.com>
+ <CAGXu5jKXEEHbxdG2VzYhUWEPEEJYdCLEY1oF+zm8wOUfdS0v+A@mail.gmail.com>
+ <CAK8P3a3xUMnWrSsW6gNwc5y0z-wR23v8Q6TGH+yNpDJq65FeMw@mail.gmail.com>
+ <20181203111826.ri2csbxs33j34dvo@linutronix.de> <CAK8P3a1mAg-XDie7ekN36WQGwVLoPW_nYCkcGmCDMmscCSRFNA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu-s59fSWrMevmbJWyBtNVYLkF7FATALGBD470CWsN9C1Q@mail.gmail.com>
+In-Reply-To: <CAK8P3a1mAg-XDie7ekN36WQGwVLoPW_nYCkcGmCDMmscCSRFNA@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Sebastian Andrzej Siewior <bigeasy@linutronix.de>
-Cc: Dave Hansen <dave.hansen@linux.intel.com>, Ingo Molnar <mingo@redhat.com>, the arch/x86 maintainers <x86@kernel.org>, nstange@suse.de, Rik van Riel <riel@surriel.com>, KVM devel mailing list <kvm@vger.kernel.org>, "Jason A. Donenfeld" <Jason@zx2c4.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ingo Molnar <mingo@kernel.org>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, linux-efi <linux-efi@vger.kernel.org>, Paolo Bonzini <pbonzini@redhat.com>, linux-tip-commits@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Sebastian Andrzej Siewior <bigeasy@linutronix.de>, Thomas Gleixner <tglx@linutronix.de>, Borislav Petkov <bp@alien8.de>, linux-efi <linux-efi@vger.kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Anton Vorontsov <anton@enomsg.org>, Colin Cross <ccross@android.com>, Tony Luck <tony.luck@intel.com>, LKML <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Dec 03, 2018 at 10:12:19PM +0100, Ard Biesheuvel wrote:
-> > + * Using the FPU in hardirq is not allowed.
-> 
-> According to the documentation in x86/kernel/fpu/core.c, this is not
-> true. So which one is accurate?
+On Mon, Dec 3, 2018 at 8:26 AM Arnd Bergmann <arnd@arndb.de> wrote:
+>
+> On Mon, Dec 3, 2018 at 12:18 PM Sebastian Andrzej Siewior
+> <bigeasy@linutronix.de> wrote:
+> >
+> > On 2018-12-01 09:42:38 [+0100], Arnd Bergmann wrote:
+> > > You are right that you can't take (or release) a mutex from interrupt
+> > > context. However, I don't think converting a spinlock to a semaphore
+> > > is going to help here either.
+> >
+> > you can acquire a semaphore with a try_lock from interrupts context but
+> > you can't do that with a mutex. You can also a acquire a semaphore in
+> > one context and release in another.
+>
+> Right, that is the obvious part.
+>
+> > I haven't looked a general picture yet, will try to do so later today or
+> > tomorrow.
+>
+> To speed this up, the problem I'm referring to is in
+> virt_efi_query_variable_info() and efi_queue_work(),
+> as in the original BUG_ON() that Kees quoted:
+>
+> > BUG: sleeping function called from invalid context at kernel/sched/completion.c:99
+> > |in_atomic(): 1, irqs_disabled(): 1, pid: 2236, name: sig-xstate-bum
+> > |Preemption disabled at:
+> > |[<ffffffff99d60512>] pstore_dump+0x72/0x330
+> > |CPU: 26 PID: 2236 Comm: sig-xstate-bum Tainted: G      D           4.20.0-rc3 #45
+> > |Call Trace:
+> > | dump_stack+0x4f/0x6a
+> > | ___might_sleep.cold.91+0xd3/0xe4
+> > | __might_sleep+0x50/0x90
+> > | wait_for_completion+0x32/0x130
+> > | virt_efi_query_variable_info+0x14e/0x160
+> > | efi_query_variable_store+0x51/0x1a0
+> > | efivar_entry_set_safe+0xa3/0x1b0
+> > | efi_pstore_write+0x109/0x140
+> > | pstore_dump+0x11c/0x330
+> > | kmsg_dump+0xa4/0xd0
+> > | oops_exit+0x22/0x30
+>
+> This will no longer happen when pstore is called from process
+> context with his patch, but we still get the same thing if we call
+> pstore from interrupt context, unless both the down_interruptible
+> and wait_for_completion in there are also changed to
+> nonblocking calls. However, once they are no longer blocking,
+> we don't need the outer lock to be changed from spinlock
+> to semaphore any more either.
 
-I think you mean the irq from user mode... Yap, we do allow that.
+My proposed patch was trying to do two things:
 
-Sebastian?
+- have pstore not make things _worse_ (do not hold a spin lock)
+- use preemptible() in efi pstore backend to get it right:
 
-Thx.
+        ret = efivar_entry_set_safe(efi_name, vendor, PSTORE_EFI_ATTRIBUTES,
+-                             !pstore_cannot_block_path(record->reason),
+-                             record->size, record->psi->buf);
++                             preemptible(), record->size, record->psi->buf);
+
+IIUC, that would make efi-vars take the nonblocking path so we don't
+trip over the might_sleep().
+
+-Kees
 
 -- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
+Kees Cook
