@@ -1,63 +1,35 @@
-From: Qian Cai <cai@gmx.us>
-Subject: Re: [RESEND PATCH] efi: let kmemleak ignore false positives
-Date: Thu, 06 Dec 2018 13:04:59 -0500
-Message-ID: <1544119499.12945.48.camel@gmx.us>
-References: <1543517152-23969-1-git-send-email-cai@gmx.us>
-         <20181206161633.36292-1-cai@gmx.us>
-         <20181206175958.GS54495@arrakis.emea.arm.com>
-         <CAKv+Gu97MU5kU878gF=KBLxQ5GjZatAbJ-LVdKv-QMgdPh3kZQ@mail.gmail.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH 1/2 v8] resource: add the new I/O resource descriptor
+ 'IORES_DESC_RESERVED'
+Date: Thu, 6 Dec 2018 21:11:47 +0100
+Message-ID: <20181206201147.GG3986@zn.tnic>
+References: <20181129080956.20776-1-lijiang@redhat.com>
+ <20181129080956.20776-2-lijiang@redhat.com>
+ <20181130033703.GA23624@dhcp-128-65.nay.redhat.com>
+ <bbf6352b-b060-4cb8-dfd2-99166b0149a7@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu97MU5kU878gF=KBLxQ5GjZatAbJ-LVdKv-QMgdPh3kZQ@mail.gmail.com>
+Content-Disposition: inline
+In-Reply-To: <bbf6352b-b060-4cb8-dfd2-99166b0149a7@redhat.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Marc Zyngier <marc.zyngier@arm.com>, linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: lijiang <lijiang@redhat.com>
+Cc: Dave Young <dyoung@redhat.com>, linux-kernel@vger.kernel.org, kexec@lists.infradead.org, x86@kernel.org, linux-ia64@vger.kernel.org, linux-efi@vger.kernel.org, tglx@linutronix.de, mingo@redhat.com, akpm@linux-foundation.org, dave.hansen@linux.intel.com, luto@kernel.org, peterz@infradead.org, ard.biesheuvel@linaro.org, tony.luck@intel.com, fenghua.yu@intel.com, bhe@redhat.com, Tom Lendacky <thomas.lendacky@amd.com>, Toshi Kani <toshi.kani@hp.com>, Dan Williams <dan.j.williams@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 2018-12-06 at 19:01 +0100, Ard Biesheuvel wrote:
-> On Thu, 6 Dec 2018 at 19:00, Catalin Marinas <catalin.marinas@arm.com> wrote:
-> > 
-> > On Thu, Dec 06, 2018 at 11:16:33AM -0500, Qian Cai wrote:
-> > > unreferenced object 0xffff8096c1acf580 (size 128):
-> > >   comm "swapper/63", pid 0, jiffies 4294937418 (age 1201.230s)
-> > >   hex dump (first 32 bytes):
-> > >     80 87 b5 c1 96 00 00 00 00 00 cc c2 16 00 00 00  ................
-> > >     00 00 01 00 00 00 00 00 6b 6b 6b 6b 6b 6b 6b 6b  ........kkkkkkkk
-> > >   backtrace:
-> > >     [<000000001d2549ba>] kmem_cache_alloc_trace+0x430/0x500
-> > >     [<0000000093a6dfab>] efi_mem_reserve_persistent+0x50/0xf8
-> > >     [<000000000a730828>] its_cpu_init_lpis+0x394/0x4b8
-> > >     [<00000000edf04e07>] its_cpu_init+0x104/0x150
-> > >     [<000000004d0342c5>] gic_starting_cpu+0x34/0x40
-> > >     [<000000005d9da772>] cpuhp_invoke_callback+0x228/0x1d68
-> > >     [<0000000061eace9b>] notify_cpu_starting+0xc0/0x118
-> > >     [<0000000048bc2dc5>] secondary_start_kernel+0x23c/0x3b0
-> > >     [<0000000015137d6a>] 0xffffffffffffffff
-> > > 
-> > > efi_mem_reserve_persistent+0x50/0xf8:
-> > > kmalloc at include/linux/slab.h:546
-> > > (inlined by) efi_mem_reserve_persistent at drivers/firmware/efi/efi.c:979
-> > > 
-> > > This line,
-> > > 
-> > > rsv = kmalloc(sizeof(*rsv), GFP_ATOMIC);
-> > > 
-> > > Kmemleak has a known limitation that can only track pointers in the kernel
-> > > virtual space. Hence, it will report false positives due to "rsv" will
-> > > only
-> > > reference to other physical addresses,
-> > > 
-> > > rsv->next = efi_memreserve_root->next;
-> > > efi_memreserve_root->next = __pa(rsv);
-> > > 
-> > > Signed-off-by: Qian Cai <cai@gmx.us>
-> > 
-> > Acked-by: Catalin Marinas <catalin.marinas@arm.com>\
+On Fri, Nov 30, 2018 at 03:04:44PM +0800, lijiang wrote:
+> I have noticed the changes on x86, but for IA64, i'm not sure whether it should do the same
+> thing, so keep it as before.
 > 
-> I don't see the patch and I wasn't cc'ed
+> If IA64 people would like to give any comment, that will be appreciated.
 
-That is strange. Please see,
+I think you should not touch ia64 and not make Tony unnecessarily power
+up the old rust.
 
-https://lore.kernel.org/lkml/1543517152-23969-1-git-send-email-cai@gmx.us/
+:-)
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
