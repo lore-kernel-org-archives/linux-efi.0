@@ -1,66 +1,69 @@
-From: "Serge E. Hallyn" <serge@hallyn.com>
-Subject: Re: [PATCH 7/7] ima: Support platform keyring for kernel appraisal
-Date: Thu, 6 Dec 2018 17:09:16 -0600
-Message-ID: <20181206230916.GA10203@mail.hallyn.com>
-References: <20181125151500.8298-1-nayna@linux.ibm.com>
- <20181125151500.8298-8-nayna@linux.ibm.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [RESEND PATCH] efi: let kmemleak ignore false positives
+Date: Fri, 7 Dec 2018 12:28:57 +0100
+Message-ID: <CAKv+Gu9ugNxoST=cc9utWNtoYFdPng0FgNfV-Mw0UWyJiKqOLw@mail.gmail.com>
+References: <1543517152-23969-1-git-send-email-cai@gmx.us> <20181206161633.36292-1-cai@gmx.us>
+ <20181206175958.GS54495@arrakis.emea.arm.com> <CAKv+Gu97MU5kU878gF=KBLxQ5GjZatAbJ-LVdKv-QMgdPh3kZQ@mail.gmail.com>
+ <1544119499.12945.48.camel@gmx.us>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20181125151500.8298-8-nayna@linux.ibm.com>
+In-Reply-To: <1544119499.12945.48.camel@gmx.us>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Nayna Jain <nayna@linux.ibm.com>
-Cc: linux-integrity@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, zohar@linux.ibm.com, dhowells@redhat.com, jforbes@redhat.com, seth.forshee@canonical.com, kexec@lists.infradead.org, keyrings@vger.kernel.org, vgoyal@redhat.com, ebiederm@xmission.com, mpe@ellerman.id.au
+To: Qian Cai <cai@gmx.us>
+Cc: Catalin Marinas <catalin.marinas@arm.com>, Andrew Morton <akpm@linux-foundation.org>, Marc Zyngier <marc.zyngier@arm.com>, linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, Nov 25, 2018 at 08:45:00PM +0530, Nayna Jain wrote:
-> On secure boot enabled systems, the bootloader verifies the kernel
-> image and possibly the initramfs signatures based on a set of keys. A
-> soft reboot(kexec) of the system, with the same kernel image and
-> initramfs, requires access to the original keys to verify the
-> signatures.
-> 
-> This patch allows IMA-appraisal access to those original keys, now
-> loaded on the platform keyring, needed for verifying the kernel image
-> and initramfs signatures.
-> 
-> Signed-off-by: Nayna Jain <nayna@linux.ibm.com>
-> Reviewed-by: Mimi Zohar <zohar@linux.ibm.com>
+On Thu, 6 Dec 2018 at 19:05, Qian Cai <cai@gmx.us> wrote:
+>
+> On Thu, 2018-12-06 at 19:01 +0100, Ard Biesheuvel wrote:
+> > On Thu, 6 Dec 2018 at 19:00, Catalin Marinas <catalin.marinas@arm.com> wrote:
+> > >
+> > > On Thu, Dec 06, 2018 at 11:16:33AM -0500, Qian Cai wrote:
+> > > > unreferenced object 0xffff8096c1acf580 (size 128):
+> > > >   comm "swapper/63", pid 0, jiffies 4294937418 (age 1201.230s)
+> > > >   hex dump (first 32 bytes):
+> > > >     80 87 b5 c1 96 00 00 00 00 00 cc c2 16 00 00 00  ................
+> > > >     00 00 01 00 00 00 00 00 6b 6b 6b 6b 6b 6b 6b 6b  ........kkkkkkkk
+> > > >   backtrace:
+> > > >     [<000000001d2549ba>] kmem_cache_alloc_trace+0x430/0x500
+> > > >     [<0000000093a6dfab>] efi_mem_reserve_persistent+0x50/0xf8
+> > > >     [<000000000a730828>] its_cpu_init_lpis+0x394/0x4b8
+> > > >     [<00000000edf04e07>] its_cpu_init+0x104/0x150
+> > > >     [<000000004d0342c5>] gic_starting_cpu+0x34/0x40
+> > > >     [<000000005d9da772>] cpuhp_invoke_callback+0x228/0x1d68
+> > > >     [<0000000061eace9b>] notify_cpu_starting+0xc0/0x118
+> > > >     [<0000000048bc2dc5>] secondary_start_kernel+0x23c/0x3b0
+> > > >     [<0000000015137d6a>] 0xffffffffffffffff
+> > > >
+> > > > efi_mem_reserve_persistent+0x50/0xf8:
+> > > > kmalloc at include/linux/slab.h:546
+> > > > (inlined by) efi_mem_reserve_persistent at drivers/firmware/efi/efi.c:979
+> > > >
+> > > > This line,
+> > > >
+> > > > rsv = kmalloc(sizeof(*rsv), GFP_ATOMIC);
+> > > >
+> > > > Kmemleak has a known limitation that can only track pointers in the kernel
+> > > > virtual space. Hence, it will report false positives due to "rsv" will
+> > > > only
+> > > > reference to other physical addresses,
+> > > >
+> > > > rsv->next = efi_memreserve_root->next;
+> > > > efi_memreserve_root->next = __pa(rsv);
+> > > >
+> > > > Signed-off-by: Qian Cai <cai@gmx.us>
+> > >
+> > > Acked-by: Catalin Marinas <catalin.marinas@arm.com>\
+> >
+> > I don't see the patch and I wasn't cc'ed
+>
+> That is strange. Please see,
+>
+> https://lore.kernel.org/lkml/1543517152-23969-1-git-send-email-cai@gmx.us/
 
-The overall set seems sensible to me, and I see no errors here,
+OK, I found it in my spam folder, apologies for that.
 
-Acked-by: Serge Hallyn <serge@hallyn.com>
-
-I do think that replacing the 'rc' with xattr_len in the previous line might
-help future readers save a few cycles.
-
-> ---
->  security/integrity/ima/ima_appraise.c | 11 ++++++++++-
->  1 file changed, 10 insertions(+), 1 deletion(-)
-> 
-> diff --git a/security/integrity/ima/ima_appraise.c b/security/integrity/ima/ima_appraise.c
-> index deec1804a00a..9c13585e7d3e 100644
-> --- a/security/integrity/ima/ima_appraise.c
-> +++ b/security/integrity/ima/ima_appraise.c
-> @@ -294,7 +294,16 @@ int ima_appraise_measurement(enum ima_hooks func,
->  					     iint->ima_hash->length);
->  		if (rc == -EOPNOTSUPP) {
->  			status = INTEGRITY_UNKNOWN;
-> -		} else if (rc) {
-> +			break;
-> +		}
-> +		if (rc && func == KEXEC_KERNEL_CHECK)
-> +			rc = integrity_digsig_verify(
-> +					INTEGRITY_KEYRING_PLATFORM,
-> +					(const char *)xattr_value,
-> +					xattr_len,
-> +					iint->ima_hash->digest,
-> +					iint->ima_hash->length);
-> +		if (rc) {
->  			cause = "invalid-signature";
->  			status = INTEGRITY_FAIL;
->  		} else {
-> -- 
-> 2.13.6
-> 
+This kmalloc() will be replaced in the next merge window by a call to
+__get_free_page(). Does kmemleak still require the kmemleak_ignore()
+for that case? Or is it only for kmalloc()?
