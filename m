@@ -1,68 +1,216 @@
 From: Nayna Jain <nayna@linux.ibm.com>
-Subject: [PATCH v2 7/7] ima: Support platform keyring for kernel appraisal
-Date: Sun,  9 Dec 2018 01:57:05 +0530
-Message-ID: <20181208202705.18673-8-nayna@linux.ibm.com>
-References: <20181208202705.18673-1-nayna@linux.ibm.com>
+Subject: [PATCH v2 1/7] integrity: Define a trusted platform keyring
+Date: Sun,  9 Dec 2018 10:18:49 +0530
+Message-ID: <20181209044849.825-1-nayna@linux.ibm.com>
+References: <20181208202705.18673-2-nayna@linux.ibm.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181208202705.18673-1-nayna@linux.ibm.com>
+In-Reply-To: <20181208202705.18673-2-nayna@linux.ibm.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-integrity@vger.kernel.org
 Cc: linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, zohar@linux.ibm.com, dhowells@redhat.com, jforbes@redhat.com, seth.forshee@canonical.com, kexec@lists.infradead.org, keyrings@vger.kernel.org, vgoyal@redhat.com, ebiederm@xmission.com, mpe@ellerman.id.au, Nayna Jain <nayna@linux.ibm.com>
 List-Id: linux-efi@vger.kernel.org
 
-On secure boot enabled systems, the bootloader verifies the kernel
-image and possibly the initramfs signatures based on a set of keys. A
-soft reboot(kexec) of the system, with the same kernel image and
-initramfs, requires access to the original keys to verify the
-signatures.
+On secure boot enabled systems, a verified kernel may need to kexec
+additional kernels. For example, it may be used as a bootloader needing
+to kexec a target kernel or it may need to kexec a crashdump kernel. In
+such cases, it may want to verify the signature of the next kernel
+image.
 
-This patch allows IMA-appraisal access to those original keys, now
-loaded on the platform keyring, needed for verifying the kernel image
-and initramfs signatures.
+It is further possible that the kernel image is signed with third party
+keys which are stored as platform or firmware keys in the 'db' variable.
+The kernel, however, can not directly verify these platform keys, and an
+administrator may therefore not want to trust them for arbitrary usage.
+In order to differentiate platform keys from other keys and provide the
+necessary separation of trust, the kernel needs an additional keyring to
+store platform keys.
+
+This patch creates the new keyring called ".platform" to isolate keys
+provided by platform from keys by kernel. These keys are used to
+facilitate signature verification during kexec. Since the scope of this
+keyring is only the platform/firmware keys, it cannot be updated from
+userspace.
+
+This keyring can be enabled by setting CONFIG_INTEGRITY_PLATFORM_KEYRING.
 
 Signed-off-by: Nayna Jain <nayna@linux.ibm.com>
 Reviewed-by: Mimi Zohar <zohar@linux.ibm.com>
 Acked-by: Serge Hallyn <serge@hallyn.com>
-- replace 'rc' with 'xattr_len' when calling integrity_digsig_verify()
-with INTEGRITY_KEYRING_IMA for readability
-Suggested-by: Serge Hallyn <serge@hallyn.com>
 ---
-Changelog:
+ security/integrity/Kconfig                         | 11 +++++
+ security/integrity/Makefile                        |  1 +
+ security/integrity/digsig.c                        | 48 +++++++++++++++-------
+ security/integrity/integrity.h                     |  3 +-
+ .../integrity/platform_certs/platform_keyring.c    | 35 ++++++++++++++++
+ 5 files changed, 83 insertions(+), 15 deletions(-)
+ create mode 100644 security/integrity/platform_certs/platform_keyring.c
 
-v2:
-- replace 'rc' with 'xattr_len' when calling integrity_digsig_verify()
-with INTEGRITY_KEYRING_IMA for readability
-
- security/integrity/ima/ima_appraise.c | 13 +++++++++++--
- 1 file changed, 11 insertions(+), 2 deletions(-)
-
-diff --git a/security/integrity/ima/ima_appraise.c b/security/integrity/ima/ima_appraise.c
-index deec1804a00a..e8f520450895 100644
---- a/security/integrity/ima/ima_appraise.c
-+++ b/security/integrity/ima/ima_appraise.c
-@@ -289,12 +289,21 @@ int ima_appraise_measurement(enum ima_hooks func,
- 	case EVM_IMA_XATTR_DIGSIG:
- 		set_bit(IMA_DIGSIG, &iint->atomic_flags);
- 		rc = integrity_digsig_verify(INTEGRITY_KEYRING_IMA,
--					     (const char *)xattr_value, rc,
-+					     (const char *)xattr_value,
-+					     xattr_len,
- 					     iint->ima_hash->digest,
- 					     iint->ima_hash->length);
- 		if (rc == -EOPNOTSUPP) {
- 			status = INTEGRITY_UNKNOWN;
--		} else if (rc) {
-+			break;
-+		}
-+		if (rc && func == KEXEC_KERNEL_CHECK)
-+			rc = integrity_digsig_verify(INTEGRITY_KEYRING_PLATFORM,
-+						     (const char *)xattr_value,
-+						     xattr_len,
-+						     iint->ima_hash->digest,
-+						     iint->ima_hash->length);
-+		if (rc) {
- 			cause = "invalid-signature";
- 			status = INTEGRITY_FAIL;
- 		} else {
+diff --git a/security/integrity/Kconfig b/security/integrity/Kconfig
+index da9565891738..4b4d2aeef539 100644
+--- a/security/integrity/Kconfig
++++ b/security/integrity/Kconfig
+@@ -51,6 +51,17 @@ config INTEGRITY_TRUSTED_KEYRING
+ 	   .evm keyrings be signed by a key on the system trusted
+ 	   keyring.
+ 
++config INTEGRITY_PLATFORM_KEYRING
++        bool "Provide keyring for platform/firmware trusted keys"
++        depends on INTEGRITY_ASYMMETRIC_KEYS
++        depends on SYSTEM_BLACKLIST_KEYRING
++        depends on EFI
++        help
++         Provide a separate, distinct keyring for platform trusted keys, which
++         the kernel automatically populates during initialization from values
++         provided by the platform for verifying the kexec'ed kerned image
++         and, possibly, the initramfs signature.
++
+ config INTEGRITY_AUDIT
+ 	bool "Enables integrity auditing support "
+ 	depends on AUDIT
+diff --git a/security/integrity/Makefile b/security/integrity/Makefile
+index 04d6e462b079..046ffc1bb42d 100644
+--- a/security/integrity/Makefile
++++ b/security/integrity/Makefile
+@@ -9,6 +9,7 @@ integrity-y := iint.o
+ integrity-$(CONFIG_INTEGRITY_AUDIT) += integrity_audit.o
+ integrity-$(CONFIG_INTEGRITY_SIGNATURE) += digsig.o
+ integrity-$(CONFIG_INTEGRITY_ASYMMETRIC_KEYS) += digsig_asymmetric.o
++integrity-$(CONFIG_INTEGRITY_PLATFORM_KEYRING) += platform_certs/platform_keyring.o
+ 
+ subdir-$(CONFIG_IMA)			+= ima
+ obj-$(CONFIG_IMA)			+= ima/
+diff --git a/security/integrity/digsig.c b/security/integrity/digsig.c
+index 5eacba858e4b..fef2a858300c 100644
+--- a/security/integrity/digsig.c
++++ b/security/integrity/digsig.c
+@@ -35,6 +35,7 @@ static const char * const keyring_name[INTEGRITY_KEYRING_MAX] = {
+ 	".ima",
+ #endif
+ 	"_module",
++	".platform",
+ };
+ 
+ #ifdef CONFIG_IMA_KEYRINGS_PERMIT_SIGNED_BY_BUILTIN_OR_SECONDARY
+@@ -73,12 +74,39 @@ int integrity_digsig_verify(const unsigned int id, const char *sig, int siglen,
+ 	return -EOPNOTSUPP;
+ }
+ 
+-int __init integrity_init_keyring(const unsigned int id)
++static int __integrity_init_keyring(const unsigned int id, key_perm_t perm,
++				    struct key_restriction *restriction)
+ {
+ 	const struct cred *cred = current_cred();
++	int err = 0;
++
++	keyring[id] = keyring_alloc(keyring_name[id], KUIDT_INIT(0),
++				    KGIDT_INIT(0), cred, perm,
++				    KEY_ALLOC_NOT_IN_QUOTA,
++				    restriction, NULL);
++	if (IS_ERR(keyring[id])) {
++		err = PTR_ERR(keyring[id]);
++		pr_info("Can't allocate %s keyring (%d)\n",
++			keyring_name[id], err);
++		keyring[id] = NULL;
++	}
++
++	return err;
++}
++
++int __init integrity_init_keyring(const unsigned int id)
++{
+ 	struct key_restriction *restriction;
++	key_perm_t perm;
+ 	int err = 0;
+ 
++	if (id == INTEGRITY_KEYRING_PLATFORM) {
++		restriction = NULL;
++		perm = (KEY_POS_ALL & ~KEY_POS_SETATTR) | KEY_USR_VIEW
++			| KEY_USR_READ | KEY_USR_SEARCH;
++		goto out;
++	}
++
+ 	if (!IS_ENABLED(CONFIG_INTEGRITY_TRUSTED_KEYRING))
+ 		return 0;
+ 
+@@ -87,20 +115,12 @@ int __init integrity_init_keyring(const unsigned int id)
+ 		return -ENOMEM;
+ 
+ 	restriction->check = restrict_link_to_ima;
++	perm = (KEY_POS_ALL & ~KEY_POS_SETATTR) | KEY_USR_VIEW | KEY_USR_READ
++		| KEY_USR_WRITE | KEY_USR_SEARCH;
++
++out:
++	err = __integrity_init_keyring(id, perm, restriction);
+ 
+-	keyring[id] = keyring_alloc(keyring_name[id], KUIDT_INIT(0),
+-				    KGIDT_INIT(0), cred,
+-				    ((KEY_POS_ALL & ~KEY_POS_SETATTR) |
+-				     KEY_USR_VIEW | KEY_USR_READ |
+-				     KEY_USR_WRITE | KEY_USR_SEARCH),
+-				    KEY_ALLOC_NOT_IN_QUOTA,
+-				    restriction, NULL);
+-	if (IS_ERR(keyring[id])) {
+-		err = PTR_ERR(keyring[id]);
+-		pr_info("Can't allocate %s keyring (%d)\n",
+-			keyring_name[id], err);
+-		keyring[id] = NULL;
+-	}
+ 	return err;
+ }
+ 
+diff --git a/security/integrity/integrity.h b/security/integrity/integrity.h
+index e60473b13a8d..c2332a44799e 100644
+--- a/security/integrity/integrity.h
++++ b/security/integrity/integrity.h
+@@ -142,7 +142,8 @@ int integrity_kernel_read(struct file *file, loff_t offset,
+ #define INTEGRITY_KEYRING_EVM		0
+ #define INTEGRITY_KEYRING_IMA		1
+ #define INTEGRITY_KEYRING_MODULE	2
+-#define INTEGRITY_KEYRING_MAX		3
++#define INTEGRITY_KEYRING_PLATFORM	3
++#define INTEGRITY_KEYRING_MAX		4
+ 
+ extern struct dentry *integrity_dir;
+ 
+diff --git a/security/integrity/platform_certs/platform_keyring.c b/security/integrity/platform_certs/platform_keyring.c
+new file mode 100644
+index 000000000000..79f80af5b470
+--- /dev/null
++++ b/security/integrity/platform_certs/platform_keyring.c
+@@ -0,0 +1,35 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Platform keyring for firmware/platform keys
++ *
++ * Copyright IBM Corporation, 2018
++ * Author(s): Nayna Jain <nayna@linux.ibm.com>
++ */
++
++#include <linux/export.h>
++#include <linux/kernel.h>
++#include <linux/sched.h>
++#include <linux/cred.h>
++#include <linux/err.h>
++#include <linux/slab.h>
++#include "../integrity.h"
++
++/*
++ * Create the trusted keyrings.
++ */
++static __init int platform_keyring_init(void)
++{
++	int rc;
++
++	rc = integrity_init_keyring(INTEGRITY_KEYRING_PLATFORM);
++	if (rc)
++		return rc;
++
++	pr_notice("Platform Keyring initialized\n");
++	return 0;
++}
++
++/*
++ * Must be initialised before we try and load the keys into the keyring.
++ */
++device_initcall(platform_keyring_init);
 -- 
 2.13.6
