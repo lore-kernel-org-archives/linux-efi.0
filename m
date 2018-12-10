@@ -1,24 +1,37 @@
-From: pr-tracker-bot@kernel.org
-Subject: Re: [GIT PULL] EFI fixes
-Date: Sun, 09 Dec 2018 23:45:01 +0000
-Message-ID: <20181209234501.29575.99220.pr-tracker-bot@pdx-korg-gitolite-1.ci.codeaurora.org>
-References: <20181209215921.GA64177@gmail.com>
+From: lijiang <lijiang@redhat.com>
+Subject: Re: [PATCH 1/2 v8] resource: add the new I/O resource descriptor
+ 'IORES_DESC_RESERVED'
+Date: Mon, 10 Dec 2018 12:20:55 +0800
+Message-ID: <4e3ec0fd-f26a-2684-23e5-b2a068326248@redhat.com>
+References: <20181129080956.20776-1-lijiang@redhat.com>
+ <20181129080956.20776-2-lijiang@redhat.com>
+ <20181130033703.GA23624@dhcp-128-65.nay.redhat.com>
+ <bbf6352b-b060-4cb8-dfd2-99166b0149a7@redhat.com>
+ <20181206201147.GG3986@zn.tnic>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181209215921.GA64177@gmail.com>
+In-Reply-To: <20181206201147.GG3986@zn.tnic>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, linux-kernel@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Borislav Petkov <bp@alien8.de>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: Dave Young <dyoung@redhat.com>, linux-kernel@vger.kernel.org, kexec@lists.infradead.org, x86@kernel.org, linux-ia64@vger.kernel.org, linux-efi@vger.kernel.org, tglx@linutronix.de, mingo@redhat.com, akpm@linux-foundation.org, dave.hansen@linux.intel.com, luto@kernel.org, peterz@infradead.org, ard.biesheuvel@linaro.org, tony.luck@intel.com, fenghua.yu@intel.com, bhe@redhat.com, Tom Lendacky <thomas.lendacky@amd.com>, Toshi Kani <toshi.kani@hp.com>, Dan Williams <dan.j.williams@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-The pull request you sent on Sun, 9 Dec 2018 22:59:21 +0100:
+在 2018年12月07日 04:11, Borislav Petkov 写道:
+> On Fri, Nov 30, 2018 at 03:04:44PM +0800, lijiang wrote:
+>> I have noticed the changes on x86, but for IA64, i'm not sure whether it should do the same
+>> thing, so keep it as before.
+>>
+>> If IA64 people would like to give any comment, that will be appreciated.
+> 
+> I think you should not touch ia64 and not make Tony unnecessarily power
+> up the old rust.
+> 
+> :-)
+> 
+Ok, it's good to me. And i will get rid of these changes for ia64 in patch v9.
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git efi-urgent-for-linus
-
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/4b04e73a78c5c89dc1a75fb35dea6c947c1d2ac7
-
-Thank you!
-
--- 
-Deet-doot-dot, I am a bot.
-https://korg.wiki.kernel.org/userdoc/prtracker
+Thanks.
+Lianbo
