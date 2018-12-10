@@ -1,14 +1,11 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 2/4] ARM: mm: permit early_memremap() to be used in
- paging_init()
-Date: Mon, 10 Dec 2018 17:29:47 +0100
-Message-ID: <20181210162949.8597-3-ard.biesheuvel@linaro.org>
-References: <20181210162949.8597-1-ard.biesheuvel@linaro.org>
+Subject: [PATCH 0/4] ARM: re-enable EFI persistent memory reservations
+Date: Mon, 10 Dec 2018 17:29:45 +0100
+Message-ID: <20181210162949.8597-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20181210162949.8597-1-ard.biesheuvel@linaro.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -22,54 +19,29 @@ To: linux-arm-kernel@lists.infradead.org
 Cc: Marc Zyngier <marc.zyngier@arm.com>, linux-efi@vger.kernel.org, Russell King <linux@armlinux.org.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-early_memremap() and early_ioremap() rely on early fixmap support,
-which shares its virtual address space with kmap(), and so it is
-taken down in paging_init().
+The EFI persistent memory reservations introduced during the v4.20
+merge window had some teething issue, and we ended up disabling it
+temporarily for 32-bit ARM due to the fact that the needed changes
+were not as straightforward as on arm64.
 
-In order to permit the EFI persistent memory reservation code to
-use early_memremap() when called from paging_init(), move the call
-to early_ioremap_reset() into paging_init(), right before the call
-to early_fixmap_shutdown(), creating a window where we can add the
-call to efi_apply_persistent_mem_reservations() in a subsequent patch.
+So this series fixes the issues, and re-enables the feature for
+32-bit ARM.
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
- arch/arm/kernel/setup.c | 2 --
- arch/arm/mm/mmu.c       | 2 ++
- 2 files changed, 2 insertions(+), 2 deletions(-)
+Cc: Russell King <linux@armlinux.org.uk>
+Cc: Marc Zyngier <marc.zyngier@arm.com>
 
-diff --git a/arch/arm/kernel/setup.c b/arch/arm/kernel/setup.c
-index 375b13f7e780..7e2a936a5ed0 100644
---- a/arch/arm/kernel/setup.c
-+++ b/arch/arm/kernel/setup.c
-@@ -1124,8 +1124,6 @@ void __init setup_arch(char **cmdline_p)
- 	/* Memory may have been removed so recalculate the bounds. */
- 	adjust_lowmem_bounds();
- 
--	early_ioremap_reset();
--
- 	paging_init(mdesc);
- 	request_standard_resources(mdesc);
- 
-diff --git a/arch/arm/mm/mmu.c b/arch/arm/mm/mmu.c
-index f6bf6686559d..078f82f89fe5 100644
---- a/arch/arm/mm/mmu.c
-+++ b/arch/arm/mm/mmu.c
-@@ -22,6 +22,7 @@
- #include <asm/cputype.h>
- #include <asm/sections.h>
- #include <asm/cachetype.h>
-+#include <asm/early_ioremap.h>
- #include <asm/fixmap.h>
- #include <asm/sections.h>
- #include <asm/setup.h>
-@@ -1628,6 +1629,7 @@ void __init paging_init(const struct machine_desc *mdesc)
- 	memblock_set_current_limit(arm_lowmem_limit);
- 	memblock_allow_resize();
- 	dma_contiguous_remap();
-+	early_ioremap_reset();
- 	early_fixmap_shutdown();
- 	devicemaps_init(mdesc);
- 	kmap_init();
+Ard Biesheuvel (4):
+  ARM: mm: permit memblock resizing right after mapping the linear
+    region
+  ARM: mm: permit early_memremap() to be used in paging_init()
+  efi/arm: apply persistent memory reservations during paging_init()
+  efi/arm: re-enable the memreserve table for 32-bit ARM
+
+ arch/arm/kernel/setup.c                 | 2 --
+ arch/arm/mm/init.c                      | 1 -
+ arch/arm/mm/mmu.c                       | 5 +++++
+ drivers/firmware/efi/libstub/arm-stub.c | 3 ---
+ 4 files changed, 5 insertions(+), 6 deletions(-)
+
 -- 
 2.19.2
