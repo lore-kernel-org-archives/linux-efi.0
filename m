@@ -1,11 +1,14 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 0/4] ARM: re-enable EFI persistent memory reservations
-Date: Mon, 10 Dec 2018 17:29:45 +0100
-Message-ID: <20181210162949.8597-1-ard.biesheuvel@linaro.org>
+Subject: [PATCH 1/4] ARM: mm: permit memblock resizing right after mapping the
+ linear region
+Date: Mon, 10 Dec 2018 17:29:46 +0100
+Message-ID: <20181210162949.8597-2-ard.biesheuvel@linaro.org>
+References: <20181210162949.8597-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20181210162949.8597-1-ard.biesheuvel@linaro.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -19,29 +22,50 @@ To: linux-arm-kernel@lists.infradead.org
 Cc: Marc Zyngier <marc.zyngier@arm.com>, linux-efi@vger.kernel.org, Russell King <linux@armlinux.org.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-The EFI persistent memory reservations introduced during the v4.20
-merge window had some teething issue, and we ended up disabling it
-temporarily for 32-bit ARM due to the fact that the needed changes
-were not as straightforward as on arm64.
+The memblock arrays can be resized dynamically if needed, but this is
+only done after memblock_allow_resize() is called, since it is up to
+the architecture to decide at which point doing so is possible (i.e.,
+when all the memory that memblock describes is actually mapped)
 
-So this series fixes the issues, and re-enables the feature for
-32-bit ARM.
+ARM grants this permission in bootmem_init(), but in order for the EFI
+persistent memory reservation code (which may create memblock
+reservations that trigger such a dynamic resize) to be able to be called
+before shutting down early fixmap (upon which the EFI code depends due
+to its use of early_memremap()), we need to do this earlier.
 
-Cc: Russell King <linux@armlinux.org.uk>
-Cc: Marc Zyngier <marc.zyngier@arm.com>
+So let's move the call to memblock_allow_resize() to right after the
+point where low memory is mapped and declared as the memory limit for
+memblock allocation.
 
-Ard Biesheuvel (4):
-  ARM: mm: permit memblock resizing right after mapping the linear
-    region
-  ARM: mm: permit early_memremap() to be used in paging_init()
-  efi/arm: apply persistent memory reservations during paging_init()
-  efi/arm: re-enable the memreserve table for 32-bit ARM
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ arch/arm/mm/init.c | 1 -
+ arch/arm/mm/mmu.c  | 1 +
+ 2 files changed, 1 insertion(+), 1 deletion(-)
 
- arch/arm/kernel/setup.c                 | 2 --
- arch/arm/mm/init.c                      | 1 -
- arch/arm/mm/mmu.c                       | 5 +++++
- drivers/firmware/efi/libstub/arm-stub.c | 3 ---
- 4 files changed, 5 insertions(+), 6 deletions(-)
-
+diff --git a/arch/arm/mm/init.c b/arch/arm/mm/init.c
+index 32e4845af2b6..797fad2b16ee 100644
+--- a/arch/arm/mm/init.c
++++ b/arch/arm/mm/init.c
+@@ -304,7 +304,6 @@ void __init bootmem_init(void)
+ {
+ 	unsigned long min, max_low, max_high;
+ 
+-	memblock_allow_resize();
+ 	max_low = max_high = 0;
+ 
+ 	find_limits(&min, &max_low, &max_high);
+diff --git a/arch/arm/mm/mmu.c b/arch/arm/mm/mmu.c
+index f5cc1ccfea3d..f6bf6686559d 100644
+--- a/arch/arm/mm/mmu.c
++++ b/arch/arm/mm/mmu.c
+@@ -1626,6 +1626,7 @@ void __init paging_init(const struct machine_desc *mdesc)
+ 	prepare_page_table();
+ 	map_lowmem();
+ 	memblock_set_current_limit(arm_lowmem_limit);
++	memblock_allow_resize();
+ 	dma_contiguous_remap();
+ 	early_fixmap_shutdown();
+ 	devicemaps_init(mdesc);
 -- 
 2.19.2
