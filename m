@@ -1,37 +1,62 @@
-From: lijiang <lijiang@redhat.com>
-Subject: Re: [PATCH 1/2 v8] resource: add the new I/O resource descriptor
- 'IORES_DESC_RESERVED'
-Date: Mon, 10 Dec 2018 12:20:55 +0800
-Message-ID: <4e3ec0fd-f26a-2684-23e5-b2a068326248@redhat.com>
-References: <20181129080956.20776-1-lijiang@redhat.com>
- <20181129080956.20776-2-lijiang@redhat.com>
- <20181130033703.GA23624@dhcp-128-65.nay.redhat.com>
- <bbf6352b-b060-4cb8-dfd2-99166b0149a7@redhat.com>
- <20181206201147.GG3986@zn.tnic>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [PATCH 3/4] efi/arm: apply persistent memory reservations during
+ paging_init()
+Date: Mon, 10 Dec 2018 17:29:48 +0100
+Message-ID: <20181210162949.8597-4-ard.biesheuvel@linaro.org>
+References: <20181210162949.8597-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181206201147.GG3986@zn.tnic>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: Dave Young <dyoung@redhat.com>, linux-kernel@vger.kernel.org, kexec@lists.infradead.org, x86@kernel.org, linux-ia64@vger.kernel.org, linux-efi@vger.kernel.org, tglx@linutronix.de, mingo@redhat.com, akpm@linux-foundation.org, dave.hansen@linux.intel.com, luto@kernel.org, peterz@infradead.org, ard.biesheuvel@linaro.org, tony.luck@intel.com, fenghua.yu@intel.com, bhe@redhat.com, Tom Lendacky <thomas.lendacky@amd.com>, Toshi Kani <toshi.kani@hp.com>, Dan Williams <dan.j.williams@intel.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20181210162949.8597-1-ard.biesheuvel@linaro.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: Marc Zyngier <marc.zyngier@arm.com>, linux-efi@vger.kernel.org, Russell King <linux@armlinux.org.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-在 2018年12月07日 04:11, Borislav Petkov 写道:
-> On Fri, Nov 30, 2018 at 03:04:44PM +0800, lijiang wrote:
->> I have noticed the changes on x86, but for IA64, i'm not sure whether it should do the same
->> thing, so keep it as before.
->>
->> If IA64 people would like to give any comment, that will be appreciated.
-> 
-> I think you should not touch ia64 and not make Tony unnecessarily power
-> up the old rust.
-> 
-> :-)
-> 
-Ok, it's good to me. And i will get rid of these changes for ia64 in patch v9.
+The new memory EFI reservation feature we introduced to allow memory
+reservations to persist across kexec may trigger an unbounded number
+of calls to memblock_reserve(). The memblock subsystem can deal with
+this fine, but not before memblock resizing is enabled, which we can
+only do after paging_init(), when the memory we reallocate the array
+into is actually mapped.
 
-Thanks.
-Lianbo
+So  on ARM, call the broken out efi_apply_persistent_mem_reservations()
+after memblock resizing has been enabled but before the early memremap
+support that we rely on has been taken down.
+
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ arch/arm/mm/mmu.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm/mm/mmu.c b/arch/arm/mm/mmu.c
+index 078f82f89fe5..8ecffb8c0c0b 100644
+--- a/arch/arm/mm/mmu.c
++++ b/arch/arm/mm/mmu.c
+@@ -9,6 +9,7 @@
+  */
+ #include <linux/module.h>
+ #include <linux/kernel.h>
++#include <linux/efi.h>
+ #include <linux/errno.h>
+ #include <linux/init.h>
+ #include <linux/mman.h>
+@@ -1629,6 +1630,7 @@ void __init paging_init(const struct machine_desc *mdesc)
+ 	memblock_set_current_limit(arm_lowmem_limit);
+ 	memblock_allow_resize();
+ 	dma_contiguous_remap();
++	efi_apply_persistent_mem_reservations();
+ 	early_ioremap_reset();
+ 	early_fixmap_shutdown();
+ 	devicemaps_init(mdesc);
+-- 
+2.19.2
