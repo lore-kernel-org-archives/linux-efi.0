@@ -1,7 +1,8 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 4/4] efi/arm: re-enable the memreserve table for 32-bit ARM
-Date: Mon, 10 Dec 2018 17:29:49 +0100
-Message-ID: <20181210162949.8597-5-ard.biesheuvel@linaro.org>
+Subject: [PATCH 2/4] ARM: mm: permit early_memremap() to be used in
+ paging_init()
+Date: Mon, 10 Dec 2018 17:29:47 +0100
+Message-ID: <20181210162949.8597-3-ard.biesheuvel@linaro.org>
 References: <20181210162949.8597-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,30 +22,54 @@ To: linux-arm-kernel@lists.infradead.org
 Cc: Marc Zyngier <marc.zyngier@arm.com>, linux-efi@vger.kernel.org, Russell King <linux@armlinux.org.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-Now that we have readded the call to efi_apply_persistent_mem_reservations
-in the 32-bit ARM boot path in a place where potentially creating
-many memblock reservations is permissible, re-enable the MEMRESERVE
-table in the 32-bit ARM EFI stub. This brings ARM back in line with
-arm64 in terms of support for efi_mem_reserve_persistent().
+early_memremap() and early_ioremap() rely on early fixmap support,
+which shares its virtual address space with kmap(), and so it is
+taken down in paging_init().
+
+In order to permit the EFI persistent memory reservation code to
+use early_memremap() when called from paging_init(), move the call
+to early_ioremap_reset() into paging_init(), right before the call
+to early_fixmap_shutdown(), creating a window where we can add the
+call to efi_apply_persistent_mem_reservations() in a subsequent patch.
 
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- drivers/firmware/efi/libstub/arm-stub.c | 3 ---
- 1 file changed, 3 deletions(-)
+ arch/arm/kernel/setup.c | 2 --
+ arch/arm/mm/mmu.c       | 2 ++
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-index 3d36142cf812..30ac0c975f8a 100644
---- a/drivers/firmware/efi/libstub/arm-stub.c
-+++ b/drivers/firmware/efi/libstub/arm-stub.c
-@@ -75,9 +75,6 @@ void install_memreserve_table(efi_system_table_t *sys_table_arg)
- 	efi_guid_t memreserve_table_guid = LINUX_EFI_MEMRESERVE_TABLE_GUID;
- 	efi_status_t status;
+diff --git a/arch/arm/kernel/setup.c b/arch/arm/kernel/setup.c
+index 375b13f7e780..7e2a936a5ed0 100644
+--- a/arch/arm/kernel/setup.c
++++ b/arch/arm/kernel/setup.c
+@@ -1124,8 +1124,6 @@ void __init setup_arch(char **cmdline_p)
+ 	/* Memory may have been removed so recalculate the bounds. */
+ 	adjust_lowmem_bounds();
  
--	if (IS_ENABLED(CONFIG_ARM))
--		return;
+-	early_ioremap_reset();
 -
- 	status = efi_call_early(allocate_pool, EFI_LOADER_DATA, sizeof(*rsv),
- 				(void **)&rsv);
- 	if (status != EFI_SUCCESS) {
+ 	paging_init(mdesc);
+ 	request_standard_resources(mdesc);
+ 
+diff --git a/arch/arm/mm/mmu.c b/arch/arm/mm/mmu.c
+index f6bf6686559d..078f82f89fe5 100644
+--- a/arch/arm/mm/mmu.c
++++ b/arch/arm/mm/mmu.c
+@@ -22,6 +22,7 @@
+ #include <asm/cputype.h>
+ #include <asm/sections.h>
+ #include <asm/cachetype.h>
++#include <asm/early_ioremap.h>
+ #include <asm/fixmap.h>
+ #include <asm/sections.h>
+ #include <asm/setup.h>
+@@ -1628,6 +1629,7 @@ void __init paging_init(const struct machine_desc *mdesc)
+ 	memblock_set_current_limit(arm_lowmem_limit);
+ 	memblock_allow_resize();
+ 	dma_contiguous_remap();
++	early_ioremap_reset();
+ 	early_fixmap_shutdown();
+ 	devicemaps_init(mdesc);
+ 	kmap_init();
 -- 
 2.19.2
