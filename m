@@ -1,71 +1,193 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 1/4] ARM: mm: permit memblock resizing right after mapping the
- linear region
-Date: Mon, 10 Dec 2018 17:29:46 +0100
-Message-ID: <20181210162949.8597-2-ard.biesheuvel@linaro.org>
-References: <20181210162949.8597-1-ard.biesheuvel@linaro.org>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.19 104/118] x86/efi: Allocate e820 buffer before calling efi_exit_boot_service
+Date: Tue, 11 Dec 2018 16:42:03 +0100
+Message-ID: <20181211151648.466213185@linuxfoundation.org>
+References: <20181211151644.216668863@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20181210162949.8597-1-ard.biesheuvel@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: Marc Zyngier <marc.zyngier@arm.com>, linux-efi@vger.kernel.org, Russell King <linux@armlinux.org.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20181211151644.216668863@linuxfoundation.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Eric Snowberg <eric.snowberg@oracle.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andy Lutomirski <luto@kernel.org>, Arend van Spriel <arend.vanspriel@broadcom.com>, Bhupesh Sharma <bhsharma@redhat.com>, Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@intel.com>, Hans de Goede <hdegoede@redhat.com>, Joe Perches <joe@perches.com>, Jon Hunter <jonathanh@nvidia.com>, Julien Thierry <julien.thierry@arm.com>, Linus Torvalds <torvalds@linux-foundation.org>, Marc Zyngier <marc.zyngier@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>, Nathan Chancellor <natechancellor@gmail.com>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-The memblock arrays can be resized dynamically if needed, but this is
-only done after memblock_allow_resize() is called, since it is up to
-the architecture to decide at which point doing so is possible (i.e.,
-when all the memory that memblock describes is actually mapped)
+4.19-stable review patch.  If anyone has any objections, please let me know.
 
-ARM grants this permission in bootmem_init(), but in order for the EFI
-persistent memory reservation code (which may create memblock
-reservations that trigger such a dynamic resize) to be able to be called
-before shutting down early fixmap (upon which the EFI code depends due
-to its use of early_memremap()), we need to do this earlier.
+------------------
 
-So let's move the call to memblock_allow_resize() to right after the
-point where low memory is mapped and declared as the memory limit for
-memblock allocation.
+From: Eric Snowberg <eric.snowberg@oracle.com>
 
+commit b84a64fad40637b1c9fa4f4dbf847a23e29e672b upstream.
+
+The following commit:
+
+  d64934019f6c ("x86/efi: Use efi_exit_boot_services()")
+
+introduced a regression on systems with large memory maps causing them
+to hang on boot. The first "goto get_map" that was removed from
+exit_boot() ensured there was enough room for the memory map when
+efi_call_early(exit_boot_services) was called. This happens when
+(nr_desc > ARRAY_SIZE(params->e820_table).
+
+Chain of events:
+
+  exit_boot()
+    efi_exit_boot_services()
+      efi_get_memory_map                  <- at this point the mm can't grow over 8 desc
+      priv_func()
+        exit_boot_func()
+          allocate_e820ext()              <- new mm grows over 8 desc from e820 alloc
+      efi_call_early(exit_boot_services)  <- mm key doesn't match so retry
+      efi_call_early(get_memory_map)      <- not enough room for new mm
+      system hangs
+
+This patch allocates the e820 buffer before calling efi_exit_boot_services()
+and fixes the regression.
+
+ [ mingo: minor cleanliness edits. ]
+
+Signed-off-by: Eric Snowberg <eric.snowberg@oracle.com>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
- arch/arm/mm/init.c | 1 -
- arch/arm/mm/mmu.c  | 1 +
- 2 files changed, 1 insertion(+), 1 deletion(-)
+Cc: <stable@vger.kernel.org>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Arend van Spriel <arend.vanspriel@broadcom.com>
+Cc: Bhupesh Sharma <bhsharma@redhat.com>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Dave Hansen <dave.hansen@intel.com>
+Cc: Hans de Goede <hdegoede@redhat.com>
+Cc: Joe Perches <joe@perches.com>
+Cc: Jon Hunter <jonathanh@nvidia.com>
+Cc: Julien Thierry <julien.thierry@arm.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Marc Zyngier <marc.zyngier@arm.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Nathan Chancellor <natechancellor@gmail.com>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: Sedat Dilek <sedat.dilek@gmail.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: YiFei Zhu <zhuyifei1999@gmail.com>
+Cc: linux-efi@vger.kernel.org
+Link: http://lkml.kernel.org/r/20181129171230.18699-2-ard.biesheuvel@linaro.org
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
-diff --git a/arch/arm/mm/init.c b/arch/arm/mm/init.c
-index 32e4845af2b6..797fad2b16ee 100644
---- a/arch/arm/mm/init.c
-+++ b/arch/arm/mm/init.c
-@@ -304,7 +304,6 @@ void __init bootmem_init(void)
+---
+ arch/x86/boot/compressed/eboot.c |   65 ++++++++++++++++++++++++---------------
+ 1 file changed, 41 insertions(+), 24 deletions(-)
+
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -1,3 +1,4 @@
++
+ /* -----------------------------------------------------------------------
+  *
+  *   Copyright 2011 Intel Corporation; author Matt Fleming
+@@ -634,37 +635,54 @@ static efi_status_t alloc_e820ext(u32 nr
+ 	return status;
+ }
+ 
++static efi_status_t allocate_e820(struct boot_params *params,
++				  struct setup_data **e820ext,
++				  u32 *e820ext_size)
++{
++	unsigned long map_size, desc_size, buff_size;
++	struct efi_boot_memmap boot_map;
++	efi_memory_desc_t *map;
++	efi_status_t status;
++	__u32 nr_desc;
++
++	boot_map.map		= &map;
++	boot_map.map_size	= &map_size;
++	boot_map.desc_size	= &desc_size;
++	boot_map.desc_ver	= NULL;
++	boot_map.key_ptr	= NULL;
++	boot_map.buff_size	= &buff_size;
++
++	status = efi_get_memory_map(sys_table, &boot_map);
++	if (status != EFI_SUCCESS)
++		return status;
++
++	nr_desc = buff_size / desc_size;
++
++	if (nr_desc > ARRAY_SIZE(params->e820_table)) {
++		u32 nr_e820ext = nr_desc - ARRAY_SIZE(params->e820_table);
++
++		status = alloc_e820ext(nr_e820ext, e820ext, e820ext_size);
++		if (status != EFI_SUCCESS)
++			return status;
++	}
++
++	return EFI_SUCCESS;
++}
++
+ struct exit_boot_struct {
+ 	struct boot_params	*boot_params;
+ 	struct efi_info		*efi;
+-	struct setup_data	*e820ext;
+-	__u32			e820ext_size;
+ };
+ 
+ static efi_status_t exit_boot_func(efi_system_table_t *sys_table_arg,
+ 				   struct efi_boot_memmap *map,
+ 				   void *priv)
  {
- 	unsigned long min, max_low, max_high;
+-	static bool first = true;
+ 	const char *signature;
+ 	__u32 nr_desc;
+ 	efi_status_t status;
+ 	struct exit_boot_struct *p = priv;
  
--	memblock_allow_resize();
- 	max_low = max_high = 0;
+-	if (first) {
+-		nr_desc = *map->buff_size / *map->desc_size;
+-		if (nr_desc > ARRAY_SIZE(p->boot_params->e820_table)) {
+-			u32 nr_e820ext = nr_desc -
+-					ARRAY_SIZE(p->boot_params->e820_table);
+-
+-			status = alloc_e820ext(nr_e820ext, &p->e820ext,
+-					       &p->e820ext_size);
+-			if (status != EFI_SUCCESS)
+-				return status;
+-		}
+-		first = false;
+-	}
+-
+ 	signature = efi_is_64bit() ? EFI64_LOADER_SIGNATURE
+ 				   : EFI32_LOADER_SIGNATURE;
+ 	memcpy(&p->efi->efi_loader_signature, signature, sizeof(__u32));
+@@ -687,8 +705,8 @@ static efi_status_t exit_boot(struct boo
+ {
+ 	unsigned long map_sz, key, desc_size, buff_size;
+ 	efi_memory_desc_t *mem_map;
+-	struct setup_data *e820ext;
+-	__u32 e820ext_size;
++	struct setup_data *e820ext = NULL;
++	__u32 e820ext_size = 0;
+ 	efi_status_t status;
+ 	__u32 desc_version;
+ 	struct efi_boot_memmap map;
+@@ -702,8 +720,10 @@ static efi_status_t exit_boot(struct boo
+ 	map.buff_size		= &buff_size;
+ 	priv.boot_params	= boot_params;
+ 	priv.efi		= &boot_params->efi_info;
+-	priv.e820ext		= NULL;
+-	priv.e820ext_size	= 0;
++
++	status = allocate_e820(boot_params, &e820ext, &e820ext_size);
++	if (status != EFI_SUCCESS)
++		return status;
  
- 	find_limits(&min, &max_low, &max_high);
-diff --git a/arch/arm/mm/mmu.c b/arch/arm/mm/mmu.c
-index f5cc1ccfea3d..f6bf6686559d 100644
---- a/arch/arm/mm/mmu.c
-+++ b/arch/arm/mm/mmu.c
-@@ -1626,6 +1626,7 @@ void __init paging_init(const struct machine_desc *mdesc)
- 	prepare_page_table();
- 	map_lowmem();
- 	memblock_set_current_limit(arm_lowmem_limit);
-+	memblock_allow_resize();
- 	dma_contiguous_remap();
- 	early_fixmap_shutdown();
- 	devicemaps_init(mdesc);
--- 
-2.19.2
+ 	/* Might as well exit boot services now */
+ 	status = efi_exit_boot_services(sys_table, handle, &map, &priv,
+@@ -711,9 +731,6 @@ static efi_status_t exit_boot(struct boo
+ 	if (status != EFI_SUCCESS)
+ 		return status;
+ 
+-	e820ext			= priv.e820ext;
+-	e820ext_size		= priv.e820ext_size;
+-
+ 	/* Historic? */
+ 	boot_params->alt_mem_k	= 32 * 1024;
+ 
