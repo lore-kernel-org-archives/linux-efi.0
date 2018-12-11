@@ -1,193 +1,49 @@
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.19 104/118] x86/efi: Allocate e820 buffer before calling efi_exit_boot_service
-Date: Tue, 11 Dec 2018 16:42:03 +0100
-Message-ID: <20181211151648.466213185@linuxfoundation.org>
-References: <20181211151644.216668863@linuxfoundation.org>
+From: James Morris <jmorris@namei.org>
+Subject: Re: [PATCH v2 1/7] integrity: Define a trusted platform keyring
+Date: Wed, 12 Dec 2018 05:27:44 +1100 (AEDT)
+Message-ID: <alpine.LRH.2.21.1812120527150.11653@namei.org>
+References: <20181208202705.18673-1-nayna@linux.ibm.com> <20181208202705.18673-2-nayna@linux.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=US-ASCII
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181211151644.216668863@linuxfoundation.org>
+In-Reply-To: <20181208202705.18673-2-nayna@linux.ibm.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Eric Snowberg <eric.snowberg@oracle.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andy Lutomirski <luto@kernel.org>, Arend van Spriel <arend.vanspriel@broadcom.com>, Bhupesh Sharma <bhsharma@redhat.com>, Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@intel.com>, Hans de Goede <hdegoede@redhat.com>, Joe Perches <joe@perches.com>, Jon Hunter <jonathanh@nvidia.com>, Julien Thierry <julien.thierry@arm.com>, Linus Torvalds <torvalds@linux-foundation.org>, Marc Zyngier <marc.zyngier@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>, Nathan Chancellor <natechancellor@gmail.com>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+To: Nayna Jain <nayna@linux.ibm.com>
+Cc: linux-integrity@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, zohar@linux.ibm.com, dhowells@redhat.com, jforbes@redhat.com, seth.forshee@canonical.com, kexec@lists.infradead.org, keyrings@vger.kernel.org, vgoyal@redhat.com, ebiederm@xmission.com, mpe@ellerman.id.au
 List-Id: linux-efi@vger.kernel.org
 
-4.19-stable review patch.  If anyone has any objections, please let me know.
+On Sun, 9 Dec 2018, Nayna Jain wrote:
 
-------------------
+> On secure boot enabled systems, a verified kernel may need to kexec
+> additional kernels. For example, it may be used as a bootloader needing
+> to kexec a target kernel or it may need to kexec a crashdump kernel. In
+> such cases, it may want to verify the signature of the next kernel
+> image.
+> 
+> It is further possible that the kernel image is signed with third party
+> keys which are stored as platform or firmware keys in the 'db' variable.
+> The kernel, however, can not directly verify these platform keys, and an
+> administrator may therefore not want to trust them for arbitrary usage.
+> In order to differentiate platform keys from other keys and provide the
+> necessary separation of trust, the kernel needs an additional keyring to
+> store platform keys.
+> 
+> This patch creates the new keyring called ".platform" to isolate keys
+> provided by platform from keys by kernel. These keys are used to
+> facilitate signature verification during kexec. Since the scope of this
+> keyring is only the platform/firmware keys, it cannot be updated from
+> userspace.
+> 
+> This keyring can be enabled by setting CONFIG_INTEGRITY_PLATFORM_KEYRING.
+> 
+> Signed-off-by: Nayna Jain <nayna@linux.ibm.com>
+> Reviewed-by: Mimi Zohar <zohar@linux.ibm.com>
+> Acked-by: Serge Hallyn <serge@hallyn.com>
 
-From: Eric Snowberg <eric.snowberg@oracle.com>
 
-commit b84a64fad40637b1c9fa4f4dbf847a23e29e672b upstream.
+Reviewed-by: James Morris <james.morris@microsoft.com>
 
-The following commit:
 
-  d64934019f6c ("x86/efi: Use efi_exit_boot_services()")
-
-introduced a regression on systems with large memory maps causing them
-to hang on boot. The first "goto get_map" that was removed from
-exit_boot() ensured there was enough room for the memory map when
-efi_call_early(exit_boot_services) was called. This happens when
-(nr_desc > ARRAY_SIZE(params->e820_table).
-
-Chain of events:
-
-  exit_boot()
-    efi_exit_boot_services()
-      efi_get_memory_map                  <- at this point the mm can't grow over 8 desc
-      priv_func()
-        exit_boot_func()
-          allocate_e820ext()              <- new mm grows over 8 desc from e820 alloc
-      efi_call_early(exit_boot_services)  <- mm key doesn't match so retry
-      efi_call_early(get_memory_map)      <- not enough room for new mm
-      system hangs
-
-This patch allocates the e820 buffer before calling efi_exit_boot_services()
-and fixes the regression.
-
- [ mingo: minor cleanliness edits. ]
-
-Signed-off-by: Eric Snowberg <eric.snowberg@oracle.com>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: <stable@vger.kernel.org>
-Cc: Andy Lutomirski <luto@kernel.org>
-Cc: Arend van Spriel <arend.vanspriel@broadcom.com>
-Cc: Bhupesh Sharma <bhsharma@redhat.com>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Dave Hansen <dave.hansen@intel.com>
-Cc: Hans de Goede <hdegoede@redhat.com>
-Cc: Joe Perches <joe@perches.com>
-Cc: Jon Hunter <jonathanh@nvidia.com>
-Cc: Julien Thierry <julien.thierry@arm.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Marc Zyngier <marc.zyngier@arm.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Nathan Chancellor <natechancellor@gmail.com>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: Sedat Dilek <sedat.dilek@gmail.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: YiFei Zhu <zhuyifei1999@gmail.com>
-Cc: linux-efi@vger.kernel.org
-Link: http://lkml.kernel.org/r/20181129171230.18699-2-ard.biesheuvel@linaro.org
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-
----
- arch/x86/boot/compressed/eboot.c |   65 ++++++++++++++++++++++++---------------
- 1 file changed, 41 insertions(+), 24 deletions(-)
-
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -1,3 +1,4 @@
-+
- /* -----------------------------------------------------------------------
-  *
-  *   Copyright 2011 Intel Corporation; author Matt Fleming
-@@ -634,37 +635,54 @@ static efi_status_t alloc_e820ext(u32 nr
- 	return status;
- }
- 
-+static efi_status_t allocate_e820(struct boot_params *params,
-+				  struct setup_data **e820ext,
-+				  u32 *e820ext_size)
-+{
-+	unsigned long map_size, desc_size, buff_size;
-+	struct efi_boot_memmap boot_map;
-+	efi_memory_desc_t *map;
-+	efi_status_t status;
-+	__u32 nr_desc;
-+
-+	boot_map.map		= &map;
-+	boot_map.map_size	= &map_size;
-+	boot_map.desc_size	= &desc_size;
-+	boot_map.desc_ver	= NULL;
-+	boot_map.key_ptr	= NULL;
-+	boot_map.buff_size	= &buff_size;
-+
-+	status = efi_get_memory_map(sys_table, &boot_map);
-+	if (status != EFI_SUCCESS)
-+		return status;
-+
-+	nr_desc = buff_size / desc_size;
-+
-+	if (nr_desc > ARRAY_SIZE(params->e820_table)) {
-+		u32 nr_e820ext = nr_desc - ARRAY_SIZE(params->e820_table);
-+
-+		status = alloc_e820ext(nr_e820ext, e820ext, e820ext_size);
-+		if (status != EFI_SUCCESS)
-+			return status;
-+	}
-+
-+	return EFI_SUCCESS;
-+}
-+
- struct exit_boot_struct {
- 	struct boot_params	*boot_params;
- 	struct efi_info		*efi;
--	struct setup_data	*e820ext;
--	__u32			e820ext_size;
- };
- 
- static efi_status_t exit_boot_func(efi_system_table_t *sys_table_arg,
- 				   struct efi_boot_memmap *map,
- 				   void *priv)
- {
--	static bool first = true;
- 	const char *signature;
- 	__u32 nr_desc;
- 	efi_status_t status;
- 	struct exit_boot_struct *p = priv;
- 
--	if (first) {
--		nr_desc = *map->buff_size / *map->desc_size;
--		if (nr_desc > ARRAY_SIZE(p->boot_params->e820_table)) {
--			u32 nr_e820ext = nr_desc -
--					ARRAY_SIZE(p->boot_params->e820_table);
--
--			status = alloc_e820ext(nr_e820ext, &p->e820ext,
--					       &p->e820ext_size);
--			if (status != EFI_SUCCESS)
--				return status;
--		}
--		first = false;
--	}
--
- 	signature = efi_is_64bit() ? EFI64_LOADER_SIGNATURE
- 				   : EFI32_LOADER_SIGNATURE;
- 	memcpy(&p->efi->efi_loader_signature, signature, sizeof(__u32));
-@@ -687,8 +705,8 @@ static efi_status_t exit_boot(struct boo
- {
- 	unsigned long map_sz, key, desc_size, buff_size;
- 	efi_memory_desc_t *mem_map;
--	struct setup_data *e820ext;
--	__u32 e820ext_size;
-+	struct setup_data *e820ext = NULL;
-+	__u32 e820ext_size = 0;
- 	efi_status_t status;
- 	__u32 desc_version;
- 	struct efi_boot_memmap map;
-@@ -702,8 +720,10 @@ static efi_status_t exit_boot(struct boo
- 	map.buff_size		= &buff_size;
- 	priv.boot_params	= boot_params;
- 	priv.efi		= &boot_params->efi_info;
--	priv.e820ext		= NULL;
--	priv.e820ext_size	= 0;
-+
-+	status = allocate_e820(boot_params, &e820ext, &e820ext_size);
-+	if (status != EFI_SUCCESS)
-+		return status;
- 
- 	/* Might as well exit boot services now */
- 	status = efi_exit_boot_services(sys_table, handle, &map, &priv,
-@@ -711,9 +731,6 @@ static efi_status_t exit_boot(struct boo
- 	if (status != EFI_SUCCESS)
- 		return status;
- 
--	e820ext			= priv.e820ext;
--	e820ext_size		= priv.e820ext_size;
--
- 	/* Historic? */
- 	boot_params->alt_mem_k	= 32 * 1024;
- 
+-- 
+James Morris
+<jmorris@namei.org>
