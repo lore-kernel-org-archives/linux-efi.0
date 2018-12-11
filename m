@@ -1,65 +1,45 @@
-From: James Morris <jmorris@namei.org>
-Subject: Re: [PATCH v2 5/7] efi: Import certificates from UEFI Secure Boot
-Date: Wed, 12 Dec 2018 05:47:58 +1100 (AEDT)
-Message-ID: <alpine.LRH.2.21.1812120547110.11653@namei.org>
-References: <20181208202705.18673-1-nayna@linux.ibm.com> <20181208202705.18673-6-nayna@linux.ibm.com>
+From: James Morris <jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>
+Subject: Re: [PATCH v2 6/7] efi: Allow the "db" UEFI variable to be suppressed
+Date: Wed, 12 Dec 2018 05:49:00 +1100 (AEDT)
+Message-ID: <alpine.LRH.2.21.1812120548480.11653@namei.org>
+References: <20181208202705.18673-1-nayna@linux.ibm.com>
+ <20181208202705.18673-7-nayna@linux.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181208202705.18673-6-nayna@linux.ibm.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Nayna Jain <nayna@linux.ibm.com>
-Cc: linux-integrity@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, zohar@linux.ibm.com, dhowells@redhat.com, jforbes@redhat.com, seth.forshee@canonical.com, kexec@lists.infradead.org, keyrings@vger.kernel.org, vgoyal@redhat.com, ebiederm@xmission.com, mpe@ellerman.id.au, Josh Boyer <jwboyer@fedoraproject.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <20181208202705.18673-7-nayna-tEXmvtCZX7AybS5Ee8rs3A@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/kexec/>
+List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Nayna Jain <nayna-tEXmvtCZX7AybS5Ee8rs3A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, mpe-Gsx/Oe8HsFggBc27wqDAHg@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, zohar-tEXmvtCZX7AybS5Ee8rs3A@public.gmane.org, dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, seth.forshee-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, jforbes-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-integrity-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
 On Sun, 9 Dec 2018, Nayna Jain wrote:
 
-> +/*
-> + * Blacklist an X509 TBS hash.
-> + */
-> +static __init void uefi_blacklist_x509_tbs(const char *source,
-> +					   const void *data, size_t len)
-> +{
-> +	char *hash, *p;
-> +
-> +	hash = kmalloc(4 + len * 2 + 1, GFP_KERNEL);
-> +	if (!hash)
-> +		return;
-> +	p = memcpy(hash, "tbs:", 4);
-> +	p += 4;
-> +	bin2hex(p, data, len);
-> +	p += len * 2;
-> +	*p = 0;
-> +
-> +	mark_hash_blacklisted(hash);
-> +	kfree(hash);
-> +}
-> +
-> +/*
-> + * Blacklist the hash of an executable.
-> + */
-> +static __init void uefi_blacklist_binary(const char *source,
-> +					 const void *data, size_t len)
-> +{
-> +	char *hash, *p;
-> +
-> +	hash = kmalloc(4 + len * 2 + 1, GFP_KERNEL);
-> +	if (!hash)
-> +		return;
-> +	p = memcpy(hash, "bin:", 4);
-> +	p += 4;
-> +	bin2hex(p, data, len);
-> +	p += len * 2;
-> +	*p = 0;
-> +
-> +	mark_hash_blacklisted(hash);
-> +	kfree(hash);
-> +}
+> From: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
 > 
+> If a user tells shim to not use the certs/hashes in the UEFI db variable
+> for verification purposes, shim will set a UEFI variable called
+> MokIgnoreDB. Have the uefi import code look for this and ignore the db
+> variable if it is found.
+> 
+> Signed-off-by: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
+> Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Acked-by: Nayna Jain <nayna-tEXmvtCZX7AybS5Ee8rs3A@public.gmane.org>
+> Acked-by: Serge Hallyn <serge-A9i7LUbDfNHQT0dZR+AlfA@public.gmane.org>
 
-These could be refactored into one function.
+
+Reviewed-by: James Morris <james.morris-0li6OtcxBFHby3iVrkZq2A@public.gmane.org>
 
 
 -- 
 James Morris
-<jmorris@namei.org>
+<jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>
