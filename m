@@ -1,45 +1,40 @@
-From: James Morris <jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>
-Subject: Re: [PATCH v2 6/7] efi: Allow the "db" UEFI variable to be suppressed
-Date: Wed, 12 Dec 2018 05:49:00 +1100 (AEDT)
-Message-ID: <alpine.LRH.2.21.1812120548480.11653@namei.org>
-References: <20181208202705.18673-1-nayna@linux.ibm.com>
- <20181208202705.18673-7-nayna@linux.ibm.com>
+From: James Morris <jmorris@namei.org>
+Subject: Re: [PATCH v2 7/7] ima: Support platform keyring for kernel
+ appraisal
+Date: Wed, 12 Dec 2018 05:53:30 +1100 (AEDT)
+Message-ID: <alpine.LRH.2.21.1812120553170.11653@namei.org>
+References: <20181208202705.18673-1-nayna@linux.ibm.com> <20181208202705.18673-8-nayna@linux.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <20181208202705.18673-7-nayna-tEXmvtCZX7AybS5Ee8rs3A@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/kexec/>
-List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Nayna Jain <nayna-tEXmvtCZX7AybS5Ee8rs3A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, mpe-Gsx/Oe8HsFggBc27wqDAHg@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, zohar-tEXmvtCZX7AybS5Ee8rs3A@public.gmane.org, dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, seth.forshee-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keyrings-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, jforbes-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-integrity-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Content-Type: text/plain; charset=US-ASCII
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20181208202705.18673-8-nayna@linux.ibm.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Nayna Jain <nayna@linux.ibm.com>
+Cc: linux-integrity@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, zohar@linux.ibm.com, dhowells@redhat.com, jforbes@redhat.com, seth.forshee@canonical.com, kexec@lists.infradead.org, keyrings@vger.kernel.org, vgoyal@redhat.com, ebiederm@xmission.com, mpe@ellerman.id.au
 List-Id: linux-efi@vger.kernel.org
 
 On Sun, 9 Dec 2018, Nayna Jain wrote:
 
-> From: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
+> On secure boot enabled systems, the bootloader verifies the kernel
+> image and possibly the initramfs signatures based on a set of keys. A
+> soft reboot(kexec) of the system, with the same kernel image and
+> initramfs, requires access to the original keys to verify the
+> signatures.
 > 
-> If a user tells shim to not use the certs/hashes in the UEFI db variable
-> for verification purposes, shim will set a UEFI variable called
-> MokIgnoreDB. Have the uefi import code look for this and ignore the db
-> variable if it is found.
+> This patch allows IMA-appraisal access to those original keys, now
+> loaded on the platform keyring, needed for verifying the kernel image
+> and initramfs signatures.
 > 
-> Signed-off-by: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
-> Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Acked-by: Nayna Jain <nayna-tEXmvtCZX7AybS5Ee8rs3A@public.gmane.org>
-> Acked-by: Serge Hallyn <serge-A9i7LUbDfNHQT0dZR+AlfA@public.gmane.org>
+> Signed-off-by: Nayna Jain <nayna@linux.ibm.com>
+> Reviewed-by: Mimi Zohar <zohar@linux.ibm.com>
+> Acked-by: Serge Hallyn <serge@hallyn.com>
+> - replace 'rc' with 'xattr_len' when calling integrity_digsig_verify()
+> with INTEGRITY_KEYRING_IMA for readability
+> Suggested-by: Serge Hallyn <serge@hallyn.com>
 
 
-Reviewed-by: James Morris <james.morris-0li6OtcxBFHby3iVrkZq2A@public.gmane.org>
-
+Reviewed-by: James Morris <james.morris@microsoft.com>
 
 -- 
 James Morris
-<jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>
+<jmorris@namei.org>
