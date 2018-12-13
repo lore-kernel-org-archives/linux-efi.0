@@ -1,35 +1,47 @@
-From: Thiago Jung Bauermann <bauerman@linux.ibm.com>
-Subject: Re: [PATCH v2 2/7] integrity: Load certs to the platform keyring
-Date: Wed, 12 Dec 2018 22:17:08 -0200
-Message-ID: <87zhtae0vv.fsf@morokweng.localdomain>
-References: <20181208202705.18673-1-nayna@linux.ibm.com> <20181208202705.18673-3-nayna@linux.ibm.com>
+From: Mimi Zohar <zohar@linux.ibm.com>
+Subject: Re: [PATCH v2 7/7] ima: Support platform keyring for kernel
+ appraisal
+Date: Wed, 12 Dec 2018 19:18:21 -0500
+Message-ID: <1544660301.3956.3.camel@linux.ibm.com>
+References: <20181208202705.18673-1-nayna@linux.ibm.com>
+         <20181208202705.18673-8-nayna@linux.ibm.com>
+         <8736r2fw88.fsf@morokweng.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <20181208202705.18673-3-nayna@linux.ibm.com>
+In-Reply-To: <8736r2fw88.fsf@morokweng.localdomain>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Nayna Jain <nayna@linux.ibm.com>
-Cc: linux-integrity@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, zohar@linux.ibm.com, dhowells@redhat.com, jforbes@redhat.com, seth.forshee@canonical.com, kexec@lists.infradead.org, keyrings@vger.kernel.org, vgoyal@redhat.com, ebiederm@xmission.com, mpe@ellerman.id.au
+To: Thiago Jung Bauermann <bauerman@linux.ibm.com>, Nayna Jain <nayna@linux.ibm.com>
+Cc: linux-integrity@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, dhowells@redhat.com, jforbes@redhat.com, seth.forshee@canonical.com, kexec@lists.infradead.org, keyrings@vger.kernel.org, vgoyal@redhat.com, ebiederm@xmission.com, mpe@ellerman.id.au
 List-Id: linux-efi@vger.kernel.org
 
+On Wed, 2018-12-12 at 16:14 -0200, Thiago Jung Bauermann wrote:
+[snip]
 
-Nayna Jain <nayna@linux.ibm.com> writes:
+> Subject: [PATCH] ima: Only use the platform keyring if it's enabled
+> 
+> Signed-off-by: Thiago Jung Bauermann <bauerman@linux.ibm.com>
 
-> The patch refactors integrity_load_x509(), making it a wrapper for a new
-> function named integrity_add_key(). This patch also defines a new
-> function named integrity_load_cert() for loading the platform keys.
->
-> Signed-off-by: Nayna Jain <nayna@linux.ibm.com>
-> Reviewed-by: Mimi Zohar <zohar@linux.ibm.com>
-> Acked-by: Serge Hallyn <serge@hallyn.com>
+Good catch!  Thanks.
+
+Mimi
+
 > ---
->  security/integrity/digsig.c                        | 71 ++++++++++++++--------
->  security/integrity/integrity.h                     | 20 ++++++
->  .../integrity/platform_certs/platform_keyring.c    | 23 +++++++
->  3 files changed, 90 insertions(+), 24 deletions(-)
-
-Reviewed-by: Thiago Jung Bauermann <bauerman@linux.ibm.com>
-
--- 
-Thiago Jung Bauermann
-IBM Linux Technology Center
+>  security/integrity/ima/ima_appraise.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/security/integrity/ima/ima_appraise.c b/security/integrity/ima/ima_appraise.c
+> index e8f520450895..f6ac405daabb 100644
+> --- a/security/integrity/ima/ima_appraise.c
+> +++ b/security/integrity/ima/ima_appraise.c
+> @@ -297,7 +297,8 @@ int ima_appraise_measurement(enum ima_hooks func,
+>  			status = INTEGRITY_UNKNOWN;
+>  			break;
+>  		}
+> -		if (rc && func == KEXEC_KERNEL_CHECK)
+> +		if (IS_ENABLED(CONFIG_INTEGRITY_PLATFORM_KEYRING) && rc &&
+> +		    func == KEXEC_KERNEL_CHECK)
+>  			rc = integrity_digsig_verify(INTEGRITY_KEYRING_PLATFORM,
+>  						     (const char *)xattr_value,
+>  						     xattr_len,
