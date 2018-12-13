@@ -1,50 +1,73 @@
-From: Thiago Jung Bauermann <bauerman@linux.ibm.com>
-Subject: Re: [PATCH v2 7/7] ima: Support platform keyring for kernel appraisal
-Date: Wed, 12 Dec 2018 22:19:56 -0200
-Message-ID: <87y38ue0r7.fsf@morokweng.localdomain>
-References: <20181208202705.18673-1-nayna@linux.ibm.com> <20181208202705.18673-8-nayna@linux.ibm.com>
+From: Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 11/73] x86/earlyprintk/efi: Fix infinite loop on some screen widths
+Date: Wed, 12 Dec 2018 23:27:36 -0500
+Message-ID: <20181213042838.75160-11-sashal@kernel.org>
+References: <20181213042838.75160-1-sashal@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <20181208202705.18673-8-nayna@linux.ibm.com>
+In-Reply-To: <20181213042838.75160-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Nayna Jain <nayna@linux.ibm.com>
-Cc: linux-integrity@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, zohar@linux.ibm.com, dhowells@redhat.com, jforbes@redhat.com, seth.forshee@canonical.com, kexec@lists.infradead.org, keyrings@vger.kernel.org, vgoyal@redhat.com, ebiederm@xmission.com, mpe@ellerman.id.au
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: YiFei Zhu <zhuyifei1999@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andy Lutomirski <luto@kernel.org>, Arend van Spriel <arend.vanspriel@broadcom.com>, Bhupesh Sharma <bhsharma@redhat.com>, Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@intel.com>, Eric Snowberg <eric.snowberg@oracle.com>, Hans de Goede <hdegoede@redhat.com>, Joe Perches <joe@perches.com>, Jon Hunter <jonathanh@nvidia.com>, Julien Thierry <julien.thierry@arm.com>, Linus Torvalds <torvalds@linux-foundation.org>, Marc Zyngier <marc.zyngier@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>, Nathan Chancellor <natechancellor@gmail.com>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Sedat Dilek <sedat.dilek@gmai>
 List-Id: linux-efi@vger.kernel.org
 
+From: YiFei Zhu <zhuyifei1999@gmail.com>
 
-Nayna Jain <nayna@linux.ibm.com> writes:
+[ Upstream commit 79c2206d369b87b19ac29cb47601059b6bf5c291 ]
 
-> On secure boot enabled systems, the bootloader verifies the kernel
-> image and possibly the initramfs signatures based on a set of keys. A
-> soft reboot(kexec) of the system, with the same kernel image and
-> initramfs, requires access to the original keys to verify the
-> signatures.
->
-> This patch allows IMA-appraisal access to those original keys, now
-> loaded on the platform keyring, needed for verifying the kernel image
-> and initramfs signatures.
->
-> Signed-off-by: Nayna Jain <nayna@linux.ibm.com>
-> Reviewed-by: Mimi Zohar <zohar@linux.ibm.com>
-> Acked-by: Serge Hallyn <serge@hallyn.com>
-> - replace 'rc' with 'xattr_len' when calling integrity_digsig_verify()
-> with INTEGRITY_KEYRING_IMA for readability
-> Suggested-by: Serge Hallyn <serge@hallyn.com>
-> ---
-> Changelog:
->
-> v2:
-> - replace 'rc' with 'xattr_len' when calling integrity_digsig_verify()
-> with INTEGRITY_KEYRING_IMA for readability
->
->  security/integrity/ima/ima_appraise.c | 13 +++++++++++--
->  1 file changed, 11 insertions(+), 2 deletions(-)
+An affected screen resolution is 1366 x 768, which width is not
+divisible by 8, the default font width. On such screens, when longer
+lines are earlyprintk'ed, overflow-to-next-line can never trigger,
+due to the left-most x-coordinate of the next character always less
+than the screen width. Earlyprintk will infinite loop in trying to
+print the rest of the string but unable to, due to the line being
+full.
 
-With the change to only access the platform keyring when it is enabled:
+This patch makes the trigger consider the right-most x-coordinate,
+instead of left-most, as the value to compare against the screen
+width threshold.
 
-Reviewed-by: Thiago Jung Bauermann <bauerman@linux.ibm.com>
+Signed-off-by: YiFei Zhu <zhuyifei1999@gmail.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Arend van Spriel <arend.vanspriel@broadcom.com>
+Cc: Bhupesh Sharma <bhsharma@redhat.com>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Dave Hansen <dave.hansen@intel.com>
+Cc: Eric Snowberg <eric.snowberg@oracle.com>
+Cc: Hans de Goede <hdegoede@redhat.com>
+Cc: Joe Perches <joe@perches.com>
+Cc: Jon Hunter <jonathanh@nvidia.com>
+Cc: Julien Thierry <julien.thierry@arm.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Marc Zyngier <marc.zyngier@arm.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Nathan Chancellor <natechancellor@gmail.com>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: Sedat Dilek <sedat.dilek@gmail.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Link: http://lkml.kernel.org/r/20181129171230.18699-12-ard.biesheuvel@linaro.org
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ arch/x86/platform/efi/early_printk.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
---
-Thiago Jung Bauermann
-IBM Linux Technology Center
+diff --git a/arch/x86/platform/efi/early_printk.c b/arch/x86/platform/efi/early_printk.c
+index 5fdacb322ceb..c3e6be110b7d 100644
+--- a/arch/x86/platform/efi/early_printk.c
++++ b/arch/x86/platform/efi/early_printk.c
+@@ -179,7 +179,7 @@ early_efi_write(struct console *con, const char *str, unsigned int num)
+ 			num--;
+ 		}
+ 
+-		if (efi_x >= si->lfb_width) {
++		if (efi_x + font->width > si->lfb_width) {
+ 			efi_x = 0;
+ 			efi_y += font->height;
+ 		}
+-- 
+2.19.1
