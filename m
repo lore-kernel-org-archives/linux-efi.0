@@ -1,13 +1,13 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 11/73] x86/earlyprintk/efi: Fix infinite loop on some screen widths
-Date: Wed, 12 Dec 2018 23:27:36 -0500
-Message-ID: <20181213042838.75160-11-sashal@kernel.org>
-References: <20181213042838.75160-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.4 04/23] x86/earlyprintk/efi: Fix infinite loop on some screen widths
+Date: Wed, 12 Dec 2018 23:32:40 -0500
+Message-ID: <20181213043259.76643-4-sashal@kernel.org>
+References: <20181213043259.76643-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181213042838.75160-1-sashal@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20181213043259.76643-1-sashal@kernel.org>
+Sender: stable-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: YiFei Zhu <zhuyifei1999@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andy Lutomirski <luto@kernel.org>, Arend van Spriel <arend.vanspriel@broadcom.com>, Bhupesh Sharma <bhsharma@redhat.com>, Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@intel.com>, Eric Snowberg <eric.snowberg@oracle.com>, Hans de Goede <hdegoede@redhat.com>, Joe Perches <joe@perches.com>, Jon Hunter <jonathanh@nvidia.com>, Julien Thierry <julien.thierry@arm.com>, Linus Torvalds <torvalds@linux-foundation.org>, Marc Zyngier <marc.zyngier@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>, Nathan Chancellor <natechancellor@gmail.com>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Sedat Dilek <sedat.dilek@gmai>
 List-Id: linux-efi@vger.kernel.org
@@ -57,7 +57,7 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/arch/x86/platform/efi/early_printk.c b/arch/x86/platform/efi/early_printk.c
-index 5fdacb322ceb..c3e6be110b7d 100644
+index 524142117296..82324fc25d5e 100644
 --- a/arch/x86/platform/efi/early_printk.c
 +++ b/arch/x86/platform/efi/early_printk.c
 @@ -179,7 +179,7 @@ early_efi_write(struct console *con, const char *str, unsigned int num)
