@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 1/2] efi: let kmemleak ignore false positives
-Date: Mon, 17 Dec 2018 19:02:13 +0100
-Message-ID: <20181217180214.9436-2-ard.biesheuvel@linaro.org>
+Subject: [PATCH 2/2] efi: efi_guid_t must be 64-bit aligned
+Date: Mon, 17 Dec 2018 19:02:14 +0100
+Message-ID: <20181217180214.9436-3-ard.biesheuvel@linaro.org>
 References: <20181217180214.9436-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20181217180214.9436-1-ard.biesheuvel@linaro.org>
@@ -10,65 +10,40 @@ To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Heinrich Schuchardt <xypron.glpk@gmx.de>, Qian Cai <cai@gmx.us>
 List-Id: linux-efi@vger.kernel.org
 
-From: Qian Cai <cai@gmx.us>
+From: Heinrich Schuchardt <xypron.glpk@gmx.de>
 
-unreferenced object 0xffff8096c1acf580 (size 128):
-  comm "swapper/63", pid 0, jiffies 4294937418 (age 1201.230s)
-  hex dump (first 32 bytes):
-    80 87 b5 c1 96 00 00 00 00 00 cc c2 16 00 00 00  ................
-    00 00 01 00 00 00 00 00 6b 6b 6b 6b 6b 6b 6b 6b  ........kkkkkkkk
-  backtrace:
-    [<000000001d2549ba>] kmem_cache_alloc_trace+0x430/0x500
-    [<0000000093a6dfab>] efi_mem_reserve_persistent+0x50/0xf8
-    [<000000000a730828>] its_cpu_init_lpis+0x394/0x4b8
-    [<00000000edf04e07>] its_cpu_init+0x104/0x150
-    [<000000004d0342c5>] gic_starting_cpu+0x34/0x40
-    [<000000005d9da772>] cpuhp_invoke_callback+0x228/0x1d68
-    [<0000000061eace9b>] notify_cpu_starting+0xc0/0x118
-    [<0000000048bc2dc5>] secondary_start_kernel+0x23c/0x3b0
-    [<0000000015137d6a>] 0xffffffffffffffff
+The UEFI Specification Version 2.7 Errata A defines:
 
-efi_mem_reserve_persistent+0x50/0xf8:
-kmalloc at include/linux/slab.h:546
-(inlined by) efi_mem_reserve_persistent at drivers/firmware/efi/efi.c:979
+"EFI_GUID
+128-bit buffer containing a unique identifier value.
+Unless otherwise specified, aligned on a 64-bit boundary."
 
-This line,
+Before this patch efi_guid_t was 8-bit aligned.
 
-rsv = kmalloc(sizeof(*rsv), GFP_ATOMIC);
+Note that this could potentially trigger alignment faults during
+EFI runtime services calls on 32-bit ARM, given that it does not
+permit load/store double or load/store multiple instructions to
+operate on memory addresses that are not 32-bit aligned.
 
-Kmemleak has a known limitation that can only track pointers in the kernel
-virtual space. Hence, it will report false positives due to "rsv" will only
-reference to other physical addresses,
-
-rsv->next = efi_memreserve_root->next;
-efi_memreserve_root->next = __pa(rsv);
-
-Signed-off-by: Qian Cai <cai@gmx.us>
+Cc: <stable@vger.kernel.org> # v4.9+, or earlier if possible
+Signed-off-by: Heinrich Schuchardt <xypron.glpk@gmx.de>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- drivers/firmware/efi/efi.c | 3 +++
- 1 file changed, 3 insertions(+)
+ include/linux/efi.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 415849bab233..7fcfe8a7ae98 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -31,6 +31,7 @@
- #include <linux/acpi.h>
- #include <linux/ucs2_string.h>
- #include <linux/memblock.h>
-+#include <linux/kmemleak.h>
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 100ce4a4aff6..e6480c805932 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -48,7 +48,7 @@ typedef u16 efi_char16_t;		/* UNICODE character */
+ typedef u64 efi_physical_addr_t;
+ typedef void *efi_handle_t;
  
- #include <asm/early_ioremap.h>
+-typedef guid_t efi_guid_t;
++typedef guid_t efi_guid_t __aligned(8);
  
-@@ -1000,6 +1001,8 @@ int __ref efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
- 	if (!rsv)
- 		return -ENOMEM;
- 
-+	kmemleak_ignore(rsv);
-+
- 	rsv->base = addr;
- 	rsv->size = size;
- 
+ #define EFI_GUID(a,b,c,d0,d1,d2,d3,d4,d5,d6,d7) \
+ 	GUID_INIT(a, b, c, d0, d1, d2, d3, d4, d5, d6, d7)
 -- 
 2.17.1
