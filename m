@@ -1,40 +1,43 @@
-From: Heinrich Schuchardt <xypron.glpk@gmx.de>
-Subject: [PATCH 1/1] efi: efi_guid_t must be 64-bit aligned
-Date: Sat, 15 Dec 2018 22:18:08 +0100
-Message-ID: <20181215211808.16837-1-xypron.glpk@gmx.de>
-Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [GIT PULL 0/2] Final EFI fixes for v4.20
+Date: Mon, 17 Dec 2018 19:02:12 +0100
+Message-ID: <20181217180214.9436-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Heinrich Schuchardt <xypron.glpk@gmx.de>
+To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Heinrich Schuchardt <xypron.glpk@gmx.de>, Qian Cai <cai@gmx.us>
 List-Id: linux-efi@vger.kernel.org
 
-The UEFI Specification Version 2.7 Errata A defines:
+The following changes since commit 7566ec393f4161572ba6f11ad5171fd5d59b0fbd:
 
-"EFI_GUID
-128-bit buffer containing a unique identifier value.
-Unless otherwise specified, aligned on a 64-bit boundary."
+  Linux 4.20-rc7 (2018-12-16 15:46:55 -0800)
 
-Before this patch efi_guid_t was 8-bit aligned.
+are available in the Git repository at:
 
-Signed-off-by: Heinrich Schuchardt <xypron.glpk@gmx.de>
----
- include/linux/efi.h | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-urgent
 
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 845174e113ce..c1a1931238c5 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -48,7 +48,7 @@ typedef u16 efi_char16_t;		/* UNICODE character */
- typedef u64 efi_physical_addr_t;
- typedef void *efi_handle_t;
- 
--typedef guid_t efi_guid_t;
-+typedef guid_t efi_guid_t __aligned(8);
- 
- #define EFI_GUID(a,b,c,d0,d1,d2,d3,d4,d5,d6,d7) \
- 	GUID_INIT(a, b, c, d0, d1, d2, d3, d4, d5, d6, d7)
--- 
-2.19.2
+for you to fetch changes up to 7b671e6a4917594a4e9ffd64111b8ac2e0323837:
+
+  efi: efi_guid_t must be 64-bit aligned (2018-12-17 10:42:26 +0100)
+
+Note that applying Qian's patch will result in a conflict with the EFI
+changes queued for the next window - the solution is to simply drop the
+kmemleak_ignore() call since it is not required for page based
+allocations.
+
+----------------------------------------------------------------
+Final EFI fixes for v4.20:
+- prevent false positives from kmemleak for persistent memory reservations
+- use the correct alignment for EFI GUIDs, preventing potential crashes in
+  firmware calls on 32-bit ARM
+
+----------------------------------------------------------------
+Heinrich Schuchardt (1):
+      efi: efi_guid_t must be 64-bit aligned
+
+Qian Cai (1):
+      efi: let kmemleak ignore false positives
+
+ drivers/firmware/efi/efi.c | 3 +++
+ include/linux/efi.h        | 2 +-
+ 2 files changed, 4 insertions(+), 1 deletion(-)
