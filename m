@@ -1,43 +1,74 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [GIT PULL 0/2] Final EFI fixes for v4.20
-Date: Mon, 17 Dec 2018 19:02:12 +0100
-Message-ID: <20181217180214.9436-1-ard.biesheuvel@linaro.org>
+Subject: [PATCH 1/2] efi: let kmemleak ignore false positives
+Date: Mon, 17 Dec 2018 19:02:13 +0100
+Message-ID: <20181217180214.9436-2-ard.biesheuvel@linaro.org>
+References: <20181217180214.9436-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20181217180214.9436-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Heinrich Schuchardt <xypron.glpk@gmx.de>, Qian Cai <cai@gmx.us>
 List-Id: linux-efi@vger.kernel.org
 
-The following changes since commit 7566ec393f4161572ba6f11ad5171fd5d59b0fbd:
+From: Qian Cai <cai@gmx.us>
 
-  Linux 4.20-rc7 (2018-12-16 15:46:55 -0800)
+unreferenced object 0xffff8096c1acf580 (size 128):
+  comm "swapper/63", pid 0, jiffies 4294937418 (age 1201.230s)
+  hex dump (first 32 bytes):
+    80 87 b5 c1 96 00 00 00 00 00 cc c2 16 00 00 00  ................
+    00 00 01 00 00 00 00 00 6b 6b 6b 6b 6b 6b 6b 6b  ........kkkkkkkk
+  backtrace:
+    [<000000001d2549ba>] kmem_cache_alloc_trace+0x430/0x500
+    [<0000000093a6dfab>] efi_mem_reserve_persistent+0x50/0xf8
+    [<000000000a730828>] its_cpu_init_lpis+0x394/0x4b8
+    [<00000000edf04e07>] its_cpu_init+0x104/0x150
+    [<000000004d0342c5>] gic_starting_cpu+0x34/0x40
+    [<000000005d9da772>] cpuhp_invoke_callback+0x228/0x1d68
+    [<0000000061eace9b>] notify_cpu_starting+0xc0/0x118
+    [<0000000048bc2dc5>] secondary_start_kernel+0x23c/0x3b0
+    [<0000000015137d6a>] 0xffffffffffffffff
 
-are available in the Git repository at:
+efi_mem_reserve_persistent+0x50/0xf8:
+kmalloc at include/linux/slab.h:546
+(inlined by) efi_mem_reserve_persistent at drivers/firmware/efi/efi.c:979
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-urgent
+This line,
 
-for you to fetch changes up to 7b671e6a4917594a4e9ffd64111b8ac2e0323837:
+rsv = kmalloc(sizeof(*rsv), GFP_ATOMIC);
 
-  efi: efi_guid_t must be 64-bit aligned (2018-12-17 10:42:26 +0100)
+Kmemleak has a known limitation that can only track pointers in the kernel
+virtual space. Hence, it will report false positives due to "rsv" will only
+reference to other physical addresses,
 
-Note that applying Qian's patch will result in a conflict with the EFI
-changes queued for the next window - the solution is to simply drop the
-kmemleak_ignore() call since it is not required for page based
-allocations.
+rsv->next = efi_memreserve_root->next;
+efi_memreserve_root->next = __pa(rsv);
 
-----------------------------------------------------------------
-Final EFI fixes for v4.20:
-- prevent false positives from kmemleak for persistent memory reservations
-- use the correct alignment for EFI GUIDs, preventing potential crashes in
-  firmware calls on 32-bit ARM
-
-----------------------------------------------------------------
-Heinrich Schuchardt (1):
-      efi: efi_guid_t must be 64-bit aligned
-
-Qian Cai (1):
-      efi: let kmemleak ignore false positives
-
+Signed-off-by: Qian Cai <cai@gmx.us>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
  drivers/firmware/efi/efi.c | 3 +++
- include/linux/efi.h        | 2 +-
- 2 files changed, 4 insertions(+), 1 deletion(-)
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 415849bab233..7fcfe8a7ae98 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -31,6 +31,7 @@
+ #include <linux/acpi.h>
+ #include <linux/ucs2_string.h>
+ #include <linux/memblock.h>
++#include <linux/kmemleak.h>
+ 
+ #include <asm/early_ioremap.h>
+ 
+@@ -1000,6 +1001,8 @@ int __ref efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
+ 	if (!rsv)
+ 		return -ENOMEM;
+ 
++	kmemleak_ignore(rsv);
++
+ 	rsv->base = addr;
+ 	rsv->size = size;
+ 
+-- 
+2.17.1
