@@ -1,19 +1,19 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.4 21/40] x86/earlyprintk/efi: Fix infinite loop on some screen widths
-Date: Thu, 20 Dec 2018 10:18:33 +0100
-Message-ID: <20181220085827.314696881@linuxfoundation.org>
-References: <20181220085826.212663515@linuxfoundation.org>
+Subject: [PATCH 4.9 34/61] x86/earlyprintk/efi: Fix infinite loop on some screen widths
+Date: Thu, 20 Dec 2018 10:18:34 +0100
+Message-ID: <20181220085845.113058962@linuxfoundation.org>
+References: <20181220085843.743900603@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181220085826.212663515@linuxfoundation.org>
+In-Reply-To: <20181220085843.743900603@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, YiFei Zhu <zhuyifei1999@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andy Lutomirski <luto@kernel.org>, Arend van Spriel <arend.vanspriel@broadcom.com>, Bhupesh Sharma <bhsharma@redhat.com>, Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@intel.com>, Eric Snowberg <eric.snowberg@oracle.com>, Hans de Goede <hdegoede@redhat.com>, Joe Perches <joe@perches.com>, Jon Hunter <jonathanh@nvidia.com>, Julien Thierry <julien.thierry@arm.com>, Linus Torvalds <torvalds@linux-foundation.org>, Marc Zyngier <marc.zyngier@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>, Nathan Chancellor <natechancellor@gmail.com>, Peter Zijlstra <peterz@infradead.org>, Sai
 List-Id: linux-efi@vger.kernel.org
 
-4.4-stable review patch.  If anyone has any objections, please let me know.
+4.9-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
@@ -60,7 +60,7 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/arch/x86/platform/efi/early_printk.c b/arch/x86/platform/efi/early_printk.c
-index 524142117296..82324fc25d5e 100644
+index 5fdacb322ceb..c3e6be110b7d 100644
 --- a/arch/x86/platform/efi/early_printk.c
 +++ b/arch/x86/platform/efi/early_printk.c
 @@ -179,7 +179,7 @@ early_efi_write(struct console *con, const char *str, unsigned int num)
