@@ -1,19 +1,19 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.19 13/67] x86/earlyprintk/efi: Fix infinite loop on some screen widths
-Date: Thu, 20 Dec 2018 10:18:25 +0100
-Message-ID: <20181220085904.086873761@linuxfoundation.org>
-References: <20181220085903.562090333@linuxfoundation.org>
+Subject: [PATCH 3.18 14/31] x86/earlyprintk/efi: Fix infinite loop on some screen widths
+Date: Thu, 20 Dec 2018 10:18:26 +0100
+Message-ID: <20181220085743.168191288@linuxfoundation.org>
+References: <20181220085742.601260254@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20181220085903.562090333@linuxfoundation.org>
-Sender: stable-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20181220085742.601260254@linuxfoundation.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, YiFei Zhu <zhuyifei1999@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andy Lutomirski <luto@kernel.org>, Arend van Spriel <arend.vanspriel@broadcom.com>, Bhupesh Sharma <bhsharma@redhat.com>, Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@intel.com>, Eric Snowberg <eric.snowberg@oracle.com>, Hans de Goede <hdegoede@redhat.com>, Joe Perches <joe@perches.com>, Jon Hunter <jonathanh@nvidia.com>, Julien Thierry <julien.thierry@arm.com>, Linus Torvalds <torvalds@linux-foundation.org>, Marc Zyngier <marc.zyngier@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>, Nathan Chancellor <natechancellor@gmail.com>, Peter Zijlstra <peterz@infradead.org>, Sai
 List-Id: linux-efi@vger.kernel.org
 
-4.19-stable review patch.  If anyone has any objections, please let me know.
+3.18-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
@@ -60,7 +60,7 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/arch/x86/platform/efi/early_printk.c b/arch/x86/platform/efi/early_printk.c
-index 5fdacb322ceb..c3e6be110b7d 100644
+index 524142117296..82324fc25d5e 100644
 --- a/arch/x86/platform/efi/early_printk.c
 +++ b/arch/x86/platform/efi/early_printk.c
 @@ -179,7 +179,7 @@ early_efi_write(struct console *con, const char *str, unsigned int num)
