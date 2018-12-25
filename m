@@ -1,74 +1,67 @@
 From: Ingo Molnar <mingo@kernel.org>
-Subject: [GIT PULL] EFI changes for v4.21
-Date: Mon, 24 Dec 2018 23:21:32 +0100
-Message-ID: <20181224222132.GA109386@gmail.com>
+Subject: Re: [PATCH] x86/efi: Don't unmap EFI boot services code/data regions
+ for EFI_OLD_MEMMAP and EFI_MIXED_MODE
+Date: Tue, 25 Dec 2018 10:51:07 +0100
+Message-ID: <20181225095107.GA100072@gmail.com>
+References: <20181222022234.7573-1-sai.praneeth.prakhya@intel.com>
+ <20181222105410.GA130780@gmail.com>
+ <CAKv+Gu93dgfXsq_sRzvXBw-h=8pn2BtrQLtpwtjK51potpOtdg@mail.gmail.com>
+ <FFF73D592F13FD46B8700F0A279B802F4860813C@ORSMSX114.amr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
+In-Reply-To: <FFF73D592F13FD46B8700F0A279B802F4860813C@ORSMSX114.amr.corp.intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Borislav Petkov <bp@alien8.de>
+To: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, the arch/x86 maintainers <x86@kernel.org>, Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>, "Hansen, Dave" <dave.hansen@intel.com>, Bhupesh Sharma <bhsharma@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>
 List-Id: linux-efi@vger.kernel.org
 
-Linus,
 
-Please pull the latest efi-core-for-linus git tree from:
+* Prakhya, Sai Praneeth <sai.praneeth.prakhya@intel.com> wrote:
 
-   git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git efi-core-for-linus
+> > > > +     /*
+> > > > +      * To Do: Remove this check after adding functionality to unmap EFI
+> > boot
+> > > > +      * services code/data regions from direct mapping area because
+> > > > +      * "efi=old_map" maps EFI regions in swapper_pg_dir.
+> > > > +      */
+> > > > +     if (efi_enabled(EFI_OLD_MEMMAP))
+> > > > +             return;
+> > > > +
+> > > > +     /*
+> > > > +      * EFI mixed mode has all RAM mapped to access arguments while
+> > making
+> > > > +      * EFI runtime calls, hence don't unmap EFI boot services code/data
+> > > > +      * regions.
+> > > > +      */
+> > > > +     if (!efi_is_native() && IS_ENABLED(CONFIG_EFI_MIXED))
+> > 
+> > AFAIK efi_is_native() can only return false is CONFIG_EFI_MIXED is set, so this
+> > expression can be simplified.
+> 
+> Makes sense.
+> efi_is_native() returns true for 32-bit machines running 32-bit firmware.
 
-   # HEAD: 1debf0958fa27b7c469dbf22754929ec59a7c0e7 x86/efi: Don't unmap EFI boot services code/data regions for EFI_OLD_MEMMAP and EFI_MIXED_MODE
+Forgot to mention that I performed this simplification in the commit I 
+applied:
 
-The main changes in this cycle were:
++       /*
++        * To Do: Remove this check after adding functionality to unmap EFI boot
++        * services code/data regions from direct mapping area because
++        * "efi=old_map" maps EFI regions in swapper_pg_dir.
++        */
++       if (efi_enabled(EFI_OLD_MEMMAP))
++               return;
++
++       /*
++        * EFI mixed mode has all RAM mapped to access arguments while making
++        * EFI runtime calls, hence don't unmap EFI boot services code/data
++        * regions.
++        */
++       if (!efi_is_native())
++               return;
 
-  - Allocate the E820 buffer before doing the GetMemoryMap/ExitBootServices
-    dance so we don't run out of space
-
-  - Clear EFI boot services mappings when freeing the memory
-
-  - Harden efivars against callers that invoke it on non-EFI boots 
-
-  - Reduce the number of memblock reservations resulting from extensive
-    use of the new efi_mem_reserve_persistent() API
-
-  - Other assorted fixes and cleanups.
-
- Thanks,
+Thanks,
 
 	Ingo
-
------------------->
-Ard Biesheuvel (2):
-      efi: Permit multiple entries in persistent memreserve data structure
-      efi: Reduce the amount of memblock reservations for persistent allocations
-
-Arend van Spriel (1):
-      firmware/efi: Add NULL pointer checks in efivars API functions
-
-Julien Thierry (2):
-      efi/fdt: Indentation fix
-      efi/fdt: Simplify the get_fdt() flow
-
-Nathan Chancellor (1):
-      efi/libstub: Disable some warnings for x86{,_64}
-
-Sai Praneeth Prakhya (4):
-      x86/mm/pageattr: Introduce helper function to unmap EFI boot services
-      x86/efi: Unmap EFI boot services code/data regions from efi_pgd
-      x86/efi: Move efi_<reserve/free>_boot_services() to arch/x86
-      x86/efi: Don't unmap EFI boot services code/data regions for EFI_OLD_MEMMAP and EFI_MIXED_MODE
-
-
- arch/x86/include/asm/efi.h              |  2 +
- arch/x86/include/asm/pgtable_types.h    |  8 ++-
- arch/x86/mm/pageattr.c                  | 40 ++++++++++++-
- arch/x86/platform/efi/efi.c             |  2 +
- arch/x86/platform/efi/quirks.c          | 41 ++++++++++++++
- drivers/firmware/efi/efi.c              | 54 +++++++++++++-----
- drivers/firmware/efi/libstub/Makefile   |  5 +-
- drivers/firmware/efi/libstub/arm-stub.c |  2 +-
- drivers/firmware/efi/libstub/fdt.c      | 30 +++++-----
- drivers/firmware/efi/vars.c             | 99 ++++++++++++++++++++++++++-------
- include/linux/efi.h                     | 19 +++++--
- init/main.c                             |  4 --
- 12 files changed, 242 insertions(+), 64 deletions(-)
