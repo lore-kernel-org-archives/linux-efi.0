@@ -1,38 +1,66 @@
-From: Pankaj Bansal <pankaj.bansal@nxp.com>
-Subject: [edk2] Uefi runtime property in device tree
-Date: Wed, 26 Dec 2018 10:17:35 +0000
-Message-ID: <HE1PR0402MB332391A3363235543F068957F1B50@HE1PR0402MB3323.eurprd04.prod.outlook.com>
-References: <HE1PR0402MB33233B2625F8D7EFF08C4994F1B50@HE1PR0402MB3323.eurprd04.prod.outlook.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH -mmotm] efi: drop kmemleak_ignore() for page allocator
+Date: Wed, 26 Dec 2018 13:02:38 +0100
+Message-ID: <CAKv+Gu_fiEDffKq_fONBYTOdSk-L7__+LgNEyVaNF3FGzBfAow@mail.gmail.com>
+References: <20181226023534.64048-1-cai@lca.pw>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <edk2-devel-bounces@lists.01.org>
-In-Reply-To: <HE1PR0402MB33233B2625F8D7EFF08C4994F1B50@HE1PR0402MB3323.eurprd04.prod.outlook.com>
-Content-Language: en-US
-List-Unsubscribe: <https://lists.01.org/mailman/options/edk2-devel>,
- <mailto:edk2-devel-request@lists.01.org?subject=unsubscribe>
-List-Archive: <http://lists.01.org/pipermail/edk2-devel/>
-List-Post: <mailto:edk2-devel@lists.01.org>
-List-Help: <mailto:edk2-devel-request@lists.01.org?subject=help>
-List-Subscribe: <https://lists.01.org/mailman/listinfo/edk2-devel>,
- <mailto:edk2-devel-request@lists.01.org?subject=subscribe>
-Errors-To: edk2-devel-bounces@lists.01.org
-Sender: "edk2-devel" <edk2-devel-bounces@lists.01.org>
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: "edk2-devel@lists.01.org" <edk2-devel@lists.01.org>, linux-efi <linux-efi@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20181226023534.64048-1-cai@lca.pw>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Qian Cai <cai@lca.pw>, Ingo Molnar <mingo@kernel.org>
+Cc: Andrew Morton <akpm@linux-foundation.org>, Catalin Marinas <catalin.marinas@arm.com>, Linux-MM <linux-mm@kvack.org>, linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hello Ard et al.
+On Wed, 26 Dec 2018 at 03:35, Qian Cai <cai@lca.pw> wrote:
+>
+> a0fc5578f1d (efi: Let kmemleak ignore false positives) is no longer
+> needed due to efi_mem_reserve_persistent() uses __get_free_page()
+> instead where kmemelak is not able to track regardless. Otherwise,
+> kernel reported "kmemleak: Trying to color unknown object at
+> 0xffff801060ef0000 as Black"
+>
+> Signed-off-by: Qian Cai <cai@lca.pw>
 
-I have a query regarding the device tree usage in UEFI.
-In our UEFI implementation for NXP SOCs, we are using device tree to detect Non discoverable platform devices.
-Based on the device detected in device tree, a device instance is created and the device's driver binds to that device's handle (a DXE driver or an UEFI driver).
-if the device were to be used for runtime service, then we need to allocate the memory for that device instance from runtime pool and set its virtual address using EfiConvertPointer.
-To facilitate this, I wish to add an optional property to the device node "uefi-runtime".
-If this property is present in device tree the UEFI firmware will allocate the data from runtime pool for this device.
-Also firmware will disable/delete the node in device tree before passing onto OS, so that OS doesn't use the device.
+Why are you sending this to -mmotm?
 
-I wish to know your thoughts on this. If this doesn't seem the right way, I am happy to hear your suggestions.
+Andrew, please disregard this patch. This is EFI/tip material.
 
-Thanks & Regards,
-Pankaj Bansal
+> ---
+>  drivers/firmware/efi/efi.c | 3 ---
+>  1 file changed, 3 deletions(-)
+>
+> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+> index 7ac09dd8f268..4c46ff6f2242 100644
+> --- a/drivers/firmware/efi/efi.c
+> +++ b/drivers/firmware/efi/efi.c
+> @@ -31,7 +31,6 @@
+>  #include <linux/acpi.h>
+>  #include <linux/ucs2_string.h>
+>  #include <linux/memblock.h>
+> -#include <linux/kmemleak.h>
+>
+>  #include <asm/early_ioremap.h>
+>
+> @@ -1027,8 +1026,6 @@ int __ref efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
+>         if (!rsv)
+>                 return -ENOMEM;
+>
+> -       kmemleak_ignore(rsv);
+> -
+>         rsv->size = EFI_MEMRESERVE_COUNT(PAGE_SIZE);
+>         atomic_set(&rsv->count, 1);
+>         rsv->entry[0].base = addr;
+
+The patch that adds the kmemleak_ignore() call here is queued in
+efi/urgent branch in the tip tree, but did not make it into v4.20.
+
+efi/urgent does not apply cleanly to efi/core, since the kmalloc()
+call [which requires the kmemleak_ignore() call] has been replaced
+with alloc_pages() [which doesn't], necessitating this patch to remove
+the kmemleak_ignore() call again.
+
+So what I would like to suggest is that Ingo resolves this conflict by
+simply dropping the call to kmemleak_ignore(). That way, we don't need
+this patch, and we can still backport the efi/urgent change to
+v4.20-stable.
