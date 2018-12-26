@@ -1,60 +1,42 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [edk2] Uefi runtime property in device tree
-Date: Wed, 26 Dec 2018 14:46:25 +0100
-Message-ID: <CAKv+Gu8=dTG158ph9255tK1FyURQcmj2H9CUc-Na4LaKf3-=LQ@mail.gmail.com>
-References: <HE1PR0402MB33233B2625F8D7EFF08C4994F1B50@HE1PR0402MB3323.eurprd04.prod.outlook.com>
+From: Qian Cai <cai@lca.pw>
+Subject: Re: [PATCH -mmotm] efi: drop kmemleak_ignore() for page allocator
+Date: Wed, 26 Dec 2018 10:13:25 -0500
+Message-ID: <403405f1-b702-2feb-4616-35fc3dc3133e@lca.pw>
+References: <20181226023534.64048-1-cai@lca.pw>
+ <CAKv+Gu_fiEDffKq_fONBYTOdSk-L7__+LgNEyVaNF3FGzBfAow@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <edk2-devel-bounces@lists.01.org>
-In-Reply-To: <HE1PR0402MB33233B2625F8D7EFF08C4994F1B50@HE1PR0402MB3323.eurprd04.prod.outlook.com>
-List-Unsubscribe: <https://lists.01.org/mailman/options/edk2-devel>,
- <mailto:edk2-devel-request@lists.01.org?subject=unsubscribe>
-List-Archive: <http://lists.01.org/pipermail/edk2-devel/>
-List-Post: <mailto:edk2-devel@lists.01.org>
-List-Help: <mailto:edk2-devel-request@lists.01.org?subject=help>
-List-Subscribe: <https://lists.01.org/mailman/listinfo/edk2-devel>,
- <mailto:edk2-devel-request@lists.01.org?subject=subscribe>
-Errors-To: edk2-devel-bounces@lists.01.org
-Sender: "edk2-devel" <edk2-devel-bounces@lists.01.org>
-To: Pankaj Bansal <pankaj.bansal@nxp.com>
-Cc: "edk2-devel@lists.01.org" <edk2-devel@lists.01.org>, linux-efi <linux-efi@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAKv+Gu_fiEDffKq_fONBYTOdSk-L7__+LgNEyVaNF3FGzBfAow@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Ingo Molnar <mingo@kernel.org>
+Cc: Andrew Morton <akpm@linux-foundation.org>, Catalin Marinas <catalin.marinas@arm.com>, Linux-MM <linux-mm@kvack.org>, linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-T24gV2VkLCAyNiBEZWMgMjAxOCBhdCAxMToxNSwgUGFua2FqIEJhbnNhbCA8cGFua2FqLmJhbnNh
-bEBueHAuY29tPiB3cm90ZToKPgo+IEhlbGxvIEFyZCBldCBhbC4KPgo+IEkgaGF2ZSBhIHF1ZXJ5
-IHJlZ2FyZGluZyB0aGUgZGV2aWNlIHRyZWUgdXNhZ2UgaW4gVUVGSS4KPiBJbiBvdXIgVUVGSSBp
-bXBsZW1lbnRhdGlvbiBmb3IgTlhQIFNPQ3MsIHdlIGFyZSB1c2luZyBkZXZpY2UgdHJlZSB0byBk
-ZXRlY3QgTm9uIGRpc2NvdmVyYWJsZSBwbGF0Zm9ybSBkZXZpY2VzLgo+IEJhc2VkIG9uIHRoZSBk
-ZXZpY2UgZGV0ZWN0ZWQgaW4gZGV2aWNlIHRyZWUsIGEgZGV2aWNlIGluc3RhbmNlIGlzIGNyZWF0
-ZWQgYW5kIHRoZSBkZXZpY2XigJlzIGRyaXZlciBiaW5kcyB0byB0aGF0IGRldmljZeKAmXMgaGFu
-ZGxlIChhIERYRSBkcml2ZXIgb3IgYW4gVUVGSSBkcml2ZXIpLgo+IGlmIHRoZSBkZXZpY2Ugd2Vy
-ZSB0byBiZSB1c2VkIGZvciBydW50aW1lIHNlcnZpY2UsIHRoZW4gd2UgbmVlZCB0byBhbGxvY2F0
-ZSB0aGUgbWVtb3J5IGZvciB0aGF0IGRldmljZSBpbnN0YW5jZSBmcm9tIHJ1bnRpbWUgcG9vbCBh
-bmQgc2V0IGl0cyB2aXJ0dWFsIGFkZHJlc3MgdXNpbmcgRWZpQ29udmVydFBvaW50ZXIuCj4gVG8g
-ZmFjaWxpdGF0ZSB0aGlzLCBJIHdpc2ggdG8gYWRkIGFuIG9wdGlvbmFsIHByb3BlcnR5IHRvIHRo
-ZSBkZXZpY2Ugbm9kZSDigJx1ZWZpLXJ1bnRpbWXigJ0uCj4gSWYgdGhpcyBwcm9wZXJ0eSBpcyBw
-cmVzZW50IGluIGRldmljZSB0cmVlIHRoZSBVRUZJIGZpcm13YXJlIHdpbGwgYWxsb2NhdGUgdGhl
-IGRhdGEgZnJvbSBydW50aW1lIHBvb2wgZm9yIHRoaXMgZGV2aWNlLgo+IEFsc28gZmlybXdhcmUg
-d2lsbCBkaXNhYmxlL2RlbGV0ZSB0aGUgbm9kZSBpbiBkZXZpY2UgdHJlZSBiZWZvcmUgcGFzc2lu
-ZyBvbnRvIE9TLCBzbyB0aGF0IE9TIGRvZXNu4oCZdCB1c2UgdGhlIGRldmljZS4KPgo+IEkgd2lz
-aCB0byBrbm93IHlvdXIgdGhvdWdodHMgb24gdGhpcy4gSWYgdGhpcyBkb2VzbuKAmXQgc2VlbSB0
-aGUgcmlnaHQgd2F5LCBJIGFtIGhhcHB5IHRvIGhlYXIgeW91ciBzdWdnZXN0aW9ucy4KPgoKSGVs
-bG8gUGFua2FqLAoKSW4gZ2VuZXJhbCwgeW91IGFyZSBmcmVlIHRvIGRvIHdoYXRldmVyIHlvdSBs
-aWtlIGluIHRoZSBpbnRlcm5hbAppbXBsZW1lbnRhdGlvbiBvZiB5b3VyIGZpcm13YXJlLiBZb3Ug
-Y2FuIGludmVudCB5b3VyIG93biBEVApwcm9wZXJ0aWVzLCBiaW5kaW5ncywgZXRjLCBvciBldmVu
-IGludmVudCB5b3VyIG93biBkZXNjcmlwdGlvbgpsYW5ndWFnZSBhbHRvZ2V0aGVyIGFzIGxvbmcg
-YXMgeW91IGVuc3VyZSB0aGF0IHRoZSBkZXNjcmlwdGlvbnMgZG9uJ3QKbGVhayBpbnRvIHBsYWNl
-cyB3aGVyZSB0aGV5IGFyZSB2aXNpYmxlIHRvIHRoZSBPUy4KCkhvd2V2ZXIsIEkgZG8gd29uZGVy
-IGhvdyBnZW5lcmljIHRoaXMgaGFzIHRvIGJlLiBTaW5jZSB0aGUgRFQgYW5kIHRoZQpmaXJtd2Fy
-ZSB3aWxsIGJlIHRpZ2h0bHkgY291cGxlZCBpbiBhbnkgY2FzZSwgd2hhdCBpcyBwcmV2ZW50aW5n
-IHlvdQpmcm9tIGRlZmluaW5nIHRoZSBSVEMgYW5kIE5PUiBmbGFzaCBkZXZpY2VzIGFzIERUIGRl
-dmljZSBwYXRocyBpbiB0aGUKZmlybXdhcmUgc291cmNlLCBhbmQgYXR0YWNoaW5nIHRvIHRoZW0g
-ZGlyZWN0bHkgcmF0aGVyIHRoYW4gdHJhdmVyc2luZwp0aGUgZGV2aWNlIHRyZWUgbG9va2luZyBm
-b3IgdWVmaV9ydW50aW1lIG5vZGVzLgoKTm90ZSB0aGF0ICphbnkqIGxvZ2ljIHRoYXQgb3BlcmF0
-ZXMgb24gZGV2aWNlIHRyZWVzIHRoYXQgYXJlIHByb3ZpZGVkCmJ5IHRoZSBPUyB0byB0aGUgZmly
-bXdhcmUgd2lsbCBiZSByZWplY3RlZC4gSXQgaXMgdGhlIGZpcm13YXJlJ3Mgam9iCnRvIGRlc2Ny
-aWJlIHRoZSBwbGF0Zm9ybSB0byB0aGUgT1MsIG5vdCB0aGUgb3RoZXIgd2F5IGFyb3VuZC4KX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KZWRrMi1kZXZlbCBt
-YWlsaW5nIGxpc3QKZWRrMi1kZXZlbEBsaXN0cy4wMS5vcmcKaHR0cHM6Ly9saXN0cy4wMS5vcmcv
-bWFpbG1hbi9saXN0aW5mby9lZGsyLWRldmVsCg==
+On 12/26/18 7:02 AM, Ard Biesheuvel wrote:
+> On Wed, 26 Dec 2018 at 03:35, Qian Cai <cai@lca.pw> wrote:
+>>
+>> a0fc5578f1d (efi: Let kmemleak ignore false positives) is no longer
+>> needed due to efi_mem_reserve_persistent() uses __get_free_page()
+>> instead where kmemelak is not able to track regardless. Otherwise,
+>> kernel reported "kmemleak: Trying to color unknown object at
+>> 0xffff801060ef0000 as Black"
+>>
+>> Signed-off-by: Qian Cai <cai@lca.pw>
+> 
+> Why are you sending this to -mmotm?
+> 
+> Andrew, please disregard this patch. This is EFI/tip material.
+
+Well, I'd like to primarily develop on the -mmotm tree as it fits in a
+sweet-spot where the mainline is too slow and linux-next is too chaotic.
+
+The bug was reproduced and the patch was tested on -mmotm. If for every bugs
+people found in -mmtom, they have to check out the corresponding sub-system tree
+and reproduce/verify the bug over there, that is quite a burden to bear.
+
+That's why sub-system maintainers are copied on those patches, so they can
+decide to fix directly in the sub-system tree instead of -mmotm, and then it
+will propagate to -mmotm one way or another.
