@@ -1,11 +1,13 @@
 From: Pankaj Bansal <pankaj.bansal@nxp.com>
 Subject: [edk2] Uefi runtime property in device tree
-Date: Wed, 26 Dec 2018 10:15:26 +0000
-Message-ID: <HE1PR0402MB33233B2625F8D7EFF08C4994F1B50@HE1PR0402MB3323.eurprd04.prod.outlook.com>
+Date: Wed, 26 Dec 2018 10:17:35 +0000
+Message-ID: <HE1PR0402MB332391A3363235543F068957F1B50@HE1PR0402MB3323.eurprd04.prod.outlook.com>
+References: <HE1PR0402MB33233B2625F8D7EFF08C4994F1B50@HE1PR0402MB3323.eurprd04.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <edk2-devel-bounces@lists.01.org>
+In-Reply-To: <HE1PR0402MB33233B2625F8D7EFF08C4994F1B50@HE1PR0402MB3323.eurprd04.prod.outlook.com>
 Content-Language: en-US
 List-Unsubscribe: <https://lists.01.org/mailman/options/edk2-devel>,
  <mailto:edk2-devel-request@lists.01.org?subject=unsubscribe>
