@@ -1,61 +1,41 @@
-From: Qian Cai <cai@lca.pw>
-Subject: Re: [PATCH -mmotm] efi: drop kmemleak_ignore() for page allocator
-Date: Sat, 29 Dec 2018 15:22:09 -0500
-Message-ID: <70d2a620-d9d8-f351-78fb-1135d264d824@lca.pw>
-References: <20181226023534.64048-1-cai@lca.pw>
- <CAKv+Gu_fiEDffKq_fONBYTOdSk-L7__+LgNEyVaNF3FGzBfAow@mail.gmail.com>
- <403405f1-b702-2feb-4616-35fc3dc3133e@lca.pw>
- <CAKv+Gu_e=NkKZ5C+KzBmgg2VMXNKPqXcPON8heRd0F_iW+aaEQ@mail.gmail.com>
- <20181227190456.0f21d511ef71f1b455403f2a@linux-foundation.org>
- <CAKv+Gu98AOB2LfQGMUHNc_B0MBvd3gATvtPypQaV1vgTcf87ww@mail.gmail.com>
+From: lijiang <lijiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 1/2 v8] resource: add the new I/O resource descriptor
+ 'IORES_DESC_RESERVED'
+Date: Mon, 7 Jan 2019 13:10:26 +0800
+Message-ID: <9e994396-4bf9-ed96-a8e7-c4ca2f69170d@redhat.com>
+References: <20181129080956.20776-1-lijiang@redhat.com>
+ <20181129080956.20776-2-lijiang@redhat.com>
+ <20181130033703.GA23624@dhcp-128-65.nay.redhat.com>
+ <bbf6352b-b060-4cb8-dfd2-99166b0149a7@redhat.com>
+ <20181206201147.GG3986@zn.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu98AOB2LfQGMUHNc_B0MBvd3gATvtPypQaV1vgTcf87ww@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <20181206201147.GG3986-Jj63ApZU6fQ@public.gmane.org>
 Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andrew Morton <akpm@linux-foundation.org>
-Cc: Ingo Molnar <mingo@kernel.org>, Catalin Marinas <catalin.marinas@arm.com>, Linux-MM <linux-mm@kvack.org>, linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/kexec/>
+List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, dave.hansen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, Tom Lendacky <thomas.lendacky-5C7GfCeVMHo@public.gmane.org>, luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 12/29/18 4:17 AM, Ard Biesheuvel wrote:
-> On Fri, 28 Dec 2018 at 04:04, Andrew Morton <akpm@linux-foundation.org> wrote:
->>
->> On Wed, 26 Dec 2018 16:31:59 +0100 Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
->>
->>> Please stop sending EFI patches if you can't be bothered to
->>> test/reproduce against the EFI tree.
->>
->> um, sorry, but that's a bit strong.  Finding (let alone fixing) a bug
->> in EFI is a great contribution (thanks!) and the EFI maintainers are
->> perfectly capable of reviewing and testing the proposed fix.  Or of
->> fixing the bug by other means.
->>
-> 
-> Qian did spot some issues recently, which was really helpful. But I
-> really think that reporting all issues you find against the -mmotm
-> tree because that happens to be your preferred tree for development is
-> not the correct approach.
-> 
->> Let's not beat people up for helping us in a less-than-perfect way, no?
-> 
-> Fair enough. But asking people to ensure that an issue they found
-> actually exists on the subsystem tree in question is not that much to
-> ask, is it?
-
-It is not too much to ask to test on EFI subsystem tree only for this patch, but
-if every maintainer asked for the same thing to test each subsystem tree after
-found a bug even a trivial one in -mmotm or linux-next, it then become an issue.
-
-There are people genuinely interested in the kernel in general rather than focus
-on a few subsystems (yet). There are many subsystem git trees out there. It at
-least needs to figure out which branch to test and adjust the config file
-accordingly. Those subsystem trees usually are not well-documented like
-linux-next or -mmotm trees. Then, they may need to deal with the subsystem
-tree-specific issues.
-
-Those people may just better switch to use mainline instead where they don't
-need to bother testing the subsystem tree for every single patch. However, that
-will cause delay in fixing those issues because mainline is usually a bit lag
-behind the development.
+5ZyoIDIwMTjlubQxMuaciDA35pelIDA0OjExLCBCb3Jpc2xhdiBQZXRrb3Yg5YaZ6YGTOgo+IE9u
+IEZyaSwgTm92IDMwLCAyMDE4IGF0IDAzOjA0OjQ0UE0gKzA4MDAsIGxpamlhbmcgd3JvdGU6Cj4+
+IEkgaGF2ZSBub3RpY2VkIHRoZSBjaGFuZ2VzIG9uIHg4NiwgYnV0IGZvciBJQTY0LCBpJ20gbm90
+IHN1cmUgd2hldGhlciBpdCBzaG91bGQgZG8gdGhlIHNhbWUKPj4gdGhpbmcsIHNvIGtlZXAgaXQg
+YXMgYmVmb3JlLgo+Pgo+PiBJZiBJQTY0IHBlb3BsZSB3b3VsZCBsaWtlIHRvIGdpdmUgYW55IGNv
+bW1lbnQsIHRoYXQgd2lsbCBiZSBhcHByZWNpYXRlZC4KPiAKPiBJIHRoaW5rIHlvdSBzaG91bGQg
+bm90IHRvdWNoIGlhNjQgYW5kIG5vdCBtYWtlIFRvbnkgdW5uZWNlc3NhcmlseSBwb3dlcgo+IHVw
+IHRoZSBvbGQgcnVzdC4KPiAKCk9rLCBpIHdpbGwgZ2V0IHJpZCBvZiBwcmV2aW91cyBjaGFuZ2Vz
+IHRvIElBNjQgaW4gbmV4dCBwb3N0LgoKVGhhbmtzLgoKPiA6LSkKPiAKCl9fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmtleGVjIG1haWxpbmcgbGlzdAprZXhl
+Y0BsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQub3JnL21haWxtYW4v
+bGlzdGluZm8va2V4ZWMK
