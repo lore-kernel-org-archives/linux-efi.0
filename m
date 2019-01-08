@@ -1,119 +1,86 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH] efi: use 32-bit alignment for efi_guid_t
-Date: Tue, 8 Jan 2019 17:22:24 +0100
-Message-ID: <CAKv+Gu9rAo3rFg+CC_vojbaSqguZQoCH1wZ3K91od6O9v7CCEQ@mail.gmail.com>
-References: <20190108152829.11579-1-ard.biesheuvel@linaro.org>
- <20190108155321.7us32cbh6jgvwaw5@bivouac.eciton.net>
+From: Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.20 041/117] efi/libstub: Disable some warnings for x86{,_64}
+Date: Tue,  8 Jan 2019 14:25:09 -0500
+Message-ID: <20190108192628.121270-41-sashal@kernel.org>
+References: <20190108192628.121270-1-sashal@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20190108155321.7us32cbh6jgvwaw5@bivouac.eciton.net>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Leif Lindholm <leif.lindholm@linaro.org>
-Cc: Heinrich Schuchardt <xypron.glpk@gmx.de>, linux-efi <linux-efi@vger.kernel.org>, Laszlo Ersek <lersek@redhat.com>, Ingo Molnar <mingo@kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
+Content-Transfer-Encoding: 8bit
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20190108192628.121270-1-sashal@kernel.org>
+Sender: stable-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: Nathan Chancellor <natechancellor@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andy Lutomirski <luto@kernel.org>, Arend van Spriel <arend.vanspriel@broadcom.com>, Bhupesh Sharma <bhsharma@redhat.com>, Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@intel.com>, Eric Snowberg <eric.snowberg@oracle.com>, Hans de Goede <hdegoede@redhat.com>, Joe Perches <joe@perches.com>, Jon Hunter <jonathanh@nvidia.com>, Julien Thierry <julien.thierry@arm.com>, Linus Torvalds <torvalds@linux-foundation.org>, Marc Zyngier <marc.zyngier@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Thomas Gleixner <tglx@linutronix.de>, YiFei Zhu <zhuyifei1999@gma>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 8 Jan 2019 at 16:53, Leif Lindholm <leif.lindholm@linaro.org> wrote:
->
-> On Tue, Jan 08, 2019 at 04:28:29PM +0100, Ard Biesheuvel wrote:
-> > The UEFI spec and EDK2 reference implementation both define EFI_GUID as
-> > struct { u32 a; u16; b; u16 c; u8 d[8]; }; and so the implied alignment
-> > is 32 bits not 8 bits like our guid_t. In some cases (i.e., on 32-bit ARM),
-> > this means that firmware services invoked by the kernel may assume that
-> > efi_guid_t* arguments are 32-bit aligned, and use memory accessors that
-> > do not tolerate misalignment. So let's set the minimum alignment to 32 bits.
-> >
-> > Note that the UEFI spec as well as some comments in the EDK2 code base
-> > suggest that EFI_GUID should be 64-bit aligned, but this appears to be
-> > a mistake, given that no code seems to exist that actually enforces that
-> > or relies on it.
->
-> Whereas code does exist that relies on it being 32-bit aligned...
->
+From: Nathan Chancellor <natechancellor@gmail.com>
 
-Well, not entirely. Code exists that expects that the size of a struct
-incorporating a efi_guid_t is not rounded up to 8 bytes.
+[ Upstream commit 3db5e0ba8b8f4aee631d7ee04b7a11c56cfdc213 ]
 
-In particular, there is
+When building the kernel with Clang, some disabled warnings appear
+because this Makefile overrides KBUILD_CFLAGS for x86{,_64}. Add them to
+this list so that the build is clean again.
 
-typedef struct {
-    efi_guid_t guid;
-    unsigned long table;
-} efi_config_table_t;
+-Wpointer-sign was disabled for the whole kernel before the beginning of Git history.
 
-and its EDK2 counterpart
+-Waddress-of-packed-member was disabled for the whole kernel and for
+the early boot code in these commits:
 
-typedef struct {
-  ///
-  /// The 128-bit GUID value that uniquely identifies the system
-configuration table.
-  ///
-  EFI_GUID                          VendorGuid;
-  ///
-  /// A pointer to the table associated with VendorGuid.
-  ///
-  VOID                              *VendorTable;
-} EFI_CONFIGURATION_TABLE;
+  bfb38988c51e ("kbuild: clang: Disable 'address-of-packed-member' warning")
+  20c6c1890455 ("x86/boot: Disable the address-of-packed-member compiler warning").
 
-neither of which are defined as packed structs, and which are used to
-describe entries in the configuration table array referenced in the
-UEFI system table, and so size matters. On 32-bit architectures, this
-struct would change size if we increase the alignment of the
-VendorGuid member, unless we turn it into a packed struct.
+-Wgnu was disabled for the whole kernel and for the early boot code in
+these commits:
 
-In any case, it seems entirely pointless to update the reference
-implementation to enforce 64 bit alignment for EFI_GUID in general,
-only to create a lots of issues like the above that will need to be
-hunted down and fixed. So for all intents and purposes, this 64-bit
-alignment of EFI_GUID in the UEFI spec can be ignored.
+  61163efae020 ("kbuild: LLVMLinux: Add Kbuild support for building kernel with Clang")
+  6c3b56b19730 ("x86/boot: Disable Clang warnings about GNU extensions").
 
-> > Reported-by: Heinrich Schuchardt <xypron.glpk@gmx.de>,
-> > Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
->
-> Reviewed-by: Leif Lindholm <leif.lindholm@linaro.org>
->
+ [ mingo: Made the changelog more readable. ]
 
-Thanks.
+Tested-by: Sedat Dilek <sedat.dilek@gmail.com>
+Signed-off-by: Nathan Chancellor <natechancellor@gmail.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Reviewed-by: Sedat Dilek <sedat.dilek@gmail.com>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Arend van Spriel <arend.vanspriel@broadcom.com>
+Cc: Bhupesh Sharma <bhsharma@redhat.com>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Dave Hansen <dave.hansen@intel.com>
+Cc: Eric Snowberg <eric.snowberg@oracle.com>
+Cc: Hans de Goede <hdegoede@redhat.com>
+Cc: Joe Perches <joe@perches.com>
+Cc: Jon Hunter <jonathanh@nvidia.com>
+Cc: Julien Thierry <julien.thierry@arm.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Marc Zyngier <marc.zyngier@arm.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: YiFei Zhu <zhuyifei1999@gmail.com>
+Cc: linux-efi@vger.kernel.org
+Link: http://lkml.kernel.org/r/20181129171230.18699-8-ard.biesheuvel@linaro.org
+Link: https://github.com/ClangBuiltLinux/linux/issues/112
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ drivers/firmware/efi/libstub/Makefile | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-> > ---
-> >  include/linux/efi.h | 15 ++++++++++++++-
-> >  1 file changed, 14 insertions(+), 1 deletion(-)
-> >
-> > diff --git a/include/linux/efi.h b/include/linux/efi.h
-> > index 45ff763fba76..be08518c2553 100644
-> > --- a/include/linux/efi.h
-> > +++ b/include/linux/efi.h
-> > @@ -48,7 +48,20 @@ typedef u16 efi_char16_t;          /* UNICODE character */
-> >  typedef u64 efi_physical_addr_t;
-> >  typedef void *efi_handle_t;
-> >
-> > -typedef guid_t efi_guid_t;
-> > +/*
-> > + * The UEFI spec and EDK2 reference implementation both define EFI_GUID as
-> > + * struct { u32 a; u16; b; u16 c; u8 d[8]; }; and so the implied alignment
-> > + * is 32 bits not 8 bits like our guid_t. In some cases (i.e., on 32-bit ARM),
-> > + * this means that firmware services invoked by the kernel may assume that
-> > + * efi_guid_t* arguments are 32-bit aligned, and use memory accessors that
-> > + * do not tolerate misalignment. So let's set the minimum alignment to 32 bits.
-> > + *
-> > + * Note that the UEFI spec as well as some comments in the EDK2 code base
-> > + * suggest that EFI_GUID should be 64-bit aligned, but this appears to be
-> > + * a mistake, given that no code seems to exist that actually enforces that
-> > + * or relies on it.
-> > + */
-> > +typedef guid_t efi_guid_t __aligned(__alignof__(u32));
-> >
-> >  #define EFI_GUID(a,b,c,d0,d1,d2,d3,d4,d5,d6,d7) \
-> >       GUID_INIT(a, b, c, d0, d1, d2, d3, d4, d5, d6, d7)
-> > --
-> > 2.20.1
-> >
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index c51627660dbb..d9845099635e 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -9,7 +9,10 @@ cflags-$(CONFIG_X86_32)		:= -march=i386
+ cflags-$(CONFIG_X86_64)		:= -mcmodel=small
+ cflags-$(CONFIG_X86)		+= -m$(BITS) -D__KERNEL__ -O2 \
+ 				   -fPIC -fno-strict-aliasing -mno-red-zone \
+-				   -mno-mmx -mno-sse -fshort-wchar
++				   -mno-mmx -mno-sse -fshort-wchar \
++				   -Wno-pointer-sign \
++				   $(call cc-disable-warning, address-of-packed-member) \
++				   $(call cc-disable-warning, gnu)
+ 
+ # arm64 uses the full KBUILD_CFLAGS so it's necessary to explicitly
+ # disable the stackleak plugin
+-- 
+2.19.1
