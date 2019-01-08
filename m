@@ -1,13 +1,13 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.20 041/117] efi/libstub: Disable some warnings for x86{,_64}
-Date: Tue,  8 Jan 2019 14:25:09 -0500
-Message-ID: <20190108192628.121270-41-sashal@kernel.org>
-References: <20190108192628.121270-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 32/97] efi/libstub: Disable some warnings for x86{,_64}
+Date: Tue,  8 Jan 2019 14:28:41 -0500
+Message-ID: <20190108192949.122407-32-sashal@kernel.org>
+References: <20190108192949.122407-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20190108192628.121270-1-sashal@kernel.org>
-Sender: stable-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190108192949.122407-1-sashal@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Nathan Chancellor <natechancellor@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andy Lutomirski <luto@kernel.org>, Arend van Spriel <arend.vanspriel@broadcom.com>, Bhupesh Sharma <bhsharma@redhat.com>, Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@intel.com>, Eric Snowberg <eric.snowberg@oracle.com>, Hans de Goede <hdegoede@redhat.com>, Joe Perches <joe@perches.com>, Jon Hunter <jonathanh@nvidia.com>, Julien Thierry <julien.thierry@arm.com>, Linus Torvalds <torvalds@linux-foundation.org>, Marc Zyngier <marc.zyngier@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Thomas Gleixner <tglx@linutronix.de>, YiFei Zhu <zhuyifei1999@gma>
 List-Id: linux-efi@vger.kernel.org
