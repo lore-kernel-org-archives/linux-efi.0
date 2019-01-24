@@ -1,102 +1,89 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH 2/2] efi/cper: Avoid possible OOB when checking generic
- data block
-Date: Wed, 23 Jan 2019 12:54:02 +0100
-Message-ID: <20190123115402.GB3227@zn.tnic>
-References: <20190122160912.27312-1-ross.lagerwall@citrix.com>
- <20190122160912.27312-3-ross.lagerwall@citrix.com>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.19 038/106] efi/libstub: Disable some warnings for x86{,_64}
+Date: Thu, 24 Jan 2019 20:19:55 +0100
+Message-ID: <20190124190208.841187965@linuxfoundation.org>
+References: <20190124190206.342411005@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20190122160912.27312-3-ross.lagerwall@citrix.com>
+In-Reply-To: <20190124190206.342411005@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ross Lagerwall <ross.lagerwall@citrix.com>
-Cc: linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Tony Luck <tony.luck@intel.com>, Huang Ying <ying.huang@intel.com>
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Sedat Dilek <sedat.dilek@gmail.com>, Nathan Chancellor <natechancellor@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andy Lutomirski <luto@kernel.org>, Arend van Spriel <arend.vanspriel@broadcom.com>, Bhupesh Sharma <bhsharma@redhat.com>, Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@intel.com>, Eric Snowberg <eric.snowberg@oracle.com>, Hans de Goede <hdegoede@redhat.com>, Joe Perches <joe@perches.com>, Jon Hunter <jonathanh@nvidia.com>, Julien Thierry <julien.thierry@arm.com>, Linus Torvalds <torvalds@linux-foundation.org>, Marc Zyngier <marc.zyngier@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Sai
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jan 22, 2019 at 04:09:12PM +0000, Ross Lagerwall wrote:
-> When checking a generic status block, we iterate over all the generic
-> data blocks. The loop condition only checks that the start of the
-> generic data block is valid (within estatus->data_length) but not the
-> whole block. Because the size of data blocks (excluding error data) may
-> vary depending on the revision and the revision is contained within the
-> data block, ensure that enough of the current data block is valid before
-> dereferencing any members otherwise an OOB access may occur if
+4.19-stable review patch.  If anyone has any objections, please let me know.
 
-Please write out the OOB abbreviation in your commit messages.
+------------------
 
-> estatus->data_length is invalid. This relies on the fact that
-> struct acpi_hest_generic_data_v300 is a superset of the earlier version.
-> Also rework the other checks to avoid potential underflow.
-> 
-> Signed-off-by: Ross Lagerwall <ross.lagerwall@citrix.com>
-> ---
->  drivers/firmware/efi/cper.c | 10 ++++++----
->  1 file changed, 6 insertions(+), 4 deletions(-)
-> 
-> diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-> index a7902fccdcfa..7cc18874b9d0 100644
-> --- a/drivers/firmware/efi/cper.c
-> +++ b/drivers/firmware/efi/cper.c
-> @@ -546,7 +546,7 @@ EXPORT_SYMBOL_GPL(cper_estatus_check_header);
->  int cper_estatus_check(const struct acpi_hest_generic_status *estatus)
->  {
->  	struct acpi_hest_generic_data *gdata;
-> -	unsigned int data_len, gedata_len;
-> +	unsigned int data_len, record_len;
->  	int rc;
->  
->  	rc = cper_estatus_check_header(estatus);
-> @@ -555,10 +555,12 @@ int cper_estatus_check(const struct acpi_hest_generic_status *estatus)
->  	data_len = estatus->data_length;
->  
->  	apei_estatus_for_each_section(estatus, gdata) {
-> -		gedata_len = acpi_hest_get_error_length(gdata);
-> -		if (gedata_len > data_len - acpi_hest_get_size(gdata))
-> +		if (sizeof(struct acpi_hest_generic_data) > data_len)
->  			return -EINVAL;
+[ Upstream commit 3db5e0ba8b8f4aee631d7ee04b7a11c56cfdc213 ]
 
-<---- newline here.
+When building the kernel with Clang, some disabled warnings appear
+because this Makefile overrides KBUILD_CFLAGS for x86{,_64}. Add them to
+this list so that the build is clean again.
 
-Also, add a new line before the data_len assignment above, in the function.
+-Wpointer-sign was disabled for the whole kernel before the beginning of Git history.
 
-> -		data_len -= acpi_hest_get_record_size(gdata);
-> +		record_len = acpi_hest_get_record_size(gdata);
+-Waddress-of-packed-member was disabled for the whole kernel and for
+the early boot code in these commits:
 
-record_size so that it matches the function name it is used to compute
-this.
+  bfb38988c51e ("kbuild: clang: Disable 'address-of-packed-member' warning")
+  20c6c1890455 ("x86/boot: Disable the address-of-packed-member compiler warning").
 
-Btw, trying to grok this code is making my head spin.
+-Wgnu was disabled for the whole kernel and for the early boot code in
+these commits:
 
-> +		if (record_len > data_len)
-> +			return -EINVAL;
+  61163efae020 ("kbuild: LLVMLinux: Add Kbuild support for building kernel with Clang")
+  6c3b56b19730 ("x86/boot: Disable Clang warnings about GNU extensions").
 
-<---- newline here.
+ [ mingo: Made the changelog more readable. ]
 
-Btw, those checks in the loop you can abstract away into a separate
-function so that you end up with something more readable like:
+Tested-by: Sedat Dilek <sedat.dilek@gmail.com>
+Signed-off-by: Nathan Chancellor <natechancellor@gmail.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Reviewed-by: Sedat Dilek <sedat.dilek@gmail.com>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Arend van Spriel <arend.vanspriel@broadcom.com>
+Cc: Bhupesh Sharma <bhsharma@redhat.com>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Dave Hansen <dave.hansen@intel.com>
+Cc: Eric Snowberg <eric.snowberg@oracle.com>
+Cc: Hans de Goede <hdegoede@redhat.com>
+Cc: Joe Perches <joe@perches.com>
+Cc: Jon Hunter <jonathanh@nvidia.com>
+Cc: Julien Thierry <julien.thierry@arm.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Marc Zyngier <marc.zyngier@arm.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: YiFei Zhu <zhuyifei1999@gmail.com>
+Cc: linux-efi@vger.kernel.org
+Link: http://lkml.kernel.org/r/20181129171230.18699-8-ard.biesheuvel@linaro.org
+Link: https://github.com/ClangBuiltLinux/linux/issues/112
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ drivers/firmware/efi/libstub/Makefile | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-        apei_estatus_for_each_section(estatus, gdata) {
-                record_size = check_hest_record_size(gdata, data_len);
-                if (!record_size)
-                        return -EINVAL;
-
-                data_len -= record_size;
-        }
-
-for example.
-
-> +		data_len -= record_len;
->  	}
->  	if (data_len)
->  		return -EINVAL;
-> -- 
-
-Thx.
-
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index c51627660dbb..d9845099635e 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -9,7 +9,10 @@ cflags-$(CONFIG_X86_32)		:= -march=i386
+ cflags-$(CONFIG_X86_64)		:= -mcmodel=small
+ cflags-$(CONFIG_X86)		+= -m$(BITS) -D__KERNEL__ -O2 \
+ 				   -fPIC -fno-strict-aliasing -mno-red-zone \
+-				   -mno-mmx -mno-sse -fshort-wchar
++				   -mno-mmx -mno-sse -fshort-wchar \
++				   -Wno-pointer-sign \
++				   $(call cc-disable-warning, address-of-packed-member) \
++				   $(call cc-disable-warning, gnu)
+ 
+ # arm64 uses the full KBUILD_CFLAGS so it's necessary to explicitly
+ # disable the stackleak plugin
 -- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
+2.19.1
