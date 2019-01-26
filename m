@@ -1,13 +1,11 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 2/2] efi: arm64: Enable earlycon for the GOP framebuffer
-Date: Fri, 25 Jan 2019 17:18:06 +0100
-Message-ID: <20190125161806.13472-3-ard.biesheuvel@linaro.org>
-References: <20190125161806.13472-1-ard.biesheuvel@linaro.org>
+Subject: [PATCH] efi: arm/arm64: allow SetVirtualAddressMap() to be omitted
+Date: Sat, 26 Jan 2019 11:22:07 +0100
+Message-ID: <20190126102207.29488-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20190125161806.13472-1-ard.biesheuvel@linaro.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -18,183 +16,137 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: linux-efi@vger.kernel.org
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, graeme.gregory@linaro.org, linux-doc@vger.kernel.org, pjones@redhat.com, corbet@lwn.net, agraf@suse.de, leif.lindholm@linaro.org, mingo@redhat.com, tglx@linutronix.de, linux-arm-kernel@lists.infradead.org
+Cc: mark.rutland@arm.com, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Heinrich Schuchardt <xypron.glpk@gmx.de>, will.deacon@arm.com, Alexander Graf <agraf@suse.de>, Leif Lindholm <leif.lindholm@linaro.org>, AKASHI Takahiro <takahiro.akashi@linaro.org>, james.morse@arm.com, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-This repurposes the existing EFI earlyprintk support and exposes it
-as an earlycon implementation, which can be enabled by passing the
-kernel parameter 'earlycon=efi' on the command line.
+The UEFI spec revision 2.7 errata A section 8.4 has the following to
+say about the virtual memory runtime services:
 
-Note that the early console is initialized before we have discovered
-anything about the memory map, and so we cannot determine automatically
-whether the framebuffer is backed by system memory that must be mapped
-with cacheable attributes. So instead, a 'ram' earlycon option is
-implemented to force this manually.
+  "This section contains function definitions for the virtual memory
+  support that may be optionally used by an operating system at runtime.
+  If an operating system chooses to make EFI runtime service calls in a
+  virtual addressing mode instead of the flat physical mode, then the
+  operating system must use the services in this section to switch the
+  EFI runtime services from flat physical addressing to virtual
+  addressing."
 
+So it is pretty clear that calling SetVirtualAddressMap() is entirely
+optional, and so there is no point in doing so unless it achieves
+anything useful for us.
+
+This is not the case for 64-bit ARM. The native mapping used by the OS
+is arbitrarily converted into another permutation of userland addresses
+(i.e., bits [63:48] cleared), and the runtime code could easily deal
+with the original layout in exactly the same way as it deals with the
+converted layout. However, due to constraints related to page size
+differences if the OS is not running with 4k pages, and related to
+systems that may expose the individual sections of PE/COFF runtime
+modules as different memory regions, creating the virtual layout is a
+bit fiddly, and requires us to sort the memory map and reason about
+adjacent regions with identical memory types etc etc.
+
+So the obvious fix is to stop calling SetVirtualAddressMap() altogether
+on arm64 systems. However, to avoid surprises, which are notoriously
+hard to diagnose when it comes to OS<->firmware interactions, let's
+start by making it an opt-out feature, and implement support for the
+'efi=novamap' kernel command line parameter on ARM and arm64 systems.
+
+(Note that 32-bit ARM generally does require SetVirtualAddressMap() to be
+used, given that the physical memory map and the kernel virtual address
+map are not guaranteed to be non-overlapping like on arm64. However,
+having support for efi=novamap,noruntime on 32-bit ARM, combined with
+the recently proposed support for earlycon=efi, is likely to be useful
+to diagnose boot issues on such systems if they have no accessible serial
+port)
+
+Cc: Alexander Graf <agraf@suse.de>
+Cc: Heinrich Schuchardt <xypron.glpk@gmx.de>
+Cc: AKASHI Takahiro <takahiro.akashi@linaro.org>
+Cc: Leif Lindholm <leif.lindholm@linaro.org>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- Documentation/admin-guide/kernel-parameters.txt |  9 ++++-
- arch/arm64/include/asm/efi.h                    |  6 +++
- drivers/firmware/efi/Kconfig                    |  1 +
- drivers/firmware/efi/earlycon.c                 | 42 +++++++++++++++-----
- 4 files changed, 48 insertions(+), 10 deletions(-)
+ drivers/firmware/efi/libstub/arm-stub.c        |  5 +++++
+ drivers/firmware/efi/libstub/efi-stub-helper.c | 10 ++++++++++
+ drivers/firmware/efi/libstub/efistub.h         |  1 +
+ drivers/firmware/efi/libstub/fdt.c             |  3 +++
+ 4 files changed, 19 insertions(+)
 
-diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index b799bcf67d7b..be6b4972cc3c 100644
---- a/Documentation/admin-guide/kernel-parameters.txt
-+++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -1073,9 +1073,16 @@
- 			specified address. The serial port must already be
- 			setup and configured. Options are not yet supported.
+diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+index eee42d5e25ee..626ec4b4a664 100644
+--- a/drivers/firmware/efi/libstub/arm-stub.c
++++ b/drivers/firmware/efi/libstub/arm-stub.c
+@@ -370,6 +370,11 @@ void efi_get_virtmap(efi_memory_desc_t *memory_map, unsigned long map_size,
+ 		paddr = in->phys_addr;
+ 		size = in->num_pages * EFI_PAGE_SIZE;
  
-+		efi[,options]                       # arm64 or x86
-+			Start an early, unaccelerated console on the EFI
-+			framebuffer. On DMA coherent arm64 systems that use
-+			system memory for the framebuffer, pass the 'ram'
-+			option so that it is mapped with the correct
-+			attributes.
++		if (novamap()) {
++			in->virt_addr = in->phys_addr;
++			continue;
++		}
 +
- 	earlyprintk=	[X86,SH,ARM,M68k,S390]
- 			earlyprintk=vga
--			earlyprintk=efi
-+			earlyprintk=efi             # x86 only
- 			earlyprintk=sclp
- 			earlyprintk=xen
- 			earlyprintk=serial[,ttySn[,baudrate]]
-diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
-index 7ed320895d1f..7f555f1c8d48 100644
---- a/arch/arm64/include/asm/efi.h
-+++ b/arch/arm64/include/asm/efi.h
-@@ -11,6 +11,7 @@
- #include <asm/neon.h>
- #include <asm/ptrace.h>
- #include <asm/tlbflush.h>
-+#include <linux/screen_info.h>
+ 		/*
+ 		 * Make the mapping compatible with 64k pages: this allows
+ 		 * a 4k page size kernel to kexec a 64k page size kernel and
+diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+index e94975f4655b..442f51c2a53d 100644
+--- a/drivers/firmware/efi/libstub/efi-stub-helper.c
++++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+@@ -34,6 +34,7 @@ static unsigned long __chunk_size = EFI_READ_CHUNK_SIZE;
  
- #ifdef CONFIG_EFI
- extern void efi_init(void);
-@@ -149,4 +150,9 @@ static inline void efi_set_pgd(struct mm_struct *mm)
- void efi_virtmap_load(void);
- void efi_virtmap_unload(void);
+ static int __section(.data) __nokaslr;
+ static int __section(.data) __quiet;
++static int __section(.data) __novamap;
  
-+static inline struct screen_info *efi_get_screen_info(void)
-+{
-+	return &screen_info;
-+}
-+
- #endif /* _ASM_EFI_H */
-diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-index 70335c7f0fe4..9d67aab94cbf 100644
---- a/drivers/firmware/efi/Kconfig
-+++ b/drivers/firmware/efi/Kconfig
-@@ -201,4 +201,5 @@ config EFI_DEV_PATH_PARSER
- 
- config UEFI_EARLYCON
- 	bool
-+	default y if ARM64
- 	select FONT_SUPPORT
-diff --git a/drivers/firmware/efi/earlycon.c b/drivers/firmware/efi/earlycon.c
-index c065c482d12b..4e8dba21673e 100644
---- a/drivers/firmware/efi/earlycon.c
-+++ b/drivers/firmware/efi/earlycon.c
-@@ -10,13 +10,17 @@
- #include <linux/font.h>
- #include <linux/io.h>
- #include <linux/kernel.h>
-+#include <linux/serial_core.h>
- #include <asm/efi.h>
- 
- static const struct font_desc *font;
- static u32 efi_x, efi_y;
- static void *efi_fb;
- static bool early_efi_keep;
-+static bool fb_is_ram;
-+static u64 fb_base;
- 
-+#ifdef CONFIG_EARLY_PRINTK_EFI
- /*
-  * efi earlyprintk need use early_ioremap to map the framebuffer.
-  * But early_ioremap is not usable for earlyprintk=efi,keep, ioremap should
-@@ -40,6 +44,7 @@ static __init int early_efi_map_fb(void)
- 	return efi_fb ? 0 : -ENOMEM;
- }
- early_initcall(early_efi_map_fb);
-+#endif
- 
- /*
-  * early_efi_map maps efi framebuffer region [start, start + len -1]
-@@ -48,21 +53,21 @@ early_initcall(early_efi_map_fb);
-  */
- static __ref void *early_efi_map(unsigned long start, unsigned long len)
+ int __pure nokaslr(void)
  {
--	u64 base;
--
--	base = efi_get_screen_info()->lfb_base;
--	if (efi_get_screen_info()->capabilities & VIDEO_CAPABILITY_64BIT_BASE)
--		base |= (u64)efi_get_screen_info()->ext_lfb_base << 32;
--
- 	if (efi_fb)
- 		return (efi_fb + start);
-+	else if (fb_is_ram)
-+		return early_memremap(fb_base + start, len);
- 	else
--		return early_ioremap(base + start, len);
-+		return early_ioremap(fb_base + start, len);
- }
- 
- static __ref void early_efi_unmap(void *addr, unsigned long len)
+@@ -43,6 +44,10 @@ int __pure is_quiet(void)
  {
--	if (!efi_fb)
-+	if (efi_fb)
-+		return;
-+	if (fb_is_ram)
-+		early_memunmap(addr, len);
-+	else
- 		early_iounmap(addr, len);
+ 	return __quiet;
  }
- 
-@@ -210,6 +215,10 @@ static __init int early_efi_setup(struct console *con, char *options)
- 	xres = si->lfb_width;
- 	yres = si->lfb_height;
- 
-+	fb_base = efi_get_screen_info()->lfb_base;
-+	if (efi_get_screen_info()->capabilities & VIDEO_CAPABILITY_64BIT_BASE)
-+		fb_base |= (u64)efi_get_screen_info()->ext_lfb_base << 32;
-+
- 	/*
- 	 * early_efi_write_char() implicitly assumes a framebuffer with
- 	 * 32-bits per pixel.
-@@ -226,11 +235,12 @@ static __init int early_efi_setup(struct console *con, char *options)
- 		early_efi_scroll_up();
- 
- 	/* early_console_register will unset CON_BOOT in case ,keep */
--	if (!(con->flags & CON_BOOT))
-+	if (con && !(con->flags & CON_BOOT))
- 		early_efi_keep = true;
- 	return 0;
- }
- 
-+#ifdef CONFIG_EARLY_PRINTK_EFI
- struct console early_efi_console = {
- 	.name =		"earlyefi",
- 	.write =	early_efi_write,
-@@ -238,3 +248,17 @@ struct console early_efi_console = {
- 	.flags =	CON_PRINTBUFFER,
- 	.index =	-1,
- };
-+#endif
-+
-+static int __init efi_earlycon_setup(struct earlycon_device *device,
-+				     const char *opt)
++int __pure novamap(void)
 +{
-+	if (efi_get_screen_info()->orig_video_isVGA != VIDEO_TYPE_EFI)
-+		return -ENODEV;
-+
-+	device->con->write = early_efi_write;
-+	early_efi_setup(NULL, NULL);
-+	fb_is_ram = !strcmp(opt, "ram");
-+	return 0;
++	return __novamap;
 +}
-+EARLYCON_DECLARE(efi, efi_earlycon_setup);
+ 
+ #define EFI_MMAP_NR_SLACK_SLOTS	8
+ 
+@@ -482,6 +487,11 @@ efi_status_t efi_parse_options(char const *cmdline)
+ 			__chunk_size = -1UL;
+ 		}
+ 
++		if (!strncmp(str, "novamap", 7)) {
++			str += strlen("novamap");
++			__novamap = 1;
++		}
++
+ 		/* Group words together, delimited by "," */
+ 		while (*str && *str != ' ' && *str != ',')
+ 			str++;
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index 32799cf039ef..337b52c4702c 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -27,6 +27,7 @@
+ 
+ extern int __pure nokaslr(void);
+ extern int __pure is_quiet(void);
++extern int __pure novamap(void);
+ 
+ #define pr_efi(sys_table, msg)		do {				\
+ 	if (!is_quiet()) efi_printk(sys_table, "EFI stub: "msg);	\
+diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+index 0dc7b4987cc2..f8f89f995e9d 100644
+--- a/drivers/firmware/efi/libstub/fdt.c
++++ b/drivers/firmware/efi/libstub/fdt.c
+@@ -327,6 +327,9 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 	if (status == EFI_SUCCESS) {
+ 		efi_set_virtual_address_map_t *svam;
+ 
++		if (novamap())
++			return EFI_SUCCESS;
++
+ 		/* Install the new virtual address map */
+ 		svam = sys_table->runtime->set_virtual_address_map;
+ 		status = svam(runtime_entry_count * desc_size, desc_size,
 -- 
-2.20.1
+2.17.1
