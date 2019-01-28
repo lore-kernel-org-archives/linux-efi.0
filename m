@@ -1,77 +1,65 @@
 From: Ross Lagerwall <ross.lagerwall@citrix.com>
-Subject: [PATCH v2 1/2] acpi/apei: Fix possible out-of-bounds access to BERT region
-Date: Mon, 28 Jan 2019 10:04:23 +0000
-Message-ID: <20190128100424.30278-2-ross.lagerwall@citrix.com>
-References: <20190128100424.30278-1-ross.lagerwall@citrix.com>
+Subject: Re: [PATCH 2/2] efi/cper: Avoid possible OOB when checking generic
+ data block
+Date: Mon, 28 Jan 2019 10:04:46 +0000
+Message-ID: <d0a78e2a-7114-de25-4515-01844087ddbb@citrix.com>
+References: <20190122160912.27312-1-ross.lagerwall@citrix.com>
+ <20190122160912.27312-3-ross.lagerwall@citrix.com>
+ <20190123115402.GB3227@zn.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190128100424.30278-1-ross.lagerwall@citrix.com>
+In-Reply-To: <20190123115402.GB3227@zn.tnic>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Tony Luck <tony.luck@intel.com>, Borislav Petkov <bp@alien8.de>, Huang Ying <ying.huang@intel.com>, Ross Lagerwall <ross.lagerwall@citrix.com>
+To: Borislav Petkov <bp@alien8.de>
+Cc: linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Tony Luck <tony.luck@intel.com>, Huang Ying <ying.huang@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-Check that the length recorded in the generic error status block is
-within the region before checking the contents of the region itself.
-Otherwise it may result in an out-of-bounds access if the system
-firmware has generated a status block with an invalid length (larger
-than the mapped region). Also move the block_status check so that it
-only happens after the block has been verified to be within the mapped
-region.
+On 1/23/19 11:54 AM, Borislav Petkov wrote:
+> On Tue, Jan 22, 2019 at 04:09:12PM +0000, Ross Lagerwall wrote:
+>> When checking a generic status block, we iterate over all the generic
+>> data blocks. The loop condition only checks that the start of the
+>> generic data block is valid (within estatus->data_length) but not the
+>> whole block. Because the size of data blocks (excluding error data) may
+>> vary depending on the revision and the revision is contained within the
+>> data block, ensure that enough of the current data block is valid before
+>> dereferencing any members otherwise an OOB access may occur if
+snip
+>> -		data_len -= acpi_hest_get_record_size(gdata);
+>> +		record_len = acpi_hest_get_record_size(gdata);
+> 
+> record_size so that it matches the function name it is used to compute
+> this.
+> 
+> Btw, trying to grok this code is making my head spin.
+> 
+>> +		if (record_len > data_len)
+>> +			return -EINVAL;
+> 
+> <---- newline here.
+> 
+> Btw, those checks in the loop you can abstract away into a separate
+> function so that you end up with something more readable like:
+> 
+>          apei_estatus_for_each_section(estatus, gdata) {
+>                  record_size = check_hest_record_size(gdata, data_len);
+>                  if (!record_size)
+>                          return -EINVAL;
+> 
+>                  data_len -= record_size;
+>          }
+> 
+> for example.
+> 
 
-Signed-off-by: Ross Lagerwall <ross.lagerwall@citrix.com>
----
- drivers/acpi/apei/bert.c | 23 ++++++++++-------------
- 1 file changed, 10 insertions(+), 13 deletions(-)
+There are only two if statements in the loop body -- I don't think it is 
+necessary to abstract this into a separate function (which still 
+requires having one if statement in the loop body).
 
-diff --git a/drivers/acpi/apei/bert.c b/drivers/acpi/apei/bert.c
-index 12771fcf0417..0d948d0a41af 100644
---- a/drivers/acpi/apei/bert.c
-+++ b/drivers/acpi/apei/bert.c
-@@ -42,15 +42,7 @@ static void __init bert_print_all(struct acpi_bert_region *region,
- 	int remain = region_len;
- 	u32 estatus_len;
- 
--	if (!estatus->block_status)
--		return;
--
--	while (remain > sizeof(struct acpi_bert_region)) {
--		if (cper_estatus_check(estatus)) {
--			pr_err(FW_BUG "Invalid error record.\n");
--			return;
--		}
--
-+	while (remain >= sizeof(struct acpi_bert_region)) {
- 		estatus_len = cper_estatus_len(estatus);
- 		if (remain < estatus_len) {
- 			pr_err(FW_BUG "Truncated status block (length: %u).\n",
-@@ -58,6 +50,15 @@ static void __init bert_print_all(struct acpi_bert_region *region,
- 			return;
- 		}
- 
-+		/* No more error records. */
-+		if (!estatus->block_status)
-+			return;
-+
-+		if (cper_estatus_check(estatus)) {
-+			pr_err(FW_BUG "Invalid error record.\n");
-+			return;
-+		}
-+
- 		pr_info_once("Error records from previous boot:\n");
- 
- 		cper_estatus_print(KERN_INFO HW_ERR, estatus);
-@@ -70,10 +71,6 @@ static void __init bert_print_all(struct acpi_bert_region *region,
- 		estatus->block_status = 0;
- 
- 		estatus = (void *)estatus + estatus_len;
--		/* No more error records. */
--		if (!estatus->block_status)
--			return;
--
- 		remain -= estatus_len;
- 	}
- }
+I've made the other changes you suggested and sent a V2.
+
+Thanks,
 -- 
-2.17.2
+Ross Lagerwall
