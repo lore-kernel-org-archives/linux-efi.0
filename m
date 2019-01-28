@@ -1,12 +1,12 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 088/258] firmware/efi: Add NULL pointer checks in efivars API functions
-Date: Mon, 28 Jan 2019 10:56:34 -0500
-Message-ID: <20190128155924.51521-88-sashal@kernel.org>
-References: <20190128155924.51521-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.9 033/107] firmware/efi: Add NULL pointer checks in efivars API functions
+Date: Mon, 28 Jan 2019 11:18:33 -0500
+Message-ID: <20190128161947.57405-33-sashal@kernel.org>
+References: <20190128161947.57405-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190128155924.51521-1-sashal@kernel.org>
+In-Reply-To: <20190128161947.57405-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Arend van Spriel <arend.vanspriel@broadcom.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andy Lutomirski <luto@kernel.org>, Bhupesh Sharma <bhsharma@redhat.com>, Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@intel.com>, Eric Snowberg <eric.snowberg@oracle.com>, Hans de Goede <hdegoede@redhat.com>, Joe Perches <joe@perches.com>, Julien Thierry <julien.thierry@arm.com>, Linus Torvalds <torvalds@linux-foundation.org>, Marc Zyngier <marc.zyngier@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>, Nathan Chancellor <natechancellor@gmail.com>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Sedat Dilek <sedat.dilek@gmail.com>, Thomas Gleixner <tglx@linutronix.de>, YiFei Zhu <zhuyifei1999@g>
