@@ -1,11 +1,14 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH v2 0/2] efi: arm: add support for earlycon on EFI framebuffer
-Date: Tue, 29 Jan 2019 10:21:48 +0100
-Message-ID: <20190129092150.15184-1-ard.biesheuvel@linaro.org>
+Subject: [PATCH v2 1/2] x86: make ARCH_USE_MEMREMAP_PROT a generic Kconfig
+ symbol
+Date: Tue, 29 Jan 2019 10:21:49 +0100
+Message-ID: <20190129092150.15184-2-ard.biesheuvel@linaro.org>
+References: <20190129092150.15184-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20190129092150.15184-1-ard.biesheuvel@linaro.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -19,56 +22,53 @@ To: linux-efi@vger.kernel.org
 Cc: graeme.gregory@linaro.org, corbet@lwn.net, pjones@redhat.com, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-doc@vger.kernel.org, agraf@suse.de, leif.lindholm@linaro.org, mingo@redhat.com, tglx@linutronix.de, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-Repurpose the existing EFI earlyprintk code to implement support for
-'earlycon=efi' for arm64 systems, allowing the graphical console
-to be used instead of the serial port for early debug output.
+Turn ARCH_USE_MEMREMAP_PROT into a generic Kconfig symbol, and fix the
+dependency expression to reflect that AMD_MEM_ENCRYPT depends on it,
+instead of the other way around. This will permit ARCH_USE_MEMREMAP_PROT
+to be selected by other architectures.
 
-Changes since v1:
-- Rename earlycon= argument to 'efifb' to emphasize that this is specific
-  to the EFI framebuffer.
-- Replace earlyprintk=efi entirely, rather than keep it alongside earlycon.
-  Since earlycon is typically enabled (along with the infrastructure), and
-  earlyprintk isn't, this does not result in a lot more code to be included,
-  but does make it more likely that a given [distro] kernel has support for
-  this enabled out of the box.
-- Switch to write-combine mappings by default. This is the default for efifb,
-  and is actually required on arm64, since device attributes do not tolerate
-  unaligned accesses or other operations (such as DC ZVA) that rely on memory
-  semantics. This requires ARCH_USE_MEMREMAP_PROT to be wired up, which is
-  why a new patch #1 has been added.
-- Since adding the 'ram' parameter for framebuffers in shared memory on cache
-  coherent devices is trivial after the switch to WC mappings, fold the change
-  into the main patch.
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ arch/Kconfig     | 3 +++
+ arch/x86/Kconfig | 5 +----
+ 2 files changed, 4 insertions(+), 4 deletions(-)
 
-Cc: corbet@lwn.net
-Cc: leif.lindholm@linaro.org
-Cc: graeme.gregory@linaro.org
-Cc: mingo@redhat.com
-Cc: tglx@linutronix.de
-Cc: linux-doc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org
-Cc: agraf@suse.de
-Cc: pjones@redhat.com
-
-Ard Biesheuvel (2):
-  x86: make ARCH_USE_MEMREMAP_PROT a generic Kconfig symbol
-  efi: x86: convert x86 EFI earlyprintk into generic earlycon
-    implementation
-
- Documentation/admin-guide/kernel-parameters.txt |   8 +-
- arch/Kconfig                                    |   3 +
- arch/x86/Kconfig                                |   5 +-
- arch/x86/Kconfig.debug                          |  10 -
- arch/x86/include/asm/efi.h                      |   1 -
- arch/x86/kernel/early_printk.c                  |   4 -
- arch/x86/platform/efi/Makefile                  |   1 -
- arch/x86/platform/efi/early_printk.c            | 240 --------------------
- drivers/firmware/efi/Kconfig                    |   6 +
- drivers/firmware/efi/Makefile                   |   1 +
- drivers/firmware/efi/earlycon.c                 | 208 +++++++++++++++++
- 11 files changed, 226 insertions(+), 261 deletions(-)
- delete mode 100644 arch/x86/platform/efi/early_printk.c
- create mode 100644 drivers/firmware/efi/earlycon.c
-
+diff --git a/arch/Kconfig b/arch/Kconfig
+index 4cfb6de48f79..9f0213213da8 100644
+--- a/arch/Kconfig
++++ b/arch/Kconfig
+@@ -885,6 +885,9 @@ config HAVE_ARCH_PREL32_RELOCATIONS
+ 	  architectures, and don't require runtime relocation on relocatable
+ 	  kernels.
+ 
++config ARCH_USE_MEMREMAP_PROT
++	bool
++
+ source "kernel/gcov/Kconfig"
+ 
+ source "scripts/gcc-plugins/Kconfig"
+diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
+index 26387c7bf305..c0e9a77dc089 100644
+--- a/arch/x86/Kconfig
++++ b/arch/x86/Kconfig
+@@ -1510,6 +1510,7 @@ config AMD_MEM_ENCRYPT
+ 	bool "AMD Secure Memory Encryption (SME) support"
+ 	depends on X86_64 && CPU_SUP_AMD
+ 	select DYNAMIC_PHYSICAL_MASK
++	select ARCH_USE_MEMREMAP_PROT
+ 	---help---
+ 	  Say yes to enable support for the encryption of system memory.
+ 	  This requires an AMD processor that supports Secure Memory
+@@ -1529,10 +1530,6 @@ config AMD_MEM_ENCRYPT_ACTIVE_BY_DEFAULT
+ 	  If set to N, then the encryption of system memory can be
+ 	  activated with the mem_encrypt=on command line option.
+ 
+-config ARCH_USE_MEMREMAP_PROT
+-	def_bool y
+-	depends on AMD_MEM_ENCRYPT
+-
+ # Common NUMA Features
+ config NUMA
+ 	bool "Numa Memory Allocation and Scheduler Support"
 -- 
 2.20.1
