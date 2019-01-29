@@ -1,18 +1,14 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH v2 2/2] efi: x86: convert x86 EFI earlyprintk into generic
- earlycon implementation
-Date: Tue, 29 Jan 2019 15:34:08 +0100
-Message-ID: <CAKv+Gu8vWfbKBssebBnVrALhdf2W5+6GpVHEtLFEn66Dr5R-zw@mail.gmail.com>
-References: <20190129092150.15184-1-ard.biesheuvel@linaro.org>
- <20190129092150.15184-3-ard.biesheuvel@linaro.org>
- <0ea153fd-1c2b-c4e6-54d9-e31189f1b90c@suse.de>
- <CAKv+Gu8S-EFdVtuKHEtV=3Mi7tKWjxEbjovAdspaKTzmUwAfjQ@mail.gmail.com>
- <15bc4db9-779b-93b3-3e6a-be8cda07be67@suse.de>
+Subject: Re: [PATCH] acpi: bgrt: parse BGRT to obtain BMP address before it
+ gets clobbered
+Date: Tue, 29 Jan 2019 15:36:01 +0100
+Message-ID: <CAKv+Gu9Ya45KONSiTh1Nj=WEoiwJqqfhOJf6-PxhyHtOoBeiKw@mail.gmail.com>
+References: <20190122150616.850-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <15bc4db9-779b-93b3-3e6a-be8cda07be67@suse.de>
+In-Reply-To: <20190122150616.850-1-ard.biesheuvel@linaro.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -22,96 +18,256 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Alexander Graf <agraf@suse.de>
-Cc: linux-efi <linux-efi@vger.kernel.org>, Graeme Gregory <graeme.gregory@linaro.org>, Jonathan Corbet <corbet@lwn.net>, Peter Jones <pjones@redhat.com>, Linux Doc Mailing List <linux-doc@vger.kernel.org>, Leif Lindholm <leif.lindholm@linaro.org>, Ingo Molnar <mingo@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
+To: ACPI Devel Maling List <linux-acpi@vger.kernel.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>
+Cc: Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Graeme Gregory <graeme.gregory@linaro.org>, Peter Jones <pjones@redhat.com>, Leif Lindholm <leif.lindholm@linaro.org>, Al Stone <astone@redhat.com>, linux-efi <linux-efi@vger.kernel.org>, "Hsiung,
+ Harry L" <harry.l.hsiung@intel.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 29 Jan 2019 at 15:04, Alexander Graf <agraf@suse.de> wrote:
+On Tue, 22 Jan 2019 at 16:06, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
 >
-> On 01/29/2019 02:41 PM, Ard Biesheuvel wrote:
-> > Hi Alex,
-> >
-> > On Tue, 29 Jan 2019 at 14:37, Alexander Graf <agraf@suse.de> wrote:
-> >> On 01/29/2019 10:21 AM, Ard Biesheuvel wrote:
-> >>> Move the x86 EFI earlyprintk implementation to a shared location under
-> >>> drivers/firmware and tweak it slightly so we can expose it as an earlycon
-> >>> implementation (which is generic) rather than earlyprintk (which is only
-> >>> implemented for a few architectures)
-> >>>
-> >>> This also involves switching to write-combine mappings by default (which
-> >>> is required on ARM since device mappings lack memory semantics, and so
-> >>> memcpy/memset may not be used on them), and adding support for shared
-> >>> memory framebuffers on cache coherent non-x86 systems (which do not
-> >>> tolerate mismatched attributes)
-> >>>
-> >>> Note that 32-bit ARM does not populate its struct screen_info early
-> >>> enough for earlycon=efifb to work, so it is disabled there.
-> >>>
-> >>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> >>> ---
-> >>>    Documentation/admin-guide/kernel-parameters.txt |   8 +-
-> >>>    arch/x86/Kconfig.debug                          |  10 -
-> >>>    arch/x86/include/asm/efi.h                      |   1 -
-> >>>    arch/x86/kernel/early_printk.c                  |   4 -
-> >>>    arch/x86/platform/efi/Makefile                  |   1 -
-> >>>    arch/x86/platform/efi/early_printk.c            | 240 --------------------
-> >>>    drivers/firmware/efi/Kconfig                    |   6 +
-> >>>    drivers/firmware/efi/Makefile                   |   1 +
-> >>>    drivers/firmware/efi/earlycon.c                 | 208 +++++++++++++++++
-> >>>    9 files changed, 222 insertions(+), 257 deletions(-)
-> >>>
-> >> [...]
-> >>
-> >>> +static int __init efi_earlycon_setup(struct earlycon_device *device,
-> >>> +                                  const char *opt)
-> >>> +{
-> >>> +     struct screen_info *si;
-> >>> +     u16 xres, yres;
-> >>> +     u32 i;
-> >>> +
-> >>> +     if (screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
-> >>> +             return -ENODEV;
-> >>> +
-> >>> +     fb_base = screen_info.lfb_base;
-> >>> +     if (screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
-> >>> +             fb_base |= (u64)screen_info.ext_lfb_base << 32;
-> >>> +
-> >>> +     if (opt && !strcmp(opt, "ram"))
-> >>> +             fb_prot = PAGE_KERNEL;
-> >>> +     else
-> >>> +             fb_prot = pgprot_writecombine(PAGE_KERNEL);
-> >> Can you determine the default from the UEFI memory map?
-> >>
-> > No. This is being called way before we parse the system table and the
-> > memory map. Given that this is debug code, duplicating a significant
-> > chunk of that work here (and run the risk of crashing here due to
-> > unexpected contents in those tables) is not a great idea imo.
+> The bitmap left in the framebuffer by the firmware is described by an
+> ACPI table called "BGRT", which describes the size, pixel format and
+> the address of a BMP image in memory. While the BGRT ACPI table is
+> guaranteed to reside in a "ACPI reclaim" memory region, which is
+> never touched by Linux. The BMP image, however, typically resides
+> in EFI Boot Services Memory, which may have been overwritten by the
+> time the BGRT discovery routine runs.
 >
-> I see. Maybe we will want to have something there, but I tend to agree
-> that for now we should keep bits as simple as possible.
+> So instead, drop the handling from the ACPI init code, and call the
+> BGRT parsing code immediately after going over the EFI configuration
+> table array, at which time no memory has been touched yet except for
+> the .data/.bss regions covered by the static kernel image.
 >
-> >
-> >> Also, doesn't the current logic map it as WC on x86 too? Is that
-> >> intentional?
-> >>
-> > Yes. As mentioned in the cover letter, this aligns it with efifb which
-> > also uses WC by default (although there, it can be overridden for
-> > performance reasons, but due to the debug nature of earlycon, this
-> > doesn't matter, since higher performance only makes it more difficult
-> > to capture the log on your phone camera)
+> Unfortunately, this involves a non-trivial amount of ACPI entry
+> point and root table parsing, but we cannot rely on the normal
+> ACPI infrastructure yet this early in the boot.
 >
-> Well, the cover letter really only talks about arm :). But yeah, I think
-> it's probably a good idea to map it WC regardless.
+> Also note that we cannot take the 'acpi_disabled' global variable
+> into account, since it may not have assumed the correct value yet
+> (on arm64, the default value is '1' which is overridden to '0' if
+> no DT description has been made available by the firmware)
+>
+> Cc: Peter Jones <pjones@redhat.com>
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> ---
+>  arch/arm64/kernel/acpi.c        |  2 -
+>  arch/x86/kernel/acpi/boot.c     |  2 -
+>  drivers/acpi/bgrt.c             |  6 --
+>  drivers/firmware/efi/efi-bgrt.c | 80 ++++++++++++++++++--
+>  drivers/firmware/efi/efi.c      | 13 ++++
+>  include/linux/efi-bgrt.h        |  4 +-
+>  6 files changed, 89 insertions(+), 18 deletions(-)
 >
 
-Fair enough.
+Rafael, Len,
 
-> Overall, I would've preferred to have a larger patch set with more, but
-> smaller changes that refactor the code. But it seems to be reviewable
-> enough still. Let's cross our fingers it doesn't break :).
->
->
-> Reviewed-by: Alexander Graf <agraf@suse.de>
->
+Do you mind if i take this via the EFI tree (after addressing
+Lorenzo's comments)
 
-Thanks
+Thanks,
+Ard.
+
+
+
+> diff --git a/arch/arm64/kernel/acpi.c b/arch/arm64/kernel/acpi.c
+> index 44e3c351e1ea..7429a811f76d 100644
+> --- a/arch/arm64/kernel/acpi.c
+> +++ b/arch/arm64/kernel/acpi.c
+> @@ -230,8 +230,6 @@ void __init acpi_boot_table_init(void)
+>                         early_init_dt_scan_chosen_stdout();
+>         } else {
+>                 acpi_parse_spcr(earlycon_acpi_spcr_enable, true);
+> -               if (IS_ENABLED(CONFIG_ACPI_BGRT))
+> -                       acpi_table_parse(ACPI_SIG_BGRT, acpi_parse_bgrt);
+>         }
+>  }
+>
+> diff --git a/arch/x86/kernel/acpi/boot.c b/arch/x86/kernel/acpi/boot.c
+> index 2624de16cd7a..2d3535b62752 100644
+> --- a/arch/x86/kernel/acpi/boot.c
+> +++ b/arch/x86/kernel/acpi/boot.c
+> @@ -1633,8 +1633,6 @@ int __init acpi_boot_init(void)
+>         acpi_process_madt();
+>
+>         acpi_table_parse(ACPI_SIG_HPET, acpi_parse_hpet);
+> -       if (IS_ENABLED(CONFIG_ACPI_BGRT))
+> -               acpi_table_parse(ACPI_SIG_BGRT, acpi_parse_bgrt);
+>
+>         if (!acpi_noirq)
+>                 x86_init.pci.init = pci_acpi_init;
+> diff --git a/drivers/acpi/bgrt.c b/drivers/acpi/bgrt.c
+> index 75af78361ce5..048413e06898 100644
+> --- a/drivers/acpi/bgrt.c
+> +++ b/drivers/acpi/bgrt.c
+> @@ -81,12 +81,6 @@ static const struct attribute_group bgrt_attribute_group = {
+>         .bin_attrs = bgrt_bin_attributes,
+>  };
+>
+> -int __init acpi_parse_bgrt(struct acpi_table_header *table)
+> -{
+> -       efi_bgrt_init(table);
+> -       return 0;
+> -}
+> -
+>  static int __init bgrt_init(void)
+>  {
+>         int ret;
+> diff --git a/drivers/firmware/efi/efi-bgrt.c b/drivers/firmware/efi/efi-bgrt.c
+> index b22ccfb0c991..8bd9b96942d2 100644
+> --- a/drivers/firmware/efi/efi-bgrt.c
+> +++ b/drivers/firmware/efi/efi-bgrt.c
+> @@ -27,24 +27,92 @@ struct bmp_header {
+>         u32 size;
+>  } __packed;
+>
+> -void __init efi_bgrt_init(struct acpi_table_header *table)
+> +void __init efi_bgrt_init(unsigned long rsdp_phys)
+>  {
+>         void *image;
+>         struct bmp_header bmp_header;
+>         struct acpi_table_bgrt *bgrt = &bgrt_tab;
+> +       struct acpi_table_bgrt *table = NULL;
+> +       struct acpi_table_rsdp *rsdp;
+> +       struct acpi_table_header *hdr;
+> +       u64 xsdt_phys;
+> +       u32 rsdt_phys;
+> +       unsigned int len;
+>
+> -       if (acpi_disabled)
+> +       if (!efi_enabled(EFI_MEMMAP))
+>                 return;
+>
+> -       if (!efi_enabled(EFI_MEMMAP))
+> +       /* map the root pointer table to find the xsdt/rsdt values */
+> +       rsdp = early_memremap(rsdp_phys, sizeof(*rsdp));
+> +       if (rsdp && ACPI_VALIDATE_RSDP_SIG(rsdp->signature)) {
+> +               xsdt_phys = rsdp->xsdt_physical_address;
+> +               rsdt_phys = rsdp->rsdt_physical_address;
+> +       } else {
+> +               WARN_ON(1);
+> +               return;
+> +       }
+> +       early_memunmap(rsdp, sizeof(*rsdp));
+> +
+> +       /* obtain the length of whichever table we will be using */
+> +       hdr = early_memremap(xsdt_phys ?: rsdt_phys, sizeof(*hdr));
+> +       if (WARN_ON(!hdr))
+> +               return;
+> +       len = hdr->length;
+> +       early_memunmap(hdr, sizeof(*hdr));
+> +
+> +       if (xsdt_phys) {
+> +               struct acpi_table_xsdt *xsdt = early_memremap(xsdt_phys, len);
+> +               int i;
+> +
+> +               if (WARN_ON(!xsdt))
+> +                       return;
+> +
+> +               for (i = 0; i < (len - sizeof(*hdr)) / sizeof(u64); i++) {
+> +                       table = early_memremap(xsdt->table_offset_entry[i],
+> +                                              sizeof(*table));
+> +                       if (WARN_ON(!table))
+> +                               break;
+> +
+> +                       if (ACPI_COMPARE_NAME(table->header.signature,
+> +                                             ACPI_SIG_BGRT))
+> +                               break;
+> +                       early_memunmap(table, sizeof(*table));
+> +                       table = NULL;
+> +               }
+> +               early_memunmap(xsdt, len);
+> +       } else if (rsdt_phys) {
+> +               struct acpi_table_rsdt *rsdt = early_memremap(rsdt_phys, len);
+> +               int i;
+> +
+> +               if (WARN_ON(!rsdt))
+> +                       return;
+> +
+> +               for (i = 0; i < (len - sizeof(*hdr)) / sizeof(u32); i++) {
+> +                       table = early_memremap(rsdt->table_offset_entry[i],
+> +                                              sizeof(*table));
+> +                       if (WARN_ON(!table))
+> +                               break;
+> +
+> +                       if (ACPI_COMPARE_NAME(table->header.signature,
+> +                                             ACPI_SIG_BGRT))
+> +                               break;
+> +                       early_memunmap(table, sizeof(*table));
+> +                       table = NULL;
+> +               }
+> +               early_memunmap(rsdt, len);
+> +       }
+> +
+> +       if (!table)
+>                 return;
+>
+> -       if (table->length < sizeof(bgrt_tab)) {
+> +       if (table->header.length < sizeof(bgrt_tab)) {
+>                 pr_notice("Ignoring BGRT: invalid length %u (expected %zu)\n",
+> -                      table->length, sizeof(bgrt_tab));
+> +                      table->header.length, sizeof(bgrt_tab));
+>                 return;
+>         }
+> -       *bgrt = *(struct acpi_table_bgrt *)table;
+> +       *bgrt = *table;
+> +       early_memunmap(table, sizeof(*table));
+> +
+>         if (bgrt->version != 1) {
+>                 pr_notice("Ignoring BGRT: invalid version %u (expected 1)\n",
+>                        bgrt->version);
+> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+> index 4c46ff6f2242..e5ef5c0eacc1 100644
+> --- a/drivers/firmware/efi/efi.c
+> +++ b/drivers/firmware/efi/efi.c
+> @@ -20,6 +20,7 @@
+>  #include <linux/init.h>
+>  #include <linux/device.h>
+>  #include <linux/efi.h>
+> +#include <linux/efi-bgrt.h>
+>  #include <linux/of.h>
+>  #include <linux/of_fdt.h>
+>  #include <linux/io.h>
+> @@ -592,6 +593,18 @@ int __init efi_config_parse_tables(void *config_tables, int count, int sz,
+>
+>                 early_memunmap(tbl, sizeof(*tbl));
+>         }
+> +
+> +       /*
+> +        * We need to parse the BGRT table (which is an ACPI table not a UEFI
+> +        * configuration table) by hand and figure out where the bitmap it
+> +        * describes lives in memory so we can reserve it early on. Otherwise,
+> +        * it may be clobbered by the time we get to it during the ordinary ACPI
+> +        * table init sequence.
+> +        */
+> +       if (IS_ENABLED(CONFIG_ACPI_BGRT) &&
+> +           efi.acpi20 != EFI_INVALID_TABLE_ADDR)
+> +               efi_bgrt_init(efi.acpi20);
+> +
+>         return 0;
+>  }
+>
+> diff --git a/include/linux/efi-bgrt.h b/include/linux/efi-bgrt.h
+> index e6cd51005633..528ea62d99ec 100644
+> --- a/include/linux/efi-bgrt.h
+> +++ b/include/linux/efi-bgrt.h
+> @@ -6,7 +6,7 @@
+>
+>  #ifdef CONFIG_ACPI_BGRT
+>
+> -void efi_bgrt_init(struct acpi_table_header *table);
+> +void efi_bgrt_init(unsigned long rsdp_phys);
+>  int __init acpi_parse_bgrt(struct acpi_table_header *table);
+>
+>  /* The BGRT data itself; only valid if bgrt_image != NULL. */
+> @@ -15,7 +15,7 @@ extern struct acpi_table_bgrt bgrt_tab;
+>
+>  #else /* !CONFIG_ACPI_BGRT */
+>
+> -static inline void efi_bgrt_init(struct acpi_table_header *table) {}
+> +static inline void efi_bgrt_init(unsigned long rsdp_phys) {}
+>  static inline int __init acpi_parse_bgrt(struct acpi_table_header *table)
+>  {
+>         return 0;
+> --
+> 2.20.1
+>
