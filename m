@@ -1,15 +1,17 @@
-From: "Rafael J. Wysocki" <rafael@kernel.org>
+From: Peter Jones <pjones@redhat.com>
 Subject: Re: [PATCH] acpi: bgrt: parse BGRT to obtain BMP address before it
  gets clobbered
-Date: Tue, 29 Jan 2019 16:09:11 +0100
-Message-ID: <CAJZ5v0jcrP1KnKO3cNfz07UmMtita0xFzS67=_v9BVhJZiBP0A@mail.gmail.com>
+Date: Tue, 29 Jan 2019 10:34:47 -0500
+Message-ID: <20190129153446.yhllzxssao3px7m3@redhat.com>
 References: <20190122150616.850-1-ard.biesheuvel@linaro.org>
- <CAKv+Gu9Ya45KONSiTh1Nj=WEoiwJqqfhOJf6-PxhyHtOoBeiKw@mail.gmail.com>
+ <20190122173222.GB11720@e107981-ln.cambridge.arm.com>
+ <CAKv+Gu9-tDRbmt+T3or9pMs78-pU-9BpKorhB60N_=Bxo78A1g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAKv+Gu9Ya45KONSiTh1Nj=WEoiwJqqfhOJf6-PxhyHtOoBeiKw@mail.gmail.com>
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu9-tDRbmt+T3or9pMs78-pU-9BpKorhB60N_=Bxo78A1g@mail.gmail.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -20,54 +22,58 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Graeme Gregory <graeme.gregory@linaro.org>, Peter Jones <pjones@redhat.com>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Leif Lindholm <leif.lindholm@linaro.org>, Al Stone <astone@redhat.com>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, linux-efi <linux-efi@vger.kernel.org>, "Hsiung,
+Cc: Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>, Graeme Gregory <graeme.gregory@linaro.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Leif Lindholm <leif.lindholm@linaro.org>, Al Stone <astone@redhat.com>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, linux-efi <linux-efi@vger.kernel.org>, "Hsiung,
  Harry L" <harry.l.hsiung@intel.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Len Brown <lenb@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jan 29, 2019 at 3:36 PM Ard Biesheuvel
-<ard.biesheuvel@linaro.org> wrote:
->
-> On Tue, 22 Jan 2019 at 16:06, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
-> >
-> > The bitmap left in the framebuffer by the firmware is described by an
-> > ACPI table called "BGRT", which describes the size, pixel format and
-> > the address of a BMP image in memory. While the BGRT ACPI table is
-> > guaranteed to reside in a "ACPI reclaim" memory region, which is
-> > never touched by Linux. The BMP image, however, typically resides
-> > in EFI Boot Services Memory, which may have been overwritten by the
-> > time the BGRT discovery routine runs.
-> >
-> > So instead, drop the handling from the ACPI init code, and call the
-> > BGRT parsing code immediately after going over the EFI configuration
-> > table array, at which time no memory has been touched yet except for
-> > the .data/.bss regions covered by the static kernel image.
-> >
-> > Unfortunately, this involves a non-trivial amount of ACPI entry
-> > point and root table parsing, but we cannot rely on the normal
-> > ACPI infrastructure yet this early in the boot.
-> >
-> > Also note that we cannot take the 'acpi_disabled' global variable
-> > into account, since it may not have assumed the correct value yet
-> > (on arm64, the default value is '1' which is overridden to '0' if
-> > no DT description has been made available by the firmware)
-> >
-> > Cc: Peter Jones <pjones@redhat.com>
-> > Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> > ---
-> >  arch/arm64/kernel/acpi.c        |  2 -
-> >  arch/x86/kernel/acpi/boot.c     |  2 -
-> >  drivers/acpi/bgrt.c             |  6 --
-> >  drivers/firmware/efi/efi-bgrt.c | 80 ++++++++++++++++++--
-> >  drivers/firmware/efi/efi.c      | 13 ++++
-> >  include/linux/efi-bgrt.h        |  4 +-
-> >  6 files changed, 89 insertions(+), 18 deletions(-)
-> >
->
-> Rafael, Len,
->
-> Do you mind if i take this via the EFI tree (after addressing
-> Lorenzo's comments)
-
-Not at all, please take it.
-
-Thanks!
+T24gVHVlLCBKYW4gMjIsIDIwMTkgYXQgMDc6MDc6MzBQTSArMDEwMCwgQXJkIEJpZXNoZXV2ZWwg
+d3JvdGU6Cj4gT24gVHVlLCAyMiBKYW4gMjAxOSBhdCAxODozMiwgTG9yZW56byBQaWVyYWxpc2kg
+PGxvcmVuem8ucGllcmFsaXNpQGFybS5jb20+IHdyb3RlOgo+ID4gU2lkZSBub3RlIChub3QgcmVs
+YXRlZCB0byB0aGlzIHBhdGNoKToKPiA+Cj4gPiBJIGRvIG5vdCB1bmRlcnN0YW5kIHRoaXMgY2hl
+Y2s6Cj4gPgo+ID4gaWYgKGJncnQtPnN0YXR1cyAmIDB4ZmUpIHsKPiA+ICAgICAgICAgcHJfbm90
+aWNlKCJJZ25vcmluZyBCR1JUOiByZXNlcnZlZCBzdGF0dXMgYml0cyBhcmUgbm9uLXplcm8gJXVc
+biIsCj4gPiAgICAgICAgICAgICAgICBiZ3J0LT5zdGF0dXMpOwo+ID4gICAgICAgICBnb3RvIG91
+dDsKPiA+IH0KPiA+Cj4gPiBTaG91bGQgbm90IHdlIGNoZWNrIGFnYWluc3QgMHhmOCAocmVzZXJ2
+ZWQgYml0cyBhcmUgWzc6M10pID8gQW5kIHdoYXQKPiA+IGFib3V0IHN0YXR1c1swXSAodmFsaWQp
+LCBzaG91bGQgd2UgY2hlY2sgdGhhdCBhcyB3ZWxsID8KPiAKPiBJIHdpbGwgbGV0IFBldGVyIHRh
+a2UgdGhhdCBxdWVzdGlvbiAuLi4KCkkgdGhpbmsgdGhpcyB3YXMgb3JpZ2luYWxseSBjb2RlZCBm
+cm9tIGEgZHJhZnQgc3BlYywgYnV0IGFsc28gaW4gQUNQSQo2LjFBIGJpdHMgWzI6MV0gZ290IGRl
+ZmluZWQgd2l0aG91dCB1cGRhdGluZyB0aGUgInZlcnNpb24iIGZpZWxkIDovLCBzbwppZiB3ZSdy
+ZSBnb2luZyB0byBjaGVjayB0aGVtLCBjaGVja2luZyBhZ2FpbnN0IDB4Zjggd291bGQgYmUgY29y
+cmVjdCAtCmJ1dCBpdCdzIHByb2JhYmx5IHNhbmVyIGp1c3QgdG8gbm90IGNoZWNrIHRoZW0/ICBO
+b3RoaW5nIHRoYXQncyBiZWVuCmRlZmluZWQgc28gZmFyIGlzIGFjdHVhbGx5IGEgcmVhc29uIG5v
+dCB0byBleHBvc2UgdGhlIGRhdGEsIGFuZCBpdCdzIG5vdApjbGVhciB0aGF0IGFueXRoaW5nIGlu
+IHRoZSBmdXR1cmUgd291bGQgZWl0aGVyLiAgQWxzbywgdGhlICJ2YWxpZCIgYml0CmlzIG1lYW50
+IG9ubHkgdG8gcmVmbGVjdCBpZiB0aGUgaW1hZ2UgaXMgb24gdGhlIHNjcmVlbiBvciBub3QuICBU
+aGlzIHdhcwpjbGFyaWZpZWQgaW4gb25lIG9mIHRoZSBBQ1BJIDUuMEEgc3BlYyAtIHRoZSBmaWVs
+ZCBoYXMgYmVlbiByZW5hbWVkIHRvCiJkaXNwbGF5ZWQiLCBzbyBhcyBub3QgdG8gY29uZnVzZSBw
+ZW9wbGUuICBIZXJlJ3Mgd2hhdCB0aGUgY3VycmVudCBBQ1BJCnNwZWMgc2F5czoKCk5hbWUgICAg
+U2l6ZSAgICBPZmZzZXQgIERlc2NyaXB0aW9uClN0YXR1cyAgMSAgICAgICAzOCAgICAgIDEtYnl0
+ZSBzdGF0dXMgZmllbGQgaW5kaWNhdGluZyBjdXJyZW50IHN0YXR1cwogICAgICAgICAgICAgICAg
+ICAgICAgICBhYm91dCB0aGUgdGFibGUuCiAgICAgICAgICAgICAgICAgICAgICAgIEJpdHMgWzc6
+M10gPSBSZXNlcnZlZCAobXVzdCBiZSB6ZXJvKQogICAgICAgICAgICAgICAgICAgICAgICBCaXRz
+IFsyOjFdID0gT3JpZW50YXRpb24gT2Zmc2V0LiBUaGVzZSBiaXRzCiAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICBkZXNjcmliZSB0aGUgY2xvY2t3aXNlIGRlZ3JlZQogICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgb2Zmc2V0IGZyb20gdGhlIGltYWdl4oCZcyBk
+ZWZhdWx0CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBvcmllbnRhdGlvbi4K
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFswMF0gPSAwLCBubyBvZmZzZXQK
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFswMV0gPSA5MAogICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgWzEwXSA9IDE4MAogICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgWzExXSA9IDI3MAoKQW5kIEkgdGhpbmsgNi4xIG9yIDYuMUEgaGFz
+IGFjY2lkZW50YWxseSBkcm9wcGVkIHRoZSB0ZXh0OgoKICAgICAgICAgICAgICAgICAgICAgICAg
+Qml0IFswXSA9IERpc3BsYXllZC4gQSBvbmUgaW5kaWNhdGVzIHRoZSBib290CiAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICBpbWFnZSBncmFwaGljIGlzIGRpc3BsYXllZC4KCkZ1cnRo
+ZXIgZG93biBpdCBzYXlzOgoKICAgICAgICBCaXQgMCAtIERpc3BsYXllZAogICAgICAgIFRoZSBz
+dGF0dXMgZmllbGQgY29udGFpbnMgaW5mb3JtYXRpb24gYWJvdXQgdGhlIGN1cnJlbnQgc3RhdHVz
+CiAgICAgICAgb2YgdGhlIHRhYmxlLiAgVGhlIFZhbGlkIGJpdCBpcyBiaXQgMCBvZiB0aGUgbG93
+ZXN0IGJ5dGUuICBJdAogICAgICAgIHNob3VsZCBiZSBzZXQgdG8gMSB3aGlsZSB0aGUgaW1hZ2Ug
+cmVzb3VyY2UgaXMgZGlzcGxheWVkIG9uIHRoZQogICAgICAgIHNjcmVlbiwgYW5kIHNldCB0byAw
+IHdoaWxlIGl0IGlzIG5vdCBkaXNwbGF5ZWQuCgpDbGVhcmx5IHRoZXJlIGhhcyBiZWVuIHNvbWUg
+ZWRpdGluZyBlcnJvciBnb2luZyBvbiBoZXJlLCBhbmQgSSdsbCBzZW5kCmluIGFuIEVDUiB0byBm
+aXggdGhhdCB1cC4gIEl0IG1pZ2h0IGJlIHdvcnRoIGV4cG9zaW5nICJvcmllbnRhdGlvbiIgYW5k
+CiJkaXNwbGF5ZWQiIGRpcmVjdGx5IGluc3RlYWQgb2YganVzdCBleHBvc2luZyAic3RhdHVzIi4K
+CkFzaWRlIGZyb20gdGhhdCBhbiBMb3JlbnpvJ3Mgb3RoZXIgb2JzZXJ2YXRpb25zLCB0aGUgcGF0
+Y2ggbG9va3MKcmVhc29uYWJsZSB0byBtZS4KCi0tIAogIFBldGVyCgpfX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51eC1hcm0ta2VybmVsIG1haWxpbmcg
+bGlzdApsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmlu
+ZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
