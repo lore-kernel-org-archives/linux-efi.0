@@ -1,14 +1,14 @@
-From: Bjorn Andersson <bjorn.andersson@linaro.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Subject: Re: [PATCH] efi: arm/arm64: allow SetVirtualAddressMap() to be omitted
-Date: Tue, 29 Jan 2019 16:06:18 -0800
-Message-ID: <20190130000618.GM31596@builder>
+Date: Wed, 30 Jan 2019 10:40:38 +0100
+Message-ID: <CAKv+Gu-xt9762Lh3A3qAW3kRYUW+pvQa6piEFwOOi0vTdmQAGw@mail.gmail.com>
 References: <20190126102207.29488-1-ard.biesheuvel@linaro.org>
+ <20190130000618.GM31596@builder>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <20190126102207.29488-1-ard.biesheuvel@linaro.org>
+In-Reply-To: <20190130000618.GM31596@builder>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -18,154 +18,64 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: mark.rutland@arm.com, linux-efi@vger.kernel.org, Heinrich Schuchardt <xypron.glpk@gmx.de>, will.deacon@arm.com, Alexander Graf <agraf@suse.de>, Leif Lindholm <leif.lindholm@linaro.org>, AKASHI Takahiro <takahiro.akashi@linaro.org>, james.morse@arm.com, linux-arm-kernel@lists.infradead.org
+To: Bjorn Andersson <bjorn.andersson@linaro.org>
+Cc: Mark Rutland <mark.rutland@arm.com>, linux-efi <linux-efi@vger.kernel.org>, Heinrich Schuchardt <xypron.glpk@gmx.de>, Will Deacon <will.deacon@arm.com>, Alexander Graf <agraf@suse.de>, Leif Lindholm <leif.lindholm@linaro.org>, AKASHI Takahiro <takahiro.akashi@linaro.org>, James Morse <james.morse@arm.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sat 26 Jan 02:22 PST 2019, Ard Biesheuvel wrote:
+On Wed, 30 Jan 2019 at 01:06, Bjorn Andersson
+<bjorn.andersson@linaro.org> wrote:
+>
+> On Sat 26 Jan 02:22 PST 2019, Ard Biesheuvel wrote:
+>
+> > The UEFI spec revision 2.7 errata A section 8.4 has the following to
+> > say about the virtual memory runtime services:
+> >
+> >   "This section contains function definitions for the virtual memory
+> >   support that may be optionally used by an operating system at runtime.
+> >   If an operating system chooses to make EFI runtime service calls in a
+> >   virtual addressing mode instead of the flat physical mode, then the
+> >   operating system must use the services in this section to switch the
+> >   EFI runtime services from flat physical addressing to virtual
+> >   addressing."
+> >
+> > So it is pretty clear that calling SetVirtualAddressMap() is entirely
+> > optional, and so there is no point in doing so unless it achieves
+> > anything useful for us.
+> >
+> > This is not the case for 64-bit ARM. The native mapping used by the OS
+> > is arbitrarily converted into another permutation of userland addresses
+> > (i.e., bits [63:48] cleared), and the runtime code could easily deal
+> > with the original layout in exactly the same way as it deals with the
+> > converted layout. However, due to constraints related to page size
+> > differences if the OS is not running with 4k pages, and related to
+> > systems that may expose the individual sections of PE/COFF runtime
+> > modules as different memory regions, creating the virtual layout is a
+> > bit fiddly, and requires us to sort the memory map and reason about
+> > adjacent regions with identical memory types etc etc.
+> >
+> > So the obvious fix is to stop calling SetVirtualAddressMap() altogether
+> > on arm64 systems. However, to avoid surprises, which are notoriously
+> > hard to diagnose when it comes to OS<->firmware interactions, let's
+> > start by making it an opt-out feature, and implement support for the
+> > 'efi=novamap' kernel command line parameter on ARM and arm64 systems.
+> >
+> > (Note that 32-bit ARM generally does require SetVirtualAddressMap() to be
+> > used, given that the physical memory map and the kernel virtual address
+> > map are not guaranteed to be non-overlapping like on arm64. However,
+> > having support for efi=novamap,noruntime on 32-bit ARM, combined with
+> > the recently proposed support for earlycon=efi, is likely to be useful
+> > to diagnose boot issues on such systems if they have no accessible serial
+> > port)
+> >
+> > Cc: Alexander Graf <agraf@suse.de>
+> > Cc: Heinrich Schuchardt <xypron.glpk@gmx.de>
+> > Cc: AKASHI Takahiro <takahiro.akashi@linaro.org>
+> > Cc: Leif Lindholm <leif.lindholm@linaro.org>
+> > Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+>
+> This makes the SDM850 bootable, thanks.
+>
+> Tested-by: Bjorn Andersson <bjorn.andersson@linaro.org>
+>
 
-> The UEFI spec revision 2.7 errata A section 8.4 has the following to
-> say about the virtual memory runtime services:
-> 
->   "This section contains function definitions for the virtual memory
->   support that may be optionally used by an operating system at runtime.
->   If an operating system chooses to make EFI runtime service calls in a
->   virtual addressing mode instead of the flat physical mode, then the
->   operating system must use the services in this section to switch the
->   EFI runtime services from flat physical addressing to virtual
->   addressing."
-> 
-> So it is pretty clear that calling SetVirtualAddressMap() is entirely
-> optional, and so there is no point in doing so unless it achieves
-> anything useful for us.
-> 
-> This is not the case for 64-bit ARM. The native mapping used by the OS
-> is arbitrarily converted into another permutation of userland addresses
-> (i.e., bits [63:48] cleared), and the runtime code could easily deal
-> with the original layout in exactly the same way as it deals with the
-> converted layout. However, due to constraints related to page size
-> differences if the OS is not running with 4k pages, and related to
-> systems that may expose the individual sections of PE/COFF runtime
-> modules as different memory regions, creating the virtual layout is a
-> bit fiddly, and requires us to sort the memory map and reason about
-> adjacent regions with identical memory types etc etc.
-> 
-> So the obvious fix is to stop calling SetVirtualAddressMap() altogether
-> on arm64 systems. However, to avoid surprises, which are notoriously
-> hard to diagnose when it comes to OS<->firmware interactions, let's
-> start by making it an opt-out feature, and implement support for the
-> 'efi=novamap' kernel command line parameter on ARM and arm64 systems.
-> 
-> (Note that 32-bit ARM generally does require SetVirtualAddressMap() to be
-> used, given that the physical memory map and the kernel virtual address
-> map are not guaranteed to be non-overlapping like on arm64. However,
-> having support for efi=novamap,noruntime on 32-bit ARM, combined with
-> the recently proposed support for earlycon=efi, is likely to be useful
-> to diagnose boot issues on such systems if they have no accessible serial
-> port)
-> 
-> Cc: Alexander Graf <agraf@suse.de>
-> Cc: Heinrich Schuchardt <xypron.glpk@gmx.de>
-> Cc: AKASHI Takahiro <takahiro.akashi@linaro.org>
-> Cc: Leif Lindholm <leif.lindholm@linaro.org>
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-
-This makes the SDM850 bootable, thanks.
-
-Tested-by: Bjorn Andersson <bjorn.andersson@linaro.org>
-
-Regards,
-Bjorn
-
-> ---
->  drivers/firmware/efi/libstub/arm-stub.c        |  5 +++++
->  drivers/firmware/efi/libstub/efi-stub-helper.c | 10 ++++++++++
->  drivers/firmware/efi/libstub/efistub.h         |  1 +
->  drivers/firmware/efi/libstub/fdt.c             |  3 +++
->  4 files changed, 19 insertions(+)
-> 
-> diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-> index eee42d5e25ee..626ec4b4a664 100644
-> --- a/drivers/firmware/efi/libstub/arm-stub.c
-> +++ b/drivers/firmware/efi/libstub/arm-stub.c
-> @@ -370,6 +370,11 @@ void efi_get_virtmap(efi_memory_desc_t *memory_map, unsigned long map_size,
->  		paddr = in->phys_addr;
->  		size = in->num_pages * EFI_PAGE_SIZE;
->  
-> +		if (novamap()) {
-> +			in->virt_addr = in->phys_addr;
-> +			continue;
-> +		}
-> +
->  		/*
->  		 * Make the mapping compatible with 64k pages: this allows
->  		 * a 4k page size kernel to kexec a 64k page size kernel and
-> diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-> index e94975f4655b..442f51c2a53d 100644
-> --- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-> +++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-> @@ -34,6 +34,7 @@ static unsigned long __chunk_size = EFI_READ_CHUNK_SIZE;
->  
->  static int __section(.data) __nokaslr;
->  static int __section(.data) __quiet;
-> +static int __section(.data) __novamap;
->  
->  int __pure nokaslr(void)
->  {
-> @@ -43,6 +44,10 @@ int __pure is_quiet(void)
->  {
->  	return __quiet;
->  }
-> +int __pure novamap(void)
-> +{
-> +	return __novamap;
-> +}
->  
->  #define EFI_MMAP_NR_SLACK_SLOTS	8
->  
-> @@ -482,6 +487,11 @@ efi_status_t efi_parse_options(char const *cmdline)
->  			__chunk_size = -1UL;
->  		}
->  
-> +		if (!strncmp(str, "novamap", 7)) {
-> +			str += strlen("novamap");
-> +			__novamap = 1;
-> +		}
-> +
->  		/* Group words together, delimited by "," */
->  		while (*str && *str != ' ' && *str != ',')
->  			str++;
-> diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-> index 32799cf039ef..337b52c4702c 100644
-> --- a/drivers/firmware/efi/libstub/efistub.h
-> +++ b/drivers/firmware/efi/libstub/efistub.h
-> @@ -27,6 +27,7 @@
->  
->  extern int __pure nokaslr(void);
->  extern int __pure is_quiet(void);
-> +extern int __pure novamap(void);
->  
->  #define pr_efi(sys_table, msg)		do {				\
->  	if (!is_quiet()) efi_printk(sys_table, "EFI stub: "msg);	\
-> diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
-> index 0dc7b4987cc2..f8f89f995e9d 100644
-> --- a/drivers/firmware/efi/libstub/fdt.c
-> +++ b/drivers/firmware/efi/libstub/fdt.c
-> @@ -327,6 +327,9 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
->  	if (status == EFI_SUCCESS) {
->  		efi_set_virtual_address_map_t *svam;
->  
-> +		if (novamap())
-> +			return EFI_SUCCESS;
-> +
->  		/* Install the new virtual address map */
->  		svam = sys_table->runtime->set_virtual_address_map;
->  		status = svam(runtime_entry_count * desc_size, desc_size,
-> -- 
-> 2.17.1
-> 
-> 
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+Thanks Bjorn
