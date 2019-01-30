@@ -1,34 +1,51 @@
-From: Tyler Baicar <baicar.tyler@gmail.com>
-Subject: Re: [PATCH v2 0/2] Fix crash in cper_estatus_check()
-Date: Wed, 30 Jan 2019 11:03:05 -0500
-Message-ID: <CABo9ajD5B2D=DoxD+-mm9EkCfBXUyB9Zb7h7B8aUoazcb-tCSA@mail.gmail.com>
-References: <20190128100424.30278-1-ross.lagerwall@citrix.com>
+From: Will Deacon <will.deacon@arm.com>
+Subject: Re: [PATCH] efi: arm/arm64: allow SetVirtualAddressMap() to be omitted
+Date: Wed, 30 Jan 2019 18:19:48 +0000
+Message-ID: <20190130181948.GC18558@fuggles.cambridge.arm.com>
+References: <20190126102207.29488-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190128100424.30278-1-ross.lagerwall@citrix.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ross Lagerwall <ross.lagerwall@citrix.com>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Linux ACPI <linux-acpi@vger.kernel.org>, linux-efi@vger.kernel.org, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Tony Luck <tony.luck@intel.com>, Borislav Petkov <bp@alien8.de>, Huang Ying <ying.huang@intel.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <20190126102207.29488-1-ard.biesheuvel@linaro.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: mark.rutland@arm.com, linux-efi@vger.kernel.org, Heinrich Schuchardt <xypron.glpk@gmx.de>, Alexander Graf <agraf@suse.de>, Leif Lindholm <leif.lindholm@linaro.org>, AKASHI Takahiro <takahiro.akashi@linaro.org>, james.morse@arm.com, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Jan 28, 2019 at 5:06 AM Ross Lagerwall
-<ross.lagerwall@citrix.com> wrote:
->
-> v2 changes:
-> - Address Boris's comments.
->
-> ---
->
-> I recently encountered a crash in cper_estatus_check() when called by
-> bert_init(). Patches follow to fix the problem. Note that I cannot fully
-> test the patches since the hardware error record on that machine has
-> been cleared.
->
-> Ross Lagerwall (2):
->   acpi/apei: Fix possible out-of-bounds access to BERT region
->   efi/cper: Fix possible out-of-bounds access
+Hi Ard,
 
-For both patches:
+On Sat, Jan 26, 2019 at 11:22:07AM +0100, Ard Biesheuvel wrote:
+> The UEFI spec revision 2.7 errata A section 8.4 has the following to
+> say about the virtual memory runtime services:
+> 
+>   "This section contains function definitions for the virtual memory
+>   support that may be optionally used by an operating system at runtime.
+>   If an operating system chooses to make EFI runtime service calls in a
+>   virtual addressing mode instead of the flat physical mode, then the
+>   operating system must use the services in this section to switch the
+>   EFI runtime services from flat physical addressing to virtual
+>   addressing."
 
-Tested-by: Tyler Baicar <baicar.tyler@gmail.com>
+I should probably go RTFM, but what does UEFI say about the attributes of
+"flat physical addressing"? The wording above implies to me that it should
+act as though the stage-1 MMU is disabled because it's described as an
+alternative to virtual addressing.
+
+If we move in a direction where we avoid calling SetVirtualAddressMap() by
+default on arm64, isn't there a real threat that this firmware call will no
+longer be validated? Do we need to worry about that?
+
+Finally, Bjorn said that SDM850 is unbootable without this change. Why is
+that?
+
+Will
