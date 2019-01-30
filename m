@@ -1,111 +1,171 @@
-From: Qian Cai <cai@lca.pw>
-Subject: [PATCH] efi/arm64: add a terminator for ptdump marker
-Date: Tue, 29 Jan 2019 12:36:00 -0500
-Message-ID: <20190129173600.38856-1-cai@lca.pw>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ard.biesheuvel@linaro.org
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Qian Cai <cai@lca.pw>
+From: Bjorn Andersson <bjorn.andersson@linaro.org>
+Subject: Re: [PATCH] efi: arm/arm64: allow SetVirtualAddressMap() to be omitted
+Date: Tue, 29 Jan 2019 16:06:18 -0800
+Message-ID: <20190130000618.GM31596@builder>
+References: <20190126102207.29488-1-ard.biesheuvel@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <20190126102207.29488-1-ard.biesheuvel@linaro.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: mark.rutland@arm.com, linux-efi@vger.kernel.org, Heinrich Schuchardt <xypron.glpk@gmx.de>, will.deacon@arm.com, Alexander Graf <agraf@suse.de>, Leif Lindholm <leif.lindholm@linaro.org>, AKASHI Takahiro <takahiro.akashi@linaro.org>, james.morse@arm.com, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-Read efi_page_tables debugfs triggering an out-of-bounds access here,
+On Sat 26 Jan 02:22 PST 2019, Ard Biesheuvel wrote:
 
-arch/arm64/mm/dump.c: 282
-if (addr >= st->marker[1].start_address) {
+> The UEFI spec revision 2.7 errata A section 8.4 has the following to
+> say about the virtual memory runtime services:
+> 
+>   "This section contains function definitions for the virtual memory
+>   support that may be optionally used by an operating system at runtime.
+>   If an operating system chooses to make EFI runtime service calls in a
+>   virtual addressing mode instead of the flat physical mode, then the
+>   operating system must use the services in this section to switch the
+>   EFI runtime services from flat physical addressing to virtual
+>   addressing."
+> 
+> So it is pretty clear that calling SetVirtualAddressMap() is entirely
+> optional, and so there is no point in doing so unless it achieves
+> anything useful for us.
+> 
+> This is not the case for 64-bit ARM. The native mapping used by the OS
+> is arbitrarily converted into another permutation of userland addresses
+> (i.e., bits [63:48] cleared), and the runtime code could easily deal
+> with the original layout in exactly the same way as it deals with the
+> converted layout. However, due to constraints related to page size
+> differences if the OS is not running with 4k pages, and related to
+> systems that may expose the individual sections of PE/COFF runtime
+> modules as different memory regions, creating the virtual layout is a
+> bit fiddly, and requires us to sort the memory map and reason about
+> adjacent regions with identical memory types etc etc.
+> 
+> So the obvious fix is to stop calling SetVirtualAddressMap() altogether
+> on arm64 systems. However, to avoid surprises, which are notoriously
+> hard to diagnose when it comes to OS<->firmware interactions, let's
+> start by making it an opt-out feature, and implement support for the
+> 'efi=novamap' kernel command line parameter on ARM and arm64 systems.
+> 
+> (Note that 32-bit ARM generally does require SetVirtualAddressMap() to be
+> used, given that the physical memory map and the kernel virtual address
+> map are not guaranteed to be non-overlapping like on arm64. However,
+> having support for efi=novamap,noruntime on 32-bit ARM, combined with
+> the recently proposed support for earlycon=efi, is likely to be useful
+> to diagnose boot issues on such systems if they have no accessible serial
+> port)
+> 
+> Cc: Alexander Graf <agraf@suse.de>
+> Cc: Heinrich Schuchardt <xypron.glpk@gmx.de>
+> Cc: AKASHI Takahiro <takahiro.akashi@linaro.org>
+> Cc: Leif Lindholm <leif.lindholm@linaro.org>
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-from,
+This makes the SDM850 bootable, thanks.
 
-arch/arm64/mm/dump.c: 331
-note_page(st, addr, 2, pud_val(pud));
+Tested-by: Bjorn Andersson <bjorn.andersson@linaro.org>
 
-because st->marker++ is is called after "UEFI runtime end" which is the
-last element in addr_marker[]. Therefore, add a terminator like the one
-for kernel_page_tables, so it can be skipped to print out non-existent
-markers.
+Regards,
+Bjorn
 
- # cat /sys/kernel/debug/efi_page_tables
----[ UEFI runtime start ]---
-0x0000000020000000-0x0000000020010000          64K PTE       RW NX SHD AF NG         UXN MEM/NORMAL
-0x0000000020200000-0x0000000021340000       17664K PTE       RW NX SHD AF NG         UXN MEM/NORMAL
-0x0000000021340000-0x0000000021350000          64K PTE       RW x  SHD AF NG         UXN MEM/NORMAL
-0x0000000021350000-0x0000000021370000         128K PTE       RW NX SHD AF NG         UXN MEM/NORMAL
-0x0000000021370000-0x0000000021380000          64K PTE       RW x  SHD AF NG         UXN MEM/NORMAL
-0x0000000021380000-0x00000000213b0000         192K PTE       RW NX SHD AF NG         UXN MEM/NORMAL
-0x00000000213b0000-0x0000000021490000         896K PTE       RW x  SHD AF NG         UXN MEM/NORMAL
-0x0000000021490000-0x00000000214b0000         128K PTE       RW NX SHD AF NG         UXN MEM/NORMAL
-0x00000000214b0000-0x00000000214e0000         192K PTE       RW x  SHD AF NG         UXN MEM/NORMAL
-0x00000000214e0000-0x00000000214f0000          64K PTE       RW NX SHD AF NG         UXN MEM/NORMAL
-0x00000000214f0000-0x0000000021540000         320K PTE       RW x  SHD AF NG         UXN MEM/NORMAL
-0x0000000021540000-0x0000000021560000         128K PTE       RW NX SHD AF NG         UXN MEM/NORMAL
-0x0000000021560000-0x0000000021580000         128K PTE       RW x  SHD AF NG         UXN MEM/NORMAL
-0x0000000021580000-0x00000000215a0000         128K PTE       RW NX SHD AF NG         UXN MEM/NORMAL
-0x00000000215a0000-0x00000000215d0000         192K PTE       RW x  SHD AF NG         UXN MEM/NORMAL
-0x00000000215d0000-0x00000000215e0000          64K PTE       RW NX SHD AF NG         UXN MEM/NORMAL
-0x00000000215e0000-0x0000000021600000         128K PTE       RW x  SHD AF NG         UXN MEM/NORMAL
-0x0000000021600000-0x0000000021800000           2M PTE       RW NX SHD AF NG         UXN MEM/NORMAL
-0x0000000021800000-0x0000000021840000         256K PTE       RW x  SHD AF NG         UXN MEM/NORMAL
-0x0000000021840000-0x00000000218e0000         640K PTE       RW NX SHD AF NG         UXN MEM/NORMAL
-0x00000000218e0000-0x0000000021900000         128K PTE       RW x  SHD AF NG         UXN MEM/NORMAL
-0x0000000021900000-0x0000000021920000         128K PTE       RW NX SHD AF NG         UXN MEM/NORMAL
-0x0000000021920000-0x0000000021950000         192K PTE       RW x  SHD AF NG         UXN MEM/NORMAL
-0x0000000021950000-0x00000000219a0000         320K PTE       RW NX SHD AF NG         UXN DEVICE/nGnRE
----[ UEFI runtime end ]---
----[ (null) ]---
----[ (null) ]---
-
-[12126.163970] BUG: KASAN: global-out-of-bounds in note_page+0x1f0/0xac0
-[12126.170404] Read of size 8 at addr ffff2000123f2ac0 by task read_all/42464
-[12126.199520] Call trace:
-[12126.201972]  dump_backtrace+0x0/0x298
-[12126.205627]  show_stack+0x24/0x30
-[12126.208944]  dump_stack+0xb0/0xdc
-[12126.212258]  print_address_description+0x64/0x2b0
-[12126.216954]  kasan_report+0x150/0x1a4
-[12126.220610]  __asan_report_load8_noabort+0x30/0x3c
-[12126.225392]  note_page+0x1f0/0xac0
-[12126.228786]  walk_pgd+0xb4/0x244
-[12126.232005]  ptdump_walk_pgd+0xec/0x140
-[12126.235833]  ptdump_show+0x40/0x50
-[12126.239237]  seq_read+0x3f8/0xad0
-[12126.242548]  full_proxy_read+0x9c/0xc0
-[12126.246290]  __vfs_read+0xfc/0x4c8
-[12126.249684]  vfs_read+0xec/0x208
-[12126.252904]  ksys_read+0xd0/0x15c
-[12126.256210]  __arm64_sys_read+0x84/0x94
-[12126.260048]  el0_svc_handler+0x258/0x304
-[12126.263963]  el0_svc+0x8/0xc
-[12126.266834]
-[12126.268317] The buggy address belongs to the variable:
-[12126.273458]  __compound_literal.0+0x20/0x800
-[12126.277718]
-[12126.279201] Memory state around the buggy address:
-[12126.283987]  ffff2000123f2980: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-[12126.291200]  ffff2000123f2a00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 fa
-[12126.298412] >ffff2000123f2a80: fa fa fa fa 00 00 00 00 fa fa fa fa 00 00 00 00
-[12126.305624]                                            ^
-[12126.310927]  ffff2000123f2b00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-[12126.318140]  ffff2000123f2b80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0
-
-Fixes: 9d80448ac92b ("efi/arm64: Add debugfs node to dump UEFI runtime
-page tables")
-Signed-off-by: Qian Cai <cai@lca.pw>
----
- drivers/firmware/efi/arm-runtime.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
-index 23ea1ed409d1..1d28fd933297 100644
---- a/drivers/firmware/efi/arm-runtime.c
-+++ b/drivers/firmware/efi/arm-runtime.c
-@@ -38,7 +38,8 @@ static struct ptdump_info efi_ptdump_info = {
- 	.mm		= &efi_mm,
- 	.markers	= (struct addr_marker[]){
- 		{ 0,		"UEFI runtime start" },
--		{ DEFAULT_MAP_WINDOW_64, "UEFI runtime end" }
-+		{ DEFAULT_MAP_WINDOW_64, "UEFI runtime end" },
-+		{ -1,		NULL }
- 	},
- 	.base_addr	= 0,
- };
--- 
-2.17.2 (Apple Git-113)
+> ---
+>  drivers/firmware/efi/libstub/arm-stub.c        |  5 +++++
+>  drivers/firmware/efi/libstub/efi-stub-helper.c | 10 ++++++++++
+>  drivers/firmware/efi/libstub/efistub.h         |  1 +
+>  drivers/firmware/efi/libstub/fdt.c             |  3 +++
+>  4 files changed, 19 insertions(+)
+> 
+> diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+> index eee42d5e25ee..626ec4b4a664 100644
+> --- a/drivers/firmware/efi/libstub/arm-stub.c
+> +++ b/drivers/firmware/efi/libstub/arm-stub.c
+> @@ -370,6 +370,11 @@ void efi_get_virtmap(efi_memory_desc_t *memory_map, unsigned long map_size,
+>  		paddr = in->phys_addr;
+>  		size = in->num_pages * EFI_PAGE_SIZE;
+>  
+> +		if (novamap()) {
+> +			in->virt_addr = in->phys_addr;
+> +			continue;
+> +		}
+> +
+>  		/*
+>  		 * Make the mapping compatible with 64k pages: this allows
+>  		 * a 4k page size kernel to kexec a 64k page size kernel and
+> diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+> index e94975f4655b..442f51c2a53d 100644
+> --- a/drivers/firmware/efi/libstub/efi-stub-helper.c
+> +++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+> @@ -34,6 +34,7 @@ static unsigned long __chunk_size = EFI_READ_CHUNK_SIZE;
+>  
+>  static int __section(.data) __nokaslr;
+>  static int __section(.data) __quiet;
+> +static int __section(.data) __novamap;
+>  
+>  int __pure nokaslr(void)
+>  {
+> @@ -43,6 +44,10 @@ int __pure is_quiet(void)
+>  {
+>  	return __quiet;
+>  }
+> +int __pure novamap(void)
+> +{
+> +	return __novamap;
+> +}
+>  
+>  #define EFI_MMAP_NR_SLACK_SLOTS	8
+>  
+> @@ -482,6 +487,11 @@ efi_status_t efi_parse_options(char const *cmdline)
+>  			__chunk_size = -1UL;
+>  		}
+>  
+> +		if (!strncmp(str, "novamap", 7)) {
+> +			str += strlen("novamap");
+> +			__novamap = 1;
+> +		}
+> +
+>  		/* Group words together, delimited by "," */
+>  		while (*str && *str != ' ' && *str != ',')
+>  			str++;
+> diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+> index 32799cf039ef..337b52c4702c 100644
+> --- a/drivers/firmware/efi/libstub/efistub.h
+> +++ b/drivers/firmware/efi/libstub/efistub.h
+> @@ -27,6 +27,7 @@
+>  
+>  extern int __pure nokaslr(void);
+>  extern int __pure is_quiet(void);
+> +extern int __pure novamap(void);
+>  
+>  #define pr_efi(sys_table, msg)		do {				\
+>  	if (!is_quiet()) efi_printk(sys_table, "EFI stub: "msg);	\
+> diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+> index 0dc7b4987cc2..f8f89f995e9d 100644
+> --- a/drivers/firmware/efi/libstub/fdt.c
+> +++ b/drivers/firmware/efi/libstub/fdt.c
+> @@ -327,6 +327,9 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+>  	if (status == EFI_SUCCESS) {
+>  		efi_set_virtual_address_map_t *svam;
+>  
+> +		if (novamap())
+> +			return EFI_SUCCESS;
+> +
+>  		/* Install the new virtual address map */
+>  		svam = sys_table->runtime->set_virtual_address_map;
+>  		status = svam(runtime_entry_count * desc_size, desc_size,
+> -- 
+> 2.17.1
+> 
+> 
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
