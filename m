@@ -1,14 +1,11 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH] efi: arm/arm64: allow SetVirtualAddressMap() to be omitted
-Date: Wed, 30 Jan 2019 19:29:14 +0100
-Message-ID: <CAKv+Gu8Ay67aJtkq8z+tu915xXZ82=wbsXbD+_W+SJz-MdD7+Q@mail.gmail.com>
-References: <20190126102207.29488-1-ard.biesheuvel@linaro.org>
- <20190130181948.GC18558@fuggles.cambridge.arm.com>
+Subject: [PATCH v3 0/2] efi: arm: add support for earlycon on EFI framebuffer
+Date: Thu, 31 Jan 2019 12:51:43 +0100
+Message-ID: <20190131115145.4634-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20190130181948.GC18558@fuggles.cambridge.arm.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -18,66 +15,66 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Will Deacon <will.deacon@arm.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, linux-efi <linux-efi@vger.kernel.org>, Heinrich Schuchardt <xypron.glpk@gmx.de>, Alexander Graf <agraf@suse.de>, Leif Lindholm <leif.lindholm@linaro.org>, AKASHI Takahiro <takahiro.akashi@linaro.org>, James Morse <james.morse@arm.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
+To: linux-efi@vger.kernel.org
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, graeme.gregory@linaro.org, corbet@lwn.net, pjones@redhat.com, x86@kernel.org, linux-doc@vger.kernel.org, agraf@suse.de, leif.lindholm@linaro.org, mingo@redhat.com, tglx@linutronix.de, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 30 Jan 2019 at 19:19, Will Deacon <will.deacon@arm.com> wrote:
->
-> Hi Ard,
->
+Repurpose the existing EFI earlyprintk code to implement support for
+'earlycon=efi' for arm64 systems, allowing the graphical console
+to be used instead of the serial port for early debug output.
 
-Hi Will,
+Changes since v2:
+- update patch #1 so that no attempts are made to build the memencrypt related
+  early memremap routines for 32-bit x86
+- update patch #2 so earlycon=efifb is not enabled on Itanium
 
-> On Sat, Jan 26, 2019 at 11:22:07AM +0100, Ard Biesheuvel wrote:
-> > The UEFI spec revision 2.7 errata A section 8.4 has the following to
-> > say about the virtual memory runtime services:
-> >
-> >   "This section contains function definitions for the virtual memory
-> >   support that may be optionally used by an operating system at runtime.
-> >   If an operating system chooses to make EFI runtime service calls in a
-> >   virtual addressing mode instead of the flat physical mode, then the
-> >   operating system must use the services in this section to switch the
-> >   EFI runtime services from flat physical addressing to virtual
-> >   addressing."
->
-> I should probably go RTFM, but what does UEFI say about the attributes of
-> "flat physical addressing"? The wording above implies to me that it should
-> act as though the stage-1 MMU is disabled because it's described as an
-> alternative to virtual addressing.
->
+Changes since v1:
+- Rename earlycon= argument to 'efifb' to emphasize that this is specific
+  to the EFI framebuffer.
+- Replace earlyprintk=efi entirely, rather than keep it alongside earlycon.
+  Since earlycon is typically enabled (along with the infrastructure), and
+  earlyprintk isn't, this does not result in a lot more code to be included,
+  but does make it more likely that a given [distro] kernel has support for
+  this enabled out of the box.
+- Switch to write-combine mappings by default. This is the default for efifb,
+  and is actually required on arm64, since device attributes do not tolerate
+  unaligned accesses or other operations (such as DC ZVA) that rely on memory
+  semantics. This requires ARCH_USE_MEMREMAP_PROT to be wired up, which is
+  why a new patch #1 has been added.
+- Since adding the 'ram' parameter for framebuffers in shared memory on cache
+  coherent devices is trivial after the switch to WC mappings, fold the change
+  into the main patch.
 
-No. Flat physical addressing applies to the translation, not to the
-memory attributes. The UEFI spec is pretty detailed when it comes to
-how the MMU should be configured and which memory attributes should be
-used while running in the firmware, and while running under the OS,
-and that is orthogonal.
+If there are no objections, I will proceed to queue these in efi/next for v5.1
 
-> If we move in a direction where we avoid calling SetVirtualAddressMap() by
-> default on arm64, isn't there a real threat that this firmware call will no
-> longer be validated? Do we need to worry about that?
->
+Cc: corbet@lwn.net
+Cc: leif.lindholm@linaro.org
+Cc: graeme.gregory@linaro.org
+Cc: mingo@redhat.com
+Cc: tglx@linutronix.de
+Cc: linux-doc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org
+Cc: agraf@suse.de
+Cc: pjones@redhat.com
 
-Yes. From a validation pov, it is useful to have both options, since
-optional functionality should work as specified, but it should also be
-truly optional, and with this change, we can at least validate that.
+Ard Biesheuvel (2):
+  x86: make ARCH_USE_MEMREMAP_PROT a generic Kconfig symbol
+  efi: x86: convert x86 EFI earlyprintk into generic earlycon
+    implementation
 
-Whether this will ever become the default or not is something we can
-debate at a later date.
+ Documentation/admin-guide/kernel-parameters.txt                         |   8 +-
+ arch/Kconfig                                                            |   3 +
+ arch/x86/Kconfig                                                        |   5 +-
+ arch/x86/Kconfig.debug                                                  |  10 --
+ arch/x86/include/asm/efi.h                                              |   1 -
+ arch/x86/kernel/early_printk.c                                          |   4 -
+ arch/x86/mm/ioremap.c                                                   |   4 +-
+ arch/x86/platform/efi/Makefile                                          |   1 -
+ drivers/firmware/efi/Kconfig                                            |   6 +
+ drivers/firmware/efi/Makefile                                           |   1 +
+ arch/x86/platform/efi/early_printk.c => drivers/firmware/efi/earlycon.c | 130 ++++++++------------
+ 11 files changed, 69 insertions(+), 104 deletions(-)
+ rename arch/x86/platform/efi/early_printk.c => drivers/firmware/efi/earlycon.c (45%)
 
-> Finally, Bjorn said that SDM850 is unbootable without this change. Why is
-> that?
->
-
-sdm835 and sdm850 are used in Windows on ARM laptops, and Windows
-behaves differently in this regard. The main issue is that the virtual
-mapping that Windows installs (which is a kernel mapping) is already
-active when it makes the call to SetVirtualAddressMap(), which means
-drivers can get away with accessing both the old and the new mapping
-in the context of that call. On Linux, the new VA mapping is not
-mapped yet, and so the code crashes.
-
-Another problem is that the PE/COFF relocation processing requires
-that the code sections are mapped read-write after ExitBootServices(),
-and the QC firmware is relying on Windows to clear the r/o
-permissions, rather than clear the r/o bits itself.
+-- 
+2.20.1
