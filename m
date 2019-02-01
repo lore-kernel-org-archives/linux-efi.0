@@ -1,76 +1,54 @@
-From: Lee Jones <lee.jones@linaro.org>
-Subject: Re: [PATCH] efi: arm/arm64: allow SetVirtualAddressMap() to be omitted
-Date: Fri, 1 Feb 2019 08:06:52 +0000
-Message-ID: <20190201080652.GA783@dell>
-References: <20190126102207.29488-1-ard.biesheuvel@linaro.org>
+From: Nathan Chancellor <natechancellor@gmail.com>
+Subject: [PATCH] efi/arm: Don't expect a return value of ptdump_debugfs_register
+Date: Fri,  1 Feb 2019 12:20:01 -0700
+Message-ID: <20190201192001.6495-1-natechancellor@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <20190126102207.29488-1-ard.biesheuvel@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: mark.rutland@arm.com, linux-efi@vger.kernel.org, Heinrich Schuchardt <xypron.glpk@gmx.de>, will.deacon@arm.com, Alexander Graf <agraf@suse.de>, Leif Lindholm <leif.lindholm@linaro.org>, AKASHI Takahiro <takahiro.akashi@linaro.org>, james.morse@arm.com, linux-arm-kernel@lists.infradead.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Nathan Chancellor <natechancellor@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
-T24gU2F0LCAyNiBKYW4gMjAxOSwgQXJkIEJpZXNoZXV2ZWwgd3JvdGU6Cgo+IFRoZSBVRUZJIHNw
-ZWMgcmV2aXNpb24gMi43IGVycmF0YSBBIHNlY3Rpb24gOC40IGhhcyB0aGUgZm9sbG93aW5nIHRv
-Cj4gc2F5IGFib3V0IHRoZSB2aXJ0dWFsIG1lbW9yeSBydW50aW1lIHNlcnZpY2VzOgo+IAo+ICAg
-IlRoaXMgc2VjdGlvbiBjb250YWlucyBmdW5jdGlvbiBkZWZpbml0aW9ucyBmb3IgdGhlIHZpcnR1
-YWwgbWVtb3J5Cj4gICBzdXBwb3J0IHRoYXQgbWF5IGJlIG9wdGlvbmFsbHkgdXNlZCBieSBhbiBv
-cGVyYXRpbmcgc3lzdGVtIGF0IHJ1bnRpbWUuCj4gICBJZiBhbiBvcGVyYXRpbmcgc3lzdGVtIGNo
-b29zZXMgdG8gbWFrZSBFRkkgcnVudGltZSBzZXJ2aWNlIGNhbGxzIGluIGEKPiAgIHZpcnR1YWwg
-YWRkcmVzc2luZyBtb2RlIGluc3RlYWQgb2YgdGhlIGZsYXQgcGh5c2ljYWwgbW9kZSwgdGhlbiB0
-aGUKPiAgIG9wZXJhdGluZyBzeXN0ZW0gbXVzdCB1c2UgdGhlIHNlcnZpY2VzIGluIHRoaXMgc2Vj
-dGlvbiB0byBzd2l0Y2ggdGhlCj4gICBFRkkgcnVudGltZSBzZXJ2aWNlcyBmcm9tIGZsYXQgcGh5
-c2ljYWwgYWRkcmVzc2luZyB0byB2aXJ0dWFsCj4gICBhZGRyZXNzaW5nLiIKPiAKPiBTbyBpdCBp
-cyBwcmV0dHkgY2xlYXIgdGhhdCBjYWxsaW5nIFNldFZpcnR1YWxBZGRyZXNzTWFwKCkgaXMgZW50
-aXJlbHkKPiBvcHRpb25hbCwgYW5kIHNvIHRoZXJlIGlzIG5vIHBvaW50IGluIGRvaW5nIHNvIHVu
-bGVzcyBpdCBhY2hpZXZlcwo+IGFueXRoaW5nIHVzZWZ1bCBmb3IgdXMuCj4gCj4gVGhpcyBpcyBu
-b3QgdGhlIGNhc2UgZm9yIDY0LWJpdCBBUk0uIFRoZSBuYXRpdmUgbWFwcGluZyB1c2VkIGJ5IHRo
-ZSBPUwo+IGlzIGFyYml0cmFyaWx5IGNvbnZlcnRlZCBpbnRvIGFub3RoZXIgcGVybXV0YXRpb24g
-b2YgdXNlcmxhbmQgYWRkcmVzc2VzCj4gKGkuZS4sIGJpdHMgWzYzOjQ4XSBjbGVhcmVkKSwgYW5k
-IHRoZSBydW50aW1lIGNvZGUgY291bGQgZWFzaWx5IGRlYWwKPiB3aXRoIHRoZSBvcmlnaW5hbCBs
-YXlvdXQgaW4gZXhhY3RseSB0aGUgc2FtZSB3YXkgYXMgaXQgZGVhbHMgd2l0aCB0aGUKPiBjb252
-ZXJ0ZWQgbGF5b3V0LiBIb3dldmVyLCBkdWUgdG8gY29uc3RyYWludHMgcmVsYXRlZCB0byBwYWdl
-IHNpemUKPiBkaWZmZXJlbmNlcyBpZiB0aGUgT1MgaXMgbm90IHJ1bm5pbmcgd2l0aCA0ayBwYWdl
-cywgYW5kIHJlbGF0ZWQgdG8KPiBzeXN0ZW1zIHRoYXQgbWF5IGV4cG9zZSB0aGUgaW5kaXZpZHVh
-bCBzZWN0aW9ucyBvZiBQRS9DT0ZGIHJ1bnRpbWUKPiBtb2R1bGVzIGFzIGRpZmZlcmVudCBtZW1v
-cnkgcmVnaW9ucywgY3JlYXRpbmcgdGhlIHZpcnR1YWwgbGF5b3V0IGlzIGEKPiBiaXQgZmlkZGx5
-LCBhbmQgcmVxdWlyZXMgdXMgdG8gc29ydCB0aGUgbWVtb3J5IG1hcCBhbmQgcmVhc29uIGFib3V0
-Cj4gYWRqYWNlbnQgcmVnaW9ucyB3aXRoIGlkZW50aWNhbCBtZW1vcnkgdHlwZXMgZXRjIGV0Yy4K
-PiAKPiBTbyB0aGUgb2J2aW91cyBmaXggaXMgdG8gc3RvcCBjYWxsaW5nIFNldFZpcnR1YWxBZGRy
-ZXNzTWFwKCkgYWx0b2dldGhlcgo+IG9uIGFybTY0IHN5c3RlbXMuIEhvd2V2ZXIsIHRvIGF2b2lk
-IHN1cnByaXNlcywgd2hpY2ggYXJlIG5vdG9yaW91c2x5Cj4gaGFyZCB0byBkaWFnbm9zZSB3aGVu
-IGl0IGNvbWVzIHRvIE9TPC0+ZmlybXdhcmUgaW50ZXJhY3Rpb25zLCBsZXQncwo+IHN0YXJ0IGJ5
-IG1ha2luZyBpdCBhbiBvcHQtb3V0IGZlYXR1cmUsIGFuZCBpbXBsZW1lbnQgc3VwcG9ydCBmb3Ig
-dGhlCj4gJ2VmaT1ub3ZhbWFwJyBrZXJuZWwgY29tbWFuZCBsaW5lIHBhcmFtZXRlciBvbiBBUk0g
-YW5kIGFybTY0IHN5c3RlbXMuCj4gCj4gKE5vdGUgdGhhdCAzMi1iaXQgQVJNIGdlbmVyYWxseSBk
-b2VzIHJlcXVpcmUgU2V0VmlydHVhbEFkZHJlc3NNYXAoKSB0byBiZQo+IHVzZWQsIGdpdmVuIHRo
-YXQgdGhlIHBoeXNpY2FsIG1lbW9yeSBtYXAgYW5kIHRoZSBrZXJuZWwgdmlydHVhbCBhZGRyZXNz
-Cj4gbWFwIGFyZSBub3QgZ3VhcmFudGVlZCB0byBiZSBub24tb3ZlcmxhcHBpbmcgbGlrZSBvbiBh
-cm02NC4gSG93ZXZlciwKPiBoYXZpbmcgc3VwcG9ydCBmb3IgZWZpPW5vdmFtYXAsbm9ydW50aW1l
-IG9uIDMyLWJpdCBBUk0sIGNvbWJpbmVkIHdpdGgKPiB0aGUgcmVjZW50bHkgcHJvcG9zZWQgc3Vw
-cG9ydCBmb3IgZWFybHljb249ZWZpLCBpcyBsaWtlbHkgdG8gYmUgdXNlZnVsCj4gdG8gZGlhZ25v
-c2UgYm9vdCBpc3N1ZXMgb24gc3VjaCBzeXN0ZW1zIGlmIHRoZXkgaGF2ZSBubyBhY2Nlc3NpYmxl
-IHNlcmlhbAo+IHBvcnQpCj4gCj4gQ2M6IEFsZXhhbmRlciBHcmFmIDxhZ3JhZkBzdXNlLmRlPgo+
-IENjOiBIZWlucmljaCBTY2h1Y2hhcmR0IDx4eXByb24uZ2xwa0BnbXguZGU+Cj4gQ2M6IEFLQVNI
-SSBUYWthaGlybyA8dGFrYWhpcm8uYWthc2hpQGxpbmFyby5vcmc+Cj4gQ2M6IExlaWYgTGluZGhv
-bG0gPGxlaWYubGluZGhvbG1AbGluYXJvLm9yZz4KPiBTaWduZWQtb2ZmLWJ5OiBBcmQgQmllc2hl
-dXZlbCA8YXJkLmJpZXNoZXV2ZWxAbGluYXJvLm9yZz4KClRlc3RlZC1ieTogTGVlIEpvbmVzIDxs
-ZWUuam9uZXNAbGluYXJvLm9yZz4KCi0tIApMZWUgSm9uZXMgW+adjueQvOaWr10KTGluYXJvIFNl
-cnZpY2VzIFRlY2huaWNhbCBMZWFkCkxpbmFyby5vcmcg4pSCIE9wZW4gc291cmNlIHNvZnR3YXJl
-IGZvciBBUk0gU29DcwpGb2xsb3cgTGluYXJvOiBGYWNlYm9vayB8IFR3aXR0ZXIgfCBCbG9nCgpf
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51eC1hcm0t
-a2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcK
-aHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1hcm0ta2Vy
-bmVsCg==
+As of commit e2a2e56e4082 ("arm64: dump: no need to check return value
+of debugfs_create functions") in the arm64 for-next/core branch,
+ptdump_debugfs_register does not have a return value, which causes a
+build error here:
+
+drivers/firmware/efi/arm-runtime.c:51:9: error: returning 'void' from a
+function with incompatible result type 'int'
+        return ptdump_debugfs_register(&efi_ptdump_info, "efi_page_tables");
+               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+1 error generated.
+
+The arm version is still awaiting acceptance [1] but in anticipation
+of that patch being merged, restructure this function to call
+ptdump_debugfs_register without expecting a return value.
+
+[1]: https://lore.kernel.org/lkml/20190122144114.9816-3-gregkh@linuxfoundation.org/
+
+Signed-off-by: Nathan Chancellor <natechancellor@gmail.com>
+---
+ drivers/firmware/efi/arm-runtime.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
+index 23ea1ed409d1..7ae3b797caf8 100644
+--- a/drivers/firmware/efi/arm-runtime.c
++++ b/drivers/firmware/efi/arm-runtime.c
+@@ -45,10 +45,10 @@ static struct ptdump_info efi_ptdump_info = {
+ 
+ static int __init ptdump_init(void)
+ {
+-	if (!efi_enabled(EFI_RUNTIME_SERVICES))
+-		return 0;
++	if (efi_enabled(EFI_RUNTIME_SERVICES))
++		ptdump_debugfs_register(&efi_ptdump_info, "efi_page_tables");
+ 
+-	return ptdump_debugfs_register(&efi_ptdump_info, "efi_page_tables");
++	return 0;
+ }
+ device_initcall(ptdump_init);
+ 
+-- 
+2.20.1
