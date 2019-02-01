@@ -1,102 +1,76 @@
-From: Julien Thierry <julien.thierry@arm.com>
-Subject: [PATCH v10 11/25] efi: Let architectures decide the flags that should be saved/restored
-Date: Thu, 31 Jan 2019 14:58:49 +0000
-Message-ID: <1548946743-38979-12-git-send-email-julien.thierry@arm.com>
-References: <1548946743-38979-1-git-send-email-julien.thierry@arm.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1548946743-38979-1-git-send-email-julien.thierry@arm.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: linux-kernel@vger.kernel.org, daniel.thompson@linaro.org, joel@joelfernandes.org, marc.zyngier@arm.com, christoffer.dall@arm.com, james.morse@arm.com, catalin.marinas@arm.com, will.deacon@arm.com, mark.rutland@arm.com, Julien Thierry <julien.thierry@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org
+From: Lee Jones <lee.jones@linaro.org>
+Subject: Re: [PATCH] efi: arm/arm64: allow SetVirtualAddressMap() to be omitted
+Date: Fri, 1 Feb 2019 08:06:52 +0000
+Message-ID: <20190201080652.GA783@dell>
+References: <20190126102207.29488-1-ard.biesheuvel@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <20190126102207.29488-1-ard.biesheuvel@linaro.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: mark.rutland@arm.com, linux-efi@vger.kernel.org, Heinrich Schuchardt <xypron.glpk@gmx.de>, will.deacon@arm.com, Alexander Graf <agraf@suse.de>, Leif Lindholm <leif.lindholm@linaro.org>, AKASHI Takahiro <takahiro.akashi@linaro.org>, james.morse@arm.com, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-Currently, irqflags are saved before calling runtime services and
-checked for mismatch on return.
-
-Provide a pair of overridable macros to save and restore (if needed) the
-state that need to be preserved on return from a runtime service.
-This allows to check for flags that are not necesarly related to
-irqflags.
-
-Signed-off-by: Julien Thierry <julien.thierry@arm.com>
-Acked-by: Catalin Marinas <catalin.marinas@arm.com>
-Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Acked-by: Marc Zyngier <marc.zyngier@arm.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: linux-efi@vger.kernel.org
----
- drivers/firmware/efi/runtime-wrappers.c | 17 +++++++++++++++--
- include/linux/efi.h                     |  5 +++--
- 2 files changed, 18 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
-index 8903b9c..c70df5a 100644
---- a/drivers/firmware/efi/runtime-wrappers.c
-+++ b/drivers/firmware/efi/runtime-wrappers.c
-@@ -89,11 +89,24 @@
- 	efi_rts_work.status;						\
- })
- 
-+#ifndef arch_efi_save_flags
-+#define arch_efi_save_flags(state_flags)	local_save_flags(state_flags)
-+#define arch_efi_restore_flags(state_flags)	local_irq_restore(state_flags)
-+#endif
-+
-+unsigned long efi_call_virt_save_flags(void)
-+{
-+	unsigned long flags;
-+
-+	arch_efi_save_flags(flags);
-+	return flags;
-+}
-+
- void efi_call_virt_check_flags(unsigned long flags, const char *call)
- {
- 	unsigned long cur_flags, mismatch;
- 
--	local_save_flags(cur_flags);
-+	cur_flags = efi_call_virt_save_flags();
- 
- 	mismatch = flags ^ cur_flags;
- 	if (!WARN_ON_ONCE(mismatch & ARCH_EFI_IRQ_FLAGS_MASK))
-@@ -102,7 +115,7 @@ void efi_call_virt_check_flags(unsigned long flags, const char *call)
- 	add_taint(TAINT_FIRMWARE_WORKAROUND, LOCKDEP_NOW_UNRELIABLE);
- 	pr_err_ratelimited(FW_BUG "IRQ flags corrupted (0x%08lx=>0x%08lx) by EFI %s\n",
- 			   flags, cur_flags, call);
--	local_irq_restore(flags);
-+	arch_efi_restore_flags(flags);
- }
- 
- /*
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 45ff763..bd80b7e 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1607,6 +1607,7 @@ efi_status_t efi_setup_gop(efi_system_table_t *sys_table_arg,
- 
- bool efi_runtime_disabled(void);
- extern void efi_call_virt_check_flags(unsigned long flags, const char *call);
-+extern unsigned long efi_call_virt_save_flags(void);
- 
- enum efi_secureboot_mode {
- 	efi_secureboot_mode_unset,
-@@ -1652,7 +1653,7 @@ enum efi_secureboot_mode {
- 									\
- 	arch_efi_call_virt_setup();					\
- 									\
--	local_save_flags(__flags);					\
-+	__flags = efi_call_virt_save_flags();				\
- 	__s = arch_efi_call_virt(p, f, args);				\
- 	efi_call_virt_check_flags(__flags, __stringify(f));		\
- 									\
-@@ -1667,7 +1668,7 @@ enum efi_secureboot_mode {
- 									\
- 	arch_efi_call_virt_setup();					\
- 									\
--	local_save_flags(__flags);					\
-+	__flags = efi_call_virt_save_flags();				\
- 	arch_efi_call_virt(p, f, args);					\
- 	efi_call_virt_check_flags(__flags, __stringify(f));		\
- 									\
--- 
-1.9.1
+T24gU2F0LCAyNiBKYW4gMjAxOSwgQXJkIEJpZXNoZXV2ZWwgd3JvdGU6Cgo+IFRoZSBVRUZJIHNw
+ZWMgcmV2aXNpb24gMi43IGVycmF0YSBBIHNlY3Rpb24gOC40IGhhcyB0aGUgZm9sbG93aW5nIHRv
+Cj4gc2F5IGFib3V0IHRoZSB2aXJ0dWFsIG1lbW9yeSBydW50aW1lIHNlcnZpY2VzOgo+IAo+ICAg
+IlRoaXMgc2VjdGlvbiBjb250YWlucyBmdW5jdGlvbiBkZWZpbml0aW9ucyBmb3IgdGhlIHZpcnR1
+YWwgbWVtb3J5Cj4gICBzdXBwb3J0IHRoYXQgbWF5IGJlIG9wdGlvbmFsbHkgdXNlZCBieSBhbiBv
+cGVyYXRpbmcgc3lzdGVtIGF0IHJ1bnRpbWUuCj4gICBJZiBhbiBvcGVyYXRpbmcgc3lzdGVtIGNo
+b29zZXMgdG8gbWFrZSBFRkkgcnVudGltZSBzZXJ2aWNlIGNhbGxzIGluIGEKPiAgIHZpcnR1YWwg
+YWRkcmVzc2luZyBtb2RlIGluc3RlYWQgb2YgdGhlIGZsYXQgcGh5c2ljYWwgbW9kZSwgdGhlbiB0
+aGUKPiAgIG9wZXJhdGluZyBzeXN0ZW0gbXVzdCB1c2UgdGhlIHNlcnZpY2VzIGluIHRoaXMgc2Vj
+dGlvbiB0byBzd2l0Y2ggdGhlCj4gICBFRkkgcnVudGltZSBzZXJ2aWNlcyBmcm9tIGZsYXQgcGh5
+c2ljYWwgYWRkcmVzc2luZyB0byB2aXJ0dWFsCj4gICBhZGRyZXNzaW5nLiIKPiAKPiBTbyBpdCBp
+cyBwcmV0dHkgY2xlYXIgdGhhdCBjYWxsaW5nIFNldFZpcnR1YWxBZGRyZXNzTWFwKCkgaXMgZW50
+aXJlbHkKPiBvcHRpb25hbCwgYW5kIHNvIHRoZXJlIGlzIG5vIHBvaW50IGluIGRvaW5nIHNvIHVu
+bGVzcyBpdCBhY2hpZXZlcwo+IGFueXRoaW5nIHVzZWZ1bCBmb3IgdXMuCj4gCj4gVGhpcyBpcyBu
+b3QgdGhlIGNhc2UgZm9yIDY0LWJpdCBBUk0uIFRoZSBuYXRpdmUgbWFwcGluZyB1c2VkIGJ5IHRo
+ZSBPUwo+IGlzIGFyYml0cmFyaWx5IGNvbnZlcnRlZCBpbnRvIGFub3RoZXIgcGVybXV0YXRpb24g
+b2YgdXNlcmxhbmQgYWRkcmVzc2VzCj4gKGkuZS4sIGJpdHMgWzYzOjQ4XSBjbGVhcmVkKSwgYW5k
+IHRoZSBydW50aW1lIGNvZGUgY291bGQgZWFzaWx5IGRlYWwKPiB3aXRoIHRoZSBvcmlnaW5hbCBs
+YXlvdXQgaW4gZXhhY3RseSB0aGUgc2FtZSB3YXkgYXMgaXQgZGVhbHMgd2l0aCB0aGUKPiBjb252
+ZXJ0ZWQgbGF5b3V0LiBIb3dldmVyLCBkdWUgdG8gY29uc3RyYWludHMgcmVsYXRlZCB0byBwYWdl
+IHNpemUKPiBkaWZmZXJlbmNlcyBpZiB0aGUgT1MgaXMgbm90IHJ1bm5pbmcgd2l0aCA0ayBwYWdl
+cywgYW5kIHJlbGF0ZWQgdG8KPiBzeXN0ZW1zIHRoYXQgbWF5IGV4cG9zZSB0aGUgaW5kaXZpZHVh
+bCBzZWN0aW9ucyBvZiBQRS9DT0ZGIHJ1bnRpbWUKPiBtb2R1bGVzIGFzIGRpZmZlcmVudCBtZW1v
+cnkgcmVnaW9ucywgY3JlYXRpbmcgdGhlIHZpcnR1YWwgbGF5b3V0IGlzIGEKPiBiaXQgZmlkZGx5
+LCBhbmQgcmVxdWlyZXMgdXMgdG8gc29ydCB0aGUgbWVtb3J5IG1hcCBhbmQgcmVhc29uIGFib3V0
+Cj4gYWRqYWNlbnQgcmVnaW9ucyB3aXRoIGlkZW50aWNhbCBtZW1vcnkgdHlwZXMgZXRjIGV0Yy4K
+PiAKPiBTbyB0aGUgb2J2aW91cyBmaXggaXMgdG8gc3RvcCBjYWxsaW5nIFNldFZpcnR1YWxBZGRy
+ZXNzTWFwKCkgYWx0b2dldGhlcgo+IG9uIGFybTY0IHN5c3RlbXMuIEhvd2V2ZXIsIHRvIGF2b2lk
+IHN1cnByaXNlcywgd2hpY2ggYXJlIG5vdG9yaW91c2x5Cj4gaGFyZCB0byBkaWFnbm9zZSB3aGVu
+IGl0IGNvbWVzIHRvIE9TPC0+ZmlybXdhcmUgaW50ZXJhY3Rpb25zLCBsZXQncwo+IHN0YXJ0IGJ5
+IG1ha2luZyBpdCBhbiBvcHQtb3V0IGZlYXR1cmUsIGFuZCBpbXBsZW1lbnQgc3VwcG9ydCBmb3Ig
+dGhlCj4gJ2VmaT1ub3ZhbWFwJyBrZXJuZWwgY29tbWFuZCBsaW5lIHBhcmFtZXRlciBvbiBBUk0g
+YW5kIGFybTY0IHN5c3RlbXMuCj4gCj4gKE5vdGUgdGhhdCAzMi1iaXQgQVJNIGdlbmVyYWxseSBk
+b2VzIHJlcXVpcmUgU2V0VmlydHVhbEFkZHJlc3NNYXAoKSB0byBiZQo+IHVzZWQsIGdpdmVuIHRo
+YXQgdGhlIHBoeXNpY2FsIG1lbW9yeSBtYXAgYW5kIHRoZSBrZXJuZWwgdmlydHVhbCBhZGRyZXNz
+Cj4gbWFwIGFyZSBub3QgZ3VhcmFudGVlZCB0byBiZSBub24tb3ZlcmxhcHBpbmcgbGlrZSBvbiBh
+cm02NC4gSG93ZXZlciwKPiBoYXZpbmcgc3VwcG9ydCBmb3IgZWZpPW5vdmFtYXAsbm9ydW50aW1l
+IG9uIDMyLWJpdCBBUk0sIGNvbWJpbmVkIHdpdGgKPiB0aGUgcmVjZW50bHkgcHJvcG9zZWQgc3Vw
+cG9ydCBmb3IgZWFybHljb249ZWZpLCBpcyBsaWtlbHkgdG8gYmUgdXNlZnVsCj4gdG8gZGlhZ25v
+c2UgYm9vdCBpc3N1ZXMgb24gc3VjaCBzeXN0ZW1zIGlmIHRoZXkgaGF2ZSBubyBhY2Nlc3NpYmxl
+IHNlcmlhbAo+IHBvcnQpCj4gCj4gQ2M6IEFsZXhhbmRlciBHcmFmIDxhZ3JhZkBzdXNlLmRlPgo+
+IENjOiBIZWlucmljaCBTY2h1Y2hhcmR0IDx4eXByb24uZ2xwa0BnbXguZGU+Cj4gQ2M6IEFLQVNI
+SSBUYWthaGlybyA8dGFrYWhpcm8uYWthc2hpQGxpbmFyby5vcmc+Cj4gQ2M6IExlaWYgTGluZGhv
+bG0gPGxlaWYubGluZGhvbG1AbGluYXJvLm9yZz4KPiBTaWduZWQtb2ZmLWJ5OiBBcmQgQmllc2hl
+dXZlbCA8YXJkLmJpZXNoZXV2ZWxAbGluYXJvLm9yZz4KClRlc3RlZC1ieTogTGVlIEpvbmVzIDxs
+ZWUuam9uZXNAbGluYXJvLm9yZz4KCi0tIApMZWUgSm9uZXMgW+adjueQvOaWr10KTGluYXJvIFNl
+cnZpY2VzIFRlY2huaWNhbCBMZWFkCkxpbmFyby5vcmcg4pSCIE9wZW4gc291cmNlIHNvZnR3YXJl
+IGZvciBBUk0gU29DcwpGb2xsb3cgTGluYXJvOiBGYWNlYm9vayB8IFR3aXR0ZXIgfCBCbG9nCgpf
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51eC1hcm0t
+a2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcK
+aHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1hcm0ta2Vy
+bmVsCg==
