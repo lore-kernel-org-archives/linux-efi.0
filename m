@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 10/10] acpi: bgrt: parse BGRT to obtain BMP address before it gets clobbered
-Date: Sat,  2 Feb 2019 10:41:19 +0100
-Message-ID: <20190202094119.13230-11-ard.biesheuvel@linaro.org>
+Subject: [PATCH 09/10] efi: x86: convert x86 EFI earlyprintk into generic earlycon implementation
+Date: Sat,  2 Feb 2019 10:41:18 +0100
+Message-ID: <20190202094119.13230-10-ard.biesheuvel@linaro.org>
 References: <20190202094119.13230-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190202094119.13230-1-ard.biesheuvel@linaro.org>
@@ -10,240 +10,390 @@ To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, AKASHI Takahiro <takahiro.akashi@linaro.org>, Alexander Graf <agraf@suse.de>, Bjorn Andersson <bjorn.andersson@linaro.org>, Borislav Petkov <bp@alien8.de>, Heinrich Schuchardt <xypron.glpk@gmx.de>, Jeffrey Hugo <jhugo@codeaurora.org>, Lee Jones <lee.jones@linaro.org>, Leif Lindholm <leif.lindholm@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Jones <pjones@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-The bitmap left in the framebuffer by the firmware is described by an
-ACPI table called "BGRT", which describes the size, pixel format and
-the address of a BMP image in memory. While the BGRT ACPI table is
-guaranteed to reside in a "ACPI reclaim" memory region, which is
-never touched by Linux. The BMP image, however, typically resides
-in EFI Boot Services Memory, which may have been overwritten by the
-time the BGRT discovery routine runs.
+Move the x86 EFI earlyprintk implementation to a shared location under
+drivers/firmware and tweak it slightly so we can expose it as an earlycon
+implementation (which is generic) rather than earlyprintk (which is only
+implemented for a few architectures)
 
-So instead, drop the handling from the ACPI init code, and call the
-BGRT parsing code immediately after going over the EFI configuration
-table array, at which time no memory has been touched yet except for
-the .data/.bss regions covered by the static kernel image.
+This also involves switching to write-combine mappings by default (which
+is required on ARM since device mappings lack memory semantics, and so
+memcpy/memset may not be used on them), and adding support for shared
+memory framebuffers on cache coherent non-x86 systems (which do not
+tolerate mismatched attributes)
 
-Unfortunately, this involves a non-trivial amount of ACPI entry
-point and root table parsing, but we cannot rely on the normal
-ACPI infrastructure yet this early in the boot.
+Note that 32-bit ARM does not populate its struct screen_info early
+enough for earlycon=efifb to work, so it is disabled there.
 
-Also note that we cannot take the 'acpi_disabled' global variable
-into account, since it may not have assumed the correct value yet
-(on arm64, the default value is '1' which is overridden to '0' if
-no DT description has been made available by the firmware)
-
-Cc: Peter Jones <pjones@redhat.com>
+Reviewed-by: Alexander Graf <agraf@suse.de>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- arch/arm64/kernel/acpi.c        |  2 -
- arch/x86/kernel/acpi/boot.c     |  2 -
- drivers/acpi/bgrt.c             |  6 ---
- drivers/firmware/efi/efi-bgrt.c | 84 ++++++++++++++++++++++++++++++---
- drivers/firmware/efi/efi.c      | 13 +++++
- include/linux/efi-bgrt.h        |  4 +-
- 6 files changed, 92 insertions(+), 19 deletions(-)
+ .../admin-guide/kernel-parameters.txt         |   8 +-
+ arch/x86/Kconfig.debug                        |  10 --
+ arch/x86/include/asm/efi.h                    |   1 -
+ arch/x86/kernel/early_printk.c                |   4 -
+ arch/x86/platform/efi/Makefile                |   1 -
+ drivers/firmware/efi/Kconfig                  |   6 +
+ drivers/firmware/efi/Makefile                 |   1 +
+ .../firmware/efi/earlycon.c                   | 134 +++++++-----------
+ 8 files changed, 64 insertions(+), 101 deletions(-)
+ rename arch/x86/platform/efi/early_printk.c => drivers/firmware/efi/earlycon.c (42%)
 
-diff --git a/arch/arm64/kernel/acpi.c b/arch/arm64/kernel/acpi.c
-index 44e3c351e1ea..7429a811f76d 100644
---- a/arch/arm64/kernel/acpi.c
-+++ b/arch/arm64/kernel/acpi.c
-@@ -230,8 +230,6 @@ void __init acpi_boot_table_init(void)
- 			early_init_dt_scan_chosen_stdout();
- 	} else {
- 		acpi_parse_spcr(earlycon_acpi_spcr_enable, true);
--		if (IS_ENABLED(CONFIG_ACPI_BGRT))
--			acpi_table_parse(ACPI_SIG_BGRT, acpi_parse_bgrt);
- 	}
- }
+diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
+index b799bcf67d7b..76dd3baa31e0 100644
+--- a/Documentation/admin-guide/kernel-parameters.txt
++++ b/Documentation/admin-guide/kernel-parameters.txt
+@@ -1073,9 +1073,15 @@
+ 			specified address. The serial port must already be
+ 			setup and configured. Options are not yet supported.
  
-diff --git a/arch/x86/kernel/acpi/boot.c b/arch/x86/kernel/acpi/boot.c
-index 2624de16cd7a..2d3535b62752 100644
---- a/arch/x86/kernel/acpi/boot.c
-+++ b/arch/x86/kernel/acpi/boot.c
-@@ -1633,8 +1633,6 @@ int __init acpi_boot_init(void)
- 	acpi_process_madt();
++		efifb,[options]
++			Start an early, unaccelerated console on the EFI
++			memory mapped framebuffer (if available). On cache
++			coherent non-x86 systems that use system memory for
++			the framebuffer, pass the 'ram' option so that it is
++			mapped with the correct attributes.
++
+ 	earlyprintk=	[X86,SH,ARM,M68k,S390]
+ 			earlyprintk=vga
+-			earlyprintk=efi
+ 			earlyprintk=sclp
+ 			earlyprintk=xen
+ 			earlyprintk=serial[,ttySn[,baudrate]]
+diff --git a/arch/x86/Kconfig.debug b/arch/x86/Kconfig.debug
+index 0723dff17e6c..15d0fbe27872 100644
+--- a/arch/x86/Kconfig.debug
++++ b/arch/x86/Kconfig.debug
+@@ -40,16 +40,6 @@ config EARLY_PRINTK_DBGP
+ 	  with klogd/syslogd or the X server. You should normally say N here,
+ 	  unless you want to debug such a crash. You need usb debug device.
  
- 	acpi_table_parse(ACPI_SIG_HPET, acpi_parse_hpet);
--	if (IS_ENABLED(CONFIG_ACPI_BGRT))
--		acpi_table_parse(ACPI_SIG_BGRT, acpi_parse_bgrt);
- 
- 	if (!acpi_noirq)
- 		x86_init.pci.init = pci_acpi_init;
-diff --git a/drivers/acpi/bgrt.c b/drivers/acpi/bgrt.c
-index 75af78361ce5..048413e06898 100644
---- a/drivers/acpi/bgrt.c
-+++ b/drivers/acpi/bgrt.c
-@@ -81,12 +81,6 @@ static const struct attribute_group bgrt_attribute_group = {
- 	.bin_attrs = bgrt_bin_attributes,
- };
- 
--int __init acpi_parse_bgrt(struct acpi_table_header *table)
--{
--	efi_bgrt_init(table);
--	return 0;
--}
+-config EARLY_PRINTK_EFI
+-	bool "Early printk via the EFI framebuffer"
+-	depends on EFI && EARLY_PRINTK
+-	select FONT_SUPPORT
+-	---help---
+-	  Write kernel log output directly into the EFI framebuffer.
 -
- static int __init bgrt_init(void)
- {
- 	int ret;
-diff --git a/drivers/firmware/efi/efi-bgrt.c b/drivers/firmware/efi/efi-bgrt.c
-index a2384184a7de..9c50d453b143 100644
---- a/drivers/firmware/efi/efi-bgrt.c
-+++ b/drivers/firmware/efi/efi-bgrt.c
-@@ -24,24 +24,94 @@ struct bmp_header {
- 	u32 size;
- } __packed;
- 
--void __init efi_bgrt_init(struct acpi_table_header *table)
-+void __init efi_bgrt_init(unsigned long rsdp_phys)
- {
- 	void *image;
- 	struct bmp_header bmp_header;
- 	struct acpi_table_bgrt *bgrt = &bgrt_tab;
-+	struct acpi_table_bgrt *table = NULL;
-+	struct acpi_table_rsdp *rsdp;
-+	struct acpi_table_header *hdr;
-+	u64 xsdt_phys = 0;
-+	u32 rsdt_phys = 0;
-+	size_t len;
- 
--	if (acpi_disabled)
-+	if (!efi_enabled(EFI_MEMMAP))
- 		return;
- 
--	if (!efi_enabled(EFI_MEMMAP))
-+	/* map the root pointer table to find the xsdt/rsdt values */
-+	rsdp = early_memremap_ro(rsdp_phys, sizeof(*rsdp));
-+	if (rsdp) {
-+		if (ACPI_VALIDATE_RSDP_SIG(rsdp->signature)) {
-+			xsdt_phys = rsdp->xsdt_physical_address;
-+			rsdt_phys = rsdp->rsdt_physical_address;
-+		}
-+		early_memunmap(rsdp, sizeof(*rsdp));
-+	}
-+
-+	if (WARN_ON(!xsdt_phys && !rsdt_phys))
- 		return;
- 
--	if (table->length < sizeof(bgrt_tab)) {
--		pr_notice("Ignoring BGRT: invalid length %u (expected %zu)\n",
--		       table->length, sizeof(bgrt_tab));
-+	/* obtain the length of whichever table we will be using */
-+	hdr = early_memremap_ro(xsdt_phys ?: rsdt_phys, sizeof(*hdr));
-+	if (WARN_ON(!hdr))
-+		return;
-+	len = hdr->length;
-+	early_memunmap(hdr, sizeof(*hdr));
-+
-+	/* remap with the correct length */
-+	hdr = early_memremap_ro(xsdt_phys ?: rsdt_phys, len);
-+	if (WARN_ON(!hdr))
-+		return;
-+
-+	if (xsdt_phys) {
-+		struct acpi_table_xsdt *xsdt = (void *)hdr;
-+		int i;
-+
-+		for (i = 0; i < (len - sizeof(*hdr)) / sizeof(u64); i++) {
-+			table = early_memremap_ro(xsdt->table_offset_entry[i],
-+						  sizeof(*table));
-+			if (WARN_ON(!table))
-+				break;
-+
-+			if (ACPI_COMPARE_NAME(table->header.signature,
-+					      ACPI_SIG_BGRT))
-+				break;
-+			early_memunmap(table, sizeof(*table));
-+			table = NULL;
-+		}
-+	} else if (rsdt_phys) {
-+		struct acpi_table_rsdt *rsdt = (void *)hdr;
-+		int i;
-+
-+		for (i = 0; i < (len - sizeof(*hdr)) / sizeof(u32); i++) {
-+			table = early_memremap_ro(rsdt->table_offset_entry[i],
-+						  sizeof(*table));
-+			if (WARN_ON(!table))
-+				break;
-+
-+			if (ACPI_COMPARE_NAME(table->header.signature,
-+					      ACPI_SIG_BGRT))
-+				break;
-+			early_memunmap(table, sizeof(*table));
-+			table = NULL;
-+		}
-+	}
-+	early_memunmap(hdr, len);
-+
-+	if (!table)
- 		return;
-+
-+	len = table->header.length;
-+	memcpy(bgrt, table, min(len, sizeof(bgrt_tab)));
-+	early_memunmap(table, sizeof(*table));
-+
-+	if (len < sizeof(bgrt_tab)) {
-+		pr_notice("Ignoring BGRT: invalid length %zu (expected %zu)\n",
-+		       len, sizeof(bgrt_tab));
-+		goto out;
- 	}
--	*bgrt = *(struct acpi_table_bgrt *)table;
-+
- 	if (bgrt->version != 1) {
- 		pr_notice("Ignoring BGRT: invalid version %u (expected 1)\n",
- 		       bgrt->version);
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 4c46ff6f2242..e5ef5c0eacc1 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -20,6 +20,7 @@
- #include <linux/init.h>
- #include <linux/device.h>
- #include <linux/efi.h>
-+#include <linux/efi-bgrt.h>
- #include <linux/of.h>
- #include <linux/of_fdt.h>
- #include <linux/io.h>
-@@ -592,6 +593,18 @@ int __init efi_config_parse_tables(void *config_tables, int count, int sz,
- 
- 		early_memunmap(tbl, sizeof(*tbl));
- 	}
-+
-+	/*
-+	 * We need to parse the BGRT table (which is an ACPI table not a UEFI
-+	 * configuration table) by hand and figure out where the bitmap it
-+	 * describes lives in memory so we can reserve it early on. Otherwise,
-+	 * it may be clobbered by the time we get to it during the ordinary ACPI
-+	 * table init sequence.
-+	 */
-+	if (IS_ENABLED(CONFIG_ACPI_BGRT) &&
-+	    efi.acpi20 != EFI_INVALID_TABLE_ADDR)
-+		efi_bgrt_init(efi.acpi20);
-+
- 	return 0;
+-	  This is useful for kernel debugging when your machine crashes very
+-	  early before the console code is initialized.
+-
+ config EARLY_PRINTK_USB_XDBC
+ 	bool "Early printk via the xHCI debug port"
+ 	depends on EARLY_PRINTK && PCI
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index a37378f986ec..08ebb2270d87 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -170,7 +170,6 @@ static inline bool efi_runtime_supported(void)
+ 	return false;
  }
  
-diff --git a/include/linux/efi-bgrt.h b/include/linux/efi-bgrt.h
-index e6cd51005633..528ea62d99ec 100644
---- a/include/linux/efi-bgrt.h
-+++ b/include/linux/efi-bgrt.h
-@@ -6,7 +6,7 @@
+-extern struct console early_efi_console;
+ extern void parse_efi_setup(u64 phys_addr, u32 data_len);
  
- #ifdef CONFIG_ACPI_BGRT
+ extern void efifb_setup_from_dmi(struct screen_info *si, const char *opt);
+diff --git a/arch/x86/kernel/early_printk.c b/arch/x86/kernel/early_printk.c
+index 374a52fa5296..9b33904251a9 100644
+--- a/arch/x86/kernel/early_printk.c
++++ b/arch/x86/kernel/early_printk.c
+@@ -388,10 +388,6 @@ static int __init setup_early_printk(char *buf)
+ 		if (!strncmp(buf, "xen", 3))
+ 			early_console_register(&xenboot_console, keep);
+ #endif
+-#ifdef CONFIG_EARLY_PRINTK_EFI
+-		if (!strncmp(buf, "efi", 3))
+-			early_console_register(&early_efi_console, keep);
+-#endif
+ #ifdef CONFIG_EARLY_PRINTK_USB_XDBC
+ 		if (!strncmp(buf, "xdbc", 4))
+ 			early_xdbc_parse_parameter(buf + 4);
+diff --git a/arch/x86/platform/efi/Makefile b/arch/x86/platform/efi/Makefile
+index e4dc3862d423..fe29f3f5d384 100644
+--- a/arch/x86/platform/efi/Makefile
++++ b/arch/x86/platform/efi/Makefile
+@@ -3,5 +3,4 @@ OBJECT_FILES_NON_STANDARD_efi_thunk_$(BITS).o := y
+ OBJECT_FILES_NON_STANDARD_efi_stub_$(BITS).o := y
  
--void efi_bgrt_init(struct acpi_table_header *table);
-+void efi_bgrt_init(unsigned long rsdp_phys);
- int __init acpi_parse_bgrt(struct acpi_table_header *table);
+ obj-$(CONFIG_EFI) 		+= quirks.o efi.o efi_$(BITS).o efi_stub_$(BITS).o
+-obj-$(CONFIG_EARLY_PRINTK_EFI)	+= early_printk.o
+ obj-$(CONFIG_EFI_MIXED)		+= efi_thunk_$(BITS).o
+diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+index 89110dfc7127..190be0b1d109 100644
+--- a/drivers/firmware/efi/Kconfig
++++ b/drivers/firmware/efi/Kconfig
+@@ -198,3 +198,9 @@ config EFI_DEV_PATH_PARSER
+ 	bool
+ 	depends on ACPI
+ 	default n
++
++config EFI_EARLYCON
++	def_bool y
++	depends on SERIAL_EARLYCON && !ARM && !IA64
++	select FONT_SUPPORT
++	select ARCH_USE_MEMREMAP_PROT
+diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+index 5f9f5039de50..d2d0d2030620 100644
+--- a/drivers/firmware/efi/Makefile
++++ b/drivers/firmware/efi/Makefile
+@@ -30,5 +30,6 @@ arm-obj-$(CONFIG_EFI)			:= arm-init.o arm-runtime.o
+ obj-$(CONFIG_ARM)			+= $(arm-obj-y)
+ obj-$(CONFIG_ARM64)			+= $(arm-obj-y)
+ obj-$(CONFIG_EFI_CAPSULE_LOADER)	+= capsule-loader.o
++obj-$(CONFIG_EFI_EARLYCON)		+= earlycon.o
+ obj-$(CONFIG_UEFI_CPER_ARM)		+= cper-arm.o
+ obj-$(CONFIG_UEFI_CPER_X86)		+= cper-x86.o
+diff --git a/arch/x86/platform/efi/early_printk.c b/drivers/firmware/efi/earlycon.c
+similarity index 42%
+rename from arch/x86/platform/efi/early_printk.c
+rename to drivers/firmware/efi/earlycon.c
+index 7138bc7a265c..dc1ae14ea4cf 100644
+--- a/arch/x86/platform/efi/early_printk.c
++++ b/drivers/firmware/efi/earlycon.c
+@@ -1,8 +1,6 @@
++// SPDX-License-Identifier: GPL-2.0
+ /*
+  * Copyright (C) 2013 Intel Corporation; author Matt Fleming
+- *
+- *  This file is part of the Linux kernel, and is made available under
+- *  the terms of the GNU General Public License version 2.
+  */
  
- /* The BGRT data itself; only valid if bgrt_image != NULL. */
-@@ -15,7 +15,7 @@ extern struct acpi_table_bgrt bgrt_tab;
+ #include <linux/console.h>
+@@ -10,104 +8,68 @@
+ #include <linux/font.h>
+ #include <linux/io.h>
+ #include <linux/kernel.h>
+-#include <asm/setup.h>
++#include <linux/serial_core.h>
++#include <linux/screen_info.h>
++
++#include <asm/early_ioremap.h>
  
- #else /* !CONFIG_ACPI_BGRT */
+ static const struct font_desc *font;
+ static u32 efi_x, efi_y;
+-static void *efi_fb;
+-static bool early_efi_keep;
+-
+-/*
+- * efi earlyprintk need use early_ioremap to map the framebuffer.
+- * But early_ioremap is not usable for earlyprintk=efi,keep, ioremap should
+- * be used instead. ioremap will be available after paging_init() which is
+- * earlier than initcall callbacks. Thus adding this early initcall function
+- * early_efi_map_fb to map the whole efi framebuffer.
+- */
+-static __init int early_efi_map_fb(void)
+-{
+-	u64 base, size;
++static u64 fb_base;
++static pgprot_t fb_prot;
  
--static inline void efi_bgrt_init(struct acpi_table_header *table) {}
-+static inline void efi_bgrt_init(unsigned long rsdp_phys) {}
- static inline int __init acpi_parse_bgrt(struct acpi_table_header *table)
+-	if (!early_efi_keep)
+-		return 0;
+-
+-	base = boot_params.screen_info.lfb_base;
+-	if (boot_params.screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
+-		base |= (u64)boot_params.screen_info.ext_lfb_base << 32;
+-	size = boot_params.screen_info.lfb_size;
+-	efi_fb = ioremap(base, size);
+-
+-	return efi_fb ? 0 : -ENOMEM;
+-}
+-early_initcall(early_efi_map_fb);
+-
+-/*
+- * early_efi_map maps efi framebuffer region [start, start + len -1]
+- * In case earlyprintk=efi,keep we have the whole framebuffer mapped already
+- * so just return the offset efi_fb + start.
+- */
+-static __ref void *early_efi_map(unsigned long start, unsigned long len)
++static __ref void *efi_earlycon_map(unsigned long start, unsigned long len)
  {
+-	u64 base;
+-
+-	base = boot_params.screen_info.lfb_base;
+-	if (boot_params.screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
+-		base |= (u64)boot_params.screen_info.ext_lfb_base << 32;
+-
+-	if (efi_fb)
+-		return (efi_fb + start);
+-	else
+-		return early_ioremap(base + start, len);
++	return early_memremap_prot(fb_base + start, len, pgprot_val(fb_prot));
+ }
+ 
+-static __ref void early_efi_unmap(void *addr, unsigned long len)
++static __ref void efi_earlycon_unmap(void *addr, unsigned long len)
+ {
+-	if (!efi_fb)
+-		early_iounmap(addr, len);
++	early_memunmap(addr, len);
+ }
+ 
+-static void early_efi_clear_scanline(unsigned int y)
++static void efi_earlycon_clear_scanline(unsigned int y)
+ {
+ 	unsigned long *dst;
+ 	u16 len;
+ 
+-	len = boot_params.screen_info.lfb_linelength;
+-	dst = early_efi_map(y*len, len);
++	len = screen_info.lfb_linelength;
++	dst = efi_earlycon_map(y*len, len);
+ 	if (!dst)
+ 		return;
+ 
+ 	memset(dst, 0, len);
+-	early_efi_unmap(dst, len);
++	efi_earlycon_unmap(dst, len);
+ }
+ 
+-static void early_efi_scroll_up(void)
++static void efi_earlycon_scroll_up(void)
+ {
+ 	unsigned long *dst, *src;
+ 	u16 len;
+ 	u32 i, height;
+ 
+-	len = boot_params.screen_info.lfb_linelength;
+-	height = boot_params.screen_info.lfb_height;
++	len = screen_info.lfb_linelength;
++	height = screen_info.lfb_height;
+ 
+ 	for (i = 0; i < height - font->height; i++) {
+-		dst = early_efi_map(i*len, len);
++		dst = efi_earlycon_map(i*len, len);
+ 		if (!dst)
+ 			return;
+ 
+-		src = early_efi_map((i + font->height) * len, len);
++		src = efi_earlycon_map((i + font->height) * len, len);
+ 		if (!src) {
+-			early_efi_unmap(dst, len);
++			efi_earlycon_unmap(dst, len);
+ 			return;
+ 		}
+ 
+ 		memmove(dst, src, len);
+ 
+-		early_efi_unmap(src, len);
+-		early_efi_unmap(dst, len);
++		efi_earlycon_unmap(src, len);
++		efi_earlycon_unmap(dst, len);
+ 	}
+ }
+ 
+-static void early_efi_write_char(u32 *dst, unsigned char c, unsigned int h)
++static void efi_earlycon_write_char(u32 *dst, unsigned char c, unsigned int h)
+ {
+ 	const u32 color_black = 0x00000000;
+ 	const u32 color_white = 0x00ffffff;
+@@ -128,14 +90,14 @@ static void early_efi_write_char(u32 *dst, unsigned char c, unsigned int h)
+ }
+ 
+ static void
+-early_efi_write(struct console *con, const char *str, unsigned int num)
++efi_earlycon_write(struct console *con, const char *str, unsigned int num)
+ {
+ 	struct screen_info *si;
+ 	unsigned int len;
+ 	const char *s;
+ 	void *dst;
+ 
+-	si = &boot_params.screen_info;
++	si = &screen_info;
+ 	len = si->lfb_linelength;
+ 
+ 	while (num) {
+@@ -155,7 +117,7 @@ early_efi_write(struct console *con, const char *str, unsigned int num)
+ 		for (h = 0; h < font->height; h++) {
+ 			unsigned int n, x;
+ 
+-			dst = early_efi_map((efi_y + h) * len, len);
++			dst = efi_earlycon_map((efi_y + h) * len, len);
+ 			if (!dst)
+ 				return;
+ 
+@@ -164,12 +126,12 @@ early_efi_write(struct console *con, const char *str, unsigned int num)
+ 			x = efi_x;
+ 
+ 			while (n-- > 0) {
+-				early_efi_write_char(dst + x*4, *s, h);
++				efi_earlycon_write_char(dst + x*4, *s, h);
+ 				x += font->width;
+ 				s++;
+ 			}
+ 
+-			early_efi_unmap(dst, len);
++			efi_earlycon_unmap(dst, len);
+ 		}
+ 
+ 		num -= count;
+@@ -192,26 +154,39 @@ early_efi_write(struct console *con, const char *str, unsigned int num)
+ 			u32 i;
+ 
+ 			efi_y -= font->height;
+-			early_efi_scroll_up();
++			efi_earlycon_scroll_up();
+ 
+ 			for (i = 0; i < font->height; i++)
+-				early_efi_clear_scanline(efi_y + i);
++				efi_earlycon_clear_scanline(efi_y + i);
+ 		}
+ 	}
+ }
+ 
+-static __init int early_efi_setup(struct console *con, char *options)
++static int __init efi_earlycon_setup(struct earlycon_device *device,
++				     const char *opt)
+ {
+ 	struct screen_info *si;
+ 	u16 xres, yres;
+ 	u32 i;
+ 
+-	si = &boot_params.screen_info;
++	if (screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
++		return -ENODEV;
++
++	fb_base = screen_info.lfb_base;
++	if (screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
++		fb_base |= (u64)screen_info.ext_lfb_base << 32;
++
++	if (opt && !strcmp(opt, "ram"))
++		fb_prot = PAGE_KERNEL;
++	else
++		fb_prot = pgprot_writecombine(PAGE_KERNEL);
++
++	si = &screen_info;
+ 	xres = si->lfb_width;
+ 	yres = si->lfb_height;
+ 
+ 	/*
+-	 * early_efi_write_char() implicitly assumes a framebuffer with
++	 * efi_earlycon_write_char() implicitly assumes a framebuffer with
+ 	 * 32-bits per pixel.
+ 	 */
+ 	if (si->lfb_depth != 32)
+@@ -223,18 +198,9 @@ static __init int early_efi_setup(struct console *con, char *options)
+ 
+ 	efi_y = rounddown(yres, font->height) - font->height;
+ 	for (i = 0; i < (yres - efi_y) / font->height; i++)
+-		early_efi_scroll_up();
++		efi_earlycon_scroll_up();
+ 
+-	/* early_console_register will unset CON_BOOT in case ,keep */
+-	if (!(con->flags & CON_BOOT))
+-		early_efi_keep = true;
++	device->con->write = efi_earlycon_write;
  	return 0;
+ }
+-
+-struct console early_efi_console = {
+-	.name =		"earlyefi",
+-	.write =	early_efi_write,
+-	.setup =	early_efi_setup,
+-	.flags =	CON_PRINTBUFFER,
+-	.index =	-1,
+-};
++EARLYCON_DECLARE(efifb, efi_earlycon_setup);
 -- 
 2.17.1
