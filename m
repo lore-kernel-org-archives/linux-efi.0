@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 04/10] efi: use 32-bit alignment for efi_guid_t
-Date: Sat,  2 Feb 2019 10:41:13 +0100
-Message-ID: <20190202094119.13230-5-ard.biesheuvel@linaro.org>
+Subject: [PATCH 01/10] x86/efi: Mark can_free_region() as an __init function
+Date: Sat,  2 Feb 2019 10:41:10 +0100
+Message-ID: <20190202094119.13230-2-ard.biesheuvel@linaro.org>
 References: <20190202094119.13230-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190202094119.13230-1-ard.biesheuvel@linaro.org>
@@ -10,50 +10,29 @@ To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, AKASHI Takahiro <takahiro.akashi@linaro.org>, Alexander Graf <agraf@suse.de>, Bjorn Andersson <bjorn.andersson@linaro.org>, Borislav Petkov <bp@alien8.de>, Heinrich Schuchardt <xypron.glpk@gmx.de>, Jeffrey Hugo <jhugo@codeaurora.org>, Lee Jones <lee.jones@linaro.org>, Leif Lindholm <leif.lindholm@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Jones <pjones@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-The UEFI spec and EDK2 reference implementation both define EFI_GUID as
-struct { u32 a; u16; b; u16 c; u8 d[8]; }; and so the implied alignment
-is 32 bits not 8 bits like our guid_t. In some cases (i.e., on 32-bit ARM),
-this means that firmware services invoked by the kernel may assume that
-efi_guid_t* arguments are 32-bit aligned, and use memory accessors that
-do not tolerate misalignment. So let's set the minimum alignment to 32 bits.
+From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
 
-Note that the UEFI spec as well as some comments in the EDK2 code base
-suggest that EFI_GUID should be 64-bit aligned, but this appears to be
-a mistake, given that no code seems to exist that actually enforces that
-or relies on it.
+can_free_region() is called only once during _boot_ by
+efi_reserve_boot_services(). Hence, mark it as __init function.
 
-Reported-by: Heinrich Schuchardt <xypron.glpk@gmx.de>
-Reviewed-by: Leif Lindholm <leif.lindholm@linaro.org>
+Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- include/linux/efi.h | 15 ++++++++++++++-
- 1 file changed, 14 insertions(+), 1 deletion(-)
+ arch/x86/platform/efi/quirks.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 45ff763fba76..be08518c2553 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -48,7 +48,20 @@ typedef u16 efi_char16_t;		/* UNICODE character */
- typedef u64 efi_physical_addr_t;
- typedef void *efi_handle_t;
- 
--typedef guid_t efi_guid_t;
-+/*
-+ * The UEFI spec and EDK2 reference implementation both define EFI_GUID as
-+ * struct { u32 a; u16; b; u16 c; u8 d[8]; }; and so the implied alignment
-+ * is 32 bits not 8 bits like our guid_t. In some cases (i.e., on 32-bit ARM),
-+ * this means that firmware services invoked by the kernel may assume that
-+ * efi_guid_t* arguments are 32-bit aligned, and use memory accessors that
-+ * do not tolerate misalignment. So let's set the minimum alignment to 32 bits.
-+ *
-+ * Note that the UEFI spec as well as some comments in the EDK2 code base
-+ * suggest that EFI_GUID should be 64-bit aligned, but this appears to be
-+ * a mistake, given that no code seems to exist that actually enforces that
-+ * or relies on it.
-+ */
-+typedef guid_t efi_guid_t __aligned(__alignof__(u32));
- 
- #define EFI_GUID(a,b,c,d0,d1,d2,d3,d4,d5,d6,d7) \
- 	GUID_INIT(a, b, c, d0, d1, d2, d3, d4, d5, d6, d7)
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index 17456a1d3f04..9ce85e605052 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -304,7 +304,7 @@ void __init efi_arch_mem_reserve(phys_addr_t addr, u64 size)
+  * - Not within any part of the kernel
+  * - Not the BIOS reserved area (E820_TYPE_RESERVED, E820_TYPE_NVS, etc)
+  */
+-static bool can_free_region(u64 start, u64 size)
++static __init bool can_free_region(u64 start, u64 size)
+ {
+ 	if (start + size > __pa_symbol(_text) && start <= __pa_symbol(_end))
+ 		return false;
 -- 
 2.17.1
