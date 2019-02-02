@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 07/10] efi: arm/arm64: allow SetVirtualAddressMap() to be omitted
-Date: Sat,  2 Feb 2019 10:41:16 +0100
-Message-ID: <20190202094119.13230-8-ard.biesheuvel@linaro.org>
+Subject: [PATCH 08/10] x86: make ARCH_USE_MEMREMAP_PROT a generic Kconfig symbol
+Date: Sat,  2 Feb 2019 10:41:17 +0100
+Message-ID: <20190202094119.13230-9-ard.biesheuvel@linaro.org>
 References: <20190202094119.13230-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190202094119.13230-1-ard.biesheuvel@linaro.org>
@@ -10,137 +10,96 @@ To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, AKASHI Takahiro <takahiro.akashi@linaro.org>, Alexander Graf <agraf@suse.de>, Bjorn Andersson <bjorn.andersson@linaro.org>, Borislav Petkov <bp@alien8.de>, Heinrich Schuchardt <xypron.glpk@gmx.de>, Jeffrey Hugo <jhugo@codeaurora.org>, Lee Jones <lee.jones@linaro.org>, Leif Lindholm <leif.lindholm@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Jones <pjones@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-The UEFI spec revision 2.7 errata A section 8.4 has the following to
-say about the virtual memory runtime services:
+Turn ARCH_USE_MEMREMAP_PROT into a generic Kconfig symbol, and fix the
+dependency expression to reflect that AMD_MEM_ENCRYPT depends on it,
+instead of the other way around. This will permit ARCH_USE_MEMREMAP_PROT
+to be selected by other architectures.
 
-  "This section contains function definitions for the virtual memory
-  support that may be optionally used by an operating system at runtime.
-  If an operating system chooses to make EFI runtime service calls in a
-  virtual addressing mode instead of the flat physical mode, then the
-  operating system must use the services in this section to switch the
-  EFI runtime services from flat physical addressing to virtual
-  addressing."
+Note that the encryption related early memremap routines in
+arch/x86/mm/ioremap.c cannot be built for 32-bit x86 without triggering
+the following warning:
 
-So it is pretty clear that calling SetVirtualAddressMap() is entirely
-optional, and so there is no point in doing so unless it achieves
-anything useful for us.
+     arch/x86//mm/ioremap.c: In function 'early_memremap_encrypted':
+  >> arch/x86/include/asm/pgtable_types.h:193:27: warning: conversion from
+                     'long long unsigned int' to 'long unsigned int' changes
+                     value from '9223372036854776163' to '355' [-Woverflow]
+      #define __PAGE_KERNEL_ENC (__PAGE_KERNEL | _PAGE_ENC)
+                                ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+     arch/x86//mm/ioremap.c:713:46: note: in expansion of macro '__PAGE_KERNEL_ENC'
+       return early_memremap_prot(phys_addr, size, __PAGE_KERNEL_ENC);
 
-This is not the case for 64-bit ARM. The identity mapping used by the
-firmware is arbitrarily converted into another permutation of userland
-addresses (i.e., bits [63:48] cleared), and the runtime code could easily
-deal with the original layout in exactly the same way as it deals with
-the converted layout. However, due to constraints related to page size
-differences if the OS is not running with 4k pages, and related to
-systems that may expose the individual sections of PE/COFF runtime
-modules as different memory regions, creating the virtual layout is a
-bit fiddly, and requires us to sort the memory map and reason about
-adjacent regions with identical memory types etc etc.
+which essentially means they are 64-bit only anyway. However, we cannot
+make them dependent on CONFIG_ARCH_HAS_MEM_ENCRYPT, since that is always
+defined, even for i386 (and changing that results in a slew of build errors)
 
-So the obvious fix is to stop calling SetVirtualAddressMap() altogether
-on arm64 systems. However, to avoid surprises, which are notoriously
-hard to diagnose when it comes to OS<->firmware interactions, let's
-start by making it an opt-out feature, and implement support for the
-'efi=novamap' kernel command line parameter on ARM and arm64 systems.
+So instead, build those routines only if CONFIG_AMD_MEM_ENCRYPT is
+defined.
 
-(Note that 32-bit ARM generally does require SetVirtualAddressMap() to be
-used, given that the physical memory map and the kernel virtual address
-map are not guaranteed to be non-overlapping like on arm64. However,
-having support for efi=novamap,noruntime on 32-bit ARM, combined with
-the recently proposed support for earlycon=efifb, is likely to be useful
-to diagnose boot issues on such systems if they have no accessible serial
-port)
-
-Cc: Alexander Graf <agraf@suse.de>
-Cc: Heinrich Schuchardt <xypron.glpk@gmx.de>
-Cc: AKASHI Takahiro <takahiro.akashi@linaro.org>
-Cc: Leif Lindholm <leif.lindholm@linaro.org>
-Tested-by: Jeffrey Hugo <jhugo@codeaurora.org>
-Tested-by: Bjorn Andersson <bjorn.andersson@linaro.org>
-Tested-by: Lee Jones <lee.jones@linaro.org>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- drivers/firmware/efi/libstub/arm-stub.c        |  5 +++++
- drivers/firmware/efi/libstub/efi-stub-helper.c | 10 ++++++++++
- drivers/firmware/efi/libstub/efistub.h         |  1 +
- drivers/firmware/efi/libstub/fdt.c             |  3 +++
- 4 files changed, 19 insertions(+)
+ arch/Kconfig          | 3 +++
+ arch/x86/Kconfig      | 5 +----
+ arch/x86/mm/ioremap.c | 4 ++--
+ 3 files changed, 6 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-index eee42d5e25ee..626ec4b4a664 100644
---- a/drivers/firmware/efi/libstub/arm-stub.c
-+++ b/drivers/firmware/efi/libstub/arm-stub.c
-@@ -370,6 +370,11 @@ void efi_get_virtmap(efi_memory_desc_t *memory_map, unsigned long map_size,
- 		paddr = in->phys_addr;
- 		size = in->num_pages * EFI_PAGE_SIZE;
+diff --git a/arch/Kconfig b/arch/Kconfig
+index 4cfb6de48f79..9f0213213da8 100644
+--- a/arch/Kconfig
++++ b/arch/Kconfig
+@@ -885,6 +885,9 @@ config HAVE_ARCH_PREL32_RELOCATIONS
+ 	  architectures, and don't require runtime relocation on relocatable
+ 	  kernels.
  
-+		if (novamap()) {
-+			in->virt_addr = in->phys_addr;
-+			continue;
-+		}
++config ARCH_USE_MEMREMAP_PROT
++	bool
 +
- 		/*
- 		 * Make the mapping compatible with 64k pages: this allows
- 		 * a 4k page size kernel to kexec a 64k page size kernel and
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index 8f2d000bec75..e4610e72b78f 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -31,6 +31,7 @@ static unsigned long __chunk_size = EFI_READ_CHUNK_SIZE;
+ source "kernel/gcov/Kconfig"
  
- static int __section(.data) __nokaslr;
- static int __section(.data) __quiet;
-+static int __section(.data) __novamap;
+ source "scripts/gcc-plugins/Kconfig"
+diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
+index 15af091611e2..09c2c5600579 100644
+--- a/arch/x86/Kconfig
++++ b/arch/x86/Kconfig
+@@ -1510,6 +1510,7 @@ config AMD_MEM_ENCRYPT
+ 	bool "AMD Secure Memory Encryption (SME) support"
+ 	depends on X86_64 && CPU_SUP_AMD
+ 	select DYNAMIC_PHYSICAL_MASK
++	select ARCH_USE_MEMREMAP_PROT
+ 	---help---
+ 	  Say yes to enable support for the encryption of system memory.
+ 	  This requires an AMD processor that supports Secure Memory
+@@ -1529,10 +1530,6 @@ config AMD_MEM_ENCRYPT_ACTIVE_BY_DEFAULT
+ 	  If set to N, then the encryption of system memory can be
+ 	  activated with the mem_encrypt=on command line option.
  
- int __pure nokaslr(void)
- {
-@@ -40,6 +41,10 @@ int __pure is_quiet(void)
- {
- 	return __quiet;
+-config ARCH_USE_MEMREMAP_PROT
+-	def_bool y
+-	depends on AMD_MEM_ENCRYPT
+-
+ # Common NUMA Features
+ config NUMA
+ 	bool "Numa Memory Allocation and Scheduler Support"
+diff --git a/arch/x86/mm/ioremap.c b/arch/x86/mm/ioremap.c
+index 5378d10f1d31..0029604af8a4 100644
+--- a/arch/x86/mm/ioremap.c
++++ b/arch/x86/mm/ioremap.c
+@@ -705,7 +705,7 @@ bool phys_mem_access_encrypted(unsigned long phys_addr, unsigned long size)
+ 	return arch_memremap_can_ram_remap(phys_addr, size, 0);
  }
-+int __pure novamap(void)
-+{
-+	return __novamap;
-+}
  
- #define EFI_MMAP_NR_SLACK_SLOTS	8
+-#ifdef CONFIG_ARCH_USE_MEMREMAP_PROT
++#ifdef CONFIG_AMD_MEM_ENCRYPT
+ /* Remap memory with encryption */
+ void __init *early_memremap_encrypted(resource_size_t phys_addr,
+ 				      unsigned long size)
+@@ -747,7 +747,7 @@ void __init *early_memremap_decrypted_wp(resource_size_t phys_addr,
  
-@@ -479,6 +484,11 @@ efi_status_t efi_parse_options(char const *cmdline)
- 			__chunk_size = -1UL;
- 		}
+ 	return early_memremap_prot(phys_addr, size, __PAGE_KERNEL_NOENC_WP);
+ }
+-#endif	/* CONFIG_ARCH_USE_MEMREMAP_PROT */
++#endif	/* CONFIG_AMD_MEM_ENCRYPT */
  
-+		if (!strncmp(str, "novamap", 7)) {
-+			str += strlen("novamap");
-+			__novamap = 1;
-+		}
-+
- 		/* Group words together, delimited by "," */
- 		while (*str && *str != ' ' && *str != ',')
- 			str++;
-diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-index cefcf6ba3150..1b1dfcaa6fb9 100644
---- a/drivers/firmware/efi/libstub/efistub.h
-+++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -27,6 +27,7 @@
+ static pte_t bm_pte[PAGE_SIZE/sizeof(pte_t)] __page_aligned_bss;
  
- extern int __pure nokaslr(void);
- extern int __pure is_quiet(void);
-+extern int __pure novamap(void);
- 
- #define pr_efi(sys_table, msg)		do {				\
- 	if (!is_quiet()) efi_printk(sys_table, "EFI stub: "msg);	\
-diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
-index 7cfc51935c4b..5440ba17a1c5 100644
---- a/drivers/firmware/efi/libstub/fdt.c
-+++ b/drivers/firmware/efi/libstub/fdt.c
-@@ -318,6 +318,9 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
- 	if (status == EFI_SUCCESS) {
- 		efi_set_virtual_address_map_t *svam;
- 
-+		if (novamap())
-+			return EFI_SUCCESS;
-+
- 		/* Install the new virtual address map */
- 		svam = sys_table->runtime->set_virtual_address_map;
- 		status = svam(runtime_entry_count * desc_size, desc_size,
 -- 
 2.17.1
