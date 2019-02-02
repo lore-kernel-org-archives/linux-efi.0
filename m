@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 08/10] x86: make ARCH_USE_MEMREMAP_PROT a generic Kconfig symbol
-Date: Sat,  2 Feb 2019 10:41:17 +0100
-Message-ID: <20190202094119.13230-9-ard.biesheuvel@linaro.org>
+Subject: [PATCH 10/10] acpi: bgrt: parse BGRT to obtain BMP address before it gets clobbered
+Date: Sat,  2 Feb 2019 10:41:19 +0100
+Message-ID: <20190202094119.13230-11-ard.biesheuvel@linaro.org>
 References: <20190202094119.13230-1-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190202094119.13230-1-ard.biesheuvel@linaro.org>
@@ -10,96 +10,240 @@ To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, AKASHI Takahiro <takahiro.akashi@linaro.org>, Alexander Graf <agraf@suse.de>, Bjorn Andersson <bjorn.andersson@linaro.org>, Borislav Petkov <bp@alien8.de>, Heinrich Schuchardt <xypron.glpk@gmx.de>, Jeffrey Hugo <jhugo@codeaurora.org>, Lee Jones <lee.jones@linaro.org>, Leif Lindholm <leif.lindholm@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Jones <pjones@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-Turn ARCH_USE_MEMREMAP_PROT into a generic Kconfig symbol, and fix the
-dependency expression to reflect that AMD_MEM_ENCRYPT depends on it,
-instead of the other way around. This will permit ARCH_USE_MEMREMAP_PROT
-to be selected by other architectures.
+The bitmap left in the framebuffer by the firmware is described by an
+ACPI table called "BGRT", which describes the size, pixel format and
+the address of a BMP image in memory. While the BGRT ACPI table is
+guaranteed to reside in a "ACPI reclaim" memory region, which is
+never touched by Linux. The BMP image, however, typically resides
+in EFI Boot Services Memory, which may have been overwritten by the
+time the BGRT discovery routine runs.
 
-Note that the encryption related early memremap routines in
-arch/x86/mm/ioremap.c cannot be built for 32-bit x86 without triggering
-the following warning:
+So instead, drop the handling from the ACPI init code, and call the
+BGRT parsing code immediately after going over the EFI configuration
+table array, at which time no memory has been touched yet except for
+the .data/.bss regions covered by the static kernel image.
 
-     arch/x86//mm/ioremap.c: In function 'early_memremap_encrypted':
-  >> arch/x86/include/asm/pgtable_types.h:193:27: warning: conversion from
-                     'long long unsigned int' to 'long unsigned int' changes
-                     value from '9223372036854776163' to '355' [-Woverflow]
-      #define __PAGE_KERNEL_ENC (__PAGE_KERNEL | _PAGE_ENC)
-                                ^~~~~~~~~~~~~~~~~~~~~~~~~~~
-     arch/x86//mm/ioremap.c:713:46: note: in expansion of macro '__PAGE_KERNEL_ENC'
-       return early_memremap_prot(phys_addr, size, __PAGE_KERNEL_ENC);
+Unfortunately, this involves a non-trivial amount of ACPI entry
+point and root table parsing, but we cannot rely on the normal
+ACPI infrastructure yet this early in the boot.
 
-which essentially means they are 64-bit only anyway. However, we cannot
-make them dependent on CONFIG_ARCH_HAS_MEM_ENCRYPT, since that is always
-defined, even for i386 (and changing that results in a slew of build errors)
+Also note that we cannot take the 'acpi_disabled' global variable
+into account, since it may not have assumed the correct value yet
+(on arm64, the default value is '1' which is overridden to '0' if
+no DT description has been made available by the firmware)
 
-So instead, build those routines only if CONFIG_AMD_MEM_ENCRYPT is
-defined.
-
+Cc: Peter Jones <pjones@redhat.com>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- arch/Kconfig          | 3 +++
- arch/x86/Kconfig      | 5 +----
- arch/x86/mm/ioremap.c | 4 ++--
- 3 files changed, 6 insertions(+), 6 deletions(-)
+ arch/arm64/kernel/acpi.c        |  2 -
+ arch/x86/kernel/acpi/boot.c     |  2 -
+ drivers/acpi/bgrt.c             |  6 ---
+ drivers/firmware/efi/efi-bgrt.c | 84 ++++++++++++++++++++++++++++++---
+ drivers/firmware/efi/efi.c      | 13 +++++
+ include/linux/efi-bgrt.h        |  4 +-
+ 6 files changed, 92 insertions(+), 19 deletions(-)
 
-diff --git a/arch/Kconfig b/arch/Kconfig
-index 4cfb6de48f79..9f0213213da8 100644
---- a/arch/Kconfig
-+++ b/arch/Kconfig
-@@ -885,6 +885,9 @@ config HAVE_ARCH_PREL32_RELOCATIONS
- 	  architectures, and don't require runtime relocation on relocatable
- 	  kernels.
+diff --git a/arch/arm64/kernel/acpi.c b/arch/arm64/kernel/acpi.c
+index 44e3c351e1ea..7429a811f76d 100644
+--- a/arch/arm64/kernel/acpi.c
++++ b/arch/arm64/kernel/acpi.c
+@@ -230,8 +230,6 @@ void __init acpi_boot_table_init(void)
+ 			early_init_dt_scan_chosen_stdout();
+ 	} else {
+ 		acpi_parse_spcr(earlycon_acpi_spcr_enable, true);
+-		if (IS_ENABLED(CONFIG_ACPI_BGRT))
+-			acpi_table_parse(ACPI_SIG_BGRT, acpi_parse_bgrt);
+ 	}
+ }
  
-+config ARCH_USE_MEMREMAP_PROT
-+	bool
-+
- source "kernel/gcov/Kconfig"
+diff --git a/arch/x86/kernel/acpi/boot.c b/arch/x86/kernel/acpi/boot.c
+index 2624de16cd7a..2d3535b62752 100644
+--- a/arch/x86/kernel/acpi/boot.c
++++ b/arch/x86/kernel/acpi/boot.c
+@@ -1633,8 +1633,6 @@ int __init acpi_boot_init(void)
+ 	acpi_process_madt();
  
- source "scripts/gcc-plugins/Kconfig"
-diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
-index 15af091611e2..09c2c5600579 100644
---- a/arch/x86/Kconfig
-+++ b/arch/x86/Kconfig
-@@ -1510,6 +1510,7 @@ config AMD_MEM_ENCRYPT
- 	bool "AMD Secure Memory Encryption (SME) support"
- 	depends on X86_64 && CPU_SUP_AMD
- 	select DYNAMIC_PHYSICAL_MASK
-+	select ARCH_USE_MEMREMAP_PROT
- 	---help---
- 	  Say yes to enable support for the encryption of system memory.
- 	  This requires an AMD processor that supports Secure Memory
-@@ -1529,10 +1530,6 @@ config AMD_MEM_ENCRYPT_ACTIVE_BY_DEFAULT
- 	  If set to N, then the encryption of system memory can be
- 	  activated with the mem_encrypt=on command line option.
+ 	acpi_table_parse(ACPI_SIG_HPET, acpi_parse_hpet);
+-	if (IS_ENABLED(CONFIG_ACPI_BGRT))
+-		acpi_table_parse(ACPI_SIG_BGRT, acpi_parse_bgrt);
  
--config ARCH_USE_MEMREMAP_PROT
--	def_bool y
--	depends on AMD_MEM_ENCRYPT
+ 	if (!acpi_noirq)
+ 		x86_init.pci.init = pci_acpi_init;
+diff --git a/drivers/acpi/bgrt.c b/drivers/acpi/bgrt.c
+index 75af78361ce5..048413e06898 100644
+--- a/drivers/acpi/bgrt.c
++++ b/drivers/acpi/bgrt.c
+@@ -81,12 +81,6 @@ static const struct attribute_group bgrt_attribute_group = {
+ 	.bin_attrs = bgrt_bin_attributes,
+ };
+ 
+-int __init acpi_parse_bgrt(struct acpi_table_header *table)
+-{
+-	efi_bgrt_init(table);
+-	return 0;
+-}
 -
- # Common NUMA Features
- config NUMA
- 	bool "Numa Memory Allocation and Scheduler Support"
-diff --git a/arch/x86/mm/ioremap.c b/arch/x86/mm/ioremap.c
-index 5378d10f1d31..0029604af8a4 100644
---- a/arch/x86/mm/ioremap.c
-+++ b/arch/x86/mm/ioremap.c
-@@ -705,7 +705,7 @@ bool phys_mem_access_encrypted(unsigned long phys_addr, unsigned long size)
- 	return arch_memremap_can_ram_remap(phys_addr, size, 0);
+ static int __init bgrt_init(void)
+ {
+ 	int ret;
+diff --git a/drivers/firmware/efi/efi-bgrt.c b/drivers/firmware/efi/efi-bgrt.c
+index a2384184a7de..9c50d453b143 100644
+--- a/drivers/firmware/efi/efi-bgrt.c
++++ b/drivers/firmware/efi/efi-bgrt.c
+@@ -24,24 +24,94 @@ struct bmp_header {
+ 	u32 size;
+ } __packed;
+ 
+-void __init efi_bgrt_init(struct acpi_table_header *table)
++void __init efi_bgrt_init(unsigned long rsdp_phys)
+ {
+ 	void *image;
+ 	struct bmp_header bmp_header;
+ 	struct acpi_table_bgrt *bgrt = &bgrt_tab;
++	struct acpi_table_bgrt *table = NULL;
++	struct acpi_table_rsdp *rsdp;
++	struct acpi_table_header *hdr;
++	u64 xsdt_phys = 0;
++	u32 rsdt_phys = 0;
++	size_t len;
+ 
+-	if (acpi_disabled)
++	if (!efi_enabled(EFI_MEMMAP))
+ 		return;
+ 
+-	if (!efi_enabled(EFI_MEMMAP))
++	/* map the root pointer table to find the xsdt/rsdt values */
++	rsdp = early_memremap_ro(rsdp_phys, sizeof(*rsdp));
++	if (rsdp) {
++		if (ACPI_VALIDATE_RSDP_SIG(rsdp->signature)) {
++			xsdt_phys = rsdp->xsdt_physical_address;
++			rsdt_phys = rsdp->rsdt_physical_address;
++		}
++		early_memunmap(rsdp, sizeof(*rsdp));
++	}
++
++	if (WARN_ON(!xsdt_phys && !rsdt_phys))
+ 		return;
+ 
+-	if (table->length < sizeof(bgrt_tab)) {
+-		pr_notice("Ignoring BGRT: invalid length %u (expected %zu)\n",
+-		       table->length, sizeof(bgrt_tab));
++	/* obtain the length of whichever table we will be using */
++	hdr = early_memremap_ro(xsdt_phys ?: rsdt_phys, sizeof(*hdr));
++	if (WARN_ON(!hdr))
++		return;
++	len = hdr->length;
++	early_memunmap(hdr, sizeof(*hdr));
++
++	/* remap with the correct length */
++	hdr = early_memremap_ro(xsdt_phys ?: rsdt_phys, len);
++	if (WARN_ON(!hdr))
++		return;
++
++	if (xsdt_phys) {
++		struct acpi_table_xsdt *xsdt = (void *)hdr;
++		int i;
++
++		for (i = 0; i < (len - sizeof(*hdr)) / sizeof(u64); i++) {
++			table = early_memremap_ro(xsdt->table_offset_entry[i],
++						  sizeof(*table));
++			if (WARN_ON(!table))
++				break;
++
++			if (ACPI_COMPARE_NAME(table->header.signature,
++					      ACPI_SIG_BGRT))
++				break;
++			early_memunmap(table, sizeof(*table));
++			table = NULL;
++		}
++	} else if (rsdt_phys) {
++		struct acpi_table_rsdt *rsdt = (void *)hdr;
++		int i;
++
++		for (i = 0; i < (len - sizeof(*hdr)) / sizeof(u32); i++) {
++			table = early_memremap_ro(rsdt->table_offset_entry[i],
++						  sizeof(*table));
++			if (WARN_ON(!table))
++				break;
++
++			if (ACPI_COMPARE_NAME(table->header.signature,
++					      ACPI_SIG_BGRT))
++				break;
++			early_memunmap(table, sizeof(*table));
++			table = NULL;
++		}
++	}
++	early_memunmap(hdr, len);
++
++	if (!table)
+ 		return;
++
++	len = table->header.length;
++	memcpy(bgrt, table, min(len, sizeof(bgrt_tab)));
++	early_memunmap(table, sizeof(*table));
++
++	if (len < sizeof(bgrt_tab)) {
++		pr_notice("Ignoring BGRT: invalid length %zu (expected %zu)\n",
++		       len, sizeof(bgrt_tab));
++		goto out;
+ 	}
+-	*bgrt = *(struct acpi_table_bgrt *)table;
++
+ 	if (bgrt->version != 1) {
+ 		pr_notice("Ignoring BGRT: invalid version %u (expected 1)\n",
+ 		       bgrt->version);
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 4c46ff6f2242..e5ef5c0eacc1 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -20,6 +20,7 @@
+ #include <linux/init.h>
+ #include <linux/device.h>
+ #include <linux/efi.h>
++#include <linux/efi-bgrt.h>
+ #include <linux/of.h>
+ #include <linux/of_fdt.h>
+ #include <linux/io.h>
+@@ -592,6 +593,18 @@ int __init efi_config_parse_tables(void *config_tables, int count, int sz,
+ 
+ 		early_memunmap(tbl, sizeof(*tbl));
+ 	}
++
++	/*
++	 * We need to parse the BGRT table (which is an ACPI table not a UEFI
++	 * configuration table) by hand and figure out where the bitmap it
++	 * describes lives in memory so we can reserve it early on. Otherwise,
++	 * it may be clobbered by the time we get to it during the ordinary ACPI
++	 * table init sequence.
++	 */
++	if (IS_ENABLED(CONFIG_ACPI_BGRT) &&
++	    efi.acpi20 != EFI_INVALID_TABLE_ADDR)
++		efi_bgrt_init(efi.acpi20);
++
+ 	return 0;
  }
  
--#ifdef CONFIG_ARCH_USE_MEMREMAP_PROT
-+#ifdef CONFIG_AMD_MEM_ENCRYPT
- /* Remap memory with encryption */
- void __init *early_memremap_encrypted(resource_size_t phys_addr,
- 				      unsigned long size)
-@@ -747,7 +747,7 @@ void __init *early_memremap_decrypted_wp(resource_size_t phys_addr,
+diff --git a/include/linux/efi-bgrt.h b/include/linux/efi-bgrt.h
+index e6cd51005633..528ea62d99ec 100644
+--- a/include/linux/efi-bgrt.h
++++ b/include/linux/efi-bgrt.h
+@@ -6,7 +6,7 @@
  
- 	return early_memremap_prot(phys_addr, size, __PAGE_KERNEL_NOENC_WP);
- }
--#endif	/* CONFIG_ARCH_USE_MEMREMAP_PROT */
-+#endif	/* CONFIG_AMD_MEM_ENCRYPT */
+ #ifdef CONFIG_ACPI_BGRT
  
- static pte_t bm_pte[PAGE_SIZE/sizeof(pte_t)] __page_aligned_bss;
+-void efi_bgrt_init(struct acpi_table_header *table);
++void efi_bgrt_init(unsigned long rsdp_phys);
+ int __init acpi_parse_bgrt(struct acpi_table_header *table);
  
+ /* The BGRT data itself; only valid if bgrt_image != NULL. */
+@@ -15,7 +15,7 @@ extern struct acpi_table_bgrt bgrt_tab;
+ 
+ #else /* !CONFIG_ACPI_BGRT */
+ 
+-static inline void efi_bgrt_init(struct acpi_table_header *table) {}
++static inline void efi_bgrt_init(unsigned long rsdp_phys) {}
+ static inline int __init acpi_parse_bgrt(struct acpi_table_header *table)
+ {
+ 	return 0;
 -- 
 2.17.1
