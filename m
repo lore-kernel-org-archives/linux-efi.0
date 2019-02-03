@@ -1,99 +1,110 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 1/1] efi/arm64: add a terminator for ptdump marker
-Date: Sat,  2 Feb 2019 10:50:17 +0100
-Message-ID: <20190202095017.13799-2-ard.biesheuvel@linaro.org>
-References: <20190202095017.13799-1-ard.biesheuvel@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190202095017.13799-1-ard.biesheuvel@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Qian Cai <cai@lca.pw>
+From: Ben Hutchings <ben@decadent.org.uk>
+Subject: [PATCH 3.16 004/305] x86/mm: Simplify p[g4um]d_page() macros
+Date: Sun, 03 Feb 2019 14:45:08 +0100
+Message-ID: <lsq.1549201508.3242952@decadent.org.uk>
+References: <lsq.1549201507.384106140@decadent.org.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Return-path: <stable-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <lsq.1549201507.384106140@decadent.org.uk>
+Sender: stable-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: akpm@linux-foundation.org, Denis Kirjanov <kda@linux-powerpc.org>, kasan-dev@googlegroups.com, Dave Young <dyoung@redhat.com>, Andy Lutomirski <luto@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Dmitry Vyukov <dvyukov@google.com>, Alexander Potapenko <glider@google.com>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, linux-efi@vger.kernel.org, Jonathan Corbet <corbet@lwn.net>, Brijesh Singh <brijesh.singh@amd.com>, Peter Zijlstra <peterz@infradead.org>, Paolo Bonzini <pbonzini@redhat.com>, Toshimitsu Kani <toshi.kani@hpe.com>, linux-doc@vger.kernel.org, Borislav Petkov <bp@alien8.de>, Thomas Gleixner <tglx@linutronix.de>, Wenkuan Wang <Wenkuan.Wang@windriver.com>, Tom Lendacky <thomas.>
 List-Id: linux-efi@vger.kernel.org
 
-From: Qian Cai <cai@lca.pw>
+3.16.63-rc1 review patch.  If anyone has any objections, please let me know.
 
-Reading efi_page_tables debugfs triggers an out-of-bounds access here,
+------------------
 
-  arch/arm64/mm/dump.c: 282
-  if (addr >= st->marker[1].start_address) {
+From: Tom Lendacky <thomas.lendacky@amd.com>
 
-called from,
+commit fd7e315988b784509ba3f1b42f539bd0b1fca9bb upstream.
 
-  arch/arm64/mm/dump.c: 331
-  note_page(st, addr, 2, pud_val(pud));
+Create a pgd_pfn() macro similar to the p[4um]d_pfn() macros and then
+use the p[g4um]d_pfn() macros in the p[g4um]d_page() macros instead of
+duplicating the code.
 
-because st->marker++ is is called after "UEFI runtime end" which is the
-last element in addr_marker[]. Therefore, add a terminator like the one
-for kernel_page_tables, so it can be skipped to print out non-existent
-markers.
-
-  # cat /sys/kernel/debug/efi_page_tables
-  ---[ UEFI runtime start ]---
-  0x0000000020000000-0x0000000020010000          64K PTE       RW NX SHD AF ...
-  0x0000000020200000-0x0000000021340000       17664K PTE       RW NX SHD AF ...
-  ...
-  0x0000000021920000-0x0000000021950000         192K PTE       RW x  SHD AF ...
-  0x0000000021950000-0x00000000219a0000         320K PTE       RW NX SHD AF ...
-  ---[ UEFI runtime end ]---
-  ---[ (null) ]---
-  ---[ (null) ]---
-
-  [12126.163970] BUG: KASAN: global-out-of-bounds in note_page+0x1f0/0xac0
-  [12126.170404] Read of size 8 at addr ffff2000123f2ac0 by task read_all/42464
-  [12126.199520] Call trace:
-  [12126.201972]  dump_backtrace+0x0/0x298
-  [12126.205627]  show_stack+0x24/0x30
-  [12126.208944]  dump_stack+0xb0/0xdc
-  [12126.212258]  print_address_description+0x64/0x2b0
-  [12126.216954]  kasan_report+0x150/0x1a4
-  [12126.220610]  __asan_report_load8_noabort+0x30/0x3c
-  [12126.225392]  note_page+0x1f0/0xac0
-  [12126.228786]  walk_pgd+0xb4/0x244
-  [12126.232005]  ptdump_walk_pgd+0xec/0x140
-  [12126.235833]  ptdump_show+0x40/0x50
-  [12126.239237]  seq_read+0x3f8/0xad0
-  [12126.242548]  full_proxy_read+0x9c/0xc0
-  [12126.246290]  __vfs_read+0xfc/0x4c8
-  [12126.249684]  vfs_read+0xec/0x208
-  [12126.252904]  ksys_read+0xd0/0x15c
-  [12126.256210]  __arm64_sys_read+0x84/0x94
-  [12126.260048]  el0_svc_handler+0x258/0x304
-  [12126.263963]  el0_svc+0x8/0xc
-  [12126.266834]
-  [12126.268317] The buggy address belongs to the variable:
-  [12126.273458]  __compound_literal.0+0x20/0x800
-  [12126.277718]
-  [12126.279201] Memory state around the buggy address:
-  [12126.283987]  ffff2000123f2980: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  [12126.291200]  ffff2000123f2a00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 fa
-  [12126.298412] >ffff2000123f2a80: fa fa fa fa 00 00 00 00 fa fa fa fa 00 00 00 00
-  [12126.305624]                                            ^
-  [12126.310927]  ffff2000123f2b00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  [12126.318140]  ffff2000123f2b80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0
-
-Fixes: 9d80448ac92b ("efi/arm64: Add debugfs node to dump UEFI runtime page tables")
-Signed-off-by: Qian Cai <cai@lca.pw>
-[ardb: fix up whitespace]
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+Reviewed-by: Thomas Gleixner <tglx@linutronix.de>
+Reviewed-by: Borislav Petkov <bp@suse.de>
+Cc: Alexander Potapenko <glider@google.com>
+Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Arnd Bergmann <arnd@arndb.de>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Brijesh Singh <brijesh.singh@amd.com>
+Cc: Dave Young <dyoung@redhat.com>
+Cc: Dmitry Vyukov <dvyukov@google.com>
+Cc: Jonathan Corbet <corbet@lwn.net>
+Cc: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
+Cc: Larry Woodman <lwoodman@redhat.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Michael S. Tsirkin <mst@redhat.com>
+Cc: Paolo Bonzini <pbonzini@redhat.com>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Radim Krčmář <rkrcmar@redhat.com>
+Cc: Rik van Riel <riel@redhat.com>
+Cc: Toshimitsu Kani <toshi.kani@hpe.com>
+Cc: kasan-dev@googlegroups.com
+Cc: kvm@vger.kernel.org
+Cc: linux-arch@vger.kernel.org
+Cc: linux-doc@vger.kernel.org
+Cc: linux-efi@vger.kernel.org
+Cc: linux-mm@kvack.org
+Link: http://lkml.kernel.org/r/e61eb533a6d0aac941db2723d8aa63ef6b882dee.1500319216.git.thomas.lendacky@amd.com
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+[Backported to 4.9 stable by AK, suggested by Michael Hocko]
+Signed-off-by: Andi Kleen <ak@linux.intel.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Wenkuan Wang <Wenkuan.Wang@windriver.com>
+Signed-off-by: Ben Hutchings <ben@decadent.org.uk>
 ---
- drivers/firmware/efi/arm-runtime.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+ arch/x86/include/asm/pgtable.h | 13 ++++++++-----
+ 1 file changed, 8 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
-index 23ea1ed409d1..352bd2473162 100644
---- a/drivers/firmware/efi/arm-runtime.c
-+++ b/drivers/firmware/efi/arm-runtime.c
-@@ -37,8 +37,9 @@ extern u64 efi_system_table;
- static struct ptdump_info efi_ptdump_info = {
- 	.mm		= &efi_mm,
- 	.markers	= (struct addr_marker[]){
--		{ 0,		"UEFI runtime start" },
--		{ DEFAULT_MAP_WINDOW_64, "UEFI runtime end" }
-+		{ 0,				"UEFI runtime start" },
-+		{ DEFAULT_MAP_WINDOW_64,	"UEFI runtime end" },
-+		{ -1,				NULL }
- 	},
- 	.base_addr	= 0,
- };
--- 
-2.17.1
+--- a/arch/x86/include/asm/pgtable.h
++++ b/arch/x86/include/asm/pgtable.h
+@@ -166,6 +166,11 @@ static inline unsigned long pud_pfn(pud_
+ 	return (pfn & pud_pfn_mask(pud)) >> PAGE_SHIFT;
+ }
+ 
++static inline unsigned long pgd_pfn(pgd_t pgd)
++{
++	return (pgd_val(pgd) & PTE_PFN_MASK) >> PAGE_SHIFT;
++}
++
+ #define pte_page(pte)	pfn_to_page(pte_pfn(pte))
+ 
+ static inline int pmd_large(pmd_t pte)
+@@ -591,8 +596,7 @@ static inline unsigned long pmd_page_vad
+  * Currently stuck as a macro due to indirect forward reference to
+  * linux/mmzone.h's __section_mem_map_addr() definition:
+  */
+-#define pmd_page(pmd)		\
+-	pfn_to_page((pmd_val(pmd) & pmd_pfn_mask(pmd)) >> PAGE_SHIFT)
++#define pmd_page(pmd)	pfn_to_page(pmd_pfn(pmd))
+ 
+ /*
+  * the pmd page can be thought of an array like this: pmd_t[PTRS_PER_PMD]
+@@ -665,8 +669,7 @@ static inline unsigned long pud_page_vad
+  * Currently stuck as a macro due to indirect forward reference to
+  * linux/mmzone.h's __section_mem_map_addr() definition:
+  */
+-#define pud_page(pud)		\
+-	pfn_to_page((pud_val(pud) & pud_pfn_mask(pud)) >> PAGE_SHIFT)
++#define pud_page(pud)	pfn_to_page(pud_pfn(pud))
+ 
+ /* Find an entry in the second-level page table.. */
+ static inline pmd_t *pmd_offset(pud_t *pud, unsigned long address)
+@@ -706,7 +709,7 @@ static inline unsigned long pgd_page_vad
+  * Currently stuck as a macro due to indirect forward reference to
+  * linux/mmzone.h's __section_mem_map_addr() definition:
+  */
+-#define pgd_page(pgd)		pfn_to_page(pgd_val(pgd) >> PAGE_SHIFT)
++#define pgd_page(pgd)		pfn_to_page(pgd_pfn(pgd))
+ 
+ /* to find an entry in a page-table-directory. */
+ static inline unsigned long pud_index(unsigned long address)
