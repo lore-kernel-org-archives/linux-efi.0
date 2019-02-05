@@ -1,195 +1,104 @@
-From: Masayoshi Mizuma <msys.mizuma@gmail.com>
-Subject: Re: [PATCH v8 0/3] x86/boot/KASLR: Parse ACPI table and limit kaslr
- in immovable memory
-Date: Tue, 5 Feb 2019 10:05:16 -0500
-Message-ID: <20190205150514.fvztftk75swgfayd@gabell>
-References: <20181022154204.kagmdb55jtoez4ca@gabell>
- <20181025103345.GF14020@nazgul.tnic>
- <20181025134050.ggiir77ehntikbwg@gabell>
- <20181106184519.GA16391@zn.tnic>
- <20181106193636.svyjwuwrlgnpuyyf@gabell>
- <20181106204511.GO13712@zn.tnic>
- <20181106222133.lb7674yzszivzihd@gabell>
- <20181108105129.GA7543@zn.tnic>
- <20181110105422.GA20023@zn.tnic>
- <20181111134556.qxv2v4g7dl5irzo7@gabell>
+From: "Ghannam, Yazen" <Yazen.Ghannam@amd.com>
+Subject: RE: [PATCH 10/10] acpi: bgrt: parse BGRT to obtain BMP address before
+ it gets clobbered
+Date: Tue, 5 Feb 2019 19:07:07 +0000
+Message-ID: <BN7PR12MB259308A068895E416766F8DEF86E0@BN7PR12MB2593.namprd12.prod.outlook.com>
+References: <20190202094119.13230-1-ard.biesheuvel@linaro.org>
+ <20190202094119.13230-11-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20181111134556.qxv2v4g7dl5irzo7@gabell>
+In-Reply-To: <20190202094119.13230-11-ard.biesheuvel@linaro.org>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, Baoquan He <bhe@redhat.com>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, x86@kernel.org
-Cc: Chao Fan <fanc.fnst@cn.fujitsu.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, mingo@redhat.com, keescook@chromium.org, rjw@rjwysocki.net, lenb@kernel.org, ard.biesheuvel@linaro.org, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, AKASHI Takahiro <takahiro.akashi@linaro.org>, Alexander Graf <agraf@suse.de>, Bjorn Andersson <bjorn.andersson@linaro.org>, Borislav Petkov <bp@alien8.de>, Heinrich Schuchardt <xypron.glpk@gmx.de>, Jeffrey Hugo <jhugo@codeaurora.org>, Lee Jones <lee.jones@linaro.org>, Leif Lindholm <leif.lindholm@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Jones <pjones@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, "Lendacky, Thomas" <Thomas.Lendacky@amd.com>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Boris and all,
+> -----Original Message-----
+> From: linux-kernel-owner@vger.kernel.org <linux-kernel-
+> owner@vger.kernel.org> On Behalf Of Ard Biesheuvel
+> Sent: Saturday, February 2, 2019 3:41 AM
+> To: linux-efi@vger.kernel.org; Ingo Molnar <mingo@kernel.org>; Thomas
+> Gleixner <tglx@linutronix.de>
+> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>; linux-kernel@vger.kernel.=
+org;
+> AKASHI Takahiro <takahiro.akashi@linaro.org>; Alexander Graf
+> <agraf@suse.de>; Bjorn Andersson <bjorn.andersson@linaro.org>; Borislav
+> Petkov <bp@alien8.de>; Heinrich Schuchardt <xypron.glpk@gmx.de>; Jeffrey
+> Hugo <jhugo@codeaurora.org>; Lee Jones <lee.jones@linaro.org>; Leif
+> Lindholm <leif.lindholm@linaro.org>; Linus Torvalds <torvalds@linux-
+> foundation.org>; Peter Jones <pjones@redhat.com>; Peter Zijlstra
+> <peterz@infradead.org>; Sai Praneeth Prakhya
+> <sai.praneeth.prakhya@intel.com>
+> Subject: [PATCH 10/10] acpi: bgrt: parse BGRT to obtain BMP address befor=
+e it
+> gets clobbered
+>=20
+> The bitmap left in the framebuffer by the firmware is described by an
+> ACPI table called "BGRT", which describes the size, pixel format and
+> the address of a BMP image in memory. While the BGRT ACPI table is
+> guaranteed to reside in a "ACPI reclaim" memory region, which is
+> never touched by Linux. The BMP image, however, typically resides
+> in EFI Boot Services Memory, which may have been overwritten by the
+> time the BGRT discovery routine runs.
+>=20
+> So instead, drop the handling from the ACPI init code, and call the
+> BGRT parsing code immediately after going over the EFI configuration
+> table array, at which time no memory has been touched yet except for
+> the .data/.bss regions covered by the static kernel image.
+>=20
+> Unfortunately, this involves a non-trivial amount of ACPI entry
+> point and root table parsing, but we cannot rely on the normal
+> ACPI infrastructure yet this early in the boot.
+>=20
+> Also note that we cannot take the 'acpi_disabled' global variable
+> into account, since it may not have assumed the correct value yet
+> (on arm64, the default value is '1' which is overridden to '0' if
+> no DT description has been made available by the firmware)
+>=20
+> Cc: Peter Jones <pjones@redhat.com>
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> ---
 
-On Sun, Nov 11, 2018 at 08:45:57AM -0500, Masayoshi Mizuma wrote:
-> On Sat, Nov 10, 2018 at 11:54:22AM +0100, Borislav Petkov wrote:
-> > On Thu, Nov 08, 2018 at 11:51:29AM +0100, Borislav Petkov wrote:
-> > > A global definition which doesn't need allocation?
-> > > 
-> > > Maybe hpa would have another, better idea...
-> > 
-> > ...and he has: just put that address in a new field in struct
-> > boot_params by converting one of the padding arrays there.
-> > 
-> > Don't forget to document it in Documentation/x86/zero-page.txt
-> > 
-> > This way you don't need any of the allocation fun or to use setup_data
-> > at all.
-> 
-> Thanks!
-> I have the prototype patch to use boot_params [1].
-> I will try to brush up it.
-> 
-> [1] https://lore.kernel.org/lkml/20181016151353.punyk7exekut2543@gabell
+Hi Ard, et. al.,
 
-Chao's patches are included in the tip tree, so I modified the patch.
+I'm trying out tip/master and I find that my system panics early during boo=
+t. Reverting
+this patch seems to resolve the issue. Please see the trace below.
 
-Could you review the following patch?
-
-From: Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>
-Date: Tue, 5 Feb 2019 10:00:59 -0500
-Subject: [PATCH] x86/mm: Introduce adjustment the padding size for KASLR
-
-If the physical memory layout has huge space for hotplug, the padding
-used for the physical memory mapping section is not enough.
-So, such system may crash while memory hot-adding on KASLR enabled system.
-
-For example, SRAT has the following layout, the maximum possible memory
-size is 32TB, and the memory is installed as 2TB actually, then the padding
-size should set 30TB (== possible memory size - actual memory size).
-
-  SRAT: Node 3 PXM 7 [mem 0x1c0000000000-0x1fffffffffff] hotplug
-
-This patch introduces adjustment the padding size if the default
-padding size isn't enough.
-
-Signed-off-by: Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>
----
- Documentation/x86/zero-page.txt       |  1 +
- arch/x86/boot/compressed/acpi.c       | 19 +++++++++++++++----
- arch/x86/include/uapi/asm/bootparam.h |  2 +-
- arch/x86/mm/kaslr.c                   | 26 +++++++++++++++++++++++++-
- 4 files changed, 42 insertions(+), 6 deletions(-)
-
-diff --git a/Documentation/x86/zero-page.txt b/Documentation/x86/zero-page.txt
-index 68aed077f..343fe1a90 100644
---- a/Documentation/x86/zero-page.txt
-+++ b/Documentation/x86/zero-page.txt
-@@ -15,6 +15,7 @@ Offset	Proto	Name		Meaning
- 058/008	ALL	tboot_addr      Physical address of tboot shared page
- 060/010	ALL	ist_info	Intel SpeedStep (IST) BIOS support information
- 				(struct ist_info)
-+078/010	ALL	possible_mem_addr The possible maximum physical memory address.
- 080/010	ALL	hd0_info	hd0 disk parameter, OBSOLETE!!
- 090/010	ALL	hd1_info	hd1 disk parameter, OBSOLETE!!
- 0A0/010	ALL	sys_desc_table	System description table (struct sys_desc_table),
-diff --git a/arch/x86/boot/compressed/acpi.c b/arch/x86/boot/compressed/acpi.c
-index c5a949335..7dd61b943 100644
---- a/arch/x86/boot/compressed/acpi.c
-+++ b/arch/x86/boot/compressed/acpi.c
-@@ -288,6 +288,7 @@ int count_immovable_mem_regions(void)
- 	struct acpi_subtable_header *sub_table;
- 	struct acpi_table_header *table_header;
- 	char arg[MAX_ACPI_ARG_LENGTH];
-+	unsigned long long possible_addr, max_possible_addr = 0;
- 	int num = 0;
- 
- 	if (cmdline_find_option("acpi", arg, sizeof(arg)) == 3 &&
-@@ -308,10 +309,19 @@ int count_immovable_mem_regions(void)
- 			struct acpi_srat_mem_affinity *ma;
- 
- 			ma = (struct acpi_srat_mem_affinity *)sub_table;
--			if (!(ma->flags & ACPI_SRAT_MEM_HOT_PLUGGABLE) && ma->length) {
--				immovable_mem[num].start = ma->base_address;
--				immovable_mem[num].size = ma->length;
--				num++;
-+			if (ma->length) {
-+				if (ma->flags & ACPI_SRAT_MEM_HOT_PLUGGABLE) {
-+					possible_addr =
-+						ma->base_address + ma->length;
-+					if (possible_addr > max_possible_addr)
-+						max_possible_addr =
-+							possible_addr;
-+				} else {
-+					immovable_mem[num].start =
-+						ma->base_address;
-+					immovable_mem[num].size = ma->length;
-+					num++;
-+				}
- 			}
- 
- 			if (num >= MAX_NUMNODES*2) {
-@@ -320,6 +330,7 @@ int count_immovable_mem_regions(void)
- 			}
- 		}
- 		table += sub_table->length;
-+		boot_params->possible_mem_addr = max_possible_addr;
- 	}
- 	return num;
- }
-diff --git a/arch/x86/include/uapi/asm/bootparam.h b/arch/x86/include/uapi/asm/bootparam.h
-index 60733f137..5b64b606e 100644
---- a/arch/x86/include/uapi/asm/bootparam.h
-+++ b/arch/x86/include/uapi/asm/bootparam.h
-@@ -156,7 +156,7 @@ struct boot_params {
- 	__u64  tboot_addr;				/* 0x058 */
- 	struct ist_info ist_info;			/* 0x060 */
- 	__u64 acpi_rsdp_addr;				/* 0x070 */
--	__u8  _pad3[8];					/* 0x078 */
-+	__u64  possible_mem_addr;			/* 0x078 */
- 	__u8  hd0_info[16];	/* obsolete! */		/* 0x080 */
- 	__u8  hd1_info[16];	/* obsolete! */		/* 0x090 */
- 	struct sys_desc_table sys_desc_table; /* obsolete! */	/* 0x0a0 */
-diff --git a/arch/x86/mm/kaslr.c b/arch/x86/mm/kaslr.c
-index 3f452ffed..71fc28570 100644
---- a/arch/x86/mm/kaslr.c
-+++ b/arch/x86/mm/kaslr.c
-@@ -70,6 +70,30 @@ static inline bool kaslr_memory_enabled(void)
- 	return kaslr_enabled() && !IS_ENABLED(CONFIG_KASAN);
- }
- 
-+static unsigned int __init kaslr_padding(void)
-+{
-+	unsigned int rand_mem_physical_padding =
-+				CONFIG_RANDOMIZE_MEMORY_PHYSICAL_PADDING;
-+#ifdef CONFIG_MEMORY_HOTPLUG
-+	unsigned long long max_possible_phys, max_actual_phys, threshold;
-+
-+	if (!boot_params.possible_mem_addr)
-+		goto out;
-+
-+	max_actual_phys = roundup(PFN_PHYS(max_pfn), 1ULL << TB_SHIFT);
-+	max_possible_phys = roundup(boot_params.possible_mem_addr,
-+					1ULL << TB_SHIFT);
-+	threshold = max_actual_phys +
-+		((unsigned long long)rand_mem_physical_padding << TB_SHIFT);
-+
-+	if (max_possible_phys > threshold)
-+		rand_mem_physical_padding =
-+			(max_possible_phys - max_actual_phys) >> TB_SHIFT;
-+out:
-+#endif
-+	return rand_mem_physical_padding;
-+}
-+
- /* Initialize base and padding for each memory region randomized with KASLR */
- void __init kernel_randomize_memory(void)
- {
-@@ -103,7 +127,7 @@ void __init kernel_randomize_memory(void)
- 	 */
- 	BUG_ON(kaslr_regions[0].base != &page_offset_base);
- 	memory_tb = DIV_ROUND_UP(max_pfn << PAGE_SHIFT, 1UL << TB_SHIFT) +
--		CONFIG_RANDOMIZE_MEMORY_PHYSICAL_PADDING;
-+			kaslr_padding();
- 
- 	/* Adapt phyiscal memory region size based on available memory */
- 	if (memory_tb < kaslr_regions[0].size_tb)
--- 
-2.20.1
+I've started debugging, but I'm not familiar with this code. Please let me =
+know if you
+have any ideas or if there's anything you'd like me to try.
 
 Thanks,
-Masa
+Yazen
+
+[    0.000000] Kernel panic - not syncing: ERROR: Failed to allocate 0x0000=
+000000000b40 bytes below 0x0000000000000000.
+[    0.000000] CPU: 0 PID: 0 Comm: swapper Not tainted 5.0.0-rc5-merged-bas=
+es+ #101
+[    0.000000] Call Trace:
+[    0.000000]  dump_stack+0x63/0x85
+[    0.000000]  panic+0xfe/0x2a4
+[    0.000000]  memblock_alloc_base+0x33/0x35
+[    0.000000]  memblock_phys_alloc+0x10/0x12
+[    0.000000]  efi_memmap_alloc+0x62/0x65
+[    0.000000]  efi_arch_mem_reserve+0x10e/0x194
+[    0.000000]  efi_mem_reserve+0x31/0x36
+[    0.000000]  ? efi_mem_reserve+0x31/0x36
+[    0.000000]  efi_bgrt_init+0x2c6/0x2e0
+[    0.000000]  efi_config_parse_tables+0x1b2/0x1dd
+[    0.000000]  efi_config_init+0x7b/0x9f
+[    0.000000]  ? efi_config_init+0x7b/0x9f
+[    0.000000]  efi_init+0x366/0x465
+[    0.000000]  ? 0xffffffff87800000
+[    0.000000]  setup_arch+0x42f/0xcc9
+[    0.000000]  ? printk+0x52/0x6e
+[    0.000000]  start_kernel+0x6c/0x516
+[    0.000000]  x86_64_start_reservations+0x24/0x26
+[    0.000000]  x86_64_start_kernel+0x74/0x77
+[    0.000000]  secondary_startup_64+0xa4/0xb0
+[    0.000000] ---[ end Kernel panic - not syncing: ERROR: Failed to alloca=
+te 0x0000000000000b40 bytes below 0x0000000000000000. ]---
