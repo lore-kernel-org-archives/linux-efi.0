@@ -1,148 +1,219 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH 02/10] x86/efi: Return error status if mapping EFI regions fail
-Date: Fri, 8 Feb 2019 16:50:37 +0100
-Message-ID: <CAKv+Gu83HJo29=d4VEMCi3D2PH-Crqrt_oUz14Ogz2r0W9ih+g@mail.gmail.com>
-References: <20190202094119.13230-1-ard.biesheuvel@linaro.org>
- <20190202094119.13230-3-ard.biesheuvel@linaro.org> <20190204071809.GA115714@gmail.com>
- <CAKv+Gu-vxV_U03jdMY0N1UMDWcB1jZLKj-ONV2rsw3UTeimhBg@mail.gmail.com> <FFF73D592F13FD46B8700F0A279B802F486FF4C3@ORSMSX114.amr.corp.intel.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v8 0/3] x86/boot/KASLR: Parse ACPI table and limit kaslr
+ in immovable memory
+Date: Fri, 8 Feb 2019 19:26:00 +0100
+Message-ID: <20190208182600.GJ674@zn.tnic>
+References: <20181025103345.GF14020@nazgul.tnic>
+ <20181025134050.ggiir77ehntikbwg@gabell>
+ <20181106184519.GA16391@zn.tnic>
+ <20181106193636.svyjwuwrlgnpuyyf@gabell>
+ <20181106204511.GO13712@zn.tnic>
+ <20181106222133.lb7674yzszivzihd@gabell>
+ <20181108105129.GA7543@zn.tnic>
+ <20181110105422.GA20023@zn.tnic>
+ <20181111134556.qxv2v4g7dl5irzo7@gabell>
+ <20190205150514.fvztftk75swgfayd@gabell>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <FFF73D592F13FD46B8700F0A279B802F486FF4C3@ORSMSX114.amr.corp.intel.com>
+Content-Disposition: inline
+In-Reply-To: <20190205150514.fvztftk75swgfayd@gabell>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
-Cc: Ingo Molnar <mingo@kernel.org>, linux-efi <linux-efi@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, AKASHI Takahiro <takahiro.akashi@linaro.org>, Alexander Graf <agraf@suse.de>, Bjorn Andersson <bjorn.andersson@linaro.org>, Borislav Petkov <bp@alien8.de>, Heinrich Schuchardt <xypron.glpk@gmx.de>, Jeffrey Hugo <jhugo@codeaurora.org>, Lee Jones <lee.jones@linaro.org>, Leif Lindholm <leif.lindholm@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Jones <pjones@redhat.com>, Peter Zijlstra <peterz@infradead.org>
+To: Masayoshi Mizuma <msys.mizuma@gmail.com>
+Cc: "H. Peter Anvin" <hpa@zytor.com>, Baoquan He <bhe@redhat.com>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, x86@kernel.org, Chao Fan <fanc.fnst@cn.fujitsu.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, mingo@redhat.com, keescook@chromium.org, rjw@rjwysocki.net, lenb@kernel.org, ard.biesheuvel@linaro.org, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 4 Feb 2019 at 23:29, Prakhya, Sai Praneeth
-<sai.praneeth.prakhya@intel.com> wrote:
->
-> > > > efi_map_region() creates VA mappings for an given EFI region using
-> > > > any one of the two helper functions (namely __map_region() and
-> > old_map_region()).
-> > > > These helper functions *could* fail while creating mappings and
-> > > > presently their return value is not checked. Not checking for the
-> > > > return value of these functions might create issues because after
-> > > > these functions return "md->virt_addr" is set to the requested
-> > > > virtual address (so it's assumed that these functions always succeed
-> > > > which is not quite true). This assumption leads to "md->virt_addr"
-> > > > having invalid mapping should any of
-> > > > __map_region() or old_map_region() fail.
-> > > >
-> > > > Hence, check for the return value of these functions and if indeed
-> > > > they fail, turn off EFI Runtime Services forever because kernel
-> > > > cannot prioritize among EFI regions.
-> > > >
-> [...................]
-> > > > -void __init old_map_region(efi_memory_desc_t *md)
-> > > > +int __init old_map_region(efi_memory_desc_t *md)
-> > > >  {
-> > > >       u64 start_pfn, end_pfn, end;
-> > > >       unsigned long size;
-> > > > @@ -601,10 +601,14 @@ void __init old_map_region(efi_memory_desc_t
-> > *md)
-> > > >               va = efi_ioremap(md->phys_addr, size,
-> > > >                                md->type, md->attribute);
-> > > >
-> > > > -     md->virt_addr = (u64) (unsigned long) va;
-> > > > -     if (!va)
-> > > > +     if (!va) {
-> > > >               pr_err("ioremap of 0x%llX failed!\n",
-> > > >                      (unsigned long long)md->phys_addr);
-> > > > +             return -ENOMEM;
-> > > > +     }
-> > > > +
-> > > > +     md->virt_addr = (u64)(unsigned long)va;
-> > > > +     return 0;
-> > >
-> > > Just wondering, shouldn't the failure path set ->virt_addr to
-> > > something safe, just in case a caller doesn't check the error and relies on it?
-> > >
-> > > That's because in this commit we've now changed it from 0 to undefined.
-> > >
-> >
-> > Indeed. We don't usually rely on the value of ->virt_addr when
-> > EFI_RUNTIME_SERVICES is unset, but there is some sysfs code, and perhaps
-> > some other places where we do reference ->virt_addr, and not assigning it at all
-> > is obviously wrong, and potentially hazardous.
-> >
->
-> Ok.. makes sense.
-> Do you think md->virt_addr = 0 for fail case is ok?
->
+On Tue, Feb 05, 2019 at 10:05:16AM -0500, Masayoshi Mizuma wrote:
+> From: Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>
+> Date: Tue, 5 Feb 2019 10:00:59 -0500
+> Subject: [PATCH] x86/mm: Introduce adjustment the padding size for KASLR
 
-0 should be fine. You shouldn't be able to dereference that anywhere.
+			"Adjust the padding size for KASLR"
 
+> If the physical memory layout has huge space for hotplug, the padding
+> used for the physical memory mapping section is not enough.
+> So, such system may crash while memory hot-adding on KASLR enabled system.
 
-> > > > +int __init efi_map_region_fixed(efi_memory_desc_t *md) { return 0;
-> > > > +}
-> > >
-> > > Inline functions should be marked inline ...
-> > >
-> > > >       if (efi_va < EFI_VA_END) {
-> > > > -             pr_warn(FW_WARN "VA address range overflow!\n");
-> > > > -             return;
-> > > > +             pr_err(FW_WARN "VA address range overflow!\n");
-> > > > +             return -ENOMEM;
-> > > >       }
-> > > >
-> > > >       /* Do the VA map */
-> > > > -     __map_region(md, efi_va);
-> > > > +     if (__map_region(md, efi_va))
-> > > > +             return -ENOMEM;
-> > > > +
-> > > >       md->virt_addr = efi_va;
-> > > > +     return 0;
-> > >
-> > > Same error return problem of leaving ->virt_addr undefined.
-> > >
->
-> Sure! Will fix it in V2.
->
-> > > Note that I also fixed up the grammar and readability of the changelog
-> > > - see the updated version below.
->
-> Thanks for fixing :)
->
-> > >
-> > > Thanks,
-> > >
-> > >         Ingo
-> > >
-> > > =============>
-> > > Subject: x86/efi: Return error status if mapping of EFI regions fails
-> > > From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> > > Date: Sat, 2 Feb 2019 10:41:11 +0100
-> > >
-> > > From: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-> > >
-> > > efi_map_region() creates VA mappings for a given EFI region using one
-> > > of the two helper functions (namely __map_region() and old_map_region()).
-> > >
-> > > These helper functions could fail while creating mappings and
-> > > presently their return value is not checked.
-> > >
-> > > Not checking for the return value of these functions might create
-> > > bugs, because after these functions return "md->virt_addr" is set to
-> > > the requested virtual address (so it's assumed that these functions
-> > > always succeed which is not quite true). This assumption leads to
-> > > "md->virt_addr" having invalid mapping, should any of __map_region()
-> > > or old_map_region() fail.
-> > >
-> > > Hence, check for the return value of these functions and if indeed
-> > > they fail, turn off EFI Runtime Services forever because kernel cannot
-> > > prioritize among EFI regions.
-> > >
-> > > This also fixes the comment "FIXME: add error handling" in
-> > > kexec_enter_virtual_mode().
-> > >
-> >
-> > Thanks Ingo.
-> >
-> > Sai, could you please respin this and use Ingo's updated version of the commit
-> > log?
->
-> Sure! I will send a V2 with the mentioned changes.
->
-> Regards,
-> Sai
+Crash why?
+
+Why is the padding not enough?
+
+> For example, SRAT has the following layout, the maximum possible memory
+> size is 32TB, and the memory is installed as 2TB actually, then the padding
+> size should set 30TB (== possible memory size - actual memory size).
+> 
+>   SRAT: Node 3 PXM 7 [mem 0x1c0000000000-0x1fffffffffff] hotplug
+
+What is that supposed to exemplify: that range is 3T not 2 and that
+range start is not at 2T but 28T. So I have absolutely no clue what
+you're trying to explain here.
+
+Please go back, take your time and structure your commit message like
+this:
+
+Problem is A.
+
+It happens because of B.
+
+Fix it by doing C.
+
+(Potentially do D).
+
+For more detailed info, see
+Documentation/process/submitting-patches.rst, Section "2) Describe your
+changes".
+
+> This patch introduces adjustment the padding size if the default
+
+Avoid having "This patch" or "This commit" in the commit message. It is
+tautologically useless.
+
+Also, do
+
+$ git grep 'This patch' Documentation/process
+
+for more details.
+
+> padding size isn't enough.
+> 
+> Signed-off-by: Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>
+> ---
+>  Documentation/x86/zero-page.txt       |  1 +
+>  arch/x86/boot/compressed/acpi.c       | 19 +++++++++++++++----
+>  arch/x86/include/uapi/asm/bootparam.h |  2 +-
+>  arch/x86/mm/kaslr.c                   | 26 +++++++++++++++++++++++++-
+>  4 files changed, 42 insertions(+), 6 deletions(-)
+> 
+> diff --git a/Documentation/x86/zero-page.txt b/Documentation/x86/zero-page.txt
+> index 68aed077f..343fe1a90 100644
+> --- a/Documentation/x86/zero-page.txt
+> +++ b/Documentation/x86/zero-page.txt
+> @@ -15,6 +15,7 @@ Offset	Proto	Name		Meaning
+>  058/008	ALL	tboot_addr      Physical address of tboot shared page
+>  060/010	ALL	ist_info	Intel SpeedStep (IST) BIOS support information
+>  				(struct ist_info)
+> +078/010	ALL	possible_mem_addr The possible maximum physical memory address.
+
+Why isn't this called max_phys_addr then?
+
+Also, please explain what it means at the end of this file.
+
+>  080/010	ALL	hd0_info	hd0 disk parameter, OBSOLETE!!
+>  090/010	ALL	hd1_info	hd1 disk parameter, OBSOLETE!!
+>  0A0/010	ALL	sys_desc_table	System description table (struct sys_desc_table),
+> diff --git a/arch/x86/boot/compressed/acpi.c b/arch/x86/boot/compressed/acpi.c
+> index c5a949335..7dd61b943 100644
+> --- a/arch/x86/boot/compressed/acpi.c
+> +++ b/arch/x86/boot/compressed/acpi.c
+> @@ -288,6 +288,7 @@ int count_immovable_mem_regions(void)
+>  	struct acpi_subtable_header *sub_table;
+>  	struct acpi_table_header *table_header;
+>  	char arg[MAX_ACPI_ARG_LENGTH];
+> +	unsigned long long possible_addr, max_possible_addr = 0;
+>  	int num = 0;
+>  
+>  	if (cmdline_find_option("acpi", arg, sizeof(arg)) == 3 &&
+> @@ -308,10 +309,19 @@ int count_immovable_mem_regions(void)
+>  			struct acpi_srat_mem_affinity *ma;
+>  
+>  			ma = (struct acpi_srat_mem_affinity *)sub_table;
+> -			if (!(ma->flags & ACPI_SRAT_MEM_HOT_PLUGGABLE) && ma->length) {
+> -				immovable_mem[num].start = ma->base_address;
+> -				immovable_mem[num].size = ma->length;
+> -				num++;
+> +			if (ma->length) {
+> +				if (ma->flags & ACPI_SRAT_MEM_HOT_PLUGGABLE) {
+> +					possible_addr =
+> +						ma->base_address + ma->length;
+> +					if (possible_addr > max_possible_addr)
+> +						max_possible_addr =
+> +							possible_addr;
+> +				} else {
+> +					immovable_mem[num].start =
+> +						ma->base_address;
+> +					immovable_mem[num].size = ma->length;
+> +					num++;
+> +				}
+
+This piece has some ugly linebreaks which makes it impossible to read.
+Perhaps because the variable names you're adding are too long.
+
+You can carve it out in a separate function, for example.
+
+>  			if (num >= MAX_NUMNODES*2) {
+> @@ -320,6 +330,7 @@ int count_immovable_mem_regions(void)
+>  			}
+>  		}
+>  		table += sub_table->length;
+> +		boot_params->possible_mem_addr = max_possible_addr;
+
+This assignment is inside the loop and happens potentially a bunch of
+times. Why?
+
+>  	}
+>  	return num;
+>  }
+> diff --git a/arch/x86/include/uapi/asm/bootparam.h b/arch/x86/include/uapi/asm/bootparam.h
+> index 60733f137..5b64b606e 100644
+> --- a/arch/x86/include/uapi/asm/bootparam.h
+> +++ b/arch/x86/include/uapi/asm/bootparam.h
+> @@ -156,7 +156,7 @@ struct boot_params {
+>  	__u64  tboot_addr;				/* 0x058 */
+>  	struct ist_info ist_info;			/* 0x060 */
+>  	__u64 acpi_rsdp_addr;				/* 0x070 */
+> -	__u8  _pad3[8];					/* 0x078 */
+> +	__u64  possible_mem_addr;			/* 0x078 */
+>  	__u8  hd0_info[16];	/* obsolete! */		/* 0x080 */
+>  	__u8  hd1_info[16];	/* obsolete! */		/* 0x090 */
+>  	struct sys_desc_table sys_desc_table; /* obsolete! */	/* 0x0a0 */
+> diff --git a/arch/x86/mm/kaslr.c b/arch/x86/mm/kaslr.c
+> index 3f452ffed..71fc28570 100644
+> --- a/arch/x86/mm/kaslr.c
+> +++ b/arch/x86/mm/kaslr.c
+> @@ -70,6 +70,30 @@ static inline bool kaslr_memory_enabled(void)
+>  	return kaslr_enabled() && !IS_ENABLED(CONFIG_KASAN);
+>  }
+>  
+> +static unsigned int __init kaslr_padding(void)
+> +{
+> +	unsigned int rand_mem_physical_padding =
+> +				CONFIG_RANDOMIZE_MEMORY_PHYSICAL_PADDING;
+> +#ifdef CONFIG_MEMORY_HOTPLUG
+> +	unsigned long long max_possible_phys, max_actual_phys, threshold;
+> +
+> +	if (!boot_params.possible_mem_addr)
+> +		goto out;
+> +
+> +	max_actual_phys = roundup(PFN_PHYS(max_pfn), 1ULL << TB_SHIFT);
+> +	max_possible_phys = roundup(boot_params.possible_mem_addr,
+> +					1ULL << TB_SHIFT);
+> +	threshold = max_actual_phys +
+> +		((unsigned long long)rand_mem_physical_padding << TB_SHIFT);
+> +
+> +	if (max_possible_phys > threshold)
+> +		rand_mem_physical_padding =
+> +			(max_possible_phys - max_actual_phys) >> TB_SHIFT;
+> +out:
+> +#endif
+> +	return rand_mem_physical_padding;
+
+Same problem: local variables with unnecessarily long names make the
+code hard to read. Pls shorten.
+
+Also, the types in that function are a total mess. An unsigned int which
+you cast to unsigned long long and return an unsigned int again to add
+into a sum with unsigned longs. Are you selecting the types randomly?
+Why aren't you using plain unsigned longs like the rest of the file does
+with memory addresses?
+
+Also, this function could have a comment above it explaining what all
+that threshold and actual and possible address arithmetic is supposed to
+do.
+
+Thx.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
