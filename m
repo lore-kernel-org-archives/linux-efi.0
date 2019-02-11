@@ -1,19 +1,19 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.19 082/313] firmware/efi: Add NULL pointer checks in efivars API functions
-Date: Mon, 11 Feb 2019 15:16:02 +0100
-Message-ID: <20190211141859.335374456@linuxfoundation.org>
-References: <20190211141852.749630980@linuxfoundation.org>
+Subject: [PATCH 4.14 054/205] firmware/efi: Add NULL pointer checks in efivars API functions
+Date: Mon, 11 Feb 2019 15:17:32 +0100
+Message-ID: <20190211141832.364983050@linuxfoundation.org>
+References: <20190211141827.214852402@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190211141852.749630980@linuxfoundation.org>
+In-Reply-To: <20190211141827.214852402@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Jon Hunter <jonathanh@nvidia.com>, Arend van Spriel <arend.vanspriel@broadcom.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Andy Lutomirski <luto@kernel.org>, Bhupesh Sharma <bhsharma@redhat.com>, Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@intel.com>, Eric Snowberg <eric.snowberg@oracle.com>, Hans de Goede <hdegoede@redhat.com>, Joe Perches <joe@perches.com>, Julien Thierry <julien.thierry@arm.com>, Linus Torvalds <torvalds@linux-foundation.org>, Marc Zyngier <marc.zyngier@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>, Nathan Chancellor <natechancellor@gmail.com>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-4.19-stable review patch.  If anyone has any objections, please let me know.
+4.14-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
