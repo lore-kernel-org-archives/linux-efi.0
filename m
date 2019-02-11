@@ -1,114 +1,83 @@
-From: bsz@semihalf.com
-Subject: [PATCH 1/5] tpm: Copy calc_tpm2_event_size() to TPM library
-Date: Mon, 11 Feb 2019 15:30:48 +0100
-Message-ID: <20190211143052.3128-2-bsz@semihalf.com>
-References: <20190211143052.3128-1-bsz@semihalf.com>
+From: Masayoshi Mizuma <msys.mizuma@gmail.com>
+Subject: Re: [PATCH v8 0/3] x86/boot/KASLR: Parse ACPI table and limit kaslr
+ in immovable memory
+Date: Mon, 11 Feb 2019 15:11:20 -0500
+Message-ID: <20190211201118.pot6347rp2ieljel@gabell>
+References: <20181025134050.ggiir77ehntikbwg@gabell>
+ <20181106184519.GA16391@zn.tnic>
+ <20181106193636.svyjwuwrlgnpuyyf@gabell>
+ <20181106204511.GO13712@zn.tnic>
+ <20181106222133.lb7674yzszivzihd@gabell>
+ <20181108105129.GA7543@zn.tnic>
+ <20181110105422.GA20023@zn.tnic>
+ <20181111134556.qxv2v4g7dl5irzo7@gabell>
+ <20190205150514.fvztftk75swgfayd@gabell>
+ <20190211014605.GC1544@localhost.localdomain>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190211143052.3128-1-bsz@semihalf.com>
+Content-Disposition: inline
+In-Reply-To: <20190211014605.GC1544@localhost.localdomain>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org, linux-kernel@vger.kernel.org, peterhuewe@gmx.de, jarkko.sakkinen@linux.intel.com, ard.biesheuvel@linaro.org
-Cc: tweek@google.com, mingo@kernel.org, hdegoede@redhat.com, leif.lindholm@linaro.org, mw@semihalf.com, Bartosz Szczepanek <bsz@semihalf.com>
+To: Chao Fan <fanc.fnst@cn.fujitsu.com>
+Cc: Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, Baoquan He <bhe@redhat.com>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, x86@kernel.org, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, mingo@redhat.com, keescook@chromium.org, rjw@rjwysocki.net, lenb@kernel.org, ard.biesheuvel@linaro.org, indou.takao@jp.fujitsu.com, caoj.fnst@cn.fujitsu.com
 List-Id: linux-efi@vger.kernel.org
 
-From: Bartosz Szczepanek <bsz@semihalf.com>
+Hi Chao,
 
-Function to calculate event size in TPM 2.0 log will also be needed in EFI
-stub. Separate it to library to make it accessible out of TPM character
-driver.
+Thank you for your review.
 
-It will be removed from tpm2.c in subsequent commit.
+On Mon, Feb 11, 2019 at 09:46:05AM +0800, Chao Fan wrote:
+> On Tue, Feb 05, 2019 at 10:05:16AM -0500, Masayoshi Mizuma wrote:
+> [...]
+> 
+> Hi Masa,
+> 
+> Sorry for delay, since last days were Chinese holiday.
+> 
+> >diff --git a/arch/x86/boot/compressed/acpi.c b/arch/x86/boot/compressed/acpi.c
+> >index c5a949335..7dd61b943 100644
+> >--- a/arch/x86/boot/compressed/acpi.c
+> >+++ b/arch/x86/boot/compressed/acpi.c
+> >@@ -288,6 +288,7 @@ int count_immovable_mem_regions(void)
+> > 	struct acpi_subtable_header *sub_table;
+> > 	struct acpi_table_header *table_header;
+> > 	char arg[MAX_ACPI_ARG_LENGTH];
+> >+	unsigned long long possible_addr, max_possible_addr = 0;
+> 
+> This line is so long that it should be added in first line.
 
-Signed-off-by: Bartosz Szczepanek <bsz@semihalf.com>
----
- lib/tpm.c | 80 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 80 insertions(+)
- create mode 100644 lib/tpm.c
+Thanks. I will simplify around the local variables.
 
-diff --git a/lib/tpm.c b/lib/tpm.c
-new file mode 100644
-index 000000000000..aaeeafe52426
---- /dev/null
-+++ b/lib/tpm.c
-@@ -0,0 +1,80 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/*
-+ * Copyright (C) 2016 IBM Corporation
-+ *
-+ * Parts of this file based on earlier work by:
-+ *      Nayna Jain <nayna@linux.vnet.ibm.com>
-+ *      Petr Vandrovec <petr@vmware.com>
-+ *
-+ * This program is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU General Public License
-+ * as published by the Free Software Foundation; either version
-+ * 2 of the License, or (at your option) any later version.
-+ */
-+#include <linux/types.h>
-+#include <linux/export.h>
-+#include <linux/string.h>
-+#include <linux/tpm_eventlog.h>
-+
-+/*
-+ * calc_tpm2_event_size() - calculate the event size, where event
-+ * is an entry in the TPM 2.0 event log. The event is of type Crypto
-+ * Agile Log Entry Format as defined in TCG EFI Protocol Specification
-+ * Family "2.0".
-+
-+ * @event: event whose size is to be calculated.
-+ * @event_header: the first event in the event log.
-+ *
-+ * Returns size of the event. If it is an invalid event, returns 0.
-+ */
-+int calc_tpm2_event_size(struct tcg_pcr_event2 *event,
-+			 struct tcg_pcr_event *event_header)
-+{
-+	struct tcg_efi_specid_event *efispecid;
-+	struct tcg_event_field *event_field;
-+	void *marker;
-+	void *marker_start;
-+	u32 halg_size;
-+	size_t size;
-+	u16 halg;
-+	int i;
-+	int j;
-+
-+	marker = event;
-+	marker_start = marker;
-+	marker = marker + sizeof(event->pcr_idx) + sizeof(event->event_type)
-+		+ sizeof(event->count);
-+
-+	efispecid = (struct tcg_efi_specid_event *)event_header->event;
-+
-+	/* Check if event is malformed. */
-+	if (event->count > efispecid->num_algs)
-+		return 0;
-+
-+	for (i = 0; i < event->count; i++) {
-+		halg_size = sizeof(event->digests[i].alg_id);
-+		memcpy(&halg, marker, halg_size);
-+		marker = marker + halg_size;
-+		for (j = 0; j < efispecid->num_algs; j++) {
-+			if (halg == efispecid->digest_sizes[j].alg_id) {
-+				marker +=
-+					efispecid->digest_sizes[j].digest_size;
-+				break;
-+			}
-+		}
-+		/* Algorithm without known length. Such event is unparseable. */
-+		if (j == efispecid->num_algs)
-+			return 0;
-+	}
-+
-+	event_field = (struct tcg_event_field *)marker;
-+	marker = marker + sizeof(event_field->event_size)
-+		+ event_field->event_size;
-+	size = marker - marker_start;
-+
-+	if ((event->event_type == 0) && (event_field->event_size == 0))
-+		return 0;
-+
-+	return size;
-+}
-+EXPORT_SYMBOL(calc_tpm2_event_size);
--- 
-2.14.4
+> 
+> > 	int num = 0;
+> > 
+> > 	if (cmdline_find_option("acpi", arg, sizeof(arg)) == 3 &&
+> >@@ -308,10 +309,19 @@ int count_immovable_mem_regions(void)
+> > 			struct acpi_srat_mem_affinity *ma;
+> > 
+> > 			ma = (struct acpi_srat_mem_affinity *)sub_table;
+> >-			if (!(ma->flags & ACPI_SRAT_MEM_HOT_PLUGGABLE) && ma->length) {
+> >-				immovable_mem[num].start = ma->base_address;
+> >-				immovable_mem[num].size = ma->length;
+> >-				num++;
+> >+			if (ma->length) {
+> >+				if (ma->flags & ACPI_SRAT_MEM_HOT_PLUGGABLE) {
+> >+					possible_addr =
+> >+						ma->base_address + ma->length;
+> >+					if (possible_addr > max_possible_addr)
+> >+						max_possible_addr =
+> >+							possible_addr;
+> >+				} else {
+> >+					immovable_mem[num].start =
+> >+						ma->base_address;
+> >+					immovable_mem[num].size = ma->length;
+> >+					num++;
+> >+				}
+> > 			}
+> 
+> It looks better in another mail where you add a new function.
+
+Thanks!
+
+- Masa
