@@ -1,44 +1,43 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH 4/5] efi/libstub/tpm: Retrieve TPM event log in 2.0 format
-Date: Wed, 13 Feb 2019 15:22:39 +0100
-Message-ID: <CAKv+Gu9_AgkDO5+Us0=WyqKKiV3m-Ajdqx3-NyqqN+kazuPXxw@mail.gmail.com>
-References: <20190211143052.3128-1-bsz@semihalf.com> <20190211143052.3128-5-bsz@semihalf.com>
- <20190213112640.GI7087@linux.intel.com> <CABLO=+ne=dfrMiqmmxV_xOPt7QKiwSgnmokgod6ZMn4PZeahvg@mail.gmail.com>
+From: Hedi Berriche <hedi.berriche@hpe.com>
+Subject: [Patch v3 3/4] x86/platform/UV: use efi_enabled() instead of test_bit()
+Date: Wed, 13 Feb 2019 19:34:12 +0000
+Message-ID: <20190213193413.25560-4-hedi.berriche@hpe.com>
+References: <20190213193413.25560-1-hedi.berriche@hpe.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CABLO=+ne=dfrMiqmmxV_xOPt7QKiwSgnmokgod6ZMn4PZeahvg@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Bartosz Szczepanek <bsz@semihalf.com>
-Cc: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>, linux-efi <linux-efi@vger.kernel.org>, linux-integrity <linux-integrity@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, peterhuewe@gmx.de, =?UTF-8?Q?Thi=C3=A9baud_Weksteen?= <tweek@google.com>, Ingo Molnar <mingo@kernel.org>, Hans de Goede <hdegoede@redhat.com>, Leif Lindholm <leif.lindholm@linaro.org>, Marcin Wojtas <mw@semihalf.com>
+Content-Transfer-Encoding: 8bit
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20190213193413.25560-1-hedi.berriche@hpe.com>
+Sender: stable-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Bhupesh Sharma <bhsharma@redhat.com>
+Cc: Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, linux-efi@vger.kernel.org, x86@kernel.org, Russ Anderson <rja@hpe.com>, Mike Travis <mike.travis@hpe.com>, Dimitri Sivanich <sivanich@hpe.com>, Steve Wahl <steve.wahl@hpe.com>, stable@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 13 Feb 2019 at 15:21, Bartosz Szczepanek <bsz@semihalf.com> wrote:
->
-> On Wed, Feb 13, 2019 at 12:26 PM Jarkko Sakkinen
-> <jarkko.sakkinen@linux.intel.com> wrote:
-> > Collides with Matthew's changes. I want to land those change first
-> > because they are almost production ready.
-> >
-> > Maybe you should consider reviewing those changes to make sure that
-> > they make sense to you so that you can build these on top of after
-> > these have landed.
->
-> Yeah, I think so. Actually, I wasn't aware of Matthew's efforts, as it
-> didn't appear on linux-efi mailing list. (On bad, I haven't checked
-> linux-integrity.)
->
-> At this point, I think it makes more sense to limit this patchset to
-> 5/5 patch, which makes TPM event log initialized on ARM platforms.
-> Patches 1-4 introduce nothing more than Matthew already did, maybe
-> except putting calc_tpm2_event_size to a library instead of making it
-> inline. This function has already grown a bit so it may be a better
-> approach, but that's nothing to affect functionality.
->
-> I'll pull Matthew changes to my tree to confirm operation on ARM
-> platforms, if that works fine the only thing to merge would be 5/5 +
-> optionally the library change, if we reach agreement on that.
->
+Use ad hoc efi_enabled() instead of fiddling with test_bit().
 
-Sounds good, and yes, it would be good to cc patches that affect the
-EFI subsystem to linux-efi as well.
+Cleanup, no functional changes.
+
+Cc: Russ Anderson <rja@hpe.com>
+Cc: Mike Travis <mike.travis@hpe.com>
+Cc: Dimitri Sivanich <sivanich@hpe.com>
+Cc: Steve Wahl <steve.wahl@hpe.com>
+Cc: stable@vger.kernel.org # v4.9+
+Signed-off-by: Hedi Berriche <hedi.berriche@hpe.com>
+---
+ arch/x86/platform/uv/bios_uv.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/x86/platform/uv/bios_uv.c b/arch/x86/platform/uv/bios_uv.c
+index 91e3d5285836..38a2e3431fc6 100644
+--- a/arch/x86/platform/uv/bios_uv.c
++++ b/arch/x86/platform/uv/bios_uv.c
+@@ -44,7 +44,7 @@ s64 uv_bios_call(enum uv_bios_cmd which, u64 a1, u64 a2, u64 a3, u64 a4, u64 a5)
+ 	 * If EFI_OLD_MEMMAP is set, we need to fall back to using our old EFI
+ 	 * callback method, which uses efi_call() directly, with the kernel page tables:
+ 	 */
+-	if (unlikely(test_bit(EFI_OLD_MEMMAP, &efi.flags)))
++	if (unlikely(efi_enabled(EFI_OLD_MEMMAP)))
+ 		ret = efi_call((void *)__va(tab->function), (u64)which, a1, a2, a3, a4, a5);
+ 	else
+ 		ret = efi_call_virt_pointer(tab, function, (u64)which, a1, a2, a3, a4, a5);
+-- 
+2.20.1
