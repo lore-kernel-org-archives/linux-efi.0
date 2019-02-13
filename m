@@ -1,39 +1,55 @@
-From: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
-Subject: Re: [PATCH 4/5] efi/libstub/tpm: Retrieve TPM event log in 2.0 format
-Date: Wed, 13 Feb 2019 13:26:40 +0200
-Message-ID: <20190213112640.GI7087@linux.intel.com>
-References: <20190211143052.3128-1-bsz@semihalf.com>
- <20190211143052.3128-5-bsz@semihalf.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [PATCH 0/2] efi/arm/gicv3: implement fix for memory reservation issue
+Date: Wed, 13 Feb 2019 14:27:36 +0100
+Message-ID: <20190213132738.10294-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20190211143052.3128-5-bsz@semihalf.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: bsz@semihalf.com
-Cc: linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org, linux-kernel@vger.kernel.org, peterhuewe@gmx.de, ard.biesheuvel@linaro.org, tweek@google.com, mingo@kernel.org, hdegoede@redhat.com, leif.lindholm@linaro.org, mw@semihalf.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-efi@vger.kernel.org
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Marc Zyngier <marc.zyngier@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, linux-mm@kvack.org, James Morse <james.morse@arm.com>, Andrew Morton <akpm@linux-foundation.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Feb 11, 2019 at 03:30:51PM +0100, bsz@semihalf.com wrote:
-> From: Bartosz Szczepanek <bsz@semihalf.com>
-> 
-> Currently, the only way to get TPM 2.0 event log from firmware is to use
-> device tree. Introduce efi_retrieve_tpm2_eventlog_2 function to enable
-> retrieving it from EFI structures.
-> 
-> Include lib/tpm.c into EFI stub to calculate event sizes using helper
-> function.
-> 
-> Signed-off-by: Bartosz Szczepanek <bsz@semihalf.com>
+Another attempt at fixing the chicked-and-egg issue where the number of
+memblock reservations for GICv3 LPI tables overflow the statically
+allocated table, and reallocating it involves allocating memory pages
+that may turn out to be the ones we were attempting to reserve in the
+first place.
 
-Collides with Matthew's changes. I want to land those change first
-because they are almost production ready.
+If this is accepted as an appropriate fix, something similar should be
+backported to v4.19 as well, although there, we'll need to increase the
+memblock reservation table size even more, given that it lacks a later
+optimization to the EFI memreserve code to merge the linked list entries.
 
-Maybe you should consider reviewing those changes to make sure that
-they make sense to you so that you can build these on top of after
-these have landed.
+Cc: Catalin Marinas <catalin.marinas@arm.com> 
+Cc: Will Deacon <will.deacon@arm.com> 
+Cc: Andrew Morton <akpm@linux-foundation.org>
+Cc: Marc Zyngier <marc.zyngier@arm.com> 
+Cc: James Morse <james.morse@arm.com>
+Cc: linux-mm@kvack.org 
 
-There is not rush as I already made my v5.1 PR. These will be released
-earliest in v5.2.
+Ard Biesheuvel (2):
+  arm64: account for GICv3 LPI tables in static memblock reserve table
+  efi/arm: Revert "Defer persistent reservations until after
+    paging_init()"
 
-/Jarkko
+ arch/arm64/include/asm/memory.h         | 11 +++++++++++
+ arch/arm64/kernel/setup.c               |  1 -
+ drivers/firmware/efi/efi.c              |  4 ----
+ drivers/firmware/efi/libstub/arm-stub.c |  3 ---
+ include/linux/efi.h                     |  7 -------
+ include/linux/memblock.h                |  3 ---
+ mm/memblock.c                           | 10 ++++++++--
+ 7 files changed, 19 insertions(+), 20 deletions(-)
+
+-- 
+2.20.1
