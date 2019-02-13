@@ -1,11 +1,14 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 0/2] efi/arm/gicv3: implement fix for memory reservation issue
-Date: Wed, 13 Feb 2019 14:27:36 +0100
-Message-ID: <20190213132738.10294-1-ard.biesheuvel@linaro.org>
+Subject: [PATCH 2/2] efi/arm: Revert "Defer persistent reservations until
+ after paging_init()"
+Date: Wed, 13 Feb 2019 14:27:38 +0100
+Message-ID: <20190213132738.10294-3-ard.biesheuvel@linaro.org>
+References: <20190213132738.10294-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20190213132738.10294-1-ard.biesheuvel@linaro.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -19,37 +22,85 @@ To: linux-efi@vger.kernel.org
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Marc Zyngier <marc.zyngier@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, linux-mm@kvack.org, James Morse <james.morse@arm.com>, Andrew Morton <akpm@linux-foundation.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-Another attempt at fixing the chicked-and-egg issue where the number of
-memblock reservations for GICv3 LPI tables overflow the statically
-allocated table, and reallocating it involves allocating memory pages
-that may turn out to be the ones we were attempting to reserve in the
-first place.
+This reverts commit eff896288872d687d9662000ec9ae11b6d61766f, which
+deferred the processing of persistent memory reservations to a point
+where the memory may have already been allocated and overwritten,
+defeating the purpose.
 
-If this is accepted as an appropriate fix, something similar should be
-backported to v4.19 as well, although there, we'll need to increase the
-memblock reservation table size even more, given that it lacks a later
-optimization to the EFI memreserve code to merge the linked list entries.
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ arch/arm64/kernel/setup.c               | 1 -
+ drivers/firmware/efi/efi.c              | 4 ----
+ drivers/firmware/efi/libstub/arm-stub.c | 3 ---
+ include/linux/efi.h                     | 7 -------
+ 4 files changed, 15 deletions(-)
 
-Cc: Catalin Marinas <catalin.marinas@arm.com> 
-Cc: Will Deacon <will.deacon@arm.com> 
-Cc: Andrew Morton <akpm@linux-foundation.org>
-Cc: Marc Zyngier <marc.zyngier@arm.com> 
-Cc: James Morse <james.morse@arm.com>
-Cc: linux-mm@kvack.org 
-
-Ard Biesheuvel (2):
-  arm64: account for GICv3 LPI tables in static memblock reserve table
-  efi/arm: Revert "Defer persistent reservations until after
-    paging_init()"
-
- arch/arm64/include/asm/memory.h         | 11 +++++++++++
- arch/arm64/kernel/setup.c               |  1 -
- drivers/firmware/efi/efi.c              |  4 ----
- drivers/firmware/efi/libstub/arm-stub.c |  3 ---
- include/linux/efi.h                     |  7 -------
- include/linux/memblock.h                |  3 ---
- mm/memblock.c                           | 10 ++++++++--
- 7 files changed, 19 insertions(+), 20 deletions(-)
-
+diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
+index 4b0e1231625c..d09ec76f08cf 100644
+--- a/arch/arm64/kernel/setup.c
++++ b/arch/arm64/kernel/setup.c
+@@ -313,7 +313,6 @@ void __init setup_arch(char **cmdline_p)
+ 	arm64_memblock_init();
+ 
+ 	paging_init();
+-	efi_apply_persistent_mem_reservations();
+ 
+ 	acpi_table_upgrade();
+ 
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 4c46ff6f2242..55b77c576c42 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -592,11 +592,7 @@ int __init efi_config_parse_tables(void *config_tables, int count, int sz,
+ 
+ 		early_memunmap(tbl, sizeof(*tbl));
+ 	}
+-	return 0;
+-}
+ 
+-int __init efi_apply_persistent_mem_reservations(void)
+-{
+ 	if (efi.mem_reserve != EFI_INVALID_TABLE_ADDR) {
+ 		unsigned long prsv = efi.mem_reserve;
+ 
+diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+index eee42d5e25ee..c037c6c5d0b7 100644
+--- a/drivers/firmware/efi/libstub/arm-stub.c
++++ b/drivers/firmware/efi/libstub/arm-stub.c
+@@ -75,9 +75,6 @@ void install_memreserve_table(efi_system_table_t *sys_table_arg)
+ 	efi_guid_t memreserve_table_guid = LINUX_EFI_MEMRESERVE_TABLE_GUID;
+ 	efi_status_t status;
+ 
+-	if (IS_ENABLED(CONFIG_ARM))
+-		return;
+-
+ 	status = efi_call_early(allocate_pool, EFI_LOADER_DATA, sizeof(*rsv),
+ 				(void **)&rsv);
+ 	if (status != EFI_SUCCESS) {
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 45ff763fba76..28604a8d0aa9 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1198,8 +1198,6 @@ static inline bool efi_enabled(int feature)
+ extern void efi_reboot(enum reboot_mode reboot_mode, const char *__unused);
+ 
+ extern bool efi_is_table_address(unsigned long phys_addr);
+-
+-extern int efi_apply_persistent_mem_reservations(void);
+ #else
+ static inline bool efi_enabled(int feature)
+ {
+@@ -1218,11 +1216,6 @@ static inline bool efi_is_table_address(unsigned long phys_addr)
+ {
+ 	return false;
+ }
+-
+-static inline int efi_apply_persistent_mem_reservations(void)
+-{
+-	return 0;
+-}
+ #endif
+ 
+ extern int efi_status_to_err(efi_status_t status);
 -- 
 2.20.1
