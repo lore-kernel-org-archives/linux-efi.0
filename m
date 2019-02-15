@@ -1,35 +1,37 @@
 From: tip-bot for Hedi Berriche <tipbot@zytor.com>
-Subject: [tip:x86/uv] x86/platform/UV: Remove uv_bios_call_reentrant()
-Date: Fri, 15 Feb 2019 07:04:51 -0800
-Message-ID: <tip-f816525d615fff0336d0c881e5d960bbec5ea016@git.kernel.org>
-References: <20190213193413.25560-3-hedi.berriche@hpe.com>
-Reply-To: bp@suse.de, hpa@zytor.com, x86@kernel.org,
-          linux-kernel@vger.kernel.org, rja@hpe.com, mingo@kernel.org,
-          andy@infradead.org, dvhart@infradead.org, tglx@linutronix.de,
-          bhsharma@redhat.com, steve.wahl@hpe.com, hedi.berriche@hpe.com,
-          linux-efi@vger.kernel.org, mike.travis@hpe.com, mingo@redhat.com,
-          ard.biesheuvel@linaro.org, sivanich@hpe.com
+Subject: [tip:x86/uv] x86/platform/UV: Use efi_enabled() instead of
+ test_bit()
+Date: Fri, 15 Feb 2019 07:05:32 -0800
+Message-ID: <tip-8945d96f7b3ead56e053ac79b8f7b0de98a30bfe@git.kernel.org>
+References: <20190213193413.25560-4-hedi.berriche@hpe.com>
+Reply-To: mingo@kernel.org, bp@suse.de, x86@kernel.org, sivanich@hpe.com,
+          hpa@zytor.com, linux-efi@vger.kernel.org,
+          ard.biesheuvel@linaro.org, rja@hpe.com, mike.travis@hpe.com,
+          bhsharma@redhat.com, mingo@redhat.com, steve.wahl@hpe.com,
+          andy@infradead.org, hedi.berriche@hpe.com,
+          linux-kernel@vger.kernel.org, dvhart@infradead.org,
+          tglx@linutronix.de
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190213193413.25560-3-hedi.berriche@hpe.com>
+In-Reply-To: <20190213193413.25560-4-hedi.berriche@hpe.com>
 Content-Disposition: inline
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-tip-commits@vger.kernel.org
-Cc: linux-efi@vger.kernel.org, hedi.berriche@hpe.com, mingo@redhat.com, mike.travis@hpe.com, ard.biesheuvel@linaro.org, sivanich@hpe.com, dvhart@infradead.org, steve.wahl@hpe.com, bhsharma@redhat.com, tglx@linutronix.de, andy@infradead.org, bp@suse.de, hpa@zytor.com, rja@hpe.com, mingo@kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org
+Cc: linux-efi@vger.kernel.org, ard.biesheuvel@linaro.org, rja@hpe.com, mike.travis@hpe.com, bhsharma@redhat.com, mingo@redhat.com, mingo@kernel.org, bp@suse.de, x86@kernel.org, sivanich@hpe.com, hpa@zytor.com, tglx@linutronix.de, steve.wahl@hpe.com, linux-kernel@vger.kernel.org, andy@infradead.org, hedi.berriche@hpe.com, dvhart@infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-Commit-ID:  f816525d615fff0336d0c881e5d960bbec5ea016
-Gitweb:     https://git.kernel.org/tip/f816525d615fff0336d0c881e5d960bbec5ea016
+Commit-ID:  8945d96f7b3ead56e053ac79b8f7b0de98a30bfe
+Gitweb:     https://git.kernel.org/tip/8945d96f7b3ead56e053ac79b8f7b0de98a30bfe
 Author:     Hedi Berriche <hedi.berriche@hpe.com>
-AuthorDate: Wed, 13 Feb 2019 19:34:11 +0000
+AuthorDate: Wed, 13 Feb 2019 19:34:12 +0000
 Committer:  Borislav Petkov <bp@suse.de>
-CommitDate: Fri, 15 Feb 2019 15:13:48 +0100
+CommitDate: Fri, 15 Feb 2019 15:15:18 +0100
 
-x86/platform/UV: Remove uv_bios_call_reentrant()
+x86/platform/UV: Use efi_enabled() instead of test_bit()
 
-uv_bios_call_reentrant() has no callers nor is it exported, remove it.
+Use ad hoc efi_enabled() instead of fiddling with test_bit().
 
 Cleanup, no functional changes.
 
@@ -49,44 +51,21 @@ Cc: platform-driver-x86@vger.kernel.org
 Cc: Steve Wahl <steve.wahl@hpe.com>
 Cc: Thomas Gleixner <tglx@linutronix.de>
 Cc: x86-ml <x86@kernel.org>
-Link: https://lkml.kernel.org/r/20190213193413.25560-3-hedi.berriche@hpe.com
+Link: https://lkml.kernel.org/r/20190213193413.25560-4-hedi.berriche@hpe.com
 ---
- arch/x86/include/asm/uv/bios.h |  1 -
- arch/x86/platform/uv/bios_uv.c | 12 ------------
- 2 files changed, 13 deletions(-)
+ arch/x86/platform/uv/bios_uv.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/arch/x86/include/asm/uv/bios.h b/arch/x86/include/asm/uv/bios.h
-index 00d862cfbcbe..8c6ac271b5b3 100644
---- a/arch/x86/include/asm/uv/bios.h
-+++ b/arch/x86/include/asm/uv/bios.h
-@@ -140,7 +140,6 @@ enum uv_memprotect {
-  */
- extern s64 uv_bios_call(enum uv_bios_cmd, u64, u64, u64, u64, u64);
- extern s64 uv_bios_call_irqsave(enum uv_bios_cmd, u64, u64, u64, u64, u64);
--extern s64 uv_bios_call_reentrant(enum uv_bios_cmd, u64, u64, u64, u64, u64);
- 
- extern s64 uv_bios_get_sn_info(int, int *, long *, long *, long *, long *);
- extern s64 uv_bios_freq_base(u64, u64 *);
 diff --git a/arch/x86/platform/uv/bios_uv.c b/arch/x86/platform/uv/bios_uv.c
-index 4a61ed2a7bb8..91e3d5285836 100644
+index 91e3d5285836..38a2e3431fc6 100644
 --- a/arch/x86/platform/uv/bios_uv.c
 +++ b/arch/x86/platform/uv/bios_uv.c
-@@ -66,18 +66,6 @@ s64 uv_bios_call_irqsave(enum uv_bios_cmd which, u64 a1, u64 a2, u64 a3,
- 	return ret;
- }
- 
--s64 uv_bios_call_reentrant(enum uv_bios_cmd which, u64 a1, u64 a2, u64 a3,
--					u64 a4, u64 a5)
--{
--	s64 ret;
--
--	preempt_disable();
--	ret = uv_bios_call(which, a1, a2, a3, a4, a5);
--	preempt_enable();
--
--	return ret;
--}
--
- 
- long sn_partition_id;
- EXPORT_SYMBOL_GPL(sn_partition_id);
+@@ -44,7 +44,7 @@ s64 uv_bios_call(enum uv_bios_cmd which, u64 a1, u64 a2, u64 a3, u64 a4, u64 a5)
+ 	 * If EFI_OLD_MEMMAP is set, we need to fall back to using our old EFI
+ 	 * callback method, which uses efi_call() directly, with the kernel page tables:
+ 	 */
+-	if (unlikely(test_bit(EFI_OLD_MEMMAP, &efi.flags)))
++	if (unlikely(efi_enabled(EFI_OLD_MEMMAP)))
+ 		ret = efi_call((void *)__va(tab->function), (u64)which, a1, a2, a3, a4, a5);
+ 	else
+ 		ret = efi_call_virt_pointer(tab, function, (u64)which, a1, a2, a3, a4, a5);
