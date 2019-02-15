@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 1/2] arm64: account for GICv3 LPI tables in static memblock reserve table
-Date: Fri, 15 Feb 2019 13:33:32 +0100
-Message-ID: <20190215123333.21209-2-ard.biesheuvel@linaro.org>
+Subject: [PATCH 2/2] efi/arm: Revert "Defer persistent reservations until after paging_init()"
+Date: Fri, 15 Feb 2019 13:33:33 +0100
+Message-ID: <20190215123333.21209-3-ard.biesheuvel@linaro.org>
 References: <20190215123333.21209-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -12,108 +12,86 @@ To: linux-arm-kernel@lists.infradead.org, Ingo Molnar <mingo@kernel.org>, Thomas
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Marc Zyngier <marc.zyngier@arm.com>, Mike Rapoport <rppt@linux.ibm.com>, Will Deacon <will.deacon@arm.com>
 List-Id: linux-efi@vger.kernel.org
 
-In the irqchip and EFI code, we have what basically amounts to a quirk
-to work around a peculiarity in the GICv3 architecture, which permits
-the system memory address of LPI tables to be programmable only once
-after a CPU reset. This means kexec kernels must use the same memory
-as the first kernel, and thus ensure that this memory has not been
-given out for other purposes by the time the ITS init code runs, which
-is not very early for secondary CPUs.
+This reverts commit eff896288872d687d9662000ec9ae11b6d61766f, which
+deferred the processing of persistent memory reservations to a point
+where the memory may have already been allocated and overwritten,
+defeating the purpose.
 
-On systems with many CPUs, these reservations could overflow the
-memblock reservation table, and this was addressed in commit
-eff896288872 ("efi/arm: Defer persistent reservations until after
-paging_init()"). However, this turns out to have made things worse,
-since the allocation of page tables and heap space for the resized
-memblock reservation table itself may overwrite the regions we are
-attempting to reserve, which may cause all kinds of corruption,
-also considering that the ITS will still be poking bits into that
-memory in response to incoming MSIs.
-
-So instead, let's grow the static memblock reservation table on such
-systems so it can accommodate these reservations at an earlier time.
-This will permit us to revert the above commit in a subsequent patch.
-
-Acked-by: Mike Rapoport <rppt@linux.ibm.com>
 Acked-by: Will Deacon <will.deacon@arm.com>
-Acked-by: Marc Zyngier <marc.zyngier@arm.com>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- arch/arm64/include/asm/memory.h | 11 +++++++++++
- include/linux/memblock.h        |  3 ---
- mm/memblock.c                   | 10 ++++++++--
- 3 files changed, 19 insertions(+), 5 deletions(-)
+ arch/arm64/kernel/setup.c               | 1 -
+ drivers/firmware/efi/efi.c              | 4 ----
+ drivers/firmware/efi/libstub/arm-stub.c | 3 ---
+ include/linux/efi.h                     | 7 -------
+ 4 files changed, 15 deletions(-)
 
-diff --git a/arch/arm64/include/asm/memory.h b/arch/arm64/include/asm/memory.h
-index e1ec947e7c0c..ada877f56551 100644
---- a/arch/arm64/include/asm/memory.h
-+++ b/arch/arm64/include/asm/memory.h
-@@ -332,6 +332,17 @@ static inline void *phys_to_virt(phys_addr_t x)
- #define virt_addr_valid(kaddr)		\
- 	(_virt_addr_is_linear(kaddr) && _virt_addr_valid(kaddr))
+diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
+index 4b0e1231625c..d09ec76f08cf 100644
+--- a/arch/arm64/kernel/setup.c
++++ b/arch/arm64/kernel/setup.c
+@@ -313,7 +313,6 @@ void __init setup_arch(char **cmdline_p)
+ 	arm64_memblock_init();
  
-+/*
-+ * Given that the GIC architecture permits ITS implementations that can only be
-+ * configured with a LPI table address once, GICv3 systems with many CPUs may
-+ * end up reserving a lot of different regions after a kexec for their LPI
-+ * tables (one per CPU), as we are forced to reuse the same memory after kexec
-+ * (and thus reserve it persistently with EFI beforehand)
-+ */
-+#if defined(CONFIG_EFI) && defined(CONFIG_ARM_GIC_V3_ITS)
-+#define INIT_MEMBLOCK_RESERVED_REGIONS	(INIT_MEMBLOCK_REGIONS + NR_CPUS + 1)
-+#endif
-+
- #include <asm-generic/memory_model.h>
+ 	paging_init();
+-	efi_apply_persistent_mem_reservations();
  
- #endif
-diff --git a/include/linux/memblock.h b/include/linux/memblock.h
-index 64c41cf45590..859b55b66db2 100644
---- a/include/linux/memblock.h
-+++ b/include/linux/memblock.h
-@@ -29,9 +29,6 @@ extern unsigned long max_pfn;
-  */
- extern unsigned long long max_possible_pfn;
+ 	acpi_table_upgrade();
  
--#define INIT_MEMBLOCK_REGIONS	128
--#define INIT_PHYSMEM_REGIONS	4
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 4c46ff6f2242..55b77c576c42 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -592,11 +592,7 @@ int __init efi_config_parse_tables(void *config_tables, int count, int sz,
+ 
+ 		early_memunmap(tbl, sizeof(*tbl));
+ 	}
+-	return 0;
+-}
+ 
+-int __init efi_apply_persistent_mem_reservations(void)
+-{
+ 	if (efi.mem_reserve != EFI_INVALID_TABLE_ADDR) {
+ 		unsigned long prsv = efi.mem_reserve;
+ 
+diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+index eee42d5e25ee..c037c6c5d0b7 100644
+--- a/drivers/firmware/efi/libstub/arm-stub.c
++++ b/drivers/firmware/efi/libstub/arm-stub.c
+@@ -75,9 +75,6 @@ void install_memreserve_table(efi_system_table_t *sys_table_arg)
+ 	efi_guid_t memreserve_table_guid = LINUX_EFI_MEMRESERVE_TABLE_GUID;
+ 	efi_status_t status;
+ 
+-	if (IS_ENABLED(CONFIG_ARM))
+-		return;
 -
- /**
-  * enum memblock_flags - definition of memory region attributes
-  * @MEMBLOCK_NONE: no special request
-diff --git a/mm/memblock.c b/mm/memblock.c
-index 022d4cbb3618..a526c3ab8390 100644
---- a/mm/memblock.c
-+++ b/mm/memblock.c
-@@ -26,6 +26,12 @@
+ 	status = efi_call_early(allocate_pool, EFI_LOADER_DATA, sizeof(*rsv),
+ 				(void **)&rsv);
+ 	if (status != EFI_SUCCESS) {
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 45ff763fba76..28604a8d0aa9 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1198,8 +1198,6 @@ static inline bool efi_enabled(int feature)
+ extern void efi_reboot(enum reboot_mode reboot_mode, const char *__unused);
  
- #include "internal.h"
- 
-+#define INIT_MEMBLOCK_REGIONS		128
-+#define INIT_PHYSMEM_REGIONS		4
-+#ifndef INIT_MEMBLOCK_RESERVED_REGIONS
-+#define INIT_MEMBLOCK_RESERVED_REGIONS	INIT_MEMBLOCK_REGIONS
-+#endif
-+
- /**
-  * DOC: memblock overview
-  *
-@@ -92,7 +98,7 @@ unsigned long max_pfn;
- unsigned long long max_possible_pfn;
- 
- static struct memblock_region memblock_memory_init_regions[INIT_MEMBLOCK_REGIONS] __initdata_memblock;
--static struct memblock_region memblock_reserved_init_regions[INIT_MEMBLOCK_REGIONS] __initdata_memblock;
-+static struct memblock_region memblock_reserved_init_regions[INIT_MEMBLOCK_RESERVED_REGIONS] __initdata_memblock;
- #ifdef CONFIG_HAVE_MEMBLOCK_PHYS_MAP
- static struct memblock_region memblock_physmem_init_regions[INIT_PHYSMEM_REGIONS] __initdata_memblock;
+ extern bool efi_is_table_address(unsigned long phys_addr);
+-
+-extern int efi_apply_persistent_mem_reservations(void);
+ #else
+ static inline bool efi_enabled(int feature)
+ {
+@@ -1218,11 +1216,6 @@ static inline bool efi_is_table_address(unsigned long phys_addr)
+ {
+ 	return false;
+ }
+-
+-static inline int efi_apply_persistent_mem_reservations(void)
+-{
+-	return 0;
+-}
  #endif
-@@ -105,7 +111,7 @@ struct memblock memblock __initdata_memblock = {
  
- 	.reserved.regions	= memblock_reserved_init_regions,
- 	.reserved.cnt		= 1,	/* empty dummy entry */
--	.reserved.max		= INIT_MEMBLOCK_REGIONS,
-+	.reserved.max		= INIT_MEMBLOCK_RESERVED_REGIONS,
- 	.reserved.name		= "reserved",
- 
- #ifdef CONFIG_HAVE_MEMBLOCK_PHYS_MAP
+ extern int efi_status_to_err(efi_status_t status);
 -- 
 2.20.1
