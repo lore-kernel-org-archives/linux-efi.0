@@ -1,79 +1,99 @@
-From: Mimi Zohar <zohar@linux.ibm.com>
-Subject: Re: [PATCH v3 1/2] ima: fix build error redeclaration of enumerator
-Date: Thu, 14 Feb 2019 21:45:34 -0500
-Message-ID: <1550198734.4107.53.camel@linux.ibm.com>
-References: <20190213221625.7551-1-anders.roxell@linaro.org>
-         <1550165329.3980.8.camel@linux.ibm.com>
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: Re: [PATCH] efi/libstub: refactor cmd_stubcopy
+Date: Fri, 15 Feb 2019 14:48:43 +0900
+Message-ID: <CAK7LNASoyeFW=j9R=M2vaoLK_Gms1Z6hA_yKLyVSY=g5ALUi8A@mail.gmail.com>
+References: <1549943095-10956-1-git-send-email-yamada.masahiro@socionext.com> <CAKv+Gu8yLY+c6jNmHYkvP3n=xiojF7dcKBHmeGibUW2FUrEczA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1550165329.3980.8.camel@linux.ibm.com>
+In-Reply-To: <CAKv+Gu8yLY+c6jNmHYkvP3n=xiojF7dcKBHmeGibUW2FUrEczA@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Anders Roxell <anders.roxell@linaro.org>, dmitry.kasatkin@gmail.com, jmorris@namei.org, serge@hallyn.com, ard.biesheuvel@linaro.org, tglx@linutronix.de, mingo@redhat.com, bp@alien8.de
-Cc: linux-integrity@vger.kernel.org, linux-security-module@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org, Andy Shevchenko <andy.shevchenko@gmail.com>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ingo Molnar <mingo@redhat.com>, linux-efi <linux-efi@vger.kernel.org>, Kees Cook <keescook@chromium.org>, Alistair Strachan <astrachan@google.com>, Laura Abbott <labbott@redhat.com>, Will Deacon <will.deacon@arm.com>, Ingo Molnar <mingo@kernel.org>, Nathan Chancellor <natechancellor@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 2019-02-14 at 12:28 -0500, Mimi Zohar wrote:
-> On Wed, 2019-02-13 at 23:16 +0100, Anders Roxell wrote:
-> > Commit a893ea15d764 ("tpm: move tpm_chip definition to
-> > include/linux/tpm.h") introduced a build error when both ima and efi is
-> > enabled. What happens is that both headers (ima.h and efi.h) defines the
-> > same 'NONE' constant, and it broke when they started getting included
-> > from the same file.
-> > 
-> > In file included from ../security/integrity/ima/ima_fs.c:30:
-> > ../security/integrity/ima/ima.h:176:7: error: redeclaration of enumerator "NONE"
-> >   hook(NONE)   \
-> >        ^~~~
-> > ../security/integrity/ima/ima.h:188:34: note: in definition of macro "__ima_hook_enumify"
-> >  #define __ima_hook_enumify(ENUM) ENUM,
-> >                                   ^~~~
-> > ../security/integrity/ima/ima.h:191:2: note: in expansion of macro "__ima_hooks"
-> >   __ima_hooks(__ima_hook_enumify)
-> >   ^~~~~~~~~~~
-> > In file included from ../arch/arm64/include/asm/acpi.h:15,
-> >                  from ../include/acpi/acpi_io.h:7,
-> >                  from ../include/linux/acpi.h:47,
-> >                  from ../include/linux/tpm.h:26,
-> >                  from ../security/integrity/ima/ima.h:25,
-> >                  from ../security/integrity/ima/ima_fs.c:30:
-> > ../include/linux/efi.h:1723:2: note: previous definition of "NONE" was here
-> >   NONE,
-> >   ^~~~
-> > make[4]: *** [../scripts/Makefile.build:277: security/integrity/ima/ima_fs.o] Error 1
-> > 
-> > Rework to prefix the ima enum with 'IMA_*'.
-> > 
-> > Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
-> > Signed-off-by: Anders Roxell <anders.roxell@linaro.org>
-> 
-> Ok, this looks reasonable, but will have a minor clash with Gustavo's
-> "security: mark expected switch fall-throughs and add a missing
-> break".
+On Tue, Feb 12, 2019 at 4:26 PM Ard Biesheuvel
+<ard.biesheuvel@linaro.org> wrote:
+>
+> On Tue, 12 Feb 2019 at 04:45, Masahiro Yamada
+> <yamada.masahiro@socionext.com> wrote:
+> >
+> > It took me a while to understand what is going on in the nested
+> > if-blocks.
+> >
+> > Simplify it by removing unneeded code.
+> >
+> >   - if_changed automatically adds 'set -e', so any failure in the
+> >     series of commands makes it immediately fail as a whole.
+> >     So, the outer if block is entirely redundant.
+> >
+> >   - Since commit 9c2af1c7377a ("kbuild: add .DELETE_ON_ERROR special
+> >     target"), GNU Make automatically deletes the target on any failure
+> >     in its recipe. The explicit 'rm -f $@' is redundant.
+> >
+> >   - surrounding commands with ( ) will spawn a subshell to execute them
+> >     in it, but it is rarely useful to do so.
+> >
+> > Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+>
+> Assuming that it still works as expected:
+>
+> Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+>
+> You can test this by adding a statically initialized global function
+> pointer to any of the libstub source files that get built for ARM.
+>
+> Thanks!
 
-This patch correctly didn't modify the IMA policy keywords, just the
-enumeration, but now the <securityfs> policy file incorrectly displays
-the "ima_" prefixed names.
 
-Instead of maintaining an enumeration and the corresponding
-stringified version of the enumeration, there is a single list with
-two macros.  One of these macros needs to be modified.  Instead of
-modifying the the hook names directly, I would probably modify the
-enumeration macro.
+I tried that, and it failed as expected.
 
-#define __ima_hook_enumify(ENUM)        ENUM,
 
-enum ima_hooks {
-        __ima_hooks(__ima_hook_enumify)
-};
+$ git diff
+diff --git a/drivers/firmware/efi/libstub/arm32-stub.c
+b/drivers/firmware/efi/libstub/arm32-stub.c
+index becbda4..5ad7bbd 100644
+--- a/drivers/firmware/efi/libstub/arm32-stub.c
++++ b/drivers/firmware/efi/libstub/arm32-stub.c
+@@ -28,6 +28,8 @@ efi_status_t
+check_platform_features(efi_system_table_t *sys_table_arg)
+        return EFI_SUCCESS;
+ }
 
-and
++void * foo = (void *)check_platform_features;
++
+ static efi_guid_t screen_info_guid = LINUX_EFI_ARM_SCREEN_INFO_TABLE_GUID;
 
-#define __ima_hook_stringify(str)       (#str),
+ struct screen_info *alloc_screen_info(efi_system_table_t *sys_table_arg)
+$ make ARCH=arm  CROSS_COMPILE=arm-linux-gnueabihf- defconfig
+drivers/firmware/efi/libstub/
+*** Default configuration is based on 'multi_v7_defconfig'
+#
+# configuration written to .config
+#
+scripts/kconfig/conf  --syncconfig Kconfig
+  CALL    scripts/checksyscalls.sh
+  CC      drivers/firmware/efi/libstub/arm32-stub.o
+  STUBCPY drivers/firmware/efi/libstub/arm32-stub.stub.o
+00000000 R_ARM_ABS32       check_platform_features
+drivers/firmware/efi/libstub/arm32-stub.stub.o: absolute symbol
+references not allowed in the EFI stub
+drivers/firmware/efi/libstub/Makefile:80: recipe for target
+'drivers/firmware/efi/libstub/arm32-stub.stub.o' failed
+make[3]: *** [drivers/firmware/efi/libstub/arm32-stub.stub.o] Error 1
+make[3]: *** Deleting file 'drivers/firmware/efi/libstub/arm32-stub.stub.o'
+Makefile:1705: recipe for target 'drivers/firmware/efi/libstub/' failed
+make[2]: *** [drivers/firmware/efi/libstub/] Error 2
+/home/masahiro/workspace/bsp/linux/Makefile:300: recipe for target
+'__build_one_by_one' failed
+make[1]: *** [__build_one_by_one] Error 2
+Makefile:160: recipe for target 'sub-make' failed
+make: *** [sub-make] Error 2
 
-static const char *const func_tokens[] = {
-        __ima_hooks(__ima_hook_stringify)
-};
 
-Mimi
+
+
+
+-- 
+Best Regards
+Masahiro Yamada
