@@ -1,97 +1,153 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 2/2] efi/arm: Revert "Defer persistent reservations until after paging_init()"
-Date: Fri, 15 Feb 2019 13:33:33 +0100
-Message-ID: <20190215123333.21209-3-ard.biesheuvel@linaro.org>
-References: <20190215123333.21209-1-ard.biesheuvel@linaro.org>
+From: tip-bot for Hedi Berriche <tipbot@zytor.com>
+Subject: [tip:x86/urgent] x86/platform/UV: Use efi_runtime_lock to serialise
+ BIOS calls
+Date: Fri, 15 Feb 2019 07:01:12 -0800
+Message-ID: <tip-f331e766c4be33f4338574f3c9f7f77e98ab4571@git.kernel.org>
+References: <20190213193413.25560-5-hedi.berriche@hpe.com>
+Reply-To: bhsharma@redhat.com, dvhart@infradead.org, tglx@linutronix.de,
+          hpa@zytor.com, steve.wahl@hpe.com, linux-kernel@vger.kernel.org,
+          x86@kernel.org, sivanich@hpe.com, ard.biesheuvel@linaro.org,
+          linux-efi@vger.kernel.org, mingo@kernel.org,
+          hedi.berriche@hpe.com, mingo@redhat.com, mike.travis@hpe.com,
+          bp@suse.de, rja@hpe.com, andy@infradead.org
 Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190215123333.21209-1-ard.biesheuvel@linaro.org>
+In-Reply-To: <20190213193413.25560-5-hedi.berriche@hpe.com>
+Content-Disposition: inline
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Marc Zyngier <marc.zyngier@arm.com>, Mike Rapoport <rppt@linux.ibm.com>, Will Deacon <will.deacon@arm.com>
+To: linux-tip-commits@vger.kernel.org
+Cc: bhsharma@redhat.com, dvhart@infradead.org, tglx@linutronix.de, hpa@zytor.com, steve.wahl@hpe.com, linux-kernel@vger.kernel.org, x86@kernel.org, sivanich@hpe.com, ard.biesheuvel@linaro.org, linux-efi@vger.kernel.org, mingo@kernel.org, hedi.berriche@hpe.com, mingo@redhat.com, mike.travis@hpe.com, bp@suse.de, rja@hpe.com, andy@infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-This reverts commit eff896288872d687d9662000ec9ae11b6d61766f, which
-deferred the processing of persistent memory reservations to a point
-where the memory may have already been allocated and overwritten,
-defeating the purpose.
+Commit-ID:  f331e766c4be33f4338574f3c9f7f77e98ab4571
+Gitweb:     https://git.kernel.org/tip/f331e766c4be33f4338574f3c9f7f77e98ab4571
+Author:     Hedi Berriche <hedi.berriche@hpe.com>
+AuthorDate: Wed, 13 Feb 2019 19:34:13 +0000
+Committer:  Borislav Petkov <bp@suse.de>
+CommitDate: Fri, 15 Feb 2019 15:19:56 +0100
 
-Acked-by: Will Deacon <will.deacon@arm.com>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+x86/platform/UV: Use efi_runtime_lock to serialise BIOS calls
+
+Calls into UV firmware must be protected against concurrency, expose the
+efi_runtime_lock to the UV platform, and use it to serialise UV BIOS
+calls.
+
+Signed-off-by: Hedi Berriche <hedi.berriche@hpe.com>
+Signed-off-by: Borislav Petkov <bp@suse.de>
+Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Reviewed-by: Russ Anderson <rja@hpe.com>
+Reviewed-by: Dimitri Sivanich <sivanich@hpe.com>
+Reviewed-by: Mike Travis <mike.travis@hpe.com>
+Cc: Andy Shevchenko <andy@infradead.org>
+Cc: Bhupesh Sharma <bhsharma@redhat.com>
+Cc: Darren Hart <dvhart@infradead.org>
+Cc: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Ingo Molnar <mingo@redhat.com>
+Cc: linux-efi <linux-efi@vger.kernel.org>
+Cc: platform-driver-x86@vger.kernel.org
+Cc: stable@vger.kernel.org # v4.9+
+Cc: Steve Wahl <steve.wahl@hpe.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: x86-ml <x86@kernel.org>
+Link: https://lkml.kernel.org/r/20190213193413.25560-5-hedi.berriche@hpe.com
 ---
- arch/arm64/kernel/setup.c               | 1 -
- drivers/firmware/efi/efi.c              | 4 ----
- drivers/firmware/efi/libstub/arm-stub.c | 3 ---
- include/linux/efi.h                     | 7 -------
- 4 files changed, 15 deletions(-)
+ arch/x86/include/asm/uv/bios.h          |  8 +++++++-
+ arch/x86/platform/uv/bios_uv.c          | 23 +++++++++++++++++++++--
+ drivers/firmware/efi/runtime-wrappers.c |  7 +++++++
+ 3 files changed, 35 insertions(+), 3 deletions(-)
 
-diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
-index 4b0e1231625c..d09ec76f08cf 100644
---- a/arch/arm64/kernel/setup.c
-+++ b/arch/arm64/kernel/setup.c
-@@ -313,7 +313,6 @@ void __init setup_arch(char **cmdline_p)
- 	arm64_memblock_init();
+diff --git a/arch/x86/include/asm/uv/bios.h b/arch/x86/include/asm/uv/bios.h
+index e652a7cc6186..3f697a9e3f59 100644
+--- a/arch/x86/include/asm/uv/bios.h
++++ b/arch/x86/include/asm/uv/bios.h
+@@ -48,7 +48,8 @@ enum {
+ 	BIOS_STATUS_SUCCESS		=  0,
+ 	BIOS_STATUS_UNIMPLEMENTED	= -ENOSYS,
+ 	BIOS_STATUS_EINVAL		= -EINVAL,
+-	BIOS_STATUS_UNAVAIL		= -EBUSY
++	BIOS_STATUS_UNAVAIL		= -EBUSY,
++	BIOS_STATUS_ABORT		= -EINTR,
+ };
  
- 	paging_init();
--	efi_apply_persistent_mem_reservations();
+ /* Address map parameters */
+@@ -167,4 +168,9 @@ extern long system_serial_number;
  
- 	acpi_table_upgrade();
+ extern struct kobject *sgi_uv_kobj;	/* /sys/firmware/sgi_uv */
  
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 4c46ff6f2242..55b77c576c42 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -592,11 +592,7 @@ int __init efi_config_parse_tables(void *config_tables, int count, int sz,
++/*
++ * EFI runtime lock; cf. firmware/efi/runtime-wrappers.c for details
++ */
++extern struct semaphore __efi_uv_runtime_lock;
++
+ #endif /* _ASM_X86_UV_BIOS_H */
+diff --git a/arch/x86/platform/uv/bios_uv.c b/arch/x86/platform/uv/bios_uv.c
+index 4a6a5a26c582..eb33432f2f24 100644
+--- a/arch/x86/platform/uv/bios_uv.c
++++ b/arch/x86/platform/uv/bios_uv.c
+@@ -29,7 +29,8 @@
  
- 		early_memunmap(tbl, sizeof(*tbl));
- 	}
--	return 0;
--}
+ struct uv_systab *uv_systab;
  
--int __init efi_apply_persistent_mem_reservations(void)
--{
- 	if (efi.mem_reserve != EFI_INVALID_TABLE_ADDR) {
- 		unsigned long prsv = efi.mem_reserve;
- 
-diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-index eee42d5e25ee..c037c6c5d0b7 100644
---- a/drivers/firmware/efi/libstub/arm-stub.c
-+++ b/drivers/firmware/efi/libstub/arm-stub.c
-@@ -75,9 +75,6 @@ void install_memreserve_table(efi_system_table_t *sys_table_arg)
- 	efi_guid_t memreserve_table_guid = LINUX_EFI_MEMRESERVE_TABLE_GUID;
- 	efi_status_t status;
- 
--	if (IS_ENABLED(CONFIG_ARM))
--		return;
--
- 	status = efi_call_early(allocate_pool, EFI_LOADER_DATA, sizeof(*rsv),
- 				(void **)&rsv);
- 	if (status != EFI_SUCCESS) {
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 45ff763fba76..28604a8d0aa9 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1198,8 +1198,6 @@ static inline bool efi_enabled(int feature)
- extern void efi_reboot(enum reboot_mode reboot_mode, const char *__unused);
- 
- extern bool efi_is_table_address(unsigned long phys_addr);
--
--extern int efi_apply_persistent_mem_reservations(void);
- #else
- static inline bool efi_enabled(int feature)
+-s64 uv_bios_call(enum uv_bios_cmd which, u64 a1, u64 a2, u64 a3, u64 a4, u64 a5)
++static s64 __uv_bios_call(enum uv_bios_cmd which, u64 a1, u64 a2, u64 a3,
++			u64 a4, u64 a5)
  {
-@@ -1218,11 +1216,6 @@ static inline bool efi_is_table_address(unsigned long phys_addr)
- {
- 	return false;
+ 	struct uv_systab *tab = uv_systab;
+ 	s64 ret;
+@@ -51,6 +52,19 @@ s64 uv_bios_call(enum uv_bios_cmd which, u64 a1, u64 a2, u64 a3, u64 a4, u64 a5)
+ 
+ 	return ret;
  }
--
--static inline int efi_apply_persistent_mem_reservations(void)
--{
--	return 0;
--}
- #endif
++
++s64 uv_bios_call(enum uv_bios_cmd which, u64 a1, u64 a2, u64 a3, u64 a4, u64 a5)
++{
++	s64 ret;
++
++	if (down_interruptible(&__efi_uv_runtime_lock))
++		return BIOS_STATUS_ABORT;
++
++	ret = __uv_bios_call(which, a1, a2, a3, a4, a5);
++	up(&__efi_uv_runtime_lock);
++
++	return ret;
++}
+ EXPORT_SYMBOL_GPL(uv_bios_call);
  
- extern int efi_status_to_err(efi_status_t status);
--- 
-2.20.1
+ s64 uv_bios_call_irqsave(enum uv_bios_cmd which, u64 a1, u64 a2, u64 a3,
+@@ -59,10 +73,15 @@ s64 uv_bios_call_irqsave(enum uv_bios_cmd which, u64 a1, u64 a2, u64 a3,
+ 	unsigned long bios_flags;
+ 	s64 ret;
+ 
++	if (down_interruptible(&__efi_uv_runtime_lock))
++		return BIOS_STATUS_ABORT;
++
+ 	local_irq_save(bios_flags);
+-	ret = uv_bios_call(which, a1, a2, a3, a4, a5);
++	ret = __uv_bios_call(which, a1, a2, a3, a4, a5);
+ 	local_irq_restore(bios_flags);
+ 
++	up(&__efi_uv_runtime_lock);
++
+ 	return ret;
+ }
+ 
+diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
+index 8903b9ccfc2b..e2abfdb5cee6 100644
+--- a/drivers/firmware/efi/runtime-wrappers.c
++++ b/drivers/firmware/efi/runtime-wrappers.c
+@@ -146,6 +146,13 @@ void efi_call_virt_check_flags(unsigned long flags, const char *call)
+  */
+ static DEFINE_SEMAPHORE(efi_runtime_lock);
+ 
++/*
++ * Expose the EFI runtime lock to the UV platform
++ */
++#ifdef CONFIG_X86_UV
++extern struct semaphore __efi_uv_runtime_lock __alias(efi_runtime_lock);
++#endif
++
+ /*
+  * Calls the appropriate efi_runtime_service() with the appropriate
+  * arguments.
