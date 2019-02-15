@@ -1,79 +1,79 @@
-From: Mike Travis <mike.travis@hpe.com>
-Subject: Re: [Patch v3 0/4] Protect against concurrent calls into UV BIOS
-Date: Thu, 14 Feb 2019 13:31:48 -0800
-Message-ID: <6d2c7655-a8f4-e2ef-1479-f43e707c6a86@hpe.com>
-References: <20190213193413.25560-1-hedi.berriche@hpe.com>
- <20190214212149.GB5073@hpe.com>
+From: Mimi Zohar <zohar@linux.ibm.com>
+Subject: Re: [PATCH v3 1/2] ima: fix build error redeclaration of enumerator
+Date: Thu, 14 Feb 2019 21:45:34 -0500
+Message-ID: <1550198734.4107.53.camel@linux.ibm.com>
+References: <20190213221625.7551-1-anders.roxell@linaro.org>
+         <1550165329.3980.8.camel@linux.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20190214212149.GB5073@hpe.com>
-Content-Language: en-US
-Sender: stable-owner@vger.kernel.org
-To: Dimitri Sivanich <sivanich@hpe.com>, Hedi Berriche <hedi.berriche@hpe.com>
-Cc: linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Bhupesh Sharma <bhsharma@redhat.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, linux-efi@vger.kernel.org, x86@kernel.org, Russ Anderson <rja@hpe.com>, Steve Wahl <steve.wahl@hpe.com>, stable@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1550165329.3980.8.camel@linux.ibm.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Anders Roxell <anders.roxell@linaro.org>, dmitry.kasatkin@gmail.com, jmorris@namei.org, serge@hallyn.com, ard.biesheuvel@linaro.org, tglx@linutronix.de, mingo@redhat.com, bp@alien8.de
+Cc: linux-integrity@vger.kernel.org, linux-security-module@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org, Andy Shevchenko <andy.shevchenko@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
-
-
-On 2/14/2019 1:21 PM, Dimitri Sivanich wrote:
-> For the series:
+On Thu, 2019-02-14 at 12:28 -0500, Mimi Zohar wrote:
+> On Wed, 2019-02-13 at 23:16 +0100, Anders Roxell wrote:
+> > Commit a893ea15d764 ("tpm: move tpm_chip definition to
+> > include/linux/tpm.h") introduced a build error when both ima and efi is
+> > enabled. What happens is that both headers (ima.h and efi.h) defines the
+> > same 'NONE' constant, and it broke when they started getting included
+> > from the same file.
+> > 
+> > In file included from ../security/integrity/ima/ima_fs.c:30:
+> > ../security/integrity/ima/ima.h:176:7: error: redeclaration of enumerator "NONE"
+> >   hook(NONE)   \
+> >        ^~~~
+> > ../security/integrity/ima/ima.h:188:34: note: in definition of macro "__ima_hook_enumify"
+> >  #define __ima_hook_enumify(ENUM) ENUM,
+> >                                   ^~~~
+> > ../security/integrity/ima/ima.h:191:2: note: in expansion of macro "__ima_hooks"
+> >   __ima_hooks(__ima_hook_enumify)
+> >   ^~~~~~~~~~~
+> > In file included from ../arch/arm64/include/asm/acpi.h:15,
+> >                  from ../include/acpi/acpi_io.h:7,
+> >                  from ../include/linux/acpi.h:47,
+> >                  from ../include/linux/tpm.h:26,
+> >                  from ../security/integrity/ima/ima.h:25,
+> >                  from ../security/integrity/ima/ima_fs.c:30:
+> > ../include/linux/efi.h:1723:2: note: previous definition of "NONE" was here
+> >   NONE,
+> >   ^~~~
+> > make[4]: *** [../scripts/Makefile.build:277: security/integrity/ima/ima_fs.o] Error 1
+> > 
+> > Rework to prefix the ima enum with 'IMA_*'.
+> > 
+> > Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
+> > Signed-off-by: Anders Roxell <anders.roxell@linaro.org>
 > 
-> Reviewed-by: Dimitri Sivanich <sivanich@hpe.com>
+> Ok, this looks reasonable, but will have a minor clash with Gustavo's
+> "security: mark expected switch fall-throughs and add a missing
+> break".
 
-As well as I:
+This patch correctly didn't modify the IMA policy keywords, just the
+enumeration, but now the <securityfs> policy file incorrectly displays
+the "ima_" prefixed names.
 
-Reviewed-by: Mike Travis <mike.travis@hpe.com>
+Instead of maintaining an enumeration and the corresponding
+stringified version of the enumeration, there is a single list with
+two macros.  One of these macros needs to be modified.  Instead of
+modifying the the hook names directly, I would probably modify the
+enumeration macro.
 
-> 
-> On Wed, Feb 13, 2019 at 07:34:09PM +0000, Hedi Berriche wrote:
->> - Changes since v2
->>    Addressed comments from Ard Biesheuvel:
->>   * expose efi_runtime_lock to UV platform only instead of globally
->>   * remove unnecessary #ifdef CONFIG_EFI from bios_uv.c
->>
->> - Changes since v1:
->>    Addressed comments from Bhupesh Sharma, Thomas Gleixner, and Ard Biesheuvel:
->>   * made __uv_bios_call() static
->>   * moved the efi_enabled() cleanup to its own patchlet
->>   * explained the reason for renaming the efi_runtime_lock semaphore
->>   * dropped the reviewed-bys as they should be given on the mailing list
->>   * Cc'ng stable@vger.kernel.org given the nature of the problem addressed by the patches
->>
->> ---
->>
->> Calls into UV BIOS were not being serialised which is wrong as it violates EFI
->> runtime rules, and bad as it does result in all sorts of potentially hard to
->> track down hangs and panics when efi_scratch.prev_mm gets clobbered whenever
->> efi_switch_mm() gets called concurrently from two different CPUs.
->>
->> Patch #1 removes an unnecessary #ifdef CONFIG_EFI guard from bios_uv.c.
->>
->> Patch #2 removes uv_bios_call_reentrant() because it's dead code.
->>
->> Patch #3 is a cleanup that drops test_bit() in favour of the ad hoc efi_enabled().
->>
->> Patch #4 makes uv_bios_call() variants use the efi_runtime_lock semaphore to
->> protect against concurrency.
->>
->> Cc: Russ Anderson <rja@hpe.com>
->> Cc: Mike Travis <mike.travis@hpe.com>
->> Cc: Dimitri Sivanich <sivanich@hpe.com>
->> Cc: Steve Wahl <steve.wahl@hpe.com>
->> Cc: stable@vger.kernel.org # v4.9+
->>
->> Hedi Berriche (4):
->>    x86/platform/UV: remove unnecessary #ifdef CONFIG_EFI
->>    x86/platform/UV: kill uv_bios_call_reentrant() as it has no callers
->>    x86/platform/UV: use efi_enabled() instead of test_bit()
->>    x86/platform/UV: use efi_runtime_lock to serialise BIOS calls
->>
->>   arch/x86/include/asm/uv/bios.h          | 13 ++++-----
->>   arch/x86/platform/uv/bios_uv.c          | 35 ++++++++++++++-----------
->>   drivers/firmware/efi/runtime-wrappers.c |  7 +++++
->>   3 files changed, 34 insertions(+), 21 deletions(-)
->>
->> -- 
->> 2.20.1
->>
+#define __ima_hook_enumify(ENUM)        ENUM,
+
+enum ima_hooks {
+        __ima_hooks(__ima_hook_enumify)
+};
+
+and
+
+#define __ima_hook_stringify(str)       (#str),
+
+static const char *const func_tokens[] = {
+        __ima_hooks(__ima_hook_stringify)
+};
+
+Mimi
