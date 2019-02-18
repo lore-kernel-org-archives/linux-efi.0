@@ -1,19 +1,19 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.9 47/58] x86/platform/UV: Use efi_runtime_lock to serialise BIOS calls
-Date: Mon, 18 Feb 2019 14:44:08 +0100
-Message-ID: <20190218133512.176790600@linuxfoundation.org>
-References: <20190218133508.567416115@linuxfoundation.org>
+Subject: [PATCH 4.4 135/143] x86/platform/UV: Use efi_runtime_lock to serialise BIOS calls
+Date: Mon, 18 Feb 2019 14:44:23 +0100
+Message-ID: <20190218133533.912603392@linuxfoundation.org>
+References: <20190218133529.099444112@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190218133508.567416115@linuxfoundation.org>
+In-Reply-To: <20190218133529.099444112@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Hedi Berriche <hedi.berriche@hpe.com>, Borislav Petkov <bp@suse.de>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Russ Anderson <rja@hpe.com>, Dimitri Sivanich <sivanich@hpe.com>, Mike Travis <mike.travis@hpe.com>, Andy Shevchenko <andy@infradead.org>, Bhupesh Sharma <bhsharma@redhat.com>, Darren Hart <dvhart@infradead.org>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, linux-efi <linux-efi@vger.kernel.org>, platform-driver-x86@vger.kernel.org, Steve Wahl <steve.wahl@hpe.com>, Thomas Gleixner <tglx@linutronix.de>, x86-ml <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-4.9-stable review patch.  If anyone has any objections, please let me know.
+4.4-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
@@ -62,8 +62,8 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 +	BIOS_STATUS_ABORT		= -EINTR,
  };
  
- /* Address map parameters */
-@@ -167,4 +168,9 @@ extern long system_serial_number;
+ /*
+@@ -111,4 +112,9 @@ extern long system_serial_number;
  
  extern struct kobject *sgi_uv_kobj;	/* /sys/firmware/sgi_uv */
  
@@ -75,18 +75,18 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
  #endif /* _ASM_X86_UV_BIOS_H */
 --- a/arch/x86/platform/uv/bios_uv.c
 +++ b/arch/x86/platform/uv/bios_uv.c
-@@ -29,7 +29,8 @@
+@@ -28,7 +28,8 @@
  
- struct uv_systab *uv_systab;
+ static struct uv_systab uv_systab;
  
 -s64 uv_bios_call(enum uv_bios_cmd which, u64 a1, u64 a2, u64 a3, u64 a4, u64 a5)
 +static s64 __uv_bios_call(enum uv_bios_cmd which, u64 a1, u64 a2, u64 a3,
 +			u64 a4, u64 a5)
  {
- 	struct uv_systab *tab = uv_systab;
+ 	struct uv_systab *tab = &uv_systab;
  	s64 ret;
-@@ -51,6 +52,19 @@ s64 uv_bios_call(enum uv_bios_cmd which,
- 
+@@ -43,6 +44,19 @@ s64 uv_bios_call(enum uv_bios_cmd which,
+ 			a1, a2, a3, a4, a5);
  	return ret;
  }
 +
@@ -105,7 +105,7 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
  EXPORT_SYMBOL_GPL(uv_bios_call);
  
  s64 uv_bios_call_irqsave(enum uv_bios_cmd which, u64 a1, u64 a2, u64 a3,
-@@ -59,10 +73,15 @@ s64 uv_bios_call_irqsave(enum uv_bios_cm
+@@ -51,10 +65,15 @@ s64 uv_bios_call_irqsave(enum uv_bios_cm
  	unsigned long bios_flags;
  	s64 ret;
  
@@ -124,8 +124,8 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
  
 --- a/drivers/firmware/efi/runtime-wrappers.c
 +++ b/drivers/firmware/efi/runtime-wrappers.c
-@@ -50,6 +50,13 @@ void efi_call_virt_check_flags(unsigned
- }
+@@ -88,6 +88,13 @@ static DEFINE_SPINLOCK(efi_runtime_lock)
+  */
  
  /*
 + * Expose the EFI runtime lock to the UV platform
@@ -135,6 +135,6 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 +#endif
 +
 +/*
-  * According to section 7.1 of the UEFI spec, Runtime Services are not fully
-  * reentrant, and there are particular combinations of calls that need to be
-  * serialized. (source: UEFI Specification v2.4A)
+  * As per commit ef68c8f87ed1 ("x86: Serialize EFI time accesses on rtc_lock"),
+  * the EFI specification requires that callers of the time related runtime
+  * functions serialize with other CMOS accesses in the kernel, as the EFI time
