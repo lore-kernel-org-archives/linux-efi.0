@@ -1,74 +1,140 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH] efi/libstub: refactor cmd_stubcopy
-Date: Sat, 16 Feb 2019 11:07:41 +0900
-Message-ID: <CAK7LNARd6R31QyGn4MZdDeTfUVGhF7bOx+5ZyuY-c7kZ6fETsA@mail.gmail.com>
-References: <1549943095-10956-1-git-send-email-yamada.masahiro@socionext.com>
- <CAKv+Gu8yLY+c6jNmHYkvP3n=xiojF7dcKBHmeGibUW2FUrEczA@mail.gmail.com>
- <CAK7LNASoyeFW=j9R=M2vaoLK_Gms1Z6hA_yKLyVSY=g5ALUi8A@mail.gmail.com> <CAKv+Gu8k63Fj2aPbQPLLvBXvJrdcu5NrODXuZKkb2n21AUM70Q@mail.gmail.com>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.20 78/92] x86/platform/UV: Use efi_runtime_lock to serialise BIOS calls
+Date: Mon, 18 Feb 2019 14:43:21 +0100
+Message-ID: <20190218133502.229535774@linuxfoundation.org>
+References: <20190218133454.668268457@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu8k63Fj2aPbQPLLvBXvJrdcu5NrODXuZKkb2n21AUM70Q@mail.gmail.com>
+In-Reply-To: <20190218133454.668268457@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ingo Molnar <mingo@redhat.com>, linux-efi <linux-efi@vger.kernel.org>, Kees Cook <keescook@chromium.org>, Alistair Strachan <astrachan@google.com>, Laura Abbott <labbott@redhat.com>, Will Deacon <will.deacon@arm.com>, Ingo Molnar <mingo@kernel.org>, Nathan Chancellor <natechancellor@gmail.com>
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Hedi Berriche <hedi.berriche@hpe.com>, Borislav Petkov <bp@suse.de>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Russ Anderson <rja@hpe.com>, Dimitri Sivanich <sivanich@hpe.com>, Mike Travis <mike.travis@hpe.com>, Andy Shevchenko <andy@infradead.org>, Bhupesh Sharma <bhsharma@redhat.com>, Darren Hart <dvhart@infradead.org>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, linux-efi <linux-efi@vger.kernel.org>, platform-driver-x86@vger.kernel.org, Steve Wahl <steve.wahl@hpe.com>, Thomas Gleixner <tglx@linutronix.de>, x86-ml <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, Feb 16, 2019 at 12:38 AM Ard Biesheuvel
-<ard.biesheuvel@linaro.org> wrote:
->
-> On Fri, 15 Feb 2019 at 06:49, Masahiro Yamada
-> <yamada.masahiro@socionext.com> wrote:
-> >
-> > On Tue, Feb 12, 2019 at 4:26 PM Ard Biesheuvel
-> > <ard.biesheuvel@linaro.org> wrote:
-> > >
-> > > On Tue, 12 Feb 2019 at 04:45, Masahiro Yamada
-> > > <yamada.masahiro@socionext.com> wrote:
-> > > >
-> > > > It took me a while to understand what is going on in the nested
-> > > > if-blocks.
-> > > >
-> > > > Simplify it by removing unneeded code.
-> > > >
-> > > >   - if_changed automatically adds 'set -e', so any failure in the
-> > > >     series of commands makes it immediately fail as a whole.
-> > > >     So, the outer if block is entirely redundant.
-> > > >
-> > > >   - Since commit 9c2af1c7377a ("kbuild: add .DELETE_ON_ERROR special
-> > > >     target"), GNU Make automatically deletes the target on any failure
-> > > >     in its recipe. The explicit 'rm -f $@' is redundant.
-> > > >
-> > > >   - surrounding commands with ( ) will spawn a subshell to execute them
-> > > >     in it, but it is rarely useful to do so.
-> > > >
-> > > > Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
-> > >
-> > > Assuming that it still works as expected:
-> > >
-> > > Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> > >
-> > > You can test this by adding a statically initialized global function
-> > > pointer to any of the libstub source files that get built for ARM.
-> > >
-> > > Thanks!
-> >
-> >
-> > I tried that, and it failed as expected.
-> >
->
-> Great, thanks for double checking.
->
-> Are you taking this directly, or do you want me to take it via the EFI
-> tree? Either is fine with me
->
->
+4.20-stable review patch.  If anyone has any objections, please let me know.
 
-Could you apply it to your EFI tree?
-Thanks.
+------------------
 
+From: Hedi Berriche <hedi.berriche@hpe.com>
 
+commit f331e766c4be33f4338574f3c9f7f77e98ab4571 upstream.
 
--- 
-Best Regards
-Masahiro Yamada
+Calls into UV firmware must be protected against concurrency, expose the
+efi_runtime_lock to the UV platform, and use it to serialise UV BIOS
+calls.
+
+Signed-off-by: Hedi Berriche <hedi.berriche@hpe.com>
+Signed-off-by: Borislav Petkov <bp@suse.de>
+Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Reviewed-by: Russ Anderson <rja@hpe.com>
+Reviewed-by: Dimitri Sivanich <sivanich@hpe.com>
+Reviewed-by: Mike Travis <mike.travis@hpe.com>
+Cc: Andy Shevchenko <andy@infradead.org>
+Cc: Bhupesh Sharma <bhsharma@redhat.com>
+Cc: Darren Hart <dvhart@infradead.org>
+Cc: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Ingo Molnar <mingo@redhat.com>
+Cc: linux-efi <linux-efi@vger.kernel.org>
+Cc: platform-driver-x86@vger.kernel.org
+Cc: stable@vger.kernel.org # v4.9+
+Cc: Steve Wahl <steve.wahl@hpe.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: x86-ml <x86@kernel.org>
+Link: https://lkml.kernel.org/r/20190213193413.25560-5-hedi.berriche@hpe.com
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+---
+ arch/x86/include/asm/uv/bios.h          |    8 +++++++-
+ arch/x86/platform/uv/bios_uv.c          |   23 +++++++++++++++++++++--
+ drivers/firmware/efi/runtime-wrappers.c |    7 +++++++
+ 3 files changed, 35 insertions(+), 3 deletions(-)
+
+--- a/arch/x86/include/asm/uv/bios.h
++++ b/arch/x86/include/asm/uv/bios.h
+@@ -48,7 +48,8 @@ enum {
+ 	BIOS_STATUS_SUCCESS		=  0,
+ 	BIOS_STATUS_UNIMPLEMENTED	= -ENOSYS,
+ 	BIOS_STATUS_EINVAL		= -EINVAL,
+-	BIOS_STATUS_UNAVAIL		= -EBUSY
++	BIOS_STATUS_UNAVAIL		= -EBUSY,
++	BIOS_STATUS_ABORT		= -EINTR,
+ };
+ 
+ /* Address map parameters */
+@@ -167,4 +168,9 @@ extern long system_serial_number;
+ 
+ extern struct kobject *sgi_uv_kobj;	/* /sys/firmware/sgi_uv */
+ 
++/*
++ * EFI runtime lock; cf. firmware/efi/runtime-wrappers.c for details
++ */
++extern struct semaphore __efi_uv_runtime_lock;
++
+ #endif /* _ASM_X86_UV_BIOS_H */
+--- a/arch/x86/platform/uv/bios_uv.c
++++ b/arch/x86/platform/uv/bios_uv.c
+@@ -29,7 +29,8 @@
+ 
+ struct uv_systab *uv_systab;
+ 
+-s64 uv_bios_call(enum uv_bios_cmd which, u64 a1, u64 a2, u64 a3, u64 a4, u64 a5)
++static s64 __uv_bios_call(enum uv_bios_cmd which, u64 a1, u64 a2, u64 a3,
++			u64 a4, u64 a5)
+ {
+ 	struct uv_systab *tab = uv_systab;
+ 	s64 ret;
+@@ -51,6 +52,19 @@ s64 uv_bios_call(enum uv_bios_cmd which,
+ 
+ 	return ret;
+ }
++
++s64 uv_bios_call(enum uv_bios_cmd which, u64 a1, u64 a2, u64 a3, u64 a4, u64 a5)
++{
++	s64 ret;
++
++	if (down_interruptible(&__efi_uv_runtime_lock))
++		return BIOS_STATUS_ABORT;
++
++	ret = __uv_bios_call(which, a1, a2, a3, a4, a5);
++	up(&__efi_uv_runtime_lock);
++
++	return ret;
++}
+ EXPORT_SYMBOL_GPL(uv_bios_call);
+ 
+ s64 uv_bios_call_irqsave(enum uv_bios_cmd which, u64 a1, u64 a2, u64 a3,
+@@ -59,10 +73,15 @@ s64 uv_bios_call_irqsave(enum uv_bios_cm
+ 	unsigned long bios_flags;
+ 	s64 ret;
+ 
++	if (down_interruptible(&__efi_uv_runtime_lock))
++		return BIOS_STATUS_ABORT;
++
+ 	local_irq_save(bios_flags);
+-	ret = uv_bios_call(which, a1, a2, a3, a4, a5);
++	ret = __uv_bios_call(which, a1, a2, a3, a4, a5);
+ 	local_irq_restore(bios_flags);
+ 
++	up(&__efi_uv_runtime_lock);
++
+ 	return ret;
+ }
+ 
+--- a/drivers/firmware/efi/runtime-wrappers.c
++++ b/drivers/firmware/efi/runtime-wrappers.c
+@@ -147,6 +147,13 @@ void efi_call_virt_check_flags(unsigned
+ static DEFINE_SEMAPHORE(efi_runtime_lock);
+ 
+ /*
++ * Expose the EFI runtime lock to the UV platform
++ */
++#ifdef CONFIG_X86_UV
++extern struct semaphore __efi_uv_runtime_lock __alias(efi_runtime_lock);
++#endif
++
++/*
+  * Calls the appropriate efi_runtime_service() with the appropriate
+  * arguments.
+  *
