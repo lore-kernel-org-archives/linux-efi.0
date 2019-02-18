@@ -1,19 +1,19 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.19 74/85] x86/platform/UV: Use efi_runtime_lock to serialise BIOS calls
-Date: Mon, 18 Feb 2019 14:43:40 +0100
-Message-ID: <20190218133507.026566605@linuxfoundation.org>
-References: <20190218133459.758004711@linuxfoundation.org>
+Subject: [PATCH 4.9 47/58] x86/platform/UV: Use efi_runtime_lock to serialise BIOS calls
+Date: Mon, 18 Feb 2019 14:44:08 +0100
+Message-ID: <20190218133512.176790600@linuxfoundation.org>
+References: <20190218133508.567416115@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20190218133459.758004711@linuxfoundation.org>
-Sender: stable-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190218133508.567416115@linuxfoundation.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Hedi Berriche <hedi.berriche@hpe.com>, Borislav Petkov <bp@suse.de>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Russ Anderson <rja@hpe.com>, Dimitri Sivanich <sivanich@hpe.com>, Mike Travis <mike.travis@hpe.com>, Andy Shevchenko <andy@infradead.org>, Bhupesh Sharma <bhsharma@redhat.com>, Darren Hart <dvhart@infradead.org>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, linux-efi <linux-efi@vger.kernel.org>, platform-driver-x86@vger.kernel.org, Steve Wahl <steve.wahl@hpe.com>, Thomas Gleixner <tglx@linutronix.de>, x86-ml <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-4.19-stable review patch.  If anyone has any objections, please let me know.
+4.9-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
@@ -124,8 +124,8 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
  
 --- a/drivers/firmware/efi/runtime-wrappers.c
 +++ b/drivers/firmware/efi/runtime-wrappers.c
-@@ -173,6 +173,13 @@ void efi_call_virt_check_flags(unsigned
- static DEFINE_SEMAPHORE(efi_runtime_lock);
+@@ -50,6 +50,13 @@ void efi_call_virt_check_flags(unsigned
+ }
  
  /*
 + * Expose the EFI runtime lock to the UV platform
@@ -135,6 +135,6 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 +#endif
 +
 +/*
-  * Calls the appropriate efi_runtime_service() with the appropriate
-  * arguments.
-  *
+  * According to section 7.1 of the UEFI spec, Runtime Services are not fully
+  * reentrant, and there are particular combinations of calls that need to be
+  * serialized. (source: UEFI Specification v2.4A)
