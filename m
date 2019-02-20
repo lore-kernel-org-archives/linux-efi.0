@@ -1,28 +1,24 @@
-From: Borislav Petkov <bp@alien8.de>
+From: "Rafael J. Wysocki" <rjw@rjwysocki.net>
 Subject: Re: [PATCH v2 0/2] Fix crash in cper_estatus_check()
-Date: Tue, 19 Feb 2019 14:50:04 +0100
-Message-ID: <20190219135004.GC19514@zn.tnic>
-References: <20190128100424.30278-1-ross.lagerwall@citrix.com>
- <2534482.fmfRlZkPUo@aspire.rjw.lan>
+Date: Wed, 20 Feb 2019 10:34:16 +0100
+Message-ID: <1984226.rhZVaWBjWf@aspire.rjw.lan>
+References: <20190128100424.30278-1-ross.lagerwall@citrix.com> <2534482.fmfRlZkPUo@aspire.rjw.lan> <20190219135004.GC19514@zn.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <2534482.fmfRlZkPUo@aspire.rjw.lan>
+In-Reply-To: <20190219135004.GC19514@zn.tnic>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Rafael J. Wysocki" <rjw@rjwysocki.net>
-Cc: Ross Lagerwall <ross.lagerwall@citrix.com>, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, Len Brown <lenb@kernel.org>, Tony Luck <tony.luck@intel.com>, Huang Ying <ying.huang@intel.com>
+To: Borislav Petkov <bp@alien8.de>, Ross Lagerwall <ross.lagerwall@citrix.com>
+Cc: linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, Len Brown <lenb@kernel.org>, Tony Luck <tony.luck@intel.com>, Huang Ying <ying.huang@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Feb 19, 2019 at 11:00:49AM +0100, Rafael J. Wysocki wrote:
-> Boris, any comments here?
+On Tuesday, February 19, 2019 2:50:04 PM CET Borislav Petkov wrote:
+> On Tue, Feb 19, 2019 at 11:00:49AM +0100, Rafael J. Wysocki wrote:
+> > Boris, any comments here?
+> 
+> For both:
+> 
+> Acked-by: Borislav Petkov <bp@suse.de>
 
-For both:
-
-Acked-by: Borislav Petkov <bp@suse.de>
-
--- 
-Regards/Gruss,
-    Boris.
-
-Good mailing practices for 400: avoid top-posting and trim the reply.
+Both applied, thanks!
