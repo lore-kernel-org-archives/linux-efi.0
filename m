@@ -1,101 +1,143 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: linux-next: Tree for Feb 20
-Date: Thu, 21 Feb 2019 10:12:37 +0100
-Message-ID: <CAKv+Gu8MWECBMgvQhLXpYkn6GQBXpGEo93EdjXcTxMsjCicaDQ@mail.gmail.com>
-References: <20190220184341.73bd2084@canb.auug.org.au> <1114b964-8ff8-5632-64d4-e94a9160b998@hisilicon.com>
- <20190220095252.GA9089@linux.intel.com> <20190220095806.GB9089@linux.intel.com>
- <CAKv+Gu8G5eWeAdCB28xa=16ANFd2he9WPSztgXYwYRkhPfpEyA@mail.gmail.com>
- <aaac08b0-6366-7b63-d6a7-eea6630ce169@hisilicon.com> <CAMuHMdWfbPHv6WBMm7uDdPhbEB-m+bOcYzzYpRe4BfcSNR2pcQ@mail.gmail.com>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.20 22/32] arm64, mm, efi: Account for GICv3 LPI tables in static memblock reserve table
+Date: Thu, 21 Feb 2019 15:36:10 +0100
+Message-ID: <20190221125252.203198615@linuxfoundation.org>
+References: <20190221125250.855065214@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAMuHMdWfbPHv6WBMm7uDdPhbEB-m+bOcYzzYpRe4BfcSNR2pcQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Zhangshaokun <zhangshaokun@hisilicon.com>, Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>, Mimi Zohar <zohar@linux.ibm.com>, Stephen Rothwell <sfr@canb.auug.org.au>, Linux Next Mailing List <linux-next@vger.kernel.org>, Roberto Sassu <roberto.sassu@huawei.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-efi <linux-efi@vger.kernel.org>, linux-integrity <linux-integrity@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20190221125250.855065214@linuxfoundation.org>
+Sender: stable-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Mike Rapoport <rppt@linux.ibm.com>, Will Deacon <will.deacon@arm.com>, Marc Zyngier <marc.zyngier@arm.com>, Andrew Morton <akpm@linux-foundation.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 21 Feb 2019 at 09:04, Geert Uytterhoeven <geert@linux-m68k.org> wro=
-te:
->
-> Hi Shaokun,
->
-> On Thu, Feb 21, 2019 at 1:45 AM Zhangshaokun <zhangshaokun@hisilicon.com>=
- wrote:
-> > On 2019/2/20 18:05, Ard Biesheuvel wrote:
-> > > On Wed, 20 Feb 2019 at 10:58, Jarkko Sakkinen
-> > > <jarkko.sakkinen@linux.intel.com> wrote:
-> > >>
-> > >> On Wed, Feb 20, 2019 at 11:52:52AM +0200, Jarkko Sakkinen wrote:
-> > >>> On Wed, Feb 20, 2019 at 05:11:15PM +0800, Zhangshaokun wrote:
-> > >>>> There is a compiler failure on arm64 platform, as follow:
-> > >>>>
-> > >>>>   AS      arch/arm64/kvm/hyp.o
-> > >>>>   CC      kernel/trace/ring_buffer.o
-> > >>>> In file included from security/integrity/ima/ima_fs.c:30:0:
-> > >>>> security/integrity/ima/ima.h:176:7: error: redeclaration of enumer=
-ator =E2=80=98NONE=E2=80=99
-> > >>>>   hook(NONE)   \
-> > >>>>        ^
-> > >>>> security/integrity/ima/ima.h:188:34: note: in definition of macro =
-=E2=80=98__ima_hook_enumify=E2=80=99
-> > >>>>  #define __ima_hook_enumify(ENUM) ENUM,
-> > >>>>                                   ^
-> > >>>> security/integrity/ima/ima.h:191:2: note: in expansion of macro =
-=E2=80=98__ima_hooks=E2=80=99
-> > >>>>   __ima_hooks(__ima_hook_enumify)
-> > >>>>   ^
-> > >>>> In file included from ./arch/arm64/include/asm/acpi.h:15:0,
-> > >>>>                  from ./include/acpi/acpi_io.h:7,
-> > >>>>                  from ./include/linux/acpi.h:47,
-> > >>>>                  from ./include/linux/tpm.h:26,
-> > >>>>                  from security/integrity/ima/ima.h:25,
-> > >>>>                  from security/integrity/ima/ima_fs.c:30:
-> > >>>> ./include/linux/efi.h:1716:2: note: previous definition of =E2=80=
-=98NONE=E2=80=99 was here
-> > >>>>   NONE,
-> > >>>>   ^
-> > >>>> scripts/Makefile.build:276: recipe for target 'security/integrity/=
-ima/ima_fs.o' failed
-> > >>>> make[3]: *** [security/integrity/ima/ima_fs.o] Error 1
-> > >>>>
-> > >>>> I dug it and it is the commit 901615cb916d ("tpm: move tpm_chip de=
-finition to include/linux/tpm.h")
-> > >>>
-> > >>> This results from a new include in tpm.h:
-> > >>>
-> > >>>   #include <linux/acpi.h>
-> > >>>
-> > >>> Must be fixed either in include/linux/efi.h or security/integrity/i=
-ma.h as
-> > >>> those files have a name collision. Makes me wonder why neither has =
-taken
-> > >>> care of prefixing the constants properly.
-> > >>
-> > >> Preferably both subsystems should be fixed with proper 'EFI_' and 'I=
-MA_'
-> > >> prefixes. Defining a constant named as NONE in a non-generic subsyst=
-em
-> > >> (e.g. not part of the core data structures of Linux) and especially
-> > >> exporting it to include/linux is not too well considered act.
-> > >>
-> > >
-> > > Fixes for this have already been proposed, and should appear in -next=
- shortly
-> > >
-> > > The EFI one is here
-> > > https://mail.google.com/mail/u/0/#label/linux-efi/FMfcgxwBVgrQRjglPkW=
-RqRqVclGgVDnB
-> > >
-> >
-> > Because of no privilege, the website is denied for me. Anyway, it's nic=
-e to have been fixed.
->
-> Looks like Ard posted a link to a label in his personal gmail mailbox?
->
+4.20-stable review patch.  If anyone has any objections, please let me know.
 
-Silly me.
+------------------
 
-https://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git/commit/?h=3Defi=
-/core&id=3D5c418dc789a3898717ebf2caa5716ba91a7150b2
+Commit 8a5b403d71affa098009cc3dff1b2c45113021ad upstream.
+
+In the irqchip and EFI code, we have what basically amounts to a quirk
+to work around a peculiarity in the GICv3 architecture, which permits
+the system memory address of LPI tables to be programmable only once
+after a CPU reset. This means kexec kernels must use the same memory
+as the first kernel, and thus ensure that this memory has not been
+given out for other purposes by the time the ITS init code runs, which
+is not very early for secondary CPUs.
+
+On systems with many CPUs, these reservations could overflow the
+memblock reservation table, and this was addressed in commit:
+
+  eff896288872 ("efi/arm: Defer persistent reservations until after paging_init()")
+
+However, this turns out to have made things worse, since the allocation
+of page tables and heap space for the resized memblock reservation table
+itself may overwrite the regions we are attempting to reserve, which may
+cause all kinds of corruption, also considering that the ITS will still
+be poking bits into that memory in response to incoming MSIs.
+
+So instead, let's grow the static memblock reservation table on such
+systems so it can accommodate these reservations at an earlier time.
+This will permit us to revert the above commit in a subsequent patch.
+
+[ mingo: Minor cleanups. ]
+
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Acked-by: Mike Rapoport <rppt@linux.ibm.com>
+Acked-by: Will Deacon <will.deacon@arm.com>
+Acked-by: Marc Zyngier <marc.zyngier@arm.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-arm-kernel@lists.infradead.org
+Cc: linux-efi@vger.kernel.org
+Link: http://lkml.kernel.org/r/20190215123333.21209-2-ard.biesheuvel@linaro.org
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+[ ardb: Double the size of the slack to account for the lack of an
+        optimization that was introduced in mainline after the release
+        of v4.20. ]
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ arch/arm64/include/asm/memory.h | 11 +++++++++++
+ include/linux/memblock.h        |  3 ---
+ mm/memblock.c                   | 11 +++++++++--
+ 3 files changed, 20 insertions(+), 5 deletions(-)
+
+diff --git a/arch/arm64/include/asm/memory.h b/arch/arm64/include/asm/memory.h
+index 778af0b7f7fd5..c67081301035f 100644
+--- a/arch/arm64/include/asm/memory.h
++++ b/arch/arm64/include/asm/memory.h
+@@ -303,6 +303,17 @@ static inline void *phys_to_virt(phys_addr_t x)
+ #define virt_addr_valid(kaddr)		(_virt_addr_is_linear(kaddr) && \
+ 					 _virt_addr_valid(kaddr))
+ 
++/*
++ * Given that the GIC architecture permits ITS implementations that can only be
++ * configured with a LPI table address once, GICv3 systems with many CPUs may
++ * end up reserving a lot of different regions after a kexec for their LPI
++ * tables (one per CPU), as we are forced to reuse the same memory after kexec
++ * (and thus reserve it persistently with EFI beforehand)
++ */
++#if defined(CONFIG_EFI) && defined(CONFIG_ARM_GIC_V3_ITS)
++# define INIT_MEMBLOCK_RESERVED_REGIONS	(INIT_MEMBLOCK_REGIONS + 2*(NR_CPUS + 1))
++#endif
++
+ #include <asm-generic/memory_model.h>
+ 
+ #endif
+diff --git a/include/linux/memblock.h b/include/linux/memblock.h
+index 3ef3086ed52f9..ecff64ff365d4 100644
+--- a/include/linux/memblock.h
++++ b/include/linux/memblock.h
+@@ -29,9 +29,6 @@ extern unsigned long max_pfn;
+  */
+ extern unsigned long long max_possible_pfn;
+ 
+-#define INIT_MEMBLOCK_REGIONS	128
+-#define INIT_PHYSMEM_REGIONS	4
+-
+ /**
+  * enum memblock_flags - definition of memory region attributes
+  * @MEMBLOCK_NONE: no special request
+diff --git a/mm/memblock.c b/mm/memblock.c
+index f45a049532fea..74ac4f89018ab 100644
+--- a/mm/memblock.c
++++ b/mm/memblock.c
+@@ -26,6 +26,13 @@
+ 
+ #include "internal.h"
+ 
++#define INIT_MEMBLOCK_REGIONS			128
++#define INIT_PHYSMEM_REGIONS			4
++
++#ifndef INIT_MEMBLOCK_RESERVED_REGIONS
++# define INIT_MEMBLOCK_RESERVED_REGIONS		INIT_MEMBLOCK_REGIONS
++#endif
++
+ /**
+  * DOC: memblock overview
+  *
+@@ -92,7 +99,7 @@ unsigned long max_pfn;
+ unsigned long long max_possible_pfn;
+ 
+ static struct memblock_region memblock_memory_init_regions[INIT_MEMBLOCK_REGIONS] __initdata_memblock;
+-static struct memblock_region memblock_reserved_init_regions[INIT_MEMBLOCK_REGIONS] __initdata_memblock;
++static struct memblock_region memblock_reserved_init_regions[INIT_MEMBLOCK_RESERVED_REGIONS] __initdata_memblock;
+ #ifdef CONFIG_HAVE_MEMBLOCK_PHYS_MAP
+ static struct memblock_region memblock_physmem_init_regions[INIT_PHYSMEM_REGIONS] __initdata_memblock;
+ #endif
+@@ -105,7 +112,7 @@ struct memblock memblock __initdata_memblock = {
+ 
+ 	.reserved.regions	= memblock_reserved_init_regions,
+ 	.reserved.cnt		= 1,	/* empty dummy entry */
+-	.reserved.max		= INIT_MEMBLOCK_REGIONS,
++	.reserved.max		= INIT_MEMBLOCK_RESERVED_REGIONS,
+ 	.reserved.name		= "reserved",
+ 
+ #ifdef CONFIG_HAVE_MEMBLOCK_PHYS_MAP
+-- 
+2.19.1
