@@ -1,105 +1,31 @@
-From: Matthew Garrett <matthewgarrett@google.com>
-Subject: [PATCH V5 3/4] tpm: Append the final event log to the TPM event log
-Date: Wed, 27 Feb 2019 12:26:57 -0800
-Message-ID: <20190227202658.197113-4-matthewgarrett@google.com>
-References: <20190227202658.197113-1-matthewgarrett@google.com>
+From: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
+Subject: Re: [PATCH V4 2/4] tpm: Reserve the TPM final events table
+Date: Thu, 28 Feb 2019 14:38:48 +0200
+Message-ID: <20190228123848.GD17109@linux.intel.com>
+References: <20190222202606.160816-1-matthewgarrett@google.com>
+ <20190222202606.160816-3-matthewgarrett@google.com>
+ <20190227140259.GA17106@linux.intel.com>
+ <CACdnJuucWezNf3jki5wN2XJ6wsN_uMSxQuyrekr9F-3aJJE4kA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190227202658.197113-1-matthewgarrett@google.com>
+Content-Disposition: inline
+In-Reply-To: <CACdnJuucWezNf3jki5wN2XJ6wsN_uMSxQuyrekr9F-3aJJE4kA@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-integrity@vger.kernel.org
-Cc: peterhuewe@gmx.de, jarkko.sakkinen@linux.intel.com, jgg@ziepe.ca, roberto.sassu@huawei.com, linux-efi@vger.kernel.org, linux-security-module@vger.kernel.org, linux-kernel@vger.kernel.org, tweek@google.com, Matthew Garrett <mjg59@google.com>
+To: Matthew Garrett <mjg59@google.com>
+Cc: linux-integrity <linux-integrity@vger.kernel.org>, Peter Huewe <peterhuewe@gmx.de>, Jason Gunthorpe <jgg@ziepe.ca>, Roberto Sassu <roberto.sassu@huawei.com>, linux-efi <linux-efi@vger.kernel.org>, LSM List <linux-security-module@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, =?iso-8859-1?Q?Thi=E9baud?= Weksteen <tweek@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Matthew Garrett <mjg59@google.com>
+On Wed, Feb 27, 2019 at 11:57:09AM -0800, Matthew Garrett wrote:
+> On Wed, Feb 27, 2019 at 6:03 AM Jarkko Sakkinen
+> <jarkko.sakkinen@linux.intel.com> wrote:
+> > My guess is that your patches are based a later 5.0-rcX. Unfortunately I
+> > cannot update my master at this point because my 5.1 PR was taken to
+> > security tree and rebasing would change the commit IDs of 5.1 content
+> > because security/next-general does not yet contain those patches.
+> 
+> Bother. I'll rebase against your tree.
 
-Any events that are logged after GetEventsLog() is called are logged to
-the EFI Final Events table. These events are defined as being in the
-crypto agile log format, so we can just append them directly to the
-existing log if it's in the same format. In theory we can also construct
-old-style SHA1 log entries for devices that only return logs in that
-format, but EDK2 doesn't generate the final event log in that case so
-it doesn't seem worth it at the moment.
+Thanks!
 
-Signed-off-by: Matthew Garrett <mjg59@google.com>
----
- drivers/char/tpm/eventlog/efi.c | 50 ++++++++++++++++++++++++++++-----
- 1 file changed, 43 insertions(+), 7 deletions(-)
-
-diff --git a/drivers/char/tpm/eventlog/efi.c b/drivers/char/tpm/eventlog/efi.c
-index 3e673ab22cb4..9179cf6bdee9 100644
---- a/drivers/char/tpm/eventlog/efi.c
-+++ b/drivers/char/tpm/eventlog/efi.c
-@@ -21,10 +21,13 @@
- int tpm_read_log_efi(struct tpm_chip *chip)
- {
- 
-+	struct efi_tcg2_final_events_table *final_tbl = NULL;
- 	struct linux_efi_tpm_eventlog *log_tbl;
- 	struct tpm_bios_log *log;
- 	u32 log_size;
- 	u8 tpm_log_version;
-+	void *tmp;
-+	int ret;
- 
- 	if (!(chip->flags & TPM_CHIP_FLAG_TPM2))
- 		return -ENODEV;
-@@ -52,15 +55,48 @@ int tpm_read_log_efi(struct tpm_chip *chip)
- 
- 	/* malloc EventLog space */
- 	log->bios_event_log = kmemdup(log_tbl->log, log_size, GFP_KERNEL);
--	if (!log->bios_event_log)
--		goto err_memunmap;
--	log->bios_event_log_end = log->bios_event_log + log_size;
-+	if (!log->bios_event_log) {
-+		ret = -ENOMEM;
-+		goto out;
-+	}
- 
-+	log->bios_event_log_end = log->bios_event_log + log_size;
- 	tpm_log_version = log_tbl->version;
--	memunmap(log_tbl);
--	return tpm_log_version;
- 
--err_memunmap:
-+	ret = tpm_log_version;
-+
-+	if (efi.tpm_final_log == EFI_INVALID_TABLE_ADDR ||
-+	    efi_tpm_final_log_size == 0 ||
-+	    tpm_log_version != EFI_TCG2_EVENT_LOG_FORMAT_TCG_2)
-+		goto out;
-+
-+	final_tbl = memremap(efi.tpm_final_log,
-+			     sizeof(*final_tbl) + efi_tpm_final_log_size,
-+			     MEMREMAP_WB);
-+	if (!final_tbl) {
-+		pr_err("Could not map UEFI TPM final log\n");
-+		kfree(log->bios_event_log);
-+		ret = -ENOMEM;
-+		goto out;
-+	}
-+
-+	tmp = krealloc(log->bios_event_log,
-+		       log_size + efi_tpm_final_log_size,
-+		       GFP_KERNEL);
-+	if (!tmp) {
-+		kfree(log->bios_event_log);
-+		ret = -ENOMEM;
-+		goto out;
-+	}
-+
-+	log->bios_event_log = tmp;
-+	memcpy((void *)log->bios_event_log + log_size,
-+	       final_tbl->events, efi_tpm_final_log_size);
-+	log->bios_event_log_end = log->bios_event_log +
-+		log_size + efi_tpm_final_log_size;
-+
-+out:
-+	memunmap(final_tbl);
- 	memunmap(log_tbl);
--	return -ENOMEM;
-+	return ret;
- }
--- 
-2.21.0.352.gf09ad66450-goog
+/Jarkko
