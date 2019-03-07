@@ -1,24 +1,22 @@
-From: pr-tracker-bot@kernel.org
-Subject: Re: [GIT PULL] EFI changes for v5.1
-Date: Wed, 06 Mar 2019 18:30:11 +0000
-Message-ID: <155189701154.14612.16713548884736621197.pr-tracker-bot@kernel.org>
-References: <20190305122038.GA2472@gmail.com>
+From: Matthew Garrett <mjg59@google.com>
+Subject: Re: [PATCH 3/3] x86/ima: retry detecting secure boot mode
+Date: Thu, 7 Mar 2019 14:28:52 -0800
+Message-ID: <CACdnJusqHZ1OLJD1baN=fXK9KE+bSqzB4OUbmLXH5-qZNrQXJg@mail.gmail.com>
+References: <1542657371-7019-1-git-send-email-zohar@linux.ibm.com> <1542657371-7019-4-git-send-email-zohar@linux.ibm.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190305122038.GA2472@gmail.com>
+In-Reply-To: <1542657371-7019-4-git-send-email-zohar@linux.ibm.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Borislav Petkov <bp@alien8.de>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Andrew Morton <akpm@linux-foundation.org>
+To: Mimi Zohar <zohar@linux.ibm.com>
+Cc: linux-integrity <linux-integrity@vger.kernel.org>, LSM List <linux-security-module@vger.kernel.org>, linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, David Howells <dhowells@redhat.com>, jforbes@redhat.com, Seth Forshee <seth.forshee@canonical.com>, kexec@lists.infradead.org, Nayna Jain <nayna@linux.ibm.com>
 List-Id: linux-efi@vger.kernel.org
 
-The pull request you sent on Tue, 5 Mar 2019 13:20:38 +0100:
+On Mon, Nov 19, 2018 at 11:57 AM Mimi Zohar <zohar@linux.ibm.com> wrote:
+>
+> The secure boot mode may not be detected on boot for some reason (eg.
+> buggy firmware).  This patch attempts one more time to detect the
+> secure boot mode.
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git efi-core-for-linus
-
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/c8f5ed6ef972ed4fd10b0c2e2baec3b6803d3c73
-
-Thank you!
-
--- 
-Deet-doot-dot, I am a bot.
-https://korg.wiki.kernel.org/userdoc/prtracker
+Do we have cases where this has actually been seen? I'm not sure what
+the circumstances are that would result in this behaviour.
