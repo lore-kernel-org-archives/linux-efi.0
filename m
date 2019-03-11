@@ -1,28 +1,33 @@
-From: Matthew Garrett <mjg59@google.com>
-Subject: Re: [PATCH 3/3] x86/ima: retry detecting secure boot mode
-Date: Fri, 8 Mar 2019 12:22:46 -0800
-Message-ID: <CACdnJuso1o=fib+fUuY_f2ibJKD5N=kr_BrAtgu_srHCcRLKig@mail.gmail.com>
-References: <1542657371-7019-1-git-send-email-zohar@linux.ibm.com>
- <1542657371-7019-4-git-send-email-zohar@linux.ibm.com> <CACdnJusqHZ1OLJD1baN=fXK9KE+bSqzB4OUbmLXH5-qZNrQXJg@mail.gmail.com>
- <CAFbkSA39RwB+E4SaG_ueu-_B=y7JytEYKw1+eXNQ_eCuMfnv=g@mail.gmail.com>
- <CACdnJuuHmK0qKjMxxonRYDUCatxqs930QGNQmREhRjimpNKzYw@mail.gmail.com>
- <1551998897.31706.461.camel@linux.ibm.com> <CACdnJusiLSCyqx7NX5bkpFr2N5YjBt_h3miOgkbey-Zndc3+Kg@mail.gmail.com>
- <1552052377.4134.23.camel@linux.ibm.com> <CACdnJut3Y7CogvgtNsEcrEtA1WOxSb9OWP_wZ=3xNgCft2oeDw@mail.gmail.com>
- <1552070598.4134.51.camel@linux.ibm.com>
+From: Hedi Berriche <hedi.berriche@hpe.com>
+Subject: Please revert 7212e37cbdf9 from 4.4-stable
+Date: Mon, 11 Mar 2019 13:48:14 +0000
+Message-ID: <20190311134814.GC30367@sarge.linuxathome.me>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8; format=flowed
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1552070598.4134.51.camel@linux.ibm.com>
+Content-Disposition: inline
 Sender: linux-kernel-owner@vger.kernel.org
-To: Mimi Zohar <zohar@linux.ibm.com>
-Cc: Justin Forbes <jforbes@redhat.com>, linux-integrity <linux-integrity@vger.kernel.org>, LSM List <linux-security-module@vger.kernel.org>, linux-efi <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, David Howells <dhowells@redhat.com>, Seth Forshee <seth.forshee@canonical.com>, kexec@lists.infradead.org, Nayna Jain <nayna@linux.ibm.com>
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: linux-kernel@vger.kernel.org, stable@vger.kernel.org, Hedi Berriche <hedi.berriche@hpe.com>, Borislav Petkov <bp@suse.de>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Russ Anderson <rja@hpe.com>, Dimitri Sivanich <sivanich@hpe.com>, Steve Wahl <steve.wahl@hpe.com>, Mike Travis <mike.travis@hpe.com>, Andy Shevchenko <andy@infradead.org>, Bhupesh Sharma <bhsharma@redhat.com>, Darren Hart <dvhart@infradead.org>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, linux-efi <linux-efi@vger.kernel.org>, platform-driver-x86@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, x86-ml <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Mar 8, 2019 at 10:43 AM Mimi Zohar <zohar@linux.ibm.com> wrote:
-> FYI, efi_printk() works before exit_boot(), but not afterwards.  The
-> system hangs.
+Hi Greg,
 
-efi_printk() uses boot services to print, so that's not unexpected :)
-It would probably be sensible to return an error rather than crash,
-though=E2=80=A6
+Could you please revert
+
+	7212e37cbdf9 x86/platform/UV: Use efi_runtime_lock to serialise BIOS calls
+
+from 4.4-stable?
+
+In 4.4-stable efi_runtime_lock as defined in drivers/firmware/efi/runtime-wrappers.c
+is a spinlock (given it predates commit dce48e351c0d) and commit
+
+	f331e766c4be x86/platform/UV: Use efi_runtime_lock to serialise BIOS calls
+
+which 7212e37cbdf9 is a backport of, needs it to be a semaphore.
+
+Cheers,
+Hedi.
+-- 
+Be careful of reading health books, you might die of a misprint.
+	-- Mark Twain
