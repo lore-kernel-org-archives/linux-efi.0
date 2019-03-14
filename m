@@ -1,36 +1,29 @@
-From: Sasha Levin <sashal@kernel.org>
-Subject: Re: Please revert 7212e37cbdf9 from 4.4-stable
-Date: Mon, 11 Mar 2019 20:29:44 -0400
-Message-ID: <20190312002944.GL158926@sasha-vm>
-References: <20190311134814.GC30367@sarge.linuxathome.me>
+From: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
+Subject: Re: Add support for TCG2 log format on UEFI systems
+Date: Thu, 14 Mar 2019 11:35:15 +0200
+Message-ID: <20190314093515.GA11165@linux.intel.com>
+References: <20190227202658.197113-1-matthewgarrett@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii; format=flowed
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20190311134814.GC30367@sarge.linuxathome.me>
+In-Reply-To: <20190227202658.197113-1-matthewgarrett@google.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-kernel@vger.kernel.org, stable@vger.kernel.org, Borislav Petkov <bp@suse.de>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Russ Anderson <rja@hpe.com>, Dimitri Sivanich <sivanich@hpe.com>, Steve Wahl <steve.wahl@hpe.com>, Mike Travis <mike.travis@hpe.com>, Andy Shevchenko <andy@infradead.org>, Bhupesh Sharma <bhsharma@redhat.com>, Darren Hart <dvhart@infradead.org>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, linux-efi <linux-efi@vger.kernel.org>, platform-driver-x86@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, x86-ml <x86@kernel.org>
+To: Matthew Garrett <matthewgarrett@google.com>
+Cc: linux-integrity@vger.kernel.org, peterhuewe@gmx.de, jgg@ziepe.ca, roberto.sassu@huawei.com, linux-efi@vger.kernel.org, linux-security-module@vger.kernel.org, linux-kernel@vger.kernel.org, tweek@google.com
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Mar 11, 2019 at 01:48:14PM +0000, Hedi Berriche wrote:
->Hi Greg,
->
->Could you please revert
->
->	7212e37cbdf9 x86/platform/UV: Use efi_runtime_lock to serialise BIOS calls
->
->from 4.4-stable?
->
->In 4.4-stable efi_runtime_lock as defined in drivers/firmware/efi/runtime-wrappers.c
->is a spinlock (given it predates commit dce48e351c0d) and commit
->
->	f331e766c4be x86/platform/UV: Use efi_runtime_lock to serialise BIOS calls
->
->which 7212e37cbdf9 is a backport of, needs it to be a semaphore.
+On Wed, Feb 27, 2019 at 12:26:54PM -0800, Matthew Garrett wrote:
+> Identical to V4, but based on tpmdd-next
 
-I've queued up the revert. I'm not sure how it ended up on 4.4 to begin
-with; sorry about that and thank you.
+This is not found /sys/kernel/security/tpm0/ascii_bios_measurements
 
---
-Thanks,
-Sasha
+But still
+
+[    0.000000] efi:  ACPI 2.0=0x69ca2000  ACPI=0x69ca2000  TPMFinalLog=0x69ce4000  SMBIOS=0x69f63000  SMBIOS 3.0=0x69f62000  ESRT=0x69f3e818  MEMATTR=0x63448018
+
+Tried this with too machines now.
+
+I wonder if anyone else has had success...
+
+/Jarkko
