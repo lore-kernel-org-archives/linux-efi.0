@@ -1,78 +1,293 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.0 186/262] efi/memattr: Don't bail on zero VA if it equals the region's PA
-Date: Wed, 27 Mar 2019 14:00:41 -0400
-Message-ID: <20190327180158.10245-186-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.0 134/262] efi: Fix build error due to enum collision between efi.h and ima.h
+Date: Wed, 27 Mar 2019 13:59:49 -0400
+Message-ID: <20190327180158.10245-134-sashal@kernel.org>
 References: <20190327180158.10245-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Return-path: <stable-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190327180158.10245-1-sashal@kernel.org>
-Sender: stable-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, AKASHI Takahiro <takahiro.akashi@linaro.org>, Alexander Graf <agraf@suse.de>, Bjorn Andersson <bjorn.andersson@linaro.org>, Borislav Petkov <bp@alien8.de>, Heinrich Schuchardt <xypron.glpk@gmx.de>, Jeffrey Hugo <jhugo@codeaurora.org>, Lee Jones <lee.jones@linaro.org>, Leif Lindholm <leif.lindholm@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Jones <pjones@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.org>
+Cc: Anders Roxell <anders.roxell@linaro.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.org>, platform-driver-x86@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+From: Anders Roxell <anders.roxell@linaro.org>
 
-[ Upstream commit 5de0fef0230f3c8d75cff450a71740a7bf2db866 ]
+[ Upstream commit 5c418dc789a3898717ebf2caa5716ba91a7150b2 ]
 
-The EFI memory attributes code cross-references the EFI memory map with
-the more granular EFI memory attributes table to ensure that they are in
-sync before applying the strict permissions to the regions it describes.
+The following commit:
 
-Since we always install virtual mappings for the EFI runtime regions to
-which these strict permissions apply, we currently perform a sanity check
-on the EFI memory descriptor, and ensure that the EFI_MEMORY_RUNTIME bit
-is set, and that the virtual address has been assigned.
+  a893ea15d764 ("tpm: move tpm_chip definition to include/linux/tpm.h")
 
-However, in cases where a runtime region exists at physical address 0x0,
-and the virtual mapping equals the physical mapping, e.g., when running
-in mixed mode on x86, we encounter a memory descriptor with the runtime
-attribute and virtual address 0x0, and incorrectly draw the conclusion
-that a runtime region exists for which no virtual mapping was installed,
-and give up altogether. The consequence of this is that firmware mappings
-retain their read-write-execute permissions, making the system more
-vulnerable to attacks.
+introduced a build error when both IMA and EFI are enabled:
 
-So let's only bail if the virtual address of 0x0 has been assigned to a
-physical region that does not reside at address 0x0.
+    In file included from ../security/integrity/ima/ima_fs.c:30:
+    ../security/integrity/ima/ima.h:176:7: error: redeclaration of enumerator "NONE"
 
+What happens is that both headers (ima.h and efi.h) defines the same
+'NONE' constant, and it broke when they started getting included from
+the same file:
+
+Rework to prefix the EFI enum with 'EFI_*'.
+
+Signed-off-by: Anders Roxell <anders.roxell@linaro.org>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Acked-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: AKASHI Takahiro <takahiro.akashi@linaro.org>
-Cc: Alexander Graf <agraf@suse.de>
-Cc: Bjorn Andersson <bjorn.andersson@linaro.org>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Heinrich Schuchardt <xypron.glpk@gmx.de>
-Cc: Jeffrey Hugo <jhugo@codeaurora.org>
-Cc: Lee Jones <lee.jones@linaro.org>
-Cc: Leif Lindholm <leif.lindholm@linaro.org>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Peter Jones <pjones@redhat.com>
 Cc: Peter Zijlstra <peterz@infradead.org>
 Cc: Thomas Gleixner <tglx@linutronix.de>
 Cc: linux-efi@vger.kernel.org
-Fixes: 10f0d2f577053 ("efi: Implement generic support for the Memory ...")
-Link: http://lkml.kernel.org/r/20190202094119.13230-4-ard.biesheuvel@linaro.org
+Link: http://lkml.kernel.org/r/20190215165551.12220-2-ard.biesheuvel@linaro.org
+[ Cleaned up the changelog a bit. ]
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/firmware/efi/memattr.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ arch/x86/platform/efi/quirks.c          |  4 +--
+ drivers/firmware/efi/runtime-wrappers.c | 48 ++++++++++++-------------
+ include/linux/efi.h                     | 26 +++++++-------
+ 3 files changed, 39 insertions(+), 39 deletions(-)
 
-diff --git a/drivers/firmware/efi/memattr.c b/drivers/firmware/efi/memattr.c
-index 8986757eafaf..aac972b056d9 100644
---- a/drivers/firmware/efi/memattr.c
-+++ b/drivers/firmware/efi/memattr.c
-@@ -94,7 +94,7 @@ static bool entry_is_valid(const efi_memory_desc_t *in, efi_memory_desc_t *out)
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index 17456a1d3f04..6c571ae86947 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -717,7 +717,7 @@ void efi_recover_from_page_fault(unsigned long phys_addr)
+ 	 * "efi_mm" cannot be used to check if the page fault had occurred
+ 	 * in the firmware context because efi=old_map doesn't use efi_pgd.
+ 	 */
+-	if (efi_rts_work.efi_rts_id == NONE)
++	if (efi_rts_work.efi_rts_id == EFI_NONE)
+ 		return;
  
- 		if (!(md->attribute & EFI_MEMORY_RUNTIME))
- 			continue;
--		if (md->virt_addr == 0) {
-+		if (md->virt_addr == 0 && md->phys_addr != 0) {
- 			/* no virtual mapping has been installed by the stub */
- 			break;
- 		}
+ 	/*
+@@ -742,7 +742,7 @@ void efi_recover_from_page_fault(unsigned long phys_addr)
+ 	 * because this case occurs *very* rarely and hence could be improved
+ 	 * on a need by basis.
+ 	 */
+-	if (efi_rts_work.efi_rts_id == RESET_SYSTEM) {
++	if (efi_rts_work.efi_rts_id == EFI_RESET_SYSTEM) {
+ 		pr_info("efi_reset_system() buggy! Reboot through BIOS\n");
+ 		machine_real_restart(MRR_BIOS);
+ 		return;
+diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
+index e2abfdb5cee6..698745c249e8 100644
+--- a/drivers/firmware/efi/runtime-wrappers.c
++++ b/drivers/firmware/efi/runtime-wrappers.c
+@@ -85,7 +85,7 @@ struct efi_runtime_work efi_rts_work;
+ 		pr_err("Failed to queue work to efi_rts_wq.\n");	\
+ 									\
+ exit:									\
+-	efi_rts_work.efi_rts_id = NONE;					\
++	efi_rts_work.efi_rts_id = EFI_NONE;				\
+ 	efi_rts_work.status;						\
+ })
+ 
+@@ -175,50 +175,50 @@ static void efi_call_rts(struct work_struct *work)
+ 	arg5 = efi_rts_work.arg5;
+ 
+ 	switch (efi_rts_work.efi_rts_id) {
+-	case GET_TIME:
++	case EFI_GET_TIME:
+ 		status = efi_call_virt(get_time, (efi_time_t *)arg1,
+ 				       (efi_time_cap_t *)arg2);
+ 		break;
+-	case SET_TIME:
++	case EFI_SET_TIME:
+ 		status = efi_call_virt(set_time, (efi_time_t *)arg1);
+ 		break;
+-	case GET_WAKEUP_TIME:
++	case EFI_GET_WAKEUP_TIME:
+ 		status = efi_call_virt(get_wakeup_time, (efi_bool_t *)arg1,
+ 				       (efi_bool_t *)arg2, (efi_time_t *)arg3);
+ 		break;
+-	case SET_WAKEUP_TIME:
++	case EFI_SET_WAKEUP_TIME:
+ 		status = efi_call_virt(set_wakeup_time, *(efi_bool_t *)arg1,
+ 				       (efi_time_t *)arg2);
+ 		break;
+-	case GET_VARIABLE:
++	case EFI_GET_VARIABLE:
+ 		status = efi_call_virt(get_variable, (efi_char16_t *)arg1,
+ 				       (efi_guid_t *)arg2, (u32 *)arg3,
+ 				       (unsigned long *)arg4, (void *)arg5);
+ 		break;
+-	case GET_NEXT_VARIABLE:
++	case EFI_GET_NEXT_VARIABLE:
+ 		status = efi_call_virt(get_next_variable, (unsigned long *)arg1,
+ 				       (efi_char16_t *)arg2,
+ 				       (efi_guid_t *)arg3);
+ 		break;
+-	case SET_VARIABLE:
++	case EFI_SET_VARIABLE:
+ 		status = efi_call_virt(set_variable, (efi_char16_t *)arg1,
+ 				       (efi_guid_t *)arg2, *(u32 *)arg3,
+ 				       *(unsigned long *)arg4, (void *)arg5);
+ 		break;
+-	case QUERY_VARIABLE_INFO:
++	case EFI_QUERY_VARIABLE_INFO:
+ 		status = efi_call_virt(query_variable_info, *(u32 *)arg1,
+ 				       (u64 *)arg2, (u64 *)arg3, (u64 *)arg4);
+ 		break;
+-	case GET_NEXT_HIGH_MONO_COUNT:
++	case EFI_GET_NEXT_HIGH_MONO_COUNT:
+ 		status = efi_call_virt(get_next_high_mono_count, (u32 *)arg1);
+ 		break;
+-	case UPDATE_CAPSULE:
++	case EFI_UPDATE_CAPSULE:
+ 		status = efi_call_virt(update_capsule,
+ 				       (efi_capsule_header_t **)arg1,
+ 				       *(unsigned long *)arg2,
+ 				       *(unsigned long *)arg3);
+ 		break;
+-	case QUERY_CAPSULE_CAPS:
++	case EFI_QUERY_CAPSULE_CAPS:
+ 		status = efi_call_virt(query_capsule_caps,
+ 				       (efi_capsule_header_t **)arg1,
+ 				       *(unsigned long *)arg2, (u64 *)arg3,
+@@ -242,7 +242,7 @@ static efi_status_t virt_efi_get_time(efi_time_t *tm, efi_time_cap_t *tc)
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_queue_work(GET_TIME, tm, tc, NULL, NULL, NULL);
++	status = efi_queue_work(EFI_GET_TIME, tm, tc, NULL, NULL, NULL);
+ 	up(&efi_runtime_lock);
+ 	return status;
+ }
+@@ -253,7 +253,7 @@ static efi_status_t virt_efi_set_time(efi_time_t *tm)
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_queue_work(SET_TIME, tm, NULL, NULL, NULL, NULL);
++	status = efi_queue_work(EFI_SET_TIME, tm, NULL, NULL, NULL, NULL);
+ 	up(&efi_runtime_lock);
+ 	return status;
+ }
+@@ -266,7 +266,7 @@ static efi_status_t virt_efi_get_wakeup_time(efi_bool_t *enabled,
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_queue_work(GET_WAKEUP_TIME, enabled, pending, tm, NULL,
++	status = efi_queue_work(EFI_GET_WAKEUP_TIME, enabled, pending, tm, NULL,
+ 				NULL);
+ 	up(&efi_runtime_lock);
+ 	return status;
+@@ -278,7 +278,7 @@ static efi_status_t virt_efi_set_wakeup_time(efi_bool_t enabled, efi_time_t *tm)
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_queue_work(SET_WAKEUP_TIME, &enabled, tm, NULL, NULL,
++	status = efi_queue_work(EFI_SET_WAKEUP_TIME, &enabled, tm, NULL, NULL,
+ 				NULL);
+ 	up(&efi_runtime_lock);
+ 	return status;
+@@ -294,7 +294,7 @@ static efi_status_t virt_efi_get_variable(efi_char16_t *name,
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_queue_work(GET_VARIABLE, name, vendor, attr, data_size,
++	status = efi_queue_work(EFI_GET_VARIABLE, name, vendor, attr, data_size,
+ 				data);
+ 	up(&efi_runtime_lock);
+ 	return status;
+@@ -308,7 +308,7 @@ static efi_status_t virt_efi_get_next_variable(unsigned long *name_size,
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_queue_work(GET_NEXT_VARIABLE, name_size, name, vendor,
++	status = efi_queue_work(EFI_GET_NEXT_VARIABLE, name_size, name, vendor,
+ 				NULL, NULL);
+ 	up(&efi_runtime_lock);
+ 	return status;
+@@ -324,7 +324,7 @@ static efi_status_t virt_efi_set_variable(efi_char16_t *name,
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_queue_work(SET_VARIABLE, name, vendor, &attr, &data_size,
++	status = efi_queue_work(EFI_SET_VARIABLE, name, vendor, &attr, &data_size,
+ 				data);
+ 	up(&efi_runtime_lock);
+ 	return status;
+@@ -359,7 +359,7 @@ static efi_status_t virt_efi_query_variable_info(u32 attr,
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_queue_work(QUERY_VARIABLE_INFO, &attr, storage_space,
++	status = efi_queue_work(EFI_QUERY_VARIABLE_INFO, &attr, storage_space,
+ 				remaining_space, max_variable_size, NULL);
+ 	up(&efi_runtime_lock);
+ 	return status;
+@@ -391,7 +391,7 @@ static efi_status_t virt_efi_get_next_high_mono_count(u32 *count)
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_queue_work(GET_NEXT_HIGH_MONO_COUNT, count, NULL, NULL,
++	status = efi_queue_work(EFI_GET_NEXT_HIGH_MONO_COUNT, count, NULL, NULL,
+ 				NULL, NULL);
+ 	up(&efi_runtime_lock);
+ 	return status;
+@@ -407,7 +407,7 @@ static void virt_efi_reset_system(int reset_type,
+ 			"could not get exclusive access to the firmware\n");
+ 		return;
+ 	}
+-	efi_rts_work.efi_rts_id = RESET_SYSTEM;
++	efi_rts_work.efi_rts_id = EFI_RESET_SYSTEM;
+ 	__efi_call_virt(reset_system, reset_type, status, data_size, data);
+ 	up(&efi_runtime_lock);
+ }
+@@ -423,7 +423,7 @@ static efi_status_t virt_efi_update_capsule(efi_capsule_header_t **capsules,
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_queue_work(UPDATE_CAPSULE, capsules, &count, &sg_list,
++	status = efi_queue_work(EFI_UPDATE_CAPSULE, capsules, &count, &sg_list,
+ 				NULL, NULL);
+ 	up(&efi_runtime_lock);
+ 	return status;
+@@ -441,7 +441,7 @@ static efi_status_t virt_efi_query_capsule_caps(efi_capsule_header_t **capsules,
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_queue_work(QUERY_CAPSULE_CAPS, capsules, &count,
++	status = efi_queue_work(EFI_QUERY_CAPSULE_CAPS, capsules, &count,
+ 				max_size, reset_type, NULL);
+ 	up(&efi_runtime_lock);
+ 	return status;
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 28604a8d0aa9..a86485ac7c87 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1699,19 +1699,19 @@ extern int efi_tpm_eventlog_init(void);
+  * fault happened while executing an efi runtime service.
+  */
+ enum efi_rts_ids {
+-	NONE,
+-	GET_TIME,
+-	SET_TIME,
+-	GET_WAKEUP_TIME,
+-	SET_WAKEUP_TIME,
+-	GET_VARIABLE,
+-	GET_NEXT_VARIABLE,
+-	SET_VARIABLE,
+-	QUERY_VARIABLE_INFO,
+-	GET_NEXT_HIGH_MONO_COUNT,
+-	RESET_SYSTEM,
+-	UPDATE_CAPSULE,
+-	QUERY_CAPSULE_CAPS,
++	EFI_NONE,
++	EFI_GET_TIME,
++	EFI_SET_TIME,
++	EFI_GET_WAKEUP_TIME,
++	EFI_SET_WAKEUP_TIME,
++	EFI_GET_VARIABLE,
++	EFI_GET_NEXT_VARIABLE,
++	EFI_SET_VARIABLE,
++	EFI_QUERY_VARIABLE_INFO,
++	EFI_GET_NEXT_HIGH_MONO_COUNT,
++	EFI_RESET_SYSTEM,
++	EFI_UPDATE_CAPSULE,
++	EFI_QUERY_CAPSULE_CAPS,
+ };
+ 
+ /*
 -- 
 2.19.1
