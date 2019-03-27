@@ -1,163 +1,78 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.14 089/123] efi/arm/arm64: Allow SetVirtualAddressMap() to be omitted
-Date: Wed, 27 Mar 2019 14:15:53 -0400
-Message-ID: <20190327181628.15899-89-sashal@kernel.org>
-References: <20190327181628.15899-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.9 62/87] efi/memattr: Don't bail on zero VA if it equals the region's PA
+Date: Wed, 27 Mar 2019 14:20:15 -0400
+Message-ID: <20190327182040.17444-62-sashal@kernel.org>
+References: <20190327182040.17444-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190327181628.15899-1-sashal@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20190327182040.17444-1-sashal@kernel.org>
+Sender: stable-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, AKASHI Takahiro <takahiro.akashi@linaro.org>, Alexander Graf <agraf@suse.de>, Borislav Petkov <bp@alien8.de>, Heinrich Schuchardt <xypron.glpk@gmx.de>, Leif Lindholm <leif.lindholm@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Jones <pjones@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.org>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, AKASHI Takahiro <takahiro.akashi@linaro.org>, Alexander Graf <agraf@suse.de>, Bjorn Andersson <bjorn.andersson@linaro.org>, Borislav Petkov <bp@alien8.de>, Heinrich Schuchardt <xypron.glpk@gmx.de>, Jeffrey Hugo <jhugo@codeaurora.org>, Lee Jones <lee.jones@linaro.org>, Leif Lindholm <leif.lindholm@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Jones <pjones@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-[ Upstream commit 4e46c2a956215482418d7b315749fb1b6c6bc224 ]
+[ Upstream commit 5de0fef0230f3c8d75cff450a71740a7bf2db866 ]
 
-The UEFI spec revision 2.7 errata A section 8.4 has the following to
-say about the virtual memory runtime services:
+The EFI memory attributes code cross-references the EFI memory map with
+the more granular EFI memory attributes table to ensure that they are in
+sync before applying the strict permissions to the regions it describes.
 
-  "This section contains function definitions for the virtual memory
-  support that may be optionally used by an operating system at runtime.
-  If an operating system chooses to make EFI runtime service calls in a
-  virtual addressing mode instead of the flat physical mode, then the
-  operating system must use the services in this section to switch the
-  EFI runtime services from flat physical addressing to virtual
-  addressing."
+Since we always install virtual mappings for the EFI runtime regions to
+which these strict permissions apply, we currently perform a sanity check
+on the EFI memory descriptor, and ensure that the EFI_MEMORY_RUNTIME bit
+is set, and that the virtual address has been assigned.
 
-So it is pretty clear that calling SetVirtualAddressMap() is entirely
-optional, and so there is no point in doing so unless it achieves
-anything useful for us.
+However, in cases where a runtime region exists at physical address 0x0,
+and the virtual mapping equals the physical mapping, e.g., when running
+in mixed mode on x86, we encounter a memory descriptor with the runtime
+attribute and virtual address 0x0, and incorrectly draw the conclusion
+that a runtime region exists for which no virtual mapping was installed,
+and give up altogether. The consequence of this is that firmware mappings
+retain their read-write-execute permissions, making the system more
+vulnerable to attacks.
 
-This is not the case for 64-bit ARM. The identity mapping used by the
-firmware is arbitrarily converted into another permutation of userland
-addresses (i.e., bits [63:48] cleared), and the runtime code could easily
-deal with the original layout in exactly the same way as it deals with
-the converted layout. However, due to constraints related to page size
-differences if the OS is not running with 4k pages, and related to
-systems that may expose the individual sections of PE/COFF runtime
-modules as different memory regions, creating the virtual layout is a
-bit fiddly, and requires us to sort the memory map and reason about
-adjacent regions with identical memory types etc etc.
+So let's only bail if the virtual address of 0x0 has been assigned to a
+physical region that does not reside at address 0x0.
 
-So the obvious fix is to stop calling SetVirtualAddressMap() altogether
-on arm64 systems. However, to avoid surprises, which are notoriously
-hard to diagnose when it comes to OS<->firmware interactions, let's
-start by making it an opt-out feature, and implement support for the
-'efi=novamap' kernel command line parameter on ARM and arm64 systems.
-
-( Note that 32-bit ARM generally does require SetVirtualAddressMap() to be
-  used, given that the physical memory map and the kernel virtual address
-  map are not guaranteed to be non-overlapping like on arm64. However,
-  having support for efi=novamap,noruntime on 32-bit ARM, combined with
-  the recently proposed support for earlycon=efifb, is likely to be useful
-  to diagnose boot issues on such systems if they have no accessible serial
-  port. )
-
-Tested-by: Jeffrey Hugo <jhugo@codeaurora.org>
-Tested-by: Bjorn Andersson <bjorn.andersson@linaro.org>
-Tested-by: Lee Jones <lee.jones@linaro.org>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Acked-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
 Cc: AKASHI Takahiro <takahiro.akashi@linaro.org>
 Cc: Alexander Graf <agraf@suse.de>
+Cc: Bjorn Andersson <bjorn.andersson@linaro.org>
 Cc: Borislav Petkov <bp@alien8.de>
 Cc: Heinrich Schuchardt <xypron.glpk@gmx.de>
+Cc: Jeffrey Hugo <jhugo@codeaurora.org>
+Cc: Lee Jones <lee.jones@linaro.org>
 Cc: Leif Lindholm <leif.lindholm@linaro.org>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>
 Cc: Matt Fleming <matt@codeblueprint.co.uk>
 Cc: Peter Jones <pjones@redhat.com>
 Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
 Cc: Thomas Gleixner <tglx@linutronix.de>
 Cc: linux-efi@vger.kernel.org
-Link: http://lkml.kernel.org/r/20190202094119.13230-8-ard.biesheuvel@linaro.org
+Fixes: 10f0d2f577053 ("efi: Implement generic support for the Memory ...")
+Link: http://lkml.kernel.org/r/20190202094119.13230-4-ard.biesheuvel@linaro.org
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/firmware/efi/libstub/arm-stub.c        |  5 +++++
- drivers/firmware/efi/libstub/efi-stub-helper.c | 10 ++++++++++
- drivers/firmware/efi/libstub/efistub.h         |  1 +
- drivers/firmware/efi/libstub/fdt.c             |  3 +++
- 4 files changed, 19 insertions(+)
+ drivers/firmware/efi/memattr.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-index 01a9d78ee415..3b1e1dc3fb46 100644
---- a/drivers/firmware/efi/libstub/arm-stub.c
-+++ b/drivers/firmware/efi/libstub/arm-stub.c
-@@ -364,6 +364,11 @@ void efi_get_virtmap(efi_memory_desc_t *memory_map, unsigned long map_size,
- 		paddr = in->phys_addr;
- 		size = in->num_pages * EFI_PAGE_SIZE;
+diff --git a/drivers/firmware/efi/memattr.c b/drivers/firmware/efi/memattr.c
+index 236004b9a50d..9faa09e7c31f 100644
+--- a/drivers/firmware/efi/memattr.c
++++ b/drivers/firmware/efi/memattr.c
+@@ -93,7 +93,7 @@ static bool entry_is_valid(const efi_memory_desc_t *in, efi_memory_desc_t *out)
  
-+		if (novamap()) {
-+			in->virt_addr = in->phys_addr;
-+			continue;
-+		}
-+
- 		/*
- 		 * Make the mapping compatible with 64k pages: this allows
- 		 * a 4k page size kernel to kexec a 64k page size kernel and
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index 50a9cab5a834..39f87e6dac5c 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -34,6 +34,7 @@ static unsigned long __chunk_size = EFI_READ_CHUNK_SIZE;
- 
- static int __section(.data) __nokaslr;
- static int __section(.data) __quiet;
-+static int __section(.data) __novamap;
- 
- int __pure nokaslr(void)
- {
-@@ -43,6 +44,10 @@ int __pure is_quiet(void)
- {
- 	return __quiet;
- }
-+int __pure novamap(void)
-+{
-+	return __novamap;
-+}
- 
- #define EFI_MMAP_NR_SLACK_SLOTS	8
- 
-@@ -454,6 +459,11 @@ efi_status_t efi_parse_options(char const *cmdline)
- 			__chunk_size = -1UL;
+ 		if (!(md->attribute & EFI_MEMORY_RUNTIME))
+ 			continue;
+-		if (md->virt_addr == 0) {
++		if (md->virt_addr == 0 && md->phys_addr != 0) {
+ 			/* no virtual mapping has been installed by the stub */
+ 			break;
  		}
- 
-+		if (!strncmp(str, "novamap", 7)) {
-+			str += strlen("novamap");
-+			__novamap = 1;
-+		}
-+
- 		/* Group words together, delimited by "," */
- 		while (*str && *str != ' ' && *str != ',')
- 			str++;
-diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-index f59564b72ddc..2adde22b4a9f 100644
---- a/drivers/firmware/efi/libstub/efistub.h
-+++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -27,6 +27,7 @@
- 
- extern int __pure nokaslr(void);
- extern int __pure is_quiet(void);
-+extern int __pure novamap(void);
- 
- #define pr_efi(sys_table, msg)		do {				\
- 	if (!is_quiet()) efi_printk(sys_table, "EFI stub: "msg);	\
-diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
-index 0c0d2312f4a8..dba296a44f4e 100644
---- a/drivers/firmware/efi/libstub/fdt.c
-+++ b/drivers/firmware/efi/libstub/fdt.c
-@@ -327,6 +327,9 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
- 	if (status == EFI_SUCCESS) {
- 		efi_set_virtual_address_map_t *svam;
- 
-+		if (novamap())
-+			return EFI_SUCCESS;
-+
- 		/* Install the new virtual address map */
- 		svam = sys_table->runtime->set_virtual_address_map;
- 		status = svam(runtime_entry_count * desc_size, desc_size,
 -- 
 2.19.1
