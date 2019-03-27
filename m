@@ -1,89 +1,75 @@
-From: Mimi Zohar <zohar@linux.ibm.com>
-Subject: Re: [PATCH 1/2] efi: add a function for transferring status to
- string
-Date: Wed, 27 Mar 2019 15:04:02 -0400
-Message-ID: <1553713442.4608.20.camel@linux.ibm.com>
-References: <20190324002621.3551-1-jlee@suse.com>
-         <CAKv+Gu9B6h3zGVTctepd1GE5LaaMaT5x14Le1v05AOhbH36bpQ@mail.gmail.com>
+From: Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 075/192] efi: cper: Fix possible out-of-bounds access
+Date: Wed, 27 Mar 2019 14:08:27 -0400
+Message-ID: <20190327181025.13507-75-sashal@kernel.org>
+References: <20190327181025.13507-1-sashal@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu9B6h3zGVTctepd1GE5LaaMaT5x14Le1v05AOhbH36bpQ@mail.gmail.com>
+In-Reply-To: <20190327181025.13507-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
-Cc: James Morris <jmorris@namei.org>, "Serge E . Hallyn" <serge@hallyn.com>, David Howells <dhowells@redhat.com>, Josh Boyer <jwboyer@fedoraproject.org>, Nayna Jain <nayna@linux.ibm.com>, linux-efi <linux-efi@vger.kernel.org>, linux-security-module <linux-security-module@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "Lee, Chun-Yi" <jlee@suse.com>, Kees Cook <keescook@chromium.org>, Anton Vorontsov <anton@enomsg.org>, Colin Cross <ccross@android.com>, Tony Luck <tony.luck@intel.com>
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: Ross Lagerwall <ross.lagerwall@citrix.com>, "Rafael J . Wysocki" <rafael.j.wysocki@intel.com>, Sasha Levin <sashal@kernel.org>, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 2019-03-27 at 19:58 +0100, Ard Biesheuvel wrote:
-> On Sun, 24 Mar 2019 at 01:26, Lee, Chun-Yi <joeyli.kernel@gmail.com> wrote:
-> >
-> > This function can be used to transfer EFI status code to string
-> > for printing out debug message. Using this function can improve
-> > the readability of log.
+From: Ross Lagerwall <ross.lagerwall@citrix.com>
 
-Maybe instead of "for transferring status" use "to convert the status
-value to a" in the Subject line and here in the patch description.
+[ Upstream commit 45b14a4ffcc1e0b5caa246638f942cbe7eaea7ad ]
 
-> >
-> > Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> > Cc: Kees Cook <keescook@chromium.org>
-> > Cc: Anton Vorontsov <anton@enomsg.org>
-> > Cc: Colin Cross <ccross@android.com>
-> > Cc: Tony Luck <tony.luck@intel.com>
-> > Signed-off-by: "Lee, Chun-Yi" <jlee@suse.com>
-> > ---
-> >  include/linux/efi.h | 28 ++++++++++++++++++++++++++++
-> >  1 file changed, 28 insertions(+)
-> >
-> > diff --git a/include/linux/efi.h b/include/linux/efi.h
-> > index 54357a258b35..a43cb0dc37af 100644
-> > --- a/include/linux/efi.h
-> > +++ b/include/linux/efi.h
-> > @@ -1768,4 +1768,32 @@ struct linux_efi_memreserve {
-> >  #define EFI_MEMRESERVE_COUNT(size) (((size) - sizeof(struct linux_efi_memreserve)) \
-> >         / sizeof(((struct linux_efi_memreserve *)0)->entry[0]))
-> >
-> > +#define EFI_STATUS_STR(_status) \
-> > +case EFI_##_status: \
-> > +       return "EFI_" __stringify(_status);
-> > +
-> > +static inline char *
-> > +efi_status_to_str(efi_status_t status)
-> > +{
-> > +       switch (status) {
-> > +       EFI_STATUS_STR(SUCCESS)
-> > +       EFI_STATUS_STR(LOAD_ERROR)
-> > +       EFI_STATUS_STR(INVALID_PARAMETER)
-> > +       EFI_STATUS_STR(UNSUPPORTED)
-> > +       EFI_STATUS_STR(BAD_BUFFER_SIZE)
-> > +       EFI_STATUS_STR(BUFFER_TOO_SMALL)
-> > +       EFI_STATUS_STR(NOT_READY)
-> > +       EFI_STATUS_STR(DEVICE_ERROR)
-> > +       EFI_STATUS_STR(WRITE_PROTECTED)
-> > +       EFI_STATUS_STR(OUT_OF_RESOURCES)
-> > +       EFI_STATUS_STR(NOT_FOUND)
-> > +       EFI_STATUS_STR(ABORTED)
-> > +       EFI_STATUS_STR(SECURITY_VIOLATION)
-> > +       default:
-> > +               pr_warn("Unknown efi status: 0x%lx", status);
-> > +       }
-> > +
-> > +       return "Unknown efi status";
-> > +}
-> > +
-> >  #endif /* _LINUX_EFI_H */
-> > --
-> > 2.16.4
-> >
-> 
-> Please turn this into a proper function so that not every calling
-> object has to duplicate all these strings.
+When checking a generic status block, we iterate over all the generic
+data blocks. The loop condition only checks that the start of the
+generic data block is valid (within estatus->data_length) but not the
+whole block. Because the size of data blocks (excluding error data) may
+vary depending on the revision and the revision is contained within the
+data block, ensure that enough of the current data block is valid before
+dereferencing any members otherwise an out-of-bounds access may occur if
+estatus->data_length is invalid.
 
-Hi Ard,
+This relies on the fact that struct acpi_hest_generic_data_v300 is a
+superset of the earlier version.  Also rework the other checks to avoid
+potential underflow.
 
-Keeping the status values and strings in sync is difficult.  I was
-going to suggest moving the macro immediately after the status value
-definitions.
+Signed-off-by: Ross Lagerwall <ross.lagerwall@citrix.com>
+Acked-by: Borislav Petkov <bp@suse.de>
+Tested-by: Tyler Baicar <baicar.tyler@gmail.com>
+Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ drivers/firmware/efi/cper.c | 13 +++++++++----
+ 1 file changed, 9 insertions(+), 4 deletions(-)
 
-Mimi 
+diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+index a7902fccdcfa..6090d25dce85 100644
+--- a/drivers/firmware/efi/cper.c
++++ b/drivers/firmware/efi/cper.c
+@@ -546,19 +546,24 @@ EXPORT_SYMBOL_GPL(cper_estatus_check_header);
+ int cper_estatus_check(const struct acpi_hest_generic_status *estatus)
+ {
+ 	struct acpi_hest_generic_data *gdata;
+-	unsigned int data_len, gedata_len;
++	unsigned int data_len, record_size;
+ 	int rc;
+ 
+ 	rc = cper_estatus_check_header(estatus);
+ 	if (rc)
+ 		return rc;
++
+ 	data_len = estatus->data_length;
+ 
+ 	apei_estatus_for_each_section(estatus, gdata) {
+-		gedata_len = acpi_hest_get_error_length(gdata);
+-		if (gedata_len > data_len - acpi_hest_get_size(gdata))
++		if (sizeof(struct acpi_hest_generic_data) > data_len)
++			return -EINVAL;
++
++		record_size = acpi_hest_get_record_size(gdata);
++		if (record_size > data_len)
+ 			return -EINVAL;
+-		data_len -= acpi_hest_get_record_size(gdata);
++
++		data_len -= record_size;
+ 	}
+ 	if (data_len)
+ 		return -EINVAL;
+-- 
+2.19.1
