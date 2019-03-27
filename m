@@ -1,78 +1,220 @@
-From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.14 087/123] efi/memattr: Don't bail on zero VA if it equals the region's PA
-Date: Wed, 27 Mar 2019 14:15:51 -0400
-Message-ID: <20190327181628.15899-87-sashal@kernel.org>
-References: <20190327181628.15899-1-sashal@kernel.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH v2] efi: Unify dmi setup code over architectures
+ arm/arm64, io64 and x86
+Date: Wed, 27 Mar 2019 19:53:47 +0100
+Message-ID: <CAKv+Gu8ta4ZSKwcFGOaf7XCam29ZrHkNowDjfdCpfQas=Xo7Fg@mail.gmail.com>
+References: <20190320130502.16667-1-rrichter@marvell.com> <20190320131607.vgst3r7ynha55ikw@rric.localdomain>
+ <20190320152240.2eun63wqkbqmuqkg@rric.localdomain>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190327181628.15899-1-sashal@kernel.org>
+In-Reply-To: <20190320152240.2eun63wqkbqmuqkg@rric.localdomain>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, AKASHI Takahiro <takahiro.akashi@linaro.org>, Alexander Graf <agraf@suse.de>, Bjorn Andersson <bjorn.andersson@linaro.org>, Borislav Petkov <bp@alien8.de>, Heinrich Schuchardt <xypron.glpk@gmx.de>, Jeffrey Hugo <jhugo@codeaurora.org>, Lee Jones <lee.jones@linaro.org>, Leif Lindholm <leif.lindholm@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Jones <pjones@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.org>
+To: Robert Richter <rrichter@marvell.com>
+Cc: Tony Luck <tony.luck@intel.com>, Fenghua Yu <fenghua.yu@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, "x86@kernel.org" <x86@kernel.org>, Jean Delvare <jdelvare@suse.com>, Marcin Benka <mbenka@marvell.com>, "linux-ia64@vger.kernel.org" <linux-ia64@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+On Wed, 20 Mar 2019 at 16:23, Robert Richter <rrichter@marvell.com> wrote:
+>
+> On 20.03.19 14:16:07, Robert Richter wrote:
+> > On 20.03.19 13:05:37, Robert Richter wrote:
+> > > @@ -167,6 +167,7 @@ static int __init arm_dmi_init(void)
+> > >      * itself, depends on dmi_scan_machine() having been called already.
+> > >      */
+> > >     dmi_scan_machine();
+> > > +   dmi_memdev_walk();
+> > >     if (dmi_available)
+> > >             dmi_set_dump_stack_arch_desc();
+> > >     return 0;
+> >
+> > After
+> >
+> >  [PATCH] efi/arm: Show SMBIOS bank/device location in cper and
+> >   ghes error logs
+> >
+> > wents in for arm/arm64, we can unify the code. See patch below.
+>
+> V2 with the fix in arm_dmi_init() below.
+>
 
-[ Upstream commit 5de0fef0230f3c8d75cff450a71740a7bf2db866 ]
+Could you please resend this as a proper patch? I am having trouble applying it.
 
-The EFI memory attributes code cross-references the EFI memory map with
-the more granular EFI memory attributes table to ensure that they are in
-sync before applying the strict permissions to the regions it describes.
 
-Since we always install virtual mappings for the EFI runtime regions to
-which these strict permissions apply, we currently perform a sanity check
-on the EFI memory descriptor, and ensure that the EFI_MEMORY_RUNTIME bit
-is set, and that the virtual address has been assigned.
-
-However, in cases where a runtime region exists at physical address 0x0,
-and the virtual mapping equals the physical mapping, e.g., when running
-in mixed mode on x86, we encounter a memory descriptor with the runtime
-attribute and virtual address 0x0, and incorrectly draw the conclusion
-that a runtime region exists for which no virtual mapping was installed,
-and give up altogether. The consequence of this is that firmware mappings
-retain their read-write-execute permissions, making the system more
-vulnerable to attacks.
-
-So let's only bail if the virtual address of 0x0 has been assigned to a
-physical region that does not reside at address 0x0.
-
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Acked-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: AKASHI Takahiro <takahiro.akashi@linaro.org>
-Cc: Alexander Graf <agraf@suse.de>
-Cc: Bjorn Andersson <bjorn.andersson@linaro.org>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Heinrich Schuchardt <xypron.glpk@gmx.de>
-Cc: Jeffrey Hugo <jhugo@codeaurora.org>
-Cc: Lee Jones <lee.jones@linaro.org>
-Cc: Leif Lindholm <leif.lindholm@linaro.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Peter Jones <pjones@redhat.com>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-efi@vger.kernel.org
-Fixes: 10f0d2f577053 ("efi: Implement generic support for the Memory ...")
-Link: http://lkml.kernel.org/r/20190202094119.13230-4-ard.biesheuvel@linaro.org
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- drivers/firmware/efi/memattr.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/firmware/efi/memattr.c b/drivers/firmware/efi/memattr.c
-index 8986757eafaf..aac972b056d9 100644
---- a/drivers/firmware/efi/memattr.c
-+++ b/drivers/firmware/efi/memattr.c
-@@ -94,7 +94,7 @@ static bool entry_is_valid(const efi_memory_desc_t *in, efi_memory_desc_t *out)
- 
- 		if (!(md->attribute & EFI_MEMORY_RUNTIME))
- 			continue;
--		if (md->virt_addr == 0) {
-+		if (md->virt_addr == 0 && md->phys_addr != 0) {
- 			/* no virtual mapping has been installed by the stub */
- 			break;
- 		}
--- 
-2.19.1
+>
+> -- >8 --
+> From: Robert Richter <rrichter@marvell.com>
+> Subject: [PATCH v2] efi: Unify dmi setup code over architectures arm/arm64,
+>  io64 and x86
+>
+> All architectures (arm/arm64, io64 and x86) do the same here, so unify
+> the code.
+>
+> Note: We do not need to call dump_stack_set_arch_desc() in case of
+> !dmi_available. Both strings, dmi_ids_string and dump_stack_arch_
+> desc_str are initialized zero and thus nothing would change.
+>
+> Signed-off-by: Robert Richter <rrichter@marvell.com>
+> ---
+>  arch/ia64/kernel/setup.c           |  4 +---
+>  arch/x86/kernel/setup.c            |  6 ++----
+>  drivers/firmware/dmi_scan.c        | 28 +++++++++++++++-------------
+>  drivers/firmware/efi/arm-runtime.c |  7 ++-----
+>  include/linux/dmi.h                |  8 ++------
+>  5 files changed, 22 insertions(+), 31 deletions(-)
+>
+> diff --git a/arch/ia64/kernel/setup.c b/arch/ia64/kernel/setup.c
+> index 583a3746d70b..c9cfa760cd57 100644
+> --- a/arch/ia64/kernel/setup.c
+> +++ b/arch/ia64/kernel/setup.c
+> @@ -1058,9 +1058,7 @@ check_bugs (void)
+>
+>  static int __init run_dmi_scan(void)
+>  {
+> -       dmi_scan_machine();
+> -       dmi_memdev_walk();
+> -       dmi_set_dump_stack_arch_desc();
+> +       dmi_setup();
+>         return 0;
+>  }
+>  core_initcall(run_dmi_scan);
+> diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
+> index 3d872a527cd9..3773905cd2c1 100644
+> --- a/arch/x86/kernel/setup.c
+> +++ b/arch/x86/kernel/setup.c
+> @@ -1005,13 +1005,11 @@ void __init setup_arch(char **cmdline_p)
+>         if (efi_enabled(EFI_BOOT))
+>                 efi_init();
+>
+> -       dmi_scan_machine();
+> -       dmi_memdev_walk();
+> -       dmi_set_dump_stack_arch_desc();
+> +       dmi_setup();
+>
+>         /*
+>          * VMware detection requires dmi to be available, so this
+> -        * needs to be done after dmi_scan_machine(), for the boot CPU.
+> +        * needs to be done after dmi_setup(), for the boot CPU.
+>          */
+>         init_hypervisor_platform();
+>
+> diff --git a/drivers/firmware/dmi_scan.c b/drivers/firmware/dmi_scan.c
+> index 099d83e4e910..fae2d5c43314 100644
+> --- a/drivers/firmware/dmi_scan.c
+> +++ b/drivers/firmware/dmi_scan.c
+> @@ -416,11 +416,8 @@ static void __init save_mem_devices(const struct dmi_header *dm, void *v)
+>         nr++;
+>  }
+>
+> -void __init dmi_memdev_walk(void)
+> +static void __init dmi_memdev_walk(void)
+>  {
+> -       if (!dmi_available)
+> -               return;
+> -
+>         if (dmi_walk_early(count_mem_devices) == 0 && dmi_memdev_nr) {
+>                 dmi_memdev = dmi_alloc(sizeof(*dmi_memdev) * dmi_memdev_nr);
+>                 if (dmi_memdev)
+> @@ -614,7 +611,7 @@ static int __init dmi_smbios3_present(const u8 *buf)
+>         return 1;
+>  }
+>
+> -void __init dmi_scan_machine(void)
+> +static void __init dmi_scan_machine(void)
+>  {
+>         char __iomem *p, *q;
+>         char buf[32];
+> @@ -769,15 +766,20 @@ static int __init dmi_init(void)
+>  subsys_initcall(dmi_init);
+>
+>  /**
+> - * dmi_set_dump_stack_arch_desc - set arch description for dump_stack()
+> + *     dmi_setup - scan and setup DMI system information
+>   *
+> - * Invoke dump_stack_set_arch_desc() with DMI system information so that
+> - * DMI identifiers are printed out on task dumps.  Arch boot code should
+> - * call this function after dmi_scan_machine() if it wants to print out DMI
+> - * identifiers on task dumps.
+> + *     Scan the DMI system information. This setups DMI identifiers
+> + *     (dmi_system_id) for printing it out on task dumps and prepares
+> + *     DIMM entry information (dmi_memdev_info) from the SMBIOS table
+> + *     for using this when reporting memory errors.
+>   */
+> -void __init dmi_set_dump_stack_arch_desc(void)
+> +void __init dmi_setup(void)
+>  {
+> +       dmi_scan_machine();
+> +       if (!dmi_available)
+> +               return;
+> +
+> +       dmi_memdev_walk();
+>         dump_stack_set_arch_desc("%s", dmi_ids_string);
+>  }
+>
+> @@ -841,7 +843,7 @@ static bool dmi_is_end_of_table(const struct dmi_system_id *dmi)
+>   *     returns non zero or we hit the end. Callback function is called for
+>   *     each successful match. Returns the number of matches.
+>   *
+> - *     dmi_scan_machine must be called before this function is called.
+> + *     dmi_setup must be called before this function is called.
+>   */
+>  int dmi_check_system(const struct dmi_system_id *list)
+>  {
+> @@ -871,7 +873,7 @@ EXPORT_SYMBOL(dmi_check_system);
+>   *     Walk the blacklist table until the first match is found.  Return the
+>   *     pointer to the matching entry or NULL if there's no match.
+>   *
+> - *     dmi_scan_machine must be called before this function is called.
+> + *     dmi_setup must be called before this function is called.
+>   */
+>  const struct dmi_system_id *dmi_first_match(const struct dmi_system_id *list)
+>  {
+> diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
+> index 4a0dfe4ab829..e2ac5fa5531b 100644
+> --- a/drivers/firmware/efi/arm-runtime.c
+> +++ b/drivers/firmware/efi/arm-runtime.c
+> @@ -162,14 +162,11 @@ void efi_virtmap_unload(void)
+>  static int __init arm_dmi_init(void)
+>  {
+>         /*
+> -        * On arm64/ARM, DMI depends on UEFI, and dmi_scan_machine() needs to
+> +        * On arm64/ARM, DMI depends on UEFI, and dmi_setup() needs to
+>          * be called early because dmi_id_init(), which is an arch_initcall
+>          * itself, depends on dmi_scan_machine() having been called already.
+>          */
+> -       dmi_scan_machine();
+> -       dmi_memdev_walk();
+> -       if (dmi_available)
+> -               dmi_set_dump_stack_arch_desc();
+> +       dmi_setup();
+>         return 0;
+>  }
+>  core_initcall(arm_dmi_init);
+> diff --git a/include/linux/dmi.h b/include/linux/dmi.h
+> index c46fdb36700b..8de8c4f15163 100644
+> --- a/include/linux/dmi.h
+> +++ b/include/linux/dmi.h
+> @@ -102,9 +102,7 @@ const struct dmi_system_id *dmi_first_match(const struct dmi_system_id *list);
+>  extern const char * dmi_get_system_info(int field);
+>  extern const struct dmi_device * dmi_find_device(int type, const char *name,
+>         const struct dmi_device *from);
+> -extern void dmi_scan_machine(void);
+> -extern void dmi_memdev_walk(void);
+> -extern void dmi_set_dump_stack_arch_desc(void);
+> +extern void dmi_setup(void);
+>  extern bool dmi_get_date(int field, int *yearp, int *monthp, int *dayp);
+>  extern int dmi_get_bios_year(void);
+>  extern int dmi_name_in_vendors(const char *str);
+> @@ -122,9 +120,7 @@ static inline int dmi_check_system(const struct dmi_system_id *list) { return 0;
+>  static inline const char * dmi_get_system_info(int field) { return NULL; }
+>  static inline const struct dmi_device * dmi_find_device(int type, const char *name,
+>         const struct dmi_device *from) { return NULL; }
+> -static inline void dmi_scan_machine(void) { return; }
+> -static inline void dmi_memdev_walk(void) { }
+> -static inline void dmi_set_dump_stack_arch_desc(void) { }
+> +static inline void dmi_setup(void) { }
+>  static inline bool dmi_get_date(int field, int *yearp, int *monthp, int *dayp)
+>  {
+>         if (yearp)
+> --
+> 2.20.1
+>
