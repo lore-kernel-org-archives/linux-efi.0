@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 1/5] efi/libstub: refactor cmd_stubcopy
-Date: Thu, 28 Mar 2019 20:34:25 +0100
-Message-ID: <20190328193429.21373-2-ard.biesheuvel@linaro.org>
+Subject: [PATCH 5/5] efi/libstub/arm: omit unneeded stripping of ksymtab/kcrctab sections
+Date: Thu, 28 Mar 2019 20:34:29 +0100
+Message-ID: <20190328193429.21373-6-ard.biesheuvel@linaro.org>
 References: <20190328193429.21373-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -9,56 +9,43 @@ Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190328193429.21373-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Nick Desaulniers <ndesaulniers@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Commit f922c4abdf764 ("module: allow symbol exports to be disabled")
+introduced a way to inhibit generation of kcrctab/ksymtab sections
+when building ordinary kernel code to be used in a different execution
+context (decompressor, EFI stub, etc)
 
-It took me a while to understand what is going on in the nested
-if-blocks.
+That means we no longer have to strip those sections explicitly when
+building the EFI libstub objects, so drop this from the Makefile.
 
-Simplify it by removing unneeded code.
-
-  - if_changed automatically adds 'set -e', so any failure in the
-    series of commands makes it immediately fail as a whole.
-    So, the outer if block is entirely redundant.
-
-  - Since commit 9c2af1c7377a ("kbuild: add .DELETE_ON_ERROR special
-    target"), GNU Make automatically deletes the target on any failure
-    in its recipe. The explicit 'rm -f $@' is redundant.
-
-  - surrounding commands with ( ) will spawn a subshell to execute them
-    in it, but it is rarely useful to do so.
-
-Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: Nick Desaulniers <ndesaulniers@google.com>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- drivers/firmware/efi/libstub/Makefile | 13 +++++++------
- 1 file changed, 7 insertions(+), 6 deletions(-)
+ drivers/firmware/efi/libstub/Makefile | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
 diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index b0103e16fc1b..ae9081988c88 100644
+index ae9081988c88..b1f7b64652db 100644
 --- a/drivers/firmware/efi/libstub/Makefile
 +++ b/drivers/firmware/efi/libstub/Makefile
-@@ -86,12 +86,13 @@ $(obj)/%.stub.o: $(obj)/%.o FORCE
- # this time, use objcopy and leave all sections in place.
+@@ -71,7 +71,6 @@ CFLAGS_arm64-stub.o		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
+ extra-$(CONFIG_EFI_ARMSTUB)	:= $(lib-y)
+ lib-$(CONFIG_EFI_ARMSTUB)	:= $(patsubst %.o,%.stub.o,$(lib-y))
+ 
+-STUBCOPY_RM-y			:= -R *ksymtab* -R *kcrctab*
+ STUBCOPY_FLAGS-$(CONFIG_ARM64)	+= --prefix-alloc-sections=.init \
+ 				   --prefix-symbols=__efistub_
+ STUBCOPY_RELOC-$(CONFIG_ARM64)	:= R_AARCH64_ABS
+@@ -87,7 +86,7 @@ $(obj)/%.stub.o: $(obj)/%.o FORCE
  #
  quiet_cmd_stubcopy = STUBCPY $@
--      cmd_stubcopy = if $(STRIP) --strip-debug $(STUBCOPY_RM-y) -o $@ $<; \
--		     then if $(OBJDUMP) -r $@ | grep $(STUBCOPY_RELOC-y); \
--		     then (echo >&2 "$@: absolute symbol references not allowed in the EFI stub"; \
--			   rm -f $@; /bin/false);			  \
--		     else $(OBJCOPY) $(STUBCOPY_FLAGS-y) $< $@; fi	  \
--		     else /bin/false; fi
-+      cmd_stubcopy =							\
-+	$(STRIP) --strip-debug $(STUBCOPY_RM-y) -o $@ $<;		\
-+	if $(OBJDUMP) -r $@ | grep $(STUBCOPY_RELOC-y); then		\
-+		echo "$@: absolute symbol references not allowed in the EFI stub" >&2; \
-+		/bin/false;						\
-+	fi;								\
-+	$(OBJCOPY) $(STUBCOPY_FLAGS-y) $< $@
- 
- #
- # ARM discards the .data section because it disallows r/w data in the
+       cmd_stubcopy =							\
+-	$(STRIP) --strip-debug $(STUBCOPY_RM-y) -o $@ $<;		\
++	$(STRIP) --strip-debug -o $@ $<;				\
+ 	if $(OBJDUMP) -r $@ | grep $(STUBCOPY_RELOC-y); then		\
+ 		echo "$@: absolute symbol references not allowed in the EFI stub" >&2; \
+ 		/bin/false;						\
 -- 
 2.20.1
