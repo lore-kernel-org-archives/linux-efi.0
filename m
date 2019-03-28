@@ -1,53 +1,64 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [GIT PULL 0/5] EFI changes for v5.2
-Date: Thu, 28 Mar 2019 20:34:24 +0100
-Message-ID: <20190328193429.21373-1-ard.biesheuvel@linaro.org>
+Subject: [PATCH 1/5] efi/libstub: refactor cmd_stubcopy
+Date: Thu, 28 Mar 2019 20:34:25 +0100
+Message-ID: <20190328193429.21373-2-ard.biesheuvel@linaro.org>
+References: <20190328193429.21373-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190328193429.21373-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Jean Delvare <jdelvare@suse.de>, Marcin Benka <mbenka@marvell.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Nick Desaulniers <ndesaulniers@google.com>, Peter Jones <pjones@redhat.com>, Robert Richter <rrichter@marvell.com>, Takashi Iwai <tiwai@suse.de>
+Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-The following changes since commit 8c2ffd9174779014c3fe1f96d9dc3641d9175f00:
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
 
-  Linux 5.1-rc2 (2019-03-24 14:02:26 -0700)
+It took me a while to understand what is going on in the nested
+if-blocks.
 
-are available in the Git repository at:
+Simplify it by removing unneeded code.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next
+  - if_changed automatically adds 'set -e', so any failure in the
+    series of commands makes it immediately fail as a whole.
+    So, the outer if block is entirely redundant.
 
-for you to fetch changes up to a72f65180feb446cc59616aab400475679b6ffce:
+  - Since commit 9c2af1c7377a ("kbuild: add .DELETE_ON_ERROR special
+    target"), GNU Make automatically deletes the target on any failure
+    in its recipe. The explicit 'rm -f $@' is redundant.
 
-  efi/libstub/arm: omit unneeded stripping of ksymtab/kcrctab sections (2019-03-28 09:22:32 +0100)
+  - surrounding commands with ( ) will spawn a subshell to execute them
+    in it, but it is rarely useful to do so.
 
-----------------------------------------------------------------
-EFI updates for v5.2:
-- Squash a spurious warning when using the EFI framebuffer on a non-EFI boot.
-- Use DMI data to annotate RAS memory errors on ARM just like we do on Intel.
-- Some followup cleanups for DMI.
-- Some libstub Makefile cleanups.
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ drivers/firmware/efi/libstub/Makefile | 13 +++++++------
+ 1 file changed, 7 insertions(+), 6 deletions(-)
 
-----------------------------------------------------------------
-Ard Biesheuvel (2):
-      efifb: omit memory map check on legacy boot
-      efi/libstub/arm: omit unneeded stripping of ksymtab/kcrctab sections
-
-Marcin Benka (1):
-      efi/arm: Show SMBIOS bank/device location in cper and ghes error logs
-
-Masahiro Yamada (1):
-      efi/libstub: refactor cmd_stubcopy
-
-Robert Richter (1):
-      efi: Unify dmi setup code over architectures arm/arm64, ia64 and x86
-
- arch/ia64/kernel/setup.c              |  4 +---
- arch/x86/kernel/setup.c               |  6 ++----
- drivers/firmware/dmi_scan.c           | 28 +++++++++++++++-------------
- drivers/firmware/efi/arm-runtime.c    |  6 ++----
- drivers/firmware/efi/libstub/Makefile | 14 +++++++-------
- drivers/video/fbdev/efifb.c           |  3 ++-
- include/linux/dmi.h                   |  8 ++------
- 7 files changed, 31 insertions(+), 38 deletions(-)
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index b0103e16fc1b..ae9081988c88 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -86,12 +86,13 @@ $(obj)/%.stub.o: $(obj)/%.o FORCE
+ # this time, use objcopy and leave all sections in place.
+ #
+ quiet_cmd_stubcopy = STUBCPY $@
+-      cmd_stubcopy = if $(STRIP) --strip-debug $(STUBCOPY_RM-y) -o $@ $<; \
+-		     then if $(OBJDUMP) -r $@ | grep $(STUBCOPY_RELOC-y); \
+-		     then (echo >&2 "$@: absolute symbol references not allowed in the EFI stub"; \
+-			   rm -f $@; /bin/false);			  \
+-		     else $(OBJCOPY) $(STUBCOPY_FLAGS-y) $< $@; fi	  \
+-		     else /bin/false; fi
++      cmd_stubcopy =							\
++	$(STRIP) --strip-debug $(STUBCOPY_RM-y) -o $@ $<;		\
++	if $(OBJDUMP) -r $@ | grep $(STUBCOPY_RELOC-y); then		\
++		echo "$@: absolute symbol references not allowed in the EFI stub" >&2; \
++		/bin/false;						\
++	fi;								\
++	$(OBJCOPY) $(STUBCOPY_FLAGS-y) $< $@
+ 
+ #
+ # ARM discards the .data section because it disallows r/w data in the
+-- 
+2.20.1
