@@ -1,110 +1,121 @@
-From: tip-bot for Matteo Croce <tipbot@zytor.com>
-Subject: [tip:x86/urgent] x86/realmode: Make set_real_mode_mem() static
- inline
-Date: Fri, 29 Mar 2019 03:10:05 -0700
-Message-ID: <tip-f560bd19d2fe0e54851d706b72acbc6f2eed3567@git.kernel.org>
-References: <20190328114233.27835-1-mcroce@redhat.com>
-Reply-To: linux-kernel@vger.kernel.org, x86@kernel.org,
-          linux-efi@vger.kernel.org, mojha@codeaurora.org,
-          mcroce@redhat.com, ard.biesheuvel@linaro.org, hpa@zytor.com,
-          bp@suse.de, tglx@linutronix.de, mingo@kernel.org,
-          mingo@redhat.com
+From: jlee@suse.com
+Subject: Re: [PATCH 2/2 v2] efi: print appropriate status message when
+ loading certificates
+Date: Sat, 30 Mar 2019 01:40:26 +0800
+Message-ID: <20190329174026.GB3701@localhost>
+References: <20190324002621.3551-1-jlee@suse.com>
+ <20190324002621.3551-2-jlee@suse.com>
+ <1553714635.4608.34.camel@linux.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190328114233.27835-1-mcroce@redhat.com>
 Content-Disposition: inline
+In-Reply-To: <1553714635.4608.34.camel@linux.ibm.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-tip-commits@vger.kernel.org
-Cc: mcroce@redhat.com, ard.biesheuvel@linaro.org, hpa@zytor.com, bp@suse.de, tglx@linutronix.de, mingo@redhat.com, mingo@kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, linux-efi@vger.kernel.org, mojha@codeaurora.org
+To: Mimi Zohar <zohar@linux.ibm.com>
+Cc: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, James Morris <jmorris@namei.org>, "Serge E . Hallyn" <serge@hallyn.com>, David Howells <dhowells@redhat.com>, Josh Boyer <jwboyer@fedoraproject.org>, Nayna Jain <nayna@linux.ibm.com>, linux-efi@vger.kernel.org, linux-security-module@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Commit-ID:  f560bd19d2fe0e54851d706b72acbc6f2eed3567
-Gitweb:     https://git.kernel.org/tip/f560bd19d2fe0e54851d706b72acbc6f2eed3567
-Author:     Matteo Croce <mcroce@redhat.com>
-AuthorDate: Thu, 28 Mar 2019 12:42:33 +0100
-Committer:  Borislav Petkov <bp@suse.de>
-CommitDate: Fri, 29 Mar 2019 10:16:27 +0100
+On Wed, Mar 27, 2019 at 03:23:55PM -0400, Mimi Zohar wrote:
+> On Sun, 2019-03-24 at 08:26 +0800, Lee, Chun-Yi wrote:
+> > When loading certificates list from UEFI variable, the original error
+> > message direct shows the efi status code from UEFI firmware. It looks
+> > ugly:
+> > 
+> > [    2.335031] Couldn't get size: 0x800000000000000e
+> > [    2.335032] Couldn't get UEFI MokListRT
+> > [    2.339985] Couldn't get size: 0x800000000000000e
+> > [    2.339987] Couldn't get UEFI dbx list
+> > 
+> > So, this patch shows the status string instead of status code.
+> > 
+> > On the other hand, the "Couldn't get UEFI" message doesn't need
+> > to be exposed when db/dbx/mok variable do not exist. So, this
+> > patch set the message level to debug.
+> > 
+> > v2.
+> > Setting the MODSIGN messagse level to debug.
+> > 
+> > Link: https://forums.opensuse.org/showthread.php/535324-MODSIGN-Couldn-t-get-UEFI-db-list?p=2897516#post2897516
+> > Cc: James Morris <jmorris@namei.org>
+> > Cc: Serge E. Hallyn" <serge@hallyn.com>
+> > Cc: David Howells <dhowells@redhat.com>
+> > Cc: Nayna Jain <nayna@linux.ibm.com>
+> > Cc: Josh Boyer <jwboyer@fedoraproject.org>
+> > Cc: Mimi Zohar <zohar@linux.ibm.com>
+> > Signed-off-by: "Lee, Chun-Yi" <jlee@suse.com>
+> > ---
+> >  security/integrity/platform_certs/load_uefi.c | 13 ++++++++-----
+> >  1 file changed, 8 insertions(+), 5 deletions(-)
+> > 
+> > diff --git a/security/integrity/platform_certs/load_uefi.c b/security/integrity/platform_certs/load_uefi.c
+> > index 81b19c52832b..e65244b31f04 100644
+> > --- a/security/integrity/platform_certs/load_uefi.c
+> > +++ b/security/integrity/platform_certs/load_uefi.c
+> > @@ -48,7 +48,9 @@ static __init void *get_cert_list(efi_char16_t *name, efi_guid_t *guid,
+> >  
+> >  	status = efi.get_variable(name, guid, NULL, &lsize, &tmpdb);
+> >  	if (status != EFI_BUFFER_TOO_SMALL) {
+> > -		pr_err("Couldn't get size: 0x%lx\n", status);
+> > +		if (status != EFI_NOT_FOUND)
+> > +			pr_err("Couldn't get size: %s\n",
+> > +				efi_status_to_str(status));
+> >  		return NULL;
+> >  	}
+> >  
+> > @@ -59,7 +61,8 @@ static __init void *get_cert_list(efi_char16_t *name, efi_guid_t *guid,
+> >  	status = efi.get_variable(name, guid, NULL, &lsize, db);
+> >  	if (status != EFI_SUCCESS) {
+> >  		kfree(db);
+> > -		pr_err("Error reading db var: 0x%lx\n", status);
+> > +		pr_err("Error reading db var: %s\n",
+> > +			efi_status_to_str(status));
+> >  		return NULL;
+> >  	}
+> >  
+> > @@ -155,7 +158,7 @@ static int __init load_uefi_certs(void)
+> >  	if (!uefi_check_ignore_db()) {
+> >  		db = get_cert_list(L"db", &secure_var, &dbsize);
+> >  		if (!db) {
+> > -			pr_err("MODSIGN: Couldn't get UEFI db list\n");
+> > +			pr_debug("MODSIGN: Couldn't get UEFI db list\n");
+> 
+> Sure, this is fine.
+> 
+> >  		} else {
+> >  			rc = parse_efi_signature_list("UEFI:db",
+> >  					db, dbsize, get_handler_for_db);
+> > @@ -168,7 +171,7 @@ static int __init load_uefi_certs(void)
+> >  
+> >  	mok = get_cert_list(L"MokListRT", &mok_var, &moksize);
+> >  	if (!mok) {
+> > -		pr_info("Couldn't get UEFI MokListRT\n");
+> > +		pr_debug("Couldn't get UEFI MokListRT\n");
+> 
+> This is fine too.
+> 
+> >  	} else {
+> >  		rc = parse_efi_signature_list("UEFI:MokListRT",
+> >  					      mok, moksize, get_handler_for_db);
+> > @@ -179,7 +182,7 @@ static int __init load_uefi_certs(void)
+> >  
+> >  	dbx = get_cert_list(L"dbx", &secure_var, &dbxsize);
+> >  	if (!dbx) {
+> > -		pr_info("Couldn't get UEFI dbx list\n");
+> > +		pr_debug("Couldn't get UEFI dbx list\n");
+> 
+> If there isn't a db or moklist, then this is fine.  My concern is not
+> having an indication that the dbx wasn't installed, when it should
+> have been.
+> 
+> Perhaps similar to the "Loading compiled-in X.509 certificates"
+> informational message there should informational messages for db, mok,
+> and dbx as well.
+>
 
-x86/realmode: Make set_real_mode_mem() static inline
+OK. I will add message when kernel found db, dbx and mok. It will
+just like the informaton message for ACPI S0,S3,S4 support.
 
-Remove the unused @size argument and move it into a header file, so it
-can be inlined.
-
- [ bp: Massage. ]
-
-Signed-off-by: Matteo Croce <mcroce@redhat.com>
-Signed-off-by: Borislav Petkov <bp@suse.de>
-Reviewed-by: Mukesh Ojha <mojha@codeaurora.org>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Ingo Molnar <mingo@redhat.com>
-Cc: linux-efi <linux-efi@vger.kernel.org>
-Cc: platform-driver-x86@vger.kernel.org
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: x86-ml <x86@kernel.org>
-Link: https://lkml.kernel.org/r/20190328114233.27835-1-mcroce@redhat.com
----
- arch/x86/include/asm/realmode.h | 6 +++++-
- arch/x86/platform/efi/quirks.c  | 2 +-
- arch/x86/realmode/init.c        | 9 +--------
- 3 files changed, 7 insertions(+), 10 deletions(-)
-
-diff --git a/arch/x86/include/asm/realmode.h b/arch/x86/include/asm/realmode.h
-index 63b3393bd98e..c53682303c9c 100644
---- a/arch/x86/include/asm/realmode.h
-+++ b/arch/x86/include/asm/realmode.h
-@@ -77,7 +77,11 @@ static inline size_t real_mode_size_needed(void)
- 	return ALIGN(real_mode_blob_end - real_mode_blob, PAGE_SIZE);
- }
- 
--void set_real_mode_mem(phys_addr_t mem, size_t size);
-+static inline void set_real_mode_mem(phys_addr_t mem)
-+{
-+	real_mode_header = (struct real_mode_header *) __va(mem);
-+}
-+
- void reserve_real_mode(void);
- 
- #endif /* __ASSEMBLY__ */
-diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-index 458a0e2bcc57..a25a9fd987a9 100644
---- a/arch/x86/platform/efi/quirks.c
-+++ b/arch/x86/platform/efi/quirks.c
-@@ -449,7 +449,7 @@ void __init efi_free_boot_services(void)
- 		 */
- 		rm_size = real_mode_size_needed();
- 		if (rm_size && (start + rm_size) < (1<<20) && size >= rm_size) {
--			set_real_mode_mem(start, rm_size);
-+			set_real_mode_mem(start);
- 			start += rm_size;
- 			size -= rm_size;
- 		}
-diff --git a/arch/x86/realmode/init.c b/arch/x86/realmode/init.c
-index 47d097946872..7dce39c8c034 100644
---- a/arch/x86/realmode/init.c
-+++ b/arch/x86/realmode/init.c
-@@ -15,13 +15,6 @@ u32 *trampoline_cr4_features;
- /* Hold the pgd entry used on booting additional CPUs */
- pgd_t trampoline_pgd_entry;
- 
--void __init set_real_mode_mem(phys_addr_t mem, size_t size)
--{
--	void *base = __va(mem);
--
--	real_mode_header = (struct real_mode_header *) base;
--}
--
- void __init reserve_real_mode(void)
- {
- 	phys_addr_t mem;
-@@ -40,7 +33,7 @@ void __init reserve_real_mode(void)
- 	}
- 
- 	memblock_reserve(mem, size);
--	set_real_mode_mem(mem, size);
-+	set_real_mode_mem(mem);
- }
- 
- static void __init setup_real_mode(void)
+Thanks
+Joey Lee
