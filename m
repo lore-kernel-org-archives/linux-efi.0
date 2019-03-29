@@ -1,49 +1,63 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH 2/5] efifb: omit memory map check on legacy boot
-Date: Thu, 28 Mar 2019 20:34:26 +0100
-Message-ID: <20190328193429.21373-3-ard.biesheuvel@linaro.org>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: [GIT PULL 0/5] EFI changes for v5.2
+Date: Fri, 29 Mar 2019 07:35:56 +0100
+Message-ID: <20190329063556.GA57868@gmail.com>
 References: <20190328193429.21373-1-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
 In-Reply-To: <20190328193429.21373-1-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, Peter Jones <pjones@redhat.com>, Takashi Iwai <tiwai@suse.de>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-efi@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, linux-kernel@vger.kernel.org, Jean Delvare <jdelvare@suse.de>, Marcin Benka <mbenka@marvell.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Nick Desaulniers <ndesaulniers@google.com>, Peter Jones <pjones@redhat.com>, Robert Richter <rrichter@marvell.com>, Takashi Iwai <tiwai@suse.de>
 List-Id: linux-efi@vger.kernel.org
 
-Since 38ac0287b7f4 ("fbdev/efifb: Honour UEFI memory map attributes
-when mapping the FB"), efifb_probe() checks its memory range via
-efi_mem_desc_lookup(), and this leads to a spurious error message
-"EFI_MEMMAP is not enabled" at every boot on KVM.  This is quite
-annoying since the error message appears even if you set "quiet" boot
-option.
 
-Since this happens on legacy boot, which strangely enough exposes
-a EFI framebuffer via screen_info, let's double check that we are
-doing an EFI boot before attempting to access the EFI memory map.
+* Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
 
-Cc: Peter Jones <pjones@redhat.com>
-Tested-by: Takashi Iwai <tiwai@suse.de>
-Reported-by: Takashi Iwai <tiwai@suse.de>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
- drivers/video/fbdev/efifb.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+> The following changes since commit 8c2ffd9174779014c3fe1f96d9dc3641d9175f00:
+> 
+>   Linux 5.1-rc2 (2019-03-24 14:02:26 -0700)
+> 
+> are available in the Git repository at:
+> 
+>   git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next
+> 
+> for you to fetch changes up to a72f65180feb446cc59616aab400475679b6ffce:
+> 
+>   efi/libstub/arm: omit unneeded stripping of ksymtab/kcrctab sections (2019-03-28 09:22:32 +0100)
+> 
+> ----------------------------------------------------------------
+> EFI updates for v5.2:
+> - Squash a spurious warning when using the EFI framebuffer on a non-EFI boot.
+> - Use DMI data to annotate RAS memory errors on ARM just like we do on Intel.
+> - Some followup cleanups for DMI.
+> - Some libstub Makefile cleanups.
+> 
+> ----------------------------------------------------------------
+> Ard Biesheuvel (2):
+>       efifb: omit memory map check on legacy boot
+>       efi/libstub/arm: omit unneeded stripping of ksymtab/kcrctab sections
+> 
+> Marcin Benka (1):
+>       efi/arm: Show SMBIOS bank/device location in cper and ghes error logs
+> 
+> Masahiro Yamada (1):
+>       efi/libstub: refactor cmd_stubcopy
+> 
+> Robert Richter (1):
+>       efi: Unify dmi setup code over architectures arm/arm64, ia64 and x86
+> 
+>  arch/ia64/kernel/setup.c              |  4 +---
+>  arch/x86/kernel/setup.c               |  6 ++----
+>  drivers/firmware/dmi_scan.c           | 28 +++++++++++++++-------------
+>  drivers/firmware/efi/arm-runtime.c    |  6 ++----
+>  drivers/firmware/efi/libstub/Makefile | 14 +++++++-------
+>  drivers/video/fbdev/efifb.c           |  3 ++-
+>  include/linux/dmi.h                   |  8 ++------
+>  7 files changed, 31 insertions(+), 38 deletions(-)
 
-diff --git a/drivers/video/fbdev/efifb.c b/drivers/video/fbdev/efifb.c
-index ba906876cc45..9e529cc2b4ff 100644
---- a/drivers/video/fbdev/efifb.c
-+++ b/drivers/video/fbdev/efifb.c
-@@ -464,7 +464,8 @@ static int efifb_probe(struct platform_device *dev)
- 	info->apertures->ranges[0].base = efifb_fix.smem_start;
- 	info->apertures->ranges[0].size = size_remap;
- 
--	if (!efi_mem_desc_lookup(efifb_fix.smem_start, &md)) {
-+	if (efi_enabled(EFI_BOOT) &&
-+	    !efi_mem_desc_lookup(efifb_fix.smem_start, &md)) {
- 		if ((efifb_fix.smem_start + efifb_fix.smem_len) >
- 		    (md.phys_addr + (md.num_pages << EFI_PAGE_SHIFT))) {
- 			pr_err("efifb: video memory @ 0x%lx spans multiple EFI memory regions\n",
--- 
-2.20.1
+Applied to tip:efi/core, thanks a lot Ard!
+
+	Ingo
