@@ -1,83 +1,99 @@
 From: joeyli <jlee@suse.com>
 Subject: Re: [PATCH 1/2] efi: add a function for transferring status to string
-Date: Sat, 30 Mar 2019 13:37:41 +0800
-Message-ID: <20190330053741.GW26049@linux-l9pv.suse>
+Date: Sat, 30 Mar 2019 13:41:23 +0800
+Message-ID: <20190330054123.GX26049@linux-l9pv.suse>
 References: <20190324002621.3551-1-jlee@suse.com>
  <CAKv+Gu9B6h3zGVTctepd1GE5LaaMaT5x14Le1v05AOhbH36bpQ@mail.gmail.com>
+ <1553713442.4608.20.camel@linux.ibm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CAKv+Gu9B6h3zGVTctepd1GE5LaaMaT5x14Le1v05AOhbH36bpQ@mail.gmail.com>
+In-Reply-To: <1553713442.4608.20.camel@linux.ibm.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>, James Morris <jmorris@namei.org>, "Serge E . Hallyn" <serge@hallyn.com>, David Howells <dhowells@redhat.com>, Josh Boyer <jwboyer@fedoraproject.org>, Nayna Jain <nayna@linux.ibm.com>, Mimi Zohar <zohar@linux.ibm.com>, linux-efi <linux-efi@vger.kernel.org>, linux-security-module <linux-security-module@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Kees Cook <keescook@chromium.org>, Anton Vorontsov <anton@enomsg.org>, Colin Cross <ccross@android.com>, Tony Luck <tony.luck@intel.com>
+To: Mimi Zohar <zohar@linux.ibm.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Lee, Chun-Yi" <joeyli.kernel@gmail.com>, James Morris <jmorris@namei.org>, "Serge E . Hallyn" <serge@hallyn.com>, David Howells <dhowells@redhat.com>, Josh Boyer <jwboyer@fedoraproject.org>, Nayna Jain <nayna@linux.ibm.com>, linux-efi <linux-efi@vger.kernel.org>, linux-security-module <linux-security-module@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Kees Cook <keescook@chromium.org>, Anton Vorontsov <anton@enomsg.org>, Colin Cross <ccross@android.com>, Tony Luck <tony.luck@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Ard,
+Hi Mimi,
 
-On Wed, Mar 27, 2019 at 07:58:03PM +0100, Ard Biesheuvel wrote:
-> On Sun, 24 Mar 2019 at 01:26, Lee, Chun-Yi <joeyli.kernel@gmail.com> wrote:
-> >
-> > This function can be used to transfer EFI status code to string
-> > for printing out debug message. Using this function can improve
-> > the readability of log.
-> >
-> > Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> > Cc: Kees Cook <keescook@chromium.org>
-> > Cc: Anton Vorontsov <anton@enomsg.org>
-> > Cc: Colin Cross <ccross@android.com>
-> > Cc: Tony Luck <tony.luck@intel.com>
-> > Signed-off-by: "Lee, Chun-Yi" <jlee@suse.com>
-> > ---
-> >  include/linux/efi.h | 28 ++++++++++++++++++++++++++++
-> >  1 file changed, 28 insertions(+)
-> >
-> > diff --git a/include/linux/efi.h b/include/linux/efi.h
-> > index 54357a258b35..a43cb0dc37af 100644
-> > --- a/include/linux/efi.h
-> > +++ b/include/linux/efi.h
-> > @@ -1768,4 +1768,32 @@ struct linux_efi_memreserve {
-> >  #define EFI_MEMRESERVE_COUNT(size) (((size) - sizeof(struct linux_efi_memreserve)) \
-> >         / sizeof(((struct linux_efi_memreserve *)0)->entry[0]))
-> >
-> > +#define EFI_STATUS_STR(_status) \
-> > +case EFI_##_status: \
-> > +       return "EFI_" __stringify(_status);
-> > +
-> > +static inline char *
-> > +efi_status_to_str(efi_status_t status)
-> > +{
-> > +       switch (status) {
-> > +       EFI_STATUS_STR(SUCCESS)
-> > +       EFI_STATUS_STR(LOAD_ERROR)
-> > +       EFI_STATUS_STR(INVALID_PARAMETER)
-> > +       EFI_STATUS_STR(UNSUPPORTED)
-> > +       EFI_STATUS_STR(BAD_BUFFER_SIZE)
-> > +       EFI_STATUS_STR(BUFFER_TOO_SMALL)
-> > +       EFI_STATUS_STR(NOT_READY)
-> > +       EFI_STATUS_STR(DEVICE_ERROR)
-> > +       EFI_STATUS_STR(WRITE_PROTECTED)
-> > +       EFI_STATUS_STR(OUT_OF_RESOURCES)
-> > +       EFI_STATUS_STR(NOT_FOUND)
-> > +       EFI_STATUS_STR(ABORTED)
-> > +       EFI_STATUS_STR(SECURITY_VIOLATION)
-> > +       default:
-> > +               pr_warn("Unknown efi status: 0x%lx", status);
-> > +       }
-> > +
-> > +       return "Unknown efi status";
-> > +}
-> > +
-> >  #endif /* _LINUX_EFI_H */
-> > --
-> > 2.16.4
-> >
+On Wed, Mar 27, 2019 at 03:04:02PM -0400, Mimi Zohar wrote:
+> On Wed, 2019-03-27 at 19:58 +0100, Ard Biesheuvel wrote:
+> > On Sun, 24 Mar 2019 at 01:26, Lee, Chun-Yi <joeyli.kernel@gmail.com> wrote:
+> > >
+> > > This function can be used to transfer EFI status code to string
+> > > for printing out debug message. Using this function can improve
+> > > the readability of log.
 > 
-> Please turn this into a proper function so that not every calling
-> object has to duplicate all these strings.
+> Maybe instead of "for transferring status" use "to convert the status
+> value to a" in the Subject line and here in the patch description.
+>
 
-OK! I will move them to function.
+Thanks for your suggestion. I will change subject and description.
+ 
+> > >
+> > > Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> > > Cc: Kees Cook <keescook@chromium.org>
+> > > Cc: Anton Vorontsov <anton@enomsg.org>
+> > > Cc: Colin Cross <ccross@android.com>
+> > > Cc: Tony Luck <tony.luck@intel.com>
+> > > Signed-off-by: "Lee, Chun-Yi" <jlee@suse.com>
+> > > ---
+> > >  include/linux/efi.h | 28 ++++++++++++++++++++++++++++
+> > >  1 file changed, 28 insertions(+)
+> > >
+> > > diff --git a/include/linux/efi.h b/include/linux/efi.h
+> > > index 54357a258b35..a43cb0dc37af 100644
+> > > --- a/include/linux/efi.h
+> > > +++ b/include/linux/efi.h
+> > > @@ -1768,4 +1768,32 @@ struct linux_efi_memreserve {
+> > >  #define EFI_MEMRESERVE_COUNT(size) (((size) - sizeof(struct linux_efi_memreserve)) \
+> > >         / sizeof(((struct linux_efi_memreserve *)0)->entry[0]))
+> > >
+> > > +#define EFI_STATUS_STR(_status) \
+> > > +case EFI_##_status: \
+> > > +       return "EFI_" __stringify(_status);
+> > > +
+> > > +static inline char *
+> > > +efi_status_to_str(efi_status_t status)
+> > > +{
+> > > +       switch (status) {
+> > > +       EFI_STATUS_STR(SUCCESS)
+> > > +       EFI_STATUS_STR(LOAD_ERROR)
+> > > +       EFI_STATUS_STR(INVALID_PARAMETER)
+> > > +       EFI_STATUS_STR(UNSUPPORTED)
+> > > +       EFI_STATUS_STR(BAD_BUFFER_SIZE)
+> > > +       EFI_STATUS_STR(BUFFER_TOO_SMALL)
+> > > +       EFI_STATUS_STR(NOT_READY)
+> > > +       EFI_STATUS_STR(DEVICE_ERROR)
+> > > +       EFI_STATUS_STR(WRITE_PROTECTED)
+> > > +       EFI_STATUS_STR(OUT_OF_RESOURCES)
+> > > +       EFI_STATUS_STR(NOT_FOUND)
+> > > +       EFI_STATUS_STR(ABORTED)
+> > > +       EFI_STATUS_STR(SECURITY_VIOLATION)
+> > > +       default:
+> > > +               pr_warn("Unknown efi status: 0x%lx", status);
+> > > +       }
+> > > +
+> > > +       return "Unknown efi status";
+> > > +}
+> > > +
+> > >  #endif /* _LINUX_EFI_H */
+> > > --
+> > > 2.16.4
+> > >
+> > 
+> > Please turn this into a proper function so that not every calling
+> > object has to duplicate all these strings.
+> 
+> Hi Ard,
+> 
+> Keeping the status values and strings in sync is difficult.  I was
+> going to suggest moving the macro immediately after the status value
+> definitions.
+>
 
-Thanks for your review!
-Joey Lee
+I will move the code to after the status value definitions.
+
+Thanks
+Joey Lee 
