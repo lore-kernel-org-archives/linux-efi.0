@@ -1,65 +1,83 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH] efi/arm: enable CP15 DMB instructions before cleaning the
- cache
-Date: Fri, 29 Mar 2019 19:24:18 +0100
-Message-ID: <20190329182418.29592-1-ard.biesheuvel@linaro.org>
+From: joeyli <jlee@suse.com>
+Subject: Re: [PATCH 1/2] efi: add a function for transferring status to string
+Date: Sat, 30 Mar 2019 13:37:41 +0800
+Message-ID: <20190330053741.GW26049@linux-l9pv.suse>
+References: <20190324002621.3551-1-jlee@suse.com>
+ <CAKv+Gu9B6h3zGVTctepd1GE5LaaMaT5x14Le1v05AOhbH36bpQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Marc Zyngier <marc.zyngier@arm.com>, linux@armlinux.org.uk, leif.lindholm@linaro.org, steve.mcintyre@linaro.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu9B6h3zGVTctepd1GE5LaaMaT5x14Le1v05AOhbH36bpQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>, James Morris <jmorris@namei.org>, "Serge E . Hallyn" <serge@hallyn.com>, David Howells <dhowells@redhat.com>, Josh Boyer <jwboyer@fedoraproject.org>, Nayna Jain <nayna@linux.ibm.com>, Mimi Zohar <zohar@linux.ibm.com>, linux-efi <linux-efi@vger.kernel.org>, linux-security-module <linux-security-module@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Kees Cook <keescook@chromium.org>, Anton Vorontsov <anton@enomsg.org>, Colin Cross <ccross@android.com>, Tony Luck <tony.luck@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-The EFI stub is entered with the caches and MMU enabled by the
-firmware, and once the stub is ready to hand over to the decompressor,
-we clean and disable the caches.
+Hi Ard,
 
-The cache clean routines use CP15 barrier instructions, which can be
-disabled via SCTLR. Normally, when using the provided cache handling
-routines to enable the caches and MMU, this bit is enabled as well.
-However, but since we entered the stub with the caches already enabled,
-this routine is not executed before we call the cache clean routines,
-resulting in undefined instruction exceptions if the firmware never
-enabled this bit.
+On Wed, Mar 27, 2019 at 07:58:03PM +0100, Ard Biesheuvel wrote:
+> On Sun, 24 Mar 2019 at 01:26, Lee, Chun-Yi <joeyli.kernel@gmail.com> wrote:
+> >
+> > This function can be used to transfer EFI status code to string
+> > for printing out debug message. Using this function can improve
+> > the readability of log.
+> >
+> > Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> > Cc: Kees Cook <keescook@chromium.org>
+> > Cc: Anton Vorontsov <anton@enomsg.org>
+> > Cc: Colin Cross <ccross@android.com>
+> > Cc: Tony Luck <tony.luck@intel.com>
+> > Signed-off-by: "Lee, Chun-Yi" <jlee@suse.com>
+> > ---
+> >  include/linux/efi.h | 28 ++++++++++++++++++++++++++++
+> >  1 file changed, 28 insertions(+)
+> >
+> > diff --git a/include/linux/efi.h b/include/linux/efi.h
+> > index 54357a258b35..a43cb0dc37af 100644
+> > --- a/include/linux/efi.h
+> > +++ b/include/linux/efi.h
+> > @@ -1768,4 +1768,32 @@ struct linux_efi_memreserve {
+> >  #define EFI_MEMRESERVE_COUNT(size) (((size) - sizeof(struct linux_efi_memreserve)) \
+> >         / sizeof(((struct linux_efi_memreserve *)0)->entry[0]))
+> >
+> > +#define EFI_STATUS_STR(_status) \
+> > +case EFI_##_status: \
+> > +       return "EFI_" __stringify(_status);
+> > +
+> > +static inline char *
+> > +efi_status_to_str(efi_status_t status)
+> > +{
+> > +       switch (status) {
+> > +       EFI_STATUS_STR(SUCCESS)
+> > +       EFI_STATUS_STR(LOAD_ERROR)
+> > +       EFI_STATUS_STR(INVALID_PARAMETER)
+> > +       EFI_STATUS_STR(UNSUPPORTED)
+> > +       EFI_STATUS_STR(BAD_BUFFER_SIZE)
+> > +       EFI_STATUS_STR(BUFFER_TOO_SMALL)
+> > +       EFI_STATUS_STR(NOT_READY)
+> > +       EFI_STATUS_STR(DEVICE_ERROR)
+> > +       EFI_STATUS_STR(WRITE_PROTECTED)
+> > +       EFI_STATUS_STR(OUT_OF_RESOURCES)
+> > +       EFI_STATUS_STR(NOT_FOUND)
+> > +       EFI_STATUS_STR(ABORTED)
+> > +       EFI_STATUS_STR(SECURITY_VIOLATION)
+> > +       default:
+> > +               pr_warn("Unknown efi status: 0x%lx", status);
+> > +       }
+> > +
+> > +       return "Unknown efi status";
+> > +}
+> > +
+> >  #endif /* _LINUX_EFI_H */
+> > --
+> > 2.16.4
+> >
+> 
+> Please turn this into a proper function so that not every calling
+> object has to duplicate all these strings.
 
-So set the bit explicitly in the EFI entry code.
+OK! I will move them to function.
 
-Cc: Marc Zyngier <marc.zyngier@arm.com>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
- arch/arm/boot/compressed/head.S | 10 ++++++++++
- 1 file changed, 10 insertions(+)
-
-diff --git a/arch/arm/boot/compressed/head.S b/arch/arm/boot/compressed/head.S
-index 6c7ccb428c07..62a49356fca3 100644
---- a/arch/arm/boot/compressed/head.S
-+++ b/arch/arm/boot/compressed/head.S
-@@ -1438,6 +1438,16 @@ ENTRY(efi_stub_entry)
- 
- 		@ Preserve return value of efi_entry() in r4
- 		mov	r4, r0
-+
-+		@ our cache maintenance code relies on CP15 barrier instructions
-+		@ but since we arrived here with the MMU and caches configured
-+		@ by UEFI, we must ensure that the use of those instructions is
-+		@ enabled in the SCTLR register, since we never executed our own
-+		@ cache enable routine, which is normally in charge of this.
-+		mrc	p15, 0, r1, c1, c0, 0	@ read SCTLR
-+		orr	r1, r1, #(1 << 5)	@ CP15 barrier instructions
-+		mcr	p15, 0, r1, c1, c0, 0	@ write SCTLR
-+
- 		bl	cache_clean_flush
- 		bl	cache_off
- 
--- 
-2.20.1
+Thanks for your review!
+Joey Lee
