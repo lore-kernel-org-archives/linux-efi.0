@@ -1,7 +1,7 @@
 From: Claudio Carvalho <cclaudio@linux.ibm.com>
-Subject: [PATCH 3/4] powerpc/powernv: Detect the secure boot mode of the system
-Date: Tue,  2 Apr 2019 15:15:04 -0300
-Message-ID: <20190402181505.25037-4-cclaudio@linux.ibm.com>
+Subject: [PATCH 4/4] powerpc: Add support to initialize ima policy rules
+Date: Tue,  2 Apr 2019 15:15:05 -0300
+Message-ID: <20190402181505.25037-5-cclaudio@linux.ibm.com>
 References: <20190402181505.25037-1-cclaudio@linux.ibm.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -14,117 +14,138 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Nayna Jain <nayna@linux.ibm.com>
 
-PowerNV secure boot defines different IMA policies based on the secure
-boot state of the system.
+PowerNV secure boot relies on the kernel IMA security subsystem to
+perform the OS kernel image signature verification. Since each secure
+boot mode has different IMA policy requirements, dynamic definition of
+the policy rules based on the runtime secure boot mode of the system is
+required. On systems that support secure boot, but have it disabled,
+only measurement policy rules of the kernel image and modules are
+defined.
 
-This patch defines a function to detect the secure boot state of the
-system.
+This patch defines the arch-specific implementation to retrieve the
+secure boot mode of the system and accordingly configures the IMA policy
+rules.
+
+This patch will provide arch-specific IMA policies if PPC_SECURE_BOOT
+config is enabled.
 
 Signed-off-by: Nayna Jain <nayna@linux.ibm.com>
 ---
- arch/powerpc/include/asm/secboot.h       | 21 +++++++++
- arch/powerpc/platforms/powernv/Makefile  |  2 +-
- arch/powerpc/platforms/powernv/secboot.c | 54 ++++++++++++++++++++++++
- 3 files changed, 76 insertions(+), 1 deletion(-)
- create mode 100644 arch/powerpc/include/asm/secboot.h
- create mode 100644 arch/powerpc/platforms/powernv/secboot.c
+ arch/powerpc/Kconfig           | 12 ++++++++
+ arch/powerpc/kernel/Makefile   |  1 +
+ arch/powerpc/kernel/ima_arch.c | 54 ++++++++++++++++++++++++++++++++++
+ include/linux/ima.h            |  3 +-
+ 4 files changed, 69 insertions(+), 1 deletion(-)
+ create mode 100644 arch/powerpc/kernel/ima_arch.c
 
-diff --git a/arch/powerpc/include/asm/secboot.h b/arch/powerpc/include/asm/secboot.h
-new file mode 100644
-index 000000000000..1904fb4a3352
---- /dev/null
-+++ b/arch/powerpc/include/asm/secboot.h
-@@ -0,0 +1,21 @@
-+/* SPDX-License-Identifier: GPL-2.0 */
-+/*
-+ * PowerPC secure boot definitions
-+ *
-+ * Copyright (C) 2019 IBM Corporation
-+ * Author: Nayna Jain <nayna@linux.ibm.com>
-+ *
-+ */
-+#ifndef POWERPC_SECBOOT_H
-+#define POWERPC_SECBOOT_H
+diff --git a/arch/powerpc/Kconfig b/arch/powerpc/Kconfig
+index 2d0be82c3061..e0ba9a9114b3 100644
+--- a/arch/powerpc/Kconfig
++++ b/arch/powerpc/Kconfig
+@@ -901,6 +901,18 @@ config PPC_MEM_KEYS
+ 
+ 	  If unsure, say y.
+ 
++config PPC_SECURE_BOOT
++	prompt "Enable PowerPC Secure Boot"
++	bool
++	default n
++	depends on IMA
++	depends on IMA_ARCH_POLICY
++	help
++	  Linux on POWER with firmware secure boot enabled needs to define
++	  security policies to extend secure boot to the OS.
++	  This config allows user to enable OS Secure Boot on PowerPC systems
++	  that have firmware secure boot support.
 +
-+#if defined(CONFIG_OPAL_SECVAR)
-+extern bool get_powerpc_sb_mode(void);
-+#else
-+static inline bool get_powerpc_sb_mode(void)
-+{
-+	return false;
-+}
-+#endif
-+
-+#endif
-diff --git a/arch/powerpc/platforms/powernv/Makefile b/arch/powerpc/platforms/powernv/Makefile
-index 1511d836fd19..a36e22f8ecf8 100644
---- a/arch/powerpc/platforms/powernv/Makefile
-+++ b/arch/powerpc/platforms/powernv/Makefile
-@@ -16,4 +16,4 @@ obj-$(CONFIG_PERF_EVENTS) += opal-imc.o
- obj-$(CONFIG_PPC_MEMTRACE)	+= memtrace.o
- obj-$(CONFIG_PPC_VAS)	+= vas.o vas-window.o vas-debug.o
- obj-$(CONFIG_OCXL_BASE)	+= ocxl.o
--obj-$(CONFIG_OPAL_SECVAR)	+= opal-secvar.o
-+obj-$(CONFIG_OPAL_SECVAR)	+= opal-secvar.o secboot.o
-diff --git a/arch/powerpc/platforms/powernv/secboot.c b/arch/powerpc/platforms/powernv/secboot.c
+ endmenu
+ 
+ config ISA_DMA_API
+diff --git a/arch/powerpc/kernel/Makefile b/arch/powerpc/kernel/Makefile
+index cddadccf551d..0f08ed7dfd1b 100644
+--- a/arch/powerpc/kernel/Makefile
++++ b/arch/powerpc/kernel/Makefile
+@@ -119,6 +119,7 @@ ifdef CONFIG_IMA
+ obj-y				+= ima_kexec.o
+ endif
+ endif
++obj-$(CONFIG_IMA)		+= ima_arch.o
+ 
+ obj-$(CONFIG_AUDIT)		+= audit.o
+ obj64-$(CONFIG_AUDIT)		+= compat_audit.o
+diff --git a/arch/powerpc/kernel/ima_arch.c b/arch/powerpc/kernel/ima_arch.c
 new file mode 100644
-index 000000000000..afb1552636c5
+index 000000000000..871b321656fb
 --- /dev/null
-+++ b/arch/powerpc/platforms/powernv/secboot.c
++++ b/arch/powerpc/kernel/ima_arch.c
 @@ -0,0 +1,54 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * Copyright (C) 2019 IBM Corporation
 + * Author: Nayna Jain <nayna@linux.ibm.com>
 + *
-+ * secboot.c
-+ *      - util functions to get powerpc secboot state
-+ *
++ * ima_arch.c
++ *      - initialize ima policies for PowerPC Secure Boot
 + */
-+#include <linux/efi.h>
++
++#include <linux/ima.h>
 +#include <asm/secboot.h>
 +
-+bool get_powerpc_sb_mode(void)
++bool arch_ima_get_secureboot(void)
 +{
-+	efi_char16_t efi_SecureBoot_name[] = L"SecureBoot";
-+	efi_char16_t efi_SetupMode_name[] = L"SetupMode";
-+	efi_guid_t efi_variable_guid = EFI_GLOBAL_VARIABLE_GUID;
-+	efi_status_t status;
-+	u8 secboot, setupmode;
-+	unsigned long size = sizeof(secboot);
++	bool sb_mode;
 +
-+	status = efi.get_variable(efi_SecureBoot_name, &efi_variable_guid,
-+				  NULL, &size, &secboot);
-+
-+	/*
-+	 * For now assume all failures reading the SecureBoot variable implies
-+	 * secure boot is not enabled. Later differentiate failure types.
-+	 */
-+	if (status != EFI_SUCCESS) {
-+		secboot = 0;
-+		setupmode = 0;
-+		goto out;
-+	}
-+
-+	size = sizeof(setupmode);
-+	status = efi.get_variable(efi_SetupMode_name, &efi_variable_guid,
-+				  NULL, &size, &setupmode);
-+
-+	/*
-+	 * Failure to read the SetupMode variable does not prevent
-+	 * secure boot mode
-+	 */
-+	if (status != EFI_SUCCESS)
-+		setupmode = 0;
-+
-+out:
-+	if ((secboot == 0) || (setupmode == 1)) {
-+		pr_info("ima: secureboot mode disabled\n");
++	sb_mode = get_powerpc_sb_mode();
++	if (sb_mode)
++		return true;
++	else
 +		return false;
-+	}
-+
-+	pr_info("ima: secureboot mode enabled\n");
-+	return true;
 +}
++
++/*
++ * File signature verification is not needed, include only measurements
++ */
++static const char *const default_arch_rules[] = {
++	"measure func=KEXEC_KERNEL_CHECK",
++	"measure func=MODULE_CHECK",
++	NULL
++};
++
++/* Both file signature verification and measurements are needed */
++static const char *const sb_arch_rules[] = {
++	"measure func=KEXEC_KERNEL_CHECK",
++	"measure func=MODULE_CHECK",
++	"appraise func=KEXEC_KERNEL_CHECK appraise_type=imasig",
++#if !IS_ENABLED(CONFIG_MODULE_SIG)
++	"appraise func=MODULE_CHECK appraise_type=imasig",
++#endif
++	NULL
++};
++
++/*
++ * On PowerPC, file measurements are to be added to the IMA measurement list
++ * irrespective of the secure boot state of the system. Signature verification
++ * is conditionally enabled based on the secure boot state.
++ */
++const char *const *arch_get_ima_policy(void)
++{
++	if (IS_ENABLED(CONFIG_IMA_ARCH_POLICY) && arch_ima_get_secureboot())
++		return sb_arch_rules;
++	return default_arch_rules;
++}
+diff --git a/include/linux/ima.h b/include/linux/ima.h
+index dc12fbcf484c..32f46d69ebd7 100644
+--- a/include/linux/ima.h
++++ b/include/linux/ima.h
+@@ -31,7 +31,8 @@ extern void ima_post_path_mknod(struct dentry *dentry);
+ extern void ima_add_kexec_buffer(struct kimage *image);
+ #endif
+ 
+-#if defined(CONFIG_X86) && defined(CONFIG_EFI)
++#if defined(CONFIG_X86) && defined(CONFIG_EFI) \
++			|| defined(CONFIG_PPC_SECURE_BOOT)
+ extern bool arch_ima_get_secureboot(void);
+ extern const char * const *arch_get_ima_policy(void);
+ #else
 -- 
 2.20.1
