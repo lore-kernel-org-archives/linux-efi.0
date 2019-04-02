@@ -1,125 +1,53 @@
-From: Matthew Garrett <matthewgarrett@google.com>
-Subject: [PATCH 2/2] tpm: Fix builds on platforms that lack early_memremap()
-Date: Tue,  2 Apr 2019 14:55:56 -0700
-Message-ID: <20190402215556.257406-3-matthewgarrett@google.com>
-References: <20190402215556.257406-1-matthewgarrett@google.com>
+From: Claudio Carvalho <cclaudio@linux.ibm.com>
+Subject: Re: [PATCH 0/4] Enabling secure boot on PowerNV systems
+Date: Tue, 2 Apr 2019 20:31:19 -0300
+Message-ID: <2208f156-d441-3082-2f4c-8030c84ef788@linux.ibm.com>
+References: <20190402181505.25037-1-cclaudio@linux.ibm.com>
+ <CACdnJuumhkqTb4+1=QBiLmbW4xd3wW=MZu6Tj_KdaoTMhCN+Tg@mail.gmail.com>
+ <4ce5e057-0702-b0d5-7bb2-cea5b22e2efa@linux.ibm.com>
+ <CACdnJusBm93zwDqTXTx_QYsg1-aGUAAHm_qq8Lcx3TvGTxdmbg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190402215556.257406-1-matthewgarrett@google.com>
+In-Reply-To: <CACdnJusBm93zwDqTXTx_QYsg1-aGUAAHm_qq8Lcx3TvGTxdmbg@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-integrity@vger.kernel.org
-Cc: peterhuewe@gmx.de, jarkko.sakkinen@linux.intel.com, jgg@ziepe.ca, roberto.sassu@huawei.com, linux-efi@vger.kernel.org, linux-security-module@vger.kernel.org, linux-kernel@vger.kernel.org, tweek@google.com, Matthew Garrett <matthewgarrett@google.com>, Matthew Garrett <mjg59@google.com>
+To: Matthew Garrett <mjg59@google.com>
+Cc: linuxppc-dev@ozlabs.org, linux-efi <linux-efi@vger.kernel.org>, linux-integrity <linux-integrity@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Michael Ellerman <mpe@ellerman.id.au>, Paul Mackerras <paulus@samba.org>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Jeremy Kerr <jk@ozlabs.org>, Matthew Garret <matthew.garret@nebula.com>, Nayna Jain <nayna@linux.ibm.com>
 List-Id: linux-efi@vger.kernel.org
 
-On EFI systems, __calc_tpm2_event_size() needs to be able to map tables
-at early boot time in order to extract information from them.
-Unfortunately this interacts badly with other architectures that don't
-provide the early_memremap() interface but which may still have other
-mechanisms for obtaining crypto-agile logs. Abstract this away so we
-can avoid the need for two implementations while still avoiding breakage
-on architectures that don't require remapping of the table.
 
-Signed-off-by: Matthew Garrett <mjg59@google.com>
----
- drivers/firmware/efi/tpm.c   |  3 +++
- include/linux/tpm_eventlog.h | 32 ++++++++++++++++++++------------
- 2 files changed, 23 insertions(+), 12 deletions(-)
+On 4/2/19 6:51 PM, Matthew Garrett wrote:
+> On Tue, Apr 2, 2019 at 2:11 PM Claudio Carvalho <cclaudio@linux.ibm.com> wrote:
+>> We want to use the efivarfs for compatibility with existing userspace
+>> tools. We will track and match any EFI changes that affect us.
+> So you implement the full PK/KEK/db/dbx/dbt infrastructure, and
+> updates are signed in the same way?
 
-diff --git a/drivers/firmware/efi/tpm.c b/drivers/firmware/efi/tpm.c
-index f2a13cbb8688..fe48150f06d1 100644
---- a/drivers/firmware/efi/tpm.c
-+++ b/drivers/firmware/efi/tpm.c
-@@ -4,6 +4,9 @@
-  *     Thiebaud Weksteen <tweek@google.com>
-  */
- 
-+#define TPM_MEMREMAP(start, size) early_memremap(start, size)
-+#define TPM_MEMUNMAP(start, size) early_memunmap(start, size)
-+
- #include <linux/efi.h>
- #include <linux/init.h>
- #include <linux/memblock.h>
-diff --git a/include/linux/tpm_eventlog.h b/include/linux/tpm_eventlog.h
-index d889e12047d9..0ca27bc053af 100644
---- a/include/linux/tpm_eventlog.h
-+++ b/include/linux/tpm_eventlog.h
-@@ -128,6 +128,14 @@ struct tcg_algorithm_info {
- 	struct tcg_algorithm_size digest_sizes[];
- };
- 
-+#ifndef TPM_MEMREMAP
-+#define TPM_MEMREMAP(start, size) NULL
-+#endif
-+
-+#ifndef TPM_MEMUNMAP
-+#define TPM_MEMUNMAP(start, size) do{} while(0)
-+#endif
-+
- /**
-  * __calc_tpm2_event_size - calculate the size of a TPM2 event log entry
-  * @event:        Pointer to the event whose size should be calculated
-@@ -171,8 +179,8 @@ static inline int __calc_tpm2_event_size(struct tcg_pcr_event2_head *event,
- 	/* Map the event header */
- 	if (do_mapping) {
- 		mapping_size = marker - marker_start;
--		mapping = early_memremap((unsigned long)marker_start,
--					 mapping_size);
-+		mapping = TPM_MEMREMAP((unsigned long)marker_start,
-+				       mapping_size);
- 		if (!mapping) {
- 			size = 0;
- 			goto out;
-@@ -192,10 +200,10 @@ static inline int __calc_tpm2_event_size(struct tcg_pcr_event2_head *event,
- 
- 		/* Map the digest's algorithm identifier */
- 		if (do_mapping) {
--			early_memunmap(mapping, mapping_size);
-+			TPM_MEMUNMAP(mapping, mapping_size);
- 			mapping_size = marker - marker_start + halg_size;
--			mapping = early_memremap((unsigned long)marker_start,
--						 mapping_size);
-+			mapping = TPM_MEMREMAP((unsigned long)marker_start,
-+					       mapping_size);
- 			if (!mapping) {
- 				size = 0;
- 				goto out;
-@@ -212,10 +220,10 @@ static inline int __calc_tpm2_event_size(struct tcg_pcr_event2_head *event,
- 
- 				/* Map the digest content itself */
- 				if (do_mapping) {
--					early_memunmap(mapping, mapping_size);
-+					TPM_MEMUNMAP(mapping, mapping_size);
- 					mapping_size = marker - marker_start;
--					mapping = early_memremap((unsigned long)marker_start,
--						      mapping_size);
-+					mapping = TPM_MEMREMAP((unsigned long)marker_start,
-+							       mapping_size);
- 					if (!mapping) {
- 						size = 0;
- 						goto out;
-@@ -238,10 +246,10 @@ static inline int __calc_tpm2_event_size(struct tcg_pcr_event2_head *event,
- 	 * we don't need to map it
- 	 */
- 	if (do_mapping) {
--		early_memunmap(marker_start, mapping_size);
-+		TPM_MEMUNMAP(marker_start, mapping_size);
- 		mapping_size += sizeof(event_field->event_size);
--		mapping = early_memremap((unsigned long)marker_start,
--					 mapping_size);
-+		mapping = TPM_MEMREMAP((unsigned long)marker_start,
-+				       mapping_size);
- 		if (!mapping) {
- 			size = 0;
- 			goto out;
-@@ -256,7 +264,7 @@ static inline int __calc_tpm2_event_size(struct tcg_pcr_event2_head *event,
- 		size = 0;
- out:
- 	if (do_mapping)
--		early_memunmap(mapping, mapping_size);
-+		TPM_MEMUNMAP(mapping, mapping_size);
- 	return size;
- }
- 
--- 
-2.21.0.392.gf8f6787159e-goog
+For the first version, our firmware will implement a simplistic PK, KEK and
+db infrastructure (without dbx and dbt) where only the Setup and User modes
+will be supported.
+
+PK, KEK and db updates will be signed the same way, that is, using
+userspace tooling like efitools in PowerNV. As for the authentication
+descriptors, only the EFI_VARIABLE_AUTHENTICATION_2 descriptor will be
+supported.
+
+
+>> Our use case is restricted to secure boot - this is not going to be a
+>> general purpose EFI variable implementation.
+> In that case we might be better off with a generic interface for this
+> purpose that we can expose on all platforms that implement a secure
+> boot key hierarchy. Having an efivarfs that doesn't allow the creation
+> of arbitrary attributes may break other existing userland
+> expectations.
+>
+For what it's worth, gsmi uses the efivars infrastructure for EFI-like
+variables.
+
+What might a generic interface look like?  It would have to work for
+existing secure boot solutions - including EFI - which would seem to imply
+changes to userspace tools.
+
+Claudio
