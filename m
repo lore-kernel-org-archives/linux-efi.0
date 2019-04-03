@@ -1,75 +1,67 @@
-From: Claudio Carvalho <cclaudio@linux.ibm.com>
+From: Matthew Garrett <mjg59@google.com>
 Subject: Re: [PATCH 0/4] Enabling secure boot on PowerNV systems
-Date: Wed, 3 Apr 2019 18:48:39 -0300
-Message-ID: <3befcee7-0b65-c312-1f14-daa56afeb176@linux.ibm.com>
+Date: Wed, 3 Apr 2019 15:27:13 -0700
+Message-ID: <CACdnJuu8OqMrSs0esOmf=ro9n00aYEQ-nikAh6v6sk+YAQw4cQ@mail.gmail.com>
 References: <20190402181505.25037-1-cclaudio@linux.ibm.com>
- <87r2aj1ayf.fsf@concordia.ellerman.id.au>
+ <CACdnJuumhkqTb4+1=QBiLmbW4xd3wW=MZu6Tj_KdaoTMhCN+Tg@mail.gmail.com>
+ <4ce5e057-0702-b0d5-7bb2-cea5b22e2efa@linux.ibm.com> <CACdnJusBm93zwDqTXTx_QYsg1-aGUAAHm_qq8Lcx3TvGTxdmbg@mail.gmail.com>
+ <2208f156-d441-3082-2f4c-8030c84ef788@linux.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <87r2aj1ayf.fsf@concordia.ellerman.id.au>
-Content-Language: en-US
+In-Reply-To: <2208f156-d441-3082-2f4c-8030c84ef788@linux.ibm.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Michael Ellerman <mpe@ellerman.id.au>, linuxppc-dev@ozlabs.org, linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Paul Mackerras <paulus@samba.org>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Jeremy Kerr <jk@ozlabs.org>, Matthew Garret <matthew.garret@nebula.com>, Nayna Jain <nayna@linux.ibm.com>
+To: Claudio Carvalho <cclaudio@linux.ibm.com>
+Cc: linuxppc-dev@ozlabs.org, linux-efi <linux-efi@vger.kernel.org>, linux-integrity <linux-integrity@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Michael Ellerman <mpe@ellerman.id.au>, Paul Mackerras <paulus@samba.org>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Jeremy Kerr <jk@ozlabs.org>, Matthew Garret <matthew.garret@nebula.com>, Nayna Jain <nayna@linux.ibm.com>
 List-Id: linux-efi@vger.kernel.org
 
-
-On 4/3/19 10:21 AM, Michael Ellerman wrote:
-> Hi Claudio,
+On Tue, Apr 2, 2019 at 4:31 PM Claudio Carvalho <cclaudio@linux.ibm.com> wrote:
 >
-> Thanks for posting this.
 >
-> Claudio Carvalho <cclaudio@linux.ibm.com> writes:
->> This patch set is part of a series that implements secure boot on
->> PowerNV systems.
->>
->> In order to verify the OS kernel on PowerNV, secure boot requires X.509
->> certificates trusted by the platform, the secure boot modes, and several
->> other pieces of information. These are stored in secure variables
->> controlled by OPAL, also known as OPAL secure variables.
->>
->> This patch set adds the following features:
->>
->> 1. Enable efivarfs by selecting CONFIG_EFI in the CONFIG_OPAL_SECVAR
->>    introduced in this patch set. With CONFIG_EFIVAR_FS, userspace tools can
->>    be used to manage the secure variables.
->> 2. Add support for OPAL secure variables by overwriting the EFI hooks
->>    (get_variable, get_next_variable, set_variable and query_variable_info)
->>    with OPAL call wrappers. There is probably a better way to add this
->>    support, for example, we are investigating if we could register the
->>    efivar_operations rather than overwriting the EFI hooks. In this patch
->>    set, CONFIG_OPAL_SECVAR selects CONFIG_EFI. If, instead, we registered
->>    efivar_operations, CONFIG_EFIVAR_FS would need to depend on
->>    CONFIG_EFI|| CONFIG_OPAL_SECVAR. Comments or suggestions on the
->>    preferred technique would be greatly appreciated.
-> I am *very* reluctant to start selecting CONFIG_EFI on powerpc.
+> On 4/2/19 6:51 PM, Matthew Garrett wrote:
+> > So you implement the full PK/KEK/db/dbx/dbt infrastructure, and
+> > updates are signed in the same way?
 >
-> Simply because we don't actually have EFI, and I worry we're going to
-> both break assumptions in the EFI code as well as impose requirements on
-> the powerpc code that aren't really necessary.
+> For the first version, our firmware will implement a simplistic PK, KEK and
+> db infrastructure (without dbx and dbt) where only the Setup and User modes
+> will be supported.
 
-Yes, we agree. We are working on the v2 and it is not going to depend on
-CONFIG_EFI. Rather, the IMA arch policies will make the OPAL calls directly.
+Not supporting dbx seems like a pretty significant shortcoming. How
+are signatures meant to be revoked?
 
+> PK, KEK and db updates will be signed the same way, that is, using
+> userspace tooling like efitools in PowerNV. As for the authentication
+> descriptors, only the EFI_VARIABLE_AUTHENTICATION_2 descriptor will be
+> supported.
 
->
-> So I'd definitely prefer we go the route of enabling efivarfs with an
-> alternate backend.
+Is this API documented?
 
-Right, I'm investigating how we can do that, but it looks like we should
-post that as a separate patchset to avoid delaying upstreaming signature
-verification based on the secure boot variables.
+> > In that case we might be better off with a generic interface for this
+> > purpose that we can expose on all platforms that implement a secure
+> > boot key hierarchy. Having an efivarfs that doesn't allow the creation
+> > of arbitrary attributes may break other existing userland
+> > expectations.
+> >
+> For what it's worth, gsmi uses the efivars infrastructure for EFI-like
+> variables.
 
-Thanks,
-Claudio
+My recollection is that at the time the Chromebook firmware still had
+EFI underpinnings and the gsmi code was largely just an alternate
+mechanism for calling into something that was fundamentally the EFI
+variable store. With hindsight I don't think layering this was the
+right move - we've adjusted the semantics of efivarfs on more than one
+occasion to deal with the behaviour of real-world EFI platforms, and I
+don't think it's helpful to end up in a situation where we're trying
+to keep behaviour consistent among entirely different firmware
+interfaces.
 
+> What might a generic interface look like?  It would have to work for
+> existing secure boot solutions - including EFI - which would seem to imply
+> changes to userspace tools.
 
->
-> Better still would be a generic secure variable interface as Matt
-> suggests, if the userspace tools can be relatively easily adapted to use
-> that interface.
->
-> cheers
->
+I think that depends on exactly what problem you're trying to solve.
+Some aspects of the EFI secure boot design end up mirroring the
+economics of the PC ecosystem rather than being inherently good design
+goals, so it'd be helpful to know whether you're taking this solution
+because you want the same three-level key infrastructure or because
+that just leaves you compatible with the tooling.
