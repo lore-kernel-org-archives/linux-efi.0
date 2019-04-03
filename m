@@ -1,36 +1,33 @@
-From: Matthew Garrett <mjg59@google.com>
-Subject: Re: [PATCH 1/2] efi: Fix cast to pointer from integer of different
- size in TPM log code
-Date: Wed, 3 Apr 2019 09:51:54 -0700
-Message-ID: <CACdnJusiCSH93cz+Q3yH01HBfDbVRQdO6JNCNOJwqt9Uqj_Qsw@mail.gmail.com>
-References: <20190402215556.257406-1-matthewgarrett@google.com>
- <20190402215556.257406-2-matthewgarrett@google.com> <89e1cf4093d7405987c55f682519f9fc@AcuMS.aculab.com>
+From: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
+Subject: Re: Add support for TCG2 log format on UEFI systems
+Date: Wed, 3 Apr 2019 20:50:19 +0300
+Message-ID: <20190403175019.GB13396@linux.intel.com>
+References: <20190227202658.197113-1-matthewgarrett@google.com>
+ <20190401235245.GA29282@linux.intel.com>
+ <CACdnJutCC7n++Nz5qy1YzmsSchEApDUvMH9-qpxYXckh-Dzf-Q@mail.gmail.com>
+ <20190402130704.GA3916@linux.intel.com>
+ <CACdnJuvFxKCwP3XftqacFiLTmTZzCGHkc9DzrJu2u6vwy5_o-w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <89e1cf4093d7405987c55f682519f9fc@AcuMS.aculab.com>
+Content-Disposition: inline
+In-Reply-To: <CACdnJuvFxKCwP3XftqacFiLTmTZzCGHkc9DzrJu2u6vwy5_o-w@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: David Laight <David.Laight@aculab.com>
-Cc: "linux-integrity@vger.kernel.org" <linux-integrity@vger.kernel.org>, "peterhuewe@gmx.de" <peterhuewe@gmx.de>, "jarkko.sakkinen@linux.intel.com" <jarkko.sakkinen@linux.intel.com>, "jgg@ziepe.ca" <jgg@ziepe.ca>, "roberto.sassu@huawei.com" <roberto.sassu@huawei.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-security-module@vger.kernel.org" <linux-security-module@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "tweek@google.com" <tweek@google.com>
+To: Matthew Garrett <mjg59@google.com>
+Cc: tomas.winkler@intel.com, linux-integrity <linux-integrity@vger.kernel.org>, Peter Huewe <peterhuewe@gmx.de>, Jason Gunthorpe <jgg@ziepe.ca>, Roberto Sassu <roberto.sassu@huawei.com>, linux-efi <linux-efi@vger.kernel.org>, LSM List <linux-security-module@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, =?iso-8859-1?Q?Thi=E9baud?= Weksteen <tweek@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Apr 3, 2019 at 6:41 AM David Laight <David.Laight@aculab.com> wrote:
->
-> From: Matthew Garrett
-> > Sent: 02 April 2019 22:56
+On Tue, Apr 02, 2019 at 10:15:39AM -0700, Matthew Garrett wrote:
+> On Tue, Apr 2, 2019 at 6:07 AM Jarkko Sakkinen
+> <jarkko.sakkinen@linux.intel.com> wrote:
+> > Reviewed-by: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
+> > Tested-by: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
 > >
-> > 8bfcff4a6a1d9d7226bb63a7da758b82d9ab4373 introduced a cast from
-> > efi_physical_address_t to (void *), which are different sizes on 32-bit.
-> > Fix that. Caught by the 0-day test bot.
->
-> Casting a physical address to 'void *' seems completely wrong.
-> Also you'd need a guarantee that the address was below 4G or the result
-> is meaningless.
-> Looks to me like something is using the wrong types somewhere.
+> > I'll apply all patches soonish and include them to the next PR.
+> 
+> Thanks! Looks like I need some fixes to deal with non-x86
+> architectures, I'll get on that today.
 
-We're in UEFI here, not the kernel proper - the firmware functions we
-call give us back physical addresses, and we're operating with a 1:1
-mapping. long is 64 bit on 64 bit systems, and on 32 bit systems we've
-already asserted that all firmware resources are under 4GB (obviously
-we're going to have a bad time if they're not, but there's not really
-anything we can do about that)
+Great thanks. I'll check them tomorrow (Thu).
+
+/Jarkko
