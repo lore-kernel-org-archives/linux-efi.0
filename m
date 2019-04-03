@@ -1,56 +1,44 @@
-From: Michael Ellerman <mpe@ellerman.id.au>
-Subject: Re: [PATCH 0/4] Enabling secure boot on PowerNV systems
-Date: Thu, 04 Apr 2019 00:21:12 +1100
-Message-ID: <87r2aj1ayf.fsf@concordia.ellerman.id.au>
-References: <20190402181505.25037-1-cclaudio@linux.ibm.com>
+From: David Laight <David.Laight@ACULAB.COM>
+Subject: RE: [PATCH 1/2] efi: Fix cast to pointer from integer of different
+ size in TPM log code
+Date: Wed, 3 Apr 2019 13:42:36 +0000
+Message-ID: <89e1cf4093d7405987c55f682519f9fc@AcuMS.aculab.com>
+References: <20190402215556.257406-1-matthewgarrett@google.com>
+ <20190402215556.257406-2-matthewgarrett@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190402181505.25037-1-cclaudio@linux.ibm.com>
+In-Reply-To: <20190402215556.257406-2-matthewgarrett@google.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: linuxppc-dev@ozlabs.org, linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Paul Mackerras <paulus@samba.org>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Jeremy Kerr <jk@ozlabs.org>, Matthew Garret <matthew.garret@nebula.com>, Claudio Carvalho <cclaudio@linux.ibm.com>, Nayna Jain <nayna@linux.ibm.com>
+To: 'Matthew Garrett' <matthewgarrett@google.com>, "linux-integrity@vger.kernel.org" <linux-integrity@vger.kernel.org>
+Cc: "peterhuewe@gmx.de" <peterhuewe@gmx.de>, "jarkko.sakkinen@linux.intel.com" <jarkko.sakkinen@linux.intel.com>, "jgg@ziepe.ca" <jgg@ziepe.ca>, "roberto.sassu@huawei.com" <roberto.sassu@huawei.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-security-module@vger.kernel.org" <linux-security-module@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "tweek@google.com" <tweek@google.com>, Matthew Garrett <mjg59@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Claudio,
-
-Thanks for posting this.
-
-Claudio Carvalho <cclaudio@linux.ibm.com> writes:
-> This patch set is part of a series that implements secure boot on
-> PowerNV systems.
->
-> In order to verify the OS kernel on PowerNV, secure boot requires X.509
-> certificates trusted by the platform, the secure boot modes, and several
-> other pieces of information. These are stored in secure variables
-> controlled by OPAL, also known as OPAL secure variables.
->
-> This patch set adds the following features:
->
-> 1. Enable efivarfs by selecting CONFIG_EFI in the CONFIG_OPAL_SECVAR
->    introduced in this patch set. With CONFIG_EFIVAR_FS, userspace tools can
->    be used to manage the secure variables.
-> 2. Add support for OPAL secure variables by overwriting the EFI hooks
->    (get_variable, get_next_variable, set_variable and query_variable_info)
->    with OPAL call wrappers. There is probably a better way to add this
->    support, for example, we are investigating if we could register the
->    efivar_operations rather than overwriting the EFI hooks. In this patch
->    set, CONFIG_OPAL_SECVAR selects CONFIG_EFI. If, instead, we registered
->    efivar_operations, CONFIG_EFIVAR_FS would need to depend on
->    CONFIG_EFI|| CONFIG_OPAL_SECVAR. Comments or suggestions on the
->    preferred technique would be greatly appreciated.
-
-I am *very* reluctant to start selecting CONFIG_EFI on powerpc.
-
-Simply because we don't actually have EFI, and I worry we're going to
-both break assumptions in the EFI code as well as impose requirements on
-the powerpc code that aren't really necessary.
-
-So I'd definitely prefer we go the route of enabling efivarfs with an
-alternate backend.
-
-Better still would be a generic secure variable interface as Matt
-suggests, if the userspace tools can be relatively easily adapted to use
-that interface.
-
-cheers
+RnJvbTogTWF0dGhldyBHYXJyZXR0DQo+IFNlbnQ6IDAyIEFwcmlsIDIwMTkgMjI6NTYNCj4gDQo+
+IDhiZmNmZjRhNmExZDlkNzIyNmJiNjNhN2RhNzU4YjgyZDlhYjQzNzMgaW50cm9kdWNlZCBhIGNh
+c3QgZnJvbQ0KPiBlZmlfcGh5c2ljYWxfYWRkcmVzc190IHRvICh2b2lkICopLCB3aGljaCBhcmUg
+ZGlmZmVyZW50IHNpemVzIG9uIDMyLWJpdC4NCj4gRml4IHRoYXQuIENhdWdodCBieSB0aGUgMC1k
+YXkgdGVzdCBib3QuDQoNCkNhc3RpbmcgYSBwaHlzaWNhbCBhZGRyZXNzIHRvICd2b2lkIConIHNl
+ZW1zIGNvbXBsZXRlbHkgd3JvbmcuDQpBbHNvIHlvdSdkIG5lZWQgYSBndWFyYW50ZWUgdGhhdCB0
+aGUgYWRkcmVzcyB3YXMgYmVsb3cgNEcgb3IgdGhlIHJlc3VsdA0KaXMgbWVhbmluZ2xlc3MuDQpM
+b29rcyB0byBtZSBsaWtlIHNvbWV0aGluZyBpcyB1c2luZyB0aGUgd3JvbmcgdHlwZXMgc29tZXdo
+ZXJlLg0KDQoJRGF2aWQNCg0KPiBTaWduZWQtb2ZmLWJ5OiBNYXR0aGV3IEdhcnJldHQgPG1qZzU5
+QGdvb2dsZS5jb20+DQo+IC0tLQ0KPiAgZHJpdmVycy9maXJtd2FyZS9lZmkvbGlic3R1Yi90cG0u
+YyB8IDQgKystLQ0KPiAgMSBmaWxlIGNoYW5nZWQsIDIgaW5zZXJ0aW9ucygrKSwgMiBkZWxldGlv
+bnMoLSkNCj4gDQo+IGRpZmYgLS1naXQgYS9kcml2ZXJzL2Zpcm13YXJlL2VmaS9saWJzdHViL3Rw
+bS5jIGIvZHJpdmVycy9maXJtd2FyZS9lZmkvbGlic3R1Yi90cG0uYw0KPiBpbmRleCBiNmU5M2Ux
+NGZjZjEuLjZiM2I1MDdhNTRlYiAxMDA2NDQNCj4gLS0tIGEvZHJpdmVycy9maXJtd2FyZS9lZmkv
+bGlic3R1Yi90cG0uYw0KPiArKysgYi9kcml2ZXJzL2Zpcm13YXJlL2VmaS9saWJzdHViL3RwbS5j
+DQo+IEBAIC0xMTQsOCArMTE0LDggQEAgdm9pZCBlZmlfcmV0cmlldmVfdHBtMl9ldmVudGxvZyhl
+Zmlfc3lzdGVtX3RhYmxlX3QgKnN5c190YWJsZV9hcmcpDQo+ICAJCQkgKi8NCj4gIAkJCWxhc3Rf
+ZW50cnlfc2l6ZSA9DQo+ICAJCQkJX19jYWxjX3RwbTJfZXZlbnRfc2l6ZSgodm9pZCAqKWxhc3Rf
+ZW50cnlfYWRkciwNCj4gLQkJCQkJCSAgICAgICAodm9pZCAqKWxvZ19sb2NhdGlvbiwNCj4gLQkJ
+CQkJCSAgICAgICBmYWxzZSk7DQo+ICsJCQkJCQkgICAgKHZvaWQgKikobG9uZylsb2dfbG9jYXRp
+b24sDQo+ICsJCQkJCQkgICAgZmFsc2UpOw0KPiAgCQl9IGVsc2Ugew0KPiAgCQkJbGFzdF9lbnRy
+eV9zaXplID0gc2l6ZW9mKHN0cnVjdCB0Y3BhX2V2ZW50KSArDQo+ICAJCQkgICAoKHN0cnVjdCB0
+Y3BhX2V2ZW50ICopIGxhc3RfZW50cnlfYWRkciktPmV2ZW50X3NpemU7DQo+IC0tDQo+IDIuMjEu
+MC4zOTIuZ2Y4ZjY3ODcxNTllLWdvb2cNCg0KLQ0KUmVnaXN0ZXJlZCBBZGRyZXNzIExha2VzaWRl
+LCBCcmFtbGV5IFJvYWQsIE1vdW50IEZhcm0sIE1pbHRvbiBLZXluZXMsIE1LMSAxUFQsIFVLDQpS
+ZWdpc3RyYXRpb24gTm86IDEzOTczODYgKFdhbGVzKQ0K
