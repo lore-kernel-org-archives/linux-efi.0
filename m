@@ -1,67 +1,81 @@
-From: Matthew Garrett <mjg59@google.com>
-Subject: Re: [PATCH 0/4] Enabling secure boot on PowerNV systems
-Date: Wed, 3 Apr 2019 15:27:13 -0700
-Message-ID: <CACdnJuu8OqMrSs0esOmf=ro9n00aYEQ-nikAh6v6sk+YAQw4cQ@mail.gmail.com>
-References: <20190402181505.25037-1-cclaudio@linux.ibm.com>
- <CACdnJuumhkqTb4+1=QBiLmbW4xd3wW=MZu6Tj_KdaoTMhCN+Tg@mail.gmail.com>
- <4ce5e057-0702-b0d5-7bb2-cea5b22e2efa@linux.ibm.com> <CACdnJusBm93zwDqTXTx_QYsg1-aGUAAHm_qq8Lcx3TvGTxdmbg@mail.gmail.com>
- <2208f156-d441-3082-2f4c-8030c84ef788@linux.ibm.com>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.9 67/91] efi/memattr: Dont bail on zero VA if it equals the regions PA
+Date: Thu,  4 Apr 2019 10:47:51 +0200
+Message-ID: <20190404084539.330838278@linuxfoundation.org>
+References: <20190404084535.450029272@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <2208f156-d441-3082-2f4c-8030c84ef788@linux.ibm.com>
+In-Reply-To: <20190404084535.450029272@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Claudio Carvalho <cclaudio@linux.ibm.com>
-Cc: linuxppc-dev@ozlabs.org, linux-efi <linux-efi@vger.kernel.org>, linux-integrity <linux-integrity@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Michael Ellerman <mpe@ellerman.id.au>, Paul Mackerras <paulus@samba.org>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Jeremy Kerr <jk@ozlabs.org>, Matthew Garret <matthew.garret@nebula.com>, Nayna Jain <nayna@linux.ibm.com>
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, AKASHI Takahiro <takahiro.akashi@linaro.org>, Alexander Graf <agraf@suse.de>, Bjorn Andersson <bjorn.andersson@linaro.org>, Borislav Petkov <bp@alien8.de>, Heinrich Schuchardt <xypron.glpk@gmx.de>, Jeffrey Hugo <jhugo@codeaurora.org>, Lee Jones <lee.jones@linaro.org>, Leif Lindholm <leif.lindholm@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Jones <pjones@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Apr 2, 2019 at 4:31 PM Claudio Carvalho <cclaudio@linux.ibm.com> wrote:
->
->
-> On 4/2/19 6:51 PM, Matthew Garrett wrote:
-> > So you implement the full PK/KEK/db/dbx/dbt infrastructure, and
-> > updates are signed in the same way?
->
-> For the first version, our firmware will implement a simplistic PK, KEK and
-> db infrastructure (without dbx and dbt) where only the Setup and User modes
-> will be supported.
+4.9-stable review patch.  If anyone has any objections, please let me know.
 
-Not supporting dbx seems like a pretty significant shortcoming. How
-are signatures meant to be revoked?
+------------------
 
-> PK, KEK and db updates will be signed the same way, that is, using
-> userspace tooling like efitools in PowerNV. As for the authentication
-> descriptors, only the EFI_VARIABLE_AUTHENTICATION_2 descriptor will be
-> supported.
+[ Upstream commit 5de0fef0230f3c8d75cff450a71740a7bf2db866 ]
 
-Is this API documented?
+The EFI memory attributes code cross-references the EFI memory map with
+the more granular EFI memory attributes table to ensure that they are in
+sync before applying the strict permissions to the regions it describes.
 
-> > In that case we might be better off with a generic interface for this
-> > purpose that we can expose on all platforms that implement a secure
-> > boot key hierarchy. Having an efivarfs that doesn't allow the creation
-> > of arbitrary attributes may break other existing userland
-> > expectations.
-> >
-> For what it's worth, gsmi uses the efivars infrastructure for EFI-like
-> variables.
+Since we always install virtual mappings for the EFI runtime regions to
+which these strict permissions apply, we currently perform a sanity check
+on the EFI memory descriptor, and ensure that the EFI_MEMORY_RUNTIME bit
+is set, and that the virtual address has been assigned.
 
-My recollection is that at the time the Chromebook firmware still had
-EFI underpinnings and the gsmi code was largely just an alternate
-mechanism for calling into something that was fundamentally the EFI
-variable store. With hindsight I don't think layering this was the
-right move - we've adjusted the semantics of efivarfs on more than one
-occasion to deal with the behaviour of real-world EFI platforms, and I
-don't think it's helpful to end up in a situation where we're trying
-to keep behaviour consistent among entirely different firmware
-interfaces.
+However, in cases where a runtime region exists at physical address 0x0,
+and the virtual mapping equals the physical mapping, e.g., when running
+in mixed mode on x86, we encounter a memory descriptor with the runtime
+attribute and virtual address 0x0, and incorrectly draw the conclusion
+that a runtime region exists for which no virtual mapping was installed,
+and give up altogether. The consequence of this is that firmware mappings
+retain their read-write-execute permissions, making the system more
+vulnerable to attacks.
 
-> What might a generic interface look like?  It would have to work for
-> existing secure boot solutions - including EFI - which would seem to imply
-> changes to userspace tools.
+So let's only bail if the virtual address of 0x0 has been assigned to a
+physical region that does not reside at address 0x0.
 
-I think that depends on exactly what problem you're trying to solve.
-Some aspects of the EFI secure boot design end up mirroring the
-economics of the PC ecosystem rather than being inherently good design
-goals, so it'd be helpful to know whether you're taking this solution
-because you want the same three-level key infrastructure or because
-that just leaves you compatible with the tooling.
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Acked-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: AKASHI Takahiro <takahiro.akashi@linaro.org>
+Cc: Alexander Graf <agraf@suse.de>
+Cc: Bjorn Andersson <bjorn.andersson@linaro.org>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Heinrich Schuchardt <xypron.glpk@gmx.de>
+Cc: Jeffrey Hugo <jhugo@codeaurora.org>
+Cc: Lee Jones <lee.jones@linaro.org>
+Cc: Leif Lindholm <leif.lindholm@linaro.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Peter Jones <pjones@redhat.com>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Fixes: 10f0d2f577053 ("efi: Implement generic support for the Memory ...")
+Link: http://lkml.kernel.org/r/20190202094119.13230-4-ard.biesheuvel@linaro.org
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ drivers/firmware/efi/memattr.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/firmware/efi/memattr.c b/drivers/firmware/efi/memattr.c
+index 236004b9a50d..9faa09e7c31f 100644
+--- a/drivers/firmware/efi/memattr.c
++++ b/drivers/firmware/efi/memattr.c
+@@ -93,7 +93,7 @@ static bool entry_is_valid(const efi_memory_desc_t *in, efi_memory_desc_t *out)
+ 
+ 		if (!(md->attribute & EFI_MEMORY_RUNTIME))
+ 			continue;
+-		if (md->virt_addr == 0) {
++		if (md->virt_addr == 0 && md->phys_addr != 0) {
+ 			/* no virtual mapping has been installed by the stub */
+ 			break;
+ 		}
+-- 
+2.19.1
