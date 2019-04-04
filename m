@@ -1,7 +1,7 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 5.0 180/246] efi/arm/arm64: Allow SetVirtualAddressMap() to be omitted
-Date: Thu,  4 Apr 2019 10:48:00 +0200
-Message-ID: <20190404084625.482886012@linuxfoundation.org>
+Subject: [PATCH 5.0 126/246] efi: Fix build error due to enum collision between efi.h and ima.h
+Date: Thu,  4 Apr 2019 10:47:06 +0200
+Message-ID: <20190404084623.569776787@linuxfoundation.org>
 References: <20190404084619.236418459@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -10,157 +10,287 @@ Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20190404084619.236418459@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Jeffrey Hugo <jhugo@codeaurora.org>, Bjorn Andersson <bjorn.andersson@linaro.org>, Lee Jones <lee.jones@linaro.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, AKASHI Takahiro <takahiro.akashi@linaro.org>, Alexander Graf <agraf@suse.de>, Borislav Petkov <bp@alien8.de>, Heinrich Schuchardt <xypron.glpk@gmx.de>, Leif Lindholm <leif.lindholm@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Jones <pjones@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Anders Roxell <anders.roxell@linaro.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
 5.0-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
-[ Upstream commit 4e46c2a956215482418d7b315749fb1b6c6bc224 ]
+[ Upstream commit 5c418dc789a3898717ebf2caa5716ba91a7150b2 ]
 
-The UEFI spec revision 2.7 errata A section 8.4 has the following to
-say about the virtual memory runtime services:
+The following commit:
 
-  "This section contains function definitions for the virtual memory
-  support that may be optionally used by an operating system at runtime.
-  If an operating system chooses to make EFI runtime service calls in a
-  virtual addressing mode instead of the flat physical mode, then the
-  operating system must use the services in this section to switch the
-  EFI runtime services from flat physical addressing to virtual
-  addressing."
+  a893ea15d764 ("tpm: move tpm_chip definition to include/linux/tpm.h")
 
-So it is pretty clear that calling SetVirtualAddressMap() is entirely
-optional, and so there is no point in doing so unless it achieves
-anything useful for us.
+introduced a build error when both IMA and EFI are enabled:
 
-This is not the case for 64-bit ARM. The identity mapping used by the
-firmware is arbitrarily converted into another permutation of userland
-addresses (i.e., bits [63:48] cleared), and the runtime code could easily
-deal with the original layout in exactly the same way as it deals with
-the converted layout. However, due to constraints related to page size
-differences if the OS is not running with 4k pages, and related to
-systems that may expose the individual sections of PE/COFF runtime
-modules as different memory regions, creating the virtual layout is a
-bit fiddly, and requires us to sort the memory map and reason about
-adjacent regions with identical memory types etc etc.
+    In file included from ../security/integrity/ima/ima_fs.c:30:
+    ../security/integrity/ima/ima.h:176:7: error: redeclaration of enumerator "NONE"
 
-So the obvious fix is to stop calling SetVirtualAddressMap() altogether
-on arm64 systems. However, to avoid surprises, which are notoriously
-hard to diagnose when it comes to OS<->firmware interactions, let's
-start by making it an opt-out feature, and implement support for the
-'efi=novamap' kernel command line parameter on ARM and arm64 systems.
+What happens is that both headers (ima.h and efi.h) defines the same
+'NONE' constant, and it broke when they started getting included from
+the same file:
 
-( Note that 32-bit ARM generally does require SetVirtualAddressMap() to be
-  used, given that the physical memory map and the kernel virtual address
-  map are not guaranteed to be non-overlapping like on arm64. However,
-  having support for efi=novamap,noruntime on 32-bit ARM, combined with
-  the recently proposed support for earlycon=efifb, is likely to be useful
-  to diagnose boot issues on such systems if they have no accessible serial
-  port. )
+Rework to prefix the EFI enum with 'EFI_*'.
 
-Tested-by: Jeffrey Hugo <jhugo@codeaurora.org>
-Tested-by: Bjorn Andersson <bjorn.andersson@linaro.org>
-Tested-by: Lee Jones <lee.jones@linaro.org>
+Signed-off-by: Anders Roxell <anders.roxell@linaro.org>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: AKASHI Takahiro <takahiro.akashi@linaro.org>
-Cc: Alexander Graf <agraf@suse.de>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Heinrich Schuchardt <xypron.glpk@gmx.de>
-Cc: Leif Lindholm <leif.lindholm@linaro.org>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Peter Jones <pjones@redhat.com>
 Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
 Cc: Thomas Gleixner <tglx@linutronix.de>
 Cc: linux-efi@vger.kernel.org
-Link: http://lkml.kernel.org/r/20190202094119.13230-8-ard.biesheuvel@linaro.org
+Link: http://lkml.kernel.org/r/20190215165551.12220-2-ard.biesheuvel@linaro.org
+[ Cleaned up the changelog a bit. ]
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/firmware/efi/libstub/arm-stub.c        |  5 +++++
- drivers/firmware/efi/libstub/efi-stub-helper.c | 10 ++++++++++
- drivers/firmware/efi/libstub/efistub.h         |  1 +
- drivers/firmware/efi/libstub/fdt.c             |  3 +++
- 4 files changed, 19 insertions(+)
+ arch/x86/platform/efi/quirks.c          |  4 +--
+ drivers/firmware/efi/runtime-wrappers.c | 48 ++++++++++++-------------
+ include/linux/efi.h                     | 26 +++++++-------
+ 3 files changed, 39 insertions(+), 39 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-index c037c6c5d0b7..04e6ecd72cd9 100644
---- a/drivers/firmware/efi/libstub/arm-stub.c
-+++ b/drivers/firmware/efi/libstub/arm-stub.c
-@@ -367,6 +367,11 @@ void efi_get_virtmap(efi_memory_desc_t *memory_map, unsigned long map_size,
- 		paddr = in->phys_addr;
- 		size = in->num_pages * EFI_PAGE_SIZE;
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index 17456a1d3f04..6c571ae86947 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -717,7 +717,7 @@ void efi_recover_from_page_fault(unsigned long phys_addr)
+ 	 * "efi_mm" cannot be used to check if the page fault had occurred
+ 	 * in the firmware context because efi=old_map doesn't use efi_pgd.
+ 	 */
+-	if (efi_rts_work.efi_rts_id == NONE)
++	if (efi_rts_work.efi_rts_id == EFI_NONE)
+ 		return;
  
-+		if (novamap()) {
-+			in->virt_addr = in->phys_addr;
-+			continue;
-+		}
-+
- 		/*
- 		 * Make the mapping compatible with 64k pages: this allows
- 		 * a 4k page size kernel to kexec a 64k page size kernel and
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index e94975f4655b..442f51c2a53d 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -34,6 +34,7 @@ static unsigned long __chunk_size = EFI_READ_CHUNK_SIZE;
+ 	/*
+@@ -742,7 +742,7 @@ void efi_recover_from_page_fault(unsigned long phys_addr)
+ 	 * because this case occurs *very* rarely and hence could be improved
+ 	 * on a need by basis.
+ 	 */
+-	if (efi_rts_work.efi_rts_id == RESET_SYSTEM) {
++	if (efi_rts_work.efi_rts_id == EFI_RESET_SYSTEM) {
+ 		pr_info("efi_reset_system() buggy! Reboot through BIOS\n");
+ 		machine_real_restart(MRR_BIOS);
+ 		return;
+diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
+index e2abfdb5cee6..698745c249e8 100644
+--- a/drivers/firmware/efi/runtime-wrappers.c
++++ b/drivers/firmware/efi/runtime-wrappers.c
+@@ -85,7 +85,7 @@ struct efi_runtime_work efi_rts_work;
+ 		pr_err("Failed to queue work to efi_rts_wq.\n");	\
+ 									\
+ exit:									\
+-	efi_rts_work.efi_rts_id = NONE;					\
++	efi_rts_work.efi_rts_id = EFI_NONE;				\
+ 	efi_rts_work.status;						\
+ })
  
- static int __section(.data) __nokaslr;
- static int __section(.data) __quiet;
-+static int __section(.data) __novamap;
+@@ -175,50 +175,50 @@ static void efi_call_rts(struct work_struct *work)
+ 	arg5 = efi_rts_work.arg5;
  
- int __pure nokaslr(void)
- {
-@@ -43,6 +44,10 @@ int __pure is_quiet(void)
- {
- 	return __quiet;
+ 	switch (efi_rts_work.efi_rts_id) {
+-	case GET_TIME:
++	case EFI_GET_TIME:
+ 		status = efi_call_virt(get_time, (efi_time_t *)arg1,
+ 				       (efi_time_cap_t *)arg2);
+ 		break;
+-	case SET_TIME:
++	case EFI_SET_TIME:
+ 		status = efi_call_virt(set_time, (efi_time_t *)arg1);
+ 		break;
+-	case GET_WAKEUP_TIME:
++	case EFI_GET_WAKEUP_TIME:
+ 		status = efi_call_virt(get_wakeup_time, (efi_bool_t *)arg1,
+ 				       (efi_bool_t *)arg2, (efi_time_t *)arg3);
+ 		break;
+-	case SET_WAKEUP_TIME:
++	case EFI_SET_WAKEUP_TIME:
+ 		status = efi_call_virt(set_wakeup_time, *(efi_bool_t *)arg1,
+ 				       (efi_time_t *)arg2);
+ 		break;
+-	case GET_VARIABLE:
++	case EFI_GET_VARIABLE:
+ 		status = efi_call_virt(get_variable, (efi_char16_t *)arg1,
+ 				       (efi_guid_t *)arg2, (u32 *)arg3,
+ 				       (unsigned long *)arg4, (void *)arg5);
+ 		break;
+-	case GET_NEXT_VARIABLE:
++	case EFI_GET_NEXT_VARIABLE:
+ 		status = efi_call_virt(get_next_variable, (unsigned long *)arg1,
+ 				       (efi_char16_t *)arg2,
+ 				       (efi_guid_t *)arg3);
+ 		break;
+-	case SET_VARIABLE:
++	case EFI_SET_VARIABLE:
+ 		status = efi_call_virt(set_variable, (efi_char16_t *)arg1,
+ 				       (efi_guid_t *)arg2, *(u32 *)arg3,
+ 				       *(unsigned long *)arg4, (void *)arg5);
+ 		break;
+-	case QUERY_VARIABLE_INFO:
++	case EFI_QUERY_VARIABLE_INFO:
+ 		status = efi_call_virt(query_variable_info, *(u32 *)arg1,
+ 				       (u64 *)arg2, (u64 *)arg3, (u64 *)arg4);
+ 		break;
+-	case GET_NEXT_HIGH_MONO_COUNT:
++	case EFI_GET_NEXT_HIGH_MONO_COUNT:
+ 		status = efi_call_virt(get_next_high_mono_count, (u32 *)arg1);
+ 		break;
+-	case UPDATE_CAPSULE:
++	case EFI_UPDATE_CAPSULE:
+ 		status = efi_call_virt(update_capsule,
+ 				       (efi_capsule_header_t **)arg1,
+ 				       *(unsigned long *)arg2,
+ 				       *(unsigned long *)arg3);
+ 		break;
+-	case QUERY_CAPSULE_CAPS:
++	case EFI_QUERY_CAPSULE_CAPS:
+ 		status = efi_call_virt(query_capsule_caps,
+ 				       (efi_capsule_header_t **)arg1,
+ 				       *(unsigned long *)arg2, (u64 *)arg3,
+@@ -242,7 +242,7 @@ static efi_status_t virt_efi_get_time(efi_time_t *tm, efi_time_cap_t *tc)
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_queue_work(GET_TIME, tm, tc, NULL, NULL, NULL);
++	status = efi_queue_work(EFI_GET_TIME, tm, tc, NULL, NULL, NULL);
+ 	up(&efi_runtime_lock);
+ 	return status;
  }
-+int __pure novamap(void)
-+{
-+	return __novamap;
-+}
+@@ -253,7 +253,7 @@ static efi_status_t virt_efi_set_time(efi_time_t *tm)
  
- #define EFI_MMAP_NR_SLACK_SLOTS	8
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_queue_work(SET_TIME, tm, NULL, NULL, NULL, NULL);
++	status = efi_queue_work(EFI_SET_TIME, tm, NULL, NULL, NULL, NULL);
+ 	up(&efi_runtime_lock);
+ 	return status;
+ }
+@@ -266,7 +266,7 @@ static efi_status_t virt_efi_get_wakeup_time(efi_bool_t *enabled,
  
-@@ -482,6 +487,11 @@ efi_status_t efi_parse_options(char const *cmdline)
- 			__chunk_size = -1UL;
- 		}
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_queue_work(GET_WAKEUP_TIME, enabled, pending, tm, NULL,
++	status = efi_queue_work(EFI_GET_WAKEUP_TIME, enabled, pending, tm, NULL,
+ 				NULL);
+ 	up(&efi_runtime_lock);
+ 	return status;
+@@ -278,7 +278,7 @@ static efi_status_t virt_efi_set_wakeup_time(efi_bool_t enabled, efi_time_t *tm)
  
-+		if (!strncmp(str, "novamap", 7)) {
-+			str += strlen("novamap");
-+			__novamap = 1;
-+		}
-+
- 		/* Group words together, delimited by "," */
- 		while (*str && *str != ' ' && *str != ',')
- 			str++;
-diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-index 32799cf039ef..337b52c4702c 100644
---- a/drivers/firmware/efi/libstub/efistub.h
-+++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -27,6 +27,7 @@
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_queue_work(SET_WAKEUP_TIME, &enabled, tm, NULL, NULL,
++	status = efi_queue_work(EFI_SET_WAKEUP_TIME, &enabled, tm, NULL, NULL,
+ 				NULL);
+ 	up(&efi_runtime_lock);
+ 	return status;
+@@ -294,7 +294,7 @@ static efi_status_t virt_efi_get_variable(efi_char16_t *name,
  
- extern int __pure nokaslr(void);
- extern int __pure is_quiet(void);
-+extern int __pure novamap(void);
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_queue_work(GET_VARIABLE, name, vendor, attr, data_size,
++	status = efi_queue_work(EFI_GET_VARIABLE, name, vendor, attr, data_size,
+ 				data);
+ 	up(&efi_runtime_lock);
+ 	return status;
+@@ -308,7 +308,7 @@ static efi_status_t virt_efi_get_next_variable(unsigned long *name_size,
  
- #define pr_efi(sys_table, msg)		do {				\
- 	if (!is_quiet()) efi_printk(sys_table, "EFI stub: "msg);	\
-diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
-index 0dc7b4987cc2..f8f89f995e9d 100644
---- a/drivers/firmware/efi/libstub/fdt.c
-+++ b/drivers/firmware/efi/libstub/fdt.c
-@@ -327,6 +327,9 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
- 	if (status == EFI_SUCCESS) {
- 		efi_set_virtual_address_map_t *svam;
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_queue_work(GET_NEXT_VARIABLE, name_size, name, vendor,
++	status = efi_queue_work(EFI_GET_NEXT_VARIABLE, name_size, name, vendor,
+ 				NULL, NULL);
+ 	up(&efi_runtime_lock);
+ 	return status;
+@@ -324,7 +324,7 @@ static efi_status_t virt_efi_set_variable(efi_char16_t *name,
  
-+		if (novamap())
-+			return EFI_SUCCESS;
-+
- 		/* Install the new virtual address map */
- 		svam = sys_table->runtime->set_virtual_address_map;
- 		status = svam(runtime_entry_count * desc_size, desc_size,
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_queue_work(SET_VARIABLE, name, vendor, &attr, &data_size,
++	status = efi_queue_work(EFI_SET_VARIABLE, name, vendor, &attr, &data_size,
+ 				data);
+ 	up(&efi_runtime_lock);
+ 	return status;
+@@ -359,7 +359,7 @@ static efi_status_t virt_efi_query_variable_info(u32 attr,
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_queue_work(QUERY_VARIABLE_INFO, &attr, storage_space,
++	status = efi_queue_work(EFI_QUERY_VARIABLE_INFO, &attr, storage_space,
+ 				remaining_space, max_variable_size, NULL);
+ 	up(&efi_runtime_lock);
+ 	return status;
+@@ -391,7 +391,7 @@ static efi_status_t virt_efi_get_next_high_mono_count(u32 *count)
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_queue_work(GET_NEXT_HIGH_MONO_COUNT, count, NULL, NULL,
++	status = efi_queue_work(EFI_GET_NEXT_HIGH_MONO_COUNT, count, NULL, NULL,
+ 				NULL, NULL);
+ 	up(&efi_runtime_lock);
+ 	return status;
+@@ -407,7 +407,7 @@ static void virt_efi_reset_system(int reset_type,
+ 			"could not get exclusive access to the firmware\n");
+ 		return;
+ 	}
+-	efi_rts_work.efi_rts_id = RESET_SYSTEM;
++	efi_rts_work.efi_rts_id = EFI_RESET_SYSTEM;
+ 	__efi_call_virt(reset_system, reset_type, status, data_size, data);
+ 	up(&efi_runtime_lock);
+ }
+@@ -423,7 +423,7 @@ static efi_status_t virt_efi_update_capsule(efi_capsule_header_t **capsules,
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_queue_work(UPDATE_CAPSULE, capsules, &count, &sg_list,
++	status = efi_queue_work(EFI_UPDATE_CAPSULE, capsules, &count, &sg_list,
+ 				NULL, NULL);
+ 	up(&efi_runtime_lock);
+ 	return status;
+@@ -441,7 +441,7 @@ static efi_status_t virt_efi_query_capsule_caps(efi_capsule_header_t **capsules,
+ 
+ 	if (down_interruptible(&efi_runtime_lock))
+ 		return EFI_ABORTED;
+-	status = efi_queue_work(QUERY_CAPSULE_CAPS, capsules, &count,
++	status = efi_queue_work(EFI_QUERY_CAPSULE_CAPS, capsules, &count,
+ 				max_size, reset_type, NULL);
+ 	up(&efi_runtime_lock);
+ 	return status;
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 28604a8d0aa9..a86485ac7c87 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1699,19 +1699,19 @@ extern int efi_tpm_eventlog_init(void);
+  * fault happened while executing an efi runtime service.
+  */
+ enum efi_rts_ids {
+-	NONE,
+-	GET_TIME,
+-	SET_TIME,
+-	GET_WAKEUP_TIME,
+-	SET_WAKEUP_TIME,
+-	GET_VARIABLE,
+-	GET_NEXT_VARIABLE,
+-	SET_VARIABLE,
+-	QUERY_VARIABLE_INFO,
+-	GET_NEXT_HIGH_MONO_COUNT,
+-	RESET_SYSTEM,
+-	UPDATE_CAPSULE,
+-	QUERY_CAPSULE_CAPS,
++	EFI_NONE,
++	EFI_GET_TIME,
++	EFI_SET_TIME,
++	EFI_GET_WAKEUP_TIME,
++	EFI_SET_WAKEUP_TIME,
++	EFI_GET_VARIABLE,
++	EFI_GET_NEXT_VARIABLE,
++	EFI_SET_VARIABLE,
++	EFI_QUERY_VARIABLE_INFO,
++	EFI_GET_NEXT_HIGH_MONO_COUNT,
++	EFI_RESET_SYSTEM,
++	EFI_UPDATE_CAPSULE,
++	EFI_QUERY_CAPSULE_CAPS,
+ };
+ 
+ /*
 -- 
 2.19.1
