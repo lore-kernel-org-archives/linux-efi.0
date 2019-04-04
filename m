@@ -1,19 +1,19 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.14 089/121] efi/arm/arm64: Allow SetVirtualAddressMap() to be omitted
-Date: Thu,  4 Apr 2019 10:47:57 +0200
-Message-ID: <20190404084550.185041497@linuxfoundation.org>
-References: <20190404084545.245659903@linuxfoundation.org>
+Subject: [PATCH 4.19 137/187] efi/arm/arm64: Allow SetVirtualAddressMap() to be omitted
+Date: Thu,  4 Apr 2019 10:47:54 +0200
+Message-ID: <20190404084609.649118556@linuxfoundation.org>
+References: <20190404084603.119654039@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190404084545.245659903@linuxfoundation.org>
+In-Reply-To: <20190404084603.119654039@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Jeffrey Hugo <jhugo@codeaurora.org>, Bjorn Andersson <bjorn.andersson@linaro.org>, Lee Jones <lee.jones@linaro.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, AKASHI Takahiro <takahiro.akashi@linaro.org>, Alexander Graf <agraf@suse.de>, Borislav Petkov <bp@alien8.de>, Heinrich Schuchardt <xypron.glpk@gmx.de>, Leif Lindholm <leif.lindholm@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Jones <pjones@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.>
 List-Id: linux-efi@vger.kernel.org
 
-4.14-stable review patch.  If anyone has any objections, please let me know.
+4.19-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
@@ -86,10 +86,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  4 files changed, 19 insertions(+)
 
 diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-index 01a9d78ee415..3b1e1dc3fb46 100644
+index 6920033de6d4..6c09644d620e 100644
 --- a/drivers/firmware/efi/libstub/arm-stub.c
 +++ b/drivers/firmware/efi/libstub/arm-stub.c
-@@ -364,6 +364,11 @@ void efi_get_virtmap(efi_memory_desc_t *memory_map, unsigned long map_size,
+@@ -340,6 +340,11 @@ void efi_get_virtmap(efi_memory_desc_t *memory_map, unsigned long map_size,
  		paddr = in->phys_addr;
  		size = in->num_pages * EFI_PAGE_SIZE;
  
@@ -102,7 +102,7 @@ index 01a9d78ee415..3b1e1dc3fb46 100644
  		 * Make the mapping compatible with 64k pages: this allows
  		 * a 4k page size kernel to kexec a 64k page size kernel and
 diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index 50a9cab5a834..39f87e6dac5c 100644
+index e94975f4655b..442f51c2a53d 100644
 --- a/drivers/firmware/efi/libstub/efi-stub-helper.c
 +++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
 @@ -34,6 +34,7 @@ static unsigned long __chunk_size = EFI_READ_CHUNK_SIZE;
@@ -124,7 +124,7 @@ index 50a9cab5a834..39f87e6dac5c 100644
  
  #define EFI_MMAP_NR_SLACK_SLOTS	8
  
-@@ -454,6 +459,11 @@ efi_status_t efi_parse_options(char const *cmdline)
+@@ -482,6 +487,11 @@ efi_status_t efi_parse_options(char const *cmdline)
  			__chunk_size = -1UL;
  		}
  
@@ -137,7 +137,7 @@ index 50a9cab5a834..39f87e6dac5c 100644
  		while (*str && *str != ' ' && *str != ',')
  			str++;
 diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-index f59564b72ddc..2adde22b4a9f 100644
+index 32799cf039ef..337b52c4702c 100644
 --- a/drivers/firmware/efi/libstub/efistub.h
 +++ b/drivers/firmware/efi/libstub/efistub.h
 @@ -27,6 +27,7 @@
