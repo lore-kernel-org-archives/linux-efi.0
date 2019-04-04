@@ -1,19 +1,19 @@
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.9 67/91] efi/memattr: Dont bail on zero VA if it equals the regions PA
-Date: Thu,  4 Apr 2019 10:47:51 +0200
-Message-ID: <20190404084539.330838278@linuxfoundation.org>
-References: <20190404084535.450029272@linuxfoundation.org>
+Subject: [PATCH 4.14 087/121] efi/memattr: Dont bail on zero VA if it equals the regions PA
+Date: Thu,  4 Apr 2019 10:47:55 +0200
+Message-ID: <20190404084549.961752459@linuxfoundation.org>
+References: <20190404084545.245659903@linuxfoundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190404084535.450029272@linuxfoundation.org>
+In-Reply-To: <20190404084545.245659903@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, AKASHI Takahiro <takahiro.akashi@linaro.org>, Alexander Graf <agraf@suse.de>, Bjorn Andersson <bjorn.andersson@linaro.org>, Borislav Petkov <bp@alien8.de>, Heinrich Schuchardt <xypron.glpk@gmx.de>, Jeffrey Hugo <jhugo@codeaurora.org>, Lee Jones <lee.jones@linaro.org>, Leif Lindholm <leif.lindholm@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Jones <pjones@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal>
 List-Id: linux-efi@vger.kernel.org
 
-4.9-stable review patch.  If anyone has any objections, please let me know.
+4.14-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
@@ -65,10 +65,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/firmware/efi/memattr.c b/drivers/firmware/efi/memattr.c
-index 236004b9a50d..9faa09e7c31f 100644
+index 8986757eafaf..aac972b056d9 100644
 --- a/drivers/firmware/efi/memattr.c
 +++ b/drivers/firmware/efi/memattr.c
-@@ -93,7 +93,7 @@ static bool entry_is_valid(const efi_memory_desc_t *in, efi_memory_desc_t *out)
+@@ -94,7 +94,7 @@ static bool entry_is_valid(const efi_memory_desc_t *in, efi_memory_desc_t *out)
  
  		if (!(md->attribute & EFI_MEMORY_RUNTIME))
  			continue;
