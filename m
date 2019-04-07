@@ -1,149 +1,152 @@
-Return-Path: <SRS0=oSEl=SH=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=RuHd=SJ=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.6 required=3.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,USER_IN_DEF_DKIM_WL autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 90E0EC282CE
-	for <linux-efi@archiver.kernel.org>; Fri,  5 Apr 2019 22:19:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 52BB4C10F0E
+	for <linux-efi@archiver.kernel.org>; Sun,  7 Apr 2019 18:19:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 5C49E21855
-	for <linux-efi@archiver.kernel.org>; Fri,  5 Apr 2019 22:19:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0FCE320870
+	for <linux-efi@archiver.kernel.org>; Sun,  7 Apr 2019 18:19:54 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="Bc0tJq9N"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ufx/ySWB"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726124AbfDEWTU (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 5 Apr 2019 18:19:20 -0400
-Received: from mail-it1-f196.google.com ([209.85.166.196]:35967 "EHLO
-        mail-it1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726206AbfDEWTU (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 5 Apr 2019 18:19:20 -0400
-Received: by mail-it1-f196.google.com with SMTP id y10so12156374itc.1
-        for <linux-efi@vger.kernel.org>; Fri, 05 Apr 2019 15:19:20 -0700 (PDT)
+        id S1726388AbfDGSTx (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 7 Apr 2019 14:19:53 -0400
+Received: from mail-it1-f194.google.com ([209.85.166.194]:51666 "EHLO
+        mail-it1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726372AbfDGSTx (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sun, 7 Apr 2019 14:19:53 -0400
+Received: by mail-it1-f194.google.com with SMTP id s3so17309597itk.1
+        for <linux-efi@vger.kernel.org>; Sun, 07 Apr 2019 11:19:53 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20161025;
+        d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=p70rh8DzLMoO9YQR1wIHClyyXHDpqpEks55cuvOjfCY=;
-        b=Bc0tJq9N/sPYw85QXGSIH0hbEtzljs8EWItZ9MIwCmNwpRUoa/Wpc5hsHoxnO/te/o
-         O3F7X0+2bCdaluN6rPhO4hAZPUmPfFaaJIknDhttv3aW3vSR2RBpC49xL+P10rlIABz2
-         FtRzhFhWl+sdRw1u7SF5C+Ul/CUNeqzj2OmmTtoUzMM/nubLgmCHk1xDxXr9CenY1pcQ
-         b0moIO332HU3WYNlXK8fBIj84fYUgtIGZOcp9farU3QDzoBMhwPPDbrro6c1+P9Jk9BI
-         dtakwadfwEhfde93OHQh09dc8rKxnXgvtSMn54RFzPcjbCcm/hATCmPV1sGr1TIM37QO
-         ZEvQ==
+        bh=V08dLIq9PhwLF7upjWHwURfkJ/gBXMfnmkMKxmsotvg=;
+        b=ufx/ySWBoM2zafy4ABaBUuoxiK3yeZbLwkOn4i402r25f5HSrgigHRLN3/Yzw+mOy+
+         vA8ZxNVDSHMMudP4xKE3dQLlWkDTJfe4TkIM8qxbncQFlIQIIdHEF1tb1BaZ3RCRyNV4
+         /TnIGHwC/V2uqNFo7gXpI42+EGamMdW6QqCt0ckf5ZSXnu9lCJAdFmGQ0E+BXN5gi/29
+         DaspsHbcLQq+77ZgXHpY5oLPy+SRqNTn45sBg4K3luh+DQdgvSp6EFIRUzd7S4VopmFU
+         2Y5qprV+HzLJyINPlEtTwI/1ZQaalngjsUImp1y+PzH9LPrZS12Sxqmo4zjWqWJmJDMd
+         aTHA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=p70rh8DzLMoO9YQR1wIHClyyXHDpqpEks55cuvOjfCY=;
-        b=lH+9o1lQXceDtbZGMl43/t0ykcp5Px4hB+y0ui6TWINt3k1DX9R6kaKGsJqvCXgygj
-         kQ5wWi4P24+A/ok0cHWLWESBxZUBaqAhdl+AkLYROE8s5fcDJ9B3UlN4jRU+KOMk7sAv
-         aeLtYx2mZV11kt8MLPQADzpHXdsAyFPY/7QvY/lLS7B7TdLveDyH+opGMqF/Jg9Sitlr
-         jdf9w6GHGvXu48iKpv9Lg2vfg0Re6/xkLLiQ3xsl7j8zyqlPXIJYZ8fDER6OfK24wjzg
-         2oYjM7NUUjGcwO3jJuY/EeklHvDx05ck+a7kvqGSjTlN8D3F97jqogoKWaTySq3oQC/F
-         TE9g==
-X-Gm-Message-State: APjAAAUUhTz4UJS5HoirETk4xykS/3qfZTAoLfqypR3YhmWBBOutR0zH
-        AdrWdS5g2J+1z5QfZNsgCUn7DHD1t/yk7RGGuUYYJA==
-X-Google-Smtp-Source: APXvYqz8L0DRIH950OrISsoMW75m56cdjyA82W8JwtiaTtpNLc8MeWdCquXt/H6qVstvEF2gn6aGUbrGlapaBmieosc=
-X-Received: by 2002:a02:1a45:: with SMTP id 66mr11594981jai.124.1554502759204;
- Fri, 05 Apr 2019 15:19:19 -0700 (PDT)
+        bh=V08dLIq9PhwLF7upjWHwURfkJ/gBXMfnmkMKxmsotvg=;
+        b=NSDds9kKjzqGJGlVyqqtpPFCAczVDaGqUlzv2+rw2+Zl83qcBcfTc/Bw87jDVaulnU
+         9U39pVSOH1G7V1ZeYOnCcbMfiZTBRgovT6/1pZig/hPMLUsuEuv9iIIgH0pa1CdIHX7i
+         2vAMSZddSV+6kKekodtM/2fiPCTcVYmfB2LHi9YMNIqOw6rkMMucmvheLlg+ktrDM7nw
+         Mhd2TGhWPRopksYZ6D0c8Kf2zsaLM86rGCxqn3GvUxN7YtQXYa7mkfCLbtYG3E59zmrC
+         eSfoXPlglMwW9xTuvqxVguAXxiriKW/2RM6QQTZWLJVsubteZBk0k1cqAxXYQrZeAReF
+         oMMw==
+X-Gm-Message-State: APjAAAU2oOu3wG3Jt5lAmgSGGkU4t+lA5YveZrK4Z/s3dUBpQGCDJ+aC
+        TjTapIg0o6/3torq0KUl9D1114gXUaLn/SgY9oSIufv713s=
+X-Google-Smtp-Source: APXvYqxLlemWllCknVRz5m4mmfCPCZx0OEnD/F3pVoRvc8rybrVyG3DQ89t2VX+zk3yfo86vP1C0b50ePr7Wp1ibLOk=
+X-Received: by 2002:a05:660c:2c5:: with SMTP id j5mr17171403itd.154.1554661192560;
+ Sun, 07 Apr 2019 11:19:52 -0700 (PDT)
 MIME-Version: 1.0
-References: <20190402181505.25037-1-cclaudio@linux.ibm.com>
- <CACdnJuumhkqTb4+1=QBiLmbW4xd3wW=MZu6Tj_KdaoTMhCN+Tg@mail.gmail.com>
- <4ce5e057-0702-b0d5-7bb2-cea5b22e2efa@linux.ibm.com> <CACdnJusBm93zwDqTXTx_QYsg1-aGUAAHm_qq8Lcx3TvGTxdmbg@mail.gmail.com>
- <2208f156-d441-3082-2f4c-8030c84ef788@linux.ibm.com> <CACdnJuu8OqMrSs0esOmf=ro9n00aYEQ-nikAh6v6sk+YAQw4cQ@mail.gmail.com>
- <d79f47f8-9006-3a47-2bdc-58012cef5c7e@linux.ibm.com>
-In-Reply-To: <d79f47f8-9006-3a47-2bdc-58012cef5c7e@linux.ibm.com>
-From:   Matthew Garrett <mjg59@google.com>
-Date:   Fri, 5 Apr 2019 15:19:07 -0700
+References: <20190329182418.29592-1-ard.biesheuvel@linaro.org>
+ <86y34w668n.wl-marc.zyngier@arm.com> <CAKv+Gu_3_nENwrp81r7=wWbbZ6hpdjewppbuy6domXoZe09ujg@mail.gmail.com>
+ <86tvfj5t2g.wl-marc.zyngier@arm.com>
+In-Reply-To: <86tvfj5t2g.wl-marc.zyngier@arm.com>
+From:   Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Date:   Sun, 7 Apr 2019 20:19:40 +0200
 Message-ID:
- <CACdnJuv_5A1_6CH1+Jn7SCrmW8Y6JuzsMmJoc1=_vn0nKdYMjQ@mail.gmail.com>
-Subject: Re: [PATCH 0/4] Enabling secure boot on PowerNV systems
-To:     Claudio Carvalho <cclaudio@linux.ibm.com>
-Cc:     linuxppc-dev@ozlabs.org, linux-efi <linux-efi@vger.kernel.org>,
-        linux-integrity <linux-integrity@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Michael Ellerman <mpe@ellerman.id.au>,
-        Paul Mackerras <paulus@samba.org>,
-        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
-        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Jeremy Kerr <jk@ozlabs.org>,
-        Matthew Garret <matthew.garret@nebula.com>,
-        Nayna Jain <nayna@linux.ibm.com>
+ <CAKv+Gu-6n5YGq3AxpCvv-Zo-Fh01vyLoqMbqTPZn+k7MOFVnRw@mail.gmail.com>
+Subject: Re: [PATCH] efi/arm: enable CP15 DMB instructions before cleaning the cache
+To:     Marc Zyngier <marc.zyngier@arm.com>
+Cc:     linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
+        linux-efi <linux-efi@vger.kernel.org>,
+        Russell King <linux@armlinux.org.uk>,
+        Leif Lindholm <leif.lindholm@linaro.org>,
+        Steve McIntyre <steve.mcintyre@linaro.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
-Message-ID: <20190405221907.ufV-z7_v_lYpcxlgnJnkDTlvZ-w-Ys5ZyBiYorEDI5I@z>
+Message-ID: <20190407181940.CrQoBWJLveRG5WNXTg0i5H1IeW2HRPznMGdA9K1-p7A@z>
 
-On Fri, Apr 5, 2019 at 2:11 PM Claudio Carvalho <cclaudio@linux.ibm.com> wrote:
+On Sun, 31 Mar 2019 at 10:47, Marc Zyngier <marc.zyngier@arm.com> wrote:
 >
->
-> On 4/3/19 7:27 PM, Matthew Garrett wrote:
-> > Not supporting dbx seems like a pretty significant shortcoming. How
-> > are signatures meant to be revoked?
->
->
-> We began by focusing on certificates for keys that can be added at
-> runtime.  Before adding support for revocation, we plan to gather
-> additional use cases.  In the meantime, unwanted certificates can be
-> removed by the administrator.
-
-Based on our experience doing this in UEFI, that's insufficient - you
-want to be able to block individual binaries or leaf certificates
-without dropping trust in an intermediate certificate entirely.
-
->
+> On Sat, 30 Mar 2019 13:10:58 +0000,
+> Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
 > >
-> >> PK, KEK and db updates will be signed the same way, that is, using
-> >> userspace tooling like efitools in PowerNV. As for the authentication
-> >> descriptors, only the EFI_VARIABLE_AUTHENTICATION_2 descriptor will be
-> >> supported.
-> > Is this API documented?
+> > On Sat, 30 Mar 2019 at 10:50, Marc Zyngier <marc.zyngier@arm.com> wrote:
+> > >
+> > > Hi Ard,
+> > >
+> > > On Fri, 29 Mar 2019 18:24:18 +0000,
+> > > Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
+> > > >
+> > > > The EFI stub is entered with the caches and MMU enabled by the
+> > > > firmware, and once the stub is ready to hand over to the decompressor,
+> > > > we clean and disable the caches.
+> > > >
+> > > > The cache clean routines use CP15 barrier instructions, which can be
+> > > > disabled via SCTLR. Normally, when using the provided cache handling
+> > > > routines to enable the caches and MMU, this bit is enabled as well.
+> > > > However, but since we entered the stub with the caches already enabled,
+> > > > this routine is not executed before we call the cache clean routines,
+> > > > resulting in undefined instruction exceptions if the firmware never
+> > > > enabled this bit.
+> > > >
+> > > > So set the bit explicitly in the EFI entry code.
+> > > >
+> > > > Cc: Marc Zyngier <marc.zyngier@arm.com>
+> > > > Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> > > > ---
+> > > >  arch/arm/boot/compressed/head.S | 10 ++++++++++
+> > > >  1 file changed, 10 insertions(+)
+> > > >
+> > > > diff --git a/arch/arm/boot/compressed/head.S b/arch/arm/boot/compressed/head.S
+> > > > index 6c7ccb428c07..62a49356fca3 100644
+> > > > --- a/arch/arm/boot/compressed/head.S
+> > > > +++ b/arch/arm/boot/compressed/head.S
+> > > > @@ -1438,6 +1438,16 @@ ENTRY(efi_stub_entry)
+> > > >
+> > > >               @ Preserve return value of efi_entry() in r4
+> > > >               mov     r4, r0
+> > > > +
+> > > > +             @ our cache maintenance code relies on CP15 barrier instructions
+> > > > +             @ but since we arrived here with the MMU and caches configured
+> > > > +             @ by UEFI, we must ensure that the use of those instructions is
+> > > > +             @ enabled in the SCTLR register, since we never executed our own
+> > > > +             @ cache enable routine, which is normally in charge of this.
+> > > > +             mrc     p15, 0, r1, c1, c0, 0   @ read SCTLR
+> > > > +             orr     r1, r1, #(1 << 5)       @ CP15 barrier instructions
+> > > > +             mcr     p15, 0, r1, c1, c0, 0   @ write SCTLR
+> > > > +
+> > >
+> > > To be on the safe side, you could add an isb here. I'm pretty sure it
+> > > is immaterial on any ARMv7 core, but hey, I'm paranoid.
+> > >
+> >
+> > Well, this is actually triggering now under KVM, so I wonder if this
+> > is a regression of some kind on the host side. But the EFI stub
+> > shouldn't use CP15 barriers without enabling them, so we need this
+> > patch in any case.
 >
+> My remark was only about the lack of an ISB instruction after the
+> write to SCTLR, and you're perfectly right to enable CP15BEN.
 >
-> The API is still a work in progress.  We are planning to publish a document
-> describing the current API and overall design shortly.
 
-Ok. How are the attributes interpreted by the API?
+Actually, the CP15 ISB is not usable here, and using the v7 ISB breaks
+v6. Would reading back SCTLR suffice?
 
-> Perhaps the biggest departure is that the secure variables are stored in
-> flash memory that is not lockable.  In order to protect the secure
-> variables, hashes of the flash regions where they're stored are written to
-> TPM NVRAM indices.  The TPM NVRAM indices we use are write locked at
-> runtime.  The sysadmin enqueues update commands in flash.  During the next
-> boot, the firmware verifies and processes the commands to update the
-> certificate store and accompanying integrity hashes in the TPM NVRAM
-> indices and write locks them.  Before certificates read from flash are
-> used, the certificate store is hashed and compared against the hashes
-> stored from the TPM.  The one exception is the PK. We store it in a TPM
-> NVRAM index by itself rather than flash because updates to it must be
-> guaranteed to be atomic.
-
-What's the behaviour if multiple updates are enqueued? Does reading
-back show a mocked up updated variable or the original state?
-
-> > I think that depends on exactly what problem you're trying to solve.
-> > Some aspects of the EFI secure boot design end up mirroring the
-> > economics of the PC ecosystem rather than being inherently good design
-> > goals, so it'd be helpful to know whether you're taking this solution
-> > because you want the same three-level key infrastructure or because
-> > that just leaves you compatible with the tooling.
+> But there is something fishy. Looking at the KVM/arm64 code,
+> SCTLR_EL1.CP15BEN resets to 1. If the barrier undefs in the stubs,
+> something must have cleared it (or the reset code is busted...).
 >
+> I've dumped SCTLR from a guest running EFI (using GDB), and I do see
+> SCTLR.CP15EN being set...
 >
-> In our use case,  the three-level key hierarchy conveniently supports the
-> concept of (1) an administrator authority, who authorizes (2) other
-> organizations, e.g., distros, to provide (3) certificates for their code
-> signing keys.   By using efivars, we leverage pre-existing userspace EFI
-> tools to generate authenticated updates and certificates.  Additionally,
-> pre-existing kernel infrastructure simplifies efivars processing.
 
-I'm not really clear on the workflow here. Who's the administrator
-authority? When would they be updating the second level of keys? If
-there's no support for revocation, why would distributions need two
-levels of key in the system database rather than just distributing a
-single intermediate and signing their actual signing certs with that?
+Yeah. I won't be able to dig into this for a while, but in the mean
+time, I'd like to get a guest fix in in any case.
