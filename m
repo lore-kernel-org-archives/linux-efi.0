@@ -1,85 +1,104 @@
-From: Matthew Garrett <mjg59@google.com>
-Subject: Re: [PATCH 0/4] Enabling secure boot on PowerNV systems
-Date: Fri, 5 Apr 2019 15:19:07 -0700
-Message-ID: <CACdnJuv_5A1_6CH1+Jn7SCrmW8Y6JuzsMmJoc1=_vn0nKdYMjQ@mail.gmail.com>
-References: <20190402181505.25037-1-cclaudio@linux.ibm.com>
- <CACdnJuumhkqTb4+1=QBiLmbW4xd3wW=MZu6Tj_KdaoTMhCN+Tg@mail.gmail.com>
- <4ce5e057-0702-b0d5-7bb2-cea5b22e2efa@linux.ibm.com> <CACdnJusBm93zwDqTXTx_QYsg1-aGUAAHm_qq8Lcx3TvGTxdmbg@mail.gmail.com>
- <2208f156-d441-3082-2f4c-8030c84ef788@linux.ibm.com> <CACdnJuu8OqMrSs0esOmf=ro9n00aYEQ-nikAh6v6sk+YAQw4cQ@mail.gmail.com>
- <d79f47f8-9006-3a47-2bdc-58012cef5c7e@linux.ibm.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH] efi/arm: enable CP15 DMB instructions before cleaning the
+ cache
+Date: Sun, 7 Apr 2019 20:19:40 +0200
+Message-ID: <CAKv+Gu-6n5YGq3AxpCvv-Zo-Fh01vyLoqMbqTPZn+k7MOFVnRw@mail.gmail.com>
+References: <20190329182418.29592-1-ard.biesheuvel@linaro.org>
+ <86y34w668n.wl-marc.zyngier@arm.com>
+ <CAKv+Gu_3_nENwrp81r7=wWbbZ6hpdjewppbuy6domXoZe09ujg@mail.gmail.com>
+ <86tvfj5t2g.wl-marc.zyngier@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <d79f47f8-9006-3a47-2bdc-58012cef5c7e@linux.ibm.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Claudio Carvalho <cclaudio@linux.ibm.com>
-Cc: linuxppc-dev@ozlabs.org, linux-efi <linux-efi@vger.kernel.org>, linux-integrity <linux-integrity@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Michael Ellerman <mpe@ellerman.id.au>, Paul Mackerras <paulus@samba.org>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Jeremy Kerr <jk@ozlabs.org>, Matthew Garret <matthew.garret@nebula.com>, Nayna Jain <nayna@linux.ibm.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <86tvfj5t2g.wl-marc.zyngier@arm.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Marc Zyngier <marc.zyngier@arm.com>
+Cc: Leif Lindholm <leif.lindholm@linaro.org>, linux-efi <linux-efi@vger.kernel.org>, Steve McIntyre <steve.mcintyre@linaro.org>, Russell King <linux@armlinux.org.uk>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Apr 5, 2019 at 2:11 PM Claudio Carvalho <cclaudio@linux.ibm.com> wrote:
+On Sun, 31 Mar 2019 at 10:47, Marc Zyngier <marc.zyngier@arm.com> wrote:
 >
->
-> On 4/3/19 7:27 PM, Matthew Garrett wrote:
-> > Not supporting dbx seems like a pretty significant shortcoming. How
-> > are signatures meant to be revoked?
->
->
-> We began by focusing on certificates for keys that can be added at
-> runtime.  Before adding support for revocation, we plan to gather
-> additional use cases.  In the meantime, unwanted certificates can be
-> removed by the administrator.
-
-Based on our experience doing this in UEFI, that's insufficient - you
-want to be able to block individual binaries or leaf certificates
-without dropping trust in an intermediate certificate entirely.
-
->
+> On Sat, 30 Mar 2019 13:10:58 +0000,
+> Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
 > >
-> >> PK, KEK and db updates will be signed the same way, that is, using
-> >> userspace tooling like efitools in PowerNV. As for the authentication
-> >> descriptors, only the EFI_VARIABLE_AUTHENTICATION_2 descriptor will be
-> >> supported.
-> > Is this API documented?
+> > On Sat, 30 Mar 2019 at 10:50, Marc Zyngier <marc.zyngier@arm.com> wrote:
+> > >
+> > > Hi Ard,
+> > >
+> > > On Fri, 29 Mar 2019 18:24:18 +0000,
+> > > Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
+> > > >
+> > > > The EFI stub is entered with the caches and MMU enabled by the
+> > > > firmware, and once the stub is ready to hand over to the decompressor,
+> > > > we clean and disable the caches.
+> > > >
+> > > > The cache clean routines use CP15 barrier instructions, which can be
+> > > > disabled via SCTLR. Normally, when using the provided cache handling
+> > > > routines to enable the caches and MMU, this bit is enabled as well.
+> > > > However, but since we entered the stub with the caches already enabled,
+> > > > this routine is not executed before we call the cache clean routines,
+> > > > resulting in undefined instruction exceptions if the firmware never
+> > > > enabled this bit.
+> > > >
+> > > > So set the bit explicitly in the EFI entry code.
+> > > >
+> > > > Cc: Marc Zyngier <marc.zyngier@arm.com>
+> > > > Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> > > > ---
+> > > >  arch/arm/boot/compressed/head.S | 10 ++++++++++
+> > > >  1 file changed, 10 insertions(+)
+> > > >
+> > > > diff --git a/arch/arm/boot/compressed/head.S b/arch/arm/boot/compressed/head.S
+> > > > index 6c7ccb428c07..62a49356fca3 100644
+> > > > --- a/arch/arm/boot/compressed/head.S
+> > > > +++ b/arch/arm/boot/compressed/head.S
+> > > > @@ -1438,6 +1438,16 @@ ENTRY(efi_stub_entry)
+> > > >
+> > > >               @ Preserve return value of efi_entry() in r4
+> > > >               mov     r4, r0
+> > > > +
+> > > > +             @ our cache maintenance code relies on CP15 barrier instructions
+> > > > +             @ but since we arrived here with the MMU and caches configured
+> > > > +             @ by UEFI, we must ensure that the use of those instructions is
+> > > > +             @ enabled in the SCTLR register, since we never executed our own
+> > > > +             @ cache enable routine, which is normally in charge of this.
+> > > > +             mrc     p15, 0, r1, c1, c0, 0   @ read SCTLR
+> > > > +             orr     r1, r1, #(1 << 5)       @ CP15 barrier instructions
+> > > > +             mcr     p15, 0, r1, c1, c0, 0   @ write SCTLR
+> > > > +
+> > >
+> > > To be on the safe side, you could add an isb here. I'm pretty sure it
+> > > is immaterial on any ARMv7 core, but hey, I'm paranoid.
+> > >
+> >
+> > Well, this is actually triggering now under KVM, so I wonder if this
+> > is a regression of some kind on the host side. But the EFI stub
+> > shouldn't use CP15 barriers without enabling them, so we need this
+> > patch in any case.
 >
+> My remark was only about the lack of an ISB instruction after the
+> write to SCTLR, and you're perfectly right to enable CP15BEN.
 >
-> The API is still a work in progress.  We are planning to publish a document
-> describing the current API and overall design shortly.
 
-Ok. How are the attributes interpreted by the API?
+Actually, the CP15 ISB is not usable here, and using the v7 ISB breaks
+v6. Would reading back SCTLR suffice?
 
-> Perhaps the biggest departure is that the secure variables are stored in
-> flash memory that is not lockable.  In order to protect the secure
-> variables, hashes of the flash regions where they're stored are written to
-> TPM NVRAM indices.  The TPM NVRAM indices we use are write locked at
-> runtime.  The sysadmin enqueues update commands in flash.  During the next
-> boot, the firmware verifies and processes the commands to update the
-> certificate store and accompanying integrity hashes in the TPM NVRAM
-> indices and write locks them.  Before certificates read from flash are
-> used, the certificate store is hashed and compared against the hashes
-> stored from the TPM.  The one exception is the PK. We store it in a TPM
-> NVRAM index by itself rather than flash because updates to it must be
-> guaranteed to be atomic.
-
-What's the behaviour if multiple updates are enqueued? Does reading
-back show a mocked up updated variable or the original state?
-
-> > I think that depends on exactly what problem you're trying to solve.
-> > Some aspects of the EFI secure boot design end up mirroring the
-> > economics of the PC ecosystem rather than being inherently good design
-> > goals, so it'd be helpful to know whether you're taking this solution
-> > because you want the same three-level key infrastructure or because
-> > that just leaves you compatible with the tooling.
+> But there is something fishy. Looking at the KVM/arm64 code,
+> SCTLR_EL1.CP15BEN resets to 1. If the barrier undefs in the stubs,
+> something must have cleared it (or the reset code is busted...).
 >
+> I've dumped SCTLR from a guest running EFI (using GDB), and I do see
+> SCTLR.CP15EN being set...
 >
-> In our use case,  the three-level key hierarchy conveniently supports the
-> concept of (1) an administrator authority, who authorizes (2) other
-> organizations, e.g., distros, to provide (3) certificates for their code
-> signing keys.   By using efivars, we leverage pre-existing userspace EFI
-> tools to generate authenticated updates and certificates.  Additionally,
-> pre-existing kernel infrastructure simplifies efivars processing.
 
-I'm not really clear on the workflow here. Who's the administrator
-authority? When would they be updating the second level of keys? If
-there's no support for revocation, why would distributions need two
-levels of key in the system database rather than just distributing a
-single intermediate and signing their actual signing certs with that?
+Yeah. I won't be able to dig into this for a while, but in the mean
+time, I'd like to get a guest fix in in any case.
