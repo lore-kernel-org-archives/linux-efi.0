@@ -2,99 +2,92 @@ Return-Path: <SRS0=QuFd=SK=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-1.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B2AF3C10F13
-	for <linux-efi@archiver.kernel.org>; Mon,  8 Apr 2019 20:49:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 44657C10F13
+	for <linux-efi@archiver.kernel.org>; Mon,  8 Apr 2019 21:39:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 75E5920857
-	for <linux-efi@archiver.kernel.org>; Mon,  8 Apr 2019 20:49:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 126EF2148E
+	for <linux-efi@archiver.kernel.org>; Mon,  8 Apr 2019 21:39:12 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="TlfdBVgk"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="FCwwjEBs"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728873AbfDHUtY (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 8 Apr 2019 16:49:24 -0400
-Received: from mail-it1-f196.google.com ([209.85.166.196]:54981 "EHLO
-        mail-it1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726396AbfDHUtY (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 8 Apr 2019 16:49:24 -0400
-Received: by mail-it1-f196.google.com with SMTP id a190so1401166ite.4
-        for <linux-efi@vger.kernel.org>; Mon, 08 Apr 2019 13:49:23 -0700 (PDT)
+        id S1726694AbfDHVjL (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 8 Apr 2019 17:39:11 -0400
+Received: from mail-io1-f65.google.com ([209.85.166.65]:37820 "EHLO
+        mail-io1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726240AbfDHVjL (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 8 Apr 2019 17:39:11 -0400
+Received: by mail-io1-f65.google.com with SMTP id x7so12417006ioh.4
+        for <linux-efi@vger.kernel.org>; Mon, 08 Apr 2019 14:39:11 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=6fikndBnrEebyCh6F08UPUuck03CmAx6aho1AMBz6FQ=;
-        b=TlfdBVgkzmiPhgSfwSEIl4s+l141o6TBSrxcquxlyClSoTSgZ/SkmUq399E5Oy+P/A
-         boS2GKob3pomajHC1HXWO6TFmBBZvn0YfKfpphHhnNpeJWXKdaai+Xtu8Kn6UGBrn9Jn
-         mRDxFwx43CFdwXNxfxi25TyAyspA9YwUNUnixbZkPO2czLOMwKPXjlhzrxPtODzH1HbL
-         wy/Q357q4eCNk8YxBG77PWX8TpwwSTU0It0bo2munnIElPWLphlgdopShQnCZU1dHA8l
-         NMilEMJ4sYgcfhgIxmGXozOLU1T21tatBMMJTPkU4EcTd6EZ9HjWITszHRbNMDgWIhjW
-         VkeQ==
+        bh=Kfbop1Rhh0LwC0/fiY9eje6v/iTvzNLN1C0UmH+zUl8=;
+        b=FCwwjEBsmKid8gqcGPRG6SR31tD2DMQkJU9c200IuFCOUhSIOXKSxal7cVysY63Syc
+         EMdKvDpwMywC+Yfy0r2idxul0NqmjRE6WJEFzdUxR5UzRKoHEw2Xyy9ZxDjPH8UbOEM+
+         otkSeLpcjWBgFpEW/V/0rTc3Xd2umXYjSQKPLH29HnvTZn+FjGy3y1cNjJz/GC7iIuvX
+         bMrSeZ9Vz9kbrNmMI2Db4kM6s55kNVtrEbVzR8iItGDVCFZpbJp8TfuKzBhL++7igvJ+
+         lLuSYlTXdQsXCYw3J15Jk2xAkL3ozLj2RcAaNnzQD7Ac0TQPJh6CQxOLb6c7X0XH/gk/
+         R91A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=6fikndBnrEebyCh6F08UPUuck03CmAx6aho1AMBz6FQ=;
-        b=StWamQDxEc6pRcCghLZ0po9nJxU3/g2z6z2OpU1mImw618c7ZghxcIjbJHa454Rtfl
-         fIiazefu36Xvfj7+juxI84/Yp4rkMY6/WeD06Pxq2i/KwcpTyImqxoQsF/nr6q2KV5LS
-         T76np5tOHN1ZozGRKbT0eOWKSIf2F2f+r1QAUiutAw8JgAuAJIxoj4r4MWTYVU96CQly
-         Us8quE/tYu6GQXb17z3y2lqNxfODOCVVu8NraMGnRN0O2NDi9kTBL9+Fr2l+f5ICq1l/
-         0JWfMP/iATXrBjkYNZ+fU4ObXOpfKRi9f6Yg9xpdnjVRaVUbTlDF8CFN69mrDDsRdzcF
-         nxvA==
-X-Gm-Message-State: APjAAAWvV7l7ikVswOKaLA8KqNHZWOuy1BSQakQ7iN1BNRTjsgeHLWVi
-        jhq5tHsXQ0DW+KmQfgCMvra7mzJnX6F/B7YUpYyn8g==
-X-Google-Smtp-Source: APXvYqxfnX5hu+73Yx18Cuo1eRLZ31HrnRCAaeQc91KzR+06giaq2wPEeYJfPp1B6RMZkR4bdVuaSUOCRrDKhIE4hXQ=
-X-Received: by 2002:a02:9042:: with SMTP id y2mr22929336jaf.113.1554756563069;
- Mon, 08 Apr 2019 13:49:23 -0700 (PDT)
+        bh=Kfbop1Rhh0LwC0/fiY9eje6v/iTvzNLN1C0UmH+zUl8=;
+        b=NrgWcWNXjQMvAwyMMPABV1lta0wvwkPE+zLeRU5qJqXyflLYtxMa5/ak4e9nJhOgXn
+         3XrItC4FpsYmVxuSHCX8H9qCB+voj8EWEtotiH1rqgCrjDacxjmym0/WVpVywzdvP0al
+         BoZYUoWZWBk/+V/7DuVR/ILcEI4woTASbU+SdFS5DRp9EIhHdKvudchJlTHdKGIdc2pV
+         Xsz0l166FNriPC0UxwgmJmRWtHVK8w6O2ssauumWTqJKtU8AoRr8D+eHYB7MEg3tJuaa
+         p9Lz2npms5zCYxwMT6kCW33u8gu7GhS4bL7cPWhgBjdDdT0144gS1Lh2p5F7hv+w0Q4/
+         7sNA==
+X-Gm-Message-State: APjAAAWK52nP9C/HnucXxUykXC1Ew0DW2S2jYFW+cgfwT2hbvhTEqxP7
+        r16qFZWKgXg5ou9xiglen2fLVdVzBiGpLIFX4jLi7A==
+X-Google-Smtp-Source: APXvYqxJy8tMfAe98EFeJwN4HlMEXAZ/pGNGpN1EFtDyq7rO1GNg1qIeP17ul/BHPaN1yL9EfQLdxhQfP2AXqNJPH4M=
+X-Received: by 2002:a6b:3b07:: with SMTP id i7mr19936460ioa.230.1554759550537;
+ Mon, 08 Apr 2019 14:39:10 -0700 (PDT)
 MIME-Version: 1.0
-References: <20190208150826.44EBC68DD2@newverein.lst.de> <20190208151011.0807668DD3@newverein.lst.de>
- <20190408152309.GJ6139@lakrids.cambridge.arm.com>
-In-Reply-To: <20190408152309.GJ6139@lakrids.cambridge.arm.com>
+References: <20190329182418.29592-1-ard.biesheuvel@linaro.org>
+ <86y34w668n.wl-marc.zyngier@arm.com> <CAKv+Gu_3_nENwrp81r7=wWbbZ6hpdjewppbuy6domXoZe09ujg@mail.gmail.com>
+ <86tvfj5t2g.wl-marc.zyngier@arm.com> <CAKv+Gu-6n5YGq3AxpCvv-Zo-Fh01vyLoqMbqTPZn+k7MOFVnRw@mail.gmail.com>
+ <1a77f587-3538-441f-c6c1-8e56fb65d855@arm.com>
+In-Reply-To: <1a77f587-3538-441f-c6c1-8e56fb65d855@arm.com>
 From:   Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Date:   Mon, 8 Apr 2019 22:49:13 +0200
+Date:   Mon, 8 Apr 2019 23:38:59 +0200
 Message-ID:
- <CAKv+Gu-DWL=gxw0gcjByrVOZsFSV1htoev5iiT++k=D3rf4WdA@mail.gmail.com>
-Subject: Re: [PATCH v8 2/5] arm64: replace -pg with CC_FLAGS_FTRACE in efi Makefiles
-To:     Mark Rutland <mark.rutland@arm.com>
-Cc:     Torsten Duwe <duwe@lst.de>, Will Deacon <will.deacon@arm.com>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Julien Thierry <julien.thierry@arm.com>,
-        Steven Rostedt <rostedt@goodmis.org>,
-        Josh Poimboeuf <jpoimboe@redhat.com>,
-        Ingo Molnar <mingo@redhat.com>, Arnd Bergmann <arnd@arndb.de>,
-        AKASHI Takahiro <takahiro.akashi@linaro.org>,
-        Amit Daniel Kachhap <amit.kachhap@arm.com>,
-        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        live-patching@vger.kernel.org,
-        linux-efi <linux-efi@vger.kernel.org>
+ <CAKv+Gu9dF-m_qjwJhDv656UGv9dQME=646TN55MUEB6Njwv-qQ@mail.gmail.com>
+Subject: Re: [PATCH] efi/arm: enable CP15 DMB instructions before cleaning the cache
+To:     Vladimir Murzin <vladimir.murzin@arm.com>
+Cc:     Marc Zyngier <marc.zyngier@arm.com>,
+        Leif Lindholm <leif.lindholm@linaro.org>,
+        linux-efi <linux-efi@vger.kernel.org>,
+        Steve McIntyre <steve.mcintyre@linaro.org>,
+        Russell King <linux@armlinux.org.uk>,
+        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
-Message-ID: <20190408204913.X_9CYrHa78V_5TAsYM5vIMsEVp67O87eS9e6vWtYb2Y@z>
+Message-ID: <20190408213859.F1An7nYS2_DConR0jPpfRTJsryy63e8txkAUi1lNOWM@z>
 
-On Mon, 8 Apr 2019 at 17:23, Mark Rutland <mark.rutland@arm.com> wrote:
+On Mon, 8 Apr 2019 at 11:20, Vladimir Murzin <vladimir.murzin@arm.com> wrote:
 >
-> On Fri, Feb 08, 2019 at 04:10:11PM +0100, Torsten Duwe wrote:
-> >   In preparation for arm64 supporting ftrace built on other compiler
-> >   options, let's have makefiles remove the $(CC_FLAGS_FTRACE)
-> >   flags, whatever these may be, rather than assuming '-pg'.
-> >   While at it, fix arm32 as well.
-> >
-> >   There should be no functional change as a result of this patch.
-> >
-> > Signed-off-by: Torsten Duwe <duwe@suse.de>
+> On 4/7/19 7:19 PM, Ard Biesheuvel wrote:
+> > Actually, the CP15 ISB is not usable here, and using the v7 ISB breaks
+> > v6. Would reading back SCTLR suffice?
 >
-> Ard, would you be happy if we were to take this via the arm64 tree?
 >
-> Assuming so, can we have your ack?
+> I think instr_sync macro should do the trick.
 >
 
-Sure
+This code should run on v7 when compiled for v6, and instr_sync uses
+the CP15 ISB in that case, which we cannot use since that is what we
+are enabling in the first place.
 
-Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+I'll go with Marc's suggestion, which should work in all cases
+(although it may require a .arch directive to ensure the isb is
+accepted)
