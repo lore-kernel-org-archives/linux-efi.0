@@ -1,35 +1,46 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH v8 2/5] arm64: replace -pg with CC_FLAGS_FTRACE in efi Makefiles
-Date: Mon, 8 Apr 2019 22:49:13 +0200
-Message-ID: <CAKv+Gu-DWL=gxw0gcjByrVOZsFSV1htoev5iiT++k=D3rf4WdA@mail.gmail.com>
-References: <20190208150826.44EBC68DD2@newverein.lst.de> <20190208151011.0807668DD3@newverein.lst.de>
- <20190408152309.GJ6139@lakrids.cambridge.arm.com>
+Subject: Re: [PATCH] efi/arm: enable CP15 DMB instructions before cleaning the
+ cache
+Date: Mon, 8 Apr 2019 23:38:59 +0200
+Message-ID: <CAKv+Gu9dF-m_qjwJhDv656UGv9dQME=646TN55MUEB6Njwv-qQ@mail.gmail.com>
+References: <20190329182418.29592-1-ard.biesheuvel@linaro.org>
+ <86y34w668n.wl-marc.zyngier@arm.com>
+ <CAKv+Gu_3_nENwrp81r7=wWbbZ6hpdjewppbuy6domXoZe09ujg@mail.gmail.com>
+ <86tvfj5t2g.wl-marc.zyngier@arm.com>
+ <CAKv+Gu-6n5YGq3AxpCvv-Zo-Fh01vyLoqMbqTPZn+k7MOFVnRw@mail.gmail.com>
+ <1a77f587-3538-441f-c6c1-8e56fb65d855@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190408152309.GJ6139@lakrids.cambridge.arm.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Mark Rutland <mark.rutland@arm.com>
-Cc: Torsten Duwe <duwe@lst.de>, Will Deacon <will.deacon@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Julien Thierry <julien.thierry@arm.com>, Steven Rostedt <rostedt@goodmis.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Ingo Molnar <mingo@redhat.com>, Arnd Bergmann <arnd@arndb.de>, AKASHI Takahiro <takahiro.akashi@linaro.org>, Amit Daniel Kachhap <amit.kachhap@arm.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, live-patching@vger.kernel.org, linux-efi <linux-efi@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1a77f587-3538-441f-c6c1-8e56fb65d855@arm.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Vladimir Murzin <vladimir.murzin@arm.com>
+Cc: linux-efi <linux-efi@vger.kernel.org>, Marc Zyngier <marc.zyngier@arm.com>, Russell King <linux@armlinux.org.uk>, Leif Lindholm <leif.lindholm@linaro.org>, Steve McIntyre <steve.mcintyre@linaro.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 8 Apr 2019 at 17:23, Mark Rutland <mark.rutland@arm.com> wrote:
+On Mon, 8 Apr 2019 at 11:20, Vladimir Murzin <vladimir.murzin@arm.com> wrote:
 >
-> On Fri, Feb 08, 2019 at 04:10:11PM +0100, Torsten Duwe wrote:
-> >   In preparation for arm64 supporting ftrace built on other compiler
-> >   options, let's have makefiles remove the $(CC_FLAGS_FTRACE)
-> >   flags, whatever these may be, rather than assuming '-pg'.
-> >   While at it, fix arm32 as well.
-> >
-> >   There should be no functional change as a result of this patch.
-> >
-> > Signed-off-by: Torsten Duwe <duwe@suse.de>
+> On 4/7/19 7:19 PM, Ard Biesheuvel wrote:
+> > Actually, the CP15 ISB is not usable here, and using the v7 ISB breaks
+> > v6. Would reading back SCTLR suffice?
 >
-> Ard, would you be happy if we were to take this via the arm64 tree?
 >
-> Assuming so, can we have your ack?
+> I think instr_sync macro should do the trick.
 >
 
-Sure
+This code should run on v7 when compiled for v6, and instr_sync uses
+the CP15 ISB in that case, which we cannot use since that is what we
+are enabling in the first place.
 
-Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+I'll go with Marc's suggestion, which should work in all cases
+(although it may require a .arch directive to ensure the isb is
+accepted)
