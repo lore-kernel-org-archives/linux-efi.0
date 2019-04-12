@@ -1,191 +1,136 @@
-Return-Path: <SRS0=roqe=SM=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=aW0u=SO=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.6 required=3.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,USER_IN_DEF_DKIM_WL autolearn=unavailable
+X-Spam-Status: No, score=-7.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F7C1C10F11
-	for <linux-efi@archiver.kernel.org>; Wed, 10 Apr 2019 17:36:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D9E0DC10F0E
+	for <linux-efi@archiver.kernel.org>; Fri, 12 Apr 2019 20:38:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 07E6C2077C
-	for <linux-efi@archiver.kernel.org>; Wed, 10 Apr 2019 17:36:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AA02C2082E
+	for <linux-efi@archiver.kernel.org>; Fri, 12 Apr 2019 20:38:24 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="bSJRSo5M"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="WhEoQR/O"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729576AbfDJRgu (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 10 Apr 2019 13:36:50 -0400
-Received: from mail-it1-f195.google.com ([209.85.166.195]:38240 "EHLO
-        mail-it1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729572AbfDJRgu (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 10 Apr 2019 13:36:50 -0400
-Received: by mail-it1-f195.google.com with SMTP id f22so4818305ita.3
-        for <linux-efi@vger.kernel.org>; Wed, 10 Apr 2019 10:36:49 -0700 (PDT)
+        id S1726905AbfDLUiY (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 12 Apr 2019 16:38:24 -0400
+Received: from mail-it1-f193.google.com ([209.85.166.193]:53568 "EHLO
+        mail-it1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726771AbfDLUiX (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 12 Apr 2019 16:38:23 -0400
+Received: by mail-it1-f193.google.com with SMTP id y204so18075074itf.3
+        for <linux-efi@vger.kernel.org>; Fri, 12 Apr 2019 13:38:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20161025;
+        d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=fsdwxzllgm3TZiNS2RBUzUWgv7Kl8/L4XW2AecOXicU=;
-        b=bSJRSo5MsFgno1KgFsAA0YK3rrv031WHLUUGrO3xbQk7/2nDnoqhvqCJ15Ey02vmDN
-         Hxk/8IqQAkGzzQ3RlVdOSQn4H8INleO5W/ThQpK7vUqwbxb2+jCr7keiDXwFtAWpkfNg
-         4hD9j7FmHX7letmuEOZ4IDSOF/QivdG51ubmLFeGqbYbQ9clMSR1PhFfW/qE8KibK+8n
-         SoWGBelTt+/DKTHDgSuq1WRucP6zbuqnPF2e3eqSAq4rMjWweTMpOp4pCDSu6FCEESOu
-         cWqbWQeM5QscA0I5BMqRgU6XQnly8tSmYOXLaNcPtKQvF6my5Rx67jZ5R2MBRepNeR4B
-         dMEw==
+         :cc;
+        bh=ft70r9hZ9Ta5dHtyNCfbG1TAk4rvzEBbEw3nu2vRgzs=;
+        b=WhEoQR/OBOmpVHsYV03yg4mVPe35QJuJ4pjISQX+6B4ImgTwbwECwTWFp8SAOcesu/
+         r48+/BmerqW04jrZym75lQ91MDDVisnfLEfrYBfxq8zCZYkcGG3UW/EbS6mJZd3FKZrC
+         aVdHwINzy7boPG+WGYFO3jofCbN6ss67UK5kJ3GYDw3onYrXpwWp+u0qQkWeaPOLxGRc
+         cPwpXoWU3q1YBWPLOuvzlG8NBI0k30oDQzBqWrKAIJJJKuWegyzuGgdgo34L7+AdGutd
+         PoC0muo1sxxJETJFmjcfF7lcUS4GTNCujM635fZ4WTkcFW1G/Up8FS3YpzEAg2LwCDwB
+         73Kg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=fsdwxzllgm3TZiNS2RBUzUWgv7Kl8/L4XW2AecOXicU=;
-        b=TsZyuUAg2k6nLhal935v/pCbHrkzNSji+IDdPRyNc30IEeoFgonEGcfohuFW9Xw5Kg
-         7ga3aEp3q3a2yExN9EK3aVNP3iarKEl22UW39DWaQSrfmvfzdCFEvoAf7/ArlqQBUVLW
-         6neWqR/SLmLohbZIE3WAG9uHNB90YiAouURLip6gYyPcwbmRZejVuarZGjTTULXtDNGn
-         ywvkoVkvKgJojHF3ub3bg9h2ue7d7TwZWq5BXp73Yu5FTutwui1g3XoJBXDAik4cC6tv
-         YhLGjzLlO09+S7dxg/Dp2CBGVp5Uz/jJbzRnLixJTjB5al/z7rVfUKJ1JfyDQ/2fbiQg
-         ir0w==
-X-Gm-Message-State: APjAAAXUU5Rc/TRkBmJyDtrOJf+cU8IVdM4bWsW8yJl8UO9uzUaCgkgs
-        HNQNKlY7iNYx7/QIfrWi+rfqvq1oK8Alb39OoQYWMg==
-X-Google-Smtp-Source: APXvYqwcxj9ETT2fC97ngGmh7CcsBy2+YL6kB6AnKQJasNCbUVIV8fGBdWEIhNBMFR1OZOiEkz1I6DPnF3iTkLVIYjE=
-X-Received: by 2002:a24:7294:: with SMTP id x142mr4445023itc.7.1554917808975;
- Wed, 10 Apr 2019 10:36:48 -0700 (PDT)
+         :message-id:subject:to:cc;
+        bh=ft70r9hZ9Ta5dHtyNCfbG1TAk4rvzEBbEw3nu2vRgzs=;
+        b=ZBbdMVQapYP9nAVDI87fJxFIAqQmppR5ON7PB9m6YIutYSWdimd82lIvkWT0/5onZ4
+         T8xIeb12GPKo880jIaQT3ZKlP2wdaA6Si/yUhcOPkDzbnIpMmHC0S3Vzx31Om7fGZXrK
+         tR9lbB0pNTQehClYdsLTWTQ6TwmxOjD9d7EcWvMpScRplMUyIepEBymadKOxrfDIeAdE
+         O8QUYFhWL/C5v/Kf6xsUM45ik5DR1F8xVEb2RqBBifNwLfbIc9cDygYmV1JzfHYEsOCh
+         ODaRm4EhsqjRecrxSwFztiOOQd/xhFw/5+kHR0/foEfJgMpqfwAUd/Y9wqkr4ylbLYj1
+         GBUw==
+X-Gm-Message-State: APjAAAVLvuqqENpyDLaIuJWE4qkvLUXR+Trjg/SvyN4ghKAJsW/7RkpZ
+        KWqJOxoLVi30NBU16rq4sWKGQA5A/rEMssZgEqhNSw==
+X-Google-Smtp-Source: APXvYqyHptYIw0skX2X7fTeuckcblcQBY27NV+DNdc4I4+YWZU0j4j/6aKhgrK1LESLhcuKwf2G++nmtHcRrSIVBPms=
+X-Received: by 2002:a02:bb06:: with SMTP id y6mr41816420jan.98.1555101502963;
+ Fri, 12 Apr 2019 13:38:22 -0700 (PDT)
 MIME-Version: 1.0
-References: <20190402181505.25037-1-cclaudio@linux.ibm.com>
- <CACdnJuumhkqTb4+1=QBiLmbW4xd3wW=MZu6Tj_KdaoTMhCN+Tg@mail.gmail.com>
- <4ce5e057-0702-b0d5-7bb2-cea5b22e2efa@linux.ibm.com> <CACdnJusBm93zwDqTXTx_QYsg1-aGUAAHm_qq8Lcx3TvGTxdmbg@mail.gmail.com>
- <2208f156-d441-3082-2f4c-8030c84ef788@linux.ibm.com> <CACdnJuu8OqMrSs0esOmf=ro9n00aYEQ-nikAh6v6sk+YAQw4cQ@mail.gmail.com>
- <d79f47f8-9006-3a47-2bdc-58012cef5c7e@linux.ibm.com> <CACdnJuv_5A1_6CH1+Jn7SCrmW8Y6JuzsMmJoc1=_vn0nKdYMjQ@mail.gmail.com>
- <28bfc0a7-9ae5-2c99-e472-ea53f856bafc@linux.ibm.com>
-In-Reply-To: <28bfc0a7-9ae5-2c99-e472-ea53f856bafc@linux.ibm.com>
-From:   Matthew Garrett <mjg59@google.com>
-Date:   Wed, 10 Apr 2019 10:36:36 -0700
+References: <20190409164220.5993-1-ard.biesheuvel@linaro.org>
+In-Reply-To: <20190409164220.5993-1-ard.biesheuvel@linaro.org>
+From:   Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Date:   Fri, 12 Apr 2019 13:38:12 -0700
 Message-ID:
- <CACdnJuvpUKiX5UgSOrzh+B9y68zKm+Bzu1c8KFJHd8diz=sm2Q@mail.gmail.com>
-Subject: Re: [PATCH 0/4] Enabling secure boot on PowerNV systems
-To:     Claudio Carvalho <cclaudio@linux.ibm.com>
-Cc:     linuxppc-dev@ozlabs.org, linux-efi <linux-efi@vger.kernel.org>,
-        linux-integrity <linux-integrity@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Michael Ellerman <mpe@ellerman.id.au>,
-        Paul Mackerras <paulus@samba.org>,
-        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
-        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Jeremy Kerr <jk@ozlabs.org>,
-        Matthew Garret <matthew.garret@nebula.com>,
-        Nayna Jain <nayna@linux.ibm.com>,
-        Peter Jones <pjones@redhat.com>
+ <CAKv+Gu_Fj9BacvCwu3XdWgE_i4EZWpTAp2Jjhj4DGMzC0bo1nA@mail.gmail.com>
+Subject: Re: [PATCH v2] efi/arm: enable CP15 DMB instructions before cleaning
+ the cache
+To:     linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
+        Russell King <linux@armlinux.org.uk>
+Cc:     linux-efi <linux-efi@vger.kernel.org>,
+        Vladimir Murzin <vladimir.murzin@arm.com>,
+        Marc Zyngier <marc.zyngier@arm.com>,
+        Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
-Message-ID: <20190410173636.Y0BPXvjgDJQSKipJd7wQE1dFqWuzjUJ4i3OqBd7gkxw@z>
+Message-ID: <20190412203812.OtjL52RjUnZ0p9_k1VUuhyFHilHORENz1mPHZjnkPXc@z>
 
-(Cc:ing Peter Jones)
+On Tue, 9 Apr 2019 at 09:42, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
+>
+> The EFI stub is entered with the caches and MMU enabled by the
+> firmware, and once the stub is ready to hand over to the decompressor,
+> we clean and disable the caches.
+>
+> The cache clean routines use CP15 barrier instructions, which can be
+> disabled via SCTLR. Normally, when using the provided cache handling
+> routines to enable the caches and MMU, this bit is enabled as well.
+> However, but since we entered the stub with the caches already enabled,
+> this routine is not executed before we call the cache clean routines,
+> resulting in undefined instruction exceptions if the firmware never
+> enabled this bit.
+>
+> So set the bit explicitly in the EFI entry code, but do so in a way that
+> guarantees that the resulting code can still run on v6 cores as well
+> (which are guaranteed to have CP15 barriers enabled)
+>
+> Acked-by: Marc Zyngier <marc.zyngier@arm.com>
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> ---
+>  arch/arm/boot/compressed/head.S | 16 +++++++++++++++-
+>  1 file changed, 15 insertions(+), 1 deletion(-)
+>
+> diff --git a/arch/arm/boot/compressed/head.S b/arch/arm/boot/compressed/head.S
+> index 6c7ccb428c07..c174098acdf1 100644
+> --- a/arch/arm/boot/compressed/head.S
+> +++ b/arch/arm/boot/compressed/head.S
+> @@ -1438,7 +1438,21 @@ ENTRY(efi_stub_entry)
+>
+>                 @ Preserve return value of efi_entry() in r4
+>                 mov     r4, r0
+> -               bl      cache_clean_flush
+> +
+> +               @ our cache maintenance code relies on CP15 barrier instructions
+> +               @ but since we arrived here with the MMU and caches configured
+> +               @ by UEFI, we must check that the CP15BEN bit is set in SCTLR.
+> +               @ Note that this bit is RAO/WI on v6 and earlier, so the ISB in
+> +               @ the enable path will be executed on v7+ only.
+> +               mrc     p15, 0, r1, c1, c0, 0   @ read SCTLR
+> +               tst     r1, #(1 << 5)           @ CP15BEN bit set?
+> +               bne     0f
+> +               orr     r1, r1, #(1 << 5)       @ CP15 barrier instructions
+> +               mcr     p15, 0, r1, c1, c0, 0   @ write SCTLR
+> + ARM(          .inst   0xf57ff06f              @ isb           )
+> + THUMB(                isb                                             )
+> +
+> +0:             bl      cache_clean_flush
+>                 bl      cache_off
+>
+>                 @ Set parameters for booting zImage according to boot protocol
+> --
+> 2.17.1
+>
 
-On Tue, Apr 9, 2019 at 3:55 PM Claudio Carvalho <cclaudio@linux.ibm.com> wr=
-ote:
->
->
-> On 4/5/19 7:19 PM, Matthew Garrett wrote:
-> > Based on our experience doing this in UEFI, that's insufficient - you
-> > want to be able to block individual binaries or leaf certificates
-> > without dropping trust in an intermediate certificate entirely.
->
->
-> We agree that a dbx would be useful for blacklisting particular kernels
-> signed with given certificate. However, we have been avoiding doing so fo=
-r
-> the initial release of secure boot on OpenPOWER. We don't have individual
-> firmware binaries in OpenPOWER. Kernels are currently the only concern fo=
-r
-> the OS secure boot certificates we're discussing here. Also, we have a ve=
-ry
-> limited keystore space in POWER9.
->
-> Petitboot doesn't have standardized OS kernel verification at all right
-> now.  Having the capability even without dbx seems valuable.
+Russell, do you mind if I take this through the EFI tree? I had
+trouble logging into your patch system (it no longer recognizes my
+email address but when I try to re-create the account, my name is
+already taken)
 
-I don't see the benefit in attempting to maintain compatibility with
-existing tooling unless you're going to be *completely* compatible
-with existing tooling. That means supporting dbx and dbt.
-
-> >> The API is still a work in progress.  We are planning to publish a doc=
-ument
-> >> describing the current API and overall design shortly.
-> > Ok. How are the attributes interpreted by the API?
->
->
-> We support a subset of standard EFI variable attributes, and we only use
-> EFI variables that relate to secure boot. Our goal is not to implement
-> UEFI.  However, we do seek to be compatible with user space tooling and
-> reuse as much existing infrastructure as possible. We don=E2=80=99t suppo=
-rt the
-> following: EFI_VARIABLE_HARDWARE_ERROR_RECORD,
-> EFI_VARIABLE_AUTHENTICATED_WRITE_ACCESS and
-> EFI_VARIABLE_ENHANCED_AUTHENTICATED_ACCESS.
-
-Ok. I think that's realistically fine.
-
->
-> >
-> >> Perhaps the biggest departure is that the secure variables are stored =
-in
-> >> flash memory that is not lockable.  In order to protect the secure
-> >> variables, hashes of the flash regions where they're stored are writte=
-n to
-> >> TPM NVRAM indices.  The TPM NVRAM indices we use are write locked at
-> >> runtime.  The sysadmin enqueues update commands in flash.  During the =
-next
-> >> boot, the firmware verifies and processes the commands to update the
-> >> certificate store and accompanying integrity hashes in the TPM NVRAM
-> >> indices and write locks them.  Before certificates read from flash are
-> >> used, the certificate store is hashed and compared against the hashes
-> >> stored from the TPM.  The one exception is the PK. We store it in a TP=
-M
-> >> NVRAM index by itself rather than flash because updates to it must be
-> >> guaranteed to be atomic.
-> > What's the behaviour if multiple updates are enqueued? Does reading
-> > back show a mocked up updated variable or the original state?
->
->
-> Our secure variable updates are only applied at boot time. If any one of
-> them fails, they all fail.
-
-So I do the following:
-
-1) Boot
-2) Extend the contents of db
-3) Extend the contents of db again
-4) Read back the contents of db through efivarfs
-5) Reboot
-6) Read back the contents of db through efivarfs
-
-Is what I see in (4) and (6) the same? Does it contain the values form
-both extensions?
-
-> > I'm not really clear on the workflow here. Who's the administrator
-> > authority? When would they be updating the second level of keys? If
-> > there's no support for revocation, why would distributions need two
-> > levels of key in the system database rather than just distributing a
-> > single intermediate and signing their actual signing certs with that?
->
->
-> In OpenPOWER systems, we enable our customers and business partners to
-> establish and manage the platform key certificate, which is the root of o=
-ur
-> key hierarchy. From there, through the KEK, they can delegate authority t=
-o
-> intermediate level organizations, e.g. distros or IT departments or
-> business operations. Those intermediate level organizations then manage t=
-he
-> code signing certificates in the DB. If this answer doesn=E2=80=99t addre=
-ss your
-> question, can you please rephrase?
-
-Why would the intermediate level organisations not just have entries
-in db? The main reason we don't do it this way in UEFI is because we
-need to support dbx, and if you're not supporting dbx I'm not sure I
-see the benefit.
+Thanks,
+Ard.
