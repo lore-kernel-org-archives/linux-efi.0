@@ -1,49 +1,22 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH v2] efi/arm: enable CP15 DMB instructions before cleaning
- the cache
-Date: Fri, 12 Apr 2019 14:21:47 -0700
-Message-ID: <CAKv+Gu_4bNq8D4dRDB=qgcngpXoJNCOz5DN=w-A21cW8swCdQw@mail.gmail.com>
-References: <20190409164220.5993-1-ard.biesheuvel@linaro.org>
- <CAKv+Gu_Fj9BacvCwu3XdWgE_i4EZWpTAp2Jjhj4DGMzC0bo1nA@mail.gmail.com>
- <20190412205834.aok6v3fnjaxl27qt@shell.armlinux.org.uk>
- <CAKv+Gu_vejJz0Gh4hz75yvUcbpiDGyA0KjUS=hSgMmMv_Z1dOg@mail.gmail.com>
- <20190412212055.lgsnjle3x75gu22m@shell.armlinux.org.uk>
+From: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
+Subject: Re: [PATCH] TCG2 log support build fixes for non-x86_64
+Date: Mon, 15 Apr 2019 11:47:23 +0300
+Message-ID: <20190415084723.GA20831@linux.intel.com>
+References: <20190402215556.257406-1-matthewgarrett@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20190412212055.lgsnjle3x75gu22m@shell.armlinux.org.uk>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Russell King - ARM Linux admin <linux@armlinux.org.uk>
-Cc: Marc Zyngier <marc.zyngier@arm.com>, linux-efi <linux-efi@vger.kernel.org>, Vladimir Murzin <vladimir.murzin@arm.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20190402215556.257406-1-matthewgarrett@google.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matthew Garrett <matthewgarrett@google.com>
+Cc: linux-integrity@vger.kernel.org, peterhuewe@gmx.de, jgg@ziepe.ca, roberto.sassu@huawei.com, linux-efi@vger.kernel.org, linux-security-module@vger.kernel.org, linux-kernel@vger.kernel.org, tweek@google.com
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 12 Apr 2019 at 14:21, Russell King - ARM Linux admin
-<linux@armlinux.org.uk> wrote:
->
-> On Fri, Apr 12, 2019 at 02:00:16PM -0700, Ard Biesheuvel wrote:
-> > If I use the forgotten password feature, it tells me
-> >
-> > """
-> > The email address you provided (ard.biesheuvel@linaro.org) is not
-> > valid. Please try again.
-> > """
->
-> Fixed, consequence of the upgrades back in January, requiring a
-> change to the regular expression system, which caused my simple
-> fixups to then generate an invalid RE.  You should have received
-> the new password as a result of my testing.
->
-> Thanks for reporting the problem - that's the only way problems
-> get fixed!
->
+On Tue, Apr 02, 2019 at 02:55:54PM -0700, Matthew Garrett wrote:
+> Couple of patches to fix ktest reported issues with the crypto-agile log
+> format support.
 
-Indeed. Thanks for solving it so quickly.
+Applied and squashed. Should be soon in linux-next.
+
+/Jarkko
