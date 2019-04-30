@@ -1,137 +1,139 @@
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: [PATCH 4.19 083/100] x86/fpu: Dont export __kernel_fpu_{begin,end}()
-Date: Tue, 30 Apr 2019 13:38:52 +0200
-Message-ID: <20190430113612.682532449@linuxfoundation.org>
-References: <20190430113608.616903219@linuxfoundation.org>
+From: Bartosz Szczepanek <bsz@semihalf.com>
+Subject: Re: [PATCH V5 2/4] tpm: Reserve the TPM final events table
+Date: Tue, 30 Apr 2019 15:07:09 +0200
+Message-ID: <CAJzaN5pUJoOCz5-ZDSnTb6dbVPuy0QwmFD0CeofAGK+bRQx0og@mail.gmail.com>
+References: <20190227202658.197113-1-matthewgarrett@google.com> <20190227202658.197113-3-matthewgarrett@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20190430113608.616903219@linuxfoundation.org>
-Sender: stable-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Sebastian Andrzej Siewior <bigeasy@linutronix.de>, Borislav Petkov <bp@suse.de>, Rik van Riel <riel@surriel.com>, "H. Peter Anvin" <hpa@zytor.com>, "Jason A. Donenfeld" <Jason@zx2c4.com>, Andy Lutomirski <luto@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Dave Hansen <dave.hansen@linux.intel.com>, Ingo Molnar <mingo@redhat.com>, Nicolai Stange <nstange@suse.de>, Paolo Bonzini <pbonzini@redhat.com>, =?UTF-8?q?Radim=20Kr=C4=8Dm=C3=A1=C5=99?= <rkrcmar@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, kvm ML <kvm@vger.kernel.org>, linux-efi <linux-efi@vger.kernel.org>, x86-ml <x86@kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190227202658.197113-3-matthewgarrett@google.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matthew Garrett <matthewgarrett@google.com>
+Cc: linux-integrity@vger.kernel.org, peterhuewe@gmx.de, jarkko.sakkinen@linux.intel.com, jgg@ziepe.ca, roberto.sassu@huawei.com, linux-efi@vger.kernel.org, linux-security-module@vger.kernel.org, linux-kernel@vger.kernel.org, tweek@google.com, Matthew Garrett <mjg59@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+I may be a little late with this comment, but I've just tested these
+patches on aarch64 platform (from the top of jjs/master) and got
+kernel panic ("Unable to handle kernel read", full log at the end of
+mail). I think there's problem with below call to
+tpm2_calc_event_log_size(), where physical address of efi.tpm_log is
+passed as (void *) and never remapped:
 
-commit 12209993e98c5fa1855c467f22a24e3d5b8be205 upstream.
+> +       tbl_size =3D tpm2_calc_event_log_size(final_tbl->events,
+> +                                           final_tbl->nr_events,
+> +                                           (void *)efi.tpm_log);
 
-There is one user of __kernel_fpu_begin() and before invoking it,
-it invokes preempt_disable(). So it could invoke kernel_fpu_begin()
-right away. The 32bit version of arch_efi_call_virt_setup() and
-arch_efi_call_virt_teardown() does this already.
+This is later used to get efispecid:
 
-The comment above *kernel_fpu*() claims that before invoking
-__kernel_fpu_begin() preemption should be disabled and that KVM is a
-good example of doing it. Well, KVM doesn't do that since commit
+>         efispecid =3D (struct tcg_efi_specid_event_head *)event_header->e=
+vent;
 
-  f775b13eedee2 ("x86,kvm: move qemu/guest FPU switching out to vcpu_run")
+It seems event_header is not mapped during dereference. This is
+somewhat expected, because it comes from different, already unmapped
+memory region (region of initial TPM log) than "event" itself (which
+comes from TPM final log).
 
-so it is not an example anymore.
+Also, value passed as size_info shouldn't be pointing to
+linux_efi_tpm_eventlog with its size and version fields, but to the
+first event (header event) within. I tried with log_tbl->log and it
+worked fine (I omitted unmapping part). On the other hand, with bare
+log_tbl it still fails. Not sure how does it even work on other
+platforms.
 
-With EFI gone as the last user of __kernel_fpu_{begin|end}(), both can
-be made static and not exported anymore.
+One more thing that's not clear for me =E2=80=93 shouldn't the value return=
+ed
+from early_memremap be used for further accesses? Throughout
+__calc_tpm2_event_size() "mapping" is only checked for being zero.
+When it is, you're still unmapping it =E2=80=93 is it correct?
 
-Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
-Signed-off-by: Borislav Petkov <bp@suse.de>
-Reviewed-by: Rik van Riel <riel@surriel.com>
-Cc: "H. Peter Anvin" <hpa@zytor.com>
-Cc: "Jason A. Donenfeld" <Jason@zx2c4.com>
-Cc: Andy Lutomirski <luto@kernel.org>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Dave Hansen <dave.hansen@linux.intel.com>
-Cc: Ingo Molnar <mingo@redhat.com>
-Cc: Nicolai Stange <nstange@suse.de>
-Cc: Paolo Bonzini <pbonzini@redhat.com>
-Cc: Radim Krčmář <rkrcmar@redhat.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: kvm ML <kvm@vger.kernel.org>
-Cc: linux-efi <linux-efi@vger.kernel.org>
-Cc: x86-ml <x86@kernel.org>
-Link: https://lkml.kernel.org/r/20181129150210.2k4mawt37ow6c2vq@linutronix.de
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+> +       while (count > 0) {
+> +               header =3D data + size;
+> +               event_size =3D __calc_tpm2_event_size(header, size_info, =
+true);
+> +               if (event_size =3D=3D 0)
+> +                       return -1;
+> +               size +=3D event_size;
+> +       }
 
----
- arch/x86/include/asm/efi.h     |    6 ++----
- arch/x86/include/asm/fpu/api.h |   15 +++++----------
- arch/x86/kernel/fpu/core.c     |    6 ++----
- 3 files changed, 9 insertions(+), 18 deletions(-)
+Loop condition here is always true, by the way.
 
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -82,8 +82,7 @@ struct efi_scratch {
- #define arch_efi_call_virt_setup()					\
- ({									\
- 	efi_sync_low_kernel_mappings();					\
--	preempt_disable();						\
--	__kernel_fpu_begin();						\
-+	kernel_fpu_begin();						\
- 	firmware_restrict_branch_speculation_start();			\
- 									\
- 	if (!efi_enabled(EFI_OLD_MEMMAP))				\
-@@ -99,8 +98,7 @@ struct efi_scratch {
- 		efi_switch_mm(efi_scratch.prev_mm);			\
- 									\
- 	firmware_restrict_branch_speculation_end();			\
--	__kernel_fpu_end();						\
--	preempt_enable();						\
-+	kernel_fpu_end();						\
- })
- 
- extern void __iomem *__init efi_ioremap(unsigned long addr, unsigned long size,
---- a/arch/x86/include/asm/fpu/api.h
-+++ b/arch/x86/include/asm/fpu/api.h
-@@ -12,17 +12,12 @@
- #define _ASM_X86_FPU_API_H
- 
- /*
-- * Careful: __kernel_fpu_begin/end() must be called with preempt disabled
-- * and they don't touch the preempt state on their own.
-- * If you enable preemption after __kernel_fpu_begin(), preempt notifier
-- * should call the __kernel_fpu_end() to prevent the kernel/user FPU
-- * state from getting corrupted. KVM for example uses this model.
-- *
-- * All other cases use kernel_fpu_begin/end() which disable preemption
-- * during kernel FPU usage.
-+ * Use kernel_fpu_begin/end() if you intend to use FPU in kernel context. It
-+ * disables preemption so be careful if you intend to use it for long periods
-+ * of time.
-+ * If you intend to use the FPU in softirq you need to check first with
-+ * irq_fpu_usable() if it is possible.
-  */
--extern void __kernel_fpu_begin(void);
--extern void __kernel_fpu_end(void);
- extern void kernel_fpu_begin(void);
- extern void kernel_fpu_end(void);
- extern bool irq_fpu_usable(void);
---- a/arch/x86/kernel/fpu/core.c
-+++ b/arch/x86/kernel/fpu/core.c
-@@ -93,7 +93,7 @@ bool irq_fpu_usable(void)
- }
- EXPORT_SYMBOL(irq_fpu_usable);
- 
--void __kernel_fpu_begin(void)
-+static void __kernel_fpu_begin(void)
- {
- 	struct fpu *fpu = &current->thread.fpu;
- 
-@@ -111,9 +111,8 @@ void __kernel_fpu_begin(void)
- 		__cpu_invalidate_fpregs_state();
- 	}
- }
--EXPORT_SYMBOL(__kernel_fpu_begin);
- 
--void __kernel_fpu_end(void)
-+static void __kernel_fpu_end(void)
- {
- 	struct fpu *fpu = &current->thread.fpu;
- 
-@@ -122,7 +121,6 @@ void __kernel_fpu_end(void)
- 
- 	kernel_fpu_enable();
- }
--EXPORT_SYMBOL(__kernel_fpu_end);
- 
- void kernel_fpu_begin(void)
- {
+One information about my setup =E2=80=93 I'm working with below local diff =
+to
+enable operation on ARM:
+> --- a/drivers/firmware/efi/libstub/arm-stub.c
+> +++ b/drivers/firmware/efi/libstub/arm-stub.c
+> @@ -194,6 +194,7 @@ unsigned long efi_entry(void *handle, efi_system_tabl=
+e_t *sys_table,
+>
+>       /* Ask the firmware to clear memory on unclean shutdown */
+>        efi_enable_reset_attack_mitigation(sys_table);
+> +       efi_retrieve_tpm2_eventlog(sys_table);
+
+Full log of kernel panic follows.
+
+EFI stub: Booting Linux Kernel...
+EFI stub: EFI_RNG_PROTOCOL unavailable, no randomness supplied
+EFI stub: Using DTB from configuration table
+EFI stub: Exiting boot services and installing virtual address map...
+[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x420f5162]
+[    0.000000] Linux version 5.1.0-rc2+ (root@localhost.localdomain)
+(gcc version 7.3.1 20180712 (Red Hat 7.3.1-6) (GCC)) #69 SMP Fri Apr
+26 03:20:57 EDT 2019
+[    0.000000] earlycon: pl11 at MMIO 0x0000000402020000 (options '115200n8=
+')
+[    0.000000] printk: bootconsole [pl11] enabled
+[    0.000000] efi: Getting EFI parameters from FDT:
+[    0.000000] efi: EFI v2.60 by Cavium Inc.
+TX2-FW-Release-7.2-build_08-0-g14f8c5bf8a Apr 15 2019 18:51:41
+[    0.000000] efi:  TPMFinalLog=3D0xed5f0000  SMBIOS=3D0xfad90000  SMBIOS
+3.0=3D0xed530000  ACPI 2.0=3D0xeda90000  ESRT=3D0xfafdb218
+MEMATTR=3D0xf8489018  TPMEventLog=3D0xedaa9018  MEMRESERVE=3D0xedaa8018
+[    0.000000] Unable to handle kernel read from unreadable memory at
+virtual address 00000000edaa9050
+[    0.000000] Mem abort info:
+[    0.000000]   ESR =3D 0x96000004
+[    0.000000]   Exception class =3D DABT (current EL), IL =3D 32 bits
+[    0.000000]   SET =3D 0, FnV =3D 0
+[    0.000000]   EA =3D 0, S1PTW =3D 0
+[    0.000000] Data abort info:
+[    0.000000]   ISV =3D 0, ISS =3D 0x00000004
+[    0.000000]   CM =3D 0, WnR =3D 0
+[    0.000000] [00000000edaa9050] user address but active_mm is swapper
+[    0.000000] Internal error: Oops: 96000004 [#1] SMP
+[    0.000000] Modules linked in:
+[    0.000000] CPU: 0 PID: 0 Comm: swapper Not tainted 5.1.0-rc2+ #69
+[    0.000000] pstate: 60400089 (nZCv daIf +PAN -UAO)
+[    0.000000] pc : efi_tpm_eventlog_init+0xfc/0x26c
+[    0.000000] lr : efi_tpm_eventlog_init+0xf4/0x26c
+[    0.000000] sp : ffff000011533ce0
+[    0.000000] x29: ffff000011533ce0 x28: 00000000edaa8018
+[    0.000000] x27: ffff7dfffe6fa010 x26: 0000000000000023
+[    0.000000] x25: ffff7dfffe6fa000 x24: 00000000edaa9038
+[    0.000000] x23: 0000000000000000 x22: ffff7dfffe6fa010
+[    0.000000] x21: ffff00001153d000 x20: ffff7dfffe6fa018
+[    0.000000] x19: ffff000011542500 x18: ffffffffffffffff
+[    0.000000] x17: 0000000000000435 x16: 0000000000000000
+[    0.000000] x15: ffff00001153d708 x14: 6576454d50542020
+[    0.000000] x13: 3831303938343866 x12: 78303d525454414d
+[    0.000000] x11: 454d202038313262 x10: 6466616678303d54
+[    0.000000] x9 : ffff00001153ef58 x8 : 0000020000000000
+[    0.000000] x7 : 0000000000000a30 x6 : ffff0000110d2a18
+[    0.000000] x5 : 000000000000013a x4 : 00000000000004c5
+[    0.000000] x3 : ffff000011714000 x2 : 0000000000000002
+[    0.000000] x1 : ffff7dfffe6fa000 x0 : ffff7dfffe73a010
+[    0.000000] Process swapper (pid: 0, stack limit =3D 0x(____ptrval____))
+[    0.000000] Call trace:
+[    0.000000]  efi_tpm_eventlog_init+0xfc/0x26c
+[    0.000000]  efi_config_parse_tables+0x180/0x29c
+[    0.000000]  uefi_init+0x1d0/0x22c
+[    0.000000]  efi_init+0x90/0x180
+[    0.000000]  setup_arch+0x1f4/0x5fc
+[    0.000000]  start_kernel+0x90/0x51c
+[    0.000000] Code: aa1603e0 97ff05c7 b4000860 b9400ac2 (b9401b01)
+[    0.000000] random: get_random_bytes called from
+print_oops_end_marker+0x54/0x70 with crng_init=3D0
+[    0.000000] ---[ end trace 0000000000000000 ]---
+[    0.000000] Kernel panic - not syncing: Attempted to kill the idle task!
+[    0.000000] ---[ end Kernel panic - not syncing: Attempted to kill
+the idle task! ]---
