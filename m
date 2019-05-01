@@ -1,54 +1,46 @@
-From: Paul Menzel <pmenzel@molgen.mpg.de>
-Subject: UEFI Fast Boot or Quick Boot for MS Windows also for Linux?
-Date: Wed, 1 May 2019 12:53:55 +0200
-Message-ID: <082b8964-7173-3a4e-b67d-24df13945617@molgen.mpg.de>
+From: Lukas Wunner <lukas@wunner.de>
+Subject: Re: [PATCH 4.19 083/100] x86/fpu: Dont export
+ __kernel_fpu_{begin,end}()
+Date: Wed, 1 May 2019 13:59:30 +0200
+Message-ID: <20190501115930.wa7ubea67rmsoqo7@wunner.de>
+References: <20190430113608.616903219@linuxfoundation.org>
+ <20190430113612.682532449@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <20190430113612.682532449@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: linux-efi@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: linux-kernel@vger.kernel.org, stable@vger.kernel.org, Sebastian Andrzej Siewior <bigeasy@linutronix.de>, Borislav Petkov <bp@suse.de>, Rik van Riel <riel@surriel.com>, "H. Peter Anvin" <hpa@zytor.com>, "Jason A. Donenfeld" <Jason@zx2c4.com>, Andy Lutomirski <luto@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Dave Hansen <dave.hansen@linux.intel.com>, Ingo Molnar <mingo@redhat.com>, Nicolai Stange <nstange@suse.de>, Paolo Bonzini <pbonzini@redhat.com>, Radim =?iso-8859-1?B?S3I/P23hPz8=?= <rkrcmar@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, kvm ML <kvm@vger.kernel.org>, linux-efi <linux-efi@vger.kernel.org>, x86-ml <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-Dear Linux folks,
-
-
-According to `systemd-analyze` the UEFI firmware on several systems, for 
-example the laptop Dell Latitude E7250 and the desktop board MSI B350M 
-MORTAR, take over ten seconds to initialize.
-
-     $ systemd-analyze
-     Startup finished in 11.193s (firmware) + 1.558s (loader) + 4.155s 
-(kernel) + 2.007s (userspace) = 18.914s
-     graphical.target reached after 1.983s in userspace
-
-Talking to other people, I heard, Microsoft Windows since version 8 can 
-activate some fast/quick boot mode in the firmware.
-
-I haven’t even found the specification for that mode. It could be 
-something like [1], but I do not think it is:
-
-> Fast Boot is a feature in BIOS that reduces your computer boot time. If
-> Fast Boot is enabled:
+On Tue, Apr 30, 2019 at 01:38:52PM +0200, Greg Kroah-Hartman wrote:
+> commit 12209993e98c5fa1855c467f22a24e3d5b8be205 upstream.
 > 
-> •   Boot from Network, Optical, and Removable Devices are disabled.
-> •   Video and USB devices (keyboard, mouse, drives) won't be available
->     until the operating system loads.
+> There is one user of __kernel_fpu_begin() and before invoking it,
+> it invokes preempt_disable(). So it could invoke kernel_fpu_begin()
+> right away. The 32bit version of arch_efi_call_virt_setup() and
+> arch_efi_call_virt_teardown() does this already.
+> 
+> The comment above *kernel_fpu*() claims that before invoking
+> __kernel_fpu_begin() preemption should be disabled and that KVM is a
+> good example of doing it. Well, KVM doesn't do that since commit
+> 
+>   f775b13eedee2 ("x86,kvm: move qemu/guest FPU switching out to vcpu_run")
+> 
+> so it is not an example anymore.
+> 
+> With EFI gone as the last user of __kernel_fpu_{begin|end}(), both can
+> be made static and not exported anymore.
 
-Some other sources [2] say, that MS Windows just uses hibernation to 
-boot quicker, but I do not think this is it, because with hibernation 
-there should be also a ten seconds delay, right?
+This is just a cleanup and therefore doesn't seem to satisfy the rules
+for stable patches per Documentation/process/stable-kernel-rules.rst
+("It must fix a real bug that bothers people / fix a problem that causes
+a build error").
 
-Do you know more about this mode, and how it works? Could it be 
-implemented for Linux?
+Why is it being queued up for stable and why are the rules disregarded here?
 
+Thanks,
 
-Kind regards,
-
-Paul
-
-
-[1]: 
-https://www.intel.com/content/www/us/en/support/articles/000006699/mini-pcs.html
+Lukas
