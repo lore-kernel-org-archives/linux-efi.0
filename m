@@ -1,46 +1,70 @@
-From: Lukas Wunner <lukas@wunner.de>
-Subject: Re: [PATCH 4.19 083/100] x86/fpu: Dont export
- __kernel_fpu_{begin,end}()
-Date: Wed, 1 May 2019 13:59:30 +0200
-Message-ID: <20190501115930.wa7ubea67rmsoqo7@wunner.de>
-References: <20190430113608.616903219@linuxfoundation.org>
- <20190430113612.682532449@linuxfoundation.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
+Subject: [PATCH 1/2 v2] efi: add a function to convert the status value to string
+Date: Thu,  2 May 2019 12:04:39 +0800
+Message-ID: <20190502040441.30372-1-jlee@suse.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20190430113612.682532449@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: linux-kernel@vger.kernel.org, stable@vger.kernel.org, Sebastian Andrzej Siewior <bigeasy@linutronix.de>, Borislav Petkov <bp@suse.de>, Rik van Riel <riel@surriel.com>, "H. Peter Anvin" <hpa@zytor.com>, "Jason A. Donenfeld" <Jason@zx2c4.com>, Andy Lutomirski <luto@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Dave Hansen <dave.hansen@linux.intel.com>, Ingo Molnar <mingo@redhat.com>, Nicolai Stange <nstange@suse.de>, Paolo Bonzini <pbonzini@redhat.com>, Radim =?iso-8859-1?B?S3I/P23hPz8=?= <rkrcmar@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, kvm ML <kvm@vger.kernel.org>, linux-efi <linux-efi@vger.kernel.org>, x86-ml <x86@kernel.org>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, James Morris <jmorris@namei.org>, "Serge E . Hallyn" <serge@hallyn.com>, David Howells <dhowells@redhat.com>, Josh Boyer <jwboyer@fedoraproject.org>, Nayna Jain <nayna@linux.ibm.com>, Mimi Zohar <zohar@linux.ibm.com>
+Cc: linux-efi@vger.kernel.org, linux-security-module@vger.kernel.org, linux-kernel@vger.kernel.org, "Lee, Chun-Yi" <jlee@suse.com>, Kees Cook <keescook@chromium.org>, Anton Vorontsov <anton@enomsg.org>, Colin Cross <ccross@android.com>, Tony Luck <tony.luck@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Apr 30, 2019 at 01:38:52PM +0200, Greg Kroah-Hartman wrote:
-> commit 12209993e98c5fa1855c467f22a24e3d5b8be205 upstream.
-> 
-> There is one user of __kernel_fpu_begin() and before invoking it,
-> it invokes preempt_disable(). So it could invoke kernel_fpu_begin()
-> right away. The 32bit version of arch_efi_call_virt_setup() and
-> arch_efi_call_virt_teardown() does this already.
-> 
-> The comment above *kernel_fpu*() claims that before invoking
-> __kernel_fpu_begin() preemption should be disabled and that KVM is a
-> good example of doing it. Well, KVM doesn't do that since commit
-> 
->   f775b13eedee2 ("x86,kvm: move qemu/guest FPU switching out to vcpu_run")
-> 
-> so it is not an example anymore.
-> 
-> With EFI gone as the last user of __kernel_fpu_{begin|end}(), both can
-> be made static and not exported anymore.
+This function can be used to convert EFI status value to string
+for printing out debug message. Using this function can improve
+the readability of log.
 
-This is just a cleanup and therefore doesn't seem to satisfy the rules
-for stable patches per Documentation/process/stable-kernel-rules.rst
-("It must fix a real bug that bothers people / fix a problem that causes
-a build error").
+v2.
+- Changed the wording in subject and description.
+- Moved the marco immediately after the status value definitions.
+- Turned into a proper function instead of inline.
 
-Why is it being queued up for stable and why are the rules disregarded here?
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Kees Cook <keescook@chromium.org>
+Cc: Anton Vorontsov <anton@enomsg.org>
+Cc: Colin Cross <ccross@android.com>
+Cc: Tony Luck <tony.luck@intel.com>
+Signed-off-by: "Lee, Chun-Yi" <jlee@suse.com>
+---
+ include/linux/efi.h | 28 ++++++++++++++++++++++++++++
+ 1 file changed, 28 insertions(+)
 
-Thanks,
-
-Lukas
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 54357a258b35..6f3f89a32eef 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -42,6 +42,34 @@
+ #define EFI_ABORTED		(21 | (1UL << (BITS_PER_LONG-1)))
+ #define EFI_SECURITY_VIOLATION	(26 | (1UL << (BITS_PER_LONG-1)))
+ 
++#define EFI_STATUS_STR(_status) \
++case EFI_##_status: \
++	return "EFI_" __stringify(_status);
++
++static __attribute__((unused)) char *
++efi_status_to_str(unsigned long status)
++{
++	switch (status) {
++	EFI_STATUS_STR(SUCCESS)
++	EFI_STATUS_STR(LOAD_ERROR)
++	EFI_STATUS_STR(INVALID_PARAMETER)
++	EFI_STATUS_STR(UNSUPPORTED)
++	EFI_STATUS_STR(BAD_BUFFER_SIZE)
++	EFI_STATUS_STR(BUFFER_TOO_SMALL)
++	EFI_STATUS_STR(NOT_READY)
++	EFI_STATUS_STR(DEVICE_ERROR)
++	EFI_STATUS_STR(WRITE_PROTECTED)
++	EFI_STATUS_STR(OUT_OF_RESOURCES)
++	EFI_STATUS_STR(NOT_FOUND)
++	EFI_STATUS_STR(ABORTED)
++	EFI_STATUS_STR(SECURITY_VIOLATION)
++	default:
++		pr_warn("Unknown efi status: 0x%lx", status);
++	}
++
++	return "Unknown efi status";
++}
++
+ typedef unsigned long efi_status_t;
+ typedef u8 efi_bool_t;
+ typedef u16 efi_char16_t;		/* UNICODE character */
+-- 
+2.16.4
