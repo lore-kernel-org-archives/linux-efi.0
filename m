@@ -1,27 +1,29 @@
 From: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
 Subject: Re: [PATCH V5 2/4] tpm: Reserve the TPM final events table
-Date: Fri, 3 May 2019 08:49:27 +0300
-Message-ID: <20190503054927.GC3728@linux.intel.com>
+Date: Fri, 3 May 2019 08:51:26 +0300
+Message-ID: <20190503055126.GD3728@linux.intel.com>
 References: <20190227202658.197113-1-matthewgarrett@google.com>
  <20190227202658.197113-3-matthewgarrett@google.com>
  <CAJzaN5pUJoOCz5-ZDSnTb6dbVPuy0QwmFD0CeofAGK+bRQx0og@mail.gmail.com>
- <20190502083240.GJ14532@linux.intel.com>
- <CACdnJuv1vwi7hgyGb-7a0dKfRhwdXTgj2baxO=qzpB_JJ1a9XQ@mail.gmail.com>
+ <CACdnJutpBPAX6TOGgs3Ng2v_cC5hAf-3pHThESvjQ9vbvQeVkA@mail.gmail.com>
+ <CAKv+Gu9PF4u=-7QL4e36Q3S5kC4+5Z=yLYHLT9jE+eNY7YUV7A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CACdnJuv1vwi7hgyGb-7a0dKfRhwdXTgj2baxO=qzpB_JJ1a9XQ@mail.gmail.com>
+In-Reply-To: <CAKv+Gu9PF4u=-7QL4e36Q3S5kC4+5Z=yLYHLT9jE+eNY7YUV7A@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Matthew Garrett <mjg59@google.com>
-Cc: Bartosz Szczepanek <bsz@semihalf.com>, linux-integrity <linux-integrity@vger.kernel.org>, Peter Huewe <peterhuewe@gmx.de>, Jason Gunthorpe <jgg@ziepe.ca>, Roberto Sassu <roberto.sassu@huawei.com>, linux-efi <linux-efi@vger.kernel.org>, LSM List <linux-security-module@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, =?iso-8859-1?Q?Thi=E9baud?= Weksteen <tweek@google.com>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Matthew Garrett <mjg59@google.com>, Ingo Molnar <mingo@kernel.org>, Bartosz Szczepanek <bsz@semihalf.com>, linux-integrity <linux-integrity@vger.kernel.org>, Peter Huewe <peterhuewe@gmx.de>, Jason Gunthorpe <jgg@ziepe.ca>, Roberto Sassu <roberto.sassu@huawei.com>, linux-efi <linux-efi@vger.kernel.org>, LSM List <linux-security-module@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, =?iso-8859-1?Q?Thi=E9baud?= Weksteen <tweek@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, May 02, 2019 at 11:03:08AM -0700, Matthew Garrett wrote:
-> On Thu, May 2, 2019 at 1:32 AM Jarkko Sakkinen
-> <jarkko.sakkinen@linux.intel.com> wrote:
+On Thu, May 02, 2019 at 09:14:49AM +0200, Ard Biesheuvel wrote:
+> (+ Ingo)
+> 
+> On Tue, 30 Apr 2019 at 21:52, Matthew Garrett <mjg59@google.com> wrote:
 > >
-> > On Tue, Apr 30, 2019 at 03:07:09PM +0200, Bartosz Szczepanek wrote:
+> > On Tue, Apr 30, 2019 at 6:07 AM Bartosz Szczepanek <bsz@semihalf.com> wrote:
+> > >
 > > > I may be a little late with this comment, but I've just tested these
 > > > patches on aarch64 platform (from the top of jjs/master) and got
 > > > kernel panic ("Unable to handle kernel read", full log at the end of
@@ -29,14 +31,16 @@ On Thu, May 02, 2019 at 11:03:08AM -0700, Matthew Garrett wrote:
 > > > tpm2_calc_event_log_size(), where physical address of efi.tpm_log is
 > > > passed as (void *) and never remapped:
 > >
-> > Not late. This is not part of any PR yet. Thank you for the
-> > feedback!
-> >
-> > Matthew, can you send an updated version of the whole patch set
-> > with fixes to this issue and also reordering of the includes?
+> > Yes, it looks like this is just broken. Can you try with the attached patch?
 > 
-> Yes, I'll resend and let's do this again for 5.3.
+> I'm a bit uncomfortable with EFI code that is obviously broken and
+> untested being queued for the next merge window in another tree.
+> 
+> What is currently queued there? Can we revert this change for the time
+> being, and resubmit it via the EFI tree for v5.3?
 
-Agreed, better not rush but get it right once.
+Nothing ATM. The broken code is in my master branch ATM. Nothing
+in my next branch nor have I included anything to my PRs. Should
+be nothing to worry about in that sense :-)
 
 /Jarkko
