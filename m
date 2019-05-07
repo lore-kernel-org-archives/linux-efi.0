@@ -1,76 +1,168 @@
-Return-Path: <SRS0=plmu=TG=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=9rRC=TH=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 65EC2C04A6B
-	for <linux-efi@archiver.kernel.org>; Mon,  6 May 2019 23:41:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C5288C004C9
+	for <linux-efi@archiver.kernel.org>; Tue,  7 May 2019 05:37:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 31C4D2087F
-	for <linux-efi@archiver.kernel.org>; Mon,  6 May 2019 23:41:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9260E216C8
+	for <linux-efi@archiver.kernel.org>; Tue,  7 May 2019 05:37:01 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1557186107;
-	bh=V4ixEGbonExk2RLE1nQcGlQFE1f0NK/exeq9Pp+mjAw=;
-	h=Subject:From:In-Reply-To:References:Date:To:Cc:List-ID:From;
-	b=VAeGRCHqEK2wKIGtUGy9nBgXyRizgmNBXGdz5/4K9Aqj/dpoEKV4JTJgMcZLtzsKi
-	 ZVY1KzfyVpBebY8VSiEb7Ijgu5xXkxy2XtWcZhXkE9KSyEaX1QCLLKyiI7DPTTXjbB
-	 Ad46XLmyekesLn5+9kBMug3s8Cma+7YNUb4fuETM=
+	s=default; t=1557207421;
+	bh=BdgObAC3fFlR0Js2Ty8pV2oYIcVW9JV+U9TauSCP3z4=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=gcPXm8jfem8EWXAfE4VFlXfspTUIkEqk8bEbajQd+JPDrkaQg0BVWEX4qaLMS+UKZ
+	 9h3mQV7UhB5EtFnhgfeShz1K0YIgTPcqw+XBZdy6RQYUh+JdOMEQ09UurntcCarFBv
+	 h5QGMWBZGhbqLTeNfktQFZPK33/TPsChjWEahZYw=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727084AbfEFXkH (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 6 May 2019 19:40:07 -0400
-Received: from mail.kernel.org ([198.145.29.99]:51758 "EHLO mail.kernel.org"
+        id S1727629AbfEGFhA (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 7 May 2019 01:37:00 -0400
+Received: from mail.kernel.org ([198.145.29.99]:56740 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727070AbfEFXkH (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 6 May 2019 19:40:07 -0400
-Subject: Re: [GIT PULL] EFI changes for v5.2
+        id S1727382AbfEGFhA (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Tue, 7 May 2019 01:37:00 -0400
+Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 1D62920C01;
+        Tue,  7 May 2019 05:36:57 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1557186006;
-        bh=V4ixEGbonExk2RLE1nQcGlQFE1f0NK/exeq9Pp+mjAw=;
-        h=From:In-Reply-To:References:Date:To:Cc:From;
-        b=E0ZtzNJkUHgLHznRrL2ZrTTlwJROiMl9pybANJJwNEDywkTKdLUfXD5jVy0R8/BoD
-         CvoinwuST5A0oe0ALOWv1xIKJby3GsRVqQT1TQSV/KDB9IyXm/fHhoQ96+geZOQUXX
-         1CoGzvEa8oQg0j5DomDCKJLjbFdjVIxdoUa54qcE=
-From:   pr-tracker-bot@kernel.org
-In-Reply-To: <20190506081759.GA30024@gmail.com>
-References: <20190506081759.GA30024@gmail.com>
-X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20190506081759.GA30024@gmail.com>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git efi-core-for-linus
-X-PR-Tracked-Commit-Id: 02562d0ca1084a688ac5c92e0e92947f62f13093
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: d90dcc1f14555c62a32bc15c86c66d1d5444b5cb
-Message-Id:
- <155718600656.9113.10517083269940973115.pr-tracker-bot@kernel.org>
-Date:   Mon, 06 May 2019 23:40:06 +0000
-To:     Ingo Molnar <mingo@kernel.org>
-Cc:     Linus Torvalds <torvalds@linux-foundation.org>,
-        linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
-        James Morse <james.morse@arm.com>,
-        Matt Fleming <matt@codeblueprint.co.uk>,
-        Thomas Gleixner <tglx@linutronix.de>,
+        s=default; t=1557207418;
+        bh=BdgObAC3fFlR0Js2Ty8pV2oYIcVW9JV+U9TauSCP3z4=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=1Uj0LqoKyCiZ3QFPW2MLJb9lRorYh68FSjluWP18J7nutRjIYLrIJKF26Fk3d+ru0
+         X9ygRuN65f4gAqo7fNPSOWxo8Tfrz8Z6ERqyjb9Uza5LTqHHVpBGEE7/rN1vu4kBu+
+         Hzu2weFCMYokrKIn1Hkz0rCdDcMzdPY0J0PKQFg0=
+From:   Sasha Levin <sashal@kernel.org>
+To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc:     Jian-Hong Pan <jian-hong@endlessm.com>,
+        Daniel Drake <drake@endlessm.com>,
+        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
         Borislav Petkov <bp@alien8.de>,
-        "H. Peter Anvin" <hpa@zytor.com>,
-        Peter Zijlstra <a.p.zijlstra@chello.nl>
+        Linus Torvalds <torvalds@linux-foundation.org>,
+        Matt Fleming <matt@codeblueprint.co.uk>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        linux-efi@vger.kernel.org, linux@endlessm.com,
+        Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 31/81] x86/reboot, efi: Use EFI reboot for Acer TravelMate X514-51T
+Date:   Tue,  7 May 2019 01:35:02 -0400
+Message-Id: <20190507053554.30848-31-sashal@kernel.org>
+X-Mailer: git-send-email 2.20.1
+In-Reply-To: <20190507053554.30848-1-sashal@kernel.org>
+References: <20190507053554.30848-1-sashal@kernel.org>
+MIME-Version: 1.0
+X-stable: review
+X-Patchwork-Hint: Ignore
+Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
-Message-ID: <20190506234006.D29IgwKTvPCBPjd0oAgV0w0I1HyYg38HTlBbDTJRMJI@z>
+Message-ID: <20190507053502.CtYAo67BVGPuFDkc8q8WYjIcAXpjYEvSi-Gb6bmVxic@z>
 
-The pull request you sent on Mon, 6 May 2019 10:17:59 +0200:
+From: Jian-Hong Pan <jian-hong@endlessm.com>
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git efi-core-for-linus
+[ Upstream commit 0082517fa4bce073e7cf542633439f26538a14cc ]
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/d90dcc1f14555c62a32bc15c86c66d1d5444b5cb
+Upon reboot, the Acer TravelMate X514-51T laptop appears to complete the
+shutdown process, but then it hangs in BIOS POST with a black screen.
 
-Thank you!
+The problem is intermittent - at some points it has appeared related to
+Secure Boot settings or different kernel builds, but ultimately we have
+not been able to identify the exact conditions that trigger the issue to
+come and go.
 
+Besides, the EFI mode cannot be disabled in the BIOS of this model.
+
+However, after extensive testing, we observe that using the EFI reboot
+method reliably avoids the issue in all cases.
+
+So add a boot time quirk to use EFI reboot on such systems.
+
+Buglink: https://bugzilla.kernel.org/show_bug.cgi?id=203119
+Signed-off-by: Jian-Hong Pan <jian-hong@endlessm.com>
+Signed-off-by: Daniel Drake <drake@endlessm.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Cc: linux@endlessm.com
+Link: http://lkml.kernel.org/r/20190412080152.3718-1-jian-hong@endlessm.com
+[ Fix !CONFIG_EFI build failure, clarify the code and the changelog a bit. ]
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ arch/x86/kernel/reboot.c | 21 +++++++++++++++++++++
+ include/linux/efi.h      |  7 ++++++-
+ 2 files changed, 27 insertions(+), 1 deletion(-)
+
+diff --git a/arch/x86/kernel/reboot.c b/arch/x86/kernel/reboot.c
+index 725624b6c0c0..8fd3cedd9acc 100644
+--- a/arch/x86/kernel/reboot.c
++++ b/arch/x86/kernel/reboot.c
+@@ -81,6 +81,19 @@ static int __init set_bios_reboot(const struct dmi_system_id *d)
+ 	return 0;
+ }
+ 
++/*
++ * Some machines don't handle the default ACPI reboot method and
++ * require the EFI reboot method:
++ */
++static int __init set_efi_reboot(const struct dmi_system_id *d)
++{
++	if (reboot_type != BOOT_EFI && !efi_runtime_disabled()) {
++		reboot_type = BOOT_EFI;
++		pr_info("%s series board detected. Selecting EFI-method for reboot.\n", d->ident);
++	}
++	return 0;
++}
++
+ void __noreturn machine_real_restart(unsigned int type)
+ {
+ 	local_irq_disable();
+@@ -166,6 +179,14 @@ static const struct dmi_system_id reboot_dmi_table[] __initconst = {
+ 			DMI_MATCH(DMI_PRODUCT_NAME, "AOA110"),
+ 		},
+ 	},
++	{	/* Handle reboot issue on Acer TravelMate X514-51T */
++		.callback = set_efi_reboot,
++		.ident = "Acer TravelMate X514-51T",
++		.matches = {
++			DMI_MATCH(DMI_SYS_VENDOR, "Acer"),
++			DMI_MATCH(DMI_PRODUCT_NAME, "TravelMate X514-51T"),
++		},
++	},
+ 
+ 	/* Apple */
+ 	{	/* Handle problems with rebooting on Apple MacBook5 */
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 401e4b254e30..cc3391796c0b 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1564,7 +1564,12 @@ efi_status_t efi_setup_gop(efi_system_table_t *sys_table_arg,
+ 			   struct screen_info *si, efi_guid_t *proto,
+ 			   unsigned long size);
+ 
+-bool efi_runtime_disabled(void);
++#ifdef CONFIG_EFI
++extern bool efi_runtime_disabled(void);
++#else
++static inline bool efi_runtime_disabled(void) { return true; }
++#endif
++
+ extern void efi_call_virt_check_flags(unsigned long flags, const char *call);
+ 
+ enum efi_secureboot_mode {
 -- 
-Deet-doot-dot, I am a bot.
-https://korg.wiki.kernel.org/userdoc/prtracker
+2.20.1
+
