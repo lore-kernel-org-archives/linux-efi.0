@@ -1,24 +1,112 @@
-From: pr-tracker-bot@kernel.org
-Subject: Re: [GIT PULL] EFI changes for v5.2
-Date: Mon, 06 May 2019 23:40:06 +0000
-Message-ID: <155718600656.9113.10517083269940973115.pr-tracker-bot@kernel.org>
-References: <20190506081759.GA30024@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190506081759.GA30024@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, James Morse <james.morse@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>, Thomas Gleixner <tglx@linutronix.de>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>
+From: Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 31/81] x86/reboot, efi: Use EFI reboot for Acer TravelMate X514-51T
+Date: Tue,  7 May 2019 01:35:02 -0400
+Message-ID: <20190507053554.30848-31-sashal@kernel.org>
+References: <20190507053554.30848-1-sashal@kernel.org>
+Mime-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20190507053554.30848-1-sashal@kernel.org>
+Sender: stable-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: Jian-Hong Pan <jian-hong@endlessm.com>, Daniel Drake <drake@endlessm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Borislav Petkov <bp@alien8.de>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, linux@endlessm.com, Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-The pull request you sent on Mon, 6 May 2019 10:17:59 +0200:
+From: Jian-Hong Pan <jian-hong@endlessm.com>
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git efi-core-for-linus
+[ Upstream commit 0082517fa4bce073e7cf542633439f26538a14cc ]
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/d90dcc1f14555c62a32bc15c86c66d1d5444b5cb
+Upon reboot, the Acer TravelMate X514-51T laptop appears to complete the
+shutdown process, but then it hangs in BIOS POST with a black screen.
 
-Thank you!
+The problem is intermittent - at some points it has appeared related to
+Secure Boot settings or different kernel builds, but ultimately we have
+not been able to identify the exact conditions that trigger the issue to
+come and go.
 
+Besides, the EFI mode cannot be disabled in the BIOS of this model.
+
+However, after extensive testing, we observe that using the EFI reboot
+method reliably avoids the issue in all cases.
+
+So add a boot time quirk to use EFI reboot on such systems.
+
+Buglink: https://bugzilla.kernel.org/show_bug.cgi?id=203119
+Signed-off-by: Jian-Hong Pan <jian-hong@endlessm.com>
+Signed-off-by: Daniel Drake <drake@endlessm.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Cc: linux@endlessm.com
+Link: http://lkml.kernel.org/r/20190412080152.3718-1-jian-hong@endlessm.com
+[ Fix !CONFIG_EFI build failure, clarify the code and the changelog a bit. ]
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ arch/x86/kernel/reboot.c | 21 +++++++++++++++++++++
+ include/linux/efi.h      |  7 ++++++-
+ 2 files changed, 27 insertions(+), 1 deletion(-)
+
+diff --git a/arch/x86/kernel/reboot.c b/arch/x86/kernel/reboot.c
+index 725624b6c0c0..8fd3cedd9acc 100644
+--- a/arch/x86/kernel/reboot.c
++++ b/arch/x86/kernel/reboot.c
+@@ -81,6 +81,19 @@ static int __init set_bios_reboot(const struct dmi_system_id *d)
+ 	return 0;
+ }
+ 
++/*
++ * Some machines don't handle the default ACPI reboot method and
++ * require the EFI reboot method:
++ */
++static int __init set_efi_reboot(const struct dmi_system_id *d)
++{
++	if (reboot_type != BOOT_EFI && !efi_runtime_disabled()) {
++		reboot_type = BOOT_EFI;
++		pr_info("%s series board detected. Selecting EFI-method for reboot.\n", d->ident);
++	}
++	return 0;
++}
++
+ void __noreturn machine_real_restart(unsigned int type)
+ {
+ 	local_irq_disable();
+@@ -166,6 +179,14 @@ static const struct dmi_system_id reboot_dmi_table[] __initconst = {
+ 			DMI_MATCH(DMI_PRODUCT_NAME, "AOA110"),
+ 		},
+ 	},
++	{	/* Handle reboot issue on Acer TravelMate X514-51T */
++		.callback = set_efi_reboot,
++		.ident = "Acer TravelMate X514-51T",
++		.matches = {
++			DMI_MATCH(DMI_SYS_VENDOR, "Acer"),
++			DMI_MATCH(DMI_PRODUCT_NAME, "TravelMate X514-51T"),
++		},
++	},
+ 
+ 	/* Apple */
+ 	{	/* Handle problems with rebooting on Apple MacBook5 */
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 401e4b254e30..cc3391796c0b 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1564,7 +1564,12 @@ efi_status_t efi_setup_gop(efi_system_table_t *sys_table_arg,
+ 			   struct screen_info *si, efi_guid_t *proto,
+ 			   unsigned long size);
+ 
+-bool efi_runtime_disabled(void);
++#ifdef CONFIG_EFI
++extern bool efi_runtime_disabled(void);
++#else
++static inline bool efi_runtime_disabled(void) { return true; }
++#endif
++
+ extern void efi_call_virt_check_flags(unsigned long flags, const char *call);
+ 
+ enum efi_secureboot_mode {
 -- 
-Deet-doot-dot, I am a bot.
-https://korg.wiki.kernel.org/userdoc/prtracker
+2.20.1
