@@ -7,37 +7,37 @@ X-Spam-Status: No, score=-9.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C5288C004C9
-	for <linux-efi@archiver.kernel.org>; Tue,  7 May 2019 05:37:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 75C4CC004C9
+	for <linux-efi@archiver.kernel.org>; Tue,  7 May 2019 05:46:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 9260E216C8
-	for <linux-efi@archiver.kernel.org>; Tue,  7 May 2019 05:37:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 475B220578
+	for <linux-efi@archiver.kernel.org>; Tue,  7 May 2019 05:46:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1557207421;
-	bh=BdgObAC3fFlR0Js2Ty8pV2oYIcVW9JV+U9TauSCP3z4=;
+	s=default; t=1557207964;
+	bh=kpd7/k7r6GpIU1KFTkia1a6/RVNXjvMllUA/yCz3gjU=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=gcPXm8jfem8EWXAfE4VFlXfspTUIkEqk8bEbajQd+JPDrkaQg0BVWEX4qaLMS+UKZ
-	 9h3mQV7UhB5EtFnhgfeShz1K0YIgTPcqw+XBZdy6RQYUh+JdOMEQ09UurntcCarFBv
-	 h5QGMWBZGhbqLTeNfktQFZPK33/TPsChjWEahZYw=
+	b=wxyKY3n5abuPFchPQ4jMxbJi7G9HYftFHKe7iZANfZuhWZx+4+FG/bNY3PMhxZzJ6
+	 tDUOqLOjYrHmWYbShz9Wz8gPYAXbjn4srDcDIMgnfQrWcys8KvTZaF5uxhPGX5jDa7
+	 wvU3UmSGCGTiYuTMJZeLOazX/p71H9fvhhMs6HEc=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727629AbfEGFhA (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 7 May 2019 01:37:00 -0400
-Received: from mail.kernel.org ([198.145.29.99]:56740 "EHLO mail.kernel.org"
+        id S1728810AbfEGFlv (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 7 May 2019 01:41:51 -0400
+Received: from mail.kernel.org ([198.145.29.99]:32916 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727382AbfEGFhA (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Tue, 7 May 2019 01:37:00 -0400
+        id S1728531AbfEGFlu (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Tue, 7 May 2019 01:41:50 -0400
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 1D62920C01;
-        Tue,  7 May 2019 05:36:57 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id B98C920675;
+        Tue,  7 May 2019 05:41:47 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1557207418;
-        bh=BdgObAC3fFlR0Js2Ty8pV2oYIcVW9JV+U9TauSCP3z4=;
+        s=default; t=1557207709;
+        bh=kpd7/k7r6GpIU1KFTkia1a6/RVNXjvMllUA/yCz3gjU=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=1Uj0LqoKyCiZ3QFPW2MLJb9lRorYh68FSjluWP18J7nutRjIYLrIJKF26Fk3d+ru0
-         X9ygRuN65f4gAqo7fNPSOWxo8Tfrz8Z6ERqyjb9Uza5LTqHHVpBGEE7/rN1vu4kBu+
-         Hzu2weFCMYokrKIn1Hkz0rCdDcMzdPY0J0PKQFg0=
+        b=WalPEDxiwuc97XY7zoNqWvyBY9SfCV0YQuY5qG6rQ2QaWFhY2kCS0Ux3BEFYzfwES
+         36VGpwZFiCLn/EuoiDMfcAZRJ5iesaIHiCLWNvvv2+In6xDJC/+2t8gL070zfIKSZp
+         0z9+wEPRah77F8ASYaC03zDZJHNdptLLJHXER91w=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Jian-Hong Pan <jian-hong@endlessm.com>,
@@ -50,12 +50,12 @@ Cc:     Jian-Hong Pan <jian-hong@endlessm.com>,
         Thomas Gleixner <tglx@linutronix.de>,
         linux-efi@vger.kernel.org, linux@endlessm.com,
         Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 31/81] x86/reboot, efi: Use EFI reboot for Acer TravelMate X514-51T
-Date:   Tue,  7 May 2019 01:35:02 -0400
-Message-Id: <20190507053554.30848-31-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.9 12/25] x86/reboot, efi: Use EFI reboot for Acer TravelMate X514-51T
+Date:   Tue,  7 May 2019 01:41:09 -0400
+Message-Id: <20190507054123.32514-12-sashal@kernel.org>
 X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20190507053554.30848-1-sashal@kernel.org>
-References: <20190507053554.30848-1-sashal@kernel.org>
+In-Reply-To: <20190507054123.32514-1-sashal@kernel.org>
+References: <20190507054123.32514-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -65,7 +65,7 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
-Message-ID: <20190507053502.CtYAo67BVGPuFDkc8q8WYjIcAXpjYEvSi-Gb6bmVxic@z>
+Message-ID: <20190507054109.ApggSMdq-Jyvfw4tFBWLWDysyQSa_foXyC79sK5T_Hg@z>
 
 From: Jian-Hong Pan <jian-hong@endlessm.com>
 
@@ -107,10 +107,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  2 files changed, 27 insertions(+), 1 deletion(-)
 
 diff --git a/arch/x86/kernel/reboot.c b/arch/x86/kernel/reboot.c
-index 725624b6c0c0..8fd3cedd9acc 100644
+index 4a12362a194a..c55b11fe8e9f 100644
 --- a/arch/x86/kernel/reboot.c
 +++ b/arch/x86/kernel/reboot.c
-@@ -81,6 +81,19 @@ static int __init set_bios_reboot(const struct dmi_system_id *d)
+@@ -82,6 +82,19 @@ static int __init set_bios_reboot(const struct dmi_system_id *d)
  	return 0;
  }
  
@@ -130,7 +130,7 @@ index 725624b6c0c0..8fd3cedd9acc 100644
  void __noreturn machine_real_restart(unsigned int type)
  {
  	local_irq_disable();
-@@ -166,6 +179,14 @@ static const struct dmi_system_id reboot_dmi_table[] __initconst = {
+@@ -167,6 +180,14 @@ static struct dmi_system_id __initdata reboot_dmi_table[] = {
  			DMI_MATCH(DMI_PRODUCT_NAME, "AOA110"),
  		},
  	},
@@ -146,10 +146,10 @@ index 725624b6c0c0..8fd3cedd9acc 100644
  	/* Apple */
  	{	/* Handle problems with rebooting on Apple MacBook5 */
 diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 401e4b254e30..cc3391796c0b 100644
+index 80b1b8faf503..e6711bf9f0d1 100644
 --- a/include/linux/efi.h
 +++ b/include/linux/efi.h
-@@ -1564,7 +1564,12 @@ efi_status_t efi_setup_gop(efi_system_table_t *sys_table_arg,
+@@ -1433,7 +1433,12 @@ efi_status_t efi_setup_gop(efi_system_table_t *sys_table_arg,
  			   struct screen_info *si, efi_guid_t *proto,
  			   unsigned long size);
  
@@ -162,7 +162,7 @@ index 401e4b254e30..cc3391796c0b 100644
 +
  extern void efi_call_virt_check_flags(unsigned long flags, const char *call);
  
- enum efi_secureboot_mode {
+ /*
 -- 
 2.20.1
 
