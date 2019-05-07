@@ -1,12 +1,12 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.14 17/95] x86/reboot, efi: Use EFI reboot for Acer TravelMate X514-51T
-Date: Tue,  7 May 2019 01:37:06 -0400
-Message-ID: <20190507053826.31622-17-sashal@kernel.org>
-References: <20190507053826.31622-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.0 42/99] x86/reboot, efi: Use EFI reboot for Acer TravelMate X514-51T
+Date: Tue,  7 May 2019 01:31:36 -0400
+Message-ID: <20190507053235.29900-42-sashal@kernel.org>
+References: <20190507053235.29900-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190507053826.31622-1-sashal@kernel.org>
+In-Reply-To: <20190507053235.29900-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Jian-Hong Pan <jian-hong@endlessm.com>, Daniel Drake <drake@endlessm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Borislav Petkov <bp@alien8.de>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, linux@endlessm.com, Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.org>
@@ -52,7 +52,7 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  2 files changed, 27 insertions(+), 1 deletion(-)
 
 diff --git a/arch/x86/kernel/reboot.c b/arch/x86/kernel/reboot.c
-index 2126b9d27c34..c663d5fcff2e 100644
+index 725624b6c0c0..8fd3cedd9acc 100644
 --- a/arch/x86/kernel/reboot.c
 +++ b/arch/x86/kernel/reboot.c
 @@ -81,6 +81,19 @@ static int __init set_bios_reboot(const struct dmi_system_id *d)
@@ -91,10 +91,10 @@ index 2126b9d27c34..c663d5fcff2e 100644
  	/* Apple */
  	{	/* Handle problems with rebooting on Apple MacBook5 */
 diff --git a/include/linux/efi.h b/include/linux/efi.h
-index b68b7d199fee..2dab158b74c4 100644
+index a86485ac7c87..de05a4302529 100644
 --- a/include/linux/efi.h
 +++ b/include/linux/efi.h
-@@ -1518,7 +1518,12 @@ efi_status_t efi_setup_gop(efi_system_table_t *sys_table_arg,
+@@ -1598,7 +1598,12 @@ efi_status_t efi_setup_gop(efi_system_table_t *sys_table_arg,
  			   struct screen_info *si, efi_guid_t *proto,
  			   unsigned long size);
  
