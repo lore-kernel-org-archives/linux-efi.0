@@ -1,360 +1,196 @@
-From: joeyli <jlee@suse.com>
-Subject: Re: [PATCH 2/2 v3] efi: print appropriate status message when
- loading certificates
-Date: Tue, 7 May 2019 16:43:09 +0800
-Message-ID: <20190507084309.GA18931@linux-l9pv.suse>
-References: <20190502040441.30372-1-jlee@suse.com>
- <20190502040441.30372-2-jlee@suse.com>
- <CAKv+Gu8MESd3BXCKR=EH7Z1kWegm9XjTP38jBsizpgDAuyA3YQ@mail.gmail.com>
- <20190503071819.GN11486@linux-l9pv.suse>
- <CAKv+Gu9CdWYMELxBz9WqaB4BSRbRx81iR-x4P+2OANAcfLUhUQ@mail.gmail.com>
- <20190503085834.GQ11486@linux-l9pv.suse>
- <CAKv+Gu-AuoObBW5Ha_cXtYQOdeYYpTRBu=6RqH7+DYvwACKR1A@mail.gmail.com>
+From: Claudio Carvalho <cclaudio@linux.ibm.com>
+Subject: Re: [PATCH 0/4] Enabling secure boot on PowerNV systems
+Date: Fri, 10 May 2019 18:31:12 -0300
+Message-ID: <e845d9f5-00bb-e68d-9d24-da802dd05549@linux.ibm.com>
+References: <20190402181505.25037-1-cclaudio@linux.ibm.com>
+ <CACdnJuumhkqTb4+1=QBiLmbW4xd3wW=MZu6Tj_KdaoTMhCN+Tg@mail.gmail.com>
+ <4ce5e057-0702-b0d5-7bb2-cea5b22e2efa@linux.ibm.com>
+ <CACdnJusBm93zwDqTXTx_QYsg1-aGUAAHm_qq8Lcx3TvGTxdmbg@mail.gmail.com>
+ <2208f156-d441-3082-2f4c-8030c84ef788@linux.ibm.com>
+ <CACdnJuu8OqMrSs0esOmf=ro9n00aYEQ-nikAh6v6sk+YAQw4cQ@mail.gmail.com>
+ <d79f47f8-9006-3a47-2bdc-58012cef5c7e@linux.ibm.com>
+ <CACdnJuv_5A1_6CH1+Jn7SCrmW8Y6JuzsMmJoc1=_vn0nKdYMjQ@mail.gmail.com>
+ <28bfc0a7-9ae5-2c99-e472-ea53f856bafc@linux.ibm.com>
+ <CACdnJuvpUKiX5UgSOrzh+B9y68zKm+Bzu1c8KFJHd8diz=sm2Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu-AuoObBW5Ha_cXtYQOdeYYpTRBu=6RqH7+DYvwACKR1A@mail.gmail.com>
+In-Reply-To: <CACdnJuvpUKiX5UgSOrzh+B9y68zKm+Bzu1c8KFJHd8diz=sm2Q@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Peter Jones <pjones@redhat.com>, Matthew Garrett <mjg59@google.com>, "Lee, Chun-Yi" <joeyli.kernel@gmail.com>, Mimi Zohar <zohar@linux.ibm.com>, David Howells <dhowells@redhat.com>, James Morris <jmorris@namei.org>, "Serge E . Hallyn" <serge@hallyn.com>, Josh Boyer <jwboyer@fedoraproject.org>, Nayna Jain <nayna@linux.ibm.com>, linux-efi <linux-efi@vger.kernel.org>, linux-security-module <linux-security-module@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Matthew Garrett <mjg59@google.com>
+Cc: linuxppc-dev@ozlabs.org, linux-efi <linux-efi@vger.kernel.org>, linux-integrity <linux-integrity@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Michael Ellerman <mpe@ellerman.id.au>, Paul Mackerras <paulus@samba.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Jeremy Kerr <jk@ozlabs.org>, Matthew Garret <matthew.garret@nebula.com>, Nayna Jain <nayna@linux.ibm.com>, Peter Jones <pjones@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, May 03, 2019 at 04:23:51PM +0200, Ard Biesheuvel wrote:
-> On Fri, 3 May 2019 at 10:59, joeyli <jlee@suse.com> wrote:
-> >
-> > On Fri, May 03, 2019 at 10:07:59AM +0200, Ard Biesheuvel wrote:
-> > > On Fri, 3 May 2019 at 09:18, joeyli <jlee@suse.com> wrote:
-> > > >
-> > > > Hi Ard,
-> > > >
-> > > > On Thu, May 02, 2019 at 11:04:34AM +0200, Ard Biesheuvel wrote:
-> > > > > On Thu, 2 May 2019 at 06:04, Lee, Chun-Yi <joeyli.kernel@gmail.com> wrote:
-> > > > > >
-> > > > > > When loading certificates list from UEFI variable, the original error
-> > > > > > message direct shows the efi status code from UEFI firmware. It looks
-> > > > > > ugly:
-> > > > > >
-> > > > > > [    2.335031] Couldn't get size: 0x800000000000000e
-> > > > > > [    2.335032] Couldn't get UEFI MokListRT
-> > > > > > [    2.339985] Couldn't get size: 0x800000000000000e
-> > > > > > [    2.339987] Couldn't get UEFI dbx list
-> > > > > >
-> > > > > > So, this patch shows the status string instead of status code.
-> > > > > >
-> > > > > > On the other hand, the "Couldn't get UEFI" message doesn't need
-> > > > > > to be exposed when db/dbx/mok variable do not exist. So, this
-> > > > > > patch set the message level to debug.
-> > > > > >
-> > > > > > v3.
-> > > > > > - Print messages similar to db/mok when loading dbx hash to blacklist:
-> > > > > > [    1.500952] EFI: Blacklisting hash of an executable: UEFI:dbx
-> > > > > > [    1.501773] blacklist: Loaded blacklisting hash
-> > > > > > 'bin:80b4d96931bf0d02fd91a61e19d14f1da452e66db2408ca8604d411f92659f0a'
-> > > > > >
-> > > > > > - Setting messages for the existence of db/mok/dbx lists to debug level.
-> > > > > >
-> > > > > > v2.
-> > > > > > Setting the MODSIGN messages level to debug.
-> > > > > >
-> > > > > > Link:
-> > > > > > https://forums.opensuse.org/showthread.php/535324-MODSIGN-Couldn-t-get-UEFI-db-list?p=2897516#post2897516
-> > > > > > Cc: James Morris <jmorris@namei.org>
-> > > > > > Cc: Serge E. Hallyn" <serge@hallyn.com>
-> > > > > > Cc: David Howells <dhowells@redhat.com>
-> > > > > > Cc: Nayna Jain <nayna@linux.ibm.com>
-> > > > > > Cc: Josh Boyer <jwboyer@fedoraproject.org>
-> > > > > > Cc: Mimi Zohar <zohar@linux.ibm.com>
-> > > > > > Signed-off-by: "Lee, Chun-Yi" <jlee@suse.com>
-> > > > > > ---
-> > > > > >  certs/blacklist.c                             |  3 +-
-> > > > > >  security/integrity/platform_certs/load_uefi.c | 40 +++++++++++++++++++--------
-> > > > > >  2 files changed, 31 insertions(+), 12 deletions(-)
-> > > > > >
-> > > > > > diff --git a/certs/blacklist.c b/certs/blacklist.c
-> > > > > > index 3a507b9e2568..f91437e39e44 100644
-> > > > > > --- a/certs/blacklist.c
-> > > > > > +++ b/certs/blacklist.c
-> > > > > > @@ -100,7 +100,8 @@ int mark_hash_blacklisted(const char *hash)
-> > > > > >         if (IS_ERR(key)) {
-> > > > > >                 pr_err("Problem blacklisting hash (%ld)\n", PTR_ERR(key));
-> > > > > >                 return PTR_ERR(key);
-> > > > > > -       }
-> > > > > > +       } else
-> > > > > > +               pr_notice("Loaded blacklisting hash '%s'\n", hash);
-> > > > > >         return 0;
-> > > > > >  }
-> > > > > >
-> > > > > > diff --git a/security/integrity/platform_certs/load_uefi.c b/security/integrity/platform_certs/load_uefi.c
-> > > > > > index 81b19c52832b..6b6996e5bc27 100644
-> > > > > > --- a/security/integrity/platform_certs/load_uefi.c
-> > > > > > +++ b/security/integrity/platform_certs/load_uefi.c
-> > > > > > @@ -1,5 +1,7 @@
-> > > > > >  // SPDX-License-Identifier: GPL-2.0
-> > > > > >
-> > > > > > +#define pr_fmt(fmt) "EFI: "fmt
-> > > > > > +
-> > > > > >  #include <linux/kernel.h>
-> > > > > >  #include <linux/sched.h>
-> > > > > >  #include <linux/cred.h>
-> > > > > > @@ -35,6 +37,18 @@ static __init bool uefi_check_ignore_db(void)
-> > > > > >         return status == EFI_SUCCESS;
-> > > > > >  }
-> > > > > >
-> > > > > > +static void str16_to_str(efi_char16_t *str16, char *str, int str_size)
-> > > > > > +{
-> > > > > > +       int i = 0;
-> > > > > > +
-> > > > > > +       while (str16[i] != '\0' && i < (str_size - 1)) {
-> > > > > > +               str[i] = str16[i];
-> > > > > > +               i++;
-> > > > > > +       }
-> > > > > > +
-> > > > > > +       str[i] = '\0';
-> > > > > > +}
-> > > > > > +
-> > > > > >  /*
-> > > > > >   * Get a certificate list blob from the named EFI variable.
-> > > > > >   */
-> > > > > > @@ -44,13 +58,20 @@ static __init void *get_cert_list(efi_char16_t *name, efi_guid_t *guid,
-> > > > > >         efi_status_t status;
-> > > > > >         unsigned long lsize = 4;
-> > > > > >         unsigned long tmpdb[4];
-> > > > > > +       char namestr[16];
-> > > > > >         void *db;
-> > > > > >
-> > > > > > +       str16_to_str(name, namestr, ARRAY_SIZE(namestr));
-> > > > >
-> > > > > Please drop this (and the function above) - instead, just return NULL
-> > > > > if the variable is not found (without reporting an error).
-> > > > >
-> > > >
-> > > > This name string is for printing debug level message, not error message.
-> > > > This function already returns NULL when EFI_NOT_FOUND be returned by
-> > > > firmware.
-> > > >
-> > > > > >         status = efi.get_variable(name, guid, NULL, &lsize, &tmpdb);
-> > > > > >         if (status != EFI_BUFFER_TOO_SMALL) {
-> > > > > > -               pr_err("Couldn't get size: 0x%lx\n", status);
-> > > > > > +               if (status == EFI_NOT_FOUND)
-> > > > > > +                       pr_debug("UEFI %s list doesn't exist\n", namestr);
-> > > > > > +               else
-> > > > > > +                       pr_err("Couldn't get size for UEFI %s list: %s\n",
-> > > > > > +                               namestr, efi_status_to_str(status));
-> > > > > >                 return NULL;
-> > > >
-> > > > here returns NULL when EFI_NOT_FOUND. The message of existence is for
-> > > > debugging.
-> > > >
-> > >
-> > > I understand that. But I don't think we need it.
-> > >
-> >
-> > OK. I will remove the debug message.
-> >
-> > > > > >         }
-> > > > > > +       pr_debug("UEFI %s list exists\n", namestr);
-> > > > > >
-> > > > > >         db = kmalloc(lsize, GFP_KERNEL);
-> > > > > >         if (!db)
-> > > > > > @@ -59,7 +80,8 @@ static __init void *get_cert_list(efi_char16_t *name, efi_guid_t *guid,
-> > > > > >         status = efi.get_variable(name, guid, NULL, &lsize, db);
-> > > > > >         if (status != EFI_SUCCESS) {
-> > > > > >                 kfree(db);
-> > > > > > -               pr_err("Error reading db var: 0x%lx\n", status);
-> > > > > > +               pr_err("Error reading UEFI %s list: %s\n",
-> > > > > > +                       namestr, efi_status_to_str(status));
-> > > > > >                 return NULL;
-> > > > > >         }
-> > > > > >
-> > > > > > @@ -95,6 +117,7 @@ static __init void uefi_blacklist_hash(const char *source, const void *data,
-> > > > > >  static __init void uefi_blacklist_x509_tbs(const char *source,
-> > > > > >                                            const void *data, size_t len)
-> > > > > >  {
-> > > > > > +       pr_info("Blacklisting X.509 TBS hash: %s\n", source);
-> > > > > >         uefi_blacklist_hash(source, data, len, "tbs:", 4);
-> > > > > >  }
-> > > > > >
-> > > > > > @@ -104,6 +127,7 @@ static __init void uefi_blacklist_x509_tbs(const char *source,
-> > > > > >  static __init void uefi_blacklist_binary(const char *source,
-> > > > > >                                          const void *data, size_t len)
-> > > > > >  {
-> > > > > > +       pr_info("Blacklisting hash of an executable: %s\n", source);
-> > > > > >         uefi_blacklist_hash(source, data, len, "bin:", 4);
-> > > > > >  }
-> > > > > >
-> > > > >
-> > > > > These are separate changes - I don't have an opinion whether they are
-> > > > > appropriate or not, but they should be in a separate patch.
-> > > > >
-> > > >
-> > > > I will move the message of blacklising hash to other patch. Thanks!
-> > > >
-> > > > > > @@ -154,9 +178,7 @@ static int __init load_uefi_certs(void)
-> > > > > >          */
-> > > > > >         if (!uefi_check_ignore_db()) {
-> > > > > >                 db = get_cert_list(L"db", &secure_var, &dbsize);
-> > > > > > -               if (!db) {
-> > > > > > -                       pr_err("MODSIGN: Couldn't get UEFI db list\n");
-> > > > > > -               } else {
-> > > > > > +               if (db) {
-> > > > > >                         rc = parse_efi_signature_list("UEFI:db",
-> > > > > >                                         db, dbsize, get_handler_for_db);
-> > > > > >                         if (rc)
-> > > > > > @@ -167,9 +189,7 @@ static int __init load_uefi_certs(void)
-> > > > > >         }
-> > > > > >
-> > > > > >         mok = get_cert_list(L"MokListRT", &mok_var, &moksize);
-> > > > > > -       if (!mok) {
-> > > > > > -               pr_info("Couldn't get UEFI MokListRT\n");
-> > > > > > -       } else {
-> > > > > > +       if (mok) {
-> > > > > >                 rc = parse_efi_signature_list("UEFI:MokListRT",
-> > > > > >                                               mok, moksize, get_handler_for_db);
-> > > > > >                 if (rc)
-> > > > > > @@ -178,9 +198,7 @@ static int __init load_uefi_certs(void)
-> > > > > >         }
-> > > > > >
-> > > > > >         dbx = get_cert_list(L"dbx", &secure_var, &dbxsize);
-> > > > > > -       if (!dbx) {
-> > > > > > -               pr_info("Couldn't get UEFI dbx list\n");
-> > > > > > -       } else {
-> > > > > > +       if (dbx) {
-> > > > > >                 rc = parse_efi_signature_list("UEFI:dbx",
-> > > > > >                                               dbx, dbxsize,
-> > > > > >                                               get_handler_for_dbx);
-> > > > > > --
-> > > > > > 2.16.4
-> > > > > >
-> > > > >
-> > > > > I think we should consider carefully what it means if some of these
-> > > > > variables don't exist:
-> > > > > - if secure boot is enabled, db and dbx must exist, so if they don't,
-> > > > > something is wrong
-> > > >
-> > > > The existence of db/dbx is not related to secure boot. If manufacturer/user
-> > > > enrolled certificate/hash to db or dbx, then the variable will be created.
-> > > > If user didn't enroll anything to db/dbx, then variables will not show up.
-> > > >
-> > >
-> > > Yes, but if secure boot is enabled and db is empty, how could you have
-> > > booted in the first place?
-> > >
-> >
-> > I agree. When secure boot enabled, kernel can not be booted without db.
-> >
-> > > And what about the converse case: if secure boot is not enabled, why
-> > > should we trust the contents of db?
-> > >
-> >
-> > The db and dbx are authenticated variables that it protected by KEK.
-> > So it can be trusted even secure boot is disabled. Unless manufacturer
-> > or user's KEK is leaked.
-> >
-> 
-> Is that true for non-secureboot capable firmware? Of course, in that
-> case, we cannot be sure that the kernel itself is trusted, but we
-> shouldn't open up another hole either.
+Hi Matthew,
+
+Thanks for the feedback and sorry for the delay in responding.
+
+
+On 4/10/19 2:36 PM, Matthew Garrett wrote:
+> (Cc:ing Peter Jones)
 >
+> On Tue, Apr 9, 2019 at 3:55 PM Claudio Carvalho <cclaudio@linux.ibm.com> wrote:
+>>
+>> On 4/5/19 7:19 PM, Matthew Garrett wrote:
+>>> Based on our experience doing this in UEFI, that's insufficient - you
+>>> want to be able to block individual binaries or leaf certificates
+>>> without dropping trust in an intermediate certificate entirely.
+>>
+>> We agree that a dbx would be useful for blacklisting particular kernels
+>> signed with given certificate. However, we have been avoiding doing so for
+>> the initial release of secure boot on OpenPOWER. We don't have individual
+>> firmware binaries in OpenPOWER. Kernels are currently the only concern for
+>> the OS secure boot certificates we're discussing here. Also, we have a very
+>> limited keystore space in POWER9.
+>>
+>> Petitboot doesn't have standardized OS kernel verification at all right
+>> now.  Having the capability even without dbx seems valuable.
+> I don't see the benefit in attempting to maintain compatibility with
+> existing tooling unless you're going to be *completely* compatible
+> with existing tooling. That means supporting dbx and dbt.
 
-I agree with you that we should filer-out non-secureboot firmware. I
-think that we can check the existence of SecureBoot variable before loading
-db/dbx. On the other hand, the SetupMode should also be checked because
-db/dbx can be changed in setup mode. 
 
-> > > > > - secure boot might be enabled but we may be booting without shim.
-> > > >
-> > > > Shim always creates MokListRT no matter secure boot enabled or disabled.
-> > > >
-> > >
-> > > That is not my point. What happens if you booted with secure boot
-> > > enabled but without the help of shim?
-> > >
-> >
-> > Without shim, the signed EFI stub can still be booted by EFI boot manager.
-> > But the MokListRT will not be created for runtime. So MOK signed kernel
-> > module can not be verified. (or IMA can not verify MOK signed kernel image
-> > for kexec...)
-> >
-> 
-> So if we opt out of using shim, we lose kexec capability as well? That
-> doesn't make any sense.
+Before addressing that, I'd like to share some of the current OpenPOWER
+secure boot design.
+Different from UEFI, secure boot in OpenPOWER systems have two distinct
+domains. Each one has its own key hierarchy and signing and signature
+verification mechanisms.
+
+In the firmware secure boot domain (work already upstream):
+ - Every image loaded up to skiroot is wrapped in a secure boot container.
+Skiroot is a Linux zimage with petitboot (kexec bootloader) embedded in the
+initramfs.
+ - Within the secure boot container, the payload image is protected by a
+chain of signatures anchored in the root ECDSA keys, also known as hardware
+keys.
+ - All public keys required to verify the container are stored in the
+container itself, but a hash of the trusted public hardware keys is stored
+in a protected SEEPROM region outside of the container. Firmware uses it to
+check if the container is anchored in the trusted hardware keys. If not,
+the container payload is not executed and the boot is aborted.
+ - The hash of the hardware keys is set by the firmware supplier, for
+instance, the platform manufacturer.
+
+In OS secure boot domain (work in progress):
+- The skiroot container is verified as part of firmware secure boot.
+- Skiroot uses UEFI-like secure variables (PK, KEK and db) to verify OS
+kernels. Only X.509 certificates will be supported for these secure variables.
+- OS kernels are signed using the Linux kernel sign-file tool, as if they
+were kernel modules.
+- In the skiroot kernel, if secure boot is enabled, the db certificates
+will be loaded into the platform keyring and IMA-appraisal will verify the
+kexec image against the platform keyring.
+- The PK is set by whoever controls the platform, for instance, the
+manufacturer or the end customer.
+
+How about dbx and dbt?
+
+The db keys will be used to verify only OS kernels via kexecs initiated by
+petitboot. So we only need the dbx to revoke kernel images, either via
+certs or hashes. Currently, the kernel loads certs and hashes from the dbx
+to the system blacklist keyring. The revoked certs are checked during pkcs7
+signature verification and loading of keys. However, there doesn't appear
+to be any verification against blacklisted hashes. Should kernel images be
+revoked only by keys and not hashes? We tried to find published revoked
+kernel lists but couldn't find any. How is kernel image revocation handled
+in practice?
+
+Also, we didn't see the shim or kernel loading anything from dbt.
+
+In general, how do you think the kernel ought to support blacklists?
+
+
 >
-
-MOK is just one of options that it can be used to sign crash kernel image.
-We can also use the key in db or the kernel embedded keys.
- 
-> In general, I am very uncomfortable with the way we have painted
-> ourselves into a corner with shim. If I install Suse on a system that
-> has the Suse cert in db or KEK, why would I need shim in the first
-> place?
+>>>> The API is still a work in progress.  We are planning to publish a document
+>>>> describing the current API and overall design shortly.
+>>> Ok. How are the attributes interpreted by the API?
+>>
+>> We support a subset of standard EFI variable attributes, and we only use
+>> EFI variables that relate to secure boot. Our goal is not to implement
+>> UEFI.  However, we do seek to be compatible with user space tooling and
+>> reuse as much existing infrastructure as possible. We don’t support the
+>> following: EFI_VARIABLE_HARDWARE_ERROR_RECORD,
+>> EFI_VARIABLE_AUTHENTICATED_WRITE_ACCESS and
+>> EFI_VARIABLE_ENHANCED_AUTHENTICATED_ACCESS.
+> Ok. I think that's realistically fine.
 >
-
-Yes! We don't need MOK if distro's certificates are preloaded in most
-machines' db. Unfortunately it's not the case on most x86 machines.
- 
-> > > > > - secure boot might be disabled.
-> > > > >
-> > > >
-> > > > It's not about secure boot, db/dbx/MokListRT are always available at
-> > > > runtime if user was enrolled something to those list.
-> > > >
-> > >
-> > > Yes, but again, depending on whether shim was involved, and/or whether
-> > > secure boot was enabled or not, the way we interpret these things may
-> > > be very different.
-> > >
-> > > I want the reasoning to be sound before merging any patches that deal
-> > > with these variables.
-> >
-> > Here is a simple summary:
-> >
-> > When secure boot is enabled:
-> >     - db/dbx: Can be trusted because they are authenticated variables.
-> >               (unless end user doesn't want to trust db/dbx)
-> >     - MokListRT:
-> >         - with shim: MokListRT will be created. It can be trusted.
-> >         - without shim: MokListRT will not be created.
-> >                         MOK protected kernel module or file can not be
-> >                         verified.
-> >
-> 
-> So who polices that MoKlistRT is not created?
+>>>> Perhaps the biggest departure is that the secure variables are stored in
+>>>> flash memory that is not lockable.  In order to protect the secure
+>>>> variables, hashes of the flash regions where they're stored are written to
+>>>> TPM NVRAM indices.  The TPM NVRAM indices we use are write locked at
+>>>> runtime.  The sysadmin enqueues update commands in flash.  During the next
+>>>> boot, the firmware verifies and processes the commands to update the
+>>>> certificate store and accompanying integrity hashes in the TPM NVRAM
+>>>> indices and write locks them.  Before certificates read from flash are
+>>>> used, the certificate store is hashed and compared against the hashes
+>>>> stored from the TPM.  The one exception is the PK. We store it in a TPM
+>>>> NVRAM index by itself rather than flash because updates to it must be
+>>>> guaranteed to be atomic.
+>>> What's the behaviour if multiple updates are enqueued? Does reading
+>>> back show a mocked up updated variable or the original state?
+>>
+>> Our secure variable updates are only applied at boot time. If any one of
+>> them fails, they all fail.
+> So I do the following:
 >
-
-At boot time, shim copies MokList (boot variable) to MokListRT (runtime
-variable). The MokListRT is a read-only runtime volatile variable. So,
-without shim, the MokListRT will not be created for runtime. 
- 
-> > When secure boot is disabled:
-> >     - db/dbx: Can be trusted because they are authenticated variables.
-> >               (unless end user doesn't want to trust db/dbx)
-> 
-> Is this true? Does non-secure boot capable firmware still guarantee
-> that db/dbx can't be created?
+> 1) Boot
+> 2) Extend the contents of db
+> 3) Extend the contents of db again
+> 4) Read back the contents of db through efivarfs
+> 5) Reboot
+> 6) Read back the contents of db through efivarfs
 >
+> Is what I see in (4) and (6) the same? Does it contain the values form
+> both extensions?
 
-I agree. So we should check the existence of SecureBoot variable as I
-mentioned above. 
- 
-> >     - MokListRT:
-> >         - with shim: MokListRT will be created. But it can not be trusted.
-> >                      MOK protected kernel module or file can not be
-> >                      verified.
-> >         - without shim: MokListRT will not be created.
-> >                         MOK protected kernel module or file can not be
-> >                         verified.
-> >
-> 
-> Enabling this securely involves more than connecting the dots when it
-> comes to db, MokListRT etc. I would like for someone to convince me as
-> a maintainer, as well as the IMA maintainers, that the security
-> requirements are still met in all cases we care about. Just copying db
-> and MokListRT into a kernel keychain doesn't appear to do that, and if
-> it does, it needs more documentation to clarify that.
+In (2) and (3) the extensions are added to the update queue, which is
+processed only in (5) by firmware. So, in (4) you should see the db content
+without the extensions.
+In (5), firmware (skiboot) will process the update queue. The extensions
+will be applied only if *all* of them are valid and pass signature
+verification. Only in this case should you be able to see the extensions in
+(6). If any of the extensions fail, firmware will discard all of them,
+clear the queue, and do the proper logging.
 
-Welcome for more input from other maintainers. But I hope that my cosmetic
-can be accepted because current warning messages looks ugly. 
 
-Thanks a lot!
-Joey Lee
+>>> I'm not really clear on the workflow here. Who's the administrator
+>>> authority? When would they be updating the second level of keys? If
+>>> there's no support for revocation, why would distributions need two
+>>> levels of key in the system database rather than just distributing a
+>>> single intermediate and signing their actual signing certs with that?
+>>
+>> In OpenPOWER systems, we enable our customers and business partners to
+>> establish and manage the platform key certificate, which is the root of our
+>> key hierarchy. From there, through the KEK, they can delegate authority to
+>> intermediate level organizations, e.g. distros or IT departments or
+>> business operations. Those intermediate level organizations then manage the
+>> code signing certificates in the DB. If this answer doesn’t address your
+>> question, can you please rephrase?
+> Why would the intermediate level organisations not just have entries
+> in db?
+
+Because that seems to add more complexity than having three levels (PK, KEK
+and db).
+
+Typically, the intermediate level organisations (or KEK) are used to
+authorize new additions to db. However, if we also have them in the db, who
+would authorize the new additions to db. If that would be the intermediate
+level organisation entries now in the db, it seems we would need to
+implement a mechanism to determine which entries are for authorizing new
+additions and which are for kernel signature verification. If that would be
+the PK, we'd be burdening the PK owner to sign every new db addition if the
+platform is owned by a company that has intermediate level organizations.
+
+
+>  The main reason we don't do it this way in UEFI is because we
+> need to support dbx, and if you're not supporting dbx I'm not sure I
+> see the benefit.
+
+I'm not sure I understand your question.  We would be using dbx to prevent
+kernels from being loaded. How is that related to having three levels in
+the key hierarchy (PK, KEK and db)?
+
+Thanks,
+Claudio
