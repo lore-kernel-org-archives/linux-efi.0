@@ -1,129 +1,111 @@
-From: Matthew Garrett <mjg59@google.com>
-Subject: Re: [PATCH 0/4] Enabling secure boot on PowerNV systems
-Date: Mon, 13 May 2019 15:06:20 -0700
-Message-ID: <CACdnJutaDXsi5N-npinkzYfikFCGFDpZk52uVArf4JRxU9WFLw@mail.gmail.com>
-References: <20190402181505.25037-1-cclaudio@linux.ibm.com>
- <CACdnJuumhkqTb4+1=QBiLmbW4xd3wW=MZu6Tj_KdaoTMhCN+Tg@mail.gmail.com>
- <4ce5e057-0702-b0d5-7bb2-cea5b22e2efa@linux.ibm.com> <CACdnJusBm93zwDqTXTx_QYsg1-aGUAAHm_qq8Lcx3TvGTxdmbg@mail.gmail.com>
- <2208f156-d441-3082-2f4c-8030c84ef788@linux.ibm.com> <CACdnJuu8OqMrSs0esOmf=ro9n00aYEQ-nikAh6v6sk+YAQw4cQ@mail.gmail.com>
- <d79f47f8-9006-3a47-2bdc-58012cef5c7e@linux.ibm.com> <CACdnJuv_5A1_6CH1+Jn7SCrmW8Y6JuzsMmJoc1=_vn0nKdYMjQ@mail.gmail.com>
- <28bfc0a7-9ae5-2c99-e472-ea53f856bafc@linux.ibm.com> <CACdnJuvpUKiX5UgSOrzh+B9y68zKm+Bzu1c8KFJHd8diz=sm2Q@mail.gmail.com>
- <e845d9f5-00bb-e68d-9d24-da802dd05549@linux.ibm.com>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: [PATCH 4.9 16/51] x86/reboot, efi: Use EFI reboot for Acer TravelMate X514-51T
+Date: Wed, 15 May 2019 12:55:51 +0200
+Message-ID: <20190515090622.504518229@linuxfoundation.org>
+References: <20190515090616.669619870@linuxfoundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <e845d9f5-00bb-e68d-9d24-da802dd05549@linux.ibm.com>
+In-Reply-To: <20190515090616.669619870@linuxfoundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Claudio Carvalho <cclaudio@linux.ibm.com>
-Cc: linuxppc-dev@ozlabs.org, linux-efi <linux-efi@vger.kernel.org>, linux-integrity <linux-integrity@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Michael Ellerman <mpe@ellerman.id.au>, Paul Mackerras <paulus@samba.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Jeremy Kerr <jk@ozlabs.org>, Matthew Garret <matthew.garret@nebula.com>, Nayna Jain <nayna@linux.ibm.com>, Peter Jones <pjones@redhat.com>
+To: linux-kernel@vger.kernel.org
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, stable@vger.kernel.org, Jian-Hong Pan <jian-hong@endlessm.com>, Daniel Drake <drake@endlessm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Borislav Petkov <bp@alien8.de>, Linus Torvalds <torvalds@linux-foundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, linux@endlessm.com, Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, May 10, 2019 at 2:31 PM Claudio Carvalho <cclaudio@linux.ibm.com> wrote:
-> On 4/10/19 2:36 PM, Matthew Garrett wrote:
-> > I don't see the benefit in attempting to maintain compatibility with
-> > existing tooling unless you're going to be *completely* compatible
-> > with existing tooling. That means supporting dbx and dbt.
+[ Upstream commit 0082517fa4bce073e7cf542633439f26538a14cc ]
 
-(snip)
+Upon reboot, the Acer TravelMate X514-51T laptop appears to complete the
+shutdown process, but then it hangs in BIOS POST with a black screen.
 
-> In OS secure boot domain (work in progress):
-> - The skiroot container is verified as part of firmware secure boot.
-> - Skiroot uses UEFI-like secure variables (PK, KEK and db) to verify OS
-> kernels. Only X.509 certificates will be supported for these secure variables.
+The problem is intermittent - at some points it has appeared related to
+Secure Boot settings or different kernel builds, but ultimately we have
+not been able to identify the exact conditions that trigger the issue to
+come and go.
 
-You don't support hashes? If so, this isn't compatible with UEFI
-Secure Boot and we shouldn't try to make it look like UEFI Secure
-Boot.
+Besides, the EFI mode cannot be disabled in the BIOS of this model.
 
-> How about dbx and dbt?
->
-> The db keys will be used to verify only OS kernels via kexecs initiated by
-> petitboot. So we only need the dbx to revoke kernel images, either via
-> certs or hashes. Currently, the kernel loads certs and hashes from the dbx
-> to the system blacklist keyring. The revoked certs are checked during pkcs7
-> signature verification and loading of keys. However, there doesn't appear
-> to be any verification against blacklisted hashes. Should kernel images be
-> revoked only by keys and not hashes? We tried to find published revoked
-> kernel lists but couldn't find any. How is kernel image revocation handled
-> in practice?
+However, after extensive testing, we observe that using the EFI reboot
+method reliably avoids the issue in all cases.
 
-Hash-based revocation is in active use in the UEFI world - to the best
-of my knowledge, all existing dbx entries are hashes with the
-exception of the invalidation of the Microsoft Windows 2010 CA.
+So add a boot time quirk to use EFI reboot on such systems.
 
-> Also, we didn't see the shim or kernel loading anything from dbt.
+Buglink: https://bugzilla.kernel.org/show_bug.cgi?id=203119
+Signed-off-by: Jian-Hong Pan <jian-hong@endlessm.com>
+Signed-off-by: Daniel Drake <drake@endlessm.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Cc: linux@endlessm.com
+Link: http://lkml.kernel.org/r/20190412080152.3718-1-jian-hong@endlessm.com
+[ Fix !CONFIG_EFI build failure, clarify the code and the changelog a bit. ]
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ arch/x86/kernel/reboot.c | 21 +++++++++++++++++++++
+ include/linux/efi.h      |  7 ++++++-
+ 2 files changed, 27 insertions(+), 1 deletion(-)
 
-dbt is currently only used for validation at the firmware level - the
-way grub and kernel signatures are currently managed means it doesn't
-make a huge amount of sense to use it in shim, but it would probably
-be reasonable to extend shim's validation to include dbt.
-
-> > So I do the following:
-> >
-> > 1) Boot
-> > 2) Extend the contents of db
-> > 3) Extend the contents of db again
-> > 4) Read back the contents of db through efivarfs
-> > 5) Reboot
-> > 6) Read back the contents of db through efivarfs
-> >
-> > Is what I see in (4) and (6) the same? Does it contain the values form
-> > both extensions?
->
-> In (2) and (3) the extensions are added to the update queue, which is
-> processed only in (5) by firmware. So, in (4) you should see the db content
-> without the extensions.
-
-Ok, this is not what we expect from UEFI systems. I'm strongly against
-providing what looks like the same ABI on multiple platforms but
-carrying subtle differences between those platforms - it's guaranteed
-to break tooling in unexpected ways.
-
-> In (5), firmware (skiboot) will process the update queue. The extensions
-> will be applied only if *all* of them are valid and pass signature
-> verification. Only in this case should you be able to see the extensions in
-> (6). If any of the extensions fail, firmware will discard all of them,
-> clear the queue, and do the proper logging.
-
-I believe that this is also a violation of expectations.
-
-> > Why would the intermediate level organisations not just have entries
-> > in db?
->
-> Because that seems to add more complexity than having three levels (PK, KEK
-> and db).
->
-> Typically, the intermediate level organisations (or KEK) are used to
-> authorize new additions to db. However, if we also have them in the db, who
-> would authorize the new additions to db. If that would be the intermediate
-> level organisation entries now in the db, it seems we would need to
-> implement a mechanism to determine which entries are for authorizing new
-> additions and which are for kernel signature verification. If that would be
-> the PK, we'd be burdening the PK owner to sign every new db addition if the
-> platform is owned by a company that has intermediate level organizations.
-
-Ok, in this scenario I don't understand why you wouldn't just want the
-intermediates in PK. Or, put another way - if you have a business
-justification for three layers of hierarchy, what do you do when
-someone has a business justification for four? The three layer
-hierarchy represents the weirdness of the PC industry where you have
-Microsoft needing to be in KEK (because they need to be able to issue
-updates to machines from multiple vendors) but not wanting to be in PK
-(because vendors don't want Microsoft to have ultimate control over
-their systems). If it weren't for this conflict, we'd just have a two
-layer hierarchy, and if some other aspect of the market had evolved
-over time we'd have a four layer hierarchy.
-
->
-> >  The main reason we don't do it this way in UEFI is because we
-> > need to support dbx, and if you're not supporting dbx I'm not sure I
-> > see the benefit.
->
-> I'm not sure I understand your question.  We would be using dbx to prevent
-> kernels from being loaded. How is that related to having three levels in
-> the key hierarchy (PK, KEK and db)?
-
-dbx entries come from Microsoft, so we need the KEK layer so Microsoft
-can update dbx. If Microsoft didn't need to update dbx then we'd leave
-Microsoft out of KEK, and then KEK and PK would be the same and we'd
-be able to get rid of KEK.
+diff --git a/arch/x86/kernel/reboot.c b/arch/x86/kernel/reboot.c
+index 4a12362a194af..c55b11fe8e9f6 100644
+--- a/arch/x86/kernel/reboot.c
++++ b/arch/x86/kernel/reboot.c
+@@ -82,6 +82,19 @@ static int __init set_bios_reboot(const struct dmi_system_id *d)
+ 	return 0;
+ }
+ 
++/*
++ * Some machines don't handle the default ACPI reboot method and
++ * require the EFI reboot method:
++ */
++static int __init set_efi_reboot(const struct dmi_system_id *d)
++{
++	if (reboot_type != BOOT_EFI && !efi_runtime_disabled()) {
++		reboot_type = BOOT_EFI;
++		pr_info("%s series board detected. Selecting EFI-method for reboot.\n", d->ident);
++	}
++	return 0;
++}
++
+ void __noreturn machine_real_restart(unsigned int type)
+ {
+ 	local_irq_disable();
+@@ -167,6 +180,14 @@ static struct dmi_system_id __initdata reboot_dmi_table[] = {
+ 			DMI_MATCH(DMI_PRODUCT_NAME, "AOA110"),
+ 		},
+ 	},
++	{	/* Handle reboot issue on Acer TravelMate X514-51T */
++		.callback = set_efi_reboot,
++		.ident = "Acer TravelMate X514-51T",
++		.matches = {
++			DMI_MATCH(DMI_SYS_VENDOR, "Acer"),
++			DMI_MATCH(DMI_PRODUCT_NAME, "TravelMate X514-51T"),
++		},
++	},
+ 
+ 	/* Apple */
+ 	{	/* Handle problems with rebooting on Apple MacBook5 */
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 80b1b8faf503f..e6711bf9f0d12 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1433,7 +1433,12 @@ efi_status_t efi_setup_gop(efi_system_table_t *sys_table_arg,
+ 			   struct screen_info *si, efi_guid_t *proto,
+ 			   unsigned long size);
+ 
+-bool efi_runtime_disabled(void);
++#ifdef CONFIG_EFI
++extern bool efi_runtime_disabled(void);
++#else
++static inline bool efi_runtime_disabled(void) { return true; }
++#endif
++
+ extern void efi_call_virt_check_flags(unsigned long flags, const char *call);
+ 
+ /*
+-- 
+2.20.1
