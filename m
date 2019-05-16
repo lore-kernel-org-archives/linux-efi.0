@@ -1,168 +1,126 @@
-Return-Path: <SRS0=BuqC=TP=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=21T4=TQ=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.0 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F558C04E87
-	for <linux-efi@archiver.kernel.org>; Wed, 15 May 2019 11:58:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A9674C04AAF
+	for <linux-efi@archiver.kernel.org>; Thu, 16 May 2019 15:17:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 320892168B
-	for <linux-efi@archiver.kernel.org>; Wed, 15 May 2019 11:58:16 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1557921496;
-	bh=JgBM/wCgs/2NqfkScBOeU3yDhKLS3px3A4CeR1lsOek=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=xWOzw0fPdDdkMrv7Ci5DAkmkkc67GZIFAFYuwnhQvZe57DqMrLhZJRTPBxCTmw9Ml
-	 1ziQmjh6GYIb7QGuaDbUJKaYCbalnSKUfHQWw1lnDSzOQnFZ7C3CPeOnYDU/M53g2+
-	 ZQGxyFDCTkJHm8H9ElhvANPtRCqyKIFWbMkVA9HE=
+	by mail.kernel.org (Postfix) with ESMTP id 781F320833
+	for <linux-efi@archiver.kernel.org>; Thu, 16 May 2019 15:17:01 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="z5iIhn/H"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730017AbfEOLQY (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 15 May 2019 07:16:24 -0400
-Received: from mail.kernel.org ([198.145.29.99]:53082 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1730473AbfEOLQU (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 15 May 2019 07:16:20 -0400
-Received: from localhost (83-86-89-107.cable.dynamic.v4.ziggo.nl [83.86.89.107])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 2C0E120843;
-        Wed, 15 May 2019 11:16:19 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1557918979;
-        bh=JgBM/wCgs/2NqfkScBOeU3yDhKLS3px3A4CeR1lsOek=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=j+n52R4PWFaweeSXLwcGWaUGDu4wWGuoA2vjHc7cc1MiyCD5kt0057H3lPqdbUazZ
-         rQMQGK43VQG/NPC8Sj6DP2jZAJfhTk35Ce8hoZW7kSeUSyh6nCM3ofJRB92QuKE5TN
-         OANxWPVDV8ZtZJykco1Fn5gDWIXAlB1hXB2n+00M=
-From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To:     linux-kernel@vger.kernel.org
-Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        stable@vger.kernel.org, Jian-Hong Pan <jian-hong@endlessm.com>,
-        Daniel Drake <drake@endlessm.com>,
-        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Borislav Petkov <bp@alien8.de>,
-        Linus Torvalds <torvalds@linux-foundation.org>,
-        Matt Fleming <matt@codeblueprint.co.uk>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        linux-efi@vger.kernel.org, linux@endlessm.com,
-        Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.org>
-Subject: [PATCH 4.14 022/115] x86/reboot, efi: Use EFI reboot for Acer TravelMate X514-51T
-Date:   Wed, 15 May 2019 12:55:02 +0200
-Message-Id: <20190515090700.904928784@linuxfoundation.org>
-X-Mailer: git-send-email 2.21.0
-In-Reply-To: <20190515090659.123121100@linuxfoundation.org>
-References: <20190515090659.123121100@linuxfoundation.org>
-User-Agent: quilt/0.66
+        id S1726703AbfEPPRB (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 16 May 2019 11:17:01 -0400
+Received: from mail-io1-f66.google.com ([209.85.166.66]:38869 "EHLO
+        mail-io1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726687AbfEPPRA (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 16 May 2019 11:17:00 -0400
+Received: by mail-io1-f66.google.com with SMTP id x24so2884846ion.5
+        for <linux-efi@vger.kernel.org>; Thu, 16 May 2019 08:17:00 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=daNJlRWE2YLofylHIDSaR/X3IJLuyNvlvoXE5tyTYjk=;
+        b=z5iIhn/H1NBgeIUcEBSIAMjKWsA246cckLhbsNw/Wx+7OJULS7GY6wFtBVpfnsXeKA
+         K+EAMqxvLP6TVd2T43ZO+onU+FRikUBgvEMockWoLxsJenaEIxbd8YKlLRQqbpNzPvf2
+         a2hvaS5PnRZNp70jSDBva2lWPHZhPe/ewEVCHC65xmebORXI78UWnhHfWYcM+mzhsKCG
+         +eBx1Ds2zT6VidHWLuiOBLrohLXwPin1ghQ7XKGnpcJdrG0F9iNRIWUILOEdZO8ihoRk
+         eF2GoH8UAEA8asRqmhutFEHwVFsF1KVdzBOAmuaNSxMCT2dE66nU/oGpNZ/Hi54PcBv0
+         oktw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=daNJlRWE2YLofylHIDSaR/X3IJLuyNvlvoXE5tyTYjk=;
+        b=snzxX77feHEa5NWPsYRdOXF/IerMEkDeKyijv4j4dxPJdN2jquTi88MChq0zP73dEw
+         zMKQNLRzAUYdJsuBPj8iBViloUN55uU6E59hyStMxDF0HK5NiTlYdBzAdYQBpK7zg8gx
+         HaSF8q4qZwlaqcTBZcTgs7MA+zKFC49kBA84JijrwcPB+VKq0608bpqyGfAJ8jzxj8El
+         RzKVjXFdG0Vnwsl9i32O4SP8VlZmXpUBlEGINVybE5whbj+u1aqFQ/ayPurPEr5n+URS
+         iJZspxLAuFfttkB76CwaFw9Cfz1kYIb1ocgzlxB6ZdmlHcWz6N0TBAJxR3mY10soByvo
+         NWsw==
+X-Gm-Message-State: APjAAAWToikgDef7DcFinYzTcQJDsBRAavQuMv41W7QJeudR/mG/iDR6
+        m3ZCTb4G9Umj4ewpuFuVq1W0sBoG6F5a3wLnMcTV5g==
+X-Google-Smtp-Source: APXvYqz6KouLHZ0E2/SfOs37Sy8GAsrGH2UQkeWUaN1f0I9toUUn1FONL7cgMkFhdxf92ZC0ez2EZDaHDLfr/s+s8Rs=
+X-Received: by 2002:a6b:ea12:: with SMTP id m18mr28631230ioc.173.1558019819811;
+ Thu, 16 May 2019 08:16:59 -0700 (PDT)
 MIME-Version: 1.0
+References: <20190423144354.3465-1-ard.biesheuvel@linaro.org>
+ <CADvTj4pYsCq8ZgcL7kELuT77URZbaDmDe-o8qj-M97e0aeCGUw@mail.gmail.com>
+ <CAKv+Gu_EN2A9fBOuw34xw=Exjbqz_0J7BzrOb2ZuWK26ouxtCQ@mail.gmail.com> <CADvTj4r4bJFHU6XELFrJ9DsT9Ao92BbcHr0GhtYzFVs8+JrTSQ@mail.gmail.com>
+In-Reply-To: <CADvTj4r4bJFHU6XELFrJ9DsT9Ao92BbcHr0GhtYzFVs8+JrTSQ@mail.gmail.com>
+From:   Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Date:   Thu, 16 May 2019 17:16:47 +0200
+Message-ID: <CAKv+Gu8=6D46bjfq05v7JHFWoR5mLWbDoV8eNw1-HsBR1uqOSA@mail.gmail.com>
+Subject: Re: [PATCH] fbdev/efifb: ignore framebuffer memmap entries that lack
+ any memory types
+To:     James Hilliard <james.hilliard1@gmail.com>
+Cc:     linux-efi <linux-efi@vger.kernel.org>,
+        Ingo Molnar <mingo@kernel.org>,
+        Peter Jones <pjones@redhat.com>,
+        Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
-Message-ID: <20190515105502.vAmSwGKIXoaVN2uVwvgJFWECOIFXHWxNMA2wiXjDbLY@z>
 
-[ Upstream commit 0082517fa4bce073e7cf542633439f26538a14cc ]
+On Thu, 9 May 2019 at 15:23, James Hilliard <james.hilliard1@gmail.com> wrote:
+>
+> On Tue, Apr 23, 2019 at 5:38 PM Ard Biesheuvel
+> <ard.biesheuvel@linaro.org> wrote:
+> >
+> > On Tue, 23 Apr 2019 at 17:01, James Hilliard <james.hilliard1@gmail.com> wrote:
+> > >
+> > > On Tue, Apr 23, 2019 at 4:44 PM Ard Biesheuvel
+> > > <ard.biesheuvel@linaro.org> wrote:
+> > > >
+> > > > Commit 38ac0287b7f4
+> > > >
+> > > >   ("fbdev/efifb: Honour UEFI memory map attributes when mapping the FB")
+> > > >
+> > > > updated the EFI framebuffer code to use memory mappings for the linear
+> > > > framebuffer that are permitted by the memory attributes described by the
+> > > > EFI memory map for the particular region, if the framebuffer happens to
+> > > > be covered by the EFI memory map (which is typically only the case for
+> > > > framebuffers in shared memory). This is required since non-X86 systems
+> > > > may require cacheable attributes for memory mappings that are shared
+> > > > with other masters (such as GPUs), and this information cannot be
+> > > > described by the Graphics Output Protocol (GOP) EFI protocol itself,
+> > > > and so we rely on the EFI memory map for this.
+> > > >
+> > > > As reported by James, this breaks some x86 systems:
+> > > >
+> > > >   [ 1.173368] efifb: probing for efifb
+> > > >   [ 1.173386] efifb: abort, cannot remap video memory 0x1d5000 @ 0xcf800000
+> > > >   [ 1.173395] Trying to free nonexistent resource <00000000cf800000-00000000cf9d4bff>
+> > > >   [ 1.173413] efi-framebuffer: probe of efi-framebuffer.0 failed with error -5
+> > > >
+> > > > The problem turns out to be that the memory map entry that describes the
+> > > > framebuffer has no memory attributes listed at all, and so we end up with
+> > > > a mem_flags value of 0x0.
+> > > >
+> > > > So work around this by ensuring that the memory map entry's attribute field
+> > > > has a sane value before using it to mask the set of usable attributes.
+> > > >
+> > > > Reported-by: James Hilliard <james.hilliard1@gmail.com>
+> > > > Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> > > > ---
+> > > >
+> > > > James, could you give this a try please? Thanks.
+> > > I can confirm this fixes the regression on my system, thanks.
+> >
+> > Thanks James, I will add your tested-by.
+> >
+> > I forgot to include EFI_MEMORY_UC in the first mask, so I will respin
+> > and resend.
+> Is there an updated patch I should test?
 
-Upon reboot, the Acer TravelMate X514-51T laptop appears to complete the
-shutdown process, but then it hangs in BIOS POST with a black screen.
-
-The problem is intermittent - at some points it has appeared related to
-Secure Boot settings or different kernel builds, but ultimately we have
-not been able to identify the exact conditions that trigger the issue to
-come and go.
-
-Besides, the EFI mode cannot be disabled in the BIOS of this model.
-
-However, after extensive testing, we observe that using the EFI reboot
-method reliably avoids the issue in all cases.
-
-So add a boot time quirk to use EFI reboot on such systems.
-
-Buglink: https://bugzilla.kernel.org/show_bug.cgi?id=203119
-Signed-off-by: Jian-Hong Pan <jian-hong@endlessm.com>
-Signed-off-by: Daniel Drake <drake@endlessm.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-efi@vger.kernel.org
-Cc: linux@endlessm.com
-Link: http://lkml.kernel.org/r/20190412080152.3718-1-jian-hong@endlessm.com
-[ Fix !CONFIG_EFI build failure, clarify the code and the changelog a bit. ]
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- arch/x86/kernel/reboot.c | 21 +++++++++++++++++++++
- include/linux/efi.h      |  7 ++++++-
- 2 files changed, 27 insertions(+), 1 deletion(-)
-
-diff --git a/arch/x86/kernel/reboot.c b/arch/x86/kernel/reboot.c
-index 2126b9d27c340..c663d5fcff2ee 100644
---- a/arch/x86/kernel/reboot.c
-+++ b/arch/x86/kernel/reboot.c
-@@ -81,6 +81,19 @@ static int __init set_bios_reboot(const struct dmi_system_id *d)
- 	return 0;
- }
- 
-+/*
-+ * Some machines don't handle the default ACPI reboot method and
-+ * require the EFI reboot method:
-+ */
-+static int __init set_efi_reboot(const struct dmi_system_id *d)
-+{
-+	if (reboot_type != BOOT_EFI && !efi_runtime_disabled()) {
-+		reboot_type = BOOT_EFI;
-+		pr_info("%s series board detected. Selecting EFI-method for reboot.\n", d->ident);
-+	}
-+	return 0;
-+}
-+
- void __noreturn machine_real_restart(unsigned int type)
- {
- 	local_irq_disable();
-@@ -166,6 +179,14 @@ static const struct dmi_system_id reboot_dmi_table[] __initconst = {
- 			DMI_MATCH(DMI_PRODUCT_NAME, "AOA110"),
- 		},
- 	},
-+	{	/* Handle reboot issue on Acer TravelMate X514-51T */
-+		.callback = set_efi_reboot,
-+		.ident = "Acer TravelMate X514-51T",
-+		.matches = {
-+			DMI_MATCH(DMI_SYS_VENDOR, "Acer"),
-+			DMI_MATCH(DMI_PRODUCT_NAME, "TravelMate X514-51T"),
-+		},
-+	},
- 
- 	/* Apple */
- 	{	/* Handle problems with rebooting on Apple MacBook5 */
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index b68b7d199feea..2dab158b74c45 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1518,7 +1518,12 @@ efi_status_t efi_setup_gop(efi_system_table_t *sys_table_arg,
- 			   struct screen_info *si, efi_guid_t *proto,
- 			   unsigned long size);
- 
--bool efi_runtime_disabled(void);
-+#ifdef CONFIG_EFI
-+extern bool efi_runtime_disabled(void);
-+#else
-+static inline bool efi_runtime_disabled(void) { return true; }
-+#endif
-+
- extern void efi_call_virt_check_flags(unsigned long flags, const char *call);
- 
- enum efi_secureboot_mode {
--- 
-2.20.1
-
-
-
+No, apologies for the delay - I have updated the patch and will send
+it upstream as a fix once I have confirmed that it doesn't cause any
+regressions.
