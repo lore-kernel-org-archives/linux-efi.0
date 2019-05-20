@@ -2,163 +2,70 @@ Return-Path: <SRS0=/oXz=TU=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.6 required=3.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT,
-	USER_IN_DEF_DKIM_WL autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.6 required=3.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT,USER_IN_DEF_DKIM_WL
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E25F9C04AAF
-	for <linux-efi@archiver.kernel.org>; Mon, 20 May 2019 20:55:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AC5F0C04AAC
+	for <linux-efi@archiver.kernel.org>; Mon, 20 May 2019 20:55:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id BAEF42173B
-	for <linux-efi@archiver.kernel.org>; Mon, 20 May 2019 20:55:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7CD182173B
+	for <linux-efi@archiver.kernel.org>; Mon, 20 May 2019 20:55:29 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="oy4ecePB"
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="KwKcFS84"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726935AbfETUzX (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 20 May 2019 16:55:23 -0400
-Received: from mail-pf1-f201.google.com ([209.85.210.201]:42173 "EHLO
-        mail-pf1-f201.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726931AbfETUzO (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 20 May 2019 16:55:14 -0400
-Received: by mail-pf1-f201.google.com with SMTP id d12so10717083pfn.9
-        for <linux-efi@vger.kernel.org>; Mon, 20 May 2019 13:55:14 -0700 (PDT)
+        id S1726814AbfETUzH (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 20 May 2019 16:55:07 -0400
+Received: from mail-qk1-f202.google.com ([209.85.222.202]:49620 "EHLO
+        mail-qk1-f202.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725978AbfETUzH (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 20 May 2019 16:55:07 -0400
+Received: by mail-qk1-f202.google.com with SMTP id c4so4102011qkd.16
+        for <linux-efi@vger.kernel.org>; Mon, 20 May 2019 13:55:06 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=google.com; s=20161025;
-        h=date:in-reply-to:message-id:mime-version:references:subject:from:to
-         :cc;
-        bh=aAD72H50ABa7i4hUmGTaWeMcxOGiBgmrF/zB0iTqZPc=;
-        b=oy4ecePBsvz9xac0sPq5+vZj/9DPsHi82imiGV3JXteI2ZIAgaQBj5lIBG6QRT7Pwb
-         JDCFVI8HELF3U8vUxaYayffHsPJmwS+V5pA5EM0kHV+BtF5CrZDr8WKsebDQKfJePJ1U
-         VRp5JL+s0h20lcmBB9keY28+iGuLquVMetdMhqk5NzKXJUjlIb5UWHt3tBEefJ4BVQZk
-         EqPYQ9dO7jAmi2kUrMfB6cGrkhG7Hy27QAJ7NphhR2soj/A+Ae1hUeh3RrBSbnyaZShU
-         OICSHoL+cttN6/XUpBvv0K3X3GLs1y0aS/M7lZHBvclCcp61I0eQv8ZJjpJMeZTDaPVV
-         UW3Q==
+        h=date:message-id:mime-version:subject:from:to:cc;
+        bh=CEe51n1cJjGjM3r3jhy0lvCRaDr0xuP675ZqA1iPYL4=;
+        b=KwKcFS84Od+0uDcbkZwTpIrT43f2kU8zmORrILLiHk2F8YkNKiv1DApHnhAMtYlYNA
+         TTKtXmA8TJ8/ipv7ecH3TyAPVRf9bZ8GXZEFmFgwDXPD4Hjtc9OoZlG6aBmwZtYTn8Oc
+         Nvt9VJVKM4ko0egxxq7cUr2yFh5bt2A6FPsfeESlkTgj+tTo5HipWQkdt0PV7yGNpC2p
+         qwWO/zif0wXn7M/9LQBi1kh21TF0FRSHZu9qfX+5MMJsj7woSz3xBh9gb5WkU4/0KX4c
+         dnI+ZE7GgTCEi7VKzXkA1bmYAkK0Nv9eJ0xJyAJqd/DQAikMJoy/AIkKcuCOHk84b2v+
+         el5A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:in-reply-to:message-id:mime-version
-         :references:subject:from:to:cc;
-        bh=aAD72H50ABa7i4hUmGTaWeMcxOGiBgmrF/zB0iTqZPc=;
-        b=V/NPn2MHgU2ErPauUDUfpDcqPy1HqWW30tV90tJMAM9M5XWVqXxIeFFK+Ze3fgytQl
-         4H+dooBjvQ8UBU+onwDDc11qHKVzZAkV8jpgQ3tiq2L2p+K+KHpNFyUHsi2agErIXn3O
-         62+1iaf1ohaHHRE18RUmIRP96sXzchXe6yGLg6cafRtw8nP/cUJupNUJKAS3e6xPfZP/
-         kulUMRwoLguFotB6bkLPABOznt6YGH5NAOc+pS4X9n4ixmXwY2MReHrusCzAFueFAHmL
-         DaMCnD6hpwKMTRUvD6hXYBQdoAzxWZgzoLtLP2cVwWe3UlJc0Q0nu9z5M9giwH08iSvB
-         VIvQ==
-X-Gm-Message-State: APjAAAVwvl4bRkaYpA/v/iiuIji6Y2xxMD+NV5W+FpZBil1dRRr4+/Fp
-        MfXgdJVtrBlLdm45OXvZ/11T2Tc7hAlzRzetJxGaiA==
-X-Google-Smtp-Source: APXvYqx75zjpUcQWvw9WxMc9l5hCExHXJMIe9nadtcG8JTTEN8h5aDc/zRJjwAMciCjy8pxxh8N9mOQ4lXQ6Ys5tGDb96g==
-X-Received: by 2002:a65:4c07:: with SMTP id u7mr75208395pgq.93.1558385713378;
- Mon, 20 May 2019 13:55:13 -0700 (PDT)
-Date:   Mon, 20 May 2019 13:55:00 -0700
-In-Reply-To: <20190520205501.177637-1-matthewgarrett@google.com>
-Message-Id: <20190520205501.177637-4-matthewgarrett@google.com>
+        h=x-gm-message-state:date:message-id:mime-version:subject:from:to:cc;
+        bh=CEe51n1cJjGjM3r3jhy0lvCRaDr0xuP675ZqA1iPYL4=;
+        b=A4wdFmFcgNcoFb14j6KNKHRp2JWuAzvlihTck7oj0CA+TdT+eGb3gL7S52YQ0xWOqk
+         ZXOy7ONI37U1PxkZPsv6GWrUvvk905BFwu9MuDrhBBCcb3yfxsc3czcV21oA2DiQZyFY
+         DudtGN6KfdSSfWpBJfBTDCWwpPh7TbBwKm+TtV2ea2crHXy9VL66MVEuM5cYwOSICDzF
+         Z42u7OEl/uicmwSAQCVI1bgGq+Rgt6eroGDaqanPlm4uB8o3cfPuWKs4dh7pM8nScGN7
+         +AMfTHndNJSs4qZe9F9PllUkRiZ5ho5rMTo7oP+gFpPQIG9eOBezuZmvzsNF8uQBESQu
+         IQLA==
+X-Gm-Message-State: APjAAAVxgV2WfaK5LRdttZ8OiB6qCq5oiq8GGlpTRi9aYRbjVVR/bLet
+        G7WMRfVXTnM79Dt899Ea+nn685Iqtrxx6xq8tTXIvQ==
+X-Google-Smtp-Source: APXvYqxcgPZwWQB2M99XR5b353YmJ/Ei17uYUIv35ZBhj13nsYbaZL7VC+EcLkbxPlvT59VqEEmZiqG52LG+K02tnRds4g==
+X-Received: by 2002:a05:620a:144c:: with SMTP id i12mr32298826qkl.243.1558385706056;
+ Mon, 20 May 2019 13:55:06 -0700 (PDT)
+Date:   Mon, 20 May 2019 13:54:57 -0700
+Message-Id: <20190520205501.177637-1-matthewgarrett@google.com>
 Mime-Version: 1.0
-References: <20190520205501.177637-1-matthewgarrett@google.com>
 X-Mailer: git-send-email 2.21.0.1020.gf2820cf01a-goog
-Subject: [PATCH V7 3/4] tpm: Append the final event log to the TPM event log
+Subject: [PATCH V7 0/4] Add support for crypto agile logs
 From:   Matthew Garrett <matthewgarrett@google.com>
 To:     linux-integrity@vger.kernel.org
 Cc:     peterhuewe@gmx.de, jarkko.sakkinen@linux.intel.com, jgg@ziepe.ca,
         roberto.sassu@huawei.com, linux-efi@vger.kernel.org,
         linux-security-module@vger.kernel.org,
-        linux-kernel@vger.kernel.org, tweek@google.com, bsz@semihalf.com,
-        Matthew Garrett <mjg59@google.com>
+        linux-kernel@vger.kernel.org, tweek@google.com, bsz@semihalf.com
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Matthew Garrett <mjg59@google.com>
+Identical to previous version except without the KSAN workaround - Ard
+has a better solution for that.
 
-Any events that are logged after GetEventsLog() is called are logged to
-the EFI Final Events table. These events are defined as being in the
-crypto agile log format, so we can just append them directly to the
-existing log if it's in the same format. In theory we can also construct
-old-style SHA1 log entries for devices that only return logs in that
-format, but EDK2 doesn't generate the final event log in that case so
-it doesn't seem worth it at the moment.
-
-Signed-off-by: Matthew Garrett <mjg59@google.com>
----
- drivers/char/tpm/eventlog/efi.c | 50 ++++++++++++++++++++++++++++-----
- 1 file changed, 43 insertions(+), 7 deletions(-)
-
-diff --git a/drivers/char/tpm/eventlog/efi.c b/drivers/char/tpm/eventlog/efi.c
-index 3e673ab22cb4..9179cf6bdee9 100644
---- a/drivers/char/tpm/eventlog/efi.c
-+++ b/drivers/char/tpm/eventlog/efi.c
-@@ -21,10 +21,13 @@
- int tpm_read_log_efi(struct tpm_chip *chip)
- {
- 
-+	struct efi_tcg2_final_events_table *final_tbl = NULL;
- 	struct linux_efi_tpm_eventlog *log_tbl;
- 	struct tpm_bios_log *log;
- 	u32 log_size;
- 	u8 tpm_log_version;
-+	void *tmp;
-+	int ret;
- 
- 	if (!(chip->flags & TPM_CHIP_FLAG_TPM2))
- 		return -ENODEV;
-@@ -52,15 +55,48 @@ int tpm_read_log_efi(struct tpm_chip *chip)
- 
- 	/* malloc EventLog space */
- 	log->bios_event_log = kmemdup(log_tbl->log, log_size, GFP_KERNEL);
--	if (!log->bios_event_log)
--		goto err_memunmap;
--	log->bios_event_log_end = log->bios_event_log + log_size;
-+	if (!log->bios_event_log) {
-+		ret = -ENOMEM;
-+		goto out;
-+	}
- 
-+	log->bios_event_log_end = log->bios_event_log + log_size;
- 	tpm_log_version = log_tbl->version;
--	memunmap(log_tbl);
--	return tpm_log_version;
- 
--err_memunmap:
-+	ret = tpm_log_version;
-+
-+	if (efi.tpm_final_log == EFI_INVALID_TABLE_ADDR ||
-+	    efi_tpm_final_log_size == 0 ||
-+	    tpm_log_version != EFI_TCG2_EVENT_LOG_FORMAT_TCG_2)
-+		goto out;
-+
-+	final_tbl = memremap(efi.tpm_final_log,
-+			     sizeof(*final_tbl) + efi_tpm_final_log_size,
-+			     MEMREMAP_WB);
-+	if (!final_tbl) {
-+		pr_err("Could not map UEFI TPM final log\n");
-+		kfree(log->bios_event_log);
-+		ret = -ENOMEM;
-+		goto out;
-+	}
-+
-+	tmp = krealloc(log->bios_event_log,
-+		       log_size + efi_tpm_final_log_size,
-+		       GFP_KERNEL);
-+	if (!tmp) {
-+		kfree(log->bios_event_log);
-+		ret = -ENOMEM;
-+		goto out;
-+	}
-+
-+	log->bios_event_log = tmp;
-+	memcpy((void *)log->bios_event_log + log_size,
-+	       final_tbl->events, efi_tpm_final_log_size);
-+	log->bios_event_log_end = log->bios_event_log +
-+		log_size + efi_tpm_final_log_size;
-+
-+out:
-+	memunmap(final_tbl);
- 	memunmap(log_tbl);
--	return -ENOMEM;
-+	return ret;
- }
--- 
-2.21.0.1020.gf2820cf01a-goog
 
