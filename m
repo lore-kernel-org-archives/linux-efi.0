@@ -2,68 +2,70 @@ Return-Path: <SRS0=UpS/=TZ=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PULL_REQUEST,
-	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 04C34C28CBF
-	for <linux-efi@archiver.kernel.org>; Sat, 25 May 2019 11:26:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F08CC28CBF
+	for <linux-efi@archiver.kernel.org>; Sat, 25 May 2019 11:26:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id C04C021848
-	for <linux-efi@archiver.kernel.org>; Sat, 25 May 2019 11:26:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E622920862
+	for <linux-efi@archiver.kernel.org>; Sat, 25 May 2019 11:26:09 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ldLaiCWc"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Xk7crZ3S"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726755AbfEYL0F (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 25 May 2019 07:26:05 -0400
-Received: from mail-wr1-f68.google.com ([209.85.221.68]:40575 "EHLO
-        mail-wr1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726653AbfEYL0F (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sat, 25 May 2019 07:26:05 -0400
-Received: by mail-wr1-f68.google.com with SMTP id t4so4092270wrx.7
-        for <linux-efi@vger.kernel.org>; Sat, 25 May 2019 04:26:04 -0700 (PDT)
+        id S1726653AbfEYL0J (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 25 May 2019 07:26:09 -0400
+Received: from mail-wm1-f68.google.com ([209.85.128.68]:36479 "EHLO
+        mail-wm1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726793AbfEYL0I (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 25 May 2019 07:26:08 -0400
+Received: by mail-wm1-f68.google.com with SMTP id v22so4267160wml.1
+        for <linux-efi@vger.kernel.org>; Sat, 25 May 2019 04:26:07 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=l3Jmq85Hmw2WeX8gpf6pOoI0z6l9EWC+tkDaeefNI1o=;
-        b=ldLaiCWcwfHAzZPNr/OkUNDMUtsFV81IstXNblmin3fdJrm4WBVKshRjXDYhIAQGBQ
-         YY0iQMRNPSYJF6qcuAJkt7xpff8wZ0jJz5jlK+eHCCWOUNHE5hlTpG5KKUhAF2ecJSby
-         GoqQ6l2PIL8dO7MkQqUO/BktFQiyWYqJJ/ZaAQZCLEdU9K/Lh4gVl5rPBxtOBAgB5JIR
-         oHvWxA3a5EaoGbJ7eTpo9bY5gsLTmyqgGnErLbZwf1N+G0luqYe2ffMgu/2zwK6S8K27
-         x9w9tWA7y6bRVWuj9YK2dCXCG08Vwv06MPwBnBldyvei5VDF+cmJ1Z3AiAXbLKLSeBEu
-         u6LQ==
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=OUI4/EWFs7dysvkWkmT8oqHBgaMA7PctBGeEQk1P8DM=;
+        b=Xk7crZ3SgaYp2op+gqS6Fwuo61nMeTjeaMhkrpOXWcTSb1xfkjUrv4qgMftwU/IlHy
+         dmd71IcLoKhv3YHnv8AZmZuTsg4jpSLsGXYM6/1C+zs43ioBxvvNoHRI/5JwgHN+XYdg
+         j/Z7lCyFj5QKDWn53ydL4gVFUQZpsjutjJhKEWcpqQMQugKiz2kR5VuJx1KGOo3E+Nda
+         Npzq01tKsupdUU7myMcCnFUImgtIcE5+zDslXII4YBhFm6GEiQYQcSsxAhKCxl9s7mTw
+         WcR43lBzU4NZLs10wB6Id/eI0J9TqsVC/wEVtt9E0FK78MoO54vaPBFBfACfaURgaczz
+         QSYg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=l3Jmq85Hmw2WeX8gpf6pOoI0z6l9EWC+tkDaeefNI1o=;
-        b=gb2tLvsvsBpIC7PerrdXnkZl1NdiMDhFOtfTclwO/CeQW+Yfp2pv5FjKWWg2Hk4vSB
-         WGbb6axV7gktIO5LLPmypzIHY0Dc6kBHp52705DqmM2PQ4TaGMnev4tpX6PAPRcNkvEH
-         h3rD8ozWpMO3aLXmIRVnUF2d6WQHBMt1hCB/NaWcykS15QVYMKSzAOEjsAiCuC0rdpSR
-         rzLq3DD8ikzaFUCpKAvBHds22YURp27Rizt/NWwKqPH3e5Qa2J4ATPEAbe9SoiO4sha3
-         ONiAOnBesYTuvgHOkEEreV3mZRbqZgxJ8W9rzMihIXAcBAwseujykN6VNrBfDvex69j3
-         wZXA==
-X-Gm-Message-State: APjAAAVejbZomxGrqp+3egcfVW+DiRuXR2XuiI9Zhd8BMabYA3XujmUt
-        WBUwlPXxBQSsXHE6rctVUCGyyJJhegQF0w==
-X-Google-Smtp-Source: APXvYqy+jHj17CyeDcnuuzBRgIjzq+0LH01TDDqXY29xxw4IQdwZmhUcOU+muNgW0OCl981nMxs5sQ==
-X-Received: by 2002:adf:dc12:: with SMTP id t18mr6275253wri.61.1558783563569;
-        Sat, 25 May 2019 04:26:03 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=OUI4/EWFs7dysvkWkmT8oqHBgaMA7PctBGeEQk1P8DM=;
+        b=VQ3XnrIrNrg+VWPd418apSJcX4zMVtZy7WhNzIjqw2pqoOeyTTe2b1/x2IqUbVpKlp
+         odS8eMzuKxB6lm09lO13ViJyBg1W3HBBWCxkyeHGooRvMaafD2SMGJE42v1gJe+c4Jdz
+         Fz8kbrLSi4xoUnhmXr9/iFV3KHBlmQY3I4x7sYpPt0l35N+azW/LaXR3U3zmWS8XK4Q9
+         e80lPZn9Qw9FF0xHU8P2zPcEI8fUJV+kyg6i2RNmkZP3pbX7ZhpU2BHdYSA3qaVOOET1
+         BuuVPDcFN8EoNvmeljJwFg115UDWqHFNv9umJNlYbjaPszOUS19GKG1RrE/dEaEr9u8e
+         vlhQ==
+X-Gm-Message-State: APjAAAUPLs3OtnBnLbe/C5u8z/g5hAMNQAlXMKV20Yskw2FKueP3FYAO
+        Sdz7zCvEYboA7bQQDnouj8G/In5FXhQ+Gg==
+X-Google-Smtp-Source: APXvYqwSAn6kgtZ1x7GaFjsTqxhVYOxcP041eLBnfHvj1a7k3ZX05vxANVyJConZNz4fmBZsZ3o3/g==
+X-Received: by 2002:a1c:1a47:: with SMTP id a68mr3134852wma.88.1558783566097;
+        Sat, 25 May 2019 04:26:06 -0700 (PDT)
 Received: from sudo.home ([2a01:cb1d:112:6f00:3ccc:7074:9336:6a6e])
-        by smtp.gmail.com with ESMTPSA id y16sm4942010wru.28.2019.05.25.04.26.02
+        by smtp.gmail.com with ESMTPSA id y16sm4942010wru.28.2019.05.25.04.26.04
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Sat, 25 May 2019 04:26:02 -0700 (PDT)
+        Sat, 25 May 2019 04:26:05 -0700 (PDT)
 From:   Ard Biesheuvel <ard.biesheuvel@linaro.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
 Cc:     Ard Biesheuvel <ard.biesheuvel@linaro.org>,
         linux-kernel@vger.kernel.org, Gen Zhang <blackgod016574@gmail.com>,
         Rob Bradford <robert.bradford@intel.com>
-Subject: [GIT PULL 0/2] EFI fixes for v5.2
-Date:   Sat, 25 May 2019 13:25:57 +0200
-Message-Id: <20190525112559.7917-1-ard.biesheuvel@linaro.org>
+Subject: [PATCH 2/2] efi: Allow the number of EFI configuration tables entries to be zero
+Date:   Sat, 25 May 2019 13:25:59 +0200
+Message-Id: <20190525112559.7917-3-ard.biesheuvel@linaro.org>
 X-Mailer: git-send-email 2.20.1
+In-Reply-To: <20190525112559.7917-1-ard.biesheuvel@linaro.org>
+References: <20190525112559.7917-1-ard.biesheuvel@linaro.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
@@ -71,32 +73,47 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The following changes since commit a188339ca5a396acc588e5851ed7e19f66b0ebd9:
+From: Rob Bradford <robert.bradford@intel.com>
 
-  Linux 5.2-rc1 (2019-05-19 15:47:09 -0700)
+Only try and access the EFI configuration tables if there there are any
+reported. This allows EFI to be continued to used on systems where there
+are no configuration table entries.
 
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-urgent
-
-for you to fetch changes up to a7decd94d514721f8bf5da02e3ae66758b80603a:
-
-  efi: Allow the number of EFI configuration tables entries to be zero (2019-05-25 13:10:50 +0200)
-
-----------------------------------------------------------------
-A pair of low priority EFI fixes for v5.2:
-- deal with systems where EFI does not expose a single configuration table
-- add missing handling for memory allocation failures to x86 old_map code
-
-----------------------------------------------------------------
-Gen Zhang (1):
-      efi/x86: Add missing error handling to old_memmap 1:1 mapping code
-
-Rob Bradford (1):
-      efi: Allow the number of EFI configuration tables entries to be zero
-
- arch/x86/platform/efi/efi.c    | 2 ++
- arch/x86/platform/efi/efi_64.c | 9 ++++++---
+Signed-off-by: Rob Bradford <robert.bradford@intel.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
  arch/x86/platform/efi/quirks.c | 3 +++
  drivers/firmware/efi/efi.c     | 3 +++
- 4 files changed, 14 insertions(+), 3 deletions(-)
+ 2 files changed, 6 insertions(+)
+
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index a25a9fd987a9..e92ab8002dc5 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -512,6 +512,9 @@ int __init efi_reuse_config(u64 tables, int nr_tables)
+ 	void *p, *tablep;
+ 	struct efi_setup_data *data;
+ 
++	if (nr_tables == 0)
++		return 0;
++
+ 	if (!efi_setup)
+ 		return 0;
+ 
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 55b77c576c42..521a541d02ad 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -636,6 +636,9 @@ int __init efi_config_init(efi_config_table_type_t *arch_tables)
+ 	void *config_tables;
+ 	int sz, ret;
+ 
++	if (efi.systab->nr_tables == 0)
++		return 0;
++
+ 	if (efi_enabled(EFI_64BIT))
+ 		sz = sizeof(efi_config_table_64_t);
+ 	else
+-- 
+2.20.1
+
