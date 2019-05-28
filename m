@@ -1,81 +1,122 @@
-Return-Path: <SRS0=kwLP=T3=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=u4dk=T4=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.5 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_MUTT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 539DBC04AB3
-	for <linux-efi@archiver.kernel.org>; Mon, 27 May 2019 14:31:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B31B6C04E84
+	for <linux-efi@archiver.kernel.org>; Tue, 28 May 2019 13:09:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 290A921721
-	for <linux-efi@archiver.kernel.org>; Mon, 27 May 2019 14:31:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 893222166E
+	for <linux-efi@archiver.kernel.org>; Tue, 28 May 2019 13:09:57 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="aQnbN08k"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726543AbfE0ObY (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 27 May 2019 10:31:24 -0400
-Received: from mga12.intel.com ([192.55.52.136]:49805 "EHLO mga12.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726191AbfE0ObY (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 27 May 2019 10:31:24 -0400
-X-Amp-Result: UNKNOWN
-X-Amp-Original-Verdict: FILE UNKNOWN
-X-Amp-File-Uploaded: False
-Received: from orsmga002.jf.intel.com ([10.7.209.21])
-  by fmsmga106.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 27 May 2019 07:31:24 -0700
-X-ExtLoop1: 1
-Received: from pgomulkx-mobl.ger.corp.intel.com (HELO localhost) ([10.251.94.230])
-  by orsmga002.jf.intel.com with ESMTP; 27 May 2019 07:31:18 -0700
-Date:   Mon, 27 May 2019 17:31:03 +0300
-From:   Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
-To:     James Morris <jmorris@namei.org>
-Cc:     Matthew Garrett <matthewgarrett@google.com>,
-        linux-integrity@vger.kernel.org, peterhuewe@gmx.de, jgg@ziepe.ca,
-        roberto.sassu@huawei.com, linux-efi@vger.kernel.org,
-        linux-security-module@vger.kernel.org,
-        linux-kernel@vger.kernel.org, tweek@google.com, bsz@semihalf.com,
-        Linus Torvalds <torvalds@linux-foundation.org>
-Subject: Re: [PATCH V7 0/4] Add support for crypto agile logs
-Message-ID: <20190527143103.GA20497@linux.intel.com>
-References: <20190520205501.177637-1-matthewgarrett@google.com>
- <20190523121449.GA9997@linux.intel.com>
- <20190523122610.GA12327@linux.intel.com>
- <alpine.LRH.2.21.1905240252440.31508@namei.org>
- <20190524103846.GA11695@linux.intel.com>
- <alpine.LRH.2.21.1905250506320.7233@namei.org>
+        id S1727532AbfE1NJw (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 28 May 2019 09:09:52 -0400
+Received: from mail-io1-f65.google.com ([209.85.166.65]:36889 "EHLO
+        mail-io1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727529AbfE1NJv (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 28 May 2019 09:09:51 -0400
+Received: by mail-io1-f65.google.com with SMTP id e5so6659560iok.4
+        for <linux-efi@vger.kernel.org>; Tue, 28 May 2019 06:09:51 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=3gMjgQF6nVEpAjnECu8ew++wo5leqfpmshMTC4gXxYo=;
+        b=aQnbN08kY+fZnKaZkc6Jz47og1ZVNUJYTwBk+2rjH4tB794JCbcokx4ppHBUIfhYsh
+         x//fmeBbsj76sAFoOntCBGhgDq0lg0eCxQjhB5H+wAklR3N252PW8ZUyDBrKeoaimS9t
+         /Ox2+TFsUhYllJXGgVC6JyJ+DaEMHC0Kg+jPaUJYGudA3FULPTDB6fPZNZ8xDXa8ZzMU
+         y7Z9PgOPmwhkHPsK9a48ubymnrRL4WFX1exKVXnTYk61mmswNcr85RK0bIFxXIuVGhKj
+         VqVFNMYES/D/pvAA8wVV1XuSBNoC2B0rM3LB6koVQ9iBrfeFgHGsfWUHlTKRLDIftMEH
+         hmDw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=3gMjgQF6nVEpAjnECu8ew++wo5leqfpmshMTC4gXxYo=;
+        b=iaXGOntwg0h1ZOV9iSDo+49FyZhkMRkSr4HSiXsz5gB5ZTB3bYJTwaeiy8Fm8N10+D
+         48uE/tO0GPqsTOjIRMcWrnI+R+rjAIXLvTRRjrL+ev7YCxm0VhpCsgrp6ZfQCnUL4cbe
+         RbSlxVuqotpvV0cDeM3jH9uCnhaX3pOru3JccPD++3Q+eRlrblRczvxc9/vOKmcc6MCI
+         pbbRRX9JXN4y/D2W330HArKSS+LjBNTCS1w0gyWNyoqCwwddjeinSif0ggziSTYTSQ9/
+         /8XLIujqDCXNGdiNho0qBYQ6f7G3ZrqZCodG6yCQEFbFPmdaQ2GzA63JV/nwfK5KD5w+
+         aMhw==
+X-Gm-Message-State: APjAAAWgH5YAJlOQBledQHD/n7lK0gdPdSnWKbeZB/MFVfUuYdaWAI/8
+        aUQTYWTPGaSv/wRmXKOhfIpYC/McLeXuW//gWv6CTA==
+X-Google-Smtp-Source: APXvYqz2NSY8Eub8B3tcZ0h/NOiXNc3gT/E67sal88UPCko5gQx0ik+z614GKA+mx2KpIkYqi6sIXUQFqE9LG/ygZX0=
+X-Received: by 2002:a5d:968e:: with SMTP id m14mr38913390ion.49.1559048990760;
+ Tue, 28 May 2019 06:09:50 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <alpine.LRH.2.21.1905250506320.7233@namei.org>
-Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
-User-Agent: Mutt/1.10.1 (2018-07-13)
+References: <20190528125805.2166-1-mail@lennart-glauer.de>
+In-Reply-To: <20190528125805.2166-1-mail@lennart-glauer.de>
+From:   Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Date:   Tue, 28 May 2019 15:09:38 +0200
+Message-ID: <CAKv+Gu8hXOLHLrBMJLYnDyW8xYhSHTAsNk6i034KA7gThjSpJQ@mail.gmail.com>
+Subject: Re: [PATCH] x86/efi: Free efi_pgd with free_pages()
+To:     Lennart Glauer <mail@lennart-glauer.de>
+Cc:     Darren Hart <dvhart@infradead.org>,
+        Andy Shevchenko <andy@infradead.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
+        "H. Peter Anvin" <hpa@zytor.com>,
+        "the arch/x86 maintainers" <x86@kernel.org>,
+        linux-efi <linux-efi@vger.kernel.org>,
+        platform-driver-x86@vger.kernel.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Sat, May 25, 2019 at 05:22:34AM +1000, James Morris wrote:
-> On Fri, 24 May 2019, Jarkko Sakkinen wrote:
-> 
-> > I'm referring to these:
-> > 
-> > https://lore.kernel.org/linux-integrity/20190329115544.GA27351@linux.intel.com/
-> > 
-> > I got response from you that those were applied and there is another
-> > response in that thread that they are being sent to Linus. That is why I
-> > haven't done anything since. Most of them are critical fixes to v5.1
-> > changes.
-> 
-> These are in Linus' tree.  
-> 
-> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=a556810d8e06aa2da8bbe22da3d105eb5a0d0c7d
-> 
-> I initially queued them in the next-tpm branch, but forgot to drop them 
-> from there after sending them to Linus as a v5.1 fix. Linus was not happy 
-> to see them again in the v5.2 merge window.
-> 
-> Apologies for the confusion.
+Hi Lennart,
 
-OK, just to confirm, my next PR will go straight to Linus?
+Thanks for the patch.
 
-/Jarkko
+On Tue, 28 May 2019 at 14:58, Lennart Glauer <mail@lennart-glauer.de> wrote:
+>
+> This patch fixes another occurrence of free_page() that was missed
+> in 06ace26.
+
+Please don't trim commit IDs like that. I think 12 digits is our
+current minimum?
+
+error: short SHA1 06ace26 is ambiguous
+hint: The candidates are:
+hint:   06ace26edc14 commit 2016-02-12 - staging: lustre: fix all NULL
+comparisons in LNet layer
+hint:   06ace26f4e6f commit 2018-03-22 - x86/efi: Free efi_pgd with free_pages()
+
+> The efi_pgd is allocated as PGD_ALLOCATION_ORDER pages and therefore must
+> also be freed as PGD_ALLOCATION_ORDER pages with free_pages().
+>
+> Signed-off-by: Lennart Glauer <mail@lennart-glauer.de>
+
+Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+
+Ingo, can you take this directly? I can't really test this anyway.
+
+
+> ---
+>  arch/x86/platform/efi/efi_64.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+> index 08ce8177c3af..acad22a44774 100644
+> --- a/arch/x86/platform/efi/efi_64.c
+> +++ b/arch/x86/platform/efi/efi_64.c
+> @@ -222,7 +222,7 @@ int __init efi_alloc_page_tables(void)
+>         pgd = efi_pgd + pgd_index(EFI_VA_END);
+>         p4d = p4d_alloc(&init_mm, pgd, EFI_VA_END);
+>         if (!p4d) {
+> -               free_page((unsigned long)efi_pgd);
+> +               free_pages((unsigned long)efi_pgd, PGD_ALLOCATION_ORDER);
+>                 return -ENOMEM;
+>         }
+>
+> --
+> 2.17.1
