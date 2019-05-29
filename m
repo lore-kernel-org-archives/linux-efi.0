@@ -2,74 +2,43 @@ Return-Path: <SRS0=u4dk=T4=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.0 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-0.7 required=3.0 tests=FREEMAIL_REPLYTO_END_DIGIT,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 47479C04E84
-	for <linux-efi@archiver.kernel.org>; Tue, 28 May 2019 13:14:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CEC33C46470
+	for <linux-efi@archiver.kernel.org>; Tue, 28 May 2019 23:50:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 2A7662133F
-	for <linux-efi@archiver.kernel.org>; Tue, 28 May 2019 13:14:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A30B420B1F
+	for <linux-efi@archiver.kernel.org>; Tue, 28 May 2019 23:50:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726985AbfE1NOx (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 28 May 2019 09:14:53 -0400
-Received: from mailgate2.uni-hannover.de ([130.75.2.114]:56978 "EHLO
-        mailgate2.uni-hannover.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726887AbfE1NOx (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 28 May 2019 09:14:53 -0400
-X-Greylist: delayed 983 seconds by postgrey-1.27 at vger.kernel.org; Tue, 28 May 2019 09:14:51 EDT
-Received: from kolab.sra.uni-hannover.de (kolab.sra.uni-hannover.de [130.75.33.6])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mailgate2.uni-hannover.de (Postfix) with ESMTPS id 2DB8D2206;
-        Tue, 28 May 2019 14:58:27 +0200 (CEST)
-X-Virus-Scanned: Debian amavisd-new at sra.uni-hannover.de
-Received: from lab.sra.uni-hannover.de (aerobus.sra.uni-hannover.de
- [130.75.33.87])
- by kolab.sra.uni-hannover.de (Postfix) with SMTP id DD1F43E0622;
- Tue, 28 May 2019 14:57:59 +0200 (CEST)
-Received: (nullmailer pid 2217 invoked by uid 20018);
- Tue, 28 May 2019 12:58:26 -0000
-From:   Lennart Glauer <mail@lennart-glauer.de>
-To:     ard.biesheuvel@linaro.org, dvhart@infradead.org,
-        andy@infradead.org, tglx@linutronix.de, mingo@redhat.com,
-        bp@alien8.de, hpa@zytor.com
-Cc:     x86@kernel.org, linux-efi@vger.kernel.org,
-        platform-driver-x86@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Lennart Glauer <mail@lennart-glauer.de>
-Subject: [PATCH] x86/efi: Free efi_pgd with free_pages()
-Date:   Tue, 28 May 2019 14:58:05 +0200
-Message-Id: <20190528125805.2166-1-mail@lennart-glauer.de>
-X-Mailer: git-send-email 2.17.1
+        id S1726689AbfE1XuZ convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 28 May 2019 19:50:25 -0400
+Received: from [138.68.6.123] ([138.68.6.123]:56957 "EHLO oii.com"
+        rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726576AbfE1XuZ (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Tue, 28 May 2019 19:50:25 -0400
+Reply-To: Mrs Karen Ngui <invoicekngui054@gmail.com>
+From:   Ms Karen~CIO/GMD <nguik@oii.com>
+To:     linux-efi@vger.kernel.org
+Subject: Urgent!!!
+Date:   28 May 2019 23:50:25 -0300
+Message-ID: <20190528235025.92BD3309378D9076@oii.com>
+MIME-Version: 1.0
+Content-Type: text/plain;
+        charset="utf-8"
+Content-Transfer-Encoding: 8BIT
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This patch fixes another occurrence of free_page() that was missed
-in 06ace26.
-The efi_pgd is allocated as PGD_ALLOCATION_ORDER pages and therefore must
-also be freed as PGD_ALLOCATION_ORDER pages with free_pages().
-
-Signed-off-by: Lennart Glauer <mail@lennart-glauer.de>
----
- arch/x86/platform/efi/efi_64.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 08ce8177c3af..acad22a44774 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -222,7 +222,7 @@ int __init efi_alloc_page_tables(void)
- 	pgd = efi_pgd + pgd_index(EFI_VA_END);
- 	p4d = p4d_alloc(&init_mm, pgd, EFI_VA_END);
- 	if (!p4d) {
--		free_page((unsigned long)efi_pgd);
-+		free_pages((unsigned long)efi_pgd, PGD_ALLOCATION_ORDER);
- 		return -ENOMEM;
- 	}
+Hello
  
--- 
-2.17.1
+  Just a quick remindal, did you get the proposal i sent to you 
+on the 24th of this month ?
+ 
+Kindly Reply
+Regional Group Manager
+Mrs Karen Ngui
