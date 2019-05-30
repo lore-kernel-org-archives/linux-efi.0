@@ -5,39 +5,39 @@ X-Spam-Level:
 X-Spam-Status: No, score=-9.0 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
 	SPF_HELO_NONE,SPF_PASS,T_DKIMWL_WL_HIGH,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 399BCC072B1
-	for <linux-efi@archiver.kernel.org>; Thu, 30 May 2019 04:17:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B425CC072B1
+	for <linux-efi@archiver.kernel.org>; Thu, 30 May 2019 04:42:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 0E75921883
-	for <linux-efi@archiver.kernel.org>; Thu, 30 May 2019 04:17:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8E11D25049
+	for <linux-efi@archiver.kernel.org>; Thu, 30 May 2019 04:42:44 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1559189878;
+	s=default; t=1559191364;
 	bh=dfEg2HOpaul2hogvunM38ZcGW3iNqFcO1GoCYEy8P4Q=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=2Wn2+UGodZ3GrO2kV69Y034HLQdJ1SrAxA9Wz4lnxj4QjkY+FibkLuYm9E7qndYTQ
-	 hlbnZNYVMTFzN4dyPCrmEBoJ1HKfN04VmTS1fdAW40s+totG254hpfFjFwZKwP4gFO
-	 ySKhI+Sz/gy8/B/txL+oAeB3J4PifJjOLvo5+rkQ=
+	b=DAUoV3kGjyTP8rIK1EstXbscoqLYsuw2v6XxrUiubTfvryBkQcLfiyGbVoE5Y3UGf
+	 Um4ysTdWXgYdAS7oehRZ20s7mJNfbsv0jqf8F/SpytKZ2QG6QoiB42+DmyOsF//pNo
+	 MRLRKrH8N2jrSWA1vD3uuHK7lC4ZECDhSfxkAazQ=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730410AbfE3ERx (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 30 May 2019 00:17:53 -0400
-Received: from mail.kernel.org ([198.145.29.99]:39358 "EHLO mail.kernel.org"
+        id S1729057AbfE3Emn (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 30 May 2019 00:42:43 -0400
+Received: from mail.kernel.org ([198.145.29.99]:53798 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729443AbfE3DPh (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 29 May 2019 23:15:37 -0400
+        id S1728880AbfE3DMP (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 29 May 2019 23:12:15 -0400
 Received: from localhost (ip67-88-213-2.z213-88-67.customer.algx.net [67.88.213.2])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id EDED12449A;
-        Thu, 30 May 2019 03:15:36 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 8E6BD244A0;
+        Thu, 30 May 2019 03:12:14 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1559186137;
+        s=default; t=1559185934;
         bh=dfEg2HOpaul2hogvunM38ZcGW3iNqFcO1GoCYEy8P4Q=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=lXCgC0qpqaGlWdUqT0r+Y2HWiouWj4JjD3dS0n3La9DnPxYP9pflWqHy8G36A+ocQ
-         xY8QP5NXbqNMw3URAtkWR1JjKQLiozGROKJzEaFXzmpGCYGJdgbIjl2ZRNsXz6stnj
-         0TpEzXa8pYgU7KAbUhllS8nlCmC6Orj78xy/2h6Q=
+        b=aGUeHRkKwPhi4hKrdT6dKYQ9+KIuKv5XBeIrGcsUtvZ+Sqt++F3qv1KosoI/kUo9c
+         /DNrFtL51iQr132FJbCJkRDI0KP1HSbXj5m3ehzCj0IvMSuGejXAGW2ukvatDX2+Gp
+         naob9zo5VuvwvbviObWzXvGADU/SzEyW7szu0N9Y=
 From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 To:     linux-kernel@vger.kernel.org
 Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
@@ -50,12 +50,12 @@ Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         Thomas Gleixner <tglx@linutronix.de>,
         linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Sasha Levin <sashal@kernel.org>
-Subject: [PATCH 5.0 260/346] efifb: Omit memory map check on legacy boot
-Date:   Wed, 29 May 2019 20:05:33 -0700
-Message-Id: <20190530030554.145227123@linuxfoundation.org>
+Subject: [PATCH 5.1 289/405] efifb: Omit memory map check on legacy boot
+Date:   Wed, 29 May 2019 20:04:47 -0700
+Message-Id: <20190530030555.482106919@linuxfoundation.org>
 X-Mailer: git-send-email 2.21.0
-In-Reply-To: <20190530030540.363386121@linuxfoundation.org>
-References: <20190530030540.363386121@linuxfoundation.org>
+In-Reply-To: <20190530030540.291644921@linuxfoundation.org>
+References: <20190530030540.291644921@linuxfoundation.org>
 User-Agent: quilt/0.66
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
