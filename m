@@ -2,45 +2,48 @@ Return-Path: <SRS0=OHl2=UE=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.5 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_MUTT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.5 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_MUTT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B112AC28CC5
-	for <linux-efi@archiver.kernel.org>; Wed,  5 Jun 2019 14:21:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EF071C28CC6
+	for <linux-efi@archiver.kernel.org>; Wed,  5 Jun 2019 14:32:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 8B7D020866
-	for <linux-efi@archiver.kernel.org>; Wed,  5 Jun 2019 14:21:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D35E02075B
+	for <linux-efi@archiver.kernel.org>; Wed,  5 Jun 2019 14:32:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728237AbfFEOVj (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 5 Jun 2019 10:21:39 -0400
-Received: from mga12.intel.com ([192.55.52.136]:39477 "EHLO mga12.intel.com"
+        id S1728430AbfFEOcY (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 5 Jun 2019 10:32:24 -0400
+Received: from mga17.intel.com ([192.55.52.151]:35243 "EHLO mga17.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728211AbfFEOVj (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 5 Jun 2019 10:21:39 -0400
+        id S1728314AbfFEOcX (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 5 Jun 2019 10:32:23 -0400
 X-Amp-Result: UNKNOWN
 X-Amp-Original-Verdict: FILE UNKNOWN
 X-Amp-File-Uploaded: False
-Received: from orsmga008.jf.intel.com ([10.7.209.65])
-  by fmsmga106.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 05 Jun 2019 07:21:38 -0700
+Received: from fmsmga005.fm.intel.com ([10.253.24.32])
+  by fmsmga107.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 05 Jun 2019 07:32:22 -0700
 X-ExtLoop1: 1
 Received: from araresx-wtg1.ger.corp.intel.com (HELO localhost) ([10.252.46.102])
-  by orsmga008.jf.intel.com with ESMTP; 05 Jun 2019 07:21:34 -0700
-Date:   Wed, 5 Jun 2019 17:21:27 +0300
+  by fmsmga005.fm.intel.com with ESMTP; 05 Jun 2019 07:32:18 -0700
+Date:   Wed, 5 Jun 2019 17:32:17 +0300
 From:   Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
-To:     Matthew Garrett <matthewgarrett@google.com>
-Cc:     linux-integrity@vger.kernel.org, peterhuewe@gmx.de, jgg@ziepe.ca,
-        linux-efi@vger.kernel.org, ard.biesheuvel@linaro.org,
+To:     Chris Coulson <chris.coulson@canonical.com>
+Cc:     linux-integrity@vger.kernel.org, linux-efi@vger.kernel.org,
+        Peter Huewe <peterhuewe@gmx.de>,
+        Jason Gunthorpe <jgg@ziepe.ca>,
         Matthew Garrett <mjg59@google.com>,
-        Joe Richey <joerichey@google.com>
-Subject: Re: [PATCH] tpm: Don't duplicate events from the final event log in
- the TCG2 log
-Message-ID: <20190605142127.GC11331@linux.intel.com>
-References: <20190604193511.153831-1-matthewgarrett@google.com>
+        Bartosz Szczepanek <bsz@semihalf.com>,
+        Roberto Sassu <roberto.sassu@huawei.com>,
+        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
+        linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 0/1] Fix crash in __calc_tpm2_event_size
+Message-ID: <20190605143217.GE11331@linux.intel.com>
+References: <20190604230433.20936-1-chris.coulson@canonical.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190604193511.153831-1-matthewgarrett@google.com>
+In-Reply-To: <20190604230433.20936-1-chris.coulson@canonical.com>
 Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
 User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-efi-owner@vger.kernel.org
@@ -48,32 +51,12 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, Jun 04, 2019 at 12:35:11PM -0700, Matthew Garrett wrote:
-> After the first call to GetEventLog() on UEFI systems using the TCG2
-> crypto agile log format, any further log events (other than those
-> triggered by ExitBootServices()) will be logged in both the main log and
-> also in the Final Events Log. While the kernel only calls GetEventLog()
-> immediately before ExitBootServices(), we can't control whether earlier
-> parts of the boot process have done so. This will result in log entries
-> that exist in both logs, and so the current approach of simply appending
-> the Final Event Log to the main log will result in events being
-> duplicated.
+On Wed, Jun 05, 2019 at 12:04:32AM +0100, Chris Coulson wrote:
+> I've been testing the latest code in the linux-tpmdd branch and I'm
+> experiencing a crash in __calc_tpm2_event_size when it's called to
+> calculate the size of events in the final log. I hope I'm not stepping on
+> anyone's toes, but this small change seems to fix it.
 
-Sounds flakky how UEFI firmaware works. Wonder why the ignition of the
-final events log is bound to the invokation of GetEventLog() in the
-first place.
-
-> We can avoid this problem by looking at the size of the Final Event Log
-> just before we call ExitBootServices() and exporting this to the main
-> kernel. The kernel can then skip over all events that occured before
-> ExitBootServices() and only append events that were not also logged to
-> the main log.
-> 
-> Signed-off-by: Matthew Garrett <mjg59@google.com>
-> Reported-by: Joe Richey <joerichey@google.com>
-> Suggested-by: Joe Richey <joerichey@google.com>
-
-Rename final_events_early_size as final_events_preboot_size because it
-is a bit more descriptive name. Other than that looks good to me.
+Oh no, thank you for reporting this.
 
 /Jarkko
