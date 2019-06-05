@@ -1,94 +1,79 @@
-Return-Path: <SRS0=BNvh=UD=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=OHl2=UE=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.0 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-5.5 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_MUTT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CFC91C282CE
-	for <linux-efi@archiver.kernel.org>; Tue,  4 Jun 2019 23:04:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B112AC28CC5
+	for <linux-efi@archiver.kernel.org>; Wed,  5 Jun 2019 14:21:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id B0AE9206BB
-	for <linux-efi@archiver.kernel.org>; Tue,  4 Jun 2019 23:04:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8B7D020866
+	for <linux-efi@archiver.kernel.org>; Wed,  5 Jun 2019 14:21:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726527AbfFDXEp (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 4 Jun 2019 19:04:45 -0400
-Received: from youngberry.canonical.com ([91.189.89.112]:36672 "EHLO
-        youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726269AbfFDXEo (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 4 Jun 2019 19:04:44 -0400
-Received: from 95.172.237.253.ip.static.uno.uk.net ([95.172.237.253] helo=localhost.localdomain)
-        by youngberry.canonical.com with esmtpsa (TLS1.0:DHE_RSA_AES_256_CBC_SHA1:32)
-        (Exim 4.76)
-        (envelope-from <chris.coulson@canonical.com>)
-        id 1hYITz-0006ef-69; Tue, 04 Jun 2019 23:04:43 +0000
-From:   Chris Coulson <chris.coulson@canonical.com>
-To:     linux-integrity@vger.kernel.org
-Cc:     Chris Coulson <chris.coulson@canonical.com>,
-        linux-efi@vger.kernel.org, Peter Huewe <peterhuewe@gmx.de>,
-        Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>,
-        Jason Gunthorpe <jgg@ziepe.ca>,
+        id S1728237AbfFEOVj (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 5 Jun 2019 10:21:39 -0400
+Received: from mga12.intel.com ([192.55.52.136]:39477 "EHLO mga12.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728211AbfFEOVj (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 5 Jun 2019 10:21:39 -0400
+X-Amp-Result: UNKNOWN
+X-Amp-Original-Verdict: FILE UNKNOWN
+X-Amp-File-Uploaded: False
+Received: from orsmga008.jf.intel.com ([10.7.209.65])
+  by fmsmga106.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 05 Jun 2019 07:21:38 -0700
+X-ExtLoop1: 1
+Received: from araresx-wtg1.ger.corp.intel.com (HELO localhost) ([10.252.46.102])
+  by orsmga008.jf.intel.com with ESMTP; 05 Jun 2019 07:21:34 -0700
+Date:   Wed, 5 Jun 2019 17:21:27 +0300
+From:   Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
+To:     Matthew Garrett <matthewgarrett@google.com>
+Cc:     linux-integrity@vger.kernel.org, peterhuewe@gmx.de, jgg@ziepe.ca,
+        linux-efi@vger.kernel.org, ard.biesheuvel@linaro.org,
         Matthew Garrett <mjg59@google.com>,
-        Bartosz Szczepanek <bsz@semihalf.com>,
-        Roberto Sassu <roberto.sassu@huawei.com>,
-        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH 1/1] tpm: Don't dereference event after it's unmapped in __calc_tpm2_event_size
-Date:   Wed,  5 Jun 2019 00:04:33 +0100
-Message-Id: <20190604230433.20936-2-chris.coulson@canonical.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20190604230433.20936-1-chris.coulson@canonical.com>
-References: <20190604230433.20936-1-chris.coulson@canonical.com>
+        Joe Richey <joerichey@google.com>
+Subject: Re: [PATCH] tpm: Don't duplicate events from the final event log in
+ the TCG2 log
+Message-ID: <20190605142127.GC11331@linux.intel.com>
+References: <20190604193511.153831-1-matthewgarrett@google.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190604193511.153831-1-matthewgarrett@google.com>
+Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The pointer to the event header is dereferenced on each loop iteration in
-order to obtain the digest count, but when called from
-tpm2_calc_event_log_size, the event header is unmapped on the first
-iteration of the loop. This results in an invalid access for on subsequent
-loop iterations for log entries that have more than one digest.
+On Tue, Jun 04, 2019 at 12:35:11PM -0700, Matthew Garrett wrote:
+> After the first call to GetEventLog() on UEFI systems using the TCG2
+> crypto agile log format, any further log events (other than those
+> triggered by ExitBootServices()) will be logged in both the main log and
+> also in the Final Events Log. While the kernel only calls GetEventLog()
+> immediately before ExitBootServices(), we can't control whether earlier
+> parts of the boot process have done so. This will result in log entries
+> that exist in both logs, and so the current approach of simply appending
+> the Final Event Log to the main log will result in events being
+> duplicated.
 
-Signed-off-by: Chris Coulson <chris.coulson@canonical.com>
----
- include/linux/tpm_eventlog.h | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+Sounds flakky how UEFI firmaware works. Wonder why the ignition of the
+final events log is bound to the invokation of GetEventLog() in the
+first place.
 
-diff --git a/include/linux/tpm_eventlog.h b/include/linux/tpm_eventlog.h
-index 63238c84dc0b..7b76abbff7d8 100644
---- a/include/linux/tpm_eventlog.h
-+++ b/include/linux/tpm_eventlog.h
-@@ -165,6 +165,7 @@ static inline int __calc_tpm2_event_size(struct tcg_pcr_event2_head *event,
- 	int mapping_size;
- 	void *marker;
- 	void *marker_start;
-+	u32 count;
- 	u32 halg_size;
- 	size_t size;
- 	u16 halg;
-@@ -190,16 +191,17 @@ static inline int __calc_tpm2_event_size(struct tcg_pcr_event2_head *event,
- 	}
- 
- 	event = (struct tcg_pcr_event2_head *)mapping;
-+	count = event->count;
- 
- 	efispecid = (struct tcg_efi_specid_event_head *)event_header->event;
- 
- 	/* Check if event is malformed. */
--	if (event->count > efispecid->num_algs) {
-+	if (count > efispecid->num_algs) {
- 		size = 0;
- 		goto out;
- 	}
- 
--	for (i = 0; i < event->count; i++) {
-+	for (i = 0; i < count; i++) {
- 		halg_size = sizeof(event->digests[i].alg_id);
- 
- 		/* Map the digest's algorithm identifier */
--- 
-2.17.1
+> We can avoid this problem by looking at the size of the Final Event Log
+> just before we call ExitBootServices() and exporting this to the main
+> kernel. The kernel can then skip over all events that occured before
+> ExitBootServices() and only append events that were not also logged to
+> the main log.
+> 
+> Signed-off-by: Matthew Garrett <mjg59@google.com>
+> Reported-by: Joe Richey <joerichey@google.com>
+> Suggested-by: Joe Richey <joerichey@google.com>
 
+Rename final_events_early_size as final_events_preboot_size because it
+is a bit more descriptive name. Other than that looks good to me.
+
+/Jarkko
