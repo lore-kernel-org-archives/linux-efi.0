@@ -2,94 +2,117 @@ Return-Path: <SRS0=kRsa=UG=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.5 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_MUTT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-1.0 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 35794C468BD
-	for <linux-efi@archiver.kernel.org>; Fri,  7 Jun 2019 15:59:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 187F3C468BD
+	for <linux-efi@archiver.kernel.org>; Fri,  7 Jun 2019 17:34:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 0F21E20657
-	for <linux-efi@archiver.kernel.org>; Fri,  7 Jun 2019 15:59:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E87C520868
+	for <linux-efi@archiver.kernel.org>; Fri,  7 Jun 2019 17:34:52 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=intel-com.20150623.gappssmtp.com header.i=@intel-com.20150623.gappssmtp.com header.b="TiqYN4ZI"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730405AbfFGPlv (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 7 Jun 2019 11:41:51 -0400
-Received: from foss.arm.com ([217.140.110.172]:42968 "EHLO foss.arm.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1730403AbfFGPlv (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 7 Jun 2019 11:41:51 -0400
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id D456C337;
-        Fri,  7 Jun 2019 08:41:50 -0700 (PDT)
-Received: from fuggles.cambridge.arm.com (usa-sjc-imap-foss1.foss.arm.com [10.121.207.14])
-        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 98B363F718;
-        Fri,  7 Jun 2019 08:41:49 -0700 (PDT)
-Date:   Fri, 7 Jun 2019 16:41:47 +0100
-From:   Will Deacon <will.deacon@arm.com>
-To:     Nathan Chancellor <natechancellor@gmail.com>
-Cc:     Qian Cai <cai@lca.pw>, Dave Martin <Dave.Martin@arm.com>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        linux-arm-kernel@lists.infradead.org,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        linux-efi@vger.kernel.org, clang-built-linux@googlegroups.com
-Subject: Re: "arm64: Silence gcc warnings about arch ABI drift" breaks clang
-Message-ID: <20190607154147.GD19862@fuggles.cambridge.arm.com>
-References: <1559920965.6132.56.camel@lca.pw>
- <20190607152517.GC19862@fuggles.cambridge.arm.com>
- <1559921171.6132.57.camel@lca.pw>
- <20190607154010.GA41392@archlinux-epyc>
+        id S1730033AbfFGRes (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 7 Jun 2019 13:34:48 -0400
+Received: from mail-oi1-f195.google.com ([209.85.167.195]:46916 "EHLO
+        mail-oi1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729629AbfFGRes (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 7 Jun 2019 13:34:48 -0400
+Received: by mail-oi1-f195.google.com with SMTP id 203so1962848oid.13
+        for <linux-efi@vger.kernel.org>; Fri, 07 Jun 2019 10:34:48 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=intel-com.20150623.gappssmtp.com; s=20150623;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=PQDn4Bg8QjtLfMA6U30U1R3x+u2Sc8pJdpkvrhwxItg=;
+        b=TiqYN4ZIeJIcZdyH76CPw/HVLGladFFX1TaVyA8d+bt91TPBoOj+Wl/qYIgyST2If0
+         5Q53pA2tQdlIrIXAbCxchjf9ns3sci6CtmdDvUYrvO+YD3Ve5aaBvSMa9VMxmPhN4j3W
+         Tn6nVuiG9Y78xQgJXKnl+5bg5ke1pBLB1GlQupAgv6HIX0F0U/aM7XPLV9VOXad4g4Lf
+         LMgAgdHX6fzBlIhsSuKFqXCYO1qbZHMxYrPREEUVIDtZdlVAsMCCpwK3xKS/Lk71Awcd
+         0pVr2y0nBr1ueHaxoR1TDFfUyDNALDL/sX3kpjnRhqFMhc9LDiPs7+I3miDoeZpWxW9D
+         0NOg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=PQDn4Bg8QjtLfMA6U30U1R3x+u2Sc8pJdpkvrhwxItg=;
+        b=qzUgvOcAC0pHnH39mwuOiCFdFzysKcwtUWAQ5BJr9UneYEypCQRWp7PwjBqdlhVbqU
+         a+rdgLIPJrNZf7t9P5ZHJPbl/k9K0xf5MdLvKp2OdkcSljnok1MRV1LPcftAU6EoOFC8
+         d4XPSKsdRw1ZU3mUnohLQq/II85b3FUoBQNrqxuag6JS3AuKqfTQrbewxrx5Z79flIx8
+         nHEnOy2a8PirIQSclJtOQAVsAT1uAVMcRCOfTYSa+QJyLiQpiFEne8dnZeuyoTfxFRNv
+         ZgVDWx+ZYVa8wD9a3IVrejtfLkb0rzo6mMcPwTcjU8/ClQQVjK99CyYOG3DrU5yT4R1p
+         1n/A==
+X-Gm-Message-State: APjAAAWJFZOylOpoPvngSvKyAsYIVYa+kqNJkN0I0SQATkaWj4kj59D2
+        6oXSDxf4iurTHExFXpn6DVY9TCUnbFkwWoAquCwKvA==
+X-Google-Smtp-Source: APXvYqwxRH9b7zfmNokXa/MJtvxICynfiQZqc9XkLddgj7G1h1cazph56bWLcewkRjUHU4E05igOxqptPTcARwRwv5E=
+X-Received: by 2002:aca:ec82:: with SMTP id k124mr1785826oih.73.1559928887822;
+ Fri, 07 Jun 2019 10:34:47 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190607154010.GA41392@archlinux-epyc>
-User-Agent: Mutt/1.11.1+86 (6f28e57d73f2) ()
+References: <155925716254.3775979.16716824941364738117.stgit@dwillia2-desk3.amr.corp.intel.com>
+ <155925718351.3775979.13546720620952434175.stgit@dwillia2-desk3.amr.corp.intel.com>
+ <CAKv+Gu-J3-66V7UhH3=AjN4sX7iydHNF7Fd+SMbezaVNrZQmGQ@mail.gmail.com>
+ <CAPcyv4g-GNe2vSYTn0a6ivQYxJdS5khE4AJbcxysoGPsTZwswg@mail.gmail.com>
+ <CAKv+Gu83QB6x8=LCaAcR0S65WELC-Y+Voxw6LzaVh4FSV3bxYA@mail.gmail.com>
+ <CAPcyv4hXBJBMrqoUr4qG5A3CUVgWzWK6bfBX29JnLCKDC7CiGA@mail.gmail.com>
+ <CAKv+Gu_ZYpey0dWYebFgCaziyJ-_x+KbCmOegWqFjwC0U-5QaA@mail.gmail.com> <CAPcyv4jO5WhRJ-=Nz70Jc0mCHYBJ6NsHjJNk6AerwQXH43oemw@mail.gmail.com>
+In-Reply-To: <CAPcyv4jO5WhRJ-=Nz70Jc0mCHYBJ6NsHjJNk6AerwQXH43oemw@mail.gmail.com>
+From:   Dan Williams <dan.j.williams@intel.com>
+Date:   Fri, 7 Jun 2019 10:34:36 -0700
+Message-ID: <CAPcyv4gzhr57xa2MbR1Jk8EDFw-WLdcw3mJnEX9PeAFwVEZbDA@mail.gmail.com>
+Subject: Re: [PATCH v2 4/8] x86, efi: Reserve UEFI 2.8 Specific Purpose Memory
+ for dax
+To:     Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc:     Mike Rapoport <rppt@linux.ibm.com>,
+        linux-efi <linux-efi@vger.kernel.org>,
+        "the arch/x86 maintainers" <x86@kernel.org>,
+        Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@redhat.com>,
+        "H. Peter Anvin" <hpa@zytor.com>,
+        Darren Hart <dvhart@infradead.org>,
+        Andy Shevchenko <andy@infradead.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        kbuild test robot <lkp@intel.com>,
+        Vishal L Verma <vishal.l.verma@intel.com>,
+        Linux-MM <linux-mm@kvack.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-nvdimm <linux-nvdimm@lists.01.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Fri, Jun 07, 2019 at 08:40:10AM -0700, Nathan Chancellor wrote:
-> On Fri, Jun 07, 2019 at 11:26:11AM -0400, Qian Cai wrote:
-> > On Fri, 2019-06-07 at 16:25 +0100, Will Deacon wrote:
-> > > On Fri, Jun 07, 2019 at 11:22:45AM -0400, Qian Cai wrote:
-> > > > The linux-next commit "arm64: Silence gcc warnings about arch ABI drift" [1]
-> > > > breaks clang build where it screams that unknown option "-Wno-psabi" and
-> > > > generates errors below,
-> > > 
-> > > So that can be easily fixed with cc-option...
-> > > 
-> > > > [1] https://lore.kernel.org/linux-arm-kernel/1559817223-32585-1-git-send-ema
-> > > > il-D
-> > > > ave.Martin@arm.com/
-> > > > 
-> > > > ./drivers/firmware/efi/libstub/arm-stub.stub.o: In function
-> > > > `install_memreserve_table':
-> > > > ./linux/drivers/firmware/efi/libstub/arm-stub.c:73: undefined reference to
-> > > > `__efistub___stack_chk_guard'
-> > > > ./linux/drivers/firmware/efi/libstub/arm-stub.c:73: undefined reference to
-> > > > `__efistub___stack_chk_guard'
-> > > > ./linux/drivers/firmware/efi/libstub/arm-stub.c:93: undefined reference to
-> > > > `__efistub___stack_chk_guard'
-> > > > ./linux/drivers/firmware/efi/libstub/arm-stub.c:93: undefined reference to
-> > > > `__efistub___stack_chk_guard'
-> > > > ./linux/drivers/firmware/efi/libstub/arm-stub.c:94: undefined reference to
-> > > > `__efistub___stack_chk_fail
-> > > 
-> > > ... but this looks unrelated. Are you saying you don't see these errors if
-> > > you revert Dave's patch?
-> > 
-> > Yes.
-> 
-> I suspect the reason for this is -Wunknown-warning-option causes
-> cc-option to fail. I see some disabled warnings like
-> -Waddress-of-packed-member and -Wunused-const-variable when -Wno-psabi
-> is unconditionally added.
-> 
-> I'll do some further triage but I think the obvious fix as Will
-> suggested is to use cc-disable-warning. I'll send a patch.
+On Fri, Jun 7, 2019 at 8:23 AM Dan Williams <dan.j.williams@intel.com> wrote:
+>
+> On Fri, Jun 7, 2019 at 5:29 AM Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
+[..]
+> > > #ifdef CONFIG_EFI_APPLICATION_RESERVED
+> > > static inline bool is_efi_application_reserved(efi_memory_desc_t *md)
+> > > {
+> > >         return md->type == EFI_CONVENTIONAL_MEMORY
+> > >                 && (md->attribute & EFI_MEMORY_SP);
+> > > }
+> > > #else
+> > > static inline bool is_efi_application_reserved(efi_memory_desc_t *md)
+> > > {
+> > >         return false;
+> > > }
+> > > #endif
+> >
+> > I think this policy decision should not live inside the EFI subsystem.
+> > EFI just gives you the memory map, and mangling that information
+> > depending on whether you think a certain memory attribute should be
+> > ignored is the job of the MM subsystem.
+>
+> The problem is that we don't have an mm subsystem at the time a
+> decision needs to be made. The reservation policy needs to be deployed
+> before even memblock has been initialized in order to keep kernel
+> allocations out of the reservation. I agree with the sentiment I just
+> don't see how to practically achieve an optional "System RAM" vs
+> "Application Reserved" routing decision without an early (before
+> e820__memblock_setup()) conditional branch.
 
-Cheers, Nathan. I've already sent the pull for -rc4, but I can send your
-fix for -rc5 next week.
-
-Will
+I can at least move it out of include/linux/efi.h and move it to
+arch/x86/include/asm/efi.h since it is an x86 specific policy decision
+/ implementation for now.
