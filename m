@@ -2,128 +2,151 @@ Return-Path: <SRS0=T8I8=UH=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-1.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,T_DKIMWL_WL_HIGH,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A4D9C28CC5
-	for <linux-efi@archiver.kernel.org>; Sat,  8 Jun 2019 07:20:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 72D45C468BD
+	for <linux-efi@archiver.kernel.org>; Sat,  8 Jun 2019 11:45:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 6E585212F5
-	for <linux-efi@archiver.kernel.org>; Sat,  8 Jun 2019 07:20:27 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="NDyg19KR"
+	by mail.kernel.org (Postfix) with ESMTP id 4CFEF214AF
+	for <linux-efi@archiver.kernel.org>; Sat,  8 Jun 2019 11:45:21 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1559994321;
+	bh=vj1gqrXMhgdJiOp320NoSZWXUh7AGhz5bqmQ5lyXcCs=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=DexmV1KDSZETp8q1M7cKTgSpHe5GO044leH9kBs3G+dHXDA5gSuLNfuidPj2qTMkl
+	 dX9vkiu6EiEhj1SkA9NEycID/rImz8sVTT0JBIUOBWtXX0mMgssvXQG3Etxtpf720U
+	 rnzWqv063wqar/8NgojFDd2h0tRw90K9Cj4bjcM0=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726950AbfFHHU1 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 8 Jun 2019 03:20:27 -0400
-Received: from mail-it1-f194.google.com ([209.85.166.194]:55677 "EHLO
-        mail-it1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726204AbfFHHU0 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sat, 8 Jun 2019 03:20:26 -0400
-Received: by mail-it1-f194.google.com with SMTP id i21so6107314ita.5
-        for <linux-efi@vger.kernel.org>; Sat, 08 Jun 2019 00:20:26 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=NRFU6E8aoY/NG8zu/5ScI8y9YPKuPdWK6EZGoPFt9Ck=;
-        b=NDyg19KRBwWKCsuIiFvg9iRfAOK0BFmH02/xvBLHZXW8TjkcbUXa07UNeCGFNRcVSQ
-         8RbFmVpFH1UV2N+/j05HX8NIJQJMtjsgEKFE86KKcUhlfShKCx8Iz8dbQ9Vsx6tckJ5T
-         rS+m/g1NYezNDmc1RO4A3Sgo+UodJa8hGFvDUEImNfqv0n+QszCBKoGTKvUhISzRtwkA
-         Xb1wAh6WTP39KnlTRX4OirLbaYKQbvdRLkSl+jZyYeOtzDdqjdwK37E0w6E6cb4CmU/O
-         DCw//CheJdpE6T4DkIGFn5i6qQUWUaZYBqkDJxVbCvsO0AZmxviK0yDSf2JLaX3ABS1p
-         82Rw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=NRFU6E8aoY/NG8zu/5ScI8y9YPKuPdWK6EZGoPFt9Ck=;
-        b=smJ/rdE5AKaO83guG/QnqVtDlNKZpn9DZRwIxNFJ80czL3pFgixvo9VbSpKD2gIrig
-         ucUEBylapbStZGd4kh4elzMfMSh2RjyY+tFkgDxmlvwNVdZ8iKBMnmMlTJ1mfgUpMrcR
-         aXyrcZLPsHOq1OW0n/PtnNKCt4u6Pjl2DRTbeJVKUiAozLddxCzDuhAhnkQIXjyiwAsa
-         /xbBq1OIpjxr4Tyg1QbtPhwEfp5rCi907Sq+GKly9nHlj8loxzh+UIdlcTqvU/EyCWpD
-         BI5n7V36maH5Wrxs2m46DCAV9eY2UJWdmi/de/FWOxt6j+pvVpl5cJyJ1NXnwir9QjoN
-         LHbw==
-X-Gm-Message-State: APjAAAU5FXD45wx1qN14PkWll+YB5jO1szq6OJdX1Lt9k22qKL4bj7eb
-        ogkehl3nn0ZB5awYZZ1zdWBBGOdm5qF71AktFx+EVw==
-X-Google-Smtp-Source: APXvYqwnMZ8z1ON6onK6aLjM8baTZPCff6UnkQu1+3vja3H65nm9+6f6XC126h9UoGCw6NSPIu5HIfQvokO9SnkaUhk=
-X-Received: by 2002:a24:4f88:: with SMTP id c130mr6512194itb.104.1559978425951;
- Sat, 08 Jun 2019 00:20:25 -0700 (PDT)
-MIME-Version: 1.0
-References: <155925716254.3775979.16716824941364738117.stgit@dwillia2-desk3.amr.corp.intel.com>
- <155925718351.3775979.13546720620952434175.stgit@dwillia2-desk3.amr.corp.intel.com>
- <CAKv+Gu-J3-66V7UhH3=AjN4sX7iydHNF7Fd+SMbezaVNrZQmGQ@mail.gmail.com>
- <CAPcyv4g-GNe2vSYTn0a6ivQYxJdS5khE4AJbcxysoGPsTZwswg@mail.gmail.com>
- <CAKv+Gu83QB6x8=LCaAcR0S65WELC-Y+Voxw6LzaVh4FSV3bxYA@mail.gmail.com>
- <CAPcyv4hXBJBMrqoUr4qG5A3CUVgWzWK6bfBX29JnLCKDC7CiGA@mail.gmail.com>
- <CAKv+Gu_ZYpey0dWYebFgCaziyJ-_x+KbCmOegWqFjwC0U-5QaA@mail.gmail.com>
- <CAPcyv4jO5WhRJ-=Nz70Jc0mCHYBJ6NsHjJNk6AerwQXH43oemw@mail.gmail.com> <CAPcyv4gzhr57xa2MbR1Jk8EDFw-WLdcw3mJnEX9PeAFwVEZbDA@mail.gmail.com>
-In-Reply-To: <CAPcyv4gzhr57xa2MbR1Jk8EDFw-WLdcw3mJnEX9PeAFwVEZbDA@mail.gmail.com>
-From:   Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Date:   Sat, 8 Jun 2019 09:20:13 +0200
-Message-ID: <CAKv+Gu_OcsWi5DqxOk-j6ovc0CMAZV37Od7zA5Bs4Ng5ATQxAA@mail.gmail.com>
-Subject: Re: [PATCH v2 4/8] x86, efi: Reserve UEFI 2.8 Specific Purpose Memory
- for dax
-To:     Dan Williams <dan.j.williams@intel.com>
-Cc:     Mike Rapoport <rppt@linux.ibm.com>,
-        linux-efi <linux-efi@vger.kernel.org>,
-        "the arch/x86 maintainers" <x86@kernel.org>,
-        Borislav Petkov <bp@alien8.de>, Ingo Molnar <mingo@redhat.com>,
-        "H. Peter Anvin" <hpa@zytor.com>,
-        Darren Hart <dvhart@infradead.org>,
-        Andy Shevchenko <andy@infradead.org>,
+        id S1728617AbfFHLpP (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 8 Jun 2019 07:45:15 -0400
+Received: from mail.kernel.org ([198.145.29.99]:60738 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728725AbfFHLnY (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Sat, 8 Jun 2019 07:43:24 -0400
+Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 971C1214C6;
+        Sat,  8 Jun 2019 11:43:22 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1559994203;
+        bh=vj1gqrXMhgdJiOp320NoSZWXUh7AGhz5bqmQ5lyXcCs=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=g2Dh1RUT8zklUr6XnngZSlTTdPVZSdLPwtziHlm6g8xBzHkAr7DQz+QExnfvi+l8v
+         VMHr7RK99pv61FupxoP6hqlZ2FYbPW13mfksBlIi/UJHtucQIwZAeADGgvU50e7V7Q
+         5KEUvgGybNW4xVJ1h2k68lzMbAWuFjy+N9lVefOU=
+From:   Sasha Levin <sashal@kernel.org>
+To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc:     Gen Zhang <blackgod016574@gmail.com>,
+        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
+        Linus Torvalds <torvalds@linux-foundation.org>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Rob Bradford <robert.bradford@intel.com>,
         Thomas Gleixner <tglx@linutronix.de>,
-        kbuild test robot <lkp@intel.com>,
-        Vishal L Verma <vishal.l.verma@intel.com>,
-        Linux-MM <linux-mm@kvack.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-nvdimm <linux-nvdimm@lists.01.org>
-Content-Type: text/plain; charset="UTF-8"
+        linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
+        Sasha Levin <sashal@kernel.org>,
+        platform-driver-x86@vger.kernel.org
+Subject: [PATCH AUTOSEL 4.19 17/49] efi/x86/Add missing error handling to old_memmap 1:1 mapping code
+Date:   Sat,  8 Jun 2019 07:41:58 -0400
+Message-Id: <20190608114232.8731-17-sashal@kernel.org>
+X-Mailer: git-send-email 2.20.1
+In-Reply-To: <20190608114232.8731-1-sashal@kernel.org>
+References: <20190608114232.8731-1-sashal@kernel.org>
+MIME-Version: 1.0
+X-stable: review
+X-Patchwork-Hint: Ignore
+Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Fri, 7 Jun 2019 at 19:34, Dan Williams <dan.j.williams@intel.com> wrote:
->
-> On Fri, Jun 7, 2019 at 8:23 AM Dan Williams <dan.j.williams@intel.com> wrote:
-> >
-> > On Fri, Jun 7, 2019 at 5:29 AM Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
-> [..]
-> > > > #ifdef CONFIG_EFI_APPLICATION_RESERVED
-> > > > static inline bool is_efi_application_reserved(efi_memory_desc_t *md)
-> > > > {
-> > > >         return md->type == EFI_CONVENTIONAL_MEMORY
-> > > >                 && (md->attribute & EFI_MEMORY_SP);
-> > > > }
-> > > > #else
-> > > > static inline bool is_efi_application_reserved(efi_memory_desc_t *md)
-> > > > {
-> > > >         return false;
-> > > > }
-> > > > #endif
-> > >
-> > > I think this policy decision should not live inside the EFI subsystem.
-> > > EFI just gives you the memory map, and mangling that information
-> > > depending on whether you think a certain memory attribute should be
-> > > ignored is the job of the MM subsystem.
-> >
-> > The problem is that we don't have an mm subsystem at the time a
-> > decision needs to be made. The reservation policy needs to be deployed
-> > before even memblock has been initialized in order to keep kernel
-> > allocations out of the reservation. I agree with the sentiment I just
-> > don't see how to practically achieve an optional "System RAM" vs
-> > "Application Reserved" routing decision without an early (before
-> > e820__memblock_setup()) conditional branch.
->
-> I can at least move it out of include/linux/efi.h and move it to
-> arch/x86/include/asm/efi.h since it is an x86 specific policy decision
-> / implementation for now.
+From: Gen Zhang <blackgod016574@gmail.com>
 
-No, that doesn't make sense to me. If it must live in the EFI
-subsystem, I'd prefer it to be in the core code, not in x86 specific
-code, since there is nothing x86 specific about it.
+[ Upstream commit 4e78921ba4dd0aca1cc89168f45039add4183f8e ]
 
-Perhaps a efi=xxx command line option would be in order to influence
-the builtin default, but it can be a followup patch independent of
-this series.
+The old_memmap flow in efi_call_phys_prolog() performs numerous memory
+allocations, and either does not check for failure at all, or it does
+but fails to propagate it back to the caller, which may end up calling
+into the firmware with an incomplete 1:1 mapping.
+
+So let's fix this by returning NULL from efi_call_phys_prolog() on
+memory allocation failures only, and by handling this condition in the
+caller. Also, clean up any half baked sets of page tables that we may
+have created before returning with a NULL return value.
+
+Note that any failure at this level will trigger a panic() two levels
+up, so none of this makes a huge difference, but it is a nice cleanup
+nonetheless.
+
+[ardb: update commit log, add efi_call_phys_epilog() call on error path]
+
+Signed-off-by: Gen Zhang <blackgod016574@gmail.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Rob Bradford <robert.bradford@intel.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Link: http://lkml.kernel.org/r/20190525112559.7917-2-ard.biesheuvel@linaro.org
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ arch/x86/platform/efi/efi.c    | 2 ++
+ arch/x86/platform/efi/efi_64.c | 9 ++++++---
+ 2 files changed, 8 insertions(+), 3 deletions(-)
+
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 9061babfbc83..353019d4e6c9 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -86,6 +86,8 @@ static efi_status_t __init phys_efi_set_virtual_address_map(
+ 	pgd_t *save_pgd;
+ 
+ 	save_pgd = efi_call_phys_prolog();
++	if (!save_pgd)
++		return EFI_ABORTED;
+ 
+ 	/* Disable interrupts around EFI calls: */
+ 	local_irq_save(flags);
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index ee5d08f25ce4..dfc809b31c7c 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -84,13 +84,15 @@ pgd_t * __init efi_call_phys_prolog(void)
+ 
+ 	if (!efi_enabled(EFI_OLD_MEMMAP)) {
+ 		efi_switch_mm(&efi_mm);
+-		return NULL;
++		return efi_mm.pgd;
+ 	}
+ 
+ 	early_code_mapping_set_exec(1);
+ 
+ 	n_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT), PGDIR_SIZE);
+ 	save_pgd = kmalloc_array(n_pgds, sizeof(*save_pgd), GFP_KERNEL);
++	if (!save_pgd)
++		return NULL;
+ 
+ 	/*
+ 	 * Build 1:1 identity mapping for efi=old_map usage. Note that
+@@ -138,10 +140,11 @@ pgd_t * __init efi_call_phys_prolog(void)
+ 		pgd_offset_k(pgd * PGDIR_SIZE)->pgd &= ~_PAGE_NX;
+ 	}
+ 
+-out:
+ 	__flush_tlb_all();
+-
+ 	return save_pgd;
++out:
++	efi_call_phys_epilog(save_pgd);
++	return NULL;
+ }
+ 
+ void __init efi_call_phys_epilog(pgd_t *save_pgd)
+-- 
+2.20.1
+
