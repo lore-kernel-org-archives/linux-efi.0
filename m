@@ -7,57 +7,58 @@ X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,T_DKIMWL_WL_HIGH,UNPARSEABLE_RELAY
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1BDDBC4360E
-	for <linux-efi@archiver.kernel.org>; Tue, 11 Jun 2019 04:48:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A456C4321D
+	for <linux-efi@archiver.kernel.org>; Tue, 11 Jun 2019 04:48:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E3D1520820
-	for <linux-efi@archiver.kernel.org>; Tue, 11 Jun 2019 04:48:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3EA8D2086A
+	for <linux-efi@archiver.kernel.org>; Tue, 11 Jun 2019 04:48:32 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="ygS9UVyB"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="aajQA90v"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388934AbfFKEr5 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 11 Jun 2019 00:47:57 -0400
-Received: from aserp2130.oracle.com ([141.146.126.79]:44360 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2403815AbfFKEr4 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 11 Jun 2019 00:47:56 -0400
-Received: from pps.filterd (aserp2130.oracle.com [127.0.0.1])
-        by aserp2130.oracle.com (8.16.0.27/8.16.0.27) with SMTP id x5B4hvkn179926;
-        Tue, 11 Jun 2019 04:46:23 GMT
+        id S2403819AbfFKErw (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 11 Jun 2019 00:47:52 -0400
+Received: from userp2130.oracle.com ([156.151.31.86]:44470 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2403815AbfFKErw (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 11 Jun 2019 00:47:52 -0400
+Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
+        by userp2130.oracle.com (8.16.0.27/8.16.0.27) with SMTP id x5B4hb7L159153;
+        Tue, 11 Jun 2019 04:46:44 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=subject : from : to :
  cc : date : message-id : in-reply-to : references : mime-version :
  content-type : content-transfer-encoding; s=corp-2018-07-02;
- bh=3VbsaLgMKmnivyw2BABUNL3yVLlrUKnFsmwkVKP7/7Q=;
- b=ygS9UVyB8LyUAR7C1mNHPgi0PbSv7gBd3P6tWeLnsQcfs4hLgurKAu8u/njUDzM8jtZl
- vwft8Ixt1L69hPzvX7z0AOvbjg30Rm+6FJl+f7XNM9UPFWffippfEl73w1UntK28uwUO
- Fr2orJrX3KwsU2DI1zdH2KeSHJb84PM6VU23UBPkhgWNXotRA3T3er9eRujknfOhMugG
- nAK8v+cAc4CkT/t6pkRpKrVFJgpouXY14kWiyJczzBwEPMhnGyvQF4902QhWOGDRE3Jx
- XbBGcmgJv4/EAPD1RHtwu9roWvkuSaYyc0Aa5vqwgIaerbFx0TB0XyAtNQNve37DvQSC wQ== 
-Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
-        by aserp2130.oracle.com with ESMTP id 2t02hejrfu-1
+ bh=OE6FPPB5Pqi/Vl6YrpWW8Mgm59ZrawiJ1ASuvgj6hZQ=;
+ b=aajQA90vj37ND50UtdyHx5H16e4znrHfLUb+wBHywGqmqqRsIos1xOgFYLz7aYNs00s1
+ mkdEqPk+9iThLFFbd7m84IB9UbTbiJsER4EGmYV30XNlH6n40JvOmYi8cKj93Y3wOIWS
+ xXXEp1l5r1zAYgrHOMIuw78O9W4vf7dHoDzzlKM07X2NgjrlxKWaQ90Q6ZtGKszaDIiW
+ t6S8su+95if8Mv8oeTvn/HimNYzwaiJe7JgUnemVyARWuXBfLDIzU5Dpew2Ysp6JC1dM
+ Nh5hEvqL7jgmqANgt7EJvwjiQk/FOzixoiiL9QVfsDpehQuyb5PWlCJr/s6iVqc1Wuda mA== 
+Received: from aserp3030.oracle.com (aserp3030.oracle.com [141.146.126.71])
+        by userp2130.oracle.com with ESMTP id 2t04etjkw1-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Tue, 11 Jun 2019 04:46:23 +0000
-Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
-        by aserp3020.oracle.com (8.16.0.27/8.16.0.27) with SMTP id x5B4k8F6173710;
-        Tue, 11 Jun 2019 04:46:22 GMT
+        Tue, 11 Jun 2019 04:46:43 +0000
+Received: from pps.filterd (aserp3030.oracle.com [127.0.0.1])
+        by aserp3030.oracle.com (8.16.0.27/8.16.0.27) with SMTP id x5B4ipsN119991;
+        Tue, 11 Jun 2019 04:46:43 GMT
 Received: from pps.reinject (localhost [127.0.0.1])
-        by aserp3020.oracle.com with ESMTP id 2t0p9r34fg-1
+        by aserp3030.oracle.com with ESMTP id 2t04hy50d3-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Tue, 11 Jun 2019 04:46:22 +0000
-Received: from aserp3020.oracle.com (aserp3020.oracle.com [127.0.0.1])
-        by pps.reinject (8.16.0.27/8.16.0.27) with SMTP id x5B4kMi7174183;
-        Tue, 11 Jun 2019 04:46:22 GMT
-Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
-        by aserp3020.oracle.com with ESMTP id 2t0p9r34f8-1
+        Tue, 11 Jun 2019 04:46:43 +0000
+Received: from aserp3030.oracle.com (aserp3030.oracle.com [127.0.0.1])
+        by pps.reinject (8.16.0.27/8.16.0.27) with SMTP id x5B4kgVr123729;
+        Tue, 11 Jun 2019 04:46:42 GMT
+Received: from userv0122.oracle.com (userv0122.oracle.com [156.151.31.75])
+        by aserp3030.oracle.com with ESMTP id 2t04hy50d0-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Tue, 11 Jun 2019 04:46:22 +0000
-Received: from abhmp0010.oracle.com (abhmp0010.oracle.com [141.146.116.16])
-        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id x5B4kKHR023006;
-        Tue, 11 Jun 2019 04:46:20 GMT
+        Tue, 11 Jun 2019 04:46:42 +0000
+Received: from abhmp0009.oracle.com (abhmp0009.oracle.com [141.146.116.15])
+        by userv0122.oracle.com (8.14.4/8.14.4) with ESMTP id x5B4keoZ002792;
+        Tue, 11 Jun 2019 04:46:40 GMT
 Received: from localhost (/67.169.218.210)
         by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Mon, 10 Jun 2019 21:46:19 -0700
-Subject: [PATCH 1/6] mm/fs: don't allow writes to immutable files
+        with ESMTP ; Mon, 10 Jun 2019 21:46:40 -0700
+Subject: [PATCH 3/6] vfs: flush and wait for io when setting the immutable
+ flag via FSSETXATTR
 From:   "Darrick J. Wong" <darrick.wong@oracle.com>
 To:     matthew.garrett@nebula.com, yuchao0@huawei.com, tytso@mit.edu,
         darrick.wong@oracle.com, ard.biesheuvel@linaro.org,
@@ -71,8 +72,8 @@ Cc:     reiserfs-devel@vger.kernel.org, linux-efi@vger.kernel.org,
         linux-mtd@lists.infradead.org, ocfs2-devel@oss.oracle.com,
         linux-fsdevel@vger.kernel.org, linux-ext4@vger.kernel.org,
         linux-btrfs@vger.kernel.org
-Date:   Mon, 10 Jun 2019 21:46:17 -0700
-Message-ID: <156022837711.3227213.11787906519006016743.stgit@magnolia>
+Date:   Mon, 10 Jun 2019 21:46:33 -0700
+Message-ID: <156022839302.3227213.8773888198343223122.stgit@magnolia>
 In-Reply-To: <156022836912.3227213.13598042497272336695.stgit@magnolia>
 References: <156022836912.3227213.13598042497272336695.stgit@magnolia>
 User-Agent: StGit/0.17.1-dirty
@@ -81,8 +82,8 @@ Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9284 signatures=668687
 X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
- suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1015
- lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=307 adultscore=0
+ suspectscore=2 phishscore=0 bulkscore=0 spamscore=0 clxscore=1015
+ lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
  classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1810050000
  definitions=main-1906110033
 Sender: linux-efi-owner@vger.kernel.org
@@ -92,115 +93,171 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Darrick J. Wong <darrick.wong@oracle.com>
 
-The chattr manpage has this to say about immutable files:
-
-"A file with the 'i' attribute cannot be modified: it cannot be deleted
-or renamed, no link can be created to this file, most of the file's
-metadata can not be modified, and the file can not be opened in write
-mode."
-
-Once the flag is set, it is enforced for quite a few file operations,
-such as fallocate, fpunch, fzero, rm, touch, open, etc.  However, we
-don't check for immutability when doing a write(), a PROT_WRITE mmap(),
-a truncate(), or a write to a previously established mmap.
-
-If a program has an open write fd to a file that the administrator
-subsequently marks immutable, the program still can change the file
-contents.  Weird!
-
-The ability to write to an immutable file does not follow the manpage
-promise that immutable files cannot be modified.  Worse yet it's
-inconsistent with the behavior of other syscalls which don't allow
-modifications of immutable files.
-
-Therefore, add the necessary checks to make the write, mmap, and
-truncate behavior consistent with what the manpage says and consistent
-with other syscalls on filesystems which support IMMUTABLE.
+When we're using FS_IOC_FSSETXATTR to set the immutable flag on a file,
+we need to ensure that userspace can't continue to write the file after
+the file becomes immutable.  To make that happen, we have to flush all
+the dirty pagecache pages to disk to ensure that we can fail a page
+fault on a mmap'd region, wait for pending directio to complete, and
+hope the caller locked out any new writes by holding the inode lock.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- fs/attr.c    |   13 ++++++-------
- mm/filemap.c |    3 +++
- mm/memory.c  |    3 +++
- mm/mmap.c    |    8 ++++++--
- 4 files changed, 18 insertions(+), 9 deletions(-)
+ fs/btrfs/ioctl.c   |    3 +++
+ fs/ext4/ioctl.c    |    3 +++
+ fs/f2fs/file.c     |    3 +++
+ fs/xfs/xfs_ioctl.c |   39 +++++++++++++++++++++++++++++++++------
+ include/linux/fs.h |   23 +++++++++++++++++++++++
+ 5 files changed, 65 insertions(+), 6 deletions(-)
 
 
-diff --git a/fs/attr.c b/fs/attr.c
-index d22e8187477f..1fcfdcc5b367 100644
---- a/fs/attr.c
-+++ b/fs/attr.c
-@@ -233,19 +233,18 @@ int notify_change(struct dentry * dentry, struct iattr * attr, struct inode **de
+diff --git a/fs/btrfs/ioctl.c b/fs/btrfs/ioctl.c
+index f431813b2454..63a9281e6ce0 100644
+--- a/fs/btrfs/ioctl.c
++++ b/fs/btrfs/ioctl.c
+@@ -432,6 +432,9 @@ static int btrfs_ioctl_fssetxattr(struct file *file, void __user *arg)
  
- 	WARN_ON_ONCE(!inode_is_locked(inode));
+ 	__btrfs_ioctl_fsgetxattr(binode, &old_fa);
+ 	ret = vfs_ioc_fssetxattr_check(inode, &old_fa, &fa);
++	if (ret)
++		goto out_unlock;
++	ret = vfs_ioc_fssetxattr_flush_data(inode, &fa);
+ 	if (ret)
+ 		goto out_unlock;
  
--	if (ia_valid & (ATTR_MODE | ATTR_UID | ATTR_GID | ATTR_TIMES_SET)) {
--		if (IS_IMMUTABLE(inode) || IS_APPEND(inode))
--			return -EPERM;
--	}
-+	if (IS_IMMUTABLE(inode))
-+		return -EPERM;
+diff --git a/fs/ext4/ioctl.c b/fs/ext4/ioctl.c
+index a05341b94d98..6037585c1520 100644
+--- a/fs/ext4/ioctl.c
++++ b/fs/ext4/ioctl.c
+@@ -1115,6 +1115,9 @@ long ext4_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+ 		inode_lock(inode);
+ 		ext4_fsgetxattr(inode, &old_fa);
+ 		err = vfs_ioc_fssetxattr_check(inode, &old_fa, &fa);
++		if (err)
++			goto out;
++		err = vfs_ioc_fssetxattr_flush_data(inode, &fa);
+ 		if (err)
+ 			goto out;
+ 		flags = (ei->i_flags & ~EXT4_FL_XFLAG_VISIBLE) |
+diff --git a/fs/f2fs/file.c b/fs/f2fs/file.c
+index d3cf4bdb8738..97f4bb36540f 100644
+--- a/fs/f2fs/file.c
++++ b/fs/f2fs/file.c
+@@ -2832,6 +2832,9 @@ static int f2fs_ioc_fssetxattr(struct file *filp, unsigned long arg)
+ 
+ 	__f2fs_ioc_fsgetxattr(inode, &old_fa);
+ 	err = vfs_ioc_fssetxattr_check(inode, &old_fa, &fa);
++	if (err)
++		goto out;
++	err = vfs_ioc_fssetxattr_flush_data(inode, &fa);
+ 	if (err)
+ 		goto out;
+ 	flags = (fi->i_flags & ~F2FS_FL_XFLAG_VISIBLE) |
+diff --git a/fs/xfs/xfs_ioctl.c b/fs/xfs/xfs_ioctl.c
+index b494e7e881e3..88583b3e1e76 100644
+--- a/fs/xfs/xfs_ioctl.c
++++ b/fs/xfs/xfs_ioctl.c
+@@ -1014,6 +1014,28 @@ xfs_diflags_to_linux(
+ #endif
+ }
+ 
++/*
++ * Lock the inode against file io and page faults, then flush all dirty pages
++ * and wait for writeback and direct IO operations to finish.  Returns with
++ * the relevant inode lock flags set in @join_flags.  Caller is responsible for
++ * unlocking even on error return.
++ */
++static int
++xfs_ioctl_setattr_flush(
++	struct xfs_inode	*ip,
++	int			*join_flags)
++{
++	/* Already locked the inode from IO?  Assume we're done. */
++	if (((*join_flags) & (XFS_IOLOCK_EXCL | XFS_MMAPLOCK_EXCL)) ==
++			     (XFS_IOLOCK_EXCL | XFS_MMAPLOCK_EXCL))
++		return 0;
 +
-+	if ((ia_valid & (ATTR_MODE | ATTR_UID | ATTR_GID | ATTR_TIMES_SET)) &&
-+	    IS_APPEND(inode))
-+		return -EPERM;
- 
- 	/*
- 	 * If utimes(2) and friends are called with times == NULL (or both
- 	 * times are UTIME_NOW), then we need to check for write permission
- 	 */
- 	if (ia_valid & ATTR_TOUCH) {
--		if (IS_IMMUTABLE(inode))
--			return -EPERM;
--
- 		if (!inode_owner_or_capable(inode)) {
- 			error = inode_permission(inode, MAY_WRITE);
- 			if (error)
-diff --git a/mm/filemap.c b/mm/filemap.c
-index df2006ba0cfa..65433c7ab1d8 100644
---- a/mm/filemap.c
-+++ b/mm/filemap.c
-@@ -2940,6 +2940,9 @@ inline ssize_t generic_write_checks(struct kiocb *iocb, struct iov_iter *from)
- 	loff_t count;
- 	int ret;
- 
-+	if (IS_IMMUTABLE(inode))
-+		return -EPERM;
++	/* Lock and flush all mappings and IO in preparation for flag change */
++	*join_flags = XFS_IOLOCK_EXCL | XFS_MMAPLOCK_EXCL;
++	xfs_ilock(ip, *join_flags);
++	return inode_flush_data(VFS_I(ip));
++}
 +
- 	if (!iov_iter_count(from))
+ static int
+ xfs_ioctl_setattr_xflags(
+ 	struct xfs_trans	*tp,
+@@ -1099,23 +1121,22 @@ xfs_ioctl_setattr_dax_invalidate(
+ 	if (!(fa->fsx_xflags & FS_XFLAG_DAX) && !IS_DAX(inode))
  		return 0;
  
-diff --git a/mm/memory.c b/mm/memory.c
-index ddf20bd0c317..4311cfdade90 100644
---- a/mm/memory.c
-+++ b/mm/memory.c
-@@ -2235,6 +2235,9 @@ static vm_fault_t do_page_mkwrite(struct vm_fault *vmf)
+-	if (S_ISDIR(inode->i_mode))
++	if (!S_ISREG(inode->i_mode))
+ 		return 0;
  
- 	vmf->flags = FAULT_FLAG_WRITE|FAULT_FLAG_MKWRITE;
+-	/* lock, flush and invalidate mapping in preparation for flag change */
+-	xfs_ilock(ip, XFS_MMAPLOCK_EXCL | XFS_IOLOCK_EXCL);
+-	error = filemap_write_and_wait(inode->i_mapping);
++	error = xfs_ioctl_setattr_flush(ip, join_flags);
+ 	if (error)
+ 		goto out_unlock;
+ 	error = invalidate_inode_pages2(inode->i_mapping);
+ 	if (error)
+ 		goto out_unlock;
  
-+	if (vmf->vma->vm_file && IS_IMMUTABLE(file_inode(vmf->vma->vm_file)))
-+		return VM_FAULT_SIGBUS;
+-	*join_flags = XFS_MMAPLOCK_EXCL | XFS_IOLOCK_EXCL;
+ 	return 0;
+ 
+ out_unlock:
+-	xfs_iunlock(ip, XFS_MMAPLOCK_EXCL | XFS_IOLOCK_EXCL);
++	if (*join_flags)
++		xfs_iunlock(ip, *join_flags);
++	*join_flags = 0;
+ 	return error;
+ 
+ }
+@@ -1337,6 +1358,12 @@ xfs_ioctl_setattr(
+ 	if (code)
+ 		goto error_free_dquots;
+ 
++	if (!join_flags && vfs_ioc_fssetxattr_need_flush(VFS_I(ip), fa)) {
++		code = xfs_ioctl_setattr_flush(ip, &join_flags);
++		if (code)
++			goto error_free_dquots;
++	}
 +
- 	ret = vmf->vma->vm_ops->page_mkwrite(vmf);
- 	/* Restore original flags so that caller is not surprised */
- 	vmf->flags = old_flags;
-diff --git a/mm/mmap.c b/mm/mmap.c
-index 7e8c3e8ae75f..ac1e32205237 100644
---- a/mm/mmap.c
-+++ b/mm/mmap.c
-@@ -1483,8 +1483,12 @@ unsigned long do_mmap(struct file *file, unsigned long addr,
- 		case MAP_SHARED_VALIDATE:
- 			if (flags & ~flags_mask)
- 				return -EOPNOTSUPP;
--			if ((prot&PROT_WRITE) && !(file->f_mode&FMODE_WRITE))
--				return -EACCES;
-+			if (prot & PROT_WRITE) {
-+				if (!(file->f_mode & FMODE_WRITE))
-+					return -EACCES;
-+				if (IS_IMMUTABLE(file_inode(file)))
-+					return -EPERM;
-+			}
+ 	tp = xfs_ioctl_setattr_get_trans(ip, join_flags);
+ 	if (IS_ERR(tp)) {
+ 		code = PTR_ERR(tp);
+diff --git a/include/linux/fs.h b/include/linux/fs.h
+index 9c899c63957e..dae2b31cd32b 100644
+--- a/include/linux/fs.h
++++ b/include/linux/fs.h
+@@ -3584,5 +3584,28 @@ static inline int vfs_ioc_setflags_flush_data(struct inode *inode, int flags)
+ int vfs_ioc_fssetxattr_check(struct inode *inode, const struct fsxattr *old_fa,
+ 			     struct fsxattr *fa);
  
- 			/*
- 			 * Make sure we don't allow writing to an append-only
++/*
++ * Do we need to flush the file data before changing attributes?  When we're
++ * setting the immutable flag we must stop all directio writes and flush the
++ * dirty pages so that we can fail the page fault on the next write attempt.
++ */
++static inline bool vfs_ioc_fssetxattr_need_flush(struct inode *inode,
++						 struct fsxattr *fa)
++{
++	if (S_ISREG(inode->i_mode) && !IS_IMMUTABLE(inode) &&
++	    (fa->fsx_xflags & FS_XFLAG_IMMUTABLE))
++		return true;
++
++	return false;
++}
++
++/* Flush file data before changing attributes, if necessary. */
++static inline int vfs_ioc_fssetxattr_flush_data(struct inode *inode,
++						struct fsxattr *fa)
++{
++	if (vfs_ioc_fssetxattr_need_flush(inode, fa))
++		return inode_flush_data(inode);
++	return 0;
++}
+ 
+ #endif /* _LINUX_FS_H */
 
