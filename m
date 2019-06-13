@@ -2,49 +2,44 @@ Return-Path: <SRS0=agq7=UM=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_MUTT
+X-Spam-Status: No, score=-5.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_MUTT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 00502C31E45
-	for <linux-efi@archiver.kernel.org>; Thu, 13 Jun 2019 15:07:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 99B7BC31E49
+	for <linux-efi@archiver.kernel.org>; Thu, 13 Jun 2019 15:07:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id C6A7F2175B
-	for <linux-efi@archiver.kernel.org>; Thu, 13 Jun 2019 15:06:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7D69B20B7C
+	for <linux-efi@archiver.kernel.org>; Thu, 13 Jun 2019 15:07:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732656AbfFMPGy (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 13 Jun 2019 11:06:54 -0400
-Received: from mga07.intel.com ([134.134.136.100]:18070 "EHLO mga07.intel.com"
+        id S1732736AbfFMPHA (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 13 Jun 2019 11:07:00 -0400
+Received: from mga17.intel.com ([192.55.52.151]:44725 "EHLO mga17.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1732402AbfFMOGr (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Thu, 13 Jun 2019 10:06:47 -0400
-X-Amp-Result: UNSCANNABLE
+        id S1732394AbfFMOCG (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Thu, 13 Jun 2019 10:02:06 -0400
+X-Amp-Result: UNKNOWN
+X-Amp-Original-Verdict: FILE UNKNOWN
 X-Amp-File-Uploaded: False
 Received: from orsmga007.jf.intel.com ([10.7.209.58])
-  by orsmga105.jf.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 13 Jun 2019 07:06:46 -0700
+  by fmsmga107.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 13 Jun 2019 07:02:05 -0700
 X-ExtLoop1: 1
 Received: from bbouchn-mobl.ger.corp.intel.com (HELO localhost) ([10.252.35.22])
-  by orsmga007.jf.intel.com with ESMTP; 13 Jun 2019 07:06:44 -0700
-Date:   Thu, 13 Jun 2019 17:06:43 +0300
+  by orsmga007.jf.intel.com with ESMTP; 13 Jun 2019 07:02:02 -0700
+Date:   Thu, 13 Jun 2019 17:02:01 +0300
 From:   Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
-To:     Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc:     Matthew Garrett <matthewgarrett@google.com>,
-        linux-integrity <linux-integrity@vger.kernel.org>,
-        Peter =?iso-8859-1?Q?H=FCwe?= <peterhuewe@gmx.de>,
-        Jason Gunthorpe <jgg@ziepe.ca>,
-        linux-efi <linux-efi@vger.kernel.org>,
-        Matthew Garrett <mjg59@google.com>,
-        Joe Richey <joerichey@google.com>
-Subject: Re: [PATCH V2 2/2] tpm: Don't duplicate events from the final event
- log in the TCG2 log
-Message-ID: <20190613140643.GE12791@linux.intel.com>
+To:     Matthew Garrett <matthewgarrett@google.com>
+Cc:     linux-integrity@vger.kernel.org, peterhuewe@gmx.de, jgg@ziepe.ca,
+        linux-efi@vger.kernel.org, ard.biesheuvel@linaro.org,
+        Matthew Garrett <mjg59@google.com>
+Subject: Re: [PATCH V2 1/2] Abstract out support for locating an EFI config
+ table
+Message-ID: <20190613140201.GC12791@linux.intel.com>
 References: <20190607205147.102904-1-matthewgarrett@google.com>
- <20190607205147.102904-2-matthewgarrett@google.com>
- <CAKv+Gu-Vz8OSspw9RdEnVj3e7GFaNdA9PVVMWY2RKkEDfAbuRA@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAKv+Gu-Vz8OSspw9RdEnVj3e7GFaNdA9PVVMWY2RKkEDfAbuRA@mail.gmail.com>
+In-Reply-To: <20190607205147.102904-1-matthewgarrett@google.com>
 Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
 User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-efi-owner@vger.kernel.org
@@ -52,11 +47,12 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Fri, Jun 07, 2019 at 11:11:21PM +0200, Ard Biesheuvel wrote:
-> Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+On Fri, Jun 07, 2019 at 01:51:46PM -0700, Matthew Garrett wrote:
+> We want to grab a pointer to the TPM final events table, so abstract out
+> the existing code for finding an FDT table and make it generic.
+> 
+> Signed-off-by: Matthew Garrett <mjg59@google.com>
 
-Ard, is it cool if I include these to my next TPM PR along with the
-other Matthew's changes? Just sanity checking given that crossing
-subsystems...
+Reviewed-by: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
 
 /Jarkko
