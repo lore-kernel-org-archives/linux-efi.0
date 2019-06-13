@@ -2,190 +2,143 @@ Return-Path: <SRS0=agq7=UM=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AAB9DC31E4A
-	for <linux-efi@archiver.kernel.org>; Thu, 13 Jun 2019 17:02:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E1943C31E45
+	for <linux-efi@archiver.kernel.org>; Thu, 13 Jun 2019 20:50:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 832D22063F
-	for <linux-efi@archiver.kernel.org>; Thu, 13 Jun 2019 17:02:34 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=axtens.net header.i=@axtens.net header.b="kMu+BVJa"
+	by mail.kernel.org (Postfix) with ESMTP id B62FF21537
+	for <linux-efi@archiver.kernel.org>; Thu, 13 Jun 2019 20:50:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729515AbfFMRCd (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 13 Jun 2019 13:02:33 -0400
-Received: from mail-pf1-f194.google.com ([209.85.210.194]:46501 "EHLO
-        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729502AbfFLXEd (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 12 Jun 2019 19:04:33 -0400
-Received: by mail-pf1-f194.google.com with SMTP id 81so10515909pfy.13
-        for <linux-efi@vger.kernel.org>; Wed, 12 Jun 2019 16:04:32 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=axtens.net; s=google;
-        h=from:to:cc:subject:in-reply-to:references:date:message-id
-         :mime-version;
-        bh=0sXEuoXXfB+58oAqB27nyxVJnIR0qxmqN3amvLO4MUI=;
-        b=kMu+BVJa981hAatIgUu4yrYi7Q8PVRZO3FdVXL/KM/vtg9zSDoY6QaoYVsgwARCtsB
-         8wMNnJZZEbmSLCmDQCZCYinzc3oFyRXDR4yjqyajTfxcaq5mYNvy6US7H9FOyI1ujcE6
-         mkifXT6gFQ7lLMNCAiWTrrsyS6n/+tpWDLK+4=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:in-reply-to:references:date
-         :message-id:mime-version;
-        bh=0sXEuoXXfB+58oAqB27nyxVJnIR0qxmqN3amvLO4MUI=;
-        b=bHicq/AebTNU3CtQ+VrOVCxduTMWnzoAkNORZW0asCnwjWuC5a8622xKypEarKjoQZ
-         Tt+pewqzAKmdwhYDEmlzHkvpEMk5m6e3YTTTUIhukfY4HXmXbN6u3KgqmRhSInGF8QQx
-         F7/9lBBoAlSaTwLUtg1rmBX5ZbDiZNrw9fSIpavsNhoyFO/W7gmyBooMxbf9iFCzN63L
-         Jg3kWoYqkrlEA1fhj1tgZdhei2GhdrXJbH/15poSJkwJNTZ8KnkAo0HAO9X1AakjBvTs
-         3YRAdY06jo6c+QPvhagDLEQlBzqA+/wP5a9h6aItT/BMLcEE9zflXHgoDy2M7QEG+xKt
-         1fGQ==
-X-Gm-Message-State: APjAAAWVvCiLRiwKN71MBPT7CPsk1m9N/F0j4RL80mAlFD4zCid6MmhZ
-        KynvLVduQvPYRKoED8TinnKXQIuAwOU=
-X-Google-Smtp-Source: APXvYqx+XWoFTjG9dZbuolj86wqQOT4Iqef0H+9nNIH/wMPWesoTcaGtVUCDotl0QJH7LYE+KensLw==
-X-Received: by 2002:a63:ee0a:: with SMTP id e10mr26896771pgi.28.1560380672280;
-        Wed, 12 Jun 2019 16:04:32 -0700 (PDT)
-Received: from localhost (ppp167-251-205.static.internode.on.net. [59.167.251.205])
-        by smtp.gmail.com with ESMTPSA id g9sm463989pgs.78.2019.06.12.16.04.29
-        (version=TLS1_3 cipher=AEAD-AES256-GCM-SHA384 bits=256/256);
-        Wed, 12 Jun 2019 16:04:31 -0700 (PDT)
-From:   Daniel Axtens <dja@axtens.net>
-To:     Nayna <nayna@linux.vnet.ibm.com>, Nayna Jain <nayna@linux.ibm.com>,
-        linuxppc-dev@ozlabs.org, linux-efi@vger.kernel.org,
-        linux-integrity@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc:     Michael Ellerman <mpe@ellerman.id.au>,
+        id S1727508AbfFMUun (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 13 Jun 2019 16:50:43 -0400
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:35436 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1725747AbfFMUun (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 13 Jun 2019 16:50:43 -0400
+Received: from pps.filterd (m0098409.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.27/8.16.0.27) with SMTP id x5DKkomT138026
+        for <linux-efi@vger.kernel.org>; Thu, 13 Jun 2019 16:50:42 -0400
+Received: from e06smtp07.uk.ibm.com (e06smtp07.uk.ibm.com [195.75.94.103])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 2t3v5gm66e-1
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
+        for <linux-efi@vger.kernel.org>; Thu, 13 Jun 2019 16:50:41 -0400
+Received: from localhost
+        by e06smtp07.uk.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        for <linux-efi@vger.kernel.org> from <nayna@linux.ibm.com>;
+        Thu, 13 Jun 2019 21:50:39 +0100
+Received: from b06avi18626390.portsmouth.uk.ibm.com (9.149.26.192)
+        by e06smtp07.uk.ibm.com (192.168.101.137) with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted;
+        (version=TLSv1/SSLv3 cipher=AES256-GCM-SHA384 bits=256/256)
+        Thu, 13 Jun 2019 21:50:34 +0100
+Received: from d06av21.portsmouth.uk.ibm.com (d06av21.portsmouth.uk.ibm.com [9.149.105.232])
+        by b06avi18626390.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id x5DKoPUi28442968
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Thu, 13 Jun 2019 20:50:25 GMT
+Received: from d06av21.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id C52C552050;
+        Thu, 13 Jun 2019 20:50:32 +0000 (GMT)
+Received: from swastik.ibm.com (unknown [9.85.207.125])
+        by d06av21.portsmouth.uk.ibm.com (Postfix) with ESMTP id B23F752051;
+        Thu, 13 Jun 2019 20:50:29 +0000 (GMT)
+From:   Nayna Jain <nayna@linux.ibm.com>
+To:     linuxppc-dev@ozlabs.org, linux-efi@vger.kernel.org
+Cc:     linux-kernel@vger.kernel.org, linux-integrity@vger.kernel.org,
+        Michael Ellerman <mpe@ellerman.id.au>,
         Paul Mackerras <paulus@samba.org>,
         Benjamin Herrenschmidt <benh@kernel.crashing.org>,
         Ard Biesheuvel <ard.biesheuvel@linaro.org>,
         Jeremy Kerr <jk@ozlabs.org>,
         Matthew Garret <matthew.garret@nebula.com>,
         Mimi Zohar <zohar@linux.ibm.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         Claudio Carvalho <cclaudio@linux.ibm.com>,
-        Eric Richter <erichte@linux.ibm.com>
-Subject: Re: [PATCH v3 1/3] powerpc/powernv: Add OPAL API interface to get secureboot state
-In-Reply-To: <eaa37bd0-a77d-d70a-feb5-c0e73ce231bf@linux.vnet.ibm.com>
-References: <1560198837-18857-1-git-send-email-nayna@linux.ibm.com> <1560198837-18857-2-git-send-email-nayna@linux.ibm.com> <87ftofpbth.fsf@dja-thinkpad.axtens.net> <eaa37bd0-a77d-d70a-feb5-c0e73ce231bf@linux.vnet.ibm.com>
-Date:   Thu, 13 Jun 2019 09:04:26 +1000
-Message-ID: <87d0jipfr9.fsf@dja-thinkpad.axtens.net>
-MIME-Version: 1.0
-Content-Type: text/plain
+        Nayna Jain <nayna@linux.ibm.com>,
+        George Wilson <gcwilson@linux.ibm.com>,
+        Elaine Palmer <erpalmer@us.ibm.com>,
+        Eric Ricther <erichte@linux.ibm.com>
+Subject: [PATCH 0/2] powerpc/powernv: expose secure variables to userspace 
+Date:   Thu, 13 Jun 2019 16:50:25 -0400
+X-Mailer: git-send-email 1.8.3.1
+X-TM-AS-GCONF: 00
+x-cbid: 19061320-0028-0000-0000-0000037A1891
+X-IBM-AV-DETECTION: SAVI=unused REMOTE=unused XFE=unused
+x-cbparentid: 19061320-0029-0000-0000-0000243A12FA
+Message-Id: <1560459027-5248-1-git-send-email-nayna@linux.ibm.com>
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:,, definitions=2019-06-13_12:,,
+ signatures=0
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
+ malwarescore=0 suspectscore=0 phishscore=0 bulkscore=0 spamscore=0
+ clxscore=1015 lowpriorityscore=0 mlxscore=0 impostorscore=0
+ mlxlogscore=999 adultscore=0 classifier=spam adjust=0 reason=mlx
+ scancount=1 engine=8.0.1-1810050000 definitions=main-1906130156
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Hi Nayna,
+This patch set is part of a series that implements secure boot on PowerNV
+systems[1]. The original series had been split into two patchsets:
+1. powerpc: enable ima arch specific policies[2]
+2. powerpc/powernv: expose secure variables to userspace, which is this
+patchset.
 
->>> Since OPAL can support different types of backend which can vary in the
->>> variable interpretation, a new OPAL API call named OPAL_SECVAR_BACKEND, is
->>> added to retrieve the supported backend version. This helps the consumer
->>> to know how to interpret the variable.
->>>
->> (Firstly, apologies that I haven't got around to asking about this yet!)
->>
->> Are pluggable/versioned backend a good idea?
->>
->> There are a few things that worry me about the idea:
->>
->>   - It adds complexity in crypto (or crypto-adjacent) code, and that
->>     increases the likelihood that we'll accidentally add a bug with bad
->>     consequences.
->
-> Sorry, I think I am not clear on what exactly you mean here.Can you 
-> please elaborate or give specifics ?
+Since there are major changes in this patchset compared to the previous
+one[1], I am posting it as new series rather than v2.
 
-Cryptosystems with greater flexibility can have new kinds of
-vulnerabilities arise from the greater complexity. The first sort of
-thing that comes to mind is a downgrade attack like from TLS. I think
-you're protected from this because the mode cannot be negotiatied at run
-time, but in general it's security sensitive code so I'd like it to be
-as simple as possible.
+As part of PowerNV secure boot support, NV OS verification keys are stored
+and controlled by OPAL as secure variables. However, to allow users to
+manage these keys, the secure variables need to be exposed to userspace.
 
->>   - If we are worried about a long-term-future change to how secure-boot
->>     works, would it be better to just add more get/set calls to opal at
->>     the point at which we actually implement the new system?
->
-> The intention is to avoid to re-implement the key/value interface for 
-> each scheme. Do you mean to deprecate the old APIs and add new APIs with 
-> every scheme ?
+OPAL provides the runtime services for the kernel to be able to access the
+secure variables[3]. This patchset defines the kernel interface for the
+OPAL APIs. These APIs are used by the hooks, which expose these variables
+to userspace for reading/writing.
 
-Yes, because I expect the scheme would change very, very rarely.
+In order to reuse the existing tools, we currently use the efi hooks to
+expose the secure variables via sysfs. Keeping the usability and
+maintainability in mind, we are starting with this scheme as simple sysfs
+implementation. We expect to refine it over time as we incorporate the
+feedback.
 
->>   - Under what circumstances would would we change the kernel-visible
->>     behaviour of skiboot? Are we expecting to change the behaviour,
->>     content or names of the variables in future? Otherwise the only
->>     relevant change I can think of is a change to hardware platforms, and
->>     I'm not sure how a change in hardware would lead to change in
->>     behaviour in the kernel. Wouldn't Skiboot hide h/w differences?
->
-> Backends are intended to be an agreement for firmware, kernel and 
-> userspace on what the format of variables are, what variables should be 
-> expected, how they should be signed, etc. Though we don't expect it to 
-> happen very often, we want to anticipate possible changes in the 
-> firmware which may affect the kernel such as new features, support of 
-> new authentication mechanisms, addition of new variables. Corresponding 
-> skiboot patches are on - 
-> https://lists.ozlabs.org/pipermail/skiboot/2019-June/014641.html
+The patchset makes substantial reuse of drivers/firmware/efi/efivars.c and
+drivers/firmware/efi/vars.c, however because POWER platforms do not use
+EFI, a new config, POWER_SECVAR_SYSFS, is defined to enable this sysfs
+interface in POWER.
 
-I still feel like this is holding onto ongoing complexity for very
-little gain, but perhaps this is because I can't picture a specific
-change that would actually require a wholesale change to the scheme.
+This patchset has a pre-requisiste of other OPAL APIs which are posted as
+part of ima arch specific patches[2].
 
-You mention new features, support for new authentication mechanisms, and
-addition of new variables.
+[1]https://patchwork.kernel.org/cover/10882149/  
+[2]https://lkml.org/lkml/2019/6/11/868
+[3]https://patchwork.ozlabs.org/project/skiboot/list/?series=112868 
 
- - New features is a bit too generic to answer specifically. In general
-   I accept that there exists some new feature that would be
-   sufficiently backwards-incompatible as to require a new version. I
-   just can't think of one off the top of my head and so I'm not
-   convinced it's worth the complexity. Did you have something in mind?
+Claudio Carvalho (1):
+  powerpc/powernv: add OPAL APIs for secure variables
 
- - By support for new authentication mechanisms, I assume you mean new
-   mechanisms for authenticating variable updates? This is communicated
-   in edk2 via the attributes field. Looking at patch 5 from the skiboot
-   series:
+Nayna Jain (1):
+  powerpc: expose secure variables via sysfs
 
-+ * When the attribute EFI_VARIABLE_TIME_BASED_AUTHENTICATED_WRITE_ACCESS is set,
-+ * then the Data buffer shall begin with an instance of a complete (and
-+ * serialized) EFI_VARIABLE_AUTHENTICATION_2 descriptor.
+ arch/powerpc/Kconfig                         |   2 +
+ arch/powerpc/include/asm/opal-api.h          |   3 +
+ arch/powerpc/include/asm/opal-secvar.h       |   9 +
+ arch/powerpc/include/asm/opal.h              |   8 +
+ arch/powerpc/platforms/powernv/opal-call.c   |   3 +
+ arch/powerpc/platforms/powernv/opal-secvar.c |  60 +++-
+ drivers/firmware/Makefile                    |   1 +
+ drivers/firmware/efi/efivars.c               |   2 +-
+ drivers/firmware/powerpc/Kconfig             |  12 +
+ drivers/firmware/powerpc/Makefile            |   3 +
+ drivers/firmware/powerpc/efi_error.c         |  46 +++
+ drivers/firmware/powerpc/secvar.c            | 326 +++++++++++++++++++
+ 12 files changed, 473 insertions(+), 2 deletions(-)
+ create mode 100644 drivers/firmware/powerpc/Kconfig
+ create mode 100644 drivers/firmware/powerpc/Makefile
+ create mode 100644 drivers/firmware/powerpc/efi_error.c
+ create mode 100644 drivers/firmware/powerpc/secvar.c
 
-   Could a new authentication scheme be communicated by setting a
-   different attribute value? Or are we not carrying attributes in the
-   metadata blob?
-
- - For addition of new variables, I'm confused as to why this would
-   require a new API - wouldn't it just be exposed in the normal way via
-   opal_secvar_get(_next)?
-
-I guess I also somewhat object to calling it a 'backend' if we're using
-it as a version scheme. I think the skiboot storage backends are true
-backends - they provide different implementations of the same
-functionality with the same API, but this seems like you're using it to
-indicate different functionality. It seems like we're using it as if it
-were called OPAL_SECVAR_VERSION.
-
->>   - What is the correct fallback behaviour if a kernel receives a result
->>     that it does not expect? If a kernel expecting BackendV1 is instead
->>     informed that it is running on BackendV2, then the cannot access the
->>     secure variable at all, so it cannot load keys that are potentially
->>     required to successfully boot (e.g. to validate the module for
->>     network card or graphics!)
->
-> The backend is declaredby the firmware, and is set at compile-time. The 
-> kernel queriesfirmware on whichbackend is in use, and the backend will 
-> not change at runtime.If the backend in use by the firmware is not 
-> supported by the kernel (e.g. kernel is too old), the kernel does not 
-> attempt to read any secure variables, as it won't understand what the 
-> format is. This is a secure boot failure condition, as we cannot verify 
-> the next kernel. With addition of new backends in the skiboot, the 
-> support will be added to the kernel. Note: skiboot and skiroot should 
-> always be in sync with backend support.
-
-Seems reasonable. I'm thinking specifically about the kernel loaded
-after skiroot; and yes, on reflection just failing to boot is the only
-sensible thing you can do.
-
-Regards,
-Daniel
+-- 
+2.20.1
 
