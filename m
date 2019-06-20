@@ -2,123 +2,86 @@ Return-Path: <SRS0=q2Ny=UT=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_MUTT autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-10.2 required=3.0
+	tests=HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_MUTT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0A27FC43613
-	for <linux-efi@archiver.kernel.org>; Thu, 20 Jun 2019 14:03:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D966CC43613
+	for <linux-efi@archiver.kernel.org>; Thu, 20 Jun 2019 21:37:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id D65622084A
-	for <linux-efi@archiver.kernel.org>; Thu, 20 Jun 2019 14:03:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B59872084A
+	for <linux-efi@archiver.kernel.org>; Thu, 20 Jun 2019 21:37:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726796AbfFTODs (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 20 Jun 2019 10:03:48 -0400
-Received: from mx2.suse.de ([195.135.220.15]:49182 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726551AbfFTODs (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Thu, 20 Jun 2019 10:03:48 -0400
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.220.254])
-        by mx1.suse.de (Postfix) with ESMTP id 05638AF85;
-        Thu, 20 Jun 2019 14:03:46 +0000 (UTC)
-Received: by quack2.suse.cz (Postfix, from userid 1000)
-        id A12B31E434F; Thu, 20 Jun 2019 16:03:45 +0200 (CEST)
-Date:   Thu, 20 Jun 2019 16:03:45 +0200
-From:   Jan Kara <jack@suse.cz>
-To:     "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc:     matthew.garrett@nebula.com, yuchao0@huawei.com, tytso@mit.edu,
-        ard.biesheuvel@linaro.org, josef@toxicpanda.com, clm@fb.com,
-        adilger.kernel@dilger.ca, viro@zeniv.linux.org.uk, jack@suse.com,
-        dsterba@suse.com, jaegeuk@kernel.org, jk@ozlabs.org,
-        reiserfs-devel@vger.kernel.org, linux-efi@vger.kernel.org,
-        devel@lists.orangefs.org, linux-kernel@vger.kernel.org,
-        linux-f2fs-devel@lists.sourceforge.net, linux-xfs@vger.kernel.org,
-        linux-mm@kvack.org, linux-nilfs@vger.kernel.org,
-        linux-mtd@lists.infradead.org, ocfs2-devel@oss.oracle.com,
-        linux-fsdevel@vger.kernel.org, linux-ext4@vger.kernel.org,
-        linux-btrfs@vger.kernel.org
-Subject: Re: [PATCH 4/6] vfs: don't allow most setxattr to immutable files
-Message-ID: <20190620140345.GI30243@quack2.suse.cz>
-References: <156022836912.3227213.13598042497272336695.stgit@magnolia>
- <156022840560.3227213.4776913678782966728.stgit@magnolia>
+        id S1726067AbfFTVhx (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 20 Jun 2019 17:37:53 -0400
+Received: from mga18.intel.com ([134.134.136.126]:34601 "EHLO mga18.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725815AbfFTVhx (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Thu, 20 Jun 2019 17:37:53 -0400
+X-Amp-Result: UNKNOWN
+X-Amp-Original-Verdict: FILE UNKNOWN
+X-Amp-File-Uploaded: False
+Received: from fmsmga007.fm.intel.com ([10.253.24.52])
+  by orsmga106.jf.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 20 Jun 2019 14:37:52 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.63,398,1557212400"; 
+   d="scan'208";a="162491010"
+Received: from mudigirx-mobl1.gar.corp.intel.com (HELO localhost) ([10.252.61.12])
+  by fmsmga007.fm.intel.com with ESMTP; 20 Jun 2019 14:37:48 -0700
+Date:   Fri, 21 Jun 2019 00:37:46 +0300
+From:   Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
+To:     Matthew Garrett <mjg59@google.com>
+Cc:     Ard Biesheuvel <ard.biesheuvel@linaro.org>,
+        Hariprasad Kelam <hariprasad.kelam@gmail.com>,
+        tpmdd-devel@lists.sourceforge.net,
+        linux-efi <linux-efi@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Subject: Re: [PATCH] drivers: firmware: efi: fix gcc warning -Wint-conversion
+Message-ID: <20190620213722.GA17841@linux.intel.com>
+References: <20190615040210.GA9112@hari-Inspiron-1545>
+ <CAKv+Gu9-wiJNxPsVn06dBSU8Gchg8LjV=mi0cThZUWywmt2xzQ@mail.gmail.com>
+ <CACdnJuudmE-MNuO7z87Mm65VaXbRzhOrBEpU5F=yC67uSLytGQ@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <156022840560.3227213.4776913678782966728.stgit@magnolia>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CACdnJuudmE-MNuO7z87Mm65VaXbRzhOrBEpU5F=yC67uSLytGQ@mail.gmail.com>
+Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
 User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Mon 10-06-19 21:46:45, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
+On Wed, Jun 19, 2019 at 03:48:23PM -0700, Matthew Garrett wrote:
+> On Wed, Jun 19, 2019 at 2:55 AM Ard Biesheuvel
+> <ard.biesheuvel@linaro.org> wrote:
+> >
+> > (+ Jarkko, tpmdd, Matthew)
+> >
+> > On Sat, 15 Jun 2019 at 06:02, Hariprasad Kelam
+> > <hariprasad.kelam@gmail.com> wrote:
+> > >
+> > > This patch fixes below warning
+> > >
+> > > drivers/firmware/efi/tpm.c:78:38: warning: passing argument 1 of
+> > > ‘tpm2_calc_event_log_size’ makes pointer from integer without a cast
+> > > [-Wint-conversion]
+> > >
+> > > Signed-off-by: Hariprasad Kelam <hariprasad.kelam@gmail.com>
+> >
+> > I think we already have a fix queued for this, no?
 > 
-> The chattr manpage has this to say about immutable files:
-> 
-> "A file with the 'i' attribute cannot be modified: it cannot be deleted
-> or renamed, no link can be created to this file, most of the file's
-> metadata can not be modified, and the file can not be opened in write
-> mode."
-> 
-> However, we don't actually check the immutable flag in the setattr code,
-> which means that we can update inode flags and project ids and extent
-> size hints on supposedly immutable files.  Therefore, reject setflags
-> and fssetxattr calls on an immutable file if the file is immutable and
-> will remain that way.
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
->  fs/inode.c |   31 +++++++++++++++++++++++++++++++
->  1 file changed, 31 insertions(+)
-> 
-> 
-> diff --git a/fs/inode.c b/fs/inode.c
-> index a3757051fd55..adfb458bf533 100644
-> --- a/fs/inode.c
-> +++ b/fs/inode.c
-> @@ -2184,6 +2184,17 @@ int vfs_ioc_setflags_check(struct inode *inode, int oldflags, int flags)
->  	    !capable(CAP_LINUX_IMMUTABLE))
->  		return -EPERM;
->  
-> +	/*
-> +	 * We aren't allowed to change any other flags if the immutable flag is
-> +	 * already set and is not being unset.
-> +	 */
-> +	if ((oldflags & FS_IMMUTABLE_FL) &&
-> +	    (flags & FS_IMMUTABLE_FL)) {
-> +		if ((oldflags & ~FS_IMMUTABLE_FL) !=
-> +		    (flags & ~FS_IMMUTABLE_FL))
+> It looks like I fixed this in "Don't duplicate events from the final
+> event log in the TCG2 log" rather than a separate patch - I'm fine
+> merging this, based on Jarkko's preferences.
 
-This check looks a bit strange when you've just check FS_IMMUTABLE_FL isn't
-changing... Why not just oldflags != flags?
+Right! OK, I squashed just the fix to the earlier patch. Master and
+next are updated. Can you take a peek of [1] and see if it looks
+legit given all the fuzz around these changes? Then I'm confident
+enough to do the 5.3 PR.
 
-> +	if ((old_fa->fsx_xflags & FS_XFLAG_IMMUTABLE) &&
-> +	    (fa->fsx_xflags & FS_XFLAG_IMMUTABLE)) {
-> +		if ((old_fa->fsx_xflags & ~FS_XFLAG_IMMUTABLE) !=
-> +		    (fa->fsx_xflags & ~FS_XFLAG_IMMUTABLE))
+[1] git://git.infradead.org/users/jjs/linux-tpmdd.git
 
-Ditto here...
-
-> +			return -EPERM;
-> +		if (old_fa->fsx_projid != fa->fsx_projid)
-> +			return -EPERM;
-> +		if ((fa->fsx_xflags & (FS_XFLAG_EXTSIZE |
-> +				       FS_XFLAG_EXTSZINHERIT)) &&
-> +		    old_fa->fsx_extsize != fa->fsx_extsize)
-> +			return -EPERM;
-> +		if ((old_fa->fsx_xflags & FS_XFLAG_COWEXTSIZE) &&
-> +		    old_fa->fsx_cowextsize != fa->fsx_cowextsize)
-> +			return -EPERM;
-> +	}
-> +
->  	/* Extent size hints of zero turn off the flags. */
->  	if (fa->fsx_extsize == 0)
->  		fa->fsx_xflags &= ~(FS_XFLAG_EXTSIZE | FS_XFLAG_EXTSZINHERIT);
-
-								Honza
--- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+/Jarkko
