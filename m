@@ -1,172 +1,113 @@
-Return-Path: <SRS0=QSM1=UU=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=CtL2=UV=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+X-Spam-Status: No, score=-16.4 required=3.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT,USER_IN_DEF_DKIM_WL autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1AA70C48BE3
-	for <linux-efi@archiver.kernel.org>; Fri, 21 Jun 2019 23:59:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2CE25C43613
+	for <linux-efi@archiver.kernel.org>; Sat, 22 Jun 2019 00:05:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E36C4206B6
-	for <linux-efi@archiver.kernel.org>; Fri, 21 Jun 2019 23:59:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EB02120881
+	for <linux-efi@archiver.kernel.org>; Sat, 22 Jun 2019 00:05:14 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="3Y+kdV0F"
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="AlJqBCOH"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726372AbfFUX7F (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 21 Jun 2019 19:59:05 -0400
-Received: from userp2120.oracle.com ([156.151.31.85]:37216 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726066AbfFUX7E (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 21 Jun 2019 19:59:04 -0400
-Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
-        by userp2120.oracle.com (8.16.0.27/8.16.0.27) with SMTP id x5LNsBti058928;
-        Fri, 21 Jun 2019 23:57:35 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=subject : from : to :
- cc : date : message-id : in-reply-to : references : mime-version :
- content-type : content-transfer-encoding; s=corp-2018-07-02;
- bh=GoNZ4aRxdLiu9VXKzoYqQXkZ8KvvgodmwFDB7EyF+mY=;
- b=3Y+kdV0FiS+tW5au38wMNPWuEC6sxrct9Yc3CK79Ps2gZr3sIwaz7QELL0qPbY+1qF0J
- lIgZ3Rgp/6bzk8/RdtUIyrGMt6hJJUyiio72dubmoyXK970/MtSrct7KLItSYck8385+
- gKeU/c7adOZBK3y2sgrIhX1NQ2QUEREBJcpWjYVK3mpxNTKe+RrqHXtk3j2LQpRyu9ev
- J5Mq7oRWE8vTr2OVMFaXnwNKLinN0hH9bh7T21sbTPqWk7ma1VEZDWKSBR6072dcrO+W
- iKut11/kS8KO+ACrX7Sf61/83yFgeGnY7W/5dTFnHodoCvrlli7/kfhPMyPix5QSOhrZ Bw== 
-Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
-        by userp2120.oracle.com with ESMTP id 2t7809rqvg-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Fri, 21 Jun 2019 23:57:35 +0000
-Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
-        by userp3030.oracle.com (8.16.0.27/8.16.0.27) with SMTP id x5LNu8OR042309;
-        Fri, 21 Jun 2019 23:57:35 GMT
-Received: from pps.reinject (localhost [127.0.0.1])
-        by userp3030.oracle.com with ESMTP id 2t77ypeshd-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Fri, 21 Jun 2019 23:57:35 +0000
-Received: from userp3030.oracle.com (userp3030.oracle.com [127.0.0.1])
-        by pps.reinject (8.16.0.27/8.16.0.27) with SMTP id x5LNvYK4044889;
-        Fri, 21 Jun 2019 23:57:34 GMT
-Received: from aserv0121.oracle.com (aserv0121.oracle.com [141.146.126.235])
-        by userp3030.oracle.com with ESMTP id 2t77ypesh2-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Fri, 21 Jun 2019 23:57:34 +0000
-Received: from abhmp0004.oracle.com (abhmp0004.oracle.com [141.146.116.10])
-        by aserv0121.oracle.com (8.14.4/8.13.8) with ESMTP id x5LNvXDf031731;
-        Fri, 21 Jun 2019 23:57:33 GMT
-Received: from localhost (/10.159.131.214)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Fri, 21 Jun 2019 16:57:33 -0700
-Subject: [PATCH 5/7] xfs: refactor setflags to use setattr code directly
-From:   "Darrick J. Wong" <darrick.wong@oracle.com>
-To:     matthew.garrett@nebula.com, yuchao0@huawei.com, tytso@mit.edu,
-        darrick.wong@oracle.com, ard.biesheuvel@linaro.org,
-        josef@toxicpanda.com, clm@fb.com, adilger.kernel@dilger.ca,
-        viro@zeniv.linux.org.uk, jack@suse.com, dsterba@suse.com,
-        jaegeuk@kernel.org, jk@ozlabs.org
-Cc:     reiserfs-devel@vger.kernel.org, linux-efi@vger.kernel.org,
-        devel@lists.orangefs.org, linux-kernel@vger.kernel.org,
-        linux-f2fs-devel@lists.sourceforge.net, linux-xfs@vger.kernel.org,
-        linux-mm@kvack.org, linux-nilfs@vger.kernel.org,
-        linux-mtd@lists.infradead.org, ocfs2-devel@oss.oracle.com,
-        linux-fsdevel@vger.kernel.org, linux-ext4@vger.kernel.org,
-        linux-btrfs@vger.kernel.org
-Date:   Fri, 21 Jun 2019 16:57:30 -0700
-Message-ID: <156116145090.1664939.13744166286109265130.stgit@magnolia>
-In-Reply-To: <156116141046.1664939.11424021489724835645.stgit@magnolia>
-References: <156116141046.1664939.11424021489724835645.stgit@magnolia>
-User-Agent: StGit/0.17.1-dirty
-MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9295 signatures=668687
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
- suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1015
- lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1810050000
- definitions=main-1906210182
+        id S1727011AbfFVAFO (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 21 Jun 2019 20:05:14 -0400
+Received: from mail-pf1-f202.google.com ([209.85.210.202]:41733 "EHLO
+        mail-pf1-f202.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726992AbfFVAFN (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 21 Jun 2019 20:05:13 -0400
+Received: by mail-pf1-f202.google.com with SMTP id q14so3631014pff.8
+        for <linux-efi@vger.kernel.org>; Fri, 21 Jun 2019 17:05:12 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20161025;
+        h=date:in-reply-to:message-id:mime-version:references:subject:from:to
+         :cc;
+        bh=RH4r7kndiMZuzkloO60/eV46GQCIwbbHWtivaOQNx8E=;
+        b=AlJqBCOH77JCstgkPmGAZLgRUSD9zvatMOj3hlS41EdO8GggJp6HBONVpx/jhauvgq
+         8AJYbxCo4G0bCR/ZL4FQ8B8+IWJY2WfIJ1YRwYg5JXFKA/gXZcRwW59UyJpziaVKPJMD
+         w/V/JtAWur3tBIDTeoEHR7ZUYTOlGArmeV75OKSfGB53kteVVkiD50m114i64uhrcDHW
+         kKiF2N+0rp0kEs0/V6xldaibUNauG2QYFkENtyXQ2vJG3z/F6Xg3uIhwM6tlnXlcDucd
+         /iycXpCPysDjGuvfZjg6xm7UFHlgNwKHAPLDV5kfEXLPXmjXQ7Mys9GnXKhb3JR5lTB6
+         04eQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:in-reply-to:message-id:mime-version
+         :references:subject:from:to:cc;
+        bh=RH4r7kndiMZuzkloO60/eV46GQCIwbbHWtivaOQNx8E=;
+        b=Dcw4MI8vMuNFsbdBqObahaYJGJ5IqB7AjAe5ktmXW6t2Kn5ayabCYB6DOGHxcrU1SR
+         kjX3tKB1T263LwhRoLv4hBkz1vWVZw1DIwgVCjH6Qwo/h/ODD8GAT5rjy870L+a1hxR7
+         I/koakC587lsj8auR1G9J5xondgQHPDB+SmNlOoKCcg8wmb6N8XgV7Po/KgaywduMHOu
+         GpcnhCfQpS0aSpNxJzo7oRibtro6/MG1ExTiCNpctrPaH5uY6olHLefydC2dBz1VrGFi
+         M3VvFObuqyrIpVO5HE1ccGwHwfuifYRnml2rbjMTv8oIl7UIh9laGa1u4TlZlLEPwQ0i
+         SQgg==
+X-Gm-Message-State: APjAAAVYnlEpTI69dOWfqWtiPbC6G3/QVbvP+Y/E98Z68IuGiHCzm6wV
+        IGr5Rm9r7UYz5++D/t67M1tPfR9l11TIA/5qK0yZXg==
+X-Google-Smtp-Source: APXvYqyVHJVn9d0VYeGJ4jqknCWJTY1KI/Z/06tozEDcOyTsuENI6t9yu2qMQUxyG2gPRdwFuoh5T585JPCvavnyfPVFAQ==
+X-Received: by 2002:a63:1d5:: with SMTP id 204mr21711270pgb.207.1561161912148;
+ Fri, 21 Jun 2019 17:05:12 -0700 (PDT)
+Date:   Fri, 21 Jun 2019 17:03:57 -0700
+In-Reply-To: <20190622000358.19895-1-matthewgarrett@google.com>
+Message-Id: <20190622000358.19895-29-matthewgarrett@google.com>
+Mime-Version: 1.0
+References: <20190622000358.19895-1-matthewgarrett@google.com>
+X-Mailer: git-send-email 2.22.0.410.gd8fdbe21b5-goog
+Subject: [PATCH V34 28/29] efi: Restrict efivar_ssdt_load when the kernel is
+ locked down
+From:   Matthew Garrett <matthewgarrett@google.com>
+To:     jmorris@namei.org
+Cc:     linux-security-module@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-api@vger.kernel.org,
+        Matthew Garrett <matthewgarrett@google.com>,
+        Matthew Garrett <mjg59@google.com>,
+        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
+        linux-efi@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+efivar_ssdt_load allows the kernel to import arbitrary ACPI code from an
+EFI variable, which gives arbitrary code execution in ring 0. Prevent
+that when the kernel is locked down.
 
-Refactor the SETFLAGS implementation to use the SETXATTR code directly
-instead of partially constructing a struct fsxattr and calling bits and
-pieces of the setxattr code.  This reduces code size and becomes
-necessary in the next patch to maintain the behavior of allowing
-userspace to set immutable on an immutable file so long as nothing
-/else/ about the attributes change.
-
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Matthew Garrett <mjg59@google.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-efi@vger.kernel.org
 ---
- fs/xfs/xfs_ioctl.c |   40 +++-------------------------------------
- 1 file changed, 3 insertions(+), 37 deletions(-)
+ drivers/firmware/efi/efi.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-
-diff --git a/fs/xfs/xfs_ioctl.c b/fs/xfs/xfs_ioctl.c
-index 88583b3e1e76..7b19ba2956ad 100644
---- a/fs/xfs/xfs_ioctl.c
-+++ b/fs/xfs/xfs_ioctl.c
-@@ -1491,11 +1491,8 @@ xfs_ioc_setxflags(
- 	struct file		*filp,
- 	void			__user *arg)
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 55b77c576c42..9f92a013ab27 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -31,6 +31,7 @@
+ #include <linux/acpi.h>
+ #include <linux/ucs2_string.h>
+ #include <linux/memblock.h>
++#include <linux/security.h>
+ 
+ #include <asm/early_ioremap.h>
+ 
+@@ -242,6 +243,11 @@ static void generic_ops_unregister(void)
+ static char efivar_ssdt[EFIVAR_SSDT_NAME_MAX] __initdata;
+ static int __init efivar_ssdt_setup(char *str)
  {
--	struct xfs_trans	*tp;
- 	struct fsxattr		fa;
--	struct fsxattr		old_fa;
- 	unsigned int		flags;
--	int			join_flags = 0;
- 	int			error;
- 
- 	if (copy_from_user(&flags, arg, sizeof(flags)))
-@@ -1506,44 +1503,13 @@ xfs_ioc_setxflags(
- 		      FS_SYNC_FL))
- 		return -EOPNOTSUPP;
- 
--	fa.fsx_xflags = xfs_merge_ioc_xflags(flags, xfs_ip2xflags(ip));
-+	__xfs_ioc_fsgetxattr(ip, false, &fa);
-+	fa.fsx_xflags = xfs_merge_ioc_xflags(flags, fa.fsx_xflags);
- 
- 	error = mnt_want_write_file(filp);
- 	if (error)
- 		return error;
--
--	/*
--	 * Changing DAX config may require inode locking for mapping
--	 * invalidation. These need to be held all the way to transaction commit
--	 * or cancel time, so need to be passed through to
--	 * xfs_ioctl_setattr_get_trans() so it can apply them to the join call
--	 * appropriately.
--	 */
--	error = xfs_ioctl_setattr_dax_invalidate(ip, &fa, &join_flags);
--	if (error)
--		goto out_drop_write;
--
--	tp = xfs_ioctl_setattr_get_trans(ip, join_flags);
--	if (IS_ERR(tp)) {
--		error = PTR_ERR(tp);
--		goto out_drop_write;
--	}
--
--	__xfs_ioc_fsgetxattr(ip, false, &old_fa);
--	error = vfs_ioc_fssetxattr_check(VFS_I(ip), &old_fa, &fa);
--	if (error) {
--		xfs_trans_cancel(tp);
--		goto out_drop_write;
--	}
--
--	error = xfs_ioctl_setattr_xflags(tp, ip, &fa);
--	if (error) {
--		xfs_trans_cancel(tp);
--		goto out_drop_write;
--	}
--
--	error = xfs_trans_commit(tp);
--out_drop_write:
-+	error = xfs_ioctl_setattr(ip, &fa);
- 	mnt_drop_write_file(filp);
- 	return error;
- }
++	int ret = security_locked_down(LOCKDOWN_ACPI_TABLES);
++
++	if (ret)
++		return ret;
++
+ 	if (strlen(str) < sizeof(efivar_ssdt))
+ 		memcpy(efivar_ssdt, str, strlen(str));
+ 	else
+-- 
+2.22.0.410.gd8fdbe21b5-goog
 
