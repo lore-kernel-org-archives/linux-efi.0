@@ -2,112 +2,40 @@ Return-Path: <SRS0=CtL2=UV=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PULL_REQUEST,
-	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+X-Spam-Status: No, score=-0.5 required=3.0 tests=FREEMAIL_REPLYTO_END_DIGIT,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AFBF2C43613
-	for <linux-efi@archiver.kernel.org>; Sat, 22 Jun 2019 08:51:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6BDC9C48BE8
+	for <linux-efi@archiver.kernel.org>; Sat, 22 Jun 2019 16:08:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 87053206BA
-	for <linux-efi@archiver.kernel.org>; Sat, 22 Jun 2019 08:51:34 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="J5J/G+b6"
+	by mail.kernel.org (Postfix) with ESMTP id 4ECDF20675
+	for <linux-efi@archiver.kernel.org>; Sat, 22 Jun 2019 16:08:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726343AbfFVIve (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 22 Jun 2019 04:51:34 -0400
-Received: from mail-wr1-f66.google.com ([209.85.221.66]:40438 "EHLO
-        mail-wr1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726307AbfFVIvO (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sat, 22 Jun 2019 04:51:14 -0400
-Received: by mail-wr1-f66.google.com with SMTP id p11so8717964wre.7
-        for <linux-efi@vger.kernel.org>; Sat, 22 Jun 2019 01:51:12 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=YdrNbZk4+5GMH7+vINq3bjHxz2Mgfb8BRnXaK4Rpn5w=;
-        b=J5J/G+b6+9YRAeBH4SXoiGYyWPDtznpGbzjZ6RJl7YlEvuROsMMjZBmDsffY2K20bR
-         STp64a7nX+qTrx7cOvvK93yZIc1FCDBRxoXGHSNsHd3ccqa/9oMhlc4V47atX9JRsf+B
-         qCoN5DY5ObbjPLmQG0i1MLZJ/GWSb8SsqDOB5XpZan8Cv0NZgAam4n+LnLh/tZmnyfxE
-         GaCQllumsHuKrMDX6bZ+iCE6hs/s2KSm0cD4AIvU2kway0TWcr733LtPN0QQYUuXlcFv
-         KbrHbU7QVtpeQ06RHxCopl490UGIfQe5Givt8772bb9LfGSvvZCDYtIRNgBT3e2VwNji
-         U9ZA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=YdrNbZk4+5GMH7+vINq3bjHxz2Mgfb8BRnXaK4Rpn5w=;
-        b=ChvVsQmOpovJJ+IEROptj8xQSVdPJqbDy4yZAAZiDkfAS6iL4Y7EmHve3uv4ypiuGa
-         g/CTrd7hAqckaMB4Tkdy+D6+2hMo7scMPO7qD+5ZV4U5iYx0zy5pZVDL8X2vO+FUiWH4
-         1LoS1fYCgbXNR4YQfg+ioPUsliOIZ/5rQmDQ+I5THu4gvCJ4/+h2QKuGg4PEbozlmBzK
-         6nAkaDK3ROPD9Ca0JhAkx/S4YD+tNBEmxS8+uu01Igz3sv7oZHOMtQji3qium7jbKa3J
-         NquuERxQM2FyZ3ASiRuRbIN6UM2JxLWfFqSwVubF6K86YT38FOLh9zu0c3+tDbchStMK
-         IDrQ==
-X-Gm-Message-State: APjAAAWOtJKA3Cm7u0cg3tUG66WZgbu8jTqRJ37yFKDK2evy5xbYiPrJ
-        DwTO0xqc0xF/D0Uw7GDbGaOVzT1533G8jtaR
-X-Google-Smtp-Source: APXvYqy4Be5mkwMCWQ+mh8cyOP9H7kRvS9JY5Hnofo0qmiISxWzTOaXY1q1Fh0sj8nBIH7SJgvxN2A==
-X-Received: by 2002:adf:f886:: with SMTP id u6mr31159299wrp.23.1561193471422;
-        Sat, 22 Jun 2019 01:51:11 -0700 (PDT)
-Received: from sudo.home ([2a01:cb1d:112:6f00:4bd:3f91:4ef8:ae7e])
-        by smtp.gmail.com with ESMTPSA id v15sm4863589wrt.25.2019.06.22.01.51.09
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Sat, 22 Jun 2019 01:51:10 -0700 (PDT)
-From:   Ard Biesheuvel <ard.biesheuvel@linaro.org>
-To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
-        Thomas Gleixner <tglx@linutronix.de>
-Cc:     Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        linux-kernel@vger.kernel.org, Hans de Goede <hdegoede@redhat.com>,
-        Jonathan Richardson <jonathan.richardson@broadcom.com>,
-        Luo XinanX <xinanx.luo@intel.com>,
-        "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>,
-        Qian Cai <cai@lca.pw>, Tian Baofeng <baofeng.tian@intel.com>
-Subject: [GIT PULL 0/4] EFI fixes for v5.2
-Date:   Sat, 22 Jun 2019 10:51:02 +0200
-Message-Id: <20190622085106.24859-1-ard.biesheuvel@linaro.org>
-X-Mailer: git-send-email 2.20.1
+        id S1726299AbfFVQIu convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 22 Jun 2019 12:08:50 -0400
+Received: from ec2-52-19-79-104.eu-west-1.compute.amazonaws.com ([52.19.79.104]:50699
+        "EHLO WIN-QLD1Q82UE87" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726276AbfFVQIt (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 22 Jun 2019 12:08:49 -0400
+X-Greylist: delayed 1028 seconds by postgrey-1.27 at vger.kernel.org; Sat, 22 Jun 2019 12:08:49 EDT
+Received: from io.com ([127.0.0.1]) by WIN-QLD1Q82UE87 with Microsoft SMTPSVC(7.5.7601.17514);
+         Sat, 22 Jun 2019 16:17:52 +0100
+Reply-To: Mrs Karen Ngui <karenngui504@gmail.com>
+From:   Regional Manager Karen <kngu@io.com>
+To:     linux-efi@vger.kernel.org
+Subject: Re: Inmail
+Date:   22 Jun 2019 16:17:52 +0100
+Message-ID: <20190622161752.6D7C14101930147C@io.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain;
+        charset="utf-8"
+Content-Transfer-Encoding: 8BIT
+X-OriginalArrivalTime: 22 Jun 2019 15:17:52.0394 (UTC) FILETIME=[A8FFAEA0:01D5290D]
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The following changes since commit d1fdb6d8f6a4109a4263176c84b899076a5f8008:
-
-  Linux 5.2-rc4 (2019-06-08 20:24:46 -0700)
-
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-urgent
-
-for you to fetch changes up to 975a6166a8584ee4a1b8bd93098e49dc101d7171:
-
-  efibc: Replace variable set function in notifier call (2019-06-22 10:24:57 +0200)
-
-----------------------------------------------------------------
-Another handful of EFI fixes for v5.2:
-- fix a potential crash after kexec on arm64 with GICv3
-- fix a build warning on x86
-- stop policing the BGRT feature flags
-- use a non-blocking version of SetVariable() in the boot control driver
-
-----------------------------------------------------------------
-Ard Biesheuvel (1):
-      efi/memreserve: deal with memreserve entries in unmapped memory
-
-Hans de Goede (1):
-      efi/bgrt: Drop BGRT status field reserved bits check
-
-Qian Cai (1):
-      x86/efi: fix a -Wtype-limits compilation warning
-
-Tian Baofeng (1):
-      efibc: Replace variable set function in notifier call
-
- arch/x86/platform/efi/quirks.c  |  2 +-
- drivers/firmware/efi/efi-bgrt.c |  5 -----
- drivers/firmware/efi/efi.c      | 12 ++++++++++--
- drivers/firmware/efi/efibc.c    | 12 +++++++-----
- 4 files changed, 18 insertions(+), 13 deletions(-)
+Did you get my previous E-mail ?
