@@ -4,56 +4,56 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-8.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DB2D9C48BE7
-	for <linux-efi@archiver.kernel.org>; Sat, 22 Jun 2019 08:51:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 42A48C48BE8
+	for <linux-efi@archiver.kernel.org>; Sat, 22 Jun 2019 08:51:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id AA121206BA
-	for <linux-efi@archiver.kernel.org>; Sat, 22 Jun 2019 08:51:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0F6B3208CA
+	for <linux-efi@archiver.kernel.org>; Sat, 22 Jun 2019 08:51:33 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="H/p1qP5U"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="iz2Wh5lK"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726432AbfFVIvT (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 22 Jun 2019 04:51:19 -0400
-Received: from mail-wr1-f68.google.com ([209.85.221.68]:36301 "EHLO
-        mail-wr1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726397AbfFVIvS (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sat, 22 Jun 2019 04:51:18 -0400
-Received: by mail-wr1-f68.google.com with SMTP id n4so7530597wrs.3
-        for <linux-efi@vger.kernel.org>; Sat, 22 Jun 2019 01:51:17 -0700 (PDT)
+        id S1726404AbfFVIvP (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 22 Jun 2019 04:51:15 -0400
+Received: from mail-wm1-f66.google.com ([209.85.128.66]:39987 "EHLO
+        mail-wm1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726310AbfFVIvP (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 22 Jun 2019 04:51:15 -0400
+Received: by mail-wm1-f66.google.com with SMTP id v19so8655875wmj.5
+        for <linux-efi@vger.kernel.org>; Sat, 22 Jun 2019 01:51:13 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=qiN85MY5YnTwB3nQ80pJ/FSY8JMCGoluMGY1yE5pzt8=;
-        b=H/p1qP5UKrqbgx62rex5GvcEiP0tumRfLfdHFtTeGXRVnhy+Bc0wSAjxZkpJI2kT6U
-         vQUfAVCPe9SfCqgFiRYWiEmlDFWx07zJylvpNpmMiWu8esFrF0nsSylVV71EWkolD9xQ
-         S6t6QfIx1p643HMzcCMzaomCgLCtYVoT4th99SnrRo5wcclGgqXgD2Mkx7M81nBh7D8c
-         FHSNPRsklt3XRZV1fmkYW6h+38Z1j8NhVaQ1GreT6T/aI81iqlGF30NUrqPj0xQozNpg
-         HEyFXAK7Eufqhn0jAVrL7bYli/+XrGKo5PABFeIFVThkD2OuAz7cbiOlxuXxWaFMaFBO
-         ZJyA==
+        bh=HO4NlEgMlVr7RQNzUTkiZe3whDgA7iGbSEYeXfsjzfo=;
+        b=iz2Wh5lKIKrtIT+GilYCiOborf/BB+0KAnXOBgcowZHsTrFSpVUgXEsP8RADKbgcjA
+         AiNEbMFDsQHqYVnWhYpACbjywEFmgTQHxJbOZh0qTYuoixUa9GwiPPPJ7c9Pohwgpt+k
+         usZtN0O+w4JAQj2x3sfCJefE7RL8k9GJwvaw6Q4C065/h9Z0VFvC/r/CllXb4R5ZPrDV
+         +a49/gi4z3nP3UUHtSONU1xhrt+djS34PKGvVpsc4yihqBsw7ULFsoBJS4VNLegoUAqE
+         kYjdwP3jxhffTl7ROUZHCgTdMj8VgCtkkMDZcwxIueXwu5dCXzu3BIFp6fCTwkKb+fym
+         LquA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=qiN85MY5YnTwB3nQ80pJ/FSY8JMCGoluMGY1yE5pzt8=;
-        b=qonbOWqOYU1X4/MySs+indRIJSI1wBZLVrKrFRer++kN38MtJGGLzi5VZqhFBNMz1n
-         4LR8evqzQf8BqOjOHa5wBC7D/+ai9Q/17HUMrftuJmFBZMNUeEg1Mtx86wcOLWZKpNvf
-         PZIT0FRDspB2UmxVDZzfjH+OfVzNhecdEkRbQhLBnSAtJVcIavlVHuy+HIETahIMtHhq
-         1VnJjQMVWhJ7C/roJ333o1fp/jb44EkbLXA40WvfnpNoYQj2HVO8zKqMKHQsrx2dxG7V
-         l2LpuN8O/gCxwyuPU2R0fCC9yDm/m9rV/ZzAZG/nOKWo/pJeiZuCweKEc8fMy6m8Tk8p
-         8osA==
-X-Gm-Message-State: APjAAAXz83gj3PrQm3smtehUciVX7XqxkzByEdz4r40EPWIvJr1E1cSB
-        /7W3mfDySvxh0kPdBFhpaiUJPTeAYzVpmoI5
-X-Google-Smtp-Source: APXvYqy5fzhYOJSXvdtzGuYRxNq7/S9xCwSYJ5Zg3y0zdEQUs8+GkbOXHTnlZaj2JbCGjTxK/8Hdzg==
-X-Received: by 2002:adf:f591:: with SMTP id f17mr2519691wro.119.1561193476680;
-        Sat, 22 Jun 2019 01:51:16 -0700 (PDT)
+        bh=HO4NlEgMlVr7RQNzUTkiZe3whDgA7iGbSEYeXfsjzfo=;
+        b=bdoVWWFoyKEkWJQIEvudR7lh78Eb9YdoB6RV4cItg2jpmNvmj4qBzdl8aX2u/YC7KL
+         h6LzqZX5Wv7ZUwAtcU0mejNDDeq5Wvci8IoRDqZmOgAmK+zapCrn94loJCz7uwyYTYFe
+         qiXmF15QzJhvFeNtGzlB/MrLslG9ZK3QwvTblAozVAk3duln62Vyy+ZmfhjCU/dJC0U9
+         vNiIwTJZLdkmH26kwu6arFObfjF9jlDjmLeieR9HiPk3T7ZEJHrleZ7/iMXxP1X0qQfM
+         XL7uWExmLrkR2r+NsLMIEBeDrbLXrurElJGIf2bmG17VZY7vD/+c73HAR3YYhNS2xSmK
+         ZNzw==
+X-Gm-Message-State: APjAAAVhEaLId6vwuX+NHcWjqurbDLUtwSCmhWwGduu4XCFJxoRaokyT
+        5Hxb3lLDCrO2jDaC0RaGUXUTlX0vCFlVSjhH
+X-Google-Smtp-Source: APXvYqzFnpgqxmtOy6/8NHQqNbTQ+elWE4WF/mHbUz0J17z0cEJj/TLZyZd5RkNkH5JI9MXqXsFM5A==
+X-Received: by 2002:a7b:c450:: with SMTP id l16mr7720525wmi.0.1561193472725;
+        Sat, 22 Jun 2019 01:51:12 -0700 (PDT)
 Received: from sudo.home ([2a01:cb1d:112:6f00:4bd:3f91:4ef8:ae7e])
-        by smtp.gmail.com with ESMTPSA id v15sm4863589wrt.25.2019.06.22.01.51.15
+        by smtp.gmail.com with ESMTPSA id v15sm4863589wrt.25.2019.06.22.01.51.11
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Sat, 22 Jun 2019 01:51:16 -0700 (PDT)
+        Sat, 22 Jun 2019 01:51:12 -0700 (PDT)
 From:   Ard Biesheuvel <ard.biesheuvel@linaro.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
@@ -63,9 +63,9 @@ Cc:     Ard Biesheuvel <ard.biesheuvel@linaro.org>,
         Luo XinanX <xinanx.luo@intel.com>,
         "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>,
         Qian Cai <cai@lca.pw>, Tian Baofeng <baofeng.tian@intel.com>
-Subject: [PATCH 4/4] efibc: Replace variable set function in notifier call
-Date:   Sat, 22 Jun 2019 10:51:06 +0200
-Message-Id: <20190622085106.24859-5-ard.biesheuvel@linaro.org>
+Subject: [PATCH 1/4] efi/memreserve: deal with memreserve entries in unmapped memory
+Date:   Sat, 22 Jun 2019 10:51:03 +0200
+Message-Id: <20190622085106.24859-2-ard.biesheuvel@linaro.org>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20190622085106.24859-1-ard.biesheuvel@linaro.org>
 References: <20190622085106.24859-1-ard.biesheuvel@linaro.org>
@@ -76,49 +76,57 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Tian Baofeng <baofeng.tian@intel.com>
+Ensure that the EFI memreserve entries can be accessed, even if they
+are located in memory that the kernel (e.g., a crashkernel) omits from
+the linear map.
 
-Replace the variable set function from "efivar_entry_set" to
-"efivar_entry_set_safe" in efibc panic notifier.
-In safe function parameter "block" will set to false
-and will call "efivar_entry_set_nonblocking"to set efi variables.
-efivar_entry_set_nonblocking is guaranteed to
-not block and is suitable for calling from crash/panic handlers.
-In UEFI android platform, when warm reset happens,
-with this change, efibc will not block the reboot process.
-Otherwise, set variable will call queue work and send to other offlined
-cpus then cause another panic, finally will cause reboot failure.
-
-Signed-off-by: Tian Baofeng <baofeng.tian@intel.com>
-Signed-off-by: Luo XinanX <xinanx.luo@intel.com>
+Fixes: 80424b02d42b ("efi: Reduce the amount of memblock reservations ...")
+Cc: <stable@vger.kernel.org> # 5.0+
+Reported-by: Jonathan Richardson <jonathan.richardson@broadcom.com>
+Reviewed-by: Jonathan Richardson <jonathan.richardson@broadcom.com>
+Tested-by: Jonathan Richardson <jonathan.richardson@broadcom.com>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- drivers/firmware/efi/efibc.c | 12 +++++++-----
- 1 file changed, 7 insertions(+), 5 deletions(-)
+ drivers/firmware/efi/efi.c | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/firmware/efi/efibc.c b/drivers/firmware/efi/efibc.c
-index 61e099826cbb..35dccc88ac0a 100644
---- a/drivers/firmware/efi/efibc.c
-+++ b/drivers/firmware/efi/efibc.c
-@@ -43,11 +43,13 @@ static int efibc_set_variable(const char *name, const char *value)
- 	efibc_str_to_str16(value, (efi_char16_t *)entry->var.Data);
- 	memcpy(&entry->var.VendorGuid, &guid, sizeof(guid));
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 16b2137d117c..4b7cf7bc0ded 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -1009,14 +1009,16 @@ int __ref efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
  
--	ret = efivar_entry_set(entry,
--			       EFI_VARIABLE_NON_VOLATILE
--			       | EFI_VARIABLE_BOOTSERVICE_ACCESS
--			       | EFI_VARIABLE_RUNTIME_ACCESS,
--			       size, entry->var.Data, NULL);
-+	ret = efivar_entry_set_safe(entry->var.VariableName,
-+				    entry->var.VendorGuid,
-+				    EFI_VARIABLE_NON_VOLATILE
-+				    | EFI_VARIABLE_BOOTSERVICE_ACCESS
-+				    | EFI_VARIABLE_RUNTIME_ACCESS,
-+				    false, size, entry->var.Data);
-+
- 	if (ret)
- 		pr_err("failed to set %s EFI variable: 0x%x\n",
- 		       name, ret);
+ 	/* first try to find a slot in an existing linked list entry */
+ 	for (prsv = efi_memreserve_root->next; prsv; prsv = rsv->next) {
+-		rsv = __va(prsv);
++		rsv = memremap(prsv, sizeof(*rsv), MEMREMAP_WB);
+ 		index = atomic_fetch_add_unless(&rsv->count, 1, rsv->size);
+ 		if (index < rsv->size) {
+ 			rsv->entry[index].base = addr;
+ 			rsv->entry[index].size = size;
+ 
++			memunmap(rsv);
+ 			return 0;
+ 		}
++		memunmap(rsv);
+ 	}
+ 
+ 	/* no slot found - allocate a new linked list entry */
+@@ -1024,7 +1026,13 @@ int __ref efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
+ 	if (!rsv)
+ 		return -ENOMEM;
+ 
+-	rsv->size = EFI_MEMRESERVE_COUNT(PAGE_SIZE);
++	/*
++	 * The memremap() call above assumes that a linux_efi_memreserve entry
++	 * never crosses a page boundary, so let's ensure that this remains true
++	 * even when kexec'ing a 4k pages kernel from a >4k pages kernel, by
++	 * using SZ_4K explicitly in the size calculation below.
++	 */
++	rsv->size = EFI_MEMRESERVE_COUNT(SZ_4K);
+ 	atomic_set(&rsv->count, 1);
+ 	rsv->entry[0].base = addr;
+ 	rsv->entry[0].size = size;
 -- 
 2.20.1
 
