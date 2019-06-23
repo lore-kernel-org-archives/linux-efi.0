@@ -1,41 +1,122 @@
-Return-Path: <SRS0=CtL2=UV=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=08ky=UW=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.5 required=3.0 tests=FREEMAIL_REPLYTO_END_DIGIT,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6BDC9C48BE8
-	for <linux-efi@archiver.kernel.org>; Sat, 22 Jun 2019 16:08:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 70930C48BE7
+	for <linux-efi@archiver.kernel.org>; Sun, 23 Jun 2019 00:14:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 4ECDF20675
-	for <linux-efi@archiver.kernel.org>; Sat, 22 Jun 2019 16:08:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 485A82084E
+	for <linux-efi@archiver.kernel.org>; Sun, 23 Jun 2019 00:14:52 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="G10ix/75"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726299AbfFVQIu convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 22 Jun 2019 12:08:50 -0400
-Received: from ec2-52-19-79-104.eu-west-1.compute.amazonaws.com ([52.19.79.104]:50699
-        "EHLO WIN-QLD1Q82UE87" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726276AbfFVQIt (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sat, 22 Jun 2019 12:08:49 -0400
-X-Greylist: delayed 1028 seconds by postgrey-1.27 at vger.kernel.org; Sat, 22 Jun 2019 12:08:49 EDT
-Received: from io.com ([127.0.0.1]) by WIN-QLD1Q82UE87 with Microsoft SMTPSVC(7.5.7601.17514);
-         Sat, 22 Jun 2019 16:17:52 +0100
-Reply-To: Mrs Karen Ngui <karenngui504@gmail.com>
-From:   Regional Manager Karen <kngu@io.com>
-To:     linux-efi@vger.kernel.org
-Subject: Re: Inmail
-Date:   22 Jun 2019 16:17:52 +0100
-Message-ID: <20190622161752.6D7C14101930147C@io.com>
+        id S1726516AbfFWAOt (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 22 Jun 2019 20:14:49 -0400
+Received: from mail-pl1-f196.google.com ([209.85.214.196]:39999 "EHLO
+        mail-pl1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726410AbfFWAOs (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 22 Jun 2019 20:14:48 -0400
+Received: by mail-pl1-f196.google.com with SMTP id a93so4818659pla.7
+        for <linux-efi@vger.kernel.org>; Sat, 22 Jun 2019 17:14:47 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=chromium.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=btG6avAzDAyvn5JxuzcdJRsv07F3W0fAi+zvzELLu4g=;
+        b=G10ix/75gAlaiLGUlBh565tLQ8+aylPU/RQBBsKWCCMUORUSsygtn+q15t9tr59J2A
+         cUiEQyECiFsC4UExccIv11GBw77rxdlv0rlsUUNpDdl5FmjAPK3GAviiQ1EbJBhyAJCJ
+         C48HUkgUK3dqaC+1Ih76fePbjemx7QzQ6cHf8=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=btG6avAzDAyvn5JxuzcdJRsv07F3W0fAi+zvzELLu4g=;
+        b=SyjiiAV7re2yHsKjiRon7TKA0zq/18e73ZzMZxmldKD+TFGUNfxnjceTLiVV/VbmMZ
+         g+yJeTTAZ7A0W5vsliluJqvp9u6uW/kp3lQ646m0Ce2sQq5AHdIhG8iog7YZvj4IpAxs
+         mE43g9JRBO9TXztN0YYmtK9sJsBRVJEiwLy18rwejUjBujfLKmMXY5KRPgHMeVPQf3JL
+         lGKHDDyzNa3HwjTzXhb+BddJ0VGY8HfgSmRYXMplLJtZUu7RYisti8HuGB8/OnBYnbCY
+         uxuLmsYWL35XnouXLYqbrzcSQIZBqhlnlwIGgBxH0JxQ71RHK+F7tF8IpG+GOH1hWHtM
+         MB5g==
+X-Gm-Message-State: APjAAAXODe+MFELHeg2s8PDQPPF9tIEdMXJnNAMLw5s9hJg+ry7p+64C
+        0m84zWrc9lT6OJh8lxaw38O1Lw==
+X-Google-Smtp-Source: APXvYqxcvat/DBQ6Sbeb3rN2qxDjuCbNFZLf7vlqSfx2l0aGYSWcasg0xVthOBBHvZpowm2Cy1Uu7w==
+X-Received: by 2002:a17:902:7443:: with SMTP id e3mr3104455plt.176.1561248887361;
+        Sat, 22 Jun 2019 17:14:47 -0700 (PDT)
+Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
+        by smtp.gmail.com with ESMTPSA id q10sm6534267pgg.35.2019.06.22.17.14.46
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Sat, 22 Jun 2019 17:14:46 -0700 (PDT)
+Date:   Sat, 22 Jun 2019 17:14:45 -0700
+From:   Kees Cook <keescook@chromium.org>
+To:     Matthew Garrett <matthewgarrett@google.com>
+Cc:     jmorris@namei.org, linux-security-module@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-api@vger.kernel.org,
+        Matthew Garrett <mjg59@google.com>,
+        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
+        linux-efi@vger.kernel.org
+Subject: Re: [PATCH V34 28/29] efi: Restrict efivar_ssdt_load when the kernel
+ is locked down
+Message-ID: <201906221714.CDECCAEDA6@keescook>
+References: <20190622000358.19895-1-matthewgarrett@google.com>
+ <20190622000358.19895-29-matthewgarrett@google.com>
 MIME-Version: 1.0
-Content-Type: text/plain;
-        charset="utf-8"
-Content-Transfer-Encoding: 8BIT
-X-OriginalArrivalTime: 22 Jun 2019 15:17:52.0394 (UTC) FILETIME=[A8FFAEA0:01D5290D]
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190622000358.19895-29-matthewgarrett@google.com>
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Did you get my previous E-mail ?
+On Fri, Jun 21, 2019 at 05:03:57PM -0700, Matthew Garrett wrote:
+> efivar_ssdt_load allows the kernel to import arbitrary ACPI code from an
+> EFI variable, which gives arbitrary code execution in ring 0. Prevent
+> that when the kernel is locked down.
+> 
+> Signed-off-by: Matthew Garrett <mjg59@google.com>
+
+Reviewed-by: Kees Cook <keescook@chromium.org>
+
+-Kees
+
+> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> Cc: linux-efi@vger.kernel.org
+> ---
+>  drivers/firmware/efi/efi.c | 6 ++++++
+>  1 file changed, 6 insertions(+)
+> 
+> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+> index 55b77c576c42..9f92a013ab27 100644
+> --- a/drivers/firmware/efi/efi.c
+> +++ b/drivers/firmware/efi/efi.c
+> @@ -31,6 +31,7 @@
+>  #include <linux/acpi.h>
+>  #include <linux/ucs2_string.h>
+>  #include <linux/memblock.h>
+> +#include <linux/security.h>
+>  
+>  #include <asm/early_ioremap.h>
+>  
+> @@ -242,6 +243,11 @@ static void generic_ops_unregister(void)
+>  static char efivar_ssdt[EFIVAR_SSDT_NAME_MAX] __initdata;
+>  static int __init efivar_ssdt_setup(char *str)
+>  {
+> +	int ret = security_locked_down(LOCKDOWN_ACPI_TABLES);
+> +
+> +	if (ret)
+> +		return ret;
+> +
+>  	if (strlen(str) < sizeof(efivar_ssdt))
+>  		memcpy(efivar_ssdt, str, strlen(str));
+>  	else
+> -- 
+> 2.22.0.410.gd8fdbe21b5-goog
+> 
+
+-- 
+Kees Cook
