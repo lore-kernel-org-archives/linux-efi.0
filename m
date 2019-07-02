@@ -2,73 +2,71 @@ Return-Path: <SRS0=p+ZZ=VA=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-1.0 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 05EA0C06510
-	for <linux-efi@archiver.kernel.org>; Wed,  3 Jul 2019 00:30:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 62F56C5B57D
+	for <linux-efi@archiver.kernel.org>; Wed,  3 Jul 2019 00:46:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id D3AAF21E6C
-	for <linux-efi@archiver.kernel.org>; Wed,  3 Jul 2019 00:30:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 335F3218AD
+	for <linux-efi@archiver.kernel.org>; Wed,  3 Jul 2019 00:46:42 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="p4QfsUpx"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="SK3VY71b"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727108AbfGCAax (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 2 Jul 2019 20:30:53 -0400
-Received: from mail-ed1-f65.google.com ([209.85.208.65]:42467 "EHLO
-        mail-ed1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726963AbfGCAaw (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 2 Jul 2019 20:30:52 -0400
-Received: by mail-ed1-f65.google.com with SMTP id z25so289911edq.9;
-        Tue, 02 Jul 2019 17:30:51 -0700 (PDT)
+        id S1727059AbfGCAql (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 2 Jul 2019 20:46:41 -0400
+Received: from mail-wr1-f67.google.com ([209.85.221.67]:33228 "EHLO
+        mail-wr1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726430AbfGCAql (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 2 Jul 2019 20:46:41 -0400
+Received: by mail-wr1-f67.google.com with SMTP id n9so725832wru.0
+        for <linux-efi@vger.kernel.org>; Tue, 02 Jul 2019 17:46:39 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
+        d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=SUMBHjqHxfFISJ4tsGh6gHnVJafzY5uBObk9/M1SI6Y=;
-        b=p4QfsUpxZBUPSNbm9a2ya6+yOVBLb06CncvEKO0qxtLknZ9dc5s45n/yCCCk8pVAGr
-         kTtuJCFsVLSmNXI13tt/3c+qkzMeuAESDbdCbiFxU8ZGu73hjgvAB7S/EKz0qJg50PM0
-         mggd9oJOp7fMPe31Y0DXLnsbQg44FXj8SGYjCyvHT1W/uN6YXAprbpsjvRGAUJjnYqRY
-         UbDxAZ046ar2qRfBKMqC0yk+pCMu82zzkmqLwb0ooQKB2mTZVaIkovBFit3MwyXI7wOa
-         w8KYcr5NOXHJ2fqa9bjhrPr+UG3CdQ92BH7V+3eVd900MzHNSuuuaZW55wl9e7h6e4PB
-         vpLQ==
+        bh=F9/H9RAoH6E0au9JZUxTVdK2VUAjq3U7v2tg4NjLm2E=;
+        b=SK3VY71b9UfihRePdJGtKBSdbFrEGcoMgA1+oLMpx0UPe6Zi3uDRyGD2EMNmRcqIq+
+         l0yxeXPdzy0dawH3rtJ13sku4q+pHqx7YfCt0T/4f0C1De+u9h4Kz7vk989kCRBNZ824
+         mTFjAk2XxdC4yvnm3rbUtw188u5UCkTkf8iB9ychSLYnKHzkYHKzxWzg/0qF5Kfv/9Ig
+         /GrTrehl6RSlBv6Ck2krL2WRej8+bAHwkMfScnrp4Eezc+lmMKJpg/mT/Sg9laJXC7bT
+         NPJ2fF2dt1HcWXS/Ex0YgUuMz0yKlYeezBAJ9Kv3upJ4MbSyUkw1RN7KepizvqV+xWfx
+         5AhQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=SUMBHjqHxfFISJ4tsGh6gHnVJafzY5uBObk9/M1SI6Y=;
-        b=aVNjQ3aZKn5OZO6na5MU7plZ2bIrRI4uKGXUdogHKc83QwSguIIWojeTQ6a98RJsoY
-         seUCji2cu6dDrRoai6omiLtnJNGl9aCP8lokwtBo0iHvcEfeNNaiMRwxbf55M1jjmjZ/
-         wKrZ6vd7qOi5YS9fXauI1ZGNUoypzd5cKYVawj1/qa79TGAndm5st5RctIA83j4tKex6
-         +MCqM1iFMMjZAkvGK1dUYUsmZMJVbMMK4xsR5ToS6E9fcO5s1uYN7YjgOj+SkJwI1gi8
-         mRqrLXCigMVnFiSPCjeyNPoc4qB7TUtCz/AuF7TFimruNZhHteLUdS7r1yW5KT6uKT7G
-         sR0Q==
-X-Gm-Message-State: APjAAAUEb3xclV+iEMHuPIodvsXJzHwrFrAskdb9Mv29M+8tmv8+1g1g
-        TVlQIbeBrkovOrG7/E0htTtfVmNDeORQGsqLuL+4aToXaVs=
-X-Google-Smtp-Source: APXvYqx4j4OCiYpTjzpwx7oNckBn+SqKRP14iTHp1P6MaiYoDQDLUnA3ecoEITujxJ6YGjIOt/liDhVugoLpxJ8Knu0=
-X-Received: by 2002:a50:9468:: with SMTP id q37mr38323779eda.163.1562107743736;
- Tue, 02 Jul 2019 15:49:03 -0700 (PDT)
+        bh=F9/H9RAoH6E0au9JZUxTVdK2VUAjq3U7v2tg4NjLm2E=;
+        b=iFtzEHIEyofxdWFBaEB+npFpgHtSMPPbBH86f3u9A/KCPIjItN1Ofzibhq2sokzVe5
+         jJud9alf+vtpm/mNaZUX32JBfZxRs54Vsg4DRVgpwztG4Xlbibhbz9Z02jLqitKPMwc5
+         6oaaqPq3yZQXDIn03Z19zr8/soW0KEdYqkLr3awiCRxpUiNbXbrn40Wfvh01AtA9QK7W
+         xZpFFpYls0Grw4f++SR75/Ef9JxB8cX+oFoXCFy5CTFiKaln8NjwHZzM9u+P42dDgyRg
+         iB1a3CAluDGct8Il324OIKPu8ZqqlQOROvNufQaToHbGArjvCU1nBVVNFB/1FRyylPyV
+         2Cmw==
+X-Gm-Message-State: APjAAAXPEGotSfAKQh1/SMp5S4NxkY8ssg9ebGKza6iY1dQvTWVX2q0D
+        TJCfHnub/GEpFMNlEiM2C7eF0hcWYtUmv25g+ThFqQ==
+X-Google-Smtp-Source: APXvYqwncd3iUgHVxdaYlFV1ID7X2V0/XLGwEniTYBbvfKVWOvdTx6vknWmPXyn5a8WQ1T7hGJ+i80nMqSq/lFM6R0k=
+X-Received: by 2002:a5d:6743:: with SMTP id l3mr14273796wrw.241.1562104410996;
+ Tue, 02 Jul 2019 14:53:30 -0700 (PDT)
 MIME-Version: 1.0
 References: <20190630203614.5290-1-robdclark@gmail.com> <20190630203614.5290-3-robdclark@gmail.com>
  <CAKv+Gu_8BOt+f8RTspHo+se-=igZba1zL0+jWLV2HuuUXCKYpA@mail.gmail.com>
- <CAKv+Gu-KhPJxxJA3+J813OPcnoAD4nHq6MhiRTJSd_5y1dPNnw@mail.gmail.com>
- <CAF6AEGv+uAXVV6Q78n=jP0YRDjYn9OS=Xec9MU0+_7EBirxF5w@mail.gmail.com> <20190702215953.wdqges66hx3ge4jr@bivouac.eciton.net>
-In-Reply-To: <20190702215953.wdqges66hx3ge4jr@bivouac.eciton.net>
-From:   Rob Clark <robdclark@gmail.com>
-Date:   Tue, 2 Jul 2019 15:48:48 -0700
-Message-ID: <CAF6AEGvm62rcm4Lp4a+QmqFweVQ0QWXLDoN2CP8=40BdwiiVbQ@mail.gmail.com>
+ <CAKv+Gu-KhPJxxJA3+J813OPcnoAD4nHq6MhiRTJSd_5y1dPNnw@mail.gmail.com> <CAF6AEGv+uAXVV6Q78n=jP0YRDjYn9OS=Xec9MU0+_7EBirxF5w@mail.gmail.com>
+In-Reply-To: <CAF6AEGv+uAXVV6Q78n=jP0YRDjYn9OS=Xec9MU0+_7EBirxF5w@mail.gmail.com>
+From:   Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Date:   Tue, 2 Jul 2019 23:53:16 +0200
+Message-ID: <CAKv+Gu9pH9=AnNee7B-z0sP3rGJ-0Qnpziyx445M30KWC=Vq+w@mail.gmail.com>
 Subject: Re: [PATCH 2/4] efi/libstub: detect panel-id
-To:     Leif Lindholm <leif.lindholm@linaro.org>
-Cc:     Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
+To:     Rob Clark <robdclark@gmail.com>
+Cc:     dri-devel <dri-devel@lists.freedesktop.org>,
         linux-arm-msm <linux-arm-msm@vger.kernel.org>,
         freedreno <freedreno@lists.freedesktop.org>,
         aarch64-laptops@lists.linaro.org,
         Rob Clark <robdclark@chromium.org>,
         Ingo Molnar <mingo@kernel.org>, Will Deacon <will@kernel.org>,
-        Alexander Graf <agraf@suse.de>,
+        Leif Lindholm <leif.lindholm@linaro.org>,
         Steve Capper <steve.capper@arm.com>,
         Lukas Wunner <lukas@wunner.de>,
         Julien Thierry <julien.thierry@arm.com>,
@@ -80,76 +78,87 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, Jul 2, 2019 at 2:59 PM Leif Lindholm <leif.lindholm@linaro.org> wrote:
+On Tue, 2 Jul 2019 at 23:02, Rob Clark <robdclark@gmail.com> wrote:
 >
-> On Tue, Jul 02, 2019 at 02:01:49PM -0700, Rob Clark wrote:
-> > > > So we are dealing with a platform that violates the UEFI spec, since
-> > > > it does not bother to implement variable services at runtime (because
-> > > > MS let the vendor get away with this).
+> On Tue, Jul 2, 2019 at 1:35 PM Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
+> >
+> > On Tue, 2 Jul 2019 at 22:26, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
 > > >
-> > > To clarify, the above remark applies to populating the DT from the OS
-> > > rather than from the firmware.
+> > > On Sun, 30 Jun 2019 at 22:36, Rob Clark <robdclark@gmail.com> wrote:
+> > > >
+> > > > From: Rob Clark <robdclark@chromium.org>
+> > > >
+> > > > On snapdragon aarch64 laptops, a 'UEFIDisplayInfo' variable is provided
+> > > > to communicate some information about the display.  Crutially it has the
+> > > > panel-id, so the appropriate panel driver can be selected.  Read this
+> > > > out and stash in /chosen/panel-id so that display driver can use it to
+> > > > pick the appropriate panel.
+> > > >
+> > > > Signed-off-by: Rob Clark <robdclark@chromium.org>
+> > >
+> > > Hi Rob,
+> > >
+> > > I understand why you are doing this, but this *really* belongs elsewhere.
+> > >
+> > > So we are dealing with a platform that violates the UEFI spec, since
+> > > it does not bother to implement variable services at runtime (because
+> > > MS let the vendor get away with this).
+> > >
 > >
-> > yeah, it isn't pretty, but there *are* some other similar cases where
-> > efi-stub is populating DT.. (like update_fdt_memmap() and
-> > kaslr-seed)..
+> > To clarify, the above remark applies to populating the DT from the OS
+> > rather than from the firmware.
 >
-> The problem isn't with the stub updating the DT, the problem is what
-> it updates it with.
->
-> update_fdt_memmap() is the stub filling in the information it
-> communicates to the main kernel.
->
-> kaslr-seed sets a standard property using a standard interface if that
-> interface is available to it at the point of execution.
->
-> Since what we're doing here is dressing up an ACPI platform to make it
-> look like it was a DT platform, and since we have the ability to tweak
-> the DT before ever passing it to the kernel, let's just do that.
->
-> Yes, I know I said I'd rather not, but it's way nicer than sticking
-> platform-specific hacks into the EFI stub.
->
-> (If adding it as a DT property is indeed the thing to do.)
->
-> > > ... but saving variables at boot time for consumption at runtime is
-> > > something that we will likely see more of in the future.
-> >
-> > I think this will be nice, but it also doesn't address the need for a
-> > quirk to get this into /chosen..  I guess we *could* use a shim or
-> > something that runs before the kernel to do this.  But that just seems
-> > like a logistical/support nightmare.
-> >
-> > There is one kernel, and there
-> > are N distro's, so debugging a users "I don't get a screen at boot"
-> > problem because their distro missed some shim patch really just
-> > doesn't seem like a headache I want to have.
->
-> The distros should not need to be aware *at all* of the hacks required
-> to disguise these platforms as DT platforms.
->
-> If they do, they're already device-specific installers and have
-> already accepted the logistical/support nightmare.
+> yeah, it isn't pretty, but there *are* some other similar cases where
+> efi-stub is populating DT.. (like update_fdt_memmap() and
+> kaslr-seed)..
 >
 
-I guess I'm not *against* a DT loader shim populating the panel-id
-over into /chosen.. I had it in mind as a backup plan.  Ofc still need
-to get dt folks to buy into /chosen/panel-id but for DT boot I think
-that is the best option.  (At least the /chosen/panel-id approach
-doesn't require the shim to be aware of how the panel is wired up to
-dsi controller and whether their is a bridge in between, and that
-short of thing, so the panel-id approach seems more maintainable that
-other options.)
+True, but those don't describe the hardware.
 
-I am a bit fearful of problems arising from different distros and
-users using different versions of shim, and how to manage that.  I
-guess if somehow "shim thing" was part of the kernel, there would by
-one less moving part... I'd know if user had kernel vX.Y.Z they'd be
-good to go vs not.  But *also* depending on a new-enough version of a
-shim, where the version # is probably not easily apparent to the end
-user, sounds a bit scary from the "all the things that can go wrong"
-point of view.  Maybe I'm paranoid, but I'm a bit worried about how to
-manage that.
+> it would be kinda nice to have an early-quirks mechanism where this
+> could fit, but I thought that might be equally unpopular ;-)
+>
 
-BR,
--R
+Very :-)
+
+> >
+> > > First of all, to pass data between the EFI stub and the OS proper, we
+> > > should use a configuration table rather than a DT property, since the
+> > > former is ACPI/DT agnostic. Also, I'd like the consumer of the data to
+> > > actually interpret it, i.e., just dump the whole opaque thing into a
+> > > config table in the stub, and do the parsing in the OS proper.
+> > >
+> > > However, I am not thrilled at adding code to the stub that
+> > > unconditionally looks for some variable with some magic name on all
+> > > ARM/arm64 EFI systems, so this will need to live under a Kconfig
+> > > option that depends on ARM64 (and does not default to y)
+>
+> I defn can add this under kconfig.. is it ok if that option is
+> select'd by ARCH_QCOM?
+>
+
+I guess some mobile SOC/snapdragon symbol would be more appropriate,
+but given that qcom left the server business, I guess it hardly
+matters, so default y if ARM64 && ARCH_QCOM is fine with me
+
+> (Just trying to minimize the things that can go wrong and the "I get a
+> blank screen at boot" bug reports I get ;-))
+>
+
+Sure
+
+> > ... but saving variables at boot time for consumption at runtime is
+> > something that we will likely see more of in the future.
+>
+> I think this will be nice, but it also doesn't address the need for a
+> quirk to get this into /chosen..  I guess we *could* use a shim or
+> something that runs before the kernel to do this.  But that just seems
+> like a logistical/support nightmare.  There is one kernel, and there
+> are N distro's, so debugging a users "I don't get a screen at boot"
+> problem because their distro missed some shim patch really just
+> doesn't seem like a headache I want to have.
+>
+
+I'd argue that this does not belong in /chosen in the first place,
+i.e., it doesn't belong in the DT at all if the OS can access the
+config table (and therefore the variable) directly.
