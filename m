@@ -2,118 +2,101 @@ Return-Path: <SRS0=p+ZZ=VA=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.0 required=3.0 tests=DATE_IN_PAST_03_06,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 99260C5B57D
-	for <linux-efi@archiver.kernel.org>; Wed,  3 Jul 2019 01:53:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AB983C06511
+	for <linux-efi@archiver.kernel.org>; Wed,  3 Jul 2019 02:20:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 6FFC02064A
-	for <linux-efi@archiver.kernel.org>; Wed,  3 Jul 2019 01:53:48 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="rouFNaQr"
+	by mail.kernel.org (Postfix) with ESMTP id 7B9792187F
+	for <linux-efi@archiver.kernel.org>; Wed,  3 Jul 2019 02:20:46 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1562120446;
+	bh=5H906uRkLsp9h23SbnZEAf41XmBJLvnlTnIbGpZBXMc=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=OGhwLFWvwOOhNbptnrKCACoU/pi9zl2oRpd+A+KL7ZtI4RnmqlGbr1ctHxw9t1RuD
+	 s/P3c2De8NdraYp+QEAui795V/LO6Bf6NtWxkAPJE2FE0gmBSEeFI+DdEbHZfb6Ixy
+	 4ympdb8gVUJr5XDoj31C/KvllavXYtJONW6CgZtQ=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726430AbfGCBxr (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 2 Jul 2019 21:53:47 -0400
-Received: from mail-wr1-f67.google.com ([209.85.221.67]:41473 "EHLO
-        mail-wr1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726635AbfGCBxr (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 2 Jul 2019 21:53:47 -0400
-Received: by mail-wr1-f67.google.com with SMTP id c2so781914wrm.8
-        for <linux-efi@vger.kernel.org>; Tue, 02 Jul 2019 18:53:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=YiKm32fbrJXvadhbbH8R2AC30oRr6R/vtBXdk9UU6tg=;
-        b=rouFNaQrAD+LVzdQfwSGl8KyN3XCFATAsscS1nSiY3nqrVKn88L+2X9hpP8G0LkkWC
-         NbXBVmKrNM2i/FYXzVyY65owea83CsnsL2EYq3GhtYm+wIktVkTqWtRAWOulqc+2Eijb
-         tNZhEVAQRLz89yF0sk+uF/rQSzJNULI8c49x9De777zT65pYsUUSurWdrSNR9lmy2NEt
-         9eY0VkqUb2j+lxdkUSL9dhgUIzql3NanYjEhvjtxJVfIfVj1EIEm0MIgXIiUzfQXV33O
-         rHDGqg4EVcvtwueBiup5u0kebQrjrGClyg1D+nX2fPJPU7N/NtWIDb7JpF1b7OEh92lu
-         QbyA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=YiKm32fbrJXvadhbbH8R2AC30oRr6R/vtBXdk9UU6tg=;
-        b=S1RV3owqwzhQ3DeZwiQswdWRTKrQRzcTLYN4zOMRLGE9mA+7eK6bA1g/rezwcuZrSv
-         oJJ8c/Map+WZc3l3wq1CeTjBZFTm4pyAppV+TKDBsZxvjIiKsvtaEN6mIcXClXPqRPPi
-         zOb7iYOR34cdQON8ilUrmGwSuffu5/nSfF3rU9ent9lQn65MOqa3/+wy7vK7t79UQceS
-         8jlG5yWBAqe5IXPvesvAFaZhxNueQANLmDUbaOtWAser7oxHbAIVQs/ZnqQnXtRWdYo8
-         yF0SbothnEr5R6AFwEOr2hs3EO3EpTDPIi1hhP4smGtVMw/Yft8KDZEYfs086rPorzJD
-         dbyA==
-X-Gm-Message-State: APjAAAVBXZNWVtFEJjC1PQkpHpJU7OLRUt+bamjHOQAq3zsP+P4ZuxM8
-        0YGMDtvg0bgfGlTFW2O+soMhWSeBrMsCHemoxeKSARJ7Xyc=
-X-Google-Smtp-Source: APXvYqyzF5MuwoPkI10B4TbfC/rzEV0YiPHBluGmH1/zHhhFfHwqiAfVyxlK7Fj4GY/VFsoeVVgftVQDaSC75isjmzg=
-X-Received: by 2002:adf:b69a:: with SMTP id j26mr17416154wre.93.1562099731858;
- Tue, 02 Jul 2019 13:35:31 -0700 (PDT)
+        id S1728228AbfGCCSS (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 2 Jul 2019 22:18:18 -0400
+Received: from mail.kernel.org ([198.145.29.99]:56222 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728004AbfGCCSS (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Tue, 2 Jul 2019 22:18:18 -0400
+Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id A509821874;
+        Wed,  3 Jul 2019 02:18:16 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1562120297;
+        bh=5H906uRkLsp9h23SbnZEAf41XmBJLvnlTnIbGpZBXMc=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=hphMU/1GtREF6aQTSsxZiwPF1HT2m3CVD7O7nKhi+Vq0Uqur+QU37CptIYWnqmxBH
+         Gs5qY03NMbI2RQUWj0gFa1QbbfT2MMcp3WEcgkme3ldxR0ropi/3lXWlv12QBVZqBZ
+         jUNrlUrh19YonwIO/sQtLYe3OfK4NwA6cPQ6CXSs=
+From:   Sasha Levin <sashal@kernel.org>
+To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc:     Hans de Goede <hdegoede@redhat.com>,
+        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
+        Sasha Levin <sashal@kernel.org>, linux-efi@vger.kernel.org
+Subject: [PATCH AUTOSEL 4.14 02/13] efi/bgrt: Drop BGRT status field reserved bits check
+Date:   Tue,  2 Jul 2019 22:18:03 -0400
+Message-Id: <20190703021814.18385-2-sashal@kernel.org>
+X-Mailer: git-send-email 2.20.1
+In-Reply-To: <20190703021814.18385-1-sashal@kernel.org>
+References: <20190703021814.18385-1-sashal@kernel.org>
 MIME-Version: 1.0
-References: <20190630203614.5290-1-robdclark@gmail.com> <20190630203614.5290-3-robdclark@gmail.com>
- <CAKv+Gu_8BOt+f8RTspHo+se-=igZba1zL0+jWLV2HuuUXCKYpA@mail.gmail.com>
-In-Reply-To: <CAKv+Gu_8BOt+f8RTspHo+se-=igZba1zL0+jWLV2HuuUXCKYpA@mail.gmail.com>
-From:   Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Date:   Tue, 2 Jul 2019 22:35:16 +0200
-Message-ID: <CAKv+Gu-KhPJxxJA3+J813OPcnoAD4nHq6MhiRTJSd_5y1dPNnw@mail.gmail.com>
-Subject: Re: [PATCH 2/4] efi/libstub: detect panel-id
-To:     Rob Clark <robdclark@gmail.com>
-Cc:     dri-devel <dri-devel@lists.freedesktop.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        freedreno@lists.freedesktop.org, aarch64-laptops@lists.linaro.org,
-        Rob Clark <robdclark@chromium.org>,
-        Ingo Molnar <mingo@kernel.org>, Will Deacon <will@kernel.org>,
-        Leif Lindholm <leif.lindholm@linaro.org>,
-        Alexander Graf <agraf@suse.de>,
-        Steve Capper <steve.capper@arm.com>,
-        Lukas Wunner <lukas@wunner.de>,
-        Julien Thierry <julien.thierry@arm.com>,
-        linux-efi <linux-efi@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+X-stable: review
+X-Patchwork-Hint: Ignore
+Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, 2 Jul 2019 at 22:26, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
->
-> On Sun, 30 Jun 2019 at 22:36, Rob Clark <robdclark@gmail.com> wrote:
-> >
-> > From: Rob Clark <robdclark@chromium.org>
-> >
-> > On snapdragon aarch64 laptops, a 'UEFIDisplayInfo' variable is provided
-> > to communicate some information about the display.  Crutially it has the
-> > panel-id, so the appropriate panel driver can be selected.  Read this
-> > out and stash in /chosen/panel-id so that display driver can use it to
-> > pick the appropriate panel.
-> >
-> > Signed-off-by: Rob Clark <robdclark@chromium.org>
->
-> Hi Rob,
->
-> I understand why you are doing this, but this *really* belongs elsewhere.
->
-> So we are dealing with a platform that violates the UEFI spec, since
-> it does not bother to implement variable services at runtime (because
-> MS let the vendor get away with this).
->
+From: Hans de Goede <hdegoede@redhat.com>
 
-To clarify, the above remark applies to populating the DT from the OS
-rather than from the firmware.
+[ Upstream commit a483fcab38b43fb34a7f12ab1daadd3907f150e2 ]
 
-> First of all, to pass data between the EFI stub and the OS proper, we
-> should use a configuration table rather than a DT property, since the
-> former is ACPI/DT agnostic. Also, I'd like the consumer of the data to
-> actually interpret it, i.e., just dump the whole opaque thing into a
-> config table in the stub, and do the parsing in the OS proper.
->
-> However, I am not thrilled at adding code to the stub that
-> unconditionally looks for some variable with some magic name on all
-> ARM/arm64 EFI systems, so this will need to live under a Kconfig
-> option that depends on ARM64 (and does not default to y)
->
+Starting with ACPI 6.2 bits 1 and 2 of the BGRT status field are no longer
+reserved. These bits are now used to indicate if the image needs to be
+rotated before being displayed.
 
-... but saving variables at boot time for consumption at runtime is
-something that we will likely see more of in the future.
+The first device using these bits has now shown up (the GPD MicroPC) and
+the reserved bits check causes us to reject the valid BGRT table on this
+device.
+
+Rather then changing the reserved bits check, allowing only the 2 new bits,
+instead just completely remove it so that we do not end up with a similar
+problem when more bits are added in the future.
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ drivers/firmware/efi/efi-bgrt.c | 5 -----
+ 1 file changed, 5 deletions(-)
+
+diff --git a/drivers/firmware/efi/efi-bgrt.c b/drivers/firmware/efi/efi-bgrt.c
+index 50793fda7819..e3d86aa1ad5d 100644
+--- a/drivers/firmware/efi/efi-bgrt.c
++++ b/drivers/firmware/efi/efi-bgrt.c
+@@ -50,11 +50,6 @@ void __init efi_bgrt_init(struct acpi_table_header *table)
+ 		       bgrt->version);
+ 		goto out;
+ 	}
+-	if (bgrt->status & 0xfe) {
+-		pr_notice("Ignoring BGRT: reserved status bits are non-zero %u\n",
+-		       bgrt->status);
+-		goto out;
+-	}
+ 	if (bgrt->image_type != 0) {
+ 		pr_notice("Ignoring BGRT: invalid image type %u (expected 0)\n",
+ 		       bgrt->image_type);
+-- 
+2.20.1
+
