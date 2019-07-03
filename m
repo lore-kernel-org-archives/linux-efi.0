@@ -7,48 +7,50 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AB32EC5B57D
-	for <linux-efi@archiver.kernel.org>; Wed,  3 Jul 2019 02:21:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ECDBFC06511
+	for <linux-efi@archiver.kernel.org>; Wed,  3 Jul 2019 02:22:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 7AE5521874
-	for <linux-efi@archiver.kernel.org>; Wed,  3 Jul 2019 02:21:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BCCE620673
+	for <linux-efi@archiver.kernel.org>; Wed,  3 Jul 2019 02:22:26 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1562120466;
-	bh=Q9xGE9S4674mQZc11CtxVVU6MEbdl6REXUoTXVQ4/KM=;
+	s=default; t=1562120546;
+	bh=kxd6DhSp0GnWT3gKbEadLw4u2K2Ny8vIqZRTBU3o9zI=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=yR6rUWZnCWR86mUxR6R99tJvADEBhQRN9JiGSXhblzba1seLbLUMcEQDCqxGvWk+B
-	 iN+NzRufAAcr0+opKn8rLe97cXWI/PXaoTDpjypJHw9iD8CYJme9vkOoP8mtmcrUQh
-	 /nKeC3KvruRPgdzCNhyKjg9M2KlfgBafcvYr+ktY=
+	b=khB3yXUcjPxmUc3H60KfM0hC5T+BmQuDq94e3Sjuglv9fOxSPPCBF/5xK8+jhGSl/
+	 XlJiEEd4Ut+BYZ0PJcuQiiEA0KlqByliUkjVVuZ42FI+jcoCkVCi2gGv1Jjsrxacxv
+	 vQC2KCLy69xuCTNdVeW6MwrcCYvjkKKYEKUIjgtU=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727729AbfGCCVB (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 2 Jul 2019 22:21:01 -0400
-Received: from mail.kernel.org ([198.145.29.99]:54824 "EHLO mail.kernel.org"
+        id S1727641AbfGCCPi (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 2 Jul 2019 22:15:38 -0400
+Received: from mail.kernel.org ([198.145.29.99]:53944 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727939AbfGCCQa (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Tue, 2 Jul 2019 22:16:30 -0400
+        id S1727626AbfGCCPi (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Tue, 2 Jul 2019 22:15:38 -0400
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id DB6882187F;
-        Wed,  3 Jul 2019 02:16:28 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 67686218A3;
+        Wed,  3 Jul 2019 02:15:36 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1562120189;
-        bh=Q9xGE9S4674mQZc11CtxVVU6MEbdl6REXUoTXVQ4/KM=;
+        s=default; t=1562120137;
+        bh=kxd6DhSp0GnWT3gKbEadLw4u2K2Ny8vIqZRTBU3o9zI=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=lz6S4g2Bsgz1eXuoCWXHo9o/tasHKowCyCJN1IGfg1/s7w/9iKQ1jgHpSyquB7WWI
-         fJdS5G/0le5IouoDnMQyBecFkCnHkeux/YS2m+NTC1eb3f6qYaCx9SdjOTUczYCT8+
-         epnDE/BO3nVrkliIc8sLQuVgDnLyEA5i+oV0XOXI=
+        b=IP4pcFdYItVDa6lu9q8+cT88ZD/tCPgk0fJ0KK27f7rNtzR/Rb25VEOPpAXRJSGLl
+         mmU25ISJVJS2xtXONrIzkNhyZAFeXhKIQB61K1IZoURtUFTFv3v97rkxNRc4FUYwNQ
+         F9dkSoLpxM0NnoBsxzMzGIsX60BL6IxCVoj8aS3E=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Hans de Goede <hdegoede@redhat.com>,
+Cc:     Qian Cai <cai@lca.pw>,
+        "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>,
         Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Sasha Levin <sashal@kernel.org>, linux-efi@vger.kernel.org
-Subject: [PATCH AUTOSEL 4.19 03/26] efi/bgrt: Drop BGRT status field reserved bits check
-Date:   Tue,  2 Jul 2019 22:16:02 -0400
-Message-Id: <20190703021625.18116-3-sashal@kernel.org>
+        Sasha Levin <sashal@kernel.org>, linux-efi@vger.kernel.org,
+        platform-driver-x86@vger.kernel.org
+Subject: [PATCH AUTOSEL 5.1 14/39] x86/efi: fix a -Wtype-limits compilation warning
+Date:   Tue,  2 Jul 2019 22:14:49 -0400
+Message-Id: <20190703021514.17727-14-sashal@kernel.org>
 X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20190703021625.18116-1-sashal@kernel.org>
-References: <20190703021625.18116-1-sashal@kernel.org>
+In-Reply-To: <20190703021514.17727-1-sashal@kernel.org>
+References: <20190703021514.17727-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -58,45 +60,37 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Hans de Goede <hdegoede@redhat.com>
+From: Qian Cai <cai@lca.pw>
 
-[ Upstream commit a483fcab38b43fb34a7f12ab1daadd3907f150e2 ]
+[ Upstream commit 919aef44d73d5d0c04213cb1bc31149cc074e65e ]
 
-Starting with ACPI 6.2 bits 1 and 2 of the BGRT status field are no longer
-reserved. These bits are now used to indicate if the image needs to be
-rotated before being displayed.
+Compiling a kernel with W=1 generates this warning,
 
-The first device using these bits has now shown up (the GPD MicroPC) and
-the reserved bits check causes us to reject the valid BGRT table on this
-device.
+arch/x86/platform/efi/quirks.c:731:16: warning: comparison of unsigned
+expression >= 0 is always true [-Wtype-limits]
 
-Rather then changing the reserved bits check, allowing only the 2 new bits,
-instead just completely remove it so that we do not end up with a similar
-problem when more bits are added in the future.
-
-Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+Fixes: 3425d934fc03 ("efi/x86: Handle page faults occurring while running ...")
+Signed-off-by: Qian Cai <cai@lca.pw>
+Acked-by: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/firmware/efi/efi-bgrt.c | 5 -----
- 1 file changed, 5 deletions(-)
+ arch/x86/platform/efi/quirks.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/firmware/efi/efi-bgrt.c b/drivers/firmware/efi/efi-bgrt.c
-index b22ccfb0c991..2bf4d31f4967 100644
---- a/drivers/firmware/efi/efi-bgrt.c
-+++ b/drivers/firmware/efi/efi-bgrt.c
-@@ -50,11 +50,6 @@ void __init efi_bgrt_init(struct acpi_table_header *table)
- 		       bgrt->version);
- 		goto out;
- 	}
--	if (bgrt->status & 0xfe) {
--		pr_notice("Ignoring BGRT: reserved status bits are non-zero %u\n",
--		       bgrt->status);
--		goto out;
--	}
- 	if (bgrt->image_type != 0) {
- 		pr_notice("Ignoring BGRT: invalid image type %u (expected 0)\n",
- 		       bgrt->image_type);
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index a25a9fd987a9..529522c62d89 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -724,7 +724,7 @@ void efi_recover_from_page_fault(unsigned long phys_addr)
+ 	 * Address range 0x0000 - 0x0fff is always mapped in the efi_pgd, so
+ 	 * page faulting on these addresses isn't expected.
+ 	 */
+-	if (phys_addr >= 0x0000 && phys_addr <= 0x0fff)
++	if (phys_addr <= 0x0fff)
+ 		return;
+ 
+ 	/*
 -- 
 2.20.1
 
