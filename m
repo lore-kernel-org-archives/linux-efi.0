@@ -1,123 +1,114 @@
-Return-Path: <SRS0=HfSR=VJ=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=Kl0G=VM=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-17.4 required=3.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT,
+	USER_IN_DEF_DKIM_WL autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E7F1C742A5
-	for <linux-efi@archiver.kernel.org>; Fri, 12 Jul 2019 02:22:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CF849C7618F
+	for <linux-efi@archiver.kernel.org>; Mon, 15 Jul 2019 20:01:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id F316321019
-	for <linux-efi@archiver.kernel.org>; Fri, 12 Jul 2019 02:22:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A9D2220659
+	for <linux-efi@archiver.kernel.org>; Mon, 15 Jul 2019 20:01:11 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="SGpuCm9n"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729042AbfGLCWU (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 11 Jul 2019 22:22:20 -0400
-Received: from szxga05-in.huawei.com ([45.249.212.191]:2263 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1728815AbfGLCWT (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Thu, 11 Jul 2019 22:22:19 -0400
-Received: from DGGEMS401-HUB.china.huawei.com (unknown [172.30.72.58])
-        by Forcepoint Email with ESMTP id 7CC8D66BCFCD34EAECC9;
-        Fri, 12 Jul 2019 10:22:15 +0800 (CST)
-Received: from localhost.localdomain (10.67.212.75) by
- DGGEMS401-HUB.china.huawei.com (10.3.19.201) with Microsoft SMTP Server id
- 14.3.439.0; Fri, 12 Jul 2019 10:22:04 +0800
-From:   Xiaofei Tan <tanxiaofei@huawei.com>
-To:     <linux-kernel@vger.kernel.org>
-CC:     Xiaofei Tan <tanxiaofei@huawei.com>, <linux-acpi@vger.kernel.org>,
-        <linux-efi@vger.kernel.org>, <rjw@rjwysocki.net>,
-        <lenb@kernel.org>, <tony.luck@intel.com>, <bp@alien8.de>,
-        <ying.huang@intel.com>, <ross.lagerwall@citrix.com>,
-        <ard.biesheuvel@linaro.org>, <lance.ortiz@hp.com>
-Subject: [PATCH 1/1] efi: cper: print AER info of PCIe fatal error
-Date:   Fri, 12 Jul 2019 10:20:17 +0800
-Message-ID: <1562898017-27166-1-git-send-email-tanxiaofei@huawei.com>
-X-Mailer: git-send-email 2.8.1
-MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.67.212.75]
-X-CFilter-Loop: Reflected
+        id S1731494AbfGOUBK (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 15 Jul 2019 16:01:10 -0400
+Received: from mail-pl1-f201.google.com ([209.85.214.201]:43284 "EHLO
+        mail-pl1-f201.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1732768AbfGOUBI (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 15 Jul 2019 16:01:08 -0400
+Received: by mail-pl1-f201.google.com with SMTP id t2so8819646plo.10
+        for <linux-efi@vger.kernel.org>; Mon, 15 Jul 2019 13:01:07 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20161025;
+        h=date:in-reply-to:message-id:mime-version:references:subject:from:to
+         :cc;
+        bh=1gkPgS/LUQWYTDhNcm4n5VtrDpueDO81OkRBGTKoxwg=;
+        b=SGpuCm9nyv32QRgah8+1J8biiXF/tNR9HQ4GFBCBrRmNuWoaPEMCoMeG8CznrJ2xBC
+         zkbDMbcYm8YcsYwmLzYCmSKjnsTMSvkKRRECL0tqQ36b9oNCLd5cuBcoa4BpCMdF21Fu
+         O2tmCsQco516iIqUSW/mBRVF6fBtQAPjVYpsnS6G2E/HLyeMh1D0p0TkTpbvhIPBXbtS
+         qtbaAbxFrni0pU2z0i41Fjy8ygJksGW51zsL1JC0ZC9Y3KF+G5b/rSrWYgjlPNfyEXRH
+         GI0wIh/cCu2IgLJwz+vjTQ1V+oJarCXW6xl6K2cpPDlePYHuZsHrVGZ78+B3jX0whKqm
+         o3xw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:in-reply-to:message-id:mime-version
+         :references:subject:from:to:cc;
+        bh=1gkPgS/LUQWYTDhNcm4n5VtrDpueDO81OkRBGTKoxwg=;
+        b=dqc9hhY6YamL+YzPWt/4qQrL/aOQc+aNUavwTEEzjovx8HO6CFUap17/lZdVQZ4cyi
+         z4pI5DaIiA6ZSKufu3+1uPUTubobevcuPZVjAilWfYserYhPXxpdDu1XxmJZWNw/3qXH
+         VX8rWykYrASv/edPiG389ozTdgtZ422yE2R51s3ppURcWQzYU2J40WM6UbHX5+HrN9MJ
+         Fqjz/pz40fBkn/sJ8kL8KtuONlk7Va0ZyCk5bC/RVPmN4kAHQidT+w7+nWictp/KlgpK
+         /fcMBV0ZkMUeSsXpAicF0cDx1iYKxJ9lcEaFBH5+fpGmChEZXWnpatN45VnF4aW20G9H
+         MBUQ==
+X-Gm-Message-State: APjAAAVQZaqXSJY01776hYVA7SbCTewebt6mG+UrvEa2JMHCuKcizsCh
+        hT2nOjO+zGcXpT/gnWZ2Stdx5l/fG6MlXMCA39wUTg==
+X-Google-Smtp-Source: APXvYqx8IB42RsjuQvqr21hPpPSRXnXopU3sD+HW/qRD9CSWBN6XHwG27W8+mPAUWW4oj0dcn2icPxBiU0iXrQYpoIx1NQ==
+X-Received: by 2002:a63:7e1d:: with SMTP id z29mr28729222pgc.346.1563220867059;
+ Mon, 15 Jul 2019 13:01:07 -0700 (PDT)
+Date:   Mon, 15 Jul 2019 12:59:45 -0700
+In-Reply-To: <20190715195946.223443-1-matthewgarrett@google.com>
+Message-Id: <20190715195946.223443-29-matthewgarrett@google.com>
+Mime-Version: 1.0
+References: <20190715195946.223443-1-matthewgarrett@google.com>
+X-Mailer: git-send-email 2.22.0.510.g264f2c817a-goog
+Subject: [PATCH V35 28/29] efi: Restrict efivar_ssdt_load when the kernel is
+ locked down
+From:   Matthew Garrett <matthewgarrett@google.com>
+To:     jmorris@namei.org
+Cc:     linux-security-module@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-api@vger.kernel.org,
+        Matthew Garrett <matthewgarrett@google.com>,
+        Matthew Garrett <mjg59@google.com>,
+        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
+        Kees Cook <keescook@chromium.org>, linux-efi@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-AER info of PCIe fatal error is not printed in the current driver.
-Because APEI driver will panic directly for fatal error, and can't
-run to the place of printing AER info.
+efivar_ssdt_load allows the kernel to import arbitrary ACPI code from an
+EFI variable, which gives arbitrary code execution in ring 0. Prevent
+that when the kernel is locked down.
 
-An example log is as following:
-[ 3157.655028] {763}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 11
-[ 3157.663610] {763}[Hardware Error]: event severity: fatal
-[ 3157.663612] {763}[Hardware Error]:  Error 0, type: fatal
-[ 3157.663614] {763}[Hardware Error]:   section_type: PCIe error
-[ 3157.680328] {763}[Hardware Error]:   port_type: 0, PCIe end point
-[ 3157.680329] {763}[Hardware Error]:   version: 4.0
-[ 3157.680332] {763}[Hardware Error]:   command: 0x0000, status: 0x0010
-[ 3157.698757] {763}[Hardware Error]:   device_id: 0000:82:00.0
-[ 3157.698758] {763}[Hardware Error]:   slot: 0
-[ 3157.698759] {763}[Hardware Error]:   secondary_bus: 0x00
-[ 3157.698760] {763}[Hardware Error]:   vendor_id: 0x8086, device_id: 0x10fb
-[ 3157.698761] {763}[Hardware Error]:   class_code: 000002
-[ 3157.698825] Kernel panic - not syncing: Fatal hardware error!
-
-This issue was imported by the patch, '37448adfc7ce ("aerdrv: Move
-cper_print_aer() call out of interrupt context")'. To fix this issue,
-this patch adds print of AER info in cper_print_pcie() for fatal error.
-
-Here is the example log after this patch applied:
-[ 7032.893566] {24}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 10
-[ 7032.901965] {24}[Hardware Error]: event severity: fatal
-[ 7032.907166] {24}[Hardware Error]:  Error 0, type: fatal
-[ 7032.912366] {24}[Hardware Error]:   section_type: PCIe error
-[ 7032.917998] {24}[Hardware Error]:   port_type: 0, PCIe end point
-[ 7032.923974] {24}[Hardware Error]:   version: 4.0
-[ 7032.928569] {24}[Hardware Error]:   command: 0x0546, status: 0x4010
-[ 7032.934806] {24}[Hardware Error]:   device_id: 0000:01:00.0
-[ 7032.940352] {24}[Hardware Error]:   slot: 0
-[ 7032.944514] {24}[Hardware Error]:   secondary_bus: 0x00
-[ 7032.949714] {24}[Hardware Error]:   vendor_id: 0x15b3, device_id: 0x1019
-[ 7032.956381] {24}[Hardware Error]:   class_code: 000002
-[ 7032.961495] {24}[Hardware Error]:   aer_uncor_status: 0x00040000, aer_uncor_mask: 0x00000000
-[ 7032.969891] {24}[Hardware Error]:   aer_uncor_severity: 0x00062010
-[ 7032.976042] {24}[Hardware Error]:   TLP Header: 000000c0 01010000 00000001 00000000
-[ 7032.983663] Kernel panic - not syncing: Fatal hardware error!
-
-Fixes: 37448adfc7ce ("aerdrv: Move cper_print_aer() call out of
-interrupt context")
-
-Signed-off-by: Xiaofei Tan <tanxiaofei@huawei.com>
+Signed-off-by: Matthew Garrett <mjg59@google.com>
+Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Reviewed-by: Kees Cook <keescook@chromium.org>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-efi@vger.kernel.org
 ---
- drivers/firmware/efi/cper.c | 13 +++++++++++++
- 1 file changed, 13 insertions(+)
+ drivers/firmware/efi/efi.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-index 8fa977c..bf8600d 100644
---- a/drivers/firmware/efi/cper.c
-+++ b/drivers/firmware/efi/cper.c
-@@ -390,6 +390,19 @@ static void cper_print_pcie(const char *pfx, const struct cper_sec_pcie *pcie,
- 		printk(
- 	"%s""bridge: secondary_status: 0x%04x, control: 0x%04x\n",
- 	pfx, pcie->bridge.secondary_status, pcie->bridge.control);
-+	if (pcie->validation_bits & CPER_PCIE_VALID_AER_INFO &&
-+	    gdata->error_severity & CPER_SEV_FATAL) {
-+		struct aer_capability_regs *aer;
-+
-+		aer = (struct aer_capability_regs *)pcie->aer_info;
-+		printk("%saer_uncor_status: 0x%08x, aer_uncor_mask: 0x%08x\n",
-+		       pfx, aer->uncor_status, aer->uncor_mask);
-+		printk("%saer_uncor_severity: 0x%08x\n",
-+		       pfx, aer->uncor_severity);
-+		printk("%sTLP Header: %08x %08x %08x %08x\n", pfx,
-+		       aer->header_log.dw0, aer->header_log.dw1,
-+		       aer->header_log.dw2, aer->header_log.dw3);
-+	}
- }
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index ad3b1f4866b3..776f479e5499 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -30,6 +30,7 @@
+ #include <linux/acpi.h>
+ #include <linux/ucs2_string.h>
+ #include <linux/memblock.h>
++#include <linux/security.h>
  
- static void cper_print_tstamp(const char *pfx,
+ #include <asm/early_ioremap.h>
+ 
+@@ -242,6 +243,11 @@ static void generic_ops_unregister(void)
+ static char efivar_ssdt[EFIVAR_SSDT_NAME_MAX] __initdata;
+ static int __init efivar_ssdt_setup(char *str)
+ {
++	int ret = security_locked_down(LOCKDOWN_ACPI_TABLES);
++
++	if (ret)
++		return ret;
++
+ 	if (strlen(str) < sizeof(efivar_ssdt))
+ 		memcpy(efivar_ssdt, str, strlen(str));
+ 	else
 -- 
-2.8.1
+2.22.0.510.g264f2c817a-goog
 
