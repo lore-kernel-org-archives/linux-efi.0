@@ -1,173 +1,114 @@
-Return-Path: <SRS0=UfN7=VO=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=fBev=VP=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.0 required=3.0 tests=DATE_IN_PAST_12_24,
-	DKIMWL_WL_HIGH,DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-17.4 required=3.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT,
+	USER_IN_DEF_DKIM_WL autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B1AFBC76186
-	for <linux-efi@archiver.kernel.org>; Wed, 17 Jul 2019 13:13:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 11EE0C76196
+	for <linux-efi@archiver.kernel.org>; Thu, 18 Jul 2019 19:45:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 781612182B
-	for <linux-efi@archiver.kernel.org>; Wed, 17 Jul 2019 13:13:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DF26C208C0
+	for <linux-efi@archiver.kernel.org>; Thu, 18 Jul 2019 19:45:41 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="ig4sFhs4"
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="pXA0X1WY"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725936AbfGQNNM (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 17 Jul 2019 09:13:12 -0400
-Received: from userp2130.oracle.com ([156.151.31.86]:47484 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725948AbfGQNNM (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 17 Jul 2019 09:13:12 -0400
-Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
-        by userp2130.oracle.com (8.16.0.27/8.16.0.27) with SMTP id x6HD9J7t194675;
-        Wed, 17 Jul 2019 13:12:31 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
- subject : date : message-id; s=corp-2018-07-02;
- bh=9R9vGnDDSVcIlOsrGA3wHv4ZyafWuZt2OPX/DOooBok=;
- b=ig4sFhs4TYsolVmYMcb5UwuC+TvWHZGMiXFRzgRRiOurtxKkS3IgDLLOoc5h98Fnp2Wf
- DuvyYMWe7nQdQA3LpTuXTN63iFfL0fvaCruaC+Uz7zRq0bfZgQ4ci/aESHVZSQdmTuYV
- 1cGWByxGZjXO7jQzHsGIUyCIt+MvqjQSbniCp0RUmii7CS0N/zVTfrUQvIxIjXJ5dHKl
- +G+E8aeWSjl4UwUpsAiOHMkUPGRFJc6uwqXEKJMN+ErOqDbrMo7nFUALlaaioHMbQMno
- YssEewHcywELRcZYWk0swJG7Loqmop53rh7zblkMpoJbc8bDBQMNzXP30bNrTGI67xOx Ig== 
-Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
-        by userp2130.oracle.com with ESMTP id 2tq6qttnae-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 17 Jul 2019 13:12:31 +0000
-Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
-        by userp3020.oracle.com (8.16.0.27/8.16.0.27) with SMTP id x6HD7b9S021756;
-        Wed, 17 Jul 2019 13:12:31 GMT
-Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
-        by userp3020.oracle.com with ESMTP id 2tsmccd3w0-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 17 Jul 2019 13:12:31 +0000
-Received: from abhmp0001.oracle.com (abhmp0001.oracle.com [141.146.116.7])
-        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id x6HDCPZR001934;
-        Wed, 17 Jul 2019 13:12:30 GMT
-Received: from z2.cn.oracle.com (/10.182.69.87)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Wed, 17 Jul 2019 13:12:25 +0000
-From:   Zhenzhong Duan <zhenzhong.duan@oracle.com>
-To:     linux-kernel@vger.kernel.org
-Cc:     linux-efi@vger.kernel.org, x86@kernel.org,
-        Zhenzhong Duan <zhenzhong.duan@oracle.com>,
+        id S2404133AbfGRTpc (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 18 Jul 2019 15:45:32 -0400
+Received: from mail-pf1-f201.google.com ([209.85.210.201]:40733 "EHLO
+        mail-pf1-f201.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2404121AbfGRTpc (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 18 Jul 2019 15:45:32 -0400
+Received: by mail-pf1-f201.google.com with SMTP id z1so17184202pfb.7
+        for <linux-efi@vger.kernel.org>; Thu, 18 Jul 2019 12:45:31 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20161025;
+        h=date:in-reply-to:message-id:mime-version:references:subject:from:to
+         :cc;
+        bh=1gkPgS/LUQWYTDhNcm4n5VtrDpueDO81OkRBGTKoxwg=;
+        b=pXA0X1WYESnUxeTUYFiBCooMuuh4vW22b03ZXSm5zMUF8YBE6F9xjLpiSkz32ut3dV
+         sVCzdtElGnDxQykLV1WTTmAb4YgbqMhw/hJhKNId5sf+lP1WkFe0DHEDbRiM4z2hfhLJ
+         iK6U7KPrBHEEp8izpgpV6X73LDyuvV6V+9ToWMovS4380QxL1/U7mzutzATNB8OaZYHm
+         Kh4FpkPv0Fv9auWT8s+aCImHbJyjCZGGXPxuA7yH/Mz+sBDaleVUmj4UhNsPTyHTjynY
+         rYOMdVuEtQROB+t1c2KOrP0kx5v/9LJmd1xN+mRHEQjwWOj18vFW99Kt5KEGb6PYfMR2
+         S60g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:in-reply-to:message-id:mime-version
+         :references:subject:from:to:cc;
+        bh=1gkPgS/LUQWYTDhNcm4n5VtrDpueDO81OkRBGTKoxwg=;
+        b=ecesEKAHOBAVJ48BHv9SDXcR752m2DBDR364pqa7Ke7eziINBB5no6aoJR3rsqSoqW
+         Ol2eyNo/aOQENf4uvGO9jYGCiSlB5q68B6nuxZt6H+xWRH8MWdOdhYmpuTbwCXmP8kBe
+         YGonx0LDwrVqu6I4QJbpsPzTspF5kEc1BD8MqswN6HIz8j8IR0S6KWbdhLLc5CtTW0SW
+         84Jkj+ku6r+MbeNq2B+aWxNzgV1o6J03xA+ng4Rro8HQpGTpF9E97FhrA35A83hmgJNd
+         1zR5fEzxSrqA74toJt1d9NNHOgZpx8A9L6ecCdF5oT9CwO3aY89X9o+5xt65VRJJNzPk
+         2ZQA==
+X-Gm-Message-State: APjAAAUPrJCC6/9pVPPiC41kVHDc1P6k6sH5Ht2PgXjFB+TwVUsfnLeD
+        9bEiWtoF04DAAzgTf2yezKyks0OlY4BAzIZqRs2aZw==
+X-Google-Smtp-Source: APXvYqxwqkDrXVnqXgFX8V2quFdORdqeEDNkSG6F+hbmam7qsgt7IU5OHfo3gKWFROaZ4LnpcXcAdTeF5PDp8QS5kQDg+Q==
+X-Received: by 2002:a63:24a:: with SMTP id 71mr24650403pgc.273.1563479131021;
+ Thu, 18 Jul 2019 12:45:31 -0700 (PDT)
+Date:   Thu, 18 Jul 2019 12:44:14 -0700
+In-Reply-To: <20190718194415.108476-1-matthewgarrett@google.com>
+Message-Id: <20190718194415.108476-29-matthewgarrett@google.com>
+Mime-Version: 1.0
+References: <20190718194415.108476-1-matthewgarrett@google.com>
+X-Mailer: git-send-email 2.22.0.510.g264f2c817a-goog
+Subject: [PATCH V36 28/29] efi: Restrict efivar_ssdt_load when the kernel is
+ locked down
+From:   Matthew Garrett <matthewgarrett@google.com>
+To:     jmorris@namei.org
+Cc:     linux-security-module@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-api@vger.kernel.org,
+        Matthew Garrett <matthewgarrett@google.com>,
+        Matthew Garrett <mjg59@google.com>,
         Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>
-Subject: [PATCH] x86/efi: Remove unused variables
-Date:   Tue, 16 Jul 2019 21:15:57 +0800
-Message-Id: <1563282957-26898-1-git-send-email-zhenzhong.duan@oracle.com>
-X-Mailer: git-send-email 1.8.3.1
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9320 signatures=668688
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=1 malwarescore=0
- phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=999
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.0.1-1810050000 definitions=main-1907170160
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9320 signatures=668688
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
- suspectscore=1 phishscore=0 bulkscore=0 spamscore=0 clxscore=1011
- lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1810050000
- definitions=main-1907170160
+        Kees Cook <keescook@chromium.org>, linux-efi@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Fix gcc warnings:
+efivar_ssdt_load allows the kernel to import arbitrary ACPI code from an
+EFI variable, which gives arbitrary code execution in ring 0. Prevent
+that when the kernel is locked down.
 
-arch/x86/boot/compressed/eboot.c: In function 'make_boot_params':
-arch/x86/boot/compressed/eboot.c:394:6: warning: unused variable 'i' [-Wunused-variable]
-  int i;
-      ^
-arch/x86/boot/compressed/eboot.c:393:6: warning: unused variable 's1' [-Wunused-variable]
-  u8 *s1;
-      ^
-arch/x86/boot/compressed/eboot.c:392:7: warning: unused variable 's2' [-Wunused-variable]
-  u16 *s2;
-       ^
-arch/x86/boot/compressed/eboot.c:387:8: warning: unused variable 'options' [-Wunused-variable]
-  void *options, *handle;
-        ^
-arch/x86/boot/compressed/eboot.c: In function 'add_e820ext':
-arch/x86/boot/compressed/eboot.c:498:16: warning: unused variable 'size' [-Wunused-variable]
-  unsigned long size;
-                ^
-arch/x86/boot/compressed/eboot.c:497:15: warning: unused variable 'status' [-Wunused-variable]
-  efi_status_t status;
-               ^
-arch/x86/boot/compressed/eboot.c: In function 'exit_boot_func':
-arch/x86/boot/compressed/eboot.c:681:15: warning: unused variable 'status' [-Wunused-variable]
-  efi_status_t status;
-               ^
-arch/x86/boot/compressed/eboot.c:680:8: warning: unused variable 'nr_desc' [-Wunused-variable]
-  __u32 nr_desc;
-        ^
-arch/x86/boot/compressed/eboot.c: In function 'efi_main':
-arch/x86/boot/compressed/eboot.c:750:22: warning: unused variable 'image' [-Wunused-variable]
-  efi_loaded_image_t *image;
-                      ^
-
-Signed-off-by: Zhenzhong Duan <zhenzhong.duan@oracle.com>
+Signed-off-by: Matthew Garrett <mjg59@google.com>
+Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Reviewed-by: Kees Cook <keescook@chromium.org>
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Ingo Molnar <mingo@redhat.com>
-Cc: Borislav Petkov <bp@alien8.de>
+Cc: linux-efi@vger.kernel.org
 ---
- arch/x86/boot/compressed/eboot.c | 10 +---------
- 1 file changed, 1 insertion(+), 9 deletions(-)
+ drivers/firmware/efi/efi.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index 220d127..d6662fd 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -384,14 +384,11 @@ struct boot_params *make_boot_params(struct efi_config *c)
- 	struct apm_bios_info *bi;
- 	struct setup_header *hdr;
- 	efi_loaded_image_t *image;
--	void *options, *handle;
-+	void *handle;
- 	efi_guid_t proto = LOADED_IMAGE_PROTOCOL_GUID;
- 	int options_size = 0;
- 	efi_status_t status;
- 	char *cmdline_ptr;
--	u16 *s2;
--	u8 *s1;
--	int i;
- 	unsigned long ramdisk_addr;
- 	unsigned long ramdisk_size;
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index ad3b1f4866b3..776f479e5499 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -30,6 +30,7 @@
+ #include <linux/acpi.h>
+ #include <linux/ucs2_string.h>
+ #include <linux/memblock.h>
++#include <linux/security.h>
  
-@@ -494,8 +491,6 @@ static void add_e820ext(struct boot_params *params,
- 			struct setup_data *e820ext, u32 nr_entries)
- {
- 	struct setup_data *data;
--	efi_status_t status;
--	unsigned long size;
+ #include <asm/early_ioremap.h>
  
- 	e820ext->type = SETUP_E820_EXT;
- 	e820ext->len  = nr_entries * sizeof(struct boot_e820_entry);
-@@ -677,8 +672,6 @@ static efi_status_t exit_boot_func(efi_system_table_t *sys_table_arg,
- 				   void *priv)
+@@ -242,6 +243,11 @@ static void generic_ops_unregister(void)
+ static char efivar_ssdt[EFIVAR_SSDT_NAME_MAX] __initdata;
+ static int __init efivar_ssdt_setup(char *str)
  {
- 	const char *signature;
--	__u32 nr_desc;
--	efi_status_t status;
- 	struct exit_boot_struct *p = priv;
- 
- 	signature = efi_is_64bit() ? EFI64_LOADER_SIGNATURE
-@@ -747,7 +740,6 @@ struct boot_params *
- efi_main(struct efi_config *c, struct boot_params *boot_params)
- {
- 	struct desc_ptr *gdt = NULL;
--	efi_loaded_image_t *image;
- 	struct setup_header *hdr = &boot_params->hdr;
- 	efi_status_t status;
- 	struct desc_struct *desc;
++	int ret = security_locked_down(LOCKDOWN_ACPI_TABLES);
++
++	if (ret)
++		return ret;
++
+ 	if (strlen(str) < sizeof(efivar_ssdt))
+ 		memcpy(efivar_ssdt, str, strlen(str));
+ 	else
 -- 
-1.8.3.1
+2.22.0.510.g264f2c817a-goog
 
