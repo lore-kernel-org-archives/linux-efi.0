@@ -1,131 +1,77 @@
-Return-Path: <SRS0=yYS8=WS=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=sC0F=WV=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 339E7C3A59D
-	for <linux-efi@archiver.kernel.org>; Thu, 22 Aug 2019 05:41:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BF5AFC3A5A1
+	for <linux-efi@archiver.kernel.org>; Sun, 25 Aug 2019 07:09:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 05047233A2
-	for <linux-efi@archiver.kernel.org>; Thu, 22 Aug 2019 05:41:34 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="qh9NTAxS"
+	by mail.kernel.org (Postfix) with ESMTP id 9283A2082F
+	for <linux-efi@archiver.kernel.org>; Sun, 25 Aug 2019 07:09:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728481AbfHVFla (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 22 Aug 2019 01:41:30 -0400
-Received: from mail-io1-f67.google.com ([209.85.166.67]:44064 "EHLO
-        mail-io1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726857AbfHVFl3 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 22 Aug 2019 01:41:29 -0400
-Received: by mail-io1-f67.google.com with SMTP id j4so1137985iog.11;
-        Wed, 21 Aug 2019 22:41:29 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=hn6rxeyfQPsYnbNUt5MSgWQtbToPh9tKf9jba7m/Mb0=;
-        b=qh9NTAxShXjNLbP7aaKIkgSdqONWOprq9JZrxoqc5kVXFAF5XJO5QWJ5FTba1FYzh3
-         y+OtXi6NNfMAbQe96n5PTZ2GLN8Ybf570q7QcCkXQwkR3A2jqYHPWQTtLJDyCxxQ8vpd
-         FzSSFLB6V/D5k3rOIAg7WfBgNX8of0+VO6VwIiUvUCxse5vr2s4F3MMKuILFAbFrOqNJ
-         lS+1sHQf8TtPAnMc9+mI5kOv/1frTd1/wywNNNTIIz42s5GGVf1QxgFPRhvXI6dIUv/7
-         myvqsmGFBPQngRg+CXIaw4wu72oAay3IjQyGlN2B4sBh6xhEnbbur+SeKGMAfsOPCbsP
-         1RXg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=hn6rxeyfQPsYnbNUt5MSgWQtbToPh9tKf9jba7m/Mb0=;
-        b=nUhf9Phac08CA/jnkLXcJoi/sEPWvbc+5LpZUcUq+7bk2Up3hmSGWRVvOPQucx+MVD
-         o4wnb8TAcupcOYClvAmrpemduSnNTPnAoP/34rddiZBIMqh82oz/5rGe5wEOYXx2CCbB
-         QQe6fIwQQucfEIimFhzDPMjOsB9i+00edLTmi3GjYdP16K6LJ4q8k/BxpbDq0vl0kvoW
-         DMsooqligz/M4fr9nfrPk7yKhcgbF5CU+c47yYqnXzFyJ4fozfjCcY5NzOHtzKtD2YHI
-         IS511i++fXETUhLa1KHl9B6/UHkh8hesd4yJCUAnItuXua3mjorhOcCkaQbv3pGGaR/P
-         dJXw==
-X-Gm-Message-State: APjAAAWbAwT+YZMtjrGt9acXxzEIARfkOBVE5X02ghPpEpS9ITZACmf1
-        PcMcFvt9uOqvhFDFbI7oEe1vr6j+N23a/RjDl7w=
-X-Google-Smtp-Source: APXvYqy6nIsjmdyjJU/y7Jt/ct3pwz+lpQCAmPtDtYRpTMGX/1uH9hIhwQwdQXVE23y8PT5ZqJiCE/t5E0jsquqbZXI=
-X-Received: by 2002:a6b:6e0e:: with SMTP id d14mr25453232ioh.18.1566452488810;
- Wed, 21 Aug 2019 22:41:28 -0700 (PDT)
-MIME-Version: 1.0
-References: <1566400103-18201-1-git-send-email-nayna@linux.ibm.com>
- <1566400103-18201-2-git-send-email-nayna@linux.ibm.com> <eda9210b56ab220519642d272079eeca60a18265.camel@gmail.com>
-In-Reply-To: <eda9210b56ab220519642d272079eeca60a18265.camel@gmail.com>
-From:   "Oliver O'Halloran" <oohall@gmail.com>
-Date:   Thu, 22 Aug 2019 15:41:17 +1000
-Message-ID: <CAOSf1CHOsnnC94DxHhG4opZfYjV7u_ndrE2B3Cr6ZV58RAxoWA@mail.gmail.com>
-Subject: Re: [PATCH v2 1/4] powerpc/powernv: Add OPAL API interface to access
- secure variable
-To:     Nayna Jain <nayna@linux.ibm.com>,
-        linuxppc-dev <linuxppc-dev@ozlabs.org>,
-        linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org
-Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Michael Ellerman <mpe@ellerman.id.au>,
-        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
-        Paul Mackerras <paulus@samba.org>,
-        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Jeremy Kerr <jk@ozlabs.org>,
-        Matthew Garret <matthew.garret@nebula.com>,
-        Mimi Zohar <zohar@linux.ibm.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Claudio Carvalho <cclaudio@linux.ibm.com>,
-        George Wilson <gcwilson@linux.ibm.com>,
-        Elaine Palmer <erpalmer@us.ibm.com>,
-        Eric Ricther <erichte@linux.ibm.com>
-Content-Type: text/plain; charset="UTF-8"
+        id S1725780AbfHYHJr (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 25 Aug 2019 03:09:47 -0400
+Received: from mailout1.hostsharing.net ([83.223.95.204]:54567 "EHLO
+        mailout1.hostsharing.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725767AbfHYHJr (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sun, 25 Aug 2019 03:09:47 -0400
+X-Greylist: delayed 306 seconds by postgrey-1.27 at vger.kernel.org; Sun, 25 Aug 2019 03:09:46 EDT
+Received: from h08.hostsharing.net (h08.hostsharing.net [83.223.95.28])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (Client CN "*.hostsharing.net", Issuer "COMODO RSA Domain Validation Secure Server CA" (not verified))
+        by mailout1.hostsharing.net (Postfix) with ESMTPS id 79D3710192620;
+        Sun, 25 Aug 2019 09:04:39 +0200 (CEST)
+Received: from localhost (unknown [89.246.108.87])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits))
+        (No client certificate requested)
+        by h08.hostsharing.net (Postfix) with ESMTPSA id 153FA603DAE0;
+        Sun, 25 Aug 2019 09:04:39 +0200 (CEST)
+X-Mailbox-Line: From e632fb385b5e3409cf6ebc9c0100dca5b3d35ea3 Mon Sep 17 00:00:00 2001
+Message-Id: <e632fb385b5e3409cf6ebc9c0100dca5b3d35ea3.1566716456.git.lukas@wunner.de>
+From:   Lukas Wunner <lukas@wunner.de>
+Date:   Sun, 25 Aug 2019 09:04:38 +0200
+Subject: [PATCH] efi: cper: Fix endianness of PCIe class code
+To:     Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc:     linux-efi@vger.kernel.org
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Thu, Aug 22, 2019 at 3:02 PM Oliver O'Halloran <oohall@gmail.com> wrote:
->
-> On Wed, 2019-08-21 at 11:08 -0400, Nayna Jain wrote:
-> > diff --git a/arch/powerpc/platforms/powernv/opal.c b/arch/powerpc/platforms/powernv/opal.c
-> > index aba443be7daa..ffe6f1cf0830 100644
-> > --- a/arch/powerpc/platforms/powernv/opal.c
-> > +++ b/arch/powerpc/platforms/powernv/opal.c
-> > @@ -32,6 +32,8 @@
-> >  #include <asm/mce.h>
-> >  #include <asm/imc-pmu.h>
-> >  #include <asm/bug.h>
-> > +#include <asm/secvar.h>
-> > +#include <asm/secboot.h>
-> >
-> >  #include "powernv.h"
-> >
-> > @@ -988,6 +990,9 @@ static int __init opal_init(void)
-> >       /* Initialise OPAL Power control interface */
-> >       opal_power_control_init();
-> >
-> > +     if (is_powerpc_secvar_supported())
-> > +             secvar_init();
-> > +
->
-> The usual pattern here is to have the init function check for support
-> internally.
->
-> Also, is_powerpc_secvar_supported() doesn't appear to be defined
-> anywhere. Is that supposed to be is_opal_secvar_supported()? Or is this
-> series supposed to be applied on top of another series?
+The CPER parser assumes that the class code is big endian, but at least
+on this edk2-derived Intel Purley platform it's little endian:
 
-To answer my own question, yes it depends on the series at [1] which
-adds IMA support. Turns out actually reading the cover letter helps,
-who knew.
+    efi: EFI v2.50 by EDK II BIOS ID:PLYDCRB1.86B.0119.R05.1701181843
+    DMI: Intel Corporation PURLEY/PURLEY, BIOS PLYDCRB1.86B.0119.R05.1701181843 01/18/2017
 
-That said, I'm still not entirely sure about this. The implementation
-of is_powerpc_secvar_supported() in [2] parses the DT and seems to
-assume the DT bindings that OPAL produces. Are those common with the
-DT bindings produced by OF when running on pseries?
+    {1}[Hardware Error]:   device_id: 0000:5d:00.0
+    {1}[Hardware Error]:   slot: 0
+    {1}[Hardware Error]:   secondary_bus: 0x5e
+    {1}[Hardware Error]:   vendor_id: 0x8086, device_id: 0x2030
+    {1}[Hardware Error]:   class_code: 000406
+                                       ^^^^^^ (should be 060400)
 
-[1] http://patchwork.ozlabs.org/project/linuxppc-dev/list/?series=125961
-[2] http://patchwork.ozlabs.org/patch/1149257/
+Signed-off-by: Lukas Wunner <lukas@wunner.de>
+---
+ drivers/firmware/efi/cper.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
->
-> >       return 0;
-> >  }
-> >  machine_subsys_initcall(powernv, opal_init);
->
+diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+index addf0749dd8b..b1af0de2e100 100644
+--- a/drivers/firmware/efi/cper.c
++++ b/drivers/firmware/efi/cper.c
+@@ -381,7 +381,7 @@ static void cper_print_pcie(const char *pfx, const struct cper_sec_pcie *pcie,
+ 		printk("%s""vendor_id: 0x%04x, device_id: 0x%04x\n", pfx,
+ 		       pcie->device_id.vendor_id, pcie->device_id.device_id);
+ 		p = pcie->device_id.class_code;
+-		printk("%s""class_code: %02x%02x%02x\n", pfx, p[0], p[1], p[2]);
++		printk("%s""class_code: %02x%02x%02x\n", pfx, p[2], p[1], p[0]);
+ 	}
+ 	if (pcie->validation_bits & CPER_PCIE_VALID_SERIAL_NUMBER)
+ 		printk("%s""serial number: 0x%04x, 0x%04x\n", pfx,
+-- 
+2.20.1
+
