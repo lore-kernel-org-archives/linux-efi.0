@@ -2,30 +2,30 @@ Return-Path: <SRS0=uLwF=W4=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BD59BC3A5A8
-	for <linux-efi@archiver.kernel.org>; Sun,  1 Sep 2019 20:35:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B60CC3A5A4
+	for <linux-efi@archiver.kernel.org>; Sun,  1 Sep 2019 20:35:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 9186222D6D
-	for <linux-efi@archiver.kernel.org>; Sun,  1 Sep 2019 20:35:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EEBB723429
+	for <linux-efi@archiver.kernel.org>; Sun,  1 Sep 2019 20:35:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728973AbfIAUfk (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 1 Sep 2019 16:35:40 -0400
-Received: from mx1.redhat.com ([209.132.183.28]:46386 "EHLO mx1.redhat.com"
+        id S1729152AbfIAUfy (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 1 Sep 2019 16:35:54 -0400
+Received: from mx1.redhat.com ([209.132.183.28]:51006 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725955AbfIAUfk (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Sun, 1 Sep 2019 16:35:40 -0400
+        id S1725955AbfIAUfx (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Sun, 1 Sep 2019 16:35:53 -0400
 Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 70E7D4ACA5;
-        Sun,  1 Sep 2019 20:35:39 +0000 (UTC)
+        by mx1.redhat.com (Postfix) with ESMTPS id F0FE536887;
+        Sun,  1 Sep 2019 20:35:52 +0000 (UTC)
 Received: from shalem.localdomain.com (ovpn-116-36.ams2.redhat.com [10.36.116.36])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 954FD608C1;
-        Sun,  1 Sep 2019 20:35:34 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id C1FD560920;
+        Sun,  1 Sep 2019 20:35:48 +0000 (UTC)
 From:   Hans de Goede <hdegoede@redhat.com>
 To:     Herbert Xu <herbert@gondor.apana.org.au>,
         "David S . Miller" <davem@davemloft.net>,
@@ -48,39 +48,70 @@ Cc:     Hans de Goede <hdegoede@redhat.com>,
         linux-crypto@vger.kernel.org, x86@kernel.org,
         linux-s390@vger.kernel.org, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Subject: [PATCH 0/9] crypto: sha256 - Merge crypto/sha256.h into crypto/sha.h
-Date:   Sun,  1 Sep 2019 22:35:23 +0200
-Message-Id: <20190901203532.2615-1-hdegoede@redhat.com>
+Subject: [PATCH 3/9] crypto: s390 - Rename functions to avoid conflict with crypto/sha256.h
+Date:   Sun,  1 Sep 2019 22:35:26 +0200
+Message-Id: <20190901203532.2615-4-hdegoede@redhat.com>
+In-Reply-To: <20190901203532.2615-1-hdegoede@redhat.com>
+References: <20190901203532.2615-1-hdegoede@redhat.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
-X-Greylist: Sender IP whitelisted, not delayed by milter-greylist-4.5.16 (mx1.redhat.com [10.5.110.38]); Sun, 01 Sep 2019 20:35:40 +0000 (UTC)
+X-Greylist: Sender IP whitelisted, not delayed by milter-greylist-4.5.16 (mx1.redhat.com [10.5.110.30]); Sun, 01 Sep 2019 20:35:53 +0000 (UTC)
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Hi All,
+Rename static / file-local functions so that they do not conflict with
+the functions declared in crypto/sha256.h.
 
-As promised here is a follow-up series to my earlier sha256 series.
+This is a preparation patch for folding crypto/sha256.h into crypto/sha.h.
 
-Note I have only compiled and tested this series on x86_64 !! 
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+ arch/s390/crypto/sha256_s390.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-All changes to architecture specific code on other archs have not even
-been tested to compile! With that said most of these changes were done
-using my editors search - replace function so things should be fine...
-(and FWIW I did do a Kconfig hack to compile test the ccree change).
-
-The first patch in this series rename various file local functions /
-arrays to avoid conflicts with the new include/crypto/sha256.h, followed
-by a patch merging include/crypto/sha256.h into include/crypto/sha.h.
-
-The last patch makes use of this merging to remove a bit more code
-duplication, making sha256_generic use sha256_init and sha224_init from
-lib/crypto/sha256.c. An added advantage of this, is that this gives these
-2 functions coverage by the crypto selftests.
-
-Regards,
-
-Hans
+diff --git a/arch/s390/crypto/sha256_s390.c b/arch/s390/crypto/sha256_s390.c
+index af7505148f80..b52c87e44939 100644
+--- a/arch/s390/crypto/sha256_s390.c
++++ b/arch/s390/crypto/sha256_s390.c
+@@ -17,7 +17,7 @@
+ 
+ #include "sha.h"
+ 
+-static int sha256_init(struct shash_desc *desc)
++static int s390_sha256_init(struct shash_desc *desc)
+ {
+ 	struct s390_sha_ctx *sctx = shash_desc_ctx(desc);
+ 
+@@ -60,7 +60,7 @@ static int sha256_import(struct shash_desc *desc, const void *in)
+ 
+ static struct shash_alg sha256_alg = {
+ 	.digestsize	=	SHA256_DIGEST_SIZE,
+-	.init		=	sha256_init,
++	.init		=	s390_sha256_init,
+ 	.update		=	s390_sha_update,
+ 	.final		=	s390_sha_final,
+ 	.export		=	sha256_export,
+@@ -76,7 +76,7 @@ static struct shash_alg sha256_alg = {
+ 	}
+ };
+ 
+-static int sha224_init(struct shash_desc *desc)
++static int s390_sha224_init(struct shash_desc *desc)
+ {
+ 	struct s390_sha_ctx *sctx = shash_desc_ctx(desc);
+ 
+@@ -96,7 +96,7 @@ static int sha224_init(struct shash_desc *desc)
+ 
+ static struct shash_alg sha224_alg = {
+ 	.digestsize	=	SHA224_DIGEST_SIZE,
+-	.init		=	sha224_init,
++	.init		=	s390_sha224_init,
+ 	.update		=	s390_sha_update,
+ 	.final		=	s390_sha_final,
+ 	.export		=	sha256_export,
+-- 
+2.23.0
 
