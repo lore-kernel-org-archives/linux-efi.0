@@ -1,129 +1,71 @@
-Return-Path: <SRS0=X/Bp=XL=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=BaBe=XM=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FSL_HELO_FAKE,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7FE5CC49ED7
-	for <linux-efi@archiver.kernel.org>; Mon, 16 Sep 2019 11:35:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D990BC49ED7
+	for <linux-efi@archiver.kernel.org>; Tue, 17 Sep 2019 01:00:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 510482067D
-	for <linux-efi@archiver.kernel.org>; Mon, 16 Sep 2019 11:35:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A2F38214D9
+	for <linux-efi@archiver.kernel.org>; Tue, 17 Sep 2019 01:00:53 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1568633756;
-	bh=SSLl/BhKysh7hNdjdqivwCIRljekkIMeLtLqdAe/AhI=;
-	h=Date:From:To:Cc:Subject:List-ID:From;
-	b=fxV+HY3zA4peDjKvcqRtvsgWwo84ydYzW0V71EqI6eEqKaxTAZK5ZR/AHWGc3AePq
-	 K+WfFUstLKDfcG9e+V5GIRD7wb/Q+Qj2LOfY3Rcn7ERh1CoT1OC4dSH9RvXLShIiBz
-	 1Aj4iS9HJnJHzwnwE+CiC7jIKO+4xu3v9E/bhwlQ=
+	s=default; t=1568682053;
+	bh=xh7OMPh/XeA91mjrPGOfWB+Ju+MvKdz9jJIN7Zmaviw=;
+	h=Subject:From:In-Reply-To:References:Date:To:Cc:List-ID:From;
+	b=jFH/sNG6x8lM3N0TyiSslJiqNDVtNddRQi6sTBy6YG+MScq5G3TuwFYvFbQIPXKQC
+	 IER4SLxfrShXYsgDoVQku324+nqb/hLfrcHcFJRtFg01ZzQxfIa6lX+lrsyH1X8bzK
+	 rgowz04SZBuPKXj7bu6aN2WAC0X8YR2WdGALwrwk=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731387AbfIPLfz (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 16 Sep 2019 07:35:55 -0400
-Received: from mail-wr1-f67.google.com ([209.85.221.67]:42511 "EHLO
-        mail-wr1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727479AbfIPLfz (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 16 Sep 2019 07:35:55 -0400
-Received: by mail-wr1-f67.google.com with SMTP id q14so38456331wrm.9;
-        Mon, 16 Sep 2019 04:35:52 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=sender:date:from:to:cc:subject:message-id:mime-version
-         :content-disposition:user-agent;
-        bh=Mv491UnCKS4JNd7z2SOkwV0dvUpBxBoTZTqacB4oBDQ=;
-        b=QlNxlAIQbvJb3OhnUhYCbkS2E2cmf2D/kPuUxGHT2UDqE/PX6Q+oUl305tVKtFn4Ht
-         zIK+pTyv1hzrnV2DLspJUU8QUSzIXviK30cKnUvMtXqkVcES+MtKtJaRYXSNqV9W1fGU
-         CegCxpAUaejap0b/1ehh1oZewOU1lyOYkZy5UhULLRSE+3LAyMCGBnX2Vx7QZ1r6+2Vk
-         Pc+1vW9DOpMnTthcU93e4Hg+6L5idXIbDwBuuGTSr6nH6f3AibmiRBBiEQH3yE5oEWQh
-         Zf40Kum8dKBkdOv4XNbMywvSDrrsCBYqeySGTwyXcQdtbPRWE2zkgjTtcV7kX7pfJJaP
-         NWzA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:sender:date:from:to:cc:subject:message-id
-         :mime-version:content-disposition:user-agent;
-        bh=Mv491UnCKS4JNd7z2SOkwV0dvUpBxBoTZTqacB4oBDQ=;
-        b=SneGaGof9GNMahPws/mDELkkizRrBXevERSjf7p7U1qX1zDYG6JCKWmuBH+bphLgm3
-         O7OOwHdrJV9DsFZ+A1BHsb6mba2rMdfO5J7O34mS54M0/VQzIDe7U+QijyJB8Ls6hr+X
-         VjSFacuR5jjHACcUFImBYyDfLOzQxf53gkYFfsVMKk4CfUhVLLi0WFxICeVt47xSOdGT
-         Ql8tKR0gpLbkO1tZAVVKYdxawh9VPeW5EVOJueZnJj9b7hfBg8I5ajn8iTC8TD+MbZVx
-         BtjejpzuboZqDZgNgTPOS4gXeFL2zBn4f8s32BSk7AiHmuQO7+j7Kbm/VADCxVqSiU5q
-         wJjw==
-X-Gm-Message-State: APjAAAVSkyqD9yiC4Fuc+5d59+KtIgThxqvS5gEwihfj7DQl4R4pSBT2
-        Nes9Twyq0OqVdci/kW8fssYJir4d
-X-Google-Smtp-Source: APXvYqzFvF/jO3IjT5ZQsh3FJ2YQUpXu8iu759xLt+TfBC7t0w52DcNJOukvVWSAoosXgI55ZsTjIQ==
-X-Received: by 2002:a05:6000:162e:: with SMTP id v14mr1456582wrb.112.1568633752298;
-        Mon, 16 Sep 2019 04:35:52 -0700 (PDT)
-Received: from gmail.com (2E8B0CD5.catv.pool.telekom.hu. [46.139.12.213])
-        by smtp.gmail.com with ESMTPSA id y13sm74527067wrg.8.2019.09.16.04.35.51
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 16 Sep 2019 04:35:51 -0700 (PDT)
-Date:   Mon, 16 Sep 2019 13:35:49 +0200
-From:   Ingo Molnar <mingo@kernel.org>
-To:     Linus Torvalds <torvalds@linux-foundation.org>
-Cc:     linux-kernel@vger.kernel.org,
+        id S2388368AbfIQBAW (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 16 Sep 2019 21:00:22 -0400
+Received: from mail.kernel.org ([198.145.29.99]:60502 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S2388338AbfIQBAW (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Mon, 16 Sep 2019 21:00:22 -0400
+Subject: Re: [GIT PULL] EFI changes for v5.4
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1568682021;
+        bh=xh7OMPh/XeA91mjrPGOfWB+Ju+MvKdz9jJIN7Zmaviw=;
+        h=From:In-Reply-To:References:Date:To:Cc:From;
+        b=e8XQbaYPNhI7P7p6W5fwo/0mRBnrxn2xL515q3gLq+4IMx7B+3jtqFV/aTQwJzxuT
+         UuoTODEPSep5L+0YYKT6JP7GMzxYkxBbfEanLh8lrzJpe+/zg2OfDjjZgkdDLgPO8w
+         J2ZX7hd2FwNmLjZcdTrCvT8g1OZ6MGqGB6D7tavE=
+From:   pr-tracker-bot@kernel.org
+In-Reply-To: <20190916113549.GA76922@gmail.com>
+References: <20190916113549.GA76922@gmail.com>
+X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
+X-PR-Tracked-Message-Id: <20190916113549.GA76922@gmail.com>
+X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git efi-core-for-linus
+X-PR-Tracked-Commit-Id: d3dc0168e93233ba4d4ed9a2c506c9d2b8d8cd33
+X-PR-Merge-Tree: torvalds/linux.git
+X-PR-Merge-Refname: refs/heads/master
+X-PR-Merge-Commit-Id: cc9b499a1f71696054a2771aae504c53eecff31d
+Message-Id: <156868202161.3683.5524767636770902438.pr-tracker-bot@kernel.org>
+Date:   Tue, 17 Sep 2019 01:00:21 +0000
+To:     Ingo Molnar <mingo@kernel.org>
+Cc:     Linus Torvalds <torvalds@linux-foundation.org>,
+        linux-kernel@vger.kernel.org,
         Ard Biesheuvel <ard.biesheuvel@linaro.org>,
         James Morse <james.morse@arm.com>, linux-efi@vger.kernel.org,
         Thomas Gleixner <tglx@linutronix.de>,
         Borislav Petkov <bp@alien8.de>
-Subject: [GIT PULL] EFI changes for v5.4
-Message-ID: <20190916113549.GA76922@gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Linus,
+The pull request you sent on Mon, 16 Sep 2019 13:35:49 +0200:
 
-Please pull the latest efi-core-for-linus git tree from:
+> git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git efi-core-for-linus
 
-   git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git efi-core-for-linus
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/cc9b499a1f71696054a2771aae504c53eecff31d
 
-   # HEAD: d3dc0168e93233ba4d4ed9a2c506c9d2b8d8cd33 Merge tag 'efi-next' of git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi into efi/core
+Thank you!
 
-The changes in this cycle were:
-
- - Refactoring of the EFI config table handling across architectures.
- - Add support for the Dell EMC OEM config table.
- - Include AER diagnostic output to CPER handling of fatal PCIe errors.
-
- Thanks,
-
-	Ingo
-
------------------->
-Ard Biesheuvel (3):
-      efi: x86: move efi_is_table_address() into arch/x86
-      efi/x86: move UV_SYSTAB handling into arch/x86
-      efi: ia64: move SAL systab handling out of generic EFI code
-
-Narendra K (1):
-      efi: Export Runtime Configuration Interface table to sysfs
-
-Xiaofei Tan (1):
-      efi: cper: print AER info of PCIe fatal error
-
-
- Documentation/ABI/testing/sysfs-firmware-efi |   8 ++
- arch/ia64/include/asm/sal.h                  |   1 +
- arch/ia64/include/asm/sn/sn_sal.h            |   2 +-
- arch/ia64/kernel/efi.c                       |   3 +
- arch/ia64/kernel/setup.c                     |   2 +-
- arch/x86/include/asm/efi.h                   |   5 +
- arch/x86/include/asm/uv/uv.h                 |   4 +-
- arch/x86/mm/ioremap.c                        |   1 +
- arch/x86/platform/efi/efi.c                  |  39 ++++++-
- arch/x86/platform/uv/bios_uv.c               |  10 +-
- drivers/firmware/efi/Kconfig                 |  13 +++
- drivers/firmware/efi/Makefile                |   1 +
- drivers/firmware/efi/cper.c                  |  15 +++
- drivers/firmware/efi/efi.c                   |  39 +------
- drivers/firmware/efi/rci2-table.c            | 147 +++++++++++++++++++++++++++
- include/linux/efi.h                          |  14 +--
- 16 files changed, 251 insertions(+), 53 deletions(-)
- create mode 100644 drivers/firmware/efi/rci2-table.c
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.wiki.kernel.org/userdoc/prtracker
