@@ -4,52 +4,52 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D0FB4C3A5A2
-	for <linux-efi@archiver.kernel.org>; Sun, 22 Sep 2019 19:01:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A4242C3A5A2
+	for <linux-efi@archiver.kernel.org>; Sun, 22 Sep 2019 19:07:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id ABFED208C2
-	for <linux-efi@archiver.kernel.org>; Sun, 22 Sep 2019 19:01:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7E49A206C2
+	for <linux-efi@archiver.kernel.org>; Sun, 22 Sep 2019 19:07:38 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1569178892;
+	s=default; t=1569179258;
 	bh=nbgbhwOlk/LuTh2Jiw/PsDh+mAGYreruz68vM9Rfhvw=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=1f7hIlqXyMEWSugEeOIFDGj/r61+WF8b7aZYMWGml/mEf1y2C6KEFbt0+TyKkn95G
-	 t+waBMRfvpNL9IcqI9ux4NWpQq5Dk3/FOPkNOvcbDEviw+S32LboZ0jCgJwWK4ASnH
-	 iqI+O9ukg2qTNoUtSfYJofzUCof99xElydxeZ7yY=
+	b=JS7gpBbr9MFWVmonc+r6unMmGNG1tUvX/IO4pkO9Gwt7lVE6xKd/Wyi2Oon9OXU2j
+	 BnmWqvFYesRavzyQW4FAogxz9Nv2XAOCNemxULP0xW6SaXBnuw69o/UM7NNQzQSXGu
+	 V+MGCdktOvOe9DHXywcG9fTCcv8wRso6tjpMtODI=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2438535AbfIVTBb (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 22 Sep 2019 15:01:31 -0400
-Received: from mail.kernel.org ([198.145.29.99]:37730 "EHLO mail.kernel.org"
+        id S1726260AbfIVTHe (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 22 Sep 2019 15:07:34 -0400
+Received: from mail.kernel.org ([198.145.29.99]:35576 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729449AbfIVTBa (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Sun, 22 Sep 2019 15:01:30 -0400
+        id S2408303AbfIVTAE (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Sun, 22 Sep 2019 15:00:04 -0400
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id E5D2D2070C;
-        Sun, 22 Sep 2019 19:01:28 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 6B2412190F;
+        Sun, 22 Sep 2019 19:00:02 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1569178889;
+        s=default; t=1569178803;
         bh=nbgbhwOlk/LuTh2Jiw/PsDh+mAGYreruz68vM9Rfhvw=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Y+KRBw8oIml4YqZMM758XATI7Hpn602wk069zzZOEC4uP5YwvAuQgW3UY+e3mOCDY
-         w03A93JeYkh9hnhSg34P4s+PUx8dfSIZ5Gp/3TaNLIUTDDdSAuoYYwA7c/5740CXiN
-         xWyIUe4y4Z4MI4b4MRCZpv0oUkajkNHLaHjHncq8=
+        b=Byhjadz/zxHLIz3F9iFWxTOE1Bj7s+6rn5MLiizqh9P0C6qE5V8b73kkSCl6ojUSg
+         NaltRx9lyWJuBiLkUzjsxUh4RDmHT66LQHAwCgtVWn6PDTiP5JaA9fUxsX5hMkro2Y
+         NY++yXd3ut2hCxWmXXqk4N4rW5SPyCw8xo5KKZ+E=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Xiaofei Tan <tanxiaofei@huawei.com>,
         James Morse <james.morse@arm.com>,
         Ard Biesheuvel <ard.biesheuvel@linaro.org>,
         Sasha Levin <sashal@kernel.org>, linux-efi@vger.kernel.org
-Subject: [PATCH AUTOSEL 4.4 19/44] efi: cper: print AER info of PCIe fatal error
-Date:   Sun, 22 Sep 2019 15:00:37 -0400
-Message-Id: <20190922190103.4906-19-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.9 22/60] efi: cper: print AER info of PCIe fatal error
+Date:   Sun, 22 Sep 2019 14:58:55 -0400
+Message-Id: <20190922185934.4305-22-sashal@kernel.org>
 X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20190922190103.4906-1-sashal@kernel.org>
-References: <20190922190103.4906-1-sashal@kernel.org>
+In-Reply-To: <20190922185934.4305-1-sashal@kernel.org>
+References: <20190922185934.4305-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
