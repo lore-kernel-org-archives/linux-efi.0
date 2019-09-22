@@ -4,52 +4,52 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A4242C3A5A2
-	for <linux-efi@archiver.kernel.org>; Sun, 22 Sep 2019 19:07:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 502C7C3A5A6
+	for <linux-efi@archiver.kernel.org>; Sun, 22 Sep 2019 19:12:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 7E49A206C2
-	for <linux-efi@archiver.kernel.org>; Sun, 22 Sep 2019 19:07:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 290372184D
+	for <linux-efi@archiver.kernel.org>; Sun, 22 Sep 2019 19:12:23 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1569179258;
-	bh=nbgbhwOlk/LuTh2Jiw/PsDh+mAGYreruz68vM9Rfhvw=;
+	s=default; t=1569179543;
+	bh=CdKsb+0RI3iUs2816+NlYyidIgr7wQBF4+TCgmP++QE=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=JS7gpBbr9MFWVmonc+r6unMmGNG1tUvX/IO4pkO9Gwt7lVE6xKd/Wyi2Oon9OXU2j
-	 BnmWqvFYesRavzyQW4FAogxz9Nv2XAOCNemxULP0xW6SaXBnuw69o/UM7NNQzQSXGu
-	 V+MGCdktOvOe9DHXywcG9fTCcv8wRso6tjpMtODI=
+	b=NpCixq3YG6edsvsY2MmiT49EW4ZPaxf1ShXCtpusWES5+/WeBzgF1ztvpL6A725Ls
+	 Y4JTOYpMfP6jMFEUUvd8O6KQjLjcQd3eRAEj+bAfCDAdJ5EY0nn2s4fMqufzpQ3JEW
+	 7ZqtK5jGrW8VRT4sHFoCxdfXSZLQKEvYmnfHgL8k=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726260AbfIVTHe (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 22 Sep 2019 15:07:34 -0400
-Received: from mail.kernel.org ([198.145.29.99]:35576 "EHLO mail.kernel.org"
+        id S2394079AbfIVTMS (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 22 Sep 2019 15:12:18 -0400
+Received: from mail.kernel.org ([198.145.29.99]:60734 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2408303AbfIVTAE (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Sun, 22 Sep 2019 15:00:04 -0400
+        id S2438724AbfIVS6F (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Sun, 22 Sep 2019 14:58:05 -0400
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 6B2412190F;
-        Sun, 22 Sep 2019 19:00:02 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 872E821A4A;
+        Sun, 22 Sep 2019 18:58:03 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1569178803;
-        bh=nbgbhwOlk/LuTh2Jiw/PsDh+mAGYreruz68vM9Rfhvw=;
+        s=default; t=1569178684;
+        bh=CdKsb+0RI3iUs2816+NlYyidIgr7wQBF4+TCgmP++QE=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Byhjadz/zxHLIz3F9iFWxTOE1Bj7s+6rn5MLiizqh9P0C6qE5V8b73kkSCl6ojUSg
-         NaltRx9lyWJuBiLkUzjsxUh4RDmHT66LQHAwCgtVWn6PDTiP5JaA9fUxsX5hMkro2Y
-         NY++yXd3ut2hCxWmXXqk4N4rW5SPyCw8xo5KKZ+E=
+        b=15Fji5Q92HRv+I2xznWZSVmtDUgW1QGOhZXNLtpj/ddlGFJUK/ItojtMQtowL+blC
+         9Hwr9cfn6cUcFt4mEXGHmBeUXwWc14Zx6z9mu77e3Kxh0YUe1dxgQZJGaRk99C+Y1q
+         t+xG0ywU9MQTzfjTpNPo71L/6jrr0s2nF63P0W0M=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Xiaofei Tan <tanxiaofei@huawei.com>,
         James Morse <james.morse@arm.com>,
         Ard Biesheuvel <ard.biesheuvel@linaro.org>,
         Sasha Levin <sashal@kernel.org>, linux-efi@vger.kernel.org
-Subject: [PATCH AUTOSEL 4.9 22/60] efi: cper: print AER info of PCIe fatal error
-Date:   Sun, 22 Sep 2019 14:58:55 -0400
-Message-Id: <20190922185934.4305-22-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.14 30/89] efi: cper: print AER info of PCIe fatal error
+Date:   Sun, 22 Sep 2019 14:56:18 -0400
+Message-Id: <20190922185717.3412-30-sashal@kernel.org>
 X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20190922185934.4305-1-sashal@kernel.org>
-References: <20190922185934.4305-1-sashal@kernel.org>
+In-Reply-To: <20190922185717.3412-1-sashal@kernel.org>
+References: <20190922185717.3412-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -115,10 +115,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 15 insertions(+)
 
 diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-index d425374254384..f40f7df4b7344 100644
+index ce23d5402bd66..db404aab82b2a 100644
 --- a/drivers/firmware/efi/cper.c
 +++ b/drivers/firmware/efi/cper.c
-@@ -384,6 +384,21 @@ static void cper_print_pcie(const char *pfx, const struct cper_sec_pcie *pcie,
+@@ -507,6 +507,21 @@ static void cper_print_pcie(const char *pfx, const struct cper_sec_pcie *pcie,
  		printk(
  	"%s""bridge: secondary_status: 0x%04x, control: 0x%04x\n",
  	pfx, pcie->bridge.secondary_status, pcie->bridge.control);
@@ -139,7 +139,7 @@ index d425374254384..f40f7df4b7344 100644
 +	}
  }
  
- static void cper_estatus_print_section(
+ static void cper_print_tstamp(const char *pfx,
 -- 
 2.20.1
 
