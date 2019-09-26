@@ -2,134 +2,113 @@ Return-Path: <SRS0=7itq=XV=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.0 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 25B64C4360C
-	for <linux-efi@archiver.kernel.org>; Thu, 26 Sep 2019 15:47:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D41DAC352AA
+	for <linux-efi@archiver.kernel.org>; Thu, 26 Sep 2019 15:48:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id EE47F222C6
-	for <linux-efi@archiver.kernel.org>; Thu, 26 Sep 2019 15:47:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A6B83222CB
+	for <linux-efi@archiver.kernel.org>; Thu, 26 Sep 2019 15:48:03 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=citrix.com header.i=@citrix.com header.b="SbxAXqTH"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="U88hSCSV"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727229AbfIZPrD (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 26 Sep 2019 11:47:03 -0400
-Received: from esa5.hc3370-68.iphmx.com ([216.71.155.168]:59657 "EHLO
-        esa5.hc3370-68.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727216AbfIZPrD (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 26 Sep 2019 11:47:03 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=citrix.com; s=securemail; t=1569512823;
-  h=subject:to:cc:references:from:message-id:date:
-   mime-version:in-reply-to:content-transfer-encoding;
-  bh=3aEwo6JJfbDUgaCgNpotaiHPkAU4MWNsC5RaS7WzFvs=;
-  b=SbxAXqTHuKjDqjPB/c64CqLeJXxQW0DdT7b559yJQPV7vhK0baiFtGJl
-   J5Q6HrhnI+iYVXq9LIOK0uhhQjxskmOQpPZ5uwSoI9XTFii5Dnbe1xxz2
-   esZGQg+BDhcGci2yLapQqMpjuAyyKSgHUyoL7v25CJdVHtC+Whps+sEZw
-   c=;
-Authentication-Results: esa5.hc3370-68.iphmx.com; dkim=none (message not signed) header.i=none; spf=None smtp.pra=ross.lagerwall@citrix.com; spf=Pass smtp.mailfrom=ross.lagerwall@citrix.com; spf=None smtp.helo=postmaster@mail.citrix.com
-Received-SPF: None (esa5.hc3370-68.iphmx.com: no sender
-  authenticity information available from domain of
-  ross.lagerwall@citrix.com) identity=pra;
-  client-ip=162.221.158.21; receiver=esa5.hc3370-68.iphmx.com;
-  envelope-from="ross.lagerwall@citrix.com";
-  x-sender="ross.lagerwall@citrix.com";
-  x-conformance=sidf_compatible
-Received-SPF: Pass (esa5.hc3370-68.iphmx.com: domain of
-  ross.lagerwall@citrix.com designates 162.221.158.21 as
-  permitted sender) identity=mailfrom;
-  client-ip=162.221.158.21; receiver=esa5.hc3370-68.iphmx.com;
-  envelope-from="ross.lagerwall@citrix.com";
-  x-sender="ross.lagerwall@citrix.com";
-  x-conformance=sidf_compatible; x-record-type="v=spf1";
-  x-record-text="v=spf1 ip4:209.167.231.154 ip4:178.63.86.133
-  ip4:195.66.111.40/30 ip4:85.115.9.32/28 ip4:199.102.83.4
-  ip4:192.28.146.160 ip4:192.28.146.107 ip4:216.52.6.88
-  ip4:216.52.6.188 ip4:162.221.158.21 ip4:162.221.156.83 ~all"
-Received-SPF: None (esa5.hc3370-68.iphmx.com: no sender
-  authenticity information available from domain of
-  postmaster@mail.citrix.com) identity=helo;
-  client-ip=162.221.158.21; receiver=esa5.hc3370-68.iphmx.com;
-  envelope-from="ross.lagerwall@citrix.com";
-  x-sender="postmaster@mail.citrix.com";
-  x-conformance=sidf_compatible
-IronPort-SDR: 6lxzUjXZlAuKPwEHzmMyxf4qADNk9nFCa+NImrWQF2kL1Zz0YzyZ+HLgRKwiyGbxBPtSrAm0oR
- hgdZYJTDGBbexISF+AZLYGuk4Ws1MmqSmWMI2vJHIDA2Qly5YG8UZFm9SotEJqd2H4R6NDhVOq
- XYfVifuuHjQjgAxuEykiZojNYDiYbD2hnel7M1X5U/TWS6xxUxuXJauaPGwvNWAZixGGUoPevL
- ItIGM1Kx1gLKKlts6XG9xn+jePp+8tS95XDYkC7Xb01RyukYX72PwiIs0o0033xHtnju+UYxEO
- reU=
-X-SBRS: 2.7
-X-MesageID: 6356222
-X-Ironport-Server: esa5.hc3370-68.iphmx.com
-X-Remote-IP: 162.221.158.21
-X-Policy: $RELAYED
-X-IronPort-AV: E=Sophos;i="5.64,552,1559534400"; 
-   d="scan'208";a="6356222"
+        id S1727287AbfIZPsC (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 26 Sep 2019 11:48:02 -0400
+Received: from mail-wm1-f66.google.com ([209.85.128.66]:50770 "EHLO
+        mail-wm1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727147AbfIZPsC (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 26 Sep 2019 11:48:02 -0400
+Received: by mail-wm1-f66.google.com with SMTP id 5so3375243wmg.0
+        for <linux-efi@vger.kernel.org>; Thu, 26 Sep 2019 08:48:00 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=c/3rZGyZ8wo8IAcGiILpVEqgSPsTH+XHREiJwrwJZ0c=;
+        b=U88hSCSVdES0JklNpygW7AUNISvDUWxqvq4/RSOySBI5RzuSv+bpqM+wTTWfEgN470
+         gpWs4NWRtg1KSgUlo1WODgHYlyEzsJCwy2XgdvfzaGF7tyj8UG3Cy33jvIZNQ9756JvX
+         1LeIfEYrSH2efSPIn9ouNdEhhcFvJsuyAipddSXiF9WT9a9mopnxOIST9ZA+6sO3tZAK
+         AVPMuSa/OpgLP+yEGoxFMsCHt46w6mASVKwB1PexFBAeghG4VYEHVzI5C4WLILW6AM27
+         kwNcJaxbNdYrbcX4EdTYGMlowktBAefXRD8GaHicfkXcwspN7u5wR5AnDdvGdeEemsVO
+         2hzg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=c/3rZGyZ8wo8IAcGiILpVEqgSPsTH+XHREiJwrwJZ0c=;
+        b=YKVhEFG+5chumQbvz30HBq0oFV3GWKvdQHj8BBSaxKxav1UJM/9VwEV8lCJDHsABgg
+         CxNR92WKMypoYzsuCeEzXtGXvhM1WMvYRvhrjEqbMTx7zvDw5tK65d45i8ubvkFirV7j
+         PHUnzNl41YzJ7Z0G7TMV8wTNn5VV3zPz0Z+mdD1ZvMykw1WrQTi4qCYvS65IW7DxkfRV
+         QBEZLUZSIxbANzY5B5qRtHUFytvfP68JHe0bCM0SQCzIcA5+ZGueBlrjYLIqg7MWbswX
+         PtbIlNTm0435SSPwquZptN+2dwMImLj+yw+KdnfdDxUi65ByJm3TM9Z2DD5UJcvK2US4
+         1wdw==
+X-Gm-Message-State: APjAAAUM38PdXfjkdfNYnyfptEdZuP24oK9XkTafI0UaX2PWWmM/zdT/
+        gVcbGJ8WMAtsmXHyrKe0K107IaJOncrLh1MyGSowUA==
+X-Google-Smtp-Source: APXvYqwg/Q6oCeFIWzSC1GJg9f91HyLzsXgfBri1ybbR91Ec6CKH3zjayo1IQXAKjEjd8xJkw8PBdgzNIcv/LyEcR7M=
+X-Received: by 2002:a1c:3cc3:: with SMTP id j186mr3407725wma.119.1569512879378;
+ Thu, 26 Sep 2019 08:47:59 -0700 (PDT)
+MIME-Version: 1.0
+References: <20190926141234.8271-1-ross.lagerwall@citrix.com>
+ <CAKv+Gu8ok=v6WaKWW1AmhPgf1-n7p=4h8Tkno9YNW6H8p4fg8w@mail.gmail.com> <be816ae1-b802-f477-20d0-16e5be15a2b8@citrix.com>
+In-Reply-To: <be816ae1-b802-f477-20d0-16e5be15a2b8@citrix.com>
+From:   Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Date:   Thu, 26 Sep 2019 17:47:47 +0200
+Message-ID: <CAKv+Gu_j=Nb_Q92vVcqyE_FBos76ZG0=hGZwSNuG2sL1ZYsxXw@mail.gmail.com>
 Subject: Re: [PATCH] x86/efi: Don't require non-blocking EFI callbacks
-To:     Ard Biesheuvel <ard.biesheuvel@linaro.org>
-CC:     linux-efi <linux-efi@vger.kernel.org>,
+To:     Ross Lagerwall <ross.lagerwall@citrix.com>
+Cc:     linux-efi <linux-efi@vger.kernel.org>,
         Darren Hart <dvhart@infradead.org>,
         Andy Shevchenko <andy@infradead.org>,
         Thomas Gleixner <tglx@linutronix.de>,
         Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
         "H. Peter Anvin" <hpa@zytor.com>,
-        the arch/x86 maintainers <x86@kernel.org>,
-        <platform-driver-x86@vger.kernel.org>,
+        "the arch/x86 maintainers" <x86@kernel.org>,
+        platform-driver-x86@vger.kernel.org,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         Sai Praneeth <sai.praneeth.prakhya@intel.com>
-References: <20190926141234.8271-1-ross.lagerwall@citrix.com>
- <CAKv+Gu8ok=v6WaKWW1AmhPgf1-n7p=4h8Tkno9YNW6H8p4fg8w@mail.gmail.com>
-From:   Ross Lagerwall <ross.lagerwall@citrix.com>
-Message-ID: <be816ae1-b802-f477-20d0-16e5be15a2b8@citrix.com>
-Date:   Thu, 26 Sep 2019 16:46:58 +0100
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101
- Thunderbird/60.8.0
-MIME-Version: 1.0
-In-Reply-To: <CAKv+Gu8ok=v6WaKWW1AmhPgf1-n7p=4h8Tkno9YNW6H8p4fg8w@mail.gmail.com>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On 9/26/19 4:29 PM, Ard Biesheuvel wrote:
-> On Thu, 26 Sep 2019 at 16:12, Ross Lagerwall <ross.lagerwall@citrix.com> wrote:
->>
->> If a backend does not implement non-blocking EFI operations, it implies
->> that the normal operations are non-blocking.
-> 
-> Is that documented anywhere?
+On Thu, 26 Sep 2019 at 17:47, Ross Lagerwall <ross.lagerwall@citrix.com> wrote:
+>
+> On 9/26/19 4:29 PM, Ard Biesheuvel wrote:
+> > On Thu, 26 Sep 2019 at 16:12, Ross Lagerwall <ross.lagerwall@citrix.com> wrote:
+> >>
+> >> If a backend does not implement non-blocking EFI operations, it implies
+> >> that the normal operations are non-blocking.
+> >
+> > Is that documented anywhere?
+>
+> Sort of. From commit 6d80dba1c9fe "efi: Provide a non-blocking
+> SetVariable() operation"
+>
+> """
+> Introduce ->set_variable_nonblocking() for this use case. It is an
+> optional EFI backend operation, and need only be implemented by those
+> backends that usually acquire locks to serialize access to EFI
+> variables, as is the case for virt_efi_set_variable() where we now grab
+> the EFI runtime spinlock.
+> """
+>
+> >
+> >> Instead of crashing
+> >> dereferencing a NULL pointer, fallback to the normal operations since it
+> >> is safe to do so.
+> >>
+> >
+> > I agree that crashing is never the right thing to do, but I wonder
+> > whether we shouldn't just bail instead. If the provided default
+> > operation is non-blocking, the platform can populate the function
+> > pointer with a reference to the default implementation.
+>
+> If you would prefer it that platforms are always required to implement
+> the non-blocking functions, then I will just send a simple patch fixing
+> up the Xen implementation.
+>
 
-Sort of. From commit 6d80dba1c9fe "efi: Provide a non-blocking 
-SetVariable() operation"
-
-"""
-Introduce ->set_variable_nonblocking() for this use case. It is an
-optional EFI backend operation, and need only be implemented by those
-backends that usually acquire locks to serialize access to EFI
-variables, as is the case for virt_efi_set_variable() where we now grab
-the EFI runtime spinlock.
-"""
-
-> 
->> Instead of crashing
->> dereferencing a NULL pointer, fallback to the normal operations since it
->> is safe to do so.
->>
-> 
-> I agree that crashing is never the right thing to do, but I wonder
-> whether we shouldn't just bail instead. If the provided default
-> operation is non-blocking, the platform can populate the function
-> pointer with a reference to the default implementation.
-
-If you would prefer it that platforms are always required to implement 
-the non-blocking functions, then I will just send a simple patch fixing 
-up the Xen implementation.
-
-Thanks,
--- 
-Ross Lagerwall
+Yes, please, that sounds like a safer option to me.
