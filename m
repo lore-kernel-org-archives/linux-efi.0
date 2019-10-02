@@ -4,56 +4,56 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E4E4CECE58A
-	for <linux-efi@archiver.kernel.org>; Wed,  2 Oct 2019 17:04:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1FE84C10F14
+	for <linux-efi@archiver.kernel.org>; Wed,  2 Oct 2019 17:04:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id B9D1B21D81
-	for <linux-efi@archiver.kernel.org>; Wed,  2 Oct 2019 17:04:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id ECE1F21D81
+	for <linux-efi@archiver.kernel.org>; Wed,  2 Oct 2019 17:04:09 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="wzK2Kr+8"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="pBjzEJT/"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728821AbfJBREF (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 2 Oct 2019 13:04:05 -0400
-Received: from mail-wm1-f65.google.com ([209.85.128.65]:39546 "EHLO
-        mail-wm1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728793AbfJBREB (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 2 Oct 2019 13:04:01 -0400
-Received: by mail-wm1-f65.google.com with SMTP id v17so7729228wml.4
-        for <linux-efi@vger.kernel.org>; Wed, 02 Oct 2019 10:04:00 -0700 (PDT)
+        id S1728023AbfJBREJ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 2 Oct 2019 13:04:09 -0400
+Received: from mail-wm1-f66.google.com ([209.85.128.66]:54041 "EHLO
+        mail-wm1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728772AbfJBREA (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 2 Oct 2019 13:04:00 -0400
+Received: by mail-wm1-f66.google.com with SMTP id i16so8009390wmd.3
+        for <linux-efi@vger.kernel.org>; Wed, 02 Oct 2019 10:03:58 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=ba3w9kcbGuMtfRQk+/aw/wvXJx7RCk+NpcTgMqWmzhU=;
-        b=wzK2Kr+8eqFEvQyxP/6nAjwnHPAGzZ8Pr5KF1g4HtEl208yl3hYOPNrU07OMhhzVWi
-         MJKwplxNEH4QgfCZUR4dvDzREYAmCwTg8QcRqVIc+N86yPlchCpdJwH64aDYPis9zk8m
-         TdMyTqaPHvXe6DL+R17NO7Ew8ajZCG6HeEYnB+26TI7BCFOg37ZX69Ifm9cCZnNvptFv
-         dh27JTl0lOOYsJXWAQYHiDsnQ/ysVdZ3EghjNhZgsmHbWK3V+X6gAGNnlR3zit/Lp1L8
-         mebYi0KthRj672fvFN5LuLKZYDX6z4czZY0Slv+AbT5SR4PFSvdKM/FhltbeInqz6vfK
-         msew==
+        bh=YsW+iaoQYKJ7b3/MuPdxHfRaGiLURHymN+VpSjfI8qI=;
+        b=pBjzEJT/pAMDLNi4fwib+YBdEle7Um7YdLiPjsxp8lLWj3W/EumlxrLiEnNi+m9lJ/
+         y4hYGKUVxgJAeq+WxhJ7KAtpcCAQIhRy7cdGFQV992aHW7hCw6UgJQlwdjAhTfwokdfe
+         tKOD+XZ1N5vfe7R3XmUuGD/RHZ35oUhX/z2Al1xYD0uxC/CRjV9Wcm6tjNwjt0jSm7Oe
+         MA4ynP1x/WnZvowG5iigM6r5rWs5o0oEJS6pTr/7ddRuXo5vwWJjpgr5MgOyP5TcQ2Bo
+         G07cF+JzljkWTcXI+IP5i/wu1fCUGWA0teNMC17YXrZ+FrlBXNZ8BPRlEhYlwEh0F+k/
+         0AYg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=ba3w9kcbGuMtfRQk+/aw/wvXJx7RCk+NpcTgMqWmzhU=;
-        b=mp6AsvIgTprkG91g6/gOTpa0Yf08DTvbA3MY+UIzrAR4aqg26Xjrlo2V+DjBARI9Ii
-         75OnlGWAMhDdSazJR5z1N08Iiqd+Zg2vOW5fzr0mC7KIp4WMU15CGmz4CowpRkGxZ7Nm
-         vxrvPtCGr1u2mCjtOHehN/poaBMFRlAgZzX1t2StmAN6I0CreA1OQN5eoTVCUt+NT3gK
-         YctCKPEDbIe+eQyNVKQD+P/rF0IFHFANlzMUin5Su7zBMu6iC8bYxU348kpRaL/R7IPs
-         l+b4DvE5xVdZxJHj4uAxf+MQmPzxiN/TpExmrB6iJYu0GeDyapYOLa4WX/Jama/NDkjs
-         fkpQ==
-X-Gm-Message-State: APjAAAUnBTMRUPIFMirBaTUEe3ArPoOEnhkHbZ8+nqJF+LTaiNENmhKe
-        fAdRCGpKdBZlKkmKQGu3EpfX/gGCzqPTKHXp
-X-Google-Smtp-Source: APXvYqwXbGLwgYQFbrU4EXNJ7vjxZWidobcE/CUTFY2F3Qa/HMp0yBUXkU17d/wY4mHe9PxlJXUcgw==
-X-Received: by 2002:a05:600c:2115:: with SMTP id u21mr3610780wml.168.1570035839244;
-        Wed, 02 Oct 2019 10:03:59 -0700 (PDT)
+        bh=YsW+iaoQYKJ7b3/MuPdxHfRaGiLURHymN+VpSjfI8qI=;
+        b=BwbFDU2Nrxk5GDnhB7olE3kT0vj91s06KxnAeIpiwY5rkOf7gIvmB3zQ9wXEYFO4v3
+         Ci4EfxUeD/zBbbOHUGM5KgO6FTQA1dv7H4oiVRA9MXfjo2c1XQePR4S0GYIA4/USiI81
+         zJJESSJ18AU8WkoYD6TEDuht4Wq1luTS2CBaQdxftI0oT3u+lQom8caRgGeSlgnsvN4L
+         XMLnpDvGtrQS7rqG8Bdh71/lgRgdNVDuIKBScljcHt++fnzzKgLic2937XSP7dxz9Rjl
+         eGOYlnKIroeydQJXJgl70ikGOMwUy4qsTz+6D0mWFo+U5uU5FpFmvIHPPBBwZr2mECPx
+         cL3w==
+X-Gm-Message-State: APjAAAW9DCtkjZgXfngVYD+fHKC8Fsnt1Qw2SFwRxEMpeFl63ZYB1tHH
+        diT/bpgDmLd2rLHm7Tys5kwqs9evEeWbcPly
+X-Google-Smtp-Source: APXvYqwJ3kz36Q30WtobntEZViJpOjnqr+GgG/h+07yEPhf6coRuAhe9qphn79wUprkC4NYqvKfZhQ==
+X-Received: by 2002:a1c:c104:: with SMTP id r4mr3961388wmf.64.1570035837982;
+        Wed, 02 Oct 2019 10:03:57 -0700 (PDT)
 Received: from sudo.home ([2a01:cb1d:112:6f00:f145:3252:fc29:76c9])
-        by smtp.gmail.com with ESMTPSA id f18sm7085459wmh.43.2019.10.02.10.03.58
+        by smtp.gmail.com with ESMTPSA id f18sm7085459wmh.43.2019.10.02.10.03.56
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 02 Oct 2019 10:03:58 -0700 (PDT)
+        Wed, 02 Oct 2019 10:03:56 -0700 (PDT)
 From:   Ard Biesheuvel <ard.biesheuvel@linaro.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
@@ -68,9 +68,9 @@ Cc:     Ard Biesheuvel <ard.biesheuvel@linaro.org>,
         Matthew Garrett <mjg59@google.com>,
         Octavian Purdila <octavian.purdila@intel.com>,
         Peter Jones <pjones@redhat.com>, Scott Talbert <swt@techie.net>
-Subject: [PATCH 7/7] efi/x86: do not clean dummy variable in kexec path
-Date:   Wed,  2 Oct 2019 18:59:04 +0200
-Message-Id: <20191002165904.8819-8-ard.biesheuvel@linaro.org>
+Subject: [PATCH 6/7] efi: make unexported efi_rci2_sysfs_init static
+Date:   Wed,  2 Oct 2019 18:59:03 +0200
+Message-Id: <20191002165904.8819-7-ard.biesheuvel@linaro.org>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20191002165904.8819-1-ard.biesheuvel@linaro.org>
 References: <20191002165904.8819-1-ard.biesheuvel@linaro.org>
@@ -81,41 +81,32 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Dave Young <dyoung@redhat.com>
+From: Ben Dooks <ben.dooks@codethink.co.uk>
 
-kexec reboot fails randomly in UEFI based kvm guest.  The firmware
-just reset while calling efi_delete_dummy_variable();  Unfortunately
-I don't know how to debug the firmware, it is also possible a potential
-problem on real hardware as well although nobody reproduced it.
+The efi_rci2_sysfs_init() is not used outside of rci2-table.c so
+make it static to silence the following sparse warning:
 
-The intention of efi_delete_dummy_variable is to trigger garbage collection
-when entering virtual mode.  But SetVirtualAddressMap can only run once
-for each physical reboot, thus kexec_enter_virtual_mode is not necessarily
-a good place to clean dummy object.
+drivers/firmware/efi/rci2-table.c:79:12: warning: symbol 'efi_rci2_sysfs_init' was not declared. Should it be static?
 
-Drop efi_delete_dummy_variable so that kexec reboot can work.
-
-Signed-off-by: Dave Young <dyoung@redhat.com>
-Acked-by: Matthew Garrett <mjg59@google.com>
+Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- arch/x86/platform/efi/efi.c | 3 ---
- 1 file changed, 3 deletions(-)
+ drivers/firmware/efi/rci2-table.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index c202e1b07e29..425e025341db 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -917,9 +917,6 @@ static void __init kexec_enter_virtual_mode(void)
- 
- 	if (efi_enabled(EFI_OLD_MEMMAP) && (__supported_pte_mask & _PAGE_NX))
- 		runtime_code_page_mkexec();
--
--	/* clean DUMMY object */
--	efi_delete_dummy_variable();
- #endif
+diff --git a/drivers/firmware/efi/rci2-table.c b/drivers/firmware/efi/rci2-table.c
+index 3e290f96620a..76b0c354a027 100644
+--- a/drivers/firmware/efi/rci2-table.c
++++ b/drivers/firmware/efi/rci2-table.c
+@@ -76,7 +76,7 @@ static u16 checksum(void)
+ 	return chksum;
  }
  
+-int __init efi_rci2_sysfs_init(void)
++static int __init efi_rci2_sysfs_init(void)
+ {
+ 	struct kobject *tables_kobj;
+ 	int ret = -ENOMEM;
 -- 
 2.20.1
 
