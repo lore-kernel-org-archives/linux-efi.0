@@ -2,119 +2,140 @@ Return-Path: <SRS0=Ll42=X3=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C4FDC10F14
-	for <linux-efi@archiver.kernel.org>; Wed,  2 Oct 2019 17:04:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 59730C4360C
+	for <linux-efi@archiver.kernel.org>; Wed,  2 Oct 2019 19:44:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 454BD21D81
-	for <linux-efi@archiver.kernel.org>; Wed,  2 Oct 2019 17:04:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2BBA4206BB
+	for <linux-efi@archiver.kernel.org>; Wed,  2 Oct 2019 19:44:14 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="lbaRKl9S"
+	dkim=pass (2048-bit key) header.d=dell.com header.i=@dell.com header.b="mAA0DqTf"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728579AbfJBRDx (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 2 Oct 2019 13:03:53 -0400
-Received: from mail-wr1-f66.google.com ([209.85.221.66]:37472 "EHLO
-        mail-wr1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727667AbfJBRDw (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 2 Oct 2019 13:03:52 -0400
-Received: by mail-wr1-f66.google.com with SMTP id i1so20545342wro.4
-        for <linux-efi@vger.kernel.org>; Wed, 02 Oct 2019 10:03:51 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=4PokOnzm+oPBOfuUNXGxhTnYV86Xe9IUth6ohOE2Moc=;
-        b=lbaRKl9Sw32KcoJuKhy42btRwwnIf5qJkXgklbtMtdTbbKv9pfLbW8DQBaa9xY5ueH
-         mmbRwytKylLFYjmSQZTewjfV8VsUpRx3BTL+xqyuRXVafUDmdiCQwyN3rSl8WcqN95Iz
-         kEt0DMUYERZOm/UNlapCkAufqsyg+s2LwOVIiBtgDyHRALMfem6bQFzj6rvW6bTNTQrK
-         chCtI4XLB6lJZAuPsb8nnelrEJPjBDa4btRcSPvvNoI6U7StdRMeAEiqS9g0cTY+LkUb
-         vRoX7QmBpMW4QJw0JDclENNx4D1okrRBxnYuJyl2qTuwqd9bB+ET/kBayqgR2YuoLRPM
-         AdIg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=4PokOnzm+oPBOfuUNXGxhTnYV86Xe9IUth6ohOE2Moc=;
-        b=Se+jfPkSCLYx+opB5XAPtTb56gC6znUs+OlNritdebtjnJdWJsqXRvD2BVwrt0V1cV
-         xBtEBK60W6mMXMQMlWn5ZdmgNMX8AfDbip1cvjU4vJ32wKXT/x+KB1nt+QjMLf8vq60A
-         CWWh75RqvlQWoWhJ7kxemlDjKbIP9ihVLyBvp89Ga26k0aUmzwSFK0LvUhswvjBIYURl
-         Wro4JO/gt2cxcFGhy0iq63+xdD8F4spt2kX5mQDtu7bGPbQ2485aY6APqSdl9h6WJRT6
-         ZAsU6jBv8ZTitJ4yq4mnWyy5GkFEKltzhPFqxtoiFd76GaEN0Qz7n6Slgkyn8a88iSi9
-         23aw==
-X-Gm-Message-State: APjAAAXlzWU+8HjK1lDcUN82Osvcyuo0H0TV5GdVy57v88mlS6ZGHyWe
-        AUgjc2uQyi6fMWo6M+Ox5v+XlqRGnjFaMbjo
-X-Google-Smtp-Source: APXvYqw9MCV1O+7Aq+XDMSajGWDzKNaYl4/YugE0KOmsVoSAQ8Gzis+ttdbZXeFqTIP6ndQafnLeAQ==
-X-Received: by 2002:adf:ea88:: with SMTP id s8mr3787044wrm.114.1570035830342;
-        Wed, 02 Oct 2019 10:03:50 -0700 (PDT)
-Received: from sudo.home ([2a01:cb1d:112:6f00:f145:3252:fc29:76c9])
-        by smtp.gmail.com with ESMTPSA id f18sm7085459wmh.43.2019.10.02.10.03.49
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 02 Oct 2019 10:03:49 -0700 (PDT)
-From:   Ard Biesheuvel <ard.biesheuvel@linaro.org>
-To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
-        Thomas Gleixner <tglx@linutronix.de>
-Cc:     Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        linux-kernel@vger.kernel.org,
-        Ben Dooks <ben.dooks@codethink.co.uk>,
-        Dave Young <dyoung@redhat.com>,
-        Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>,
-        Jerry Snitselaar <jsnitsel@redhat.com>,
-        linux-integrity@vger.kernel.org, Lukas Wunner <lukas@wunner.de>,
-        Lyude Paul <lyude@redhat.com>,
-        Matthew Garrett <mjg59@google.com>,
-        Octavian Purdila <octavian.purdila@intel.com>,
-        Peter Jones <pjones@redhat.com>, Scott Talbert <swt@techie.net>
-Subject: [PATCH 1/7] efi: cper: Fix endianness of PCIe class code
-Date:   Wed,  2 Oct 2019 18:58:58 +0200
-Message-Id: <20191002165904.8819-2-ard.biesheuvel@linaro.org>
-X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20191002165904.8819-1-ard.biesheuvel@linaro.org>
-References: <20191002165904.8819-1-ard.biesheuvel@linaro.org>
+        id S1727264AbfJBToN (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 2 Oct 2019 15:44:13 -0400
+Received: from mx0a-00154904.pphosted.com ([148.163.133.20]:9150 "EHLO
+        mx0a-00154904.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1727257AbfJBToN (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 2 Oct 2019 15:44:13 -0400
+Received: from pps.filterd (m0170393.ppops.net [127.0.0.1])
+        by mx0a-00154904.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id x92JemoQ029831;
+        Wed, 2 Oct 2019 15:44:12 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dell.com; h=from : to : cc :
+ subject : date : message-id : content-type : content-id :
+ content-transfer-encoding : mime-version; s=smtpout1;
+ bh=XSeNTl5I855C3uT83to227D7zveqjCiQR4dEW0mojwU=;
+ b=mAA0DqTfmnbi2N7jy1TpGlhS6QTuPqyrRPRBjPuijgRCAh6oaMhwmzKgZWOshHlOREEZ
+ lAv1DCkrqIb1+zWLXOGfKkr+Akxxotuwci6BYTbQokHwCdNMF/1veRPxOlueKXB+HjCL
+ LE9CAomPyuh9yk+xUTKlkphXB+0dQFVhTG8muMP5cWQ7MEcZrCGHF3r242AZ+1wFaaz3
+ wLeMz9zc2fjoqGz0Mg0l6YO65NByMHXgeqCnQcS4RDfj6NYA6Sl66nQymi1w01I7i9Sy
+ VYehOhx0EvITenA9Zi0XUKiJq3jdkHL1JJQUBumGnPWrYfTG/BQaMXASQ4p8TaEhCYZT rw== 
+Received: from mx0b-00154901.pphosted.com (mx0b-00154901.pphosted.com [67.231.157.37])
+        by mx0a-00154904.pphosted.com with ESMTP id 2va2uk4p8j-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 02 Oct 2019 15:44:11 -0400
+Received: from pps.filterd (m0134318.ppops.net [127.0.0.1])
+        by mx0a-00154901.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id x92JhBMc084375;
+        Wed, 2 Oct 2019 15:44:10 -0400
+Received: from ausxipps306.us.dell.com (AUSXIPPS306.us.dell.com [143.166.148.156])
+        by mx0a-00154901.pphosted.com with ESMTP id 2va25gew0y-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Wed, 02 Oct 2019 15:44:10 -0400
+X-LoopCount0: from 10.166.132.129
+X-PREM-Routing: D-Outbound
+X-IronPort-AV: E=Sophos;i="5.60,349,1549951200"; 
+   d="scan'208";a="382563207"
+From:   <Narendra.K@dell.com>
+To:     <linux-efi@vger.kernel.org>
+CC:     <Mario.Limonciello@dell.com>, <ard.biesheuvel@linaro.org>,
+        <geert@linux-m68k.org>, <tglx@linutronix.de>,
+        <linux-kernel@vger.kernel.org>, <james.morse@arm.com>,
+        <mingo@kernel.org>, <Narendra.K@dell.com>
+Subject: [PATCH] Ask user input only when CONFIG_X86 or CONFIG_COMPILE_TEST is
+ set to y
+Thread-Topic: [PATCH] Ask user input only when CONFIG_X86 or
+ CONFIG_COMPILE_TEST is set to y
+Thread-Index: AQHVeVm8hd3/NfhPNEW1ErxPMn2a1Q==
+Date:   Wed, 2 Oct 2019 19:44:00 +0000
+Message-ID: <20191002194346.GA3792@localhost.localdomain>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+user-agent: Mutt/1.10.1 (2018-07-13)
+x-ms-exchange-messagesentrepresentingtype: 1
+x-ms-exchange-transport-fromentityheader: Hosted
+x-originating-ip: [10.143.242.75]
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <73613574CD0BB740BB500DF328D5F721@dell.com>
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.95,1.0.8
+ definitions=2019-10-02_08:2019-10-01,2019-10-02 signatures=0
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 phishscore=0
+ priorityscore=1501 malwarescore=0 spamscore=0 clxscore=1015 mlxscore=0
+ impostorscore=0 adultscore=0 lowpriorityscore=0 suspectscore=0
+ mlxlogscore=999 bulkscore=0 classifier=spam adjust=0 reason=mlx
+ scancount=1 engine=8.12.0-1908290000 definitions=main-1910020154
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 impostorscore=0 bulkscore=0
+ clxscore=1015 mlxlogscore=999 priorityscore=1501 lowpriorityscore=0
+ spamscore=0 malwarescore=0 phishscore=0 adultscore=0 suspectscore=0
+ mlxscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-1908290000 definitions=main-1910020153
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Lukas Wunner <lukas@wunner.de>
+From: Narendra K <Narendra.K@dell.com>
 
-The CPER parser assumes that the class code is big endian, but at least
-on this edk2-derived Intel Purley platform it's little endian:
+For the EFI_RCI2_TABLE kconfig option, 'make oldconfig' asks the user
+for input as it is a new kconfig option in kernel version 5.4. This patch
+modifies the kconfig option to ask the user for input only when CONFIG_X86
+or CONFIG_COMPILE_TEST is set to y.
 
-    efi: EFI v2.50 by EDK II BIOS ID:PLYDCRB1.86B.0119.R05.1701181843
-    DMI: Intel Corporation PURLEY/PURLEY, BIOS PLYDCRB1.86B.0119.R05.1701181843 01/18/2017
+The patch also makes EFI_RCI2_TABLE kconfig option depend on CONFIG_EFI.
 
-    {1}[Hardware Error]:   device_id: 0000:5d:00.0
-    {1}[Hardware Error]:   slot: 0
-    {1}[Hardware Error]:   secondary_bus: 0x5e
-    {1}[Hardware Error]:   vendor_id: 0x8086, device_id: 0x2030
-    {1}[Hardware Error]:   class_code: 000406
-                                       ^^^^^^ (should be 060400)
-
-Signed-off-by: Lukas Wunner <lukas@wunner.de>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: Narendra K <Narendra.K@dell.com>
 ---
- drivers/firmware/efi/cper.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+The patch is created on kernel version 5.4-rc1.
 
-diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-index addf0749dd8b..b1af0de2e100 100644
---- a/drivers/firmware/efi/cper.c
-+++ b/drivers/firmware/efi/cper.c
-@@ -381,7 +381,7 @@ static void cper_print_pcie(const char *pfx, const struct cper_sec_pcie *pcie,
- 		printk("%s""vendor_id: 0x%04x, device_id: 0x%04x\n", pfx,
- 		       pcie->device_id.vendor_id, pcie->device_id.device_id);
- 		p = pcie->device_id.class_code;
--		printk("%s""class_code: %02x%02x%02x\n", pfx, p[0], p[1], p[2]);
-+		printk("%s""class_code: %02x%02x%02x\n", pfx, p[2], p[1], p[0]);
- 	}
- 	if (pcie->validation_bits & CPER_PCIE_VALID_SERIAL_NUMBER)
- 		printk("%s""serial number: 0x%04x, 0x%04x\n", pfx,
--- 
-2.20.1
+Hi Ard, I have made following changes -
 
+- changed the prompt string from "EFI Runtime Configuration
+Interface Table Version 2 Support" to "EFI RCI Table Version 2 Support"
+as the string crossed 80 char limit.=20
+
+- added "depends on EFI" so that code builds only when CONFIG_EFI is
+set to y.
+
+- added 'default n' for ease of understanding though default is set to n.
+
+ drivers/firmware/efi/Kconfig | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+index 178ee8106828..6e4c46e8a954 100644
+--- a/drivers/firmware/efi/Kconfig
++++ b/drivers/firmware/efi/Kconfig
+@@ -181,7 +181,10 @@ config RESET_ATTACK_MITIGATION
+ 	  reboots.
+=20
+ config EFI_RCI2_TABLE
+-	bool "EFI Runtime Configuration Interface Table Version 2 Support"
++	bool
++	prompt "EFI RCI Table Version 2 Support" if X86 || COMPILE_TEST
++	depends on EFI
++	default n
+ 	help
+ 	  Displays the content of the Runtime Configuration Interface
+ 	  Table version 2 on Dell EMC PowerEdge systems as a binary
+--=20
+2.18.1
+
+--=20
+With regards,
+Narendra K=
