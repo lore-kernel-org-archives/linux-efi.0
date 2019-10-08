@@ -1,127 +1,208 @@
-Return-Path: <SRS0=7VXw=YA=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=1hdo=YB=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.8 required=3.0
-	tests=HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1BF2EECE58D
-	for <linux-efi@archiver.kernel.org>; Mon,  7 Oct 2019 14:52:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D1A0AECE58C
+	for <linux-efi@archiver.kernel.org>; Tue,  8 Oct 2019 01:14:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E330D2173B
-	for <linux-efi@archiver.kernel.org>; Mon,  7 Oct 2019 14:52:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id ACDF921721
+	for <linux-efi@archiver.kernel.org>; Tue,  8 Oct 2019 01:14:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727912AbfJGOwA (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 7 Oct 2019 10:52:00 -0400
-Received: from Galois.linutronix.de ([193.142.43.55]:44247 "EHLO
-        Galois.linutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728019AbfJGOt0 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 7 Oct 2019 10:49:26 -0400
-Received: from [5.158.153.53] (helo=tip-bot2.lab.linutronix.de)
-        by Galois.linutronix.de with esmtpsa (TLS1.2:DHE_RSA_AES_256_CBC_SHA256:256)
-        (Exim 4.80)
-        (envelope-from <tip-bot2@linutronix.de>)
-        id 1iHUJz-0005pe-PH; Mon, 07 Oct 2019 16:49:11 +0200
-Received: from [127.0.1.1] (localhost [IPv6:::1])
-        by tip-bot2.lab.linutronix.de (Postfix) with ESMTP id 3A4A61C032F;
-        Mon,  7 Oct 2019 16:49:10 +0200 (CEST)
-Date:   Mon, 07 Oct 2019 14:49:10 -0000
-From:   "tip-bot2 for Lukas Wunner" <tip-bot2@linutronix.de>
-Reply-to: linux-kernel@vger.kernel.org
-To:     linux-tip-commits@vger.kernel.org
-Subject: [tip: efi/urgent] efi/cper: Fix endianness of PCIe class code
-Cc:     Lukas Wunner <lukas@wunner.de>,
+        id S1728983AbfJHBOw (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 7 Oct 2019 21:14:52 -0400
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:49598 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1729285AbfJHBOv (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 7 Oct 2019 21:14:51 -0400
+Received: from pps.filterd (m0098410.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.27/8.16.0.27) with SMTP id x981BoOo144180
+        for <linux-efi@vger.kernel.org>; Mon, 7 Oct 2019 21:14:50 -0400
+Received: from e06smtp02.uk.ibm.com (e06smtp02.uk.ibm.com [195.75.94.98])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 2vgd6pdq66-1
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
+        for <linux-efi@vger.kernel.org>; Mon, 07 Oct 2019 21:14:50 -0400
+Received: from localhost
+        by e06smtp02.uk.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        for <linux-efi@vger.kernel.org> from <nayna@linux.ibm.com>;
+        Tue, 8 Oct 2019 02:14:48 +0100
+Received: from b06avi18626390.portsmouth.uk.ibm.com (9.149.26.192)
+        by e06smtp02.uk.ibm.com (192.168.101.132) with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted;
+        (version=TLSv1/SSLv3 cipher=AES256-GCM-SHA384 bits=256/256)
+        Tue, 8 Oct 2019 02:14:44 +0100
+Received: from d06av25.portsmouth.uk.ibm.com (d06av25.portsmouth.uk.ibm.com [9.149.105.61])
+        by b06avi18626390.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id x981ECxP36372934
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 8 Oct 2019 01:14:13 GMT
+Received: from d06av25.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 83ED411C054;
+        Tue,  8 Oct 2019 01:14:42 +0000 (GMT)
+Received: from d06av25.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id ECC7B11C04C;
+        Tue,  8 Oct 2019 01:14:39 +0000 (GMT)
+Received: from swastik.ibm.com (unknown [9.80.231.8])
+        by d06av25.portsmouth.uk.ibm.com (Postfix) with ESMTP;
+        Tue,  8 Oct 2019 01:14:39 +0000 (GMT)
+From:   Nayna Jain <nayna@linux.ibm.com>
+To:     linuxppc-dev@ozlabs.org, linux-efi@vger.kernel.org,
+        linux-integrity@vger.kernel.org
+Cc:     linux-kernel@vger.kernel.org,
+        Michael Ellerman <mpe@ellerman.id.au>,
+        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
+        Paul Mackerras <paulus@samba.org>,
         Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Ben Dooks <ben.dooks@codethink.co.uk>,
-        Dave Young <dyoung@redhat.com>,
-        Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>,
-        Jerry Snitselaar <jsnitsel@redhat.com>,
-        Linus Torvalds <torvalds@linux-foundation.org>,
-        Lyude Paul <lyude@redhat.com>,
-        Matthew Garrett <mjg59@google.com>,
-        Octavian Purdila <octavian.purdila@intel.com>,
-        Peter Jones <pjones@redhat.com>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Scott Talbert <swt@techie.net>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org,
-        Ingo Molnar <mingo@kernel.org>, Borislav Petkov <bp@alien8.de>,
-        linux-kernel@vger.kernel.org
-In-Reply-To: <20191002165904.8819-2-ard.biesheuvel@linaro.org>
-References: <20191002165904.8819-2-ard.biesheuvel@linaro.org>
-MIME-Version: 1.0
-Message-ID: <157045975018.9978.3816747773596306843.tip-bot2@tip-bot2>
-X-Mailer: tip-git-log-daemon
-Robot-ID: <tip-bot2.linutronix.de>
-Robot-Unsubscribe: Contact <mailto:tglx@linutronix.de> to get blacklisted from these emails
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-X-Linutronix-Spam-Score: -1.0
-X-Linutronix-Spam-Level: -
-X-Linutronix-Spam-Status: No , -1.0 points, 5.0 required,  ALL_TRUSTED=-1,SHORTCIRCUIT=-0.0001
+        Jeremy Kerr <jk@ozlabs.org>,
+        Matthew Garret <matthew.garret@nebula.com>,
+        Mimi Zohar <zohar@linux.ibm.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Claudio Carvalho <cclaudio@linux.ibm.com>,
+        George Wilson <gcwilson@linux.ibm.com>,
+        Elaine Palmer <erpalmer@us.ibm.com>,
+        Eric Ricther <erichte@linux.ibm.com>,
+        "Oliver O'Halloran" <oohall@gmail.com>,
+        Nayna Jain <nayna@linux.ibm.com>
+Subject: [PATCH v7 0/8] powerpc: Enabling IMA arch specific secure boot policies
+Date:   Mon,  7 Oct 2019 21:14:19 -0400
+X-Mailer: git-send-email 1.8.3.1
+X-TM-AS-GCONF: 00
+x-cbid: 19100801-0008-0000-0000-0000031EF96D
+X-IBM-AV-DETECTION: SAVI=unused REMOTE=unused XFE=unused
+x-cbparentid: 19100801-0009-0000-0000-00004A3E0C47
+Message-Id: <1570497267-13672-1-git-send-email-nayna@linux.ibm.com>
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:,, definitions=2019-10-07_05:,,
+ signatures=0
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
+ malwarescore=0 suspectscore=0 phishscore=0 bulkscore=0 spamscore=0
+ clxscore=1015 lowpriorityscore=0 mlxscore=0 impostorscore=0
+ mlxlogscore=999 adultscore=0 classifier=spam adjust=0 reason=mlx
+ scancount=1 engine=8.0.1-1908290000 definitions=main-1910080011
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The following commit has been merged into the efi/urgent branch of tip:
+This patchset extends the previous version of the patchset[1] by adding
+the support for checking against the binary blacklisted hashes.
 
-Commit-ID:     6fb9367a15d1a126d222d738b2702c7958594a5f
-Gitweb:        https://git.kernel.org/tip/6fb9367a15d1a126d222d738b2702c7958594a5f
-Author:        Lukas Wunner <lukas@wunner.de>
-AuthorDate:    Wed, 02 Oct 2019 18:58:58 +02:00
-Committer:     Ingo Molnar <mingo@kernel.org>
-CommitterDate: Mon, 07 Oct 2019 15:24:35 +02:00
+IMA subsystem supports custom, built-in, arch-specific policies to define
+the files to be measured and appraised. These policies are honored based
+on the priority where arch-specific policies is the highest and custom
+is the lowest.
 
-efi/cper: Fix endianness of PCIe class code
+PowerNV systems uses the linux based bootloader and kexec the Host OS.
+It rely on IMA for signature verification of the kernel before doing the
+kexec. This patchset adds support for powerpc arch specific ima policies
+that are defined based on system's OS secureboot and trustedboot state.
+The OS secureboot and trustedboot state are determined via device-tree
+properties.
 
-The CPER parser assumes that the class code is big endian, but at least
-on this edk2-derived Intel Purley platform it's little endian:
+The verification needs to be done only for the binaries which are not
+blacklisted. The kernel currently checks against the blacklisted keys.
+However that results in blacklisting all the binaries that are signed by
+that key. In order to prevent single binary from loading, it is required
+to support checking against blacklisting of the binary hash. This patchset
+adds the support in IMA to check against blacklisted hashes for the files
+signed by appended signature.
 
-    efi: EFI v2.50 by EDK II BIOS ID:PLYDCRB1.86B.0119.R05.1701181843
-    DMI: Intel Corporation PURLEY/PURLEY, BIOS PLYDCRB1.86B.0119.R05.1701181843 01/18/2017
+[1] http://patchwork.ozlabs.org/cover/1149262/ 
 
-    {1}[Hardware Error]:   device_id: 0000:5d:00.0
-    {1}[Hardware Error]:   slot: 0
-    {1}[Hardware Error]:   secondary_bus: 0x5e
-    {1}[Hardware Error]:   vendor_id: 0x8086, device_id: 0x2030
-    {1}[Hardware Error]:   class_code: 000406
-                                       ^^^^^^ (should be 060400)
+Changelog:
+v7:
+* Removes patch related to dt-bindings as per input from Rob Herring. 
+* fixes Patch 1/8 to use new device-tree updates as per Oliver
+  feedback to device-tree documentation in skiboot mailing list.
+(https://lists.ozlabs.org/pipermail/skiboot/2019-September/015329.html)
+* Includes feedbacks from Mimi, Thiago
+  * moves function get_powerpc_fw_sb_node() from Patch 1 to Patch 3 
+  * fixes Patch 2/8 to use CONFIG_MODULE_SIG_FORCE.
+  * updates Patch description in Patch 5/8
+  * adds a new patch to add wrapper is_binary_blacklisted()
+  * removes the patch that deprecated permit_directio
 
-Signed-off-by: Lukas Wunner <lukas@wunner.de>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Ben Dooks <ben.dooks@codethink.co.uk>
-Cc: Dave Young <dyoung@redhat.com>
-Cc: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
-Cc: Jerry Snitselaar <jsnitsel@redhat.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Lyude Paul <lyude@redhat.com>
-Cc: Matthew Garrett <mjg59@google.com>
-Cc: Octavian Purdila <octavian.purdila@intel.com>
-Cc: Peter Jones <pjones@redhat.com>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Scott Talbert <swt@techie.net>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-efi@vger.kernel.org
-Cc: linux-integrity@vger.kernel.org
-Link: https://lkml.kernel.org/r/20191002165904.8819-2-ard.biesheuvel@linaro.org
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
----
- drivers/firmware/efi/cper.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+v6:
+* includes feedbacks from Michael Ellerman on the patchset v5
+  * removed email ids from comments
+  * add the doc for the device-tree
+  * renames the secboot.c to secure_boot.c and secboot.h to secure_boot.h
+  * other code specific fixes
+* split the patches to differentiate between secureboot and trustedboot
+state of the system
+* adds the patches to support the blacklisting of the binary hash.
 
-diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-index addf074..b1af0de 100644
---- a/drivers/firmware/efi/cper.c
-+++ b/drivers/firmware/efi/cper.c
-@@ -381,7 +381,7 @@ static void cper_print_pcie(const char *pfx, const struct cper_sec_pcie *pcie,
- 		printk("%s""vendor_id: 0x%04x, device_id: 0x%04x\n", pfx,
- 		       pcie->device_id.vendor_id, pcie->device_id.device_id);
- 		p = pcie->device_id.class_code;
--		printk("%s""class_code: %02x%02x%02x\n", pfx, p[0], p[1], p[2]);
-+		printk("%s""class_code: %02x%02x%02x\n", pfx, p[2], p[1], p[0]);
- 	}
- 	if (pcie->validation_bits & CPER_PCIE_VALID_SERIAL_NUMBER)
- 		printk("%s""serial number: 0x%04x, 0x%04x\n", pfx,
+v5:
+* secureboot state is now read via device tree entry rather than OPAL
+secure variables
+* ima arch policies are updated to use policy based template for
+measurement rules
+
+v4:
+* Fixed the build issue as reported by Satheesh Rajendran.
+
+v3:
+* OPAL APIs in Patch 1 are updated to provide generic interface based on
+key/keylen. This patchset updates kernel OPAL APIs to be compatible with
+generic interface.
+* Patch 2 is cleaned up to use new OPAL APIs.
+* Since OPAL can support different types of backend which can vary in the
+variable interpretation, the Patch 2 is updated to add a check for the
+backend version
+* OPAL API now expects consumer to first check the supported backend version
+before calling other secvar OPAL APIs. This check is now added in patch 2.
+* IMA policies in Patch 3 is updated to specify appended signature and
+per policy template.
+* The patches now are free of any EFIisms.
+
+v2:
+
+* Removed Patch 1: powerpc/include: Override unneeded early ioremap
+functions
+* Updated Subject line and patch description of the Patch 1 of this series
+* Removed dependency of OPAL_SECVAR on EFI, CPU_BIG_ENDIAN and UCS2_STRING
+* Changed OPAL APIs from static to non-static. Added opal-secvar.h for the
+same
+* Removed EFI hooks from opal_secvar.c
+* Removed opal_secvar_get_next(), opal_secvar_enqueue() and
+opal_query_variable_info() function
+* get_powerpc_sb_mode() in secboot.c now directly calls OPAL Runtime API
+rather than via EFI hooks.
+* Fixed log messages in get_powerpc_sb_mode() function.
+* Added dependency for PPC_SECURE_BOOT on configs PPC64 and OPAL_SECVAR
+* Replaced obj-$(CONFIG_IMA) with obj-$(CONFIG_PPC_SECURE_BOOT) in
+arch/powerpc/kernel/Makefile
+*** BLURB HERE ***
+
+Nayna Jain (8):
+  powerpc: detect the secure boot mode of the system
+  powerpc: add support to initialize ima policy rules
+  powerpc: detect the trusted boot state of the system
+  powerpc/ima: add measurement rules to ima arch specific policy
+  ima: make process_buffer_measurement() generic
+  certs: add wrapper function to check blacklisted binary hash
+  ima: check against blacklisted hashes for files with modsig
+  powerpc/ima: update ima arch policy to check for blacklist
+
+ Documentation/ABI/testing/ima_policy   |  1 +
+ arch/powerpc/Kconfig                   | 12 ++++
+ arch/powerpc/include/asm/secure_boot.h | 35 ++++++++++++
+ arch/powerpc/kernel/Makefile           |  2 +
+ arch/powerpc/kernel/ima_arch.c         | 72 ++++++++++++++++++++++++
+ arch/powerpc/kernel/secure_boot.c      | 77 ++++++++++++++++++++++++++
+ certs/blacklist.c                      |  9 +++
+ include/keys/system_keyring.h          |  6 ++
+ include/linux/ima.h                    |  3 +-
+ security/integrity/ima/ima.h           | 12 ++++
+ security/integrity/ima/ima_appraise.c  | 39 +++++++++++++
+ security/integrity/ima/ima_main.c      | 41 +++++++-------
+ security/integrity/ima/ima_policy.c    | 10 +++-
+ security/integrity/integrity.h         |  1 +
+ 14 files changed, 298 insertions(+), 22 deletions(-)
+ create mode 100644 arch/powerpc/include/asm/secure_boot.h
+ create mode 100644 arch/powerpc/kernel/ima_arch.c
+ create mode 100644 arch/powerpc/kernel/secure_boot.c
+
+-- 
+2.20.1
+
