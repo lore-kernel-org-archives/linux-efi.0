@@ -6,38 +6,36 @@ X-Spam-Status: No, score=-6.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	URIBL_BLOCKED autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 05644ECE58C
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DEADEC47404
 	for <linux-efi@archiver.kernel.org>; Wed,  9 Oct 2019 23:19:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id DE24F206C0
-	for <linux-efi@archiver.kernel.org>; Wed,  9 Oct 2019 23:19:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BE6F0206C0
+	for <linux-efi@archiver.kernel.org>; Wed,  9 Oct 2019 23:19:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732530AbfJIXT2 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 9 Oct 2019 19:19:28 -0400
-Received: from mga02.intel.com ([134.134.136.20]:2147 "EHLO mga02.intel.com"
+        id S1732481AbfJIXTR (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 9 Oct 2019 19:19:17 -0400
+Received: from mga01.intel.com ([192.55.52.88]:49489 "EHLO mga01.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1732387AbfJIXT2 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 9 Oct 2019 19:19:28 -0400
+        id S1732507AbfJIXTQ (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 9 Oct 2019 19:19:16 -0400
 X-Amp-Result: SKIPPED(no attachment in message)
 X-Amp-File-Uploaded: False
-Received: from orsmga008.jf.intel.com ([10.7.209.65])
-  by orsmga101.jf.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 09 Oct 2019 16:19:27 -0700
+Received: from fmsmga002.fm.intel.com ([10.253.24.26])
+  by fmsmga101.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 09 Oct 2019 16:19:15 -0700
 X-IronPort-AV: E=Sophos;i="5.67,277,1566889200"; 
-   d="scan'208";a="187772323"
+   d="scan'208";a="223748443"
 Received: from dwillia2-desk3.jf.intel.com (HELO dwillia2-desk3.amr.corp.intel.com) ([10.54.39.16])
-  by orsmga008-auth.jf.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 09 Oct 2019 16:19:26 -0700
-Subject: [PATCH v6 06/12] arm/efi: EFI soft reservation to memblock
+  by fmsmga002-auth.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 09 Oct 2019 16:19:15 -0700
+Subject: [PATCH v6 04/12] efi: Common enable/disable infrastructure for EFI
+ soft reservation
 From:   Dan Williams <dan.j.williams@intel.com>
 To:     mingo@redhat.com
-Cc:     Will Deacon <will@kernel.org>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        peterz@infradead.org, vishal.l.verma@intel.com,
-        dave.hansen@linux.intel.com, x86@kernel.org,
-        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-acpi@vger.kernel.org
-Date:   Wed, 09 Oct 2019 16:05:09 -0700
-Message-ID: <157066230919.1059972.9000449870543851830.stgit@dwillia2-desk3.amr.corp.intel.com>
+Cc:     Ard Biesheuvel <ard.biesheuvel@linaro.org>, peterz@infradead.org,
+        vishal.l.verma@intel.com, dave.hansen@linux.intel.com,
+        x86@kernel.org, linux-efi@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org
+Date:   Wed, 09 Oct 2019 16:04:57 -0700
+Message-ID: <157066229757.1059972.16873416956816693344.stgit@dwillia2-desk3.amr.corp.intel.com>
 In-Reply-To: <157066227329.1059972.5659620631541203458.stgit@dwillia2-desk3.amr.corp.intel.com>
 References: <157066227329.1059972.5659620631541203458.stgit@dwillia2-desk3.amr.corp.intel.com>
 User-Agent: StGit/0.18-2-gc94f
@@ -64,122 +62,198 @@ reservation to be recovered as typical memory. This policy can be
 disabled at compile-time with CONFIG_EFI_SOFT_RESERVE=n, or runtime with
 efi=nosoftreserve.
 
-For this patch, update the ARM paths that consider
-EFI_CONVENTIONAL_MEMORY to optionally take the EFI_MEMORY_SP attribute
-into account as a reservation indicator. Publish the soft reservation as
-IORES_DESC_SOFT_RESERVED memory, similar to x86.
+As for this patch, define the common helpers to determine if the
+EFI_MEMORY_SP attribute should be honored. The determination needs to be
+made early to prevent the kernel from being loaded into soft-reserved
+memory, or otherwise allowing early allocations to land there. Follow-on
+changes are needed per architecture to leverage these helpers in their
+respective mem-init paths.
 
-(Based on an original patch by Ard)
-
-Cc: Will Deacon <will@kernel.org>
-Cc: Catalin Marinas <catalin.marinas@arm.com>
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Signed-off-by: Dan Williams <dan.j.williams@intel.com>
 ---
- arch/arm64/mm/mmu.c                       |    2 ++
- drivers/firmware/efi/arm-init.c           |    9 +++++++++
- drivers/firmware/efi/arm-runtime.c        |   24 ++++++++++++++++++++++++
- drivers/firmware/efi/libstub/arm32-stub.c |    5 +++++
- drivers/firmware/efi/libstub/random.c     |    4 ++++
- 5 files changed, 44 insertions(+)
+ Documentation/admin-guide/kernel-parameters.txt |    9 ++++++++-
+ drivers/firmware/efi/Kconfig                    |   21 +++++++++++++++++++++
+ drivers/firmware/efi/efi.c                      |    9 +++++++++
+ drivers/firmware/efi/libstub/efi-stub-helper.c  |   19 +++++++++++++++++++
+ include/linux/efi.h                             |    8 ++++++++
+ 5 files changed, 65 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
-index 60c929f3683b..2c385fe05fde 100644
---- a/arch/arm64/mm/mmu.c
-+++ b/arch/arm64/mm/mmu.c
-@@ -1061,6 +1061,8 @@ int arch_add_memory(int nid, u64 start, u64 size,
- 	__create_pgd_mapping(swapper_pg_dir, start, __phys_to_virt(start),
- 			     size, PAGE_KERNEL, __pgd_pgtable_alloc, flags);
+diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
+index c7ac2f3ac99f..47478a730011 100644
+--- a/Documentation/admin-guide/kernel-parameters.txt
++++ b/Documentation/admin-guide/kernel-parameters.txt
+@@ -1168,7 +1168,8 @@
+ 			Format: {"off" | "on" | "skip[mbr]"}
  
-+	memblock_clear_nomap(start, size);
+ 	efi=		[EFI]
+-			Format: { "old_map", "nochunk", "noruntime", "debug" }
++			Format: { "old_map", "nochunk", "noruntime", "debug",
++				  "nosoftreserve" }
+ 			old_map [X86-64]: switch to the old ioremap-based EFI
+ 			runtime services mapping. 32-bit still uses this one by
+ 			default.
+@@ -1177,6 +1178,12 @@
+ 			firmware implementations.
+ 			noruntime : disable EFI runtime services support
+ 			debug: enable misc debug output
++			nosoftreserve: The EFI_MEMORY_SP (Specific Purpose)
++			attribute may cause the kernel to reserve the
++			memory range for a memory mapping driver to
++			claim. Specify efi=nosoftreserve to disable this
++			reservation and treat the memory by its base type
++			(i.e. EFI_CONVENTIONAL_MEMORY / "System RAM").
+ 
+ 	efi_no_storage_paranoia [EFI; X86]
+ 			Using this parameter you can use more than 50% of
+diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+index 178ee8106828..9fa79f9fa0af 100644
+--- a/drivers/firmware/efi/Kconfig
++++ b/drivers/firmware/efi/Kconfig
+@@ -75,6 +75,27 @@ config EFI_MAX_FAKE_MEM
+ 	  Ranges can be set up to this value using comma-separated list.
+ 	  The default value is 8.
+ 
++config EFI_SOFT_RESERVE
++	bool "Reserve EFI Specific Purpose Memory"
++	depends on EFI && ACPI_HMAT
++	default ACPI_HMAT
++	help
++	  On systems that have mixed performance classes of memory EFI
++	  may indicate specific purpose memory with an attribute (See
++	  EFI_MEMORY_SP in UEFI 2.8). A memory range tagged with this
++	  attribute may have unique performance characteristics compared
++	  to the system's general purpose "System RAM" pool. On the
++	  expectation that such memory has application specific usage,
++	  and its base EFI memory type is "conventional" answer Y to
++	  arrange for the kernel to reserve it as a "Soft Reserved"
++	  resource, and set aside for direct-access (device-dax) by
++	  default. The memory range can later be optionally assigned to
++	  the page allocator by system administrator policy via the
++	  device-dax kmem facility. Say N to have the kernel treat this
++	  memory as "System RAM" by default.
 +
- 	return __add_pages(nid, start >> PAGE_SHIFT, size >> PAGE_SHIFT,
- 			   restrictions);
++	  If unsure, say Y.
++
+ config EFI_PARAMS_FROM_FDT
+ 	bool
+ 	help
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 68a4ec24b823..911a58be4a36 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -81,6 +81,12 @@ bool efi_runtime_disabled(void)
+ 	return disable_runtime;
  }
-diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
-index 311cd349a862..904fa09e6a6b 100644
---- a/drivers/firmware/efi/arm-init.c
-+++ b/drivers/firmware/efi/arm-init.c
-@@ -163,6 +163,15 @@ static __init int is_usable_memory(efi_memory_desc_t *md)
- 	case EFI_BOOT_SERVICES_DATA:
- 	case EFI_CONVENTIONAL_MEMORY:
- 	case EFI_PERSISTENT_MEMORY:
-+		/*
-+		 * Special purpose memory is 'soft reserved', which means it
-+		 * is set aside initially, but can be hotplugged back in or
-+		 * be assigned to the dax driver after boot.
-+		 */
-+		if (efi_soft_reserve_enabled() &&
-+		    (md->attribute & EFI_MEMORY_SP))
-+			return false;
-+
- 		/*
- 		 * According to the spec, these regions are no longer reserved
- 		 * after calling ExitBootServices(). However, we can only use
-diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
-index e2ac5fa5531b..899b803842bb 100644
---- a/drivers/firmware/efi/arm-runtime.c
-+++ b/drivers/firmware/efi/arm-runtime.c
-@@ -121,6 +121,30 @@ static int __init arm_enable_runtime_services(void)
- 		return 0;
- 	}
  
-+	if (efi_soft_reserve_enabled()) {
-+		efi_memory_desc_t *md;
++bool __pure efi_soft_reserve_enabled(void)
++{
++	return IS_ENABLED(CONFIG_EFI_SOFT_RESERVE) &&
++	       !efi_enabled(EFI_MEM_NO_SOFT_RESERVE);
++}
 +
-+		for_each_efi_memory_desc(md) {
-+			int md_size = md->num_pages << EFI_PAGE_SHIFT;
-+			struct resource *res;
+ static int __init parse_efi_cmdline(char *str)
+ {
+ 	if (!str) {
+@@ -94,6 +100,9 @@ static int __init parse_efi_cmdline(char *str)
+ 	if (parse_option_str(str, "noruntime"))
+ 		disable_runtime = true;
+ 
++	if (parse_option_str(str, "nosoftreserve"))
++		set_bit(EFI_MEM_NO_SOFT_RESERVE, &efi.flags);
 +
-+			if (!(md->attribute & EFI_MEMORY_SP))
-+				continue;
-+
-+			res = kzalloc(sizeof(*res), GFP_KERNEL);
-+			if (WARN_ON(!res))
-+				break;
-+
-+			res->start	= md->phys_addr;
-+			res->end	= md->phys_addr + md_size - 1;
-+			res->name	= "Soft Reserved";
-+			res->flags	= IORESOURCE_MEM;
-+			res->desc	= IORES_DESC_SOFT_RESERVED;
-+
-+			insert_resource(&iomem_resource, res);
-+		}
-+	}
-+
- 	if (efi_runtime_disabled()) {
- 		pr_info("EFI runtime services will be disabled.\n");
- 		return 0;
-diff --git a/drivers/firmware/efi/libstub/arm32-stub.c b/drivers/firmware/efi/libstub/arm32-stub.c
-index e8f7aefb6813..3cd54d2096c6 100644
---- a/drivers/firmware/efi/libstub/arm32-stub.c
-+++ b/drivers/firmware/efi/libstub/arm32-stub.c
-@@ -146,6 +146,11 @@ static efi_status_t reserve_kernel_base(efi_system_table_t *sys_table_arg,
+ 	return 0;
+ }
+ early_param("efi", parse_efi_cmdline);
+diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+index 3caae7f2cf56..5d901c56ac5f 100644
+--- a/drivers/firmware/efi/libstub/efi-stub-helper.c
++++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+@@ -32,6 +32,7 @@ static unsigned long __chunk_size = EFI_READ_CHUNK_SIZE;
+ static int __section(.data) __nokaslr;
+ static int __section(.data) __quiet;
+ static int __section(.data) __novamap;
++static bool __section(.data) efi_nosoftreserve;
+ 
+ int __pure nokaslr(void)
+ {
+@@ -45,6 +46,10 @@ int __pure novamap(void)
+ {
+ 	return __novamap;
+ }
++bool __pure efi_soft_reserve_enabled(void)
++{
++	return IS_ENABLED(CONFIG_EFI_SOFT_RESERVE) && !efi_nosoftreserve;
++}
+ 
+ #define EFI_MMAP_NR_SLACK_SLOTS	8
+ 
+@@ -211,6 +216,10 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
+ 		if (desc->type != EFI_CONVENTIONAL_MEMORY)
  			continue;
  
- 		case EFI_CONVENTIONAL_MEMORY:
-+			/* Skip soft reserved conventional memory */
-+			if (efi_soft_reserve_enabled() &&
-+			    (desc->attribute & EFI_MEMORY_SP))
-+				continue;
++		if (efi_soft_reserve_enabled() &&
++		    (desc->attribute & EFI_MEMORY_SP))
++			continue;
 +
- 			/*
- 			 * Reserve the intersection between this entry and the
- 			 * region.
-diff --git a/drivers/firmware/efi/libstub/random.c b/drivers/firmware/efi/libstub/random.c
-index b4b1d1dcb5fd..6c188695e730 100644
---- a/drivers/firmware/efi/libstub/random.c
-+++ b/drivers/firmware/efi/libstub/random.c
-@@ -46,6 +46,10 @@ static unsigned long get_entry_num_slots(efi_memory_desc_t *md,
- 	if (md->type != EFI_CONVENTIONAL_MEMORY)
- 		return 0;
+ 		if (desc->num_pages < nr_pages)
+ 			continue;
  
-+	if (efi_soft_reserve_enabled() &&
-+	    (md->attribute & EFI_MEMORY_SP))
-+		return 0;
+@@ -305,6 +314,10 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
+ 		if (desc->type != EFI_CONVENTIONAL_MEMORY)
+ 			continue;
+ 
++		if (efi_soft_reserve_enabled() &&
++		    (desc->attribute & EFI_MEMORY_SP))
++			continue;
 +
- 	region_end = min((u64)ULONG_MAX, md->phys_addr + md->num_pages*EFI_PAGE_SIZE - 1);
+ 		if (desc->num_pages < nr_pages)
+ 			continue;
  
- 	first_slot = round_up(md->phys_addr, align);
+@@ -489,6 +502,12 @@ efi_status_t efi_parse_options(char const *cmdline)
+ 			__novamap = 1;
+ 		}
+ 
++		if (IS_ENABLED(CONFIG_EFI_SOFT_RESERVE) &&
++		    !strncmp(str, "nosoftreserve", 7)) {
++			str += strlen("nosoftreserve");
++			efi_nosoftreserve = 1;
++		}
++
+ 		/* Group words together, delimited by "," */
+ 		while (*str && *str != ' ' && *str != ',')
+ 			str++;
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index baa275c56401..959c9650018f 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1202,6 +1202,7 @@ extern int __init efi_setup_pcdp_console(char *);
+ #define EFI_DBG			8	/* Print additional debug info at runtime */
+ #define EFI_NX_PE_DATA		9	/* Can runtime data regions be mapped non-executable? */
+ #define EFI_MEM_ATTR		10	/* Did firmware publish an EFI_MEMORY_ATTRIBUTES table? */
++#define EFI_MEM_NO_SOFT_RESERVE	11	/* Is the kernel configured to ignore soft reservations? */
+ 
+ #ifdef CONFIG_EFI
+ /*
+@@ -1212,6 +1213,8 @@ static inline bool efi_enabled(int feature)
+ 	return test_bit(feature, &efi.flags) != 0;
+ }
+ extern void efi_reboot(enum reboot_mode reboot_mode, const char *__unused);
++
++bool __pure efi_soft_reserve_enabled(void);
+ #else
+ static inline bool efi_enabled(int feature)
+ {
+@@ -1225,6 +1228,11 @@ efi_capsule_pending(int *reset_type)
+ {
+ 	return false;
+ }
++
++static inline bool efi_soft_reserve_enabled(void)
++{
++	return false;
++}
+ #endif
+ 
+ extern int efi_status_to_err(efi_status_t status);
 
