@@ -2,109 +2,92 @@ Return-Path: <SRS0=IIaK=YC=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_GIT autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F76CECE58D
-	for <linux-efi@archiver.kernel.org>; Wed,  9 Oct 2019 10:55:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 56AD6ECE58E
+	for <linux-efi@archiver.kernel.org>; Wed,  9 Oct 2019 13:02:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 7956F20B7C
-	for <linux-efi@archiver.kernel.org>; Wed,  9 Oct 2019 10:55:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2CF5C21721
+	for <linux-efi@archiver.kernel.org>; Wed,  9 Oct 2019 13:02:28 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="qqpha/Te"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="GHo82XUA"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729575AbfJIKzX (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 9 Oct 2019 06:55:23 -0400
-Received: from userp2130.oracle.com ([156.151.31.86]:42494 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725953AbfJIKzW (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 9 Oct 2019 06:55:22 -0400
-Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
-        by userp2130.oracle.com (8.16.0.27/8.16.0.27) with SMTP id x99An3EM076380;
-        Wed, 9 Oct 2019 10:54:25 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
- subject : date : message-id; s=corp-2019-08-05;
- bh=M33GVO9Y3jme01jHHD3zcMXHqJ6aM2z9oePhh2hkmuM=;
- b=qqpha/Te0Pky6KVXQk6AfDXZU2rXagKbsGeiW09MRWld8zjLm9/Ca+V9NZIcRUTcP1Hp
- w/n76C552Hetap0fxKNnEQ9LoesxXYBtHMlazkm5/rKaq8t+L67kAFN8CLu6yeVTWF0s
- wyiJP5m6Bqi94EcYz3RRLU2ytkAMDkl8YB0uNEe2vIYai8pcGNSnD+gpdHHpH6vRxPCs
- eSQmKOJRg8QQNG+Y/UYNW30dTChC2GdjjKcrtFeM7JLrbudajEHPoMJCfB5LpJeYwKZ4
- FnUtQeYQkIpc4mTqkcxGD99Qz2QUOihkg5ZrrxY/v2c3vHt+xJIyNEqNfjvvzTUSaKIn +w== 
-Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
-        by userp2130.oracle.com with ESMTP id 2vejkukb03-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 09 Oct 2019 10:54:25 +0000
-Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
-        by userp3020.oracle.com (8.16.0.27/8.16.0.27) with SMTP id x99AmbN2162723;
-        Wed, 9 Oct 2019 10:54:24 GMT
-Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
-        by userp3020.oracle.com with ESMTP id 2vh5caap72-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 09 Oct 2019 10:54:24 +0000
-Received: from abhmp0013.oracle.com (abhmp0013.oracle.com [141.146.116.19])
-        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id x99AsHxQ031048;
-        Wed, 9 Oct 2019 10:54:19 GMT
-Received: from tomti.i.net-space.pl (/10.175.167.68)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Wed, 09 Oct 2019 03:54:16 -0700
-From:   Daniel Kiper <daniel.kiper@oracle.com>
-To:     linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
-        x86@kernel.org, xen-devel@lists.xenproject.org
-Cc:     ard.biesheuvel@linaro.org, boris.ostrovsky@oracle.com,
-        bp@alien8.de, corbet@lwn.net, dave.hansen@linux.intel.com,
-        luto@kernel.org, peterz@infradead.org, eric.snowberg@oracle.com,
-        hpa@zytor.com, jgross@suse.com, konrad.wilk@oracle.com,
-        mingo@redhat.com, ross.philipson@oracle.com, tglx@linutronix.de
-Subject: [PATCH v3 0/3] x86/boot: Introduce the kernel_info et consortes
-Date:   Wed,  9 Oct 2019 12:53:55 +0200
-Message-Id: <20191009105358.32256-1-daniel.kiper@oracle.com>
-X-Mailer: git-send-email 2.11.0
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9404 signatures=668684
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
- phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=672
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.0.1-1908290000 definitions=main-1910090101
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9404 signatures=668684
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
- suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1011
- lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=747 adultscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1908290000
- definitions=main-1910090101
+        id S1731233AbfJINC2 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 9 Oct 2019 09:02:28 -0400
+Received: from mail-wm1-f66.google.com ([209.85.128.66]:40808 "EHLO
+        mail-wm1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1731187AbfJINC1 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 9 Oct 2019 09:02:27 -0400
+Received: by mail-wm1-f66.google.com with SMTP id b24so2509807wmj.5
+        for <linux-efi@vger.kernel.org>; Wed, 09 Oct 2019 06:02:25 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=6gKyU2lVUG9r8tkVXQwlslVrnGaZcT+vH7d3AbPHYB0=;
+        b=GHo82XUApFZmoJ9rbUiaxY0lPH5g1hfz9r8MSUnSI3GN9JdNoZQcA4UQ6OJo1rICO0
+         qzfEEIaPLpbItb/8PbB0tgtmMY3OvSBeFhFZiL7aO0dIhyWBySy0Gc4iZkpX6vcuzMon
+         Wj//7wE6Nd30Th7JDUX9ivMJk8/CkfEoL9COKkOw/OLGxaSlPBMlO4GEdXfniAHaK+uV
+         ThL1YwwiUvNrQ4RoX+Gkqtnk4np+XvZsHPcUah8iL/Z2af9/saPP/imUSPit0/RkYjkD
+         lCQnoyj1ClCApdV1FAhLZTizqvX7pcIkRlATP26I2RICqhtg4PmooQaeKNBqRXA5MyyA
+         j92g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=6gKyU2lVUG9r8tkVXQwlslVrnGaZcT+vH7d3AbPHYB0=;
+        b=OQL07PcO7Eep0qlWUm4rEC44Xr+SDeLevgRDlcPeC3Hvw7uCJEao9fJk8OkHG6jdq1
+         P0w2pCRTPtRr58R18F+NbsX5uAV/6yWJsY/546TwzY2ugYl2BwgHXnhvUe/3PfwiDBBb
+         ELjFePjCc1ufOjGhX5Xtn3PzzSbF8Kd8LiS5+vgYahyEHoYes0GTV9rtJoHcf1Rfx0/x
+         tc2PZBR4LorgYpo5kp3fM1QW82tdKClddRDdkFW0nPMAY25HU8BgxAf0UhRRvHqq5GK1
+         jqdBJ5AiWNOaqYZaDszRYl1R01/kqmEdJEuN794vUD0VKwuwN3LDcFMJxrSJhkaWD6eT
+         VCKA==
+X-Gm-Message-State: APjAAAVU30BigVkggpEtO4icvrS84xrgfV5riVGGKkjDbqVh0g8bNg/k
+        P2XN/1VtZmeapS/fDnRQRIjEmc54tmdXe347Wu109A==
+X-Google-Smtp-Source: APXvYqx+LxYtjcQzWODIZ+2Z6/00LXRbD8qwCw7fnhTtTZ7OXnXpkwtdFXmQrWSQSDmS0fILF/nvqqpHFCBNgF8/Vuo=
+X-Received: by 2002:a7b:cb54:: with SMTP id v20mr2412915wmj.119.1570626144905;
+ Wed, 09 Oct 2019 06:02:24 -0700 (PDT)
+MIME-Version: 1.0
+References: <20191008105510.6975-1-javierm@redhat.com> <CACdnJusuMQf8B9u83mB2Wye+aZ4aV8v4j2eFrokURHkLGA0G_w@mail.gmail.com>
+In-Reply-To: <CACdnJusuMQf8B9u83mB2Wye+aZ4aV8v4j2eFrokURHkLGA0G_w@mail.gmail.com>
+From:   Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Date:   Wed, 9 Oct 2019 15:02:13 +0200
+Message-ID: <CAKv+Gu8xgqEqeRPQSyEkcW6q0rosFRsGNdDxfOL2QdQXzkKvWw@mail.gmail.com>
+Subject: Re: [PATCH v2] efi/efi_test: lock down /dev/efi_test and require CAP_SYS_ADMIN
+To:     Matthew Garrett <mjg59@google.com>
+Cc:     Javier Martinez Canillas <javierm@redhat.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Ivan Hu <ivan.hu@canonical.com>,
+        Laszlo Ersek <lersek@redhat.com>,
+        linux-efi <linux-efi@vger.kernel.org>,
+        Laura Abbott <labbott@redhat.com>,
+        Josh Boyer <jwboyer@redhat.com>,
+        Peter Jones <pjones@redhat.com>,
+        Janne Karhunen <janne.karhunen@gmail.com>,
+        Kees Cook <keescook@chromium.org>,
+        David Howells <dhowells@redhat.com>,
+        LSM List <linux-security-module@vger.kernel.org>,
+        Casey Schaufler <casey@schaufler-ca.com>,
+        Micah Morton <mortonm@chromium.org>,
+        "Steven Rostedt (VMware)" <rostedt@goodmis.org>,
+        James Morris <jmorris@namei.org>,
+        Al Viro <viro@zeniv.linux.org.uk>,
+        "Serge E. Hallyn" <serge@hallyn.com>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Hi,
+On Wed, 9 Oct 2019 at 04:18, Matthew Garrett <mjg59@google.com> wrote:
+>
+> On Tue, Oct 8, 2019 at 9:55 PM Javier Martinez Canillas
+> <javierm@redhat.com> wrote:
+> > Signed-off-by: Javier Martinez Canillas <javierm@redhat.com>
+> > Acked-by: Laszlo Ersek <lersek@redhat.com>
+>
+> Acked-by: Matthew Garrett <mjg59@google.com>
 
-Due to very limited space in the setup_header this patch series introduces new
-kernel_info struct which will be used to convey information from the kernel to
-the bootloader. This way the boot protocol can be extended regardless of the
-setup_header limitations. Additionally, the patch series introduces some
-convenience features like the setup_indirect struct and the
-kernel_info.setup_type_max field.
-
-Daniel
-
- Documentation/x86/boot.rst             | 168 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- arch/x86/boot/Makefile                 |   2 +-
- arch/x86/boot/compressed/Makefile      |   4 +-
- arch/x86/boot/compressed/kaslr.c       |  12 ++++++
- arch/x86/boot/compressed/kernel_info.S |  22 +++++++++++
- arch/x86/boot/header.S                 |   3 +-
- arch/x86/boot/tools/build.c            |   5 +++
- arch/x86/include/uapi/asm/bootparam.h  |  16 +++++++-
- arch/x86/kernel/e820.c                 |  11 ++++++
- arch/x86/kernel/kdebugfs.c             |  20 ++++++++--
- arch/x86/kernel/ksysfs.c               |  30 ++++++++++----
- arch/x86/kernel/setup.c                |   4 ++
- arch/x86/mm/ioremap.c                  |  11 ++++++
- 13 files changed, 292 insertions(+), 16 deletions(-)
-
-Daniel Kiper (3):
-      x86/boot: Introduce the kernel_info
-      x86/boot: Introduce the kernel_info.setup_type_max
-      x86/boot: Introduce the setup_indirect
-
+Thanks all. Queued as a fix.
