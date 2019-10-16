@@ -7,62 +7,61 @@ X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D077AECE599
-	for <linux-efi@archiver.kernel.org>; Wed, 16 Oct 2019 22:04:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0E1F3FA372B
+	for <linux-efi@archiver.kernel.org>; Wed, 16 Oct 2019 22:09:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id A90F420872
-	for <linux-efi@archiver.kernel.org>; Wed, 16 Oct 2019 22:04:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D693921928
+	for <linux-efi@archiver.kernel.org>; Wed, 16 Oct 2019 22:09:57 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1571263487;
-	bh=zDAyQj87Ix+mlCwGZuPzUCOe+91kc9aoAPI8vKo9zP0=;
+	s=default; t=1571263797;
+	bh=tLqn9fDciW0EARsJzKSJ3fsSJmySKLNnTrfEp8YU+jU=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=ux8FMRclRwJT1SJErLIolk5hFrqo8Lsi2GLh1Bv9rm4f+wZSgnOQZCHoXq60Dxz1G
-	 JPrQ+wbhSP+Fyk7XNqapchYD+KIpGsestPN1tIMhhjjVXOgmdBxSSco+GVA2nCG2l7
-	 N8zpjMPCW4YRLOFeGROZEM46qMV0v5l7eGBP3ShA=
+	b=ggNCPRe8DZjZnZOGfj77Jrn2VdYKqyBIUJ+A6BXhJ9ONKXA/TTdQerInsidkxHW/6
+	 sG8/N7GmMffwIhQInSgVN12SYzteLAMvDOT376RKWPOKulBggc0/GNL21xZWBEi95U
+	 VoI1ogkGS6kZ7EsZeSsOBsSzlqSNfMGijOUPB+YM=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731631AbfJPWEm (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 16 Oct 2019 18:04:42 -0400
-Received: from mail.kernel.org ([198.145.29.99]:53108 "EHLO mail.kernel.org"
+        id S2395477AbfJPWJx (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 16 Oct 2019 18:09:53 -0400
+Received: from mail.kernel.org ([198.145.29.99]:50042 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2438354AbfJPV7A (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 16 Oct 2019 17:59:00 -0400
+        id S2395471AbfJPV5Z (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 16 Oct 2019 17:57:25 -0400
 Received: from localhost (unknown [192.55.54.58])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 979B2218DE;
-        Wed, 16 Oct 2019 21:58:59 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id B48CD20872;
+        Wed, 16 Oct 2019 21:57:24 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1571263139;
-        bh=zDAyQj87Ix+mlCwGZuPzUCOe+91kc9aoAPI8vKo9zP0=;
+        s=default; t=1571263044;
+        bh=tLqn9fDciW0EARsJzKSJ3fsSJmySKLNnTrfEp8YU+jU=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=RYulFleah8emP24FFJPI2rc7LrYUVllvon1X7iISzg5qgb/wZDrd2ukTgiLzclxQS
-         6aEY5aVQ5VNDSG6AFz2hwRlza1mp3btWRDZNu/B+zX3ooo7AVDeY4lGIK1QKNxr5Oy
-         8izx7lw3dcmHPRS7VyBGsgrgAGyltNlHv/nJX9Ak=
+        b=o67WOPaXzENmDg2LM8JUomPHIO/78dBZ6aPEvVsAUnrv80LGOufjg+0FvVDoFocjA
+         Lhx1kSZ6xHTeQJoAwcZC+MDwGsstM0hMUA21To65hcniaXVR2KP/0zs1mtVcs9u836
+         beqvv6RkHSWtVbqzMLe6TJXInImJF5SSMMxhoNwM=
 From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 To:     linux-kernel@vger.kernel.org
 Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        stable@vger.kernel.org, Lyude Paul <lyude@redhat.com>,
-        Peter Jones <pjones@redhat.com>,
-        Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>,
+        stable@vger.kernel.org, Scott Talbert <swt@techie.net>,
         Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Matthew Garrett <mjg59@google.com>,
         Ben Dooks <ben.dooks@codethink.co.uk>,
         Dave Young <dyoung@redhat.com>,
+        Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>,
         Jerry Snitselaar <jsnitsel@redhat.com>,
         Linus Torvalds <torvalds@linux-foundation.org>,
-        Lukas Wunner <lukas@wunner.de>,
+        Lukas Wunner <lukas@wunner.de>, Lyude Paul <lyude@redhat.com>,
+        Matthew Garrett <mjg59@google.com>,
         Octavian Purdila <octavian.purdila@intel.com>,
+        Peter Jones <pjones@redhat.com>,
         Peter Zijlstra <peterz@infradead.org>,
-        Scott Talbert <swt@techie.net>,
         Thomas Gleixner <tglx@linutronix.de>,
         linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org,
         Ingo Molnar <mingo@kernel.org>
-Subject: [PATCH 5.3 063/112] efi/tpm: Dont access event->count when it isnt mapped
-Date:   Wed, 16 Oct 2019 14:50:55 -0700
-Message-Id: <20191016214901.201583264@linuxfoundation.org>
+Subject: [PATCH 4.19 49/81] efivar/ssdt: Dont iterate over EFI vars if no SSDT override was specified
+Date:   Wed, 16 Oct 2019 14:51:00 -0700
+Message-Id: <20191016214840.161364695@linuxfoundation.org>
 X-Mailer: git-send-email 2.23.0
-In-Reply-To: <20191016214844.038848564@linuxfoundation.org>
-References: <20191016214844.038848564@linuxfoundation.org>
+In-Reply-To: <20191016214805.727399379@linuxfoundation.org>
+References: <20191016214805.727399379@linuxfoundation.org>
 User-Agent: quilt/0.66
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -72,92 +71,59 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Peter Jones <pjones@redhat.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-commit 047d50aee341d940350897c85799e56ae57c3849 upstream.
+commit c05f8f92b701576b615f30aac31fabdc0648649b upstream.
 
-Some machines generate a lot of event log entries.  When we're
-iterating over them, the code removes the old mapping and adds a
-new one, so once we cross the page boundary we're unmapping the page
-with the count on it.  Hilarity ensues.
+The kernel command line option efivar_ssdt= allows the name to be
+specified of an EFI variable containing an ACPI SSDT table that should
+be loaded into memory by the OS, and treated as if it was provided by
+the firmware.
 
-This patch keeps the info from the header in local variables so we don't
-need to access that page again or keep track of if it's mapped.
+Currently, that code will always iterate over the EFI variables and
+compare each name with the provided name, even if the command line
+option wasn't set to begin with.
 
-Tested-by: Lyude Paul <lyude@redhat.com>
-Signed-off-by: Peter Jones <pjones@redhat.com>
-Signed-off-by: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
+So bail early when no variable name was provided. This works around a
+boot regression on the 2012 Mac Pro, as reported by Scott.
+
+Tested-by: Scott Talbert <swt@techie.net>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Reviewed-by: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
-Acked-by: Matthew Garrett <mjg59@google.com>
-Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: <stable@vger.kernel.org> # v4.9+
 Cc: Ben Dooks <ben.dooks@codethink.co.uk>
 Cc: Dave Young <dyoung@redhat.com>
+Cc: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
 Cc: Jerry Snitselaar <jsnitsel@redhat.com>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>
 Cc: Lukas Wunner <lukas@wunner.de>
+Cc: Lyude Paul <lyude@redhat.com>
+Cc: Matthew Garrett <mjg59@google.com>
 Cc: Octavian Purdila <octavian.purdila@intel.com>
+Cc: Peter Jones <pjones@redhat.com>
 Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Scott Talbert <swt@techie.net>
 Cc: Thomas Gleixner <tglx@linutronix.de>
 Cc: linux-efi@vger.kernel.org
 Cc: linux-integrity@vger.kernel.org
-Cc: stable@vger.kernel.org
-Fixes: 44038bc514a2 ("tpm: Abstract crypto agile event size calculations")
-Link: https://lkml.kernel.org/r/20191002165904.8819-4-ard.biesheuvel@linaro.org
-[ Minor edits. ]
+Fixes: 475fb4e8b2f4 ("efi / ACPI: load SSTDs from EFI variables")
+Link: https://lkml.kernel.org/r/20191002165904.8819-3-ard.biesheuvel@linaro.org
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
 ---
- include/linux/tpm_eventlog.h |   14 +++++++++++---
- 1 file changed, 11 insertions(+), 3 deletions(-)
+ drivers/firmware/efi/efi.c |    3 +++
+ 1 file changed, 3 insertions(+)
 
---- a/include/linux/tpm_eventlog.h
-+++ b/include/linux/tpm_eventlog.h
-@@ -170,6 +170,7 @@ static inline int __calc_tpm2_event_size
- 	u16 halg;
- 	int i;
- 	int j;
-+	u32 count, event_type;
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -281,6 +281,9 @@ static __init int efivar_ssdt_load(void)
+ 	void *data;
+ 	int ret;
  
- 	marker = event;
- 	marker_start = marker;
-@@ -190,16 +191,22 @@ static inline int __calc_tpm2_event_size
- 	}
- 
- 	event = (struct tcg_pcr_event2_head *)mapping;
-+	/*
-+	 * The loop below will unmap these fields if the log is larger than
-+	 * one page, so save them here for reference:
-+	 */
-+	count = READ_ONCE(event->count);
-+	event_type = READ_ONCE(event->event_type);
- 
- 	efispecid = (struct tcg_efi_specid_event_head *)event_header->event;
- 
- 	/* Check if event is malformed. */
--	if (event->count > efispecid->num_algs) {
-+	if (count > efispecid->num_algs) {
- 		size = 0;
- 		goto out;
- 	}
- 
--	for (i = 0; i < event->count; i++) {
-+	for (i = 0; i < count; i++) {
- 		halg_size = sizeof(event->digests[i].alg_id);
- 
- 		/* Map the digest's algorithm identifier */
-@@ -256,8 +263,9 @@ static inline int __calc_tpm2_event_size
- 		+ event_field->event_size;
- 	size = marker - marker_start;
- 
--	if ((event->event_type == 0) && (event_field->event_size == 0))
-+	if (event_type == 0 && event_field->event_size == 0)
- 		size = 0;
++	if (!efivar_ssdt[0])
++		return 0;
 +
- out:
- 	if (do_mapping)
- 		TPM_MEMUNMAP(mapping, mapping_size);
+ 	ret = efivar_init(efivar_ssdt_iter, &entries, true, &entries);
+ 
+ 	list_for_each_entry_safe(entry, aux, &entries, list) {
 
 
