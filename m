@@ -2,241 +2,201 @@ Return-Path: <SRS0=qah4=YK=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.4 required=3.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT,
-	USER_IN_DEF_DKIM_WL autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.3 required=3.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_IN_DEF_DKIM_WL
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 51D8BECE58E
-	for <linux-efi@archiver.kernel.org>; Thu, 17 Oct 2019 14:14:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A9CCFA372A
+	for <linux-efi@archiver.kernel.org>; Thu, 17 Oct 2019 14:15:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 1ED7220854
-	for <linux-efi@archiver.kernel.org>; Thu, 17 Oct 2019 14:14:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2447721848
+	for <linux-efi@archiver.kernel.org>; Thu, 17 Oct 2019 14:15:35 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="q2AICOUX"
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="Kv2dqE7D"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2439998AbfJQOOF (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 17 Oct 2019 10:14:05 -0400
-Received: from mail-vs1-f74.google.com ([209.85.217.74]:44425 "EHLO
-        mail-vs1-f74.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2439927AbfJQONq (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 17 Oct 2019 10:13:46 -0400
-Received: by mail-vs1-f74.google.com with SMTP id y14so483102vsj.11
-        for <linux-efi@vger.kernel.org>; Thu, 17 Oct 2019 07:13:45 -0700 (PDT)
+        id S1729876AbfJQOPe (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 17 Oct 2019 10:15:34 -0400
+Received: from mail-oi1-f196.google.com ([209.85.167.196]:41941 "EHLO
+        mail-oi1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2394833AbfJQOPe (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 17 Oct 2019 10:15:34 -0400
+Received: by mail-oi1-f196.google.com with SMTP id g81so2262394oib.8
+        for <linux-efi@vger.kernel.org>; Thu, 17 Oct 2019 07:15:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=google.com; s=20161025;
-        h=date:in-reply-to:message-id:mime-version:references:subject:from:to
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=WK0XW0pj3angQDA5Q/f2RR4InnLdQcXEOv/B1XGqGcA=;
-        b=q2AICOUXfZaGMFSuns+PWDFv7IviEfOJbKopMZtW33QU+VemQtbnLj4qpxHAn5TXP2
-         nzER+TG3nGC/4BnHcTJZtqhT+ftdIDAxWqODmlYmcCyXiCbqVrjWQBjoDghwO4JYBVtZ
-         TyDiMUNobY0cwPOJOBL6+gK8l+10whP9H8NgHsQACC0UZksdSB+unHQrq7KWLfsb6Htl
-         UhaBI8tbBbOVj/p+mV54y6z6FRRqMBaTZKt5+pJJNUFZtpNVLYAamhnmxLhVB0B6Kdzm
-         ehKQd2N9TZJmncuM+e17E05VElF0VQrVLgOt/JhaNy2obM/ZBAaeQNn+R2HBaFJxy2K/
-         +yGw==
+        bh=gNom0VFlbRYX78r4OKfXRzBJyj1ZzMem6+U6GRAPZGs=;
+        b=Kv2dqE7DBOjguEO+g1W15SDaL2UD4S+vcY1QNPVx8SnJ2E5T2gdGww8rE+GRAhGYAF
+         ILBKEBvVHXtMZ3BmzKphs7G2RPP27C2X9+3swp8cGF2i/u/m66J9i9veo+ceI3Bj3osq
+         MWlFe3gqzbgrf9H5LWLUoOvE3Mg2Hr3oEmfWcYTbw5kZC11hxu6xajsIp6aP88N8Ct22
+         ZTltpyBZZS0029i8Cfhdn6iROub4bj69y7h+zPK6we8swLKJcmbnUZt3w2D0PXT19Z7X
+         n98Y+SLmGCkEjEMCpEuotp9DxZ2U01vOh+RKvP1EMnD5m2ntbhD2ntvxfPt1+/6e0XPl
+         W8yw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:in-reply-to:message-id:mime-version
-         :references:subject:from:to:cc;
-        bh=WK0XW0pj3angQDA5Q/f2RR4InnLdQcXEOv/B1XGqGcA=;
-        b=NzsvmEdfy+AG+ZFyXietr1M5aiT5M8VYpYk7iTQS3OuuGMvw9H4NWoDvA8dQ+qLquL
-         bpl46XNeqtVaVdc3Ef8O3mfxvtQHgamcV3qxghb4ekfRwdkykYBc3XHLjc+BHABpI42d
-         9VhaGcgJzpVNswPAuY1iEhrwpxLxysUnYJUnnXnOwLGAEuf8xMdD8eq0d9I2UNw/6Pgq
-         8lJZiYD+HS2JBPYI7NhxflTItzmlgc/6xJxc9GtXB4km+Qxs3FFMChAqzSbgVY/K9qYb
-         KF6u0KP1yT/3bzbXMufrcQ9KrjiSzE890IVS6oldEnVbpccV2bAm5M7X3WXQR9Hkkyfg
-         MuHg==
-X-Gm-Message-State: APjAAAUDZiOC6/o4js8KKXSw+cpOqrwyL9nkaP6CP5kAcHxzItmrBQLd
-        JZLheFltJWzwM3YDOrAX+Zw+XClvNg==
-X-Google-Smtp-Source: APXvYqzc1xz+/8MP7Z8NguqZ/3K5mUNbYma5HtKap1F1LGuqAoshK2iVor1wVZteZ3LMcdUMczzv5cYnww==
-X-Received: by 2002:a1f:9e8e:: with SMTP id h136mr2074941vke.8.1571321624934;
- Thu, 17 Oct 2019 07:13:44 -0700 (PDT)
-Date:   Thu, 17 Oct 2019 16:13:03 +0200
-In-Reply-To: <20191017141305.146193-1-elver@google.com>
-Message-Id: <20191017141305.146193-7-elver@google.com>
-Mime-Version: 1.0
-References: <20191017141305.146193-1-elver@google.com>
-X-Mailer: git-send-email 2.23.0.866.gb869b98d4c-goog
-Subject: [PATCH v2 6/8] asm-generic, kcsan: Add KCSAN instrumentation for bitops
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=gNom0VFlbRYX78r4OKfXRzBJyj1ZzMem6+U6GRAPZGs=;
+        b=KyzYdr60Zvhk/69Fx1C4t5A+CRQOoO9OXL6XvbcGF/AV8boMREl/Z5NLO/KbV1xedo
+         ZkrR56TOBIrgKwWRVUbz2hlJVipHZ4phoAVKANn85OlkTCutNGpoiE+Fx636ct5w7hru
+         sOxJsKahIw4eautBmhVzPeO4b9WvaZAJoXZ1dG0bhVdR7ibQnwIhIcXxO0QyiLRY7aF4
+         s0zFN4XnhfK2m2wqyTruMLvJbAk3z2GFO7neDbR9riaFcVDdHZvBfZQm/4HZRhCliesf
+         Ff7fJwncW+9KGEethLRQdbhgszNvcw8MF1LRYTH646ZiIGPoiEwcRbNvzNvQH718xfne
+         QT5g==
+X-Gm-Message-State: APjAAAWvUTrRfYs9IJREg1xWv/OhBbxnHOhKCaWCjtfVyeBO19ayOytW
+        Xj00S8QR12T0Ct50DV1XClpO01DdloNJ85Lp4Tr65w==
+X-Google-Smtp-Source: APXvYqyuauWsvEE+jliJ5S7S3Gh0NvhZGewq3BAb0qQ2dVeR8Gj7daShagq5yO57tbCuu+twdnA3Uh6Z3wF+KW7VHrc=
+X-Received: by 2002:aca:5015:: with SMTP id e21mr3502104oib.121.1571321732803;
+ Thu, 17 Oct 2019 07:15:32 -0700 (PDT)
+MIME-Version: 1.0
+References: <20191016083959.186860-1-elver@google.com>
+In-Reply-To: <20191016083959.186860-1-elver@google.com>
 From:   Marco Elver <elver@google.com>
-To:     elver@google.com
-Cc:     akiyks@gmail.com, stern@rowland.harvard.edu, glider@google.com,
-        parri.andrea@gmail.com, andreyknvl@google.com, luto@kernel.org,
-        ard.biesheuvel@linaro.org, arnd@arndb.de, boqun.feng@gmail.com,
-        bp@alien8.de, dja@axtens.net, dlustig@nvidia.com,
-        dave.hansen@linux.intel.com, dhowells@redhat.com,
-        dvyukov@google.com, hpa@zytor.com, mingo@redhat.com,
-        j.alglave@ucl.ac.uk, joel@joelfernandes.org, corbet@lwn.net,
-        jpoimboe@redhat.com, luc.maranget@inria.fr, mark.rutland@arm.com,
-        npiggin@gmail.com, paulmck@linux.ibm.com, peterz@infradead.org,
-        tglx@linutronix.de, will@kernel.org, kasan-dev@googlegroups.com,
-        linux-arch@vger.kernel.org, linux-doc@vger.kernel.org,
-        linux-efi@vger.kernel.org, linux-kbuild@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-mm@kvack.org, x86@kernel.org
+Date:   Thu, 17 Oct 2019 16:15:20 +0200
+Message-ID: <CANpmjNPB8mFso7=WpUQ8Nbxon3kKTEGRUFMCVhjLNkfzey+TJg@mail.gmail.com>
+Subject: Re: [PATCH 0/8] Add Kernel Concurrency Sanitizer (KCSAN)
+To:     Marco Elver <elver@google.com>
+Cc:     LKMM Maintainers -- Akira Yokosawa <akiyks@gmail.com>,
+        Alan Stern <stern@rowland.harvard.edu>,
+        Alexander Potapenko <glider@google.com>,
+        Andrea Parri <parri.andrea@gmail.com>,
+        Andrey Konovalov <andreyknvl@google.com>,
+        Andy Lutomirski <luto@kernel.org>,
+        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Boqun Feng <boqun.feng@gmail.com>,
+        Borislav Petkov <bp@alien8.de>, Daniel Axtens <dja@axtens.net>,
+        Daniel Lustig <dlustig@nvidia.com>,
+        dave.hansen@linux.intel.com, David Howells <dhowells@redhat.com>,
+        Dmitry Vyukov <dvyukov@google.com>,
+        "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>,
+        Jade Alglave <j.alglave@ucl.ac.uk>,
+        Joel Fernandes <joel@joelfernandes.org>,
+        Jonathan Corbet <corbet@lwn.net>,
+        Josh Poimboeuf <jpoimboe@redhat.com>,
+        Luc Maranget <luc.maranget@inria.fr>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Nicholas Piggin <npiggin@gmail.com>,
+        "Paul E. McKenney" <paulmck@linux.ibm.com>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Will Deacon <will@kernel.org>,
+        kasan-dev <kasan-dev@googlegroups.com>,
+        linux-arch <linux-arch@vger.kernel.org>,
+        "open list:DOCUMENTATION" <linux-doc@vger.kernel.org>,
+        linux-efi@vger.kernel.org,
+        Linux Kbuild mailing list <linux-kbuild@vger.kernel.org>,
+        LKML <linux-kernel@vger.kernel.org>,
+        Linux Memory Management List <linux-mm@kvack.org>,
+        "the arch/x86 maintainers" <x86@kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Add explicit KCSAN checks for bitops.
+On Wed, 16 Oct 2019 at 10:41, Marco Elver <elver@google.com> wrote:
+>
+> This is the patch-series for the Kernel Concurrency Sanitizer (KCSAN).
+> KCSAN is a sampling watchpoint-based data-race detector. More details
+> are included in Documentation/dev-tools/kcsan.rst. This patch-series
+> only enables KCSAN for x86, but we expect adding support for other
+> architectures is relatively straightforward (we are aware of
+> experimental ARM64 and POWER support).
+>
+> To gather early feedback, we announced KCSAN back in September, and
+> have integrated the feedback where possible:
+> http://lkml.kernel.org/r/CANpmjNPJ_bHjfLZCAPV23AXFfiPiyXXqqu72n6TgWzb2Gnu1eA@mail.gmail.com
+>
+> We want to point out and acknowledge the work surrounding the LKMM,
+> including several articles that motivate why data-races are dangerous
+> [1, 2], justifying a data-race detector such as KCSAN.
+> [1] https://lwn.net/Articles/793253/
+> [2] https://lwn.net/Articles/799218/
+>
+> The current list of known upstream fixes for data-races found by KCSAN
+> can be found here:
+> https://github.com/google/ktsan/wiki/KCSAN#upstream-fixes-of-data-races-found-by-kcsan
 
-Signed-off-by: Marco Elver <elver@google.com>
----
-v2:
-* Use kcsan_check{,_atomic}_{read,write} instead of
-  kcsan_check_{access,atomic}.
----
- include/asm-generic/bitops-instrumented.h | 18 ++++++++++++++++++
- 1 file changed, 18 insertions(+)
+Sent v2: http://lkml.kernel.org/r/20191017141305.146193-1-elver@google.com
 
-diff --git a/include/asm-generic/bitops-instrumented.h b/include/asm-generic/bitops-instrumented.h
-index ddd1c6d9d8db..864d707cdb87 100644
---- a/include/asm-generic/bitops-instrumented.h
-+++ b/include/asm-generic/bitops-instrumented.h
-@@ -12,6 +12,7 @@
- #define _ASM_GENERIC_BITOPS_INSTRUMENTED_H
- 
- #include <linux/kasan-checks.h>
-+#include <linux/kcsan-checks.h>
- 
- /**
-  * set_bit - Atomically set a bit in memory
-@@ -26,6 +27,7 @@
- static inline void set_bit(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_atomic_write(addr + BIT_WORD(nr), sizeof(long));
- 	arch_set_bit(nr, addr);
- }
- 
-@@ -41,6 +43,7 @@ static inline void set_bit(long nr, volatile unsigned long *addr)
- static inline void __set_bit(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_write(addr + BIT_WORD(nr), sizeof(long));
- 	arch___set_bit(nr, addr);
- }
- 
-@@ -54,6 +57,7 @@ static inline void __set_bit(long nr, volatile unsigned long *addr)
- static inline void clear_bit(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_atomic_write(addr + BIT_WORD(nr), sizeof(long));
- 	arch_clear_bit(nr, addr);
- }
- 
-@@ -69,6 +73,7 @@ static inline void clear_bit(long nr, volatile unsigned long *addr)
- static inline void __clear_bit(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_write(addr + BIT_WORD(nr), sizeof(long));
- 	arch___clear_bit(nr, addr);
- }
- 
-@@ -82,6 +87,7 @@ static inline void __clear_bit(long nr, volatile unsigned long *addr)
- static inline void clear_bit_unlock(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_atomic_write(addr + BIT_WORD(nr), sizeof(long));
- 	arch_clear_bit_unlock(nr, addr);
- }
- 
-@@ -97,6 +103,7 @@ static inline void clear_bit_unlock(long nr, volatile unsigned long *addr)
- static inline void __clear_bit_unlock(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_write(addr + BIT_WORD(nr), sizeof(long));
- 	arch___clear_bit_unlock(nr, addr);
- }
- 
-@@ -113,6 +120,7 @@ static inline void __clear_bit_unlock(long nr, volatile unsigned long *addr)
- static inline void change_bit(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_atomic_write(addr + BIT_WORD(nr), sizeof(long));
- 	arch_change_bit(nr, addr);
- }
- 
-@@ -128,6 +136,7 @@ static inline void change_bit(long nr, volatile unsigned long *addr)
- static inline void __change_bit(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_write(addr + BIT_WORD(nr), sizeof(long));
- 	arch___change_bit(nr, addr);
- }
- 
-@@ -141,6 +150,7 @@ static inline void __change_bit(long nr, volatile unsigned long *addr)
- static inline bool test_and_set_bit(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_atomic_write(addr + BIT_WORD(nr), sizeof(long));
- 	return arch_test_and_set_bit(nr, addr);
- }
- 
-@@ -155,6 +165,7 @@ static inline bool test_and_set_bit(long nr, volatile unsigned long *addr)
- static inline bool __test_and_set_bit(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_write(addr + BIT_WORD(nr), sizeof(long));
- 	return arch___test_and_set_bit(nr, addr);
- }
- 
-@@ -170,6 +181,7 @@ static inline bool __test_and_set_bit(long nr, volatile unsigned long *addr)
- static inline bool test_and_set_bit_lock(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_atomic_write(addr + BIT_WORD(nr), sizeof(long));
- 	return arch_test_and_set_bit_lock(nr, addr);
- }
- 
-@@ -183,6 +195,7 @@ static inline bool test_and_set_bit_lock(long nr, volatile unsigned long *addr)
- static inline bool test_and_clear_bit(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_atomic_write(addr + BIT_WORD(nr), sizeof(long));
- 	return arch_test_and_clear_bit(nr, addr);
- }
- 
-@@ -197,6 +210,7 @@ static inline bool test_and_clear_bit(long nr, volatile unsigned long *addr)
- static inline bool __test_and_clear_bit(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_write(addr + BIT_WORD(nr), sizeof(long));
- 	return arch___test_and_clear_bit(nr, addr);
- }
- 
-@@ -210,6 +224,7 @@ static inline bool __test_and_clear_bit(long nr, volatile unsigned long *addr)
- static inline bool test_and_change_bit(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_atomic_write(addr + BIT_WORD(nr), sizeof(long));
- 	return arch_test_and_change_bit(nr, addr);
- }
- 
-@@ -224,6 +239,7 @@ static inline bool test_and_change_bit(long nr, volatile unsigned long *addr)
- static inline bool __test_and_change_bit(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_write(addr + BIT_WORD(nr), sizeof(long));
- 	return arch___test_and_change_bit(nr, addr);
- }
- 
-@@ -235,6 +251,7 @@ static inline bool __test_and_change_bit(long nr, volatile unsigned long *addr)
- static inline bool test_bit(long nr, const volatile unsigned long *addr)
- {
- 	kasan_check_read(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_atomic_read(addr + BIT_WORD(nr), sizeof(long));
- 	return arch_test_bit(nr, addr);
- }
- 
-@@ -254,6 +271,7 @@ static inline bool
- clear_bit_unlock_is_negative_byte(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_atomic_write(addr + BIT_WORD(nr), sizeof(long));
- 	return arch_clear_bit_unlock_is_negative_byte(nr, addr);
- }
- /* Let everybody know we have it. */
--- 
-2.23.0.866.gb869b98d4c-goog
+Many thanks,
+-- Marco
 
+> Marco Elver (8):
+>   kcsan: Add Kernel Concurrency Sanitizer infrastructure
+>   objtool, kcsan: Add KCSAN runtime functions to whitelist
+>   build, kcsan: Add KCSAN build exceptions
+>   seqlock, kcsan: Add annotations for KCSAN
+>   seqlock: Require WRITE_ONCE surrounding raw_seqcount_barrier
+>   asm-generic, kcsan: Add KCSAN instrumentation for bitops
+>   locking/atomics, kcsan: Add KCSAN instrumentation
+>   x86, kcsan: Enable KCSAN for x86
+>
+>  Documentation/dev-tools/kcsan.rst         | 202 ++++++++++
+>  MAINTAINERS                               |  11 +
+>  Makefile                                  |   3 +-
+>  arch/x86/Kconfig                          |   1 +
+>  arch/x86/boot/Makefile                    |   1 +
+>  arch/x86/boot/compressed/Makefile         |   1 +
+>  arch/x86/entry/vdso/Makefile              |   1 +
+>  arch/x86/include/asm/bitops.h             |   2 +-
+>  arch/x86/kernel/Makefile                  |   6 +
+>  arch/x86/kernel/cpu/Makefile              |   3 +
+>  arch/x86/lib/Makefile                     |   2 +
+>  arch/x86/mm/Makefile                      |   3 +
+>  arch/x86/purgatory/Makefile               |   1 +
+>  arch/x86/realmode/Makefile                |   1 +
+>  arch/x86/realmode/rm/Makefile             |   1 +
+>  drivers/firmware/efi/libstub/Makefile     |   1 +
+>  include/asm-generic/atomic-instrumented.h | 192 ++++++++-
+>  include/asm-generic/bitops-instrumented.h |  18 +
+>  include/linux/compiler-clang.h            |   9 +
+>  include/linux/compiler-gcc.h              |   7 +
+>  include/linux/compiler.h                  |  35 +-
+>  include/linux/kcsan-checks.h              | 116 ++++++
+>  include/linux/kcsan.h                     |  85 ++++
+>  include/linux/sched.h                     |   7 +
+>  include/linux/seqlock.h                   |  51 ++-
+>  init/init_task.c                          |   6 +
+>  init/main.c                               |   2 +
+>  kernel/Makefile                           |   6 +
+>  kernel/kcsan/Makefile                     |  14 +
+>  kernel/kcsan/atomic.c                     |  21 +
+>  kernel/kcsan/core.c                       | 458 ++++++++++++++++++++++
+>  kernel/kcsan/debugfs.c                    | 225 +++++++++++
+>  kernel/kcsan/encoding.h                   |  94 +++++
+>  kernel/kcsan/kcsan.c                      |  81 ++++
+>  kernel/kcsan/kcsan.h                      | 140 +++++++
+>  kernel/kcsan/report.c                     | 307 +++++++++++++++
+>  kernel/kcsan/test.c                       | 117 ++++++
+>  kernel/sched/Makefile                     |   6 +
+>  lib/Kconfig.debug                         |   2 +
+>  lib/Kconfig.kcsan                         |  88 +++++
+>  lib/Makefile                              |   3 +
+>  mm/Makefile                               |   8 +
+>  scripts/Makefile.kcsan                    |   6 +
+>  scripts/Makefile.lib                      |  10 +
+>  scripts/atomic/gen-atomic-instrumented.sh |   9 +-
+>  tools/objtool/check.c                     |  17 +
+>  46 files changed, 2364 insertions(+), 16 deletions(-)
+>  create mode 100644 Documentation/dev-tools/kcsan.rst
+>  create mode 100644 include/linux/kcsan-checks.h
+>  create mode 100644 include/linux/kcsan.h
+>  create mode 100644 kernel/kcsan/Makefile
+>  create mode 100644 kernel/kcsan/atomic.c
+>  create mode 100644 kernel/kcsan/core.c
+>  create mode 100644 kernel/kcsan/debugfs.c
+>  create mode 100644 kernel/kcsan/encoding.h
+>  create mode 100644 kernel/kcsan/kcsan.c
+>  create mode 100644 kernel/kcsan/kcsan.h
+>  create mode 100644 kernel/kcsan/report.c
+>  create mode 100644 kernel/kcsan/test.c
+>  create mode 100644 lib/Kconfig.kcsan
+>  create mode 100644 scripts/Makefile.kcsan
+>
+> --
+> 2.23.0.700.g56cf767bdb-goog
+>
