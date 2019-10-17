@@ -8,56 +8,56 @@ X-Spam-Status: No, score=-17.4 required=3.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
 	USER_AGENT_GIT,USER_IN_DEF_DKIM_WL autolearn=unavailable autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CEA5FFA372A
-	for <linux-efi@archiver.kernel.org>; Thu, 17 Oct 2019 14:14:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D6460FA3735
+	for <linux-efi@archiver.kernel.org>; Thu, 17 Oct 2019 14:14:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 951CE20872
-	for <linux-efi@archiver.kernel.org>; Thu, 17 Oct 2019 14:14:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AC27620854
+	for <linux-efi@archiver.kernel.org>; Thu, 17 Oct 2019 14:14:05 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="mYDkEQ8s"
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="nw1HzU4Y"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2439910AbfJQOOD (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 17 Oct 2019 10:14:03 -0400
-Received: from mail-wm1-f73.google.com ([209.85.128.73]:36702 "EHLO
-        mail-wm1-f73.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2439974AbfJQONy (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 17 Oct 2019 10:13:54 -0400
-Received: by mail-wm1-f73.google.com with SMTP id k184so1232718wmk.1
-        for <linux-efi@vger.kernel.org>; Thu, 17 Oct 2019 07:13:52 -0700 (PDT)
+        id S2439948AbfJQONq (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 17 Oct 2019 10:13:46 -0400
+Received: from mail-wr1-f73.google.com ([209.85.221.73]:54254 "EHLO
+        mail-wr1-f73.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2439942AbfJQONp (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 17 Oct 2019 10:13:45 -0400
+Received: by mail-wr1-f73.google.com with SMTP id i10so1022192wrb.20
+        for <linux-efi@vger.kernel.org>; Thu, 17 Oct 2019 07:13:42 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=google.com; s=20161025;
         h=date:in-reply-to:message-id:mime-version:references:subject:from:to
          :cc;
-        bh=C4dnsunAWNHT00RdRPhWuKYLNPc5AUOyg3b62948kqU=;
-        b=mYDkEQ8s9nyfgNFH6dyVQNAgzsXlrRV1iBjO1G2mlkdxxfUL1b9pBU2fZj01uKk3xK
-         bJSL/XJ78IWTPHDtuuQJZfDwVLdV/DZDh8OWLAyTAJqcQ6RR9mKMlceynqWJyAKRHDrV
-         pAdv2SlemLu8wAmizHk2OrRk0ZBfUmbZdNKRJuhMj0pSkKNSK9FPvAviZfBJ4A2Plcvo
-         FbxT4oj+W+EZPkYk2lR4RUcqF4CHyosk4dqGUgC6w2jivQkV/1tMZo/6w0U9pJhbYmUZ
-         dzBKwmSaWGSfKMH2NDnxD39B+WXuxqgQGRV8K4tjlWUjiGBpzOPoHZnl3nb8UHORf61N
-         gvjA==
+        bh=3gVtAYjAise6qkpXvJpnBc4+Dg01VPHxIztWXKyEDrs=;
+        b=nw1HzU4YhpADMRj5UcTtHVLYN5BYzkEigcx4qq8GgANxDr1oa7wwp9eBrai6SevU3L
+         j6+eBoMTDTLr4MfHhPgQAfCVxbs/TDtYH3dM34nHE9GwrKvxMVkIM8SKmzOVCgyNsl1J
+         8JCWp8E1/V2C5sPtkhe+9qZtMe1Jlqj/tGsabkTzYwAXrhNRPPV61Krj4j7eL33dzCRo
+         vi3iEmj/yoEDHZlTklvYDdAo2+pPavz2RxydqsIaxQBoN62eHioWvJMGflKNnvf3DEvQ
+         uH0PCgQuc9bA4n/QMMwlzKF0xDJkVO6Esd8Thk2Un4lhRcJMfpw6KYrPCMgh7QspQH3M
+         /3Qg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:in-reply-to:message-id:mime-version
          :references:subject:from:to:cc;
-        bh=C4dnsunAWNHT00RdRPhWuKYLNPc5AUOyg3b62948kqU=;
-        b=YGbf37WfiF1GRoP6yPF5MiNHCIYTGH6rHDiwJzX9Xia7rEJniONc/2ooZqZtzbvwGf
-         Z1ngZJuw5wAh0VsvaYj+rMUuB24ITdsXw8L6kbCnXDSWVO1Uds/rgeOFlXXUnIq4bJF7
-         5yYvBDE80soa8w54Y0pr+SAMPSEfCrkeP8hWQn/mk4+cYyltxMqeX4Ztk8QAKQO9g5Tq
-         h3nGjEs1EE8yEIHxECjhKOxzLzXUEsTIHHb0GLUBDMZ2Krn5CfDfnbpm3jCRFKGoB5+8
-         R4IssBRpSqo6CtkOmPRcZYKQbWeXwzfWouOOZJhVCD95B8GzTkRfvstH1Avo65xUMfIw
-         orhA==
-X-Gm-Message-State: APjAAAWdElR/MBiocCTnVuy+PFcK1v3itzIv7h3PrBUa7DTcbh1/6SLs
-        msL/n0gPfloJLRmPK9lBuz96bT+uiA==
-X-Google-Smtp-Source: APXvYqwRrm7mSLgK02eK8Gmh7tMc4aMZPJHDzATL1Tbd4StzBgi/Gl/z1DGR6sft7R44frqI0MAEbmcDTw==
-X-Received: by 2002:a5d:674e:: with SMTP id l14mr3127939wrw.45.1571321631237;
- Thu, 17 Oct 2019 07:13:51 -0700 (PDT)
-Date:   Thu, 17 Oct 2019 16:13:05 +0200
+        bh=3gVtAYjAise6qkpXvJpnBc4+Dg01VPHxIztWXKyEDrs=;
+        b=iv7v1Ow9ji5OSGhMQUbSLOGNBt8Qth08nOE9E4+/XNlS9Hzc4sCGCKWi07ITU+xU02
+         MMjjpQAri+02Uku4YdwlZ27aFWzIXwxWvRiIXf6VcTHe2w8nxS+sc3gW13YHs60bFEWU
+         ODK/WgqaH8qBKdCZixrLnzC8JCQQoRKuEMJOyXv4YQoAKiGWDS3RQim0u/aE67E8IQej
+         b/hiYgqk/aAf6UD3uy9+eWpYZ8rq+ivPnlKuFUo/yjg1j+BEG1tLZYrxhg4v+/FlS9CP
+         2AGQiWO5PfAJ4fvZZ6AZbllvaS0pwTclURu3j3c+OycMF6dPPKRUTd31dPW/EfCV/4FZ
+         ov4Q==
+X-Gm-Message-State: APjAAAU9ISJRedITnfbBpphmaWLvZlA7KIbxCbTubgbwxwITf/dpz3tg
+        okMGRMsWq9+KQmntCNuS03PwpTVFiA==
+X-Google-Smtp-Source: APXvYqwm5MBAQfwag+rUQZPLBD5lU8Dcy9D4qbG5eYoF6kbjjpG7UAv0Jr3LBxiSV8B2Gx4Vpx/JXFdfwA==
+X-Received: by 2002:adf:b102:: with SMTP id l2mr3493651wra.269.1571321621593;
+ Thu, 17 Oct 2019 07:13:41 -0700 (PDT)
+Date:   Thu, 17 Oct 2019 16:13:02 +0200
 In-Reply-To: <20191017141305.146193-1-elver@google.com>
-Message-Id: <20191017141305.146193-9-elver@google.com>
+Message-Id: <20191017141305.146193-6-elver@google.com>
 Mime-Version: 1.0
 References: <20191017141305.146193-1-elver@google.com>
 X-Mailer: git-send-email 2.23.0.866.gb869b98d4c-goog
-Subject: [PATCH v2 8/8] x86, kcsan: Enable KCSAN for x86
+Subject: [PATCH v2 5/8] seqlock: Require WRITE_ONCE surrounding raw_seqcount_barrier
 From:   Marco Elver <elver@google.com>
 To:     elver@google.com
 Cc:     akiyks@gmail.com, stern@rowland.harvard.edu, glider@google.com,
@@ -79,227 +79,44 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This patch enables KCSAN for x86, with updates to build rules to not use
-KCSAN for several incompatible compilation units.
+This patch proposes to require marked atomic accesses surrounding
+raw_write_seqcount_barrier. We reason that otherwise there is no way to
+guarantee propagation nor atomicity of writes before/after the barrier
+[1]. For example, consider the compiler tears stores either before or
+after the barrier; in this case, readers may observe a partial value,
+and because readers are unaware that writes are going on (writes are not
+in a seq-writer critical section), will complete the seq-reader critical
+section while having observed some partial state.
+[1] https://lwn.net/Articles/793253/
+
+This came up when designing and implementing KCSAN, because KCSAN would
+flag these accesses as data-races. After careful analysis, our reasoning
+as above led us to conclude that the best thing to do is to propose an
+amendment to the raw_seqcount_barrier usage.
 
 Signed-off-by: Marco Elver <elver@google.com>
 ---
-v2:
-* Document build exceptions where no previous above comment explained
-  why we cannot instrument.
----
- arch/x86/Kconfig                      | 1 +
- arch/x86/boot/Makefile                | 2 ++
- arch/x86/boot/compressed/Makefile     | 2 ++
- arch/x86/entry/vdso/Makefile          | 3 +++
- arch/x86/include/asm/bitops.h         | 6 +++++-
- arch/x86/kernel/Makefile              | 7 +++++++
- arch/x86/kernel/cpu/Makefile          | 3 +++
- arch/x86/lib/Makefile                 | 4 ++++
- arch/x86/mm/Makefile                  | 3 +++
- arch/x86/purgatory/Makefile           | 2 ++
- arch/x86/realmode/Makefile            | 3 +++
- arch/x86/realmode/rm/Makefile         | 3 +++
- drivers/firmware/efi/libstub/Makefile | 2 ++
- 13 files changed, 40 insertions(+), 1 deletion(-)
+ include/linux/seqlock.h | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
-diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
-index d6e1faa28c58..81859be4a005 100644
---- a/arch/x86/Kconfig
-+++ b/arch/x86/Kconfig
-@@ -226,6 +226,7 @@ config X86
- 	select VIRT_TO_BUS
- 	select X86_FEATURE_NAMES		if PROC_FS
- 	select PROC_PID_ARCH_STATUS		if PROC_FS
-+	select HAVE_ARCH_KCSAN if X86_64
- 
- config INSTRUCTION_DECODER
- 	def_bool y
-diff --git a/arch/x86/boot/Makefile b/arch/x86/boot/Makefile
-index e2839b5c246c..9c7942794164 100644
---- a/arch/x86/boot/Makefile
-+++ b/arch/x86/boot/Makefile
-@@ -9,7 +9,9 @@
- # Changed by many, many contributors over the years.
- #
- 
-+# Sanitizer runtimes are unavailable and cannot be linked for early boot code.
- KASAN_SANITIZE			:= n
-+KCSAN_SANITIZE			:= n
- OBJECT_FILES_NON_STANDARD	:= y
- 
- # Kernel does not boot with kcov instrumentation here.
-diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
-index 6b84afdd7538..a1c248b8439f 100644
---- a/arch/x86/boot/compressed/Makefile
-+++ b/arch/x86/boot/compressed/Makefile
-@@ -17,7 +17,9 @@
- #	(see scripts/Makefile.lib size_append)
- #	compressed vmlinux.bin.all + u32 size of vmlinux.bin.all
- 
-+# Sanitizer runtimes are unavailable and cannot be linked for early boot code.
- KASAN_SANITIZE			:= n
-+KCSAN_SANITIZE			:= n
- OBJECT_FILES_NON_STANDARD	:= y
- 
- # Prevents link failures: __sanitizer_cov_trace_pc() is not linked in.
-diff --git a/arch/x86/entry/vdso/Makefile b/arch/x86/entry/vdso/Makefile
-index 0f2154106d01..a23debaad5b9 100644
---- a/arch/x86/entry/vdso/Makefile
-+++ b/arch/x86/entry/vdso/Makefile
-@@ -10,8 +10,11 @@ ARCH_REL_TYPE_ABS += R_386_GLOB_DAT|R_386_JMP_SLOT|R_386_RELATIVE
- include $(srctree)/lib/vdso/Makefile
- 
- KBUILD_CFLAGS += $(DISABLE_LTO)
-+
-+# Sanitizer runtimes are unavailable and cannot be linked here.
- KASAN_SANITIZE			:= n
- UBSAN_SANITIZE			:= n
-+KCSAN_SANITIZE			:= n
- OBJECT_FILES_NON_STANDARD	:= y
- 
- # Prevents link failures: __sanitizer_cov_trace_pc() is not linked in.
-diff --git a/arch/x86/include/asm/bitops.h b/arch/x86/include/asm/bitops.h
-index 7d1f6a49bfae..ee08917d3d92 100644
---- a/arch/x86/include/asm/bitops.h
-+++ b/arch/x86/include/asm/bitops.h
-@@ -201,8 +201,12 @@ arch_test_and_change_bit(long nr, volatile unsigned long *addr)
- 	return GEN_BINARY_RMWcc(LOCK_PREFIX __ASM_SIZE(btc), *addr, c, "Ir", nr);
- }
- 
--static __always_inline bool constant_test_bit(long nr, const volatile unsigned long *addr)
-+static __no_kcsan_or_inline bool constant_test_bit(long nr, const volatile unsigned long *addr)
- {
-+	/*
-+	 * Because this is a plain access, we need to disable KCSAN here to
-+	 * avoid double instrumentation via bitops-instrumented.h.
-+	 */
- 	return ((1UL << (nr & (BITS_PER_LONG-1))) &
- 		(addr[nr >> _BITOPS_LONG_SHIFT])) != 0;
- }
-diff --git a/arch/x86/kernel/Makefile b/arch/x86/kernel/Makefile
-index 3578ad248bc9..2aa122d94956 100644
---- a/arch/x86/kernel/Makefile
-+++ b/arch/x86/kernel/Makefile
-@@ -28,6 +28,13 @@ KASAN_SANITIZE_dumpstack_$(BITS).o			:= n
- KASAN_SANITIZE_stacktrace.o				:= n
- KASAN_SANITIZE_paravirt.o				:= n
- 
-+# Do not instrument early boot code.
-+KCSAN_SANITIZE_head$(BITS).o				:= n
-+# Do not instrument debug code to avoid corrupting bug reporting.
-+KCSAN_SANITIZE_dumpstack.o				:= n
-+KCSAN_SANITIZE_dumpstack_$(BITS).o			:= n
-+KCSAN_SANITIZE_stacktrace.o				:= n
-+
- OBJECT_FILES_NON_STANDARD_relocate_kernel_$(BITS).o	:= y
- OBJECT_FILES_NON_STANDARD_test_nx.o			:= y
- OBJECT_FILES_NON_STANDARD_paravirt_patch.o		:= y
-diff --git a/arch/x86/kernel/cpu/Makefile b/arch/x86/kernel/cpu/Makefile
-index d7a1e5a9331c..1f1b0edc0187 100644
---- a/arch/x86/kernel/cpu/Makefile
-+++ b/arch/x86/kernel/cpu/Makefile
-@@ -13,6 +13,9 @@ endif
- KCOV_INSTRUMENT_common.o := n
- KCOV_INSTRUMENT_perf_event.o := n
- 
-+# As above, instrumenting secondary CPU boot code causes boot hangs.
-+KCSAN_SANITIZE_common.o := n
-+
- # Make sure load_percpu_segment has no stackprotector
- nostackp := $(call cc-option, -fno-stack-protector)
- CFLAGS_common.o		:= $(nostackp)
-diff --git a/arch/x86/lib/Makefile b/arch/x86/lib/Makefile
-index 5246db42de45..432a07705677 100644
---- a/arch/x86/lib/Makefile
-+++ b/arch/x86/lib/Makefile
-@@ -6,10 +6,14 @@
- # Produces uninteresting flaky coverage.
- KCOV_INSTRUMENT_delay.o	:= n
- 
-+# KCSAN uses udelay for introducing watchpoint delay; avoid recursion.
-+KCSAN_SANITIZE_delay.o := n
-+
- # Early boot use of cmdline; don't instrument it
- ifdef CONFIG_AMD_MEM_ENCRYPT
- KCOV_INSTRUMENT_cmdline.o := n
- KASAN_SANITIZE_cmdline.o  := n
-+KCSAN_SANITIZE_cmdline.o  := n
- 
- ifdef CONFIG_FUNCTION_TRACER
- CFLAGS_REMOVE_cmdline.o = -pg
-diff --git a/arch/x86/mm/Makefile b/arch/x86/mm/Makefile
-index 84373dc9b341..ee871602f96a 100644
---- a/arch/x86/mm/Makefile
-+++ b/arch/x86/mm/Makefile
-@@ -7,6 +7,9 @@ KCOV_INSTRUMENT_mem_encrypt_identity.o	:= n
- KASAN_SANITIZE_mem_encrypt.o		:= n
- KASAN_SANITIZE_mem_encrypt_identity.o	:= n
- 
-+KCSAN_SANITIZE_mem_encrypt.o		:= n
-+KCSAN_SANITIZE_mem_encrypt_identity.o	:= n
-+
- ifdef CONFIG_FUNCTION_TRACER
- CFLAGS_REMOVE_mem_encrypt.o		= -pg
- CFLAGS_REMOVE_mem_encrypt_identity.o	= -pg
-diff --git a/arch/x86/purgatory/Makefile b/arch/x86/purgatory/Makefile
-index fb4ee5444379..69379bce9574 100644
---- a/arch/x86/purgatory/Makefile
-+++ b/arch/x86/purgatory/Makefile
-@@ -17,7 +17,9 @@ CFLAGS_sha256.o := -D__DISABLE_EXPORTS
- LDFLAGS_purgatory.ro := -e purgatory_start -r --no-undefined -nostdlib -z nodefaultlib
- targets += purgatory.ro
- 
-+# Sanitizer runtimes are unavailable and cannot be linked here.
- KASAN_SANITIZE	:= n
-+KCSAN_SANITIZE	:= n
- KCOV_INSTRUMENT := n
- 
- # These are adjustments to the compiler flags used for objects that
-diff --git a/arch/x86/realmode/Makefile b/arch/x86/realmode/Makefile
-index 682c895753d9..6b1f3a4eeb44 100644
---- a/arch/x86/realmode/Makefile
-+++ b/arch/x86/realmode/Makefile
-@@ -6,7 +6,10 @@
- # for more details.
- #
- #
-+
-+# Sanitizer runtimes are unavailable and cannot be linked here.
- KASAN_SANITIZE			:= n
-+KCSAN_SANITIZE			:= n
- OBJECT_FILES_NON_STANDARD	:= y
- 
- subdir- := rm
-diff --git a/arch/x86/realmode/rm/Makefile b/arch/x86/realmode/rm/Makefile
-index f60501a384f9..fdbbb945c216 100644
---- a/arch/x86/realmode/rm/Makefile
-+++ b/arch/x86/realmode/rm/Makefile
-@@ -6,7 +6,10 @@
- # for more details.
- #
- #
-+
-+# Sanitizer runtimes are unavailable and cannot be linked here.
- KASAN_SANITIZE			:= n
-+KCSAN_SANITIZE			:= n
- OBJECT_FILES_NON_STANDARD	:= y
- 
- # Prevents link failures: __sanitizer_cov_trace_pc() is not linked in.
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index 0460c7581220..693d0a94b118 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -31,7 +31,9 @@ KBUILD_CFLAGS			:= $(cflags-y) -DDISABLE_BRANCH_PROFILING \
- 				   -D__DISABLE_EXPORTS
- 
- GCOV_PROFILE			:= n
-+# Sanitizer runtimes are unavailable and cannot be linked here.
- KASAN_SANITIZE			:= n
-+KCSAN_SANITIZE			:= n
- UBSAN_SANITIZE			:= n
- OBJECT_FILES_NON_STANDARD	:= y
- 
+diff --git a/include/linux/seqlock.h b/include/linux/seqlock.h
+index 1e425831a7ed..5d50aad53b47 100644
+--- a/include/linux/seqlock.h
++++ b/include/linux/seqlock.h
+@@ -265,6 +265,13 @@ static inline void raw_write_seqcount_end(seqcount_t *s)
+  * usual consistency guarantee. It is one wmb cheaper, because we can
+  * collapse the two back-to-back wmb()s.
+  *
++ * Note that, writes surrounding the barrier should be declared atomic (e.g.
++ * via WRITE_ONCE): a) to ensure the writes become visible to other threads
++ * atomically, avoiding compiler optimizations; b) to document which writes are
++ * meant to propagate to the reader critical section. This is necessary because
++ * neither writes before and after the barrier are enclosed in a seq-writer
++ * critical section that would ensure readers are aware of ongoing writes.
++ *
+  *      seqcount_t seq;
+  *      bool X = true, Y = false;
+  *
 -- 
 2.23.0.866.gb869b98d4c-goog
 
