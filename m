@@ -4,40 +4,40 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BCE49CA9EAB
-	for <linux-efi@archiver.kernel.org>; Fri, 18 Oct 2019 22:09:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 64E18CA9EA9
+	for <linux-efi@archiver.kernel.org>; Fri, 18 Oct 2019 22:12:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 90864222D1
-	for <linux-efi@archiver.kernel.org>; Fri, 18 Oct 2019 22:09:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 339AD21D7C
+	for <linux-efi@archiver.kernel.org>; Fri, 18 Oct 2019 22:12:01 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1571436594;
-	bh=Jrncc+KwxtewoaMxgGEJEbpoZW9yORUclvwsXtwbsCc=;
+	s=default; t=1571436721;
+	bh=vhLLu4Q3ANV96K9R9BBwMJ7SfEgIHXx42oFIcggazeo=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=1lXTVapKGloC8sHpfoolGZHs+oGpQevv6iCsy43W9r8AVQVCfl7ksXPRN1OEk+G9L
-	 Ypn8jCMBtgDsRpVcFZwp93HSjKHpJq3BJNelGY9rqoPiWcLpipUfnFi9t3Cca0RCX4
-	 /b7+SIjzP2KTRVhVILcOKLRaCrKh44LtINLt3/tQ=
+	b=jPs9UuxJqwavUc+EPqDN473gvPxY1wgEuIHkaiTkblOTo0kdCN3DqblBwT2Qq62fH
+	 hYDw5sp/DNmWTWMwFfHBBz3Vql1wBeS5sz3nR2frjScDS1SKTbeKqP5SSoohGocRRC
+	 oallS/UVHEHetw2NmpKTbVgd7W7g93CITnDbmGDU=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2389418AbfJRWJx (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 18 Oct 2019 18:09:53 -0400
-Received: from mail.kernel.org ([198.145.29.99]:42560 "EHLO mail.kernel.org"
+        id S2390195AbfJRWK3 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 18 Oct 2019 18:10:29 -0400
+Received: from mail.kernel.org ([198.145.29.99]:43412 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2389373AbfJRWJw (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 18 Oct 2019 18:09:52 -0400
+        id S2390102AbfJRWK3 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 18 Oct 2019 18:10:29 -0400
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 4129F222D4;
-        Fri, 18 Oct 2019 22:09:50 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 6ED4822474;
+        Fri, 18 Oct 2019 22:10:26 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1571436592;
-        bh=Jrncc+KwxtewoaMxgGEJEbpoZW9yORUclvwsXtwbsCc=;
+        s=default; t=1571436628;
+        bh=vhLLu4Q3ANV96K9R9BBwMJ7SfEgIHXx42oFIcggazeo=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=WwCdpmlc2FQSRURtRvOLY4ZsQ3aPHfajEn+JcVLL/T0gm/SfBjqOhWAsg9OcjgrLj
-         ugQf83qJ4iu7cSi1OghBnZQjTD4Qtt038f75hXn1GlshYXUO4JMVw1RsK8GUVKCfjw
-         MTrs6DOj4emIAMVTcEO6XtFhAJN3MwAU0LlX5uzE=
+        b=j/U/S3OH5a541G28VJ24XlddlyM4h+klwPf787X09xZ7ofhoxkEsX8I0tN0lez2/I
+         d5f0enVjB5/sJrIF2H9kT7dxYh1wngcaFtrGzwbasMWUpE84DahB9z7ub94r6XS4R/
+         5CPYyP/z39Djmn8iP2PG0AeOa8uZg1Tq5Iz4B15I=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Dave Young <dyoung@redhat.com>,
@@ -55,12 +55,12 @@ Cc:     Dave Young <dyoung@redhat.com>,
         Thomas Gleixner <tglx@linutronix.de>,
         linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org,
         Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.9 18/29] efi/x86: Do not clean dummy variable in kexec path
-Date:   Fri, 18 Oct 2019 18:09:09 -0400
-Message-Id: <20191018220920.10545-18-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.4 13/21] efi/x86: Do not clean dummy variable in kexec path
+Date:   Fri, 18 Oct 2019 18:09:59 -0400
+Message-Id: <20191018221007.10851-13-sashal@kernel.org>
 X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20191018220920.10545-1-sashal@kernel.org>
-References: <20191018220920.10545-1-sashal@kernel.org>
+In-Reply-To: <20191018221007.10851-1-sashal@kernel.org>
+References: <20191018221007.10851-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -110,10 +110,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 3 deletions(-)
 
 diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index a0e85f2aff7d8..b6669d326545a 100644
+index ad285404ea7f5..4bc352fc08f19 100644
 --- a/arch/x86/platform/efi/efi.c
 +++ b/arch/x86/platform/efi/efi.c
-@@ -896,9 +896,6 @@ static void __init kexec_enter_virtual_mode(void)
+@@ -859,9 +859,6 @@ static void __init kexec_enter_virtual_mode(void)
  
  	if (efi_enabled(EFI_OLD_MEMMAP) && (__supported_pte_mask & _PAGE_NX))
  		runtime_code_page_mkexec();
