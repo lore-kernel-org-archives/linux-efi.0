@@ -2,139 +2,96 @@ Return-Path: <SRS0=BqK5=YL=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 31577CA9EA0
-	for <linux-efi@archiver.kernel.org>; Fri, 18 Oct 2019 07:37:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 39C51CA9EA1
+	for <linux-efi@archiver.kernel.org>; Fri, 18 Oct 2019 09:25:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 141D121925
-	for <linux-efi@archiver.kernel.org>; Fri, 18 Oct 2019 07:37:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0F37E21897
+	for <linux-efi@archiver.kernel.org>; Fri, 18 Oct 2019 09:25:26 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1571390726;
+	bh=WLZQsTX5Rvgnn5vL+Xt61Ar3lBtnc8eFFCcH3/lKWdo=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
+	b=USjNv/CX2FoSXyiqiRIrh4yNWo8LxW8jg3V+MynsyHBbYoRW3KHY/QPrEUo7Fzt3F
+	 GYXW4kaPBGT9LshYINAlSv3N0XxU4B5MgIPn5Ffzjt8uFrSWAut5kcpcnOHSZX2zZL
+	 FM50vclZXKvXBoDAHCNksvpZN213sk2AeTjQ8v5A=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2391209AbfJRHhk (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 18 Oct 2019 03:37:40 -0400
-Received: from helcar.hmeau.com ([216.24.177.18]:37236 "EHLO fornost.hmeau.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728302AbfJRHhk (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 18 Oct 2019 03:37:40 -0400
-Received: from gwarestrin.arnor.me.apana.org.au ([192.168.0.7])
-        by fornost.hmeau.com with smtp (Exim 4.89 #2 (Debian))
-        id 1iLMoG-0004PG-JE; Fri, 18 Oct 2019 18:36:29 +1100
-Received: by gwarestrin.arnor.me.apana.org.au (sSMTP sendmail emulation); Fri, 18 Oct 2019 18:36:16 +1100
-Date:   Fri, 18 Oct 2019 17:56:23 +1100
-From:   Herbert Xu <herbert@gondor.apana.org.au>
-To:     Borislav Petkov <bp@alien8.de>
-Cc:     "David S. Miller" <davem@davemloft.net>,
-        Jiri Slaby <jslaby@suse.cz>, tglx@linutronix.de,
-        mingo@redhat.com, hpa@zytor.com, x86@kernel.org,
-        linux-arch@vger.kernel.org, linux-kernel@vger.kernel.org,
-        "Rafael J . Wysocki" <rafael.j.wysocki@intel.com>,
-        Boris Ostrovsky <boris.ostrovsky@oracle.com>,
-        "Rafael J. Wysocki" <rjw@rjwysocki.net>,
-        Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>,
-        Matt Fleming <matt@codeblueprint.co.uk>,
-        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Juergen Gross <jgross@suse.com>, linux-crypto@vger.kernel.org,
-        linux-pm@vger.kernel.org, linux-efi@vger.kernel.org,
-        xen-devel@lists.xenproject.org
-Subject: Re: [PATCH v9 24/28] x86_64/asm: Change all ENTRY+ENDPROC to
- SYM_FUNC_*
-Message-ID: <20191018065623.GA15199@gondor.apana.org.au>
-References: <20191011115108.12392-1-jslaby@suse.cz>
- <20191011115108.12392-25-jslaby@suse.cz>
- <20191016071230.GD1138@zn.tnic>
+        id S2409696AbfJRJZZ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 18 Oct 2019 05:25:25 -0400
+Received: from mail-ot1-f66.google.com ([209.85.210.66]:35423 "EHLO
+        mail-ot1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2409691AbfJRJZZ (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 18 Oct 2019 05:25:25 -0400
+Received: by mail-ot1-f66.google.com with SMTP id z6so4414145otb.2;
+        Fri, 18 Oct 2019 02:25:24 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=WLZQsTX5Rvgnn5vL+Xt61Ar3lBtnc8eFFCcH3/lKWdo=;
+        b=HmIKM1zdPNKjl9agxduwc8eusnivKiEXsQHZWrBqOo7++PkpaJWm2juZMSRmrWn53j
+         ehC37p5MDPl37RnN5x0riZ4Yjccc8vuXkGK/+Vdn+Y9pINCv+sEXprguM0iOYN4aTkiX
+         pu0GkZXEJJvAlZmHEMEK6Rz7aAdJV/DwX0yzJAgB5SNHpAzkT4sD2f1Sehw+HrbtQnHw
+         sAlsLIsdM/mdlzuSpAIi+YIFBtVXJ/g8HPHp0UTCFkx1sTsx3mYciZ2vUQaLeE6QS6/u
+         CT/ATDoUK9jGnCYy/qBpmVuTqP0i+HrrQJLRkBKIRdSCr28hDtGqbbKLq5WYeUoq77Gs
+         JC3g==
+X-Gm-Message-State: APjAAAXPRMcVOHn1iHfadRo8SuUaUruo90Um/4wblRATmbFduIC3BC7g
+        FiZSEIqzxLVj8CnVwuiL/RUpkW//vHqYvPbutqE=
+X-Google-Smtp-Source: APXvYqz39QtuEfi070UhPNWBHg9t+xSrdCWlQ70T7u8LNX/2ChPK/tcarZZe5ZN2MTvNYCCWIcPJAED04XWic0o7MAg=
+X-Received: by 2002:a9d:5a0f:: with SMTP id v15mr6986127oth.266.1571390724530;
+ Fri, 18 Oct 2019 02:25:24 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20191016071230.GD1138@zn.tnic>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+References: <157118756627.2063440.9878062995925617180.stgit@dwillia2-desk3.amr.corp.intel.com>
+ <157118757175.2063440.9248947575330904096.stgit@dwillia2-desk3.amr.corp.intel.com>
+In-Reply-To: <157118757175.2063440.9248947575330904096.stgit@dwillia2-desk3.amr.corp.intel.com>
+From:   "Rafael J. Wysocki" <rafael@kernel.org>
+Date:   Fri, 18 Oct 2019 11:25:13 +0200
+Message-ID: <CAJZ5v0i-hhasNCD6Ur8VLfrkc+4GOeNXXX_ZNFZjcY6F51ciSQ@mail.gmail.com>
+Subject: Re: [PATCH v7 01/12] acpi/numa: Establish a new drivers/acpi/numa/ directory
+To:     Dan Williams <dan.j.williams@intel.com>
+Cc:     Ingo Molnar <mingo@redhat.com>, Len Brown <lenb@kernel.org>,
+        Keith Busch <kbusch@kernel.org>,
+        "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Vishal Verma <vishal.l.verma@intel.com>,
+        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
+        "the arch/x86 maintainers" <x86@kernel.org>,
+        linux-efi <linux-efi@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        ACPI Devel Maling List <linux-acpi@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Wed, Oct 16, 2019 at 09:12:30AM +0200, Borislav Petkov wrote:
-> Hi,
-> 
-> On Fri, Oct 11, 2019 at 01:51:04PM +0200, Jiri Slaby wrote:
-> > These are all functions which are invoked from elsewhere, so annotate
-> > them as global using the new SYM_FUNC_START. And their ENDPROC's by
-> > SYM_FUNC_END.
-> > 
-> > And make sure ENTRY/ENDPROC is not defined on X86_64, given these were
-> > the last users.
-> > 
-> > Signed-off-by: Jiri Slaby <jslaby@suse.cz>
-> > Reviewed-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com> [hibernate]
-> > Reviewed-by: Boris Ostrovsky <boris.ostrovsky@oracle.com> [xen bits]
-> > Cc: "H. Peter Anvin" <hpa@zytor.com>
-> > Cc: Borislav Petkov <bp@alien8.de>
-> > Cc: Thomas Gleixner <tglx@linutronix.de>
-> > Cc: Ingo Molnar <mingo@redhat.com>
-> > Cc: x86@kernel.org
-> > Cc: Herbert Xu <herbert@gondor.apana.org.au>
-> > Cc: "David S. Miller" <davem@davemloft.net>
-> > Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>
-> > Cc: Len Brown <len.brown@intel.com>
-> > Cc: Pavel Machek <pavel@ucw.cz>
-> > Cc: Matt Fleming <matt@codeblueprint.co.uk>
-> > Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> > Cc: Boris Ostrovsky <boris.ostrovsky@oracle.com>
-> > Cc: Juergen Gross <jgross@suse.com>
-> > Cc: linux-crypto@vger.kernel.org
-> > Cc: linux-pm@vger.kernel.org
-> > Cc: linux-efi@vger.kernel.org
-> > Cc: xen-devel@lists.xenproject.org
-> > ---
-> >  arch/x86/boot/compressed/efi_thunk_64.S      |  4 +-
-> >  arch/x86/boot/compressed/head_64.S           | 16 +++---
-> >  arch/x86/boot/compressed/mem_encrypt.S       |  8 +--
-> >  arch/x86/crypto/aegis128-aesni-asm.S         | 28 ++++-----
-> >  arch/x86/crypto/aes_ctrby8_avx-x86_64.S      | 12 ++--
-> >  arch/x86/crypto/aesni-intel_asm.S            | 60 ++++++++++----------
-> >  arch/x86/crypto/aesni-intel_avx-x86_64.S     | 32 +++++------
-> >  arch/x86/crypto/blowfish-x86_64-asm_64.S     | 16 +++---
-> >  arch/x86/crypto/camellia-aesni-avx-asm_64.S  | 24 ++++----
-> >  arch/x86/crypto/camellia-aesni-avx2-asm_64.S | 24 ++++----
-> >  arch/x86/crypto/camellia-x86_64-asm_64.S     | 16 +++---
-> >  arch/x86/crypto/cast5-avx-x86_64-asm_64.S    | 16 +++---
-> >  arch/x86/crypto/cast6-avx-x86_64-asm_64.S    | 24 ++++----
-> >  arch/x86/crypto/chacha-avx2-x86_64.S         | 12 ++--
-> >  arch/x86/crypto/chacha-avx512vl-x86_64.S     | 12 ++--
-> >  arch/x86/crypto/chacha-ssse3-x86_64.S        | 12 ++--
-> >  arch/x86/crypto/crc32-pclmul_asm.S           |  4 +-
-> >  arch/x86/crypto/crc32c-pcl-intel-asm_64.S    |  4 +-
-> >  arch/x86/crypto/crct10dif-pcl-asm_64.S       |  4 +-
-> >  arch/x86/crypto/des3_ede-asm_64.S            |  8 +--
-> >  arch/x86/crypto/ghash-clmulni-intel_asm.S    |  8 +--
-> >  arch/x86/crypto/nh-avx2-x86_64.S             |  4 +-
-> >  arch/x86/crypto/nh-sse2-x86_64.S             |  4 +-
-> >  arch/x86/crypto/poly1305-avx2-x86_64.S       |  4 +-
-> >  arch/x86/crypto/poly1305-sse2-x86_64.S       |  8 +--
-> >  arch/x86/crypto/serpent-avx-x86_64-asm_64.S  | 24 ++++----
-> >  arch/x86/crypto/serpent-avx2-asm_64.S        | 24 ++++----
-> >  arch/x86/crypto/serpent-sse2-x86_64-asm_64.S |  8 +--
-> >  arch/x86/crypto/sha1_avx2_x86_64_asm.S       |  4 +-
-> >  arch/x86/crypto/sha1_ni_asm.S                |  4 +-
-> >  arch/x86/crypto/sha1_ssse3_asm.S             |  4 +-
-> >  arch/x86/crypto/sha256-avx-asm.S             |  4 +-
-> >  arch/x86/crypto/sha256-avx2-asm.S            |  4 +-
-> >  arch/x86/crypto/sha256-ssse3-asm.S           |  4 +-
-> >  arch/x86/crypto/sha256_ni_asm.S              |  4 +-
-> >  arch/x86/crypto/sha512-avx-asm.S             |  4 +-
-> >  arch/x86/crypto/sha512-avx2-asm.S            |  4 +-
-> >  arch/x86/crypto/sha512-ssse3-asm.S           |  4 +-
-> >  arch/x86/crypto/twofish-avx-x86_64-asm_64.S  | 24 ++++----
-> >  arch/x86/crypto/twofish-x86_64-asm_64-3way.S |  8 +--
-> >  arch/x86/crypto/twofish-x86_64-asm_64.S      |  8 +--
-> 
-> I could use an ACK for the crypto bits...
+ On Wed, Oct 16, 2019 at 3:13 AM Dan Williams <dan.j.williams@intel.com> wrote:
+>
+> Currently hmat.c lives under an "hmat" directory which does not enhance
+> the description of the file. The initial motivation for giving hmat.c
+> its own directory was to delineate it as mm functionality in contrast to
+> ACPI device driver functionality.
+>
+> As ACPI continues to play an increasing role in conveying
+> memory location and performance topology information to the OS take the
+> opportunity to co-locate these NUMA relevant tables in a combined
+> directory.
+>
+> numa.c is renamed to srat.c and moved to drivers/acpi/numa/ along with
+> hmat.c.
+>
+> Cc: Len Brown <lenb@kernel.org>
+> Cc: Keith Busch <kbusch@kernel.org>
+> Acked-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+> Reviewed-by: Dave Hansen <dave.hansen@linux.intel.com>
+> Signed-off-by: Dan Williams <dan.j.williams@intel.com>
 
-Acked-by: Herbert Xu <herbert@gondor.apana.org.au>
+Please note that https://patchwork.kernel.org/patch/11078171/ is being
+pushed to Linus (it is overdue anyway), so if it is pulled, there will
+be a merge conflict with this patch.
 
-Cheers,
--- 
-Email: Herbert Xu <herbert@gondor.apana.org.au>
-Home Page: http://gondor.apana.org.au/~herbert/
-PGP Key: http://gondor.apana.org.au/~herbert/pubkey.txt
+Respin maybe?
