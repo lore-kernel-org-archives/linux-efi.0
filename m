@@ -4,40 +4,40 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-7.3 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY,USER_AGENT_GIT
+	SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7011BCA9EA9
-	for <linux-efi@archiver.kernel.org>; Fri, 18 Oct 2019 22:12:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CE663CA9EAB
+	for <linux-efi@archiver.kernel.org>; Fri, 18 Oct 2019 22:13:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 3C7CE21925
-	for <linux-efi@archiver.kernel.org>; Fri, 18 Oct 2019 22:12:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A202D21852
+	for <linux-efi@archiver.kernel.org>; Fri, 18 Oct 2019 22:13:35 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1571436731;
+	s=default; t=1571436815;
 	bh=7SOk7tiTVGhBb6vH7JX2MPjaoKS77atUxG4Pvnesje8=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=M7EGPlDBjaJM6Xm6Dg1Tc44N3C154FDfOV7T8yYBgaOUWbzOIbGFTd9BTcHklq/u7
-	 C2Tj8xMxgIUnTYNW+3OAlnszT7QinGXeKzFlUtMVeyWKw8gu0hcJWdcIZBnWdrSLIV
-	 cqqzd3LhnhAV2cPwAiEV4OoOOhERfYT0/+SMAYgw=
+	b=hHENt4/mf3CJXucoUo1nLKcsy1REPK60MOH/5g5vlZa29XcNhxQZw7NXy9KoJJavt
+	 i95oplWcqRknSRPSWavk7sebvJqMi5zxqaY2tnFTwogeQcM+7DycZOHmQe2v+FOCvi
+	 yVuKVzEfwV7iv8NPCdPBz80flVOrchhmsDPzH7LA=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2390229AbfJRWMF (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 18 Oct 2019 18:12:05 -0400
-Received: from mail.kernel.org ([198.145.29.99]:43366 "EHLO mail.kernel.org"
+        id S2389360AbfJRWJw (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 18 Oct 2019 18:09:52 -0400
+Received: from mail.kernel.org ([198.145.29.99]:42506 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2390094AbfJRWK1 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 18 Oct 2019 18:10:27 -0400
+        id S2389317AbfJRWJv (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 18 Oct 2019 18:09:51 -0400
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 3692C2248C;
-        Fri, 18 Oct 2019 22:10:24 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 0B2C522478;
+        Fri, 18 Oct 2019 22:09:47 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1571436626;
+        s=default; t=1571436589;
         bh=7SOk7tiTVGhBb6vH7JX2MPjaoKS77atUxG4Pvnesje8=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=bDT/DQmMfFrdqRnANXVJ8x1+7PHqpgdERz5g90Fc0WqxrrrfIp/VUMQiY8jd/ovCm
-         75lAcHg058MBysY9fHstBJ1ZVR9CtOmjAdEa8xTCeukPh/kyaCilicDZIPgQDbDei+
-         +uURirgbJxmzYArglLlw0vgrW3vUTl+D/sYqMzz4=
+        b=qiuniB1JomZTru8yoP6UAPYkzLPBmLKTdscXKGc80hIrK34zqY0qNYD2ey2JwnJr4
+         PiQLF5m2Q7V0u2u6F+s2XYLEDoK51uvUjy5ghyYFOMBccfRYRVaBCtItDsW9XducHe
+         1l2CIyREShGmmF5vG3RH7zv/iKB1FawjIpNZJutk=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Lukas Wunner <lukas@wunner.de>,
@@ -56,12 +56,12 @@ Cc:     Lukas Wunner <lukas@wunner.de>,
         Thomas Gleixner <tglx@linutronix.de>,
         linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org,
         Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.4 12/21] efi/cper: Fix endianness of PCIe class code
-Date:   Fri, 18 Oct 2019 18:09:58 -0400
-Message-Id: <20191018221007.10851-12-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.9 17/29] efi/cper: Fix endianness of PCIe class code
+Date:   Fri, 18 Oct 2019 18:09:08 -0400
+Message-Id: <20191018220920.10545-17-sashal@kernel.org>
 X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20191018221007.10851-1-sashal@kernel.org>
-References: <20191018221007.10851-1-sashal@kernel.org>
+In-Reply-To: <20191018220920.10545-1-sashal@kernel.org>
+References: <20191018220920.10545-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
