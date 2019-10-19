@@ -1,129 +1,216 @@
-Return-Path: <SRS0=BqK5=YL=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=jETT=YM=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 65C75CA9EA0
-	for <linux-efi@archiver.kernel.org>; Fri, 18 Oct 2019 22:25:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 780ADCA9EAB
+	for <linux-efi@archiver.kernel.org>; Sat, 19 Oct 2019 18:06:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 3913820659
-	for <linux-efi@archiver.kernel.org>; Fri, 18 Oct 2019 22:25:59 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1571437559;
-	bh=FrzwZv6FVNvvAr07Vc1/1PA+4MPp/UssWIY/WONUOQo=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=y/H9DMVCKodb0cczmC1nrXqTElQfVoCPWFOQBpdNejNkiKaPeXxYn6TPOmoGcH2v7
-	 5iIGhtArcYSigcJToQd8eGzmhVnpOu06Sjtl5RlAILv4zH4trsSsCzqYmnIA+/qndy
-	 zeQd2b8/9xf5yWAObQ2hx7o4CRTTABGczh6XlRfM=
+	by mail.kernel.org (Postfix) with ESMTP id 5C845222C5
+	for <linux-efi@archiver.kernel.org>; Sat, 19 Oct 2019 18:06:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2390479AbfJRWZy (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 18 Oct 2019 18:25:54 -0400
-Received: from mail.kernel.org ([198.145.29.99]:36100 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728205AbfJRWE2 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 18 Oct 2019 18:04:28 -0400
-Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 88068222C3;
-        Fri, 18 Oct 2019 22:04:25 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1571436267;
-        bh=FrzwZv6FVNvvAr07Vc1/1PA+4MPp/UssWIY/WONUOQo=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=LKpfSIixH6I86iLZqeL5cnQ+1fheAdULtWAoLgg+ltCawi0fKrt0TRdnkCF+PubKx
-         IIXF4+lEzOS38xAc6PMQYvDf/kDCZZD7FD+EQjJMnXK0kRbV0/wtNiJY1l4KCQEA3P
-         isgTA2A6NqSW169ULn+g2nTHSpyDlBbHfy2oiKJQ=
-From:   Sasha Levin <sashal@kernel.org>
-To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Lukas Wunner <lukas@wunner.de>,
+        id S1726143AbfJSSGn (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 19 Oct 2019 14:06:43 -0400
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:1926 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726052AbfJSSGm (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 19 Oct 2019 14:06:42 -0400
+Received: from pps.filterd (m0098394.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.27/8.16.0.27) with SMTP id x9JI6gZL146559
+        for <linux-efi@vger.kernel.org>; Sat, 19 Oct 2019 14:06:42 -0400
+Received: from e06smtp05.uk.ibm.com (e06smtp05.uk.ibm.com [195.75.94.101])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 2vqy0mb8v6-1
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
+        for <linux-efi@vger.kernel.org>; Sat, 19 Oct 2019 14:06:41 -0400
+Received: from localhost
+        by e06smtp05.uk.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        for <linux-efi@vger.kernel.org> from <nayna@linux.ibm.com>;
+        Sat, 19 Oct 2019 19:06:32 +0100
+Received: from b06cxnps4075.portsmouth.uk.ibm.com (9.149.109.197)
+        by e06smtp05.uk.ibm.com (192.168.101.135) with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted;
+        (version=TLSv1/SSLv3 cipher=AES256-GCM-SHA384 bits=256/256)
+        Sat, 19 Oct 2019 19:06:28 +0100
+Received: from d06av21.portsmouth.uk.ibm.com (d06av21.portsmouth.uk.ibm.com [9.149.105.232])
+        by b06cxnps4075.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id x9JI6Q4O44761160
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Sat, 19 Oct 2019 18:06:26 GMT
+Received: from d06av21.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 883625204F;
+        Sat, 19 Oct 2019 18:06:26 +0000 (GMT)
+Received: from swastik.ibm.com (unknown [9.85.146.216])
+        by d06av21.portsmouth.uk.ibm.com (Postfix) with ESMTP id C8F555204E;
+        Sat, 19 Oct 2019 18:06:23 +0000 (GMT)
+From:   Nayna Jain <nayna@linux.ibm.com>
+To:     linuxppc-dev@ozlabs.org, linux-efi@vger.kernel.org,
+        linux-integrity@vger.kernel.org
+Cc:     linux-kernel@vger.kernel.org,
+        Michael Ellerman <mpe@ellerman.id.au>,
+        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
+        Paul Mackerras <paulus@samba.org>,
         Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Ben Dooks <ben.dooks@codethink.co.uk>,
-        Dave Young <dyoung@redhat.com>,
-        Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>,
-        Jerry Snitselaar <jsnitsel@redhat.com>,
-        Linus Torvalds <torvalds@linux-foundation.org>,
-        Lyude Paul <lyude@redhat.com>,
-        Matthew Garrett <mjg59@google.com>,
-        Octavian Purdila <octavian.purdila@intel.com>,
-        Peter Jones <pjones@redhat.com>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Scott Talbert <swt@techie.net>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org,
-        Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.3 48/89] efi/cper: Fix endianness of PCIe class code
-Date:   Fri, 18 Oct 2019 18:02:43 -0400
-Message-Id: <20191018220324.8165-48-sashal@kernel.org>
-X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20191018220324.8165-1-sashal@kernel.org>
-References: <20191018220324.8165-1-sashal@kernel.org>
-MIME-Version: 1.0
-X-stable: review
-X-Patchwork-Hint: Ignore
-Content-Transfer-Encoding: 8bit
+        Jeremy Kerr <jk@ozlabs.org>,
+        Matthew Garret <matthew.garret@nebula.com>,
+        Mimi Zohar <zohar@linux.ibm.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Claudio Carvalho <cclaudio@linux.ibm.com>,
+        George Wilson <gcwilson@linux.ibm.com>,
+        Elaine Palmer <erpalmer@us.ibm.com>,
+        Eric Ricther <erichte@linux.ibm.com>,
+        "Oliver O'Halloran" <oohall@gmail.com>,
+        Nayna Jain <nayna@linux.ibm.com>,
+        Prakhar Srivastava <prsriva02@gmail.com>,
+        Lakshmi Ramasubramanian <nramas@linux.microsoft.com>
+Subject: [PATCH v8 0/8] powerpc: Enabling IMA arch specific secure boot policies
+Date:   Sat, 19 Oct 2019 14:06:09 -0400
+X-Mailer: git-send-email 1.8.3.1
+X-TM-AS-GCONF: 00
+x-cbid: 19101918-0020-0000-0000-0000037B06E9
+X-IBM-AV-DETECTION: SAVI=unused REMOTE=unused XFE=unused
+x-cbparentid: 19101918-0021-0000-0000-000021D1391D
+Message-Id: <1571508377-23603-1-git-send-email-nayna@linux.ibm.com>
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:,, definitions=2019-10-19_04:,,
+ signatures=0
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
+ malwarescore=0 suspectscore=0 phishscore=0 bulkscore=0 spamscore=0
+ clxscore=1015 lowpriorityscore=0 mlxscore=0 impostorscore=0
+ mlxlogscore=999 adultscore=0 classifier=spam adjust=0 reason=mlx
+ scancount=1 engine=8.0.1-1908290000 definitions=main-1910190171
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Lukas Wunner <lukas@wunner.de>
+This patchset extends the previous version[1] by adding support for
+checking against a blacklist of binary hashes.
 
-[ Upstream commit 6fb9367a15d1a126d222d738b2702c7958594a5f ]
+The IMA subsystem supports custom, built-in, arch-specific policies to
+define the files to be measured and appraised. These policies are honored
+based on priority, where arch-specific policy is the highest and custom
+is the lowest.
 
-The CPER parser assumes that the class code is big endian, but at least
-on this edk2-derived Intel Purley platform it's little endian:
+PowerNV system uses a Linux-based bootloader to kexec the OS. The
+bootloader kernel relies on IMA for signature verification of the OS
+kernel before doing the kexec. This patchset adds support for powerpc
+arch-specific IMA policies that are conditionally defined based on a
+system's secure boot and trusted boot states. The OS secure boot and
+trusted boot states are determined via device-tree properties.
 
-    efi: EFI v2.50 by EDK II BIOS ID:PLYDCRB1.86B.0119.R05.1701181843
-    DMI: Intel Corporation PURLEY/PURLEY, BIOS PLYDCRB1.86B.0119.R05.1701181843 01/18/2017
+The verification needs to be performed only for binaries that are not
+blacklisted. The kernel currently only checks against the blacklist of
+keys. However, doing so results in blacklisting all the binaries that
+are signed by the same key. In order to prevent just one particular
+binary from being loaded, it must be checked against a blacklist of
+binary hashes. This patchset also adds support to IMA for checking
+against a hash blacklist for files. signed by appended signature.
 
-    {1}[Hardware Error]:   device_id: 0000:5d:00.0
-    {1}[Hardware Error]:   slot: 0
-    {1}[Hardware Error]:   secondary_bus: 0x5e
-    {1}[Hardware Error]:   vendor_id: 0x8086, device_id: 0x2030
-    {1}[Hardware Error]:   class_code: 000406
-                                       ^^^^^^ (should be 060400)
+[1] http://patchwork.ozlabs.org/cover/1149262/ 
 
-Signed-off-by: Lukas Wunner <lukas@wunner.de>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Ben Dooks <ben.dooks@codethink.co.uk>
-Cc: Dave Young <dyoung@redhat.com>
-Cc: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
-Cc: Jerry Snitselaar <jsnitsel@redhat.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Lyude Paul <lyude@redhat.com>
-Cc: Matthew Garrett <mjg59@google.com>
-Cc: Octavian Purdila <octavian.purdila@intel.com>
-Cc: Peter Jones <pjones@redhat.com>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Scott Talbert <swt@techie.net>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-efi@vger.kernel.org
-Cc: linux-integrity@vger.kernel.org
-Link: https://lkml.kernel.org/r/20191002165904.8819-2-ard.biesheuvel@linaro.org
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- drivers/firmware/efi/cper.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Changelog:
+v8:
+* Updates the Patch Description as per Michael's and Mimi's feedback
+* Includes feedbacks from Michael for the device tree and policies
+  * removes the arch-policy hack by defining three arrays.
+  * fixes related to device-tree calls 
+  * other code specific feedbacks
+* Includes feedbacks from Mimi on the blacklist
+  * generic blacklist function is modified than previous version
+  * other coding fixes
 
-diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-index addf0749dd8b6..b1af0de2e1008 100644
---- a/drivers/firmware/efi/cper.c
-+++ b/drivers/firmware/efi/cper.c
-@@ -381,7 +381,7 @@ static void cper_print_pcie(const char *pfx, const struct cper_sec_pcie *pcie,
- 		printk("%s""vendor_id: 0x%04x, device_id: 0x%04x\n", pfx,
- 		       pcie->device_id.vendor_id, pcie->device_id.device_id);
- 		p = pcie->device_id.class_code;
--		printk("%s""class_code: %02x%02x%02x\n", pfx, p[0], p[1], p[2]);
-+		printk("%s""class_code: %02x%02x%02x\n", pfx, p[2], p[1], p[0]);
- 	}
- 	if (pcie->validation_bits & CPER_PCIE_VALID_SERIAL_NUMBER)
- 		printk("%s""serial number: 0x%04x, 0x%04x\n", pfx,
+v7:
+* Removes patch related to dt-bindings as per input from Rob Herring. 
+* fixes Patch 1/8 to use new device-tree updates as per Oliver
+  feedback to device-tree documentation in skiboot mailing list.
+(https://lists.ozlabs.org/pipermail/skiboot/2019-September/015329.html)
+* Includes feedbacks from Mimi, Thiago
+  * moves function get_powerpc_fw_sb_node() from Patch 1 to Patch 3 
+  * fixes Patch 2/8 to use CONFIG_MODULE_SIG_FORCE.
+  * updates Patch description in Patch 5/8
+  * adds a new patch to add wrapper is_binary_blacklisted()
+  * removes the patch that deprecated permit_directio
+
+v6:
+* includes feedbacks from Michael Ellerman on the patchset v5
+  * removed email ids from comments
+  * add the doc for the device-tree
+  * renames the secboot.c to secure_boot.c and secboot.h to secure_boot.h
+  * other code specific fixes
+* split the patches to differentiate between secureboot and trustedboot
+state of the system
+* adds the patches to support the blacklisting of the binary hash.
+
+v5:
+* secureboot state is now read via device tree entry rather than OPAL
+secure variables
+* ima arch policies are updated to use policy based template for
+measurement rules
+
+v4:
+* Fixed the build issue as reported by Satheesh Rajendran.
+
+v3:
+* OPAL APIs in Patch 1 are updated to provide generic interface based on
+key/keylen. This patchset updates kernel OPAL APIs to be compatible with
+generic interface.
+* Patch 2 is cleaned up to use new OPAL APIs.
+* Since OPAL can support different types of backend which can vary in the
+variable interpretation, the Patch 2 is updated to add a check for the
+backend version
+* OPAL API now expects consumer to first check the supported backend version
+before calling other secvar OPAL APIs. This check is now added in patch 2.
+* IMA policies in Patch 3 is updated to specify appended signature and
+per policy template.
+* The patches now are free of any EFIisms.
+
+v2:
+
+* Removed Patch 1: powerpc/include: Override unneeded early ioremap
+functions
+* Updated Subject line and patch description of the Patch 1 of this series
+* Removed dependency of OPAL_SECVAR on EFI, CPU_BIG_ENDIAN and UCS2_STRING
+* Changed OPAL APIs from static to non-static. Added opal-secvar.h for the
+same
+* Removed EFI hooks from opal_secvar.c
+* Removed opal_secvar_get_next(), opal_secvar_enqueue() and
+opal_query_variable_info() function
+* get_powerpc_sb_mode() in secboot.c now directly calls OPAL Runtime API
+rather than via EFI hooks.
+* Fixed log messages in get_powerpc_sb_mode() function.
+* Added dependency for PPC_SECURE_BOOT on configs PPC64 and OPAL_SECVAR
+* Replaced obj-$(CONFIG_IMA) with obj-$(CONFIG_PPC_SECURE_BOOT) in
+arch/powerpc/kernel/Makefile
+
+Nayna Jain (8):
+  powerpc: detect the secure boot mode of the system
+  powerpc/ima: add support to initialize ima policy rules
+  powerpc: detect the trusted boot state of the system
+  powerpc/ima: add measurement rules to ima arch specific policy
+  ima: make process_buffer_measurement() generic
+  certs: add wrapper function to check blacklisted binary hash
+  ima: check against blacklisted hashes for files with modsig
+  powerpc/ima: update ima arch policy to check for blacklist
+
+ Documentation/ABI/testing/ima_policy   |  1 +
+ arch/powerpc/Kconfig                   | 11 ++++
+ arch/powerpc/include/asm/secure_boot.h | 29 +++++++++++
+ arch/powerpc/kernel/Makefile           |  2 +
+ arch/powerpc/kernel/ima_arch.c         | 71 ++++++++++++++++++++++++++
+ arch/powerpc/kernel/secure_boot.c      | 54 ++++++++++++++++++++
+ certs/blacklist.c                      |  9 ++++
+ include/keys/system_keyring.h          |  6 +++
+ include/linux/ima.h                    |  3 +-
+ security/integrity/ima/ima.h           | 11 ++++
+ security/integrity/ima/ima_appraise.c  | 31 +++++++++++
+ security/integrity/ima/ima_main.c      | 63 +++++++++++++++--------
+ security/integrity/ima/ima_policy.c    | 10 +++-
+ security/integrity/integrity.h         |  1 +
+ 14 files changed, 277 insertions(+), 25 deletions(-)
+ create mode 100644 arch/powerpc/include/asm/secure_boot.h
+ create mode 100644 arch/powerpc/kernel/ima_arch.c
+ create mode 100644 arch/powerpc/kernel/secure_boot.c
+
 -- 
 2.20.1
 
