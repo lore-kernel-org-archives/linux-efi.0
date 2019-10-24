@@ -2,131 +2,142 @@ Return-Path: <SRS0=fhIB=YR=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_IN_DEF_DKIM_WL autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 06E71CA9EBB
-	for <linux-efi@archiver.kernel.org>; Thu, 24 Oct 2019 03:48:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 542D4CA9EAF
+	for <linux-efi@archiver.kernel.org>; Thu, 24 Oct 2019 11:02:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id DAAE921655
-	for <linux-efi@archiver.kernel.org>; Thu, 24 Oct 2019 03:48:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 285EA21929
+	for <linux-efi@archiver.kernel.org>; Thu, 24 Oct 2019 11:02:18 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="GSxZTUgn"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2437420AbfJXDsU (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 23 Oct 2019 23:48:20 -0400
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:43778 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S2437404AbfJXDsU (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 23 Oct 2019 23:48:20 -0400
-Received: from pps.filterd (m0098417.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.27/8.16.0.27) with SMTP id x9O3lExB003825
-        for <linux-efi@vger.kernel.org>; Wed, 23 Oct 2019 23:48:19 -0400
-Received: from e06smtp02.uk.ibm.com (e06smtp02.uk.ibm.com [195.75.94.98])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 2vu13h5afc-1
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <linux-efi@vger.kernel.org>; Wed, 23 Oct 2019 23:48:18 -0400
-Received: from localhost
-        by e06smtp02.uk.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-        for <linux-efi@vger.kernel.org> from <nayna@linux.ibm.com>;
-        Thu, 24 Oct 2019 04:48:17 +0100
-Received: from b06avi18878370.portsmouth.uk.ibm.com (9.149.26.194)
-        by e06smtp02.uk.ibm.com (192.168.101.132) with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted;
-        (version=TLSv1/SSLv3 cipher=AES256-GCM-SHA384 bits=256/256)
-        Thu, 24 Oct 2019 04:48:11 +0100
-Received: from d06av26.portsmouth.uk.ibm.com (d06av26.portsmouth.uk.ibm.com [9.149.105.62])
-        by b06avi18878370.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id x9O3m9L840042988
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 24 Oct 2019 03:48:09 GMT
-Received: from d06av26.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 7A420AE04D;
-        Thu, 24 Oct 2019 03:48:09 +0000 (GMT)
-Received: from d06av26.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id B17B9AE053;
-        Thu, 24 Oct 2019 03:48:06 +0000 (GMT)
-Received: from localhost.localdomain (unknown [9.40.192.65])
-        by d06av26.portsmouth.uk.ibm.com (Postfix) with ESMTP;
-        Thu, 24 Oct 2019 03:48:06 +0000 (GMT)
-From:   Nayna Jain <nayna@linux.ibm.com>
-To:     linuxppc-dev@ozlabs.org, linux-efi@vger.kernel.org,
-        linux-integrity@vger.kernel.org
-Cc:     linux-kernel@vger.kernel.org,
-        Michael Ellerman <mpe@ellerman.id.au>,
-        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
-        Paul Mackerras <paulus@samba.org>,
-        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Jeremy Kerr <jk@ozlabs.org>,
-        Matthew Garret <matthew.garret@nebula.com>,
-        Mimi Zohar <zohar@linux.ibm.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Claudio Carvalho <cclaudio@linux.ibm.com>,
-        George Wilson <gcwilson@linux.ibm.com>,
-        Elaine Palmer <erpalmer@us.ibm.com>,
-        Eric Ricther <erichte@linux.ibm.com>,
-        "Oliver O'Halloran" <oohall@gmail.com>,
-        Nayna Jain <nayna@linux.ibm.com>,
-        Prakhar Srivastava <prsriva02@gmail.com>,
-        Lakshmi Ramasubramanian <nramas@linux.microsoft.com>
-Subject: [PATCH v9 8/8] powerpc/ima: update ima arch policy to check for blacklist
-Date:   Wed, 23 Oct 2019 22:47:17 -0500
-X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20191024034717.70552-1-nayna@linux.ibm.com>
-References: <20191024034717.70552-1-nayna@linux.ibm.com>
+        id S2392237AbfJXLCR (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 24 Oct 2019 07:02:17 -0400
+Received: from mail-ot1-f67.google.com ([209.85.210.67]:45102 "EHLO
+        mail-ot1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2392213AbfJXLCR (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 24 Oct 2019 07:02:17 -0400
+Received: by mail-ot1-f67.google.com with SMTP id 41so20244052oti.12
+        for <linux-efi@vger.kernel.org>; Thu, 24 Oct 2019 04:02:16 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=Wp7j55fCu8VBbV3w6xxbpPhvOdRSu/ha8VU4hcpzHdY=;
+        b=GSxZTUgn5T2HRAlKrADzvv53PhUqCr6HGwWIfZ+q0bFeBI/8il22Kv3vpugrhHlUKc
+         JSd3yXOh4TDUfIqO8JPYXGilp4Vg98FIe9l+pL6F5FO2iW7zWgkU28rHfnrJDKC/RUhT
+         9y7xvvCroceLV28G/DNxI6s3sI/MSBb0LxVcLxj5vL25ilXRyhqWJ+AnuTdwWYD+wKpX
+         O5vqsk+9Nvl/sUnYEZWYKKkmZRx3M69w2mSa0T0GYjtT0TBikdjdIHl9bdIy1avJXFGR
+         mVT16n7Jv0qZPjTSiWzuZVrSqaZmV1oEhg+iVLOxp3SXxbxsxWpuo8R2VJIKx8+2qGRR
+         M+7Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=Wp7j55fCu8VBbV3w6xxbpPhvOdRSu/ha8VU4hcpzHdY=;
+        b=qIfN0L071h0xSDCOTEgDCkLUO1tMkIeMdpt7VYQY8I6qYz5g2oVLpyRS1YBbJnKtwl
+         6Bo6zeCM/HEcztE6UWE84d1B2KTpYEL58g/oR+R+4BGxGoc678T1J+Vt3ye7x7PNV+yt
+         3cjldfOxhxxD+nkt7hZYsGkqT/ea8+FMAcxOB+FZP91z+U28glvfYdFCnW4f+5HguPFb
+         7KX0plrpYg2HzEkNYOjmXVkLnulPtgllO3JGMWEzv/OlzaNgm3zVIUJ052bB7ZX7QHXV
+         vY1e9EKBkLsNIAYHaow5WwFc08/hIFKgyIRDUATpfjp8OQ0O5fox45+Rqd/J27M0WEAs
+         NV/A==
+X-Gm-Message-State: APjAAAVxN5dlz7ZnIJWVA/vVxlC1yFjHKOWJKOoLvLqDABkMhKi3X7dI
+        Y/vfiIOMJGlOeEx04FUTk/eYQz3U0OaBhncH6rAkwA==
+X-Google-Smtp-Source: APXvYqzzXJwi5QeAS4Gnmcn5kNWx1bB+mxOrVbyaL3mIhkaZR6F+nFKJsdPfH9bNhx4bqmlmQAfh3F8piEDK6aQ6BY4=
+X-Received: by 2002:a9d:82e:: with SMTP id 43mr8537524oty.23.1571914935893;
+ Thu, 24 Oct 2019 04:02:15 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-TM-AS-GCONF: 00
-x-cbid: 19102403-0008-0000-0000-000003267A2E
-X-IBM-AV-DETECTION: SAVI=unused REMOTE=unused XFE=unused
-x-cbparentid: 19102403-0009-0000-0000-00004A45AB93
-Message-Id: <20191024034717.70552-9-nayna@linux.ibm.com>
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:,, definitions=2019-10-24_02:,,
- signatures=0
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
- malwarescore=0 suspectscore=0 phishscore=0 bulkscore=0 spamscore=0
- clxscore=1015 lowpriorityscore=0 mlxscore=0 impostorscore=0
- mlxlogscore=999 adultscore=0 classifier=spam adjust=0 reason=mlx
- scancount=1 engine=8.0.1-1908290000 definitions=main-1910240033
+References: <20191017141305.146193-1-elver@google.com> <20191017141305.146193-2-elver@google.com>
+ <20191022154858.GA13700@redhat.com> <CANpmjNPUT2B3rWaa=5Ee2Xs3HHDaUiBGpG09Q4h9Gemhsp9KFw@mail.gmail.com>
+ <20191023162432.GC14327@redhat.com>
+In-Reply-To: <20191023162432.GC14327@redhat.com>
+From:   Marco Elver <elver@google.com>
+Date:   Thu, 24 Oct 2019 13:02:03 +0200
+Message-ID: <CANpmjNOOT+KR7m8KpETk1czyJLr3TeHsvvejwyuY3JXKr=eajg@mail.gmail.com>
+Subject: Re: [PATCH v2 1/8] kcsan: Add Kernel Concurrency Sanitizer infrastructure
+To:     Oleg Nesterov <oleg@redhat.com>
+Cc:     LKMM Maintainers -- Akira Yokosawa <akiyks@gmail.com>,
+        Alan Stern <stern@rowland.harvard.edu>,
+        Alexander Potapenko <glider@google.com>,
+        Andrea Parri <parri.andrea@gmail.com>,
+        Andrey Konovalov <andreyknvl@google.com>,
+        Andy Lutomirski <luto@kernel.org>,
+        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Boqun Feng <boqun.feng@gmail.com>,
+        Borislav Petkov <bp@alien8.de>, Daniel Axtens <dja@axtens.net>,
+        Daniel Lustig <dlustig@nvidia.com>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        David Howells <dhowells@redhat.com>,
+        Dmitry Vyukov <dvyukov@google.com>,
+        "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>,
+        Jade Alglave <j.alglave@ucl.ac.uk>,
+        Joel Fernandes <joel@joelfernandes.org>,
+        Jonathan Corbet <corbet@lwn.net>,
+        Josh Poimboeuf <jpoimboe@redhat.com>,
+        Luc Maranget <luc.maranget@inria.fr>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Nicholas Piggin <npiggin@gmail.com>,
+        "Paul E. McKenney" <paulmck@linux.ibm.com>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Will Deacon <will@kernel.org>,
+        kasan-dev <kasan-dev@googlegroups.com>,
+        linux-arch <linux-arch@vger.kernel.org>,
+        "open list:DOCUMENTATION" <linux-doc@vger.kernel.org>,
+        linux-efi@vger.kernel.org,
+        Linux Kbuild mailing list <linux-kbuild@vger.kernel.org>,
+        LKML <linux-kernel@vger.kernel.org>,
+        Linux Memory Management List <linux-mm@kvack.org>,
+        "the arch/x86 maintainers" <x86@kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This patch updates the arch-specific policies for PowerNV system to make
-sure that the binary hash is not blacklisted.
+On Wed, 23 Oct 2019 at 18:24, Oleg Nesterov <oleg@redhat.com> wrote:
+>
+> On 10/22, Marco Elver wrote:
+> >
+> > On Tue, 22 Oct 2019 at 17:49, Oleg Nesterov <oleg@redhat.com> wrote:
+> > >
+> > > Just for example. Suppose that task->state = TASK_UNINTERRUPTIBLE, this task
+> > > does __set_current_state(TASK_RUNNING), another CPU does wake_up_process(task)
+> > > which does the same UNINTERRUPTIBLE -> RUNNING transition.
+> > >
+> > > Looks like, this is the "data race" according to kcsan?
+> >
+> > Yes, they are "data races". They are probably not "race conditions" though.
+> >
+> > This is a fair distinction to make, and we never claimed to find "race
+> > conditions" only
+>
+> I see, thanks, just wanted to be sure...
+>
+> > KCSAN's goal is to find *data races* according to the LKMM.  Some data
+> > races are race conditions (usually the more interesting bugs) -- but
+> > not *all* data races are race conditions. Those are what are usually
+> > referred to as "benign", but they can still become bugs on the wrong
+> > arch/compiler combination. Hence, the need to annotate these accesses
+> > with READ_ONCE, WRITE_ONCE or use atomic_t:
+>
+> Well, if I see READ_ONCE() in the code I want to understand why it was
+> used. Is it really needed for correctness or we want to shut up kcsan?
+> Say, why should wait_event(wq, *ptr) use READ_ONCE()? Nevermind, please
+> forget.
+>
+> Btw, why __kcsan_check_watchpoint() does user_access_save() before
+> try_consume_watchpoint() ?
 
-Signed-off-by: Nayna Jain <nayna@linux.ibm.com>
-Reviewed-by: Mimi Zohar <zohar@linux.ibm.com>
----
- arch/powerpc/kernel/ima_arch.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+Instrumentation is added in UACCESS regions. Since we do not access
+user-memory, we do user_access_save to ensure everything is safe
+(otherwise objtool complains that we do calls to non-whitelisted
+functions). I will try to optimize this a bit, but we can't avoid it.
 
-diff --git a/arch/powerpc/kernel/ima_arch.c b/arch/powerpc/kernel/ima_arch.c
-index 0ef5956c9753..b9de0fb45bb9 100644
---- a/arch/powerpc/kernel/ima_arch.c
-+++ b/arch/powerpc/kernel/ima_arch.c
-@@ -23,9 +23,9 @@ bool arch_ima_get_secureboot(void)
-  * is not enabled.
-  */
- static const char *const secure_rules[] = {
--	"appraise func=KEXEC_KERNEL_CHECK appraise_type=imasig|modsig",
-+	"appraise func=KEXEC_KERNEL_CHECK appraise_flag=check_blacklist appraise_type=imasig|modsig",
- #ifndef CONFIG_MODULE_SIG_FORCE
--	"appraise func=MODULE_CHECK appraise_type=imasig|modsig",
-+	"appraise func=MODULE_CHECK appraise_flag=check_blacklist appraise_type=imasig|modsig",
- #endif
- 	NULL
- };
-@@ -49,9 +49,9 @@ static const char *const trusted_rules[] = {
- static const char *const secure_and_trusted_rules[] = {
- 	"measure func=KEXEC_KERNEL_CHECK template=ima-modsig",
- 	"measure func=MODULE_CHECK template=ima-modsig",
--	"appraise func=KEXEC_KERNEL_CHECK appraise_type=imasig|modsig",
-+	"appraise func=KEXEC_KERNEL_CHECK appraise_flag=check_blacklist appraise_type=imasig|modsig",
- #ifndef CONFIG_MODULE_SIG_FORCE
--	"appraise func=MODULE_CHECK appraise_type=imasig|modsig",
-+	"appraise func=MODULE_CHECK appraise_flag=check_blacklist appraise_type=imasig|modsig",
- #endif
- 	NULL
- };
--- 
-2.20.1
-
+> Oleg.
+>
