@@ -2,142 +2,176 @@ Return-Path: <SRS0=fhIB=YR=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,USER_IN_DEF_DKIM_WL autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 542D4CA9EAF
-	for <linux-efi@archiver.kernel.org>; Thu, 24 Oct 2019 11:02:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B0DF6CA9EAF
+	for <linux-efi@archiver.kernel.org>; Thu, 24 Oct 2019 11:49:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 285EA21929
-	for <linux-efi@archiver.kernel.org>; Thu, 24 Oct 2019 11:02:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 815DD21655
+	for <linux-efi@archiver.kernel.org>; Thu, 24 Oct 2019 11:49:26 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="GSxZTUgn"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="bWrkHXfq"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2392237AbfJXLCR (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 24 Oct 2019 07:02:17 -0400
-Received: from mail-ot1-f67.google.com ([209.85.210.67]:45102 "EHLO
-        mail-ot1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2392213AbfJXLCR (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 24 Oct 2019 07:02:17 -0400
-Received: by mail-ot1-f67.google.com with SMTP id 41so20244052oti.12
-        for <linux-efi@vger.kernel.org>; Thu, 24 Oct 2019 04:02:16 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=Wp7j55fCu8VBbV3w6xxbpPhvOdRSu/ha8VU4hcpzHdY=;
-        b=GSxZTUgn5T2HRAlKrADzvv53PhUqCr6HGwWIfZ+q0bFeBI/8il22Kv3vpugrhHlUKc
-         JSd3yXOh4TDUfIqO8JPYXGilp4Vg98FIe9l+pL6F5FO2iW7zWgkU28rHfnrJDKC/RUhT
-         9y7xvvCroceLV28G/DNxI6s3sI/MSBb0LxVcLxj5vL25ilXRyhqWJ+AnuTdwWYD+wKpX
-         O5vqsk+9Nvl/sUnYEZWYKKkmZRx3M69w2mSa0T0GYjtT0TBikdjdIHl9bdIy1avJXFGR
-         mVT16n7Jv0qZPjTSiWzuZVrSqaZmV1oEhg+iVLOxp3SXxbxsxWpuo8R2VJIKx8+2qGRR
-         M+7Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=Wp7j55fCu8VBbV3w6xxbpPhvOdRSu/ha8VU4hcpzHdY=;
-        b=qIfN0L071h0xSDCOTEgDCkLUO1tMkIeMdpt7VYQY8I6qYz5g2oVLpyRS1YBbJnKtwl
-         6Bo6zeCM/HEcztE6UWE84d1B2KTpYEL58g/oR+R+4BGxGoc678T1J+Vt3ye7x7PNV+yt
-         3cjldfOxhxxD+nkt7hZYsGkqT/ea8+FMAcxOB+FZP91z+U28glvfYdFCnW4f+5HguPFb
-         7KX0plrpYg2HzEkNYOjmXVkLnulPtgllO3JGMWEzv/OlzaNgm3zVIUJ052bB7ZX7QHXV
-         vY1e9EKBkLsNIAYHaow5WwFc08/hIFKgyIRDUATpfjp8OQ0O5fox45+Rqd/J27M0WEAs
-         NV/A==
-X-Gm-Message-State: APjAAAVxN5dlz7ZnIJWVA/vVxlC1yFjHKOWJKOoLvLqDABkMhKi3X7dI
-        Y/vfiIOMJGlOeEx04FUTk/eYQz3U0OaBhncH6rAkwA==
-X-Google-Smtp-Source: APXvYqzzXJwi5QeAS4Gnmcn5kNWx1bB+mxOrVbyaL3mIhkaZR6F+nFKJsdPfH9bNhx4bqmlmQAfh3F8piEDK6aQ6BY4=
-X-Received: by 2002:a9d:82e:: with SMTP id 43mr8537524oty.23.1571914935893;
- Thu, 24 Oct 2019 04:02:15 -0700 (PDT)
-MIME-Version: 1.0
-References: <20191017141305.146193-1-elver@google.com> <20191017141305.146193-2-elver@google.com>
- <20191022154858.GA13700@redhat.com> <CANpmjNPUT2B3rWaa=5Ee2Xs3HHDaUiBGpG09Q4h9Gemhsp9KFw@mail.gmail.com>
- <20191023162432.GC14327@redhat.com>
-In-Reply-To: <20191023162432.GC14327@redhat.com>
-From:   Marco Elver <elver@google.com>
-Date:   Thu, 24 Oct 2019 13:02:03 +0200
-Message-ID: <CANpmjNOOT+KR7m8KpETk1czyJLr3TeHsvvejwyuY3JXKr=eajg@mail.gmail.com>
-Subject: Re: [PATCH v2 1/8] kcsan: Add Kernel Concurrency Sanitizer infrastructure
-To:     Oleg Nesterov <oleg@redhat.com>
-Cc:     LKMM Maintainers -- Akira Yokosawa <akiyks@gmail.com>,
-        Alan Stern <stern@rowland.harvard.edu>,
-        Alexander Potapenko <glider@google.com>,
-        Andrea Parri <parri.andrea@gmail.com>,
-        Andrey Konovalov <andreyknvl@google.com>,
-        Andy Lutomirski <luto@kernel.org>,
-        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Boqun Feng <boqun.feng@gmail.com>,
-        Borislav Petkov <bp@alien8.de>, Daniel Axtens <dja@axtens.net>,
-        Daniel Lustig <dlustig@nvidia.com>,
-        Dave Hansen <dave.hansen@linux.intel.com>,
-        David Howells <dhowells@redhat.com>,
-        Dmitry Vyukov <dvyukov@google.com>,
-        "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>,
-        Jade Alglave <j.alglave@ucl.ac.uk>,
-        Joel Fernandes <joel@joelfernandes.org>,
-        Jonathan Corbet <corbet@lwn.net>,
-        Josh Poimboeuf <jpoimboe@redhat.com>,
-        Luc Maranget <luc.maranget@inria.fr>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Nicholas Piggin <npiggin@gmail.com>,
-        "Paul E. McKenney" <paulmck@linux.ibm.com>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Will Deacon <will@kernel.org>,
-        kasan-dev <kasan-dev@googlegroups.com>,
-        linux-arch <linux-arch@vger.kernel.org>,
-        "open list:DOCUMENTATION" <linux-doc@vger.kernel.org>,
-        linux-efi@vger.kernel.org,
-        Linux Kbuild mailing list <linux-kbuild@vger.kernel.org>,
-        LKML <linux-kernel@vger.kernel.org>,
-        Linux Memory Management List <linux-mm@kvack.org>,
-        "the arch/x86 maintainers" <x86@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        id S1726389AbfJXLt0 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 24 Oct 2019 07:49:26 -0400
+Received: from aserp2120.oracle.com ([141.146.126.78]:49652 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726326AbfJXLt0 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 24 Oct 2019 07:49:26 -0400
+Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
+        by aserp2120.oracle.com (8.16.0.27/8.16.0.27) with SMTP id x9OBdxUn027790;
+        Thu, 24 Oct 2019 11:48:48 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
+ subject : date : message-id : in-reply-to : references; s=corp-2019-08-05;
+ bh=z13BAF6ghH9YJkJPP/cOfQet3c3eWcpMKhNqVJkkLRM=;
+ b=bWrkHXfqnm9iQapN5MJCYi1RPzf0CfNulUZ4eLSmNGn83Pg/jE/OBDfrGJWsbm0hvQfi
+ qj9hwLqAKRC/OlqQ8JffjEb5wsFJF41FWAjXSwr29vDXHJ2fUIITjsjHOfCzNqnUFBGY
+ EShZtABmBBD0CyQtpyXpOUFQHzNJLQhXXFFqwzYMjUM0UzMkcy4fbccV2+mGsN2DFFBm
+ DVXnJUPgN+MQglCoq9T3j+lKkXqOtuiIfE/i9gBKrfoFX2vSxNzp6ctnS3gSB8cgrZSW
+ 8U6m8nMA6o9Bn8Lm6LjD71b+43h6k7k4vB/xq5UDMgv5Skn08Rq+UmvWNjgnP2A4L33o Jw== 
+Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
+        by aserp2120.oracle.com with ESMTP id 2vqteq323h-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Thu, 24 Oct 2019 11:48:48 +0000
+Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
+        by userp3030.oracle.com (8.16.0.27/8.16.0.27) with SMTP id x9OBdDSh050160;
+        Thu, 24 Oct 2019 11:48:47 GMT
+Received: from aserv0121.oracle.com (aserv0121.oracle.com [141.146.126.235])
+        by userp3030.oracle.com with ESMTP id 2vtjkjcsf7-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Thu, 24 Oct 2019 11:48:47 +0000
+Received: from abhmp0008.oracle.com (abhmp0008.oracle.com [141.146.116.14])
+        by aserv0121.oracle.com (8.14.4/8.13.8) with ESMTP id x9OBmjeO010783;
+        Thu, 24 Oct 2019 11:48:46 GMT
+Received: from tomti.i.net-space.pl (/10.175.165.209)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Thu, 24 Oct 2019 04:48:45 -0700
+From:   Daniel Kiper <daniel.kiper@oracle.com>
+To:     linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
+        x86@kernel.org, xen-devel@lists.xenproject.org
+Cc:     ard.biesheuvel@linaro.org, boris.ostrovsky@oracle.com,
+        bp@alien8.de, corbet@lwn.net, dave.hansen@linux.intel.com,
+        luto@kernel.org, peterz@infradead.org, eric.snowberg@oracle.com,
+        hpa@zytor.com, jgross@suse.com, kanth.ghatraju@oracle.com,
+        konrad.wilk@oracle.com, mingo@redhat.com, rdunlap@infradead.org,
+        ross.philipson@oracle.com, tglx@linutronix.de
+Subject: [PATCH v4 2/3] x86/boot: Introduce the kernel_info.setup_type_max
+Date:   Thu, 24 Oct 2019 13:48:13 +0200
+Message-Id: <20191024114814.6488-3-daniel.kiper@oracle.com>
+X-Mailer: git-send-email 2.11.0
+In-Reply-To: <20191024114814.6488-1-daniel.kiper@oracle.com>
+References: <20191024114814.6488-1-daniel.kiper@oracle.com>
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9419 signatures=668684
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 malwarescore=0
+ phishscore=0 bulkscore=0 spamscore=0 mlxscore=0 mlxlogscore=999
+ adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.0.1-1908290000 definitions=main-1910240116
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9419 signatures=668684
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 priorityscore=1501 malwarescore=0
+ suspectscore=0 phishscore=0 bulkscore=0 spamscore=0 clxscore=1015
+ lowpriorityscore=0 mlxscore=0 impostorscore=0 mlxlogscore=999 adultscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.0.1-1908290000
+ definitions=main-1910240116
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Wed, 23 Oct 2019 at 18:24, Oleg Nesterov <oleg@redhat.com> wrote:
->
-> On 10/22, Marco Elver wrote:
-> >
-> > On Tue, 22 Oct 2019 at 17:49, Oleg Nesterov <oleg@redhat.com> wrote:
-> > >
-> > > Just for example. Suppose that task->state = TASK_UNINTERRUPTIBLE, this task
-> > > does __set_current_state(TASK_RUNNING), another CPU does wake_up_process(task)
-> > > which does the same UNINTERRUPTIBLE -> RUNNING transition.
-> > >
-> > > Looks like, this is the "data race" according to kcsan?
-> >
-> > Yes, they are "data races". They are probably not "race conditions" though.
-> >
-> > This is a fair distinction to make, and we never claimed to find "race
-> > conditions" only
->
-> I see, thanks, just wanted to be sure...
->
-> > KCSAN's goal is to find *data races* according to the LKMM.  Some data
-> > races are race conditions (usually the more interesting bugs) -- but
-> > not *all* data races are race conditions. Those are what are usually
-> > referred to as "benign", but they can still become bugs on the wrong
-> > arch/compiler combination. Hence, the need to annotate these accesses
-> > with READ_ONCE, WRITE_ONCE or use atomic_t:
->
-> Well, if I see READ_ONCE() in the code I want to understand why it was
-> used. Is it really needed for correctness or we want to shut up kcsan?
-> Say, why should wait_event(wq, *ptr) use READ_ONCE()? Nevermind, please
-> forget.
->
-> Btw, why __kcsan_check_watchpoint() does user_access_save() before
-> try_consume_watchpoint() ?
+This field contains maximal allowed type for setup_data.
 
-Instrumentation is added in UACCESS regions. Since we do not access
-user-memory, we do user_access_save to ensure everything is safe
-(otherwise objtool complains that we do calls to non-whitelisted
-functions). I will try to optimize this a bit, but we can't avoid it.
+Now bump the setup_header version in arch/x86/boot/header.S.
 
-> Oleg.
->
+Suggested-by: H. Peter Anvin (Intel) <hpa@zytor.com>
+Signed-off-by: Daniel Kiper <daniel.kiper@oracle.com>
+Reviewed-by: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
+Reviewed-by: Ross Philipson <ross.philipson@oracle.com>
+Reviewed-by: H. Peter Anvin (Intel) <hpa@zytor.com>
+---
+ Documentation/x86/boot.rst             | 9 ++++++++-
+ arch/x86/boot/compressed/kernel_info.S | 5 +++++
+ arch/x86/boot/header.S                 | 2 +-
+ arch/x86/include/uapi/asm/bootparam.h  | 3 +++
+ 4 files changed, 17 insertions(+), 2 deletions(-)
+
+diff --git a/Documentation/x86/boot.rst b/Documentation/x86/boot.rst
+index c60fafda9427..8e523c23ede3 100644
+--- a/Documentation/x86/boot.rst
++++ b/Documentation/x86/boot.rst
+@@ -73,7 +73,7 @@ Protocol 2.14:	BURNT BY INCORRECT COMMIT ae7e1238e68f2a472a125673ab506d49158c188
+ 		(x86/boot: Add ACPI RSDP address to setup_header)
+ 		DO NOT USE!!! ASSUME SAME AS 2.13.
+ 
+-Protocol 2.15:	(Kernel 5.5) Added the kernel_info.
++Protocol 2.15:	(Kernel 5.5) Added the kernel_info and kernel_info.setup_type_max.
+ =============	============================================================
+ 
+ .. note::
+@@ -981,6 +981,13 @@ Offset/size:	0x0008/4
+   This field contains the size of the kernel_info including kernel_info.header
+   and kernel_info.kernel_info_var_len_data.
+ 
++============	==============
++Field name:	setup_type_max
++Offset/size:	0x0008/4
++============	==============
++
++  This field contains maximal allowed type for setup_data and setup_indirect structs.
++
+ 
+ The Image Checksum
+ ==================
+diff --git a/arch/x86/boot/compressed/kernel_info.S b/arch/x86/boot/compressed/kernel_info.S
+index 8ea6f6e3feef..f818ee8fba38 100644
+--- a/arch/x86/boot/compressed/kernel_info.S
++++ b/arch/x86/boot/compressed/kernel_info.S
+@@ -1,5 +1,7 @@
+ /* SPDX-License-Identifier: GPL-2.0 */
+ 
++#include <asm/bootparam.h>
++
+ 	.section ".rodata.kernel_info", "a"
+ 
+ 	.global kernel_info
+@@ -12,6 +14,9 @@ kernel_info:
+ 	/* Size total. */
+ 	.long	kernel_info_end - kernel_info
+ 
++	/* Maximal allowed type for setup_data and setup_indirect structs. */
++	.long	SETUP_TYPE_MAX
++
+ kernel_info_var_len_data:
+ 	/* Empty for time being... */
+ kernel_info_end:
+diff --git a/arch/x86/boot/header.S b/arch/x86/boot/header.S
+index 22dcecaaa898..97d9b6d6c1af 100644
+--- a/arch/x86/boot/header.S
++++ b/arch/x86/boot/header.S
+@@ -300,7 +300,7 @@ _start:
+ 	# Part 2 of the header, from the old setup.S
+ 
+ 		.ascii	"HdrS"		# header signature
+-		.word	0x020d		# header version number (>= 0x0105)
++		.word	0x020f		# header version number (>= 0x0105)
+ 					# or else old loadlin-1.5 will fail)
+ 		.globl realmode_swtch
+ realmode_swtch:	.word	0, 0		# default_switch, SETUPSEG
+diff --git a/arch/x86/include/uapi/asm/bootparam.h b/arch/x86/include/uapi/asm/bootparam.h
+index a1ebcd7a991c..dbb41128e5a0 100644
+--- a/arch/x86/include/uapi/asm/bootparam.h
++++ b/arch/x86/include/uapi/asm/bootparam.h
+@@ -11,6 +11,9 @@
+ #define SETUP_APPLE_PROPERTIES		5
+ #define SETUP_JAILHOUSE			6
+ 
++/* max(SETUP_*) */
++#define SETUP_TYPE_MAX			SETUP_JAILHOUSE
++
+ /* ram_size flags */
+ #define RAMDISK_IMAGE_START_MASK	0x07FF
+ #define RAMDISK_PROMPT_FLAG		0x8000
+-- 
+2.11.0
+
