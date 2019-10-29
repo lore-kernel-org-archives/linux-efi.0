@@ -2,87 +2,139 @@ Return-Path: <SRS0=+8OP=YW=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CE32DCA9EAE
-	for <linux-efi@archiver.kernel.org>; Tue, 29 Oct 2019 17:39:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5652CCA9EAE
+	for <linux-efi@archiver.kernel.org>; Tue, 29 Oct 2019 19:14:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 9DADE20679
-	for <linux-efi@archiver.kernel.org>; Tue, 29 Oct 2019 17:39:49 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1572370789;
-	bh=seibnrRNRbSPy1J1lWeJMDFnX5JQTvYifsg77MzzXhU=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=Z7o7GXqHpwF+ZJafHgsxWtdPfkVacZnTBOHrxu8snmQNwYiNsDfrVTiOKG27IIq56
-	 zRrZjuzMCABD2PBIcmXqViQXRDguQ19P8ZcomCD42sJ0pIni5oviuGDIDhMW+XWMzn
-	 6HkmxvSnzgdiiK/Zj3Kp691r/iRZAtWS9agaAzFo=
+	by mail.kernel.org (Postfix) with ESMTP id 1EE592087E
+	for <linux-efi@archiver.kernel.org>; Tue, 29 Oct 2019 19:14:33 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="DO1hZp2r"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728381AbfJ2RjE (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 29 Oct 2019 13:39:04 -0400
-Received: from mail.kernel.org ([198.145.29.99]:53020 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726068AbfJ2RjE (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Tue, 29 Oct 2019 13:39:04 -0400
-Received: from e123331-lin.home (lfbn-mar-1-643-104.w90-118.abo.wanadoo.fr [90.118.215.104])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 4852020856;
-        Tue, 29 Oct 2019 17:39:02 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1572370743;
-        bh=seibnrRNRbSPy1J1lWeJMDFnX5JQTvYifsg77MzzXhU=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=yZ2+Mf0FboDrCDBF7qwaLAOyhzrruAsrSFoMvn+aY8Q17n7HP4Maxk+1xU+6G19nr
-         VPRR+0FDnnfONTcLpHLlfb2mtX3LfECi6+zKM75oKmu7xXC8kztbWB50JLpTt/xJlJ
-         QYwKUDYEVUVCqOiPv0X3Yhhl1d0vp4hFqAEJf4eg=
-From:   Ard Biesheuvel <ardb@kernel.org>
-To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
-        Thomas Gleixner <tglx@linutronix.de>
-Cc:     Narendra K <Narendra.K@dell.com>,
+        id S1731246AbfJ2TOc (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 29 Oct 2019 15:14:32 -0400
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:58556 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1730743AbfJ2TOc (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 29 Oct 2019 15:14:32 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1572376471;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=nxayejYSVXr47U447mSkKDwpy7jX9q8NIi6Fc4NbQBc=;
+        b=DO1hZp2rjjvGs0jb/saN3Upvu+3I57KcitSChkmaHYFCzWvmrMpmhjglL/wfI7B2FF/bwh
+        Q4ADd1EqsE0IKPHgmeZeqLippB+3uN9FjtnbxzKVKIyGhOHTIkEP8P17C2IyL+pycV2Csn
+        HmYA+tCZgpoeOFwz+723SuMVnUzaipA=
+Received: from mail-lj1-f200.google.com (mail-lj1-f200.google.com
+ [209.85.208.200]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-331-D66aXY2-Nw-SymNVYgXhfg-1; Tue, 29 Oct 2019 15:14:29 -0400
+Received: by mail-lj1-f200.google.com with SMTP id i27so2896733ljb.17
+        for <linux-efi@vger.kernel.org>; Tue, 29 Oct 2019 12:14:28 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=pwzekU6FTVb4WJ1KYylvE2Fm3CGIkd3DwRcFLlZGbuw=;
+        b=g/H0C5KZa0PafAmE6t6Q/VSjY6afEj/JVltC3oVSaJa37UOA+LKILCyxzOamOtR5ph
+         FHk7Mww/BqUluZ7WB6noS+yYzUP/fvRbRf2FrM387Qid2Y3JhnPlsyXJ/kfiBtoi9nlT
+         5UsqCs77VJc7x7aLhedlTkVYC/eQIjxBOEtGuFGpBeExb6KF/Ha4MTADJy+tSgA9tLfW
+         zqdnlFz5IumljhORtHNUAXjXZr+cT8K2DnKzk9KuyxYliKnhECNw0CxGFyGkydlFlq86
+         3B4tpsZZkb3KtWq1Hgfrd1KhXW/tEYyeVavAc/lROYQJDegK8d3NghlAnq5iMNOeSYlj
+         sJlA==
+X-Gm-Message-State: APjAAAWAM+WB/3UY1EUJIilwAVchCSm6+tbGBFDPA1Koc4d3cfYQscmo
+        MHAc+icBemKraXUJZIKq6xxTP9QSXH1uj83L0ey95EXXA3ESTUe7M06LLj9JYP2IH/QcpxzrvDp
+        vzU75Ipy5xBAeBBZRRn/cRGug3NvsShgmBR0C
+X-Received: by 2002:a19:ac04:: with SMTP id g4mr3546577lfc.63.1572376467656;
+        Tue, 29 Oct 2019 12:14:27 -0700 (PDT)
+X-Google-Smtp-Source: APXvYqyB0C3Ii5OEJM05OMOUAAZ49o0SiI0p8Oyn3T8k9fDZCZX9ZMdZD7rNOLGdjhWiT4TOIpbqxNY+7kioHW7fcD4=
+X-Received: by 2002:a19:ac04:: with SMTP id g4mr3546566lfc.63.1572376467423;
+ Tue, 29 Oct 2019 12:14:27 -0700 (PDT)
+MIME-Version: 1.0
+References: <20191029173755.27149-1-ardb@kernel.org> <20191029173755.27149-4-ardb@kernel.org>
+In-Reply-To: <20191029173755.27149-4-ardb@kernel.org>
+From:   Bhupesh Sharma <bhsharma@redhat.com>
+Date:   Wed, 30 Oct 2019 00:44:14 +0530
+Message-ID: <CACi5LpMAagnn_yEmqRBGfxJFZcAUzohU30NACeGvdXaHFZwAMA@mail.gmail.com>
+Subject: Re: [PATCH v2 3/6] efi/random: treat EFI_RNG_PROTOCOL output as
+ bootloader randomness
+To:     Ard Biesheuvel <ardb@kernel.org>
+Cc:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Dominik Brodowski <linux@dominikbrodowski.net>,
         Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH v2 1/6] efi: Make CONFIG_EFI_RCI2_TABLE selectable on x86 only
-Date:   Tue, 29 Oct 2019 18:37:50 +0100
-Message-Id: <20191029173755.27149-2-ardb@kernel.org>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20191029173755.27149-1-ardb@kernel.org>
-References: <20191029173755.27149-1-ardb@kernel.org>
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+X-MC-Unique: D66aXY2-Nw-SymNVYgXhfg-1
+X-Mimecast-Spam-Score: 0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Narendra K <Narendra.K@dell.com>
+Hi Ard,
 
-For the EFI_RCI2_TABLE kconfig option, 'make oldconfig' asks the user
-for input on platforms where the option may not be applicable. This patch
-modifies the kconfig option to ask the user for input only when CONFIG_X86
-or CONFIG_COMPILE_TEST is set to y.
+On Tue, Oct 29, 2019 at 11:10 PM Ard Biesheuvel <ardb@kernel.org> wrote:
+>
+> From: Dominik Brodowski <linux@dominikbrodowski.net>
+>
+> Commit 428826f5358c ("fdt: add support for rng-seed") introduced
+> add_bootloader_randomness(), permitting randomness provided by the
+> bootloader or firmware to be credited as entropy. However, the fact
+> that the UEFI support code was already wired into the RNG subsystem
+> via a call to add_device_randomness() was overlooked, and so it was
+> not converted at the same time.
+>
+> Note that this UEFI (v2.4 or newer) feature is currently only
+> implemented for EFI stub booting on ARM, and further note that
+> CONFIG_RANDOM_TRUST_BOOTLOADER must be enabled, and this should be
+> done only if there indeed is sufficient trust in the bootloader
+> _and_ its source of randomness.
+>
+> Signed-off-by: Dominik Brodowski <linux@dominikbrodowski.net>
+> [ardb: update commit log]
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-Reported-by: Geert Uytterhoeven <geert@linux-m68k.org>
-Suggested-by: Geert Uytterhoeven <geert@linux-m68k.org>
-Tested-by: Geert Uytterhoeven <geert+renesas@glider.be>
-Signed-off-by: Narendra K <Narendra.K@dell.com>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
- drivers/firmware/efi/Kconfig | 1 +
- 1 file changed, 1 insertion(+)
+Seems my Tested-by was dropped which I provide for the RFC version of
+this patch.
+See <https://www.mail-archive.com/linux-efi@vger.kernel.org/msg12281.html>
+for details.
 
-diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-index 178ee8106828..b248870a9806 100644
---- a/drivers/firmware/efi/Kconfig
-+++ b/drivers/firmware/efi/Kconfig
-@@ -182,6 +182,7 @@ config RESET_ATTACK_MITIGATION
- 
- config EFI_RCI2_TABLE
- 	bool "EFI Runtime Configuration Interface Table Version 2 Support"
-+	depends on X86 || COMPILE_TEST
- 	help
- 	  Displays the content of the Runtime Configuration Interface
- 	  Table version 2 on Dell EMC PowerEdge systems as a binary
--- 
-2.17.1
+I can provide a similar Tested-by for this version as well.
+
+Thanks,
+Bhupesh
+
+
+> ---
+>  drivers/firmware/efi/efi.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+> index 69f00f7453a3..e98bbf8e56d9 100644
+> --- a/drivers/firmware/efi/efi.c
+> +++ b/drivers/firmware/efi/efi.c
+> @@ -554,7 +554,7 @@ int __init efi_config_parse_tables(void *config_table=
+s, int count, int sz,
+>                                               sizeof(*seed) + size);
+>                         if (seed !=3D NULL) {
+>                                 pr_notice("seeding entropy pool\n");
+> -                               add_device_randomness(seed->bits, seed->s=
+ize);
+> +                               add_bootloader_randomness(seed->bits, see=
+d->size);
+>                                 early_memunmap(seed, sizeof(*seed) + size=
+);
+>                         } else {
+>                                 pr_err("Could not map UEFI random seed!\n=
+");
+> --
+> 2.17.1
+>
 
