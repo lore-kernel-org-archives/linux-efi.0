@@ -7,45 +7,46 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 01D89CA9EC4
-	for <linux-efi@archiver.kernel.org>; Tue, 29 Oct 2019 17:39:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B2025CA9EC3
+	for <linux-efi@archiver.kernel.org>; Tue, 29 Oct 2019 17:39:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id CFAF620856
-	for <linux-efi@archiver.kernel.org>; Tue, 29 Oct 2019 17:39:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8C5082173E
+	for <linux-efi@archiver.kernel.org>; Tue, 29 Oct 2019 17:39:17 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1572370751;
-	bh=5JAEhpTmrGeng4o8SZlsF0+eWo/frFdlcFrUqJ8GBk8=;
+	s=default; t=1572370757;
+	bh=X3ehY7Q4jyB/cxVp+V5vhcNdWc86hx666eHOj+aMPs4=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=ZvJqcHNSxnXuZJtyHRqcQJxdRLaecqUSgevdU52IWGmC56V2cS30i1qLx56OWrBM7
-	 lpesZEblccCDwl8v1ftnqMI7Qn+9xJcRl6u8UJEPJtsBzrz2OqDXwDVtCyf+lqWrtV
-	 lHT/PpEZylqwNHLd+I+LkGL3VdAybBhQWV44zRx4=
+	b=eu50LA3fv9H+5osP5DslZfrJak4pStcvXGqnpALWyo3VqtqXemq95Fezi2a8xZu+J
+	 Kgfi2bKfdnIvxf39GbpWofrbj/dnp7a5bQFLtNkAR2b8/pUTKT3rmlU07VXwhy5U3s
+	 WG0M1tDiIp+VTYZ4lqOy2GIO00FwqAICvFLUKymA=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728957AbfJ2RjL (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 29 Oct 2019 13:39:11 -0400
-Received: from mail.kernel.org ([198.145.29.99]:53168 "EHLO mail.kernel.org"
+        id S1729052AbfJ2RjR (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 29 Oct 2019 13:39:17 -0400
+Received: from mail.kernel.org ([198.145.29.99]:53202 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728917AbfJ2RjL (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Tue, 29 Oct 2019 13:39:11 -0400
+        id S1729226AbfJ2RjQ (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Tue, 29 Oct 2019 13:39:16 -0400
 Received: from e123331-lin.home (lfbn-mar-1-643-104.w90-118.abo.wanadoo.fr [90.118.215.104])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id CECF421721;
-        Tue, 29 Oct 2019 17:39:08 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 578C420856;
+        Tue, 29 Oct 2019 17:39:13 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1572370750;
-        bh=5JAEhpTmrGeng4o8SZlsF0+eWo/frFdlcFrUqJ8GBk8=;
+        s=default; t=1572370755;
+        bh=X3ehY7Q4jyB/cxVp+V5vhcNdWc86hx666eHOj+aMPs4=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=vv0PYDMraLkh4sDr3+6X1vwPIopcRMaMBnkph91GAN+rMrEgqREA5hPDq/t/fv360
-         MZNSQVT1uHv+5LbQNbe/3ejZgIPtM+fm3gWHW6lCR5dmYEFrdWtcixAdrnmnKd+RSb
-         bGmOXLWSU4/h0fmfwGd1F9sTC05aj4LAcsiZnGaA=
+        b=oHsD6GNjn3gq7fC84d0L1YkvHnHVJTr8UWLlntuqwtL/NrTJzWaGRFxu3XX0Xi8ML
+         vZ4KGGeHIvPk6DgsrejOKcEcX91oC5uu/XJL3G1HzgqrCkNFeE+DvMu7Xi50xJ7EQ4
+         pY2/C/6xr6PM5bt0NWfftzV8QhSOQ+D9dH9HFvkU=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
-Cc:     Ard Biesheuvel <ard.biesheuvel@linaro.org>,
+Cc:     Javier Martinez Canillas <javierm@redhat.com>,
+        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v2 4/6] efi: libstub/arm: account for firmware reserved memory at the base of RAM
-Date:   Tue, 29 Oct 2019 18:37:53 +0100
-Message-Id: <20191029173755.27149-5-ardb@kernel.org>
+Subject: [PATCH v2 6/6] efi/efi_test: lock down /dev/efi_test and require CAP_SYS_ADMIN
+Date:   Tue, 29 Oct 2019 18:37:55 +0100
+Message-Id: <20191029173755.27149-7-ardb@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20191029173755.27149-1-ardb@kernel.org>
 References: <20191029173755.27149-1-ardb@kernel.org>
@@ -54,89 +55,85 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+From: Javier Martinez Canillas <javierm@redhat.com>
 
-The EFI stubloader for ARM starts out by allocating a 32 MB window
-at the base of RAM, in order to ensure that the decompressor (which
-blindly copies the uncompressed kernel into that window) does not
-overwrite other allocations that are made while running in the context
-of the EFI firmware.
+The driver exposes EFI runtime services to user-space through an IOCTL
+interface, calling the EFI services function pointers directly without
+using the efivar API.
 
-In some cases, (e.g., U-Boot running on the Raspberry Pi 2), this is
-causing boot failures because this initial allocation conflicts with
-a page of reserved memory at the base of RAM that contains the SMP spin
-tables and other pieces of firmware data and which was put there by
-the bootloader under the assumption that the TEXT_OFFSET window right
-below the kernel is only used partially during early boot, and will be
-left alone once the memory reservations are processed and taken into
-account.
+Disallow access to the /dev/efi_test character device when the kernel is
+locked down to prevent arbitrary user-space to call EFI runtime services.
 
-So let's permit reserved memory regions to exist in the region starting
-at the base of RAM, and ending at TEXT_OFFSET - 5 * PAGE_SIZE, which is
-the window below the kernel that is not touched by the early boot code.
+Also require CAP_SYS_ADMIN to open the chardev to prevent unprivileged
+users to call the EFI runtime services, instead of just relying on the
+chardev file mode bits for this.
 
-Acked-by: Chester Lin <clin@suse.com>
-Tested-by: Guillaume Gardet <Guillaume.Gardet@arm.com>
+The main user of this driver is the fwts [0] tool that already checks if
+the effective user ID is 0 and fails otherwise. So this change shouldn't
+cause any regression to this tool.
+
+[0]: https://wiki.ubuntu.com/FirmwareTestSuite/Reference/uefivarinfo
+
+Signed-off-by: Javier Martinez Canillas <javierm@redhat.com>
+Acked-by: Laszlo Ersek <lersek@redhat.com>
+Acked-by: Matthew Garrett <mjg59@google.com>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- drivers/firmware/efi/libstub/Makefile     |  1 +
- drivers/firmware/efi/libstub/arm32-stub.c | 16 +++++++++++++---
- 2 files changed, 14 insertions(+), 3 deletions(-)
+ drivers/firmware/efi/test/efi_test.c | 8 ++++++++
+ include/linux/security.h             | 1 +
+ security/lockdown/lockdown.c         | 1 +
+ 3 files changed, 10 insertions(+)
 
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index 0460c7581220..ee0661ddb25b 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -52,6 +52,7 @@ lib-$(CONFIG_EFI_ARMSTUB)	+= arm-stub.o fdt.o string.o random.o \
+diff --git a/drivers/firmware/efi/test/efi_test.c b/drivers/firmware/efi/test/efi_test.c
+index 877745c3aaf2..7baf48c01e72 100644
+--- a/drivers/firmware/efi/test/efi_test.c
++++ b/drivers/firmware/efi/test/efi_test.c
+@@ -14,6 +14,7 @@
+ #include <linux/init.h>
+ #include <linux/proc_fs.h>
+ #include <linux/efi.h>
++#include <linux/security.h>
+ #include <linux/slab.h>
+ #include <linux/uaccess.h>
  
- lib-$(CONFIG_ARM)		+= arm32-stub.o
- lib-$(CONFIG_ARM64)		+= arm64-stub.o
-+CFLAGS_arm32-stub.o		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
- CFLAGS_arm64-stub.o		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
+@@ -717,6 +718,13 @@ static long efi_test_ioctl(struct file *file, unsigned int cmd,
  
- #
-diff --git a/drivers/firmware/efi/libstub/arm32-stub.c b/drivers/firmware/efi/libstub/arm32-stub.c
-index e8f7aefb6813..ffa242ad0a82 100644
---- a/drivers/firmware/efi/libstub/arm32-stub.c
-+++ b/drivers/firmware/efi/libstub/arm32-stub.c
-@@ -195,6 +195,7 @@ efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
- 				 unsigned long dram_base,
- 				 efi_loaded_image_t *image)
+ static int efi_test_open(struct inode *inode, struct file *file)
  {
-+	unsigned long kernel_base;
- 	efi_status_t status;
- 
- 	/*
-@@ -204,9 +205,18 @@ efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
- 	 * loaded. These assumptions are made by the decompressor,
- 	 * before any memory map is available.
- 	 */
--	dram_base = round_up(dram_base, SZ_128M);
-+	kernel_base = round_up(dram_base, SZ_128M);
- 
--	status = reserve_kernel_base(sys_table, dram_base, reserve_addr,
-+	/*
-+	 * Note that some platforms (notably, the Raspberry Pi 2) put
-+	 * spin-tables and other pieces of firmware at the base of RAM,
-+	 * abusing the fact that the window of TEXT_OFFSET bytes at the
-+	 * base of the kernel image is only partially used at the moment.
-+	 * (Up to 5 pages are used for the swapper page tables)
-+	 */
-+	kernel_base += TEXT_OFFSET - 5 * PAGE_SIZE;
++	int ret = security_locked_down(LOCKDOWN_EFI_TEST);
 +
-+	status = reserve_kernel_base(sys_table, kernel_base, reserve_addr,
- 				     reserve_size);
- 	if (status != EFI_SUCCESS) {
- 		pr_efi_err(sys_table, "Unable to allocate memory for uncompressed kernel.\n");
-@@ -220,7 +230,7 @@ efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
- 	*image_size = image->image_size;
- 	status = efi_relocate_kernel(sys_table, image_addr, *image_size,
- 				     *image_size,
--				     dram_base + MAX_UNCOMP_KERNEL_SIZE, 0);
-+				     kernel_base + MAX_UNCOMP_KERNEL_SIZE, 0);
- 	if (status != EFI_SUCCESS) {
- 		pr_efi_err(sys_table, "Failed to relocate kernel.\n");
- 		efi_free(sys_table, *reserve_size, *reserve_addr);
++	if (ret)
++		return ret;
++
++	if (!capable(CAP_SYS_ADMIN))
++		return -EACCES;
+ 	/*
+ 	 * nothing special to do here
+ 	 * We do accept multiple open files at the same time as we
+diff --git a/include/linux/security.h b/include/linux/security.h
+index a8d59d612d27..9df7547afc0c 100644
+--- a/include/linux/security.h
++++ b/include/linux/security.h
+@@ -105,6 +105,7 @@ enum lockdown_reason {
+ 	LOCKDOWN_NONE,
+ 	LOCKDOWN_MODULE_SIGNATURE,
+ 	LOCKDOWN_DEV_MEM,
++	LOCKDOWN_EFI_TEST,
+ 	LOCKDOWN_KEXEC,
+ 	LOCKDOWN_HIBERNATION,
+ 	LOCKDOWN_PCI_ACCESS,
+diff --git a/security/lockdown/lockdown.c b/security/lockdown/lockdown.c
+index 8a10b43daf74..40b790536def 100644
+--- a/security/lockdown/lockdown.c
++++ b/security/lockdown/lockdown.c
+@@ -20,6 +20,7 @@ static const char *const lockdown_reasons[LOCKDOWN_CONFIDENTIALITY_MAX+1] = {
+ 	[LOCKDOWN_NONE] = "none",
+ 	[LOCKDOWN_MODULE_SIGNATURE] = "unsigned module loading",
+ 	[LOCKDOWN_DEV_MEM] = "/dev/mem,kmem,port",
++	[LOCKDOWN_EFI_TEST] = "/dev/efi_test access",
+ 	[LOCKDOWN_KEXEC] = "kexec of unsigned images",
+ 	[LOCKDOWN_HIBERNATION] = "hibernation",
+ 	[LOCKDOWN_PCI_ACCESS] = "direct PCI access",
 -- 
 2.17.1
 
