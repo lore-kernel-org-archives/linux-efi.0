@@ -2,128 +2,87 @@ Return-Path: <SRS0=+8OP=YW=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PULL_REQUEST,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B9D4CA9EAE
-	for <linux-efi@archiver.kernel.org>; Tue, 29 Oct 2019 17:39:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B87D4CA9EAE
+	for <linux-efi@archiver.kernel.org>; Tue, 29 Oct 2019 17:39:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 21C0E21479
-	for <linux-efi@archiver.kernel.org>; Tue, 29 Oct 2019 17:39:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 91BC920856
+	for <linux-efi@archiver.kernel.org>; Tue, 29 Oct 2019 17:39:11 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1572370743;
-	bh=TZP5RGLTh46FKw2IHMHKaCfLhrDgBMwi+Av69vqWVBI=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=k2APZTfDo1t535suixFwr9lZC0rA2JsIgB378I8OjYTA8ihZr2ZRLAWno2yKo8Gjm
-	 63wvj1BThEwuRP2V/+Ledg59AfJpmo+FHOg+RvewR5v6ty+CAcl40ozeSe1tjr2kWm
-	 G3A73HboidImt9TNJ+eGpKvgQE/tvMa6AXjh2iLY=
+	s=default; t=1572370751;
+	bh=GBeza5p8WGEvTqzWSjJUDKX9RvIIFgkMR8VvUvUMP2Y=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=Yfp9kdbpwIlIhDylhaeGXHtJcQxFGPBQb9/b5gtYC2x+Oa/ex95tCXxNvY9jXe9dl
+	 GQf2AiZjKH9S/FU4PtKCcZCgBM4IuKCE9F2dY4tP0m3VgPOfkPObzTVfoAUl17JgzW
+	 bZxixOmqq6gySvj2P8bSK6UpiMk/4ennho6PohR8=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726740AbfJ2RjC (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 29 Oct 2019 13:39:02 -0400
-Received: from mail.kernel.org ([198.145.29.99]:52974 "EHLO mail.kernel.org"
+        id S1728275AbfJ2RjH (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 29 Oct 2019 13:39:07 -0400
+Received: from mail.kernel.org ([198.145.29.99]:53072 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726068AbfJ2RjC (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Tue, 29 Oct 2019 13:39:02 -0400
+        id S1726068AbfJ2RjG (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Tue, 29 Oct 2019 13:39:06 -0400
 Received: from e123331-lin.home (lfbn-mar-1-643-104.w90-118.abo.wanadoo.fr [90.118.215.104])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 4650920679;
-        Tue, 29 Oct 2019 17:38:57 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 6D4FD208E3;
+        Tue, 29 Oct 2019 17:39:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1572370741;
-        bh=TZP5RGLTh46FKw2IHMHKaCfLhrDgBMwi+Av69vqWVBI=;
-        h=From:To:Cc:Subject:Date:From;
-        b=xI/+BecBR5HnXNvy8BbJdxAEdOyoAxaUe6muUdJJM9yVStcxohIbweKxu1OlpumIl
-         pyquMZCS2cdeQViNLLKqF5YTPMZm8x1fgKVykCXm2uXesKHHH0UsHy3yex+NsYlBuL
-         rgzZ/rypjQ2EmSB39WLO8+mRVsRy0kWA1u7UmXuM=
+        s=default; t=1572370746;
+        bh=GBeza5p8WGEvTqzWSjJUDKX9RvIIFgkMR8VvUvUMP2Y=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=bOxUEvSJkDU0GBuWyEMx0SaHO4nEupao0qdBOAT6Wu48CJRJPUFmLWAd1Z75GMpMO
+         MBhA2SNJJffeHkGsVyFSCkS6kMB94mxdSwMF5zF0TWI6khDSn+3zc7sz5Pz5oewoD0
+         ttXyY7KDpCpVfcZyTrdDQWLxMTMrt2dHaNe2JnMg=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
-Cc:     Ard Biesheuvel <ardb@kernel.org>,
+Cc:     Jerry Snitselaar <jsnitsel@redhat.com>,
         Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        linux-kernel@vger.kernel.org, Chester Lin <clin@suse.com>,
-        Dan Carpenter <dan.carpenter@oracle.com>,
-        Dominik Brodowski <linux@dominikbrodowski.net>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Guillaume Gardet <Guillaume.Gardet@arm.com>,
-        Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>,
-        Javier Martinez Canillas <javierm@redhat.com>,
-        Jerry Snitselaar <jsnitsel@redhat.com>,
-        Kairui Song <kasong@redhat.com>,
-        Laszlo Ersek <lersek@redhat.com>,
-        Matthew Garrett <mjg59@google.com>,
-        Narendra K <Narendra.K@dell.com>
-Subject: [GIT PULL v2 0/6] EFI fixes for v5.4
-Date:   Tue, 29 Oct 2019 18:37:49 +0100
-Message-Id: <20191029173755.27149-1-ardb@kernel.org>
+        linux-kernel@vger.kernel.org
+Subject: [PATCH v2 2/6] efi/tpm: return -EINVAL when determining tpm final events log size fails
+Date:   Tue, 29 Oct 2019 18:37:51 +0100
+Message-Id: <20191029173755.27149-3-ardb@kernel.org>
 X-Mailer: git-send-email 2.17.1
+In-Reply-To: <20191029173755.27149-1-ardb@kernel.org>
+References: <20191029173755.27149-1-ardb@kernel.org>
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Ingo, Thomas,
+From: Jerry Snitselaar <jsnitsel@redhat.com>
 
-The v1 of this pull request/series was sent out last Wednesday, and
-appears to have slipped through the cracks. This is actually for the
-better, given that I had overlooked a patch that I had queued in the
-wrong place, so I have included it now for this v2.
+Currently nothing checks the return value of efi_tpm_eventlog_init,
+but in case that changes in the future make sure an error is
+returned when it fails to determine the tpm final events log
+size.
 
-Thanks,
-Ard.
+Fixes: e658c82be556 ("efi/tpm: Only set 'efi_tpm_final_log_size' after ...")
+Reviewed-by: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
+Suggested-by: Dan Carpenter <dan.carpenter@oracle.com>
+Signed-off-by: Jerry Snitselaar <jsnitsel@redhat.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ drivers/firmware/efi/tpm.c | 1 +
+ 1 file changed, 1 insertion(+)
 
+diff --git a/drivers/firmware/efi/tpm.c b/drivers/firmware/efi/tpm.c
+index ebd7977653a8..31f9f0e369b9 100644
+--- a/drivers/firmware/efi/tpm.c
++++ b/drivers/firmware/efi/tpm.c
+@@ -88,6 +88,7 @@ int __init efi_tpm_eventlog_init(void)
+ 
+ 	if (tbl_size < 0) {
+ 		pr_err(FW_BUG "Failed to parse event in TPM Final Events Log\n");
++		ret = -EINVAL;
+ 		goto out_calc;
+ 	}
+ 
+-- 
+2.17.1
 
-The following changes since commit 7d194c2100ad2a6dded545887d02754948ca5241:
-
-  Linux 5.4-rc4 (2019-10-20 15:56:22 -0400)
-
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-urgent
-
-for you to fetch changes up to 8a1022da89857a21556eb04f53d281eda94ef02d:
-
-  efi/efi_test: lock down /dev/efi_test and require CAP_SYS_ADMIN (2019-10-29 10:30:18 +0100)
-
-----------------------------------------------------------------
-Some more fixes for the EFI subsystem:
-- Prevent boot problems on HyperV due to incorrect placement of the kernel
-- Classify UEFI randomness as bootloader randomness
-- Fix EFI boot for the Raspberry Pi2 running U-boot
-- A capability/lockdown fix for the efi_test module.
-- Some more odd fixes.
-
-----------------------------------------------------------------
-Ard Biesheuvel (1):
-      efi: libstub/arm: account for firmware reserved memory at the base of RAM
-
-Dominik Brodowski (1):
-      efi/random: treat EFI_RNG_PROTOCOL output as bootloader randomness
-
-Javier Martinez Canillas (1):
-      efi/efi_test: lock down /dev/efi_test and require CAP_SYS_ADMIN
-
-Jerry Snitselaar (1):
-      efi/tpm: return -EINVAL when determining tpm final events log size fails
-
-Kairui Song (1):
-      x86, efi: never relocate kernel below lowest acceptable address
-
-Narendra K (1):
-      efi: Make CONFIG_EFI_RCI2_TABLE selectable on x86 only
-
- arch/x86/boot/compressed/eboot.c               |  4 +++-
- drivers/firmware/efi/Kconfig                   |  1 +
- drivers/firmware/efi/efi.c                     |  2 +-
- drivers/firmware/efi/libstub/Makefile          |  1 +
- drivers/firmware/efi/libstub/arm32-stub.c      | 16 +++++++++++++---
- drivers/firmware/efi/libstub/efi-stub-helper.c | 24 ++++++++++--------------
- drivers/firmware/efi/test/efi_test.c           |  8 ++++++++
- drivers/firmware/efi/tpm.c                     |  1 +
- include/linux/efi.h                            | 18 ++++++++++++++++--
- include/linux/security.h                       |  1 +
- security/lockdown/lockdown.c                   |  1 +
- 11 files changed, 56 insertions(+), 21 deletions(-)
