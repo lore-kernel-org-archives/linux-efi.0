@@ -7,44 +7,45 @@ X-Spam-Status: No, score=-11.8 required=3.0
 	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BDE52CA9ECB
-	for <linux-efi@archiver.kernel.org>; Thu, 31 Oct 2019 11:55:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D31CACA9ECB
+	for <linux-efi@archiver.kernel.org>; Thu, 31 Oct 2019 11:55:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 9BE6B2087F
-	for <linux-efi@archiver.kernel.org>; Thu, 31 Oct 2019 11:55:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B1DF2208C0
+	for <linux-efi@archiver.kernel.org>; Thu, 31 Oct 2019 11:55:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727581AbfJaLzh (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 31 Oct 2019 07:55:37 -0400
-Received: from Galois.linutronix.de ([193.142.43.55]:55508 "EHLO
+        id S1727335AbfJaLzi (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 31 Oct 2019 07:55:38 -0400
+Received: from Galois.linutronix.de ([193.142.43.55]:55510 "EHLO
         Galois.linutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727560AbfJaLzg (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 31 Oct 2019 07:55:36 -0400
+        with ESMTP id S1727576AbfJaLzi (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 31 Oct 2019 07:55:38 -0400
 Received: from [5.158.153.53] (helo=tip-bot2.lab.linutronix.de)
         by Galois.linutronix.de with esmtpsa (TLS1.2:DHE_RSA_AES_256_CBC_SHA256:256)
         (Exim 4.80)
         (envelope-from <tip-bot2@linutronix.de>)
-        id 1iQ933-0003CN-4R; Thu, 31 Oct 2019 12:55:29 +0100
+        id 1iQ933-0003Ac-Ho; Thu, 31 Oct 2019 12:55:29 +0100
 Received: from [127.0.1.1] (localhost [IPv6:::1])
-        by tip-bot2.lab.linutronix.de (Postfix) with ESMTP id AF3F01C04F3;
-        Thu, 31 Oct 2019 12:55:15 +0100 (CET)
-Date:   Thu, 31 Oct 2019 11:55:15 -0000
-From:   "tip-bot2 for Narendra K" <tip-bot2@linutronix.de>
+        by tip-bot2.lab.linutronix.de (Postfix) with ESMTP id C84BF1C03AD;
+        Thu, 31 Oct 2019 12:55:13 +0100 (CET)
+Date:   Thu, 31 Oct 2019 11:55:13 -0000
+From:   "tip-bot2 for Javier Martinez Canillas" <tip-bot2@linutronix.de>
 Reply-to: linux-kernel@vger.kernel.org
 To:     linux-tip-commits@vger.kernel.org
-Subject: [tip: efi/urgent] efi: Make CONFIG_EFI_RCI2_TABLE selectable on x86 only
-Cc:     Geert Uytterhoeven <geert@linux-m68k.org>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Narendra K <Narendra.K@dell.com>,
+Subject: [tip: efi/urgent] efi/efi_test: Lock down /dev/efi_test and require
+ CAP_SYS_ADMIN
+Cc:     Javier Martinez Canillas <javierm@redhat.com>,
         Ard Biesheuvel <ard.biesheuvel@linaro.org>,
+        Laszlo Ersek <lersek@redhat.com>,
+        Matthew Garrett <mjg59@google.com>,
         Linus Torvalds <torvalds@linux-foundation.org>,
         Peter Zijlstra <peterz@infradead.org>,
         Thomas Gleixner <tglx@linutronix.de>,
         linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Borislav Petkov <bp@alien8.de>, linux-kernel@vger.kernel.org
-In-Reply-To: <20191029173755.27149-2-ardb@kernel.org>
-References: <20191029173755.27149-2-ardb@kernel.org>
+In-Reply-To: <20191029173755.27149-7-ardb@kernel.org>
+References: <20191029173755.27149-7-ardb@kernel.org>
 MIME-Version: 1.0
-Message-ID: <157252291543.29376.8913809191549096088.tip-bot2@tip-bot2>
+Message-ID: <157252291350.29376.13774937345623386555.tip-bot2@tip-bot2>
 X-Mailer: tip-git-log-daemon
 Robot-ID: <tip-bot2.linutronix.de>
 Robot-Unsubscribe: Contact <mailto:tglx@linutronix.de> to get blacklisted from these emails
@@ -60,44 +61,95 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 The following commit has been merged into the efi/urgent branch of tip:
 
-Commit-ID:     0b6b30c65621fc11a799ca71241f52d8fd9e334c
-Gitweb:        https://git.kernel.org/tip/0b6b30c65621fc11a799ca71241f52d8fd9e334c
-Author:        Narendra K <Narendra.K@dell.com>
-AuthorDate:    Tue, 29 Oct 2019 18:37:50 +01:00
+Commit-ID:     359efcc2c910117d2faf704ce154e91fc976d37f
+Gitweb:        https://git.kernel.org/tip/359efcc2c910117d2faf704ce154e91fc976d37f
+Author:        Javier Martinez Canillas <javierm@redhat.com>
+AuthorDate:    Tue, 29 Oct 2019 18:37:55 +01:00
 Committer:     Ingo Molnar <mingo@kernel.org>
-CommitterDate: Thu, 31 Oct 2019 09:40:16 +01:00
+CommitterDate: Thu, 31 Oct 2019 09:40:21 +01:00
 
-efi: Make CONFIG_EFI_RCI2_TABLE selectable on x86 only
+efi/efi_test: Lock down /dev/efi_test and require CAP_SYS_ADMIN
 
-For the EFI_RCI2_TABLE Kconfig option, 'make oldconfig' asks the user
-for input on platforms where the option may not be applicable. This patch
-modifies the Kconfig option to ask the user for input only when CONFIG_X86
-or CONFIG_COMPILE_TEST is set to y.
+The driver exposes EFI runtime services to user-space through an IOCTL
+interface, calling the EFI services function pointers directly without
+using the efivar API.
 
-Suggested-by: Geert Uytterhoeven <geert@linux-m68k.org>
-Reported-by: Geert Uytterhoeven <geert@linux-m68k.org>
-Tested-by: Geert Uytterhoeven <geert+renesas@glider.be>
-Signed-off-by: Narendra K <Narendra.K@dell.com>
+Disallow access to the /dev/efi_test character device when the kernel is
+locked down to prevent arbitrary user-space to call EFI runtime services.
+
+Also require CAP_SYS_ADMIN to open the chardev to prevent unprivileged
+users to call the EFI runtime services, instead of just relying on the
+chardev file mode bits for this.
+
+The main user of this driver is the fwts [0] tool that already checks if
+the effective user ID is 0 and fails otherwise. So this change shouldn't
+cause any regression to this tool.
+
+[0]: https://wiki.ubuntu.com/FirmwareTestSuite/Reference/uefivarinfo
+
+Signed-off-by: Javier Martinez Canillas <javierm@redhat.com>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Acked-by: Laszlo Ersek <lersek@redhat.com>
+Acked-by: Matthew Garrett <mjg59@google.com>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>
 Cc: Peter Zijlstra <peterz@infradead.org>
 Cc: Thomas Gleixner <tglx@linutronix.de>
 Cc: linux-efi@vger.kernel.org
-Link: https://lkml.kernel.org/r/20191029173755.27149-2-ardb@kernel.org
+Link: https://lkml.kernel.org/r/20191029173755.27149-7-ardb@kernel.org
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 ---
- drivers/firmware/efi/Kconfig | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/firmware/efi/test/efi_test.c | 8 ++++++++
+ include/linux/security.h             | 1 +
+ security/lockdown/lockdown.c         | 1 +
+ 3 files changed, 10 insertions(+)
 
-diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-index 178ee81..b248870 100644
---- a/drivers/firmware/efi/Kconfig
-+++ b/drivers/firmware/efi/Kconfig
-@@ -182,6 +182,7 @@ config RESET_ATTACK_MITIGATION
+diff --git a/drivers/firmware/efi/test/efi_test.c b/drivers/firmware/efi/test/efi_test.c
+index 877745c..7baf48c 100644
+--- a/drivers/firmware/efi/test/efi_test.c
++++ b/drivers/firmware/efi/test/efi_test.c
+@@ -14,6 +14,7 @@
+ #include <linux/init.h>
+ #include <linux/proc_fs.h>
+ #include <linux/efi.h>
++#include <linux/security.h>
+ #include <linux/slab.h>
+ #include <linux/uaccess.h>
  
- config EFI_RCI2_TABLE
- 	bool "EFI Runtime Configuration Interface Table Version 2 Support"
-+	depends on X86 || COMPILE_TEST
- 	help
- 	  Displays the content of the Runtime Configuration Interface
- 	  Table version 2 on Dell EMC PowerEdge systems as a binary
+@@ -717,6 +718,13 @@ static long efi_test_ioctl(struct file *file, unsigned int cmd,
+ 
+ static int efi_test_open(struct inode *inode, struct file *file)
+ {
++	int ret = security_locked_down(LOCKDOWN_EFI_TEST);
++
++	if (ret)
++		return ret;
++
++	if (!capable(CAP_SYS_ADMIN))
++		return -EACCES;
+ 	/*
+ 	 * nothing special to do here
+ 	 * We do accept multiple open files at the same time as we
+diff --git a/include/linux/security.h b/include/linux/security.h
+index a8d59d6..9df7547 100644
+--- a/include/linux/security.h
++++ b/include/linux/security.h
+@@ -105,6 +105,7 @@ enum lockdown_reason {
+ 	LOCKDOWN_NONE,
+ 	LOCKDOWN_MODULE_SIGNATURE,
+ 	LOCKDOWN_DEV_MEM,
++	LOCKDOWN_EFI_TEST,
+ 	LOCKDOWN_KEXEC,
+ 	LOCKDOWN_HIBERNATION,
+ 	LOCKDOWN_PCI_ACCESS,
+diff --git a/security/lockdown/lockdown.c b/security/lockdown/lockdown.c
+index 8a10b43..40b7905 100644
+--- a/security/lockdown/lockdown.c
++++ b/security/lockdown/lockdown.c
+@@ -20,6 +20,7 @@ static const char *const lockdown_reasons[LOCKDOWN_CONFIDENTIALITY_MAX+1] = {
+ 	[LOCKDOWN_NONE] = "none",
+ 	[LOCKDOWN_MODULE_SIGNATURE] = "unsigned module loading",
+ 	[LOCKDOWN_DEV_MEM] = "/dev/mem,kmem,port",
++	[LOCKDOWN_EFI_TEST] = "/dev/efi_test access",
+ 	[LOCKDOWN_KEXEC] = "kexec of unsigned images",
+ 	[LOCKDOWN_HIBERNATION] = "hibernation",
+ 	[LOCKDOWN_PCI_ACCESS] = "direct PCI access",
