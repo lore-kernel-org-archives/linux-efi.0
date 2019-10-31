@@ -4,48 +4,48 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B92DCA9EC3
-	for <linux-efi@archiver.kernel.org>; Thu, 31 Oct 2019 03:32:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B426CCA9EC3
+	for <linux-efi@archiver.kernel.org>; Thu, 31 Oct 2019 03:32:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 43E9D2080F
-	for <linux-efi@archiver.kernel.org>; Thu, 31 Oct 2019 03:32:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 955652080F
+	for <linux-efi@archiver.kernel.org>; Thu, 31 Oct 2019 03:32:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726524AbfJaDcS (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 30 Oct 2019 23:32:18 -0400
-Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:33248 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726897AbfJaDb5 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 30 Oct 2019 23:31:57 -0400
-Received: from pps.filterd (m0098410.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.27/8.16.0.27) with SMTP id x9V3ReXC024196
-        for <linux-efi@vger.kernel.org>; Wed, 30 Oct 2019 23:31:56 -0400
-Received: from e06smtp02.uk.ibm.com (e06smtp02.uk.ibm.com [195.75.94.98])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 2vyhyw9x3a-1
+        id S1726825AbfJaDbw (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 30 Oct 2019 23:31:52 -0400
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:45560 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726414AbfJaDbv (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 30 Oct 2019 23:31:51 -0400
+Received: from pps.filterd (m0098421.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.27/8.16.0.27) with SMTP id x9V3ReKY081162
+        for <linux-efi@vger.kernel.org>; Wed, 30 Oct 2019 23:31:51 -0400
+Received: from e06smtp03.uk.ibm.com (e06smtp03.uk.ibm.com [195.75.94.99])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 2vyqk1g9qn-1
         (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <linux-efi@vger.kernel.org>; Wed, 30 Oct 2019 23:31:56 -0400
+        for <linux-efi@vger.kernel.org>; Wed, 30 Oct 2019 23:31:50 -0400
 Received: from localhost
-        by e06smtp02.uk.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        by e06smtp03.uk.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
         for <linux-efi@vger.kernel.org> from <zohar@linux.ibm.com>;
-        Thu, 31 Oct 2019 03:31:54 -0000
-Received: from b06cxnps4076.portsmouth.uk.ibm.com (9.149.109.198)
-        by e06smtp02.uk.ibm.com (192.168.101.132) with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted;
+        Thu, 31 Oct 2019 03:31:49 -0000
+Received: from b06avi18626390.portsmouth.uk.ibm.com (9.149.26.192)
+        by e06smtp03.uk.ibm.com (192.168.101.133) with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted;
         (version=TLSv1/SSLv3 cipher=AES256-GCM-SHA384 bits=256/256)
-        Thu, 31 Oct 2019 03:31:50 -0000
+        Thu, 31 Oct 2019 03:31:45 -0000
 Received: from b06wcsmtp001.portsmouth.uk.ibm.com (b06wcsmtp001.portsmouth.uk.ibm.com [9.149.105.160])
-        by b06cxnps4076.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id x9V3VmAX49283176
+        by b06avi18626390.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id x9V3V9VF40829428
         (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 31 Oct 2019 03:31:49 GMT
+        Thu, 31 Oct 2019 03:31:09 GMT
 Received: from b06wcsmtp001.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id D4747A405C;
-        Thu, 31 Oct 2019 03:31:48 +0000 (GMT)
+        by IMSVA (Postfix) with ESMTP id 8B453A4054;
+        Thu, 31 Oct 2019 03:31:43 +0000 (GMT)
 Received: from b06wcsmtp001.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 3B11CA405B;
-        Thu, 31 Oct 2019 03:31:47 +0000 (GMT)
+        by IMSVA (Postfix) with ESMTP id 15CA8A4062;
+        Thu, 31 Oct 2019 03:31:42 +0000 (GMT)
 Received: from localhost.ibm.com (unknown [9.85.201.217])
         by b06wcsmtp001.portsmouth.uk.ibm.com (Postfix) with ESMTP;
-        Thu, 31 Oct 2019 03:31:47 +0000 (GMT)
+        Thu, 31 Oct 2019 03:31:41 +0000 (GMT)
 From:   Mimi Zohar <zohar@linux.ibm.com>
 To:     linuxppc-dev@ozlabs.org, linux-efi@vger.kernel.org,
         linux-integrity@vger.kernel.org
@@ -58,16 +58,16 @@ Cc:     Nayna Jain <nayna@linux.ibm.com>, linux-kernel@vger.kernel.org,
         Eric Ricther <erichte@linux.ibm.com>,
         "Oliver O'Halloran" <oohall@gmail.com>,
         Mimi Zohar <zohar@linux.ibm.com>
-Subject: [PATCH v10 5/9] ima: make process_buffer_measurement() generic
-Date:   Wed, 30 Oct 2019 23:31:30 -0400
+Subject: [PATCH v10 2/9] powerpc/ima: add support to initialize ima policy rules
+Date:   Wed, 30 Oct 2019 23:31:27 -0400
 X-Mailer: git-send-email 2.7.5
 In-Reply-To: <1572492694-6520-1-git-send-email-zohar@linux.ibm.com>
 References: <1572492694-6520-1-git-send-email-zohar@linux.ibm.com>
 X-TM-AS-GCONF: 00
-x-cbid: 19103103-0008-0000-0000-000003295393
+x-cbid: 19103103-0012-0000-0000-0000035F54EE
 X-IBM-AV-DETECTION: SAVI=unused REMOTE=unused XFE=unused
-x-cbparentid: 19103103-0009-0000-0000-00004A489CB1
-Message-Id: <1572492694-6520-6-git-send-email-zohar@linux.ibm.com>
+x-cbparentid: 19103103-0013-0000-0000-0000219A9D43
+Message-Id: <1572492694-6520-3-git-send-email-zohar@linux.ibm.com>
 X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:,, definitions=2019-10-31_01:,,
  signatures=0
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
@@ -82,140 +82,115 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Nayna Jain <nayna@linux.ibm.com>
 
-process_buffer_measurement() is limited to measuring the kexec boot
-command line. This patch makes process_buffer_measurement() more
-generic, allowing it to measure other types of buffer data (e.g.
-blacklisted binary hashes or key hashes).
+PowerNV systems use a Linux-based bootloader, which rely on the IMA
+subsystem to enforce different secure boot modes.  Since the verification
+policy may differ based on the secure boot mode of the system, the
+policies must be defined at runtime.
 
-process_buffer_measurement() may be called directly from an IMA
-hook or as an auxiliary measurement record. In both cases the buffer
-measurement is based on policy. This patch modifies the function to
-conditionally retrieve the policy defined PCR and template for the IMA
-hook case.
+This patch implements arch-specific support to define IMA policy
+rules based on the runtime secure boot mode of the system.
+
+This patch provides arch-specific IMA policies if PPC_SECURE_BOOT
+config is enabled.
 
 Signed-off-by: Nayna Jain <nayna@linux.ibm.com>
-[zohar@linux.ibm.com: added comment in process_buffer_measurement()]
 Signed-off-by: Mimi Zohar <zohar@linux.ibm.com>
 ---
- security/integrity/ima/ima.h      |  3 ++
- security/integrity/ima/ima_main.c | 58 +++++++++++++++++++++++++++------------
- 2 files changed, 43 insertions(+), 18 deletions(-)
+ arch/powerpc/Kconfig           |  1 +
+ arch/powerpc/kernel/Makefile   |  2 +-
+ arch/powerpc/kernel/ima_arch.c | 43 ++++++++++++++++++++++++++++++++++++++++++
+ include/linux/ima.h            |  3 ++-
+ 4 files changed, 47 insertions(+), 2 deletions(-)
+ create mode 100644 arch/powerpc/kernel/ima_arch.c
 
-diff --git a/security/integrity/ima/ima.h b/security/integrity/ima/ima.h
-index 3689081aaf38..a65772ffa427 100644
---- a/security/integrity/ima/ima.h
-+++ b/security/integrity/ima/ima.h
-@@ -217,6 +217,9 @@ void ima_store_measurement(struct integrity_iint_cache *iint, struct file *file,
- 			   struct evm_ima_xattr_data *xattr_value,
- 			   int xattr_len, const struct modsig *modsig, int pcr,
- 			   struct ima_template_desc *template_desc);
-+void process_buffer_measurement(const void *buf, int size,
-+				const char *eventname, enum ima_hooks func,
-+				int pcr);
- void ima_audit_measurement(struct integrity_iint_cache *iint,
- 			   const unsigned char *filename);
- int ima_alloc_init_template(struct ima_event_data *event_data,
-diff --git a/security/integrity/ima/ima_main.c b/security/integrity/ima/ima_main.c
-index 60027c643ecd..a26e3ad4e886 100644
---- a/security/integrity/ima/ima_main.c
-+++ b/security/integrity/ima/ima_main.c
-@@ -626,14 +626,14 @@ int ima_load_data(enum kernel_load_data_id id)
-  * @buf: pointer to the buffer that needs to be added to the log.
-  * @size: size of buffer(in bytes).
-  * @eventname: event name to be used for the buffer entry.
-- * @cred: a pointer to a credentials structure for user validation.
-- * @secid: the secid of the task to be validated.
-+ * @func: IMA hook
-+ * @pcr: pcr to extend the measurement
-  *
-  * Based on policy, the buffer is measured into the ima log.
-  */
--static void process_buffer_measurement(const void *buf, int size,
--				       const char *eventname,
--				       const struct cred *cred, u32 secid)
-+void process_buffer_measurement(const void *buf, int size,
-+				const char *eventname, enum ima_hooks func,
-+				int pcr)
- {
- 	int ret = 0;
- 	struct ima_template_entry *entry = NULL;
-@@ -642,19 +642,45 @@ static void process_buffer_measurement(const void *buf, int size,
- 					    .filename = eventname,
- 					    .buf = buf,
- 					    .buf_len = size};
--	struct ima_template_desc *template_desc = NULL;
-+	struct ima_template_desc *template = NULL;
- 	struct {
- 		struct ima_digest_data hdr;
- 		char digest[IMA_MAX_DIGEST_SIZE];
- 	} hash = {};
- 	int violation = 0;
--	int pcr = CONFIG_IMA_MEASURE_PCR_IDX;
- 	int action = 0;
-+	u32 secid;
+diff --git a/arch/powerpc/Kconfig b/arch/powerpc/Kconfig
+index 56ea0019b616..c795039bdc73 100644
+--- a/arch/powerpc/Kconfig
++++ b/arch/powerpc/Kconfig
+@@ -938,6 +938,7 @@ config PPC_SECURE_BOOT
+ 	prompt "Enable secure boot support"
+ 	bool
+ 	depends on PPC_POWERNV
++	depends on IMA_ARCH_POLICY
+ 	help
+ 	  Systems with firmware secure boot enabled need to define security
+ 	  policies to extend secure boot to the OS. This config allows a user
+diff --git a/arch/powerpc/kernel/Makefile b/arch/powerpc/kernel/Makefile
+index e2a54fa240ac..e8eb2955b7d5 100644
+--- a/arch/powerpc/kernel/Makefile
++++ b/arch/powerpc/kernel/Makefile
+@@ -161,7 +161,7 @@ ifneq ($(CONFIG_PPC_POWERNV)$(CONFIG_PPC_SVM),)
+ obj-y				+= ucall.o
+ endif
  
--	action = ima_get_action(NULL, cred, secid, 0, KEXEC_CMDLINE, &pcr,
--				&template_desc);
--	if (!(action & IMA_MEASURE))
--		return;
-+	/*
-+	 * Both LSM hooks and auxilary based buffer measurements are
-+	 * based on policy.  To avoid code duplication, differentiate
-+	 * between the LSM hooks and auxilary buffer measurements,
-+	 * retrieving the policy rule information only for the LSM hook
-+	 * buffer measurements.
-+	 */
-+	if (func) {
-+		security_task_getsecid(current, &secid);
-+		action = ima_get_action(NULL, current_cred(), secid, 0, func,
-+					&pcr, &template);
-+		if (!(action & IMA_MEASURE))
-+			return;
-+	}
+-obj-$(CONFIG_PPC_SECURE_BOOT)	+= secure_boot.o
++obj-$(CONFIG_PPC_SECURE_BOOT)	+= secure_boot.o ima_arch.o
+ 
+ # Disable GCOV, KCOV & sanitizers in odd or sensitive code
+ GCOV_PROFILE_prom_init.o := n
+diff --git a/arch/powerpc/kernel/ima_arch.c b/arch/powerpc/kernel/ima_arch.c
+new file mode 100644
+index 000000000000..d88913dc0da7
+--- /dev/null
++++ b/arch/powerpc/kernel/ima_arch.c
+@@ -0,0 +1,43 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Copyright (C) 2019 IBM Corporation
++ * Author: Nayna Jain
++ */
 +
-+	if (!pcr)
-+		pcr = CONFIG_IMA_MEASURE_PCR_IDX;
++#include <linux/ima.h>
++#include <asm/secure_boot.h>
 +
-+	if (!template) {
-+		template = lookup_template_desc("ima-buf");
-+		ret = template_desc_init_fields(template->fmt,
-+						&(template->fields),
-+						&(template->num_fields));
-+		if (ret < 0) {
-+			pr_err("template %s init failed, result: %d\n",
-+			       (strlen(template->name) ?
-+				template->name : template->fmt), ret);
-+			return;
-+		}
-+	}
++bool arch_ima_get_secureboot(void)
++{
++	return is_ppc_secureboot_enabled();
++}
++
++/*
++ * The "secure_rules" are enabled only on "secureboot" enabled systems.
++ * These rules verify the file signatures against known good values.
++ * The "appraise_type=imasig|modsig" option allows the known good signature
++ * to be stored as an xattr or as an appended signature.
++ *
++ * To avoid duplicate signature verification as much as possible, the IMA
++ * policy rule for module appraisal is added only if CONFIG_MODULE_SIG_FORCE
++ * is not enabled.
++ */
++static const char *const secure_rules[] = {
++	"appraise func=KEXEC_KERNEL_CHECK appraise_type=imasig|modsig",
++#ifndef CONFIG_MODULE_SIG_FORCE
++	"appraise func=MODULE_CHECK appraise_type=imasig|modsig",
++#endif
++	NULL
++};
++
++/*
++ * Returns the relevant IMA arch-specific policies based on the system secure
++ * boot state.
++ */
++const char *const *arch_get_ima_policy(void)
++{
++	if (is_ppc_secureboot_enabled())
++		return secure_rules;
++
++	return NULL;
++}
+diff --git a/include/linux/ima.h b/include/linux/ima.h
+index 1c37f17f7203..6d904754d858 100644
+--- a/include/linux/ima.h
++++ b/include/linux/ima.h
+@@ -29,7 +29,8 @@ extern void ima_kexec_cmdline(const void *buf, int size);
+ extern void ima_add_kexec_buffer(struct kimage *image);
+ #endif
  
- 	iint.ima_hash = &hash.hdr;
- 	iint.ima_hash->algo = ima_hash_algo;
-@@ -664,7 +690,7 @@ static void process_buffer_measurement(const void *buf, int size,
- 	if (ret < 0)
- 		goto out;
- 
--	ret = ima_alloc_init_template(&event_data, &entry, template_desc);
-+	ret = ima_alloc_init_template(&event_data, &entry, template);
- 	if (ret < 0)
- 		goto out;
- 
-@@ -686,13 +712,9 @@ static void process_buffer_measurement(const void *buf, int size,
-  */
- void ima_kexec_cmdline(const void *buf, int size)
- {
--	u32 secid;
--
--	if (buf && size != 0) {
--		security_task_getsecid(current, &secid);
-+	if (buf && size != 0)
- 		process_buffer_measurement(buf, size, "kexec-cmdline",
--					   current_cred(), secid);
--	}
-+					   KEXEC_CMDLINE, 0);
- }
- 
- static int __init init_ima(void)
+-#if (defined(CONFIG_X86) && defined(CONFIG_EFI)) || defined(CONFIG_S390)
++#if (defined(CONFIG_X86) && defined(CONFIG_EFI)) || defined(CONFIG_S390) \
++	|| defined(CONFIG_PPC_SECURE_BOOT)
+ extern bool arch_ima_get_secureboot(void);
+ extern const char * const *arch_get_ima_policy(void);
+ #else
 -- 
 2.7.5
 
