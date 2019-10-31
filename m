@@ -7,44 +7,44 @@ X-Spam-Status: No, score=-11.8 required=3.0
 	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 22912CA9EC3
-	for <linux-efi@archiver.kernel.org>; Thu, 31 Oct 2019 11:56:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 24435CA9EC3
+	for <linux-efi@archiver.kernel.org>; Thu, 31 Oct 2019 11:56:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E7D29208C0
-	for <linux-efi@archiver.kernel.org>; Thu, 31 Oct 2019 11:56:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EC9422087F
+	for <linux-efi@archiver.kernel.org>; Thu, 31 Oct 2019 11:56:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727597AbfJaL4L (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 31 Oct 2019 07:56:11 -0400
-Received: from Galois.linutronix.de ([193.142.43.55]:55509 "EHLO
+        id S1726673AbfJaL4R (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 31 Oct 2019 07:56:17 -0400
+Received: from Galois.linutronix.de ([193.142.43.55]:55495 "EHLO
         Galois.linutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727570AbfJaLzh (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 31 Oct 2019 07:55:37 -0400
+        with ESMTP id S1727526AbfJaLze (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 31 Oct 2019 07:55:34 -0400
 Received: from [5.158.153.53] (helo=tip-bot2.lab.linutronix.de)
         by Galois.linutronix.de with esmtpsa (TLS1.2:DHE_RSA_AES_256_CBC_SHA256:256)
         (Exim 4.80)
         (envelope-from <tip-bot2@linutronix.de>)
-        id 1iQ931-0003BQ-BA; Thu, 31 Oct 2019 12:55:27 +0100
+        id 1iQ92z-0003B7-LM; Thu, 31 Oct 2019 12:55:25 +0100
 Received: from [127.0.1.1] (localhost [IPv6:::1])
-        by tip-bot2.lab.linutronix.de (Postfix) with ESMTP id 8AD231C0673;
+        by tip-bot2.lab.linutronix.de (Postfix) with ESMTP id 30DF41C0494;
         Thu, 31 Oct 2019 12:55:14 +0100 (CET)
-Date:   Thu, 31 Oct 2019 11:55:14 -0000
-From:   "tip-bot2 for Ard Biesheuvel" <tip-bot2@linutronix.de>
+Date:   Thu, 31 Oct 2019 11:55:13 -0000
+From:   "tip-bot2 for Kairui Song" <tip-bot2@linutronix.de>
 Reply-to: linux-kernel@vger.kernel.org
 To:     linux-tip-commits@vger.kernel.org
-Subject: [tip: efi/urgent] efi: libstub/arm: Account for firmware reserved
- memory at the base of RAM
-Cc:     Guillaume Gardet <Guillaume.Gardet@arm.com>,
+Subject: [tip: efi/urgent] x86, efi: Never relocate kernel below lowest
+ acceptable address
+Cc:     Kairui Song <kasong@redhat.com>,
         Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Chester Lin <clin@suse.com>,
+        Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>,
         Linus Torvalds <torvalds@linux-foundation.org>,
         Peter Zijlstra <peterz@infradead.org>,
         Thomas Gleixner <tglx@linutronix.de>,
         linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Borislav Petkov <bp@alien8.de>, linux-kernel@vger.kernel.org
-In-Reply-To: <20191029173755.27149-5-ardb@kernel.org>
-References: <20191029173755.27149-5-ardb@kernel.org>
+In-Reply-To: <20191029173755.27149-6-ardb@kernel.org>
+References: <20191029173755.27149-6-ardb@kernel.org>
 MIME-Version: 1.0
-Message-ID: <157252291426.29376.475960355315678836.tip-bot2@tip-bot2>
+Message-ID: <157252291389.29376.11703637548575936536.tip-bot2@tip-bot2>
 X-Mailer: tip-git-log-daemon
 Robot-ID: <tip-bot2.linutronix.de>
 Robot-Unsubscribe: Contact <mailto:tglx@linutronix.de> to get blacklisted from these emails
@@ -60,99 +60,192 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 The following commit has been merged into the efi/urgent branch of tip:
 
-Commit-ID:     41cd96fa149b29684ebd38759fefb07f9c7d5276
-Gitweb:        https://git.kernel.org/tip/41cd96fa149b29684ebd38759fefb07f9c7d5276
-Author:        Ard Biesheuvel <ard.biesheuvel@linaro.org>
-AuthorDate:    Tue, 29 Oct 2019 18:37:53 +01:00
+Commit-ID:     220dd7699c46d5940115bd797b01b2ab047c87b8
+Gitweb:        https://git.kernel.org/tip/220dd7699c46d5940115bd797b01b2ab047c87b8
+Author:        Kairui Song <kasong@redhat.com>
+AuthorDate:    Tue, 29 Oct 2019 18:37:54 +01:00
 Committer:     Ingo Molnar <mingo@kernel.org>
 CommitterDate: Thu, 31 Oct 2019 09:40:19 +01:00
 
-efi: libstub/arm: Account for firmware reserved memory at the base of RAM
+x86, efi: Never relocate kernel below lowest acceptable address
 
-The EFI stubloader for ARM starts out by allocating a 32 MB window
-at the base of RAM, in order to ensure that the decompressor (which
-blindly copies the uncompressed kernel into that window) does not
-overwrite other allocations that are made while running in the context
-of the EFI firmware.
+Currently, kernel fails to boot on some HyperV VMs when using EFI.
+And it's a potential issue on all x86 platforms.
 
-In some cases, (e.g., U-Boot running on the Raspberry Pi 2), this is
-causing boot failures because this initial allocation conflicts with
-a page of reserved memory at the base of RAM that contains the SMP spin
-tables and other pieces of firmware data and which was put there by
-the bootloader under the assumption that the TEXT_OFFSET window right
-below the kernel is only used partially during early boot, and will be
-left alone once the memory reservations are processed and taken into
-account.
+It's caused by broken kernel relocation on EFI systems, when below three
+conditions are met:
 
-So let's permit reserved memory regions to exist in the region starting
-at the base of RAM, and ending at TEXT_OFFSET - 5 * PAGE_SIZE, which is
-the window below the kernel that is not touched by the early boot code.
+1. Kernel image is not loaded to the default address (LOAD_PHYSICAL_ADDR)
+   by the loader.
+2. There isn't enough room to contain the kernel, starting from the
+   default load address (eg. something else occupied part the region).
+3. In the memmap provided by EFI firmware, there is a memory region
+   starts below LOAD_PHYSICAL_ADDR, and suitable for containing the
+   kernel.
 
-Tested-by: Guillaume Gardet <Guillaume.Gardet@arm.com>
+EFI stub will perform a kernel relocation when condition 1 is met. But
+due to condition 2, EFI stub can't relocate kernel to the preferred
+address, so it fallback to ask EFI firmware to alloc lowest usable memory
+region, got the low region mentioned in condition 3, and relocated
+kernel there.
+
+It's incorrect to relocate the kernel below LOAD_PHYSICAL_ADDR. This
+is the lowest acceptable kernel relocation address.
+
+The first thing goes wrong is in arch/x86/boot/compressed/head_64.S.
+Kernel decompression will force use LOAD_PHYSICAL_ADDR as the output
+address if kernel is located below it. Then the relocation before
+decompression, which move kernel to the end of the decompression buffer,
+will overwrite other memory region, as there is no enough memory there.
+
+To fix it, just don't let EFI stub relocate the kernel to any address
+lower than lowest acceptable address.
+
+[ ardb: introduce efi_low_alloc_above() to reduce the scope of the change ]
+
+Signed-off-by: Kairui Song <kasong@redhat.com>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Acked-by: Chester Lin <clin@suse.com>
+Acked-by: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>
 Cc: Peter Zijlstra <peterz@infradead.org>
 Cc: Thomas Gleixner <tglx@linutronix.de>
 Cc: linux-efi@vger.kernel.org
-Link: https://lkml.kernel.org/r/20191029173755.27149-5-ardb@kernel.org
+Link: https://lkml.kernel.org/r/20191029173755.27149-6-ardb@kernel.org
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 ---
- drivers/firmware/efi/libstub/Makefile     |  1 +
- drivers/firmware/efi/libstub/arm32-stub.c | 16 +++++++++++++---
- 2 files changed, 14 insertions(+), 3 deletions(-)
+ arch/x86/boot/compressed/eboot.c               |  4 ++-
+ drivers/firmware/efi/libstub/arm32-stub.c      |  2 +-
+ drivers/firmware/efi/libstub/efi-stub-helper.c | 24 +++++++----------
+ include/linux/efi.h                            | 18 +++++++++++--
+ 4 files changed, 30 insertions(+), 18 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index 0460c75..ee0661d 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -52,6 +52,7 @@ lib-$(CONFIG_EFI_ARMSTUB)	+= arm-stub.o fdt.o string.o random.o \
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index d6662fd..82bc60c 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -13,6 +13,7 @@
+ #include <asm/e820/types.h>
+ #include <asm/setup.h>
+ #include <asm/desc.h>
++#include <asm/boot.h>
  
- lib-$(CONFIG_ARM)		+= arm32-stub.o
- lib-$(CONFIG_ARM64)		+= arm64-stub.o
-+CFLAGS_arm32-stub.o		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
- CFLAGS_arm64-stub.o		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
- 
- #
+ #include "../string.h"
+ #include "eboot.h"
+@@ -813,7 +814,8 @@ efi_main(struct efi_config *c, struct boot_params *boot_params)
+ 		status = efi_relocate_kernel(sys_table, &bzimage_addr,
+ 					     hdr->init_size, hdr->init_size,
+ 					     hdr->pref_address,
+-					     hdr->kernel_alignment);
++					     hdr->kernel_alignment,
++					     LOAD_PHYSICAL_ADDR);
+ 		if (status != EFI_SUCCESS) {
+ 			efi_printk(sys_table, "efi_relocate_kernel() failed!\n");
+ 			goto fail;
 diff --git a/drivers/firmware/efi/libstub/arm32-stub.c b/drivers/firmware/efi/libstub/arm32-stub.c
-index e8f7aef..ffa242a 100644
+index ffa242a..41213bf 100644
 --- a/drivers/firmware/efi/libstub/arm32-stub.c
 +++ b/drivers/firmware/efi/libstub/arm32-stub.c
-@@ -195,6 +195,7 @@ efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
- 				 unsigned long dram_base,
- 				 efi_loaded_image_t *image)
- {
-+	unsigned long kernel_base;
- 	efi_status_t status;
- 
- 	/*
-@@ -204,9 +205,18 @@ efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
- 	 * loaded. These assumptions are made by the decompressor,
- 	 * before any memory map is available.
- 	 */
--	dram_base = round_up(dram_base, SZ_128M);
-+	kernel_base = round_up(dram_base, SZ_128M);
- 
--	status = reserve_kernel_base(sys_table, dram_base, reserve_addr,
-+	/*
-+	 * Note that some platforms (notably, the Raspberry Pi 2) put
-+	 * spin-tables and other pieces of firmware at the base of RAM,
-+	 * abusing the fact that the window of TEXT_OFFSET bytes at the
-+	 * base of the kernel image is only partially used at the moment.
-+	 * (Up to 5 pages are used for the swapper page tables)
-+	 */
-+	kernel_base += TEXT_OFFSET - 5 * PAGE_SIZE;
-+
-+	status = reserve_kernel_base(sys_table, kernel_base, reserve_addr,
- 				     reserve_size);
- 	if (status != EFI_SUCCESS) {
- 		pr_efi_err(sys_table, "Unable to allocate memory for uncompressed kernel.\n");
-@@ -220,7 +230,7 @@ efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
+@@ -230,7 +230,7 @@ efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
  	*image_size = image->image_size;
  	status = efi_relocate_kernel(sys_table, image_addr, *image_size,
  				     *image_size,
--				     dram_base + MAX_UNCOMP_KERNEL_SIZE, 0);
-+				     kernel_base + MAX_UNCOMP_KERNEL_SIZE, 0);
+-				     kernel_base + MAX_UNCOMP_KERNEL_SIZE, 0);
++				     kernel_base + MAX_UNCOMP_KERNEL_SIZE, 0, 0);
  	if (status != EFI_SUCCESS) {
  		pr_efi_err(sys_table, "Failed to relocate kernel.\n");
  		efi_free(sys_table, *reserve_size, *reserve_addr);
+diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+index 3caae7f..35dbc27 100644
+--- a/drivers/firmware/efi/libstub/efi-stub-helper.c
++++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+@@ -260,11 +260,11 @@ fail:
+ }
+ 
+ /*
+- * Allocate at the lowest possible address.
++ * Allocate at the lowest possible address that is not below 'min'.
+  */
+-efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
+-			   unsigned long size, unsigned long align,
+-			   unsigned long *addr)
++efi_status_t efi_low_alloc_above(efi_system_table_t *sys_table_arg,
++				 unsigned long size, unsigned long align,
++				 unsigned long *addr, unsigned long min)
+ {
+ 	unsigned long map_size, desc_size, buff_size;
+ 	efi_memory_desc_t *map;
+@@ -311,13 +311,8 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
+ 		start = desc->phys_addr;
+ 		end = start + desc->num_pages * EFI_PAGE_SIZE;
+ 
+-		/*
+-		 * Don't allocate at 0x0. It will confuse code that
+-		 * checks pointers against NULL. Skip the first 8
+-		 * bytes so we start at a nice even number.
+-		 */
+-		if (start == 0x0)
+-			start += 8;
++		if (start < min)
++			start = min;
+ 
+ 		start = round_up(start, align);
+ 		if ((start + size) > end)
+@@ -698,7 +693,8 @@ efi_status_t efi_relocate_kernel(efi_system_table_t *sys_table_arg,
+ 				 unsigned long image_size,
+ 				 unsigned long alloc_size,
+ 				 unsigned long preferred_addr,
+-				 unsigned long alignment)
++				 unsigned long alignment,
++				 unsigned long min_addr)
+ {
+ 	unsigned long cur_image_addr;
+ 	unsigned long new_addr = 0;
+@@ -731,8 +727,8 @@ efi_status_t efi_relocate_kernel(efi_system_table_t *sys_table_arg,
+ 	 * possible.
+ 	 */
+ 	if (status != EFI_SUCCESS) {
+-		status = efi_low_alloc(sys_table_arg, alloc_size, alignment,
+-				       &new_addr);
++		status = efi_low_alloc_above(sys_table_arg, alloc_size,
++					     alignment, &new_addr, min_addr);
+ 	}
+ 	if (status != EFI_SUCCESS) {
+ 		pr_efi_err(sys_table_arg, "Failed to allocate usable memory for kernel.\n");
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index bd38370..d87acf6 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1579,9 +1579,22 @@ char *efi_convert_cmdline(efi_system_table_t *sys_table_arg,
+ efi_status_t efi_get_memory_map(efi_system_table_t *sys_table_arg,
+ 				struct efi_boot_memmap *map);
+ 
++efi_status_t efi_low_alloc_above(efi_system_table_t *sys_table_arg,
++				 unsigned long size, unsigned long align,
++				 unsigned long *addr, unsigned long min);
++
++static inline
+ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
+ 			   unsigned long size, unsigned long align,
+-			   unsigned long *addr);
++			   unsigned long *addr)
++{
++	/*
++	 * Don't allocate at 0x0. It will confuse code that
++	 * checks pointers against NULL. Skip the first 8
++	 * bytes so we start at a nice even number.
++	 */
++	return efi_low_alloc_above(sys_table_arg, size, align, addr, 0x8);
++}
+ 
+ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
+ 			    unsigned long size, unsigned long align,
+@@ -1592,7 +1605,8 @@ efi_status_t efi_relocate_kernel(efi_system_table_t *sys_table_arg,
+ 				 unsigned long image_size,
+ 				 unsigned long alloc_size,
+ 				 unsigned long preferred_addr,
+-				 unsigned long alignment);
++				 unsigned long alignment,
++				 unsigned long min_addr);
+ 
+ efi_status_t handle_cmdline_files(efi_system_table_t *sys_table_arg,
+ 				  efi_loaded_image_t *image,
