@@ -2,164 +2,107 @@ Return-Path: <SRS0=b2o+=YY=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ABC5ECA9EC3
-	for <linux-efi@archiver.kernel.org>; Thu, 31 Oct 2019 03:33:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5077ACA9ECB
+	for <linux-efi@archiver.kernel.org>; Thu, 31 Oct 2019 08:24:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 88AD12080F
-	for <linux-efi@archiver.kernel.org>; Thu, 31 Oct 2019 03:33:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 254C72087F
+	for <linux-efi@archiver.kernel.org>; Thu, 31 Oct 2019 08:24:44 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="i6fHLUXi"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726650AbfJaDd1 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 30 Oct 2019 23:33:27 -0400
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:51684 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726465AbfJaDd1 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 30 Oct 2019 23:33:27 -0400
-Received: from pps.filterd (m0098414.ppops.net [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com (8.16.0.27/8.16.0.27) with SMTP id x9V3T9oS129448
-        for <linux-efi@vger.kernel.org>; Wed, 30 Oct 2019 23:33:25 -0400
-Received: from e06smtp02.uk.ibm.com (e06smtp02.uk.ibm.com [195.75.94.98])
-        by mx0b-001b2d01.pphosted.com with ESMTP id 2vyj0v9d58-1
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <linux-efi@vger.kernel.org>; Wed, 30 Oct 2019 23:33:23 -0400
-Received: from localhost
-        by e06smtp02.uk.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-        for <linux-efi@vger.kernel.org> from <zohar@linux.ibm.com>;
-        Thu, 31 Oct 2019 03:31:50 -0000
-Received: from b06cxnps3075.portsmouth.uk.ibm.com (9.149.109.195)
-        by e06smtp02.uk.ibm.com (192.168.101.132) with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted;
-        (version=TLSv1/SSLv3 cipher=AES256-GCM-SHA384 bits=256/256)
-        Thu, 31 Oct 2019 03:31:46 -0000
-Received: from b06wcsmtp001.portsmouth.uk.ibm.com (b06wcsmtp001.portsmouth.uk.ibm.com [9.149.105.160])
-        by b06cxnps3075.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id x9V3Vjip50528310
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 31 Oct 2019 03:31:45 GMT
-Received: from b06wcsmtp001.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 37A17A4062;
-        Thu, 31 Oct 2019 03:31:45 +0000 (GMT)
-Received: from b06wcsmtp001.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id BABC5A405B;
-        Thu, 31 Oct 2019 03:31:43 +0000 (GMT)
-Received: from localhost.ibm.com (unknown [9.85.201.217])
-        by b06wcsmtp001.portsmouth.uk.ibm.com (Postfix) with ESMTP;
-        Thu, 31 Oct 2019 03:31:43 +0000 (GMT)
-From:   Mimi Zohar <zohar@linux.ibm.com>
-To:     linuxppc-dev@ozlabs.org, linux-efi@vger.kernel.org,
-        linux-integrity@vger.kernel.org
-Cc:     Nayna Jain <nayna@linux.ibm.com>, linux-kernel@vger.kernel.org,
-        Michael Ellerman <mpe@ellerman.id.au>,
-        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
-        Paul Mackerras <paulus@samba.org>,
-        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Jeremy Kerr <jk@ozlabs.org>,
-        Eric Ricther <erichte@linux.ibm.com>,
-        "Oliver O'Halloran" <oohall@gmail.com>
-Subject: [PATCH v10 3/9] powerpc: detect the trusted boot state of the system
-Date:   Wed, 30 Oct 2019 23:31:28 -0400
-X-Mailer: git-send-email 2.7.5
-In-Reply-To: <1572492694-6520-1-git-send-email-zohar@linux.ibm.com>
-References: <1572492694-6520-1-git-send-email-zohar@linux.ibm.com>
-X-TM-AS-GCONF: 00
-x-cbid: 19103103-0008-0000-0000-000003295392
-X-IBM-AV-DETECTION: SAVI=unused REMOTE=unused XFE=unused
-x-cbparentid: 19103103-0009-0000-0000-00004A489CAF
-Message-Id: <1572492694-6520-4-git-send-email-zohar@linux.ibm.com>
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:,, definitions=2019-10-31_01:,,
- signatures=0
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
- malwarescore=0 suspectscore=0 phishscore=0 bulkscore=0 spamscore=0
- clxscore=1015 lowpriorityscore=0 mlxscore=0 impostorscore=0
- mlxlogscore=610 adultscore=0 classifier=spam adjust=0 reason=mlx
- scancount=1 engine=8.0.1-1908290000 definitions=main-1910310031
+        id S1726875AbfJaIYn (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 31 Oct 2019 04:24:43 -0400
+Received: from mail-wr1-f68.google.com ([209.85.221.68]:36578 "EHLO
+        mail-wr1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726747AbfJaIYn (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 31 Oct 2019 04:24:43 -0400
+Received: by mail-wr1-f68.google.com with SMTP id w18so5203507wrt.3
+        for <linux-efi@vger.kernel.org>; Thu, 31 Oct 2019 01:24:41 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=hwRXo6F4Q49q2OBaCjuHQqtxPHes3aTNLtF4lURqyMo=;
+        b=i6fHLUXiRR5UkIqqSBjC6ztqMNazpDg62eCa0ff6GP9Qt5QQfz5iTquXhd4F39+mYc
+         u1w9ohGsXZTSFrmXZV6/t/aluc2s5O1YZR2OpmhbMo2jsqjpSMb2/66A2g+JifTzoWE3
+         Q0U8MkIew1zeHP2NuQrdsltJKUM2HMJP0yldaOBI7VUOC/+PmSRWABGmktjluGExCps/
+         ypYMgDU7N6/GAQko9k31Zq0KzFvsxXajclFLYpf8v/rSAVBKnuEvvNCt6BhVMghMGIaV
+         7wkFzrvIh4WaQgXVREi4TGhFHEm8Mu9kuLoSuEtO4GwXu378GyLeaJq9/gELsV//5nFn
+         1bAw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=hwRXo6F4Q49q2OBaCjuHQqtxPHes3aTNLtF4lURqyMo=;
+        b=RgeCx99fyWI9CS0qpx5gNowyOg7zDL+R7T4jvLp5iWQBb9ItappUb/zMNp82ujzLV1
+         RQXHAieNvJveRQ4RsCBTmvrz8P/9tjWxmKfsuOztt4rdqWXUJiU4Qq9F6aAhT73Wa+p/
+         MohgFluB2GBtZr/A7k7bUNafpEH9Z7lbpGCl8qyE7fwM2Bru2Z7KZ9PjIUU5xHWUNTSb
+         jaETFYutt4p7rw63/tc5Vf6OeGlFy9q1eL1cmo/C8alGP3NPoF3uC0rGY6iJxs5Ex21H
+         Jdl+89FAz++FBCeDna3nhK3ReY/z3mS5K0siQs2IQhxrhmrJnTmMbBVWYC/OchLFFa8l
+         EUKw==
+X-Gm-Message-State: APjAAAVIJyXHYYB0WMMieq+Ur+NYeg3D6PyiaSIFTQxc8Eqa4QgvfBlh
+        IShWuGZTuyGWBaE7Oz306/FsXZFw3sJvLueQuBN2fQ==
+X-Google-Smtp-Source: APXvYqzcs5anAptA40KO2f/DjMvYh1MjL0Q8+V3IIgHojFe37raK8oYokFb0klEN4SUxJbbhlaj9FJFoP0hfP8H0A4Y=
+X-Received: by 2002:adf:8289:: with SMTP id 9mr4551139wrc.0.1572510280859;
+ Thu, 31 Oct 2019 01:24:40 -0700 (PDT)
+MIME-Version: 1.0
+References: <20191029173755.27149-1-ardb@kernel.org> <20191029173755.27149-4-ardb@kernel.org>
+ <CACi5LpMAagnn_yEmqRBGfxJFZcAUzohU30NACeGvdXaHFZwAMA@mail.gmail.com>
+In-Reply-To: <CACi5LpMAagnn_yEmqRBGfxJFZcAUzohU30NACeGvdXaHFZwAMA@mail.gmail.com>
+From:   Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Date:   Thu, 31 Oct 2019 09:24:29 +0100
+Message-ID: <CAKv+Gu_zMMeRSBYk_tBX4UA+v1r+Kntrxe3xurLd1Q2_+HkbWw@mail.gmail.com>
+Subject: Re: [PATCH v2 3/6] efi/random: treat EFI_RNG_PROTOCOL output as
+ bootloader randomness
+To:     Bhupesh Sharma <bhsharma@redhat.com>
+Cc:     Ard Biesheuvel <ardb@kernel.org>,
+        linux-efi <linux-efi@vger.kernel.org>,
+        Ingo Molnar <mingo@kernel.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Dominik Brodowski <linux@dominikbrodowski.net>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Nayna Jain <nayna@linux.ibm.com>
+On Tue, 29 Oct 2019 at 20:14, Bhupesh Sharma <bhsharma@redhat.com> wrote:
+>
+> Hi Ard,
+>
+> On Tue, Oct 29, 2019 at 11:10 PM Ard Biesheuvel <ardb@kernel.org> wrote:
+> >
+> > From: Dominik Brodowski <linux@dominikbrodowski.net>
+> >
+> > Commit 428826f5358c ("fdt: add support for rng-seed") introduced
+> > add_bootloader_randomness(), permitting randomness provided by the
+> > bootloader or firmware to be credited as entropy. However, the fact
+> > that the UEFI support code was already wired into the RNG subsystem
+> > via a call to add_device_randomness() was overlooked, and so it was
+> > not converted at the same time.
+> >
+> > Note that this UEFI (v2.4 or newer) feature is currently only
+> > implemented for EFI stub booting on ARM, and further note that
+> > CONFIG_RANDOM_TRUST_BOOTLOADER must be enabled, and this should be
+> > done only if there indeed is sufficient trust in the bootloader
+> > _and_ its source of randomness.
+> >
+> > Signed-off-by: Dominik Brodowski <linux@dominikbrodowski.net>
+> > [ardb: update commit log]
+> > Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+>
+> Seems my Tested-by was dropped which I provide for the RFC version of
+> this patch.
+> See <https://www.mail-archive.com/linux-efi@vger.kernel.org/msg12281.html>
+> for details.
+>
+> I can provide a similar Tested-by for this version as well.
+>
 
-While secure boot permits only properly verified signed kernels to be
-booted, trusted boot calculates the file hash of the kernel image and
-stores the measurement prior to boot, that can be subsequently compared
-against good known values via attestation services.
-
-This patch reads the trusted boot state of a PowerNV system. The state
-is used to conditionally enable additional measurement rules in the IMA
-arch-specific policies.
-
-Signed-off-by: Nayna Jain <nayna@linux.ibm.com>
----
- arch/powerpc/include/asm/secure_boot.h |  6 ++++++
- arch/powerpc/kernel/secure_boot.c      | 26 ++++++++++++++++++++++++++
- 2 files changed, 32 insertions(+)
-
-diff --git a/arch/powerpc/include/asm/secure_boot.h b/arch/powerpc/include/asm/secure_boot.h
-index 07d0fe0ca81f..a2ff556916c6 100644
---- a/arch/powerpc/include/asm/secure_boot.h
-+++ b/arch/powerpc/include/asm/secure_boot.h
-@@ -11,6 +11,7 @@
- #ifdef CONFIG_PPC_SECURE_BOOT
- 
- bool is_ppc_secureboot_enabled(void);
-+bool is_ppc_trustedboot_enabled(void);
- 
- #else
- 
-@@ -19,5 +20,10 @@ static inline bool is_ppc_secureboot_enabled(void)
- 	return false;
- }
- 
-+static inline bool is_ppc_trustedboot_enabled(void)
-+{
-+	return false;
-+}
-+
- #endif
- #endif
-diff --git a/arch/powerpc/kernel/secure_boot.c b/arch/powerpc/kernel/secure_boot.c
-index 63dc82c50862..a6a5f17ede03 100644
---- a/arch/powerpc/kernel/secure_boot.c
-+++ b/arch/powerpc/kernel/secure_boot.c
-@@ -7,6 +7,17 @@
- #include <linux/of.h>
- #include <asm/secure_boot.h>
- 
-+static struct device_node *get_ppc_fw_sb_node(void)
-+{
-+	static const struct of_device_id ids[] = {
-+		{ .compatible = "ibm,secureboot-v1", },
-+		{ .compatible = "ibm,secureboot-v2", },
-+		{},
-+	};
-+
-+	return of_find_matching_node(NULL, ids);
-+}
-+
- bool is_ppc_secureboot_enabled(void)
- {
- 	struct device_node *node;
-@@ -30,3 +41,18 @@ bool is_ppc_secureboot_enabled(void)
- 	pr_info("Secure boot mode %s\n", enabled ? "enabled" : "disabled");
- 	return enabled;
- }
-+
-+bool is_ppc_trustedboot_enabled(void)
-+{
-+	struct device_node *node;
-+	bool enabled = false;
-+
-+	node = get_ppc_fw_sb_node();
-+	enabled = of_property_read_bool(node, "trusted-enabled");
-+
-+	of_node_put(node);
-+
-+	pr_info("Trusted boot mode %s\n", enabled ? "enabled" : "disabled");
-+
-+	return enabled;
-+}
--- 
-2.7.5
-
+Thanks Bhupesh
