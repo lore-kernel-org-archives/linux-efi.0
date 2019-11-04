@@ -4,59 +4,60 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-17.4 required=3.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT,
-	USER_IN_DEF_DKIM_WL autolearn=unavailable autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT,USER_IN_DEF_DKIM_WL autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 47C76CA9EB5
-	for <linux-efi@archiver.kernel.org>; Mon,  4 Nov 2019 14:29:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E8D44CA9ED4
+	for <linux-efi@archiver.kernel.org>; Mon,  4 Nov 2019 14:29:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 13F47217F4
-	for <linux-efi@archiver.kernel.org>; Mon,  4 Nov 2019 14:29:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B1313217F4
+	for <linux-efi@archiver.kernel.org>; Mon,  4 Nov 2019 14:29:22 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="U/XYdcDe"
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="RwMp4ufZ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729110AbfKDO3U (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 4 Nov 2019 09:29:20 -0500
-Received: from mail-wr1-f74.google.com ([209.85.221.74]:52267 "EHLO
-        mail-wr1-f74.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729061AbfKDO3Q (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 4 Nov 2019 09:29:16 -0500
-Received: by mail-wr1-f74.google.com with SMTP id 4so10466599wrf.19
-        for <linux-efi@vger.kernel.org>; Mon, 04 Nov 2019 06:29:13 -0800 (PST)
+        id S1729162AbfKDO3W (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 4 Nov 2019 09:29:22 -0500
+Received: from mail-wr1-f73.google.com ([209.85.221.73]:53866 "EHLO
+        mail-wr1-f73.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728409AbfKDO3V (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 4 Nov 2019 09:29:21 -0500
+Received: by mail-wr1-f73.google.com with SMTP id m17so10435356wrb.20
+        for <linux-efi@vger.kernel.org>; Mon, 04 Nov 2019 06:29:19 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=google.com; s=20161025;
         h=date:in-reply-to:message-id:mime-version:references:subject:from:to
          :cc;
-        bh=dwkrnZGKd1o82vLncnnMx5+hskPdjM10M9XkepioArw=;
-        b=U/XYdcDexJdJytPXnvebCsib+0GCSIPOwwp7Our+Srw04lF1o6qWXtQirdZaNuJDvi
-         PWCZjs8lgfF3WbZz4xb/auZ2JLOMXS22DAbDUAir83/a9im8xzHbMI+3Gu++FTfIcLfu
-         4N6smqE432wGYXiOL/zZLNF84FWK873RmTrhXDXetMe6YOErFUcq8DANBux5E8sX7L/n
-         ewoK6G/O2gCYatjbKfhV816P7ABJJQjkKZ0IEM6z5SdBMPbKmrPBObno0g9wFbE9TlXT
-         Po2bJCggaH5lttawH0WEhd/kX3X2ZHKDLyD6dRTKJO2pU31u2DoYewsgALhVOX4WYheA
-         iS5g==
+        bh=v/fBCawgbNr9z8sHoDyBwn+JenP5278dLuCFcze5nO4=;
+        b=RwMp4ufZMoAcy8AGYLyDxOiK52Y41IM5Omu5uyT1UQikQpowYCEdcb8GrcK71T8g5n
+         C72pggEFwJnmMPerjWv2sTnaV6/S5Yd6Y6O00gERNelbkaBI9N2T1+v4C2nXgYBwo5Rj
+         QaDlbklupShqTrgcnZ2WP6nCfyuM5+zjFaSApzBrMx6qoIMrnUFWntuH2puHKq0HJJhx
+         ofz5Vh2ubSbi72M1x6K6RQiUV4mBMZQYHRvQ7sYWm7ATdo4nulInqcTv+r6ITZ0cQblc
+         IS7EkLHNU3eGauKI/Rostf6g8IXwbewQSkxEDH52jftz5DpxyD+oojQLDNB7m8TR3EAK
+         A/EA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:in-reply-to:message-id:mime-version
          :references:subject:from:to:cc;
-        bh=dwkrnZGKd1o82vLncnnMx5+hskPdjM10M9XkepioArw=;
-        b=gyU+j+30i4ihbQvKE2N0tvlYYLnAUc5DhKAOvahXB3fhBoyOOap8a2G52k2ctwa1l5
-         HCo0hT9fxkaCBaEldqfscJHq1vp+wwFdVmtVXusK+YN+VnwIlwBHjJ2fXoCcrYQCCvIV
-         7PKlY90S8twF8b9/sO43I13jIWKDBpCj7OcQq1tUIj7bswisC6f14IjY99LkajyNdNan
-         m1fKcj0ZL4W084+M9RuwWdk+gWgAz95SN8ZRt1hD0KBCRDyUpwokuSuRhDtKINrqQLoo
-         2aKP4aOy9SPjyZpozOMPRF/jRDNqh7LVPDtsBTqGQSw+VxV8DbmD1sJmr4UUxJOMvehh
-         AoeQ==
-X-Gm-Message-State: APjAAAWxjEsk9k39vYd0ixMO8ooAuyvEPUZc+ucbYN6MdtqRV57D3iOp
-        hJ9kTQqZpcXITG8UE+wdl1fFPyVbHg==
-X-Google-Smtp-Source: APXvYqwCl8PFLBkBfL5EK6ygI9RFEdP8s5WO4pmDF1xMh0RzOTTNq2VfQ/1s2B6lgxYW8RHEScbPyJRLvw==
-X-Received: by 2002:a5d:5591:: with SMTP id i17mr22415611wrv.151.1572877752204;
- Mon, 04 Nov 2019 06:29:12 -0800 (PST)
-Date:   Mon,  4 Nov 2019 15:27:43 +0100
+        bh=v/fBCawgbNr9z8sHoDyBwn+JenP5278dLuCFcze5nO4=;
+        b=RxvzDGKAYi3A1DeqNf2W7mbADGB+/v6072erfOoWA5n0JEC5uNpviqMOAnAYbiRzwX
+         srfIDamVriADWt9ZQi+MppO6bopDI73Jphr9TFXEs/sn/Oaf/MjRjybrgL3a3g+6v6Z3
+         bMg4NoIQI99mrowR7tId8vS4wvAS8ADvQtwM8glqUtI7B+v+DwO8CuA5u7jWBtmrdB++
+         JCGpff7jswHSgEs7PZ05mxDT1q7n6iBqAkMD7oFqKkyKC99j5WVFBxjGJ+lT3cGLGs4A
+         D4zsZqHGClWzWlquTyp46uTTn1X8oAm6/2gY7x54YL+tan9tkn8cE+n/SpTugMWwooby
+         5/Fw==
+X-Gm-Message-State: APjAAAVrKaPmGOj/iClNjod/Ebib8YzHVMeKqla/pSxm520h+iyVXWhp
+        pmoRcx4AnRj4aWLUYI8DEgho7uVGWw==
+X-Google-Smtp-Source: APXvYqztjJN/esR+L3OUI4QZ+K5dhvl1Dd08UL4fO1/9xBiWuMOU3zCx1yGn64DkSaz9eoQ3fDi32RAqJw==
+X-Received: by 2002:a5d:4808:: with SMTP id l8mr23085087wrq.118.1572877758478;
+ Mon, 04 Nov 2019 06:29:18 -0800 (PST)
+Date:   Mon,  4 Nov 2019 15:27:45 +0100
 In-Reply-To: <20191104142745.14722-1-elver@google.com>
-Message-Id: <20191104142745.14722-8-elver@google.com>
+Message-Id: <20191104142745.14722-10-elver@google.com>
 Mime-Version: 1.0
 References: <20191104142745.14722-1-elver@google.com>
 X-Mailer: git-send-email 2.24.0.rc1.363.gb1bccd3e3d-goog
-Subject: [PATCH v3 7/9] asm-generic, kcsan: Add KCSAN instrumentation for bitops
+Subject: [PATCH v3 9/9] x86, kcsan: Enable KCSAN for x86
 From:   Marco Elver <elver@google.com>
 To:     elver@google.com
 Cc:     akiyks@gmail.com, stern@rowland.harvard.edu, glider@google.com,
@@ -78,165 +79,216 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Add explicit KCSAN checks for bitops.
+This patch enables KCSAN for x86, with updates to build rules to not use
+KCSAN for several incompatible compilation units.
 
 Signed-off-by: Marco Elver <elver@google.com>
 ---
-v2:
-* Use kcsan_check{,_atomic}_{read,write} instead of
-  kcsan_check_{access,atomic}.
----
- include/asm-generic/bitops-instrumented.h | 18 ++++++++++++++++++
- 1 file changed, 18 insertions(+)
+v3:
+* Moved EFI stub build exception hunk to generic build exception patch,
+  since it's not x86-specific.
 
-diff --git a/include/asm-generic/bitops-instrumented.h b/include/asm-generic/bitops-instrumented.h
-index ddd1c6d9d8db..864d707cdb87 100644
---- a/include/asm-generic/bitops-instrumented.h
-+++ b/include/asm-generic/bitops-instrumented.h
-@@ -12,6 +12,7 @@
- #define _ASM_GENERIC_BITOPS_INSTRUMENTED_H
+v2:
+* Document build exceptions where no previous above comment explained
+  why we cannot instrument.
+---
+ arch/x86/Kconfig                  | 1 +
+ arch/x86/boot/Makefile            | 2 ++
+ arch/x86/boot/compressed/Makefile | 2 ++
+ arch/x86/entry/vdso/Makefile      | 3 +++
+ arch/x86/include/asm/bitops.h     | 6 +++++-
+ arch/x86/kernel/Makefile          | 7 +++++++
+ arch/x86/kernel/cpu/Makefile      | 3 +++
+ arch/x86/lib/Makefile             | 4 ++++
+ arch/x86/mm/Makefile              | 3 +++
+ arch/x86/purgatory/Makefile       | 2 ++
+ arch/x86/realmode/Makefile        | 3 +++
+ arch/x86/realmode/rm/Makefile     | 3 +++
+ 12 files changed, 38 insertions(+), 1 deletion(-)
+
+diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
+index d6e1faa28c58..81859be4a005 100644
+--- a/arch/x86/Kconfig
++++ b/arch/x86/Kconfig
+@@ -226,6 +226,7 @@ config X86
+ 	select VIRT_TO_BUS
+ 	select X86_FEATURE_NAMES		if PROC_FS
+ 	select PROC_PID_ARCH_STATUS		if PROC_FS
++	select HAVE_ARCH_KCSAN if X86_64
  
- #include <linux/kasan-checks.h>
-+#include <linux/kcsan-checks.h>
+ config INSTRUCTION_DECODER
+ 	def_bool y
+diff --git a/arch/x86/boot/Makefile b/arch/x86/boot/Makefile
+index e2839b5c246c..9c7942794164 100644
+--- a/arch/x86/boot/Makefile
++++ b/arch/x86/boot/Makefile
+@@ -9,7 +9,9 @@
+ # Changed by many, many contributors over the years.
+ #
  
- /**
-  * set_bit - Atomically set a bit in memory
-@@ -26,6 +27,7 @@
- static inline void set_bit(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_atomic_write(addr + BIT_WORD(nr), sizeof(long));
- 	arch_set_bit(nr, addr);
++# Sanitizer runtimes are unavailable and cannot be linked for early boot code.
+ KASAN_SANITIZE			:= n
++KCSAN_SANITIZE			:= n
+ OBJECT_FILES_NON_STANDARD	:= y
+ 
+ # Kernel does not boot with kcov instrumentation here.
+diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
+index 6b84afdd7538..a1c248b8439f 100644
+--- a/arch/x86/boot/compressed/Makefile
++++ b/arch/x86/boot/compressed/Makefile
+@@ -17,7 +17,9 @@
+ #	(see scripts/Makefile.lib size_append)
+ #	compressed vmlinux.bin.all + u32 size of vmlinux.bin.all
+ 
++# Sanitizer runtimes are unavailable and cannot be linked for early boot code.
+ KASAN_SANITIZE			:= n
++KCSAN_SANITIZE			:= n
+ OBJECT_FILES_NON_STANDARD	:= y
+ 
+ # Prevents link failures: __sanitizer_cov_trace_pc() is not linked in.
+diff --git a/arch/x86/entry/vdso/Makefile b/arch/x86/entry/vdso/Makefile
+index 0f2154106d01..a23debaad5b9 100644
+--- a/arch/x86/entry/vdso/Makefile
++++ b/arch/x86/entry/vdso/Makefile
+@@ -10,8 +10,11 @@ ARCH_REL_TYPE_ABS += R_386_GLOB_DAT|R_386_JMP_SLOT|R_386_RELATIVE
+ include $(srctree)/lib/vdso/Makefile
+ 
+ KBUILD_CFLAGS += $(DISABLE_LTO)
++
++# Sanitizer runtimes are unavailable and cannot be linked here.
+ KASAN_SANITIZE			:= n
+ UBSAN_SANITIZE			:= n
++KCSAN_SANITIZE			:= n
+ OBJECT_FILES_NON_STANDARD	:= y
+ 
+ # Prevents link failures: __sanitizer_cov_trace_pc() is not linked in.
+diff --git a/arch/x86/include/asm/bitops.h b/arch/x86/include/asm/bitops.h
+index 7d1f6a49bfae..ee08917d3d92 100644
+--- a/arch/x86/include/asm/bitops.h
++++ b/arch/x86/include/asm/bitops.h
+@@ -201,8 +201,12 @@ arch_test_and_change_bit(long nr, volatile unsigned long *addr)
+ 	return GEN_BINARY_RMWcc(LOCK_PREFIX __ASM_SIZE(btc), *addr, c, "Ir", nr);
  }
  
-@@ -41,6 +43,7 @@ static inline void set_bit(long nr, volatile unsigned long *addr)
- static inline void __set_bit(long nr, volatile unsigned long *addr)
+-static __always_inline bool constant_test_bit(long nr, const volatile unsigned long *addr)
++static __no_kcsan_or_inline bool constant_test_bit(long nr, const volatile unsigned long *addr)
  {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_write(addr + BIT_WORD(nr), sizeof(long));
- 	arch___set_bit(nr, addr);
++	/*
++	 * Because this is a plain access, we need to disable KCSAN here to
++	 * avoid double instrumentation via bitops-instrumented.h.
++	 */
+ 	return ((1UL << (nr & (BITS_PER_LONG-1))) &
+ 		(addr[nr >> _BITOPS_LONG_SHIFT])) != 0;
  }
+diff --git a/arch/x86/kernel/Makefile b/arch/x86/kernel/Makefile
+index 3578ad248bc9..2aa122d94956 100644
+--- a/arch/x86/kernel/Makefile
++++ b/arch/x86/kernel/Makefile
+@@ -28,6 +28,13 @@ KASAN_SANITIZE_dumpstack_$(BITS).o			:= n
+ KASAN_SANITIZE_stacktrace.o				:= n
+ KASAN_SANITIZE_paravirt.o				:= n
  
-@@ -54,6 +57,7 @@ static inline void __set_bit(long nr, volatile unsigned long *addr)
- static inline void clear_bit(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_atomic_write(addr + BIT_WORD(nr), sizeof(long));
- 	arch_clear_bit(nr, addr);
- }
++# Do not instrument early boot code.
++KCSAN_SANITIZE_head$(BITS).o				:= n
++# Do not instrument debug code to avoid corrupting bug reporting.
++KCSAN_SANITIZE_dumpstack.o				:= n
++KCSAN_SANITIZE_dumpstack_$(BITS).o			:= n
++KCSAN_SANITIZE_stacktrace.o				:= n
++
+ OBJECT_FILES_NON_STANDARD_relocate_kernel_$(BITS).o	:= y
+ OBJECT_FILES_NON_STANDARD_test_nx.o			:= y
+ OBJECT_FILES_NON_STANDARD_paravirt_patch.o		:= y
+diff --git a/arch/x86/kernel/cpu/Makefile b/arch/x86/kernel/cpu/Makefile
+index d7a1e5a9331c..1f1b0edc0187 100644
+--- a/arch/x86/kernel/cpu/Makefile
++++ b/arch/x86/kernel/cpu/Makefile
+@@ -13,6 +13,9 @@ endif
+ KCOV_INSTRUMENT_common.o := n
+ KCOV_INSTRUMENT_perf_event.o := n
  
-@@ -69,6 +73,7 @@ static inline void clear_bit(long nr, volatile unsigned long *addr)
- static inline void __clear_bit(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_write(addr + BIT_WORD(nr), sizeof(long));
- 	arch___clear_bit(nr, addr);
- }
++# As above, instrumenting secondary CPU boot code causes boot hangs.
++KCSAN_SANITIZE_common.o := n
++
+ # Make sure load_percpu_segment has no stackprotector
+ nostackp := $(call cc-option, -fno-stack-protector)
+ CFLAGS_common.o		:= $(nostackp)
+diff --git a/arch/x86/lib/Makefile b/arch/x86/lib/Makefile
+index 5246db42de45..432a07705677 100644
+--- a/arch/x86/lib/Makefile
++++ b/arch/x86/lib/Makefile
+@@ -6,10 +6,14 @@
+ # Produces uninteresting flaky coverage.
+ KCOV_INSTRUMENT_delay.o	:= n
  
-@@ -82,6 +87,7 @@ static inline void __clear_bit(long nr, volatile unsigned long *addr)
- static inline void clear_bit_unlock(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_atomic_write(addr + BIT_WORD(nr), sizeof(long));
- 	arch_clear_bit_unlock(nr, addr);
- }
++# KCSAN uses udelay for introducing watchpoint delay; avoid recursion.
++KCSAN_SANITIZE_delay.o := n
++
+ # Early boot use of cmdline; don't instrument it
+ ifdef CONFIG_AMD_MEM_ENCRYPT
+ KCOV_INSTRUMENT_cmdline.o := n
+ KASAN_SANITIZE_cmdline.o  := n
++KCSAN_SANITIZE_cmdline.o  := n
  
-@@ -97,6 +103,7 @@ static inline void clear_bit_unlock(long nr, volatile unsigned long *addr)
- static inline void __clear_bit_unlock(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_write(addr + BIT_WORD(nr), sizeof(long));
- 	arch___clear_bit_unlock(nr, addr);
- }
+ ifdef CONFIG_FUNCTION_TRACER
+ CFLAGS_REMOVE_cmdline.o = -pg
+diff --git a/arch/x86/mm/Makefile b/arch/x86/mm/Makefile
+index 84373dc9b341..ee871602f96a 100644
+--- a/arch/x86/mm/Makefile
++++ b/arch/x86/mm/Makefile
+@@ -7,6 +7,9 @@ KCOV_INSTRUMENT_mem_encrypt_identity.o	:= n
+ KASAN_SANITIZE_mem_encrypt.o		:= n
+ KASAN_SANITIZE_mem_encrypt_identity.o	:= n
  
-@@ -113,6 +120,7 @@ static inline void __clear_bit_unlock(long nr, volatile unsigned long *addr)
- static inline void change_bit(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_atomic_write(addr + BIT_WORD(nr), sizeof(long));
- 	arch_change_bit(nr, addr);
- }
++KCSAN_SANITIZE_mem_encrypt.o		:= n
++KCSAN_SANITIZE_mem_encrypt_identity.o	:= n
++
+ ifdef CONFIG_FUNCTION_TRACER
+ CFLAGS_REMOVE_mem_encrypt.o		= -pg
+ CFLAGS_REMOVE_mem_encrypt_identity.o	= -pg
+diff --git a/arch/x86/purgatory/Makefile b/arch/x86/purgatory/Makefile
+index fb4ee5444379..69379bce9574 100644
+--- a/arch/x86/purgatory/Makefile
++++ b/arch/x86/purgatory/Makefile
+@@ -17,7 +17,9 @@ CFLAGS_sha256.o := -D__DISABLE_EXPORTS
+ LDFLAGS_purgatory.ro := -e purgatory_start -r --no-undefined -nostdlib -z nodefaultlib
+ targets += purgatory.ro
  
-@@ -128,6 +136,7 @@ static inline void change_bit(long nr, volatile unsigned long *addr)
- static inline void __change_bit(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_write(addr + BIT_WORD(nr), sizeof(long));
- 	arch___change_bit(nr, addr);
- }
++# Sanitizer runtimes are unavailable and cannot be linked here.
+ KASAN_SANITIZE	:= n
++KCSAN_SANITIZE	:= n
+ KCOV_INSTRUMENT := n
  
-@@ -141,6 +150,7 @@ static inline void __change_bit(long nr, volatile unsigned long *addr)
- static inline bool test_and_set_bit(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_atomic_write(addr + BIT_WORD(nr), sizeof(long));
- 	return arch_test_and_set_bit(nr, addr);
- }
+ # These are adjustments to the compiler flags used for objects that
+diff --git a/arch/x86/realmode/Makefile b/arch/x86/realmode/Makefile
+index 682c895753d9..6b1f3a4eeb44 100644
+--- a/arch/x86/realmode/Makefile
++++ b/arch/x86/realmode/Makefile
+@@ -6,7 +6,10 @@
+ # for more details.
+ #
+ #
++
++# Sanitizer runtimes are unavailable and cannot be linked here.
+ KASAN_SANITIZE			:= n
++KCSAN_SANITIZE			:= n
+ OBJECT_FILES_NON_STANDARD	:= y
  
-@@ -155,6 +165,7 @@ static inline bool test_and_set_bit(long nr, volatile unsigned long *addr)
- static inline bool __test_and_set_bit(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_write(addr + BIT_WORD(nr), sizeof(long));
- 	return arch___test_and_set_bit(nr, addr);
- }
+ subdir- := rm
+diff --git a/arch/x86/realmode/rm/Makefile b/arch/x86/realmode/rm/Makefile
+index f60501a384f9..fdbbb945c216 100644
+--- a/arch/x86/realmode/rm/Makefile
++++ b/arch/x86/realmode/rm/Makefile
+@@ -6,7 +6,10 @@
+ # for more details.
+ #
+ #
++
++# Sanitizer runtimes are unavailable and cannot be linked here.
+ KASAN_SANITIZE			:= n
++KCSAN_SANITIZE			:= n
+ OBJECT_FILES_NON_STANDARD	:= y
  
-@@ -170,6 +181,7 @@ static inline bool __test_and_set_bit(long nr, volatile unsigned long *addr)
- static inline bool test_and_set_bit_lock(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_atomic_write(addr + BIT_WORD(nr), sizeof(long));
- 	return arch_test_and_set_bit_lock(nr, addr);
- }
- 
-@@ -183,6 +195,7 @@ static inline bool test_and_set_bit_lock(long nr, volatile unsigned long *addr)
- static inline bool test_and_clear_bit(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_atomic_write(addr + BIT_WORD(nr), sizeof(long));
- 	return arch_test_and_clear_bit(nr, addr);
- }
- 
-@@ -197,6 +210,7 @@ static inline bool test_and_clear_bit(long nr, volatile unsigned long *addr)
- static inline bool __test_and_clear_bit(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_write(addr + BIT_WORD(nr), sizeof(long));
- 	return arch___test_and_clear_bit(nr, addr);
- }
- 
-@@ -210,6 +224,7 @@ static inline bool __test_and_clear_bit(long nr, volatile unsigned long *addr)
- static inline bool test_and_change_bit(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_atomic_write(addr + BIT_WORD(nr), sizeof(long));
- 	return arch_test_and_change_bit(nr, addr);
- }
- 
-@@ -224,6 +239,7 @@ static inline bool test_and_change_bit(long nr, volatile unsigned long *addr)
- static inline bool __test_and_change_bit(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_write(addr + BIT_WORD(nr), sizeof(long));
- 	return arch___test_and_change_bit(nr, addr);
- }
- 
-@@ -235,6 +251,7 @@ static inline bool __test_and_change_bit(long nr, volatile unsigned long *addr)
- static inline bool test_bit(long nr, const volatile unsigned long *addr)
- {
- 	kasan_check_read(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_atomic_read(addr + BIT_WORD(nr), sizeof(long));
- 	return arch_test_bit(nr, addr);
- }
- 
-@@ -254,6 +271,7 @@ static inline bool
- clear_bit_unlock_is_negative_byte(long nr, volatile unsigned long *addr)
- {
- 	kasan_check_write(addr + BIT_WORD(nr), sizeof(long));
-+	kcsan_check_atomic_write(addr + BIT_WORD(nr), sizeof(long));
- 	return arch_clear_bit_unlock_is_negative_byte(nr, addr);
- }
- /* Let everybody know we have it. */
+ # Prevents link failures: __sanitizer_cov_trace_pc() is not linked in.
 -- 
 2.24.0.rc1.363.gb1bccd3e3d-goog
 
