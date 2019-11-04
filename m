@@ -1,153 +1,198 @@
-Return-Path: <SRS0=2osm=Y2=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=x1O8=Y4=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.4 required=3.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT,
+	USER_IN_DEF_DKIM_WL autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 00A7DCA9EC7
-	for <linux-efi@archiver.kernel.org>; Sat,  2 Nov 2019 05:41:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 55603CA9EB5
+	for <linux-efi@archiver.kernel.org>; Mon,  4 Nov 2019 14:28:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id ABC4B21897
-	for <linux-efi@archiver.kernel.org>; Sat,  2 Nov 2019 05:41:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1FB4121D7F
+	for <linux-efi@archiver.kernel.org>; Mon,  4 Nov 2019 14:28:54 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Cpc155Al"
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="iYeCrSfz"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726532AbfKBFl1 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 2 Nov 2019 01:41:27 -0400
-Received: from mail-io1-f49.google.com ([209.85.166.49]:33618 "EHLO
-        mail-io1-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725842AbfKBFl1 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sat, 2 Nov 2019 01:41:27 -0400
-Received: by mail-io1-f49.google.com with SMTP id n17so13147180ioa.0;
-        Fri, 01 Nov 2019 22:41:25 -0700 (PDT)
+        id S1728687AbfKDO2x (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 4 Nov 2019 09:28:53 -0500
+Received: from mail-vk1-f201.google.com ([209.85.221.201]:51096 "EHLO
+        mail-vk1-f201.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727861AbfKDO2u (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 4 Nov 2019 09:28:50 -0500
+Received: by mail-vk1-f201.google.com with SMTP id r128so7945670vke.17
+        for <linux-efi@vger.kernel.org>; Mon, 04 Nov 2019 06:28:49 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :content-transfer-encoding;
-        bh=QBDErql//TWf4HGFiZIRJL9D655gxzXFYHFbWHCEoP8=;
-        b=Cpc155Al/oQP+f9V7NRSIzj10uR6wo7G1+ARsUsJZlhkqVkg6aaxyyasyAKZy7LIEO
-         L74ZISmWEhxEgH0t1Sf7pPC0o6fbSOn1Wmu39b1bSgMsZB9CSDCSLK4EU/bs1VmudPvt
-         JWXZcRr5xxONHTiP+Yf1BMDqxwrdnO1yaZRq5isdNiKE1zfFG+uqxySYGQIlTBJuwcky
-         gKO+jtkBvufdaCeHAILxcz0F3+YrOwpYujepsvqvAl6xA7Mp/yC4TrDngBxGLqVFAP5t
-         EGo3GKTP8/qAjD75it7eIBVxILc7jjubFOnJnwXpABSgAV1GsSTeWglLGCuAweyO7Gjm
-         db8A==
+        d=google.com; s=20161025;
+        h=date:message-id:mime-version:subject:from:to:cc;
+        bh=gOZJXriFYaJqnLiXWIeTvOu6TRK/57oj4m43E1U5Ltw=;
+        b=iYeCrSfzcJoqpFfx6PikIHg8ccjBlymGJnP7hoPQwkYwjCtI9GxlmAhDNPMboxoTVO
+         x0r3aGeA4Mh55fN74DlnnyoKLCP5EYtGoDRC1iJxDUrLjdkzWX2Z8xkzsuyteDFKdMu7
+         j9QngGU+Lh7YFeOyuqjYfowPE5w4CorcRwYknePhBEWSRm/ggfZyx7vY8L6GGJvAE6n8
+         QE3y+1uf000U7nWOZ0L0iV5yDzjIaUGAZazZh5REdGHMjOBwQujSQBLtL81TMYPnLLHX
+         WF4N/P47ZjSdXzqhY+tOV7QPWdrBIiS+PKoKfUHodGpyf5G8hdYY2YVVFvpQ4MyVAoxn
+         ATxw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:content-transfer-encoding;
-        bh=QBDErql//TWf4HGFiZIRJL9D655gxzXFYHFbWHCEoP8=;
-        b=GvdreWuAEiUYCzvSgIR8QEZZiQfS2Q+oil9Fz3oES6X9EJVWcx9bJ4AYJTI93Zk+gH
-         jGOiCihPlDEh2TkM4C9ncFCxqx65ipaopJZU+FFhCz2aF3SnoVaQbwHQ4IBzAkfi7jJr
-         p8fMXD98xxHH9n03tePyAwNCRGQiVF1shj/XsWN5ORNCvAcx33AP9SuhXdjvOI1ujONt
-         1rT65TFJFIvF00Vtricc6QC30NJZX+RUKXBYhYyB9j8YdF2NafjXt56/N3aqyLVuAWhv
-         r3AsuY26/yehnVjFIWltSYmS7pUePhd/dmgRuIctNwjMame8aP1/yEDhoaW6qXDrFwit
-         9qFw==
-X-Gm-Message-State: APjAAAV6zn0Apbyy2Nakzb7gSNsT+jetcezeJvgMIVqaXk879bP9NxSh
-        7KsAWRCfI+Vo9s4qGXr6mJRe115huP+/ru1DHG00MxSC
-X-Google-Smtp-Source: APXvYqx7G+KPCLOJaoIc56cJKepKN7LB8qxj7Muv4L2UHxT5LV+z0akTqIn7ECLMR5A7Q28Q276XoyrfIdMXyO2r9/M=
-X-Received: by 2002:a02:1948:: with SMTP id b69mr11490135jab.30.1572673284276;
- Fri, 01 Nov 2019 22:41:24 -0700 (PDT)
-MIME-Version: 1.0
-References: <CAOzgRdbjf7AkxXtgQ_ZxWU_QW2XqT+=CpSTBt0_T10+gynXtTw@mail.gmail.com>
- <CAOzgRdYLYB5eB2aNiGL7wuS5tvF7M8cEWiOqLFKcnMsWOe=zNA@mail.gmail.com> <CAOzgRdbhSwY3GY8V-w3b41eA-vz7MatkCSX2RbOL5Lk-06ZtSg@mail.gmail.com>
-In-Reply-To: <CAOzgRdbhSwY3GY8V-w3b41eA-vz7MatkCSX2RbOL5Lk-06ZtSg@mail.gmail.com>
-From:   youling 257 <youling257@gmail.com>
-Date:   Sat, 2 Nov 2019 13:41:08 +0800
-Message-ID: <CAOzgRdaBukdDtCuYQe3wvAgtXmRrbtXcj6yD4bJvqO2xQmO+tA@mail.gmail.com>
-Subject: Re: x86/boot: add ramoops.mem_size=1048576 boot parameter cause can't boot
-To:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-efi@vger.kernel.org
+        h=x-gm-message-state:date:message-id:mime-version:subject:from:to:cc;
+        bh=gOZJXriFYaJqnLiXWIeTvOu6TRK/57oj4m43E1U5Ltw=;
+        b=ST71pftnnnnE+5QgHJ9q0FGPvodbsLP7tjb/ByHwYjhCdGfNmwgJem4cX+4ZSEWOfS
+         Dy2p88+0tjIDxhHD78XZPkJd+ia4CfAxvBpAU6dIA94WtcnUrtZ7C7fCSlOFzLiPyN5w
+         CxFXk1+vU5yTQCluHZ9RlYtZS1xbnII39GGolPQRDWTAJNZuf1+Ur77JBo8+oiipHUPJ
+         RoSS9Q3HQBrsic1bgvSsTSqKs/nzhl0mZOcjU37ek0sGOayETcHeKQD//LnMK4htAdZm
+         LdGCFcHKcRQ17+8t684wMQ8hJY2RcTREbUaN4EycpPNIza2YE2GMFBrbtBHSAMCw0IfF
+         +pCw==
+X-Gm-Message-State: APjAAAXIqr6m+aVJKiSoLthf59ni49VMKE38S6kW2PJr3bRVpEhB7F/+
+        8Si7GuQO6uX+vSjFyGctc3RrMtfKqA==
+X-Google-Smtp-Source: APXvYqzSuwLczAxwseRWbVJPz3W76r9RPcuLhjVcCaAZtkQCbfSRQ1gJrmSs8glOqHVw0BLDi5YUSOLJcQ==
+X-Received: by 2002:a67:fbd9:: with SMTP id o25mr5000794vsr.70.1572877728570;
+ Mon, 04 Nov 2019 06:28:48 -0800 (PST)
+Date:   Mon,  4 Nov 2019 15:27:36 +0100
+Message-Id: <20191104142745.14722-1-elver@google.com>
+Mime-Version: 1.0
+X-Mailer: git-send-email 2.24.0.rc1.363.gb1bccd3e3d-goog
+Subject: [PATCH v3 0/9] Add Kernel Concurrency Sanitizer (KCSAN)
+From:   Marco Elver <elver@google.com>
+To:     elver@google.com
+Cc:     akiyks@gmail.com, stern@rowland.harvard.edu, glider@google.com,
+        parri.andrea@gmail.com, andreyknvl@google.com, luto@kernel.org,
+        ard.biesheuvel@linaro.org, arnd@arndb.de, boqun.feng@gmail.com,
+        bp@alien8.de, dja@axtens.net, dlustig@nvidia.com,
+        dave.hansen@linux.intel.com, dhowells@redhat.com,
+        dvyukov@google.com, hpa@zytor.com, mingo@redhat.com,
+        j.alglave@ucl.ac.uk, joel@joelfernandes.org, corbet@lwn.net,
+        jpoimboe@redhat.com, luc.maranget@inria.fr, mark.rutland@arm.com,
+        npiggin@gmail.com, paulmck@kernel.org, peterz@infradead.org,
+        tglx@linutronix.de, will@kernel.org, kasan-dev@googlegroups.com,
+        linux-arch@vger.kernel.org, linux-doc@vger.kernel.org,
+        linux-efi@vger.kernel.org, linux-kbuild@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-mm@kvack.org, x86@kernel.org
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On my v891w, i add "memmap=3D1M!2047M ramoops.mem_size=3D1048576
-ramoops.ecc=3D1 ramoops.mem_address=3D0x7ff00000
-ramoops.console_size=3D16384 ramoops.ftrace_size=3D16384
-ramoops.pmsg_size=3D16384 ramoops.record_size=3D32768" boot parameter,
-[ 0.483935] printk: console [pstore-1] enabled
-[ 0.484034] pstore: Registered ramoops as persistent store backend
-[ 0.484121] ramoops: using 0x100000@0x7ff00000, ecc: 16
+This is the patch-series for the Kernel Concurrency Sanitizer (KCSAN).
+KCSAN is a sampling watchpoint-based data-race detector. More details
+are included in Documentation/dev-tools/kcsan.rst. This patch-series
+only enables KCSAN for x86, but we expect adding support for other
+architectures is relatively straightforward (we are aware of
+experimental ARM64 and POWER support).
 
-But on my ezpad 6 m4, i add "memmap=3D1M!4095M ramoops.mem_size=3D1048576
-ramoops.ecc=3D1 ramoops.mem_address=3D0xfff00000
-ramoops.console_size=3D16384 ramoops.ftrace_size=3D16384
-ramoops.pmsg_size=3D16384 ramoops.record_size=3D32768" boot parameter, it
-can't boot, stop at "boot command list", no anyting happen, no dmesg.
-I test boot parameter one by one, just add ramoops.mem_size=3D1048576,
-will cause can't boot.
+To gather early feedback, we announced KCSAN back in September, and
+have integrated the feedback where possible:
+http://lkml.kernel.org/r/CANpmjNPJ_bHjfLZCAPV23AXFfiPiyXXqqu72n6TgWzb2Gnu1eA@mail.gmail.com
 
-youling 257 <youling257@gmail.com> =E4=BA=8E2019=E5=B9=B411=E6=9C=882=E6=97=
-=A5=E5=91=A8=E5=85=AD =E4=B8=8A=E5=8D=8810:26=E5=86=99=E9=81=93=EF=BC=9A
->
-> Ram map
->
-> [ 0.000000] BIOS-provided physical RAM map:
-> [ 0.000000] BIOS-e820: [mem 0x0000000000000000-0x000000000008efff] usable
-> [ 0.000000] BIOS-e820: [mem 0x000000000008f000-0x000000000008ffff] ACPI N=
-VS
-> [ 0.000000] BIOS-e820: [mem 0x0000000000090000-0x000000000009ffff] usable
-> [ 0.000000] BIOS-e820: [mem 0x0000000000100000-0x000000001effffff] usable
-> [ 0.000000] BIOS-e820: [mem 0x000000001f000000-0x00000000201fffff] reserv=
-ed
-> [ 0.000000] BIOS-e820: [mem 0x0000000020200000-0x00000000b6de7fff] usable
-> [ 0.000000] BIOS-e820: [mem 0x00000000b6de8000-0x00000000b6e08fff] reserv=
-ed
-> [ 0.000000] BIOS-e820: [mem 0x00000000b6e09000-0x00000000ba608fff] usable
-> [ 0.000000] BIOS-e820: [mem 0x00000000ba609000-0x00000000ba698fff] type 2=
-0
-> [ 0.000000] BIOS-e820: [mem 0x00000000ba699000-0x00000000baf18fff] reserv=
-ed
-> [ 0.000000] BIOS-e820: [mem 0x00000000baf19000-0x00000000bb018fff] ACPI N=
-VS
-> [ 0.000000] BIOS-e820: [mem 0x00000000bb019000-0x00000000bb058fff] ACPI d=
-ata
-> [ 0.000000] BIOS-e820: [mem 0x00000000bb059000-0x00000000bbffffff] usable
-> [ 0.000000] BIOS-e820: [mem 0x00000000e0000000-0x00000000e3ffffff] reserv=
-ed
-> [ 0.000000] BIOS-e820: [mem 0x00000000fea00000-0x00000000feafffff] reserv=
-ed
-> [ 0.000000] BIOS-e820: [mem 0x00000000fec00000-0x00000000fec00fff] reserv=
-ed
-> [ 0.000000] BIOS-e820: [mem 0x00000000fed01000-0x00000000fed01fff] reserv=
-ed
-> [ 0.000000] BIOS-e820: [mem 0x00000000fed03000-0x00000000fed03fff] reserv=
-ed
-> [ 0.000000] BIOS-e820: [mem 0x00000000fed06000-0x00000000fed06fff] reserv=
-ed
-> [ 0.000000] BIOS-e820: [mem 0x00000000fed08000-0x00000000fed09fff] reserv=
-ed
-> [ 0.000000] BIOS-e820: [mem 0x00000000fed1c000-0x00000000fed1cfff] reserv=
-ed
-> [ 0.000000] BIOS-e820: [mem 0x00000000fed80000-0x00000000fedbffff] reserv=
-ed
-> [ 0.000000] BIOS-e820: [mem 0x00000000fee00000-0x00000000fee00fff] reserv=
-ed
-> [ 0.000000] BIOS-e820: [mem 0x00000000ffc00000-0x00000000ffffffff] reserv=
-ed
-> [ 0.000000] BIOS-e820: [mem 0x0000000100000000-0x000000013fffffff] usable
-> [ 0.000000] NX (Execute Disable) protection: active
-> [ 0.000000] efi: EFI v2.40 by INSYDE Corp.
-> [ 0.000000] efi: ACPI 2.0=3D0xbb058014 SMBIOS=3D0xba6a9000 ESRT=3D0xba6ac=
-918
-> [ 0.000000] SMBIOS 2.8 present.
-> [ 0.000000] DMI: jumper EZpad/EZpad, BIOS Jumper8.S106x.A00C.1066 12/22/2=
-015
-> [ 0.000000] tsc: Detected 1440.000 MHz processor
-> [ 0.000298] e820: update [mem 0x00000000-0x00000fff] usable =3D=3D> reser=
-ved
-> [ 0.000302] e820: remove [mem 0x000a0000-0x000fffff] usable
->
-> youling 257 <youling257@gmail.com> =E4=BA=8E2019=E5=B9=B411=E6=9C=882=E6=
-=97=A5=E5=91=A8=E5=85=AD =E4=B8=8A=E5=8D=8810:23=E5=86=99=E9=81=93=EF=BC=9A
-> >
-> > only add ramoops.mem_size=3D1048576 boot parameter cause can't boot on
-> > my device, stop at booting command list, no anyting happen, no dmesg.
-> >
-> >
+We want to point out and acknowledge the work surrounding the LKMM,
+including several articles that motivate why data-races are dangerous
+[1, 2], justifying a data-race detector such as KCSAN.
+[1] https://lwn.net/Articles/793253/
+[2] https://lwn.net/Articles/799218/
+
+The current list of known upstream fixes for data-races found by KCSAN
+can be found here:
+https://github.com/google/ktsan/wiki/KCSAN#upstream-fixes-of-data-races-found-by-kcsan
+
+Changelog
+---------
+v3:
+* Major changes:
+ - Add microbenchmark.
+ - Add instruction watchpoint skip randomization.
+ - Refactor API and core runtime fast-path and slow-path. Compared to
+   the previous version, with a default config and benchmarked using the
+   added microbenchmark, this version is 3.8x faster.
+ - Make __tsan_unaligned __alias of generic accesses.
+ - Rename kcsan_{begin,end}_atomic ->
+   kcsan_{nestable,flat}_atomic_{begin,end}
+ - For filter list in debugfs.c use kmalloc+krealloc instead of
+   kvmalloc.
+ - Split Documentation into separate patch.
+
+v2: http://lkml.kernel.org/r/20191017141305.146193-1-elver@google.com
+* Major changes:
+ - Replace kcsan_check_access(.., {true, false}) with
+   kcsan_check_{read,write}.
+ - Change atomic-instrumented.h to use __atomic_check_{read,write}.
+ - Use common struct kcsan_ctx in task_struct and for per-CPU interrupt
+   contexts.
+
+v1: http://lkml.kernel.org/r/20191016083959.186860-1-elver@google.com
+
+Marco Elver (9):
+  kcsan: Add Kernel Concurrency Sanitizer infrastructure
+  kcsan: Add Documentation entry in dev-tools
+  objtool, kcsan: Add KCSAN runtime functions to whitelist
+  build, kcsan: Add KCSAN build exceptions
+  seqlock, kcsan: Add annotations for KCSAN
+  seqlock: Require WRITE_ONCE surrounding raw_seqcount_barrier
+  asm-generic, kcsan: Add KCSAN instrumentation for bitops
+  locking/atomics, kcsan: Add KCSAN instrumentation
+  x86, kcsan: Enable KCSAN for x86
+
+ Documentation/dev-tools/index.rst         |   1 +
+ Documentation/dev-tools/kcsan.rst         | 217 +++++++++
+ MAINTAINERS                               |  11 +
+ Makefile                                  |   3 +-
+ arch/x86/Kconfig                          |   1 +
+ arch/x86/boot/Makefile                    |   2 +
+ arch/x86/boot/compressed/Makefile         |   2 +
+ arch/x86/entry/vdso/Makefile              |   3 +
+ arch/x86/include/asm/bitops.h             |   6 +-
+ arch/x86/kernel/Makefile                  |   7 +
+ arch/x86/kernel/cpu/Makefile              |   3 +
+ arch/x86/lib/Makefile                     |   4 +
+ arch/x86/mm/Makefile                      |   3 +
+ arch/x86/purgatory/Makefile               |   2 +
+ arch/x86/realmode/Makefile                |   3 +
+ arch/x86/realmode/rm/Makefile             |   3 +
+ drivers/firmware/efi/libstub/Makefile     |   2 +
+ include/asm-generic/atomic-instrumented.h | 393 +++++++--------
+ include/asm-generic/bitops-instrumented.h |  18 +
+ include/linux/compiler-clang.h            |   9 +
+ include/linux/compiler-gcc.h              |   7 +
+ include/linux/compiler.h                  |  35 +-
+ include/linux/kcsan-checks.h              |  97 ++++
+ include/linux/kcsan.h                     | 115 +++++
+ include/linux/sched.h                     |   4 +
+ include/linux/seqlock.h                   |  51 +-
+ init/init_task.c                          |   8 +
+ init/main.c                               |   2 +
+ kernel/Makefile                           |   6 +
+ kernel/kcsan/Makefile                     |  11 +
+ kernel/kcsan/atomic.h                     |  27 ++
+ kernel/kcsan/core.c                       | 560 ++++++++++++++++++++++
+ kernel/kcsan/debugfs.c                    | 275 +++++++++++
+ kernel/kcsan/encoding.h                   |  94 ++++
+ kernel/kcsan/kcsan.h                      | 131 +++++
+ kernel/kcsan/report.c                     | 306 ++++++++++++
+ kernel/kcsan/test.c                       | 121 +++++
+ kernel/sched/Makefile                     |   6 +
+ lib/Kconfig.debug                         |   2 +
+ lib/Kconfig.kcsan                         | 119 +++++
+ lib/Makefile                              |   3 +
+ mm/Makefile                               |   8 +
+ scripts/Makefile.kcsan                    |   6 +
+ scripts/Makefile.lib                      |  10 +
+ scripts/atomic/gen-atomic-instrumented.sh |  17 +-
+ tools/objtool/check.c                     |  18 +
+ 46 files changed, 2526 insertions(+), 206 deletions(-)
+ create mode 100644 Documentation/dev-tools/kcsan.rst
+ create mode 100644 include/linux/kcsan-checks.h
+ create mode 100644 include/linux/kcsan.h
+ create mode 100644 kernel/kcsan/Makefile
+ create mode 100644 kernel/kcsan/atomic.h
+ create mode 100644 kernel/kcsan/core.c
+ create mode 100644 kernel/kcsan/debugfs.c
+ create mode 100644 kernel/kcsan/encoding.h
+ create mode 100644 kernel/kcsan/kcsan.h
+ create mode 100644 kernel/kcsan/report.c
+ create mode 100644 kernel/kcsan/test.c
+ create mode 100644 lib/Kconfig.kcsan
+ create mode 100644 scripts/Makefile.kcsan
+
+-- 
+2.24.0.rc1.363.gb1bccd3e3d-goog
+
