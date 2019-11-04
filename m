@@ -5,39 +5,39 @@ X-Spam-Level:
 X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 44EBDCA9ED3
-	for <linux-efi@archiver.kernel.org>; Mon,  4 Nov 2019 22:00:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E575ECA9ED3
+	for <linux-efi@archiver.kernel.org>; Mon,  4 Nov 2019 22:14:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 17A4D222C1
-	for <linux-efi@archiver.kernel.org>; Mon,  4 Nov 2019 22:00:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BA9F821744
+	for <linux-efi@archiver.kernel.org>; Mon,  4 Nov 2019 22:14:16 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1572904844;
-	bh=BQznuFgVQfqp84u8/GPWmIUgThSN1012WBeQa99r7uE=;
+	s=default; t=1572905656;
+	bh=mlquCAeuub9DQjmH5s7QG9Jv8sxTcMDhb1VpuNgMqWg=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=i5wBhFFM4pzYgeM5VV0VUuvLWVi/uYriI+nFenWHDam2M9Cfb8+RvtRhr+nNLgGJV
-	 DqXQbPDfMGQ7FQZvJFZg35Kbz3SAujIUgjgsDPetJOhcHq415QkCFeW7L9eeuUr4OG
-	 ScaIwwI2W9I+AcKEi+IC9kUWGX+zAkFAcLG1ByZU=
+	b=qwi4hHjrsfU/fflDnrzNMNP9pl9fxhMDsU644iRYGn3RiZkSgF/bH6366aSfPZvq9
+	 wt41LZGjTAkRkuidrX96aTUL2l6FnZKrNij8Bp8gE6VqB9CFKBiUz3KdC6/iTXZSL/
+	 IVT/IfdB8XqEbwNkQu8mPJOiD4rbd+krOcw7cOlI=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388292AbfKDWAm (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 4 Nov 2019 17:00:42 -0500
-Received: from mail.kernel.org ([198.145.29.99]:58412 "EHLO mail.kernel.org"
+        id S2389820AbfKDWIN (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 4 Nov 2019 17:08:13 -0500
+Received: from mail.kernel.org ([198.145.29.99]:40926 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2388905AbfKDWAl (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 4 Nov 2019 17:00:41 -0500
+        id S2388378AbfKDWIK (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Mon, 4 Nov 2019 17:08:10 -0500
 Received: from localhost (6.204-14-84.ripe.coltfrance.com [84.14.204.6])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 9C36E22473;
-        Mon,  4 Nov 2019 22:00:39 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id CBC2D21744;
+        Mon,  4 Nov 2019 22:08:08 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1572904840;
-        bh=BQznuFgVQfqp84u8/GPWmIUgThSN1012WBeQa99r7uE=;
+        s=default; t=1572905289;
+        bh=mlquCAeuub9DQjmH5s7QG9Jv8sxTcMDhb1VpuNgMqWg=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=mJHqgmsat+Gr916hLzfU8/cxAZjsyhIJtEY2B/0eGAqDhRoQfwTU1v63r9F8qIuxr
-         HVkmjein6OtnTrNiGL+x0XPhhZWHvHPP2JW7jme2UDmv2qkBDC4IRpFzZP/vEIcHZ7
-         1mbG/FpSiKAi8zATezmttAtlfJ1pnFoh7MXPdML4=
+        b=XdWHNLYbCPavn5BT5vjL7PnVIViFQWD5ovfqc7c4aTTWThhjlcIMxcHcPEAThvQm2
+         iITfI0FtOdt1SVMxEKD6JlnQKHrgIqF9nU9oymB7Bjy5Ylzn/Xygy/WDRHSuTqbC28
+         r874eFfTE1BRZdjVhIjL/Jg2BAUCblsZ0/PyMCvs=
 From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 To:     linux-kernel@vger.kernel.org
 Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
@@ -56,12 +56,12 @@ Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         Thomas Gleixner <tglx@linutronix.de>,
         linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org,
         Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.org>
-Subject: [PATCH 4.19 082/149] efi/x86: Do not clean dummy variable in kexec path
-Date:   Mon,  4 Nov 2019 22:44:35 +0100
-Message-Id: <20191104212142.341008793@linuxfoundation.org>
+Subject: [PATCH 5.3 052/163] efi/x86: Do not clean dummy variable in kexec path
+Date:   Mon,  4 Nov 2019 22:44:02 +0100
+Message-Id: <20191104212143.934226398@linuxfoundation.org>
 X-Mailer: git-send-email 2.23.0
-In-Reply-To: <20191104212126.090054740@linuxfoundation.org>
-References: <20191104212126.090054740@linuxfoundation.org>
+In-Reply-To: <20191104212140.046021995@linuxfoundation.org>
+References: <20191104212140.046021995@linuxfoundation.org>
 User-Agent: quilt/0.66
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -111,10 +111,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 3 deletions(-)
 
 diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 9061babfbc83d..335a62e74a2e9 100644
+index a7189a3b4d70f..3304f61538a26 100644
 --- a/arch/x86/platform/efi/efi.c
 +++ b/arch/x86/platform/efi/efi.c
-@@ -893,9 +893,6 @@ static void __init kexec_enter_virtual_mode(void)
+@@ -894,9 +894,6 @@ static void __init kexec_enter_virtual_mode(void)
  
  	if (efi_enabled(EFI_OLD_MEMMAP) && (__supported_pte_mask & _PAGE_NX))
  		runtime_code_page_mkexec();
