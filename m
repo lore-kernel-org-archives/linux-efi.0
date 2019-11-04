@@ -8,56 +8,56 @@ X-Spam-Status: No, score=-17.4 required=3.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
 	USER_AGENT_GIT,USER_IN_DEF_DKIM_WL autolearn=unavailable autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E923ACA9EB5
-	for <linux-efi@archiver.kernel.org>; Mon,  4 Nov 2019 14:29:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 00CE1CA9ECF
+	for <linux-efi@archiver.kernel.org>; Mon,  4 Nov 2019 14:29:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id BB2BA222C5
-	for <linux-efi@archiver.kernel.org>; Mon,  4 Nov 2019 14:29:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CB72921D7F
+	for <linux-efi@archiver.kernel.org>; Mon,  4 Nov 2019 14:29:33 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="FhPDq8Y8"
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="LohiqOAc"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729070AbfKDO3O (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 4 Nov 2019 09:29:14 -0500
-Received: from mail-vs1-f74.google.com ([209.85.217.74]:34150 "EHLO
+        id S1729055AbfKDO3d (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 4 Nov 2019 09:29:33 -0500
+Received: from mail-vs1-f74.google.com ([209.85.217.74]:36455 "EHLO
         mail-vs1-f74.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729010AbfKDO3L (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 4 Nov 2019 09:29:11 -0500
-Received: by mail-vs1-f74.google.com with SMTP id z20so2797648vsf.1
-        for <linux-efi@vger.kernel.org>; Mon, 04 Nov 2019 06:29:09 -0800 (PST)
+        with ESMTP id S1728940AbfKDO3F (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 4 Nov 2019 09:29:05 -0500
+Received: by mail-vs1-f74.google.com with SMTP id x72so1917760vsx.3
+        for <linux-efi@vger.kernel.org>; Mon, 04 Nov 2019 06:29:03 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=google.com; s=20161025;
         h=date:in-reply-to:message-id:mime-version:references:subject:from:to
          :cc;
-        bh=sQU0jAVefneuTdQpIgbUF6GdSN4TcMOiQRxRVI16Vls=;
-        b=FhPDq8Y8jgh3GaqH19Ri5l4th6SIgrfB5k6uYp6Qe1zCUALU5Q1h777JkPDXGoqtF+
-         rUVB4HT5dCMdMd/+svGvi1KkuFsbojwRCgfaJkdh2DPMBB53CrCa1TeF/tRilzh/U2Vv
-         rC8CcHxh3PrEaKH9Qc4nO5dN6oULNuw2D+ebZe/2C78pc5pykjiO0Bg4leEG7yFIFNxI
-         lT1Onq8IrfB98Hhn323WbkEF/3JHPJUZwZzMucC6nWXt4j1r7WLeMRYJuLt6zhN4vW9Q
-         0cZ7MGwIvE1QsZGodu2uWGo2OqoLsx5v5yIqO4x8fyNCQ7jT/uIEts0ZzNEU0DdB7OYH
-         Ef0A==
+        bh=pDhjw8llKKibkxwiEHjLwKfV0zoLrBjVR8XQZovar/g=;
+        b=LohiqOAcn6QB64L+xHNmTrNt1oKq4UZRkk4ZOhNrkaIxT1TltVDgpaprtEdibTc9pU
+         A3DldvhOSHYm9RKiNhv/6sRm2D1JbPCRDzgE3/c1GpAU2Jyv8tXRPLu2UNpc6Ukyiz51
+         SOtLkgj8OZ5YtevqEFEQ6iIBKMWD+3/xzWtyrdxl0scSH5KcQ6ctsCphAu7ip6gQBDL1
+         Knbbpb+HuMTblcij2UwwdOwlf2vvecyoBV8ZwKls56j6P+XNjjTsTjRq87vdKZE0Xb5r
+         LBfonj+OTaHHrtkacnJyj6KX3UQabQ3eWMCKP9kxDsoEJ4NXEn7JlCddkDBVEI/NHXRh
+         d44Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:in-reply-to:message-id:mime-version
          :references:subject:from:to:cc;
-        bh=sQU0jAVefneuTdQpIgbUF6GdSN4TcMOiQRxRVI16Vls=;
-        b=ZgiIIpjevffQ1tzFuNBk0G14zLC4Dgrqe0U946UM+etxM1Dic2sFNIo5l1LjMikBWE
-         zKCWkQQ/qVcd9kHnzF+pfzdXDhE/Rfe6O6euWxplH5Rmp1DnsJMKMX6i11Q+IMe2E7aG
-         FCSMtroaAtpUzanPCcX2WW+32plFWLpggxNIXMLWS58mdFptp/yUleczhwWCZK82Qx80
-         P70oVqYT0+4y2HnoN3C4BQXc6DZV7cO0phMJwaNKktsB3qKU+6IOTxm9zmsuun2eUuPm
-         gPwAe2lDL0b2R8OtYzrd7TYyTsBQ+Kdq2wR8mX88qeKS5JCXrl1vDO8BL/UwAeXNHP8o
-         aIhA==
-X-Gm-Message-State: APjAAAWHKDiOlX0evV9O8JKS4kAtNB5aObplsmbu65jEQWjAXmfoN14Y
-        4yN74sDo9lJRoNo/bMmslXaVImaO1g==
-X-Google-Smtp-Source: APXvYqxZ17ci8UfBwQliZ986Aa6FaGmsNO4/Ie/63JBd/SxBBgXy0wxlK6hBzj3ifIPGT1Jnqi5jP2CEFw==
-X-Received: by 2002:a05:6122:2c7:: with SMTP id k7mr10982783vki.97.1572877749135;
- Mon, 04 Nov 2019 06:29:09 -0800 (PST)
-Date:   Mon,  4 Nov 2019 15:27:42 +0100
+        bh=pDhjw8llKKibkxwiEHjLwKfV0zoLrBjVR8XQZovar/g=;
+        b=oeljX5TSd1DaiBw5IPAlpF+xBvISXnvS0Yz1NEjpG++roryAXN2YSxLZSf3amrVjYZ
+         qEW0zZ+YCQls4ioTyOlptgdBELPKYpMZYuB29N0gV8h2FkGDDZRLhxhav/o2Ah/80Zgg
+         C72CccPkOavb5nwo6Z7C1OLPd1cLzMzlL7K8klZDVEApYp1Py2KWXCMI6Hua72SvDklF
+         y/wd9UPq6NEoty/WP4V/khwFqbsJkL6nsA62oPMT1Uj9jSDXrkGuDE/k4ldVAkvVMObb
+         dMvI2bEQ42w+8WAMsR7PrqiWpNk9UEdUoviiBMoia3Yn0i4CNIYSnPxZdUf8TkDGeBZt
+         lPew==
+X-Gm-Message-State: APjAAAWuojM9CbHiu61fiWBglXtUK4unOARTc0b+tVwTqCNLTNhOduox
+        gdHdJ3+85bx/cT2j6cvY9G3mNz37Eg==
+X-Google-Smtp-Source: APXvYqzw3sxkDPv1YzCqpxSha4ijHDPuL+Rfk58iD5OOS4HLDTOu4FfiMAruziYhLL/nRX03UYWRc/epwg==
+X-Received: by 2002:a67:fd8b:: with SMTP id k11mr11860157vsq.43.1572877742637;
+ Mon, 04 Nov 2019 06:29:02 -0800 (PST)
+Date:   Mon,  4 Nov 2019 15:27:40 +0100
 In-Reply-To: <20191104142745.14722-1-elver@google.com>
-Message-Id: <20191104142745.14722-7-elver@google.com>
+Message-Id: <20191104142745.14722-5-elver@google.com>
 Mime-Version: 1.0
 References: <20191104142745.14722-1-elver@google.com>
 X-Mailer: git-send-email 2.24.0.rc1.363.gb1bccd3e3d-goog
-Subject: [PATCH v3 6/9] seqlock: Require WRITE_ONCE surrounding raw_seqcount_barrier
+Subject: [PATCH v3 4/9] build, kcsan: Add KCSAN build exceptions
 From:   Marco Elver <elver@google.com>
 To:     elver@google.com
 Cc:     akiyks@gmail.com, stern@rowland.harvard.edu, glider@google.com,
@@ -79,61 +79,102 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This patch proposes to require marked atomic accesses surrounding
-raw_write_seqcount_barrier. We reason that otherwise there is no way to
-guarantee propagation nor atomicity of writes before/after the barrier
-[1]. For example, consider the compiler tears stores either before or
-after the barrier; in this case, readers may observe a partial value,
-and because readers are unaware that writes are going on (writes are not
-in a seq-writer critical section), will complete the seq-reader critical
-section while having observed some partial state.
-[1] https://lwn.net/Articles/793253/
-
-This came up when designing and implementing KCSAN, because KCSAN would
-flag these accesses as data-races. After careful analysis, our reasoning
-as above led us to conclude that the best thing to do is to propose an
-amendment to the raw_seqcount_barrier usage.
+This blacklists several compilation units from KCSAN. See the respective
+inline comments for the reasoning.
 
 Signed-off-by: Marco Elver <elver@google.com>
 ---
 v3:
-* Add missing comment that was in preceding seqlock patch.
+* Moved EFI stub build exception hunk from x86-specific patch, since
+  it's not x86-specific.
+* Spelling "data-race" -> "data race".
 ---
- include/linux/seqlock.h | 11 +++++++++--
- 1 file changed, 9 insertions(+), 2 deletions(-)
+ drivers/firmware/efi/libstub/Makefile | 2 ++
+ kernel/Makefile                       | 5 +++++
+ kernel/sched/Makefile                 | 6 ++++++
+ mm/Makefile                           | 8 ++++++++
+ 4 files changed, 21 insertions(+)
 
-diff --git a/include/linux/seqlock.h b/include/linux/seqlock.h
-index 61232bc223fd..f52c91be8939 100644
---- a/include/linux/seqlock.h
-+++ b/include/linux/seqlock.h
-@@ -265,6 +265,13 @@ static inline void raw_write_seqcount_end(seqcount_t *s)
-  * usual consistency guarantee. It is one wmb cheaper, because we can
-  * collapse the two back-to-back wmb()s.
-  *
-+ * Note that, writes surrounding the barrier should be declared atomic (e.g.
-+ * via WRITE_ONCE): a) to ensure the writes become visible to other threads
-+ * atomically, avoiding compiler optimizations; b) to document which writes are
-+ * meant to propagate to the reader critical section. This is necessary because
-+ * neither writes before and after the barrier are enclosed in a seq-writer
-+ * critical section that would ensure readers are aware of ongoing writes.
-+ *
-  *      seqcount_t seq;
-  *      bool X = true, Y = false;
-  *
-@@ -284,11 +291,11 @@ static inline void raw_write_seqcount_end(seqcount_t *s)
-  *
-  *      void write(void)
-  *      {
-- *              Y = true;
-+ *              WRITE_ONCE(Y, true);
-  *
-  *              raw_write_seqcount_barrier(seq);
-  *
-- *              X = false;
-+ *              WRITE_ONCE(X, false);
-  *      }
-  */
- static inline void raw_write_seqcount_barrier(seqcount_t *s)
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index ee0661ddb25b..5d0a645c0de8 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -31,7 +31,9 @@ KBUILD_CFLAGS			:= $(cflags-y) -DDISABLE_BRANCH_PROFILING \
+ 				   -D__DISABLE_EXPORTS
+ 
+ GCOV_PROFILE			:= n
++# Sanitizer runtimes are unavailable and cannot be linked here.
+ KASAN_SANITIZE			:= n
++KCSAN_SANITIZE			:= n
+ UBSAN_SANITIZE			:= n
+ OBJECT_FILES_NON_STANDARD	:= y
+ 
+diff --git a/kernel/Makefile b/kernel/Makefile
+index 74ab46e2ebd1..cc53f7c25446 100644
+--- a/kernel/Makefile
++++ b/kernel/Makefile
+@@ -23,6 +23,9 @@ endif
+ # Prevents flicker of uninteresting __do_softirq()/__local_bh_disable_ip()
+ # in coverage traces.
+ KCOV_INSTRUMENT_softirq.o := n
++# Avoid KCSAN instrumentation in softirq ("No shared variables, all the data
++# are CPU local" => assume no data races), to reduce overhead in interrupts.
++KCSAN_SANITIZE_softirq.o = n
+ # These are called from save_stack_trace() on slub debug path,
+ # and produce insane amounts of uninteresting coverage.
+ KCOV_INSTRUMENT_module.o := n
+@@ -30,6 +33,7 @@ KCOV_INSTRUMENT_extable.o := n
+ # Don't self-instrument.
+ KCOV_INSTRUMENT_kcov.o := n
+ KASAN_SANITIZE_kcov.o := n
++KCSAN_SANITIZE_kcov.o := n
+ CFLAGS_kcov.o := $(call cc-option, -fno-conserve-stack -fno-stack-protector)
+ 
+ # cond_syscall is currently not LTO compatible
+@@ -118,6 +122,7 @@ obj-$(CONFIG_RSEQ) += rseq.o
+ 
+ obj-$(CONFIG_GCC_PLUGIN_STACKLEAK) += stackleak.o
+ KASAN_SANITIZE_stackleak.o := n
++KCSAN_SANITIZE_stackleak.o := n
+ KCOV_INSTRUMENT_stackleak.o := n
+ 
+ $(obj)/configs.o: $(obj)/config_data.gz
+diff --git a/kernel/sched/Makefile b/kernel/sched/Makefile
+index 21fb5a5662b5..e9307a9c54e7 100644
+--- a/kernel/sched/Makefile
++++ b/kernel/sched/Makefile
+@@ -7,6 +7,12 @@ endif
+ # that is not a function of syscall inputs. E.g. involuntary context switches.
+ KCOV_INSTRUMENT := n
+ 
++# There are numerous races here, however, most of them due to plain accesses.
++# This would make it even harder for syzbot to find reproducers, because these
++# bugs trigger without specific input. Disable by default, but should re-enable
++# eventually.
++KCSAN_SANITIZE := n
++
+ ifneq ($(CONFIG_SCHED_OMIT_FRAME_POINTER),y)
+ # According to Alan Modra <alan@linuxcare.com.au>, the -fno-omit-frame-pointer is
+ # needed for x86 only.  Why this used to be enabled for all architectures is beyond
+diff --git a/mm/Makefile b/mm/Makefile
+index d996846697ef..56c1964bb3a1 100644
+--- a/mm/Makefile
++++ b/mm/Makefile
+@@ -7,6 +7,14 @@ KASAN_SANITIZE_slab_common.o := n
+ KASAN_SANITIZE_slab.o := n
+ KASAN_SANITIZE_slub.o := n
+ 
++# These produce frequent data race reports: most of them are due to races on
++# the same word but accesses to different bits of that word. Re-enable KCSAN
++# for these when we have more consensus on what to do about them.
++KCSAN_SANITIZE_slab_common.o := n
++KCSAN_SANITIZE_slab.o := n
++KCSAN_SANITIZE_slub.o := n
++KCSAN_SANITIZE_page_alloc.o := n
++
+ # These files are disabled because they produce non-interesting and/or
+ # flaky coverage that is not a function of syscall inputs. E.g. slab is out of
+ # free pages, or a task is migrated between nodes.
 -- 
 2.24.0.rc1.363.gb1bccd3e3d-goog
 
