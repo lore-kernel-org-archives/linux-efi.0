@@ -7,37 +7,37 @@ X-Spam-Status: No, score=-7.0 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY,URIBL_BLOCKED,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C8FACA9EC9
-	for <linux-efi@archiver.kernel.org>; Mon,  4 Nov 2019 22:14:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EBBB7CA9ED4
+	for <linux-efi@archiver.kernel.org>; Mon,  4 Nov 2019 22:17:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 10CF921744
-	for <linux-efi@archiver.kernel.org>; Mon,  4 Nov 2019 22:14:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C0646204EC
+	for <linux-efi@archiver.kernel.org>; Mon,  4 Nov 2019 22:17:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1572905662;
-	bh=FrzwZv6FVNvvAr07Vc1/1PA+4MPp/UssWIY/WONUOQo=;
+	s=default; t=1572905838;
+	bh=bhZyzt5jNJv5rZYKFKakbsYlNulrMGxOM/5JzLduPEM=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=r4xIVrgGZVFLXNMApNMG8f1/m1YvrPhTHyF+X02AHNHsrWcnQzvfvFTAjsCIaZ2U8
-	 dH/psUEtYKNwFSajiIB2wmfKwFWG3/PpCGDRvhzNPIN2CYK3SIxEha7ivRp3UxvugP
-	 +QZAvFMp3kAVQkKMhWp78wydir5ee9jHJs91wa78=
+	b=fbKlHOS77c8aSaPNQpI1okG7c19hB2kvGtwHB6jkTyrdrcMKnN9JAnRkmmZFh1L4e
+	 wAa9vY2ip9zRbOpi2lp0ZHyO3gJzbtppegsI0/Nt5i9Yg62aWDW/JEtgFucVDmDYjX
+	 G0yExM/QskGGknl5J4XOx8RLO1ahVbTJ46fWNLTw=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2389203AbfKDWIM (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 4 Nov 2019 17:08:12 -0500
-Received: from mail.kernel.org ([198.145.29.99]:40842 "EHLO mail.kernel.org"
+        id S2389409AbfKDWCx (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 4 Nov 2019 17:02:53 -0500
+Received: from mail.kernel.org ([198.145.29.99]:33088 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2388489AbfKDWIJ (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 4 Nov 2019 17:08:09 -0500
+        id S2389403AbfKDWCw (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Mon, 4 Nov 2019 17:02:52 -0500
 Received: from localhost (6.204-14-84.ripe.coltfrance.com [84.14.204.6])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id DCDBE205C9;
-        Mon,  4 Nov 2019 22:08:05 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 3143120650;
+        Mon,  4 Nov 2019 22:02:50 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1572905286;
-        bh=FrzwZv6FVNvvAr07Vc1/1PA+4MPp/UssWIY/WONUOQo=;
+        s=default; t=1572904971;
+        bh=bhZyzt5jNJv5rZYKFKakbsYlNulrMGxOM/5JzLduPEM=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Lkl57Kl/3efiw8Rc3IKSlgdJQp4Dlv7Ag+KsByN21eHf+03HhZz3gE1TXCR65ZpQR
-         WTcsLEs32Py/PB5LUpFGaRRtO5e98rwNXSGyc/xJKMjoOai2mfqcILGNs55tcrlO3d
-         /WtDnkogd+4uEPzx29/KDUAyBXSDqHVTSVoMvIv0=
+        b=wlKpWtXUHbFCqVjWTPfF3fyGMkd9jnkHIaNsiR2GCTUeC/xPU60Wy+jsCAsZ51KQm
+         55ip79Dcpt21JqqV7Z+ydfXSwhjyU97G+Jby3pBvkU+agHkZJhK/ZP54VqaYwiB12Y
+         c6sb6LmqEvXY2Aqnn1xvouOsEsTzPM0SnxGfgfE4=
 From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 To:     linux-kernel@vger.kernel.org
 Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
@@ -57,12 +57,12 @@ Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         Thomas Gleixner <tglx@linutronix.de>,
         linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org,
         Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.org>
-Subject: [PATCH 5.3 051/163] efi/cper: Fix endianness of PCIe class code
-Date:   Mon,  4 Nov 2019 22:44:01 +0100
-Message-Id: <20191104212143.869392738@linuxfoundation.org>
+Subject: [PATCH 4.19 081/149] efi/cper: Fix endianness of PCIe class code
+Date:   Mon,  4 Nov 2019 22:44:34 +0100
+Message-Id: <20191104212142.274068642@linuxfoundation.org>
 X-Mailer: git-send-email 2.23.0
-In-Reply-To: <20191104212140.046021995@linuxfoundation.org>
-References: <20191104212140.046021995@linuxfoundation.org>
+In-Reply-To: <20191104212126.090054740@linuxfoundation.org>
+References: <20191104212126.090054740@linuxfoundation.org>
 User-Agent: quilt/0.66
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -113,10 +113,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-index addf0749dd8b6..b1af0de2e1008 100644
+index 4045098ddb860..116989cf3d457 100644
 --- a/drivers/firmware/efi/cper.c
 +++ b/drivers/firmware/efi/cper.c
-@@ -381,7 +381,7 @@ static void cper_print_pcie(const char *pfx, const struct cper_sec_pcie *pcie,
+@@ -393,7 +393,7 @@ static void cper_print_pcie(const char *pfx, const struct cper_sec_pcie *pcie,
  		printk("%s""vendor_id: 0x%04x, device_id: 0x%04x\n", pfx,
  		       pcie->device_id.vendor_id, pcie->device_id.device_id);
  		p = pcie->device_id.class_code;
