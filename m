@@ -4,40 +4,40 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A7D84C5DF61
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D1F8FC5DF60
 	for <linux-efi@archiver.kernel.org>; Thu,  7 Nov 2019 15:11:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 7DF2A21D82
+	by mail.kernel.org (Postfix) with ESMTP id A8833222C9
 	for <linux-efi@archiver.kernel.org>; Thu,  7 Nov 2019 15:11:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=default; t=1573139464;
-	bh=7T11RtN4dXAfLvwcDCgYIQmw0NTGKRuoKKREaMPYfh8=;
+	bh=QGlx/0lTtlPo1pPUoK2v4agM2ZMHLbvfThCaSQNT1rs=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=zFUKXjVFvHJHgMaoOVDaZ80kcHenhDtId6RxvC4laiqIXj2gY5HLXEY7cI21krn1F
-	 bj0EhJHbgGi/kD13hHTAQDCm72q7VR0NU+nBhj0R/7dKguwn8tsYIKepsX/xdZWzuT
-	 3TsLxAr4i3zYeOkKe3yY5vLNDK4vq2pJTRIw7938=
+	b=0Ysz2Ykc3tVRNDhOxLKdj/DG6kPkFhGbZjGkymYfwrbEy+FL66vQ79UXzbw2fnKY2
+	 lFgfyG9W4hyrWEIiXsg7f9gnKOD06s+3So5GTmQ2A545GCYLNhg6dr2KJG+igqea33
+	 R54X73w4DbKV/5Q6UOvp12JaEwnguCFb15atu7M0=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2389327AbfKGPLB (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 7 Nov 2019 10:11:01 -0500
-Received: from mail.kernel.org ([198.145.29.99]:34948 "EHLO mail.kernel.org"
+        id S2389358AbfKGPLE (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 7 Nov 2019 10:11:04 -0500
+Received: from mail.kernel.org ([198.145.29.99]:34998 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2388215AbfKGPLA (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Thu, 7 Nov 2019 10:11:00 -0500
+        id S2388215AbfKGPLD (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Thu, 7 Nov 2019 10:11:03 -0500
 Received: from e123331-lin.home (lfbn-mar-1-643-104.w90-118.abo.wanadoo.fr [90.118.215.104])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 8473C21D7B;
-        Thu,  7 Nov 2019 15:10:57 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 6AC0021D7E;
+        Thu,  7 Nov 2019 15:11:00 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1573139459;
-        bh=7T11RtN4dXAfLvwcDCgYIQmw0NTGKRuoKKREaMPYfh8=;
+        s=default; t=1573139462;
+        bh=QGlx/0lTtlPo1pPUoK2v4agM2ZMHLbvfThCaSQNT1rs=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=mSlLkHJQ2gu/SNR+prRU/mM1VLOhaZCOQEiVSXV01acGatL584mJsW12o9bImKfO/
-         hKu10rEuvr6P1dFqi5WjAhzzsexsPf/A+ZdgJI/jJSgkZ1LxymAycuQAQaWphJPRqN
-         bEWdj4Vfju+ALWTeOxC+LgIqyOXwZPS0bBEmc+GE=
+        b=bbUPcnFgfHg6IARJNAoUITp5eEc9iWFTqdyX4iFMQ4gpiIfNb/BcOFZ/BPYJC4La/
+         Xx1OEaE+YRVqHn1e2uqqE7iI6IXXHj5hmvTDHblXWB0VTHIzdiLYl7jHFdT5up990t
+         RdJW/rkzs4iFqbU7e9sW43WfwQn+2buzNMN/wvv4=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
@@ -47,9 +47,9 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>,
         Dominik Brodowski <linux@dominikbrodowski.net>,
         Xinwei Kong <kong.kongxinwei@hisilicon.com>,
         Zou Cao <zoucao@linux.alibaba.com>
-Subject: [PATCH 2/4] efi/random: use arch-independent efi_call_proto()
-Date:   Thu,  7 Nov 2019 16:10:34 +0100
-Message-Id: <20191107151036.5586-3-ardb@kernel.org>
+Subject: [PATCH 3/4] x86: efi/random: Invoke EFI_RNG_PROTOCOL to seed the UEFI RNG table
+Date:   Thu,  7 Nov 2019 16:10:35 +0100
+Message-Id: <20191107151036.5586-4-ardb@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20191107151036.5586-1-ardb@kernel.org>
 References: <20191107151036.5586-1-ardb@kernel.org>
@@ -60,73 +60,86 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Dominik Brodowski <linux@dominikbrodowski.net>
 
-To handle all arch-specific peculiarities when calling an EFI protocol
-function, a wrapper efi_call_proto() exists on all relevant architectures.
-On arm/arm64, this is merely a plain function call. On x86, a special EFI
-entry stub needs to be used, however, as the calling convention differs.
-To make the efi/random stub arch-independent, use efi_call_proto()
-instead of the existing non-portable calls to the EFI get_rng protocol
-function. This also requires the addition of some typedefs.
+Invoke the EFI_RNG_PROTOCOL protocol in the context of the x86 EFI stub,
+same as is done on arm/arm64 since commit 568bc4e87033 ("efi/arm*/libstub:
+Invoke EFI_RNG_PROTOCOL to seed the UEFI RNG table"). Within the stub,
+a Linux-specific RNG seed UEFI config table will be seeded. The EFI routines
+in the core kernel will pick that up later, yet still early during boot,
+to seed the kernel entropy pool. If CONFIG_RANDOM_TRUST_BOOTLOADER, entropy
+is credited for this seed.
 
 Signed-off-by: Dominik Brodowski <linux@dominikbrodowski.net>
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/firmware/efi/libstub/random.c | 23 ++++++++++++++++++-----
- 1 file changed, 18 insertions(+), 5 deletions(-)
+ arch/x86/boot/compressed/eboot.c       | 3 +++
+ drivers/firmware/efi/libstub/Makefile  | 5 +++--
+ drivers/firmware/efi/libstub/efistub.h | 2 --
+ include/linux/efi.h                    | 2 ++
+ 4 files changed, 8 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/random.c b/drivers/firmware/efi/libstub/random.c
-index b4b1d1dcb5fd..53f1466f7de6 100644
---- a/drivers/firmware/efi/libstub/random.c
-+++ b/drivers/firmware/efi/libstub/random.c
-@@ -9,6 +9,18 @@
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index 82bc60c8acb2..68945c5700bf 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -782,6 +782,9 @@ efi_main(struct efi_config *c, struct boot_params *boot_params)
  
- #include "efistub.h"
+ 	/* Ask the firmware to clear memory on unclean shutdown */
+ 	efi_enable_reset_attack_mitigation(sys_table);
++
++	efi_random_get_seed(sys_table);
++
+ 	efi_retrieve_tpm2_eventlog(sys_table);
  
-+typedef struct efi_rng_protocol efi_rng_protocol_t;
-+
-+typedef struct {
-+	u32 get_info;
-+	u32 get_rng;
-+} efi_rng_protocol_32_t;
-+
-+typedef struct {
-+	u64 get_info;
-+	u64 get_rng;
-+} efi_rng_protocol_64_t;
-+
- struct efi_rng_protocol {
- 	efi_status_t (*get_info)(struct efi_rng_protocol *,
- 				 unsigned long *, efi_guid_t *);
-@@ -28,7 +40,7 @@ efi_status_t efi_get_random_bytes(efi_system_table_t *sys_table_arg,
- 	if (status != EFI_SUCCESS)
- 		return status;
+ 	setup_graphics(boot_params);
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index ee0661ddb25b..c35f893897e1 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -38,7 +38,8 @@ OBJECT_FILES_NON_STANDARD	:= y
+ # Prevents link failures: __sanitizer_cov_trace_pc() is not linked in.
+ KCOV_INSTRUMENT			:= n
  
--	return rng->get_rng(rng, NULL, size, out);
-+	return efi_call_proto(efi_rng_protocol, get_rng, rng, NULL, size, out);
- }
+-lib-y				:= efi-stub-helper.o gop.o secureboot.o tpm.o
++lib-y				:= efi-stub-helper.o gop.o secureboot.o tpm.o \
++				   random.o
+ 
+ # include the stub's generic dependencies from lib/ when building for ARM/arm64
+ arm-deps-y := fdt_rw.c fdt_ro.c fdt_wip.c fdt.c fdt_empty_tree.c fdt_sw.c
+@@ -47,7 +48,7 @@ arm-deps-$(CONFIG_ARM64) += sort.c
+ $(obj)/lib-%.o: $(srctree)/lib/%.c FORCE
+ 	$(call if_changed_rule,cc_o_c)
+ 
+-lib-$(CONFIG_EFI_ARMSTUB)	+= arm-stub.o fdt.o string.o random.o \
++lib-$(CONFIG_EFI_ARMSTUB)	+= arm-stub.o fdt.o string.o \
+ 				   $(patsubst %.c,lib-%.o,$(arm-deps-y))
+ 
+ lib-$(CONFIG_ARM)		+= arm32-stub.o
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index 7f1556fd867d..05739ae013c8 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -63,8 +63,6 @@ efi_status_t efi_random_alloc(efi_system_table_t *sys_table_arg,
+ 
+ efi_status_t check_platform_features(efi_system_table_t *sys_table_arg);
+ 
+-efi_status_t efi_random_get_seed(efi_system_table_t *sys_table_arg);
+-
+ void *get_efi_config_table(efi_system_table_t *sys_table, efi_guid_t guid);
+ 
+ /* Helper macros for the usual case of using simple C variables: */
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index d87acf62958e..028efa7a9f3b 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1645,6 +1645,8 @@ static inline void
+ efi_enable_reset_attack_mitigation(efi_system_table_t *sys_table_arg) { }
+ #endif
+ 
++efi_status_t efi_random_get_seed(efi_system_table_t *sys_table_arg);
++
+ void efi_retrieve_tpm2_eventlog(efi_system_table_t *sys_table);
  
  /*
-@@ -161,15 +173,16 @@ efi_status_t efi_random_get_seed(efi_system_table_t *sys_table_arg)
- 	if (status != EFI_SUCCESS)
- 		return status;
- 
--	status = rng->get_rng(rng, &rng_algo_raw, EFI_RANDOM_SEED_SIZE,
--			      seed->bits);
-+	status = efi_call_proto(efi_rng_protocol, get_rng, rng, &rng_algo_raw,
-+				 EFI_RANDOM_SEED_SIZE, seed->bits);
-+
- 	if (status == EFI_UNSUPPORTED)
- 		/*
- 		 * Use whatever algorithm we have available if the raw algorithm
- 		 * is not implemented.
- 		 */
--		status = rng->get_rng(rng, NULL, EFI_RANDOM_SEED_SIZE,
--				      seed->bits);
-+		status = efi_call_proto(efi_rng_protocol, get_rng, rng, NULL,
-+					 EFI_RANDOM_SEED_SIZE, seed->bits);
- 
- 	if (status != EFI_SUCCESS)
- 		goto err_freepool;
 -- 
 2.17.1
 
