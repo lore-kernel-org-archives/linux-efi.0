@@ -2,42 +2,42 @@ Return-Path: <SRS0=vceF=Y7=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 58240C5DF61
-	for <linux-efi@archiver.kernel.org>; Thu,  7 Nov 2019 15:11:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7D84C5DF61
+	for <linux-efi@archiver.kernel.org>; Thu,  7 Nov 2019 15:11:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 2E53D21D7F
-	for <linux-efi@archiver.kernel.org>; Thu,  7 Nov 2019 15:11:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7DF2A21D82
+	for <linux-efi@archiver.kernel.org>; Thu,  7 Nov 2019 15:11:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1573139461;
-	bh=zy8/oTWVp9pAU9Yw/5ShxGylu0BdMemczEEpuQoS5vQ=;
+	s=default; t=1573139464;
+	bh=7T11RtN4dXAfLvwcDCgYIQmw0NTGKRuoKKREaMPYfh8=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=Ln8NEQZIG4VM5gGKalzxN58ame51n7TOAfanF8v0E0CMtpGPg35Qj7GqiqFuPbE++
-	 25ZP7O3HBhZjXQbXk6q1Cg1+KOsB1CAOUY0PWLtYzK4jOGAHPR7hH050vZBClRwuJB
-	 OJYDQyksH+zaRqLpAJh4f+hR79YF3t+DmXzswG78=
+	b=zFUKXjVFvHJHgMaoOVDaZ80kcHenhDtId6RxvC4laiqIXj2gY5HLXEY7cI21krn1F
+	 bj0EhJHbgGi/kD13hHTAQDCm72q7VR0NU+nBhj0R/7dKguwn8tsYIKepsX/xdZWzuT
+	 3TsLxAr4i3zYeOkKe3yY5vLNDK4vq2pJTRIw7938=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388454AbfKGPK5 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 7 Nov 2019 10:10:57 -0500
-Received: from mail.kernel.org ([198.145.29.99]:34880 "EHLO mail.kernel.org"
+        id S2389327AbfKGPLB (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 7 Nov 2019 10:11:01 -0500
+Received: from mail.kernel.org ([198.145.29.99]:34948 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729854AbfKGPK5 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Thu, 7 Nov 2019 10:10:57 -0500
+        id S2388215AbfKGPLA (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Thu, 7 Nov 2019 10:11:00 -0500
 Received: from e123331-lin.home (lfbn-mar-1-643-104.w90-118.abo.wanadoo.fr [90.118.215.104])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id CA9ED21D79;
-        Thu,  7 Nov 2019 15:10:54 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 8473C21D7B;
+        Thu,  7 Nov 2019 15:10:57 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1573139457;
-        bh=zy8/oTWVp9pAU9Yw/5ShxGylu0BdMemczEEpuQoS5vQ=;
+        s=default; t=1573139459;
+        bh=7T11RtN4dXAfLvwcDCgYIQmw0NTGKRuoKKREaMPYfh8=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=cMBab5NQhJpSiAGMJ5dr6OYJkfykMx1hkWEWZ5G1UY0yreVLHj7vBI1PsxSqlRr9D
-         nbGd1TVROvVhrmTH6QyLpaNUNRVVyLNEfbYHt4Ts6HVICpDJ6VakdP1DoPoIjPDxj2
-         fdal657TSMAD2JOVGMTJMgsTeP0EZLJY2HBKKSXE=
+        b=mSlLkHJQ2gu/SNR+prRU/mM1VLOhaZCOQEiVSXV01acGatL584mJsW12o9bImKfO/
+         hKu10rEuvr6P1dFqi5WjAhzzsexsPf/A+ZdgJI/jJSgkZ1LxymAycuQAQaWphJPRqN
+         bEWdj4Vfju+ALWTeOxC+LgIqyOXwZPS0bBEmc+GE=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
@@ -46,11 +46,10 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>,
         linux-kernel@vger.kernel.org,
         Dominik Brodowski <linux@dominikbrodowski.net>,
         Xinwei Kong <kong.kongxinwei@hisilicon.com>,
-        Zou Cao <zoucao@linux.alibaba.com>,
-        Ard Biesheuvel <ard.biesheuvel@arm.com>
-Subject: [PATCH 1/4] MAINTAINERS: update Ard's email address to @kernel.org
-Date:   Thu,  7 Nov 2019 16:10:33 +0100
-Message-Id: <20191107151036.5586-2-ardb@kernel.org>
+        Zou Cao <zoucao@linux.alibaba.com>
+Subject: [PATCH 2/4] efi/random: use arch-independent efi_call_proto()
+Date:   Thu,  7 Nov 2019 16:10:34 +0100
+Message-Id: <20191107151036.5586-3-ardb@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20191107151036.5586-1-ardb@kernel.org>
 References: <20191107151036.5586-1-ardb@kernel.org>
@@ -59,65 +58,75 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Cc: Ard Biesheuvel <ard.biesheuvel@arm.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+From: Dominik Brodowski <linux@dominikbrodowski.net>
+
+To handle all arch-specific peculiarities when calling an EFI protocol
+function, a wrapper efi_call_proto() exists on all relevant architectures.
+On arm/arm64, this is merely a plain function call. On x86, a special EFI
+entry stub needs to be used, however, as the calling convention differs.
+To make the efi/random stub arch-independent, use efi_call_proto()
+instead of the existing non-portable calls to the EFI get_rng protocol
+function. This also requires the addition of some typedefs.
+
+Signed-off-by: Dominik Brodowski <linux@dominikbrodowski.net>
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- .mailmap    | 1 +
- MAINTAINERS | 8 ++++----
- 2 files changed, 5 insertions(+), 4 deletions(-)
+ drivers/firmware/efi/libstub/random.c | 23 ++++++++++++++++++-----
+ 1 file changed, 18 insertions(+), 5 deletions(-)
 
-diff --git a/.mailmap b/.mailmap
-index 83d7e750c2fc..5d3b741a3f95 100644
---- a/.mailmap
-+++ b/.mailmap
-@@ -32,6 +32,7 @@ Andy Adamson <andros@citi.umich.edu>
- Antoine Tenart <antoine.tenart@free-electrons.com>
- Antonio Ospite <ao2@ao2.it> <ao2@amarulasolutions.com>
- Archit Taneja <archit@ti.com>
-+Ard Biesheuvel <ardb@kernel.org> <ard.biesheuvel@linaro.org>
- Arnaud Patard <arnaud.patard@rtp-net.org>
- Arnd Bergmann <arnd@arndb.de>
- Axel Dyks <xl@xlsigned.net>
-diff --git a/MAINTAINERS b/MAINTAINERS
-index cba1095547fd..cc9f02ab9316 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -6003,14 +6003,14 @@ F:	sound/usb/misc/ua101.c
- EFI TEST DRIVER
- L:	linux-efi@vger.kernel.org
- M:	Ivan Hu <ivan.hu@canonical.com>
--M:	Ard Biesheuvel <ard.biesheuvel@linaro.org>
-+M:	Ard Biesheuvel <ardb@kernel.org>
- S:	Maintained
- F:	drivers/firmware/efi/test/
+diff --git a/drivers/firmware/efi/libstub/random.c b/drivers/firmware/efi/libstub/random.c
+index b4b1d1dcb5fd..53f1466f7de6 100644
+--- a/drivers/firmware/efi/libstub/random.c
++++ b/drivers/firmware/efi/libstub/random.c
+@@ -9,6 +9,18 @@
  
- EFI VARIABLE FILESYSTEM
- M:	Matthew Garrett <matthew.garrett@nebula.com>
- M:	Jeremy Kerr <jk@ozlabs.org>
--M:	Ard Biesheuvel <ard.biesheuvel@linaro.org>
-+M:	Ard Biesheuvel <ardb@kernel.org>
- T:	git git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git
- L:	linux-efi@vger.kernel.org
- S:	Maintained
-@@ -6189,7 +6189,7 @@ S:	Supported
- F:	security/integrity/evm/
+ #include "efistub.h"
  
- EXTENSIBLE FIRMWARE INTERFACE (EFI)
--M:	Ard Biesheuvel <ard.biesheuvel@linaro.org>
-+M:	Ard Biesheuvel <ardb@kernel.org>
- L:	linux-efi@vger.kernel.org
- T:	git git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git
- S:	Maintained
-@@ -15006,7 +15006,7 @@ F:	include/media/soc_camera.h
- F:	drivers/staging/media/soc_camera/
++typedef struct efi_rng_protocol efi_rng_protocol_t;
++
++typedef struct {
++	u32 get_info;
++	u32 get_rng;
++} efi_rng_protocol_32_t;
++
++typedef struct {
++	u64 get_info;
++	u64 get_rng;
++} efi_rng_protocol_64_t;
++
+ struct efi_rng_protocol {
+ 	efi_status_t (*get_info)(struct efi_rng_protocol *,
+ 				 unsigned long *, efi_guid_t *);
+@@ -28,7 +40,7 @@ efi_status_t efi_get_random_bytes(efi_system_table_t *sys_table_arg,
+ 	if (status != EFI_SUCCESS)
+ 		return status;
  
- SOCIONEXT SYNQUACER I2C DRIVER
--M:	Ard Biesheuvel <ard.biesheuvel@linaro.org>
-+M:	Ard Biesheuvel <ardb@kernel.org>
- L:	linux-i2c@vger.kernel.org
- S:	Maintained
- F:	drivers/i2c/busses/i2c-synquacer.c
+-	return rng->get_rng(rng, NULL, size, out);
++	return efi_call_proto(efi_rng_protocol, get_rng, rng, NULL, size, out);
+ }
+ 
+ /*
+@@ -161,15 +173,16 @@ efi_status_t efi_random_get_seed(efi_system_table_t *sys_table_arg)
+ 	if (status != EFI_SUCCESS)
+ 		return status;
+ 
+-	status = rng->get_rng(rng, &rng_algo_raw, EFI_RANDOM_SEED_SIZE,
+-			      seed->bits);
++	status = efi_call_proto(efi_rng_protocol, get_rng, rng, &rng_algo_raw,
++				 EFI_RANDOM_SEED_SIZE, seed->bits);
++
+ 	if (status == EFI_UNSUPPORTED)
+ 		/*
+ 		 * Use whatever algorithm we have available if the raw algorithm
+ 		 * is not implemented.
+ 		 */
+-		status = rng->get_rng(rng, NULL, EFI_RANDOM_SEED_SIZE,
+-				      seed->bits);
++		status = efi_call_proto(efi_rng_protocol, get_rng, rng, NULL,
++					 EFI_RANDOM_SEED_SIZE, seed->bits);
+ 
+ 	if (status != EFI_SUCCESS)
+ 		goto err_freepool;
 -- 
 2.17.1
 
