@@ -6,37 +6,40 @@ X-Spam-Status: No, score=-6.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	URIBL_BLOCKED autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 10FF4FA372C
-	for <linux-efi@archiver.kernel.org>; Thu,  7 Nov 2019 01:58:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 20487FC6196
+	for <linux-efi@archiver.kernel.org>; Thu,  7 Nov 2019 01:58:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E088721848
-	for <linux-efi@archiver.kernel.org>; Thu,  7 Nov 2019 01:58:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E570621848
+	for <linux-efi@archiver.kernel.org>; Thu,  7 Nov 2019 01:58:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1733072AbfKGB5z (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 6 Nov 2019 20:57:55 -0500
-Received: from mga04.intel.com ([192.55.52.120]:52972 "EHLO mga04.intel.com"
+        id S1733114AbfKGB6H (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 6 Nov 2019 20:58:07 -0500
+Received: from mga17.intel.com ([192.55.52.151]:41575 "EHLO mga17.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1733033AbfKGB5z (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 6 Nov 2019 20:57:55 -0500
+        id S1733111AbfKGB6H (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 6 Nov 2019 20:58:07 -0500
 X-Amp-Result: SKIPPED(no attachment in message)
 X-Amp-File-Uploaded: False
-Received: from fmsmga007.fm.intel.com ([10.253.24.52])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 06 Nov 2019 17:57:55 -0800
+Received: from fmsmga005.fm.intel.com ([10.253.24.32])
+  by fmsmga107.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 06 Nov 2019 17:58:06 -0800
 X-IronPort-AV: E=Sophos;i="5.68,276,1569308400"; 
-   d="scan'208";a="201272088"
+   d="scan'208";a="402579218"
 Received: from dwillia2-desk3.jf.intel.com (HELO dwillia2-desk3.amr.corp.intel.com) ([10.54.39.16])
-  by fmsmga007-auth.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 06 Nov 2019 17:57:54 -0800
-Subject: [PATCH v8 09/12] dax: Fix alloc_dax_region() compile warning
+  by fmsmga005-auth.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 06 Nov 2019 17:58:06 -0800
+Subject: [PATCH v8 11/12] acpi/numa/hmat: Register HMAT at device_initcall
+ level
 From:   Dan Williams <dan.j.williams@intel.com>
 To:     mingo@redhat.com
-Cc:     Vishal Verma <vishal.l.verma@intel.com>,
-        kbuild test robot <lkp@intel.com>, peterz@infradead.org,
-        dave.hansen@linux.intel.com, ard.biesheuvel@linaro.org,
-        x86@kernel.org, linux-acpi@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-nvdimm@lists.01.org,
-        linux-efi@vger.kernel.org
-Date:   Wed, 06 Nov 2019 17:43:37 -0800
-Message-ID: <157309101783.1579826.6555129802030578776.stgit@dwillia2-desk3.amr.corp.intel.com>
+Cc:     "Rafael J. Wysocki" <rjw@rjwysocki.net>,
+        Len Brown <lenb@kernel.org>, Keith Busch <kbusch@kernel.org>,
+        Jonathan Cameron <Jonathan.Cameron@huawei.com>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        peterz@infradead.org, vishal.l.verma@intel.com,
+        ard.biesheuvel@linaro.org, x86@kernel.org,
+        linux-acpi@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-nvdimm@lists.01.org, linux-efi@vger.kernel.org
+Date:   Wed, 06 Nov 2019 17:43:49 -0800
+Message-ID: <157309102949.1579826.9612009592539745686.stgit@dwillia2-desk3.amr.corp.intel.com>
 In-Reply-To: <157309097008.1579826.12818463304589384434.stgit@dwillia2-desk3.amr.corp.intel.com>
 References: <157309097008.1579826.12818463304589384434.stgit@dwillia2-desk3.amr.corp.intel.com>
 User-Agent: StGit/0.18-2-gc94f
@@ -48,58 +51,32 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-PFN flags are (unsigned long long), fix the alloc_dax_region() calling
-convention to fix warnings of the form:
+In preparation for registering device-dax instances for accessing EFI
+specific-purpose memory, arrange for the HMAT registration to occur
+later in the init process. Critically HMAT initialization needs to occur
+after e820__reserve_resources_late() which is the point at which the
+iomem resource tree is populated with "Application Reserved"
+(IORES_DESC_APPLICATION_RESERVED). e820__reserve_resources_late()
+happens at subsys_initcall time.
 
->> include/linux/pfn_t.h:18:17: warning: large integer implicitly truncated to unsigned type [-Woverflow]
-    #define PFN_DEV (1ULL << (BITS_PER_LONG_LONG - 3))
-
-Cc: Vishal Verma <vishal.l.verma@intel.com>
-Reported-by: kbuild test robot <lkp@intel.com>
+Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Cc: Len Brown <lenb@kernel.org>
+Cc: Keith Busch <kbusch@kernel.org>
+Cc: Jonathan Cameron <Jonathan.Cameron@huawei.com>
+Reviewed-by: Dave Hansen <dave.hansen@linux.intel.com>
 Signed-off-by: Dan Williams <dan.j.williams@intel.com>
 ---
- drivers/dax/bus.c         |    2 +-
- drivers/dax/bus.h         |    2 +-
- drivers/dax/dax-private.h |    2 +-
- 3 files changed, 3 insertions(+), 3 deletions(-)
+ drivers/acpi/numa/hmat.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/dax/bus.c b/drivers/dax/bus.c
-index 8fafbeab510a..eccdda1f7b71 100644
---- a/drivers/dax/bus.c
-+++ b/drivers/dax/bus.c
-@@ -227,7 +227,7 @@ static void dax_region_unregister(void *region)
- 
- struct dax_region *alloc_dax_region(struct device *parent, int region_id,
- 		struct resource *res, int target_node, unsigned int align,
--		unsigned long pfn_flags)
-+		unsigned long long pfn_flags)
- {
- 	struct dax_region *dax_region;
- 
-diff --git a/drivers/dax/bus.h b/drivers/dax/bus.h
-index 8619e3299943..9e4eba67e8b9 100644
---- a/drivers/dax/bus.h
-+++ b/drivers/dax/bus.h
-@@ -11,7 +11,7 @@ struct dax_region;
- void dax_region_put(struct dax_region *dax_region);
- struct dax_region *alloc_dax_region(struct device *parent, int region_id,
- 		struct resource *res, int target_node, unsigned int align,
--		unsigned long flags);
-+		unsigned long long flags);
- 
- enum dev_dax_subsys {
- 	DEV_DAX_BUS,
-diff --git a/drivers/dax/dax-private.h b/drivers/dax/dax-private.h
-index 6ccca3b890d6..3107ce80e809 100644
---- a/drivers/dax/dax-private.h
-+++ b/drivers/dax/dax-private.h
-@@ -32,7 +32,7 @@ struct dax_region {
- 	struct device *dev;
- 	unsigned int align;
- 	struct resource res;
--	unsigned long pfn_flags;
-+	unsigned long long pfn_flags;
- };
- 
- /**
+diff --git a/drivers/acpi/numa/hmat.c b/drivers/acpi/numa/hmat.c
+index 8b0de8a3c647..00e0a270ece3 100644
+--- a/drivers/acpi/numa/hmat.c
++++ b/drivers/acpi/numa/hmat.c
+@@ -748,4 +748,4 @@ static __init int hmat_init(void)
+ 	acpi_put_table(tbl);
+ 	return 0;
+ }
+-subsys_initcall(hmat_init);
++device_initcall(hmat_init);
 
