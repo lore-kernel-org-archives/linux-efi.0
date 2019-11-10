@@ -1,244 +1,96 @@
-Return-Path: <SRS0=Kr36=ZB=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=TBuH=ZC=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 61F8EC17444
-	for <linux-efi@archiver.kernel.org>; Sat,  9 Nov 2019 19:01:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 359E7C43331
+	for <linux-efi@archiver.kernel.org>; Sun, 10 Nov 2019 03:07:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 3C1E0215EA
-	for <linux-efi@archiver.kernel.org>; Sat,  9 Nov 2019 19:01:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 00F15215EA
+	for <linux-efi@archiver.kernel.org>; Sun, 10 Nov 2019 03:07:05 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1573355225;
+	bh=Nie5KcE/bv2R3qZeKePgfZiKNZdaUTRXVrjT3s8MwA0=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=cp2YWmJ9cjQDxzJScAlK2wFyrzHgDDde5/3qzJGjp0KuqdLp/FzuMm+johVQx4SY7
+	 3PUUe2C5/QDesJr2/MGMhQTxZo4+CYkVt4ON5iCtFQJ6xhMtqoczYKN4CDQYVSpghi
+	 WpFzgjYkCaGNAqoznZ2+ubr1E6lw4STqUtGeoYOY=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726684AbfKITBD (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 9 Nov 2019 14:01:03 -0500
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:64020 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726681AbfKITBD (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sat, 9 Nov 2019 14:01:03 -0500
-Received: from pps.filterd (m0098420.ppops.net [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com (8.16.0.27/8.16.0.27) with SMTP id xA9IuxeY181746
-        for <linux-efi@vger.kernel.org>; Sat, 9 Nov 2019 14:01:02 -0500
-Received: from e06smtp04.uk.ibm.com (e06smtp04.uk.ibm.com [195.75.94.100])
-        by mx0b-001b2d01.pphosted.com with ESMTP id 2w5th85drw-1
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <linux-efi@vger.kernel.org>; Sat, 09 Nov 2019 14:01:01 -0500
-Received: from localhost
-        by e06smtp04.uk.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-        for <linux-efi@vger.kernel.org> from <nayna@linux.ibm.com>;
-        Sat, 9 Nov 2019 19:01:00 -0000
-Received: from b06avi18626390.portsmouth.uk.ibm.com (9.149.26.192)
-        by e06smtp04.uk.ibm.com (192.168.101.134) with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted;
-        (version=TLSv1/SSLv3 cipher=AES256-GCM-SHA384 bits=256/256)
-        Sat, 9 Nov 2019 19:00:56 -0000
-Received: from d06av21.portsmouth.uk.ibm.com (d06av21.portsmouth.uk.ibm.com [9.149.105.232])
-        by b06avi18626390.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id xA9J0JwL38207828
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Sat, 9 Nov 2019 19:00:19 GMT
-Received: from d06av21.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 98FC552050;
-        Sat,  9 Nov 2019 19:00:54 +0000 (GMT)
-Received: from localhost.localdomain (unknown [9.40.192.65])
-        by d06av21.portsmouth.uk.ibm.com (Postfix) with ESMTP id 20AA85204E;
-        Sat,  9 Nov 2019 19:00:52 +0000 (GMT)
-From:   Nayna Jain <nayna@linux.ibm.com>
-To:     linuxppc-dev@ozlabs.org, linux-efi@vger.kernel.org,
-        linux-integrity@vger.kernel.org
-Cc:     linux-kernel@vger.kernel.org,
-        Michael Ellerman <mpe@ellerman.id.au>,
-        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
-        Paul Mackerras <paulus@samba.org>,
+        id S1727643AbfKJDHA (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 9 Nov 2019 22:07:00 -0500
+Received: from mail.kernel.org ([198.145.29.99]:47326 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728842AbfKJCpd (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Sat, 9 Nov 2019 21:45:33 -0500
+Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id BC00E222C5;
+        Sun, 10 Nov 2019 02:45:31 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1573353932;
+        bh=Nie5KcE/bv2R3qZeKePgfZiKNZdaUTRXVrjT3s8MwA0=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=b/pkp0kj6GBgBPLgSBOuI2iDtreyu+i1Q9mRnSBHwscw0EllssZ4EbehiWEacEEdV
+         H42VzEPuhsUkwfX8qY/OgxDcc9nPB3Ae55JloKfBopO0cBfLvxz2rmsoEM+uU0ycO1
+         8B/S+EJ5mrW/IIwMn1rfC0Kg7FD5jAvhEx+FUCUo=
+From:   Sasha Levin <sashal@kernel.org>
+To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc:     Qian Cai <cai@lca.pw>,
+        "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>,
         Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Jeremy Kerr <jk@ozlabs.org>,
-        Matthew Garret <matthew.garret@nebula.com>,
-        Mimi Zohar <zohar@linux.ibm.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Claudio Carvalho <cclaudio@linux.ibm.com>,
-        George Wilson <gcwilson@linux.ibm.com>,
-        Elaine Palmer <erpalmer@us.ibm.com>,
-        Eric Ricther <erichte@linux.ibm.com>,
-        "Oliver O'Halloran" <oohall@gmail.com>,
-        Nayna Jain <nayna@linux.ibm.com>
-Subject: [PATCH v8 4/4] powerpc: load firmware trusted keys/hashes into kernel keyring
-Date:   Sat,  9 Nov 2019 13:00:32 -0600
+        Sasha Levin <sashal@kernel.org>, linux-efi@vger.kernel.org,
+        platform-driver-x86@vger.kernel.org
+Subject: [PATCH AUTOSEL 4.19 191/191] x86/efi: fix a -Wtype-limits compilation warning
+Date:   Sat,  9 Nov 2019 21:40:13 -0500
+Message-Id: <20191110024013.29782-191-sashal@kernel.org>
 X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20191109190032.96259-1-nayna@linux.ibm.com>
-References: <20191109190032.96259-1-nayna@linux.ibm.com>
+In-Reply-To: <20191110024013.29782-1-sashal@kernel.org>
+References: <20191110024013.29782-1-sashal@kernel.org>
 MIME-Version: 1.0
+X-stable: review
+X-Patchwork-Hint: Ignore
 Content-Transfer-Encoding: 8bit
-X-TM-AS-GCONF: 00
-x-cbid: 19110919-0016-0000-0000-000002C23D10
-X-IBM-AV-DETECTION: SAVI=unused REMOTE=unused XFE=unused
-x-cbparentid: 19110919-0017-0000-0000-00003323C7BD
-Message-Id: <20191109190032.96259-5-nayna@linux.ibm.com>
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:,, definitions=2019-11-09_07:,,
- signatures=0
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
- malwarescore=0 suspectscore=0 phishscore=0 bulkscore=0 spamscore=0
- clxscore=1015 lowpriorityscore=0 mlxscore=0 impostorscore=0
- mlxlogscore=999 adultscore=0 classifier=spam adjust=0 reason=mlx
- scancount=1 engine=8.0.1-1910280000 definitions=main-1911090193
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The keys used to verify the Host OS kernel are managed by firmware as
-secure variables. This patch loads the verification keys into the .platform
-keyring and revocation hashes into .blacklist keyring. This enables
-verification and loading of the kernels signed by the boot time keys which
-are trusted by firmware.
+From: Qian Cai <cai@lca.pw>
 
-Signed-off-by: Nayna Jain <nayna@linux.ibm.com>
-Reviewed-by: Mimi Zohar <zohar@linux.ibm.com>
-Signed-off-by: Eric Richter <erichte@linux.ibm.com>
+[ Upstream commit 919aef44d73d5d0c04213cb1bc31149cc074e65e ]
+
+Compiling a kernel with W=1 generates this warning,
+
+arch/x86/platform/efi/quirks.c:731:16: warning: comparison of unsigned
+expression >= 0 is always true [-Wtype-limits]
+
+Fixes: 3425d934fc03 ("efi/x86: Handle page faults occurring while running ...")
+Signed-off-by: Qian Cai <cai@lca.pw>
+Acked-by: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya@intel.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- security/integrity/Kconfig                    |  9 ++
- security/integrity/Makefile                   |  4 +-
- .../integrity/platform_certs/load_powerpc.c   | 98 +++++++++++++++++++
- 3 files changed, 110 insertions(+), 1 deletion(-)
- create mode 100644 security/integrity/platform_certs/load_powerpc.c
+ arch/x86/platform/efi/quirks.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/security/integrity/Kconfig b/security/integrity/Kconfig
-index 0bae6adb63a9..71f0177e8716 100644
---- a/security/integrity/Kconfig
-+++ b/security/integrity/Kconfig
-@@ -72,6 +72,15 @@ config LOAD_IPL_KEYS
-        depends on S390
-        def_bool y
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index 669babcaf245a..c75d5ba732f18 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -684,7 +684,7 @@ void efi_recover_from_page_fault(unsigned long phys_addr)
+ 	 * Address range 0x0000 - 0x0fff is always mapped in the efi_pgd, so
+ 	 * page faulting on these addresses isn't expected.
+ 	 */
+-	if (phys_addr >= 0x0000 && phys_addr <= 0x0fff)
++	if (phys_addr <= 0x0fff)
+ 		return;
  
-+config LOAD_PPC_KEYS
-+	bool "Enable loading of platform and blacklisted keys for POWER"
-+	depends on INTEGRITY_PLATFORM_KEYRING
-+	depends on PPC_SECURE_BOOT
-+	default y
-+	help
-+	  Enable loading of keys to the .platform keyring and blacklisted
-+	  hashes to the .blacklist keyring for powerpc based platforms.
-+
- config INTEGRITY_AUDIT
- 	bool "Enables integrity auditing support "
- 	depends on AUDIT
-diff --git a/security/integrity/Makefile b/security/integrity/Makefile
-index 351c9662994b..7ee39d66cf16 100644
---- a/security/integrity/Makefile
-+++ b/security/integrity/Makefile
-@@ -14,6 +14,8 @@ integrity-$(CONFIG_LOAD_UEFI_KEYS) += platform_certs/efi_parser.o \
- 				      platform_certs/load_uefi.o \
- 				      platform_certs/keyring_handler.o
- integrity-$(CONFIG_LOAD_IPL_KEYS) += platform_certs/load_ipl_s390.o
--
-+integrity-$(CONFIG_LOAD_PPC_KEYS) += platform_certs/efi_parser.o \
-+                                     platform_certs/load_powerpc.o \
-+                                     platform_certs/keyring_handler.o
- obj-$(CONFIG_IMA)			+= ima/
- obj-$(CONFIG_EVM)			+= evm/
-diff --git a/security/integrity/platform_certs/load_powerpc.c b/security/integrity/platform_certs/load_powerpc.c
-new file mode 100644
-index 000000000000..99ddc2ed59e6
---- /dev/null
-+++ b/security/integrity/platform_certs/load_powerpc.c
-@@ -0,0 +1,98 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/*
-+ * Copyright (C) 2019 IBM Corporation
-+ * Author: Nayna Jain
-+ *
-+ *      - loads keys and hashes stored and controlled by the firmware.
-+ */
-+#include <linux/kernel.h>
-+#include <linux/sched.h>
-+#include <linux/cred.h>
-+#include <linux/err.h>
-+#include <linux/slab.h>
-+#include <linux/of.h>
-+#include <asm/secure_boot.h>
-+#include <asm/secvar.h>
-+#include "keyring_handler.h"
-+
-+/*
-+ * Get a certificate list blob from the named secure variable.
-+ */
-+static __init void *get_cert_list(u8 *key, unsigned long keylen, uint64_t *size)
-+{
-+	int rc;
-+	void *db;
-+
-+	rc = secvar_ops->get(key, keylen, NULL, size);
-+	if (rc) {
-+		pr_err("Couldn't get size: %d\n", rc);
-+		return NULL;
-+	}
-+
-+	db = kmalloc(*size, GFP_KERNEL);
-+	if (!db)
-+		return NULL;
-+
-+	rc = secvar_ops->get(key, keylen, db, size);
-+	if (rc) {
-+		kfree(db);
-+		pr_err("Error reading %s var: %d\n", key, rc);
-+		return NULL;
-+	}
-+
-+	return db;
-+}
-+
-+/*
-+ * Load the certs contained in the keys databases into the platform trusted
-+ * keyring and the blacklisted X.509 cert SHA256 hashes into the blacklist
-+ * keyring.
-+ */
-+static int __init load_powerpc_certs(void)
-+{
-+	void *db = NULL, *dbx = NULL;
-+	uint64_t dbsize = 0, dbxsize = 0;
-+	int rc = 0;
-+	struct device_node *node;
-+
-+	if (!secvar_ops)
-+		return -ENODEV;
-+
-+	/* The following only applies for the edk2-compat backend.
-+	 * Return early if it is not set.
-+	 */
-+
-+	node = of_find_compatible_node(NULL, NULL, "ibm,edk2-compat-v1");
-+	if (!node)
-+		return -ENODEV;
-+
-+	/* Get db, and dbx.  They might not exist, so it isn't
-+	 * an error if we can't get them.
-+	 */
-+	db = get_cert_list("db", 3, &dbsize);
-+	if (!db) {
-+		pr_err("Couldn't get db list from firmware\n");
-+	} else {
-+		rc = parse_efi_signature_list("powerpc:db", db, dbsize,
-+					      get_handler_for_db);
-+		if (rc)
-+			pr_err("Couldn't parse db signatures: %d\n", rc);
-+		kfree(db);
-+	}
-+
-+	dbx = get_cert_list("dbx", 4,  &dbxsize);
-+	if (!dbx) {
-+		pr_info("Couldn't get dbx list from firmware\n");
-+	} else {
-+		rc = parse_efi_signature_list("powerpc:dbx", dbx, dbxsize,
-+					      get_handler_for_dbx);
-+		if (rc)
-+			pr_err("Couldn't parse dbx signatures: %d\n", rc);
-+		kfree(dbx);
-+	}
-+
-+	of_node_put(node);
-+
-+	return rc;
-+}
-+late_initcall(load_powerpc_certs);
+ 	/*
 -- 
 2.20.1
 
