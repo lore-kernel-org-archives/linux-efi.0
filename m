@@ -2,81 +2,78 @@ Return-Path: <SRS0=OfYk=ZD=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.2 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B6D30C17441
-	for <linux-efi@archiver.kernel.org>; Mon, 11 Nov 2019 19:05:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 820A0C17447
+	for <linux-efi@archiver.kernel.org>; Mon, 11 Nov 2019 21:46:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 8593B21655
-	for <linux-efi@archiver.kernel.org>; Mon, 11 Nov 2019 19:05:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4E6EC206BB
+	for <linux-efi@archiver.kernel.org>; Mon, 11 Nov 2019 21:46:37 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="h8reDHaD"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="nV9YueSX"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728249AbfKKTFn (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 11 Nov 2019 14:05:43 -0500
-Received: from mail-yw1-f50.google.com ([209.85.161.50]:41064 "EHLO
-        mail-yw1-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728388AbfKKTFk (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 11 Nov 2019 14:05:40 -0500
-Received: by mail-yw1-f50.google.com with SMTP id j190so5539948ywf.8
-        for <linux-efi@vger.kernel.org>; Mon, 11 Nov 2019 11:05:39 -0800 (PST)
+        id S1727750AbfKKVqg (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 11 Nov 2019 16:46:36 -0500
+Received: from mail-wr1-f67.google.com ([209.85.221.67]:34345 "EHLO
+        mail-wr1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727632AbfKKVqf (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 11 Nov 2019 16:46:35 -0500
+Received: by mail-wr1-f67.google.com with SMTP id e6so16359081wrw.1
+        for <linux-efi@vger.kernel.org>; Mon, 11 Nov 2019 13:46:34 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=to:from:subject:message-id:date:user-agent:mime-version
-         :content-transfer-encoding:content-language;
-        bh=USC+ean2zCjbw40hyUC9AMXI77Zyo0AFapAoVU/VFHk=;
-        b=h8reDHaDRHFzOI2Pj+/SEe0SJqf2wUPJq38+PVW7z32fFfQT+QdfY+BHHphDvp6Iw3
-         q3n7DCfdYhXrBbgzfnErYxJv0LUK1JG6sNmMDzfq01uud0ZcMHPTHp5qDUtNxefU3qp1
-         +vYsYL25Epn2kn9gnzLaNyTxuDFW1z5K1mxMgJkT8X5XImqBionuH5wCw1gXAPn10Ef6
-         xNVhru9Oek3+ingwRcuvIa7EDpqt92WsHOO7+FC0U2FwK/xFKW33CcYzLtkj0SmVK/s4
-         aGw2PXQ++DPDDfMPWTpMqt6u+9FE5U3XcVpENF8Imwp7YGyVd6/4o7hljiSVL6DyzFrP
-         rxUw==
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=z19yH60lspQOQpX3PTFyVmzAHxSqcnfoBNNeK2r9yWE=;
+        b=nV9YueSXoouxRoL8YbLIG6XT1i0a1/U8WGkeiWjPghCqzPViufj340DHozYi0mJczB
+         VVV2PQNUz0Dg90lCv+jwwp+e2Bmd302kQks0HKNJfZ6l5tpK8BTpHQihkxSoWK7dEJ1/
+         +Ssafs7zqNVAr1NWYgXjzP2m9Sg4KU3RQfnr2tcMEVT1uS+lczdaJ0hX4MVEEhlYjOOL
+         QejyLY/ZmiZ2viNLxGFE4IVYC75HAOdEx5kXt9fXbzk/hCHbzbiPTPe68YJ4BbjBFOCB
+         xxDhUBoM+hRBURFVYdfbAG7XRJ2qcpGdiwYCEPy/3DEb53REXjBuIC92Usxuut3asvOx
+         SNNw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:to:from:subject:message-id:date:user-agent
-         :mime-version:content-transfer-encoding:content-language;
-        bh=USC+ean2zCjbw40hyUC9AMXI77Zyo0AFapAoVU/VFHk=;
-        b=dnc6o2mAzsAVZwoxQojLUexPT5fc3LQfCuLGERoxCtcIJ99ZjzD+nJ390p2YA/J6XQ
-         1kyCC0pRcgxYyRU4y4z/396HyqviDgqgqwCGn2Xt6CBmZfDkXjQ3xYvqoiT16oWrhEzZ
-         cu85auC6IJSsfRZks4JrsFFXgDK/nAEjDrN/raMTRdP6m76FtlyUTwOzHHLk/hVXiL/e
-         RRuQ2+l1CjOK+ju+761w4NFGIbGlXWKPDrCS5crfW98SObsKLe0bn074Pi9UpL88oFMs
-         gULySLBhlAEU9yPiimc3Wv03awMLhjqIkfEfer9YWLYS+e1y/mclxbwbW+8nVQDoKxn7
-         fXXQ==
-X-Gm-Message-State: APjAAAUsZ1QEIG1IEBMQTVCYQf94qXKdrNhXEGx9BuGOZtaMDWSC1wBA
-        7BN7SxWBmXd0lBppihg2FbjqA6Jx
-X-Google-Smtp-Source: APXvYqxgSBCFyeu9GkdY/nphptBUEiwjJOpX22LviFNLqcYxWnn3Ukh5eiT5ktvekCUu9NnxOtxtnQ==
-X-Received: by 2002:a81:7a05:: with SMTP id v5mr2524511ywc.259.1573499138809;
-        Mon, 11 Nov 2019 11:05:38 -0800 (PST)
-Received: from ?IPv6:2601:244:4d01:52df:40f2:6b8f:f857:28ef? ([2601:244:4d01:52df:40f2:6b8f:f857:28ef])
-        by smtp.gmail.com with ESMTPSA id b63sm4621635ywc.94.2019.11.11.11.05.38
-        for <linux-efi@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 11 Nov 2019 11:05:38 -0800 (PST)
-To:     linux-efi@vger.kernel.org
-From:   Kyle K <kylek389@gmail.com>
-Subject: Linux 5.3.8: gsmi: failed to allocate name buffer. BUG: kernel NULL
- pointer dereference
-Message-ID: <ac8c3a1d-e44a-4f89-8a58-fb3ef09659d4@gmail.com>
-Date:   Mon, 11 Nov 2019 19:07:00 +0000
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.2.2
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=z19yH60lspQOQpX3PTFyVmzAHxSqcnfoBNNeK2r9yWE=;
+        b=qqBY0CnRz6l3o+Memzm18zj56tcsuMS7Co2Hiti58udILgbVhLTvN8g5tWbeLBk+eu
+         GAbhQtApYBXMC7pWO7fakqI9nF+I97RVe2TbwcWUN+Em4hMhM1u7Gq39r+uRMbYjWJkD
+         IpRao3Kyv4IGjgJWDftO6WdpDivsZvAi+eEMTxh2AOKSiyJP5av81XUkwbNP+JJRK2Fi
+         K++O0Bp9zWA5F/F1cygM0Yla2u+lNRdpQXIAWCpXFrmPZ77olFEiUmu4xKrB2AMhXam2
+         7DAfTc7hMHOFjDM2Yn16rto7W9wfEYXwLHftNGSkse1oBsNoDSEqohlxJRB/yDKqzmgH
+         FiVg==
+X-Gm-Message-State: APjAAAXS9rJlf2ElFxxZzVGWNLXKMq3Rz5lQaHFXQEvQ09SFWhmWFa2W
+        x8sr5sHw7gAYarsGXQRD+eI33Li5fkZ8Mg+i4+7mnA==
+X-Google-Smtp-Source: APXvYqyCjdvPpxGWoMEuQTI+xfip9kJqo3D8X4t/W8OSXRPRKCrjLVbKRW/MMnI9aw+asqs97MeXAfxKoRUIZ+BG8I8=
+X-Received: by 2002:adf:ec42:: with SMTP id w2mr21288389wrn.32.1573508794043;
+ Mon, 11 Nov 2019 13:46:34 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Content-Language: en-US
+References: <ac8c3a1d-e44a-4f89-8a58-fb3ef09659d4@gmail.com>
+In-Reply-To: <ac8c3a1d-e44a-4f89-8a58-fb3ef09659d4@gmail.com>
+From:   Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Date:   Mon, 11 Nov 2019 21:46:22 +0000
+Message-ID: <CAKv+Gu-cPmnxtN_5Y_=kodF7KcKjK+vkPdd+9gDiR55Mh4CKhg@mail.gmail.com>
+Subject: Re: Linux 5.3.8: gsmi: failed to allocate name buffer. BUG: kernel
+ NULL pointer dereference
+To:     Kyle K <kylek389@gmail.com>
+Cc:     linux-efi <linux-efi@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-https://bugzilla.kernel.org/show_bug.cgi?id=205445
+On Mon, 11 Nov 2019 at 19:05, Kyle K <kylek389@gmail.com> wrote:
+>
+> https://bugzilla.kernel.org/show_bug.cgi?id=205445
+>
+> Someone please take a look at this. There's is a regression in Linux
+> 5.3.8 related to google EFI code changes that is causing sideeffects on
+> Coreboot enabled laptops resulting in inability to suspend/wakeup and
+> WiFi troubles. There's is another person experiencing same issue when
+> upgrading to 5.3.8, so this bug is pretty much confirmed.
+>
 
-Someone please take a look at this. There's is a regression in Linux 
-5.3.8 related to google EFI code changes that is causing sideeffects on 
-Coreboot enabled laptops resulting in inability to suspend/wakeup and 
-WiFi troubles. There's is another person experiencing same issue when 
-upgrading to 5.3.8, so this bug is pretty much confirmed.
-
+Someone please bisect this on the affected hardware.
