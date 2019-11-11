@@ -6,46 +6,46 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 01671C17443
-	for <linux-efi@archiver.kernel.org>; Mon, 11 Nov 2019 03:11:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9EA7EC43331
+	for <linux-efi@archiver.kernel.org>; Mon, 11 Nov 2019 03:11:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id D08052075C
-	for <linux-efi@archiver.kernel.org>; Mon, 11 Nov 2019 03:11:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6771820650
+	for <linux-efi@archiver.kernel.org>; Mon, 11 Nov 2019 03:11:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727046AbfKKDLM (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 10 Nov 2019 22:11:12 -0500
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:3404 "EHLO
+        id S1726791AbfKKDLy (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 10 Nov 2019 22:11:54 -0500
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:38368 "EHLO
         mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726991AbfKKDLL (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sun, 10 Nov 2019 22:11:11 -0500
-Received: from pps.filterd (m0098420.ppops.net [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com (8.16.0.27/8.16.0.27) with SMTP id xAB37cTc065269
-        for <linux-efi@vger.kernel.org>; Sun, 10 Nov 2019 22:11:10 -0500
-Received: from e06smtp07.uk.ibm.com (e06smtp07.uk.ibm.com [195.75.94.103])
-        by mx0b-001b2d01.pphosted.com with ESMTP id 2w6rdmtn9h-1
+        by vger.kernel.org with ESMTP id S1726763AbfKKDLy (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sun, 10 Nov 2019 22:11:54 -0500
+Received: from pps.filterd (m0098413.ppops.net [127.0.0.1])
+        by mx0b-001b2d01.pphosted.com (8.16.0.27/8.16.0.27) with SMTP id xAB389Nl145982
+        for <linux-efi@vger.kernel.org>; Sun, 10 Nov 2019 22:11:51 -0500
+Received: from e06smtp02.uk.ibm.com (e06smtp02.uk.ibm.com [195.75.94.98])
+        by mx0b-001b2d01.pphosted.com with ESMTP id 2w6nqxwk8u-1
         (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <linux-efi@vger.kernel.org>; Sun, 10 Nov 2019 22:11:09 -0500
+        for <linux-efi@vger.kernel.org>; Sun, 10 Nov 2019 22:11:49 -0500
 Received: from localhost
-        by e06smtp07.uk.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        by e06smtp02.uk.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
         for <linux-efi@vger.kernel.org> from <nayna@linux.ibm.com>;
-        Mon, 11 Nov 2019 03:11:08 -0000
-Received: from b06cxnps4074.portsmouth.uk.ibm.com (9.149.109.196)
-        by e06smtp07.uk.ibm.com (192.168.101.137) with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted;
+        Mon, 11 Nov 2019 03:10:54 -0000
+Received: from b06cxnps3074.portsmouth.uk.ibm.com (9.149.109.194)
+        by e06smtp02.uk.ibm.com (192.168.101.132) with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted;
         (version=TLSv1/SSLv3 cipher=AES256-GCM-SHA384 bits=256/256)
-        Mon, 11 Nov 2019 03:11:04 -0000
+        Mon, 11 Nov 2019 03:10:50 -0000
 Received: from d06av22.portsmouth.uk.ibm.com (d06av22.portsmouth.uk.ibm.com [9.149.105.58])
-        by b06cxnps4074.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id xAB3B2tb47186000
+        by b06cxnps3074.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id xAB3AnDX38207496
         (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 11 Nov 2019 03:11:02 GMT
+        Mon, 11 Nov 2019 03:10:49 GMT
 Received: from d06av22.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id A1FAD4C04A;
-        Mon, 11 Nov 2019 03:11:02 +0000 (GMT)
+        by IMSVA (Postfix) with ESMTP id 0AA804C059;
+        Mon, 11 Nov 2019 03:10:49 +0000 (GMT)
 Received: from d06av22.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 37FC04C04E;
-        Mon, 11 Nov 2019 03:10:59 +0000 (GMT)
+        by IMSVA (Postfix) with ESMTP id AEA2D4C046;
+        Mon, 11 Nov 2019 03:10:45 +0000 (GMT)
 Received: from mhp50.ibm.com (unknown [9.80.199.87])
         by d06av22.portsmouth.uk.ibm.com (Postfix) with ESMTP;
-        Mon, 11 Nov 2019 03:10:58 +0000 (GMT)
+        Mon, 11 Nov 2019 03:10:45 +0000 (GMT)
 From:   Nayna Jain <nayna@linux.ibm.com>
 To:     linuxppc-dev@ozlabs.org, linux-efi@vger.kernel.org,
         linux-integrity@vger.kernel.org
@@ -64,16 +64,16 @@ Cc:     linux-kernel@vger.kernel.org,
         Eric Ricther <erichte@linux.ibm.com>,
         "Oliver O'Halloran" <oohall@gmail.com>,
         Nayna Jain <nayna@linux.ibm.com>
-Subject: [PATCH v9 4/4] powerpc: load firmware trusted keys/hashes into kernel keyring
-Date:   Sun, 10 Nov 2019 21:10:36 -0600
+Subject: [PATCH v9 1/4] powerpc/powernv: Add OPAL API interface to access secure variable
+Date:   Sun, 10 Nov 2019 21:10:33 -0600
 X-Mailer: git-send-email 1.8.3.1
 In-Reply-To: <1573441836-3632-1-git-send-email-nayna@linux.ibm.com>
 References: <1573441836-3632-1-git-send-email-nayna@linux.ibm.com>
 X-TM-AS-GCONF: 00
-x-cbid: 19111103-0028-0000-0000-000003B4C22C
+x-cbid: 19111103-0008-0000-0000-0000032D56B9
 X-IBM-AV-DETECTION: SAVI=unused REMOTE=unused XFE=unused
-x-cbparentid: 19111103-0029-0000-0000-00002477C81B
-Message-Id: <1573441836-3632-5-git-send-email-nayna@linux.ibm.com>
+x-cbparentid: 19111103-0009-0000-0000-00004A4C63F0
+Message-Id: <1573441836-3632-2-git-send-email-nayna@linux.ibm.com>
 X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:,, definitions=2019-11-10_08:,,
  signatures=0
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
@@ -86,161 +86,327 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The keys used to verify the Host OS kernel are managed by firmware as
-secure variables. This patch loads the verification keys into the .platform
-keyring and revocation hashes into .blacklist keyring. This enables
-verification and loading of the kernels signed by the boot time keys which
-are trusted by firmware.
+The X.509 certificates trusted by the platform and required to secure boot
+the OS kernel are wrapped in secure variables, which are controlled by
+OPAL.
 
+This patch adds firmware/kernel interface to read and write OPAL secure
+variables based on the unique key.
+
+This support can be enabled using CONFIG_OPAL_SECVAR.
+
+Signed-off-by: Claudio Carvalho <cclaudio@linux.ibm.com>
 Signed-off-by: Nayna Jain <nayna@linux.ibm.com>
-Reviewed-by: Mimi Zohar <zohar@linux.ibm.com>
 Signed-off-by: Eric Richter <erichte@linux.ibm.com>
 ---
- security/integrity/Kconfig                       |  9 +++
- security/integrity/Makefile                      |  4 +-
- security/integrity/platform_certs/load_powerpc.c | 99 ++++++++++++++++++++++++
- 3 files changed, 111 insertions(+), 1 deletion(-)
- create mode 100644 security/integrity/platform_certs/load_powerpc.c
+ arch/powerpc/include/asm/opal-api.h          |   5 +-
+ arch/powerpc/include/asm/opal.h              |   7 ++
+ arch/powerpc/include/asm/secvar.h            |  35 +++++++
+ arch/powerpc/kernel/Makefile                 |   2 +-
+ arch/powerpc/kernel/secvar-ops.c             |  16 +++
+ arch/powerpc/platforms/powernv/Makefile      |   2 +-
+ arch/powerpc/platforms/powernv/opal-call.c   |   3 +
+ arch/powerpc/platforms/powernv/opal-secvar.c | 140 +++++++++++++++++++++++++++
+ arch/powerpc/platforms/powernv/opal.c        |   3 +
+ 9 files changed, 210 insertions(+), 3 deletions(-)
+ create mode 100644 arch/powerpc/include/asm/secvar.h
+ create mode 100644 arch/powerpc/kernel/secvar-ops.c
+ create mode 100644 arch/powerpc/platforms/powernv/opal-secvar.c
 
-diff --git a/security/integrity/Kconfig b/security/integrity/Kconfig
-index 0bae6adb63a9..71f0177e8716 100644
---- a/security/integrity/Kconfig
-+++ b/security/integrity/Kconfig
-@@ -72,6 +72,15 @@ config LOAD_IPL_KEYS
-        depends on S390
-        def_bool y
+diff --git a/arch/powerpc/include/asm/opal-api.h b/arch/powerpc/include/asm/opal-api.h
+index 378e3997845a..c1f25a760eb1 100644
+--- a/arch/powerpc/include/asm/opal-api.h
++++ b/arch/powerpc/include/asm/opal-api.h
+@@ -211,7 +211,10 @@
+ #define OPAL_MPIPL_UPDATE			173
+ #define OPAL_MPIPL_REGISTER_TAG			174
+ #define OPAL_MPIPL_QUERY_TAG			175
+-#define OPAL_LAST				175
++#define OPAL_SECVAR_GET				176
++#define OPAL_SECVAR_GET_NEXT			177
++#define OPAL_SECVAR_ENQUEUE_UPDATE		178
++#define OPAL_LAST				178
  
-+config LOAD_PPC_KEYS
-+	bool "Enable loading of platform and blacklisted keys for POWER"
-+	depends on INTEGRITY_PLATFORM_KEYRING
-+	depends on PPC_SECURE_BOOT
-+	default y
-+	help
-+	  Enable loading of keys to the .platform keyring and blacklisted
-+	  hashes to the .blacklist keyring for powerpc based platforms.
+ #define QUIESCE_HOLD			1 /* Spin all calls at entry */
+ #define QUIESCE_REJECT			2 /* Fail all calls with OPAL_BUSY */
+diff --git a/arch/powerpc/include/asm/opal.h b/arch/powerpc/include/asm/opal.h
+index a0cf8fba4d12..9986ac34b8e2 100644
+--- a/arch/powerpc/include/asm/opal.h
++++ b/arch/powerpc/include/asm/opal.h
+@@ -298,6 +298,13 @@ int opal_sensor_group_clear(u32 group_hndl, int token);
+ int opal_sensor_group_enable(u32 group_hndl, int token, bool enable);
+ int opal_nx_coproc_init(uint32_t chip_id, uint32_t ct);
+ 
++int opal_secvar_get(const char *key, uint64_t key_len, u8 *data,
++		    uint64_t *data_size);
++int opal_secvar_get_next(const char *key, uint64_t *key_len,
++			 uint64_t key_buf_size);
++int opal_secvar_enqueue_update(const char *key, uint64_t key_len, u8 *data,
++			       uint64_t data_size);
 +
- config INTEGRITY_AUDIT
- 	bool "Enables integrity auditing support "
- 	depends on AUDIT
-diff --git a/security/integrity/Makefile b/security/integrity/Makefile
-index 351c9662994b..7ee39d66cf16 100644
---- a/security/integrity/Makefile
-+++ b/security/integrity/Makefile
-@@ -14,6 +14,8 @@ integrity-$(CONFIG_LOAD_UEFI_KEYS) += platform_certs/efi_parser.o \
- 				      platform_certs/load_uefi.o \
- 				      platform_certs/keyring_handler.o
- integrity-$(CONFIG_LOAD_IPL_KEYS) += platform_certs/load_ipl_s390.o
--
-+integrity-$(CONFIG_LOAD_PPC_KEYS) += platform_certs/efi_parser.o \
-+                                     platform_certs/load_powerpc.o \
-+                                     platform_certs/keyring_handler.o
- obj-$(CONFIG_IMA)			+= ima/
- obj-$(CONFIG_EVM)			+= evm/
-diff --git a/security/integrity/platform_certs/load_powerpc.c b/security/integrity/platform_certs/load_powerpc.c
+ s64 opal_mpipl_update(enum opal_mpipl_ops op, u64 src, u64 dest, u64 size);
+ s64 opal_mpipl_register_tag(enum opal_mpipl_tags tag, u64 addr);
+ s64 opal_mpipl_query_tag(enum opal_mpipl_tags tag, u64 *addr);
+diff --git a/arch/powerpc/include/asm/secvar.h b/arch/powerpc/include/asm/secvar.h
 new file mode 100644
-index 000000000000..9b2596e838ac
+index 000000000000..4cc35b58b986
 --- /dev/null
-+++ b/security/integrity/platform_certs/load_powerpc.c
-@@ -0,0 +1,99 @@
++++ b/arch/powerpc/include/asm/secvar.h
+@@ -0,0 +1,35 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++/*
++ * Copyright (C) 2019 IBM Corporation
++ * Author: Nayna Jain
++ *
++ * PowerPC secure variable operations.
++ */
++#ifndef SECVAR_OPS_H
++#define SECVAR_OPS_H
++
++#include <linux/types.h>
++#include <linux/errno.h>
++
++extern const struct secvar_operations *secvar_ops;
++
++struct secvar_operations {
++	int (*get)(const char *key, uint64_t key_len, u8 *data,
++		   uint64_t *data_size);
++	int (*get_next)(const char *key, uint64_t *key_len,
++			uint64_t keybufsize);
++	int (*set)(const char *key, uint64_t key_len, u8 *data,
++		   uint64_t data_size);
++};
++
++#ifdef CONFIG_PPC_SECURE_BOOT
++
++extern void set_secvar_ops(const struct secvar_operations *ops);
++
++#else
++
++static inline void set_secvar_ops(const struct secvar_operations *ops) { }
++
++#endif
++
++#endif
+diff --git a/arch/powerpc/kernel/Makefile b/arch/powerpc/kernel/Makefile
+index e8eb2955b7d5..3cf26427334f 100644
+--- a/arch/powerpc/kernel/Makefile
++++ b/arch/powerpc/kernel/Makefile
+@@ -161,7 +161,7 @@ ifneq ($(CONFIG_PPC_POWERNV)$(CONFIG_PPC_SVM),)
+ obj-y				+= ucall.o
+ endif
+ 
+-obj-$(CONFIG_PPC_SECURE_BOOT)	+= secure_boot.o ima_arch.o
++obj-$(CONFIG_PPC_SECURE_BOOT)	+= secure_boot.o ima_arch.o secvar-ops.o
+ 
+ # Disable GCOV, KCOV & sanitizers in odd or sensitive code
+ GCOV_PROFILE_prom_init.o := n
+diff --git a/arch/powerpc/kernel/secvar-ops.c b/arch/powerpc/kernel/secvar-ops.c
+new file mode 100644
+index 000000000000..4cfa7dbd8850
+--- /dev/null
++++ b/arch/powerpc/kernel/secvar-ops.c
+@@ -0,0 +1,16 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * Copyright (C) 2019 IBM Corporation
 + * Author: Nayna Jain
 + *
-+ *      - loads keys and hashes stored and controlled by the firmware.
++ * This file initializes secvar operations for PowerPC Secureboot
 + */
-+#include <linux/kernel.h>
-+#include <linux/sched.h>
-+#include <linux/cred.h>
-+#include <linux/err.h>
-+#include <linux/slab.h>
-+#include <linux/of.h>
-+#include <asm/secure_boot.h>
-+#include <asm/secvar.h>
-+#include "keyring_handler.h"
 +
++#include <asm/secvar.h>
++
++const struct secvar_operations *secvar_ops;
++
++void set_secvar_ops(const struct secvar_operations *ops)
++{
++	secvar_ops = ops;
++}
+diff --git a/arch/powerpc/platforms/powernv/Makefile b/arch/powerpc/platforms/powernv/Makefile
+index a3ac9646119d..f9c4fa99e8b9 100644
+--- a/arch/powerpc/platforms/powernv/Makefile
++++ b/arch/powerpc/platforms/powernv/Makefile
+@@ -4,7 +4,7 @@ obj-y			+= idle.o opal-rtc.o opal-nvram.o opal-lpc.o opal-flash.o
+ obj-y			+= rng.o opal-elog.o opal-dump.o opal-sysparam.o opal-sensor.o
+ obj-y			+= opal-msglog.o opal-hmi.o opal-power.o opal-irqchip.o
+ obj-y			+= opal-kmsg.o opal-powercap.o opal-psr.o opal-sensor-groups.o
+-obj-y			+= ultravisor.o
++obj-y			+= ultravisor.o opal-secvar.o
+ 
+ obj-$(CONFIG_SMP)	+= smp.o subcore.o subcore-asm.o
+ obj-$(CONFIG_FA_DUMP)	+= opal-fadump.o
+diff --git a/arch/powerpc/platforms/powernv/opal-call.c b/arch/powerpc/platforms/powernv/opal-call.c
+index a2aa5e433ac8..5cd0f52d258f 100644
+--- a/arch/powerpc/platforms/powernv/opal-call.c
++++ b/arch/powerpc/platforms/powernv/opal-call.c
+@@ -290,3 +290,6 @@ OPAL_CALL(opal_nx_coproc_init,			OPAL_NX_COPROC_INIT);
+ OPAL_CALL(opal_mpipl_update,			OPAL_MPIPL_UPDATE);
+ OPAL_CALL(opal_mpipl_register_tag,		OPAL_MPIPL_REGISTER_TAG);
+ OPAL_CALL(opal_mpipl_query_tag,			OPAL_MPIPL_QUERY_TAG);
++OPAL_CALL(opal_secvar_get,			OPAL_SECVAR_GET);
++OPAL_CALL(opal_secvar_get_next,			OPAL_SECVAR_GET_NEXT);
++OPAL_CALL(opal_secvar_enqueue_update,		OPAL_SECVAR_ENQUEUE_UPDATE);
+diff --git a/arch/powerpc/platforms/powernv/opal-secvar.c b/arch/powerpc/platforms/powernv/opal-secvar.c
+new file mode 100644
+index 000000000000..14133e120bdd
+--- /dev/null
++++ b/arch/powerpc/platforms/powernv/opal-secvar.c
+@@ -0,0 +1,140 @@
++// SPDX-License-Identifier: GPL-2.0
 +/*
-+ * Get a certificate list blob from the named secure variable.
++ * PowerNV code for secure variables
++ *
++ * Copyright (C) 2019 IBM Corporation
++ * Author: Claudio Carvalho
++ *         Nayna Jain
++ *
++ * APIs to access secure variables managed by OPAL.
 + */
-+static __init void *get_cert_list(u8 *key, unsigned long keylen, uint64_t *size)
++
++#define pr_fmt(fmt) "secvar: "fmt
++
++#include <linux/types.h>
++#include <linux/platform_device.h>
++#include <linux/of_platform.h>
++#include <asm/opal.h>
++#include <asm/secvar.h>
++#include <asm/secure_boot.h>
++
++static int opal_status_to_err(int rc)
++{
++	int err;
++
++	switch (rc) {
++	case OPAL_SUCCESS:
++		err = 0;
++		break;
++	case OPAL_UNSUPPORTED:
++		err = -ENXIO;
++		break;
++	case OPAL_PARAMETER:
++		err = -EINVAL;
++		break;
++	case OPAL_RESOURCE:
++		err = -ENOSPC;
++		break;
++	case OPAL_HARDWARE:
++		err = -EIO;
++		break;
++	case OPAL_NO_MEM:
++		err = -ENOMEM;
++		break;
++	case OPAL_EMPTY:
++		err = -ENOENT;
++		break;
++	case OPAL_PARTIAL:
++		err = -EFBIG;
++		break;
++	default:
++		err = -EINVAL;
++	}
++
++	return err;
++}
++
++static int opal_get_variable(const char *key, uint64_t ksize,
++			     u8 *data, uint64_t *dsize)
 +{
 +	int rc;
-+	void *db;
 +
-+	rc = secvar_ops->get(key, keylen, NULL, size);
-+	if (rc) {
-+		pr_err("Couldn't get size: %d\n", rc);
-+		return NULL;
-+	}
++	if (!key || !dsize)
++		return -EINVAL;
 +
-+	db = kmalloc(*size, GFP_KERNEL);
-+	if (!db)
-+		return NULL;
++	*dsize = cpu_to_be64(*dsize);
 +
-+	rc = secvar_ops->get(key, keylen, db, size);
-+	if (rc) {
-+		kfree(db);
-+		pr_err("Error reading %s var: %d\n", key, rc);
-+		return NULL;
-+	}
++	rc = opal_secvar_get(key, ksize, data, dsize);
 +
-+	return db;
++	*dsize = be64_to_cpu(*dsize);
++
++	return opal_status_to_err(rc);
 +}
 +
-+/*
-+ * Load the certs contained in the keys databases into the platform trusted
-+ * keyring and the blacklisted X.509 cert SHA256 hashes into the blacklist
-+ * keyring.
-+ */
-+static int __init load_powerpc_certs(void)
++static int opal_get_next_variable(const char *key, uint64_t *keylen,
++				  uint64_t keybufsize)
 +{
-+	void *db = NULL, *dbx = NULL;
-+	uint64_t dbsize = 0, dbxsize = 0;
-+	int rc = 0;
-+	struct device_node *node;
++	int rc;
 +
-+	if (!secvar_ops)
-+		return -ENODEV;
++	if (!key || !keylen)
++		return -EINVAL;
 +
-+	/* The following only applies for the edk2-compat backend.
-+	 * Return early if it is not set.
-+	 */
++	*keylen = cpu_to_be64(*keylen);
 +
-+	node = of_find_compatible_node(NULL, NULL, "ibm,secvar-backend");
-+	rc = of_property_match_string(node, "format", "ibm,edk2-compat-v1");
-+	if (rc)
-+		return -ENODEV;
++	rc = opal_secvar_get_next(key, keylen, keybufsize);
 +
-+	/* Get db, and dbx.  They might not exist, so it isn't
-+	 * an error if we can't get them.
-+	 */
-+	db = get_cert_list("db", 3, &dbsize);
-+	if (!db) {
-+		pr_err("Couldn't get db list from firmware\n");
-+	} else {
-+		rc = parse_efi_signature_list("powerpc:db", db, dbsize,
-+					      get_handler_for_db);
-+		if (rc)
-+			pr_err("Couldn't parse db signatures: %d\n", rc);
-+		kfree(db);
-+	}
++	*keylen = be64_to_cpu(*keylen);
 +
-+	dbx = get_cert_list("dbx", 4,  &dbxsize);
-+	if (!dbx) {
-+		pr_info("Couldn't get dbx list from firmware\n");
-+	} else {
-+		rc = parse_efi_signature_list("powerpc:dbx", dbx, dbxsize,
-+					      get_handler_for_dbx);
-+		if (rc)
-+			pr_err("Couldn't parse dbx signatures: %d\n", rc);
-+		kfree(dbx);
-+	}
-+
-+	of_node_put(node);
-+
-+	return rc;
++	return opal_status_to_err(rc);
 +}
-+late_initcall(load_powerpc_certs);
++
++static int opal_set_variable(const char *key, uint64_t ksize, u8 *data,
++			     uint64_t dsize)
++{
++	int rc;
++
++	if (!key || !data)
++		return -EINVAL;
++
++	rc = opal_secvar_enqueue_update(key, ksize, data, dsize);
++
++	return opal_status_to_err(rc);
++}
++
++static const struct secvar_operations opal_secvar_ops = {
++	.get = opal_get_variable,
++	.get_next = opal_get_next_variable,
++	.set = opal_set_variable,
++};
++
++static int opal_secvar_probe(struct platform_device *pdev)
++{
++	if (!opal_check_token(OPAL_SECVAR_GET)
++			|| !opal_check_token(OPAL_SECVAR_GET_NEXT)
++			|| !opal_check_token(OPAL_SECVAR_ENQUEUE_UPDATE)) {
++		pr_err("OPAL doesn't support secure variables\n");
++		return -ENODEV;
++	}
++
++	set_secvar_ops(&opal_secvar_ops);
++
++	return 0;
++}
++
++static const struct of_device_id opal_secvar_match[] = {
++	{ .compatible = "ibm,secvar-backend",},
++	{},
++};
++
++static struct platform_driver opal_secvar_driver = {
++	.driver = {
++		.name = "secvar",
++		.of_match_table = opal_secvar_match,
++	},
++};
++
++static int __init opal_secvar_init(void)
++{
++	return platform_driver_probe(&opal_secvar_driver, opal_secvar_probe);
++}
++device_initcall(opal_secvar_init);
+diff --git a/arch/powerpc/platforms/powernv/opal.c b/arch/powerpc/platforms/powernv/opal.c
+index 38e90270280b..8355bcd00f93 100644
+--- a/arch/powerpc/platforms/powernv/opal.c
++++ b/arch/powerpc/platforms/powernv/opal.c
+@@ -1002,6 +1002,9 @@ static int __init opal_init(void)
+ 	/* Initialise OPAL Power control interface */
+ 	opal_power_control_init();
+ 
++	/* Initialize OPAL secure variables */
++	opal_pdev_init("ibm,secvar-backend");
++
+ 	return 0;
+ }
+ machine_subsys_initcall(powernv, opal_init);
 -- 
 2.13.6
 
