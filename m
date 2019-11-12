@@ -7,24 +7,24 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0766AC17440
-	for <linux-efi@archiver.kernel.org>; Tue, 12 Nov 2019 16:55:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 84376C17448
+	for <linux-efi@archiver.kernel.org>; Tue, 12 Nov 2019 16:55:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id DE129222C2
-	for <linux-efi@archiver.kernel.org>; Tue, 12 Nov 2019 16:55:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6600721E6F
+	for <linux-efi@archiver.kernel.org>; Tue, 12 Nov 2019 16:55:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727628AbfKLQxr (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 12 Nov 2019 11:53:47 -0500
-Received: from szxga07-in.huawei.com ([45.249.212.35]:58248 "EHLO huawei.com"
+        id S1727568AbfKLQxm (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 12 Nov 2019 11:53:42 -0500
+Received: from szxga07-in.huawei.com ([45.249.212.35]:57982 "EHLO huawei.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1727607AbfKLQxr (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Tue, 12 Nov 2019 11:53:47 -0500
-Received: from DGGEMS411-HUB.china.huawei.com (unknown [172.30.72.60])
-        by Forcepoint Email with ESMTP id 987EC7319E5F574EC2EB;
-        Wed, 13 Nov 2019 00:53:43 +0800 (CST)
+        id S1727418AbfKLQxl (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Tue, 12 Nov 2019 11:53:41 -0500
+Received: from DGGEMS411-HUB.china.huawei.com (unknown [172.30.72.59])
+        by Forcepoint Email with ESMTP id 78384161250F11771ECA;
+        Wed, 13 Nov 2019 00:53:33 +0800 (CST)
 Received: from lhrphicprd00229.huawei.com (10.123.41.22) by
  DGGEMS411-HUB.china.huawei.com (10.3.19.211) with Microsoft SMTP Server id
- 14.3.439.0; Wed, 13 Nov 2019 00:53:34 +0800
+ 14.3.439.0; Wed, 13 Nov 2019 00:53:24 +0800
 From:   Jonathan Cameron <Jonathan.Cameron@huawei.com>
 To:     <linux-edac@vger.kernel.org>, <linux-acpi@vger.kernel.org>,
         <linux-efi@vger.kernel.org>, Borislav Petkov <bp@alien8.de>,
@@ -33,9 +33,9 @@ CC:     <rjw@rjwysocki.net>, <tony.luck@intel.com>, <linuxarm@huawei.com>,
         <ard.biesheuvel@linaro.org>, <nariman.poushin@linaro.org>,
         Thanu Rangarajan <Thanu.Rangarajan@arm.com>,
         Jonathan Cameron <Jonathan.Cameron@huawei.com>
-Subject: [PATCH v3 6/6] efi / ras: CCIX Agent internal error reporting
-Date:   Wed, 13 Nov 2019 00:52:26 +0800
-Message-ID: <20191112165226.106107-7-Jonathan.Cameron@huawei.com>
+Subject: [PATCH v3 3/6] efi / ras: CCIX Address Translation Cache error reporting
+Date:   Wed, 13 Nov 2019 00:52:23 +0800
+Message-ID: <20191112165226.106107-4-Jonathan.Cameron@huawei.com>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20191112165226.106107-1-Jonathan.Cameron@huawei.com>
 References: <20191112165226.106107-1-Jonathan.Cameron@huawei.com>
@@ -49,68 +49,79 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The CCIX 1.0 Base specification defines an internal agent error,
-for which the specific data present afte the header is vendor
-defined.
+CCIX devices tend to make heavy use of ATCs. The CCIX base
+specification defines a protocol error message (PER) that
+describes errors reported by such caches. The UEFI 2.8
+specification includes a CCIX CPER record for firmware first
+handling to report these errors to the operating system.
+
+This patch is very similar to the support previously added
+for CCIX Memory Errors and provides both logging and RAS
+tracepoint for this error class.
 
 Signed-off-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
 ---
  drivers/acpi/apei/ghes.c         |  4 ++
- drivers/firmware/efi/cper-ccix.c | 43 +++++++++++++++++++++
- include/linux/cper.h             | 29 +++++++++++++++
- include/ras/ras_event.h          | 64 ++++++++++++++++++++++++++++++++
- 4 files changed, 140 insertions(+)
+ drivers/firmware/efi/cper-ccix.c | 84 ++++++++++++++++++++++++++++++++
+ include/linux/cper.h             | 39 +++++++++++++++
+ include/ras/ras_event.h          | 67 +++++++++++++++++++++++++
+ 4 files changed, 194 insertions(+)
 
 diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-index 22df8c14ec13..5a75fb0374dd 100644
+index c99a4216b67d..ba73d3a5d564 100644
 --- a/drivers/acpi/apei/ghes.c
 +++ b/drivers/acpi/apei/ghes.c
-@@ -533,6 +533,10 @@ static void ghes_handle_ccix_per(struct acpi_hest_generic_data *gdata, int sev)
- 		trace_ccix_link_error_event(payload, err_seq, sev,
- 					    ccix_link_err_ven_len_get(payload));
+@@ -521,6 +521,10 @@ static void ghes_handle_ccix_per(struct acpi_hest_generic_data *gdata, int sev)
+ 		trace_ccix_cache_error_event(payload, err_seq, sev,
+ 					     ccix_cache_err_ven_len_get(payload));
  		break;
-+	case CCIX_AGENT_INTERNAL_ERROR:
-+		trace_ccix_agent_error_event(payload, err_seq, sev,
-+					     ccix_agent_err_ven_len_get(payload));
++	case CCIX_ATC_ERROR:
++		trace_ccix_atc_error_event(payload, err_seq, sev,
++					   ccix_atc_err_ven_len_get(payload));
 +		break;
  	default:
  		/* Unknown error type */
  		pr_info("CCIX error of unknown or vendor defined type\n");
 diff --git a/drivers/firmware/efi/cper-ccix.c b/drivers/firmware/efi/cper-ccix.c
-index 03630f4abaab..250857146077 100644
+index 14d3f5b8ceab..a33683d057e9 100644
 --- a/drivers/firmware/efi/cper-ccix.c
 +++ b/drivers/firmware/efi/cper-ccix.c
-@@ -586,6 +586,38 @@ static int cper_ccix_link_err_details(const char *pfx,
+@@ -394,6 +394,43 @@ static int cper_ccix_cache_err_details(const char *pfx,
  	return 0;
  }
  
-+static int cper_ccix_agent_err_details(const char *pfx,
-+				       struct acpi_hest_generic_data *gdata)
++static int cper_ccix_atc_err_details(const char *pfx,
++				     struct acpi_hest_generic_data *gdata)
 +{
-+	struct cper_ccix_agent_err *full_agent_err;
-+	struct cper_sec_ccix_agent_err *agent_err;
++	struct cper_ccix_atc_error *full_atc_err;
++	struct cper_sec_ccix_atc_error *atc_err;
 +	u16 vendor_data_len;
 +	int i;
 +
-+	if (gdata->error_data_length < sizeof(*full_agent_err))
++	if (gdata->error_data_length < sizeof(*full_atc_err))
 +		return -ENOSPC;
 +
-+	full_agent_err = acpi_hest_get_payload(gdata);
++	full_atc_err = acpi_hest_get_payload(gdata);
 +
-+	agent_err = &full_agent_err->agent_record;
++	atc_err = &full_atc_err->atc_record;
 +
-+	if (agent_err->validation_bits & CCIX_AGENT_INTERNAL_ERR_VENDOR_DATA_VALID) {
-+		if (gdata->error_data_length < sizeof(*full_agent_err) + 4)
++	if (atc_err->validation_bits & CCIX_ATC_ERR_OP_VALID)
++		printk("%s""Operation: %s\n", pfx,
++		       cper_ccix_cache_err_op_str(atc_err->op_type));
++
++	if (atc_err->validation_bits & CCIX_ATC_ERR_INSTANCE_ID_VALID)
++		printk("%s""Instance ID: %d\n", pfx, atc_err->instance);
++
++	if (atc_err->validation_bits & CCIX_ATC_ERR_VENDOR_DATA_VALID) {
++		if (gdata->error_data_length < sizeof(*full_atc_err) + 4)
++			return -ENOSPC;
++		vendor_data_len = atc_err->vendor_data[0] & GENMASK(15, 0);
++		if (gdata->error_data_length < sizeof(*full_atc_err) + vendor_data_len)
 +			return -ENOSPC;
 +
-+		vendor_data_len = agent_err->vendor_data[0] & GENMASK(15, 0);
-+		if (gdata->error_data_length <
-+		    sizeof(*full_agent_err) + vendor_data_len)
-+			return -ENOSPC;
-+
-+		for (i = 0; i < vendor_data_len/4 - 1; i++)
++		for (i = 0; i < vendor_data_len / 4 - 1; i++)
 +			printk("%s""Vendor%d: 0x%08x\n", pfx, i,
-+			       agent_err->vendor_data[i + 1]);
++			       atc_err->vendor_data[i + 1]);
 +	}
 +
 +	return 0;
@@ -119,87 +130,135 @@ index 03630f4abaab..250857146077 100644
  int cper_print_ccix_per(const char *pfx, struct acpi_hest_generic_data *gdata)
  {
  	struct cper_sec_ccix_header *header = acpi_hest_get_payload(gdata);
-@@ -655,6 +687,8 @@ int cper_print_ccix_per(const char *pfx, struct acpi_hest_generic_data *gdata)
- 		return cper_ccix_port_err_details(pfx, gdata);
- 	case CCIX_LINK_ERROR:
- 		return cper_ccix_link_err_details(pfx, gdata);
-+	case CCIX_AGENT_INTERNAL_ERROR:
-+		return cper_ccix_agent_err_details(pfx, gdata);
+@@ -457,6 +494,8 @@ int cper_print_ccix_per(const char *pfx, struct acpi_hest_generic_data *gdata)
+ 		return cper_ccix_mem_err_details(pfx, gdata);
+ 	case CCIX_CACHE_ERROR:
+ 		return cper_ccix_cache_err_details(pfx, gdata);
++	case CCIX_ATC_ERROR:
++		return cper_ccix_atc_err_details(pfx, gdata);
  	default:
  		/* Vendor defined so no formatting be done */
  		break;
-@@ -874,3 +908,12 @@ const char *cper_ccix_link_err_unpack(struct trace_seq *p,
+@@ -527,3 +566,48 @@ const char *cper_ccix_cache_err_unpack(struct trace_seq *p,
  
  	return ret;
  }
 +
-+void cper_ccix_agent_err_pack(const struct cper_sec_ccix_agent_err *agent_record,
-+			      struct cper_ccix_agent_err_compact *cagent_err,
-+			      const u16 vendor_data_len,
-+			      u8 *vendor_data)
++void cper_ccix_atc_err_pack(const struct cper_sec_ccix_atc_error *atc_record,
++			    struct cper_ccix_atc_err_compact *catc_err,
++			    const u16 vendor_data_len,
++			    u8 *vendor_data)
 +{
-+	cagent_err->validation_bits = agent_record->validation_bits;
-+	memcpy(vendor_data, &agent_record->vendor_data[1], vendor_data_len);
++	catc_err->validation_bits = atc_record->validation_bits;
++	catc_err->op_type = atc_record->op_type;
++	catc_err->instance = atc_record->instance;
++	memcpy(vendor_data, &atc_record->vendor_data[1], vendor_data_len);
 +}
++
++static int cper_ccix_err_atc_location(struct cper_ccix_atc_err_compact *catc_err,
++				      char *msg)
++{
++	u32 len = CPER_REC_LEN - 1;
++	u32 n = 0;
++
++	if (!msg)
++		return 0;
++
++	if (catc_err->validation_bits & CCIX_ATC_ERR_OP_VALID)
++		n += snprintf(msg + n, len, "Op: %s ",
++			     cper_ccix_cache_err_op_str(catc_err->op_type));
++
++	if (catc_err->validation_bits & CCIX_ATC_ERR_INSTANCE_ID_VALID)
++		n += snprintf(msg + n, len, "Instance: %d ",
++			      catc_err->instance);
++
++	return n;
++}
++
++const char *cper_ccix_atc_err_unpack(struct trace_seq *p,
++				     struct cper_ccix_atc_err_compact *catc_err)
++{
++	const char *ret = trace_seq_buffer_ptr(p);
++
++	if (cper_ccix_err_atc_location(catc_err, rcd_decode_str))
++		trace_seq_printf(p, "%s", rcd_decode_str);
++
++	trace_seq_putc(p, '\0');
++
++	return ret;
++}
++
 diff --git a/include/linux/cper.h b/include/linux/cper.h
-index d35be55351e3..373c1d387a70 100644
+index eef254b8b8b7..6bb603e9a97a 100644
 --- a/include/linux/cper.h
 +++ b/include/linux/cper.h
-@@ -783,6 +783,30 @@ struct cper_ccix_link_err_compact {
- 	__u8	credit_type;
+@@ -675,6 +675,38 @@ struct cper_ccix_cache_err_compact {
+ 	__u8	instance;
  };
  
-+struct cper_sec_ccix_agent_err {
++struct cper_sec_ccix_atc_error {
 +	__u32	validation_bits;
-+#define CCIX_AGENT_INTERNAL_ERR_VENDOR_DATA_VALID	BIT(0)
++#define CCIX_ATC_ERR_OP_VALID			BIT(0)
++#define CCIX_ATC_ERR_INSTANCE_ID_VALID		BIT(1)
++#define CCIX_ATC_ERR_VENDOR_DATA_VALID		BIT(2)
++	__u16	length; /* Includes vendor specific log info */
++	__u8	op_type;
++	__u8	instance;
++	__u32	reserved;
 +	__u32	vendor_data[];
 +};
 +
-+struct cper_ccix_agent_err {
++struct cper_ccix_atc_error {
 +	struct cper_sec_ccix_header header;
 +	__u32 ccix_header[CCIX_PER_LOG_HEADER_DWS];
-+	struct cper_sec_ccix_agent_err agent_record;
++	struct cper_sec_ccix_atc_error atc_record;
 +};
 +
-+static inline u16 ccix_agent_err_ven_len_get(struct cper_ccix_agent_err *agent_err)
++static inline u16 ccix_atc_err_ven_len_get(struct cper_ccix_atc_error *atc_err)
 +{
-+	if (agent_err->agent_record.validation_bits & CCIX_AGENT_INTERNAL_ERR_VENDOR_DATA_VALID)
-+		return agent_err->agent_record.vendor_data[0] & 0xFFFF;
++	if (atc_err->atc_record.validation_bits & CCIX_ATC_ERR_VENDOR_DATA_VALID)
++		return atc_err->atc_record.vendor_data[0] & 0xFFFF;
 +	else
 +		return 0;
 +}
 +
-+struct cper_ccix_agent_err_compact {
++struct cper_ccix_atc_err_compact {
 +	__u32	validation_bits;
++	__u8	op_type;
++	__u8	instance;
 +};
 +
  /* Reset to default packing */
  #pragma pack()
  
-@@ -835,6 +859,11 @@ void cper_ccix_link_err_pack(const struct cper_sec_ccix_link_error *link_record,
- const char *cper_ccix_link_err_unpack(struct trace_seq *p,
- 				      struct cper_ccix_link_err_compact *clink_err);
+@@ -706,6 +738,13 @@ const char *cper_ccix_cache_err_unpack(struct trace_seq *p,
+ 				       struct cper_ccix_cache_err_compact *ccache_err);
+ const char *cper_ccix_cache_err_type_str(__u8 error_type);
  
-+void cper_ccix_agent_err_pack(const struct cper_sec_ccix_agent_err *agent_record,
-+			      struct cper_ccix_agent_err_compact *cagent_err,
-+			      const u16 vendor_data_len,
-+			      u8 *vendor_data);
++void cper_ccix_atc_err_pack(const struct cper_sec_ccix_atc_error *atc_record,
++			    struct cper_ccix_atc_err_compact *catc_err,
++			    const u16 vendor_data_len,
++			    u8 *vendor_data);
++const char *cper_ccix_atc_err_unpack(struct trace_seq *p,
++				     struct cper_ccix_atc_err_compact *catc_err);
 +
  struct acpi_hest_generic_data;
  int cper_print_ccix_per(const char *pfx,
  			struct acpi_hest_generic_data *gdata);
 diff --git a/include/ras/ras_event.h b/include/ras/ras_event.h
-index bfe1c64b9db0..d09e5389a1e6 100644
+index 55f2c1900c54..bab49e297551 100644
 --- a/include/ras/ras_event.h
 +++ b/include/ras/ras_event.h
-@@ -679,6 +679,70 @@ TRACE_EVENT(ccix_link_error_event,
+@@ -481,6 +481,73 @@ TRACE_EVENT(ccix_cache_error_event,
+ 			    __entry->vendor_data_length)
  	)
  );
- 
-+TRACE_EVENT(ccix_agent_error_event,
-+	TP_PROTO(struct cper_ccix_agent_err *err,
++
++TRACE_EVENT(ccix_atc_error_event,
++	TP_PROTO(struct cper_ccix_atc_error *err,
 +		 u32 err_seq,
-+		 u8 sev, u16 ven_len),
++		 u8 sev,
++		 u16 ven_len),
 +
 +	TP_ARGS(err, err_seq, sev, ven_len),
 +
@@ -211,8 +270,8 @@ index bfe1c64b9db0..d09e5389a1e6 100644
 +		__field(u8, component)
 +		__field(u64, pa)
 +		__field(u8, pa_mask_lsb)
++		__field_struct(struct cper_ccix_atc_err_compact, data)
 +		__field(u16, vendor_data_length)
-+		__field_struct(struct cper_ccix_agent_err_compact, data)
 +		__dynamic_array(u8, vendor_data, ven_len)
 +	),
 +
@@ -230,7 +289,7 @@ index bfe1c64b9db0..d09e5389a1e6 100644
 +		else
 +			__entry->source = ~0;
 +		__entry->component = FIELD_GET(CCIX_PER_LOG_DW1_COMP_TYPE_M,
-+						   err->ccix_header[1]);
++					       err->ccix_header[1]);
 +		if (err->ccix_header[1] & CCIX_PER_LOG_DW1_ADDR_VAL_M) {
 +			__entry->pa = (u64)err->ccix_header[2] << 32 |
 +				(err->ccix_header[3] & 0xfffffffc);
@@ -239,14 +298,14 @@ index bfe1c64b9db0..d09e5389a1e6 100644
 +			__entry->pa = ~0ull;
 +			__entry->pa_mask_lsb = ~0;
 +		}
-+		/* Do not store the vendor data header length */
++
 +		__entry->vendor_data_length = ven_len ? ven_len - 4 : 0;
-+		cper_ccix_agent_err_pack(&err->agent_record, &__entry->data,
-+					__entry->vendor_data_length,
-+					__get_dynamic_array(vendor_data));
++		cper_ccix_atc_err_pack(&err->atc_record, &__entry->data,
++				       __entry->vendor_data_length,
++				       __get_dynamic_array(vendor_data));
 +	),
 +
-+	TP_printk("{%d} %s CCIX PER Agent Internal Error in %s SevUE:%d SevNoComm:%d SevDegraded:%d SevDeferred:%d physical addr: %016llx (mask: %x) vendor:%s",
++	TP_printk("{%d} %s CCIX PER ATC Error in %s SevUE:%d SevNoComm:%d SevDegraded:%d SevDeferred:%d physical addr: %016llx (mask: %x) %s vendor:%s",
 +		__entry->err_seq,
 +		cper_severity_str(__entry->sev),
 +		cper_ccix_comp_type_str(__entry->component),
@@ -256,6 +315,7 @@ index bfe1c64b9db0..d09e5389a1e6 100644
 +		__entry->sevdetail & BIT(3) ? 1 : 0,
 +		__entry->pa,
 +		__entry->pa_mask_lsb,
++		cper_ccix_atc_err_unpack(p, &__entry->data),
 +		__print_hex(__get_dynamic_array(vendor_data), __entry->vendor_data_length)
 +	)
 +);
