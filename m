@@ -2,389 +2,261 @@ Return-Path: <SRS0=kCSs=ZF=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5C7CCC17449
-	for <linux-efi@archiver.kernel.org>; Wed, 13 Nov 2019 15:17:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57864C432C3
+	for <linux-efi@archiver.kernel.org>; Wed, 13 Nov 2019 19:43:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 3F62622466
-	for <linux-efi@archiver.kernel.org>; Wed, 13 Nov 2019 15:17:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C2EC5206E1
+	for <linux-efi@archiver.kernel.org>; Wed, 13 Nov 2019 19:43:27 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="tXz+MujY"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727992AbfKMPRX (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 13 Nov 2019 10:17:23 -0500
-Received: from szxga07-in.huawei.com ([45.249.212.35]:42104 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1727754AbfKMPRX (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 13 Nov 2019 10:17:23 -0500
-Received: from DGGEMS409-HUB.china.huawei.com (unknown [172.30.72.59])
-        by Forcepoint Email with ESMTP id 5B0905872C78A1AA11B1;
-        Wed, 13 Nov 2019 23:17:08 +0800 (CST)
-Received: from lhrphicprd00229.huawei.com (10.123.41.22) by
- DGGEMS409-HUB.china.huawei.com (10.3.19.209) with Microsoft SMTP Server id
- 14.3.439.0; Wed, 13 Nov 2019 23:17:01 +0800
-From:   Jonathan Cameron <Jonathan.Cameron@huawei.com>
-To:     <linux-edac@vger.kernel.org>, <linux-acpi@vger.kernel.org>,
-        <linux-efi@vger.kernel.org>, Borislav Petkov <bp@alien8.de>,
-        "Mauro Carvalho Chehab" <mchehab@kernel.org>, <james.morse@arm.com>
-CC:     <rjw@rjwysocki.net>, <tony.luck@intel.com>, <linuxarm@huawei.com>,
-        <ard.biesheuvel@linaro.org>, <nariman.poushin@linaro.org>,
-        Thanu Rangarajan <Thanu.Rangarajan@arm.com>,
-        Jonathan Cameron <Jonathan.Cameron@huawei.com>
-Subject: [PATCH v4 5/6] efi / ras: CCIX Link error reporting
-Date:   Wed, 13 Nov 2019 23:16:26 +0800
-Message-ID: <20191113151627.7950-6-Jonathan.Cameron@huawei.com>
-X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20191113151627.7950-1-Jonathan.Cameron@huawei.com>
-References: <20191113151627.7950-1-Jonathan.Cameron@huawei.com>
+        id S1726291AbfKMTn0 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 13 Nov 2019 14:43:26 -0500
+Received: from mail-qt1-f194.google.com ([209.85.160.194]:46869 "EHLO
+        mail-qt1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726165AbfKMTn0 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 13 Nov 2019 14:43:26 -0500
+Received: by mail-qt1-f194.google.com with SMTP id r20so3868012qtp.13;
+        Wed, 13 Nov 2019 11:43:24 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=LTpeEfUp2aDF2PuVPItGfVBk3+wf98fXG2ncSzi/Vdk=;
+        b=tXz+MujYAez3+OpD7+2t674yspYgv6gqgmmgqG8P5mkHlKw1lGZKIqdaqMlTltismO
+         2MSmHXgtSsuTAdXEMg3NxWRmaf4ifUEYqu/nSDxOCaefc5XLN+sOJyC67lhgdNiFDghd
+         ewDgcka08ijUkVgD7/CRLUykL00f+Ru6rlWkThupHKl//CGc5AZfLQwSHDyOfIk3YYFM
+         QpZjRPNjfFhtMF+PCZU0L4CmvrEGwsO03YVUwTMWS2LO12+FhB8sjYHWO05KdPMTAajC
+         m8X3EOg5jyLpiga9HQhExsqG+pMPjeyn33Ck/orFk4lyDiraONSmkN8wsfp5t/8uBJ2r
+         acTw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=LTpeEfUp2aDF2PuVPItGfVBk3+wf98fXG2ncSzi/Vdk=;
+        b=OxoSS9VgYSOWS1uD7y95i5lW5Mha2AgTjvxbK1TyZuJUkSHuj2ci0qRdF/uzFaiAKQ
+         nf5yFcnDnHzw0Gog8ZzVE2hJz6ogpRAk5x8T9tq2joiErQT5D3ROQnm1qo+ZU5BqbckB
+         3YHIF6Gpuy2X3s43ZpSwg1uo9/tmjHhESZU0ZV2D4KUyZfY10z3CYe7Jkeqa7nsZzkR2
+         Xf9L85FV/hFLFW2Kwez3raZ6IyznaTbnaOzulLoE8zN8JM31uuFw2E3R6Y82R8uKd/fs
+         wOSrjtUSbHpPusess2G6LiZ36IpxRLXV9b11je3IiLZY+8kpyWnQxnP056ClSzZProt7
+         93OQ==
+X-Gm-Message-State: APjAAAVmVCvnz0WEMfzlmo1T79+ULbvgAk2Yqhk5B2tbVOJHLRHS2xcV
+        6ETnpqDoAYwDYCJXdpbPlQ==
+X-Google-Smtp-Source: APXvYqwuQjXnzhWn63dYa+pvmHYPOPoyVfz7wGIAq+IWPm8a4FT9l+pVXnuyAqjs+W+XzuMuGrJfbw==
+X-Received: by 2002:aed:2357:: with SMTP id i23mr4552514qtc.365.1573674203724;
+        Wed, 13 Nov 2019 11:43:23 -0800 (PST)
+Received: from gabell (nat-pool-bos-t.redhat.com. [66.187.233.206])
+        by smtp.gmail.com with ESMTPSA id f191sm1419361qke.62.2019.11.13.11.43.23
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Wed, 13 Nov 2019 11:43:23 -0800 (PST)
+Date:   Wed, 13 Nov 2019 14:43:16 -0500
+From:   Masayoshi Mizuma <msys.mizuma@gmail.com>
+To:     "d.hatayama@fujitsu.com" <d.hatayama@fujitsu.com>
+Cc:     Ard Biesheuvel <ard.biesheuvel@linaro.org>,
+        "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>,
+        "m.mizuma@jp.fujitsu.com" <m.mizuma@jp.fujitsu.com>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "kexec@lists.infradead.org" <kexec@lists.infradead.org>
+Subject: Re: [RFC PATCH] efi: arm64: Introduce /sys/firmware/efi/memreserve
+ to tell the persistent pages
+Message-ID: <20191113194229.jfaawdhummneri6s@gabell>
+References: <20191112165303.24270-1-msys.mizuma@gmail.com>
+ <OSBPR01MB4006D6F586695E2B867C95F095760@OSBPR01MB4006.jpnprd01.prod.outlook.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-Originating-IP: [10.123.41.22]
-X-CFilter-Loop: Reflected
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <OSBPR01MB4006D6F586695E2B867C95F095760@OSBPR01MB4006.jpnprd01.prod.outlook.com>
+User-Agent: NeoMutt/20180716
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The CCIX 1.0 Base Specification defines a protocol layer
-CCIX link and related error reporting mechanism.
-The UEFI 2.8 specification includes a CCIX CPER record for
-firmware first handling to report these errors to the
-operating system.
+On Wed, Nov 13, 2019 at 07:59:04AM +0000, d.hatayama@fujitsu.com wrote:
+> > From: Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>
+> > 
+> > kexec reboot stucks because efi_config_parse_tables() refers garbage
+> >  (with memblock=debug):
+> > 
+> >   efi:  ACPI 2.0=0x9821790014  PROP=0x8757f5c0  SMBIOS 3.0=0x9820740000
+> > MEMRESERVE=0x9820bfdc58
+> >   memblock_reserve: [0x0000009820bfdc58-0x0000009820bfdc67]
+> > efi_config_parse_tables+0x228/0x278
+> >   memblock_reserve: [0x0000000082760000-0x00000000324d07ff]
+> > efi_config_parse_tables+0x228/0x278
+> >   memblock_reserve: [0xcc4f84ecc0511670-0x5f6e5214a7fd91f9]
+> > efi_config_parse_tables+0x244/0x278
+> >   memblock_reserve: [0xd2fd4144b9af693d-0xad0c1db1086f40a2]
+> > efi_config_parse_tables+0x244/0x278
+> >   memblock_reserve: [0x0c719bb159b1fadc-0x5aa6e62a1417ce12]
+> > efi_config_parse_tables+0x244/0x278
+> >   ...
+> > 
+> > That happens because 0x82760000, struct linux_efi_memreserve, is destroyed.
+> > 0x82760000 is pointed from efi.mem_reseve, and efi.mem_reserve points the
+> > head page of pending table and prop table which are allocated by
+> > gic_reserve_range().
+> > 
+> > The destroyer is kexec. kexec locates the inird to the area:
+> > 
+> > # kexec -d -l /boot/vmlinuz-5.4.0-rc7 /boot/initramfs-5.4.0-rc7.img
+> > --reuse-cmdline
+> > ...
+> > initrd: base 82290000, size 388dd8ah (59301258)
+> > ...
+> > 
+> > From dynamic debug log:
+> >   machine_kexec_prepare:70:
+> >     kexec kimage info:
+> >       type:        0
+> >       start:       85b30680
+> >       head:        0
+> >       nr_segments: 4
+> >         segment[0]: 0000000080480000 - 0000000082290000, 0x1e10000 bytes, 481
+> > pages
+> >         segment[1]: 0000000082290000 - 0000000085b20000, 0x3890000 bytes, 905
+> > pages
+> >         segment[2]: 0000000085b20000 - 0000000085b30000, 0x10000 bytes, 1
+> > pages
+> >         segment[3]: 0000000085b30000 - 0000000085b40000, 0x10000 bytes, 1
+> > pages
+> > 
+> > kexec searches the appropriate memory region to locate initrd through "System
+> > RAM"
+> > in /proc/iomem. The pending tables are included in "System RAM" because they
+> > are
+> > allocated by alloc_pages(), so kexec destroys the pending tables.
+> > 
+> > Introduce /sys/firmware/efi/memreserve to tell the pages pointed by
+> > efi.mem_reserve
+> > so that kexec can avoid the area to locate initrd.
+> > 
+> > Signed-off-by: Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>
+> > ---
+> >  drivers/firmware/efi/efi.c | 32 +++++++++++++++++++++++++++++++-
+> >  1 file changed, 31 insertions(+), 1 deletion(-)
+> > 
+> > diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+> > index e98bbf8e5..67b21ae7a 100644
+> > --- a/drivers/firmware/efi/efi.c
+> > +++ b/drivers/firmware/efi/efi.c
+> > @@ -141,6 +141,36 @@ static ssize_t systab_show(struct kobject *kobj,
+> > 
+> >  static struct kobj_attribute efi_attr_systab = __ATTR_RO_MODE(systab, 0400);
+> > 
+> > +static struct linux_efi_memreserve *efi_memreserve_root __ro_after_init;
+> > +static ssize_t memreserve_show(struct kobject *kobj,
+> > +			   struct kobj_attribute *attr, char *buf)
+> > +{
+> > +	struct linux_efi_memreserve *rsv;
+> > +	unsigned long prsv;
+> > +	char *str = buf;
+> > +	int index, i;
+> > +
+> > +	if (!kobj || !buf)
+> > +		return -EINVAL;
+> > +
+> > +	if (!efi_memreserve_root)
+> > +		return -ENODEV;
+> 
+> Other functions use different conditions.
+> The latter efi_memreserve_root == (void *)ULONG_MAX is correct?
+> 
+> static int __init efi_memreserve_map_root(void)
+> {
+>         if (efi.mem_reserve == EFI_INVALID_TABLE_ADDR)
+>                 return -ENODEV;
+> int __ref efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
+> {
+>         struct linux_efi_memreserve *rsv;
+>         unsigned long prsv;
+>         int rc, index;
+> 
+>         if (efi_memreserve_root == (void *)ULONG_MAX)
+>                 return -ENODEV;
 
-This patch is very similar to the support previously added
-for CCIX Memory Errors and provides both logging and RAS
-tracepoint for this error class.
+I think it's better to add both checks like as:
 
-Signed-off-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
----
- drivers/acpi/apei/ghes.c         |   4 +
- drivers/firmware/efi/cper-ccix.c | 140 +++++++++++++++++++++++++++++++
- include/linux/cper.h             |  48 +++++++++++
- include/ras/ras_event.h          |  65 ++++++++++++++
- 4 files changed, 257 insertions(+)
+        if ((efi_memreserve_root == (void *)ULONG_MAX) ||
+                        (!efi_memreserve_root))
+                return -ENODEV;
+> 
+> > +
+> > +	for (prsv = efi_memreserve_root->next; prsv; prsv = rsv->next) {
+> > +		rsv = memremap(prsv, sizeof(*rsv), MEMREMAP_WB);
+> 
+> memremap() could fail with NULL as a return value.
+> You need to deal with such case.
+> 
+> It looks to me efi_mem_reserve_persistent() also doesn't deal with this.
+> Maybe you should fix this, too.
 
-diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-index 7455db97319c..22df8c14ec13 100644
---- a/drivers/acpi/apei/ghes.c
-+++ b/drivers/acpi/apei/ghes.c
-@@ -529,6 +529,10 @@ static void ghes_handle_ccix_per(struct acpi_hest_generic_data *gdata, int sev)
- 		trace_ccix_port_error_event(payload, err_seq, sev,
- 					    ccix_port_err_ven_len_get(payload));
- 		break;
-+	case CCIX_LINK_ERROR:
-+		trace_ccix_link_error_event(payload, err_seq, sev,
-+					    ccix_link_err_ven_len_get(payload));
-+		break;
- 	default:
- 		/* Unknown error type */
- 		pr_info("CCIX error of unknown or vendor defined type\n");
-diff --git a/drivers/firmware/efi/cper-ccix.c b/drivers/firmware/efi/cper-ccix.c
-index b936661b3db3..03630f4abaab 100644
---- a/drivers/firmware/efi/cper-ccix.c
-+++ b/drivers/firmware/efi/cper-ccix.c
-@@ -506,6 +506,86 @@ static int cper_ccix_port_err_details(const char *pfx,
- 	return 0;
- }
- 
-+static const char * const ccix_link_err_type_strs[] = {
-+	"Generic Error",
-+	"Credit Underflow",
-+	"Credit Overflow",
-+	"Unusable Credit Received",
-+	"Link Credit Timeout",
-+};
-+
-+static const char *cper_ccix_link_err_type_str(__u8 op)
-+{
-+	return op < ARRAY_SIZE(ccix_link_err_type_strs) ?
-+		ccix_link_err_type_strs[op] : "Reserved";
-+}
-+
-+static const char * const ccix_link_credit_type_strs[] = {
-+	"Memory",
-+	"Snoop",
-+	"Data",
-+	"Misc",
-+};
-+
-+static const char *cper_ccix_link_credit_type_str(__u8 op)
-+{
-+	return op < ARRAY_SIZE(ccix_link_credit_type_strs) ?
-+		ccix_link_credit_type_strs[op] : "Reserved";
-+}
-+
-+static int cper_ccix_link_err_details(const char *pfx,
-+				     struct acpi_hest_generic_data *gdata)
-+{
-+	struct cper_ccix_link_error *full_link_err;
-+	struct cper_sec_ccix_link_error *link_err;
-+	u16 vendor_data_len;
-+	int i;
-+
-+	if (gdata->error_data_length < sizeof(*full_link_err))
-+		return -ENOSPC;
-+
-+	full_link_err = acpi_hest_get_payload(gdata);
-+
-+	link_err = &full_link_err->link_record;
-+
-+	if (link_err->validation_bits & CCIX_LINK_ERR_TYPE_VALID)
-+		printk("%s""Error Type: %s\n", pfx,
-+		       cper_ccix_link_err_type_str(link_err->err_type));
-+
-+	if (link_err->validation_bits & CCIX_LINK_ERR_OP_VALID)
-+		printk("%s""Operation: %s\n", pfx,
-+		       cper_ccix_port_err_op_str(link_err->op_type));
-+
-+	if (link_err->validation_bits & CCIX_LINK_ERR_LINK_ID_VALID)
-+		printk("%s""Link ID: %d\n", pfx, link_err->link_id);
-+
-+	if (link_err->validation_bits & CCIX_LINK_ERR_CREDIT_TYPE_VALID)
-+		printk("%s""Credit Type: %s\n", pfx,
-+		       cper_ccix_link_credit_type_str(link_err->credit_type));
-+
-+	/* CHECK THE AER EQUIVALENT */
-+	if (link_err->validation_bits & CCIX_LINK_ERR_MESSAGE_VALID) {
-+		for (i = 0; i < ARRAY_SIZE(link_err->message); i++)
-+			printk("%s""Message%d: 0x%08x\n", pfx, i, link_err->message[i]);
-+	}
-+
-+	if (link_err->validation_bits & CCIX_LINK_ERR_VENDOR_DATA_VALID) {
-+		if (gdata->error_data_length < sizeof(*full_link_err) + 4)
-+			return -ENOSPC;
-+
-+		vendor_data_len = link_err->vendor_data[0] & GENMASK(15, 0);
-+		if (gdata->error_data_length < sizeof(*full_link_err) + vendor_data_len)
-+			return -ENOSPC;
-+
-+		for (i = 0; i < vendor_data_len/4 - 1; i++)
-+			printk("%s""Vendor%d: 0x%08x\n", pfx, i,
-+			       link_err->vendor_data[i + 1]);
-+
-+	}
-+
-+	return 0;
-+}
-+
- int cper_print_ccix_per(const char *pfx, struct acpi_hest_generic_data *gdata)
- {
- 	struct cper_sec_ccix_header *header = acpi_hest_get_payload(gdata);
-@@ -573,6 +653,8 @@ int cper_print_ccix_per(const char *pfx, struct acpi_hest_generic_data *gdata)
- 		return cper_ccix_atc_err_details(pfx, gdata);
- 	case CCIX_PORT_ERROR:
- 		return cper_ccix_port_err_details(pfx, gdata);
-+	case CCIX_LINK_ERROR:
-+		return cper_ccix_link_err_details(pfx, gdata);
- 	default:
- 		/* Vendor defined so no formatting be done */
- 		break;
-@@ -734,3 +816,61 @@ const char *cper_ccix_port_err_unpack(struct trace_seq *p,
- 
- 	return ret;
- }
-+
-+void cper_ccix_link_err_pack(const struct cper_sec_ccix_link_error *link_record,
-+			     struct cper_ccix_link_err_compact *clink_err,
-+			     const u16 vendor_data_len,
-+			     u8 *vendor_data)
-+{
-+	clink_err->validation_bits = link_record->validation_bits;
-+	clink_err->err_type = link_record->err_type;
-+	clink_err->op_type = link_record->op_type;
-+	clink_err->link_id = link_record->link_id;
-+	clink_err->credit_type = link_record->credit_type;
-+	memcpy(clink_err->message, link_record->message,
-+	       sizeof(clink_err->message));
-+
-+	memcpy(vendor_data, &link_record->vendor_data[1], vendor_data_len);
-+}
-+
-+static int cper_ccix_err_link_location(struct cper_ccix_link_err_compact *clink_err,
-+				       char *msg)
-+{
-+	u32 len = CPER_REC_LEN - 1;
-+	u32 n = 0;
-+
-+	if (!msg)
-+		return 0;
-+
-+	if (clink_err->validation_bits & CCIX_LINK_ERR_TYPE_VALID)
-+		n += snprintf(msg + n, len, "Error Type: %s ",
-+			      cper_ccix_link_err_type_str(clink_err->err_type));
-+
-+
-+	if (clink_err->validation_bits & CCIX_LINK_ERR_OP_VALID)
-+		n += snprintf(msg + n, len, "Op: %s ",
-+			     cper_ccix_port_err_op_str(clink_err->op_type));
-+
-+	if (clink_err->validation_bits & CCIX_LINK_ERR_LINK_ID_VALID)
-+		n += snprintf(msg + n, len, "Link ID: %d ", clink_err->link_id);
-+
-+	if (clink_err->validation_bits & CCIX_LINK_ERR_CREDIT_TYPE_VALID)
-+		n += snprintf(msg + n, len, "Credit Type: %s ",
-+			      cper_ccix_link_credit_type_str(clink_err->credit_type));
-+
-+	/* MESSAGE TODO */
-+	return n;
-+}
-+
-+const char *cper_ccix_link_err_unpack(struct trace_seq *p,
-+				      struct cper_ccix_link_err_compact *clink_err)
-+{
-+	const char *ret = trace_seq_buffer_ptr(p);
-+
-+	if (cper_ccix_err_link_location(clink_err, rcd_decode_str))
-+		trace_seq_printf(p, "%s", rcd_decode_str);
-+
-+	trace_seq_putc(p, '\0');
-+
-+	return ret;
-+}
-diff --git a/include/linux/cper.h b/include/linux/cper.h
-index 5e315afc210e..d35be55351e3 100644
---- a/include/linux/cper.h
-+++ b/include/linux/cper.h
-@@ -742,6 +742,47 @@ struct cper_ccix_port_err_compact {
- 	__u8	op_type;
- };
- 
-+struct cper_sec_ccix_link_error {
-+	__u32	validation_bits;
-+#define CCIX_LINK_ERR_OP_VALID			BIT(0)
-+#define CCIX_LINK_ERR_TYPE_VALID		BIT(1)
-+#define CCIX_LINK_ERR_LINK_ID_VALID		BIT(2)
-+#define CCIX_LINK_ERR_CREDIT_TYPE_VALID		BIT(3)
-+#define CCIX_LINK_ERR_MESSAGE_VALID		BIT(4)
-+#define CCIX_LINK_ERR_VENDOR_DATA_VALID		BIT(5)
-+	__u16	length; /* Includes vendor specific log info */
-+	__u8	op_type;
-+	__u8	err_type;
-+	__u8	link_id;
-+	__u8	credit_type;
-+	__u16	reserved;
-+	__u32	message[8];
-+	__u32	vendor_data[];
-+};
-+
-+struct cper_ccix_link_error {
-+	struct cper_sec_ccix_header header;
-+	__u32 ccix_header[CCIX_PER_LOG_HEADER_DWS];
-+	struct cper_sec_ccix_link_error link_record;
-+};
-+
-+static inline u16 ccix_link_err_ven_len_get(struct cper_ccix_link_error *link_err)
-+{
-+	if (link_err->link_record.validation_bits & CCIX_LINK_ERR_VENDOR_DATA_VALID)
-+		return link_err->link_record.vendor_data[0] & 0xFFFF;
-+	else
-+		return 0;
-+}
-+
-+struct cper_ccix_link_err_compact {
-+	__u32	validation_bits;
-+	__u32	message[8];
-+	__u8	err_type;
-+	__u8	op_type;
-+	__u8	link_id;
-+	__u8	credit_type;
-+};
-+
- /* Reset to default packing */
- #pragma pack()
- 
-@@ -787,6 +828,13 @@ void cper_ccix_port_err_pack(const struct cper_sec_ccix_port_error *port_record,
- const char *cper_ccix_port_err_unpack(struct trace_seq *p,
- 				      struct cper_ccix_port_err_compact *cport_err);
- 
-+void cper_ccix_link_err_pack(const struct cper_sec_ccix_link_error *link_record,
-+			     struct cper_ccix_link_err_compact *clink_err,
-+			     const u16 vendor_data_len,
-+			     u8 *vendor_data);
-+const char *cper_ccix_link_err_unpack(struct trace_seq *p,
-+				      struct cper_ccix_link_err_compact *clink_err);
-+
- struct acpi_hest_generic_data;
- int cper_print_ccix_per(const char *pfx,
- 			struct acpi_hest_generic_data *gdata);
-diff --git a/include/ras/ras_event.h b/include/ras/ras_event.h
-index b0c416382786..7cecfadb0b15 100644
---- a/include/ras/ras_event.h
-+++ b/include/ras/ras_event.h
-@@ -614,6 +614,71 @@ TRACE_EVENT(ccix_port_error_event,
- 		__print_hex(__get_dynamic_array(vendor_data), __entry->vendor_data_length)
- 	)
- );
-+
-+TRACE_EVENT(ccix_link_error_event,
-+	TP_PROTO(struct cper_ccix_link_error *err,
-+		 u32 err_seq,
-+		 u8 sev, u16 ven_len),
-+
-+	TP_ARGS(err, err_seq, sev, ven_len),
-+
-+	TP_STRUCT__entry(
-+		__field(u32, err_seq)
-+		__field(u8, sev)
-+		__field(u8, sevdetail)
-+		__field(u8, source)
-+		__field(u8, component)
-+		__field(u64, pa)
-+		__field(u8, pa_mask_lsb)
-+		__field_struct(struct cper_ccix_link_err_compact, data)
-+		__field(u16, vendor_data_length)
-+		__dynamic_array(u8, vendor_data, ven_len)
-+	),
-+
-+	TP_fast_assign(
-+		__entry->err_seq = err_seq;
-+
-+		__entry->sev = sev;
-+		__entry->sevdetail = FIELD_GET(CCIX_PER_LOG_DW1_SEV_UE_M |
-+			CCIX_PER_LOG_DW1_SEV_NO_COMM_M |
-+			CCIX_PER_LOG_DW1_SEV_DEGRADED_M |
-+			CCIX_PER_LOG_DW1_SEV_DEFFERABLE_M,
-+			err->ccix_header[1]);
-+		if (err->header.validation_bits & 0x1)
-+			__entry->source = err->header.source_id;
-+		else
-+			__entry->source = ~0;
-+		__entry->component = FIELD_GET(CCIX_PER_LOG_DW1_COMP_TYPE_M,
-+						   err->ccix_header[1]);
-+		if (err->ccix_header[1] & CCIX_PER_LOG_DW1_ADDR_VAL_M) {
-+			__entry->pa = (u64)err->ccix_header[2] << 32 |
-+				(err->ccix_header[3] & 0xfffffffc);
-+			__entry->pa_mask_lsb = err->ccix_header[4] & 0xff;
-+		} else {
-+			__entry->pa = ~0ull;
-+			__entry->pa_mask_lsb = ~0;
-+		}
-+		/* Do not store the vendor data header length */
-+		__entry->vendor_data_length = ven_len ? ven_len - 4 : 0;
-+		cper_ccix_link_err_pack(&err->link_record, &__entry->data,
-+					__entry->vendor_data_length,
-+					__get_dynamic_array(vendor_data));
-+	),
-+
-+	TP_printk("{%d} %s CCIX PER Link Error in %s SevUE:%d SevNoComm:%d SevDegraded:%d SevDeferred:%d physical addr: %016llx (mask: %x) %s vendor:%s",
-+		__entry->err_seq,
-+		cper_severity_str(__entry->sev),
-+		cper_ccix_comp_type_str(__entry->component),
-+		__entry->sevdetail & BIT(0) ? 1 : 0,
-+		__entry->sevdetail & BIT(1) ? 1 : 0,
-+		__entry->sevdetail & BIT(2) ? 1 : 0,
-+		__entry->sevdetail & BIT(3) ? 1 : 0,
-+		__entry->pa,
-+		__entry->pa_mask_lsb,
-+		cper_ccix_link_err_unpack(p, &__entry->data),
-+		__print_hex(__get_dynamic_array(vendor_data), __entry->vendor_data_length)
-+	)
-+);
- #endif
- 
- /*
--- 
-2.20.1
+OK, I'll post a patch sepaletely to add the sanity check.
 
+> 
+> > +		index = atomic_read(&rsv->count);
+> > +		for (i = 0; i < index; i++)
+> > +			str += sprintf(str, "%llx-%llx\n",
+> > +				rsv->entry[i].base,
+> > +				rsv->entry[i].base + rsv->entry[i].size -
+> > 1);
+> 
+> Is memreserve supported on 32-bit system?
+> If so, phy_addr_t could have a type of 4-byte length in such system
+> (not so if with PAE) and then %llx could lead to inconsistent type error.
+> It's enough to add a cast to unsigned long long.
+
+Good catch. I'll modify the sprintf() format to
+use %pa like as:
+
+  phys_addr_t start, end;
+
+  for (i = 0; i < index; i++) {
+          start = rsv->entry[i].base;
+          end = start + rsv->entry[i].size - 1;
+
+          str += sprintf(str, "%pa-%pa\n", &start, &end);
+  }
+
+Thanks,
+Masa
+> 
+> > +		memunmap(rsv);
+> > +	}
+> > +
+> > +	return str - buf;
+> > +}
+> > +
+> > +static struct kobj_attribute efi_attr_memreserve =
+> > __ATTR_RO_MODE(memreserve, 0444);
+> > +
+> >  #define EFI_FIELD(var) efi.var
+> > 
+> >  #define EFI_ATTR_SHOW(name) \
+> > @@ -172,6 +202,7 @@ static struct attribute *efi_subsys_attrs[] = {
+> >  	&efi_attr_runtime.attr,
+> >  	&efi_attr_config_table.attr,
+> >  	&efi_attr_fw_platform_size.attr,
+> > +	&efi_attr_memreserve.attr,
+> >  	NULL,
+> >  };
+> > 
+> > @@ -955,7 +986,6 @@ int efi_status_to_err(efi_status_t status)
+> >  }
+> > 
+> >  static DEFINE_SPINLOCK(efi_mem_reserve_persistent_lock);
+> > -static struct linux_efi_memreserve *efi_memreserve_root __ro_after_init;
+> > 
+> >  static int __init efi_memreserve_map_root(void)
+> >  {
+> > --
+> > 2.18.1
+> 
