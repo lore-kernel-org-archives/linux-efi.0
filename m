@@ -2,58 +2,84 @@ Return-Path: <SRS0=V+Gr=ZG=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
+X-Spam-Status: No, score=-10.3 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 79D18C432C3
-	for <linux-efi@archiver.kernel.org>; Thu, 14 Nov 2019 09:09:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EE142C43141
+	for <linux-efi@archiver.kernel.org>; Thu, 14 Nov 2019 09:48:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 5B66A206C0
-	for <linux-efi@archiver.kernel.org>; Thu, 14 Nov 2019 09:09:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BC6E520724
+	for <linux-efi@archiver.kernel.org>; Thu, 14 Nov 2019 09:48:01 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1573724881;
+	bh=aENC5+uqOt8x8k+ADiNUuSTlGYJaOZ2quvrGJvqWymA=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
+	b=OmBCU64Js6nTmr875GoWFmDK6jgj22DwMMWVZeuLQgN/8vbMkIUTNOgeJCksV5M6g
+	 AthYiEhIZGyz2ZwfyhHvKg1kDglG2RPSg29yDvdobrzzd3UoQ8o2AQx6QeGjOSiJNu
+	 sSVAvHY9hfG1fNpk6St6y1oZX+9y02PglgFwtjsk=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726894AbfKNJHx (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 14 Nov 2019 04:07:53 -0500
-Received: from bilbo.ozlabs.org ([203.11.71.1]:60617 "EHLO ozlabs.org"
+        id S1726473AbfKNJsB (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 14 Nov 2019 04:48:01 -0500
+Received: from mail.kernel.org ([198.145.29.99]:53586 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726786AbfKNJHw (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Thu, 14 Nov 2019 04:07:52 -0500
-Received: by ozlabs.org (Postfix, from userid 1034)
-        id 47DFxf2Pscz9s7T; Thu, 14 Nov 2019 20:07:49 +1100 (AEDT)
-X-powerpc-patch-notification: thanks
-X-powerpc-patch-commit: 39a963b457b5c6cbbdc70441c9d496e39d151582
-In-Reply-To: <1569973038-2710-1-git-send-email-nayna@linux.ibm.com>
-To:     Nayna Jain <nayna@linux.ibm.com>, linuxppc-dev@ozlabs.org,
-        linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org
-From:   Michael Ellerman <patch-notifications@ellerman.id.au>
-Cc:     Ard Biesheuvel <ard.biesheuvel@linaro.org>,
+        id S1726190AbfKNJsB (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Thu, 14 Nov 2019 04:48:01 -0500
+Received: from localhost (unknown [61.58.47.46])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 0A7A620715;
+        Thu, 14 Nov 2019 09:48:00 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1573724880;
+        bh=aENC5+uqOt8x8k+ADiNUuSTlGYJaOZ2quvrGJvqWymA=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=U77pto+xf9jrnoKspvyzQb985Tr5D5ytMcnOHuYeHgUkP0MblJgFv2wef5vEDJRHQ
+         GGVrwmuvD2E1SnpHs+N/qxs0wHt9+Oq7SxovW3t/k/ZOFJmWpjTN+miORfCWjndAJX
+         S35KA6XKHK7RYSWfL330CTKrkX7Uj5/wPOlkcI9E=
+Date:   Thu, 14 Nov 2019 17:47:58 +0800
+From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+To:     Michael Ellerman <patch-notifications@ellerman.id.au>
+Cc:     Nayna Jain <nayna@linux.ibm.com>, linuxppc-dev@ozlabs.org,
+        linux-efi@vger.kernel.org, linux-integrity@vger.kernel.org,
+        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
         Eric Ricther <erichte@linux.ibm.com>,
-        Nayna Jain <nayna@linux.ibm.com>, linux-kernel@vger.kernel.org,
-        Mimi Zohar <zohar@linux.ibm.com>,
+        linux-kernel@vger.kernel.org, Mimi Zohar <zohar@linux.ibm.com>,
         Claudio Carvalho <cclaudio@linux.ibm.com>,
         Matthew Garret <matthew.garret@nebula.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         Paul Mackerras <paulus@samba.org>, Jeremy Kerr <jk@ozlabs.org>,
         Elaine Palmer <erpalmer@us.ibm.com>,
         Oliver O'Halloran <oohall@gmail.com>,
         George Wilson <gcwilson@linux.ibm.com>
 Subject: Re: [PATCH] sysfs: Fixes __BIN_ATTR_WO() macro
-Message-Id: <47DFxf2Pscz9s7T@ozlabs.org>
-Date:   Thu, 14 Nov 2019 20:07:49 +1100 (AEDT)
+Message-ID: <20191114094758.GB631558@kroah.com>
+References: <1569973038-2710-1-git-send-email-nayna@linux.ibm.com>
+ <47DFxf2Pscz9s7T@ozlabs.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <47DFxf2Pscz9s7T@ozlabs.org>
+User-Agent: Mutt/1.12.2 (2019-09-21)
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, 2019-10-01 at 23:37:18 UTC, Nayna Jain wrote:
-> This patch fixes the size and write parameter for the macro
-> __BIN_ATTR_WO().
+On Thu, Nov 14, 2019 at 08:07:49PM +1100, Michael Ellerman wrote:
+> On Tue, 2019-10-01 at 23:37:18 UTC, Nayna Jain wrote:
+> > This patch fixes the size and write parameter for the macro
+> > __BIN_ATTR_WO().
+> > 
+> > Fixes: 7f905761e15a8 ("sysfs: add BIN_ATTR_WO() macro")
+> > Signed-off-by: Nayna Jain <nayna@linux.ibm.com>
 > 
-> Fixes: 7f905761e15a8 ("sysfs: add BIN_ATTR_WO() macro")
-> Signed-off-by: Nayna Jain <nayna@linux.ibm.com>
+> Applied to powerpc next, thanks.
+> 
+> https://git.kernel.org/powerpc/c/39a963b457b5c6cbbdc70441c9d496e39d151582
 
-Applied to powerpc next, thanks.
+Why?  This is already in 5.4-rc5, why do you need/want it again?
 
-https://git.kernel.org/powerpc/c/39a963b457b5c6cbbdc70441c9d496e39d151582
+thanks,
 
-cheers
+greg k-h
