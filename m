@@ -2,243 +2,170 @@ Return-Path: <SRS0=3FKS=ZH=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3571CC432C3
-	for <linux-efi@archiver.kernel.org>; Fri, 15 Nov 2019 15:36:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E86B1C432C3
+	for <linux-efi@archiver.kernel.org>; Fri, 15 Nov 2019 16:28:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 06D1820715
-	for <linux-efi@archiver.kernel.org>; Fri, 15 Nov 2019 15:36:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BA9A42072D
+	for <linux-efi@archiver.kernel.org>; Fri, 15 Nov 2019 16:28:20 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="CzluX0be"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="hZp+Qccw"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727476AbfKOPfs (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 15 Nov 2019 10:35:48 -0500
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:42792 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727526AbfKOPfr (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 15 Nov 2019 10:35:47 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1573832146;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=OixvqTV1IxVuShrXtiRs+/ZEbuvrAgG5Cpf1NhQlRk4=;
-        b=CzluX0beDjZi+3R6FzMlO+NIqva73zZq2iLgEe/Sdl07xSdT3PSgdj/c5uaNZYWrCPla3Z
-        7xqeo26TQJWQnMO9myQ7UwrIH857l0c42+7NfL9Pm22q8GCrB2ybWzSEYYkZrJqQhVacFR
-        /C/evH3RgNKkocFQhe72l3bVJSlB88k=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-133-ngfll0vkOZuPv2WP52TSKg-1; Fri, 15 Nov 2019 10:35:43 -0500
-Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 36D7810D237A;
-        Fri, 15 Nov 2019 15:35:39 +0000 (UTC)
-Received: from shalem.localdomain.com (ovpn-116-154.ams2.redhat.com [10.36.116.154])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 8F4BA6117E;
-        Fri, 15 Nov 2019 15:35:35 +0000 (UTC)
-From:   Hans de Goede <hdegoede@redhat.com>
-To:     Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Darren Hart <dvhart@infradead.org>,
-        Andy Shevchenko <andy@infradead.org>,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        "Rafael J . Wysocki" <rafael@kernel.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
-        "H . Peter Anvin" <hpa@zytor.com>,
-        Jonathan Corbet <corbet@lwn.net>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>
-Cc:     Hans de Goede <hdegoede@redhat.com>,
-        Peter Jones <pjones@redhat.com>,
-        Dave Olsthoorn <dave@bewaar.me>, x86@kernel.org,
-        platform-driver-x86@vger.kernel.org, linux-efi@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-doc@vger.kernel.org,
-        linux-input@vger.kernel.org
-Subject: [PATCH v8 1/8] efi: Export boot-services code and data as debugfs-blobs
-Date:   Fri, 15 Nov 2019 16:35:22 +0100
-Message-Id: <20191115153529.215244-2-hdegoede@redhat.com>
-In-Reply-To: <20191115153529.215244-1-hdegoede@redhat.com>
-References: <20191115153529.215244-1-hdegoede@redhat.com>
+        id S1727528AbfKOQ2U (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 15 Nov 2019 11:28:20 -0500
+Received: from mail-wm1-f68.google.com ([209.85.128.68]:39913 "EHLO
+        mail-wm1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727520AbfKOQ2U (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 15 Nov 2019 11:28:20 -0500
+Received: by mail-wm1-f68.google.com with SMTP id t26so11086556wmi.4
+        for <linux-efi@vger.kernel.org>; Fri, 15 Nov 2019 08:28:19 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=s+V0QiQSoCj4k49EY49nJq90kEBC7Yfhy2bOMluqbVo=;
+        b=hZp+QccwjL4WvbbKO5rtid/3Qdt0IuPqRX+pmKYjrTsWjvr6NC50oP2F9g7hot+AqM
+         uHkB1mOY3BygfL+MgoAgE0qrGcaSihZEgHXNBGw6QyTd/0ZQ9+m8pfZG/g4lgWklXGvs
+         uWDmJGYYzef0Zz9bslcDTanv/sYDr6t1CC5DaVBiqeH5nCI83Dki9hr8yKEKA4SbS8Hv
+         Z/wBW/6jxzQw1yKYyPREs2o1q7oOScu61zveGSr9ug4GlZ5bl5Oequ0IP89kHto7gtjg
+         zFMqLiDMeXoRT154nK1L9UnGen+I4FSgKU8z3CdSFnHLCLIkTRYmQgiyS8O4huGKHXll
+         qIMg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=s+V0QiQSoCj4k49EY49nJq90kEBC7Yfhy2bOMluqbVo=;
+        b=r1QINc/EMA4u12OOzdolZLsCNsRyduIR2s6PsGCNo5F3Iu9oAKfoy+1lWo7U9HVxgQ
+         MDOeKPoGmIijRwaLI91tFJBcCgDwv6xEmS2j98bT2Gd4vzgHevxSIMEQXejaH7Iw++Vj
+         Fp8PJdc02SuKnusckvO65OKdKcGpB3idLMovPw139ZAckC0AqFqXyGJckanC6pL9qJ/r
+         VkQdwhHG2wdAwXugFEPwJ9psPrrqL1D9mgF5c4hdyDQwzGD1UcLIbSXEaviRu+XQsRQs
+         tmVMId+hUx3av9+9iY+hxsJo0olNimX5b7f2+WoRYD1iBWLtkvB8Piwuk80YqZ6cG8Sh
+         z83g==
+X-Gm-Message-State: APjAAAW3DQNcftQq3gZEJCTbGdnzZ+MotC0jrPd84Oh3t3Dl89DuDP5A
+        uy0rZI9gyw+axEkWMDjvT/twO78NUO4oIgNbbC6jGrypztWPKQ==
+X-Google-Smtp-Source: APXvYqwbGXbkxad19SZAx2qD4Vo+5buLyQaIs2DKxY/366DkGj6vQFmwPBK+mH3p2jK1rGicJFdNLmu3USCFa3CIvkQ=
+X-Received: by 2002:a1c:64d6:: with SMTP id y205mr14426699wmb.136.1573835298305;
+ Fri, 15 Nov 2019 08:28:18 -0800 (PST)
 MIME-Version: 1.0
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
-X-MC-Unique: ngfll0vkOZuPv2WP52TSKg-1
-X-Mimecast-Spam-Score: 0
-Content-Type: text/plain; charset=WINDOWS-1252
-Content-Transfer-Encoding: quoted-printable
+References: <20191115153102.51921-1-andriy.shevchenko@linux.intel.com>
+In-Reply-To: <20191115153102.51921-1-andriy.shevchenko@linux.intel.com>
+From:   Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Date:   Fri, 15 Nov 2019 16:28:10 +0000
+Message-ID: <CAKv+Gu9wKQ_yXjfkB6-6f8Tfu+cfpSNnxn04ZqExYxuPSQS-ww@mail.gmail.com>
+Subject: Re: [PATCH v3] efi/earlycon: Remap entire framebuffer after page initialization
+To:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc:     linux-efi <linux-efi@vger.kernel.org>,
+        Mika Westerberg <mika.westerberg@linux.intel.com>,
+        Alexander Graf <agraf@suse.de>,
+        Matt Fleming <matt@codeblueprint.co.uk>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Sometimes it is useful to be able to dump the efi boot-services code and
-data. This commit adds these as debugfs-blobs to /sys/kernel/debug/efi,
-but only if efi=3Ddebug is passed on the kernel-commandline as this require=
-s
-not freeing those memory-regions, which costs 20+ MB of RAM.
+On Fri, 15 Nov 2019 at 15:31, Andy Shevchenko
+<andriy.shevchenko@linux.intel.com> wrote:
+>
+> When the commit 69c1f396f25b ("efi/x86: Convert x86 EFI earlyprintk
+> into generic earlycon implementation") moved x86 specific EFI earlyprintk
+> implementation to shared location it also tweaked the behaviour. In particular
+> it dropped a trick with full framebuffer remapping after page initialization.
+> This lead to two regressions:
+> 1) very slow scrolling after page initialization;
+> 2) kernel hang when keep_bootcon parameter is being provided.
+>
+> Returning the trick back fixes #2 and mitigates, i.e. reduces the window when
+> slowness appears, #1 presumably due to eliminating heavy map()/unmap()
+> operations per each pixel line on the screen.
+>
+> Fixes: 69c1f396f25b ("efi/x86: Convert x86 EFI earlyprintk into generic earlycon implementation")
+> Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> Cc: Alexander Graf <agraf@suse.de>
+> Cc: Matt Fleming <matt@codeblueprint.co.uk>
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+> ---
+> v3:
+> - assign size in efi_earlycon_setup()
+> - check base and size before mapping in early_efi_map_fb()
+>  drivers/firmware/efi/earlycon.c | 37 +++++++++++++++++++++++++++++++++
+>  1 file changed, 37 insertions(+)
+>
+> diff --git a/drivers/firmware/efi/earlycon.c b/drivers/firmware/efi/earlycon.c
+> index c9a0efca17b0..60b5350c6105 100644
+> --- a/drivers/firmware/efi/earlycon.c
+> +++ b/drivers/firmware/efi/earlycon.c
+> @@ -16,15 +16,50 @@
+>  static const struct font_desc *font;
+>  static u32 efi_x, efi_y;
+>  static u64 fb_base;
+> +static u32 fb_size;
+>  static pgprot_t fb_prot;
+> +static void *efi_fb;
+> +
+> +/*
+> + * efi earlycon needs to use early_memremap() to map the framebuffer.
+> + * But early_memremap() is not usable for 'earlycon=efifb keep_bootcon',
+> + * memremap() should be used instead. memremap() will be available after
+> + * paging_init() which is earlier than initcall callbacks. Thus adding this
+> + * early initcall function early_efi_map_fb() to map the whole efi framebuffer.
+> + */
+> +static int __init early_efi_map_fb(void)
+> +{
+> +       if (!fb_base || !fb_size)
+> +               return NULL;
+> +
 
-Reviewed-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Signed-off-by: Hans de Goede <hdegoede@redhat.com>
----
-Changes in v8:
--Add pr_warn if there are mode then EFI_DEBUGFS_MAX_BLOBS boot service segm=
-ents
--Document how the boot_service_code? files can be used to check for embedde=
-d
- firmware. Note since this is related to the firmware EFI embedded fw suppo=
-rt,
- these docs are added in the 4th patch of this patch-set, not in this one.
+'return 0' please.
 
-Changes in v5:
--Rename the EFI_BOOT_SERVICES flag to EFI_PRESERVE_BS_REGIONS
+I'll test this on actual arm64 hardware somewhere next week, and queue
+it if it doesn't break anything (no need to resend for the above)
 
-Changes in v4:
--Add new EFI_BOOT_SERVICES flag and use it to determine if the boot-service=
-s
- memory segments are available (and thus if it makes sense to register the
- debugfs bits for them)
 
-Changes in v2:
--Do not call pr_err on debugfs call failures
----
- arch/x86/platform/efi/efi.c    |  1 +
- arch/x86/platform/efi/quirks.c |  4 +++
- drivers/firmware/efi/efi.c     | 57 ++++++++++++++++++++++++++++++++++
- include/linux/efi.h            |  1 +
- 4 files changed, 63 insertions(+)
-
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 425e025341db..f8a9f5230aaf 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -232,6 +232,7 @@ int __init efi_memblock_x86_reserve_range(void)
- =09     efi.memmap.desc_version);
-=20
- =09memblock_reserve(pmap, efi.memmap.nr_map * efi.memmap.desc_size);
-+=09set_bit(EFI_PRESERVE_BS_REGIONS, &efi.flags);
-=20
- =09return 0;
- }
-diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.=
-c
-index 3b9fd679cea9..fab12ebf0ada 100644
---- a/arch/x86/platform/efi/quirks.c
-+++ b/arch/x86/platform/efi/quirks.c
-@@ -411,6 +411,10 @@ void __init efi_free_boot_services(void)
- =09int num_entries =3D 0;
- =09void *new, *new_md;
-=20
-+=09/* Keep all regions for /sys/kernel/debug/efi */
-+=09if (efi_enabled(EFI_DBG))
-+=09=09return;
-+
- =09for_each_efi_memory_desc(md) {
- =09=09unsigned long long start =3D md->phys_addr;
- =09=09unsigned long long size =3D md->num_pages << EFI_PAGE_SHIFT;
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index e98bbf8e56d9..bee809b337de 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -17,6 +17,7 @@
- #include <linux/kobject.h>
- #include <linux/module.h>
- #include <linux/init.h>
-+#include <linux/debugfs.h>
- #include <linux/device.h>
- #include <linux/efi.h>
- #include <linux/of.h>
-@@ -317,6 +318,59 @@ static __init int efivar_ssdt_load(void)
- static inline int efivar_ssdt_load(void) { return 0; }
- #endif
-=20
-+#ifdef CONFIG_DEBUG_FS
-+
-+#define EFI_DEBUGFS_MAX_BLOBS 32
-+
-+static struct debugfs_blob_wrapper debugfs_blob[EFI_DEBUGFS_MAX_BLOBS];
-+
-+static void __init efi_debugfs_init(void)
-+{
-+=09struct dentry *efi_debugfs;
-+=09efi_memory_desc_t *md;
-+=09char name[32];
-+=09int type_count[EFI_BOOT_SERVICES_DATA + 1] =3D {};
-+=09int i =3D 0;
-+
-+=09efi_debugfs =3D debugfs_create_dir("efi", NULL);
-+=09if (IS_ERR_OR_NULL(efi_debugfs))
-+=09=09return;
-+
-+=09for_each_efi_memory_desc(md) {
-+=09=09switch (md->type) {
-+=09=09case EFI_BOOT_SERVICES_CODE:
-+=09=09=09snprintf(name, sizeof(name), "boot_services_code%d",
-+=09=09=09=09 type_count[md->type]++);
-+=09=09=09break;
-+=09=09case EFI_BOOT_SERVICES_DATA:
-+=09=09=09snprintf(name, sizeof(name), "boot_services_data%d",
-+=09=09=09=09 type_count[md->type]++);
-+=09=09=09break;
-+=09=09default:
-+=09=09=09continue;
-+=09=09}
-+
-+=09=09if (i >=3D EFI_DEBUGFS_MAX_BLOBS) {
-+=09=09=09pr_warn("More then %d EFI boot service segments, only showing fir=
-st %d in debugfs\n",
-+=09=09=09=09EFI_DEBUGFS_MAX_BLOBS, EFI_DEBUGFS_MAX_BLOBS);
-+=09=09=09break;
-+=09=09}
-+
-+=09=09debugfs_blob[i].size =3D md->num_pages << EFI_PAGE_SHIFT;
-+=09=09debugfs_blob[i].data =3D memremap(md->phys_addr,
-+=09=09=09=09=09=09debugfs_blob[i].size,
-+=09=09=09=09=09=09MEMREMAP_WB);
-+=09=09if (!debugfs_blob[i].data)
-+=09=09=09continue;
-+
-+=09=09debugfs_create_blob(name, 0400, efi_debugfs, &debugfs_blob[i]);
-+=09=09i++;
-+=09}
-+}
-+#else
-+static inline void efi_debugfs_init(void) {}
-+#endif
-+
- /*
-  * We register the efi subsystem with the firmware subsystem and the
-  * efivars subsystem with the efi subsystem, if the system was booted with
-@@ -373,6 +427,9 @@ static int __init efisubsys_init(void)
- =09=09goto err_remove_group;
- =09}
-=20
-+=09if (efi_enabled(EFI_DBG) && efi_enabled(EFI_PRESERVE_BS_REGIONS))
-+=09=09efi_debugfs_init();
-+
- =09return 0;
-=20
- err_remove_group:
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index d87acf62958e..2929abb1e3c0 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1202,6 +1202,7 @@ extern int __init efi_setup_pcdp_console(char *);
- #define EFI_DBG=09=09=098=09/* Print additional debug info at runtime */
- #define EFI_NX_PE_DATA=09=099=09/* Can runtime data regions be mapped non-=
-executable? */
- #define EFI_MEM_ATTR=09=0910=09/* Did firmware publish an EFI_MEMORY_ATTRI=
-BUTES table? */
-+#define EFI_PRESERVE_BS_REGIONS=0911=09/* Are EFI boot-services memory seg=
-ments available? */
-=20
- #ifdef CONFIG_EFI
- /*
---=20
-2.23.0
-
+> +       if (pgprot_val(fb_prot) == pgprot_val(PAGE_KERNEL))
+> +               efi_fb = memremap(fb_base, fb_size, MEMREMAP_WB);
+> +       else
+> +               efi_fb = memremap(fb_base, fb_size, MEMREMAP_WC);
+> +
+> +       return efi_fb ? 0 : -ENOMEM;
+> +}
+> +early_initcall(early_efi_map_fb);
+> +
+> +static void __exit early_efi_unmap_fb(void)
+> +{
+> +       memunmap(efi_fb);
+> +}
+> +__exitcall(early_efi_unmap_fb);
+>
+>  static __ref void *efi_earlycon_map(unsigned long start, unsigned long len)
+>  {
+> +       if (efi_fb)
+> +               return efi_fb + start;
+> +
+>         return early_memremap_prot(fb_base + start, len, pgprot_val(fb_prot));
+>  }
+>
+>  static __ref void efi_earlycon_unmap(void *addr, unsigned long len)
+>  {
+> +       if (efi_fb)
+> +               return;
+> +
+>         early_memunmap(addr, len);
+>  }
+>
+> @@ -176,6 +211,8 @@ static int __init efi_earlycon_setup(struct earlycon_device *device,
+>         if (screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
+>                 fb_base |= (u64)screen_info.ext_lfb_base << 32;
+>
+> +       fb_size = screen_info.lfb_size;
+> +
+>         if (opt && !strcmp(opt, "ram"))
+>                 fb_prot = PAGE_KERNEL;
+>         else
+> --
+> 2.24.0
+>
