@@ -2,46 +2,46 @@ Return-Path: <SRS0=3FKS=ZH=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C88BC43141
-	for <linux-efi@archiver.kernel.org>; Fri, 15 Nov 2019 15:36:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 12757C43215
+	for <linux-efi@archiver.kernel.org>; Fri, 15 Nov 2019 15:36:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 0589D20748
-	for <linux-efi@archiver.kernel.org>; Fri, 15 Nov 2019 15:36:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DD91220674
+	for <linux-efi@archiver.kernel.org>; Fri, 15 Nov 2019 15:36:19 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="RFG9uuNO"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="VPjlRGll"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727834AbfKOPgG (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 15 Nov 2019 10:36:06 -0500
-Received: from us-smtp-1.mimecast.com ([205.139.110.61]:55384 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1727831AbfKOPgF (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 15 Nov 2019 10:36:05 -0500
+        id S1727894AbfKOPgT (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 15 Nov 2019 10:36:19 -0500
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:36531 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1727879AbfKOPgQ (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 15 Nov 2019 10:36:16 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1573832164;
+        s=mimecast20190719; t=1573832175;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=l3ClPDQhnQdEhbyOWefyMTALJbpKz/GsjGzDJ6+49Gg=;
-        b=RFG9uuNOKXF50ybrPBZ/c7NoZ+mCLW8JFChk5PIg6KNGrFUosaYk9yz67ZYe7FcLKxOIBL
-        mHWOSRE3Sj5+J/OvqvTA0Qj77tW28DEFXvF2TB9GcfXkCmT6KXnlpRMBwCe3EbG4r/Fr68
-        WBF0IQQncJaeKemJ1BP1ab1XjyH7/98=
+        bh=o+ceyNOAgwOHGOedPh8jjnXDmvLZ/5D9KblQB5Ic6zg=;
+        b=VPjlRGllygMfSWAWQ+IM/KYP1LdN8oQ2oMMjZW3aqVBn7ZOOff20Uo2Y4cBDTwiK+NKSsz
+        bOtNeLKHUwjjxLperHEolcGRYkLVnfHLhuqGrd/rmTee+nxVvXt/5T+FRHo/iU/Kw3G3AV
+        QI1S3dXlpu4p4Caze5xlxbCP2ZRcvJs=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-308-QRXe6FPLNl21VTXrpS5kgw-1; Fri, 15 Nov 2019 10:36:01 -0500
+ us-mta-272-9G6vf67KOMymBhSKmwPLHw-1; Fri, 15 Nov 2019 10:36:10 -0500
 Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id E82DADB8D;
-        Fri, 15 Nov 2019 15:35:58 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 17B5C8A20E2;
+        Fri, 15 Nov 2019 15:36:08 +0000 (UTC)
 Received: from shalem.localdomain.com (ovpn-116-154.ams2.redhat.com [10.36.116.154])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 4E77E6106C;
-        Fri, 15 Nov 2019 15:35:55 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 4E40F6117E;
+        Fri, 15 Nov 2019 15:36:04 +0000 (UTC)
 From:   Hans de Goede <hdegoede@redhat.com>
 To:     Ard Biesheuvel <ard.biesheuvel@linaro.org>,
         Darren Hart <dvhart@infradead.org>,
@@ -59,15 +59,16 @@ Cc:     Hans de Goede <hdegoede@redhat.com>,
         Dave Olsthoorn <dave@bewaar.me>, x86@kernel.org,
         platform-driver-x86@vger.kernel.org, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-doc@vger.kernel.org,
-        linux-input@vger.kernel.org
-Subject: [PATCH v8 6/8] Input: icn8505 - Switch to firmware_request_platform for retreiving the fw
-Date:   Fri, 15 Nov 2019 16:35:27 +0100
-Message-Id: <20191115153529.215244-7-hdegoede@redhat.com>
+        linux-input@vger.kernel.org,
+        Andy Shevchenko <andy.shevchenko@gmail.com>
+Subject: [PATCH v8 8/8] platform/x86: touchscreen_dmi: Add info for the Chuwi Vi8 Plus tablet
+Date:   Fri, 15 Nov 2019 16:35:29 +0100
+Message-Id: <20191115153529.215244-9-hdegoede@redhat.com>
 In-Reply-To: <20191115153529.215244-1-hdegoede@redhat.com>
 References: <20191115153529.215244-1-hdegoede@redhat.com>
 MIME-Version: 1.0
 X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
-X-MC-Unique: QRXe6FPLNl21VTXrpS5kgw-1
+X-MC-Unique: 9G6vf67KOMymBhSKmwPLHw-1
 X-Mimecast-Spam-Score: 0
 Content-Type: text/plain; charset=WINDOWS-1252
 Content-Transfer-Encoding: quoted-printable
@@ -76,40 +77,75 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Unfortunately sofar we have been unable to get permission to redistribute
-icn8505 touchscreen firmwares in linux-firmware. This means that people
-need to find and install the firmware themselves before the touchscreen
-will work
+Add touchscreen info for the Chuwi Vi8 Plus tablet. This tablet uses a
+Chipone ICN8505 touchscreen controller, with the firmware used by the
+touchscreen embedded in the EFI firmware.
 
-Some UEFI/x86 tablets with an icn8505 touchscreen have a copy of the fw
-embedded in their UEFI boot-services code.
-
-This commit makes the icn8505 driver use the new firmware_request_platform
-function, which will fallback to looking for such an embedded copy when
-direct filesystem lookup fails. This will make the touchscreen work OOTB
-on devices where there is a fw copy embedded in the UEFI code.
-
-Acked-by: Dmitry Torokhov <dmitry.torokhov@gmail.com>
+Acked-by: Andy Shevchenko <andy.shevchenko@gmail.com>
+Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Signed-off-by: Hans de Goede <hdegoede@redhat.com>
 ---
- drivers/input/touchscreen/chipone_icn8505.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Changes in v7:
+- Remove PROPERTY_ENTRY_BOOL("efi-embedded-firmware") properties entry,
+  as this is no longer necessary
 
-diff --git a/drivers/input/touchscreen/chipone_icn8505.c b/drivers/input/to=
-uchscreen/chipone_icn8505.c
-index c768186ce856..f9ca5502ac8c 100644
---- a/drivers/input/touchscreen/chipone_icn8505.c
-+++ b/drivers/input/touchscreen/chipone_icn8505.c
-@@ -288,7 +288,7 @@ static int icn8505_upload_fw(struct icn8505_data *icn85=
-05)
- =09 * we may need it at resume. Having loaded it once will make the
- =09 * firmware class code cache it at suspend/resume.
- =09 */
--=09error =3D request_firmware(&fw, icn8505->firmware_name, dev);
-+=09error =3D firmware_request_platform(&fw, icn8505->firmware_name, dev);
- =09if (error) {
- =09=09dev_err(dev, "Firmware request error %d\n", error);
- =09=09return error;
+Changes in v6:
+- Switch from crc sums to SHA256 hashes for the firmware hash
+---
+ drivers/platform/x86/touchscreen_dmi.c | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
+
+diff --git a/drivers/platform/x86/touchscreen_dmi.c b/drivers/platform/x86/=
+touchscreen_dmi.c
+index 4449e4c0b26b..4a09b479cda5 100644
+--- a/drivers/platform/x86/touchscreen_dmi.c
++++ b/drivers/platform/x86/touchscreen_dmi.c
+@@ -132,6 +132,18 @@ static const struct ts_dmi_data chuwi_vi8_data =3D {
+ =09.properties     =3D chuwi_vi8_props,
+ };
+=20
++static const struct ts_dmi_data chuwi_vi8_plus_data =3D {
++=09.embedded_fw =3D {
++=09=09.name=09=3D "chipone/icn8505-HAMP0002.fw",
++=09=09.prefix =3D { 0xb0, 0x07, 0x00, 0x00, 0xe4, 0x07, 0x00, 0x00 },
++=09=09.length=09=3D 35012,
++=09=09.sha256=09=3D { 0x93, 0xe5, 0x49, 0xe0, 0xb6, 0xa2, 0xb4, 0xb3,
++=09=09=09    0x88, 0x96, 0x34, 0x97, 0x5e, 0xa8, 0x13, 0x78,
++=09=09=09    0x72, 0x98, 0xb8, 0x29, 0xeb, 0x5c, 0xa7, 0xf1,
++=09=09=09    0x25, 0x13, 0x43, 0xf4, 0x30, 0x7c, 0xfc, 0x7c },
++=09},
++};
++
+ static const struct property_entry chuwi_vi10_props[] =3D {
+ =09PROPERTY_ENTRY_U32("touchscreen-min-x", 0),
+ =09PROPERTY_ENTRY_U32("touchscreen-min-y", 4),
+@@ -743,6 +755,15 @@ const struct dmi_system_id touchscreen_dmi_table[] =3D=
+ {
+ =09=09=09DMI_MATCH(DMI_BIOS_VERSION, "CHUWI.D86JLBNR"),
+ =09=09},
+ =09},
++=09{
++=09=09/* Chuwi Vi8 Plus (CWI519) */
++=09=09.driver_data =3D (void *)&chuwi_vi8_plus_data,
++=09=09.matches =3D {
++=09=09=09DMI_MATCH(DMI_SYS_VENDOR, "Hampoo"),
++=09=09=09DMI_MATCH(DMI_PRODUCT_NAME, "D2D3_Vi8A1"),
++=09=09=09DMI_MATCH(DMI_BOARD_NAME, "Cherry Trail CR"),
++=09=09},
++=09},
+ =09{
+ =09=09/* Chuwi Vi10 (CWI505) */
+ =09=09.driver_data =3D (void *)&chuwi_vi10_data,
+@@ -1137,6 +1158,9 @@ static int __init ts_dmi_init(void)
+ =09=09return 0; /* Not an error */
+=20
+ =09ts_data =3D dmi_id->driver_data;
++=09/* Some dmi table entries only provide an efi_embedded_fw_desc */
++=09if (!ts_data->properties)
++=09=09return 0;
+=20
+ =09error =3D bus_register_notifier(&i2c_bus_type, &ts_dmi_notifier);
+ =09if (error)
 --=20
 2.23.0
 
