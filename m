@@ -7,27 +7,27 @@ X-Spam-Status: No, score=-9.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A70F3C33CA1
-	for <linux-efi@archiver.kernel.org>; Tue, 19 Nov 2019 00:22:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 335DDC47412
+	for <linux-efi@archiver.kernel.org>; Tue, 19 Nov 2019 00:22:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 842AA223C7
-	for <linux-efi@archiver.kernel.org>; Tue, 19 Nov 2019 00:22:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0FF4322315
+	for <linux-efi@archiver.kernel.org>; Tue, 19 Nov 2019 00:22:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727527AbfKSAWK (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 18 Nov 2019 19:22:10 -0500
+        id S1727372AbfKSAVr (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 18 Nov 2019 19:21:47 -0500
 Received: from mga18.intel.com ([134.134.136.126]:64622 "EHLO mga18.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727386AbfKSAVs (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 18 Nov 2019 19:21:48 -0500
+        id S1727343AbfKSAVr (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Mon, 18 Nov 2019 19:21:47 -0500
 X-Amp-Result: SKIPPED(no attachment in message)
 X-Amp-File-Uploaded: False
 Received: from fmsmga001.fm.intel.com ([10.253.24.23])
-  by orsmga106.jf.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 18 Nov 2019 16:21:47 -0800
+  by orsmga106.jf.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 18 Nov 2019 16:21:46 -0800
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.68,321,1569308400"; 
-   d="scan'208";a="215412045"
+   d="scan'208";a="215412042"
 Received: from sjchrist-coffee.jf.intel.com ([10.54.74.41])
-  by fmsmga001.fm.intel.com with ESMTP; 18 Nov 2019 16:21:46 -0800
+  by fmsmga001.fm.intel.com with ESMTP; 18 Nov 2019 16:21:45 -0800
 From:   Sean Christopherson <sean.j.christopherson@intel.com>
 To:     Thomas Gleixner <tglx@linutronix.de>,
         Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
@@ -60,9 +60,9 @@ Cc:     Tony Luck <tony.luck@intel.com>, Fenghua Yu <fenghua.yu@intel.com>,
         linux-kernel@vger.kernel.org, linux-pm@vger.kernel.org,
         linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org,
         linux-acpi@vger.kernel.org, alsa-devel@alsa-project.org
-Subject: [PATCH 08/12] vmw_balloon: Explicitly include linux/io.h for virt_to_phys()
-Date:   Mon, 18 Nov 2019 16:21:17 -0800
-Message-Id: <20191119002121.4107-9-sean.j.christopherson@intel.com>
+Subject: [PATCH 07/12] virt: vbox: Explicitly include linux/io.h to pick up various defs
+Date:   Mon, 18 Nov 2019 16:21:16 -0800
+Message-Id: <20191119002121.4107-8-sean.j.christopherson@intel.com>
 X-Mailer: git-send-email 2.24.0
 In-Reply-To: <20191119002121.4107-1-sean.j.christopherson@intel.com>
 References: <20191119002121.4107-1-sean.j.christopherson@intel.com>
@@ -73,30 +73,43 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-iThrough a labyrinthian sequence of includes, usage of virt_to_phys() is
-dependent on the include of asm/io.h in x86's asm/realmode.h, which is
-included in x86's asm/acpi.h and thus by linux/acpi.h.  Explicitly
-include linux/io.h to break the dependency on realmode.h so that a
-future patch can remove the realmode.h include from acpi.h without
-breaking the build.
+Through a labyrinthian sequence of includes, usage of page_to_phys(),
+virt_to_phys() and out*() is dependent on the include of asm/io.h in
+x86's asm/realmode.h, which is included in x86's asm/acpi.h and thus by
+linux/acpi.h.  Explicitly include linux/io.h to break the dependency on
+realmode.h so that a future patch can remove the realmode.h include from
+acpi.h without breaking the build.
 
 Signed-off-by: Sean Christopherson <sean.j.christopherson@intel.com>
 ---
- drivers/misc/vmw_balloon.c | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/virt/vboxguest/vboxguest_core.c  | 1 +
+ drivers/virt/vboxguest/vboxguest_utils.c | 1 +
+ 2 files changed, 2 insertions(+)
 
-diff --git a/drivers/misc/vmw_balloon.c b/drivers/misc/vmw_balloon.c
-index 5e6be1527571..b837e7eba5f7 100644
---- a/drivers/misc/vmw_balloon.c
-+++ b/drivers/misc/vmw_balloon.c
-@@ -17,6 +17,7 @@
- #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+diff --git a/drivers/virt/vboxguest/vboxguest_core.c b/drivers/virt/vboxguest/vboxguest_core.c
+index 2307b0329aec..d823d558c0c4 100644
+--- a/drivers/virt/vboxguest/vboxguest_core.c
++++ b/drivers/virt/vboxguest/vboxguest_core.c
+@@ -6,6 +6,7 @@
+  */
  
- #include <linux/types.h>
+ #include <linux/device.h>
++#include <linux/io.h>
+ #include <linux/mm.h>
+ #include <linux/sched.h>
+ #include <linux/sizes.h>
+diff --git a/drivers/virt/vboxguest/vboxguest_utils.c b/drivers/virt/vboxguest/vboxguest_utils.c
+index 43c391626a00..50920b6fc319 100644
+--- a/drivers/virt/vboxguest/vboxguest_utils.c
++++ b/drivers/virt/vboxguest/vboxguest_utils.c
+@@ -7,6 +7,7 @@
+  */
+ 
+ #include <linux/errno.h>
 +#include <linux/io.h>
  #include <linux/kernel.h>
  #include <linux/mm.h>
- #include <linux/vmalloc.h>
+ #include <linux/module.h>
 -- 
 2.24.0
 
