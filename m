@@ -7,27 +7,27 @@ X-Spam-Status: No, score=-9.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 067EBC432C0
-	for <linux-efi@archiver.kernel.org>; Tue, 19 Nov 2019 00:22:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3AD73C432C3
+	for <linux-efi@archiver.kernel.org>; Tue, 19 Nov 2019 00:22:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id D2A5822315
-	for <linux-efi@archiver.kernel.org>; Tue, 19 Nov 2019 00:22:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1615422315
+	for <linux-efi@archiver.kernel.org>; Tue, 19 Nov 2019 00:22:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727295AbfKSAVn (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 18 Nov 2019 19:21:43 -0500
+        id S1727253AbfKSAVm (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 18 Nov 2019 19:21:42 -0500
 Received: from mga18.intel.com ([134.134.136.126]:64622 "EHLO mga18.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727254AbfKSAVn (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 18 Nov 2019 19:21:43 -0500
+        id S1727224AbfKSAVm (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Mon, 18 Nov 2019 19:21:42 -0500
 X-Amp-Result: SKIPPED(no attachment in message)
 X-Amp-File-Uploaded: False
 Received: from fmsmga001.fm.intel.com ([10.253.24.23])
-  by orsmga106.jf.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 18 Nov 2019 16:21:42 -0800
+  by orsmga106.jf.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 18 Nov 2019 16:21:41 -0800
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.68,321,1569308400"; 
-   d="scan'208";a="215412029"
+   d="scan'208";a="215412025"
 Received: from sjchrist-coffee.jf.intel.com ([10.54.74.41])
-  by fmsmga001.fm.intel.com with ESMTP; 18 Nov 2019 16:21:41 -0800
+  by fmsmga001.fm.intel.com with ESMTP; 18 Nov 2019 16:21:40 -0800
 From:   Sean Christopherson <sean.j.christopherson@intel.com>
 To:     Thomas Gleixner <tglx@linutronix.de>,
         Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
@@ -60,9 +60,9 @@ Cc:     Tony Luck <tony.luck@intel.com>, Fenghua Yu <fenghua.yu@intel.com>,
         linux-kernel@vger.kernel.org, linux-pm@vger.kernel.org,
         linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org,
         linux-acpi@vger.kernel.org, alsa-devel@alsa-project.org
-Subject: [PATCH 04/12] x86/kprobes: Explicitly include vmalloc.h for set_vm_flush_reset_perms()
-Date:   Mon, 18 Nov 2019 16:21:13 -0800
-Message-Id: <20191119002121.4107-5-sean.j.christopherson@intel.com>
+Subject: [PATCH 03/12] x86/ftrace: Explicitly include vmalloc.h for set_vm_flush_reset_perms()
+Date:   Mon, 18 Nov 2019 16:21:12 -0800
+Message-Id: <20191119002121.4107-4-sean.j.christopherson@intel.com>
 X-Mailer: git-send-email 2.24.0
 In-Reply-To: <20191119002121.4107-1-sean.j.christopherson@intel.com>
 References: <20191119002121.4107-1-sean.j.christopherson@intel.com>
@@ -79,24 +79,24 @@ being included by asm/acpi.h.  Explicitly include linux/vmalloc.h so
 that a future patch can drop the realmode.h include from asm/acpi.h
 without breaking the build.
 
-Fixes: 241a1f2238064 ("x86/kprobes: Use vmalloc special flag")
+Fixes: 7fdfe1e40b225 ("x86/ftrace: Use vmalloc special flag")
 Signed-off-by: Sean Christopherson <sean.j.christopherson@intel.com>
 ---
- arch/x86/kernel/kprobes/core.c | 1 +
+ arch/x86/kernel/ftrace.c | 1 +
  1 file changed, 1 insertion(+)
 
-diff --git a/arch/x86/kernel/kprobes/core.c b/arch/x86/kernel/kprobes/core.c
-index 4f13af7cbcdb..a0c223ab7264 100644
---- a/arch/x86/kernel/kprobes/core.c
-+++ b/arch/x86/kernel/kprobes/core.c
-@@ -40,6 +40,7 @@
- #include <linux/frame.h>
- #include <linux/kasan.h>
- #include <linux/moduleloader.h>
+diff --git a/arch/x86/kernel/ftrace.c b/arch/x86/kernel/ftrace.c
+index 2a179fb35cd1..681eae0fb64d 100644
+--- a/arch/x86/kernel/ftrace.c
++++ b/arch/x86/kernel/ftrace.c
+@@ -23,6 +23,7 @@
+ #include <linux/list.h>
+ #include <linux/module.h>
+ #include <linux/memory.h>
 +#include <linux/vmalloc.h>
  
- #include <asm/text-patching.h>
- #include <asm/cacheflush.h>
+ #include <trace/syscall.h>
+ 
 -- 
 2.24.0
 
