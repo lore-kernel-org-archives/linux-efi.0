@@ -2,99 +2,180 @@ Return-Path: <SRS0=szt/=ZL=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 31A8AC33CA3
-	for <linux-efi@archiver.kernel.org>; Tue, 19 Nov 2019 00:22:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ED4F8C432C0
+	for <linux-efi@archiver.kernel.org>; Tue, 19 Nov 2019 01:53:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 0CCB722315
-	for <linux-efi@archiver.kernel.org>; Tue, 19 Nov 2019 00:22:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B2A54222D9
+	for <linux-efi@archiver.kernel.org>; Tue, 19 Nov 2019 01:53:08 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=gmx.net header.i=@gmx.net header.b="QpVPLQDD"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727577AbfKSAWc (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 18 Nov 2019 19:22:32 -0500
-Received: from mga18.intel.com ([134.134.136.126]:64622 "EHLO mga18.intel.com"
+        id S1726994AbfKSBxI (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 18 Nov 2019 20:53:08 -0500
+Received: from mout.gmx.net ([212.227.15.18]:59413 "EHLO mout.gmx.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727146AbfKSAVj (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 18 Nov 2019 19:21:39 -0500
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga001.fm.intel.com ([10.253.24.23])
-  by orsmga106.jf.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 18 Nov 2019 16:21:38 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.68,321,1569308400"; 
-   d="scan'208";a="215412016"
-Received: from sjchrist-coffee.jf.intel.com ([10.54.74.41])
-  by fmsmga001.fm.intel.com with ESMTP; 18 Nov 2019 16:21:37 -0800
-From:   Sean Christopherson <sean.j.christopherson@intel.com>
-To:     Thomas Gleixner <tglx@linutronix.de>,
-        Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
-        x86@kernel.org, "Rafael J. Wysocki" <rjw@rjwysocki.net>,
-        Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>
-Cc:     Tony Luck <tony.luck@intel.com>, Fenghua Yu <fenghua.yu@intel.com>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Arnaldo Carvalho de Melo <acme@kernel.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
-        Jiri Olsa <jolsa@redhat.com>,
-        Namhyung Kim <namhyung@kernel.org>,
-        "H. Peter Anvin" <hpa@zytor.com>,
-        Steven Rostedt <rostedt@goodmis.org>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Darren Hart <dvhart@infradead.org>,
-        Andy Shevchenko <andy@infradead.org>,
-        Nadav Amit <namit@vmware.com>,
-        "VMware, Inc." <pv-drivers@vmware.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Hans de Goede <hdegoede@redhat.com>,
-        Cezary Rojewski <cezary.rojewski@intel.com>,
-        Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>,
-        Liam Girdwood <liam.r.girdwood@linux.intel.com>,
-        Jie Yang <yang.jie@linux.intel.com>,
-        Mark Brown <broonie@kernel.org>,
-        Jaroslav Kysela <perex@perex.cz>,
-        Takashi Iwai <tiwai@suse.com>, linux-ia64@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-pm@vger.kernel.org,
-        linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org,
-        linux-acpi@vger.kernel.org, alsa-devel@alsa-project.org
-Subject: [PATCH 01/12] x86/efi: Explicitly include realmode.h to handle RM trampoline quirk
-Date:   Mon, 18 Nov 2019 16:21:10 -0800
-Message-Id: <20191119002121.4107-2-sean.j.christopherson@intel.com>
-X-Mailer: git-send-email 2.24.0
-In-Reply-To: <20191119002121.4107-1-sean.j.christopherson@intel.com>
-References: <20191119002121.4107-1-sean.j.christopherson@intel.com>
+        id S1726761AbfKSBxI (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Mon, 18 Nov 2019 20:53:08 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
+        s=badeba3b8450; t=1574128382;
+        bh=FJlv+wjrfvTNQfsvrOqUT0LQpiUXBqzrh68fr0AbCKc=;
+        h=X-UI-Sender-Class:Subject:To:Cc:References:From:Date:In-Reply-To;
+        b=QpVPLQDDucsKgkN+Bj0R/LlXB9XUzTJjPWOzYCBU2WkILcCiH2GYfJHfp19foFHHK
+         yAzJOH1VJEyNh9Zhy960WE2sAbBcDki5ECCL3ZOB3HZswPKgnSjq7pxGtR4Yym0Ss0
+         OHhrN3za9x9YJnjCSOLxVLmqYuDHpIQ+0d/c2HjY=
+X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
+Received: from [192.168.123.51] ([94.114.42.168]) by mail.gmx.com (mrgmx005
+ [212.227.17.190]) with ESMTPSA (Nemesis) id 1MWRRZ-1iL1tt0jmd-00Xql3; Tue, 19
+ Nov 2019 02:53:02 +0100
+Subject: Re: [PATCH 0/1] Temporary fix for data abort on armv6z EFI boot
+To:     Ard Biesheuvel <ard.biesheuvel@linaro.org>,
+        Cristian Ciocaltea <cristian.ciocaltea@gmail.com>,
+        Guillaume GARDET <guillaume.gardet@arm.com>
+Cc:     Kairui Song <kasong@redhat.com>,
+        linux-efi <linux-efi@vger.kernel.org>
+References: <20191118174252.26758-1-cristian.ciocaltea@gmail.com>
+ <CAKv+Gu-EdbnECitBT1e3AxthzgOa+_m4r8hfu78m6-fEHtZrFg@mail.gmail.com>
+From:   Heinrich Schuchardt <xypron.glpk@gmx.de>
+Message-ID: <ec5e4750-1708-70e6-bc11-d49fd1e10764@gmx.de>
+Date:   Tue, 19 Nov 2019 02:52:48 +0100
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101
+ Thunderbird/60.9.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAKv+Gu-EdbnECitBT1e3AxthzgOa+_m4r8hfu78m6-fEHtZrFg@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:6Pv0X7Sl7VmC0+TbCMcs8cSSArm/1MRkBjzJP9qkaeI/CE4f5M9
+ EEwTPij3LZnVPxTm6fDABXn2O1nGabeUY/kGiT2b3ojoPS+0LTwSx1YmZ78ifPtu9ICNMDP
+ 5OiQaNPZhBNvnQNSiKmUCkmgtm472TMiJTMqPaK3pqp7Uw1S0nlUkrRJBA2IsHysG8Rvpe3
+ 5MfE8hFi9/NJfGWiODNVA==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:4XZPTDUrMh0=:+wcaoZba/z0Ed1+OL1H7ny
+ S+WygMW2bbuOG2NT5s0GBrxUI9Vj62Mh7QeoXUmBW1882m5e4w3M2HXECNT/X5wL3YvOfZkPZ
+ 89csFRepMe2MnwvXhWXLc+R/6bh4uPwNn6UoqAn98X5eMmFfXWgNT41zty+nWng/DJ+Yanffs
+ NJdnZBrqcVSQcDmiwG8HJTJGkYWV6l8hsO/eZeAjqE7P0ZOKI32Ytt+UJVFka1GRHmqFUFHPh
+ cLpYs/pAIl3HeOGtTvjr4FTVUvcDqWhG9EcR0cYTrZ57Q/pPOVdkOe51w+Gui54PRgEsoeunU
+ LlRniDbWG7TxV8P2Ik5YeWQlr6P29/L8F0RWXdQN0cdjUlPR2PvCnC94RwcR1nkv0DVUK0PnK
+ J5nbSHKqZ8VDVGeaTd38Wcduu+sOkUtlTO/9sxRBicNZ4lhXD9U3TEnN6JeWZ+MnjUxOKvXpq
+ G2PO9UIwJvjECR7OyRi34E3WpAO2k8pl/AmSFApSgWYIWr3hWaFqKU04bwUCLbqWuR36RTY83
+ brdVrnl5Xnaxab4HkLQRjHWv4SOtBA/mGBGhcb+mT0RyR4DYgBCHSbKoZca2PmkHW3XvXOkCa
+ R3Owqvh4JWqNkTzCSESsTe6E2EuSGTPWycQhfBLuIrCN+56LPxrXcasPa2feyiCAWwt907mL/
+ zTQ8b/YMz9x7uXnJzpB+CxP0c1aulbxSBUyKDrd0Maaxp5kmiXybBv3kzer1vqxUcoO6FBPsn
+ OdufCMyzLkWL0zkIlOsT79DBTpOyO3lVC5ReM1F7Tovtyx2tiGcCAkb5rqxMst4FyF2aunXHX
+ frLSXWN9mHUE87WFV6xdAtB09fbFLn6fUoXp4fRFMNTKDZPKLMe4XfDnQTI0Q7drbPKLwYUY6
+ 95RJHCsbEdaJfZ4i8XAB/IoDvcDyssBo+OAYsLXCpOXLB/MHL2a8n2tAoSarSOxIJVNzudngO
+ pmT6WfK7uzROtaUI3tyM6oYb8p0AeaeG7wdCvNBgnX4HtE8HsZIpQGjLsfOrxkaYsHs1Jt+Xg
+ MxHD/KlSX5MYsAQClEcY/A9GZuT3uW9adBtIaQInx6+gMDiq0Thxz/UC5AF3hzWX346yxqvEL
+ aYhG/DHlsR3QnKEbf6XQhM24o58FircNg4D4c+Pc067zSA2H0OYBYcc/veDpxIDtP5XHULGjy
+ ykYeeNxqAQ5Wb/d7UfoeDspbEOdu3IdpM8QdMPTqVK+VOYNSUu8hDF8SYJRkY8l52qeT1BNlw
+ 0kdJOhB0fgoh39eBZJO21ufRl978CZQPUnYi1poZiYEYFZKyxqGpB71dgOsg=
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Explicitly include asm/realmode.h, which is needed to handle a real mode
-trampoline quirk in efi_free_boot_services(), instead of picking it up
-by way of linux/acpi.h.  acpi.h will soon stop including realmode.h so
-that changing realmode.h doesn't require a full kernel rebuild.
+On 11/18/19 7:02 PM, Ard Biesheuvel wrote:
+> (adding some people that may be able to help, and removing some others)
+>
+> On Mon, 18 Nov 2019 at 18:42, Cristian Ciocaltea
+> <cristian.ciocaltea@gmail.com> wrote:
+>>
+>> I'm trying to boot the Linux kernel on RaspberryPi Zero via GRUB2,
+>> which in turn is executed by U-Boot as an UEFI binary.
+>>
+>> However, I'm facing data abort issues in efi_get_memory_map()
+>> that seem to be related to some ldrd instructions generated by the
+>> compiler.
+>>
+>> To simplify the investigation, I temporarily gave up on GRUB2 and
+>> started directly the Linux kernel via U-Boot bootefi command.
+>> The result is an immediate crash at PC 0x92c8:
+>>
+>> data abort
+>> pc : [<1c6b12c8>]          lr : [<1c6b1558>]
+>> reloc pc : [<fe76a2c8>]    lr : [<fe76a558>]
+>> sp : 1db43b30  ip : 00000000     fp : 1db43cc0
+>> r10: 20494249  r9 : ffffffff     r8 : 00000000
+>> r7 : 1db43b3c  r6 : 00000000     r5 : 1db43bfa  r4 : 1db43bb0
+>> r3 : 1db43b9c  r2 : 00000028     r1 : 00000000  r0 : 1df4f828
+>> Flags: nZCv  IRQs off  FIQs off  Mode SVC_32
+>> Code: e3a02028 e3a01000 e527100c e5832000 (e1c420d4)
+>> UEFI image [0x1c6a8000:0x1cb2ffff] pc=3D0x92c8 '/boot\zImage'
+>> Resetting CPU ...
+>>
+>> The related disassembled section shows the *ldrd* instruction
+>> in the context of the following statement:
+>> *map->map_size =3D        *map->desc_size * 32;
+>>
+>> drivers/firmware/efi/libstub/efi-stub-helper.c:90
+>>          *map->desc_size =3D       sizeof(*m);
+>>      92ac:       e5913008        ldr     r3, [r1, #8]
+>> drivers/firmware/efi/libstub/efi-stub-helper.c:84
+>> {
+>>      92b0:       e1a04001        mov     r4, r1
+>> drivers/firmware/efi/libstub/efi-stub-helper.c:85
+>>          efi_memory_desc_t *m =3D NULL;
+>>      92b4:       e28d7018        add     r7, sp, #24
+>> linux/drivers/firmware/efi/libstub/efi-stub-helper.c:90
+>>          *map->desc_size =3D       sizeof(*m);
+>>      92b8:       e3a02028        mov     r2, #40 ; 0x28
+>>      92c4:       e5832000        str     r2, [r3]
+>> linux/drivers/firmware/efi/libstub/efi-stub-helper.c:91
+>>          *map->map_size =3D        *map->desc_size * 32;
+>>      92c8:       e1c420d4        ldrd    r2, [r4, #4]
+>>
+>
+> This instruction looks absolutely fine, so I don't know why this is abor=
+ting.
+> 0x1db43bb0+4 is word aligned, as required, and the address seems to be m=
+apped.
+>
+>
+>
+>> I changed the code to avoid the memory access and eventually get
+>> rid of the ldrd instruction:
+>> *map->map_size =3D        sizeof(*m) * 32;
+>>
+>> A subsequent data abort was caused by a similar ldrd instruction
+>> generated in the context of the statement:
+>> *map->map_size +=3D *map->desc_size * EFI_MMAP_NR_SLACK_SLOTS;
+>>
+>> The workaround to avoid the ldrd instruction was trickier in that case,
+>> as you may see in the patch, but eventually the kernel was able to boot
+>> successfully, with or without GRUB2 chain-loading. The system looks
+>> stable for the moment, but most probably there are many other similar
+>> statements which were not enabled for this particular use case and stil=
+l
+>> have the potential to trigger data aborts.
+>>
+>> Unfortunately I'm not sure how to further investigate this issue and,
+>> therefore, I would kindly ask for some feedback or suggestions.
+>>
+>> Some additional notes:
+>>   - Used GCC 7.3.0 and GCC 8.2.0 based armv6-eabihf toolchains:
+>>     https://toolchains.bootlin.com/releases_armv6-eabihf.html
+>>   - Kernel and root filesystem build process handled by buildroot
+>>   - Tested with kernels: 4.2, 4.3, 4.4
+>>
+>> --
+>> 2.17.1
+>>
+>
 
-Fixes: 5bc653b731821 ("x86/efi: Allocate a trampoline if needed in efi_free_boot_services()")
-Signed-off-by: Sean Christopherson <sean.j.christopherson@intel.com>
----
- arch/x86/platform/efi/quirks.c | 1 +
- 1 file changed, 1 insertion(+)
+As described in
 
-diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-index 3b9fd679cea9..f9ef5c5346ca 100644
---- a/arch/x86/platform/efi/quirks.c
-+++ b/arch/x86/platform/efi/quirks.c
-@@ -16,6 +16,7 @@
- #include <asm/efi.h>
- #include <asm/uv/uv.h>
- #include <asm/cpu_device_id.h>
-+#include <asm/realmode.h>
- #include <asm/reboot.h>
- 
- #define EFI_MIN_RESERVE 5120
--- 
-2.24.0
+efi_loader: restrict EFI_LOADER to armv7 and armv8 on ARM
+https://lists.denx.de/pipermail/u-boot/2019-November/390613.html
 
+booting ARMv5 and ARMv6 via UEFI is not supported by U-Boot.
+
+What would be needed is an implementation of function allow_unaligned()
+in arch/arm/cpu/arm1176/sctlr.S (cf. arch/arm/cpu/armv7/sctlr.S).
+
+Best regards
+
+Heinrich
