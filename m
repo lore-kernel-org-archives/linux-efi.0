@@ -4,30 +4,29 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
-	version=3.4.0
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 65131C432C0
-	for <linux-efi@archiver.kernel.org>; Tue, 26 Nov 2019 16:55:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B68BC33C99
+	for <linux-efi@archiver.kernel.org>; Tue, 26 Nov 2019 16:55:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 498EF20836
-	for <linux-efi@archiver.kernel.org>; Tue, 26 Nov 2019 16:55:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 157172075C
+	for <linux-efi@archiver.kernel.org>; Tue, 26 Nov 2019 16:55:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728827AbfKZQzb (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 26 Nov 2019 11:55:31 -0500
+        id S1728585AbfKZQyp (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 26 Nov 2019 11:54:45 -0500
 Received: from mga17.intel.com ([192.55.52.151]:10925 "EHLO mga17.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728593AbfKZQyq (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Tue, 26 Nov 2019 11:54:46 -0500
+        id S1728547AbfKZQyp (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Tue, 26 Nov 2019 11:54:45 -0500
 X-Amp-Result: SKIPPED(no attachment in message)
 X-Amp-File-Uploaded: False
 Received: from fmsmga001.fm.intel.com ([10.253.24.23])
-  by fmsmga107.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 26 Nov 2019 08:54:45 -0800
+  by fmsmga107.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 26 Nov 2019 08:54:44 -0800
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.69,246,1571727600"; 
-   d="scan'208";a="217197210"
+   d="scan'208";a="217197203"
 Received: from sjchrist-coffee.jf.intel.com ([10.54.74.41])
-  by fmsmga001.fm.intel.com with ESMTP; 26 Nov 2019 08:54:44 -0800
+  by fmsmga001.fm.intel.com with ESMTP; 26 Nov 2019 08:54:43 -0800
 From:   Sean Christopherson <sean.j.christopherson@intel.com>
 To:     Thomas Gleixner <tglx@linutronix.de>,
         Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
@@ -60,9 +59,9 @@ Cc:     Tony Luck <tony.luck@intel.com>, Fenghua Yu <fenghua.yu@intel.com>,
         linux-kernel@vger.kernel.org, linux-pm@vger.kernel.org,
         linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org,
         linux-acpi@vger.kernel.org, alsa-devel@alsa-project.org
-Subject: [PATCH v2 03/12] x86/ftrace: Explicitly include vmalloc.h for set_vm_flush_reset_perms()
-Date:   Tue, 26 Nov 2019 08:54:08 -0800
-Message-Id: <20191126165417.22423-4-sean.j.christopherson@intel.com>
+Subject: [PATCH v2 02/12] x86/boot: Explicitly include realmode.h to handle RM reservations
+Date:   Tue, 26 Nov 2019 08:54:07 -0800
+Message-Id: <20191126165417.22423-3-sean.j.christopherson@intel.com>
 X-Mailer: git-send-email 2.24.0
 In-Reply-To: <20191126165417.22423-1-sean.j.christopherson@intel.com>
 References: <20191126165417.22423-1-sean.j.christopherson@intel.com>
@@ -73,30 +72,28 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The inclusion of linux/vmalloc.h, which is required for its definition
-of set_vm_flush_reset_perms(), is somehow dependent on asm/realmode.h
-being included by asm/acpi.h.  Explicitly include linux/vmalloc.h so
-that a future patch can drop the realmode.h include from asm/acpi.h
-without breaking the build.
+Explicitly include asm/realmode.h, which provides reserve_real_mode(),
+instead of picking it up by an indirect include of asm/acpi.h.  acpi.h
+will soon stop including realmode.h so that changing realmode.h doesn't
+require a full kernel rebuild.
 
-Acked-by: Steven Rostedt (VMware) <rostedt@goodmis.org>
 Signed-off-by: Sean Christopherson <sean.j.christopherson@intel.com>
 ---
- arch/x86/kernel/ftrace.c | 1 +
+ arch/x86/kernel/setup.c | 1 +
  1 file changed, 1 insertion(+)
 
-diff --git a/arch/x86/kernel/ftrace.c b/arch/x86/kernel/ftrace.c
-index 024c3053dbba..2009047bb015 100644
---- a/arch/x86/kernel/ftrace.c
-+++ b/arch/x86/kernel/ftrace.c
-@@ -23,6 +23,7 @@
- #include <linux/list.h>
- #include <linux/module.h>
- #include <linux/memory.h>
-+#include <linux/vmalloc.h>
- 
- #include <trace/syscall.h>
- 
+diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
+index a87138186724..38dfb61cacb8 100644
+--- a/arch/x86/kernel/setup.c
++++ b/arch/x86/kernel/setup.c
+@@ -35,6 +35,7 @@
+ #include <asm/kaslr.h>
+ #include <asm/mce.h>
+ #include <asm/mtrr.h>
++#include <asm/realmode.h>
+ #include <asm/olpc_ofw.h>
+ #include <asm/pci-direct.h>
+ #include <asm/prom.h>
 -- 
 2.24.0
 
