@@ -2,53 +2,69 @@ Return-Path: <SRS0=VB+x=ZS=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5279FC432C0
-	for <linux-efi@archiver.kernel.org>; Tue, 26 Nov 2019 16:30:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7F73DC432C0
+	for <linux-efi@archiver.kernel.org>; Tue, 26 Nov 2019 16:54:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 260FE20722
-	for <linux-efi@archiver.kernel.org>; Tue, 26 Nov 2019 16:30:00 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1574785800;
-	bh=qrvXuMHKCoQOdORxNJ+YbqsB49FLPqu3p1fW/+eSpZo=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=YL8k/XMh6tlQjd5U/M1TiWPGslvozP0HIvzN2hUpYjmHCZvMumOwRkn59PsdSfuVx
-	 00QxmRS2S/qjXpBFH6zeCcy+Wy8de33xhSY4fUyTa1UIKf4slYHh11Zt2/O+AiDywF
-	 bZywCxOW3DkdYrYqCqo2ly6yYEr4nI+brNLE87OE=
+	by mail.kernel.org (Postfix) with ESMTP id 5C1CD2080F
+	for <linux-efi@archiver.kernel.org>; Tue, 26 Nov 2019 16:54:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726101AbfKZQ37 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 26 Nov 2019 11:29:59 -0500
-Received: from mail.kernel.org ([198.145.29.99]:44620 "EHLO mail.kernel.org"
+        id S1728699AbfKZQyy (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 26 Nov 2019 11:54:54 -0500
+Received: from mga17.intel.com ([192.55.52.151]:10925 "EHLO mga17.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725972AbfKZQ37 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Tue, 26 Nov 2019 11:29:59 -0500
-Received: from localhost.localdomain (91-167-84-221.subs.proxad.net [91.167.84.221])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 184572071A;
-        Tue, 26 Nov 2019 16:29:56 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1574785798;
-        bh=qrvXuMHKCoQOdORxNJ+YbqsB49FLPqu3p1fW/+eSpZo=;
-        h=From:To:Cc:Subject:Date:From;
-        b=rNwTJiwpENG4ilu/hr3qpPAyWcnzAGOtNgVJBrxsMrEgkzWe0Ng+15ivaad2xTIvx
-         yMTwWWetijnvVdKWKUlrh5QdY8wiellk32/tA6dpP1AjdcTEAoL2qjvN//Fb8u6qal
-         YuLRlvReTloPuw1Grmkb393LOg6lU11gvYBcBctQ=
-From:   Ard Biesheuvel <ardb@kernel.org>
-To:     linux-kernel@vger.kernel.org
-Cc:     linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org,
-        will@kernel.org, bhelgaas@google.com,
-        Ard Biesheuvel <ardb@kernel.org>,
+        id S1728691AbfKZQyx (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Tue, 26 Nov 2019 11:54:53 -0500
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from fmsmga001.fm.intel.com ([10.253.24.23])
+  by fmsmga107.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 26 Nov 2019 08:54:53 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.69,246,1571727600"; 
+   d="scan'208";a="217197244"
+Received: from sjchrist-coffee.jf.intel.com ([10.54.74.41])
+  by fmsmga001.fm.intel.com with ESMTP; 26 Nov 2019 08:54:52 -0800
+From:   Sean Christopherson <sean.j.christopherson@intel.com>
+To:     Thomas Gleixner <tglx@linutronix.de>,
+        Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
+        x86@kernel.org, "Rafael J. Wysocki" <rjw@rjwysocki.net>,
+        Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>
+Cc:     Tony Luck <tony.luck@intel.com>, Fenghua Yu <fenghua.yu@intel.com>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Arnaldo Carvalho de Melo <acme@kernel.org>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
+        Jiri Olsa <jolsa@redhat.com>,
+        Namhyung Kim <namhyung@kernel.org>,
+        "H. Peter Anvin" <hpa@zytor.com>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
+        Darren Hart <dvhart@infradead.org>,
+        Andy Shevchenko <andy@infradead.org>,
+        Nadav Amit <nadav.amit@gmail.com>,
+        "VMware, Inc." <pv-drivers@vmware.com>,
+        Arnd Bergmann <arnd@arndb.de>,
         Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Saravana Kannan <saravanak@google.com>
-Subject: [PATCH] efi: arm: defer probe of PCIe backed efifb on DT systems
-Date:   Tue, 26 Nov 2019 17:29:02 +0100
-Message-Id: <20191126162902.16788-1-ardb@kernel.org>
-X-Mailer: git-send-email 2.20.1
+        Hans de Goede <hdegoede@redhat.com>,
+        Cezary Rojewski <cezary.rojewski@intel.com>,
+        Pierre-Louis Bossart <pierre-louis.bossart@linux.intel.com>,
+        Liam Girdwood <liam.r.girdwood@linux.intel.com>,
+        Jie Yang <yang.jie@linux.intel.com>,
+        Mark Brown <broonie@kernel.org>,
+        Jaroslav Kysela <perex@perex.cz>,
+        Takashi Iwai <tiwai@suse.com>, linux-ia64@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-pm@vger.kernel.org,
+        linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org,
+        linux-acpi@vger.kernel.org, alsa-devel@alsa-project.org
+Subject: [PATCH v2 09/12] ASoC: Intel: Skylake: Explicitly include linux/io.h for virt_to_phys()
+Date:   Tue, 26 Nov 2019 08:54:14 -0800
+Message-Id: <20191126165417.22423-10-sean.j.christopherson@intel.com>
+X-Mailer: git-send-email 2.24.0
+In-Reply-To: <20191126165417.22423-1-sean.j.christopherson@intel.com>
+References: <20191126165417.22423-1-sean.j.christopherson@intel.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
@@ -56,112 +72,31 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The new of_devlink support breaks PCIe probing on ARM platforms booting
-via UEFI if the firmware exposes a EFI framebuffer that is backed by a
-PCI device. The reason is that the probing order gets reversed,
-resulting in a resource conflict on the framebuffer memory window when
-the PCIe probes last, causing it to give up entirely.
+Through a labyrinthian sequence of includes, usage of virt_to_phys() is
+dependent on the include of asm/io.h in x86's asm/realmode.h, which is
+included in x86's asm/acpi.h and thus by linux/acpi.h.  Explicitly
+include linux/io.h to break the dependency on realmode.h so that a
+future patch can remove the realmode.h include from acpi.h without
+breaking the build.
 
-Given that we rely on PCI quirks to deal with EFI framebuffers that get
-moved around in memory, we cannot simply drop the memory reservation, so
-instead, let's use the device link infrastructure to register this
-dependency, and force the probing to occur in the expected order.
-
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Saravana Kannan <saravanak@google.com>
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+Acked-by: Mark Brown <broonie@kernel.org>
+Signed-off-by: Sean Christopherson <sean.j.christopherson@intel.com>
 ---
- drivers/firmware/efi/arm-init.c | 66 ++++++++++++++++++--
- 1 file changed, 61 insertions(+), 5 deletions(-)
+ sound/soc/intel/skylake/skl-sst-cldma.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
-index 311cd349a862..617226d50774 100644
---- a/drivers/firmware/efi/arm-init.c
-+++ b/drivers/firmware/efi/arm-init.c
-@@ -14,6 +14,7 @@
- #include <linux/memblock.h>
- #include <linux/mm_types.h>
- #include <linux/of.h>
-+#include <linux/of_address.h>
- #include <linux/of_fdt.h>
- #include <linux/platform_device.h>
- #include <linux/screen_info.h>
-@@ -267,15 +268,70 @@ void __init efi_init(void)
- 		efi_memmap_unmap();
- }
+diff --git a/sound/soc/intel/skylake/skl-sst-cldma.c b/sound/soc/intel/skylake/skl-sst-cldma.c
+index 5a2c35f58fda..36f697c61074 100644
+--- a/sound/soc/intel/skylake/skl-sst-cldma.c
++++ b/sound/soc/intel/skylake/skl-sst-cldma.c
+@@ -8,6 +8,7 @@
+  */
  
-+static bool __init efifb_overlaps_pci_range(const struct of_pci_range *range)
-+{
-+	u64 fb_base = screen_info.lfb_base;
-+
-+	if (screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
-+		fb_base |= (u64)(unsigned long)screen_info.ext_lfb_base << 32;
-+
-+	return fb_base >= range->cpu_addr &&
-+	       fb_base < (range->cpu_addr + range->size);
-+}
-+
- static int __init register_gop_device(void)
- {
--	void *pd;
-+	struct platform_device *pd;
-+	struct device_node *np;
-+	bool found = false;
-+	int err;
- 
- 	if (screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
- 		return 0;
- 
--	pd = platform_device_register_data(NULL, "efi-framebuffer", 0,
--					   &screen_info, sizeof(screen_info));
--	return PTR_ERR_OR_ZERO(pd);
-+	pd = platform_device_alloc("efi-framebuffer", 0);
-+	if (!pd)
-+		return -ENOMEM;
-+
-+	err = platform_device_add_data(pd, &screen_info, sizeof(screen_info));
-+	if (err)
-+		return err;
-+
-+	/*
-+	 * If the efifb framebuffer is backed by a PCI graphics controller, we
-+	 * have to ensure that this relation is expressed using a device link
-+	 * when running in DT mode, or the probe order may be reversed,
-+	 * resulting in a resource reservation conflict on the memory window
-+	 * that the efifb framebuffer steals from the PCIe host bridge.
-+	 */
-+	for_each_node_by_type(np, "pci") {
-+		struct of_pci_range_parser parser;
-+		struct of_pci_range range;
-+		struct device *sup_dev;
-+
-+		if (found) {
-+			of_node_put(np);
-+			break;
-+		}
-+
-+		err = of_pci_range_parser_init(&parser, np);
-+		if (err) {
-+			pr_warn("of_pci_range_parser_init() failed: %d\n", err);
-+			continue;
-+		}
-+
-+		sup_dev = get_dev_from_fwnode(&np->fwnode);
-+
-+		for_each_of_pci_range(&parser, &range) {
-+			if (efifb_overlaps_pci_range(&range)) {
-+				found = true;
-+				if (!device_link_add(&pd->dev, sup_dev, 0))
-+					pr_warn("device_link_add() failed\n");
-+				break;
-+			}
-+		}
-+		put_device(sup_dev);
-+	}
-+	return platform_device_add(pd);
- }
--subsys_initcall(register_gop_device);
-+device_initcall(register_gop_device);
+ #include <linux/device.h>
++#include <linux/io.h>
+ #include <linux/mm.h>
+ #include <linux/delay.h>
+ #include "../common/sst-dsp.h"
 -- 
-2.20.1
+2.24.0
 
