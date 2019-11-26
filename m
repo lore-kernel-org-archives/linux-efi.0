@@ -4,29 +4,30 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C4E0EC43215
-	for <linux-efi@archiver.kernel.org>; Tue, 26 Nov 2019 16:54:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 77E2CC432C0
+	for <linux-efi@archiver.kernel.org>; Tue, 26 Nov 2019 16:55:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id A83E320891
-	for <linux-efi@archiver.kernel.org>; Tue, 26 Nov 2019 16:54:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 59B4B2075C
+	for <linux-efi@archiver.kernel.org>; Tue, 26 Nov 2019 16:55:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728743AbfKZQy5 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 26 Nov 2019 11:54:57 -0500
-Received: from mga17.intel.com ([192.55.52.151]:10936 "EHLO mga17.intel.com"
+        id S1728788AbfKZQzO (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 26 Nov 2019 11:55:14 -0500
+Received: from mga17.intel.com ([192.55.52.151]:10925 "EHLO mga17.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728733AbfKZQy5 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Tue, 26 Nov 2019 11:54:57 -0500
+        id S1728715AbfKZQyz (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Tue, 26 Nov 2019 11:54:55 -0500
 X-Amp-Result: SKIPPED(no attachment in message)
 X-Amp-File-Uploaded: False
 Received: from fmsmga001.fm.intel.com ([10.253.24.23])
-  by fmsmga107.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 26 Nov 2019 08:54:56 -0800
+  by fmsmga107.fm.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 26 Nov 2019 08:54:54 -0800
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.69,246,1571727600"; 
-   d="scan'208";a="217197254"
+   d="scan'208";a="217197247"
 Received: from sjchrist-coffee.jf.intel.com ([10.54.74.41])
-  by fmsmga001.fm.intel.com with ESMTP; 26 Nov 2019 08:54:55 -0800
+  by fmsmga001.fm.intel.com with ESMTP; 26 Nov 2019 08:54:53 -0800
 From:   Sean Christopherson <sean.j.christopherson@intel.com>
 To:     Thomas Gleixner <tglx@linutronix.de>,
         Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
@@ -59,9 +60,9 @@ Cc:     Tony Luck <tony.luck@intel.com>, Fenghua Yu <fenghua.yu@intel.com>,
         linux-kernel@vger.kernel.org, linux-pm@vger.kernel.org,
         linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org,
         linux-acpi@vger.kernel.org, alsa-devel@alsa-project.org
-Subject: [PATCH v2 12/12] x86/ACPI/sleep: Move acpi_get_wakeup_address() into sleep.c, remove <asm/realmode.h> from <asm/acpi.h>
-Date:   Tue, 26 Nov 2019 08:54:17 -0800
-Message-Id: <20191126165417.22423-13-sean.j.christopherson@intel.com>
+Subject: [PATCH v2 10/12] x86/ACPI/sleep: Remove an unnecessary include of asm/realmode.h
+Date:   Tue, 26 Nov 2019 08:54:15 -0800
+Message-Id: <20191126165417.22423-11-sean.j.christopherson@intel.com>
 X-Mailer: git-send-email 2.24.0
 In-Reply-To: <20191126165417.22423-1-sean.j.christopherson@intel.com>
 References: <20191126165417.22423-1-sean.j.christopherson@intel.com>
@@ -72,67 +73,30 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Move the definition of acpi_get_wakeup_address() into sleep.c to break
-linux/acpi.h's dependency (by way of asm/acpi.h) on asm/realmode.h.
-Everyone and their mother includes linux/acpi.h, i.e. modifying
-realmode.h results in a full kernel rebuild, which makes the already
-inscrutable real mode boot code even more difficult to understand and is
-positively rage inducing when trying to make changes to x86's boot flow.
+None of the declarations in x86's acpi/sleep.h are in any way dependent
+on the real mode boot code.  Remove sleep.h's include of asm/realmode.h
+to limit the dependencies on realmode.h to code that actually interacts
+with the boot code.
 
-No functional change intended.
-
+Acked-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
 Signed-off-by: Sean Christopherson <sean.j.christopherson@intel.com>
 ---
- arch/x86/include/asm/acpi.h  |  6 +-----
- arch/x86/kernel/acpi/sleep.c | 11 +++++++++++
- 2 files changed, 12 insertions(+), 5 deletions(-)
+ arch/x86/kernel/acpi/sleep.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/arch/x86/include/asm/acpi.h b/arch/x86/include/asm/acpi.h
-index 23ffafd927a1..ca0976456a6b 100644
---- a/arch/x86/include/asm/acpi.h
-+++ b/arch/x86/include/asm/acpi.h
-@@ -13,7 +13,6 @@
- #include <asm/processor.h>
- #include <asm/mmu.h>
- #include <asm/mpspec.h>
+diff --git a/arch/x86/kernel/acpi/sleep.h b/arch/x86/kernel/acpi/sleep.h
+index fbb60ca4255c..d06c2079b6c1 100644
+--- a/arch/x86/kernel/acpi/sleep.h
++++ b/arch/x86/kernel/acpi/sleep.h
+@@ -3,7 +3,7 @@
+  *	Variables and functions used by the code in sleep.c
+  */
+ 
 -#include <asm/realmode.h>
- #include <asm/x86_init.h>
++#include <linux/linkage.h>
  
- #ifdef CONFIG_ACPI_APEI
-@@ -62,10 +61,7 @@ static inline void acpi_disable_pci(void)
- extern int (*acpi_suspend_lowlevel)(void);
- 
- /* Physical address to resume after wakeup */
--static inline unsigned long acpi_get_wakeup_address(void)
--{
--	return ((unsigned long)(real_mode_header->wakeup_start));
--}
-+unsigned long acpi_get_wakeup_address(void);
- 
- /*
-  * Check if the CPU can handle C2 and deeper
-diff --git a/arch/x86/kernel/acpi/sleep.c b/arch/x86/kernel/acpi/sleep.c
-index ca13851f0570..26b7256f590f 100644
---- a/arch/x86/kernel/acpi/sleep.c
-+++ b/arch/x86/kernel/acpi/sleep.c
-@@ -26,6 +26,17 @@ unsigned long acpi_realmode_flags;
- static char temp_stack[4096];
- #endif
- 
-+/**
-+ * acpi_get_wakeup_address - provide physical address for S3 wakeup
-+ *
-+ * Returns the physical address where the kernel should be resumed after the
-+ * system awakes from S3, e.g. for programming into the firmware waking vector.
-+ */
-+unsigned long acpi_get_wakeup_address(void)
-+{
-+	return ((unsigned long)(real_mode_header->wakeup_start));
-+}
-+
- /**
-  * x86_acpi_enter_sleep_state - enter sleep state
-  * @state: Sleep state to enter.
+ extern unsigned long saved_video_mode;
+ extern long saved_magic;
 -- 
 2.24.0
 
