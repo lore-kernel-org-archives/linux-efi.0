@@ -4,66 +4,66 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-6.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0A1F4C432C0
-	for <linux-efi@archiver.kernel.org>; Wed, 27 Nov 2019 01:30:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 083AEC43215
+	for <linux-efi@archiver.kernel.org>; Wed, 27 Nov 2019 04:20:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id D53F520862
-	for <linux-efi@archiver.kernel.org>; Wed, 27 Nov 2019 01:30:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D44EF20863
+	for <linux-efi@archiver.kernel.org>; Wed, 27 Nov 2019 04:20:23 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1574818213;
-	bh=wnIhLn9O2NKDdVCLtrutx7mSOPJrp/maVJMQpfjq6rQ=;
+	s=default; t=1574828423;
+	bh=7U5QvbOcu2GrhmPv65Z5K1XMND22gyJT+/bvOU+tXtM=;
 	h=Subject:From:In-Reply-To:References:Date:To:Cc:List-ID:From;
-	b=R9VXLe4XlI48YEecbp+ftabSOcXY41Il85SkSWkj2EL6JsgIEcO2d++1BK4/oulsn
-	 IY0A1L5XKEuVXDBEiEhDaVqy7AlnCIuYgsiz3cXA/tLWJZ0E2HwxJmKaUOPXhxCbZ3
-	 hN0nnjRm3nLg7rr5x/VWebhwxTl1KoGR1m7+QldY=
+	b=Hb5PEOCZs+vigRN/jIXG3vliFV6DtBd9jRiq38yg+jLj7Hz9yAHpj85mXGKrQ53rq
+	 zlzlqGGiTLuZEWGt5uoRSddyfYG7BMCakfwa4D27c9ChSidkn+OnNZdTrE83uC5+Qm
+	 4YfYZ5F/w/8j+qXKfz/rsDLbw5yWKYs5KfRr6Hg0=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726920AbfK0BaN (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 26 Nov 2019 20:30:13 -0500
-Received: from mail.kernel.org ([198.145.29.99]:59098 "EHLO mail.kernel.org"
+        id S1727358AbfK0EUO (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 26 Nov 2019 23:20:14 -0500
+Received: from mail.kernel.org ([198.145.29.99]:44334 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727451AbfK0BaM (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Tue, 26 Nov 2019 20:30:12 -0500
-Subject: Re: [GIT PULL] EFI updates for v5.5
+        id S1727374AbfK0EUO (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Tue, 26 Nov 2019 23:20:14 -0500
+Subject: Re: [GIT PULL] ACPI updates for v5.5-rc1
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1574818211;
-        bh=wnIhLn9O2NKDdVCLtrutx7mSOPJrp/maVJMQpfjq6rQ=;
+        s=default; t=1574828414;
+        bh=7U5QvbOcu2GrhmPv65Z5K1XMND22gyJT+/bvOU+tXtM=;
         h=From:In-Reply-To:References:Date:To:Cc:From;
-        b=OeR5W6ZaKPo+khE5zRYIJ2EgkyIqjNlHKEoxbk4N/ZZH3At9+aCB+JdijykfPmyd/
-         Hd1hYWW8K7J4QciekYTeuzYgpocIerp2iy/ztKljeJsY8D9kef9w6cJ/HjhTYZ2q3m
-         4Z8uW1EtOVlOiKSkKqzCekvMYaaqT/dmbfMXtVbE=
+        b=JqILwvzR1BsJxoAyrFiYdqGkCOKo2kTaSk7aJj/tnQq/wh942VjyvBbocQsgTNXlu
+         QK6fedUdzir4oTXS7t7Aj73kKtbJzAO6Pth+yfM0ND99yiDXVC+jo4QG45R4ZQMMpD
+         3hJWrD8p3bYncFROQ73w3Ytg8Ryl1Rt3t/eT82Nw=
 From:   pr-tracker-bot@kernel.org
-In-Reply-To: <20191125110415.GA37886@gmail.com>
-References: <20191125110415.GA37886@gmail.com>
+In-Reply-To: <CAJZ5v0g944ZbCaoCvGcT7EFJVKW5efSMgf9oi_d3iP_3+iwbNg@mail.gmail.com>
+References: <CAJZ5v0g944ZbCaoCvGcT7EFJVKW5efSMgf9oi_d3iP_3+iwbNg@mail.gmail.com>
 X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20191125110415.GA37886@gmail.com>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git efi-core-for-linus
-X-PR-Tracked-Commit-Id: 2278f452a12d5b5b01f96441a7a4336710365022
+X-PR-Tracked-Message-Id: <CAJZ5v0g944ZbCaoCvGcT7EFJVKW5efSMgf9oi_d3iP_3+iwbNg@mail.gmail.com>
+X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/rafael/linux-pm.git
+ acpi-5.5-rc1
+X-PR-Tracked-Commit-Id: 782b59711e1561ee0da06bc478ca5e8249aa8d09
 X-PR-Merge-Tree: torvalds/linux.git
 X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: df28204bb0f29cc475c0a8893c99b46a11a4903f
-Message-Id: <157481821181.26353.8841723438521281530.pr-tracker-bot@kernel.org>
-Date:   Wed, 27 Nov 2019 01:30:11 +0000
-To:     Ingo Molnar <mingo@kernel.org>
+X-PR-Merge-Commit-Id: 6e9f879684b46331f51d0c76ebee981c788417db
+Message-Id: <157482841395.9403.2315371254751175937.pr-tracker-bot@kernel.org>
+Date:   Wed, 27 Nov 2019 04:20:13 +0000
+To:     "Rafael J. Wysocki" <rafael@kernel.org>
 Cc:     Linus Torvalds <torvalds@linux-foundation.org>,
-        linux-kernel@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>,
-        Borislav Petkov <bp@alien8.de>,
-        Peter Zijlstra <a.p.zijlstra@chello.nl>,
-        linux-efi@vger.kernel.org,
-        Dominik Brodowski <linux@dominikbrodowski.net>,
-        James Morse <james.morse@arm.com>
+        ACPI Devel Maling List <linux-acpi@vger.kernel.org>,
+        the arch/x86 maintainers <x86@kernel.org>,
+        linux-efi <linux-efi@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "linux-nvdimm@lists.01.org" <linux-nvdimm@lists.01.org>
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The pull request you sent on Mon, 25 Nov 2019 12:04:15 +0100:
+The pull request you sent on Tue, 26 Nov 2019 13:59:13 +0100:
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git efi-core-for-linus
+> git://git.kernel.org/pub/scm/linux/kernel/git/rafael/linux-pm.git acpi-5.5-rc1
 
 has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/df28204bb0f29cc475c0a8893c99b46a11a4903f
+https://git.kernel.org/torvalds/c/6e9f879684b46331f51d0c76ebee981c788417db
 
 Thank you!
 
