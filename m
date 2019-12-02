@@ -2,61 +2,64 @@ Return-Path: <SRS0=hv4V=ZY=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7241AC432C0
-	for <linux-efi@archiver.kernel.org>; Mon,  2 Dec 2019 12:29:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0C33CC432C0
+	for <linux-efi@archiver.kernel.org>; Mon,  2 Dec 2019 15:57:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 3CCE020748
-	for <linux-efi@archiver.kernel.org>; Mon,  2 Dec 2019 12:29:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C5CC02084F
+	for <linux-efi@archiver.kernel.org>; Mon,  2 Dec 2019 15:57:52 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="VndfOFFM"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GKNf9NPi"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727381AbfLBM3g (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 2 Dec 2019 07:29:36 -0500
-Received: from mail-wr1-f65.google.com ([209.85.221.65]:33830 "EHLO
-        mail-wr1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727362AbfLBM3e (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 2 Dec 2019 07:29:34 -0500
-Received: by mail-wr1-f65.google.com with SMTP id t2so43981562wrr.1
-        for <linux-efi@vger.kernel.org>; Mon, 02 Dec 2019 04:29:32 -0800 (PST)
+        id S1727442AbfLBP5w (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 2 Dec 2019 10:57:52 -0500
+Received: from mail-ed1-f67.google.com ([209.85.208.67]:47042 "EHLO
+        mail-ed1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727432AbfLBP5w (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 2 Dec 2019 10:57:52 -0500
+Received: by mail-ed1-f67.google.com with SMTP id m8so9936763edi.13;
+        Mon, 02 Dec 2019 07:57:50 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to:user-agent;
-        bh=m1gJFoxmvPjutyLqW6gwKw+LefgYzc+HHd4YVNJtFa4=;
-        b=VndfOFFMw1L/rmuAHJ6jsXalfXg2a3CmIxhSSc606nhVmBTPvovbR3NUrurVVdK3+W
-         E44+UttwXNH+0MxtQCXPLB8OiNanW+qSedpbrnWe9oQwqFucaNAQFIjpuaw89wOr9obQ
-         k0GCmcbMZk07b54nPsC/Wu55iei83BFsi1ci2YGe1U1KCx+WfIz8TaJQqQysqUH1/o1L
-         wtI5WOt0+zMNneclxZ7mMTgiFMk9GnqC44YtMjkUSoag6KZasDDHmvYom6ygNf2udlI2
-         BaJse3K4+wKFBwjw60hmQDUgvnai2FTppz18uwNeK7qTXNnqS/Ia6WWOY3aYW8mtXHrj
-         sYcw==
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=6xiKHRsLDcrKCkoTPQ4cXh2n9DxXl/CJ4KW/4aj6WAE=;
+        b=GKNf9NPiAxnkVn3US2bCoLb76TDeAMSu+HvI/JGk8tBTkt8RZaX1lhdsmsdWdK9+k0
+         sU3A1pGU6C0XuAFQuARmglwvuroak1b+m3wzjJE28TsgpQLacMeF4wn2o8ch+laawMov
+         CGYoe7DHr3rDG3TH1c4rkxafckTq/wJwWaYajFLjEX86om4mlGfk/ud/RazblC/6P+Pv
+         9+f4+PEEHc6RMtnSdzJs4O5iGZnFGHcfSIE6aHr+BhgsaJOgEkASQUBPD5AubcsA0/WA
+         9jiKHARdKl0XDj7tH/atG4xT1/f4lsBBzRTt32jj4wvj9I4v2FM9hIdoaTokXGS0ayxU
+         5ogA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=m1gJFoxmvPjutyLqW6gwKw+LefgYzc+HHd4YVNJtFa4=;
-        b=Z6QWBoU0ux1uf1m/qwCcQ/KtA/L4PUOZgsXFIKl4uSgj8NZ8RGev6erDngHBwlvM9W
-         sp4MT8QFTzjtrAykXE6Apu++p1T0oHSToYVBE3B8zEyvRVuImqLgdupJK8ZybhgD8OPI
-         BdjcIZxuqoLEjkZB3XTek2jOpVA3lp3CTbnhUG+HluiF5mSXaf1kujAjh+ai6gVPGmMf
-         ywQc3jCeeucn1ZrFInymm2JRLCSw+K5gKfN8oR+02Imz6f+WOVcy6h/ZR+zLJ3tOgBtv
-         o7pEdWvX1ALaDBGgALTioM+J2DFvaB2Ly1kqS/ulxDJCX0BHJ9IcKe/WXoSA2vjCOfSx
-         fQKg==
-X-Gm-Message-State: APjAAAVSeaJA17MfrQDJg5ldmsCn4BWJsM/RniZlWMB4nIbwNk//a9OS
-        Lls9wmpfHWDt5aiEdtAJuElqiQ==
-X-Google-Smtp-Source: APXvYqwd3UxC6c3DYGT/u/UuFJrPiuTjk+YcI3ZageRxW8ixm+PJ796D/NoYSrhFUN4lmKDGhjxM3w==
-X-Received: by 2002:adf:fe86:: with SMTP id l6mr4235243wrr.252.1575289772174;
-        Mon, 02 Dec 2019 04:29:32 -0800 (PST)
-Received: from bivouac.eciton.net (bivouac.eciton.net. [2a00:1098:0:86:1000:23:0:2])
-        by smtp.gmail.com with ESMTPSA id a14sm6471505wrx.81.2019.12.02.04.29.31
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 02 Dec 2019 04:29:31 -0800 (PST)
-Date:   Mon, 2 Dec 2019 12:29:29 +0000
-From:   Leif Lindholm <leif.lindholm@linaro.org>
-To:     Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc:     Rob Clark <robdclark@gmail.com>,
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=6xiKHRsLDcrKCkoTPQ4cXh2n9DxXl/CJ4KW/4aj6WAE=;
+        b=AD92V67I+QsX602DwnzuK1R6LFshZKeJjM4ENgj5QegOYLGuwTA8Jls0dT1VVIzFh3
+         FEvZPNjV8PFQKgnO4FN8DCRxQXCzWaBzc6OiiPs9DY4PDXxbfsLGnF+98OlxpO5zM75x
+         QsXH3x1NOcsATgqbCr9r4sbfGW9ZkcnOg3j9r6Nn6KzqTSSZImB8i+BCqtbhc6oqFKVo
+         6DJ8RvVSq7KYKtHupZyI3Q2L4ki10vSmqN3A7FjFgzSoUqNOycWgVEedZoEnvZrbqcbK
+         mjf9ddtg4OI55AO8/pmnOli3UgJJJT4UgSadbSGhPZuMjO6/U390B4990SOWYJHIsMtg
+         HfCg==
+X-Gm-Message-State: APjAAAUJNl7zIt41KDzJLfpxrRDr96IQKi8mnbjzd9cUw6qDfbWJzIK2
+        dqX1gS2EZqv+V3Nt8m5seewQNSISO5ijb3JKwm8=
+X-Google-Smtp-Source: APXvYqwjfEKeEexNOy0NO/E4wHkDPAUvEcHz2A4YERwPTOAhmnW5mGkiWxP70WrGLCKlx+j1UpRL8pbhCwPPzmJ56io=
+X-Received: by 2002:a17:906:34d7:: with SMTP id h23mr20809804ejb.90.1575302269170;
+ Mon, 02 Dec 2019 07:57:49 -0800 (PST)
+MIME-Version: 1.0
+References: <20191130195045.2005835-1-robdclark@gmail.com> <CAKv+Gu_HXD=59q9zeK6-WoEEngHPrEJpPTyT8U4TZZ3AOs=TcA@mail.gmail.com>
+ <20191202122929.GC7359@bivouac.eciton.net>
+In-Reply-To: <20191202122929.GC7359@bivouac.eciton.net>
+From:   Rob Clark <robdclark@gmail.com>
+Date:   Mon, 2 Dec 2019 07:57:37 -0800
+Message-ID: <CAF6AEGsrTuZk0KZDWGN4m+7dFWo62zeHmFj_0-r87Q-3rwg0hw@mail.gmail.com>
+Subject: Re: [PATCH] efi/fdt: install new fdt config table
+To:     Leif Lindholm <leif.lindholm@linaro.org>
+Cc:     Ard Biesheuvel <ard.biesheuvel@linaro.org>,
         Rob Clark <robdclark@chromium.org>,
         Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>,
         Ingo Molnar <mingo@kernel.org>,
@@ -66,87 +69,113 @@ Cc:     Rob Clark <robdclark@gmail.com>,
         "open list:EXTENSIBLE FIRMWARE INTERFACE (EFI)" 
         <linux-efi@vger.kernel.org>,
         open list <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH] efi/fdt: install new fdt config table
-Message-ID: <20191202122929.GC7359@bivouac.eciton.net>
-References: <20191130195045.2005835-1-robdclark@gmail.com>
- <CAKv+Gu_HXD=59q9zeK6-WoEEngHPrEJpPTyT8U4TZZ3AOs=TcA@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu_HXD=59q9zeK6-WoEEngHPrEJpPTyT8U4TZZ3AOs=TcA@mail.gmail.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Mon, Dec 02, 2019 at 10:35:05 +0100, Ard Biesheuvel wrote:
-> On Sat, 30 Nov 2019 at 20:51, Rob Clark <robdclark@gmail.com> wrote:
+On Mon, Dec 2, 2019 at 4:29 AM Leif Lindholm <leif.lindholm@linaro.org> wrote:
 >
-> I understand what you are trying to do here, but this is not the right solution.
-> 
-> I have rejected patches in the past where config tables are used to
-> communicate information back to the firmware, as creating reverse
-> dependencies like this is a recipe for disaster.
+> On Mon, Dec 02, 2019 at 10:35:05 +0100, Ard Biesheuvel wrote:
+> > On Sat, 30 Nov 2019 at 20:51, Rob Clark <robdclark@gmail.com> wrote:
+> >
+> > I understand what you are trying to do here, but this is not the right solution.
+> >
+> > I have rejected patches in the past where config tables are used to
+> > communicate information back to the firmware, as creating reverse
+> > dependencies like this is a recipe for disaster.
+>
+> This isn't *technically* communicating information back to the
+> firmware, since the agent that ends up being invoked is a driver that
+> has been explicitly installed in order to permit running Linux without
+> hacking about with GRUB. (But it's certainly communicating it back to
+> the firmware context.)
+>
+> > IIUC, the problem is that the DtbLoader attempts to be smart about
+> > whether to install the DT config table, and to only do so if the OS is
+> > going to boot in DT mode. This is based on the principle that we
+> > should not expose both ACPI and DT tables, and make it the OS's
+> > problem to reason about which one is the preferred description.
+> >
+> > I agree with that approach in general, but in this particular case, I
+> > don't think it makes sense. Windows only cares about ACPI, and Linux
+> > only cares about DT unless you instruct it specifically to prioritize
+> > ACPI over DT.
 
-This isn't *technically* communicating information back to the
-firmware, since the agent that ends up being invoked is a driver that
-has been explicitly installed in order to permit running Linux without
-hacking about with GRUB. (But it's certainly communicating it back to
-the firmware context.)
+well, I don't mind too much if the patch is rejected, it doesn't
+really cause a problem (at least upstream) to have both ACPI and DT
+config tables.  But I figured I'd at least point out why DtbLoader
+wasn't removing the ACPI tables (when grub is not involved) in the
+form of a patch..
 
-> IIUC, the problem is that the DtbLoader attempts to be smart about
-> whether to install the DT config table, and to only do so if the OS is
-> going to boot in DT mode. This is based on the principle that we
-> should not expose both ACPI and DT tables, and make it the OS's
-> problem to reason about which one is the preferred description.
-> 
-> I agree with that approach in general, but in this particular case, I
-> don't think it makes sense. Windows only cares about ACPI, and Linux
-> only cares about DT unless you instruct it specifically to prioritize
-> ACPI over DT.
+>
+> I guess it's worth pointing out here that this approach (DtbLoader)
+> predates the finding out that these devices use PEP instead of ACPI
+> for power management (which I guess makes it ACI) - so ACPI can never
+> be usefully supported.
 
-I guess it's worth pointing out here that this approach (DtbLoader)
-predates the finding out that these devices use PEP instead of ACPI
-for power management (which I guess makes it ACI) - so ACPI can never
-be usefully supported.
+I don't think this is necessarily true.  With ACPI boot you can still
+get far enough to run an installer and get to the point where you can
+install OS updates.  The experience isn't great without PEP.. but more
+or less the same is true on x86 laptops, where you need to get to the
+point of installing updated kernel and/or mesa to have accelerated
+graphics and other nice things.  The "PEP" driver is just another
+thing that needs to get installed via HLOS updates.
 
-> So the problem that this solves does not exist in
-> practice, and we're much better off just exposing the DT alongside the
-> ACPI tables, and let the OS use whichever one it wants.
+That said, coming up with some sort of PEP mechanism for linux is
+beyond what I have weekend hacking bandwidth for, so I'll leave that
+for someone else.  Right now I'd be happy to get the various patchsets
+we need to have things working landed upstream, and have some sort of
+sane/standardized way to manage DT boot.  (Either DtbLoader or
+something in grub picking the correct dtb file based on what we can
+pull out of SMBIOS tables seems the sanest thing to me.)
 
-Wo-hoo...
+Eventually if we have enough different aarch64 "ACI" laptops and users
+out there, I think the DT approach will become too painful and we'll
+have to tackle PEP for linux.. at least thats a problem I hope we have
+eventually.
 
-> Also, the stub always reallocates the FDT, and so the CRC check is
-> only detecting whether the DT is being touched by GRUB or not.
+BR,
+-R
 
-So does GRUB.
-
-DtbLoader looks up the DT through the system table again as part of
-the ExitBootservices hook. An address change *or* a CRC change
-triggers the ACPI deletion.
-
-This was the problem Rob was trying to address - ensuring the hook
-gets invoked even where the stub was the one that updated the DT.
-
-But given the situation we're in, I don't really disagree with you
-anyway.
-
-Let's just be clear that this isn't a free-for-all - this is because
-the abstraction of power management on this family of machines is
-broken by design.
-
-> So removing the ACPI tables like this is not something I think we
-> should be doing at all. As a compromise, you might add 'acpi=off' to
-> /chosen/cmdline so that GRUBless boot into Linux does not
-> inadvertently ends up booting in ACPI mode.
-
-If so, some form of (out-of-tree) sanity check would be needed on
-distros carrying out-of-tree patches that disable DT boot.
-
-It *is* possible to boot these machines using only ACPI. It's just not
-a very great user experience with all cores running at minimum
-frequency.
-
-/
-    Leif
+>
+> > So the problem that this solves does not exist in
+> > practice, and we're much better off just exposing the DT alongside the
+> > ACPI tables, and let the OS use whichever one it wants.
+>
+> Wo-hoo...
+>
+> > Also, the stub always reallocates the FDT, and so the CRC check is
+> > only detecting whether the DT is being touched by GRUB or not.
+>
+> So does GRUB.
+>
+> DtbLoader looks up the DT through the system table again as part of
+> the ExitBootservices hook. An address change *or* a CRC change
+> triggers the ACPI deletion.
+>
+> This was the problem Rob was trying to address - ensuring the hook
+> gets invoked even where the stub was the one that updated the DT.
+>
+> But given the situation we're in, I don't really disagree with you
+> anyway.
+>
+> Let's just be clear that this isn't a free-for-all - this is because
+> the abstraction of power management on this family of machines is
+> broken by design.
+>
+> > So removing the ACPI tables like this is not something I think we
+> > should be doing at all. As a compromise, you might add 'acpi=off' to
+> > /chosen/cmdline so that GRUBless boot into Linux does not
+> > inadvertently ends up booting in ACPI mode.
+>
+> If so, some form of (out-of-tree) sanity check would be needed on
+> distros carrying out-of-tree patches that disable DT boot.
+>
+> It *is* possible to boot these machines using only ACPI. It's just not
+> a very great user experience with all cores running at minimum
+> frequency.
+>
+> /
+>     Leif
