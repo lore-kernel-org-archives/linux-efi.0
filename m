@@ -2,213 +2,189 @@ Return-Path: <SRS0=Mume=Z2=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BBEF1C43603
-	for <linux-efi@archiver.kernel.org>; Wed,  4 Dec 2019 17:17:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 17609C2BD09
+	for <linux-efi@archiver.kernel.org>; Wed,  4 Dec 2019 18:17:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 8561C2073B
-	for <linux-efi@archiver.kernel.org>; Wed,  4 Dec 2019 17:17:54 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="p62RXt/9"
+	by mail.kernel.org (Postfix) with ESMTP id E1E4A21556
+	for <linux-efi@archiver.kernel.org>; Wed,  4 Dec 2019 18:17:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728065AbfLDRRy (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 4 Dec 2019 12:17:54 -0500
-Received: from mail-qt1-f193.google.com ([209.85.160.193]:37379 "EHLO
-        mail-qt1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726934AbfLDRRy (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 4 Dec 2019 12:17:54 -0500
-Received: by mail-qt1-f193.google.com with SMTP id w47so520179qtk.4
-        for <linux-efi@vger.kernel.org>; Wed, 04 Dec 2019 09:17:53 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=uJmxSM90BwOzzfnCIuJaV9fTmYo4GaP5ZVkBe3GqlAQ=;
-        b=p62RXt/9TccQo8gUT6RUoVqezJF5HJZYGPQFcY/Q0vOTplwkif/Dflq4JNR96iE9Dc
-         zd4GIMWIminNeEcO9hrDw9lRTenDYwN/x7MFE9HYNLLq/nT/yEtYDt0La+Lua+/XIhBG
-         yLrADh2/j6IEvT5G9vjns0Vb4PPjYg6sP+GTuS3y4xvCmC56h5GuW35lvQFT6Rn0AWP/
-         hEzdigz1bErHRa7F7bPstEZEP3kSIK3X/F4AR4OMWWcFdxQzjKrVSlcgi9x5VLmpDS6T
-         c/FpvAKgHio3G6Q6LXsz1UfnbO9U+dGxYMfMYboZYFLKLj7O/ExjCp3xSz9nK+JPAtp8
-         zKZw==
+        id S1731431AbfLDSRw (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 4 Dec 2019 13:17:52 -0500
+Received: from mail-qt1-f194.google.com ([209.85.160.194]:37523 "EHLO
+        mail-qt1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729411AbfLDSRv (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 4 Dec 2019 13:17:51 -0500
+Received: by mail-qt1-f194.google.com with SMTP id w47so732036qtk.4
+        for <linux-efi@vger.kernel.org>; Wed, 04 Dec 2019 10:17:49 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=uJmxSM90BwOzzfnCIuJaV9fTmYo4GaP5ZVkBe3GqlAQ=;
-        b=oqyDuySTFS00MCiWQ+1w8F9FuNfuqzxPgDWMaVYXeaV4Xb2Q/RHM89bvA9QSdHjeRT
-         Iwai5/f0sLHoStN26S8DjwSwdT7ByErfbWTSYiLwAn+L+5fs2F5iZqY5xB1eFUKN0+Tt
-         LWaM07L1GXzJv1JQjii6haCY7j3g/01F/LXN4W1t4KArzABLrcu43e/LqUIgie3qo20o
-         cKpaeaD+z6BqrAb4RbNhfjSljAch/SdRAbhPLjNJ8w/LZwBRpPmYeOJj2Ci6i27k3BlD
-         w4tsavTwiPyw+x7DzFOOa8WXgVVhYmHzqTz5t9+HI7zCOR839UFLGPM9MmbsAq39EX+m
-         R/Gg==
-X-Gm-Message-State: APjAAAW6OT/juOIR4rs2RyV6lbRgmICA0+RPv7o+xAm2VNBMMt7lAJhz
-        ARfSCLmBp0uw5MZyj7wDjzZLeeM=
-X-Google-Smtp-Source: APXvYqyFjloF4HHs2p8CJyaWpYiWdOKbFhcP8ySf1aoAj3Li0WFsP5nOT3NwG6pJkCbokqe5UPb+HQ==
-X-Received: by 2002:ac8:4509:: with SMTP id q9mr3619553qtn.214.1575479871519;
-        Wed, 04 Dec 2019 09:17:51 -0800 (PST)
-Received: from gabell (209-6-122-159.s2973.c3-0.arl-cbr1.sbo-arl.ma.cable.rcncustomer.com. [209.6.122.159])
-        by smtp.gmail.com with ESMTPSA id y184sm3950517qkd.128.2019.12.04.09.17.50
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Wed, 04 Dec 2019 09:17:50 -0800 (PST)
-Date:   Wed, 4 Dec 2019 12:17:44 -0500
-From:   Masayoshi Mizuma <msys.mizuma@gmail.com>
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=0lRgPN3RUS73LsaIHYq45B/z4v9LWEWB5O0HdPdhSK8=;
+        b=UzBdmmE3RVBvjSJin2kuT+M0+0CQa57lyVlswJJZEb3AHhb+eRwaXVVDCX+qMFhCxF
+         VbTQx3Ucf7MuRMJvihmui6BlRZbp7EEAkcIJFRiVOBzXF/TMj9t/gA64BSjU65ALXm3K
+         zs6rLC15jumfGkeN4OJnonQA4sFPjr2Y/FyR4GQQ/ZLFT47oRltpgluDUAeXg55Az4Kk
+         Tik3lFW+vVJXc7QowUyPLbvlmSJPwUAOnZBkcYhozOZy1a5lQ1bYGC6/hGJazyDba5Dg
+         ZwgsRCy4IKDUykDQSvTJw3OCUDqk4Z7uy50syMvuomRt9HF5IrH+6bwmWD/oY23zcddi
+         BL1Q==
+X-Gm-Message-State: APjAAAWBDNRJkSZ4UVlOcMGdLIGWpfcoJ3aVlV8+kQfAciW74HOspdQx
+        AcrnljIm3ur+4rQi2dPwZ1LXYfjUhxQ=
+X-Google-Smtp-Source: APXvYqyVNgFejhUnx6HvOJQkLv/deBW/iehgkQPLH3vC5IEslvcEXjFnUU8tTa7Tor9zw2B+FPUuXA==
+X-Received: by 2002:aed:2d67:: with SMTP id h94mr4068358qtd.74.1575483469184;
+        Wed, 04 Dec 2019 10:17:49 -0800 (PST)
+Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
+        by smtp.gmail.com with ESMTPSA id c6sm4072506qka.111.2019.12.04.10.17.48
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 04 Dec 2019 10:17:48 -0800 (PST)
+From:   Arvind Sankar <nivedita@alum.mit.edu>
 To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     linux-efi@vger.kernel.org, mark.rutland@arm.com,
-        james.morse@arm.com, Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>,
-        d.hatayama@fujitsu.com, kexec@lists.infradead.org
-Subject: Re: [PATCH] efi/memreserve: register reservations as 'reserved' in
- /proc/iomem
-Message-ID: <20191204171744.o3ijdspnelqn5fgd@gabell>
-References: <20191204145233.11962-1-ardb@kernel.org>
+Cc:     linux-efi@vger.kernel.org
+Subject: [PATCH v2 3/3] efi/gop: Fix memory leak from __gop_query32/64
+Date:   Wed,  4 Dec 2019 13:17:44 -0500
+Message-Id: <20191204181744.14326-4-nivedita@alum.mit.edu>
+X-Mailer: git-send-email 2.23.0
+In-Reply-To: <20191203214728.19264-1-nivedita@alum.mit.edu>
+References: <20191203214728.19264-1-nivedita@alum.mit.edu>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20191204145233.11962-1-ardb@kernel.org>
+Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Hello Ard,
+gop->query_mode returns info in callee-allocated memory which must be
+freed by the caller, which we aren't doing.
 
-Thank you for sending the patch, but unfortunately it doesn't work for the issue...
+We don't actually need to call query_mode in order to obtain the info
+for the current graphics mode, which is already there in
+gop->mode->info, so just access it directly in the setup_gop32/64
+functions.
 
-After applied your patch, the LPI tables are marked as reserved in
-/proc/iomem like as:
+Also nothing uses the size of the info structure, so don't update the
+passed-in size (which is the size of the gop_handle table in bytes)
+unnecessarily.
 
-80300000-a1fdffff : System RAM
-  80480000-8134ffff : Kernel code
-  81350000-817bffff : reserved
-  817c0000-82acffff : Kernel data
-  830f0000-830fffff : reserved # Property table
-  83480000-83480fff : reserved # Pending table
-  83490000-8349ffff : reserved # Pending table
+Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
+---
+ drivers/firmware/efi/libstub/gop.c | 66 ++++++------------------------
+ 1 file changed, 12 insertions(+), 54 deletions(-)
 
-However, kexec tries to allocate memory from System RAM, it doesn't care
-the reserved in System RAM.
+diff --git a/drivers/firmware/efi/libstub/gop.c b/drivers/firmware/efi/libstub/gop.c
+index 245a5fbef3dc..7693ec9bbec7 100644
+--- a/drivers/firmware/efi/libstub/gop.c
++++ b/drivers/firmware/efi/libstub/gop.c
+@@ -83,30 +83,6 @@ setup_pixel_info(struct screen_info *si, u32 pixels_per_scan_line,
+ 	}
+ }
+ 
+-static efi_status_t
+-__gop_query32(efi_system_table_t *sys_table_arg,
+-	      struct efi_graphics_output_protocol_32 *gop32,
+-	      struct efi_graphics_output_mode_info **info,
+-	      unsigned long *size, u64 *fb_base)
+-{
+-	struct efi_graphics_output_protocol_mode_32 *mode;
+-	efi_graphics_output_protocol_query_mode query_mode;
+-	efi_status_t status;
+-	unsigned long m;
+-
+-	m = gop32->mode;
+-	mode = (struct efi_graphics_output_protocol_mode_32 *)m;
+-	query_mode = (void *)(unsigned long)gop32->query_mode;
+-
+-	status = __efi_call_early(query_mode, (void *)gop32, mode->mode, size,
+-				  info);
+-	if (status != EFI_SUCCESS)
+-		return status;
+-
+-	*fb_base = mode->frame_buffer_base;
+-	return status;
+-}
+-
+ static efi_status_t
+ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
+             efi_guid_t *proto, unsigned long size, void **gop_handle)
+@@ -128,6 +104,7 @@ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
+ 
+ 	nr_gops = size / sizeof(u32);
+ 	for (i = 0; i < nr_gops; i++) {
++		struct efi_graphics_output_protocol_mode_32 *mode;
+ 		struct efi_graphics_output_mode_info *info = NULL;
+ 		efi_guid_t conout_proto = EFI_CONSOLE_OUT_DEVICE_GUID;
+ 		bool conout_found = false;
+@@ -145,9 +122,11 @@ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
+ 		if (status == EFI_SUCCESS)
+ 			conout_found = true;
+ 
+-		status = __gop_query32(sys_table_arg, gop32, &info, &size,
+-				       &current_fb_base);
+-		if (status == EFI_SUCCESS && (!first_gop || conout_found) &&
++		mode = (void *)(unsigned long)gop32->mode;
++		info = (void *)(unsigned long)mode->info;
++		current_fb_base = mode->frame_buffer_base;
++
++		if ((!first_gop || conout_found) &&
+ 		    info->pixel_format != PIXEL_BLT_ONLY) {
+ 			/*
+ 			 * Systems that use the UEFI Console Splitter may
+@@ -201,30 +180,6 @@ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
+ 	return EFI_SUCCESS;
+ }
+ 
+-static efi_status_t
+-__gop_query64(efi_system_table_t *sys_table_arg,
+-	      struct efi_graphics_output_protocol_64 *gop64,
+-	      struct efi_graphics_output_mode_info **info,
+-	      unsigned long *size, u64 *fb_base)
+-{
+-	struct efi_graphics_output_protocol_mode_64 *mode;
+-	efi_graphics_output_protocol_query_mode query_mode;
+-	efi_status_t status;
+-	unsigned long m;
+-
+-	m = gop64->mode;
+-	mode = (struct efi_graphics_output_protocol_mode_64 *)m;
+-	query_mode = (void *)(unsigned long)gop64->query_mode;
+-
+-	status = __efi_call_early(query_mode, (void *)gop64, mode->mode, size,
+-				  info);
+-	if (status != EFI_SUCCESS)
+-		return status;
+-
+-	*fb_base = mode->frame_buffer_base;
+-	return status;
+-}
+-
+ static efi_status_t
+ setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
+ 	    efi_guid_t *proto, unsigned long size, void **gop_handle)
+@@ -246,6 +201,7 @@ setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
+ 
+ 	nr_gops = size / sizeof(u64);
+ 	for (i = 0; i < nr_gops; i++) {
++		struct efi_graphics_output_protocol_mode_64 *mode;
+ 		struct efi_graphics_output_mode_info *info = NULL;
+ 		efi_guid_t conout_proto = EFI_CONSOLE_OUT_DEVICE_GUID;
+ 		bool conout_found = false;
+@@ -263,9 +219,11 @@ setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
+ 		if (status == EFI_SUCCESS)
+ 			conout_found = true;
+ 
+-		status = __gop_query64(sys_table_arg, gop64, &info, &size,
+-				       &current_fb_base);
+-		if (status == EFI_SUCCESS && (!first_gop || conout_found) &&
++		mode = (void *)(unsigned long)gop64->mode;
++		info = (void *)(unsigned long)mode->info;
++		current_fb_base = mode->frame_buffer_base;
++
++		if ((!first_gop || conout_found) &&
+ 		    info->pixel_format != PIXEL_BLT_ONLY) {
+ 			/*
+ 			 * Systems that use the UEFI Console Splitter may
+-- 
+2.23.0
 
-Following example, kexec allocates memory 0x82ad0000-0x86640000 to locate
-the initrd, and LPI tables are also in the memory region, so LPI tables
-will be destroyed by kexec reboot.
-
-# kexec -d -l /boot/vmlinuz-5.4.1+ --initrd=/boot/initramfs-5.4.1+.img
-...
-initrd: base 82ad0000, size 3b67c6fh (62291055)
-...
-segment[1].mem   = 0x82ad0000
-segment[1].memsz = 0x3b70000   # 0x86640000 (== 0x82ad0000 + 0x3b70000)
-...
-
-I'm not sure why kexec doesn't care the reserved in System RAM, however,
-if the kexec behaivor is right, the LPI tables should not belong to
-System RAM.
-Like as:
-
-80300000-830effff : System RAM
-  80480000-8134ffff : Kernel code
-  81350000-817bffff : reserved
-  817c0000-82acffff : Kernel data
-830f0000-830fffff : reserved # Property table
-83480000-83480fff : reserved # Pending table
-83490000-8349ffff : reserved # Pending table
-834a0000-a1fdffff : System RAM
-
-I don't have ideas to separete LPI tables from System RAM... so I tried
-to add a new file to inform the LPI tables to userspace.
-
-Thanks,
-Masa
-
-On Wed, Dec 04, 2019 at 02:52:33PM +0000, Ard Biesheuvel wrote:
-> Memory regions that are reserved using efi_mem_reserve_persistent()
-> are recorded in a special EFI config table which survives kexec,
-> allowing the incoming kernel to honour them as well. However,
-> such reservations are not visible in /proc/iomem, and so the kexec
-> tools that load the incoming kernel and its initrd into memory may
-> overwrite these reserved regions before the incoming kernel has a
-> chance to reserve them from further use.
-> 
-> So add these reservations to /proc/iomem as they are created. Note
-> that reservations that are inherited from a previous kernel are
-> memblock_reserve()'d early on, so they are already visible in
-> /proc/iomem.
-> 
-> Cc: Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>
-> Cc: d.hatayama@fujitsu.com
-> Cc: kexec@lists.infradead.org
-> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
-> ---
->  drivers/firmware/efi/efi.c | 29 ++++++++++++++++++--
->  1 file changed, 26 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-> index d101f072c8f8..fcd82dde23c8 100644
-> --- a/drivers/firmware/efi/efi.c
-> +++ b/drivers/firmware/efi/efi.c
-> @@ -979,6 +979,24 @@ static int __init efi_memreserve_map_root(void)
->  	return 0;
->  }
->  
-> +static int efi_mem_reserve_iomem(phys_addr_t addr, u64 size)
-> +{
-> +	struct resource *res, *parent;
-> +
-> +	res = kzalloc(sizeof(struct resource), GFP_ATOMIC);
-> +	if (!res)
-> +		return -ENOMEM;
-> +
-> +	res->name	= "reserved";
-> +	res->flags	= IORESOURCE_MEM;
-> +	res->start	= addr;
-> +	res->end	= addr + size - 1;
-> +
-> +	/* we expect a conflict with a 'System RAM' region */
-> +	parent = request_resource_conflict(&iomem_resource, res);
-> +	return parent ? request_resource(parent, res) : 0;
-> +}
-> +
->  int __ref efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
->  {
->  	struct linux_efi_memreserve *rsv;
-> @@ -1001,9 +1019,8 @@ int __ref efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
->  		if (index < rsv->size) {
->  			rsv->entry[index].base = addr;
->  			rsv->entry[index].size = size;
-> -
->  			memunmap(rsv);
-> -			return 0;
-> +			return efi_mem_reserve_iomem(addr, size);
->  		}
->  		memunmap(rsv);
->  	}
-> @@ -1013,6 +1030,12 @@ int __ref efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
->  	if (!rsv)
->  		return -ENOMEM;
->  
-> +	rc = efi_mem_reserve_iomem(__pa(rsv), SZ_4K);
-> +	if (rc) {
-> +		free_page(rsv);
-> +		return rc;
-> +	}
-> +
->  	/*
->  	 * The memremap() call above assumes that a linux_efi_memreserve entry
->  	 * never crosses a page boundary, so let's ensure that this remains true
-> @@ -1029,7 +1052,7 @@ int __ref efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
->  	efi_memreserve_root->next = __pa(rsv);
->  	spin_unlock(&efi_mem_reserve_persistent_lock);
->  
-> -	return 0;
-> +	return efi_mem_reserve_iomem(addr, size);
->  }
->  
->  static int __init efi_memreserve_root_init(void)
-> -- 
-> 2.17.1
-> 
-> 
-> 
