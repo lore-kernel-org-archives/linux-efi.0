@@ -2,112 +2,105 @@ Return-Path: <SRS0=Mume=Z2=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9DBB1C43603
-	for <linux-efi@archiver.kernel.org>; Wed,  4 Dec 2019 18:17:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8863FC43603
+	for <linux-efi@archiver.kernel.org>; Wed,  4 Dec 2019 18:18:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 7AEA720675
-	for <linux-efi@archiver.kernel.org>; Wed,  4 Dec 2019 18:17:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5A43F20675
+	for <linux-efi@archiver.kernel.org>; Wed,  4 Dec 2019 18:18:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729433AbfLDSRu (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 4 Dec 2019 13:17:50 -0500
-Received: from mail-qk1-f195.google.com ([209.85.222.195]:32791 "EHLO
-        mail-qk1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729052AbfLDSRt (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 4 Dec 2019 13:17:49 -0500
-Received: by mail-qk1-f195.google.com with SMTP id c124so897526qkg.0
-        for <linux-efi@vger.kernel.org>; Wed, 04 Dec 2019 10:17:47 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=gzomWh8xjoi21A3gfLuDiDBmKGStkUDN6z5Fo4YMjpk=;
-        b=XaFw8Yg37/a5Uli3QD49Kmy3ltgkTnF+ZF42n5X4m4yXB5mkzxFMxuaV7cKTrp2RNX
-         /2JA6jkom4tmfpoMpGS1KprvBuR//1EL88wUGt4ezv6PfGhdTH1EnInke9/n6YOA9FMC
-         9fJlokCgs/OCKG/cVr9SF1GV6ayAkiXP10hOUmzm94t817RyHK2RxGUV4WQvVmdgUF0j
-         2oYbNDYTWjrUhzK9h6t8V8avkGSAZP1VcM/MU6s2ZnGqIjldFAf6thk3+HPOPHsU82iY
-         xslC0FRUkhHh4P1vYBGpeXYR6N/4TcZk6ky652c7v7nCIxKpdMaSAu+1TyQqt91cl58P
-         FHmA==
-X-Gm-Message-State: APjAAAUV6EfeliK6N748eEmCLPR7MT+iP/Z9tAQMVbQkoSnsAD19mBwB
-        Z7Mq9PG6kyooq5BXAByG6oZqQiz3d7M=
-X-Google-Smtp-Source: APXvYqy4dAbmXcjs7gnPBXkqlFmximIgLagWeUwlhhhN40qpZ4IZ3P7b8OImOlKPf0tYHilsFlOo4g==
-X-Received: by 2002:a37:61c6:: with SMTP id v189mr4340324qkb.158.1575483467381;
-        Wed, 04 Dec 2019 10:17:47 -0800 (PST)
-Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
-        by smtp.gmail.com with ESMTPSA id c6sm4072506qka.111.2019.12.04.10.17.46
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 04 Dec 2019 10:17:46 -0800 (PST)
-From:   Arvind Sankar <nivedita@alum.mit.edu>
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     linux-efi@vger.kernel.org
-Subject: [PATCH v2 1/3] efi/gop: Return EFI_NOT_FOUND if there are no usable GOP's
-Date:   Wed,  4 Dec 2019 13:17:42 -0500
-Message-Id: <20191204181744.14326-2-nivedita@alum.mit.edu>
-X-Mailer: git-send-email 2.23.0
-In-Reply-To: <20191203214728.19264-1-nivedita@alum.mit.edu>
-References: <20191203214728.19264-1-nivedita@alum.mit.edu>
+        id S1731929AbfLDSSD (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 4 Dec 2019 13:18:03 -0500
+Received: from foss.arm.com ([217.140.110.172]:60486 "EHLO foss.arm.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1731879AbfLDSSC (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 4 Dec 2019 13:18:02 -0500
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 0220731B;
+        Wed,  4 Dec 2019 10:18:02 -0800 (PST)
+Received: from [10.1.196.105] (eglon.cambridge.arm.com [10.1.196.105])
+        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 0D5083F718;
+        Wed,  4 Dec 2019 10:18:00 -0800 (PST)
+Subject: Re: [PATCH] efi/memreserve: register reservations as 'reserved' in
+ /proc/iomem
+To:     Masayoshi Mizuma <msys.mizuma@gmail.com>,
+        Ard Biesheuvel <ardb@kernel.org>
+Cc:     linux-efi@vger.kernel.org, mark.rutland@arm.com,
+        Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>,
+        d.hatayama@fujitsu.com, kexec@lists.infradead.org
+References: <20191204145233.11962-1-ardb@kernel.org>
+ <20191204171744.o3ijdspnelqn5fgd@gabell>
+From:   James Morse <james.morse@arm.com>
+Message-ID: <08f05b18-12b2-0ba4-b819-b95ba27d1862@arm.com>
+Date:   Wed, 4 Dec 2019 18:17:59 +0000
+User-Agent: Mozilla/5.0 (X11; Linux aarch64; rv:60.0) Gecko/20100101
+ Thunderbird/60.9.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <20191204171744.o3ijdspnelqn5fgd@gabell>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-GB
+Content-Transfer-Encoding: 7bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-If we don't find a usable GOP because none of them have a framebuffer
-(i.e. they were all PIXEL_BLT_ONLY), but all the efi calls succeeded, we
-will return EFI_SUCCESS even though we didn't find a usable GOP.
+Hi Masa,
 
-Fix this by explicitly returning EFI_NOT_FOUND if no usable GOP's are
-found, allowing the caller to probe for UGA instead.
+On 04/12/2019 17:17, Masayoshi Mizuma wrote:
+> Thank you for sending the patch, but unfortunately it doesn't work for the issue...
+> 
+> After applied your patch, the LPI tables are marked as reserved in
+> /proc/iomem like as:
+> 
+> 80300000-a1fdffff : System RAM
+>   80480000-8134ffff : Kernel code
+>   81350000-817bffff : reserved
+>   817c0000-82acffff : Kernel data
+>   830f0000-830fffff : reserved # Property table
+>   83480000-83480fff : reserved # Pending table
+>   83490000-8349ffff : reserved # Pending table
+> 
+> However, kexec tries to allocate memory from System RAM, it doesn't care
+> the reserved in System RAM.
 
-Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
----
- drivers/firmware/efi/libstub/gop.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+> I'm not sure why kexec doesn't care the reserved in System RAM, however,
 
-diff --git a/drivers/firmware/efi/libstub/gop.c b/drivers/firmware/efi/libstub/gop.c
-index 0101ca4c13b1..62e8b7cff72f 100644
---- a/drivers/firmware/efi/libstub/gop.c
-+++ b/drivers/firmware/efi/libstub/gop.c
-@@ -175,7 +175,7 @@ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
- 
- 	/* Did we find any GOPs? */
- 	if (!first_gop)
--		goto out;
-+		return EFI_NOT_FOUND;
- 
- 	/* EFI framebuffer */
- 	si->orig_video_isVGA = VIDEO_TYPE_EFI;
-@@ -197,7 +197,7 @@ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
- 	si->lfb_size = si->lfb_linelength * si->lfb_height;
- 
- 	si->capabilities |= VIDEO_CAPABILITY_SKIP_QUIRKS;
--out:
-+
- 	return status;
- }
- 
-@@ -293,7 +293,7 @@ setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
- 
- 	/* Did we find any GOPs? */
- 	if (!first_gop)
--		goto out;
-+		return EFI_NOT_FOUND;
- 
- 	/* EFI framebuffer */
- 	si->orig_video_isVGA = VIDEO_TYPE_EFI;
-@@ -315,7 +315,7 @@ setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
- 	si->lfb_size = si->lfb_linelength * si->lfb_height;
- 
- 	si->capabilities |= VIDEO_CAPABILITY_SKIP_QUIRKS;
--out:
-+
- 	return status;
- }
- 
--- 
-2.23.0
+Hmm, we added these to fix a problem with the UEFI memory map, and more recently ACPI
+tables being overwritten by kexec.
 
+Which version of kexec-tools are you using? Could you try:
+https://git.linaro.org/people/takahiro.akashi/kexec-tools.git/commit/?h=arm64/resv_mem
+
+
+> if the kexec behaivor is right, the LPI tables should not belong to
+> System RAM.
+
+> Like as:
+> 
+> 80300000-830effff : System RAM
+>   80480000-8134ffff : Kernel code
+>   81350000-817bffff : reserved
+>   817c0000-82acffff : Kernel data
+> 830f0000-830fffff : reserved # Property table
+> 83480000-83480fff : reserved # Pending table
+> 83490000-8349ffff : reserved # Pending table
+> 834a0000-a1fdffff : System RAM
+> 
+> I don't have ideas to separete LPI tables from System RAM... so I tried
+> to add a new file to inform the LPI tables to userspace.
+
+This is how 'nomap' memory appears, we carve it out of System RAM. A side effect of this
+is kdump can't touch it, as you've told it this isn't memory.
+
+As these tables are memory, mapped by the linear map, I think Ard's patch is the right
+thing to do ... I suspect your kexec-tools doesn't have those patches from Akashi to make
+it honour all second level entries.
+
+
+Thanks,
+
+James
