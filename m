@@ -2,50 +2,50 @@ Return-Path: <SRS0=Mume=Z2=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C496AC2BC73
-	for <linux-efi@archiver.kernel.org>; Wed,  4 Dec 2019 18:17:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C5EA1C2BD09
+	for <linux-efi@archiver.kernel.org>; Wed,  4 Dec 2019 18:17:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 9A6D520675
-	for <linux-efi@archiver.kernel.org>; Wed,  4 Dec 2019 18:17:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9C28120833
+	for <linux-efi@archiver.kernel.org>; Wed,  4 Dec 2019 18:17:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731438AbfLDSRu (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 4 Dec 2019 13:17:50 -0500
-Received: from mail-qv1-f67.google.com ([209.85.219.67]:43302 "EHLO
-        mail-qv1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729065AbfLDSRu (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 4 Dec 2019 13:17:50 -0500
-Received: by mail-qv1-f67.google.com with SMTP id p2so214493qvo.10
-        for <linux-efi@vger.kernel.org>; Wed, 04 Dec 2019 10:17:48 -0800 (PST)
+        id S1729217AbfLDSRt (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 4 Dec 2019 13:17:49 -0500
+Received: from mail-qt1-f169.google.com ([209.85.160.169]:46853 "EHLO
+        mail-qt1-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728482AbfLDSRs (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 4 Dec 2019 13:17:48 -0500
+Received: by mail-qt1-f169.google.com with SMTP id 38so663768qtb.13
+        for <linux-efi@vger.kernel.org>; Wed, 04 Dec 2019 10:17:46 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=ofs7prmxLlh429JEbrQMC8jYGExN/xhN9sTNWJH71+g=;
-        b=R0pVhn4+YBcKDMsaEV+0sBAVr2lNZfcQdpDGeThDxmzz2HgbLoJdy7LFjKg3qbxSDz
-         defRn0xMro+NLM9NYxdRocIGT3z9ilIWzWUhdrPgParHYH57aHclENMVkGQ7maN4bY9D
-         9f+Z1r7SOR0BspLsd+DsK1/fLmKnNbEGF+VCO64rI5dw1Os3AIPAIMWXvzWjb+7Fl9Zk
-         w2lRUN9JJypDZWGVC46iKBIbCw94oDJeb8SVBG4i6IZyC6bXyS00R3CiLfhoQF3si/MQ
-         qZ0SjcuIJZFZKJE02kcH0lyQVuYP+v4ZdIPZokEPPjsGrZPNK2W4CDsrFiDPiW7BqzdJ
-         EHmA==
-X-Gm-Message-State: APjAAAW1RuNJ113gVwiCFjeu+68m0+Ow5ifUL9SFeMwb8bnKf+pSIXNP
-        SMJ7gGjSgplS0SzaaSzkQL65CA+V+Ck=
-X-Google-Smtp-Source: APXvYqxtkFyjZixH5+Vv+xd+SUfQP7cn/ILwEuv0JnhBr2GVT4Qtdctkux/FjBnixbh7E8WYog7Mqw==
-X-Received: by 2002:ad4:4e44:: with SMTP id eb4mr3999941qvb.101.1575483468218;
-        Wed, 04 Dec 2019 10:17:48 -0800 (PST)
+        bh=T/NtrK93kweHDh9fbynMFC36+nWCgNJ7iCqATo+lt4E=;
+        b=fT5Vuam5fK2KgA+zMNSB/BTfrue178kGdvXS1w9W1gimet69ur0WMmz/NPhSKdPuxX
+         wYwuRKx/E7tLrWEExPWEnQQVH2mMyJullhFz3y1dVl02CL7y05wXvG5GlT+Hvyz/SO00
+         HXv9QWX9y5A1I6FO4BK7sOSg5UjWqafrqxLOhvUB+JgFpmf/jaiH9BQWG9SIzse93tOM
+         D8p7OfQPB/FBWeW7K8Nyh8h3S4wOgv/W6ttFfWJcRwf1vsskG06CM8pIPcz1qtpMWop6
+         fuio5oAHG9ztz0P27pQARHLsAcF/yEA/pjPxYCD+P+dfLaosvgXWH/DbesW/Sf8ypFlS
+         qz1Q==
+X-Gm-Message-State: APjAAAUo1vYR/xlLeqQwvQo9aUtJ6HhNCpmExcVhshhBgvMvYQy4ifIt
+        KSgRUznoL58FrGAb14DIDhc=
+X-Google-Smtp-Source: APXvYqypMZWQwPwtCAmQL3iVnY8bBBuS1F/nsarwUqqBaaWOlTFDaZLT8ZVxV4PjkD1fuehXQmpDXA==
+X-Received: by 2002:aed:204d:: with SMTP id 71mr4136095qta.116.1575483466349;
+        Wed, 04 Dec 2019 10:17:46 -0800 (PST)
 Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
-        by smtp.gmail.com with ESMTPSA id c6sm4072506qka.111.2019.12.04.10.17.47
+        by smtp.gmail.com with ESMTPSA id c6sm4072506qka.111.2019.12.04.10.17.45
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 04 Dec 2019 10:17:47 -0800 (PST)
+        Wed, 04 Dec 2019 10:17:45 -0800 (PST)
 From:   Arvind Sankar <nivedita@alum.mit.edu>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     linux-efi@vger.kernel.org
-Subject: [PATCH v2 2/3] efi/gop: Return EFI_SUCCESS if a usable GOP was found
-Date:   Wed,  4 Dec 2019 13:17:43 -0500
-Message-Id: <20191204181744.14326-3-nivedita@alum.mit.edu>
+Subject: [PATCH v2 0/3] Fix a couple of bugs in efi/gop.c
+Date:   Wed,  4 Dec 2019 13:17:41 -0500
+Message-Id: <20191204181744.14326-1-nivedita@alum.mit.edu>
 X-Mailer: git-send-email 2.23.0
 In-Reply-To: <20191203214728.19264-1-nivedita@alum.mit.edu>
 References: <20191203214728.19264-1-nivedita@alum.mit.edu>
@@ -56,41 +56,18 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-If we've found a usable GOP with a framebuffer, it is possible that one
-of the later EFI calls fails while checking if any support console
-output. In this case status may be an EFI error code even though we
-found a usable GOP.
+Changes from v1:
+- Split return value patch into two as requested.
+- Remove the __gop_query functions
 
-Fix this by explicitly return EFI_SUCCESS if a usable GOP has been
-located.
+Arvind Sankar (3):
+  efi/gop: Return EFI_NOT_FOUND if there are no usable GOP's
+  efi/gop: Return EFI_SUCCESS if a usable GOP was found
+  efi/gop: Fix memory leak from __gop_query32/64
 
-Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
----
- drivers/firmware/efi/libstub/gop.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/firmware/efi/libstub/gop.c | 76 +++++++-----------------------
+ 1 file changed, 17 insertions(+), 59 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/gop.c b/drivers/firmware/efi/libstub/gop.c
-index 62e8b7cff72f..245a5fbef3dc 100644
---- a/drivers/firmware/efi/libstub/gop.c
-+++ b/drivers/firmware/efi/libstub/gop.c
-@@ -198,7 +198,7 @@ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
- 
- 	si->capabilities |= VIDEO_CAPABILITY_SKIP_QUIRKS;
- 
--	return status;
-+	return EFI_SUCCESS;
- }
- 
- static efi_status_t
-@@ -316,7 +316,7 @@ setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
- 
- 	si->capabilities |= VIDEO_CAPABILITY_SKIP_QUIRKS;
- 
--	return status;
-+	return EFI_SUCCESS;
- }
- 
- /*
 -- 
 2.23.0
 
