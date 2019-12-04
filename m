@@ -2,63 +2,63 @@ Return-Path: <SRS0=Mume=Z2=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BCB52C43603
-	for <linux-efi@archiver.kernel.org>; Wed,  4 Dec 2019 10:09:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 288D6C43603
+	for <linux-efi@archiver.kernel.org>; Wed,  4 Dec 2019 10:14:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 8E0B720675
-	for <linux-efi@archiver.kernel.org>; Wed,  4 Dec 2019 10:09:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id ED778205ED
+	for <linux-efi@archiver.kernel.org>; Wed,  4 Dec 2019 10:14:17 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1575454163;
-	bh=+vcZT/nr+wvQkboAAcSFVpt9hDwo+WsUeLIrl6pw/Dk=;
+	s=default; t=1575454458;
+	bh=eV/OG+wDQFYfv5Ue03UDnIlBmXN/EqkPTPMh7OoORZs=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=jHCAnNq3SZa5AaQjSzrWqNFQMBz9qMCvif9ZWSCK+GEz8GBHvLvTVoLw3TE09/BUB
-	 GAZW7ERJlzPvml4z9IDXFcLMv4nqS8ReQPt0gz5yt+l4LoMLFLY3OP2mQDBOXKCePg
-	 z4egQg88EnWWOeRcyLo/3tfdgele/Do13SOqX754=
+	b=qaSifvO5aWNKJ3NAPPC/Xo1PQfvEdxCmLmvVtWrdrMCA4WX9xkvNCBCWIBexzy8Jy
+	 2yxgqcUJzq1kP+k5wHPSVIoQbwICWNiCnkZXn/R/hmm4lsUdAHuTsQ5dSlFq1rO8ag
+	 PHeYE3H+3DYs2BDaRc7o4w7wWFY2B+hyblCPvLWE=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727447AbfLDKJX (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 4 Dec 2019 05:09:23 -0500
-Received: from mail-wr1-f66.google.com ([209.85.221.66]:40760 "EHLO
-        mail-wr1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727273AbfLDKJW (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 4 Dec 2019 05:09:22 -0500
-Received: by mail-wr1-f66.google.com with SMTP id c14so7779502wrn.7;
-        Wed, 04 Dec 2019 02:09:21 -0800 (PST)
+        id S1727273AbfLDKOR (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 4 Dec 2019 05:14:17 -0500
+Received: from mail-wr1-f65.google.com ([209.85.221.65]:38735 "EHLO
+        mail-wr1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727268AbfLDKOR (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 4 Dec 2019 05:14:17 -0500
+Received: by mail-wr1-f65.google.com with SMTP id y17so7820666wrh.5;
+        Wed, 04 Dec 2019 02:14:15 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=sender:date:from:to:cc:subject:message-id:references:mime-version
          :content-disposition:in-reply-to:user-agent;
-        bh=raeCtC+dljo0qv32p8D/VuYe95bGrREsFJM19wAQqc8=;
-        b=KNNpisM7QR9D0AXGY6S7UtWvFsgqwnLg/z6E+LyY7Z/PFWc7kGnrlFu6LchmdcXtYB
-         aGFWUf0fW3q2g4j/4SBrKGBNBUhWnrbisCgGNU+O/SwpJUczZTtjNty4T25ydIG98Gu0
-         9tjFel3etp4TbLMLYVAJvGJ/BCaQguKU3Q3dh1z+kJlCkHV35WqyjNshFNyMS9cS0Ycj
-         6tjRA7/DKcSkDXS+IXLd/FUf4vTKPti5MP+kI0gqdrTwTDhcsKKQVajzp5h4/DqqfJzf
-         wy5VqBQLFm7a2H9Tj5EmLjZ+SXc0gFVn8MlNI8+nmozpPRfnwMOu53xH3mUvHFM6ToJJ
-         VfOw==
+        bh=3SqaxowF8V8CPgMsCKyGumZmEAzs8aY4VegZwp5+TJI=;
+        b=f6raTZTe79rlg7+fJKgUTxXXJGhcd07fCb9NQihp35dE+7aiwdBDZ8kKQ7AP+0BxiN
+         CBoVs0ibvXFlm+DyTKLnA1St0+1gmLZVP+RJaA4nrHM0bSKAL65Rfd2DksonyBs0L3Cu
+         hDubG4qC5KU1pPmIvEOy/UhkIdY41uu3mBR8zfZxQ8d4+Iow+U+CGFyftZEsR372B5Qo
+         moteIbv3TNBcxP35csUxJT018haSIcA1ztkkvlRwmiRHHMRfBbCSnaYMZszgFMwWABC+
+         UQJTs0EeXjjFTexPavo0XzfzMwSzsdiOrR2wtLSIdECLw+VNstkhiSA3SOZiqNSzxNGV
+         1lGQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:sender:date:from:to:cc:subject:message-id
          :references:mime-version:content-disposition:in-reply-to:user-agent;
-        bh=raeCtC+dljo0qv32p8D/VuYe95bGrREsFJM19wAQqc8=;
-        b=m9P0nEAY+LH079XRoTxkiUt2k0fxCDFz5WK0DVZhGkNJXI4Ca16HHd2lQqOHv7bc/h
-         Gogdv4WNob5rUcBnVDNQfK1dCEjoL2xpdN6i0OxvOZLJpySCWTdvBLUVtkxkeIi/nvy3
-         6jjBjKKMoxlE0qpNuh20jy1sj/odrQII2BLmoFqw7IHz2Z4tsH2x88u1h93TjPwth5lT
-         aihHEod4EioxEjPOCpc1D+iqJFHDN1slT126681LeNSavtR+L4QUuRffjfFNtDesqor1
-         stNvH2WHxOy7t5cBR1oPnPgQj8LJgV+vNLDVT955cJDfzQOh+7BAHOR4S9T1Os+HhvS4
-         PEXg==
-X-Gm-Message-State: APjAAAUBrzPK8PwhsW3dtcfYIFxjQQSuXXqRZIi7E30adN+y7c4XEaA8
-        ILkIsgO6oPQJtEaWCjJxdvZ4weoF
-X-Google-Smtp-Source: APXvYqx/rwFl+MtYvoLLcqkK+aNtlxTL2ZxgvfhoeTj9iJCmEq1E6xWqdoYOZqa5c48gZrbUu0/hyA==
-X-Received: by 2002:adf:f78d:: with SMTP id q13mr3059791wrp.365.1575454160662;
-        Wed, 04 Dec 2019 02:09:20 -0800 (PST)
+        bh=3SqaxowF8V8CPgMsCKyGumZmEAzs8aY4VegZwp5+TJI=;
+        b=e0r5hsaa959s6bGmQ3IsxdwUqx3W3cZYrpszYYvXZFc6zkYXuolAx/EEltN7ztTvSx
+         mZ/WV6rFeFElaZZBcSsEVVhLOHbI96YO9CTsKkgubvZO4NoTLYbMeGH74PuwZWyM54ra
+         w9SKtdR+GXgpChf0OKWF0T5TBSGd1+lNO0bW9rbXLKP9s9v6h8Z7noKkR03pq9zeUH9u
+         X0saNmwlwpfqMNPxT4q3tYvz5IofU4ZmBWGMRIyaxLfsB3xG2kbYUuVQYhVhYJuB1wbH
+         bAQWqSqzGTs6OMWbDDUE0YT2SNuEcYkmaOQTsHxdBZylLd1VTpHmxuP4Too29hEmBQwo
+         EQDg==
+X-Gm-Message-State: APjAAAWg6faCeT5sQEzr8xwj0ha3rOL1rMCv+juTcJ7eK1uFKhCNvxXR
+        7bH1vSN6bdJ6kpDI3oz09MmS0Ye8
+X-Google-Smtp-Source: APXvYqynMfBJtkF2DxLQaA4sUUx4cn+Cwkjpd9I9MD1TWmeTnTAX5UQC4joBUKLuTCYAuFkI9DZozA==
+X-Received: by 2002:adf:a746:: with SMTP id e6mr3200398wrd.329.1575454455106;
+        Wed, 04 Dec 2019 02:14:15 -0800 (PST)
 Received: from gmail.com (54033286.catv.pool.telekom.hu. [84.3.50.134])
-        by smtp.gmail.com with ESMTPSA id h17sm7904846wrs.18.2019.12.04.02.09.19
+        by smtp.gmail.com with ESMTPSA id r15sm6282851wmh.21.2019.12.04.02.14.14
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 04 Dec 2019 02:09:19 -0800 (PST)
-Date:   Wed, 4 Dec 2019 11:09:17 +0100
+        Wed, 04 Dec 2019 02:14:14 -0800 (PST)
+Date:   Wed, 4 Dec 2019 11:14:12 +0100
 From:   Ingo Molnar <mingo@kernel.org>
 To:     Dave Young <dyoung@redhat.com>
 Cc:     linux-efi@vger.kernel.org, x86@kernel.org,
@@ -72,7 +72,7 @@ Cc:     linux-efi@vger.kernel.org, x86@kernel.org,
         Thomas Gleixner <tglx@linutronix.de>
 Subject: Re: [PATCH] x86/efi: update e820 about reserved EFI boot services
  data to fix kexec breakage
-Message-ID: <20191204100917.GC114697@gmail.com>
+Message-ID: <20191204101412.GD114697@gmail.com>
 References: <20191204075233.GA10520@dhcp-128-65.nay.redhat.com>
  <20191204075917.GA10587@dhcp-128-65.nay.redhat.com>
 MIME-Version: 1.0
@@ -103,8 +103,55 @@ X-Mailing-List: linux-efi@vger.kernel.org
 > > initramfs overwritten the ESRT memory and then the failure happened.
 > 
 > s/overwritten/overwrote :)  If need a repost please let me know..
+> 
+> > 
+> > Since kexec_file_load depends on the e820 to be updated, just fix this
+> > by updating the reserved EFI boot services memory as reserved type in e820.
+> > 
+> > Originally any memory descriptors with EFI_MEMORY_RUNTIME attribute are
+> > bypassed in the reservation code path because they are assumed as reserved.
+> > But the reservation is still needed for multiple kexec reboot.
+> > And it is the only possible case we come here thus just drop the code
+> > chunk then everything works without side effects. 
+> > 
+> > On my machine the ESRT memory sits in an EFI runtime data range, it does
+> > not trigger the problem, but I successfully tested with BGRT instead.
+> > both kexec_load and kexec_file_load work and kdump works as well.
+> > 
+> > Signed-off-by: Dave Young <dyoung@redhat.com>
 
-No need, I've edited the typo. :)
+
+So I edited this to:
+
+ From: Dave Young <dyoung@redhat.com>
+
+ Michael Weiser reported he got this error during a kexec rebooting:
+
+   esrt: Unsupported ESRT version 2904149718861218184.
+
+ The ESRT memory stays in EFI boot services data, and it was reserved
+ in kernel via efi_mem_reserve().  The initial purpose of the reservation
+ is to reuse the EFI boot services data across kexec reboot. For example
+ the BGRT image data and some ESRT memory like Michael reported.
+
+ But although the memory is reserved it is not updated in the X86 E820 table,
+ and kexec_file_load() iterates system RAM in the IO resource list to find places
+ for kernel, initramfs and other stuff. In Michael's case the kexec loaded
+ initramfs overwrote the ESRT memory and then the failure happened.
+
+ Since kexec_file_load() depends on the E820 table being updated, just fix this
+ by updating the reserved EFI boot services memory as reserved type in E820.
+
+ Originally any memory descriptors with EFI_MEMORY_RUNTIME attribute are
+ bypassed in the reservation code path because they are assumed as reserved.
+
+ But the reservation is still needed for multiple kexec reboots,
+ and it is the only possible case we come here thus just drop the code
+ chunk, then everything works without side effects.
+
+ On my machine the ESRT memory sits in an EFI runtime data range, it does
+ not trigger the problem, but I successfully tested with BGRT instead.
+ both kexec_load() and kexec_file_load() work and kdump works as well.
 
 Thanks,
 
