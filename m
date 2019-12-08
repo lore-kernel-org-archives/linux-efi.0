@@ -7,45 +7,42 @@ X-Spam-Status: No, score=-11.8 required=3.0
 	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DC027C2D0BE
-	for <linux-efi@archiver.kernel.org>; Sun,  8 Dec 2019 13:33:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7692C2D0BE
+	for <linux-efi@archiver.kernel.org>; Sun,  8 Dec 2019 13:34:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id B81BD206F4
-	for <linux-efi@archiver.kernel.org>; Sun,  8 Dec 2019 13:33:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 85FE7206F4
+	for <linux-efi@archiver.kernel.org>; Sun,  8 Dec 2019 13:34:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726418AbfLHNdx (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 8 Dec 2019 08:33:53 -0500
-Received: from Galois.linutronix.de ([193.142.43.55]:36614 "EHLO
+        id S1726527AbfLHNdw (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 8 Dec 2019 08:33:52 -0500
+Received: from Galois.linutronix.de ([193.142.43.55]:36610 "EHLO
         Galois.linutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726406AbfLHNdx (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sun, 8 Dec 2019 08:33:53 -0500
+        with ESMTP id S1726418AbfLHNdv (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sun, 8 Dec 2019 08:33:51 -0500
 Received: from [5.158.153.53] (helo=tip-bot2.lab.linutronix.de)
         by Galois.linutronix.de with esmtpsa (TLS1.2:DHE_RSA_AES_256_CBC_SHA256:256)
         (Exim 4.80)
         (envelope-from <tip-bot2@linutronix.de>)
-        id 1idwgp-0007gN-Gj; Sun, 08 Dec 2019 14:33:35 +0100
+        id 1idwgp-0007gW-4F; Sun, 08 Dec 2019 14:33:35 +0100
 Received: from [127.0.1.1] (localhost [IPv6:::1])
-        by tip-bot2.lab.linutronix.de (Postfix) with ESMTP id 933761C287F;
-        Sun,  8 Dec 2019 14:33:33 +0100 (CET)
-Date:   Sun, 08 Dec 2019 13:33:33 -0000
+        by tip-bot2.lab.linutronix.de (Postfix) with ESMTP id 269171C2882;
+        Sun,  8 Dec 2019 14:33:34 +0100 (CET)
+Date:   Sun, 08 Dec 2019 13:33:34 -0000
 From:   "tip-bot2 for Arvind Sankar" <tip-bot2@linutronix.de>
 Reply-to: linux-kernel@vger.kernel.org
 To:     linux-tip-commits@vger.kernel.org
-Subject: [tip: efi/urgent] efi: Fix efi_loaded_image_t::unload type
+Subject: [tip: efi/urgent] efi/gop: Return EFI_NOT_FOUND if there are no usable GOPs
 Cc:     Arvind Sankar <nivedita@alum.mit.edu>,
         Ard Biesheuvel <ardb@kernel.org>,
         Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
         Bhupesh Sharma <bhsharma@redhat.com>,
-        Linus Torvalds <torvalds@linux-foundation.org>,
         Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
         linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         x86 <x86@kernel.org>, LKML <linux-kernel@vger.kernel.org>
-In-Reply-To: <20191206165542.31469-6-ardb@kernel.org>
-References: <20191206165542.31469-6-ardb@kernel.org>
+In-Reply-To: <20191206165542.31469-3-ardb@kernel.org>
+References: <20191206165542.31469-3-ardb@kernel.org>
 MIME-Version: 1.0
-Message-ID: <157581201350.21853.6212874556450430437.tip-bot2@tip-bot2>
+Message-ID: <157581201403.21853.7025589605824516098.tip-bot2@tip-bot2>
 X-Mailer: tip-git-log-daemon
 Robot-ID: <tip-bot2.linutronix.de>
 Robot-Unsubscribe: Contact <mailto:tglx@linutronix.de> to get blacklisted from these emails
@@ -61,74 +58,90 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 The following commit has been merged into the efi/urgent branch of tip:
 
-Commit-ID:     9fa76ca7b8bdcdf51fc8c7b7b7a7bfc4eccceb58
-Gitweb:        https://git.kernel.org/tip/9fa76ca7b8bdcdf51fc8c7b7b7a7bfc4eccceb58
+Commit-ID:     6fc3cec30dfeee7d3c5db8154016aff9d65503c5
+Gitweb:        https://git.kernel.org/tip/6fc3cec30dfeee7d3c5db8154016aff9d65503c5
 Author:        Arvind Sankar <nivedita@alum.mit.edu>
-AuthorDate:    Fri, 06 Dec 2019 16:55:41 
+AuthorDate:    Fri, 06 Dec 2019 16:55:38 
 Committer:     Ingo Molnar <mingo@kernel.org>
-CommitterDate: Sun, 08 Dec 2019 12:42:19 +01:00
+CommitterDate: Sun, 08 Dec 2019 12:42:18 +01:00
 
-efi: Fix efi_loaded_image_t::unload type
+efi/gop: Return EFI_NOT_FOUND if there are no usable GOPs
 
-The ::unload field is a function pointer, so it should be u32 for 32-bit,
-u64 for 64-bit. Add a prototype for it in the native efi_loaded_image_t
-type. Also change type of parent_handle and device_handle from void * to
-efi_handle_t for documentation purposes.
+If we don't find a usable instance of the Graphics Output Protocol
+(GOP) because none of them have a framebuffer (i.e. they were all
+PIXEL_BLT_ONLY), but all the EFI calls succeeded, we will return
+EFI_SUCCESS even though we didn't find a usable GOP.
 
-The unload method is not used, so no functional change.
+Fix this by explicitly returning EFI_NOT_FOUND if no usable GOPs are
+found, allowing the caller to probe for UGA instead.
 
 Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 Cc: Bhupesh Sharma <bhsharma@redhat.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
 Cc: Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
 Cc: linux-efi@vger.kernel.org
-Link: https://lkml.kernel.org/r/20191206165542.31469-6-ardb@kernel.org
+Link: https://lkml.kernel.org/r/20191206165542.31469-3-ardb@kernel.org
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 ---
- include/linux/efi.h | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+ drivers/firmware/efi/libstub/gop.c | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
 
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 99dfea5..aa54586 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -824,7 +824,7 @@ typedef struct {
- 	__aligned_u64 image_size;
- 	unsigned int image_code_type;
- 	unsigned int image_data_type;
--	unsigned long unload;
-+	u32 unload;
- } efi_loaded_image_32_t;
+diff --git a/drivers/firmware/efi/libstub/gop.c b/drivers/firmware/efi/libstub/gop.c
+index 0101ca4..08f3c1a 100644
+--- a/drivers/firmware/efi/libstub/gop.c
++++ b/drivers/firmware/efi/libstub/gop.c
+@@ -119,7 +119,7 @@ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
+ 	u64 fb_base;
+ 	struct efi_pixel_bitmask pixel_info;
+ 	int pixel_format;
+-	efi_status_t status = EFI_NOT_FOUND;
++	efi_status_t status;
+ 	u32 *handles = (u32 *)(unsigned long)gop_handle;
+ 	int i;
  
- typedef struct {
-@@ -840,14 +840,14 @@ typedef struct {
- 	__aligned_u64 image_size;
- 	unsigned int image_code_type;
- 	unsigned int image_data_type;
--	unsigned long unload;
-+	u64 unload;
- } efi_loaded_image_64_t;
+@@ -175,7 +175,7 @@ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
  
- typedef struct {
- 	u32 revision;
--	void *parent_handle;
-+	efi_handle_t parent_handle;
- 	efi_system_table_t *system_table;
--	void *device_handle;
-+	efi_handle_t device_handle;
- 	void *file_path;
- 	void *reserved;
- 	u32 load_options_size;
-@@ -856,7 +856,7 @@ typedef struct {
- 	__aligned_u64 image_size;
- 	unsigned int image_code_type;
- 	unsigned int image_data_type;
--	unsigned long unload;
-+	efi_status_t (*unload)(efi_handle_t image_handle);
- } efi_loaded_image_t;
+ 	/* Did we find any GOPs? */
+ 	if (!first_gop)
+-		goto out;
++		return EFI_NOT_FOUND;
  
+ 	/* EFI framebuffer */
+ 	si->orig_video_isVGA = VIDEO_TYPE_EFI;
+@@ -197,7 +197,7 @@ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
+ 	si->lfb_size = si->lfb_linelength * si->lfb_height;
+ 
+ 	si->capabilities |= VIDEO_CAPABILITY_SKIP_QUIRKS;
+-out:
++
+ 	return status;
+ }
+ 
+@@ -237,7 +237,7 @@ setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
+ 	u64 fb_base;
+ 	struct efi_pixel_bitmask pixel_info;
+ 	int pixel_format;
+-	efi_status_t status = EFI_NOT_FOUND;
++	efi_status_t status;
+ 	u64 *handles = (u64 *)(unsigned long)gop_handle;
+ 	int i;
+ 
+@@ -293,7 +293,7 @@ setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
+ 
+ 	/* Did we find any GOPs? */
+ 	if (!first_gop)
+-		goto out;
++		return EFI_NOT_FOUND;
+ 
+ 	/* EFI framebuffer */
+ 	si->orig_video_isVGA = VIDEO_TYPE_EFI;
+@@ -315,7 +315,7 @@ setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
+ 	si->lfb_size = si->lfb_linelength * si->lfb_height;
+ 
+ 	si->capabilities |= VIDEO_CAPABILITY_SKIP_QUIRKS;
+-out:
++
+ 	return status;
+ }
  
