@@ -2,180 +2,137 @@ Return-Path: <SRS0=My+G=2A=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.0 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AD2FCC2D0BF
-	for <linux-efi@archiver.kernel.org>; Tue, 10 Dec 2019 11:52:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D997FC43603
+	for <linux-efi@archiver.kernel.org>; Tue, 10 Dec 2019 20:05:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 8416B20828
-	for <linux-efi@archiver.kernel.org>; Tue, 10 Dec 2019 11:52:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AC87F2077B
+	for <linux-efi@archiver.kernel.org>; Tue, 10 Dec 2019 20:05:50 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Dfou0yC1"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="AkxT05ek"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727671AbfLJLvt (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 10 Dec 2019 06:51:49 -0500
-Received: from us-smtp-1.mimecast.com ([207.211.31.81]:37767 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1727628AbfLJLvs (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 10 Dec 2019 06:51:48 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1575978706;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=fUWUkAQNAvMtZ8EbtAtuhCe7GW5wk+XJnd8sLndlYtw=;
-        b=Dfou0yC1e5ceUn17l7g/gwfROV1gCXV/8wO0zlHW8ZYaxE3Ge+nnqffg9y5/uY5ZeJlA5H
-        xlhMqpmE4QyOOhXD2Vs50wo8LSNnKBZ3wWrhwbFyCoVjPdLrNre9XUzKNb7mpufmh3D55l
-        xTHxj9S/2SzOXl2FoBazABnOXONtky8=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-369-3JDbasoaP2qIcH6A8m7Bdw-1; Tue, 10 Dec 2019 06:51:39 -0500
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id AEBFFB06CE;
-        Tue, 10 Dec 2019 11:51:36 +0000 (UTC)
-Received: from shalem.localdomain.com (unknown [10.36.118.144])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id F0DF05DA2C;
-        Tue, 10 Dec 2019 11:51:32 +0000 (UTC)
-From:   Hans de Goede <hdegoede@redhat.com>
-To:     Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Darren Hart <dvhart@infradead.org>,
-        Andy Shevchenko <andy@infradead.org>,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        "Rafael J . Wysocki" <rafael@kernel.org>,
+        id S1726500AbfLJUFu (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 10 Dec 2019 15:05:50 -0500
+Received: from mail-qt1-f196.google.com ([209.85.160.196]:46483 "EHLO
+        mail-qt1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726018AbfLJUFu (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 10 Dec 2019 15:05:50 -0500
+Received: by mail-qt1-f196.google.com with SMTP id 38so3927500qtb.13;
+        Tue, 10 Dec 2019 12:05:49 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=sender:from:date:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=kpl5a69JvY6GzTR5oUeYrNiOLOxlBeo8ElozW9pum5Q=;
+        b=AkxT05ekyXRjMThw+9iEXTUhXwFhtBxYqVXlYf4klrgejyUcpKXSfuXPhRD/yf2DNj
+         aueQEWJjPQ7jUE+W0ZFMqDFYlscTHeXJUtmCJbH8mbNaV5IirVGKjdhKbZmRwNYVuvlf
+         huKetD3FU7GWI3jURtJEogvnCStsoTGbNZwj8SUUeQyOGakN6oe1u5cMwpuJQps9dSfk
+         Q/aG53W0/S11ccVo6VTrXjXLNgtO6F1H+XkDDHWLhQU6Wl4GZyedUo75uN85h1hBIcN/
+         XB2DxiXdUEJM7cXtUpe1FrY9gTjoPT5WVRGXP6GiDIRvtO2E7zmI+9L3GxatB1FUpFPF
+         +3aQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:sender:from:date:to:cc:subject:message-id
+         :references:mime-version:content-disposition:in-reply-to:user-agent;
+        bh=kpl5a69JvY6GzTR5oUeYrNiOLOxlBeo8ElozW9pum5Q=;
+        b=uiJbJTXbNm5+2454mP2rG5hjwSQXZ9dluxrwdlsdYZCPM7MwPLVvRPoStrJFM0uuBy
+         OpLYCiUW5/5jBFXRY3etqEWmSRoKMSs9PLI3Zvlrtha6ZAPokkb1DwY4MaDtecZglTaU
+         Qrb5A8HD8hjN8yltEYc5OqHtbQARoM0HTTy/XwY0UQ6lifDhPoglr8oNBd5Oeeio8nJu
+         314Ox911bORWia4R6lkp2u4k9jwhylUZpPumuebrLmlueLc7htZ3qupnbX0+zz+mh8x9
+         Cr0EwswgupcUxPe6JSN1htKXOs32q6gVtLTqvu6lI+9PxdEAdmneMqGIje3xCzCYn/hq
+         EumA==
+X-Gm-Message-State: APjAAAWyIRF86tLZzO84wXswTexLUvzIrzP7flY0EFN/IJJxFC8WnTCu
+        2qOqqHzxpACVNnb26XZScqM=
+X-Google-Smtp-Source: APXvYqzuUxl11wIi6o5vCQr/UPQqonnlS+QqpBwyK0rkBdg+K3EWV0aNMW66jezrKGNJ7Do2bq+OMw==
+X-Received: by 2002:ac8:5346:: with SMTP id d6mr32351262qto.49.1576008348859;
+        Tue, 10 Dec 2019 12:05:48 -0800 (PST)
+Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
+        by smtp.gmail.com with ESMTPSA id d19sm56856qto.15.2019.12.10.12.05.48
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 10 Dec 2019 12:05:48 -0800 (PST)
+From:   Arvind Sankar <nivedita@alum.mit.edu>
+X-Google-Original-From: Arvind Sankar <arvind@rani.riverdale.lan>
+Date:   Tue, 10 Dec 2019 15:05:46 -0500
+To:     Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc:     Arvind Sankar <nivedita@alum.mit.edu>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        linux-efi <linux-efi@vger.kernel.org>,
+        Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>,
-        Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
-        "H . Peter Anvin" <hpa@zytor.com>,
-        Jonathan Corbet <corbet@lwn.net>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>
-Cc:     Hans de Goede <hdegoede@redhat.com>,
-        Peter Jones <pjones@redhat.com>,
-        Dave Olsthoorn <dave@bewaar.me>, x86@kernel.org,
-        platform-driver-x86@vger.kernel.org, linux-efi@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-doc@vger.kernel.org,
-        linux-input@vger.kernel.org
-Subject: [PATCH v10 03/10] firmware: Rename FW_OPT_NOFALLBACK to FW_OPT_NOFALLBACK_SYSFS
-Date:   Tue, 10 Dec 2019 12:51:10 +0100
-Message-Id: <20191210115117.303935-4-hdegoede@redhat.com>
-In-Reply-To: <20191210115117.303935-1-hdegoede@redhat.com>
-References: <20191210115117.303935-1-hdegoede@redhat.com>
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Bhupesh Sharma <bhsharma@redhat.com>,
+        Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>
+Subject: Re: [PATCH 6/6] efi/earlycon: Remap entire framebuffer after page
+ initialization
+Message-ID: <20191210200546.GA55356@rani.riverdale.lan>
+References: <20191206165542.31469-1-ardb@kernel.org>
+ <20191206165542.31469-7-ardb@kernel.org>
+ <20191209191242.GA3075464@rani.riverdale.lan>
+ <CAKv+Gu8QWcSwRajsO5voTQJxDHy613ugCd_R6=SStf9ABrmtfQ@mail.gmail.com>
 MIME-Version: 1.0
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
-X-MC-Unique: 3JDbasoaP2qIcH6A8m7Bdw-1
-X-Mimecast-Spam-Score: 0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu8QWcSwRajsO5voTQJxDHy613ugCd_R6=SStf9ABrmtfQ@mail.gmail.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This is a preparation patch for adding a new platform fallback mechanism,
-which will have its own enable/disable FW_OPT_xxx option.
+On Mon, Dec 09, 2019 at 07:24:13PM +0000, Ard Biesheuvel wrote:
+> On Mon, 9 Dec 2019 at 20:12, Arvind Sankar <nivedita@alum.mit.edu> wrote:
+> >
+> > On Fri, Dec 06, 2019 at 04:55:42PM +0000, Ard Biesheuvel wrote:
+> > > From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+> > >
+> > > When commit 69c1f396f25b
+> > >
+> > >   "efi/x86: Convert x86 EFI earlyprintk into generic earlycon implementation"
+> > >
+> > > moved the x86 specific EFI earlyprintk implementation to a shared location,
+> > > it also tweaked the behaviour. In particular, it dropped a trick with full
+> > > framebuffer remapping after page initialization, leading to two regressions:
+> > > 1) very slow scrolling after page initialization,
+> > > 2) kernel hang when the 'keep_bootcon' command line argument is passed.
+> > >
+> > > Putting the tweak back fixes #2 and mitigates #1, i.e., it limits the slow
+> > > behavior to the early boot stages, presumably due to eliminating heavy
+> > > map()/unmap() operations per each pixel line on the screen.
+> > >
+> >
+> > Could the efi earlycon have an interaction with PCI resource allocation,
+> > similar to what commit dcf8f5ce3165 ("drivers/fbdev/efifb: Allow BAR to
+> > be moved instead of claiming it") fixed for efifb?
+> 
+> Yes. If the BAR gets moved, things will break. This is mostly an issue
+> for the keep_bootcon case, but that is documented as being a debug
+> feature specifically for addressing console initialization related
+> issues. Earlycon itself is also a debug feature, so if you hit the BAR
+> reallocation issue, you're simply out of luck. Note that this happens
+> rarely in practice, only on non-x86 systems where the firmware and the
+> kernel have very different policies regarding BAR allocation, and on
+> DT based systems, you can force the OS to honour the existing
+> allocation by using linux,pci-probe-only
 
-Note this also fixes a typo in one of the re-wordwrapped comments:
-enfoce -> enforce.
+Thanks. Another q -- I tried out the earlycon=efifb, and it seems like
+it gets disabled (without keep_bootcon) as soon as dummycon takes over,
+which is well before the real console.
 
-Acked-by: Luis Chamberlain <mcgrof@kernel.org>
-Signed-off-by: Hans de Goede <hdegoede@redhat.com>
----
- drivers/base/firmware_loader/fallback.c | 11 ++++++-----
- drivers/base/firmware_loader/firmware.h | 16 ++++++++--------
- drivers/base/firmware_loader/main.c     |  2 +-
- 3 files changed, 15 insertions(+), 14 deletions(-)
+DUMMY_CONSOLE is defined as
+	depends on VGA_CONSOLE!=y || SGI_NEWPORT_CONSOLE!=y 
+	default y
 
-diff --git a/drivers/base/firmware_loader/fallback.c b/drivers/base/firmwar=
-e_loader/fallback.c
-index 62ee90b4db56..8704e1bae175 100644
---- a/drivers/base/firmware_loader/fallback.c
-+++ b/drivers/base/firmware_loader/fallback.c
-@@ -606,7 +606,7 @@ static bool fw_run_sysfs_fallback(enum fw_opt opt_flags=
-)
- =09=09return false;
- =09}
-=20
--=09if ((opt_flags & FW_OPT_NOFALLBACK))
-+=09if ((opt_flags & FW_OPT_NOFALLBACK_SYSFS))
- =09=09return false;
-=20
- =09/* Also permit LSMs and IMA to fail firmware sysfs fallback */
-@@ -630,10 +630,11 @@ static bool fw_run_sysfs_fallback(enum fw_opt opt_fla=
-gs)
-  * interface. Userspace is in charge of loading the firmware through the s=
-ysfs
-  * loading interface. This sysfs fallback mechanism may be disabled comple=
-tely
-  * on a system by setting the proc sysctl value ignore_sysfs_fallback to t=
-rue.
-- * If this false we check if the internal API caller set the @FW_OPT_NOFAL=
-LBACK
-- * flag, if so it would also disable the fallback mechanism. A system may =
-want
-- * to enfoce the sysfs fallback mechanism at all times, it can do this by
-- * setting ignore_sysfs_fallback to false and force_sysfs_fallback to true=
-.
-+ * If this is false we check if the internal API caller set the
-+ * @FW_OPT_NOFALLBACK_SYSFS flag, if so it would also disable the fallback
-+ * mechanism. A system may want to enforce the sysfs fallback mechanism at=
- all
-+ * times, it can do this by setting ignore_sysfs_fallback to false and
-+ * force_sysfs_fallback to true.
-  * Enabling force_sysfs_fallback is functionally equivalent to build a ker=
-nel
-  * with CONFIG_FW_LOADER_USER_HELPER_FALLBACK.
-  **/
-diff --git a/drivers/base/firmware_loader/firmware.h b/drivers/base/firmwar=
-e_loader/firmware.h
-index 7ecd590e67fe..8656e5239a80 100644
---- a/drivers/base/firmware_loader/firmware.h
-+++ b/drivers/base/firmware_loader/firmware.h
-@@ -27,16 +27,16 @@
-  *=09firmware file lookup on storage is avoided. Used for calls where the
-  *=09file may be too big, or where the driver takes charge of its own
-  *=09firmware caching mechanism.
-- * @FW_OPT_NOFALLBACK: Disable the fallback mechanism. Takes precedence ov=
-er
-- *=09&FW_OPT_UEVENT and &FW_OPT_USERHELPER.
-+ * @FW_OPT_NOFALLBACK_SYSFS: Disable the sysfs fallback mechanism. Takes
-+ *=09precedence over &FW_OPT_UEVENT and &FW_OPT_USERHELPER.
-  */
- enum fw_opt {
--=09FW_OPT_UEVENT =3D         BIT(0),
--=09FW_OPT_NOWAIT =3D         BIT(1),
--=09FW_OPT_USERHELPER =3D     BIT(2),
--=09FW_OPT_NO_WARN =3D        BIT(3),
--=09FW_OPT_NOCACHE =3D        BIT(4),
--=09FW_OPT_NOFALLBACK =3D     BIT(5),
-+=09FW_OPT_UEVENT=09=09=09=3D BIT(0),
-+=09FW_OPT_NOWAIT=09=09=09=3D BIT(1),
-+=09FW_OPT_USERHELPER=09=09=3D BIT(2),
-+=09FW_OPT_NO_WARN=09=09=09=3D BIT(3),
-+=09FW_OPT_NOCACHE=09=09=09=3D BIT(4),
-+=09FW_OPT_NOFALLBACK_SYSFS=09=09=3D BIT(5),
- };
-=20
- enum fw_status {
-diff --git a/drivers/base/firmware_loader/main.c b/drivers/base/firmware_lo=
-ader/main.c
-index 249add8c5e05..57133a9dad09 100644
---- a/drivers/base/firmware_loader/main.c
-+++ b/drivers/base/firmware_loader/main.c
-@@ -877,7 +877,7 @@ int request_firmware_direct(const struct firmware **fir=
-mware_p,
- =09__module_get(THIS_MODULE);
- =09ret =3D _request_firmware(firmware_p, name, device, NULL, 0,
- =09=09=09=09FW_OPT_UEVENT | FW_OPT_NO_WARN |
--=09=09=09=09FW_OPT_NOFALLBACK);
-+=09=09=09=09FW_OPT_NOFALLBACK_SYSFS);
- =09module_put(THIS_MODULE);
- =09return ret;
- }
---=20
-2.23.0
+so it seems like it will pretty much always be enabled, as it doesn't
+seem likely that VGA_CONSOLE=y and SGI_NEWPORT_CONSOLE=y would ever be
+true simultaneously.
 
+Am I missing something or is this the way it's supposed to work? So
+keep_bootcon seems almost necessary with the EFI boot console? Would a
+patch to not disable boot console when dummycon is initialized, but wait
+for a real console, be useful?
+
+Thanks.
