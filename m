@@ -2,54 +2,59 @@ Return-Path: <SRS0=J6bi=2C=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 75CE2C43603
-	for <linux-efi@archiver.kernel.org>; Thu, 12 Dec 2019 10:32:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DF5BAC43603
+	for <linux-efi@archiver.kernel.org>; Thu, 12 Dec 2019 10:32:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 39831206DA
-	for <linux-efi@archiver.kernel.org>; Thu, 12 Dec 2019 10:32:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B06E424658
+	for <linux-efi@archiver.kernel.org>; Thu, 12 Dec 2019 10:32:10 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="W0H0pxld"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="HX9e1VGy"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728589AbfLLKcH (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 12 Dec 2019 05:32:07 -0500
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:60447 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1728567AbfLLKcG (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 12 Dec 2019 05:32:06 -0500
+        id S1728697AbfLLKcK (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 12 Dec 2019 05:32:10 -0500
+Received: from us-smtp-2.mimecast.com ([207.211.31.81]:53179 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1728693AbfLLKcJ (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 12 Dec 2019 05:32:09 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1576146725;
+        s=mimecast20190719; t=1576146728;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=ziLQtEYjxvu61h+g9EC+nqhtRVmmOST0OYXIKk0q5ho=;
-        b=W0H0pxldIPjefbYntaBkHb1va0/fjCk/H7EAbd/KrnCGR/iOLTEBzI20vJ+rvadALDEMxK
-        5ui0m+vPIw8l+qLfIFZ6bv20CaM8Qbe9gw1zERSRWJqvYT2/feS0P3uqO6gWaUIM8oIWzz
-        ZYw/juED8Z9l60InsJq7BZsv+Iexwrw=
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=P9Dh2S27/TULqQS9Vj4g94fO/JhD3/K1HM2qzjZTtcQ=;
+        b=HX9e1VGyirxJhOr09nS765e6eJZ3lN3nJDInHF5mGRHe7ueKf0QBBzYrJ2aMwHGVYYGUi0
+        sokECCVOrbBGMyeAMyuk9+s4ym1yTNmRh4PLcPdbpoYx/aWya4sx4UBQJFNYgvA3w08rDn
+        aVMsHpZswptS3SLwPceyTTG1K0T6osw=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-391-tTLposStNIWU_L_ye0hL6w-1; Thu, 12 Dec 2019 05:32:04 -0500
-X-MC-Unique: tTLposStNIWU_L_ye0hL6w-1
+ us-mta-261-SYkBUYFRM5ey7kpHtb5voA-1; Thu, 12 Dec 2019 05:32:07 -0500
+X-MC-Unique: SYkBUYFRM5ey7kpHtb5voA-1
 Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 56E201800D42;
-        Thu, 12 Dec 2019 10:32:02 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id D59651005502;
+        Thu, 12 Dec 2019 10:32:05 +0000 (UTC)
 Received: from shalem.localdomain.com (unknown [10.36.118.130])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 8AA8A18779;
-        Thu, 12 Dec 2019 10:32:00 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 4E5A918779;
+        Thu, 12 Dec 2019 10:32:04 +0000 (UTC)
 From:   Hans de Goede <hdegoede@redhat.com>
 To:     Ard Biesheuvel <ard.biesheuvel@linaro.org>,
         Thomas Gleixner <tglx@linutronix.de>
 Cc:     Hans de Goede <hdegoede@redhat.com>,
         Dominik Brodowski <linux@dominikbrodowski.net>, x86@kernel.org,
-        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH 5.5 regression fix 0/2] efi/libstub: Fix mixed-mode crash at boot
-Date:   Thu, 12 Dec 2019 11:31:56 +0100
-Message-Id: <20191212103158.4958-1-hdegoede@redhat.com>
+        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
+        stable@vger.kernel.org
+Subject: [PATCH 5.5 regression fix 2/2] efi/libstub/helper: Initialize pointer variables to zero for mixed mode
+Date:   Thu, 12 Dec 2019 11:31:58 +0100
+Message-Id: <20191212103158.4958-3-hdegoede@redhat.com>
+In-Reply-To: <20191212103158.4958-1-hdegoede@redhat.com>
+References: <20191212103158.4958-1-hdegoede@redhat.com>
 MIME-Version: 1.0
 X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
 Content-Transfer-Encoding: quoted-printable
@@ -58,28 +63,51 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Hi All,
+When running in EFI mixed mode (running a 64 bit kernel on 32 bit EFI
+firmware), we _must_ initialize any pointers which are returned by
+reference by an EFI call to NULL before making the EFI call.
 
-Commit 0d95981438c3 ("x86: efi/random: Invoke EFI_RNG_PROTOCOL to seed th=
-e UEFI RNG table")
-causes drivers/efi/libstub/random.c to be used on x86 for the first time
-and some of the code in that file does not deal properly with mixed-mode
-setups causing a crash at boot on mixed-mode devices.
+In mixed mode pointers are 64 bit, but when running on a 32 bit firmware,
+EFI calls which return a pointer value by reference only fill the lower
+32 bits of the passed pointer, leaving the upper 32 bits uninitialized
+unless we explicitly set them to 0 before the call.
 
-The first patch in this series fixes this and is the regression-fix from
-$subject.
+We have had this bug in the efi-stub-helper.c file reading code for
+a while now, but this has likely not been noticed sofar because
+this code only gets triggered when LILO style file=3D... arguments are
+present on the kernel cmdline.
 
-While looking into this I did a quick search for other cases of the same
-problem in the libstub code and I found the same issue in the handling of
-LILO-style file=3D kernel commandline arguments, which I guess are not
-used that often because AFAICT we have no bug report for these not workin=
-g
-in mixed-mode. The second patch fixes this, this is a pre-existing proble=
-m
-and not a 5.5 regression, still we should probably also include this fix
-in 5.5.
+Cc: stable@vger.kernel.org
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+ drivers/firmware/efi/libstub/efi-stub-helper.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-Regards,
-
-Hans
+diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/fir=
+mware/efi/libstub/efi-stub-helper.c
+index e02579907f2e..6ca7d86743af 100644
+--- a/drivers/firmware/efi/libstub/efi-stub-helper.c
++++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+@@ -365,7 +365,7 @@ static efi_status_t efi_file_size(efi_system_table_t =
+*sys_table_arg, void *__fh,
+ 				  u64 *file_sz)
+ {
+ 	efi_file_handle_t *h, *fh =3D __fh;
+-	efi_file_info_t *info;
++	efi_file_info_t *info =3D NULL;
+ 	efi_status_t status;
+ 	efi_guid_t info_guid =3D EFI_FILE_INFO_ID;
+ 	unsigned long info_sz;
+@@ -527,7 +527,7 @@ efi_status_t handle_cmdline_files(efi_system_table_t =
+*sys_table_arg,
+ 				  unsigned long *load_addr,
+ 				  unsigned long *load_size)
+ {
+-	struct file_info *files;
++	struct file_info *files =3D NULL;
+ 	unsigned long file_addr;
+ 	u64 file_size_total;
+ 	efi_file_handle_t *fh =3D NULL;
+--=20
+2.23.0
 
