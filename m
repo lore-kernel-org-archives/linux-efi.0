@@ -2,51 +2,53 @@ Return-Path: <SRS0=J6bi=2C=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B722C43603
-	for <linux-efi@archiver.kernel.org>; Thu, 12 Dec 2019 21:34:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 30248C00454
+	for <linux-efi@archiver.kernel.org>; Thu, 12 Dec 2019 21:34:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id C4F5122527
-	for <linux-efi@archiver.kernel.org>; Thu, 12 Dec 2019 21:34:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CCAED20663
+	for <linux-efi@archiver.kernel.org>; Thu, 12 Dec 2019 21:34:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731112AbfLLVeq (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 12 Dec 2019 16:34:46 -0500
-Received: from mail-qk1-f193.google.com ([209.85.222.193]:37688 "EHLO
-        mail-qk1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730902AbfLLVeq (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 12 Dec 2019 16:34:46 -0500
-Received: by mail-qk1-f193.google.com with SMTP id m188so49832qkc.4
-        for <linux-efi@vger.kernel.org>; Thu, 12 Dec 2019 13:34:45 -0800 (PST)
+        id S1731121AbfLLVer (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 12 Dec 2019 16:34:47 -0500
+Received: from mail-qk1-f194.google.com ([209.85.222.194]:39980 "EHLO
+        mail-qk1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1731086AbfLLVer (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 12 Dec 2019 16:34:47 -0500
+Received: by mail-qk1-f194.google.com with SMTP id c17so35789qkg.7
+        for <linux-efi@vger.kernel.org>; Thu, 12 Dec 2019 13:34:47 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=H2nKgCZNFFEBZCU2Z37qQNI7htkAaxmvPk6e+dzcsRQ=;
-        b=RqjJiEMCaJHl5clxBnYh9arA8mG5J+lAD+1CKvq/z7EMSF/hMB6bfgbiYHefe7Mnuq
-         LFndLw/EtxnMcK/UqTjitDJeiJr99wq464mtycRqXvi2Z5q5wpx16BCvCyk0DPRFElmz
-         OilJWhRO2NLsBKL7NMdgzK+b/sZTIYgPAPN4mqJAgHXgvy5QzoM/VqmXfO/8uk9oDD9w
-         NCorlk7iLYwJ1gfyO+0P6uxaNwaeMtAVuwQJ3fi1XH97tMUZbxdJW2lnENo643MRO3hG
-         k15PaHJVGLJLqSWLZGT/AExEvNerveRkyNkT5vz2nduGNSftBXqyP6pFH2rTuWe3GgKJ
-         ItYQ==
-X-Gm-Message-State: APjAAAWlTXnmHj6g58dh4Ul2d4H0yDJTDoJ3jIKzXhu7yooxmR/h2U0c
-        46C/qtbYAp/x07HeCamDbTw=
-X-Google-Smtp-Source: APXvYqwhQ4XJzhsiagpvaP2+F4kfTWMUjE45USEiP4I9crh1lg6tuQRBbJE5uxUoH2Hd+ZkDMXkDvg==
-X-Received: by 2002:ae9:f709:: with SMTP id s9mr10196255qkg.463.1576186485085;
-        Thu, 12 Dec 2019 13:34:45 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=kzhDclgt4wr1Bn7jb+ojQoXbYLOpj5Ctg783GxIkMtA=;
+        b=JKB09/hpoDn6R85wyS6undDxf9sTFe95KPWvR8OWLwJIIpBBwcR+32edwfqQyDG84d
+         C7ib1HvYOGLW8jESP5+9mSD2O2qci4Te6D/4f9TzhS27wPen/Wz/5V0LZAQS6GnRXaW4
+         f0Yjdz5vd57Jl1IKXsxO6KgjpKjorDmwS2zoyweSB5YhY1uduBv6IrfPSdgucvWM4p66
+         F3niAm58nj0fY6VqNOkesSEKgAWNEdbtz/cp696/00p9thblB2Ztxk4TTpMyJi9VZZZy
+         2+LbwpHhFQcjswY29cuNC0JxE/TxvCVtwpm/Gv+o38iwtz2JiTyo8lkC+hwupL8pLZ+1
+         I45Q==
+X-Gm-Message-State: APjAAAX/BZTeFUTfUBTs5PoRPHOhvsFytlth7acwhWDC73k2sDq0qMjt
+        tu3/6fISnE8b3eE0bxjDlE8=
+X-Google-Smtp-Source: APXvYqymvvg64QgHa7L8gUXUsy/3iy4o7d3Lqy2NZ6jmYgSHANFy/Qw0LYaLK84224smBRmhkcEeiA==
+X-Received: by 2002:a05:620a:1307:: with SMTP id o7mr10282161qkj.312.1576186486492;
+        Thu, 12 Dec 2019 13:34:46 -0800 (PST)
 Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
-        by smtp.gmail.com with ESMTPSA id r5sm2116467qkf.44.2019.12.12.13.34.44
+        by smtp.gmail.com with ESMTPSA id r5sm2116467qkf.44.2019.12.12.13.34.45
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 12 Dec 2019 13:34:44 -0800 (PST)
+        Thu, 12 Dec 2019 13:34:45 -0800 (PST)
 From:   Arvind Sankar <nivedita@alum.mit.edu>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     linux-efi@vger.kernel.org
-Subject: [RFC PATCH 0/5] efi/gop: Merge 32/64-bit code
-Date:   Thu, 12 Dec 2019 16:34:38 -0500
-Message-Id: <20191212213443.24128-1-nivedita@alum.mit.edu>
+Subject: [RFC PATCH 2/5] efi/gop: Remove unused typedef
+Date:   Thu, 12 Dec 2019 16:34:40 -0500
+Message-Id: <20191212213443.24128-3-nivedita@alum.mit.edu>
 X-Mailer: git-send-email 2.23.0
+In-Reply-To: <20191212213443.24128-1-nivedita@alum.mit.edu>
+References: <20191212213443.24128-1-nivedita@alum.mit.edu>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
@@ -54,48 +56,29 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This series unifies the 32-bit and 64-bit firmware functions in gop.c.
+We have stopped using gop->query_mode(), so remove the unused typedef
+for the function prototype.
 
-Patches 1, 2 and 5 are bugfix/cleanup. The merge is in patches 3/4.
+Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
+---
+ include/linux/efi.h | 4 ----
+ 1 file changed, 4 deletions(-)
 
-Patch 1 removes __packed from the GOP structures, which is wrong but
-didn't impact their layout.
-
-The UEFI spec differs from the standard gcc layout for 32-bit systems,
-in that it specifies 64-bit alignment for 64-bit members. We have a bit
-of a mix in the type definitions currently, with different types doing
-one of the below:
-	(a) nothing, if a 64-bit member happens to fall naturally on a
-	    64-bit boundary
-	(b) explicit padding fields
-	(c) use of __aligned_u64
-The last method is the only one that gets the alignment requirement of
-the structure itself correct as well as the internal layout -- is it
-worth fixing everything to use it?
-
-Patch 5 is to make sure that we don't wind up with a >4G framebuffer on
-a 32-bit kernel that can only address 4G. I'm not sure if this can
-practically happen on anything that we can run a 32-bit kernel on, but
-UEFI specs the framebuffer physical address to be 64-bit even on 32-bit
-systems, so I figured we might as well cover this edge case.
-
-For the code merge, formatting is a bit annoying as the types are named
-"graphics_output_protocol", which is overly long to let code fit nicely
-into 80 columns. I've used an intermediate macro to address that
-somewhat. Alternatively, would renaming the types to use just "gop" be
-acceptable?
-
-Arvind Sankar (5):
-  efi/gop: Remove bogus packed attribute from GOP structures
-  efi/gop: Remove unused typedef
-  efi/gop: Convert GOP structures to typedef and cleanup some types
-  efi/gop: Unify 32/64-bit functions
-  efi/gop: Check that the framebuffer will be accessible
-
- drivers/firmware/efi/libstub/gop.c | 150 ++++++-----------------------
- include/linux/efi.h                |  50 +++++-----
- 2 files changed, 50 insertions(+), 150 deletions(-)
-
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index bffe6e0a9b53..8be59ec77dee 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1479,10 +1479,6 @@ struct efi_graphics_output_protocol {
+ 	struct efi_graphics_output_protocol_mode *mode;
+ };
+ 
+-typedef efi_status_t (*efi_graphics_output_protocol_query_mode)(
+-	struct efi_graphics_output_protocol *, u32, unsigned long *,
+-	struct efi_graphics_output_mode_info **);
+-
+ extern struct list_head efivar_sysfs_list;
+ 
+ static inline void
 -- 
 2.23.0
 
