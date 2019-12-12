@@ -2,105 +2,112 @@ Return-Path: <SRS0=J6bi=2C=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 705F3C43603
-	for <linux-efi@archiver.kernel.org>; Thu, 12 Dec 2019 16:57:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3FA74C2D0C9
+	for <linux-efi@archiver.kernel.org>; Thu, 12 Dec 2019 21:34:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 3F4E4214AF
-	for <linux-efi@archiver.kernel.org>; Thu, 12 Dec 2019 16:57:58 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="E+EayL/M"
+	by mail.kernel.org (Postfix) with ESMTP id E6442227BF
+	for <linux-efi@archiver.kernel.org>; Thu, 12 Dec 2019 21:34:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729791AbfLLQ56 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 12 Dec 2019 11:57:58 -0500
-Received: from mail-wm1-f66.google.com ([209.85.128.66]:39453 "EHLO
-        mail-wm1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729247AbfLLQ55 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 12 Dec 2019 11:57:57 -0500
-Received: by mail-wm1-f66.google.com with SMTP id d5so3333189wmb.4
-        for <linux-efi@vger.kernel.org>; Thu, 12 Dec 2019 08:57:56 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=nrhHmmWG6ZTX5+x4X3+AWEGGcmY8Wfs7R6zkQJKl2zU=;
-        b=E+EayL/MsCj4TQDokvtlsT1HcSU5y8CAf3mu0ps6Uluh8/XlBca9HWCwWAVTGDKEj0
-         01GvR0UP+/dthtjCR6xhAT+zgjTgjK1SwX9FiT96gDTamngl8F1TVKM+lf6LKqjot+0J
-         s85xNeI598vNuv6rY41/zwnu3H/sA7Kykz8mYvLiEq18tOargex2fwOFSblLiZaXVD6N
-         qG8UE2QC1K17eK5UmjDyW57Sl2JEmunPmycuu1mJGzXodi3C4HOMiWfi75t9yZTkQA6u
-         o+CodHj+ZqQavZNfW/ny4KSiVDBIv50184VjB5cQCrv4Sd4uMxNQ2Gqo9IRQ2Eoobw4P
-         OyGQ==
+        id S1730902AbfLLVeq (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 12 Dec 2019 16:34:46 -0500
+Received: from mail-qk1-f194.google.com ([209.85.222.194]:42943 "EHLO
+        mail-qk1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1731086AbfLLVeq (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 12 Dec 2019 16:34:46 -0500
+Received: by mail-qk1-f194.google.com with SMTP id z14so27791qkg.9
+        for <linux-efi@vger.kernel.org>; Thu, 12 Dec 2019 13:34:46 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=nrhHmmWG6ZTX5+x4X3+AWEGGcmY8Wfs7R6zkQJKl2zU=;
-        b=lBFhutY3sf3lUgjZyzImDjQCjOzPWujLJsQ0EyIxuXHsFGdGsoPscwKWGsDT5i2qGY
-         tpQtMKVL5eJXZIHJJ8BTIwqXpotKUVFsWGCLlc2a89eF3YHfLD4Mw7maSeCt5Zw9afBy
-         FYjpdRh8hrxMWOe5ZugmgASSsTzKWm0ERuZUrV24TXx7GxBHyet63aSAKCyjHjQfssin
-         6AuoiMwkbDTjEM7zf71eU63mM+VUBjDtRIytZrait/XEnmquITycGLtHsIum5P8mVunI
-         PlnWmdYVU1Cish7PzHIsyOF3LrOYZTpvwlbpgTD5oRmAsQpjnm8WgFZ+QoJuHWojgbmV
-         PQeA==
-X-Gm-Message-State: APjAAAWh4lqzB9XDKbpehAQIJLNvIPYo4vyf5rVgPtY+2sbp32qeVuNX
-        dl71FNXw+ExbdpWowCCWqHmHAF7AHH3mdLwzqth2Ow==
-X-Google-Smtp-Source: APXvYqzc8FhDkJnVj/eoIPyG6FAyooTk4A4Ejx1+nyQc5vqwcwknY/JGRtN8uvGVgf/wC2xA0tRs/fpxWHlwbik2KS4=
-X-Received: by 2002:a1c:7205:: with SMTP id n5mr8015316wmc.9.1576169875370;
- Thu, 12 Dec 2019 08:57:55 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=mYk+pP/U4eC+SSzH9fa5Kd01UDBC1RKdUeYD1GrtGgY=;
+        b=PptymULuUGiFOg9tYZ6HzlKjS0mkGDOz3z+AftXZTvTXvqqlol6eduXDvaDdY2rQRe
+         rPGOI0S8GDIJfDpNKjA8WWO/eGzB/TGHz/aMduHp3ZeX3A5tBIdtEI0Qav9EBvx2KGQ+
+         0rBGE1dma+0vwbOruZjY/g6V4qKTTHV17vWiuDxDytoOVA5owUY6X4v9y2dcl9wv/6OJ
+         az5dstC9AX4vCUblKrikdmJNIKEhhXK3J8MASCh0h2hhGYZmVGAbbJFkZOiCrilaeURt
+         3UN2p6av0y5XJWSuFaHMSOuhF4PwtCSeeHFsLMbBRMC/2diLql3k7UG5HMSzWP7GC04w
+         EPIQ==
+X-Gm-Message-State: APjAAAVpTQAufK2dJlRO9/54G1I8tp94gV7IoL7Yobehjik9UyPQspEV
+        gJmuR0A2cVKVgEuDEd6q4XY=
+X-Google-Smtp-Source: APXvYqx8jlFNYcGnUsQoErq4RGRJqDeMrN+4UkUQh76yCmUEbCeJQ309B1PcuxzcqbSsrsKSx3pJKQ==
+X-Received: by 2002:ae9:e30e:: with SMTP id v14mr10110506qkf.344.1576186485690;
+        Thu, 12 Dec 2019 13:34:45 -0800 (PST)
+Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
+        by smtp.gmail.com with ESMTPSA id r5sm2116467qkf.44.2019.12.12.13.34.45
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 12 Dec 2019 13:34:45 -0800 (PST)
+From:   Arvind Sankar <nivedita@alum.mit.edu>
+To:     Ard Biesheuvel <ardb@kernel.org>
+Cc:     linux-efi@vger.kernel.org
+Subject: [RFC PATCH 1/5] efi/gop: Remove bogus packed attribute from GOP structures
+Date:   Thu, 12 Dec 2019 16:34:39 -0500
+Message-Id: <20191212213443.24128-2-nivedita@alum.mit.edu>
+X-Mailer: git-send-email 2.23.0
+In-Reply-To: <20191212213443.24128-1-nivedita@alum.mit.edu>
+References: <20191212213443.24128-1-nivedita@alum.mit.edu>
 MIME-Version: 1.0
-References: <20191210232410.17890-1-nivedita@alum.mit.edu> <CAKv+Gu8s=kT_21WasEsTRh+6COQYD0mpzOT5n0qhD1Y+YdR3JQ@mail.gmail.com>
- <20191211110435.GP32742@smile.fi.intel.com> <20191211173746.GA220404@rani.riverdale.lan>
- <20191211180330.GZ32742@smile.fi.intel.com> <CAKv+Gu8TbPg_SGZvTc+ZHgTnAq9zYtei7ZgqpdHv=5nNpW4j1Q@mail.gmail.com>
- <20191211200007.GB32742@smile.fi.intel.com> <20191212165649.GA117958@rani.riverdale.lan>
-In-Reply-To: <20191212165649.GA117958@rani.riverdale.lan>
-From:   Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Date:   Thu, 12 Dec 2019 17:57:44 +0100
-Message-ID: <CAKv+Gu9v=oSyQL6hmxDBVgZb9tEq+LTtWaUDN7vRyViEKAxEgA@mail.gmail.com>
-Subject: Re: [PATCH] efi/earlycon: Fix write-combine mapping on x86
-To:     Arvind Sankar <nivedita@alum.mit.edu>
-Cc:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        linux-efi <linux-efi@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Thu, 12 Dec 2019 at 17:56, Arvind Sankar <nivedita@alum.mit.edu> wrote:
->
-> On Wed, Dec 11, 2019 at 10:00:07PM +0200, Andy Shevchenko wrote:
-> > On Wed, Dec 11, 2019 at 06:06:28PM +0000, Ard Biesheuvel wrote:
-> > > On Wed, 11 Dec 2019 at 19:03, Andy Shevchenko
-> > > <andriy.shevchenko@linux.intel.com> wrote:
-> > > > On Wed, Dec 11, 2019 at 12:37:46PM -0500, Arvind Sankar wrote:
-> >
-> > > > Perhaps comment near to if can explain this.
-> >
-> > > I'm fine with the ternary, actually. What do you feel is wrong with it?
-> >
-> > I don't like ternary when it takes more than one line. I found them hard to
-> > follow.
-> >
-> > It's anyway style, so, go ahead with it.
-> >
-> > --
-> > With Best Regards,
-> > Andy Shevchenko
-> >
-> >
-> Thanks.
-> > > Can't we just set a global flag to MEMREMAP_WB or MEMREMAP_WC in the
-> > > init code, and use that directly?
-> > We can't use it directly in efi_earlycon_map though, so we still need to
-> > translate there, and we'd need an if/else in the init code, so this
-> > would just move the if/else from here to the init code.
->
-> Ard, re your comment, does that cover it and the patch is ok as it
-> stands then?
+EFI structures are not packed, they follow natural alignment.
 
-Yes.
+The packed attribute doesn't have any effect on the structure layout due
+to the types and order of the members, and we only ever get these
+structures as output from the EFI firmware so alignment issues have not
+come up.
 
-I have queued it up and will send it out shortly.
+Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
+---
+ include/linux/efi.h | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 99dfea595c8c..bffe6e0a9b53 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1429,7 +1429,7 @@ struct efi_graphics_output_mode_info {
+ 	int pixel_format;
+ 	struct efi_pixel_bitmask pixel_information;
+ 	u32 pixels_per_scan_line;
+-} __packed;
++};
+ 
+ struct efi_graphics_output_protocol_mode_32 {
+ 	u32 max_mode;
+@@ -1438,7 +1438,7 @@ struct efi_graphics_output_protocol_mode_32 {
+ 	u32 size_of_info;
+ 	u64 frame_buffer_base;
+ 	u32 frame_buffer_size;
+-} __packed;
++};
+ 
+ struct efi_graphics_output_protocol_mode_64 {
+ 	u32 max_mode;
+@@ -1447,7 +1447,7 @@ struct efi_graphics_output_protocol_mode_64 {
+ 	u64 size_of_info;
+ 	u64 frame_buffer_base;
+ 	u64 frame_buffer_size;
+-} __packed;
++};
+ 
+ struct efi_graphics_output_protocol_mode {
+ 	u32 max_mode;
+@@ -1456,7 +1456,7 @@ struct efi_graphics_output_protocol_mode {
+ 	unsigned long size_of_info;
+ 	u64 frame_buffer_base;
+ 	unsigned long frame_buffer_size;
+-} __packed;
++};
+ 
+ struct efi_graphics_output_protocol_32 {
+ 	u32 query_mode;
+-- 
+2.23.0
+
