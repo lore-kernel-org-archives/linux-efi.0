@@ -2,217 +2,99 @@ Return-Path: <SRS0=rvgm=2E=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.1 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4FE64C2D0CA
-	for <linux-efi@archiver.kernel.org>; Sat, 14 Dec 2019 17:58:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A95CDC43603
+	for <linux-efi@archiver.kernel.org>; Sat, 14 Dec 2019 19:46:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 24FD9214AF
-	for <linux-efi@archiver.kernel.org>; Sat, 14 Dec 2019 17:58:17 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1576346297;
-	bh=ClNPNQkcULHMe6x4ESqX9wm1W8QH2TUNVHmuKcuRwAg=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=i50penC81QszzUznbSRgaZs/2UYkSEKU2q4SeHl6Q7YjRU3noXcHksg81kB6gIO+8
-	 U5/T+ZPiexhxmlpiR2rXfX1/rimiyNGsCgmkCMCmn2OvMbFK4oSbueMhvCXiUymqJ+
-	 lDlnGlWxRr85Lyrtk9XfM3qajmlI6hydUhNmzrNU=
+	by mail.kernel.org (Postfix) with ESMTP id 754D12073D
+	for <linux-efi@archiver.kernel.org>; Sat, 14 Dec 2019 19:46:31 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="HVurpgad"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727126AbfLNR5u (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 14 Dec 2019 12:57:50 -0500
-Received: from mail.kernel.org ([198.145.29.99]:44212 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725943AbfLNR5t (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Sat, 14 Dec 2019 12:57:49 -0500
-Received: from cam-smtp0.cambridge.arm.com (fw-tnat.cambridge.arm.com [217.140.96.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 7F95C24658;
-        Sat, 14 Dec 2019 17:57:46 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1576346268;
-        bh=ClNPNQkcULHMe6x4ESqX9wm1W8QH2TUNVHmuKcuRwAg=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=z2sMtPL4/onveciJrsEKn1D1YIew9yew5b6rdcxhhW9HklmpUYM65a+6ELwNZYviz
-         UVzWsBkBZdWiBcSHcenRtlikdQN/xyw9LAQ+ExOr4YZza5jskeTPT79RmHKAMgFc+/
-         KhHbKHg1h7p1gsVrOyGSPsywUAG96G6MeieRK+dQ=
-From:   Ard Biesheuvel <ardb@kernel.org>
-To:     linux-kernel@vger.kernel.org
-Cc:     linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
+        id S1726792AbfLNTqb (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 14 Dec 2019 14:46:31 -0500
+Received: from mail-qk1-f193.google.com ([209.85.222.193]:46350 "EHLO
+        mail-qk1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726484AbfLNTqa (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 14 Dec 2019 14:46:30 -0500
+Received: by mail-qk1-f193.google.com with SMTP id r14so1641608qke.13;
+        Sat, 14 Dec 2019 11:46:30 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=sender:from:date:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=taLHS8JyLC+BenbNT7BxnrVrwoDPqQMtSy8lb0fixC0=;
+        b=HVurpgad1QMZQN0+i58d659mAg2CARQfC7k6Yc2ns+gRiGEMv+w662w2XASNY+IBO0
+         obJd8LRJkqjqAenPYRGZZnrote5+1rpMa9nHxa5DQTQueo+82hxsRVo3D8ANaRk75+si
+         9G81TK6fBwZeIxbVZLaaDVMQFMw1OSEDE7VojohAI1kRpEMxwoAjJ/iZoijSrYueLjV/
+         xxSmyZlzThT5yo90i1oUBwhSjiCKrqZgRIbTU1By6IEKtkODA/IlqX0o3/ICRpPQY6we
+         EqbRu5FKQiNHdG+48YSA0nFN9mnHx6O3sBHSO2ttCAbzSWjn2TFOtqBKkswukr8sF+zT
+         N6mw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:sender:from:date:to:cc:subject:message-id
+         :references:mime-version:content-disposition:in-reply-to:user-agent;
+        bh=taLHS8JyLC+BenbNT7BxnrVrwoDPqQMtSy8lb0fixC0=;
+        b=TftmVZc4oWBcZsk62txCrodD1Ioqgiy6GF8wy4/BaPYUl1YqnMSmH1FMPuKQGU2/9/
+         sWtN+wPVrCMs9RKXhz85mj58tO+rNcMtssUMKZQNiZDVuwvE6zqs7iNjg2sehbVftAtz
+         o2oNXuDM9kx+n7ZpPj2blPNjKkuL3JCIbWXJvgtYx7HPvbvGvLq4UB2+gD6Go7emD3zZ
+         FdV+Vxxjt37L07R87K3ZsBedrVT3Dw4TxXXwiEOq/THmPds2OLHMyFkhLwWY9tNz1oDd
+         4828ZrDA983abCtY1xCtYVSNvCnSLRPuZ2zyhKEOdKyAUPv2u4rjWRim2swv4aDdGqKV
+         4RPQ==
+X-Gm-Message-State: APjAAAVtEkh0MWgsIQqW7O1ZkbA8MEo1GlyYMwb1kUlhBZ5aCBCW+O7/
+        8oYDsQRVL8mg+2/EJhwQfzg=
+X-Google-Smtp-Source: APXvYqwQrs/JEOLTWQC8pQo+gOvB/pQ/X08MuDids0dmfojHeL4EZ/iAx1PIIZhPK+PosoSANVKCmw==
+X-Received: by 2002:a37:2e47:: with SMTP id u68mr19395733qkh.485.1576352789530;
+        Sat, 14 Dec 2019 11:46:29 -0800 (PST)
+Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
+        by smtp.gmail.com with ESMTPSA id d25sm4837459qtm.67.2019.12.14.11.46.28
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 14 Dec 2019 11:46:28 -0800 (PST)
+From:   Arvind Sankar <nivedita@alum.mit.edu>
+X-Google-Original-From: Arvind Sankar <arvind@rani.riverdale.lan>
+Date:   Sat, 14 Dec 2019 14:46:27 -0500
+To:     Ard Biesheuvel <ardb@kernel.org>
+Cc:     linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
         Hans de Goede <hdegoede@redhat.com>,
         Matthew Garrett <matthewgarrett@google.com>,
         Ingo Molnar <mingo@kernel.org>,
         Andy Lutomirski <luto@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>,
         Arvind Sankar <nivedita@alum.mit.edu>
-Subject: [PATCH 03/10] efi/libstub: use a helper to iterate over a EFI handle array
-Date:   Sat, 14 Dec 2019 18:57:28 +0100
-Message-Id: <20191214175735.22518-4-ardb@kernel.org>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20191214175735.22518-1-ardb@kernel.org>
+Subject: Re: [PATCH 05/10] efi/libstub: distinguish between native/mixed not
+ 32/64 bit
+Message-ID: <20191214194626.GA140998@rani.riverdale.lan>
 References: <20191214175735.22518-1-ardb@kernel.org>
+ <20191214175735.22518-6-ardb@kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20191214175735.22518-6-ardb@kernel.org>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Iterating over a EFI handle array is a bit finicky, since we have
-to take mixed mode into account, where handles are only 32-bit
-while the native efi_handle_t type is 64-bit.
+On Sat, Dec 14, 2019 at 06:57:30PM +0100, Ard Biesheuvel wrote:
+> +
+> +#define efi_table_attr(table, attr, instance) ({			\
+> +	__typeof__(((table##_t *)0)->attr) __ret;			\
+> +	if (efi_is_native()) {						\
+> +		__ret = ((table##_t *)instance)->attr;			\
+> +	} else {							\
+> +		__typeof__(((table##_32_t *)0)->attr) at;		\
+> +		at = (((table##_32_t *)(unsigned long)instance)->attr);	\
+> +		__ret = (__typeof__(__ret))(unsigned long)at;		\
+> +	}								\
+> +	__ret;								\
+> +})
 
-So introduce a helper, and replace the various occurrences of
-this pattern.
-
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
----
- arch/x86/boot/compressed/eboot.c   | 14 +++++---------
- drivers/firmware/efi/libstub/gop.c |  9 ++-------
- drivers/firmware/efi/libstub/pci.c |  9 +++------
- include/linux/efi.h                | 10 ++++++++++
- 4 files changed, 20 insertions(+), 22 deletions(-)
-
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index 0f1edd2c49fc..34962f2f3337 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -135,6 +135,7 @@ static void setup_efi_pci(struct boot_params *params)
- 	unsigned long size = 0;
- 	unsigned long nr_pci;
- 	struct setup_data *data;
-+	efi_handle_t h;
- 	int i;
- 
- 	efi_pci_disable_bridge_busmaster(sys_table);
-@@ -166,14 +167,11 @@ static void setup_efi_pci(struct boot_params *params)
- 	while (data && data->next)
- 		data = (struct setup_data *)(unsigned long)data->next;
- 
--	nr_pci = size / (efi_is_64bit() ? sizeof(u64) : sizeof(u32));
--	for (i = 0; i < nr_pci; i++) {
-+	for_each_efi_handle(h, pci_handle, size, i) {
- 		efi_pci_io_protocol_t *pci = NULL;
- 		struct pci_setup_rom *rom;
- 
--		status = efi_call_early(handle_protocol,
--					efi_is_64bit() ? ((u64 *)pci_handle)[i]
--						       : ((u32 *)pci_handle)[i],
-+		status = efi_call_early(handle_protocol, h,
- 					&pci_proto, (void **)&pci);
- 		if (status != EFI_SUCCESS || !pci)
- 			continue;
-@@ -268,6 +266,7 @@ setup_uga(struct screen_info *si, efi_guid_t *uga_proto, unsigned long size)
- 	void **uga_handle = NULL;
- 	efi_uga_draw_protocol_t *uga = NULL, *first_uga;
- 	unsigned long nr_ugas;
-+	efi_handle_t handle;
- 	int i;
- 
- 	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
-@@ -285,13 +284,10 @@ setup_uga(struct screen_info *si, efi_guid_t *uga_proto, unsigned long size)
- 	width = 0;
- 
- 	first_uga = NULL;
--	nr_ugas = size / (efi_is_64bit() ? sizeof(u64) : sizeof(u32));
--	for (i = 0; i < nr_ugas; i++) {
-+	for_each_efi_handle(handle, uga_handle, size, i) {
- 		efi_guid_t pciio_proto = EFI_PCI_IO_PROTOCOL_GUID;
- 		u32 w, h, depth, refresh;
- 		void *pciio;
--		unsigned long handle = efi_is_64bit() ? ((u64 *)uga_handle)[i]
--						      : ((u32 *)uga_handle)[i];
- 
- 		status = efi_call_early(handle_protocol, handle,
- 					uga_proto, (void **)&uga);
-diff --git a/drivers/firmware/efi/libstub/gop.c b/drivers/firmware/efi/libstub/gop.c
-index 94045ab7dd3d..5f4fbc2ac687 100644
---- a/drivers/firmware/efi/libstub/gop.c
-+++ b/drivers/firmware/efi/libstub/gop.c
-@@ -91,7 +91,6 @@ setup_gop(efi_system_table_t *sys_table_arg, struct screen_info *si,
- 	  efi_guid_t *proto, unsigned long size, void **handles)
- {
- 	efi_graphics_output_protocol_t *gop, *first_gop;
--	unsigned long nr_gops;
- 	u16 width, height;
- 	u32 pixels_per_scan_line;
- 	u32 ext_lfb_base;
-@@ -99,22 +98,18 @@ setup_gop(efi_system_table_t *sys_table_arg, struct screen_info *si,
- 	efi_pixel_bitmask_t pixel_info;
- 	int pixel_format;
- 	efi_status_t status;
-+	efi_handle_t h;
- 	int i;
--	bool is64 = efi_is_64bit();
- 
- 	first_gop = NULL;
- 	gop = NULL;
- 
--	nr_gops = size / (is64 ? sizeof(u64) : sizeof(u32));
--	for (i = 0; i < nr_gops; i++) {
-+	for_each_efi_handle(h, handles, size, i) {
- 		efi_graphics_output_protocol_mode_t *mode;
- 		efi_graphics_output_mode_info_t *info = NULL;
- 		efi_guid_t conout_proto = EFI_CONSOLE_OUT_DEVICE_GUID;
- 		bool conout_found = false;
- 		void *dummy = NULL;
--		efi_handle_t h = (efi_handle_t)(unsigned long)
--				 (is64 ? ((u64 *)handles)[i]
--				       : ((u32 *)handles)[i]);
- 		efi_physical_addr_t current_fb_base;
- 
- 		status = efi_call_early(handle_protocol, h,
-diff --git a/drivers/firmware/efi/libstub/pci.c b/drivers/firmware/efi/libstub/pci.c
-index f792b241383d..d144551e36eb 100644
---- a/drivers/firmware/efi/libstub/pci.c
-+++ b/drivers/firmware/efi/libstub/pci.c
-@@ -19,8 +19,8 @@ void efi_pci_disable_bridge_busmaster(efi_system_table_t *sys_table_arg)
- 	void **pci_handle = NULL;
- 	efi_guid_t pci_proto = EFI_PCI_IO_PROTOCOL_GUID;
- 	unsigned long size = 0;
--	unsigned long nr_pci;
- 	u16 class, command;
-+	efi_handle_t handle;
- 	int i;
- 
- 	if (!nobusmaster())
-@@ -49,13 +49,10 @@ void efi_pci_disable_bridge_busmaster(efi_system_table_t *sys_table_arg)
- 	if (status != EFI_SUCCESS)
- 		goto free_handle;
- 
--	nr_pci = size / (efi_is_64bit() ? sizeof(u64) : sizeof(u32));
--	for (i = 0; i < nr_pci; i++) {
-+	for_each_efi_handle(handle, pci_handle, size, i) {
- 		efi_pci_io_protocol_t *pci = NULL;
--		unsigned long handle = efi_is_64bit() ? ((u64 *)pci_handle)[i]
--						      : ((u32 *)pci_handle)[i];
- 
--		status = efi_call_early(handle_protocol, (efi_handle_t)handle,
-+		status = efi_call_early(handle_protocol, handle,
- 					&pci_proto, (void **)&pci);
- 		if (status != EFI_SUCCESS || !pci)
- 			continue;
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index de2087149089..d7ca0b85b2b5 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -48,6 +48,16 @@ typedef u16 efi_char16_t;		/* UNICODE character */
- typedef u64 efi_physical_addr_t;
- typedef void *efi_handle_t;
- 
-+#define for_each_efi_handle(handle, array, size, i)			\
-+	for (i = 1, handle = efi_is_64bit()				\
-+		? (efi_handle_t)(unsigned long)((u64 *)(array))[0]	\
-+		: (efi_handle_t)(unsigned long)((u32 *)(array))[0];	\
-+	    i++ <= (size) / (efi_is_64bit() ? sizeof(efi_handle_t)	\
-+					     : sizeof(u32));		\
-+	    handle = efi_is_64bit()					\
-+		? (efi_handle_t)(unsigned long)((u64 *)(array))[i]	\
-+		: (efi_handle_t)(unsigned long)((u32 *)(array))[i])
-+
- /*
-  * The UEFI spec and EDK2 reference implementation both define EFI_GUID as
-  * struct { u32 a; u16; b; u16 c; u8 d[8]; }; and so the implied alignment
--- 
-2.17.1
-
+The casting of `at' is appropriate if the attr is a pointer type which
+needs to be zero-extended to 64-bit, but for other fields it is
+unnecessary at best and possibly dangerous.  There are probably no
+instances currently where it is called for a non-pointer field, but is
+it possible to detect if the type is pointer and avoid the cast if not?
