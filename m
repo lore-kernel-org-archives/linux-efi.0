@@ -2,63 +2,67 @@ Return-Path: <SRS0=rvgm=2E=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.1 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C8FDC43603
-	for <linux-efi@archiver.kernel.org>; Sat, 14 Dec 2019 22:14:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 91544C43603
+	for <linux-efi@archiver.kernel.org>; Sat, 14 Dec 2019 22:14:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 38FA8206D8
-	for <linux-efi@archiver.kernel.org>; Sat, 14 Dec 2019 22:14:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 63A7120724
+	for <linux-efi@archiver.kernel.org>; Sat, 14 Dec 2019 22:14:43 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ILEZNtdm"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="CgKhjGqM"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726792AbfLNWOY (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 14 Dec 2019 17:14:24 -0500
-Received: from mail-qk1-f195.google.com ([209.85.222.195]:44307 "EHLO
-        mail-qk1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726713AbfLNWOX (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sat, 14 Dec 2019 17:14:23 -0500
-Received: by mail-qk1-f195.google.com with SMTP id w127so2241550qkb.11;
-        Sat, 14 Dec 2019 14:14:23 -0800 (PST)
+        id S1727036AbfLNWOm (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 14 Dec 2019 17:14:42 -0500
+Received: from mail-wm1-f65.google.com ([209.85.128.65]:33629 "EHLO
+        mail-wm1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726713AbfLNWOm (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 14 Dec 2019 17:14:42 -0500
+Received: by mail-wm1-f65.google.com with SMTP id d139so2072131wmd.0
+        for <linux-efi@vger.kernel.org>; Sat, 14 Dec 2019 14:14:40 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=sender:from:date:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to:user-agent;
-        bh=mNxH4bC0nj4GKy1qzFOGpsL1EBMNwk7EhK4/inatLcs=;
-        b=ILEZNtdmmx/CUHtQBEJSuLuOmeMmonMQ4Gq1TR2xfxGV7Q8RsQ+ySllmBfGH1TBFVf
-         LnFaVgqExmdgj7k9KErMQIIlmmFW8rIvzFXvzl/Zzgf9Fm3lDynGykU1NeL3KYEUCm91
-         CkeLUYt2AUR3nJzfNE+nna+rly3IsSbpKJRsYHgdOdNUWngwKddkYOinlnIYFyZOsf1N
-         VUOEfVZzvwnfbwpnE0r7H11kd+LtFPbqME8nCOK3izp4SvaS2XqajynwZM3b2pAIpIFi
-         WPqz8r64PNEsTpCwD6XnEoR/Q7BGpoa/plFcWhzW8c2xSFa0hiVk8yIf0uZ2rC9ripHd
-         Sqrg==
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=le9gTEplXasSXY5+vU+POpcZ8GAoVTNi2DgRESF94BM=;
+        b=CgKhjGqMjA2Ua4JZEnoVl9pkDc3irF6rNmQisnnigTz32BBdJj0Xz5PRQaXiAcUw5V
+         eblM0Al8GX6idpxU+O+1z5URLpOZ39TTZ9JqoXlta344q/oKLNxi0oMNdlPCLT6eq6o+
+         Paz31NM4grktE57soKYFyBqOda9J/Jq0tUuk20g6wllWE8fCCbvikAuTBkKc0zPh46DO
+         4AwgSLVhpYWXLe1/PrthS5cK77yZPjZBr4fX6TFxqtMFhoeG7JmJl9uQq0Pk7O8HleWr
+         8qOWZPATz2piV8ARXFuxta9CBPDQYfHUvve4r8JUb3Pma5oXnOSAgKdOZ0UJcz5bo96Z
+         2JLA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:sender:from:date:to:cc:subject:message-id
-         :references:mime-version:content-disposition:in-reply-to:user-agent;
-        bh=mNxH4bC0nj4GKy1qzFOGpsL1EBMNwk7EhK4/inatLcs=;
-        b=M52XxHJnr/gAaQ4QvafAwh9z89oNNTW/H0N7JmWVns15oftoDnDIgQGWW2xAC5GPgO
-         fZt2XrkSPOIC/v111N9NXLr0VOpcDBjV7PTyRsxMhexYGVhQpJxntWQh3C9832+Dsw69
-         ToN2kxEXoEeJrO2Qz4z8ssgNsOgZ1LiWgZgsJvTMsmQXcF3iAmDqrVpwWygxYgEPoAdS
-         +29FyRdPpe7NzG2iILoDK4s4LmE+EN99l9XC8pV+YJ5fl7aNAr4vL6mvTDyuLMFZVerS
-         TSiSOZZLuw8oMmufv+tLrKGDgP56XhRmEmg/HsVNviGM/QDRSTZeT+wubhi7WWzo0IGj
-         jzMA==
-X-Gm-Message-State: APjAAAX7aIGG2R+r9i/dBgZfMDFw6zg9dkMOnJ3KlFt/Kk0THlChzzK/
-        T2HIMacKDAR3OytuajdC37Y=
-X-Google-Smtp-Source: APXvYqyt2uNyrzAsRZWGSIBr1phWC1jzp/BKcUCVuGfbTEZT334tULcotp3l/4PxFNR99raWAnHPFQ==
-X-Received: by 2002:a37:4f04:: with SMTP id d4mr12713502qkb.200.1576361662509;
-        Sat, 14 Dec 2019 14:14:22 -0800 (PST)
-Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
-        by smtp.gmail.com with ESMTPSA id d23sm5179142qte.32.2019.12.14.14.14.21
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 14 Dec 2019 14:14:22 -0800 (PST)
-From:   Arvind Sankar <nivedita@alum.mit.edu>
-X-Google-Original-From: Arvind Sankar <arvind@rani.riverdale.lan>
-Date:   Sat, 14 Dec 2019 17:14:20 -0500
-To:     Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc:     Arvind Sankar <nivedita@alum.mit.edu>,
-        Ard Biesheuvel <ardb@kernel.org>,
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=le9gTEplXasSXY5+vU+POpcZ8GAoVTNi2DgRESF94BM=;
+        b=mquRvFQcdDSk+qfmb2v6f3urdYY3LL5AaIBBomqcVgZszNZHYMxR7StNdljsZxbVSS
+         udTQXeMIZBZqpVRhC16CUjg5aXAtw4oRR+ufxnxXV+R3VXbeaLKnmzBn59GcYVHC7Mta
+         wv/iTGX6Ov461qzWTp0VA44tJrMFTPRMa5YtgKflh4h1ilOtuG1+pHSvKh3Gzg8me+zN
+         Ty/vtMYE27UdMTHSTjmO50h98YsJsILQW5PfyNMnW+w/6OcEVLxQMev1H6T+HPupnO6u
+         bwzAQ3y77jFO6V0brgOpmmYjRbL8QDW+JMyjm2Q1o8w0FWwLmokcJo/EZ46v4QEYw8JJ
+         az+w==
+X-Gm-Message-State: APjAAAXG4XlAnFtcUj06DCo06rT2ul0TenmaJe6Tiyp2hwwkP5ZI1ZOz
+        sFYyKdOhkOrxxspGGQ9W/yO+LdsmWReIwCLGKKpZKQ==
+X-Google-Smtp-Source: APXvYqz/Z3CqaojWv8/IXIkI9cm5DNoK5eR8xmbyteKGdULWQOhr7KljxO1EoyBbnQ0OjeuG/sHwIDTV+qS+hrVBthM=
+X-Received: by 2002:a1c:7205:: with SMTP id n5mr22174711wmc.9.1576361679990;
+ Sat, 14 Dec 2019 14:14:39 -0800 (PST)
+MIME-Version: 1.0
+References: <20191214175735.22518-1-ardb@kernel.org> <20191214175735.22518-6-ardb@kernel.org>
+ <20191214194626.GA140998@rani.riverdale.lan> <20191214194936.GB140998@rani.riverdale.lan>
+ <CAKv+Gu_JQz=xd_UmqiuZ8TvA+ksT_rY4iXP_j7OdW4F5sfZt9g@mail.gmail.com>
+ <20191214201334.GC140998@rani.riverdale.lan> <CAKv+Gu-A4bE0DM96-dNjtsYG=a3g-X4f-y=NcJ5ZCvZHaDJZmw@mail.gmail.com>
+ <20191214211725.GG140998@rani.riverdale.lan> <CAKv+Gu85yLS6cYaGPTLc=hjHjvjjYYX-E0wCwKK+1W+T9dxAcQ@mail.gmail.com>
+In-Reply-To: <CAKv+Gu85yLS6cYaGPTLc=hjHjvjjYYX-E0wCwKK+1W+T9dxAcQ@mail.gmail.com>
+From:   Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Date:   Sat, 14 Dec 2019 22:14:38 +0000
+Message-ID: <CAKv+Gu8DNwWF4FfiZNStHTqNZeUP90c1_NkSLC_80YxF4smnxA@mail.gmail.com>
+Subject: Re: [PATCH 05/10] efi/libstub: distinguish between native/mixed not
+ 32/64 bit
+To:     Arvind Sankar <nivedita@alum.mit.edu>
+Cc:     Ard Biesheuvel <ardb@kernel.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         linux-efi <linux-efi@vger.kernel.org>,
         Hans de Goede <hdegoede@redhat.com>,
@@ -66,30 +70,41 @@ Cc:     Arvind Sankar <nivedita@alum.mit.edu>,
         Ingo Molnar <mingo@kernel.org>,
         Andy Lutomirski <luto@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
-Subject: Re: [PATCH 05/10] efi/libstub: distinguish between native/mixed not
- 32/64 bit
-Message-ID: <20191214221419.GA314531@rani.riverdale.lan>
-References: <20191214175735.22518-1-ardb@kernel.org>
- <20191214175735.22518-6-ardb@kernel.org>
- <20191214194626.GA140998@rani.riverdale.lan>
- <20191214194936.GB140998@rani.riverdale.lan>
- <CAKv+Gu_JQz=xd_UmqiuZ8TvA+ksT_rY4iXP_j7OdW4F5sfZt9g@mail.gmail.com>
- <20191214201334.GC140998@rani.riverdale.lan>
- <CAKv+Gu-A4bE0DM96-dNjtsYG=a3g-X4f-y=NcJ5ZCvZHaDJZmw@mail.gmail.com>
- <20191214211725.GG140998@rani.riverdale.lan>
- <CAKv+Gu85yLS6cYaGPTLc=hjHjvjjYYX-E0wCwKK+1W+T9dxAcQ@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu85yLS6cYaGPTLc=hjHjvjjYYX-E0wCwKK+1W+T9dxAcQ@mail.gmail.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Sat, Dec 14, 2019 at 09:30:08PM +0000, Ard Biesheuvel wrote:
+On Sat, 14 Dec 2019 at 22:30, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
+>
 > On Sat, 14 Dec 2019 at 22:17, Arvind Sankar <nivedita@alum.mit.edu> wrote:
+> >
+> > On Sat, Dec 14, 2019 at 08:27:50PM +0000, Ard Biesheuvel wrote:
+> > > On Sat, 14 Dec 2019 at 21:13, Arvind Sankar <nivedita@alum.mit.edu> wrote:
+> > > >
+> > > > On Sat, Dec 14, 2019 at 07:54:25PM +0000, Ard Biesheuvel wrote:
+> > > > > On Sat, 14 Dec 2019 at 20:49, Arvind Sankar <nivedita@alum.mit.edu> wrote:
+> > > > > >
+> > > > > > On Sat, Dec 14, 2019 at 02:46:27PM -0500, Arvind Sankar wrote:
+> > > > > > > On Sat, Dec 14, 2019 at 06:57:30PM +0100, Ard Biesheuvel wrote:
+> > > > > > > > +
+> > > > > > > > +#define efi_table_attr(table, attr, instance) ({                   \
+> > > > > > > > +   __typeof__(((table##_t *)0)->attr) __ret;                       \
+> > > > > > > > +   if (efi_is_native()) {                                          \
+> > > > > > > > +           __ret = ((table##_t *)instance)->attr;                  \
+> > > > > > > > +   } else {                                                        \
+> > > > > > > > +           __typeof__(((table##_32_t *)0)->attr) at;               \
+> > > > > > > > +           at = (((table##_32_t *)(unsigned long)instance)->attr); \
+> > > > > > > > +           __ret = (__typeof__(__ret))(unsigned long)at;           \
+> > > > > > > > +   }                                                               \
+> > > > > > > > +   __ret;                                                          \
+> > > > > > > > +})
+> > > > > > >
+> > > Yes. I'm open to suggestions on how to improve this, but mixed mode is
+> > > somewhat of a maintenance burden, so if new future functionality needs
+> > > to leave mixed mode behind, I'm not too bothered.
+> > >
 > >
 > > Maybe just do
 > >         if (sizeof(at) < sizeof(__ret))
@@ -97,9 +112,9 @@ On Sat, Dec 14, 2019 at 09:30:08PM +0000, Ard Biesheuvel wrote:
 > >         else
 > >                 __ret = (__typeof__(__ret))at;
 > > That should cover most of the cases.
-> 
+>
 > But the compiler will still be unhappy about the else clause if __ret
 > is a pointer type, since we'll be casting an u32 to a pointer,
 
-Ugh, yeah it complains even though it can tell at compile time that that
-branch isn't taken.
+I think the answer is to have efi_table_ptr() for pointers and
+efi_table_attr() for other types.
