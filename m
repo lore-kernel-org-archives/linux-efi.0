@@ -2,42 +2,42 @@ Return-Path: <SRS0=rvgm=2E=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 41D3BC43603
-	for <linux-efi@archiver.kernel.org>; Sat, 14 Dec 2019 17:57:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 96269C43603
+	for <linux-efi@archiver.kernel.org>; Sat, 14 Dec 2019 17:57:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 15B9E2465B
-	for <linux-efi@archiver.kernel.org>; Sat, 14 Dec 2019 17:57:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 671D4214D8
+	for <linux-efi@archiver.kernel.org>; Sat, 14 Dec 2019 17:57:50 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1576346262;
-	bh=jus25Rf83MkRqCWDILe7u65yRwf/8zffQBj/3myz95U=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=aDTMoloWzOwRuDFgDBb/ZXJBStWtCFlJJ1m6YN2U4MkAG160SYCVz1LlTb7QCYsnG
-	 GLsBzovqBy4g/3AvTxvtGP35mBhWx5EEVwvvvk8VDPsEd8dANCTUO726/7OjkBN5g1
-	 zLQkGBX8Hd/qSOUruN0aH5+ZJoDEC9jKncu8/E8k=
+	s=default; t=1576346270;
+	bh=9UXdi9+k83l2dNzBnx8MXZnI2nvL09miLg3HX3ie14o=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=EuzmF33fOSCn0mNb67tsuQHVJguPCk5fQbgNLnJmK68zjqYNdLSWdwYLTfUmpAyOZ
+	 WA9sNTZnZcUpjLfFXOr8ePJzbZEfpydoY4lcUy/+54iFVELd+5AYWq605dLugb66vt
+	 Q1ywVgBtCIbWar214soZWtSvS79xT9zUA/tlmrYE=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726411AbfLNR5l (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 14 Dec 2019 12:57:41 -0500
-Received: from mail.kernel.org ([198.145.29.99]:43968 "EHLO mail.kernel.org"
+        id S1727006AbfLNR5r (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 14 Dec 2019 12:57:47 -0500
+Received: from mail.kernel.org ([198.145.29.99]:44142 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725975AbfLNR5l (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Sat, 14 Dec 2019 12:57:41 -0500
+        id S1725943AbfLNR5q (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Sat, 14 Dec 2019 12:57:46 -0500
 Received: from cam-smtp0.cambridge.arm.com (fw-tnat.cambridge.arm.com [217.140.96.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 6BF4E20724;
-        Sat, 14 Dec 2019 17:57:38 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id CB69524125;
+        Sat, 14 Dec 2019 17:57:43 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1576346260;
-        bh=jus25Rf83MkRqCWDILe7u65yRwf/8zffQBj/3myz95U=;
-        h=From:To:Cc:Subject:Date:From;
-        b=ZwGNNAC6xsTjiBfR8qFIEbdr7xISdVWktqPbQ8YST3u/j+ECDuWmbEAcydJoL5y6H
-         OYrh27gaarC4FKpX95+6J6qufqT0Qkkfq+aF20YGQ4UF0nmSIld/8FcUq3mesidFTN
-         4JxAfA4cm0hXjY93walqagFGf7sQw+zQr9Rl1YDI=
+        s=default; t=1576346266;
+        bh=9UXdi9+k83l2dNzBnx8MXZnI2nvL09miLg3HX3ie14o=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=WSSE7HvCN/7YhcoivyBiJPIGiDUxfe62b/DlcJ1TOllsHcufUhRKc+mjnzi4VtLcF
+         tJjVm4v9g70Rh/NncuS3FoIu9QN0DEHtCKHZrdX2drICiayhaMMF7Cu3Pc17V1eZGr
+         uJ4uY23Jw4xFZZZew3yIKeWhHA5lmea+dG+3e2gQ=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-kernel@vger.kernel.org
 Cc:     linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -47,87 +47,136 @@ Cc:     linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         Andy Lutomirski <luto@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>,
         Arvind Sankar <nivedita@alum.mit.edu>
-Subject: [PATCH 00/10] efi/x86: confine type unsafe casting to mixed mode
-Date:   Sat, 14 Dec 2019 18:57:25 +0100
-Message-Id: <20191214175735.22518-1-ardb@kernel.org>
+Subject: [PATCH 02/10] efi/x86: rename efi_is_native() to efi_is_mixed()
+Date:   Sat, 14 Dec 2019 18:57:27 +0100
+Message-Id: <20191214175735.22518-3-ardb@kernel.org>
 X-Mailer: git-send-email 2.17.1
+In-Reply-To: <20191214175735.22518-1-ardb@kernel.org>
+References: <20191214175735.22518-1-ardb@kernel.org>
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Currently, we support mixed mode (64-bit Linux running on 32-bit firmware)
-by explicitly reasoning about pointer sizes for every call into the
-firmware: on x86, there are 32-bit and 64-bit versions of each protocol
-interface, and each call gets routed via one of the two, depending on the
-native size of the firmware.
+The ARM architecture does not permit combining 32-bit and 64-bit code
+at the same privilege level, and so EFI mixed mode is strictly a x86
+concept.
 
-There is a lot of casting and pointer mangling involved in this, and as
-a result, we end up with much less coverage in terms of type checking by
-the compiler, due to the indirection via an anonymous, variadic thunking
-routine.
+In preparation of turning the 32/64 bit distinction in shared stub
+code to a native vs mixed one, refactor x86's current use of the
+helper function efi_is_native() into efi_is_mixed().
 
-This peculiarity of x86 is also leaking into generic EFI code, which is
-shared with ia64, arm64, ARM and likely RiscV in the future. So let's
-try to clean this up a bit.
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+---
+ arch/x86/include/asm/efi.h     | 10 ++++++----
+ arch/x86/platform/efi/efi.c    |  8 ++++----
+ arch/x86/platform/efi/efi_64.c |  4 ++--
+ arch/x86/platform/efi/quirks.c |  2 +-
+ 4 files changed, 13 insertions(+), 11 deletions(-)
 
-The approach taken by this series is to replace the 32/64 bit distinction
-with a distinction between native calls and mixed mode calls, where the
-former can be either 32 or 64 bit [depending on the platform] and use
-the ordinary native protocol definitions, while mixed mode calls retain
-the existing casting/thunking approach based on the 32-bit protocol
-definitions.
-
-Given that GCC now supports emitting function calls using the MS calling
-convention, we can get rid of all the wrapping and casting, and emit the
-indirect calls directly.
-
-Code can be found here
-https://git.kernel.org/pub/scm/linux/kernel/git/ardb/linux.git/log/?h=efistub-x86-cleanup
-
-Cc: Hans de Goede <hdegoede@redhat.com>
-Cc: Matthew Garrett <matthewgarrett@google.com>
-Cc: Ingo Molnar <mingo@kernel.org>
-Cc: Andy Lutomirski <luto@kernel.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Arvind Sankar <nivedita@alum.mit.edu>
-
-Ard Biesheuvel (10):
-  efi/libstub: remove unused __efi_call_early() macro
-  efi/x86: rename efi_is_native() to efi_is_mixed()
-  efi/libstub: use a helper to iterate over a EFI handle array
-  efi/libstub: add missing apple_properties_protocol_t definition
-  efi/libstub: distinguish between native/mixed not 32/64 bit
-  efi/libstub/x86: use mixed mode helpers to populate efi_config
-  efi/libstub: drop explicit 64-bit protocol definitions
-  efi/libstub: use stricter typing for firmware function pointers
-  efi/libstub: annotate firmware routines as __efiapi
-  efi/libstub/x86: avoid thunking for native firmware calls
-
- arch/arm/include/asm/efi.h                    |   3 +-
- arch/arm64/include/asm/efi.h                  |   3 +-
- arch/x86/Kconfig                              |   1 +
- arch/x86/boot/compressed/Makefile             |   2 +-
- arch/x86/boot/compressed/eboot.c              |  51 ++--
- arch/x86/boot/compressed/eboot.h              |  11 +-
- arch/x86/boot/compressed/efi_stub_32.S        |  87 ------
- arch/x86/boot/compressed/efi_stub_64.S        |   5 -
- arch/x86/boot/compressed/head_32.S            |   8 +-
- arch/x86/boot/compressed/head_64.S            |  12 -
- arch/x86/include/asm/efi.h                    |  64 ++--
- arch/x86/platform/efi/efi.c                   |  12 +-
- arch/x86/platform/efi/efi_64.c                |   6 +-
- arch/x86/platform/efi/quirks.c                |   2 +-
- .../firmware/efi/libstub/efi-stub-helper.c    |  46 ++-
- drivers/firmware/efi/libstub/gop.c            |   9 +-
- drivers/firmware/efi/libstub/pci.c            |   9 +-
- drivers/firmware/efi/libstub/random.c         |  13 +-
- drivers/firmware/efi/libstub/tpm.c            |   4 +-
- include/linux/efi.h                           | 278 ++++++------------
- 20 files changed, 195 insertions(+), 431 deletions(-)
- delete mode 100644 arch/x86/boot/compressed/efi_stub_32.S
- delete mode 100644 arch/x86/boot/compressed/efi_stub_64.S
-
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index 59c19e0b6027..6094e7f49a99 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -153,17 +153,19 @@ extern u64 efi_setup;
+ 
+ #ifdef CONFIG_EFI
+ 
+-static inline bool efi_is_native(void)
++static inline bool efi_is_mixed(void)
+ {
+-	return IS_ENABLED(CONFIG_X86_64) == efi_enabled(EFI_64BIT);
++	if (!IS_ENABLED(CONFIG_EFI_MIXED))
++		return false;
++	return IS_ENABLED(CONFIG_X86_64) && !efi_enabled(EFI_64BIT);
+ }
+ 
+ static inline bool efi_runtime_supported(void)
+ {
+-	if (efi_is_native())
++	if (!efi_is_mixed())
+ 		return true;
+ 
+-	if (IS_ENABLED(CONFIG_EFI_MIXED) && !efi_enabled(EFI_OLD_MEMMAP))
++	if (!efi_enabled(EFI_OLD_MEMMAP))
+ 		return true;
+ 
+ 	return false;
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index bb8e37a723d6..1493e964c267 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -848,7 +848,7 @@ static bool should_map_region(efi_memory_desc_t *md)
+ 	 * Map all of RAM so that we can access arguments in the 1:1
+ 	 * mapping when making EFI runtime calls.
+ 	 */
+-	if (IS_ENABLED(CONFIG_EFI_MIXED) && !efi_is_native()) {
++	if (efi_is_mixed()) {
+ 		if (md->type == EFI_CONVENTIONAL_MEMORY ||
+ 		    md->type == EFI_LOADER_DATA ||
+ 		    md->type == EFI_LOADER_CODE)
+@@ -923,7 +923,7 @@ static void __init kexec_enter_virtual_mode(void)
+ 	 * kexec kernel because in the initial boot something else might
+ 	 * have been mapped at these virtual addresses.
+ 	 */
+-	if (!efi_is_native() || efi_enabled(EFI_OLD_MEMMAP)) {
++	if (efi_is_mixed() || efi_enabled(EFI_OLD_MEMMAP)) {
+ 		efi_memmap_unmap();
+ 		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+ 		return;
+@@ -1060,7 +1060,7 @@ static void __init __efi_enter_virtual_mode(void)
+ 
+ 	efi_sync_low_kernel_mappings();
+ 
+-	if (efi_is_native()) {
++	if (!efi_is_mixed()) {
+ 		status = phys_efi_set_virtual_address_map(
+ 				efi.memmap.desc_size * count,
+ 				efi.memmap.desc_size,
+@@ -1091,7 +1091,7 @@ static void __init __efi_enter_virtual_mode(void)
+ 	 */
+ 	efi.runtime_version = efi_systab.hdr.revision;
+ 
+-	if (efi_is_native())
++	if (!efi_is_mixed())
+ 		efi_native_runtime_setup();
+ 	else
+ 		efi_thunk_runtime_setup();
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index 08ce8177c3af..885e50a707a6 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -388,7 +388,7 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 	 * text and allocate a new stack because we can't rely on the
+ 	 * stack pointer being < 4GB.
+ 	 */
+-	if (!IS_ENABLED(CONFIG_EFI_MIXED) || efi_is_native())
++	if (!efi_is_mixed())
+ 		return 0;
+ 
+ 	page = alloc_page(GFP_KERNEL|__GFP_DMA32);
+@@ -449,7 +449,7 @@ void __init efi_map_region(efi_memory_desc_t *md)
+ 	 * booting in EFI mixed mode, because even though we may be
+ 	 * running a 64-bit kernel, the firmware may only be 32-bit.
+ 	 */
+-	if (!efi_is_native () && IS_ENABLED(CONFIG_EFI_MIXED)) {
++	if (efi_is_mixed()) {
+ 		md->virt_addr = md->phys_addr;
+ 		return;
+ 	}
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index 7675cf754d90..84d7176983d2 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -397,7 +397,7 @@ static void __init efi_unmap_pages(efi_memory_desc_t *md)
+ 	 * EFI runtime calls, hence don't unmap EFI boot services code/data
+ 	 * regions.
+ 	 */
+-	if (!efi_is_native())
++	if (efi_is_mixed())
+ 		return;
+ 
+ 	if (kernel_unmap_pages_in_pgd(pgd, pa, md->num_pages))
 -- 
 2.17.1
 
