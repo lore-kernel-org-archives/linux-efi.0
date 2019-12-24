@@ -2,54 +2,51 @@ Return-Path: <SRS0=cs/k=2O=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+X-Spam-Status: No, score=-14.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PULL_REQUEST,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C1C4C2D0D5
-	for <linux-efi@archiver.kernel.org>; Tue, 24 Dec 2019 13:29:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0574EC2D0CF
+	for <linux-efi@archiver.kernel.org>; Tue, 24 Dec 2019 15:10:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 43B5720643
-	for <linux-efi@archiver.kernel.org>; Tue, 24 Dec 2019 13:29:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CC63F20722
+	for <linux-efi@archiver.kernel.org>; Tue, 24 Dec 2019 15:10:47 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1577194194;
-	bh=GazPSS+c6B9Kt3+UlWZWQ/BY8A3l+UHzfQLW+rSPTWk=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=nWHTDyWiDmBp+pbVGWer432NVkH9MYnOamM6Yn5JhFNs4lz0EXyAuBZwhmgPv+Igj
-	 GyyidIH2GzUuMpPMfvxld20MXjIfCEXSmn/GM0+i9RBFQIPCTQ1xF0trrMCeNhMx7X
-	 lfJRVjA09XaBL39czxxlWZ6bEyrLPwvNlD//iVTo=
+	s=default; t=1577200247;
+	bh=P1P3d45D4yYj4txibJRGvNfX8LMUJ2HDXlU0mOi5kj8=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=VarXD3l10z5J4HNESFAwca9B8qih71RCH1NZpQbcOAFPPIcZMWX+Jkz5C1S4Q9TpD
+	 00D1Ba85j73ELwwMnxXbUTRmWY5S9TVYttbShtEEavhMouSRyFfw4D9Vv293jEmNDt
+	 UYAYgK2QQl6GZwjiQsBwEmaImR2yIdY8b+b/3Tak=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726237AbfLXN3q (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 24 Dec 2019 08:29:46 -0500
-Received: from mail.kernel.org ([198.145.29.99]:58538 "EHLO mail.kernel.org"
+        id S1726184AbfLXPKr (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 24 Dec 2019 10:10:47 -0500
+Received: from mail.kernel.org ([198.145.29.99]:50546 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726124AbfLXN3q (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Tue, 24 Dec 2019 08:29:46 -0500
-Received: from localhost.localdomain (91-167-84-221.subs.proxad.net [91.167.84.221])
+        id S1726178AbfLXPKr (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Tue, 24 Dec 2019 10:10:47 -0500
+Received: from localhost.localdomain (aaubervilliers-681-1-7-6.w90-88.abo.wanadoo.fr [90.88.129.6])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 40B582071E;
-        Tue, 24 Dec 2019 13:29:44 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id AD0FA206D3;
+        Tue, 24 Dec 2019 15:10:44 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1577194185;
-        bh=GazPSS+c6B9Kt3+UlWZWQ/BY8A3l+UHzfQLW+rSPTWk=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=CfPfLMO3jmt87QgxhMjBz86DUJKBk4WOZWfR9x/voHeXFtnK+LJ+HgQhEDo1n1X3J
-         FuSRv3enqdSIk8xtvFSZDtvnUwfdJOEyh6GideQstDaQsSRZc8CgCT2bZIPU8wK5wU
-         exTAzBmNjH+NrglLSwxYGIdHet4USIJChsV6Vz+g=
+        s=default; t=1577200245;
+        bh=P1P3d45D4yYj4txibJRGvNfX8LMUJ2HDXlU0mOi5kj8=;
+        h=From:To:Cc:Subject:Date:From;
+        b=prRvTpKjaLXsmsJXe7ssz7nlP3ws8nPKsnklenEx8KqVnuU0wz3jEv/nscUXsfLjK
+         LGHcOVL7+abLiYQL0QJWlG2pDa+/lFdq9Ju5hzEg+pCrvRUgN+6tZcUU/F6+MHm4WP
+         GVDtnqWjSNmgiFx76pMBIHHYW8nD3muOoX1aoQxM=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
 Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
-        Arvind Sankar <nivedita@alum.mit.edu>,
-        Hans de Goede <hdegoede@redhat.com>
-Subject: [PATCH 1/3] efi/earlycon: Fix write-combine mapping on x86
-Date:   Tue, 24 Dec 2019 14:29:07 +0100
-Message-Id: <20191224132909.102540-2-ardb@kernel.org>
+        Arvind Sankar <nivedita@alum.mit.edu>
+Subject: [GIT PULL 00/25] EFI updates for v5.6
+Date:   Tue, 24 Dec 2019 16:10:00 +0100
+Message-Id: <20191224151025.32482-1-ardb@kernel.org>
 X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20191224132909.102540-1-ardb@kernel.org>
-References: <20191224132909.102540-1-ardb@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
@@ -57,76 +54,108 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Arvind Sankar <nivedita@alum.mit.edu>
+Ingo, Thomas,
 
-On x86, until PAT is initialized, WC translates into UC-. Since we
-calculate and store pgprot_writecombine(PAGE_KERNEL) when earlycon is
-initialized, this means we actually use UC- mappings instead of WC
-mappings, which makes scrolling very slow.
+Please consider the pull request below. I am anticipating some more
+changes for this cycle, but it would be good to get these queued up and
+into -next sooner rather than later, since there is some risk of
+breakage even though the changes have been tested on a variety of
+hardware.
 
-Instead store a boolean flag to indicate whether we want to use
-writeback or write-combine mappings, and recalculate the actual pgprot_t
-we need on every mapping. Once PAT is initialized, we will start using
-write-combine mappings, which speeds up the scrolling considerably.
+If you have the stomach to go over them in detail: please take into
+account that these patches modify the same efi_call_xxx() macro
+definitions multiple times, in order to be bisectable, so please
+consider the end result first before commenting on coding style of the
+intermediate changes.
 
-Fixes: 69c1f396f25b ("efi/x86: Convert x86 EFI earlyprintk into generic earlycon implementation")
-Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
----
- drivers/firmware/efi/earlycon.c | 16 +++++++---------
- 1 file changed, 7 insertions(+), 9 deletions(-)
+NOTE: this series depends on the efi-urgent PR that I just sent out, so
+please merge tip/efi/urgent into tip/efi/core before applying the
+changes below.
 
-diff --git a/drivers/firmware/efi/earlycon.c b/drivers/firmware/efi/earlycon.c
-index d4077db6dc97..5d4f84781aa0 100644
---- a/drivers/firmware/efi/earlycon.c
-+++ b/drivers/firmware/efi/earlycon.c
-@@ -17,7 +17,7 @@ static const struct console *earlycon_console __initdata;
- static const struct font_desc *font;
- static u32 efi_x, efi_y;
- static u64 fb_base;
--static pgprot_t fb_prot;
-+static bool fb_wb;
- static void *efi_fb;
- 
- /*
-@@ -33,10 +33,8 @@ static int __init efi_earlycon_remap_fb(void)
- 	if (!earlycon_console || !(earlycon_console->flags & CON_ENABLED))
- 		return 0;
- 
--	if (pgprot_val(fb_prot) == pgprot_val(PAGE_KERNEL))
--		efi_fb = memremap(fb_base, screen_info.lfb_size, MEMREMAP_WB);
--	else
--		efi_fb = memremap(fb_base, screen_info.lfb_size, MEMREMAP_WC);
-+	efi_fb = memremap(fb_base, screen_info.lfb_size,
-+			  fb_wb ? MEMREMAP_WB : MEMREMAP_WC);
- 
- 	return efi_fb ? 0 : -ENOMEM;
- }
-@@ -53,9 +51,12 @@ late_initcall(efi_earlycon_unmap_fb);
- 
- static __ref void *efi_earlycon_map(unsigned long start, unsigned long len)
- {
-+	pgprot_t fb_prot;
-+
- 	if (efi_fb)
- 		return efi_fb + start;
- 
-+	fb_prot = fb_wb ? PAGE_KERNEL : pgprot_writecombine(PAGE_KERNEL);
- 	return early_memremap_prot(fb_base + start, len, pgprot_val(fb_prot));
- }
- 
-@@ -215,10 +216,7 @@ static int __init efi_earlycon_setup(struct earlycon_device *device,
- 	if (screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
- 		fb_base |= (u64)screen_info.ext_lfb_base << 32;
- 
--	if (opt && !strcmp(opt, "ram"))
--		fb_prot = PAGE_KERNEL;
--	else
--		fb_prot = pgprot_writecombine(PAGE_KERNEL);
-+	fb_wb = opt && !strcmp(opt, "ram");
- 
- 	si = &screen_info;
- 	xres = si->lfb_width;
--- 
-2.20.1
+Thanks and happy Christmas,
+Ard.
 
+
+
+The following changes since commit 77217fcc8e04f27127b32825376ed508705fd946:
+
+  x86/efistub: disable paging at mixed mode entry (2019-12-23 16:25:21 +0100)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next
+
+for you to fetch changes up to c51a0735389b92cb0025137af0034773773ad7da:
+
+  efi/libstub/x86: avoid globals to store context during mixed mode calls (2019-12-24 15:32:22 +0100)
+
+----------------------------------------------------------------
+EFI changes for v5.6:
+- Cleanup of the GOP [graphics output] handling code in the EFI stub (Arvind)
+- Inspired by the above, and with a little bit of Arvind's help, a complete
+  refactor of the mixed mode handling in the x86 EFI stub, getting rid of a
+  lot of ugly and unnecessary wrapping and typecasting. This is a worthwhile
+  cleanup by itself, but it also addresses a recurring issue where stub code
+  often fails to compile on non-x86 because all the casting and thunking via
+  variadic wrapper routines is masking problems in the code.
+
+----------------------------------------------------------------
+Ard Biesheuvel (21):
+      efi/libstub: remove unused __efi_call_early() macro
+      efi/x86: rename efi_is_native() to efi_is_mixed()
+      efi/libstub: use a helper to iterate over a EFI handle array
+      efi/libstub: extend native protocol definitions with mixed_mode aliases
+      efi/libstub: distinguish between native/mixed not 32/64 bit
+      efi/libstub: drop explicit 32/64-bit protocol definitions
+      efi/libstub: use stricter typing for firmware function pointers
+      efi/libstub: annotate firmware routines as __efiapi
+      efi/libstub/x86: avoid thunking for native firmware calls
+      efi/libstub: avoid protocol wrapper for file I/O routines
+      efi/libstub: get rid of 'sys_table_arg' macro parameter
+      efi/libstub: unify the efi_char16_printk implementations
+      efi/libstub/x86: drop __efi_early() export and efi_config struct
+      efi/libstub: drop sys_table_arg from printk routines
+      efi/libstub: remove 'sys_table_arg' from all function prototypes
+      efi/libstub/x86: work around page freeing issue in mixed mode
+      efi/libstub: drop protocol argument from efi_call_proto() macro
+      efi/libstub: drop 'table' argument from efi_table_attr() macro
+      efi/libstub: rename efi_call_early/_runtime macros to be more intuitive
+      efi/libstub: tidy up types and names of global cmdline variables
+      efi/libstub/x86: avoid globals to store context during mixed mode calls
+
+Arvind Sankar (4):
+      efi/gop: Remove bogus packed attribute from GOP structures
+      efi/gop: Remove unused typedef
+      efi/gop: Convert GOP structures to typedef and cleanup some types
+      efi/gop: Unify 32/64-bit functions
+
+ arch/arm/include/asm/efi.h                     |  17 +-
+ arch/arm64/include/asm/efi.h                   |  16 +-
+ arch/x86/Kconfig                               |  11 +-
+ arch/x86/boot/compressed/Makefile              |   2 +-
+ arch/x86/boot/compressed/eboot.c               | 290 +++++-----
+ arch/x86/boot/compressed/eboot.h               |  30 +-
+ arch/x86/boot/compressed/efi_stub_32.S         |  87 ---
+ arch/x86/boot/compressed/efi_stub_64.S         |   5 -
+ arch/x86/boot/compressed/efi_thunk_64.S        |  17 +-
+ arch/x86/boot/compressed/head_32.S             |  64 +--
+ arch/x86/boot/compressed/head_64.S             |  97 +---
+ arch/x86/include/asm/efi.h                     |  77 ++-
+ arch/x86/platform/efi/efi.c                    |  12 +-
+ arch/x86/platform/efi/efi_64.c                 |   6 +-
+ arch/x86/platform/efi/quirks.c                 |   2 +-
+ arch/x86/xen/efi.c                             |   2 +-
+ drivers/firmware/efi/libstub/arm-stub.c        | 110 ++--
+ drivers/firmware/efi/libstub/arm32-stub.c      |  70 ++-
+ drivers/firmware/efi/libstub/arm64-stub.c      |  32 +-
+ drivers/firmware/efi/libstub/efi-stub-helper.c | 278 +++++-----
+ drivers/firmware/efi/libstub/efistub.h         |  48 +-
+ drivers/firmware/efi/libstub/fdt.c             |  53 +-
+ drivers/firmware/efi/libstub/gop.c             | 163 +-----
+ drivers/firmware/efi/libstub/random.c          |  77 ++-
+ drivers/firmware/efi/libstub/secureboot.c      |  11 +-
+ drivers/firmware/efi/libstub/tpm.c             |  48 +-
+ include/linux/efi.h                            | 730 +++++++++++--------------
+ 27 files changed, 914 insertions(+), 1441 deletions(-)
+ delete mode 100644 arch/x86/boot/compressed/efi_stub_32.S
+ delete mode 100644 arch/x86/boot/compressed/efi_stub_64.S
