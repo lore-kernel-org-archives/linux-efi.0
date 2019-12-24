@@ -7,45 +7,45 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ED1B7C2D0CF
-	for <linux-efi@archiver.kernel.org>; Tue, 24 Dec 2019 15:11:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0987AC2D0D0
+	for <linux-efi@archiver.kernel.org>; Tue, 24 Dec 2019 15:11:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id C3E122071A
-	for <linux-efi@archiver.kernel.org>; Tue, 24 Dec 2019 15:11:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CC8FA20722
+	for <linux-efi@archiver.kernel.org>; Tue, 24 Dec 2019 15:11:24 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1577200279;
-	bh=1kGaF15vN4FH35+L10jBoeSTMyYo9nfMYIkLyf6n3DY=;
+	s=default; t=1577200284;
+	bh=lU3wbNRnxJSjaN1Fj0CStvzmViQE35LF9RQXbonPEj0=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=IDvmq5uBnCXz7WuaKhSXWYkVH217cVbL7X4BvW3tGIoh1abC/fXXnM6zlGGftkZZh
-	 HO0XHD40mLelXuUCDlIDskDXQMD1qkVCQhNJVrl4EoyB5A6N8iGziJhGmGLVKZO9Ft
-	 s8AAOMcHc+DDYhS9DXHGuBJi23kJgzoTryj51ous=
+	b=rLhbhHIrYtbeWsn2ltnrEk0i/EISgFHgWK3zKA4Oen/VdVIqzwYn38S8j/pEyGMIl
+	 Ibr664GlGi9iJD4FDYec1443sK8cZgVzI4rBK1cWY+UH+mJmrOmbHIDo2ys0cmzcno
+	 OTsP2AyDzgE3WQvjVNNmqTZosk3NCzLAyYynNiVY=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727273AbfLXPLS (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 24 Dec 2019 10:11:18 -0500
-Received: from mail.kernel.org ([198.145.29.99]:51278 "EHLO mail.kernel.org"
+        id S1727331AbfLXPLY (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 24 Dec 2019 10:11:24 -0500
+Received: from mail.kernel.org ([198.145.29.99]:51334 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727260AbfLXPLR (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Tue, 24 Dec 2019 10:11:17 -0500
+        id S1727297AbfLXPLV (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Tue, 24 Dec 2019 10:11:21 -0500
 Received: from localhost.localdomain (aaubervilliers-681-1-7-6.w90-88.abo.wanadoo.fr [90.88.129.6])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id ECFB12073B;
-        Tue, 24 Dec 2019 15:11:15 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 0F8F920706;
+        Tue, 24 Dec 2019 15:11:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1577200277;
-        bh=1kGaF15vN4FH35+L10jBoeSTMyYo9nfMYIkLyf6n3DY=;
+        s=default; t=1577200280;
+        bh=lU3wbNRnxJSjaN1Fj0CStvzmViQE35LF9RQXbonPEj0=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=RAAjpbODotl186aq1RcetHMH9s138IBE/wqMv1B8Kk3twlDy+2p9PJLdcRCZ66jzh
-         RW56ANO4m1gV3l0T67QxCGrd5zUnnBwUZrxl5BJV1IhkiFnuzkX7Ss9Dq+vwZ07t/P
-         hXouMhyQ0Jx91lUSN2RVvMV5XIuqNazQw8qm5R3w=
+        b=xq3gx+uqRCmMw5+yPB9TykVfqAuHZcdHsQogmkCG0YVl3g9p2VNkPJ+utJrDD8OmX
+         sIv1f1VdOxRFL/Z7W7Cksi6pBigIeJCzPybcJE/Qt3xAtcU2xYu7LYjG5ioLgmf7W9
+         +d3vwVkeBdxpFhhHjo8n0XlQp6CMY/DB09I4tbwU=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
 Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
         Arvind Sankar <nivedita@alum.mit.edu>
-Subject: [PATCH 20/25] efi/libstub/x86: work around page freeing issue in mixed mode
-Date:   Tue, 24 Dec 2019 16:10:20 +0100
-Message-Id: <20191224151025.32482-21-ardb@kernel.org>
+Subject: [PATCH 22/25] efi/libstub: drop 'table' argument from efi_table_attr() macro
+Date:   Tue, 24 Dec 2019 16:10:22 +0100
+Message-Id: <20191224151025.32482-23-ardb@kernel.org>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20191224151025.32482-1-ardb@kernel.org>
 References: <20191224151025.32482-1-ardb@kernel.org>
@@ -56,77 +56,188 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Mixed mode translates calls from the 64-bit kernel into the 32-bit
-firmware by wrapping them in a call to a thunking routine that
-pushes a 32-bit word onto the stack for each argument passed to the
-function, regardless of the argument type. This works surprisingly
-well for most services and protocols, with the exception of ones that
-take explicit 64-bit arguments.
-
-efi_free() invokes the FreePages() EFI boot service, which takes
-a efi_physical_addr_t as its address argument, and this is one of
-those 64-bit types. This means that the 32-bit firmware will
-interpret the (addr, size) pair as a single 64-bit quantity, and
-since it is guaranteed to have the high word set (as size > 0),
-it will always fail due to the fact that EFI memory allocations are
-always < 4 GB on 32-bit firmware.
-
-So let's fix this by giving the thunking code a little hand, and
-pass two values for the address, and a third one for the size.
+None of the definitions of the efi_table_attr() still refer to
+their 'table' argument so let's get rid of it entirely.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/boot/compressed/eboot.c               | 16 ++++++++++++++++
- drivers/firmware/efi/libstub/efi-stub-helper.c |  5 ++++-
- 2 files changed, 20 insertions(+), 1 deletion(-)
+ arch/arm/include/asm/efi.h                    |  3 +--
+ arch/arm64/include/asm/efi.h                  |  3 +--
+ arch/x86/boot/compressed/eboot.c              |  8 +++---
+ arch/x86/include/asm/efi.h                    | 25 +++++++------------
+ .../firmware/efi/libstub/efi-stub-helper.c    | 11 +++-----
+ drivers/firmware/efi/libstub/gop.c            |  9 +++----
+ 6 files changed, 22 insertions(+), 37 deletions(-)
 
+diff --git a/arch/arm/include/asm/efi.h b/arch/arm/include/asm/efi.h
+index bdc5288cc643..bc720024a260 100644
+--- a/arch/arm/include/asm/efi.h
++++ b/arch/arm/include/asm/efi.h
+@@ -54,8 +54,7 @@ void efi_virtmap_unload(void);
+ #define efi_call_runtime(f, ...)	efi_system_table()->runtime->f(__VA_ARGS__)
+ #define efi_is_native()			(true)
+ 
+-#define efi_table_attr(table, attr, instance)				\
+-	instance->attr
++#define efi_table_attr(inst, attr)	(inst->attr)
+ 
+ #define efi_call_proto(inst, func, ...) inst->func(inst, ##__VA_ARGS__)
+ 
+diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
+index 4bc1e89671ab..6f041ae446d2 100644
+--- a/arch/arm64/include/asm/efi.h
++++ b/arch/arm64/include/asm/efi.h
+@@ -97,8 +97,7 @@ static inline unsigned long efi_get_max_initrd_addr(unsigned long dram_base,
+ #define efi_call_runtime(f, ...)	efi_system_table()->runtime->f(__VA_ARGS__)
+ #define efi_is_native()			(true)
+ 
+-#define efi_table_attr(table, attr, instance)				\
+-	instance->attr
++#define efi_table_attr(inst, attr)	(inst->attr)
+ 
+ #define efi_call_proto(inst, func, ...) inst->func(inst, ##__VA_ARGS__)
+ 
 diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index f81dd66626ce..ec92c4decc86 100644
+index 751fd5fc3367..cccd9e16b329 100644
 --- a/arch/x86/boot/compressed/eboot.c
 +++ b/arch/x86/boot/compressed/eboot.c
-@@ -901,3 +901,19 @@ struct boot_params *efi_main(efi_handle_t handle,
- 	for (;;)
- 		asm("hlt");
- }
-+
-+#ifdef CONFIG_EFI_MIXED
-+void efi_free_native(unsigned long size, unsigned long addr);
-+
-+void efi_free(unsigned long size, unsigned long addr)
-+{
-+	if (!size)
-+		return;
-+
-+	if (efi_is_native())
-+		efi_free_native(size, addr);
-+	else
-+		efi64_thunk(efi_system_table()->boottime->mixed_mode.free_pages,
-+			    addr, 0, DIV_ROUND_UP(size, EFI_PAGE_SIZE));
-+}
-+#endif
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index d4215571f05a..b715ac6a0c94 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -346,6 +346,9 @@ efi_status_t efi_low_alloc_above(unsigned long size, unsigned long align,
- }
+@@ -47,8 +47,8 @@ preserve_pci_rom_image(efi_pci_io_protocol_t *pci, struct pci_setup_rom **__rom)
+ 	 * large romsize. The UEFI spec limits the size of option ROMs to 16
+ 	 * MiB so we reject any ROMs over 16 MiB in size to catch this.
+ 	 */
+-	romimage = efi_table_attr(efi_pci_io_protocol, romimage, pci);
+-	romsize = efi_table_attr(efi_pci_io_protocol, romsize, pci);
++	romimage = efi_table_attr(pci, romimage);
++	romsize = efi_table_attr(pci, romsize);
+ 	if (!romimage || !romsize || romsize > SZ_16M)
+ 		return EFI_INVALID_PARAMETER;
  
- void efi_free(unsigned long size, unsigned long addr)
-+	__weak __alias(efi_free_native);
-+
-+void efi_free_native(unsigned long size, unsigned long addr)
- {
- 	unsigned long nr_pages;
- 
-@@ -353,7 +356,7 @@ void efi_free(unsigned long size, unsigned long addr)
+@@ -183,7 +183,7 @@ static void retrieve_apple_device_properties(struct boot_params *boot_params)
+ 	if (status != EFI_SUCCESS)
  		return;
  
- 	nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
--	efi_call_early(free_pages, addr, nr_pages);
-+	efi_system_table()->boottime->free_pages(addr, nr_pages);
+-	if (efi_table_attr(apple_properties_protocol, version, p) != 0x10000) {
++	if (efi_table_attr(p, version) != 0x10000) {
+ 		efi_printk("Unsupported properties proto version\n");
+ 		return;
+ 	}
+@@ -226,7 +226,7 @@ static const efi_char16_t apple[] = L"Apple";
+ static void setup_quirks(struct boot_params *boot_params)
+ {
+ 	efi_char16_t *fw_vendor = (efi_char16_t *)(unsigned long)
+-		efi_table_attr(efi_system_table, fw_vendor, sys_table);
++		efi_table_attr(efi_system_table(), fw_vendor);
+ 
+ 	if (!memcmp(fw_vendor, apple, sizeof(apple))) {
+ 		if (IS_ENABLED(CONFIG_APPLE_PROPERTIES))
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index b7cd14e3a634..39814a0a92f7 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -216,16 +216,11 @@ static inline bool efi_is_native(void)
+ 		__builtin_types_compatible_p(u32, __typeof__(attr)),	\
+ 			(unsigned long)(attr), (attr))
+ 
+-#define efi_table_attr(table, attr, instance) ({			\
+-	__typeof__(instance->attr) __ret;				\
+-	if (efi_is_native()) {						\
+-		__ret = instance->attr;					\
+-	} else {							\
+-		__ret = (__typeof__(__ret))				\
+-			efi_mixed_mode_cast(instance->mixed_mode.attr);	\
+-	}								\
+-	__ret;								\
+-})
++#define efi_table_attr(inst, attr)					\
++	(efi_is_native()						\
++		? inst->attr						\
++		: (__typeof__(inst->attr))				\
++			efi_mixed_mode_cast(inst->mixed_mode.attr))
+ 
+ #define efi_call_proto(inst, func, ...)					\
+ 	(efi_is_native()						\
+@@ -235,16 +230,14 @@ static inline bool efi_is_native(void)
+ #define efi_call_early(f, ...)						\
+ 	(efi_is_native()						\
+ 		? efi_system_table()->boottime->f(__VA_ARGS__)		\
+-		: efi64_thunk(efi_table_attr(efi_boot_services,		\
+-			boottime, efi_system_table())->mixed_mode.f,	\
+-			__VA_ARGS__))
++		: efi64_thunk(efi_table_attr(efi_system_table(),	\
++				boottime)->mixed_mode.f, __VA_ARGS__))
+ 
+ #define efi_call_runtime(f, ...)					\
+ 	(efi_is_native()						\
+ 		? efi_system_table()->runtime->f(__VA_ARGS__)		\
+-		: efi64_thunk(efi_table_attr(efi_runtime_services,	\
+-			runtime, efi_system_table())->mixed_mode.f,	\
+-			__VA_ARGS__))
++		: efi64_thunk(efi_table_attr(efi_system_table(),	\
++				runtime)->mixed_mode.f, __VA_ARGS__))
+ 
+ extern bool efi_reboot_required(void);
+ extern bool efi_is_table_address(unsigned long phys_addr);
+diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+index 48eab7b9d066..8754ec04788b 100644
+--- a/drivers/firmware/efi/libstub/efi-stub-helper.c
++++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+@@ -933,17 +933,15 @@ efi_status_t efi_exit_boot_services(void *handle,
+ 
+ void *get_efi_config_table(efi_guid_t guid)
+ {
+-	unsigned long tables = efi_table_attr(efi_system_table, tables,
+-					      efi_system_table());
+-	int nr_tables = efi_table_attr(efi_system_table, nr_tables,
+-				       efi_system_table());
++	unsigned long tables = efi_table_attr(efi_system_table(), tables);
++	int nr_tables = efi_table_attr(efi_system_table(), nr_tables);
+ 	int i;
+ 
+ 	for (i = 0; i < nr_tables; i++) {
+ 		efi_config_table_t *t = (void *)tables;
+ 
+ 		if (efi_guidcmp(t->guid, guid) == 0)
+-			return efi_table_attr(efi_config_table, table, t);
++			return efi_table_attr(t, table);
+ 
+ 		tables += efi_is_native() ? sizeof(efi_config_table_t)
+ 					  : sizeof(efi_config_table_32_t);
+@@ -953,7 +951,6 @@ void *get_efi_config_table(efi_guid_t guid)
+ 
+ void efi_char16_printk(efi_char16_t *str)
+ {
+-	efi_call_proto(efi_table_attr(efi_system_table, con_out,
+-				      efi_system_table()),
++	efi_call_proto(efi_table_attr(efi_system_table(), con_out),
+ 		       output_string, str);
+ }
+diff --git a/drivers/firmware/efi/libstub/gop.c b/drivers/firmware/efi/libstub/gop.c
+index c3afe8d4a688..8f746282c219 100644
+--- a/drivers/firmware/efi/libstub/gop.c
++++ b/drivers/firmware/efi/libstub/gop.c
+@@ -85,9 +85,6 @@ setup_pixel_info(struct screen_info *si, u32 pixels_per_scan_line,
+ 	}
  }
  
- static efi_status_t efi_file_size(void *__fh, efi_char16_t *filename_16,
+-#define efi_gop_attr(table, attr, instance) \
+-	(efi_table_attr(efi_graphics_output_protocol##table, attr, instance))
+-
+ static efi_status_t setup_gop(struct screen_info *si, efi_guid_t *proto,
+ 			      unsigned long size, void **handles)
+ {
+@@ -123,9 +120,9 @@ static efi_status_t setup_gop(struct screen_info *si, efi_guid_t *proto,
+ 		if (status == EFI_SUCCESS)
+ 			conout_found = true;
+ 
+-		mode = (void *)(unsigned long)efi_gop_attr(, mode, gop);
+-		info = (void *)(unsigned long)efi_gop_attr(_mode, info, mode);
+-		current_fb_base = efi_gop_attr(_mode, frame_buffer_base, mode);
++		mode = efi_table_attr(gop, mode);
++		info = efi_table_attr(mode, info);
++		current_fb_base = efi_table_attr(mode, frame_buffer_base);
+ 
+ 		if ((!first_gop || conout_found) &&
+ 		    info->pixel_format != PIXEL_BLT_ONLY) {
 -- 
 2.20.1
 
