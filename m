@@ -4,48 +4,48 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CF8E9C2D0D2
-	for <linux-efi@archiver.kernel.org>; Tue, 24 Dec 2019 15:11:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 67B99C2D0CF
+	for <linux-efi@archiver.kernel.org>; Tue, 24 Dec 2019 15:11:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 9D0E120706
-	for <linux-efi@archiver.kernel.org>; Tue, 24 Dec 2019 15:11:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 31F8D206D3
+	for <linux-efi@archiver.kernel.org>; Tue, 24 Dec 2019 15:11:47 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1577200303;
-	bh=vp4tPUJrPl7NR6sJEfPN8YgDSPqhs4AhjEo0AZjIFiQ=;
+	s=default; t=1577200307;
+	bh=GVPoJlxSC11hzoqixxuoDr31eHREpLJzx+3KKItjjns=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=gf4EH5v+Vyk8s2HIq/1e0dPJOrFxhuLGvnZ3y4L8WFzmfjxnUErtO+ctygCZSba2m
-	 IL3+r72b8RTemsv6MVtoKsO7kJmIQNBJ3HLfKcN6PG967joZbLodO+N3MyffrYScVA
-	 63PVfmypooCMxFBE6NYR/hQUsgkfY9n+MsO5Ug8k=
+	b=hJcDxsXU27f+xKkXB1/697OicJUfIMLWO+pwbtHvxNl5uqr6kFgbjqlk4vVksCDIW
+	 QdzBuVbF1HJFLzb4+DvNltbEBqiYBA0kkSksvFQ/oSmQrTsZ51vL73j69Q6pyTem40
+	 OMwkD9XK6RguS67Ry8Nye+VBI5xAGoNoAnNYLRbs=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727359AbfLXPLj (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 24 Dec 2019 10:11:39 -0500
-Received: from mail.kernel.org ([198.145.29.99]:51304 "EHLO mail.kernel.org"
+        id S1727429AbfLXPLp (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 24 Dec 2019 10:11:45 -0500
+Received: from mail.kernel.org ([198.145.29.99]:51196 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727274AbfLXPLT (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Tue, 24 Dec 2019 10:11:19 -0500
+        id S1727215AbfLXPLN (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Tue, 24 Dec 2019 10:11:13 -0500
 Received: from localhost.localdomain (aaubervilliers-681-1-7-6.w90-88.abo.wanadoo.fr [90.88.129.6])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 7E9EE206D3;
-        Tue, 24 Dec 2019 15:11:17 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 2AB5E20731;
+        Tue, 24 Dec 2019 15:11:11 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1577200278;
-        bh=vp4tPUJrPl7NR6sJEfPN8YgDSPqhs4AhjEo0AZjIFiQ=;
+        s=default; t=1577200272;
+        bh=GVPoJlxSC11hzoqixxuoDr31eHREpLJzx+3KKItjjns=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=BB+CLt8eTfHwejokBwGemcuSggP7MUmPecC/591G0Zwu8TuHU7dRgeQ2mX/H1MXf3
-         MOvp2qzR2tkmYP+ZvK6HR7p21X97GBO25hZeWA2kYu7JquUPERBbRpJEqOYQv+MqYw
-         N1iVSWjPXwTl6X/O6Un55vFIy8QFgND5qlgTX8a0=
+        b=nTKbe8XoM6NJ+M+rexrBhCgSkjFD0sPnSDV7vcNbzghMI9LLZSqBaqUw1LB6A0BVF
+         uTkqEx8STdPqbQ/55j8Pbbc3nR1Kc27sYQ0v1+TaYr+L+Un46xa9bFmfM0f4V/P4QS
+         JuYE3xTGb8U8w6qyc5bC6EbEyeQTFgj91uPptogY=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
 Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
         Arvind Sankar <nivedita@alum.mit.edu>
-Subject: [PATCH 21/25] efi/libstub: drop protocol argument from efi_call_proto() macro
-Date:   Tue, 24 Dec 2019 16:10:21 +0100
-Message-Id: <20191224151025.32482-22-ardb@kernel.org>
+Subject: [PATCH 17/25] efi/libstub/x86: drop __efi_early() export and efi_config struct
+Date:   Tue, 24 Dec 2019 16:10:17 +0100
+Message-Id: <20191224151025.32482-18-ardb@kernel.org>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20191224151025.32482-1-ardb@kernel.org>
 References: <20191224151025.32482-1-ardb@kernel.org>
@@ -56,208 +56,472 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-After refactoring the mixed mode support code, efi_call_proto()
-no longer uses its protocol argument in any of its implementation,
-so let's remove it altogether.
+The various pointers we stash in the efi_config struct which we
+retrieve using __efi_early() are simply copies of the ones in
+the EFI system table, which we have started accessing directly
+in the previous patch. So drop all the __efi_early() related
+plumbing, as well as all the assembly code dealing with efi_config,
+which allows us to move the PE/COFF entry point to C code as well.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/arm/include/asm/efi.h                    |  3 +--
- arch/arm64/include/asm/efi.h                  |  3 +--
- arch/x86/boot/compressed/eboot.c              | 23 ++++++++-----------
- arch/x86/include/asm/efi.h                    |  6 ++---
- .../firmware/efi/libstub/efi-stub-helper.c    |  6 ++---
- drivers/firmware/efi/libstub/random.c         |  8 +++----
- drivers/firmware/efi/libstub/tpm.c            | 11 ++++-----
- 7 files changed, 25 insertions(+), 35 deletions(-)
+ arch/x86/boot/compressed/eboot.c   | 82 +++++++++++-------------------
+ arch/x86/boot/compressed/head_32.S | 58 +--------------------
+ arch/x86/boot/compressed/head_64.S | 74 +++++----------------------
+ arch/x86/include/asm/efi.h         | 38 ++++----------
+ 4 files changed, 54 insertions(+), 198 deletions(-)
 
-diff --git a/arch/arm/include/asm/efi.h b/arch/arm/include/asm/efi.h
-index 58e5acc424a0..bdc5288cc643 100644
---- a/arch/arm/include/asm/efi.h
-+++ b/arch/arm/include/asm/efi.h
-@@ -57,8 +57,7 @@ void efi_virtmap_unload(void);
- #define efi_table_attr(table, attr, instance)				\
- 	instance->attr
- 
--#define efi_call_proto(protocol, f, instance, ...)			\
--	instance->f(instance, ##__VA_ARGS__)
-+#define efi_call_proto(inst, func, ...) inst->func(inst, ##__VA_ARGS__)
- 
- struct screen_info *alloc_screen_info(void);
- void free_screen_info(struct screen_info *si);
-diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
-index d73693177f31..4bc1e89671ab 100644
---- a/arch/arm64/include/asm/efi.h
-+++ b/arch/arm64/include/asm/efi.h
-@@ -100,8 +100,7 @@ static inline unsigned long efi_get_max_initrd_addr(unsigned long dram_base,
- #define efi_table_attr(table, attr, instance)				\
- 	instance->attr
- 
--#define efi_call_proto(protocol, f, instance, ...)			\
--	instance->f(instance, ##__VA_ARGS__)
-+#define efi_call_proto(inst, func, ...) inst->func(inst, ##__VA_ARGS__)
- 
- #define alloc_screen_info(x...)		&screen_info
- 
 diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index ec92c4decc86..751fd5fc3367 100644
+index 5fb12827bdc2..2a7c6d58cc56 100644
 --- a/arch/x86/boot/compressed/eboot.c
 +++ b/arch/x86/boot/compressed/eboot.c
-@@ -69,27 +69,24 @@ preserve_pci_rom_image(efi_pci_io_protocol_t *pci, struct pci_setup_rom **__rom)
- 	rom->pcilen	= pci->romsize;
- 	*__rom = rom;
+@@ -19,32 +19,17 @@
+ #include "eboot.h"
  
--	status = efi_call_proto(efi_pci_io_protocol, pci.read, pci,
--				EfiPciIoWidthUint16, PCI_VENDOR_ID, 1,
--				&rom->vendor);
-+	status = efi_call_proto(pci, pci.read, EfiPciIoWidthUint16,
-+				PCI_VENDOR_ID, 1, &rom->vendor);
+ static efi_system_table_t *sys_table;
+-
+-static struct efi_config *efi_early;
+-
+-__pure const struct efi_config *__efi_early(void)
+-{
+-	return efi_early;
+-}
++static bool efi_is64 = IS_ENABLED(CONFIG_X86_64);
  
+ __pure efi_system_table_t *efi_system_table(void)
+ {
+ 	return sys_table;
+ }
+ 
+-#define BOOT_SERVICES(bits)						\
+-static void setup_boot_services##bits(struct efi_config *c)		\
+-{									\
+-	efi_system_table_##bits##_t *table;				\
+-									\
+-	table = (typeof(table))sys_table;				\
+-									\
+-	c->runtime_services	= table->runtime;			\
+-	c->boot_services	= table->boottime;			\
+-	c->text_output		= table->con_out;			\
++__pure bool efi_is_64bit(void)
++{
++	return efi_is64;
+ }
+-BOOT_SERVICES(32);
+-BOOT_SERVICES(64);
+ 
+ static efi_status_t
+ preserve_pci_rom_image(efi_pci_io_protocol_t *pci, struct pci_setup_rom **__rom)
+@@ -367,21 +352,24 @@ void setup_graphics(struct boot_params *boot_params)
+ 	}
+ }
+ 
++void startup_32(struct boot_params *boot_params);
++
++void __noreturn efi_stub_entry(efi_handle_t handle,
++			       efi_system_table_t *sys_table_arg,
++			       struct boot_params *boot_params);
++
+ /*
+  * Because the x86 boot code expects to be passed a boot_params we
+  * need to create one ourselves (usually the bootloader would create
+  * one for us).
+- *
+- * The caller is responsible for filling out ->code32_start in the
+- * returned boot_params.
+  */
+-struct boot_params *make_boot_params(struct efi_config *c)
++efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
++				   efi_system_table_t *sys_table_arg)
+ {
+ 	struct boot_params *boot_params;
+ 	struct apm_bios_info *bi;
+ 	struct setup_header *hdr;
+ 	efi_loaded_image_t *image;
+-	void *handle;
+ 	efi_guid_t proto = LOADED_IMAGE_PROTOCOL_GUID;
+ 	int options_size = 0;
+ 	efi_status_t status;
+@@ -389,31 +377,24 @@ struct boot_params *make_boot_params(struct efi_config *c)
+ 	unsigned long ramdisk_addr;
+ 	unsigned long ramdisk_size;
+ 
+-	efi_early = c;
+-	sys_table = (efi_system_table_t *)(unsigned long)efi_early->table;
+-	handle = (void *)(unsigned long)efi_early->image_handle;
++	sys_table = sys_table_arg;
+ 
+ 	/* Check if we were booted by the EFI firmware */
+ 	if (sys_table->hdr.signature != EFI_SYSTEM_TABLE_SIGNATURE)
+-		return NULL;
+-
+-	if (efi_is_64bit())
+-		setup_boot_services64(efi_early);
+-	else
+-		setup_boot_services32(efi_early);
++		return EFI_INVALID_PARAMETER;
+ 
+ 	status = efi_call_early(handle_protocol, handle,
+ 				&proto, (void *)&image);
  	if (status != EFI_SUCCESS) {
- 		efi_printk("Failed to read rom->vendor\n");
- 		goto free_struct;
+ 		efi_printk(sys_table, "Failed to get handle for LOADED_IMAGE_PROTOCOL\n");
+-		return NULL;
++		return status;
  	}
  
--	status = efi_call_proto(efi_pci_io_protocol, pci.read, pci,
--				EfiPciIoWidthUint16, PCI_DEVICE_ID, 1,
--				&rom->devid);
-+	status = efi_call_proto(pci, pci.read, EfiPciIoWidthUint16,
-+				PCI_DEVICE_ID, 1, &rom->devid);
- 
+ 	status = efi_low_alloc(sys_table, 0x4000, 1,
+ 			       (unsigned long *)&boot_params);
  	if (status != EFI_SUCCESS) {
- 		efi_printk("Failed to read rom->devid\n");
- 		goto free_struct;
+ 		efi_printk(sys_table, "Failed to allocate lowmem for boot params\n");
+-		return NULL;
++		return status;
  	}
  
--	status = efi_call_proto(efi_pci_io_protocol, get_location, pci,
--				&rom->segment, &rom->bus, &rom->device,
--				&rom->function);
-+	status = efi_call_proto(pci, get_location, &rom->segment, &rom->bus,
-+				&rom->device, &rom->function);
+ 	memset(boot_params, 0x0, 0x4000);
+@@ -474,14 +455,17 @@ struct boot_params *make_boot_params(struct efi_config *c)
+ 	boot_params->ext_ramdisk_image = (u64)ramdisk_addr >> 32;
+ 	boot_params->ext_ramdisk_size  = (u64)ramdisk_size >> 32;
  
- 	if (status != EFI_SUCCESS)
- 		goto free_struct;
-@@ -191,7 +188,7 @@ static void retrieve_apple_device_properties(struct boot_params *boot_params)
- 		return;
- 	}
+-	return boot_params;
++	hdr->code32_start = (u32)(unsigned long)startup_32;
++
++	efi_stub_entry(handle, sys_table, boot_params);
++	/* not reached */
  
--	efi_call_proto(apple_properties_protocol, get_all, p, NULL, &size);
-+	efi_call_proto(p, get_all, NULL, &size);
- 	if (!size)
- 		return;
+ fail2:
+ 	efi_free(sys_table, options_size, hdr->cmd_line_ptr);
+ fail:
+ 	efi_free(sys_table, 0x4000, (unsigned long)boot_params);
  
-@@ -204,8 +201,7 @@ static void retrieve_apple_device_properties(struct boot_params *boot_params)
- 			return;
- 		}
+-	return NULL;
++	return status;
+ }
  
--		status = efi_call_proto(apple_properties_protocol, get_all, p,
--					new->data, &size);
-+		status = efi_call_proto(p, get_all, new->data, &size);
+ static void add_e820ext(struct boot_params *params,
+@@ -737,33 +721,26 @@ static efi_status_t exit_boot(struct boot_params *boot_params, void *handle)
+  * On success we return a pointer to a boot_params structure, and NULL
+  * on failure.
+  */
+-struct boot_params *
+-efi_main(struct efi_config *c, struct boot_params *boot_params)
++struct boot_params *efi_main(efi_handle_t handle,
++			     efi_system_table_t *sys_table_arg,
++			     struct boot_params *boot_params,
++			     bool is64)
+ {
+ 	struct desc_ptr *gdt = NULL;
+ 	struct setup_header *hdr = &boot_params->hdr;
+ 	efi_status_t status;
+ 	struct desc_struct *desc;
+-	void *handle;
+-	efi_system_table_t *_table;
+ 	unsigned long cmdline_paddr;
  
- 		if (status == EFI_BUFFER_TOO_SMALL)
- 			efi_call_early(free_pool, new);
-@@ -280,8 +276,7 @@ setup_uga(struct screen_info *si, efi_guid_t *uga_proto, unsigned long size)
- 		pciio = NULL;
- 		efi_call_early(handle_protocol, handle, &pciio_proto, &pciio);
+-	efi_early = c;
+-
+-	_table = (efi_system_table_t *)(unsigned long)efi_early->table;
+-	handle = (void *)(unsigned long)efi_early->image_handle;
++	sys_table = sys_table_arg;
  
--		status = efi_call_proto(efi_uga_draw_protocol, get_mode, uga,
--					&w, &h, &depth, &refresh);
-+		status = efi_call_proto(uga, get_mode, &w, &h, &depth, &refresh);
- 		if (status == EFI_SUCCESS && (!first_uga || pciio)) {
- 			width = w;
- 			height = h;
+-	sys_table = _table;
++	if (IS_ENABLED(CONFIG_EFI_MIXED))
++		efi_is64 = is64;
+ 
+ 	/* Check if we were booted by the EFI firmware */
+ 	if (sys_table->hdr.signature != EFI_SYSTEM_TABLE_SIGNATURE)
+ 		goto fail;
+ 
+-	if (efi_is_64bit())
+-		setup_boot_services64(efi_early);
+-	else
+-		setup_boot_services32(efi_early);
+-
+ 	/*
+ 	 * make_boot_params() may have been called before efi_main(), in which
+ 	 * case this is the second time we parse the cmdline. This is ok,
+@@ -925,5 +902,6 @@ efi_main(struct efi_config *c, struct boot_params *boot_params)
+ fail:
+ 	efi_printk(sys_table, "efi_main() failed!\n");
+ 
+-	return NULL;
++	for (;;)
++		asm("hlt");
+ }
+diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
+index 0b03dc7bba12..e43ac17cb9fb 100644
+--- a/arch/x86/boot/compressed/head_32.S
++++ b/arch/x86/boot/compressed/head_32.S
+@@ -145,63 +145,16 @@ SYM_FUNC_START(startup_32)
+ SYM_FUNC_END(startup_32)
+ 
+ #ifdef CONFIG_EFI_STUB
+-/*
+- * We don't need the return address, so set up the stack so efi_main() can find
+- * its arguments.
+- */
+-SYM_FUNC_START(efi_pe_entry)
+-	add	$0x4, %esp
+-
+-	call	1f
+-1:	popl	%esi
+-	subl	$1b, %esi
+-
+-	popl	%ecx
+-	movl	%ecx, efi32_config(%esi)	/* Handle */
+-	popl	%ecx
+-	movl	%ecx, efi32_config+8(%esi)	/* EFI System table pointer */
+-
+-	leal	efi32_config(%esi), %eax
+-	pushl	%eax
+-
+-	call	make_boot_params
+-	cmpl	$0, %eax
+-	je	fail
+-	movl	%esi, BP_code32_start(%eax)
+-	popl	%ecx
+-	pushl	%eax
+-	pushl	%ecx
+-	jmp	2f		/* Skip efi_config initialization */
+-SYM_FUNC_END(efi_pe_entry)
+-
+ SYM_FUNC_START(efi32_stub_entry)
++SYM_FUNC_START_ALIAS(efi_stub_entry)
+ 	add	$0x4, %esp
+-	popl	%ecx
+-	popl	%edx
+-
+-	call	1f
+-1:	popl	%esi
+-	subl	$1b, %esi
+-
+-	movl	%ecx, efi32_config(%esi)	/* Handle */
+-	movl	%edx, efi32_config+8(%esi)	/* EFI System table pointer */
+-
+-	leal	efi32_config(%esi), %eax
+-	pushl	%eax
+-2:
+ 	call	efi_main
+-	cmpl	$0, %eax
+ 	movl	%eax, %esi
+-	jne	2f
+-fail:
+-	/* EFI init failed, so hang. */
+-	hlt
+-	jmp	fail
+-2:
+ 	movl	BP_code32_start(%esi), %eax
+ 	leal	startup_32(%eax), %eax
+ 	jmp	*%eax
+ SYM_FUNC_END(efi32_stub_entry)
++SYM_FUNC_END_ALIAS(efi_stub_entry)
+ #endif
+ 
+ 	.text
+@@ -258,13 +211,6 @@ SYM_FUNC_START_LOCAL_NOALIGN(.Lrelocated)
+ 	jmp	*%eax
+ SYM_FUNC_END(.Lrelocated)
+ 
+-#ifdef CONFIG_EFI_STUB
+-	.data
+-efi32_config:
+-	.fill 5,8,0
+-	.byte 0
+-#endif
+-
+ /*
+  * Stack and heap for uncompression
+  */
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index ad57edeaeeb3..a6f3ee9ca61d 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -208,10 +208,14 @@ SYM_FUNC_START(startup_32)
+ 	pushl	$__KERNEL_CS
+ 	leal	startup_64(%ebp), %eax
+ #ifdef CONFIG_EFI_MIXED
+-	movl	efi32_config(%ebp), %ebx
++	movl	efi32_boot_args(%ebp), %ebx
+ 	cmp	$0, %ebx
+ 	jz	1f
+ 	leal	handover_entry(%ebp), %eax
++	movl	0(%ebx), %edi
++	movl	4(%ebx), %esi
++	movl	8(%ebx), %edx
++	movl	$0x0, %ecx
+ 1:
+ #endif
+ 	pushl	%eax
+@@ -228,22 +232,14 @@ SYM_FUNC_END(startup_32)
+ 	.org 0x190
+ SYM_FUNC_START(efi32_stub_entry)
+ 	add	$0x4, %esp		/* Discard return address */
+-	popl	%ecx
+-	popl	%edx
+-	popl	%esi
+ 
+-	leal	(BP_scratch+4)(%esi), %esp
+ 	call	1f
+ 1:	pop	%ebp
+ 	subl	$1b, %ebp
+ 
+-	movl	%ecx, efi32_config(%ebp)
+-	movl	%edx, efi32_config+8(%ebp)
++	movl	%esp, efi32_boot_args(%ebp)
+ 	sgdtl	efi32_boot_gdt(%ebp)
+ 
+-	leal	efi32_config(%ebp), %eax
+-	movl	%eax, efi_config(%ebp)
+-
+ 	/* Disable paging */
+ 	movl	%cr0, %eax
+ 	btrl	$X86_CR0_PG_BIT, %eax
+@@ -450,51 +446,19 @@ trampoline_return:
+ SYM_CODE_END(startup_64)
+ 
+ #ifdef CONFIG_EFI_STUB
+-
+-/* The entry point for the PE/COFF executable is efi_pe_entry. */
+-SYM_FUNC_START(efi_pe_entry)
+-	movq	%rcx, efi64_config(%rip)	/* Handle */
+-	movq	%rdx, efi64_config+8(%rip) /* EFI System table pointer */
+-
+-	leaq	efi64_config(%rip), %rax
+-	movq	%rax, efi_config(%rip)
+-
+-	movq	%rax, %rdi
+-	call	make_boot_params
+-	cmpq	$0,%rax
+-	je	fail
+-	mov	%rax, %rsi
+-	leaq	startup_32(%rip), %rax
+-	movl	%eax, BP_code32_start(%rsi)
+-
+-handover_entry:
+-	movq	efi_config(%rip), %rdi
++	.org 0x390
++SYM_FUNC_START(efi64_stub_entry)
++SYM_FUNC_START_ALIAS(efi_stub_entry)
++	movq	$1, %rcx
++SYM_INNER_LABEL(handover_entry, SYM_L_LOCAL)
+ 	and	$~0xf, %rsp			/* realign the stack */
+ 	call	efi_main
+ 	movq	%rax,%rsi
+-	cmpq	$0,%rax
+-	jne	2f
+-fail:
+-	/* EFI init failed, so hang. */
+-	hlt
+-	jmp	fail
+-2:
+ 	movl	BP_code32_start(%esi), %eax
+ 	leaq	startup_64(%rax), %rax
+ 	jmp	*%rax
+-SYM_FUNC_END(efi_pe_entry)
+-
+-	.org 0x390
+-SYM_FUNC_START(efi64_stub_entry)
+-	movq	%rdi, efi64_config(%rip)	/* Handle */
+-	movq	%rsi, efi64_config+8(%rip) /* EFI System table pointer */
+-
+-	leaq	efi64_config(%rip), %rax
+-	movq	%rax, efi_config(%rip)
+-
+-	movq	%rdx, %rsi
+-	jmp	handover_entry
+ SYM_FUNC_END(efi64_stub_entry)
++SYM_FUNC_END_ALIAS(efi_stub_entry)
+ #endif
+ 
+ 	.text
+@@ -663,22 +627,10 @@ SYM_DATA_START_LOCAL(gdt)
+ 	.quad   0x0000000000000000	/* TS continued */
+ SYM_DATA_END_LABEL(gdt, SYM_L_LOCAL, gdt_end)
+ 
+-#ifdef CONFIG_EFI_STUB
+-SYM_DATA_LOCAL(efi_config, .quad 0)
+-
+ #ifdef CONFIG_EFI_MIXED
+-SYM_DATA_START(efi32_config)
+-	.fill	5,8,0
+-	.byte	0
+-SYM_DATA_END(efi32_config)
++SYM_DATA_LOCAL(efi32_boot_args, .long 0)
+ #endif
+ 
+-SYM_DATA_START(efi64_config)
+-	.fill	5,8,0
+-	.byte	1
+-SYM_DATA_END(efi64_config)
+-#endif /* CONFIG_EFI_STUB */
+-
+ /*
+  * Stack and heap for uncompression
+  */
 diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index 1817f350618e..b7cd14e3a634 100644
+index 001905daa110..1817f350618e 100644
 --- a/arch/x86/include/asm/efi.h
 +++ b/arch/x86/include/asm/efi.h
-@@ -227,10 +227,10 @@ static inline bool efi_is_native(void)
- 	__ret;								\
- })
+@@ -200,32 +200,14 @@ static inline efi_status_t efi_thunk_set_virtual_address_map(
  
--#define efi_call_proto(protocol, f, instance, ...)			\
-+#define efi_call_proto(inst, func, ...)					\
- 	(efi_is_native()						\
--		? instance->f(instance, ##__VA_ARGS__)			\
--		: efi64_thunk(instance->mixed_mode.f, instance,	##__VA_ARGS__))
-+		? inst->func(inst, ##__VA_ARGS__)			\
-+		: efi64_thunk(inst->mixed_mode.func, inst, ##__VA_ARGS__))
+ /* arch specific definitions used by the stub code */
+ 
+-struct efi_config {
+-	u64 image_handle;
+-	u64 table;
+-	u64 runtime_services;
+-	u64 boot_services;
+-	u64 text_output;
+-	bool is64;
+-} __packed;
+-
+-__pure const struct efi_config *__efi_early(void);
+-
+-static inline bool efi_is_64bit(void)
+-{
+-	if (!IS_ENABLED(CONFIG_X86_64))
+-		return false;
+-
+-	if (!IS_ENABLED(CONFIG_EFI_MIXED))
+-		return true;
+-
+-	return __efi_early()->is64;
+-}
++__pure bool efi_is_64bit(void);
+ 
+ static inline bool efi_is_native(void)
+ {
+ 	if (!IS_ENABLED(CONFIG_X86_64))
+ 		return true;
++	if (!IS_ENABLED(CONFIG_EFI_MIXED))
++		return true;
+ 	return efi_is_64bit();
+ }
+ 
+@@ -252,18 +234,16 @@ static inline bool efi_is_native(void)
  
  #define efi_call_early(f, ...)						\
  	(efi_is_native()						\
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index b715ac6a0c94..48eab7b9d066 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -953,9 +953,7 @@ void *get_efi_config_table(efi_guid_t guid)
+-		? ((efi_boot_services_t *)(unsigned long)		\
+-			__efi_early()->boot_services)->f(__VA_ARGS__)	\
+-		: efi64_thunk(((efi_boot_services_t *)(unsigned long)	\
+-			__efi_early()->boot_services)->mixed_mode.f,	\
++		? efi_system_table()->boottime->f(__VA_ARGS__)		\
++		: efi64_thunk(efi_table_attr(efi_boot_services,		\
++			boottime, efi_system_table())->mixed_mode.f,	\
+ 			__VA_ARGS__))
  
- void efi_char16_printk(efi_char16_t *str)
- {
--	efi_call_proto(efi_simple_text_output_protocol,
--		       output_string,
--		       efi_table_attr(efi_system_table, con_out,
-+	efi_call_proto(efi_table_attr(efi_system_table, con_out,
- 				      efi_system_table()),
--		       str);
-+		       output_string, str);
- }
-diff --git a/drivers/firmware/efi/libstub/random.c b/drivers/firmware/efi/libstub/random.c
-index 9b30d953d13b..fbd5b5724b19 100644
---- a/drivers/firmware/efi/libstub/random.c
-+++ b/drivers/firmware/efi/libstub/random.c
-@@ -37,7 +37,7 @@ efi_status_t efi_get_random_bytes(unsigned long size, u8 *out)
- 	if (status != EFI_SUCCESS)
- 		return status;
+ #define efi_call_runtime(f, ...)					\
+ 	(efi_is_native()						\
+-		? ((efi_runtime_services_t *)(unsigned long)		\
+-			__efi_early()->runtime_services)->f(__VA_ARGS__)\
+-		: efi64_thunk(((efi_runtime_services_t *)(unsigned long)\
+-			__efi_early()->runtime_services)->mixed_mode.f,	\
++		? efi_system_table()->runtime->f(__VA_ARGS__)		\
++		: efi64_thunk(efi_table_attr(efi_runtime_services,	\
++			runtime, efi_system_table())->mixed_mode.f,	\
+ 			__VA_ARGS__))
  
--	return efi_call_proto(efi_rng_protocol, get_rng, rng, NULL, size, out);
-+	return efi_call_proto(rng, get_rng, NULL, size, out);
- }
- 
- /*
-@@ -173,7 +173,7 @@ efi_status_t efi_random_get_seed(void)
- 	if (status != EFI_SUCCESS)
- 		return status;
- 
--	status = efi_call_proto(efi_rng_protocol, get_rng, rng, &rng_algo_raw,
-+	status = efi_call_proto(rng, get_rng, &rng_algo_raw,
- 				 EFI_RANDOM_SEED_SIZE, seed->bits);
- 
- 	if (status == EFI_UNSUPPORTED)
-@@ -181,8 +181,8 @@ efi_status_t efi_random_get_seed(void)
- 		 * Use whatever algorithm we have available if the raw algorithm
- 		 * is not implemented.
- 		 */
--		status = efi_call_proto(efi_rng_protocol, get_rng, rng, NULL,
--					 EFI_RANDOM_SEED_SIZE, seed->bits);
-+		status = efi_call_proto(rng, get_rng, NULL,
-+					EFI_RANDOM_SEED_SIZE, seed->bits);
- 
- 	if (status != EFI_SUCCESS)
- 		goto err_freepool;
-diff --git a/drivers/firmware/efi/libstub/tpm.c b/drivers/firmware/efi/libstub/tpm.c
-index f6fa1c9de77c..4a0017a181bf 100644
---- a/drivers/firmware/efi/libstub/tpm.c
-+++ b/drivers/firmware/efi/libstub/tpm.c
-@@ -77,15 +77,14 @@ void efi_retrieve_tpm2_eventlog(void)
- 	if (status != EFI_SUCCESS)
- 		return;
- 
--	status = efi_call_proto(efi_tcg2_protocol, get_event_log,
--				tcg2_protocol, version, &log_location,
--				&log_last_entry, &truncated);
-+	status = efi_call_proto(tcg2_protocol, get_event_log, version,
-+				&log_location, &log_last_entry, &truncated);
- 
- 	if (status != EFI_SUCCESS || !log_location) {
- 		version = EFI_TCG2_EVENT_LOG_FORMAT_TCG_1_2;
--		status = efi_call_proto(efi_tcg2_protocol, get_event_log,
--					tcg2_protocol, version, &log_location,
--					&log_last_entry, &truncated);
-+		status = efi_call_proto(tcg2_protocol, get_event_log, version,
-+					&log_location, &log_last_entry,
-+					&truncated);
- 		if (status != EFI_SUCCESS || !log_location)
- 			return;
- 
+ extern bool efi_reboot_required(void);
 -- 
 2.20.1
 
