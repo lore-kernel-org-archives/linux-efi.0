@@ -7,45 +7,45 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 75D68C2D0CF
-	for <linux-efi@archiver.kernel.org>; Tue, 24 Dec 2019 15:12:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B0E26C2D0CF
+	for <linux-efi@archiver.kernel.org>; Tue, 24 Dec 2019 15:12:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 4970720706
-	for <linux-efi@archiver.kernel.org>; Tue, 24 Dec 2019 15:12:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7F41220706
+	for <linux-efi@archiver.kernel.org>; Tue, 24 Dec 2019 15:12:19 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1577200336;
-	bh=Ws+oTwB+I3M+2jvOIhXh/ZD0LB86tM4i3zzfEbfA6Rg=;
+	s=default; t=1577200339;
+	bh=Cc5CrzKhXQw4gi2he3vnDwz0fwhp+/45TjHbFXyulW8=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=bqoqc3qIFfUddM4qWXI2TbU7aZY5K5rquVGE7QC2d6PBCldawejnhg4bxI9E6jK1y
-	 Wq23QaGaG8WSHpbeGu7hs8kQOz0ax6fqJp/c+B1Bq6NQuBJ8dvYunuz6FudUEl92N0
-	 fpKyoQyjXmBBwTnkzCsV5XZPtwj4Jpl39ey/Reec=
+	b=SVhIohT4KJaWkMWibDsnG26045E/JBldogqdQg46Io7lJ7pkC6IV2sjSdEORzDgg6
+	 GfwcGNjhOpS0aDcpGepLvy1GGDSMhIx2YdPH/TPNNKIV7+7zydu32bWFvedYrnXAlL
+	 hBnORzOWreNuOcfAKhUsR2RXIGO+2DHmdsqJyfKo=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726954AbfLXPK4 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 24 Dec 2019 10:10:56 -0500
-Received: from mail.kernel.org ([198.145.29.99]:50772 "EHLO mail.kernel.org"
+        id S1726271AbfLXPKv (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 24 Dec 2019 10:10:51 -0500
+Received: from mail.kernel.org ([198.145.29.99]:50628 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726920AbfLXPK4 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Tue, 24 Dec 2019 10:10:56 -0500
+        id S1726704AbfLXPKv (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Tue, 24 Dec 2019 10:10:51 -0500
 Received: from localhost.localdomain (aaubervilliers-681-1-7-6.w90-88.abo.wanadoo.fr [90.88.129.6])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 02213206D3;
-        Tue, 24 Dec 2019 15:10:53 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 5A9D520730;
+        Tue, 24 Dec 2019 15:10:49 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1577200255;
-        bh=Ws+oTwB+I3M+2jvOIhXh/ZD0LB86tM4i3zzfEbfA6Rg=;
+        s=default; t=1577200250;
+        bh=Cc5CrzKhXQw4gi2he3vnDwz0fwhp+/45TjHbFXyulW8=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=t9mdvB3WF77xeoMels2lsiq+8AG56R2zmGHFbRK1htGvrwkwM5YAa719YeWfYHWsD
-         ujrTQiFaBWlFCdblnmLjREwMxtpPdqm0eIuBiRQfgfHP3lpt5sS8LglLe4E3sfmJkS
-         VKGOrDwWMpuW88lVQhZAxujxmu0VmbsLxhlmbgtc=
+        b=EETZx0DpYxRmF6OEDJ80+Z7DcGolkbV/CM3E7R7VyiDQIJ2w0aLxTKnbgSPh5oRxz
+         m7gnEoz1F8RXDF7VQbDHlD3ZapfQL7XrzqAEKNsWo9P6VXLAQ97ihYQOQwfeZJqH/g
+         tmAA6KKPQ6nqf9KJOjG1T1DjNoYCOhC7u+chDxjY=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
 Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
         Arvind Sankar <nivedita@alum.mit.edu>
-Subject: [PATCH 06/25] efi/x86: rename efi_is_native() to efi_is_mixed()
-Date:   Tue, 24 Dec 2019 16:10:06 +0100
-Message-Id: <20191224151025.32482-7-ardb@kernel.org>
+Subject: [PATCH 03/25] efi/gop: Convert GOP structures to typedef and cleanup some types
+Date:   Tue, 24 Dec 2019 16:10:03 +0100
+Message-Id: <20191224151025.32482-4-ardb@kernel.org>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20191224151025.32482-1-ardb@kernel.org>
 References: <20191224151025.32482-1-ardb@kernel.org>
@@ -56,125 +56,197 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The ARM architecture does not permit combining 32-bit and 64-bit code
-at the same privilege level, and so EFI mixed mode is strictly a x86
-concept.
+From: Arvind Sankar <nivedita@alum.mit.edu>
 
-In preparation of turning the 32/64 bit distinction in shared stub
-code to a native vs mixed one, refactor x86's current use of the
-helper function efi_is_native() into efi_is_mixed().
+Use typedef for the GOP structures, in anticipation of unifying
+32/64-bit code. Also use more appropriate types in the non-bitness
+specific structures for the framebuffer address and pointers.
 
+Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/include/asm/efi.h     | 10 ++++++----
- arch/x86/platform/efi/efi.c    |  8 ++++----
- arch/x86/platform/efi/efi_64.c |  4 ++--
- arch/x86/platform/efi/quirks.c |  2 +-
- 4 files changed, 13 insertions(+), 11 deletions(-)
+ drivers/firmware/efi/libstub/gop.c | 26 ++++++++---------
+ include/linux/efi.h                | 46 +++++++++++++++---------------
+ 2 files changed, 36 insertions(+), 36 deletions(-)
 
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index 59c19e0b6027..6094e7f49a99 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -153,17 +153,19 @@ extern u64 efi_setup;
+diff --git a/drivers/firmware/efi/libstub/gop.c b/drivers/firmware/efi/libstub/gop.c
+index b7bf1e993b8b..a0c1ef64d445 100644
+--- a/drivers/firmware/efi/libstub/gop.c
++++ b/drivers/firmware/efi/libstub/gop.c
+@@ -35,7 +35,7 @@ static void find_bits(unsigned long mask, u8 *pos, u8 *size)
  
- #ifdef CONFIG_EFI
- 
--static inline bool efi_is_native(void)
-+static inline bool efi_is_mixed(void)
+ static void
+ setup_pixel_info(struct screen_info *si, u32 pixels_per_scan_line,
+-		 struct efi_pixel_bitmask pixel_info, int pixel_format)
++		 efi_pixel_bitmask_t pixel_info, int pixel_format)
  {
--	return IS_ENABLED(CONFIG_X86_64) == efi_enabled(EFI_64BIT);
-+	if (!IS_ENABLED(CONFIG_EFI_MIXED))
-+		return false;
-+	return IS_ENABLED(CONFIG_X86_64) && !efi_enabled(EFI_64BIT);
- }
- 
- static inline bool efi_runtime_supported(void)
+ 	if (pixel_format == PIXEL_RGB_RESERVED_8BIT_PER_COLOR) {
+ 		si->lfb_depth = 32;
+@@ -87,13 +87,13 @@ static efi_status_t
+ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
+             efi_guid_t *proto, unsigned long size, void **gop_handle)
  {
--	if (efi_is_native())
-+	if (!efi_is_mixed())
- 		return true;
+-	struct efi_graphics_output_protocol_32 *gop32, *first_gop;
++	efi_graphics_output_protocol_32_t *gop32, *first_gop;
+ 	unsigned long nr_gops;
+ 	u16 width, height;
+ 	u32 pixels_per_scan_line;
+ 	u32 ext_lfb_base;
+-	u64 fb_base;
+-	struct efi_pixel_bitmask pixel_info;
++	efi_physical_addr_t fb_base;
++	efi_pixel_bitmask_t pixel_info;
+ 	int pixel_format;
+ 	efi_status_t status;
+ 	u32 *handles = (u32 *)(unsigned long)gop_handle;
+@@ -104,13 +104,13 @@ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
  
--	if (IS_ENABLED(CONFIG_EFI_MIXED) && !efi_enabled(EFI_OLD_MEMMAP))
-+	if (!efi_enabled(EFI_OLD_MEMMAP))
- 		return true;
+ 	nr_gops = size / sizeof(u32);
+ 	for (i = 0; i < nr_gops; i++) {
+-		struct efi_graphics_output_protocol_mode_32 *mode;
+-		struct efi_graphics_output_mode_info *info = NULL;
++		efi_graphics_output_protocol_mode_32_t *mode;
++		efi_graphics_output_mode_info_t *info = NULL;
+ 		efi_guid_t conout_proto = EFI_CONSOLE_OUT_DEVICE_GUID;
+ 		bool conout_found = false;
+ 		void *dummy = NULL;
+ 		efi_handle_t h = (efi_handle_t)(unsigned long)handles[i];
+-		u64 current_fb_base;
++		efi_physical_addr_t current_fb_base;
  
- 	return false;
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 38d44f36d5ed..e188b7ce0796 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -828,7 +828,7 @@ static bool should_map_region(efi_memory_desc_t *md)
- 	 * Map all of RAM so that we can access arguments in the 1:1
- 	 * mapping when making EFI runtime calls.
- 	 */
--	if (IS_ENABLED(CONFIG_EFI_MIXED) && !efi_is_native()) {
-+	if (efi_is_mixed()) {
- 		if (md->type == EFI_CONVENTIONAL_MEMORY ||
- 		    md->type == EFI_LOADER_DATA ||
- 		    md->type == EFI_LOADER_CODE)
-@@ -903,7 +903,7 @@ static void __init kexec_enter_virtual_mode(void)
- 	 * kexec kernel because in the initial boot something else might
- 	 * have been mapped at these virtual addresses.
- 	 */
--	if (!efi_is_native() || efi_enabled(EFI_OLD_MEMMAP)) {
-+	if (efi_is_mixed() || efi_enabled(EFI_OLD_MEMMAP)) {
- 		efi_memmap_unmap();
- 		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
- 		return;
-@@ -1040,7 +1040,7 @@ static void __init __efi_enter_virtual_mode(void)
+ 		status = efi_call_early(handle_protocol, h,
+ 					proto, (void **)&gop32);
+@@ -184,13 +184,13 @@ static efi_status_t
+ setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
+ 	    efi_guid_t *proto, unsigned long size, void **gop_handle)
+ {
+-	struct efi_graphics_output_protocol_64 *gop64, *first_gop;
++	efi_graphics_output_protocol_64_t *gop64, *first_gop;
+ 	unsigned long nr_gops;
+ 	u16 width, height;
+ 	u32 pixels_per_scan_line;
+ 	u32 ext_lfb_base;
+-	u64 fb_base;
+-	struct efi_pixel_bitmask pixel_info;
++	efi_physical_addr_t fb_base;
++	efi_pixel_bitmask_t pixel_info;
+ 	int pixel_format;
+ 	efi_status_t status;
+ 	u64 *handles = (u64 *)(unsigned long)gop_handle;
+@@ -201,13 +201,13 @@ setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
  
- 	efi_sync_low_kernel_mappings();
+ 	nr_gops = size / sizeof(u64);
+ 	for (i = 0; i < nr_gops; i++) {
+-		struct efi_graphics_output_protocol_mode_64 *mode;
+-		struct efi_graphics_output_mode_info *info = NULL;
++		efi_graphics_output_protocol_mode_64_t *mode;
++		efi_graphics_output_mode_info_t *info = NULL;
+ 		efi_guid_t conout_proto = EFI_CONSOLE_OUT_DEVICE_GUID;
+ 		bool conout_found = false;
+ 		void *dummy = NULL;
+ 		efi_handle_t h = (efi_handle_t)(unsigned long)handles[i];
+-		u64 current_fb_base;
++		efi_physical_addr_t current_fb_base;
  
--	if (efi_is_native()) {
-+	if (!efi_is_mixed()) {
- 		status = phys_efi_set_virtual_address_map(
- 				efi.memmap.desc_size * count,
- 				efi.memmap.desc_size,
-@@ -1071,7 +1071,7 @@ static void __init __efi_enter_virtual_mode(void)
- 	 */
- 	efi.runtime_version = efi_systab.hdr.revision;
+ 		status = efi_call_early(handle_protocol, h,
+ 					proto, (void **)&gop64);
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 9ea81cfe1576..561db9deedae 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1415,69 +1415,69 @@ struct efi_simple_text_output_protocol {
+ #define PIXEL_BLT_ONLY					3
+ #define PIXEL_FORMAT_MAX				4
  
--	if (efi_is_native())
-+	if (!efi_is_mixed())
- 		efi_native_runtime_setup();
- 	else
- 		efi_thunk_runtime_setup();
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 08ce8177c3af..885e50a707a6 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -388,7 +388,7 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- 	 * text and allocate a new stack because we can't rely on the
- 	 * stack pointer being < 4GB.
- 	 */
--	if (!IS_ENABLED(CONFIG_EFI_MIXED) || efi_is_native())
-+	if (!efi_is_mixed())
- 		return 0;
+-struct efi_pixel_bitmask {
++typedef struct {
+ 	u32 red_mask;
+ 	u32 green_mask;
+ 	u32 blue_mask;
+ 	u32 reserved_mask;
+-};
++} efi_pixel_bitmask_t;
  
- 	page = alloc_page(GFP_KERNEL|__GFP_DMA32);
-@@ -449,7 +449,7 @@ void __init efi_map_region(efi_memory_desc_t *md)
- 	 * booting in EFI mixed mode, because even though we may be
- 	 * running a 64-bit kernel, the firmware may only be 32-bit.
- 	 */
--	if (!efi_is_native () && IS_ENABLED(CONFIG_EFI_MIXED)) {
-+	if (efi_is_mixed()) {
- 		md->virt_addr = md->phys_addr;
- 		return;
- 	}
-diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-index 7675cf754d90..84d7176983d2 100644
---- a/arch/x86/platform/efi/quirks.c
-+++ b/arch/x86/platform/efi/quirks.c
-@@ -397,7 +397,7 @@ static void __init efi_unmap_pages(efi_memory_desc_t *md)
- 	 * EFI runtime calls, hence don't unmap EFI boot services code/data
- 	 * regions.
- 	 */
--	if (!efi_is_native())
-+	if (efi_is_mixed())
- 		return;
+-struct efi_graphics_output_mode_info {
++typedef struct {
+ 	u32 version;
+ 	u32 horizontal_resolution;
+ 	u32 vertical_resolution;
+ 	int pixel_format;
+-	struct efi_pixel_bitmask pixel_information;
++	efi_pixel_bitmask_t pixel_information;
+ 	u32 pixels_per_scan_line;
+-};
++} efi_graphics_output_mode_info_t;
  
- 	if (kernel_unmap_pages_in_pgd(pgd, pa, md->num_pages))
+-struct efi_graphics_output_protocol_mode_32 {
++typedef struct {
+ 	u32 max_mode;
+ 	u32 mode;
+ 	u32 info;
+ 	u32 size_of_info;
+ 	u64 frame_buffer_base;
+ 	u32 frame_buffer_size;
+-};
++} efi_graphics_output_protocol_mode_32_t;
+ 
+-struct efi_graphics_output_protocol_mode_64 {
++typedef struct {
+ 	u32 max_mode;
+ 	u32 mode;
+ 	u64 info;
+ 	u64 size_of_info;
+ 	u64 frame_buffer_base;
+ 	u64 frame_buffer_size;
+-};
++} efi_graphics_output_protocol_mode_64_t;
+ 
+-struct efi_graphics_output_protocol_mode {
++typedef struct {
+ 	u32 max_mode;
+ 	u32 mode;
+-	unsigned long info;
++	efi_graphics_output_mode_info_t *info;
+ 	unsigned long size_of_info;
+-	u64 frame_buffer_base;
++	efi_physical_addr_t frame_buffer_base;
+ 	unsigned long frame_buffer_size;
+-};
++} efi_graphics_output_protocol_mode_t;
+ 
+-struct efi_graphics_output_protocol_32 {
++typedef struct {
+ 	u32 query_mode;
+ 	u32 set_mode;
+ 	u32 blt;
+ 	u32 mode;
+-};
++} efi_graphics_output_protocol_32_t;
+ 
+-struct efi_graphics_output_protocol_64 {
++typedef struct {
+ 	u64 query_mode;
+ 	u64 set_mode;
+ 	u64 blt;
+ 	u64 mode;
+-};
++} efi_graphics_output_protocol_64_t;
+ 
+-struct efi_graphics_output_protocol {
+-	unsigned long query_mode;
+-	unsigned long set_mode;
+-	unsigned long blt;
+-	struct efi_graphics_output_protocol_mode *mode;
+-};
++typedef struct {
++	void *query_mode;
++	void *set_mode;
++	void *blt;
++	efi_graphics_output_protocol_mode_t *mode;
++} efi_graphics_output_protocol_t;
+ 
+ extern struct list_head efivar_sysfs_list;
+ 
 -- 
 2.20.1
 
