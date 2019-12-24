@@ -7,45 +7,45 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A4ADC2D0D0
-	for <linux-efi@archiver.kernel.org>; Tue, 24 Dec 2019 15:11:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4776FC2D0D0
+	for <linux-efi@archiver.kernel.org>; Tue, 24 Dec 2019 15:11:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 4AC2820731
-	for <linux-efi@archiver.kernel.org>; Tue, 24 Dec 2019 15:11:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 00E6820706
+	for <linux-efi@archiver.kernel.org>; Tue, 24 Dec 2019 15:11:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1577200269;
-	bh=Fd8DTgE0OxArHcVWRJCDHAkcmB5mK4a18uzWO/MtnAE=;
+	s=default; t=1577200278;
+	bh=GZcoBbklxYPexvBGAH7d2secV6CRr9Zlis2664kpEgc=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=TKyyWzvKNT731p+DfezN+bK3nT2vZdaMKv8/jhVyDIs6VMtJSMuDUx/5Twy7Of3kF
-	 /J1b4f89hrJHzPn+EmTXu7r9FMvg/0IS+6+AQwsyLuxD6vZ2L+j8oMzC8zMkfIiIU8
-	 dhVn1+Ck+FLk0knBmkGp5uFU5MN90v1ZpqjMPerc=
+	b=gCzrrdK6q2Fm7wHlxQGDs2FoqNawgGdJqucGWyQDI+knH8AIy54gSffJEqjUNSmsZ
+	 RcSGsSaUPo/A+Pmx5P9gJWdxY2isGkAxDP8CduUYthl4CZgFvIKr8VHERpNhEbKGqc
+	 j3p4Q2SUS0wNgzlL8e9AbWVkWETfYFKbf5DEns2g=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727158AbfLXPLI (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 24 Dec 2019 10:11:08 -0500
-Received: from mail.kernel.org ([198.145.29.99]:51058 "EHLO mail.kernel.org"
+        id S1726168AbfLXPLQ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 24 Dec 2019 10:11:16 -0500
+Received: from mail.kernel.org ([198.145.29.99]:51222 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727132AbfLXPLH (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Tue, 24 Dec 2019 10:11:07 -0500
+        id S1727236AbfLXPLQ (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Tue, 24 Dec 2019 10:11:16 -0500
 Received: from localhost.localdomain (aaubervilliers-681-1-7-6.w90-88.abo.wanadoo.fr [90.88.129.6])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id F169A206D3;
-        Tue, 24 Dec 2019 15:11:04 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id B09472075E;
+        Tue, 24 Dec 2019 15:11:12 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1577200266;
-        bh=Fd8DTgE0OxArHcVWRJCDHAkcmB5mK4a18uzWO/MtnAE=;
+        s=default; t=1577200274;
+        bh=GZcoBbklxYPexvBGAH7d2secV6CRr9Zlis2664kpEgc=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=zvvwoJplubvo/n8N2yXnnEBtDvjFk8ZGhYB020crSKL3IAThWPlDe9GIOj1b/gkJM
-         neQ8RP8WoBX3jXa8qPGPlcNi0e9vmXk1H/1+3xhl1rEj098ICNsyscEaO7KmZi6WrH
-         SzSAgL8sMPm2Usi3ZsgqeBVO2xOjeRvwpDuPYxl8=
+        b=Sj6CUJ9gRsGrQL2793aMEuvpMFYdw7v8bU8xLjq0ocKcb3WpMnXQnc0t7mctv/NgY
+         MHpiXohPCF/JNdbjhtmWOY4TM82jNaFgEHXm7hd+DZyArseir0XciaCQ2qEUry2xI6
+         ofNKqThP2GaBKVUtoPvD5b1jd9TggvYns6fwJld0=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
 Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
         Arvind Sankar <nivedita@alum.mit.edu>
-Subject: [PATCH 13/25] efi/libstub/x86: avoid thunking for native firmware calls
-Date:   Tue, 24 Dec 2019 16:10:13 +0100
-Message-Id: <20191224151025.32482-14-ardb@kernel.org>
+Subject: [PATCH 18/25] efi/libstub: drop sys_table_arg from printk routines
+Date:   Tue, 24 Dec 2019 16:10:18 +0100
+Message-Id: <20191224151025.32482-19-ardb@kernel.org>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20191224151025.32482-1-ardb@kernel.org>
 References: <20191224151025.32482-1-ardb@kernel.org>
@@ -56,336 +56,645 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-We use special wrapper routines to invoke firmware services in the
-native case as well as the mixed mode case. For mixed mode, the need
-is obvious, but for the native cases, we can simply rely on the
-compiler to generate the indirect call, given that GCC now has
-support for the MS calling convention (and has had it for quite some
-time now). Note that on i386, the decompressor and the EFI stub are not
-built with -mregparm=3 like the rest of the i386 kernel, so we can
-safely allow the compiler to emit the indirect calls here as well.
-
-So drop all the wrappers and indirection, and switch to either native
-calls, or direct calls into the thunk routine for mixed mode.
+As a first step towards getting rid of the need to pass around a function
+parameter 'sys_table_arg' pointing to the EFI system table, remove the
+references to it in the printing code, which is represents the majority
+of the use cases.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/boot/compressed/Makefile      |  2 +-
- arch/x86/boot/compressed/eboot.c       |  3 +-
- arch/x86/boot/compressed/efi_stub_32.S | 87 --------------------------
- arch/x86/boot/compressed/efi_stub_64.S |  5 --
- arch/x86/boot/compressed/head_32.S     |  6 --
- arch/x86/boot/compressed/head_64.S     | 23 +------
- arch/x86/include/asm/efi.h             | 34 +++++-----
- arch/x86/platform/efi/efi_64.c         |  2 -
- 8 files changed, 24 insertions(+), 138 deletions(-)
- delete mode 100644 arch/x86/boot/compressed/efi_stub_32.S
- delete mode 100644 arch/x86/boot/compressed/efi_stub_64.S
+ arch/x86/boot/compressed/eboot.c              | 28 +++++++--------
+ drivers/firmware/efi/libstub/arm-stub.c       | 28 +++++++--------
+ drivers/firmware/efi/libstub/arm32-stub.c     | 14 ++++----
+ drivers/firmware/efi/libstub/arm64-stub.c     | 12 +++----
+ .../firmware/efi/libstub/efi-stub-helper.c    | 34 +++++++++----------
+ drivers/firmware/efi/libstub/efistub.h        |  9 ++---
+ drivers/firmware/efi/libstub/fdt.c            | 16 ++++-----
+ drivers/firmware/efi/libstub/secureboot.c     |  4 +--
+ drivers/firmware/efi/libstub/tpm.c            |  3 +-
+ include/linux/efi.h                           |  2 +-
+ 10 files changed, 74 insertions(+), 76 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
-index aa976adb7094..a20f55c59753 100644
---- a/arch/x86/boot/compressed/Makefile
-+++ b/arch/x86/boot/compressed/Makefile
-@@ -89,7 +89,7 @@ vmlinux-objs-$(CONFIG_ACPI) += $(obj)/acpi.o
- 
- $(obj)/eboot.o: KBUILD_CFLAGS += -fshort-wchar -mno-red-zone
- 
--vmlinux-objs-$(CONFIG_EFI_STUB) += $(obj)/eboot.o $(obj)/efi_stub_$(BITS).o \
-+vmlinux-objs-$(CONFIG_EFI_STUB) += $(obj)/eboot.o \
- 	$(objtree)/drivers/firmware/efi/libstub/lib.a
- vmlinux-objs-$(CONFIG_EFI_MIXED) += $(obj)/efi_thunk_$(BITS).o
- 
 diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index 2733bc263c04..36a26d6e2af0 100644
+index 2a7c6d58cc56..1e072d487833 100644
 --- a/arch/x86/boot/compressed/eboot.c
 +++ b/arch/x86/boot/compressed/eboot.c
-@@ -44,7 +44,8 @@ BOOT_SERVICES(64);
- void efi_char16_printk(efi_system_table_t *table, efi_char16_t *str)
- {
- 	efi_call_proto(efi_simple_text_output_protocol, output_string,
--		       efi_early->text_output, str);
-+		       ((efi_simple_text_output_protocol_t *)(unsigned long)
-+				efi_early->text_output), str);
+@@ -57,7 +57,7 @@ preserve_pci_rom_image(efi_pci_io_protocol_t *pci, struct pci_setup_rom **__rom)
+ 	status = efi_call_early(allocate_pool, EFI_LOADER_DATA, size,
+ 				(void **)&rom);
+ 	if (status != EFI_SUCCESS) {
+-		efi_printk(sys_table, "Failed to allocate memory for 'rom'\n");
++		efi_printk("Failed to allocate memory for 'rom'\n");
+ 		return status;
+ 	}
+ 
+@@ -74,7 +74,7 @@ preserve_pci_rom_image(efi_pci_io_protocol_t *pci, struct pci_setup_rom **__rom)
+ 				&rom->vendor);
+ 
+ 	if (status != EFI_SUCCESS) {
+-		efi_printk(sys_table, "Failed to read rom->vendor\n");
++		efi_printk("Failed to read rom->vendor\n");
+ 		goto free_struct;
+ 	}
+ 
+@@ -83,7 +83,7 @@ preserve_pci_rom_image(efi_pci_io_protocol_t *pci, struct pci_setup_rom **__rom)
+ 				&rom->devid);
+ 
+ 	if (status != EFI_SUCCESS) {
+-		efi_printk(sys_table, "Failed to read rom->devid\n");
++		efi_printk("Failed to read rom->devid\n");
+ 		goto free_struct;
+ 	}
+ 
+@@ -132,7 +132,7 @@ static void setup_efi_pci(struct boot_params *params)
+ 					size, (void **)&pci_handle);
+ 
+ 		if (status != EFI_SUCCESS) {
+-			efi_printk(sys_table, "Failed to allocate memory for 'pci_handle'\n");
++			efi_printk("Failed to allocate memory for 'pci_handle'\n");
+ 			return;
+ 		}
+ 
+@@ -187,7 +187,7 @@ static void retrieve_apple_device_properties(struct boot_params *boot_params)
+ 		return;
+ 
+ 	if (efi_table_attr(apple_properties_protocol, version, p) != 0x10000) {
+-		efi_printk(sys_table, "Unsupported properties proto version\n");
++		efi_printk("Unsupported properties proto version\n");
+ 		return;
+ 	}
+ 
+@@ -200,7 +200,7 @@ static void retrieve_apple_device_properties(struct boot_params *boot_params)
+ 					size + sizeof(struct setup_data),
+ 					(void **)&new);
+ 		if (status != EFI_SUCCESS) {
+-			efi_printk(sys_table, "Failed to allocate memory for 'properties'\n");
++			efi_printk("Failed to allocate memory for 'properties'\n");
+ 			return;
+ 		}
+ 
+@@ -386,14 +386,14 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
+ 	status = efi_call_early(handle_protocol, handle,
+ 				&proto, (void *)&image);
+ 	if (status != EFI_SUCCESS) {
+-		efi_printk(sys_table, "Failed to get handle for LOADED_IMAGE_PROTOCOL\n");
++		efi_printk("Failed to get handle for LOADED_IMAGE_PROTOCOL\n");
+ 		return status;
+ 	}
+ 
+ 	status = efi_low_alloc(sys_table, 0x4000, 1,
+ 			       (unsigned long *)&boot_params);
+ 	if (status != EFI_SUCCESS) {
+-		efi_printk(sys_table, "Failed to allocate lowmem for boot params\n");
++		efi_printk("Failed to allocate lowmem for boot params\n");
+ 		return status;
+ 	}
+ 
+@@ -441,7 +441,7 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
+ 
+ 	if (status != EFI_SUCCESS &&
+ 	    hdr->xloadflags & XLF_CAN_BE_LOADED_ABOVE_4G) {
+-		efi_printk(sys_table, "Trying to load files to higher address\n");
++		efi_printk("Trying to load files to higher address\n");
+ 		status = handle_cmdline_files(sys_table, image,
+ 				      (char *)(unsigned long)hdr->cmd_line_ptr,
+ 				      "initrd=", -1UL,
+@@ -773,7 +773,7 @@ struct boot_params *efi_main(efi_handle_t handle,
+ 	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
+ 				sizeof(*gdt), (void **)&gdt);
+ 	if (status != EFI_SUCCESS) {
+-		efi_printk(sys_table, "Failed to allocate memory for 'gdt' structure\n");
++		efi_printk("Failed to allocate memory for 'gdt' structure\n");
+ 		goto fail;
+ 	}
+ 
+@@ -781,7 +781,7 @@ struct boot_params *efi_main(efi_handle_t handle,
+ 	status = efi_low_alloc(sys_table, gdt->size, 8,
+ 			   (unsigned long *)&gdt->address);
+ 	if (status != EFI_SUCCESS) {
+-		efi_printk(sys_table, "Failed to allocate memory for 'gdt'\n");
++		efi_printk("Failed to allocate memory for 'gdt'\n");
+ 		goto fail;
+ 	}
+ 
+@@ -797,7 +797,7 @@ struct boot_params *efi_main(efi_handle_t handle,
+ 					     hdr->kernel_alignment,
+ 					     LOAD_PHYSICAL_ADDR);
+ 		if (status != EFI_SUCCESS) {
+-			efi_printk(sys_table, "efi_relocate_kernel() failed!\n");
++			efi_printk("efi_relocate_kernel() failed!\n");
+ 			goto fail;
+ 		}
+ 
+@@ -807,7 +807,7 @@ struct boot_params *efi_main(efi_handle_t handle,
+ 
+ 	status = exit_boot(boot_params, handle);
+ 	if (status != EFI_SUCCESS) {
+-		efi_printk(sys_table, "exit_boot() failed!\n");
++		efi_printk("exit_boot() failed!\n");
+ 		goto fail;
+ 	}
+ 
+@@ -900,7 +900,7 @@ struct boot_params *efi_main(efi_handle_t handle,
+ 
+ 	return boot_params;
+ fail:
+-	efi_printk(sys_table, "efi_main() failed!\n");
++	efi_printk("efi_main() failed!\n");
+ 
+ 	for (;;)
+ 		asm("hlt");
+diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+index b44b1bd4d480..2ed4bd457e66 100644
+--- a/drivers/firmware/efi/libstub/arm-stub.c
++++ b/drivers/firmware/efi/libstub/arm-stub.c
+@@ -73,7 +73,7 @@ void install_memreserve_table(efi_system_table_t *sys_table_arg)
+ 	status = efi_call_early(allocate_pool, EFI_LOADER_DATA, sizeof(*rsv),
+ 				(void **)&rsv);
+ 	if (status != EFI_SUCCESS) {
+-		pr_efi_err(sys_table_arg, "Failed to allocate memreserve entry!\n");
++		pr_efi_err("Failed to allocate memreserve entry!\n");
+ 		return;
+ 	}
+ 
+@@ -85,7 +85,7 @@ void install_memreserve_table(efi_system_table_t *sys_table_arg)
+ 				&memreserve_table_guid,
+ 				rsv);
+ 	if (status != EFI_SUCCESS)
+-		pr_efi_err(sys_table_arg, "Failed to install memreserve config table!\n");
++		pr_efi_err("Failed to install memreserve config table!\n");
  }
  
- static efi_status_t
-diff --git a/arch/x86/boot/compressed/efi_stub_32.S b/arch/x86/boot/compressed/efi_stub_32.S
-deleted file mode 100644
-index ed6c351d34ed..000000000000
---- a/arch/x86/boot/compressed/efi_stub_32.S
-+++ /dev/null
-@@ -1,87 +0,0 @@
--/* SPDX-License-Identifier: GPL-2.0 */
--/*
-- * EFI call stub for IA32.
-- *
-- * This stub allows us to make EFI calls in physical mode with interrupts
-- * turned off. Note that this implementation is different from the one in
-- * arch/x86/platform/efi/efi_stub_32.S because we're _already_ in physical
-- * mode at this point.
-- */
--
--#include <linux/linkage.h>
--#include <asm/page_types.h>
--
--/*
-- * efi_call_phys(void *, ...) is a function with variable parameters.
-- * All the callers of this function assure that all the parameters are 4-bytes.
-- */
--
--/*
-- * In gcc calling convention, EBX, ESP, EBP, ESI and EDI are all callee save.
-- * So we'd better save all of them at the beginning of this function and restore
-- * at the end no matter how many we use, because we can not assure EFI runtime
-- * service functions will comply with gcc calling convention, too.
-- */
--
--.text
--SYM_FUNC_START(efi_call_phys)
--	/*
--	 * 0. The function can only be called in Linux kernel. So CS has been
--	 * set to 0x0010, DS and SS have been set to 0x0018. In EFI, I found
--	 * the values of these registers are the same. And, the corresponding
--	 * GDT entries are identical. So I will do nothing about segment reg
--	 * and GDT, but change GDT base register in prelog and epilog.
--	 */
--
--	/*
--	 * 1. Because we haven't been relocated by this point we need to
--	 * use relative addressing.
--	 */
--	call	1f
--1:	popl	%edx
--	subl	$1b, %edx
--
--	/*
--	 * 2. Now on the top of stack is the return
--	 * address in the caller of efi_call_phys(), then parameter 1,
--	 * parameter 2, ..., param n. To make things easy, we save the return
--	 * address of efi_call_phys in a global variable.
--	 */
--	popl	%ecx
--	movl	%ecx, saved_return_addr(%edx)
--	/* get the function pointer into ECX*/
--	popl	%ecx
--	movl	%ecx, efi_rt_function_ptr(%edx)
--
--	/*
--	 * 3. Call the physical function.
--	 */
--	call	*%ecx
--
--	/*
--	 * 4. Balance the stack. And because EAX contain the return value,
--	 * we'd better not clobber it. We need to calculate our address
--	 * again because %ecx and %edx are not preserved across EFI function
--	 * calls.
--	 */
--	call	1f
--1:	popl	%edx
--	subl	$1b, %edx
--
--	movl	efi_rt_function_ptr(%edx), %ecx
--	pushl	%ecx
--
--	/*
--	 * 10. Push the saved return address onto the stack and return.
--	 */
--	movl	saved_return_addr(%edx), %ecx
--	pushl	%ecx
--	ret
--SYM_FUNC_END(efi_call_phys)
--.previous
--
--.data
--saved_return_addr:
--	.long 0
--efi_rt_function_ptr:
--	.long 0
-diff --git a/arch/x86/boot/compressed/efi_stub_64.S b/arch/x86/boot/compressed/efi_stub_64.S
-deleted file mode 100644
-index 99494dff2113..000000000000
---- a/arch/x86/boot/compressed/efi_stub_64.S
-+++ /dev/null
-@@ -1,5 +0,0 @@
--#include <asm/segment.h>
--#include <asm/msr.h>
--#include <asm/processor-flags.h>
--
--#include "../../platform/efi/efi_stub_64.S"
-diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
-index f2dfd6d083ef..0b03dc7bba12 100644
---- a/arch/x86/boot/compressed/head_32.S
-+++ b/arch/x86/boot/compressed/head_32.S
-@@ -161,9 +161,7 @@ SYM_FUNC_START(efi_pe_entry)
- 	popl	%ecx
- 	movl	%ecx, efi32_config+8(%esi)	/* EFI System table pointer */
  
--	/* Relocate efi_config->call() */
- 	leal	efi32_config(%esi), %eax
--	add	%esi, 40(%eax)
- 	pushl	%eax
+@@ -147,13 +147,13 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table_arg,
+ 	status = sys_table->boottime->handle_protocol(handle,
+ 					&loaded_image_proto, (void *)&image);
+ 	if (status != EFI_SUCCESS) {
+-		pr_efi_err(sys_table, "Failed to get loaded image protocol\n");
++		pr_efi_err("Failed to get loaded image protocol\n");
+ 		goto fail;
+ 	}
  
- 	call	make_boot_params
-@@ -188,9 +186,7 @@ SYM_FUNC_START(efi32_stub_entry)
- 	movl	%ecx, efi32_config(%esi)	/* Handle */
- 	movl	%edx, efi32_config+8(%esi)	/* EFI System table pointer */
+ 	dram_base = get_dram_base(sys_table);
+ 	if (dram_base == EFI_ERROR) {
+-		pr_efi_err(sys_table, "Failed to find DRAM base\n");
++		pr_efi_err("Failed to find DRAM base\n");
+ 		goto fail;
+ 	}
  
--	/* Relocate efi_config->call() */
- 	leal	efi32_config(%esi), %eax
--	add	%esi, 40(%eax)
- 	pushl	%eax
- 2:
- 	call	efi_main
-@@ -266,8 +262,6 @@ SYM_FUNC_END(.Lrelocated)
- 	.data
- efi32_config:
- 	.fill 5,8,0
--	.long efi_call_phys
--	.long 0
- 	.byte 0
- #endif
+@@ -164,7 +164,7 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table_arg,
+ 	 */
+ 	cmdline_ptr = efi_convert_cmdline(sys_table, image, &cmdline_size);
+ 	if (!cmdline_ptr) {
+-		pr_efi_err(sys_table, "getting command line via LOADED_IMAGE_PROTOCOL\n");
++		pr_efi_err("getting command line via LOADED_IMAGE_PROTOCOL\n");
+ 		goto fail;
+ 	}
  
-diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
-index ee60b81944a7..ad57edeaeeb3 100644
---- a/arch/x86/boot/compressed/head_64.S
-+++ b/arch/x86/boot/compressed/head_64.S
-@@ -459,15 +459,6 @@ SYM_FUNC_START(efi_pe_entry)
- 	leaq	efi64_config(%rip), %rax
- 	movq	%rax, efi_config(%rip)
+@@ -176,7 +176,7 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table_arg,
+ 	if (!IS_ENABLED(CONFIG_CMDLINE_FORCE) && cmdline_size > 0)
+ 		efi_parse_options(cmdline_ptr);
  
--	call	1f
--1:	popq	%rbp
--	subq	$1b, %rbp
--
--	/*
--	 * Relocate efi_config->call().
--	 */
--	addq	%rbp, efi64_config+40(%rip)
--
- 	movq	%rax, %rdi
- 	call	make_boot_params
- 	cmpq	$0,%rax
-@@ -475,20 +466,10 @@ SYM_FUNC_START(efi_pe_entry)
- 	mov	%rax, %rsi
- 	leaq	startup_32(%rip), %rax
- 	movl	%eax, BP_code32_start(%rsi)
--	jmp	2f		/* Skip the relocation */
+-	pr_efi(sys_table, "Booting Linux Kernel...\n");
++	pr_efi("Booting Linux Kernel...\n");
  
- handover_entry:
--	call	1f
--1:	popq	%rbp
--	subq	$1b, %rbp
--
--	/*
--	 * Relocate efi_config->call().
--	 */
--	movq	efi_config(%rip), %rax
--	addq	%rbp, 40(%rax)
--2:
- 	movq	efi_config(%rip), %rdi
-+	and	$~0xf, %rsp			/* realign the stack */
- 	call	efi_main
- 	movq	%rax,%rsi
- 	cmpq	$0,%rax
-@@ -688,14 +669,12 @@ SYM_DATA_LOCAL(efi_config, .quad 0)
- #ifdef CONFIG_EFI_MIXED
- SYM_DATA_START(efi32_config)
- 	.fill	5,8,0
--	.quad	efi64_thunk
- 	.byte	0
- SYM_DATA_END(efi32_config)
- #endif
+ 	si = setup_graphics(sys_table);
  
- SYM_DATA_START(efi64_config)
- 	.fill	5,8,0
--	.quad	efi_call
- 	.byte	1
- SYM_DATA_END(efi64_config)
- #endif /* CONFIG_EFI_STUB */
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index c27323cb49e5..001905daa110 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -152,6 +152,7 @@ struct efi_setup_data {
- extern u64 efi_setup;
+@@ -185,7 +185,7 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table_arg,
+ 				     &reserve_size,
+ 				     dram_base, image);
+ 	if (status != EFI_SUCCESS) {
+-		pr_efi_err(sys_table, "Failed to relocate kernel\n");
++		pr_efi_err("Failed to relocate kernel\n");
+ 		goto fail_free_cmdline;
+ 	}
  
- #ifdef CONFIG_EFI
-+extern efi_status_t efi64_thunk(u32, ...);
+@@ -204,29 +204,29 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table_arg,
+ 	if (!IS_ENABLED(CONFIG_EFI_ARMSTUB_DTB_LOADER) ||
+ 	     secure_boot != efi_secureboot_mode_disabled) {
+ 		if (strstr(cmdline_ptr, "dtb="))
+-			pr_efi(sys_table, "Ignoring DTB from command line.\n");
++			pr_efi("Ignoring DTB from command line.\n");
+ 	} else {
+ 		status = handle_cmdline_files(sys_table, image, cmdline_ptr,
+ 					      "dtb=",
+ 					      ~0UL, &fdt_addr, &fdt_size);
  
- static inline bool efi_is_mixed(void)
+ 		if (status != EFI_SUCCESS) {
+-			pr_efi_err(sys_table, "Failed to load device tree!\n");
++			pr_efi_err("Failed to load device tree!\n");
+ 			goto fail_free_image;
+ 		}
+ 	}
+ 
+ 	if (fdt_addr) {
+-		pr_efi(sys_table, "Using DTB from command line\n");
++		pr_efi("Using DTB from command line\n");
+ 	} else {
+ 		/* Look for a device tree configuration table entry. */
+ 		fdt_addr = (uintptr_t)get_fdt(sys_table, &fdt_size);
+ 		if (fdt_addr)
+-			pr_efi(sys_table, "Using DTB from configuration table\n");
++			pr_efi("Using DTB from configuration table\n");
+ 	}
+ 
+ 	if (!fdt_addr)
+-		pr_efi(sys_table, "Generating empty DTB\n");
++		pr_efi("Generating empty DTB\n");
+ 
+ 	status = handle_cmdline_files(sys_table, image, cmdline_ptr, "initrd=",
+ 				      efi_get_max_initrd_addr(dram_base,
+@@ -234,7 +234,7 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table_arg,
+ 				      (unsigned long *)&initrd_addr,
+ 				      (unsigned long *)&initrd_size);
+ 	if (status != EFI_SUCCESS)
+-		pr_efi_err(sys_table, "Failed initrd from command line!\n");
++		pr_efi_err("Failed initrd from command line!\n");
+ 
+ 	efi_random_get_seed(sys_table);
+ 
+@@ -275,7 +275,7 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table_arg,
+ 	if (status == EFI_SUCCESS)
+ 		return new_fdt_addr;
+ 
+-	pr_efi_err(sys_table, "Failed to update FDT and exit boot services\n");
++	pr_efi_err("Failed to update FDT and exit boot services\n");
+ 
+ 	efi_free(sys_table, initrd_size, initrd_addr);
+ 	efi_free(sys_table, fdt_size, fdt_addr);
+diff --git a/drivers/firmware/efi/libstub/arm32-stub.c b/drivers/firmware/efi/libstub/arm32-stub.c
+index 4566640de650..7b5c717ddfac 100644
+--- a/drivers/firmware/efi/libstub/arm32-stub.c
++++ b/drivers/firmware/efi/libstub/arm32-stub.c
+@@ -18,7 +18,7 @@ efi_status_t check_platform_features(efi_system_table_t *sys_table_arg)
+ 	/* LPAE kernels need compatible hardware */
+ 	block = cpuid_feature_extract(CPUID_EXT_MMFR0, 0);
+ 	if (block < 5) {
+-		pr_efi_err(sys_table_arg, "This LPAE kernel is not supported by your CPU\n");
++		pr_efi_err("This LPAE kernel is not supported by your CPU\n");
+ 		return EFI_UNSUPPORTED;
+ 	}
+ 	return EFI_SUCCESS;
+@@ -121,8 +121,7 @@ static efi_status_t reserve_kernel_base(efi_system_table_t *sys_table_arg,
+ 	 */
+ 	status = efi_get_memory_map(sys_table_arg, &map);
+ 	if (status != EFI_SUCCESS) {
+-		pr_efi_err(sys_table_arg,
+-			   "reserve_kernel_base(): Unable to retrieve memory map.\n");
++		pr_efi_err("reserve_kernel_base(): Unable to retrieve memory map.\n");
+ 		return status;
+ 	}
+ 
+@@ -164,8 +163,7 @@ static efi_status_t reserve_kernel_base(efi_system_table_t *sys_table_arg,
+ 						(end - start) / EFI_PAGE_SIZE,
+ 						&start);
+ 			if (status != EFI_SUCCESS) {
+-				pr_efi_err(sys_table_arg,
+-					"reserve_kernel_base(): alloc failed.\n");
++				pr_efi_err("reserve_kernel_base(): alloc failed.\n");
+ 				goto out;
+ 			}
+ 			break;
+@@ -224,7 +222,7 @@ efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
+ 	status = reserve_kernel_base(sys_table, kernel_base, reserve_addr,
+ 				     reserve_size);
+ 	if (status != EFI_SUCCESS) {
+-		pr_efi_err(sys_table, "Unable to allocate memory for uncompressed kernel.\n");
++		pr_efi_err("Unable to allocate memory for uncompressed kernel.\n");
+ 		return status;
+ 	}
+ 
+@@ -237,7 +235,7 @@ efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
+ 				     *image_size,
+ 				     kernel_base + MAX_UNCOMP_KERNEL_SIZE, 0, 0);
+ 	if (status != EFI_SUCCESS) {
+-		pr_efi_err(sys_table, "Failed to relocate kernel.\n");
++		pr_efi_err("Failed to relocate kernel.\n");
+ 		efi_free(sys_table, *reserve_size, *reserve_addr);
+ 		*reserve_size = 0;
+ 		return status;
+@@ -249,7 +247,7 @@ efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
+ 	 * address at which the zImage is loaded.
+ 	 */
+ 	if (*image_addr + *image_size > dram_base + ZIMAGE_OFFSET_LIMIT) {
+-		pr_efi_err(sys_table, "Failed to relocate kernel, no low memory available.\n");
++		pr_efi_err("Failed to relocate kernel, no low memory available.\n");
+ 		efi_free(sys_table, *reserve_size, *reserve_addr);
+ 		*reserve_size = 0;
+ 		efi_free(sys_table, *image_size, *image_addr);
+diff --git a/drivers/firmware/efi/libstub/arm64-stub.c b/drivers/firmware/efi/libstub/arm64-stub.c
+index 1550d244e996..b09dda600c78 100644
+--- a/drivers/firmware/efi/libstub/arm64-stub.c
++++ b/drivers/firmware/efi/libstub/arm64-stub.c
+@@ -32,9 +32,9 @@ efi_status_t check_platform_features(efi_system_table_t *sys_table_arg)
+ 	tg = (read_cpuid(ID_AA64MMFR0_EL1) >> ID_AA64MMFR0_TGRAN_SHIFT) & 0xf;
+ 	if (tg != ID_AA64MMFR0_TGRAN_SUPPORTED) {
+ 		if (IS_ENABLED(CONFIG_ARM64_64K_PAGES))
+-			pr_efi_err(sys_table_arg, "This 64 KB granular kernel is not supported by your CPU\n");
++			pr_efi_err("This 64 KB granular kernel is not supported by your CPU\n");
+ 		else
+-			pr_efi_err(sys_table_arg, "This 16 KB granular kernel is not supported by your CPU\n");
++			pr_efi_err("This 16 KB granular kernel is not supported by your CPU\n");
+ 		return EFI_UNSUPPORTED;
+ 	}
+ 	return EFI_SUCCESS;
+@@ -60,13 +60,13 @@ efi_status_t handle_kernel_image(efi_system_table_t *sys_table_arg,
+ 						      sizeof(phys_seed),
+ 						      (u8 *)&phys_seed);
+ 			if (status == EFI_NOT_FOUND) {
+-				pr_efi(sys_table_arg, "EFI_RNG_PROTOCOL unavailable, no randomness supplied\n");
++				pr_efi("EFI_RNG_PROTOCOL unavailable, no randomness supplied\n");
+ 			} else if (status != EFI_SUCCESS) {
+-				pr_efi_err(sys_table_arg, "efi_get_random_bytes() failed\n");
++				pr_efi_err("efi_get_random_bytes() failed\n");
+ 				return status;
+ 			}
+ 		} else {
+-			pr_efi(sys_table_arg, "KASLR disabled on kernel command line\n");
++			pr_efi("KASLR disabled on kernel command line\n");
+ 		}
+ 	}
+ 
+@@ -143,7 +143,7 @@ efi_status_t handle_kernel_image(efi_system_table_t *sys_table_arg,
+ 				       MIN_KIMG_ALIGN, reserve_addr);
+ 
+ 		if (status != EFI_SUCCESS) {
+-			pr_efi_err(sys_table_arg, "Failed to relocate kernel\n");
++			pr_efi_err("Failed to relocate kernel\n");
+ 			*reserve_size = 0;
+ 			return status;
+ 		}
+diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+index f74b514789d7..9f0d332954ab 100644
+--- a/drivers/firmware/efi/libstub/efi-stub-helper.c
++++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+@@ -58,7 +58,7 @@ struct file_info {
+ 	u64 size;
+ };
+ 
+-void efi_printk(efi_system_table_t *sys_table_arg, char *str)
++void efi_printk(char *str)
  {
-@@ -205,7 +206,6 @@ struct efi_config {
- 	u64 runtime_services;
- 	u64 boot_services;
- 	u64 text_output;
--	efi_status_t (*call)(unsigned long, ...);
- 	bool is64;
- } __packed;
+ 	char *s8;
  
-@@ -235,30 +235,36 @@ static inline bool efi_is_native(void)
- 			(unsigned long)(attr), (attr))
+@@ -68,10 +68,10 @@ void efi_printk(efi_system_table_t *sys_table_arg, char *str)
+ 		ch[0] = *s8;
+ 		if (*s8 == '\n') {
+ 			efi_char16_t nl[2] = { '\r', 0 };
+-			efi_char16_printk(sys_table_arg, nl);
++			efi_char16_printk(nl);
+ 		}
  
- #define efi_table_attr(table, attr, instance) ({			\
--	__typeof__(((table##_t *)0)->attr) __ret;			\
-+	__typeof__(instance->attr) __ret;				\
- 	if (efi_is_native()) {						\
--		__ret = ((table##_t *)(unsigned long)instance)->attr;	\
-+		__ret = instance->attr;					\
- 	} else {							\
--		__ret = (__typeof__(__ret))efi_mixed_mode_cast(		\
--		((table##_t *)(unsigned long)instance)->mixed_mode.attr);\
-+		__ret = (__typeof__(__ret))				\
-+			efi_mixed_mode_cast(instance->mixed_mode.attr);	\
- 	}								\
- 	__ret;								\
- })
- 
- #define efi_call_proto(protocol, f, instance, ...)			\
--	__efi_early()->call((unsigned long)				\
--				efi_table_attr(protocol, f, instance),	\
--		instance, ##__VA_ARGS__)
-+	(efi_is_native()						\
-+		? instance->f(instance, ##__VA_ARGS__)			\
-+		: efi64_thunk(instance->mixed_mode.f, instance,	##__VA_ARGS__))
- 
- #define efi_call_early(f, ...)						\
--	__efi_early()->call((unsigned long)				\
--				efi_table_attr(efi_boot_services, f,	\
--		__efi_early()->boot_services), __VA_ARGS__)
-+	(efi_is_native()						\
-+		? ((efi_boot_services_t *)(unsigned long)		\
-+			__efi_early()->boot_services)->f(__VA_ARGS__)	\
-+		: efi64_thunk(((efi_boot_services_t *)(unsigned long)	\
-+			__efi_early()->boot_services)->mixed_mode.f,	\
-+			__VA_ARGS__))
- 
- #define efi_call_runtime(f, ...)					\
--	__efi_early()->call((unsigned long)				\
--				efi_table_attr(efi_runtime_services, f,	\
--		__efi_early()->runtime_services), __VA_ARGS__)
-+	(efi_is_native()						\
-+		? ((efi_runtime_services_t *)(unsigned long)		\
-+			__efi_early()->runtime_services)->f(__VA_ARGS__)\
-+		: efi64_thunk(((efi_runtime_services_t *)(unsigned long)\
-+			__efi_early()->runtime_services)->mixed_mode.f,	\
-+			__VA_ARGS__))
- 
- extern bool efi_reboot_required(void);
- extern bool efi_is_table_address(unsigned long phys_addr);
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 885e50a707a6..03c2ed3c645c 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -635,8 +635,6 @@ void efi_switch_mm(struct mm_struct *mm)
+-		efi_char16_printk(sys_table_arg, ch);
++		efi_char16_printk(ch);
+ 	}
  }
  
- #ifdef CONFIG_EFI_MIXED
--extern efi_status_t efi64_thunk(u32, ...);
--
- static DEFINE_SPINLOCK(efi_runtime_lock);
+@@ -372,9 +372,9 @@ static efi_status_t efi_file_size(efi_system_table_t *sys_table_arg, void *__fh,
  
- #define runtime_service32(func)						 \
+ 	status = fh->open(fh, &h, filename_16, EFI_FILE_MODE_READ, 0);
+ 	if (status != EFI_SUCCESS) {
+-		efi_printk(sys_table_arg, "Failed to open file: ");
+-		efi_char16_printk(sys_table_arg, filename_16);
+-		efi_printk(sys_table_arg, "\n");
++		efi_printk("Failed to open file: ");
++		efi_char16_printk(filename_16);
++		efi_printk("\n");
+ 		return status;
+ 	}
+ 
+@@ -383,7 +383,7 @@ static efi_status_t efi_file_size(efi_system_table_t *sys_table_arg, void *__fh,
+ 	info_sz = 0;
+ 	status = h->get_info(h, &info_guid, &info_sz, NULL);
+ 	if (status != EFI_BUFFER_TOO_SMALL) {
+-		efi_printk(sys_table_arg, "Failed to get file info size\n");
++		efi_printk("Failed to get file info size\n");
+ 		return status;
+ 	}
+ 
+@@ -391,7 +391,7 @@ static efi_status_t efi_file_size(efi_system_table_t *sys_table_arg, void *__fh,
+ 	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
+ 				info_sz, (void **)&info);
+ 	if (status != EFI_SUCCESS) {
+-		efi_printk(sys_table_arg, "Failed to alloc mem for file info\n");
++		efi_printk("Failed to alloc mem for file info\n");
+ 		return status;
+ 	}
+ 
+@@ -405,7 +405,7 @@ static efi_status_t efi_file_size(efi_system_table_t *sys_table_arg, void *__fh,
+ 	efi_call_early(free_pool, info);
+ 
+ 	if (status != EFI_SUCCESS)
+-		efi_printk(sys_table_arg, "Failed to get initrd info\n");
++		efi_printk("Failed to get initrd info\n");
+ 
+ 	return status;
+ }
+@@ -434,13 +434,13 @@ static efi_status_t efi_open_volume(efi_system_table_t *sys_table_arg,
+ 	status = efi_call_early(handle_protocol, handle,
+ 				&fs_proto, (void **)&io);
+ 	if (status != EFI_SUCCESS) {
+-		efi_printk(sys_table_arg, "Failed to handle fs_proto\n");
++		efi_printk("Failed to handle fs_proto\n");
+ 		return status;
+ 	}
+ 
+ 	status = io->open_volume(io, &fh);
+ 	if (status != EFI_SUCCESS)
+-		efi_printk(sys_table_arg, "Failed to open volume\n");
++		efi_printk("Failed to open volume\n");
+ 	else
+ 		*__fh = fh;
+ 
+@@ -569,7 +569,7 @@ efi_status_t handle_cmdline_files(efi_system_table_t *sys_table_arg,
+ 	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
+ 				nr_files * sizeof(*files), (void **)&files);
+ 	if (status != EFI_SUCCESS) {
+-		pr_efi_err(sys_table_arg, "Failed to alloc mem for file handle list\n");
++		pr_efi_err("Failed to alloc mem for file handle list\n");
+ 		goto fail;
+ 	}
+ 
+@@ -632,13 +632,13 @@ efi_status_t handle_cmdline_files(efi_system_table_t *sys_table_arg,
+ 		status = efi_high_alloc(sys_table_arg, file_size_total, 0x1000,
+ 				    &file_addr, max_addr);
+ 		if (status != EFI_SUCCESS) {
+-			pr_efi_err(sys_table_arg, "Failed to alloc highmem for files\n");
++			pr_efi_err("Failed to alloc highmem for files\n");
+ 			goto close_handles;
+ 		}
+ 
+ 		/* We've run out of free low memory. */
+ 		if (file_addr > max_addr) {
+-			pr_efi_err(sys_table_arg, "We've run out of free low memory\n");
++			pr_efi_err("We've run out of free low memory\n");
+ 			status = EFI_INVALID_PARAMETER;
+ 			goto free_file_total;
+ 		}
+@@ -660,7 +660,7 @@ efi_status_t handle_cmdline_files(efi_system_table_t *sys_table_arg,
+ 						       &chunksize,
+ 						       (void *)addr);
+ 				if (status != EFI_SUCCESS) {
+-					pr_efi_err(sys_table_arg, "Failed to read file\n");
++					pr_efi_err("Failed to read file\n");
+ 					goto free_file_total;
+ 				}
+ 				addr += chunksize;
+@@ -746,7 +746,7 @@ efi_status_t efi_relocate_kernel(efi_system_table_t *sys_table_arg,
+ 					     alignment, &new_addr, min_addr);
+ 	}
+ 	if (status != EFI_SUCCESS) {
+-		pr_efi_err(sys_table_arg, "Failed to allocate usable memory for kernel.\n");
++		pr_efi_err("Failed to allocate usable memory for kernel.\n");
+ 		return status;
+ 	}
+ 
+@@ -956,7 +956,7 @@ void *get_efi_config_table(efi_system_table_t *sys_table, efi_guid_t guid)
+ 	return NULL;
+ }
+ 
+-void efi_char16_printk(efi_system_table_t *table, efi_char16_t *str)
++void efi_char16_printk(efi_char16_t *str)
+ {
+ 	efi_call_proto(efi_simple_text_output_protocol,
+ 		       output_string,
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index e6775c16a97d..4a6acd28ce65 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -31,13 +31,14 @@ extern int __pure novamap(void);
+ 
+ extern __pure efi_system_table_t  *efi_system_table(void);
+ 
+-#define pr_efi(sys_table, msg)		do {				\
+-	if (!is_quiet()) efi_printk(sys_table, "EFI stub: "msg);	\
++#define pr_efi(msg)		do {			\
++	if (!is_quiet()) efi_printk("EFI stub: "msg);	\
+ } while (0)
+ 
+-#define pr_efi_err(sys_table, msg) efi_printk(sys_table, "EFI stub: ERROR: "msg)
++#define pr_efi_err(msg) efi_printk("EFI stub: ERROR: "msg)
+ 
+-void efi_char16_printk(efi_system_table_t *, efi_char16_t *);
++void efi_char16_printk(efi_char16_t *);
++void efi_char16_printk(efi_char16_t *);
+ 
+ unsigned long get_dram_base(efi_system_table_t *sys_table_arg);
+ 
+diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+index 0bf0190917e0..1bf7edfd81ec 100644
+--- a/drivers/firmware/efi/libstub/fdt.c
++++ b/drivers/firmware/efi/libstub/fdt.c
+@@ -40,7 +40,7 @@ static efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+ 	/* Do some checks on provided FDT, if it exists: */
+ 	if (orig_fdt) {
+ 		if (fdt_check_header(orig_fdt)) {
+-			pr_efi_err(sys_table, "Device Tree header not valid!\n");
++			pr_efi_err("Device Tree header not valid!\n");
+ 			return EFI_LOAD_ERROR;
+ 		}
+ 		/*
+@@ -48,7 +48,7 @@ static efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+ 		 * configuration table:
+ 		 */
+ 		if (orig_fdt_size && fdt_totalsize(orig_fdt) > orig_fdt_size) {
+-			pr_efi_err(sys_table, "Truncated device tree! foo!\n");
++			pr_efi_err("Truncated device tree! foo!\n");
+ 			return EFI_LOAD_ERROR;
+ 		}
+ 	}
+@@ -277,17 +277,17 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 	 */
+ 	status = efi_get_memory_map(sys_table, &map);
+ 	if (status != EFI_SUCCESS) {
+-		pr_efi_err(sys_table, "Unable to retrieve UEFI memory map.\n");
++		pr_efi_err("Unable to retrieve UEFI memory map.\n");
+ 		return status;
+ 	}
+ 
+-	pr_efi(sys_table, "Exiting boot services and installing virtual address map...\n");
++	pr_efi("Exiting boot services and installing virtual address map...\n");
+ 
+ 	map.map = &memory_map;
+ 	status = efi_high_alloc(sys_table, MAX_FDT_SIZE, EFI_FDT_ALIGN,
+ 				new_fdt_addr, max_addr);
+ 	if (status != EFI_SUCCESS) {
+-		pr_efi_err(sys_table, "Unable to allocate memory for new device tree.\n");
++		pr_efi_err("Unable to allocate memory for new device tree.\n");
+ 		goto fail;
+ 	}
+ 
+@@ -304,7 +304,7 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 			    initrd_addr, initrd_size);
+ 
+ 	if (status != EFI_SUCCESS) {
+-		pr_efi_err(sys_table, "Unable to construct new device tree.\n");
++		pr_efi_err("Unable to construct new device tree.\n");
+ 		goto fail_free_new_fdt;
+ 	}
+ 
+@@ -350,7 +350,7 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 		return EFI_SUCCESS;
+ 	}
+ 
+-	pr_efi_err(sys_table, "Exit boot services failed.\n");
++	pr_efi_err("Exit boot services failed.\n");
+ 
+ fail_free_new_fdt:
+ 	efi_free(sys_table, MAX_FDT_SIZE, *new_fdt_addr);
+@@ -371,7 +371,7 @@ void *get_fdt(efi_system_table_t *sys_table, unsigned long *fdt_size)
+ 		return NULL;
+ 
+ 	if (fdt_check_header(fdt) != 0) {
+-		pr_efi_err(sys_table, "Invalid header detected on UEFI supplied FDT, ignoring ...\n");
++		pr_efi_err("Invalid header detected on UEFI supplied FDT, ignoring ...\n");
+ 		return NULL;
+ 	}
+ 	*fdt_size = fdt_totalsize(fdt);
+diff --git a/drivers/firmware/efi/libstub/secureboot.c b/drivers/firmware/efi/libstub/secureboot.c
+index edba5e7a3743..9071b57da8fe 100644
+--- a/drivers/firmware/efi/libstub/secureboot.c
++++ b/drivers/firmware/efi/libstub/secureboot.c
+@@ -72,10 +72,10 @@ enum efi_secureboot_mode efi_get_secureboot(efi_system_table_t *sys_table_arg)
+ 		return efi_secureboot_mode_disabled;
+ 
+ secure_boot_enabled:
+-	pr_efi(sys_table_arg, "UEFI Secure Boot is enabled.\n");
++	pr_efi("UEFI Secure Boot is enabled.\n");
+ 	return efi_secureboot_mode_enabled;
+ 
+ out_efi_err:
+-	pr_efi_err(sys_table_arg, "Could not determine UEFI Secure Boot status.\n");
++	pr_efi_err("Could not determine UEFI Secure Boot status.\n");
+ 	return efi_secureboot_mode_unknown;
+ }
+diff --git a/drivers/firmware/efi/libstub/tpm.c b/drivers/firmware/efi/libstub/tpm.c
+index d270acd43de8..86658b005e85 100644
+--- a/drivers/firmware/efi/libstub/tpm.c
++++ b/drivers/firmware/efi/libstub/tpm.c
+@@ -131,8 +131,7 @@ void efi_retrieve_tpm2_eventlog(efi_system_table_t *sys_table_arg)
+ 				(void **) &log_tbl);
+ 
+ 	if (status != EFI_SUCCESS) {
+-		efi_printk(sys_table_arg,
+-			   "Unable to allocate memory for event log\n");
++		efi_printk("Unable to allocate memory for event log\n");
+ 		return;
+ 	}
+ 
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 14dd08ecf8a7..5b207db6ead0 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1493,7 +1493,7 @@ static inline int efi_runtime_map_copy(void *buf, size_t bufsz)
+ 
+ /* prototypes shared between arch specific and generic stub code */
+ 
+-void efi_printk(efi_system_table_t *sys_table_arg, char *str);
++void efi_printk(char *str);
+ 
+ void efi_free(efi_system_table_t *sys_table_arg, unsigned long size,
+ 	      unsigned long addr);
 -- 
 2.20.1
 
