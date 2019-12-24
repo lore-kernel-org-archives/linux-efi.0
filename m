@@ -7,45 +7,45 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B0E26C2D0CF
-	for <linux-efi@archiver.kernel.org>; Tue, 24 Dec 2019 15:12:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4DAE3C2D0CF
+	for <linux-efi@archiver.kernel.org>; Tue, 24 Dec 2019 15:12:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 7F41220706
-	for <linux-efi@archiver.kernel.org>; Tue, 24 Dec 2019 15:12:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1658320706
+	for <linux-efi@archiver.kernel.org>; Tue, 24 Dec 2019 15:12:22 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1577200339;
-	bh=Cc5CrzKhXQw4gi2he3vnDwz0fwhp+/45TjHbFXyulW8=;
+	s=default; t=1577200342;
+	bh=RoARWJOIPMJq0BHsAvsBc0tsIwOnvbk4j780//NXma8=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=SVhIohT4KJaWkMWibDsnG26045E/JBldogqdQg46Io7lJ7pkC6IV2sjSdEORzDgg6
-	 GfwcGNjhOpS0aDcpGepLvy1GGDSMhIx2YdPH/TPNNKIV7+7zydu32bWFvedYrnXAlL
-	 hBnORzOWreNuOcfAKhUsR2RXIGO+2DHmdsqJyfKo=
+	b=hJ9bInzbyf/DHNnGIhti1lixvIU5U+rYVoKuSIP8BjqG+VpuCk5B1YpPCmxwOG8fi
+	 gyujIc1VaRmZ7mo42pmxY/TitHX5ICeQ+3N6bYd1RjaOKGIRsC2kh8gru5JVdgyImb
+	 W5t1LNGqIRHMm+0VSWp5h+6nq8Snj4FO45BQ7p1s=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726271AbfLXPKv (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 24 Dec 2019 10:10:51 -0500
-Received: from mail.kernel.org ([198.145.29.99]:50628 "EHLO mail.kernel.org"
+        id S1726316AbfLXPKs (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 24 Dec 2019 10:10:48 -0500
+Received: from mail.kernel.org ([198.145.29.99]:50566 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726704AbfLXPKv (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Tue, 24 Dec 2019 10:10:51 -0500
+        id S1726271AbfLXPKs (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Tue, 24 Dec 2019 10:10:48 -0500
 Received: from localhost.localdomain (aaubervilliers-681-1-7-6.w90-88.abo.wanadoo.fr [90.88.129.6])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 5A9D520730;
-        Tue, 24 Dec 2019 15:10:49 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 44D6C2071A;
+        Tue, 24 Dec 2019 15:10:46 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1577200250;
-        bh=Cc5CrzKhXQw4gi2he3vnDwz0fwhp+/45TjHbFXyulW8=;
+        s=default; t=1577200247;
+        bh=RoARWJOIPMJq0BHsAvsBc0tsIwOnvbk4j780//NXma8=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=EETZx0DpYxRmF6OEDJ80+Z7DcGolkbV/CM3E7R7VyiDQIJ2w0aLxTKnbgSPh5oRxz
-         m7gnEoz1F8RXDF7VQbDHlD3ZapfQL7XrzqAEKNsWo9P6VXLAQ97ihYQOQwfeZJqH/g
-         tmAA6KKPQ6nqf9KJOjG1T1DjNoYCOhC7u+chDxjY=
+        b=CjmTPw/d9Dt9NEaVl12fBgc9q0yR2fZTy+1P6A30rllMXhqAZDZ9GeltQUEMGO1b0
+         gqRUF+SJoufGVp531AM+KHMxjtFBUr4MD/oA7F+jk6a9bj85CthWW6C+bQogtzturJ
+         PXVXIIVoPsj8/GUjyKxk692N+7Hr+RcLceuHv5c4=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
 Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
         Arvind Sankar <nivedita@alum.mit.edu>
-Subject: [PATCH 03/25] efi/gop: Convert GOP structures to typedef and cleanup some types
-Date:   Tue, 24 Dec 2019 16:10:03 +0100
-Message-Id: <20191224151025.32482-4-ardb@kernel.org>
+Subject: [PATCH 01/25] efi/gop: Remove bogus packed attribute from GOP structures
+Date:   Tue, 24 Dec 2019 16:10:01 +0100
+Message-Id: <20191224151025.32482-2-ardb@kernel.org>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20191224151025.32482-1-ardb@kernel.org>
 References: <20191224151025.32482-1-ardb@kernel.org>
@@ -58,195 +58,59 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Arvind Sankar <nivedita@alum.mit.edu>
 
-Use typedef for the GOP structures, in anticipation of unifying
-32/64-bit code. Also use more appropriate types in the non-bitness
-specific structures for the framebuffer address and pointers.
+EFI structures are not packed, they follow natural alignment.
+
+The packed attribute doesn't have any effect on the structure layout due
+to the types and order of the members, and we only ever get these
+structures as output from the EFI firmware so alignment issues have not
+come up.
 
 Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/firmware/efi/libstub/gop.c | 26 ++++++++---------
- include/linux/efi.h                | 46 +++++++++++++++---------------
- 2 files changed, 36 insertions(+), 36 deletions(-)
+ include/linux/efi.h | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/gop.c b/drivers/firmware/efi/libstub/gop.c
-index b7bf1e993b8b..a0c1ef64d445 100644
---- a/drivers/firmware/efi/libstub/gop.c
-+++ b/drivers/firmware/efi/libstub/gop.c
-@@ -35,7 +35,7 @@ static void find_bits(unsigned long mask, u8 *pos, u8 *size)
- 
- static void
- setup_pixel_info(struct screen_info *si, u32 pixels_per_scan_line,
--		 struct efi_pixel_bitmask pixel_info, int pixel_format)
-+		 efi_pixel_bitmask_t pixel_info, int pixel_format)
- {
- 	if (pixel_format == PIXEL_RGB_RESERVED_8BIT_PER_COLOR) {
- 		si->lfb_depth = 32;
-@@ -87,13 +87,13 @@ static efi_status_t
- setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
-             efi_guid_t *proto, unsigned long size, void **gop_handle)
- {
--	struct efi_graphics_output_protocol_32 *gop32, *first_gop;
-+	efi_graphics_output_protocol_32_t *gop32, *first_gop;
- 	unsigned long nr_gops;
- 	u16 width, height;
- 	u32 pixels_per_scan_line;
- 	u32 ext_lfb_base;
--	u64 fb_base;
--	struct efi_pixel_bitmask pixel_info;
-+	efi_physical_addr_t fb_base;
-+	efi_pixel_bitmask_t pixel_info;
- 	int pixel_format;
- 	efi_status_t status;
- 	u32 *handles = (u32 *)(unsigned long)gop_handle;
-@@ -104,13 +104,13 @@ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
- 
- 	nr_gops = size / sizeof(u32);
- 	for (i = 0; i < nr_gops; i++) {
--		struct efi_graphics_output_protocol_mode_32 *mode;
--		struct efi_graphics_output_mode_info *info = NULL;
-+		efi_graphics_output_protocol_mode_32_t *mode;
-+		efi_graphics_output_mode_info_t *info = NULL;
- 		efi_guid_t conout_proto = EFI_CONSOLE_OUT_DEVICE_GUID;
- 		bool conout_found = false;
- 		void *dummy = NULL;
- 		efi_handle_t h = (efi_handle_t)(unsigned long)handles[i];
--		u64 current_fb_base;
-+		efi_physical_addr_t current_fb_base;
- 
- 		status = efi_call_early(handle_protocol, h,
- 					proto, (void **)&gop32);
-@@ -184,13 +184,13 @@ static efi_status_t
- setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
- 	    efi_guid_t *proto, unsigned long size, void **gop_handle)
- {
--	struct efi_graphics_output_protocol_64 *gop64, *first_gop;
-+	efi_graphics_output_protocol_64_t *gop64, *first_gop;
- 	unsigned long nr_gops;
- 	u16 width, height;
- 	u32 pixels_per_scan_line;
- 	u32 ext_lfb_base;
--	u64 fb_base;
--	struct efi_pixel_bitmask pixel_info;
-+	efi_physical_addr_t fb_base;
-+	efi_pixel_bitmask_t pixel_info;
- 	int pixel_format;
- 	efi_status_t status;
- 	u64 *handles = (u64 *)(unsigned long)gop_handle;
-@@ -201,13 +201,13 @@ setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
- 
- 	nr_gops = size / sizeof(u64);
- 	for (i = 0; i < nr_gops; i++) {
--		struct efi_graphics_output_protocol_mode_64 *mode;
--		struct efi_graphics_output_mode_info *info = NULL;
-+		efi_graphics_output_protocol_mode_64_t *mode;
-+		efi_graphics_output_mode_info_t *info = NULL;
- 		efi_guid_t conout_proto = EFI_CONSOLE_OUT_DEVICE_GUID;
- 		bool conout_found = false;
- 		void *dummy = NULL;
- 		efi_handle_t h = (efi_handle_t)(unsigned long)handles[i];
--		u64 current_fb_base;
-+		efi_physical_addr_t current_fb_base;
- 
- 		status = efi_call_early(handle_protocol, h,
- 					proto, (void **)&gop64);
 diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 9ea81cfe1576..561db9deedae 100644
+index aa54586db7a5..83a62f5c3fd7 100644
 --- a/include/linux/efi.h
 +++ b/include/linux/efi.h
-@@ -1415,69 +1415,69 @@ struct efi_simple_text_output_protocol {
- #define PIXEL_BLT_ONLY					3
- #define PIXEL_FORMAT_MAX				4
- 
--struct efi_pixel_bitmask {
-+typedef struct {
- 	u32 red_mask;
- 	u32 green_mask;
- 	u32 blue_mask;
- 	u32 reserved_mask;
--};
-+} efi_pixel_bitmask_t;
- 
--struct efi_graphics_output_mode_info {
-+typedef struct {
- 	u32 version;
- 	u32 horizontal_resolution;
- 	u32 vertical_resolution;
+@@ -1429,7 +1429,7 @@ struct efi_graphics_output_mode_info {
  	int pixel_format;
--	struct efi_pixel_bitmask pixel_information;
-+	efi_pixel_bitmask_t pixel_information;
+ 	struct efi_pixel_bitmask pixel_information;
  	u32 pixels_per_scan_line;
--};
-+} efi_graphics_output_mode_info_t;
+-} __packed;
++};
  
--struct efi_graphics_output_protocol_mode_32 {
-+typedef struct {
+ struct efi_graphics_output_protocol_mode_32 {
  	u32 max_mode;
- 	u32 mode;
- 	u32 info;
+@@ -1438,7 +1438,7 @@ struct efi_graphics_output_protocol_mode_32 {
  	u32 size_of_info;
  	u64 frame_buffer_base;
  	u32 frame_buffer_size;
--};
-+} efi_graphics_output_protocol_mode_32_t;
+-} __packed;
++};
  
--struct efi_graphics_output_protocol_mode_64 {
-+typedef struct {
+ struct efi_graphics_output_protocol_mode_64 {
  	u32 max_mode;
- 	u32 mode;
- 	u64 info;
+@@ -1447,7 +1447,7 @@ struct efi_graphics_output_protocol_mode_64 {
  	u64 size_of_info;
  	u64 frame_buffer_base;
  	u64 frame_buffer_size;
--};
-+} efi_graphics_output_protocol_mode_64_t;
+-} __packed;
++};
  
--struct efi_graphics_output_protocol_mode {
-+typedef struct {
+ struct efi_graphics_output_protocol_mode {
  	u32 max_mode;
- 	u32 mode;
--	unsigned long info;
-+	efi_graphics_output_mode_info_t *info;
+@@ -1456,7 +1456,7 @@ struct efi_graphics_output_protocol_mode {
  	unsigned long size_of_info;
--	u64 frame_buffer_base;
-+	efi_physical_addr_t frame_buffer_base;
+ 	u64 frame_buffer_base;
  	unsigned long frame_buffer_size;
--};
-+} efi_graphics_output_protocol_mode_t;
+-} __packed;
++};
  
--struct efi_graphics_output_protocol_32 {
-+typedef struct {
+ struct efi_graphics_output_protocol_32 {
  	u32 query_mode;
- 	u32 set_mode;
- 	u32 blt;
- 	u32 mode;
--};
-+} efi_graphics_output_protocol_32_t;
- 
--struct efi_graphics_output_protocol_64 {
-+typedef struct {
- 	u64 query_mode;
- 	u64 set_mode;
- 	u64 blt;
- 	u64 mode;
--};
-+} efi_graphics_output_protocol_64_t;
- 
--struct efi_graphics_output_protocol {
--	unsigned long query_mode;
--	unsigned long set_mode;
--	unsigned long blt;
--	struct efi_graphics_output_protocol_mode *mode;
--};
-+typedef struct {
-+	void *query_mode;
-+	void *set_mode;
-+	void *blt;
-+	efi_graphics_output_protocol_mode_t *mode;
-+} efi_graphics_output_protocol_t;
- 
- extern struct list_head efivar_sysfs_list;
- 
 -- 
 2.20.1
 
