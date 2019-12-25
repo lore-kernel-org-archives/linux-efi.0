@@ -4,47 +4,46 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-11.8 required=3.0
 	tests=HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2188BC2D0DA
-	for <linux-efi@archiver.kernel.org>; Wed, 25 Dec 2019 10:39:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BD82DC2D0DC
+	for <linux-efi@archiver.kernel.org>; Wed, 25 Dec 2019 10:39:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id F15A321569
-	for <linux-efi@archiver.kernel.org>; Wed, 25 Dec 2019 10:39:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9E82E2077B
+	for <linux-efi@archiver.kernel.org>; Wed, 25 Dec 2019 10:39:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726866AbfLYKjD (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 25 Dec 2019 05:39:03 -0500
-Received: from Galois.linutronix.de ([193.142.43.55]:40560 "EHLO
+        id S1726918AbfLYKjF (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 25 Dec 2019 05:39:05 -0500
+Received: from Galois.linutronix.de ([193.142.43.55]:40583 "EHLO
         Galois.linutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726289AbfLYKjD (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 25 Dec 2019 05:39:03 -0500
+        with ESMTP id S1726369AbfLYKjE (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 25 Dec 2019 05:39:04 -0500
 Received: from [5.158.153.53] (helo=tip-bot2.lab.linutronix.de)
         by Galois.linutronix.de with esmtpsa (TLS1.2:DHE_RSA_AES_256_CBC_SHA256:256)
         (Exim 4.80)
         (envelope-from <tip-bot2@linutronix.de>)
-        id 1ik446-000865-TP; Wed, 25 Dec 2019 11:38:55 +0100
+        id 1ik446-000864-Mh; Wed, 25 Dec 2019 11:38:54 +0100
 Received: from [127.0.1.1] (localhost [IPv6:::1])
-        by tip-bot2.lab.linutronix.de (Postfix) with ESMTP id 8B2AC1C2B24;
+        by tip-bot2.lab.linutronix.de (Postfix) with ESMTP id 5CD941C2B1E;
         Wed, 25 Dec 2019 11:38:54 +0100 (CET)
 Date:   Wed, 25 Dec 2019 10:38:54 -0000
-From:   "tip-bot2 for Hans de Goede" <tip-bot2@linutronix.de>
+From:   "tip-bot2 for Ard Biesheuvel" <tip-bot2@linutronix.de>
 Reply-to: linux-kernel@vger.kernel.org
 To:     linux-tip-commits@vger.kernel.org
-Subject: [tip: efi/urgent] efi/libstub/random: Initialize pointer variables to
- zero for mixed mode
-Cc:     Hans de Goede <hdegoede@redhat.com>,
-        Ard Biesheuvel <ardb@kernel.org>,
+Subject: [tip: efi/urgent] x86/efistub: Disable paging at mixed mode entry
+Cc:     Ard Biesheuvel <ardb@kernel.org>, <stable@vger.kernel.org>,
         Arvind Sankar <nivedita@alum.mit.edu>,
+        Hans de Goede <hdegoede@redhat.com>,
         Linus Torvalds <torvalds@linux-foundation.org>,
         Peter Zijlstra <peterz@infradead.org>,
         Thomas Gleixner <tglx@linutronix.de>,
         linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         x86 <x86@kernel.org>, LKML <linux-kernel@vger.kernel.org>
-In-Reply-To: <20191224132909.102540-3-ardb@kernel.org>
-References: <20191224132909.102540-3-ardb@kernel.org>
+In-Reply-To: <20191224132909.102540-4-ardb@kernel.org>
+References: <20191224132909.102540-4-ardb@kernel.org>
 MIME-Version: 1.0
-Message-ID: <157727033445.30329.1314683422943763379.tip-bot2@tip-bot2>
+Message-ID: <157727033419.30329.4854144376331074852.tip-bot2@tip-bot2>
 X-Mailer: tip-git-log-daemon
 Robot-ID: <tip-bot2.linutronix.de>
 Robot-Unsubscribe: Contact <mailto:tglx@linutronix.de> to get blacklisted from these emails
@@ -60,69 +59,49 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 The following commit has been merged into the efi/urgent branch of tip:
 
-Commit-ID:     818c7ce724770fbcdcd43725c81f2b3535f82b76
-Gitweb:        https://git.kernel.org/tip/818c7ce724770fbcdcd43725c81f2b3535f82b76
-Author:        Hans de Goede <hdegoede@redhat.com>
-AuthorDate:    Tue, 24 Dec 2019 14:29:08 +01:00
+Commit-ID:     4911ee401b7ceff8f38e0ac597cbf503d71e690c
+Gitweb:        https://git.kernel.org/tip/4911ee401b7ceff8f38e0ac597cbf503d71e690c
+Author:        Ard Biesheuvel <ardb@kernel.org>
+AuthorDate:    Tue, 24 Dec 2019 14:29:09 +01:00
 Committer:     Ingo Molnar <mingo@kernel.org>
-CommitterDate: Wed, 25 Dec 2019 10:46:06 +01:00
+CommitterDate: Wed, 25 Dec 2019 10:46:07 +01:00
 
-efi/libstub/random: Initialize pointer variables to zero for mixed mode
+x86/efistub: Disable paging at mixed mode entry
 
-Commit:
+The EFI mixed mode entry code goes through the ordinary startup_32()
+routine before jumping into the kernel's EFI boot code in 64-bit
+mode. The 32-bit startup code must be entered with paging disabled,
+but this is not documented as a requirement for the EFI handover
+protocol, and so we should disable paging explicitly when entering
+the kernel from 32-bit EFI firmware.
 
-  0d95981438c3 ("x86: efi/random: Invoke EFI_RNG_PROTOCOL to seed the UEFI RNG table")
-
-causes the drivers/efi/libstub/random.c code to get used on x86 for the first time.
-
-But this code was not written with EFI mixed mode in mind (running a 64
-bit kernel on 32 bit EFI firmware), this causes the kernel to crash during
-early boot when running in mixed mode.
-
-The problem is that in mixed mode pointers are 64 bit, but when running on
-a 32 bit firmware, EFI calls which return a pointer value by reference only
-fill the lower 32 bits of the passed pointer, leaving the upper 32 bits
-uninitialized which leads to crashes.
-
-This commit fixes this by initializing pointers which are passed by
-reference to EFI calls to NULL before passing them, so that the upper 32
-bits are initialized to 0.
-
-Signed-off-by: Hans de Goede <hdegoede@redhat.com>
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+Cc: <stable@vger.kernel.org>
 Cc: Arvind Sankar <nivedita@alum.mit.edu>
+Cc: Hans de Goede <hdegoede@redhat.com>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>
 Cc: Peter Zijlstra <peterz@infradead.org>
 Cc: Thomas Gleixner <tglx@linutronix.de>
 Cc: linux-efi@vger.kernel.org
-Fixes: 0d95981438c3 ("x86: efi/random: Invoke EFI_RNG_PROTOCOL to seed the UEFI RNG table")
-Link: https://lkml.kernel.org/r/20191224132909.102540-3-ardb@kernel.org
+Link: https://lkml.kernel.org/r/20191224132909.102540-4-ardb@kernel.org
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 ---
- drivers/firmware/efi/libstub/random.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ arch/x86/boot/compressed/head_64.S | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-diff --git a/drivers/firmware/efi/libstub/random.c b/drivers/firmware/efi/libstub/random.c
-index 35edd7c..97378cf 100644
---- a/drivers/firmware/efi/libstub/random.c
-+++ b/drivers/firmware/efi/libstub/random.c
-@@ -33,7 +33,7 @@ efi_status_t efi_get_random_bytes(efi_system_table_t *sys_table_arg,
- {
- 	efi_guid_t rng_proto = EFI_RNG_PROTOCOL_GUID;
- 	efi_status_t status;
--	struct efi_rng_protocol *rng;
-+	struct efi_rng_protocol *rng = NULL;
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index 58a512e..ee60b81 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -244,6 +244,11 @@ SYM_FUNC_START(efi32_stub_entry)
+ 	leal	efi32_config(%ebp), %eax
+ 	movl	%eax, efi_config(%ebp)
  
- 	status = efi_call_early(locate_protocol, &rng_proto, NULL,
- 				(void **)&rng);
-@@ -162,8 +162,8 @@ efi_status_t efi_random_get_seed(efi_system_table_t *sys_table_arg)
- 	efi_guid_t rng_proto = EFI_RNG_PROTOCOL_GUID;
- 	efi_guid_t rng_algo_raw = EFI_RNG_ALGORITHM_RAW;
- 	efi_guid_t rng_table_guid = LINUX_EFI_RANDOM_SEED_TABLE_GUID;
--	struct efi_rng_protocol *rng;
--	struct linux_efi_random_seed *seed;
-+	struct efi_rng_protocol *rng = NULL;
-+	struct linux_efi_random_seed *seed = NULL;
- 	efi_status_t status;
- 
- 	status = efi_call_early(locate_protocol, &rng_proto, NULL,
++	/* Disable paging */
++	movl	%cr0, %eax
++	btrl	$X86_CR0_PG_BIT, %eax
++	movl	%eax, %cr0
++
+ 	jmp	startup_32
+ SYM_FUNC_END(efi32_stub_entry)
+ #endif
