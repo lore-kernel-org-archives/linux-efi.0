@@ -2,144 +2,103 @@ Return-Path: <SRS0=pBvQ=2P=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.8 required=3.0
-	tests=HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F1F23C2D0DA
-	for <linux-efi@archiver.kernel.org>; Wed, 25 Dec 2019 10:40:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B61E5C2D0DA
+	for <linux-efi@archiver.kernel.org>; Wed, 25 Dec 2019 14:42:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id D135F2077B
-	for <linux-efi@archiver.kernel.org>; Wed, 25 Dec 2019 10:40:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7E5F2207FF
+	for <linux-efi@archiver.kernel.org>; Wed, 25 Dec 2019 14:42:46 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="eE+aEZe7"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726903AbfLYKjF (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 25 Dec 2019 05:39:05 -0500
-Received: from Galois.linutronix.de ([193.142.43.55]:40579 "EHLO
-        Galois.linutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726307AbfLYKjE (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 25 Dec 2019 05:39:04 -0500
-Received: from [5.158.153.53] (helo=tip-bot2.lab.linutronix.de)
-        by Galois.linutronix.de with esmtpsa (TLS1.2:DHE_RSA_AES_256_CBC_SHA256:256)
-        (Exim 4.80)
-        (envelope-from <tip-bot2@linutronix.de>)
-        id 1ik447-000866-3n; Wed, 25 Dec 2019 11:38:55 +0100
-Received: from [127.0.1.1] (localhost [IPv6:::1])
-        by tip-bot2.lab.linutronix.de (Postfix) with ESMTP id BC26F1C2BA3;
-        Wed, 25 Dec 2019 11:38:54 +0100 (CET)
-Date:   Wed, 25 Dec 2019 10:38:54 -0000
-From:   "tip-bot2 for Arvind Sankar" <tip-bot2@linutronix.de>
-Reply-to: linux-kernel@vger.kernel.org
-To:     linux-tip-commits@vger.kernel.org
-Subject: [tip: efi/urgent] efi/earlycon: Fix write-combine mapping on x86
-Cc:     Arvind Sankar <nivedita@alum.mit.edu>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Hans de Goede <hdegoede@redhat.com>,
-        Linus Torvalds <torvalds@linux-foundation.org>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
-        x86 <x86@kernel.org>, LKML <linux-kernel@vger.kernel.org>
-In-Reply-To: <20191224132909.102540-2-ardb@kernel.org>
-References: <20191224132909.102540-2-ardb@kernel.org>
+        id S1726397AbfLYOmp (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 25 Dec 2019 09:42:45 -0500
+Received: from mail-wm1-f67.google.com ([209.85.128.67]:34031 "EHLO
+        mail-wm1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726353AbfLYOmp (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 25 Dec 2019 09:42:45 -0500
+Received: by mail-wm1-f67.google.com with SMTP id c127so3641687wme.1
+        for <linux-efi@vger.kernel.org>; Wed, 25 Dec 2019 06:42:45 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=PlOZrS/zV7/3xmf3ZkRzcqveBiOROyYvCQZXZ1HuBxE=;
+        b=eE+aEZe7Pf65Cq0zuZadRae+/2XtFDHq+EeOdYZamjDFckdNefoEqLJ2XrJxuRj1Q4
+         x+1mrOPPA8ojZT4LIij98aRAWyXFQIyM6DfcG33lW00HcRNajWzY3W75GASeiGzaFBmk
+         5y/Me0ubysn4LYWviGOlTeDhM156AttYL8+ioHlSNP5c/N49DNANlfXzZ51+Ur+1dya2
+         kvNhCsAntYOucVBscl5OSvj6eWMfSdjMGBNGNJNafLeOVGbIWsf/V6RxRXg30UvMgBit
+         y5G28S8y+YC8T5FRWlzpTsb+4xrvCh20CIVaoRyf42sZ0qK1twFVPsgycj2zttFNIFXe
+         YM8Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=PlOZrS/zV7/3xmf3ZkRzcqveBiOROyYvCQZXZ1HuBxE=;
+        b=d3JYG+P7X4j3ex+OJREHWsOEXddYNZYCD4p3nM69JaeG6PBGg9nvNejVaTrFUxX/Hu
+         Rer+Qze7450hwPQt1FvE+3m5lA1rVeHL8CuHOu/LM9OkqsGDHE1t/DT57F2lGEGMQ2A0
+         QEFXwcpwxnjQ4KE252fNPZz63vWm7NBKusFD787hYciDOWKN92ce7dwmG7hlZCJDUZ5M
+         1Hz7jOzHIWdocLJJz7S1nq7aMwZSW7DgaPoaDzFm0cirw+vVWYeN/0MQgpQQYoqPlUCc
+         n2Rg8izbGh61rfKveguGDUDvE44BX1nrXm/kBWGBjlLUZbhMaTawoGL6z/GwjGwCfgKw
+         Lfnw==
+X-Gm-Message-State: APjAAAUTaISbMRwLrR5ICHr24Oixfs0Gpcw2ePYnDepxtxvB/m56zNfM
+        fk7wFyyGY8h0FZAAxEe2ySAuSHvaPa/58BJAolm/wQ==
+X-Google-Smtp-Source: APXvYqxxOf9pygDePkH/YKZFKBc3JmwjvwPCySo9MiHNKc6daOGSpX/a50AFwz7sMYCYLbZMq7wxJft0WdJuke1TyIw=
+X-Received: by 2002:a1c:7901:: with SMTP id l1mr9518562wme.67.1577284964492;
+ Wed, 25 Dec 2019 06:42:44 -0800 (PST)
 MIME-Version: 1.0
-Message-ID: <157727033465.30329.13576323770465814572.tip-bot2@tip-bot2>
-X-Mailer: tip-git-log-daemon
-Robot-ID: <tip-bot2.linutronix.de>
-Robot-Unsubscribe: Contact <mailto:tglx@linutronix.de> to get blacklisted from these emails
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-X-Linutronix-Spam-Score: -1.0
-X-Linutronix-Spam-Level: -
-X-Linutronix-Spam-Status: No , -1.0 points, 5.0 required,  ALL_TRUSTED=-1,SHORTCIRCUIT=-0.0001
+References: <20191218170139.9468-1-ardb@kernel.org> <20191218170139.9468-14-ardb@kernel.org>
+ <463b0b17-3be7-697e-1227-5d3df52996d6@redhat.com>
+In-Reply-To: <463b0b17-3be7-697e-1227-5d3df52996d6@redhat.com>
+From:   Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Date:   Wed, 25 Dec 2019 15:42:44 +0100
+Message-ID: <CAKv+Gu-wk5qBOGuoLx6v7Zo41dOZ5oNL3oBCnyT858DY7JCuhw@mail.gmail.com>
+Subject: Re: [PATCH v2 13/21] efi/libstub/x86: drop __efi_early() export of
+ efi_config struct
+To:     Hans de Goede <hdegoede@redhat.com>
+Cc:     Ard Biesheuvel <ardb@kernel.org>,
+        linux-efi <linux-efi@vger.kernel.org>,
+        Matthew Garrett <matthewgarrett@google.com>,
+        Ingo Molnar <mingo@kernel.org>,
+        Andy Lutomirski <luto@kernel.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Arvind Sankar <nivedita@alum.mit.edu>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The following commit has been merged into the efi/urgent branch of tip:
+On Tue, 24 Dec 2019 at 20:34, Hans de Goede <hdegoede@redhat.com> wrote:
+>
+> Hi Ard,
+>
+> On 12/18/19 6:01 PM, Ard Biesheuvel wrote:
+> > The various pointers we stash in the efi_config struct which we
+> > retrieve using __efi_early() are simply copies of the ones in
+> > the EFI system table, which we have started accessing directly
+> > in the previous patch. So drop all the __efi_early() related
+> > plumbing, except for the access to a boolean which tells us
+> > whether the firmware is 64-bit or not.
+> >
+> > Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+>
+> I synced my personal tree yesterday to 5.5-rc3 + the most
+> recent version (as of yesterday afternoon) of your
+> efistub-x86-cleanup-v3 branch on top.
+>
+> This has been working fine on a bunch of devices, but it fails
+> on a Teclast X89 Bay Trail (mixed mode) device. When reverting all
+> the commits from your efistub-x86-cleanup-v3 branch one by one, things
+> start working again after reverting this one.
+>
 
-Commit-ID:     d92b54570d24d017d2630e314b525ed792f5aa6c
-Gitweb:        https://git.kernel.org/tip/d92b54570d24d017d2630e314b525ed792f5aa6c
-Author:        Arvind Sankar <nivedita@alum.mit.edu>
-AuthorDate:    Tue, 24 Dec 2019 14:29:07 +01:00
-Committer:     Ingo Molnar <mingo@kernel.org>
-CommitterDate: Wed, 25 Dec 2019 10:46:06 +01:00
+Oops again. And thanks again for taking the time to test this stuff.
 
-efi/earlycon: Fix write-combine mapping on x86
+Could you please try the branch below and check whether it fixes it?
 
-On x86, until PAT is initialized, WC translates into UC-. Since we
-calculate and store pgprot_writecombine(PAGE_KERNEL) when earlycon is
-initialized, this means we actually use UC- mappings instead of WC
-mappings, which makes scrolling very slow.
-
-Instead store a boolean flag to indicate whether we want to use
-writeback or write-combine mappings, and recalculate the actual pgprot_t
-we need on every mapping. Once PAT is initialized, we will start using
-write-combine mappings, which speeds up the scrolling considerably.
-
-Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
-Cc: Hans de Goede <hdegoede@redhat.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-efi@vger.kernel.org
-Fixes: 69c1f396f25b ("efi/x86: Convert x86 EFI earlyprintk into generic earlycon implementation")
-Link: https://lkml.kernel.org/r/20191224132909.102540-2-ardb@kernel.org
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
----
- drivers/firmware/efi/earlycon.c | 16 +++++++---------
- 1 file changed, 7 insertions(+), 9 deletions(-)
-
-diff --git a/drivers/firmware/efi/earlycon.c b/drivers/firmware/efi/earlycon.c
-index d4077db..5d4f847 100644
---- a/drivers/firmware/efi/earlycon.c
-+++ b/drivers/firmware/efi/earlycon.c
-@@ -17,7 +17,7 @@ static const struct console *earlycon_console __initdata;
- static const struct font_desc *font;
- static u32 efi_x, efi_y;
- static u64 fb_base;
--static pgprot_t fb_prot;
-+static bool fb_wb;
- static void *efi_fb;
- 
- /*
-@@ -33,10 +33,8 @@ static int __init efi_earlycon_remap_fb(void)
- 	if (!earlycon_console || !(earlycon_console->flags & CON_ENABLED))
- 		return 0;
- 
--	if (pgprot_val(fb_prot) == pgprot_val(PAGE_KERNEL))
--		efi_fb = memremap(fb_base, screen_info.lfb_size, MEMREMAP_WB);
--	else
--		efi_fb = memremap(fb_base, screen_info.lfb_size, MEMREMAP_WC);
-+	efi_fb = memremap(fb_base, screen_info.lfb_size,
-+			  fb_wb ? MEMREMAP_WB : MEMREMAP_WC);
- 
- 	return efi_fb ? 0 : -ENOMEM;
- }
-@@ -53,9 +51,12 @@ late_initcall(efi_earlycon_unmap_fb);
- 
- static __ref void *efi_earlycon_map(unsigned long start, unsigned long len)
- {
-+	pgprot_t fb_prot;
-+
- 	if (efi_fb)
- 		return efi_fb + start;
- 
-+	fb_prot = fb_wb ? PAGE_KERNEL : pgprot_writecombine(PAGE_KERNEL);
- 	return early_memremap_prot(fb_base + start, len, pgprot_val(fb_prot));
- }
- 
-@@ -215,10 +216,7 @@ static int __init efi_earlycon_setup(struct earlycon_device *device,
- 	if (screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
- 		fb_base |= (u64)screen_info.ext_lfb_base << 32;
- 
--	if (opt && !strcmp(opt, "ram"))
--		fb_prot = PAGE_KERNEL;
--	else
--		fb_prot = pgprot_writecombine(PAGE_KERNEL);
-+	fb_wb = opt && !strcmp(opt, "ram");
- 
- 	si = &screen_info;
- 	xres = si->lfb_width;
+https://git.kernel.org/pub/scm/linux/kernel/git/ardb/linux.git/log/?h=efi-core-mm-fix
