@@ -2,114 +2,138 @@ Return-Path: <SRS0=vIKq=2R=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-10.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A8797C2D0DA
-	for <linux-efi@archiver.kernel.org>; Fri, 27 Dec 2019 18:19:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 68F67C2D0C3
+	for <linux-efi@archiver.kernel.org>; Fri, 27 Dec 2019 22:45:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 7D17120722
-	for <linux-efi@archiver.kernel.org>; Fri, 27 Dec 2019 18:19:53 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1577470793;
-	bh=lNUYq7bp5wkI5mc/7OLg2R0gWlSNmXm1kqXk6M4f69k=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=tSH7BpjZVGVKgnWY0D+fHSoPST2a/ETuWbZXqKp+mjw7ZMvCNNISIn5Dl3sRoBiqx
-	 p2HQu3+fjY0RKtU7Qidlc3U2nqpMO86MBIkHb0eP3DdI3bWF1VbxwCrcvRsTJsDQ9F
-	 HhksJffSnycfuQdR4e9nFuH9jgJVu3wZEDPC+9wY=
+	by mail.kernel.org (Postfix) with ESMTP id 202F020838
+	for <linux-efi@archiver.kernel.org>; Fri, 27 Dec 2019 22:45:04 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="cBGnZBcz"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727323AbfL0STw (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 27 Dec 2019 13:19:52 -0500
-Received: from mail.kernel.org ([198.145.29.99]:38964 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727250AbfL0SOn (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 27 Dec 2019 13:14:43 -0500
-Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 1D5B0218AC;
-        Fri, 27 Dec 2019 18:14:42 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1577470483;
-        bh=lNUYq7bp5wkI5mc/7OLg2R0gWlSNmXm1kqXk6M4f69k=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=GVHOByvfHHjZhz6TjkzVtq3FJItZ3RuR3ETPk+dRNOga7Rqzl3lgTa3nFeYJBTBVp
-         2+RQ6hng9eDc7iXycrD9G4Lrq0XxSA4PyaJpqspAeo9O6GUz6lUfvDY4C2l2og40q3
-         M0jb304OpAGwoXAFCjTz52HBCMOXtTv/weZjx4bg=
-From:   Sasha Levin <sashal@kernel.org>
-To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Arvind Sankar <nivedita@alum.mit.edu>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Bhupesh Sharma <bhsharma@redhat.com>,
-        Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>,
-        linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
-        Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.9 05/38] efi/gop: Return EFI_SUCCESS if a usable GOP was found
-Date:   Fri, 27 Dec 2019 13:14:02 -0500
-Message-Id: <20191227181435.7644-5-sashal@kernel.org>
-X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20191227181435.7644-1-sashal@kernel.org>
-References: <20191227181435.7644-1-sashal@kernel.org>
+        id S1725860AbfL0WpD (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 27 Dec 2019 17:45:03 -0500
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:35564 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1725306AbfL0WpD (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 27 Dec 2019 17:45:03 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1577486701;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=nSAm4SacMV7LrVbIZgHNPaTxQvom2Z7SvCkmieLXHT4=;
+        b=cBGnZBczM7TmOzrXOEB5GOhzH6qUr3qOvHj/8SsyfWxMhoFbt1pV2OphekZ2Wt3CZX+0uH
+        KyYtctKWG+3DcrjFhFcJxmn8K0n8IabP6y3s4zPIlYaDrRJJqE258W9WEN1LGRmjqRVyNy
+        L3/zNJTkeXHqHzabLEl/IRp2ognr1w4=
+Received: from mail-wr1-f69.google.com (mail-wr1-f69.google.com
+ [209.85.221.69]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-39-62CNJhkANbyXShbLAJeUeg-1; Fri, 27 Dec 2019 17:44:55 -0500
+X-MC-Unique: 62CNJhkANbyXShbLAJeUeg-1
+Received: by mail-wr1-f69.google.com with SMTP id b13so14459039wrx.22
+        for <linux-efi@vger.kernel.org>; Fri, 27 Dec 2019 14:44:54 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=nSAm4SacMV7LrVbIZgHNPaTxQvom2Z7SvCkmieLXHT4=;
+        b=WQvczlCMNjPMroRf86rWD70BAj4AMdq8MDhWgkJJrVUfSoOkkm258EGel+cn/o7s0v
+         THXWBUMmNypi3UhIJjIyoMicoFfVUdcJW+RL82FHocntywm3xf5Q57DcVpo84huj4dSL
+         ovAK120ZEXgLSMCmHf4o2rOwtWyqzl/jU/3rokhFC83Er4QYQouGq68CCuMjJ0W1uU4y
+         v3FzB99EOfM7txE7TffjmfWvkCU+wTIyyOub0u2QNyFERrWKxl1D3hYZpx/dN4gGYwqw
+         OAtY2XteesP8gBVp6YvNUqG8gAw3Ss+feabkvJTVFhLH8XM/qG/wgQ7MtLdD8HhfSAw5
+         d76Q==
+X-Gm-Message-State: APjAAAWYlVATkK5ZVP6kEHKbYXFCDzWJNLb8GyrWWuIXPUdHemyv19kM
+        qUL2W34qNAp65U9ESBIp4ybl2FnwV9uGeMKwt7vVv5YXOnC8ouHgLCCS5XJEzk+DNh01Myoxu2/
+        4I0vi1+1roX2y4Aj0kwJH
+X-Received: by 2002:a5d:4386:: with SMTP id i6mr52406299wrq.63.1577486694057;
+        Fri, 27 Dec 2019 14:44:54 -0800 (PST)
+X-Google-Smtp-Source: APXvYqzTV78q1+6EaJ64kpdklMGbakmKQqf+MRM5WcFATYZxCDV1vPcuBJVpoDS/9Guw9U0SKd/Z8A==
+X-Received: by 2002:a5d:4386:: with SMTP id i6mr52406291wrq.63.1577486693881;
+        Fri, 27 Dec 2019 14:44:53 -0800 (PST)
+Received: from shalem.localdomain (2001-1c00-0c0c-fe00-7e79-4dac-39d0-9c14.cable.dynamic.v6.ziggo.nl. [2001:1c00:c0c:fe00:7e79:4dac:39d0:9c14])
+        by smtp.gmail.com with ESMTPSA id p15sm12550083wma.40.2019.12.27.14.44.52
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 27 Dec 2019 14:44:53 -0800 (PST)
+Subject: Re: [PATCH v2 13/21] efi/libstub/x86: drop __efi_early() export of
+ efi_config struct
+To:     Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc:     Ard Biesheuvel <ardb@kernel.org>,
+        linux-efi <linux-efi@vger.kernel.org>,
+        Matthew Garrett <matthewgarrett@google.com>,
+        Ingo Molnar <mingo@kernel.org>,
+        Andy Lutomirski <luto@kernel.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Arvind Sankar <nivedita@alum.mit.edu>
+References: <20191218170139.9468-1-ardb@kernel.org>
+ <20191218170139.9468-14-ardb@kernel.org>
+ <463b0b17-3be7-697e-1227-5d3df52996d6@redhat.com>
+ <CAKv+Gu-wk5qBOGuoLx6v7Zo41dOZ5oNL3oBCnyT858DY7JCuhw@mail.gmail.com>
+From:   Hans de Goede <hdegoede@redhat.com>
+Message-ID: <82ad1878-85e3-f893-1c8d-ade0225b2074@redhat.com>
+Date:   Fri, 27 Dec 2019 23:44:51 +0100
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.3.1
 MIME-Version: 1.0
-X-stable: review
-X-Patchwork-Hint: Ignore
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAKv+Gu-wk5qBOGuoLx6v7Zo41dOZ5oNL3oBCnyT858DY7JCuhw@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Arvind Sankar <nivedita@alum.mit.edu>
+Hi,
 
-[ Upstream commit dbd89c303b4420f6cdb689fd398349fc83b059dd ]
+On 25-12-2019 15:42, Ard Biesheuvel wrote:
+> On Tue, 24 Dec 2019 at 20:34, Hans de Goede <hdegoede@redhat.com> wrote:
+>>
+>> Hi Ard,
+>>
+>> On 12/18/19 6:01 PM, Ard Biesheuvel wrote:
+>>> The various pointers we stash in the efi_config struct which we
+>>> retrieve using __efi_early() are simply copies of the ones in
+>>> the EFI system table, which we have started accessing directly
+>>> in the previous patch. So drop all the __efi_early() related
+>>> plumbing, except for the access to a boolean which tells us
+>>> whether the firmware is 64-bit or not.
+>>>
+>>> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+>>
+>> I synced my personal tree yesterday to 5.5-rc3 + the most
+>> recent version (as of yesterday afternoon) of your
+>> efistub-x86-cleanup-v3 branch on top.
+>>
+>> This has been working fine on a bunch of devices, but it fails
+>> on a Teclast X89 Bay Trail (mixed mode) device. When reverting all
+>> the commits from your efistub-x86-cleanup-v3 branch one by one, things
+>> start working again after reverting this one.
+>>
+> 
+> Oops again. And thanks again for taking the time to test this stuff.
+> 
+> Could you please try the branch below and check whether it fixes it?
+> 
+> https://git.kernel.org/pub/scm/linux/kernel/git/ardb/linux.git/log/?h=efi-core-mm-fix
 
-If we've found a usable instance of the Graphics Output Protocol
-(GOP) with a framebuffer, it is possible that one of the later EFI
-calls fails while checking if any support console output. In this
-case status may be an EFI error code even though we found a usable
-GOP.
+This seems to fix the issue, the Teclast X89 boots again and I've
+also tested this on 2 other devices (one mixed mode Bay Trail one 64 bit
+Cherry Trail device).
 
-Fix this by explicitly return EFI_SUCCESS if a usable GOP has been
-located.
+If I want to also test them, how do the 2 new series you've just posted come
+into the mix here? :
 
-Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
-Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Cc: Bhupesh Sharma <bhsharma@redhat.com>
-Cc: Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>
-Cc: linux-efi@vger.kernel.org
-Link: https://lkml.kernel.org/r/20191206165542.31469-4-ardb@kernel.org
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- drivers/firmware/efi/libstub/gop.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+"[PATCH 0/3] efi/x86: clean up and simplify runtime call wrappers"
+"[PATCH 0/3] efi/x86: righten memory protections at runtime"
 
-diff --git a/drivers/firmware/efi/libstub/gop.c b/drivers/firmware/efi/libstub/gop.c
-index 16ed61c023e8..81ffda5d1e48 100644
---- a/drivers/firmware/efi/libstub/gop.c
-+++ b/drivers/firmware/efi/libstub/gop.c
-@@ -200,7 +200,7 @@ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
- 
- 	si->capabilities |= VIDEO_CAPABILITY_SKIP_QUIRKS;
- 
--	return status;
-+	return EFI_SUCCESS;
- }
- 
- static efi_status_t
-@@ -318,7 +318,7 @@ setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
- 
- 	si->capabilities |= VIDEO_CAPABILITY_SKIP_QUIRKS;
- 
--	return status;
-+	return EFI_SUCCESS;
- }
- 
- /*
--- 
-2.20.1
+Regards,
+
+Hans
 
