@@ -7,58 +7,52 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 55225C2D0CE
-	for <linux-efi@archiver.kernel.org>; Fri, 27 Dec 2019 17:58:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F594C2D0DA
+	for <linux-efi@archiver.kernel.org>; Fri, 27 Dec 2019 18:07:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 32872227BF
-	for <linux-efi@archiver.kernel.org>; Fri, 27 Dec 2019 17:58:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1B8DA21927
+	for <linux-efi@archiver.kernel.org>; Fri, 27 Dec 2019 18:07:11 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1577469505;
-	bh=PAOUSNAxojEzCiLlv75nNZS799ylz9MjHsY1qAlDUQ4=;
+	s=default; t=1577470031;
+	bh=Dpq8wuZ0aaFZMU+WnK22+ipxpSbe3i1U4BrVYFSNTiM=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=NRz0SNbWHsDD9mN6uq4YKwQL2d0jdzqxbBw2/UKuZPel+077M8AkLifQtglZm+wUW
-	 0+RK3wb0mm+HdQ0AdmsBjEml8iZM4gqK5KPmLYjEq6YEN7vtwFvkZO7ckeiSGCCO4G
-	 nE+mmfbxe76OrnBA+ccs+JiFPcZMCfIwXjOP3MlI=
+	b=UWSugwa5V9O9z0v2lklxmsZbIdkRsvv8lSaqa61dzNVZ0N8gMJlLLsVhXm2PSFLsb
+	 Ig7rJHEyYigiu0woLNtrXGeHdt2HQzao3RwF+EnoffuKcjLKgYbedvC0MxK1VGAhWU
+	 gHFYmpTAq/i8odUaP8khNkLnMCNbTxztk91edCTE=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726885AbfL0R6V (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 27 Dec 2019 12:58:21 -0500
-Received: from mail.kernel.org ([198.145.29.99]:37622 "EHLO mail.kernel.org"
+        id S1727757AbfL0SHC (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 27 Dec 2019 13:07:02 -0500
+Received: from mail.kernel.org ([198.145.29.99]:59524 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727401AbfL0Rl0 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 27 Dec 2019 12:41:26 -0500
+        id S1727649AbfL0SCi (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 27 Dec 2019 13:02:38 -0500
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id F322A22B48;
-        Fri, 27 Dec 2019 17:41:22 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id A9A1C206CB;
+        Fri, 27 Dec 2019 18:02:35 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1577468484;
-        bh=PAOUSNAxojEzCiLlv75nNZS799ylz9MjHsY1qAlDUQ4=;
+        s=default; t=1577469756;
+        bh=Dpq8wuZ0aaFZMU+WnK22+ipxpSbe3i1U4BrVYFSNTiM=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Q4zdVrjxH4agQM6pwN7FRkBdsqmC2+5lQLTXW7cymaVqUQW0lP/4bWnCIGg2t8HaR
-         w2E/vCJ4tJT9T/fgDgceK2cO64RqAsQ1eG/GdsfJf2bf2RkCaNMBCoLIGlghEHPCzi
-         MB5xlSw4XCy59M3XNkwzcxUniX/E2x/rzbhqLwrY=
+        b=BicfYkcsWrH1TkBVB2ObtdFyIHJhmYNa31E05N4dkisBX2bIhvihyw7ye06qNLpFN
+         8yUifll1ZixvxcKWdsNTrZiPX8YNgfG40zFfv3LeeAlFWDvSN4j56ykvLjXrPnAmo7
+         23OpZna+9e0+pRNJSImXOanNHaAWX9lKoZdUSArI=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Dave Young <dyoung@redhat.com>,
-        Michael Weiser <michael@weiser.dinsnail.net>,
-        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Borislav Petkov <bp@alien8.de>,
-        "Eric W . Biederman" <ebiederm@xmission.com>,
-        "H . Peter Anvin" <hpa@zytor.com>,
-        Linus Torvalds <torvalds@linux-foundation.org>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        kexec@lists.infradead.org, linux-efi@vger.kernel.org,
-        Ingo Molnar <mingo@kernel.org>,
-        Sasha Levin <sashal@kernel.org>,
-        platform-driver-x86@vger.kernel.org, x86@kernel.org
-Subject: [PATCH AUTOSEL 5.4 022/187] x86/efi: Update e820 with reserved EFI boot services data to fix kexec breakage
-Date:   Fri, 27 Dec 2019 12:38:10 -0500
-Message-Id: <20191227174055.4923-22-sashal@kernel.org>
+Cc:     Arvind Sankar <nivedita@alum.mit.edu>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Bhupesh Sharma <bhsharma@redhat.com>,
+        Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>,
+        linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
+        Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.14 10/57] efi/gop: Fix memory leak in __gop_query32/64()
+Date:   Fri, 27 Dec 2019 13:01:35 -0500
+Message-Id: <20191227180222.7076-10-sashal@kernel.org>
 X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20191227174055.4923-1-sashal@kernel.org>
-References: <20191227174055.4923-1-sashal@kernel.org>
+In-Reply-To: <20191227180222.7076-1-sashal@kernel.org>
+References: <20191227180222.7076-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -68,83 +62,148 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Dave Young <dyoung@redhat.com>
+From: Arvind Sankar <nivedita@alum.mit.edu>
 
-[ Upstream commit af164898482817a1d487964b68f3c21bae7a1beb ]
+[ Upstream commit ff397be685e410a59c34b21ce0c55d4daa466bb7 ]
 
-Michael Weiser reported that he got this error during a kexec rebooting:
+efi_graphics_output_protocol::query_mode() returns info in
+callee-allocated memory which must be freed by the caller, which
+we aren't doing.
 
-  esrt: Unsupported ESRT version 2904149718861218184.
+We don't actually need to call query_mode() in order to obtain the
+info for the current graphics mode, which is already there in
+gop->mode->info, so just access it directly in the setup_gop32/64()
+functions.
 
-The ESRT memory stays in EFI boot services data, and it was reserved
-in kernel via efi_mem_reserve().  The initial purpose of the reservation
-is to reuse the EFI boot services data across kexec reboot. For example
-the BGRT image data and some ESRT memory like Michael reported.
+Also nothing uses the size of the info structure, so don't update the
+passed-in size (which is the size of the gop_handle table in bytes)
+unnecessarily.
 
-But although the memory is reserved it is not updated in the X86 E820 table,
-and kexec_file_load() iterates system RAM in the IO resource list to find places
-for kernel, initramfs and other stuff. In Michael's case the kexec loaded
-initramfs overwrote the ESRT memory and then the failure happened.
-
-Since kexec_file_load() depends on the E820 table being updated, just fix this
-by updating the reserved EFI boot services memory as reserved type in E820.
-
-Originally any memory descriptors with EFI_MEMORY_RUNTIME attribute are
-bypassed in the reservation code path because they are assumed as reserved.
-
-But the reservation is still needed for multiple kexec reboots,
-and it is the only possible case we come here thus just drop the code
-chunk, then everything works without side effects.
-
-On my machine the ESRT memory sits in an EFI runtime data range, it does
-not trigger the problem, but I successfully tested with BGRT instead.
-both kexec_load() and kexec_file_load() work and kdump works as well.
-
-[ mingo: Edited the changelog. ]
-
-Reported-by: Michael Weiser <michael@weiser.dinsnail.net>
-Tested-by: Michael Weiser <michael@weiser.dinsnail.net>
-Signed-off-by: Dave Young <dyoung@redhat.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Eric W. Biederman <ebiederm@xmission.com>
-Cc: H. Peter Anvin <hpa@zytor.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: kexec@lists.infradead.org
+Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: Bhupesh Sharma <bhsharma@redhat.com>
+Cc: Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>
 Cc: linux-efi@vger.kernel.org
-Link: https://lkml.kernel.org/r/20191204075233.GA10520@dhcp-128-65.nay.redhat.com
+Link: https://lkml.kernel.org/r/20191206165542.31469-5-ardb@kernel.org
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- arch/x86/platform/efi/quirks.c | 6 ++----
- 1 file changed, 2 insertions(+), 4 deletions(-)
+ drivers/firmware/efi/libstub/gop.c | 66 ++++++------------------------
+ 1 file changed, 12 insertions(+), 54 deletions(-)
 
-diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-index 3b9fd679cea9..aefe845dff59 100644
---- a/arch/x86/platform/efi/quirks.c
-+++ b/arch/x86/platform/efi/quirks.c
-@@ -260,10 +260,6 @@ void __init efi_arch_mem_reserve(phys_addr_t addr, u64 size)
- 		return;
+diff --git a/drivers/firmware/efi/libstub/gop.c b/drivers/firmware/efi/libstub/gop.c
+index 81ffda5d1e48..fd8053f9556e 100644
+--- a/drivers/firmware/efi/libstub/gop.c
++++ b/drivers/firmware/efi/libstub/gop.c
+@@ -85,30 +85,6 @@ setup_pixel_info(struct screen_info *si, u32 pixels_per_scan_line,
  	}
- 
--	/* No need to reserve regions that will never be freed. */
--	if (md.attribute & EFI_MEMORY_RUNTIME)
--		return;
--
- 	size += addr % EFI_PAGE_SIZE;
- 	size = round_up(size, EFI_PAGE_SIZE);
- 	addr = round_down(addr, EFI_PAGE_SIZE);
-@@ -293,6 +289,8 @@ void __init efi_arch_mem_reserve(phys_addr_t addr, u64 size)
- 	early_memunmap(new, new_size);
- 
- 	efi_memmap_install(new_phys, num_entries);
-+	e820__range_update(addr, size, E820_TYPE_RAM, E820_TYPE_RESERVED);
-+	e820__update_table(e820_table);
  }
  
- /*
+-static efi_status_t
+-__gop_query32(efi_system_table_t *sys_table_arg,
+-	      struct efi_graphics_output_protocol_32 *gop32,
+-	      struct efi_graphics_output_mode_info **info,
+-	      unsigned long *size, u64 *fb_base)
+-{
+-	struct efi_graphics_output_protocol_mode_32 *mode;
+-	efi_graphics_output_protocol_query_mode query_mode;
+-	efi_status_t status;
+-	unsigned long m;
+-
+-	m = gop32->mode;
+-	mode = (struct efi_graphics_output_protocol_mode_32 *)m;
+-	query_mode = (void *)(unsigned long)gop32->query_mode;
+-
+-	status = __efi_call_early(query_mode, (void *)gop32, mode->mode, size,
+-				  info);
+-	if (status != EFI_SUCCESS)
+-		return status;
+-
+-	*fb_base = mode->frame_buffer_base;
+-	return status;
+-}
+-
+ static efi_status_t
+ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
+             efi_guid_t *proto, unsigned long size, void **gop_handle)
+@@ -130,6 +106,7 @@ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
+ 
+ 	nr_gops = size / sizeof(u32);
+ 	for (i = 0; i < nr_gops; i++) {
++		struct efi_graphics_output_protocol_mode_32 *mode;
+ 		struct efi_graphics_output_mode_info *info = NULL;
+ 		efi_guid_t conout_proto = EFI_CONSOLE_OUT_DEVICE_GUID;
+ 		bool conout_found = false;
+@@ -147,9 +124,11 @@ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
+ 		if (status == EFI_SUCCESS)
+ 			conout_found = true;
+ 
+-		status = __gop_query32(sys_table_arg, gop32, &info, &size,
+-				       &current_fb_base);
+-		if (status == EFI_SUCCESS && (!first_gop || conout_found) &&
++		mode = (void *)(unsigned long)gop32->mode;
++		info = (void *)(unsigned long)mode->info;
++		current_fb_base = mode->frame_buffer_base;
++
++		if ((!first_gop || conout_found) &&
+ 		    info->pixel_format != PIXEL_BLT_ONLY) {
+ 			/*
+ 			 * Systems that use the UEFI Console Splitter may
+@@ -203,30 +182,6 @@ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
+ 	return EFI_SUCCESS;
+ }
+ 
+-static efi_status_t
+-__gop_query64(efi_system_table_t *sys_table_arg,
+-	      struct efi_graphics_output_protocol_64 *gop64,
+-	      struct efi_graphics_output_mode_info **info,
+-	      unsigned long *size, u64 *fb_base)
+-{
+-	struct efi_graphics_output_protocol_mode_64 *mode;
+-	efi_graphics_output_protocol_query_mode query_mode;
+-	efi_status_t status;
+-	unsigned long m;
+-
+-	m = gop64->mode;
+-	mode = (struct efi_graphics_output_protocol_mode_64 *)m;
+-	query_mode = (void *)(unsigned long)gop64->query_mode;
+-
+-	status = __efi_call_early(query_mode, (void *)gop64, mode->mode, size,
+-				  info);
+-	if (status != EFI_SUCCESS)
+-		return status;
+-
+-	*fb_base = mode->frame_buffer_base;
+-	return status;
+-}
+-
+ static efi_status_t
+ setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
+ 	    efi_guid_t *proto, unsigned long size, void **gop_handle)
+@@ -248,6 +203,7 @@ setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
+ 
+ 	nr_gops = size / sizeof(u64);
+ 	for (i = 0; i < nr_gops; i++) {
++		struct efi_graphics_output_protocol_mode_64 *mode;
+ 		struct efi_graphics_output_mode_info *info = NULL;
+ 		efi_guid_t conout_proto = EFI_CONSOLE_OUT_DEVICE_GUID;
+ 		bool conout_found = false;
+@@ -265,9 +221,11 @@ setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
+ 		if (status == EFI_SUCCESS)
+ 			conout_found = true;
+ 
+-		status = __gop_query64(sys_table_arg, gop64, &info, &size,
+-				       &current_fb_base);
+-		if (status == EFI_SUCCESS && (!first_gop || conout_found) &&
++		mode = (void *)(unsigned long)gop64->mode;
++		info = (void *)(unsigned long)mode->info;
++		current_fb_base = mode->frame_buffer_base;
++
++		if ((!first_gop || conout_found) &&
+ 		    info->pixel_format != PIXEL_BLT_ONLY) {
+ 			/*
+ 			 * Systems that use the UEFI Console Splitter may
 -- 
 2.20.1
 
