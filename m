@@ -2,138 +2,84 @@ Return-Path: <SRS0=Hy2n=2U=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AFF73C2D0C3
-	for <linux-efi@archiver.kernel.org>; Mon, 30 Dec 2019 20:14:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E4F40C2D0D3
+	for <linux-efi@archiver.kernel.org>; Mon, 30 Dec 2019 20:16:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 8B0962071E
-	for <linux-efi@archiver.kernel.org>; Mon, 30 Dec 2019 20:14:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B963720722
+	for <linux-efi@archiver.kernel.org>; Mon, 30 Dec 2019 20:16:53 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=intel-com.20150623.gappssmtp.com header.i=@intel-com.20150623.gappssmtp.com header.b="LOFA+mxl"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727726AbfL3UO0 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 30 Dec 2019 15:14:26 -0500
-Received: from mga18.intel.com ([134.134.136.126]:61436 "EHLO mga18.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727691AbfL3UOZ (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 30 Dec 2019 15:14:25 -0500
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from orsmga008.jf.intel.com ([10.7.209.65])
-  by orsmga106.jf.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 30 Dec 2019 12:14:25 -0800
-X-IronPort-AV: E=Sophos;i="5.69,376,1571727600"; 
-   d="scan'208";a="213420200"
-Received: from dwillia2-desk3.jf.intel.com (HELO dwillia2-desk3.amr.corp.intel.com) ([10.54.39.16])
-  by orsmga008-auth.jf.intel.com with ESMTP/TLS/DHE-RSA-AES256-GCM-SHA384; 30 Dec 2019 12:14:25 -0800
-Subject: [PATCH] efi: Fix handling of multiple contiguous efi_fake_mem=
- entries
-From:   Dan Williams <dan.j.williams@intel.com>
-To:     mingo@redhat.com
-Cc:     Taku Izumi <izumi.taku@jp.fujitsu.com>,
-        Michael Weiser <michael@weiser.dinsnail.net>,
-        Dave Young <dyoung@redhat.com>,
-        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Ingo Molnar <mingo@kernel.org>, linux-kernel@vger.kernel.org,
-        linux-efi@vger.kernel.org, kexec@lists.infradead.org
-Date:   Mon, 30 Dec 2019 11:58:23 -0800
-Message-ID: <157773590338.4153451.5898675419563883883.stgit@dwillia2-desk3.amr.corp.intel.com>
-User-Agent: StGit/0.18-3-g996c
+        id S1727715AbfL3UQv (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 30 Dec 2019 15:16:51 -0500
+Received: from mail-oi1-f196.google.com ([209.85.167.196]:39757 "EHLO
+        mail-oi1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727698AbfL3UQv (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 30 Dec 2019 15:16:51 -0500
+Received: by mail-oi1-f196.google.com with SMTP id a67so11455210oib.6
+        for <linux-efi@vger.kernel.org>; Mon, 30 Dec 2019 12:16:50 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=intel-com.20150623.gappssmtp.com; s=20150623;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=vGoYHJkV2sBuC/EabEMn2jT6G42n0LQcEtNTThbzJvo=;
+        b=LOFA+mxlmd5oV8l+Ly2ITiGE7quCUFquXLsCfnDW9MllcsxJM+xgnpfdFKisb8BlW1
+         GsO5VONykMGvsC/iRi6Eid6vExDoXX/AGXk3RgaQSaV/KJstjudxFNuYhLaX/O/sRVgI
+         fCl75NApfe3sM2ibIn7p9xCxDkpU9lBZeIiHUmzhr+s8RGLjZMMlrnEOtoVPjzn7bz+8
+         qAXlEZ4WIdspGkErzVHHtXGP+qBfG7Ig0sNFiB5LEExIhOb0uo+rkIgNuo/eDxEcTcVA
+         mHuU2UpXe/KNqH19ffb+XBrtbUJmugSY6caSLnbRawTieig0KcwDS3330Y27EYSFO6nG
+         GO5A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=vGoYHJkV2sBuC/EabEMn2jT6G42n0LQcEtNTThbzJvo=;
+        b=U+UzU0yaw4G/q5mRROsM0B/cu73z6e0k766XJ/SZrQyc45MZhgPIEP/GQKq0p3Eux6
+         i4ZAez26cUdo8cVwpi3QlvAkflilTInSCn7lCbkyO0epHeu9mThnUbbG4b7an+mtyqQM
+         TbRxtC6/Bs6iDnjk7ScsQn7uDnaQRqw0c32dyPsAzx//rM6KFl553IIZEiBfluBU32bN
+         XYr/hpHaJER+C3A0B9kECwNUWc1ZpbO3AYkN7/LxoltsgXF6d0NqcnjtcM/vh96NP0mA
+         qO3wh+YltvVR1CZwSiwJQnK+pwzJShw8h4bLcxs1BiEoeOTWZzpl1QDkvwnl34/ASJ18
+         D0vw==
+X-Gm-Message-State: APjAAAWyu7yjf60UnYmcja50Iqsz5jFwF0nOEvQx6A69CUQgG9XFC20d
+        Nv+3sO0S9IAkC0S7x2v6ArC3JVel47WFOJ+d8D0ZHg==
+X-Google-Smtp-Source: APXvYqx3ceamtmJUChp1TLuDkDv4af0iLI+bwyDSS+upKsqsk+U0Ob0XHRDXqZ29dmIwB0CA1zn0kxN2oJlTNMRltC0=
+X-Received: by 2002:aca:3f54:: with SMTP id m81mr333228oia.73.1577737010159;
+ Mon, 30 Dec 2019 12:16:50 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+References: <20191204075233.GA10520@dhcp-128-65.nay.redhat.com>
+ <CANTgghnsdijH90qnm24qat70T7FA5qOwmnXXt+NYVxHYa4SLJA@mail.gmail.com>
+ <CAPcyv4iRdJO6xrCaN=vrSvYFLZanLazmJLArT5YMfdJ6rc-PEQ@mail.gmail.com> <CAPcyv4hT9HXN2CqZw96zqgdNaapc=9oqSYvGrnEbeqSmx0t5xw@mail.gmail.com>
+In-Reply-To: <CAPcyv4hT9HXN2CqZw96zqgdNaapc=9oqSYvGrnEbeqSmx0t5xw@mail.gmail.com>
+From:   Dan Williams <dan.j.williams@intel.com>
+Date:   Mon, 30 Dec 2019 12:16:39 -0800
+Message-ID: <CAPcyv4jLxqPaB22Ao9oV31Gm=b0+Phty+Uz33Snex4QchOUb0Q@mail.gmail.com>
+Subject: Re: [PATCH] x86/efi: update e820 about reserved EFI boot services
+ data to fix kexec breakage
+To:     Dan Williams <dan.j.williams.korg@gmail.com>
+Cc:     Dave Young <dyoung@redhat.com>,
+        linux-efi <linux-efi@vger.kernel.org>, X86 ML <x86@kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Michael Weiser <michael@weiser.dinsnail.net>,
+        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
+        kexec@lists.infradead.org, Ingo Molnar <mingo@redhat.com>,
+        Borislav Petkov <bp@alien8.de>,
+        "Eric W. Biederman" <ebiederm@xmission.com>,
+        "H. Peter Anvin" <hpa@zytor.com>,
+        Thomas Gleixner <tglx@linutronix.de>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-A recent test of efi_fake_mem=4G@9G:0x40000,4G@13G:0x40000 crashed with
-a signature of:
+On Mon, Dec 30, 2019 at 1:42 AM Dan Williams <dan.j.williams@intel.com> wrote:
+[..]
+> I'll send a patch to fix up efi_fake_memmap().
 
-    BUG: unable to handle page fault for address: ffffffffff281000
-    [..]
-    RIP: 0010:efi_memmap_insert+0x11d/0x191
-    [..]
-    Call Trace:
-     ? bgrt_init+0xbe/0xbe
-     ? efi_arch_mem_reserve+0x1cb/0x228
-     ? acpi_parse_bgrt+0xa/0xd
-     ? acpi_table_parse+0x86/0xb8
-     ? acpi_boot_init+0x494/0x4e3
-     ? acpi_parse_x2apic+0x87/0x87
-     ? setup_acpi_sci+0xa2/0xa2
-     ? setup_arch+0x8db/0x9e1
-     ? start_kernel+0x6a/0x547
-     ? secondary_startup_64+0xb6/0xc0
+For others following this thread, that patch is here:
 
-efi_memmap_insert() is attempting to insert entries past the end of the
-new map. This condition is setup by efi_fake_mem() leaking empty entries
-to the end of memory map, and then efi_arch_mem_reserve() trips over the
-bad entry when attempting an additional efi_memmap_insert(). The empty
-entry causes efi_memmap_insert() to attempt more memmap splits / copies
-than efi_memmap_split_count() accounted for when sizing the new map.
-
-Update efi_fake_memmap() to cleanup lagging empty entries.
-
-This change is related to commit af1648984828 "x86/efi: Update e820 with
-reserved EFI boot services data to fix kexec breakage" since that
-introduces more occurrences where efi_memmap_insert() is invoked after
-an efi_fake_mem= configuration has been parsed. Previously the side
-effects of vestigial empty entries were benign, but with commit
-af1648984828 that follow-on efi_memmap_insert() invocation triggers the
-above crash signature.
-
-Fixes: 0f96a99dab36 ("efi: Add 'efi_fake_mem' boot option")
-Fixes: af1648984828 ("x86/efi: Update e820 with reserved EFI boot services...")
-Cc: Taku Izumi <izumi.taku@jp.fujitsu.com>
-Cc: Michael Weiser <michael@weiser.dinsnail.net>
-Cc: Dave Young <dyoung@redhat.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Dan Williams <dan.j.williams@intel.com>
----
- drivers/firmware/efi/fake_mem.c |   22 +++++++++++++++++++++-
- 1 file changed, 21 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/firmware/efi/fake_mem.c b/drivers/firmware/efi/fake_mem.c
-index bb9fc70d0cfa..6df51ba93ae8 100644
---- a/drivers/firmware/efi/fake_mem.c
-+++ b/drivers/firmware/efi/fake_mem.c
-@@ -67,13 +67,33 @@ void __init efi_fake_memmap(void)
- 		return;
- 	}
- 
-+	memset(new_memmap, 0, efi.memmap.desc_size * new_nr_map);
- 	for (i = 0; i < nr_fake_mem; i++)
- 		efi_memmap_insert(&efi.memmap, new_memmap, &efi_fake_mems[i]);
- 
-+	/*
-+	 * efi_memmap_split_count() may over count the number of
-+	 * required splits in the case when contiguous fake entries are
-+	 * specified. Check that all new_nr_map entries were consumed.
-+	 */
-+	for (i = new_nr_map; i > 0; i--) {
-+		efi_memory_desc_t *md;
-+		u64 start, end;
-+
-+		md = new_memmap + efi.memmap.desc_size * (new_nr_map - i - 1);
-+		end = md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT) - 1;
-+		start = md->phys_addr;
-+
-+		if (start == 0 && end + 1 == 0)
-+			continue;
-+		break;
-+	}
-+
- 	/* swap into new EFI memmap */
- 	early_memunmap(new_memmap, efi.memmap.desc_size * new_nr_map);
- 
--	efi_memmap_install(new_memmap_phy, new_nr_map);
-+	/* install only the valid entries */
-+	efi_memmap_install(new_memmap_phy, i);
- 
- 	/* print new EFI memmap */
- 	efi_print_memmap();
-
+http://lore.kernel.org/r/157773590338.4153451.5898675419563883883.stgit@dwillia2-desk3.amr.corp.intel.com
