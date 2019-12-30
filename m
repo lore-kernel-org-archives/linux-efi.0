@@ -7,46 +7,46 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E70ACC2D0D3
-	for <linux-efi@archiver.kernel.org>; Mon, 30 Dec 2019 18:09:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 79163C3F68F
+	for <linux-efi@archiver.kernel.org>; Mon, 30 Dec 2019 18:09:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id BC2CD20748
-	for <linux-efi@archiver.kernel.org>; Mon, 30 Dec 2019 18:09:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4FC31206DB
+	for <linux-efi@archiver.kernel.org>; Mon, 30 Dec 2019 18:09:38 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1577729377;
-	bh=hsQRMT4OopvQk5rblI9umDd3b6hgAdw64BJosxwWrxE=;
+	s=default; t=1577729378;
+	bh=wmat1qnhdpT11mqLy8hwQvtNC90Q2jFPKcLAsTNNoVc=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=M1YKRKrsXV/8yWvOaZNxKKF4D3Xnf7+aDIwgY1ih/QQaOpr1iZJ0ykhT421vp6vtZ
-	 F4D5WZmnUERLda3sZB/LtT8qLpjO//MNm4QiDuOPwLgi+VfYd7IGjSjcW0M8P9rdrL
-	 yqFt/HeS/QNJTIFpF8gp0YOZ3fMJIsHWzKJAZkJ4=
+	b=MbLgtLokcJTLjEhn+7XRRfanqFMnewlSbKrFsBKbhC6IJF18DTgmUkfQwytkKYL8l
+	 SxUtsMsXStYEOYhtMeNybpxvAA5WLgwZlt1MNiFd8VMEGePhyL3BZ2pN6k0t+bNqEo
+	 9ZY3KIe+nv+Y4YkCxhFOM6hUSkFmXMI0e1xmCtWE=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727634AbfL3SJh (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 30 Dec 2019 13:09:37 -0500
-Received: from mail.kernel.org ([198.145.29.99]:38360 "EHLO mail.kernel.org"
+        id S1727318AbfL3SJi (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 30 Dec 2019 13:09:38 -0500
+Received: from mail.kernel.org ([198.145.29.99]:38492 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727318AbfL3SJe (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 30 Dec 2019 13:09:34 -0500
+        id S1727635AbfL3SJh (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Mon, 30 Dec 2019 13:09:37 -0500
 Received: from localhost.localdomain (91-167-84-221.subs.proxad.net [91.167.84.221])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 348E6222C3;
-        Mon, 30 Dec 2019 18:09:32 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 8D3032077B;
+        Mon, 30 Dec 2019 18:09:35 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1577729373;
-        bh=hsQRMT4OopvQk5rblI9umDd3b6hgAdw64BJosxwWrxE=;
+        s=default; t=1577729376;
+        bh=wmat1qnhdpT11mqLy8hwQvtNC90Q2jFPKcLAsTNNoVc=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=zZ+uJ8Em8SkMdmM0gUZv/zGxkkL+b/rjEwzcPgBpZlfO6zKZ5dEepffbSh6Um/b3N
-         MM6ghfu4DIDkL6sKyDUg6vQGBbtop0UbKTZK2/ZFtpAFpPAnHEhqY1/iiPRr7UKk6b
-         n3EkvIRWRqQla9Funrrt3e0n0JQHNHGoD79HDtJ0=
+        b=uC03d6FbhkSdKzrTSq5l+ckK0jFfwOUTTzcX93uuAnj7rrsdCCiSP8ZqX0xRx0l0F
+         XdvtPzPr30FXjc+MgIuesZYL4W06CqklQMj1OWZ5fD/ukK9QLazDTb7P2Q4CaA4+fs
+         vzhn+ReHSGYM49m3IQVQVMeNZu7cFiY93k/dHFHM=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     Ard Biesheuvel <ardb@kernel.org>, Ingo Molnar <mingo@redhat.com>,
         Arvind Sankar <nivedita@alum.mit.edu>,
         Hans de Goede <hdegoede@redhat.com>,
         Andy Lutomirski <luto@kernel.org>
-Subject: [PATCH v2 07/14] efi/x86: split SetVirtualAddresMap() wrappers into 32 and 64 bit versions
-Date:   Mon, 30 Dec 2019 19:08:27 +0100
-Message-Id: <20191230180834.75601-8-ardb@kernel.org>
+Subject: [PATCH v2 09/14] efi/x86: simplify 64-bit EFI firmware call wrapper
+Date:   Mon, 30 Dec 2019 19:08:29 +0100
+Message-Id: <20191230180834.75601-10-ardb@kernel.org>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20191230180834.75601-1-ardb@kernel.org>
 References: <20191230180834.75601-1-ardb@kernel.org>
@@ -57,220 +57,143 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Split the phys_efi_set_virtual_address_map() routine into 32 and 64 bit
-versions, so we can simplify them individually in subsequent patches.
+The efi_call() wrapper used to invoke EFI runtime services serves
+a number of purposes:
+- realign the stack to 16 bytes
+- preserve FP and CR0 register state
+- translate from SysV to MS calling convention.
 
-There is very little overlap between the logic anyway, and this has
-already been factored out in prolog/epilog routines which are completely
-different between 32 bit and 64 bit. So let's take it one step further,
-and get rid of the overlap completely.
+Preserving CR0.TS is no longer necessary in Linux, and preserving the
+FP register state is also redundant in most cases, since efi_call() is
+almost always used from within the scope of a pair of kernel_fpu_begin()/
+kernel_fpu_end() calls, with the exception of the early call to
+SetVirtualAddressMap() and the SGI UV support code.
+
+So let's add a pair of kernel_fpu_begin()/_end() calls there as well,
+and remove the unnecessary code from the assembly implementation of
+efi_call(), and only keep the pieces that deal with the stack
+alignment and the ABI translation.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/include/asm/efi.h     |  8 ++--
- arch/x86/platform/efi/efi.c    | 30 +-----------
- arch/x86/platform/efi/efi_32.c | 21 ++++++--
- arch/x86/platform/efi/efi_64.c | 50 +++++++++++++-------
- 4 files changed, 55 insertions(+), 54 deletions(-)
+ arch/x86/platform/efi/Makefile      |  1 -
+ arch/x86/platform/efi/efi_64.c      |  3 ++
+ arch/x86/platform/efi/efi_stub_64.S | 39 ++------------------
+ arch/x86/platform/uv/bios_uv.c      |  7 +++-
+ 4 files changed, 12 insertions(+), 38 deletions(-)
 
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index 09c3fc468793..e29e5dc0b750 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -61,8 +61,6 @@ extern asmlinkage unsigned long efi_call_phys(void *, ...);
+diff --git a/arch/x86/platform/efi/Makefile b/arch/x86/platform/efi/Makefile
+index fe29f3f5d384..7ec3a8b31f8b 100644
+--- a/arch/x86/platform/efi/Makefile
++++ b/arch/x86/platform/efi/Makefile
+@@ -1,6 +1,5 @@
+ # SPDX-License-Identifier: GPL-2.0
+ OBJECT_FILES_NON_STANDARD_efi_thunk_$(BITS).o := y
+-OBJECT_FILES_NON_STANDARD_efi_stub_$(BITS).o := y
  
- extern asmlinkage u64 efi_call(void *fp, ...);
- 
--#define efi_call_phys(f, args...)		efi_call((f), args)
--
- /*
-  * struct efi_scratch - Scratch space used while switching to/from efi_mm
-  * @phys_stack: stack used during EFI Mixed Mode
-@@ -115,8 +113,6 @@ extern void __iomem *__init efi_ioremap(unsigned long addr, unsigned long size,
- extern struct efi_scratch efi_scratch;
- extern void __init efi_set_executable(efi_memory_desc_t *md, bool executable);
- extern int __init efi_memblock_x86_reserve_range(void);
--extern pgd_t * __init efi_call_phys_prolog(void);
--extern void __init efi_call_phys_epilog(pgd_t *save_pgd);
- extern void __init efi_print_memmap(void);
- extern void __init efi_memory_uc(u64 addr, unsigned long size);
- extern void __init efi_map_region(efi_memory_desc_t *md);
-@@ -177,6 +173,10 @@ extern efi_status_t efi_thunk_set_virtual_address_map(
- 	unsigned long descriptor_size,
- 	u32 descriptor_version,
- 	efi_memory_desc_t *virtual_map);
-+efi_status_t efi_set_virtual_address_map(unsigned long memory_map_size,
-+					 unsigned long descriptor_size,
-+					 u32 descriptor_version,
-+					 efi_memory_desc_t *virtual_map);
- 
- /* arch specific definitions used by the stub code */
- 
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 3ce32c31bb61..50f8123e658a 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -54,7 +54,7 @@
- #include <asm/x86_init.h>
- #include <asm/uv/uv.h>
- 
--static struct efi efi_phys __initdata;
-+struct efi efi_phys __initdata;
- static efi_system_table_t efi_systab __initdata;
- 
- static efi_config_table_type_t arch_tables[] __initdata = {
-@@ -97,32 +97,6 @@ static int __init setup_add_efi_memmap(char *arg)
- }
- early_param("add_efi_memmap", setup_add_efi_memmap);
- 
--static efi_status_t __init phys_efi_set_virtual_address_map(
--	unsigned long memory_map_size,
--	unsigned long descriptor_size,
--	u32 descriptor_version,
--	efi_memory_desc_t *virtual_map)
--{
--	efi_status_t status;
--	unsigned long flags;
--	pgd_t *save_pgd;
--
--	save_pgd = efi_call_phys_prolog();
--	if (!save_pgd)
--		return EFI_ABORTED;
--
--	/* Disable interrupts around EFI calls: */
--	local_irq_save(flags);
--	status = efi_call_phys(efi_phys.set_virtual_address_map,
--			       memory_map_size, descriptor_size,
--			       descriptor_version, virtual_map);
--	local_irq_restore(flags);
--
--	efi_call_phys_epilog(save_pgd);
--
--	return status;
--}
--
- void __init efi_find_mirror(void)
- {
- 	efi_memory_desc_t *md;
-@@ -1042,7 +1016,7 @@ static void __init __efi_enter_virtual_mode(void)
- 	efi_sync_low_kernel_mappings();
- 
- 	if (!efi_is_mixed()) {
--		status = phys_efi_set_virtual_address_map(
-+		status = efi_set_virtual_address_map(
- 				efi.memmap.desc_size * count,
- 				efi.memmap.desc_size,
- 				efi.memmap.desc_version,
-diff --git a/arch/x86/platform/efi/efi_32.c b/arch/x86/platform/efi/efi_32.c
-index 9959657127f4..185950ade0e9 100644
---- a/arch/x86/platform/efi/efi_32.c
-+++ b/arch/x86/platform/efi/efi_32.c
-@@ -66,9 +66,16 @@ void __init efi_map_region(efi_memory_desc_t *md)
- void __init efi_map_region_fixed(efi_memory_desc_t *md) {}
- void __init parse_efi_setup(u64 phys_addr, u32 data_len) {}
- 
--pgd_t * __init efi_call_phys_prolog(void)
-+extern struct efi efi_phys;
-+
-+efi_status_t __init efi_set_virtual_address_map(unsigned long memory_map_size,
-+						unsigned long descriptor_size,
-+						u32 descriptor_version,
-+						efi_memory_desc_t *virtual_map)
- {
- 	struct desc_ptr gdt_descr;
-+	efi_status_t status;
-+	unsigned long flags;
- 	pgd_t *save_pgd;
- 
- 	/* Current pgd is swapper_pg_dir, we'll restore it later: */
-@@ -80,14 +87,18 @@ pgd_t * __init efi_call_phys_prolog(void)
- 	gdt_descr.size = GDT_SIZE - 1;
- 	load_gdt(&gdt_descr);
- 
--	return save_pgd;
--}
-+	/* Disable interrupts around EFI calls: */
-+	local_irq_save(flags);
-+	status = efi_call_phys(efi_phys.set_virtual_address_map,
-+			       memory_map_size, descriptor_size,
-+			       descriptor_version, virtual_map);
-+	local_irq_restore(flags);
- 
--void __init efi_call_phys_epilog(pgd_t *save_pgd)
--{
- 	load_fixmap_gdt(0);
- 	load_cr3(save_pgd);
- 	__flush_tlb_all();
-+
-+	return status;
- }
- 
- void __init efi_runtime_update_mappings(void)
+ obj-$(CONFIG_EFI) 		+= quirks.o efi.o efi_$(BITS).o efi_stub_$(BITS).o
+ obj-$(CONFIG_EFI_MIXED)		+= efi_thunk_$(BITS).o
 diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index a72bbabbc595..b7fb2fd24830 100644
+index b7fb2fd24830..809db917cf3e 100644
 --- a/arch/x86/platform/efi/efi_64.c
 +++ b/arch/x86/platform/efi/efi_64.c
-@@ -185,23 +185,6 @@ void __init efi_old_memmap_phys_epilog(pgd_t *save_pgd)
- 	early_code_mapping_set_exec(0);
- }
+@@ -1019,6 +1019,8 @@ efi_status_t __init efi_set_virtual_address_map(unsigned long memory_map_size,
+ 		efi_switch_mm(&efi_mm);
+ 	}
  
--pgd_t * __init efi_call_phys_prolog(void)
--{
--	if (efi_enabled(EFI_OLD_MEMMAP))
--		return efi_old_memmap_phys_prolog();
++	kernel_fpu_begin();
++
+ 	/* Disable interrupts around EFI calls: */
+ 	local_irq_save(flags);
+ 	status = efi_call(efi.systab->runtime->set_virtual_address_map,
+@@ -1026,6 +1028,7 @@ efi_status_t __init efi_set_virtual_address_map(unsigned long memory_map_size,
+ 			  descriptor_version, virtual_map);
+ 	local_irq_restore(flags);
+ 
++	kernel_fpu_end();
+ 
+ 	if (save_pgd)
+ 		efi_old_memmap_phys_epilog(save_pgd);
+diff --git a/arch/x86/platform/efi/efi_stub_64.S b/arch/x86/platform/efi/efi_stub_64.S
+index b1d2313fe3bf..e7e1020f4ccb 100644
+--- a/arch/x86/platform/efi/efi_stub_64.S
++++ b/arch/x86/platform/efi/efi_stub_64.S
+@@ -8,41 +8,12 @@
+  */
+ 
+ #include <linux/linkage.h>
+-#include <asm/segment.h>
+-#include <asm/msr.h>
+-#include <asm/processor-flags.h>
+-#include <asm/page_types.h>
 -
--	efi_switch_mm(&efi_mm);
--	return efi_mm.pgd;
--}
+-#define SAVE_XMM			\
+-	mov %rsp, %rax;			\
+-	subq $0x70, %rsp;		\
+-	and $~0xf, %rsp;		\
+-	mov %rax, (%rsp);		\
+-	mov %cr0, %rax;			\
+-	clts;				\
+-	mov %rax, 0x8(%rsp);		\
+-	movaps %xmm0, 0x60(%rsp);	\
+-	movaps %xmm1, 0x50(%rsp);	\
+-	movaps %xmm2, 0x40(%rsp);	\
+-	movaps %xmm3, 0x30(%rsp);	\
+-	movaps %xmm4, 0x20(%rsp);	\
+-	movaps %xmm5, 0x10(%rsp)
 -
--void __init efi_call_phys_epilog(pgd_t *save_pgd)
--{
--	if (efi_enabled(EFI_OLD_MEMMAP))
--		efi_old_memmap_phys_epilog(save_pgd);
+-#define RESTORE_XMM			\
+-	movaps 0x60(%rsp), %xmm0;	\
+-	movaps 0x50(%rsp), %xmm1;	\
+-	movaps 0x40(%rsp), %xmm2;	\
+-	movaps 0x30(%rsp), %xmm3;	\
+-	movaps 0x20(%rsp), %xmm4;	\
+-	movaps 0x10(%rsp), %xmm5;	\
+-	mov 0x8(%rsp), %rsi;		\
+-	mov %rsi, %cr0;			\
+-	mov (%rsp), %rsp
++#include <asm/nospec-branch.h>
+ 
+ SYM_FUNC_START(efi_call)
+ 	pushq %rbp
+ 	movq %rsp, %rbp
+-	SAVE_XMM
++	and $~0xf, %rsp
+ 	mov 16(%rbp), %rax
+ 	subq $48, %rsp
+ 	mov %r9, 32(%rsp)
+@@ -50,9 +21,7 @@ SYM_FUNC_START(efi_call)
+ 	mov %r8, %r9
+ 	mov %rcx, %r8
+ 	mov %rsi, %rcx
+-	call *%rdi
+-	addq $48, %rsp
+-	RESTORE_XMM
+-	popq %rbp
++	CALL_NOSPEC %rdi
++	leave
+ 	ret
+ SYM_FUNC_END(efi_call)
+diff --git a/arch/x86/platform/uv/bios_uv.c b/arch/x86/platform/uv/bios_uv.c
+index ece9cb9c1189..5c0e2eb5d87c 100644
+--- a/arch/x86/platform/uv/bios_uv.c
++++ b/arch/x86/platform/uv/bios_uv.c
+@@ -34,10 +34,13 @@ static s64 __uv_bios_call(enum uv_bios_cmd which, u64 a1, u64 a2, u64 a3,
+ 	 * If EFI_OLD_MEMMAP is set, we need to fall back to using our old EFI
+ 	 * callback method, which uses efi_call() directly, with the kernel page tables:
+ 	 */
+-	if (unlikely(efi_enabled(EFI_OLD_MEMMAP)))
++	if (unlikely(efi_enabled(EFI_OLD_MEMMAP))) {
++		kernel_fpu_begin();
+ 		ret = efi_call((void *)__va(tab->function), (u64)which, a1, a2, a3, a4, a5);
 -	else
--		efi_switch_mm(efi_scratch.prev_mm);
--}
--
- EXPORT_SYMBOL_GPL(efi_mm);
- 
- /*
-@@ -1018,3 +1001,36 @@ void efi_thunk_runtime_setup(void)
- 	efi.query_capsule_caps = efi_thunk_query_capsule_caps;
- }
- #endif /* CONFIG_EFI_MIXED */
-+
-+efi_status_t __init efi_set_virtual_address_map(unsigned long memory_map_size,
-+						unsigned long descriptor_size,
-+						u32 descriptor_version,
-+						efi_memory_desc_t *virtual_map)
-+{
-+	efi_status_t status;
-+	unsigned long flags;
-+	pgd_t *save_pgd = NULL;
-+
-+	if (efi_enabled(EFI_OLD_MEMMAP)) {
-+		save_pgd = efi_old_memmap_phys_prolog();
-+		if (!save_pgd)
-+			return EFI_ABORTED;
++		kernel_fpu_end();
 +	} else {
-+		efi_switch_mm(&efi_mm);
+ 		ret = efi_call_virt_pointer(tab, function, (u64)which, a1, a2, a3, a4, a5);
 +	}
-+
-+	/* Disable interrupts around EFI calls: */
-+	local_irq_save(flags);
-+	status = efi_call(efi.systab->runtime->set_virtual_address_map,
-+			  memory_map_size, descriptor_size,
-+			  descriptor_version, virtual_map);
-+	local_irq_restore(flags);
-+
-+
-+	if (save_pgd)
-+		efi_old_memmap_phys_epilog(save_pgd);
-+	else
-+		efi_switch_mm(efi_scratch.prev_mm);
-+
-+	return status;
-+}
+ 
+ 	return ret;
+ }
 -- 
 2.20.1
 
