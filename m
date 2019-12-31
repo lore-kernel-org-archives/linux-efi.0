@@ -2,77 +2,128 @@ Return-Path: <SRS0=+Anq=2V=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.1 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.1 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 39F73C2D0CE
-	for <linux-efi@archiver.kernel.org>; Tue, 31 Dec 2019 22:51:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8317AC2D0CE
+	for <linux-efi@archiver.kernel.org>; Tue, 31 Dec 2019 23:04:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E7EF5206DA
-	for <linux-efi@archiver.kernel.org>; Tue, 31 Dec 2019 22:51:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4933C206DA
+	for <linux-efi@archiver.kernel.org>; Tue, 31 Dec 2019 23:04:40 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=codon.org.uk header.i=@codon.org.uk header.b="udZOn1Au"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="OKy7hCee"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727071AbfLaWvh (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 31 Dec 2019 17:51:37 -0500
-Received: from cavan.codon.org.uk ([93.93.128.6]:51798 "EHLO
-        cavan.codon.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727054AbfLaWvh (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 31 Dec 2019 17:51:37 -0500
-X-Greylist: delayed 1372 seconds by postgrey-1.27 at vger.kernel.org; Tue, 31 Dec 2019 17:51:36 EST
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=codon.org.uk; s=63138784; h=In-Reply-To:Content-Type:MIME-Version:
-        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description:Resent-Date:
-        Resent-From:Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:List-Id:
-        List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive;
-         bh=XKOHTo6zu2DfekeXpI2v+Dec+QqJwXCPmaBxyuFPC/8=; b=udZOn1AuqL9LkDFm3v1QhVmkS
-        QGabZ01W1wplNbrtmr1BOmdsQm0BcR2YbQc8mw2TuQ7f7qNr7r2kSgHrdTHiVwF3AoELX5q9z4ptl
-        cagxaIN7/BxkWjhfbw7vEwjPlinTNYryMumox5bGe3BUdNVeCJw6z52AQnaIoL4LqImHI=;
-Received: from mjg59 by cavan.codon.org.uk with local (Exim 4.89)
-        (envelope-from <mjg59@cavan.codon.org.uk>)
-        id 1imQ0D-0003lT-Fx; Tue, 31 Dec 2019 22:28:37 +0000
-Date:   Tue, 31 Dec 2019 22:28:37 +0000
-From:   Matthew Garrett <mjg59@srcf.ucam.org>
-To:     Borislav Petkov <bp@alien8.de>
-Cc:     Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Matt Fleming <matt@codeblueprint.co.uk>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Dave Young <dyoung@redhat.com>,
-        linux-efi <linux-efi@vger.kernel.org>,
-        the arch/x86 maintainers <x86@kernel.org>,
-        Dimitri Sivanich <dimitri.sivanich@hpe.com>,
-        Mike Travis <mike.travis@hpe.com>,
-        Hedi Berriche <hedi.berriche@hpe.com>
-Subject: Re: [RFC PATCH] efi/x86: limit EFI old memory map to SGI UV1 machines
-Message-ID: <20191231222837.wpardrndvnukpgfp@srcf.ucam.org>
-References: <CAKv+Gu82ZCk3Wy6NHHyRs0CAFXJDMfDu2KpH3PZ-Le1SjsQLLQ@mail.gmail.com>
- <20191231160547.GB13549@zn.tnic>
+        id S1727071AbfLaXEj (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 31 Dec 2019 18:04:39 -0500
+Received: from mail-qv1-f67.google.com ([209.85.219.67]:45407 "EHLO
+        mail-qv1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727031AbfLaXEj (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 31 Dec 2019 18:04:39 -0500
+Received: by mail-qv1-f67.google.com with SMTP id l14so13768216qvu.12
+        for <linux-efi@vger.kernel.org>; Tue, 31 Dec 2019 15:04:39 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=sender:from:date:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=zhUc/1Doyl6yHwnTb+0TidLzdtNEKJ8aLybfLFEBTeo=;
+        b=OKy7hCeeHenq/MQ66kKJsHcRESH5cxwvCCr24KjaOxcSm2fQfOZ6ZAQ3Q737dOXBoz
+         VZwbnsAZ3tNKEDpn/vYKC7y1zeZtg+8OFNimQwY90fN2uCQIyLslwDQgYWTztZTFhtgu
+         KZrt8bSaeWny2bWLT02SDxA50S79E165QSDPiYZRCSkSWIssooU5VUwtuigL7NPjvvaj
+         /L4YzA2gGEMlch8/TaLq8qrWtWt31Rp2FkGTJEvk/hiJTcW8B61rPSmTO2JLRnYgEOZr
+         BfIX3C0U+uZnEPrN7zpXIhv9F+xBMRnxsS2rgVr5qWAc7HNxdduGRyczno+f8WPtADQE
+         JgrQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:sender:from:date:to:cc:subject:message-id
+         :references:mime-version:content-disposition:in-reply-to:user-agent;
+        bh=zhUc/1Doyl6yHwnTb+0TidLzdtNEKJ8aLybfLFEBTeo=;
+        b=LKA1WRRsYsZwTljDQdkr9wAtDoJnaPMI9c5PtlGpmwDTBFGDytpShsHc7vMMGfRTBn
+         DSYILLuswBI0+P90xLptN+rzuIHxcrd5YkqC8XSfO3JbXQugXlPAzLEbci5p8Dwzo9ss
+         s94ZFx4gixJqCDdEyUR+QPy9pkt4I6MzTkNYGLoWA5EXsob2cCx5tXtRdAdGANuKYPTJ
+         DWpwQcjWITRaViC6OYsIeV2N6cZl7PsEACMl30ALX2qDEO77jXy0LwemfkGjiKfLaQ3l
+         14wwRc6x/7tgREZJBHb2KLa6MQLF8UNb2BefW2R+C6b8LesshyRuHIZbVlim8prXhzrF
+         SfCg==
+X-Gm-Message-State: APjAAAXQNKLeU6xAlcdZPLjfQ1FExSz6JQ6/XHnb2Fpw1H0IUAh0sFzU
+        ww2X9oMWKFCTPEGHcvCRE9Q=
+X-Google-Smtp-Source: APXvYqzbEHjOH270SD4BgdTitK+1yPGBPupeSgZuybx3wZvoefEQkEcUPhMw8GtaG/bGf5Vbuhch7g==
+X-Received: by 2002:a05:6214:965:: with SMTP id do5mr42024915qvb.202.1577833478536;
+        Tue, 31 Dec 2019 15:04:38 -0800 (PST)
+Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
+        by smtp.gmail.com with ESMTPSA id m95sm12752198qte.41.2019.12.31.15.04.38
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 31 Dec 2019 15:04:38 -0800 (PST)
+From:   Arvind Sankar <nivedita@alum.mit.edu>
+X-Google-Original-From: Arvind Sankar <arvind@rani.riverdale.lan>
+Date:   Tue, 31 Dec 2019 18:04:36 -0500
+To:     Ard Biesheuvel <ardb@kernel.org>
+Cc:     linux-efi@vger.kernel.org, Hans de Goede <hdegoede@redhat.com>,
+        Matthew Garrett <matthewgarrett@google.com>,
+        Ingo Molnar <mingo@kernel.org>,
+        Andy Lutomirski <luto@kernel.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Arvind Sankar <nivedita@alum.mit.edu>
+Subject: Re: [PATCH v2 13/21] efi/libstub/x86: drop __efi_early() export of
+ efi_config struct
+Message-ID: <20191231230436.GA78532@rani.riverdale.lan>
+References: <20191218170139.9468-1-ardb@kernel.org>
+ <20191218170139.9468-14-ardb@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20191231160547.GB13549@zn.tnic>
-User-Agent: NeoMutt/20170113 (1.7.2)
-X-SA-Exim-Connect-IP: <locally generated>
-X-SA-Exim-Mail-From: mjg59@cavan.codon.org.uk
-X-SA-Exim-Scanned: No (on cavan.codon.org.uk); SAEximRunCond expanded to false
+In-Reply-To: <20191218170139.9468-14-ardb@kernel.org>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, Dec 31, 2019 at 05:05:47PM +0100, Borislav Petkov wrote:
+On Wed, Dec 18, 2019 at 07:01:31PM +0200, Ard Biesheuvel wrote:
+> The various pointers we stash in the efi_config struct which we
+> retrieve using __efi_early() are simply copies of the ones in
+> the EFI system table, which we have started accessing directly
+> in the previous patch. So drop all the __efi_early() related
+> plumbing, except for the access to a boolean which tells us
+> whether the firmware is 64-bit or not.
+> 
+> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+> ---
+>  arch/x86/boot/compressed/eboot.c   | 36 ++++++++------------
+>  arch/x86/boot/compressed/head_32.S |  2 +-
+>  arch/x86/boot/compressed/head_64.S |  4 +--
+>  arch/x86/include/asm/efi.h         | 23 +++++--------
+>  4 files changed, 26 insertions(+), 39 deletions(-)
+> 
+> diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+> index 2bcab1ef5a56..53e67334c4c3 100644
+> --- a/arch/x86/boot/compressed/eboot.c
+> +++ b/arch/x86/boot/compressed/eboot.c
+> @@ -20,11 +20,17 @@
+>  
+>  static efi_system_table_t *sys_table;
+>  
+> -static struct efi_config *efi_early;
+> +struct efi_config {
+> +	u64 image_handle;
+> +	u64 table;
+> +	bool is64;
+> +} __packed;
+>  
+> -__pure const struct efi_config *__efi_early(void)
+> +static bool is64;
+> +
+> +__pure bool __efi_early_is64(void)
+>  {
+> -	return efi_early;
+> +	return is64;
+>  }
+>  
+>  __pure efi_system_table_t *efi_system_table(void)
 
-> looks like mfleming meant the opposite: some apple laptops don't like
-> the 1:1 runtime mapping. But there might be more and I believe mjg59 had
-> some use case at the time but I could be remembering it wrong.
-
-I've lost most of the context for this over the years, I'm afraid. The 
-case I remember was that the EFI reboot code on some hardware would 
-attempt to access physical addresses and we wanted some form of 1:1 
-mapping to handle that, but I really don't remember what the larger 
-details were.
-
--- 
-Matthew Garrett | mjg59@srcf.ucam.org
+This predates your series, but looking at the generated code I noticed
+that pure isn't enough to let gcc optimize out repeated calls to is64
+and system_table. Declaring them as __attribute_const__ would allow
+optimization. They don't quite meet gcc's requirements for that as they
+access global non-const variables, but it seems like it ought to be
+safe, especially if we stop using the functions within eboot.c itself?
