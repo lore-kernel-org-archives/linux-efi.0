@@ -2,82 +2,226 @@ Return-Path: <SRS0=+Anq=2V=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 64D10C2D0CE
-	for <linux-efi@archiver.kernel.org>; Tue, 31 Dec 2019 22:22:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6F45AC2D0DE
+	for <linux-efi@archiver.kernel.org>; Tue, 31 Dec 2019 22:47:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 2D6FF205ED
-	for <linux-efi@archiver.kernel.org>; Tue, 31 Dec 2019 22:22:01 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel-com.20150623.gappssmtp.com header.i=@intel-com.20150623.gappssmtp.com header.b="SDs1XLSX"
+	by mail.kernel.org (Postfix) with ESMTP id 4C99F206E6
+	for <linux-efi@archiver.kernel.org>; Tue, 31 Dec 2019 22:47:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727109AbfLaWWA (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 31 Dec 2019 17:22:00 -0500
-Received: from mail-ot1-f67.google.com ([209.85.210.67]:38127 "EHLO
-        mail-ot1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727054AbfLaWWA (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 31 Dec 2019 17:22:00 -0500
-Received: by mail-ot1-f67.google.com with SMTP id d7so47335724otf.5
-        for <linux-efi@vger.kernel.org>; Tue, 31 Dec 2019 14:21:59 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=intel-com.20150623.gappssmtp.com; s=20150623;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=KlT2jnj7z1iFkAKUNQWbQsSo+TR/YWaOOgSod0k7w7Q=;
-        b=SDs1XLSXb/UhPFICpRz+QEz2jdxJ6mnD5z1RgiUjXl2kSN/SRjY9qdkxJyPAomSFTo
-         4W9MT/Op5DGfy6j89Y0CN+wSoO62llB4hEsqZe/GklaDrEVyBKPBfqdEaWhDU8nIxLmJ
-         9G0L5DxAM6OUB020gwJZmEOLfI2umTuE8DSX41pN9b6WJW23421YpX2Wkr4V9QE/5XC1
-         TzPh49oF7f8lsyZ4X7hp8T26FyBOWgQZPAGfV5pzgheLaoIKmuE6AU6YHebo+rk5XUYQ
-         tjdS2jb/XLEk3L/6NONnK54wVAI1n0emlo3so96l7qP/07/oL/REYGzpBJAAD9H4Sk7W
-         lbSg==
+        id S1727031AbfLaWr7 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 31 Dec 2019 17:47:59 -0500
+Received: from mail-qv1-f65.google.com ([209.85.219.65]:35100 "EHLO
+        mail-qv1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727071AbfLaWr6 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 31 Dec 2019 17:47:58 -0500
+Received: by mail-qv1-f65.google.com with SMTP id u10so13704311qvi.2
+        for <linux-efi@vger.kernel.org>; Tue, 31 Dec 2019 14:47:58 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=KlT2jnj7z1iFkAKUNQWbQsSo+TR/YWaOOgSod0k7w7Q=;
-        b=bzOFQibQfAxH8ylE6HMe42aYOqdpwVv45qINqXtEirhozmOp0ec/qjWJ3xT0P5zZx8
-         ZZU/ExA9lVDNtBEfSDVbEhVGIuVat0P7opO6M0epGEFATQWKIgci1BqEPQJAJ3lwU0am
-         rOilZYlm4MWrnSYNMD+Ixqhf4N7lC+xuTu5rrpar9TqrZLRS6K8pgcVKsvMTdeReA5KP
-         EhIJR0K7on+7jbmsebG8KDQAZj+fZ7/Rg04Rk69c8SF8irJu/XOO1eyRbmkFtaY2h6kZ
-         JoF2OOqTBq1tZD+id3AZeF3DPOY/pcDrY+nxEhLjsfx11pxfEVjaI5fYza1+rb7oZEmN
-         KuIA==
-X-Gm-Message-State: APjAAAXyPqDy8b6Se9tWpHK/aPScOugfchngju/wWIhTaIMAOVjqrLdM
-        upk38dLXbMdd4DgIQ8XEdu6Nwy3o2wklD8wHJJCfAQ==
-X-Google-Smtp-Source: APXvYqy1Nlu/1GbgH0I6iq3zMFnAaxwd8ZFUXv3pxT0OCb9TlTQPfJLMpeN7TKNH/fK7w1/i3uKBuqDIMtTj0BVo/Zw=
-X-Received: by 2002:a9d:4e99:: with SMTP id v25mr84887327otk.363.1577830919298;
- Tue, 31 Dec 2019 14:21:59 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=fdMNPwBqWxRAmxwkQZx8IOhqMeTfhFKEE23k1B9GzsQ=;
+        b=o9u7oXcVWugKwU+l5uPC136tsIO+6ShBJe3ewkk29Mf4D34yp9DiS2RTqcf9vRSD0u
+         n03H9X+ssH8MNY38D9HZV2vFmzsLH+fyBNnyZaG72UAJNEhz74+yY1vjtuMNYu07YgTT
+         8VPhfCuLj36mAHQPzsWMl9Ta8XMKXA+xpfTon42yAwmzDssIU8910j78VnY0NRDj8XJp
+         vfSZQAQQjGej+RXbF88ebcAwgxIlMpDu5cANIG6ZUPwobJ6nsHrB+J/PecoaMlm1mEw9
+         FM1gpiq2GFoD0qxuBnrRc1jmXoJ5Dhw/h3SGv/JBewJ3ln5IUtU92BLP6mjXU6hGD07D
+         Wegg==
+X-Gm-Message-State: APjAAAVfnQc4zp7Sq7DwQj5kEpsXCtRm/lQzisA7LL2nYyWXbpNovfwe
+        OR3Zru1U2usJS0FiNzn5s2NJxwqH
+X-Google-Smtp-Source: APXvYqxWsAJpiKrvI24DRt37oj2kBZZwZxnkela/RCx7un/CctApLe02Nl/dUCBaNYq9VnP8BTE1HA==
+X-Received: by 2002:a05:6214:13a8:: with SMTP id h8mr55202544qvz.41.1577832477351;
+        Tue, 31 Dec 2019 14:47:57 -0800 (PST)
+Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
+        by smtp.gmail.com with ESMTPSA id o7sm13746085qkd.119.2019.12.31.14.47.56
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 31 Dec 2019 14:47:57 -0800 (PST)
+From:   Arvind Sankar <nivedita@alum.mit.edu>
+To:     Ard Biesheuvel <ardb@kernel.org>
+Cc:     linux-efi@vger.kernel.org
+Subject: [PATCH 2/2] efi/x86: Allow translating 64-bit arguments for mixed mode calls
+Date:   Tue, 31 Dec 2019 17:47:55 -0500
+Message-Id: <20191231224755.77310-2-nivedita@alum.mit.edu>
+X-Mailer: git-send-email 2.24.1
+In-Reply-To: <20191231224755.77310-1-nivedita@alum.mit.edu>
+References: <CAKv+Gu_7KxS2--Zy7vky7zZ4bQchLJ6Vv+kceKDwjAvYVeXL9A@mail.gmail.com>
+ <20191231224755.77310-1-nivedita@alum.mit.edu>
 MIME-Version: 1.0
-References: <157773590338.4153451.5898675419563883883.stgit@dwillia2-desk3.amr.corp.intel.com>
- <20191231014630.GA24942@dhcp-128-65.nay.redhat.com> <CAPcyv4heY1CKAWo1AKKifYUtXdKjoUt45dZbCNhB2o59hkXY6g@mail.gmail.com>
-In-Reply-To: <CAPcyv4heY1CKAWo1AKKifYUtXdKjoUt45dZbCNhB2o59hkXY6g@mail.gmail.com>
-From:   Dan Williams <dan.j.williams@intel.com>
-Date:   Tue, 31 Dec 2019 14:21:48 -0800
-Message-ID: <CAPcyv4idLx58iH0tA08vrVdvornd-jAwSwHQ6Eha+Z_UQUDDAQ@mail.gmail.com>
-Subject: Re: [PATCH] efi: Fix handling of multiple contiguous efi_fake_mem= entries
-To:     Dave Young <dyoung@redhat.com>
-Cc:     Ingo Molnar <mingo@redhat.com>,
-        Taku Izumi <izumi.taku@jp.fujitsu.com>,
-        Michael Weiser <michael@weiser.dinsnail.net>,
-        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Ingo Molnar <mingo@kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-efi <linux-efi@vger.kernel.org>, kexec@lists.infradead.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, Dec 31, 2019 at 1:11 PM Dan Williams <dan.j.williams@intel.com> wrote:
-> Perhaps a prettier way to do this is to push the handling of each
-> efi_fake_mem entry into a subroutine. However, I notice when a memmap
-> allocated by efi_memmap_alloc() is replaced by another dynamically
-> allocated memmap the previous one isn't released. I have a series that
-> fixes that up as well.
+Introduce the ability to define macros to perform argument translation
+for the calls that need it, and define them for the boot services that
+we currently use.
 
-Available here:
-http://lore.kernel.org/r/157782985777.367056.14741265874314204783.stgit@dwillia2-desk3.amr.corp.intel.com
+When calling 32-bit firmware methods in mixed mode, all output
+parameters that are 32-bit according to the firmware, but 64-bit in the
+kernel (ie OUT UINTN * or OUT VOID **) must be initialized in the
+kernel, or the upper 32 bits may contain garbage. Define macros that
+zero out the upper 32 bits of the output before invoking the firmware
+method.
+
+When a 32-bit EFI call takes 64-bit arguments, the mixed-mode call must
+push the two 32-bit halves as separate arguments onto the stack. This
+can be achieved by splitting the argument into its two halves when
+calling the assembler thunk. Define a macro to do this for the
+free_pages boot service.
+
+Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
+---
+ arch/x86/boot/compressed/eboot.c              | 17 -----
+ arch/x86/include/asm/efi.h                    | 71 +++++++++++++++++--
+ .../firmware/efi/libstub/efi-stub-helper.c    |  5 +-
+ 3 files changed, 67 insertions(+), 26 deletions(-)
+
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index 98477f3529f6..4884483ec093 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -889,20 +889,3 @@ struct boot_params *efi_main(efi_handle_t handle,
+ 	for (;;)
+ 		asm("hlt");
+ }
+-
+-#ifdef CONFIG_EFI_MIXED
+-void efi_free_native(unsigned long size, unsigned long addr);
+-
+-void efi_free(unsigned long size, unsigned long addr)
+-{
+-	if (!size)
+-		return;
+-
+-	if (efi_is_native())
+-		efi_free_native(size, addr);
+-	else
+-		efi64_thunk(efi_table_attr(efi_system_table(),
+-					   boottime)->mixed_mode.free_pages,
+-			    addr, 0, DIV_ROUND_UP(size, EFI_PAGE_SIZE));
+-}
+-#endif
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index cfc450085584..166f0386719e 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -243,22 +243,83 @@ static inline bool efi_is_native(void)
+ 		: (__typeof__(inst->attr))				\
+ 			efi_mixed_mode_cast(inst->mixed_mode.attr))
+ 
++/*
++ * The following macros allow translating arguments if necessary from native to
++ * mixed mode. The use case for this is to initialize the upper 32 bits of
++ * output parameters, and where the 32-bit method requires a 64-bit argument,
++ * which must be split up into two arguments to be thunked properly.
++ *
++ * As examples, the AllocatePool boot service returns the address of the
++ * allocation, but it will not set the high 32 bits of the address. To ensure
++ * that the full 64-bit address is initialized, we zero-init the address before
++ * calling the thunk.
++ *
++ * The FreePages boot service takes a 64-bit physical address even in 32-bit
++ * mode. For the thunk to work correctly, a native 64-bit call of
++ * 	free_pages(addr, size)
++ * must be translated to
++ * 	efi64_thunk(free_pages, addr & U32_MAX, addr >> 32, size)
++ * so that the two 32-bit halves of addr get pushed onto the stack separately.
++ */
++
++static inline void *efi64_zero_upper(void *p)
++{
++	((u32 *)p)[1] = 0;
++	return p;
++}
++
++#define __efi64_argmap_free_pages(addr, size)				\
++	((addr), 0, (size))
++
++#define __efi64_argmap_get_memory_map(mm_size, mm, key, size, ver)	\
++	((mm_size), (mm), efi64_zero_upper(key), efi64_zero_upper(size), (ver))
++
++#define __efi64_argmap_allocate_pool(type, size, buffer)		\
++	((type), (size), efi64_zero_upper(buffer))
++
++#define __efi64_argmap_handle_protocol(handle, protocol, interface)	\
++	((handle), (protocol), efi64_zero_upper(interface))
++
++#define __efi64_argmap_locate_protocol(protocol, reg, interface)	\
++	((protocol), (reg), efi64_zero_upper(interface))
++
++/*
++ * The macros below handle the plumbing for the argument mapping. To add a
++ * mapping for a specific EFI method, simply define a macro
++ * __efi64_argmap_<method name>, following the examples above.
++ */
++
++#define __efi64_thunk_map(inst, func, ...)				\
++	efi64_thunk(inst->mixed_mode.func,				\
++		__efi64_argmap(__efi64_argmap_ ## func(__VA_ARGS__),	\
++			       (__VA_ARGS__)))
++
++#define __efi64_argmap(mapped, args)					\
++	__PASTE(__efi64_argmap__, __efi_nargs(__efi_eat mapped))(mapped, args)
++#define __efi64_argmap__0(mapped, args) __efi_eval mapped
++#define __efi64_argmap__1(mapped, args) __efi_eval args
++
++#define __efi_eat(...)
++#define __efi_eval(...) __VA_ARGS__
++
++/* The three macros below handle dispatching via the thunk if needed */
++
+ #define efi_call_proto(inst, func, ...)					\
+ 	(efi_is_native()						\
+ 		? inst->func(inst, ##__VA_ARGS__)			\
+-		: efi64_thunk(inst->mixed_mode.func, inst, ##__VA_ARGS__))
++		: __efi64_thunk_map(inst, func, inst, ##__VA_ARGS__))
+ 
+ #define efi_bs_call(func, ...)						\
+ 	(efi_is_native()						\
+ 		? efi_system_table()->boottime->func(__VA_ARGS__)	\
+-		: efi64_thunk(efi_table_attr(efi_system_table(),	\
+-				boottime)->mixed_mode.func, __VA_ARGS__))
++		: __efi64_thunk_map(efi_table_attr(efi_system_table(),	\
++				boottime), func, __VA_ARGS__))
+ 
+ #define efi_rt_call(func, ...)						\
+ 	(efi_is_native()						\
+ 		? efi_system_table()->runtime->func(__VA_ARGS__)	\
+-		: efi64_thunk(efi_table_attr(efi_system_table(),	\
+-				runtime)->mixed_mode.func, __VA_ARGS__))
++		: __efi64_thunk_map(efi_table_attr(efi_system_table(),	\
++				runtime), func, __VA_ARGS__))
+ 
+ extern bool efi_reboot_required(void);
+ extern bool efi_is_table_address(unsigned long phys_addr);
+diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+index f1b9c36934e9..fcc45ee94e02 100644
+--- a/drivers/firmware/efi/libstub/efi-stub-helper.c
++++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+@@ -344,9 +344,6 @@ efi_status_t efi_low_alloc_above(unsigned long size, unsigned long align,
+ }
+ 
+ void efi_free(unsigned long size, unsigned long addr)
+-	__weak __alias(efi_free_native);
+-
+-void efi_free_native(unsigned long size, unsigned long addr)
+ {
+ 	unsigned long nr_pages;
+ 
+@@ -354,7 +351,7 @@ void efi_free_native(unsigned long size, unsigned long addr)
+ 		return;
+ 
+ 	nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
+-	efi_system_table()->boottime->free_pages(addr, nr_pages);
++	efi_bs_call(free_pages, addr, nr_pages);
+ }
+ 
+ static efi_status_t efi_file_size(void *__fh, efi_char16_t *filename_16,
+-- 
+2.24.1
+
