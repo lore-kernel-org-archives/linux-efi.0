@@ -2,315 +2,162 @@ Return-Path: <SRS0=zl8W=2Y=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E0795C2D0CE
-	for <linux-efi@archiver.kernel.org>; Fri,  3 Jan 2020 05:13:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 86688C00523
+	for <linux-efi@archiver.kernel.org>; Fri,  3 Jan 2020 08:14:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 9F9F321734
-	for <linux-efi@archiver.kernel.org>; Fri,  3 Jan 2020 05:13:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 577ED21835
+	for <linux-efi@archiver.kernel.org>; Fri,  3 Jan 2020 08:14:28 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=lca.pw header.i=@lca.pw header.b="A9Y6Ks64"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="CZheVjob"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726077AbgACFNP (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 3 Jan 2020 00:13:15 -0500
-Received: from mail-qk1-f196.google.com ([209.85.222.196]:38274 "EHLO
-        mail-qk1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726133AbgACFNL (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 3 Jan 2020 00:13:11 -0500
-Received: by mail-qk1-f196.google.com with SMTP id k6so33001879qki.5
-        for <linux-efi@vger.kernel.org>; Thu, 02 Jan 2020 21:13:10 -0800 (PST)
+        id S1726054AbgACIO1 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 3 Jan 2020 03:14:27 -0500
+Received: from mail-wm1-f65.google.com ([209.85.128.65]:52298 "EHLO
+        mail-wm1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726077AbgACIO1 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 3 Jan 2020 03:14:27 -0500
+Received: by mail-wm1-f65.google.com with SMTP id p9so7661150wmc.2
+        for <linux-efi@vger.kernel.org>; Fri, 03 Jan 2020 00:14:25 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=lca.pw; s=google;
-        h=mime-version:subject:from:in-reply-to:date:cc
-         :content-transfer-encoding:message-id:references:to;
-        bh=MbKEXyW47YMzVOhpkB8OI//XIVkD5GwLB/bgMClwXAU=;
-        b=A9Y6Ks64PNviI8x66M5tvnf1nwmxmts4vC3BqkdAtwyIAVc7LnEeIeWSxOnFtTgPff
-         RaVi5Z0ETdL3Hh2pHUy2+Gfux5N1M4xQDqGKpWO3zpjTK6PPIX/FnCqkcA/JsZx38AVT
-         xwzsN1g9Gd8BPSVjnKvTiosCrLE15Ld1jtGjM6k3zv5f3MFnQCWxhEC+g7Cc5rAUpAzN
-         mc8XoNM1vWkj4wa2sO+b3FHvRtYP1PSMh7QzHj3GKDafND/EWFQZ6ZBgrNvwmyPPWiFe
-         ikOsXhvzgdTJC1ia86IMNq9pDPKRAW1K5VQmuyI8LGL+FgOQfNJi4QToUQ18MMuRfDEO
-         vYqA==
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=jtYTjq9x+N051Fkpy/e0vGbzPe3+HDhA240O17jwqeI=;
+        b=CZheVjobvmLRj43eW1hfEsGIpDIlLuYUHMjbzG9HH5wpolJoQlOQo2OWzN+9NMSTRS
+         FfwqWWrM5neVpTdbkXji1YiTd1RQbIs1XgljNccdwNZTDm9lkExzNZeZ46XzLxI861Sb
+         TI83XkxHoQBiKvYl/yXZy7vhuF3UahvqzPIBSc1HnBcJ6im+Q+XB/824Vuons7/7kpDD
+         XucNkcKjGh+NH4F7c6q3BoYS7voKQUPqyoVRNATAES2577ajvD3GqNIVtosEYgJDMN2b
+         2lS/dy40e30bsLR4x5gnJBGEwhpedJxlI+cejlBE3sOw4XVOLSCMHSLv7+NlsMHyhT7A
+         Kuow==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:subject:from:in-reply-to:date:cc
-         :content-transfer-encoding:message-id:references:to;
-        bh=MbKEXyW47YMzVOhpkB8OI//XIVkD5GwLB/bgMClwXAU=;
-        b=SCbhWHW4w/6SBqwb63MFbHzzeoerM9rIPoscYk2RnIlp+sfp3S7YriTUKTLwG3FKlk
-         zZDST0Jy/BX9G0L58EisYcOgvNQinjKZ8IF5PLW1+VfwA2AYqQIDglF8u4nuWQF0orqN
-         2tUiffFfWLXDwS5rh4xBwNeIjeapHyABjPgK1r79JAZ8RiEw0rBwmS+xPpiLdnHiIEQb
-         INxAi2l1nrhW2uEr1lhCcS1aRkJb6sm27Dy4J0KNWhOYeczdDICb64Lk1iWgXA64PrML
-         nz2nTCZktHsKSCZ74fCMP5wNPB3irmol0vu6mnpQgRfWBL/+bCj3QlCAYx0Fo6kdF9Z5
-         6BIQ==
-X-Gm-Message-State: APjAAAW5Yx0QML0WMCOqh1/+lLvXfHlxxkKlvRi6c2u6VJwWPu0Dt5qK
-        MBW7+6JNfvRoE2fFmif+7SVNbw==
-X-Google-Smtp-Source: APXvYqwMDpgkySQDJwQlNlMur5cZtLEl/Y63Elqng4hYrQmnAjM8TeUFEzxzuEBr3jllcyy4CXcngQ==
-X-Received: by 2002:a05:620a:14a2:: with SMTP id x2mr70773447qkj.36.1578028389751;
-        Thu, 02 Jan 2020 21:13:09 -0800 (PST)
-Received: from [192.168.1.153] (pool-71-184-117-43.bstnma.fios.verizon.net. [71.184.117.43])
-        by smtp.gmail.com with ESMTPSA id 3sm17654195qte.59.2020.01.02.21.13.07
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 02 Jan 2020 21:13:09 -0800 (PST)
-Content-Type: text/plain;
-        charset=us-ascii
-Mime-Version: 1.0 (Mac OS X Mail 13.0 \(3608.40.2.2.4\))
-Subject: Re: [PATCH v4 01/10] kcsan: Add Kernel Concurrency Sanitizer
- infrastructure
-From:   Qian Cai <cai@lca.pw>
-In-Reply-To: <20191114180303.66955-2-elver@google.com>
-Date:   Fri, 3 Jan 2020 00:13:07 -0500
-Cc:     akiyks@gmail.com, stern@rowland.harvard.edu,
-        Alexander Potapenko <glider@google.com>,
-        parri.andrea@gmail.com, andreyknvl@google.com,
-        Andy Lutomirski <luto@kernel.org>,
-        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Arnd Bergmann <arnd@arndb.de>, boqun.feng@gmail.com,
-        Borislav Petkov <bp@alien8.de>, Daniel Axtens <dja@axtens.net>,
-        dlustig@nvidia.com, Dave Hansen <dave.hansen@linux.intel.com>,
-        dhowells@redhat.com, Dmitry Vyukov <dvyukov@google.com>,
-        "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>,
-        j.alglave@ucl.ac.uk, joel@joelfernandes.org, corbet@lwn.net,
-        jpoimboe@redhat.com, luc.maranget@inria.fr, mark.rutland@arm.com,
-        npiggin@gmail.com, paulmck@kernel.org, peterz@infradead.org,
-        tglx@linutronix.de, will@kernel.org, edumazet@google.com,
-        kasan-dev@googlegroups.com, linux-arch@vger.kernel.org,
-        linux-doc@vger.kernel.org, linux-efi@vger.kernel.org,
-        linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mm@kvack.org, x86@kernel.org
-Content-Transfer-Encoding: quoted-printable
-Message-Id: <BAB5F853-95FA-4623-A067-4E62B90721D3@lca.pw>
-References: <20191114180303.66955-1-elver@google.com>
- <20191114180303.66955-2-elver@google.com>
-To:     Marco Elver <elver@google.com>
-X-Mailer: Apple Mail (2.3608.40.2.2.4)
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=jtYTjq9x+N051Fkpy/e0vGbzPe3+HDhA240O17jwqeI=;
+        b=mX8cPy1qjJEDa1QOOjV9/3iqJlNGVqIPrtSdgbVUpliyEEoWmBrtzL7MWbvurhbzPQ
+         am4lBM7RYWzuqQ35M3Iw1KNiHzYiSswqgLHYbGYwQFCxppdxGlkGaltjpCstPcML2bjb
+         OjCOM8uqNBs9DzFSOqhmu/Ptz+cR7AYf1w18U7QOSpzWZkeRdq+BBrrxUvcRp20yewcv
+         ThOgYTsrIN5ZdA8/FAhIc0Iwg4lsamAoKyPilkEz1cFQTW0Z38o1ajUeMd6wROAubOzy
+         z8rfQOXmRvtnWcpi1rvDqrIJ5/dNRMuS68Wk18PJvJfi2iKLpHabulnfFm8Z98KS/ZOS
+         w4Nw==
+X-Gm-Message-State: APjAAAWm9mFTQbI2TiCQ5Y69FUMFIM6+nUnzzIxvMRLiCTDG4E+RLwtY
+        oSej6PI5cB6BJlxOdbr4CNhT117wT3yGyPKP9FcJqg==
+X-Google-Smtp-Source: APXvYqyypJCFSMhWrIHQOBlxXofft8kUryYKhk7iuKkNzX5Cisb3FItf3y1TKyYiqqATt+26s96EWt6QepIRdu0Py5U=
+X-Received: by 2002:a1c:9d52:: with SMTP id g79mr18468630wme.148.1578039265144;
+ Fri, 03 Jan 2020 00:14:25 -0800 (PST)
+MIME-Version: 1.0
+References: <CAKv+Gu82ZCk3Wy6NHHyRs0CAFXJDMfDu2KpH3PZ-Le1SjsQLLQ@mail.gmail.com>
+ <20191231160547.GB13549@zn.tnic> <20200102143757.tqhvff32ksc2rpvh@hpe.com>
+ <CAKv+Gu9y9yA+4cnii6QvJ3CjxqmxPmEc333cKezzxwrPCKvKGQ@mail.gmail.com>
+ <20200102164536.ks5dmtrbtl4i7rnt@hpe.com> <CAKv+Gu86SaU+D8x2ScRXbTvR8aK23CfhAL=mkUNcn=9vrbgznw@mail.gmail.com>
+ <20200102231317.yoj2xdplqp42lmcq@hpe.com>
+In-Reply-To: <20200102231317.yoj2xdplqp42lmcq@hpe.com>
+From:   Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Date:   Fri, 3 Jan 2020 09:14:14 +0100
+Message-ID: <CAKv+Gu9VDxWZXKr3nZ1igP-u5q=jo_Z5UPROh+NhkTHdes8CLA@mail.gmail.com>
+Subject: Re: [RFC PATCH] efi/x86: limit EFI old memory map to SGI UV1 machines
+To:     Russ Anderson <rja@hpe.com>
+Cc:     Borislav Petkov <bp@alien8.de>,
+        Matthew Garrett <mjg59@srcf.ucam.org>,
+        Matt Fleming <matt@codeblueprint.co.uk>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Dave Young <dyoung@redhat.com>,
+        linux-efi <linux-efi@vger.kernel.org>,
+        "the arch/x86 maintainers" <x86@kernel.org>,
+        Dimitri Sivanich <dimitri.sivanich@hpe.com>,
+        Mike Travis <mike.travis@hpe.com>,
+        Hedi Berriche <hedi.berriche@hpe.com>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
+On Fri, 3 Jan 2020 at 00:13, Russ Anderson <rja@hpe.com> wrote:
+>
+> On Thu, Jan 02, 2020 at 05:52:39PM +0100, Ard Biesheuvel wrote:
+> > On Thu, 2 Jan 2020 at 17:45, Russ Anderson <rja@hpe.com> wrote:
+> > >
+> > > I want to make sure my undestanding of what you are proposing
+> > > is the same as what you are proposing.
+> > >
+> >
+> > What I am proposing is to document efi=old_map as only being available
+> > on kernels built with CONFIG_X86_UV=y, and moving the code that
+> > implements it into the UV support code.
+> >
+> > > I will have some additional background information shortly.
+> > >
+> >
+> > Thanks, that is very helpful.
+>
+> After talking with some engineers, here is a brief history.
+>
+> When EFI new mapping was implemented, it did not work with
+> the SGI UV1 bios, which worked with the old EFI mapping.
+> Boris added the efi=old_map quirk as a workaround to keep
+> UV1 working.
+>
+> SGI UV2 bios (and later) have a fix for that issue, so the
+> quirk was modified for just UV1 by this commit.  That allowed
+> new EFI mapping to be used on newer UV platforms.
+>
+>   https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/arch/x86/platform/efi/quirks.c?id=d394f2d9d8e1e7b4959819344baf67b5995da9b0
+>
+> There have been at least two other times efi=old_map has
+> been used to work around issues.
+>
+> One was when KASLR was added (as part of the Spectre/Meldown
+> mitigation).  The initial implementation broke with new
+> map so efi=old_map was used as a workaround.  I don't know
+> if this was a distro specific breakage or upstream, but the
+> workaround limited the impact and the breakage was quickly
+> fixed.
+>
+> Another time was the EFI locking issue mentioned earlier
+> in this thread.
+>
 
+So are you saying the distros updated their kernels which subsequently
+broke your platforms, and you needed to use efi=old_map in production
+to work around this? This sounds like something that should have been
+caught in testing before the release was made.
 
-> On Nov 14, 2019, at 1:02 PM, 'Marco Elver' via kasan-dev =
-<kasan-dev@googlegroups.com> wrote:
-> +static noinline void kcsan_setup_watchpoint(const volatile void *ptr,
-> +					    size_t size, bool is_write)
-> +{
-> +	atomic_long_t *watchpoint;
-> +	union {
-> +		u8 _1;
-> +		u16 _2;
-> +		u32 _4;
-> +		u64 _8;
-> +	} expect_value;
-> +	bool value_change =3D false;
-> +	unsigned long ua_flags =3D user_access_save();
-> +	unsigned long irq_flags;
-> +
-> +	/*
-> +	 * Always reset kcsan_skip counter in slow-path to avoid =
-underflow; see
-> +	 * should_watch().
-> +	 */
-> +	reset_kcsan_skip();
-> +
-> +	if (!kcsan_is_enabled())
-> +		goto out;
-> +
-> +	if (!check_encodable((unsigned long)ptr, size)) {
-> +		kcsan_counter_inc(KCSAN_COUNTER_UNENCODABLE_ACCESSES);
-> +		goto out;
-> +	}
-> +
-> +	/*
-> +	 * Disable interrupts & preemptions to avoid another thread on =
-the same
-> +	 * CPU accessing memory locations for the set up watchpoint; =
-this is to
-> +	 * avoid reporting races to e.g. CPU-local data.
-> +	 *
-> +	 * An alternative would be adding the source CPU to the =
-watchpoint
-> +	 * encoding, and checking that watchpoint-CPU !=3D this-CPU. =
-There are
-> +	 * several problems with this:
-> +	 *   1. we should avoid stealing more bits from the watchpoint =
-encoding
-> +	 *      as it would affect accuracy, as well as increase =
-performance
-> +	 *      overhead in the fast-path;
-> +	 *   2. if we are preempted, but there *is* a genuine data race, =
-we
-> +	 *      would *not* report it -- since this is the common case =
-(vs.
-> +	 *      CPU-local data accesses), it makes more sense (from a =
-data race
-> +	 *      detection point of view) to simply disable preemptions =
-to ensure
-> +	 *      as many tasks as possible run on other CPUs.
-> +	 */
-> +	local_irq_save(irq_flags);
+Is there any way you could make one of these systems
+available/accessible for testing new kernels? Also, was the breakage
+related specifically to the use of the UV runtime services?
 
-Enabling KCSAN will now generate a warning during boot here.
+> Those are a couple of examples of efi=old_map being used
+> after the UV1 platform.  They were cases of issues that
+> impacted the new EFI mapping, not platform or bios issues,
+> and having the ability to fall back to the old EFI mapping
+> helped minimize the impact.  Neither were problems in the
+> new EFI mapping code itself, with the new mapping an
+> innocent victim of other issues.
+>
+> Having the efi=old_map quirk available with CONFIG_X86_UV=y
+> makes it available on the platform I care about, and as it
+> is enabled in the distros we support (SLES, RHEL, Oracle Linux)
+> and Fedora.  Not sure if anyone else has used efi=old_map to
+> work around other issues, but this change would remove
+> old_map as a possible workaround for others.
+>
 
-Config (need to deselect KASAN and select KCSAN):
+Indeed.
 
-https://raw.githubusercontent.com/cailca/linux-mm/master/x86.config
+> Is there a compelling reason to put efi=old_map quirk
+> under CONFIG_X86_UV=y?  The original patch description assumed
+> only old SGI UV1 used efi=old_map, that it had not been
+> used on newer hardware, but that isn't the case.  It has been
+> used on newer currently shipping hardware.  Given that
+> new information is there a compelling reason for the change?
+>
 
-[   13.358813][    T0] Spectre V2 : Spectre v2 / SpectreRSB mitigation: =
-Filling RSB on context switch
-[   13.361606][    T0] Speculative Store Bypass: Vulnerable
-[   13.363254][    T0] TAA: Vulnerable: Clear CPU buffers attempted, no =
-microcode
-[   13.366836][    T0] MDS: Vulnerable: Clear CPU buffers attempted, no =
-microcode
-[   13.369877][    T0] debug: unmapping init [mem =
-0xffffffff8dd83000-0xffffffff8dd87fff]
-[   13.415028][    T1] ------------[ cut here ]------------
-[   13.416814][    T1] DEBUG_LOCKS_WARN_ON(!current->hardirqs_enabled)
-[   13.416814][    T1] WARNING: CPU: 0 PID: 1 at =
-kernel/locking/lockdep.c:4406 check_flags.part.26+0x102/0x240
-[   13.416814][    T1] Modules linked in:
-[   13.416814][    T1] CPU: 0 PID: 1 Comm: swapper/0 Not tainted =
-5.5.0-rc2-next-20191220+ #4
-[   13.416814][    T1] Hardware name: HP ProLiant DL580 Gen9/ProLiant =
-DL580 Gen9, BIOS U17 07/21/2016
-[   13.416814][    T1] RIP: 0010:check_flags.part.26+0x102/0x240
-[   13.416814][    T1] Code: bc 8d e8 51 a1 15 00 44 8b 05 2a a0 46 01 =
-45 85 c0 0f 85 57 76 00 00 48 c7 c6 5d fa 7b 8d 48 c7 c7 b1 54 7b 8d e8 =
-10 91 f5 ff <0f> 0b e9 3d 76 00 00 65 48 8b 3c 25 40 7f 01 00 e8 89 f0 =
-ff ff e8
-[   13.416814][    T1] RSP: 0000:ffff9d3206287ce8 EFLAGS: 00010082
-[   13.416814][    T1] RAX: 0000000000000000 RBX: ffff8e5b8541e040 RCX: =
-0000000000000000
-[   13.416814][    T1] RDX: 0000000000000000 RSI: 0000000000000001 RDI: =
-0000000000000000
-[   13.416814][    T1] RBP: ffff9d3206287cf0 R08: 0000000000000000 R09: =
-0000ffff8dbcc254
-[   13.416814][    T1] R10: 0000ffffffffffff R11: 0000ffff8dbcc257 R12: =
-0000000000000235
-[   13.416814][    T1] R13: 0000000000000000 R14: 0000000000000246 R15: =
-000000000000001b
-[   13.416814][    T1] FS:  0000000000000000(0000) =
-GS:ffff8e61e3200000(0000) knlGS:0000000000000000
-[   13.416814][    T1] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-[   13.416814][    T1] CR2: ffff8e79f07ff000 CR3: 0000001284c0e001 CR4: =
-00000000003606f0
-[   13.416814][    T1] DR0: 0000000000000000 DR1: 0000000000000000 DR2: =
-0000000000000000
-[   13.416814][    T1] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: =
-0000000000000400
-[   13.416814][    T1] Call Trace:
-[   13.416814][    T1]  lock_is_held_type+0x66/0x160
-[   13.416814][    T1]  ___might_sleep+0xc1/0x1d0
-[   13.416814][    T1]  __might_sleep+0x5b/0xa0
-[   13.416814][    T1]  slab_pre_alloc_hook+0x7b/0xa0
-[   13.416814][    T1]  __kmalloc_node+0x60/0x300
-[   13.416814   T1]  ? alloc_cpumask_var_node+0x44/0x70
-[   13.416814][    T1]  ? topology_phys_to_logical_die+0x7e/0x180
-[   13.416814][    T1]  alloc_cpumask_var_node+0x44/0x70
-[   13.416814][    T1]  zalloc_cpumask_var+0x2a/0x40
-[   13.416814][    T1]  native_smp_prepare_cpus+0x246/0x425
-[   13.416814][    T1]  kernel_init_freeable+0x1b8/0x496
-[   13.416814][    T1]  ? rest_init+0x381/0x381
-[   13.416814][    T1]  kernel_init+0x18/0x17f
-[   13.416814][    T1]  ? rest_init+0x381/0x381
-[   13.416814][    T1]  ret_from_fork+0x3a/0x50
-[   13.416814][    T1] irq event stamp: 910
-[   13.416814][    T1] hardirqs last  enabled at (909): =
-[<ffffffff8d1240f3>] _raw_write_unlock_irqrestore+0x53/0x57
-[   13.416814][    T1] hardirqs last disabled at (910): =
-[<ffffffff8c8bba76>] kcsan_setup_watchpoint+0x96/0x460
-[   13.416814][    T1] softirqs last  enabled at (0): =
-[<ffffffff8c6b697a>] copy_process+0x11fa/0x34f0
-[   13.416814][    T1] softirqs last disabled at (0): =
-[<0000000000000000>] 0x0
-[   13.416814][    T1] ---[ end trace 7d1df66da055aa92 ]---
-[   13.416814][    T1] possible reason: unannotated irqs-on.
-[   13.416814][ent stamp: 910
-[   13.416814][    T1] hardirqs last  enabled at (909): =
-[<ffffffff8d1240f3>] _raw_write_unlock_irqrestore+0x53/0x57
-[   13.416814][    T1] hardirqs last disabled at (910): =
-[<ffffffff8c8bba76>] kcsan_setup_watchpoint+0x96/0x460
-[   13.416814][    T1] softirqs last  enabled at (0): =
-[<ffffffff8c6b697a>] copy_process+0x11fa/0x34f0
-[   13.416814][    T1] softirqs last disabled at (0): =
-[<0000000000000000>] 0x0
-
-
-The other issue is that the system is unable to boot due to endless of =
-those messages.
-
-[   17.976814][  T578] Reported by Kernel Concurrency Sanitizer on:
-[   17.976814][  T578] CPU: 12 PID: 578 Comm: pgdatinit1 Tainted: G      =
-  W         5.5.0-rc2-next-20191220+ #4
-[   17.976814][  T578] Hardware name: HP ProLiant DL580 Gen9/ProLiant =
-DL580 Gen9, BIOS U17 07/21/2016
-[   17.976814][  T578] =
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-[   17.976814][  T578] =
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-[   17.976814][  T578] BUG: KCSAN: data-race in __change_page_attr / =
-__change_page_attr
-[   17.976814][  T578]=20
-[   17.976814][  T578] write to 0xffffffff8dda0de0 of 8 bytes by task =
-577 on cpu 2:
-[   17.976814][  T578]  __change_page_attr+0xef7/0x16a0
-[   17.976814][  T578]  __change_page_attr_set_clr+0xec/0x4f0
-[   17.97681pages_np+0xcc/0x100
-[   17.976814][  T578]  __kernel_map_pages+0xd6/0xdb
-[   17.976814][  T578]  __free_pages_ok+0x1a8/0x730
-[   17.976814][  T578]  __free_pages+0x51/0x90
-[   17.976814][  T578]  __free_pages_core+0x1c7/0x2c0
-[   17.976814][  T578]  deferred_free_range+0x59/0x8f
-[   17.976814][  T578]  deferred_init_maxorder+0x1d6/0x21d
-[   17.976814][  T578]  deferred_init_memmap+0x14a/0x1c1
-[   17.976814][  T578]  kthread+0x1e0/0x200
-[   17.976814][  T578]  ret_from_fork+0x3a/0x50
-[   17.976814][  T578]=20
-[   17.976814][  T578] read to 0xffffffff8dda0de0 of 8 bytes by task 578 =
-on cpu 12:
-[   17.976814][  T578]  __change_page_attr+0xed1/0x16a0
-[   17.976814][  T578]  __change_page_attr_set_clr+0xec/0x4f0
-[   17.976814][  T578]  __set_pages_np+0xcc/0x100
-[   17.976814][  T578]  __kernel_map_pages+0xd6/0xdb
-[   17.976814][  T578]  __free_pages_ok+0x1a8/0x730
-[   17.976814][  T578]  __free_pages+0x51/0x90
-[   17.976814][  T578]  __free_pages_core+0x1c7/0x2c0
-[   17.976814][  T578]  deferred_free_range+0x59/0x8f
-[   17.976814][  T578]  deferred_init_maxorder+0x1aa/0x21d
-[   17.976814][  T578]  deferred_init_memmap+0x14a/0x1c1
-[   17.976814][  T578]  kthread+0x1e0/0x200
-[   17.976814][  T578]  ret_from_fork+0x3a/0x50
-
-# ./scripts/faddr2line vmlinux __change_page_attr+0xef7/0x16a0
-__change_page_attr+0xef7/0x16a0:
-static_protections at arch/x86/mm/pat/set_memory.c:528
-(inlined by) __change_page_attr at arch/x86/mm/pat/set_memory.c:1516
-
-# ./scripts/faddr2line vmlinux __change_page_attr+0xed1/0x16a0
-__change_page_attr+0xed1/0x16a0:
-cpa_inc_4k_install at arch/x86/mm/pat/set_memory.c:131
-(inlined by) __change_page_attr at arch/x86/mm/pat/set_memory.c:1514
-
-> +
-> +	watchpoint =3D insert_watchpoint((unsigned long)ptr, size, =
-is_write);
-> +	if (watchpoint =3D=3D NULL) {
-> +		/*
-> +		 * Out of capacity: the size of `watchpoints`, and the =
-frequency
-> +		 * with which `should_watch()` returns true should be =
-tweaked so
-> +		 * that this case happens very rarely.
-> +		 */
-> +		kcsan_counter_inc(KCSAN_COUNTER_NO_CAPACITY);
-> +		goto out_unlock;
-> +	}
-> +
-
+Every feature like this doubles the size of the validation matrix, and
+so restricting efi=old_map to a single target helps to keep the
+maintenance effort manageable.
