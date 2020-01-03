@@ -2,138 +2,111 @@ Return-Path: <SRS0=zl8W=2Y=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PULL_REQUEST,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.0 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96FF5C2D0C2
-	for <linux-efi@archiver.kernel.org>; Fri,  3 Jan 2020 11:41:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CB98BC2D0C2
+	for <linux-efi@archiver.kernel.org>; Fri,  3 Jan 2020 14:17:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 677A021835
-	for <linux-efi@archiver.kernel.org>; Fri,  3 Jan 2020 11:41:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1578051701;
-	bh=YCnh2bjtvzMK85XmelAkUX2fnI8ywWKdYa01Y5hGEEA=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=2WLWOwcEuSygbH8kZNEkj9LBnKvGRO1dhvjFy24ijFUG9EssQ4dhByXcAPgxzZAVl
-	 XIICq/ba1IXmckHzmqfCFrLSXI8u+vnP6aL+qcexyYDmEheRRHuTe6NBCFIwuyCR5H
-	 77iV+NxW8ahXb6oN+IP1p4VwDykZmkA3P0u9ErDw=
+	by mail.kernel.org (Postfix) with ESMTP id 9FBAF22522
+	for <linux-efi@archiver.kernel.org>; Fri,  3 Jan 2020 14:17:02 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="KXZKxgfv"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727635AbgACLkR (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 3 Jan 2020 06:40:17 -0500
-Received: from mail.kernel.org ([198.145.29.99]:39300 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727457AbgACLkR (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 3 Jan 2020 06:40:17 -0500
-Received: from localhost.localdomain (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 46DC121835;
-        Fri,  3 Jan 2020 11:40:14 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1578051616;
-        bh=YCnh2bjtvzMK85XmelAkUX2fnI8ywWKdYa01Y5hGEEA=;
-        h=From:To:Cc:Subject:Date:From;
-        b=ZZHjYvVgDKlrsQ5Dg3YaObOyT98JEx4nPrcu8A+xi4qeRtgwhRwoavCLU22BMW1OR
-         rkpJS/s4F6Mc3/dOhoXH4ZN68uzBSIvhGaXDPl9EeMJwos22JanQ08iymqyrYu6+80
-         mwyWClffeti/UjEARFyD5PP/KWl8wlXJLUhpoqFk=
-From:   Ard Biesheuvel <ardb@kernel.org>
-To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
+        id S1727527AbgACORC (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 3 Jan 2020 09:17:02 -0500
+Received: from mail-qv1-f65.google.com ([209.85.219.65]:37666 "EHLO
+        mail-qv1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727523AbgACORB (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 3 Jan 2020 09:17:01 -0500
+Received: by mail-qv1-f65.google.com with SMTP id f16so16263454qvi.4
+        for <linux-efi@vger.kernel.org>; Fri, 03 Jan 2020 06:17:01 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=sender:from:date:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=i0orxC0f9GEHv/18++7WN43Uk702gBVzndKRdF7rXHA=;
+        b=KXZKxgfvQShC90U5S4/fRRh2WT26aX5m22QbSaOAUe3QXJfyvA1T8H718SHkUb3b5q
+         wdNgMN8ehAh+wljWQVzbaw/WfQ4uPeL21nx+h6p58vSzcisCH2xVdD3RblPVeTtoYUX7
+         4ufDO4FUJTI7upmpLR8vv5FlV2/+81iGR+kUvcCoJrT926P8LIS+x3TF5P2N8a+/VEZp
+         OP/bSigihFi14Rtq1wpsQHH/rgncxxfmeCWHzXIkOkALUfvNA+Gfel1oLwgpSuTK2YIf
+         RAn6/v1VFPZgLH9CdsmhDb0GOFdfluRq+IF/ueA5c6KS9kbskJF2EawSo88naUJQL8eg
+         ZVzg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:sender:from:date:to:cc:subject:message-id
+         :references:mime-version:content-disposition:in-reply-to:user-agent;
+        bh=i0orxC0f9GEHv/18++7WN43Uk702gBVzndKRdF7rXHA=;
+        b=a5l7vy2smeSsoeqKw8+Ss93yWgHDUj2hcPn731+lCl2ClB3xyh9t6j+6uE/3Cq8YGy
+         zv9bquvXXFWh2rCIAKLz4PI5f7pdpmrv3Donwyl+nEFyqrTLjETvBnXpwCSFxIyOHauh
+         SrJ1hUcbv3yp9vXtQWuhKSFdnInkA3PjIg6pP+LcbJf912XrxnAqwwIKIAokNc7rKUZC
+         x9o9Y5pA/VSpHwYCzBkOvAw8+vU07MyfIrsjkQ3MWVyPdfwdk/UftRLmdsM+lFPNFi7e
+         1VkXuNPhmUGGyhO/xo62AW1mEzErdTsaujiIV5JFukkgqj06HXuqy7Mil31f93f7DZ9/
+         wTIA==
+X-Gm-Message-State: APjAAAVTxawG0OzBFbnE/jnKVhlrHyM9WWzB8C1CsNdQo6teIbvPgB9Z
+        II7xymLyvMJgFCqKZuWbsJU=
+X-Google-Smtp-Source: APXvYqzoSdPmxaFy+b36g7AsoPwnE+n6Iu7wUPBmxvMqvxdr30WB+O7t1NUu0zzE5ovMUgwYqR1dgg==
+X-Received: by 2002:a0c:edc2:: with SMTP id i2mr68859024qvr.62.1578061020720;
+        Fri, 03 Jan 2020 06:17:00 -0800 (PST)
+Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
+        by smtp.gmail.com with ESMTPSA id 16sm16533935qkj.77.2020.01.03.06.17.00
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 03 Jan 2020 06:17:00 -0800 (PST)
+From:   Arvind Sankar <nivedita@alum.mit.edu>
+X-Google-Original-From: Arvind Sankar <arvind@rani.riverdale.lan>
+Date:   Fri, 3 Jan 2020 09:16:58 -0500
+To:     Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc:     Arvind Sankar <nivedita@alum.mit.edu>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        linux-efi <linux-efi@vger.kernel.org>,
+        Hans de Goede <hdegoede@redhat.com>,
+        Matthew Garrett <matthewgarrett@google.com>,
+        Ingo Molnar <mingo@kernel.org>,
+        Andy Lutomirski <luto@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
-Cc:     Ard Biesheuvel <ardb@kernel.org>,
-        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        linux-kernel@vger.kernel.org, Andy Lutomirski <luto@kernel.org>,
-        Arvind Sankar <nivedita@alum.mit.edu>,
-        Matthew Garrett <mjg59@google.com>
-Subject: [GIT PULL 00/20] More EFI updates for v5.6
-Date:   Fri,  3 Jan 2020 12:39:33 +0100
-Message-Id: <20200103113953.9571-1-ardb@kernel.org>
-X-Mailer: git-send-email 2.20.1
+Subject: Re: [PATCH v2 13/21] efi/libstub/x86: drop __efi_early() export of
+ efi_config struct
+Message-ID: <20200103141658.GA1204556@rani.riverdale.lan>
+References: <20200102155129.GA668939@rani.riverdale.lan>
+ <CAKv+Gu9Ne6HT1csRE4r-LZnZ9vUEOqnzHHjoj+a=NU=Tnj6o4w@mail.gmail.com>
+ <CAKv+Gu_ksPvVpD=GxBNcJNhqak_k0-HZaK0jM10mKN==7k83xA@mail.gmail.com>
+ <CAKv+Gu8m5vtJ6_TUgqy-Aa_7FNyhYBx=gsh1c62_impS2G99AQ@mail.gmail.com>
+ <20200102172637.GB701372@rani.riverdale.lan>
+ <CAKv+Gu9eEC+yQM1BsLTWLYkxCugVw76-nPQOQ14EavkJHGtcdg@mail.gmail.com>
+ <20200102174142.GA713602@rani.riverdale.lan>
+ <CAKv+Gu-NDps2EP865v45sUbKRwSc2fwvcfLt64BKX_D=ErmvMQ@mail.gmail.com>
+ <20200102181015.GA720259@rani.riverdale.lan>
+ <CAKv+Gu8stpJ2YZ6sJb5WvwftNy9SDsQpxoS1uH0FV5vXQKvihA@mail.gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu8stpJ2YZ6sJb5WvwftNy9SDsQpxoS1uH0FV5vXQKvihA@mail.gmail.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Ingo, Thomas,
+On Thu, Jan 02, 2020 at 07:38:06PM +0100, Ard Biesheuvel wrote:
+> On Thu, 2 Jan 2020 at 19:10, Arvind Sankar <nivedita@alum.mit.edu> wrote:
+> >
+> > On Thu, Jan 02, 2020 at 06:48:52PM +0100, Ard Biesheuvel wrote:
+> > > Currently, I am not managing to get the 64-bit compiler to emit any
+> > > GOT based references for efi_is64, though, even without the attribute,
+> > > so I am not sure what's going on there.
+> >
+> > With gcc 9, I do get R_X86_64_REX_GOTPCRELX relocations in libstub,
+> > which are then eliminated by the linker -- if they weren't they would be
+> > using addresses from the GOT. They turn into R_X86_64_PC32 with the
+> > hidden visibility.
+> 
+> Indeed. I was looking at eboot.o but that gets built with -fPIE not
+> -fPIC [if available].
+> 
+> libstub objects indeed have the R_X86_64_REX_GOTPCRELX relocations, so
+> I'll add the hidden visibility to the extern declaration of efi_is64
 
-This is the second batch of EFI updates for v5.6. Two things are still
-under discussion, so I'll probably have a few more changes for this
-cycle in a week or so.
-
-The following changes since commit 0679715e714345d273c0e1eb78078535ffc4b2a1:
-
-  efi/libstub/x86: Avoid globals to store context during mixed mode calls (2019-12-25 10:49:26 +0100)
-
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next
-
-for you to fetch changes up to d95e4feae5368a91775c4597a8f298ba84f31535:
-
-  efi/x86: avoid RWX mappings for all of DRAM (2020-01-03 11:46:15 +0100)
-
-----------------------------------------------------------------
-Second batch of EFI updates for v5.6:
-- Some followup fixes for the EFI stub changes that have been queued up
-  already.
-- Overhaul of the x86 EFI boot/runtime code, to peel off layers of pointer
-  casting and type mangling via variadic macros and asm wrappers that made
-  the code fragile and ugly.
-- Increase robustness for mixed mode code, by using argmaps to annotate and
-  translate function prototypes that are not mixed mode safe. (Arvind)
-- Add the ability to disable DMA at the root port level in the EFI stub, to
-  avoid booting into the kernel proper with IOMMUs in pass through and DMA
-  enabled (suggested by Matthew)
-- Get rid of RWX mappings in the EFI memory map, where possible.
-
-----------------------------------------------------------------
-Ard Biesheuvel (17):
-      efi/libstub: fix boot argument handling in mixed mode entry code
-      efi/libstub/x86: force 'hidden' visibility for extern declarations
-      efi/x86: re-disable RT services for 32-bit kernels running on 64-bit EFI
-      efi/x86: map the entire EFI vendor string before copying it
-      efi/x86: avoid redundant cast of EFI firmware service pointer
-      efi/x86: split off some old memmap handling into separate routines
-      efi/x86: split SetVirtualAddresMap() wrappers into 32 and 64 bit versions
-      efi/x86: simplify i386 efi_call_phys() firmware call wrapper
-      efi/x86: simplify 64-bit EFI firmware call wrapper
-      efi/x86: simplify mixed mode call wrapper
-      efi/x86: drop two near identical versions of efi_runtime_init()
-      efi/x86: clean up efi_systab_init() routine for legibility
-      efi/x86: don't panic or BUG() on non-critical error conditions
-      efi/x86: remove unreachable code in kexec_enter_virtual_mode()
-      x86/mm: fix NX bit clearing issue in kernel_map_pages_in_pgd
-      efi/x86: don't map the entire kernel text RW for mixed mode
-      efi/x86: avoid RWX mappings for all of DRAM
-
-Arvind Sankar (2):
-      efi/x86: Check number of arguments to variadic functions
-      efi/x86: Allow translating 64-bit arguments for mixed mode calls
-
-Matthew Garrett (1):
-      efi: Allow disabling PCI busmastering on bridges during boot
-
- Documentation/admin-guide/kernel-parameters.txt |   7 +-
- arch/x86/boot/compressed/eboot.c                |  18 +-
- arch/x86/boot/compressed/efi_thunk_64.S         |   4 +-
- arch/x86/boot/compressed/head_64.S              |  17 +-
- arch/x86/include/asm/efi.h                      | 169 ++++++++---
- arch/x86/mm/pageattr.c                          |   8 +-
- arch/x86/platform/efi/Makefile                  |   1 -
- arch/x86/platform/efi/efi.c                     | 354 ++++++++----------------
- arch/x86/platform/efi/efi_32.c                  |  22 +-
- arch/x86/platform/efi/efi_64.c                  | 157 +++++++----
- arch/x86/platform/efi/efi_stub_32.S             | 109 ++------
- arch/x86/platform/efi/efi_stub_64.S             |  43 +--
- arch/x86/platform/efi/efi_thunk_64.S            | 121 ++------
- arch/x86/platform/uv/bios_uv.c                  |   7 +-
- drivers/firmware/efi/Kconfig                    |  22 ++
- drivers/firmware/efi/libstub/Makefile           |   2 +-
- drivers/firmware/efi/libstub/efi-stub-helper.c  |  20 +-
- drivers/firmware/efi/libstub/pci.c              | 114 ++++++++
- include/linux/efi.h                             |  29 +-
- 19 files changed, 597 insertions(+), 627 deletions(-)
- create mode 100644 drivers/firmware/efi/libstub/pci.c
+Is there any reason not to compile the stub with -fPIE btw? Also fPIE
+seems to be there even in gcc 4.1.2, the check for availability can
+probably be dropped.
