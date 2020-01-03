@@ -7,37 +7,37 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DF273C2D0C2
-	for <linux-efi@archiver.kernel.org>; Fri,  3 Jan 2020 11:41:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 50CDFC32767
+	for <linux-efi@archiver.kernel.org>; Fri,  3 Jan 2020 11:41:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id B746B21835
-	for <linux-efi@archiver.kernel.org>; Fri,  3 Jan 2020 11:41:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1CEE621835
+	for <linux-efi@archiver.kernel.org>; Fri,  3 Jan 2020 11:41:35 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1578051694;
-	bh=Tkr0nKl/EJ3yOJKQ+DRPPZE3cePp9fBzXGjjjNNv/AA=;
+	s=default; t=1578051695;
+	bh=2ZDafcrOFKSF2ybRq49KajpWushIOtD+aMmrNSMAiQM=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=YHEb83MLlT12sxGmL2qC/xL9X0Ow7Sn4owCgGB8NJpJZfbT7b/laU6Zs56fJAlM08
-	 /y7zL8eAsPKJ1n6+HQBi65MSmcxO7tqj+43EaVlSkXgaL9X46TcDNXNetoOW+rESxH
-	 FSy7PLNwFKFQHWwqPr7DhZKZX8bqoO2GIVlekcVg=
+	b=gzkQHpDbOWneHX/mDr4WCh2+EhCs7lavCCN62a0pYaMACN65XodQumcbAEhGwXop+
+	 TDicXk3tjDQoIDSBQLS6oRsLmAxNMdxJu39IwrySXk/ZRn+q8Um6h+qVSfh5QDPlMb
+	 UIM7JE7EQJVtERiioNHKHVN6o6Ngp2Q5rsQK8M4I=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727761AbgACLk3 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 3 Jan 2020 06:40:29 -0500
-Received: from mail.kernel.org ([198.145.29.99]:39876 "EHLO mail.kernel.org"
+        id S1727710AbgACLkZ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 3 Jan 2020 06:40:25 -0500
+Received: from mail.kernel.org ([198.145.29.99]:39670 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727726AbgACLk3 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 3 Jan 2020 06:40:29 -0500
+        id S1727726AbgACLkY (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 3 Jan 2020 06:40:24 -0500
 Received: from localhost.localdomain (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id AB3E02464E;
-        Fri,  3 Jan 2020 11:40:26 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 8E3E524649;
+        Fri,  3 Jan 2020 11:40:22 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1578051628;
-        bh=Tkr0nKl/EJ3yOJKQ+DRPPZE3cePp9fBzXGjjjNNv/AA=;
+        s=default; t=1578051624;
+        bh=2ZDafcrOFKSF2ybRq49KajpWushIOtD+aMmrNSMAiQM=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=y1a6utLtLa6sVeADfYJ60O8/Q+zwf1Bu5gFryoHWr9N6wKzQclonJNK05y3cL2cVO
-         as4ts7WNXiGcbBCno4+fc9W9qRe8FtKgmaPv7VA52NwNbWwNAVREWlynzQZd3MrbRb
-         mqxMvRSYEoELiDvJqtaNJnRlF5edC0MOS7QKGYSg=
+        b=Z3XU3CX/9PcO9vjlhAP54CO0W7KCHeRLDWxVe7EmYZDGNEZYy0VzFjoF4p/HgVqZ0
+         EceYb2XWR0TSCUpTK++cE4gQny6i+NcoNcGpW/CzYeDxZjbi08BTKv4U+nIuLvZ3Pw
+         EnI7TEFmrSWeEw3vnneMEdOmph9URiSeDtNq/Zg0=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
@@ -46,9 +46,9 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>,
         linux-kernel@vger.kernel.org, Andy Lutomirski <luto@kernel.org>,
         Arvind Sankar <nivedita@alum.mit.edu>,
         Matthew Garrett <mjg59@google.com>
-Subject: [PATCH 06/20] efi/x86: split off some old memmap handling into separate routines
-Date:   Fri,  3 Jan 2020 12:39:39 +0100
-Message-Id: <20200103113953.9571-7-ardb@kernel.org>
+Subject: [PATCH 04/20] efi/x86: map the entire EFI vendor string before copying it
+Date:   Fri,  3 Jan 2020 12:39:37 +0100
+Message-Id: <20200103113953.9571-5-ardb@kernel.org>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20200103113953.9571-1-ardb@kernel.org>
 References: <20200103113953.9571-1-ardb@kernel.org>
@@ -59,95 +59,55 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-In a subsequent patch, we will fold the prolog/epilog routines that are
-part of the support code to call SetVirtualAddressMap() with a 1:1
-mapping into the callers. However, the 64-bit version mostly consists
-of ugly mapping code that is only used when efi=old_map is in effect,
-which is extremely rare. So let's move this code out of the way so it
-does not clutter the common code.
+Fix a couple of issues with the way we map and copy the vendor string:
+- we map only 2 bytes, which usually works since you get at least a
+  page, but if the vendor string happens to cross a page boundary,
+  a crash will result
+- only call early_memunmap() if early_memremap() succeeded, or we will
+  call it with a NULL address which it doesn't like,
+- while at it, switch to early_memremap_ro(), and array indexing rather
+  than pointer dereferencing to read the CHAR16 characters.
 
+Fixes: 5b83683f32b1 ("x86: EFI runtime service support")
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/platform/efi/efi_64.c | 35 +++++++++++++++++++++-------------
- 1 file changed, 22 insertions(+), 13 deletions(-)
+ arch/x86/platform/efi/efi.c | 13 +++++++------
+ 1 file changed, 7 insertions(+), 6 deletions(-)
 
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 03c2ed3c645c..a72bbabbc595 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -72,7 +72,9 @@ static void __init early_code_mapping_set_exec(int executable)
- 	}
- }
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index d96953d9d4e7..3ce32c31bb61 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -541,7 +541,6 @@ void __init efi_init(void)
+ 	efi_char16_t *c16;
+ 	char vendor[100] = "unknown";
+ 	int i = 0;
+-	void *tmp;
  
--pgd_t * __init efi_call_phys_prolog(void)
-+void __init efi_old_memmap_phys_epilog(pgd_t *save_pgd);
-+
-+pgd_t * __init efi_old_memmap_phys_prolog(void)
- {
- 	unsigned long vaddr, addr_pgd, addr_p4d, addr_pud;
- 	pgd_t *save_pgd, *pgd_k, *pgd_efi;
-@@ -82,11 +84,6 @@ pgd_t * __init efi_call_phys_prolog(void)
- 	int pgd;
- 	int n_pgds, i, j;
- 
--	if (!efi_enabled(EFI_OLD_MEMMAP)) {
--		efi_switch_mm(&efi_mm);
--		return efi_mm.pgd;
--	}
--
- 	early_code_mapping_set_exec(1);
- 
- 	n_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT), PGDIR_SIZE);
-@@ -143,11 +140,11 @@ pgd_t * __init efi_call_phys_prolog(void)
- 	__flush_tlb_all();
- 	return save_pgd;
- out:
--	efi_call_phys_epilog(save_pgd);
-+	efi_old_memmap_phys_epilog(save_pgd);
- 	return NULL;
- }
- 
--void __init efi_call_phys_epilog(pgd_t *save_pgd)
-+void __init efi_old_memmap_phys_epilog(pgd_t *save_pgd)
- {
+ #ifdef CONFIG_X86_32
+ 	if (boot_params.efi_info.efi_systab_hi ||
+@@ -566,14 +565,16 @@ void __init efi_init(void)
  	/*
- 	 * After the lock is released, the original page table is restored.
-@@ -158,11 +155,6 @@ void __init efi_call_phys_epilog(pgd_t *save_pgd)
- 	p4d_t *p4d;
- 	pud_t *pud;
+ 	 * Show what we know for posterity
+ 	 */
+-	c16 = tmp = early_memremap(efi.systab->fw_vendor, 2);
++	c16 = early_memremap_ro(efi.systab->fw_vendor,
++				sizeof(vendor) * sizeof(efi_char16_t));
+ 	if (c16) {
+-		for (i = 0; i < sizeof(vendor) - 1 && *c16; ++i)
+-			vendor[i] = *c16++;
++		for (i = 0; i < sizeof(vendor) - 1 && c16[i]; ++i)
++			vendor[i] = c16[i];
+ 		vendor[i] = '\0';
+-	} else
++		early_memunmap(c16, sizeof(vendor) * sizeof(efi_char16_t));
++	} else {
+ 		pr_err("Could not map the firmware vendor!\n");
+-	early_memunmap(tmp, 2);
++	}
  
--	if (!efi_enabled(EFI_OLD_MEMMAP)) {
--		efi_switch_mm(efi_scratch.prev_mm);
--		return;
--	}
--
- 	nr_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT) , PGDIR_SIZE);
- 
- 	for (pgd_idx = 0; pgd_idx < nr_pgds; pgd_idx++) {
-@@ -193,6 +185,23 @@ void __init efi_call_phys_epilog(pgd_t *save_pgd)
- 	early_code_mapping_set_exec(0);
- }
- 
-+pgd_t * __init efi_call_phys_prolog(void)
-+{
-+	if (efi_enabled(EFI_OLD_MEMMAP))
-+		return efi_old_memmap_phys_prolog();
-+
-+	efi_switch_mm(&efi_mm);
-+	return efi_mm.pgd;
-+}
-+
-+void __init efi_call_phys_epilog(pgd_t *save_pgd)
-+{
-+	if (efi_enabled(EFI_OLD_MEMMAP))
-+		efi_old_memmap_phys_epilog(save_pgd);
-+	else
-+		efi_switch_mm(efi_scratch.prev_mm);
-+}
-+
- EXPORT_SYMBOL_GPL(efi_mm);
- 
- /*
+ 	pr_info("EFI v%u.%.02u by %s\n",
+ 		efi.systab->hdr.revision >> 16,
 -- 
 2.20.1
 
