@@ -1,105 +1,135 @@
-Return-Path: <SRS0=zl8W=2Y=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=uFlG=23=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E4EE3C2D0C2
-	for <linux-efi@archiver.kernel.org>; Fri,  3 Jan 2020 14:23:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AE9A4C32767
+	for <linux-efi@archiver.kernel.org>; Mon,  6 Jan 2020 05:02:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id B8841206DA
-	for <linux-efi@archiver.kernel.org>; Fri,  3 Jan 2020 14:23:24 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="WZq+1oT9"
+	by mail.kernel.org (Postfix) with ESMTP id 8CCB221734
+	for <linux-efi@archiver.kernel.org>; Mon,  6 Jan 2020 05:02:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727539AbgACOXY (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 3 Jan 2020 09:23:24 -0500
-Received: from mail-wr1-f65.google.com ([209.85.221.65]:44134 "EHLO
-        mail-wr1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727523AbgACOXY (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 3 Jan 2020 09:23:24 -0500
-Received: by mail-wr1-f65.google.com with SMTP id q10so3636661wrm.11
-        for <linux-efi@vger.kernel.org>; Fri, 03 Jan 2020 06:23:22 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=gi0DZpr0qeDTj1+4L+h14X28Rm9afD0mtH0nuAUrYlo=;
-        b=WZq+1oT9yXalbweiNNuMnloSBL282Mo+1m+HQ81CUtFHEx1FsmR6IFsOkhxmbiE3xI
-         57sKCe7w6xtqwE5O1XKVNjuMViFl4TWyaOB3k8SnW3aEDwRNbkNGEK8zF/eNQyZLEBot
-         YPFSFCMF8Z1eWKWUdnRofE1GuMnOSF5dHwO758NsCIbJ78Vl9vP7Jqje7et4xkKqotOn
-         xHPQ1QIhiUpMNe9EHlbLETMe0xl6Mu9TncYGqtghtzp7NvzWio+QUvT91L1mVfUTbQd9
-         1Pj/OXQa7m7q2gy3gnrASfh67SWRX7Osk6ewrm+74KVIqcrN5Y1cgYz716Di5QVCm6S9
-         bDwA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=gi0DZpr0qeDTj1+4L+h14X28Rm9afD0mtH0nuAUrYlo=;
-        b=CTuYN0HcjZTX13TYPfOeNU25Vfwu1Q+rPm1VaqICfNaQc2b2axsyvWd8CAu4e+wCC5
-         gbAuTPlyeTNw/tn4MBmDCxTW5cKkiQjUfvMlEpOI9miUug9nBJuwwm9J7f1+ru2r9o99
-         mGY1OUdpPGUpDxoJA5IhACjTrhw55GbunwtQmharDXcKXO9iBz9bH3LeMXTi4mYwfloW
-         BAIC5zXn9Ae/XOiHh1+mhxS7c6N1ZGkuqA3UQ/Owbu8Squdo6FETyt6AauVxFYG2lB2m
-         pqM+9lAp8xDi6kZ6ehL6DelqGfxwmOa2HljwNiInMXh7jf7zVgn6lmHTdUy+Y5E4Y7CB
-         Pyow==
-X-Gm-Message-State: APjAAAUR+0ByG7rp7L//XM78EPLBeeont6dsMrKyjD47PbKh8doKowZ8
-        vNJs+U02Q/gk4kQJQBo6LBkw3LmLewouU0k1Xa/wmQ==
-X-Google-Smtp-Source: APXvYqxmZZbf7P8f353NuB9NPdNXzP7RUjOgAEPIo2elscT33RLr3oCG2+ZazS4u9endCJCk5nlXPFrBt5Xzdfrmgec=
-X-Received: by 2002:a5d:46c1:: with SMTP id g1mr86451416wrs.200.1578061401967;
- Fri, 03 Jan 2020 06:23:21 -0800 (PST)
-MIME-Version: 1.0
-References: <20200102155129.GA668939@rani.riverdale.lan> <CAKv+Gu9Ne6HT1csRE4r-LZnZ9vUEOqnzHHjoj+a=NU=Tnj6o4w@mail.gmail.com>
- <CAKv+Gu_ksPvVpD=GxBNcJNhqak_k0-HZaK0jM10mKN==7k83xA@mail.gmail.com>
- <CAKv+Gu8m5vtJ6_TUgqy-Aa_7FNyhYBx=gsh1c62_impS2G99AQ@mail.gmail.com>
- <20200102172637.GB701372@rani.riverdale.lan> <CAKv+Gu9eEC+yQM1BsLTWLYkxCugVw76-nPQOQ14EavkJHGtcdg@mail.gmail.com>
- <20200102174142.GA713602@rani.riverdale.lan> <CAKv+Gu-NDps2EP865v45sUbKRwSc2fwvcfLt64BKX_D=ErmvMQ@mail.gmail.com>
- <20200102181015.GA720259@rani.riverdale.lan> <CAKv+Gu8stpJ2YZ6sJb5WvwftNy9SDsQpxoS1uH0FV5vXQKvihA@mail.gmail.com>
- <20200103141658.GA1204556@rani.riverdale.lan>
-In-Reply-To: <20200103141658.GA1204556@rani.riverdale.lan>
-From:   Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Date:   Fri, 3 Jan 2020 15:23:10 +0100
-Message-ID: <CAKv+Gu8NcdQ915cRnMCPtMRh+EGSjm0e+Uv6j48qraxzXS7dEA@mail.gmail.com>
-Subject: Re: [PATCH v2 13/21] efi/libstub/x86: drop __efi_early() export of
- efi_config struct
-To:     Arvind Sankar <nivedita@alum.mit.edu>
-Cc:     Ard Biesheuvel <ardb@kernel.org>,
+        id S1726300AbgAFFCS (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 6 Jan 2020 00:02:18 -0500
+Received: from mx0a-002e3701.pphosted.com ([148.163.147.86]:7336 "EHLO
+        mx0a-002e3701.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1725446AbgAFFCR (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 6 Jan 2020 00:02:17 -0500
+Received: from pps.filterd (m0134421.ppops.net [127.0.0.1])
+        by mx0b-002e3701.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 00651PGO032355;
+        Mon, 6 Jan 2020 05:01:59 GMT
+Received: from g2t2354.austin.hpe.com (g2t2354.austin.hpe.com [15.233.44.27])
+        by mx0b-002e3701.pphosted.com with ESMTP id 2xb4ahw497-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 06 Jan 2020 05:01:59 +0000
+Received: from g2t2360.austin.hpecorp.net (g2t2360.austin.hpecorp.net [16.196.225.135])
+        by g2t2354.austin.hpe.com (Postfix) with ESMTP id 78DF983;
+        Mon,  6 Jan 2020 05:01:58 +0000 (UTC)
+Received: from hpe.com (ben.americas.hpqcorp.net [10.33.153.7])
+        by g2t2360.austin.hpecorp.net (Postfix) with ESMTP id 60CDD4C;
+        Mon,  6 Jan 2020 05:01:57 +0000 (UTC)
+Date:   Sun, 5 Jan 2020 23:01:57 -0600
+From:   Russ Anderson <rja@hpe.com>
+To:     Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc:     Borislav Petkov <bp@alien8.de>,
+        Matthew Garrett <mjg59@srcf.ucam.org>,
+        Matt Fleming <matt@codeblueprint.co.uk>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Dave Young <dyoung@redhat.com>,
         linux-efi <linux-efi@vger.kernel.org>,
-        Hans de Goede <hdegoede@redhat.com>,
-        Matthew Garrett <matthewgarrett@google.com>,
-        Ingo Molnar <mingo@kernel.org>,
-        Andy Lutomirski <luto@kernel.org>,
-        Thomas Gleixner <tglx@linutronix.de>
-Content-Type: text/plain; charset="UTF-8"
+        the arch/x86 maintainers <x86@kernel.org>,
+        Dimitri Sivanich <dimitri.sivanich@hpe.com>,
+        Mike Travis <mike.travis@hpe.com>,
+        Hedi Berriche <hedi.berriche@hpe.com>
+Subject: Re: [RFC PATCH] efi/x86: limit EFI old memory map to SGI UV1 machines
+Message-ID: <20200106050157.5htrc4nw7lhixlyy@hpe.com>
+Reply-To: Russ Anderson <rja@hpe.com>
+References: <CAKv+Gu82ZCk3Wy6NHHyRs0CAFXJDMfDu2KpH3PZ-Le1SjsQLLQ@mail.gmail.com>
+ <20191231160547.GB13549@zn.tnic>
+ <20200102143757.tqhvff32ksc2rpvh@hpe.com>
+ <CAKv+Gu9y9yA+4cnii6QvJ3CjxqmxPmEc333cKezzxwrPCKvKGQ@mail.gmail.com>
+ <20200102164536.ks5dmtrbtl4i7rnt@hpe.com>
+ <CAKv+Gu86SaU+D8x2ScRXbTvR8aK23CfhAL=mkUNcn=9vrbgznw@mail.gmail.com>
+ <20200102231317.yoj2xdplqp42lmcq@hpe.com>
+ <CAKv+Gu9VDxWZXKr3nZ1igP-u5q=jo_Z5UPROh+NhkTHdes8CLA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu9VDxWZXKr3nZ1igP-u5q=jo_Z5UPROh+NhkTHdes8CLA@mail.gmail.com>
+User-Agent: NeoMutt/20170421 (1.8.2)
+X-HPE-SCL: -1
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.95,18.0.572
+ definitions=2020-01-06_01:2020-01-06,2020-01-05 signatures=0
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 malwarescore=0
+ mlxlogscore=881 adultscore=0 impostorscore=0 bulkscore=0 clxscore=1015
+ phishscore=0 lowpriorityscore=0 priorityscore=1501 spamscore=0
+ suspectscore=2 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-1910280000 definitions=main-2001060045
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Fri, 3 Jan 2020 at 15:17, Arvind Sankar <nivedita@alum.mit.edu> wrote:
->
-> On Thu, Jan 02, 2020 at 07:38:06PM +0100, Ard Biesheuvel wrote:
-> > On Thu, 2 Jan 2020 at 19:10, Arvind Sankar <nivedita@alum.mit.edu> wrote:
-> > >
-> > > On Thu, Jan 02, 2020 at 06:48:52PM +0100, Ard Biesheuvel wrote:
-> > > > Currently, I am not managing to get the 64-bit compiler to emit any
-> > > > GOT based references for efi_is64, though, even without the attribute,
-> > > > so I am not sure what's going on there.
-> > >
-> > > With gcc 9, I do get R_X86_64_REX_GOTPCRELX relocations in libstub,
-> > > which are then eliminated by the linker -- if they weren't they would be
-> > > using addresses from the GOT. They turn into R_X86_64_PC32 with the
-> > > hidden visibility.
+On Fri, Jan 03, 2020 at 09:14:14AM +0100, Ard Biesheuvel wrote:
+> On Fri, 3 Jan 2020 at 00:13, Russ Anderson <rja@hpe.com> wrote:
+> > been used to work around issues.
 > >
-> > Indeed. I was looking at eboot.o but that gets built with -fPIE not
-> > -fPIC [if available].
+> > One was when KASLR was added (as part of the Spectre/Meldown
+> > mitigation).  The initial implementation broke with new
+> > map so efi=old_map was used as a workaround.  I don't know
+> > if this was a distro specific breakage or upstream, but the
+> > workaround limited the impact and the breakage was quickly
+> > fixed.
 > >
-> > libstub objects indeed have the R_X86_64_REX_GOTPCRELX relocations, so
-> > I'll add the hidden visibility to the extern declaration of efi_is64
->
-> Is there any reason not to compile the stub with -fPIE btw? Also fPIE
-> seems to be there even in gcc 4.1.2, the check for availability can
-> probably be dropped.
+> > Another time was the EFI locking issue mentioned earlier
+> > in this thread.
+> >
+> 
+> So are you saying the distros updated their kernels which subsequently
+> broke your platforms, and you needed to use efi=old_map in production
+> to work around this? This sounds like something that should have been
+> caught in testing before the release was made.
 
-No we should switch to -fPIE for the stub as well
+The Spectre/Meldown change was rushed through, without proper
+testing.  The lesson was that even security fixes need full testing.
+All involved (that I am aware of) do not want to repeat releasing
+code that has not been fully tested.
+
+The EFI locking issue was caught by the HPE BRT (Basic Regression Test)
+team, but after it had been released by distros.  It was a small
+timing hole that ALMOST always worked, which is why it was not detected
+immediately.
+
+> Is there any way you could make one of these systems
+> available/accessible for testing new kernels? Also, was the breakage
+> related specifically to the use of the UV runtime services?
+
+HPE does have systems at Red Hat and SUSE (part of the distro test
+environments), along with internal test systems.  HPE does have access
+to pre-release distro (RHEL, SLES, Oracle Linux) kernels, including
+nightly development builds.  I have a kernel engineer on-site at Red Hat
+with access to RH kernel engineers and git trees.  We do test upstream
+kernels and have fixed regressions.  That said, we do have limited
+resources (test systems, people, time) and do as much as we can with
+what we have, so it is not perfect.  But we try our best to be perfect.
+
+> > Is there a compelling reason to put efi=old_map quirk
+> > under CONFIG_X86_UV=y?  The original patch description assumed
+> > only old SGI UV1 used efi=old_map, that it had not been
+> > used on newer hardware, but that isn't the case.  It has been
+> > used on newer currently shipping hardware.  Given that
+> > new information is there a compelling reason for the change?
+> 
+> Every feature like this doubles the size of the validation matrix, and
+> so restricting efi=old_map to a single target helps to keep the
+> maintenance effort manageable.
+
+Understood.  
+
+Thanks.
+-- 
+Russ Anderson,  SuperDome Flex Linux Kernel Group Manager
+HPE - Hewlett Packard Enterprise (formerly SGI)  rja@hpe.com
