@@ -2,140 +2,100 @@ Return-Path: <SRS0=IfCu=24=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.0 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D38B9C282DD
-	for <linux-efi@archiver.kernel.org>; Tue,  7 Jan 2020 19:51:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 19006C282DD
+	for <linux-efi@archiver.kernel.org>; Tue,  7 Jan 2020 20:00:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id AAB32206DB
-	for <linux-efi@archiver.kernel.org>; Tue,  7 Jan 2020 19:51:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DD230206DB
+	for <linux-efi@archiver.kernel.org>; Tue,  7 Jan 2020 20:00:52 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="cNJ9Nuqo"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="K2iunqi5"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728585AbgAGTv2 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 7 Jan 2020 14:51:28 -0500
-Received: from mail-wr1-f66.google.com ([209.85.221.66]:36041 "EHLO
-        mail-wr1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728364AbgAGTv2 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 7 Jan 2020 14:51:28 -0500
-Received: by mail-wr1-f66.google.com with SMTP id z3so868257wru.3
-        for <linux-efi@vger.kernel.org>; Tue, 07 Jan 2020 11:51:26 -0800 (PST)
+        id S1728369AbgAGUAw (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 7 Jan 2020 15:00:52 -0500
+Received: from mail-qk1-f194.google.com ([209.85.222.194]:43945 "EHLO
+        mail-qk1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728358AbgAGUAw (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 7 Jan 2020 15:00:52 -0500
+Received: by mail-qk1-f194.google.com with SMTP id t129so517157qke.10
+        for <linux-efi@vger.kernel.org>; Tue, 07 Jan 2020 12:00:51 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=z3vZbnaTkTQkpTOs5RyT3/aPplNkcOKw6w0UH9176lE=;
-        b=cNJ9NuqoDe1y+n2Qyzs5y8kk9ZLbVRw4gabym3OmF5BK1ac9nGlzljXaE0JsGj5fkp
-         QHECUVKarV3EyFpddyVsEBAAiAFYJPdj6R13li3g57ir3VaYkqJvreavoBieMHBBdt7i
-         oLeFeo297PsAiiklbBOBc5WkCt7SySPyEHlPcBl1CU0SUYZcPRmkje4mkbE2bMjxK2vz
-         8+EGpqDBKa5cKLGwF80iXx8pZZvWEuKv/q1cQTuSFdyjtl/Wkfgh89ASsHCu8hYeqiqh
-         ZXZgV+WqEIx8PD4xg/ADyUsa/C81zTch9g3g/Oty4JD9mpMomMo5M8+7EVJe4a/X/Byw
-         6dtg==
+        d=gmail.com; s=20161025;
+        h=sender:from:date:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=Jzy/pg0JfocfwEqBeH4CI1XSgNiVS+eHVqP3Hc/Wg4k=;
+        b=K2iunqi5OOiqmcOlXPiS9qezIkuJMVGMWj1HxHX/Tl7fW+BnlBcAPIIizHeJXrQRpf
+         XTNdtGhOK0tG50xENl9ZYAh8cZoHRboyFtP01+S6yRdP+ELXzzjrYgY/hAEQJxkRzIMK
+         pKVwuyaa7dWHNwT/YS57UgeUNYEWhS7ALtsr20onzCfsDAUJDeflopTkyxRL8ERT5P9g
+         +5qKqv0nGWzGiNLDqI2SWrjlIwQUNWI22Vorqaen9fbGc2WYkeuM3O/e9bC5pKvs7Z8V
+         lEbVOw2I74DazU9beeIx05TxjRCtgmcUXcltbCB+PdPSFcO4txFx3sjrNcJkc4hQYG65
+         5ApQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=z3vZbnaTkTQkpTOs5RyT3/aPplNkcOKw6w0UH9176lE=;
-        b=ntiih+dnexc/o+16Kropgrea5bgTqawbdtavCJqjch5uCUqriwxr5nXPSGIZNRDbwL
-         abeEr1DNGV6Uz+7B7++17cKciYE4MGz33bi6Bfh27OG12IfIhas1hFZOZDC2ybRyq9d+
-         aPAgQly83bP1iI+ir4Ci5kBKfSAkhFKs9UwBwXj5vICkwN3HcHqeW88p9Kkps6KBTXtg
-         Vi0aXIrzVsvvbjTouGSmMWNdA5o4WqD7A0gmpFmMTCkbmsKWC9x7wKEIForAtw2QPtmE
-         mL+5QlZWLSgUSYiJpoZsmS9j88X2jmkZRcwAVm/1wQo5tlqdFv5vOuV3hvjtTVctQDqd
-         gW6Q==
-X-Gm-Message-State: APjAAAWRc0kllpWsjUxMCUWiENu0mLIMMTuE2ZEJo0FDOfGg4mN3fLdv
-        9NgDNEQfHNiMx6Jvsfhbiy/2Uz9Ex91fbFJZkFLI/g==
-X-Google-Smtp-Source: APXvYqwhb8rNCqSEG4S0O8Z0IppA0vQcphTr8HzWC4stka4y6ztRY/QFEGhli+vnmvOlFKnptsXfRKum3nlKLv8yzbU=
-X-Received: by 2002:a5d:5345:: with SMTP id t5mr826747wrv.0.1578426685884;
- Tue, 07 Jan 2020 11:51:25 -0800 (PST)
-MIME-Version: 1.0
-References: <20200107142125.GA652888@rani.riverdale.lan> <CAKv+Gu-xDaTBVKJ=9ya74giBZ=LdX2r-8-LiFJWzcUofthGv7w@mail.gmail.com>
- <20200107142732.GB652888@rani.riverdale.lan> <CAKv+Gu8v-5DXWh5ZaY0omrVNh46TEourpcf2Hv3TrsbCUtLFng@mail.gmail.com>
- <20200107175829.GA1599060@rani.riverdale.lan> <CAKv+Gu-PU=LqT7MEbSH-0GnJOdakDeaC=ANdmag6JptcfJEJtA@mail.gmail.com>
- <20200107180807.GA1642410@rani.riverdale.lan> <CAKv+Gu8Jsen-oAvUYrrTXnLRog+iHsLf0s6EMJ9smgUXpzncZw@mail.gmail.com>
- <20200107183224.GB1642410@rani.riverdale.lan> <CAKv+Gu_+8-vFFg6V06cxK4McbqOeqkAFYGB_MHDU3jcFyM1yHA@mail.gmail.com>
- <20200107191412.GA1685286@rani.riverdale.lan> <CAKv+Gu8CsQOZJErDOjCtMB-6yr92CmLiCFpOTeoqdZWBOLh1oQ@mail.gmail.com>
-In-Reply-To: <CAKv+Gu8CsQOZJErDOjCtMB-6yr92CmLiCFpOTeoqdZWBOLh1oQ@mail.gmail.com>
-From:   Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Date:   Tue, 7 Jan 2020 20:51:14 +0100
-Message-ID: <CAKv+Gu97YJ5AiG0+38fGJWfr6DWsohLrpUxGfdqaRawEhqbhTw@mail.gmail.com>
-Subject: Re: [PATCH 0/3] Relocate GOT before calling EFI stub
-To:     Arvind Sankar <nivedita@alum.mit.edu>
-Cc:     Ard Biesheuvel <ardb@kernel.org>,
+        h=x-gm-message-state:sender:from:date:to:cc:subject:message-id
+         :references:mime-version:content-disposition:in-reply-to:user-agent;
+        bh=Jzy/pg0JfocfwEqBeH4CI1XSgNiVS+eHVqP3Hc/Wg4k=;
+        b=G8y6J4A+p9sussb96EuQo21bCBYE+B/xA97nJ0MmvnOiwQYETmKwxbOfo2/gTUY3GD
+         MCRxd3o+icelIuAdIWyNHI9/XR3hp0rm4EV7CM0FLpI1gXfRq2Q2eYWeCKuqZMcc8B2j
+         8FfUfOS/Lig0aSuy+TBblrZieciZVoD8+lAI29li5nSAekQM0KVjILHAEyfjD7aQxVtN
+         zN4VISXlvBz5pOfWo3JlEU622PAUc4QMuhfPV1AmSChUbKGbR3P6ZNimhFN0OANIRI4L
+         +suLP4+QSAGOqP9v5bWuFIAwY8IBgxaiWh1jmMXQkmLLV0hjw7w/aAv/QbWkr9k80oEx
+         RgQw==
+X-Gm-Message-State: APjAAAX6WOpeyd8gDutYYujCaxEw4SydN0k0NU6ArAIbasebS9QL1vv+
+        ct0UCU4GGAYNUvLKfRLEGN0=
+X-Google-Smtp-Source: APXvYqxmH9cE1oTEIMePOSdr+tHfO3cuzOoH3+cbyYTIguv6vK8qOsefhzgh6g5ZqmzUxAxr7Zf62Q==
+X-Received: by 2002:a37:52d5:: with SMTP id g204mr1034798qkb.215.1578427251435;
+        Tue, 07 Jan 2020 12:00:51 -0800 (PST)
+Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
+        by smtp.gmail.com with ESMTPSA id g81sm315459qkb.70.2020.01.07.12.00.51
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 07 Jan 2020 12:00:51 -0800 (PST)
+From:   Arvind Sankar <nivedita@alum.mit.edu>
+X-Google-Original-From: Arvind Sankar <arvind@rani.riverdale.lan>
+Date:   Tue, 7 Jan 2020 15:00:49 -0500
+To:     Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc:     Arvind Sankar <nivedita@alum.mit.edu>,
+        Ard Biesheuvel <ardb@kernel.org>,
         linux-efi <linux-efi@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Subject: Re: [PATCH 0/3] Relocate GOT before calling EFI stub
+Message-ID: <20200107200049.GA2172504@rani.riverdale.lan>
+References: <CAKv+Gu8v-5DXWh5ZaY0omrVNh46TEourpcf2Hv3TrsbCUtLFng@mail.gmail.com>
+ <20200107175829.GA1599060@rani.riverdale.lan>
+ <CAKv+Gu-PU=LqT7MEbSH-0GnJOdakDeaC=ANdmag6JptcfJEJtA@mail.gmail.com>
+ <20200107180807.GA1642410@rani.riverdale.lan>
+ <CAKv+Gu8Jsen-oAvUYrrTXnLRog+iHsLf0s6EMJ9smgUXpzncZw@mail.gmail.com>
+ <20200107183224.GB1642410@rani.riverdale.lan>
+ <CAKv+Gu_+8-vFFg6V06cxK4McbqOeqkAFYGB_MHDU3jcFyM1yHA@mail.gmail.com>
+ <20200107191412.GA1685286@rani.riverdale.lan>
+ <CAKv+Gu8CsQOZJErDOjCtMB-6yr92CmLiCFpOTeoqdZWBOLh1oQ@mail.gmail.com>
+ <CAKv+Gu97YJ5AiG0+38fGJWfr6DWsohLrpUxGfdqaRawEhqbhTw@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu97YJ5AiG0+38fGJWfr6DWsohLrpUxGfdqaRawEhqbhTw@mail.gmail.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, 7 Jan 2020 at 20:23, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
->
-> On Tue, 7 Jan 2020 at 20:14, Arvind Sankar <nivedita@alum.mit.edu> wrote:
+On Tue, Jan 07, 2020 at 08:51:14PM +0100, Ard Biesheuvel wrote:
 > >
-> > On Tue, Jan 07, 2020 at 08:03:18PM +0100, Ard Biesheuvel wrote:
-> > > On Tue, 7 Jan 2020 at 19:32, Arvind Sankar <nivedita@alum.mit.edu> wrote:
-> > > >
-> > > > On Tue, Jan 07, 2020 at 07:10:34PM +0100, Ard Biesheuvel wrote:
-> > > > > On Tue, 7 Jan 2020 at 19:08, Arvind Sankar <nivedita@alum.mit.edu> wrote:
-> > > > > >
-> > > > > > On Tue, Jan 07, 2020 at 06:59:57PM +0100, Ard Biesheuvel wrote:
-> > > > > > > On Tue, 7 Jan 2020 at 18:58, Arvind Sankar <nivedita@alum.mit.edu> wrote:
-> > > > > > > >
-> > > > > > > > On Tue, Jan 07, 2020 at 03:28:31PM +0100, Ard Biesheuvel wrote:
-> > > > > > > > >
-> > > > > > > > > Unfortunately, the command line option implements a weaker form of
-> > > > > > > > > visibility than the pragma, so it probably comes down to setting the
-> > > > > > > > > pragma in a .h file that gets -include'd via the command line so it is
-> > > > > > > > > guaranteed to be seen first.
-> > > > > > > >
-> > > > > > > > Tried hacking that in and it works, tested with gcc 4.6.4.
-> > > > > > >
-> > > > > > > Excellent. But in my testing locally, I don't get any GOT entries in
-> > > > > > > the first place, strangely enough. So what changes in the output for
-> > > > > > > you with visibility hidden compared to before?
-> > > > > >
-> > > > > > Works with 32-bit as well.
-> > > > > >
-> > > > > > Are you checking libstub or boot/compressed? Below is with gcc 4.6 (but
-> > > > > > latest binutils). With gcc 9, there's only one left -- trampoline_32bit_src
-> > > > > > in pgtable_64.
-> > > > > >
-> > > > >
-> > > > > I am looking at the size of the .got section in
-> > > > > boot/compressed/vmlinux, and it is 0x0 on 64-bit, and 0xc (i.e., only
-> > > > > the .got.plt fixup code) on 32-bit.
-> > > > >
-> > > > > Could you please check whether passing -Bsymbolic to the linker gives
-> > > > > the same result btw?
-> > > > >
-> > > >
-> > > > With new ld all those GOTPCRELX's get eliminated. If you add --no-relax
-> > > > you'll get them in the .got. I don't have an old version of binutils so
-> > > > I can't check, but I think they will be assembled as GOTPCREL and remain
-> > > > in the .got section after linking.
-> > > >
-> > >
-> > > Right, unless you use hidden visibility, no?
-> > >
+> > Yeah. I have just reinstalled Ubuntu Trusty in a VM, which has
+> > binutils 2.4 and has a GCC 4.6 package available, but I haven't tried
+> > building the 64-bit kernel yet.
 > >
-> > Right, that's what I said works before -- with hidden visibility the
-> > compiler (even an old one) does not generate any GOT-using relocations.
-> > We're trying to debug why you don't see any .got entries even before
-> > turning on hidden visibility, while I do, no?
-> >
->
-> Yeah. I have just reinstalled Ubuntu Trusty in a VM, which has
-> binutils 2.4 and has a GCC 4.6 package available, but I haven't tried
-> building the 64-bit kernel yet.
->
+> 
+> I see the same thing: all GOT entries are gone when using -include to
+> set the pragma, with the exception of the first 0x18 bytes of the
+> .got.plt section, which we can ignore.
+> 
+> So in summary, we should be able ASSERT() in the linker script that
+> (_egot - _got) <= 3 * word size, and get rid of all the GOT fixup code
+> entirely. Or perhaps it is better to add a section marker, and assert
+> that the *(.got) part is really empty.
 
-I see the same thing: all GOT entries are gone when using -include to
-set the pragma, with the exception of the first 0x18 bytes of the
-.got.plt section, which we can ignore.
-
-So in summary, we should be able ASSERT() in the linker script that
-(_egot - _got) <= 3 * word size, and get rid of all the GOT fixup code
-entirely. Or perhaps it is better to add a section marker, and assert
-that the *(.got) part is really empty.
+Great!
