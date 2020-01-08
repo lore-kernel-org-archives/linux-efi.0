@@ -2,41 +2,42 @@ Return-Path: <SRS0=ZTBG=25=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AEDDEC00523
-	for <linux-efi@archiver.kernel.org>; Wed,  8 Jan 2020 10:23:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F3DF1C00523
+	for <linux-efi@archiver.kernel.org>; Wed,  8 Jan 2020 10:23:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 8049E2077B
-	for <linux-efi@archiver.kernel.org>; Wed,  8 Jan 2020 10:23:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CAED12077B
+	for <linux-efi@archiver.kernel.org>; Wed,  8 Jan 2020 10:23:12 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1578478990;
-	bh=HBYcND0O4F0mOlf8KYE+tblLbrHUEjoYsw3oZGnSYLA=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=TdycC8KRqaa4dz6j2A3tEonvsB7fLVt+/rO3WZUsPvwIwP8ngSAUnoGjRGR+6d4H/
-	 UzS0owVYVxR3Ql9t4XP7W1C0sh9MRhLRncf+1gfJwoDoYHBPT1Zwfm1v5LMP0o1/Ch
-	 0rnhFo7SgoTV1INKeV5EJknHfugUW09b/HuVVrxg=
+	s=default; t=1578478992;
+	bh=wCfg2ssSFutFVGkbtoCVz2iPKb67wYGKG6IyCNR1lyQ=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=Mb/xL2mCLCVq/muzR8ZQsdAkHVwufADq/5i7b82FQluwnnaVb1xGK0q4YI5izYP5a
+	 PLlm4+yodCLvl/dMqsZQwR2WRh48iGXQuD/brKvhUWiTr0JrB4m4RHgisrp/ohAy/d
+	 hdXFbKIsh/bN2zwt3lZyzbEuDIkvV4iES9GJgdTY=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726931AbgAHKXK (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 8 Jan 2020 05:23:10 -0500
-Received: from mail.kernel.org ([198.145.29.99]:49620 "EHLO mail.kernel.org"
+        id S1727595AbgAHKXM (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 8 Jan 2020 05:23:12 -0500
+Received: from mail.kernel.org ([198.145.29.99]:49694 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726144AbgAHKXK (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 8 Jan 2020 05:23:10 -0500
+        id S1726144AbgAHKXM (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 8 Jan 2020 05:23:12 -0500
 Received: from localhost.localdomain (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id E3E4320673;
-        Wed,  8 Jan 2020 10:23:07 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id EDA4A2082E;
+        Wed,  8 Jan 2020 10:23:09 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1578478989;
-        bh=HBYcND0O4F0mOlf8KYE+tblLbrHUEjoYsw3oZGnSYLA=;
-        h=From:To:Cc:Subject:Date:From;
-        b=xWIWiYVtdyv7IQUpsL5XsTkdH4ccda5pg5nuNCXr7LunYXfxmiDz3zSjCXeb7vtlq
-         g2+XzosY723SVuVnsPyLrEM6pKGsPxKG4D9PR6zVm40sK8wAiP/gjb0IZSE3eq8Apd
-         CPxHtalasx4v+b6n/dlG4S7dOJYObe8QNshsoJiA=
+        s=default; t=1578478991;
+        bh=wCfg2ssSFutFVGkbtoCVz2iPKb67wYGKG6IyCNR1lyQ=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=1qTg2IkYhepZw5OIwlGyLiL1eS1lQVkc5XJ2gP82L0KG5WHcG47/cHlVzaYzkKxYu
+         VaUSbQxS8dPE9aZi/C+uZZI9dOHdutpN9FCHMc1aX7O+9icPM29hzhaJQmvEEDnOci
+         c/K8+Fi/fIP8e1lUJK+/bD/N76vL5z+kKGHZz50Y=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     x86@kernel.org, luto@kernel.org, linux-kernel@vger.kernel.org,
@@ -44,10 +45,12 @@ Cc:     x86@kernel.org, luto@kernel.org, linux-kernel@vger.kernel.org,
         Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
         Linus Torvalds <torvalds@linux-foundation.org>,
         Arvind Sankar <nivedita@alum.mit.edu>
-Subject: [RFC PATCH 0/3] x86/boot: get rid of GOT entries and associated fixup code
-Date:   Wed,  8 Jan 2020 11:23:01 +0100
-Message-Id: <20200108102304.25800-1-ardb@kernel.org>
+Subject: [RFC PATCH 1/3] x86/boot/compressed: move .got.plt entries out of the .got section
+Date:   Wed,  8 Jan 2020 11:23:02 +0100
+Message-Id: <20200108102304.25800-2-ardb@kernel.org>
 X-Mailer: git-send-email 2.20.1
+In-Reply-To: <20200108102304.25800-1-ardb@kernel.org>
+References: <20200108102304.25800-1-ardb@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
@@ -55,52 +58,62 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Building position independent code using GCC by default results in references
-to symbols with external linkage to be resolved via GOT entries, which
-carry the absolute addresses of the symbols, and thus need to be corrected
-if the load time address of the executable != the link time address.
+The .got.plt section contains the part of the GOT which is used by PLT
+entries, and which gets updated lazily by the dynamic loader when
+function calls are dispatched through those PLT entries.
 
-For fully linked binaries, such GOT indirected references are completely
-useless, and actually make the startup code more complicated than necessary,
-since these corrections may need to be applied more than once. In fact, we
-have been very careful to avoid such references in the EFI stub code, since
-it would require yet another [earlier] pass of GOT fixups which we currently
-don't implement.
+On fully linked binaries such as the kernel proper or the decompressor,
+this never happens, and so in practice, the .got.plt section consists
+only of the first 3 magic entries that are meant to point at the _DYNAMIC
+section and at the fixup routine in the loader. However, since we don't
+use a dynamic loader, those entries are never populated or used.
 
-Older GCCs were quirky when it came to overriding this behavior using symbol
-visibility, but now that we have increased the minimum GCC version to 4.6,
-we can actually start setting the symbol visibility to 'hidden' globally for
-all symbol references in the decompressor, getting rid of the GOT entirely.
-This means we can get rid of the GOT fixup code right away, and we can start
-using ordinary external symbol references in the EFI stub without running the
-risk of boot regressions.
+This means that treating those entries like ordinary GOT entries, and
+fixing them up based on the actual placement of the executable in
+memory is completely pointless, and we can just ignore the .got.plt
+section entirely, provided that it has no additional entries beyond
+the first 3 ones.
 
-CC'ing Linus and Maarten, who were involved in diagnosing an issue related
-to GOT entries emitted from the EFI stub ~5 years ago. [0] [1]
+So add an assertion in the linker script to ensure that this assumption
+holds, and move the contents out of the [_got, _egot) memory range that
+is modified by the GOT fixup routines.
 
-Many thanks to Arvind for the suggestions and the help in testing these
-changes. Tested on GCC 4.6 + binutils 2.24 (Ubuntu 14.04), and GCC 8 +
-binutils 2.31 (Debian Buster)
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+---
+ arch/x86/boot/compressed/vmlinux.lds.S | 13 ++++++++++++-
+ 1 file changed, 12 insertions(+), 1 deletion(-)
 
-Cc: Maarten Lankhorst <maarten.lankhorst@linux.intel.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Arvind Sankar <nivedita@alum.mit.edu>
-
-[0] https://lore.kernel.org/lkml/5405E186.2080406@canonical.com/
-[1] https://lore.kernel.org/lkml/CA+55aFxW9PmtjOf9nUQwpU8swsFqJOz8whZXcONo+XFmkSwezg@mail.gmail.com/
-
-Ard Biesheuvel (3):
-  x86/boot/compressed: move .got.plt entries out of the .got section
-  x86/boot/compressed: force hidden visibility for all symbol references
-  x86/boot/compressed: get rid of GOT fixup code
-
- arch/x86/boot/compressed/Makefile      |  1 +
- arch/x86/boot/compressed/head_32.S     | 22 ++------
- arch/x86/boot/compressed/head_64.S     | 57 --------------------
- arch/x86/boot/compressed/hidden.h      | 19 +++++++
- arch/x86/boot/compressed/vmlinux.lds.S | 16 ++++--
- 5 files changed, 36 insertions(+), 79 deletions(-)
- create mode 100644 arch/x86/boot/compressed/hidden.h
-
+diff --git a/arch/x86/boot/compressed/vmlinux.lds.S b/arch/x86/boot/compressed/vmlinux.lds.S
+index 508cfa6828c5..51ca654e43a9 100644
+--- a/arch/x86/boot/compressed/vmlinux.lds.S
++++ b/arch/x86/boot/compressed/vmlinux.lds.S
+@@ -44,10 +44,13 @@ SECTIONS
+ 	}
+ 	.got : {
+ 		_got = .;
+-		KEEP(*(.got.plt))
+ 		KEEP(*(.got))
+ 		_egot = .;
+ 	}
++	.got.plt : {
++		KEEP(*(.got.plt))
++	}
++
+ 	.data :	{
+ 		_data = . ;
+ 		*(.data)
+@@ -74,3 +77,11 @@ SECTIONS
+ 	. = ALIGN(PAGE_SIZE);	/* keep ZO size page aligned */
+ 	_end = .;
+ }
++
++#ifdef CONFIG_X86_64
++ASSERT (SIZEOF(.got.plt) == 0 || SIZEOF(.got.plt) == 0x18,
++	"Unexpected GOT/PLT entries detected!")
++#else
++ASSERT (SIZEOF(.got.plt) == 0 || SIZEOF(.got.plt) == 0xc,
++	"Unexpected GOT/PLT entries detected!")
++#endif
 -- 
 2.20.1
+
