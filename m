@@ -7,42 +7,42 @@ X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 86ABEC33CA3
-	for <linux-efi@archiver.kernel.org>; Sat, 11 Jan 2020 14:58:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 952D7C33CA5
+	for <linux-efi@archiver.kernel.org>; Sat, 11 Jan 2020 14:58:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 5DCA32072E
-	for <linux-efi@archiver.kernel.org>; Sat, 11 Jan 2020 14:58:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6C62B2084D
+	for <linux-efi@archiver.kernel.org>; Sat, 11 Jan 2020 14:58:02 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="LtyDeFF4"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="fDdjUG1+"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730212AbgAKO6A (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 11 Jan 2020 09:58:00 -0500
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:50158 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1730149AbgAKO5h (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sat, 11 Jan 2020 09:57:37 -0500
+        id S1730048AbgAKO51 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 11 Jan 2020 09:57:27 -0500
+Received: from us-smtp-2.mimecast.com ([207.211.31.81]:43310 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1730000AbgAKO50 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 11 Jan 2020 09:57:26 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1578754656;
+        s=mimecast20190719; t=1578754644;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=7qjy9xbiaLG7WRsoNLzShcjgZHsU7KBsnk3kgwPRLlc=;
-        b=LtyDeFF4NPEofNwqsHG2n5due3jnQfSgVt7ekOgHvVI2E9FepxiqxrnZbdFGacygpVDoXr
-        a1Y/QP6mf6oCZdVEO4YbqghSaByGsaOj2oLdJy1DBmjoZqanNinbqVAh7tkX0VqAuTLzPy
-        3JjsA1MOHyoBA1tNNqFN6uVqWXxmVbc=
+        bh=eVY918Qo8zqs+/9YxsquL9mthkGkrO/QKB0e1ZjhCrY=;
+        b=fDdjUG1+La9yX60S8g4gtpJRMjd7gLg2ahSs4PMkbtRDuRzZT/14N/KrYQSbmJFwNtBtdO
+        CBHAJFU6ZxpZkuWqzb6HK8peo+E4/OgHyNVTBsIz3J560UsnAWefVqA3wjLKb6HkFVUsdo
+        TH+nq2slASPY8etmWTtkGpRPQKARXZs=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-285-rCXvitP5Ndmnijv-dMacdQ-1; Sat, 11 Jan 2020 09:57:34 -0500
-X-MC-Unique: rCXvitP5Ndmnijv-dMacdQ-1
+ us-mta-167-HGN18lMYMJ6Wyl03EHdHZQ-1; Sat, 11 Jan 2020 09:57:23 -0500
+X-MC-Unique: HGN18lMYMJ6Wyl03EHdHZQ-1
 Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 4B2E9801E70;
-        Sat, 11 Jan 2020 14:57:32 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id B1196800A02;
+        Sat, 11 Jan 2020 14:57:20 +0000 (UTC)
 Received: from shalem.localdomain.com (ovpn-116-84.ams2.redhat.com [10.36.116.84])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id C5D948177F;
-        Sat, 11 Jan 2020 14:57:28 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 2E9B987EC6;
+        Sat, 11 Jan 2020 14:57:17 +0000 (UTC)
 From:   Hans de Goede <hdegoede@redhat.com>
 To:     Ard Biesheuvel <ardb@kernel.org>,
         Darren Hart <dvhart@infradead.org>,
@@ -61,9 +61,9 @@ Cc:     Hans de Goede <hdegoede@redhat.com>,
         platform-driver-x86@vger.kernel.org, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-doc@vger.kernel.org,
         linux-input@vger.kernel.org
-Subject: [PATCH v11 06/10] selftests: firmware: Add firmware_request_platform tests
-Date:   Sat, 11 Jan 2020 15:56:59 +0100
-Message-Id: <20200111145703.533809-7-hdegoede@redhat.com>
+Subject: [PATCH v11 03/10] firmware: Rename FW_OPT_NOFALLBACK to FW_OPT_NOFALLBACK_SYSFS
+Date:   Sat, 11 Jan 2020 15:56:56 +0100
+Message-Id: <20200111145703.533809-4-hdegoede@redhat.com>
 In-Reply-To: <20200111145703.533809-1-hdegoede@redhat.com>
 References: <20200111145703.533809-1-hdegoede@redhat.com>
 MIME-Version: 1.0
@@ -74,49 +74,108 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Add tests cases for checking the new firmware_request_platform api.
+This is a preparation patch for adding a new platform fallback mechanism,
+which will have its own enable/disable FW_OPT_xxx option.
 
+Note this also fixes a typo in one of the re-wordwrapped comments:
+enfoce -> enforce.
+
+Acked-by: Luis Chamberlain <mcgrof@kernel.org>
 Signed-off-by: Hans de Goede <hdegoede@redhat.com>
 ---
- .../selftests/firmware/fw_filesystem.sh       | 23 +++++++++++++++++++
- 1 file changed, 23 insertions(+)
+ drivers/base/firmware_loader/fallback.c | 11 ++++++-----
+ drivers/base/firmware_loader/firmware.h | 16 ++++++++--------
+ drivers/base/firmware_loader/main.c     |  2 +-
+ 3 files changed, 15 insertions(+), 14 deletions(-)
 
-diff --git a/tools/testing/selftests/firmware/fw_filesystem.sh b/tools/te=
-sting/selftests/firmware/fw_filesystem.sh
-index 56894477c8bd..fcc281373b4d 100755
---- a/tools/testing/selftests/firmware/fw_filesystem.sh
-+++ b/tools/testing/selftests/firmware/fw_filesystem.sh
-@@ -86,6 +86,29 @@ else
- 	fi
- fi
+diff --git a/drivers/base/firmware_loader/fallback.c b/drivers/base/firmw=
+are_loader/fallback.c
+index 62ee90b4db56..8704e1bae175 100644
+--- a/drivers/base/firmware_loader/fallback.c
++++ b/drivers/base/firmware_loader/fallback.c
+@@ -606,7 +606,7 @@ static bool fw_run_sysfs_fallback(enum fw_opt opt_fla=
+gs)
+ 		return false;
+ 	}
 =20
-+# Try platform (EFI embedded fw) loading too
-+if [ ! -e "$DIR"/trigger_request_platform ]; then
-+	echo "$0: firmware loading: platform trigger not present, ignoring test=
-" >&2
-+else
-+	if printf '\000' >"$DIR"/trigger_request_platform 2> /dev/null; then
-+		echo "$0: empty filename should not succeed (platform)" >&2
-+		exit 1
-+	fi
-+
-+	# Note we echo a non-existing name, since files on the file-system
-+	# are preferred over firmware embedded inside the platform's firmware
-+	# The test adds a fake entry with the requested name to the platform's
-+	# fw list, so the name does not matter as long as it does not exist
-+	if ! echo -n "nope-$NAME" >"$DIR"/trigger_request_platform ; then
-+		echo "$0: could not trigger request platform" >&2
-+		exit 1
-+	fi
-+
-+	# The test verifies itself that the loaded firmware contents matches
-+	# the contents for the fake platform fw entry it added.
-+	echo "$0: platform loading works"
-+fi
-+
- ### Batched requests tests
- test_config_present()
- {
+-	if ((opt_flags & FW_OPT_NOFALLBACK))
++	if ((opt_flags & FW_OPT_NOFALLBACK_SYSFS))
+ 		return false;
+=20
+ 	/* Also permit LSMs and IMA to fail firmware sysfs fallback */
+@@ -630,10 +630,11 @@ static bool fw_run_sysfs_fallback(enum fw_opt opt_f=
+lags)
+  * interface. Userspace is in charge of loading the firmware through the=
+ sysfs
+  * loading interface. This sysfs fallback mechanism may be disabled comp=
+letely
+  * on a system by setting the proc sysctl value ignore_sysfs_fallback to=
+ true.
+- * If this false we check if the internal API caller set the @FW_OPT_NOF=
+ALLBACK
+- * flag, if so it would also disable the fallback mechanism. A system ma=
+y want
+- * to enfoce the sysfs fallback mechanism at all times, it can do this b=
+y
+- * setting ignore_sysfs_fallback to false and force_sysfs_fallback to tr=
+ue.
++ * If this is false we check if the internal API caller set the
++ * @FW_OPT_NOFALLBACK_SYSFS flag, if so it would also disable the fallba=
+ck
++ * mechanism. A system may want to enforce the sysfs fallback mechanism =
+at all
++ * times, it can do this by setting ignore_sysfs_fallback to false and
++ * force_sysfs_fallback to true.
+  * Enabling force_sysfs_fallback is functionally equivalent to build a k=
+ernel
+  * with CONFIG_FW_LOADER_USER_HELPER_FALLBACK.
+  **/
+diff --git a/drivers/base/firmware_loader/firmware.h b/drivers/base/firmw=
+are_loader/firmware.h
+index 7ecd590e67fe..8656e5239a80 100644
+--- a/drivers/base/firmware_loader/firmware.h
++++ b/drivers/base/firmware_loader/firmware.h
+@@ -27,16 +27,16 @@
+  *	firmware file lookup on storage is avoided. Used for calls where the
+  *	file may be too big, or where the driver takes charge of its own
+  *	firmware caching mechanism.
+- * @FW_OPT_NOFALLBACK: Disable the fallback mechanism. Takes precedence =
+over
+- *	&FW_OPT_UEVENT and &FW_OPT_USERHELPER.
++ * @FW_OPT_NOFALLBACK_SYSFS: Disable the sysfs fallback mechanism. Takes
++ *	precedence over &FW_OPT_UEVENT and &FW_OPT_USERHELPER.
+  */
+ enum fw_opt {
+-	FW_OPT_UEVENT =3D         BIT(0),
+-	FW_OPT_NOWAIT =3D         BIT(1),
+-	FW_OPT_USERHELPER =3D     BIT(2),
+-	FW_OPT_NO_WARN =3D        BIT(3),
+-	FW_OPT_NOCACHE =3D        BIT(4),
+-	FW_OPT_NOFALLBACK =3D     BIT(5),
++	FW_OPT_UEVENT			=3D BIT(0),
++	FW_OPT_NOWAIT			=3D BIT(1),
++	FW_OPT_USERHELPER		=3D BIT(2),
++	FW_OPT_NO_WARN			=3D BIT(3),
++	FW_OPT_NOCACHE			=3D BIT(4),
++	FW_OPT_NOFALLBACK_SYSFS		=3D BIT(5),
+ };
+=20
+ enum fw_status {
+diff --git a/drivers/base/firmware_loader/main.c b/drivers/base/firmware_=
+loader/main.c
+index 249add8c5e05..57133a9dad09 100644
+--- a/drivers/base/firmware_loader/main.c
++++ b/drivers/base/firmware_loader/main.c
+@@ -877,7 +877,7 @@ int request_firmware_direct(const struct firmware **f=
+irmware_p,
+ 	__module_get(THIS_MODULE);
+ 	ret =3D _request_firmware(firmware_p, name, device, NULL, 0,
+ 				FW_OPT_UEVENT | FW_OPT_NO_WARN |
+-				FW_OPT_NOFALLBACK);
++				FW_OPT_NOFALLBACK_SYSFS);
+ 	module_put(THIS_MODULE);
+ 	return ret;
+ }
 --=20
 2.24.1
 
