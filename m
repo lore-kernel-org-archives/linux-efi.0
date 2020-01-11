@@ -4,40 +4,40 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6F1EAC33CA4
-	for <linux-efi@archiver.kernel.org>; Sat, 11 Jan 2020 10:08:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 38CA1C33CA3
+	for <linux-efi@archiver.kernel.org>; Sat, 11 Jan 2020 10:09:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 469652084D
-	for <linux-efi@archiver.kernel.org>; Sat, 11 Jan 2020 10:08:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0C44320882
+	for <linux-efi@archiver.kernel.org>; Sat, 11 Jan 2020 10:09:05 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1578737337;
-	bh=dSpqFK6i710jE4XItym/hIRAQU51Rs8DQiINUBZ5nGk=;
+	s=default; t=1578737345;
+	bh=lNUYq7bp5wkI5mc/7OLg2R0gWlSNmXm1kqXk6M4f69k=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=c6YRPQ6bLGm3qyI3QB6FiAHYoeydZt6SfzgxeSxC6+5gj4HZatNo2McHNTbJQOycl
-	 gYKvE7SDGA2fldEHeASCLxwCOkOSou8HwGLYZIH5HKVCHSaaefsEfXeH8SJzOSHPpH
-	 Wj8BdD1AYk5wgaR5k/s1fvw+oDjdrXjqCKfJlpIg=
+	b=MmJgAQhGW94Mx9XX/By0MNRH5NIfXfVpXmRssZu335agpogx9KPKF/4Nt5shaemQw
+	 l9NrIuvK0YaHhBBJrcfrxY/zEh4JenSizxXvY7xb7eTtUUHnmVXRiOVB373ovaoDWR
+	 GD+9VHt/dZJAbdf59RnudfmP9AXQePQ2bRt1M054=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729517AbgAKKI5 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 11 Jan 2020 05:08:57 -0500
-Received: from mail.kernel.org ([198.145.29.99]:44370 "EHLO mail.kernel.org"
+        id S1729148AbgAKKJB (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 11 Jan 2020 05:09:01 -0500
+Received: from mail.kernel.org ([198.145.29.99]:44548 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729148AbgAKKI4 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Sat, 11 Jan 2020 05:08:56 -0500
+        id S1729097AbgAKKJB (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Sat, 11 Jan 2020 05:09:01 -0500
 Received: from localhost (unknown [62.119.166.9])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 133A720880;
-        Sat, 11 Jan 2020 10:08:55 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 03CE22084D;
+        Sat, 11 Jan 2020 10:09:00 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1578737335;
-        bh=dSpqFK6i710jE4XItym/hIRAQU51Rs8DQiINUBZ5nGk=;
+        s=default; t=1578737340;
+        bh=lNUYq7bp5wkI5mc/7OLg2R0gWlSNmXm1kqXk6M4f69k=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=I5lKDXqb1594+Eo9PLCfku7X3efS26q0dDnIer0AYYjEr87uz/WRjc54PjCXM1Qnb
-         0lDcnf+/jql6Cd6B3UUs9xq9SC2D9sSpLp73CRJ7+2q/l6IKGHiWG6oAid6MmVvGWP
-         BgaThR15rWO85YOcX+gZudAmjl9bayktdNd9nVEY=
+        b=vO01E+oxnulBzgNzSbVjHBFl/PHJ24jUyBzXmvitYJxuyZkcCi/+A1OnhrY/nK6h9
+         lpZLHo/yJMUh/oWon/iar/im16j5ARaKAnETHU0Rxn9YJ9O9jYD0RQjYBoR2tcQdsQ
+         5BUE1unw5/3t+ghcl+S8DpWI6dwZEusQcgKnJCUY=
 From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 To:     linux-kernel@vger.kernel.org
 Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
@@ -48,9 +48,9 @@ Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>,
         linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Sasha Levin <sashal@kernel.org>
-Subject: [PATCH 4.14 08/62] efi/gop: Return EFI_NOT_FOUND if there are no usable GOPs
-Date:   Sat, 11 Jan 2020 10:49:50 +0100
-Message-Id: <20200111094840.974597343@linuxfoundation.org>
+Subject: [PATCH 4.14 09/62] efi/gop: Return EFI_SUCCESS if a usable GOP was found
+Date:   Sat, 11 Jan 2020 10:49:51 +0100
+Message-Id: <20200111094841.330769059@linuxfoundation.org>
 X-Mailer: git-send-email 2.24.1
 In-Reply-To: <20200111094837.425430968@linuxfoundation.org>
 References: <20200111094837.425430968@linuxfoundation.org>
@@ -65,15 +65,16 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Arvind Sankar <nivedita@alum.mit.edu>
 
-[ Upstream commit 6fc3cec30dfeee7d3c5db8154016aff9d65503c5 ]
+[ Upstream commit dbd89c303b4420f6cdb689fd398349fc83b059dd ]
 
-If we don't find a usable instance of the Graphics Output Protocol
-(GOP) because none of them have a framebuffer (i.e. they were all
-PIXEL_BLT_ONLY), but all the EFI calls succeeded, we will return
-EFI_SUCCESS even though we didn't find a usable GOP.
+If we've found a usable instance of the Graphics Output Protocol
+(GOP) with a framebuffer, it is possible that one of the later EFI
+calls fails while checking if any support console output. In this
+case status may be an EFI error code even though we found a usable
+GOP.
 
-Fix this by explicitly returning EFI_NOT_FOUND if no usable GOPs are
-found, allowing the caller to probe for UGA instead.
+Fix this by explicitly return EFI_SUCCESS if a usable GOP has been
+located.
 
 Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
@@ -81,71 +82,35 @@ Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 Cc: Bhupesh Sharma <bhsharma@redhat.com>
 Cc: Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>
 Cc: linux-efi@vger.kernel.org
-Link: https://lkml.kernel.org/r/20191206165542.31469-3-ardb@kernel.org
+Link: https://lkml.kernel.org/r/20191206165542.31469-4-ardb@kernel.org
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/firmware/efi/libstub/gop.c | 12 ++++++------
- 1 file changed, 6 insertions(+), 6 deletions(-)
+ drivers/firmware/efi/libstub/gop.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/firmware/efi/libstub/gop.c b/drivers/firmware/efi/libstub/gop.c
-index 24c461dea7af..16ed61c023e8 100644
+index 16ed61c023e8..81ffda5d1e48 100644
 --- a/drivers/firmware/efi/libstub/gop.c
 +++ b/drivers/firmware/efi/libstub/gop.c
-@@ -121,7 +121,7 @@ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
- 	u64 fb_base;
- 	struct efi_pixel_bitmask pixel_info;
- 	int pixel_format;
--	efi_status_t status = EFI_NOT_FOUND;
-+	efi_status_t status;
- 	u32 *handles = (u32 *)(unsigned long)gop_handle;
- 	int i;
- 
-@@ -177,7 +177,7 @@ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
- 
- 	/* Did we find any GOPs? */
- 	if (!first_gop)
--		goto out;
-+		return EFI_NOT_FOUND;
- 
- 	/* EFI framebuffer */
- 	si->orig_video_isVGA = VIDEO_TYPE_EFI;
-@@ -199,7 +199,7 @@ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
- 	si->lfb_size = si->lfb_linelength * si->lfb_height;
+@@ -200,7 +200,7 @@ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
  
  	si->capabilities |= VIDEO_CAPABILITY_SKIP_QUIRKS;
--out:
-+
- 	return status;
+ 
+-	return status;
++	return EFI_SUCCESS;
  }
  
-@@ -239,7 +239,7 @@ setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
- 	u64 fb_base;
- 	struct efi_pixel_bitmask pixel_info;
- 	int pixel_format;
--	efi_status_t status = EFI_NOT_FOUND;
-+	efi_status_t status;
- 	u64 *handles = (u64 *)(unsigned long)gop_handle;
- 	int i;
- 
-@@ -295,7 +295,7 @@ setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
- 
- 	/* Did we find any GOPs? */
- 	if (!first_gop)
--		goto out;
-+		return EFI_NOT_FOUND;
- 
- 	/* EFI framebuffer */
- 	si->orig_video_isVGA = VIDEO_TYPE_EFI;
-@@ -317,7 +317,7 @@ setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
- 	si->lfb_size = si->lfb_linelength * si->lfb_height;
+ static efi_status_t
+@@ -318,7 +318,7 @@ setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
  
  	si->capabilities |= VIDEO_CAPABILITY_SKIP_QUIRKS;
--out:
-+
- 	return status;
+ 
+-	return status;
++	return EFI_SUCCESS;
  }
  
+ /*
 -- 
 2.20.1
 
