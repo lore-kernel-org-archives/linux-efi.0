@@ -1,226 +1,153 @@
-Return-Path: <SRS0=ugPR=27=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=w8fh=3A=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E3578C282DD
-	for <linux-efi@archiver.kernel.org>; Fri, 10 Jan 2020 19:49:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 405A6C33C9E
+	for <linux-efi@archiver.kernel.org>; Sat, 11 Jan 2020 10:02:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id AC75820842
-	for <linux-efi@archiver.kernel.org>; Fri, 10 Jan 2020 19:49:04 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="SaBtyU8D"
+	by mail.kernel.org (Postfix) with ESMTP id 117A820848
+	for <linux-efi@archiver.kernel.org>; Sat, 11 Jan 2020 10:02:59 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1578736979;
+	bh=dSpqFK6i710jE4XItym/hIRAQU51Rs8DQiINUBZ5nGk=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=ZS2qpNxiXucUwNkG7xaSe52ofM050wTeohbZEtYwFRjg92nZk1e6gwQgFdkzH0u6R
+	 jmZtwlT6MVDRA4vEf74dBj6TRVGyCfLK5FmACLwhj6L7/9EA5x0G7FtJm5pit4gaf5
+	 lx9fvWuShdbGtS6HKsIAPbBKRNahUHNAmmOiIoew=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728519AbgAJTtE (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 10 Jan 2020 14:49:04 -0500
-Received: from us-smtp-2.mimecast.com ([207.211.31.81]:32561 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728369AbgAJTtD (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 10 Jan 2020 14:49:03 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1578685742;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=riUDIprs0OHwhmObTROTPPNxIryJYavnWepv59WA+CA=;
-        b=SaBtyU8DbWUjGZ0O6fPM3bo7b2GE4337uelIOiOXYHV49ClkppzA7kN6YIIgLQjP1mffJh
-        9fx02z/H3UpjvwrLki+2H2fDueFaoTETLsmv7ndvQATiw3Cgy5s/x/51YVszfC3XL/YcRM
-        X5WS9PdQYGpYdeFS1CSj20CpGkX2vVc=
-Received: from mail-wm1-f71.google.com (mail-wm1-f71.google.com
- [209.85.128.71]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-19-zi3O7waxNYGDXHV-Kn40bw-1; Fri, 10 Jan 2020 14:48:57 -0500
-X-MC-Unique: zi3O7waxNYGDXHV-Kn40bw-1
-Received: by mail-wm1-f71.google.com with SMTP id b9so1232199wmj.6
-        for <linux-efi@vger.kernel.org>; Fri, 10 Jan 2020 11:48:57 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=riUDIprs0OHwhmObTROTPPNxIryJYavnWepv59WA+CA=;
-        b=uAMq1G0rbv64lPMUoR3VbqtUbn0JczsV2CHOQ/svakhKqhYfNbKq6D38Hub2DflCtp
-         YXFQvu13ZuVYIxs4mXx06YB8Vdcm9dkMrGDGPmFMElqhulKleIkVF2NZXUus3l0OPu09
-         SFfWFhGWAJMV24ZamOB2LKhd+rBgG2G+PY09X1MP37J+rUCKGVscNzbdLTodaIxFdxCR
-         hUOcixP3JDVCKnvknT9/6NDpPkbB4IsrrSm/ora/tUVyxWqD6K4shV8nc2abrc3K58AS
-         QLias51a/No+y+8sPiwcPxfqozvRIuQMOVUkM+5wRwOSKshO9319PhoVYLAm/n0mFVBs
-         zASA==
-X-Gm-Message-State: APjAAAUlzGHHBPAA5pD8tuvmTt5yq/pc9Xn3jtuj+VmGsevkOIdWbeYs
-        +fAZPH29IdiVLJqsAlZy00AanIqqsZFAWc6MkuU2QqR76o3YcseGW0MtqRnCgNFOyIldwtQ4TiU
-        KhMevoz1TTfZ7z0y4rhHM
-X-Received: by 2002:a5d:6a02:: with SMTP id m2mr4963223wru.52.1578685736124;
-        Fri, 10 Jan 2020 11:48:56 -0800 (PST)
-X-Google-Smtp-Source: APXvYqxnkUfoP+uLL1SY4zC1FGF5vm1kFUOUl7yLkO6Ifz3AOpkkYChb29i69nRMpO6ILyWjfQK53w==
-X-Received: by 2002:a5d:6a02:: with SMTP id m2mr4963192wru.52.1578685735822;
-        Fri, 10 Jan 2020 11:48:55 -0800 (PST)
-Received: from dhcp-44-196.space.revspace.nl ([2a0e:5700:4:11:6eb:1143:b8be:2b8])
-        by smtp.gmail.com with ESMTPSA id f17sm3450764wmc.8.2020.01.10.11.48.54
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 10 Jan 2020 11:48:55 -0800 (PST)
-Subject: Re: [PATCH v10 05/10] test_firmware: add support for
- firmware_request_platform
-To:     Luis Chamberlain <mcgrof@kernel.org>
-Cc:     Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Darren Hart <dvhart@infradead.org>,
-        Andy Shevchenko <andy@infradead.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        "Rafael J . Wysocki" <rafael@kernel.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
-        "H . Peter Anvin" <hpa@zytor.com>,
-        Jonathan Corbet <corbet@lwn.net>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Peter Jones <pjones@redhat.com>,
-        Dave Olsthoorn <dave@bewaar.me>, x86@kernel.org,
-        platform-driver-x86@vger.kernel.org, linux-efi@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-doc@vger.kernel.org,
-        linux-input@vger.kernel.org
-References: <20191210115117.303935-1-hdegoede@redhat.com>
- <20191210115117.303935-6-hdegoede@redhat.com>
- <20200106213343.GV11244@42.do-not-panic.com>
-From:   Hans de Goede <hdegoede@redhat.com>
-Message-ID: <071db8c5-4be1-c6d1-0ccb-a2268cd5b347@redhat.com>
-Date:   Fri, 10 Jan 2020 20:48:53 +0100
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.1.1
+        id S1729098AbgAKKC6 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 11 Jan 2020 05:02:58 -0500
+Received: from mail.kernel.org ([198.145.29.99]:33944 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1729079AbgAKKC5 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Sat, 11 Jan 2020 05:02:57 -0500
+Received: from localhost (unknown [62.119.166.9])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id D4F062077C;
+        Sat, 11 Jan 2020 10:02:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1578736976;
+        bh=dSpqFK6i710jE4XItym/hIRAQU51Rs8DQiINUBZ5nGk=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=1aY/CzSU/Py9cEMT6XPNmc0lByKQ8uaPCoY348XntwQseA78tEhbIFNcWSBBIOz17
+         wCIYwaiE3pWIwaOfhlf+oPM32qZNyFsAZCTFKwOQGb8nYEEyk/5mtXSOcsPbNQCuRF
+         qtqNULLqCGHj4J18QpdnCthDLoRUvMwbjK0f1K/A=
+From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+To:     linux-kernel@vger.kernel.org
+Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        stable@vger.kernel.org, Arvind Sankar <nivedita@alum.mit.edu>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Bhupesh Sharma <bhsharma@redhat.com>,
+        Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>,
+        linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
+        Sasha Levin <sashal@kernel.org>
+Subject: [PATCH 4.9 59/91] efi/gop: Return EFI_NOT_FOUND if there are no usable GOPs
+Date:   Sat, 11 Jan 2020 10:49:52 +0100
+Message-Id: <20200111094907.050194489@linuxfoundation.org>
+X-Mailer: git-send-email 2.24.1
+In-Reply-To: <20200111094844.748507863@linuxfoundation.org>
+References: <20200111094844.748507863@linuxfoundation.org>
+User-Agent: quilt/0.66
 MIME-Version: 1.0
-In-Reply-To: <20200106213343.GV11244@42.do-not-panic.com>
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Hi,
+From: Arvind Sankar <nivedita@alum.mit.edu>
 
-On 1/6/20 10:33 PM, Luis Chamberlain wrote:
-> On Tue, Dec 10, 2019 at 12:51:12PM +0100, Hans de Goede wrote:
->> Add support for testing firmware_request_platform through a new
->> trigger_request_platform trigger.
->>
->> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
->> ---
->>   lib/test_firmware.c | 68 +++++++++++++++++++++++++++++++++++++++++++++
->>   1 file changed, 68 insertions(+)
->>
->> diff --git a/lib/test_firmware.c b/lib/test_firmware.c
->> index 251213c872b5..9af00cfc8979 100644
->> --- a/lib/test_firmware.c
->> +++ b/lib/test_firmware.c
->> @@ -24,6 +24,7 @@
->>   #include <linux/delay.h>
->>   #include <linux/kthread.h>
->>   #include <linux/vmalloc.h>
->> +#include <linux/efi_embedded_fw.h>
->>   
->>   #define TEST_FIRMWARE_NAME	"test-firmware.bin"
->>   #define TEST_FIRMWARE_NUM_REQS	4
->> @@ -507,12 +508,76 @@ static ssize_t trigger_request_store(struct device *dev,
->>   }
->>   static DEVICE_ATTR_WO(trigger_request);
->>   
->> +#ifdef CONFIG_EFI_EMBEDDED_FIRMWARE
->> +static ssize_t trigger_request_platform_store(struct device *dev,
->> +					      struct device_attribute *attr,
->> +					      const char *buf, size_t count)
->> +{
->> +	static const u8 test_data[] = {
->> +		0x55, 0xaa, 0x55, 0xaa, 0x01, 0x02, 0x03, 0x04,
->> +		0x55, 0xaa, 0x55, 0xaa, 0x05, 0x06, 0x07, 0x08,
->> +		0x55, 0xaa, 0x55, 0xaa, 0x10, 0x20, 0x30, 0x40,
->> +		0x55, 0xaa, 0x55, 0xaa, 0x50, 0x60, 0x70, 0x80
->> +	};
->> +	struct efi_embedded_fw fw;
->> +	int rc;
->> +	char *name;
->> +
->> +	name = kstrndup(buf, count, GFP_KERNEL);
->> +	if (!name)
->> +		return -ENOSPC;
->> +
->> +	pr_info("inserting test platform fw '%s'\n", name);
->> +	fw.name = name;
->> +	fw.data = (void *)test_data;
->> +	fw.length = sizeof(test_data);
->> +	list_add(&fw.list, &efi_embedded_fw_list);
->> +
->> +	pr_info("loading '%s'\n", name);
->> +
->> +	mutex_lock(&test_fw_mutex);
->> +	release_firmware(test_firmware);
->> +	test_firmware = NULL;
-> 
-> Seems odd to have the above two lines here before the request, why not
-> after as noted below.
+[ Upstream commit 6fc3cec30dfeee7d3c5db8154016aff9d65503c5 ]
 
-I modelled this after trigger_request_store which keeps the
-test_firmware around after it has been called so that its contents can be
-read back from the char misc device which the test_firmware module registers.
+If we don't find a usable instance of the Graphics Output Protocol
+(GOP) because none of them have a framebuffer (i.e. they were all
+PIXEL_BLT_ONLY), but all the EFI calls succeeded, we will return
+EFI_SUCCESS even though we didn't find a usable GOP.
 
-Since e.g. trigger_request_store which keeps the test_firmware around
-we must check and free it before assigning a new firmware to it using
-firmware_request_platform, which is why this is done before and not
-after the request.
+Fix this by explicitly returning EFI_NOT_FOUND if no usable GOPs are
+found, allowing the caller to probe for UGA instead.
 
-> 
->> +	rc = firmware_request_platform(&test_firmware, name, dev);
->> +	if (rc) {
->> +		pr_info("load of '%s' failed: %d\n", name, rc);
->> +		goto out;
->> +	}
->> +	if (test_firmware->size != sizeof(test_data) ||
->> +	    memcmp(test_firmware->data, test_data, sizeof(test_data)) != 0) {
->> +		pr_info("firmware contents mismatch for '%s'\n", name);
->> +		rc = -EINVAL;
->> +		goto out;
->> +	}
->> +	pr_info("loaded: %zu\n", test_firmware->size);
->> +	rc = count;
-> 
-> Here.
-> 
->> +
->> +out:
->> +	mutex_unlock(&test_fw_mutex);
->> +
->> +	list_del(&fw.list);
->> +	kfree(name);
->> +
->> +	return rc;
->> +}
->> +static DEVICE_ATTR_WO(trigger_request_platform);
->> +#endif
->> +
->>   static DECLARE_COMPLETION(async_fw_done);
->>   
->>   static void trigger_async_request_cb(const struct firmware *fw, void *context)
->>   {
->>   	test_firmware = fw;
->>   	complete(&async_fw_done);
->> +
->> +
->> +
->> +
->> +
->> +
->> +
->> +
->> +
->>   }
-> 
-> Ummm, new empty lines without any code added... did you forget
-> something?  Please address this.
+Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: Bhupesh Sharma <bhsharma@redhat.com>
+Cc: Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>
+Cc: linux-efi@vger.kernel.org
+Link: https://lkml.kernel.org/r/20191206165542.31469-3-ardb@kernel.org
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ drivers/firmware/efi/libstub/gop.c | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
 
-This is a left over from an earlier version of the patch, my bad, I will remove
-this and send out a new version.
+diff --git a/drivers/firmware/efi/libstub/gop.c b/drivers/firmware/efi/libstub/gop.c
+index 24c461dea7af..16ed61c023e8 100644
+--- a/drivers/firmware/efi/libstub/gop.c
++++ b/drivers/firmware/efi/libstub/gop.c
+@@ -121,7 +121,7 @@ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
+ 	u64 fb_base;
+ 	struct efi_pixel_bitmask pixel_info;
+ 	int pixel_format;
+-	efi_status_t status = EFI_NOT_FOUND;
++	efi_status_t status;
+ 	u32 *handles = (u32 *)(unsigned long)gop_handle;
+ 	int i;
+ 
+@@ -177,7 +177,7 @@ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
+ 
+ 	/* Did we find any GOPs? */
+ 	if (!first_gop)
+-		goto out;
++		return EFI_NOT_FOUND;
+ 
+ 	/* EFI framebuffer */
+ 	si->orig_video_isVGA = VIDEO_TYPE_EFI;
+@@ -199,7 +199,7 @@ setup_gop32(efi_system_table_t *sys_table_arg, struct screen_info *si,
+ 	si->lfb_size = si->lfb_linelength * si->lfb_height;
+ 
+ 	si->capabilities |= VIDEO_CAPABILITY_SKIP_QUIRKS;
+-out:
++
+ 	return status;
+ }
+ 
+@@ -239,7 +239,7 @@ setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
+ 	u64 fb_base;
+ 	struct efi_pixel_bitmask pixel_info;
+ 	int pixel_format;
+-	efi_status_t status = EFI_NOT_FOUND;
++	efi_status_t status;
+ 	u64 *handles = (u64 *)(unsigned long)gop_handle;
+ 	int i;
+ 
+@@ -295,7 +295,7 @@ setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
+ 
+ 	/* Did we find any GOPs? */
+ 	if (!first_gop)
+-		goto out;
++		return EFI_NOT_FOUND;
+ 
+ 	/* EFI framebuffer */
+ 	si->orig_video_isVGA = VIDEO_TYPE_EFI;
+@@ -317,7 +317,7 @@ setup_gop64(efi_system_table_t *sys_table_arg, struct screen_info *si,
+ 	si->lfb_size = si->lfb_linelength * si->lfb_height;
+ 
+ 	si->capabilities |= VIDEO_CAPABILITY_SKIP_QUIRKS;
+-out:
++
+ 	return status;
+ }
+ 
+-- 
+2.20.1
 
-Regards,
 
-Hans
 
