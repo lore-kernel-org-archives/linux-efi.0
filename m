@@ -7,42 +7,42 @@ X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 26CDCC33CA4
-	for <linux-efi@archiver.kernel.org>; Sat, 11 Jan 2020 14:57:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 86ABEC33CA3
+	for <linux-efi@archiver.kernel.org>; Sat, 11 Jan 2020 14:58:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id EE1D92087F
-	for <linux-efi@archiver.kernel.org>; Sat, 11 Jan 2020 14:57:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5DCA32072E
+	for <linux-efi@archiver.kernel.org>; Sat, 11 Jan 2020 14:58:01 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="IeSdjk7b"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="LtyDeFF4"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730215AbgAKO5q (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 11 Jan 2020 09:57:46 -0500
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:37207 "EHLO
+        id S1730212AbgAKO6A (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 11 Jan 2020 09:58:00 -0500
+Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:50158 "EHLO
         us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1730207AbgAKO5p (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sat, 11 Jan 2020 09:57:45 -0500
+        with ESMTP id S1730149AbgAKO5h (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 11 Jan 2020 09:57:37 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1578754664;
+        s=mimecast20190719; t=1578754656;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=EzKr3IrS0x45CiJWcfOwfaEV1+BQ8JkmqIzHDuO+5WE=;
-        b=IeSdjk7brcUgUq5va+qvh5SpFU1oYKCR09X/Awc7HqpqWY46mGZ4Wd0HLK1Z67kFGd7YXC
-        6FS8XKl60UpLjbzT9QW1KAjAWYYBNmT/nsjLpJVYwD3szzz10ZmmtoQZF6lBwvQMSdxP5M
-        20zM25in5r69Sy6FFG38/n2EmmM3g/Y=
+        bh=7qjy9xbiaLG7WRsoNLzShcjgZHsU7KBsnk3kgwPRLlc=;
+        b=LtyDeFF4NPEofNwqsHG2n5due3jnQfSgVt7ekOgHvVI2E9FepxiqxrnZbdFGacygpVDoXr
+        a1Y/QP6mf6oCZdVEO4YbqghSaByGsaOj2oLdJy1DBmjoZqanNinbqVAh7tkX0VqAuTLzPy
+        3JjsA1MOHyoBA1tNNqFN6uVqWXxmVbc=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-69-D8Mo1gFhNPK79iY5nal_XQ-1; Sat, 11 Jan 2020 09:57:42 -0500
-X-MC-Unique: D8Mo1gFhNPK79iY5nal_XQ-1
+ us-mta-285-rCXvitP5Ndmnijv-dMacdQ-1; Sat, 11 Jan 2020 09:57:34 -0500
+X-MC-Unique: rCXvitP5Ndmnijv-dMacdQ-1
 Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id E40F51800D48;
-        Sat, 11 Jan 2020 14:57:39 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 4B2E9801E70;
+        Sat, 11 Jan 2020 14:57:32 +0000 (UTC)
 Received: from shalem.localdomain.com (ovpn-116-84.ams2.redhat.com [10.36.116.84])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 632808177F;
-        Sat, 11 Jan 2020 14:57:36 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id C5D948177F;
+        Sat, 11 Jan 2020 14:57:28 +0000 (UTC)
 From:   Hans de Goede <hdegoede@redhat.com>
 To:     Ard Biesheuvel <ardb@kernel.org>,
         Darren Hart <dvhart@infradead.org>,
@@ -61,9 +61,9 @@ Cc:     Hans de Goede <hdegoede@redhat.com>,
         platform-driver-x86@vger.kernel.org, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-doc@vger.kernel.org,
         linux-input@vger.kernel.org
-Subject: [PATCH v11 08/10] Input: icn8505 - Switch to firmware_request_platform for retreiving the fw
-Date:   Sat, 11 Jan 2020 15:57:01 +0100
-Message-Id: <20200111145703.533809-9-hdegoede@redhat.com>
+Subject: [PATCH v11 06/10] selftests: firmware: Add firmware_request_platform tests
+Date:   Sat, 11 Jan 2020 15:56:59 +0100
+Message-Id: <20200111145703.533809-7-hdegoede@redhat.com>
 In-Reply-To: <20200111145703.533809-1-hdegoede@redhat.com>
 References: <20200111145703.533809-1-hdegoede@redhat.com>
 MIME-Version: 1.0
@@ -74,41 +74,49 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Unfortunately sofar we have been unable to get permission to redistribute
-icn8505 touchscreen firmwares in linux-firmware. This means that people
-need to find and install the firmware themselves before the touchscreen
-will work
+Add tests cases for checking the new firmware_request_platform api.
 
-Some UEFI/x86 tablets with an icn8505 touchscreen have a copy of the fw
-embedded in their UEFI boot-services code.
-
-This commit makes the icn8505 driver use the new firmware_request_platfor=
-m
-function, which will fallback to looking for such an embedded copy when
-direct filesystem lookup fails. This will make the touchscreen work OOTB
-on devices where there is a fw copy embedded in the UEFI code.
-
-Acked-by: Dmitry Torokhov <dmitry.torokhov@gmail.com>
 Signed-off-by: Hans de Goede <hdegoede@redhat.com>
 ---
- drivers/input/touchscreen/chipone_icn8505.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ .../selftests/firmware/fw_filesystem.sh       | 23 +++++++++++++++++++
+ 1 file changed, 23 insertions(+)
 
-diff --git a/drivers/input/touchscreen/chipone_icn8505.c b/drivers/input/=
-touchscreen/chipone_icn8505.c
-index c768186ce856..f9ca5502ac8c 100644
---- a/drivers/input/touchscreen/chipone_icn8505.c
-+++ b/drivers/input/touchscreen/chipone_icn8505.c
-@@ -288,7 +288,7 @@ static int icn8505_upload_fw(struct icn8505_data *icn=
-8505)
- 	 * we may need it at resume. Having loaded it once will make the
- 	 * firmware class code cache it at suspend/resume.
- 	 */
--	error =3D request_firmware(&fw, icn8505->firmware_name, dev);
-+	error =3D firmware_request_platform(&fw, icn8505->firmware_name, dev);
- 	if (error) {
- 		dev_err(dev, "Firmware request error %d\n", error);
- 		return error;
+diff --git a/tools/testing/selftests/firmware/fw_filesystem.sh b/tools/te=
+sting/selftests/firmware/fw_filesystem.sh
+index 56894477c8bd..fcc281373b4d 100755
+--- a/tools/testing/selftests/firmware/fw_filesystem.sh
++++ b/tools/testing/selftests/firmware/fw_filesystem.sh
+@@ -86,6 +86,29 @@ else
+ 	fi
+ fi
+=20
++# Try platform (EFI embedded fw) loading too
++if [ ! -e "$DIR"/trigger_request_platform ]; then
++	echo "$0: firmware loading: platform trigger not present, ignoring test=
+" >&2
++else
++	if printf '\000' >"$DIR"/trigger_request_platform 2> /dev/null; then
++		echo "$0: empty filename should not succeed (platform)" >&2
++		exit 1
++	fi
++
++	# Note we echo a non-existing name, since files on the file-system
++	# are preferred over firmware embedded inside the platform's firmware
++	# The test adds a fake entry with the requested name to the platform's
++	# fw list, so the name does not matter as long as it does not exist
++	if ! echo -n "nope-$NAME" >"$DIR"/trigger_request_platform ; then
++		echo "$0: could not trigger request platform" >&2
++		exit 1
++	fi
++
++	# The test verifies itself that the loaded firmware contents matches
++	# the contents for the fake platform fw entry it added.
++	echo "$0: platform loading works"
++fi
++
+ ### Batched requests tests
+ test_config_present()
+ {
 --=20
 2.24.1
 
