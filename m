@@ -1,181 +1,93 @@
-Return-Path: <SRS0=w8fh=3A=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=fz7u=3B=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 952D7C33CA5
-	for <linux-efi@archiver.kernel.org>; Sat, 11 Jan 2020 14:58:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CDBB2C32771
+	for <linux-efi@archiver.kernel.org>; Sun, 12 Jan 2020 06:14:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 6C62B2084D
-	for <linux-efi@archiver.kernel.org>; Sat, 11 Jan 2020 14:58:02 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="fDdjUG1+"
+	by mail.kernel.org (Postfix) with ESMTP id A50E2214D8
+	for <linux-efi@archiver.kernel.org>; Sun, 12 Jan 2020 06:14:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730048AbgAKO51 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 11 Jan 2020 09:57:27 -0500
-Received: from us-smtp-2.mimecast.com ([207.211.31.81]:43310 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1730000AbgAKO50 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sat, 11 Jan 2020 09:57:26 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1578754644;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=eVY918Qo8zqs+/9YxsquL9mthkGkrO/QKB0e1ZjhCrY=;
-        b=fDdjUG1+La9yX60S8g4gtpJRMjd7gLg2ahSs4PMkbtRDuRzZT/14N/KrYQSbmJFwNtBtdO
-        CBHAJFU6ZxpZkuWqzb6HK8peo+E4/OgHyNVTBsIz3J560UsnAWefVqA3wjLKb6HkFVUsdo
-        TH+nq2slASPY8etmWTtkGpRPQKARXZs=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-167-HGN18lMYMJ6Wyl03EHdHZQ-1; Sat, 11 Jan 2020 09:57:23 -0500
-X-MC-Unique: HGN18lMYMJ6Wyl03EHdHZQ-1
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id B1196800A02;
-        Sat, 11 Jan 2020 14:57:20 +0000 (UTC)
-Received: from shalem.localdomain.com (ovpn-116-84.ams2.redhat.com [10.36.116.84])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 2E9B987EC6;
-        Sat, 11 Jan 2020 14:57:17 +0000 (UTC)
-From:   Hans de Goede <hdegoede@redhat.com>
-To:     Ard Biesheuvel <ardb@kernel.org>,
-        Darren Hart <dvhart@infradead.org>,
-        Andy Shevchenko <andy@infradead.org>,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        "Rafael J . Wysocki" <rafael@kernel.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
-        "H . Peter Anvin" <hpa@zytor.com>,
-        Jonathan Corbet <corbet@lwn.net>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>
-Cc:     Hans de Goede <hdegoede@redhat.com>,
-        Peter Jones <pjones@redhat.com>,
-        Dave Olsthoorn <dave@bewaar.me>, x86@kernel.org,
-        platform-driver-x86@vger.kernel.org, linux-efi@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-doc@vger.kernel.org,
-        linux-input@vger.kernel.org
-Subject: [PATCH v11 03/10] firmware: Rename FW_OPT_NOFALLBACK to FW_OPT_NOFALLBACK_SYSFS
-Date:   Sat, 11 Jan 2020 15:56:56 +0100
-Message-Id: <20200111145703.533809-4-hdegoede@redhat.com>
-In-Reply-To: <20200111145703.533809-1-hdegoede@redhat.com>
-References: <20200111145703.533809-1-hdegoede@redhat.com>
+        id S1732270AbgALGOI (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 12 Jan 2020 01:14:08 -0500
+Received: from mail3-bck.iservicesmail.com ([217.130.24.85]:4788 "EHLO
+        mail3-bck.iservicesmail.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1732268AbgALGOI (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sun, 12 Jan 2020 01:14:08 -0500
+X-Greylist: delayed 301 seconds by postgrey-1.27 at vger.kernel.org; Sun, 12 Jan 2020 01:14:07 EST
+IronPort-SDR: +hhxqcLicT2D6ETOmFdSqa4peHMeh4hnU/oYCJ4tfEPQ8DF5jgr/aFBiaaIRtfkGbDDFvaKdxb
+ /73a5InReF0Q==
+IronPort-PHdr: =?us-ascii?q?9a23=3AcEGqrxDVyFESlWnxJPwxUyQJP3N1i/DPJgcQr6?=
+ =?us-ascii?q?AfoPdwSPTzoMbcNUDSrc9gkEXOFd2Cra4d0KyM7f6rCDdIyK3CmUhKSIZLWR?=
+ =?us-ascii?q?4BhJdetC0bK+nBN3fGKuX3ZTcxBsVIWQwt1Xi6NU9IBJS2PAWK8TW94jEIBx?=
+ =?us-ascii?q?rwKxd+KPjrFY7OlcS30P2594HObwlSizexfL1/IA+ooQjQt8Qajo9vJ6gswR?=
+ =?us-ascii?q?bVv3VEfPhby3l1LlyJhRb84cmw/J9n8ytOvv8q6tBNX6bncakmVLJUFDspPX?=
+ =?us-ascii?q?w7683trhnDUBCA5mAAXWUMkxpHGBbK4RfnVZrsqCT6t+592C6HPc3qSL0/RD?=
+ =?us-ascii?q?qv47t3RBLulSwLMTk1/nzLhcNqiaJaoAutqgJ4w47OeIGVM+B+cbnBfdwEXG?=
+ =?us-ascii?q?ZOQMBRWzVdD4Ogc4sAFfYOPeZGoIn4uVQOqwe+CRCyC+Pp0zNGgXj23ask3O?=
+ =?us-ascii?q?UhCA3JwgogFM8KvHnasNn5KKIeXOaox6fK0DrDdetb1zn95ojSbB4vouyCUr?=
+ =?us-ascii?q?1sfsTe0kQvCwHIgUmMpYD5Iz+ZyOIAuHWb4ep6UuKvjnYqpRtvrTiz2MgskJ?=
+ =?us-ascii?q?TCiYISylDC+iVy3YE4JcWmR05nf9GkCpVRtyacN4t5Wc4iQ3potz0mxbEcpZ?=
+ =?us-ascii?q?G7ey0KxI4nxx7ccvGKdZWD7BH7VOuJPzt0mXBodKiiixu87USs0PPwW8au3F?=
+ =?us-ascii?q?tEridIlMTHuGoX2BzJ8MeHT+Nw/kKm2TmSyQ/e8vpEIUUolarDLJ4h36Iwmo?=
+ =?us-ascii?q?ITsUvdGi/2n137jKqMeUUl/uio8froYrH6qpKTLYN0lAb+Pbk0lcyxBuQ4NB?=
+ =?us-ascii?q?YBU3KF9uSnzLHj/Ev5T6tWjvAujKXVrZLXKd4GqqO3HwNZyJgv5hmlAzqo0N?=
+ =?us-ascii?q?kUhXwHI0hEeBKDgYjpIVbOIPXgAPennVusjClkx+rIP73mBJXNIWPOkLf6fb?=
+ =?us-ascii?q?lm90FQ0hY8zdda555OCrEBI+r/WlXtu9zAEh85Lwu0zv7jCNV80IMeRG2ODr?=
+ =?us-ascii?q?aHP6PcsF+F/fwvI+aSa48Pojr9KOYq5+TojXAnnV8RZ66p3YEYaCPwIvMzJ0?=
+ =?us-ascii?q?SffGqpj9kAOXkFsxB4T+HwjlCGFzlJaCWIUro49w08XbqrEYrZDr+qhrPJiD?=
+ =?us-ascii?q?+2ApBMeWdABVCPEWzifK2LXv4NbGSZJco3wRIeUr30c4I92Avmiwj8xPIzNu?=
+ =?us-ascii?q?fI9zcHspTs/Nhu7eaVnhY3szx3WZfOm1qRRn15yzpbDwQ927py9Bclklo=3D?=
+X-IronPort-Anti-Spam-Filtered: true
+X-IronPort-Anti-Spam-Result: =?us-ascii?q?A2GeAgBWtxpelyMYgtlNGBoBAQEBAQE?=
+ =?us-ascii?q?BAQEDAQEBAREBAQECAgEBAQGBaAQBAQEBCwEBGwgBgSWBTVIgEpNQgU0fg0O?=
+ =?us-ascii?q?LY4EAgx4VhgcUDIFbDQEBAQEBNQIBAYRATgEXgQ8kNQgOAgMNAQEFAQEBAQE?=
+ =?us-ascii?q?FBAEBAhABAQEBAQYYBoVzgh0MHgEEAQEBAQMDAwEBDAGDXQcZDzlKTAEOAVO?=
+ =?us-ascii?q?DBIJLAQEznXEBjQQNDQKFHYJKBAqBCYEaI4E2AYwYGoFBP4EjIYIrCAGCAYJ?=
+ =?us-ascii?q?/ARIBbIJIglkEjUISIYEHiCmYF4JBBHaJTIwCgjcBD4gBhDEDEIJFD4EJiAO?=
+ =?us-ascii?q?EToF9ozdXdAGBHnEzGoImGoEgTxgNiBuOLUCBFhACT4xbgjIBAQ?=
+X-IPAS-Result: =?us-ascii?q?A2GeAgBWtxpelyMYgtlNGBoBAQEBAQEBAQEDAQEBAREBA?=
+ =?us-ascii?q?QECAgEBAQGBaAQBAQEBCwEBGwgBgSWBTVIgEpNQgU0fg0OLY4EAgx4VhgcUD?=
+ =?us-ascii?q?IFbDQEBAQEBNQIBAYRATgEXgQ8kNQgOAgMNAQEFAQEBAQEFBAEBAhABAQEBA?=
+ =?us-ascii?q?QYYBoVzgh0MHgEEAQEBAQMDAwEBDAGDXQcZDzlKTAEOAVODBIJLAQEznXEBj?=
+ =?us-ascii?q?QQNDQKFHYJKBAqBCYEaI4E2AYwYGoFBP4EjIYIrCAGCAYJ/ARIBbIJIglkEj?=
+ =?us-ascii?q?UISIYEHiCmYF4JBBHaJTIwCgjcBD4gBhDEDEIJFD4EJiAOEToF9ozdXdAGBH?=
+ =?us-ascii?q?nEzGoImGoEgTxgNiBuOLUCBFhACT4xbgjIBAQ?=
+X-IronPort-AV: E=Sophos;i="5.69,424,1571695200"; 
+   d="scan'208";a="323209900"
+Received: from mailrel04.vodafone.es ([217.130.24.35])
+  by mail02.vodafone.es with ESMTP; 12 Jan 2020 07:09:04 +0100
+Received: (qmail 24225 invoked from network); 12 Jan 2020 05:00:20 -0000
+Received: from unknown (HELO 192.168.1.3) (quesosbelda@[217.217.179.17])
+          (envelope-sender <peterwong@hsbc.com.hk>)
+          by mailrel04.vodafone.es (qmail-ldap-1.03) with SMTP
+          for <linux-efi@vger.kernel.org>; 12 Jan 2020 05:00:20 -0000
+Date:   Sun, 12 Jan 2020 06:00:18 +0100 (CET)
+From:   Peter Wong <peterwong@hsbc.com.hk>
+Reply-To: Peter Wong <peterwonghkhsbc@gmail.com>
+To:     linux-efi@vger.kernel.org
+Message-ID: <12146499.460727.1578805219919.JavaMail.cash@217.130.24.55>
+Subject: Investment opportunity
 MIME-Version: 1.0
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This is a preparation patch for adding a new platform fallback mechanism,
-which will have its own enable/disable FW_OPT_xxx option.
+Greetings,
+Please read the attached investment proposal and reply for more details.
+Are you interested in loan?
+Sincerely: Peter Wong
 
-Note this also fixes a typo in one of the re-wordwrapped comments:
-enfoce -> enforce.
 
-Acked-by: Luis Chamberlain <mcgrof@kernel.org>
-Signed-off-by: Hans de Goede <hdegoede@redhat.com>
----
- drivers/base/firmware_loader/fallback.c | 11 ++++++-----
- drivers/base/firmware_loader/firmware.h | 16 ++++++++--------
- drivers/base/firmware_loader/main.c     |  2 +-
- 3 files changed, 15 insertions(+), 14 deletions(-)
 
-diff --git a/drivers/base/firmware_loader/fallback.c b/drivers/base/firmw=
-are_loader/fallback.c
-index 62ee90b4db56..8704e1bae175 100644
---- a/drivers/base/firmware_loader/fallback.c
-+++ b/drivers/base/firmware_loader/fallback.c
-@@ -606,7 +606,7 @@ static bool fw_run_sysfs_fallback(enum fw_opt opt_fla=
-gs)
- 		return false;
- 	}
-=20
--	if ((opt_flags & FW_OPT_NOFALLBACK))
-+	if ((opt_flags & FW_OPT_NOFALLBACK_SYSFS))
- 		return false;
-=20
- 	/* Also permit LSMs and IMA to fail firmware sysfs fallback */
-@@ -630,10 +630,11 @@ static bool fw_run_sysfs_fallback(enum fw_opt opt_f=
-lags)
-  * interface. Userspace is in charge of loading the firmware through the=
- sysfs
-  * loading interface. This sysfs fallback mechanism may be disabled comp=
-letely
-  * on a system by setting the proc sysctl value ignore_sysfs_fallback to=
- true.
-- * If this false we check if the internal API caller set the @FW_OPT_NOF=
-ALLBACK
-- * flag, if so it would also disable the fallback mechanism. A system ma=
-y want
-- * to enfoce the sysfs fallback mechanism at all times, it can do this b=
-y
-- * setting ignore_sysfs_fallback to false and force_sysfs_fallback to tr=
-ue.
-+ * If this is false we check if the internal API caller set the
-+ * @FW_OPT_NOFALLBACK_SYSFS flag, if so it would also disable the fallba=
-ck
-+ * mechanism. A system may want to enforce the sysfs fallback mechanism =
-at all
-+ * times, it can do this by setting ignore_sysfs_fallback to false and
-+ * force_sysfs_fallback to true.
-  * Enabling force_sysfs_fallback is functionally equivalent to build a k=
-ernel
-  * with CONFIG_FW_LOADER_USER_HELPER_FALLBACK.
-  **/
-diff --git a/drivers/base/firmware_loader/firmware.h b/drivers/base/firmw=
-are_loader/firmware.h
-index 7ecd590e67fe..8656e5239a80 100644
---- a/drivers/base/firmware_loader/firmware.h
-+++ b/drivers/base/firmware_loader/firmware.h
-@@ -27,16 +27,16 @@
-  *	firmware file lookup on storage is avoided. Used for calls where the
-  *	file may be too big, or where the driver takes charge of its own
-  *	firmware caching mechanism.
-- * @FW_OPT_NOFALLBACK: Disable the fallback mechanism. Takes precedence =
-over
-- *	&FW_OPT_UEVENT and &FW_OPT_USERHELPER.
-+ * @FW_OPT_NOFALLBACK_SYSFS: Disable the sysfs fallback mechanism. Takes
-+ *	precedence over &FW_OPT_UEVENT and &FW_OPT_USERHELPER.
-  */
- enum fw_opt {
--	FW_OPT_UEVENT =3D         BIT(0),
--	FW_OPT_NOWAIT =3D         BIT(1),
--	FW_OPT_USERHELPER =3D     BIT(2),
--	FW_OPT_NO_WARN =3D        BIT(3),
--	FW_OPT_NOCACHE =3D        BIT(4),
--	FW_OPT_NOFALLBACK =3D     BIT(5),
-+	FW_OPT_UEVENT			=3D BIT(0),
-+	FW_OPT_NOWAIT			=3D BIT(1),
-+	FW_OPT_USERHELPER		=3D BIT(2),
-+	FW_OPT_NO_WARN			=3D BIT(3),
-+	FW_OPT_NOCACHE			=3D BIT(4),
-+	FW_OPT_NOFALLBACK_SYSFS		=3D BIT(5),
- };
-=20
- enum fw_status {
-diff --git a/drivers/base/firmware_loader/main.c b/drivers/base/firmware_=
-loader/main.c
-index 249add8c5e05..57133a9dad09 100644
---- a/drivers/base/firmware_loader/main.c
-+++ b/drivers/base/firmware_loader/main.c
-@@ -877,7 +877,7 @@ int request_firmware_direct(const struct firmware **f=
-irmware_p,
- 	__module_get(THIS_MODULE);
- 	ret =3D _request_firmware(firmware_p, name, device, NULL, 0,
- 				FW_OPT_UEVENT | FW_OPT_NO_WARN |
--				FW_OPT_NOFALLBACK);
-+				FW_OPT_NOFALLBACK_SYSFS);
- 	module_put(THIS_MODULE);
- 	return ret;
- }
---=20
-2.24.1
+
+----------------------------------------------------
+This email was sent by the shareware version of Postman Professional.
 
