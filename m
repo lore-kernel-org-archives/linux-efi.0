@@ -4,40 +4,40 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 262C8C33CB1
-	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 17:24:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D34A8C33CA9
+	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 17:24:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E24A9206DA
-	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 17:24:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AAC3321739
+	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 17:24:05 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1578936241;
-	bh=f7ymohb97S6b58KJNRXy0ZTCMS6AMDRFCM6vKzcZbSc=;
+	s=default; t=1578936245;
+	bh=ywnXyYx3AvLj1uPsyuEwdyOKRA+9azpuVDDX701x9FU=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=D0nETEwXJvzKTEWNxLo1fh7gV5ccDMAEqK8aqK1uhsWrFhxCIHgqWulxt5V5iqr09
-	 MqnuQ3Du3B5iWWrSj+blGIOpi+XoeaPASBL2TpR9GMyTNSq4TW0e8fdKeiSQh7NsaL
-	 cqFfEGYaGPmGfxDGYnFkwHjUrWcOCY99JoXFDiXw=
+	b=FsQoDlNztoHklbGGoUeooyiCqMlZnq1R8SMmO6k3Lpdksa6PHG6f+arfqvHJQPHec
+	 CEn4HqSsDd0zh7sb9U82FMXaF7M3aH4PPVuzqlyXtBP0zSKlfNnUBiMU4QU9SRN2jV
+	 tE3KMHHzMcHYXZrrJhu5DS5HlHtZclTi8OD4lvhU=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729009AbgAMRYA (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 13 Jan 2020 12:24:00 -0500
-Received: from mail.kernel.org ([198.145.29.99]:41764 "EHLO mail.kernel.org"
+        id S1728804AbgAMRXK (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 13 Jan 2020 12:23:10 -0500
+Received: from mail.kernel.org ([198.145.29.99]:41218 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728850AbgAMRXS (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 13 Jan 2020 12:23:18 -0500
+        id S1728512AbgAMRXJ (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Mon, 13 Jan 2020 12:23:09 -0500
 Received: from dogfood.home (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 10C43206DA;
-        Mon, 13 Jan 2020 17:23:15 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id C0C772081E;
+        Mon, 13 Jan 2020 17:23:06 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1578936197;
-        bh=f7ymohb97S6b58KJNRXy0ZTCMS6AMDRFCM6vKzcZbSc=;
+        s=default; t=1578936188;
+        bh=ywnXyYx3AvLj1uPsyuEwdyOKRA+9azpuVDDX701x9FU=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=z2fLnfDjeLLXm+R00A0QgLFKw1e9CTcm2vmKN1TxwkXfNKHwDPibnlyE1BTgJF1rm
-         IPl0O6ezRM94ccQvwNGFbeO6CcVDzVea5DCRo9a2RWXrjSNMDKh8NFWx26iCweqxm/
-         3WZFHeKW88kbnS2nKpTEc7N8hseF+VEHS+UA0EOk=
+        b=Sm6BT1QpuPskrUhj/iXXK55XKmolJ7zOspIwbiFCSIX1ypWH0+jE1YjfiCyzhlXHb
+         5hTWc2SNKNPp9ureteaF+3cXnHSqVxTKjELOeBTepJ7bEhtnpO9qYq3wMhG5BkXyQ6
+         xeFHG2ackdA5eXgnOoMtBBVBSU0uMq9GPc9eNG6w=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
@@ -47,9 +47,9 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
         Dan Williams <dan.j.williams@intel.com>,
         Dave Young <dyoung@redhat.com>,
         Saravana Kannan <saravanak@google.com>
-Subject: [PATCH 05/13] efi/x86: don't map the entire kernel text RW for mixed mode
-Date:   Mon, 13 Jan 2020 18:22:37 +0100
-Message-Id: <20200113172245.27925-6-ardb@kernel.org>
+Subject: [PATCH 01/13] efi/libstub/x86: use const attribute for efi_is_64bit()
+Date:   Mon, 13 Jan 2020 18:22:33 +0100
+Message-Id: <20200113172245.27925-2-ardb@kernel.org>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20200113172245.27925-1-ardb@kernel.org>
 References: <20200113172245.27925-1-ardb@kernel.org>
@@ -60,41 +60,120 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The mixed mode thunking routine requires a part of it to be
-mapped 1:1, and for this reason, we currently map the entire
-kernel .text read/write in the EFI page tables, which is bad.
-
-In fact, the kernel_map_pages_in_pgd() invocation that installs
-this mapping is entirely redundant, since all of DRAM is already
-1:1 mapped read/write in the EFI page tables when we reach this
-point, which means that .rodata is mapped read-write as well.
-
-So let's remap both .text and .rodata read-only in the EFI
-page tables.
+Reshuffle the x86 stub code a bit so that we can tag the efi_is_64bit()
+function with the 'const' attribute, which permits the compiler to
+optimize away any redundant calls. Since we have two different entry
+points for 32 and 64 bit firmware in the startup code, this also
+simplifies the C code since we'll enter it with the efi_is64 variable
+already set.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/platform/efi/efi_64.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ arch/x86/boot/compressed/eboot.c   | 14 ++++++--------
+ arch/x86/boot/compressed/head_64.S |  7 +++----
+ arch/x86/include/asm/efi.h         |  2 +-
+ 3 files changed, 10 insertions(+), 13 deletions(-)
 
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index c13fa2150976..6ec58ff60b56 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -391,11 +391,11 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index 4afd29eb5b34..ab3a40283db7 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -21,16 +21,18 @@
+ #include "eboot.h"
  
- 	efi_scratch.phys_stack = page_to_phys(page + 1); /* stack grows down */
+ static efi_system_table_t *sys_table;
+-static bool efi_is64 = IS_ENABLED(CONFIG_X86_64);
++extern const bool efi_is64;
  
--	npages = (_etext - _text) >> PAGE_SHIFT;
-+	npages = (__end_rodata_aligned - _text) >> PAGE_SHIFT;
- 	text = __pa(_text);
- 	pfn = text >> PAGE_SHIFT;
+ __pure efi_system_table_t *efi_system_table(void)
+ {
+ 	return sys_table;
+ }
  
--	pf = _PAGE_RW | _PAGE_ENC;
-+	pf = _PAGE_ENC;
- 	if (kernel_map_pages_in_pgd(pgd, pfn, text, npages, pf)) {
- 		pr_err("Failed to map kernel text 1:1\n");
- 		return 1;
+-__pure bool efi_is_64bit(void)
++__attribute_const__ bool efi_is_64bit(void)
+ {
+-	return efi_is64;
++	if (IS_ENABLED(CONFIG_EFI_MIXED))
++		return efi_is64;
++	return IS_ENABLED(CONFIG_X64_64);
+ }
+ 
+ static efi_status_t
+@@ -710,8 +712,7 @@ static efi_status_t exit_boot(struct boot_params *boot_params, void *handle)
+  */
+ struct boot_params *efi_main(efi_handle_t handle,
+ 			     efi_system_table_t *sys_table_arg,
+-			     struct boot_params *boot_params,
+-			     bool is64)
++			     struct boot_params *boot_params)
+ {
+ 	struct desc_ptr *gdt = NULL;
+ 	struct setup_header *hdr = &boot_params->hdr;
+@@ -721,9 +722,6 @@ struct boot_params *efi_main(efi_handle_t handle,
+ 
+ 	sys_table = sys_table_arg;
+ 
+-	if (IS_ENABLED(CONFIG_EFI_MIXED))
+-		efi_is64 = is64;
+-
+ 	/* Check if we were booted by the EFI firmware */
+ 	if (sys_table->hdr.signature != EFI_SYSTEM_TABLE_SIGNATURE)
+ 		goto fail;
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index 44a6bb6964b5..1f1f6c8139b3 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -211,10 +211,9 @@ SYM_FUNC_START(startup_32)
+ 	movl	efi32_boot_args(%ebp), %edi
+ 	cmp	$0, %edi
+ 	jz	1f
+-	leal	handover_entry(%ebp), %eax
++	leal	efi64_stub_entry(%ebp), %eax
+ 	movl	%esi, %edx
+ 	movl	efi32_boot_args+4(%ebp), %esi
+-	movl	$0x0, %ecx
+ 1:
+ #endif
+ 	pushl	%eax
+@@ -242,6 +241,7 @@ SYM_FUNC_START(efi32_stub_entry)
+ 	movl	%ecx, efi32_boot_args(%ebp)
+ 	movl	%edx, efi32_boot_args+4(%ebp)
+ 	sgdtl	efi32_boot_gdt(%ebp)
++	movb	$0, efi_is64(%ebp)
+ 
+ 	/* Disable paging */
+ 	movl	%cr0, %eax
+@@ -452,8 +452,6 @@ SYM_CODE_END(startup_64)
+ 	.org 0x390
+ SYM_FUNC_START(efi64_stub_entry)
+ SYM_FUNC_START_ALIAS(efi_stub_entry)
+-	movq	$1, %rcx
+-SYM_INNER_LABEL(handover_entry, SYM_L_LOCAL)
+ 	and	$~0xf, %rsp			/* realign the stack */
+ 	call	efi_main
+ 	movq	%rax,%rsi
+@@ -632,6 +630,7 @@ SYM_DATA_END_LABEL(gdt, SYM_L_LOCAL, gdt_end)
+ 
+ #ifdef CONFIG_EFI_MIXED
+ SYM_DATA_LOCAL(efi32_boot_args, .long 0, 0)
++SYM_DATA(efi_is64, .byte 1)
+ #endif
+ 
+ /*
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index 383f7a0fc170..0a58468a7203 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -221,7 +221,7 @@ efi_status_t efi_set_virtual_address_map(unsigned long memory_map_size,
+ 
+ /* arch specific definitions used by the stub code */
+ 
+-__pure bool efi_is_64bit(void);
++__attribute_const__ bool efi_is_64bit(void);
+ 
+ static inline bool efi_is_native(void)
+ {
 -- 
 2.20.1
 
