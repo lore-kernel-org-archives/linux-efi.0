@@ -4,40 +4,40 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E14E8C33CAF
-	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 17:24:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 262C8C33CB1
+	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 17:24:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id B73BF21739
+	by mail.kernel.org (Postfix) with ESMTP id E24A9206DA
 	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 17:24:00 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1578936240;
-	bh=cg/rGZ6nIeh2leUh4xr8p6ii7cYV/TifdRIjaYF2Fp4=;
+	s=default; t=1578936241;
+	bh=f7ymohb97S6b58KJNRXy0ZTCMS6AMDRFCM6vKzcZbSc=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=K72Y8cE/NWQdN79PU7mnACkasQZM1b5W031QHSXYtZ787+0M7dvk2cPdHWh4qfqnb
-	 hyJmINIjf5la5pEDMiAtbhEwBl9zfzlpjjkKdlVz05n+lP3Gin1sAO1JKQW5yDvayU
-	 Aj2EuJ/QH8/mX9AVPZnX2zvx7dQqRMhgLmtdouFQ=
+	b=D0nETEwXJvzKTEWNxLo1fh7gV5ccDMAEqK8aqK1uhsWrFhxCIHgqWulxt5V5iqr09
+	 MqnuQ3Du3B5iWWrSj+blGIOpi+XoeaPASBL2TpR9GMyTNSq4TW0e8fdKeiSQh7NsaL
+	 cqFfEGYaGPmGfxDGYnFkwHjUrWcOCY99JoXFDiXw=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728853AbgAMRXS (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 13 Jan 2020 12:23:18 -0500
-Received: from mail.kernel.org ([198.145.29.99]:41444 "EHLO mail.kernel.org"
+        id S1729009AbgAMRYA (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 13 Jan 2020 12:24:00 -0500
+Received: from mail.kernel.org ([198.145.29.99]:41764 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728833AbgAMRXN (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 13 Jan 2020 12:23:13 -0500
+        id S1728850AbgAMRXS (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Mon, 13 Jan 2020 12:23:18 -0500
 Received: from dogfood.home (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 658BD21739;
-        Mon, 13 Jan 2020 17:23:11 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 10C43206DA;
+        Mon, 13 Jan 2020 17:23:15 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1578936193;
-        bh=cg/rGZ6nIeh2leUh4xr8p6ii7cYV/TifdRIjaYF2Fp4=;
+        s=default; t=1578936197;
+        bh=f7ymohb97S6b58KJNRXy0ZTCMS6AMDRFCM6vKzcZbSc=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=xOq5LAOWRIl553Q0Gav37/vxEKieAlUyNkbOx99PyI0fxTK78htNEUC7HOlIxWAW2
-         18+UcwM6DGRz4ARZTzyiJ6kGqUHjdHuI+EKQv+HE7OrrWaJCIJyDVI9DadtEAFk33Y
-         H01skN+HlgG5l6BhSLDqv2DnoOeVRmZdIwJFi7rs=
+        b=z2fLnfDjeLLXm+R00A0QgLFKw1e9CTcm2vmKN1TxwkXfNKHwDPibnlyE1BTgJF1rm
+         IPl0O6ezRM94ccQvwNGFbeO6CcVDzVea5DCRo9a2RWXrjSNMDKh8NFWx26iCweqxm/
+         3WZFHeKW88kbnS2nKpTEc7N8hseF+VEHS+UA0EOk=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
@@ -47,9 +47,9 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
         Dan Williams <dan.j.williams@intel.com>,
         Dave Young <dyoung@redhat.com>,
         Saravana Kannan <saravanak@google.com>
-Subject: [PATCH 03/13] efi/libstub/x86: fix unused-variable warning
-Date:   Mon, 13 Jan 2020 18:22:35 +0100
-Message-Id: <20200113172245.27925-4-ardb@kernel.org>
+Subject: [PATCH 05/13] efi/x86: don't map the entire kernel text RW for mixed mode
+Date:   Mon, 13 Jan 2020 18:22:37 +0100
+Message-Id: <20200113172245.27925-6-ardb@kernel.org>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20200113172245.27925-1-ardb@kernel.org>
 References: <20200113172245.27925-1-ardb@kernel.org>
@@ -60,47 +60,41 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Arnd Bergmann <arnd@arndb.de>
+The mixed mode thunking routine requires a part of it to be
+mapped 1:1, and for this reason, we currently map the entire
+kernel .text read/write in the EFI page tables, which is bad.
 
-The only users of these got removed, so they also need to be
-removed to avoid warnings:
+In fact, the kernel_map_pages_in_pgd() invocation that installs
+this mapping is entirely redundant, since all of DRAM is already
+1:1 mapped read/write in the EFI page tables when we reach this
+point, which means that .rodata is mapped read-write as well.
 
-arch/x86/boot/compressed/eboot.c: In function 'setup_efi_pci':
-arch/x86/boot/compressed/eboot.c:117:16: error: unused variable 'nr_pci' [-Werror=unused-variable]
-  unsigned long nr_pci;
-                ^~~~~~
-arch/x86/boot/compressed/eboot.c: In function 'setup_uga':
-arch/x86/boot/compressed/eboot.c:244:16: error: unused variable 'nr_ugas' [-Werror=unused-variable]
-  unsigned long nr_ugas;
-                ^~~~~~~
+So let's remap both .text and .rodata read-only in the EFI
+page tables.
 
-Fixes: 2732ea0d5c0a ("efi/libstub: Use a helper to iterate over a EFI handle array")
-Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/boot/compressed/eboot.c | 2 --
- 1 file changed, 2 deletions(-)
+ arch/x86/platform/efi/efi_64.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index ab3a40283db7..82e26d0ff075 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -118,7 +118,6 @@ static void setup_efi_pci(struct boot_params *params)
- 	void **pci_handle = NULL;
- 	efi_guid_t pci_proto = EFI_PCI_IO_PROTOCOL_GUID;
- 	unsigned long size = 0;
--	unsigned long nr_pci;
- 	struct setup_data *data;
- 	efi_handle_t h;
- 	int i;
-@@ -245,7 +244,6 @@ setup_uga(struct screen_info *si, efi_guid_t *uga_proto, unsigned long size)
- 	u32 width, height;
- 	void **uga_handle = NULL;
- 	efi_uga_draw_protocol_t *uga = NULL, *first_uga;
--	unsigned long nr_ugas;
- 	efi_handle_t handle;
- 	int i;
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index c13fa2150976..6ec58ff60b56 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -391,11 +391,11 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
  
+ 	efi_scratch.phys_stack = page_to_phys(page + 1); /* stack grows down */
+ 
+-	npages = (_etext - _text) >> PAGE_SHIFT;
++	npages = (__end_rodata_aligned - _text) >> PAGE_SHIFT;
+ 	text = __pa(_text);
+ 	pfn = text >> PAGE_SHIFT;
+ 
+-	pf = _PAGE_RW | _PAGE_ENC;
++	pf = _PAGE_ENC;
+ 	if (kernel_map_pages_in_pgd(pgd, pfn, text, npages, pf)) {
+ 		pr_err("Failed to map kernel text 1:1\n");
+ 		return 1;
 -- 
 2.20.1
 
