@@ -1,123 +1,119 @@
-Return-Path: <SRS0=fz7u=3B=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=ETnK=3C=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-1.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PULL_REQUEST,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F6D0C47409
-	for <linux-efi@archiver.kernel.org>; Sun, 12 Jan 2020 22:54:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AFEC8C33CAE
+	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 07:29:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 2AC7C2253D
-	for <linux-efi@archiver.kernel.org>; Sun, 12 Jan 2020 22:54:22 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1578869662;
-	bh=OTPSk1FDbrul0QY/pUOTlMEtUEMURhj6Q/PvlUu/sI8=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=rmXj4IF49K+yS5N4gRRIgLp6U+mN4eRJGYaAJFQA5gXUiUhE8i1ISmj8NMendb4lA
-	 KH7Q+A2jAQuCPOynxjyFygXpGDczqYsjd6Bp4eFvZuBkzNc0BnyIt/OgzimWyo3vhF
-	 E7x2l6enUGaTKVqfFVHMq0U4X4k92uV/1Qjqt1sQ=
+	by mail.kernel.org (Postfix) with ESMTP id 7E3DD207FF
+	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 07:29:22 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="bD+O85KG"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387474AbgALWyS (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 12 Jan 2020 17:54:18 -0500
-Received: from mail.kernel.org ([198.145.29.99]:56952 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2387460AbgALWyS (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Sun, 12 Jan 2020 17:54:18 -0500
-Received: from mail-wr1-f53.google.com (mail-wr1-f53.google.com [209.85.221.53])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 0CC242467C
-        for <linux-efi@vger.kernel.org>; Sun, 12 Jan 2020 22:54:17 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1578869657;
-        bh=OTPSk1FDbrul0QY/pUOTlMEtUEMURhj6Q/PvlUu/sI8=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=hzhvSFdpz62gogZ9QN7lfmafoGsakUjT1kaPTgxvKWg5Xq+befE3iVxPLwm79hZTC
-         daPQyiQvVm0j+WIy9HH+k4T6lNya6yT+5xyuppstOXHcEnLAtcJfMXOwB4xoUxPQBi
-         wd32iWGi8yUPDeOVPUB/jfWtezETqeizKYZhYU6U=
-Received: by mail-wr1-f53.google.com with SMTP id z7so6757328wrl.13
-        for <linux-efi@vger.kernel.org>; Sun, 12 Jan 2020 14:54:16 -0800 (PST)
-X-Gm-Message-State: APjAAAWgZYXqmlF8VuYoglCNQUZ7RSVv7NTYh80q0uV9Eg5P/yS6q4l0
-        EZRtC6K7yQOLVuqkrKzvedCSFnSxHEoqW8am5qqrNg==
-X-Google-Smtp-Source: APXvYqwqvYzhEdydCPNO7qcIvHe+8nzILh5eaIaQCyGHnDLwjQKEoFRnKyCjU2psD4HOU4Uu55mc3jpLpIFWqLzfw5Q=
-X-Received: by 2002:adf:f491:: with SMTP id l17mr14897341wro.149.1578869655295;
- Sun, 12 Jan 2020 14:54:15 -0800 (PST)
+        id S1728738AbgAMH3W (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 13 Jan 2020 02:29:22 -0500
+Received: from mail-wr1-f66.google.com ([209.85.221.66]:39292 "EHLO
+        mail-wr1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728709AbgAMH3W (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 13 Jan 2020 02:29:22 -0500
+Received: by mail-wr1-f66.google.com with SMTP id y11so7397518wrt.6
+        for <linux-efi@vger.kernel.org>; Sun, 12 Jan 2020 23:29:20 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=Whdn2m/U1+HR1RNQq+8AxWESiMgdzhNcD7fmHq1i6N8=;
+        b=bD+O85KGDadiliWt3Ps6YuhsgSPwXU8EYhpSch8p+13GrX2HlxbLekt0Q7m5w43NTc
+         KU72X99cw/UqTi2iXQzYiev8cXt8UvHfsC5iEU0o9JjBYfQP4IGFo4loiZSrQcHaj+ph
+         qfEe8OckgtbZyNM4ZcfXyT0L+HB9TdxF/T8EfwYEQX9bQV905u7RP61+cj0ZsXOaJUQ2
+         BnT4z6Rmzco6HRo3UCQx9fBV4dSbRjp4OJtXJ7PFXsBGmP14XS+uTFBR4wQ1FXrYw7sz
+         mimNnG+o78KhowrJbnHEPPTi3dlIhRe1x9ud8xc0psJ0tCP9dCDq30klcJVBSSjsPXOk
+         Mdiw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=Whdn2m/U1+HR1RNQq+8AxWESiMgdzhNcD7fmHq1i6N8=;
+        b=TCpBeWQMFykmCxjtAzBKc2wAFZ6A/lhHISgHq0bVoTNvKg3PMS6SAIggLPivznB4A5
+         3kpYvqLXgelB+vf7AZJMf3h8XRzg7UiY8QUBmNL4/DMiquD3wnq2QATQeJlRQnaUCCx2
+         zyxefxnw+XzMj3oGqS9dZSucKxZ4MHWDIRmVD3mFSkYvpJy8QbvSH/Wv9D+hMAyFOtzf
+         sWVpk8Xy0FxWSGO/DrQRA5VMaRqkqhw3FL9EcHPgAHkvHWOK+UzaOmK68iEyBx1Se4eZ
+         qAyt8A5pGpssZZ4WB/OjhPddT7SoPyP1Hcmqoe6Um5/sGCjCr+6t0C1AZlXOyH/Mfbs4
+         i7Iw==
+X-Gm-Message-State: APjAAAW3Te0slIl/NSWFRuz8D140XZ8nojf8NIYKlLxSAktuzidAFcBf
+        mOJ69lqBHUDox4ZujalPaiaFQkofU9yD1kDaVo2gcw==
+X-Google-Smtp-Source: APXvYqybS5eWEDwKlCVck9fBn8ODoIWsy3woTpWRduDt3Jqrcph4In1sPlEdRF1YEQxWKwUulSCwOK9Iz13o914Trto=
+X-Received: by 2002:a5d:6652:: with SMTP id f18mr17078276wrw.246.1578900560096;
+ Sun, 12 Jan 2020 23:29:20 -0800 (PST)
 MIME-Version: 1.0
-References: <20200111145703.533809-1-hdegoede@redhat.com> <20200111145703.533809-5-hdegoede@redhat.com>
-In-Reply-To: <20200111145703.533809-5-hdegoede@redhat.com>
-From:   Andy Lutomirski <luto@kernel.org>
-Date:   Sun, 12 Jan 2020 14:54:04 -0800
-X-Gmail-Original-Message-ID: <CALCETrXi_P1_nCp27yawLeUKuR=Wo11rKao222SVsnhi6qF9fA@mail.gmail.com>
-Message-ID: <CALCETrXi_P1_nCp27yawLeUKuR=Wo11rKao222SVsnhi6qF9fA@mail.gmail.com>
-Subject: Re: [PATCH v11 04/10] firmware: Add new platform fallback mechanism
- and firmware_request_platform()
-To:     Hans de Goede <hdegoede@redhat.com>
+References: <20200103113953.9571-1-ardb@kernel.org> <CAKv+Gu8pzDSs6G5k9JfX77NB4q2kerxSuprnzFzeGBPd2kPd5g@mail.gmail.com>
+ <20200110181312.GB83292@gmail.com>
+In-Reply-To: <20200110181312.GB83292@gmail.com>
+From:   Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Date:   Mon, 13 Jan 2020 08:29:09 +0100
+Message-ID: <CAKv+Gu_4GNdu+72iGN5wnzfDx3iQ0uM2x9wC6pOBPvqAvJu8dA@mail.gmail.com>
+Subject: Re: [GIT PULL 00/20] More EFI updates for v5.6
+To:     Ingo Molnar <mingo@kernel.org>
 Cc:     Ard Biesheuvel <ardb@kernel.org>,
-        Darren Hart <dvhart@infradead.org>,
-        Andy Shevchenko <andy@infradead.org>,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        "Rafael J . Wysocki" <rafael@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>,
-        Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
-        "H . Peter Anvin" <hpa@zytor.com>,
-        Jonathan Corbet <corbet@lwn.net>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Peter Jones <pjones@redhat.com>,
-        Dave Olsthoorn <dave@bewaar.me>, X86 ML <x86@kernel.org>,
-        Platform Driver <platform-driver-x86@vger.kernel.org>,
         linux-efi <linux-efi@vger.kernel.org>,
-        LKML <linux-kernel@vger.kernel.org>,
-        "open list:DOCUMENTATION" <linux-doc@vger.kernel.org>,
-        "open list:HID CORE LAYER" <linux-input@vger.kernel.org>
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Andy Lutomirski <luto@kernel.org>,
+        Arvind Sankar <nivedita@alum.mit.edu>,
+        Matthew Garrett <mjg59@google.com>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Sat, Jan 11, 2020 at 6:57 AM Hans de Goede <hdegoede@redhat.com> wrote:
+On Fri, 10 Jan 2020 at 19:13, Ingo Molnar <mingo@kernel.org> wrote:
 >
-> In some cases the platform's main firmware (e.g. the UEFI fw) may contain
-> an embedded copy of device firmware which needs to be (re)loaded into the
-> peripheral. Normally such firmware would be part of linux-firmware, but in
-> some cases this is not feasible, for 2 reasons:
 >
-> 1) The firmware is customized for a specific use-case of the chipset / use
-> with a specific hardware model, so we cannot have a single firmware file
-> for the chipset. E.g. touchscreen controller firmwares are compiled
-> specifically for the hardware model they are used with, as they are
-> calibrated for a specific model digitizer.
+> * Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
 >
-> 2) Despite repeated attempts we have failed to get permission to
-> redistribute the firmware. This is especially a problem with customized
-> firmwares, these get created by the chip vendor for a specific ODM and the
-> copyright may partially belong with the ODM, so the chip vendor cannot
-> give a blanket permission to distribute these.
+> > On Fri, 3 Jan 2020 at 12:40, Ard Biesheuvel <ardb@kernel.org> wrote:
+> > >
+> > > Ingo, Thomas,
+> > >
+> > > This is the second batch of EFI updates for v5.6. Two things are still
+> > > under discussion, so I'll probably have a few more changes for this
+> > > cycle in a week or so.
+> > >
+> > > The following changes since commit 0679715e714345d273c0e1eb78078535ffc4b2a1:
+> > >
+> > >   efi/libstub/x86: Avoid globals to store context during mixed mode calls (2019-12-25 10:49:26 +0100)
+> > >
+> > > are available in the Git repository at:
+> > >
+> > >   git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next
+> > >
+> > > for you to fetch changes up to d95e4feae5368a91775c4597a8f298ba84f31535:
+> > >
+> > >   efi/x86: avoid RWX mappings for all of DRAM (2020-01-03 11:46:15 +0100)
+> > >
+> >
+> > Ingo, Thomas,
+> >
+> > I'll be submitting another PR later today or tomorrow that goes on top
+> > of these changes. Please let me know if you would like a v2 of this PR
+> > with the new content included, or rather keep them separate.
 >
-> This commit adds a new platform fallback mechanism to the firmware loader
-> which will try to lookup a device fw copy embedded in the platform's main
-> firmware if direct filesystem lookup fails.
+> So there's one complication I noticed, there's conflicts with ongoing
+> x86/mm work. I've merged x86/mm into efi/core (and will send the branches
+> in that order in the merge window), and the final three patches conflict.
 >
-> Drivers which need such embedded fw copies can enable this fallback
-> mechanism by using the new firmware_request_platform() function.
+> Mind sending those three patches and your other patches on top of the
+> latest efi/core (4444f8541dad)?
+>
 
-After finally wrapping my head around how this all fits together:
+No problem. I'll rebase and retest, and send out the result end of
+today or tomorrow.
 
-Early in boot, you check a bunch of firmware descriptors, bundled with
-drivers, to search EFI code and data for firmware before you free said
-code and data.  You catalogue it by name.  Later on, you use this list
-as a fallback, again catalogued by name.  I think it would be rather
-nicer if you simply had a list in a single file containing all these
-descriptors rather than commingling it with the driver's internal dmi
-data.  This gets rid of all the ifdeffery and module issues.  It also
-avoids any potential nastiness when you have a dmi entry that contains
-driver_data that points into the driver when the driver is a module.
-
-And you can mark the entire list __initdata.  And you can easily (now
-or later on) invert the code flow so you map each EFI region exactly
-once and then search for all the firmware in it.
-
---Andy
+Thanks,
+Ard.
