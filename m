@@ -7,37 +7,37 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DAFD9C33CB0
-	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 17:23:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E8B61C33CA9
+	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 17:23:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id A7208206DA
-	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 17:23:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BD9AD206DA
+	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 17:23:52 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1578936231;
-	bh=6I/2D+31V6MW3cEthNUUKIA6MmnULXVS6B/ucqvCFHM=;
+	s=default; t=1578936232;
+	bh=MVe9e5VC7SvtShd7dyIhPx2HpG1JLgDlBrxjy8ZUlSk=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=ZGMm36vsVKKmLcr2vXkvnWDyXWLtZjgLhLvxEwj7nWujq65NB+CcS3mS6MlhHHVaz
-	 etE8hAI5JuihbEZuGglaatmOw8XokGcqUTrhvp+Yb24fpig99AUp4WCbxynJn4+J93
-	 H0sCmaJ+zUquTtwo4Dykq0zY/8EKPp6JYQUyYACI=
+	b=C6eVHPq95PNVXcYdY+BQQi6/DV+Xj5byYsTrmRZvzlofxo9jLHErcCLqoKF2jD+CM
+	 IRJYRHUpFffH/JjMOahA8rUjPfMH0aG4ECAD3M+bxUhNHnDRycFsMwG/FKv3Utxw1Q
+	 Iei4L+ZFg0Olxlh5EIH0bNFVeiUWo74vo/YsQHrs=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728766AbgAMRXb (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 13 Jan 2020 12:23:31 -0500
-Received: from mail.kernel.org ([198.145.29.99]:42348 "EHLO mail.kernel.org"
+        id S1728885AbgAMRXY (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 13 Jan 2020 12:23:24 -0500
+Received: from mail.kernel.org ([198.145.29.99]:41888 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728914AbgAMRX1 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 13 Jan 2020 12:23:27 -0500
+        id S1728873AbgAMRXU (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Mon, 13 Jan 2020 12:23:20 -0500
 Received: from dogfood.home (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 5A72921556;
-        Mon, 13 Jan 2020 17:23:25 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 5C959214AF;
+        Mon, 13 Jan 2020 17:23:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1578936207;
-        bh=6I/2D+31V6MW3cEthNUUKIA6MmnULXVS6B/ucqvCFHM=;
+        s=default; t=1578936200;
+        bh=MVe9e5VC7SvtShd7dyIhPx2HpG1JLgDlBrxjy8ZUlSk=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=1kjSBHC7afRi3ljsNFWH9Z31xZ7fP6FoorHSJMzNfnhUPTQetDtyZTxsNZne2Lko7
-         Xy9CXgRxCFfYL5jlCgJ5G7hxkfJlXzn16p9TULO8bi1Z14cCu+lcCUd0Aa/CmDYtK/
-         cRc05611WLiiDCZNMtahE5Vspur3ueuA9kHHBmyc=
+        b=Ac1KvcWjdAcdmg5YbZ+vsNC+isxtg0/6KrqTVTKwCbz+P6pIJNBWaKnGtOzgA3qR4
+         p9fKwtbtdeNgghon2V3vV0t0zqgPwXm39AC2QjadIAE4RF7DrlYjDdupxMz1W+Hjz6
+         HHc+PvxprBSZ1piJ+w7HLeCFrI03Y1JudFJdg+HY=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
@@ -47,9 +47,9 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
         Dan Williams <dan.j.williams@intel.com>,
         Dave Young <dyoung@redhat.com>,
         Saravana Kannan <saravanak@google.com>
-Subject: [PATCH 09/13] efi: Fix comment for efi_mem_type() wrt absent physical addresses
-Date:   Mon, 13 Jan 2020 18:22:41 +0100
-Message-Id: <20200113172245.27925-10-ardb@kernel.org>
+Subject: [PATCH 06/13] efi/x86: avoid RWX mappings for all of DRAM
+Date:   Mon, 13 Jan 2020 18:22:38 +0100
+Message-Id: <20200113172245.27925-7-ardb@kernel.org>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20200113172245.27925-1-ardb@kernel.org>
 References: <20200113172245.27925-1-ardb@kernel.org>
@@ -60,33 +60,61 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Anshuman Khandual <anshuman.khandual@arm.com>
+The EFI code creates RWX mappings for all memory regions that are
+occupied after the stub completes, and in the mixed mode case, it
+even creates RWX mappings for all of the remaining DRAM as well.
 
-A previous commit f99afd08a45f ("efi: Update efi_mem_type() to return an
-error rather than 0") changed the return value from EFI_RESERVED_TYPE to
--EINVAL when the searched physical address is not present in any memory
-descriptor. But the comment preceding the function never changed. Let's
-change the comment now to reflect the new return value -EINVAL.
+Let's try to avoid this, by setting the NX bit for all memory
+regions except the ones that are marked as EFI runtime services
+code [which means text+rodata+data in practice, so we cannot mark
+them read-only right away]. For cases of buggy firmware where boot
+services code is called during SetVirtualAddressMap(), map those
+regions with exec permissions as well - they will be unmapped in
+efi_free_boot_services().
 
-Signed-off-by: Anshuman Khandual <anshuman.khandual@arm.com>
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/firmware/efi/efi.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ arch/x86/platform/efi/efi_64.c | 20 ++++++++++++++++----
+ 1 file changed, 16 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 2b02cb165f16..621220ab3d0e 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -908,7 +908,7 @@ u64 efi_mem_attributes(unsigned long phys_addr)
-  *
-  * Search in the EFI memory map for the region covering @phys_addr.
-  * Returns the EFI memory type if the region was found in the memory
-- * map, EFI_RESERVED_TYPE (zero) otherwise.
-+ * map, -EINVAL otherwise.
-  */
- int efi_mem_type(unsigned long phys_addr)
- {
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index 6ec58ff60b56..3eb23966e30a 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -365,10 +365,6 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 	 * as trim_bios_range() will reserve the first page and isolate it away
+ 	 * from memory allocators anyway.
+ 	 */
+-	pf = _PAGE_RW;
+-	if (sev_active())
+-		pf |= _PAGE_ENC;
+-
+ 	if (kernel_map_pages_in_pgd(pgd, 0x0, 0x0, 1, pf)) {
+ 		pr_err("Failed to create 1:1 mapping for the first page!\n");
+ 		return 1;
+@@ -410,6 +406,22 @@ static void __init __map_region(efi_memory_desc_t *md, u64 va)
+ 	unsigned long pfn;
+ 	pgd_t *pgd = efi_mm.pgd;
+ 
++	/*
++	 * EFI_RUNTIME_SERVICES_CODE regions typically cover PE/COFF
++	 * executable images in memory that consist of both R-X and
++	 * RW- sections, so we cannot apply read-only or non-exec
++	 * permissions just yet. However, modern EFI systems provide
++	 * a memory attributes table that describes those sections
++	 * with the appropriate restricted permissions, which are
++	 * applied in efi_runtime_update_mappings() below. All other
++	 * regions can be mapped non-executable at this point, with
++	 * the exception of boot services code regions, but those will
++	 * be unmapped again entirely in efi_free_boot_services().
++	 */
++	if (md->type != EFI_BOOT_SERVICES_CODE &&
++	    md->type != EFI_RUNTIME_SERVICES_CODE)
++		flags |= _PAGE_NX;
++
+ 	if (!(md->attribute & EFI_MEMORY_WB))
+ 		flags |= _PAGE_PCD;
+ 
 -- 
 2.20.1
 
