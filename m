@@ -7,37 +7,37 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AB9F5C33CA9
-	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 17:23:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0E34FC33CA9
+	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 17:23:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 78F3A222C2
-	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 17:23:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D56232081E
+	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 17:23:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1578936193;
-	bh=V8FfWZwqcvkcPv0qLBBwy6zI1GWJXarK+QE6YYnWud0=;
+	s=default; t=1578936198;
+	bh=yc2upCJC1oIV4r6mrOZ4qqD4lozYeYb8kOlT9po9Zz4=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=YgvsHK7/q1MEIeGmvMLKZWcEE0rOTKCpXmr5yl8I2EvRNlugoBTG1bwsXMfo5v/yn
-	 9RqEPOacx+F2QWFjwSyXrT0kPnxqkbzbk8zWeuH6z1cNGlivydHVWlZa9jxKFMQIGf
-	 jon2saQ77k84CjnukkbmXO6p8Tlf6vgbIevZTBDc=
+	b=o2nuae6V5Ndp6len0jbIR/kwGbJRFyWdIXA3cMlCEwzJ0+isd1DK23KM6sFLVQsp4
+	 G0nS0xa0deoMku6fVNtZOd79SlykUrgRXzAjk98vPklYIcZRZP8cmICEBDSCHPyPyQ
+	 Hf7MXf22Xpj8OfFcUcc7W93oqP4NahvYWKTswxBQ=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728827AbgAMRXM (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 13 Jan 2020 12:23:12 -0500
-Received: from mail.kernel.org ([198.145.29.99]:41334 "EHLO mail.kernel.org"
+        id S1728848AbgAMRXR (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 13 Jan 2020 12:23:17 -0500
+Received: from mail.kernel.org ([198.145.29.99]:41628 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728811AbgAMRXM (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 13 Jan 2020 12:23:12 -0500
+        id S1728847AbgAMRXQ (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Mon, 13 Jan 2020 12:23:16 -0500
 Received: from dogfood.home (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 188C1214AF;
-        Mon, 13 Jan 2020 17:23:08 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id B30E621569;
+        Mon, 13 Jan 2020 17:23:13 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1578936191;
-        bh=V8FfWZwqcvkcPv0qLBBwy6zI1GWJXarK+QE6YYnWud0=;
+        s=default; t=1578936195;
+        bh=yc2upCJC1oIV4r6mrOZ4qqD4lozYeYb8kOlT9po9Zz4=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Pv/F55+gtJTUxHqaYX/wT7LaQpEtSKcrnjZ4NTvhMYH4ofzMC0tRAZkQL0EhZrVlg
-         tqypwMAp0v2cN83VqM4MnOH7wLkiVxzVPFnyJSms+F+duplmukubp5W1/HQbJUzjUz
-         xMh3AV5zC/7BaIhbwzZeGbN+rJumQdIc/VbMRwGk=
+        b=OLapDzxIfuetZiW2VU/osuqqHFd+PoxAO7ibvMaSfG9Il5L7MT339KNxbkSymQ3ZP
+         UyQNdkfLuQPPXEZ4zQ32zWGJsUWkh7deJ8fsENgYgkbi/Ukf4ykDm7Z7uWmRgE1id3
+         TZOWpubOLdUl1IwCpMQrtAb6rlf/bBtBGtYxKz4Y=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
@@ -47,9 +47,9 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
         Dan Williams <dan.j.williams@intel.com>,
         Dave Young <dyoung@redhat.com>,
         Saravana Kannan <saravanak@google.com>
-Subject: [PATCH 02/13] efi/libstub/x86: use mandatory 16-byte stack alignment in mixed mode
-Date:   Mon, 13 Jan 2020 18:22:34 +0100
-Message-Id: <20200113172245.27925-3-ardb@kernel.org>
+Subject: [PATCH 04/13] x86/mm: fix NX bit clearing issue in kernel_map_pages_in_pgd
+Date:   Mon, 13 Jan 2020 18:22:36 +0100
+Message-Id: <20200113172245.27925-5-ardb@kernel.org>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20200113172245.27925-1-ardb@kernel.org>
 References: <20200113172245.27925-1-ardb@kernel.org>
@@ -60,125 +60,50 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Reduce the stack frame of the EFI stub's mixed mode thunk routine by
-8 bytes, by moving the GDT and return addresses to EBP and EBX, which
-we need to preserve anyway, since their top halves will be cleared by
-the call into 32-bit firmware code. Doing so results in the UEFI code
-being entered with a 16 byte aligned stack, as mandated by the UEFI
-spec, fixing the last occurrence in the 64-bit kernel where we violate
-this requirement.
+Commit 15f003d20782 ("x86/mm/pat: Don't implicitly allow _PAGE_RW in
+kernel_map_pages_in_pgd()") modified kernel_map_pages_in_pgd() to
+manage writable permissions of memory mappings in the EFI page
+table in a different way, but in the process, it removed the
+ability to clear NX attributes from read-only mappings, by
+clobbering the clear mask if _PAGE_RW is not being requested.
 
-Also, move the saved GDT from a global variable to an unused part of the
-stack frame, and touch up some other parts of the code.
+Failure to remove the NX attribute from read-only mappings is
+unlikely to be a security issue, but it does prevent us from
+tightening the permissions in the EFI page tables going forward,
+so let's fix it now.
 
+Fixes: 15f003d20782 ("x86/mm/pat: Don't implicitly allow _PAGE_RW in kernel_map_pages_in_pgd()
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/boot/compressed/efi_thunk_64.S | 46 +++++++------------------
- 1 file changed, 13 insertions(+), 33 deletions(-)
+ arch/x86/mm/pat/set_memory.c | 8 +-------
+ 1 file changed, 1 insertion(+), 7 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/efi_thunk_64.S b/arch/x86/boot/compressed/efi_thunk_64.S
-index d040ff5458e5..8fb7f6799c52 100644
---- a/arch/x86/boot/compressed/efi_thunk_64.S
-+++ b/arch/x86/boot/compressed/efi_thunk_64.S
-@@ -27,12 +27,9 @@ SYM_FUNC_START(__efi64_thunk)
- 	push	%rbp
- 	push	%rbx
+diff --git a/arch/x86/mm/pat/set_memory.c b/arch/x86/mm/pat/set_memory.c
+index 20823392f4f2..62a8ebe72a52 100644
+--- a/arch/x86/mm/pat/set_memory.c
++++ b/arch/x86/mm/pat/set_memory.c
+@@ -2215,7 +2215,7 @@ int __init kernel_map_pages_in_pgd(pgd_t *pgd, u64 pfn, unsigned long address,
+ 		.pgd = pgd,
+ 		.numpages = numpages,
+ 		.mask_set = __pgprot(0),
+-		.mask_clr = __pgprot(0),
++		.mask_clr = __pgprot(~page_flags & (_PAGE_NX|_PAGE_RW)),
+ 		.flags = 0,
+ 	};
  
--	subq	$8, %rsp
--	leaq	1f(%rip), %rax
--	movl	%eax, 4(%rsp)
--	leaq	efi_gdt64(%rip), %rax
--	movl	%eax, (%rsp)
--	movl	%eax, 2(%rax)		/* Fixup the gdt base address */
-+	leaq	1f(%rip), %rbp
-+	leaq	efi_gdt64(%rip), %rbx
-+	movl	%ebx, 2(%rbx)		/* Fixup the gdt base address */
+@@ -2224,12 +2224,6 @@ int __init kernel_map_pages_in_pgd(pgd_t *pgd, u64 pfn, unsigned long address,
+ 	if (!(__supported_pte_mask & _PAGE_NX))
+ 		goto out;
  
- 	movl	%ds, %eax
- 	push	%rax
-@@ -48,12 +45,10 @@ SYM_FUNC_START(__efi64_thunk)
- 	movl	%esi, 0x0(%rsp)
- 	movl	%edx, 0x4(%rsp)
- 	movl	%ecx, 0x8(%rsp)
--	movq	%r8, %rsi
--	movl	%esi, 0xc(%rsp)
--	movq	%r9, %rsi
--	movl	%esi,  0x10(%rsp)
-+	movl	%r8d, 0xc(%rsp)
-+	movl	%r9d, 0x10(%rsp)
- 
--	sgdt	save_gdt(%rip)
-+	sgdt	0x14(%rsp)
- 
- 	/*
- 	 * Switch to gdt with 32-bit segments. This is the firmware GDT
-@@ -68,11 +63,10 @@ SYM_FUNC_START(__efi64_thunk)
- 	pushq	%rax
- 	lretq
- 
--1:	addq	$32, %rsp
-+1:	lgdt	0x14(%rsp)
-+	addq	$32, %rsp
- 	movq	%rdi, %rax
- 
--	lgdt	save_gdt(%rip)
+-	if (!(page_flags & _PAGE_NX))
+-		cpa.mask_clr = __pgprot(_PAGE_NX);
 -
- 	pop	%rbx
- 	movl	%ebx, %ss
- 	pop	%rbx
-@@ -83,15 +77,9 @@ SYM_FUNC_START(__efi64_thunk)
- 	/*
- 	 * Convert 32-bit status code into 64-bit.
- 	 */
--	test	%rax, %rax
--	jz	1f
--	movl	%eax, %ecx
--	andl	$0x0fffffff, %ecx
--	andl	$0xf0000000, %eax
--	shl	$32, %rax
--	or	%rcx, %rax
--1:
--	addq	$8, %rsp
-+	roll	$1, %eax
-+	rorq	$1, %rax
-+
- 	pop	%rbx
- 	pop	%rbp
- 	ret
-@@ -135,9 +123,7 @@ SYM_FUNC_START_LOCAL(efi_enter32)
- 	 */
- 	cli
- 
--	movl	56(%esp), %eax
--	movl	%eax, 2(%eax)
--	lgdtl	(%eax)
-+	lgdtl	(%ebx)
- 
- 	movl	%cr4, %eax
- 	btsl	$(X86_CR4_PAE_BIT), %eax
-@@ -154,9 +140,8 @@ SYM_FUNC_START_LOCAL(efi_enter32)
- 	xorl	%eax, %eax
- 	lldt	%ax
- 
--	movl	60(%esp), %eax
- 	pushl	$__KERNEL_CS
--	pushl	%eax
-+	pushl	%ebp
- 
- 	/* Enable paging */
- 	movl	%cr0, %eax
-@@ -172,11 +157,6 @@ SYM_DATA_START(efi32_boot_gdt)
- 	.quad	0
- SYM_DATA_END(efi32_boot_gdt)
- 
--SYM_DATA_START_LOCAL(save_gdt)
--	.word	0
--	.quad	0
--SYM_DATA_END(save_gdt)
+-	if (!(page_flags & _PAGE_RW))
+-		cpa.mask_clr = __pgprot(_PAGE_RW);
 -
- SYM_DATA_START(efi_gdt64)
- 	.word	efi_gdt64_end - efi_gdt64
- 	.long	0			/* Filled out by user */
+ 	if (!(page_flags & _PAGE_ENC))
+ 		cpa.mask_clr = pgprot_encrypted(cpa.mask_clr);
+ 
 -- 
 2.20.1
 
