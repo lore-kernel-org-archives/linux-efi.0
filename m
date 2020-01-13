@@ -2,42 +2,42 @@ Return-Path: <SRS0=ETnK=3C=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PULL_REQUEST,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E0CBDC33CA9
-	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 17:23:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AB9F5C33CA9
+	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 17:23:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id B20E8214AF
-	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 17:23:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 78F3A222C2
+	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 17:23:13 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1578936187;
-	bh=Mc+JBGwCS17q1ERYia2qc0tuxix0IR/XU/AuycW3Tak=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=t/nv02JvXoXpIyajj0ymcnp3NB+IVzU/WEnwQhGYrum+ilcyve3yED8V/H6b00pnZ
-	 p+20OszwfFUn6SCtyjIZlabwSeIZ1GpEw8stu2o7XQe01DhpnFnpWdz7kpl7ZcUK0b
-	 ZhfgdDoDTCrtiQY0VPuXTT2foQiTzyMRm7uQ/8ss=
+	s=default; t=1578936193;
+	bh=V8FfWZwqcvkcPv0qLBBwy6zI1GWJXarK+QE6YYnWud0=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=YgvsHK7/q1MEIeGmvMLKZWcEE0rOTKCpXmr5yl8I2EvRNlugoBTG1bwsXMfo5v/yn
+	 9RqEPOacx+F2QWFjwSyXrT0kPnxqkbzbk8zWeuH6z1cNGlivydHVWlZa9jxKFMQIGf
+	 jon2saQ77k84CjnukkbmXO6p8Tlf6vgbIevZTBDc=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728682AbgAMRXH (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 13 Jan 2020 12:23:07 -0500
-Received: from mail.kernel.org ([198.145.29.99]:41108 "EHLO mail.kernel.org"
+        id S1728827AbgAMRXM (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 13 Jan 2020 12:23:12 -0500
+Received: from mail.kernel.org ([198.145.29.99]:41334 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728512AbgAMRXH (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 13 Jan 2020 12:23:07 -0500
+        id S1728811AbgAMRXM (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Mon, 13 Jan 2020 12:23:12 -0500
 Received: from dogfood.home (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 720DF206DA;
-        Mon, 13 Jan 2020 17:23:04 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 188C1214AF;
+        Mon, 13 Jan 2020 17:23:08 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1578936186;
-        bh=Mc+JBGwCS17q1ERYia2qc0tuxix0IR/XU/AuycW3Tak=;
-        h=From:To:Cc:Subject:Date:From;
-        b=YiulQq2q+pCvuCIE7mZCgZhC+xq2YI2nRT+26mWV01zvZ9nKQPV6tlg1R8I1BxxUo
-         ocluvZmD/lYvCX+QAwp5T56O5Mr3Mm7cgOXmiugSrInz8mNwzjWZJbILANJLX+JRpR
-         h3XacNENLDSi/oAFeNw4QyKu7GYRG6MBv5vVabUs=
+        s=default; t=1578936191;
+        bh=V8FfWZwqcvkcPv0qLBBwy6zI1GWJXarK+QE6YYnWud0=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=Pv/F55+gtJTUxHqaYX/wT7LaQpEtSKcrnjZ4NTvhMYH4ofzMC0tRAZkQL0EhZrVlg
+         tqypwMAp0v2cN83VqM4MnOH7wLkiVxzVPFnyJSms+F+duplmukubp5W1/HQbJUzjUz
+         xMh3AV5zC/7BaIhbwzZeGbN+rJumQdIc/VbMRwGk=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
@@ -47,10 +47,12 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
         Dan Williams <dan.j.williams@intel.com>,
         Dave Young <dyoung@redhat.com>,
         Saravana Kannan <saravanak@google.com>
-Subject: [GIT PULL 00/13] More EFI updates for v5.6
-Date:   Mon, 13 Jan 2020 18:22:32 +0100
-Message-Id: <20200113172245.27925-1-ardb@kernel.org>
+Subject: [PATCH 02/13] efi/libstub/x86: use mandatory 16-byte stack alignment in mixed mode
+Date:   Mon, 13 Jan 2020 18:22:34 +0100
+Message-Id: <20200113172245.27925-3-ardb@kernel.org>
 X-Mailer: git-send-email 2.20.1
+In-Reply-To: <20200113172245.27925-1-ardb@kernel.org>
+References: <20200113172245.27925-1-ardb@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
@@ -58,66 +60,125 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The following changes since commit 4444f8541dad16fefd9b8807ad1451e806ef1d94:
+Reduce the stack frame of the EFI stub's mixed mode thunk routine by
+8 bytes, by moving the GDT and return addresses to EBP and EBX, which
+we need to preserve anyway, since their top halves will be cleared by
+the call into 32-bit firmware code. Doing so results in the UEFI code
+being entered with a 16 byte aligned stack, as mandated by the UEFI
+spec, fixing the last occurrence in the 64-bit kernel where we violate
+this requirement.
 
-  efi: Allow disabling PCI busmastering on bridges during boot (2020-01-10 18:55:04 +0100)
+Also, move the saved GDT from a global variable to an unused part of the
+stack frame, and touch up some other parts of the code.
 
-are available in the Git repository at:
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+---
+ arch/x86/boot/compressed/efi_thunk_64.S | 46 +++++++------------------
+ 1 file changed, 13 insertions(+), 33 deletions(-)
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next
+diff --git a/arch/x86/boot/compressed/efi_thunk_64.S b/arch/x86/boot/compressed/efi_thunk_64.S
+index d040ff5458e5..8fb7f6799c52 100644
+--- a/arch/x86/boot/compressed/efi_thunk_64.S
++++ b/arch/x86/boot/compressed/efi_thunk_64.S
+@@ -27,12 +27,9 @@ SYM_FUNC_START(__efi64_thunk)
+ 	push	%rbp
+ 	push	%rbx
+ 
+-	subq	$8, %rsp
+-	leaq	1f(%rip), %rax
+-	movl	%eax, 4(%rsp)
+-	leaq	efi_gdt64(%rip), %rax
+-	movl	%eax, (%rsp)
+-	movl	%eax, 2(%rax)		/* Fixup the gdt base address */
++	leaq	1f(%rip), %rbp
++	leaq	efi_gdt64(%rip), %rbx
++	movl	%ebx, 2(%rbx)		/* Fixup the gdt base address */
+ 
+ 	movl	%ds, %eax
+ 	push	%rax
+@@ -48,12 +45,10 @@ SYM_FUNC_START(__efi64_thunk)
+ 	movl	%esi, 0x0(%rsp)
+ 	movl	%edx, 0x4(%rsp)
+ 	movl	%ecx, 0x8(%rsp)
+-	movq	%r8, %rsi
+-	movl	%esi, 0xc(%rsp)
+-	movq	%r9, %rsi
+-	movl	%esi,  0x10(%rsp)
++	movl	%r8d, 0xc(%rsp)
++	movl	%r9d, 0x10(%rsp)
+ 
+-	sgdt	save_gdt(%rip)
++	sgdt	0x14(%rsp)
+ 
+ 	/*
+ 	 * Switch to gdt with 32-bit segments. This is the firmware GDT
+@@ -68,11 +63,10 @@ SYM_FUNC_START(__efi64_thunk)
+ 	pushq	%rax
+ 	lretq
+ 
+-1:	addq	$32, %rsp
++1:	lgdt	0x14(%rsp)
++	addq	$32, %rsp
+ 	movq	%rdi, %rax
+ 
+-	lgdt	save_gdt(%rip)
+-
+ 	pop	%rbx
+ 	movl	%ebx, %ss
+ 	pop	%rbx
+@@ -83,15 +77,9 @@ SYM_FUNC_START(__efi64_thunk)
+ 	/*
+ 	 * Convert 32-bit status code into 64-bit.
+ 	 */
+-	test	%rax, %rax
+-	jz	1f
+-	movl	%eax, %ecx
+-	andl	$0x0fffffff, %ecx
+-	andl	$0xf0000000, %eax
+-	shl	$32, %rax
+-	or	%rcx, %rax
+-1:
+-	addq	$8, %rsp
++	roll	$1, %eax
++	rorq	$1, %rax
++
+ 	pop	%rbx
+ 	pop	%rbp
+ 	ret
+@@ -135,9 +123,7 @@ SYM_FUNC_START_LOCAL(efi_enter32)
+ 	 */
+ 	cli
+ 
+-	movl	56(%esp), %eax
+-	movl	%eax, 2(%eax)
+-	lgdtl	(%eax)
++	lgdtl	(%ebx)
+ 
+ 	movl	%cr4, %eax
+ 	btsl	$(X86_CR4_PAE_BIT), %eax
+@@ -154,9 +140,8 @@ SYM_FUNC_START_LOCAL(efi_enter32)
+ 	xorl	%eax, %eax
+ 	lldt	%ax
+ 
+-	movl	60(%esp), %eax
+ 	pushl	$__KERNEL_CS
+-	pushl	%eax
++	pushl	%ebp
+ 
+ 	/* Enable paging */
+ 	movl	%cr0, %eax
+@@ -172,11 +157,6 @@ SYM_DATA_START(efi32_boot_gdt)
+ 	.quad	0
+ SYM_DATA_END(efi32_boot_gdt)
+ 
+-SYM_DATA_START_LOCAL(save_gdt)
+-	.word	0
+-	.quad	0
+-SYM_DATA_END(save_gdt)
+-
+ SYM_DATA_START(efi_gdt64)
+ 	.word	efi_gdt64_end - efi_gdt64
+ 	.long	0			/* Filled out by user */
+-- 
+2.20.1
 
-for you to fetch changes up to 743c5dd59f7e4b9e7a28be6a8f0e8d03271a98ab:
-
-  efi: Fix handling of multiple efi_fake_mem= entries (2020-01-13 10:41:53 +0100)
-
-----------------------------------------------------------------
-Third and final batch of EFI updates for v5.6:
-- A few touchups for the x86 libstub changes that have already been queued
-  up.
-- Fix memory leaks and crash bugs in the EFI fake_mem driver, which may be
-  used more heavily in the future for device-dax soft reservation (Dan)
-- Avoid RWX mappings in the EFI page tables when possible.
-- Avoid PCIe probing failures if the EFI framebuffer is probed first when
-  the new of_devlink feature is active.
-- Move the support code for the old EFI memory mapping style into its only
-  user, the SGI UV1+ support code.
-
-----------------------------------------------------------------
-Anshuman Khandual (1):
-      efi: Fix comment for efi_mem_type() wrt absent physical addresses
-
-Ard Biesheuvel (7):
-      efi/libstub/x86: use const attribute for efi_is_64bit()
-      efi/libstub/x86: use mandatory 16-byte stack alignment in mixed mode
-      x86/mm: fix NX bit clearing issue in kernel_map_pages_in_pgd
-      efi/x86: don't map the entire kernel text RW for mixed mode
-      efi/x86: avoid RWX mappings for all of DRAM
-      efi/x86: limit EFI old memory map to SGI UV machines
-      efi/arm: defer probe of PCIe backed efifb on DT systems
-
-Arnd Bergmann (1):
-      efi/libstub/x86: fix unused-variable warning
-
-Dan Williams (4):
-      efi: Add a flags parameter to efi_memory_map
-      efi: Add tracking for dynamically allocated memmaps
-      efi: Fix efi_memmap_alloc() leaks
-      efi: Fix handling of multiple efi_fake_mem= entries
-
- Documentation/admin-guide/kernel-parameters.txt |   3 +-
- arch/x86/boot/compressed/eboot.c                |  16 +-
- arch/x86/boot/compressed/efi_thunk_64.S         |  46 ++----
- arch/x86/boot/compressed/head_64.S              |   7 +-
- arch/x86/include/asm/efi.h                      |  28 ++--
- arch/x86/kernel/kexec-bzimage64.c               |   2 +-
- arch/x86/mm/pat/set_memory.c                    |   8 +-
- arch/x86/platform/efi/efi.c                     |  40 +++--
- arch/x86/platform/efi/efi_64.c                  | 190 ++++--------------------
- arch/x86/platform/efi/quirks.c                  |  44 +++---
- arch/x86/platform/uv/bios_uv.c                  | 164 +++++++++++++++++++-
- drivers/firmware/efi/arm-init.c                 | 107 ++++++++++++-
- drivers/firmware/efi/efi.c                      |   2 +-
- drivers/firmware/efi/fake_mem.c                 |  43 +++---
- drivers/firmware/efi/memmap.c                   |  95 ++++++++----
- include/linux/efi.h                             |  17 ++-
- 16 files changed, 471 insertions(+), 341 deletions(-)
