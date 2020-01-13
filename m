@@ -4,40 +4,40 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E8472C33CAE
-	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 17:23:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7523DC33CB0
+	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 17:23:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id B3D13206DA
-	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 17:23:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4BE13222C3
+	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 17:23:32 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1578936211;
-	bh=niQyp4EepwCvKwoSufe5yiv+s5x2vxpqwbY5ju16TJg=;
+	s=default; t=1578936212;
+	bh=x9TTkFxU4CKU8Ii3qVXXqis0Dv6loWv7+lGjAMLiEKI=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=j4nSEfwztIgy6YUn0lz8FxQD8GOQYE6fbZBG/0dUfyPmtSk7fpA/LmQ0L4kkZpQMv
-	 wwDFacBcZ1miB0fzm428NFnQLYVteW1smJZtlVNtYI0aB+XIE5EAfvMKA6FYFNz1ov
-	 3vVnZPfJ9cH6EfKEQTjfkzAgF9+rtN6S5dHpRGvA=
+	b=QWkb9gPbZ8vUqzwiQ3efWy08PI33QhyriX7nJypuMDpePeEHosEsPonf6EA4ep13W
+	 I8bGRTS/wwc0rjWXv0Ufib4K9RWA6qXskgkyBTAJJSMlUeF7crvDDXt4+UoASJjGIg
+	 RjxV2NE78pzI5owfhI3whGeC9Mu6mYU1StkA3q2s=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728909AbgAMRX0 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 13 Jan 2020 12:23:26 -0500
-Received: from mail.kernel.org ([198.145.29.99]:42168 "EHLO mail.kernel.org"
+        id S1727331AbgAMRXb (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 13 Jan 2020 12:23:31 -0500
+Received: from mail.kernel.org ([198.145.29.99]:42482 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728896AbgAMRX0 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 13 Jan 2020 12:23:26 -0500
+        id S1728923AbgAMRXa (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Mon, 13 Jan 2020 12:23:30 -0500
 Received: from dogfood.home (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 0A7362081E;
-        Mon, 13 Jan 2020 17:23:22 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id A5D5A214AF;
+        Mon, 13 Jan 2020 17:23:27 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1578936204;
-        bh=niQyp4EepwCvKwoSufe5yiv+s5x2vxpqwbY5ju16TJg=;
+        s=default; t=1578936209;
+        bh=x9TTkFxU4CKU8Ii3qVXXqis0Dv6loWv7+lGjAMLiEKI=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=ihGdTwRnrXKCjNJa1vpmzhFgqBGE410liZy96yELhFVNl0SAKU6zFIe1QYJqOQ4wK
-         0TCrsVYbBNzL+1l6TiNvNzZ7TJcR16b71tZAxIF8UPqHANh/haWrC9XvhjkTQWSpsf
-         ayz1+HQb5xlpGf0n47ba7hhNHb1I8HQAd+g3EXoA=
+        b=B/l4VOs2PDhOyMyZ4NGBzwr6Aa7MMMG41hkZuZpAxozyYqiJ1/BO/K3u10aYJ5jyE
+         7puKV3Md6Q8cCSSMp7xYYK+qvYv9qhpd8WBLug263n7BQhpwYvIPXP2Yqb1xbSFeLX
+         vi+4a0y3qkDfuiQ9AE+h3kS9FVxUDEe0BQNHCzwA=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
@@ -47,9 +47,9 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
         Dan Williams <dan.j.williams@intel.com>,
         Dave Young <dyoung@redhat.com>,
         Saravana Kannan <saravanak@google.com>
-Subject: [PATCH 08/13] efi/arm: defer probe of PCIe backed efifb on DT systems
-Date:   Mon, 13 Jan 2020 18:22:40 +0100
-Message-Id: <20200113172245.27925-9-ardb@kernel.org>
+Subject: [PATCH 10/13] efi: Add a flags parameter to efi_memory_map
+Date:   Mon, 13 Jan 2020 18:22:42 +0100
+Message-Id: <20200113172245.27925-11-ardb@kernel.org>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20200113172245.27925-1-ardb@kernel.org>
 References: <20200113172245.27925-1-ardb@kernel.org>
@@ -60,158 +60,159 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The new of_devlink support breaks PCIe probing on ARM platforms booting
-via UEFI if the firmware exposes a EFI framebuffer that is backed by a
-PCI device. The reason is that the probing order gets reversed,
-resulting in a resource conflict on the framebuffer memory window when
-the PCIe probes last, causing it to give up entirely.
+From: Dan Williams <dan.j.williams@intel.com>
 
-Given that we rely on PCI quirks to deal with EFI framebuffers that get
-moved around in memory, we cannot simply drop the memory reservation, so
-instead, let's use the device link infrastructure to register this
-dependency, and force the probing to occur in the expected order.
+In preparation for garbage collecting dynamically allocated efi memory
+maps, where the allocation method of memblock vs slab needs to be
+recalled, convert the existing 'late' flag into a 'flags' bitmask.
 
-Co-developed-by: Saravana Kannan <saravanak@google.com>
-Signed-off-by: Saravana Kannan <saravanak@google.com>
+Arrange for the flag to be passed via 'struct efi_memory_map_data'. This
+structure grows additional flags in follow-on changes.
+
+Signed-off-by: Dan Williams <dan.j.williams@intel.com>
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/firmware/efi/arm-init.c | 107 ++++++++++++++++++++++++++++++--
- 1 file changed, 103 insertions(+), 4 deletions(-)
+ drivers/firmware/efi/memmap.c | 31 +++++++++++++++++--------------
+ include/linux/efi.h           |  4 +++-
+ 2 files changed, 20 insertions(+), 15 deletions(-)
 
-diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
-index 904fa09e6a6b..d99f5b0c8a09 100644
---- a/drivers/firmware/efi/arm-init.c
-+++ b/drivers/firmware/efi/arm-init.c
-@@ -10,10 +10,12 @@
- #define pr_fmt(fmt)	"efi: " fmt
- 
- #include <linux/efi.h>
-+#include <linux/fwnode.h>
- #include <linux/init.h>
- #include <linux/memblock.h>
- #include <linux/mm_types.h>
- #include <linux/of.h>
-+#include <linux/of_address.h>
- #include <linux/of_fdt.h>
- #include <linux/platform_device.h>
- #include <linux/screen_info.h>
-@@ -276,15 +278,112 @@ void __init efi_init(void)
- 		efi_memmap_unmap();
- }
- 
-+static bool efifb_overlaps_pci_range(const struct of_pci_range *range)
-+{
-+	u64 fb_base = screen_info.lfb_base;
-+
-+	if (screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
-+		fb_base |= (u64)(unsigned long)screen_info.ext_lfb_base << 32;
-+
-+	return fb_base >= range->cpu_addr &&
-+	       fb_base < (range->cpu_addr + range->size);
-+}
-+
-+static struct device_node *find_pci_overlap_node(void)
-+{
-+	struct device_node *np;
-+
-+	for_each_node_by_type(np, "pci") {
-+		struct of_pci_range_parser parser;
-+		struct of_pci_range range;
-+		int err;
-+
-+		err = of_pci_range_parser_init(&parser, np);
-+		if (err) {
-+			pr_warn("of_pci_range_parser_init() failed: %d\n", err);
-+			continue;
-+		}
-+
-+		for_each_of_pci_range(&parser, &range)
-+			if (efifb_overlaps_pci_range(&range))
-+				return np;
-+	}
-+	return NULL;
-+}
-+
-+/*
-+ * If the efifb framebuffer is backed by a PCI graphics controller, we have
-+ * to ensure that this relation is expressed using a device link when
-+ * running in DT mode, or the probe order may be reversed, resulting in a
-+ * resource reservation conflict on the memory window that the efifb
-+ * framebuffer steals from the PCIe host bridge.
-+ */
-+static int efifb_add_links(const struct fwnode_handle *fwnode,
-+			   struct device *dev)
-+{
-+	struct device_node *sup_np;
-+	struct device *sup_dev;
-+
-+	sup_np = find_pci_overlap_node();
-+
-+	/*
-+	 * If there's no PCI graphics controller backing the efifb, we are
-+	 * done here.
-+	 */
-+	if (!sup_np)
-+		return 0;
-+
-+	sup_dev = get_dev_from_fwnode(&sup_np->fwnode);
-+	of_node_put(sup_np);
-+
-+	/*
-+	 * Return -ENODEV if the PCI graphics controller device hasn't been
-+	 * registered yet.  This ensures that efifb isn't allowed to probe
-+	 * and this function is retried again when new devices are
-+	 * registered.
-+	 */
-+	if (!sup_dev)
-+		return -ENODEV;
-+
-+	/*
-+	 * If this fails, retrying this function at a later point won't
-+	 * change anything. So, don't return an error after this.
-+	 */
-+	if (!device_link_add(dev, sup_dev, 0))
-+		dev_warn(dev, "device_link_add() failed\n");
-+
-+	put_device(sup_dev);
-+
-+	return 0;
-+}
-+
-+static const struct fwnode_operations efifb_fwnode_ops = {
-+	.add_links = efifb_add_links,
-+};
-+
-+static struct fwnode_handle efifb_fwnode = {
-+	.ops = &efifb_fwnode_ops,
-+};
-+
- static int __init register_gop_device(void)
+diff --git a/drivers/firmware/efi/memmap.c b/drivers/firmware/efi/memmap.c
+index 38b686c67b17..4f98eb12c172 100644
+--- a/drivers/firmware/efi/memmap.c
++++ b/drivers/firmware/efi/memmap.c
+@@ -52,21 +52,20 @@ phys_addr_t __init efi_memmap_alloc(unsigned int num_entries)
+ /**
+  * __efi_memmap_init - Common code for mapping the EFI memory map
+  * @data: EFI memory map data
+- * @late: Use early or late mapping function?
+  *
+  * This function takes care of figuring out which function to use to
+  * map the EFI memory map in efi.memmap based on how far into the boot
+  * we are.
+  *
+- * During bootup @late should be %false since we only have access to
+- * the early_memremap*() functions as the vmalloc space isn't setup.
+- * Once the kernel is fully booted we can fallback to the more robust
+- * memremap*() API.
++ * During bootup EFI_MEMMAP_LATE in data->flags should be clear since we
++ * only have access to the early_memremap*() functions as the vmalloc
++ * space isn't setup.  Once the kernel is fully booted we can fallback
++ * to the more robust memremap*() API.
+  *
+  * Returns zero on success, a negative error code on failure.
+  */
+ static int __init
+-__efi_memmap_init(struct efi_memory_map_data *data, bool late)
++__efi_memmap_init(struct efi_memory_map_data *data)
  {
--	void *pd;
-+	struct platform_device *pd;
-+	int err;
+ 	struct efi_memory_map map;
+ 	phys_addr_t phys_map;
+@@ -76,7 +75,7 @@ __efi_memmap_init(struct efi_memory_map_data *data, bool late)
  
- 	if (screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
- 		return 0;
+ 	phys_map = data->phys_map;
  
--	pd = platform_device_register_data(NULL, "efi-framebuffer", 0,
--					   &screen_info, sizeof(screen_info));
--	return PTR_ERR_OR_ZERO(pd);
-+	pd = platform_device_alloc("efi-framebuffer", 0);
-+	if (!pd)
-+		return -ENOMEM;
-+
-+	if (IS_ENABLED(CONFIG_PCI))
-+		pd->dev.fwnode = &efifb_fwnode;
-+
-+	err = platform_device_add_data(pd, &screen_info, sizeof(screen_info));
-+	if (err)
-+		return err;
-+
-+	return platform_device_add(pd);
+-	if (late)
++	if (data->flags & EFI_MEMMAP_LATE)
+ 		map.map = memremap(phys_map, data->size, MEMREMAP_WB);
+ 	else
+ 		map.map = early_memremap(phys_map, data->size);
+@@ -92,7 +91,7 @@ __efi_memmap_init(struct efi_memory_map_data *data, bool late)
+ 
+ 	map.desc_version = data->desc_version;
+ 	map.desc_size = data->desc_size;
+-	map.late = late;
++	map.flags = data->flags;
+ 
+ 	set_bit(EFI_MEMMAP, &efi.flags);
+ 
+@@ -111,9 +110,10 @@ __efi_memmap_init(struct efi_memory_map_data *data, bool late)
+ int __init efi_memmap_init_early(struct efi_memory_map_data *data)
+ {
+ 	/* Cannot go backwards */
+-	WARN_ON(efi.memmap.late);
++	WARN_ON(efi.memmap.flags & EFI_MEMMAP_LATE);
+ 
+-	return __efi_memmap_init(data, false);
++	data->flags = 0;
++	return __efi_memmap_init(data);
  }
- subsys_initcall(register_gop_device);
+ 
+ void __init efi_memmap_unmap(void)
+@@ -121,7 +121,7 @@ void __init efi_memmap_unmap(void)
+ 	if (!efi_enabled(EFI_MEMMAP))
+ 		return;
+ 
+-	if (!efi.memmap.late) {
++	if (!(efi.memmap.flags & EFI_MEMMAP_LATE)) {
+ 		unsigned long size;
+ 
+ 		size = efi.memmap.desc_size * efi.memmap.nr_map;
+@@ -162,13 +162,14 @@ int __init efi_memmap_init_late(phys_addr_t addr, unsigned long size)
+ 	struct efi_memory_map_data data = {
+ 		.phys_map = addr,
+ 		.size = size,
++		.flags = EFI_MEMMAP_LATE,
+ 	};
+ 
+ 	/* Did we forget to unmap the early EFI memmap? */
+ 	WARN_ON(efi.memmap.map);
+ 
+ 	/* Were we already called? */
+-	WARN_ON(efi.memmap.late);
++	WARN_ON(efi.memmap.flags & EFI_MEMMAP_LATE);
+ 
+ 	/*
+ 	 * It makes no sense to allow callers to register different
+@@ -178,7 +179,7 @@ int __init efi_memmap_init_late(phys_addr_t addr, unsigned long size)
+ 	data.desc_version = efi.memmap.desc_version;
+ 	data.desc_size = efi.memmap.desc_size;
+ 
+-	return __efi_memmap_init(&data, true);
++	return __efi_memmap_init(&data);
+ }
+ 
+ /**
+@@ -195,6 +196,7 @@ int __init efi_memmap_init_late(phys_addr_t addr, unsigned long size)
+ int __init efi_memmap_install(phys_addr_t addr, unsigned int nr_map)
+ {
+ 	struct efi_memory_map_data data;
++	unsigned long flags;
+ 
+ 	efi_memmap_unmap();
+ 
+@@ -202,8 +204,9 @@ int __init efi_memmap_install(phys_addr_t addr, unsigned int nr_map)
+ 	data.size = efi.memmap.desc_size * nr_map;
+ 	data.desc_version = efi.memmap.desc_version;
+ 	data.desc_size = efi.memmap.desc_size;
++	data.flags = efi.memmap.flags & EFI_MEMMAP_LATE;
+ 
+-	return __efi_memmap_init(&data, efi.memmap.late);
++	return __efi_memmap_init(&data);
+ }
+ 
+ /**
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 7e8e25b1d11c..f117d68c314e 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -767,6 +767,7 @@ struct efi_memory_map_data {
+ 	unsigned long size;
+ 	unsigned long desc_version;
+ 	unsigned long desc_size;
++	unsigned long flags;
+ };
+ 
+ struct efi_memory_map {
+@@ -776,7 +777,8 @@ struct efi_memory_map {
+ 	int nr_map;
+ 	unsigned long desc_version;
+ 	unsigned long desc_size;
+-	bool late;
++#define EFI_MEMMAP_LATE (1UL << 0)
++	unsigned long flags;
+ };
+ 
+ struct efi_mem_range {
 -- 
 2.20.1
 
