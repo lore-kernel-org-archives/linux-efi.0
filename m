@@ -1,179 +1,162 @@
-Return-Path: <SRS0=ETnK=3C=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=IhF9=3D=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D34A8C33CA9
-	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 17:24:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57D9AC33CB1
+	for <linux-efi@archiver.kernel.org>; Tue, 14 Jan 2020 11:08:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id AAC3321739
-	for <linux-efi@archiver.kernel.org>; Mon, 13 Jan 2020 17:24:05 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1578936245;
-	bh=ywnXyYx3AvLj1uPsyuEwdyOKRA+9azpuVDDX701x9FU=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=FsQoDlNztoHklbGGoUeooyiCqMlZnq1R8SMmO6k3Lpdksa6PHG6f+arfqvHJQPHec
-	 CEn4HqSsDd0zh7sb9U82FMXaF7M3aH4PPVuzqlyXtBP0zSKlfNnUBiMU4QU9SRN2jV
-	 tE3KMHHzMcHYXZrrJhu5DS5HlHtZclTi8OD4lvhU=
+	by mail.kernel.org (Postfix) with ESMTP id 2B84C24672
+	for <linux-efi@archiver.kernel.org>; Tue, 14 Jan 2020 11:08:33 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=lca.pw header.i=@lca.pw header.b="mDLkJsF3"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728804AbgAMRXK (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 13 Jan 2020 12:23:10 -0500
-Received: from mail.kernel.org ([198.145.29.99]:41218 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728512AbgAMRXJ (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 13 Jan 2020 12:23:09 -0500
-Received: from dogfood.home (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id C0C772081E;
-        Mon, 13 Jan 2020 17:23:06 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1578936188;
-        bh=ywnXyYx3AvLj1uPsyuEwdyOKRA+9azpuVDDX701x9FU=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Sm6BT1QpuPskrUhj/iXXK55XKmolJ7zOspIwbiFCSIX1ypWH0+jE1YjfiCyzhlXHb
-         5hTWc2SNKNPp9ureteaF+3cXnHSqVxTKjELOeBTepJ7bEhtnpO9qYq3wMhG5BkXyQ6
-         xeFHG2ackdA5eXgnOoMtBBVBSU0uMq9GPc9eNG6w=
-From:   Ard Biesheuvel <ardb@kernel.org>
-To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
-        Thomas Gleixner <tglx@linutronix.de>
-Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
-        Anshuman Khandual <anshuman.khandual@arm.com>,
+        id S1729462AbgANLId (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 14 Jan 2020 06:08:33 -0500
+Received: from mail-qk1-f196.google.com ([209.85.222.196]:40361 "EHLO
+        mail-qk1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727556AbgANLIc (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 14 Jan 2020 06:08:32 -0500
+Received: by mail-qk1-f196.google.com with SMTP id c17so11660459qkg.7
+        for <linux-efi@vger.kernel.org>; Tue, 14 Jan 2020 03:08:31 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=lca.pw; s=google;
+        h=content-transfer-encoding:from:mime-version:subject:date:message-id
+         :references:cc:in-reply-to:to;
+        bh=ukU/HTx3Lur+oN5f1R5Yulqfuax6so7AyFG3I+NXijE=;
+        b=mDLkJsF382qFbmEkUJXrjKsSsU0bztLQnJuEdueVjG+YHKn129QRMVkFBhaHs02jlb
+         S5JV36BNDDNUfL8KemT5hOsLWqTvUggPzEAa8N2CZKjqEUL2gsDnvv40g+BB+uela7dh
+         Jgrx9rDjz5OErwlXPsX7nNM+dSWsRNE8nulA4QnYl74qcvdSBJGmDk3He16/4mFZs33S
+         IzPGb27j4W2dHx0T8+OODSyZm7E16IzcLQzguhPs5vHLJASI9JeNCkexh2az/dQ96t3u
+         ruWKhzckHLSdD4ijmd79+MvrNJzlzIX0uzlRXCf+RicfDnuUK7rhsIpo8bqFBLTAzkrn
+         doog==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:content-transfer-encoding:from:mime-version
+         :subject:date:message-id:references:cc:in-reply-to:to;
+        bh=ukU/HTx3Lur+oN5f1R5Yulqfuax6so7AyFG3I+NXijE=;
+        b=dCr2Qc4soALsL9VOrx/ZAIb3CxOdGSWqS+hCNGB81G0h/IRU6Hzqbnnjs2kWWEVnfg
+         osiFcITmk/aG7hIEFMxVJr4/Dn+SD63qarc8GOS9NuCLJlFHJQn7SkEhNG1SOpIG3O18
+         djLFjwCh2svNVdAK3+DdyQkHNXex9QoBxhhlq/5PuBvfA9ODT01NEz6/k5ohr0Ylru8c
+         J2OO4D3weIcLhlj36mcv/6nIOYP2ihOuApO3UR/7A8Py5Ox93pDdeOHnsFEg3JZZX938
+         ttPNMeHnqchCt86/3zchT30cMoG04HJx4F+kRTeT9A+WasoDd9RWozFWdEOuszMeqdC4
+         LNLg==
+X-Gm-Message-State: APjAAAWW9UMEDRQpSM1fQIi/UZW97fpKJMjVH2Clmt7LxERf9tNflwd0
+        5BCRQkJxphET4JOrmpTJvajakg==
+X-Google-Smtp-Source: APXvYqw+K7nK6v62iaPG8IRuXo2+JcN5WoG4smCXzjE2do7qUArjfSk6sdyUR46tJD8UtoLaDUB45w==
+X-Received: by 2002:a37:4b93:: with SMTP id y141mr21982856qka.205.1579000111263;
+        Tue, 14 Jan 2020 03:08:31 -0800 (PST)
+Received: from [192.168.1.183] (pool-71-184-117-43.bstnma.fios.verizon.net. [71.184.117.43])
+        by smtp.gmail.com with ESMTPSA id i16sm6406845qkh.120.2020.01.14.03.08.30
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 14 Jan 2020 03:08:30 -0800 (PST)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: quoted-printable
+From:   Qian Cai <cai@lca.pw>
+Mime-Version: 1.0 (1.0)
+Subject: Re: [PATCH v4 01/10] kcsan: Add Kernel Concurrency Sanitizer infrastructure
+Date:   Tue, 14 Jan 2020 06:08:29 -0500
+Message-Id: <53F6B915-AC53-41BB-BF32-33732515B3A0@lca.pw>
+References: <CANpmjNOC2PYFsE_TK2SYmKcHxyG+2arWc8x_fmeWPOMi0+ot8g@mail.gmail.com>
+Cc:     LKMM Maintainers -- Akira Yokosawa <akiyks@gmail.com>,
+        Alan Stern <stern@rowland.harvard.edu>,
+        Alexander Potapenko <glider@google.com>,
+        Andrea Parri <parri.andrea@gmail.com>,
+        Andrey Konovalov <andreyknvl@google.com>,
+        Andy Lutomirski <luto@kernel.org>,
+        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
         Arnd Bergmann <arnd@arndb.de>,
-        Dan Williams <dan.j.williams@intel.com>,
-        Dave Young <dyoung@redhat.com>,
-        Saravana Kannan <saravanak@google.com>
-Subject: [PATCH 01/13] efi/libstub/x86: use const attribute for efi_is_64bit()
-Date:   Mon, 13 Jan 2020 18:22:33 +0100
-Message-Id: <20200113172245.27925-2-ardb@kernel.org>
-X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20200113172245.27925-1-ardb@kernel.org>
-References: <20200113172245.27925-1-ardb@kernel.org>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+        Boqun Feng <boqun.feng@gmail.com>,
+        Borislav Petkov <bp@alien8.de>, Daniel Axtens <dja@axtens.net>,
+        Daniel Lustig <dlustig@nvidia.com>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        David Howells <dhowells@redhat.com>,
+        Dmitry Vyukov <dvyukov@google.com>,
+        "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>,
+        Jade Alglave <j.alglave@ucl.ac.uk>,
+        Joel Fernandes <joel@joelfernandes.org>,
+        Jonathan Corbet <corbet@lwn.net>,
+        Josh Poimboeuf <jpoimboe@redhat.com>,
+        Luc Maranget <luc.maranget@inria.fr>,
+        Mark Rutland <Mark.Rutland@arm.com>,
+        Nicholas Piggin <npiggin@gmail.com>,
+        "Paul E. McKenney" <paulmck@kernel.org>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Will Deacon <will@kernel.org>,
+        Eric Dumazet <edumazet@google.com>,
+        kasan-dev <kasan-dev@googlegroups.com>,
+        linux-arch <linux-arch@vger.kernel.org>,
+        "open list:DOCUMENTATION" <linux-doc@vger.kernel.org>,
+        linux-efi@vger.kernel.org,
+        Linux Kbuild mailing list <linux-kbuild@vger.kernel.org>,
+        LKML <linux-kernel@vger.kernel.org>,
+        Linux Memory Management List <linux-mm@kvack.org>,
+        the arch/x86 maintainers <x86@kernel.org>
+In-Reply-To: <CANpmjNOC2PYFsE_TK2SYmKcHxyG+2arWc8x_fmeWPOMi0+ot8g@mail.gmail.com>
+To:     Marco Elver <elver@google.com>
+X-Mailer: iPhone Mail (17C54)
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Reshuffle the x86 stub code a bit so that we can tag the efi_is_64bit()
-function with the 'const' attribute, which permits the compiler to
-optimize away any redundant calls. Since we have two different entry
-points for 32 and 64 bit firmware in the startup code, this also
-simplifies the C code since we'll enter it with the efi_is64 variable
-already set.
 
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
----
- arch/x86/boot/compressed/eboot.c   | 14 ++++++--------
- arch/x86/boot/compressed/head_64.S |  7 +++----
- arch/x86/include/asm/efi.h         |  2 +-
- 3 files changed, 10 insertions(+), 13 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index 4afd29eb5b34..ab3a40283db7 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -21,16 +21,18 @@
- #include "eboot.h"
- 
- static efi_system_table_t *sys_table;
--static bool efi_is64 = IS_ENABLED(CONFIG_X86_64);
-+extern const bool efi_is64;
- 
- __pure efi_system_table_t *efi_system_table(void)
- {
- 	return sys_table;
- }
- 
--__pure bool efi_is_64bit(void)
-+__attribute_const__ bool efi_is_64bit(void)
- {
--	return efi_is64;
-+	if (IS_ENABLED(CONFIG_EFI_MIXED))
-+		return efi_is64;
-+	return IS_ENABLED(CONFIG_X64_64);
- }
- 
- static efi_status_t
-@@ -710,8 +712,7 @@ static efi_status_t exit_boot(struct boot_params *boot_params, void *handle)
-  */
- struct boot_params *efi_main(efi_handle_t handle,
- 			     efi_system_table_t *sys_table_arg,
--			     struct boot_params *boot_params,
--			     bool is64)
-+			     struct boot_params *boot_params)
- {
- 	struct desc_ptr *gdt = NULL;
- 	struct setup_header *hdr = &boot_params->hdr;
-@@ -721,9 +722,6 @@ struct boot_params *efi_main(efi_handle_t handle,
- 
- 	sys_table = sys_table_arg;
- 
--	if (IS_ENABLED(CONFIG_EFI_MIXED))
--		efi_is64 = is64;
--
- 	/* Check if we were booted by the EFI firmware */
- 	if (sys_table->hdr.signature != EFI_SYSTEM_TABLE_SIGNATURE)
- 		goto fail;
-diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
-index 44a6bb6964b5..1f1f6c8139b3 100644
---- a/arch/x86/boot/compressed/head_64.S
-+++ b/arch/x86/boot/compressed/head_64.S
-@@ -211,10 +211,9 @@ SYM_FUNC_START(startup_32)
- 	movl	efi32_boot_args(%ebp), %edi
- 	cmp	$0, %edi
- 	jz	1f
--	leal	handover_entry(%ebp), %eax
-+	leal	efi64_stub_entry(%ebp), %eax
- 	movl	%esi, %edx
- 	movl	efi32_boot_args+4(%ebp), %esi
--	movl	$0x0, %ecx
- 1:
- #endif
- 	pushl	%eax
-@@ -242,6 +241,7 @@ SYM_FUNC_START(efi32_stub_entry)
- 	movl	%ecx, efi32_boot_args(%ebp)
- 	movl	%edx, efi32_boot_args+4(%ebp)
- 	sgdtl	efi32_boot_gdt(%ebp)
-+	movb	$0, efi_is64(%ebp)
- 
- 	/* Disable paging */
- 	movl	%cr0, %eax
-@@ -452,8 +452,6 @@ SYM_CODE_END(startup_64)
- 	.org 0x390
- SYM_FUNC_START(efi64_stub_entry)
- SYM_FUNC_START_ALIAS(efi_stub_entry)
--	movq	$1, %rcx
--SYM_INNER_LABEL(handover_entry, SYM_L_LOCAL)
- 	and	$~0xf, %rsp			/* realign the stack */
- 	call	efi_main
- 	movq	%rax,%rsi
-@@ -632,6 +630,7 @@ SYM_DATA_END_LABEL(gdt, SYM_L_LOCAL, gdt_end)
- 
- #ifdef CONFIG_EFI_MIXED
- SYM_DATA_LOCAL(efi32_boot_args, .long 0, 0)
-+SYM_DATA(efi_is64, .byte 1)
- #endif
- 
- /*
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index 383f7a0fc170..0a58468a7203 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -221,7 +221,7 @@ efi_status_t efi_set_virtual_address_map(unsigned long memory_map_size,
- 
- /* arch specific definitions used by the stub code */
- 
--__pure bool efi_is_64bit(void);
-+__attribute_const__ bool efi_is_64bit(void);
- 
- static inline bool efi_is_native(void)
- {
--- 
-2.20.1
+> On Jan 6, 2020, at 7:47 AM, Marco Elver <elver@google.com> wrote:
+>=20
+> Thanks, I'll look into KCSAN + lockdep compatibility. It's probably
+> missing some KCSAN_SANITIZE :=3D n in some Makefile.
 
+Can I have a update on fixing this? It looks like more of a problem that kcs=
+an_setup_watchpoint() will disable IRQs and then dive into the page allocato=
+r where it would complain because it might sleep.
+
+BTW, I saw Paul sent a pull request for 5.6 but it is ugly to have everybody=
+ could trigger a deadlock (sleep function called in atomic context) like thi=
+s during boot once this hits the mainline not to mention about only recently=
+ it is possible to test this feature (thanks to warning ratelimit) with the e=
+xisting debugging options because it was unable to boot due to the brokennes=
+s with debug_pagealloc as mentioned in this thread, so this does sounds like=
+ it needs more soak time for the mainline to me.
+
+0000000000000400
+[   13.416814][    T1] Call Trace:
+[   13.416814][    T1]  lock_is_held_type+0x66/0x160
+[   13.416814][    T1]  ___might_sleep+0xc1/0x1d0
+[   13.416814][    T1]  __might_sleep+0x5b/0xa0
+[   13.416814][    T1]  slab_pre_alloc_hook+0x7b/0xa0
+[   13.416814][    T1]  __kmalloc_node+0x60/0x300
+[   13.416814   T1]  ? alloc_cpumask_var_node+0x44/0x70
+[   13.416814][    T1]  ? topology_phys_to_logical_die+0x7e/0x180
+[   13.416814][    T1]  alloc_cpumask_var_node+0x44/0x70
+[   13.416814][    T1]  zalloc_cpumask_var+0x2a/0x40
+[   13.416814][    T1]  native_smp_prepare_cpus+0x246/0x425
+[   13.416814][    T1]  kernel_init_freeable+0x1b8/0x496
+[   13.416814][    T1]  ? rest_init+0x381/0x381
+[   13.416814][    T1]  kernel_init+0x18/0x17f
+[   13.416814][    T1]  ? rest_init+0x381/0x381
+[   13.416814][    T1]  ret_from_fork+0x3a/0x50
+[   13.416814][    T1] irq event stamp: 910
+[   13.416814][    T1] hardirqs last  enabled at (909): [<ffffffff8d1240f3>]=
+ _raw_write_unlock_irqrestore+0x53/0x57
+[   13.416814][    T1] hardirqs last disabled at (910): [<ffffffff8c8bba76>]=
+ kcsan_setup_watchpoint+0x96/0x460
+[   13.416814][    T1] softirqs last  enabled at (0): [<ffffffff8c6b697a>] c=
+opy_process+0x11fa/0x34f0
+[   13.416814][    T1] softirqs last disabled at (0): [<0000000000000000>] 0=
+x0
+[   13.416814][    T1] ---[ end trace 7d1df66da055aa92 ]---
+[   13.416814][    T1] possible reason: unannotated irqs-on.
+[   13.416814][ent stamp: 910
+[   13.416814][    T1] hardirqs last  enabled at (909): [<ffffffff8d1240f3>]=
+ _raw_write_unlock_irqrestore+0x53/0x57
+[   13.416814][    T1] hardirqs last disabled at (910): [<ffffffff8c8bba76>]=
+ kcsan_setup_watchpoint+0x96/0x460
+[   13.416814][    T1] softirqs last  enabled at (0): [<ffffffff8c6b697a>] c=
+opy_process+0x11fa/0x34f0
+[   13.416814][    T1] softirqs last disabled at (0): [<0000000000000000>] 0=
+x0=
