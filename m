@@ -4,45 +4,45 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5ACC3C33CB2
-	for <linux-efi@archiver.kernel.org>; Wed, 15 Jan 2020 16:36:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1D290C32771
+	for <linux-efi@archiver.kernel.org>; Wed, 15 Jan 2020 16:36:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 33D7A2467A
-	for <linux-efi@archiver.kernel.org>; Wed, 15 Jan 2020 16:36:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E6BEF2467D
+	for <linux-efi@archiver.kernel.org>; Wed, 15 Jan 2020 16:36:51 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="alC2gcx/"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="UHypfphM"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729190AbgAOQgk (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 15 Jan 2020 11:36:40 -0500
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:45581 "EHLO
+        id S1729246AbgAOQgv (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 15 Jan 2020 11:36:51 -0500
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:20447 "EHLO
         us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1729187AbgAOQgi (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 15 Jan 2020 11:36:38 -0500
+        with ESMTP id S1729266AbgAOQgu (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 15 Jan 2020 11:36:50 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1579106197;
+        s=mimecast20190719; t=1579106210;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=VqDSi00IIiR4MKfM9kfHuXfjy0CMBtCyRpTjZC9pBlY=;
-        b=alC2gcx/j76hp0+Uuc63wqUt2qCfIzzgRY93aR7KbkjG3mx1XbhWM9nQeMP47IzXJN8j2q
-        Xa8m2RFcWRwZhtvxFvVOoEQA6UL4oGBTjUp2XGFb/XuObIlS2X8RdaGjh1PxOY5kM3J+h5
-        DhycVlCh1kdln+7X9qqOWZkRf8vAe7w=
+        bh=6IIyl7nwLzkMIjP69KzWLUXNNYREWPo9znJtU/sIj/o=;
+        b=UHypfphM3f08erT95URNJEP7LxM4oOZ+O315KZEnJjc0imOEu7aTALChw7PG3NnTCICG/H
+        EAV3dmFJX05kWAkdMfN/C1+fWSaXk9YprZE0AZoCTu5u7uyHoNszR5K/8L45Uv6kxcls55
+        AD0+qj1t3/zeTzjRrBgUjjdAkXYML7k=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-176-21qKNekrPvucHTbRYTvVvw-1; Wed, 15 Jan 2020 11:36:36 -0500
-X-MC-Unique: 21qKNekrPvucHTbRYTvVvw-1
+ us-mta-30-TluyZrpAP2WR_tppIxPjkg-1; Wed, 15 Jan 2020 11:36:48 -0500
+X-MC-Unique: TluyZrpAP2WR_tppIxPjkg-1
 Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id E33F414E1;
-        Wed, 15 Jan 2020 16:36:33 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 2B6BA800D48;
+        Wed, 15 Jan 2020 16:36:46 +0000 (UTC)
 Received: from shalem.localdomain.com (ovpn-116-188.ams2.redhat.com [10.36.116.188])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 539B75DA76;
-        Wed, 15 Jan 2020 16:36:30 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 386A25DA76;
+        Wed, 15 Jan 2020 16:36:42 +0000 (UTC)
 From:   Hans de Goede <hdegoede@redhat.com>
 To:     Ard Biesheuvel <ardb@kernel.org>,
         Darren Hart <dvhart@infradead.org>,
@@ -60,10 +60,12 @@ Cc:     Hans de Goede <hdegoede@redhat.com>,
         Dave Olsthoorn <dave@bewaar.me>, x86@kernel.org,
         platform-driver-x86@vger.kernel.org, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-doc@vger.kernel.org,
-        linux-input@vger.kernel.org
-Subject: [PATCH v12 07/10] Input: silead - Switch to firmware_request_platform for retreiving the fw
-Date:   Wed, 15 Jan 2020 17:35:51 +0100
-Message-Id: <20200115163554.101315-8-hdegoede@redhat.com>
+        linux-input@vger.kernel.org,
+        Andy Shevchenko <andy.shevchenko@gmail.com>,
+        Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [PATCH v12 10/10] platform/x86: touchscreen_dmi: Add info for the Chuwi Vi8 Plus tablet
+Date:   Wed, 15 Jan 2020 17:35:54 +0100
+Message-Id: <20200115163554.101315-11-hdegoede@redhat.com>
 In-Reply-To: <20200115163554.101315-1-hdegoede@redhat.com>
 References: <20200115163554.101315-1-hdegoede@redhat.com>
 MIME-Version: 1.0
@@ -74,40 +76,75 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Unfortunately sofar we have been unable to get permission to redistribute
-Silead touchscreen firmwares in linux-firmware. This means that people
-need to find and install the firmware themselves before the touchscreen
-will work
+Add touchscreen info for the Chuwi Vi8 Plus tablet. This tablet uses a
+Chipone ICN8505 touchscreen controller, with the firmware used by the
+touchscreen embedded in the EFI firmware.
 
-Some UEFI/x86 tablets with a Silead touchscreen have a copy of the fw
-embedded in their UEFI boot-services code.
-
-This commit makes the silead driver use the new firmware_request_platform
-function, which will fallback to looking for such an embedded copy when
-direct filesystem lookup fails. This will make the touchscreen work OOTB
-on devices where there is a fw copy embedded in the UEFI code.
-
-Acked-by: Dmitry Torokhov <dmitry.torokhov@gmail.com>
+Acked-by: Andy Shevchenko <andy.shevchenko@gmail.com>
+Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Signed-off-by: Hans de Goede <hdegoede@redhat.com>
 ---
- drivers/input/touchscreen/silead.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Changes in v7:
+- Remove PROPERTY_ENTRY_BOOL("efi-embedded-firmware") properties entry,
+  as this is no longer necessary
 
-diff --git a/drivers/input/touchscreen/silead.c b/drivers/input/touchscre=
-en/silead.c
-index ad8b6a2bfd36..8fa2f3b7cfd8 100644
---- a/drivers/input/touchscreen/silead.c
-+++ b/drivers/input/touchscreen/silead.c
-@@ -288,7 +288,7 @@ static int silead_ts_load_fw(struct i2c_client *clien=
-t)
+Changes in v6:
+- Switch from crc sums to SHA256 hashes for the firmware hash
+---
+ drivers/platform/x86/touchscreen_dmi.c | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
+
+diff --git a/drivers/platform/x86/touchscreen_dmi.c b/drivers/platform/x8=
+6/touchscreen_dmi.c
+index 4449e4c0b26b..4a09b479cda5 100644
+--- a/drivers/platform/x86/touchscreen_dmi.c
++++ b/drivers/platform/x86/touchscreen_dmi.c
+@@ -132,6 +132,18 @@ static const struct ts_dmi_data chuwi_vi8_data =3D {
+ 	.properties     =3D chuwi_vi8_props,
+ };
 =20
- 	dev_dbg(dev, "Firmware file name: %s", data->fw_name);
++static const struct ts_dmi_data chuwi_vi8_plus_data =3D {
++	.embedded_fw =3D {
++		.name	=3D "chipone/icn8505-HAMP0002.fw",
++		.prefix =3D { 0xb0, 0x07, 0x00, 0x00, 0xe4, 0x07, 0x00, 0x00 },
++		.length	=3D 35012,
++		.sha256	=3D { 0x93, 0xe5, 0x49, 0xe0, 0xb6, 0xa2, 0xb4, 0xb3,
++			    0x88, 0x96, 0x34, 0x97, 0x5e, 0xa8, 0x13, 0x78,
++			    0x72, 0x98, 0xb8, 0x29, 0xeb, 0x5c, 0xa7, 0xf1,
++			    0x25, 0x13, 0x43, 0xf4, 0x30, 0x7c, 0xfc, 0x7c },
++	},
++};
++
+ static const struct property_entry chuwi_vi10_props[] =3D {
+ 	PROPERTY_ENTRY_U32("touchscreen-min-x", 0),
+ 	PROPERTY_ENTRY_U32("touchscreen-min-y", 4),
+@@ -743,6 +755,15 @@ const struct dmi_system_id touchscreen_dmi_table[] =3D=
+ {
+ 			DMI_MATCH(DMI_BIOS_VERSION, "CHUWI.D86JLBNR"),
+ 		},
+ 	},
++	{
++		/* Chuwi Vi8 Plus (CWI519) */
++		.driver_data =3D (void *)&chuwi_vi8_plus_data,
++		.matches =3D {
++			DMI_MATCH(DMI_SYS_VENDOR, "Hampoo"),
++			DMI_MATCH(DMI_PRODUCT_NAME, "D2D3_Vi8A1"),
++			DMI_MATCH(DMI_BOARD_NAME, "Cherry Trail CR"),
++		},
++	},
+ 	{
+ 		/* Chuwi Vi10 (CWI505) */
+ 		.driver_data =3D (void *)&chuwi_vi10_data,
+@@ -1137,6 +1158,9 @@ static int __init ts_dmi_init(void)
+ 		return 0; /* Not an error */
 =20
--	error =3D request_firmware(&fw, data->fw_name, dev);
-+	error =3D firmware_request_platform(&fw, data->fw_name, dev);
- 	if (error) {
- 		dev_err(dev, "Firmware request error %d\n", error);
- 		return error;
+ 	ts_data =3D dmi_id->driver_data;
++	/* Some dmi table entries only provide an efi_embedded_fw_desc */
++	if (!ts_data->properties)
++		return 0;
+=20
+ 	error =3D bus_register_notifier(&i2c_bus_type, &ts_dmi_notifier);
+ 	if (error)
 --=20
 2.24.1
 
