@@ -7,37 +7,37 @@ X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 14C1BC2D0DB
-	for <linux-efi@archiver.kernel.org>; Wed, 22 Jan 2020 09:41:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 37365C33CAF
+	for <linux-efi@archiver.kernel.org>; Wed, 22 Jan 2020 09:50:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id D3AF624684
-	for <linux-efi@archiver.kernel.org>; Wed, 22 Jan 2020 09:41:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F38C92468A
+	for <linux-efi@archiver.kernel.org>; Wed, 22 Jan 2020 09:50:39 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1579686079;
-	bh=RSUDhfPhXk0dWiZ10UxNgdPkWdvoHWDWWByQvoZi8Lo=;
+	s=default; t=1579686640;
+	bh=B6CoHhvLw7WB8SuV6DdMNus0dYLAJVGCvhoAIgBNBjk=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=esKxHrEle/iY7eWlaPr8MUMA8LcpunSsFmABtfznSh04u4pdPKN6S9f3eXJnsgRIq
-	 eWrpIZuxeVF9vxkRCp0/hr5/rRAWPg6nC0WulQTSJCrRLc0oNZ7dnpHhFcYI3akdNa
-	 KFVYJ/5Ih+Nv/DpRvUFgDfEIkyY2jPsZjA9MpKeU=
+	b=F/PhUdEXCvq3949C/YdAir1RsQ4daiUfW3Cw3Lsg8ouazpOlOyoYgaCW3DzBXUvAA
+	 4X9JM6OX/IAqTvLRMqcGx+40fkFua+XuANJTGDDjGMbuP2J8WywYOGzXsoLTUae9Ue
+	 EtjxlIy9W+lUMEfeKUHXOTLgs2ETA2ij4IsACrNk=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387413AbgAVJlT (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 22 Jan 2020 04:41:19 -0500
-Received: from mail.kernel.org ([198.145.29.99]:60684 "EHLO mail.kernel.org"
+        id S1729996AbgAVJuj (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 22 Jan 2020 04:50:39 -0500
+Received: from mail.kernel.org ([198.145.29.99]:54658 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2387512AbgAVJlS (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 22 Jan 2020 04:41:18 -0500
+        id S1730977AbgAVJiK (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 22 Jan 2020 04:38:10 -0500
 Received: from localhost (83-86-89-107.cable.dynamic.v4.ziggo.nl [83.86.89.107])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 6683C2467B;
-        Wed, 22 Jan 2020 09:41:17 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 4306D2467E;
+        Wed, 22 Jan 2020 09:38:09 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1579686077;
-        bh=RSUDhfPhXk0dWiZ10UxNgdPkWdvoHWDWWByQvoZi8Lo=;
+        s=default; t=1579685889;
+        bh=B6CoHhvLw7WB8SuV6DdMNus0dYLAJVGCvhoAIgBNBjk=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=fDeqOYTwOI9QlI+TYTAiIhMN9Gtv02zMie3FrZJBP2cjk9EJbSKmVjQ+RiihlnHu/
-         aqqaRPKBuEsUv0jzVHZzfIjFcXVuWu0nOygbzZC846RDnlbuHlAIewr53qZKlkyu8+
-         hqwnZky+4rfg7p+wb9LUgTilxj2fwIqMfFW6c00s=
+        b=aH2GrSjU1vc1P/Na0Ks2PlRxOqvP6g5c6lAnzkwI52ELIlaqD9CnyOoFFCYzY2iUV
+         K3GcxOQraEF3Lg7h99BL7BGNIRbgVsoP+rS3wkS7ttvD56skIRSIQ6v0o1e/ZA6H4h
+         IDxKn3U4o89xQlXpfDJYNU46DxIDzSPlsaLXTGHU=
 From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 To:     linux-kernel@vger.kernel.org
 Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
@@ -48,12 +48,12 @@ Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         Peter Zijlstra <peterz@infradead.org>,
         Thomas Gleixner <tglx@linutronix.de>,
         linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
-Subject: [PATCH 4.19 035/103] x86/efistub: Disable paging at mixed mode entry
-Date:   Wed, 22 Jan 2020 10:28:51 +0100
-Message-Id: <20200122092809.152269979@linuxfoundation.org>
+Subject: [PATCH 4.14 23/65] x86/efistub: Disable paging at mixed mode entry
+Date:   Wed, 22 Jan 2020 10:29:08 +0100
+Message-Id: <20200122092754.276233918@linuxfoundation.org>
 X-Mailer: git-send-email 2.25.0
-In-Reply-To: <20200122092803.587683021@linuxfoundation.org>
-References: <20200122092803.587683021@linuxfoundation.org>
+In-Reply-To: <20200122092750.976732974@linuxfoundation.org>
+References: <20200122092750.976732974@linuxfoundation.org>
 User-Agent: quilt/0.66
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -92,7 +92,7 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
 --- a/arch/x86/boot/compressed/head_64.S
 +++ b/arch/x86/boot/compressed/head_64.S
-@@ -244,6 +244,11 @@ ENTRY(efi32_stub_entry)
+@@ -227,6 +227,11 @@ ENTRY(efi32_stub_entry)
  	leal	efi32_config(%ebp), %eax
  	movl	%eax, efi_config(%ebp)
  
