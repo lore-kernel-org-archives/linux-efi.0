@@ -6,49 +6,49 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 49C03C3524C
-	for <linux-efi@archiver.kernel.org>; Sun,  2 Feb 2020 17:14:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A6FFC35249
+	for <linux-efi@archiver.kernel.org>; Sun,  2 Feb 2020 17:14:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 1D9062067C
-	for <linux-efi@archiver.kernel.org>; Sun,  2 Feb 2020 17:14:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4765120679
+	for <linux-efi@archiver.kernel.org>; Sun,  2 Feb 2020 17:14:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727093AbgBBROA (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 2 Feb 2020 12:14:00 -0500
-Received: from mail-qk1-f194.google.com ([209.85.222.194]:34620 "EHLO
+        id S1727177AbgBBROQ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 2 Feb 2020 12:14:16 -0500
+Received: from mail-qk1-f194.google.com ([209.85.222.194]:37594 "EHLO
         mail-qk1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726989AbgBBROA (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sun, 2 Feb 2020 12:14:00 -0500
-Received: by mail-qk1-f194.google.com with SMTP id g3so3346546qka.1;
-        Sun, 02 Feb 2020 09:14:00 -0800 (PST)
+        with ESMTP id S1726992AbgBBRN7 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sun, 2 Feb 2020 12:13:59 -0500
+Received: by mail-qk1-f194.google.com with SMTP id 21so11945102qky.4;
+        Sun, 02 Feb 2020 09:13:58 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=jaSQqD1f11t4pGUDsgeYFl9+dx25Mu1OCOk2wHccxUc=;
-        b=TTMwCmCrQz1HYEnLRwIdzFnaW69M9Rc1efT/gDVUaMyDW7OYyvPhYoyV8QQehEXeVa
-         5DTB6owCKFzOCCxqttFYmwUgmdJHxpRUXpnsy7XwOkm4xkPKvmqGbaLRKpv5DYqiZGA1
-         wkE3B4dQXTT2LMWOuI7oydriILNhkOLnnZKoMz0tmwD5u+v2D8+K5ZSiH0kWQm74JYBI
-         PcoP8IfdT/JW7o6jNlReXMJ8qG0rXEysFnTcH73D7a92UI7y2Ow+yyKlazWPuMwZsJjx
-         3zJ9j6UTFbZmXem9Mo4987IZLKg5ydp6OWLsJBDapksbhx6C4hNPIAEcacDp9qctcvCs
-         FcJQ==
-X-Gm-Message-State: APjAAAWtI5qVKc1eAXh+BOK/yUV8Q/6f66u3IXcvi/YK5JPRx/YMpdGm
-        3FrK5DUtTZvZaK4G3hRvZWI=
-X-Google-Smtp-Source: APXvYqwMtgW9EfbgzTEC8DH0j5loYu+zFEopOTh/5uDUhajtIkBVVcQ/d3uB0UAUTphurHIu38AIng==
-X-Received: by 2002:a37:48c4:: with SMTP id v187mr20383369qka.198.1580663639639;
-        Sun, 02 Feb 2020 09:13:59 -0800 (PST)
+        bh=7z/YtSaq7WUzyq8uTh8INOXWGUnC01Sb7rXV3fObso0=;
+        b=pp7H0XoQYSNYA4GFMEUYibj5HNzpPxzQMK+MCbV61x++knGyJ6trn61dhBcIVI7nlK
+         DbpDJ0p/7Rw0dE0JFrgJSVpbIdFPt31lFno5QJTL+eESlAkP8Sx1dgcSTxzSrrcFasfq
+         koUR/LGd73FsWm3HXR5tXYLZgQ3nZPSIZvgq1C7dWs11z4xMl5E3WTr92zQgeHNNWtUI
+         xWNjJGiB9xAgMO3pHK/wRLAlxuv4XgL7JbKzdx20ZNwG3qgzuA7E31qD2KqZ293HsPM8
+         zR8ZLj12u3ciyN5LbFJ3UmrdTitKfIvUIUxtIqA+RDMcY+6vU9yL+WqAXAuVlTzz1x+4
+         ekiA==
+X-Gm-Message-State: APjAAAXKu+adxd8KA85BjpfTUZamU6WJpBhLYAf3bIlAUlmvzAYd51yp
+        H1kQ5/F0O/KGlg5UnMUOTrQ=
+X-Google-Smtp-Source: APXvYqx/ENYUtOI2sS13110ci/muoumkUzIc1oq7r7XR5BT3TFvqqrlcgxGHBpUBdZE2WuV2sCY5xw==
+X-Received: by 2002:a05:620a:1108:: with SMTP id o8mr19312466qkk.118.1580663638235;
+        Sun, 02 Feb 2020 09:13:58 -0800 (PST)
 Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
-        by smtp.gmail.com with ESMTPSA id 3sm8150081qte.59.2020.02.02.09.13.59
+        by smtp.gmail.com with ESMTPSA id 3sm8150081qte.59.2020.02.02.09.13.57
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 02 Feb 2020 09:13:59 -0800 (PST)
+        Sun, 02 Feb 2020 09:13:57 -0800 (PST)
 From:   Arvind Sankar <nivedita@alum.mit.edu>
 To:     Thomas Gleixner <tglx@linutronix.de>,
         Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
         "H. Peter Anvin" <hpa@zytor.com>, Ard Biesheuvel <ardb@kernel.org>
 Cc:     linux-efi@vger.kernel.org, x86@kernel.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v2 6/7] x86/boot: GDT limit value should be size - 1
-Date:   Sun,  2 Feb 2020 12:13:52 -0500
-Message-Id: <20200202171353.3736319-7-nivedita@alum.mit.edu>
+Subject: [PATCH v2 4/7] x86/boot: Clear direction and interrupt flags in startup_64
+Date:   Sun,  2 Feb 2020 12:13:50 -0500
+Message-Id: <20200202171353.3736319-5-nivedita@alum.mit.edu>
 X-Mailer: git-send-email 2.24.1
 In-Reply-To: <20200202171353.3736319-1-nivedita@alum.mit.edu>
 References: <20200130200440.1796058-1-nivedita@alum.mit.edu>
@@ -60,34 +60,32 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The limit value for the GDTR should be such that adding it to the base
-address gives the address of the last byte of the GDT, i.e. it should be
-one less than the size, not the size.
+startup_32 already clears these flags on entry, do it in startup_64 as
+well for consistency.
+
+The direction flag in particular is not specified to be cleared in the
+boot protocol documentation, and we currently call into C code
+(paging_prepare) without explicitly clearing it.
 
 Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
 ---
- arch/x86/boot/compressed/head_64.S | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ arch/x86/boot/compressed/head_64.S | 3 +++
+ 1 file changed, 3 insertions(+)
 
 diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
-index 69cc6c68741e..c36e6156b6a3 100644
+index 27eb2a6786db..69cc6c68741e 100644
 --- a/arch/x86/boot/compressed/head_64.S
 +++ b/arch/x86/boot/compressed/head_64.S
-@@ -624,12 +624,12 @@ SYM_FUNC_END(.Lno_longmode)
+@@ -264,6 +264,9 @@ SYM_CODE_START(startup_64)
+ 	 * and command line.
+ 	 */
  
- 	.data
- SYM_DATA_START_LOCAL(gdt64)
--	.word	gdt_end - gdt
-+	.word	gdt_end - gdt - 1
- 	.quad   0
- SYM_DATA_END(gdt64)
- 	.balign	8
- SYM_DATA_START_LOCAL(gdt)
--	.word	gdt_end - gdt
-+	.word	gdt_end - gdt - 1
- 	.long	gdt
- 	.word	0
- 	.quad	0x00cf9a000000ffff	/* __KERNEL32_CS */
++	cld
++	cli
++
+ 	/* Setup data segments. */
+ 	xorl	%eax, %eax
+ 	movl	%eax, %ds
 -- 
 2.24.1
 
