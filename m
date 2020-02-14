@@ -7,37 +7,37 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E036AC3B1A1
-	for <linux-efi@archiver.kernel.org>; Fri, 14 Feb 2020 16:35:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CD0ADC3B1A1
+	for <linux-efi@archiver.kernel.org>; Fri, 14 Feb 2020 16:44:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id B702724696
-	for <linux-efi@archiver.kernel.org>; Fri, 14 Feb 2020 16:35:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9F6022187F
+	for <linux-efi@archiver.kernel.org>; Fri, 14 Feb 2020 16:44:01 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1581698157;
-	bh=u4qyc8uNB1l2T+CyO/foQ1KOl/EGrkXWAq28DrRAVi0=;
+	s=default; t=1581698641;
+	bh=lL4pFfsrsx5IvHqyB0CeDf2N+rjFEBCQR0PaBMWEcVk=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=DNT1Rk28Z7F/6kN+l2aINOjnKfEtsKhk02E8jFvIdgnnL8P219towLZV556VJgzNU
-	 Co4p1giF4q+X6jjDTnVz+bjxbahNWxZeOWcrE+wzi6hw9QDhjjx2W385ktYERMlU1v
-	 tfK/3Ju/q4cW/ZlkRD4KsAywh2GzuLpnXeY9xORE=
+	b=xsE4lvQAKvsSlWPU6rYX8UV1uTZT83Gk8Of0uSCMdQ4YPhiyeJqV1wbNB8FakCOru
+	 xu40EoDfWLDGBPMEGx9mVSrvSj2No91KN88VsG0m8XD9ybvw7zpV9ljKYq+Pb1ADA6
+	 O1N80lu9ZfxGMIl2GOXGVfJGwEJr5m/vPM4JANN8=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2393652AbgBNQft (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 14 Feb 2020 11:35:49 -0500
-Received: from mail.kernel.org ([198.145.29.99]:33264 "EHLO mail.kernel.org"
+        id S2393086AbgBNQVq (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 14 Feb 2020 11:21:46 -0500
+Received: from mail.kernel.org ([198.145.29.99]:56574 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2405921AbgBNQYg (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 14 Feb 2020 11:24:36 -0500
+        id S2393075AbgBNQVo (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 14 Feb 2020 11:21:44 -0500
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id D128F2479D;
-        Fri, 14 Feb 2020 16:24:34 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 9CB37246C5;
+        Fri, 14 Feb 2020 16:21:42 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1581697476;
-        bh=u4qyc8uNB1l2T+CyO/foQ1KOl/EGrkXWAq28DrRAVi0=;
+        s=default; t=1581697304;
+        bh=lL4pFfsrsx5IvHqyB0CeDf2N+rjFEBCQR0PaBMWEcVk=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=N4rcD326m2vNUk7WIzU4Z61e5TaTyQ3q6vSG0DlfLZGYxplJJXw62r6EU0MTN5PEA
-         U8M2pM6wrwATTdARqIGHnhcukoTT6WxhOdkvFzHgqQoArTOeQzzzw1p1OL29NfNCj2
-         OlXig9nMVQXYryOwK2k0p4rZPjGutqIDmXkZTfNk=
+        b=SEuBJEFzuMbG758vb88vmeye+U0Hy+XSdtlLJNuf8UgnJ/BbUu0kFEYkRLNPawEbH
+         t92d50sSk3Wjt1DF7zvA97IEZEVDdxF6d8vuRLCoWxbSYvJel16kSeqNv6Pg032Xkb
+         Ty9E2pOyZmyUFKHq6spzoykMeHDpoH3j2uoZHriM=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Ard Biesheuvel <ardb@kernel.org>,
@@ -48,12 +48,12 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>,
         Ingo Molnar <mingo@kernel.org>,
         Sasha Levin <sashal@kernel.org>,
         platform-driver-x86@vger.kernel.org, x86@kernel.org
-Subject: [PATCH AUTOSEL 4.4 008/100] efi/x86: Map the entire EFI vendor string before copying it
-Date:   Fri, 14 Feb 2020 11:22:52 -0500
-Message-Id: <20200214162425.21071-8-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.9 016/141] efi/x86: Map the entire EFI vendor string before copying it
+Date:   Fri, 14 Feb 2020 11:19:16 -0500
+Message-Id: <20200214162122.19794-16-sashal@kernel.org>
 X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20200214162425.21071-1-sashal@kernel.org>
-References: <20200214162425.21071-1-sashal@kernel.org>
+In-Reply-To: <20200214162122.19794-1-sashal@kernel.org>
+References: <20200214162122.19794-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -91,10 +91,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 7 insertions(+), 6 deletions(-)
 
 diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 4bc352fc08f19..105872617be08 100644
+index b6669d326545a..f08abdf8bb676 100644
 --- a/arch/x86/platform/efi/efi.c
 +++ b/arch/x86/platform/efi/efi.c
-@@ -465,7 +465,6 @@ void __init efi_init(void)
+@@ -478,7 +478,6 @@ void __init efi_init(void)
  	efi_char16_t *c16;
  	char vendor[100] = "unknown";
  	int i = 0;
@@ -102,7 +102,7 @@ index 4bc352fc08f19..105872617be08 100644
  
  #ifdef CONFIG_X86_32
  	if (boot_params.efi_info.efi_systab_hi ||
-@@ -490,14 +489,16 @@ void __init efi_init(void)
+@@ -503,14 +502,16 @@ void __init efi_init(void)
  	/*
  	 * Show what we know for posterity
  	 */
