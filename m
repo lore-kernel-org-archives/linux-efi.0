@@ -7,46 +7,50 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 74544C3B1B1
-	for <linux-efi@archiver.kernel.org>; Fri, 14 Feb 2020 17:55:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 55626C2BA83
+	for <linux-efi@archiver.kernel.org>; Fri, 14 Feb 2020 18:03:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 4A4C8206B6
-	for <linux-efi@archiver.kernel.org>; Fri, 14 Feb 2020 17:55:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2AF1F20848
+	for <linux-efi@archiver.kernel.org>; Fri, 14 Feb 2020 18:03:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1581702923;
-	bh=GiqdFSZEoNy8iXjcP7SuRT0i4X8ZFZZeuCykkBIh0EQ=;
+	s=default; t=1581703384;
+	bh=iVW8kYUZhNEhv4a1bYT2fR3fYrBKZHxbNJJMtyi5k9w=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=THxna2FohnG4nQ5+BOqdHUIDY7efr/7o+xHFQ7ddxOLqSJGtkgmLlZr/932vG+8rT
-	 4eZnOtiGAax/qjPktudWU5vKlIbp+avS8VXC82CdOmDIqaBgqey/c9H0q8PD7LRt/+
-	 Xdu+CBhgXOly+tA4bXZ4DAXKNl48Sm4iXbl14Stc=
+	b=cCjME+x9rqG6SPnuX5ktqaR9IidwuFiXmgFT3U/uvdTFMuSkYi2Emq5rVpJTHIQFG
+	 kmoN872gUWbT5PJ5lRrlCF5drDpWxoguDbgxfu36XcWHUW8H5zmq+xVbPHYdR+QWCR
+	 CVEt1T/8m39GilEUHOk9O6AfXDi1OXqaaDLxVRPo=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388359AbgBNP5q (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 14 Feb 2020 10:57:46 -0500
-Received: from mail.kernel.org ([198.145.29.99]:41152 "EHLO mail.kernel.org"
+        id S1731143AbgBNPzw (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 14 Feb 2020 10:55:52 -0500
+Received: from mail.kernel.org ([198.145.29.99]:37162 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2388352AbgBNP5q (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 14 Feb 2020 10:57:46 -0500
+        id S1730653AbgBNPzw (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 14 Feb 2020 10:55:52 -0500
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 1C07B24690;
-        Fri, 14 Feb 2020 15:57:44 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 6D4ED24673;
+        Fri, 14 Feb 2020 15:55:49 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1581695864;
-        bh=GiqdFSZEoNy8iXjcP7SuRT0i4X8ZFZZeuCykkBIh0EQ=;
+        s=default; t=1581695750;
+        bh=iVW8kYUZhNEhv4a1bYT2fR3fYrBKZHxbNJJMtyi5k9w=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=nvo5LUK2RCyz69UYS+F+91OMbW3UdL7+fnK9KqUAYK4TdZ/67KKzFnq/lV+pWVpma
-         HThGM9/iWDQOvGGMTMCcz567pqM6nBPaRg3ndKZLeVEkkKOUKEGdlqK98HZ4kDbBH9
-         /uxIFpucdnHMznrKOJcf8uSoXWurJp9Yr0rPg7AU=
+        b=x486BSbgUxy4GWKRrAg0/5s/yyG7mO/Bmj/zztqjtX7NWZNANvs0xiAPeRseOSbv2
+         6k68PayBT94lT8VwT3vv7vrAVXJSzqK3KMiTWD6yTv1hXORYML3DS2X2tWFbqUTuEo
+         tLm8sxx7LfvIkpgTkP327CZ2Wu6t2LD9BdV8PRFM=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Ard Biesheuvel <ardb@kernel.org>,
-        Saravana Kannan <saravanak@google.com>,
+        Andy Lutomirski <luto@kernel.org>,
+        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
+        Arvind Sankar <nivedita@alum.mit.edu>,
+        Matthew Garrett <mjg59@google.com>, linux-efi@vger.kernel.org,
         Ingo Molnar <mingo@kernel.org>,
-        Sasha Levin <sashal@kernel.org>, linux-efi@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.5 411/542] efi/arm: Defer probe of PCIe backed efifb on DT systems
-Date:   Fri, 14 Feb 2020 10:46:43 -0500
-Message-Id: <20200214154854.6746-411-sashal@kernel.org>
+        Sasha Levin <sashal@kernel.org>,
+        platform-driver-x86@vger.kernel.org, x86@kernel.org
+Subject: [PATCH AUTOSEL 5.5 320/542] efi/x86: Don't panic or BUG() on non-critical error conditions
+Date:   Fri, 14 Feb 2020 10:45:12 -0500
+Message-Id: <20200214154854.6746-320-sashal@kernel.org>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20200214154854.6746-1-sashal@kernel.org>
 References: <20200214154854.6746-1-sashal@kernel.org>
@@ -61,164 +65,127 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Ard Biesheuvel <ardb@kernel.org>
 
-[ Upstream commit 64c8a0cd0a535891d5905c3a1651150f0f141439 ]
+[ Upstream commit e2d68a955e49d61fd0384f23e92058dc9b79be5e ]
 
-The new of_devlink support breaks PCIe probing on ARM platforms booting
-via UEFI if the firmware exposes a EFI framebuffer that is backed by a
-PCI device. The reason is that the probing order gets reversed,
-resulting in a resource conflict on the framebuffer memory window when
-the PCIe probes last, causing it to give up entirely.
+The logic in __efi_enter_virtual_mode() does a number of steps in
+sequence, all of which may fail in one way or the other. In most
+cases, we simply print an error and disable EFI runtime services
+support, but in some cases, we BUG() or panic() and bring down the
+system when encountering conditions that we could easily handle in
+the same way.
 
-Given that we rely on PCI quirks to deal with EFI framebuffers that get
-moved around in memory, we cannot simply drop the memory reservation, so
-instead, let's use the device link infrastructure to register this
-dependency, and force the probing to occur in the expected order.
+While at it, replace a pointless page-to-virt-phys conversion with
+one that goes straight from struct page to physical.
 
-Co-developed-by: Saravana Kannan <saravanak@google.com>
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
-Signed-off-by: Saravana Kannan <saravanak@google.com>
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Arvind Sankar <nivedita@alum.mit.edu>
+Cc: Matthew Garrett <mjg59@google.com>
+Cc: linux-efi@vger.kernel.org
+Link: https://lkml.kernel.org/r/20200103113953.9571-14-ardb@kernel.org
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Link: https://lore.kernel.org/r/20200113172245.27925-9-ardb@kernel.org
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/firmware/efi/arm-init.c | 107 ++++++++++++++++++++++++++++++--
- 1 file changed, 103 insertions(+), 4 deletions(-)
+ arch/x86/platform/efi/efi.c    | 28 ++++++++++++++--------------
+ arch/x86/platform/efi/efi_64.c |  9 +++++----
+ 2 files changed, 19 insertions(+), 18 deletions(-)
 
-diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
-index 904fa09e6a6b0..d99f5b0c8a090 100644
---- a/drivers/firmware/efi/arm-init.c
-+++ b/drivers/firmware/efi/arm-init.c
-@@ -10,10 +10,12 @@
- #define pr_fmt(fmt)	"efi: " fmt
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 06f69bcd233fe..ad4dd3a977533 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -1000,16 +1000,14 @@ static void __init __efi_enter_virtual_mode(void)
  
- #include <linux/efi.h>
-+#include <linux/fwnode.h>
- #include <linux/init.h>
- #include <linux/memblock.h>
- #include <linux/mm_types.h>
- #include <linux/of.h>
-+#include <linux/of_address.h>
- #include <linux/of_fdt.h>
- #include <linux/platform_device.h>
- #include <linux/screen_info.h>
-@@ -276,15 +278,112 @@ void __init efi_init(void)
- 		efi_memmap_unmap();
+ 	if (efi_alloc_page_tables()) {
+ 		pr_err("Failed to allocate EFI page tables\n");
+-		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+-		return;
++		goto err;
+ 	}
+ 
+ 	efi_merge_regions();
+ 	new_memmap = efi_map_regions(&count, &pg_shift);
+ 	if (!new_memmap) {
+ 		pr_err("Error reallocating memory, EFI runtime non-functional!\n");
+-		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+-		return;
++		goto err;
+ 	}
+ 
+ 	pa = __pa(new_memmap);
+@@ -1023,8 +1021,7 @@ static void __init __efi_enter_virtual_mode(void)
+ 
+ 	if (efi_memmap_init_late(pa, efi.memmap.desc_size * count)) {
+ 		pr_err("Failed to remap late EFI memory map\n");
+-		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+-		return;
++		goto err;
+ 	}
+ 
+ 	if (efi_enabled(EFI_DBG)) {
+@@ -1032,12 +1029,11 @@ static void __init __efi_enter_virtual_mode(void)
+ 		efi_print_memmap();
+ 	}
+ 
+-	BUG_ON(!efi.systab);
++	if (WARN_ON(!efi.systab))
++		goto err;
+ 
+-	if (efi_setup_page_tables(pa, 1 << pg_shift)) {
+-		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+-		return;
+-	}
++	if (efi_setup_page_tables(pa, 1 << pg_shift))
++		goto err;
+ 
+ 	efi_sync_low_kernel_mappings();
+ 
+@@ -1057,9 +1053,9 @@ static void __init __efi_enter_virtual_mode(void)
+ 	}
+ 
+ 	if (status != EFI_SUCCESS) {
+-		pr_alert("Unable to switch EFI into virtual mode (status=%lx)!\n",
+-			 status);
+-		panic("EFI call to SetVirtualAddressMap() failed!");
++		pr_err("Unable to switch EFI into virtual mode (status=%lx)!\n",
++		       status);
++		goto err;
+ 	}
+ 
+ 	efi_free_boot_services();
+@@ -1088,6 +1084,10 @@ static void __init __efi_enter_virtual_mode(void)
+ 
+ 	/* clean DUMMY object */
+ 	efi_delete_dummy_variable();
++	return;
++
++err:
++	clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
  }
  
-+static bool efifb_overlaps_pci_range(const struct of_pci_range *range)
-+{
-+	u64 fb_base = screen_info.lfb_base;
-+
-+	if (screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
-+		fb_base |= (u64)(unsigned long)screen_info.ext_lfb_base << 32;
-+
-+	return fb_base >= range->cpu_addr &&
-+	       fb_base < (range->cpu_addr + range->size);
-+}
-+
-+static struct device_node *find_pci_overlap_node(void)
-+{
-+	struct device_node *np;
-+
-+	for_each_node_by_type(np, "pci") {
-+		struct of_pci_range_parser parser;
-+		struct of_pci_range range;
-+		int err;
-+
-+		err = of_pci_range_parser_init(&parser, np);
-+		if (err) {
-+			pr_warn("of_pci_range_parser_init() failed: %d\n", err);
-+			continue;
-+		}
-+
-+		for_each_of_pci_range(&parser, &range)
-+			if (efifb_overlaps_pci_range(&range))
-+				return np;
-+	}
-+	return NULL;
-+}
-+
-+/*
-+ * If the efifb framebuffer is backed by a PCI graphics controller, we have
-+ * to ensure that this relation is expressed using a device link when
-+ * running in DT mode, or the probe order may be reversed, resulting in a
-+ * resource reservation conflict on the memory window that the efifb
-+ * framebuffer steals from the PCIe host bridge.
-+ */
-+static int efifb_add_links(const struct fwnode_handle *fwnode,
-+			   struct device *dev)
-+{
-+	struct device_node *sup_np;
-+	struct device *sup_dev;
-+
-+	sup_np = find_pci_overlap_node();
-+
-+	/*
-+	 * If there's no PCI graphics controller backing the efifb, we are
-+	 * done here.
-+	 */
-+	if (!sup_np)
-+		return 0;
-+
-+	sup_dev = get_dev_from_fwnode(&sup_np->fwnode);
-+	of_node_put(sup_np);
-+
-+	/*
-+	 * Return -ENODEV if the PCI graphics controller device hasn't been
-+	 * registered yet.  This ensures that efifb isn't allowed to probe
-+	 * and this function is retried again when new devices are
-+	 * registered.
-+	 */
-+	if (!sup_dev)
-+		return -ENODEV;
-+
-+	/*
-+	 * If this fails, retrying this function at a later point won't
-+	 * change anything. So, don't return an error after this.
-+	 */
-+	if (!device_link_add(dev, sup_dev, 0))
-+		dev_warn(dev, "device_link_add() failed\n");
-+
-+	put_device(sup_dev);
-+
-+	return 0;
-+}
-+
-+static const struct fwnode_operations efifb_fwnode_ops = {
-+	.add_links = efifb_add_links,
-+};
-+
-+static struct fwnode_handle efifb_fwnode = {
-+	.ops = &efifb_fwnode_ops,
-+};
-+
- static int __init register_gop_device(void)
- {
--	void *pd;
-+	struct platform_device *pd;
-+	int err;
- 
- 	if (screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
+ void __init efi_enter_virtual_mode(void)
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index 08ce8177c3af1..52a1e5192fa80 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -392,11 +392,12 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
  		return 0;
  
--	pd = platform_device_register_data(NULL, "efi-framebuffer", 0,
--					   &screen_info, sizeof(screen_info));
--	return PTR_ERR_OR_ZERO(pd);
-+	pd = platform_device_alloc("efi-framebuffer", 0);
-+	if (!pd)
-+		return -ENOMEM;
-+
-+	if (IS_ENABLED(CONFIG_PCI))
-+		pd->dev.fwnode = &efifb_fwnode;
-+
-+	err = platform_device_add_data(pd, &screen_info, sizeof(screen_info));
-+	if (err)
-+		return err;
-+
-+	return platform_device_add(pd);
- }
- subsys_initcall(register_gop_device);
+ 	page = alloc_page(GFP_KERNEL|__GFP_DMA32);
+-	if (!page)
+-		panic("Unable to allocate EFI runtime stack < 4GB\n");
++	if (!page) {
++		pr_err("Unable to allocate EFI runtime stack < 4GB\n");
++		return 1;
++	}
+ 
+-	efi_scratch.phys_stack = virt_to_phys(page_address(page));
+-	efi_scratch.phys_stack += PAGE_SIZE; /* stack grows down */
++	efi_scratch.phys_stack = page_to_phys(page + 1); /* stack grows down */
+ 
+ 	npages = (_etext - _text) >> PAGE_SHIFT;
+ 	text = __pa(_text);
 -- 
 2.20.1
 
