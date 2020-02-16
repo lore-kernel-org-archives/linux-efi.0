@@ -1,129 +1,144 @@
-Return-Path: <SRS0=Dmk2=4C=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=2niR=4E=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 871ADC3B1B9
-	for <linux-efi@archiver.kernel.org>; Fri, 14 Feb 2020 18:20:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1455DC2BA83
+	for <linux-efi@archiver.kernel.org>; Sun, 16 Feb 2020 14:11:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 5B00724654
-	for <linux-efi@archiver.kernel.org>; Fri, 14 Feb 2020 18:20:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B465E206E2
+	for <linux-efi@archiver.kernel.org>; Sun, 16 Feb 2020 14:11:52 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1581704408;
-	bh=SX59StiBv01BZsQL/M6GsKcpiCvE0GOavYHZERRX5mk=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=cy2zYELiQzYP9U4No6oymcpI3S1QBh69Z9/ACpp6+HWoR7NyEfRq2kzY7nW2ZcCJ4
-	 wBbHW/3Hk31giOEv+fq2PFnGB4w9JuAKtWGlyBC8/bJpHGJPu4iynDznfcpzg5g7nH
-	 x7A2/SWtbRjROJxYISVhilJNJGdH4YStonA2Lsf0=
+	s=default; t=1581862312;
+	bh=DKirdU0ufWfvPWErLTUkOEyE4AL9d2cSF3zd29hUQRk=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=xg8oxYB2Cn+rnQ8f0B6a7VvbBaBd6nMElknEgPxOZgEfHIFtmmujoUT+x8HHnVgPP
+	 MTAzf9Z+qn/LcM/F0InIKauieS9cm41QtzQX5pDmw2tRBitt6IaHsaZ6nr0oVV1apW
+	 ORwuJSoMCCNt2nEYCdbWvyrBZHf8mGUSsF8OfAsU=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2394790AbgBNST7 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 14 Feb 2020 13:19:59 -0500
-Received: from mail.kernel.org ([198.145.29.99]:54268 "EHLO mail.kernel.org"
+        id S1727926AbgBPOLw (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 16 Feb 2020 09:11:52 -0500
+Received: from mail.kernel.org ([198.145.29.99]:36394 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729688AbgBNPuS (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 14 Feb 2020 10:50:18 -0500
-Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
+        id S1727889AbgBPOLv (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Sun, 16 Feb 2020 09:11:51 -0500
+Received: from e123331-lin.home (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id EDBAA2467D;
-        Fri, 14 Feb 2020 15:50:16 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 25E9E2086A;
+        Sun, 16 Feb 2020 14:11:47 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1581695418;
-        bh=SX59StiBv01BZsQL/M6GsKcpiCvE0GOavYHZERRX5mk=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=aDRzk23Madhjz2kIjzrSbMsfX355BIBbtERnDAanO4iMQe7MMIXIXafp3b+/6LewC
-         +B0gxL+lLITy1uRc8GPlO+WOzc+uPDHmKIJnr2l4COoroDi61lZu/XCySdyAL+A2km
-         zr1YDjULUAhXhNtpzA3g1G7+i26LBhaTcWVv3bQI=
-From:   Sasha Levin <sashal@kernel.org>
-To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Ard Biesheuvel <ardb@kernel.org>,
-        Andy Lutomirski <luto@kernel.org>,
-        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Arvind Sankar <nivedita@alum.mit.edu>,
-        Matthew Garrett <mjg59@google.com>, linux-efi@vger.kernel.org,
-        Ingo Molnar <mingo@kernel.org>,
-        Sasha Levin <sashal@kernel.org>,
-        platform-driver-x86@vger.kernel.org, x86@kernel.org
-Subject: [PATCH AUTOSEL 5.5 063/542] efi/x86: Map the entire EFI vendor string before copying it
-Date:   Fri, 14 Feb 2020 10:40:55 -0500
-Message-Id: <20200214154854.6746-63-sashal@kernel.org>
-X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20200214154854.6746-1-sashal@kernel.org>
-References: <20200214154854.6746-1-sashal@kernel.org>
-MIME-Version: 1.0
-X-stable: review
-X-Patchwork-Hint: Ignore
-Content-Transfer-Encoding: 8bit
+        s=default; t=1581862310;
+        bh=DKirdU0ufWfvPWErLTUkOEyE4AL9d2cSF3zd29hUQRk=;
+        h=From:To:Cc:Subject:Date:From;
+        b=o4u0xzwJR2Do3USyGEZc8LJsFAfEKOLRrx++LbJ8mP4ZEXJzX51+M1UnPvuSGA1aK
+         uYa5jrKWmtACntcNXsdgpGCAeyDzVJwEoyW47K6nZJ2/Vs62A9ER9DxZfVR/6s6Nko
+         vP5jXf09H/ah9rN8/KCU6zMiORJOkG0lEx7S+8hs=
+From:   Ard Biesheuvel <ardb@kernel.org>
+To:     linux-efi@vger.kernel.org
+Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
+        lersek@redhat.com, leif@nuviainc.com, pjones@redhat.com,
+        mjg59@google.com, agraf@csgraf.de, ilias.apalodimas@linaro.org,
+        xypron.glpk@gmx.de, daniel.kiper@oracle.com, nivedita@alum.mit.edu,
+        James.Bottomley@hansenpartnership.com, lukas@wunner.de
+Subject: [PATCH v2 0/3] arch-agnostic initrd loading method for EFI systems
+Date:   Sun, 16 Feb 2020 15:11:01 +0100
+Message-Id: <20200216141104.21477-1-ardb@kernel.org>
+X-Mailer: git-send-email 2.17.1
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Ard Biesheuvel <ardb@kernel.org>
+This series introduces an arch agnostic way of loading the initrd into
+memory from the EFI stub. This addresses a number of shortcomings that
+affect the current implementations that exist across architectures:
 
-[ Upstream commit ffc2760bcf2dba0dbef74013ed73eea8310cc52c ]
+- The initrd=<file> command line option can only load files that reside
+  on the same file system that the kernel itself was loaded from, which
+  requires the bootloader or firmware to expose that file system via the
+  appropriate EFI protocol, which is not always feasible. From the kernel
+  side, this protocol is problematic since it is incompatible with mixed
+  mode on x86 (this is due to the fact that some of its methods have
+  prototypes that are difficult to marshall)
 
-Fix a couple of issues with the way we map and copy the vendor string:
-- we map only 2 bytes, which usually works since you get at least a
-  page, but if the vendor string happens to cross a page boundary,
-  a crash will result
-- only call early_memunmap() if early_memremap() succeeded, or we will
-  call it with a NULL address which it doesn't like,
-- while at it, switch to early_memremap_ro(), and array indexing rather
-  than pointer dereferencing to read the CHAR16 characters.
+- The approach that is ordinarily taken by GRUB is to load the initrd into
+  memory, and pass it to the kernel proper via the bootparams structure or
+  via the device tree. This requires the boot loader to have an understanding
+  of those structures, which are not always set in stone, and of the policies
+  around where the initrd may be loaded into memory. In the ARM case, it
+  requires GRUB to modify the hardware description provided by the firmware,
+  given that the initrd base and offset in memory are passed via the same
+  data structure. It also creates a time window where the initrd data sits
+  in memory, and can potentially be corrupted before the kernel is booted.
 
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
-Cc: Andy Lutomirski <luto@kernel.org>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Arvind Sankar <nivedita@alum.mit.edu>
-Cc: Matthew Garrett <mjg59@google.com>
-Cc: linux-efi@vger.kernel.org
-Fixes: 5b83683f32b1 ("x86: EFI runtime service support")
-Link: https://lkml.kernel.org/r/20200103113953.9571-5-ardb@kernel.org
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- arch/x86/platform/efi/efi.c | 13 +++++++------
- 1 file changed, 7 insertions(+), 6 deletions(-)
+Considering that we will soon have new users of these interfaces (EFI for
+kvmtool on ARM, RISC-V in u-boot, etc), it makes sense to add a generic
+interface now, before having another wave of bespoke arch specific code
+coming in.
 
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 38d44f36d5ede..06f69bcd233fe 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -541,7 +541,6 @@ void __init efi_init(void)
- 	efi_char16_t *c16;
- 	char vendor[100] = "unknown";
- 	int i = 0;
--	void *tmp;
- 
- #ifdef CONFIG_X86_32
- 	if (boot_params.efi_info.efi_systab_hi ||
-@@ -566,14 +565,16 @@ void __init efi_init(void)
- 	/*
- 	 * Show what we know for posterity
- 	 */
--	c16 = tmp = early_memremap(efi.systab->fw_vendor, 2);
-+	c16 = early_memremap_ro(efi.systab->fw_vendor,
-+				sizeof(vendor) * sizeof(efi_char16_t));
- 	if (c16) {
--		for (i = 0; i < sizeof(vendor) - 1 && *c16; ++i)
--			vendor[i] = *c16++;
-+		for (i = 0; i < sizeof(vendor) - 1 && c16[i]; ++i)
-+			vendor[i] = c16[i];
- 		vendor[i] = '\0';
--	} else
-+		early_memunmap(c16, sizeof(vendor) * sizeof(efi_char16_t));
-+	} else {
- 		pr_err("Could not map the firmware vendor!\n");
--	early_memunmap(tmp, 2);
-+	}
- 
- 	pr_info("EFI v%u.%.02u by %s\n",
- 		efi.systab->hdr.revision >> 16,
+Another aspect to take into account is that support for UEFI secure boot
+and measured boot is being taken into the upstream, and being able to
+rely on the PE entry point for booting any architecture makes the GRUB
+vs shim story much cleaner, as we should be able to rely on LoadImage
+and StartImage on all architectures, while retaining the ability to
+load initrds from anywhere.
+
+Note that these patches depend on a fair amount of cleanup work that I
+am targetting for v5.7. Branch can be found at:
+https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git/log/?h=next
+
+A PoC implementation for OVMF and ArmVirtQemu (OVMF for ARM aka AAVMF) can
+be found at https://github.com/ardbiesheuvel/edk2/commits/linux-efi-generic.
+
+A U-Boot implementation is under development as well, and can be found at
+https://github.com/apalos/u-boot/commits/efi_load_file_8
+
+Changes since v1:
+- merge vendor media device path type definition with the existing device path
+  definitions we already have, and rework the latter slightly to be more easily
+  reusable
+- use 'dev_path' not 'devpath' consistently
+- pass correct FilePath value to LoadFile2 (i.e., the device path pointer that
+  was advanced to point to the 'end' node by locate_device_path())
+- add kerneldoc comment to efi_load_initrd_dev_path()
+- take care to only return EFI_NOT_FOUND from efi_load_initrd_dev_path() if the
+  LoadFile2 protocol does not exist on the LINUX_EFI_INITRD_MEDIA_GUID device
+  path - this makes the logic whether to fallback to the command line method
+  more robust
+
+Cc: lersek@redhat.com
+Cc: leif@nuviainc.com
+Cc: pjones@redhat.com
+Cc: mjg59@google.com
+Cc: agraf@csgraf.de
+Cc: ilias.apalodimas@linaro.org
+Cc: xypron.glpk@gmx.de
+Cc: daniel.kiper@oracle.com
+Cc: nivedita@alum.mit.edu
+Cc: James.Bottomley@hansenpartnership.com
+Cc: lukas@wunner.de
+
+Ard Biesheuvel (3):
+  efi/dev-path-parser: Add struct definition for vendor type device path
+    nodes
+  efi/libstub: Add support for loading the initrd from a device path
+  efi/libstub: Take noinitrd cmdline argument into account for devpath
+    initrd
+
+ drivers/firmware/efi/apple-properties.c       |  8 +-
+ drivers/firmware/efi/dev-path-parser.c        | 38 ++++----
+ drivers/firmware/efi/libstub/arm-stub.c       | 20 ++++-
+ .../firmware/efi/libstub/efi-stub-helper.c    | 89 +++++++++++++++++++
+ drivers/firmware/efi/libstub/efistub.h        |  5 ++
+ drivers/firmware/efi/libstub/x86-stub.c       | 47 ++++++++--
+ include/linux/efi.h                           | 49 ++++++----
+ 7 files changed, 201 insertions(+), 55 deletions(-)
+
 -- 
-2.20.1
+2.17.1
 
