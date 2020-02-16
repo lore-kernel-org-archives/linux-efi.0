@@ -7,45 +7,45 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0196DC76199
-	for <linux-efi@archiver.kernel.org>; Sun, 16 Feb 2020 18:24:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 26E35C7619B
+	for <linux-efi@archiver.kernel.org>; Sun, 16 Feb 2020 18:24:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id D63A6208C4
-	for <linux-efi@archiver.kernel.org>; Sun, 16 Feb 2020 18:24:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id ED808208C4
+	for <linux-efi@archiver.kernel.org>; Sun, 16 Feb 2020 18:24:46 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1581877484;
-	bh=535G2Z6StN4Ag1aO0gRi6xti0zt7h38+r39I0O3lAk8=;
+	s=default; t=1581877487;
+	bh=j3nSc1ziDeAOZ+GMaZJ73PIdlDUEWebRMtAgq39UXfs=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=fhPtX4eF7tRx17wdP8PX1nxryqQoZDw7+GRybqpiedHy4tayUD57NFVOY/jF8vCxh
-	 ZhatjDVMj24+kt+2mHlaO4TruLF1eXUzDsiHSwOe0+AVA+RRYS9SkKBCEEks/DpVrg
-	 uJkAq2xdbV0VinTMeNsFzcXlk4GotQgIXb3vdRqo=
+	b=KyqZZsLYTDxNf6BlHsbFNT9XIzeuxt3MY8jFJeVtLwwAeR1HG9yWqJgk8HXExN/tk
+	 V+4bSxlwOLXLtRi5UzFicBmTxwT/2Q5ezHi60cOr3HS5MNHDd1O0BN9UNgXFZJnBUm
+	 BIFtevLVS71gGSAqC9+Swrh9P8AgmwR7QkogFOsM=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728208AbgBPSYk (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 16 Feb 2020 13:24:40 -0500
-Received: from mail.kernel.org ([198.145.29.99]:33472 "EHLO mail.kernel.org"
+        id S1727926AbgBPSYC (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 16 Feb 2020 13:24:02 -0500
+Received: from mail.kernel.org ([198.145.29.99]:33412 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727974AbgBPSYF (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Sun, 16 Feb 2020 13:24:05 -0500
+        id S1727915AbgBPSYC (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Sun, 16 Feb 2020 13:24:02 -0500
 Received: from e123331-lin.home (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id BAE3624125;
-        Sun, 16 Feb 2020 18:24:03 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 5E2102086A;
+        Sun, 16 Feb 2020 18:24:00 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1581877445;
-        bh=535G2Z6StN4Ag1aO0gRi6xti0zt7h38+r39I0O3lAk8=;
+        s=default; t=1581877441;
+        bh=j3nSc1ziDeAOZ+GMaZJ73PIdlDUEWebRMtAgq39UXfs=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=sFiyKrgOP9c19cScnbZQghLN4QA0LCqNwm75+aGlG0FUblmVzZv8FqPCDO2ubjczS
-         Ed+qzRTyxJ5mXoRvja33ngrr8OrRohFwRgACnrScf/qSmZet864xPbdbqYn92FPQa1
-         OnwbKMFZ8bHrSiFCDSNdODl8UvwC3SpRWaifqMwU=
+        b=iqZ9ZlllVcZiNnNk8PL/flvephl9ku9KJYSiyBxqtBcQBrRodDzq86YSHV8aqPWWy
+         O9mdOL0iIQU0P1EIkskzsJiFN+pro0ivbUT1nk6CimLwxyH720r+n+V/b0cWnnEo11
+         Z6i8sRHBC6mIlFObDNM47f+2QzWWhAbF37M0tmo8=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
         Ard Biesheuvel <ardb@kernel.org>, nivedita@alum.mit.edu,
         x86@kernel.org
-Subject: [PATCH 11/18] efi: make efi_config_init() x86 only
-Date:   Sun, 16 Feb 2020 19:23:27 +0100
-Message-Id: <20200216182334.8121-12-ardb@kernel.org>
+Subject: [PATCH 09/18] efi/ia64: use local variable for EFI system table address
+Date:   Sun, 16 Feb 2020 19:23:25 +0100
+Message-Id: <20200216182334.8121-10-ardb@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20200216182334.8121-1-ardb@kernel.org>
 References: <20200216182334.8121-1-ardb@kernel.org>
@@ -54,112 +54,58 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The efi_config_init() routine is no longer shared with ia64 so let's
-move it into the x86 arch code before making further x86 specific
-changes to it.
+The IA64 code never refers to the EFI system table except from
+inside the scope of efi_init(). So let's use a local variable
+instead of efi.systab, which will be going away soon.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/platform/efi/efi.c | 30 +++++++++++++++++++
- drivers/firmware/efi/efi.c  | 31 --------------------
- include/linux/efi.h         |  1 -
- 3 files changed, 30 insertions(+), 32 deletions(-)
+ arch/ia64/kernel/efi.c | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
 
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 777373423a67..26d905e6b579 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -434,6 +434,36 @@ static int __init efi_systab_init(u64 phys)
- 	return 0;
- }
- 
-+static int __init efi_config_init(efi_config_table_type_t *arch_tables)
-+{
-+	void *config_tables;
-+	int sz, ret;
-+
-+	if (efi.systab->nr_tables == 0)
-+		return 0;
-+
-+	if (efi_enabled(EFI_64BIT))
-+		sz = sizeof(efi_config_table_64_t);
-+	else
-+		sz = sizeof(efi_config_table_32_t);
-+
-+	/*
-+	 * Let's see what config tables the firmware passed to us.
-+	 */
-+	config_tables = early_memremap(efi.systab->tables,
-+				       efi.systab->nr_tables * sz);
-+	if (config_tables == NULL) {
-+		pr_err("Could not map Configuration table!\n");
-+		return -ENOMEM;
-+	}
-+
-+	ret = efi_config_parse_tables(config_tables, efi.systab->nr_tables, sz,
-+				      arch_tables);
-+
-+	early_memunmap(config_tables, efi.systab->nr_tables * sz);
-+	return ret;
-+}
-+
- void __init efi_init(void)
+diff --git a/arch/ia64/kernel/efi.c b/arch/ia64/kernel/efi.c
+index 74fad89ae209..81bc5031a115 100644
+--- a/arch/ia64/kernel/efi.c
++++ b/arch/ia64/kernel/efi.c
+@@ -484,6 +484,7 @@ efi_map_pal_code (void)
+ void __init
+ efi_init (void)
  {
- 	if (IS_ENABLED(CONFIG_X86_32) &&
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 80fe0044f2e2..2bfd6c0806ce 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -601,37 +601,6 @@ int __init efi_config_parse_tables(void *config_tables, int count, int sz,
- 	return 0;
- }
++	const efi_system_table_t *efi_systab;
+ 	void *efi_map_start, *efi_map_end;
+ 	u64 efi_desc_size;
+ 	char *cp;
+@@ -516,17 +517,17 @@ efi_init (void)
+ 		printk(KERN_INFO "Ignoring memory above %lluMB\n",
+ 		       max_addr >> 20);
  
--int __init efi_config_init(efi_config_table_type_t *arch_tables)
--{
--	void *config_tables;
--	int sz, ret;
--
--	if (efi.systab->nr_tables == 0)
--		return 0;
--
--	if (efi_enabled(EFI_64BIT))
--		sz = sizeof(efi_config_table_64_t);
--	else
--		sz = sizeof(efi_config_table_32_t);
--
--	/*
--	 * Let's see what config tables the firmware passed to us.
--	 */
--	config_tables = early_memremap(efi.systab->tables,
--				       efi.systab->nr_tables * sz);
--	if (config_tables == NULL) {
--		pr_err("Could not map Configuration table!\n");
--		return -ENOMEM;
--	}
--
--	ret = efi_config_parse_tables(config_tables, efi.systab->nr_tables, sz,
--				      arch_tables);
--
--	early_memunmap(config_tables, efi.systab->nr_tables * sz);
--	return ret;
--}
--
--
- int __init efi_systab_check_header(const efi_table_hdr_t *systab_hdr,
- 				   int min_major_version)
- {
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 287510e84dfb..d61c25fd5824 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -608,7 +608,6 @@ extern int __init efi_memmap_split_count(efi_memory_desc_t *md,
- extern void __init efi_memmap_insert(struct efi_memory_map *old_memmap,
- 				     void *buf, struct efi_mem_range *mem);
+-	efi.systab = __va(ia64_boot_param->efi_systab);
++	efi_systab = __va(ia64_boot_param->efi_systab);
  
--extern int efi_config_init(efi_config_table_type_t *arch_tables);
- #ifdef CONFIG_EFI_ESRT
- extern void __init efi_esrt_init(void);
- #else
+ 	/*
+ 	 * Verify the EFI Table
+ 	 */
+-	if (efi.systab == NULL)
++	if (efi_systab == NULL)
+ 		panic("Whoa! Can't find EFI system table.\n");
+-	if (efi_systab_check_header(&efi.systab->hdr, 1))
++	if (efi_systab_check_header(&efi_systab->hdr, 1))
+ 		panic("Whoa! EFI system table signature incorrect\n");
+ 
+-	efi_systab_report_header(&efi.systab->hdr, efi.systab->fw_vendor);
++	efi_systab_report_header(&efi_systab->hdr, efi_systab->fw_vendor);
+ 
+ 	palo_phys      = EFI_INVALID_TABLE_ADDR;
+ 
+@@ -536,7 +537,7 @@ efi_init (void)
+ 	if (palo_phys != EFI_INVALID_TABLE_ADDR)
+ 		handle_palo(palo_phys);
+ 
+-	runtime = __va(efi.systab->runtime);
++	runtime = __va(efi_systab->runtime);
+ 	efi.get_time = phys_get_time;
+ 	efi.set_time = phys_set_time;
+ 	efi.get_wakeup_time = phys_get_wakeup_time;
 -- 
 2.17.1
 
