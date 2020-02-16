@@ -7,45 +7,45 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E3E11C7619D
-	for <linux-efi@archiver.kernel.org>; Sun, 16 Feb 2020 18:24:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F002DC7619D
+	for <linux-efi@archiver.kernel.org>; Sun, 16 Feb 2020 18:24:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id C151124673
-	for <linux-efi@archiver.kernel.org>; Sun, 16 Feb 2020 18:24:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CBD4222B48
+	for <linux-efi@archiver.kernel.org>; Sun, 16 Feb 2020 18:24:06 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1581877441;
-	bh=euKJYXOia2rQ9pUwQt2bnN7886DrahmzBis1Tb15+pY=;
+	s=default; t=1581877446;
+	bh=M6CtQIWxWimc9CTNa99EsOazRYurLdEN+0lz9EbRkzY=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=mlQsZqkdx+PNcW6WZNaF6ycv1GtD7fRrf3i9srsPkzVCfwpOr1JFOOo3HQKwGxqPk
-	 XZGQB+IVU2d8JKYHfaZnHGPz/I7+IKUqTD/fraYaablnF8uf/nfd2KtmnNCZnNfGf9
-	 l0U2WmEenSa+gAFwVrQCZPpcfiQ0jdOlVSK04hEY=
+	b=PDGypRviU0Z/OGAK6fjCW0FpiGPEZzxatf/nYXzxHLAncibDx5PSNAwX7VI+F1mR4
+	 QzMeEHzbsX/vDMaD/Ohl/4lEiagVLvJVE0d4wmWcltRUGyrR4b4pQ0lRhxm1JMKjOG
+	 ojkypj7K+89wu2dUai6tYCL//DMTXiCz5Aqjjgr0=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727901AbgBPSYA (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 16 Feb 2020 13:24:00 -0500
-Received: from mail.kernel.org ([198.145.29.99]:33380 "EHLO mail.kernel.org"
+        id S1727986AbgBPSYF (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 16 Feb 2020 13:24:05 -0500
+Received: from mail.kernel.org ([198.145.29.99]:33440 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727891AbgBPSYA (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Sun, 16 Feb 2020 13:24:00 -0500
+        id S1727963AbgBPSYD (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Sun, 16 Feb 2020 13:24:03 -0500
 Received: from e123331-lin.home (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id A89CB227BF;
-        Sun, 16 Feb 2020 18:23:58 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 1234B2465D;
+        Sun, 16 Feb 2020 18:24:01 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1581877440;
-        bh=euKJYXOia2rQ9pUwQt2bnN7886DrahmzBis1Tb15+pY=;
+        s=default; t=1581877443;
+        bh=M6CtQIWxWimc9CTNa99EsOazRYurLdEN+0lz9EbRkzY=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=wC6t4Yjbw8Re489VTKrMSSHcLumHV4tFZbfljRUT/T5F5bx1zDZZUV+kSVWl3v2vY
-         k0yu0Vrl0Oh5BH3sv/x0qRePNwd5xu619EiK6byRf8/V834vDhERcxZdyxFCJBMiWq
-         sxRC/BLI6QtXiGsq2sYAfEEfXiNVXtyr4cBCTfsU=
+        b=HF+fSYYCHuFY90WdfozOQ/Gg+MLB1ebGPUlwlpGiC5OyQbuTT7J7qecISnVTyY8Fz
+         w7Z1mlXr2uRiv6VsFCnhx8poDOo8eS3nvWJQA9Hw/NeTHiAOqiPapXEntfifvNZvo3
+         hoes4JQxVBBy9jejNEh4C6g5Oiox3GkIeL9mvBl4=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
         Ard Biesheuvel <ardb@kernel.org>, nivedita@alum.mit.edu,
         x86@kernel.org
-Subject: [PATCH 08/18] efi/ia64: use existing helpers to locate ESI table
-Date:   Sun, 16 Feb 2020 19:23:24 +0100
-Message-Id: <20200216182334.8121-9-ardb@kernel.org>
+Subject: [PATCH 10/18] efi/ia64: switch to efi_config_parse_tables()
+Date:   Sun, 16 Feb 2020 19:23:26 +0100
+Message-Id: <20200216182334.8121-11-ardb@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20200216182334.8121-1-ardb@kernel.org>
 References: <20200216182334.8121-1-ardb@kernel.org>
@@ -54,87 +54,32 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Instead of iterating over the EFI config table array manually,
-declare it as an arch table so it gets picked up by the existing
-config table handling code.
+IA64 calls efi_config_parse_tables() via efi_config_init(), which
+does an explicit memremap() of the tables, which is unnecessary
+on IA64. So let's call efi_config_parse_tables() directly, passing
+the __va() of the config table array.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/ia64/kernel/efi.c |  6 ++++++
- arch/ia64/kernel/esi.c | 21 ++++----------------
- 2 files changed, 10 insertions(+), 17 deletions(-)
+ arch/ia64/kernel/efi.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/arch/ia64/kernel/efi.c b/arch/ia64/kernel/efi.c
-index 292fe354158d..74fad89ae209 100644
+index 81bc5031a115..3b5cf551489c 100644
 --- a/arch/ia64/kernel/efi.c
 +++ b/arch/ia64/kernel/efi.c
-@@ -45,13 +45,19 @@
+@@ -531,7 +531,10 @@ efi_init (void)
  
- #define EFI_DEBUG	0
+ 	palo_phys      = EFI_INVALID_TABLE_ADDR;
  
-+#define ESI_TABLE_GUID					\
-+    EFI_GUID(0x43EA58DC, 0xCF28, 0x4b06, 0xB3,		\
-+	     0x91, 0xB7, 0x50, 0x59, 0x34, 0x2B, 0xD4)
-+
- static unsigned long mps_phys = EFI_INVALID_TABLE_ADDR;
- static __initdata unsigned long palo_phys;
+-	if (efi_config_init(arch_tables) != 0)
++	if (efi_config_parse_tables(__va(efi_systab->tables),
++				    efi_systab->nr_tables,
++				    sizeof(efi_config_table_t),
++				    arch_tables) != 0)
+ 		return;
  
-+unsigned long __initdata esi_phys = EFI_INVALID_TABLE_ADDR;
- unsigned long hcdp_phys = EFI_INVALID_TABLE_ADDR;
- unsigned long sal_systab_phys = EFI_INVALID_TABLE_ADDR;
- 
- static __initdata efi_config_table_type_t arch_tables[] = {
-+	{ESI_TABLE_GUID, "ESI", &esi_phys},
- 	{HCDP_TABLE_GUID, "HCDP", &hcdp_phys},
- 	{MPS_TABLE_GUID, "MPS", &mps_phys},
- 	{PROCESSOR_ABSTRACTION_LAYER_OVERWRITE_GUID, "PALO", &palo_phys},
-diff --git a/arch/ia64/kernel/esi.c b/arch/ia64/kernel/esi.c
-index cb514126ef7f..4df57c93e0a8 100644
---- a/arch/ia64/kernel/esi.c
-+++ b/arch/ia64/kernel/esi.c
-@@ -19,10 +19,6 @@ MODULE_LICENSE("GPL");
- 
- #define MODULE_NAME	"esi"
- 
--#define ESI_TABLE_GUID					\
--    EFI_GUID(0x43EA58DC, 0xCF28, 0x4b06, 0xB3,		\
--	     0x91, 0xB7, 0x50, 0x59, 0x34, 0x2B, 0xD4)
--
- enum esi_systab_entry_type {
- 	ESI_DESC_ENTRY_POINT = 0
- };
-@@ -48,27 +44,18 @@ struct pdesc {
- 
- static struct ia64_sal_systab *esi_systab;
- 
-+extern unsigned long esi_phys;
-+
- static int __init esi_init (void)
- {
--	efi_config_table_t *config_tables;
- 	struct ia64_sal_systab *systab;
--	unsigned long esi = 0;
- 	char *p;
- 	int i;
- 
--	config_tables = __va(efi.systab->tables);
--
--	for (i = 0; i < (int) efi.systab->nr_tables; ++i) {
--		if (efi_guidcmp(config_tables[i].guid, ESI_TABLE_GUID) == 0) {
--			esi = config_tables[i].table;
--			break;
--		}
--	}
--
--	if (!esi)
-+	if (esi_phys == EFI_INVALID_TABLE_ADDR)
- 		return -ENODEV;
- 
--	systab = __va(esi);
-+	systab = __va(esi_phys);
- 
- 	if (strncmp(systab->signature, "ESIT", 4) != 0) {
- 		printk(KERN_ERR "bad signature in ESI system table!");
+ 	if (palo_phys != EFI_INVALID_TABLE_ADDR)
 -- 
 2.17.1
 
