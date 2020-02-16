@@ -2,130 +2,149 @@ Return-Path: <SRS0=2niR=4E=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-1.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 03C38C7619B
-	for <linux-efi@archiver.kernel.org>; Sun, 16 Feb 2020 18:24:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 93B8EC2BA83
+	for <linux-efi@archiver.kernel.org>; Sun, 16 Feb 2020 18:32:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id D7869227BF
-	for <linux-efi@archiver.kernel.org>; Sun, 16 Feb 2020 18:24:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6EB4D22B48
+	for <linux-efi@archiver.kernel.org>; Sun, 16 Feb 2020 18:32:12 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1581877495;
-	bh=bvY7jkOH4eGGLIFXLY5eHChKYaTowEdHN1ApObhP+M4=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=LC0/GTYZOv3ffliu9UXsNB6JwWgOUSnhkBNIfjF476WOzS+DHqLU0BS68GV/GEFxi
-	 DW2KzMmWxm8h24bGM9BcNrhynRdiF7NHfJb+kJhMmEsDOlJroPfJIbA4mPLSOTZK3W
-	 fjWgfRIYp8l2AeFKWR7JRCFFeulX+pXK9cWfwRHQ=
+	s=default; t=1581877932;
+	bh=EDzR1SWoeTP3PS53iYm+v8llO5Y8uiP2GNaxmMQ4++U=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
+	b=KOou7L0TNsTfh+QxhyiG3fhpQfH48J1JH9470Ura6Rk/rzS4b7u5dTtCkUBF9w5LA
+	 GHIb65V8CNWQLkPIv4COqAevw98eYMAOsoyg9ZRDAHhIk8cEck9kBF9RpOxv3pbE5s
+	 oXNJ8Sk4j+gMwn3k5nc6E8FJPABS5BWx1sRSJMT0=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727974AbgBPSYt (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 16 Feb 2020 13:24:49 -0500
-Received: from mail.kernel.org ([198.145.29.99]:33286 "EHLO mail.kernel.org"
+        id S1725989AbgBPScM (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 16 Feb 2020 13:32:12 -0500
+Received: from mail.kernel.org ([198.145.29.99]:36264 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727797AbgBPSX5 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Sun, 16 Feb 2020 13:23:57 -0500
-Received: from e123331-lin.home (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
+        id S1726020AbgBPScM (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Sun, 16 Feb 2020 13:32:12 -0500
+Received: from mail-wm1-f53.google.com (mail-wm1-f53.google.com [209.85.128.53])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 4DAE6206D6;
-        Sun, 16 Feb 2020 18:23:55 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 554A022B48
+        for <linux-efi@vger.kernel.org>; Sun, 16 Feb 2020 18:32:11 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1581877436;
-        bh=bvY7jkOH4eGGLIFXLY5eHChKYaTowEdHN1ApObhP+M4=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=VocnGw1e6dD8Q4xB9HaV8zimojU5yPjH0C6Xx5XWMaf6PVA5YhmiEpLytQSeRod05
-         OjU5RMws0nqm9HZQdDkgg8S5cFvpv7Hm/d5yb1YILEyBE92a0hdqH+5yEEM+ywn0GQ
-         nNCnkdRN85vDgn0/Zh6Jcmid2Fvi2VBWTRzF+EHw=
-From:   Ard Biesheuvel <ardb@kernel.org>
-To:     linux-efi@vger.kernel.org
-Cc:     linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        Ard Biesheuvel <ardb@kernel.org>, nivedita@alum.mit.edu,
-        x86@kernel.org
-Subject: [PATCH 06/18] efi: make memreserve table handling local to efi.c
-Date:   Sun, 16 Feb 2020 19:23:22 +0100
-Message-Id: <20200216182334.8121-7-ardb@kernel.org>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20200216182334.8121-1-ardb@kernel.org>
+        s=default; t=1581877931;
+        bh=EDzR1SWoeTP3PS53iYm+v8llO5Y8uiP2GNaxmMQ4++U=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=KzopiJlktkgo2BlJO3vgl9MaBGiKPsegU24YVDwiGiNOx04Jx3efc0f1wclBd3Bhn
+         qNwAuE/6o4lvolmI2A1RjPmwU2me/Dpa28WarONn07FACnuW/Dh868BsbeNOBMXQaO
+         T+iKtMs189lciumH3sR2ZYGPWH+hzmUcib4g5lr0=
+Received: by mail-wm1-f53.google.com with SMTP id m10so5809341wmc.0
+        for <linux-efi@vger.kernel.org>; Sun, 16 Feb 2020 10:32:11 -0800 (PST)
+X-Gm-Message-State: APjAAAXzT5r8V+LlDC3ChVuT//PGWn9AKlvvLSXCZloVWcNgYeG1AE/G
+        9nQqhBtfshYgx7kZyLrJ4CcewPcm/QBYaUVg7TlChA==
+X-Google-Smtp-Source: APXvYqw49cvCSIJYQeUyUb39Yo8eW5vIIraLjTmETS76Q9vf74bEtQkragmJ5CnqaAMS9OSHHTRcJG9ASHNzdzoQm8Y=
+X-Received: by 2002:a7b:c4cc:: with SMTP id g12mr18463603wmk.68.1581877929530;
+ Sun, 16 Feb 2020 10:32:09 -0800 (PST)
+MIME-Version: 1.0
 References: <20200216182334.8121-1-ardb@kernel.org>
+In-Reply-To: <20200216182334.8121-1-ardb@kernel.org>
+From:   Ard Biesheuvel <ardb@kernel.org>
+Date:   Sun, 16 Feb 2020 19:31:58 +0100
+X-Gmail-Original-Message-ID: <CAKv+Gu-4N6B0LPL1fn5C2EAh9y3ECZ=mSi92p0AyJf67mJoWmw@mail.gmail.com>
+Message-ID: <CAKv+Gu-4N6B0LPL1fn5C2EAh9y3ECZ=mSi92p0AyJf67mJoWmw@mail.gmail.com>
+Subject: Re: [PATCH 00/18] efi: clean up contents of struct efi
+To:     linux-efi <linux-efi@vger.kernel.org>,
+        Tony Luck <tony.luck@intel.com>,
+        "Yu, Fenghua" <fenghua.yu@intel.com>
+Cc:     linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Arvind Sankar <nivedita@alum.mit.edu>,
+        "the arch/x86 maintainers" <x86@kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-There is no need for struct efi to carry the address of the memreserve
-table and share it with the world. So move it out and make it
-__initdata as well.
+(+ Tony and Fenghua)
 
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
----
- drivers/firmware/efi/efi.c | 12 ++++++------
- include/linux/efi.h        |  1 -
- 2 files changed, 6 insertions(+), 7 deletions(-)
+On Sun, 16 Feb 2020 at 19:23, Ard Biesheuvel <ardb@kernel.org> wrote:
+>
+> The generic r/w singleton object 'struct efi efi' is currently being used
+> as a dumping ground for memory addresses of firmware tables that only have
+> significance for a single architecture, or only at boot time [whereas
+> struct efi is an object with indefinite lifetime, and which is exported
+> to modules]
+>
+> Since we're expecting a new arrival that does affect all architectures,
+> which will need to be added to struct efi as well, let's do a cleanup
+> pass, and move out all the per-arch pieces and other stuff that does not
+> need to live in a global r/w struct.
+>
+> As a side effect, I ran into some other things that can be refactored
+> so that more code is shared between architectures, or made x86 specific
+> if it is something that should maybe not have existed in the first place,
+> and x86 is the only architecture where we cannot remove it for compatibility
+> reasons.
+>
+> Finally, we get rid of the struct efi::systab member, which we only need
+> at runtime to get at the 'runtime' pointer, so let's store that instead.
+> This allows us to drop some ugly handling of the remapped systab address,
+> which we cannot discover as easily as the remapped 'runtime' pointer.
+>
+> Cc: nivedita@alum.mit.edu
+> Cc: x86@kernel.org
+>
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 1fc4e174f11d..41bb2c44cea4 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -45,11 +45,11 @@ struct efi __read_mostly efi = {
- 	.esrt			= EFI_INVALID_TABLE_ADDR,
- 	.tpm_log		= EFI_INVALID_TABLE_ADDR,
- 	.tpm_final_log		= EFI_INVALID_TABLE_ADDR,
--	.mem_reserve		= EFI_INVALID_TABLE_ADDR,
- };
- EXPORT_SYMBOL(efi);
- 
- static unsigned long __ro_after_init rng_seed = EFI_INVALID_TABLE_ADDR;
-+static unsigned long __initdata mem_reserve = EFI_INVALID_TABLE_ADDR;
- 
- struct mm_struct efi_mm = {
- 	.mm_rb			= RB_ROOT,
-@@ -470,7 +470,7 @@ static __initdata efi_config_table_type_t common_tables[] = {
- 	{LINUX_EFI_RANDOM_SEED_TABLE_GUID, "RNG", &rng_seed},
- 	{LINUX_EFI_TPM_EVENT_LOG_GUID, "TPMEventLog", &efi.tpm_log},
- 	{LINUX_EFI_TPM_FINAL_LOG_GUID, "TPMFinalLog", &efi.tpm_final_log},
--	{LINUX_EFI_MEMRESERVE_TABLE_GUID, "MEMRESERVE", &efi.mem_reserve},
-+	{LINUX_EFI_MEMRESERVE_TABLE_GUID, "MEMRESERVE", &mem_reserve},
- #ifdef CONFIG_EFI_RCI2_TABLE
- 	{DELLEMC_EFI_RCI2_TABLE_GUID, NULL, &rci2_table_phys},
- #endif
-@@ -563,8 +563,8 @@ int __init efi_config_parse_tables(void *config_tables, int count, int sz,
- 
- 	efi_tpm_eventlog_init();
- 
--	if (efi.mem_reserve != EFI_INVALID_TABLE_ADDR) {
--		unsigned long prsv = efi.mem_reserve;
-+	if (mem_reserve != EFI_INVALID_TABLE_ADDR) {
-+		unsigned long prsv = mem_reserve;
- 
- 		while (prsv) {
- 			struct linux_efi_memreserve *rsv;
-@@ -939,10 +939,10 @@ static struct linux_efi_memreserve *efi_memreserve_root __ro_after_init;
- 
- static int __init efi_memreserve_map_root(void)
- {
--	if (efi.mem_reserve == EFI_INVALID_TABLE_ADDR)
-+	if (mem_reserve == EFI_INVALID_TABLE_ADDR)
- 		return -ENODEV;
- 
--	efi_memreserve_root = memremap(efi.mem_reserve,
-+	efi_memreserve_root = memremap(mem_reserve,
- 				       sizeof(*efi_memreserve_root),
- 				       MEMREMAP_WB);
- 	if (WARN_ON_ONCE(!efi_memreserve_root))
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index b093fce1cf59..a5e210abe4ca 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -541,7 +541,6 @@ extern struct efi {
- 	unsigned long esrt;		/* ESRT table */
- 	unsigned long tpm_log;		/* TPM2 Event Log table */
- 	unsigned long tpm_final_log;	/* TPM2 Final Events Log table */
--	unsigned long mem_reserve;	/* Linux EFI memreserve table */
- 	efi_get_time_t *get_time;
- 	efi_set_time_t *set_time;
- 	efi_get_wakeup_time_t *get_wakeup_time;
--- 
-2.17.1
+Apologies to the IA64 maintainers for forgetting to cc you.
 
+The whole series can be found at
+https://lore.kernel.org/linux-efi/20200216182334.8121-1-ardb@kernel.org/
+
+Please let me know if you need me to resend with the missing cc's added.
+
+
+
+
+> Ard Biesheuvel (18):
+>   efi: drop handling of 'boot_info' configuration table
+>   efi/ia64: move HCDP and MPS table handling into IA64 arch code
+>   efi: move UGA and PROP table handling to x86 code
+>   efi: make rng_seed table handling local to efi.c
+>   efi: move mem_attr_table out of struct efi
+>   efi: make memreserve table handling local to efi.c
+>   efi: merge EFI system table revision and vendor checks
+>   efi/ia64: use existing helpers to locate ESI table
+>   efi/ia64: use local variable for EFI system table address
+>   efi/ia64: switch to efi_config_parse_tables()
+>   efi: make efi_config_init() x86 only
+>   efi: clean up config_parse_tables()
+>   efi/x86: remove runtime table address from kexec EFI setup data
+>   efi/x86: make fw_vendor, config_table and runtime sysfs nodes x86
+>     specific
+>   efi/x86: merge assignments of efi.runtime_version
+>   efi: add 'runtime' pointer to struct efi
+>   efi/arm: drop unnecessary references to efi.systab
+>   efi/x86: drop 'systab' member from struct efi
+>
+>  arch/ia64/kernel/efi.c                  |  55 ++--
+>  arch/ia64/kernel/esi.c                  |  21 +-
+>  arch/x86/include/asm/efi.h              |   6 +-
+>  arch/x86/kernel/asm-offsets_32.c        |   5 +
+>  arch/x86/kernel/kexec-bzimage64.c       |   5 +-
+>  arch/x86/platform/efi/efi.c             | 262 ++++++++++----------
+>  arch/x86/platform/efi/efi_32.c          |  13 +-
+>  arch/x86/platform/efi/efi_64.c          |  14 +-
+>  arch/x86/platform/efi/efi_stub_32.S     |  21 +-
+>  arch/x86/platform/efi/quirks.c          |   2 +-
+>  drivers/firmware/efi/arm-init.c         |  68 ++---
+>  drivers/firmware/efi/arm-runtime.c      |  18 --
+>  drivers/firmware/efi/efi.c              | 237 ++++++++----------
+>  drivers/firmware/efi/memattr.c          |  13 +-
+>  drivers/firmware/efi/runtime-wrappers.c |   4 +-
+>  drivers/firmware/pcdp.c                 |   8 +-
+>  include/linux/efi.h                     |  76 +++---
+>  17 files changed, 379 insertions(+), 449 deletions(-)
+>
+> --
+> 2.17.1
+>
