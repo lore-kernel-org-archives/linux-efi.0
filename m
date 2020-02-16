@@ -4,48 +4,48 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E22BAC7619C
-	for <linux-efi@archiver.kernel.org>; Sun, 16 Feb 2020 18:24:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0196DC76199
+	for <linux-efi@archiver.kernel.org>; Sun, 16 Feb 2020 18:24:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id C1DD6208C4
-	for <linux-efi@archiver.kernel.org>; Sun, 16 Feb 2020 18:24:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D63A6208C4
+	for <linux-efi@archiver.kernel.org>; Sun, 16 Feb 2020 18:24:44 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1581877475;
-	bh=VYuJuZnaa051raJcxOzrSPyvqDyaPJlw5R0zDN1unHw=;
+	s=default; t=1581877484;
+	bh=535G2Z6StN4Ag1aO0gRi6xti0zt7h38+r39I0O3lAk8=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=P5x3m1rZDJLrRBPh0RRg3FsYoLRpiITHT5OhAhf7ERsecnjYEGfVv+L4IXQfY6T3z
-	 z3nj9IfY0GjygrlAaq3k9jL6fv61l9YTxD12x77/5uOA24j/SvG/FbkWaE1x2Dh6o+
-	 hbY/Aszgrjcy/vEvA0rWVLqQpPWAth368sePYSMc=
+	b=fhPtX4eF7tRx17wdP8PX1nxryqQoZDw7+GRybqpiedHy4tayUD57NFVOY/jF8vCxh
+	 ZhatjDVMj24+kt+2mHlaO4TruLF1eXUzDsiHSwOe0+AVA+RRYS9SkKBCEEks/DpVrg
+	 uJkAq2xdbV0VinTMeNsFzcXlk4GotQgIXb3vdRqo=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728116AbgBPSYe (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 16 Feb 2020 13:24:34 -0500
-Received: from mail.kernel.org ([198.145.29.99]:33566 "EHLO mail.kernel.org"
+        id S1728208AbgBPSYk (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 16 Feb 2020 13:24:40 -0500
+Received: from mail.kernel.org ([198.145.29.99]:33472 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728011AbgBPSYJ (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Sun, 16 Feb 2020 13:24:09 -0500
+        id S1727974AbgBPSYF (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Sun, 16 Feb 2020 13:24:05 -0500
 Received: from e123331-lin.home (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 2223522B48;
-        Sun, 16 Feb 2020 18:24:06 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id BAE3624125;
+        Sun, 16 Feb 2020 18:24:03 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1581877448;
-        bh=VYuJuZnaa051raJcxOzrSPyvqDyaPJlw5R0zDN1unHw=;
+        s=default; t=1581877445;
+        bh=535G2Z6StN4Ag1aO0gRi6xti0zt7h38+r39I0O3lAk8=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=XJsmffHbmCBdu7JcFJ4AtluEOljB9p+FpodsStoYzM1kZcZvTtV2p9zvBvQ0zk40w
-         8ylvOxwyByUk3XTUgse1ulLm6wGJ19alcZdVxNs1kiX1AXolaFY8eC75KWeez4Q5RQ
-         hHs8oavQvDBuPU62ACbf2DHdvkpHoHV/d1MVSKOU=
+        b=sFiyKrgOP9c19cScnbZQghLN4QA0LCqNwm75+aGlG0FUblmVzZv8FqPCDO2ubjczS
+         Ed+qzRTyxJ5mXoRvja33ngrr8OrRohFwRgACnrScf/qSmZet864xPbdbqYn92FPQa1
+         OnwbKMFZ8bHrSiFCDSNdODl8UvwC3SpRWaifqMwU=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
         Ard Biesheuvel <ardb@kernel.org>, nivedita@alum.mit.edu,
         x86@kernel.org
-Subject: [PATCH 13/18] efi/x86: remove runtime table address from kexec EFI setup data
-Date:   Sun, 16 Feb 2020 19:23:29 +0100
-Message-Id: <20200216182334.8121-14-ardb@kernel.org>
+Subject: [PATCH 11/18] efi: make efi_config_init() x86 only
+Date:   Sun, 16 Feb 2020 19:23:27 +0100
+Message-Id: <20200216182334.8121-12-ardb@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20200216182334.8121-1-ardb@kernel.org>
 References: <20200216182334.8121-1-ardb@kernel.org>
@@ -54,76 +54,112 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Since commit 33b85447fa61946b ("efi/x86: Drop two near identical versions
-of efi_runtime_init()"), we no longer map the EFI runtime services table
-before calling SetVirtualAddressMap(), which means we don't need the 1:1
-mapped physical address of this table, and so there is no point in passing
-the address via EFI setup data on kexec boot.
-
-Note that the kexec tools will still look for this address in sysfs, so
-we still need to provide it.
+The efi_config_init() routine is no longer shared with ia64 so let's
+move it into the x86 arch code before making further x86 specific
+changes to it.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/include/asm/efi.h        | 1 -
- arch/x86/kernel/kexec-bzimage64.c | 1 -
- arch/x86/platform/efi/efi.c       | 4 +---
- 3 files changed, 1 insertion(+), 5 deletions(-)
+ arch/x86/platform/efi/efi.c | 30 +++++++++++++++++++
+ drivers/firmware/efi/efi.c  | 31 --------------------
+ include/linux/efi.h         |  1 -
+ 3 files changed, 30 insertions(+), 32 deletions(-)
 
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index fcb21e3d13c5..ee867f01b2f6 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -178,7 +178,6 @@ extern void __init efi_uv1_memmap_phys_epilog(pgd_t *save_pgd);
- 
- struct efi_setup_data {
- 	u64 fw_vendor;
--	u64 runtime;
- 	u64 tables;
- 	u64 smbios;
- 	u64 reserved[8];
-diff --git a/arch/x86/kernel/kexec-bzimage64.c b/arch/x86/kernel/kexec-bzimage64.c
-index f293d872602a..f400678bd345 100644
---- a/arch/x86/kernel/kexec-bzimage64.c
-+++ b/arch/x86/kernel/kexec-bzimage64.c
-@@ -142,7 +142,6 @@ prepare_add_efi_setup_data(struct boot_params *params,
- 	struct efi_setup_data *esd = (void *)sd + sizeof(struct setup_data);
- 
- 	esd->fw_vendor = efi.fw_vendor;
--	esd->runtime = efi.runtime;
- 	esd->tables = efi.config_table;
- 	esd->smbios = efi.smbios;
- 
 diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index f7025b9075b4..c1f5f229cb02 100644
+index 777373423a67..26d905e6b579 100644
 --- a/arch/x86/platform/efi/efi.c
 +++ b/arch/x86/platform/efi/efi.c
-@@ -379,6 +379,7 @@ static int __init efi_systab_init(u64 phys)
- 			 systab64->con_out		> U32_MAX ||
- 			 systab64->stderr_handle	> U32_MAX ||
- 			 systab64->stderr		> U32_MAX ||
-+			 systab64->runtime		> U32_MAX ||
- 			 systab64->boottime		> U32_MAX;
+@@ -434,6 +434,36 @@ static int __init efi_systab_init(u64 phys)
+ 	return 0;
+ }
  
- 		if (efi_setup) {
-@@ -391,17 +392,14 @@ static int __init efi_systab_init(u64 phys)
- 			}
++static int __init efi_config_init(efi_config_table_type_t *arch_tables)
++{
++	void *config_tables;
++	int sz, ret;
++
++	if (efi.systab->nr_tables == 0)
++		return 0;
++
++	if (efi_enabled(EFI_64BIT))
++		sz = sizeof(efi_config_table_64_t);
++	else
++		sz = sizeof(efi_config_table_32_t);
++
++	/*
++	 * Let's see what config tables the firmware passed to us.
++	 */
++	config_tables = early_memremap(efi.systab->tables,
++				       efi.systab->nr_tables * sz);
++	if (config_tables == NULL) {
++		pr_err("Could not map Configuration table!\n");
++		return -ENOMEM;
++	}
++
++	ret = efi_config_parse_tables(config_tables, efi.systab->nr_tables, sz,
++				      arch_tables);
++
++	early_memunmap(config_tables, efi.systab->nr_tables * sz);
++	return ret;
++}
++
+ void __init efi_init(void)
+ {
+ 	if (IS_ENABLED(CONFIG_X86_32) &&
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 80fe0044f2e2..2bfd6c0806ce 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -601,37 +601,6 @@ int __init efi_config_parse_tables(void *config_tables, int count, int sz,
+ 	return 0;
+ }
  
- 			efi_systab.fw_vendor	= (unsigned long)data->fw_vendor;
--			efi_systab.runtime	= (void *)(unsigned long)data->runtime;
- 			efi_systab.tables	= (unsigned long)data->tables;
+-int __init efi_config_init(efi_config_table_type_t *arch_tables)
+-{
+-	void *config_tables;
+-	int sz, ret;
+-
+-	if (efi.systab->nr_tables == 0)
+-		return 0;
+-
+-	if (efi_enabled(EFI_64BIT))
+-		sz = sizeof(efi_config_table_64_t);
+-	else
+-		sz = sizeof(efi_config_table_32_t);
+-
+-	/*
+-	 * Let's see what config tables the firmware passed to us.
+-	 */
+-	config_tables = early_memremap(efi.systab->tables,
+-				       efi.systab->nr_tables * sz);
+-	if (config_tables == NULL) {
+-		pr_err("Could not map Configuration table!\n");
+-		return -ENOMEM;
+-	}
+-
+-	ret = efi_config_parse_tables(config_tables, efi.systab->nr_tables, sz,
+-				      arch_tables);
+-
+-	early_memunmap(config_tables, efi.systab->nr_tables * sz);
+-	return ret;
+-}
+-
+-
+ int __init efi_systab_check_header(const efi_table_hdr_t *systab_hdr,
+ 				   int min_major_version)
+ {
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 287510e84dfb..d61c25fd5824 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -608,7 +608,6 @@ extern int __init efi_memmap_split_count(efi_memory_desc_t *md,
+ extern void __init efi_memmap_insert(struct efi_memory_map *old_memmap,
+ 				     void *buf, struct efi_mem_range *mem);
  
- 			over4g |= data->fw_vendor	> U32_MAX ||
--				  data->runtime		> U32_MAX ||
- 				  data->tables		> U32_MAX;
- 
- 			early_memunmap(data, sizeof(*data));
- 		} else {
- 			over4g |= systab64->fw_vendor	> U32_MAX ||
--				  systab64->runtime	> U32_MAX ||
- 				  systab64->tables	> U32_MAX;
- 		}
- 	} else {
+-extern int efi_config_init(efi_config_table_type_t *arch_tables);
+ #ifdef CONFIG_EFI_ESRT
+ extern void __init efi_esrt_init(void);
+ #else
 -- 
 2.17.1
 
