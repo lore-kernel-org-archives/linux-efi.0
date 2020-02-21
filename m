@@ -4,40 +4,40 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 76A40C35640
-	for <linux-efi@archiver.kernel.org>; Fri, 21 Feb 2020 08:34:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 02211C35642
+	for <linux-efi@archiver.kernel.org>; Fri, 21 Feb 2020 08:38:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 480C520578
-	for <linux-efi@archiver.kernel.org>; Fri, 21 Feb 2020 08:34:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CBEEF206ED
+	for <linux-efi@archiver.kernel.org>; Fri, 21 Feb 2020 08:38:17 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1582274049;
-	bh=+JV1zX3XquiSEzUQgobeArAwwcIAYgouiRF7J9Wtenk=;
+	s=default; t=1582274297;
+	bh=chNtPjHLERPHJ9c+cj6K23uf8rG57CC74WRP35QmUmQ=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=pllukiRgMmB/Q1jXg91wDDWDJZaZvgT2sSQJWL/R5W/p7zm8HtIoiecK2NWDMt88X
-	 JJtKAY2TrbC4YaL85+slPpzloS7gv1GTvuFSNrMLjvEshc1X4Q37MAjFPY173HXwjw
-	 9wqcTi4qs85elJhEW+4ERIrGkjRPO5ceMw8Bd70E=
+	b=r2PYIc3SISKkVVzxRCtVZ1SnrzIWpgH/hTsEw2eKjyUwLljf9DTQsvdsCG4rhiZDh
+	 80vEwU8FuVL2ArGBotvVzAV+P3uFtaTsWbEKQHHkhPSHowvsx7P7GtbMiszzahu+DW
+	 8Qk65A783kJivgLalZRVS9KD9zmrI56fJ5Fbbn3U=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732434AbgBUIJv (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 21 Feb 2020 03:09:51 -0500
-Received: from mail.kernel.org ([198.145.29.99]:44874 "EHLO mail.kernel.org"
+        id S1731155AbgBUIDP (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 21 Feb 2020 03:03:15 -0500
+Received: from mail.kernel.org ([198.145.29.99]:35932 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1731637AbgBUIJv (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 21 Feb 2020 03:09:51 -0500
+        id S1731426AbgBUIDN (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 21 Feb 2020 03:03:13 -0500
 Received: from localhost (83-86-89-107.cable.dynamic.v4.ziggo.nl [83.86.89.107])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 228EC20578;
-        Fri, 21 Feb 2020 08:09:49 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id AC9702073A;
+        Fri, 21 Feb 2020 08:03:12 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1582272590;
-        bh=+JV1zX3XquiSEzUQgobeArAwwcIAYgouiRF7J9Wtenk=;
+        s=default; t=1582272193;
+        bh=chNtPjHLERPHJ9c+cj6K23uf8rG57CC74WRP35QmUmQ=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=vuEIZ0bf5f0swAc6FFA72glV2yp023oQ7jgqYpdY1h3r3nuZG1p3lXF1tL4kqvDDo
-         s6phYccZidM41d/STePRDfTzh3mxdoiCtAW4canTn42xCP1mhd6y+dmQ5L369EQ+Wa
-         av07JffpigDzF3Gkv1ogbLisvjmYXk5pOXekpmkY=
+        b=NcwqlNjpbD48lim5ivRwxU233Zgztd3mLe73Ed5+7UVf85eECjuq0nhhdXRgEiGvm
+         t4XiPtrHnUWZDF7SW5WBtGiT/w+4XDw30pOvATLe+A+KxsdbvaGO58ZOr6z2KEFNLe
+         s5Niy+wqlNFOWv3iRCbaMI4dH9/VhtrFhknJ9idU=
 From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 To:     linux-kernel@vger.kernel.org
 Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
@@ -47,9 +47,9 @@ Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         Arvind Sankar <nivedita@alum.mit.edu>,
         Matthew Garrett <mjg59@google.com>, linux-efi@vger.kernel.org,
         Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.org>
-Subject: [PATCH 5.4 200/344] efi/x86: Dont panic or BUG() on non-critical error conditions
-Date:   Fri, 21 Feb 2020 08:39:59 +0100
-Message-Id: <20200221072407.233116928@linuxfoundation.org>
+Subject: [PATCH 5.4 050/344] efi/x86: Map the entire EFI vendor string before copying it
+Date:   Fri, 21 Feb 2020 08:37:29 +0100
+Message-Id: <20200221072353.624711225@linuxfoundation.org>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200221072349.335551332@linuxfoundation.org>
 References: <20200221072349.335551332@linuxfoundation.org>
@@ -64,17 +64,16 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Ard Biesheuvel <ardb@kernel.org>
 
-[ Upstream commit e2d68a955e49d61fd0384f23e92058dc9b79be5e ]
+[ Upstream commit ffc2760bcf2dba0dbef74013ed73eea8310cc52c ]
 
-The logic in __efi_enter_virtual_mode() does a number of steps in
-sequence, all of which may fail in one way or the other. In most
-cases, we simply print an error and disable EFI runtime services
-support, but in some cases, we BUG() or panic() and bring down the
-system when encountering conditions that we could easily handle in
-the same way.
-
-While at it, replace a pointless page-to-virt-phys conversion with
-one that goes straight from struct page to physical.
+Fix a couple of issues with the way we map and copy the vendor string:
+- we map only 2 bytes, which usually works since you get at least a
+  page, but if the vendor string happens to cross a page boundary,
+  a crash will result
+- only call early_memunmap() if early_memremap() succeeded, or we will
+  call it with a NULL address which it doesn't like,
+- while at it, switch to early_memremap_ro(), and array indexing rather
+  than pointer dereferencing to read the CHAR16 characters.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 Cc: Andy Lutomirski <luto@kernel.org>
@@ -82,109 +81,48 @@ Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Cc: Arvind Sankar <nivedita@alum.mit.edu>
 Cc: Matthew Garrett <mjg59@google.com>
 Cc: linux-efi@vger.kernel.org
-Link: https://lkml.kernel.org/r/20200103113953.9571-14-ardb@kernel.org
+Fixes: 5b83683f32b1 ("x86: EFI runtime service support")
+Link: https://lkml.kernel.org/r/20200103113953.9571-5-ardb@kernel.org
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- arch/x86/platform/efi/efi.c    | 28 ++++++++++++++--------------
- arch/x86/platform/efi/efi_64.c |  9 +++++----
- 2 files changed, 19 insertions(+), 18 deletions(-)
+ arch/x86/platform/efi/efi.c | 13 +++++++------
+ 1 file changed, 7 insertions(+), 6 deletions(-)
 
 diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 8a4f389330396..01d7ca492741d 100644
+index 425e025341db9..8a4f389330396 100644
 --- a/arch/x86/platform/efi/efi.c
 +++ b/arch/x86/platform/efi/efi.c
-@@ -954,16 +954,14 @@ static void __init __efi_enter_virtual_mode(void)
+@@ -504,7 +504,6 @@ void __init efi_init(void)
+ 	efi_char16_t *c16;
+ 	char vendor[100] = "unknown";
+ 	int i = 0;
+-	void *tmp;
  
- 	if (efi_alloc_page_tables()) {
- 		pr_err("Failed to allocate EFI page tables\n");
--		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
--		return;
-+		goto err;
- 	}
- 
- 	efi_merge_regions();
- 	new_memmap = efi_map_regions(&count, &pg_shift);
- 	if (!new_memmap) {
- 		pr_err("Error reallocating memory, EFI runtime non-functional!\n");
--		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
--		return;
-+		goto err;
- 	}
- 
- 	pa = __pa(new_memmap);
-@@ -977,8 +975,7 @@ static void __init __efi_enter_virtual_mode(void)
- 
- 	if (efi_memmap_init_late(pa, efi.memmap.desc_size * count)) {
- 		pr_err("Failed to remap late EFI memory map\n");
--		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
--		return;
-+		goto err;
- 	}
- 
- 	if (efi_enabled(EFI_DBG)) {
-@@ -986,12 +983,11 @@ static void __init __efi_enter_virtual_mode(void)
- 		efi_print_memmap();
- 	}
- 
--	BUG_ON(!efi.systab);
-+	if (WARN_ON(!efi.systab))
-+		goto err;
- 
--	if (efi_setup_page_tables(pa, 1 << pg_shift)) {
--		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
--		return;
--	}
-+	if (efi_setup_page_tables(pa, 1 << pg_shift))
-+		goto err;
- 
- 	efi_sync_low_kernel_mappings();
- 
-@@ -1011,9 +1007,9 @@ static void __init __efi_enter_virtual_mode(void)
- 	}
- 
- 	if (status != EFI_SUCCESS) {
--		pr_alert("Unable to switch EFI into virtual mode (status=%lx)!\n",
--			 status);
--		panic("EFI call to SetVirtualAddressMap() failed!");
-+		pr_err("Unable to switch EFI into virtual mode (status=%lx)!\n",
-+		       status);
-+		goto err;
- 	}
- 
- 	efi_free_boot_services();
-@@ -1042,6 +1038,10 @@ static void __init __efi_enter_virtual_mode(void)
- 
- 	/* clean DUMMY object */
- 	efi_delete_dummy_variable();
-+	return;
-+
-+err:
-+	clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
- }
- 
- void __init efi_enter_virtual_mode(void)
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 08ce8177c3af1..52a1e5192fa80 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -392,11 +392,12 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- 		return 0;
- 
- 	page = alloc_page(GFP_KERNEL|__GFP_DMA32);
--	if (!page)
--		panic("Unable to allocate EFI runtime stack < 4GB\n");
-+	if (!page) {
-+		pr_err("Unable to allocate EFI runtime stack < 4GB\n");
-+		return 1;
+ #ifdef CONFIG_X86_32
+ 	if (boot_params.efi_info.efi_systab_hi ||
+@@ -529,14 +528,16 @@ void __init efi_init(void)
+ 	/*
+ 	 * Show what we know for posterity
+ 	 */
+-	c16 = tmp = early_memremap(efi.systab->fw_vendor, 2);
++	c16 = early_memremap_ro(efi.systab->fw_vendor,
++				sizeof(vendor) * sizeof(efi_char16_t));
+ 	if (c16) {
+-		for (i = 0; i < sizeof(vendor) - 1 && *c16; ++i)
+-			vendor[i] = *c16++;
++		for (i = 0; i < sizeof(vendor) - 1 && c16[i]; ++i)
++			vendor[i] = c16[i];
+ 		vendor[i] = '\0';
+-	} else
++		early_memunmap(c16, sizeof(vendor) * sizeof(efi_char16_t));
++	} else {
+ 		pr_err("Could not map the firmware vendor!\n");
+-	early_memunmap(tmp, 2);
 +	}
  
--	efi_scratch.phys_stack = virt_to_phys(page_address(page));
--	efi_scratch.phys_stack += PAGE_SIZE; /* stack grows down */
-+	efi_scratch.phys_stack = page_to_phys(page + 1); /* stack grows down */
- 
- 	npages = (_etext - _text) >> PAGE_SHIFT;
- 	text = __pa(_text);
+ 	pr_info("EFI v%u.%.02u by %s\n",
+ 		efi.systab->hdr.revision >> 16,
 -- 
 2.20.1
 
