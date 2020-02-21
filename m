@@ -2,191 +2,188 @@ Return-Path: <SRS0=8Umt=4J=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AB001C35640
-	for <linux-efi@archiver.kernel.org>; Fri, 21 Feb 2020 08:43:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 05080C35641
+	for <linux-efi@archiver.kernel.org>; Fri, 21 Feb 2020 08:49:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 80EBD2073A
-	for <linux-efi@archiver.kernel.org>; Fri, 21 Feb 2020 08:43:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CA6EC24670
+	for <linux-efi@archiver.kernel.org>; Fri, 21 Feb 2020 08:49:13 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1582274617;
-	bh=iVW8kYUZhNEhv4a1bYT2fR3fYrBKZHxbNJJMtyi5k9w=;
+	s=default; t=1582274953;
+	bh=w6FmeglHbbjQyOVeVhB1YQFs2bUzBxmdI+GXM/tT2+I=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=Ajfp+0J6RpsfEuiY3FHEVtRvgV0Ln70RfRun0XE/LY9sO/+mzwiGo0C4ddGJI5zsn
-	 MtU2N7R1i/ECEn/O6L9UJuKdsIB41J+EvrocI8wpfYvCIW1r9goeztk745OmpM4/pS
-	 E8DrcVOoP7SUJFOysUklU9UhCSi2Ll+JddqLPyJY=
+	b=jdq+1pLEJzofvfUy8DUaGGB0q1VtOXMpG6A+8EjJhB2fUXz+Ka0C3wSzdvjt7tLZk
+	 o181kQjnKtzzd4MmQbOLsCH+13huili5N8kYo+9O4FBVAQ/HgQmHMs0SjeSbVICOL7
+	 4uQLlnHYEIc7Xb+EtPrRBqyYFj7CjqINP+CSG+Ao=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730084AbgBUHx2 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 21 Feb 2020 02:53:28 -0500
-Received: from mail.kernel.org ([198.145.29.99]:51696 "EHLO mail.kernel.org"
+        id S1726325AbgBUItL (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 21 Feb 2020 03:49:11 -0500
+Received: from mail.kernel.org ([198.145.29.99]:58136 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729337AbgBUHx1 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 21 Feb 2020 02:53:27 -0500
-Received: from localhost (83-86-89-107.cable.dynamic.v4.ziggo.nl [83.86.89.107])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        id S1728578AbgBUItK (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 21 Feb 2020 03:49:10 -0500
+Received: from e123331-lin.home (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 420832465D;
-        Fri, 21 Feb 2020 07:53:26 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id A075924650;
+        Fri, 21 Feb 2020 08:49:08 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1582271606;
-        bh=iVW8kYUZhNEhv4a1bYT2fR3fYrBKZHxbNJJMtyi5k9w=;
+        s=default; t=1582274949;
+        bh=w6FmeglHbbjQyOVeVhB1YQFs2bUzBxmdI+GXM/tT2+I=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=m9QXgOrhGGcTDpcgMtwjX3xET7BFOAbThJxcBBwrW7eLpxQBSyHWLMGf/QuyymRYv
-         OoLHFjTFUELwjtmc48u/lvaUX9jgkeBvJAIZ+PnmL7x6zWiORPmHy5xAMiy0pUDY5k
-         6J9xoGi+DAaX+WbjTZEIsV3iTGqn1V6nkJiq9rQ8=
-From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To:     linux-kernel@vger.kernel.org
-Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        stable@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
-        Andy Lutomirski <luto@kernel.org>,
-        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Arvind Sankar <nivedita@alum.mit.edu>,
-        Matthew Garrett <mjg59@google.com>, linux-efi@vger.kernel.org,
-        Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.org>
-Subject: [PATCH 5.5 229/399] efi/x86: Dont panic or BUG() on non-critical error conditions
-Date:   Fri, 21 Feb 2020 08:39:14 +0100
-Message-Id: <20200221072425.094393843@linuxfoundation.org>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20200221072402.315346745@linuxfoundation.org>
-References: <20200221072402.315346745@linuxfoundation.org>
-User-Agent: quilt/0.66
-MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+        b=riwpfHIPIcMULGmYyrkl0wTkBeHPKCmFb+zczCh1JnvTgviWzr+/fH5wxJE/pKn7c
+         ZuDc5phjLlhAoNGWldDL9oKfmyS6JVgJT4NYX1lcCVVbbxnjjfAiB37IR/rjRbKo04
+         K4RWmumB1x7prrghLRPf4Opg8tGev3dVB4IJVkqY=
+From:   Ard Biesheuvel <ardb@kernel.org>
+To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
+        Thomas Gleixner <tglx@linutronix.de>
+Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org
+Subject: [PATCH 2/4] efi/x86: remove support for EFI time and counter services in mixed mode
+Date:   Fri, 21 Feb 2020 09:48:47 +0100
+Message-Id: <20200221084849.26878-3-ardb@kernel.org>
+X-Mailer: git-send-email 2.17.1
+In-Reply-To: <20200221084849.26878-1-ardb@kernel.org>
+References: <20200221084849.26878-1-ardb@kernel.org>
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Ard Biesheuvel <ardb@kernel.org>
+Mixed mode calls at runtime are rather tricky with vmap'ed stacks,
+as we can no longer assume that data passed in by the callers of the
+EFI runtime wrapper routines is contiguous in physical memory.
 
-[ Upstream commit e2d68a955e49d61fd0384f23e92058dc9b79be5e ]
+We need to fix this, but before we do, let's drop the implementations
+of routines that we know are never used on x86, i.e., the RTC related
+ones. Given that UEFI rev2.8 permits any runtime service to return
+EFI_UNSUPPORTED at runtime, let's return that instead.
 
-The logic in __efi_enter_virtual_mode() does a number of steps in
-sequence, all of which may fail in one way or the other. In most
-cases, we simply print an error and disable EFI runtime services
-support, but in some cases, we BUG() or panic() and bring down the
-system when encountering conditions that we could easily handle in
-the same way.
-
-While at it, replace a pointless page-to-virt-phys conversion with
-one that goes straight from struct page to physical.
+As get_next_high_mono_count() is never used at all, even on other
+architectures, let's make that return EFI_UNSUPPORTED too.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
-Cc: Andy Lutomirski <luto@kernel.org>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Arvind Sankar <nivedita@alum.mit.edu>
-Cc: Matthew Garrett <mjg59@google.com>
-Cc: linux-efi@vger.kernel.org
-Link: https://lkml.kernel.org/r/20200103113953.9571-14-ardb@kernel.org
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- arch/x86/platform/efi/efi.c    | 28 ++++++++++++++--------------
- arch/x86/platform/efi/efi_64.c |  9 +++++----
- 2 files changed, 19 insertions(+), 18 deletions(-)
+ arch/x86/platform/efi/efi_64.c | 81 +++-------------------------------
+ 1 file changed, 5 insertions(+), 76 deletions(-)
 
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 06f69bcd233fe..ad4dd3a977533 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -1000,16 +1000,14 @@ static void __init __efi_enter_virtual_mode(void)
- 
- 	if (efi_alloc_page_tables()) {
- 		pr_err("Failed to allocate EFI page tables\n");
--		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
--		return;
-+		goto err;
- 	}
- 
- 	efi_merge_regions();
- 	new_memmap = efi_map_regions(&count, &pg_shift);
- 	if (!new_memmap) {
- 		pr_err("Error reallocating memory, EFI runtime non-functional!\n");
--		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
--		return;
-+		goto err;
- 	}
- 
- 	pa = __pa(new_memmap);
-@@ -1023,8 +1021,7 @@ static void __init __efi_enter_virtual_mode(void)
- 
- 	if (efi_memmap_init_late(pa, efi.memmap.desc_size * count)) {
- 		pr_err("Failed to remap late EFI memory map\n");
--		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
--		return;
-+		goto err;
- 	}
- 
- 	if (efi_enabled(EFI_DBG)) {
-@@ -1032,12 +1029,11 @@ static void __init __efi_enter_virtual_mode(void)
- 		efi_print_memmap();
- 	}
- 
--	BUG_ON(!efi.systab);
-+	if (WARN_ON(!efi.systab))
-+		goto err;
- 
--	if (efi_setup_page_tables(pa, 1 << pg_shift)) {
--		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
--		return;
--	}
-+	if (efi_setup_page_tables(pa, 1 << pg_shift))
-+		goto err;
- 
- 	efi_sync_low_kernel_mappings();
- 
-@@ -1057,9 +1053,9 @@ static void __init __efi_enter_virtual_mode(void)
- 	}
- 
- 	if (status != EFI_SUCCESS) {
--		pr_alert("Unable to switch EFI into virtual mode (status=%lx)!\n",
--			 status);
--		panic("EFI call to SetVirtualAddressMap() failed!");
-+		pr_err("Unable to switch EFI into virtual mode (status=%lx)!\n",
-+		       status);
-+		goto err;
- 	}
- 
- 	efi_free_boot_services();
-@@ -1088,6 +1084,10 @@ static void __init __efi_enter_virtual_mode(void)
- 
- 	/* clean DUMMY object */
- 	efi_delete_dummy_variable();
-+	return;
-+
-+err:
-+	clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
- }
- 
- void __init efi_enter_virtual_mode(void)
 diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 08ce8177c3af1..52a1e5192fa80 100644
+index 543edfdcd1b9..ae398587f264 100644
 --- a/arch/x86/platform/efi/efi_64.c
 +++ b/arch/x86/platform/efi/efi_64.c
-@@ -392,11 +392,12 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- 		return 0;
+@@ -568,85 +568,25 @@ efi_thunk_set_virtual_address_map(unsigned long memory_map_size,
  
- 	page = alloc_page(GFP_KERNEL|__GFP_DMA32);
--	if (!page)
--		panic("Unable to allocate EFI runtime stack < 4GB\n");
-+	if (!page) {
-+		pr_err("Unable to allocate EFI runtime stack < 4GB\n");
-+		return 1;
-+	}
+ static efi_status_t efi_thunk_get_time(efi_time_t *tm, efi_time_cap_t *tc)
+ {
+-	efi_status_t status;
+-	u32 phys_tm, phys_tc;
+-	unsigned long flags;
+-
+-	spin_lock(&rtc_lock);
+-	spin_lock_irqsave(&efi_runtime_lock, flags);
+-
+-	phys_tm = virt_to_phys_or_null(tm);
+-	phys_tc = virt_to_phys_or_null(tc);
+-
+-	status = efi_thunk(get_time, phys_tm, phys_tc);
+-
+-	spin_unlock_irqrestore(&efi_runtime_lock, flags);
+-	spin_unlock(&rtc_lock);
+-
+-	return status;
++	return EFI_UNSUPPORTED;
+ }
  
--	efi_scratch.phys_stack = virt_to_phys(page_address(page));
--	efi_scratch.phys_stack += PAGE_SIZE; /* stack grows down */
-+	efi_scratch.phys_stack = page_to_phys(page + 1); /* stack grows down */
+ static efi_status_t efi_thunk_set_time(efi_time_t *tm)
+ {
+-	efi_status_t status;
+-	u32 phys_tm;
+-	unsigned long flags;
+-
+-	spin_lock(&rtc_lock);
+-	spin_lock_irqsave(&efi_runtime_lock, flags);
+-
+-	phys_tm = virt_to_phys_or_null(tm);
+-
+-	status = efi_thunk(set_time, phys_tm);
+-
+-	spin_unlock_irqrestore(&efi_runtime_lock, flags);
+-	spin_unlock(&rtc_lock);
+-
+-	return status;
++	return EFI_UNSUPPORTED;
+ }
  
- 	npages = (_etext - _text) >> PAGE_SHIFT;
- 	text = __pa(_text);
+ static efi_status_t
+ efi_thunk_get_wakeup_time(efi_bool_t *enabled, efi_bool_t *pending,
+ 			  efi_time_t *tm)
+ {
+-	efi_status_t status;
+-	u32 phys_enabled, phys_pending, phys_tm;
+-	unsigned long flags;
+-
+-	spin_lock(&rtc_lock);
+-	spin_lock_irqsave(&efi_runtime_lock, flags);
+-
+-	phys_enabled = virt_to_phys_or_null(enabled);
+-	phys_pending = virt_to_phys_or_null(pending);
+-	phys_tm = virt_to_phys_or_null(tm);
+-
+-	status = efi_thunk(get_wakeup_time, phys_enabled,
+-			     phys_pending, phys_tm);
+-
+-	spin_unlock_irqrestore(&efi_runtime_lock, flags);
+-	spin_unlock(&rtc_lock);
+-
+-	return status;
++	return EFI_UNSUPPORTED;
+ }
+ 
+ static efi_status_t
+ efi_thunk_set_wakeup_time(efi_bool_t enabled, efi_time_t *tm)
+ {
+-	efi_status_t status;
+-	u32 phys_tm;
+-	unsigned long flags;
+-
+-	spin_lock(&rtc_lock);
+-	spin_lock_irqsave(&efi_runtime_lock, flags);
+-
+-	phys_tm = virt_to_phys_or_null(tm);
+-
+-	status = efi_thunk(set_wakeup_time, enabled, phys_tm);
+-
+-	spin_unlock_irqrestore(&efi_runtime_lock, flags);
+-	spin_unlock(&rtc_lock);
+-
+-	return status;
++	return EFI_UNSUPPORTED;
+ }
+ 
+ static unsigned long efi_name_size(efi_char16_t *name)
+@@ -770,18 +710,7 @@ efi_thunk_get_next_variable(unsigned long *name_size,
+ static efi_status_t
+ efi_thunk_get_next_high_mono_count(u32 *count)
+ {
+-	efi_status_t status;
+-	u32 phys_count;
+-	unsigned long flags;
+-
+-	spin_lock_irqsave(&efi_runtime_lock, flags);
+-
+-	phys_count = virt_to_phys_or_null(count);
+-	status = efi_thunk(get_next_high_mono_count, phys_count);
+-
+-	spin_unlock_irqrestore(&efi_runtime_lock, flags);
+-
+-	return status;
++	return EFI_UNSUPPORTED;
+ }
+ 
+ static void
 -- 
-2.20.1
-
-
+2.17.1
 
