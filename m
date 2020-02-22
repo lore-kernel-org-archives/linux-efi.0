@@ -2,92 +2,98 @@ Return-Path: <SRS0=dwzu=4K=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73A66C35666
-	for <linux-efi@archiver.kernel.org>; Sat, 22 Feb 2020 17:53:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B245EC35669
+	for <linux-efi@archiver.kernel.org>; Sat, 22 Feb 2020 23:38:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 431E820707
-	for <linux-efi@archiver.kernel.org>; Sat, 22 Feb 2020 17:53:39 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1582394019;
-	bh=YgKrm0xiETHM9Cmfn3YsYzVL6NnGHRbjPZ0LttoOZPs=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=XwzhA+wZxu2AuH3Up1nP5l5bPukCdgYDZr9cZlBYaZo5sYXccc5uGaDRsyiqYIL2e
-	 wJndujkGYVXf0W1Kzsh12owICjPuIJWDQA9xKwRSdE4EMaHc3buMfEEPBJIcVdbB8M
-	 ThEcL/yOXDXbLN9mRdD1tElKdrdWd3XKwW3NXuZw=
+	by mail.kernel.org (Postfix) with ESMTP id 8551B206EF
+	for <linux-efi@archiver.kernel.org>; Sat, 22 Feb 2020 23:38:35 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="KsM6sFEt"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726829AbgBVRxi (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 22 Feb 2020 12:53:38 -0500
-Received: from mail.kernel.org ([198.145.29.99]:41296 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726550AbgBVRxi (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Sat, 22 Feb 2020 12:53:38 -0500
-Received: from mail-wr1-f41.google.com (mail-wr1-f41.google.com [209.85.221.41])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 70CC020707
-        for <linux-efi@vger.kernel.org>; Sat, 22 Feb 2020 17:53:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1582394017;
-        bh=YgKrm0xiETHM9Cmfn3YsYzVL6NnGHRbjPZ0LttoOZPs=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=WHBit2bA6T3EHwMhwqLDdrr2CZGcZ4tX4F/1r5Lyk9AQFzU/OqaIeMgyCzk97aE/7
-         O6S595fJcXq5KtBCozs3jOWCnHfAra61DJEVNImt3IcPoHBp16EPEQ+CCjyiaNIa+j
-         0fH3UOISh+mdmW2T186huegR4ms51t3JnWEZ/IrE=
-Received: by mail-wr1-f41.google.com with SMTP id t3so5586021wru.7
-        for <linux-efi@vger.kernel.org>; Sat, 22 Feb 2020 09:53:37 -0800 (PST)
-X-Gm-Message-State: APjAAAUPA01dJHHjZV7X6aVtdCKBz7NnXkBP+7GKnUQCfaOwuaO9EEgD
-        ygh9+oFx6ZoraGsjO9wuHldte+66kvRi+H7tUq+hlA==
-X-Google-Smtp-Source: APXvYqyWzaLbt4HYjpKwPlRQWQGBksiImz9hsJkpyk87ED2N2OOaMX24u0bAr90dNAd3Wc+csetD0svSTq78dij7MPk=
-X-Received: by 2002:a5d:5188:: with SMTP id k8mr55791430wrv.151.1582394015897;
- Sat, 22 Feb 2020 09:53:35 -0800 (PST)
+        id S1726884AbgBVXif (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 22 Feb 2020 18:38:35 -0500
+Received: from mail-lj1-f196.google.com ([209.85.208.196]:37779 "EHLO
+        mail-lj1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726865AbgBVXif (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 22 Feb 2020 18:38:35 -0500
+Received: by mail-lj1-f196.google.com with SMTP id q23so6066596ljm.4
+        for <linux-efi@vger.kernel.org>; Sat, 22 Feb 2020 15:38:32 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=h6NihziCTyZMAUdv/tajx8t4ufGMIb+wHMLzzNaM6Qc=;
+        b=KsM6sFEt0PpXEdyf2g72FHXKriIH7ohllYlnTqE9t2lgHEQ/FgJKQBR/LbvEqGTeH0
+         zS1h/7IkcSQulywMOMsTWj2DIHqg3hWW+US/H3nXZjlvZA1nNhdJ3WGdQQlnsENPmgqY
+         p73FdtM589cbmZCb34mHbMWS8OZLFahbyxrn8iOSIsTnUpFUqRBO++k3Jw9ziK24sB14
+         1aEJkNkdhEPN/DwB9zunSF9ErK707rj1NqaFQRD0syG6oCo4aPIVR0XaMUx2kJSBIx29
+         OhwRrCD9Ex4HVVr1r/dJzSMmSwAcEyMUmo32cG5Vx50/hb/WXwU9SEgXnf6wt/Hu9Bzq
+         XYhw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=h6NihziCTyZMAUdv/tajx8t4ufGMIb+wHMLzzNaM6Qc=;
+        b=NPk3HPdN/cxWWguuDeQEfsmgFvoJXORq2DHroYqUuTZIHtrZNQYXw1ioCs10LbAkSO
+         ae5QD6zI6ObP5AX0I/crHxHAszUB7Njsunvrk7uB8YdQ+YZ5ODAO51IyRka3y55VbxsC
+         5hYhorUMCzXpka8D4cJb3YJoRITB4m6fXGU6hqpqdVnE07uSdVe3sHy2u8Gn0sEpcSQ7
+         tJXtIOxqUo+SqCxhEng7D99PI01VQFCK8Noe5JpdcFL95KbBn8HIQMb+/i2jIILFPg0b
+         Q+OIk/Vczkr+uDLnAM34o6EAcRzLD9/zrgpz+1JbqGk9uOMe535THokJpyQDQzKB8NfS
+         UATQ==
+X-Gm-Message-State: APjAAAUpTf+kI+mfF+FxM0IsIaUrr9iKGtgyfyAO08/qzv1nLY1Us7Fv
+        +Mqk5FicPxmjKpH3pHADrL4RNR5MBlASq4/+FmxYzA==
+X-Google-Smtp-Source: APXvYqziLZ994tDnwRiLck1FaENzmhT9e4Iye+IQizxx2JZmB9oorbeE1//5MgiHKZhF8rfXYT8vkMOYdjt9JS7vGvw=
+X-Received: by 2002:a2e:b6ce:: with SMTP id m14mr24505315ljo.99.1582414711800;
+ Sat, 22 Feb 2020 15:38:31 -0800 (PST)
 MIME-Version: 1.0
-References: <20200221191829.18149-1-xypron.glpk@gmx.de>
-In-Reply-To: <20200221191829.18149-1-xypron.glpk@gmx.de>
-From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Sat, 22 Feb 2020 18:53:25 +0100
-X-Gmail-Original-Message-ID: <CAKv+Gu_A1r7JYmUrgEyZjkiZam7oEB=rANuUiCfsFfkQAfxuCg@mail.gmail.com>
-Message-ID: <CAKv+Gu_A1r7JYmUrgEyZjkiZam7oEB=rANuUiCfsFfkQAfxuCg@mail.gmail.com>
-Subject: Re: [PATCH 1/1] efi/libstub: error message in handle_cmdline_files()
-To:     Heinrich Schuchardt <xypron.glpk@gmx.de>
-Cc:     linux-efi <linux-efi@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+References: <20200219094340.16597-1-ardb@kernel.org> <CAKv+Gu_aL_=W7qMuLwu+427=DSgj5Kmg7Qm0ujooxS9s=zDT2g@mail.gmail.com>
+ <fa6aa783-0b01-9d29-03be-3ec8d352f373@arm.com> <CAKv+Gu8g_fb-Xq3XcyZivG5405jypHnkBy6gnWMWy4Oz8763XA@mail.gmail.com>
+ <01039e92-8354-a75f-44de-7638b103be42@arm.com>
+In-Reply-To: <01039e92-8354-a75f-44de-7638b103be42@arm.com>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Sun, 23 Feb 2020 00:38:20 +0100
+Message-ID: <CACRpkdZpM18k0S64U1UvgFbDGPYZbY-gRzchGRYsi9g2wTbQCw@mail.gmail.com>
+Subject: Re: [PATCH v2 0/4] ARM: decompressor: use by-VA cache maintenance for
+ v7 cores
+To:     Robin Murphy <robin.murphy@arm.com>
+Cc:     Ard Biesheuvel <ardb@kernel.org>,
+        linux-efi <linux-efi@vger.kernel.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Nicolas Pitre <nico@fluxnic.net>,
+        Tony Lindgren <tony@atomide.com>,
+        Marc Zyngier <maz@kernel.org>,
+        Russell King <linux@armlinux.org.uk>,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Fri, 21 Feb 2020 at 20:18, Heinrich Schuchardt <xypron.glpk@gmx.de> wrote:
->
-> The memory for files is allocated not reallocated.
->
-> Signed-off-by: Heinrich Schuchardt <xypron.glpk@gmx.de>
+On Fri, Feb 21, 2020 at 5:09 PM Robin Murphy <robin.murphy@arm.com> wrote:
+> On 21/02/2020 1:42 pm, Ard Biesheuvel wrote:
 
-Queued in efi/next
+> > OK, so where should it be instead? Are you saying it is now required
+> > to have a /soc or /smb node that contains all the device nodes?
+>
+> That is now my understanding, yes - if there is some property of the
+> system interconnect which is not entirely transparent relative to the
+> conceptual CPU-visible physical address space and needs to be described,
+> then the only way to correctly encode that in DT is with an explicit
+> level of 'bus' in the hierarchy to represent that interconnect.
+> Otherwise these address translation properties quickly end up in
+> philosophical conundrums over what the parent of the root node is.
 
-Thanks,
+This confirms my similar understanding. Rob sent a patch to
+remove the root level dma-ranges from the ARM Integrator,
+and I have since added it back below the logic module bus
+after you pointed out that the dma-ranges was actually there
+for that very bus.
 
-> ---
->  drivers/firmware/efi/libstub/file.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/firmware/efi/libstub/file.c b/drivers/firmware/efi/libstub/file.c
-> index be78f64f8d80..d4c7e5f59d2c 100644
-> --- a/drivers/firmware/efi/libstub/file.c
-> +++ b/drivers/firmware/efi/libstub/file.c
-> @@ -190,7 +190,7 @@ static efi_status_t handle_cmdline_files(efi_loaded_image_t *image,
->                                                             &alloc_addr,
->                                                             hard_limit);
->                         if (status != EFI_SUCCESS) {
-> -                               pr_efi_err("Failed to reallocate memory for files\n");
-> +                               pr_efi_err("Failed to allocate memory for files\n");
->                                 goto err_close_file;
->                         }
->
-> --
-> 2.25.0
->
+Yours,
+Linus Walleij
