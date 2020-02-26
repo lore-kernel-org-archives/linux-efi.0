@@ -2,107 +2,130 @@ Return-Path: <SRS0=gsoD=4O=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.8 required=3.0
-	tests=HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D0D0C4BA18
-	for <linux-efi@archiver.kernel.org>; Wed, 26 Feb 2020 16:55:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7ACC0C4BA13
+	for <linux-efi@archiver.kernel.org>; Wed, 26 Feb 2020 16:57:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 7CB3321556
-	for <linux-efi@archiver.kernel.org>; Wed, 26 Feb 2020 16:55:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4E6B524680
+	for <linux-efi@archiver.kernel.org>; Wed, 26 Feb 2020 16:57:48 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1582736268;
+	bh=Snro6dewJjLv0IRXOXFhEpHZJxQtAuKLFzocHl4NYu0=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=0eCqmMwp0/truB6r9hoKtRwRkL7JkSyrTDg+Sjib0kWvdf8pfCTy/jRlml/CZuJer
+	 NXP9wyy63ffXgFNTj9YW5Qh/mXu35lyeqbYdnqbZoMlUdGdGC/LWB7pnt7IrFcCU5v
+	 qt6CGvFx5uLBHcIOTygIbr6usdYC5WjTGKIAyZKs=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727311AbgBZQzR (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 26 Feb 2020 11:55:17 -0500
-Received: from Galois.linutronix.de ([193.142.43.55]:58288 "EHLO
-        Galois.linutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726214AbgBZQzQ (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 26 Feb 2020 11:55:16 -0500
-Received: from [5.158.153.53] (helo=tip-bot2.lab.linutronix.de)
-        by Galois.linutronix.de with esmtpsa (TLS1.2:DHE_RSA_AES_256_CBC_SHA256:256)
-        (Exim 4.80)
-        (envelope-from <tip-bot2@linutronix.de>)
-        id 1j6zxp-0002Dj-BO; Wed, 26 Feb 2020 17:55:13 +0100
-Received: from [127.0.1.1] (localhost [IPv6:::1])
-        by tip-bot2.lab.linutronix.de (Postfix) with ESMTP id EB54E1C215C;
-        Wed, 26 Feb 2020 17:55:12 +0100 (CET)
-Date:   Wed, 26 Feb 2020 16:55:12 -0000
-From:   "tip-bot2 for Jason A. Donenfeld" <tip-bot2@linutronix.de>
-Reply-to: linux-kernel@vger.kernel.org
-To:     linux-tip-commits@vger.kernel.org
-Subject: [tip: efi/urgent] efi: READ_ONCE rng seed size before munmap
-Cc:     "Jason A. Donenfeld" <Jason@zx2c4.com>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Ingo Molnar <mingo@kernel.org>, linux-efi@vger.kernel.org,
-        Thomas Gleixner <tglx@linutronix.de>, x86 <x86@kernel.org>,
-        LKML <linux-kernel@vger.kernel.org>
-In-Reply-To: <20200217123354.21140-1-Jason@zx2c4.com>
-References: <20200217123354.21140-1-Jason@zx2c4.com>
-MIME-Version: 1.0
-Message-ID: <158273611261.28353.8523357540114932134.tip-bot2@tip-bot2>
-X-Mailer: tip-git-log-daemon
-Robot-ID: <tip-bot2.linutronix.de>
-Robot-Unsubscribe: Contact <mailto:tglx@linutronix.de> to get blacklisted from these emails
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-X-Linutronix-Spam-Score: -1.0
-X-Linutronix-Spam-Level: -
-X-Linutronix-Spam-Status: No , -1.0 points, 5.0 required,  ALL_TRUSTED=-1,SHORTCIRCUIT=-0.0001
+        id S1727112AbgBZQ5s (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 26 Feb 2020 11:57:48 -0500
+Received: from mail.kernel.org ([198.145.29.99]:35956 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726980AbgBZQ5r (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 26 Feb 2020 11:57:47 -0500
+Received: from e123331-lin.home (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 42D2D21556;
+        Wed, 26 Feb 2020 16:57:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1582736267;
+        bh=Snro6dewJjLv0IRXOXFhEpHZJxQtAuKLFzocHl4NYu0=;
+        h=From:To:Cc:Subject:Date:From;
+        b=QbkaaaoZusV5GN4xkIz9nl0KTwlVMJWOz/U0UGhMGMslxSGXIlqYGBBucWunuZ/Bi
+         FhtgKLmotwCyNkQJVdwwxLaLcyZDbRiQen5vD3VKSD8LuRoKCkEYusfei8ECBkaebL
+         mGw4gw3JvV+u8VPRKr4LlWXcfeREQztbJwGBiZQM=
+From:   Ard Biesheuvel <ardb@kernel.org>
+To:     linux-arm-kernel@lists.infradead.org
+Cc:     linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
+        Russell King <linux@armlinux.org.uk>,
+        Marc Zyngier <maz@kernel.org>,
+        Nicolas Pitre <nico@fluxnic.net>,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        Tony Lindgren <tony@atomide.com>,
+        Linus Walleij <linus.walleij@linaro.org>
+Subject: [PATCH v4 0/5] ARM: decompressor: use by-VA cache maintenance for v7 cores
+Date:   Wed, 26 Feb 2020 17:57:33 +0100
+Message-Id: <20200226165738.11201-1-ardb@kernel.org>
+X-Mailer: git-send-email 2.17.1
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The following commit has been merged into the efi/urgent branch of tip:
+While making changes to the EFI stub startup code, I noticed that we are
+still doing set/way maintenance on the caches when booting on v7 cores.
+This works today on VMs by virtue of the fact that KVM traps set/way ops
+and cleans the whole address space by VA on behalf of the guest, and on
+most v7 hardware, the set/way ops are in fact sufficient when only one
+core is running, as there usually is no system cache. But on systems
+like SynQuacer, for which 32-bit firmware is available, the current cache
+maintenance only pushes the data out to the L3 system cache, where it
+is not visible to the CPU once it turns the MMU and caches off.
 
-Commit-ID:     be36f9e7517e17810ec369626a128d7948942259
-Gitweb:        https://git.kernel.org/tip/be36f9e7517e17810ec369626a128d7948942259
-Author:        Jason A. Donenfeld <Jason@zx2c4.com>
-AuthorDate:    Fri, 21 Feb 2020 09:48:49 +01:00
-Committer:     Ingo Molnar <mingo@kernel.org>
-CommitterDate: Wed, 26 Feb 2020 15:31:43 +01:00
+So instead, switch to the by-VA cache maintenance that the architecture
+requires for v7 and later (and ARM1176, as a side effect).
 
-efi: READ_ONCE rng seed size before munmap
+Changes since v3:
+- ensure that the region that is cleaned after self-relocation of the zImage
+  covers the appended DTB, if present
 
-This function is consistent with using size instead of seed->size
-(except for one place that this patch fixes), but it reads seed->size
-without using READ_ONCE, which means the compiler might still do
-something unwanted. So, this commit simply adds the READ_ONCE
-wrapper.
+Apologies to Linus, but due to this change, I decided not to take your
+Tested-by into account, and I would appreciate it if you could retest
+this version of the series? Thanks.
 
-Fixes: 636259880a7e ("efi: Add support for seeding the RNG from a UEFI ...")
-Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Cc: linux-efi@vger.kernel.org
-Cc: Ingo Molnar <mingo@kernel.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Link: https://lore.kernel.org/r/20200217123354.21140-1-Jason@zx2c4.com
-Link: https://lore.kernel.org/r/20200221084849.26878-5-ardb@kernel.org
----
- drivers/firmware/efi/efi.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+Changes since v2:
+- add a patch to factor out the code sequence that obtains the inflated image
+  size by doing an unaligned LE32 load from the end of the compressed data
+- use new macro to load the inflated image size instead of doing a potentially
+  unaligned load
+- omit the stack for getting the base and size of the self-relocated zImage
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 621220a..21ea99f 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -552,7 +552,7 @@ int __init efi_config_parse_tables(void *config_tables, int count, int sz,
- 
- 		seed = early_memremap(efi.rng_seed, sizeof(*seed));
- 		if (seed != NULL) {
--			size = seed->size;
-+			size = READ_ONCE(seed->size);
- 			early_memunmap(seed, sizeof(*seed));
- 		} else {
- 			pr_err("Could not map UEFI random seed!\n");
-@@ -562,7 +562,7 @@ int __init efi_config_parse_tables(void *config_tables, int count, int sz,
- 					      sizeof(*seed) + size);
- 			if (seed != NULL) {
- 				pr_notice("seeding entropy pool\n");
--				add_bootloader_randomness(seed->bits, seed->size);
-+				add_bootloader_randomness(seed->bits, size);
- 				early_memunmap(seed, sizeof(*seed) + size);
- 			} else {
- 				pr_err("Could not map UEFI random seed!\n");
+Changes since v1:
+- include the EFI patch that was sent out separately before (#1)
+- split the preparatory work to pass the region to clean in r0/r1 in a EFI
+  specific one and one for the decompressor - this way, the first two patches
+  can go on a stable branch that is shared between the ARM tree and the EFI
+  tree
+- document the meaning of the values in r0/r1 upon entry to cache_clean_flush
+- take care to treat the region end address as exclusive
+- switch to clean+invalidate to align with the other implementations
+- drop some code that manages the stack pointer value before calling
+  cache_clean_flush(), which is no longer necessary
+- take care to clean the entire region that is covered by the relocated zImage
+  if it needs to relocate itself before decompressing
+
+https://git.kernel.org/pub/scm/linux/kernel/git/ardb/linux.git/log/?h=arm32-efi-cache-ops
+
+[ Several people asked me offline why on earth I am running SynQuacer on 32 bit:
+  the answer is that this is simply to prove that it is currently broken, and
+  this implies that for 32-bit VMs running under KVM, we are relying on the
+  special, non-architectural cache management done by the hypervisor on behalf
+  of the guest to be able to run this code. ]
+
+Cc: Russell King <linux@armlinux.org.uk>
+Cc: Marc Zyngier <maz@kernel.org>
+Cc: Nicolas Pitre <nico@fluxnic.net>
+Cc: Catalin Marinas <catalin.marinas@arm.com>
+Cc: Tony Lindgren <tony@atomide.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>
+
+Ard Biesheuvel (5):
+  efi/arm: Work around missing cache maintenance in decompressor
+    handover
+  efi/arm: Pass start and end addresses to cache_clean_flush()
+  ARM: decompressor: factor out routine to obtain the inflated image
+    size
+  ARM: decompressor: prepare cache_clean_flush for doing by-VA
+    maintenance
+  ARM: decompressor: switch to by-VA cache maintenance for v7 cores
+
+ arch/arm/boot/compressed/head.S | 162 +++++++++++---------
+ 1 file changed, 86 insertions(+), 76 deletions(-)
+
+-- 
+2.17.1
+
