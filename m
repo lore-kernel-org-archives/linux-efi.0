@@ -2,72 +2,64 @@ Return-Path: <SRS0=gsoD=4O=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 59E4FC4BA0D
-	for <linux-efi@archiver.kernel.org>; Wed, 26 Feb 2020 01:11:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B48AC4BA0A
+	for <linux-efi@archiver.kernel.org>; Wed, 26 Feb 2020 07:04:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 2E25F2465D
-	for <linux-efi@archiver.kernel.org>; Wed, 26 Feb 2020 01:11:10 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="BT+YfqKg"
+	by mail.kernel.org (Postfix) with ESMTP id 67EEE2467D
+	for <linux-efi@archiver.kernel.org>; Wed, 26 Feb 2020 07:04:20 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1582700660;
+	bh=2Mn2rh2UnmkLwubpFpFIFXU5YjtRyl4XRJrdW3Zv9eg=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
+	b=pFTh0lfGDYgPngDJ7iTtxZof9/loubUsuTIqR8KVVgGkoaM0QbMk47+FtKQlPPg59
+	 I7eWk+gYKER2ytGBOe9nUjQ4k0sxk2tzUL0aYg+nuQ7pLufWfJytHqwl9uZWgG+zRa
+	 pAfr3NtwvMduYS7illBcmqY7Tr+CAQirpSj/dKVk=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729747AbgBZBKv (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 25 Feb 2020 20:10:51 -0500
-Received: from esa5.hgst.iphmx.com ([216.71.153.144]:57156 "EHLO
-        esa5.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729653AbgBZBKv (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 25 Feb 2020 20:10:51 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1582679451; x=1614215451;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=jG6X4JnNilU/eW30gWfXMqqgjMVBZILEbLLORFCd6Bs=;
-  b=BT+YfqKggJt90DAC2k6UY7bxbKyONlexRzVMN3oArNN69ETSZ5me55uH
-   7uxIaHRtw2/vWvOpkrNNeEOdsp3Aq8iW+IVU6litIEnW+qc6R8Zt1IiE2
-   38OK2K6RwqbGryiNAZ5pSszWNkyvsmV+T56bIc21vYA+Lni76VcAwDDf5
-   Yw/Tl6pDZ1q1NtzD4rc2CD0OzMxwq5/8I7T0IV2gy47iZmFmDpEaCS7YO
-   bwrtzRAC4hhaULlUOQs5p1ZLm5dB2qbFjRrQu/eouZZ86DpxYxxedfSJ+
-   E7g1R0up5i7N/pCNWvyA5wpAOWsgXwRk/+yphXc3gZy+CtjC7pfemSIu9
-   Q==;
-IronPort-SDR: mLQNKErLCiKr4SKBFc17m1CoQEjj32K2YNZtzFUKaXehCh0yOd4obyaUQBSSDG6pAYZE4JkiD9
- FrBuTBWWLUp1DGrV4n4ygPj/GYYW6S5IWVLmYKBi4ehzY/t94t3GrbfFgEnEcX5SiN4wqSum1M
- YmxHOaAHGeOYQbL+oRqWFV11NFopWJSO+0RHtb4T7aF3DkSaeNRSfTULlKcao0BQ2i/UObxQCW
- MkO/bvKDZVORPN2Jle7/xhduPB+drEquPuC/gVKMs9XT8B5F698PeOt6iqTxz3CGDtfK3Q59Zn
- bgQ=
-X-IronPort-AV: E=Sophos;i="5.70,486,1574092800"; 
-   d="scan'208";a="131266509"
-Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 26 Feb 2020 09:10:50 +0800
-IronPort-SDR: iEBOSU0o2v5CrwC7hDW62w+O1KcCUh1zcuhUWC93u4IahX0DEWqgqeifklV7JwHtqYyrmK1L/Y
- 1MCSQgPYqsmIONdZVDqwaO0HahaBP3DbII+FjxHCrPrmQvdFT2ZMPH72UYkoxBanRbGLZHGnh8
- jI8AmLcLeD99NgRMWT9yi9OHSPfRH+M3MHWNE8T4L5ctwhWefhaGx9ibFKkxFlN/iE5qjAwjDU
- sKP5GWhMFsrjez2FTNqlRv3cX+OjH0Ply440q73+ifHZIgRib/PRW6B3NZGxLfc4+u3EBGNB+o
- ZvvtPMdHJBcCPo/TBu4mtLNt
-Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Feb 2020 17:03:16 -0800
-IronPort-SDR: uYo8/yrdVKwUzqReGdMdTrQ3dSJmyKvsNgCAiPHd8mBJG5pa8Xkamt42xv+OK0H1Ikp3xGDQsF
- ftEMYmliGZhro6eqMNQ0uZ1bBq+V5Q3ZnweFEcLHkJYZcjBTj0ZQVSQjLVwhjT/+Cwt7EUky2o
- SagAFlELftAlMUBYjHpNT5CLhV3eejODZHig/Qt7cIcL4hGTTxcbxzekGU22nJPWuWNIZgzKB2
- qhpSaRB6WDIZmTAI0d1zashabLhrnFRJvbfJdAHIQPvWJHVSyPwsz+lpBxLknNeXurWJDtbWfF
- OZY=
-WDCIronportException: Internal
-Received: from jedi-01.sdcorp.global.sandisk.com (HELO jedi-01.int.fusionio.com) ([10.11.143.218])
-  by uls-op-cesaip02.wdc.com with ESMTP; 25 Feb 2020 17:10:48 -0800
-From:   Atish Patra <atish.patra@wdc.com>
-To:     linux-kernel@vger.kernel.org
-Cc:     Atish Patra <atish.patra@wdc.com>,
+        id S1726719AbgBZHEU (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 26 Feb 2020 02:04:20 -0500
+Received: from mail.kernel.org ([198.145.29.99]:40514 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726587AbgBZHET (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 26 Feb 2020 02:04:19 -0500
+Received: from mail-wr1-f49.google.com (mail-wr1-f49.google.com [209.85.221.49])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id DA1132467D
+        for <linux-efi@vger.kernel.org>; Wed, 26 Feb 2020 07:04:18 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1582700659;
+        bh=2Mn2rh2UnmkLwubpFpFIFXU5YjtRyl4XRJrdW3Zv9eg=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=tjIqbhWsUsTz4+iaFuaG3Q3kZPeya2RNPgdfY9noKlzPMqR70kquicHQLOlKKBWSh
+         eYRTl6fWrrUsdHkTvGZghxaIlHSgAmwwb0d/CUZ3po4ElqkuoNAYxicPT4hSPsXM3e
+         nYG0nVkZhDRwP3wJsVw62bE3cGetKKrWbXVlDqHg=
+Received: by mail-wr1-f49.google.com with SMTP id j7so1518198wrp.13
+        for <linux-efi@vger.kernel.org>; Tue, 25 Feb 2020 23:04:18 -0800 (PST)
+X-Gm-Message-State: APjAAAWMojQBxt4cp1BPcC2L3suzgWrCtGeSPSmwW4ktt8dAacoKKatN
+        QcsFltFzPLA/jcwJ565GnOmn21zXxkqsiMkpdveafg==
+X-Google-Smtp-Source: APXvYqxa555rzHIoZ0rL1iFd+0wW3hZMB+8tKwX5N+47RWMS2ZNV5aiZqsLpbDwxvKr3L1l/1SoAEfvpxFPPGEc0+z4=
+X-Received: by 2002:a05:6000:110b:: with SMTP id z11mr3726058wrw.252.1582700657097;
+ Tue, 25 Feb 2020 23:04:17 -0800 (PST)
+MIME-Version: 1.0
+References: <20200226011037.7179-1-atish.patra@wdc.com> <20200226011037.7179-2-atish.patra@wdc.com>
+In-Reply-To: <20200226011037.7179-2-atish.patra@wdc.com>
+From:   Ard Biesheuvel <ardb@kernel.org>
+Date:   Wed, 26 Feb 2020 08:04:06 +0100
+X-Gmail-Original-Message-ID: <CAKv+Gu-Dk4hOobKhOEn1Wpbc4Ta2F5anZQ4rRmjpkPfT2g1L3w@mail.gmail.com>
+Message-ID: <CAKv+Gu-Dk4hOobKhOEn1Wpbc4Ta2F5anZQ4rRmjpkPfT2g1L3w@mail.gmail.com>
+Subject: Re: [RFC PATCH 1/5] efi: Move arm-stub to a common file
+To:     Atish Patra <atish.patra@wdc.com>
+Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         Albert Ou <aou@eecs.berkeley.edu>,
         Alexios Zavras <alexios.zavras@intel.com>,
         Allison Randal <allison@lohutok.net>,
         Andrew Morton <akpm@linux-foundation.org>,
-        Anup Patel <Anup.Patel@wdc.com>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Arnd Bergmann <arnd@arndb.de>, Borislav Petkov <bp@suse.de>,
+        Anup Patel <Anup.Patel@wdc.com>, Arnd Bergmann <arnd@arndb.de>,
+        Borislav Petkov <bp@suse.de>,
         Catalin Marinas <catalin.marinas@arm.com>,
         Greentime Hu <greentime.hu@sifive.com>,
         Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
@@ -75,8 +67,8 @@ Cc:     Atish Patra <atish.patra@wdc.com>,
         Kate Stewart <kstewart@linuxfoundation.org>,
         Kees Cook <keescook@chromium.org>,
         Linus Walleij <linus.walleij@linaro.org>,
-        linux-efi@vger.kernel.org, linux-riscv@lists.infradead.org,
-        Mao Han <han_mao@c-sky.com>,
+        linux-efi <linux-efi@vger.kernel.org>,
+        linux-riscv@lists.infradead.org, Mao Han <han_mao@c-sky.com>,
         Mauro Carvalho Chehab <mchehab+samsung@kernel.org>,
         Michal Simek <michal.simek@xilinx.com>,
         Mike Rapoport <rppt@linux.ibm.com>,
@@ -89,102 +81,167 @@ Cc:     Atish Patra <atish.patra@wdc.com>,
         Alexander Graf <agraf@csgraf.de>,
         "leif@nuviainc.com" <leif@nuviainc.com>,
         "Chang, Abner (HPS SW/FW Technologist)" <abner.chang@hpe.com>,
-        daniel.schaefer@hpe.com
-Subject: [RFC PATCH 3/5] RISC-V: Define fixmap bindings for generic early ioremap support
-Date:   Tue, 25 Feb 2020 17:10:35 -0800
-Message-Id: <20200226011037.7179-4-atish.patra@wdc.com>
-X-Mailer: git-send-email 2.24.0
-In-Reply-To: <20200226011037.7179-1-atish.patra@wdc.com>
-References: <20200226011037.7179-1-atish.patra@wdc.com>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+        "Schaefer, Daniel (DualStudy)" <daniel.schaefer@hpe.com>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-UEFI uses early IO or memory mappings for runtime services before
-normal ioremap() is usable. This patch only adds minimum necessary
-fixmap bindings and headers for generic ioremap support to work.
+Hi Atish,
 
-Signed-off-by: Atish Patra <atish.patra@wdc.com>
----
- arch/riscv/Kconfig              |  1 +
- arch/riscv/include/asm/Kbuild   |  1 +
- arch/riscv/include/asm/fixmap.h | 21 ++++++++++++++++++++-
- arch/riscv/include/asm/io.h     |  1 +
- 4 files changed, 23 insertions(+), 1 deletion(-)
+On Wed, 26 Feb 2020 at 02:10, Atish Patra <atish.patra@wdc.com> wrote:
+>
+> Most of the arm-stub code is written in an architecture independent manner.
+> As a result, RISC-V can reuse most of the arm-stub code.
+>
+> Rename the arm-stub.c to efi-stub.c so that ARM, ARM64 and RISC-V can use it.
+> This patch doesn't introduce any functional changes.
+>
+> Signed-off-by: Atish Patra <atish.patra@wdc.com>
+> ---
+>  arch/arm/Kconfig                                     |  2 +-
+>  arch/arm64/Kconfig                                   |  2 +-
+>  drivers/firmware/efi/Kconfig                         |  6 +++---
+>  drivers/firmware/efi/libstub/Makefile                | 12 ++++++------
+>  .../firmware/efi/libstub/{arm-stub.c => efi-stub.c}  |  7 ++++++-
+>  5 files changed, 17 insertions(+), 12 deletions(-)
+>  rename drivers/firmware/efi/libstub/{arm-stub.c => efi-stub.c} (98%)
+>
+> diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+> index 97864aabc2a6..9931fea06076 100644
+> --- a/arch/arm/Kconfig
+> +++ b/arch/arm/Kconfig
+> @@ -1955,7 +1955,7 @@ config EFI
+>         select UCS2_STRING
+>         select EFI_PARAMS_FROM_FDT
+>         select EFI_STUB
+> -       select EFI_ARMSTUB
+> +       select EFI_GENERIC_ARCH_STUB
+>         select EFI_RUNTIME_WRAPPERS
+>         ---help---
+>           This option provides support for runtime services provided
+> diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+> index 0b30e884e088..ae776d8ef2f9 100644
+> --- a/arch/arm64/Kconfig
+> +++ b/arch/arm64/Kconfig
+> @@ -1720,7 +1720,7 @@ config EFI
+>         select EFI_PARAMS_FROM_FDT
+>         select EFI_RUNTIME_WRAPPERS
+>         select EFI_STUB
+> -       select EFI_ARMSTUB
+> +       select EFI_GENERIC_ARCH_STUB
+>         default y
+>         help
+>           This option provides support for runtime services provided
+> diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+> index ecc83e2f032c..1bcedb7812da 100644
+> --- a/drivers/firmware/efi/Kconfig
+> +++ b/drivers/firmware/efi/Kconfig
+> @@ -106,12 +106,12 @@ config EFI_PARAMS_FROM_FDT
+>  config EFI_RUNTIME_WRAPPERS
+>         bool
+>
+> -config EFI_ARMSTUB
+> +config EFI_GENERIC_ARCH_STUB
 
-diff --git a/arch/riscv/Kconfig b/arch/riscv/Kconfig
-index 27bfc7947e44..42c122170cfd 100644
---- a/arch/riscv/Kconfig
-+++ b/arch/riscv/Kconfig
-@@ -65,6 +65,7 @@ config RISCV
- 	select ARCH_HAS_GCOV_PROFILE_ALL
- 	select HAVE_COPY_THREAD_TLS
- 	select HAVE_ARCH_KASAN if MMU && 64BIT
-+	select GENERIC_EARLY_IOREMAP
- 
- config ARCH_MMAP_RND_BITS_MIN
- 	default 18 if 64BIT
-diff --git a/arch/riscv/include/asm/Kbuild b/arch/riscv/include/asm/Kbuild
-index ec0ca8c6ab64..517394390106 100644
---- a/arch/riscv/include/asm/Kbuild
-+++ b/arch/riscv/include/asm/Kbuild
-@@ -4,6 +4,7 @@ generic-y += checksum.h
- generic-y += compat.h
- generic-y += device.h
- generic-y += div64.h
-+generic-y += early_ioremap.h
- generic-y += extable.h
- generic-y += flat.h
- generic-y += dma.h
-diff --git a/arch/riscv/include/asm/fixmap.h b/arch/riscv/include/asm/fixmap.h
-index 42d2c42f3cc9..7a4beb7e29a3 100644
---- a/arch/riscv/include/asm/fixmap.h
-+++ b/arch/riscv/include/asm/fixmap.h
-@@ -25,9 +25,28 @@ enum fixed_addresses {
- #define FIX_FDT_SIZE	SZ_1M
- 	FIX_FDT_END,
- 	FIX_FDT = FIX_FDT_END + FIX_FDT_SIZE / PAGE_SIZE - 1,
-+	FIX_EARLYCON_MEM_BASE,
-+
- 	FIX_PTE,
- 	FIX_PMD,
--	FIX_EARLYCON_MEM_BASE,
-+	/*
-+	 * Make sure that it is 2MB aligned.
-+	 */
-+#define NR_FIX_SZ_2M	(SZ_2M / PAGE_SIZE)
-+	FIX_THOLE = NR_FIX_SZ_2M - FIX_PMD - 1,
-+
-+	__end_of_permanent_fixed_addresses,
-+	/*
-+	 * Temporary boot-time mappings, used by early_ioremap(),
-+	 * before ioremap() is functional.
-+	 */
-+#define NR_FIX_BTMAPS		(SZ_256K / PAGE_SIZE)
-+#define FIX_BTMAPS_SLOTS	7
-+#define TOTAL_FIX_BTMAPS	(NR_FIX_BTMAPS * FIX_BTMAPS_SLOTS)
-+
-+	FIX_BTMAP_END = __end_of_permanent_fixed_addresses,
-+	FIX_BTMAP_BEGIN = FIX_BTMAP_END + TOTAL_FIX_BTMAPS - 1,
-+
- 	__end_of_fixed_addresses
- };
- 
-diff --git a/arch/riscv/include/asm/io.h b/arch/riscv/include/asm/io.h
-index 0f477206a4ed..047f414b6948 100644
---- a/arch/riscv/include/asm/io.h
-+++ b/arch/riscv/include/asm/io.h
-@@ -14,6 +14,7 @@
- #include <linux/types.h>
- #include <asm/mmiowb.h>
- #include <asm/pgtable.h>
-+#include <asm/early_ioremap.h>
- 
- /*
-  * MMIO access functions are separated out to break dependency cycles
--- 
-2.24.0
+Let's call it EFI_GENERIC_STUB
 
+>         bool
+>
+> -config EFI_ARMSTUB_DTB_LOADER
+> +config EFI_STUB_DTB_LOADER
+>         bool "Enable the DTB loader"
+> -       depends on EFI_ARMSTUB
+> +       depends on EFI_GENERIC_ARCH_STUB
+
+Do you actually need the DTB loader? I feel adding this for ARM was a
+mistake, so you may want to make this depend on !RISCV while you're at
+it.
+
+>         default y
+>         help
+>           Select this config option to add support for the dtb= command
+> diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+> index 4d6246c6f651..2c5b76787126 100644
+> --- a/drivers/firmware/efi/libstub/Makefile
+> +++ b/drivers/firmware/efi/libstub/Makefile
+> @@ -22,7 +22,7 @@ cflags-$(CONFIG_ARM)          := $(subst $(CC_FLAGS_FTRACE),,$(KBUILD_CFLAGS)) \
+>                                    -fno-builtin -fpic \
+>                                    $(call cc-option,-mno-single-pic-base)
+>
+> -cflags-$(CONFIG_EFI_ARMSTUB)   += -I$(srctree)/scripts/dtc/libfdt
+> +cflags-$(CONFIG_EFI_GENERIC_ARCH_STUB) += -I$(srctree)/scripts/dtc/libfdt
+>
+>  KBUILD_CFLAGS                  := $(cflags-y) -DDISABLE_BRANCH_PROFILING \
+>                                    -include $(srctree)/drivers/firmware/efi/libstub/hidden.h \
+> @@ -44,13 +44,13 @@ lib-y                               := efi-stub-helper.o gop.o secureboot.o tpm.o \
+>                                    skip_spaces.o lib-cmdline.o lib-ctype.o
+>
+>  # include the stub's generic dependencies from lib/ when building for ARM/arm64
+> -arm-deps-y := fdt_rw.c fdt_ro.c fdt_wip.c fdt.c fdt_empty_tree.c fdt_sw.c
+> +efi-deps-y := fdt_rw.c fdt_ro.c fdt_wip.c fdt.c fdt_empty_tree.c fdt_sw.c
+>
+>  $(obj)/lib-%.o: $(srctree)/lib/%.c FORCE
+>         $(call if_changed_rule,cc_o_c)
+>
+> -lib-$(CONFIG_EFI_ARMSTUB)      += arm-stub.o fdt.o string.o \
+> -                                  $(patsubst %.c,lib-%.o,$(arm-deps-y))
+> +lib-$(CONFIG_EFI_GENERIC_ARCH_STUB)            += efi-stub.o fdt.o string.o \
+> +                                  $(patsubst %.c,lib-%.o,$(efi-deps-y))
+>
+>  lib-$(CONFIG_ARM)              += arm32-stub.o
+>  lib-$(CONFIG_ARM64)            += arm64-stub.o
+> @@ -72,8 +72,8 @@ CFLAGS_arm64-stub.o           := -DTEXT_OFFSET=$(TEXT_OFFSET)
+>  # a verification pass to see if any absolute relocations exist in any of the
+>  # object files.
+>  #
+> -extra-$(CONFIG_EFI_ARMSTUB)    := $(lib-y)
+> -lib-$(CONFIG_EFI_ARMSTUB)      := $(patsubst %.o,%.stub.o,$(lib-y))
+> +extra-$(CONFIG_EFI_GENERIC_ARCH_STUB)  := $(lib-y)
+> +lib-$(CONFIG_EFI_GENERIC_ARCH_STUB)    := $(patsubst %.o,%.stub.o,$(lib-y))
+>
+>  STUBCOPY_FLAGS-$(CONFIG_ARM64) += --prefix-alloc-sections=.init \
+>                                    --prefix-symbols=__efistub_
+> diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/efi-stub.c
+> similarity index 98%
+> rename from drivers/firmware/efi/libstub/arm-stub.c
+> rename to drivers/firmware/efi/libstub/efi-stub.c
+> index 13559c7e6643..b87c3f70430c 100644
+> --- a/drivers/firmware/efi/libstub/arm-stub.c
+> +++ b/drivers/firmware/efi/libstub/efi-stub.c
+> @@ -15,6 +15,7 @@
+>
+>  #include "efistub.h"
+>
+> +#if IS_ENABLED(CONFIG_ARM64) || IS_ENABLED(CONFIG_ARM)
+>  /*
+>   * This is the base address at which to start allocating virtual memory ranges
+>   * for UEFI Runtime Services. This is in the low TTBR0 range so that we can use
+> @@ -27,6 +28,10 @@
+>   * entire footprint of the UEFI runtime services memory regions)
+>   */
+>  #define EFI_RT_VIRTUAL_BASE    SZ_512M
+> +#else
+> +#define EFI_RT_VIRTUAL_BASE    SZ_2G
+> +#endif
+> +
+
+Can we drop this hunk for now? It should be part of your runtime
+services series.
+
+>  #define EFI_RT_VIRTUAL_SIZE    SZ_512M
+>
+>  #ifdef CONFIG_ARM64
+> @@ -243,7 +248,7 @@ efi_status_t efi_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg)
+>          * 'dtb=' unless UEFI Secure Boot is disabled.  We assume that secure
+>          * boot is enabled if we can't determine its state.
+>          */
+> -       if (!IS_ENABLED(CONFIG_EFI_ARMSTUB_DTB_LOADER) ||
+> +       if (!IS_ENABLED(CONFIG_EFI_STUB_DTB_LOADER) ||
+>              secure_boot != efi_secureboot_mode_disabled) {
+>                 if (strstr(cmdline_ptr, "dtb="))
+>                         pr_efi("Ignoring DTB from command line.\n");
+> --
+> 2.24.0
+>
