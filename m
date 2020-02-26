@@ -4,60 +4,60 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F2087C4BA0E
-	for <linux-efi@archiver.kernel.org>; Wed, 26 Feb 2020 01:11:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3A67BC4BA06
+	for <linux-efi@archiver.kernel.org>; Wed, 26 Feb 2020 01:11:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id BDAFE222C2
-	for <linux-efi@archiver.kernel.org>; Wed, 26 Feb 2020 01:11:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0D95B22464
+	for <linux-efi@archiver.kernel.org>; Wed, 26 Feb 2020 01:11:09 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="SbzVCM99"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="VoB0oeTr"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729795AbgBZBLE (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 25 Feb 2020 20:11:04 -0500
-Received: from esa5.hgst.iphmx.com ([216.71.153.144]:57169 "EHLO
+        id S1729764AbgBZBKv (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 25 Feb 2020 20:10:51 -0500
+Received: from esa5.hgst.iphmx.com ([216.71.153.144]:57148 "EHLO
         esa5.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729828AbgBZBKy (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 25 Feb 2020 20:10:54 -0500
+        with ESMTP id S1729346AbgBZBKu (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 25 Feb 2020 20:10:50 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1582679454; x=1614215454;
+  t=1582679450; x=1614215450;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=yvp7JbTAQq6IiOaxcY3rqmzJZBWNbV6pzkO60Mdeefs=;
-  b=SbzVCM99PJbU/oDc3TPLAQmGSZuC1Qw6rhkoZ7WGv8s9hVDQ6vt6YRoH
-   oGZgMGTdAEyW9EPLmo/muTA6liznIOuBrlMrQ4R/5FkLE7Tz1EmyWqELp
-   Wyin68bRlq4gj3a9i3cASZxbSucVLu/4jHY2mecth9leilz5yxD65adaR
-   htoyn0bc0L4JMyy3PymcmkGhpXKwFkU/U13rdz3cnBCtKrb1o5AJiaypC
-   BmuhUA1PJ3TrGUNbNBV4s07g2DHlWdStz1sFGKuYLs7yWtWKD+2z3q6dH
-   t5QdQAO72VZLb7njoKpSziFw5NxWTAeSGmr1J/ecMbWTclDbJs2OxbmLt
-   A==;
-IronPort-SDR: B6Y62grar0JZbgZeLaWd5ql7eaAuvbenAdDm8s/EquFdmaN4CGsFjrHNi/lllA1rfVdkUhx7fw
- W4lo2i19Lpu7U6QtJuFWHIAULKjjjm0Zec/mI+lbR/M+98znBK9ZYNt7frdu4uDhNhpmz9oOww
- KpfHBCrxu7K4QCUmccgZrSmimZyBG8bH5bE56swwj+WD53Gc1pIUT8kroJGDThfDiROhCW+c9O
- UtvxC+2aseaiet0o6hQ/RWy3HipGDOhNz8kLOPwfdhHQs4Mj/mhM56v8VpY8Zrn0zG4BFfrLye
- De8=
+  bh=km1VvmnuQj7lRiGCtgFsEfp9xWGhODjFHkqy+jn/5IE=;
+  b=VoB0oeTr2Pd0g2h1WKz+c02esZ+OrCYq1449vmHI51e1bV2Rel2KA5FJ
+   SMkfB62Ol0BGRnhRvZwA1j/VaBnnaPLGRYxHlEtCx8z6XlB9OTBpJ957B
+   6CdiUmfoQaq/Tnqt4Os+C9kjdqOS+dqReeAIiS88E3YGzjdrMzmyLR5/t
+   5fxGfTNXTwAmaiGItCEIoOLZasqlKvn7rM6+GBFSL/MkfOJzVP3L+v9Gr
+   gxgIGR9ss+nMlqRAdlgPaISLj00cYo2jhID8AIBqANS9HxYYNMJxo6wMd
+   r8SaHhAdfwPiXDFVzmWazfAjNDWm/RiyDvfsm8LAu9AgFmu9Yd4oz6AKO
+   w==;
+IronPort-SDR: RUGwhWHn4x9alqJAPWSj15MinUmrl7948vVrSOkEg/yh+gzWfC2U7ETIcaiZro0dETogXLsF3w
+ Kkhmf4cAM3kzVjusl6k4X6RN3nVQQeqoUNJfgNnSaWToBtjM7Xd6nqLWXxQqraFQnFryp4kVPu
+ k/ZnDI8zLWEVOGgDHj4fKejjkeoHZh1OYEeZhz5W3e4zx4/f0yKIB2V3bUkh71SE76tDuWoqgC
+ E6ZU++cBXWtSx7ya1/Fez6qN0JObu+yI7WgKEaaCmRTmN812l1AKFwffZsYiRdmuyrlf/mpL0P
+ ly4=
 X-IronPort-AV: E=Sophos;i="5.70,486,1574092800"; 
-   d="scan'208";a="131266526"
+   d="scan'208";a="131266501"
 Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 26 Feb 2020 09:10:52 +0800
-IronPort-SDR: +7PhHgU/QbZnpHxlhyesT7bnYodiUUyZ6SSpyeMYllyhqqiPbNwafhZsASabjdgyPPdTt4Hhs5
- 3caelb2KHFZME1v8Krr+Yn54dqQo+BxuEYBZVrrwFIu8P889DrYb+BqetQGGrjj3UJGl0vdaHM
- 6TiHIQN4PbKoY4VmJiMH+OL2NJXYRDqAt1N/aTFCCgwLvOpI4QziWO267qSFduIDNgzBi8VU7H
- sPZ3rL1XLtWHz00kUUx5GDVJ+AcX9C/GSlSEg2Vsq6X9f/Mp6SEWFTJUIR81FGNxBhUigzy7kO
- jfa2ClIAKVWR9olhvRNwTNrS
+  by ob1.hgst.iphmx.com with ESMTP; 26 Feb 2020 09:10:50 +0800
+IronPort-SDR: L/xEh/oMCpWFsvBGqwpn28t1qCTykvBwHSj46KuHyeLf+bYc//taHfvkODDDl/6CmHpofuaISv
+ 4aWz24xB3bZFOn/JDy7oQAYIhOBoyhJ/6ipr995PTajzNF6gFNipKk/wWxPHwlOhyf4SW3rScY
+ 81QhNVNxOqcgm5cHcsgFLH/rZSPoEDbe1jrNZUmDAebB+AY1/J785JsmdNa1sh+CTogl2IWiOz
+ mSpPyvI8kyd+wZfhR6NRddiWi64d48ptGzRsgh7gnCO9U/YJxQYZ1T5gBYZCWL6NQEaQDPNWAN
+ TeOLZx0LltdV6xFvTx9iQ0R4
 Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Feb 2020 17:03:17 -0800
-IronPort-SDR: 6xEEAyVqD6GSFudyXzng+Zf+ndXD+T7l8RciiDcoUJMqvWvlRqgluYEAv4otTjcr1qy33VNQg4
- 2/xvRlHOKLZfaF5mczO5FrL0jq8kF+g5yyZoxKk6sPnRSOB10TgBpcSrHXWJ4nzG3fqMJBIghW
- gSRYXYFZKZLu2marYcNBeEN1isvMmDwhsM8tK+DJos7wi8Q6D0MAzTYxXmrNOaKc52LOrZgVYZ
- cmtUg+YjRK0B1uC76pdz/MVWDVf7S7a2Qk5uPFy6/+ZiKM7PUaU0Ln3J3ID96JpkWZUIWazctK
- vs0=
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Feb 2020 17:03:15 -0800
+IronPort-SDR: DStrW9Vd4utZF1pF2XNWrYK8IPP2TZhl9+LTcQRkI2XPIDXj8PnxMlAk3Am8hTYroeihv50UhV
+ 4SLEad5jCpjROgGHafrFxWdpgLOdKBO+quj7ooZixI2Qdq3/mXqT9OlNHOWnF4dX6CXw7lsvQv
+ Ntinh3nPQdjW1gL0ZicBlLKgRTF/mxMBLmPGWLr5elcBq9iiOto1mc+/YRX/+KIqNK/8NSBVcS
+ NufJjHjzNoep/YJ1ImXTyy1FTJPijSNLp0bA+Oaochg6T63sTKC+Rdn+phk0Uey0qqKExobdW9
+ XZA=
 WDCIronportException: Internal
 Received: from jedi-01.sdcorp.global.sandisk.com (HELO jedi-01.int.fusionio.com) ([10.11.143.218])
-  by uls-op-cesaip02.wdc.com with ESMTP; 25 Feb 2020 17:10:50 -0800
+  by uls-op-cesaip02.wdc.com with ESMTP; 25 Feb 2020 17:10:48 -0800
 From:   Atish Patra <atish.patra@wdc.com>
 To:     linux-kernel@vger.kernel.org
 Cc:     Atish Patra <atish.patra@wdc.com>,
@@ -90,9 +90,9 @@ Cc:     Atish Patra <atish.patra@wdc.com>,
         "leif@nuviainc.com" <leif@nuviainc.com>,
         "Chang, Abner (HPS SW/FW Technologist)" <abner.chang@hpe.com>,
         daniel.schaefer@hpe.com
-Subject: [RFC PATCH 5/5] RISC-V: Add EFI stub support.
-Date:   Tue, 25 Feb 2020 17:10:37 -0800
-Message-Id: <20200226011037.7179-6-atish.patra@wdc.com>
+Subject: [RFC PATCH 2/5] include: pe.h: Add RISC-V related PE definition
+Date:   Tue, 25 Feb 2020 17:10:34 -0800
+Message-Id: <20200226011037.7179-3-atish.patra@wdc.com>
 X-Mailer: git-send-email 2.24.0
 In-Reply-To: <20200226011037.7179-1-atish.patra@wdc.com>
 References: <20200226011037.7179-1-atish.patra@wdc.com>
@@ -103,250 +103,27 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Add a RISC-V architecture specific stub code that actually copies the
-actual kernel image to a valid address and jump to it after boot services
-are terminated. Enable UEFI related kernel configs as well for RISC-V.
+Define RISC-V related machine types.
 
 Signed-off-by: Atish Patra <atish.patra@wdc.com>
 ---
- arch/riscv/Kconfig                        |  20 ++++
- arch/riscv/Makefile                       |   1 +
- arch/riscv/configs/defconfig              |   1 +
- drivers/firmware/efi/libstub/Makefile     |   8 ++
- drivers/firmware/efi/libstub/riscv-stub.c | 135 ++++++++++++++++++++++
- 5 files changed, 165 insertions(+)
- create mode 100644 drivers/firmware/efi/libstub/riscv-stub.c
+ include/linux/pe.h | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/arch/riscv/Kconfig b/arch/riscv/Kconfig
-index 42c122170cfd..68b1d565e51d 100644
---- a/arch/riscv/Kconfig
-+++ b/arch/riscv/Kconfig
-@@ -372,10 +372,30 @@ config CMDLINE_FORCE
- 
- endchoice
- 
-+config EFI_STUB
-+	bool
-+
-+config EFI
-+	bool "UEFI runtime support"
-+	depends on OF
-+	select LIBFDT
-+	select UCS2_STRING
-+	select EFI_PARAMS_FROM_FDT
-+	select EFI_STUB
-+	select EFI_GENERIC_ARCH_STUB
-+	default y
-+	help
-+	  This option provides support for runtime services provided
-+	  by UEFI firmware (such as non-volatile variables, realtime
-+          clock, and platform reset). A UEFI stub is also provided to
-+	  allow the kernel to be booted as an EFI application. This
-+	  is only useful on systems that have UEFI firmware.
-+
- endmenu
- 
- menu "Power management options"
- 
- source "kernel/power/Kconfig"
-+source "drivers/firmware/Kconfig"
- 
- endmenu
-diff --git a/arch/riscv/Makefile b/arch/riscv/Makefile
-index b9009a2fbaf5..0afaa89ba9ad 100644
---- a/arch/riscv/Makefile
-+++ b/arch/riscv/Makefile
-@@ -78,6 +78,7 @@ head-y := arch/riscv/kernel/head.o
- core-y += arch/riscv/
- 
- libs-y += arch/riscv/lib/
-+core-$(CONFIG_EFI_STUB) += $(objtree)/drivers/firmware/efi/libstub/lib.a
- 
- PHONY += vdso_install
- vdso_install:
-diff --git a/arch/riscv/configs/defconfig b/arch/riscv/configs/defconfig
-index e2ff95cb3390..0a5d3578f51e 100644
---- a/arch/riscv/configs/defconfig
-+++ b/arch/riscv/configs/defconfig
-@@ -125,3 +125,4 @@ CONFIG_DEBUG_BLOCK_EXT_DEVT=y
- # CONFIG_FTRACE is not set
- # CONFIG_RUNTIME_TESTING_MENU is not set
- CONFIG_MEMTEST=y
-+CONFIG_EFI=y
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index 2c5b76787126..38facb61745b 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -21,6 +21,8 @@ cflags-$(CONFIG_ARM64)		:= $(subst $(CC_FLAGS_FTRACE),,$(KBUILD_CFLAGS)) \
- cflags-$(CONFIG_ARM)		:= $(subst $(CC_FLAGS_FTRACE),,$(KBUILD_CFLAGS)) \
- 				   -fno-builtin -fpic \
- 				   $(call cc-option,-mno-single-pic-base)
-+cflags-$(CONFIG_RISCV)		:= $(subst $(CC_FLAGS_FTRACE),,$(KBUILD_CFLAGS)) \
-+				   -fpic
- 
- cflags-$(CONFIG_EFI_GENERIC_ARCH_STUB)	+= -I$(srctree)/scripts/dtc/libfdt
- 
-@@ -55,6 +57,7 @@ lib-$(CONFIG_EFI_GENERIC_ARCH_STUB)		+= efi-stub.o fdt.o string.o \
- lib-$(CONFIG_ARM)		+= arm32-stub.o
- lib-$(CONFIG_ARM64)		+= arm64-stub.o
- lib-$(CONFIG_X86)		+= x86-stub.o
-+lib-$(CONFIG_RISCV)		+= riscv-stub.o
- CFLAGS_arm32-stub.o		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
- CFLAGS_arm64-stub.o		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
- 
-@@ -79,6 +82,11 @@ STUBCOPY_FLAGS-$(CONFIG_ARM64)	+= --prefix-alloc-sections=.init \
- 				   --prefix-symbols=__efistub_
- STUBCOPY_RELOC-$(CONFIG_ARM64)	:= R_AARCH64_ABS
- 
-+STUBCOPY_FLAGS-$(CONFIG_RISCV)	+= --prefix-alloc-sections=.init \
-+				   --prefix-symbols=__efistub_
-+STUBCOPY_RELOC-$(CONFIG_RISCV)	:= R_RISCV_HI20
-+
-+
- $(obj)/%.stub.o: $(obj)/%.o FORCE
- 	$(call if_changed,stubcopy)
- 
-diff --git a/drivers/firmware/efi/libstub/riscv-stub.c b/drivers/firmware/efi/libstub/riscv-stub.c
-new file mode 100644
-index 000000000000..3935b29ea93a
---- /dev/null
-+++ b/drivers/firmware/efi/libstub/riscv-stub.c
-@@ -0,0 +1,135 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/*
-+ * Copyright (C) 2013, 2014 Linaro Ltd;  <roy.franz@linaro.org>
-+ * Copyright (C) 2020 Western Digital Corporation or its affiliates.
-+ *
-+ * This file implements the EFI boot stub for the RISC-V kernel.
-+ * Adapted from ARM64 version at drivers/firmware/efi/libstub/arm64-stub.c.
-+ */
-+
-+#include <linux/efi.h>
-+#include <linux/libfdt.h>
-+#include <linux/libfdt_env.h>
-+#include <asm/efi.h>
-+#include <asm/sections.h>
-+
-+#include "efistub.h"
-+/*
-+ * RISCV requires the kernel image to placed TEXT_OFFSET bytes beyond a 2 MB
-+ * aligned base for 64 bit and 4MB for 32 bit.
-+ */
-+#if IS_ENABLED(CONFIG_64BIT)
-+#define MIN_KIMG_ALIGN	SZ_2M
-+#else
-+#define MIN_KIMG_ALIGN	SZ_4M
-+#endif
-+/*
-+ * TEXT_OFFSET ensures that we don't overwrite the firmware that probably sits
-+ * at the beginning of the DRAM.
-+ */
-+#define TEXT_OFFSET MIN_KIMG_ALIGN
-+
-+typedef __attribute__((noreturn)) void (*jump_kernel_func)(unsigned int,
-+							   unsigned long);
-+
-+efi_status_t check_platform_features(void)
-+{
-+	return EFI_SUCCESS;
-+}
-+
-+u64 get_boot_hartid_from_fdt(unsigned long fdt)
-+{
-+	int chosen_node, len;
-+	const fdt64_t *prop;
-+	uint64_t hartid = U64_MAX;
-+
-+	chosen_node = fdt_path_offset((void *)fdt, "/chosen");
-+	if (chosen_node < 0)
-+		return hartid;
-+	prop = fdt_getprop((void *)fdt, chosen_node, "efi-boot-hartid", &len);
-+	if (!prop || len != sizeof(u64))
-+		return hartid;
-+
-+	hartid = fdt64_to_cpu(*prop);
-+
-+	return hartid;
-+}
-+
-+/*
-+ * Jump to real kernel here with following constraints.
-+ * 1. MMU should be disabled.
-+ * 2. a0 should contain hartid
-+ * 3. a1 should DT address
-+ */
-+void __noreturn efi_enter_kernel(unsigned long entrypoint, unsigned long fdt)
-+{
-+	unsigned long kernel_entry = entrypoint + _start_kernel - _start;
-+	jump_kernel_func jump_kernel = (void (*)(unsigned int, unsigned long))kernel_entry;
-+	u64 hartid = get_boot_hartid_from_fdt(fdt);
-+
-+	if (hartid == U64_MAX)
-+		/* We can not use panic or BUG at this point */
-+		__asm__ __volatile__ ("ebreak");
-+	/* Disable MMU */
-+	csr_write(CSR_SATP, 0);
-+	jump_kernel(hartid, fdt);
-+}
-+
-+efi_status_t handle_kernel_image(unsigned long *image_addr,
-+				 unsigned long *image_size,
-+				 unsigned long *reserve_addr,
-+				 unsigned long *reserve_size,
-+				 unsigned long dram_base,
-+				 efi_loaded_image_t *image)
-+{
-+	efi_status_t status;
-+	unsigned long kernel_size, kernel_memsize = 0;
-+	unsigned long preferred_offset;
-+
-+	/*
-+	 * The preferred offset of the kernel Image is TEXT_OFFSET bytes beyond
-+	 * a KIMG_ALIGN aligned base.
-+	 */
-+	preferred_offset = round_up(dram_base, MIN_KIMG_ALIGN) + TEXT_OFFSET;
-+
-+	kernel_size = _edata - _start;
-+	kernel_memsize = kernel_size + (_end - _edata);
-+
-+	/*
-+	 * Try a straight allocation at the preferred offset.
-+	 * This will work around the issue where, if dram_base == 0x0,
-+	 * efi_low_alloc() refuses to allocate at 0x0 (to prevent the
-+	 * address of the allocation to be mistaken for a FAIL return
-+	 * value or a NULL pointer). It will also ensure that, on
-+	 * platforms where the [dram_base, dram_base + TEXT_OFFSET)
-+	 * interval is partially occupied by the firmware (like on APM
-+	 * Mustang), we can still place the kernel at the address
-+	 * 'dram_base + TEXT_OFFSET'.
-+	 */
-+	if (*image_addr == preferred_offset)
-+		return EFI_SUCCESS;
-+
-+	*image_addr = *reserve_addr = preferred_offset;
-+	*reserve_size = round_up(kernel_memsize, EFI_ALLOC_ALIGN);
-+
-+	status = efi_bs_call(allocate_pages, EFI_ALLOCATE_ADDRESS,
-+				EFI_LOADER_DATA,
-+				*reserve_size / EFI_PAGE_SIZE,
-+				(efi_physical_addr_t *)reserve_addr);
-+
-+	if (status != EFI_SUCCESS) {
-+		*reserve_size = kernel_memsize + TEXT_OFFSET;
-+		status = efi_low_alloc(*reserve_size, MIN_KIMG_ALIGN,
-+				       reserve_addr);
-+
-+		if (status != EFI_SUCCESS) {
-+			pr_efi_err("Failed to relocate kernel\n");
-+			*reserve_size = 0;
-+			return status;
-+		}
-+		*image_addr = *reserve_addr + TEXT_OFFSET;
-+	}
-+	memcpy((void *)*image_addr, image->image_base, kernel_size);
-+
-+	return EFI_SUCCESS;
-+}
+diff --git a/include/linux/pe.h b/include/linux/pe.h
+index 8ad71d763a77..6a7c497e4b1f 100644
+--- a/include/linux/pe.h
++++ b/include/linux/pe.h
+@@ -56,6 +56,9 @@
+ #define	IMAGE_FILE_MACHINE_POWERPCFP	0x01f1
+ #define	IMAGE_FILE_MACHINE_R4000	0x0166
+ #define	IMAGE_FILE_MACHINE_SH3		0x01a2
++#define	IMAGE_FILE_MACHINE_RISCV32	0x5032
++#define	IMAGE_FILE_MACHINE_RISCV64	0x5064
++#define	IMAGE_FILE_MACHINE_RISCV128	0x5128
+ #define	IMAGE_FILE_MACHINE_SH3DSP	0x01a3
+ #define	IMAGE_FILE_MACHINE_SH3E		0x01a4
+ #define	IMAGE_FILE_MACHINE_SH4		0x01a6
 -- 
 2.24.0
 
