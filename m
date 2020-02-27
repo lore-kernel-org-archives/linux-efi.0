@@ -2,98 +2,191 @@ Return-Path: <SRS0=yzCP=4P=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B8A8DC4BA24
-	for <linux-efi@archiver.kernel.org>; Thu, 27 Feb 2020 10:12:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0C5D3C7656B
+	for <linux-efi@archiver.kernel.org>; Thu, 27 Feb 2020 14:38:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 8784924670
-	for <linux-efi@archiver.kernel.org>; Thu, 27 Feb 2020 10:12:05 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="cNwEapeF"
+	by mail.kernel.org (Postfix) with ESMTP id D870B2468F
+	for <linux-efi@archiver.kernel.org>; Thu, 27 Feb 2020 14:38:07 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1582814287;
+	bh=65POcJFp0QtikRJMJrWeAydJ2XT6KUTDHap55AKMNRs=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=W84/mdDpNmWfCuDm797APiJ7QmRZBImA53TYM4isVkb662RJC0y++wEG0+0WKoKmD
+	 jocOzAAqXeNL6A0F1E6hYqVaemA7KnB3GOTDBn7M3szSuiDIb/vJi0kRUx/zMNQHnm
+	 3sZrYhtMX2aVORMwQy68CyqYff19CR9rwNNW7X7k=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728731AbgB0KMF (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 27 Feb 2020 05:12:05 -0500
-Received: from mail-lf1-f68.google.com ([209.85.167.68]:36366 "EHLO
-        mail-lf1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728645AbgB0KMF (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 27 Feb 2020 05:12:05 -0500
-Received: by mail-lf1-f68.google.com with SMTP id f24so1651427lfh.3
-        for <linux-efi@vger.kernel.org>; Thu, 27 Feb 2020 02:12:04 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=23xg3xXgAfGKhWk8U0pLr4SmL7oKXrfhT/YKVSMTCAs=;
-        b=cNwEapeFUzaWpVHyTde34ajOhYtNgyscBOY0MMR7uoUnIttkKKjV8jTh8GqQdMDbgO
-         nZKn2PP4N8AC3WjQfvbK1KY9vCpIMf5CZUleHiQlmNd8Ct4X8IG7jWgIgEHNOOYvGuYW
-         0GZKZC4qtpFuySBKmVhGJaG9721lK1J703CXFcNYEZ2yzoHjtGcElxDmb2sC6L0Qf9DA
-         rECkOSktr43ZGYKuTdzUu1USz98cH/EKBlMSak66p6bfjiQR14QFpSkFYb6fRBOsHhkS
-         wzXA4o0ZGYyDT6Hb6ntwd5dFnLC661+BoV9e4xEPUCsWj9TYeP2G2ie/OQsLcSa8rU0Q
-         1bIg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=23xg3xXgAfGKhWk8U0pLr4SmL7oKXrfhT/YKVSMTCAs=;
-        b=R35xZd+JloE6deqM3VRs+GrvRL0qvSH5HghL435tnue04jmipPAo+5fKwbsVB21eii
-         QazhxgZvZfblvBuyjseXUA0kvU976IulJGhqhR+MoP0cxmpE+Tb30KPTNT3DceWyE0tX
-         dmFABHEkD62CgW67TLGvRghmm3HUr1xHlwof0XeLRzcHtWhXG/AW7urwzAVZ51rtqHep
-         /yEd+zvQTgchBRUzcIV6cGz6bJsCvb37zPsdJZl2fTltl5rfITeAxUItDp2vWUXR5U0E
-         EslG0c5+RQtFXux5iQLSf1PvMd4r8n/1NvJPnBKNoOZ9w3+Qal6NRS8EX/YpEsq8qNuu
-         qv5w==
-X-Gm-Message-State: ANhLgQ0TrCH07MBFRLEBfz5sYLyK8XDfg8eyPekJQrYdD1apghr1te59
-        0LG1F9ZEcGugMWb0Xv1cKvlfMiTDxKJliAnt0a5o/w==
-X-Google-Smtp-Source: ADFU+vsc2T2jZf70kpZMvYMwpfS+uLg4OObFA/cnTervsw+SJLOvoZvVNj5I9uhJjuGVX8IdlnaMjTx8rjO5JeJrKis=
-X-Received: by 2002:a19:ed0b:: with SMTP id y11mr1776494lfy.77.1582798323589;
- Thu, 27 Feb 2020 02:12:03 -0800 (PST)
+        id S1732196AbgB0N4q (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 27 Feb 2020 08:56:46 -0500
+Received: from mail.kernel.org ([198.145.29.99]:57356 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1732190AbgB0N4p (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Thu, 27 Feb 2020 08:56:45 -0500
+Received: from localhost (83-86-89-107.cable.dynamic.v4.ziggo.nl [83.86.89.107])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 8821820578;
+        Thu, 27 Feb 2020 13:56:43 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1582811804;
+        bh=65POcJFp0QtikRJMJrWeAydJ2XT6KUTDHap55AKMNRs=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=2QzplRNPW7b2PZT0uDvB0S1PXRyvX7LFOIHlsVdpRcYaYB+SBwBh6BMkdXzcgnWxc
+         lIGRxv5LpmO/1DoogAcbyq8gqq2Hh+10Y+pb+WjDGQGWtAhdeGPTjLAuxVQv90JJ4+
+         O50S3wZBOC74R3kIA2kqtVXFk0AMJUo84axaur0s=
+From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+To:     linux-kernel@vger.kernel.org
+Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        stable@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
+        Andy Lutomirski <luto@kernel.org>,
+        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
+        Arvind Sankar <nivedita@alum.mit.edu>,
+        Matthew Garrett <mjg59@google.com>, linux-efi@vger.kernel.org,
+        Ingo Molnar <mingo@kernel.org>, Sasha Levin <sashal@kernel.org>
+Subject: [PATCH 4.14 106/237] efi/x86: Dont panic or BUG() on non-critical error conditions
+Date:   Thu, 27 Feb 2020 14:35:20 +0100
+Message-Id: <20200227132304.718102165@linuxfoundation.org>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20200227132255.285644406@linuxfoundation.org>
+References: <20200227132255.285644406@linuxfoundation.org>
+User-Agent: quilt/0.66
 MIME-Version: 1.0
-References: <20200226165738.11201-1-ardb@kernel.org>
-In-Reply-To: <20200226165738.11201-1-ardb@kernel.org>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Thu, 27 Feb 2020 11:11:52 +0100
-Message-ID: <CACRpkdZ9WR7wEjgscAF=Pwy0=YwbNPjtH6BQWa5wfXW74Md4xQ@mail.gmail.com>
-Subject: Re: [PATCH v4 0/5] ARM: decompressor: use by-VA cache maintenance for
- v7 cores
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        linux-efi <linux-efi@vger.kernel.org>,
-        Russell King <linux@armlinux.org.uk>,
-        Marc Zyngier <maz@kernel.org>,
-        Nicolas Pitre <nico@fluxnic.net>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Tony Lindgren <tony@atomide.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Wed, Feb 26, 2020 at 5:57 PM Ard Biesheuvel <ardb@kernel.org> wrote:
+From: Ard Biesheuvel <ardb@kernel.org>
 
-> So instead, switch to the by-VA cache maintenance that the architecture
-> requires for v7 and later (and ARM1176, as a side effect).
->
-> Changes since v3:
-> - ensure that the region that is cleaned after self-relocation of the zImage
->   covers the appended DTB, if present
->
-> Apologies to Linus, but due to this change, I decided not to take your
-> Tested-by into account, and I would appreciate it if you could retest
-> this version of the series? Thanks.
+[ Upstream commit e2d68a955e49d61fd0384f23e92058dc9b79be5e ]
 
-No problem, I have tested it on the following:
+The logic in __efi_enter_virtual_mode() does a number of steps in
+sequence, all of which may fail in one way or the other. In most
+cases, we simply print an error and disable EFI runtime services
+support, but in some cases, we BUG() or panic() and bring down the
+system when encountering conditions that we could easily handle in
+the same way.
 
-- ARMv7 Cortex A9 x 2 Qualcomm APQ8060 DragonBoard
-- ARM PB11MPCore (4 x 1176)
-- ARMv7 Ux500 Cortex A9 x 2
+While at it, replace a pointless page-to-virt-phys conversion with
+one that goes straight from struct page to physical.
 
-The PB11MPCore is again the crucial board, if it work on that
-board it works on anything, most of the time :D
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Arvind Sankar <nivedita@alum.mit.edu>
+Cc: Matthew Garrett <mjg59@google.com>
+Cc: linux-efi@vger.kernel.org
+Link: https://lkml.kernel.org/r/20200103113953.9571-14-ardb@kernel.org
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ arch/x86/platform/efi/efi.c    | 28 ++++++++++++++--------------
+ arch/x86/platform/efi/efi_64.c |  9 +++++----
+ 2 files changed, 19 insertions(+), 18 deletions(-)
 
-Tested-by: Linus Walleij <linus.walleij@linaro.org>
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 5b0275310070e..e7f19dec16b97 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -930,16 +930,14 @@ static void __init __efi_enter_virtual_mode(void)
+ 
+ 	if (efi_alloc_page_tables()) {
+ 		pr_err("Failed to allocate EFI page tables\n");
+-		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+-		return;
++		goto err;
+ 	}
+ 
+ 	efi_merge_regions();
+ 	new_memmap = efi_map_regions(&count, &pg_shift);
+ 	if (!new_memmap) {
+ 		pr_err("Error reallocating memory, EFI runtime non-functional!\n");
+-		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+-		return;
++		goto err;
+ 	}
+ 
+ 	pa = __pa(new_memmap);
+@@ -953,8 +951,7 @@ static void __init __efi_enter_virtual_mode(void)
+ 
+ 	if (efi_memmap_init_late(pa, efi.memmap.desc_size * count)) {
+ 		pr_err("Failed to remap late EFI memory map\n");
+-		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+-		return;
++		goto err;
+ 	}
+ 
+ 	if (efi_enabled(EFI_DBG)) {
+@@ -962,12 +959,11 @@ static void __init __efi_enter_virtual_mode(void)
+ 		efi_print_memmap();
+ 	}
+ 
+-	BUG_ON(!efi.systab);
++	if (WARN_ON(!efi.systab))
++		goto err;
+ 
+-	if (efi_setup_page_tables(pa, 1 << pg_shift)) {
+-		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+-		return;
+-	}
++	if (efi_setup_page_tables(pa, 1 << pg_shift))
++		goto err;
+ 
+ 	efi_sync_low_kernel_mappings();
+ 
+@@ -987,9 +983,9 @@ static void __init __efi_enter_virtual_mode(void)
+ 	}
+ 
+ 	if (status != EFI_SUCCESS) {
+-		pr_alert("Unable to switch EFI into virtual mode (status=%lx)!\n",
+-			 status);
+-		panic("EFI call to SetVirtualAddressMap() failed!");
++		pr_err("Unable to switch EFI into virtual mode (status=%lx)!\n",
++		       status);
++		goto err;
+ 	}
+ 
+ 	/*
+@@ -1016,6 +1012,10 @@ static void __init __efi_enter_virtual_mode(void)
+ 
+ 	/* clean DUMMY object */
+ 	efi_delete_dummy_variable();
++	return;
++
++err:
++	clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+ }
+ 
+ void __init efi_enter_virtual_mode(void)
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index ae369c2bbc3eb..0ebb7f94fd518 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -390,11 +390,12 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 		return 0;
+ 
+ 	page = alloc_page(GFP_KERNEL|__GFP_DMA32);
+-	if (!page)
+-		panic("Unable to allocate EFI runtime stack < 4GB\n");
++	if (!page) {
++		pr_err("Unable to allocate EFI runtime stack < 4GB\n");
++		return 1;
++	}
+ 
+-	efi_scratch.phys_stack = virt_to_phys(page_address(page));
+-	efi_scratch.phys_stack += PAGE_SIZE; /* stack grows down */
++	efi_scratch.phys_stack = page_to_phys(page + 1); /* stack grows down */
+ 
+ 	npages = (_etext - _text) >> PAGE_SHIFT;
+ 	text = __pa(_text);
+-- 
+2.20.1
 
-Yours,
-Linus Walleij
+
+
