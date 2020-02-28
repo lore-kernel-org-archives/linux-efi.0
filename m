@@ -4,40 +4,40 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D40EC3F2D4
-	for <linux-efi@archiver.kernel.org>; Fri, 28 Feb 2020 12:14:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 52190C3F2D2
+	for <linux-efi@archiver.kernel.org>; Fri, 28 Feb 2020 12:14:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 469A42087F
-	for <linux-efi@archiver.kernel.org>; Fri, 28 Feb 2020 12:14:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1F2542087F
+	for <linux-efi@archiver.kernel.org>; Fri, 28 Feb 2020 12:14:35 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1582892073;
-	bh=SJlSXAj88NxcUgayRsmVia+8rhay30lruXWP/iqAjMI=;
+	s=default; t=1582892075;
+	bh=FoQDG3xdJuBlX9Uf6sQGSNLk3h0Lwk3nb9QI5kC4A5U=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=HvR7S/KeWHMeIpfwdLIKOnZRiyhP7PHmV6i29jEoWcI8Og387thDp/JIfw6sTcp5+
-	 BMQSbc/uXjK96Whfuv0W9NzrgCtr7QaRKSuIbDAkCYJ/FEd4WX6UbsU0UJ7t8yYOOb
-	 2kk3FoL+n7PaXgmim666wz9jzAU7jljAz+mkg2/c=
+	b=tM5MXQJ9May634EnRxdlDRYBsrv9NxkoSjNwMY+etq5fe57Ibk/IAbXLWmKC2fmmI
+	 eOVZmkZhiO4JFbPQXSgOsYpeWTb0gq5QCv1OH8Pybf0IMz1d6UP582M5pSjiag6dSq
+	 GRYi3xKkom7tTI5DSH/87UiBsCmC5L1KGphc5DkM=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726788AbgB1MOX (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 28 Feb 2020 07:14:23 -0500
-Received: from mail.kernel.org ([198.145.29.99]:45426 "EHLO mail.kernel.org"
+        id S1726738AbgB1MOV (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 28 Feb 2020 07:14:21 -0500
+Received: from mail.kernel.org ([198.145.29.99]:45358 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726766AbgB1MOX (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 28 Feb 2020 07:14:23 -0500
+        id S1726614AbgB1MOV (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 28 Feb 2020 07:14:21 -0500
 Received: from e123331-lin.home (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 55BA6246B4;
-        Fri, 28 Feb 2020 12:14:21 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id A510B246B6;
+        Fri, 28 Feb 2020 12:14:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1582892062;
-        bh=SJlSXAj88NxcUgayRsmVia+8rhay30lruXWP/iqAjMI=;
+        s=default; t=1582892060;
+        bh=FoQDG3xdJuBlX9Uf6sQGSNLk3h0Lwk3nb9QI5kC4A5U=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=I7mHf5R/zM6ZpKSsX0WU01oYVn7q8YxP5x5qTMPdG3Khh90RmygLun+z7pHwe6A4B
-         TShk8GRDcGQz3Vxf8vK5RHoWg5Xardi6OKwDB+l3Qv2IXYUf2BA9wU2kQaX7DgRLhS
-         igjhQmBSuquK6ULax3roenKuV9qFGAijIMpbIVlA=
+        b=O+qoS2prwh0smdk1Ih84pqcIFbf4cmbb+oj9xxTVjc37OFQmji/GNZ+YXPRB518gJ
+         6HwyHNOVl8iMarvvCYVxzKRAGQzMHLzEa2vMWnVGWMOYSfN2zK1b8I1JOl+vwLYzZW
+         ASAqKt5Ohw3metMGkew1mxt2tteRQD+qlEvwa4a8=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
@@ -45,9 +45,9 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
         David Hildenbrand <david@redhat.com>,
         Heinrich Schuchardt <xypron.glpk@gmx.de>,
         Tom Lendacky <thomas.lendacky@amd.com>
-Subject: [PATCH 4/6] efi/arm: clean EFI stub exit code from cache instead of avoiding it
-Date:   Fri, 28 Feb 2020 13:14:06 +0100
-Message-Id: <20200228121408.9075-5-ardb@kernel.org>
+Subject: [PATCH 3/6] efi: don't shadow i in efi_config_parse_tables()
+Date:   Fri, 28 Feb 2020 13:14:05 +0100
+Message-Id: <20200228121408.9075-4-ardb@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20200228121408.9075-1-ardb@kernel.org>
 References: <20200228121408.9075-1-ardb@kernel.org>
@@ -56,66 +56,31 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Commit c7225494b ("efi/arm: Work around missing cache maintenance in
-decompressor handover") modified the handover code written in assembler
-to work around the missing cache maintenance of the piece of code that
-is executed after the MMU and caches are turned off. Due to the fact
-that this sequence incorporates a subroutine call, cleaning that code
-from the cache is not a matter of simply passing the start and end of
-the currently running subroutine into cache_clean_flush(), which is why
-instead, the code jumps across into the cleaned copy of the image.
+From: Heinrich Schuchardt <xypron.glpk@gmx.de>
 
-However, this assumes that this copy is executable, and this means we
-expect EFI_LOADER_DATA regions to be executable as well, which is not
-a reasonable assumption to make, even if this is true for most UEFI
-implementations today.
+Shadowing variables is generally frowned upon.
 
-So change this back, and add a cache_clean_flush() call to cover the
-remaining code in the subroutine, and any code it may execute in the
-context of cache_off().
+Let's simply reuse the existing loop counter i instead of shadowing it.
 
+Signed-off-by: Heinrich Schuchardt <xypron.glpk@gmx.de>
+Link: https://lore.kernel.org/r/20200223221324.156086-1-xypron.glpk@gmx.de
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/arm/boot/compressed/head.S | 18 ++++++++----------
- 1 file changed, 8 insertions(+), 10 deletions(-)
+ drivers/firmware/efi/efi.c | 1 -
+ 1 file changed, 1 deletion(-)
 
-diff --git a/arch/arm/boot/compressed/head.S b/arch/arm/boot/compressed/head.S
-index 36ffbeecd30b..04f77214f050 100644
---- a/arch/arm/boot/compressed/head.S
-+++ b/arch/arm/boot/compressed/head.S
-@@ -1452,13 +1452,11 @@ ENTRY(efi_enter_kernel)
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 1e79f77d4e6c..41269a95ff85 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -554,7 +554,6 @@ int __init efi_config_parse_tables(const efi_config_table_t *config_tables,
+ 		while (prsv) {
+ 			struct linux_efi_memreserve *rsv;
+ 			u8 *p;
+-			int i;
  
- 		@ The PE/COFF loader might not have cleaned the code we are
- 		@ running beyond the PoU, and so calling cache_off below from
--		@ inside the PE/COFF loader allocated region is unsafe. Let's
--		@ assume our own zImage relocation code did a better job, and
--		@ jump into its version of this routine before proceeding.
--		ldr	r1, .Ljmp
--		sub	r1, r7, r1
--		mov	pc, r1				@ no mode switch
--0:
-+		@ inside the PE/COFF loader allocated region is unsafe unless
-+		@ we explicitly clean it to the PoC.
-+		adr	r0, call_cache_fn		@ region of code we will
-+		adr	r1, 0f				@ run with MMU off
-+		bl	cache_clean_flush
- 		bl	cache_off
- 
- 		@ Set parameters for booting zImage according to boot protocol
-@@ -1467,10 +1465,10 @@ ENTRY(efi_enter_kernel)
- 		mov	r0, #0
- 		mov	r1, #0xFFFFFFFF
- 		mov	r2, r4
--		b	__efi_start
-+		add	r7, r7, #(__efi_start - start)
-+		mov	pc, r7				@ no mode switch
- ENDPROC(efi_enter_kernel)
--		.align	2
--.Ljmp:		.long	start - 0b
-+0:
- #endif
- 
- 		.align
+ 			/*
+ 			 * Just map a full page: that is what we will get
 -- 
 2.17.1
 
