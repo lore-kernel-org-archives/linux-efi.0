@@ -6,47 +6,47 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 09754C3F2D4
-	for <linux-efi@archiver.kernel.org>; Sun,  1 Mar 2020 23:04:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AB6B5C3F2CD
+	for <linux-efi@archiver.kernel.org>; Sun,  1 Mar 2020 23:04:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id DE40C2469C
-	for <linux-efi@archiver.kernel.org>; Sun,  1 Mar 2020 23:04:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8CBB5246B4
+	for <linux-efi@archiver.kernel.org>; Sun,  1 Mar 2020 23:04:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726785AbgCAXEl (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 1 Mar 2020 18:04:41 -0500
-Received: from mail-qt1-f196.google.com ([209.85.160.196]:32933 "EHLO
-        mail-qt1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726766AbgCAXEk (ORCPT
+        id S1726448AbgCAXEw (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 1 Mar 2020 18:04:52 -0500
+Received: from mail-qk1-f175.google.com ([209.85.222.175]:44795 "EHLO
+        mail-qk1-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726700AbgCAXEk (ORCPT
         <rfc822;linux-efi@vger.kernel.org>); Sun, 1 Mar 2020 18:04:40 -0500
-Received: by mail-qt1-f196.google.com with SMTP id x8so4111680qts.0;
-        Sun, 01 Mar 2020 15:04:40 -0800 (PST)
+Received: by mail-qk1-f175.google.com with SMTP id f198so707490qke.11;
+        Sun, 01 Mar 2020 15:04:39 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=AUjIIsPXPmqVI6pKRaapg6FxwXRBN7yq/9Q9SfoYuSg=;
-        b=r88TRoy2X2zJDT73nWbIeEZ7OeQuVD/UIyt/6rAar357qAivbB9n3qjqQz5jHP2QWV
-         8PL6TOq7P+lN9v/bObsA0SQ4ibVzcSCcd/hfIf1fSwWvVmANnxQcSuOGIGX058DCEe9J
-         f5ucb408+zJEDBFUJ6lh6mNStfEvAJ8dvQBHtOV/ZUpZ2p7ck8PKhtFrRpVfg/GthtSu
-         /GmKeuVlzx04wUt5X+ogIC0iyc+NIuz7r5koU+Y0DHPNGIMiCtC/PM7gGisGFK8L2ECc
-         u/QbsGoSBQO2SRLcEHdczvikQbpZS193uPG+4wUboe1NULpcLfzbd2UJPYp+DHt26h3O
-         kNyA==
-X-Gm-Message-State: ANhLgQ3RlVKMoBEl8dohSPn60uezo5+uvdslys6b7X2oKlw39HK7EnxD
-        XJ395ls1bmMNMHpi/jTPhck=
-X-Google-Smtp-Source: ADFU+vsYAIdS2YWQfdA/f/nvEC++maOnxktB9K4vPdLL6bZVhnK6dPUBWrJoOG04FjioiuNNSi+ZCQ==
-X-Received: by 2002:ac8:6d10:: with SMTP id o16mr3479482qtt.308.1583103879876;
+        bh=IZ0AjbtgZYbQmgeycgx4fTf3TsbCTcfSdl6G4jmsqCg=;
+        b=B5WwEWH9pXCrhOj4AH2H8P6LUKUBP8cC69hez9R9FvKpowmP2REUd8S8RnWoQLK9lf
+         MNQuKxUhi5VBvFGNHFu/jWo8EAyVetr8fs/hbzaGacabLsoCdoXhzaugJLhKB4kNEyE2
+         vXAhxm49Qjj0/ky1d2TaZEK6b3YeoqzFYRCdiWUGOLFcxi9TS8Jx/5bpSmtMNXcofIhr
+         fbN0j0HFTzQIKJJjrOw1mwyAO5bWxGbIEedgqa6QIhmWRJhv6fo1wgYwshfT1irpfrIw
+         BVaBQjxvf+Xgr8iq5zgTRdxBDiYNOZ4AuMNcd+xmmXqxg5ziPjnrUoCLEpYi9xKlJRnC
+         r9YA==
+X-Gm-Message-State: APjAAAXeaWIH5x0vngmNBfc3sKdeMwXxZA0L6kvYly0Y3nxpByvJ1GHE
+        +j98nDdwmNTxwP3MJ5En/fnzsP3PljE=
+X-Google-Smtp-Source: APXvYqzXeQubmG7BwOy8awbJEJ0VNG5+1+QlqryjrKh3BNhzIZGYDaqv6YlqnbRWjSFpKGBVzlvzVQ==
+X-Received: by 2002:a37:5285:: with SMTP id g127mr13356577qkb.315.1583103879165;
         Sun, 01 Mar 2020 15:04:39 -0800 (PST)
 Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
-        by smtp.gmail.com with ESMTPSA id n138sm9065082qkn.33.2020.03.01.15.04.39
+        by smtp.gmail.com with ESMTPSA id n138sm9065082qkn.33.2020.03.01.15.04.38
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 01 Mar 2020 15:04:39 -0800 (PST)
+        Sun, 01 Mar 2020 15:04:38 -0800 (PST)
 From:   Arvind Sankar <nivedita@alum.mit.edu>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     linux-efi@vger.kernel.org, x86@kernel.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH 3/5] efi/x86: Make efi32_pe_entry more readable
-Date:   Sun,  1 Mar 2020 18:04:34 -0500
-Message-Id: <20200301230436.2246909-4-nivedita@alum.mit.edu>
+Subject: [PATCH 2/5] efi/x86: Respect 32-bit ABI in efi32_pe_entry
+Date:   Sun,  1 Mar 2020 18:04:33 -0500
+Message-Id: <20200301230436.2246909-3-nivedita@alum.mit.edu>
 X-Mailer: git-send-email 2.24.1
 In-Reply-To: <20200301230436.2246909-1-nivedita@alum.mit.edu>
 References: <20200301230436.2246909-1-nivedita@alum.mit.edu>
@@ -57,101 +57,30 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Setup a proper frame pointer in efi32_pe_entry so that it's easier to
-calculate offsets for arguments.
+verify_cpu clobbers BX and DI. In case we have to return error, we need
+to preserve them to respect 32-bit calling convention.
 
 Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
 ---
- arch/x86/boot/compressed/head_64.S | 57 +++++++++++++++++++++---------
- 1 file changed, 40 insertions(+), 17 deletions(-)
+ arch/x86/boot/compressed/head_64.S | 4 ++++
+ 1 file changed, 4 insertions(+)
 
 diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
-index 920daf62dac2..fabbd4c2e9f2 100644
+index 8105e8348607..920daf62dac2 100644
 --- a/arch/x86/boot/compressed/head_64.S
 +++ b/arch/x86/boot/compressed/head_64.S
-@@ -658,42 +658,65 @@ SYM_DATA(efi_is64, .byte 1)
- 	.text
- 	.code32
+@@ -660,7 +660,11 @@ SYM_DATA(efi_is64, .byte 1)
  SYM_FUNC_START(efi32_pe_entry)
-+/*
-+ * efi_status_t efi32_pe_entry(efi_handle_t image_handle,
-+ *			       efi_system_table_32_t *sys_table)
-+ */
-+
  	pushl	%ebp
-+	movl	%esp, %ebp
-+	pushl	%eax				// dummy push to allocate loaded_image
  
--	pushl	%ebx
-+	pushl	%ebx				// save callee-save registers
- 	pushl	%edi
-+
++	pushl	%ebx
++	pushl	%edi
  	call	verify_cpu			// check for long mode support
--	popl	%edi
--	popl	%ebx
++	popl	%edi
++	popl	%ebx
  	testl	%eax, %eax
  	movl	$0x80000003, %eax		// EFI_UNSUPPORTED
--	jnz	3f
-+	jnz	2f
- 
- 	call	1f
--1:	pop	%ebp
--	subl	$1b, %ebp
-+1:	pop	%ebx
-+	subl	$1b, %ebx
- 
- 	/* Get the loaded image protocol pointer from the image handle */
--	subl	$12, %esp			// space for the loaded image pointer
--	pushl	%esp				// pass its address
--	leal	loaded_image_proto(%ebp), %eax
-+	leal	-4(%ebp), %eax
-+	pushl	%eax				// &loaded_image
-+	leal	loaded_image_proto(%ebx), %eax
- 	pushl	%eax				// pass the GUID address
--	pushl	28(%esp)			// pass the image handle
-+	pushl	8(%ebp)				// pass the image handle
- 
--	movl	36(%esp), %eax			// sys_table
-+	/*
-+	 * Note the alignment of the stack frame.
-+	 *   sys_table
-+	 *   handle             <-- 16-byte aligned on entry by ABI
-+	 *   return address
-+	 *   frame pointer
-+	 *   loaded_image       <-- local variable
-+	 *   saved %ebx		<-- 16-byte aligned here
-+	 *   saved %edi
-+	 *   &loaded_image
-+	 *   &loaded_image_proto
-+	 *   handle             <-- 16-byte aligned for call to handle_protocol
-+	 */
-+
-+	movl	12(%ebp), %eax			// sys_table
- 	movl	ST32_boottime(%eax), %eax	// sys_table->boottime
- 	call	*BS32_handle_protocol(%eax)	// sys_table->boottime->handle_protocol
--	cmp	$0, %eax
-+	addl	$12, %esp			// restore argument space
-+	testl	%eax, %eax
- 	jnz	2f
- 
--	movl	32(%esp), %ecx			// image_handle
--	movl	36(%esp), %edx			// sys_table
--	movl	12(%esp), %esi			// loaded_image
-+	movl	8(%ebp), %ecx			// image_handle
-+	movl	12(%ebp), %edx			// sys_table
-+	movl	-4(%ebp), %esi			// loaded_image
- 	movl	LI32_image_base(%esi), %esi	// loaded_image->image_base
-+	movl	%ebx, %ebp			// startup_32 for efi32_pe_stub_entry
- 	jmp	efi32_pe_stub_entry
- 
--2:	addl	$24, %esp
--3:	popl	%ebp
-+2:	popl	%edi				// restore callee-save registers
-+	popl	%ebx
-+	leave
- 	ret
- SYM_FUNC_END(efi32_pe_entry)
- 
+ 	jnz	3f
 -- 
 2.24.1
 
