@@ -2,52 +2,54 @@ Return-Path: <SRS0=Ivah=4S=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 81422C3F2CD
-	for <linux-efi@archiver.kernel.org>; Sun,  1 Mar 2020 23:05:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 44675C3F2CD
+	for <linux-efi@archiver.kernel.org>; Sun,  1 Mar 2020 23:05:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 4C87A2469C
-	for <linux-efi@archiver.kernel.org>; Sun,  1 Mar 2020 23:05:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 19035246B6
+	for <linux-efi@archiver.kernel.org>; Sun,  1 Mar 2020 23:05:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726714AbgCAXFk (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 1 Mar 2020 18:05:40 -0500
-Received: from mail-qt1-f194.google.com ([209.85.160.194]:43057 "EHLO
-        mail-qt1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726448AbgCAXFj (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sun, 1 Mar 2020 18:05:39 -0500
-Received: by mail-qt1-f194.google.com with SMTP id v22so2678291qtp.10;
-        Sun, 01 Mar 2020 15:05:38 -0800 (PST)
+        id S1727026AbgCAXFn (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 1 Mar 2020 18:05:43 -0500
+Received: from mail-qk1-f195.google.com ([209.85.222.195]:44155 "EHLO
+        mail-qk1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726982AbgCAXFm (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sun, 1 Mar 2020 18:05:42 -0500
+Received: by mail-qk1-f195.google.com with SMTP id f198so709162qke.11;
+        Sun, 01 Mar 2020 15:05:41 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=rmClv7KUwsEhPV3Su7vBp7m1YxS3IV694ue7XnXG+Ow=;
-        b=qKEpjBhGTrRrez8qm5wza2pft8/5X+eqJPie5m2ic0QjN7V4w8bBe2Ao1tukxzWqk2
-         PLnsKfte2MnV70QFFLceFWW8D4n01Zm+c/cU/DYAo9hnrBh/hGgw4pVJ4C6pbkvzp2La
-         lpafj4gADyu4aitjT2f+uQ1L5KUusgK5d1jTz4qx5f4ft7Oyuw99t1WEtsAoxR6REzOm
-         QaoStTfGStRqtSvekATjJ+gfY2wfFR42h37C8uK3+MTKqCT+W/ZJiJGyfk4TtdbqLBNH
-         uoJkSFvsAMHMFs8B+xU2wlUVhPb4qkRwMMTB1Y0gvX7hkWzJwKqVq8rAF22vEijr0IB9
-         qI+g==
-X-Gm-Message-State: APjAAAUqrT8gcPq/TgwD3rDk9x2I6Mcs3abfKL4XhymdaQ+1/snrngD2
-        WGirOz8yoCeV2f3dPDuQn9A5i8bwk4M=
-X-Google-Smtp-Source: APXvYqy56aMXIUNCZtAG2NF4c1uMnZeJwSYjOsPTfiahWJAg3V8HeA/L/WbLsWSZgGG5CIs6gxEbjA==
-X-Received: by 2002:ac8:740f:: with SMTP id p15mr12682765qtq.211.1583103938201;
-        Sun, 01 Mar 2020 15:05:38 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=stySVg75jtrX3mke708zz6bLekHeYxF3iciPLxqHuAc=;
+        b=KOQRS2wh5DS8ld0EhLnrgNfNHzbbBcLREyp/LNc7sbQtbDwIwcMYF8OhBkOX1yjOho
+         ylDJaA/+ari3FEyk/tPCJ5qBfZY8Icue6miWHtBPsjweuTbtlo5G5QoGNxFVYcyMmAnQ
+         +Ofn2je2T47KvEHmZpIA7vPWqo58wE+6F3FdKv2LtFEcxLP96ZPjX63ktV6B9ydKVFut
+         DIr20cMpi/1P0T9I4YAcMee4hCeCyYA+aWKMtEx2e90Bh2zqJ6kIfXq6b6RtWAtda/83
+         OuH+DAIjqAjP5FDihsQmeWpks8N16HdKi+e5CEti/lKLVfDysDAQb0N9unVZpmqQrUFt
+         z5Tw==
+X-Gm-Message-State: APjAAAXPE9/abyeqLlGPeTDuSU53CrWJ8V9/qxR9cq5WUThhYBMquOjf
+        MD7F3yJanA+CjacCODkoBwgINlGs7rk=
+X-Google-Smtp-Source: APXvYqy1tgjQ++4RNCcXiYsMm5Q0UxuGo1U29MKMbqNVu8loTNuWWy4U4VyXpgXZDq4nFKODltte3w==
+X-Received: by 2002:a37:6854:: with SMTP id d81mr13649432qkc.157.1583103941278;
+        Sun, 01 Mar 2020 15:05:41 -0800 (PST)
 Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
-        by smtp.gmail.com with ESMTPSA id x131sm8923906qka.1.2020.03.01.15.05.37
+        by smtp.gmail.com with ESMTPSA id x131sm8923906qka.1.2020.03.01.15.05.40
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 01 Mar 2020 15:05:37 -0800 (PST)
+        Sun, 01 Mar 2020 15:05:40 -0800 (PST)
 From:   Arvind Sankar <nivedita@alum.mit.edu>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     linux-efi@vger.kernel.org, x86@kernel.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH 0/5] Minimize the need to move the kernel in the EFI stub
-Date:   Sun,  1 Mar 2020 18:05:32 -0500
-Message-Id: <20200301230537.2247550-1-nivedita@alum.mit.edu>
+Subject: [PATCH 4/5] efi/x86: Remove extra headroom for setup block
+Date:   Sun,  1 Mar 2020 18:05:36 -0500
+Message-Id: <20200301230537.2247550-5-nivedita@alum.mit.edu>
 X-Mailer: git-send-email 2.24.1
+In-Reply-To: <20200301230537.2247550-1-nivedita@alum.mit.edu>
+References: <20200301230537.2247550-1-nivedita@alum.mit.edu>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
@@ -55,30 +57,90 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This series adds the ability to use the entire PE image space for
-decompression, provides the preferred address to the PE loader via the
-header, and finally restricts efi_relocate_kernel to cases where we
-really need it rather than whenever we were loaded at something other
-than preferred address.
+commit 223e3ee56f77 ("efi/x86: add headroom to decompressor BSS to
+account for setup block") added headroom to the PE image to account for
+the setup block, which wasn't used for the decompression buffer.
 
-Based on tip:efi/core + the cleanup series just posted [1]
-[1] https://lore.kernel.org/linux-efi/20200301230436.2246909-1-nivedita@alum.mit.edu/
+Now that we decompress from the start of the image, this is no longer
+required.
 
-Arvind Sankar (5):
-  x86/boot/compressed/32: Save the output address instead of
-    recalculating it
-  efi/x86: Decompress at start of PE image load address
-  efi/x86: Add kernel preferred address to PE header
-  efi/x86: Remove extra headroom for setup block
-  efi/x86: Don't relocate the kernel unless necessary
+Add a check to make sure that the head section of the compressed kernel
+won't overwrite itself while relocating. This is only for
+future-proofing as with current limits on the setup and the actual size
+of the head section, this can never happen.
 
- arch/x86/boot/compressed/head_32.S      | 42 +++++++++++++++--------
- arch/x86/boot/compressed/head_64.S      | 38 +++++++++++++++++++--
- arch/x86/boot/header.S                  |  6 ++--
- arch/x86/boot/tools/build.c             | 44 ++++++++++++++++++-------
- drivers/firmware/efi/libstub/x86-stub.c | 32 +++++++++++++++---
- 5 files changed, 127 insertions(+), 35 deletions(-)
+Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
+---
+ arch/x86/boot/tools/build.c | 28 ++++++++++++++++++++++++++--
+ 1 file changed, 26 insertions(+), 2 deletions(-)
 
+diff --git a/arch/x86/boot/tools/build.c b/arch/x86/boot/tools/build.c
+index 90d403dfec80..3d03ad753ed5 100644
+--- a/arch/x86/boot/tools/build.c
++++ b/arch/x86/boot/tools/build.c
+@@ -65,6 +65,8 @@ unsigned long efi_pe_entry;
+ unsigned long efi32_pe_entry;
+ unsigned long kernel_info;
+ unsigned long startup_64;
++unsigned long _ehead;
++unsigned long _end;
+ 
+ /*----------------------------------------------------------------------*/
+ 
+@@ -232,7 +234,7 @@ static void update_pecoff_text(unsigned int text_start, unsigned int file_sz,
+ {
+ 	unsigned int pe_header;
+ 	unsigned int text_sz = file_sz - text_start;
+-	unsigned int bss_sz = init_sz + text_start - file_sz;
++	unsigned int bss_sz = init_sz - file_sz;
+ 
+ 	pe_header = get_unaligned_le32(&buf[0x3c]);
+ 
+@@ -259,7 +261,7 @@ static void update_pecoff_text(unsigned int text_start, unsigned int file_sz,
+ 	put_unaligned_le32(file_sz - 512 + bss_sz, &buf[pe_header + 0x1c]);
+ 
+ 	/* Size of image */
+-	put_unaligned_le32(init_sz + text_start, &buf[pe_header + 0x50]);
++	put_unaligned_le32(init_sz, &buf[pe_header + 0x50]);
+ 
+ 	/*
+ 	 * Address of entry point for PE/COFF executable
+@@ -360,6 +362,8 @@ static void parse_zoffset(char *fname)
+ 		PARSE_ZOFS(p, efi32_pe_entry);
+ 		PARSE_ZOFS(p, kernel_info);
+ 		PARSE_ZOFS(p, startup_64);
++		PARSE_ZOFS(p, _ehead);
++		PARSE_ZOFS(p, _end);
+ 
+ 		p = strchr(p, '\n');
+ 		while (p && (*p == '\r' || *p == '\n'))
+@@ -444,6 +448,26 @@ int main(int argc, char ** argv)
+ 	put_unaligned_le32(sys_size, &buf[0x1f4]);
+ 
+ 	init_sz = get_unaligned_le32(&buf[0x260]);
++#ifdef CONFIG_EFI_STUB
++	/*
++	 * The decompression buffer will start at ImageBase. When relocating
++	 * the compressed kernel to its end, we must ensure that the head
++	 * section does not get overwritten.  The head section occupies
++	 * [i, i + _ehead), and the destination is [init_sz - _end, init_sz).
++	 *
++	 * At present these should never overlap, because i is at most 32k
++	 * because of SETUP_SECT_MAX, _ehead is less than 1k, and the
++	 * calculation of INIT_SIZE in boot/header.S ensures that
++	 * init_sz - _end is at least 64k.
++	 *
++	 * For future-proofing, increase init_sz if necessary.
++	 */
++
++	if (init_sz - _end < i + _ehead) {
++		init_sz = (i + _ehead + _end + 4095) & ~4095;
++		put_unaligned_le32(init_sz, &buf[0x260]);
++	}
++#endif
+ 	update_pecoff_text(setup_sectors * 512, i + (sys_size * 16), init_sz);
+ 
+ 	efi_stub_entry_update();
 -- 
 2.24.1
 
