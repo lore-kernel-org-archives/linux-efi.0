@@ -2,102 +2,118 @@ Return-Path: <SRS0=Gkif=4T=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-1.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B34E9C3F2D2
-	for <linux-efi@archiver.kernel.org>; Mon,  2 Mar 2020 09:06:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AEA4AC3F2D2
+	for <linux-efi@archiver.kernel.org>; Mon,  2 Mar 2020 12:15:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 7A62524699
-	for <linux-efi@archiver.kernel.org>; Mon,  2 Mar 2020 09:06:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 835A722B48
+	for <linux-efi@archiver.kernel.org>; Mon,  2 Mar 2020 12:15:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1583139965;
-	bh=9VyCf4dwGTnrVyn18Hp/Ohy02tvvPdNQE/X3kfntlnY=;
+	s=default; t=1583151304;
+	bh=GMiJWJz0kUUsBXkgFg5SmgI08tTGguGxAr9xUHY1ca8=;
 	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=JVmtK3gRFz2IPSWkiswr1ippnvjEPHBID+AJWNFlW3AwqHV2ldi7Epb3a/SOqgZRY
-	 xuEhVSW/9crgU4TgJLVpmeYjjBE2i/FlXj4LNUcwQlWypAO/BkGibjr5LCFjM+fxAa
-	 BXkpEv9fhIrdJq7nMZjS0bscOMKpASw2n3w3i4Do=
+	b=ewpSJb7kT7IHfJewaR871YLVHG8Jd6pnw73OdQ5Es2RncnNV3gW9ymmiNvUpbtb+B
+	 IUnE5yGcKGv2P2ehYft2R7/OywnzFSewnefrSbLSIHKh5yD94AYWzi3ue86gwiyh3A
+	 ul3moMVaj0xVoOMQpHG8sPHavztalORiIvLy3/xQ=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727030AbgCBJGE (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 2 Mar 2020 04:06:04 -0500
-Received: from mail.kernel.org ([198.145.29.99]:40396 "EHLO mail.kernel.org"
+        id S1726654AbgCBMPE (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 2 Mar 2020 07:15:04 -0500
+Received: from mail.kernel.org ([198.145.29.99]:60980 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726313AbgCBJGC (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 2 Mar 2020 04:06:02 -0500
-Received: from mail-wr1-f46.google.com (mail-wr1-f46.google.com [209.85.221.46])
+        id S1725802AbgCBMPD (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Mon, 2 Mar 2020 07:15:03 -0500
+Received: from mail-wm1-f46.google.com (mail-wm1-f46.google.com [209.85.128.46])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id AF558246B6
-        for <linux-efi@vger.kernel.org>; Mon,  2 Mar 2020 09:05:59 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 98C5E2187F
+        for <linux-efi@vger.kernel.org>; Mon,  2 Mar 2020 12:15:02 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1583139960;
-        bh=9VyCf4dwGTnrVyn18Hp/Ohy02tvvPdNQE/X3kfntlnY=;
+        s=default; t=1583151302;
+        bh=GMiJWJz0kUUsBXkgFg5SmgI08tTGguGxAr9xUHY1ca8=;
         h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=cZ5plMEanXjcxTSiK8Z5s9eTiSyLDidnZC3a0qAVHwC8AeMFxMK8Jkb2kftPUI/RL
-         /fNSSTunTS4R0bcIAlW3ojaWkTFr7tTC0xQ0gUVGeR2K94QHn0PuxhyKaIXBqjmTk1
-         SkYOKsLteQ6IVqUpEIscDzVzgY4ilkYmmHnHQook=
-Received: by mail-wr1-f46.google.com with SMTP id n7so3577802wrt.11
-        for <linux-efi@vger.kernel.org>; Mon, 02 Mar 2020 01:05:59 -0800 (PST)
-X-Gm-Message-State: ANhLgQ0vY6AieTY2ac+fE8kWTev8dY34MDaSzqFqXqx7EL8wxx2H4u0o
-        UPJtJUSLSxeEqwqQHUdopSnWvLKja2R3DyWLuBtOJw==
-X-Google-Smtp-Source: ADFU+vsJ1MsogAG7JWBk0KsbC6ingwVKpcNrmJm/CtOg8fMZzkADZRUnDDKZ9pMMuCZbkETade0v13pKbGcH+k5atmE=
-X-Received: by 2002:a5d:6051:: with SMTP id j17mr1272058wrt.151.1583139958096;
- Mon, 02 Mar 2020 01:05:58 -0800 (PST)
+        b=XPq340VxoHD7py1+l0cLglG9MiKJC7Z2C8t5o2oBcY/MYN1dDYjkRqQ4g0QboVizT
+         0d8ghfuH8KV796/TI4O9arhcjMjY4qCV5Pwuejiz0pWbl6cASxpDwDVZGASv54QL8R
+         3oU1Ldxh//cdBR4PzUXfZ7othQfWrHHTYh2fDyss=
+Received: by mail-wm1-f46.google.com with SMTP id a132so920103wme.1
+        for <linux-efi@vger.kernel.org>; Mon, 02 Mar 2020 04:15:02 -0800 (PST)
+X-Gm-Message-State: APjAAAXJbNATZ/BfblQh1ts2bRJqcblZnBwJMKi6vaguvml2RMRVSYVJ
+        me01U8Jx7Z0Y+2y3X4hKAUHdyAg3pSr6jQF3mCY7Ug==
+X-Google-Smtp-Source: APXvYqwWjz/jYq9C/3EGYkstVIG3rxc1OOUFgi+JyY5gcPRwCxYxLmdtQ4k/vDSEZ950XfkF7RLCVHVl+kXGRmhonOY=
+X-Received: by 2002:a1c:bc46:: with SMTP id m67mr18953780wmf.40.1583151300961;
+ Mon, 02 Mar 2020 04:15:00 -0800 (PST)
 MIME-Version: 1.0
-References: <20200301155748.4788-1-lukas.bulwahn@gmail.com>
-In-Reply-To: <20200301155748.4788-1-lukas.bulwahn@gmail.com>
+References: <20200301172248.GA1851857@rani.riverdale.lan> <CAKv+Gu_N3vbea79CAQNZn6DmKBsKOhT9ucQYgBf0_8Pnd+vz2g@mail.gmail.com>
+ <20200301200035.GA2031375@rani.riverdale.lan> <CAKv+Gu_megM4a26r8AxeVEBrDLcY202K6nEcVxQ5bAeCcDBekw@mail.gmail.com>
+ <CAKv+Gu9=p8q3adeRVCbsxfoV17-SbKkeOe8Lx0OQYZAsmja+oQ@mail.gmail.com>
+ <CAKv+Gu87vexrXoofKdoFNEcr_Zw1dwe6pXz3DHhJ4NGZG=8SiA@mail.gmail.com>
+ <20200301205419.GA2116204@rani.riverdale.lan> <CAKv+Gu-sqC4_1ry_D1WCqraFR3bnaMegkJv9SHzXuUY7FLYs2g@mail.gmail.com>
+ <20200301220126.GA2204298@rani.riverdale.lan> <CAKv+Gu-zqrPSwgFAsamPQzwB_uVv8UaLZyqhOsBPb_m=FccnKg@mail.gmail.com>
+ <20200301230345.GA2227739@rani.riverdale.lan>
+In-Reply-To: <20200301230345.GA2227739@rani.riverdale.lan>
 From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Mon, 2 Mar 2020 10:05:47 +0100
-X-Gmail-Original-Message-ID: <CAKv+Gu_gCqMO89wQ8RTwveBMDu-vdwhS5anPiZzQHdViygEouQ@mail.gmail.com>
-Message-ID: <CAKv+Gu_gCqMO89wQ8RTwveBMDu-vdwhS5anPiZzQHdViygEouQ@mail.gmail.com>
-Subject: Re: [PATCH] MAINTAINERS: adjust EFI entry to removing eboot.c
-To:     Lukas Bulwahn <lukas.bulwahn@gmail.com>
+Date:   Mon, 2 Mar 2020 13:14:50 +0100
+X-Gmail-Original-Message-ID: <CAKv+Gu-ufV7xhptpEpNvEhvmLywQgRndFMsm6FJUko+z2Ob5vA@mail.gmail.com>
+Message-ID: <CAKv+Gu-ufV7xhptpEpNvEhvmLywQgRndFMsm6FJUko+z2Ob5vA@mail.gmail.com>
+Subject: Re: [PATCH v3 0/6] efi/x86: add support for generic EFI mixed mode boot
+To:     Arvind Sankar <nivedita@alum.mit.edu>
 Cc:     linux-efi <linux-efi@vger.kernel.org>,
-        Joe Perches <joe@perches.com>, kernel-janitors@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+        Hans de Goede <hdegoede@redhat.com>,
+        "the arch/x86 maintainers" <x86@kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Sun, 1 Mar 2020 at 16:58, Lukas Bulwahn <lukas.bulwahn@gmail.com> wrote:
+On Mon, 2 Mar 2020 at 00:03, Arvind Sankar <nivedita@alum.mit.edu> wrote:
 >
-> Commit c2d0b470154c ("efi/libstub/x86: Incorporate eboot.c into libstub")
-> removed arch/x86/boot/compressed/eboot.[ch], but missed to adjust the
-> MAINTAINERS entry.
+> On Sun, Mar 01, 2020 at 11:56:44PM +0100, Ard Biesheuvel wrote:
+> > On Sun, 1 Mar 2020 at 23:01, Arvind Sankar <nivedita@alum.mit.edu> wrote:
+> > >
+> > > On Sun, Mar 01, 2020 at 10:36:05PM +0100, Ard Biesheuvel wrote:
+> > > > On Sun, 1 Mar 2020 at 21:54, Arvind Sankar <nivedita@alum.mit.edu> wrote:
+> > > > > > I see this in the memory map
+> > > > > >
+> > > > > > [    0.000000] efi: mem47: [Conventional Memory|   |  |  |  |  |  |  |
+> > > > > >  |   |WB|WT|WC|UC] range=[0x0000000100000000-0x000000013fffffff]
+> > > > > > (1024MB)
+> > > > > >
+> > > > > > so it looks like qemu-system-x86_64 puts the memory in a weird place?
+> > > > > > Or is this expected?
+> > > > >
+> > > > > Mine ended here:
+> > > > > [    0.000000] efi: mem45: [Memory Mapped I/O  |RUN|  |  |  |  |  |  |  |   |  |  |  |UC] range=[0x00000000ffc00000-0x00000000ffffffff] (4MB)
+> > > > > are you running with -m 3072 or more?
+> > > > >
+> > > >
+> > > > That is not memory, it's some mmio region
+> > > >
+> > >
+> > > Right, but it's the last (highest) range in my memory map. It was just
+> > > to illustrate that I have no addresses above 4Gb, unlike the mapping you
+> > > got, although I now see that the MMIO range is the last one printed
+> > > regardless of where RAM ends, so that wasn't quite enough. I only get
+> > > the 4g-5g mapping range if I run it with -m 4096.
+> > >
+> > > This is the tail end of the mapping I got.
+> > >
+> > > [    0.000000] efi: mem38: [Conventional Memory|   |  |  |  |  |  |  |  |   |WB|WT|WC|UC] range=[0x00000000bfe00000-0x00000000bfe89fff] (0MB)
+> > > [    0.000000] efi: mem39: [Boot Data          |   |  |  |  |  |  |  |  |   |WB|WT|WC|UC] range=[0x00000000bfe8a000-0x00000000bfea9fff] (0MB)
+> > > [    0.000000] efi: mem40: [Boot Code          |   |  |  |  |  |  |  |  |   |WB|WT|WC|UC] range=[0x00000000bfeaa000-0x00000000bfeccfff] (0MB)
+> > > [    0.000000] efi: mem41: [Boot Data          |   |  |  |  |  |  |  |  |   |WB|WT|WC|UC] range=[0x00000000bfecd000-0x00000000bfed5fff] (0MB)
+> > > [    0.000000] efi: mem42: [Boot Code          |   |  |  |  |  |  |  |  |   |WB|WT|WC|UC] range=[0x00000000bfed6000-0x00000000bfef3fff] (0MB)
+> > > [    0.000000] efi: mem43: [Runtime Data       |RUN|  |  |  |  |  |  |  |   |WB|WT|WC|UC] range=[0x00000000bfef4000-0x00000000bff77fff] (0MB)
+> > > [    0.000000] efi: mem44: [ACPI Memory NVS    |   |  |  |  |  |  |  |  |   |WB|WT|WC|UC] range=[0x00000000bff78000-0x00000000bfffffff] (0MB)
+> > > [    0.000000] efi: mem45: [Memory Mapped I/O  |RUN|  |  |  |  |  |  |  |   |  |  |  |UC] range=[0x00000000ffc00000-0x00000000ffffffff] (4MB)
+> >
+> > Looks like it's the difference in machine type - I was using q35, and
+> > when I switch to the default, I can reproduce the early boot crash you
+> > sent the patch for. I don't see the other issue though.
 >
-> Since then, ./scripts/get_maintainer.pl --self-test complains:
->
->   warning: no file matches F: arch/x86/boot/compressed/eboot.[ch]
->
-> Rectify EXTENSIBLE FIRMWARE INTERFACE (EFI) entry in MAINTAINERS.
->
-> Signed-off-by: Lukas Bulwahn <lukas.bulwahn@gmail.com>
-> ---
-> Ard, please pick this patch for your linux-next branch.
-> applies cleanly on next-20200228, do not apply on current master
->
->  MAINTAINERS | 1 -
->  1 file changed, 1 deletion(-)
->
+> So you can boot successfully without hanging in SetVirtualAddressMap?
+> Weird. I'm using QEMU 4.2.0 in case that matters.
 
-Thanks Lukas, I'll queue this up.
-
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 09b04505e7c3..4ce510b8467a 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -6383,7 +6383,6 @@ T:        git git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git
->  S:     Maintained
->  F:     Documentation/admin-guide/efi-stub.rst
->  F:     arch/*/kernel/efi.c
-> -F:     arch/x86/boot/compressed/eboot.[ch]
->  F:     arch/*/include/asm/efi.h
->  F:     arch/x86/platform/efi/
->  F:     drivers/firmware/efi/
-> --
-> 2.17.1
->
+Mine is 2.11, as shipped with my Ubuntu Bionic installation (company laptop)
