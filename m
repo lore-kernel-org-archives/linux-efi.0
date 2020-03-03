@@ -2,44 +2,44 @@ Return-Path: <SRS0=iIKs=4U=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5E5D3C3F2C6
-	for <linux-efi@archiver.kernel.org>; Tue,  3 Mar 2020 20:54:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1337DC3F2D1
+	for <linux-efi@archiver.kernel.org>; Tue,  3 Mar 2020 20:55:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 3BC3B20842
-	for <linux-efi@archiver.kernel.org>; Tue,  3 Mar 2020 20:54:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D5D9520842
+	for <linux-efi@archiver.kernel.org>; Tue,  3 Mar 2020 20:55:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732103AbgCCUyu (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 3 Mar 2020 15:54:50 -0500
-Received: from mail-qv1-f65.google.com ([209.85.219.65]:42831 "EHLO
-        mail-qv1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1732094AbgCCUyu (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 3 Mar 2020 15:54:50 -0500
-Received: by mail-qv1-f65.google.com with SMTP id e7so2343687qvy.9;
-        Tue, 03 Mar 2020 12:54:49 -0800 (PST)
+        id S1732084AbgCCUyt (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 3 Mar 2020 15:54:49 -0500
+Received: from mail-qt1-f195.google.com ([209.85.160.195]:34076 "EHLO
+        mail-qt1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1731387AbgCCUys (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 3 Mar 2020 15:54:48 -0500
+Received: by mail-qt1-f195.google.com with SMTP id 59so2799248qtb.1;
+        Tue, 03 Mar 2020 12:54:46 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=XrJj+32a4u1g/+qGhJSOQLI9T64Z8GnmPgV9eQzjWGw=;
-        b=TbAn8A4P4LM4DxLA68gAb72gtulbgR2HnjbCb701rC6lT1VRnt2866KM2BOnlHs18i
-         RauGNASbtnJRXpMz7ZoISlLadS5AXR9VhPC9M0CdNemJcDRsrvbJ9+8UbBvlmoYa9NkS
-         qPbe7+CBWdhSqIo6FE5VAYVplq3h4qeyPTlypMTPtCoPOJTw+T00S7MQtGzEYYlLjECr
-         6Q+mVWqLyD10NL9xUgyrQBCYDSCWnaZpcLjNOMygDoZtoBYwoTqmYeX3hEz6xuXeZZeD
-         6u/5Zc/q7LElgWo5yDSBUc2RgNjJmpizTrW78SGqrHJpwgjJWp4/YbKX8o1jQCp9QozV
-         IA4w==
-X-Gm-Message-State: ANhLgQ3FquwhHfsKkJXsrIpjDIH9Thdho9X8nB2ZdEbvRJuTFKpf7Hfy
-        mDRZ756cRW2HvpWwPdTwiww=
-X-Google-Smtp-Source: ADFU+vuuPzHDymFpuKFWXB+axrHh/7mbR+A7tfWqpdAgtLEP9MQDghKh0PoegHqG46ptyG6yfcadgA==
-X-Received: by 2002:a0c:bf05:: with SMTP id m5mr5688837qvi.26.1583268888930;
-        Tue, 03 Mar 2020 12:54:48 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=M8leJle+RWUzuAGtnKfypyt7f42XpUo4qzg+KJegl9Y=;
+        b=OjU4ncjqn6WeTUDjpv0a627yTlL2zxH8FzdFxLtVsA8sfXrtrQZphi/hk2Um+mMjwp
+         gxSMRo/MMkheGKEJXvEKL05yacshgB4hgVEhSvioUTSDOfiiMqLOju6N4T5QjUNAsc8n
+         uFsvFOdafgBKI8+NPVWsQTXQGT8zIk7CPfw78oeixdMzcdM8bHVKAnkr/KLv5hHx2l6D
+         kBUcD3lXM6w/ISfTLQkkdSZMMRzwbtnGlZmxC+tpWfMOEuc5fGKmsit4kLHqfXirVx8M
+         NvKZhl6zLq0N0JGIWAh3YsbUj+yYUtUeQuQU/8urdXNKi2QlvIGcUOco4yumCX9SZxVi
+         F5mw==
+X-Gm-Message-State: ANhLgQ1IrydboRBkfcZlLhEeVqGV6rsYwwJAIg7PG6Si6ZZEzp3MUGh3
+        35lK+h8NscWI0ogzV5FlPVU+YcYfVD8=
+X-Google-Smtp-Source: ADFU+vsjCOghGZ5RC1+941u05BCVRAFiwexK0akEf9XfqkcF3gBne9L9RsEdjzsMaWyclOJbli5zvw==
+X-Received: by 2002:ac8:16b3:: with SMTP id r48mr2486825qtj.31.1583268886268;
+        Tue, 03 Mar 2020 12:54:46 -0800 (PST)
 Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
-        by smtp.gmail.com with ESMTPSA id v12sm11473041qti.84.2020.03.03.12.54.48
+        by smtp.gmail.com with ESMTPSA id v12sm11473041qti.84.2020.03.03.12.54.45
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 03 Mar 2020 12:54:48 -0800 (PST)
+        Tue, 03 Mar 2020 12:54:45 -0800 (PST)
 From:   Arvind Sankar <nivedita@alum.mit.edu>
 To:     Dave Hansen <dave.hansen@linux.intel.com>,
         Andy Lutomirski <luto@kernel.org>,
@@ -49,12 +49,10 @@ Cc:     Thomas Gleixner <tglx@linutronix.de>,
         "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org,
         Ard Biesheuvel <ardb@kernel.org>, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH 3/4] x86/mm/pat: Propagate all errors out of populate_pud
-Date:   Tue,  3 Mar 2020 15:54:44 -0500
-Message-Id: <20200303205445.3965393-4-nivedita@alum.mit.edu>
+Subject: [PATCH 0/4] Bugfix + small cleanup to populate_p[mug]d
+Date:   Tue,  3 Mar 2020 15:54:41 -0500
+Message-Id: <20200303205445.3965393-1-nivedita@alum.mit.edu>
 X-Mailer: git-send-email 2.24.1
-In-Reply-To: <20200303205445.3965393-1-nivedita@alum.mit.edu>
-References: <20200303205445.3965393-1-nivedita@alum.mit.edu>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
@@ -62,145 +60,24 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-populate_pud tries to return the number of pages mapped so far if
-populate_pmd fails. This is of dubious utility, since if populate_pmd
-did any work before failing, the returned number of pages will be
-inconsistent with cpa->pfn, and the loop in __change_page_attr_set_clr
-will retry with that inconsistent state. Further, if the number of pages
-mapped before failure is zero, that will trigger the BUG_ON in
-__change_page_attr_set_clr.
+The first patch fixes a bug in populate_pud, which results in the
+requested mapping not being completely installed if the CPU does not
+support GB pages.
 
-Just return all errors up the stack and let the original caller deal
-with it.
+The next three are small cleanups.
 
-Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
----
- arch/x86/mm/pat/set_memory.c | 43 ++++++++++++++++--------------------
- 1 file changed, 19 insertions(+), 24 deletions(-)
+Thanks.
 
-diff --git a/arch/x86/mm/pat/set_memory.c b/arch/x86/mm/pat/set_memory.c
-index a1003bc9fdf6..2f98423ef69a 100644
---- a/arch/x86/mm/pat/set_memory.c
-+++ b/arch/x86/mm/pat/set_memory.c
-@@ -1247,9 +1247,9 @@ static void populate_pte(struct cpa_data *cpa,
- 	}
- }
- 
--static long populate_pmd(struct cpa_data *cpa,
--			 unsigned long start, unsigned long end,
--			 unsigned num_pages, pud_t *pud, pgprot_t pgprot)
-+static int populate_pmd(struct cpa_data *cpa,
-+			unsigned long start, unsigned long end,
-+			unsigned num_pages, pud_t *pud, pgprot_t pgprot)
- {
- 	long cur_pages = 0;
- 	pmd_t *pmd;
-@@ -1283,7 +1283,7 @@ static long populate_pmd(struct cpa_data *cpa,
- 	 * We mapped them all?
- 	 */
- 	if (num_pages == cur_pages)
--		return cur_pages;
-+		return 0;
- 
- 	pmd_pgprot = pgprot_4k_2_large(pgprot);
- 
-@@ -1318,7 +1318,7 @@ static long populate_pmd(struct cpa_data *cpa,
- 		populate_pte(cpa, start, end, num_pages - cur_pages,
- 			     pmd, pgprot);
- 	}
--	return num_pages;
-+	return 0;
- }
- 
- static int populate_pud(struct cpa_data *cpa, unsigned long start, p4d_t *p4d,
-@@ -1328,6 +1328,7 @@ static int populate_pud(struct cpa_data *cpa, unsigned long start, p4d_t *p4d,
- 	unsigned long end;
- 	long cur_pages = 0;
- 	pgprot_t pud_pgprot;
-+	int ret;
- 
- 	end = start + (cpa->numpages << PAGE_SHIFT);
- 
-@@ -1352,17 +1353,16 @@ static int populate_pud(struct cpa_data *cpa, unsigned long start, p4d_t *p4d,
- 			if (alloc_pmd_page(pud))
- 				return -1;
- 
--		cur_pages = populate_pmd(cpa, start, pre_end, cur_pages,
--					 pud, pgprot);
--		if (cur_pages < 0)
--			return cur_pages;
-+		ret = populate_pmd(cpa, start, pre_end, cur_pages, pud, pgprot);
-+		if (ret < 0)
-+			return ret;
- 
- 		start = pre_end;
- 	}
- 
- 	/* We mapped them all? */
- 	if (cpa->numpages == cur_pages)
--		return cur_pages;
-+		return 0;
- 
- 	pud = pud_offset(p4d, start);
- 	pud_pgprot = pgprot_4k_2_large(pgprot);
-@@ -1379,10 +1379,10 @@ static int populate_pud(struct cpa_data *cpa, unsigned long start, p4d_t *p4d,
- 			if (pud_none(*pud))
- 				if (alloc_pmd_page(pud))
- 					return -1;
--			if (populate_pmd(cpa, start, start + PUD_SIZE,
--					 PUD_SIZE >> PAGE_SHIFT,
--					 pud, pgprot) < 0)
--				return cur_pages;
-+			ret = populate_pmd(cpa, start, start + PUD_SIZE,
-+					   PUD_SIZE >> PAGE_SHIFT, pud, pgprot);
-+			if (ret < 0)
-+				return ret;
- 		}
- 
- 		start	  += PUD_SIZE;
-@@ -1392,21 +1392,17 @@ static int populate_pud(struct cpa_data *cpa, unsigned long start, p4d_t *p4d,
- 
- 	/* Map trailing leftover */
- 	if (start < end) {
--		long tmp;
--
- 		pud = pud_offset(p4d, start);
- 		if (pud_none(*pud))
- 			if (alloc_pmd_page(pud))
- 				return -1;
- 
--		tmp = populate_pmd(cpa, start, end, cpa->numpages - cur_pages,
-+		ret = populate_pmd(cpa, start, end, cpa->numpages - cur_pages,
- 				   pud, pgprot);
--		if (tmp < 0)
--			return cur_pages;
--
--		cur_pages += tmp;
-+		if (ret < 0)
-+			return ret;
- 	}
--	return cur_pages;
-+	return 0;
- }
- 
- /*
-@@ -1419,7 +1415,7 @@ static int populate_pgd(struct cpa_data *cpa, unsigned long addr)
- 	pud_t *pud = NULL;	/* shut up gcc */
- 	p4d_t *p4d;
- 	pgd_t *pgd_entry;
--	long ret;
-+	int ret;
- 	unsigned long end, end_p4d;
- 
- 	pgd_entry = cpa->pgd + pgd_index(addr);
-@@ -1468,7 +1464,6 @@ static int populate_pgd(struct cpa_data *cpa, unsigned long addr)
- 		return ret;
- 	}
- 
--	cpa->numpages = ret;
- 	return 0;
- }
- 
+Arvind Sankar (4):
+  x86/mm/pat: Handle no-GBPAGES case correctly in populate_pud
+  x86/mm/pat: Ensure that populate_pud only handles one PUD
+  x86/mm/pat: Propagate all errors out of populate_pud
+  x86/mm/pat: Make num_pages consistent in populate_{pte,pud,pgd}
+
+ arch/x86/include/asm/pgtable_types.h |  2 +-
+ arch/x86/mm/pat/set_memory.c         | 74 +++++++++++++++++-----------
+ 2 files changed, 45 insertions(+), 31 deletions(-)
+
 -- 
 2.24.1
 
