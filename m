@@ -4,49 +4,49 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5EE6EC3F2D8
-	for <linux-efi@archiver.kernel.org>; Tue,  3 Mar 2020 22:12:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A6F31C3F2C6
+	for <linux-efi@archiver.kernel.org>; Tue,  3 Mar 2020 22:12:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 3474C208C3
-	for <linux-efi@archiver.kernel.org>; Tue,  3 Mar 2020 22:12:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5F62420870
+	for <linux-efi@archiver.kernel.org>; Tue,  3 Mar 2020 22:12:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727888AbgCCWMN (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 3 Mar 2020 17:12:13 -0500
-Received: from mail-qt1-f195.google.com ([209.85.160.195]:35453 "EHLO
-        mail-qt1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727870AbgCCWMM (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 3 Mar 2020 17:12:12 -0500
-Received: by mail-qt1-f195.google.com with SMTP id v15so1343497qto.2;
-        Tue, 03 Mar 2020 14:12:10 -0800 (PST)
+        id S1727802AbgCCWMV (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 3 Mar 2020 17:12:21 -0500
+Received: from mail-qk1-f194.google.com ([209.85.222.194]:35168 "EHLO
+        mail-qk1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727311AbgCCWMI (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 3 Mar 2020 17:12:08 -0500
+Received: by mail-qk1-f194.google.com with SMTP id 145so5136598qkl.2;
+        Tue, 03 Mar 2020 14:12:07 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=vQx7FGziZfvZ+uJJoZ5T61fhrPtNY4KnIrK1LWeACyQ=;
-        b=F2fHwcupiv+9VppG5BuYyxiA3sygvouUnZTyEbe4MafyardHB/vL6353Ly9WjviBRa
-         eVyXoJCmpBNetNUcru9Pxkdf27DKy6P4AJG6Zy+ryl4WfzLhDLfdaImoXCpJEU2GtdxJ
-         5xPHjnZCkDPjxKw/eWRpMlFouiniK55nVRSj2czKgtAXW6kL1Rwacgjy3yIKlnIILReE
-         lSAjDrmhbP2K6ljafCGVvuIDnF/DYwD5ckcOQwMbbiiY3x2W2ljAf/tpTjkSxX6TBXjm
-         49+h6EbTlydJR3P0tRKzqB4U5VmYvQDawxZtOuxoB/n2c4zEvxAkVg3HYs0namua0jOU
-         zk2g==
-X-Gm-Message-State: ANhLgQ0rhgTMWm3KZdCu73Xe4LgGl2qLwnJUZ427spMzAiSavqyQClCP
-        lPXTZxXOo0bnfOiNads7U0E=
-X-Google-Smtp-Source: ADFU+vshsB9lMkvhs9h+psMOIx/jhLBmuNrFpZxVybguzxUf9II1jZKtl8D8QMql12UAP4mzuoNLIw==
-X-Received: by 2002:aed:308a:: with SMTP id 10mr6647996qtf.221.1583273529360;
-        Tue, 03 Mar 2020 14:12:09 -0800 (PST)
+        bh=Nxp2N/+qPhL2jiuGrf5UBDCZbk70psISz/K4zJ0PBCM=;
+        b=I6B/gYuc08FDlIAvyE7FDZm1NSQEFykwPxaWHvv09QnYGFg+ggd2znyVBKXcpIH2RN
+         k+BddmnpihMIwI5WF9d7yQM/B3RYVAFcXRibbnznMMSKkGGFyfKY5QWG2h/vPJ59zJJd
+         ar90BN6Hg6VTGwNBI/+M1ca9ArfjKcmcpG/bEs5WN46Jo96OewHbyZZiyfE0FuLu9G3g
+         Zxbisc5YooG0q4qCYpVxuY8Jvni7waLXvlMVbA+bUpBdIX6qkiFilshTjJQ58cV2fKRv
+         PL62GEm/1nbg10A+aouYwixcHil/NmNCNuRKxgcII+//FRw8DFDSHwI8jb5nf4O/mQUA
+         p9Ng==
+X-Gm-Message-State: ANhLgQ26WaqM6cjo1PGXFb1LCcfIkRQ0PWlS2hU1Nroa7HH02iCzhXWD
+        evS53bxSjf9wo2NfeN7ol1Th3bYfHQY=
+X-Google-Smtp-Source: ADFU+vtIih8zsflAoNyN4lfdYEWlNJBCM7hnC6wjtyCOoPYNltvZ+m9D4jZc3zeWbkJIss6hMxbexQ==
+X-Received: by 2002:a05:620a:1186:: with SMTP id b6mr191181qkk.59.1583273527108;
+        Tue, 03 Mar 2020 14:12:07 -0800 (PST)
 Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
-        by smtp.gmail.com with ESMTPSA id i91sm13267378qtd.70.2020.03.03.14.12.08
+        by smtp.gmail.com with ESMTPSA id i91sm13267378qtd.70.2020.03.03.14.12.06
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 03 Mar 2020 14:12:09 -0800 (PST)
+        Tue, 03 Mar 2020 14:12:06 -0800 (PST)
 From:   Arvind Sankar <nivedita@alum.mit.edu>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     linux-efi@vger.kernel.org, x86@kernel.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v2 4/5] efi/x86: Remove extra headroom for setup block
-Date:   Tue,  3 Mar 2020 17:12:04 -0500
-Message-Id: <20200303221205.4048668-5-nivedita@alum.mit.edu>
+Subject: [PATCH v2 1/5] x86/boot/compressed/32: Save the output address instead of recalculating it
+Date:   Tue,  3 Mar 2020 17:12:01 -0500
+Message-Id: <20200303221205.4048668-2-nivedita@alum.mit.edu>
 X-Mailer: git-send-email 2.24.1
 In-Reply-To: <20200303221205.4048668-1-nivedita@alum.mit.edu>
 References: <20200301230537.2247550-1-nivedita@alum.mit.edu>
@@ -58,90 +58,91 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-commit 223e3ee56f77 ("efi/x86: add headroom to decompressor BSS to
-account for setup block") added headroom to the PE image to account for
-the setup block, which wasn't used for the decompression buffer.
+In preparation for being able to decompress into a buffer starting at a
+different address than startup_32, save the calculated output address
+instead of recalculating it later.
 
-Now that the decompression buffer is located at the start of the image,
-and includes the setup block, this is no longer required.
-
-Add a check to make sure that the head section of the compressed kernel
-won't overwrite itself while relocating. This is only for
-future-proofing as with current limits on the setup and the actual size
-of the head section, this can never happen.
+We now keep track of three addresses:
+	%edx: startup_32 as we were loaded by bootloader
+	%ebx: new location of compressed kernel
+	%ebp: start of decompression buffer
 
 Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
 ---
- arch/x86/boot/tools/build.c | 28 ++++++++++++++++++++++++++--
- 1 file changed, 26 insertions(+), 2 deletions(-)
+ arch/x86/boot/compressed/head_32.S | 25 ++++++++++++-------------
+ 1 file changed, 12 insertions(+), 13 deletions(-)
 
-diff --git a/arch/x86/boot/tools/build.c b/arch/x86/boot/tools/build.c
-index 90d403dfec80..3d03ad753ed5 100644
---- a/arch/x86/boot/tools/build.c
-+++ b/arch/x86/boot/tools/build.c
-@@ -65,6 +65,8 @@ unsigned long efi_pe_entry;
- unsigned long efi32_pe_entry;
- unsigned long kernel_info;
- unsigned long startup_64;
-+unsigned long _ehead;
-+unsigned long _end;
+diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
+index 46bbe7ab4adf..894182500606 100644
+--- a/arch/x86/boot/compressed/head_32.S
++++ b/arch/x86/boot/compressed/head_32.S
+@@ -75,11 +75,11 @@ SYM_FUNC_START(startup_32)
+  */
+ 	leal	(BP_scratch+4)(%esi), %esp
+ 	call	1f
+-1:	popl	%ebp
+-	subl	$1b, %ebp
++1:	popl	%edx
++	subl	$1b, %edx
  
- /*----------------------------------------------------------------------*/
+ 	/* Load new GDT */
+-	leal	gdt(%ebp), %eax
++	leal	gdt(%edx), %eax
+ 	movl	%eax, 2(%eax)
+ 	lgdt	(%eax)
  
-@@ -232,7 +234,7 @@ static void update_pecoff_text(unsigned int text_start, unsigned int file_sz,
- {
- 	unsigned int pe_header;
- 	unsigned int text_sz = file_sz - text_start;
--	unsigned int bss_sz = init_sz + text_start - file_sz;
-+	unsigned int bss_sz = init_sz - file_sz;
+@@ -92,13 +92,14 @@ SYM_FUNC_START(startup_32)
+ 	movl	%eax, %ss
  
- 	pe_header = get_unaligned_le32(&buf[0x3c]);
+ /*
+- * %ebp contains the address we are loaded at by the boot loader and %ebx
++ * %edx contains the address we are loaded at by the boot loader and %ebx
+  * contains the address where we should move the kernel image temporarily
+- * for safe in-place decompression.
++ * for safe in-place decompression. %ebp contains the address that the kernel
++ * will be decompressed to.
+  */
  
-@@ -259,7 +261,7 @@ static void update_pecoff_text(unsigned int text_start, unsigned int file_sz,
- 	put_unaligned_le32(file_sz - 512 + bss_sz, &buf[pe_header + 0x1c]);
+ #ifdef CONFIG_RELOCATABLE
+-	movl	%ebp, %ebx
++	movl	%edx, %ebx
+ 	movl	BP_kernel_alignment(%esi), %eax
+ 	decl	%eax
+ 	addl    %eax, %ebx
+@@ -110,10 +111,10 @@ SYM_FUNC_START(startup_32)
+ 	movl	$LOAD_PHYSICAL_ADDR, %ebx
+ 1:
  
- 	/* Size of image */
--	put_unaligned_le32(init_sz + text_start, &buf[pe_header + 0x50]);
-+	put_unaligned_le32(init_sz, &buf[pe_header + 0x50]);
++	movl	%ebx, %ebp	// Save the output address for later
+ 	/* Target address to relocate to for decompression */
+-	movl    BP_init_size(%esi), %eax
+-	subl    $_end, %eax
+-	addl    %eax, %ebx
++	addl    BP_init_size(%esi), %ebx
++	subl    $_end, %ebx
  
- 	/*
- 	 * Address of entry point for PE/COFF executable
-@@ -360,6 +362,8 @@ static void parse_zoffset(char *fname)
- 		PARSE_ZOFS(p, efi32_pe_entry);
- 		PARSE_ZOFS(p, kernel_info);
- 		PARSE_ZOFS(p, startup_64);
-+		PARSE_ZOFS(p, _ehead);
-+		PARSE_ZOFS(p, _end);
+ 	/* Set up the stack */
+ 	leal	boot_stack_end(%ebx), %esp
+@@ -127,7 +128,7 @@ SYM_FUNC_START(startup_32)
+  * where decompression in place becomes safe.
+  */
+ 	pushl	%esi
+-	leal	(_bss-4)(%ebp), %esi
++	leal	(_bss-4)(%edx), %esi
+ 	leal	(_bss-4)(%ebx), %edi
+ 	movl	$(_bss - startup_32), %ecx
+ 	shrl	$2, %ecx
+@@ -196,9 +197,7 @@ SYM_FUNC_START_LOCAL_NOALIGN(.Lrelocated)
+ 				/* push arguments for extract_kernel: */
+ 	pushl	$z_output_len	/* decompressed length, end of relocs */
  
- 		p = strchr(p, '\n');
- 		while (p && (*p == '\r' || *p == '\n'))
-@@ -444,6 +448,26 @@ int main(int argc, char ** argv)
- 	put_unaligned_le32(sys_size, &buf[0x1f4]);
+-	leal	_end(%ebx), %eax
+-	subl    BP_init_size(%esi), %eax
+-	pushl	%eax		/* output address */
++	pushl	%ebp		/* output address */
  
- 	init_sz = get_unaligned_le32(&buf[0x260]);
-+#ifdef CONFIG_EFI_STUB
-+	/*
-+	 * The decompression buffer will start at ImageBase. When relocating
-+	 * the compressed kernel to its end, we must ensure that the head
-+	 * section does not get overwritten.  The head section occupies
-+	 * [i, i + _ehead), and the destination is [init_sz - _end, init_sz).
-+	 *
-+	 * At present these should never overlap, because i is at most 32k
-+	 * because of SETUP_SECT_MAX, _ehead is less than 1k, and the
-+	 * calculation of INIT_SIZE in boot/header.S ensures that
-+	 * init_sz - _end is at least 64k.
-+	 *
-+	 * For future-proofing, increase init_sz if necessary.
-+	 */
-+
-+	if (init_sz - _end < i + _ehead) {
-+		init_sz = (i + _ehead + _end + 4095) & ~4095;
-+		put_unaligned_le32(init_sz, &buf[0x260]);
-+	}
-+#endif
- 	update_pecoff_text(setup_sectors * 512, i + (sys_size * 16), init_sz);
- 
- 	efi_stub_entry_update();
+ 	pushl	$z_input_len	/* input_len */
+ 	leal	input_data(%ebx), %eax
 -- 
 2.24.1
 
