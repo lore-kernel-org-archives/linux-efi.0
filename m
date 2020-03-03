@@ -2,147 +2,226 @@ Return-Path: <SRS0=iIKs=4U=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-1.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A6F31C3F2C6
-	for <linux-efi@archiver.kernel.org>; Tue,  3 Mar 2020 22:12:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CF72EC3F2D7
+	for <linux-efi@archiver.kernel.org>; Tue,  3 Mar 2020 22:26:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 5F62420870
-	for <linux-efi@archiver.kernel.org>; Tue,  3 Mar 2020 22:12:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 99C6320848
+	for <linux-efi@archiver.kernel.org>; Tue,  3 Mar 2020 22:26:18 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1583274378;
+	bh=IQRk+eFyYJbHwb5eI2wYOOU5Ad0xyo8Ui/jniBEGSF8=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
+	b=jFET7cazuhmZG1zDJoF+tW8LwTWnDZ0VZ444h4GFx9rVDJrVNKMgx/FN2Trk6H5rR
+	 g7J4/wqNKQh2KqUA00Ht3/9xJRrgDwVwYG6k2WU7ZR17DQwBm1b9tUtmwf4yAqvlky
+	 sMGiUZBAN6sOzo8tDcfjMd+eGtjGi3yGZO960VsI=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727802AbgCCWMV (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 3 Mar 2020 17:12:21 -0500
-Received: from mail-qk1-f194.google.com ([209.85.222.194]:35168 "EHLO
-        mail-qk1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727311AbgCCWMI (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 3 Mar 2020 17:12:08 -0500
-Received: by mail-qk1-f194.google.com with SMTP id 145so5136598qkl.2;
-        Tue, 03 Mar 2020 14:12:07 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=Nxp2N/+qPhL2jiuGrf5UBDCZbk70psISz/K4zJ0PBCM=;
-        b=I6B/gYuc08FDlIAvyE7FDZm1NSQEFykwPxaWHvv09QnYGFg+ggd2znyVBKXcpIH2RN
-         k+BddmnpihMIwI5WF9d7yQM/B3RYVAFcXRibbnznMMSKkGGFyfKY5QWG2h/vPJ59zJJd
-         ar90BN6Hg6VTGwNBI/+M1ca9ArfjKcmcpG/bEs5WN46Jo96OewHbyZZiyfE0FuLu9G3g
-         Zxbisc5YooG0q4qCYpVxuY8Jvni7waLXvlMVbA+bUpBdIX6qkiFilshTjJQ58cV2fKRv
-         PL62GEm/1nbg10A+aouYwixcHil/NmNCNuRKxgcII+//FRw8DFDSHwI8jb5nf4O/mQUA
-         p9Ng==
-X-Gm-Message-State: ANhLgQ26WaqM6cjo1PGXFb1LCcfIkRQ0PWlS2hU1Nroa7HH02iCzhXWD
-        evS53bxSjf9wo2NfeN7ol1Th3bYfHQY=
-X-Google-Smtp-Source: ADFU+vtIih8zsflAoNyN4lfdYEWlNJBCM7hnC6wjtyCOoPYNltvZ+m9D4jZc3zeWbkJIss6hMxbexQ==
-X-Received: by 2002:a05:620a:1186:: with SMTP id b6mr191181qkk.59.1583273527108;
-        Tue, 03 Mar 2020 14:12:07 -0800 (PST)
-Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
-        by smtp.gmail.com with ESMTPSA id i91sm13267378qtd.70.2020.03.03.14.12.06
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 03 Mar 2020 14:12:06 -0800 (PST)
-From:   Arvind Sankar <nivedita@alum.mit.edu>
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     linux-efi@vger.kernel.org, x86@kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH v2 1/5] x86/boot/compressed/32: Save the output address instead of recalculating it
-Date:   Tue,  3 Mar 2020 17:12:01 -0500
-Message-Id: <20200303221205.4048668-2-nivedita@alum.mit.edu>
-X-Mailer: git-send-email 2.24.1
-In-Reply-To: <20200303221205.4048668-1-nivedita@alum.mit.edu>
-References: <20200301230537.2247550-1-nivedita@alum.mit.edu>
- <20200303221205.4048668-1-nivedita@alum.mit.edu>
+        id S1727827AbgCCW0P (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 3 Mar 2020 17:26:15 -0500
+Received: from mail.kernel.org ([198.145.29.99]:33284 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727793AbgCCW0P (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Tue, 3 Mar 2020 17:26:15 -0500
+Received: from mail-wr1-f43.google.com (mail-wr1-f43.google.com [209.85.221.43])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 79E8A20848
+        for <linux-efi@vger.kernel.org>; Tue,  3 Mar 2020 22:26:14 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1583274374;
+        bh=IQRk+eFyYJbHwb5eI2wYOOU5Ad0xyo8Ui/jniBEGSF8=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=H1iXvAO8KqFpuVbyeWy2cJXvNy03pBgZ3Z4aFPJy1/64efKNP8vtdwTu47HOQ8DEd
+         LjJrSdVI4VJg9GPFvawj+9RlHGZolWEDJx9ocnJE9WBk5JAQtxx+eBhE5A8GEWpPux
+         ZZF7PYIUeJL970gwHM6u2b3y2na2ZGVqVo+oeKvM=
+Received: by mail-wr1-f43.google.com with SMTP id x7so6524336wrr.0
+        for <linux-efi@vger.kernel.org>; Tue, 03 Mar 2020 14:26:14 -0800 (PST)
+X-Gm-Message-State: ANhLgQ1Y/IVIzXQsucogiBeL6oh7iTAv8hxSs2CLxZ3XNRep1ZmrEJCQ
+        wdH8YKpcD14pwpQiAc8soyzoyG3ghH4dEtldz8EpnA==
+X-Google-Smtp-Source: ADFU+vu1fLRYbCKGQ/5O+V3FsnX68e8PkwyG8jiBMrqAlOtj12J1JrgdIvP+mFodyfHh5And3nvSwNdP+60iKiui/Gs=
+X-Received: by 2002:adf:e742:: with SMTP id c2mr193882wrn.262.1583274372835;
+ Tue, 03 Mar 2020 14:26:12 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20200301230537.2247550-1-nivedita@alum.mit.edu> <20200303221205.4048668-1-nivedita@alum.mit.edu>
+In-Reply-To: <20200303221205.4048668-1-nivedita@alum.mit.edu>
+From:   Ard Biesheuvel <ardb@kernel.org>
+Date:   Tue, 3 Mar 2020 23:26:01 +0100
+X-Gmail-Original-Message-ID: <CAKv+Gu_S_BwKRXhRz2=AoNj2E8sxuXSfZwg2poLDq96FmaoVtA@mail.gmail.com>
+Message-ID: <CAKv+Gu_S_BwKRXhRz2=AoNj2E8sxuXSfZwg2poLDq96FmaoVtA@mail.gmail.com>
+Subject: Re: [PATCH v2 0/5] Minimize the need to move the kernel in the EFI stub
+To:     Arvind Sankar <nivedita@alum.mit.edu>
+Cc:     linux-efi <linux-efi@vger.kernel.org>,
+        "the arch/x86 maintainers" <x86@kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-In preparation for being able to decompress into a buffer starting at a
-different address than startup_32, save the calculated output address
-instead of recalculating it later.
+On Tue, 3 Mar 2020 at 23:12, Arvind Sankar <nivedita@alum.mit.edu> wrote:
+>
+> This series adds the ability to use the entire PE image space for
+> decompression, provides the preferred address to the PE loader via the
+> header, and finally restricts efi_relocate_kernel to cases where we
+> really need it rather than whenever we were loaded at something other
+> than preferred address.
+>
+> Based on tip:efi/core + the cleanup series [1]
+> [1] https://lore.kernel.org/linux-efi/20200301230436.2246909-1-nivedita@alum.mit.edu/
+>
+> Changes from v1
+> - clarify a few comments
+> - cleanups to code formatting
+>
+> Arvind Sankar (5):
+>   x86/boot/compressed/32: Save the output address instead of
+>     recalculating it
+>   efi/x86: Decompress at start of PE image load address
+>   efi/x86: Add kernel preferred address to PE header
+>   efi/x86: Remove extra headroom for setup block
+>   efi/x86: Don't relocate the kernel unless necessary
+>
 
-We now keep track of three addresses:
-	%edx: startup_32 as we were loaded by bootloader
-	%ebx: new location of compressed kernel
-	%ebp: start of decompression buffer
+Thanks. I have queued these up in efi/next, along with your mixed mode cleanups.
 
-Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
----
- arch/x86/boot/compressed/head_32.S | 25 ++++++++++++-------------
- 1 file changed, 12 insertions(+), 13 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
-index 46bbe7ab4adf..894182500606 100644
---- a/arch/x86/boot/compressed/head_32.S
-+++ b/arch/x86/boot/compressed/head_32.S
-@@ -75,11 +75,11 @@ SYM_FUNC_START(startup_32)
-  */
- 	leal	(BP_scratch+4)(%esi), %esp
- 	call	1f
--1:	popl	%ebp
--	subl	$1b, %ebp
-+1:	popl	%edx
-+	subl	$1b, %edx
- 
- 	/* Load new GDT */
--	leal	gdt(%ebp), %eax
-+	leal	gdt(%edx), %eax
- 	movl	%eax, 2(%eax)
- 	lgdt	(%eax)
- 
-@@ -92,13 +92,14 @@ SYM_FUNC_START(startup_32)
- 	movl	%eax, %ss
- 
- /*
-- * %ebp contains the address we are loaded at by the boot loader and %ebx
-+ * %edx contains the address we are loaded at by the boot loader and %ebx
-  * contains the address where we should move the kernel image temporarily
-- * for safe in-place decompression.
-+ * for safe in-place decompression. %ebp contains the address that the kernel
-+ * will be decompressed to.
-  */
- 
- #ifdef CONFIG_RELOCATABLE
--	movl	%ebp, %ebx
-+	movl	%edx, %ebx
- 	movl	BP_kernel_alignment(%esi), %eax
- 	decl	%eax
- 	addl    %eax, %ebx
-@@ -110,10 +111,10 @@ SYM_FUNC_START(startup_32)
- 	movl	$LOAD_PHYSICAL_ADDR, %ebx
- 1:
- 
-+	movl	%ebx, %ebp	// Save the output address for later
- 	/* Target address to relocate to for decompression */
--	movl    BP_init_size(%esi), %eax
--	subl    $_end, %eax
--	addl    %eax, %ebx
-+	addl    BP_init_size(%esi), %ebx
-+	subl    $_end, %ebx
- 
- 	/* Set up the stack */
- 	leal	boot_stack_end(%ebx), %esp
-@@ -127,7 +128,7 @@ SYM_FUNC_START(startup_32)
-  * where decompression in place becomes safe.
-  */
- 	pushl	%esi
--	leal	(_bss-4)(%ebp), %esi
-+	leal	(_bss-4)(%edx), %esi
- 	leal	(_bss-4)(%ebx), %edi
- 	movl	$(_bss - startup_32), %ecx
- 	shrl	$2, %ecx
-@@ -196,9 +197,7 @@ SYM_FUNC_START_LOCAL_NOALIGN(.Lrelocated)
- 				/* push arguments for extract_kernel: */
- 	pushl	$z_output_len	/* decompressed length, end of relocs */
- 
--	leal	_end(%ebx), %eax
--	subl    BP_init_size(%esi), %eax
--	pushl	%eax		/* output address */
-+	pushl	%ebp		/* output address */
- 
- 	pushl	$z_input_len	/* input_len */
- 	leal	input_data(%ebx), %eax
--- 
-2.24.1
-
+>  arch/x86/boot/compressed/head_32.S      | 42 +++++++++++++++-------
+>  arch/x86/boot/compressed/head_64.S      | 42 ++++++++++++++++++++--
+>  arch/x86/boot/header.S                  |  6 ++--
+>  arch/x86/boot/tools/build.c             | 44 ++++++++++++++++-------
+>  drivers/firmware/efi/libstub/x86-stub.c | 48 ++++++++++++++++++++++---
+>  5 files changed, 147 insertions(+), 35 deletions(-)
+>
+> Range-diff against v1:
+> 1:  0cdb6bf27a24 ! 1:  2ecbf60b9ecd x86/boot/compressed/32: Save the output address instead of recalculating it
+>     @@ Metadata
+>       ## Commit message ##
+>          x86/boot/compressed/32: Save the output address instead of recalculating it
+>
+>     -    In preparation for being able to decompress starting at a different
+>     -    address than startup_32, save the calculated output address instead of
+>     -    recalculating it later.
+>     +    In preparation for being able to decompress into a buffer starting at a
+>     +    different address than startup_32, save the calculated output address
+>     +    instead of recalculating it later.
+>
+>          We now keep track of three addresses:
+>                  %edx: startup_32 as we were loaded by bootloader
+> 2:  d4df840752ac ! 2:  e2bdbe6cb692 efi/x86: Decompress at start of PE image load address
+>     @@ arch/x86/boot/compressed/head_64.S: SYM_FUNC_START(efi32_pe_entry)
+>         movl    -4(%ebp), %esi                  // loaded_image
+>         movl    LI32_image_base(%esi), %esi     // loaded_image->image_base
+>         movl    %ebx, %ebp                      // startup_32 for efi32_pe_stub_entry
+>     ++  /*
+>     ++   * We need to set the image_offset variable here since startup_32 will
+>     ++   * use it before we get to the 64-bit efi_pe_entry in C code.
+>     ++   */
+>      +  subl    %esi, %ebx
+>      +  movl    %ebx, image_offset(%ebp)        // save image_offset
+>         jmp     efi32_pe_stub_entry
+>     @@ drivers/firmware/efi/libstub/x86-stub.c: unsigned long efi_main(efi_handle_t han
+>                         efi_printk("efi_relocate_kernel() failed!\n");
+>                         goto fail;
+>                 }
+>     ++          /*
+>     ++           * Now that we've copied the kernel elsewhere, we no longer
+>     ++           * have a setup block before startup_32, so reset image_offset
+>     ++           * to zero in case it was set earlier.
+>     ++           */
+>      +          image_offset = 0;
+>         }
+>
+> 3:  4bae68f25b90 ! 3:  ea840f78f138 efi/x86: Add kernel preferred address to PE header
+>     @@ arch/x86/boot/header.S: optional_header:
+>
+>       extra_header_fields:
+>      +  # PE specification requires ImageBase to be 64k-aligned
+>     -+  .set    ImageBase, (LOAD_PHYSICAL_ADDR+0xffff) & ~0xffff
+>     ++  .set    image_base, (LOAD_PHYSICAL_ADDR + 0xffff) & ~0xffff
+>       #ifdef CONFIG_X86_32
+>      -  .long   0                               # ImageBase
+>     -+  .long   ImageBase                       # ImageBase
+>     ++  .long   image_base                      # ImageBase
+>       #else
+>      -  .quad   0                               # ImageBase
+>     -+  .quad   ImageBase                       # ImageBase
+>     ++  .quad   image_base                      # ImageBase
+>       #endif
+>         .long   0x20                            # SectionAlignment
+>         .long   0x20                            # FileAlignment
+> 4:  2330a25c6b0f ! 4:  c25a9b507d6d efi/x86: Remove extra headroom for setup block
+>     @@ Commit message
+>          account for setup block") added headroom to the PE image to account for
+>          the setup block, which wasn't used for the decompression buffer.
+>
+>     -    Now that we decompress from the start of the image, this is no longer
+>     -    required.
+>     +    Now that the decompression buffer is located at the start of the image,
+>     +    and includes the setup block, this is no longer required.
+>
+>          Add a check to make sure that the head section of the compressed kernel
+>          won't overwrite itself while relocating. This is only for
+> 5:  2081f91cbe75 ! 5:  d3dc3af1c7b8 efi/x86: Don't relocate the kernel unless necessary
+>     @@ arch/x86/boot/tools/build.c: static void update_pecoff_text(unsigned int text_st
+>          * Size of code: Subtract the size of the first sector (512 bytes)
+>
+>       ## drivers/firmware/efi/libstub/x86-stub.c ##
+>     +@@
+>     +
+>     + #include "efistub.h"
+>     +
+>     ++/* Maximum physical address for 64-bit kernel with 4-level paging */
+>     ++#define MAXMEM_X86_64_4LEVEL (1ull << 46)
+>     ++
+>     + static efi_system_table_t *sys_table;
+>     + extern const bool efi_is64;
+>     + extern u32 image_offset;
+>      @@ drivers/firmware/efi/libstub/x86-stub.c: unsigned long efi_main(efi_handle_t handle,
+>                              struct boot_params *boot_params)
+>       {
+>     @@ drivers/firmware/efi/libstub/x86-stub.c: unsigned long efi_main(efi_handle_t han
+>      -   * address, relocate it.
+>      +   * If the kernel isn't already loaded at a suitable address,
+>      +   * relocate it.
+>     ++   *
+>      +   * It must be loaded above LOAD_PHYSICAL_ADDR.
+>     -+   * The maximum address for 64-bit is 1 << 46 for 4-level paging.
+>     ++   *
+>     ++   * The maximum address for 64-bit is 1 << 46 for 4-level paging. This
+>     ++   * is defined as the macro MAXMEM, but unfortunately that is not a
+>     ++   * compile-time constant if 5-level paging is configured, so we instead
+>     ++   * define our own macro for use here.
+>     ++   *
+>      +   * For 32-bit, the maximum address is complicated to figure out, for
+>      +   * now use KERNEL_IMAGE_SIZE, which will be 512MiB, the same as what
+>      +   * KASLR uses.
+>     ++   *
+>      +   * Also relocate it if image_offset is zero, i.e. we weren't loaded by
+>      +   * LoadImage, but we are not aligned correctly.
+>          */
+>      -  if (bzimage_addr - image_offset != hdr->pref_address) {
+>     ++
+>      +  buffer_start = ALIGN(bzimage_addr - image_offset,
+>      +                       hdr->kernel_alignment);
+>      +  buffer_end = buffer_start + hdr->init_size;
+>      +
+>     -+  if (buffer_start < LOAD_PHYSICAL_ADDR
+>     -+      || IS_ENABLED(CONFIG_X86_32) && buffer_end > KERNEL_IMAGE_SIZE
+>     -+      || IS_ENABLED(CONFIG_X86_64) && buffer_end > 1ull << 46
+>     -+      || image_offset == 0 && !IS_ALIGNED(bzimage_addr,
+>     -+                                          hdr->kernel_alignment)) {
+>     ++  if ((buffer_start < LOAD_PHYSICAL_ADDR)                              ||
+>     ++      (IS_ENABLED(CONFIG_X86_32) && buffer_end > KERNEL_IMAGE_SIZE)    ||
+>     ++      (IS_ENABLED(CONFIG_X86_64) && buffer_end > MAXMEM_X86_64_4LEVEL) ||
+>     ++      (image_offset == 0 && !IS_ALIGNED(bzimage_addr,
+>     ++                                        hdr->kernel_alignment))) {
+>                 status = efi_relocate_kernel(&bzimage_addr,
+>                                              hdr->init_size, hdr->init_size,
+>                                              hdr->pref_address,
+> --
+> 2.24.1
+>
