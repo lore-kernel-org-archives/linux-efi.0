@@ -4,40 +4,40 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3CE0CC18E5F
-	for <linux-efi@archiver.kernel.org>; Sun,  8 Mar 2020 08:10:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ABAB6C10F28
+	for <linux-efi@archiver.kernel.org>; Sun,  8 Mar 2020 08:10:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 0B41722B48
-	for <linux-efi@archiver.kernel.org>; Sun,  8 Mar 2020 08:10:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 84C6420880
+	for <linux-efi@archiver.kernel.org>; Sun,  8 Mar 2020 08:10:20 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1583655016;
-	bh=t0zvztmSKZBoKnmOYnVnakURJ8XSfvQMNh6AI9EG5U4=;
+	s=default; t=1583655020;
+	bh=Xkgy0zYrAkt/De5xXIRMq3YKLZIpZI6wQxlcM1ahsug=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=RR10sxvpQuGEajHTy/8GaamPgYKJLJooB3OS5ythndFFU1PfI/3Wx1faCqpsTYXIx
-	 bv+hGNMMElPyH0evfQhyErvoZDuSODXZ+Ndn93hXuJ4w3xdXMOXyibfqfVIHq0nFAJ
-	 +za2ealQto9ibuc8OeBw/fAc+YEgog6UAkvyF4/Q=
+	b=zZMi4nlrNE2j8zWzGjHnoNPCtBThq7a4QP9sjCFwtGMd5FzwuTB/+5kqkXGjwP+Pt
+	 oyv12KlpKLgK4WYG936i9c8yNXUgufRA5ECGwR7bILQQV/43uKzOXKO0+4fzs2pWba
+	 W4VNC+IpXxC29Y6PwVph1OuxQXHqBGT/T4rHz+7w=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726438AbgCHIKM (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 8 Mar 2020 04:10:12 -0400
-Received: from mail.kernel.org ([198.145.29.99]:37878 "EHLO mail.kernel.org"
+        id S1726804AbgCHIKT (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 8 Mar 2020 04:10:19 -0400
+Received: from mail.kernel.org ([198.145.29.99]:38086 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726271AbgCHIKL (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Sun, 8 Mar 2020 04:10:11 -0400
+        id S1726271AbgCHIKS (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Sun, 8 Mar 2020 04:10:18 -0400
 Received: from e123331-lin.home (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 668F02084E;
-        Sun,  8 Mar 2020 08:10:07 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id D376021927;
+        Sun,  8 Mar 2020 08:10:14 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1583655010;
-        bh=t0zvztmSKZBoKnmOYnVnakURJ8XSfvQMNh6AI9EG5U4=;
+        s=default; t=1583655018;
+        bh=Xkgy0zYrAkt/De5xXIRMq3YKLZIpZI6wQxlcM1ahsug=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=HTgQG5AXw5GRdnhwSuCXacqg1T8fwvrsfRvDN7h/XavfpT75YOP3jQUC8HXm3r8S1
-         syj1PmSvVHIhQvV1l9dcjcuEi/mpKvHCY1I1vmo0Hc8go6UbLTIlW0Nb72Og7kMlFy
-         3SuLGoaJHpGSO/MTR/gmgGARKeXDzGU2Ws74gWzM=
+        b=lUH6eDyd7UXWX07uxd6MSgX++1yo1so0VCwoVphdgLR9jxkTYpxighBoQilBEBIRm
+         xl/uj2rGFt7ISOEbWBi3QZdbljJO5Y2Flyw8u2Skpr3PBoQG9e5Vl8sSpkY/duoh2G
+         zNTz5XnXl0Z7mBU3BEAQ8e/jmgXXj7hNVU51c2Kg=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
@@ -54,9 +54,9 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
         Nikolai Merinov <n.merinov@inango-systems.com>,
         Tom Lendacky <thomas.lendacky@amd.com>,
         Vladis Dronov <vdronov@redhat.com>
-Subject: [PATCH 18/28] efi/x86: Remove extra headroom for setup block
-Date:   Sun,  8 Mar 2020 09:08:49 +0100
-Message-Id: <20200308080859.21568-19-ardb@kernel.org>
+Subject: [PATCH 20/28] efi/x86: ignore memory attributes table on i386
+Date:   Sun,  8 Mar 2020 09:08:51 +0100
+Message-Id: <20200308080859.21568-21-ardb@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20200308080859.21568-1-ardb@kernel.org>
 References: <20200308080859.21568-1-ardb@kernel.org>
@@ -65,94 +65,66 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Arvind Sankar <nivedita@alum.mit.edu>
+Commit 3a6b6c6fb23667fa ("efi: Make EFI_MEMORY_ATTRIBUTES_TABLE
+initialization common across all architectures") moved the call to
+efi_memattr_init() from ARM specific to generic EFI init code, in
+order to be able to apply the restricted permissions described in
+that table on x86 as well.
 
-commit 223e3ee56f77 ("efi/x86: add headroom to decompressor BSS to
-account for setup block") added headroom to the PE image to account for
-the setup block, which wasn't used for the decompression buffer.
+We never enabled this feature fully on i386, and so mapping and
+reserving this table is pointless. However, due to the early call to
+memblock_reserve(), the memory bookkeeping gets confused to the point
+where it produces the splat below when we try to map the memory later
+on:
 
-Now that the decompression buffer is located at the start of the image,
-and includes the setup block, this is no longer required.
+  ------------[ cut here ]------------
+  ioremap on RAM at 0x3f251000 - 0x3fa1afff
+  WARNING: CPU: 0 PID: 0 at arch/x86/mm/ioremap.c:166 __ioremap_caller ...
+  Modules linked in:
+  CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.20.0 #48
+  Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 0.0.0 02/06/2015
+  EIP: __ioremap_caller.constprop.0+0x249/0x260
+  Code: 90 0f b7 05 4e 38 40 de 09 45 e0 e9 09 ff ff ff 90 8d 45 ec c6 05 ...
+  EAX: 00000029 EBX: 00000000 ECX: de59c228 EDX: 00000001
+  ESI: 3f250fff EDI: 00000000 EBP: de3edf20 ESP: de3edee0
+  DS: 007b ES: 007b FS: 00d8 GS: 00e0 SS: 0068 EFLAGS: 00200296
+  CR0: 80050033 CR2: ffd17000 CR3: 1e58c000 CR4: 00040690
+  Call Trace:
+   ioremap_cache+0xd/0x10
+   ? old_map_region+0x72/0x9d
+   old_map_region+0x72/0x9d
+   efi_map_region+0x8/0xa
+   efi_enter_virtual_mode+0x260/0x43b
+   start_kernel+0x329/0x3aa
+   i386_start_kernel+0xa7/0xab
+   startup_32_smp+0x164/0x168
+  ---[ end trace e15ccf6b9f356833 ]---
 
-Add a check to make sure that the head section of the compressed kernel
-won't overwrite itself while relocating. This is only for
-future-proofing as with current limits on the setup and the actual size
-of the head section, this can never happen.
+Let's work around this by disregarding the memory attributes table
+altogether on i386, which does not result in a loss of functionality
+or protection, given that we never consumed the contents.
 
-Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
-Link: https://lore.kernel.org/r/20200303221205.4048668-5-nivedita@alum.mit.edu
+Fixes: 3a6b6c6fb23667fa ("efi: Make EFI_MEMORY_ATTRIBUTES_TABLE ... ")
+Tested-by: Arvind Sankar <nivedita@alum.mit.edu>
+Link: https://lore.kernel.org/r/20200304165917.5893-1-ardb@kernel.org
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/boot/tools/build.c | 28 ++++++++++++++++++++++++++--
- 1 file changed, 26 insertions(+), 2 deletions(-)
+ drivers/firmware/efi/efi.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/arch/x86/boot/tools/build.c b/arch/x86/boot/tools/build.c
-index 90d403dfec80..3d03ad753ed5 100644
---- a/arch/x86/boot/tools/build.c
-+++ b/arch/x86/boot/tools/build.c
-@@ -65,6 +65,8 @@ unsigned long efi_pe_entry;
- unsigned long efi32_pe_entry;
- unsigned long kernel_info;
- unsigned long startup_64;
-+unsigned long _ehead;
-+unsigned long _end;
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 1d5e9a030cb1..348fe572816b 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -600,7 +600,7 @@ int __init efi_config_parse_tables(const efi_config_table_t *config_tables,
+ 		}
+ 	}
  
- /*----------------------------------------------------------------------*/
+-	if (efi_enabled(EFI_MEMMAP))
++	if (!IS_ENABLED(CONFIG_X86_32) && efi_enabled(EFI_MEMMAP))
+ 		efi_memattr_init();
  
-@@ -232,7 +234,7 @@ static void update_pecoff_text(unsigned int text_start, unsigned int file_sz,
- {
- 	unsigned int pe_header;
- 	unsigned int text_sz = file_sz - text_start;
--	unsigned int bss_sz = init_sz + text_start - file_sz;
-+	unsigned int bss_sz = init_sz - file_sz;
- 
- 	pe_header = get_unaligned_le32(&buf[0x3c]);
- 
-@@ -259,7 +261,7 @@ static void update_pecoff_text(unsigned int text_start, unsigned int file_sz,
- 	put_unaligned_le32(file_sz - 512 + bss_sz, &buf[pe_header + 0x1c]);
- 
- 	/* Size of image */
--	put_unaligned_le32(init_sz + text_start, &buf[pe_header + 0x50]);
-+	put_unaligned_le32(init_sz, &buf[pe_header + 0x50]);
- 
- 	/*
- 	 * Address of entry point for PE/COFF executable
-@@ -360,6 +362,8 @@ static void parse_zoffset(char *fname)
- 		PARSE_ZOFS(p, efi32_pe_entry);
- 		PARSE_ZOFS(p, kernel_info);
- 		PARSE_ZOFS(p, startup_64);
-+		PARSE_ZOFS(p, _ehead);
-+		PARSE_ZOFS(p, _end);
- 
- 		p = strchr(p, '\n');
- 		while (p && (*p == '\r' || *p == '\n'))
-@@ -444,6 +448,26 @@ int main(int argc, char ** argv)
- 	put_unaligned_le32(sys_size, &buf[0x1f4]);
- 
- 	init_sz = get_unaligned_le32(&buf[0x260]);
-+#ifdef CONFIG_EFI_STUB
-+	/*
-+	 * The decompression buffer will start at ImageBase. When relocating
-+	 * the compressed kernel to its end, we must ensure that the head
-+	 * section does not get overwritten.  The head section occupies
-+	 * [i, i + _ehead), and the destination is [init_sz - _end, init_sz).
-+	 *
-+	 * At present these should never overlap, because i is at most 32k
-+	 * because of SETUP_SECT_MAX, _ehead is less than 1k, and the
-+	 * calculation of INIT_SIZE in boot/header.S ensures that
-+	 * init_sz - _end is at least 64k.
-+	 *
-+	 * For future-proofing, increase init_sz if necessary.
-+	 */
-+
-+	if (init_sz - _end < i + _ehead) {
-+		init_sz = (i + _ehead + _end + 4095) & ~4095;
-+		put_unaligned_le32(init_sz, &buf[0x260]);
-+	}
-+#endif
- 	update_pecoff_text(setup_sectors * 512, i + (sys_size * 16), init_sz);
- 
- 	efi_stub_entry_update();
+ 	efi_tpm_eventlog_init();
 -- 
 2.17.1
 
