@@ -7,37 +7,37 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96BF5C2BB57
-	for <linux-efi@archiver.kernel.org>; Sun,  8 Mar 2020 08:09:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1BF95C2BB58
+	for <linux-efi@archiver.kernel.org>; Sun,  8 Mar 2020 08:09:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 6CAB02173E
-	for <linux-efi@archiver.kernel.org>; Sun,  8 Mar 2020 08:09:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E861D2146E
+	for <linux-efi@archiver.kernel.org>; Sun,  8 Mar 2020 08:09:26 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1583654964;
-	bh=SJlSXAj88NxcUgayRsmVia+8rhay30lruXWP/iqAjMI=;
+	s=default; t=1583654967;
+	bh=ZC3Ht6M1A+48LStSHQkp1WSEU79DLzGExzetr4ZF0/w=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=VWJZiIm2S7K5TOi1+/f/+VWDBYbAiKufWyd77YQioS1xkl/TqNJ19uJRlYuW9D6fS
-	 E61u/t7zBtoJvGM/Tk5vkzblyAvJS+Tk+IheaqTyZMelAPz/Z/XT8BzpJxOo8mZOOe
-	 RXYgV3eQkG5dqN3FPD0ooaW16DbyRCS3Am/4Tn9Q=
+	b=uYtXExY5qCXZ4NVcsiLDvXzW6CCAosOiLOb18CY2PvQ8rSFoFrKxbraH2EH5D8wn1
+	 evnROlFC64PnAsojNWpqEl6TMGScy4/8bXwkBUUWI3CS8i4jvKU06G3Zqf5stz19wE
+	 Rrs2SaRp9X8bLsCAawOwwE2aUhvFncWENwsziI/A=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726338AbgCHIJV (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 8 Mar 2020 04:09:21 -0400
-Received: from mail.kernel.org ([198.145.29.99]:36448 "EHLO mail.kernel.org"
+        id S1726363AbgCHIJ0 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 8 Mar 2020 04:09:26 -0400
+Received: from mail.kernel.org ([198.145.29.99]:36512 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725854AbgCHIJV (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Sun, 8 Mar 2020 04:09:21 -0400
+        id S1725854AbgCHIJY (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Sun, 8 Mar 2020 04:09:24 -0400
 Received: from e123331-lin.home (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 85E7B20848;
-        Sun,  8 Mar 2020 08:09:17 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 085C921739;
+        Sun,  8 Mar 2020 08:09:20 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1583654960;
-        bh=SJlSXAj88NxcUgayRsmVia+8rhay30lruXWP/iqAjMI=;
+        s=default; t=1583654964;
+        bh=ZC3Ht6M1A+48LStSHQkp1WSEU79DLzGExzetr4ZF0/w=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=DE8U2X7x42Lp9qb6qzdhmRSH2JQTfZEFTsWtGQ1f/Qc/eUL3NQ9fTc3+uqCoRyuS4
-         Vetb6YJUiNyE/fMrYRs6CL66yHyO6rx2RT8Xh8CkkMuMhY5xGke+NKHNa6wDXpzFU3
-         vFsPXeFzg3Rs0VgtNfcgwEfskR2BxfKblLF03mpw=
+        b=wlqYQQbJf49fo+tvqgZnzRXtZ+4PXamCyT3Ob1WyM/4LPYjRDDJSAWsoUJTE4RXdA
+         DOM26GVL6jE7ZRJBfxzTu/nbMjG08PuURjECThsAsqHtDb6HxbiAps/grmjPew4/JA
+         2q6ow5vvHoI6WtZ9PJSk8hxmZ9an5a1wgAEG0JNQ=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
@@ -54,9 +54,9 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
         Nikolai Merinov <n.merinov@inango-systems.com>,
         Tom Lendacky <thomas.lendacky@amd.com>,
         Vladis Dronov <vdronov@redhat.com>
-Subject: [PATCH 04/28] efi/arm: clean EFI stub exit code from cache instead of avoiding it
-Date:   Sun,  8 Mar 2020 09:08:35 +0100
-Message-Id: <20200308080859.21568-5-ardb@kernel.org>
+Subject: [PATCH 05/28] efi/arm64: clean EFI stub exit code from cache instead of avoiding it
+Date:   Sun,  8 Mar 2020 09:08:36 +0100
+Message-Id: <20200308080859.21568-6-ardb@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20200308080859.21568-1-ardb@kernel.org>
 References: <20200308080859.21568-1-ardb@kernel.org>
@@ -65,66 +65,116 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Commit c7225494b ("efi/arm: Work around missing cache maintenance in
-decompressor handover") modified the handover code written in assembler
-to work around the missing cache maintenance of the piece of code that
-is executed after the MMU and caches are turned off. Due to the fact
-that this sequence incorporates a subroutine call, cleaning that code
-from the cache is not a matter of simply passing the start and end of
-the currently running subroutine into cache_clean_flush(), which is why
-instead, the code jumps across into the cleaned copy of the image.
+Commit 9f9223778 ("efi/libstub/arm: Make efi_entry() an ordinary PE/COFF
+entrypoint") modified the handover code written in assembler, and for
+maintainability, aligned the logic with the logic used in the 32-bit ARM
+version, which is to avoid cache maintenance on the remaining instructions
+in the subroutine that will be executed with the MMU and caches off, and
+instead, branch into the relocated copy of the kernel image.
 
 However, this assumes that this copy is executable, and this means we
 expect EFI_LOADER_DATA regions to be executable as well, which is not
 a reasonable assumption to make, even if this is true for most UEFI
 implementations today.
 
-So change this back, and add a cache_clean_flush() call to cover the
-remaining code in the subroutine, and any code it may execute in the
-context of cache_off().
+So change this back, and add a __clean_dcache_area_poc() call to cover
+the remaining code in the subroutine. While at it, switch the other
+call site over to __clean_dcache_area_poc() as well, and clean up the
+terminology in comments to avoid using 'flush' in the context of cache
+maintenance. Also, let's switch to the new style asm annotations.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/arm/boot/compressed/head.S | 18 ++++++++----------
- 1 file changed, 8 insertions(+), 10 deletions(-)
+ arch/arm64/kernel/efi-entry.S  | 26 +++++++++++++-------------
+ arch/arm64/kernel/image-vars.h |  4 ++--
+ 2 files changed, 15 insertions(+), 15 deletions(-)
 
-diff --git a/arch/arm/boot/compressed/head.S b/arch/arm/boot/compressed/head.S
-index 36ffbeecd30b..04f77214f050 100644
---- a/arch/arm/boot/compressed/head.S
-+++ b/arch/arm/boot/compressed/head.S
-@@ -1452,13 +1452,11 @@ ENTRY(efi_enter_kernel)
+diff --git a/arch/arm64/kernel/efi-entry.S b/arch/arm64/kernel/efi-entry.S
+index 4cfd03c35c49..1a03618df0df 100644
+--- a/arch/arm64/kernel/efi-entry.S
++++ b/arch/arm64/kernel/efi-entry.S
+@@ -12,32 +12,32 @@
  
- 		@ The PE/COFF loader might not have cleaned the code we are
- 		@ running beyond the PoU, and so calling cache_off below from
--		@ inside the PE/COFF loader allocated region is unsafe. Let's
--		@ assume our own zImage relocation code did a better job, and
--		@ jump into its version of this routine before proceeding.
--		ldr	r1, .Ljmp
--		sub	r1, r7, r1
--		mov	pc, r1				@ no mode switch
--0:
-+		@ inside the PE/COFF loader allocated region is unsafe unless
-+		@ we explicitly clean it to the PoC.
-+		adr	r0, call_cache_fn		@ region of code we will
-+		adr	r1, 0f				@ run with MMU off
-+		bl	cache_clean_flush
- 		bl	cache_off
+ 	__INIT
  
- 		@ Set parameters for booting zImage according to boot protocol
-@@ -1467,10 +1465,10 @@ ENTRY(efi_enter_kernel)
- 		mov	r0, #0
- 		mov	r1, #0xFFFFFFFF
- 		mov	r2, r4
--		b	__efi_start
-+		add	r7, r7, #(__efi_start - start)
-+		mov	pc, r7				@ no mode switch
- ENDPROC(efi_enter_kernel)
--		.align	2
--.Ljmp:		.long	start - 0b
-+0:
+-ENTRY(efi_enter_kernel)
++SYM_CODE_START(efi_enter_kernel)
+ 	/*
+ 	 * efi_entry() will have copied the kernel image if necessary and we
+ 	 * end up here with device tree address in x1 and the kernel entry
+ 	 * point stored in x0. Save those values in registers which are
+ 	 * callee preserved.
+ 	 */
+-	mov	x19, x0			// relocated Image address
++	ldr	w2, =stext_offset
++	add	x19, x0, x2		// relocated Image entrypoint
+ 	mov	x20, x1			// DTB address
+ 
+ 	/*
+-	 * Flush the copied Image to the PoC, and ensure it is not shadowed by
++	 * Clean the copied Image to the PoC, and ensure it is not shadowed by
+ 	 * stale icache entries from before relocation.
+ 	 */
+ 	ldr	w1, =kernel_size
+-	bl	__flush_dcache_area
++	bl	__clean_dcache_area_poc
+ 	ic	ialluis
+-	dsb	sy
+ 
+ 	/*
+-	 * Jump across, into the copy of the image that we just cleaned
+-	 * to the PoC, so that we can safely disable the MMU and caches.
++	 * Clean the remainder of this routine to the PoC
++	 * so that we can safely disable the MMU and caches.
+ 	 */
+-	ldr	w0, .Ljmp
+-	sub	x0, x19, w0, sxtw
+-	br	x0
++	adr	x0, 0f
++	ldr	w1, 3f
++	bl	__clean_dcache_area_poc
+ 0:
+ 	/* Turn off Dcache and MMU */
+ 	mrs	x0, CurrentEL
+@@ -63,6 +63,6 @@ ENTRY(efi_enter_kernel)
+ 	mov	x1, xzr
+ 	mov	x2, xzr
+ 	mov	x3, xzr
+-	b	stext
+-ENDPROC(efi_enter_kernel)
+-.Ljmp:	.long	_text - 0b
++	br	x19
++SYM_CODE_END(efi_enter_kernel)
++3:	.long	. - 0b
+diff --git a/arch/arm64/kernel/image-vars.h b/arch/arm64/kernel/image-vars.h
+index 9a7aef0d6f70..7f06ad93fc95 100644
+--- a/arch/arm64/kernel/image-vars.h
++++ b/arch/arm64/kernel/image-vars.h
+@@ -13,6 +13,7 @@
+ #ifdef CONFIG_EFI
+ 
+ __efistub_kernel_size		= _edata - _text;
++__efistub_stext_offset		= stext - _text;
+ 
+ 
+ /*
+@@ -34,7 +35,7 @@ __efistub_strnlen		= __pi_strnlen;
+ __efistub_strcmp		= __pi_strcmp;
+ __efistub_strncmp		= __pi_strncmp;
+ __efistub_strrchr		= __pi_strrchr;
+-__efistub___flush_dcache_area	= __pi___flush_dcache_area;
++__efistub___clean_dcache_area_poc = __pi___clean_dcache_area_poc;
+ 
+ #ifdef CONFIG_KASAN
+ __efistub___memcpy		= __pi_memcpy;
+@@ -43,7 +44,6 @@ __efistub___memset		= __pi_memset;
  #endif
  
- 		.align
+ __efistub__text			= _text;
+-__efistub_stext			= stext;
+ __efistub__end			= _end;
+ __efistub__edata		= _edata;
+ __efistub_screen_info		= screen_info;
 -- 
 2.17.1
 
