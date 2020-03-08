@@ -7,37 +7,37 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F85EC18E5F
-	for <linux-efi@archiver.kernel.org>; Sun,  8 Mar 2020 08:10:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 59FC6C1975A
+	for <linux-efi@archiver.kernel.org>; Sun,  8 Mar 2020 08:10:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id E8F8820880
-	for <linux-efi@archiver.kernel.org>; Sun,  8 Mar 2020 08:10:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 335CA2187F
+	for <linux-efi@archiver.kernel.org>; Sun,  8 Mar 2020 08:10:16 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1583655009;
-	bh=mjY+mhy5ip/EF4tM7wbe7FUn0QAZIdNhkYDMdzkX9vc=;
+	s=default; t=1583655016;
+	bh=4ipDn/3aECRab2dGz92cr6IfDiukXbrhk8j6xGQ9xo0=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=xukiF9/L/ZXIIp05F498urL96i9KYAPXglQRWs5WpKQRVIoO+iahC3bPUq9j1KgMd
-	 +544tEzAUMP1DrW+Mv4oBWyE1ffvgmGW8CQcTOF0CeOfrT1s29wPHgAZhzcaolZlkU
-	 pC7FdR/egK91ZExdMG+8LWumWucVc5GZh3ftVULM=
+	b=Iif97F/yYlmvHUhZg451rfA6dmgdINQoSJfbBSXZqa3QB+jWGFcnsO60CmxX1daOg
+	 DSD79YXZQO8MeAw4HYMfg+823WO1EH3arvynDuDczmBeYhVLFVdDYUOCikwQPKTY3/
+	 e5eRkPLqoinLZjdUJUrGD/yX3LV5vb+xFFfApgmI=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726718AbgCHIKI (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 8 Mar 2020 04:10:08 -0400
-Received: from mail.kernel.org ([198.145.29.99]:37784 "EHLO mail.kernel.org"
+        id S1726776AbgCHIKP (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 8 Mar 2020 04:10:15 -0400
+Received: from mail.kernel.org ([198.145.29.99]:38000 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726271AbgCHIKH (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Sun, 8 Mar 2020 04:10:07 -0400
+        id S1726271AbgCHIKO (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Sun, 8 Mar 2020 04:10:14 -0400
 Received: from e123331-lin.home (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id D4BC42072A;
-        Sun,  8 Mar 2020 08:10:03 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 06B81222C3;
+        Sun,  8 Mar 2020 08:10:10 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1583655007;
-        bh=mjY+mhy5ip/EF4tM7wbe7FUn0QAZIdNhkYDMdzkX9vc=;
+        s=default; t=1583655014;
+        bh=4ipDn/3aECRab2dGz92cr6IfDiukXbrhk8j6xGQ9xo0=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Gq597acox6U7vOw5T+6iC8AfeSGRpxkH1x83Hw0fotFT7AsBwqBGBiwv1nQUfA65N
-         cvrNb+LejfR48KyCusNMpQggvNKsrfQpW+GybCPcl+Y4HjPn2NOmH4rMP2BJ1g9a8u
-         IbHARRkEhrWgdtc56AMgavi5J9zjxMYNgC4F3UwY=
+        b=rmzy0iyzQD+Dss5WVTcfZakIu1YeBVmYSj/6+oPO1RuSLc+azr7BTfmPke2FMNxWx
+         hW8oWvcV33E5ROsg6RQekILdDIXjeNL1re1dmGbwpBK1Xe8+b41bN17hbONM3FpAQm
+         TuUNDpijchtHCTFhLMN1T9yVr7AvRWGma2XhifaQ=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
@@ -54,9 +54,9 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
         Nikolai Merinov <n.merinov@inango-systems.com>,
         Tom Lendacky <thomas.lendacky@amd.com>,
         Vladis Dronov <vdronov@redhat.com>
-Subject: [PATCH 17/28] efi/x86: Add kernel preferred address to PE header
-Date:   Sun,  8 Mar 2020 09:08:48 +0100
-Message-Id: <20200308080859.21568-18-ardb@kernel.org>
+Subject: [PATCH 19/28] efi/x86: Don't relocate the kernel unless necessary
+Date:   Sun,  8 Mar 2020 09:08:50 +0100
+Message-Id: <20200308080859.21568-20-ardb@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20200308080859.21568-1-ardb@kernel.org>
 References: <20200308080859.21568-1-ardb@kernel.org>
@@ -67,37 +67,115 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Arvind Sankar <nivedita@alum.mit.edu>
 
-Store the kernel's link address as ImageBase in the PE header. Note that
-the PE specification requires the ImageBase to be 64k aligned. The
-preferred address should almost always satisfy that, except for 32-bit
-kernel if the configuration has been customized.
+Add alignment slack to the PE image size, so that we can realign the
+decompression buffer within the space allocated for the image.
+
+Only relocate the kernel if it has been loaded at an unsuitable address:
+* Below LOAD_PHYSICAL_ADDR, or
+* Above 64T for 64-bit and 512MiB for 32-bit
+
+For 32-bit, the upper limit is conservative, but the exact limit can be
+difficult to calculate.
 
 Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
-Link: https://lore.kernel.org/r/20200303221205.4048668-4-nivedita@alum.mit.edu
+Link: https://lore.kernel.org/r/20200303221205.4048668-6-nivedita@alum.mit.edu
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/boot/header.S | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+ arch/x86/boot/tools/build.c             | 16 +++++-------
+ drivers/firmware/efi/libstub/x86-stub.c | 33 ++++++++++++++++++++++---
+ 2 files changed, 36 insertions(+), 13 deletions(-)
 
-diff --git a/arch/x86/boot/header.S b/arch/x86/boot/header.S
-index 4ee25e28996f..736b3a0c9454 100644
---- a/arch/x86/boot/header.S
-+++ b/arch/x86/boot/header.S
-@@ -138,10 +138,12 @@ optional_header:
- #endif
+diff --git a/arch/x86/boot/tools/build.c b/arch/x86/boot/tools/build.c
+index 3d03ad753ed5..db528961c283 100644
+--- a/arch/x86/boot/tools/build.c
++++ b/arch/x86/boot/tools/build.c
+@@ -238,21 +238,17 @@ static void update_pecoff_text(unsigned int text_start, unsigned int file_sz,
  
- extra_header_fields:
-+	# PE specification requires ImageBase to be 64k-aligned
-+	.set	image_base, (LOAD_PHYSICAL_ADDR + 0xffff) & ~0xffff
- #ifdef CONFIG_X86_32
--	.long	0				# ImageBase
-+	.long	image_base			# ImageBase
- #else
--	.quad	0				# ImageBase
-+	.quad	image_base			# ImageBase
- #endif
- 	.long	0x20				# SectionAlignment
- 	.long	0x20				# FileAlignment
+ 	pe_header = get_unaligned_le32(&buf[0x3c]);
+ 
+-#ifdef CONFIG_EFI_MIXED
+ 	/*
+-	 * In mixed mode, we will execute startup_32() at whichever offset in
+-	 * memory it happened to land when the PE/COFF loader loaded the image,
+-	 * which may be misaligned with respect to the kernel_alignment field
+-	 * in the setup header.
++	 * The PE/COFF loader may load the image at an address which is
++	 * misaligned with respect to the kernel_alignment field in the setup
++	 * header.
+ 	 *
+-	 * In order for startup_32 to safely execute in place at this offset,
+-	 * we need to ensure that the CONFIG_PHYSICAL_ALIGN aligned allocation
+-	 * it creates for the page tables does not extend beyond the declared
+-	 * size of the image in the PE/COFF header. So add the required slack.
++	 * In order to avoid relocating the kernel to correct the misalignment,
++	 * add slack to allow the buffer to be aligned within the declared size
++	 * of the image.
+ 	 */
+ 	bss_sz	+= CONFIG_PHYSICAL_ALIGN;
+ 	init_sz	+= CONFIG_PHYSICAL_ALIGN;
+-#endif
+ 
+ 	/*
+ 	 * Size of code: Subtract the size of the first sector (512 bytes)
+diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
+index 96bc4a8733c8..064941ecc36f 100644
+--- a/drivers/firmware/efi/libstub/x86-stub.c
++++ b/drivers/firmware/efi/libstub/x86-stub.c
+@@ -17,6 +17,9 @@
+ 
+ #include "efistub.h"
+ 
++/* Maximum physical address for 64-bit kernel with 4-level paging */
++#define MAXMEM_X86_64_4LEVEL (1ull << 46)
++
+ static efi_system_table_t *sys_table;
+ extern const bool efi_is64;
+ extern u32 image_offset;
+@@ -718,6 +721,7 @@ unsigned long efi_main(efi_handle_t handle,
+ 			     struct boot_params *boot_params)
+ {
+ 	unsigned long bzimage_addr = (unsigned long)startup_32;
++	unsigned long buffer_start, buffer_end;
+ 	struct setup_header *hdr = &boot_params->hdr;
+ 	efi_status_t status;
+ 	unsigned long cmdline_paddr;
+@@ -729,10 +733,33 @@ unsigned long efi_main(efi_handle_t handle,
+ 		efi_exit(handle, EFI_INVALID_PARAMETER);
+ 
+ 	/*
+-	 * If the kernel isn't already loaded at the preferred load
+-	 * address, relocate it.
++	 * If the kernel isn't already loaded at a suitable address,
++	 * relocate it.
++	 *
++	 * It must be loaded above LOAD_PHYSICAL_ADDR.
++	 *
++	 * The maximum address for 64-bit is 1 << 46 for 4-level paging. This
++	 * is defined as the macro MAXMEM, but unfortunately that is not a
++	 * compile-time constant if 5-level paging is configured, so we instead
++	 * define our own macro for use here.
++	 *
++	 * For 32-bit, the maximum address is complicated to figure out, for
++	 * now use KERNEL_IMAGE_SIZE, which will be 512MiB, the same as what
++	 * KASLR uses.
++	 *
++	 * Also relocate it if image_offset is zero, i.e. we weren't loaded by
++	 * LoadImage, but we are not aligned correctly.
+ 	 */
+-	if (bzimage_addr - image_offset != hdr->pref_address) {
++
++	buffer_start = ALIGN(bzimage_addr - image_offset,
++			     hdr->kernel_alignment);
++	buffer_end = buffer_start + hdr->init_size;
++
++	if ((buffer_start < LOAD_PHYSICAL_ADDR)				     ||
++	    (IS_ENABLED(CONFIG_X86_32) && buffer_end > KERNEL_IMAGE_SIZE)    ||
++	    (IS_ENABLED(CONFIG_X86_64) && buffer_end > MAXMEM_X86_64_4LEVEL) ||
++	    (image_offset == 0 && !IS_ALIGNED(bzimage_addr,
++					      hdr->kernel_alignment))) {
+ 		status = efi_relocate_kernel(&bzimage_addr,
+ 					     hdr->init_size, hdr->init_size,
+ 					     hdr->pref_address,
 -- 
 2.17.1
 
