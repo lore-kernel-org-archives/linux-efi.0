@@ -1,133 +1,214 @@
-Return-Path: <SRS0=8H/N=4Z=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=+1jX=42=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.7 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FSL_HELO_FAKE,INCLUDES_PULL_REQUEST,
-	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 58B08C10F29
-	for <linux-efi@archiver.kernel.org>; Sun,  8 Mar 2020 09:00:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C102C10F28
+	for <linux-efi@archiver.kernel.org>; Mon,  9 Mar 2020 00:58:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 1D82E2084E
-	for <linux-efi@archiver.kernel.org>; Sun,  8 Mar 2020 09:00:51 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1583658051;
-	bh=K7KOu9n69DKIQVTs+dfX7VaCxSrfxXP+vl9sGJqMUIU=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=yPt5wnqcW23Wv5MmoxeXeGLULuqLIVbW0PuFrAOOF7FlnPhwhwAhDNyPGoJ+1kA0G
-	 UjkkqE83R8rMkbjLNfwLVFltWyYZ/Jpb1AXDSlzB7e5kT8GYc0/KwadNd2w2JACVAm
-	 JoHQVRntSf2DHtl9cxM5G0tX4ZaFMPW+Xk3RbqY8=
+	by mail.kernel.org (Postfix) with ESMTP id 0DA3920863
+	for <linux-efi@archiver.kernel.org>; Mon,  9 Mar 2020 00:58:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726202AbgCHJAu (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 8 Mar 2020 05:00:50 -0400
-Received: from mail-wm1-f67.google.com ([209.85.128.67]:54565 "EHLO
-        mail-wm1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726180AbgCHJAu (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sun, 8 Mar 2020 05:00:50 -0400
-Received: by mail-wm1-f67.google.com with SMTP id n8so2780541wmc.4;
-        Sun, 08 Mar 2020 01:00:48 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=sender:date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to:user-agent;
-        bh=ZbPsq1rZ+x/H5maMlysEeMg2kNODV83Sx1BWK6bggxY=;
-        b=i0X7UqA9rF0hRyuyjOE+QnDFd+vWZTWCc0hfa4PhOYElxE3tSx8L/kKTtuI6wgQwIg
-         R7p/BwH3P1lR6EMDFCy2DGRRJJGBqtlq8XpHcA3D9OVf0ExvmRMogTiM0yTR8V0O0d4I
-         Cdl1j7J1ynlGm/T2c7cQY7SvRc5af0BHUy+VCpwJQa/2z2qMvyoQ38TiM9DaHvI2X/OI
-         Hvh/X6jqadxAIVLMxc0aVwqaYykotgIzW0amm84+eljwjACC/gZ7jFb6b14zuxt9WoSc
-         GlAMtTbRl4cskUDoo7oZttZNnBdGd0mR4XJHLNFehQOe1BRVQwHSZUdUeNuJJeN9Tno2
-         n56A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:sender:date:from:to:cc:subject:message-id
-         :references:mime-version:content-disposition:in-reply-to:user-agent;
-        bh=ZbPsq1rZ+x/H5maMlysEeMg2kNODV83Sx1BWK6bggxY=;
-        b=X4SmTVoxLv8N68wh8Wi8RoidJdGmS0kMzfZyKYWyc7+YJgEx8Q9w0zH7qhhLJ0q4Hd
-         gFJFw/z1jOFX0C+pMQAPLKjPC4iIJjUgwL8Nql/Cg+WQwQ+XUZhjqLJk2z+rn1Z8Dkir
-         YP0ccwJG3n48hrUDfwpuMeE6UkL6de1CS/p0Q7YWyIo6vB+ajCGhwCNq6RY8dcbioijS
-         RVy6x8V1rkcUwEGeWmjmDkX1ucyy23KSk/mmQVLOx+p/U9azcIhklLYRVrbWsR7ZkqqO
-         jbYjE6Ixprl7BsWBnZ1hNOJB+6O7wGpy7bXmbiBNHh7Md53GQnBd75ddvC0LDAt47viw
-         6Sag==
-X-Gm-Message-State: ANhLgQ2jVOddA2P/ZAl3shjvLLVr5VjYoImolOw/nx91cwFTImNFHH24
-        sP1vko55ifOxKQ93aholPRM=
-X-Google-Smtp-Source: ADFU+vvbnTnfLH/nBqVRzrfodbRG0G1WHC8PrDA/ZE2QJk4lCIVG0YbZst1d5XrdR0jnTzW5HYKrZg==
-X-Received: by 2002:a7b:cc8a:: with SMTP id p10mr3646380wma.10.1583658048246;
-        Sun, 08 Mar 2020 01:00:48 -0800 (PST)
-Received: from gmail.com (54033286.catv.pool.telekom.hu. [84.3.50.134])
-        by smtp.gmail.com with ESMTPSA id a7sm943674wrn.25.2020.03.08.01.00.46
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 08 Mar 2020 01:00:47 -0800 (PST)
-Date:   Sun, 8 Mar 2020 10:00:45 +0100
-From:   Ingo Molnar <mingo@kernel.org>
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     linux-efi@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>,
+        id S1726558AbgCIA6G (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 8 Mar 2020 20:58:06 -0400
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:20502 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726549AbgCIA6G (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sun, 8 Mar 2020 20:58:06 -0400
+Received: from pps.filterd (m0098404.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 0290s0pn039974
+        for <linux-efi@vger.kernel.org>; Sun, 8 Mar 2020 20:58:05 -0400
+Received: from e06smtp02.uk.ibm.com (e06smtp02.uk.ibm.com [195.75.94.98])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 2ym8k70s6d-1
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
+        for <linux-efi@vger.kernel.org>; Sun, 08 Mar 2020 20:58:05 -0400
+Received: from localhost
+        by e06smtp02.uk.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        for <linux-efi@vger.kernel.org> from <nayna@linux.ibm.com>;
+        Mon, 9 Mar 2020 00:58:03 -0000
+Received: from b06avi18626390.portsmouth.uk.ibm.com (9.149.26.192)
+        by e06smtp02.uk.ibm.com (192.168.101.132) with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted;
+        (version=TLSv1/SSLv3 cipher=AES256-GCM-SHA384 bits=256/256)
+        Mon, 9 Mar 2020 00:57:58 -0000
+Received: from d06av23.portsmouth.uk.ibm.com (d06av23.portsmouth.uk.ibm.com [9.149.105.59])
+        by b06avi18626390.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 0290uwXT49086812
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 9 Mar 2020 00:56:58 GMT
+Received: from d06av23.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 2F3EFA404D;
+        Mon,  9 Mar 2020 00:57:57 +0000 (GMT)
+Received: from d06av23.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id EFCC3A4051;
+        Mon,  9 Mar 2020 00:57:54 +0000 (GMT)
+Received: from swastik.ibm.com (unknown [9.160.62.221])
+        by d06av23.portsmouth.uk.ibm.com (Postfix) with ESMTP;
+        Mon,  9 Mar 2020 00:57:54 +0000 (GMT)
+From:   Nayna Jain <nayna@linux.ibm.com>
+To:     linux-integrity@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
+        linux-efi@vger.kernel.org, linux-s390@vger.kernel.org,
+        x86@kernel.org
+Cc:     Ard Biesheuvel <ardb@kernel.org>,
+        Philipp Rudo <prudo@linux.ibm.com>,
+        Michael Ellerman <mpe@ellerman.id.au>, zohar@linux.ibm.com,
+        Thomas Gleixner <tglx@linutronix.de>,
         linux-kernel@vger.kernel.org,
-        Arvind Sankar <nivedita@alum.mit.edu>,
-        Christoph Hellwig <hch@lst.de>,
-        David Hildenbrand <david@redhat.com>,
-        Davidlohr Bueso <dave@stgolabs.net>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Heinrich Schuchardt <xypron.glpk@gmx.de>,
-        Jonathan Corbet <corbet@lwn.net>,
-        Lukas Bulwahn <lukas.bulwahn@gmail.com>,
-        Masahiro Yamada <masahiroy@kernel.org>,
-        Nikolai Merinov <n.merinov@inango-systems.com>,
-        Tom Lendacky <thomas.lendacky@amd.com>,
-        Vladis Dronov <vdronov@redhat.com>
-Subject: Re: [GIT PULL 00/28] More EFI fixes for v5.7
-Message-ID: <20200308090045.GH32920@gmail.com>
-References: <20200308080859.21568-1-ardb@kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200308080859.21568-1-ardb@kernel.org>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+        Nayna Jain <nayna@linux.vnet.ibm.com>,
+        Nayna Jain <nayna@linux.ibm.com>
+Subject: [PATCH v3] ima: add a new CONFIG for loading arch-specific policies
+Date:   Sun,  8 Mar 2020 20:57:51 -0400
+X-Mailer: git-send-email 1.8.3.1
+X-TM-AS-GCONF: 00
+x-cbid: 20030900-0008-0000-0000-0000035A88E0
+X-IBM-AV-DETECTION: SAVI=unused REMOTE=unused XFE=unused
+x-cbparentid: 20030900-0009-0000-0000-00004A7BC6FE
+Message-Id: <1583715471-15525-1-git-send-email-nayna@linux.ibm.com>
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.138,18.0.572
+ definitions=2020-03-08_09:2020-03-06,2020-03-08 signatures=0
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 phishscore=0 mlxscore=0
+ lowpriorityscore=0 malwarescore=0 clxscore=1015 impostorscore=0
+ bulkscore=0 priorityscore=1501 adultscore=0 suspectscore=0 spamscore=0
+ mlxlogscore=999 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2001150001 definitions=main-2003090003
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
+From: Nayna Jain <nayna@linux.vnet.ibm.com>
 
-* Ard Biesheuvel <ardb@kernel.org> wrote:
+Every time a new architecture defines the IMA architecture specific
+functions - arch_ima_get_secureboot() and arch_ima_get_policy(), the IMA
+include file needs to be updated. To avoid this "noise", this patch
+defines a new IMA Kconfig IMA_SECURE_AND_OR_TRUSTED_BOOT option, allowing
+the different architectures to select it.
 
-> The following changes since commit b9d8b63e340392d7f3ad79881f36a550566cbbbe:
-> 
->   Merge tag 'stable-shared-branch-for-driver-tree' into HEAD (2020-03-05 09:58:20 +0100)
-> 
-> are available in the Git repository at:
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next
-> 
-> for you to fetch changes up to dfb2a1c61fcdc8be5dd74608c411c78008a0f078:
-> 
->   partitions/efi: Fix partition name parsing in GUID partition entry (2020-03-06 11:17:42 +0100)
-> 
-> ----------------------------------------------------------------
-> More EFI updates for v5.7
-> 
-> - a fix for a boot regression in the IMA code on x86 booting without UEFI
-> - memory encryption fixes for x86, so that the TPM tables and the RNG
->   config table created by the stub are correctly identified as living in
->   unencrypted memory
-> - style tweak and doc update from Heinrich
-> - followup to the ARM EFI entry code simplifications to ensure that we
->   don't rely on EFI_LOADER_DATA memory being RWX
-> - fixes from Arvind to ensure that the new mixed mode approach works as
->   expected regardless of where the image is loaded in memory by the UEFI
->   PE/COFF loader
-> - more fixes from Arvind to make it more likely that the image can be
->   decompressed in place, regardless of where it was loaded in memory
-> - efivars bugfix and some cleanup from Vladis
-> - incorporate a stable branch with the EFI pieces of Hans's work on
->   loading device firmware from EFI boot service memory regions
-> - some followup fixes for the EFI stub changes that are queued for
->   v5.7 already
-> - an endianness fix for the EFI GPT partition table driver
+Suggested-by: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Nayna Jain <nayna@linux.ibm.com>
+Acked-by: Ard Biesheuvel <ardb@kernel.org>
+Cc: Ard Biesheuvel <ardb@kernel.org>
+Cc: Philipp Rudo <prudo@linux.ibm.com>
+Cc: Michael Ellerman <mpe@ellerman.id.au>
+---
+v3:
+* Removes CONFIG_IMA dependency. Thanks Ard.
+* Updated the patch with improvements suggested by Michael. It now uses
+"imply" instead of "select". Thanks Michael.
+* Replaced the CONFIG_IMA in x86 and s390 with new config, else it was
+resulting in redefinition when the IMA_SECURE_AND_OR_TRUSTED_BOOT
+is not enabled. Thanks to Mimi for identifying the problem.
+* Removed "#ifdef EFI" check in the arch/x86/Makefile for compiling
+ima_arch.c file.
+* Ard, Thanks for your Acked-by. I have changed the arch/x86/Makefile in
+this version. Can you please review again and confirm ?
+* Rudo, Thanks for your review. I have changed arch/s390/Makefile as well.
+Can you also please review again ?
 
->  22 files changed, 319 insertions(+), 141 deletions(-)
+v2:
+* Fixed the issue identified by Mimi. Thanks Mimi, Ard, Heiko and Michael for
+discussing the fix.
 
-Applied, thanks Ard!
+ arch/powerpc/Kconfig           | 1 +
+ arch/s390/Kconfig              | 1 +
+ arch/s390/kernel/Makefile      | 2 +-
+ arch/x86/Kconfig               | 1 +
+ arch/x86/kernel/Makefile       | 4 +---
+ include/linux/ima.h            | 3 +--
+ security/integrity/ima/Kconfig | 7 +++++++
+ 7 files changed, 13 insertions(+), 6 deletions(-)
 
-	Ingo
+diff --git a/arch/powerpc/Kconfig b/arch/powerpc/Kconfig
+index 497b7d0b2d7e..5b9f1cba2a44 100644
+--- a/arch/powerpc/Kconfig
++++ b/arch/powerpc/Kconfig
+@@ -979,6 +979,7 @@ config PPC_SECURE_BOOT
+ 	bool
+ 	depends on PPC_POWERNV
+ 	depends on IMA_ARCH_POLICY
++	imply IMA_SECURE_AND_OR_TRUSTED_BOOT
+ 	help
+ 	  Systems with firmware secure boot enabled need to define security
+ 	  policies to extend secure boot to the OS. This config allows a user
+diff --git a/arch/s390/Kconfig b/arch/s390/Kconfig
+index 8abe77536d9d..59c216af6264 100644
+--- a/arch/s390/Kconfig
++++ b/arch/s390/Kconfig
+@@ -195,6 +195,7 @@ config S390
+ 	select ARCH_HAS_FORCE_DMA_UNENCRYPTED
+ 	select SWIOTLB
+ 	select GENERIC_ALLOCATOR
++	imply IMA_SECURE_AND_OR_TRUSTED_BOOT
+ 
+ 
+ config SCHED_OMIT_FRAME_POINTER
+diff --git a/arch/s390/kernel/Makefile b/arch/s390/kernel/Makefile
+index 2b1203cf7be6..578a6fa82ea4 100644
+--- a/arch/s390/kernel/Makefile
++++ b/arch/s390/kernel/Makefile
+@@ -70,7 +70,7 @@ obj-$(CONFIG_JUMP_LABEL)	+= jump_label.o
+ obj-$(CONFIG_KEXEC_FILE)	+= machine_kexec_file.o kexec_image.o
+ obj-$(CONFIG_KEXEC_FILE)	+= kexec_elf.o
+ 
+-obj-$(CONFIG_IMA)		+= ima_arch.o
++obj-$(CONFIG_IMA_SECURE_AND_OR_TRUSTED_BOOT)	+= ima_arch.o
+ 
+ obj-$(CONFIG_PERF_EVENTS)	+= perf_event.o perf_cpum_cf_common.o
+ obj-$(CONFIG_PERF_EVENTS)	+= perf_cpum_cf.o perf_cpum_sf.o
+diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
+index beea77046f9b..dcf5b1729f7c 100644
+--- a/arch/x86/Kconfig
++++ b/arch/x86/Kconfig
+@@ -230,6 +230,7 @@ config X86
+ 	select VIRT_TO_BUS
+ 	select X86_FEATURE_NAMES		if PROC_FS
+ 	select PROC_PID_ARCH_STATUS		if PROC_FS
++	imply IMA_SECURE_AND_OR_TRUSTED_BOOT    if EFI
+ 
+ config INSTRUCTION_DECODER
+ 	def_bool y
+diff --git a/arch/x86/kernel/Makefile b/arch/x86/kernel/Makefile
+index 9b294c13809a..cfef37a27def 100644
+--- a/arch/x86/kernel/Makefile
++++ b/arch/x86/kernel/Makefile
+@@ -154,6 +154,4 @@ ifeq ($(CONFIG_X86_64),y)
+ 	obj-y				+= vsmp_64.o
+ endif
+ 
+-ifdef CONFIG_EFI
+-obj-$(CONFIG_IMA)			+= ima_arch.o
+-endif
++obj-$(CONFIG_IMA_SECURE_AND_OR_TRUSTED_BOOT)	+= ima_arch.o
+diff --git a/include/linux/ima.h b/include/linux/ima.h
+index 1659217e9b60..aefe758f4466 100644
+--- a/include/linux/ima.h
++++ b/include/linux/ima.h
+@@ -30,8 +30,7 @@ extern void ima_kexec_cmdline(const void *buf, int size);
+ extern void ima_add_kexec_buffer(struct kimage *image);
+ #endif
+ 
+-#if (defined(CONFIG_X86) && defined(CONFIG_EFI)) || defined(CONFIG_S390) \
+-	|| defined(CONFIG_PPC_SECURE_BOOT)
++#ifdef CONFIG_IMA_SECURE_AND_OR_TRUSTED_BOOT
+ extern bool arch_ima_get_secureboot(void);
+ extern const char * const *arch_get_ima_policy(void);
+ #else
+diff --git a/security/integrity/ima/Kconfig b/security/integrity/ima/Kconfig
+index 3f3ee4e2eb0d..edde88dbe576 100644
+--- a/security/integrity/ima/Kconfig
++++ b/security/integrity/ima/Kconfig
+@@ -327,3 +327,10 @@ config IMA_QUEUE_EARLY_BOOT_KEYS
+ 	depends on IMA_MEASURE_ASYMMETRIC_KEYS
+ 	depends on SYSTEM_TRUSTED_KEYRING
+ 	default y
++
++config IMA_SECURE_AND_OR_TRUSTED_BOOT
++       bool
++       depends on IMA_ARCH_POLICY
++       help
++          This option is selected by architectures to enable secure and/or
++          trusted boot based on IMA runtime policies.
+-- 
+2.17.1
+
