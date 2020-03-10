@@ -7,47 +7,47 @@ X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 880A6C18E5C
-	for <linux-efi@archiver.kernel.org>; Tue, 10 Mar 2020 13:04:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 738F4C18E5B
+	for <linux-efi@archiver.kernel.org>; Tue, 10 Mar 2020 13:04:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 5B34B24691
-	for <linux-efi@archiver.kernel.org>; Tue, 10 Mar 2020 13:04:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4B9AC208E4
+	for <linux-efi@archiver.kernel.org>; Tue, 10 Mar 2020 13:04:55 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1583845463;
-	bh=khnnaXEotQCDVtCSFvYA545nYovW0yzZNDRL37GEq3c=;
+	s=default; t=1583845495;
+	bh=vEJRaIWZP1JrsXk0SSZIMme2Ea/tPhjTX/5WV+l20Vs=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=yq0VenXSf2kRCWmM+GnEXeIhK9CSEL3n7OyrWyU8S3Ms4jQkAe+XDqg9YTZ6AWXfo
-	 dXhRSl3uxXTkZ0wWWRiIY31w57n0zQAUoINtb1xpurLxRTTjb5u9oS6Agg0ExG4DoF
-	 riU9QvCEI26rTTHAbEwYNAlV1Tl+/Zh/0G0Wgv5I=
+	b=BMFt57pTCsvQTknSNEf8tYZy76WSLuuyVgLHTvyVdUnjWM0aasVnEZAdZfCWHqzn4
+	 MD9WwO21VNGWAxb60tkm94gKS2EKCyXJPKqosb0+PH4WOExqaJJq/PNRRmvhdsyyAI
+	 4IqvRfOKshlFeLERMjCvPLoley0rw2toygGEJQ7k=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728807AbgCJNEM (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 10 Mar 2020 09:04:12 -0400
-Received: from mail.kernel.org ([198.145.29.99]:49182 "EHLO mail.kernel.org"
+        id S1729456AbgCJNEX (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 10 Mar 2020 09:04:23 -0400
+Received: from mail.kernel.org ([198.145.29.99]:49314 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729456AbgCJNEL (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Tue, 10 Mar 2020 09:04:11 -0400
+        id S1729287AbgCJNES (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Tue, 10 Mar 2020 09:04:18 -0400
 Received: from localhost (83-86-89-107.cable.dynamic.v4.ziggo.nl [83.86.89.107])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id C9C672468C;
-        Tue, 10 Mar 2020 13:04:10 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 3113F24695;
+        Tue, 10 Mar 2020 13:04:17 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1583845451;
-        bh=khnnaXEotQCDVtCSFvYA545nYovW0yzZNDRL37GEq3c=;
+        s=default; t=1583845457;
+        bh=vEJRaIWZP1JrsXk0SSZIMme2Ea/tPhjTX/5WV+l20Vs=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=GsymGbLMZrPf3FmTFK8zaM4gjDfghU++dg8zgq6VcjACXHlXDHTmZaMVSzM2VLls6
-         oobDDX3xWG3NLT5nVjQoOEZ3KqYBHij3pZkrd5B0UR2z2AW73pUwU4QoNdPbiAgvIw
-         R8HFYLPiwOgjG9fXglA8R5lT+hd8d4JUkr2iepOE=
+        b=DPnghW//FNQbkzXYPb/o+76QpJcXrQKAiKT/JH65oZVMGPEO/Li764EJI+DZXNjn0
+         PvtiZTp90WQgOXk3mJdsmNV/KnYrNgFVeolt4PbhM0cn5UATuNw63kUOukySlz/o8q
+         twUxij0lKsB4Wih9DyQKoNbfgQB4lUDmg7t06mN0=
 From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 To:     linux-kernel@vger.kernel.org
 Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        stable@vger.kernel.org, Hans de Goede <hdegoede@redhat.com>,
+        stable@vger.kernel.org, "Jason A. Donenfeld" <Jason@zx2c4.com>,
         Ard Biesheuvel <ardb@kernel.org>,
         Ingo Molnar <mingo@kernel.org>, linux-efi@vger.kernel.org,
         Thomas Gleixner <tglx@linutronix.de>
-Subject: [PATCH 5.5 186/189] efi/x86: Align GUIDs to their size in the mixed mode runtime wrapper
-Date:   Tue, 10 Mar 2020 13:40:23 +0100
-Message-Id: <20200310123658.257035725@linuxfoundation.org>
+Subject: [PATCH 5.5 188/189] efi: READ_ONCE rng seed size before munmap
+Date:   Tue, 10 Mar 2020 13:40:25 +0100
+Message-Id: <20200310123658.428463192@linuxfoundation.org>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200310123639.608886314@linuxfoundation.org>
 References: <20200310123639.608886314@linuxfoundation.org>
@@ -60,129 +60,50 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Ard Biesheuvel <ardb@kernel.org>
+From: Jason A. Donenfeld <Jason@zx2c4.com>
 
-commit 63056e8b5ebf41d52170e9f5ba1fc83d1855278c upstream.
+commit be36f9e7517e17810ec369626a128d7948942259 upstream.
 
-Hans reports that his mixed mode systems running v5.6-rc1 kernels hit
-the WARN_ON() in virt_to_phys_or_null_size(), caused by the fact that
-efi_guid_t objects on the vmap'ed stack happen to be misaligned with
-respect to their sizes. As a quick (i.e., backportable) fix, copy GUID
-pointer arguments to the local stack into a buffer that is naturally
-aligned to its size, so that it is guaranteed to cover only one
-physical page.
+This function is consistent with using size instead of seed->size
+(except for one place that this patch fixes), but it reads seed->size
+without using READ_ONCE, which means the compiler might still do
+something unwanted. So, this commit simply adds the READ_ONCE
+wrapper.
 
-Note that on x86, we cannot rely on the stack pointer being aligned
-the way the compiler expects, so we need to allocate an 8-byte aligned
-buffer of sufficient size, and copy the GUID into that buffer at an
-offset that is aligned to 16 bytes.
-
-Fixes: f6697df36bdf0bf7 ("x86/efi: Prevent mixed mode boot corruption with CONFIG_VMAP_STACK=y")
-Reported-by: Hans de Goede <hdegoede@redhat.com>
+Fixes: 636259880a7e ("efi: Add support for seeding the RNG from a UEFI ...")
+Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Tested-by: Hans de Goede <hdegoede@redhat.com>
 Cc: linux-efi@vger.kernel.org
 Cc: Ingo Molnar <mingo@kernel.org>
 Cc: Thomas Gleixner <tglx@linutronix.de>
-Link: https://lore.kernel.org/r/20200221084849.26878-2-ardb@kernel.org
+Link: https://lore.kernel.org/r/20200217123354.21140-1-Jason@zx2c4.com
+Link: https://lore.kernel.org/r/20200221084849.26878-5-ardb@kernel.org
 Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
 ---
- arch/x86/platform/efi/efi_64.c |   25 +++++++++++++++++++++----
- 1 file changed, 21 insertions(+), 4 deletions(-)
+ drivers/firmware/efi/efi.c |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -791,6 +791,8 @@ static efi_status_t
- efi_thunk_get_variable(efi_char16_t *name, efi_guid_t *vendor,
- 		       u32 *attr, unsigned long *data_size, void *data)
- {
-+	u8 buf[24] __aligned(8);
-+	efi_guid_t *vnd = PTR_ALIGN((efi_guid_t *)buf, sizeof(*vnd));
- 	efi_status_t status;
- 	u32 phys_name, phys_vendor, phys_attr;
- 	u32 phys_data_size, phys_data;
-@@ -798,8 +800,10 @@ efi_thunk_get_variable(efi_char16_t *nam
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -552,7 +552,7 @@ int __init efi_config_parse_tables(void
  
- 	spin_lock_irqsave(&efi_runtime_lock, flags);
- 
-+	*vnd = *vendor;
-+
- 	phys_data_size = virt_to_phys_or_null(data_size);
--	phys_vendor = virt_to_phys_or_null(vendor);
-+	phys_vendor = virt_to_phys_or_null(vnd);
- 	phys_name = virt_to_phys_or_null_size(name, efi_name_size(name));
- 	phys_attr = virt_to_phys_or_null(attr);
- 	phys_data = virt_to_phys_or_null_size(data, *data_size);
-@@ -816,14 +820,18 @@ static efi_status_t
- efi_thunk_set_variable(efi_char16_t *name, efi_guid_t *vendor,
- 		       u32 attr, unsigned long data_size, void *data)
- {
-+	u8 buf[24] __aligned(8);
-+	efi_guid_t *vnd = PTR_ALIGN((efi_guid_t *)buf, sizeof(*vnd));
- 	u32 phys_name, phys_vendor, phys_data;
- 	efi_status_t status;
- 	unsigned long flags;
- 
- 	spin_lock_irqsave(&efi_runtime_lock, flags);
- 
-+	*vnd = *vendor;
-+
- 	phys_name = virt_to_phys_or_null_size(name, efi_name_size(name));
--	phys_vendor = virt_to_phys_or_null(vendor);
-+	phys_vendor = virt_to_phys_or_null(vnd);
- 	phys_data = virt_to_phys_or_null_size(data, data_size);
- 
- 	/* If data_size is > sizeof(u32) we've got problems */
-@@ -840,6 +848,8 @@ efi_thunk_set_variable_nonblocking(efi_c
- 				   u32 attr, unsigned long data_size,
- 				   void *data)
- {
-+	u8 buf[24] __aligned(8);
-+	efi_guid_t *vnd = PTR_ALIGN((efi_guid_t *)buf, sizeof(*vnd));
- 	u32 phys_name, phys_vendor, phys_data;
- 	efi_status_t status;
- 	unsigned long flags;
-@@ -847,8 +857,10 @@ efi_thunk_set_variable_nonblocking(efi_c
- 	if (!spin_trylock_irqsave(&efi_runtime_lock, flags))
- 		return EFI_NOT_READY;
- 
-+	*vnd = *vendor;
-+
- 	phys_name = virt_to_phys_or_null_size(name, efi_name_size(name));
--	phys_vendor = virt_to_phys_or_null(vendor);
-+	phys_vendor = virt_to_phys_or_null(vnd);
- 	phys_data = virt_to_phys_or_null_size(data, data_size);
- 
- 	/* If data_size is > sizeof(u32) we've got problems */
-@@ -865,14 +877,18 @@ efi_thunk_get_next_variable(unsigned lon
- 			    efi_char16_t *name,
- 			    efi_guid_t *vendor)
- {
-+	u8 buf[24] __aligned(8);
-+	efi_guid_t *vnd = PTR_ALIGN((efi_guid_t *)buf, sizeof(*vnd));
- 	efi_status_t status;
- 	u32 phys_name_size, phys_name, phys_vendor;
- 	unsigned long flags;
- 
- 	spin_lock_irqsave(&efi_runtime_lock, flags);
- 
-+	*vnd = *vendor;
-+
- 	phys_name_size = virt_to_phys_or_null(name_size);
--	phys_vendor = virt_to_phys_or_null(vendor);
-+	phys_vendor = virt_to_phys_or_null(vnd);
- 	phys_name = virt_to_phys_or_null_size(name, *name_size);
- 
- 	status = efi_thunk(get_next_variable, phys_name_size,
-@@ -880,6 +896,7 @@ efi_thunk_get_next_variable(unsigned lon
- 
- 	spin_unlock_irqrestore(&efi_runtime_lock, flags);
- 
-+	*vendor = *vnd;
- 	return status;
- }
- 
+ 		seed = early_memremap(efi.rng_seed, sizeof(*seed));
+ 		if (seed != NULL) {
+-			size = seed->size;
++			size = READ_ONCE(seed->size);
+ 			early_memunmap(seed, sizeof(*seed));
+ 		} else {
+ 			pr_err("Could not map UEFI random seed!\n");
+@@ -562,7 +562,7 @@ int __init efi_config_parse_tables(void
+ 					      sizeof(*seed) + size);
+ 			if (seed != NULL) {
+ 				pr_notice("seeding entropy pool\n");
+-				add_bootloader_randomness(seed->bits, seed->size);
++				add_bootloader_randomness(seed->bits, size);
+ 				early_memunmap(seed, sizeof(*seed) + size);
+ 			} else {
+ 				pr_err("Could not map UEFI random seed!\n");
 
 
