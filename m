@@ -1,214 +1,331 @@
-Return-Path: <SRS0=+1jX=42=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=imLm=43=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C102C10F28
-	for <linux-efi@archiver.kernel.org>; Mon,  9 Mar 2020 00:58:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57ACDC3F2D0
+	for <linux-efi@archiver.kernel.org>; Tue, 10 Mar 2020 07:09:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 0DA3920863
-	for <linux-efi@archiver.kernel.org>; Mon,  9 Mar 2020 00:58:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1FB15246A9
+	for <linux-efi@archiver.kernel.org>; Tue, 10 Mar 2020 07:09:04 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=atishpatra.org header.i=@atishpatra.org header.b="YLuE6SI3"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726558AbgCIA6G (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 8 Mar 2020 20:58:06 -0400
-Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:20502 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726549AbgCIA6G (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sun, 8 Mar 2020 20:58:06 -0400
-Received: from pps.filterd (m0098404.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 0290s0pn039974
-        for <linux-efi@vger.kernel.org>; Sun, 8 Mar 2020 20:58:05 -0400
-Received: from e06smtp02.uk.ibm.com (e06smtp02.uk.ibm.com [195.75.94.98])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 2ym8k70s6d-1
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <linux-efi@vger.kernel.org>; Sun, 08 Mar 2020 20:58:05 -0400
-Received: from localhost
-        by e06smtp02.uk.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-        for <linux-efi@vger.kernel.org> from <nayna@linux.ibm.com>;
-        Mon, 9 Mar 2020 00:58:03 -0000
-Received: from b06avi18626390.portsmouth.uk.ibm.com (9.149.26.192)
-        by e06smtp02.uk.ibm.com (192.168.101.132) with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted;
-        (version=TLSv1/SSLv3 cipher=AES256-GCM-SHA384 bits=256/256)
-        Mon, 9 Mar 2020 00:57:58 -0000
-Received: from d06av23.portsmouth.uk.ibm.com (d06av23.portsmouth.uk.ibm.com [9.149.105.59])
-        by b06avi18626390.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 0290uwXT49086812
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 9 Mar 2020 00:56:58 GMT
-Received: from d06av23.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 2F3EFA404D;
-        Mon,  9 Mar 2020 00:57:57 +0000 (GMT)
-Received: from d06av23.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id EFCC3A4051;
-        Mon,  9 Mar 2020 00:57:54 +0000 (GMT)
-Received: from swastik.ibm.com (unknown [9.160.62.221])
-        by d06av23.portsmouth.uk.ibm.com (Postfix) with ESMTP;
-        Mon,  9 Mar 2020 00:57:54 +0000 (GMT)
-From:   Nayna Jain <nayna@linux.ibm.com>
-To:     linux-integrity@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
-        linux-efi@vger.kernel.org, linux-s390@vger.kernel.org,
-        x86@kernel.org
-Cc:     Ard Biesheuvel <ardb@kernel.org>,
-        Philipp Rudo <prudo@linux.ibm.com>,
-        Michael Ellerman <mpe@ellerman.id.au>, zohar@linux.ibm.com,
-        Thomas Gleixner <tglx@linutronix.de>,
-        linux-kernel@vger.kernel.org,
-        Nayna Jain <nayna@linux.vnet.ibm.com>,
-        Nayna Jain <nayna@linux.ibm.com>
-Subject: [PATCH v3] ima: add a new CONFIG for loading arch-specific policies
-Date:   Sun,  8 Mar 2020 20:57:51 -0400
-X-Mailer: git-send-email 1.8.3.1
-X-TM-AS-GCONF: 00
-x-cbid: 20030900-0008-0000-0000-0000035A88E0
-X-IBM-AV-DETECTION: SAVI=unused REMOTE=unused XFE=unused
-x-cbparentid: 20030900-0009-0000-0000-00004A7BC6FE
-Message-Id: <1583715471-15525-1-git-send-email-nayna@linux.ibm.com>
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.138,18.0.572
- definitions=2020-03-08_09:2020-03-06,2020-03-08 signatures=0
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 phishscore=0 mlxscore=0
- lowpriorityscore=0 malwarescore=0 clxscore=1015 impostorscore=0
- bulkscore=0 priorityscore=1501 adultscore=0 suspectscore=0 spamscore=0
- mlxlogscore=999 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2001150001 definitions=main-2003090003
+        id S1725919AbgCJHJD (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 10 Mar 2020 03:09:03 -0400
+Received: from mail-wr1-f68.google.com ([209.85.221.68]:43115 "EHLO
+        mail-wr1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726156AbgCJHJC (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 10 Mar 2020 03:09:02 -0400
+Received: by mail-wr1-f68.google.com with SMTP id v9so14348968wrf.10
+        for <linux-efi@vger.kernel.org>; Tue, 10 Mar 2020 00:08:59 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=atishpatra.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=tTCoR/CCNaXq1FOvzXwAgeXX2l2MsSCD9apFaZmeBWM=;
+        b=YLuE6SI3gxQyzQVjsUjvP8gTTJJ1WcGl5C6N6SeNI2r8E7WOAnFx4SoSbsb5C5gqXY
+         Er9Y5eIqAdrQm0Dsc+GN9pUzArPlxjfLbJ+eK7IjrKq8i2oBBEyV9K31sFgvKTq9UiRY
+         9sZ5KeSrGUdz10VndnUpGD2nHxR5IeFVLH/aNc44o/cLv57N8FxD8fXjXJZ+3CgG9fD8
+         TYOfTi2jon61UBv+wwNJL40ZJjMpoy+Iar11lQdmk3IXCG+jnmsX/rpjqqx15BEk9Mcy
+         FQiNfsuyVV5EuEoCZ4R3NH6TzzfAGq3OqVH9bCf4xDJpzG8atQ0PJ6bawgMSMRqcJ9Ny
+         fplQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=tTCoR/CCNaXq1FOvzXwAgeXX2l2MsSCD9apFaZmeBWM=;
+        b=AUoLBupC8WogzROlBzpNlxmJRSOC7/8rvgpFtVqDaqmZPZf+1/2UTwGazdiFt8hk5K
+         7YLWDBNstyKmjTI1qN9l+FiDOtbpdrTD6spMID9DsGzTMqrQPzSYS6ToQ6PXCHS2My6t
+         XKcxEct1+gxkMbUZ2kS1UU41fVrgtnnZfTa0K8j/omwJqroYluJigHa6nlPHqNw0pqF/
+         y5+68a777zD3Ylgxv9k+RO3tL/mZwp1xJMh/O6iJgF3tD/o5kkBJY0CfdJ8W8APK9RcQ
+         uWIo1T9MSb8Wl/BTKBcpTsQ+UL3yWLky4GDyeBbACaDX074IkveP2dXlabrA7NAvbGaq
+         mFFw==
+X-Gm-Message-State: ANhLgQ0jPWTed+TforNEJT3/NYfPVh2MsnQm1e/1j/0MNYCRMi/Q30yz
+        TwXC431+x61QUZkKsGqCHqVxKK0y8CdzhYYjPSi+
+X-Google-Smtp-Source: ADFU+vs1apM0VoS4vrkx/AlvsxaJjXfeemK1n2070pj//svyZs06PXbNZkxvZNk2TF6v3cekKagzYvO9h0mSol0kzrI=
+X-Received: by 2002:a5d:522c:: with SMTP id i12mr5999547wra.176.1583824139112;
+ Tue, 10 Mar 2020 00:08:59 -0700 (PDT)
+MIME-Version: 1.0
+References: <20200226011037.7179-1-atish.patra@wdc.com> <20200226011037.7179-6-atish.patra@wdc.com>
+ <CAKv+Gu_iAzQ6et13aACarqns8-xzQ+YSqj+m3mVGGy=ny8GJBg@mail.gmail.com>
+ <26172d39fdb5ecd951ade0a89566c010f6166a03.camel@wdc.com> <CAKv+Gu8i93gM0dMqzbhvNbqsgd9dHCMGzX7E47uusrUvv6xRJA@mail.gmail.com>
+ <46e9873e288134f638cd8726a2c15c9ca63860ce.camel@wdc.com> <CAKv+Gu_2dCj74VvCMRQ9yFgBtJRENasBbEV0bwcfqLQwuaj0=A@mail.gmail.com>
+In-Reply-To: <CAKv+Gu_2dCj74VvCMRQ9yFgBtJRENasBbEV0bwcfqLQwuaj0=A@mail.gmail.com>
+From:   Atish Patra <atishp@atishpatra.org>
+Date:   Tue, 10 Mar 2020 00:08:48 -0700
+Message-ID: <CAOnJCU+zBgYo0ez2ExiAbGttwpVq302vGrZJ3Y9g+S=SHTMuiw@mail.gmail.com>
+Subject: Re: [RFC PATCH 5/5] RISC-V: Add EFI stub support.
+To:     Ard Biesheuvel <ardb@kernel.org>
+Cc:     Atish Patra <Atish.Patra@wdc.com>,
+        "linux@armlinux.org.uk" <linux@armlinux.org.uk>,
+        "abner.chang@hpe.com" <abner.chang@hpe.com>,
+        "linux-riscv@lists.infradead.org" <linux-riscv@lists.infradead.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "daniel.schaefer@hpe.com" <daniel.schaefer@hpe.com>,
+        Anup Patel <Anup.Patel@wdc.com>,
+        "palmer@dabbelt.com" <palmer@dabbelt.com>,
+        "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>,
+        "agraf@csgraf.de" <agraf@csgraf.de>,
+        "paul.walmsley@sifive.com" <paul.walmsley@sifive.com>,
+        "leif@nuviainc.com" <leif@nuviainc.com>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Nayna Jain <nayna@linux.vnet.ibm.com>
+On Thu, Feb 27, 2020 at 10:57 PM Ard Biesheuvel <ardb@kernel.org> wrote:
+>
+> On Fri, 28 Feb 2020 at 02:05, Atish Patra <Atish.Patra@wdc.com> wrote:
+> >
+> > On Thu, 2020-02-27 at 20:59 +0100, Ard Biesheuvel wrote:
+> > > On Thu, 27 Feb 2020 at 20:53, Atish Patra <Atish.Patra@wdc.com>
+> > > wrote:
+> > > > On Wed, 2020-02-26 at 08:28 +0100, Ard Biesheuvel wrote:
+> > > > > On Wed, 26 Feb 2020 at 02:10, Atish Patra <atish.patra@wdc.com>
+> > > > > wrote:
+> > > > > > Add a RISC-V architecture specific stub code that actually
+> > > > > > copies
+> > > > > > the
+> > > > > > actual kernel image to a valid address and jump to it after
+> > > > > > boot
+> > > > > > services
+> > > > > > are terminated. Enable UEFI related kernel configs as well for
+> > > > > > RISC-V.
+> > > > > >
+> > > > > > Signed-off-by: Atish Patra <atish.patra@wdc.com>
+> > > > > > ---
+> > > > > >  arch/riscv/Kconfig                        |  20 ++++
+> > > > > >  arch/riscv/Makefile                       |   1 +
+> > > > > >  arch/riscv/configs/defconfig              |   1 +
+> > > > > >  drivers/firmware/efi/libstub/Makefile     |   8 ++
+> > > > > >  drivers/firmware/efi/libstub/riscv-stub.c | 135
+> > > > > > ++++++++++++++++++++++
+> > > > > >  5 files changed, 165 insertions(+)
+> > > > > >  create mode 100644 drivers/firmware/efi/libstub/riscv-stub.c
+> > > > > >
+> > > > > > diff --git a/arch/riscv/Kconfig b/arch/riscv/Kconfig
+> > > > > > index 42c122170cfd..68b1d565e51d 100644
+> > > > > > --- a/arch/riscv/Kconfig
+> > > > > > +++ b/arch/riscv/Kconfig
+> > > > > > @@ -372,10 +372,30 @@ config CMDLINE_FORCE
+> > > > > >
+> > > > > >  endchoice
+> > > > > >
+> > > > > > +config EFI_STUB
+> > > > > > +       bool
+> > > > > > +
+> > > > > > +config EFI
+> > > > > > +       bool "UEFI runtime support"
+> > > > > > +       depends on OF
+> > > > > > +       select LIBFDT
+> > > > > > +       select UCS2_STRING
+> > > > > > +       select EFI_PARAMS_FROM_FDT
+> > > > > > +       select EFI_STUB
+> > > > > > +       select EFI_GENERIC_ARCH_STUB
+> > > > > > +       default y
+> > > > > > +       help
+> > > > > > +         This option provides support for runtime services
+> > > > > > provided
+> > > > > > +         by UEFI firmware (such as non-volatile variables,
+> > > > > > realtime
+> > > > > > +          clock, and platform reset). A UEFI stub is also
+> > > > > > provided
+> > > > > > to
+> > > > > > +         allow the kernel to be booted as an EFI application.
+> > > > > > This
+> > > > > > +         is only useful on systems that have UEFI firmware.
+> > > > > > +
+> > > > > >  endmenu
+> > > > > >
+> > > > > >  menu "Power management options"
+> > > > > >
+> > > > > >  source "kernel/power/Kconfig"
+> > > > > > +source "drivers/firmware/Kconfig"
+> > > > > >
+> > > > > >  endmenu
+> > > > > > diff --git a/arch/riscv/Makefile b/arch/riscv/Makefile
+> > > > > > index b9009a2fbaf5..0afaa89ba9ad 100644
+> > > > > > --- a/arch/riscv/Makefile
+> > > > > > +++ b/arch/riscv/Makefile
+> > > > > > @@ -78,6 +78,7 @@ head-y := arch/riscv/kernel/head.o
+> > > > > >  core-y += arch/riscv/
+> > > > > >
+> > > > > >  libs-y += arch/riscv/lib/
+> > > > > > +core-$(CONFIG_EFI_STUB) +=
+> > > > > > $(objtree)/drivers/firmware/efi/libstub/lib.a
+> > > > > >
+> > > > > >  PHONY += vdso_install
+> > > > > >  vdso_install:
+> > > > > > diff --git a/arch/riscv/configs/defconfig
+> > > > > > b/arch/riscv/configs/defconfig
+> > > > > > index e2ff95cb3390..0a5d3578f51e 100644
+> > > > > > --- a/arch/riscv/configs/defconfig
+> > > > > > +++ b/arch/riscv/configs/defconfig
+> > > > > > @@ -125,3 +125,4 @@ CONFIG_DEBUG_BLOCK_EXT_DEVT=y
+> > > > > >  # CONFIG_FTRACE is not set
+> > > > > >  # CONFIG_RUNTIME_TESTING_MENU is not set
+> > > > > >  CONFIG_MEMTEST=y
+> > > > > > +CONFIG_EFI=y
+> > > > > > diff --git a/drivers/firmware/efi/libstub/Makefile
+> > > > > > b/drivers/firmware/efi/libstub/Makefile
+> > > > > > index 2c5b76787126..38facb61745b 100644
+> > > > > > --- a/drivers/firmware/efi/libstub/Makefile
+> > > > > > +++ b/drivers/firmware/efi/libstub/Makefile
+> > > > > > @@ -21,6 +21,8 @@ cflags-$(CONFIG_ARM64)                :=
+> > > > > > $(subst
+> > > > > > $(CC_FLAGS_FTRACE),,$(KBUILD_CFLAGS)) \
+> > > > > >  cflags-$(CONFIG_ARM)           := $(subst
+> > > > > > $(CC_FLAGS_FTRACE),,$(KBUILD_CFLAGS)) \
+> > > > > >                                    -fno-builtin -fpic \
+> > > > > >                                    $(call cc-option,-mno-
+> > > > > > single-
+> > > > > > pic-base)
+> > > > > > +cflags-$(CONFIG_RISCV)         := $(subst
+> > > > > > $(CC_FLAGS_FTRACE),,$(KBUILD_CFLAGS)) \
+> > > > > > +                                  -fpic
+> > > > > >
+> > > > > >  cflags-$(CONFIG_EFI_GENERIC_ARCH_STUB) +=
+> > > > > > -I$(srctree)/scripts/dtc/libfdt
+> > > > > >
+> > > > > > @@ -55,6 +57,7 @@ lib-
+> > > > > > $(CONFIG_EFI_GENERIC_ARCH_STUB)           +=
+> > > > > > efi-stub.o fdt.o string.o \
+> > > > > >  lib-$(CONFIG_ARM)              += arm32-stub.o
+> > > > > >  lib-$(CONFIG_ARM64)            += arm64-stub.o
+> > > > > >  lib-$(CONFIG_X86)              += x86-stub.o
+> > > > > > +lib-$(CONFIG_RISCV)            += riscv-stub.o
+> > > > > >  CFLAGS_arm32-stub.o            := -DTEXT_OFFSET=$(TEXT_OFFSET)
+> > > > > >  CFLAGS_arm64-stub.o            := -DTEXT_OFFSET=$(TEXT_OFFSET)
+> > > > > >
+> > > > > > @@ -79,6 +82,11 @@ STUBCOPY_FLAGS-$(CONFIG_ARM64)       += --
+> > > > > > prefix-alloc-sections=.init \
+> > > > > >                                    --prefix-symbols=__efistub_
+> > > > > >  STUBCOPY_RELOC-$(CONFIG_ARM64) := R_AARCH64_ABS
+> > > > > >
+> > > > > > +STUBCOPY_FLAGS-$(CONFIG_RISCV) += --prefix-alloc-
+> > > > > > sections=.init \
+> > > > > > +                                  --prefix-symbols=__efistub_
+> > > > > > +STUBCOPY_RELOC-$(CONFIG_RISCV) := R_RISCV_HI20
+> > > > > > +
+> > > > > > +
+> > > > > >  $(obj)/%.stub.o: $(obj)/%.o FORCE
+> > > > > >         $(call if_changed,stubcopy)
+> > > > > >
+> > > > > > diff --git a/drivers/firmware/efi/libstub/riscv-stub.c
+> > > > > > b/drivers/firmware/efi/libstub/riscv-stub.c
+> > > > > > new file mode 100644
+> > > > > > index 000000000000..3935b29ea93a
+> > > > > > --- /dev/null
+> > > > > > +++ b/drivers/firmware/efi/libstub/riscv-stub.c
+> > > > > > @@ -0,0 +1,135 @@
+> > > > > > +// SPDX-License-Identifier: GPL-2.0
+> > > > > > +/*
+> > > > > > + * Copyright (C) 2013, 2014 Linaro Ltd;  <roy.franz@linaro.org
+> > > > > > >
+> > > > > > + * Copyright (C) 2020 Western Digital Corporation or its
+> > > > > > affiliates.
+> > > > > > + *
+> > > > > > + * This file implements the EFI boot stub for the RISC-V
+> > > > > > kernel.
+> > > > > > + * Adapted from ARM64 version at
+> > > > > > drivers/firmware/efi/libstub/arm64-stub.c.
+> > > > > > + */
+> > > > > > +
+> > > > > > +#include <linux/efi.h>
+> > > > > > +#include <linux/libfdt.h>
+> > > > > > +#include <linux/libfdt_env.h>
+> > > > > > +#include <asm/efi.h>
+> > > > > > +#include <asm/sections.h>
+> > > > > > +
+> > > > > > +#include "efistub.h"
+> > > > > > +/*
+> > > > > > + * RISCV requires the kernel image to placed TEXT_OFFSET bytes
+> > > > > > beyond a 2 MB
+> > > > > > + * aligned base for 64 bit and 4MB for 32 bit.
+> > > > > > + */
+> > > > > > +#if IS_ENABLED(CONFIG_64BIT)
+> > > > >
+> > > > > You can use #ifdef here
+> > > > >
+> > > >
+> > > > ok.
+> > > >
+> > > > > > +#define MIN_KIMG_ALIGN SZ_2M
+> > > > > > +#else
+> > > > > > +#define MIN_KIMG_ALIGN SZ_4M
+> > > > > > +#endif
+> > > > > > +/*
+> > > > > > + * TEXT_OFFSET ensures that we don't overwrite the firmware
+> > > > > > that
+> > > > > > probably sits
+> > > > > > + * at the beginning of the DRAM.
+> > > > > > + */
+> > > > >
+> > > > > Ugh. Really? On an EFI system, that memory should be reserved in
+> > > > > some
+> > > > > way, we shouldn't be able to stomp on it like that.
+> > > > >
+> > > >
+> > > > Currently, we reserve the initial 128KB for run time firmware(only
+> > > > openSBI for now, EDK2 later) by using PMP (physical memory
+> > > > protection).
+> > > > Any acess to that region from supervisor mode (i.e. U-Boot) will
+> > > > result
+> > > > in a fault.
+> > > >
+> > > > Is it mandatory for UEFI to reserve the beginning of the DRAM ?
+> > > >
+> > >
+> > > It is mandatory to describe which memory is usable and which memory
+> > > is
+> > > reserved. If this memory is not usable, you either describe it as
+> > > reserved, or not describe it at all. Describing it as usable memory,
+> > > allocating it for the kernel but with a hidden agreement that it is
+> > > reserved is highly likely to cause problems down the road.
+> > >
+> >
+> > I completely agree with you on this. We have been talking to have a
+> > booting guide and memory map document for RISC-V Linux to document all
+> > the idiosyncries of RISC-V. But that has not happend until now.
+> > Once, the ordered booting patches are merged, I will try to take a stab
+> > at it.
+> >
+> > Other than that, do we need to describe it somewhere in U-boot wrt to
+> > UEFI so that it doesn't allocate memory from that region ?
+> >
+>
+> It is an idiosyncrasy that the firmware should hide from the OS.
+>
+> What if GRUB comes along and attempts to allocate that memory? Do we
+> also have to teach it that the first 128 KB memory of free memory are
+> magic and should not be touched?
+>
+> So the answer is to mark it as reserved. This way, no UEFI tools,
+> bootloaders etc will ever try to use it.
 
-Every time a new architecture defines the IMA architecture specific
-functions - arch_ima_get_secureboot() and arch_ima_get_policy(), the IMA
-include file needs to be updated. To avoid this "noise", this patch
-defines a new IMA Kconfig IMA_SECURE_AND_OR_TRUSTED_BOOT option, allowing
-the different architectures to select it.
+Sounds good to me. We are currently discussing the best approach to
+provide reserved memory
+information to U-Boot/EDK2. The idea is to U-Boot/EDK2 may have to
+update the DT with
+reserved-memory node so that Linux is aware of the reservation as well.
 
-Suggested-by: Linus Torvalds <torvalds@linux-foundation.org>
-Signed-off-by: Nayna Jain <nayna@linux.ibm.com>
-Acked-by: Ard Biesheuvel <ardb@kernel.org>
-Cc: Ard Biesheuvel <ardb@kernel.org>
-Cc: Philipp Rudo <prudo@linux.ibm.com>
-Cc: Michael Ellerman <mpe@ellerman.id.au>
----
-v3:
-* Removes CONFIG_IMA dependency. Thanks Ard.
-* Updated the patch with improvements suggested by Michael. It now uses
-"imply" instead of "select". Thanks Michael.
-* Replaced the CONFIG_IMA in x86 and s390 with new config, else it was
-resulting in redefinition when the IMA_SECURE_AND_OR_TRUSTED_BOOT
-is not enabled. Thanks to Mimi for identifying the problem.
-* Removed "#ifdef EFI" check in the arch/x86/Makefile for compiling
-ima_arch.c file.
-* Ard, Thanks for your Acked-by. I have changed the arch/x86/Makefile in
-this version. Can you please review again and confirm ?
-* Rudo, Thanks for your review. I have changed arch/s390/Makefile as well.
-Can you also please review again ?
+Then, in the stub, you can
+> tweak the existing code to cheat a bit, and make the TEXT_OFFSET
+> window overlap the 128 KB reserved window at the bottom of memory.
+> Doing that in the stub is fine - this is part of the kernel so it can
+> know about crazy RISC-V rules.
 
-v2:
-* Fixed the issue identified by Mimi. Thanks Mimi, Ard, Heiko and Michael for
-discussing the fix.
+I am bit confused here. Why does EFI stub need to overlap the reserved memory.
+I thought EFI stub just needs to parse the DT to find out the reserved
+memory region to make sure
+that it doesn't try to access/overwrite that region.
 
- arch/powerpc/Kconfig           | 1 +
- arch/s390/Kconfig              | 1 +
- arch/s390/kernel/Makefile      | 2 +-
- arch/x86/Kconfig               | 1 +
- arch/x86/kernel/Makefile       | 4 +---
- include/linux/ima.h            | 3 +--
- security/integrity/ima/Kconfig | 7 +++++++
- 7 files changed, 13 insertions(+), 6 deletions(-)
-
-diff --git a/arch/powerpc/Kconfig b/arch/powerpc/Kconfig
-index 497b7d0b2d7e..5b9f1cba2a44 100644
---- a/arch/powerpc/Kconfig
-+++ b/arch/powerpc/Kconfig
-@@ -979,6 +979,7 @@ config PPC_SECURE_BOOT
- 	bool
- 	depends on PPC_POWERNV
- 	depends on IMA_ARCH_POLICY
-+	imply IMA_SECURE_AND_OR_TRUSTED_BOOT
- 	help
- 	  Systems with firmware secure boot enabled need to define security
- 	  policies to extend secure boot to the OS. This config allows a user
-diff --git a/arch/s390/Kconfig b/arch/s390/Kconfig
-index 8abe77536d9d..59c216af6264 100644
---- a/arch/s390/Kconfig
-+++ b/arch/s390/Kconfig
-@@ -195,6 +195,7 @@ config S390
- 	select ARCH_HAS_FORCE_DMA_UNENCRYPTED
- 	select SWIOTLB
- 	select GENERIC_ALLOCATOR
-+	imply IMA_SECURE_AND_OR_TRUSTED_BOOT
- 
- 
- config SCHED_OMIT_FRAME_POINTER
-diff --git a/arch/s390/kernel/Makefile b/arch/s390/kernel/Makefile
-index 2b1203cf7be6..578a6fa82ea4 100644
---- a/arch/s390/kernel/Makefile
-+++ b/arch/s390/kernel/Makefile
-@@ -70,7 +70,7 @@ obj-$(CONFIG_JUMP_LABEL)	+= jump_label.o
- obj-$(CONFIG_KEXEC_FILE)	+= machine_kexec_file.o kexec_image.o
- obj-$(CONFIG_KEXEC_FILE)	+= kexec_elf.o
- 
--obj-$(CONFIG_IMA)		+= ima_arch.o
-+obj-$(CONFIG_IMA_SECURE_AND_OR_TRUSTED_BOOT)	+= ima_arch.o
- 
- obj-$(CONFIG_PERF_EVENTS)	+= perf_event.o perf_cpum_cf_common.o
- obj-$(CONFIG_PERF_EVENTS)	+= perf_cpum_cf.o perf_cpum_sf.o
-diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
-index beea77046f9b..dcf5b1729f7c 100644
---- a/arch/x86/Kconfig
-+++ b/arch/x86/Kconfig
-@@ -230,6 +230,7 @@ config X86
- 	select VIRT_TO_BUS
- 	select X86_FEATURE_NAMES		if PROC_FS
- 	select PROC_PID_ARCH_STATUS		if PROC_FS
-+	imply IMA_SECURE_AND_OR_TRUSTED_BOOT    if EFI
- 
- config INSTRUCTION_DECODER
- 	def_bool y
-diff --git a/arch/x86/kernel/Makefile b/arch/x86/kernel/Makefile
-index 9b294c13809a..cfef37a27def 100644
---- a/arch/x86/kernel/Makefile
-+++ b/arch/x86/kernel/Makefile
-@@ -154,6 +154,4 @@ ifeq ($(CONFIG_X86_64),y)
- 	obj-y				+= vsmp_64.o
- endif
- 
--ifdef CONFIG_EFI
--obj-$(CONFIG_IMA)			+= ima_arch.o
--endif
-+obj-$(CONFIG_IMA_SECURE_AND_OR_TRUSTED_BOOT)	+= ima_arch.o
-diff --git a/include/linux/ima.h b/include/linux/ima.h
-index 1659217e9b60..aefe758f4466 100644
---- a/include/linux/ima.h
-+++ b/include/linux/ima.h
-@@ -30,8 +30,7 @@ extern void ima_kexec_cmdline(const void *buf, int size);
- extern void ima_add_kexec_buffer(struct kimage *image);
- #endif
- 
--#if (defined(CONFIG_X86) && defined(CONFIG_EFI)) || defined(CONFIG_S390) \
--	|| defined(CONFIG_PPC_SECURE_BOOT)
-+#ifdef CONFIG_IMA_SECURE_AND_OR_TRUSTED_BOOT
- extern bool arch_ima_get_secureboot(void);
- extern const char * const *arch_get_ima_policy(void);
- #else
-diff --git a/security/integrity/ima/Kconfig b/security/integrity/ima/Kconfig
-index 3f3ee4e2eb0d..edde88dbe576 100644
---- a/security/integrity/ima/Kconfig
-+++ b/security/integrity/ima/Kconfig
-@@ -327,3 +327,10 @@ config IMA_QUEUE_EARLY_BOOT_KEYS
- 	depends on IMA_MEASURE_ASYMMETRIC_KEYS
- 	depends on SYSTEM_TRUSTED_KEYRING
- 	default y
-+
-+config IMA_SECURE_AND_OR_TRUSTED_BOOT
-+       bool
-+       depends on IMA_ARCH_POLICY
-+       help
-+          This option is selected by architectures to enable secure and/or
-+          trusted boot based on IMA runtime policies.
 -- 
-2.17.1
-
+Regards,
+Atish
