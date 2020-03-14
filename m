@@ -7,47 +7,47 @@ X-Spam-Status: No, score=-9.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	MAILING_LIST_MULTI,MSGID_FROM_MTA_HEADER,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 839F4C4CECE
-	for <linux-efi@archiver.kernel.org>; Sun, 15 Mar 2020 01:32:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 13890C0044D
+	for <linux-efi@archiver.kernel.org>; Sun, 15 Mar 2020 01:32:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 516AB20771
-	for <linux-efi@archiver.kernel.org>; Sun, 15 Mar 2020 01:32:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D94FE2076A
+	for <linux-efi@archiver.kernel.org>; Sun, 15 Mar 2020 01:32:17 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=microsoft.com header.i=@microsoft.com header.b="Xq7cxraS"
+	dkim=pass (1024-bit key) header.d=microsoft.com header.i=@microsoft.com header.b="OFtconn8"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726478AbgCOBcN (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 14 Mar 2020 21:32:13 -0400
+        id S1727385AbgCOBbu (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 14 Mar 2020 21:31:50 -0400
 Received: from mail-mw2nam10on2123.outbound.protection.outlook.com ([40.107.94.123]:18974
         "EHLO NAM10-MW2-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1727401AbgCOBbx (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Sat, 14 Mar 2020 21:31:53 -0400
+        id S1727356AbgCOBbt (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Sat, 14 Mar 2020 21:31:49 -0400
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=WN8Ehu4TOAFLkoX6fUVUNF8K2d3matrnLwfO4PeoXtb2ulwiCFNvDh1qXSW1Oh1VIdXdGq6xW4pjoGTs5rmFkEmpNrN/ZCUH2zOTu6Z2k9Lin1lPIsRUI0P+kZvbSG/G41jflfekJITc+LtXyCtGeP8vslIfS6U+nkD7jYpqy5+S8fJLbv/y3UICRRMGx0vfT/n+ruSfhGF+WSbpyFYSoCe3ZAVqpBauuK9q9cKY4FLGdUcLX3OCdk90jrZCAkMhJaOpqU+tA8PKqo9dmrbrrTPKTjmHsymqXG+7e3V53lLlNiOfJRmPzXw0uk45W7LDca/rLY+JH16WbOexSuSiXw==
+ b=JCOAkCZvPx7tA5Uv/xAPpwvM7zvGGEYQt2QWaC6HntweiquaF0exLtv/ZbCu+b9YLID2KNBoQrKy1JHHIaXFtEm0zElQWDHOsECQCYLLiQshvdYAdTwLG3+iTWisO4i7fK/Xio3CinlW3HsKbIg5rPkBlSc3WNZoG0UVu2K5aUNpWMzGZaRmzhJAMRISv9MTOErqFB0LAeySTK9judqBmqNwSLBfXA9CY+HcQwsaPtI9FqM72iuQyvspULxKzNBA8Clpfs8FClef8u5aU1Gu8yA1Ti/mVioWhXAPWK7u5aiTy2SNvLK+guHMoJxgzhGv9/6wuhf4YQEKKBNGvmZrOQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=t2V69NKeaHto3g1dhRW/YvOGh1RIGqgL7YLwR1BORBM=;
- b=nXjVWcu+vyTuntoWdADYZpFPrVEjfLoMc1eUKrII1yYwxhVFDVISdvf0WZoMltEjVfEMlSjvOPIg60Wor9iUp/xbmRNGqJjBhUWgNJmrSJcOzjx4cHXiv/0TwZmEneU9tQJipxKtalZZEQpCNGULJ1PGYGIemvpcttZtieRagk+PJxIlc1Z7/sfqFveIeXD0cpXu5EIoXr6Xikhn6QXpCh34J+O3U31KJntblzZKoVAfV9tKVWLNXSmIrCU5JvkHvFChvC7I4u20mGyghn6L/wX2IS/C6DauXgqkwsY1oBZIq4+pWSzDfi/Zs+DjscwKib0H9ePCZZM12wvh26A8LQ==
+ bh=zEGJ2pGVOoA/475BwOAc1zBZDs85myo5tbrBv9fk6gs=;
+ b=KQki/ICY5T7Yo7w3BjTvCBhxq7Mase1EzNfg9d5iy2bEgpa2BXO4TAnalh3jOvbXnQ2CD9DBnk1C0whpS+Cwa4kNODN1AkAlZ/ND92iTLU+z0Gower/Ozv3FmqbC8lunNRSLm1jykYDQcBvcqqtua/QgikcMsevd0lnm/JScvpd5QeYtYSkgMsURcK/Chwfpj50cbXYTIf4emwrmm9CbI7Hm64eaTm6FjHTaYOynC577GUTYLAMeqCFTtNoXMO++amkTRXAUobawK4UMDceuNP9KeMxhKGDNRI4jxsYebklB6VViAM1ne6fCecrv03UCXPr62RtOJEshdjlUoNOI/A==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=microsoft.com; dmarc=pass action=none
  header.from=microsoft.com; dkim=pass header.d=microsoft.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=t2V69NKeaHto3g1dhRW/YvOGh1RIGqgL7YLwR1BORBM=;
- b=Xq7cxraSh/D5JHZe7aYoPO0iNxPIfiK/eE+TOsqL6lz5TB7kmb0RSISiG66REZsrRw8q8dM7DN70yeSOkzUDLPBPp+jZE6dV4Tp0pSFLn/PZlMwOFcIAZzacWEy+PmL6Wua0dWU2UWYaFfIe2e5kumDue7BWL7Swto2LVsNo0BA=
+ bh=zEGJ2pGVOoA/475BwOAc1zBZDs85myo5tbrBv9fk6gs=;
+ b=OFtconn8tvxTC//+CKBLiEWqGqhRmljXERNtTSt4uo32x115srrKJrI3bP9gryJ8Ne1CUAwC0gFkOWyKMQklHFV+wEDoUtrydbOW3WjjDNIestCstVUl/6bHOnE+8DIbDEYGEhp8upsmCNHcxE2nybfCY+cjxehRjt7B2gsce/E=
 Authentication-Results: spf=none (sender IP is )
  smtp.mailfrom=mikelley@microsoft.com; 
 Received: from SN6PR2101MB0927.namprd21.prod.outlook.com (2603:10b6:805:a::18)
  by SN6PR2101MB1632.namprd21.prod.outlook.com (2603:10b6:805:53::25) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.2835.4; Sat, 14 Mar
- 2020 15:36:07 +0000
+ 2020 15:36:14 +0000
 Received: from SN6PR2101MB0927.namprd21.prod.outlook.com
  ([fe80::a819:6437:1733:17b3]) by SN6PR2101MB0927.namprd21.prod.outlook.com
  ([fe80::a819:6437:1733:17b3%9]) with mapi id 15.20.2835.008; Sat, 14 Mar 2020
- 15:36:07 +0000
+ 15:36:14 +0000
 From:   Michael Kelley <mikelley@microsoft.com>
 To:     will@kernel.org, ardb@kernel.org, arnd@arndb.de,
         catalin.marinas@arm.com, mark.rutland@arm.com, maz@kernel.org,
@@ -58,9 +58,9 @@ To:     will@kernel.org, ardb@kernel.org, arnd@arndb.de,
         jasowang@redhat.com, marcelo.cerri@canonical.com, kys@microsoft.com
 Cc:     mikelley@microsoft.com, sunilmut@microsoft.com,
         boqun.feng@gmail.com
-Subject: [PATCH v6 04/10] arm64: hyperv: Add memory alloc/free functions for Hyper-V size pages
-Date:   Sat, 14 Mar 2020 08:35:13 -0700
-Message-Id: <1584200119-18594-5-git-send-email-mikelley@microsoft.com>
+Subject: [PATCH v6 09/10] arm64: efi: Export screen_info
+Date:   Sat, 14 Mar 2020 08:35:18 -0700
+Message-Id: <1584200119-18594-10-git-send-email-mikelley@microsoft.com>
 X-Mailer: git-send-email 1.8.3.1
 In-Reply-To: <1584200119-18594-1-git-send-email-mikelley@microsoft.com>
 References: <1584200119-18594-1-git-send-email-mikelley@microsoft.com>
@@ -70,119 +70,59 @@ X-ClientProxiedBy: MWHPR22CA0047.namprd22.prod.outlook.com
  (2603:10b6:805:a::18)
 MIME-Version: 1.0
 X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from mhkkerneltest.corp.microsoft.com (131.107.159.247) by MWHPR22CA0047.namprd22.prod.outlook.com (2603:10b6:300:69::33) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.2814.18 via Frontend Transport; Sat, 14 Mar 2020 15:36:05 +0000
+Received: from mhkkerneltest.corp.microsoft.com (131.107.159.247) by MWHPR22CA0047.namprd22.prod.outlook.com (2603:10b6:300:69::33) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.2814.18 via Frontend Transport; Sat, 14 Mar 2020 15:36:12 +0000
 X-Mailer: git-send-email 1.8.3.1
 X-Originating-IP: [131.107.159.247]
 X-MS-PublicTrafficType: Email
 X-MS-Office365-Filtering-HT: Tenant
-X-MS-Office365-Filtering-Correlation-Id: 86ef4915-8e75-4bbf-dcdb-08d7c82d6999
+X-MS-Office365-Filtering-Correlation-Id: aa18a8ac-fb5b-45a4-0360-08d7c82d6e08
 X-MS-TrafficTypeDiagnostic: SN6PR2101MB1632:|SN6PR2101MB1632:|SN6PR2101MB1632:
 X-MS-Exchange-Transport-Forked: True
 X-LD-Processed: 72f988bf-86f1-41af-91ab-2d7cd011db47,ExtAddr
-X-Microsoft-Antispam-PRVS: <SN6PR2101MB16328E4EB44CFFD346077C4DD7FB0@SN6PR2101MB1632.namprd21.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:6430;
+X-Microsoft-Antispam-PRVS: <SN6PR2101MB1632D8BED20203D17C2B48C6D7FB0@SN6PR2101MB1632.namprd21.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:6790;
 X-Forefront-PRVS: 034215E98F
-X-Forefront-Antispam-Report: SFV:NSPM;SFS:(10019020)(4636009)(136003)(366004)(39860400002)(346002)(376002)(396003)(199004)(10290500003)(478600001)(2906002)(6486002)(36756003)(8936002)(66946007)(26005)(86362001)(2616005)(16526019)(186003)(956004)(66556008)(6636002)(66476007)(4326008)(7416002)(316002)(81166006)(8676002)(81156014)(52116002)(7696005)(6666004)(5660300002)(921003)(1121003);DIR:OUT;SFP:1102;SCL:1;SRVR:SN6PR2101MB1632;H:SN6PR2101MB0927.namprd21.prod.outlook.com;FPR:;SPF:None;LANG:en;PTR:InfoNoRecords;A:1;
+X-Forefront-Antispam-Report: SFV:NSPM;SFS:(10019020)(4636009)(136003)(366004)(39860400002)(346002)(376002)(396003)(199004)(10290500003)(478600001)(2906002)(6486002)(36756003)(8936002)(66946007)(26005)(86362001)(2616005)(16526019)(186003)(956004)(66556008)(6636002)(66476007)(4326008)(7416002)(316002)(81166006)(8676002)(81156014)(52116002)(7696005)(5660300002)(4744005)(921003)(1121003);DIR:OUT;SFP:1102;SCL:1;SRVR:SN6PR2101MB1632;H:SN6PR2101MB0927.namprd21.prod.outlook.com;FPR:;SPF:None;LANG:en;PTR:InfoNoRecords;A:1;
 Received-SPF: None (protection.outlook.com: microsoft.com does not designate
  permitted sender hosts)
 X-MS-Exchange-SenderADCheck: 1
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: xJTg6sD5zPlTVyE446APU6nwIRyZQF9KoJPCDN60PmHqCjj6OdxpIHhoerG0bvkItNUfMkn3SoT6JR0D8L2BmLNwHJetq7E+lMjPXk62wPHdrOtkogyuNenslbOOTb5Js5GHh9yb0AtTMPTeVPcTlOPQOWFJQZxY1EsjgPWrHlJIf+FBC0GfeOlD0jPBWZhfksa6hnutnRFChWpBRr2cROosu5o/vx9dHbysW2V6z8ooUbIbOo7RzHuEquew0xe0E/9l4AY2+S1+a73yaEY/hlNMEbM7V7blN99c4QLLRD4cnFCmCucvin0ufBUEh8prlUP78KKgqE+oh14j61JLegQVW6m1I5P92BL6qcHSDYiNZQFVLbvmSv2WfF5pYTL41PNWnJfAODDXF/S+tlIeHACvsOT+32fiTtDsYRSQenNzjUQBVA3TFtjMdhuxzIag9rj0yc9qjDUo9gJwndR4+UOPzhWqaQxA+Cfmv6IKVtwodj344zCa+QK8ZSaRlD1U
-X-MS-Exchange-AntiSpam-MessageData: CKq4bdrQuYVxw3um1J8bYVSNJ7VkvkENgp/rfN/B0ufJArfh4aYIy1U5To3A06RM5f/lFR2xqsgZgOd/sVkVn+g3xUGLRFrg1V7tzY5thAHV/pfQBjasaA1Wl5gKFNYWKN4ZfwGSJjDeMccV/aQzNg==
+X-Microsoft-Antispam-Message-Info: gbdB0tH8tKMiUThQwYWGKZOxRnzTq127KlSzAswxDBC95h1k5YnSKKp9yRxZiximTAfmMkOh7m6o4CFYMXv7cFcDvQEy0H4yc3FXtstTKmn4LOnAzS/P+0LbITjzynrRY1oBm2/rS5n1z1KYeX88ETeZqSRTUdijmhtziWoiyqoqNMakPx1701tzyVYGMivPnTJrs7xGkVNGUrfug2pO0ZXrGZPOj8wm4u8p95hg8AX4lbE1cuO6XwrickuRkceHyfE+nqdJr+VTGE0ftBmak4Nk63dKdfImTzOJ9N9BYjwB0sY+/IYgBl4chXTgdfAlO5k8CejpvAjNd3WPIt3gQ35fTvsj/RV0aKGUhBdDlEIUvY2xkJZM+PHs4rrljn7AXqQBz+dQlUmf24YAtZiToM3Fw3uq+p2Obu/y8OpCcnVfI2Mv/qEbcIqMUOPhgBxJ3O+X9vviWLV0REcElQTvtrJomWcuPE0IQ+7BO3IosUmpCE2ZWI3t4/aBbnS+PtoJ
+X-MS-Exchange-AntiSpam-MessageData: uj/Hisrwvd9nKQv9zZzTKBbJdCFbA+a/Xi8IMlDGwTR/33vJy0BTxVRgXf2jB1T5M2p3nGvS01NabtHqA2C6tmBIFjrfsv7YLpU7yqiQVuXUpgpwo4LF7lvlJxm9MEQCUk5Bcw/CKKCw+TDEoTvOvA==
 X-OriginatorOrg: microsoft.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 86ef4915-8e75-4bbf-dcdb-08d7c82d6999
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 14 Mar 2020 15:36:06.8578
+X-MS-Exchange-CrossTenant-Network-Message-Id: aa18a8ac-fb5b-45a4-0360-08d7c82d6e08
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 14 Mar 2020 15:36:14.3225
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 72f988bf-86f1-41af-91ab-2d7cd011db47
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 5C0DXU9F/QfEdL2v8CKLs1UHzUYhWNqkJtrpzXgun5cAi4L32noayJ6xW3V78QOt/jxsAiIZ9/SvuW6+UazfJg==
+X-MS-Exchange-CrossTenant-UserPrincipalName: tE5H610I12vVHMne5ENm75qulXv5rQnTdmxZsYsCEtGs7uDNtrXkXw6eksn5HAj3HlNQkc5jp3NoTU+AmOuEzw==
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: SN6PR2101MB1632
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Add ARM64-specific code to allocate memory with HV_HYP_PAGE_SIZE
-size and alignment. These are for use when pages need to be shared
-with Hyper-V. Separate functions are needed as the page size used
-by Hyper-V may not be the same as the guest page size.
-
-This code is built only when CONFIG_HYPERV is enabled.
+The Hyper-V frame buffer driver may be built as a module, and
+it needs access to screen_info. So export screen_info.
 
 Signed-off-by: Michael Kelley <mikelley@microsoft.com>
 ---
- arch/arm64/hyperv/hv_core.c    | 34 ++++++++++++++++++++++++++++++++++
- include/asm-generic/mshyperv.h |  5 +++++
- 2 files changed, 39 insertions(+)
+ arch/arm64/kernel/efi.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/arch/arm64/hyperv/hv_core.c b/arch/arm64/hyperv/hv_core.c
-index 272c348..4aa6b8f 100644
---- a/arch/arm64/hyperv/hv_core.c
-+++ b/arch/arm64/hyperv/hv_core.c
-@@ -17,12 +17,46 @@
- #include <linux/slab.h>
- #include <linux/hyperv.h>
- #include <linux/arm-smccc.h>
-+#include <linux/string.h>
- #include <asm-generic/bug.h>
- #include <asm/hyperv-tlfs.h>
- #include <asm/mshyperv.h>
+diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+index d0cf596..8ff557a 100644
+--- a/arch/arm64/kernel/efi.c
++++ b/arch/arm64/kernel/efi.c
+@@ -55,6 +55,7 @@ static __init pteval_t create_mapping_protection(efi_memory_desc_t *md)
  
+ /* we will fill this structure from the stub, so don't put it in .bss */
+ struct screen_info screen_info __section(.data);
++EXPORT_SYMBOL(screen_info);
  
- /*
-+ * Functions for allocating and freeing memory with size and
-+ * alignment HV_HYP_PAGE_SIZE. These functions are needed because
-+ * the guest page size may not be the same as the Hyper-V page
-+ * size. We depend upon kmalloc() aligning power-of-two size
-+ * allocations to the allocation size boundary, so that the
-+ * allocated memory appears to Hyper-V as a page of the size
-+ * it expects.
-+ *
-+ * These functions are used by arm64 specific code as well as
-+ * arch independent Hyper-V drivers.
-+ */
-+
-+void *hv_alloc_hyperv_page(void)
-+{
-+	BUILD_BUG_ON(PAGE_SIZE <  HV_HYP_PAGE_SIZE);
-+	return kmalloc(HV_HYP_PAGE_SIZE, GFP_KERNEL);
-+}
-+EXPORT_SYMBOL_GPL(hv_alloc_hyperv_page);
-+
-+void *hv_alloc_hyperv_zeroed_page(void)
-+{
-+	return kzalloc(HV_HYP_PAGE_SIZE, GFP_KERNEL);
-+}
-+EXPORT_SYMBOL_GPL(hv_alloc_hyperv_zeroed_page);
-+
-+void hv_free_hyperv_page(unsigned long addr)
-+{
-+	kfree((void *)addr);
-+}
-+EXPORT_SYMBOL_GPL(hv_free_hyperv_page);
-+
-+
-+/*
-  * hv_do_hypercall- Invoke the specified hypercall
-  */
- u64 hv_do_hypercall(u64 control, void *input, void *output)
-diff --git a/include/asm-generic/mshyperv.h b/include/asm-generic/mshyperv.h
-index b3f1082..1a7c4c5 100644
---- a/include/asm-generic/mshyperv.h
-+++ b/include/asm-generic/mshyperv.h
-@@ -99,6 +99,11 @@ static inline void vmbus_signal_eom(struct hv_message *msg, u32 old_msg_type)
- void hv_setup_crash_handler(void (*handler)(struct pt_regs *regs));
- void hv_remove_crash_handler(void);
- 
-+void *hv_alloc_hyperv_page(void);
-+void *hv_alloc_hyperv_zeroed_page(void);
-+void hv_free_hyperv_page(unsigned long addr);
-+
-+
- #if IS_ENABLED(CONFIG_HYPERV)
- /*
-  * Hypervisor's notion of virtual processor ID is different from
+ int __init efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md)
+ {
 -- 
 1.8.3.1
 
