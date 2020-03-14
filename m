@@ -1,147 +1,129 @@
-Return-Path: <SRS0=jOJV=47=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=e6bq=5A=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+X-Spam-Status: No, score=-9.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,MSGID_FROM_MTA_HEADER,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 62BB3C10DCE
-	for <linux-efi@archiver.kernel.org>; Sat, 14 Mar 2020 03:23:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9CA07C1975A
+	for <linux-efi@archiver.kernel.org>; Sun, 15 Mar 2020 01:31:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 298CE2067C
-	for <linux-efi@archiver.kernel.org>; Sat, 14 Mar 2020 03:23:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 71E1520637
+	for <linux-efi@archiver.kernel.org>; Sun, 15 Mar 2020 01:31:43 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="craGocge"
+	dkim=pass (1024-bit key) header.d=microsoft.com header.i=@microsoft.com header.b="UUIacZrL"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726559AbgCNDXk (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 13 Mar 2020 23:23:40 -0400
-Received: from mail-pj1-f68.google.com ([209.85.216.68]:38386 "EHLO
-        mail-pj1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726530AbgCNDXk (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 13 Mar 2020 23:23:40 -0400
-Received: by mail-pj1-f68.google.com with SMTP id m15so4684087pje.3
-        for <linux-efi@vger.kernel.org>; Fri, 13 Mar 2020 20:23:39 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=rfdOz8mHYBRUomVk15RzHjMTiFUq9xKO13xgLgIv0XA=;
-        b=craGocgehlme7am/VOSIck8j0h/Fo6fJ2K+c+lafI7yDiPYy7qfoRnxmy96n5NvPJm
-         c0smWFIdFvCK8fd8LWhIJWWjeGW6PZkhg+iWO8X2UcTeeq+sTGhXI4NX57fHDqJDywiY
-         i8YiQ65plSuUnpyGjV36xL8WIjtRAnxdp/Bhw=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=rfdOz8mHYBRUomVk15RzHjMTiFUq9xKO13xgLgIv0XA=;
-        b=TmtQVxF09YWK5hBntqAN660vbMIpxXLpNPbW3QYTa2A5f3wLCkKg47fRc6cXnFzOr1
-         cRESr4pMYA1v3muEzKkWRPh6vPx+xUyBRy5hxvjh8x89vLMaSFVltJYja4anH1B2nSjc
-         kvuL5a5Q/o2oUoKc5wVvkRpmfIrY4SRR661CYPu70EoxT/UkJeImz2i2fnA0/eTn+t8f
-         ykaRo/ZduIw8cF/PXeG9Otoem4VXvy0FiMxmH7gtj+fNu9GcQAgP4nuySdp2HFodAQX5
-         SJ8j/RwOMjSOykg3GBTW60gws/sFp49OH1V53yPSoRnICDwBI0rQYtkRQ1J+7VwJraXm
-         SXuA==
-X-Gm-Message-State: ANhLgQ2woCLowPg3mm+9Fu9PTE023Or4+e4AGFQxX/fO2i9fKJpwyYYG
-        bCxjWc4nB9kthN2z6bv4X4aClw==
-X-Google-Smtp-Source: ADFU+vtqhny53+UwKx0kI/rxGpW3RocBkKNvILOn/f4BjoCfsdT765v8Ax+3V0NOKKSQK+JcSK+PiA==
-X-Received: by 2002:a17:90b:344:: with SMTP id fh4mr12401643pjb.126.1584156219439;
-        Fri, 13 Mar 2020 20:23:39 -0700 (PDT)
-Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
-        by smtp.gmail.com with ESMTPSA id 19sm20623109pgx.63.2020.03.13.20.23.37
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 13 Mar 2020 20:23:37 -0700 (PDT)
-Date:   Fri, 13 Mar 2020 20:23:37 -0700
-From:   Kees Cook <keescook@chromium.org>
-To:     Qiuxu Zhuo <qiuxu.zhuo@intel.com>
-Cc:     ardb@kernel.org, tony.luck@intel.com, matt@codeblueprint.co.uk,
-        liming.gao@intel.com, linux-efi@vger.kernel.org
-Subject: Re: [PATCH v6 1/2] efi: Add 'nr_config_table' variable in efi
- structure
-Message-ID: <202003132023.68BFCB0@keescook>
-References: <20200312011324.70701-1-qiuxu.zhuo@intel.com>
+        id S1727327AbgCOBbk (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 14 Mar 2020 21:31:40 -0400
+Received: from mail-mw2nam10on2097.outbound.protection.outlook.com ([40.107.94.97]:13053
+        "EHLO NAM10-MW2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1727320AbgCOBbj (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Sat, 14 Mar 2020 21:31:39 -0400
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=Ch1KfLqAGOu/pIdmuD08W6n6ANb6CZwrE4IL3YBMs2s//eKcK/Oruxr747wFvHXvic3jmLKtyNu9YXDJN4I6dn9htF7KSfqPl0gvPHHWKO53xpia+roBLbTzgmuWq+7/XSVHJdSghgOFko+QesX70RjB+MsQk6dpK1p/HUcpXQDAgT6jULfFDqToiaOU7ST6D2TRWYynPg6JkW0+f8eGLWRZX8q4+xvyZvXXUur70z5byE4nOlc0V9iWBoSgCllNVQPjjgWsfiyq50PacZ4YIj9b2+gvUlevbgyUsMxezYxHr9zzRpWUDGd8vdKQG+fpfw5xizfJktSc9ez5LHNVKA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=+PV712g3ms28H2QFj0D+vWdL+gvp+JVKNUthg+fNuV4=;
+ b=Ce+b48i/FmDby3pP9lV4vSK0FVcitNhWRmsV2U7cv6Ir2KmCIZc5qvXxnfgkgxOjaDyXaJO5c8T21nOSOC0TAM/NAEBG4B8GXq/bwEkInj6pwCp3Z9BX/bAZKgBoe+8xD1U514uccEB7PCxThp/3AjgOQhpeNZMVF/LrPsQetZJDyJO+D10frtilfpLTcKuETyLiyUZmntCIfD+faguCj3IyBBBDQnawaIC/vP3+PICDD3e69Yoo+IJZEJFmaQ0ErSj7qkMRASts/DcNionF1oUzXYo6y7EqYfQh7SO6KKJya743/S+5BgTTeRIr0ut/FkL/t3nnlz8OeQMbh817pA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=microsoft.com; dmarc=pass action=none
+ header.from=microsoft.com; dkim=pass header.d=microsoft.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=+PV712g3ms28H2QFj0D+vWdL+gvp+JVKNUthg+fNuV4=;
+ b=UUIacZrLAouOhySM2YNnfqUXVZT5ln+4MGb/SEGBV3Pg6H7WIpkCUN+tlVx5El2FOUz8GjrZFFOjhMstYiZ5GmG8/iHDCFzRz1nyrsPSjnd+KiZm1QhkjbgvkyckVIHcB4E+ZpedlTSeyXK+EsMwwDMzqjklrZV0wBL9pvTSKac=
+Authentication-Results: spf=none (sender IP is )
+ smtp.mailfrom=mikelley@microsoft.com; 
+Received: from SN6PR2101MB0927.namprd21.prod.outlook.com (2603:10b6:805:a::18)
+ by SN6PR2101MB1632.namprd21.prod.outlook.com (2603:10b6:805:53::25) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.2835.4; Sat, 14 Mar
+ 2020 15:36:04 +0000
+Received: from SN6PR2101MB0927.namprd21.prod.outlook.com
+ ([fe80::a819:6437:1733:17b3]) by SN6PR2101MB0927.namprd21.prod.outlook.com
+ ([fe80::a819:6437:1733:17b3%9]) with mapi id 15.20.2835.008; Sat, 14 Mar 2020
+ 15:36:04 +0000
+From:   Michael Kelley <mikelley@microsoft.com>
+To:     will@kernel.org, ardb@kernel.org, arnd@arndb.de,
+        catalin.marinas@arm.com, mark.rutland@arm.com, maz@kernel.org,
+        linux-arm-kernel@lists.infradead.org, gregkh@linuxfoundation.org,
+        linux-kernel@vger.kernel.org, linux-hyperv@vger.kernel.org,
+        linux-efi@vger.kernel.org, linux-arch@vger.kernel.org,
+        olaf@aepfle.de, apw@canonical.com, vkuznets@redhat.com,
+        jasowang@redhat.com, marcelo.cerri@canonical.com, kys@microsoft.com
+Cc:     mikelley@microsoft.com, sunilmut@microsoft.com,
+        boqun.feng@gmail.com
+Subject: [PATCH v6 02/10] arm/arm64: smccc-1.1: Add vendor specific owner definition
+Date:   Sat, 14 Mar 2020 08:35:11 -0700
+Message-Id: <1584200119-18594-3-git-send-email-mikelley@microsoft.com>
+X-Mailer: git-send-email 1.8.3.1
+In-Reply-To: <1584200119-18594-1-git-send-email-mikelley@microsoft.com>
+References: <1584200119-18594-1-git-send-email-mikelley@microsoft.com>
+Content-Type: text/plain
+X-ClientProxiedBy: MWHPR22CA0047.namprd22.prod.outlook.com
+ (2603:10b6:300:69::33) To SN6PR2101MB0927.namprd21.prod.outlook.com
+ (2603:10b6:805:a::18)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200312011324.70701-1-qiuxu.zhuo@intel.com>
+X-MS-Exchange-MessageSentRepresentingType: 1
+Received: from mhkkerneltest.corp.microsoft.com (131.107.159.247) by MWHPR22CA0047.namprd22.prod.outlook.com (2603:10b6:300:69::33) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.2814.18 via Frontend Transport; Sat, 14 Mar 2020 15:36:02 +0000
+X-Mailer: git-send-email 1.8.3.1
+X-Originating-IP: [131.107.159.247]
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-HT: Tenant
+X-MS-Office365-Filtering-Correlation-Id: 4a134102-4fd6-4387-1abb-08d7c82d67d3
+X-MS-TrafficTypeDiagnostic: SN6PR2101MB1632:|SN6PR2101MB1632:|SN6PR2101MB1632:
+X-MS-Exchange-Transport-Forked: True
+X-LD-Processed: 72f988bf-86f1-41af-91ab-2d7cd011db47,ExtAddr
+X-Microsoft-Antispam-PRVS: <SN6PR2101MB16326D7E357D07CD5FE99651D7FB0@SN6PR2101MB1632.namprd21.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:2582;
+X-Forefront-PRVS: 034215E98F
+X-Forefront-Antispam-Report: SFV:NSPM;SFS:(10019020)(4636009)(136003)(366004)(39860400002)(346002)(376002)(396003)(199004)(10290500003)(478600001)(2906002)(6486002)(36756003)(8936002)(66946007)(26005)(86362001)(2616005)(16526019)(186003)(956004)(66556008)(6636002)(66476007)(4326008)(7416002)(316002)(81166006)(8676002)(81156014)(52116002)(7696005)(6666004)(5660300002)(4744005)(921003)(1121003);DIR:OUT;SFP:1102;SCL:1;SRVR:SN6PR2101MB1632;H:SN6PR2101MB0927.namprd21.prod.outlook.com;FPR:;SPF:None;LANG:en;PTR:InfoNoRecords;A:1;
+Received-SPF: None (protection.outlook.com: microsoft.com does not designate
+ permitted sender hosts)
+X-MS-Exchange-SenderADCheck: 1
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: D0Kh8yFy3reWaUxLQCaMYY2ktWMPKpRky5Rlm5BsEF1biqj8PpWSBK2TLn+hPBLTfMde0w7IyW0W9Ty8UVLvs+kNqWdAsTMsCh5yGLFYYcC5TqQfa2ExI+x1PBG0zqTdx96dhbZOPUOQ91+42BgE7MMzurgXjl00PG7Oj4U4/GtKOYjGgjiJMV2p1Kj51C1C6nDmP6BHLPNpG7uwBVPpYgRxIsYT97+H+vrfOt9xDZ8oJXLIThZ0XJRVCyiHpvK2D8j4at5NcOvym7Um0SUDmFB/N87cezrI+yovBcovVfO+pF0bqe17f5GtOnbaeyjBvSpQOK5ls82W12s2fxrooibtmpr/PoILwvVzBs6Xb4nJxXEGw33xpN1G5Eh5A8GDEeJ+VquepkNginoEieEm57cDs0SailplvLhpMBHeXsu9hwXB1VCk5FVAXDmVjsNCJBwtRnKgBs4Mc+5Olnq2HqHWEgyF0RPnjHY0R2ym2h1crxck5433O5M+EDirQ0sj
+X-MS-Exchange-AntiSpam-MessageData: ci0tGJWaCSEryytksHgXytNUSd2e+/ZIuZIJY2k6vbgADmeuXnH5jxHsgRDgXKgkNuNxy0SRbl9dvWb6pmDZevMEqaGucEQDvxYjjEaS3No4Lnq+VnVaN6MDxA4gGrzeOaS2Cu0whF1jjxP6jODECw==
+X-OriginatorOrg: microsoft.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 4a134102-4fd6-4387-1abb-08d7c82d67d3
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 14 Mar 2020 15:36:03.9085
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 72f988bf-86f1-41af-91ab-2d7cd011db47
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: KBiuNiMTlIE2xu4JI+QkBi0HgPBOa5+EfYGpGXY/WIbWuROln+X0LuwLwO+N6s2ym/PHkeddSFJFOd1HfBuTMw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SN6PR2101MB1632
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Thu, Mar 12, 2020 at 09:13:24AM +0800, Qiuxu Zhuo wrote:
-> The 'nr_config_table' and 'config_table' (already in efi structure)
-> in efi structure provide a way for some driver(e.g. capsule-pstore
-> goes through the configuration table to extract crash capsules to
-> aid in debugging) to iterate over the EFI configuration table array.
-> 
-> Signed-off-by: Qiuxu Zhuo <qiuxu.zhuo@intel.com>
-> ---
->  arch/x86/platform/efi/efi.c     | 1 +
->  drivers/firmware/efi/arm-init.c | 4 +++-
->  drivers/firmware/efi/efi.c      | 1 +
->  include/linux/efi.h             | 1 +
->  4 files changed, 6 insertions(+), 1 deletion(-)
-> 
-> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-> index ae923ee8e2b4..2f3065905e8a 100644
-> --- a/arch/x86/platform/efi/efi.c
-> +++ b/arch/x86/platform/efi/efi.c
-> @@ -456,6 +456,7 @@ void __init efi_init(void)
->  		return;
->  
->  	efi.config_table = (unsigned long)efi.systab->tables;
-> +	efi.nr_config_table = (unsigned long)efi.systab->nr_tables;
->  	efi.fw_vendor	 = (unsigned long)efi.systab->fw_vendor;
->  	efi.runtime	 = (unsigned long)efi.systab->runtime;
->  
-> diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
-> index d99f5b0c8a09..f2e2e1c1624b 100644
-> --- a/drivers/firmware/efi/arm-init.c
-> +++ b/drivers/firmware/efi/arm-init.c
-> @@ -143,8 +143,10 @@ static int __init uefi_init(void)
->  					 sizeof(efi_config_table_t),
->  					 arch_tables);
->  
-> -	if (!retval)
-> +	if (!retval) {
->  		efi.config_table = (unsigned long)efi.systab->tables;
-> +		efi.nr_config_table = (unsigned long)efi.systab->nr_tables;
-> +	}
->  
->  	early_memunmap(config_tables, table_size);
->  out:
-> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-> index 621220ab3d0e..1b599941bad3 100644
-> --- a/drivers/firmware/efi/efi.c
-> +++ b/drivers/firmware/efi/efi.c
-> @@ -46,6 +46,7 @@ struct efi __read_mostly efi = {
->  	.fw_vendor		= EFI_INVALID_TABLE_ADDR,
->  	.runtime		= EFI_INVALID_TABLE_ADDR,
->  	.config_table		= EFI_INVALID_TABLE_ADDR,
-> +	.nr_config_table	= 0,
->  	.esrt			= EFI_INVALID_TABLE_ADDR,
->  	.properties_table	= EFI_INVALID_TABLE_ADDR,
->  	.mem_attr_table		= EFI_INVALID_TABLE_ADDR,
-> diff --git a/include/linux/efi.h b/include/linux/efi.h
-> index 7efd7072cca5..13b3fe069f1f 100644
-> --- a/include/linux/efi.h
-> +++ b/include/linux/efi.h
-> @@ -913,6 +913,7 @@ extern struct efi {
->  	unsigned long fw_vendor;	/* fw_vendor */
->  	unsigned long runtime;		/* runtime table */
->  	unsigned long config_table;	/* config tables */
-> +	unsigned long nr_config_table; /* the number of config tables */
+In the SMCCC v1.1 spec, the Owning Entity Number in the Function
+Identifier may have a value of 6 for a vendor specific hypervisor
+service call. Add this #define.
 
-nit: please use a tab character before the comment to get correct
-alignemnt.
+Signed-off-by: Michael Kelley <mikelley@microsoft.com>
+---
+ include/linux/arm-smccc.h | 1 +
+ 1 file changed, 1 insertion(+)
 
->  	unsigned long esrt;		/* ESRT table */
->  	unsigned long properties_table;	/* properties table */
->  	unsigned long mem_attr_table;	/* memory attributes table */
-> -- 
-> 2.17.1
-> 
-
+diff --git a/include/linux/arm-smccc.h b/include/linux/arm-smccc.h
+index 59494df..8229203 100644
+--- a/include/linux/arm-smccc.h
++++ b/include/linux/arm-smccc.h
+@@ -46,6 +46,7 @@
+ #define ARM_SMCCC_OWNER_OEM		3
+ #define ARM_SMCCC_OWNER_STANDARD	4
+ #define ARM_SMCCC_OWNER_STANDARD_HYP	5
++#define ARM_SMCCC_OWNER_VENDOR_HYP	6
+ #define ARM_SMCCC_OWNER_TRUSTED_APP	48
+ #define ARM_SMCCC_OWNER_TRUSTED_APP_END	49
+ #define ARM_SMCCC_OWNER_TRUSTED_OS	50
 -- 
-Kees Cook
+1.8.3.1
+
