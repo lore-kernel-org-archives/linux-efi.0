@@ -2,97 +2,117 @@ Return-Path: <SRS0=Yrk4=5E=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-1.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A29C2C4332E
-	for <linux-efi@archiver.kernel.org>; Thu, 19 Mar 2020 19:29:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A121FC4332B
+	for <linux-efi@archiver.kernel.org>; Thu, 19 Mar 2020 20:02:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 83E6B20739
-	for <linux-efi@archiver.kernel.org>; Thu, 19 Mar 2020 19:29:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6B042206D7
+	for <linux-efi@archiver.kernel.org>; Thu, 19 Mar 2020 20:02:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1584648177;
+	bh=Lz6iUmdUUFtwGgC/vfuRKQ4BpFFpCfAxCeA22G6refY=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
+	b=l+FY2NaXvyufZ7Q5sLy8fZbGJaukBQMq1ELGhO7j3HOTHcISq7VEWZHGJkK8zck5T
+	 tt4g49xRzX8KszVM1J4qgNRDz3H2rMpqiuIRVBzaHueIVXIvuWzXrB+tzyG70EYh02
+	 9fB2IOu0jbh69yzRqzV3qDAYl26qMdJs+C3DrQpw=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726785AbgCST27 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 19 Mar 2020 15:28:59 -0400
-Received: from mail-qt1-f193.google.com ([209.85.160.193]:35549 "EHLO
-        mail-qt1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727346AbgCST27 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 19 Mar 2020 15:28:59 -0400
-Received: by mail-qt1-f193.google.com with SMTP id v15so2937106qto.2;
-        Thu, 19 Mar 2020 12:28:58 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=r6d+yKOCqA+0QeYSPpX1kUL29PTJLI/h9o5LVefuBko=;
-        b=R1K6PGoNtFyb1gpzTHsOA/zDl+4SOsoClZIcTmOo7gLCobxgIFYu/vlSgjwFY/wQE3
-         mCY46aN9pmvvoO6kbFOxd/hLMcFeWmDwxsxpsON8UhsCq0nLKubo3tHjHUb1Tb+fa1ga
-         VSkchQb4uy3vpwYcVRZIVP8ApZcY1wuccDJioePBm0izFg+8hT7eZ2H7aPm18Qb7cIhQ
-         ydnENRsDXSkCBJAmkwlQrypRDT63vb//h3kzZR5H/9VmZZ9pgpnvV6tRicpxbx/fb5ar
-         KX7UwoUa4U+i5c3QllviNgeSqC/dJmpUil0pXenRWK3eK7OXgf+C5Y0Y9rxnnCmi/RTd
-         T9mw==
-X-Gm-Message-State: ANhLgQ0UU5Q3dUIO69HGuv94ydYdmGZByBI4/3bS8EnXxcQ+ha4BzCHb
-        R4UClO07N/Gf5mmKnaDJht9b/Zan
-X-Google-Smtp-Source: ADFU+vvbNlW2iFC8Dg30XlNMdBCNkU2rerS86XnyXa/VDu3nJi0Sy1RZXgeAnupQd8md8itwZc7/JA==
-X-Received: by 2002:ac8:2bf9:: with SMTP id n54mr4662595qtn.280.1584646138192;
-        Thu, 19 Mar 2020 12:28:58 -0700 (PDT)
-Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
-        by smtp.gmail.com with ESMTPSA id x89sm2292649qtd.43.2020.03.19.12.28.57
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 19 Mar 2020 12:28:57 -0700 (PDT)
-From:   Arvind Sankar <nivedita@alum.mit.edu>
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH 01/14] efi/gop: Remove redundant current_fb_base
-Date:   Thu, 19 Mar 2020 15:28:42 -0400
-Message-Id: <20200319192855.29876-2-nivedita@alum.mit.edu>
-X-Mailer: git-send-email 2.24.1
-In-Reply-To: <20200319192855.29876-1-nivedita@alum.mit.edu>
-References: <20200319192855.29876-1-nivedita@alum.mit.edu>
+        id S1726983AbgCSUC4 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 19 Mar 2020 16:02:56 -0400
+Received: from mail.kernel.org ([198.145.29.99]:38324 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725787AbgCSUC4 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Thu, 19 Mar 2020 16:02:56 -0400
+Received: from mail-wr1-f46.google.com (mail-wr1-f46.google.com [209.85.221.46])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id B1E9420752
+        for <linux-efi@vger.kernel.org>; Thu, 19 Mar 2020 20:02:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1584648176;
+        bh=Lz6iUmdUUFtwGgC/vfuRKQ4BpFFpCfAxCeA22G6refY=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=UNzpO6C9p3kkdMRO/wFsMOCfZCjvFGFOqXrMixglo9ZBkLOHXEI61lRXFEwob+2uO
+         TC56t2GJFLmu3txDR4aKcOU/eDjF5fW2xVZxP3BrVaTK7Aiu8xpzwX5TTcyZhSo8AW
+         PzQ5QKmgBZYgJT7h7QDx4gRY1KSRoUSzA8BehXwE=
+Received: by mail-wr1-f46.google.com with SMTP id h4so4799716wru.2
+        for <linux-efi@vger.kernel.org>; Thu, 19 Mar 2020 13:02:55 -0700 (PDT)
+X-Gm-Message-State: ANhLgQ1ARK/lF+PKuO4IgMM5U1hYl8NQqhsr2HbNJQ9xSfLctFrOGMlX
+        35UyNBYg46f3zIf1bo5Y4/0hX1lj5CBYUM0ds+CeIw==
+X-Google-Smtp-Source: ADFU+vv0pjFJjqLm9+W9pQLQM0AJcDlx7TFtehByST5eabRXhk06kFShIyZpJ7BFdappIgjff7LYwTx1pfxTxuUJCu4=
+X-Received: by 2002:adf:afdb:: with SMTP id y27mr6463654wrd.208.1584648174030;
+ Thu, 19 Mar 2020 13:02:54 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20200319192855.29876-1-nivedita@alum.mit.edu>
+In-Reply-To: <20200319192855.29876-1-nivedita@alum.mit.edu>
+From:   Ard Biesheuvel <ardb@kernel.org>
+Date:   Thu, 19 Mar 2020 16:02:42 -0400
+X-Gmail-Original-Message-ID: <CAKv+Gu9i68KKXwE37kwLuHRVLLbVE+YC_JGog6P-ZtCtbYn4fA@mail.gmail.com>
+Message-ID: <CAKv+Gu9i68KKXwE37kwLuHRVLLbVE+YC_JGog6P-ZtCtbYn4fA@mail.gmail.com>
+Subject: Re: [PATCH 00/14] efi/gop: Refactoring + mode-setting feature
+To:     Arvind Sankar <nivedita@alum.mit.edu>,
+        Hans de Goede <hdegoede@redhat.com>
+Cc:     linux-efi <linux-efi@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-current_fb_base isn't used for anything except assigning to fb_base if
-we locate a suitable gop.
+On Thu, 19 Mar 2020 at 15:28, Arvind Sankar <nivedita@alum.mit.edu> wrote:
+>
+> This series is against tip:efi/core.
+>
+> Patches 1-9 are small cleanups and refactoring of the code in
+> libstub/gop.c.
+>
+> The rest of the patches add the ability to use a command-line option to
+> switch the gop's display mode.
+>
+> The options supported are:
+> video=efifb:mode=n
+>         Choose a specific mode number
+> video=efifb:<xres>x<yres>[-(rgb|bgr|<bpp>)]
+>         Specify mode by resolution and optionally color depth
+> video=efifb:auto
+>         Let the EFI stub choose the highest resolution mode available.
+>
+> The mode-setting additions increase code size of gop.o by about 3k on
+> x86-64 with EFI_MIXED enabled.
+>
+> Arvind Sankar (14):
+>   efi/gop: Remove redundant current_fb_base
+>   efi/gop: Move check for framebuffer before con_out
+>   efi/gop: Get mode information outside the loop
+>   efi/gop: Factor out locating the gop into a function
+>   efi/gop: Slightly re-arrange logic of find_gop
+>   efi/gop: Move variable declarations into loop block
+>   efi/gop: Use helper macros for populating lfb_base
+>   efi/gop: Use helper macros for find_bits
+>   efi/gop: Remove unreachable code from setup_pixel_info
+>   efi/gop: Add prototypes for query_mode and set_mode
+>   efi/gop: Allow specifying mode number on command line
+>   efi/gop: Allow specifying mode by <xres>x<yres>
+>   efi/gop: Allow specifying depth as well as resolution
+>   efi/gop: Allow automatically choosing the best mode
+>
 
-Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
----
- drivers/firmware/efi/libstub/gop.c | 4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
+Thanks for this! I like it a lot.
 
-diff --git a/drivers/firmware/efi/libstub/gop.c b/drivers/firmware/efi/libstub/gop.c
-index 55e6b3f286fe..f40d535dccb8 100644
---- a/drivers/firmware/efi/libstub/gop.c
-+++ b/drivers/firmware/efi/libstub/gop.c
-@@ -108,7 +108,6 @@ static efi_status_t setup_gop(struct screen_info *si, efi_guid_t *proto,
- 		efi_guid_t conout_proto = EFI_CONSOLE_OUT_DEVICE_GUID;
- 		bool conout_found = false;
- 		void *dummy = NULL;
--		efi_physical_addr_t current_fb_base;
- 
- 		status = efi_bs_call(handle_protocol, h, proto, (void **)&gop);
- 		if (status != EFI_SUCCESS)
-@@ -120,7 +119,6 @@ static efi_status_t setup_gop(struct screen_info *si, efi_guid_t *proto,
- 
- 		mode = efi_table_attr(gop, mode);
- 		info = efi_table_attr(mode, info);
--		current_fb_base = efi_table_attr(mode, frame_buffer_base);
- 
- 		if ((!first_gop || conout_found) &&
- 		    info->pixel_format != PIXEL_BLT_ONLY) {
-@@ -136,7 +134,7 @@ static efi_status_t setup_gop(struct screen_info *si, efi_guid_t *proto,
- 			pixel_format = info->pixel_format;
- 			pixel_info = info->pixel_information;
- 			pixels_per_scan_line = info->pixels_per_scan_line;
--			fb_base = current_fb_base;
-+			fb_base = efi_table_attr(mode, frame_buffer_base);
- 
- 			/*
- 			 * Once we've found a GOP supporting ConOut,
--- 
-2.24.1
+Adding Hans to cc as he has been working on seamless fb handover.
 
+I will review this somewhere next week.
+
+>  Documentation/fb/efifb.rst                    |  33 +-
+>  arch/x86/include/asm/efi.h                    |   4 +
+>  .../firmware/efi/libstub/efi-stub-helper.c    |   3 +
+>  drivers/firmware/efi/libstub/efistub.h        |   8 +-
+>  drivers/firmware/efi/libstub/gop.c            | 489 ++++++++++++++----
+>  5 files changed, 428 insertions(+), 109 deletions(-)
+>
+> --
+> 2.24.1
+>
