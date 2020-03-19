@@ -4,48 +4,48 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D2B9C43332
-	for <linux-efi@archiver.kernel.org>; Thu, 19 Mar 2020 19:29:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A0335C4332B
+	for <linux-efi@archiver.kernel.org>; Thu, 19 Mar 2020 19:29:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 3EF072070A
-	for <linux-efi@archiver.kernel.org>; Thu, 19 Mar 2020 19:29:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7293720739
+	for <linux-efi@archiver.kernel.org>; Thu, 19 Mar 2020 19:29:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727836AbgCST31 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        id S1727990AbgCST31 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
         Thu, 19 Mar 2020 15:29:27 -0400
-Received: from mail-qt1-f196.google.com ([209.85.160.196]:37177 "EHLO
-        mail-qt1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727774AbgCST3K (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 19 Mar 2020 15:29:10 -0400
-Received: by mail-qt1-f196.google.com with SMTP id d12so467958qtj.4;
-        Thu, 19 Mar 2020 12:29:08 -0700 (PDT)
+Received: from mail-qk1-f194.google.com ([209.85.222.194]:33785 "EHLO
+        mail-qk1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727733AbgCST3I (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 19 Mar 2020 15:29:08 -0400
+Received: by mail-qk1-f194.google.com with SMTP id p6so4460220qkm.0;
+        Thu, 19 Mar 2020 12:29:07 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=yLbPkx1KOJWUINkAAWmVsrQXp7G7xl6QXWk15AcAOUU=;
-        b=q05a2A1tTkOvecKUz49OEnzzO2yqZ0Lje1QwaLp5Bi7NKowBkwCVQTXEyqfA4/gXnr
-         FJyxIWqV22PyYzIW+4+G/uR+YVM/kQXE1SSRA8ZW6PKgHUr3KlBygKrxMKCDT15UO5/9
-         h79C0SWO9qHG4NxyYXVgd9ZBBd9NzqD7yBN8JHYPb7VWufjk1n2A4J++J1EnPizqMSMO
-         vwWQzAcuXjHJeIBHHApLsHqv0r/+K6d6HDNMXGRg+1bNlIHnuqdJseYea1IO9uxDIOKf
-         MCV3UW3Fh5WEyLdlTV27cqPFg/l2rwwOUmr4Rdy+JUp2uaNeDXlltuqaH6netB3tOlk3
-         T/dg==
-X-Gm-Message-State: ANhLgQ1rs4kZQ8v1alJnIAq0xLY8kudExxmQA6DL6Kql/isOUvScR76J
-        jei/uY7QGVLzsG8ztuA4n1Q=
-X-Google-Smtp-Source: ADFU+vtgfhDAduUdBX8GL/6vWENq96TfBEP/nHb0VG09kDS/aye0GrunVByLfOpvpr+o+Ox+TgNfXg==
-X-Received: by 2002:ac8:1184:: with SMTP id d4mr4739801qtj.104.1584646147994;
-        Thu, 19 Mar 2020 12:29:07 -0700 (PDT)
+        bh=nvWF6M+b3mCkDJv7fjXrYleSEiMuc4JiGA/Ixiv8Avo=;
+        b=azylzJn1pd6KxWy8F8g5vScug+fIe7p3WhdUztxA60qNKvcpkaEWnDyhP1iPLGOiJm
+         EHuh2xLriqoQ01+6ByuUEWsXu71esKj/vwXdhSXMJNdTef0d3L3Qr7hZajXBVg15pUd8
+         WuP3vYDBCuZu2FXJS1U5a+ruY0HK42MABWWEA8t/RirD1mClRLpXbMlAuy1iAnEsdrH7
+         NOeNSQFYHKZYjb/wGuCJM1sdU0ojEROiag61mVIkx4qBPsUacY39tJLYutujBnC47N7/
+         a+bgOgCiucAvA1Wwo6yjHPArKrL6HRPi+UfRoUmM9EZ5trrfvIF9NDDJlFpzPb6qXCpd
+         eRvQ==
+X-Gm-Message-State: ANhLgQ0CZVU172ckL3fGCH7qwlpmF0yYj1rsmyIhfuolQ2QRnwNs1rVh
+        eqTGJNCIGxieCpuZ1qGCY4E=
+X-Google-Smtp-Source: ADFU+vvk8e2FVM0gEpudMoEK3BZ5/2oNngVxHTmj4mS0dpjfnsPvNuXMcZ/o7LeJjye+O+iFU5crPw==
+X-Received: by 2002:ae9:eb0b:: with SMTP id b11mr4559277qkg.75.1584646146796;
+        Thu, 19 Mar 2020 12:29:06 -0700 (PDT)
 Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
-        by smtp.gmail.com with ESMTPSA id x89sm2292649qtd.43.2020.03.19.12.29.07
+        by smtp.gmail.com with ESMTPSA id x89sm2292649qtd.43.2020.03.19.12.29.06
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 19 Mar 2020 12:29:07 -0700 (PDT)
+        Thu, 19 Mar 2020 12:29:06 -0700 (PDT)
 From:   Arvind Sankar <nivedita@alum.mit.edu>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH 13/14] efi/gop: Allow specifying depth as well as resolution
-Date:   Thu, 19 Mar 2020 15:28:54 -0400
-Message-Id: <20200319192855.29876-14-nivedita@alum.mit.edu>
+Subject: [PATCH 11/14] efi/gop: Allow specifying mode number on command line
+Date:   Thu, 19 Mar 2020 15:28:52 -0400
+Message-Id: <20200319192855.29876-12-nivedita@alum.mit.edu>
 X-Mailer: git-send-email 2.24.1
 In-Reply-To: <20200319192855.29876-1-nivedita@alum.mit.edu>
 References: <20200319192855.29876-1-nivedita@alum.mit.edu>
@@ -56,148 +56,229 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Extend the video mode argument to handle an optional color depth
-specification of the form
-	video=efifb:<xres>x<yres>[-(rgb|bgr|<bpp>)]
+Add the ability to choose a video mode for the selected gop by using a
+command-line argument of the form
+	video=efifb:mode=<n>
 
 Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
 ---
- Documentation/fb/efifb.rst         |  8 +++--
- drivers/firmware/efi/libstub/gop.c | 48 ++++++++++++++++++++++++++----
- 2 files changed, 48 insertions(+), 8 deletions(-)
+ Documentation/fb/efifb.rst                    |  20 +++-
+ .../firmware/efi/libstub/efi-stub-helper.c    |   3 +
+ drivers/firmware/efi/libstub/efistub.h        |   2 +
+ drivers/firmware/efi/libstub/gop.c            | 107 ++++++++++++++++++
+ 4 files changed, 129 insertions(+), 3 deletions(-)
 
 diff --git a/Documentation/fb/efifb.rst b/Documentation/fb/efifb.rst
-index 635275071307..eca38466487a 100644
+index 04840331a00e..367fbda2f4da 100644
 --- a/Documentation/fb/efifb.rst
 +++ b/Documentation/fb/efifb.rst
-@@ -50,9 +50,11 @@ mode=n
-         The EFI stub will set the mode of the display to mode number n if
-         possible.
+@@ -2,8 +2,10 @@
+ What is efifb?
+ ==============
  
--<xres>x<yres>
-+<xres>x<yres>[-(rgb|bgr|<bpp>)]
-         The EFI stub will search for a display mode that matches the specified
--        horizontal and vertical resolution, and set the mode of the display to
--        it if one is found.
-+        horizontal and vertical resolution, and optionally bit depth, and set
-+        the mode of the display to it if one is found. The bit depth can either
-+        "rgb" or "bgr" to match specifically those pixel formats, or a number
-+        for a mode with matching bits per pixel.
+-This is a generic EFI platform driver for Intel based Apple computers.
+-efifb is only for EFI booted Intel Macs.
++This is a generic EFI platform driver for systems with UEFI firmware. The
++system must be booted via the EFI stub for this to be usable. efifb supports
++both firmware with Graphics Output Protocol (GOP) displays as well as older
++systems with only Universal Graphics Adapter (UGA) displays.
  
+ Supported Hardware
+ ==================
+@@ -12,11 +14,14 @@ Supported Hardware
+ - Macbook
+ - Macbook Pro 15"/17"
+ - MacMini
++- ARM/ARM64/X86 systems with UEFI firmware
+ 
+ How to use it?
+ ==============
+ 
+-efifb does not have any kind of autodetection of your machine.
++For UGA displays, efifb does not have any kind of autodetection of your
++machine.
++
+ You have to add the following kernel parameters in your elilo.conf::
+ 
+ 	Macbook :
+@@ -28,6 +33,9 @@ You have to add the following kernel parameters in your elilo.conf::
+ 	Macbook Pro 17", iMac 20" :
+ 		video=efifb:i20
+ 
++For GOP displays, efifb can autodetect the display's resolution and framebuffer
++address, so these should work out of the box without any special parameters.
++
+ Accepted options:
+ 
+ ======= ===========================================================
+@@ -36,4 +44,10 @@ nowc	Don't map the framebuffer write combined. This can be used
+ 	when large amounts of console data are written.
+ ======= ===========================================================
+ 
++Options for GOP displays:
++
++mode=n
++        The EFI stub will set the mode of the display to mode number n if
++        possible.
++
  Edgar Hucek <gimli@dark-green.com>
+diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+index 9f34c7242939..c6092b6038cf 100644
+--- a/drivers/firmware/efi/libstub/efi-stub-helper.c
++++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+@@ -105,6 +105,9 @@ efi_status_t efi_parse_options(char const *cmdline)
+ 				efi_disable_pci_dma = true;
+ 			if (parse_option_str(val, "no_disable_early_pci_dma"))
+ 				efi_disable_pci_dma = false;
++		} else if (!strcmp(param, "video") &&
++			   val && strstarts(val, "efifb:")) {
++			efi_parse_option_graphics(val + strlen("efifb:"));
+ 		}
+ 	}
+ 	efi_bs_call(free_pool, buf);
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index c400fd88fe38..4844c3bd40df 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -650,6 +650,8 @@ efi_status_t efi_relocate_kernel(unsigned long *image_addr,
+ 
+ efi_status_t efi_parse_options(char const *cmdline);
+ 
++void efi_parse_option_graphics(char *option);
++
+ efi_status_t efi_setup_gop(struct screen_info *si, efi_guid_t *proto,
+ 			   unsigned long size);
+ 
 diff --git a/drivers/firmware/efi/libstub/gop.c b/drivers/firmware/efi/libstub/gop.c
-index 2d56efaa1600..671f812e0b5a 100644
+index 2d91699e3061..34b55715d372 100644
 --- a/drivers/firmware/efi/libstub/gop.c
 +++ b/drivers/firmware/efi/libstub/gop.c
-@@ -27,6 +27,8 @@ static struct {
- 		u32 mode;
- 		struct {
- 			u32 width, height;
-+			int format;
-+			u8 depth;
- 		} res;
- 	};
- } __efistub_global cmdline = { .option = EFI_CMDLINE_NONE };
-@@ -50,7 +52,8 @@ static bool parse_modenum(char *option, char **next)
+@@ -8,11 +8,115 @@
+ #include <linux/bitops.h>
+ #include <linux/efi.h>
+ #include <linux/screen_info.h>
++#include <linux/string.h>
+ #include <asm/efi.h>
+ #include <asm/setup.h>
  
- static bool parse_res(char *option, char **next)
- {
--	u32 w, h;
-+	u32 w, h, d = 0;
-+	int pf = -1;
+ #include "efistub.h"
  
- 	if (!isdigit(*option))
- 		return false;
-@@ -58,11 +61,26 @@ static bool parse_res(char *option, char **next)
- 	if (*option++ != 'x' || !isdigit(*option))
- 		return false;
- 	h = simple_strtoull(option, &option, 10);
-+	if (*option == '-') {
-+		option++;
-+		if (strstarts(option, "rgb")) {
-+			option += strlen("rgb");
-+			pf = PIXEL_RGB_RESERVED_8BIT_PER_COLOR;
-+		} else if (strstarts(option, "bgr")) {
-+			option += strlen("bgr");
-+			pf = PIXEL_BGR_RESERVED_8BIT_PER_COLOR;
-+		} else if (isdigit(*option))
-+			d = simple_strtoull(option, &option, 10);
-+		else
-+			return false;
-+	}
- 	if (*option && *option++ != ',')
- 		return false;
- 	cmdline.option     = EFI_CMDLINE_RES;
- 	cmdline.res.width  = w;
- 	cmdline.res.height = h;
-+	cmdline.res.format = pf;
-+	cmdline.res.depth  = d;
- 
- 	*next = option;
- 	return true;
-@@ -123,6 +141,18 @@ static u32 choose_mode_modenum(efi_graphics_output_protocol_t *gop)
- 	return cmdline.mode;
- }
- 
-+static u8 pixel_bpp(int pixel_format, efi_pixel_bitmask_t pixel_info)
++enum efi_cmdline_option {
++	EFI_CMDLINE_NONE,
++	EFI_CMDLINE_MODE_NUM,
++};
++
++static struct {
++	enum efi_cmdline_option option;
++	u32 mode;
++} __efistub_global cmdline = { .option = EFI_CMDLINE_NONE };
++
++static bool parse_modenum(char *option, char **next)
 +{
-+	if (pixel_format == PIXEL_BIT_MASK) {
-+		u32 mask = pixel_info.red_mask | pixel_info.green_mask |
-+			   pixel_info.blue_mask | pixel_info.reserved_mask;
-+		if (!mask)
-+			return 0;
-+		return __fls(mask) - __ffs(mask) + 1;
-+	} else
-+		return 32;
++	u32 m;
++
++	if (!strstarts(option, "mode="))
++		return false;
++	option += strlen("mode=");
++	m = simple_strtoull(option, &option, 0);
++	if (*option && *option++ != ',')
++		return false;
++	cmdline.option = EFI_CMDLINE_MODE_NUM;
++	cmdline.mode   = m;
++
++	*next = option;
++	return true;
 +}
 +
- static u32 choose_mode_res(efi_graphics_output_protocol_t *gop)
- {
- 	efi_status_t status;
-@@ -133,16 +163,21 @@ static u32 choose_mode_res(efi_graphics_output_protocol_t *gop)
- 
- 	u32 max_mode, cur_mode;
- 	int pf;
-+	efi_pixel_bitmask_t pi;
- 	u32 m, w, h;
- 
- 	mode = efi_table_attr(gop, mode);
- 
- 	cur_mode = efi_table_attr(mode, mode);
- 	info = efi_table_attr(mode, info);
--	w = info->horizontal_resolution;
--	h = info->vertical_resolution;
++void efi_parse_option_graphics(char *option)
++{
++	while (*option) {
++		if (parse_modenum(option, &option))
++			continue;
++
++		while (*option && *option++ != ',')
++			;
++	}
++}
++
++static u32 choose_mode_modenum(efi_graphics_output_protocol_t *gop)
++{
++	efi_status_t status;
++
++	efi_graphics_output_protocol_mode_t *mode;
++	efi_graphics_output_mode_info_t *info;
++	unsigned long info_size;
++
++	u32 max_mode, cur_mode;
++	int pf;
++
++	mode = efi_table_attr(gop, mode);
++
++	cur_mode = efi_table_attr(mode, mode);
++	if (cmdline.mode == cur_mode)
++		return cur_mode;
++
++	max_mode = efi_table_attr(mode, max_mode);
++	if (cmdline.mode >= max_mode) {
++		efi_printk("Requested mode is invalid\n");
++		return cur_mode;
++	}
++
++	status = efi_call_proto(gop, query_mode, cmdline.mode,
++				&info_size, &info);
++	if (status != EFI_SUCCESS) {
++		efi_printk("Couldn't get mode information\n");
++		return cur_mode;
++	}
++
 +	pf = info->pixel_format;
-+	pi = info->pixel_information;
-+	w  = info->horizontal_resolution;
-+	h  = info->vertical_resolution;
++
++	efi_bs_call(free_pool, info);
++
++	if (pf == PIXEL_BLT_ONLY || pf >= PIXEL_FORMAT_MAX) {
++		efi_printk("Invalid PixelFormat\n");
++		return cur_mode;
++	}
++
++	return cmdline.mode;
++}
++
++static void set_mode(efi_graphics_output_protocol_t *gop)
++{
++	efi_graphics_output_protocol_mode_t *mode;
++	u32 cur_mode, new_mode;
++
++	switch (cmdline.option) {
++	case EFI_CMDLINE_NONE:
++		return;
++	case EFI_CMDLINE_MODE_NUM:
++		new_mode = choose_mode_modenum(gop);
++		break;
++	}
++
++	mode = efi_table_attr(gop, mode);
++	cur_mode = efi_table_attr(mode, mode);
++
++	if (new_mode == cur_mode)
++		return;
++
++	if (efi_call_proto(gop, set_mode, new_mode) != EFI_SUCCESS)
++		efi_printk("Failed to set requested mode\n");
++}
++
+ static void find_bits(u32 mask, u8 *pos, u8 *size)
+ {
+ 	if (!mask) {
+@@ -124,6 +228,9 @@ static efi_status_t setup_gop(struct screen_info *si, efi_guid_t *proto,
+ 	if (!gop)
+ 		return EFI_NOT_FOUND;
  
--	if (w == cmdline.res.width && h == cmdline.res.height)
-+	if (w == cmdline.res.width && h == cmdline.res.height &&
-+	    (cmdline.res.format < 0 || cmdline.res.format == pf) &&
-+	    (!cmdline.res.depth || cmdline.res.depth == pixel_bpp(pf, pi)))
- 		return cur_mode;
- 
- 	max_mode = efi_table_attr(mode, max_mode);
-@@ -157,6 +192,7 @@ static u32 choose_mode_res(efi_graphics_output_protocol_t *gop)
- 			continue;
- 
- 		pf = info->pixel_format;
-+		pi = info->pixel_information;
- 		w  = info->horizontal_resolution;
- 		h  = info->vertical_resolution;
- 
-@@ -164,7 +200,9 @@ static u32 choose_mode_res(efi_graphics_output_protocol_t *gop)
- 
- 		if (pf == PIXEL_BLT_ONLY || pf >= PIXEL_FORMAT_MAX)
- 			continue;
--		if (w == cmdline.res.width && h == cmdline.res.height)
-+		if (w == cmdline.res.width && h == cmdline.res.height &&
-+		    (cmdline.res.format < 0 || cmdline.res.format == pf) &&
-+		    (!cmdline.res.depth || cmdline.res.depth == pixel_bpp(pf, pi)))
- 			return m;
- 	}
- 
++	/* Change mode if requested */
++	set_mode(gop);
++
+ 	/* EFI framebuffer */
+ 	mode = efi_table_attr(gop, mode);
+ 	info = efi_table_attr(mode, info);
 -- 
 2.24.1
 
