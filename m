@@ -2,51 +2,53 @@ Return-Path: <SRS0=Yrk4=5E=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 77781C4332B
-	for <linux-efi@archiver.kernel.org>; Thu, 19 Mar 2020 19:28:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E9CD1C4332E
+	for <linux-efi@archiver.kernel.org>; Thu, 19 Mar 2020 19:29:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 5257B2071C
-	for <linux-efi@archiver.kernel.org>; Thu, 19 Mar 2020 19:28:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CA4A120752
+	for <linux-efi@archiver.kernel.org>; Thu, 19 Mar 2020 19:29:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727364AbgCST27 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 19 Mar 2020 15:28:59 -0400
-Received: from mail-qt1-f180.google.com ([209.85.160.180]:46382 "EHLO
-        mail-qt1-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726785AbgCST26 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 19 Mar 2020 15:28:58 -0400
-Received: by mail-qt1-f180.google.com with SMTP id t13so2879057qtn.13;
-        Thu, 19 Mar 2020 12:28:57 -0700 (PDT)
+        id S1727599AbgCST3D (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 19 Mar 2020 15:29:03 -0400
+Received: from mail-qt1-f193.google.com ([209.85.160.193]:34397 "EHLO
+        mail-qt1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727346AbgCST3B (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 19 Mar 2020 15:29:01 -0400
+Received: by mail-qt1-f193.google.com with SMTP id 10so2933023qtp.1;
+        Thu, 19 Mar 2020 12:29:00 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=fO0ESG9ioh3Qb6IQVZmuJEmcqIIHJ324D9kNXryCnBo=;
-        b=EH2FtY0xzd7cMj1PldoYDKGpOZDXxfW74bdEt1DKctIpL6QoUun4aUP+x/tHc829Y6
-         ErP6JVl3pSAqf+7lfVas/RgkwWvF5dkNFF9fSQ4MH8F293qPz4bh/Sd7JlLjm40ECdva
-         oYFRyW9vMCBhMUBA4vDzNeizZOqkXKgo3qboYZgYXT1A5Ntkw9xMg2oTEvfLxYFPKRLk
-         CRwGNSE3g6yyFahEcFcES5X8Wk8e0G+am7bXSBOKBDuW80oxEsYNgB0VfYbeW2o+BjRe
-         VoQPAhTfgLtPa69i43p5ShVd+rlL6C5nSkmgAEzdk2MVLUiyrg91hldJISLUzPI09h8S
-         tcEA==
-X-Gm-Message-State: ANhLgQ2BKm7+iz9pcE0gFlq3mJLXOyX3U6oh0n0tN7NTmCaxtTHeXva3
-        kba0XEWQhI6Dfr+GAzZhLPOlQqyd
-X-Google-Smtp-Source: ADFU+vuZF6p6+9nTJ9Roq33+C6hF/mST2zJ0B1tN5hEOnYljGm07bEulC7JQKL+2mMF2grhXQFphYw==
-X-Received: by 2002:aed:24c2:: with SMTP id u2mr4671556qtc.269.1584646137247;
-        Thu, 19 Mar 2020 12:28:57 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=qiFAu6RCpFkDkDQyLqPSk31H4M9LfMJt3s8TsvDnQxY=;
+        b=jwOK4TDbewXTqnruoYxb92KFsDNz8hTCz5F+IbyjCfyiUCSFDUaBt4jUNXKRnZentu
+         qY8zGEkmv8N32hQF/Sa//z2HIugTjSbzhrxBIMoam1KPi3D96+f5pvyw81SRzfCNtXM0
+         DUmTqjv6CrxiSDFFzHvJjR3S3pLTaecTK9GrMN9R0iRpe4HH2opN7e7lsKqaIGkJ9LOL
+         GQYzkb9gaDX602lnY2ZTKNXTzAAS7ua4DdNCcaOpCetlHXD8l3e/x8AfUqVWJpZswgr+
+         ctrjc4iX6MAaXXqBudtcXu17XBXoPbPgS41B74LwJfTZdIwm4QEoiqCUpNEHVUCJL5of
+         EGuw==
+X-Gm-Message-State: ANhLgQ0NT9juooLJJGPh2M4At1S8FA2LVrV18gMfVmLibi3v2esO5sEn
+        W+BbtM4KnLe0B8G4cqBvrF2ypUL4
+X-Google-Smtp-Source: ADFU+vteTN3JcLnwiPcKbQR9WxitFNBQEMasteMrLyid5kEiyibhmVcyi0yiBiLQSgh5JO7I4LG/Cg==
+X-Received: by 2002:aed:2ba2:: with SMTP id e31mr4628189qtd.286.1584646140271;
+        Thu, 19 Mar 2020 12:29:00 -0700 (PDT)
 Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
-        by smtp.gmail.com with ESMTPSA id x89sm2292649qtd.43.2020.03.19.12.28.56
+        by smtp.gmail.com with ESMTPSA id x89sm2292649qtd.43.2020.03.19.12.28.59
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 19 Mar 2020 12:28:56 -0700 (PDT)
+        Thu, 19 Mar 2020 12:28:59 -0700 (PDT)
 From:   Arvind Sankar <nivedita@alum.mit.edu>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH 00/14] efi/gop: Refactoring + mode-setting feature
-Date:   Thu, 19 Mar 2020 15:28:41 -0400
-Message-Id: <20200319192855.29876-1-nivedita@alum.mit.edu>
+Subject: [PATCH 03/14] efi/gop: Get mode information outside the loop
+Date:   Thu, 19 Mar 2020 15:28:44 -0400
+Message-Id: <20200319192855.29876-4-nivedita@alum.mit.edu>
 X-Mailer: git-send-email 2.24.1
+In-Reply-To: <20200319192855.29876-1-nivedita@alum.mit.edu>
+References: <20200319192855.29876-1-nivedita@alum.mit.edu>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
@@ -54,48 +56,92 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This series is against tip:efi/core.
+Move extraction of the mode information parameters outside the loop to
+find the gop, and eliminate some redundant variables.
 
-Patches 1-9 are small cleanups and refactoring of the code in
-libstub/gop.c.
+Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
+---
+ drivers/firmware/efi/libstub/gop.c | 38 +++++++++++-------------------
+ 1 file changed, 14 insertions(+), 24 deletions(-)
 
-The rest of the patches add the ability to use a command-line option to
-switch the gop's display mode.
-
-The options supported are:
-video=efifb:mode=n
-	Choose a specific mode number
-video=efifb:<xres>x<yres>[-(rgb|bgr|<bpp>)]
-	Specify mode by resolution and optionally color depth
-video=efifb:auto
-	Let the EFI stub choose the highest resolution mode available.
-
-The mode-setting additions increase code size of gop.o by about 3k on
-x86-64 with EFI_MIXED enabled.
-
-Arvind Sankar (14):
-  efi/gop: Remove redundant current_fb_base
-  efi/gop: Move check for framebuffer before con_out
-  efi/gop: Get mode information outside the loop
-  efi/gop: Factor out locating the gop into a function
-  efi/gop: Slightly re-arrange logic of find_gop
-  efi/gop: Move variable declarations into loop block
-  efi/gop: Use helper macros for populating lfb_base
-  efi/gop: Use helper macros for find_bits
-  efi/gop: Remove unreachable code from setup_pixel_info
-  efi/gop: Add prototypes for query_mode and set_mode
-  efi/gop: Allow specifying mode number on command line
-  efi/gop: Allow specifying mode by <xres>x<yres>
-  efi/gop: Allow specifying depth as well as resolution
-  efi/gop: Allow automatically choosing the best mode
-
- Documentation/fb/efifb.rst                    |  33 +-
- arch/x86/include/asm/efi.h                    |   4 +
- .../firmware/efi/libstub/efi-stub-helper.c    |   3 +
- drivers/firmware/efi/libstub/efistub.h        |   8 +-
- drivers/firmware/efi/libstub/gop.c            | 489 ++++++++++++++----
- 5 files changed, 428 insertions(+), 109 deletions(-)
-
+diff --git a/drivers/firmware/efi/libstub/gop.c b/drivers/firmware/efi/libstub/gop.c
+index 201b66970b2b..d692b8c65813 100644
+--- a/drivers/firmware/efi/libstub/gop.c
++++ b/drivers/firmware/efi/libstub/gop.c
+@@ -89,12 +89,9 @@ static efi_status_t setup_gop(struct screen_info *si, efi_guid_t *proto,
+ 			      unsigned long size, void **handles)
+ {
+ 	efi_graphics_output_protocol_t *gop, *first_gop;
+-	u16 width, height;
+-	u32 pixels_per_scan_line;
+-	u32 ext_lfb_base;
++	efi_graphics_output_protocol_mode_t *mode;
++	efi_graphics_output_mode_info_t *info = NULL;
+ 	efi_physical_addr_t fb_base;
+-	efi_pixel_bitmask_t pixel_info;
+-	int pixel_format;
+ 	efi_status_t status;
+ 	efi_handle_t h;
+ 	int i;
+@@ -103,8 +100,6 @@ static efi_status_t setup_gop(struct screen_info *si, efi_guid_t *proto,
+ 	gop = NULL;
+ 
+ 	for_each_efi_handle(h, handles, size, i) {
+-		efi_graphics_output_protocol_mode_t *mode;
+-		efi_graphics_output_mode_info_t *info = NULL;
+ 		efi_guid_t conout_proto = EFI_CONSOLE_OUT_DEVICE_GUID;
+ 		bool conout_found = false;
+ 		void *dummy = NULL;
+@@ -129,15 +124,7 @@ static efi_status_t setup_gop(struct screen_info *si, efi_guid_t *proto,
+ 			 * backed by real hardware. The workaround is to search
+ 			 * for a GOP implementing the ConOut protocol, and if
+ 			 * one isn't found, to just fall back to the first GOP.
+-			 */
+-			width = info->horizontal_resolution;
+-			height = info->vertical_resolution;
+-			pixel_format = info->pixel_format;
+-			pixel_info = info->pixel_information;
+-			pixels_per_scan_line = info->pixels_per_scan_line;
+-			fb_base = efi_table_attr(mode, frame_buffer_base);
+-
+-			/*
++			 *
+ 			 * Once we've found a GOP supporting ConOut,
+ 			 * don't bother looking any further.
+ 			 */
+@@ -152,21 +139,24 @@ static efi_status_t setup_gop(struct screen_info *si, efi_guid_t *proto,
+ 		return EFI_NOT_FOUND;
+ 
+ 	/* EFI framebuffer */
++	mode = efi_table_attr(first_gop, mode);
++	info = efi_table_attr(mode, info);
++
+ 	si->orig_video_isVGA = VIDEO_TYPE_EFI;
+ 
+-	si->lfb_width = width;
+-	si->lfb_height = height;
+-	si->lfb_base = fb_base;
++	si->lfb_width  = info->horizontal_resolution;
++	si->lfb_height = info->vertical_resolution;
+ 
+-	ext_lfb_base = (u64)(unsigned long)fb_base >> 32;
+-	if (ext_lfb_base) {
++	fb_base		 = efi_table_attr(mode, frame_buffer_base);
++	si->lfb_base	 = fb_base;
++	si->ext_lfb_base = (u64)(unsigned long)fb_base >> 32;
++	if (si->ext_lfb_base)
+ 		si->capabilities |= VIDEO_CAPABILITY_64BIT_BASE;
+-		si->ext_lfb_base = ext_lfb_base;
+-	}
+ 
+ 	si->pages = 1;
+ 
+-	setup_pixel_info(si, pixels_per_scan_line, pixel_info, pixel_format);
++	setup_pixel_info(si, info->pixels_per_scan_line,
++			     info->pixel_information, info->pixel_format);
+ 
+ 	si->lfb_size = si->lfb_linelength * si->lfb_height;
+ 
 -- 
 2.24.1
 
