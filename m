@@ -2,111 +2,105 @@ Return-Path: <SRS0=4MSR=5F=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6F17BC4332B
-	for <linux-efi@archiver.kernel.org>; Fri, 20 Mar 2020 02:01:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D2F71C4332B
+	for <linux-efi@archiver.kernel.org>; Fri, 20 Mar 2020 12:38:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 4A4B02076C
-	for <linux-efi@archiver.kernel.org>; Fri, 20 Mar 2020 02:01:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AA59F20776
+	for <linux-efi@archiver.kernel.org>; Fri, 20 Mar 2020 12:38:08 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=endlessm-com.20150623.gappssmtp.com header.i=@endlessm-com.20150623.gappssmtp.com header.b="tZugQz/A"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727286AbgCTCBY (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 19 Mar 2020 22:01:24 -0400
-Received: from mail-qk1-f181.google.com ([209.85.222.181]:43435 "EHLO
-        mail-qk1-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727389AbgCTCAd (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 19 Mar 2020 22:00:33 -0400
-Received: by mail-qk1-f181.google.com with SMTP id x18so5376578qki.10;
-        Thu, 19 Mar 2020 19:00:31 -0700 (PDT)
+        id S1726896AbgCTMiI (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 20 Mar 2020 08:38:08 -0400
+Received: from mail-qk1-f194.google.com ([209.85.222.194]:40650 "EHLO
+        mail-qk1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726814AbgCTMiH (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 20 Mar 2020 08:38:07 -0400
+Received: by mail-qk1-f194.google.com with SMTP id l25so1688794qki.7
+        for <linux-efi@vger.kernel.org>; Fri, 20 Mar 2020 05:38:06 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=endlessm-com.20150623.gappssmtp.com; s=20150623;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=lUsFDDLc+OT1mxat4BydgprIPibf9UQTcm/vZqGE7Pg=;
+        b=tZugQz/AH0shvqjYWaF1gAAwX+4ovdwCpMJMoGaKc3JPHNP4DA0wP2zsgC6Wc7fcg7
+         6b/lkws0cqY8gp36RTo5o0CfaGP2IIcQy+DYVsoxd+wux++dbBa5aLZaeLXCvn6pqDX4
+         FgHC2C8kyi7zTi7bMu5dulWZ6wSXCXhxLDDUK533HO0MZDS+kbxeuPXjJpp/F7DX93JL
+         g3wBrf1xCYeBbUCQSoEUYQIrA0EszHphDJCTYduJhXi36Hynt6Az3btqPZrUFmEz7+Fx
+         GOMEQYUDg01KIVTjvzayfXnA7mXXR76J+LjqCgO0nZg6b4+WcdsuuGzGFuz6G99yEIgf
+         3nOg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=AeGhU+XJtuOPs3cRLNFViNTkzOH17jcA/a34LgeIkSw=;
-        b=aq4OHE/phBWP1IjK3aZCrnawXgjFXaWfTifotFP7BuXGd2TSc3K2gfLzel3p9rN6y8
-         CHjYypIJ3s7MifasLxUVGqOdHnSV9vhzcIPaKyIQOpkPTuORtvUoMqcNanzoYzzwwflk
-         fFFQd0w5w6HgRKHfclgj89U0Axu15OPh/vdrB5jtSkgui2zGmWdC+UDuwb5Bn8Z+775h
-         dDRVOd1Ly8nvbh4IWoy6wOo2/RK52N+g6r+DLxPkedgFjnXToe16EIQphUMPluccd9gG
-         lPrdoux7212Swb4OPiuYd1Q7RXpcoLDsos0HjhrUlaqa7XhFDTuZJpLCmoR4tjXXfOeI
-         Dpqw==
-X-Gm-Message-State: ANhLgQ2ry76fn9D7aFdIPoEam585NgQjHb0+1StlXmYv2LLbomA4cSdL
-        P7d1z+6+pONOTWi6abLuTvs=
-X-Google-Smtp-Source: ADFU+vuYAuraRM34QGCeIGQxO2X9JnyFXoVl2vLu4umGI3M8e/EYAYX6dEjzwMv0Ww/mVra5lFffwQ==
-X-Received: by 2002:a37:7e82:: with SMTP id z124mr5776266qkc.360.1584669630572;
-        Thu, 19 Mar 2020 19:00:30 -0700 (PDT)
-Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
-        by smtp.gmail.com with ESMTPSA id n46sm3342198qtb.48.2020.03.19.19.00.29
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 19 Mar 2020 19:00:29 -0700 (PDT)
-From:   Arvind Sankar <nivedita@alum.mit.edu>
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     Hans de Goede <hdegoede@redhat.com>, linux-efi@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH v2 00/14] efi/gop: Refactoring + mode-setting feature
-Date:   Thu, 19 Mar 2020 22:00:14 -0400
-Message-Id: <20200320020028.1936003-1-nivedita@alum.mit.edu>
-X-Mailer: git-send-email 2.24.1
-In-Reply-To: <20200319192855.29876-1-nivedita@alum.mit.edu>
-References: <20200319192855.29876-1-nivedita@alum.mit.edu>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=lUsFDDLc+OT1mxat4BydgprIPibf9UQTcm/vZqGE7Pg=;
+        b=Q5jsTjZfBJIl/VkiruQLXZkngx3SHIchhaWK8yUloHGRfFqsaj8wPbcz9afwc2WDQJ
+         YX698dT0RSg8Useaok6x1aG/Ze5EOonYxNKxQgkMM3ybdJM+T4l/S8GyfKFrkkE3baJP
+         beSjiLdD8ti+fkK6J8qW130qoSqiOMxauyNyvCZATx6HOvU17ZPKHuYzoAOZHl0k+5SE
+         oSfTgh2E/WUtKsf+kih48bl2nWG+rq090o0U4O4i6IuU+BOZ12DnSOmROZzBKBjPB0lF
+         DkoBvz9IbR23UVRDJO9W+9/cPSPdAwl1xklqkRLpHkio/4ZkRS+Pdr+EsXBLlPhWUgt5
+         x8Cg==
+X-Gm-Message-State: ANhLgQ1qSyLBdFaMWQFAvKwpGAxMPHF4XBKpYEVUR9YL7+TiHxhCIhQz
+        +10YJf754X9DbdOQgbxaXmKPiRpS26a6wkr98/XPGQ==
+X-Google-Smtp-Source: ADFU+vvDBQQsdYulrWhgu3FelWi5P2Ua5BYNVN5DgtEqXHnJH+UBtT1nfmzl6r7OJ12TSJdnY5SvrhtF8srk+gySCGk=
+X-Received: by 2002:a37:51d5:: with SMTP id f204mr7674280qkb.14.1584707886141;
+ Fri, 20 Mar 2020 05:38:06 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20200312083341.9365-1-jian-hong@endlessm.com> <20200312104643.GA15619@zn.tnic>
+In-Reply-To: <20200312104643.GA15619@zn.tnic>
+From:   Daniel Drake <drake@endlessm.com>
+Date:   Fri, 20 Mar 2020 20:37:54 +0800
+Message-ID: <CAD8Lp47ndRqeS5VbkCMR_Faq-du9eDW28rHOG4Owxq862t-kGQ@mail.gmail.com>
+Subject: Re: [PATCH] Revert "x86/reboot, efi: Use EFI reboot for Acer
+ TravelMate X514-51T"
+To:     Borislav Petkov <bp@alien8.de>
+Cc:     Jian-Hong Pan <jian-hong@endlessm.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Ingo Molnar <mingo@redhat.com>,
+        "H . Peter Anvin" <hpa@zytor.com>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Kees Cook <keescook@chromium.org>,
+        Anton Vorontsov <anton@enomsg.org>,
+        Colin Cross <ccross@android.com>,
+        Tony Luck <tony.luck@intel.com>, x86@kernel.org,
+        Linux Kernel <linux-kernel@vger.kernel.org>,
+        linux-efi@vger.kernel.org,
+        Linux Upstreaming Team <linux@endlessm.com>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This series is against tip:efi/core.
+On Thu, Mar 12, 2020 at 6:46 PM Borislav Petkov <bp@alien8.de> wrote:
+> How do you know *everyone* affected will update their BIOS?
+>
+> And what's the downside of keeping it?
 
-Patches 1-9 are small cleanups and refactoring of the code in
-libstub/gop.c.
+It could indeed be kept without user-visible downside, and that would
+be the normal case for quirks that work around BIOS bugs.
 
-The rest of the patches add the ability to use a command-line option to
-switch the gop's display mode.
+But I had two reasons for suggesting that Jian-Hong should send this
+revert patch, which may be worth some consideration:
 
-The options supported are:
-video=efifb:mode=n
-        Choose a specific mode number
-video=efifb:<xres>x<yres>[-(rgb|bgr|<bpp>)]
-        Specify mode by resolution and optionally color depth
-video=efifb:auto
-        Let the EFI stub choose the highest resolution mode available.
+ 1. This was working around a BIOS bug truly separate from Linux to
+the point where it was a little questionable for Linux to put a quirk
+in place. The original bug was that after Linux completed executing
+the reboot code, the machine would reboot, the BIOS would start
+loading, and then crash well before loading the OS. Presumably
+crashing on some state that Linux left that was not reset in the
+machine's reboot stage. The vendor later found the issue (something
+TPM-related) and fixed the BIOS to avoid the crash.
+ 2. We normally receive these units before they go into mass
+production, so there's a decent chance that production versions
+already include this BIOS fix.
 
-The mode-setting additions increase code size of gop.o by about 3k on
-x86-64 with EFI_MIXED enabled.
+Based on that I was considering that the patch could be reverted for
+cleanliness/ At the same time, I do not have strong feelings on this,
+no issues if the quirk is left in place.
 
-Changes in v2 (HT lkp@intel.com):
-- Fix __efistub_global attribute to be after the variable.
-  (NB: bunch of other places should ideally be fixed, those I guess
-  don't matter as they are scalars?)
-- Silence -Wmaybe-uninitialized warning in set_mode function.
-
-Arvind Sankar (14):
-  efi/gop: Remove redundant current_fb_base
-  efi/gop: Move check for framebuffer before con_out
-  efi/gop: Get mode information outside the loop
-  efi/gop: Factor out locating the gop into a function
-  efi/gop: Slightly re-arrange logic of find_gop
-  efi/gop: Move variable declarations into loop block
-  efi/gop: Use helper macros for populating lfb_base
-  efi/gop: Use helper macros for find_bits
-  efi/gop: Remove unreachable code from setup_pixel_info
-  efi/gop: Add prototypes for query_mode and set_mode
-  efi/gop: Allow specifying mode number on command line
-  efi/gop: Allow specifying mode by <xres>x<yres>
-  efi/gop: Allow specifying depth as well as resolution
-  efi/gop: Allow automatically choosing the best mode
-
- Documentation/fb/efifb.rst                    |  33 +-
- arch/x86/include/asm/efi.h                    |   4 +
- .../firmware/efi/libstub/efi-stub-helper.c    |   3 +
- drivers/firmware/efi/libstub/efistub.h        |   8 +-
- drivers/firmware/efi/libstub/gop.c            | 489 ++++++++++++++----
- 5 files changed, 428 insertions(+), 109 deletions(-)
-
-
-base-commit: d5528d5e91041e68e8eab9792ce627705a0ed273
--- 
-2.24.1
-
+Daniel
