@@ -2,78 +2,93 @@ Return-Path: <SRS0=d1h+=5K=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-1.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E7DBFC43331
-	for <linux-efi@archiver.kernel.org>; Wed, 25 Mar 2020 10:13:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0874BC1975A
+	for <linux-efi@archiver.kernel.org>; Wed, 25 Mar 2020 15:52:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id AA290206F6
-	for <linux-efi@archiver.kernel.org>; Wed, 25 Mar 2020 10:13:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D914B20772
+	for <linux-efi@archiver.kernel.org>; Wed, 25 Mar 2020 15:52:22 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1585131200;
-	bh=YoGWxBSDa8w2HaKjgI6HCFScbw5ThSeWBwlptOiz/TE=;
+	s=default; t=1585151542;
+	bh=A4aToqgYItAqaRXK+3xYpi8GGWZeOAW9vy5r583WeHs=;
 	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=MWJdeZHJHg8H45z/WNy+EL+BYH38k/lhy0CmflD42teolhDTb6sbHju71OaRhTWSm
-	 Zu6n7og7riTj16JA41I9FyXRSlThRmk75oxkf0UIt0ey0A1P6AA6DqfxaM/4vTFmSY
-	 PvCsfntJ5hQX87EM9i1cHvTHI0WNVQqxEKEdgix0=
+	b=jc1v0Ro8OHjmDJAqLP6Efk8tMsu0xajnPdwMtYE6bL9PNc02Z2OxZep9Qhv5I1dnm
+	 oXyjhkf2kI3gab5+Y084eJaZNAmlRRKL0h7nc8ioLzJpl7aPZ6yke0C3oIq8TfhZlf
+	 kfaIUvzG9jHZ3AoFeSvd7cG4fg9RTAlQIn6H/m8A=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726264AbgCYKNU (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 25 Mar 2020 06:13:20 -0400
-Received: from mail.kernel.org ([198.145.29.99]:38958 "EHLO mail.kernel.org"
+        id S1727811AbgCYPwW (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 25 Mar 2020 11:52:22 -0400
+Received: from mail.kernel.org ([198.145.29.99]:49388 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726043AbgCYKNU (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 25 Mar 2020 06:13:20 -0400
-Received: from mail-wm1-f52.google.com (mail-wm1-f52.google.com [209.85.128.52])
+        id S1727775AbgCYPwW (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 25 Mar 2020 11:52:22 -0400
+Received: from mail-wm1-f48.google.com (mail-wm1-f48.google.com [209.85.128.48])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 73AB3206F6
-        for <linux-efi@vger.kernel.org>; Wed, 25 Mar 2020 10:13:19 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id C86772078A
+        for <linux-efi@vger.kernel.org>; Wed, 25 Mar 2020 15:52:21 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1585131199;
-        bh=YoGWxBSDa8w2HaKjgI6HCFScbw5ThSeWBwlptOiz/TE=;
+        s=default; t=1585151542;
+        bh=A4aToqgYItAqaRXK+3xYpi8GGWZeOAW9vy5r583WeHs=;
         h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=Y2s/IPFKUpYRXJCoE3UJfCr4MD9IRwAleMh2xexVEGbo/6v8Tdt+l+HKJtpvrt48v
-         4cWlfTERVL4qXwmC4Km5B29gNryOzIulscaSeRe/h/eoopl8v8sJdaoZ7TB7N0T5W4
-         MN9+OKDBb5tc98guMnBVVP6pCnw7vTnN2xTZdKt0=
-Received: by mail-wm1-f52.google.com with SMTP id b12so1696038wmj.3
-        for <linux-efi@vger.kernel.org>; Wed, 25 Mar 2020 03:13:19 -0700 (PDT)
-X-Gm-Message-State: ANhLgQ1NP+0TkPWO/AXqVzqKh1EMHhmzADCNyy2hblGFW660B3JdrBzt
-        MusVLVf5wBTWAYaR3K9kEDoKiTeN2fGYNGoyvq8FVg==
-X-Google-Smtp-Source: ADFU+vvJHI5y1nnOoWdOwcn46Rc67YSck/gQ/al4nNQHZr/R78WNYxgs+8VffdUMuf5eX56X1J8x7enaFSrMKd1oh84=
-X-Received: by 2002:a7b:cb81:: with SMTP id m1mr2648477wmi.1.1585131197918;
- Wed, 25 Mar 2020 03:13:17 -0700 (PDT)
+        b=bI1HIvZMrl1CxxMsAyD8uC2fDT7OXAvzGPSnDrUThrlUHbWlZUcYMmqN7dzktVOwV
+         fgkiche1KVleEB6GbMo5BRNvfKfoqj0P6X5Jff4EgzSPpRYU3PRpG3Rkezdrt/6ejm
+         56HvU5HSbIrf9Xcvsstm1ubMPSwD1JfJo3VTTnWI=
+Received: by mail-wm1-f48.google.com with SMTP id a81so3278239wmf.5
+        for <linux-efi@vger.kernel.org>; Wed, 25 Mar 2020 08:52:21 -0700 (PDT)
+X-Gm-Message-State: ANhLgQ1qvOyZrvZP6h7V/qK2rjgXX75oyng62Y84eSfNpQRB/0I2G2Do
+        evsH3mrSYecEekG+J47OPvw1syEoNHAXSYue16QXWw==
+X-Google-Smtp-Source: ADFU+vt8735ZWRnBwRWD9SqkPAn5QRqdMwZN/c2sk954h87LHobbuMDhyHh7DZF84UWK+AvlpFCnB2rr2aczEq6qvrM=
+X-Received: by 2002:a1c:ac8a:: with SMTP id v132mr3934539wme.62.1585151540255;
+ Wed, 25 Mar 2020 08:52:20 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200311072145.5001-1-tiwai@suse.de> <s5h4kukuyga.wl-tiwai@suse.de>
-In-Reply-To: <s5h4kukuyga.wl-tiwai@suse.de>
+References: <20200312011312.70653-1-qiuxu.zhuo@intel.com> <CAKv+Gu9BvqZavV6XjfuacXXpabNCXLYEw-f=81fwX8hdL6Fn-A@mail.gmail.com>
+ <d0a09900ca0341029980d351bbe2aecc@intel.com> <CAKv+Gu82OFMJk-jQKdvA0_Sgp_CCmvC1a63QYrY+Cc4Qjx3+Yw@mail.gmail.com>
+ <abd0a0d1095f4bc4a8fc2be420a2478a@intel.com> <20200320192527.GA31764@agluck-desk2.amr.corp.intel.com>
+In-Reply-To: <20200320192527.GA31764@agluck-desk2.amr.corp.intel.com>
 From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Wed, 25 Mar 2020 11:13:07 +0100
-X-Gmail-Original-Message-ID: <CAKv+Gu-GNbgqDWYvp9=ZA+SgpZC=NXgvdMLxF-AY854XF8wTmA@mail.gmail.com>
-Message-ID: <CAKv+Gu-GNbgqDWYvp9=ZA+SgpZC=NXgvdMLxF-AY854XF8wTmA@mail.gmail.com>
-Subject: Re: [PATCH] efi/cper: Use scnprintf() for avoiding potential buffer overflow
-To:     Takashi Iwai <tiwai@suse.de>
-Cc:     linux-efi <linux-efi@vger.kernel.org>
+Date:   Wed, 25 Mar 2020 16:52:09 +0100
+X-Gmail-Original-Message-ID: <CAKv+Gu9zJ7O29Y1+99TSBuQJ86RKDJ4MQHZSUs+rxq0WHKMEYg@mail.gmail.com>
+Message-ID: <CAKv+Gu9zJ7O29Y1+99TSBuQJ86RKDJ4MQHZSUs+rxq0WHKMEYg@mail.gmail.com>
+Subject: Re: [PATCH v6 0/2] Add capsule-pstore backend support
+To:     "Luck, Tony" <tony.luck@intel.com>
+Cc:     "Zhuo, Qiuxu" <qiuxu.zhuo@intel.com>,
+        Kees Cook <keescook@chromium.org>,
+        Matt Fleming <matt@codeblueprint.co.uk>,
+        "Gao, Liming" <liming.gao@intel.com>,
+        linux-efi <linux-efi@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Thu, 19 Mar 2020 at 17:00, Takashi Iwai <tiwai@suse.de> wrote:
+On Fri, 20 Mar 2020 at 20:25, Luck, Tony <tony.luck@intel.com> wrote:
 >
-> On Wed, 11 Mar 2020 08:21:45 +0100,
-> Takashi Iwai wrote:
+> On Thu, Mar 19, 2020 at 01:53:38AM -0700, Zhuo, Qiuxu wrote:
+> > > From: linux-efi-owner@vger.kernel.org <linux-efi-owner@vger.kernel.org> On> Behalf Of Ard Biesheuvel
+> > > ...
+> > > > The following commit on the tip tree removes the variables 'config_table' from the efi structure.
+> > > >
+> > > >     9cd437ac0ef4 ("efi/x86: Make fw_vendor, config_table and runtime sysfs nodes x86 specific")
+> > > >
+> > > > But the external driver "capsule-pstore.ko" needs to access  'config_table' and 'nr_tables' to go through the configuration table to extract  crash capsules.
+> > > >
+> > > > Adding 'config_table' and 'nr_tables' back to the efi structure looks like not a good way.
+> > > > Do you have any  suggestion on how to export 'config_table' and 'nr_tables' variables for the external driver "capsule-pstore.ko"?
+> > > >
+> > >
+> > > I will get back to you on monday about this. In any case, this will have to wait until v5.8
 > >
-> > Since snprintf() returns the would-be-output size instead of the
-> > actual output size, the succeeding calls may go beyond the given
-> > buffer limit.  Fix it by replacing with scnprintf().
-> >
-> > Signed-off-by: Takashi Iwai <tiwai@suse.de>
+> > OK. Thanks!
 >
-> A gentle reminder for this forgotten patch.
-> Let me know if any further changes are needed.
+> Would it be acceptable to take the first half of Qiuxu's
+> function efi_capsule_table_get() and move it into the
+> generic efi code naming it something like: "efi_get_table_by_guid()"?
+> Then EXPORT_GPL that function?
 >
 
-
-Thanks Takashi, I'll queue this up.
+That sounds reasonable to me.
