@@ -2,70 +2,87 @@ Return-Path: <SRS0=ukhU=5L=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5FE9CC43331
-	for <linux-efi@archiver.kernel.org>; Thu, 26 Mar 2020 16:59:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0AF14C43331
+	for <linux-efi@archiver.kernel.org>; Thu, 26 Mar 2020 16:59:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 32B992073E
-	for <linux-efi@archiver.kernel.org>; Thu, 26 Mar 2020 16:59:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CDFF02073E
+	for <linux-efi@archiver.kernel.org>; Thu, 26 Mar 2020 16:59:56 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1585241995;
-	bh=rV3h8qQW0FYqgWhqZ43zHTAw48+LqjuopHgk1oz9eFI=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=RjcRgAf85PVWortHYres10236YqfirzJTRTamkBCAIPSBmnJw5dIKSq4An00Z7n4B
-	 cJp4eGYArKy8xPiTZ+xLTA78o3lAY0Og2pmaEA7VuTH246kb7BTfN/+e8lFRMcxuvf
-	 WzHsMkyghBkIt1bPl7ghulUaSeAyAJJOLDei8eWo=
+	s=default; t=1585241996;
+	bh=WOxWjfDmGgg1+ZblWxXKQ7OejY4FNXMxB6c3NNDo23Y=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=1b7NM309QqPs2NNH94dFjNWpNqDrjdTxb/w1HZZyjzREC1P7aQ4atJ6IfQjZ8mHyQ
+	 fCboawj6fniMdLx//gm8By4SeHuSzR8xYnc/KTSJRiNdGWTPW1JT0xZ+UxSFOZO96a
+	 EVtfoFLjJIsoxXrFAQ64kGJTqE5KIoCs/nl9gmAI=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727505AbgCZQ7z (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 26 Mar 2020 12:59:55 -0400
-Received: from mail.kernel.org ([198.145.29.99]:59366 "EHLO mail.kernel.org"
+        id S1727751AbgCZQ74 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 26 Mar 2020 12:59:56 -0400
+Received: from mail.kernel.org ([198.145.29.99]:59388 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727393AbgCZQ7y (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Thu, 26 Mar 2020 12:59:54 -0400
+        id S1727393AbgCZQ74 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Thu, 26 Mar 2020 12:59:56 -0400
 Received: from e123331-lin.home (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 11C1920714;
-        Thu, 26 Mar 2020 16:59:52 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id C249A2076A;
+        Thu, 26 Mar 2020 16:59:54 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1585241994;
-        bh=rV3h8qQW0FYqgWhqZ43zHTAw48+LqjuopHgk1oz9eFI=;
-        h=From:To:Cc:Subject:Date:From;
-        b=OAJFIulTl2hFO5S3shSIYNsdtc5wosrzM1sChFB1FGubeEBrFs0nliXdBDWSTXmIJ
-         kKrCamJcH5xpKtRdVYB02/2g9KeL1QPOH9FtnWqXaqvhu4EvHokac++F0yxnBg2/lQ
-         caQFPX3w5M1ydgcJNBAOejNcvETos0V/CdPOdXNM=
+        s=default; t=1585241996;
+        bh=WOxWjfDmGgg1+ZblWxXKQ7OejY4FNXMxB6c3NNDo23Y=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=a5yS6UI+qIXaocfR3tO4kOzpDdfzRknly4fV8lN/Y+PTW38wpngB7+Kd9aHPD6wNf
+         zpF/TOJg8TJ+YEla3iNTKBnNBcoPVTdzIDMrpikCjVr43EkanYnwZv+9HdSQPySgxF
+         QtlG8IXCFTTfpDnQ48/jz68+2S8GYYvxaPl0dkHk=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-arm-kernel@lists.infradead.org
 Cc:     catalin.marinas@arm.com, will@kernel.org, mark.rutland@arm.com,
         linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>
-Subject: [PATCH 0/2] efi/arm64: execute the kernel in place if possible
-Date:   Thu, 26 Mar 2020 17:59:03 +0100
-Message-Id: <20200326165905.2240-1-ardb@kernel.org>
+Subject: [PATCH 1/2] efi/libstub/arm64: avoid copying the kernel unnecessarily
+Date:   Thu, 26 Mar 2020 17:59:04 +0100
+Message-Id: <20200326165905.2240-2-ardb@kernel.org>
 X-Mailer: git-send-email 2.17.1
+In-Reply-To: <20200326165905.2240-1-ardb@kernel.org>
+References: <20200326165905.2240-1-ardb@kernel.org>
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Update the relocation logic in the EFI stub for arm64 so it runs the
-kernel in place if it was loaded by firmware at an address which allows
-doing so. Then, update the PE/COFF header metadata and increase the
-section alignment to force the UEFI image loader to honour the minimal
-alignment requirement imposed by the kernel proper.
+If the UEFI firmware has loaded the kernel at the right alignment, and
+we are running a relocatable kernel, there is no point in copying the
+kernel to a different place in memory, and instead, we can just run it
+in place.
 
-Ard Biesheuvel (2):
-  efi/libstub/arm64: avoid copying the kernel unnecessarily
-  efi/arm64: increase the PE/COFF alignment so the kernel can run in
-    place
-
- arch/arm64/kernel/efi-header.S            | 2 +-
- arch/arm64/kernel/image-vars.h            | 7 +++++++
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+---
  drivers/firmware/efi/libstub/arm64-stub.c | 9 +++++++++
- 3 files changed, 17 insertions(+), 1 deletion(-)
+ 1 file changed, 9 insertions(+)
 
+diff --git a/drivers/firmware/efi/libstub/arm64-stub.c b/drivers/firmware/efi/libstub/arm64-stub.c
+index 9254cd8ab2d3..d263f504dcf0 100644
+--- a/drivers/firmware/efi/libstub/arm64-stub.c
++++ b/drivers/firmware/efi/libstub/arm64-stub.c
+@@ -104,6 +104,15 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
+ 					  (u32)phys_seed);
+ 
+ 		*image_addr = *reserve_addr + offset;
++	} else if (IS_ENABLED(CONFIG_RELOCATABLE) &&
++		   IS_ALIGNED((u64)_text - TEXT_OFFSET, EFI_KIMG_ALIGN)) {
++		/*
++		 * If we are relocatable and were loaded at a suitable offset,
++		 * there is no need to do anything and we can just execute in
++		 * place.
++		 */
++		*image_addr = (u64)_text;
++		return EFI_SUCCESS;
+ 	} else {
+ 		/*
+ 		 * Else, try a straight allocation at the preferred offset.
 -- 
 2.17.1
 
