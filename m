@@ -1,98 +1,202 @@
-Return-Path: <SRS0=dRSc=5S=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=eowX=5T=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A0309C43331
-	for <linux-efi@archiver.kernel.org>; Thu,  2 Apr 2020 12:31:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 982AFC43331
+	for <linux-efi@archiver.kernel.org>; Fri,  3 Apr 2020 23:02:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 720F220757
-	for <linux-efi@archiver.kernel.org>; Thu,  2 Apr 2020 12:31:49 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1585830709;
-	bh=DNMiejYwj2j0Q5rLQZF5oFRZlYEgWeu3M1bkmf7hNEc=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=CQOWD7/DFMy0bISlM4Jjv7VkF59Gey7RT7VJp9NEbZ7YfgN+/VXiZ1AjuThQ3RShm
-	 xSi15VIvH9O3izVngugz9bEtVzcUlT7nZADEX0yUgiFkiL9e9OylhMjHEHNs30gqtT
-	 oRnbasAmDNtYVGTPygQsU6u/zBmK4BQk+DdD1tZU=
+	by mail.kernel.org (Postfix) with ESMTP id 6773C206F6
+	for <linux-efi@archiver.kernel.org>; Fri,  3 Apr 2020 23:02:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387678AbgDBMbt (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 2 Apr 2020 08:31:49 -0400
-Received: from mail.kernel.org ([198.145.29.99]:35242 "EHLO mail.kernel.org"
+        id S1727907AbgDCXCS (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 3 Apr 2020 19:02:18 -0400
+Received: from mga05.intel.com ([192.55.52.43]:63296 "EHLO mga05.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1732957AbgDBMbs (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Thu, 2 Apr 2020 08:31:48 -0400
-Received: from mail-io1-f46.google.com (mail-io1-f46.google.com [209.85.166.46])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id E278420784;
-        Thu,  2 Apr 2020 12:31:47 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1585830708;
-        bh=DNMiejYwj2j0Q5rLQZF5oFRZlYEgWeu3M1bkmf7hNEc=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=k/apptIJHcrqHktp4ToqJxrtyMHceAbQ598Eg3lDXvMcf8qQLBmBq9Avwh4QCIXhf
-         xEdPcA+wfR3dbIc2FEKx2apDHYG2eSMvJ3hWCpOKL4KPWzAKUGuGTMYhoU5pB2KMaX
-         dqK/l/ksji1WsoiFipAjKyd9k14HypJd9c7ynSCo=
-Received: by mail-io1-f46.google.com with SMTP id y17so1259898iow.9;
-        Thu, 02 Apr 2020 05:31:47 -0700 (PDT)
-X-Gm-Message-State: AGi0PubbHIFtlWLhTPDbPRy/5aeVYdDgeSl6Mjt21DoLHilONJSuw+5m
-        /mOEmjT59BuB7e5z7A1+aH0RyC01ZnQ0vKPjYAE=
-X-Google-Smtp-Source: APiQypL+SH2GW1pV8qQ+8TpfGGBEg/QFKeyESpRUrLNNnjZ3QYYp2FRde6CIsOAENBP0K5dSS6xs7XOfzgQAjR/9PLQ=
-X-Received: by 2002:a05:6638:a22:: with SMTP id 2mr3218066jao.74.1585830707279;
- Thu, 02 Apr 2020 05:31:47 -0700 (PDT)
+        id S1727829AbgDCXCS (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 3 Apr 2020 19:02:18 -0400
+IronPort-SDR: IRKUKsgjqXxEohNXW9TWIMtwOqSIe7z77MYayIbsQ5gILawzvIAioEywIOKX3SqZJhWZcdcpNl
+ e3hAX+Lp9ADg==
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from fmsmga007.fm.intel.com ([10.253.24.52])
+  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Apr 2020 16:02:18 -0700
+IronPort-SDR: 7X2FdEeSHnZud7U2di3W2CIpbLySTT+WfbNcqcpADFSzU7W42GaDPZkVI7HQlMDErZLgI2Bi44
+ RLmTPlFWod2g==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.72,341,1580803200"; 
+   d="scan'208";a="241248159"
+Received: from lkp-server01.sh.intel.com (HELO lkp-server01) ([10.239.97.150])
+  by fmsmga007.fm.intel.com with ESMTP; 03 Apr 2020 16:02:15 -0700
+Received: from kbuild by lkp-server01 with local (Exim 4.89)
+        (envelope-from <lkp@intel.com>)
+        id 1jKVK8-0007gr-OX; Sat, 04 Apr 2020 07:02:04 +0800
+Date:   Sat, 04 Apr 2020 07:01:06 +0800
+From:   kbuild test robot <lkp@intel.com>
+To:     Ard Biesheuvel <ardb@kernel.org>
+Cc:     linux-efi@vger.kernel.org
+Subject: [efi:urgent] BUILD SUCCESS
+ 33da38529f13f938a73107aa2dc7c3b4e786967a
+Message-ID: <5e87c032.59Gf9H9dKvGGOkeb%lkp@intel.com>
+User-Agent: Heirloom mailx 12.5 6/20/10
 MIME-Version: 1.0
-References: <20200402102537.503103-1-colin.king@canonical.com>
-In-Reply-To: <20200402102537.503103-1-colin.king@canonical.com>
-From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Thu, 2 Apr 2020 14:31:36 +0200
-X-Gmail-Original-Message-ID: <CAMj1kXF=v5QNEPdzFuwuE6-FTysGV1qTfsHLRFkbgG8sjMcAMQ@mail.gmail.com>
-Message-ID: <CAMj1kXF=v5QNEPdzFuwuE6-FTysGV1qTfsHLRFkbgG8sjMcAMQ@mail.gmail.com>
-Subject: Re: [PATCH] efi/libstub/x86: remove redundant assignment to pointer hdr
-To:     Colin King <colin.king@canonical.com>
-Cc:     Ingo Molnar <mingo@kernel.org>,
-        linux-efi <linux-efi@vger.kernel.org>,
-        kernel-janitors@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Thu, 2 Apr 2020 at 12:25, Colin King <colin.king@canonical.com> wrote:
->
-> From: Colin Ian King <colin.king@canonical.com>
->
-> The pointer hdr is being assigned a value that is never read and
-> it is being updated later with a new value. The assignment is
-> redundant and can be removed.
->
-> Addresses-Coverity: ("Unused value")
-> Signed-off-by: Colin Ian King <colin.king@canonical.com>
+tree/branch: https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git  urgent
+branch HEAD: 33da38529f13f938a73107aa2dc7c3b4e786967a  efi/libstub/x86: remove redundant assignment to pointer hdr
 
-Thanks Colin. I'll queue this up.
+elapsed time: 481m
 
-> ---
->  drivers/firmware/efi/libstub/x86-stub.c | 2 --
->  1 file changed, 2 deletions(-)
->
-> diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-> index 8d3a707789de..e02ea51273ff 100644
-> --- a/drivers/firmware/efi/libstub/x86-stub.c
-> +++ b/drivers/firmware/efi/libstub/x86-stub.c
-> @@ -392,8 +392,6 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
->         image_base = efi_table_attr(image, image_base);
->         image_offset = (void *)startup_32 - image_base;
->
-> -       hdr = &((struct boot_params *)image_base)->hdr;
-> -
->         status = efi_allocate_pages(0x4000, (unsigned long *)&boot_params, ULONG_MAX);
->         if (status != EFI_SUCCESS) {
->                 efi_printk("Failed to allocate lowmem for boot params\n");
-> --
-> 2.25.1
->
+configs tested: 135
+configs skipped: 0
+
+The following configs have been built successfully.
+More configs may be tested in the coming days.
+
+arm                              allmodconfig
+arm                               allnoconfig
+arm                              allyesconfig
+arm64                            allmodconfig
+arm64                             allnoconfig
+arm64                            allyesconfig
+arm                           efm32_defconfig
+arm                         at91_dt_defconfig
+arm                        shmobile_defconfig
+arm64                               defconfig
+arm                          exynos_defconfig
+arm                        multi_v5_defconfig
+arm                           sunxi_defconfig
+arm                        multi_v7_defconfig
+sparc                            allyesconfig
+i386                                defconfig
+riscv                          rv32_defconfig
+s390                       zfcpdump_defconfig
+m68k                           sun3_defconfig
+sh                            titan_defconfig
+powerpc                           allnoconfig
+xtensa                       common_defconfig
+ia64                             alldefconfig
+i386                              allnoconfig
+i386                             alldefconfig
+i386                             allyesconfig
+ia64                             allmodconfig
+ia64                              allnoconfig
+ia64                             allyesconfig
+ia64                                defconfig
+c6x                              allyesconfig
+c6x                        evmc6678_defconfig
+nios2                         10m50_defconfig
+nios2                         3c120_defconfig
+openrisc                    or1ksim_defconfig
+openrisc                 simple_smp_defconfig
+xtensa                          iss_defconfig
+h8300                       h8s-sim_defconfig
+h8300                     edosk2674_defconfig
+m68k                       m5475evb_defconfig
+m68k                             allmodconfig
+h8300                    h8300h-sim_defconfig
+m68k                          multi_defconfig
+arc                              allyesconfig
+arc                                 defconfig
+microblaze                      mmu_defconfig
+microblaze                    nommu_defconfig
+powerpc                             defconfig
+powerpc                       ppc64_defconfig
+powerpc                          rhel-kconfig
+mips                           32r2_defconfig
+mips                         64r6el_defconfig
+mips                             allmodconfig
+mips                              allnoconfig
+mips                             allyesconfig
+mips                      fuloong2e_defconfig
+mips                      malta_kvm_defconfig
+parisc                            allnoconfig
+parisc                generic-64bit_defconfig
+parisc                generic-32bit_defconfig
+parisc                           allyesconfig
+x86_64               randconfig-a001-20200403
+x86_64               randconfig-a002-20200403
+x86_64               randconfig-a003-20200403
+i386                 randconfig-a001-20200403
+i386                 randconfig-a002-20200403
+i386                 randconfig-a003-20200403
+nds32                randconfig-a001-20200403
+m68k                 randconfig-a001-20200403
+alpha                randconfig-a001-20200403
+parisc               randconfig-a001-20200403
+riscv                randconfig-a001-20200403
+sparc64              randconfig-a001-20200403
+h8300                randconfig-a001-20200403
+nios2                randconfig-a001-20200403
+microblaze           randconfig-a001-20200403
+c6x                  randconfig-a001-20200403
+s390                 randconfig-a001-20200403
+xtensa               randconfig-a001-20200403
+csky                 randconfig-a001-20200403
+openrisc             randconfig-a001-20200403
+sh                   randconfig-a001-20200403
+x86_64               randconfig-e001-20200403
+x86_64               randconfig-e002-20200403
+x86_64               randconfig-e003-20200403
+i386                 randconfig-e001-20200403
+i386                 randconfig-e002-20200403
+i386                 randconfig-e003-20200403
+x86_64               randconfig-f001-20200403
+x86_64               randconfig-f002-20200403
+x86_64               randconfig-f003-20200403
+i386                 randconfig-f001-20200403
+i386                 randconfig-f002-20200403
+i386                 randconfig-f003-20200403
+x86_64               randconfig-g001-20200403
+x86_64               randconfig-g002-20200403
+x86_64               randconfig-g003-20200403
+i386                 randconfig-g001-20200403
+i386                 randconfig-g002-20200403
+i386                 randconfig-g003-20200403
+arm64                randconfig-a001-20200403
+sparc                randconfig-a001-20200403
+ia64                 randconfig-a001-20200403
+arc                  randconfig-a001-20200403
+arm                  randconfig-a001-20200403
+powerpc              randconfig-a001-20200403
+riscv                            allyesconfig
+riscv                    nommu_virt_defconfig
+riscv                             allnoconfig
+riscv                               defconfig
+riscv                            allmodconfig
+s390                          debug_defconfig
+s390                             allyesconfig
+s390                              allnoconfig
+s390                             allmodconfig
+s390                             alldefconfig
+s390                                defconfig
+sh                          rsk7269_defconfig
+sh                               allmodconfig
+sh                  sh7785lcr_32bit_defconfig
+sh                                allnoconfig
+sparc                               defconfig
+sparc64                             defconfig
+sparc64                           allnoconfig
+sparc64                          allyesconfig
+sparc64                          allmodconfig
+um                           x86_64_defconfig
+um                             i386_defconfig
+um                                  defconfig
+x86_64                                   rhel
+x86_64                               rhel-7.6
+x86_64                         rhel-7.2-clear
+x86_64                                    lkp
+x86_64                              fedora-25
+x86_64                                  kexec
+
+---
+0-DAY CI Kernel Test Service, Intel Corporation
+https://lists.01.org/hyperkitty/list/kbuild-all@lists.01.org
