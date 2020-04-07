@@ -1,156 +1,162 @@
-Return-Path: <SRS0=GtyG=5W=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=DGf0=5X=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.3 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-1.3 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9FFEAC2BA17
-	for <linux-efi@archiver.kernel.org>; Mon,  6 Apr 2020 18:30:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ADB27C2BA16
+	for <linux-efi@archiver.kernel.org>; Tue,  7 Apr 2020 08:08:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id 7E0D12078C
-	for <linux-efi@archiver.kernel.org>; Mon,  6 Apr 2020 18:30:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7439420748
+	for <linux-efi@archiver.kernel.org>; Tue,  7 Apr 2020 08:08:07 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1586197811;
-	bh=HBvFCeSJpqyDca6uPYo//uUcwNS1HPsmDmAlbZua63w=;
+	s=default; t=1586246887;
+	bh=xkADbzVLtud6m/+4evkDQMCfw2n794Vkxp3wdzhIe5c=;
 	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=y6z0qi8NTr97ceXPeZ40PscvUuxQm2BGYwyMGK4l7sp9mZYp7HrI74xvxg96QargY
-	 Tpxojuh1+maB8Es5M4oZkFNdDUxVKpuhsfwl1ViMg2NnvS+azrk9FdDLWS6nnWfHlD
-	 jZ1QLKWNXpROhPYZP3oEL2j7Etg63bMuqsv4ZhJE=
+	b=qWv2U6vA8FplBEfzwahc2QG6RBQzMTOf9J2w5fV5nty0t4AC+KtzmhsJhfA8h4eEI
+	 kFyEhyMYzNPPuBXEbWsGGTPbeGvmsnDxH/488f2js+HY79PYRBoEzNxfmxIc6/9txD
+	 PO7Rcn7IIu13eRJV0fR89IBn217qbVHKSL9z9Y4o=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726420AbgDFSaL (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 6 Apr 2020 14:30:11 -0400
-Received: from mail.kernel.org ([198.145.29.99]:44710 "EHLO mail.kernel.org"
+        id S1726707AbgDGIIH (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 7 Apr 2020 04:08:07 -0400
+Received: from mail.kernel.org ([198.145.29.99]:42674 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725787AbgDFSaK (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 6 Apr 2020 14:30:10 -0400
-Received: from mail-io1-f43.google.com (mail-io1-f43.google.com [209.85.166.43])
+        id S1726635AbgDGIIG (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Tue, 7 Apr 2020 04:08:06 -0400
+Received: from mail-io1-f46.google.com (mail-io1-f46.google.com [209.85.166.46])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 7DF642078C;
-        Mon,  6 Apr 2020 18:30:09 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 5DF3F20753
+        for <linux-efi@vger.kernel.org>; Tue,  7 Apr 2020 08:08:05 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1586197809;
-        bh=HBvFCeSJpqyDca6uPYo//uUcwNS1HPsmDmAlbZua63w=;
+        s=default; t=1586246885;
+        bh=xkADbzVLtud6m/+4evkDQMCfw2n794Vkxp3wdzhIe5c=;
         h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=OQu/KdqJDMcqZ+Bn5MhryrSIlGUHMSCxoQrTySfWGm1ktwzBg6k747lsrw+hZMziC
-         y5Nf10brDLchUsRgeYPnGZGa24JPBacfZ9l4FK7znrXsllWpNbStplA7N6K+xnag/o
-         Ryltx4sNIduVtvaQRx22htBLO7ONSwi9FeB4uwqw=
-Received: by mail-io1-f43.google.com with SMTP id y14so473769iol.12;
-        Mon, 06 Apr 2020 11:30:09 -0700 (PDT)
-X-Gm-Message-State: AGi0PubxFqFEwI5fPWqNYrlBSehLjkE/qvvonBGr7ezCPQayBGiTGcw5
-        8/s5fP6ECNPrWdIermal4xZ2ESqPPcfhWj4x9To=
-X-Google-Smtp-Source: APiQypId4Gl802lHnEOrV9sQstKR9OAkyvaTpSgpJG5BIvk42Cjxi15zB2C1hlXWt9hJyyflowd/BdxiWcIZ1/rOigw=
-X-Received: by 2002:a5e:8b47:: with SMTP id z7mr1222858iom.16.1586197808726;
- Mon, 06 Apr 2020 11:30:08 -0700 (PDT)
+        b=eBXPcdOH3SLwhrCsbStr6LlvZvcgM4nk3FbBm0inY5FHPjPjzRLLa8Wp5zcZiwS3a
+         916urRF3rf+Y4lQij6x0SiwhH+3iQ/+9XW8/VvMEwcaYQtvZAtFNKOK+Rn/q9+r3Wf
+         g728ef8nCtg0rDLmLx+DJqteieWPHUf6G+w4073E=
+Received: by mail-io1-f46.google.com with SMTP id u2so2413923iop.10
+        for <linux-efi@vger.kernel.org>; Tue, 07 Apr 2020 01:08:05 -0700 (PDT)
+X-Gm-Message-State: AGi0PuZrhuKjm/tecrdQ4a5TSgX+sc9LZGmA7h98YBIP1k7lQuYjKJBV
+        TYTFCmJgQ9f2qmBjWLzNWqtdEsz6U9vVMjtOZas=
+X-Google-Smtp-Source: APiQypJH7m+mkBesv8DTbNoK1L38bWn1GoKo/KLCYlQNQZSTA5+FBHoI7xTP5yWLtq1MzgM2z2vhGPjcwVpvtm4yXQk=
+X-Received: by 2002:a05:6602:2439:: with SMTP id g25mr1020219iob.142.1586246884776;
+ Tue, 07 Apr 2020 01:08:04 -0700 (PDT)
 MIME-Version: 1.0
-References: <CAMj1kXEUkJ1XJ9OTsijeq8tNNYC00bXqEV44OMtX5ugo9WoLKA@mail.gmail.com>
- <20200406180614.429454-1-nivedita@alum.mit.edu>
-In-Reply-To: <20200406180614.429454-1-nivedita@alum.mit.edu>
+References: <20200328205809.23825-1-ardb@kernel.org> <20200330074721.GV22097@bivouac.eciton.net>
+ <CAMj1kXFPtY20afbAZgXT3As4TUuAqi3=pG8u19hjMjFxgN6HWA@mail.gmail.com>
+ <CAMj1kXEf5rT1pmDNQoOd5Tx9xQ=fUMT0xo4JXZNfz=VDY9268Q@mail.gmail.com>
+ <DM5PR2101MB104760D03E632DD4DBE99AE1D7CB0@DM5PR2101MB1047.namprd21.prod.outlook.com>
+ <CAMj1kXF+2O5cDC9zuNp9Lx9Oe6WyxRghPqSi63CnF+KCcGUZyw@mail.gmail.com>
+ <CAMj1kXFJB9ciJ41V2tpQNX_mN7S8BweV9_ME3sDxKjwnR2Jwbg@mail.gmail.com>
+ <MW2PR2101MB10525381BAB07997EA5F6B7CD7C80@MW2PR2101MB1052.namprd21.prod.outlook.com>
+ <MW2PR2101MB1052F06F444705247419B2B3D7C20@MW2PR2101MB1052.namprd21.prod.outlook.com>
+In-Reply-To: <MW2PR2101MB1052F06F444705247419B2B3D7C20@MW2PR2101MB1052.namprd21.prod.outlook.com>
 From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Mon, 6 Apr 2020 20:29:57 +0200
-X-Gmail-Original-Message-ID: <CAMj1kXEpaKxoOBP9suDR1CJ7gTnKEQJcA1nPa3BWh1sN5piZoA@mail.gmail.com>
-Message-ID: <CAMj1kXEpaKxoOBP9suDR1CJ7gTnKEQJcA1nPa3BWh1sN5piZoA@mail.gmail.com>
-Subject: Re: [PATCH 1/2] efi/x86: Move efi stub globals from .bss to .data
-To:     Arvind Sankar <nivedita@alum.mit.edu>
-Cc:     Borislav Petkov <bp@alien8.de>, Sergey Shatunov <me@prok.pw>,
-        hpa@zytor.com,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        mingo@redhat.com, Thomas Gleixner <tglx@linutronix.de>,
-        x86@kernel.org, linux-efi <linux-efi@vger.kernel.org>,
-        initramfs@vger.kernel.org,
-        Donovan Tremura <neurognostic@protonmail.ch>,
-        Harald Hoyer <harald@hoyer.xyz>
+Date:   Tue, 7 Apr 2020 10:07:53 +0200
+X-Gmail-Original-Message-ID: <CAMj1kXEZgeNUVVZHiF+vS5_ekCSaiJgP5WBG0WoBkfRnWPhzzw@mail.gmail.com>
+Message-ID: <CAMj1kXEZgeNUVVZHiF+vS5_ekCSaiJgP5WBG0WoBkfRnWPhzzw@mail.gmail.com>
+Subject: Re: [PATCH] efi/libstub/arm64: avoid image_base value from efi_loaded_image
+To:     Michael Kelley <mikelley@microsoft.com>
+Cc:     "lersek@redhat.com" <lersek@redhat.com>,
+        Leif Lindholm <leif@nuviainc.com>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        linux-efi <linux-efi@vger.kernel.org>,
+        Boqun Feng <Boqun.Feng@microsoft.com>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Mon, 6 Apr 2020 at 20:06, Arvind Sankar <nivedita@alum.mit.edu> wrote:
+On Mon, 6 Apr 2020 at 19:13, Michael Kelley <mikelley@microsoft.com> wrote:
 >
-> Commit
+> From: Michael Kelley  Sent: Tuesday, March 31, 2020 6:38 AM
+> >
+> > From: Ard Biesheuvel <ardb@kernel.org>  Sent: Tuesday, March 31, 2020 12:56 AM
+> > >
+> > > On Mon, 30 Mar 2020 at 20:24, Ard Biesheuvel <ardb@kernel.org> wrote:
+> > > >
+> > > > On Mon, 30 Mar 2020 at 20:12, Michael Kelley <mikelley@microsoft.com> wrote:
+> > > > >
+> > > > > From: Ard Biesheuvel <ardb@kernel.org>  Sent: Monday, March 30, 2020 12:51 AM
+> > > > > >
+> > > > > > On Mon, 30 Mar 2020 at 09:50, Ard Biesheuvel <ardb@kernel.org> wrote:
+> > > > > > >
+> > > > > > > On Mon, 30 Mar 2020 at 09:47, Leif Lindholm <leif@nuviainc.com> wrote:
+> > > > > > > >
+> > > > > > > > On Sat, Mar 28, 2020 at 21:58:09 +0100, Ard Biesheuvel wrote:
+> > > > > > > > > Commit 9f9223778ef3 ("efi/libstub/arm: Make efi_entry() an ordinary
+> > > > > > > > > PE/COFF entrypoint") did some code refactoring to get rid of the
+> > > > > > > > > EFI entry point assembler code, and in the process, it got rid of the
+> > > > > > > > > assignment of image_addr to the value of _text. Instead, it switched
+> > > > > > > > > to using the image_base field of the efi_loaded_image struct provided
+> > > > > > > > > by UEFI, which should contain the same value.
+> > > > > > > > >
+> > > > > > > > > However, Michael reports that this is not the case: older GRUB builds
+> > > > > > > > > corrupt this value in some way, and since we can easily switch back to
+> > > > > > > > > referring to _text to discover this value, let's simply do that.
+> > > > > > > >
+> > > > > > > > It is not clear to me how "older GRUB builds" would differ here.
+> > > > > > > > I think more investigation is needed before making that claim.
+> > > > > > > > My suspicion is that some (old) version of non-upstream, shim-enabled
+> > > > > > > > distro-specific build is playing a part.
+> > > > > > > >
+> > > > > > > > So, do we have the option for more detailed investigations, or can we
+> > > > > > > > vague the claim up to say "some GRUB builds seen in the wild, based
+> > > > > > > > on an upstream 2.02" or suchlike?
+> > > > > > > >
+> > > > > > >
+> > > > > > > I've queued a fix that prints a nastygram if the value deviates from
+> > > > > > > the expected one. Let's see if this triggers any reports.
+> > > > > >
+> > > > > > (/me looks at context)
+> > > > > >
+> > > > > > *This* is the fix that prints a nastygram.
+> > > > >
+> > > > > FWIW, I pulled the BOOTAA64.EFI and grubaa64.efi files from CentOS 7.6
+> > > > > and CentOS 8.0 binary packages and tested both in my Hyper-V VM.
+> > > > > Using strings | grep '2\.' to get version info, the CentOS 7.6 grubaa64.efi
+> > > > > shows:
+> > > > >
+> > > > >         User-Agent: GRUB 2.02~beta2
+> > > > >
+> > > > > The CentOS 8.0 grubaa64.efi shows:
+> > > > >
+> > > > >         User-Agent: GRUB 2.03
+> > > > >
+> > > > > Both versions produce the FIRMWARE BUG warning when using Ard's
+> > > > > latest patch.  I'll assume the equivalent RHEL versions are the same.
+> > > > > So we've got official distro releases that show the problem.
+> > > > >
+> > > > > As reported earlier, the BOOTAA64.EFI and grubaa64.efi from a
+> > > > > Debian release (not exactly sure which one) do not produce the
+> > > > > FIRMWARE BUG warning.  The grubaa64.efi reports as 2.04-4.
+> > > > >
+> > > >
+> > > > Thanks a lot Michael, that is really helpful.
+> > >
+> > > I could not reproduce the issue with Debian Stretch's
+> > > 2.02~beta3-5+deb9u2, so it does appear to be RedHat's value add that
+> > > is to blame here.
+> > >
+> > > @Laszlo: TL;DR RedHat's GRUB for arm64 appears to clobber the
+> > > image_base field of the efi_loaded_image struct passed to the kernel.
+> > > Could you please recommend a way to report this?
+> >
+> > Or there could be something weird about my Hyper-V VM.  I have a
+> > couple of ARM64 bare metal machines, but they are in the office
+> > with no remote access, and we're on the work-from-home plan for
+> > now.  But I may be able to get into the office later this week and
+> > try it.  I'd like to rule out anything related to Hyper-V, and will
+> > update this thread if I can.
+> >
 >
->   3ee372ccce4d ("x86/boot/compressed/64: Remove .bss/.pgtable from
->   bzImage")
+> I have tried this scenario on bare metal running RHEL 7.4, and the
+> problem reproduces as described above.  So this is *not* related to
+> running in a Hyper-V VM, which is what I wanted to make sure of.
 >
-> removed the .bss section from the bzImage.
->
-> However, while a PE loader is required to zero-initialize the .bss
-> section before calling the PE entry point, the EFI handover protocol
-> does not currently document any requirement that .bss be initialized by
-> the bootloader prior to calling the handover entry.
->
-> When systemd-boot is used to boot a unified kernel image [1], the image
-> is constructed by embedding the bzImage as a .linux section in a PE
-> executable that contains a small stub loader from systemd together with
-> additional sections and potentially an initrd. As the .bss section
-> within the bzImage is no longer explicitly present as part of the file,
-> it is not initialized before calling the EFI handover entry.
-> Furthermore, as the size of the embedded .linux section is only the size
-> of the bzImage file itself, the .bss section's memory may not even have
-> been allocated.
->
-> In particular, this can result in efi_disable_pci_dma being true even
-> when it was not specified via the command line or configuration option,
-> which in turn causes crashes while booting on some systems.
->
-> To avoid issues, place all EFI stub global variables into the .data
-> section instead of .bss. As of this writing, only boolean flags for a
-> few command line arguments and the sys_table pointer were in .bss and
-> will now move into the .data section.
->
-> [1] https://systemd.io/BOOT_LOADER_SPECIFICATION/#type-2-efi-unified-kernel-images
->
-> Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
-> Reported-by: Sergey Shatunov <me@prok.pw>
-> Fixes: 3ee372ccce4d ("x86/boot/compressed/64: Remove .bss/.pgtable from bzImage")
 
-Thanks Arvind.
-
-This should be fine for the time being, but going forward, it would
-indeed be better [as you suggested] to consolidate the section
-tweaking logic that exists on different architectures for entirely
-different reasons, but with similar results. That will also ensure
-that BSS gets pulled into .data (or .init.data for arm64)
-automatically, rather than requiring these manual annotations.
-
-I'll queue these up in efi/urgent, and send them on later this week.
-
-
-> ---
->  drivers/firmware/efi/libstub/efistub.h  | 2 +-
->  drivers/firmware/efi/libstub/x86-stub.c | 2 +-
->  2 files changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-> index cc90a748bcf0..67d26949fd26 100644
-> --- a/drivers/firmware/efi/libstub/efistub.h
-> +++ b/drivers/firmware/efi/libstub/efistub.h
-> @@ -25,7 +25,7 @@
->  #define EFI_ALLOC_ALIGN                EFI_PAGE_SIZE
->  #endif
->
-> -#ifdef CONFIG_ARM
-> +#if defined(CONFIG_ARM) || defined(CONFIG_X86)
->  #define __efistub_global       __section(.data)
->  #else
->  #define __efistub_global
-> diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-> index 8d3a707789de..e7af6d2eddbf 100644
-> --- a/drivers/firmware/efi/libstub/x86-stub.c
-> +++ b/drivers/firmware/efi/libstub/x86-stub.c
-> @@ -20,7 +20,7 @@
->  /* Maximum physical address for 64-bit kernel with 4-level paging */
->  #define MAXMEM_X86_64_4LEVEL (1ull << 46)
->
-> -static efi_system_table_t *sys_table;
-> +static efi_system_table_t *sys_table __efistub_global;
->  extern const bool efi_is64;
->  extern u32 image_offset;
->
-> --
-> 2.24.1
->
+Thanks Michael. I'll mention this in the bugzilla entry.
