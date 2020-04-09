@@ -1,85 +1,211 @@
-Return-Path: <SRS0=FM6U=5Y=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=7pYY=5Z=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.4 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D5800C2D0F4
-	for <linux-efi@archiver.kernel.org>; Wed,  8 Apr 2020 17:58:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 84D33C2BA2B
+	for <linux-efi@archiver.kernel.org>; Thu,  9 Apr 2020 01:44:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [209.132.180.67])
-	by mail.kernel.org (Postfix) with ESMTP id A70452075E
-	for <linux-efi@archiver.kernel.org>; Wed,  8 Apr 2020 17:58:02 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=alien8.de header.i=@alien8.de header.b="HgiWbD9r"
+	by mail.kernel.org (Postfix) with ESMTP id 5AC9120857
+	for <linux-efi@archiver.kernel.org>; Thu,  9 Apr 2020 01:44:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727028AbgDHR6C (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 8 Apr 2020 13:58:02 -0400
-Received: from mail.skyhub.de ([5.9.137.197]:59098 "EHLO mail.skyhub.de"
+        id S1726582AbgDIBol (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 8 Apr 2020 21:44:41 -0400
+Received: from mga18.intel.com ([134.134.136.126]:23906 "EHLO mga18.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726780AbgDHR6C (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 8 Apr 2020 13:58:02 -0400
-Received: from zn.tnic (p200300EC2F0A93002886CB34BCAFCB01.dip0.t-ipconnect.de [IPv6:2003:ec:2f0a:9300:2886:cb34:bcaf:cb01])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id 90F541EC0CD9;
-        Wed,  8 Apr 2020 19:58:00 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alien8.de; s=dkim;
-        t=1586368680;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=EzzxUVtmTm/3Jlc1oShOC/yjn0NG06h83DNl2MgAQgg=;
-        b=HgiWbD9rW0RVGYaoQrtZR5kayVtadTnVRw9XJ447LU49VDnnv61CUm0N4zhFCIeH5YYvJf
-        J7L61rcPQRI1RLxG/kahf3/pN6RIid/wknNDP+fJzhEqyMLr6NXpTfLaVgctoP0Qc6tz9C
-        N6eLcJkM+MS1n52Zzcrj/tDuou+0V/w=
-Date:   Wed, 8 Apr 2020 19:57:56 +0200
-From:   Borislav Petkov <bp@alien8.de>
+        id S1726579AbgDIBol (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 8 Apr 2020 21:44:41 -0400
+IronPort-SDR: GP3X8Gi8iP+cH9ISjG3oxQo9DwKayHBAVCZdRW50s9qmvDQGVe6/16VPpciURyJByNEb2Oi7zA
+ 59L61dcuV0iA==
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from fmsmga007.fm.intel.com ([10.253.24.52])
+  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Apr 2020 18:44:40 -0700
+IronPort-SDR: gOnmBvFts9djdwO+fwjBN4ZwF2jOa3LrELVrzFqY+OWUDo5EFdGDU9XQnB0z6EN/wz996cgZNP
+ +SaHn55xgDWQ==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.72,360,1580803200"; 
+   d="scan'208";a="242514066"
+Received: from lkp-server01.sh.intel.com (HELO lkp-server01) ([10.239.97.150])
+  by fmsmga007.fm.intel.com with ESMTP; 08 Apr 2020 18:44:38 -0700
+Received: from kbuild by lkp-server01 with local (Exim 4.89)
+        (envelope-from <lkp@intel.com>)
+        id 1jMMFB-000Eiv-Mj; Thu, 09 Apr 2020 09:44:37 +0800
+Date:   Thu, 09 Apr 2020 09:43:44 +0800
+From:   kbuild test robot <lkp@intel.com>
 To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     Benjamin Thiel <b.thiel@posteo.de>, X86 ML <x86@kernel.org>,
-        LKML <linux-kernel@vger.kernel.org>,
-        linux-efi <linux-efi@vger.kernel.org>
-Subject: Re: [PATCH] x86/efi: Add a prototype for efi_arch_mem_reserve()
-Message-ID: <20200408175756.GG24663@zn.tnic>
-References: <20200326135041.3264-1-b.thiel@posteo.de>
- <CAMj1kXF6UF318wCL74T9orJk=+LafZ3VFXUGmqoBefYVaP2gNw@mail.gmail.com>
+Cc:     linux-efi@vger.kernel.org
+Subject: [efi:urgent] BUILD SUCCESS
+ f5356a8c201bf2dfa3783b3894f31f8e96f94624
+Message-ID: <5e8e7dd0.hLflH8uMWc9Gqk98%lkp@intel.com>
+User-Agent: Heirloom mailx 12.5 6/20/10
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAMj1kXF6UF318wCL74T9orJk=+LafZ3VFXUGmqoBefYVaP2gNw@mail.gmail.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Wed, Apr 08, 2020 at 07:39:56PM +0200, Ard Biesheuvel wrote:
-> On Thu, 26 Mar 2020 at 14:50, Benjamin Thiel <b.thiel@posteo.de> wrote:
-> >
-> > ... in order to fix a -Wmissing-ptototypes warning:
-> >
-> > arch/x86/platform/efi/quirks.c:245:13: warning:
-> > no previous prototype for ‘efi_arch_mem_reserve’ [-Wmissing-prototypes]
-> > void __init efi_arch_mem_reserve(phys_addr_t addr, u64 size)
-> >
-> > Signed-off-by: Benjamin Thiel <b.thiel@posteo.de>
-> 
-> Thanks. I'll queue this as a fix.
+tree/branch: https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git  urgent
+branch HEAD: f5356a8c201bf2dfa3783b3894f31f8e96f94624  x86/efi: Add a prototype for efi_arch_mem_reserve()
 
-I already took that one, see:
+elapsed time: 481m
 
-860f89e61824 ("x86/efi: Add a prototype for efi_arch_mem_reserve()")
+configs tested: 144
+configs skipped: 0
 
-but forgot to Cc: linux-efi@.
+The following configs have been built successfully.
+More configs may be tested in the coming days.
 
-Sorry about that.
+arm64                            allyesconfig
+arm                              allyesconfig
+arm64                             allnoconfig
+arm                               allnoconfig
+arm                           efm32_defconfig
+arm                         at91_dt_defconfig
+arm                        shmobile_defconfig
+arm64                               defconfig
+arm                          exynos_defconfig
+arm                        multi_v5_defconfig
+arm                           sunxi_defconfig
+arm                        multi_v7_defconfig
+sparc                            allyesconfig
+h8300                    h8300h-sim_defconfig
+s390                                defconfig
+xtensa                          iss_defconfig
+i386                              allnoconfig
+i386                             alldefconfig
+i386                             allyesconfig
+i386                              debian-10.3
+i386                                defconfig
+ia64                             allmodconfig
+ia64                                defconfig
+ia64                              allnoconfig
+ia64                             allyesconfig
+ia64                             alldefconfig
+arm64                            allmodconfig
+arm                              allmodconfig
+c6x                              allyesconfig
+c6x                        evmc6678_defconfig
+nios2                         10m50_defconfig
+nios2                         3c120_defconfig
+openrisc                    or1ksim_defconfig
+openrisc                 simple_smp_defconfig
+xtensa                       common_defconfig
+nds32                               defconfig
+nds32                             allnoconfig
+csky                                defconfig
+alpha                               defconfig
+h8300                       h8s-sim_defconfig
+h8300                     edosk2674_defconfig
+m68k                       m5475evb_defconfig
+m68k                             allmodconfig
+m68k                           sun3_defconfig
+m68k                          multi_defconfig
+arc                              allyesconfig
+arc                                 defconfig
+microblaze                      mmu_defconfig
+microblaze                    nommu_defconfig
+powerpc                           allnoconfig
+powerpc                             defconfig
+powerpc                       ppc64_defconfig
+powerpc                          rhel-kconfig
+mips                      fuloong2e_defconfig
+mips                      malta_kvm_defconfig
+mips                             allyesconfig
+mips                         64r6el_defconfig
+mips                              allnoconfig
+mips                           32r2_defconfig
+mips                             allmodconfig
+parisc                            allnoconfig
+parisc                           allyesconfig
+parisc                generic-32bit_defconfig
+parisc                generic-64bit_defconfig
+c6x                  randconfig-a001-20200408
+h8300                randconfig-a001-20200408
+microblaze           randconfig-a001-20200408
+nios2                randconfig-a001-20200408
+sparc64              randconfig-a001-20200408
+s390                 randconfig-a001-20200408
+xtensa               randconfig-a001-20200408
+csky                 randconfig-a001-20200408
+openrisc             randconfig-a001-20200408
+sh                   randconfig-a001-20200408
+x86_64               randconfig-b001-20200408
+x86_64               randconfig-b002-20200408
+x86_64               randconfig-b003-20200408
+i386                 randconfig-b001-20200408
+i386                 randconfig-b002-20200408
+i386                 randconfig-b003-20200408
+x86_64               randconfig-c001-20200408
+x86_64               randconfig-c002-20200408
+x86_64               randconfig-c003-20200408
+i386                 randconfig-c001-20200408
+i386                 randconfig-c002-20200408
+i386                 randconfig-c003-20200408
+x86_64               randconfig-d001-20200409
+x86_64               randconfig-d002-20200409
+x86_64               randconfig-d003-20200409
+i386                 randconfig-d001-20200409
+i386                 randconfig-d002-20200409
+i386                 randconfig-d003-20200409
+x86_64               randconfig-e002-20200408
+i386                 randconfig-e003-20200408
+i386                 randconfig-e001-20200408
+x86_64               randconfig-e001-20200408
+x86_64               randconfig-e003-20200408
+i386                 randconfig-e002-20200408
+i386                 randconfig-f001-20200408
+i386                 randconfig-f003-20200408
+x86_64               randconfig-f003-20200408
+x86_64               randconfig-f001-20200408
+i386                 randconfig-f002-20200408
+i386                 randconfig-h002-20200408
+i386                 randconfig-h003-20200408
+i386                 randconfig-h001-20200408
+x86_64               randconfig-h001-20200408
+x86_64               randconfig-h003-20200408
+sparc                randconfig-a001-20200408
+arm64                randconfig-a001-20200408
+ia64                 randconfig-a001-20200408
+arc                  randconfig-a001-20200408
+arm                  randconfig-a001-20200408
+riscv                            allmodconfig
+riscv                             allnoconfig
+riscv                            allyesconfig
+riscv                               defconfig
+riscv                    nommu_virt_defconfig
+riscv                          rv32_defconfig
+s390                             alldefconfig
+s390                             allmodconfig
+s390                              allnoconfig
+s390                             allyesconfig
+s390                          debug_defconfig
+s390                       zfcpdump_defconfig
+sh                               allmodconfig
+sh                                allnoconfig
+sh                          rsk7269_defconfig
+sh                  sh7785lcr_32bit_defconfig
+sh                            titan_defconfig
+sparc                               defconfig
+sparc64                             defconfig
+sparc64                           allnoconfig
+sparc64                          allyesconfig
+sparc64                          allmodconfig
+um                           x86_64_defconfig
+um                             i386_defconfig
+um                                  defconfig
+x86_64                                   rhel
+x86_64                               rhel-7.6
+x86_64                         rhel-7.2-clear
+x86_64                                    lkp
+x86_64                              fedora-25
+x86_64                                  kexec
 
--- 
-Regards/Gruss,
-    Boris.
-
-https://people.kernel.org/tglx/notes-about-netiquette
+---
+0-DAY CI Kernel Test Service, Intel Corporation
+https://lists.01.org/hyperkitty/list/kbuild-all@lists.01.org
