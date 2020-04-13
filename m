@@ -2,161 +2,129 @@ Return-Path: <SRS0=VwMC=55=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5350BC2BB86
-	for <linux-efi@archiver.kernel.org>; Mon, 13 Apr 2020 21:30:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CC0E8C2BA2B
+	for <linux-efi@archiver.kernel.org>; Mon, 13 Apr 2020 21:54:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3108120739
-	for <linux-efi@archiver.kernel.org>; Mon, 13 Apr 2020 21:30:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A4C5520732
+	for <linux-efi@archiver.kernel.org>; Mon, 13 Apr 2020 21:54:14 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="SpCaj77X"
+	dkim=pass (2048-bit key) header.d=atishpatra.org header.i=@atishpatra.org header.b="S9tY0EwJ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2389042AbgDMV3b (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 13 Apr 2020 17:29:31 -0400
-Received: from esa3.hgst.iphmx.com ([216.71.153.141]:20794 "EHLO
-        esa3.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2388994AbgDMV3a (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 13 Apr 2020 17:29:30 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1586813370; x=1618349370;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=VGLGVChtgkugJ2Zf+S/wgEqmmZg5+pWj+SDm9AjhtcA=;
-  b=SpCaj77XNEzRm+5VZXpMJbGmJpMwA10C1bZBbpraCjFcMPMBVyx1H+03
-   9c4QfsaHE0t2kYwkgW00SDSnKlgdrw1RC1aT5VKHjmQvWr7iJLEWNS+HC
-   jkWyP48t5t6RultefLBvYTGv2taoe8E54DTtv3yO+tUtjc5IRwqmGnmvf
-   QvXTr1602odO7gu0o0fPfOZIqECIABGaq/dNFru0V92nm2mD8l3B4Weqn
-   6hvTDSQg9bhWSkCyLHGfoHL7nC6vP3we4Qkf1Leq7UPzr3OgBnN2gV7vy
-   oNeYFtAaijUAcuNswVUDHRv5KOlukNg9Sct2Yfxjl99T77jJ0/jyBMpFZ
-   Q==;
-IronPort-SDR: L99hkqN4LH3oQcz2WVtJj3K7Nu8spioaRmwD3uQfOEj2sZ8ZEprpM6neTxpFfwDNCREXXw6jjU
- dJQOOBU5wAa4Orz/V8uZ988YqWMnadX+IPjNrhmveuanraBu1TqclgGj9amKKfsKpbCRBdWelB
- 8Dokly0RJcosjjD1xfYi5tc/SCFSrBa6yoSffCP78WMvPib6f28UNBtSOa7ye/wwgnzLJD+e/e
- GhLyndmlFsBS+WLUniQ4VWHRr0885LCHAaivez9p2k84FMTkta+velAHrF/OKe2XRz+I9gzIyK
- vzo=
-X-IronPort-AV: E=Sophos;i="5.72,380,1580745600"; 
-   d="scan'208";a="139583348"
-Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 14 Apr 2020 05:29:29 +0800
-IronPort-SDR: PVi9g5xGh0STGPeWQpw87pLhjP+yCoCDAVlhaPW8wBts8uELJQ1nZIT45PscpKuTsB07wnXiOO
- byQ5n1EVXPvwtAff9q1n9F9ZlKzKALtXvYN9WKMZHkNRIMS6d+UYcDPSfz6PMNdd0/KL4FNTaW
- gb6X24VCe4I09r93iFu8Kvl4vVAAox3CrhO+/enCV1oj73bGM9fq5ktHyuDd+eVrbT8y56eeom
- 5HyQkqJQ+Gtr32+AGaLsPHe3b84Vs2LCwucHhw5oh/17ew+3IPWXPink/Tgu+GmQB6MJS3/SPP
- 9VoTGPaSFghgtyfAf0Xp2bjJ
-Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 13 Apr 2020 14:20:33 -0700
-IronPort-SDR: WT5XDCFN81cADlBdOKDjic6ONVXHu3nS0Q+aL5T9UZa8LcDQ4YTXdhXRPIAv5q7nBEeBBLSrPh
- pEcJJEK7lUvjOI5ZmkXx/2g0RkbihNkPpV6qbaOpzJmxVDraTlUlUQ6OuRSCSabH9V2nskYlLZ
- Yfr5pie0rwXElQ33RRu85DkExbBxfpVL8JuCFvS/9bSBqqYIGlnD5vf1RzzkIxGotZuztB1Vsh
- ty8HgLZKEX3u9zuXuzq13KH6YOE0aWf65iPB8xpFeNnAiXZiNxTgy8jxECq68SL3nO1W5sszxQ
- mIM=
-WDCIronportException: Internal
-Received: from 9dg4l72.ad.shared (HELO jedi-01.hgst.com) ([10.86.55.26])
-  by uls-op-cesaip01.wdc.com with ESMTP; 13 Apr 2020 14:29:29 -0700
-From:   Atish Patra <atish.patra@wdc.com>
-To:     linux-kernel@vger.kernel.org
-Cc:     Atish Patra <atish.patra@wdc.com>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Ingo Molnar <mingo@kernel.org>, linux-efi@vger.kernel.org,
-        linux-riscv@lists.infradead.org,
-        linux-arm-kernel@lists.infradead.org,
-        Masahiro Yamada <masahiroy@kernel.org>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Russell King <linux@armlinux.org.uk>,
-        Will Deacon <will@kernel.org>
-Subject: [v2 PATCH 0/5] Add UEFI support for RISC-V 
-Date:   Mon, 13 Apr 2020 14:29:02 -0700
-Message-Id: <20200413212907.29244-1-atish.patra@wdc.com>
-X-Mailer: git-send-email 2.24.0
+        id S2389337AbgDMVyN (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 13 Apr 2020 17:54:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51990 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S2389286AbgDMVyL (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 13 Apr 2020 17:54:11 -0400
+Received: from mail-wm1-x342.google.com (mail-wm1-x342.google.com [IPv6:2a00:1450:4864:20::342])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0A45DC0A3BE2
+        for <linux-efi@vger.kernel.org>; Mon, 13 Apr 2020 14:54:11 -0700 (PDT)
+Received: by mail-wm1-x342.google.com with SMTP id e26so10823827wmk.5
+        for <linux-efi@vger.kernel.org>; Mon, 13 Apr 2020 14:54:10 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=atishpatra.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=n2YrxFswkx7hDllVIsDVbzNNztgUR6Vkh9Ws2W9v0sU=;
+        b=S9tY0EwJ0DuckJovjeInEXlrGKO2+8M+UJjAQNxtSEHCABWcJrCv/FH8NxKGKNYGgk
+         eyx0wTZ5zhhpfDX1eFiNK7yAbuWgJ3GrMZ0cinZzhaqluce2O7yyc1PXRfrsWqI0N7mH
+         f9iB6dT8Fbpxh4Vmc19lHugKZi/s6WM4hqAbOWtMw5baLt1tc5TNXR7//SDq/IcUyAbw
+         lQVSvBUJnK4g8MhUdHCQjuoczqcMFlRzHMDNpZZyLZb1d2p7bZac1MTQ21FKk2tHTMxV
+         Pv7pBwT1bKUu8LgcDVVS+Vv37thyxOSQTxmqu9lBp7VR0gtifwgNeL7cbJwW86dACaYK
+         rGEg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=n2YrxFswkx7hDllVIsDVbzNNztgUR6Vkh9Ws2W9v0sU=;
+        b=EEktAhpQjUr5G25xsqzuYd9CppGyQOZEiTQwK/XPYTwYTj07ohygGWX7Nxeuovq6D8
+         nzzJM4KglATdsTpTbR21mzDeLMVcfTXz+/Nu+87cerZFEtRsxHBhr+QQAQDh6tPqK8rB
+         edhu/Pmj9W/X8E5cfaGRD3e/lQY55ggph71cgGtAIMf12P93YfW1kvPj9KeShRELlPc8
+         7EIK7Mwci91j3pe/uhfUTlx+oVf4JIpKsWoG8x8XGdt4o7Erh+C+FkZok2U4P9HQzIad
+         lfFl2edLd521WgW+Oe/2g9LtFgaM6gxI6Af+l6qo1gyLS/mAMKymrzrb9ckqz1xoBhBd
+         WO3Q==
+X-Gm-Message-State: AGi0PuZSSPGYwwoGNfYFy6eb//G9M2zJnSJjYwqFHzudoa7exZf77HMg
+        5Jow6nLzPJrIXZAp9/XvrBQUbvvfNB2ACH8CFIglOO4=
+X-Google-Smtp-Source: APiQypLR+TgWBKP/kkMmQfl3pNKIeF2HWnQrkpYuKf4da4NMDuLoi6OHvBqTmJaukhMVepYAflj20L2qUMY42xQhy9s=
+X-Received: by 2002:a7b:cdfa:: with SMTP id p26mr9270601wmj.186.1586814849695;
+ Mon, 13 Apr 2020 14:54:09 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20200413155521.24698-1-ardb@kernel.org>
+In-Reply-To: <20200413155521.24698-1-ardb@kernel.org>
+From:   Atish Patra <atishp@atishpatra.org>
+Date:   Mon, 13 Apr 2020 14:53:58 -0700
+Message-ID: <CAOnJCULxNtk99sudMD5Rn5ao0orwcarOAwg7NPXMK6ZdXmwNOA@mail.gmail.com>
+Subject: Re: [PATCH v2 0/8] efi/libstub: simplify arm64 kernel image loading
+To:     Ard Biesheuvel <ardb@kernel.org>
+Cc:     linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        mark.rutland@arm.com, catalin.marinas@arm.com, will@kernel.org,
+        Jonathan.Cameron@huawei.com, nivedita@alum.mit.edu
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This series adds UEFI support for RISC-V. Currently, only boot time
-services have been added. Runtime services will be added in a separate
-series. This series depends on some core EFI patches
-present in current in efi-next and following other patches.
+On Mon, Apr 13, 2020 at 8:55 AM Ard Biesheuvel <ardb@kernel.org> wrote:
+>
+> On arm64, the kernel image used to be virtually mapped via the linear
+> region, making the two mappings correlated in a way that required the
+> kernel to be located at the start of the linear region, or the memory
+> below would not be accessible. For this reason, the EFI stub loader
+> code for arm64 has the notion of a 'preferred offset' for the physical
+> placement of the kernel image, and tries to put the kernel there, or
+> at least as low as possible in physical memory (unless KASLR is active,
+> in which case the placement is randomized)
+>
+> When KASLR was introduced, the virtual mapping of the kernel was moved
+> into the vmalloc region, and now, regardless of whether KASLR support
+> is built in or active, the kernel can be placed anywhere in physical
+> memory without any detrimental side effects on the linear region.
+>
+> This means that we can drop the notion of 'preferred offset' entirely,
+> and invoke the kernel in place if the PE/COFF loader loaded it at the
+> right offset. If not, we can invoke the ordinary UEFI top down page
+> allocator to reallocate it elsewhere in memory. By updating the PE/COFF
+> metadata, we can inform the PE/COFF loader about the desired alignment,
+> making it less likely that we need to move the kernel image in the first
+> place.
+>
+> Ard Biesheuvel (8):
+>   efi/libstub/random: align allocate size to EFI_ALLOC_ALIGN
+>   efi/libstub/random: increase random alloc granularity
+>   efi/libstub/arm64: replace 'preferred' offset with alignment check
+>   efi/libstub/arm64: simplify randomized loading of kernel image
+>   efi/libstub/arm64: align PE/COFF sections to segment alignment
+>   efi/libstub: add API function to allocate aligned memory
+>   efi/libstub/arm64: switch to ordinary page allocator for kernel image
+>   efi/libstub: move efi_relocate_kernel() into separate source file
+>
+>  arch/arm64/kernel/efi-header.S             |   2 +-
+>  arch/arm64/kernel/vmlinux.lds.S            |   3 +-
+>  drivers/firmware/efi/libstub/Makefile      |   3 +-
+>  drivers/firmware/efi/libstub/alignedmem.c  |  57 ++++++
+>  drivers/firmware/efi/libstub/arm64-stub.c  |  92 +++-------
+>  drivers/firmware/efi/libstub/efistub.h     |  18 +-
+>  drivers/firmware/efi/libstub/mem.c         | 191 +-------------------
+>  drivers/firmware/efi/libstub/randomalloc.c |   6 +-
+>  drivers/firmware/efi/libstub/relocate.c    | 174 ++++++++++++++++++
+>  9 files changed, 280 insertions(+), 266 deletions(-)
+>  create mode 100644 drivers/firmware/efi/libstub/alignedmem.c
+>  create mode 100644 drivers/firmware/efi/libstub/relocate.c
+>
+> --
+> 2.17.1
+>
 
-U-Boot: Adds the boot hartid under chosen node.
-https://lists.denx.de/pipermail/u-boot/2020-April/405726.html
-
-Linux kernel: 5.7-rc1
-
-OpenSBI: master
-
-Patch 1 just moves arm-stub code to a generic code so that it can be used
-across different architecture.
-
-Patch 3 adds fixmap bindings so that CONFIG_EFI can be compiled and we do not
-have create separate config to enable boot time services. 
-As runtime services are not enabled at this time, full generic early ioremap
-support is also not added in this series.
-
-Patch 4 and 5 adds the PE/COFF header and EFI stub code support for RISC-V
-respectively.
-
-The patches can also be found in following git repo.
-
-https://github.com/atishp04/linux/tree/wip_uefi_riscv_v2
-
-The patches have been verified on Qemu using bootefi command in U-Boot.
-
-Changes from v1->v2:
-1. Rebased on 5.7-rc1.
-2. Fixed minor typos and removed redundant macros/comments.
-
-Changes from previous version:
-1. Renamed to the generic efi stub macro.
-2. Address all redundant comments.
-3. Supported EFI kernel image with normal booti command.
-4. Removed runtime service related macro defines.
-
-Atish Patra (5):
-efi: Move arm-stub to a common file
-include: pe.h: Add RISC-V related PE definition
-RISC-V: Define fixmap bindings for generic early ioremap support
-RISC-V: Add PE/COFF header for EFI stub
-RISC-V: Add EFI stub support.
-
-arch/arm/Kconfig                              |   2 +-
-arch/arm64/Kconfig                            |   2 +-
-arch/riscv/Kconfig                            |  21 +++
-arch/riscv/Makefile                           |   1 +
-arch/riscv/configs/defconfig                  |   1 +
-arch/riscv/include/asm/Kbuild                 |   1 +
-arch/riscv/include/asm/efi.h                  |  45 ++++++
-arch/riscv/include/asm/fixmap.h               |  18 +++
-arch/riscv/include/asm/io.h                   |   1 +
-arch/riscv/include/asm/sections.h             |  13 ++
-arch/riscv/kernel/Makefile                    |   4 +
-arch/riscv/kernel/efi-header.S                |  99 +++++++++++++
-arch/riscv/kernel/head.S                      |  16 +++
-arch/riscv/kernel/image-vars.h                |  53 +++++++
-arch/riscv/kernel/vmlinux.lds.S               |  22 ++-
-drivers/firmware/efi/Kconfig                  |   4 +-
-drivers/firmware/efi/libstub/Makefile         |  20 ++-
-.../efi/libstub/{arm-stub.c => efi-stub.c}    |   0
-drivers/firmware/efi/libstub/riscv-stub.c     | 131 ++++++++++++++++++
-include/linux/pe.h                            |   3 +
-20 files changed, 445 insertions(+), 12 deletions(-)
-create mode 100644 arch/riscv/include/asm/efi.h
-create mode 100644 arch/riscv/include/asm/sections.h
-create mode 100644 arch/riscv/kernel/efi-header.S
-create mode 100644 arch/riscv/kernel/image-vars.h
-rename drivers/firmware/efi/libstub/{arm-stub.c => efi-stub.c} (100%)
-create mode 100644 drivers/firmware/efi/libstub/riscv-stub.c
+Oops. I just noticed this series after I sent out a v2.
+I see that efi_low_alloc is removed now and the handle_kernel_image is
+simplified for arm64.
+I will update the risc-v uefi series accordingly. Sorry for the noise.
 
 --
-2.24.0
-
+Regards,
+Atish
