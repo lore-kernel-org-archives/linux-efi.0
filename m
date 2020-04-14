@@ -2,123 +2,100 @@ Return-Path: <SRS0=RBj2=56=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.9 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F95CC2BA19
-	for <linux-efi@archiver.kernel.org>; Tue, 14 Apr 2020 16:36:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F00EC3815B
+	for <linux-efi@archiver.kernel.org>; Tue, 14 Apr 2020 18:27:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id ED1F120737
-	for <linux-efi@archiver.kernel.org>; Tue, 14 Apr 2020 16:35:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 401A120575
+	for <linux-efi@archiver.kernel.org>; Tue, 14 Apr 2020 18:27:28 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1586882160;
-	bh=2fMLCgNMiZFmx0Qt1Q1vqSQe2+/NjRgn2Y1LBwTa5SU=;
+	s=default; t=1586888848;
+	bh=Y5f94rGXyvxM7q1IoU22He/0fWYgi6eYHPW6GepYqCY=;
 	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=Cd8CrWvc6jMNVuAaOih5QXQ32pbNz7oUPM4d6MKeGL0qesUR3MIOB/ZxP59f3Lz7K
-	 HFjSotF7bpk5SY/7h5+cZuvPdd7wJPThzNTw5v7RFrPBfOrP4+3U9t9gnkRKT6TaT6
-	 X3YG6lI2/Bwk/bOqE98nuUcO8/E4gKebZFOZJesM=
+	b=KPIx0He94czpnpHsjLEr6aZOk+Hz7V8BZNDN59NlycAxSqFTGFjeJ6LHYjA9qvcVn
+	 IlC6TG5Vc1u+/CWkaoiEAntEjtMtekGYhG2R4puoyn8jk6K+rhpuWVSp9ryk3MiF2C
+	 gb1TbT2eBLp5pn2FnyZoojOZW5rQHbbgsZqekt+0=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2391799AbgDNQf7 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 14 Apr 2020 12:35:59 -0400
-Received: from mail.kernel.org ([198.145.29.99]:47318 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2391800AbgDNQfz (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Tue, 14 Apr 2020 12:35:55 -0400
-Received: from mail-io1-f41.google.com (mail-io1-f41.google.com [209.85.166.41])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id ED80E2075E;
-        Tue, 14 Apr 2020 16:35:54 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1586882155;
-        bh=2fMLCgNMiZFmx0Qt1Q1vqSQe2+/NjRgn2Y1LBwTa5SU=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=Gd+0HVdq52wpdUq6+a9/eByVgBfUR7p7zTcZjbc+yPyV0pJoJp1EV7kFvUdCa1Rfn
-         6e6XpTWhWYbAQf8Pu6dhlPXnNk84cxwlgb2kvHYlsqTuoE4Xxh+PdTbGnBcnDhIgu6
-         KYwdiwwI8Kj5HztyuuSw7gAUUVrz2xWQeI/p5t7c=
-Received: by mail-io1-f41.google.com with SMTP id f19so13884292iog.5;
-        Tue, 14 Apr 2020 09:35:54 -0700 (PDT)
-X-Gm-Message-State: AGi0PuYVm1w10wEKYMqzvXSNM7tXzR+stnIA+5vZMi4c/ohDVVijFtxQ
-        hMdzjkVAqDxiibbGty+vhHfzj2K0f4ZyDEnEV+g=
-X-Google-Smtp-Source: APiQypKEUymaYVGzyU19WNpTfuxoJxKR5JcXxbfn4/yW0MOIADW8ku2Y9fFXDHocj0oRicKhmLLiQugDVgqQVYF0p3Q=
-X-Received: by 2002:a02:7785:: with SMTP id g127mr21321483jac.134.1586882154307;
- Tue, 14 Apr 2020 09:35:54 -0700 (PDT)
+        id S2503942AbgDNS11 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 14 Apr 2020 14:27:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47602 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S2503916AbgDNS1Y (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 14 Apr 2020 14:27:24 -0400
+Received: from mail-lf1-x143.google.com (mail-lf1-x143.google.com [IPv6:2a00:1450:4864:20::143])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 90EE4C061A0C
+        for <linux-efi@vger.kernel.org>; Tue, 14 Apr 2020 11:27:23 -0700 (PDT)
+Received: by mail-lf1-x143.google.com with SMTP id m2so555755lfo.6
+        for <linux-efi@vger.kernel.org>; Tue, 14 Apr 2020 11:27:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linux-foundation.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=39725/N1RjmePGAGcC5L2gkhHxlD8TbK9gL3md/ZFx8=;
+        b=CklwolPhhQ8hL0pe0esgaXAWhzOphc+1ipdU/gtsCdbnIN8BptD7ncJ7Ip2B+9ZNIz
+         vFn/n2SF727a3t5AeH8HNVUtkc4iDjzx7d4aFtPu1v6a4Pj2VtCbnLyg/RmKavbz+gss
+         DDIxPHkXG5BPEFZw9Xl5Mv4iABaWzzjBotJ0Y=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=39725/N1RjmePGAGcC5L2gkhHxlD8TbK9gL3md/ZFx8=;
+        b=oEY6NyUwbtqgroaf9HHavsxyAPPECHbSSgOfbAklIVJuYFFac+2vNnu/ojoQXp4XbY
+         v16C1fTCYuANmzJg7RRp0kDOoUtyaz6flNyBZd8jIdyNpIWYrzlp8y62Cf/gU8euJ9Yx
+         8XrE/SErlqnKCvVWk0fB/19iqUqKe958mj49kOZrG3R9L8KnEdC6ugt05TVf8+WSVONX
+         RBKiOouYb+bL5OipjqFRjlXBzPSFue8Mk+ZZjuDfEJUA3D1VWIQ6BP65JWmrXaRjpEmx
+         P/XlFhzevDgmckv2roQRa3goRoqbP6raEMzigWo/Cz2F1gFtvJXgln4gdnMw5FXFogqo
+         HyoQ==
+X-Gm-Message-State: AGi0PubnQNsi7kMQjBfBgEEHuiMu2ZZQRRiCvSAWSVR2PtD+n791n5oo
+        lKgIwGYxxWFjYt0GjDiuSjm2zBIHMI8=
+X-Google-Smtp-Source: APiQypLurLhqpOuwx5B55D6hthyJhXuVyHGq8edIGTIb8FPm94Gzxa4JApRMVYlovQWj5JtvXasGmQ==
+X-Received: by 2002:ac2:5f92:: with SMTP id r18mr688469lfe.154.1586888841518;
+        Tue, 14 Apr 2020 11:27:21 -0700 (PDT)
+Received: from mail-lj1-f176.google.com (mail-lj1-f176.google.com. [209.85.208.176])
+        by smtp.gmail.com with ESMTPSA id x80sm10767583lff.23.2020.04.14.11.27.20
+        for <linux-efi@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 14 Apr 2020 11:27:20 -0700 (PDT)
+Received: by mail-lj1-f176.google.com with SMTP id j3so443248ljg.8
+        for <linux-efi@vger.kernel.org>; Tue, 14 Apr 2020 11:27:20 -0700 (PDT)
+X-Received: by 2002:a2e:a58e:: with SMTP id m14mr859604ljp.204.1586888840289;
+ Tue, 14 Apr 2020 11:27:20 -0700 (PDT)
 MIME-Version: 1.0
 References: <CADDKRnBdM_T1W=iECrt89hmAmbRRyskGhS4d3ozTz1nWj_i_qQ@mail.gmail.com>
- <CAMj1kXGuMjHi=E6cVGGpwrKF_-KXcj0VRcvAdFS_vmwV7PudCQ@mail.gmail.com> <CADDKRnAvC7U6kWdiqmib40cJ7r41COyic4LTdO9utsp4GOJnvA@mail.gmail.com>
-In-Reply-To: <CADDKRnAvC7U6kWdiqmib40cJ7r41COyic4LTdO9utsp4GOJnvA@mail.gmail.com>
-From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Tue, 14 Apr 2020 18:35:43 +0200
-X-Gmail-Original-Message-ID: <CAMj1kXEDJ67oJJjKtDC--VXmr+z8-voPhHnRnaMCEfo5Pc6Sqg@mail.gmail.com>
-Message-ID: <CAMj1kXEDJ67oJJjKtDC--VXmr+z8-voPhHnRnaMCEfo5Pc6Sqg@mail.gmail.com>
+ <CAMj1kXGuMjHi=E6cVGGpwrKF_-KXcj0VRcvAdFS_vmwV7PudCQ@mail.gmail.com>
+In-Reply-To: <CAMj1kXGuMjHi=E6cVGGpwrKF_-KXcj0VRcvAdFS_vmwV7PudCQ@mail.gmail.com>
+From:   Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Tue, 14 Apr 2020 11:27:04 -0700
+X-Gmail-Original-Message-ID: <CAHk-=wi-s0mmLAVg-aSmNU55=cE8ES7mC=Mc3Wn62P8W9VjY-A@mail.gmail.com>
+Message-ID: <CAHk-=wi-s0mmLAVg-aSmNU55=cE8ES7mC=Mc3Wn62P8W9VjY-A@mail.gmail.com>
 Subject: Re: Kernel V5.7-rc1 doesn't boot (EFI?)
-To:     =?UTF-8?Q?J=C3=B6rg_Otte?= <jrg.otte@gmail.com>
-Cc:     linux-efi <linux-efi@vger.kernel.org>,
+To:     Ard Biesheuvel <ardb@kernel.org>
+Cc:     =?UTF-8?Q?J=C3=B6rg_Otte?= <jrg.otte@gmail.com>,
+        linux-efi <linux-efi@vger.kernel.org>,
         Arvind Sankar <nivedita@alum.mit.edu>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Linus Torvalds <torvalds@linux-foundation.org>
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, 14 Apr 2020 at 18:32, J=C3=B6rg Otte <jrg.otte@gmail.com> wrote:
+On Tue, Apr 14, 2020 at 3:50 AM Ard Biesheuvel <ardb@kernel.org> wrote:
 >
-> Am Di., 14. Apr. 2020 um 12:50 Uhr schrieb Ard Biesheuvel <ardb@kernel.or=
-g>:
-> >
-> > On Tue, 14 Apr 2020 at 12:40, J=C3=B6rg Otte <jrg.otte@gmail.com> wrote=
-:
-> > >
-> > > Booting my notebook with kernel V57-rc1 I get following
-> > > display:
-> > >
-> > > exit_boot() failed!
-> > > efi_main() failed!
-> > > StartImage failed: Buffer Too Small
-> > >
-> > > Booting Kernel V5.6 works well.
-> > >
-> > > From dmesg (kernel V5.6):
-> > > efi: EFI v2.31 by Phoenix Technologies Ltd.
-> > > efi:  ACPI=3D0xdcffe000  ACPI 2.0=3D0xdcffe014  SMBIOS=3D0xdce80000  =
-RNG=3D0xdc3cd198
-> > > efi: seeding entropy pool
-> > > efi: [Firmware Bug]: Invalid EFI memory map entries:
-> > > efi: mem47: [Reserved           |   |  |  |  |  |  |  |  |   |  |  |
-> > > |  ] range=3D[0x0000000000000000-0x0000000000000000] (invalid)
-> > > efi: mem48: [Reserved           |   |  |  |  |  |  |  |  |   |  |  |
-> > > |  ] range=3D[0x0000000000000000-0x0000000000000000] (invalid)
-> > > efi: mem49: [Reserved           |   |  |  |  |  |  |  |  |   |  |  |
-> > > |  ] range=3D[0x0000000000000000-0x0000000000000000] (invalid)
-> > > efi: mem50: [Reserved           |   |  |  |  |  |  |  |  |   |  |  |
-> > > |  ] range=3D[0x0000000000000000-0x0000000000000000] (invalid)
-> > > efi: mem51: [Reserved           |   |  |  |  |  |  |  |  |   |  |  |
-> > > |  ] range=3D[0x0000000000000000-0x0000000000000000] (invalid)
-> > > efi: Removing 5 invalid memory map entries.
-> > >
-> >
-> > Thanks for the report.
-> >
-> > Can you try booting with efi=3Dno_disable_early_pci_dma passed via the
-> > kernel command line? [*]
-> >
-> Yes, that works!
->
-> > If that does not help, can you try to reproduce with this branch?
-> >
-> > https://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git/log/?h=3Def=
-i/urgent
->
-> Should I give that branch a try anyway?
->
+> [*] GRUB on x86 turns out not to zero initialize BSS when it invokes
+> the EFI stub as a PE/COFF executable
 
-Your test proves that BSS is not being cleared correctly, so I have
-the answer I was looking for. However, I would appreciate it if you
-could test that branch, just to double check.
+The fix seems to be to put all globals in the .data section, even if
+they don't have initializers.
 
-Thanks,
-Ard.
+That seems very fragile. Very easy to forget to not declare some
+static variable with __efistub_global.
+
+Could we not make the EFI stub code zero out the BSS itself? Perhaps
+setting a warning flag (for a later printout) if it wasn't already
+zero, so that people could point fingers are buggy loaders..
+
+             Linus
