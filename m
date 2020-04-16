@@ -4,42 +4,42 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DAF7FC2BB55
-	for <linux-efi@archiver.kernel.org>; Thu, 16 Apr 2020 15:12:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 036E8C2BB85
+	for <linux-efi@archiver.kernel.org>; Thu, 16 Apr 2020 15:13:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BF414214AF
-	for <linux-efi@archiver.kernel.org>; Thu, 16 Apr 2020 15:12:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E139F206A2
+	for <linux-efi@archiver.kernel.org>; Thu, 16 Apr 2020 15:13:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2395090AbgDPPMi (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 16 Apr 2020 11:12:38 -0400
-Received: from mail-qt1-f194.google.com ([209.85.160.194]:37786 "EHLO
-        mail-qt1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2395081AbgDPPMe (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 16 Apr 2020 11:12:34 -0400
-Received: by mail-qt1-f194.google.com with SMTP id q17so16354754qtp.4;
-        Thu, 16 Apr 2020 08:12:32 -0700 (PDT)
+        id S2438646AbgDPPNu (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 16 Apr 2020 11:13:50 -0400
+Received: from mail-qt1-f193.google.com ([209.85.160.193]:43544 "EHLO
+        mail-qt1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2395067AbgDPPMc (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 16 Apr 2020 11:12:32 -0400
+Received: by mail-qt1-f193.google.com with SMTP id z90so16606157qtd.10;
+        Thu, 16 Apr 2020 08:12:30 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=KisqXFX2ulNUKz2440gS97HInTPJUxOKPLXnv3/3XBo=;
-        b=ONRHzk98M6o5zKTEZKdr85THO+LJ157tF5YoA7aP/p4JUeasZdCWInDFMXFnNxf8JS
-         iRmKGq2nLN23XqkspShEATxbh3cWf3ij7oaRqnQjNJPEDnmOlh4OpirHcwNJNZMKKiqz
-         7+RAxXc4aMCJYDS9tycQi2aKT4eJyVFJPxUPOU1b5VLYFTfcOy0r1F4ZHiAcUnWZPqkn
-         uap0IQM8QmCNWX0z/Rg4+tbiyCtdGlSmC/Po6OJZrPTPvT//Q0GzZ/LQdy4AB3b34EUs
-         2O6n4ibrihLncMIb5QL2TY0XLnvChVU4/hf1Ltn20zPtXMq6cpc1Q9H/YLnZgrfQlYPB
-         8qZw==
-X-Gm-Message-State: AGi0PuZxq2Tx2hDsIGhpf4FjyGOdafqIdIbqEutFRie0VpyztAd4gdtX
-        o0TtbiInIzVo8ssnIK9iXrg=
-X-Google-Smtp-Source: APiQypIPRk5qt0xhHpWYN1+m32Md8N9+UiGMBo0eavOhuXfsoMRtmHqYSc4JoAekFfMxinNmOUXvzg==
-X-Received: by 2002:ac8:6d2c:: with SMTP id r12mr19506468qtu.355.1587049952304;
-        Thu, 16 Apr 2020 08:12:32 -0700 (PDT)
+        bh=imM7gqSOmjnj0wLJRzezT2h41SI88XC5LjGCQYHrvNA=;
+        b=AYjrBysu632X4CYN38xkeaCnbPj1dQEo0rNA+77p95vZQHenGv1jEfzaIyAGZNzGFc
+         +akHzWEmHU8ZXwq4FwHFmfF+bYn4j2XJOZi+3JblObHPw5wib0kPReEHWu8JxpuSfCOI
+         FxhHIhal8f54LasOYnRBYOZskYHuC+ggd+xQ/e0+rOoTtxl5hsbRU+AiZIrZWeJeb0ap
+         2Au7IDoyfz20JLUvhVRO9GH3OzLwWpS3t4L5/nC847W2DB/bx1UFGWM2G8TTI0atMNKE
+         STIw+HMd739MHkQrijslIwDa2ovj3SP3uYQUNRbQ8d/OnMknsrLCXSVUeZRP65ZBOCtc
+         3aJQ==
+X-Gm-Message-State: AGi0PuZdyb6FoBawFSND/j4dBI0dBio6spHCuv/qle57XCDHFZ6O+1Vh
+        u0LWAZLYi5TJFlJgRLz9w24=
+X-Google-Smtp-Source: APiQypICZD8HX0Ag/0fyyN0plcalNvAkwlqULHJHnrsXM4DNaQJR+ueS8IG2TsC0OBzxINWC7ELOiw==
+X-Received: by 2002:ac8:45cf:: with SMTP id e15mr27114418qto.21.1587049950302;
+        Thu, 16 Apr 2020 08:12:30 -0700 (PDT)
 Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
-        by smtp.gmail.com with ESMTPSA id c207sm15252197qkb.7.2020.04.16.08.12.31
+        by smtp.gmail.com with ESMTPSA id c207sm15252197qkb.7.2020.04.16.08.12.29
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 16 Apr 2020 08:12:31 -0700 (PDT)
+        Thu, 16 Apr 2020 08:12:29 -0700 (PDT)
 From:   Arvind Sankar <nivedita@alum.mit.edu>
 To:     Arvind Sankar <nivedita@alum.mit.edu>
 Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-efi@vger.kernel.org,
@@ -47,9 +47,9 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-efi@vger.kernel.org,
         Thomas Gleixner <tglx@linutronix.de>,
         Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v2 3/3] efi: Kill __efistub_global
-Date:   Thu, 16 Apr 2020 11:12:27 -0400
-Message-Id: <20200416151227.3360778-4-nivedita@alum.mit.edu>
+Subject: [PATCH v2 1/3] efi/arm: Remove __efistub_global annotation
+Date:   Thu, 16 Apr 2020 11:12:25 -0400
+Message-Id: <20200416151227.3360778-2-nivedita@alum.mit.edu>
 X-Mailer: git-send-email 2.25.3
 In-Reply-To: <20200415221520.2692512-1-nivedita@alum.mit.edu>
 References: <20200415221520.2692512-1-nivedita@alum.mit.edu>
@@ -60,100 +60,61 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Now that both arm and x86 are using the linker script to place the EFI
-stub's global variables in the correct section, remove __efistub_global.
+Instead of using __efistub_global to force variables into the .data
+section, leave them in the .bss but pull the EFI stub's .bss section
+into .data in the linker script for the compressed kernel.
 
 Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
 Reviewed-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/firmware/efi/libstub/arm-stub.c        |  4 ++--
- drivers/firmware/efi/libstub/efi-stub-helper.c | 15 +++++++--------
- drivers/firmware/efi/libstub/efistub.h         |  2 --
- drivers/firmware/efi/libstub/gop.c             |  2 +-
- drivers/firmware/efi/libstub/x86-stub.c        |  2 +-
- 5 files changed, 11 insertions(+), 14 deletions(-)
+ arch/arm/boot/compressed/vmlinux.lds.S | 2 +-
+ drivers/firmware/efi/libstub/Makefile  | 7 ++++---
+ drivers/firmware/efi/libstub/efistub.h | 2 +-
+ 3 files changed, 6 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-index 99a5cde7c2d8..bf42d6c742a8 100644
---- a/drivers/firmware/efi/libstub/arm-stub.c
-+++ b/drivers/firmware/efi/libstub/arm-stub.c
-@@ -36,9 +36,9 @@
- #endif
+diff --git a/arch/arm/boot/compressed/vmlinux.lds.S b/arch/arm/boot/compressed/vmlinux.lds.S
+index b247f399de71..b6793c7932a9 100644
+--- a/arch/arm/boot/compressed/vmlinux.lds.S
++++ b/arch/arm/boot/compressed/vmlinux.lds.S
+@@ -78,7 +78,7 @@ SECTIONS
+      * The EFI stub always executes from RAM, and runs strictly before the
+      * decompressor, so we can make an exception for its r/w data, and keep it
+      */
+-    *(.data.efistub)
++    *(.data.efistub .bss.efistub)
+     __pecoff_data_end = .;
  
- static u64 virtmap_base = EFI_RT_VIRTUAL_BASE;
--static bool __efistub_global flat_va_mapping;
-+static bool flat_va_mapping;
+     /*
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index 094eabdecfe6..45ffe0822df1 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -100,8 +100,9 @@ quiet_cmd_stubcopy = STUBCPY $@
  
--static efi_system_table_t *__efistub_global sys_table;
-+static efi_system_table_t *sys_table;
- 
- __pure efi_system_table_t *efi_system_table(void)
- {
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index c6092b6038cf..14e56a64f208 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -12,14 +12,13 @@
- 
- #include "efistub.h"
- 
--static bool __efistub_global efi_nochunk;
--static bool __efistub_global efi_nokaslr;
--static bool __efistub_global efi_noinitrd;
--static bool __efistub_global efi_quiet;
--static bool __efistub_global efi_novamap;
--static bool __efistub_global efi_nosoftreserve;
--static bool __efistub_global efi_disable_pci_dma =
--					IS_ENABLED(CONFIG_EFI_DISABLE_PCI_DMA);
-+static bool efi_nochunk;
-+static bool efi_nokaslr;
-+static bool efi_noinitrd;
-+static bool efi_quiet;
-+static bool efi_novamap;
-+static bool efi_nosoftreserve;
-+static bool efi_disable_pci_dma = IS_ENABLED(CONFIG_EFI_DISABLE_PCI_DMA);
- 
- bool __pure nochunk(void)
- {
+ #
+ # ARM discards the .data section because it disallows r/w data in the
+-# decompressor. So move our .data to .data.efistub, which is preserved
+-# explicitly by the decompressor linker script.
++# decompressor. So move our .data to .data.efistub and .bss to .bss.efistub,
++# which are preserved explicitly by the decompressor linker script.
+ #
+-STUBCOPY_FLAGS-$(CONFIG_ARM)	+= --rename-section .data=.data.efistub
++STUBCOPY_FLAGS-$(CONFIG_ARM)	+= --rename-section .data=.data.efistub	\
++				   --rename-section .bss=.bss.efistub,load,alloc
+ STUBCOPY_RELOC-$(CONFIG_ARM)	:= R_ARM_ABS
 diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-index 49651e20bb9f..f96c56596034 100644
+index bd0b86b63936..a92d42ffd9f7 100644
 --- a/drivers/firmware/efi/libstub/efistub.h
 +++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -25,8 +25,6 @@
+@@ -25,7 +25,7 @@
  #define EFI_ALLOC_ALIGN		EFI_PAGE_SIZE
  #endif
  
--#define __efistub_global
--
- extern bool __pure nochunk(void);
- extern bool __pure nokaslr(void);
- extern bool __pure noinitrd(void);
-diff --git a/drivers/firmware/efi/libstub/gop.c b/drivers/firmware/efi/libstub/gop.c
-index fa05a0b0adfd..216327d0b034 100644
---- a/drivers/firmware/efi/libstub/gop.c
-+++ b/drivers/firmware/efi/libstub/gop.c
-@@ -32,7 +32,7 @@ static struct {
- 			u8 depth;
- 		} res;
- 	};
--} cmdline __efistub_global = { .option = EFI_CMDLINE_NONE };
-+} cmdline = { .option = EFI_CMDLINE_NONE };
- 
- static bool parse_modenum(char *option, char **next)
- {
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index 7583e908852f..aedac3af4b5c 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -20,7 +20,7 @@
- /* Maximum physical address for 64-bit kernel with 4-level paging */
- #define MAXMEM_X86_64_4LEVEL (1ull << 46)
- 
--static efi_system_table_t *sys_table __efistub_global;
-+static efi_system_table_t *sys_table;
- extern const bool efi_is64;
- extern u32 image_offset;
- 
+-#if defined(CONFIG_ARM) || defined(CONFIG_X86)
++#if defined(CONFIG_X86)
+ #define __efistub_global	__section(.data)
+ #else
+ #define __efistub_global
 -- 
 2.25.3
 
