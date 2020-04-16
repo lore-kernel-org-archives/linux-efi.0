@@ -2,44 +2,44 @@ Return-Path: <SRS0=ZyQ3=6A=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C5A77C352BE
-	for <linux-efi@archiver.kernel.org>; Thu, 16 Apr 2020 15:12:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 07571C2BB55
+	for <linux-efi@archiver.kernel.org>; Thu, 16 Apr 2020 15:12:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AFA1322245
-	for <linux-efi@archiver.kernel.org>; Thu, 16 Apr 2020 15:12:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DDB0C2222D
+	for <linux-efi@archiver.kernel.org>; Thu, 16 Apr 2020 15:12:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2395082AbgDPPMd (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 16 Apr 2020 11:12:33 -0400
-Received: from mail-qk1-f194.google.com ([209.85.222.194]:43328 "EHLO
-        mail-qk1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2395079AbgDPPMa (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 16 Apr 2020 11:12:30 -0400
-Received: by mail-qk1-f194.google.com with SMTP id 20so13555963qkl.10;
-        Thu, 16 Apr 2020 08:12:29 -0700 (PDT)
+        id S2395086AbgDPPMf (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 16 Apr 2020 11:12:35 -0400
+Received: from mail-qk1-f195.google.com ([209.85.222.195]:46394 "EHLO
+        mail-qk1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2395080AbgDPPMc (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 16 Apr 2020 11:12:32 -0400
+Received: by mail-qk1-f195.google.com with SMTP id g74so21562647qke.13;
+        Thu, 16 Apr 2020 08:12:31 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=z50ZsQ8IUFKM+b5Biw9UtKMzIva0+uiY3DIJESbMIYI=;
-        b=b3AvZJdB+XYSInOhwiqHoL54WbIpkjelfc/zxOKcDkELhhrh6/iJPR+Hv1B67DRe/k
-         s8Z9GatXTDh3tu0sppjh2cWoBe6BOt65w1ggHYRC42aleTJSn6VVae7hhs0V7SjkfvtC
-         fnDgTkiCoE19/aVbIVS8Ma7lccntWq8VFlCzEYQ+VwrduM/12Xd1E3JjpxTuuP1EBuR2
-         Pq/Tv3VdPBqF23Wcie1Kyho/1wHUQ82vkvodZ32VimH6BeDUVtXmPSt348/Sor9wV/Oz
-         pkkEF4pZRfJcrUHGYF+n18u2nIFOowxakQFK61i+OtPErT7/KNF14Fc7sWA+NIt7CyLW
-         mhUQ==
-X-Gm-Message-State: AGi0PuaDmYZRx2YAB1yUYmL/lTJy+iVId4sJkc5+Jtq7mFzhdjDy3R6W
-        CWl/NFkmJzjOGgMGDO+46Rk=
-X-Google-Smtp-Source: APiQypL6nC7+eoW1r8jlGp0Pbr9X6TqFhXKgLwxJWfl9Gn6UCRZwndkSTjZyZCGBOb2DmniWXBxoFQ==
-X-Received: by 2002:a37:7242:: with SMTP id n63mr30880327qkc.111.1587049949214;
-        Thu, 16 Apr 2020 08:12:29 -0700 (PDT)
+        bh=Dyf4r03T42/Fy8x1nrv3/xsvgPjc2y6s6Z0vSeQSYSg=;
+        b=pcC9rpeySHk3w+NjLlo6qNuB8XsZMgtE+AfteIHyR0pnxMX1kyI690eDiNL+lxJBm3
+         VKCv7R97umCPM/AW9dSGq7m6r0Z4w7AzMrsYcHpRYexJUlD5KgSyNGW3SrD6ilLwwzR3
+         lkjLhv2VxamOKkmP0kvJ8h4Z/IuOt93nHXTdbQwOvZUqEqVdf0aZC2Fxkfxz/MQDqH5P
+         13+KH/2vq74cM96sas+AgkmMcI7lu2hYvZX5L+8K2KH5s9DgMpHKVBfBtTs9Uge0vOCg
+         CAMkdmAHPibb0P+xcSgtErq7xTLpZvRgaZHCgVaRPMHnrblGDGagBQnKRz+7ulaF6wXd
+         v1ag==
+X-Gm-Message-State: AGi0PuYZpqzf2mpWngvswMGChSJ16bi32Jz9/BNykR18rSDlYkY7kIMB
+        tCvUjUk9vf3Gf/rtigmGLow=
+X-Google-Smtp-Source: APiQypKLdtvWPbVerN9afGD477FA7gKjijbQItkiMGN23vQW6YEg3e2VjR3oP6K+WdheuvtL1luyQQ==
+X-Received: by 2002:a37:58a:: with SMTP id 132mr21979682qkf.303.1587049951094;
+        Thu, 16 Apr 2020 08:12:31 -0700 (PDT)
 Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
-        by smtp.gmail.com with ESMTPSA id c207sm15252197qkb.7.2020.04.16.08.12.28
+        by smtp.gmail.com with ESMTPSA id c207sm15252197qkb.7.2020.04.16.08.12.30
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 16 Apr 2020 08:12:28 -0700 (PDT)
+        Thu, 16 Apr 2020 08:12:30 -0700 (PDT)
 From:   Arvind Sankar <nivedita@alum.mit.edu>
 To:     Arvind Sankar <nivedita@alum.mit.edu>
 Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-efi@vger.kernel.org,
@@ -47,9 +47,9 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-efi@vger.kernel.org,
         Thomas Gleixner <tglx@linutronix.de>,
         Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v2 0/3] efi: Remove __efistub_global annotation
-Date:   Thu, 16 Apr 2020 11:12:24 -0400
-Message-Id: <20200416151227.3360778-1-nivedita@alum.mit.edu>
+Subject: [PATCH v2 2/3] efi/x86: Remove __efistub_global and add relocation check
+Date:   Thu, 16 Apr 2020 11:12:26 -0400
+Message-Id: <20200416151227.3360778-3-nivedita@alum.mit.edu>
 X-Mailer: git-send-email 2.25.3
 In-Reply-To: <20200415221520.2692512-1-nivedita@alum.mit.edu>
 References: <20200415221520.2692512-1-nivedita@alum.mit.edu>
@@ -60,66 +60,104 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This patch series removes the need for annotating global data in the EFI
-stub with __efistub_global for ARM32 and X86.
+Instead of using __efistub_global to force variables into the .data
+section, leave them in the .bss but pull the EFI stub's .bss section
+into .data in the linker script for the compressed kernel.
 
-This is done by renaming the .data and .bss sections in the object files
-linked into the EFI stub to .data.efistub and .bss.efistub respectively,
-and including those sections into the compressed kernel's .data section
-using its linker script.
+Add relocation checking for x86 as well to catch non-PC-relative
+relocations that require runtime processing, since the EFI stub does not
+do any runtime relocation processing.
 
-Changes from v1:
-- drop patch 2 and squash patches 3 and 5 for x86
-- fix R_X86 -> R_386
-- only check native relocation size (32-bit for R386 and 64-bit for
-  RX86_64)
+This will catch, for example, data relocations created by static
+initializers of pointers.
 
-The series is based on efi/next, rebased onto v5.7-rc1, plus two earlier
-fixes for x86 EFI that are queued for v5.7.
+Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
+---
+ arch/x86/boot/compressed/vmlinux.lds.S |  1 +
+ drivers/firmware/efi/libstub/Makefile  | 32 +++++++++++++++++---------
+ drivers/firmware/efi/libstub/efistub.h |  4 ----
+ 3 files changed, 22 insertions(+), 15 deletions(-)
 
-Patches on top of v5.7-rc1:
-In efi/next:
-
-Ard Biesheuvel (2):
-      efi: clean up config table description arrays
-      efi: move arch_tables check to caller
-
-Arvind Sankar (19):
-      efi/gop: Remove redundant current_fb_base
-      efi/gop: Move check for framebuffer before con_out
-      efi/gop: Get mode information outside the loop
-      efi/gop: Factor out locating the gop into a function
-      efi/gop: Slightly re-arrange logic of find_gop
-      efi/gop: Move variable declarations into loop block
-      efi/gop: Use helper macros for populating lfb_base
-      efi/gop: Use helper macros for find_bits
-      efi/gop: Remove unreachable code from setup_pixel_info
-      efi/gop: Add prototypes for query_mode and set_mode
-      efi/gop: Allow specifying mode number on command line
-      efi/gop: Allow specifying mode by <xres>x<yres>
-      efi/gop: Allow specifying depth as well as resolution
-      efi/gop: Allow automatically choosing the best mode
-
-Additional:
-Arvind Sankar (2):
-      efi/x86: Move efi stub globals from .bss to .data
-      efi/x86: Always relocate the kernel for EFI handover entry
-
-Arvind Sankar (3):
-  efi/arm: Remove __efistub_global annotation
-  efi/x86: Remove __efistub_global and add relocation check
-  efi: Kill __efistub_global
-
- arch/arm/boot/compressed/vmlinux.lds.S        |  2 +-
- arch/x86/boot/compressed/vmlinux.lds.S        |  1 +
- drivers/firmware/efi/libstub/Makefile         | 31 +++++++++++++------
- drivers/firmware/efi/libstub/arm-stub.c       |  4 +--
- .../firmware/efi/libstub/efi-stub-helper.c    | 15 +++++----
- drivers/firmware/efi/libstub/efistub.h        |  6 ----
- drivers/firmware/efi/libstub/gop.c            |  2 +-
- drivers/firmware/efi/libstub/x86-stub.c       |  2 +-
- 8 files changed, 34 insertions(+), 29 deletions(-)
-
+diff --git a/arch/x86/boot/compressed/vmlinux.lds.S b/arch/x86/boot/compressed/vmlinux.lds.S
+index 508cfa6828c5..0dc5c2b9614b 100644
+--- a/arch/x86/boot/compressed/vmlinux.lds.S
++++ b/arch/x86/boot/compressed/vmlinux.lds.S
+@@ -52,6 +52,7 @@ SECTIONS
+ 		_data = . ;
+ 		*(.data)
+ 		*(.data.*)
++		*(.bss.efistub)
+ 		_edata = . ;
+ 	}
+ 	. = ALIGN(L1_CACHE_BYTES);
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index 45ffe0822df1..069d117d5451 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -73,13 +73,32 @@ CFLAGS_arm64-stub.o		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
+ # a verification pass to see if any absolute relocations exist in any of the
+ # object files.
+ #
+-extra-$(CONFIG_EFI_ARMSTUB)	:= $(lib-y)
+-lib-$(CONFIG_EFI_ARMSTUB)	:= $(patsubst %.o,%.stub.o,$(lib-y))
++extra-y	:= $(lib-y)
++lib-y	:= $(patsubst %.o,%.stub.o,$(lib-y))
+ 
+ STUBCOPY_FLAGS-$(CONFIG_ARM64)	+= --prefix-alloc-sections=.init \
+ 				   --prefix-symbols=__efistub_
+ STUBCOPY_RELOC-$(CONFIG_ARM64)	:= R_AARCH64_ABS
+ 
++#
++# ARM discards the .data section because it disallows r/w data in the
++# decompressor. So move our .data to .data.efistub and .bss to .bss.efistub,
++# which are preserved explicitly by the decompressor linker script.
++#
++STUBCOPY_FLAGS-$(CONFIG_ARM)	+= --rename-section .data=.data.efistub	\
++				   --rename-section .bss=.bss.efistub,load,alloc
++STUBCOPY_RELOC-$(CONFIG_ARM)	:= R_ARM_ABS
++
++#
++# For x86, bootloaders like systemd-boot or grub-efi do not zero-initialize the
++# .bss section, so the .bss section of the EFI stub needs to be included in the
++# .data section of the compressed kernel to ensure initialization. Rename the
++# .bss section here so it's easy to pick out in the linker script.
++#
++STUBCOPY_FLAGS-$(CONFIG_X86)	+= --rename-section .bss=.bss.efistub,load,alloc
++STUBCOPY_RELOC-$(CONFIG_X86_32) := R_386_32
++STUBCOPY_RELOC-$(CONFIG_X86_64) := R_X86_64_64
++
+ $(obj)/%.stub.o: $(obj)/%.o FORCE
+ 	$(call if_changed,stubcopy)
+ 
+@@ -97,12 +116,3 @@ quiet_cmd_stubcopy = STUBCPY $@
+ 		/bin/false;						\
+ 	fi;								\
+ 	$(OBJCOPY) $(STUBCOPY_FLAGS-y) $< $@
+-
+-#
+-# ARM discards the .data section because it disallows r/w data in the
+-# decompressor. So move our .data to .data.efistub and .bss to .bss.efistub,
+-# which are preserved explicitly by the decompressor linker script.
+-#
+-STUBCOPY_FLAGS-$(CONFIG_ARM)	+= --rename-section .data=.data.efistub	\
+-				   --rename-section .bss=.bss.efistub,load,alloc
+-STUBCOPY_RELOC-$(CONFIG_ARM)	:= R_ARM_ABS
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index a92d42ffd9f7..49651e20bb9f 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -25,11 +25,7 @@
+ #define EFI_ALLOC_ALIGN		EFI_PAGE_SIZE
+ #endif
+ 
+-#if defined(CONFIG_X86)
+-#define __efistub_global	__section(.data)
+-#else
+ #define __efistub_global
+-#endif
+ 
+ extern bool __pure nochunk(void);
+ extern bool __pure nokaslr(void);
 -- 
 2.25.3
 
