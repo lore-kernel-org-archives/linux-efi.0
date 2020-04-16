@@ -7,37 +7,37 @@ X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F493C3815B
-	for <linux-efi@archiver.kernel.org>; Thu, 16 Apr 2020 13:46:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0544DC2BB55
+	for <linux-efi@archiver.kernel.org>; Thu, 16 Apr 2020 13:57:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 061BD2222C
-	for <linux-efi@archiver.kernel.org>; Thu, 16 Apr 2020 13:46:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D72AB2076D
+	for <linux-efi@archiver.kernel.org>; Thu, 16 Apr 2020 13:57:00 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1587044783;
+	s=default; t=1587045420;
 	bh=1jzhNCiKswhoIJTfB2OLMsRckfeRXXkCNaRRwVljCGw=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=QyxYC4jqttQziGsEJRU04DGN8dLhc9fzkaem6gF3e9d0O/pT/Nj48Nre9pn1STgF5
-	 khf10v5wvAjTCex01vFeMxy8zZ3ic4scnSyvUw6aP58Y6XjBis1OqVrf9drEBlS6hS
-	 IrvQe1EU6N2jPXVVerGxdBVafukSCrDg42XSKKRE=
+	b=dkICmzdzUxgrWYBgyFzPDVNc/whsG8AMM8UVxU+5d/j7nGy1D87XWIvaAsxh0jUOL
+	 DzmE4J9HdCYvLr2IcwsKEJqfWpiD5iRp1ZEewdFXYXBmHb61x7goTMIa5m6164vI52
+	 7/miw3JE/++izIRXIUfegxcpcEp9I4KVcKXm2DTY=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2898569AbgDPNqT (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 16 Apr 2020 09:46:19 -0400
-Received: from mail.kernel.org ([198.145.29.99]:60184 "EHLO mail.kernel.org"
+        id S2389036AbgDPN47 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 16 Apr 2020 09:56:59 -0400
+Received: from mail.kernel.org ([198.145.29.99]:43936 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2392296AbgDPNqR (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Thu, 16 Apr 2020 09:46:17 -0400
+        id S2409247AbgDPN4z (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Thu, 16 Apr 2020 09:56:55 -0400
 Received: from localhost (83-86-89-107.cable.dynamic.v4.ziggo.nl [83.86.89.107])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id C89512076D;
-        Thu, 16 Apr 2020 13:46:16 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id E99F920786;
+        Thu, 16 Apr 2020 13:56:54 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1587044777;
+        s=default; t=1587045415;
         bh=1jzhNCiKswhoIJTfB2OLMsRckfeRXXkCNaRRwVljCGw=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=1XwVQIwwDgT6qZooVs194NawgPWKaz/Z7xbhWz0YUt2OZjpgxrNKIapnicc9XL2ST
-         B4Ooln7hPRXk7tPHvEHGprNcaADlF8m4XvRePkRpe5v372pqKUPDnjkrLpQKlKecmF
-         pJCtwRmY7xb2Sj4aG5PsvjqjifIwixyLC/uSOOnM=
+        b=sFXF656UiBTpJn3JMkDrhH2qFhxm4zT0Eb07ArMJnvBMZUSj2Q9XR0jYe+M3yeLwJ
+         dch3ODJ5IAg6wKhII0ohLBVF+9Ko+QampC93fN36BBRBmyTshbkVvxKo+mMuaKuPb6
+         qPGmYnHUEr92ABO0xuERKV6zLzxPR42iwNa4DTo8=
 From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 To:     linux-kernel@vger.kernel.org
 Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
@@ -47,12 +47,12 @@ Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         Thomas Gleixner <tglx@linutronix.de>,
         David Hildenbrand <david@redhat.com>,
         Heinrich Schuchardt <xypron.glpk@gmx.de>
-Subject: [PATCH 5.4 098/232] efi/x86: Add TPM related EFI tables to unencrypted mapping checks
-Date:   Thu, 16 Apr 2020 15:23:12 +0200
-Message-Id: <20200416131327.275420952@linuxfoundation.org>
+Subject: [PATCH 5.6 098/254] efi/x86: Add TPM related EFI tables to unencrypted mapping checks
+Date:   Thu, 16 Apr 2020 15:23:07 +0200
+Message-Id: <20200416131338.257988354@linuxfoundation.org>
 X-Mailer: git-send-email 2.26.1
-In-Reply-To: <20200416131316.640996080@linuxfoundation.org>
-References: <20200416131316.640996080@linuxfoundation.org>
+In-Reply-To: <20200416131325.804095985@linuxfoundation.org>
+References: <20200416131325.804095985@linuxfoundation.org>
 User-Agent: quilt/0.66
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
