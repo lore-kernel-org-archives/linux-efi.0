@@ -2,94 +2,139 @@ Return-Path: <SRS0=Ix2C=6H=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A1CF1C54FCB
-	for <linux-efi@archiver.kernel.org>; Thu, 23 Apr 2020 12:16:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 93A4BC54FD0
+	for <linux-efi@archiver.kernel.org>; Thu, 23 Apr 2020 22:43:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7E7C720736
-	for <linux-efi@archiver.kernel.org>; Thu, 23 Apr 2020 12:16:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1587644218;
-	bh=U5EcyJ4LAn+9tG4HUQGnWOxyVrEOqSnXbGZQjRBnVM4=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=DwmFc0RaxkGBfTuwfdyajdF/mmIdeQ/i/PopEO6xFnFI+ura7ihhXhS0ZcGJ49EH6
-	 ygeFfrBMOVh1AqXaf46R9hnmuzYkF+xvAujMcNw/CzFwsVkXCyATVmHmro6Gp4Qsyh
-	 +DMrfw9jviq6GMP+MjZi7bMuUz8BkKOtvDt3bM/c=
+	by mail.kernel.org (Postfix) with ESMTP id 703B220715
+	for <linux-efi@archiver.kernel.org>; Thu, 23 Apr 2020 22:43:32 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=dabbelt-com.20150623.gappssmtp.com header.i=@dabbelt-com.20150623.gappssmtp.com header.b="jxWUUAHc"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726071AbgDWMQ6 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 23 Apr 2020 08:16:58 -0400
-Received: from mail.kernel.org ([198.145.29.99]:51188 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726056AbgDWMQ5 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Thu, 23 Apr 2020 08:16:57 -0400
-Received: from mail-io1-f42.google.com (mail-io1-f42.google.com [209.85.166.42])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 4358020736;
-        Thu, 23 Apr 2020 12:16:57 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1587644217;
-        bh=U5EcyJ4LAn+9tG4HUQGnWOxyVrEOqSnXbGZQjRBnVM4=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=YSz9I4Hg0vhedotjh1JhX7J6tShH1/TBbRuE3PJraGlmGq1ybu0HGKWnJBWDZ9Qpd
-         Rior/+hBjaqRsP3a7b9/cLkCxloz5uT2EyzcZk9/0cHma6auWkFQ0D98MLaluhvdF2
-         lf+9XmR8e5S5++ubDqqY6en7mYq0jej/66vlSvqE=
-Received: by mail-io1-f42.google.com with SMTP id u11so6148845iow.4;
-        Thu, 23 Apr 2020 05:16:57 -0700 (PDT)
-X-Gm-Message-State: AGi0PubRlmK4wBWm4X983IrbAx/cjtbDQPGIIU8NFAHEQMFrRP9gWTHV
-        lzSm7KorrRjBYN5ea+Au0tQ56svY1R71m2+WF1M=
-X-Google-Smtp-Source: APiQypJgcYYnNF9+i/ZUlfaQMKdUjHUmKXoDUpPNNGFEVVKm4tNUPY/qiqlS2CrCHCqaVVrHvrBSjOetHLLKQqyKzsg=
-X-Received: by 2002:a6b:ef03:: with SMTP id k3mr3315558ioh.203.1587644216688;
- Thu, 23 Apr 2020 05:16:56 -0700 (PDT)
-MIME-Version: 1.0
-References: <1587643713-28169-1-git-send-email-zou_wei@huawei.com>
-In-Reply-To: <1587643713-28169-1-git-send-email-zou_wei@huawei.com>
-From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Thu, 23 Apr 2020 14:16:45 +0200
-X-Gmail-Original-Message-ID: <CAMj1kXFdaGNPc284T+2hs4oGjmwnjbvCdD_Y2xfwTfbOygGwyw@mail.gmail.com>
-Message-ID: <CAMj1kXFdaGNPc284T+2hs4oGjmwnjbvCdD_Y2xfwTfbOygGwyw@mail.gmail.com>
-Subject: Re: [PATCH -next] efi/libstub/arm: Make install_memreserve_table static
-To:     Zou Wei <zou_wei@huawei.com>
-Cc:     linux-efi <linux-efi@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        id S1726079AbgDWWnc (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 23 Apr 2020 18:43:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36506 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726071AbgDWWnb (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 23 Apr 2020 18:43:31 -0400
+Received: from mail-pf1-x444.google.com (mail-pf1-x444.google.com [IPv6:2607:f8b0:4864:20::444])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CAABEC09B042
+        for <linux-efi@vger.kernel.org>; Thu, 23 Apr 2020 15:43:31 -0700 (PDT)
+Received: by mail-pf1-x444.google.com with SMTP id 18so3756957pfx.6
+        for <linux-efi@vger.kernel.org>; Thu, 23 Apr 2020 15:43:31 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=dabbelt-com.20150623.gappssmtp.com; s=20150623;
+        h=date:subject:in-reply-to:cc:from:to:message-id:mime-version
+         :content-transfer-encoding;
+        bh=N/UJzAr5dtehQTHBzXy34ZuA/CAq9RTQL58DIHmSsDU=;
+        b=jxWUUAHcZRLKkUCvwG3LxBUbKC0Gy7M7XkL63S5P+Xc5a3iB/dxyTwjsaiq4YSnhnt
+         nIliNPSoyS+0tv7rEPxJKt7d8S1w6c/T+RHiHtG22tL7VE5ho57cXV+QrFES49a64tsJ
+         BZ6PVIAu3W3xz8b0WQzrCxrf2DoTSi8VGlPxqsH9j/2/nJE3pj8A+EKCsXYC+jH4qEf8
+         Gg37qlnOEK3/IALDBKMZVl9POHEbSulN/OrRyrTizHNo2f30rBVjCawgISMTyrBzimDB
+         3YiXkmmIIMeQo17eMp9Tfm9Kz7wNhm1YB7QQ8LZX2coRgsw2xGX2ODlWk32ivaBvC1cU
+         ZnrQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:subject:in-reply-to:cc:from:to:message-id
+         :mime-version:content-transfer-encoding;
+        bh=N/UJzAr5dtehQTHBzXy34ZuA/CAq9RTQL58DIHmSsDU=;
+        b=N18u0PGUQESxc2FWSWZdQeeb1mnV/YGmeK3A7XtBAHr7H0G3bEIV44RViWqhv8r0vP
+         lC/30CglOnDY0KyJvnBiYdpcih+UU6v5UEL3a+zuXlaY8jRXCMMvegxY6KYOcoUjoM75
+         qGewMy6F8NVTr2FQoGBSo8oBOwTlFT04+JQNB43znFf7jJ8IY53B1jRQfCTk2I5JDjic
+         BTULyb5HD+ggZXI8+03LWNUp6Kimlu5Pl+mHWHbeFcLsdKOIUlNYmO4C+v8jZKSRyo2y
+         hvdwjoNfTiQjLwk0TKQbU6VQOMBdCmiGpkOz313TXIQ4oz7LQRJtvMCPQk6GxKoG2SU2
+         GRpg==
+X-Gm-Message-State: AGi0PuY3+hGtIwvkmKLRd7KbdYnqrUrNmcP2PUjfD3/7JQKbXGcikKJd
+        rstNusoLboEKATyTrmfEc5KGtxJ5W4n5hA==
+X-Google-Smtp-Source: APiQypK+qFJjBWZIM4JseuejIHzEpgez/1Eb2rNDWCq0/ARVphGcY6JqUI7zr0Fw6Lx1kMeyag+eTA==
+X-Received: by 2002:a62:25c6:: with SMTP id l189mr6346111pfl.28.1587681810670;
+        Thu, 23 Apr 2020 15:43:30 -0700 (PDT)
+Received: from localhost (76-210-143-223.lightspeed.sntcca.sbcglobal.net. [76.210.143.223])
+        by smtp.gmail.com with ESMTPSA id o9sm3280699pje.47.2020.04.23.15.43.29
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 23 Apr 2020 15:43:29 -0700 (PDT)
+Date:   Thu, 23 Apr 2020 15:43:29 -0700 (PDT)
+X-Google-Original-Date: Thu, 23 Apr 2020 15:43:27 PDT (-0700)
+Subject:     Re: [PATCH v5 0/7] Add UEFI support for RISC-V
+In-Reply-To: <20200422172414.6662-1-ardb@kernel.org>
+CC:     linux-efi@vger.kernel.org, ardb@kernel.org,
+        Atish Patra <Atish.Patra@wdc.com>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        aou@eecs.berkeley.edu, linux-riscv@lists.infradead.org
+From:   Palmer Dabbelt <palmer@dabbelt.com>
+To:     ardb@kernel.org
+Message-ID: <mhng-f9b51803-74ca-494c-8433-59911c657b2f@palmerdabbelt-glaptop1>
+Mime-Version: 1.0 (MHng)
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Thu, 23 Apr 2020 at 14:02, Zou Wei <zou_wei@huawei.com> wrote:
+On Wed, 22 Apr 2020 10:24:07 PDT (-0700), ardb@kernel.org wrote:
+> This is a rework of Atish's series [0] to add EFI stub loader support
+> to the RISC-V port. The purpose is to split the code in a way that makes
+> it amenable to being merged via different trees during the same cycle.
+> While at it, I added a patch to disable initrd= loading for new ports,
+> given that it is deprecated and replaced with a method based on a
+> special UEFI device path.
 >
-> Fix the following sparse warning:
+> My changes are logged in the individual patches.
 >
-> drivers/firmware/efi/libstub/arm-stub.c:68:6: warning:
-> symbol 'install_memreserve_table' was not declared. Should it be static?
->
-> Reported-by: Hulk Robot <hulkci@huawei.com>
-> Signed-off-by: Zou Wei <zou_wei@huawei.com>
-> ---
->  drivers/firmware/efi/libstub/arm-stub.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-> index 99a5cde..8a26cc1 100644
-> --- a/drivers/firmware/efi/libstub/arm-stub.c
-> +++ b/drivers/firmware/efi/libstub/arm-stub.c
-> @@ -65,7 +65,7 @@ static struct screen_info *setup_graphics(void)
->         return si;
->  }
->
-> -void install_memreserve_table(void)
-> +static void install_memreserve_table(void)
->  {
->         struct linux_efi_memreserve *rsv;
->         efi_guid_t memreserve_table_guid = LINUX_EFI_MEMRESERVE_TABLE_GUID;
-> --
-> 2.6.2
->
+> I propose to take the first four patches via the EFI tree, and expose
+> them via a stable tag so that the RISC-V maintainers can merge it before
+> applying the remaining patches. That will ensure that both trees remain
+> in a buildable state, with working EFI stub support on the riscv branch.
 
-Applied to efi/next, thanks.
+Works for me.  Thanks!
+
+>
+> Cc: Atish Patra <atish.patra@wdc.com>
+> Cc: Palmer Dabbelt <palmer@dabbelt.com>
+> Cc: Paul Walmsley <paul.walmsley@sifive.com>
+> Cc: Albert Ou <aou@eecs.berkeley.edu>
+> Cc: linux-riscv@lists.infradead.org
+>
+> Ard Biesheuvel (1):
+>   efi/libstub: Make initrd file loader configurable
+>
+> Atish Patra (6):
+>   efi/libstub: Move arm-stub to a common file
+>   efi/libstub/riscv: add arch specific efi.h header file
+>   include: pe.h: Add RISC-V related PE definition
+>   RISC-V: Define fixmap bindings for generic early ioremap support
+>   RISC-V: Add PE/COFF header for EFI stub
+>   RISC-V: Add EFI stub support.
+>
+>  arch/arm/Kconfig                              |   2 +-
+>  arch/arm64/Kconfig                            |   2 +-
+>  arch/riscv/Kconfig                            |  21 ++++
+>  arch/riscv/Makefile                           |   1 +
+>  arch/riscv/configs/defconfig                  |   1 +
+>  arch/riscv/include/asm/Kbuild                 |   1 +
+>  arch/riscv/include/asm/efi.h                  |  41 +++++++
+>  arch/riscv/include/asm/fixmap.h               |  18 +++
+>  arch/riscv/include/asm/io.h                   |   1 +
+>  arch/riscv/include/asm/sections.h             |  13 +++
+>  arch/riscv/kernel/Makefile                    |   4 +
+>  arch/riscv/kernel/efi-header.S                | 100 ++++++++++++++++
+>  arch/riscv/kernel/head.S                      |  16 +++
+>  arch/riscv/kernel/image-vars.h                |  53 +++++++++
+>  arch/riscv/kernel/vmlinux.lds.S               |  22 +++-
+>  drivers/firmware/efi/Kconfig                  |  15 ++-
+>  drivers/firmware/efi/libstub/Makefile         |  22 +++-
+>  .../efi/libstub/{arm-stub.c => efi-stub.c}    |   0
+>  drivers/firmware/efi/libstub/file.c           |   3 +
+>  drivers/firmware/efi/libstub/riscv-stub.c     | 109 ++++++++++++++++++
+>  include/linux/pe.h                            |   3 +
+>  21 files changed, 436 insertions(+), 12 deletions(-)
+>  create mode 100644 arch/riscv/include/asm/efi.h
+>  create mode 100644 arch/riscv/include/asm/sections.h
+>  create mode 100644 arch/riscv/kernel/efi-header.S
+>  create mode 100644 arch/riscv/kernel/image-vars.h
+>  rename drivers/firmware/efi/libstub/{arm-stub.c => efi-stub.c} (100%)
+>  create mode 100644 drivers/firmware/efi/libstub/riscv-stub.c
