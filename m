@@ -2,42 +2,42 @@ Return-Path: <SRS0=8DUf=6I=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PULL_REQUEST,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C8F4C54FD0
-	for <linux-efi@archiver.kernel.org>; Fri, 24 Apr 2020 13:06:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E5F7C55194
+	for <linux-efi@archiver.kernel.org>; Fri, 24 Apr 2020 13:06:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E612A20736
-	for <linux-efi@archiver.kernel.org>; Fri, 24 Apr 2020 13:06:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DEDFD208E4
+	for <linux-efi@archiver.kernel.org>; Fri, 24 Apr 2020 13:06:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1587733574;
-	bh=MGfaKuTdiHMWXthLJG7QjKnDtjDnpF4Sbmv1jSHLBaw=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=KvRZCZyWp140bM+aAsWXI8x1eAluX81Vo167AMHCwT+I/gkbR+QrnB/nLPXoq4CjS
-	 1Iheei+H9VNtL3uzIK9MMwyvuNsGLMjdbO4JMWIiZq/IPAp+f4j+XV6n2uypyzYuiZ
-	 AAWyH36tsDsvBaAgfDkAzUjib/OQUwjiiaMEf+9A=
+	s=default; t=1587733578;
+	bh=/SaENcmpX64RmJ+qKH6iETdVCvEB9U8MqVfSzhEvTPI=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=PUqLzBtEGDIMSasez3vXo35Ux4ci98qrKKoY5+KSAo6WYFA/nARAfsOUzsMsAf0iz
+	 RsABOrNELGcdWWcrZ4e5QERPzTWM0SUdNJPf7shq6kCEI5ZFBD3hYqIWisujhunptD
+	 moK3kZbTJ0Ak8qdGPY0UsJQa30U/3h7pDOR5mmG0=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726699AbgDXNGN (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 24 Apr 2020 09:06:13 -0400
-Received: from mail.kernel.org ([198.145.29.99]:56458 "EHLO mail.kernel.org"
+        id S1727815AbgDXNGS (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 24 Apr 2020 09:06:18 -0400
+Received: from mail.kernel.org ([198.145.29.99]:56544 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726489AbgDXNGN (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 24 Apr 2020 09:06:13 -0400
+        id S1726489AbgDXNGR (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 24 Apr 2020 09:06:17 -0400
 Received: from e123331-lin.home (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id F317B20728;
-        Fri, 24 Apr 2020 13:06:10 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 4D7F320736;
+        Fri, 24 Apr 2020 13:06:15 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1587733572;
-        bh=MGfaKuTdiHMWXthLJG7QjKnDtjDnpF4Sbmv1jSHLBaw=;
-        h=From:To:Cc:Subject:Date:From;
-        b=mt2kNDVx0/Zn5SRqp6TTuvYKiha8u0LKNG4C0Mm81Hj/xmd4c+ipnN1bI8I9d/qOb
-         L2eCkuDsXWm0krlV9vsSHbdia8h5wNwC35oKuuoSVq2yKgkghNaMw5cs9xqX7KALd4
-         fv8J3CzfLL+l4brN8mLPIPSxQIZwcGLe3r+DSrMk=
+        s=default; t=1587733577;
+        bh=/SaENcmpX64RmJ+qKH6iETdVCvEB9U8MqVfSzhEvTPI=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=hjNPec/KrHVaqtSvSomqAl53yyRYO2AwRQDDPRyx1Q6PcnRIXysgmdUy0krLrr47x
+         vRM0Sb+jjiKE1Zp2G8kSlKC7wMo9bq5E3JPulC6egKAQqjoIa59yguCnstYY8SsTQk
+         O2SiIgqV+xiaCofFeuNEwBqJvx/oixATG9ocb1bM=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
@@ -46,115 +46,148 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
         Atish Patra <atish.patra@wdc.com>,
         Palmer Dabbelt <palmerdabbelt@google.com>,
         Zou Wei <zou_wei@huawei.com>
-Subject: [GIT PULL 00/33] EFI updates for v5.8
-Date:   Fri, 24 Apr 2020 15:04:58 +0200
-Message-Id: <20200424130531.30518-1-ardb@kernel.org>
+Subject: [PATCH 02/33] efi/libstub: Make initrd file loader configurable
+Date:   Fri, 24 Apr 2020 15:05:00 +0200
+Message-Id: <20200424130531.30518-3-ardb@kernel.org>
 X-Mailer: git-send-email 2.17.1
+In-Reply-To: <20200424130531.30518-1-ardb@kernel.org>
+References: <20200424130531.30518-1-ardb@kernel.org>
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Hello Ingo, Thomas,
+Loading an initrd passed via the kernel command line is deprecated: it
+is limited to files that reside in the same volume as the one the kernel
+itself was loaded from, and we have more flexible ways to achieve the
+same. So make it configurable so new architectures can decide not to
+enable it.
 
-Please pull the attached changes into tip/efi/next. There is some
-coordination going on with the RISC-V tree this time, so please take the
-patches in this exact order, and apply them onto v5.7-rc2 so the first
-three patches can serve as a shared stable base between the efi/core
-branch and the riscv tree.
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+---
+ drivers/firmware/efi/Kconfig           | 11 ++++++++
+ drivers/firmware/efi/libstub/efistub.h | 38 ++++++++++++++++++++------
+ drivers/firmware/efi/libstub/file.c    | 32 +++++-----------------
+ 3 files changed, 47 insertions(+), 34 deletions(-)
 
-The following changes since commit ae83d0b416db002fe95601e7f97f64b59514d936:
+diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+index 2a2b2b96a1dc..4e788dd55b03 100644
+--- a/drivers/firmware/efi/Kconfig
++++ b/drivers/firmware/efi/Kconfig
+@@ -124,6 +124,17 @@ config EFI_ARMSTUB_DTB_LOADER
+ 	  functionality for bootloaders that do not have such support
+ 	  this option is necessary.
+ 
++config EFI_GENERIC_STUB_INITRD_CMDLINE_LOADER
++	bool "Enable the command line initrd loader"
++	depends on EFI_GENERIC_STUB
++	default y
++	help
++	  Select this config option to add support for the initrd= command
++	  line parameter, allowing an initrd that resides on the same volume
++	  as the kernel image to be loaded into memory.
++
++	  This method is deprecated.
++
+ config EFI_BOOTLOADER_CONTROL
+ 	tristate "EFI Bootloader Control"
+ 	depends on EFI_VARS
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index 67d26949fd26..7517683b31e9 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -651,15 +651,35 @@ efi_status_t efi_parse_options(char const *cmdline);
+ efi_status_t efi_setup_gop(struct screen_info *si, efi_guid_t *proto,
+ 			   unsigned long size);
+ 
+-efi_status_t efi_load_dtb(efi_loaded_image_t *image,
+-			  unsigned long *load_addr,
+-			  unsigned long *load_size);
+-
+-efi_status_t efi_load_initrd(efi_loaded_image_t *image,
+-			     unsigned long *load_addr,
+-			     unsigned long *load_size,
+-			     unsigned long soft_limit,
+-			     unsigned long hard_limit);
++efi_status_t handle_cmdline_files(efi_loaded_image_t *image,
++				  const efi_char16_t *optstr,
++				  int optstr_size,
++				  unsigned long soft_limit,
++				  unsigned long hard_limit,
++				  unsigned long *load_addr,
++				  unsigned long *load_size);
++
++
++static inline efi_status_t efi_load_dtb(efi_loaded_image_t *image,
++					unsigned long *load_addr,
++					unsigned long *load_size)
++{
++	return handle_cmdline_files(image, L"dtb=", sizeof(L"dtb=") - 2,
++				    ULONG_MAX, ULONG_MAX, load_addr, load_size);
++}
++
++static inline efi_status_t efi_load_initrd(efi_loaded_image_t *image,
++					   unsigned long *load_addr,
++					   unsigned long *load_size,
++					   unsigned long soft_limit,
++					   unsigned long hard_limit)
++{
++	if (!IS_ENABLED(CONFIG_EFI_GENERIC_STUB_INITRD_CMDLINE_LOADER))
++		return EFI_SUCCESS;
++
++	return handle_cmdline_files(image, L"initrd=", sizeof(L"initrd=") - 2,
++				    soft_limit, hard_limit, load_addr, load_size);
++}
+ 
+ efi_status_t efi_load_initrd_dev_path(unsigned long *load_addr,
+ 				      unsigned long *load_size,
+diff --git a/drivers/firmware/efi/libstub/file.c b/drivers/firmware/efi/libstub/file.c
+index ea66b1f16a79..27e014ea4459 100644
+--- a/drivers/firmware/efi/libstub/file.c
++++ b/drivers/firmware/efi/libstub/file.c
+@@ -121,13 +121,13 @@ static int find_file_option(const efi_char16_t *cmdline, int cmdline_len,
+  * We only support loading a file from the same filesystem as
+  * the kernel image.
+  */
+-static efi_status_t handle_cmdline_files(efi_loaded_image_t *image,
+-					 const efi_char16_t *optstr,
+-					 int optstr_size,
+-					 unsigned long soft_limit,
+-					 unsigned long hard_limit,
+-					 unsigned long *load_addr,
+-					 unsigned long *load_size)
++efi_status_t handle_cmdline_files(efi_loaded_image_t *image,
++				  const efi_char16_t *optstr,
++				  int optstr_size,
++				  unsigned long soft_limit,
++				  unsigned long hard_limit,
++				  unsigned long *load_addr,
++				  unsigned long *load_size)
+ {
+ 	const efi_char16_t *cmdline = image->load_options;
+ 	int cmdline_len = image->load_options_size / 2;
+@@ -239,21 +239,3 @@ static efi_status_t handle_cmdline_files(efi_loaded_image_t *image,
+ 	efi_free(alloc_size, alloc_addr);
+ 	return status;
+ }
+-
+-efi_status_t efi_load_dtb(efi_loaded_image_t *image,
+-			  unsigned long *load_addr,
+-			  unsigned long *load_size)
+-{
+-	return handle_cmdline_files(image, L"dtb=", sizeof(L"dtb=") - 2,
+-				    ULONG_MAX, ULONG_MAX, load_addr, load_size);
+-}
+-
+-efi_status_t efi_load_initrd(efi_loaded_image_t *image,
+-			     unsigned long *load_addr,
+-			     unsigned long *load_size,
+-			     unsigned long soft_limit,
+-			     unsigned long hard_limit)
+-{
+-	return handle_cmdline_files(image, L"initrd=", sizeof(L"initrd=") - 2,
+-				    soft_limit, hard_limit, load_addr, load_size);
+-}
+-- 
+2.17.1
 
-  Linux 5.7-rc2 (2020-04-19 14:35:30 -0700)
-
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next
-
-for you to fetch changes up to 4eb8320bd1aaa7e69d039f2c251735e3ef0b9a38:
-
-  efi: Move arch_tables check to caller (2020-04-24 14:52:16 +0200)
-
-----------------------------------------------------------------
-EFI changes for v5.8:
-- preliminary changes for RISC-V
-- add support for setting the resolution on the EFI framebuffer
-- simplify kernel image loading for arm64
-- Move .bss into .data via the linker script instead of relying on symbol
-  annotations.
-- Get rid of __pure getters to access global variables
-- Clean up the config table matching arrays
-
-----------------------------------------------------------------
-Ard Biesheuvel (14):
-      efi/libstub: Make initrd file loader configurable
-      efi/libstub: Unify EFI call wrappers for non-x86
-      efi/libstub/random: Align allocate size to EFI_ALLOC_ALIGN
-      efi/libstub/random: Increase random alloc granularity
-      efi/libstub/arm64: Replace 'preferred' offset with alignment check
-      efi/libstub/arm64: Simplify randomized loading of kernel image
-      efi/libstub: Add API function to allocate aligned memory
-      efi/libstub/arm64: Switch to ordinary page allocator for kernel image
-      efi/libstub: Move efi_relocate_kernel() into separate source file
-      efi/libstub: Drop __pure getter for efi_system_table
-      efi/libstub: Drop __pure getters for EFI stub options
-      efi/libstub/x86: Avoid getter function for efi_is64
-      efi: Clean up config table description arrays
-      efi: Move arch_tables check to caller
-
-Arvind Sankar (17):
-      efi/gop: Remove redundant current_fb_base
-      efi/gop: Move check for framebuffer before con_out
-      efi/gop: Get mode information outside the loop
-      efi/gop: Factor out locating the gop into a function
-      efi/gop: Slightly re-arrange logic of find_gop
-      efi/gop: Move variable declarations into loop block
-      efi/gop: Use helper macros for populating lfb_base
-      efi/gop: Use helper macros for find_bits
-      efi/gop: Remove unreachable code from setup_pixel_info
-      efi/gop: Add prototypes for query_mode and set_mode
-      efi/gop: Allow specifying mode number on command line
-      efi/gop: Allow specifying mode by <xres>x<yres>
-      efi/gop: Allow specifying depth as well as resolution
-      efi/gop: Allow automatically choosing the best mode
-      efi/arm: Remove __efistub_global annotation
-      efi/x86: Remove __efistub_global and add relocation check
-      efi: Kill __efistub_global
-
-Atish Patra (1):
-      efi/libstub: Move arm-stub to a common file
-
-Zou Wei (1):
-      efi/libstub/arm: Make install_memreserve_table static
-
- Documentation/fb/efifb.rst                         |  33 +-
- arch/arm/Kconfig                                   |   2 +-
- arch/arm/boot/compressed/vmlinux.lds.S             |   2 +-
- arch/arm/include/asm/efi.h                         |   8 -
- arch/arm64/Kconfig                                 |   2 +-
- arch/arm64/include/asm/efi.h                       |   8 -
- arch/ia64/kernel/efi.c                             |  12 +-
- arch/x86/boot/compressed/vmlinux.lds.S             |   1 +
- arch/x86/include/asm/efi.h                         |  29 +-
- arch/x86/platform/efi/efi.c                        |   8 +-
- drivers/firmware/efi/Kconfig                       |  15 +-
- drivers/firmware/efi/arm-init.c                    |   4 +-
- drivers/firmware/efi/efi.c                         |  44 +-
- drivers/firmware/efi/libstub/Makefile              |  42 +-
- drivers/firmware/efi/libstub/alignedmem.c          |  57 +++
- drivers/firmware/efi/libstub/arm64-stub.c          |  94 ++--
- drivers/firmware/efi/libstub/efi-stub-helper.c     |  47 +-
- .../efi/libstub/{arm-stub.c => efi-stub.c}         |  23 +-
- drivers/firmware/efi/libstub/efistub.h             |  96 ++--
- drivers/firmware/efi/libstub/fdt.c                 |   8 +-
- drivers/firmware/efi/libstub/file.c                |  34 +-
- drivers/firmware/efi/libstub/gop.c                 | 492 ++++++++++++++++-----
- drivers/firmware/efi/libstub/mem.c                 | 191 +-------
- drivers/firmware/efi/libstub/randomalloc.c         |   6 +-
- drivers/firmware/efi/libstub/relocate.c            | 174 ++++++++
- drivers/firmware/efi/libstub/x86-stub.c            |  35 +-
- include/linux/efi.h                                |   2 +-
- 27 files changed, 895 insertions(+), 574 deletions(-)
- create mode 100644 drivers/firmware/efi/libstub/alignedmem.c
- rename drivers/firmware/efi/libstub/{arm-stub.c => efi-stub.c} (96%)
- create mode 100644 drivers/firmware/efi/libstub/relocate.c
