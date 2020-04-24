@@ -7,37 +7,37 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1516EC55191
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D7DECC55194
 	for <linux-efi@archiver.kernel.org>; Fri, 24 Apr 2020 13:07:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DEBB420728
-	for <linux-efi@archiver.kernel.org>; Fri, 24 Apr 2020 13:07:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B879920728
+	for <linux-efi@archiver.kernel.org>; Fri, 24 Apr 2020 13:07:52 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1587733671;
-	bh=7KAnblsMPEX8fNveCLVX4SlaOtYuZcYiuTwICv9E6vs=;
+	s=default; t=1587733672;
+	bh=vZ2mY0Fi8GtL2gtiC4tR9yAyAZ8ys6huFhYY105Hm+8=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=C1O83isdgucbLqCwochUr9h0QbTSBa94bujk41RId1BH2BCEK9omOwIbW2h3LcZ/L
-	 Y4mt12EWhB2dLnR3WJ2IUWWPWmSuQNMY8o6RihS+9L+Z0rreAKjf4pvjBrkmITp50+
-	 1HCICBsT5RSBQC2ZHfHGDqRKchP+5T8kb0Mw/Xhg=
+	b=sIT9ENwA3yprRS1F18MI1OZ5PnFsiIS7z9cy2+SAczy/9EMFmw8IS9t2fAQQMYej/
+	 vFexuWdrS+dOcMq7+pKUvd7LsklddrWAPwgwpbAVTmnBKRsMamg95owMmCE0qF+tzM
+	 RLEHvV6OXje/NWXMZ0MIex/+j3FSapR2lfgD/M4I=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726926AbgDXNHI (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 24 Apr 2020 09:07:08 -0400
-Received: from mail.kernel.org ([198.145.29.99]:57804 "EHLO mail.kernel.org"
+        id S1728203AbgDXNHC (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 24 Apr 2020 09:07:02 -0400
+Received: from mail.kernel.org ([198.145.29.99]:57624 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728182AbgDXNHH (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 24 Apr 2020 09:07:07 -0400
+        id S1728182AbgDXNG6 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 24 Apr 2020 09:06:58 -0400
 Received: from e123331-lin.home (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id B4B1020736;
-        Fri, 24 Apr 2020 13:07:04 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 16D0721569;
+        Fri, 24 Apr 2020 13:06:55 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1587733626;
-        bh=7KAnblsMPEX8fNveCLVX4SlaOtYuZcYiuTwICv9E6vs=;
+        s=default; t=1587733617;
+        bh=vZ2mY0Fi8GtL2gtiC4tR9yAyAZ8ys6huFhYY105Hm+8=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=ndxR6fQma74mzrIPDYaNa6sqhLfWACo1lHwdYj/NvTR0e39FtL1X3uwtG6AqnoMI0
-         zK4RUE0uonJEcqUR9JtABJ2wUBuBhtxsPKGM508eUN1ZfoLSmDtGB+8IW9fvRQ85pQ
-         F1YvEnvsj63nhObQUZD0Y8lxv2O5JScm7GdV0fvw=
+        b=1Smbt+vIBubprOoGwndT69kEsRuXbh3Dsu0UOcxmxjFKs+bMmlvRHLXa/1tydGz9I
+         DLzsaXCidBM3eeDXC7cZoy+KqzY3oU57rYyQ7FGcY7kreCuOps/dEfKvShQgyD0dXQ
+         EHFkQ2Fk8ULBr04u6XmDgewrAxMaJ0Ep8TiBV/Ys=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
@@ -46,9 +46,9 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
         Atish Patra <atish.patra@wdc.com>,
         Palmer Dabbelt <palmerdabbelt@google.com>,
         Zou Wei <zou_wei@huawei.com>
-Subject: [PATCH 25/33] efi/libstub: Move efi_relocate_kernel() into separate source file
-Date:   Fri, 24 Apr 2020 15:05:23 +0200
-Message-Id: <20200424130531.30518-26-ardb@kernel.org>
+Subject: [PATCH 21/33] efi/libstub/arm64: Replace 'preferred' offset with alignment check
+Date:   Fri, 24 Apr 2020 15:05:19 +0200
+Message-Id: <20200424130531.30518-22-ardb@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20200424130531.30518-1-ardb@kernel.org>
 References: <20200424130531.30518-1-ardb@kernel.org>
@@ -57,422 +57,138 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Move efi_relocate_kernel() into a separate source file, so that it
-only gets pulled into builds for architectures that use it. Since
-efi_relocate_kernel() is the only user of efi_low_alloc(), let's
-move that over as well.
+The notion of a 'preferred' load offset for the kernel dates back to the
+times when the kernel's primary mapping overlapped with the linear region,
+and memory below it could not be used at all.
+
+Today, the arm64 kernel does not really care where it is loaded in physical
+memory, as long as the alignment requirements are met, and so there is no
+point in unconditionally moving the kernel to a new location in memory at
+boot. Instead, we can
+- check for a KASLR seed, and randomly reallocate the kernel if one is
+  provided
+- otherwise, check whether the alignment requirements are met for the
+  current placement of the kernel, and just run it in place if they are
+- finally, do an ordinary page allocation and reallocate the kernel to a
+  suitably aligned buffer anywhere in memory.
+
+By the same reasoning, there is no need to take TEXT_OFFSET into account
+if it is a round multiple of the minimum alignment, which is the usual
+case for relocatable kernels with TEXT_OFFSET randomization disabled.
+Otherwise, it suffices to use the relative misaligment of TEXT_OFFSET
+when reallocating the kernel.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/firmware/efi/libstub/Makefile   |   2 +-
- drivers/firmware/efi/libstub/efistub.h  |  15 --
- drivers/firmware/efi/libstub/mem.c      | 168 -----------------------
- drivers/firmware/efi/libstub/relocate.c | 174 ++++++++++++++++++++++++
- 4 files changed, 175 insertions(+), 184 deletions(-)
- create mode 100644 drivers/firmware/efi/libstub/relocate.c
+ drivers/firmware/efi/libstub/arm64-stub.c | 62 +++++++++--------------
+ 1 file changed, 25 insertions(+), 37 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index bb8af2b16c49..9a712a6e2f87 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -43,7 +43,7 @@ KCOV_INSTRUMENT			:= n
- lib-y				:= efi-stub-helper.o gop.o secureboot.o tpm.o \
- 				   file.o mem.o random.o randomalloc.o pci.o \
- 				   skip_spaces.o lib-cmdline.o lib-ctype.o \
--				   alignedmem.o
-+				   alignedmem.o relocate.o
- 
- # include the stub's generic dependencies from lib/ when building for ARM/arm64
- efi-deps-y := fdt_rw.c fdt_ro.c fdt_wip.c fdt.c fdt_empty_tree.c fdt_sw.c
-diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-index baa0bc166074..2a0698d9dc78 100644
---- a/drivers/firmware/efi/libstub/efistub.h
-+++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -639,21 +639,6 @@ char *efi_convert_cmdline(efi_loaded_image_t *image, int *cmd_line_len,
- 
- efi_status_t efi_get_memory_map(struct efi_boot_memmap *map);
- 
--efi_status_t efi_low_alloc_above(unsigned long size, unsigned long align,
--				 unsigned long *addr, unsigned long min);
--
--static inline
--efi_status_t efi_low_alloc(unsigned long size, unsigned long align,
--			   unsigned long *addr)
--{
--	/*
--	 * Don't allocate at 0x0. It will confuse code that
--	 * checks pointers against NULL. Skip the first 8
--	 * bytes so we start at a nice even number.
--	 */
--	return efi_low_alloc_above(size, align, addr, 0x8);
--}
--
- efi_status_t efi_allocate_pages(unsigned long size, unsigned long *addr,
- 				unsigned long max);
- 
-diff --git a/drivers/firmware/efi/libstub/mem.c b/drivers/firmware/efi/libstub/mem.c
-index 0020b0fa9587..6e0ee6b3d897 100644
---- a/drivers/firmware/efi/libstub/mem.c
-+++ b/drivers/firmware/efi/libstub/mem.c
-@@ -111,96 +111,6 @@ efi_status_t efi_allocate_pages(unsigned long size, unsigned long *addr,
+diff --git a/drivers/firmware/efi/libstub/arm64-stub.c b/drivers/firmware/efi/libstub/arm64-stub.c
+index fc9f8ab533a7..cfd535c13242 100644
+--- a/drivers/firmware/efi/libstub/arm64-stub.c
++++ b/drivers/firmware/efi/libstub/arm64-stub.c
+@@ -34,6 +34,15 @@ efi_status_t check_platform_features(void)
  	return EFI_SUCCESS;
  }
  
--/**
-- * efi_low_alloc_above() - allocate pages at or above given address
-- * @size:	size of the memory area to allocate
-- * @align:	minimum alignment of the allocated memory area. It should
-- *		a power of two.
-- * @addr:	on exit the address of the allocated memory
-- * @min:	minimum address to used for the memory allocation
-- *
-- * Allocate at the lowest possible address that is not below @min as
-- * EFI_LOADER_DATA. The allocated pages are aligned according to @align but at
-- * least EFI_ALLOC_ALIGN. The first allocated page will not below the address
-- * given by @min.
-- *
-- * Return:	status code
-- */
--efi_status_t efi_low_alloc_above(unsigned long size, unsigned long align,
--				 unsigned long *addr, unsigned long min)
--{
--	unsigned long map_size, desc_size, buff_size;
--	efi_memory_desc_t *map;
--	efi_status_t status;
--	unsigned long nr_pages;
--	int i;
--	struct efi_boot_memmap boot_map;
--
--	boot_map.map		= &map;
--	boot_map.map_size	= &map_size;
--	boot_map.desc_size	= &desc_size;
--	boot_map.desc_ver	= NULL;
--	boot_map.key_ptr	= NULL;
--	boot_map.buff_size	= &buff_size;
--
--	status = efi_get_memory_map(&boot_map);
--	if (status != EFI_SUCCESS)
--		goto fail;
--
++/*
++ * Relocatable kernels can fix up the misalignment with respect to
++ * MIN_KIMG_ALIGN, so they only require a minimum alignment of EFI_KIMG_ALIGN
++ * (which accounts for the alignment of statically allocated objects such as
++ * the swapper stack.)
++ */
++static const u64 min_kimg_align = IS_ENABLED(CONFIG_RELOCATABLE) ? EFI_KIMG_ALIGN
++								 : MIN_KIMG_ALIGN;
++
+ efi_status_t handle_kernel_image(unsigned long *image_addr,
+ 				 unsigned long *image_size,
+ 				 unsigned long *reserve_addr,
+@@ -43,7 +52,6 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
+ {
+ 	efi_status_t status;
+ 	unsigned long kernel_size, kernel_memsize = 0;
+-	unsigned long preferred_offset;
+ 	u64 phys_seed = 0;
+ 
+ 	if (IS_ENABLED(CONFIG_RANDOMIZE_BASE)) {
+@@ -61,14 +69,8 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
+ 		}
+ 	}
+ 
 -	/*
--	 * Enforce minimum alignment that EFI or Linux requires when
--	 * requesting a specific address.  We are doing page-based (or
--	 * larger) allocations, and both the address and size must meet
--	 * alignment constraints.
+-	 * The preferred offset of the kernel Image is TEXT_OFFSET bytes beyond
+-	 * a 2 MB aligned base, which itself may be lower than dram_base, as
+-	 * long as the resulting offset equals or exceeds it.
 -	 */
--	if (align < EFI_ALLOC_ALIGN)
--		align = EFI_ALLOC_ALIGN;
+-	preferred_offset = round_down(dram_base, MIN_KIMG_ALIGN) + TEXT_OFFSET;
+-	if (preferred_offset < dram_base)
+-		preferred_offset += MIN_KIMG_ALIGN;
++	if (image->image_base != _text)
++		pr_efi_err("FIRMWARE BUG: efi_loaded_image_t::image_base has bogus value\n");
+ 
+ 	kernel_size = _edata - _text;
+ 	kernel_memsize = kernel_size + (_end - _edata);
+@@ -103,46 +105,32 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
+ 
+ 		*image_addr = *reserve_addr + offset;
+ 	} else {
+-		/*
+-		 * Else, try a straight allocation at the preferred offset.
+-		 * This will work around the issue where, if dram_base == 0x0,
+-		 * efi_low_alloc() refuses to allocate at 0x0 (to prevent the
+-		 * address of the allocation to be mistaken for a FAIL return
+-		 * value or a NULL pointer). It will also ensure that, on
+-		 * platforms where the [dram_base, dram_base + TEXT_OFFSET)
+-		 * interval is partially occupied by the firmware (like on APM
+-		 * Mustang), we can still place the kernel at the address
+-		 * 'dram_base + TEXT_OFFSET'.
+-		 */
+-		*image_addr = (unsigned long)_text;
+-		if (*image_addr == preferred_offset)
+-			return EFI_SUCCESS;
 -
--	size = round_up(size, EFI_ALLOC_ALIGN);
--	nr_pages = size / EFI_PAGE_SIZE;
--	for (i = 0; i < map_size / desc_size; i++) {
--		efi_memory_desc_t *desc;
--		unsigned long m = (unsigned long)map;
--		u64 start, end;
--
--		desc = efi_early_memdesc_ptr(m, desc_size, i);
--
--		if (desc->type != EFI_CONVENTIONAL_MEMORY)
--			continue;
--
--		if (efi_soft_reserve_enabled() &&
--		    (desc->attribute & EFI_MEMORY_SP))
--			continue;
--
--		if (desc->num_pages < nr_pages)
--			continue;
--
--		start = desc->phys_addr;
--		end = start + desc->num_pages * EFI_PAGE_SIZE;
--
--		if (start < min)
--			start = min;
--
--		start = round_up(start, align);
--		if ((start + size) > end)
--			continue;
+-		*image_addr = *reserve_addr = preferred_offset;
+-		*reserve_size = round_up(kernel_memsize, EFI_ALLOC_ALIGN);
 -
 -		status = efi_bs_call(allocate_pages, EFI_ALLOCATE_ADDRESS,
--				     EFI_LOADER_DATA, nr_pages, &start);
--		if (status == EFI_SUCCESS) {
--			*addr = start;
--			break;
--		}
--	}
--
--	if (i == map_size / desc_size)
--		status = EFI_NOT_FOUND;
--
--	efi_bs_call(free_pool, map);
--fail:
--	return status;
--}
--
- /**
-  * efi_free() - free memory pages
-  * @size:	size of the memory area to free in bytes
-@@ -222,81 +132,3 @@ void efi_free(unsigned long size, unsigned long addr)
- 	nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
- 	efi_bs_call(free_pages, addr, nr_pages);
- }
--
--/**
-- * efi_relocate_kernel() - copy memory area
-- * @image_addr:		pointer to address of memory area to copy
-- * @image_size:		size of memory area to copy
-- * @alloc_size:		minimum size of memory to allocate, must be greater or
-- *			equal to image_size
-- * @preferred_addr:	preferred target address
-- * @alignment:		minimum alignment of the allocated memory area. It
-- *			should be a power of two.
-- * @min_addr:		minimum target address
-- *
-- * Copy a memory area to a newly allocated memory area aligned according
-- * to @alignment but at least EFI_ALLOC_ALIGN. If the preferred address
-- * is not available, the allocated address will not be below @min_addr.
-- * On exit, @image_addr is updated to the target copy address that was used.
-- *
-- * This function is used to copy the Linux kernel verbatim. It does not apply
-- * any relocation changes.
-- *
-- * Return:		status code
-- */
--efi_status_t efi_relocate_kernel(unsigned long *image_addr,
--				 unsigned long image_size,
--				 unsigned long alloc_size,
--				 unsigned long preferred_addr,
--				 unsigned long alignment,
--				 unsigned long min_addr)
--{
--	unsigned long cur_image_addr;
--	unsigned long new_addr = 0;
--	efi_status_t status;
--	unsigned long nr_pages;
--	efi_physical_addr_t efi_addr = preferred_addr;
--
--	if (!image_addr || !image_size || !alloc_size)
--		return EFI_INVALID_PARAMETER;
--	if (alloc_size < image_size)
--		return EFI_INVALID_PARAMETER;
--
--	cur_image_addr = *image_addr;
--
--	/*
--	 * The EFI firmware loader could have placed the kernel image
--	 * anywhere in memory, but the kernel has restrictions on the
--	 * max physical address it can run at.  Some architectures
--	 * also have a prefered address, so first try to relocate
--	 * to the preferred address.  If that fails, allocate as low
--	 * as possible while respecting the required alignment.
--	 */
--	nr_pages = round_up(alloc_size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
--	status = efi_bs_call(allocate_pages, EFI_ALLOCATE_ADDRESS,
--			     EFI_LOADER_DATA, nr_pages, &efi_addr);
--	new_addr = efi_addr;
--	/*
--	 * If preferred address allocation failed allocate as low as
--	 * possible.
--	 */
--	if (status != EFI_SUCCESS) {
--		status = efi_low_alloc_above(alloc_size, alignment, &new_addr,
--					     min_addr);
--	}
--	if (status != EFI_SUCCESS) {
--		pr_efi_err("Failed to allocate usable memory for kernel.\n");
--		return status;
--	}
--
--	/*
--	 * We know source/dest won't overlap since both memory ranges
--	 * have been allocated by UEFI, so we can safely use memcpy.
--	 */
--	memcpy((void *)new_addr, (void *)cur_image_addr, image_size);
--
--	/* Return the new address of the relocated image. */
--	*image_addr = new_addr;
--
--	return status;
--}
-diff --git a/drivers/firmware/efi/libstub/relocate.c b/drivers/firmware/efi/libstub/relocate.c
-new file mode 100644
-index 000000000000..1507d3c82884
---- /dev/null
-+++ b/drivers/firmware/efi/libstub/relocate.c
-@@ -0,0 +1,174 @@
-+// SPDX-License-Identifier: GPL-2.0
-+
-+#include <linux/efi.h>
-+#include <asm/efi.h>
-+
-+#include "efistub.h"
-+
-+/**
-+ * efi_low_alloc_above() - allocate pages at or above given address
-+ * @size:	size of the memory area to allocate
-+ * @align:	minimum alignment of the allocated memory area. It should
-+ *		a power of two.
-+ * @addr:	on exit the address of the allocated memory
-+ * @min:	minimum address to used for the memory allocation
-+ *
-+ * Allocate at the lowest possible address that is not below @min as
-+ * EFI_LOADER_DATA. The allocated pages are aligned according to @align but at
-+ * least EFI_ALLOC_ALIGN. The first allocated page will not below the address
-+ * given by @min.
-+ *
-+ * Return:	status code
-+ */
-+static efi_status_t efi_low_alloc_above(unsigned long size, unsigned long align,
-+					unsigned long *addr, unsigned long min)
-+{
-+	unsigned long map_size, desc_size, buff_size;
-+	efi_memory_desc_t *map;
-+	efi_status_t status;
-+	unsigned long nr_pages;
-+	int i;
-+	struct efi_boot_memmap boot_map;
-+
-+	boot_map.map		= &map;
-+	boot_map.map_size	= &map_size;
-+	boot_map.desc_size	= &desc_size;
-+	boot_map.desc_ver	= NULL;
-+	boot_map.key_ptr	= NULL;
-+	boot_map.buff_size	= &buff_size;
-+
-+	status = efi_get_memory_map(&boot_map);
-+	if (status != EFI_SUCCESS)
-+		goto fail;
-+
-+	/*
-+	 * Enforce minimum alignment that EFI or Linux requires when
-+	 * requesting a specific address.  We are doing page-based (or
-+	 * larger) allocations, and both the address and size must meet
-+	 * alignment constraints.
-+	 */
-+	if (align < EFI_ALLOC_ALIGN)
-+		align = EFI_ALLOC_ALIGN;
-+
-+	size = round_up(size, EFI_ALLOC_ALIGN);
-+	nr_pages = size / EFI_PAGE_SIZE;
-+	for (i = 0; i < map_size / desc_size; i++) {
-+		efi_memory_desc_t *desc;
-+		unsigned long m = (unsigned long)map;
-+		u64 start, end;
-+
-+		desc = efi_early_memdesc_ptr(m, desc_size, i);
-+
-+		if (desc->type != EFI_CONVENTIONAL_MEMORY)
-+			continue;
-+
-+		if (efi_soft_reserve_enabled() &&
-+		    (desc->attribute & EFI_MEMORY_SP))
-+			continue;
-+
-+		if (desc->num_pages < nr_pages)
-+			continue;
-+
-+		start = desc->phys_addr;
-+		end = start + desc->num_pages * EFI_PAGE_SIZE;
-+
-+		if (start < min)
-+			start = min;
-+
-+		start = round_up(start, align);
-+		if ((start + size) > end)
-+			continue;
-+
-+		status = efi_bs_call(allocate_pages, EFI_ALLOCATE_ADDRESS,
-+				     EFI_LOADER_DATA, nr_pages, &start);
-+		if (status == EFI_SUCCESS) {
-+			*addr = start;
-+			break;
+-				     EFI_LOADER_DATA,
+-				     *reserve_size / EFI_PAGE_SIZE,
+-				     (efi_physical_addr_t *)reserve_addr);
++		status = EFI_OUT_OF_RESOURCES;
+ 	}
+ 
+ 	if (status != EFI_SUCCESS) {
+-		*reserve_size = kernel_memsize + TEXT_OFFSET;
++		if (IS_ALIGNED((u64)_text - TEXT_OFFSET, min_kimg_align)) {
++			/*
++			 * Just execute from wherever we were loaded by the
++			 * UEFI PE/COFF loader if the alignment is suitable.
++			 */
++			*image_addr = (u64)_text;
++			*reserve_size = 0;
++			return EFI_SUCCESS;
 +		}
-+	}
 +
-+	if (i == map_size / desc_size)
-+		status = EFI_NOT_FOUND;
-+
-+	efi_bs_call(free_pool, map);
-+fail:
-+	return status;
-+}
-+
-+/**
-+ * efi_relocate_kernel() - copy memory area
-+ * @image_addr:		pointer to address of memory area to copy
-+ * @image_size:		size of memory area to copy
-+ * @alloc_size:		minimum size of memory to allocate, must be greater or
-+ *			equal to image_size
-+ * @preferred_addr:	preferred target address
-+ * @alignment:		minimum alignment of the allocated memory area. It
-+ *			should be a power of two.
-+ * @min_addr:		minimum target address
-+ *
-+ * Copy a memory area to a newly allocated memory area aligned according
-+ * to @alignment but at least EFI_ALLOC_ALIGN. If the preferred address
-+ * is not available, the allocated address will not be below @min_addr.
-+ * On exit, @image_addr is updated to the target copy address that was used.
-+ *
-+ * This function is used to copy the Linux kernel verbatim. It does not apply
-+ * any relocation changes.
-+ *
-+ * Return:		status code
-+ */
-+efi_status_t efi_relocate_kernel(unsigned long *image_addr,
-+				 unsigned long image_size,
-+				 unsigned long alloc_size,
-+				 unsigned long preferred_addr,
-+				 unsigned long alignment,
-+				 unsigned long min_addr)
-+{
-+	unsigned long cur_image_addr;
-+	unsigned long new_addr = 0;
-+	efi_status_t status;
-+	unsigned long nr_pages;
-+	efi_physical_addr_t efi_addr = preferred_addr;
-+
-+	if (!image_addr || !image_size || !alloc_size)
-+		return EFI_INVALID_PARAMETER;
-+	if (alloc_size < image_size)
-+		return EFI_INVALID_PARAMETER;
-+
-+	cur_image_addr = *image_addr;
-+
-+	/*
-+	 * The EFI firmware loader could have placed the kernel image
-+	 * anywhere in memory, but the kernel has restrictions on the
-+	 * max physical address it can run at.  Some architectures
-+	 * also have a prefered address, so first try to relocate
-+	 * to the preferred address.  If that fails, allocate as low
-+	 * as possible while respecting the required alignment.
-+	 */
-+	nr_pages = round_up(alloc_size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
-+	status = efi_bs_call(allocate_pages, EFI_ALLOCATE_ADDRESS,
-+			     EFI_LOADER_DATA, nr_pages, &efi_addr);
-+	new_addr = efi_addr;
-+	/*
-+	 * If preferred address allocation failed allocate as low as
-+	 * possible.
-+	 */
-+	if (status != EFI_SUCCESS) {
-+		status = efi_low_alloc_above(alloc_size, alignment, &new_addr,
-+					     min_addr);
-+	}
-+	if (status != EFI_SUCCESS) {
-+		pr_efi_err("Failed to allocate usable memory for kernel.\n");
-+		return status;
-+	}
-+
-+	/*
-+	 * We know source/dest won't overlap since both memory ranges
-+	 * have been allocated by UEFI, so we can safely use memcpy.
-+	 */
-+	memcpy((void *)new_addr, (void *)cur_image_addr, image_size);
-+
-+	/* Return the new address of the relocated image. */
-+	*image_addr = new_addr;
-+
-+	return status;
-+}
++		*reserve_size = kernel_memsize + TEXT_OFFSET % min_kimg_align;
+ 		status = efi_low_alloc(*reserve_size,
+-				       MIN_KIMG_ALIGN, reserve_addr);
++				       min_kimg_align, reserve_addr);
+ 
+ 		if (status != EFI_SUCCESS) {
+ 			pr_efi_err("Failed to relocate kernel\n");
+ 			*reserve_size = 0;
+ 			return status;
+ 		}
+-		*image_addr = *reserve_addr + TEXT_OFFSET;
++		*image_addr = *reserve_addr + TEXT_OFFSET % min_kimg_align;
+ 	}
+ 
+-	if (image->image_base != _text)
+-		pr_efi_err("FIRMWARE BUG: efi_loaded_image_t::image_base has bogus value\n");
+-
+ 	memcpy((void *)*image_addr, _text, kernel_size);
+ 
+ 	return EFI_SUCCESS;
 -- 
 2.17.1
 
