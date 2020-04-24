@@ -4,40 +4,40 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E884CC54FCB
-	for <linux-efi@archiver.kernel.org>; Fri, 24 Apr 2020 13:08:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 233D2C54FD0
+	for <linux-efi@archiver.kernel.org>; Fri, 24 Apr 2020 13:08:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C764120728
+	by mail.kernel.org (Postfix) with ESMTP id EE02120728
 	for <linux-efi@archiver.kernel.org>; Fri, 24 Apr 2020 13:08:16 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1587733696;
-	bh=2mZCKtYRxieeXbekBkiiyJNTO6FmbsTF0OKojHO/iqs=;
+	s=default; t=1587733697;
+	bh=rRk35WDL+St6SUKwBs+S8eHDu7OxGH5ousr0/ZE+828=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=WYx2f/pIp9OLp6VjeoLKNargp5CwPJa5ERnWMEJW9tk96O0MjfwQVB7jF57rbjZLz
-	 LWv6OTNm5adxgLeA3ipZw8syV2OSXcke0T3sGHJy0PCRCT1Cb4rOKREvPzLX6wgzjy
-	 sy2NE8nP14/suIRCEc5PKFDM7/Rvwg9WuADx08S8=
+	b=AwU97VUXdYYvYknwLBM1l+NEUz5TD296OuWcyiQflb8NqmB9L2NDm/JtII/LuSLbc
+	 d6JYHFKNMo7of6PZ6ScYLvSpIyGqaukzs5t1EaXqI+44mYJ3BoAuVTH+aNxIh4uGSx
+	 RKAi0hjG27cyFpwKFUzC6jy8tUGCZbLveUkxizl8=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727889AbgDXNG1 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 24 Apr 2020 09:06:27 -0400
-Received: from mail.kernel.org ([198.145.29.99]:56804 "EHLO mail.kernel.org"
+        id S1728477AbgDXNIQ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 24 Apr 2020 09:08:16 -0400
+Received: from mail.kernel.org ([198.145.29.99]:56904 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727875AbgDXNG0 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 24 Apr 2020 09:06:26 -0400
+        id S1727909AbgDXNGa (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 24 Apr 2020 09:06:30 -0400
 Received: from e123331-lin.home (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id D94F921655;
-        Fri, 24 Apr 2020 13:06:23 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 28E2B20736;
+        Fri, 24 Apr 2020 13:06:28 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1587733585;
-        bh=2mZCKtYRxieeXbekBkiiyJNTO6FmbsTF0OKojHO/iqs=;
+        s=default; t=1587733589;
+        bh=rRk35WDL+St6SUKwBs+S8eHDu7OxGH5ousr0/ZE+828=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Kk+GsYR2+pabwwlKSl+YvbWXH8xIXMXrus/J+waWOMMx336TMnExtBL2q8ceeKDW7
-         9vM6a2Dg+C9htwH/k86kl5YneL37sYEjJtMkbPnt5HjQVhBEK2LMkT/DpZCntWVPGP
-         wJ2ivyj6QZmRh7LFX9XRJpWrZ8lwnLoB1JmSvZxE=
+        b=ckIbt3E0RpNdNsX2GKl32F1DnlrnKEehY9g1PBkbcPyoceeIOGVYJt2BYUxH9fGhk
+         1znNLxxyKz/xFpJS8OJt8/x90ThsGFdV3EX031LU8Ue1aGyPuZwnBeBH0Mf29lBpIT
+         gGpfr5c4jGn0S3s1ZoMeZlOnB+CJv1F5s5wwTk8s=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
@@ -46,9 +46,9 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
         Atish Patra <atish.patra@wdc.com>,
         Palmer Dabbelt <palmerdabbelt@google.com>,
         Zou Wei <zou_wei@huawei.com>
-Subject: [PATCH 06/33] efi/gop: Move check for framebuffer before con_out
-Date:   Fri, 24 Apr 2020 15:05:04 +0200
-Message-Id: <20200424130531.30518-7-ardb@kernel.org>
+Subject: [PATCH 08/33] efi/gop: Factor out locating the gop into a function
+Date:   Fri, 24 Apr 2020 15:05:06 +0200
+Message-Id: <20200424130531.30518-9-ardb@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20200424130531.30518-1-ardb@kernel.org>
 References: <20200424130531.30518-1-ardb@kernel.org>
@@ -59,42 +59,69 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Arvind Sankar <nivedita@alum.mit.edu>
 
-If the gop doesn't have a framebuffer, there's no point in checking for
-con_out support.
+Move the loop to find a gop into its own function.
 
 Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
-Link: https://lore.kernel.org/r/20200320020028.1936003-3-nivedita@alum.mit.edu
+Link: https://lore.kernel.org/r/20200320020028.1936003-5-nivedita@alum.mit.edu
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/firmware/efi/libstub/gop.c | 11 ++++++-----
- 1 file changed, 6 insertions(+), 5 deletions(-)
+ drivers/firmware/efi/libstub/gop.c | 23 +++++++++++++++++------
+ 1 file changed, 17 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/firmware/efi/libstub/gop.c b/drivers/firmware/efi/libstub/gop.c
-index f40d535dccb8..201b66970b2b 100644
+index d692b8c65813..92abcf558845 100644
 --- a/drivers/firmware/efi/libstub/gop.c
 +++ b/drivers/firmware/efi/libstub/gop.c
-@@ -113,15 +113,16 @@ static efi_status_t setup_gop(struct screen_info *si, efi_guid_t *proto,
- 		if (status != EFI_SUCCESS)
- 			continue;
+@@ -85,19 +85,17 @@ setup_pixel_info(struct screen_info *si, u32 pixels_per_scan_line,
+ 	}
+ }
  
-+		mode = efi_table_attr(gop, mode);
-+		info = efi_table_attr(mode, info);
-+		if (info->pixel_format == PIXEL_BLT_ONLY)
-+			continue;
+-static efi_status_t setup_gop(struct screen_info *si, efi_guid_t *proto,
+-			      unsigned long size, void **handles)
++static efi_graphics_output_protocol_t *
++find_gop(efi_guid_t *proto, unsigned long size, void **handles)
+ {
+ 	efi_graphics_output_protocol_t *gop, *first_gop;
+ 	efi_graphics_output_protocol_mode_t *mode;
+ 	efi_graphics_output_mode_info_t *info = NULL;
+-	efi_physical_addr_t fb_base;
+ 	efi_status_t status;
+ 	efi_handle_t h;
+ 	int i;
+ 
+ 	first_gop = NULL;
+-	gop = NULL;
+ 
+ 	for_each_efi_handle(h, handles, size, i) {
+ 		efi_guid_t conout_proto = EFI_CONSOLE_OUT_DEVICE_GUID;
+@@ -134,12 +132,25 @@ static efi_status_t setup_gop(struct screen_info *si, efi_guid_t *proto,
+ 		}
+ 	}
+ 
++	return first_gop;
++}
 +
- 		status = efi_bs_call(handle_protocol, h, &conout_proto, &dummy);
- 		if (status == EFI_SUCCESS)
- 			conout_found = true;
++static efi_status_t setup_gop(struct screen_info *si, efi_guid_t *proto,
++			      unsigned long size, void **handles)
++{
++	efi_graphics_output_protocol_t *gop;
++	efi_graphics_output_protocol_mode_t *mode;
++	efi_graphics_output_mode_info_t *info = NULL;
++	efi_physical_addr_t fb_base;
++
++	gop = find_gop(proto, size, handles);
++
+ 	/* Did we find any GOPs? */
+-	if (!first_gop)
++	if (!gop)
+ 		return EFI_NOT_FOUND;
  
--		mode = efi_table_attr(gop, mode);
--		info = efi_table_attr(mode, info);
--
--		if ((!first_gop || conout_found) &&
--		    info->pixel_format != PIXEL_BLT_ONLY) {
-+		if (!first_gop || conout_found) {
- 			/*
- 			 * Systems that use the UEFI Console Splitter may
- 			 * provide multiple GOP devices, not all of which are
+ 	/* EFI framebuffer */
+-	mode = efi_table_attr(first_gop, mode);
++	mode = efi_table_attr(gop, mode);
+ 	info = efi_table_attr(mode, info);
+ 
+ 	si->orig_video_isVGA = VIDEO_TYPE_EFI;
 -- 
 2.17.1
 
