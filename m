@@ -4,40 +4,40 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 233D2C54FD0
-	for <linux-efi@archiver.kernel.org>; Fri, 24 Apr 2020 13:08:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A30DDC54FCB
+	for <linux-efi@archiver.kernel.org>; Fri, 24 Apr 2020 13:08:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EE02120728
-	for <linux-efi@archiver.kernel.org>; Fri, 24 Apr 2020 13:08:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7F3B720736
+	for <linux-efi@archiver.kernel.org>; Fri, 24 Apr 2020 13:08:24 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1587733697;
-	bh=rRk35WDL+St6SUKwBs+S8eHDu7OxGH5ousr0/ZE+828=;
+	s=default; t=1587733704;
+	bh=N8WHCZTXoYVd4HikAPCUeH5omQc/d7QvplV5w5DjrJc=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=AwU97VUXdYYvYknwLBM1l+NEUz5TD296OuWcyiQflb8NqmB9L2NDm/JtII/LuSLbc
-	 d6JYHFKNMo7of6PZ6ScYLvSpIyGqaukzs5t1EaXqI+44mYJ3BoAuVTH+aNxIh4uGSx
-	 RKAi0hjG27cyFpwKFUzC6jy8tUGCZbLveUkxizl8=
+	b=caYR3O/YPK8YA5cnVoZHiQHvVyNUrlKth4BUQ+1fnnZTUSlQZktHNqZi4s6O+MAF/
+	 nXIP/8XhnAEkqGFdrVtioRGeEYWrqXeWW4aYIhwkpCmYNu9fdIUBfoBXhxmiDO+IRy
+	 DSR6vPLNHClt2hb9kFWCGB7+vAYtiwo+i7OoLq64=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728477AbgDXNIQ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 24 Apr 2020 09:08:16 -0400
-Received: from mail.kernel.org ([198.145.29.99]:56904 "EHLO mail.kernel.org"
+        id S1727909AbgDXNIU (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 24 Apr 2020 09:08:20 -0400
+Received: from mail.kernel.org ([198.145.29.99]:56724 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727909AbgDXNGa (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 24 Apr 2020 09:06:30 -0400
+        id S1727832AbgDXNGY (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 24 Apr 2020 09:06:24 -0400
 Received: from e123331-lin.home (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 28E2B20736;
-        Fri, 24 Apr 2020 13:06:28 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id B3E7F208E4;
+        Fri, 24 Apr 2020 13:06:21 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1587733589;
-        bh=rRk35WDL+St6SUKwBs+S8eHDu7OxGH5ousr0/ZE+828=;
+        s=default; t=1587733583;
+        bh=N8WHCZTXoYVd4HikAPCUeH5omQc/d7QvplV5w5DjrJc=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=ckIbt3E0RpNdNsX2GKl32F1DnlrnKEehY9g1PBkbcPyoceeIOGVYJt2BYUxH9fGhk
-         1znNLxxyKz/xFpJS8OJt8/x90ThsGFdV3EX031LU8Ue1aGyPuZwnBeBH0Mf29lBpIT
-         gGpfr5c4jGn0S3s1ZoMeZlOnB+CJv1F5s5wwTk8s=
+        b=lHjiZgxdXjR19WURXyNO0lmUEVNnlAOHUwUbY/wnZ9QUEfvIXfzoQaf/FxL7Gxaow
+         YHxRRUXYI5n4PO7+K9PgHIUiqwUKVq+QRby0CsAHuMABoznxKpPd/M9AWpMknbZTSx
+         UDxM/ZdgfG1pbrCToQjt6uoH6sk2L8J1y+zw8El8=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
@@ -46,9 +46,9 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
         Atish Patra <atish.patra@wdc.com>,
         Palmer Dabbelt <palmerdabbelt@google.com>,
         Zou Wei <zou_wei@huawei.com>
-Subject: [PATCH 08/33] efi/gop: Factor out locating the gop into a function
-Date:   Fri, 24 Apr 2020 15:05:06 +0200
-Message-Id: <20200424130531.30518-9-ardb@kernel.org>
+Subject: [PATCH 05/33] efi/gop: Remove redundant current_fb_base
+Date:   Fri, 24 Apr 2020 15:05:03 +0200
+Message-Id: <20200424130531.30518-6-ardb@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20200424130531.30518-1-ardb@kernel.org>
 References: <20200424130531.30518-1-ardb@kernel.org>
@@ -59,69 +59,45 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Arvind Sankar <nivedita@alum.mit.edu>
 
-Move the loop to find a gop into its own function.
+current_fb_base isn't used for anything except assigning to fb_base if
+we locate a suitable gop.
 
 Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
-Link: https://lore.kernel.org/r/20200320020028.1936003-5-nivedita@alum.mit.edu
+Link: https://lore.kernel.org/r/20200320020028.1936003-2-nivedita@alum.mit.edu
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/firmware/efi/libstub/gop.c | 23 +++++++++++++++++------
- 1 file changed, 17 insertions(+), 6 deletions(-)
+ drivers/firmware/efi/libstub/gop.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
 
 diff --git a/drivers/firmware/efi/libstub/gop.c b/drivers/firmware/efi/libstub/gop.c
-index d692b8c65813..92abcf558845 100644
+index 55e6b3f286fe..f40d535dccb8 100644
 --- a/drivers/firmware/efi/libstub/gop.c
 +++ b/drivers/firmware/efi/libstub/gop.c
-@@ -85,19 +85,17 @@ setup_pixel_info(struct screen_info *si, u32 pixels_per_scan_line,
- 	}
- }
- 
--static efi_status_t setup_gop(struct screen_info *si, efi_guid_t *proto,
--			      unsigned long size, void **handles)
-+static efi_graphics_output_protocol_t *
-+find_gop(efi_guid_t *proto, unsigned long size, void **handles)
- {
- 	efi_graphics_output_protocol_t *gop, *first_gop;
- 	efi_graphics_output_protocol_mode_t *mode;
- 	efi_graphics_output_mode_info_t *info = NULL;
--	efi_physical_addr_t fb_base;
- 	efi_status_t status;
- 	efi_handle_t h;
- 	int i;
- 
- 	first_gop = NULL;
--	gop = NULL;
- 
- 	for_each_efi_handle(h, handles, size, i) {
+@@ -108,7 +108,6 @@ static efi_status_t setup_gop(struct screen_info *si, efi_guid_t *proto,
  		efi_guid_t conout_proto = EFI_CONSOLE_OUT_DEVICE_GUID;
-@@ -134,12 +132,25 @@ static efi_status_t setup_gop(struct screen_info *si, efi_guid_t *proto,
- 		}
- 	}
+ 		bool conout_found = false;
+ 		void *dummy = NULL;
+-		efi_physical_addr_t current_fb_base;
  
-+	return first_gop;
-+}
-+
-+static efi_status_t setup_gop(struct screen_info *si, efi_guid_t *proto,
-+			      unsigned long size, void **handles)
-+{
-+	efi_graphics_output_protocol_t *gop;
-+	efi_graphics_output_protocol_mode_t *mode;
-+	efi_graphics_output_mode_info_t *info = NULL;
-+	efi_physical_addr_t fb_base;
-+
-+	gop = find_gop(proto, size, handles);
-+
- 	/* Did we find any GOPs? */
--	if (!first_gop)
-+	if (!gop)
- 		return EFI_NOT_FOUND;
+ 		status = efi_bs_call(handle_protocol, h, proto, (void **)&gop);
+ 		if (status != EFI_SUCCESS)
+@@ -120,7 +119,6 @@ static efi_status_t setup_gop(struct screen_info *si, efi_guid_t *proto,
  
- 	/* EFI framebuffer */
--	mode = efi_table_attr(first_gop, mode);
-+	mode = efi_table_attr(gop, mode);
- 	info = efi_table_attr(mode, info);
+ 		mode = efi_table_attr(gop, mode);
+ 		info = efi_table_attr(mode, info);
+-		current_fb_base = efi_table_attr(mode, frame_buffer_base);
  
- 	si->orig_video_isVGA = VIDEO_TYPE_EFI;
+ 		if ((!first_gop || conout_found) &&
+ 		    info->pixel_format != PIXEL_BLT_ONLY) {
+@@ -136,7 +134,7 @@ static efi_status_t setup_gop(struct screen_info *si, efi_guid_t *proto,
+ 			pixel_format = info->pixel_format;
+ 			pixel_info = info->pixel_information;
+ 			pixels_per_scan_line = info->pixels_per_scan_line;
+-			fb_base = current_fb_base;
++			fb_base = efi_table_attr(mode, frame_buffer_base);
+ 
+ 			/*
+ 			 * Once we've found a GOP supporting ConOut,
 -- 
 2.17.1
 
