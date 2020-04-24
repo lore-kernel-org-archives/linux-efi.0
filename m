@@ -4,40 +4,40 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A202C54FCB
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AAF38C55191
 	for <linux-efi@archiver.kernel.org>; Fri, 24 Apr 2020 13:07:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3AB3120728
+	by mail.kernel.org (Postfix) with ESMTP id 8D1BF21655
 	for <linux-efi@archiver.kernel.org>; Fri, 24 Apr 2020 13:07:47 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=default; t=1587733667;
-	bh=3Fh3BffeAc7NkYh1mfmRJ9kkzBxnlWD78shHS+Df4II=;
+	bh=p+IQwNbfDeLJQR+77NgodSuCuaqd1Jnu5YGcIuDiIUQ=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=eGDhYyamQElSUQR6lXjYZd6xAxLtQahaMebs3C+iuFVB+ivlV73Vgz7OXO51i1BJf
-	 H0M7aIaT4liLpqDPjfd2clLvQ94aSVKoyKWmpCFk2rjm/ekaZjyJvjciyRt0Cj7GsW
-	 NC0p6Ugnc/njLSCM04Ok6nYRBzx9aHyt2o4qtkNE=
+	b=Fx7aA92JbLeOT0DKioyaBy5519tzTCebqcQBcjAU54kqsg8fRhVf/AWMBsV+gFSkP
+	 A+E/w40jgaZbJLEI8F7nd+R03uf9R96BiLDRdFdg8sBb7eUorXbKdqeS0fYTmLIUcg
+	 q8M3DMzxRMsRMcb2i7MjQXqc7gUDOGSPL/mZrfr8=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728244AbgDXNHI (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 24 Apr 2020 09:07:08 -0400
-Received: from mail.kernel.org ([198.145.29.99]:57752 "EHLO mail.kernel.org"
+        id S1727022AbgDXNHq (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 24 Apr 2020 09:07:46 -0400
+Received: from mail.kernel.org ([198.145.29.99]:57856 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728230AbgDXNHE (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 24 Apr 2020 09:07:04 -0400
+        id S1728245AbgDXNHJ (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 24 Apr 2020 09:07:09 -0400
 Received: from e123331-lin.home (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 8F55C20728;
-        Fri, 24 Apr 2020 13:07:02 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id D709721D7A;
+        Fri, 24 Apr 2020 13:07:06 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1587733624;
-        bh=3Fh3BffeAc7NkYh1mfmRJ9kkzBxnlWD78shHS+Df4II=;
+        s=default; t=1587733628;
+        bh=p+IQwNbfDeLJQR+77NgodSuCuaqd1Jnu5YGcIuDiIUQ=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=rI6WnrIRr/J9d5C0RJFP9SOZuTELgaxTmEfTG6iQizhWIBBxtCdvxFLMP02SqvyU4
-         6PBs14MEOzt0njqKX67itrSfDFEysotV8yDg327WmbJoN7/Jo30komyemNteGMkzs7
-         AAttOUCUlhdMWsdwjvp3+FRnqsv1tBc1LQmYGsv8=
+        b=cl805xhFzHKUAJmo20ZVqxtpOpmjyxSr8/AbZtPrexCrvqcdOyN3phpQpvhFvr9MW
+         DMJkpSOwmeqFl+fUO+h2y3uGVZ/QvcudwPyjqFbaobSExnfRDkV/wQBcwpTeNc5WLg
+         vUN44RDohp6J49E9u6A2yNLro2YJIndNA2Bb7MkQ=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
@@ -46,9 +46,9 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
         Atish Patra <atish.patra@wdc.com>,
         Palmer Dabbelt <palmerdabbelt@google.com>,
         Zou Wei <zou_wei@huawei.com>
-Subject: [PATCH 24/33] efi/libstub/arm64: Switch to ordinary page allocator for kernel image
-Date:   Fri, 24 Apr 2020 15:05:22 +0200
-Message-Id: <20200424130531.30518-25-ardb@kernel.org>
+Subject: [PATCH 26/33] efi/arm: Remove __efistub_global annotation
+Date:   Fri, 24 Apr 2020 15:05:24 +0200
+Message-Id: <20200424130531.30518-27-ardb@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20200424130531.30518-1-ardb@kernel.org>
 References: <20200424130531.30518-1-ardb@kernel.org>
@@ -57,36 +57,65 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-It is no longer necessary to locate the kernel as low as possible in
-physical memory, and so we can switch from efi_low_alloc() [which is
-a rather nasty concoction on top of GetMemoryMap()] to a new helper
-called efi_allocate_pages_aligned(), which simply rounds up the size
-to account for the alignment, and frees the misaligned pages again.
+From: Arvind Sankar <nivedita@alum.mit.edu>
 
-So considering that the kernel can live anywhere in the physical
-address space, as long as its alignment requirements are met, let's
-switch to efi_allocate_pages_aligned() to allocate the pages.
+Instead of using __efistub_global to force variables into the .data
+section, leave them in the .bss but pull the EFI stub's .bss section
+into .data in the linker script for the compressed kernel.
 
+Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
+Reviewed-by: Ard Biesheuvel <ardb@kernel.org>
+Link: https://lore.kernel.org/r/20200416151227.3360778-2-nivedita@alum.mit.edu
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/firmware/efi/libstub/arm64-stub.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ arch/arm/boot/compressed/vmlinux.lds.S | 2 +-
+ drivers/firmware/efi/libstub/Makefile  | 7 ++++---
+ drivers/firmware/efi/libstub/efistub.h | 2 +-
+ 3 files changed, 6 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/arm64-stub.c b/drivers/firmware/efi/libstub/arm64-stub.c
-index 6fc3bd9a56db..99b67e88a33b 100644
---- a/drivers/firmware/efi/libstub/arm64-stub.c
-+++ b/drivers/firmware/efi/libstub/arm64-stub.c
-@@ -98,8 +98,8 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
- 			return EFI_SUCCESS;
- 		}
+diff --git a/arch/arm/boot/compressed/vmlinux.lds.S b/arch/arm/boot/compressed/vmlinux.lds.S
+index b247f399de71..b6793c7932a9 100644
+--- a/arch/arm/boot/compressed/vmlinux.lds.S
++++ b/arch/arm/boot/compressed/vmlinux.lds.S
+@@ -78,7 +78,7 @@ SECTIONS
+      * The EFI stub always executes from RAM, and runs strictly before the
+      * decompressor, so we can make an exception for its r/w data, and keep it
+      */
+-    *(.data.efistub)
++    *(.data.efistub .bss.efistub)
+     __pecoff_data_end = .;
  
--		status = efi_low_alloc(*reserve_size,
--				       min_kimg_align, reserve_addr);
-+		status = efi_allocate_pages_aligned(*reserve_size, reserve_addr,
-+						    ULONG_MAX, min_kimg_align);
+     /*
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index 9a712a6e2f87..aa3ab9a4105e 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -101,8 +101,9 @@ quiet_cmd_stubcopy = STUBCPY $@
  
- 		if (status != EFI_SUCCESS) {
- 			pr_efi_err("Failed to relocate kernel\n");
+ #
+ # ARM discards the .data section because it disallows r/w data in the
+-# decompressor. So move our .data to .data.efistub, which is preserved
+-# explicitly by the decompressor linker script.
++# decompressor. So move our .data to .data.efistub and .bss to .bss.efistub,
++# which are preserved explicitly by the decompressor linker script.
+ #
+-STUBCOPY_FLAGS-$(CONFIG_ARM)	+= --rename-section .data=.data.efistub
++STUBCOPY_FLAGS-$(CONFIG_ARM)	+= --rename-section .data=.data.efistub	\
++				   --rename-section .bss=.bss.efistub,load,alloc
+ STUBCOPY_RELOC-$(CONFIG_ARM)	:= R_ARM_ABS
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index 2a0698d9dc78..96e25b17c88e 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -25,7 +25,7 @@
+ #define EFI_ALLOC_ALIGN		EFI_PAGE_SIZE
+ #endif
+ 
+-#if defined(CONFIG_ARM) || defined(CONFIG_X86)
++#if defined(CONFIG_X86)
+ #define __efistub_global	__section(.data)
+ #else
+ #define __efistub_global
 -- 
 2.17.1
 
