@@ -2,104 +2,196 @@ Return-Path: <SRS0=oqdq=6L=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5C400C54FD0
-	for <linux-efi@archiver.kernel.org>; Mon, 27 Apr 2020 06:52:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 46870C54FD0
+	for <linux-efi@archiver.kernel.org>; Mon, 27 Apr 2020 09:05:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 393FD206B9
-	for <linux-efi@archiver.kernel.org>; Mon, 27 Apr 2020 06:52:42 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1587970362;
-	bh=SXEGb6LTTKGu/qwb7zAbrCsuo/qhlGR1iqLf7e+m/4g=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=JQ552hdGqwtVoFVoWcT+jKbPXz8rvrWzKsAfhJTILqgT31QdjqlSQgCHhI8MhTTJ6
-	 WI1VLveZu2ZqlcSyGtAdOCZHlnveK2PEK33NvthjDcgDNnebK/zSPeqo2m/cS4CpGd
-	 ctIrV24N3ppmZpI591x3K2Ne9iio0JsSmQ29ciQ4=
+	by mail.kernel.org (Postfix) with ESMTP id 274772064A
+	for <linux-efi@archiver.kernel.org>; Mon, 27 Apr 2020 09:05:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726573AbgD0Gwl (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 27 Apr 2020 02:52:41 -0400
-Received: from mail.kernel.org ([198.145.29.99]:51110 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726246AbgD0Gwl (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 27 Apr 2020 02:52:41 -0400
-Received: from mail-io1-f53.google.com (mail-io1-f53.google.com [209.85.166.53])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id E2D38206B9;
-        Mon, 27 Apr 2020 06:52:40 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1587970361;
-        bh=SXEGb6LTTKGu/qwb7zAbrCsuo/qhlGR1iqLf7e+m/4g=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=I6W2zcpTcQQUBXpvQrLKVxXyAtKVPcshHgUOpviTXOZGsQ4Fllfwl2aPL6PyWM+6H
-         3iUInwn5KIi7ym1XJG6JgSYgRnYBWBqYf4ItC9qyPFPSzI/rYA3XVAfuDG06BvmmxL
-         spKLWGKyQ6pR0kkeL3Q7Jdm5b5ygjwaOpy3MO9Nk=
-Received: by mail-io1-f53.google.com with SMTP id o127so17674487iof.0;
-        Sun, 26 Apr 2020 23:52:40 -0700 (PDT)
-X-Gm-Message-State: AGi0PubNY8enL+EYlLKDlt2IQ87aOfsVpOgWGhTCtIIGkk/lKBlyqVXt
-        3oboLL4ClXtezrnQBd2l+FLDAa9+LlilzJ/bGe8=
-X-Google-Smtp-Source: APiQypLYfh2DXGdQLTmg+XU3QUKt5FEeozkZZy28VGrW7SVPCC2k5PiT5Q4wKEtoGybgbDAPe4Cs1Qr/zryB7LGnZ3E=
-X-Received: by 2002:a6b:ef03:: with SMTP id k3mr19662018ioh.203.1587970360390;
- Sun, 26 Apr 2020 23:52:40 -0700 (PDT)
+        id S1726700AbgD0JFQ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 27 Apr 2020 05:05:16 -0400
+Received: from mo-csw-fb1116.securemx.jp ([210.130.202.175]:36920 "EHLO
+        mo-csw-fb.securemx.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726183AbgD0JFQ (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 27 Apr 2020 05:05:16 -0400
+X-Greylist: delayed 711 seconds by postgrey-1.27 at vger.kernel.org; Mon, 27 Apr 2020 05:05:14 EDT
+Received: by mo-csw-fb.securemx.jp (mx-mo-csw-fb1116) id 03R8rOaE008423; Mon, 27 Apr 2020 17:53:24 +0900
+Received: by mo-csw.securemx.jp (mx-mo-csw1114) id 03R8qwAY012935; Mon, 27 Apr 2020 17:52:58 +0900
+X-Iguazu-Qid: 2wHHmtTglbDiQFar0U
+X-Iguazu-QSIG: v=2; s=0; t=1587977578; q=2wHHmtTglbDiQFar0U; m=xkIQ5G8uB+mBuk2KpbYQ9WX+PVEjESxzVhAAS6YBJ14=
+Received: from imx12.toshiba.co.jp (imx12.toshiba.co.jp [61.202.160.132])
+        by relay.securemx.jp (mx-mr1111) id 03R8qucT003817;
+        Mon, 27 Apr 2020 17:52:56 +0900
+Received: from enc02.toshiba.co.jp ([61.202.160.51])
+        by imx12.toshiba.co.jp  with ESMTP id 03R8quBJ001287;
+        Mon, 27 Apr 2020 17:52:56 +0900 (JST)
+Received: from hop101.toshiba.co.jp ([133.199.85.107])
+        by enc02.toshiba.co.jp  with ESMTP id 03R8qtgc029882;
+        Mon, 27 Apr 2020 17:52:55 +0900
+From:   Punit Agrawal <punit1.agrawal@toshiba.co.jp>
+To:     Ard Biesheuvel <ardb@kernel.org>
+Cc:     linux-kernel@vger.kernel.org,
+        Punit Agrawal <punit1.agrawal@toshiba.co.jp>,
+        "Rafael J. Wysocki" <rjw@rjwysocki.net>,
+        Borislav Petkov <bp@alien8.de>,
+        James Morse <james.morse@arm.com>, linux-acpi@vger.kernel.org,
+        linux-efi@vger.kernel.org
+Subject: [PATCH] efi: cper: Add support for printing Firmware Error Record Reference
+Date:   Mon, 27 Apr 2020 17:52:42 +0900
+X-TSB-HOP: ON
+Message-Id: <20200427085242.2380614-1-punit1.agrawal@toshiba.co.jp>
+X-Mailer: git-send-email 2.26.2
 MIME-Version: 1.0
-References: <20200426194946.112768-1-xypron.glpk@gmx.de>
-In-Reply-To: <20200426194946.112768-1-xypron.glpk@gmx.de>
-From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Mon, 27 Apr 2020 08:52:29 +0200
-X-Gmail-Original-Message-ID: <CAMj1kXHo+utD4Y2BT0kcefEtYUKZsEWvqgzMNcJy0GE3Cw3jGA@mail.gmail.com>
-Message-ID: <CAMj1kXHo+utD4Y2BT0kcefEtYUKZsEWvqgzMNcJy0GE3Cw3jGA@mail.gmail.com>
-Subject: Re: [PATCH 1/1] efi/libstub: setup_graphics() do not return random data
-To:     Heinrich Schuchardt <xypron.glpk@gmx.de>
-Cc:     Ingo Molnar <mingo@kernel.org>,
-        linux-efi <linux-efi@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Sun, 26 Apr 2020 at 21:49, Heinrich Schuchardt <xypron.glpk@gmx.de> wrote:
->
-> Currently setup_graphics() ignores the return value of efi_setup_gop(). As
-> AllocatePool() does not zero out memory the screen information table will
-> contain random data in this case.
->
-> We should free the screen information table if efi_setup_gop() returns an
-> error code.
->
-> Signed-off-by: Heinrich Schuchardt <xypron.glpk@gmx.de>
+While debugging a boot failure, the following unknown error record was
+seen in the boot logs.
 
-Thanks Heinrich
+    <...>
+    BERT: Error records from previous boot:
+    [Hardware Error]: event severity: fatal
+    [Hardware Error]:  Error 0, type: fatal
+    [Hardware Error]:   section type: unknown, 81212a96-09ed-4996-9471-8d729c8e69ed
+    [Hardware Error]:   section length: 0x290
+    [Hardware Error]:   00000000: 00000001 00000000 00000000 00020002  ................
+    [Hardware Error]:   00000010: 00020002 0000001f 00000320 00000000  ........ .......
+    [Hardware Error]:   00000020: 00000000 00000000 00000000 00000000  ................
+    [Hardware Error]:   00000030: 00000000 00000000 00000000 00000000  ................
+    <...>
 
-I will take this as a fix
+On further investigation, it was found that the error record with
+UUID (81212a96-09ed-4996-9471-8d729c8e69ed) has been defined in the
+UEFI Specification at least since v2.4 and has recently had additional
+fields defined in v2.7 Section N.2.10 Firmware Error Record Reference.
 
+Add support for parsing and printing the defined fields to give users
+a chance to figure out what's went wrong.
 
-> ---
->  drivers/firmware/efi/libstub/efi-stub.c | 6 +++++-
->  1 file changed, 5 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/firmware/efi/libstub/efi-stub.c b/drivers/firmware/efi/libstub/efi-stub.c
-> index ee225b323687..60377e5ceab3 100644
-> --- a/drivers/firmware/efi/libstub/efi-stub.c
-> +++ b/drivers/firmware/efi/libstub/efi-stub.c
-> @@ -55,7 +55,11 @@ static struct screen_info *setup_graphics(void)
->                 si = alloc_screen_info();
->                 if (!si)
->                         return NULL;
-> -               efi_setup_gop(si, &gop_proto, size);
-> +               status = efi_setup_gop(si, &gop_proto, size);
-> +               if (status != EFI_SUCCESS) {
-> +                       free_screen_info(si);
-> +                       return NULL;
-> +               }
->         }
->         return si;
->  }
-> --
-> 2.26.2
->
+Signed-off-by: Punit Agrawal <punit1.agrawal@toshiba.co.jp>
+Cc: Ard Biesheuvel <ardb@kernel.org>
+Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: James Morse <james.morse@arm.com>
+Cc: linux-acpi@vger.kernel.org
+Cc: linux-efi@vger.kernel.org
+---
+
+Hi,
+
+I ran into this while debugging a boot failure on an end product
+device. Parsing known record types can help the user narrow down the
+investigation quickly to the failing components - firmware error in
+this case.
+
+It would be good to support the record types specified in the
+standard.
+
+Feedback welcome.
+
+Thanks,
+Punit
+---
+ drivers/firmware/efi/cper.c | 49 +++++++++++++++++++++++++++++++++++++
+ include/linux/cper.h        | 11 +++++++++
+ 2 files changed, 60 insertions(+)
+
+diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+index 9d2512913d25..153b95257e23 100644
+--- a/drivers/firmware/efi/cper.c
++++ b/drivers/firmware/efi/cper.c
+@@ -407,6 +407,46 @@ static void cper_print_pcie(const char *pfx, const struct cper_sec_pcie *pcie,
+ 	}
+ }
+ 
++static const char * const fw_err_rec_type_strs[] = {
++	"IPF SAL Error Record",
++	"SOC Firmware Error Record Type1 (Legacy CrashLog Support)",
++	"SOC Firmware Error Record Type2",
++};
++
++static void cper_print_fw_err(const char *pfx,
++			      struct acpi_hest_generic_data *gdata,
++			      const struct cper_sec_fw_err_rec_ref *fw_err)
++{
++	void *buf = acpi_hest_get_payload(gdata);
++	u32 offset, length = gdata->error_data_length;
++
++	printk("%s""Firmware Error Record Type: %s\n", pfx,
++	       fw_err->record_type < ARRAY_SIZE(fw_err_rec_type_strs) ?
++	       fw_err_rec_type_strs[fw_err->record_type] : "unknown");
++
++	/* Record Type based on UEFI 2.7 */
++	if (fw_err->revision == 0)
++		printk("%s""Record Identifier: %08llx\n", pfx,
++		       fw_err->record_identifier);
++	else if (fw_err->revision == 2)
++		printk("%s""Record Identifier: %pUl\n", pfx,
++		       &fw_err->record_identifier_guid);
++
++	if (fw_err->revision == 0)
++		offset = offsetof(struct cper_sec_fw_err_rec_ref,
++				  record_identifier_guid);
++	else if (fw_err->revision == 1)
++		offset = offsetof(struct cper_sec_fw_err_rec_ref,
++				  record_identifier);
++	else
++		offset = sizeof(*fw_err);
++
++	buf += offset;
++	length -= offset;
++
++	print_hex_dump(pfx, "", DUMP_PREFIX_OFFSET, 16, 4, buf, length, true);
++}
++
+ static void cper_print_tstamp(const char *pfx,
+ 				   struct acpi_hest_generic_data_v300 *gdata)
+ {
+@@ -494,6 +534,15 @@ cper_estatus_print_section(const char *pfx, struct acpi_hest_generic_data *gdata
+ 		else
+ 			goto err_section_too_small;
+ #endif
++	} else if (guid_equal(sec_type, &CPER_SEC_FW_ERR_REC_REF)) {
++		struct cper_sec_fw_err_rec_ref *fw_err = acpi_hest_get_payload(gdata);
++
++		printk("%ssection_type: Firmware Error Record Reference\n",
++		       newpfx);
++		if (gdata->error_data_length >= sizeof(*fw_err))
++			cper_print_fw_err(newpfx, gdata, fw_err);
++		else
++			goto err_section_too_small;
+ 	} else {
+ 		const void *err = acpi_hest_get_payload(gdata);
+ 
+diff --git a/include/linux/cper.h b/include/linux/cper.h
+index 4f005d95ce88..5cb57e69df70 100644
+--- a/include/linux/cper.h
++++ b/include/linux/cper.h
+@@ -521,6 +521,17 @@ struct cper_sec_pcie {
+ 	u8	aer_info[96];
+ };
+ 
++/* Firmware Error Record Reference, UEFI v2.7 sec N.2.10  */
++struct cper_sec_fw_err_rec_ref {
++	u8 record_type;
++	union {
++		u8 revision;
++		u8 reserved[7];
++	};
++	u64 record_identifier;
++	guid_t record_identifier_guid;
++};
++
+ /* Reset to default packing */
+ #pragma pack()
+ 
+-- 
+2.26.2
+
