@@ -6,47 +6,47 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 45379C83006
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 72D77C83004
 	for <linux-efi@archiver.kernel.org>; Wed, 29 Apr 2020 17:41:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2D59720757
+	by mail.kernel.org (Postfix) with ESMTP id 5D99520B80
 	for <linux-efi@archiver.kernel.org>; Wed, 29 Apr 2020 17:41:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727784AbgD2Rlf (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 29 Apr 2020 13:41:35 -0400
-Received: from mail-qv1-f67.google.com ([209.85.219.67]:46126 "EHLO
-        mail-qv1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727812AbgD2Rlb (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 29 Apr 2020 13:41:31 -0400
-Received: by mail-qv1-f67.google.com with SMTP id 59so1544422qva.13;
-        Wed, 29 Apr 2020 10:41:30 -0700 (PDT)
+        id S1727815AbgD2Rla (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 29 Apr 2020 13:41:30 -0400
+Received: from mail-qk1-f195.google.com ([209.85.222.195]:44266 "EHLO
+        mail-qk1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727784AbgD2Rl3 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 29 Apr 2020 13:41:29 -0400
+Received: by mail-qk1-f195.google.com with SMTP id h124so2846984qke.11;
+        Wed, 29 Apr 2020 10:41:28 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=/ripA1cv3wgZlf0slliRjLteC8ID9H9NjTXvUNwlSmw=;
-        b=Kyqu9KjzelJrKSKUBBoYDwMJDOe5Mj3X02OwbB93F5Fkc+syyboPJ9q4gRf+NRg1lU
-         +rPwcFeVGKpzbewV6O3n4MufQD2WUy/DOXBb3HwuLfZROsAvrDX7KtRqXC4ZZsosnrYP
-         +av6MoYLzsFzaDbyc0THxc63lEvvlvA5c2qMYb48YTd3t9vfoDWok9uU6SzAgnCX4h71
-         DHmLxRi+3W2RJkbp83AYJpK4KYy6myl4RDCCibk5dxL1+ZL4aK6cEi1gphzg4PZpBNLy
-         4PEuPaHshZrfYgi1IsnJLHz5GeddN1m2N9YWgUNcn2gSZIXe9g/z4MLIQqDGgdh8rj2Q
-         8J8Q==
-X-Gm-Message-State: AGi0PuaMhRWA3gFVbOloo1eCC36ZqpXoTpRpJO2ucfB/yNsqRC6lphlG
-        wuc1vusewFEorHyovzfNswVH/8sN/mA=
-X-Google-Smtp-Source: APiQypLd1+gq1CorW1pD17UsROfO8KWa/WyQ4fPOauRmaeHs92LijWzsyPo6W7jgeHDt2nzBAewvOg==
-X-Received: by 2002:a0c:f34b:: with SMTP id e11mr33725259qvm.76.1588182090079;
-        Wed, 29 Apr 2020 10:41:30 -0700 (PDT)
+        bh=17khpAR6nkDRxD5BLjB1TLshrcrm8CQXqW4S+007WC0=;
+        b=e4hkMRX36wCSBXDbOwrAHlQ0+3+UzKDaDoQlDEal0TDtXSL2ktd/gwMf2tOa+BKvq2
+         AnNrtXk1r3uDJeivjypEbnVKF6jDrt8fjskJQaa9MjkqBeauKjFT5GRFrK4ySW3BPKLB
+         BXXTOzvTnMqU7WCcm8ilIm/gozPrOo7kyD0PS9aug3UZqqv4x7Ftk8UXfhNH+1v09Aa7
+         +8cVI42w1P/wdm32OaV4De1xv8Da8Sqiy3rS2BqFSuhNeyQnEcE26mk6U+QvY4oU2y16
+         tcyLfoQAWKJQTkightZZfLavrwCgt/qkk8Me4e/O69Km5JlW9m3KQ+D2JANNW93Yrcft
+         Rg8Q==
+X-Gm-Message-State: AGi0PubnZPMcdCMsFG8pLorJlRuQ7GjWvI4EuqTev5Db+TTxDwGALa+z
+        Eb0JVMhUcKvL2fQhaPyNejFXJtpE0pY=
+X-Google-Smtp-Source: APiQypId6FRdVQ5rgZXwMpyyulkPIOzJTkZLhESAX7kwc7wuAwALRTKjXYLTR2upv59PaLhOzDs7yw==
+X-Received: by 2002:a37:ad0d:: with SMTP id f13mr13462804qkm.7.1588182087926;
+        Wed, 29 Apr 2020 10:41:27 -0700 (PDT)
 Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
-        by smtp.gmail.com with ESMTPSA id z1sm14766448qkz.3.2020.04.29.10.41.29
+        by smtp.gmail.com with ESMTPSA id z1sm14766448qkz.3.2020.04.29.10.41.27
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 29 Apr 2020 10:41:29 -0700 (PDT)
+        Wed, 29 Apr 2020 10:41:27 -0700 (PDT)
 From:   Arvind Sankar <nivedita@alum.mit.edu>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     linux-efi@vger.kernel.org, x86@kernel.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH 10/10] efi/libstub: Check return value of efi_parse_options
-Date:   Wed, 29 Apr 2020 13:41:20 -0400
-Message-Id: <20200429174120.1497212-12-nivedita@alum.mit.edu>
+Subject: [PATCH 07/10] efi/libstub: Unify initrd loading across architectures
+Date:   Wed, 29 Apr 2020 13:41:17 -0400
+Message-Id: <20200429174120.1497212-9-nivedita@alum.mit.edu>
 X-Mailer: git-send-email 2.26.2
 In-Reply-To: <20200429174120.1497212-1-nivedita@alum.mit.edu>
 References: <20200429174120.1497212-1-nivedita@alum.mit.edu>
@@ -57,72 +57,163 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-efi_parse_options can fail if it is unable to allocate space for a copy
-of the command line. Check the return value to make sure it succeeded.
+Factor out the initrd loading into a common function that can be called
+both from the generic efi-stub.c and the x86-specific x86-stub.c.
 
 Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
 ---
- drivers/firmware/efi/libstub/efi-stub.c | 18 ++++++++++++++----
- drivers/firmware/efi/libstub/x86-stub.c | 12 ++++++++++--
- 2 files changed, 24 insertions(+), 6 deletions(-)
+ .../firmware/efi/libstub/efi-stub-helper.c    | 46 +++++++++++++++++--
+ drivers/firmware/efi/libstub/efi-stub.c       | 12 +----
+ drivers/firmware/efi/libstub/efistub.h        | 21 ++-------
+ drivers/firmware/efi/libstub/x86-stub.c       | 13 +-----
+ 4 files changed, 52 insertions(+), 40 deletions(-)
 
+diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+index 1c92ac231f94..2c0c2c34b4cc 100644
+--- a/drivers/firmware/efi/libstub/efi-stub-helper.c
++++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+@@ -331,6 +331,7 @@ static const struct {
+  *		%EFI_OUT_OF_RESOURCES if memory allocation failed
+  *		%EFI_LOAD_ERROR in all other cases
+  */
++static
+ efi_status_t efi_load_initrd_dev_path(unsigned long *load_addr,
+ 				      unsigned long *load_size,
+ 				      unsigned long max)
+@@ -343,9 +344,6 @@ efi_status_t efi_load_initrd_dev_path(unsigned long *load_addr,
+ 	efi_handle_t handle;
+ 	efi_status_t status;
+ 
+-	if (!load_addr || !load_size)
+-		return EFI_INVALID_PARAMETER;
+-
+ 	dp = (efi_device_path_protocol_t *)&initrd_dev_path;
+ 	status = efi_bs_call(locate_device_path, &lf2_proto_guid, &dp, &handle);
+ 	if (status != EFI_SUCCESS)
+@@ -375,3 +373,45 @@ efi_status_t efi_load_initrd_dev_path(unsigned long *load_addr,
+ 	*load_size = initrd_size;
+ 	return EFI_SUCCESS;
+ }
++
++static
++efi_status_t efi_load_initrd_cmdline(efi_loaded_image_t *image,
++				     unsigned long *load_addr,
++				     unsigned long *load_size,
++				     unsigned long soft_limit,
++				     unsigned long hard_limit)
++{
++	if (!IS_ENABLED(CONFIG_EFI_GENERIC_STUB_INITRD_CMDLINE_LOADER) ||
++	    (IS_ENABLED(CONFIG_X86) && (!efi_is_native() || image == NULL))) {
++		*load_addr = *load_size = 0;
++		return EFI_SUCCESS;
++	}
++
++	return handle_cmdline_files(image, L"initrd=", sizeof(L"initrd=") - 2,
++				    soft_limit, hard_limit,
++				    load_addr, load_size);
++}
++
++efi_status_t efi_load_initrd(efi_loaded_image_t *image,
++			     unsigned long *load_addr,
++			     unsigned long *load_size,
++			     unsigned long soft_limit,
++			     unsigned long hard_limit)
++{
++	efi_status_t status;
++
++	if (!load_addr || !load_size)
++		return EFI_INVALID_PARAMETER;
++
++	status = efi_load_initrd_dev_path(load_addr, load_size, hard_limit);
++	if (status == EFI_SUCCESS) {
++		pr_efi("Loaded initrd from LINUX_EFI_INITRD_MEDIA_GUID device path\n");
++	} else if (status == EFI_NOT_FOUND) {
++		status = efi_load_initrd_cmdline(image, load_addr, load_size,
++						 soft_limit, hard_limit);
++		if (status == EFI_SUCCESS && *load_size > 0)
++			pr_efi("Loaded initrd from command line option\n");
++	}
++
++	return status;
++}
 diff --git a/drivers/firmware/efi/libstub/efi-stub.c b/drivers/firmware/efi/libstub/efi-stub.c
-index 930302d9415a..a4399537b4e6 100644
+index ee225b323687..d8f24f5c91bd 100644
 --- a/drivers/firmware/efi/libstub/efi-stub.c
 +++ b/drivers/firmware/efi/libstub/efi-stub.c
-@@ -207,11 +207,21 @@ efi_status_t efi_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg)
+@@ -265,16 +265,8 @@ efi_status_t efi_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg)
  
- 	if (IS_ENABLED(CONFIG_CMDLINE_EXTEND) ||
- 	    IS_ENABLED(CONFIG_CMDLINE_FORCE) ||
--	    cmdline_size == 0)
--		efi_parse_options(CONFIG_CMDLINE);
-+	    cmdline_size == 0) {
-+		status = efi_parse_options(CONFIG_CMDLINE);
-+		if (status != EFI_SUCCESS) {
-+			pr_efi_err("Failed to parse options\n");
-+			goto fail_free_cmdline;
-+		}
-+	}
+ 	if (!efi_noinitrd) {
+ 		max_addr = efi_get_max_initrd_addr(dram_base, image_addr);
+-		status = efi_load_initrd_dev_path(&initrd_addr, &initrd_size,
+-						  max_addr);
+-		if (status == EFI_SUCCESS) {
+-			pr_efi("Loaded initrd from LINUX_EFI_INITRD_MEDIA_GUID device path\n");
+-		} else if (status == EFI_NOT_FOUND) {
+-			status = efi_load_initrd(image, &initrd_addr, &initrd_size,
+-						 ULONG_MAX, max_addr);
+-			if (status == EFI_SUCCESS && initrd_size > 0)
+-				pr_efi("Loaded initrd from command line option\n");
+-		}
++		status = efi_load_initrd(image, &initrd_addr, &initrd_size,
++					 ULONG_MAX, max_addr);
+ 		if (status != EFI_SUCCESS)
+ 			pr_efi_err("Failed to load initrd!\n");
+ 	}
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index e8aa70ba08d5..dfdd7954bf58 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -677,21 +677,10 @@ static inline efi_status_t efi_load_dtb(efi_loaded_image_t *image,
+ 				    ULONG_MAX, ULONG_MAX, load_addr, load_size);
+ }
  
--	if (!IS_ENABLED(CONFIG_CMDLINE_FORCE) && cmdline_size > 0)
--		efi_parse_options(cmdline_ptr);
-+	if (!IS_ENABLED(CONFIG_CMDLINE_FORCE) && cmdline_size > 0) {
-+		status = efi_parse_options(cmdline_ptr);
-+		if (status != EFI_SUCCESS) {
-+			pr_efi_err("Failed to parse options\n");
-+			goto fail_free_cmdline;
-+		}
-+	}
+-static inline efi_status_t efi_load_initrd(efi_loaded_image_t *image,
+-					   unsigned long *load_addr,
+-					   unsigned long *load_size,
+-					   unsigned long soft_limit,
+-					   unsigned long hard_limit)
+-{
+-	if (!IS_ENABLED(CONFIG_EFI_GENERIC_STUB_INITRD_CMDLINE_LOADER))
+-		return EFI_SUCCESS;
+-
+-	return handle_cmdline_files(image, L"initrd=", sizeof(L"initrd=") - 2,
+-				    soft_limit, hard_limit, load_addr, load_size);
+-}
+-
+-efi_status_t efi_load_initrd_dev_path(unsigned long *load_addr,
+-				      unsigned long *load_size,
+-				      unsigned long max);
++efi_status_t efi_load_initrd(efi_loaded_image_t *image,
++			     unsigned long *load_addr,
++			     unsigned long *load_size,
++			     unsigned long soft_limit,
++			     unsigned long hard_limit);
  
- 	pr_efi("Booting Linux Kernel...\n");
- 
+ #endif
 diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index 0faba30d6406..ca549f26f45d 100644
+index ee4241df4f29..1d3f94f1dafa 100644
 --- a/drivers/firmware/efi/libstub/x86-stub.c
 +++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -739,12 +739,20 @@ unsigned long efi_main(efi_handle_t handle,
- 	}
+@@ -755,17 +755,8 @@ unsigned long efi_main(efi_handle_t handle,
+ 	if (!efi_noinitrd) {
+ 		unsigned long addr, size;
  
- #ifdef CONFIG_CMDLINE_BOOL
--	efi_parse_options(CONFIG_CMDLINE);
-+	status = efi_parse_options(CONFIG_CMDLINE);
-+	if (status != EFI_SUCCESS) {
-+		pr_efi_err("Failed to parse options\n");
-+		goto fail;
-+	}
- #endif
- 	if (!IS_ENABLED(CONFIG_CMDLINE_OVERRIDE)) {
- 		unsigned long cmdline_paddr = ((u64)hdr->cmd_line_ptr |
- 					       ((u64)boot_params->ext_cmd_line_ptr << 32));
--		efi_parse_options((char *)cmdline_paddr);
-+		status = efi_parse_options((char *)cmdline_paddr);
-+		if (status != EFI_SUCCESS) {
-+			pr_efi_err("Failed to parse options\n");
-+			goto fail;
-+		}
- 	}
+-		status = efi_load_initrd_dev_path(&addr, &size, ULONG_MAX);
+-		if (status == EFI_NOT_FOUND) {
+-			if (efi_is_native() && image != NULL) {
+-				status = efi_load_initrd(image, &addr, &size,
+-							 hdr->initrd_addr_max,
+-							 ULONG_MAX);
+-			} else {
+-				addr = size = 0;
+-				status = EFI_SUCCESS;
+-			}
+-		}
++		status = efi_load_initrd(image, &addr, &size,
++					 hdr->initrd_addr_max, ULONG_MAX);
  
- 	/*
+ 		if (status != EFI_SUCCESS) {
+ 			pr_efi_err("Failed to load initrd!\n");
 -- 
 2.26.2
 
