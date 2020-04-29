@@ -4,49 +4,49 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D1E3AC83000
-	for <linux-efi@archiver.kernel.org>; Wed, 29 Apr 2020 17:41:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 45379C83006
+	for <linux-efi@archiver.kernel.org>; Wed, 29 Apr 2020 17:41:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B890920BED
-	for <linux-efi@archiver.kernel.org>; Wed, 29 Apr 2020 17:41:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2D59720757
+	for <linux-efi@archiver.kernel.org>; Wed, 29 Apr 2020 17:41:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727122AbgD2Rl0 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 29 Apr 2020 13:41:26 -0400
-Received: from mail-qk1-f193.google.com ([209.85.222.193]:46737 "EHLO
-        mail-qk1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727106AbgD2RlZ (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 29 Apr 2020 13:41:25 -0400
-Received: by mail-qk1-f193.google.com with SMTP id g74so2842913qke.13;
-        Wed, 29 Apr 2020 10:41:25 -0700 (PDT)
+        id S1727784AbgD2Rlf (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 29 Apr 2020 13:41:35 -0400
+Received: from mail-qv1-f67.google.com ([209.85.219.67]:46126 "EHLO
+        mail-qv1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727812AbgD2Rlb (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 29 Apr 2020 13:41:31 -0400
+Received: by mail-qv1-f67.google.com with SMTP id 59so1544422qva.13;
+        Wed, 29 Apr 2020 10:41:30 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=esudLbF50xrd3X4yxmF75Z7c/P/j5/QO+86gC+Ihm+I=;
-        b=eUPSb8OFFq2IV5RKikfia5EhsCnYUn92dttz/3vF4dTo0UPhO4jAdIaEv/h+EqBdpE
-         YGJudFBcPqc59oHVCxpNbFgKtN7aIJbJtD/QHDjxRqljfVGkuw/NCEVDChjKwl0Rbz/k
-         p8Sje/A1dcpTz6feGCwpROBy/QqeYGdDVQy7zc12vs3Aif4t4k+IdGPt/NRf1JLOQtI4
-         TGnpBg/z/nHVjwNWJzy0B6x5rHtisJ78L/XZ3VJ1fTJtig2x3yFBNnqHviBAdX8+51kV
-         8/mT8ezXfg6+biDNGBY67X2/i9A+tD+YQC4r05ufeP+x50Kwup18VKACXOB3rKkt8+gI
-         Qutg==
-X-Gm-Message-State: AGi0PuZ4ROJrGYY0wl6PffYdZthSRILzgHG7KlwlOl6j1oBdhRnQyzMB
-        P+cu8F0L8ddJCur9Ev3BsIxfBjVImyM=
-X-Google-Smtp-Source: APiQypInkqTX0HfGThjHulH7Fu43Los2Js/u4CzOAROOk1tAxlCH2E1pnmDqUe3E0o0i+/k5rUsQ3A==
-X-Received: by 2002:ae9:ed04:: with SMTP id c4mr35152020qkg.367.1588182084734;
-        Wed, 29 Apr 2020 10:41:24 -0700 (PDT)
+        bh=/ripA1cv3wgZlf0slliRjLteC8ID9H9NjTXvUNwlSmw=;
+        b=Kyqu9KjzelJrKSKUBBoYDwMJDOe5Mj3X02OwbB93F5Fkc+syyboPJ9q4gRf+NRg1lU
+         +rPwcFeVGKpzbewV6O3n4MufQD2WUy/DOXBb3HwuLfZROsAvrDX7KtRqXC4ZZsosnrYP
+         +av6MoYLzsFzaDbyc0THxc63lEvvlvA5c2qMYb48YTd3t9vfoDWok9uU6SzAgnCX4h71
+         DHmLxRi+3W2RJkbp83AYJpK4KYy6myl4RDCCibk5dxL1+ZL4aK6cEi1gphzg4PZpBNLy
+         4PEuPaHshZrfYgi1IsnJLHz5GeddN1m2N9YWgUNcn2gSZIXe9g/z4MLIQqDGgdh8rj2Q
+         8J8Q==
+X-Gm-Message-State: AGi0PuaMhRWA3gFVbOloo1eCC36ZqpXoTpRpJO2ucfB/yNsqRC6lphlG
+        wuc1vusewFEorHyovzfNswVH/8sN/mA=
+X-Google-Smtp-Source: APiQypLd1+gq1CorW1pD17UsROfO8KWa/WyQ4fPOauRmaeHs92LijWzsyPo6W7jgeHDt2nzBAewvOg==
+X-Received: by 2002:a0c:f34b:: with SMTP id e11mr33725259qvm.76.1588182090079;
+        Wed, 29 Apr 2020 10:41:30 -0700 (PDT)
 Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
-        by smtp.gmail.com with ESMTPSA id z1sm14766448qkz.3.2020.04.29.10.41.24
+        by smtp.gmail.com with ESMTPSA id z1sm14766448qkz.3.2020.04.29.10.41.29
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 29 Apr 2020 10:41:24 -0700 (PDT)
+        Wed, 29 Apr 2020 10:41:29 -0700 (PDT)
 From:   Arvind Sankar <nivedita@alum.mit.edu>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     linux-efi@vger.kernel.org, x86@kernel.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH 03/10] efi/x86: Use pr_efi_err for error messages
-Date:   Wed, 29 Apr 2020 13:41:13 -0400
-Message-Id: <20200429174120.1497212-5-nivedita@alum.mit.edu>
+Subject: [PATCH 10/10] efi/libstub: Check return value of efi_parse_options
+Date:   Wed, 29 Apr 2020 13:41:20 -0400
+Message-Id: <20200429174120.1497212-12-nivedita@alum.mit.edu>
 X-Mailer: git-send-email 2.26.2
 In-Reply-To: <20200429174120.1497212-1-nivedita@alum.mit.edu>
 References: <20200429174120.1497212-1-nivedita@alum.mit.edu>
@@ -57,123 +57,72 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Use pr_efi_err instead of bare efi_printk for error messages.
+efi_parse_options can fail if it is unable to allocate space for a copy
+of the command line. Check the return value to make sure it succeeded.
 
 Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
 ---
- drivers/firmware/efi/libstub/x86-stub.c | 24 ++++++++++++------------
- 1 file changed, 12 insertions(+), 12 deletions(-)
+ drivers/firmware/efi/libstub/efi-stub.c | 18 ++++++++++++++----
+ drivers/firmware/efi/libstub/x86-stub.c | 12 ++++++++++--
+ 2 files changed, 24 insertions(+), 6 deletions(-)
 
+diff --git a/drivers/firmware/efi/libstub/efi-stub.c b/drivers/firmware/efi/libstub/efi-stub.c
+index 930302d9415a..a4399537b4e6 100644
+--- a/drivers/firmware/efi/libstub/efi-stub.c
++++ b/drivers/firmware/efi/libstub/efi-stub.c
+@@ -207,11 +207,21 @@ efi_status_t efi_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg)
+ 
+ 	if (IS_ENABLED(CONFIG_CMDLINE_EXTEND) ||
+ 	    IS_ENABLED(CONFIG_CMDLINE_FORCE) ||
+-	    cmdline_size == 0)
+-		efi_parse_options(CONFIG_CMDLINE);
++	    cmdline_size == 0) {
++		status = efi_parse_options(CONFIG_CMDLINE);
++		if (status != EFI_SUCCESS) {
++			pr_efi_err("Failed to parse options\n");
++			goto fail_free_cmdline;
++		}
++	}
+ 
+-	if (!IS_ENABLED(CONFIG_CMDLINE_FORCE) && cmdline_size > 0)
+-		efi_parse_options(cmdline_ptr);
++	if (!IS_ENABLED(CONFIG_CMDLINE_FORCE) && cmdline_size > 0) {
++		status = efi_parse_options(cmdline_ptr);
++		if (status != EFI_SUCCESS) {
++			pr_efi_err("Failed to parse options\n");
++			goto fail_free_cmdline;
++		}
++	}
+ 
+ 	pr_efi("Booting Linux Kernel...\n");
+ 
 diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index 677b5a1e0543..933205772d8c 100644
+index 0faba30d6406..ca549f26f45d 100644
 --- a/drivers/firmware/efi/libstub/x86-stub.c
 +++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -49,7 +49,7 @@ preserve_pci_rom_image(efi_pci_io_protocol_t *pci, struct pci_setup_rom **__rom)
- 	status = efi_bs_call(allocate_pool, EFI_LOADER_DATA, size,
- 			     (void **)&rom);
- 	if (status != EFI_SUCCESS) {
--		efi_printk("Failed to allocate memory for 'rom'\n");
-+		pr_efi_err("Failed to allocate memory for 'rom'\n");
- 		return status;
+@@ -739,12 +739,20 @@ unsigned long efi_main(efi_handle_t handle,
  	}
  
-@@ -65,7 +65,7 @@ preserve_pci_rom_image(efi_pci_io_protocol_t *pci, struct pci_setup_rom **__rom)
- 				PCI_VENDOR_ID, 1, &rom->vendor);
- 
- 	if (status != EFI_SUCCESS) {
--		efi_printk("Failed to read rom->vendor\n");
-+		pr_efi_err("Failed to read rom->vendor\n");
- 		goto free_struct;
+ #ifdef CONFIG_CMDLINE_BOOL
+-	efi_parse_options(CONFIG_CMDLINE);
++	status = efi_parse_options(CONFIG_CMDLINE);
++	if (status != EFI_SUCCESS) {
++		pr_efi_err("Failed to parse options\n");
++		goto fail;
++	}
+ #endif
+ 	if (!IS_ENABLED(CONFIG_CMDLINE_OVERRIDE)) {
+ 		unsigned long cmdline_paddr = ((u64)hdr->cmd_line_ptr |
+ 					       ((u64)boot_params->ext_cmd_line_ptr << 32));
+-		efi_parse_options((char *)cmdline_paddr);
++		status = efi_parse_options((char *)cmdline_paddr);
++		if (status != EFI_SUCCESS) {
++			pr_efi_err("Failed to parse options\n");
++			goto fail;
++		}
  	}
  
-@@ -73,7 +73,7 @@ preserve_pci_rom_image(efi_pci_io_protocol_t *pci, struct pci_setup_rom **__rom)
- 				PCI_DEVICE_ID, 1, &rom->devid);
- 
- 	if (status != EFI_SUCCESS) {
--		efi_printk("Failed to read rom->devid\n");
-+		pr_efi_err("Failed to read rom->devid\n");
- 		goto free_struct;
- 	}
- 
-@@ -118,7 +118,7 @@ static void setup_efi_pci(struct boot_params *params)
- 				     (void **)&pci_handle);
- 
- 		if (status != EFI_SUCCESS) {
--			efi_printk("Failed to allocate memory for 'pci_handle'\n");
-+			pr_efi_err("Failed to allocate memory for 'pci_handle'\n");
- 			return;
- 		}
- 
-@@ -172,7 +172,7 @@ static void retrieve_apple_device_properties(struct boot_params *boot_params)
- 		return;
- 
- 	if (efi_table_attr(p, version) != 0x10000) {
--		efi_printk("Unsupported properties proto version\n");
-+		pr_efi_err("Unsupported properties proto version\n");
- 		return;
- 	}
- 
-@@ -185,7 +185,7 @@ static void retrieve_apple_device_properties(struct boot_params *boot_params)
- 				     size + sizeof(struct setup_data),
- 				     (void **)&new);
- 		if (status != EFI_SUCCESS) {
--			efi_printk("Failed to allocate memory for 'properties'\n");
-+			pr_efi_err("Failed to allocate memory for 'properties'\n");
- 			return;
- 		}
- 
-@@ -372,7 +372,7 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
- 
- 	status = efi_bs_call(handle_protocol, handle, &proto, (void **)&image);
- 	if (status != EFI_SUCCESS) {
--		efi_printk("Failed to get handle for LOADED_IMAGE_PROTOCOL\n");
-+		pr_efi_err("Failed to get handle for LOADED_IMAGE_PROTOCOL\n");
- 		efi_exit(handle, status);
- 	}
- 
-@@ -382,7 +382,7 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
- 	status = efi_allocate_pages(sizeof(struct boot_params),
- 				    (unsigned long *)&boot_params, ULONG_MAX);
- 	if (status != EFI_SUCCESS) {
--		efi_printk("Failed to allocate lowmem for boot params\n");
-+		pr_efi_err("Failed to allocate lowmem for boot params\n");
- 		efi_exit(handle, status);
- 	}
- 
-@@ -749,7 +749,7 @@ unsigned long efi_main(efi_handle_t handle,
- 					     hdr->kernel_alignment,
- 					     LOAD_PHYSICAL_ADDR);
- 		if (status != EFI_SUCCESS) {
--			efi_printk("efi_relocate_kernel() failed!\n");
-+			pr_efi_err("efi_relocate_kernel() failed!\n");
- 			goto fail;
- 		}
- 		/*
-@@ -786,7 +786,7 @@ unsigned long efi_main(efi_handle_t handle,
- 			efi_set_u64_split(size, &hdr->ramdisk_size,
- 					  &boot_params->ext_ramdisk_size);
- 		} else if (status != EFI_NOT_FOUND) {
--			efi_printk("efi_load_initrd_dev_path() failed!\n");
-+			pr_efi_err("efi_load_initrd_dev_path() failed!\n");
- 			goto fail;
- 		}
- 	}
-@@ -813,13 +813,13 @@ unsigned long efi_main(efi_handle_t handle,
- 
- 	status = exit_boot(boot_params, handle);
- 	if (status != EFI_SUCCESS) {
--		efi_printk("exit_boot() failed!\n");
-+		pr_efi_err("exit_boot() failed!\n");
- 		goto fail;
- 	}
- 
- 	return bzimage_addr;
- fail:
--	efi_printk("efi_main() failed!\n");
-+	pr_efi_err("efi_main() failed!\n");
- 
- 	efi_exit(handle, status);
- }
+ 	/*
 -- 
 2.26.2
 
