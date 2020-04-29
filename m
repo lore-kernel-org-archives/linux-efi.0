@@ -2,52 +2,54 @@ Return-Path: <SRS0=PRj/=6N=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1BB55C83000
-	for <linux-efi@archiver.kernel.org>; Wed, 29 Apr 2020 17:41:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C6B1DC83004
+	for <linux-efi@archiver.kernel.org>; Wed, 29 Apr 2020 17:41:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F1E3C20BED
-	for <linux-efi@archiver.kernel.org>; Wed, 29 Apr 2020 17:41:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AB86A214D8
+	for <linux-efi@archiver.kernel.org>; Wed, 29 Apr 2020 17:41:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727086AbgD2RlX (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 29 Apr 2020 13:41:23 -0400
-Received: from mail-qt1-f194.google.com ([209.85.160.194]:42002 "EHLO
-        mail-qt1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726456AbgD2RlX (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 29 Apr 2020 13:41:23 -0400
-Received: by mail-qt1-f194.google.com with SMTP id x12so2568538qts.9;
-        Wed, 29 Apr 2020 10:41:22 -0700 (PDT)
+        id S1727105AbgD2RlZ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 29 Apr 2020 13:41:25 -0400
+Received: from mail-qt1-f195.google.com ([209.85.160.195]:44129 "EHLO
+        mail-qt1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727100AbgD2RlY (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 29 Apr 2020 13:41:24 -0400
+Received: by mail-qt1-f195.google.com with SMTP id c23so2558535qtp.11;
+        Wed, 29 Apr 2020 10:41:23 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=QmaqVWTwC+lifYOHHk5qJWZIkbjYOF5n6zq/dLJ9qS8=;
-        b=tLV+9VAkXyWZZviO0O8/8kFafwP+AcTqn6UHC1UNuMAxBEfMDfGxInei9A6ZHaPbqD
-         pSlqUY8C6DSm1sOnaMPOXK1JZV851LnYj0qFHwYbl1b1EkhTojHf4uHurTF65bCQyOlk
-         mNI+FuvIjXsQba582OVTO/5m54kuyuoqqp41EmmfaUJFZLFuNf3xyEx2beYtnRV4k+5e
-         UDkGR6Msk5Bf+M33VVBzgJBjCIC02hVWufkyMfx0SPTmZoPrWMOJSqg8UqVuQ5NCz0Sf
-         amAOPxudMlWAZrHyUPhfS1su7wHBl/dp2z2pmwIWjjBu+oySvHg+4rfborbE8f7WZ8oY
-         k3yQ==
-X-Gm-Message-State: AGi0PuY7nlTBpGMz2uWAe9ry79kEPERtyhOoGZ8/6qgwfNZkQCXSsGoP
-        m5eG1D6sf7uPO1qQsXvsjMM=
-X-Google-Smtp-Source: APiQypLxyLPkkPxJ7hAxvBZh2k8InnCXzIzNkEn7fexexbKw1lrg9fRqSlEQnYPvPhf/Y//hKel9Lg==
-X-Received: by 2002:ac8:6d1d:: with SMTP id o29mr35735607qtt.327.1588182081959;
-        Wed, 29 Apr 2020 10:41:21 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=P15viJAU+0RM8Psz28V6qOX0pe0sVwfTgVh2E8+aZ1I=;
+        b=MANmL+zmeZa1pfF1B0Bpp7e4xIJ3JlC65IE2PUW36JBPMNLGb87HV0yRWIqJRUfPsp
+         YmdQ69q52guz4lojrb8+8OxSUIYt911ZbJexu8sc05HtHaLBx5lTwwy1W8+0YY13sc44
+         RA21aj7edBDtH7PEtrTuSLxU2OKSk5KmcRawD1bOnQYna+JVh5gKIuCBFSG6QlZ3j6PW
+         hGFqq9A7HeQaBslvuuyvpjtvtfpLwguztoX+kW46VTdlTM3713wxJBtXwRPncXIWbtkQ
+         tGsR1JSX34uOJTwUf1GSd1Uk+6icL1g9LamLaJFohVd/1QJtv4RPjQ2YThOLoU5eerWU
+         FIjw==
+X-Gm-Message-State: AGi0PuascN9o69ycNpZ4OZEbhMZyRClW+K/ywgEhpaa1Zm+E2g+MzArA
+        efw0V+Arz8hqX1YlaesRHow=
+X-Google-Smtp-Source: APiQypIFC1kL1kHOsrK5LIv1m3ylQNsvj/MBPF5eIlzcnj6qkPG+1z6BoeD+s2IvNNgbmSe15xM/2g==
+X-Received: by 2002:ac8:3808:: with SMTP id q8mr35924404qtb.245.1588182083306;
+        Wed, 29 Apr 2020 10:41:23 -0700 (PDT)
 Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
-        by smtp.gmail.com with ESMTPSA id z1sm14766448qkz.3.2020.04.29.10.41.20
+        by smtp.gmail.com with ESMTPSA id z1sm14766448qkz.3.2020.04.29.10.41.22
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 29 Apr 2020 10:41:21 -0700 (PDT)
+        Wed, 29 Apr 2020 10:41:22 -0700 (PDT)
 From:   Arvind Sankar <nivedita@alum.mit.edu>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     linux-efi@vger.kernel.org, x86@kernel.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH 00/10] efi: some cleanups/refactoring for efi/next
-Date:   Wed, 29 Apr 2020 13:41:09 -0400
-Message-Id: <20200429174120.1497212-1-nivedita@alum.mit.edu>
+Subject: [PATCH 02/10] efi: Add a helper function to split 64-bit values
+Date:   Wed, 29 Apr 2020 13:41:11 -0400
+Message-Id: <20200429174120.1497212-3-nivedita@alum.mit.edu>
 X-Mailer: git-send-email 2.26.2
+In-Reply-To: <20200429174120.1497212-1-nivedita@alum.mit.edu>
+References: <20200429174120.1497212-1-nivedita@alum.mit.edu>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
@@ -55,37 +57,129 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This series is on top of efi/next.
+In several places 64-bit values need to be split up into two 32-bit
+fields, in order to be backward-compatible with the old 32-bit ABIs.
 
-Patch 1 fixes the size allocated for x86 boot_params.
-Patch 2 refactors the setting of various hi/lo 32-bit fields, mainly on x86.
-Patches 3-5 convert the remaining uses of efi_printk to print error
-messages to use pr_efi_err instead.
-Patches 6-8 refactor initrd loading, moving it into efi-stub-helper.
-Patch 9 adds support for x86 builtin command line.
-Patch 10 adds error checking for efi_parse_options.
+Instead of open-coding this, add a helper function to set a 64-bit value
+as two 32-bit fields.
 
-Arvind Sankar (10):
-  efi/x86: Use correct size for boot_params
-  efi/libstub: Add a helper function to split 64-bit values
-  efi/x86: Use pr_efi_err for error messages
-  efi/gop: Use pr_efi_err for error messages
-  efi/tpm: Use pr_efi_err for error messages
-  efi/x86: Move command-line initrd loading to efi_main
-  efi/libstub: Unify initrd loading across architectures
-  efi/x86: Drop soft_limit for x86 initrd loading
-  efi/x86: Support builtin command line
-  efi/libstub: Check return value of efi_parse_options
+Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
+---
+ drivers/firmware/efi/libstub/efistub.h  |  7 ++++++
+ drivers/firmware/efi/libstub/gop.c      |  6 ++---
+ drivers/firmware/efi/libstub/x86-stub.c | 32 +++++++++++--------------
+ 3 files changed, 23 insertions(+), 22 deletions(-)
 
- .../firmware/efi/libstub/efi-stub-helper.c    |  42 +++++-
- drivers/firmware/efi/libstub/efi-stub.c       |  29 +++--
- drivers/firmware/efi/libstub/efistub.h        |  32 ++---
- drivers/firmware/efi/libstub/file.c           |  13 +-
- drivers/firmware/efi/libstub/gop.c            |  16 +--
- drivers/firmware/efi/libstub/tpm.c            |   2 +-
- drivers/firmware/efi/libstub/x86-stub.c       | 121 ++++++++----------
- 7 files changed, 130 insertions(+), 125 deletions(-)
-
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index 5ff63230a1f1..e8aa70ba08d5 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -87,6 +87,13 @@ extern const efi_system_table_t *efi_system_table;
+ 		((handle = efi_get_handle_at((array), i)) || true);	\
+ 	     i++)
+ 
++static inline
++void efi_set_u64_split(u64 data, u32 *lo, u32 *hi)
++{
++	*lo = lower_32_bits(data);
++	*hi = upper_32_bits(data);
++}
++
+ /*
+  * Allocation types for calls to boottime->allocate_pages.
+  */
+diff --git a/drivers/firmware/efi/libstub/gop.c b/drivers/firmware/efi/libstub/gop.c
+index 216327d0b034..64cee0febae0 100644
+--- a/drivers/firmware/efi/libstub/gop.c
++++ b/drivers/firmware/efi/libstub/gop.c
+@@ -422,7 +422,6 @@ static efi_status_t setup_gop(struct screen_info *si, efi_guid_t *proto,
+ 	efi_graphics_output_protocol_t *gop;
+ 	efi_graphics_output_protocol_mode_t *mode;
+ 	efi_graphics_output_mode_info_t *info;
+-	efi_physical_addr_t fb_base;
+ 
+ 	gop = find_gop(proto, size, handles);
+ 
+@@ -442,9 +441,8 @@ static efi_status_t setup_gop(struct screen_info *si, efi_guid_t *proto,
+ 	si->lfb_width  = info->horizontal_resolution;
+ 	si->lfb_height = info->vertical_resolution;
+ 
+-	fb_base		 = efi_table_attr(mode, frame_buffer_base);
+-	si->lfb_base	 = lower_32_bits(fb_base);
+-	si->ext_lfb_base = upper_32_bits(fb_base);
++	efi_set_u64_split(efi_table_attr(mode, frame_buffer_base),
++			  &si->lfb_base, &si->ext_lfb_base);
+ 	if (si->ext_lfb_base)
+ 		si->capabilities |= VIDEO_CAPABILITY_64BIT_BASE;
+ 
+diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
+index d4bafd7f6f9f..677b5a1e0543 100644
+--- a/drivers/firmware/efi/libstub/x86-stub.c
++++ b/drivers/firmware/efi/libstub/x86-stub.c
+@@ -408,9 +408,8 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
+ 	if (!cmdline_ptr)
+ 		goto fail;
+ 
+-	hdr->cmd_line_ptr = (unsigned long)cmdline_ptr;
+-	/* Fill in upper bits of command line address, NOP on 32 bit  */
+-	boot_params->ext_cmd_line_ptr = (u64)(unsigned long)cmdline_ptr >> 32;
++	efi_set_u64_split((u64)cmdline_ptr,
++			  &hdr->cmd_line_ptr, &boot_params->ext_cmd_line_ptr);
+ 
+ 	hdr->ramdisk_image = 0;
+ 	hdr->ramdisk_size = 0;
+@@ -427,10 +426,10 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
+ 						 ULONG_MAX);
+ 			if (status != EFI_SUCCESS)
+ 				goto fail2;
+-			hdr->ramdisk_image = ramdisk_addr & 0xffffffff;
+-			hdr->ramdisk_size  = ramdisk_size & 0xffffffff;
+-			boot_params->ext_ramdisk_image = (u64)ramdisk_addr >> 32;
+-			boot_params->ext_ramdisk_size  = (u64)ramdisk_size >> 32;
++			efi_set_u64_split(ramdisk_addr, &hdr->ramdisk_image,
++					  &boot_params->ext_ramdisk_image);
++			efi_set_u64_split(ramdisk_size, &hdr->ramdisk_size,
++					  &boot_params->ext_ramdisk_size);
+ 		}
+ 	}
+ 
+@@ -639,17 +638,14 @@ static efi_status_t exit_boot_func(struct efi_boot_memmap *map,
+ 				   : EFI32_LOADER_SIGNATURE;
+ 	memcpy(&p->efi->efi_loader_signature, signature, sizeof(__u32));
+ 
+-	p->efi->efi_systab		= (unsigned long)efi_system_table;
++	efi_set_u64_split((u64)efi_system_table,
++			  &p->efi->efi_systab, &p->efi->efi_systab_hi);
+ 	p->efi->efi_memdesc_size	= *map->desc_size;
+ 	p->efi->efi_memdesc_version	= *map->desc_ver;
+-	p->efi->efi_memmap		= (unsigned long)*map->map;
++	efi_set_u64_split((u64)*map->map,
++			  &p->efi->efi_memmap, &p->efi->efi_memmap_hi);
+ 	p->efi->efi_memmap_size		= *map->map_size;
+ 
+-#ifdef CONFIG_X86_64
+-	p->efi->efi_systab_hi		= (unsigned long)efi_system_table >> 32;
+-	p->efi->efi_memmap_hi		= (unsigned long)*map->map >> 32;
+-#endif
+-
+ 	return EFI_SUCCESS;
+ }
+ 
+@@ -785,10 +781,10 @@ unsigned long efi_main(efi_handle_t handle,
+ 
+ 		status = efi_load_initrd_dev_path(&addr, &size, ULONG_MAX);
+ 		if (status == EFI_SUCCESS) {
+-			hdr->ramdisk_image		= (u32)addr;
+-			hdr->ramdisk_size 		= (u32)size;
+-			boot_params->ext_ramdisk_image	= (u64)addr >> 32;
+-			boot_params->ext_ramdisk_size 	= (u64)size >> 32;
++			efi_set_u64_split(addr, &hdr->ramdisk_image,
++					  &boot_params->ext_ramdisk_image);
++			efi_set_u64_split(size, &hdr->ramdisk_size,
++					  &boot_params->ext_ramdisk_size);
+ 		} else if (status != EFI_NOT_FOUND) {
+ 			efi_printk("efi_load_initrd_dev_path() failed!\n");
+ 			goto fail;
 -- 
 2.26.2
 
