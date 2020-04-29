@@ -6,47 +6,47 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E845DC83004
-	for <linux-efi@archiver.kernel.org>; Wed, 29 Apr 2020 17:41:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 60CCDC83006
+	for <linux-efi@archiver.kernel.org>; Wed, 29 Apr 2020 17:41:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CB21421707
-	for <linux-efi@archiver.kernel.org>; Wed, 29 Apr 2020 17:41:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3BD3220B1F
+	for <linux-efi@archiver.kernel.org>; Wed, 29 Apr 2020 17:41:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727769AbgD2Rlw (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 29 Apr 2020 13:41:52 -0400
-Received: from mail-qk1-f195.google.com ([209.85.222.195]:35429 "EHLO
-        mail-qk1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727124AbgD2Rl1 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 29 Apr 2020 13:41:27 -0400
-Received: by mail-qk1-f195.google.com with SMTP id c63so2900254qke.2;
-        Wed, 29 Apr 2020 10:41:26 -0700 (PDT)
+        id S1727117AbgD2Rl0 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 29 Apr 2020 13:41:26 -0400
+Received: from mail-qv1-f65.google.com ([209.85.219.65]:36958 "EHLO
+        mail-qv1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727085AbgD2RlX (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 29 Apr 2020 13:41:23 -0400
+Received: by mail-qv1-f65.google.com with SMTP id y19so1576519qvv.4;
+        Wed, 29 Apr 2020 10:41:23 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=gNcbFcBqpcuqFq869O2rJKX45xd3G8ARmUjKz33/zqw=;
-        b=F2eZMJjns1F3zNykCXKsi3Z6VupLI3mvnRu8EwGxd7H8jJg9VOgpPra/hDN7ie/XYG
-         eGAfevAf3ciHEBBhEjCAbTIRC4IXHtw/b4gbIuJvtL6adhx2oWXfAn9RKWD5xxZP5Wj1
-         SW3WxHWgjDO3cHchgztWwjvNPuFk3QI9k4qEY2ab5zDhCjFq3S9URS0EcY0A0e1+PDO5
-         fXSnA1260OUjoZG46p37x0yURyXfKIm0tI8XRYAM8+SotEOZ+MwdWcNPMk11n4o3t4+Z
-         fC57xgmASNr8eF4XQxYOE/oH0q5Fm5AtNPkd4138S11yQNGmIwwZk6CnBkOKxZXXeYoX
-         KJeg==
-X-Gm-Message-State: AGi0PubokkgafaTKMzEuewxm2+E2MAA+GocCz+OCiyHlXZO/1P6osZQv
-        2gqO/n8sJ15MfDTXoMA/p2iZf0cClHk=
-X-Google-Smtp-Source: APiQypKTW2hHx8g1COTK3HONNfuPE920a4LtjOiRXSx3Vb+HF8SQ04prPnlHzQYqye/9WDbwXTPi0g==
-X-Received: by 2002:a37:a9c7:: with SMTP id s190mr33631397qke.75.1588182086301;
-        Wed, 29 Apr 2020 10:41:26 -0700 (PDT)
+        bh=fzOcH/m5zVvfS8Ajxoe5u2BiH2fwXioZ/jPs2mokyCI=;
+        b=fjvTBd5axusa8j50qjOLy/Pl5KexImAIDdG4tW1m+Ypn0HclwKdj8WWTsfcw13/KLi
+         +PXmkISfJpFEUjfi7qvar3dVw6Omtvo3cxE1j9T/6OZf5F4R2u0eBx2/4JQNKdD486dn
+         OGfVMwDkzItUc3C630f82rLvySv+/goJwqCCZkAWFqdWia3EmgRX7mT7xS23glLXvX2E
+         NuDzr0U9pB4r5pOfqa811ZPRDEBB53drRMyu56J8RzyRGAcb9h4Yr73macVNKMF7Epll
+         Lj4TwP4OyMMQ6geX5byMXU9VdQtKvWSXFhBNu4O0ot0YSiWm+LOL08AgqOoa572EeUal
+         OEgQ==
+X-Gm-Message-State: AGi0PuYaIL+ar01BJRGAE+R0YtSFPeGdH2Q7kqnJ5j0LYdM2u0fshxmh
+        sKCXT2VPX8rF1932yhJX+Hw=
+X-Google-Smtp-Source: APiQypJjWyRFFMBmXSV7SqYxkg8nbzXq6dVoC+akmTG0YOzx6zqkoUtn024JEjBQfIFxs5PAIjPJkw==
+X-Received: by 2002:ad4:45ec:: with SMTP id q12mr34740939qvu.157.1588182082544;
+        Wed, 29 Apr 2020 10:41:22 -0700 (PDT)
 Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
-        by smtp.gmail.com with ESMTPSA id z1sm14766448qkz.3.2020.04.29.10.41.25
+        by smtp.gmail.com with ESMTPSA id z1sm14766448qkz.3.2020.04.29.10.41.22
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 29 Apr 2020 10:41:25 -0700 (PDT)
+        Wed, 29 Apr 2020 10:41:22 -0700 (PDT)
 From:   Arvind Sankar <nivedita@alum.mit.edu>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     linux-efi@vger.kernel.org, x86@kernel.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH 05/10] efi/tpm: Use pr_efi_err for error messages
-Date:   Wed, 29 Apr 2020 13:41:15 -0400
-Message-Id: <20200429174120.1497212-7-nivedita@alum.mit.edu>
+Subject: [PATCH 01/10] efi/x86: Use correct size for boot_params
+Date:   Wed, 29 Apr 2020 13:41:10 -0400
+Message-Id: <20200429174120.1497212-2-nivedita@alum.mit.edu>
 X-Mailer: git-send-email 2.26.2
 In-Reply-To: <20200429174120.1497212-1-nivedita@alum.mit.edu>
 References: <20200429174120.1497212-1-nivedita@alum.mit.edu>
@@ -57,26 +57,44 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Use pr_efi_err instead of bare efi_printk for error messages.
+struct boot_params is only 4096 bytes, not 16384. Fix this by using
+sizeof(struct boot_params) instead of hardcoding the incorrect value.
 
 Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
 ---
- drivers/firmware/efi/libstub/tpm.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/firmware/efi/libstub/x86-stub.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/tpm.c b/drivers/firmware/efi/libstub/tpm.c
-index 1d59e103a2e3..8a16983fad98 100644
---- a/drivers/firmware/efi/libstub/tpm.c
-+++ b/drivers/firmware/efi/libstub/tpm.c
-@@ -119,7 +119,7 @@ void efi_retrieve_tpm2_eventlog(void)
- 			     sizeof(*log_tbl) + log_size, (void **)&log_tbl);
+diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
+index 597793fe8d22..d4bafd7f6f9f 100644
+--- a/drivers/firmware/efi/libstub/x86-stub.c
++++ b/drivers/firmware/efi/libstub/x86-stub.c
+@@ -379,13 +379,14 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
+ 	image_base = efi_table_attr(image, image_base);
+ 	image_offset = (void *)startup_32 - image_base;
  
+-	status = efi_allocate_pages(0x4000, (unsigned long *)&boot_params, ULONG_MAX);
++	status = efi_allocate_pages(sizeof(struct boot_params),
++				    (unsigned long *)&boot_params, ULONG_MAX);
  	if (status != EFI_SUCCESS) {
--		efi_printk("Unable to allocate memory for event log\n");
-+		pr_efi_err("Unable to allocate memory for event log\n");
- 		return;
+ 		efi_printk("Failed to allocate lowmem for boot params\n");
+ 		efi_exit(handle, status);
  	}
  
+-	memset(boot_params, 0x0, 0x4000);
++	memset(boot_params, 0x0, sizeof(struct boot_params));
+ 
+ 	hdr = &boot_params->hdr;
+ 
+@@ -439,7 +440,7 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
+ fail2:
+ 	efi_free(options_size, (unsigned long)cmdline_ptr);
+ fail:
+-	efi_free(0x4000, (unsigned long)boot_params);
++	efi_free(sizeof(struct boot_params), (unsigned long)boot_params);
+ 
+ 	efi_exit(handle, status);
+ }
 -- 
 2.26.2
 
