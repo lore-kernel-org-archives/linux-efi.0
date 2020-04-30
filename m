@@ -4,49 +4,49 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DC07EC47247
-	for <linux-efi@archiver.kernel.org>; Thu, 30 Apr 2020 18:29:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9720AC47253
+	for <linux-efi@archiver.kernel.org>; Thu, 30 Apr 2020 18:29:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C127C20836
-	for <linux-efi@archiver.kernel.org>; Thu, 30 Apr 2020 18:29:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7F51720836
+	for <linux-efi@archiver.kernel.org>; Thu, 30 Apr 2020 18:29:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726853AbgD3S3G (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 30 Apr 2020 14:29:06 -0400
-Received: from mail-qk1-f196.google.com ([209.85.222.196]:38840 "EHLO
-        mail-qk1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726784AbgD3S2y (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 30 Apr 2020 14:28:54 -0400
-Received: by mail-qk1-f196.google.com with SMTP id k81so4062674qke.5;
-        Thu, 30 Apr 2020 11:28:53 -0700 (PDT)
+        id S1726784AbgD3S3O (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 30 Apr 2020 14:29:14 -0400
+Received: from mail-qt1-f195.google.com ([209.85.160.195]:35913 "EHLO
+        mail-qt1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726712AbgD3S2v (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 30 Apr 2020 14:28:51 -0400
+Received: by mail-qt1-f195.google.com with SMTP id w29so5897487qtv.3;
+        Thu, 30 Apr 2020 11:28:50 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=0AMrosFd1f72Qq3WfrgWyCQT84wdVtOTpaMD31DP6+8=;
-        b=ElldIPtabJ8fg6dJmHkVPI249OjOjF24ePjhOo9qL14A0Tgnf1oBr5L8Pn3TgZfVgY
-         MJMr6+/4mFMzwYZ4KV93kmkbn4f/tp9TuK0cThBbnU4NOUiaRYIEGgP5mZc2ngwuSZO2
-         mVTwUD/yCqWwJxUJRdBLvl6/8/edOxv/AzQ4XblXcLPdJ1roDGwD3VCM6KAobvlUDCop
-         Wp84ccfFh7JyeAJaSRloj+HP9mvBslGRBJUFfHKfZvYz1mRYO1ZOu9w7mUeWJCBbGscg
-         Yc9xbaZGQ37hp8dHwCbzmAhVUIrcGCaLRvyLHquUzeo/lJwK1c82Z17JDTXXDvJE3Go6
-         rbYw==
-X-Gm-Message-State: AGi0PuaWeompHexudMCd2JVRjaNJ5Oq+JrOE+gs8iofL49BoRY4KWqOB
-        ILZ32XX8hdQ8H5XLnOFIFDY=
-X-Google-Smtp-Source: APiQypI+9d3becN2aJEn1PCKzErog4aSwYsGKYpSla2kXVJaZPtbTIV+j5yY6w5zTkKXvysmklb3jQ==
-X-Received: by 2002:a37:4ad8:: with SMTP id x207mr4421744qka.427.1588271333463;
-        Thu, 30 Apr 2020 11:28:53 -0700 (PDT)
+        bh=94wAFMFaMaSvZGl5ZBqxA0PT7iUq3+1Urv4C9UV7BRM=;
+        b=jq0vfmKyGUyEuJbfuwTiM6BU5t/YHBap/TTzkPHj4OBF6RTCSumae8H199fcDsGqdU
+         KPa/EE/r1kAIU7tVW409nMdSpxqtDXODPpPNN5f38xxyYMnSXAQQoYBZPtYHA8wlueoW
+         CxkBMjFpdOStATjPCu+NxpTcO77lrZd3RpX6+WJ5VbOp912kCTzZ4ZJAQNFRzw7JoegH
+         sOuABgsMJJG/R8700rPJKZ7c59y8aI4fqXZ+D/PHd9SWa65QUAqH4dDZAYIi+MaNgvkT
+         tQG1r3372jQf0+h3pt2C8jdqg1bHPlx4wFN2t/MLdNQimG/aKsQBIyEOpdq0A8arwjfA
+         XPBg==
+X-Gm-Message-State: AGi0PuaDhti/9y88t4du8bZ6ZqOnxosW4uHwLG/hr752v+NOUUJXnnVP
+        8hnc/wYqSve/RE9KN0KMGU7iMfkktPk=
+X-Google-Smtp-Source: APiQypKYpPbIyD4ANh9B4MxtpjS6ebCbYVfKIrYIpeH/ublhD/01JsNcjKb7vNn4TSfof1d3h0sURQ==
+X-Received: by 2002:ac8:4e53:: with SMTP id e19mr5155151qtw.277.1588271329940;
+        Thu, 30 Apr 2020 11:28:49 -0700 (PDT)
 Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
-        by smtp.gmail.com with ESMTPSA id v27sm449785qtb.35.2020.04.30.11.28.52
+        by smtp.gmail.com with ESMTPSA id v27sm449785qtb.35.2020.04.30.11.28.49
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 30 Apr 2020 11:28:52 -0700 (PDT)
+        Thu, 30 Apr 2020 11:28:49 -0700 (PDT)
 From:   Arvind Sankar <nivedita@alum.mit.edu>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     linux-efi@vger.kernel.org, x86@kernel.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v2 10/11] efi/x86: Support builtin command line
-Date:   Thu, 30 Apr 2020 14:28:42 -0400
-Message-Id: <20200430182843.2510180-11-nivedita@alum.mit.edu>
+Subject: [PATCH v2 06/11] efi/tpm: Use efi_err for error messages
+Date:   Thu, 30 Apr 2020 14:28:38 -0400
+Message-Id: <20200430182843.2510180-7-nivedita@alum.mit.edu>
 X-Mailer: git-send-email 2.26.2
 In-Reply-To: <20200430182843.2510180-1-nivedita@alum.mit.edu>
 References: <20200429174120.1497212-1-nivedita@alum.mit.edu>
@@ -58,44 +58,26 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Add support for the x86 CMDLINE_BOOL and CMDLINE_OVERRIDE configuration
-options.
+Use efi_err instead of bare efi_printk for error messages.
 
 Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
 ---
- drivers/firmware/efi/libstub/x86-stub.c | 12 ++++++++----
- 1 file changed, 8 insertions(+), 4 deletions(-)
+ drivers/firmware/efi/libstub/tpm.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index f1a134596b53..c84c5678e3e1 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -680,7 +680,6 @@ unsigned long efi_main(efi_handle_t handle,
- 	unsigned long buffer_start, buffer_end;
- 	struct setup_header *hdr = &boot_params->hdr;
- 	efi_status_t status;
--	unsigned long cmdline_paddr;
+diff --git a/drivers/firmware/efi/libstub/tpm.c b/drivers/firmware/efi/libstub/tpm.c
+index 1d59e103a2e3..09adcf51b75b 100644
+--- a/drivers/firmware/efi/libstub/tpm.c
++++ b/drivers/firmware/efi/libstub/tpm.c
+@@ -119,7 +119,7 @@ void efi_retrieve_tpm2_eventlog(void)
+ 			     sizeof(*log_tbl) + log_size, (void **)&log_tbl);
  
- 	efi_system_table = sys_table_arg;
- 
-@@ -739,9 +738,14 @@ unsigned long efi_main(efi_handle_t handle,
- 		image_offset = 0;
+ 	if (status != EFI_SUCCESS) {
+-		efi_printk("Unable to allocate memory for event log\n");
++		efi_err("Unable to allocate memory for event log\n");
+ 		return;
  	}
  
--	cmdline_paddr = ((u64)hdr->cmd_line_ptr |
--			 ((u64)boot_params->ext_cmd_line_ptr << 32));
--	efi_parse_options((char *)cmdline_paddr);
-+#ifdef CONFIG_CMDLINE_BOOL
-+	efi_parse_options(CONFIG_CMDLINE);
-+#endif
-+	if (!IS_ENABLED(CONFIG_CMDLINE_OVERRIDE)) {
-+		unsigned long cmdline_paddr = ((u64)hdr->cmd_line_ptr |
-+					       ((u64)boot_params->ext_cmd_line_ptr << 32));
-+		efi_parse_options((char *)cmdline_paddr);
-+	}
- 
- 	/*
- 	 * At this point, an initrd may already have been loaded by the
 -- 
 2.26.2
 
