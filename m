@@ -1,112 +1,72 @@
-Return-Path: <SRS0=1TMn=6R=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=EqbT=6S=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.1 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	FAKE_REPLY_C,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham
+X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=no
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 97C3FC28CBC
-	for <linux-efi@archiver.kernel.org>; Sun,  3 May 2020 16:16:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DF45CC28CBC
+	for <linux-efi@archiver.kernel.org>; Mon,  4 May 2020 00:38:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 72BC920836
-	for <linux-efi@archiver.kernel.org>; Sun,  3 May 2020 16:16:06 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="gq1EJB2O"
+	by mail.kernel.org (Postfix) with ESMTP id C361120661
+	for <linux-efi@archiver.kernel.org>; Mon,  4 May 2020 00:38:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728729AbgECQQG (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 3 May 2020 12:16:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43392 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728665AbgECQQF (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sun, 3 May 2020 12:16:05 -0400
-Received: from mail-pf1-x443.google.com (mail-pf1-x443.google.com [IPv6:2607:f8b0:4864:20::443])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 56FCBC061A0E
-        for <linux-efi@vger.kernel.org>; Sun,  3 May 2020 09:16:04 -0700 (PDT)
-Received: by mail-pf1-x443.google.com with SMTP id d184so4332475pfd.4
-        for <linux-efi@vger.kernel.org>; Sun, 03 May 2020 09:16:04 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=sender:date:from:to:cc:subject:message-id:mime-version
-         :content-disposition:user-agent;
-        bh=ViMcN5Zl68ZchHHk3aJI/lSPRjfqslW7Zgmv1TQFIvw=;
-        b=gq1EJB2OMmp5abc0shFR16tUj4bGIG96k8MybUp+mOKyuJxcg3rW+pPyOTqGKNKiPM
-         5JyGzvLu19lW5Aea8YfWSPzjzMiHJ0jfUlkWtTAyPLK00ji0e0BFFQ1Kq6v7ZZio4IgM
-         hQLjIhWSicDjoZ2pSGcGOpk4dZxAM3xEmYPqcMxCFRllFdtIm9xAqEEpM61P90O+Xpgp
-         qd87BuAMzRORfZCBjht6QUdiU3I8ZLMn1pdPRZx+MZVhH5dra07QIqJ0EjFS70SuCrMh
-         BjDAEBg+IwssIWpw0vz60fA31ljtsBl40G1dZsEG8OxrNMVaeceqtjL5Ef5ZT/JOsqoT
-         Ebzw==
+        id S1726842AbgEDAiz (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 3 May 2020 20:38:55 -0400
+Received: from mail-qv1-f52.google.com ([209.85.219.52]:41142 "EHLO
+        mail-qv1-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726809AbgEDAiz (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sun, 3 May 2020 20:38:55 -0400
+Received: by mail-qv1-f52.google.com with SMTP id h6so7578503qvz.8
+        for <linux-efi@vger.kernel.org>; Sun, 03 May 2020 17:38:54 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:sender:date:from:to:cc:subject:message-id
-         :mime-version:content-disposition:user-agent;
-        bh=ViMcN5Zl68ZchHHk3aJI/lSPRjfqslW7Zgmv1TQFIvw=;
-        b=VbNjnoKpQvqxy/aLHK0sgXeqi2Wk6+qGJ5NeGZXuQiw/dF/nqg6WgdUgIR/tusydVv
-         0Gc2txZ2eDu3cAYYrxbaI6sEutQ4/pqC9PGt1CewRFshGTYCW7qeddpCBcnrx64BCV7U
-         lwhi2xzQGOuGKbm4DkXz9bIhJ4Pm985x+zWynL0yLH4mwP+o1ZL9BcaoGk5iQmKbcjUP
-         jEm5ig0f/7tVkhNoB9BoOSbRHjIxysTQhQd59MVXJdlWdNjSVJcNYFS2AN8nT7+MVMZS
-         nUqT5PDxi1rk1ZHrJgyAVU//I/nbQbSM6rApaeaAkepgwF45M+PGPQpi7JxJ/Qv7VLP7
-         F5Rg==
-X-Gm-Message-State: AGi0PuaPOhHqoz9um/6874qeDN+xyEDS7KKP8WYj20oYvpKnaumqRqF+
-        /E79P2lH9rxVwwKupah9E+o=
-X-Google-Smtp-Source: APiQypI3Ejvb0SacnaWnyr9B6D9OJn2Uu3jFJ6HpUmbTerv/yu65YP2pcSgdWpBTtOyPipANVWxB6Q==
-X-Received: by 2002:a62:1d1:: with SMTP id 200mr14178020pfb.286.1588522563815;
-        Sun, 03 May 2020 09:16:03 -0700 (PDT)
-Received: from localhost ([2600:1700:e321:62f0:329c:23ff:fee3:9d7c])
-        by smtp.gmail.com with ESMTPSA id c12sm6151540pgk.11.2020.05.03.09.16.02
-        (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
-        Sun, 03 May 2020 09:16:03 -0700 (PDT)
-Date:   Sun, 3 May 2020 09:16:02 -0700
-From:   Guenter Roeck <linux@roeck-us.net>
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=HKMFY6yI2D4GutblGx9dzUPhUWuCr1EL0c2GEIwMSOc=;
+        b=TM5fKeGeoTSnyVzYBJFxiDNX4R2S2n02I3FGmVUvB3d7BEYQlUR0hKtXPlPZfN9QUe
+         Ct/04jOldqe8k/8ITpfNJwKOaNCPwZnL8bTMnZ/xnhoywkR0ZC+NeeFffF8eOw1f8FQv
+         MztmJJJMt4rhy6mx/oJEHI/cfOpDQCTdCsnfzblX+jB+hTNPgaviqha+wj422qF9pRVL
+         7hV2t6WECyKo5t/KgjzR3spvSQRxPWM+jps+YPqK2M/eGvlzDkErvXEY60ziJD215N/3
+         bGbGiHGN3kPqmDI8MPfZUZT6k8sUgUJ0WbKmDl1r2sJCmriRFB65x5GDpBUhCjNo5vdt
+         PtYQ==
+X-Gm-Message-State: AGi0PuZzgefyo0LyDxXB6J3gmGafFMHdcAWhIglFqF1QHX0klWUc12rT
+        4K8SV1gNNibVT1VJhR1D1w4QFRtWcBM=
+X-Google-Smtp-Source: APiQypLJT68sFjBNUZHTIuKK66xL2pjFpI/KSLDpPNMidgryI9aPQ6AgFVdfmfY6Gd0LQ1rs1rCr5Q==
+X-Received: by 2002:a05:6214:b88:: with SMTP id fe8mr14420128qvb.250.1588552734170;
+        Sun, 03 May 2020 17:38:54 -0700 (PDT)
+Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
+        by smtp.gmail.com with ESMTPSA id t14sm9401506qtj.71.2020.05.03.17.38.53
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 03 May 2020 17:38:53 -0700 (PDT)
+From:   Arvind Sankar <nivedita@alum.mit.edu>
 To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     linux-efi@vger.kernel.org
-Subject: Re: [PATCH] efi/libstub/x86: fix mixed mode boot issue after macro
- refactor
-Message-ID: <20200503161602.GA117639@roeck-us.net>
+Cc:     linux-efi@vger.kernel.org, linux@roeck-us.net
+Subject: [PATCH 0/1] efi/libstub: Fix mixed mode boot on efi/next
+Date:   Sun,  3 May 2020 20:38:51 -0400
+Message-Id: <20200504003852.1096018-1-nivedita@alum.mit.edu>
+X-Mailer: git-send-email 2.26.2
+In-Reply-To: <20200503154507.82880-1-ardb@kernel.org>
+References: <20200503154507.82880-1-ardb@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-User-Agent: Mutt/1.9.4 (2018-02-28)
+Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Sun, May 03, 2020 at 05:45:07PM +0200, Ard Biesheuvel wrote:
-> Commit
-> 
->   22090f84bc3f8081 ("efi/libstub: Unify EFI call wrappers for non-x86")
-> 
-> refactored some macros that are used to wrap EFI service calls, and
-> allow us to boot the 64-bit x86 kernel from 32-bit firmware. Sadly, due
-> to an oversight, this caused a boot issue on mixed mode, due to the fact
-> that efi_is_native() is not a macro on x86, and so #ifndef will not
-> detect that it is already defined.
-> 
-> Fix this by defining the macro as well.
-> 
-> Reported-by: Guenter Roeck <linux@roeck-us.net>
-> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+How about this instead -- just get rid of the macros on x86 as well if
+mixed mode isn't enabled, and condition the generic definition on
+CONFIG_EFI_MIXED?
 
-Tested-by: Guenter Roeck <linux@roeck-us.net>
+Arvind Sankar (1):
+  efi/libstub: Fix mixed mode boot issue after macro refactor
 
-> ---
->  arch/x86/include/asm/efi.h | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-> index cd0c3fbf6156..42b2fd123a2f 100644
-> --- a/arch/x86/include/asm/efi.h
-> +++ b/arch/x86/include/asm/efi.h
-> @@ -240,6 +240,7 @@ static inline bool efi_is_native(void)
->  		return true;
->  	return efi_is_64bit();
->  }
-> +#define efi_is_native efi_is_native
->  
->  #define efi_mixed_mode_cast(attr)					\
->  	__builtin_choose_expr(						\
-> -- 
-> 2.26.2
-> 
+ arch/x86/include/asm/efi.h             | 17 +++++++++++++----
+ drivers/firmware/efi/libstub/efistub.h | 14 ++++----------
+ 2 files changed, 17 insertions(+), 14 deletions(-)
+
+-- 
+2.26.2
+
