@@ -2,99 +2,100 @@ Return-Path: <SRS0=8hDy=6U=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EB509C28CBC
-	for <linux-efi@archiver.kernel.org>; Wed,  6 May 2020 07:24:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 62596C47258
+	for <linux-efi@archiver.kernel.org>; Wed,  6 May 2020 08:19:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C523E2075A
-	for <linux-efi@archiver.kernel.org>; Wed,  6 May 2020 07:24:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 424F9207DD
+	for <linux-efi@archiver.kernel.org>; Wed,  6 May 2020 08:19:55 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1588749848;
-	bh=x7OyI4ujQqJw0j0GzC4hS3Aq2xvKqYQlLnWoJNviDjI=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=nWdO4wZ+bvxGMxrXNA4ZTU4s4ta31pq8NCAsZOmZRX3hB82XxUN/OYEKqIwU3OiqJ
-	 MwFy/yZPKsOj8LbSfWNtbWamcCe05OqV1DdDAHRwTiJXH3xcqNdHS43UwBapXeKe77
-	 ApiayB7fzaQnkiKQz1bcQ417W95nFEC8l8t5zxkM=
+	s=default; t=1588753195;
+	bh=+SDKOkKg1ZVm776EJnD5TocZ5JZYu6XB9fPUJmWVkEY=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=ad9i20jzg2IN08PUC+cuptopAEZnyqw3Z/r3XQ9OahU5xQ+Fa6Fp+AigKLOrPU6VG
+	 lXdZ2qJMhIA/uCA6X2KAAYmCrluTKGO0/yUftiMOZ34IgwMRKGZh2EBCe2EqeLz6OB
+	 xmEu0YOBSVY/1P+kcelIiXHTxgbiHBKHT0DE6VSA=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727982AbgEFHYH (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 6 May 2020 03:24:07 -0400
-Received: from mail.kernel.org ([198.145.29.99]:33324 "EHLO mail.kernel.org"
+        id S1728852AbgEFITy (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 6 May 2020 04:19:54 -0400
+Received: from mail.kernel.org ([198.145.29.99]:51496 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727832AbgEFHYH (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 6 May 2020 03:24:07 -0400
-Received: from mail-io1-f43.google.com (mail-io1-f43.google.com [209.85.166.43])
+        id S1728857AbgEFITw (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 6 May 2020 04:19:52 -0400
+Received: from e123331-lin.nice.arm.com (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 1542E2075A;
-        Wed,  6 May 2020 07:24:07 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id BF91D206E6;
+        Wed,  6 May 2020 08:19:50 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1588749847;
-        bh=x7OyI4ujQqJw0j0GzC4hS3Aq2xvKqYQlLnWoJNviDjI=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=2dF/3JTTgUTXkPe00eAGP+i/UrEb6At13z6L8h0yfrl/xzNk2Y5LE5dG3bFPy3gsV
-         PanOXrzYPZqsVHdv4gTC1p54m9U/IrzFxdW0PPJ6mB4mrKWoHAmCzVMzr1tCUx8MbD
-         mgM6oToSjO1sRXefqDLWUFwvnbNkWAeT0wdLMaio=
-Received: by mail-io1-f43.google.com with SMTP id k18so1201848ion.0;
-        Wed, 06 May 2020 00:24:07 -0700 (PDT)
-X-Gm-Message-State: AGi0PuYoT4ZZstg3sPL6oQwiLuTiKNjIDIeCqxshoR6lAX/ZSnl3ww0A
-        /Pdf8tA7K/oPGQ8sXyaiAIwRFquy7Pnog8qw7fg=
-X-Google-Smtp-Source: APiQypIDZYGhT0LIyzlWMf02JIHTT0d22XLa8P8k+ofCUy3V1mbu/iTR9hb+bBCzJxHhbqT4z3ia2IzftQLl9LWc4FA=
-X-Received: by 2002:a02:8247:: with SMTP id q7mr6901558jag.68.1588749846416;
- Wed, 06 May 2020 00:24:06 -0700 (PDT)
-MIME-Version: 1.0
-References: <20200505190016.4350-1-lszubowi@redhat.com>
-In-Reply-To: <20200505190016.4350-1-lszubowi@redhat.com>
+        s=default; t=1588753192;
+        bh=+SDKOkKg1ZVm776EJnD5TocZ5JZYu6XB9fPUJmWVkEY=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=V7RUbhXRbrB3Li/B6+aTYZBzPWW0zBHo8mlxoPYe9a4TsrqjmQEaYj0XG70gXkU4Y
+         AMD+NV0UAgbLq/QCU3tVU6fAT8Oks+2vz+BcNtL0SkpHc2FfFabaITWdKO6O1g1ggL
+         tKavAHWBRbeOownHlPTga6bo66nH6EA9Nrt96pEI=
 From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Wed, 6 May 2020 09:23:55 +0200
-X-Gmail-Original-Message-ID: <CAMj1kXHsvy09V0rK2Qh0eiR4Vi5ZDn=5ordNvEBH4c-Xk00QgQ@mail.gmail.com>
-Message-ID: <CAMj1kXHsvy09V0rK2Qh0eiR4Vi5ZDn=5ordNvEBH4c-Xk00QgQ@mail.gmail.com>
-Subject: Re: [PATCH] efi/libstub/x86: Free EFI map buffer in allocate_e820()
-To:     Lenny Szubowicz <lszubowi@redhat.com>
-Cc:     eric.snowberg@oracle.com, Ingo Molnar <mingo@kernel.org>,
-        Arvind Sankar <nivedita@alum.mit.edu>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        linux-efi <linux-efi@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+To:     linux-efi@vger.kernel.org
+Cc:     linux-arm-kernel@lists.infradead.org,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Nicolas Pitre <nico@fluxnic.net>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Russell King <linux@armlinux.org.uk>,
+        Heinrich Schuchardt <xypron.glpk@gmx.de>
+Subject: [PATCH v3 1/5] ARM: decompressor: move headroom variable out of LC0
+Date:   Wed,  6 May 2020 10:19:35 +0200
+Message-Id: <20200506081939.8986-2-ardb@kernel.org>
+X-Mailer: git-send-email 2.17.1
+In-Reply-To: <20200506081939.8986-1-ardb@kernel.org>
+References: <20200506081939.8986-1-ardb@kernel.org>
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, 5 May 2020 at 21:00, Lenny Szubowicz <lszubowi@redhat.com> wrote:
->
-> In allocate_e820(), free the EFI map buffer that has been returned
-> by efi_get_memory_map(). The returned size of the EFI map buffer
-> is used to allocate an adequately sized e820ext buffer, if it's
-> needed. But the contents of that EFI map buffer is not used at all
-> and the local pointer to it is gone on return from allocate_e820().
->
-> Signed-off-by: Lenny Szubowicz <lszubowi@redhat.com>
-> ---
->  drivers/firmware/efi/libstub/x86-stub.c | 3 +++
->  1 file changed, 3 insertions(+)
->
-> diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-> index 05ccb229fb45..4efe3e7a218d 100644
-> --- a/drivers/firmware/efi/libstub/x86-stub.c
-> +++ b/drivers/firmware/efi/libstub/x86-stub.c
-> @@ -623,6 +623,9 @@ static efi_status_t allocate_e820(struct boot_params *params,
->         if (status != EFI_SUCCESS)
->                 return status;
->
-> +       /* Allocated EFI map buf is not used here. Just need its size. */
-> +       efi_bs_call(free_pool, map);
-> +
+Before breaking up LC0 into different pieces, move out the variable
+that is already place-relative (given that it subtracts 'restart' in
+the expression) and so its value does not need to be added to the
+runtime address of the LC0 symbol itself.
 
-Wouldn't it be better to call BS->GetMemoryMap() directly here, with a
-zero size for the input buffer?
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+Reviewed-by: Nicolas Pitre <nico@fluxnic.net>
+---
+ arch/arm/boot/compressed/head.S | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
->         nr_desc = buff_size / desc_size;
->
->         if (nr_desc > ARRAY_SIZE(params->e820_table)) {
-> --
-> 2.18.4
->
+diff --git a/arch/arm/boot/compressed/head.S b/arch/arm/boot/compressed/head.S
+index 2d2a42865b39..bb674febf640 100644
+--- a/arch/arm/boot/compressed/head.S
++++ b/arch/arm/boot/compressed/head.S
+@@ -339,7 +339,7 @@ not_angel:
+ 		 */
+ 		mov	r0, pc
+ 		cmp	r0, r4
+-		ldrcc	r0, LC0+28
++		ldrcc	r0, .Lheadroom
+ 		addcc	r0, r0, pc
+ 		cmpcc	r4, r0
+ 		orrcc	r4, r4, #1		@ remember we skipped cache_on
+@@ -716,9 +716,11 @@ LC0:		.word	LC0			@ r1
+ 		.word	_got_start		@ r11
+ 		.word	_got_end		@ ip
+ 		.word	.L_user_stack_end	@ sp
+-		.word	_end - restart + 16384 + 1024*1024
+ 		.size	LC0, . - LC0
+ 
++.Lheadroom:
++		.word	_end - restart + 16384 + 1024*1024
++
+ .Linflated_image_size_offset:
+ 		.long	(input_data_end - 4) - .
+ 
+-- 
+2.17.1
+
