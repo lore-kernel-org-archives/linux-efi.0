@@ -2,105 +2,99 @@ Return-Path: <SRS0=8hDy=6U=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-0.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 45B45C28CBC
-	for <linux-efi@archiver.kernel.org>; Wed,  6 May 2020 08:20:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E4CCFC47256
+	for <linux-efi@archiver.kernel.org>; Wed,  6 May 2020 13:29:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1E4ED20714
-	for <linux-efi@archiver.kernel.org>; Wed,  6 May 2020 08:20:21 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1588753221;
-	bh=PWMM3kT0ABXGqymWpNLRYqWaQ9HTNg5EFVcVWwoEfTI=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=K2Fom4y/qGFFm7gOTA36+lqB0nOkTwCgt5d8sUlzwuYplpPJwEXIRF4OGKwVys6J8
-	 Dg3E7VPtDWauM8wrjo3+KVgPPFTKeNiogQYLgzl6+b7R5MaWtus3CYIhfhCYoWd/JS
-	 6EVBENy1715ET+GSTej5nK+plKTLVCeRacT/Gcwo=
+	by mail.kernel.org (Postfix) with ESMTP id B900220757
+	for <linux-efi@archiver.kernel.org>; Wed,  6 May 2020 13:29:12 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="CyVSzoYs"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728844AbgEFITv (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 6 May 2020 04:19:51 -0400
-Received: from mail.kernel.org ([198.145.29.99]:51362 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728839AbgEFITu (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 6 May 2020 04:19:50 -0400
-Received: from e123331-lin.nice.arm.com (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 3152120714;
-        Wed,  6 May 2020 08:19:48 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1588753190;
-        bh=PWMM3kT0ABXGqymWpNLRYqWaQ9HTNg5EFVcVWwoEfTI=;
-        h=From:To:Cc:Subject:Date:From;
-        b=mCOBUa6HCaA8B2xUAoRUx93cdBJCOGSepe3slTife/7F580tWhjC9iUMC2WxrLqow
-         d1dS/bPUGt4ihEBPgM04D8q2vrmyDUvZJx/i5P3QUYKA7tRHC2Pez7VSUllhFMfQKR
-         cOPDZOIlobWcPQsEoAW4/M6N1vbOxKEyTFR89vr8=
-From:   Ard Biesheuvel <ardb@kernel.org>
-To:     linux-efi@vger.kernel.org
-Cc:     linux-arm-kernel@lists.infradead.org,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Nicolas Pitre <nico@fluxnic.net>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Russell King <linux@armlinux.org.uk>,
-        Heinrich Schuchardt <xypron.glpk@gmx.de>
-Subject: [PATCH v3 0/5] ARM: simplify handover from UEFI to decompressor
-Date:   Wed,  6 May 2020 10:19:34 +0200
-Message-Id: <20200506081939.8986-1-ardb@kernel.org>
-X-Mailer: git-send-email 2.17.1
+        id S1728483AbgEFN3M (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 6 May 2020 09:29:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40698 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1728081AbgEFN3M (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 6 May 2020 09:29:12 -0400
+Received: from mail-ot1-x343.google.com (mail-ot1-x343.google.com [IPv6:2607:f8b0:4864:20::343])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2B56AC061A0F
+        for <linux-efi@vger.kernel.org>; Wed,  6 May 2020 06:29:12 -0700 (PDT)
+Received: by mail-ot1-x343.google.com with SMTP id g19so1320641otk.5
+        for <linux-efi@vger.kernel.org>; Wed, 06 May 2020 06:29:12 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:from:date:message-id:subject:to:cc;
+        bh=c7SLmnE4klnpTd1SZ9Ht0REZux2oXpJ65WbnH469Wzg=;
+        b=CyVSzoYsWHRsoot5bAkYTiqb57hYNWb5+Dd9xwzDUIx/Pcl6qSLYMfZrCnTJi6cVNG
+         YDaQZKuJmL1pg/MWn5cCMzpseKihGeZR4YuHXDNJ/4x6zIwh2uR7a2y9CAMb8GCvDzml
+         W83I4ZZ1+Qjl//iY8JBSipxi749JJzrKLyUA8jEXOyFowGYZ1mIGXE2RtTQfubDpaaMb
+         KkEGpbp6VnL6IZVWNRXib/m7tm4eRe5QSAENM7m7xJfqSSc9g8NulqDvv04PUca9HbZm
+         GGHrlE160qyi0eleeZjQ9Em7cVo/QG+WeA9WUThCC09xNaPdiM6y65jVPPFTXt7JBcaA
+         jGWQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:from:date:message-id:subject:to:cc;
+        bh=c7SLmnE4klnpTd1SZ9Ht0REZux2oXpJ65WbnH469Wzg=;
+        b=qkBRGj8b3qYCwqCHffjkVFJySqlGWOVaqM25gAGd26jOZcy/xwwt358GgxpLEkLqei
+         ousjbriEouu+Lmh7MW11CeSdZUyqOR8CLqDcFmXuspsqTcPdAK36riNt7qCX+5j36oNl
+         xje/4u78+deEWu5nmrDPg/g9HQqHCJ9XhDvQg0MuURs1505qmAJxwDdwAn0dQ05QV77h
+         RKoxh8xuk69spiaPqGgDdAG1fHzimhAZzJqnQ+MQ4bwnD3oewjb26+bis6heYFOwrpFp
+         i12Ip4yiR70r61LSN3Ok5Yglug71lYNwd+TvcvM20xovU56ChNQt38YZtfEVqyhXpbWe
+         PsaA==
+X-Gm-Message-State: AGi0PuZJhGf7l57bl2uwSJqb3CZYUROVF0h/wlFPMd0hLe9WFu/NkZRk
+        FWaqwI9HKoNA592zhiGIsluQddTbiMshB+kdMZqnqf90NiT2Ug==
+X-Google-Smtp-Source: APiQypLRAthXdsOm1L1Xh7fckzRMCkZLzZpR9SQjXlVr7x94zRagJ7zFM2NDPm0Kwe5zQXn5bpBqJHVjNustIe2fCwA=
+X-Received: by 2002:a9d:68c5:: with SMTP id i5mr916578oto.251.1588771751575;
+ Wed, 06 May 2020 06:29:11 -0700 (PDT)
+MIME-Version: 1.0
+From:   =?UTF-8?B?5Lq/5LiA?= <teroincn@gmail.com>
+Date:   Wed, 6 May 2020 21:28:59 +0800
+Message-ID: <CANTwqXCzoejWKz+x=FnS6uk2THM0qZUW-3YjJpvfwjtuiPi7=w@mail.gmail.com>
+Subject: [BUG]is there a memleak in function efivar_create_sysfs_entry?
+To:     ardb@kernel.org
+Cc:     linux-efi@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The EFI stub in the ARM kernel runs in the context of the firmware, which
-means it usually runs with the caches and MMU on. Currently, we relocate
-the zImage so it appears in the first 128 MiB, disable the MMU and caches
-and invoke the decompressor via its ordinary entry point. However, since we
-can pass the base of DRAM directly, there is no need to relocate the zImage,
-which also means there is no need to disable and re-enable the caches and
-create new page tables etc.
+Hi all,
+I notice that most of the usage of kobject_init_and_add in drivers are
+wrong, and now some drivers code has maken it right,
+please see commit dfb5394f804e (https://lkml.org/lkml/2020/4/11/282).
 
-This simplification is implemented by patch #5. Patches #1 - #4 are
-prerequisite changes to permit the decompressor startup code to be invoked
-past its ordinary entry point, and execute from the offset where the UEFI
-firmware happened to load it.
+function efivar_create_sysfs_entry() in drivers/firmware/efi/efivars.c may
+have the similar issue and leak kobject.
+if kobject_init_and_add() failed, the new_var->kobj may already
+increased it's refcnt and allocated memory to store it's name,
+so a kobject_put is need before return.
 
-Note that this applies onto rmk/for-next as of today.
+static int
+efivar_create_sysfs_entry(struct efivar_entry *new_var)
+{
 
-Changes since v2:
-- Set the LSB of the image address if we are entering with MMU and caches off,
-  so that the decompressor will install its own page tables as it usually
-  does. This might happen on U-Boot platforms that call 'bootefi' without
-  enabling the caches (which technically violates the UEFI spec, but might
-  be working fine today)
-- Add Nico's ack to the series
 
-Changes since v1:
-- Tweak some asm sequences in #2 to fix the Thumb2 build
-- Switch immediately to the new stack in #5
+    ret = kobject_init_and_add(&new_var->kobj, &efivar_ktype,
+  NULL, "%s", short_name);
+    kfree(short_name);
+    if (ret)
+        return ret;
 
-Cc: Geert Uytterhoeven <geert+renesas@glider.be>
-Cc: Nicolas Pitre <nico@fluxnic.net>
-Cc: Linus Walleij <linus.walleij@linaro.org>
-Cc: Russell King <linux@armlinux.org.uk>
-Cc: Heinrich Schuchardt <xypron.glpk@gmx.de>
+kobject_uevent(&new_var->kobj, KOBJ_ADD);
+if (efivar_entry_add(new_var, &efivar_sysfs_list)) {
+    efivar_unregister(new_var);
+    return -EINTR;
+}
 
-Ard Biesheuvel (5):
-  ARM: decompressor: move headroom variable out of LC0
-  ARM: decompressor: split off _edata and stack base into separate
-    object
-  ARM: decompressor: defer loading of the contents of the LC0 structure
-  ARM: decompressor: move GOT into .data for EFI enabled builds
-  ARM: decompressor: run decompressor in place if loaded via UEFI
+    return 0;
+}
 
- arch/arm/boot/compressed/head.S           | 91 ++++++++------------
- arch/arm/boot/compressed/vmlinux.lds.S    |  5 ++
- drivers/firmware/efi/libstub/arm32-stub.c | 45 ++--------
- 3 files changed, 48 insertions(+), 93 deletions(-)
 
--- 
-2.17.1
-
+Best regards,
+Lin Yi
