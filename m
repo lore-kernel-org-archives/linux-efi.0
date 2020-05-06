@@ -2,42 +2,41 @@ Return-Path: <SRS0=8hDy=6U=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9CA43C47259
-	for <linux-efi@archiver.kernel.org>; Wed,  6 May 2020 08:20:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 45B45C28CBC
+	for <linux-efi@archiver.kernel.org>; Wed,  6 May 2020 08:20:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7C854206E6
-	for <linux-efi@archiver.kernel.org>; Wed,  6 May 2020 08:20:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1E4ED20714
+	for <linux-efi@archiver.kernel.org>; Wed,  6 May 2020 08:20:21 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1588753204;
-	bh=8ouhSegoa2BFfwpTHy/DDrs8wf6In/Qbisl3KSpg1Z4=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=Q3Q42KGBwb8ZgBQLNnotojzgcCmOl0Ap78P99EiA+IjSpx8M/F4QRM8HBeXK0nSGI
-	 ShhY4GUrSydb6dciSA4OLG3fpnmH/b9dESNgPMfwxOPLmzgvg465fFvggkmJw3aLEZ
-	 kLigakZdj/mBbAmybTIixtY78VB1acS39hOPb7Z4=
+	s=default; t=1588753221;
+	bh=PWMM3kT0ABXGqymWpNLRYqWaQ9HTNg5EFVcVWwoEfTI=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=K2Fom4y/qGFFm7gOTA36+lqB0nOkTwCgt5d8sUlzwuYplpPJwEXIRF4OGKwVys6J8
+	 Dg3E7VPtDWauM8wrjo3+KVgPPFTKeNiogQYLgzl6+b7R5MaWtus3CYIhfhCYoWd/JS
+	 6EVBENy1715ET+GSTej5nK+plKTLVCeRacT/Gcwo=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728712AbgEFIUD (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 6 May 2020 04:20:03 -0400
-Received: from mail.kernel.org ([198.145.29.99]:52052 "EHLO mail.kernel.org"
+        id S1728844AbgEFITv (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 6 May 2020 04:19:51 -0400
+Received: from mail.kernel.org ([198.145.29.99]:51362 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728742AbgEFIUD (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 6 May 2020 04:20:03 -0400
+        id S1728839AbgEFITu (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 6 May 2020 04:19:50 -0400
 Received: from e123331-lin.nice.arm.com (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 9367A2087E;
-        Wed,  6 May 2020 08:20:00 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 3152120714;
+        Wed,  6 May 2020 08:19:48 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1588753202;
-        bh=8ouhSegoa2BFfwpTHy/DDrs8wf6In/Qbisl3KSpg1Z4=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Gq6uyEEH87KKgmdEKaqTVXt7XXD01VUHigr6Dh3PCYVXU1fO6rpAOPNGpphQn5X7Q
-         NKYqIkRLiZ/dtpKUqXFTdUIHEYJDAQAxViJ5z9c+h8DHjEy1c5uT9rbOwSCGNZa/ys
-         KdoeyYykCRxt9YlmDUu381ESPdfzsioVofF2FtOk=
+        s=default; t=1588753190;
+        bh=PWMM3kT0ABXGqymWpNLRYqWaQ9HTNg5EFVcVWwoEfTI=;
+        h=From:To:Cc:Subject:Date:From;
+        b=mCOBUa6HCaA8B2xUAoRUx93cdBJCOGSepe3slTife/7F580tWhjC9iUMC2WxrLqow
+         d1dS/bPUGt4ihEBPgM04D8q2vrmyDUvZJx/i5P3QUYKA7tRHC2Pez7VSUllhFMfQKR
+         cOPDZOIlobWcPQsEoAW4/M6N1vbOxKEyTFR89vr8=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-arm-kernel@lists.infradead.org,
@@ -47,157 +46,61 @@ Cc:     linux-arm-kernel@lists.infradead.org,
         Linus Walleij <linus.walleij@linaro.org>,
         Russell King <linux@armlinux.org.uk>,
         Heinrich Schuchardt <xypron.glpk@gmx.de>
-Subject: [PATCH v3 5/5] ARM: decompressor: run decompressor in place if loaded via UEFI
-Date:   Wed,  6 May 2020 10:19:39 +0200
-Message-Id: <20200506081939.8986-6-ardb@kernel.org>
+Subject: [PATCH v3 0/5] ARM: simplify handover from UEFI to decompressor
+Date:   Wed,  6 May 2020 10:19:34 +0200
+Message-Id: <20200506081939.8986-1-ardb@kernel.org>
 X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20200506081939.8986-1-ardb@kernel.org>
-References: <20200506081939.8986-1-ardb@kernel.org>
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The decompressor can load from anywhere in memory, and the only reason
-the EFI stub code relocates it is to ensure it appears within the first
-128 MiB of memory, so that the uncompressed kernel ends up at the right
-offset in memory.
+The EFI stub in the ARM kernel runs in the context of the firmware, which
+means it usually runs with the caches and MMU on. Currently, we relocate
+the zImage so it appears in the first 128 MiB, disable the MMU and caches
+and invoke the decompressor via its ordinary entry point. However, since we
+can pass the base of DRAM directly, there is no need to relocate the zImage,
+which also means there is no need to disable and re-enable the caches and
+create new page tables etc.
 
-We can short circuit this, and simply jump into the decompressor startup
-code at the point where it knows where the base of memory lives. This
-also means there is no need to disable the MMU and caches, create new
-page tables and re-enable them.
+This simplification is implemented by patch #5. Patches #1 - #4 are
+prerequisite changes to permit the decompressor startup code to be invoked
+past its ordinary entry point, and execute from the offset where the UEFI
+firmware happened to load it.
 
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
-Reviewed-by: Nicolas Pitre <nico@fluxnic.net>
----
- arch/arm/boot/compressed/head.S           | 39 ++++++-----------
- drivers/firmware/efi/libstub/arm32-stub.c | 45 +++-----------------
- 2 files changed, 20 insertions(+), 64 deletions(-)
+Note that this applies onto rmk/for-next as of today.
 
-diff --git a/arch/arm/boot/compressed/head.S b/arch/arm/boot/compressed/head.S
-index 9dea394b286b..3e525e9325d6 100644
---- a/arch/arm/boot/compressed/head.S
-+++ b/arch/arm/boot/compressed/head.S
-@@ -1480,37 +1480,26 @@ reloc_code_end:
- 
- #ifdef CONFIG_EFI_STUB
- ENTRY(efi_enter_kernel)
--		mov	r7, r0				@ preserve image base
--		mov	r4, r1				@ preserve DT pointer
-+		mov	r4, r0			@ preserve image base
-+		mov	r8, r1			@ preserve DT pointer
- 
--		mov	r0, r4				@ DT start
--		add	r1, r4, r2			@ DT end
--		bl	cache_clean_flush
-+		mrc	p15, 0, r0, c1, c0, 0	@ read SCTLR
-+		tst	r0, #0x1		@ MMU enabled?
-+		orreq	r4, r4, #1		@ set LSB if not
- 
--		mov	r0, r7				@ relocated zImage
--		ldr	r1, =_edata			@ size of zImage
--		add	r1, r1, r0			@ end of zImage
-+		mov	r0, r8			@ DT start
-+		add	r1, r8, r2		@ DT end
- 		bl	cache_clean_flush
- 
--		@ The PE/COFF loader might not have cleaned the code we are
--		@ running beyond the PoU, and so calling cache_off below from
--		@ inside the PE/COFF loader allocated region is unsafe unless
--		@ we explicitly clean it to the PoC.
--		adr	r0, call_cache_fn		@ region of code we will
--		adr	r1, 0f				@ run with MMU off
--		bl	cache_clean_flush
--		bl	cache_off
-+		adr	r0, 0f			@ switch to our stack
-+		ldr	sp, [r0]
-+		add	sp, sp, r0
- 
--		@ Set parameters for booting zImage according to boot protocol
--		@ put FDT address in r2, it was returned by efi_entry()
--		@ r1 is the machine type, and r0 needs to be 0
--		mov	r0, #0
--		mov	r1, #0xFFFFFFFF
--		mov	r2, r4
--		add	r7, r7, #(__efi_start - start)
--		mov	pc, r7				@ no mode switch
-+		mov	r5, #0			@ appended DTB size
-+		mov	r7, #0xFFFFFFFF		@ machine ID
-+		b	wont_overwrite
- ENDPROC(efi_enter_kernel)
--0:
-+0:		.long	.L_user_stack_end - .
- #endif
- 
- 		.align
-diff --git a/drivers/firmware/efi/libstub/arm32-stub.c b/drivers/firmware/efi/libstub/arm32-stub.c
-index 7826553af2ba..0050d811bf20 100644
---- a/drivers/firmware/efi/libstub/arm32-stub.c
-+++ b/drivers/firmware/efi/libstub/arm32-stub.c
-@@ -199,14 +199,8 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
- 	unsigned long kernel_base;
- 	efi_status_t status;
- 
--	/*
--	 * Verify that the DRAM base address is compatible with the ARM
--	 * boot protocol, which determines the base of DRAM by masking
--	 * off the low 27 bits of the address at which the zImage is
--	 * loaded. These assumptions are made by the decompressor,
--	 * before any memory map is available.
--	 */
--	kernel_base = round_up(dram_base, SZ_128M);
-+	/* use a 16 MiB aligned base for the decompressed kernel */
-+	kernel_base = round_up(dram_base, SZ_16M) + TEXT_OFFSET;
- 
- 	/*
- 	 * Note that some platforms (notably, the Raspberry Pi 2) put
-@@ -215,41 +209,14 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
- 	 * base of the kernel image is only partially used at the moment.
- 	 * (Up to 5 pages are used for the swapper page tables)
- 	 */
--	kernel_base += TEXT_OFFSET - 5 * PAGE_SIZE;
--
--	status = reserve_kernel_base(kernel_base, reserve_addr, reserve_size);
-+	status = reserve_kernel_base(kernel_base - 5 * PAGE_SIZE, reserve_addr,
-+				     reserve_size);
- 	if (status != EFI_SUCCESS) {
- 		pr_efi_err("Unable to allocate memory for uncompressed kernel.\n");
- 		return status;
- 	}
- 
--	/*
--	 * Relocate the zImage, so that it appears in the lowest 128 MB
--	 * memory window.
--	 */
--	*image_addr = (unsigned long)image->image_base;
--	*image_size = image->image_size;
--	status = efi_relocate_kernel(image_addr, *image_size, *image_size,
--				     kernel_base + MAX_UNCOMP_KERNEL_SIZE, 0, 0);
--	if (status != EFI_SUCCESS) {
--		pr_efi_err("Failed to relocate kernel.\n");
--		efi_free(*reserve_size, *reserve_addr);
--		*reserve_size = 0;
--		return status;
--	}
--
--	/*
--	 * Check to see if we were able to allocate memory low enough
--	 * in memory. The kernel determines the base of DRAM from the
--	 * address at which the zImage is loaded.
--	 */
--	if (*image_addr + *image_size > dram_base + ZIMAGE_OFFSET_LIMIT) {
--		pr_efi_err("Failed to relocate kernel, no low memory available.\n");
--		efi_free(*reserve_size, *reserve_addr);
--		*reserve_size = 0;
--		efi_free(*image_size, *image_addr);
--		*image_size = 0;
--		return EFI_LOAD_ERROR;
--	}
-+	*image_addr = kernel_base;
-+	*image_size = 0;
- 	return EFI_SUCCESS;
- }
+Changes since v2:
+- Set the LSB of the image address if we are entering with MMU and caches off,
+  so that the decompressor will install its own page tables as it usually
+  does. This might happen on U-Boot platforms that call 'bootefi' without
+  enabling the caches (which technically violates the UEFI spec, but might
+  be working fine today)
+- Add Nico's ack to the series
+
+Changes since v1:
+- Tweak some asm sequences in #2 to fix the Thumb2 build
+- Switch immediately to the new stack in #5
+
+Cc: Geert Uytterhoeven <geert+renesas@glider.be>
+Cc: Nicolas Pitre <nico@fluxnic.net>
+Cc: Linus Walleij <linus.walleij@linaro.org>
+Cc: Russell King <linux@armlinux.org.uk>
+Cc: Heinrich Schuchardt <xypron.glpk@gmx.de>
+
+Ard Biesheuvel (5):
+  ARM: decompressor: move headroom variable out of LC0
+  ARM: decompressor: split off _edata and stack base into separate
+    object
+  ARM: decompressor: defer loading of the contents of the LC0 structure
+  ARM: decompressor: move GOT into .data for EFI enabled builds
+  ARM: decompressor: run decompressor in place if loaded via UEFI
+
+ arch/arm/boot/compressed/head.S           | 91 ++++++++------------
+ arch/arm/boot/compressed/vmlinux.lds.S    |  5 ++
+ drivers/firmware/efi/libstub/arm32-stub.c | 45 ++--------
+ 3 files changed, 48 insertions(+), 93 deletions(-)
+
 -- 
 2.17.1
 
