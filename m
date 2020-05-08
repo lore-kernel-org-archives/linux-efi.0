@@ -7,37 +7,37 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CEB99C38A2A
-	for <linux-efi@archiver.kernel.org>; Fri,  8 May 2020 18:03:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 53278C47257
+	for <linux-efi@archiver.kernel.org>; Fri,  8 May 2020 18:03:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B0AEA2184D
-	for <linux-efi@archiver.kernel.org>; Fri,  8 May 2020 18:03:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2CE442184D
+	for <linux-efi@archiver.kernel.org>; Fri,  8 May 2020 18:03:13 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1588960991;
-	bh=2jew03jHhbJ4tYdttjEtxxUUZNb9+fBYEcl/Fza8KHA=;
+	s=default; t=1588960993;
+	bh=WTukNKpKjk8cOI4uPZY4UeJ1dYYW706w8hy+2fahylY=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=N0eBxrGs65uRgNqNHPlHznUgB5DnVwR2lVHwuK4mvPcfe9adHIJhx8fj5+NZu4RRi
-	 Rm0z40Wfu9L4yzn0GTOISJ+lw9Ip31kK0L2CUPC23neDFFBgzpmRFH6rfOpgO+TiKN
-	 7FjpJ1UHVoy0ZMMQmEtAUTnaTt/RqzYc7Qm8meg8=
+	b=vbdu1tK4KAk6NOmoKfzg3yM7Z06mOYnwrhvwcD9D3shzxFTIfSvg3gwoNJ27EZUBS
+	 PSdfpLFn7OLx1Jb2mv9sktgSs+7smhv1zlwrSlZJQ5IJKJFq3f1gwtsHReFlinzoFN
+	 nuNIUYBRVTtT7TmiR5zuBtzvZx1AjPBHFMYp2PMw=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728005AbgEHSCv (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 8 May 2020 14:02:51 -0400
-Received: from mail.kernel.org ([198.145.29.99]:48342 "EHLO mail.kernel.org"
+        id S1727969AbgEHSCt (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 8 May 2020 14:02:49 -0400
+Received: from mail.kernel.org ([198.145.29.99]:48294 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727989AbgEHSCu (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 8 May 2020 14:02:50 -0400
+        id S1727978AbgEHSCq (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 8 May 2020 14:02:46 -0400
 Received: from e123331-lin.nice.arm.com (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id E205721974;
-        Fri,  8 May 2020 18:02:46 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 4B3AA24958;
+        Fri,  8 May 2020 18:02:43 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1588960969;
-        bh=2jew03jHhbJ4tYdttjEtxxUUZNb9+fBYEcl/Fza8KHA=;
+        s=default; t=1588960966;
+        bh=WTukNKpKjk8cOI4uPZY4UeJ1dYYW706w8hy+2fahylY=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=dC5rEQLjwHmHetLSEiZcwaxJZ1kftToq3Sp6pjkfQneV3LjotGcj4EyPYiA7DNe3n
-         ekcMAJ/royVlIhZ5kVffwvaiWnDleZC4zneskzf9yOlj1m/U0GHnd81zVMS0hY318+
-         M6eBqLTOiJ76IilGtlBHdVnC9JgjZSME39z74Dvg=
+        b=2UAI6X/nBupzoFacpraPzq49FlH9Q3AzcBI8fCBaPkDNc0e34yiKDRM4XSWxCsgMt
+         7NUkshxZPIXSGAdbEP/8fOvH6oLyfLLFc3EIdqVrRT9sT+GxbQChkS+Z8li6a8utNH
+         0DbdR1Ub7MW4aeX0l9eubwfIzD51KJnCTsiqJlsw=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
@@ -46,9 +46,9 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
         Arvind Sankar <nivedita@alum.mit.edu>,
         Guenter Roeck <linux@roeck-us.net>,
         Joe Perches <joe@perches.com>
-Subject: [PATCH 11/15] efi/libstub: Check return value of efi_parse_options
-Date:   Fri,  8 May 2020 20:01:53 +0200
-Message-Id: <20200508180157.1816-12-ardb@kernel.org>
+Subject: [PATCH 10/15] efi/x86: Support builtin command line
+Date:   Fri,  8 May 2020 20:01:52 +0200
+Message-Id: <20200508180157.1816-11-ardb@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20200508180157.1816-1-ardb@kernel.org>
 References: <20200508180157.1816-1-ardb@kernel.org>
@@ -59,94 +59,46 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Arvind Sankar <nivedita@alum.mit.edu>
 
-efi_parse_options can fail if it is unable to allocate space for a copy
-of the command line. Check the return value to make sure it succeeded.
+Add support for the x86 CMDLINE_BOOL and CMDLINE_OVERRIDE configuration
+options.
 
 Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
-Link: https://lore.kernel.org/r/20200430182843.2510180-12-nivedita@alum.mit.edu
+Link: https://lore.kernel.org/r/20200430182843.2510180-11-nivedita@alum.mit.edu
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/firmware/efi/libstub/efi-stub.c | 23 +++++++++++++++++------
- drivers/firmware/efi/libstub/x86-stub.c | 12 ++++++++++--
- 2 files changed, 27 insertions(+), 8 deletions(-)
+ drivers/firmware/efi/libstub/x86-stub.c | 12 ++++++++----
+ 1 file changed, 8 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/efi-stub.c b/drivers/firmware/efi/libstub/efi-stub.c
-index 63541c2440ef..c2484bf75c5d 100644
---- a/drivers/firmware/efi/libstub/efi-stub.c
-+++ b/drivers/firmware/efi/libstub/efi-stub.c
-@@ -207,11 +207,21 @@ efi_status_t efi_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg)
- 
- 	if (IS_ENABLED(CONFIG_CMDLINE_EXTEND) ||
- 	    IS_ENABLED(CONFIG_CMDLINE_FORCE) ||
--	    cmdline_size == 0)
--		efi_parse_options(CONFIG_CMDLINE);
-+	    cmdline_size == 0) {
-+		status = efi_parse_options(CONFIG_CMDLINE);
-+		if (status != EFI_SUCCESS) {
-+			efi_err("Failed to parse options\n");
-+			goto fail_free_cmdline;
-+		}
-+	}
- 
--	if (!IS_ENABLED(CONFIG_CMDLINE_FORCE) && cmdline_size > 0)
--		efi_parse_options(cmdline_ptr);
-+	if (!IS_ENABLED(CONFIG_CMDLINE_FORCE) && cmdline_size > 0) {
-+		status = efi_parse_options(cmdline_ptr);
-+		if (status != EFI_SUCCESS) {
-+			efi_err("Failed to parse options\n");
-+			goto fail_free_cmdline;
-+		}
-+	}
- 
- 	efi_info("Booting Linux Kernel...\n");
- 
-@@ -223,7 +233,7 @@ efi_status_t efi_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg)
- 				     dram_base, image);
- 	if (status != EFI_SUCCESS) {
- 		efi_err("Failed to relocate kernel\n");
--		goto fail_free_cmdline;
-+		goto fail_free_screeninfo;
- 	}
- 
- 	efi_retrieve_tpm2_eventlog();
-@@ -326,8 +336,9 @@ efi_status_t efi_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg)
- fail_free_image:
- 	efi_free(image_size, image_addr);
- 	efi_free(reserve_size, reserve_addr);
--fail_free_cmdline:
-+fail_free_screeninfo:
- 	free_screen_info(si);
-+fail_free_cmdline:
- 	efi_free(cmdline_size, (unsigned long)cmdline_ptr);
- fail:
- 	return status;
 diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index c84c5678e3e1..37154bb93c59 100644
+index f1a134596b53..c84c5678e3e1 100644
 --- a/drivers/firmware/efi/libstub/x86-stub.c
 +++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -739,12 +739,20 @@ unsigned long efi_main(efi_handle_t handle,
+@@ -680,7 +680,6 @@ unsigned long efi_main(efi_handle_t handle,
+ 	unsigned long buffer_start, buffer_end;
+ 	struct setup_header *hdr = &boot_params->hdr;
+ 	efi_status_t status;
+-	unsigned long cmdline_paddr;
+ 
+ 	efi_system_table = sys_table_arg;
+ 
+@@ -739,9 +738,14 @@ unsigned long efi_main(efi_handle_t handle,
+ 		image_offset = 0;
  	}
  
- #ifdef CONFIG_CMDLINE_BOOL
--	efi_parse_options(CONFIG_CMDLINE);
-+	status = efi_parse_options(CONFIG_CMDLINE);
-+	if (status != EFI_SUCCESS) {
-+		efi_err("Failed to parse options\n");
-+		goto fail;
+-	cmdline_paddr = ((u64)hdr->cmd_line_ptr |
+-			 ((u64)boot_params->ext_cmd_line_ptr << 32));
+-	efi_parse_options((char *)cmdline_paddr);
++#ifdef CONFIG_CMDLINE_BOOL
++	efi_parse_options(CONFIG_CMDLINE);
++#endif
++	if (!IS_ENABLED(CONFIG_CMDLINE_OVERRIDE)) {
++		unsigned long cmdline_paddr = ((u64)hdr->cmd_line_ptr |
++					       ((u64)boot_params->ext_cmd_line_ptr << 32));
++		efi_parse_options((char *)cmdline_paddr);
 +	}
- #endif
- 	if (!IS_ENABLED(CONFIG_CMDLINE_OVERRIDE)) {
- 		unsigned long cmdline_paddr = ((u64)hdr->cmd_line_ptr |
- 					       ((u64)boot_params->ext_cmd_line_ptr << 32));
--		efi_parse_options((char *)cmdline_paddr);
-+		status = efi_parse_options((char *)cmdline_paddr);
-+		if (status != EFI_SUCCESS) {
-+			efi_err("Failed to parse options\n");
-+			goto fail;
-+		}
- 	}
  
  	/*
+ 	 * At this point, an initrd may already have been loaded by the
 -- 
 2.17.1
 
