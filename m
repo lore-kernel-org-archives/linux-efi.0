@@ -7,37 +7,37 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BBAAEC47255
-	for <linux-efi@archiver.kernel.org>; Fri,  8 May 2020 18:03:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 02B60C47257
+	for <linux-efi@archiver.kernel.org>; Fri,  8 May 2020 18:03:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9F619218AC
-	for <linux-efi@archiver.kernel.org>; Fri,  8 May 2020 18:03:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DB8C92184D
+	for <linux-efi@archiver.kernel.org>; Fri,  8 May 2020 18:03:06 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1588960980;
-	bh=0UX/KE5NPn6JSiA254bGg/BusFMtpcXn/r1pNYgqK6I=;
+	s=default; t=1588960986;
+	bh=Ciz6cGqRWSQBYdBDzNC/bjGbGKvmMvh2ZJIHO54bhtc=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=lBj+cxLPCjtet622Y0u8Yz181aHja/xDKRYGF8MI9ZMiibXb/RsFgGdlEjdNRcQWy
-	 UgKSq/HoPK5syNvBw787y3FXJJXAqCzg1aS68HJt1QbaEQzx/ZtpKIIlhkrTIAvQVJ
-	 oWMaVHeFfGewa20AB1UvSB+/wjuvU3JnUKJ64NiY=
+	b=aflc99YcV6o0tU2K4Ql0CuZwug71GceABcnpvAiNHgL9jjioroMhL34lepmt0S2i6
+	 ElcHljXauu/9Qfxf9EXdn0uwdIl0k4elLi8faSBEP7TFr1fUIsHiSxQFY9M+IW88q8
+	 QxmurBiHO/YuQnxWpYERbB2Ltl4emu3peApRAlcU=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727992AbgEHSC4 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 8 May 2020 14:02:56 -0400
-Received: from mail.kernel.org ([198.145.29.99]:48430 "EHLO mail.kernel.org"
+        id S1728063AbgEHSDD (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 8 May 2020 14:03:03 -0400
+Received: from mail.kernel.org ([198.145.29.99]:48534 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728060AbgEHSCz (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 8 May 2020 14:02:55 -0400
+        id S1728021AbgEHSDA (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 8 May 2020 14:03:00 -0400
 Received: from e123331-lin.nice.arm.com (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 761DE24972;
-        Fri,  8 May 2020 18:02:52 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id E2ED024956;
+        Fri,  8 May 2020 18:02:57 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1588960975;
-        bh=0UX/KE5NPn6JSiA254bGg/BusFMtpcXn/r1pNYgqK6I=;
+        s=default; t=1588960980;
+        bh=Ciz6cGqRWSQBYdBDzNC/bjGbGKvmMvh2ZJIHO54bhtc=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=IXM4t75JqlaHiuFtBGFnYCJhAOG3cXnRftl3lC0d1wkSrTcSK1NPlvTuTP6RuRoKx
-         PoUquoGe81LiZsJai7SUnr3VcKhV8MsnyLAeew1pk1XOHZRmiO940szHkL7uqb0m6X
-         DE2lNg8X5w/xStFsNyV5uF+VfuiBSVBgaommgppE=
+        b=VMY0aJTmwc6t9qpd2+OOuFn/TtgB/PeXvYYc13DZkbJb/oGSkIkOlxopzsq45BIdO
+         W9GJa3H75aH+x4bzPrCiAnhRWE1B9j8aZbWajIOTDt0/vFlUjLkK65din6I71CnVXu
+         Y8Ibihl/uMO3kYqJkhZ36TS/9RWeO+f2VrGd2g14=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
@@ -45,13 +45,10 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
         Arnd Bergmann <arnd@arndb.de>,
         Arvind Sankar <nivedita@alum.mit.edu>,
         Guenter Roeck <linux@roeck-us.net>,
-        Joe Perches <joe@perches.com>,
-        Nick Desaulniers <ndesaulniers@google.com>,
-        Peter Collingbourne <pcc@google.com>,
-        Sami Tolvanen <samitolvanen@google.com>
-Subject: [PATCH 13/15] efi/libstub/x86: Work around LLVM ELF quirk build regression
-Date:   Fri,  8 May 2020 20:01:55 +0200
-Message-Id: <20200508180157.1816-14-ardb@kernel.org>
+        Joe Perches <joe@perches.com>
+Subject: [PATCH 15/15] efi/libstub: Correct comment typos
+Date:   Fri,  8 May 2020 20:01:57 +0200
+Message-Id: <20200508180157.1816-16-ardb@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20200508180157.1816-1-ardb@kernel.org>
 References: <20200508180157.1816-1-ardb@kernel.org>
@@ -60,44 +57,44 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-When building the x86 EFI stub with Clang, the libstub Makefile rules
-that manipulate the ELF object files may throw an error like:
+From: Joe Perches <joe@perches.com>
 
-    STUBCPY drivers/firmware/efi/libstub/efi-stub-helper.stub.o
-  strip: drivers/firmware/efi/libstub/efi-stub-helper.stub.o: Failed to find link section for section 10
-  objcopy: drivers/firmware/efi/libstub/efi-stub-helper.stub.o: Failed to find link section for section 10
+Fix a couple typos in comments.
 
-This is the result of a LLVM feature [0] where symbol references are
-stored in a LLVM specific .llvm_addrsig section in a non-transparent way,
-causing generic ELF tools such as strip or objcopy to choke on them.
-
-So force the compiler not to emit these sections, by passing the
-appropriate command line option.
-
-[0] https://sourceware.org/bugzilla/show_bug.cgi?id=23817
-
-Cc: Nick Desaulniers <ndesaulniers@google.com>
-Cc: Peter Collingbourne <pcc@google.com>
-Cc: Sami Tolvanen <samitolvanen@google.com>
-Reported-by: Arnd Bergmann <arnd@arndb.de>
-Suggested-by: Fangrui Song <maskray@google.com>
+Signed-off-by: Joe Perches <joe@perches.com>
+Link: https://lore.kernel.org/r/ec53e67b3ac928922807db3cb1585e911971dadc.1588273612.git.joe@perches.com
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/firmware/efi/libstub/Makefile | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/firmware/efi/libstub/pci.c      | 2 +-
+ drivers/firmware/efi/libstub/relocate.c | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index 8d246b51bd49..e5a49dc8e9bc 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -30,6 +30,7 @@ KBUILD_CFLAGS			:= $(cflags-y) -DDISABLE_BRANCH_PROFILING \
- 				   -D__NO_FORTIFY \
- 				   $(call cc-option,-ffreestanding) \
- 				   $(call cc-option,-fno-stack-protector) \
-+				   $(call cc-option,-fno-addrsig) \
- 				   -D__DISABLE_EXPORTS
- 
- GCOV_PROFILE			:= n
+diff --git a/drivers/firmware/efi/libstub/pci.c b/drivers/firmware/efi/libstub/pci.c
+index 60af51bed573..99fb25d2bcf5 100644
+--- a/drivers/firmware/efi/libstub/pci.c
++++ b/drivers/firmware/efi/libstub/pci.c
+@@ -69,7 +69,7 @@ void efi_pci_disable_bridge_busmaster(void)
+ 		 * access to the framebuffer. Drivers for true PCIe graphics
+ 		 * controllers that are behind a PCIe root port do not use
+ 		 * DMA to implement the GOP framebuffer anyway [although they
+-		 * may use it in their implentation of Gop->Blt()], and so
++		 * may use it in their implementation of Gop->Blt()], and so
+ 		 * disabling DMA in the PCI bridge should not interfere with
+ 		 * normal operation of the device.
+ 		 */
+diff --git a/drivers/firmware/efi/libstub/relocate.c b/drivers/firmware/efi/libstub/relocate.c
+index 93c04d6aaed1..9b1aaf8b123f 100644
+--- a/drivers/firmware/efi/libstub/relocate.c
++++ b/drivers/firmware/efi/libstub/relocate.c
+@@ -140,7 +140,7 @@ efi_status_t efi_relocate_kernel(unsigned long *image_addr,
+ 	 * The EFI firmware loader could have placed the kernel image
+ 	 * anywhere in memory, but the kernel has restrictions on the
+ 	 * max physical address it can run at.  Some architectures
+-	 * also have a prefered address, so first try to relocate
++	 * also have a preferred address, so first try to relocate
+ 	 * to the preferred address.  If that fails, allocate as low
+ 	 * as possible while respecting the required alignment.
+ 	 */
 -- 
 2.17.1
 
