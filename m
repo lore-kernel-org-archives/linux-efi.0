@@ -4,40 +4,40 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A0744C47257
-	for <linux-efi@archiver.kernel.org>; Fri,  8 May 2020 18:02:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CEEE7C38A2A
+	for <linux-efi@archiver.kernel.org>; Fri,  8 May 2020 18:02:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 84E8121974
-	for <linux-efi@archiver.kernel.org>; Fri,  8 May 2020 18:02:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AE80824955
+	for <linux-efi@archiver.kernel.org>; Fri,  8 May 2020 18:02:53 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1588960963;
-	bh=MShStUH0SyUusi3VC7mLRP+NpMvAKqWnINbb+1eHpsg=;
+	s=default; t=1588960973;
+	bh=cy0V4lbi7zDsWS5x9DClkcbqGwBIYKZEuTAbd1OIDjk=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=jo7EDdqoM0+w8jBHzUiDkvWDpRZeWaIE0Tuks04J2zBsiprVgMxo07vNzgIEFfp5t
-	 WQfmb9Xt+nWzFWZMEheP9T4f3ClHLa91HNe/j9DstTMFbHi8HsxWtmJyY5bXHQrMY2
-	 x9++KQAFWiRfRx90JgurYqO3TMBKke470OGSKkfw=
+	b=QazbJ+EniTpyPJM3l/AmB5pjtYXKoUsba0EjzggSuKHlzlX4Us0LX5dv1EywZU816
+	 nKlTSbQfxwuk55Q9fAP8ugP5qgS8d2ZYc1P07Sr+BzoDG/VBqcVPdR80P+NT3maEg/
+	 R+5nGb1vMlUFG03mBcWS0KKjM4Lo8rUXo1cU3t+0=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727956AbgEHSCm (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 8 May 2020 14:02:42 -0400
-Received: from mail.kernel.org ([198.145.29.99]:48158 "EHLO mail.kernel.org"
+        id S1728035AbgEHSCx (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 8 May 2020 14:02:53 -0400
+Received: from mail.kernel.org ([198.145.29.99]:48394 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727946AbgEHSCl (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 8 May 2020 14:02:41 -0400
+        id S1728025AbgEHSCw (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 8 May 2020 14:02:52 -0400
 Received: from e123331-lin.nice.arm.com (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id A4F972184D;
-        Fri,  8 May 2020 18:02:38 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id CC95624954;
+        Fri,  8 May 2020 18:02:49 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1588960960;
-        bh=MShStUH0SyUusi3VC7mLRP+NpMvAKqWnINbb+1eHpsg=;
+        s=default; t=1588960972;
+        bh=cy0V4lbi7zDsWS5x9DClkcbqGwBIYKZEuTAbd1OIDjk=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=pLNg8ILNtEVyA7BiL2T9jQl5t/npVwReW7ccay2m5LsCZzr6REJUkHZZknpc/7xR/
-         JJslzb/Izrf4sWDaAevT6SRkHYJw4t0y/fMrdb7fHx4DEHoQyrQ6igLi5XoLRH5yc2
-         gDFj4fLv2SnzNhPm/SfmXp9pjPibO7RgNxmHYdis=
+        b=P+hLRZUFTbB4uFWZe8W30e+YZrzPx19vd8lF3lwHs7ucirq+tAYNfvxXk7GGmB+LA
+         Tp8Z3dII1VHWvDP6jwt2Cezqm86N0ur0mocRGbyIrHwBDZUE3SJRGYdT+sSYkqsoVk
+         1TGTuEXYPRVWbEPNKup2qFuQTEVCoZr67VYh+j0Q=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>
@@ -46,9 +46,9 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
         Arvind Sankar <nivedita@alum.mit.edu>,
         Guenter Roeck <linux@roeck-us.net>,
         Joe Perches <joe@perches.com>
-Subject: [PATCH 08/15] efi/x86: Move command-line initrd loading to efi_main
-Date:   Fri,  8 May 2020 20:01:50 +0200
-Message-Id: <20200508180157.1816-9-ardb@kernel.org>
+Subject: [PATCH 12/15] efi/libstub: Fix mixed mode boot issue after macro refactor
+Date:   Fri,  8 May 2020 20:01:54 +0200
+Message-Id: <20200508180157.1816-13-ardb@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20200508180157.1816-1-ardb@kernel.org>
 References: <20200508180157.1816-1-ardb@kernel.org>
@@ -59,128 +59,100 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Arvind Sankar <nivedita@alum.mit.edu>
 
-Consolidate the initrd loading in efi_main.
+Commit
 
-The command line options now need to be parsed only once.
+  22090f84bc3f ("efi/libstub: unify EFI call wrappers for non-x86")
 
+refactored the macros that are used to provide wrappers for mixed-mode
+calls on x86, allowing us to boot a 64-bit kernel on 32-bit firmware.
+
+Unfortunately, this broke mixed mode boot due to the fact that
+efi_is_native() is not a macro on x86.
+
+All of these macros should go together, so rather than testing each one
+to see if it is defined, condition the generic macro definitions on a
+new ARCH_HAS_EFISTUB_WRAPPERS, and remove the wrapper definitions on x86
+as well if CONFIG_EFI_MIXED is not enabled.
+
+Fixes: 22090f84bc3f ("efi/libstub: unify EFI call wrappers for non-x86")
+Reported-by: Guenter Roeck <linux@roeck-us.net>
 Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
-Link: https://lore.kernel.org/r/20200430182843.2510180-9-nivedita@alum.mit.edu
+Link: https://lore.kernel.org/r/20200504150248.62482-1-nivedita@alum.mit.edu
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/firmware/efi/libstub/x86-stub.c | 64 ++++++++++---------------
- 1 file changed, 25 insertions(+), 39 deletions(-)
+ arch/x86/include/asm/efi.h             | 19 +++++++++++++++----
+ drivers/firmware/efi/libstub/efistub.h | 14 ++++----------
+ 2 files changed, 19 insertions(+), 14 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index 3800eb22232e..defeb6035109 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -22,6 +22,7 @@
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index cd0c3fbf6156..6b9ab0d8b2a7 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -225,13 +225,15 @@ efi_status_t efi_set_virtual_address_map(unsigned long memory_map_size,
  
- const efi_system_table_t *efi_system_table;
- extern u32 image_offset;
-+static efi_loaded_image_t *image = NULL;
+ /* arch specific definitions used by the stub code */
  
- static efi_status_t
- preserve_pci_rom_image(efi_pci_io_protocol_t *pci, struct pci_setup_rom **__rom)
-@@ -355,7 +356,6 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
- {
- 	struct boot_params *boot_params;
- 	struct setup_header *hdr;
--	efi_loaded_image_t *image;
- 	void *image_base;
- 	efi_guid_t proto = LOADED_IMAGE_PROTOCOL_GUID;
- 	int options_size = 0;
-@@ -414,30 +414,9 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
- 	hdr->ramdisk_image = 0;
- 	hdr->ramdisk_size = 0;
- 
--	if (efi_is_native()) {
--		status = efi_parse_options(cmdline_ptr);
--		if (status != EFI_SUCCESS)
--			goto fail2;
--
--		if (!efi_noinitrd) {
--			status = efi_load_initrd(image, &ramdisk_addr,
--						 &ramdisk_size,
--						 hdr->initrd_addr_max,
--						 ULONG_MAX);
--			if (status != EFI_SUCCESS)
--				goto fail2;
--			efi_set_u64_split(ramdisk_addr, &hdr->ramdisk_image,
--					  &boot_params->ext_ramdisk_image);
--			efi_set_u64_split(ramdisk_size, &hdr->ramdisk_size,
--					  &boot_params->ext_ramdisk_size);
--		}
--	}
--
- 	efi_stub_entry(handle, sys_table_arg, boot_params);
- 	/* not reached */
- 
--fail2:
--	efi_free(options_size, (unsigned long)cmdline_ptr);
- fail:
- 	efi_free(sizeof(struct boot_params), (unsigned long)boot_params);
- 
-@@ -760,35 +739,42 @@ unsigned long efi_main(efi_handle_t handle,
- 		image_offset = 0;
- 	}
- 
--	/*
--	 * efi_pe_entry() may have been called before efi_main(), in which
--	 * case this is the second time we parse the cmdline. This is ok,
--	 * parsing the cmdline multiple times does not have side-effects.
--	 */
- 	cmdline_paddr = ((u64)hdr->cmd_line_ptr |
- 			 ((u64)boot_params->ext_cmd_line_ptr << 32));
- 	efi_parse_options((char *)cmdline_paddr);
- 
- 	/*
--	 * At this point, an initrd may already have been loaded, either by
--	 * the bootloader and passed via bootparams, or loaded from a initrd=
--	 * command line option by efi_pe_entry() above. In either case, we
--	 * permit an initrd loaded from the LINUX_EFI_INITRD_MEDIA_GUID device
--	 * path to supersede it.
-+	 * At this point, an initrd may already have been loaded by the
-+	 * bootloader and passed via bootparams. We permit an initrd loaded
-+	 * from the LINUX_EFI_INITRD_MEDIA_GUID device path to supersede it.
-+	 *
-+	 * If the device path is not present, any command-line initrd=
-+	 * arguments will be processed only if image is not NULL, which will be
-+	 * the case only if we were loaded via the PE entry point.
- 	 */
- 	if (!efi_noinitrd) {
- 		unsigned long addr, size;
- 
- 		status = efi_load_initrd_dev_path(&addr, &size, ULONG_MAX);
--		if (status == EFI_SUCCESS) {
--			efi_set_u64_split(addr, &hdr->ramdisk_image,
--					  &boot_params->ext_ramdisk_image);
--			efi_set_u64_split(size, &hdr->ramdisk_size,
--					  &boot_params->ext_ramdisk_size);
--		} else if (status != EFI_NOT_FOUND) {
--			efi_err("efi_load_initrd_dev_path() failed!\n");
-+		if (status == EFI_NOT_FOUND) {
-+			if (efi_is_native() && image != NULL) {
-+				status = efi_load_initrd(image, &addr, &size,
-+							 hdr->initrd_addr_max,
-+							 ULONG_MAX);
-+			} else {
-+				addr = size = 0;
-+				status = EFI_SUCCESS;
-+			}
-+		}
+-extern const bool efi_is64;
++#ifdef CONFIG_EFI_MIXED
 +
-+		if (status != EFI_SUCCESS) {
-+			efi_err("Failed to load initrd!\n");
- 			goto fail;
- 		}
-+		efi_set_u64_split(addr, &hdr->ramdisk_image,
-+				  &boot_params->ext_ramdisk_image);
-+		efi_set_u64_split(size, &hdr->ramdisk_size,
-+				  &boot_params->ext_ramdisk_size);
- 	}
++#define ARCH_HAS_EFISTUB_WRAPPERS
  
- 	/*
+ static inline bool efi_is_64bit(void)
+ {
+-	if (IS_ENABLED(CONFIG_EFI_MIXED))
+-		return efi_is64;
+-	return IS_ENABLED(CONFIG_X86_64);
++	extern const bool efi_is64;
++
++	return efi_is64;
+ }
+ 
+ static inline bool efi_is_native(void)
+@@ -356,6 +358,15 @@ static inline u32 efi64_convert_status(efi_status_t status)
+ 						   runtime),		\
+ 				    func, __VA_ARGS__))
+ 
++#else /* CONFIG_EFI_MIXED */
++
++static inline bool efi_is_64bit(void)
++{
++	return IS_ENABLED(CONFIG_X86_64);
++}
++
++#endif /* CONFIG_EFI_MIXED */
++
+ extern bool efi_reboot_required(void);
+ extern bool efi_is_table_address(unsigned long phys_addr);
+ 
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index 874233cf8820..4f10a09563f3 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -33,20 +33,14 @@ extern bool efi_novamap;
+ 
+ extern const efi_system_table_t *efi_system_table;
+ 
+-#ifndef efi_bs_call
++#ifndef ARCH_HAS_EFISTUB_WRAPPERS
++
++#define efi_is_native()		(true)
+ #define efi_bs_call(func, ...)	efi_system_table->boottime->func(__VA_ARGS__)
+-#endif
+-#ifndef efi_rt_call
+ #define efi_rt_call(func, ...)	efi_system_table->runtime->func(__VA_ARGS__)
+-#endif
+-#ifndef efi_is_native
+-#define efi_is_native()		(true)
+-#endif
+-#ifndef efi_table_attr
+ #define efi_table_attr(inst, attr)	(inst->attr)
+-#endif
+-#ifndef efi_call_proto
+ #define efi_call_proto(inst, func, ...) inst->func(inst, ##__VA_ARGS__)
++
+ #endif
+ 
+ #define efi_info(msg)		do {			\
 -- 
 2.17.1
 
