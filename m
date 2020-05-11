@@ -2,92 +2,102 @@ Return-Path: <SRS0=vnWr=6Z=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-0.5 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
 	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 88532C47255
-	for <linux-efi@archiver.kernel.org>; Mon, 11 May 2020 17:02:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9FF85C47255
+	for <linux-efi@archiver.kernel.org>; Mon, 11 May 2020 18:36:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4603D2070B
-	for <linux-efi@archiver.kernel.org>; Mon, 11 May 2020 17:02:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7751C206E6
+	for <linux-efi@archiver.kernel.org>; Mon, 11 May 2020 18:36:49 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=fireburn-co-uk.20150623.gappssmtp.com header.i=@fireburn-co-uk.20150623.gappssmtp.com header.b="TI0vssJB"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="sfNDo4R5"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730629AbgEKRCA (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 11 May 2020 13:02:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35084 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729731AbgEKRB7 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 11 May 2020 13:01:59 -0400
-Received: from mail-wr1-x444.google.com (mail-wr1-x444.google.com [IPv6:2a00:1450:4864:20::444])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 95EBEC061A0E
-        for <linux-efi@vger.kernel.org>; Mon, 11 May 2020 10:01:55 -0700 (PDT)
-Received: by mail-wr1-x444.google.com with SMTP id l11so5997754wru.0
-        for <linux-efi@vger.kernel.org>; Mon, 11 May 2020 10:01:55 -0700 (PDT)
+        id S1729836AbgEKSgt (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 11 May 2020 14:36:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49870 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1729727AbgEKSgt (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 11 May 2020 14:36:49 -0400
+Received: from mail-qk1-x741.google.com (mail-qk1-x741.google.com [IPv6:2607:f8b0:4864:20::741])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CFBD3C061A0C;
+        Mon, 11 May 2020 11:36:48 -0700 (PDT)
+Received: by mail-qk1-x741.google.com with SMTP id a136so1918441qkg.6;
+        Mon, 11 May 2020 11:36:48 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fireburn-co-uk.20150623.gappssmtp.com; s=20150623;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=mmdp25EQ8v0wuV4mVsq8FtF479Pr9MswXZ7O+Ch3s28=;
-        b=TI0vssJBeyHfKkJPorkVHrlz52YVSU/E3UCjFd1m7lHuGT9QoQxtjyQHUvUx+32lTT
-         TnayIuEewWH83ETvE+6HjPyKmVyxw/Qwp5496syBzsn6odOUhJCJnwoPNHt+BETnL609
-         j7t7wkPLHZuVBPt7wW97H5IYwYRUHdfcjEHeUUuZsGUfbhX4AhKuxe20tcFxhyjI3HP1
-         zu+Ndnby7fEYTZXWlgWQMxijIu/5Z2ylO17tYVaxpm0NuhpNL7fpCKy9TTfA2JdDWc+A
-         Z8tkX7UbTIAO5fFHJqGGWjVktr5cs/hmE4qtNS8eXVf1O4ycgeQ+3Oq7dJMqGXkgNOB+
-         2hiw==
+        d=gmail.com; s=20161025;
+        h=sender:from:date:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=hA9NFTb1+7k7xQlzFjP2Fi9iwvqTE3WYCLOf33vGY+M=;
+        b=sfNDo4R5La/bb5OB6hnHssr8h76VH8aLlD1rbbIrvmbck/Xcsy2pD667yGsFJrWSjY
+         69qZrPn1OjscwhR1UkWrkAiWM0uu1dTKhxraBDKrcDO/uZCevhIjikLCLNJHUJWZdxks
+         eHmU6wKWNZV0fCkzqxknLJJdTbHw06VCk3mPuBnxK3IXft7SHvpyarHkw/4OK8LprC5g
+         stnM+EsOyBq+HIw856oLjv0uw6yvjDout+tkpcg48t7k+U+97m/rIQ9YxVrsFEbZy50r
+         6QtfKIQRRsrvvPbWLZBMd0ABM0SzIs+NQzFvkxOPODlWrntgLVkXSmow159TwMcxKa0d
+         zu5A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=mmdp25EQ8v0wuV4mVsq8FtF479Pr9MswXZ7O+Ch3s28=;
-        b=mnOYY1EVEA2CqvlyCHgQo3OGB09iLJiu2iOr9WV05lZiqB7gPVe26RfR+YvEKarJpU
-         41R6E1KGjjUo5X/fbyFIvlcBa3+XCj0sLEAlx7OnIFlW6uvxHIfQvX6H/uLa9PTF0mmD
-         wQsj+HozL60Z4zhVGFQ3VlQ10MC3eJzrD7i+lNq+TshEN7Nz1m/+qc7w1VOkniMUkC8T
-         Jr6rwsCbwVITqTlJoJpOy0Y/gcSIQrMpv7UaAssO7gW2M2dK7V66kEkkRQKhOWCfzGxF
-         0I42oagXr+xhGJRyJedRfpTZw8rhWXwhyxDESVYMKfaMBQlALpiFewwxWt9rVMT/AeOJ
-         UKkA==
-X-Gm-Message-State: AGi0Puby4Am00iKwR/PzPtsVCAvVUej3eHYOufV9nXhd8eu/plA0FNui
-        jj2pgjd2i++tz97OxXmN15qETh11YY1PFg==
-X-Google-Smtp-Source: APiQypJMAkUzfIFHSDDRuJ6ZptTUoB8Twc6PWnX1oRT4RX4dM5kexeDaRf54TEZ2T9NcIEm0IZstAA==
-X-Received: by 2002:adf:f1c4:: with SMTP id z4mr21486249wro.25.1589216513994;
-        Mon, 11 May 2020 10:01:53 -0700 (PDT)
-Received: from axion.fireburn.co.uk ([2a01:4b00:f40e:900::64c])
-        by smtp.gmail.com with ESMTPSA id p23sm21670792wmj.37.2020.05.11.10.01.52
+        h=x-gm-message-state:sender:from:date:to:cc:subject:message-id
+         :references:mime-version:content-disposition:in-reply-to;
+        bh=hA9NFTb1+7k7xQlzFjP2Fi9iwvqTE3WYCLOf33vGY+M=;
+        b=HXgPxq3hLz6O5vtrQIID+hI202xiLsbAKZjvw8uggaTY14sbe/wm6gfTtyDqeEGr6X
+         dPmwuV9Vta33X9I/QCuaB1rZ+ai2nyet43Bh9e3tPpt1RBHUaopaKcjICgGW9G2g9Jln
+         HhTkgVN8DlcqPI8t+ZldXLqZCoE3qpc54oXoMuJQDCiC+jHnysp8pNhsNLC+xLidgkCe
+         rVYlZamVOhNBZPUo3l5lK5H8ihEKwmx2WUykFd3MXKHa80vhxyNAbsfYs1nxJ/vi+KUo
+         CQCRWDoayjga1GgZb/J81NH/BfObICrltPgIUuUhBLmWCqZ1HEn4Kv3Xn6sOk89x8OAX
+         M2NA==
+X-Gm-Message-State: AGi0PubCvB3lrW+rTpESKukFycWsv7m2L0+XTUJ8NWjM7nJqv1zTs3DJ
+        18GQ3HmV2SotWnV7Cvm7aMk=
+X-Google-Smtp-Source: APiQypJmWrK/qPSGb3yE+HiSRqj/fjCSLcZsMaJeZzIuWtFaDmCqFgjK4i5q9yCvDhdylDhKy8svZQ==
+X-Received: by 2002:a37:a30f:: with SMTP id m15mr16398937qke.271.1589222207680;
+        Mon, 11 May 2020 11:36:47 -0700 (PDT)
+Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
+        by smtp.gmail.com with ESMTPSA id e16sm10096205qtc.92.2020.05.11.11.36.46
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 11 May 2020 10:01:53 -0700 (PDT)
-From:   Mike Lothian <mike@fireburn.co.uk>
-To:     nivedita@alum.mit.edu, Ard Biesheuvel <ardb@kernel.org>
-Cc:     linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
-        x86@kernel.org, Mike Lothian <mike@fireburn.co.uk>
+        Mon, 11 May 2020 11:36:46 -0700 (PDT)
+From:   Arvind Sankar <nivedita@alum.mit.edu>
+X-Google-Original-From: Arvind Sankar <arvind@rani.riverdale.lan>
+Date:   Mon, 11 May 2020 14:36:45 -0400
+To:     Mike Lothian <mike@fireburn.co.uk>
+Cc:     nivedita@alum.mit.edu, Ard Biesheuvel <ardb@kernel.org>,
+        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
+        x86@kernel.org
 Subject: Re: [PATCH v2 4/5] efi/x86: Remove extra headroom for setup block
-Date:   Mon, 11 May 2020 18:01:49 +0100
-Message-Id: <20200511170149.1363260-1-mike@fireburn.co.uk>
-X-Mailer: git-send-email 2.26.2
-In-Reply-To: <20200303221205.4048668-5-nivedita@alum.mit.edu>
+Message-ID: <20200511183645.GA596850@rani.riverdale.lan>
 References: <20200303221205.4048668-5-nivedita@alum.mit.edu>
+ <20200511170149.1363260-1-mike@fireburn.co.uk>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20200511170149.1363260-1-mike@fireburn.co.uk>
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Hi
+On Mon, May 11, 2020 at 06:01:49PM +0100, Mike Lothian wrote:
+> Hi
+> 
+> This patch has been causing issues for me since switching to GCC 10.1:
+> 
+>   CALL    scripts/checksyscalls.sh
+>   CALL    scripts/atomic/check-atomics.sh
+>   DESCEND  objtool
+>   CHK     include/generated/compile.h
+>   HOSTCC  arch/x86/boot/tools/build
+> /usr/lib/gcc/x86_64-pc-linux-gnu/10.1.0/../../../../x86_64-pc-linux-gnu/bin/ld: error: linker defined: multiple definition of '_end'
+> /usr/lib/gcc/x86_64-pc-linux-gnu/10.1.0/../../../../x86_64-pc-linux-gnu/bin/ld: /tmp/ccEkW0jM.o: previous definition here
+> collect2: error: ld returned 1 exit status
+> make[1]: *** [scripts/Makefile.host:103: arch/x86/boot/tools/build] Error 1
+> make: *** [arch/x86/Makefile:303: bzImage] Error 2
+> 
+> Cheers
+> 
+> Mike
 
-This patch has been causing issues for me since switching to GCC 10.1:
+I'm not getting an error even with gcc 10 for some reason, but I can see
+that it is busted. It's using the linker-defined _end symbol which is
+just pass the end of the .bss.
 
-  CALL    scripts/checksyscalls.sh
-  CALL    scripts/atomic/check-atomics.sh
-  DESCEND  objtool
-  CHK     include/generated/compile.h
-  HOSTCC  arch/x86/boot/tools/build
-/usr/lib/gcc/x86_64-pc-linux-gnu/10.1.0/../../../../x86_64-pc-linux-gnu/bin/ld: error: linker defined: multiple definition of '_end'
-/usr/lib/gcc/x86_64-pc-linux-gnu/10.1.0/../../../../x86_64-pc-linux-gnu/bin/ld: /tmp/ccEkW0jM.o: previous definition here
-collect2: error: ld returned 1 exit status
-make[1]: *** [scripts/Makefile.host:103: arch/x86/boot/tools/build] Error 1
-make: *** [arch/x86/Makefile:303: bzImage] Error 2
-
-Cheers
-
-Mike
+Does adding "static" to the declaration of _end fix your error?
