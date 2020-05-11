@@ -1,87 +1,93 @@
-Return-Path: <SRS0=JpIZ=6W=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=vnWr=6Z=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D6E34C38A2A
-	for <linux-efi@archiver.kernel.org>; Fri,  8 May 2020 18:03:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 88532C47255
+	for <linux-efi@archiver.kernel.org>; Mon, 11 May 2020 17:02:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B141B2184D
-	for <linux-efi@archiver.kernel.org>; Fri,  8 May 2020 18:03:15 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1588960995;
-	bh=oMjpzDDlh2D1GE9o+Fjd+U1ibu0bpncO6VpG1sd997M=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=1o5meq27AESgynnystoIjxKqwMSiGevRkovSr1cYfbatKnydNdBQcfNTt8t0znrJr
-	 0OKqwWj6ipEJ1Kt3f6j++bEYYNUnDxgwMGIyyfORwqPqrkLpruzpJR4xo319IBCS08
-	 QKXuNMkH7XYHp6CV1jHCdQLsnSB2o9iy9BPU6Xuk=
+	by mail.kernel.org (Postfix) with ESMTP id 4603D2070B
+	for <linux-efi@archiver.kernel.org>; Mon, 11 May 2020 17:02:00 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=fireburn-co-uk.20150623.gappssmtp.com header.i=@fireburn-co-uk.20150623.gappssmtp.com header.b="TI0vssJB"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727932AbgEHSCj (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 8 May 2020 14:02:39 -0400
-Received: from mail.kernel.org ([198.145.29.99]:48134 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727922AbgEHSCi (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 8 May 2020 14:02:38 -0400
-Received: from e123331-lin.nice.arm.com (amontpellier-657-1-18-247.w109-210.abo.wanadoo.fr [109.210.65.247])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id D607924966;
-        Fri,  8 May 2020 18:02:35 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1588960958;
-        bh=oMjpzDDlh2D1GE9o+Fjd+U1ibu0bpncO6VpG1sd997M=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=fhj4MoXdUqj8yzhTUGgvYW+H0XQoe3/Zz/3lcPtHgGzEURkTg/ySvKnHgAhDpdIAT
-         ui9qEe1p+jXCZ8SXhTjYbLI9CWaS8bLjiMQuuLfr9iarzNy5EmjKtg79eA5mcLQySl
-         8ZhIsUrSnWMc/6AO6TpyTfZ2WNec59jI7H7slTio=
-From:   Ard Biesheuvel <ardb@kernel.org>
-To:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>,
-        Thomas Gleixner <tglx@linutronix.de>
-Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
-        Arnd Bergmann <arnd@arndb.de>,
-        Arvind Sankar <nivedita@alum.mit.edu>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Joe Perches <joe@perches.com>
-Subject: [PATCH 07/15] efi/libstub: Upgrade ignored dtb= argument message to error
-Date:   Fri,  8 May 2020 20:01:49 +0200
-Message-Id: <20200508180157.1816-8-ardb@kernel.org>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20200508180157.1816-1-ardb@kernel.org>
-References: <20200508180157.1816-1-ardb@kernel.org>
+        id S1730629AbgEKRCA (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 11 May 2020 13:02:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35084 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729731AbgEKRB7 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 11 May 2020 13:01:59 -0400
+Received: from mail-wr1-x444.google.com (mail-wr1-x444.google.com [IPv6:2a00:1450:4864:20::444])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 95EBEC061A0E
+        for <linux-efi@vger.kernel.org>; Mon, 11 May 2020 10:01:55 -0700 (PDT)
+Received: by mail-wr1-x444.google.com with SMTP id l11so5997754wru.0
+        for <linux-efi@vger.kernel.org>; Mon, 11 May 2020 10:01:55 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=fireburn-co-uk.20150623.gappssmtp.com; s=20150623;
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=mmdp25EQ8v0wuV4mVsq8FtF479Pr9MswXZ7O+Ch3s28=;
+        b=TI0vssJBeyHfKkJPorkVHrlz52YVSU/E3UCjFd1m7lHuGT9QoQxtjyQHUvUx+32lTT
+         TnayIuEewWH83ETvE+6HjPyKmVyxw/Qwp5496syBzsn6odOUhJCJnwoPNHt+BETnL609
+         j7t7wkPLHZuVBPt7wW97H5IYwYRUHdfcjEHeUUuZsGUfbhX4AhKuxe20tcFxhyjI3HP1
+         zu+Ndnby7fEYTZXWlgWQMxijIu/5Z2ylO17tYVaxpm0NuhpNL7fpCKy9TTfA2JdDWc+A
+         Z8tkX7UbTIAO5fFHJqGGWjVktr5cs/hmE4qtNS8eXVf1O4ycgeQ+3Oq7dJMqGXkgNOB+
+         2hiw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=mmdp25EQ8v0wuV4mVsq8FtF479Pr9MswXZ7O+Ch3s28=;
+        b=mnOYY1EVEA2CqvlyCHgQo3OGB09iLJiu2iOr9WV05lZiqB7gPVe26RfR+YvEKarJpU
+         41R6E1KGjjUo5X/fbyFIvlcBa3+XCj0sLEAlx7OnIFlW6uvxHIfQvX6H/uLa9PTF0mmD
+         wQsj+HozL60Z4zhVGFQ3VlQ10MC3eJzrD7i+lNq+TshEN7Nz1m/+qc7w1VOkniMUkC8T
+         Jr6rwsCbwVITqTlJoJpOy0Y/gcSIQrMpv7UaAssO7gW2M2dK7V66kEkkRQKhOWCfzGxF
+         0I42oagXr+xhGJRyJedRfpTZw8rhWXwhyxDESVYMKfaMBQlALpiFewwxWt9rVMT/AeOJ
+         UKkA==
+X-Gm-Message-State: AGi0Puby4Am00iKwR/PzPtsVCAvVUej3eHYOufV9nXhd8eu/plA0FNui
+        jj2pgjd2i++tz97OxXmN15qETh11YY1PFg==
+X-Google-Smtp-Source: APiQypJMAkUzfIFHSDDRuJ6ZptTUoB8Twc6PWnX1oRT4RX4dM5kexeDaRf54TEZ2T9NcIEm0IZstAA==
+X-Received: by 2002:adf:f1c4:: with SMTP id z4mr21486249wro.25.1589216513994;
+        Mon, 11 May 2020 10:01:53 -0700 (PDT)
+Received: from axion.fireburn.co.uk ([2a01:4b00:f40e:900::64c])
+        by smtp.gmail.com with ESMTPSA id p23sm21670792wmj.37.2020.05.11.10.01.52
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 11 May 2020 10:01:53 -0700 (PDT)
+From:   Mike Lothian <mike@fireburn.co.uk>
+To:     nivedita@alum.mit.edu, Ard Biesheuvel <ardb@kernel.org>
+Cc:     linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
+        x86@kernel.org, Mike Lothian <mike@fireburn.co.uk>
+Subject: Re: [PATCH v2 4/5] efi/x86: Remove extra headroom for setup block
+Date:   Mon, 11 May 2020 18:01:49 +0100
+Message-Id: <20200511170149.1363260-1-mike@fireburn.co.uk>
+X-Mailer: git-send-email 2.26.2
+In-Reply-To: <20200303221205.4048668-5-nivedita@alum.mit.edu>
+References: <20200303221205.4048668-5-nivedita@alum.mit.edu>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Arvind Sankar <nivedita@alum.mit.edu>
+Hi
 
-Use efi_err if we ignore a command-line dtb= argument, so that it shows
-up even on a quiet boot.
+This patch has been causing issues for me since switching to GCC 10.1:
 
-Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
-Link: https://lore.kernel.org/r/20200430182843.2510180-8-nivedita@alum.mit.edu
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
----
- drivers/firmware/efi/libstub/efi-stub.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+  CALL    scripts/checksyscalls.sh
+  CALL    scripts/atomic/check-atomics.sh
+  DESCEND  objtool
+  CHK     include/generated/compile.h
+  HOSTCC  arch/x86/boot/tools/build
+/usr/lib/gcc/x86_64-pc-linux-gnu/10.1.0/../../../../x86_64-pc-linux-gnu/bin/ld: error: linker defined: multiple definition of '_end'
+/usr/lib/gcc/x86_64-pc-linux-gnu/10.1.0/../../../../x86_64-pc-linux-gnu/bin/ld: /tmp/ccEkW0jM.o: previous definition here
+collect2: error: ld returned 1 exit status
+make[1]: *** [scripts/Makefile.host:103: arch/x86/boot/tools/build] Error 1
+make: *** [arch/x86/Makefile:303: bzImage] Error 2
 
-diff --git a/drivers/firmware/efi/libstub/efi-stub.c b/drivers/firmware/efi/libstub/efi-stub.c
-index 72ffd2670f99..cb02e8bb6b44 100644
---- a/drivers/firmware/efi/libstub/efi-stub.c
-+++ b/drivers/firmware/efi/libstub/efi-stub.c
-@@ -241,7 +241,7 @@ efi_status_t efi_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg)
- 	if (!IS_ENABLED(CONFIG_EFI_ARMSTUB_DTB_LOADER) ||
- 	     secure_boot != efi_secureboot_mode_disabled) {
- 		if (strstr(cmdline_ptr, "dtb="))
--			efi_info("Ignoring DTB from command line.\n");
-+			efi_err("Ignoring DTB from command line.\n");
- 	} else {
- 		status = efi_load_dtb(image, &fdt_addr, &fdt_size);
- 
--- 
-2.17.1
+Cheers
 
+Mike
