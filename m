@@ -4,50 +4,50 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DA92CC433DF
-	for <linux-efi@archiver.kernel.org>; Thu, 14 May 2020 19:05:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 551ACC433E0
+	for <linux-efi@archiver.kernel.org>; Thu, 14 May 2020 19:09:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BB3B6206A5
-	for <linux-efi@archiver.kernel.org>; Thu, 14 May 2020 19:05:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 31D382065F
+	for <linux-efi@archiver.kernel.org>; Thu, 14 May 2020 19:09:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1589483123;
-	bh=YF3YJA/sJV+McsRl8tNVPGnWzpwXw5S6XE3QGipp+l4=;
+	s=default; t=1589483344;
+	bh=fgwqYlmvbIZhbZ+Axt+VfYBsWO6kKrxtHD5E8q5cdxI=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=R3IZokBNyC/aacG+urhOn3isZWdwrATqFR+kQKYXCIMlPXqMC3wVTz2Pp3voFIBfl
-	 sMhx+loOf1KvEg1TPF1XpIRsT3r8kTiDNJtVURxJv4gMAvc2kcoepiSZujF6SjfXhL
-	 rdoW9eIjQb1xgPgQ2eLI58RAAm4XEuGau34oE/bc=
+	b=b2V6+pK9yg5rEHVFRDjY6xfVowHrUYA8BODhIIhrVIV2qYvjhlalBh/YFgO9KwU/c
+	 QG2vlfK8INAJe3eJifkFfAaM0213CZ0dkmdmjt1Wg34NqRKibIth3iedq7N/ttIDxJ
+	 HUgaceeFqgDzypbuYnF0uz0zvvIlKuxzmuu24Qlg=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728881AbgENSyI (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 14 May 2020 14:54:08 -0400
-Received: from mail.kernel.org ([198.145.29.99]:53966 "EHLO mail.kernel.org"
+        id S1728662AbgENTI6 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 14 May 2020 15:08:58 -0400
+Received: from mail.kernel.org ([198.145.29.99]:51942 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728952AbgENSyI (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Thu, 14 May 2020 14:54:08 -0400
+        id S1728547AbgENSxC (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Thu, 14 May 2020 14:53:02 -0400
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 05032206DC;
-        Thu, 14 May 2020 18:54:06 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id E52BA206A5;
+        Thu, 14 May 2020 18:53:01 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1589482447;
-        bh=YF3YJA/sJV+McsRl8tNVPGnWzpwXw5S6XE3QGipp+l4=;
+        s=default; t=1589482382;
+        bh=fgwqYlmvbIZhbZ+Axt+VfYBsWO6kKrxtHD5E8q5cdxI=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=MsX0RKVuDOyZtR1s8/zXc32DyK+iJA9HZfMfd3lkLamJR5EqZSGGv2n1JIEGREX+r
-         GWdOwNlAtYd+fWLt/16XgORoHSlkafWajtigVga08vpnXsO/UajNOda7BgkyWOjAqf
-         ku6Ar13+ZHDk+7h7E/KQf9trUsY9Y9ELGocUmcMU=
+        b=f8Yrzbzlek2UMNCKMLplTFh581qWaX2/DdHsl7cQwi3Nvw2tF4+rHx9HSLi4v4aF4
+         VqdLedzKpfaPiD3P6YjxL+EB/yPIiv7qObu+VXiNyKl4S+3puZs+buYufL8s1ez8Sh
+         f54X65Sm59xr3Y/F/6UQRVdxAbPz+k/xMg1USFio=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Linus Torvalds <torvalds@linux-foundation.org>,
         Sasha Levin <sashal@kernel.org>, linux-efi@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.4 46/49] gcc-10: mark more functions __init to avoid section mismatch warnings
-Date:   Thu, 14 May 2020 14:53:07 -0400
-Message-Id: <20200514185311.20294-46-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.6 59/62] gcc-10: mark more functions __init to avoid section mismatch warnings
+Date:   Thu, 14 May 2020 14:51:44 -0400
+Message-Id: <20200514185147.19716-59-sashal@kernel.org>
 X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20200514185311.20294-1-sashal@kernel.org>
-References: <20200514185311.20294-1-sashal@kernel.org>
+In-Reply-To: <20200514185147.19716-1-sashal@kernel.org>
+References: <20200514185147.19716-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -99,10 +99,10 @@ index 31f9f0e369b97..55b031d2c9890 100644
  	struct tcg_pcr_event2_head *header;
  	int event_size, size = 0;
 diff --git a/init/initramfs.c b/init/initramfs.c
-index c47dad0884f7f..5feee4f616d55 100644
+index 8ec1be4d7d512..7a38012e1af74 100644
 --- a/init/initramfs.c
 +++ b/init/initramfs.c
-@@ -534,7 +534,7 @@ void __weak free_initrd_mem(unsigned long start, unsigned long end)
+@@ -542,7 +542,7 @@ void __weak free_initrd_mem(unsigned long start, unsigned long end)
  }
  
  #ifdef CONFIG_KEXEC_CORE
