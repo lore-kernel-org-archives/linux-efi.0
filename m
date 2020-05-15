@@ -2,67 +2,46 @@ Return-Path: <SRS0=xEJ1=65=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.0 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 17E14C433E1
-	for <linux-efi@archiver.kernel.org>; Fri, 15 May 2020 01:43:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DF92FC433DF
+	for <linux-efi@archiver.kernel.org>; Fri, 15 May 2020 01:58:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DFF2720671
-	for <linux-efi@archiver.kernel.org>; Fri, 15 May 2020 01:43:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BD8B020748
+	for <linux-efi@archiver.kernel.org>; Fri, 15 May 2020 01:58:20 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="hpYWXz9c"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="bHwtY2fP"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728303AbgEOBmv (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 14 May 2020 21:42:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55856 "EHLO
+        id S1727910AbgEOB6R (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 14 May 2020 21:58:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58224 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726170AbgEOBmu (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 14 May 2020 21:42:50 -0400
-Received: from mail-lj1-x244.google.com (mail-lj1-x244.google.com [IPv6:2a00:1450:4864:20::244])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C9070C061A0C;
-        Thu, 14 May 2020 18:42:49 -0700 (PDT)
-Received: by mail-lj1-x244.google.com with SMTP id e25so475450ljg.5;
-        Thu, 14 May 2020 18:42:49 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=hY+h+hQNft22sbR2GRHdulgy1g8os6lzLdmN2sCZ1lE=;
-        b=hpYWXz9cOLo7O2IXWeM/JpwktEaIYJmYkUm63rJSdzrIZjaGXcK4WfSKmzz7w8TNW4
-         pLM2wkRdRjyfJhO02BxNVSg52g1gi5peBx2hg0hoHOJIxiPMPHwvbfxGO44kMDv564jZ
-         SBYLnd9x4lR3IzHMLryyc9FOq175xqOJrieCe4GmocyGfQuK1kfsYOrTxhKpO7Psy7Cj
-         EXFL951nV0VHsMiKrX/ROuOHE4PWR2iiMhJ4wcwtF/M5fupE6nBLSyZjJstCwAvdk56G
-         G9tIJDV6fp8jNeIUMWtBu5Pws0yi5zmKgfFz4WYizcsJohwQ2g5MwoGXCfp72gZv0dlA
-         Ye0g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=hY+h+hQNft22sbR2GRHdulgy1g8os6lzLdmN2sCZ1lE=;
-        b=cagLZ0b3Vt2JG+1O8Shbkjsy4XJ13WeLM5HzUwujYd8kyRoNxb6YUK7xPyp0hTdGam
-         uMDWyP//KnMRQrTK+SMwJ4AXsnnnBDvKDBhUP6VV/3xbWuSnAP6IMHM81giVWNTD/xgu
-         W7dpgpqM8KwmMgH7hgUS89/rtU+9K7VAen+5JF+iVWP5+JwJUQvv77CIPo5IrNMGnV1Q
-         NOACXuORFkYQgmqxsG1C18gtEHdcUAaQaetIbTMvIPOL0Tp4vfeQ5YCADZ991QxnFKiu
-         sQn3AHrT4gt/xWoLgWWAWTJ8FYb9MBWJ64wLhEb2ni/ZpRoKYkNXi3piTK+WrpyWUvdU
-         Nl3g==
-X-Gm-Message-State: AOAM53174e49C9uFEbJRocms/5u3Ug/GM61z+jz98Ysx2fSFxxXKkHCA
-        djwKetYyLB/Rz1+XwTLoNQI=
-X-Google-Smtp-Source: ABdhPJwXJTmffyGCIHEU0fLqa8XYSSYSNQU3NSvh1kPxhok4OLg+x9AfceTzW+o/4yurd0Tx+klhOA==
-X-Received: by 2002:a2e:731a:: with SMTP id o26mr652912ljc.189.1589506968312;
-        Thu, 14 May 2020 18:42:48 -0700 (PDT)
-Received: from localhost.localdomain (ppp91-78-208-152.pppoe.mtu-net.ru. [91.78.208.152])
-        by smtp.gmail.com with ESMTPSA id i1sm309669lja.3.2020.05.14.18.42.46
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 14 May 2020 18:42:47 -0700 (PDT)
-From:   Dmitry Osipenko <digetx@gmail.com>
-To:     Jens Axboe <axboe@kernel.dk>,
+        with ESMTP id S1727029AbgEOB6R (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 14 May 2020 21:58:17 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2F68DC061A0C;
+        Thu, 14 May 2020 18:58:17 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20170209; h=Content-Transfer-Encoding:
+        Content-Type:In-Reply-To:MIME-Version:Date:Message-ID:From:References:Cc:To:
+        Subject:Sender:Reply-To:Content-ID:Content-Description;
+        bh=MigIs8+MSs175TeEb7Pa4gsLZS9q5xByc1dl+HIlrjI=; b=bHwtY2fPAXiCAJTE92WpQJ8hkD
+        NV225SU2KCY5/IpoGIk4zgOjXVq1excRKzaM4OOab2arXZ7WK0O8Vpp8PVF9gbjpL8TuJ3YKIL/wM
+        ewPIpXqPkmDG2pOD7WS6btZ06s71Bcx2KNoS9txFlHhpTAlFrjeHXdt0Inzw/wAeD7VxpJxG+fGSM
+        1AqCrfB4xixXsLru2AjhnVE7ZyYwvQxxBvs8yf7rHWBiz0ADuR5q0siv01fR/rr/3riGGyLEmm8mr
+        Lcy7mVqyx8o0ePnQCOSEHQBJFQLcERBghWOBPDfaljQkgd+MTIt3SoOSDkRUWKj9tmmao5Cc7Lj6h
+        Jl5cgWVw==;
+Received: from [2601:1c0:6280:3f0::19c2]
+        by bombadil.infradead.org with esmtpsa (Exim 4.92.3 #3 (Red Hat Linux))
+        id 1jZPbz-0002KY-E5; Fri, 15 May 2020 01:58:07 +0000
+Subject: Re: [PATCH v4 3/6] partitions: Introduce NVIDIA Tegra Partition Table
+To:     Dmitry Osipenko <digetx@gmail.com>, Jens Axboe <axboe@kernel.dk>,
         Thierry Reding <thierry.reding@gmail.com>,
         Jonathan Hunter <jonathanh@nvidia.com>,
-        =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>,
+        =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
         David Heidelberg <david@ixit.cz>,
         Peter Geis <pgwipeout@gmail.com>,
         Stephen Warren <swarren@wwwdotorg.org>,
@@ -70,7 +49,7 @@ To:     Jens Axboe <axboe@kernel.dk>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
         Billy Laws <blaws05@gmail.com>,
-        =?UTF-8?q?Nils=20=C3=96stlund?= <nils@naltan.com>,
+        =?UTF-8?Q?Nils_=c3=96stlund?= <nils@naltan.com>,
         Christoph Hellwig <hch@infradead.org>,
         Ard Biesheuvel <ard.biesheuvel@linaro.org>,
         Davidlohr Bueso <dave@stgolabs.net>
@@ -79,56 +58,49 @@ Cc:     linux-tegra@vger.kernel.org, linux-block@vger.kernel.org,
         Gilles Grandou <gilles@grandou.net>,
         Ryan Grachek <ryan@edited.us>, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-efi <linux-efi@vger.kernel.org>
-Subject: [PATCH v4 1/6] mmc: core: Add raw_boot_mult field to mmc_ext_csd
-Date:   Fri, 15 May 2020 04:41:38 +0300
-Message-Id: <20200515014143.12984-2-digetx@gmail.com>
-X-Mailer: git-send-email 2.26.0
-In-Reply-To: <20200515014143.12984-1-digetx@gmail.com>
 References: <20200515014143.12984-1-digetx@gmail.com>
+ <20200515014143.12984-4-digetx@gmail.com>
+From:   Randy Dunlap <rdunlap@infradead.org>
+Message-ID: <055fc187-6181-6ccb-04a8-ab4324270ed7@infradead.org>
+Date:   Thu, 14 May 2020 18:58:05 -0700
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.8.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <20200515014143.12984-4-digetx@gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-In order to support parsing of NVIDIA Tegra Partition Table format, we
-need to know the BOOT_SIZE_MULT value of the Extended CSD register because
-NVIDIA's bootloader linearizes the boot0/boot1/main partitions into a
-single virtual space, and thus, all partition addresses are shifted by
-the size of boot0 + boot1 partitions.
+On 5/14/20 6:41 PM, Dmitry Osipenko wrote:
+> diff --git a/block/partitions/Kconfig b/block/partitions/Kconfig
+> index 702689a628f0..2c1408cba1a6 100644
+> --- a/block/partitions/Kconfig
+> +++ b/block/partitions/Kconfig
+> @@ -268,3 +268,11 @@ config CMDLINE_PARTITION
+>  	help
+>  	  Say Y here if you want to read the partition table from bootargs.
+>  	  The format for the command line is just like mtdparts.
+> +
+> +config TEGRA_PARTITION
+> +	bool "NVIDIA Tegra Partition support" if PARTITION_ADVANCED
+> +	default y if ARCH_TEGRA
+> +	depends on (ARCH_TEGRA && MMC_BLOCK) || COMPILE_TEST
 
-Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
----
- drivers/mmc/core/mmc.c   | 2 ++
- include/linux/mmc/card.h | 1 +
- 2 files changed, 3 insertions(+)
+That looks odd. Such depends are more often like:
+	depends on MMC_BLOCK && (ARCH_TEGRA || COMPILE_TEST)
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 4203303f946a..112edfb1eb1d 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -417,6 +417,8 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 		ext_csd[EXT_CSD_ERASE_TIMEOUT_MULT];
- 	card->ext_csd.raw_hc_erase_grp_size =
- 		ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
-+	card->ext_csd.raw_boot_mult =
-+		ext_csd[EXT_CSD_BOOT_MULT];
- 	if (card->ext_csd.rev >= 3) {
- 		u8 sa_shift = ext_csd[EXT_CSD_S_A_TIMEOUT];
- 		card->ext_csd.part_config = ext_csd[EXT_CSD_PART_CONFIG];
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 7d46411ffaa2..cd6b58b66010 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -109,6 +109,7 @@ struct mmc_ext_csd {
- 	u8			raw_hc_erase_gap_size;	/* 221 */
- 	u8			raw_erase_timeout_mult;	/* 223 */
- 	u8			raw_hc_erase_grp_size;	/* 224 */
-+	u8			raw_boot_mult;		/* 226 */
- 	u8			raw_sec_trim_mult;	/* 229 */
- 	u8			raw_sec_erase_mult;	/* 230 */
- 	u8			raw_sec_feature_support;/* 231 */
+but that's just my experience. If this works when ARCH_TEGRA and MMC_BLOCK
+are not set and COMPILE_TEST is set, that's fine.
+
+> +	help
+> +	  Say Y here if you would like to be able to read the hard disk
+> +	  partition table format used by NVIDIA Tegra machines.
+
+thanks.
 -- 
-2.26.0
+~Randy
 
