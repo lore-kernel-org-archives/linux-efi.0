@@ -1,116 +1,106 @@
-Return-Path: <SRS0=xEJ1=65=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=8wie=66=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.1 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.9 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D47D7C433E0
-	for <linux-efi@archiver.kernel.org>; Fri, 15 May 2020 15:53:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BFCC7C433DF
+	for <linux-efi@archiver.kernel.org>; Sat, 16 May 2020 12:59:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B7ADA206D8
-	for <linux-efi@archiver.kernel.org>; Fri, 15 May 2020 15:53:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7368D20671
+	for <linux-efi@archiver.kernel.org>; Sat, 16 May 2020 12:59:55 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="h+zhmsKd"
+	dkim=pass (2048-bit key) header.d=posteo.de header.i=@posteo.de header.b="sHsn31OS"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726607AbgEOPw6 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 15 May 2020 11:52:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47576 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726250AbgEOPw5 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 15 May 2020 11:52:57 -0400
-Received: from mail-lf1-x143.google.com (mail-lf1-x143.google.com [IPv6:2a00:1450:4864:20::143])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D4B81C061A0C;
-        Fri, 15 May 2020 08:52:56 -0700 (PDT)
-Received: by mail-lf1-x143.google.com with SMTP id d22so2216335lfm.11;
-        Fri, 15 May 2020 08:52:56 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=l71weFdBgY/OPubK5TNcEV6JMPL70XXv0VPAI4BGmH8=;
-        b=h+zhmsKdPrBiA91DhveEfpS8srEtG6zUpM0LynXaeBAEpjymBb7cGgwHobsxSjveai
-         MczFjeQoUoR6hJ9K5WfBuDl6RUF3pIVcUH7a80+4OpUErSQVuHRoCukkkzKjzaC2mgjo
-         mjKXqx8t8tuPjiwOG5LF1XcrQz6VP+Z0Bk18SGdBx0GNTou6BwFy2NDR5le9ScpHhEqA
-         mYDelPDUPWjs3L6EPRXiDUmQ48Ni2B0+u1+p98HtmkYe4Bn57ASFvWY8W4/r1ZJzOOKK
-         5qCUawwktx2EmXiU3luK9jSBqVJJ/SHxbs9gvkyv1JoPU/81ttsidcCYJCD/KY40kdGA
-         e3EA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=l71weFdBgY/OPubK5TNcEV6JMPL70XXv0VPAI4BGmH8=;
-        b=M1n47HXBz/zH+lDK0suR2M5L53Pt1vdvNiDnaoCCH36lkWQp8MuX28hYUEh6uwd93Z
-         EWL3n59rwWn7i3S3ubIQ8ZuMcdBlyI2HQfNWqHUZxp+b2WXY+NqdYw3LieNd4WUBx73W
-         72sOZXx3Lq9ROZisqNe+b0thI7zDMTdb/HVjCARQql+yr6n2ZLnVbWj5/Ghl6d4edT9a
-         DVMkFsqCEaagQWOSAyQagkCIXwDeuvREEX84ue9LOBwBLdPOBWKK8Ajparlg3iqJAf3X
-         hiVcUfJ2SUUzFxcJxTbikNduBWRbr8gQ5B7sji3p/0968DvnobG8rlgcfGjuPjdve3RV
-         Q6tg==
-X-Gm-Message-State: AOAM532Rg6gPSN/W9GBeA6zcaVhmiUi+LrbBHGbsiPogvSsvQkk/A5aG
-        VUJquoagHKPofhWV3yc6kvy16Lva
-X-Google-Smtp-Source: ABdhPJxTNdXAf1FtSIiCyjYkNMI+hY5ajiYzUnof3HI0p3oY3hAgh9KXwjPIo2BOWmWGbMMBMBBZgg==
-X-Received: by 2002:a19:2258:: with SMTP id i85mr2905186lfi.86.1589557975112;
-        Fri, 15 May 2020 08:52:55 -0700 (PDT)
-Received: from [192.168.2.145] (ppp91-78-208-152.pppoe.mtu-net.ru. [91.78.208.152])
-        by smtp.googlemail.com with ESMTPSA id r3sm1529811lfm.52.2020.05.15.08.52.53
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 15 May 2020 08:52:54 -0700 (PDT)
-Subject: Re: [PATCH v4 4/6] partitions/efi: Support GPT entry lookup at a
- non-standard location
-To:     Steve McIntyre <steve@einval.com>
-Cc:     Jens Axboe <axboe@kernel.dk>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
-        David Heidelberg <david@ixit.cz>,
-        Peter Geis <pgwipeout@gmail.com>,
-        Stephen Warren <swarren@wwwdotorg.org>,
-        Nicolas Chauvet <kwizart@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Billy Laws <blaws05@gmail.com>,
-        =?UTF-8?Q?Nils_=c3=96stlund?= <nils@naltan.com>,
-        Christoph Hellwig <hch@infradead.org>,
-        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
-        Davidlohr Bueso <dave@stgolabs.net>,
-        linux-tegra@vger.kernel.org, linux-block@vger.kernel.org,
-        Andrey Danin <danindrey@mail.ru>,
-        Gilles Grandou <gilles@grandou.net>,
-        Ryan Grachek <ryan@edited.us>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-efi <linux-efi@vger.kernel.org>
-References: <20200515014143.12984-1-digetx@gmail.com>
- <20200515014143.12984-5-digetx@gmail.com>
- <20200515100320.GB30674@tack.einval.com>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <2633429b-f014-15ea-c08c-d2157b0177b1@gmail.com>
-Date:   Fri, 15 May 2020 18:52:53 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.7.0
+        id S1726269AbgEPM7z (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 16 May 2020 08:59:55 -0400
+Received: from mout02.posteo.de ([185.67.36.66]:51689 "EHLO mout02.posteo.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726219AbgEPM7y (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Sat, 16 May 2020 08:59:54 -0400
+Received: from submission (posteo.de [89.146.220.130]) 
+        by mout02.posteo.de (Postfix) with ESMTPS id 4B1422400FD
+        for <linux-efi@vger.kernel.org>; Sat, 16 May 2020 14:59:52 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=posteo.de; s=2017;
+        t=1589633992; bh=9piRR8kN2zSd0xNtdI/xYxaqCZDooh4Pp8qoD8MP5Os=;
+        h=From:To:Cc:Subject:Date:From;
+        b=sHsn31OSJvGn8l3giYEJDS/9lr+uE7kZjyaV7DD5WFNxSGfRaAPq5FXgTYX389Dji
+         dpg0V5DDaU8OmpwyJry0gCLMUpCDMUCVZBuCBb3IPftR83OII412ZSjGrOXGCxFFxB
+         uoTpzVakexgvK2DzBb/MOocWX+x8nfNe7k5dclS+fj2v4bCfqz+cc8o6Nfcg2xz5af
+         p7NzgQy/7WkBLygWaXvsr+Edd9TEMG5GbegfazOj+rrZxbS16fla1ZnC1LEIuX881F
+         faQK8zeDR6QPaO3G15FmCHmNTPwflNO2MRBG8AV51w72jWSyOs+EYgh4TLevtkIJFO
+         ds8saYoKKMtbg==
+Received: from customer (localhost [127.0.0.1])
+        by submission (posteo.de) with ESMTPSA id 49PQNR60NQz9rxf;
+        Sat, 16 May 2020 14:59:51 +0200 (CEST)
+From:   Benjamin Thiel <b.thiel@posteo.de>
+To:     linux-efi@vger.kernel.org
+Cc:     LKML <linux-kernel@vger.kernel.org>,
+        Borislav Petkov <bp@alien8.de>,
+        Benjamin Thiel <b.thiel@posteo.de>
+Subject: [PATCH] efi: Pull up arch-specific prototype efi_systab_show_arch()
+Date:   Sat, 16 May 2020 14:59:48 +0200
+Message-Id: <20200516125948.3459-1-b.thiel@posteo.de>
+X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
-In-Reply-To: <20200515100320.GB30674@tack.einval.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-15.05.2020 13:03, Steve McIntyre пишет:
-> On Fri, May 15, 2020 at 04:41:41AM +0300, Dmitry Osipenko wrote:
->> Most of consumer-grade NVIDIA Tegra devices use a proprietary bootloader
->> that can't be easily replaced because it's locked down using Secure Boot
->> cryptography singing and the crypto keys aren't given to a device owner.
->               ^^^^^^^ typo
->> These devices usually have eMMC storage that is partitioned using a custom
->> NVIDIA Tegra partition table format.  Of course bootloader and other
->> "special things" are stored on the eMMC storage, and thus, the partition
->> format can't be changed.
-> 
-> ...
-> 
+... in order to fix a -Wmissing-prototypes warning:
 
-Thanks! I'll correct it in v5.
+arch/x86/platform/efi/efi.c:957:7: warning: no previous prototype for
+‘efi_systab_show_arch’ [-Wmissing-prototypes]
+char *efi_systab_show_arch(char *str)
+
+Signed-off-by: Benjamin Thiel <b.thiel@posteo.de>
+---
+ drivers/firmware/efi/efi.c | 7 ++-----
+ include/linux/efi.h        | 4 ++++
+ 2 files changed, 6 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 911a2bd0f6b7..d3e7ce6f1027 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -130,11 +130,8 @@ static ssize_t systab_show(struct kobject *kobj,
+ 	if (efi.smbios != EFI_INVALID_TABLE_ADDR)
+ 		str += sprintf(str, "SMBIOS=0x%lx\n", efi.smbios);
+ 
+-	if (IS_ENABLED(CONFIG_IA64) || IS_ENABLED(CONFIG_X86)) {
+-		extern char *efi_systab_show_arch(char *str);
+-
++	if (IS_ENABLED(CONFIG_IA64) || IS_ENABLED(CONFIG_X86))
+ 		str = efi_systab_show_arch(str);
+-	}
+ 
+ 	return str - buf;
+ }
+@@ -1012,4 +1009,4 @@ static int __init register_update_efi_random_seed(void)
+ 	return register_reboot_notifier(&efi_random_seed_nb);
+ }
+ late_initcall(register_update_efi_random_seed);
+-#endif
++#endifefi_systab_show_arch
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 251f1f783cdf..e47dae8c8d5f 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1245,4 +1245,8 @@ struct linux_efi_memreserve {
+ 
+ void __init efi_arch_mem_reserve(phys_addr_t addr, u64 size);
+ 
++#if defined(CONFIG_IA64) || defined(CONFIG_X86)
++extern char *efi_systab_show_arch(char *str);
++#endif
++
+ #endif /* _LINUX_EFI_H */
+-- 
+2.20.1
+
