@@ -2,83 +2,135 @@ Return-Path: <SRS0=8wie=66=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.4 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
+X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 00F8FC433E0
-	for <linux-efi@archiver.kernel.org>; Sat, 16 May 2020 13:38:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 62FC5C433DF
+	for <linux-efi@archiver.kernel.org>; Sat, 16 May 2020 15:37:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BD50F20671
-	for <linux-efi@archiver.kernel.org>; Sat, 16 May 2020 13:38:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 35F32207CB
+	for <linux-efi@archiver.kernel.org>; Sat, 16 May 2020 15:37:22 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=alien8.de header.i=@alien8.de header.b="iMspuoAi"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="W5o9sYz6"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726295AbgEPNiE (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 16 May 2020 09:38:04 -0400
-Received: from mail.skyhub.de ([5.9.137.197]:53278 "EHLO mail.skyhub.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726266AbgEPNiE (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Sat, 16 May 2020 09:38:04 -0400
-Received: from zn.tnic (p200300ec2f1da5006c2171768245b3fc.dip0.t-ipconnect.de [IPv6:2003:ec:2f1d:a500:6c21:7176:8245:b3fc])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id C0BBE1EC0345;
-        Sat, 16 May 2020 15:38:02 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alien8.de; s=dkim;
-        t=1589636282;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=YnC5M8+45coK6blTjpWVSwTrK5ZsOZRTdrUKNcF4tRM=;
-        b=iMspuoAiJP+ZjHVfa1VXtwQZfdYwGvj4OEXN+b5iLwb3EwSMy8iO6brhm+SMl47AHwmI/n
-        +Zs7ULwEVUtL+KDr3Uhf9/lL4aafdWXOWAUfG5FVYFJJ+UhDDmOxWnidaCG9JdEQ2soZ7J
-        TFYOFXr2Fp8CpGDzNvWeSHOlEZ+vYkE=
-Date:   Sat, 16 May 2020 15:37:58 +0200
-From:   Borislav Petkov <bp@alien8.de>
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     Benjamin Thiel <b.thiel@posteo.de>,
-        linux-efi <linux-efi@vger.kernel.org>,
-        LKML <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH v2] efi: Pull up arch-specific prototype
- efi_systab_show_arch()
-Message-ID: <20200516133758.GA19372@zn.tnic>
-References: <20200516132647.14568-1-b.thiel@posteo.de>
- <CAMj1kXE92_hmbaNURjW9FuRo02B9my1UBBUhPZi_CS+FRr8-aw@mail.gmail.com>
+        id S1727777AbgEPPhV (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 16 May 2020 11:37:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45232 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727082AbgEPPhT (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 16 May 2020 11:37:19 -0400
+Received: from mail-lj1-x244.google.com (mail-lj1-x244.google.com [IPv6:2a00:1450:4864:20::244])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DC1CCC05BD09;
+        Sat, 16 May 2020 08:37:18 -0700 (PDT)
+Received: by mail-lj1-x244.google.com with SMTP id g1so5344888ljk.7;
+        Sat, 16 May 2020 08:37:18 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=hY+h+hQNft22sbR2GRHdulgy1g8os6lzLdmN2sCZ1lE=;
+        b=W5o9sYz66CM1jaHftKzu53qc4tndJdJyEpks307TEOIhx05twGZL58yXzc2rm/fmF3
+         gY+hiG81x5eadB2JrGXiyQ5Pq9PAXhWZofEox+oFkF/7Bn+lejFkpC4rLVPpJ+nPmh43
+         uaigifY9LwaZYHMqzEfUPVFF8mVByFQuvsQ2aPip/YUZh6H7pCeMxsI5Q9R1tco0uwrk
+         sy2C4dM/p6PSHVmiQt2LqUeXks8DkEoh8SBfwUKf5Hb/8Kjyd/cALFqIJw2s8rMOpfLq
+         HngheLBsMaWMVMEAYbcsaeT40D1K3bT/1pwCQDOaLHzmJmCDklXf+rfs+bUp0Hw7oCZT
+         GowA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=hY+h+hQNft22sbR2GRHdulgy1g8os6lzLdmN2sCZ1lE=;
+        b=lzV85Z9YK6LtsbMB3HhgxWxa4Jrp6oZw/r0Q6SGID2MixM+leUj4KHvrlxjbO9MG6y
+         OZIifyR9EdNc+Yje/6pLU05rK29ajelts7aPjdkzByIJGFnCQIdIc+8je4oIEbVojeCZ
+         obJMy/hiEG91mWEx1t2vmgGhff7RDKKDedC5UqIC1q4UQXRKrzTwKHx4hSBVljeyTczk
+         T2wDt3EWALfiVddY0kw+3YHfvbhMR5sThzgxlXYN+8KJWXGgtv1L5yfHxFjHL9pyaULi
+         T+aeOWR/b4IYu/6ulzQ1d7U7J4k8lYhLxCFVCv/uXWllAqQeCxqdeUnbYcNkYn5ng5Ou
+         7X7Q==
+X-Gm-Message-State: AOAM5313RNTLMFwAgkoCF6VeDxZ9l+H6BcbQHkuwUM8x5bLSPkI3hldO
+        ELoD2vBJq4CSyORUpCXzi0uTzHlJ
+X-Google-Smtp-Source: ABdhPJyf4prqs2e1qsAwyKo3RPBy4DbONUEjYYWDpAq4jeUWnpTlFo7a2DK8Y1jb12R6CVG+yCAcfg==
+X-Received: by 2002:a2e:8997:: with SMTP id c23mr845199lji.22.1589643437449;
+        Sat, 16 May 2020 08:37:17 -0700 (PDT)
+Received: from localhost.localdomain (ppp91-78-208-152.pppoe.mtu-net.ru. [91.78.208.152])
+        by smtp.gmail.com with ESMTPSA id a12sm2845356ljj.64.2020.05.16.08.37.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 16 May 2020 08:37:16 -0700 (PDT)
+From:   Dmitry Osipenko <digetx@gmail.com>
+To:     Jens Axboe <axboe@kernel.dk>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>,
+        David Heidelberg <david@ixit.cz>,
+        Peter Geis <pgwipeout@gmail.com>,
+        Stephen Warren <swarren@wwwdotorg.org>,
+        Nicolas Chauvet <kwizart@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Billy Laws <blaws05@gmail.com>,
+        =?UTF-8?q?Nils=20=C3=96stlund?= <nils@naltan.com>,
+        Christoph Hellwig <hch@infradead.org>,
+        Ard Biesheuvel <ard.biesheuvel@linaro.org>,
+        Davidlohr Bueso <dave@stgolabs.net>
+Cc:     linux-tegra@vger.kernel.org, linux-block@vger.kernel.org,
+        Andrey Danin <danindrey@mail.ru>,
+        Gilles Grandou <gilles@grandou.net>,
+        Ryan Grachek <ryan@edited.us>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Steve McIntyre <steve@einval.com>,
+        Randy Dunlap <rdunlap@infradead.org>,
+        linux-efi <linux-efi@vger.kernel.org>
+Subject: [PATCH v5 1/6] mmc: core: Add raw_boot_mult field to mmc_ext_csd
+Date:   Sat, 16 May 2020 18:36:39 +0300
+Message-Id: <20200516153644.13748-2-digetx@gmail.com>
+X-Mailer: git-send-email 2.26.0
+In-Reply-To: <20200516153644.13748-1-digetx@gmail.com>
+References: <20200516153644.13748-1-digetx@gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAMj1kXE92_hmbaNURjW9FuRo02B9my1UBBUhPZi_CS+FRr8-aw@mail.gmail.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Sat, May 16, 2020 at 03:32:25PM +0200, Ard Biesheuvel wrote:
-> On Sat, 16 May 2020 at 15:26, Benjamin Thiel <b.thiel@posteo.de> wrote:
-> >
-> > ... in order to fix a -Wmissing-prototypes warning:
-> >
-> > arch/x86/platform/efi/efi.c:957:7: warning: no previous prototype for
-> > ‘efi_systab_show_arch’ [-Wmissing-prototypes]
-> > char *efi_systab_show_arch(char *str)
-> >
-> > Signed-off-by: Benjamin Thiel <b.thiel@posteo.de>
-> 
-> Thanks, I'll queue this as a fix.
-> 
-> Nit: please don't treat the subject line as the first N words of the
-> commit log, but start with a full sentence. Not all mail readers show
-> the subject line and the body together. I've fixed it up for now.
+In order to support parsing of NVIDIA Tegra Partition Table format, we
+need to know the BOOT_SIZE_MULT value of the Extended CSD register because
+NVIDIA's bootloader linearizes the boot0/boot1/main partitions into a
+single virtual space, and thus, all partition addresses are shifted by
+the size of boot0 + boot1 partitions.
 
-That was my suggestion as I do that a lot. :)
+Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
+---
+ drivers/mmc/core/mmc.c   | 2 ++
+ include/linux/mmc/card.h | 1 +
+ 2 files changed, 3 insertions(+)
 
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 4203303f946a..112edfb1eb1d 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -417,6 +417,8 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 		ext_csd[EXT_CSD_ERASE_TIMEOUT_MULT];
+ 	card->ext_csd.raw_hc_erase_grp_size =
+ 		ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
++	card->ext_csd.raw_boot_mult =
++		ext_csd[EXT_CSD_BOOT_MULT];
+ 	if (card->ext_csd.rev >= 3) {
+ 		u8 sa_shift = ext_csd[EXT_CSD_S_A_TIMEOUT];
+ 		card->ext_csd.part_config = ext_csd[EXT_CSD_PART_CONFIG];
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 7d46411ffaa2..cd6b58b66010 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -109,6 +109,7 @@ struct mmc_ext_csd {
+ 	u8			raw_hc_erase_gap_size;	/* 221 */
+ 	u8			raw_erase_timeout_mult;	/* 223 */
+ 	u8			raw_hc_erase_grp_size;	/* 224 */
++	u8			raw_boot_mult;		/* 226 */
+ 	u8			raw_sec_trim_mult;	/* 229 */
+ 	u8			raw_sec_erase_mult;	/* 230 */
+ 	u8			raw_sec_feature_support;/* 231 */
 -- 
-Regards/Gruss,
-    Boris.
+2.26.0
 
-https://people.kernel.org/tglx/notes-about-netiquette
