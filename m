@@ -2,62 +2,61 @@ Return-Path: <SRS0=8wie=66=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-3.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7C69EC433DF
-	for <linux-efi@archiver.kernel.org>; Sat, 16 May 2020 15:37:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2E355C433DF
+	for <linux-efi@archiver.kernel.org>; Sat, 16 May 2020 15:38:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5A6E920727
-	for <linux-efi@archiver.kernel.org>; Sat, 16 May 2020 15:37:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0840A20727
+	for <linux-efi@archiver.kernel.org>; Sat, 16 May 2020 15:38:02 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Tu95+p9L"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="e2EflnAF"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727882AbgEPPhm (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 16 May 2020 11:37:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45260 "EHLO
+        id S1727084AbgEPPhU (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 16 May 2020 11:37:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45226 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727823AbgEPPh0 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sat, 16 May 2020 11:37:26 -0400
-Received: from mail-lj1-x241.google.com (mail-lj1-x241.google.com [IPv6:2a00:1450:4864:20::241])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 464AEC05BD0B;
-        Sat, 16 May 2020 08:37:26 -0700 (PDT)
-Received: by mail-lj1-x241.google.com with SMTP id a21so5336509ljj.11;
-        Sat, 16 May 2020 08:37:26 -0700 (PDT)
+        with ESMTP id S1726695AbgEPPhR (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 16 May 2020 11:37:17 -0400
+Received: from mail-lf1-x143.google.com (mail-lf1-x143.google.com [IPv6:2a00:1450:4864:20::143])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 77C95C061A0C;
+        Sat, 16 May 2020 08:37:17 -0700 (PDT)
+Received: by mail-lf1-x143.google.com with SMTP id e125so3547100lfd.1;
+        Sat, 16 May 2020 08:37:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=VCfDgD0BOTw7K9rKkuVs5dDCTL68za+UymQx9p6OCAo=;
-        b=Tu95+p9LzkryZ16vSFZZQPj7/Fw+f6F4Qd52s6KxDrpoMlLM6glOlN/7FxCAdHIxgm
-         vSbowE8l/GmXrqZgkQ9FoNdCoCcXSr6WwbgF85fOMhy502POhoZcHbGULKcxZC7sLx+P
-         mF3xhaiD8ijbJVKjyhetN1hE3spflbHWTDgdr+WUvzISCsCl2y3gO036TN3A+R4l25WD
-         yN8kZHV5l7j1gtfJr/T9pqqsu7UB+OMCffo9W5wo/26Do1RLJjsWH4HxijkvhYsRlxAO
-         DQnxGCqvldqp3xRObAOuL80oefJfL6Hy+qF/K7RO8bz8FeRyAcSxzJsav1oBjLMxQYw6
-         VNLA==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=WpS6ZF4a9pRJWnYHipEFM6MSvAxIosbAoCxtuvJZD2U=;
+        b=e2EflnAFQNGYa6b9ZkPB3ugDZlPy9NujHKEviT4Vly5xOP+KrScI+I+pZ+5+SCXCgD
+         044f3ENefm1lg/0+PBSX5avuH/zpA2CdXcMWxpnENCcd3ul6kY9wZ9+r39zMX4YmYYZO
+         QyIUk7lBtLH76SUakEqZQzyV41N2+VPKMI7hI/AypO2ybWxeF1+vPeWBqgtUWlO//1e5
+         HWSCkxGMiN9lV2znZGSm58f3reOIcngSLuLvw74ZVFqNIgYvrlfualH1CpFiWVoLGSzQ
+         ZZvXsMgHOnA+qDFuz3EjHzhJBafog15qgNhP6gRfydDVlB1WST4LaUDaeySNAh80eOxY
+         5ZMA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=VCfDgD0BOTw7K9rKkuVs5dDCTL68za+UymQx9p6OCAo=;
-        b=un31ORivh+G4dUM4AxtVAIzISF765TxBUKxghU/sL+QWbf+0QaB/Y7hvXfRC9O9xMh
-         qnBXI5k8X1vXZk91ByfU5iIwuyCUP5MlH0WhboquzKeBKnHWOg7wdJ9zqvuJxoniu+Dq
-         aODQVmRPge0I3xplEcroSFcNur96nysiVo3TC5nq2hGxuxU4xmtAGCVz3B5/xm2oUNmA
-         S0MAhg7AzC9ONPDE0JQy1wQY0a+uibGeE5fp68aFEQgVWPCTuareZYqo8ff0mkyW2OEk
-         37kDaUX0PVMIppEdFUsZv3InhInU+gOVoubCV75s9TtiFTo/xQyt70iYrF9iFnftkIgc
-         fT0Q==
-X-Gm-Message-State: AOAM532ebaP/1Fp3S1DWHFyJrkxS8Jns3zsToNl3/mgWfc+loVjG9oLd
-        NDMuEmZslGzMSS9BIs/kqWw=
-X-Google-Smtp-Source: ABdhPJyjz6TSw1+Q50zR2PhQEFqRV9q4+gSgAVTNYqnkDFl5nbJo2ngLzGQ96G1iDJ8aI7KbZ9oO7w==
-X-Received: by 2002:a2e:3a10:: with SMTP id h16mr4897156lja.49.1589643444763;
-        Sat, 16 May 2020 08:37:24 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=WpS6ZF4a9pRJWnYHipEFM6MSvAxIosbAoCxtuvJZD2U=;
+        b=e58ofcHHKNXn+7unLOIfx4RAgH5y8uXd1XX7usoP4ypncdw+5diuQnBzk64hTprArw
+         5XsOifb/Xdbw+/yELu8lIPTtTdSXAkgoVQufM6XJGpdpxy+dtout+V+byHI8BDTWdbPm
+         g4jMnPE7egrHw5ZlqkA53DuDAS0R74i0s33st+q2EWG/6M6WlkUms5mF5oXwD0w0ROkI
+         KVNYIV2dNhrZYCzqNJNF2E3cyDQC0JG4CyVqw9aSAfz9zdoDT4k/ffy3HHVe58yI/Sbc
+         3gxHJJC1RWONsO7ZgtoU8bh9ti1mKVrk30xNf/3dlZTZPUTjL7bQiFWBGuxR/4BjuFC9
+         dHjw==
+X-Gm-Message-State: AOAM531VOLrFMaSFZ1j6J745cCQRnledG9ctTjQhPmYrSQC89if+nBjl
+        gM304O8dwxH71MY+tZKeMO0=
+X-Google-Smtp-Source: ABdhPJw7fZ7fe0nFEzhAHpqMKS0/SiilLYRy0bfzdQ9MmGm2T7tfXUK+NOZ5b0ebyYCngBDwVwC+vQ==
+X-Received: by 2002:ac2:4354:: with SMTP id o20mr5938363lfl.102.1589643435946;
+        Sat, 16 May 2020 08:37:15 -0700 (PDT)
 Received: from localhost.localdomain (ppp91-78-208-152.pppoe.mtu-net.ru. [91.78.208.152])
-        by smtp.gmail.com with ESMTPSA id a12sm2845356ljj.64.2020.05.16.08.37.23
+        by smtp.gmail.com with ESMTPSA id a12sm2845356ljj.64.2020.05.16.08.37.14
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 16 May 2020 08:37:24 -0700 (PDT)
+        Sat, 16 May 2020 08:37:15 -0700 (PDT)
 From:   Dmitry Osipenko <digetx@gmail.com>
 To:     Jens Axboe <axboe@kernel.dk>,
         Thierry Reding <thierry.reding@gmail.com>,
@@ -81,12 +80,10 @@ Cc:     linux-tegra@vger.kernel.org, linux-block@vger.kernel.org,
         linux-kernel@vger.kernel.org, Steve McIntyre <steve@einval.com>,
         Randy Dunlap <rdunlap@infradead.org>,
         linux-efi <linux-efi@vger.kernel.org>
-Subject: [PATCH v5 6/6] soc/tegra: Expose Boot Configuration Table via sysfs
-Date:   Sat, 16 May 2020 18:36:44 +0300
-Message-Id: <20200516153644.13748-7-digetx@gmail.com>
+Subject: [PATCH v5 0/6] Introduce NVIDIA Tegra Partition Table
+Date:   Sat, 16 May 2020 18:36:38 +0300
+Message-Id: <20200516153644.13748-1-digetx@gmail.com>
 X-Mailer: git-send-email 2.26.0
-In-Reply-To: <20200516153644.13748-1-digetx@gmail.com>
-References: <20200516153644.13748-1-digetx@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -95,189 +92,140 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-It's quite useful to have unencrypted BCT exposed to userspace for
-debugging purposes, so let's expose it via sysfs.  The BCT data will be
-present in '/sys/tegra/boot_config_table' binary file if BCT is available.
+Hello,
 
-Suggested-by: Michał Mirosław <mirq-linux@rere.qmqm.pl>
-Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
----
- arch/arm/mach-tegra/tegra.c  |  4 +++
- drivers/soc/tegra/Makefile   |  1 +
- drivers/soc/tegra/bootdata.c | 51 ++++++++++++++++++++++++++++++++++++
- drivers/soc/tegra/common.c   | 17 ++++++++++++
- include/soc/tegra/bootdata.h |  2 ++
- include/soc/tegra/common.h   |  3 +++
- 6 files changed, 78 insertions(+)
+This series adds support for the NVIDIA Tegra Partition Table format,
+which is needed in order to support consumer-grade Tegra-based devices
+by the upstream kernel.  These devices have Secure Boot enabled and it
+can't be disabled, and thus, it's not possible to easily modify bootloader
+and eMMC storage partitioning.
+
+Big thanks to everyone who helped with figuring out the TegraPT format
+and with testing!
+
+Changelog:
+
+v5: - Corrected Kconfig dependency, like it was suggested by Randy Dunlap
+      in the review comment to v4.
+
+    - Corrected a typo in the commit message, which was spotted by
+      Steve McIntyre in v4.
+
+    - The new force_gpt_sector variable has been moved out to the common
+      parser state because I realized that multiple drives could be scanned
+      simultaneously, and thus, a global shared variable isn't a suitable
+      variant.
+
+    - The Tegra's enforced GPT-scan now supports older bootloader versions,
+      which do not provide the gpt_sector= command line option.  The gpt_sector
+      should be calculated using NVIDIA's algorithm in this case.
+
+v4: - Scanning of the eMMC boot partitions has been dropped because it
+      requires a bit too messy hacks in the kernel.  We can live without
+      this feature, at least for now it's not really needed.
+
+    - Instead of the dropped boot partitions scanning, the "gpt_sector="
+      command line option has been brought back [1].  But now it's done
+      in a different way, not bothering platforms other than Tegra and
+      not touching block devices other than eMMC, which was requested during
+      of the [1] review.  The "gpt_sector=" usage is needed when partition
+      table is inaccessible by kernel, which is the case for the Ouya game
+      console device for example.  Please note that "gpt_sector=" is not
+      available on all devices, such devices will fall back to the TegraPT,
+      Samsung Galaxy Tab 10.1 is an example of a such device.
+
+      [1] https://patchwork.ozlabs.org/project/linux-tegra/patch/20200219162339.16192-1-digetx@gmail.com/
+
+    - We got a bit more broad testing and discovered that Samsung Galaxy
+      Tab 10.1 uses 2K logical sectors instead of 4K.  So the 2K sectors
+      are supported now by the TegraPT parser.  Thanks to Nils Östlund for
+      the testing!
+
+    - TegraPT parser now utilizes "tegraboot=" cmdline option which is
+      passed to kernel by the NVIDIA's bootloader.  It's used for verifying
+      that SDMMC device is *the* boot source.
+
+    - Added patch that exposes Boot Configuration Table to userspace via
+      sysfs.  Thanks to Michał Mirosław for the suggestion!
+
+    - Misc changes:
+        - The EB2 (second bootloader) partition is added to the list of
+          known partitions.  Used by the Galaxy Tab 10.
+
+        - The blkdev logical sector size is checked now, for consistency.
+          It always should be 512 bytes on the supported/tested devices.
+
+        - Verbose error messages are replaced with pr_debug().
+
+v3: - Fixed "BUG: KASAN: slab-out-of-bounds in tegra_partition".  Thanks to
+      Peter Geis for noticing the problem.
+
+    - The MMC boot partitions scanning is now opt-in. See this patch:
+
+        mmc: block: Support partition-table scanning on boot partitions
+
+    - The found MMC boot partitions won't be assigned to the MMC boot
+      block device ever due to the new GENHD_FL_PART_SCAN_ONCE flag.
+
+      This makes us to ensure that the old behavior of the MMC core is
+      preserved for a non-Tegra MMC-block users.
+
+    New patches in v3:
+
+        block: Introduce GENHD_FL_PART_SCAN_ONCE
+        mmc: sdhci-tegra: Enable boot partitions scanning on Tegra20 and Tegra30
+
+v2: - Addressed v1 review comments from Stephen Warren by using BIT for
+      locating BCT position in IRAM.
+
+    - Added more validations to the TegraPT parser: partition type is
+      verified, eMMC instance ID is verified.
+
+    - TegraPT parser now doesn't touch any devices other than eMMC.
+
+    - EKS (encrypted keys) partition is blacklisted now.
+
+    - Implemented eMMC boot partitions scanning.  These new patches are
+      added in a result:
+
+        mmc: block: Add mmc_bdev_to_part_type() helper
+        mmc: block: Add mmc_bdev_to_area_type() helper
+        mmc: block: Add MMC_QUIRK_RESCAN_MAIN_BLKDEV
+        mmc: block: Enable partition-table scanning for boot partitions
+        partitions/tegra: Implement eMMC boot partitions scanning
+
+Dmitry Osipenko (6):
+  mmc: core: Add raw_boot_mult field to mmc_ext_csd
+  mmc: block: Add mmc_bdev_to_card() helper
+  partitions: Introduce NVIDIA Tegra Partition Table
+  partitions/efi: Support GPT entry lookup at a non-standard location
+  partitions/tegra: Support enforced GPT scanning
+  soc/tegra: Expose Boot Configuration Table via sysfs
+
+ arch/arm/mach-tegra/tegra.c   |  58 ++++
+ block/partitions/Kconfig      |   8 +
+ block/partitions/Makefile     |   1 +
+ block/partitions/check.h      |   3 +
+ block/partitions/core.c       |   4 +
+ block/partitions/efi.c        |  14 +
+ block/partitions/tegra.c      | 624 ++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/block.c      |  15 +
+ drivers/mmc/core/mmc.c        |   2 +
+ drivers/soc/tegra/Makefile    |   1 +
+ drivers/soc/tegra/bootdata.c  |  51 +++
+ drivers/soc/tegra/common.c    |  17 +
+ include/linux/mmc/blkdev.h    |  13 +
+ include/linux/mmc/card.h      |   1 +
+ include/soc/tegra/bootdata.h  |  48 +++
+ include/soc/tegra/common.h    |  12 +
+ include/soc/tegra/partition.h |  84 +++++
+ 17 files changed, 956 insertions(+)
+ create mode 100644 block/partitions/tegra.c
  create mode 100644 drivers/soc/tegra/bootdata.c
+ create mode 100644 include/linux/mmc/blkdev.h
+ create mode 100644 include/soc/tegra/bootdata.h
+ create mode 100644 include/soc/tegra/partition.h
 
-diff --git a/arch/arm/mach-tegra/tegra.c b/arch/arm/mach-tegra/tegra.c
-index da6bcd85398b..5f40463f1b97 100644
---- a/arch/arm/mach-tegra/tegra.c
-+++ b/arch/arm/mach-tegra/tegra.c
-@@ -72,6 +72,7 @@ static void __init tegra_boot_config_table_init(void)
- 	u32 iram_end   = TEGRA_IRAM_BASE + TEGRA_IRAM_SIZE;
- 	u32 iram_start = TEGRA_IRAM_BASE;
- 	u32 pt_addr, pt_size, bct_size;
-+	void __iomem *bct_ptr;
- 
- 	t20_bit = IO_ADDRESS(TEGRA_IRAM_BASE);
- 
-@@ -90,6 +91,7 @@ static void __init tegra_boot_config_table_init(void)
- 
- 		pt_addr = t20_bct->partition_table_logical_sector_address;
- 		pt_size = t20_bct->partition_table_num_logical_sectors;
-+		bct_ptr = t20_bct;
- 
- 	} else if (of_machine_is_compatible("nvidia,tegra30")) {
- 		bct_size = sizeof(*t30_bct);
-@@ -106,12 +108,14 @@ static void __init tegra_boot_config_table_init(void)
- 
- 		pt_addr = t30_bct->partition_table_logical_sector_address;
- 		pt_size = t30_bct->partition_table_num_logical_sectors;
-+		bct_ptr = t30_bct;
- 	} else {
- 		return;
- 	}
- 
- 	pr_info("%s: BCT found in IRAM\n", __func__);
- 
-+	tegra_bootdata_bct_setup(bct_ptr, bct_size);
- 	tegra_partition_table_setup(pt_addr, pt_size);
- }
- 
-diff --git a/drivers/soc/tegra/Makefile b/drivers/soc/tegra/Makefile
-index 9c809c1814bd..8be2bfb4d95d 100644
---- a/drivers/soc/tegra/Makefile
-+++ b/drivers/soc/tegra/Makefile
-@@ -1,6 +1,7 @@
- # SPDX-License-Identifier: GPL-2.0
- obj-y += fuse/
- 
-+obj-y += bootdata.o
- obj-y += common.o
- obj-$(CONFIG_SOC_TEGRA_FLOWCTRL) += flowctrl.o
- obj-$(CONFIG_SOC_TEGRA_PMC) += pmc.o
-diff --git a/drivers/soc/tegra/bootdata.c b/drivers/soc/tegra/bootdata.c
-new file mode 100644
-index 000000000000..e18a27b74023
---- /dev/null
-+++ b/drivers/soc/tegra/bootdata.c
-@@ -0,0 +1,51 @@
-+// SPDX-License-Identifier: GPL-2.0
-+
-+#include <linux/init.h>
-+#include <linux/io.h>
-+#include <linux/sizes.h>
-+#include <linux/slab.h>
-+#include <linux/sysfs.h>
-+#include <linux/types.h>
-+
-+#include <soc/tegra/bootdata.h>
-+#include <soc/tegra/common.h>
-+
-+/*
-+ * spare_bct[] will be released once kernel is booted, hence not wasting
-+ * kernel space if BCT is missing. The tegra_bct can't be allocated during
-+ * of BCT setting up because it's too early for the slab allocator.
-+ */
-+static u8 spare_bct[SZ_8K] __initdata;
-+static u8 *tegra_bct;
-+
-+static ssize_t boot_config_table_read(struct file *filp,
-+				      struct kobject *kobj,
-+				      struct bin_attribute *bin_attr,
-+				      char *buf, loff_t off, size_t count)
-+{
-+	memcpy(buf, tegra_bct + off, count);
-+	return count;
-+}
-+static BIN_ATTR_RO(boot_config_table, 0);
-+
-+static int __init tegra_bootdata_bct_sysfs_init(void)
-+{
-+	if (!bin_attr_boot_config_table.size)
-+		return 0;
-+
-+	tegra_bct = kmalloc(GFP_KERNEL, bin_attr_boot_config_table.size);
-+	if (!tegra_bct)
-+		return -ENOMEM;
-+
-+	memcpy(tegra_bct, spare_bct, bin_attr_boot_config_table.size);
-+
-+	return sysfs_create_bin_file(tegra_soc_kobj,
-+				     &bin_attr_boot_config_table);
-+}
-+late_initcall(tegra_bootdata_bct_sysfs_init)
-+
-+void __init tegra_bootdata_bct_setup(void __iomem *bct_ptr, size_t bct_size)
-+{
-+	memcpy_fromio(spare_bct, bct_ptr, bct_size);
-+	bin_attr_boot_config_table.size = bct_size;
-+}
-diff --git a/drivers/soc/tegra/common.c b/drivers/soc/tegra/common.c
-index 3dc54f59cafe..2b4b49eacb2e 100644
---- a/drivers/soc/tegra/common.c
-+++ b/drivers/soc/tegra/common.c
-@@ -3,10 +3,15 @@
-  * Copyright (C) 2014 NVIDIA CORPORATION.  All rights reserved.
-  */
- 
-+#include <linux/init.h>
-+#include <linux/kernel.h>
- #include <linux/of.h>
-+#include <linux/sysfs.h>
- 
- #include <soc/tegra/common.h>
- 
-+struct kobject *tegra_soc_kobj;
-+
- static const struct of_device_id tegra_machine_match[] = {
- 	{ .compatible = "nvidia,tegra20", },
- 	{ .compatible = "nvidia,tegra30", },
-@@ -31,3 +36,15 @@ bool soc_is_tegra(void)
- 
- 	return match != NULL;
- }
-+
-+static int __init tegra_soc_sysfs_init(void)
-+{
-+	if (!soc_is_tegra())
-+		return 0;
-+
-+	tegra_soc_kobj = kobject_create_and_add("tegra", NULL);
-+	WARN_ON(!tegra_soc_kobj);
-+
-+	return 0;
-+}
-+arch_initcall(tegra_soc_sysfs_init)
-diff --git a/include/soc/tegra/bootdata.h b/include/soc/tegra/bootdata.h
-index 7be207cb2519..d5c7a251517d 100644
---- a/include/soc/tegra/bootdata.h
-+++ b/include/soc/tegra/bootdata.h
-@@ -43,4 +43,6 @@ struct tegra30_boot_config_table {
- 	u32 unused_data[3];
- } __packed;
- 
-+void tegra_bootdata_bct_setup(void __iomem *bct_ptr, size_t bct_size);
-+
- #endif /* __SOC_TEGRA_BOOTDATA_H__ */
-diff --git a/include/soc/tegra/common.h b/include/soc/tegra/common.h
-index 744280ecab5f..0bc11b45c98e 100644
---- a/include/soc/tegra/common.h
-+++ b/include/soc/tegra/common.h
-@@ -7,8 +7,11 @@
- #define __SOC_TEGRA_COMMON_H__
- 
- #include <linux/types.h>
-+#include <linux/sysfs.h>
- 
- #ifdef CONFIG_ARCH_TEGRA
-+extern struct kobject *tegra_soc_kobj;
-+
- bool soc_is_tegra(void);
- #else
- static inline bool soc_is_tegra(void)
 -- 
 2.26.0
 
