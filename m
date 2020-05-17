@@ -8,56 +8,56 @@ X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 23929C433E3
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D4809C433DF
 	for <linux-efi@archiver.kernel.org>; Sun, 17 May 2020 02:13:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DBEFE207D5
-	for <linux-efi@archiver.kernel.org>; Sun, 17 May 2020 02:13:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B03FA207D5
+	for <linux-efi@archiver.kernel.org>; Sun, 17 May 2020 02:13:48 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="YRAo0d6k"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="KqTIB7mU"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727003AbgEQCNa (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 16 May 2020 22:13:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59084 "EHLO
+        id S1726990AbgEQCN0 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 16 May 2020 22:13:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59072 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726031AbgEQCN3 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sat, 16 May 2020 22:13:29 -0400
-Received: from mail-lf1-x144.google.com (mail-lf1-x144.google.com [IPv6:2a00:1450:4864:20::144])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9D084C061A0C;
-        Sat, 16 May 2020 19:13:27 -0700 (PDT)
-Received: by mail-lf1-x144.google.com with SMTP id 202so4992524lfe.5;
-        Sat, 16 May 2020 19:13:27 -0700 (PDT)
+        with ESMTP id S1726031AbgEQCNZ (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 16 May 2020 22:13:25 -0400
+Received: from mail-lf1-x143.google.com (mail-lf1-x143.google.com [IPv6:2a00:1450:4864:20::143])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 76AE5C061A0C;
+        Sat, 16 May 2020 19:13:24 -0700 (PDT)
+Received: by mail-lf1-x143.google.com with SMTP id x22so2083607lfd.4;
+        Sat, 16 May 2020 19:13:24 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=A0o7uTeMMiknzTDLyOmQ9sSn2udYzDsg380RDfhX0oU=;
-        b=YRAo0d6kjWYnoIquN8WoAcF93xXF/b0Hx+sLB1OD3wj18IOr0BOdQ46D9Xvgx14PeP
-         2bkzrOz+O5oRLA7X/xGJF9ROs41wfuhjyG4fJPTm0DNLmtD+3uBsTYS0wTqNd7g0eoxn
-         ANYJGT1iETXbKG1wxKHYHEaWpP6GS4BRLB/a/SnDK2D0+L7qaohKPBhbYKumc2MWRFHT
-         zXxHQlkkwIUDlTWI8tXgj4D3w+eprBdrtElhyOOKe+CFWyWvSvXUDTfnsXYBFX+dM4Jk
-         xNS7OfcV5PkjSqco66P6p/8q4/TGF3qRy985F1FmDwXyQD78WCGBqnfeR3t3rpBwZCHV
-         U/jA==
+        bh=iF67MNAgaGyZZHB9DgzgiS2naQdhA3dnI6fWutC5dQ8=;
+        b=KqTIB7mUUAoZJym4q6G95Nj9UuC8ShYdNEsQLRefZptaa3Zz0G7HqBmmbhie+pM1dW
+         5Vl/D0Nnay/d74fiZafKgX7GGWpflUaKMZsEmWmck0/b4c2Yrrz4qPMpQ1hH5VAEAyeg
+         H8vIqjy/1oEfZJPGJUyWZF0y1l47Mna68aSPfeXsFZGAsFBVCQ4A5MAFM3eTgQ9+COvv
+         X8J9rj9d2ycH2YIIb5DR2b0bsQl9/LuvkeZGs0gd0EoaAHmUrpFQfLVeKawa1dBIiCSZ
+         5NhODOSKc4m4ywu88rod3o65sK0JGiTSC1DvsYjgyb4M3xExj5o14hV+lIS3GDWP8JLI
+         vMTw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=A0o7uTeMMiknzTDLyOmQ9sSn2udYzDsg380RDfhX0oU=;
-        b=gT0TsCthJSPu613N6Lb+16MPuMSB/RRaV/dvdSLDIJhsJZaSjOaX/DS2UusEZ6BYw4
-         YB1SgFl9z4Kg1cDZQhXFUT/BUSxEzimk/H2nXhlXSvxHS8vL7bYJ5gmxCbW3BXC2XOKU
-         VX43CszK0XAQHvtPpBamm4c7kOQsMyxOA3gxsJPhAunz4UvUq3JVxJ74gb02dqkhrxY4
-         pgDNO7GZXkP6A1ZHiC34EWakVkuPLjp99ryA1DLwJYkjC8VoziqlMscjvQD1/BZXt96s
-         CtaSSqia2kmcrkaHzdw46H8AjNGFdIqyVs2q7nQAMbBOFcD+/AXmoU0FSU1kAyGbYiQB
-         MyVw==
-X-Gm-Message-State: AOAM532g7e/mU8otYyWsLwDcsa6hIjYY7xx7PYfkZnrP+dbf497CdYc9
-        ssT8Zt5kU/ZF4k3nLrQ92+o=
-X-Google-Smtp-Source: ABdhPJzojD26S2gUGtOFW0VMgSY+GHJksrLetZBcxRS85JMaN9V3ItxTn5tOdOu5dCTbnS/yl7Wn4g==
-X-Received: by 2002:a05:6512:44d:: with SMTP id y13mr7099060lfk.118.1589681605951;
-        Sat, 16 May 2020 19:13:25 -0700 (PDT)
+        bh=iF67MNAgaGyZZHB9DgzgiS2naQdhA3dnI6fWutC5dQ8=;
+        b=pnuEQ78gl/SXzP4uzmwp7YHQWbN7cGCT6h8YmAUzgK7o4iIBuoyUuxjVEnlRN4eTcV
+         g1/I0XQOKgK/O8bUNU1ew73GFjvolSiQ4Ma89YBpLNfv9uSON5QxC8b76v+gBoZquG0X
+         bTYEAKlzvlcuEgWAIjb1BmrviVAPeTg3/yvjsMJgTvlhYmyuTVTDNzkFaCJalpG0M7fh
+         9o8i/9WD7CzFrTdaKgg3PhGMojint50ZHawADRKHyHvgDZ3SMSyxQnaYpXYdCVLx2Det
+         yA9248sDc3BL/uFciVcGW1vSkzezD5yBkshda2cmamwydVzdnztmqjlEm+Y65SeBYshQ
+         JJjw==
+X-Gm-Message-State: AOAM530WpgPQOeQueApG+SRY1j+a3yO15DwNteWWytXnYbi3S1q6poOn
+        hppmt63vdU0G3v/sJFxDBlU=
+X-Google-Smtp-Source: ABdhPJz1XeF3CCJYMEUiSxSXuHEacMb4BwYa5jj40vdoBZRNG68K8EI9i/fiLBOLcR+XYMFFuLbP6A==
+X-Received: by 2002:ac2:58c8:: with SMTP id u8mr7255954lfo.142.1589681602790;
+        Sat, 16 May 2020 19:13:22 -0700 (PDT)
 Received: from localhost.localdomain (ppp91-78-208-152.pppoe.mtu-net.ru. [91.78.208.152])
-        by smtp.gmail.com with ESMTPSA id z5sm3463149lji.30.2020.05.16.19.13.24
+        by smtp.gmail.com with ESMTPSA id z5sm3463149lji.30.2020.05.16.19.13.21
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 16 May 2020 19:13:25 -0700 (PDT)
+        Sat, 16 May 2020 19:13:22 -0700 (PDT)
 From:   Dmitry Osipenko <digetx@gmail.com>
 To:     Jens Axboe <axboe@kernel.dk>,
         Thierry Reding <thierry.reding@gmail.com>,
@@ -81,744 +81,905 @@ Cc:     linux-tegra@vger.kernel.org, linux-block@vger.kernel.org,
         Ryan Grachek <ryan@edited.us>, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org, Steve McIntyre <steve@einval.com>,
         linux-efi <linux-efi@vger.kernel.org>
-Subject: [PATCH v6 5/7] partitions/efi: Improve coding style
-Date:   Sun, 17 May 2020 05:12:23 +0300
-Message-Id: <20200517021225.22890-6-digetx@gmail.com>
+Subject: [PATCH v6 3/7] partitions: Introduce NVIDIA Tegra Partition Table
+Date:   Sun, 17 May 2020 05:12:21 +0300
+Message-Id: <20200517021225.22890-4-digetx@gmail.com>
 X-Mailer: git-send-email 2.26.0
 In-Reply-To: <20200517021225.22890-1-digetx@gmail.com>
 References: <20200517021225.22890-1-digetx@gmail.com>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The 'efi.c' source code has a lot of coding style problems like:
+All NVIDIA Tegra devices use a special partition table format for the
+internal storage partitioning.  Most of Tegra devices have GPT partition
+in addition to TegraPT, but some older Android consumer-grade devices do
+not or GPT is placed in a wrong sector, and thus, the TegraPT is needed
+in order to support these devices properly by the upstream kernel. This
+patch adds support for NVIDIA Tegra Partition Table format that is used
+at least by all NVIDIA Tegra20 and Tegra30 devices.
 
-  - trailing whitespaces
-  - whitespaces instead of tabs
-  - missing whitespaces where they actually needed
-  - double blank-lines
-  - improperly aligned code
-  - improperly styled multi-line comments
-  - unnecessarily assigned variables
-  - NULL-checks that can't ever trigger
-
-and etc.
-
-This patch fixes few dozen of coding style problems without introducing
-any functional changes, making code easier to read, and thus, easier to
-maintain.
-
+Tested-by: Nils Östlund <nils@naltan.com>
 Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
 ---
- block/partitions/efi.c | 354 ++++++++++++++++++++---------------------
- 1 file changed, 175 insertions(+), 179 deletions(-)
+ arch/arm/mach-tegra/tegra.c   |  54 ++++
+ block/partitions/Kconfig      |   8 +
+ block/partitions/Makefile     |   1 +
+ block/partitions/check.h      |   1 +
+ block/partitions/core.c       |   3 +
+ block/partitions/tegra.c      | 567 ++++++++++++++++++++++++++++++++++
+ include/soc/tegra/bootdata.h  |  46 +++
+ include/soc/tegra/common.h    |   9 +
+ include/soc/tegra/partition.h |  84 +++++
+ 9 files changed, 773 insertions(+)
+ create mode 100644 block/partitions/tegra.c
+ create mode 100644 include/soc/tegra/bootdata.h
+ create mode 100644 include/soc/tegra/partition.h
 
-diff --git a/block/partitions/efi.c b/block/partitions/efi.c
-index 34c25f708733..f0229e7a6894 100644
---- a/block/partitions/efi.c
-+++ b/block/partitions/efi.c
-@@ -23,7 +23,7 @@
-  * - Ported to 2.5.7-pre1 and 2.5.7-dj2
-  * - Applied patch to avoid fault in alternate header handling
-  * - cleaned up find_valid_gpt
-- * - On-disk structure and copy in memory is *always* LE now - 
-+ * - On-disk structure and copy in memory is *always* LE now -
-  *   swab fields as needed
-  * - remove print_gpt_header()
-  * - only use first max_p partition entries, to keep the kernel minor number
-@@ -40,7 +40,7 @@
-  * - moved le_efi_guid_to_cpus() back into this file.  GPT is the only
-  *   thing that keeps EFI GUIDs on disk.
-  * - Changed gpt structure names and members to be simpler and more Linux-like.
-- * 
-+ *
-  * Wed Oct 17 2001 Matt Domsch <Matt_Domsch@dell.com>
-  * - Removed CONFIG_DEVFS_VOLUMES_UUID code entirely per Martin Wilck
-  *
-@@ -65,7 +65,7 @@
-  *
-  * Wed Jun  6 2001 Martin Wilck <Martin.Wilck@Fujitsu-Siemens.com>
-  * - added devfs volume UUID support (/dev/volumes/uuids) for
-- *   mounting file systems by the partition GUID. 
-+ *   mounting file systems by the partition GUID.
-  *
-  * Tue Dec  5 2000 Matt Domsch <Matt_Domsch@dell.com>
-  * - Moved crc32() to linux/lib, added efi_crc32().
-@@ -82,15 +82,18 @@
-  * - Code works, detects all the partitions.
-  *
-  ************************************************************/
--#include <linux/kernel.h>
- #include <linux/crc32.h>
- #include <linux/ctype.h>
-+#include <linux/kernel.h>
- #include <linux/math64.h>
- #include <linux/slab.h>
-+#include <linux/types.h>
+diff --git a/arch/arm/mach-tegra/tegra.c b/arch/arm/mach-tegra/tegra.c
+index c011359bcdb4..da6bcd85398b 100644
+--- a/arch/arm/mach-tegra/tegra.c
++++ b/arch/arm/mach-tegra/tegra.c
+@@ -28,7 +28,9 @@
+ 
+ #include <linux/firmware/trusted_foundations.h>
+ 
++#include <soc/tegra/bootdata.h>
+ #include <soc/tegra/fuse.h>
++#include <soc/tegra/partition.h>
+ #include <soc/tegra/pmc.h>
+ 
+ #include <asm/firmware.h>
+@@ -62,9 +64,61 @@ u32 tegra_uart_config[3] = {
+ 	0,
+ };
+ 
++static void __init tegra_boot_config_table_init(void)
++{
++	struct tegra30_boot_config_table __iomem *t30_bct;
++	struct tegra20_boot_config_table __iomem *t20_bct;
++	struct tegra20_boot_info_table   __iomem *t20_bit;
++	u32 iram_end   = TEGRA_IRAM_BASE + TEGRA_IRAM_SIZE;
++	u32 iram_start = TEGRA_IRAM_BASE;
++	u32 pt_addr, pt_size, bct_size;
 +
- #include "check.h"
- #include "efi.h"
- 
--/* This allows a kernel command line option 'gpt' to override
-+/*
-+ * This allows a kernel command line option 'gpt' to override
-  * the test for invalid PMBR.  Not __initdata because reloading
-  * the partition tables happens after init too.
-  */
-@@ -103,14 +106,13 @@ force_gpt_fn(char *str)
- }
- __setup("gpt", force_gpt_fn);
- 
--
- /**
-  * efi_crc32() - EFI version of crc32 function
-  * @buf: buffer to calculate crc32 of
-  * @len: length of buf
-  *
-  * Description: Returns EFI-style CRC32 value for @buf
-- * 
-+ *
-  * This function uses the little endian Ethernet polynomial
-  * but seeds the function with ~0, and xor's with ~0 at the end.
-  * Note, the EFI Specification, v1.02, has a reference to
-@@ -125,7 +127,7 @@ efi_crc32(const void *buf, unsigned long len)
- /**
-  * last_lba(): return number of last logical block of device
-  * @bdev: block device
-- * 
-+ *
-  * Description: Returns last LBA value on success, 0 on error.
-  * This is stored (by sd and ide-geometry) in
-  *  the part[0] entry for this disk, and is the number of
-@@ -173,8 +175,8 @@ static inline int pmbr_part_valid(gpt_mbr_record *part)
-  */
- static int is_pmbr_valid(legacy_mbr *mbr, sector_t total_sectors)
++	t20_bit = IO_ADDRESS(TEGRA_IRAM_BASE);
++
++	if (of_machine_is_compatible("nvidia,tegra20")) {
++		bct_size = sizeof(*t20_bct);
++
++		if (t20_bit->bct_size != bct_size ||
++		    t20_bit->bct_ptr < iram_start ||
++		    t20_bit->bct_ptr > iram_end - bct_size)
++			return;
++
++		t20_bct = IO_ADDRESS(t20_bit->bct_ptr);
++
++		if (t20_bct->boot_data_version != TEGRA_BOOTDATA_VERSION_T20)
++			return;
++
++		pt_addr = t20_bct->partition_table_logical_sector_address;
++		pt_size = t20_bct->partition_table_num_logical_sectors;
++
++	} else if (of_machine_is_compatible("nvidia,tegra30")) {
++		bct_size = sizeof(*t30_bct);
++
++		if (t20_bit->bct_size != bct_size ||
++		    t20_bit->bct_ptr < iram_start ||
++		    t20_bit->bct_ptr > iram_end - bct_size)
++			return;
++
++		t30_bct = IO_ADDRESS(t20_bit->bct_ptr);
++
++		if (t30_bct->boot_data_version != TEGRA_BOOTDATA_VERSION_T30)
++			return;
++
++		pt_addr = t30_bct->partition_table_logical_sector_address;
++		pt_size = t30_bct->partition_table_num_logical_sectors;
++	} else {
++		return;
++	}
++
++	pr_info("%s: BCT found in IRAM\n", __func__);
++
++	tegra_partition_table_setup(pt_addr, pt_size);
++}
++
+ static void __init tegra_init_early(void)
  {
--	uint32_t sz = 0;
--	int i, part = 0, ret = 0; /* invalid by default */
-+	unsigned int i, sz = 0, part = 0;
-+	int ret = 0; /* invalid by default */
- 
- 	if (!mbr || le16_to_cpu(mbr->signature) != MSDOS_MBR_SIGNATURE)
- 		goto done;
-@@ -195,11 +197,13 @@ static int is_pmbr_valid(legacy_mbr *mbr, sector_t total_sectors)
- 	if (ret != GPT_MBR_PROTECTIVE)
- 		goto done;
- check_hybrid:
--	for (i = 0; i < 4; i++)
--		if ((mbr->partition_record[i].os_type !=
--			EFI_PMBR_OSTYPE_EFI_GPT) &&
--		    (mbr->partition_record[i].os_type != 0x00))
-+	for (i = 0; i < 4; i++) {
-+		if (mbr->partition_record[i].os_type != EFI_PMBR_OSTYPE_EFI_GPT &&
-+		    mbr->partition_record[i].os_type != 0x00) {
- 			ret = GPT_MBR_HYBRID;
+ 	of_register_trusted_foundations();
++	tegra_boot_config_table_init();
+ 	tegra_cpu_reset_handler_init();
+ 	call_firmware_op(l2x0_init);
+ }
+diff --git a/block/partitions/Kconfig b/block/partitions/Kconfig
+index 702689a628f0..97cd4a030f98 100644
+--- a/block/partitions/Kconfig
++++ b/block/partitions/Kconfig
+@@ -268,3 +268,11 @@ config CMDLINE_PARTITION
+ 	help
+ 	  Say Y here if you want to read the partition table from bootargs.
+ 	  The format for the command line is just like mtdparts.
++
++config TEGRA_PARTITION
++	bool "NVIDIA Tegra Partition support" if PARTITION_ADVANCED
++	default y if ARCH_TEGRA
++	depends on MMC_BLOCK && (ARCH_TEGRA || COMPILE_TEST)
++	help
++	  Say Y here if you would like to be able to read the hard disk
++	  partition table format used by NVIDIA Tegra machines.
+diff --git a/block/partitions/Makefile b/block/partitions/Makefile
+index a7f05cdb02a8..83cb70c6d08d 100644
+--- a/block/partitions/Makefile
++++ b/block/partitions/Makefile
+@@ -20,3 +20,4 @@ obj-$(CONFIG_IBM_PARTITION) += ibm.o
+ obj-$(CONFIG_EFI_PARTITION) += efi.o
+ obj-$(CONFIG_KARMA_PARTITION) += karma.o
+ obj-$(CONFIG_SYSV68_PARTITION) += sysv68.o
++obj-$(CONFIG_TEGRA_PARTITION) += tegra.o
+diff --git a/block/partitions/check.h b/block/partitions/check.h
+index c577e9ee67f0..ffa01cc4b0b0 100644
+--- a/block/partitions/check.h
++++ b/block/partitions/check.h
+@@ -67,4 +67,5 @@ int osf_partition(struct parsed_partitions *state);
+ int sgi_partition(struct parsed_partitions *state);
+ int sun_partition(struct parsed_partitions *state);
+ int sysv68_partition(struct parsed_partitions *state);
++int tegra_partition(struct parsed_partitions *state);
+ int ultrix_partition(struct parsed_partitions *state);
+diff --git a/block/partitions/core.c b/block/partitions/core.c
+index 297004fd2264..0b4720372f07 100644
+--- a/block/partitions/core.c
++++ b/block/partitions/core.c
+@@ -81,6 +81,9 @@ static int (*check_part[])(struct parsed_partitions *) = {
+ #endif
+ #ifdef CONFIG_SYSV68_PARTITION
+ 	sysv68_partition,
++#endif
++#ifdef CONFIG_TEGRA_PARTITION
++	tegra_partition,
+ #endif
+ 	NULL
+ };
+diff --git a/block/partitions/tegra.c b/block/partitions/tegra.c
+new file mode 100644
+index 000000000000..d3a00ade145a
+--- /dev/null
++++ b/block/partitions/tegra.c
+@@ -0,0 +1,567 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * NVIDIA Tegra Partition Table
++ *
++ * Copyright (C) 2020 GRATE-DRIVER project
++ * Copyright (C) 2020 Dmitry Osipenko <digetx@gmail.com>
++ *
++ * Credits for the partition table format:
++ *
++ *   Andrey Danin <danindrey@mail.ru>       (Toshiba AC100 TegraPT format)
++ *   Gilles Grandou <gilles@grandou.net>    (Toshiba AC100 TegraPT format)
++ *   Ryan Grachek <ryan@edited.us>          (Google TV "Molly" TegraPT format)
++ *   Stephen Warren <swarren@wwwdotorg.org> (Useful suggestions about eMMC/etc)
++ */
++
++#define pr_fmt(fmt) "tegra-partition: " fmt
++
++#include <linux/blkdev.h>
++#include <linux/init.h>
++#include <linux/kernel.h>
++#include <linux/of.h>
++#include <linux/sizes.h>
++#include <linux/slab.h>
++#include <linux/string.h>
++
++#include <linux/mmc/blkdev.h>
++#include <linux/mmc/card.h>
++#include <linux/mmc/host.h>
++
++#include <soc/tegra/common.h>
++#include <soc/tegra/partition.h>
++
++#include "check.h"
++
++#define TEGRA_PT_SECTOR_SIZE(ptp)	((ptp)->logical_sector_size / SZ_512)
++#define TEGRA_PT_SECTOR(ptp, s)		((s) * TEGRA_PT_SECTOR_SIZE(ptp))
++
++#define TEGRA_PT_HEADER_SIZE						\
++	(sizeof(struct tegra_partition_header_insecure) +		\
++	 sizeof(struct tegra_partition_header_secure))			\
++
++#define TEGRA_PT_MAX_PARTITIONS(ptp)					\
++	(((ptp)->logical_sector_size - TEGRA_PT_HEADER_SIZE) /		\
++	 sizeof(struct tegra_partition))
++
++#define TEGRA_PT_ERR(ptp, fmt, ...)					\
++	pr_debug("%s: " fmt,						\
++		 (ptp)->state->bdev->bd_disk->disk_name, ##__VA_ARGS__)	\
++
++#define TEGRA_PT_PARSE_ERR(ptp, fmt, ...)				\
++	TEGRA_PT_ERR(ptp, "sector %llu: invalid " fmt,			\
++		     (ptp)->sector, ##__VA_ARGS__)
++
++struct tegra_partition_table_parser {
++	struct tegra_partition_table *pt;
++	unsigned int logical_sector_size;
++	struct parsed_partitions *state;
++	bool pt_entry_checked;
++	sector_t sector;
++	int boot_offset;
++	u32 dev_instance;
++	u32 dev_id;
++};
++
++union tegra_partition_table_u {
++	struct tegra_partition_table pt;
++	u8 pt_parts[SZ_4K / SZ_512][SZ_512];
++};
++
++struct tegra_partition_type {
++	unsigned int type;
++	char *name;
++};
++
++static sector_t tegra_pt_logical_sector_address;
++static sector_t tegra_pt_logical_sectors_num;
++
++void tegra_partition_table_setup(unsigned int logical_sector_address,
++				 unsigned int logical_sectors_num)
++{
++	tegra_pt_logical_sector_address = logical_sector_address;
++	tegra_pt_logical_sectors_num    = logical_sectors_num;
++
++	pr_info("initialized to logical sector = %llu sectors_num = %llu\n",
++		tegra_pt_logical_sector_address, tegra_pt_logical_sectors_num);
++}
++
++/*
++ * Some partitions are very sensitive, changing data on them may brick device.
++ *
++ * For more details about partitions see:
++ *
++ *  "https://docs.nvidia.com/jetson/l4t/Tegra Linux Driver Package Development Guide/part_config.html"
++ */
++static const char * const partitions_blacklist[] = {
++	"BCT", "EBT", "EB2", "EKS", "GP1", "GPT", "MBR", "PT",
++};
++
++static bool tegra_partition_name_match(struct tegra_partition *p,
++				       const char *name)
++{
++	return !strncmp(p->partition_name, name, TEGRA_PT_NAME_SIZE);
++}
++
++static bool tegra_partition_skip(struct tegra_partition *p,
++				 struct tegra_partition_table_parser *ptp,
++				 sector_t sector)
++{
++	unsigned int i;
++
++	/* skip eMMC boot partitions */
++	if (sector < ptp->boot_offset)
++		return true;
++
++	for (i = 0; i < ARRAY_SIZE(partitions_blacklist); i++) {
++		if (tegra_partition_name_match(p, partitions_blacklist[i]))
++			return true;
++	}
++
++	return false;
++}
++
++static const struct tegra_partition_type tegra_partition_expected_types[] = {
++	{ .type = TEGRA_PT_PART_TYPE_BCT,	.name = "BCT", },
++	{ .type = TEGRA_PT_PART_TYPE_EBT,	.name = "EBT", },
++	{ .type = TEGRA_PT_PART_TYPE_EBT,	.name = "EB2", },
++	{ .type = TEGRA_PT_PART_TYPE_PT,	.name = "PT",  },
++	{ .type = TEGRA_PT_PART_TYPE_GP1,	.name = "GP1", },
++	{ .type = TEGRA_PT_PART_TYPE_GPT,	.name = "GPT", },
++	{ .type = TEGRA_PT_PART_TYPE_GENERIC,	.name = NULL,  },
++};
++
++static int tegra_partition_type_valid(struct tegra_partition_table_parser *ptp,
++				      struct tegra_partition *p)
++{
++	const struct tegra_partition_type *ptype;
++	unsigned int i;
++
++	for (i = 0; i < ARRAY_SIZE(tegra_partition_expected_types); i++) {
++		ptype = &tegra_partition_expected_types[i];
++
++		if (ptype->name && !tegra_partition_name_match(p, ptype->name))
++			continue;
++
++		if (p->part_info.partition_type == ptype->type)
++			return 0;
++
++		/*
++		 * Unsure about all possible types, let's emit error and
++		 * allow to continue for now.
++		 */
++		if (!ptype->name)
++			return 1;
++	}
++
++	return -1;
++}
++
++static bool tegra_partition_valid(struct tegra_partition_table_parser *ptp,
++				  struct tegra_partition *p,
++				  struct tegra_partition *prev,
++				  sector_t sector,
++				  sector_t size)
++{
++	struct tegra_partition_info *prev_pi = &prev->part_info;
++	sector_t sect_end = TEGRA_PT_SECTOR(ptp,
++					    prev_pi->logical_sector_address +
++					    prev_pi->logical_sectors_num);
++	char *type, name[2][TEGRA_PT_NAME_SIZE + 1];
++	int err;
++
++	strscpy(name[0], p->partition_name,    sizeof(name[0]));
++	strscpy(name[1], prev->partition_name, sizeof(name[1]));
++
++	/* validate expected partition name/type */
++	err = tegra_partition_type_valid(ptp, p);
++	if (err) {
++		TEGRA_PT_PARSE_ERR(ptp, "partition_type: [%s] partition_type=%u\n",
++				   name[0], p->part_info.partition_type);
++		if (err < 0)
++			return false;
++
++		TEGRA_PT_ERR(ptp, "continuing, please update list of expected types\n");
++	}
++
++	/* validate partition table BCT addresses */
++	if (tegra_partition_name_match(p, "PT")) {
++		if (sector != TEGRA_PT_SECTOR(ptp, tegra_pt_logical_sector_address) &&
++		    size   != TEGRA_PT_SECTOR(ptp, tegra_pt_logical_sectors_num)) {
++			TEGRA_PT_PARSE_ERR(ptp, "PT location: sector=%llu size=%llu\n",
++					   sector, size);
++			return false;
++		}
++
++		if (ptp->pt_entry_checked) {
++			TEGRA_PT_PARSE_ERR(ptp, "(duplicated) PT\n");
++			return false;
++		}
++
++		ptp->pt_entry_checked = true;
++	}
++
++	if (sector + size < sector) {
++		TEGRA_PT_PARSE_ERR(ptp, "size: [%s] integer overflow sector=%llu size=%llu\n",
++				   name[0], sector, size);
++		return false;
++	}
++
++	/* validate allocation_policy=sequential (absolute unsupported) */
++	if (p != prev && sect_end > sector) {
++		TEGRA_PT_PARSE_ERR(ptp, "allocation_policy: [%s] end=%llu [%s] sector=%llu size=%llu\n",
++				   name[1], sect_end, name[0], sector, size);
++		return false;
++	}
++
++	if (ptp->dev_instance != p->mount_info.device_instance) {
++		TEGRA_PT_PARSE_ERR(ptp, "device_instance: [%s] device_instance=%u|%u\n",
++				   name[0], ptp->dev_instance,
++				   p->mount_info.device_instance);
++		return false;
++	}
++
++	if (ptp->dev_id != p->mount_info.device_id) {
++		TEGRA_PT_PARSE_ERR(ptp, "device_id: [%s] device_id=%u|%u\n",
++				   name[0], ptp->dev_id,
++				   p->mount_info.device_id);
++		return false;
++	}
++
++	if (p->partition_id > 127) {
++		TEGRA_PT_PARSE_ERR(ptp, "partition_id: [%s] partition_id=%u\n",
++				   name[0], p->partition_id);
++		return false;
++	}
++
++	sect_end = get_capacity(ptp->state->bdev->bd_disk);
++
++	/* eMMC boot partitions are below ptp->boot_offset */
++	if (sector < ptp->boot_offset) {
++		sect_end += ptp->boot_offset;
++		type = "boot";
++	} else {
++		sector -= ptp->boot_offset;
++		type = "main";
++	}
++
++	/* validate size */
++	if (!size || sector + size > sect_end) {
++		TEGRA_PT_PARSE_ERR(ptp, "size: [%s] %s partition boot_offt=%d end=%llu sector=%llu size=%llu\n",
++				   name[0], type, ptp->boot_offset, sect_end,
++				   sector, size);
++		return false;
++	}
++
++	return true;
++}
++
++static bool tegra_partitions_parsed(struct tegra_partition_table_parser *ptp,
++				    bool check_only)
++{
++	struct parsed_partitions *state = ptp->state;
++	struct tegra_partition_table *pt = ptp->pt;
++	sector_t sector, size;
++	int i, slot = 1;
++
++	ptp->pt_entry_checked = false;
++
++	for (i = 0; i < pt->secure.num_partitions; i++) {
++		struct tegra_partition *p = &pt->partitions[i];
++		struct tegra_partition *prev = &pt->partitions[max(i - 1, 0)];
++		struct tegra_partition_info *pi = &p->part_info;
++
++		if (slot == state->limit && !check_only)
++			break;
++
++		sector = TEGRA_PT_SECTOR(ptp, pi->logical_sector_address);
++		size   = TEGRA_PT_SECTOR(ptp, pi->logical_sectors_num);
++
++		if (check_only &&
++		    !tegra_partition_valid(ptp, p, prev, sector, size))
++			return false;
++
++		if (check_only ||
++		    tegra_partition_skip(p, ptp, sector))
++			continue;
++
++		put_partition(state, slot++, sector - ptp->boot_offset, size);
++	}
++
++	if (check_only && !ptp->pt_entry_checked) {
++		TEGRA_PT_PARSE_ERR(ptp, "PT: table entry not found\n");
++		return false;
++	}
++
++	return true;
++}
++
++static bool
++tegra_partition_table_parsed(struct tegra_partition_table_parser *ptp)
++{
++	if (ptp->pt->secure.num_partitions == 0 ||
++	    ptp->pt->secure.num_partitions > TEGRA_PT_MAX_PARTITIONS(ptp)) {
++		TEGRA_PT_PARSE_ERR(ptp, "num_partitions=%u\n",
++				   ptp->pt->secure.num_partitions);
++		return false;
++	}
++
++	return tegra_partitions_parsed(ptp, true) &&
++	       tegra_partitions_parsed(ptp, false);
++}
++
++static int
++tegra_partition_table_insec_hdr_valid(struct tegra_partition_table_parser *ptp)
++{
++	if (ptp->pt->insecure.magic   != TEGRA_PT_MAGIC ||
++	    ptp->pt->insecure.version != TEGRA_PT_VERSION) {
++		TEGRA_PT_PARSE_ERR(ptp, "insecure header: magic=0x%llx ver=0x%x\n",
++				   ptp->pt->insecure.magic,
++				   ptp->pt->insecure.version);
++		return 0;
++	}
++
++	return 1;
++}
++
++static int
++tegra_partition_table_sec_hdr_valid(struct tegra_partition_table_parser *ptp)
++{
++	size_t pt_size = ptp->pt->secure.num_partitions;
++
++	pt_size *= sizeof(ptp->pt->partitions[0]);
++	pt_size += TEGRA_PT_HEADER_SIZE;
++
++	if (ptp->pt->secure.magic   != TEGRA_PT_MAGIC ||
++	    ptp->pt->secure.version != TEGRA_PT_VERSION ||
++	    ptp->pt->secure.length  != ptp->pt->insecure.length ||
++	    ptp->pt->secure.length  < pt_size) {
++		TEGRA_PT_PARSE_ERR(ptp, "secure header: magic=0x%llx ver=0x%x length=%u|%u|%zu\n",
++				   ptp->pt->secure.magic,
++				   ptp->pt->secure.version,
++				   ptp->pt->secure.length,
++				   ptp->pt->insecure.length,
++				   pt_size);
++		return 0;
++	}
++
++	return 1;
++}
++
++static int
++tegra_partition_table_unencrypted(struct tegra_partition_table_parser *ptp)
++{
++	/* AES IV, all zeros if unencrypted */
++	if (ptp->pt->secure.random_data[0] || ptp->pt->secure.random_data[1] ||
++	    ptp->pt->secure.random_data[2] || ptp->pt->secure.random_data[3]) {
++		pr_err_once("encrypted partition table unsupported\n");
++		return 0;
++	}
++
++	return 1;
++}
++
++static int tegra_read_partition_table(struct tegra_partition_table_parser *ptp)
++{
++	union tegra_partition_table_u *ptu = (typeof(ptu))ptp->pt;
++	unsigned int i;
++	Sector sect;
++	void *part;
++
++	for (i = 0; i < ptp->logical_sector_size / SZ_512; i++) {
++		/*
++		 * Partition table takes at maximum 4096 bytes, but
++		 * read_part_sector() guarantees only that SECTOR_SIZE will
++		 * be read at minimum.
++		 */
++		part = read_part_sector(ptp->state, ptp->sector + i, &sect);
++		if (!part) {
++			TEGRA_PT_ERR(ptp, "failed to read sector %llu\n",
++				     ptp->sector + i);
++			return 0;
++		}
++
++		memcpy(ptu->pt_parts[i], part, SZ_512);
++		put_dev_sector(sect);
++	}
++
++	return 1;
++}
++
++static int tegra_partition_scan(struct tegra_partition_table_parser *ptp)
++{
++	sector_t start_sector, num_sectors;
++	int ret = 0;
++
++	num_sectors  = TEGRA_PT_SECTOR(ptp, tegra_pt_logical_sectors_num);
++	start_sector = TEGRA_PT_SECTOR(ptp, tegra_pt_logical_sector_address);
++
++	if (start_sector < ptp->boot_offset) {
++		TEGRA_PT_ERR(ptp,
++			     "scanning eMMC boot partitions unimplemented\n");
++		return 0;
++	}
++
++	ptp->sector = start_sector - ptp->boot_offset;
++
++	/*
++	 * Partition table is duplicated for num_sectors.
++	 * If first table is corrupted, we will try next.
++	 */
++	while (num_sectors--) {
++		ret = tegra_read_partition_table(ptp);
++		if (!ret)
++			goto next_sector;
++
++		ret = tegra_partition_table_insec_hdr_valid(ptp);
++		if (!ret)
++			goto next_sector;
++
++		ret = tegra_partition_table_unencrypted(ptp);
++		if (!ret)
++			goto next_sector;
++
++		ret = tegra_partition_table_sec_hdr_valid(ptp);
++		if (!ret)
++			goto next_sector;
++
++		ret = tegra_partition_table_parsed(ptp);
++		if (ret)
++			break;
++next_sector:
++		ptp->sector += TEGRA_PT_SECTOR_SIZE(ptp);
++	}
++
++	return ret;
++}
++
++static const u32 tegra20_sdhci_bases[TEGRA_PT_SDHCI_DEVICE_INSTANCES] = {
++	0xc8000000, 0xc8000200, 0xc8000400, 0xc8000600,
++};
++
++static const u32 tegra30_sdhci_bases[TEGRA_PT_SDHCI_DEVICE_INSTANCES] = {
++	0x78000000, 0x78000200, 0x78000400, 0x78000600,
++};
++
++static const struct of_device_id tegra_sdhci_match[] = {
++	{ .compatible = "nvidia,tegra20-sdhci", .data = tegra20_sdhci_bases, },
++	{ .compatible = "nvidia,tegra30-sdhci", .data = tegra30_sdhci_bases, },
++	{}
++};
++
++static int
++tegra_partition_table_emmc_boot_offset(struct tegra_partition_table_parser *ptp)
++{
++	struct mmc_card *card = mmc_bdev_to_card(ptp->state->bdev);
++	const struct of_device_id *matched;
++	const u32 *sdhci_bases;
++	u32 sdhci_base;
++	unsigned int i;
++	int err;
++
++	/* filter out unexpected/untested boot sources */
++	if (!card || card->ext_csd.rev < 3 ||
++	    !mmc_card_is_blockaddr(card) ||
++	     mmc_card_is_removable(card->host) ||
++	     bdev_logical_block_size(ptp->state->bdev) != SZ_512) {
++		TEGRA_PT_ERR(ptp, "unexpected boot source\n");
++		return -1;
++	}
++
++	/* skip everything unrelated to Tegra eMMC */
++	matched = of_match_node(tegra_sdhci_match, card->host->parent->of_node);
++	if (!matched)
++		return -1;
++
++	sdhci_bases = matched->data;
++
++	/* figure out SDHCI instance ID by the base address */
++	err = of_property_read_u32_index(card->host->parent->of_node,
++					 "reg", 0, &sdhci_base);
++	if (err)
++		return -1;
++
++	for (i = 0; i < TEGRA_PT_SDHCI_DEVICE_INSTANCES; i++) {
++		if (sdhci_base == sdhci_bases[i])
++			break;
++	}
++
++	if (i == TEGRA_PT_SDHCI_DEVICE_INSTANCES)
++		return -1;
++
++	ptp->dev_id       = TEGRA_PT_SDHCI_DEVICE_ID;
++	ptp->dev_instance = i;
++
++	/*
++	 * eMMC storage has two special boot partitions in addition to the
++	 * main one.  NVIDIA's bootloader linearizes eMMC boot0->boot1->main
++	 * accesses, this means that the partition table addresses are shifted
++	 * by the size of boot partitions.  In accordance with the eMMC
++	 * specification, the boot partition size is calculated as follows:
++	 *
++	 *	boot partition size = 128K byte x BOOT_SIZE_MULT
++	 *
++	 * This function returns number of sectors occupied by the both boot
++	 * partitions.
++	 */
++	return card->ext_csd.raw_boot_mult * SZ_128K /
++	       SZ_512 * MMC_NUM_BOOT_PARTITION;
++}
++
++/*
++ * Logical sector size may vary per device model and apparently there is no
++ * way to get information about the size from kernel. The info is hardcoded
++ * into bootloader and it doesn't tell us, so we'll just try all possible
++ * well-known sizes until succeed.
++ *
++ * For example Samsung Galaxy Tab 10.1 uses 2K sectors. While Acer A500,
++ * Nexus 7 and Ouya are using 4K sectors.
++ */
++static const unsigned int tegra_pt_logical_sector_sizes[] = {
++	SZ_4K, SZ_2K,
++};
++
++/*
++ * The 'tegraboot=<source>' command line option is provided to kernel by
++ * NVIDIA's proprietary bootloader.
++ */
++static bool tegra_boot_sdmmc;
++static int __init tegra_boot_fn(char *str)
++{
++	tegra_boot_sdmmc = !strcmp(str, "sdmmc");
++	return 1;
++}
++__setup("tegraboot=", tegra_boot_fn);
++
++int tegra_partition(struct parsed_partitions *state)
++{
++	struct tegra_partition_table_parser ptp = {};
++	unsigned int i;
++	int ret;
++
++	if (!soc_is_tegra() || !tegra_boot_sdmmc)
++		return 0;
++
++	ptp.state = state;
++
++	ptp.boot_offset = tegra_partition_table_emmc_boot_offset(&ptp);
++	if (ptp.boot_offset < 0)
++		return 0;
++
++	ptp.pt = kmalloc(SZ_4K, GFP_KERNEL);
++	if (!ptp.pt)
++		return 0;
++
++	for (i = 0; i < ARRAY_SIZE(tegra_pt_logical_sector_sizes); i++) {
++		ptp.logical_sector_size = tegra_pt_logical_sector_sizes[i];
++
++		ret = tegra_partition_scan(&ptp);
++		if (ret == 1) {
++			strlcat(state->pp_buf, "\n", PAGE_SIZE);
 +			break;
 +		}
 +	}
- 
- 	/*
- 	 * Protective MBRs take up the lesser of the whole disk
-@@ -215,10 +219,9 @@ static int is_pmbr_valid(legacy_mbr *mbr, sector_t total_sectors)
- 	 */
- 	if (ret == GPT_MBR_PROTECTIVE) {
- 		sz = le32_to_cpu(mbr->partition_record[part].size_in_lba);
--		if (sz != (uint32_t) total_sectors - 1 && sz != 0xFFFFFFFF)
--			pr_debug("GPT: mbr size in lba (%u) different than whole disk (%u).\n",
--				 sz, min_t(uint32_t,
--					   total_sectors - 1, 0xFFFFFFFF));
-+		if (sz != (u32)total_sectors - 1 && sz != 0xFFFFFFFF)
-+			pr_debug("GPT: mbr size in lba (%u) different than whole disk (%u)\n",
-+				 sz, min_t(u32, total_sectors - 1, 0xFFFFFFFF));
- 	}
- done:
- 	return ret;
-@@ -237,17 +240,18 @@ static int is_pmbr_valid(legacy_mbr *mbr, sector_t total_sectors)
- static size_t read_lba(struct parsed_partitions *state,
- 		       u64 lba, u8 *buffer, size_t count)
- {
--	size_t totalreadcount = 0;
-+	size_t totalreadcount = 0, copied;
- 	struct block_device *bdev = state->bdev;
- 	sector_t n = lba * (bdev_logical_block_size(bdev) / 512);
-+	Sector sect;
-+	u8 *data;
- 
- 	if (!buffer || lba > last_lba(bdev))
--                return 0;
-+		return 0;
- 
- 	while (count) {
--		int copied = 512;
--		Sector sect;
--		unsigned char *data = read_part_sector(state, n++, &sect);
-+		copied = 512;
-+		data = read_part_sector(state, n++, &sect);
- 		if (!data)
- 			break;
- 		if (copied > count)
-@@ -255,7 +259,7 @@ static size_t read_lba(struct parsed_partitions *state,
- 		memcpy(buffer, data, copied);
- 		put_dev_sector(sect);
- 		buffer += copied;
--		totalreadcount +=copied;
-+		totalreadcount += copied;
- 		count -= copied;
- 	}
- 	return totalreadcount;
-@@ -265,7 +269,7 @@ static size_t read_lba(struct parsed_partitions *state,
-  * alloc_read_gpt_entries(): reads partition entries from disk
-  * @state: disk parsed partitions
-  * @gpt: GPT header
-- * 
-+ *
-  * Description: Returns ptes on success,  NULL on error.
-  * Allocates space for PTEs based on information found in @gpt.
-  * Notes: remember to free pte when you're done!
-@@ -280,7 +284,7 @@ static gpt_entry *alloc_read_gpt_entries(struct parsed_partitions *state,
- 		return NULL;
- 
- 	count = (size_t)le32_to_cpu(gpt->num_partition_entries) *
--                le32_to_cpu(gpt->sizeof_partition_entry);
-+			le32_to_cpu(gpt->sizeof_partition_entry);
- 	if (!count)
- 		return NULL;
- 	pte = kmalloc(count, GFP_KERNEL);
-@@ -288,9 +292,8 @@ static gpt_entry *alloc_read_gpt_entries(struct parsed_partitions *state,
- 		return NULL;
- 
- 	if (read_lba(state, le64_to_cpu(gpt->partition_entry_lba),
--			(u8 *) pte, count) < count) {
-+		     (u8 *)pte, count) < count) {
- 		kfree(pte);
--                pte=NULL;
- 		return NULL;
- 	}
- 	return pte;
-@@ -300,7 +303,7 @@ static gpt_entry *alloc_read_gpt_entries(struct parsed_partitions *state,
-  * alloc_read_gpt_header(): Allocates GPT header, reads into it from disk
-  * @state: disk parsed partitions
-  * @lba: the Logical Block Address of the partition table
-- * 
-+ *
-  * Description: returns GPT header on success, NULL on error.   Allocates
-  * and fills a GPT header starting at @ from @state->bdev.
-  * Note: remember to free gpt when finished with it.
-@@ -308,16 +311,15 @@ static gpt_entry *alloc_read_gpt_entries(struct parsed_partitions *state,
- static gpt_header *alloc_read_gpt_header(struct parsed_partitions *state,
- 					 u64 lba)
- {
-+	unsigned int ssz = bdev_logical_block_size(state->bdev);
- 	gpt_header *gpt;
--	unsigned ssz = bdev_logical_block_size(state->bdev);
- 
- 	gpt = kmalloc(ssz, GFP_KERNEL);
- 	if (!gpt)
- 		return NULL;
- 
--	if (read_lba(state, lba, (u8 *) gpt, ssz) < ssz) {
-+	if (read_lba(state, lba, (u8 *)gpt, ssz) < ssz) {
- 		kfree(gpt);
--                gpt=NULL;
- 		return NULL;
- 	}
- 
-@@ -328,127 +330,130 @@ static gpt_header *alloc_read_gpt_header(struct parsed_partitions *state,
-  * is_gpt_valid() - tests one GPT header and PTEs for validity
-  * @state: disk parsed partitions
-  * @lba: logical block address of the GPT header to test
-- * @gpt: GPT header ptr, filled on return.
-- * @ptes: PTEs ptr, filled on return.
-+ * @ret_gpt: GPT header ptr, filled on successful return.
-+ * @ret_ptes: PTEs ptr, filled on successful return.
-  *
-  * Description: returns 1 if valid,  0 on error.
-  * If valid, returns pointers to newly allocated GPT header and PTEs.
-  */
- static int is_gpt_valid(struct parsed_partitions *state, u64 lba,
--			gpt_header **gpt, gpt_entry **ptes)
-+			gpt_header **ret_gpt, gpt_entry **ret_ptes)
- {
--	u32 crc, origcrc;
- 	u64 lastlba, pt_size;
-+	u32 crc, origcrc;
-+	gpt_header *gpt;
-+	gpt_entry *ptes;
- 
--	if (!ptes)
--		return 0;
--	if (!(*gpt = alloc_read_gpt_header(state, lba)))
-+	gpt = alloc_read_gpt_header(state, lba);
-+	if (!gpt)
- 		return 0;
- 
- 	/* Check the GUID Partition Table signature */
--	if (le64_to_cpu((*gpt)->signature) != GPT_HEADER_SIGNATURE) {
--		pr_debug("GUID Partition Table Header signature is wrong:"
--			 "%lld != %lld\n",
--			 (unsigned long long)le64_to_cpu((*gpt)->signature),
--			 (unsigned long long)GPT_HEADER_SIGNATURE);
-+	if (le64_to_cpu(gpt->signature) != GPT_HEADER_SIGNATURE) {
-+		pr_debug("GUID Partition Table Header signature is wrong: %lld != %lld\n",
-+			 (u64)le64_to_cpu(gpt->signature),
-+			 (u64)GPT_HEADER_SIGNATURE);
- 		goto fail;
- 	}
- 
- 	/* Check the GUID Partition Table header size is too big */
--	if (le32_to_cpu((*gpt)->header_size) >
-+	if (le32_to_cpu(gpt->header_size) >
- 			bdev_logical_block_size(state->bdev)) {
- 		pr_debug("GUID Partition Table Header size is too large: %u > %u\n",
--			le32_to_cpu((*gpt)->header_size),
--			bdev_logical_block_size(state->bdev));
-+			 le32_to_cpu(gpt->header_size),
-+			 bdev_logical_block_size(state->bdev));
- 		goto fail;
- 	}
- 
- 	/* Check the GUID Partition Table header size is too small */
--	if (le32_to_cpu((*gpt)->header_size) < sizeof(gpt_header)) {
-+	if (le32_to_cpu(gpt->header_size) < sizeof(gpt_header)) {
- 		pr_debug("GUID Partition Table Header size is too small: %u < %zu\n",
--			le32_to_cpu((*gpt)->header_size),
--			sizeof(gpt_header));
-+			 le32_to_cpu(gpt->header_size),
-+			 sizeof(gpt_header));
- 		goto fail;
- 	}
- 
- 	/* Check the GUID Partition Table CRC */
--	origcrc = le32_to_cpu((*gpt)->header_crc32);
--	(*gpt)->header_crc32 = 0;
--	crc = efi_crc32((const unsigned char *) (*gpt), le32_to_cpu((*gpt)->header_size));
-+	origcrc = le32_to_cpu(gpt->header_crc32);
-+	gpt->header_crc32 = 0;
-+	crc = efi_crc32(gpt, le32_to_cpu(gpt->header_size));
- 
- 	if (crc != origcrc) {
- 		pr_debug("GUID Partition Table Header CRC is wrong: %x != %x\n",
- 			 crc, origcrc);
- 		goto fail;
- 	}
--	(*gpt)->header_crc32 = cpu_to_le32(origcrc);
-+	gpt->header_crc32 = cpu_to_le32(origcrc);
- 
--	/* Check that the my_lba entry points to the LBA that contains
--	 * the GUID Partition Table */
--	if (le64_to_cpu((*gpt)->my_lba) != lba) {
-+	/*
-+	 * Check that the my_lba entry points to the LBA that contains
-+	 * the GUID Partition Table.
-+	 */
-+	if (le64_to_cpu(gpt->my_lba) != lba) {
- 		pr_debug("GPT my_lba incorrect: %lld != %lld\n",
--			 (unsigned long long)le64_to_cpu((*gpt)->my_lba),
--			 (unsigned long long)lba);
-+			 (u64)le64_to_cpu(gpt->my_lba), lba);
- 		goto fail;
- 	}
- 
--	/* Check the first_usable_lba and last_usable_lba are
-+	/*
-+	 * Check the first_usable_lba and last_usable_lba are
- 	 * within the disk.
- 	 */
- 	lastlba = last_lba(state->bdev);
--	if (le64_to_cpu((*gpt)->first_usable_lba) > lastlba) {
-+	if (le64_to_cpu(gpt->first_usable_lba) > lastlba) {
- 		pr_debug("GPT: first_usable_lba incorrect: %lld > %lld\n",
--			 (unsigned long long)le64_to_cpu((*gpt)->first_usable_lba),
--			 (unsigned long long)lastlba);
-+			 (u64)le64_to_cpu(gpt->first_usable_lba), lastlba);
- 		goto fail;
- 	}
--	if (le64_to_cpu((*gpt)->last_usable_lba) > lastlba) {
-+	if (le64_to_cpu(gpt->last_usable_lba) > lastlba) {
- 		pr_debug("GPT: last_usable_lba incorrect: %lld > %lld\n",
--			 (unsigned long long)le64_to_cpu((*gpt)->last_usable_lba),
--			 (unsigned long long)lastlba);
-+			 (u64)le64_to_cpu(gpt->last_usable_lba), lastlba);
- 		goto fail;
- 	}
--	if (le64_to_cpu((*gpt)->last_usable_lba) < le64_to_cpu((*gpt)->first_usable_lba)) {
-+	if (le64_to_cpu(gpt->last_usable_lba) <
-+	    le64_to_cpu(gpt->first_usable_lba)) {
- 		pr_debug("GPT: last_usable_lba incorrect: %lld > %lld\n",
--			 (unsigned long long)le64_to_cpu((*gpt)->last_usable_lba),
--			 (unsigned long long)le64_to_cpu((*gpt)->first_usable_lba));
-+			 (u64)le64_to_cpu(gpt->last_usable_lba),
-+			 (u64)le64_to_cpu(gpt->first_usable_lba));
- 		goto fail;
- 	}
- 	/* Check that sizeof_partition_entry has the correct value */
--	if (le32_to_cpu((*gpt)->sizeof_partition_entry) != sizeof(gpt_entry)) {
--		pr_debug("GUID Partition Entry Size check failed.\n");
-+	if (le32_to_cpu(gpt->sizeof_partition_entry) != sizeof(gpt_entry)) {
-+		pr_debug("GUID Partition Entry Size check failed\n");
- 		goto fail;
- 	}
- 
- 	/* Sanity check partition table size */
--	pt_size = (u64)le32_to_cpu((*gpt)->num_partition_entries) *
--		le32_to_cpu((*gpt)->sizeof_partition_entry);
-+	pt_size = (u64)le32_to_cpu(gpt->num_partition_entries) *
-+		       le32_to_cpu(gpt->sizeof_partition_entry);
- 	if (pt_size > KMALLOC_MAX_SIZE) {
- 		pr_debug("GUID Partition Table is too large: %llu > %lu bytes\n",
--			 (unsigned long long)pt_size, KMALLOC_MAX_SIZE);
-+			 pt_size, KMALLOC_MAX_SIZE);
- 		goto fail;
- 	}
- 
--	if (!(*ptes = alloc_read_gpt_entries(state, *gpt)))
-+	ptes = alloc_read_gpt_entries(state, gpt);
-+	if (!ptes)
- 		goto fail;
- 
- 	/* Check the GUID Partition Entry Array CRC */
--	crc = efi_crc32((const unsigned char *) (*ptes), pt_size);
-+	crc = efi_crc32(ptes, pt_size);
- 
--	if (crc != le32_to_cpu((*gpt)->partition_entry_array_crc32)) {
--		pr_debug("GUID Partition Entry Array CRC check failed.\n");
-+	if (crc != le32_to_cpu(gpt->partition_entry_array_crc32)) {
-+		pr_debug("GUID Partition Entry Array CRC check failed\n");
- 		goto fail_ptes;
- 	}
- 
-+	*ret_gpt  = gpt;
-+	*ret_ptes = ptes;
 +
- 	/* We're done, all's well */
- 	return 1;
- 
-- fail_ptes:
--	kfree(*ptes);
--	*ptes = NULL;
-- fail:
--	kfree(*gpt);
--	*gpt = NULL;
-+fail_ptes:
-+	kfree(ptes);
-+fail:
-+	kfree(gpt);
- 	return 0;
- }
- 
-@@ -462,8 +467,8 @@ static int is_gpt_valid(struct parsed_partitions *state, u64 lba,
- static inline int
- is_pte_valid(const gpt_entry *pte, const u64 lastlba)
- {
--	if ((!efi_guidcmp(pte->partition_type_guid, NULL_GUID)) ||
--	    le64_to_cpu(pte->starting_lba) > lastlba         ||
-+	if ((!efi_guidcmp(pte->partition_type_guid, NULL_GUID))	||
-+	    le64_to_cpu(pte->starting_lba) > lastlba		||
- 	    le64_to_cpu(pte->ending_lba)   > lastlba)
- 		return 0;
- 	return 1;
-@@ -477,98 +482,93 @@ is_pte_valid(const gpt_entry *pte, const u64 lastlba)
-  *
-  * Description: Returns nothing.  Sanity checks pgpt and agpt fields
-  * and prints warnings on discrepancies.
-- * 
-+ *
-  */
- static void
- compare_gpts(gpt_header *pgpt, gpt_header *agpt, u64 lastlba)
- {
--	int error_found = 0;
-+	unsigned int error_found = 0;
++	kfree(ptp.pt);
 +
- 	if (!pgpt || !agpt)
- 		return;
- 	if (le64_to_cpu(pgpt->my_lba) != le64_to_cpu(agpt->alternate_lba)) {
- 		pr_warn("GPT:Primary header LBA != Alt. header alternate_lba\n");
- 		pr_warn("GPT:%lld != %lld\n",
--		       (unsigned long long)le64_to_cpu(pgpt->my_lba),
--                       (unsigned long long)le64_to_cpu(agpt->alternate_lba));
-+			(u64)le64_to_cpu(pgpt->my_lba),
-+			(u64)le64_to_cpu(agpt->alternate_lba));
- 		error_found++;
- 	}
- 	if (le64_to_cpu(pgpt->alternate_lba) != le64_to_cpu(agpt->my_lba)) {
- 		pr_warn("GPT:Primary header alternate_lba != Alt. header my_lba\n");
- 		pr_warn("GPT:%lld != %lld\n",
--		       (unsigned long long)le64_to_cpu(pgpt->alternate_lba),
--                       (unsigned long long)le64_to_cpu(agpt->my_lba));
-+			(u64)le64_to_cpu(pgpt->alternate_lba),
-+			(u64)le64_to_cpu(agpt->my_lba));
- 		error_found++;
- 	}
- 	if (le64_to_cpu(pgpt->first_usable_lba) !=
--            le64_to_cpu(agpt->first_usable_lba)) {
--		pr_warn("GPT:first_usable_lbas don't match.\n");
-+	    le64_to_cpu(agpt->first_usable_lba)) {
-+		pr_warn("GPT:first_usable_lbas don't match\n");
- 		pr_warn("GPT:%lld != %lld\n",
--		       (unsigned long long)le64_to_cpu(pgpt->first_usable_lba),
--                       (unsigned long long)le64_to_cpu(agpt->first_usable_lba));
-+			(u64)le64_to_cpu(pgpt->first_usable_lba),
-+			(u64)le64_to_cpu(agpt->first_usable_lba));
- 		error_found++;
- 	}
- 	if (le64_to_cpu(pgpt->last_usable_lba) !=
--            le64_to_cpu(agpt->last_usable_lba)) {
--		pr_warn("GPT:last_usable_lbas don't match.\n");
-+	    le64_to_cpu(agpt->last_usable_lba)) {
-+		pr_warn("GPT:last_usable_lbas don't match\n");
- 		pr_warn("GPT:%lld != %lld\n",
--		       (unsigned long long)le64_to_cpu(pgpt->last_usable_lba),
--                       (unsigned long long)le64_to_cpu(agpt->last_usable_lba));
-+			(u64)le64_to_cpu(pgpt->last_usable_lba),
-+			(u64)le64_to_cpu(agpt->last_usable_lba));
- 		error_found++;
- 	}
- 	if (efi_guidcmp(pgpt->disk_guid, agpt->disk_guid)) {
--		pr_warn("GPT:disk_guids don't match.\n");
-+		pr_warn("GPT:disk_guids don't match\n");
- 		error_found++;
- 	}
- 	if (le32_to_cpu(pgpt->num_partition_entries) !=
--            le32_to_cpu(agpt->num_partition_entries)) {
--		pr_warn("GPT:num_partition_entries don't match: "
--		       "0x%x != 0x%x\n",
--		       le32_to_cpu(pgpt->num_partition_entries),
--		       le32_to_cpu(agpt->num_partition_entries));
-+	    le32_to_cpu(agpt->num_partition_entries)) {
-+		pr_warn("GPT:num_partition_entries don't match: 0x%x != 0x%x\n",
-+			le32_to_cpu(pgpt->num_partition_entries),
-+			le32_to_cpu(agpt->num_partition_entries));
- 		error_found++;
- 	}
- 	if (le32_to_cpu(pgpt->sizeof_partition_entry) !=
--            le32_to_cpu(agpt->sizeof_partition_entry)) {
--		pr_warn("GPT:sizeof_partition_entry values don't match: "
--		       "0x%x != 0x%x\n",
--                       le32_to_cpu(pgpt->sizeof_partition_entry),
--		       le32_to_cpu(agpt->sizeof_partition_entry));
-+	    le32_to_cpu(agpt->sizeof_partition_entry)) {
-+		pr_warn("GPT:sizeof_partition_entry values don't match: 0x%x != 0x%x\n",
-+			le32_to_cpu(pgpt->sizeof_partition_entry),
-+			le32_to_cpu(agpt->sizeof_partition_entry));
- 		error_found++;
- 	}
- 	if (le32_to_cpu(pgpt->partition_entry_array_crc32) !=
--            le32_to_cpu(agpt->partition_entry_array_crc32)) {
--		pr_warn("GPT:partition_entry_array_crc32 values don't match: "
--		       "0x%x != 0x%x\n",
--                       le32_to_cpu(pgpt->partition_entry_array_crc32),
--		       le32_to_cpu(agpt->partition_entry_array_crc32));
-+	    le32_to_cpu(agpt->partition_entry_array_crc32)) {
-+		pr_warn("GPT:partition_entry_array_crc32 values don't match: 0x%x != 0x%x\n",
-+			le32_to_cpu(pgpt->partition_entry_array_crc32),
-+			le32_to_cpu(agpt->partition_entry_array_crc32));
- 		error_found++;
- 	}
- 	if (le64_to_cpu(pgpt->alternate_lba) != lastlba) {
--		pr_warn("GPT:Primary header thinks Alt. header is not at the end of the disk.\n");
-+		pr_warn("GPT:Primary header thinks Alt. header is not at the end of the disk\n");
- 		pr_warn("GPT:%lld != %lld\n",
--			(unsigned long long)le64_to_cpu(pgpt->alternate_lba),
--			(unsigned long long)lastlba);
-+			(u64)le64_to_cpu(pgpt->alternate_lba), lastlba);
- 		error_found++;
- 	}
- 
- 	if (le64_to_cpu(agpt->my_lba) != lastlba) {
--		pr_warn("GPT:Alternate GPT header not at the end of the disk.\n");
-+		pr_warn("GPT:Alternate GPT header not at the end of the disk\n");
- 		pr_warn("GPT:%lld != %lld\n",
--			(unsigned long long)le64_to_cpu(agpt->my_lba),
--			(unsigned long long)lastlba);
-+			(u64)le64_to_cpu(agpt->my_lba), lastlba);
- 		error_found++;
- 	}
- 
- 	if (error_found)
--		pr_warn("GPT: Use GNU Parted to correct GPT errors.\n");
--	return;
-+		pr_warn("GPT: Use GNU Parted to correct GPT errors\n");
- }
- 
- /**
-  * find_valid_gpt() - Search disk for valid GPT headers and PTEs
-  * @state: disk parsed partitions
-- * @gpt: GPT header ptr, filled on return.
-- * @ptes: PTEs ptr, filled on return.
-+ * @gpt: GPT header ptr, filled on successful return.
-+ * @ptes: PTEs ptr, filled on successful return.
-  *
-  * Description: Returns 1 if valid, 0 on error.
-  * If valid, returns pointers to newly allocated GPT header and PTEs.
-@@ -583,18 +583,14 @@ compare_gpts(gpt_header *pgpt, gpt_header *agpt, u64 lastlba)
- static int find_valid_gpt(struct parsed_partitions *state, gpt_header **gpt,
- 			  gpt_entry **ptes)
- {
--	int good_pgpt = 0, good_agpt = 0, good_pmbr = 0;
-+	sector_t total_sectors = i_size_read(state->bdev->bd_inode) >> 9;
-+	int good_pgpt, good_agpt = 0, good_pmbr = 0;
- 	gpt_header *pgpt = NULL, *agpt = NULL;
- 	gpt_entry *pptes = NULL, *aptes = NULL;
-+	u64 lastlba = last_lba(state->bdev);
- 	legacy_mbr *legacymbr;
--	sector_t total_sectors = i_size_read(state->bdev->bd_inode) >> 9;
--	u64 lastlba;
--
--	if (!ptes)
--		return 0;
- 
--	lastlba = last_lba(state->bdev);
--        if (!force_gpt) {
-+	if (!force_gpt) {
- 		/* This will be added to the EFI Spec. per Intel after v1.02. */
- 		legacymbr = kzalloc(sizeof(*legacymbr), GFP_KERNEL);
- 		if (!legacymbr)
-@@ -614,12 +610,12 @@ static int find_valid_gpt(struct parsed_partitions *state, gpt_header **gpt,
- 
- 	good_pgpt = is_gpt_valid(state, GPT_PRIMARY_PARTITION_TABLE_LBA,
- 				 &pgpt, &pptes);
--        if (good_pgpt)
-+	if (good_pgpt)
- 		good_agpt = is_gpt_valid(state,
- 					 le64_to_cpu(pgpt->alternate_lba),
- 					 &agpt, &aptes);
--        if (!good_agpt && force_gpt)
--                good_agpt = is_gpt_valid(state, lastlba, &agpt, &aptes);
-+	if (!good_agpt && force_gpt)
-+		good_agpt = is_gpt_valid(state, lastlba, &agpt, &aptes);
- 
- 	/*
- 	 * The force_gpt_sector is used by NVIDIA Tegra partition parser in
-@@ -630,43 +626,42 @@ static int find_valid_gpt(struct parsed_partitions *state, gpt_header **gpt,
- 		good_agpt = is_gpt_valid(state, state->force_gpt_sector,
- 					 &agpt, &aptes);
- 
--        /* The obviously unsuccessful case */
--        if (!good_pgpt && !good_agpt)
--                goto fail;
-+	/* The obviously unsuccessful case */
-+	if (!good_pgpt && !good_agpt)
-+		goto fail;
- 
--        compare_gpts(pgpt, agpt, lastlba);
-+	compare_gpts(pgpt, agpt, lastlba);
- 
--        /* The good cases */
--        if (good_pgpt) {
--                *gpt  = pgpt;
--                *ptes = pptes;
--                kfree(agpt);
--                kfree(aptes);
-+	/* The good cases */
-+	if (good_pgpt) {
-+		*gpt  = pgpt;
-+		*ptes = pptes;
-+		kfree(agpt);
-+		kfree(aptes);
- 		if (!good_agpt)
--                        pr_warn("Alternate GPT is invalid, using primary GPT.\n");
--                return 1;
--        }
--        else if (good_agpt) {
--                *gpt  = agpt;
--                *ptes = aptes;
--                kfree(pgpt);
--                kfree(pptes);
--		pr_warn("Primary GPT is invalid, using alternate GPT.\n");
--                return 1;
--        }
--
-- fail:
--        kfree(pgpt);
--        kfree(agpt);
--        kfree(pptes);
--        kfree(aptes);
--        *gpt = NULL;
--        *ptes = NULL;
--        return 0;
-+			pr_warn("Alternate GPT is invalid, using primary GPT\n");
-+		return 1;
-+	}
++	return ret;
++}
+diff --git a/include/soc/tegra/bootdata.h b/include/soc/tegra/bootdata.h
+new file mode 100644
+index 000000000000..7be207cb2519
+--- /dev/null
++++ b/include/soc/tegra/bootdata.h
+@@ -0,0 +1,46 @@
++/* SPDX-License-Identifier: GPL-2.0-only */
 +
-+	if (good_agpt) {
-+		*gpt  = agpt;
-+		*ptes = aptes;
-+		kfree(pgpt);
-+		kfree(pptes);
-+		pr_warn("Primary GPT is invalid, using alternate GPT\n");
-+		return 1;
-+	}
++#ifndef __SOC_TEGRA_BOOTDATA_H__
++#define __SOC_TEGRA_BOOTDATA_H__
 +
-+fail:
-+	kfree(pgpt);
-+	kfree(agpt);
-+	kfree(pptes);
-+	kfree(aptes);
-+	return 0;
- }
- 
- /**
-- * utf16_le_to_7bit(): Naively converts a UTF-16LE string to 7-bit ASCII characters
-+ * utf16_le_to_7bit()
-  * @in: input UTF-16LE string
-  * @size: size of the input string
-  * @out: output string ptr, should be capable to store @size+1 characters
-@@ -713,20 +708,19 @@ int efi_partition(struct parsed_partitions *state)
- {
- 	gpt_header *gpt = NULL;
- 	gpt_entry *ptes = NULL;
--	u32 i;
--	unsigned ssz = bdev_logical_block_size(state->bdev) / 512;
-+	unsigned int ssz = bdev_logical_block_size(state->bdev) / 512;
-+	unsigned int num_partition_entries, i;
- 
--	if (!find_valid_gpt(state, &gpt, &ptes) || !gpt || !ptes) {
--		kfree(gpt);
--		kfree(ptes);
-+	if (!find_valid_gpt(state, &gpt, &ptes) || !gpt || !ptes)
- 		return 0;
--	}
- 
- 	pr_debug("GUID Partition Table is valid!  Yea!\n");
- 
--	for (i = 0; i < le32_to_cpu(gpt->num_partition_entries) && i < state->limit-1; i++) {
-+	num_partition_entries = le32_to_cpu(gpt->num_partition_entries);
++#include <linux/compiler.h>
++#include <linux/types.h>
 +
-+	for (i = 0; i < num_partition_entries && i < state->limit - 1; i++) {
- 		struct partition_meta_info *info;
--		unsigned label_max;
-+		unsigned int label_max;
- 		u64 start = le64_to_cpu(ptes[i].starting_lba);
- 		u64 size = le64_to_cpu(ptes[i].ending_lba) -
- 			   le64_to_cpu(ptes[i].starting_lba) + 1ULL;
-@@ -734,10 +728,11 @@ int efi_partition(struct parsed_partitions *state)
- 		if (!is_pte_valid(&ptes[i], last_lba(state->bdev)))
- 			continue;
++#define TEGRA_BOOTDATA_VERSION_T20	NVBOOT_BOOTDATA_VERSION(0x2, 0x1)
++#define TEGRA_BOOTDATA_VERSION_T30	NVBOOT_BOOTDATA_VERSION(0x3, 0x1)
++
++#define NVBOOT_BOOTDATA_VERSION(a, b)	((((a) & 0xffff) << 16) | \
++					  ((b) & 0xffff))
++#define NVBOOT_CMAC_AES_HASH_LENGTH	4
++
++struct tegra20_boot_info_table {
++	u32 unused_data1[14];
++	u32 bct_size;
++	u32 bct_ptr;
++} __packed;
++
++struct tegra20_boot_config_table {
++	u32 crypto_hash[NVBOOT_CMAC_AES_HASH_LENGTH];
++	u32 random_aes_blk[NVBOOT_CMAC_AES_HASH_LENGTH];
++	u32 boot_data_version;
++	u32 unused_data1[712];
++	u32 unused_consumer_data1;
++	u16 partition_table_logical_sector_address;
++	u16 partition_table_num_logical_sectors;
++	u32 unused_consumer_data[294];
++	u32 unused_data[3];
++} __packed;
++
++struct tegra30_boot_config_table {
++	u32 crypto_hash[NVBOOT_CMAC_AES_HASH_LENGTH];
++	u32 random_aes_blk[NVBOOT_CMAC_AES_HASH_LENGTH];
++	u32 boot_data_version;
++	u32 unused_data1[1016];
++	u32 unused_consumer_data1;
++	u16 partition_table_logical_sector_address;
++	u16 partition_table_num_logical_sectors;
++	u32 unused_consumer_data[502];
++	u32 unused_data[3];
++} __packed;
++
++#endif /* __SOC_TEGRA_BOOTDATA_H__ */
+diff --git a/include/soc/tegra/common.h b/include/soc/tegra/common.h
+index 98027a76ce3d..744280ecab5f 100644
+--- a/include/soc/tegra/common.h
++++ b/include/soc/tegra/common.h
+@@ -6,6 +6,15 @@
+ #ifndef __SOC_TEGRA_COMMON_H__
+ #define __SOC_TEGRA_COMMON_H__
  
--		put_partition(state, i+1, start * ssz, size * ssz);
-+		put_partition(state, i + 1, start * ssz, size * ssz);
++#include <linux/types.h>
++
++#ifdef CONFIG_ARCH_TEGRA
+ bool soc_is_tegra(void);
++#else
++static inline bool soc_is_tegra(void)
++{
++	return false;
++}
++#endif
  
- 		/* If this is a RAID volume, tell md */
--		if (!efi_guidcmp(ptes[i].partition_type_guid, PARTITION_LINUX_RAID_GUID))
-+		if (!efi_guidcmp(ptes[i].partition_type_guid,
-+				 PARTITION_LINUX_RAID_GUID))
- 			state->parts[i + 1].flags = ADDPART_FLAG_RAID;
- 
- 		info = &state->parts[i + 1].info;
-@@ -746,7 +741,8 @@ int efi_partition(struct parsed_partitions *state)
- 		/* Naively convert UTF16-LE to 7 bits. */
- 		label_max = min(ARRAY_SIZE(info->volname) - 1,
- 				ARRAY_SIZE(ptes[i].partition_name));
--		utf16_le_to_7bit(ptes[i].partition_name, label_max, info->volname);
-+		utf16_le_to_7bit(ptes[i].partition_name, label_max,
-+				 info->volname);
- 		state->parts[i + 1].has_info = true;
- 	}
- 	kfree(ptes);
+ #endif /* __SOC_TEGRA_COMMON_H__ */
+diff --git a/include/soc/tegra/partition.h b/include/soc/tegra/partition.h
+new file mode 100644
+index 000000000000..e8fcce1a725d
+--- /dev/null
++++ b/include/soc/tegra/partition.h
+@@ -0,0 +1,84 @@
++/* SPDX-License-Identifier: GPL-2.0-only */
++
++#ifndef __SOC_TEGRA_PARTITION_H__
++#define __SOC_TEGRA_PARTITION_H__
++
++#include <linux/compiler.h>
++#include <linux/types.h>
++
++#define TEGRA_PT_MAGIC				0xffffffff8f9e8d8bULL
++#define TEGRA_PT_VERSION			0x100
++#define TEGRA_PT_AES_HASH_SIZE			4
++#define TEGRA_PT_NAME_SIZE			4
++
++#define TEGRA_PT_SDHCI_DEVICE_ID		18
++#define TEGRA_PT_SDHCI_DEVICE_INSTANCES		4
++
++#define TEGRA_PT_PART_TYPE_BCT			1
++#define TEGRA_PT_PART_TYPE_EBT			2
++#define TEGRA_PT_PART_TYPE_PT			3
++#define TEGRA_PT_PART_TYPE_GENERIC		6
++#define TEGRA_PT_PART_TYPE_GP1			9
++#define TEGRA_PT_PART_TYPE_GPT			10
++
++struct tegra_partition_mount_info {
++	u32 device_id;
++	u32 device_instance;
++	u32 device_attr;
++	u8  mount_path[TEGRA_PT_NAME_SIZE];
++	u32 file_system_type;
++	u32 file_system_attr;
++} __packed;
++
++struct tegra_partition_info {
++	u32 partition_attr;
++	u32 __pad1;
++	u64 logical_sector_address;
++	u64 logical_sectors_num;
++	u64 physical_sector_address;
++	u64 physical_sectors_num;
++	u32 partition_type;
++	u32 __pad2;
++} __packed;
++
++struct tegra_partition {
++	u32 partition_id;
++	u8  partition_name[TEGRA_PT_NAME_SIZE];
++	struct tegra_partition_mount_info mount_info;
++	struct tegra_partition_info part_info;
++} __packed;
++
++struct tegra_partition_header_insecure {
++	u64 magic;
++	u32 version;
++	u32 length;
++	u32 signature[TEGRA_PT_AES_HASH_SIZE];
++} __packed;
++
++struct tegra_partition_header_secure {
++	u32 random_data[TEGRA_PT_AES_HASH_SIZE];
++	u64 magic;
++	u32 version;
++	u32 length;
++	u32 num_partitions;
++	u32 __pad;
++} __packed;
++
++struct tegra_partition_table {
++	struct tegra_partition_header_insecure insecure;
++	struct tegra_partition_header_secure secure;
++	struct tegra_partition partitions[];
++} __packed;
++
++#ifdef CONFIG_TEGRA_PARTITION
++void tegra_partition_table_setup(unsigned int logical_sector_address,
++				 unsigned int logical_sectors_num);
++#else
++static inline void
++tegra_partition_table_setup(unsigned int logical_sector_address,
++			    unsigned int logical_sectors_num)
++{
++}
++#endif
++
++#endif /* __SOC_TEGRA_PARTITION_H__ */
 -- 
 2.26.0
 
