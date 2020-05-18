@@ -2,112 +2,153 @@ Return-Path: <SRS0=pLtV=7A=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PULL_REQUEST,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6362DC433DF
-	for <linux-efi@archiver.kernel.org>; Mon, 18 May 2020 09:15:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 67A40C433E0
+	for <linux-efi@archiver.kernel.org>; Mon, 18 May 2020 12:51:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 42C6E20643
-	for <linux-efi@archiver.kernel.org>; Mon, 18 May 2020 09:15:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 43485207C4
+	for <linux-efi@archiver.kernel.org>; Mon, 18 May 2020 12:51:28 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1589793334;
-	bh=sNUlztveAJmm2fG/0q/M4GeYZ6rBhLJUQL5DhHVZvK4=;
+	s=default; t=1589806288;
+	bh=59VoFxWg86wvMXwZUsJGWlhU4ZYA2YVdpnEWpzS7DZE=;
 	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=zZkiL/Ijc6z/csBjcdsmiBixun44wkdQVGcO1h4YCUmQ2y5WgMUxNvciBZsqd7wu2
-	 U/OsapKTKhKLNP2kUb/ToJPz5M/tdmsSeMoLfGdaxa11MK1elc1zdP13pNttvPtK7M
-	 u/j2UBrpG7ML32Wn3JPmmBpDwb59w1NyY+hwWqXY=
+	b=dU4ce7eRAQyfx8cGMkoDvZ8aNLNrEo9bfRyNdujq9149CBD/mpM508UKBRxVUIAK4
+	 p2pI+ONJ5XXFe36hlfpbE2Bv42qKdKSSP+aQ/pcQv6ZLwtzqHnow3T5X3rAK117dKu
+	 Mu89EWSLxejS6+fPTRhQ52jC8uFYmI4SFKcPd1WA=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726432AbgERJPT (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 18 May 2020 05:15:19 -0400
-Received: from mail.kernel.org ([198.145.29.99]:56814 "EHLO mail.kernel.org"
+        id S1726999AbgERMvY (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 18 May 2020 08:51:24 -0400
+Received: from mail.kernel.org ([198.145.29.99]:43512 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726675AbgERJPR (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 18 May 2020 05:15:17 -0400
-Received: from mail-il1-f182.google.com (mail-il1-f182.google.com [209.85.166.182])
+        id S1726726AbgERMvY (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Mon, 18 May 2020 08:51:24 -0400
+Received: from mail-io1-f44.google.com (mail-io1-f44.google.com [209.85.166.44])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 2965720829;
-        Mon, 18 May 2020 09:15:17 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 19158207D8;
+        Mon, 18 May 2020 12:51:23 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1589793317;
-        bh=sNUlztveAJmm2fG/0q/M4GeYZ6rBhLJUQL5DhHVZvK4=;
+        s=default; t=1589806283;
+        bh=59VoFxWg86wvMXwZUsJGWlhU4ZYA2YVdpnEWpzS7DZE=;
         h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=r5tppO3WttYFqmI/6cAYpnHh/CB7jLrjAuoFpekIdwtZjUlgdWxkGYoeau60MVckb
-         MKh8qAINrYZ75mPxTwngXfHrBeyouZMkl387o0bZjw/YOIH1ytd7gRNRig9xcCy2Bd
-         S/bViTImsCWu+9R97Rfrm3MfsKKHD8yvC9529sLE=
-Received: by mail-il1-f182.google.com with SMTP id 18so184228iln.9;
-        Mon, 18 May 2020 02:15:17 -0700 (PDT)
-X-Gm-Message-State: AOAM532Sn2almpxnWIjlaZ0HzJlM40/U1+3RMxwbP+MF5WNubomZ/zQq
-        KJXLTTbeX62WUPP0oslCxPRzDJwebBB0M3vr3qQ=
-X-Google-Smtp-Source: ABdhPJw0Jj+zCyjLeSB2lkHXVRYCqJYNFRmf+fCB5ep87YsnuouFjIitXVOzsn92D0RXZ2WlhL8KQ+OuPoyOfADrS2Q=
-X-Received: by 2002:a92:a312:: with SMTP id a18mr15414538ili.80.1589793316534;
- Mon, 18 May 2020 02:15:16 -0700 (PDT)
+        b=TRlQTwf11+v0bpjUNl2t5dPXV5ZIgFjYItuEHgPDLLWI8nX/b3fI1Gf9oXF2MEkY+
+         ag3gxxuz76Dqxvfrl2+KlKkbDYuLczLDqjJr4Jr/MylKyy2pqFx2xqJ5fah7iXpxfv
+         0CUSaHum5Oyo+Swa4XBHPXOioS47ylD1QP5MYOTg=
+Received: by mail-io1-f44.google.com with SMTP id h10so10376232iob.10;
+        Mon, 18 May 2020 05:51:23 -0700 (PDT)
+X-Gm-Message-State: AOAM533kr8lVGMOlORWinukcrczWUHssUmdNBL5hHoMKBtqyNzGFur/Q
+        fdPYRdcAKX0Yo9N4/h56FVXHLNjJgB8owra7InY=
+X-Google-Smtp-Source: ABdhPJz9/6CkchQipSV8AM+pHvWaEqOIHqsO5Jiu/QyHeKgC98RsdhCrUuUpwXRVK59Pi3qeDsED7Bv2BcEqy1sJsHA=
+X-Received: by 2002:a5e:8705:: with SMTP id y5mr14514218ioj.142.1589806282417;
+ Mon, 18 May 2020 05:51:22 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200517125754.8934-1-ardb@kernel.org> <20200518090727.GB25034@zn.tnic>
-In-Reply-To: <20200518090727.GB25034@zn.tnic>
+References: <1584200119-18594-1-git-send-email-mikelley@microsoft.com>
+ <1584200119-18594-10-git-send-email-mikelley@microsoft.com>
+ <CAK8P3a1YUjhaVUmjVC2pCoTTBTU408iN44Q=QZ0RDz8rmzJisQ@mail.gmail.com>
+ <MW2PR2101MB10524254D2FE3EFC72329465D7F70@MW2PR2101MB1052.namprd21.prod.outlook.com>
+ <CAK8P3a1YCtc3LJ-_3iT90_Srehb96gLHvTXsbJ0wT6NFYCG=TQ@mail.gmail.com>
+ <MW2PR2101MB1052E413218D295EF24E5E05D7F40@MW2PR2101MB1052.namprd21.prod.outlook.com>
+ <f2b63853-24ae-d6b7-cd43-5792c0d4d31b@nvidia.com> <4202ea20-6e51-31d3-44b1-3861798a8158@nvidia.com>
+In-Reply-To: <4202ea20-6e51-31d3-44b1-3861798a8158@nvidia.com>
 From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Mon, 18 May 2020 11:15:05 +0200
-X-Gmail-Original-Message-ID: <CAMj1kXGArZihaTkq49vSi0=3UWQrtsCDMeBbuK=EO9R1ik5AcQ@mail.gmail.com>
-Message-ID: <CAMj1kXGArZihaTkq49vSi0=3UWQrtsCDMeBbuK=EO9R1ik5AcQ@mail.gmail.com>
-Subject: Re: [GIT PULL 0/7] EFI fixes for v5.7
-To:     Borislav Petkov <bp@alien8.de>
-Cc:     linux-efi <linux-efi@vger.kernel.org>,
-        Ingo Molnar <mingo@kernel.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Arvind Sankar <nivedita@alum.mit.edu>,
-        Benjamin Thiel <b.thiel@posteo.de>,
-        Dave Young <dyoung@redhat.com>,
-        Heinrich Schuchardt <xypron.glpk@gmx.de>,
-        Javier Martinez Canillas <javierm@redhat.com>,
-        Jerry Snitselaar <jsnitsel@redhat.com>,
-        Lenny Szubowicz <lszubowi@redhat.com>,
-        ACPI Devel Maling List <linux-acpi@vger.kernel.org>,
-        Loic Yhuel <loic.yhuel@gmail.com>,
-        Matthew Garrett <mjg59@google.com>,
-        Mike Lothian <mike@fireburn.co.uk>,
-        Punit Agrawal <punit1.agrawal@toshiba.co.jp>
+Date:   Mon, 18 May 2020 14:51:11 +0200
+X-Gmail-Original-Message-ID: <CAMj1kXEpryfqk5eKxB5NrDcriEBRQKEHnDVZNBMfB4DY=708fw@mail.gmail.com>
+Message-ID: <CAMj1kXEpryfqk5eKxB5NrDcriEBRQKEHnDVZNBMfB4DY=708fw@mail.gmail.com>
+Subject: Re: [PATCH v6 09/10] arm64: efi: Export screen_info
+To:     Nikhil Mahale <nmahale@nvidia.com>
+Cc:     Michael Kelley <mikelley@microsoft.com>,
+        Arnd Bergmann <arnd@arndb.de>, Will Deacon <will@kernel.org>,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Marc Zyngier <maz@kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        gregkh <gregkh@linuxfoundation.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-hyperv@vger.kernel.org" <linux-hyperv@vger.kernel.org>,
+        linux-efi <linux-efi@vger.kernel.org>,
+        linux-arch <linux-arch@vger.kernel.org>,
+        "olaf@aepfle.de" <olaf@aepfle.de>,
+        Andy Whitcroft <apw@canonical.com>,
+        vkuznets <vkuznets@redhat.com>, Jason Wang <jasowang@redhat.com>,
+        "marcelo.cerri@canonical.com" <marcelo.cerri@canonical.com>,
+        KY Srinivasan <kys@microsoft.com>,
+        Sunil Muthuswamy <sunilmut@microsoft.com>,
+        Boqun Feng <boqun.feng@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Mon, 18 May 2020 at 11:07, Borislav Petkov <bp@alien8.de> wrote:
+On Mon, 18 May 2020 at 06:25, Nikhil Mahale <nmahale@nvidia.com> wrote:
 >
-> Hi,
->
-> On Sun, May 17, 2020 at 02:57:47PM +0200, Ard Biesheuvel wrote:
-> > The following changes since commit a088b858f16af85e3db359b6c6aaa92dd3bc0921:
+> On 5/13/20 7:56 PM, Nikhil Mahale wrote:
+> > On 3/20/20 3:16 AM, Michael Kelley wrote:
+> >> From: Arnd Bergmann <arnd@arndb.de> Sent: Wednesday, March 18, 2020 2:27 AM
+> >>>
+> >>> On Wed, Mar 18, 2020 at 1:18 AM Michael Kelley <mikelley@microsoft.com> wrote:
+> >>>> From: Arnd Bergmann <arnd@arndb.de>
+> >>>>> On Sat, Mar 14, 2020 at 4:36 PM Michael Kelley <mikelley@microsoft.com> wrote:
+> >>>>>>
+> >>>>>> The Hyper-V frame buffer driver may be built as a module, and
+> >>>>>> it needs access to screen_info. So export screen_info.
+> >>>>>>
+> >>>>>> Signed-off-by: Michael Kelley <mikelley@microsoft.com>
+> >>>>>
+> >>>>> Is there any chance of using a more modern KMS based driver for the screen
+> >>>>> than the old fbdev subsystem? I had hoped to one day completely remove
+> >>>>> support for the old CONFIG_VIDEO_FBDEV and screen_info from modern
+> >>>>> architectures.
+> >>>>>
+> >>>>
+> >>>> The current hyperv_fb.c driver is all we have today for the synthetic Hyper-V
+> >>>> frame buffer device.  That driver builds and runs on both ARM64 and x86.
+> >>>>
+> >>>> I'm not knowledgeable about video/graphics drivers, but when you
+> >>>> say "a more modern KMS based driver", are you meaning one based on
+> >>>> DRM & KMS?  Does DRM make sense for a "dumb" frame buffer device?
+> >>>> Are there any drivers that would be a good pattern to look at?
+> >>>
+> >>> It used to be a lot harder to write a DRM driver compared to an fbdev
+> >>> driver, but this has changed to the opposite over the years.
+> >>>
+> >>> A fairly minimal example would be drivers/gpu/drm/pl111/pl111_drv.c
+> >>> or anything in drivers/gpu/drm/tiny/, but you may want to look at the
+> >>> other hypervisor platforms first, i.e drivers/gpu/drm/virtio/virtgpu_drv.c,
+> >>> drivers/gpu/drm/vmwgfx/vmwgfx_drv.c, drivers/gpu/drm/xen/xen_drm_front.c,
+> >>> drivers/gpu/drm/qxl/qxl_drv.c, and drivers/gpu/drm/bochs/bochs_drv.c.
+> >>>
+> >>
+> >> Thanks for the pointers, especially for the other hypervisors.
+> >>
+> > Sorry if anybody in 'to' or 'cc' is receiving this reply multiple times.
+> > I had configured by email client incorrectly to reply.
 > >
-> >   efi/x86: Revert struct layout change to fix kexec boot regression (2020-04-14 08:32:17 +0200)
+> > screen_info is still useful with a modern KMS-based driver.  It exposes
+> > the mode parameters that the GOP driver chose.  This information is
+> > needed to implement seamless or glitchless boot, by both ensuring that
+> > the scanout parameters don't change and being able to read back the
+> > scanout image to populate the initial contents of the new surface.
 > >
-> > are available in the Git repository at:
-> >
-> >   git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-urgent
+> > This works today on arches which implement (U)EFI and export
+> > screen_info, including x86 and powerpc, but doesn't work on arm or
+> > arm64.  As arm64 systems that implement UEFI with real GOP drivers
+> > become more prevalent, it would be nice to be have these features there
+> > as well.
 >
-> can you please make your tags unique? For example call this one:
+> In addition to this, even if a driver doesn't implement a framebuffer
+> console, or if it does but has an option to disable it, the driver still
+> needs to know whether the EFI console is using resources on the GPU so
+> it can avoid clobbering them. For example screen_info provides information
+> like offset and size of EFI console, using this information driver can
+> reserve memory used by console and prevent corruption on it.
 >
-> efi-urgent-for-v5.7-rc6
->
-> or so so that the git history can show for which -rc that urgent tag was
-> meant?
->
-> I mean, technically one can do that already with git but it would be
-> easier if it had the rc in the name. We do that already in tip - either
-> -rc name or the date of the tag.
->
-> Also, using the same tag gives:
->
-> From git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi
->  ! [rejected]                  efi-next           -> efi-next  (would clobber existing tag)
->  ! [rejected]                  efi-urgent         -> efi-urgent  (would clobber existing tag)
->
-> when I try to fetch from you and I can delete the old tag but having
-> unique tag names makes the history more user-friendly, I'd say.
+> I think arm64 should export screen_info.
 >
 
-Sure
+If there are reasons why KMS or fbdev drivers may need to access the
+information in screen_info, it should be exported. I don't think that
+is under debate here.
