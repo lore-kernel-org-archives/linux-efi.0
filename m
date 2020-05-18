@@ -6,46 +6,46 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8FE77C433E3
-	for <linux-efi@archiver.kernel.org>; Mon, 18 May 2020 19:07:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 00C69C433E2
+	for <linux-efi@archiver.kernel.org>; Mon, 18 May 2020 19:07:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 783DE20674
+	by mail.kernel.org (Postfix) with ESMTP id DD9EE20674
 	for <linux-efi@archiver.kernel.org>; Mon, 18 May 2020 19:07:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726573AbgERTHh (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        id S1726615AbgERTHh (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
         Mon, 18 May 2020 15:07:37 -0400
-Received: from mail-qk1-f193.google.com ([209.85.222.193]:42519 "EHLO
-        mail-qk1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726596AbgERTHe (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 18 May 2020 15:07:34 -0400
-Received: by mail-qk1-f193.google.com with SMTP id s1so11439866qkf.9
-        for <linux-efi@vger.kernel.org>; Mon, 18 May 2020 12:07:34 -0700 (PDT)
+Received: from mail-qt1-f196.google.com ([209.85.160.196]:34141 "EHLO
+        mail-qt1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726553AbgERTHg (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 18 May 2020 15:07:36 -0400
+Received: by mail-qt1-f196.google.com with SMTP id a23so3344236qto.1
+        for <linux-efi@vger.kernel.org>; Mon, 18 May 2020 12:07:35 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=w+iG1P6JmDBl3cKGR2MtVKJJGjxVfQhIfjLESQws+zM=;
-        b=CnDbQgaIZPDCO5C/bDVyLl91HU9Sc3NYfmepyRTX29FFyynP25PvhmNogREGRhW2NJ
-         JySO2FA8UrWZ7O8JGLY00xzJmHfUYzy8CgB0ZE1pev1x6oiGjiei3vj+lAWSuqFeyEtk
-         zY5QsSylL2p+DzJ7ck2lvp5zzibiUNl1/TBbdoiwCm7yy7GF0u03qxLWhH5UqcWIaPb7
-         mFxcOnO1weiUSLVOF2SvvW/EfA5DJYH5aJxe0YxRe+GOhwientG8HkDttNQsoFJplumX
-         Fv1aMRw6P3+N9J3uksnWipdU+TbQmB5Y74049vEDzWwXZJpy0eHO25aFD5sHkvcgkSSt
-         LVGQ==
-X-Gm-Message-State: AOAM533Xk+Qcg7qsaeHNhTZlkv+GXUqpSX9s33m9EWWgtJDOTMnBSudP
-        rfgfkYYo1/GUlJfF9wbAfzE=
-X-Google-Smtp-Source: ABdhPJxdv8jCzWl2XhXXaDGnWF5HxkVmU2ko4k12CdLrUkSl1UheWSx2KzmQmFX1TUNLBtG/XjiRCw==
-X-Received: by 2002:a37:61d8:: with SMTP id v207mr16461775qkb.146.1589828853692;
-        Mon, 18 May 2020 12:07:33 -0700 (PDT)
+        bh=n2+mp2oioqnXLDd7lyopk0p21Q0yaRtmEUZkcAcyKHs=;
+        b=L7O3Da3jCxJT/NBkQLcoU5m9Zy2OMqYfoMRiZgNejmyo+2MkKFokHiG5VrYhnTWCJB
+         xX+JbCU+pmsLMGLCYixlOzBLqwNjcCKC9r7Mdam/EMpetQBpmS9DHUIct4ORd9GJWeem
+         wP/2aLBsiw48iHiXZjcwzuWRssdlpzBBgHmc6pZpg878VPf/DM0kzBAPciGRN6G7z9YJ
+         do5QxYEyRBKpuQk+rrazNz1Ee/4lJnE/WEGh+o4nF0J1wPmGZp+hal7AUsslpGacKoge
+         ipGOSFPn9wvQr4WODG4nJ+kor9YX3T1ZoKyjl3f+IhUYHVRh7hjtUDlENnn9sbLnUjJM
+         qCyA==
+X-Gm-Message-State: AOAM531gF9/zEOC6r1uGOA0yWtXTjRcNvdzxGZeeD5OQMq9uwmwDgv+4
+        Dv2ZBFLuwrMm/OnrGhUenpBkhHL6wA4=
+X-Google-Smtp-Source: ABdhPJyR9CAINp36UApb7bKPnaxMcVuASzginpQY9h3gjw0E7rXTlKG9GA8cYsZN1gLi37Qwf6tu+A==
+X-Received: by 2002:ac8:6615:: with SMTP id c21mr10374210qtp.185.1589828854960;
+        Mon, 18 May 2020 12:07:34 -0700 (PDT)
 Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
-        by smtp.gmail.com with ESMTPSA id a1sm9862811qtj.65.2020.05.18.12.07.33
+        by smtp.gmail.com with ESMTPSA id a1sm9862811qtj.65.2020.05.18.12.07.34
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 18 May 2020 12:07:33 -0700 (PDT)
+        Mon, 18 May 2020 12:07:34 -0700 (PDT)
 From:   Arvind Sankar <nivedita@alum.mit.edu>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     linux-efi@vger.kernel.org
-Subject: [PATCH 21/24] efi/libstub: Add UTF-8 decoding to efi_puts
-Date:   Mon, 18 May 2020 15:07:13 -0400
-Message-Id: <20200518190716.751506-22-nivedita@alum.mit.edu>
+Subject: [PATCH 23/24] efi/libstub: Get the exact UTF-8 length
+Date:   Mon, 18 May 2020 15:07:15 -0400
+Message-Id: <20200518190716.751506-24-nivedita@alum.mit.edu>
 X-Mailer: git-send-email 2.26.2
 In-Reply-To: <20200518190716.751506-1-nivedita@alum.mit.edu>
 References: <20200518190716.751506-1-nivedita@alum.mit.edu>
@@ -56,99 +56,82 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-In order to be able to use the UTF-16 support added to vsprintf in the
-previous commit, enhance efi_puts to decode UTF-8 into UTF-16. Invalid
-UTF-8 encodings are passed through unchanged.
+efi_convert_cmdline currently overestimates the length of the equivalent
+UTF-8 encoding.
+
+snprintf can now be used to do the conversion to UTF-8, however, it does
+not have a way to specify the size of the UTF-16 string, only the size
+of the resulting UTF-8 string. So in order to use it, we need to
+precalculate the exact UTF-8 size.
 
 Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
 ---
- .../firmware/efi/libstub/efi-stub-helper.c    | 67 +++++++++++++++++--
- 1 file changed, 62 insertions(+), 5 deletions(-)
+ .../firmware/efi/libstub/efi-stub-helper.c    | 44 ++++++++++++++-----
+ 1 file changed, 32 insertions(+), 12 deletions(-)
 
 diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index a36f3af6e130..48242bc982a3 100644
+index 48242bc982a3..01476d8f8edf 100644
 --- a/drivers/firmware/efi/libstub/efi-stub-helper.c
 +++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -36,17 +36,74 @@ void efi_char16_puts(efi_char16_t *str)
- 		       output_string, str);
+@@ -205,15 +205,6 @@ efi_status_t efi_parse_options(char const *cmdline)
+ 	return EFI_SUCCESS;
  }
  
-+static
-+u32 utf8_to_utf32(const u8 **s8)
-+{
-+	u32 c32;
-+	u8 c0, cx;
-+	size_t clen, i;
-+
-+	c0 = cx = *(*s8)++;
-+	/*
-+	 * The position of the most-significant 0 bit gives us the length of
-+	 * a multi-octet encoding.
-+	 */
-+	for (clen = 0; cx & 0x80; ++clen)
-+		cx <<= 1;
-+	/*
-+	 * If the 0 bit is in position 8, this is a valid single-octet
-+	 * encoding. If the 0 bit is in position 7 or positions 1-3, the
-+	 * encoding is invalid.
-+	 * In either case, we just return the first octet.
-+	 */
-+	if (clen < 2 || clen > 4)
-+		return c0;
-+	/* Get the bits from the first octet. */
-+	c32 = cx >> clen--;
-+	for (i = 0; i < clen; ++i) {
-+		/* Trailing octets must have 10 in most significant bits. */
-+		cx = (*s8)[i] ^ 0x80;
-+		if (cx & 0xc0)
-+			return c0;
-+		c32 = (c32 << 6) | cx;
-+	}
-+	/*
-+	 * Check for validity:
-+	 * - The character must be in the Unicode range.
-+	 * - It must not be a surrogate.
-+	 * - It must be encoded using the correct number of octets.
-+	 */
-+	if (c32 > 0x10ffff ||
-+	    (c32 & 0xf800) == 0xd800 ||
-+	    clen != (c32 >= 0x80) + (c32 >= 0x800) + (c32 >= 0x10000))
-+		return c0;
-+	*s8 += clen;
-+	return c32;
-+}
-+
- void efi_puts(const char *str)
- {
- 	efi_char16_t buf[128];
- 	size_t pos = 0, lim = ARRAY_SIZE(buf);
-+	const u8 *s8 = (const u8 *)str;
-+	u32 c32;
+-/*
+- * Get the number of UTF-8 bytes corresponding to an UTF-16 character.
+- * This overestimates for surrogates, but that is okay.
+- */
+-static int efi_utf8_bytes(u16 c)
+-{
+-	return 1 + (c >= 0x80) + (c >= 0x800);
+-}
+-
+ /*
+  * Convert an UTF-16 string, not necessarily null terminated, to UTF-8.
+  */
+@@ -274,10 +265,39 @@ char *efi_convert_cmdline(efi_loaded_image_t *image,
  
--	while (*str) {
--		if (*str == '\n')
-+	while (*s8) {
-+		if (*s8 == '\n')
- 			buf[pos++] = L'\r';
--		/* Cast to unsigned char to avoid sign-extension */
--		buf[pos++] = (unsigned char)(*str++);
--		if (*str == '\0' || pos >= lim - 2) {
-+		c32 = utf8_to_utf32(&s8);
-+		if (c32 < 0x10000)
-+			/* Characters in plane 0 use a single word. */
-+			buf[pos++] = c32;
-+		else {
+ 	if (options) {
+ 		s2 = options;
+-		while (*s2 && *s2 != '\n'
+-		       && options_chars < load_options_chars) {
+-			options_bytes += efi_utf8_bytes(*s2++);
++		while (options_chars < load_options_chars) {
++			u16 c = *s2++;
++
++			if (c == L'\0' || c == L'\n')
++				break;
 +			/*
-+			 * Characters in other planes encode into a surrogate
-+			 * pair.
++			 * Get the number of UTF-8 bytes corresponding to a
++			 * UTF-16 character.
++			 * The first part handles everything in the BMP.
 +			 */
-+			buf[pos++] = (0xd800 - (0x10000 >> 10)) + (c32 >> 10);
-+			buf[pos++] = 0xdc00 + (c32 & 0x3ff);
-+		}
-+		if (*s8 == '\0' || pos >= lim - 2) {
- 			buf[pos] = L'\0';
- 			efi_char16_puts(buf);
- 			pos = 0;
++			options_bytes += 1 + (c >= 0x80) + (c >= 0x800);
+ 			options_chars++;
++			/*
++			 * Add one more byte for valid surrogate pairs. Invalid
++			 * surrogates will be replaced with 0xfffd and take up
++			 * only 3 bytes.
++			 */
++			if ((c & 0xfc00) == 0xd800) {
++				/*
++				 * If the very last word is a high surrogate,
++				 * we must ignore it since we can't access the
++				 * low surrogate.
++				 */
++				if (options_chars == load_options_chars) {
++					options_bytes -= 3;
++					options_chars--;
++					break;
++				} else if ((*s2 & 0xfc00) == 0xdc00) {
++					options_bytes++;
++					options_chars++;
++					s2++;
++				}
++			}
+ 		}
+ 	}
+ 
 -- 
 2.26.2
 
