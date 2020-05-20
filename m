@@ -2,121 +2,123 @@ Return-Path: <SRS0=3aIX=7C=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.3 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.5 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 90B89C433E0
-	for <linux-efi@archiver.kernel.org>; Wed, 20 May 2020 17:57:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7CA10C433DF
+	for <linux-efi@archiver.kernel.org>; Wed, 20 May 2020 18:00:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 70906206F1
-	for <linux-efi@archiver.kernel.org>; Wed, 20 May 2020 17:57:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5E7A6204EF
+	for <linux-efi@archiver.kernel.org>; Wed, 20 May 2020 18:00:13 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="wyrlqKfo"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="hCQJss4d"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726688AbgETR5G (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 20 May 2020 13:57:06 -0400
-Received: from aserp2120.oracle.com ([141.146.126.78]:47022 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726576AbgETR5F (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 20 May 2020 13:57:05 -0400
-Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
-        by aserp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 04KHltod092459;
-        Wed, 20 May 2020 17:56:58 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2020-01-29;
- bh=yB+sRelD8Yf/aSv30BZHaKCU1UG7BPZ/0HtXQYWn5xs=;
- b=wyrlqKfo3S/VpYOlW0fRofmnh3EG4lJIGY0jgiuiMDclu1eHGOk85Av/OGZZBl4hPOrc
- a7uzR8I29QRtldHc9I9DFOHBoFLXLm+gtWKbvNqh75X3eQjJ5l5/eZZvWmj/OoRSu+vL
- Yk37i+Ax+G1mGnlhLMPcdjq4RJ3puqQJOyFC9JIipHwN8fBLvSewOwOLgpdQE6ArWHkY
- G64DX31tjSl7aB/5PIIzOGnxHhe34GOQg/aK08VrW8Wou1KTgo2ukAfxJ0FhfbOEtWi7
- LhLbj4Q9t9ZxglU5owCOzzNrzjuXmMVd+5uzWBFvTexgpTYxFyL71I1i8Q5y6uenzPq7 rA== 
-Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
-        by aserp2120.oracle.com with ESMTP id 31284m4jaq-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Wed, 20 May 2020 17:56:58 +0000
-Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
-        by userp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 04KHrCY9176547;
-        Wed, 20 May 2020 17:54:58 GMT
-Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
-        by userp3020.oracle.com with ESMTP id 315020pkte-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 20 May 2020 17:54:57 +0000
-Received: from abhmp0002.oracle.com (abhmp0002.oracle.com [141.146.116.8])
-        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 04KHsuWZ015729;
-        Wed, 20 May 2020 17:54:56 GMT
-Received: from kadam (/41.57.98.10)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Wed, 20 May 2020 10:54:55 -0700
-Date:   Wed, 20 May 2020 20:54:49 +0300
-From:   Dan Carpenter <dan.carpenter@oracle.com>
-To:     Arvind Sankar <nivedita@alum.mit.edu>
-Cc:     kbuild@lists.01.org, lkp@intel.com, kbuild-all@lists.01.org,
-        linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>
+        id S1726832AbgETSAN (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 20 May 2020 14:00:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32870 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726804AbgETSAL (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 20 May 2020 14:00:11 -0400
+Received: from mail-qt1-x843.google.com (mail-qt1-x843.google.com [IPv6:2607:f8b0:4864:20::843])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 435EAC061A0E
+        for <linux-efi@vger.kernel.org>; Wed, 20 May 2020 11:00:11 -0700 (PDT)
+Received: by mail-qt1-x843.google.com with SMTP id m64so3308928qtd.4
+        for <linux-efi@vger.kernel.org>; Wed, 20 May 2020 11:00:11 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=sender:from:date:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=b4U55p9iswVuppx4Qdn7q6oWVQHU+iEp1TlMOGZn5Ic=;
+        b=hCQJss4d3jnP2YFd4P6zsMxjIfW5tn5OubiNktYPgOF9OwQ7x0JASI5mMCHnPin1zB
+         sw/CW1AR/HjJauT6LOsQ+LG7H39JxA2nW2OXxcJAaqH76QTuN00K8IhnqMxoqTkGH97l
+         sfHtEKL9Is3WWBiADly0J/jbPKoGCeReawnqRl/6kzG8R75F9K4Bt4+/MlFd7O5pfVmZ
+         KOyLUjNLR5FgcucbJnSbuKFrZJfCk2y/KaJ6rhRdaNdqXd84hFxsQe7ilDBgzE6Hvejo
+         iZfPPEF7jeMtjVjrKWBOsruhaZewHAdis/QV/jFEXjl3eDiXMoquyAgbcthT7ZisCOje
+         LnCg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:sender:from:date:to:cc:subject:message-id
+         :references:mime-version:content-disposition:in-reply-to;
+        bh=b4U55p9iswVuppx4Qdn7q6oWVQHU+iEp1TlMOGZn5Ic=;
+        b=qLyNWahT5JFIXlZ+xrDoC3bQyJuN6ZmLWzYitTOWTw3OSgad6cLVtSk8wiVwob6JpD
+         3FhSZkp2w/sTUSZWMeEF5AcEV/MxBaXb/R3B52e2yrBESnJEA9l3S5jKTx0+s4Yp26br
+         vAYPXO5VXkySc3tv02e5T16g/Mh8+O0pH15te2Q6kyWM+7heL96u6sFfufdMjvVDelZU
+         oQLxG6I7/yGMDy5om3i26WN4bgWd738mYLkjtCo/7L2nWzpAQ+/nAG5EHiHnviCvMSlt
+         qYiYNwm694EHB2DCaMJY90BmiibAzmY+OKDWZY9QAGHEr/0O8n3MiunpozAK7Y34dWlB
+         8abQ==
+X-Gm-Message-State: AOAM531dx8cjZqgSulR6ZjJQynv6/QOhvqNg93TBybjJDIBUcGgVBw20
+        2/OO+mysdqmYQdBDn0h8chk=
+X-Google-Smtp-Source: ABdhPJyxvNJSsKrcyJv4ysEiPMYA+hzLIeSs7jkDjsyBrVCrIFq8kst7eR4jQ6MIkhdZBHDlsEw7EQ==
+X-Received: by 2002:ac8:188c:: with SMTP id s12mr6677032qtj.172.1589997610454;
+        Wed, 20 May 2020 11:00:10 -0700 (PDT)
+Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
+        by smtp.gmail.com with ESMTPSA id t12sm2653608qkt.77.2020.05.20.11.00.09
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 20 May 2020 11:00:10 -0700 (PDT)
+From:   Arvind Sankar <nivedita@alum.mit.edu>
+X-Google-Original-From: Arvind Sankar <arvind@rani.riverdale.lan>
+Date:   Wed, 20 May 2020 14:00:08 -0400
+To:     Dan Carpenter <dan.carpenter@oracle.com>
+Cc:     Arvind Sankar <nivedita@alum.mit.edu>, kbuild@lists.01.org,
+        lkp@intel.com, kbuild-all@lists.01.org, linux-efi@vger.kernel.org,
+        Ard Biesheuvel <ardb@kernel.org>
 Subject: Re: [efi:next 39/40]
  drivers/firmware/efi/libstub/efi-stub-helper.c:265 efi_convert_cmdline()
  warn: qualifier 'l' ignored for %s specifier
-Message-ID: <20200520175449.GR3041@kadam>
+Message-ID: <20200520180008.GA3428271@rani.riverdale.lan>
 References: <20200520140903.GA30374@kadam>
  <20200520154308.GA3184088@rani.riverdale.lan>
+ <20200520175449.GR3041@kadam>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20200520154308.GA3184088@rani.riverdale.lan>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9627 signatures=668686
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 mlxscore=0 mlxlogscore=999
- adultscore=0 bulkscore=0 suspectscore=0 phishscore=0 malwarescore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2004280000
- definitions=main-2005200145
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9627 signatures=668686
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 mlxscore=0
- cotscore=-2147483648 impostorscore=0 malwarescore=0 mlxlogscore=999
- lowpriorityscore=0 phishscore=0 spamscore=0 bulkscore=0 adultscore=0
- priorityscore=1501 clxscore=1015 classifier=spam adjust=0 reason=mlx
- scancount=1 engine=8.12.0-2004280000 definitions=main-2005200144
+In-Reply-To: <20200520175449.GR3041@kadam>
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Wed, May 20, 2020 at 11:43:08AM -0400, Arvind Sankar wrote:
-> On Wed, May 20, 2020 at 05:09:03PM +0300, Dan Carpenter wrote:
-> > tree:   https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git next
-> > head:   e5fbadd1179cdadeaa44d71a9ec068c5bc100524
-> > commit: 85f5afd4322d294a7eca0d304744a1646113fbd9 [39/40] efi/libstub: Use snprintf with %ls to convert the command line
-> > config: x86_64-defconfig (attached as .config)
+On Wed, May 20, 2020 at 08:54:49PM +0300, Dan Carpenter wrote:
+> On Wed, May 20, 2020 at 11:43:08AM -0400, Arvind Sankar wrote:
+> > On Wed, May 20, 2020 at 05:09:03PM +0300, Dan Carpenter wrote:
+> > > tree:   https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git next
+> > > head:   e5fbadd1179cdadeaa44d71a9ec068c5bc100524
+> > > commit: 85f5afd4322d294a7eca0d304744a1646113fbd9 [39/40] efi/libstub: Use snprintf with %ls to convert the command line
+> > > config: x86_64-defconfig (attached as .config)
+> > > 
+> > > If you fix the issue, kindly add following tag as appropriate
+> > > Reported-by: kbuild test robot <lkp@intel.com>
+> > > Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
+> > > 
+> > > New smatch warnings:
+> > > drivers/firmware/efi/libstub/efi-stub-helper.c:265 efi_convert_cmdline() warn: qualifier 'l' ignored for %s specifier
+> > > 
+> > > # https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git/commit/?id=85f5afd4322d294a7eca0d304744a1646113fbd9
+> > > git remote add efi https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git
+> > > git remote update efi
+> > > git checkout 85f5afd4322d294a7eca0d304744a1646113fbd9
+> > > vim +/l +265 drivers/firmware/efi/libstub/efi-stub-helper.c
+> > > 
+> > > c625d1c203941f drivers/firmware/efi/efi-stub-helper.c         H. Peter Anvin 2013-09-20  258  	options_bytes++;	/* NUL termination */
+> > > 9403e462fb5ffa drivers/firmware/efi/efi-stub-helper.c         Leif Lindholm  2014-04-04  259  
+> > > 1e45bf7372c48c drivers/firmware/efi/libstub/efi-stub-helper.c Ard Biesheuvel 2020-02-10  260  	status = efi_allocate_pages(options_bytes, &cmdline_addr, max_addr);
+> > > 5fef3870c572a3 drivers/firmware/efi/efi-stub-helper.c         Roy Franz      2013-09-22  261  	if (status != EFI_SUCCESS)
+> > > 5fef3870c572a3 drivers/firmware/efi/efi-stub-helper.c         Roy Franz      2013-09-22  262  		return NULL;
+> > > 5fef3870c572a3 drivers/firmware/efi/efi-stub-helper.c         Roy Franz      2013-09-22  263  
+> > > 85f5afd4322d29 drivers/firmware/efi/libstub/efi-stub-helper.c Arvind Sankar  2020-05-18  264  	snprintf((char *)cmdline_addr, options_bytes, "%.*ls",
+> > >                                                                                                                                                   ^
+> > > The "l" doesn't make sense here?
 > > 
-> > If you fix the issue, kindly add following tag as appropriate
-> > Reported-by: kbuild test robot <lkp@intel.com>
-> > Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
-> > 
-> > New smatch warnings:
-> > drivers/firmware/efi/libstub/efi-stub-helper.c:265 efi_convert_cmdline() warn: qualifier 'l' ignored for %s specifier
-> > 
-> > # https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git/commit/?id=85f5afd4322d294a7eca0d304744a1646113fbd9
-> > git remote add efi https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git
-> > git remote update efi
-> > git checkout 85f5afd4322d294a7eca0d304744a1646113fbd9
-> > vim +/l +265 drivers/firmware/efi/libstub/efi-stub-helper.c
-> > 
-> > c625d1c203941f drivers/firmware/efi/efi-stub-helper.c         H. Peter Anvin 2013-09-20  258  	options_bytes++;	/* NUL termination */
-> > 9403e462fb5ffa drivers/firmware/efi/efi-stub-helper.c         Leif Lindholm  2014-04-04  259  
-> > 1e45bf7372c48c drivers/firmware/efi/libstub/efi-stub-helper.c Ard Biesheuvel 2020-02-10  260  	status = efi_allocate_pages(options_bytes, &cmdline_addr, max_addr);
-> > 5fef3870c572a3 drivers/firmware/efi/efi-stub-helper.c         Roy Franz      2013-09-22  261  	if (status != EFI_SUCCESS)
-> > 5fef3870c572a3 drivers/firmware/efi/efi-stub-helper.c         Roy Franz      2013-09-22  262  		return NULL;
-> > 5fef3870c572a3 drivers/firmware/efi/efi-stub-helper.c         Roy Franz      2013-09-22  263  
-> > 85f5afd4322d29 drivers/firmware/efi/libstub/efi-stub-helper.c Arvind Sankar  2020-05-18  264  	snprintf((char *)cmdline_addr, options_bytes, "%.*ls",
-> >                                                                                                                                                   ^
-> > The "l" doesn't make sense here?
+> > The previous patches add support for wide strings to the version of
+> > snprintf used here.
 > 
-> The previous patches add support for wide strings to the version of
-> snprintf used here.
-
-Ah.  Thanks.  I will update the Smatch check.
-
-regards,
-dan carpenter
-
+> Ah.  Thanks.  I will update the Smatch check.
+> 
+> regards,
+> dan carpenter
+> 
+Note that the main kernel's printf still doesn't support it. It's only
+been added to the version in drivers/firmware/efi/libstub/vsprintf.c
+(added as part of this series).
