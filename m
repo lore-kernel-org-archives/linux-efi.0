@@ -2,157 +2,92 @@ Return-Path: <SRS0=3aIX=7C=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.5 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-8.4 required=3.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_IN_DEF_DKIM_WL autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F3355C433DF
-	for <linux-efi@archiver.kernel.org>; Wed, 20 May 2020 17:41:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 77D41C433DF
+	for <linux-efi@archiver.kernel.org>; Wed, 20 May 2020 17:56:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C6D6F207D3
-	for <linux-efi@archiver.kernel.org>; Wed, 20 May 2020 17:41:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4C83D204EF
+	for <linux-efi@archiver.kernel.org>; Wed, 20 May 2020 17:56:41 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="keV7XTh4"
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="sEj297nZ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726727AbgETRlD (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 20 May 2020 13:41:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58104 "EHLO
+        id S1726754AbgETR4l (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 20 May 2020 13:56:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60528 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726691AbgETRlD (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 20 May 2020 13:41:03 -0400
-Received: from mail-qk1-x744.google.com (mail-qk1-x744.google.com [IPv6:2607:f8b0:4864:20::744])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2587AC061A0E
-        for <linux-efi@vger.kernel.org>; Wed, 20 May 2020 10:41:03 -0700 (PDT)
-Received: by mail-qk1-x744.google.com with SMTP id f83so4357078qke.13
-        for <linux-efi@vger.kernel.org>; Wed, 20 May 2020 10:41:03 -0700 (PDT)
+        with ESMTP id S1726576AbgETR4k (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 20 May 2020 13:56:40 -0400
+Received: from mail-pg1-x542.google.com (mail-pg1-x542.google.com [IPv6:2607:f8b0:4864:20::542])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B7B64C061A0E
+        for <linux-efi@vger.kernel.org>; Wed, 20 May 2020 10:56:40 -0700 (PDT)
+Received: by mail-pg1-x542.google.com with SMTP id s10so1809091pgm.0
+        for <linux-efi@vger.kernel.org>; Wed, 20 May 2020 10:56:40 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=sender:from:date:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=URcpVJ4JyI57kr8iGfQFjLThhOWvhbh5pUatdFl6RX0=;
-        b=keV7XTh4eKjU5X7A4OB8uJlutr1YaW4DzruYCqDiJAHT+hlGdTCyWIR+tfp1bSHfg/
-         wb5RQ3bAzBnbrN2cG5JghiUKvNDPg+NcsWzfrbJHYP8QSXF6u46aLDHbCLWpbDOU5ADy
-         NF/E2x2JuElkMplS21QHAkhrlAOnw1Yz7aKS8ek6laWM5shmX07KcedVzjvch8UZN55Q
-         phg3KLdELXJ0loHNGlllX9mCz3jRENl54GT6OUZkYbm2aGs/hiZbNm+QGpFqgoeBtc6/
-         vHqz8hRF03ypgxQWcRvZ758mzIogDnFMbyxHHWRdXlWOkeic7OK0os1vX9UT7nX/oQYW
-         zcpw==
+        d=google.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=Pty6C2nrLJxasEr51wGRq0lQ2nqP2bOfYIiMHMUP8D4=;
+        b=sEj297nZW6hx12Of6Jrt2tzuj8Tydj3iqonbVwfnj8wMbBdLZwyqzlMMBPBF73QUz8
+         8usHo5Y5t0YB1HVGDsdsizXL8LvEga4tgkQztpHhHYutc2629WqAZ8enT5ePwRdxp/86
+         sMYRmmeFusUz0Meaaey/Q2du7Df9Ou69oR6XnoCpgzOtJPc12TrR6GxR7WuvTzMjvl7p
+         tCVjjwQCSNL/edZcUKMg9yc9gtHbGrf2yTqhk7u3ibGEXM5FhO/siy+jGmNNiZlI6o2v
+         g5KPQO+eB2zIY6+BNqwt6+YSGEFrwOki0BZBcFHgB+oQi9WbXBbntmEX3DUN9vyCLdKI
+         nYbg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:sender:from:date:to:cc:subject:message-id
-         :references:mime-version:content-disposition:in-reply-to;
-        bh=URcpVJ4JyI57kr8iGfQFjLThhOWvhbh5pUatdFl6RX0=;
-        b=hCIC+S/4Lxp8lyN+tmy/7yKMZWztIXdJh/WdaJEN7yfzAf313+T3BtyiAORUCT1tCi
-         WbF8OAUR4lw5IF1gorTtJ6OpyGtjJQ+X8VSRIfT/SrEDb8qVFCdlHGxY+zsJzcllPzy3
-         2jgDUUaJeDFm/+WiMUeDnbnVt74Vi05xPsdDeNUvsYzfQzKEgr7tOC5oQgscAPWnJW5F
-         /c2nyY2bPdP6f5b7+35SxNd/xbWgQ2JFcULwFw9/NWp/9TCQp9GiXlBDq2Z5AGju7VcQ
-         UgJ5XWhesSf13f1D+Os9muklzUllKvRc0iP5kEGIl1+YfNNSZDUNSDhYVEiTLWZyhz60
-         ot2A==
-X-Gm-Message-State: AOAM5328IlPJ7bfvN5He3h2M+GKXN9aJaKEPsqLTj9p/Wnk4/nc5FxlM
-        kNlfaO9elWMI1j0gpvnyuWk=
-X-Google-Smtp-Source: ABdhPJxlTehEtmapECoCvCig3puREjMQ/z8NipxQnBEyp/X4jRrBCVOyD5IRRB8Bg84moopL/SM34A==
-X-Received: by 2002:a37:bd81:: with SMTP id n123mr5662348qkf.57.1589996462293;
-        Wed, 20 May 2020 10:41:02 -0700 (PDT)
-Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
-        by smtp.gmail.com with ESMTPSA id 99sm2828391qte.93.2020.05.20.10.41.01
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 20 May 2020 10:41:01 -0700 (PDT)
-From:   Arvind Sankar <nivedita@alum.mit.edu>
-X-Google-Original-From: Arvind Sankar <arvind@rani.riverdale.lan>
-Date:   Wed, 20 May 2020 13:41:00 -0400
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=Pty6C2nrLJxasEr51wGRq0lQ2nqP2bOfYIiMHMUP8D4=;
+        b=K5W7LXSyKrW6r3PHPnntwVv3Xtxv4dO59xryKl/5rksh4Iyk9WwkRmdKkto0j993aS
+         xXNNnreTr30YlbXBTM6Tyy/QEKdwaaE7b2N0HdGAkDAXm/FBwttkns5YpQWIEEtSU7g7
+         LIIqAXjoQSSmWAhMxwAhHxpZz7lmSIVX4EhZUbl68r8OCBCiDe90NJN0xw1+K6MSFCHH
+         HsI4M/Ooh+H3ndg9eJMGj6HfUkIqn9KFA4Mjk8rkwN+PLpxRd44mJP7dXOAiN+3z0E6E
+         7zr8T+4IMYuXbQM+Aga4XovmOSO/vgRn5AXar+C/DfdZ+01ITgca7qAhzqxiiDmIjbM5
+         ttMg==
+X-Gm-Message-State: AOAM531kPTFc0UT8vPdggQqusP7g1U8hx2ytaQOJaWsOBt7R1fHNcis5
+        BUxivEDl5te/IMyzLoIUtXcCmmnNdloAkSEmxb0X2Q==
+X-Google-Smtp-Source: ABdhPJz7f2ctcvowLB8POxF7O44Xzl0pcHw/Wjh4YQjO4B8g4KIXAQLFcp5F4S8dtKLWiqJILKDI+ym+AVAN8VG54Qc=
+X-Received: by 2002:a63:d010:: with SMTP id z16mr4949420pgf.381.1589997399878;
+ Wed, 20 May 2020 10:56:39 -0700 (PDT)
+MIME-Version: 1.0
+References: <202005201012.pqmB8hA5%lkp@intel.com> <20200520155352.GB3184088@rani.riverdale.lan>
+ <CAMj1kXGNmDPQRCCtRYFRa+0NW9kADnx327FzPbNge+MU+NFoVg@mail.gmail.com>
+ <20200520173425.ovn4kvv2cvkdlrnn@google.com> <20200520173926.GA3365034@rani.riverdale.lan>
+ <20200520174100.GB3365034@rani.riverdale.lan>
+In-Reply-To: <20200520174100.GB3365034@rani.riverdale.lan>
+From:   Nick Desaulniers <ndesaulniers@google.com>
+Date:   Wed, 20 May 2020 10:56:28 -0700
+Message-ID: <CAKwvOdns1LkmPNAGcOZRdXxD_2fTgbYzr0DndvsTVL-Zuuowgg@mail.gmail.com>
+Subject: Re: [efi:next 22/40] ld.lld: warning: vsprintf.c:(.discard.unreachable+0x0):
+ has non-ABS relocation R_X86_64_PC32 against symbol ''
 To:     Arvind Sankar <nivedita@alum.mit.edu>
 Cc:     Fangrui Song <maskray@google.com>,
         Ard Biesheuvel <ardb@kernel.org>,
         kbuild test robot <lkp@intel.com>, kbuild-all@lists.01.org,
         clang-built-linux <clang-built-linux@googlegroups.com>,
-        linux-efi <linux-efi@vger.kernel.org>
-Subject: Re: [efi:next 22/40] ld.lld: warning:
- vsprintf.c:(.discard.unreachable+0x0): has non-ABS relocation R_X86_64_PC32
- against symbol ''
-Message-ID: <20200520174100.GB3365034@rani.riverdale.lan>
-References: <202005201012.pqmB8hA5%lkp@intel.com>
- <20200520155352.GB3184088@rani.riverdale.lan>
- <CAMj1kXGNmDPQRCCtRYFRa+0NW9kADnx327FzPbNge+MU+NFoVg@mail.gmail.com>
- <20200520173425.ovn4kvv2cvkdlrnn@google.com>
- <20200520173926.GA3365034@rani.riverdale.lan>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20200520173926.GA3365034@rani.riverdale.lan>
+        linux-efi <linux-efi@vger.kernel.org>,
+        Philip Li <philip.li@intel.com>,
+        Chen Rong <rong.a.chen@intel.com>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Wed, May 20, 2020 at 01:39:26PM -0400, Arvind Sankar wrote:
-> On Wed, May 20, 2020 at 10:34:25AM -0700, Fangrui Song wrote:
-> > On 2020-05-20, Ard Biesheuvel wrote:
-> > >On Wed, 20 May 2020 at 17:53, Arvind Sankar <nivedita@alum.mit.edu> wrote:
-> > >>
-> > >> On Wed, May 20, 2020 at 10:28:13AM +0800, kbuild test robot wrote:
-> > >> > tree:   https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git next
-> > >> > head:   e5fbadd1179cdadeaa44d71a9ec068c5bc100524
-> > >> > commit: ce5e3f909fc0ed67e58367b9c56a54c20a51080b [22/40] efi/printf: Add 64-bit and 8-bit integer support
-> > >> > config: x86_64-defconfig (attached as .config)
-> > >> > compiler: clang version 11.0.0 (https://github.com/llvm/llvm-project 135b877874fae96b4372c8a3fbfaa8ff44ff86e3)
-> > >> > reproduce:
-> > >> >         wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
-> > >> >         chmod +x ~/bin/make.cross
-> > >> >         # install x86_64 cross compiling tool for clang build
-> > >> >         # apt-get install binutils-x86-64-linux-gnu
-> > >> >         git checkout ce5e3f909fc0ed67e58367b9c56a54c20a51080b
-> > >> >         # save the attached .config to linux build tree
-> > >> >         COMPILER_INSTALL_PATH=$HOME/0day COMPILER=clang make.cross ARCH=x86_64
-> > >> >
-> > >> > If you fix the issue, kindly add following tag as appropriate
-> > >> > Reported-by: kbuild test robot <lkp@intel.com>
-> > >> >
-> > >> > All warnings (new ones prefixed by >>, old ones prefixed by <<):
-> > >> >
-> > >> > >> ld.lld: warning: vsprintf.c:(.discard.unreachable+0x0): has non-ABS relocation R_X86_64_PC32 against symbol ''
-> > >> >
-> > >> > ---
-> > >> > 0-DAY CI Kernel Test Service, Intel Corporation
-> > >> > https://lists.01.org/hyperkitty/list/kbuild-all@lists.01.org
-> > >>
-> > >> Clang folk, is anything actually wrong here? This seems to result from
-> > >> use of unreachable() annotation, which generates these
-> > >> .discard.unreachable sections apparently to help objtool.
-> > >>
-> > >
-> > >This came up before, and IIRC, it has already been fixed, only this
-> > >branch is based on v5.7-rc2.
-> > 
-> > LLD reports the diagnostic because a PC-relative relocation referencing a
-> > SHF_ALLOC section from a non-SHF_ALLOC section (.discard.unreachable) cannot be
-> > reasonably represented. A non-SHF_ALLOC section is not part of the memory image, thus conceptually
-> > the distance between a non-SHF_ALLOC and a SHF_ALLOC is not a constant which can be resolved at linktime.
-> > This is actually a nice diagnostic which has caught a number of issues.
-> > 
-> > % readelf -Wr drivers/firmware/efi/libstub/vsprintf.stub.o
-> > ..
-> > Relocation section '.rela.discard.unreachable' at offset 0xe38 contains 1 entry:
-> >      Offset             Info             Type               Symbol's Value  Symbol's Name + Addend
-> > 0000000000000000  0000000600000002 R_X86_64_PC32          0000000000000000 .text + ac0
-> > 
-> > ---
-> > 
-> > The linker command line is:
-> > 
-> > % ld.lld -m elf_x86_64 -T arch/x86/boot/compressed/vmlinux.lds arch/x86/boot/compressed/kernel_info.o arch/x86/boot/compressed/head_64.o arch/x86/boot/compressed/misc.o arch/x86/boot/compressed/string.o arch/x86/boot/compressed/cmdline.o arch/x86/boot/compressed/error.o arch/x86/boot/compressed/piggy.o arch/x86/boot/compressed/cpuflags.o arch/x86/boot/compressed/early_serial_console.o arch/x86/boot/compressed/kaslr.o arch/x86/boot/compressed/kaslr_64.o arch/x86/boot/compressed/mem_encrypt.o arch/x86/boot/compressed/pgtable_64.o arch/x86/boot/compressed/acpi.o drivers/firmware/efi/libstub/lib.a arch/x86/boot/compressed/efi_thunk_64.o -o arch/x86/boot/compressed/vmlinux
-> > ld.lld: warning: vsprintf.c:(.discard.unreachable+0x0): has non-ABS relocation R_X86_64_PC32 against symbol ''
-> > 
-> > arch/x86/boot/compressed/vmlinux has an output section .discard.unreachable , which is likely desired.
-> 
-> You mean /not/ desired, right?
-> 
-> > 
-> > Note that arch/x86/kernel/vmlinux.lds.S has an output section description /DISCARD/ : { ... *(.discard.*) ... },
-> > but arch/x86/boot/compressed/vmlinux doesn't.
-> > 
-> > We can let arch/x86/boot/compressed/vmlinux reuse the /DISCARD/ to fix the issue.
-> 
-> Yep.
+On Wed, May 20, 2020 at 10:41 AM Arvind Sankar <nivedita@alum.mit.edu> wrote:
+>
+> As an aside, how does one (should I) get onto kbuild-all? It keeps
+> bouncing me as a non-list member currently.
 
-As an aside, how does one (should I) get onto kbuild-all? It keeps
-bouncing me as a non-list member currently.
+Philip Li <philip.li@intel.com>
+Chen Rong <rong.a.chen@intel.com>
+are the two folks I always reference for 0day bot related questions. I
+haven't seen bounces, but I also don't recall subscribing to any
+related mailing lists.  Maybe I was added to one?
+-- 
+Thanks,
+~Nick Desaulniers
