@@ -2,41 +2,58 @@ Return-Path: <SRS0=2xyo=7E=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.4 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
-	DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-1.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 36A2AC433DF
-	for <linux-efi@archiver.kernel.org>; Fri, 22 May 2020 13:40:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B724C433E1
+	for <linux-efi@archiver.kernel.org>; Fri, 22 May 2020 13:44:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 03FFD207D8
-	for <linux-efi@archiver.kernel.org>; Fri, 22 May 2020 13:40:12 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=alien8.de header.i=@alien8.de header.b="OMXeKQ+l"
+	by mail.kernel.org (Postfix) with ESMTP id 6554B207D8
+	for <linux-efi@archiver.kernel.org>; Fri, 22 May 2020 13:44:37 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1590155077;
+	bh=uJcG2OQ2rSI4SuWWuLzjgm2Ceju6BKG1zcJBZTzbQ8Q=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
+	b=utw69/v0AvJnBe6BGk7ccsX34mYxpK1xmIN0jzobBNHJgaqdRhGj4ctjv3obOs5t4
+	 6/rhJ0g/WFEJxv5TqPMGEuwnfDmeXtpw9XsiVQJjs4KuJSE9nIp3R8uM8cByVfcu0H
+	 8ACG7GXT3p1iFlVN4sfL5rwSzLHPzpF3pcXSVSV4=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729676AbgEVNkL (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 22 May 2020 09:40:11 -0400
-Received: from mail.skyhub.de ([5.9.137.197]:53156 "EHLO mail.skyhub.de"
+        id S1729740AbgEVNoe (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 22 May 2020 09:44:34 -0400
+Received: from mail.kernel.org ([198.145.29.99]:58558 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729406AbgEVNkL (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 22 May 2020 09:40:11 -0400
-Received: from zn.tnic (p200300ec2f0d4900a503efeda57d2ecc.dip0.t-ipconnect.de [IPv6:2003:ec:2f0d:4900:a503:efed:a57d:2ecc])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        id S1729399AbgEVNod (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 22 May 2020 09:44:33 -0400
+Received: from mail-il1-f177.google.com (mail-il1-f177.google.com [209.85.166.177])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id 07B341EC02DD;
-        Fri, 22 May 2020 15:40:10 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alien8.de; s=dkim;
-        t=1590154810;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:in-reply-to:in-reply-to:  references:references;
-        bh=Pw4qZddkN9GARxEt8dEIB/8bXHBWj3ikGLqk4GalsDI=;
-        b=OMXeKQ+lA5i44nvFQReQLVYF4u5t5YzXL+c9LW740nPyR9rd7bNT752oRFxrmq05fHnm2y
-        A9KklmoK6nbusEHZtzVRcWBa0d3ekTrHXUuDyYWz2tdqkDbspvDnn6VIGQfWFDiyKWoZML
-        Y1XxO57yR1hRM37VQwpeYIjqI92mO5c=
-Date:   Fri, 22 May 2020 15:40:04 +0200
-From:   Borislav Petkov <bp@alien8.de>
-To:     Ard Biesheuvel <ardb@kernel.org>
+        by mail.kernel.org (Postfix) with ESMTPSA id 75C07207D8;
+        Fri, 22 May 2020 13:44:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1590155073;
+        bh=uJcG2OQ2rSI4SuWWuLzjgm2Ceju6BKG1zcJBZTzbQ8Q=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=Lw24PK1kRgyDaZ0ciGSyLQ/QWtRXiiAHFW6rlKtsogEp3Tat4AnELfuXBDpiCTP0V
+         aCdwu+mGw1W7icZlD9oxFmBRSqWIGRxjmi92ia5Zxmmn4ASsYuA3bBk201wu6fAvc9
+         o3uDJyV1B7QJSQJ5DK+ISNPv19wIs921sVCNq2w8=
+Received: by mail-il1-f177.google.com with SMTP id w18so10651521ilm.13;
+        Fri, 22 May 2020 06:44:33 -0700 (PDT)
+X-Gm-Message-State: AOAM5323MKaZ64Svb5I6igjMMrnJEGko9WTP/VuWoNIWth9ucpik+NPV
+        XVIu/8wCr9wy3wLQlW3O2HBnpiLKCWjf6Ctwa4k=
+X-Google-Smtp-Source: ABdhPJzbGhgU2FO1RXLapvTMCcL+3fVf/Gte05lXmIm8Z1k+ZjyZdMHtkgAqfkOyO6a0rnF/fPLfTlqqhi07lUxOhN0=
+X-Received: by 2002:a92:5ec1:: with SMTP id f62mr10773461ilg.80.1590155072870;
+ Fri, 22 May 2020 06:44:32 -0700 (PDT)
+MIME-Version: 1.0
+References: <20200517125754.8934-1-ardb@kernel.org> <CAMj1kXGUxPuQCv9KPezqpLf1qLTbJh_j9JeVnnYZ=HbnL65=AQ@mail.gmail.com>
+ <20200522134004.GF28750@zn.tnic>
+In-Reply-To: <20200522134004.GF28750@zn.tnic>
+From:   Ard Biesheuvel <ardb@kernel.org>
+Date:   Fri, 22 May 2020 15:44:21 +0200
+X-Gmail-Original-Message-ID: <CAMj1kXHogO=3wAyZPi9WtHP9++N5KH6OjNgY_CQ_o8nZJ5jjVA@mail.gmail.com>
+Message-ID: <CAMj1kXHogO=3wAyZPi9WtHP9++N5KH6OjNgY_CQ_o8nZJ5jjVA@mail.gmail.com>
+Subject: Re: [GIT PULL 0/7] EFI fixes for v5.7
+To:     Borislav Petkov <bp@alien8.de>
 Cc:     linux-efi <linux-efi@vger.kernel.org>,
         Ingo Molnar <mingo@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>,
@@ -53,30 +70,35 @@ Cc:     linux-efi <linux-efi@vger.kernel.org>,
         Matthew Garrett <mjg59@google.com>,
         Mike Lothian <mike@fireburn.co.uk>,
         Punit Agrawal <punit1.agrawal@toshiba.co.jp>
-Subject: Re: [GIT PULL 0/7] EFI fixes for v5.7
-Message-ID: <20200522134004.GF28750@zn.tnic>
-References: <20200517125754.8934-1-ardb@kernel.org>
- <CAMj1kXGUxPuQCv9KPezqpLf1qLTbJh_j9JeVnnYZ=HbnL65=AQ@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <CAMj1kXGUxPuQCv9KPezqpLf1qLTbJh_j9JeVnnYZ=HbnL65=AQ@mail.gmail.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Fri, May 22, 2020 at 03:06:20PM +0200, Ard Biesheuvel wrote:
-> Ping?
+On Fri, 22 May 2020 at 15:40, Borislav Petkov <bp@alien8.de> wrote:
+>
+> On Fri, May 22, 2020 at 03:06:20PM +0200, Ard Biesheuvel wrote:
+> > Ping?
+>
+> Did you want to make your tags unique from the next pull request onwards
+> and I were supposed to pull this one as is?
+>
 
-Did you want to make your tags unique from the next pull request onwards
-and I were supposed to pull this one as is?
+What usually happens is that Ingo applies the patches piecemeal,
+ignoring the tag altogether, so without any coordination between you
+as x86 maintainers or communication back to me, that is what i was
+expecting to happen this time as well.
 
-Thx.
+Note that I have another PR pending since two weeks ago [0].
 
--- 
-Regards/Gruss,
-    Boris.
+So if you want to start dealing with the EFI trees in a different way
+from now on, that is perfectly fine with me, but please align with
+Ingo and Thomas first.
 
-https://people.kernel.org/tglx/notes-about-netiquette
+Thanks,
+Ard.
+
+
+
+[0] https://lore.kernel.org/linux-efi/20200508180157.1816-1-ardb@kernel.org/
