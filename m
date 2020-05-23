@@ -2,41 +2,42 @@ Return-Path: <SRS0=c6ga=7F=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E8685C433E0
-	for <linux-efi@archiver.kernel.org>; Sat, 23 May 2020 12:00:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E9BFDC433DF
+	for <linux-efi@archiver.kernel.org>; Sat, 23 May 2020 12:00:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BBC4A20814
-	for <linux-efi@archiver.kernel.org>; Sat, 23 May 2020 12:00:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C0409206C3
+	for <linux-efi@archiver.kernel.org>; Sat, 23 May 2020 12:00:46 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1590235239;
-	bh=a1EfeTlX8OqgAm4kNKi5ia4j9VRX69XYnUu6nE/MoiI=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=QXsIK1y0C7AtFNYaW5aqWUJ+LPE66Q93TXBZtDKiFrJIUkYGwaZSZETXEFjSV70rx
-	 BetoJzgKV2PhTVRzr57bmlDyaLHZE4sYdMhJTuaGRr7b+2YompmaNzXE9VWYIcFUIa
-	 AwKTAOK8y2O4Re/NewH/PohuhMpKv68y064jCi3c=
+	s=default; t=1590235246;
+	bh=I7jb6C1RNyVBMRZDsHgxpUAsckf/p1J+dg1wIdxLwNM=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=Y84iyTcDHm+lIV14QzL0r2vwVIlpAdGFJ+IV9aANAiv1RqLsF2m89HP9ZQyKZVECV
+	 ygkwYsghDPaDRLIHEN98Pa/cfbimGJROavBOwzO5JiqGQedgabv6RkutlJjIVjy325
+	 v/nCoqLzRbHhenfyL0dL38FsRrUNx/3BC6zH9iwA=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729712AbgEWMAj (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 23 May 2020 08:00:39 -0400
-Received: from mail.kernel.org ([198.145.29.99]:40900 "EHLO mail.kernel.org"
+        id S1731283AbgEWMAn (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 23 May 2020 08:00:43 -0400
+Received: from mail.kernel.org ([198.145.29.99]:40976 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728749AbgEWMAj (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Sat, 23 May 2020 08:00:39 -0400
+        id S1728749AbgEWMAm (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Sat, 23 May 2020 08:00:42 -0400
 Received: from localhost.localdomain (82-64-249-211.subs.proxad.net [82.64.249.211])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id B5E29206C3;
-        Sat, 23 May 2020 12:00:36 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 6F10A2070A;
+        Sat, 23 May 2020 12:00:40 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1590235238;
-        bh=a1EfeTlX8OqgAm4kNKi5ia4j9VRX69XYnUu6nE/MoiI=;
-        h=From:To:Cc:Subject:Date:From;
-        b=bHFXmpuCwMc3PgK8aXtgTzlOCn9DMagXiavppfZ2J9d17sdFhBPu5vvaVjO4tf/Iy
-         Dde4pvvfFfr9IR+uepbOX5hkDma0SXAIbeu34uEDc3a8w0r+cBXPaDGkAF7Ma23bvO
-         lRpzr2osX3ecrGGNzu/7vWH6c6tKh+5vgQIJ5hd8=
+        s=default; t=1590235241;
+        bh=I7jb6C1RNyVBMRZDsHgxpUAsckf/p1J+dg1wIdxLwNM=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=2rOBsM8RHaIn7cOcE4a+PyAz0kNYYJZWHbJo+cNmEEmpHXi7YRiJnVmBiuFAO5P2l
+         L5INBQtkgfUgJwvkip7ULW2/A3TBJ/68GXVQdBXcoKD2ZvMvlz8+JKJJNBYZR8id2Z
+         kjdkj7YjtKSPPZOl6nvSsK0l9a1QQrsWdCZL5dNw=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     x86@kernel.org, linux-kernel@vger.kernel.org,
@@ -44,10 +45,12 @@ Cc:     x86@kernel.org, linux-kernel@vger.kernel.org,
         Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
         Linus Torvalds <torvalds@linux-foundation.org>,
         Arvind Sankar <nivedita@alum.mit.edu>
-Subject: [PATCH v2 0/3] x86/boot: get rid of GOT entries and associated fixup code
-Date:   Sat, 23 May 2020 14:00:18 +0200
-Message-Id: <20200523120021.34996-1-ardb@kernel.org>
+Subject: [PATCH v2 2/3] x86/boot/compressed: force hidden visibility for all symbol references
+Date:   Sat, 23 May 2020 14:00:20 +0200
+Message-Id: <20200523120021.34996-3-ardb@kernel.org>
 X-Mailer: git-send-email 2.20.1
+In-Reply-To: <20200523120021.34996-1-ardb@kernel.org>
+References: <20200523120021.34996-1-ardb@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
@@ -55,63 +58,71 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Building position independent code using GCC by default results in references
-to symbols with external linkage to be resolved via GOT entries, which
-carry the absolute addresses of the symbols, and thus need to be corrected
-if the load time address of the executable != the link time address.
+Eliminate all GOT entries in the decompressor binary, by forcing hidden
+visibility for all symbol references, which informs the compiler that
+such references will be resolved at link time without the need for
+allocating GOT entries.
 
-For fully linked binaries, such GOT indirected references are completely
-useless, and actually make the startup code more complicated than necessary,
-since these corrections may need to be applied more than once. In fact, we
-have been very careful to avoid such references in the EFI stub code, since
-it would require yet another [earlier] pass of GOT fixups which we currently
-don't implement.
+To ensure that no GOT entries will creep back in, add an assertion to
+the decompressor linker script that will fire if the .got section has
+a non-zero size.
 
-Older GCCs were quirky when it came to overriding this behavior using symbol
-visibility, but now that we have increased the minimum GCC version to 4.6,
-we can actually start setting the symbol visibility to 'hidden' globally for
-all symbol references in the decompressor, getting rid of the GOT entirely.
-This means we can get rid of the GOT fixup code right away, and we can start
-using ordinary external symbol references in the EFI stub without running the
-risk of boot regressions. (v2 note: we have already started doing this)
-
-CC'ing Linus and Maarten, who were involved in diagnosing an issue related
-to GOT entries emitted from the EFI stub ~5 years ago. [0] [1]
-
-Many thanks to Arvind for the suggestions and the help in testing these
-changes. Tested on GCC 4.6 + binutils 2.24 (Ubuntu 14.04), and GCC 8 +
-binutils 2.31 (Debian Buster)
-
-Changes since v1 [2]:
-Rebase only - recent EFI changes have moved all the C code into
-drivers/firmware/efi/libstub/, which is also built with hidden
-visibility, and contains an additional objdump pass to detect (and
-reject) absolute symbol references.
-
-Unless anyone objects, I'd like to incorporate these changes into my
-late EFI PR for v5.8, which will go out in a day or two.
-
-Cc: Maarten Lankhorst <maarten.lankhorst@linux.intel.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Arvind Sankar <nivedita@alum.mit.edu>
-
-[0] https://lore.kernel.org/lkml/5405E186.2080406@canonical.com/
-[1] https://lore.kernel.org/lkml/CA+55aFxW9PmtjOf9nUQwpU8swsFqJOz8whZXcONo+XFmkSwezg@mail.gmail.com/
-[2] https://lore.kernel.org/linux-efi/20200108102304.25800-1-ardb@kernel.org/
-
-Ard Biesheuvel (3):
-  x86/boot/compressed: move .got.plt entries out of the .got section
-  x86/boot/compressed: force hidden visibility for all symbol references
-  x86/boot/compressed: get rid of GOT fixup code
-
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+---
  arch/x86/boot/compressed/Makefile      |  1 +
- arch/x86/boot/compressed/head_32.S     | 22 ++------
- arch/x86/boot/compressed/head_64.S     | 57 --------------------
- arch/x86/boot/compressed/hidden.h      | 19 +++++++
- arch/x86/boot/compressed/vmlinux.lds.S | 16 ++++--
- 5 files changed, 36 insertions(+), 79 deletions(-)
- create mode 100644 arch/x86/boot/compressed/hidden.h
+ arch/x86/boot/compressed/hidden.h      | 19 +++++++++++++++++++
+ arch/x86/boot/compressed/vmlinux.lds.S |  1 +
+ 3 files changed, 21 insertions(+)
 
+diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
+index 5f7c262bcc99..aa9ed814e5fa 100644
+--- a/arch/x86/boot/compressed/Makefile
++++ b/arch/x86/boot/compressed/Makefile
+@@ -40,6 +40,7 @@ KBUILD_CFLAGS += $(call cc-disable-warning, gnu)
+ KBUILD_CFLAGS += -Wno-pointer-sign
+ KBUILD_CFLAGS += $(call cc-option,-fmacro-prefix-map=$(srctree)/=)
+ KBUILD_CFLAGS += -fno-asynchronous-unwind-tables
++KBUILD_CFLAGS += -include hidden.h
+ 
+ KBUILD_AFLAGS  := $(KBUILD_CFLAGS) -D__ASSEMBLY__
+ GCOV_PROFILE := n
+diff --git a/arch/x86/boot/compressed/hidden.h b/arch/x86/boot/compressed/hidden.h
+new file mode 100644
+index 000000000000..49a17b6b5962
+--- /dev/null
++++ b/arch/x86/boot/compressed/hidden.h
+@@ -0,0 +1,19 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++/*
++ * When building position independent code with GCC using the -fPIC option,
++ * (or even the -fPIE one on older versions), it will assume that we are
++ * building a dynamic object (either a shared library or an executable) that
++ * may have symbol references that can only be resolved at load time. For a
++ * variety of reasons (ELF symbol preemption, the CoW footprint of the section
++ * that is modified by the loader), this results in all references to symbols
++ * with external linkage to go via entries in the Global Offset Table (GOT),
++ * which carries absolute addresses which need to be fixed up when the
++ * executable image is loaded at an offset which is different from its link
++ * time offset.
++ *
++ * Fortunately, there is a way to inform the compiler that such symbol
++ * references will be satisfied at link time rather than at load time, by
++ * giving them 'hidden' visibility.
++ */
++
++#pragma GCC visibility push(hidden)
+diff --git a/arch/x86/boot/compressed/vmlinux.lds.S b/arch/x86/boot/compressed/vmlinux.lds.S
+index ce3fdfb93b57..60a99dfb9d72 100644
+--- a/arch/x86/boot/compressed/vmlinux.lds.S
++++ b/arch/x86/boot/compressed/vmlinux.lds.S
+@@ -79,6 +79,7 @@ SECTIONS
+ 	_end = .;
+ }
+ 
++ASSERT (SIZEOF(.got) == 0, "Unexpected GOT entries detected!")
+ #ifdef CONFIG_X86_64
+ ASSERT (SIZEOF(.got.plt) == 0 || SIZEOF(.got.plt) == 0x18,
+ 	"Unexpected GOT/PLT entries detected!")
 -- 
 2.20.1
 
