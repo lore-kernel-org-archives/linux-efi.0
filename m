@@ -1,130 +1,69 @@
-Return-Path: <SRS0=fsCa=7H=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=rmX5=7I=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PULL_REQUEST,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8BD71C433E2
-	for <linux-efi@archiver.kernel.org>; Mon, 25 May 2020 13:14:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 28EB3C433E0
+	for <linux-efi@archiver.kernel.org>; Tue, 26 May 2020 17:02:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6B9B02078B
-	for <linux-efi@archiver.kernel.org>; Mon, 25 May 2020 13:14:23 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1590412463;
-	bh=h59g/FWKiLO/S5qsGnm95+KrT3FhntaQraRQRXiYPEQ=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=DhlQFAAGMKQcjX3YRwXvT4zagoFl0sAZGkI0CnaVu2AnkA1bNss8QBmPJpx0NpIoD
-	 CQPtOrv57tfGpnbD2CX9WSW3mvOwrav0xxJInPaXVSdRVu1FKt5rb6p1wZgAaCX2n/
-	 3WqxWP25voFwgyqkZeUWOgw18pR/ktSOpfDBIyzs=
+	by mail.kernel.org (Postfix) with ESMTP id 0BD1120776
+	for <linux-efi@archiver.kernel.org>; Tue, 26 May 2020 17:02:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2390674AbgEYNOW (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 25 May 2020 09:14:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34596 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2390626AbgEYNOW (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 25 May 2020 09:14:22 -0400
-Received: from mail-wm1-x342.google.com (mail-wm1-x342.google.com [IPv6:2a00:1450:4864:20::342])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E657DC061A0E;
-        Mon, 25 May 2020 06:14:21 -0700 (PDT)
-Received: by mail-wm1-x342.google.com with SMTP id l26so1100922wme.3;
-        Mon, 25 May 2020 06:14:21 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=sender:date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=lLb0og4tlG0+5ScJbZjLWh8El6oOSBuFzon5WeuLTO4=;
-        b=i96jkpDU/ButrseZ7QFSuoa+G4ZzhfXIIph4o9JxLPuUrH4KjK86b3q2zr5C3AN3Qk
-         K3tKbBD3D0ecBH47eTU1BKqPyq5McNWKNvoyNHqmPl8usDeeohnwsXLi977SE7RD2WK/
-         ttoqwdNAotGk46M12G+dGyPXgNGEoLHXR3zfBmJL/g9PPTaqNUyFRRb1uD7vypNTbdHF
-         toQtk3P8zMbL9pUEYlDkpdvfiI4C2O86E3pHcjjBGz4/94vAiSSvg5xsfQctnmG8LpVc
-         lJQLoCtEUYYlLhRMSZi0TsllFBZMiBpqdgmiGEvZl/kdfGJqCDkys2YMdP4NOwm5FWlc
-         3cvQ==
+        id S1728523AbgEZRC3 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 26 May 2020 13:02:29 -0400
+Received: from mail-qk1-f195.google.com ([209.85.222.195]:40762 "EHLO
+        mail-qk1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726420AbgEZRC3 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 26 May 2020 13:02:29 -0400
+Received: by mail-qk1-f195.google.com with SMTP id c185so7220611qke.7
+        for <linux-efi@vger.kernel.org>; Tue, 26 May 2020 10:02:28 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:sender:date:from:to:cc:subject:message-id
-         :references:mime-version:content-disposition:in-reply-to;
-        bh=lLb0og4tlG0+5ScJbZjLWh8El6oOSBuFzon5WeuLTO4=;
-        b=Fn0AQeJxEbIU5FZRTdNZXdGWAGGevry25gSDSD8GLKN+jw6Sa/l1dlU5w0Q32DhteX
-         oejCEmtEOdJRh0xI//u0SUWfDY4fj9IVg+3+0PevimEEzunXwwbG3E9dmEKIQqfqpLiJ
-         cujYjHsSN9G9G5ElcjqbyLUFUqyzNg2el+g6gFUBQ15g/Z1EGoVZWzfFW9js0sOUa2HU
-         Qgy7bR2nooZnB/GkF0x6+fewGWoiHRnzn6TyfPyuGQRZq84viG3iQRrHic3MeBsd0fuR
-         a57+DC9ImrcweN1BFzzxNcAt+xBZc1T9KssPzBn2nedK86oLnof0wKI4Kws3dUhXbh7p
-         NeLw==
-X-Gm-Message-State: AOAM530ci4HQuieUcY6COgSUN362NVsm8hJdNUScR5+cVJPRXeXC1Kbr
-        8QHDHZj9RWSjBv1+6H2P80arIy/v
-X-Google-Smtp-Source: ABdhPJylPg58OihdBLTiDOTMZiAMnlp4GjxJTJedis+A0Gvf6fegBNgbpQBUr6txkuYengzMpcy/HQ==
-X-Received: by 2002:a1c:29c4:: with SMTP id p187mr25142690wmp.73.1590412460688;
-        Mon, 25 May 2020 06:14:20 -0700 (PDT)
-Received: from gmail.com (54033286.catv.pool.telekom.hu. [84.3.50.134])
-        by smtp.gmail.com with ESMTPSA id 23sm10133992wmo.18.2020.05.25.06.14.19
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=K0HXWMhpIgTmqNl6PDghzhtC0QLa3pCcs/FQlrU8e6k=;
+        b=CxaDigOIJKVMG/kv+VhP729Z7fXA6EE50HIsQlInP6xpQnDnug5WLpsV8YnH6nOaaW
+         jLcesateLj1Yq3Erfrqu1UrSjiQvARAqq9oqVdEro7TAXKr14eLKmbFV6bwxc0+RBDt0
+         IQ8IwVUcEH9zagMHDWdxPYu9nu1IDaGBgdTz0kkvBqIGlJ8M67WpA7liUpnEgexYYOGD
+         OkTDVbrXYdq10zidQFgICgKH1aXCrDzxjTHrWT+8E1NcDqIsRHblRxt9ueMVe9UDBTKP
+         Q7h08It5tirxmvc9U2o/rGPI64wJ6z3XX4hiq3cy2xbpNXMsQf4Taghq/i9V6Ht87lG+
+         df4g==
+X-Gm-Message-State: AOAM531/aBtrLceGkq/Wqdrc0GaiOg/LSAkW01uKMYOEgVFtmZ+Fg3Lu
+        oWi16KwMbs/aC2/3f2Sf++LVGNgf
+X-Google-Smtp-Source: ABdhPJy/fjeqLKXKSnmMJe5WOtL/iLh8a8t7zJtZkvlgJ12qpBjJc3dzF6sqa5p79vFEFB+iF73/Hg==
+X-Received: by 2002:a37:b50:: with SMTP id 77mr2377701qkl.152.1590512548286;
+        Tue, 26 May 2020 10:02:28 -0700 (PDT)
+Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
+        by smtp.gmail.com with ESMTPSA id l184sm125392qkf.84.2020.05.26.10.02.27
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 25 May 2020 06:14:19 -0700 (PDT)
-Date:   Mon, 25 May 2020 15:14:17 +0200
-From:   Ingo Molnar <mingo@kernel.org>
+        Tue, 26 May 2020 10:02:27 -0700 (PDT)
+From:   Arvind Sankar <nivedita@alum.mit.edu>
 To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
-        x86@kernel.org, Ingo Molnar <mingo@redhat.com>,
-        Borislav Petkov <bp@alien8.de>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Arvind Sankar <nivedita@alum.mit.edu>
-Subject: Re: [GIT PULL] EFI changes for v5.8
-Message-ID: <20200525131417.GA3066456@gmail.com>
-References: <20200525080714.23228-1-ardb@kernel.org>
+Cc:     linux-efi@vger.kernel.org
+Subject: [PATCH 0/1] efi/x86: Use firmware stack for mixed-mode EFI stub
+Date:   Tue, 26 May 2020 13:02:25 -0400
+Message-Id: <20200526170226.2371024-1-nivedita@alum.mit.edu>
+X-Mailer: git-send-email 2.26.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200525080714.23228-1-ardb@kernel.org>
+Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
+This patch is on top of the series removing runtime relocs [1].
 
-* Ard Biesheuvel <ardb@kernel.org> wrote:
+[1] https://lore.kernel.org/lkml/20200525225918.1624470-1-nivedita@alum.mit.edu/
 
-> Ingo, Thomsd, Boris,
-> 
-> Please pull the changes below. Note that I did not incorporate the GOT
-> handling changes for the x86 decompressor - Arvind has some changes on
-> top that might just as well go in at the same time, and they are not
-> really EFI changes anyway.
-> 
-> The following changes since commit 4da0b2b7e67524cc206067865666899bc02e1cb0:
-> 
->   efi/libstub: Re-enable command line initrd loading for x86 (2020-04-25 12:26:32 +0200)
-> 
-> are available in the Git repository at:
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-changes-for-v5.8
-> 
-> for you to fetch changes up to 9241dfe7f2772fc73c82eb950afb1c795d2c012c:
-> 
->   efi/x86: Drop the special GDT for the EFI thunk (2020-05-24 00:25:15 +0200)
-> 
-> Cc: Ingo Molnar <mingo@redhat.com>,
-> Cc: Borislav Petkov <bp@alien8.de>
-> Cc: Thomas Gleixner <tglx@linutronix.de>
-> Cc: Arvind Sankar <nivedita@alum.mit.edu>
-> 
-> ----------------------------------------------------------------
-> More EFI changes for v5.8:
-> - Rename pr_efi/pr_efi_err to efi_info/efi_err, and use them consistently
-> - Simplify and unify initrd loading
-> - Parse the builtin command line on x86 (if provided)
-> - Implement printk() support, including support for wide character strings
-> - Some fixes for issues introduced by the first batch of v5.8 changes
-> - Fix a missing prototypes warning
-> - Simplify GDT handling in early mixed mode thunking code
-> - Some other minor fixes and cleanups
+Arvind Sankar (1):
+  efi/x86: Use firmware stack for mixed-mode EFI stub
 
->  24 files changed, 1211 insertions(+), 313 deletions(-)
+ arch/x86/boot/compressed/head_64.S | 46 ++++++++++++++++++++----------
+ 1 file changed, 31 insertions(+), 15 deletions(-)
 
-Pulled, thanks a lot Ard! Will push it out after a bit of testing.
+-- 
+2.26.2
 
-There was one conflict, in drivers/firmware/efi/libstub/efistub.h, 
-with a straightforward resolution.
-
-	Ingo
