@@ -2,66 +2,66 @@ Return-Path: <SRS0=XdNs=7J=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+X-Spam-Status: No, score=-6.5 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 275B1C433E0
-	for <linux-efi@archiver.kernel.org>; Wed, 27 May 2020 22:57:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DE8E2C433E0
+	for <linux-efi@archiver.kernel.org>; Wed, 27 May 2020 23:02:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F336D2071A
-	for <linux-efi@archiver.kernel.org>; Wed, 27 May 2020 22:57:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A99382075F
+	for <linux-efi@archiver.kernel.org>; Wed, 27 May 2020 23:02:14 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel-com.20150623.gappssmtp.com header.i=@intel-com.20150623.gappssmtp.com header.b="KSvS6x9p"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ShneLxh9"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725802AbgE0W47 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 27 May 2020 18:56:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38900 "EHLO
+        id S1725601AbgE0XCO (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 27 May 2020 19:02:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39716 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725385AbgE0W46 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 27 May 2020 18:56:58 -0400
-Received: from mail-ej1-x644.google.com (mail-ej1-x644.google.com [IPv6:2a00:1450:4864:20::644])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 34AF4C08C5C1
-        for <linux-efi@vger.kernel.org>; Wed, 27 May 2020 15:56:58 -0700 (PDT)
-Received: by mail-ej1-x644.google.com with SMTP id l21so29994399eji.4
-        for <linux-efi@vger.kernel.org>; Wed, 27 May 2020 15:56:58 -0700 (PDT)
+        with ESMTP id S1725385AbgE0XCO (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 27 May 2020 19:02:14 -0400
+Received: from mail-qk1-x741.google.com (mail-qk1-x741.google.com [IPv6:2607:f8b0:4864:20::741])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DE961C08C5C1;
+        Wed, 27 May 2020 16:02:13 -0700 (PDT)
+Received: by mail-qk1-x741.google.com with SMTP id q8so1321779qkm.12;
+        Wed, 27 May 2020 16:02:13 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=intel-com.20150623.gappssmtp.com; s=20150623;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=fwGU2uQiVzC2IW1d4XSgnAmDLz6dVOd0vO60zHVlzOo=;
-        b=KSvS6x9pGnU336XAjSEy2Gk8ZiLnXQf+5DAP7Svh82mYjA1dYIGgElASJQZ12fQTI0
-         njv6EpY0sGtmVzQuWlZAv/DApYjfP9FJH4pTeQYSZbDxLJvoeOy9VJsuU8jYZshthfLV
-         oW+b9h7z5MNMzG+ZXEbPbQ8zV+q6B/HysBpenZGULORU5qsQ/D0hw+8lSgGTJPG53DAj
-         ncwpjAHUWdIS05VTTosKfSEwLAxMmYOKrNoa6v4tUOIDRiySFpHVzBqwpJFDo2P2zOfF
-         l27BHoULc166seGg+/gnS+F4Ie2SU9aLgyYxOMIpnSFp5W5PVqZdOuGKBYq48im1D9z1
-         nRPw==
+        d=gmail.com; s=20161025;
+        h=sender:from:date:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=qYOUMbGRbXoFBwjaad5Ny0vONPBdfJSQTLm2Tk6FIJg=;
+        b=ShneLxh9Xe9PgyCQYJk9ewv0cbYYri4qqOAfyLHE3O8XDTR4LdyEmeOYfQude2nzG/
+         05NAmFVV1NLJ5X86wQ0WGNVV9V1E+1m8syCcrsNPTCKGUH8uvDXF/Myx61TCLP3Y/G81
+         yX9EcTD0Xjw9Dr4Q0F4aFdQeybiAI34Lb/+4KBQYWjajSAwvygB6+PYFZzNIr6e72kFJ
+         CvQ8RTBPWZxRTQcxgVYZaDIsY83wpvwB+8O3XW2ZD5Kp5GVGOYlEBJuhuj5zIHbi8yIb
+         b6Z3eHSIKTL51Twfg+xWed+eNBnQGCRp8Wc1IfwGkB3fgXXk4X6qX01tCFQxVXMt4YqR
+         6gnQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=fwGU2uQiVzC2IW1d4XSgnAmDLz6dVOd0vO60zHVlzOo=;
-        b=tH0wZ5KkVotw3k2DjihsMwR89GvwMkku0jZslBdujBMUNVOwpHMZMNdf13chrlCH7+
-         iLJu76tOKDlzX3CS3NId7glAya/h8OAh6EXkHhSF0+wq0RU9EINfey0z3fqEo4vQDn3/
-         xtmUhI2KMW/IkYlK/ztddc3fJ+tCE+tj8Hz+2Rp4uKRrY82d9Vus5wA4aMF+zhe0nS3R
-         mqWzGi+FAaStkXWBeW/pk8sOw3TqUVngR8YVeWVQBohGqJbi+n7U49FCQHF40K8b0/PA
-         A/mb07ihRe1Mw1q9qClVGxVOHWIvtPf1PmG7LWyVXpk2ko82ozfV5nz/M5M6vEa32Pql
-         PqRA==
-X-Gm-Message-State: AOAM530olBZlC9PrKWiJc/Di9AENU7+lrGM2w504qni1CsdT+oTvYtz9
-        kq8pTMj9LY3lvqxxGJAP6/bga4Y/BBSTv9166UxnEA==
-X-Google-Smtp-Source: ABdhPJzifeTbqLEgFw8mAxsZqyIiMiAysH0JILvagDOdSAmeTZcZsPKvsacGAbZ5HtpGbNjkqmFFEIQEKYYEmRknmzk=
-X-Received: by 2002:a17:906:fb0e:: with SMTP id lz14mr491849ejb.237.1590620216822;
- Wed, 27 May 2020 15:56:56 -0700 (PDT)
-MIME-Version: 1.0
-References: <20200508180157.1816-1-ardb@kernel.org> <20200508180157.1816-9-ardb@kernel.org>
- <10a1c7fcea861f5d45dff81cba673e970d686bc2.camel@intel.com> <20200527224657.GA3568142@rani.riverdale.lan>
-In-Reply-To: <20200527224657.GA3568142@rani.riverdale.lan>
-From:   Dan Williams <dan.j.williams@intel.com>
-Date:   Wed, 27 May 2020 15:56:45 -0700
-Message-ID: <CAPcyv4jOCY=kxeZVWsS0Xc36jmPr7DSR_sFrsMeoiEs+iEfbEA@mail.gmail.com>
-Subject: Re: [PATCH 08/15] efi/x86: Move command-line initrd loading to efi_main
-To:     Arvind Sankar <nivedita@alum.mit.edu>
-Cc:     "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>,
+        h=x-gm-message-state:sender:from:date:to:cc:subject:message-id
+         :references:mime-version:content-disposition:in-reply-to;
+        bh=qYOUMbGRbXoFBwjaad5Ny0vONPBdfJSQTLm2Tk6FIJg=;
+        b=HzR8R53gNteJSjGoL1IuRmTlZrHK91dO0JsAMqduWgIsT/Z9k36DQEh5xAx9fPra5u
+         FybnBMCKgQ3lVo6JIANgCPAc5KFfiylN4APHr10dp5tctkYrdjBsZhAaZrvVUcH7ulv5
+         7jdmQ1iwodFe8vV8s7BwNnjrzoHdDhpom4eFjGslcw4jnGwaxeBpXj7lefIPPj2bubDZ
+         Z0C+r7ZjDpYeVKk5VqQOMkedDCaHLeCyLCMqeco5rEqt/EIJpFN21upf82a8ctDIEQu3
+         u93SrG3gaDeqtzfNP3obLSuLmxqqAAslHI6WuZW3OQf7CzI/MbHtWuJ+YefV7ZJB+A6z
+         5CYQ==
+X-Gm-Message-State: AOAM531RWn7PJPHJ3AMlJ3FoCRuW4bzCu+lHES382hLi/lhOCjCNRR/y
+        THnrciT3mwyb62wxbeSlgFCo1jtP
+X-Google-Smtp-Source: ABdhPJxMk1bgFZVPt3++Ket2S3kFyFHSTmpmLoobwtt2X5j9BweaNuqR0TO7eg1VL7+NltlB63poJw==
+X-Received: by 2002:a37:a74a:: with SMTP id q71mr166810qke.446.1590620532632;
+        Wed, 27 May 2020 16:02:12 -0700 (PDT)
+Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
+        by smtp.gmail.com with ESMTPSA id x14sm3559390qkb.67.2020.05.27.16.02.11
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 27 May 2020 16:02:11 -0700 (PDT)
+From:   Arvind Sankar <nivedita@alum.mit.edu>
+X-Google-Original-From: Arvind Sankar <arvind@rani.riverdale.lan>
+Date:   Wed, 27 May 2020 19:02:09 -0400
+To:     Dan Williams <dan.j.williams@intel.com>
+Cc:     Arvind Sankar <nivedita@alum.mit.edu>,
+        "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>,
         "mingo@kernel.org" <mingo@kernel.org>,
         "tglx@linutronix.de" <tglx@linutronix.de>,
         "ardb@kernel.org" <ardb@kernel.org>,
@@ -69,72 +69,90 @@ Cc:     "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>,
         "joe@perches.com" <joe@perches.com>,
         "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
         "arnd@arndb.de" <arnd@arndb.de>
-Content-Type: text/plain; charset="UTF-8"
+Subject: Re: [PATCH 08/15] efi/x86: Move command-line initrd loading to
+ efi_main
+Message-ID: <20200527230209.GA3575079@rani.riverdale.lan>
+References: <20200508180157.1816-1-ardb@kernel.org>
+ <20200508180157.1816-9-ardb@kernel.org>
+ <10a1c7fcea861f5d45dff81cba673e970d686bc2.camel@intel.com>
+ <20200527224657.GA3568142@rani.riverdale.lan>
+ <CAPcyv4jOCY=kxeZVWsS0Xc36jmPr7DSR_sFrsMeoiEs+iEfbEA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <CAPcyv4jOCY=kxeZVWsS0Xc36jmPr7DSR_sFrsMeoiEs+iEfbEA@mail.gmail.com>
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Wed, May 27, 2020 at 3:47 PM Arvind Sankar <nivedita@alum.mit.edu> wrote:
->
-> On Wed, May 27, 2020 at 10:30:18PM +0000, Williams, Dan J wrote:
-> > On Fri, 2020-05-08 at 20:01 +0200, Ard Biesheuvel wrote:
-> > > From: Arvind Sankar <nivedita@alum.mit.edu>
+On Wed, May 27, 2020 at 03:56:45PM -0700, Dan Williams wrote:
+> On Wed, May 27, 2020 at 3:47 PM Arvind Sankar <nivedita@alum.mit.edu> wrote:
+> >
+> > On Wed, May 27, 2020 at 10:30:18PM +0000, Williams, Dan J wrote:
+> > > On Fri, 2020-05-08 at 20:01 +0200, Ard Biesheuvel wrote:
+> > > > From: Arvind Sankar <nivedita@alum.mit.edu>
+> > > >
+> > > > Consolidate the initrd loading in efi_main.
+> > > >
+> > > > The command line options now need to be parsed only once.
+> > > >
+> > > > Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
+> > > > Link:
+> > > > https://lore.kernel.org/r/20200430182843.2510180-9-nivedita@alum.mit.edu
+> > > > Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 > > >
-> > > Consolidate the initrd loading in efi_main.
+> > > Hi,
 > > >
-> > > The command line options now need to be parsed only once.
+> > > This patch patch in tip/master as:
 > > >
-> > > Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
-> > > Link:
-> > > https://lore.kernel.org/r/20200430182843.2510180-9-nivedita@alum.mit.edu
-> > > Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+> > > 987053a30016 efi/x86: Move command-line initrd loading to efi_main
+> > >
+> > > ...regresses my nfs root configuration. It hangs trying to mount the
+> > > nfs root filesystem "root=/dev/nfs ip=dhcp".
+> > >
+> > > It does not revert cleanly.
+> > >
+> > >
 > >
-> > Hi,
+> > Does this fix it?
 > >
-> > This patch patch in tip/master as:
-> >
-> > 987053a30016 efi/x86: Move command-line initrd loading to efi_main
-> >
-> > ...regresses my nfs root configuration. It hangs trying to mount the
-> > nfs root filesystem "root=/dev/nfs ip=dhcp".
-> >
-> > It does not revert cleanly.
-> >
-> >
->
-> Does this fix it?
->
-> diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-> index defeb6035109..f53362efef84 100644
-> --- a/drivers/firmware/efi/libstub/x86-stub.c
-> +++ b/drivers/firmware/efi/libstub/x86-stub.c
-> @@ -771,10 +771,12 @@ unsigned long efi_main(efi_handle_t handle,
->                         efi_err("Failed to load initrd!\n");
->                         goto fail;
->                 }
-> -               efi_set_u64_split(addr, &hdr->ramdisk_image,
-> -                                 &boot_params->ext_ramdisk_image);
-> -               efi_set_u64_split(size, &hdr->ramdisk_size,
-> -                                 &boot_params->ext_ramdisk_size);
-> +               if (size > 0) {
-> +                       efi_set_u64_split(addr, &hdr->ramdisk_image,
-> +                                         &boot_params->ext_ramdisk_image);
-> +                       efi_set_u64_split(size, &hdr->ramdisk_size,
-> +                                         &boot_params->ext_ramdisk_size);
-> +               }
+> > diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
+> > index defeb6035109..f53362efef84 100644
+> > --- a/drivers/firmware/efi/libstub/x86-stub.c
+> > +++ b/drivers/firmware/efi/libstub/x86-stub.c
+> > @@ -771,10 +771,12 @@ unsigned long efi_main(efi_handle_t handle,
+> >                         efi_err("Failed to load initrd!\n");
+> >                         goto fail;
+> >                 }
+> > -               efi_set_u64_split(addr, &hdr->ramdisk_image,
+> > -                                 &boot_params->ext_ramdisk_image);
+> > -               efi_set_u64_split(size, &hdr->ramdisk_size,
+> > -                                 &boot_params->ext_ramdisk_size);
+> > +               if (size > 0) {
+> > +                       efi_set_u64_split(addr, &hdr->ramdisk_image,
+> > +                                         &boot_params->ext_ramdisk_image);
+> > +                       efi_set_u64_split(size, &hdr->ramdisk_size,
+> > +                                         &boot_params->ext_ramdisk_size);
+> > +               }
+> 
+> I'll give it a shot, but my guess would have been something related to
+> the fact that this patch moves the initrd loading relative to when the
+> command line is being parsed. In this case it's a dracut initrd built
+> by:
+> 
+>     dracut -m "nfs network base"
+> 
+> ...with a kernel built with:
+> 
+> CONFIG_IP_PNP_DHCP=y
+> 
+> ...and a built-in network interface. The behavior seems to be that the
+> kernel gets an IP address just fine, but there's no initrd userspace
+> to mount nfs and the kernel eventually gives up looking for root.
 
-I'll give it a shot, but my guess would have been something related to
-the fact that this patch moves the initrd loading relative to when the
-command line is being parsed. In this case it's a dracut initrd built
-by:
-
-    dracut -m "nfs network base"
-
-...with a kernel built with:
-
-CONFIG_IP_PNP_DHCP=y
-
-...and a built-in network interface. The behavior seems to be that the
-kernel gets an IP address just fine, but there's no initrd userspace
-to mount nfs and the kernel eventually gives up looking for root.
+It's an oversight in this patch: I set addr/size to 0 in the case where
+the EFI stub is not supposed to handle the initrd loading (because a
+bootloader ran before it and was responsible for handling the loading),
+but then those 0's get written into the bootparams structure anyway,
+blowing away whatever the bootloader had loaded.
