@@ -1,87 +1,161 @@
-Return-Path: <SRS0=CLSZ=7K=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=RRme=7L=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.8 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 09F4CC433DF
-	for <linux-efi@archiver.kernel.org>; Thu, 28 May 2020 19:49:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C8D3C433E0
+	for <linux-efi@archiver.kernel.org>; Fri, 29 May 2020 08:31:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DB725207BC
-	for <linux-efi@archiver.kernel.org>; Thu, 28 May 2020 19:49:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1AF712075A
+	for <linux-efi@archiver.kernel.org>; Fri, 29 May 2020 08:31:59 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="WghyQcNa"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2406815AbgE1TtW (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 28 May 2020 15:49:22 -0400
-Received: from mga18.intel.com ([134.134.136.126]:16414 "EHLO mga18.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2406796AbgE1TtK (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Thu, 28 May 2020 15:49:10 -0400
-IronPort-SDR: fbmfp/K5pdOxVUhXE1rW+XZbcSDxBJ3rVNwkP1GpRESjDKzorSCaPH1Pv2Wy2FaUQvelUEA2t1
- B138melZn1MQ==
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga006.fm.intel.com ([10.253.24.20])
-  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 May 2020 12:49:06 -0700
-IronPort-SDR: 8F9810rEMx6IOPi3omf7m2l5VhxDBULuRDgai1F3PxuNtSGrcFhENKjpRoocZqPScKVtj3DuEJ
- lVfUp+VG43sQ==
-X-IronPort-AV: E=Sophos;i="5.73,446,1583222400"; 
-   d="scan'208";a="469254374"
-Received: from agluck-desk2.sc.intel.com ([10.3.52.68])
-  by fmsmga006-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 May 2020 12:49:06 -0700
-From:   Tony Luck <tony.luck@intel.com>
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     Tony Luck <tony.luck@intel.com>,
-        Lennart Poettering <mzxreary@0pointer.de>,
-        Matthew Garrett <matthew.garrett@nebula.com>,
-        Jeremy Kerr <jk@ozlabs.org>, linux-efi@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH 2/2] efivarfs: Don't return -EINTR when rate-limiting reads
-Date:   Thu, 28 May 2020 12:49:05 -0700
-Message-Id: <20200528194905.690-3-tony.luck@intel.com>
-X-Mailer: git-send-email 2.21.1
-In-Reply-To: <20200528194905.690-1-tony.luck@intel.com>
-References: <20200528194905.690-1-tony.luck@intel.com>
+        id S1725795AbgE2Ib6 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 29 May 2020 04:31:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41330 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725562AbgE2Ib5 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 29 May 2020 04:31:57 -0400
+Received: from mail-pj1-x1043.google.com (mail-pj1-x1043.google.com [IPv6:2607:f8b0:4864:20::1043])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7BDD5C08C5C6
+        for <linux-efi@vger.kernel.org>; Fri, 29 May 2020 01:31:57 -0700 (PDT)
+Received: by mail-pj1-x1043.google.com with SMTP id cx22so933444pjb.1
+        for <linux-efi@vger.kernel.org>; Fri, 29 May 2020 01:31:57 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=chromium.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=84A0M1H4jy1ecL+D5qAu1liGD/cksWTm83SNF7xy+/U=;
+        b=WghyQcNaT0+nqHX9TbJBOpZhhUuqKCs0t6Db6P3hFwLDMvvxT3kUESBC7ajW56kRKY
+         CRSiMXhf6uHVw/68Q67YX1fHr5mUltzqfc3Q57fYIy+tCodGIXtAln+PKgEIARGmBP/P
+         ofH4efXdeHMhL8oNbqIOYTQTX9FVJ62mu7paM=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=84A0M1H4jy1ecL+D5qAu1liGD/cksWTm83SNF7xy+/U=;
+        b=RyNJv/De0Fni2RulnOLzDe2b0wChZaWFzhJ+u0vMlm+eKjyu/s5FGqgapxH5wt1ChZ
+         AnnjCMASDEOWMyPUFFQjLOJlA2fuoqNCS85wq9a1UKVnqhjIoPnoKQac+0xZ6ClvR6ei
+         LDRLnJLcI5QjNpV95Eoaf2wiBtu9fFy+Q+KV96F5kJla6EhlaB9FWT17YGoVZLPK8NiH
+         lukC75nnLFkVUeAISL8goWDwXnrCOpYbYrF+ckTbiIsnU53t5Ggfp7G2xjhSOaYwVqNc
+         MxBzO5zMoWlkON/PPi1jC190oIYKwBAbnmNUVTjMPoXEr6rfpu/IYcZ4Xvz5xriqKhGT
+         3fHw==
+X-Gm-Message-State: AOAM533AVSx6J76dhQLcB5RWj9zf8ypCBhQZZz9hpLWDPCwi+/czv+a4
+        TDNB0QPi5ziuP6FlZ6+KdoZlSLT7uS3hKA==
+X-Google-Smtp-Source: ABdhPJwEYthMkSM49YNCxr0c5BBaSDzab+YjZMTHlFo3GA6Kodaph5uWiLr/twt3lQYpnSiIFKG4Zg==
+X-Received: by 2002:a17:902:fe12:: with SMTP id g18mr6066462plj.215.1590741117028;
+        Fri, 29 May 2020 01:31:57 -0700 (PDT)
+Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
+        by smtp.gmail.com with ESMTPSA id g18sm6353691pgn.47.2020.05.29.01.31.55
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 29 May 2020 01:31:56 -0700 (PDT)
+Date:   Fri, 29 May 2020 01:31:54 -0700
+From:   Kees Cook <keescook@chromium.org>
+To:     "Gustavo A. R. Silva" <gustavoars@kernel.org>
+Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-efi@vger.kernel.org,
+        linux-kernel@vger.kernel.org,
+        "Gustavo A. R. Silva" <gustavo@embeddedor.com>
+Subject: Re: [PATCH] efi: Replace zero-length array and use struct_size()
+ helper
+Message-ID: <202005290131.4B104937C@keescook>
+References: <20200527171425.GA4053@embeddedor>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200527171425.GA4053@embeddedor>
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Applications that read EFI variables may see a return
-value of -EINTR if they exceed the rate limit and a
-signal delivery is attempted while the process is sleeping.
+On Wed, May 27, 2020 at 12:14:25PM -0500, Gustavo A. R. Silva wrote:
+> The current codebase makes use of the zero-length array language
+> extension to the C90 standard, but the preferred mechanism to declare
+> variable-length types such as these ones is a flexible array member[1][2],
+> introduced in C99:
+> 
+> struct foo {
+>         int stuff;
+>         struct boo array[];
+> };
+> 
+> By making use of the mechanism above, we will get a compiler warning
+> in case the flexible array does not occur last in the structure, which
+> will help us prevent some kind of undefined behavior bugs from being
+> inadvertently introduced[3] to the codebase from now on.
+> 
+> Also, notice that, dynamic memory allocations won't be affected by
+> this change:
+> 
+> "Flexible array members have incomplete type, and so the sizeof operator
+> may not be applied. As a quirk of the original implementation of
+> zero-length arrays, sizeof evaluates to zero."[1]
+> 
+> sizeof(flexible-array-member) triggers a warning because flexible array
+> members have incomplete type[1]. There are some instances of code in
+> which the sizeof operator is being incorrectly/erroneously applied to
+> zero-length arrays and the result is zero. Such instances may be hiding
+> some bugs. So, this work (flexible-array member conversions) will also
+> help to get completely rid of those sorts of issues.
+> 
+> Lastly, make use of the sizeof_field() helper instead of an open-coded
+> version.
+> 
+> This issue was found with the help of Coccinelle and audited _manually_.
+> 
+> [1] https://gcc.gnu.org/onlinedocs/gcc/Zero-Length.html
+> [2] https://github.com/KSPP/linux/issues/21
+> [3] commit 76497732932f ("cxgb3/l2t: Fix undefined behaviour")
+> 
+> Signed-off-by: Gustavo A. R. Silva <gustavoars@kernel.org>
 
-This is quite surprising to the application, which probably
-doesn't have code to handle it.
+Reviewed-by: Kees Cook <keescook@chromium.org>
 
-Change the interruptible sleep to a non-interruptible one.
+> ---
+>  drivers/firmware/efi/efi.c | 3 ++-
+>  include/linux/efi.h        | 7 ++-----
+>  2 files changed, 4 insertions(+), 6 deletions(-)
+> 
+> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+> index 7f1657b6c30df..edc5d36caf54e 100644
+> --- a/drivers/firmware/efi/efi.c
+> +++ b/drivers/firmware/efi/efi.c
+> @@ -622,7 +622,8 @@ int __init efi_config_parse_tables(const efi_config_table_t *config_tables,
+>  			rsv = (void *)(p + prsv % PAGE_SIZE);
+>  
+>  			/* reserve the entry itself */
+> -			memblock_reserve(prsv, EFI_MEMRESERVE_SIZE(rsv->size));
+> +			memblock_reserve(prsv,
+> +					 struct_size(rsv, entry, rsv->size));
+>  
+>  			for (i = 0; i < atomic_read(&rsv->count); i++) {
+>  				memblock_reserve(rsv->entry[i].base,
+> diff --git a/include/linux/efi.h b/include/linux/efi.h
+> index c45ac969ea4eb..328cc52a5fd45 100644
+> --- a/include/linux/efi.h
+> +++ b/include/linux/efi.h
+> @@ -1234,14 +1234,11 @@ struct linux_efi_memreserve {
+>  	struct {
+>  		phys_addr_t	base;
+>  		phys_addr_t	size;
+> -	} entry[0];
+> +	} entry[];
+>  };
+>  
+> -#define EFI_MEMRESERVE_SIZE(count) (sizeof(struct linux_efi_memreserve) + \
+> -	(count) * sizeof(((struct linux_efi_memreserve *)0)->entry[0]))
+> -
+>  #define EFI_MEMRESERVE_COUNT(size) (((size) - sizeof(struct linux_efi_memreserve)) \
+> -	/ sizeof(((struct linux_efi_memreserve *)0)->entry[0]))
+> +	/ sizeof_field(struct linux_efi_memreserve, entry[0]))
 
-Reported-by: Lennart Poettering <mzxreary@0pointer.de>
-Signed-off-by: Tony Luck <tony.luck@intel.com>
----
- fs/efivarfs/file.c | 6 ++----
- 1 file changed, 2 insertions(+), 4 deletions(-)
+Whoa. This is kind of a "reverse struct_size()". I wonder if any other
+places in the kernel do a similar calculation?
 
-diff --git a/fs/efivarfs/file.c b/fs/efivarfs/file.c
-index 4b8bc4560d70..feaa5e182b7b 100644
---- a/fs/efivarfs/file.c
-+++ b/fs/efivarfs/file.c
-@@ -73,10 +73,8 @@ static ssize_t efivarfs_file_read(struct file *file, char __user *userbuf,
- 	ssize_t size = 0;
- 	int err;
- 
--	while (!__ratelimit(&file->f_cred->user->ratelimit)) {
--		if (!msleep_interruptible(50))
--			return -EINTR;
--	}
-+	while (!__ratelimit(&file->f_cred->user->ratelimit))
-+		msleep(50);
- 
- 	err = efivar_entry_size(var, &datasize);
- 
 -- 
-2.21.1
-
+Kees Cook
