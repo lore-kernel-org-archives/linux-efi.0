@@ -1,161 +1,200 @@
-Return-Path: <SRS0=RRme=7L=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=OiXb=7Q=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.6 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2188CC433DF
-	for <linux-efi@archiver.kernel.org>; Fri, 29 May 2020 17:32:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B70AC433DF
+	for <linux-efi@archiver.kernel.org>; Wed,  3 Jun 2020 05:50:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F0B88207BC
-	for <linux-efi@archiver.kernel.org>; Fri, 29 May 2020 17:32:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6403B207DA
+	for <linux-efi@archiver.kernel.org>; Wed,  3 Jun 2020 05:50:49 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1590773545;
-	bh=1qy2XwZGp6bw0IMioTK3OHYDxNdjw6uX1yU4MFZqyEI=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=L3tQIaAOdIgcBPWhNEncPvE21heE+Z+BMwBcTVW5wOYxoNo+t7Q14cYnFYZw+gcQs
-	 f095WBGI0x45noxaRoOhSq0QvFnsLMkH/SIPmbIw55MkeX7lZ2q9wvG/GENwtAWWlr
-	 OJDdr1/c16MSi1ni55cxQPxwwna90r/o4zMYw654=
+	s=default; t=1591163449;
+	bh=2J4PNSQo+EMPpKpVUEWImjPF5uGuv2PW0A8egppWV6E=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=w6HCd9ThuMrABibNc/Hc8oGGU1erGOS7drEqgj7LD4BB3x8dwKrxw5meATWYozdV1
+	 /Raih2Bgn8vXtlWpwhNgfXeMHO1+gAZrV/v/izt9/Dr941AMFJTPnMpA4pADFXeJVS
+	 Adz/G2QHxFEds4F/rc6sI/JxjstRZ7Z5qtN8dwC8=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726487AbgE2RcY (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 29 May 2020 13:32:24 -0400
-Received: from mail.kernel.org ([198.145.29.99]:53766 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725839AbgE2RcY (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 29 May 2020 13:32:24 -0400
-Received: from embeddedor (unknown [189.207.59.248])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 9A8022072D;
-        Fri, 29 May 2020 17:32:22 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1590773543;
-        bh=1qy2XwZGp6bw0IMioTK3OHYDxNdjw6uX1yU4MFZqyEI=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=OqI/h7AsBu9I3eV7QBx+U2GmtaZbGtMR2lueZwwG2zrgxBaTzdr36ogU0oge2PwiG
-         AqvStkVV/3iFsl5cOb989SGXYRVMllbsqzQZfKw7sY0zbTHC6AKaDNJSMj3iI1b9RD
-         jMCuVD0DHQTc6TOPOPYoVeWqXxKsAoDby5dlqOsQ=
-Date:   Fri, 29 May 2020 12:37:22 -0500
-From:   "Gustavo A. R. Silva" <gustavoars@kernel.org>
-To:     Kees Cook <keescook@chromium.org>
-Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-efi@vger.kernel.org,
-        linux-kernel@vger.kernel.org,
-        "Gustavo A. R. Silva" <gustavo@embeddedor.com>
-Subject: Re: [PATCH] efi: Replace zero-length array and use struct_size()
- helper
-Message-ID: <20200529173722.GB10051@embeddedor>
-References: <20200527171425.GA4053@embeddedor>
- <202005290131.4B104937C@keescook>
+        id S1725828AbgFCFus (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 3 Jun 2020 01:50:48 -0400
+Received: from condef-05.nifty.com ([202.248.20.70]:45932 "EHLO
+        condef-05.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725810AbgFCFus (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 3 Jun 2020 01:50:48 -0400
+X-Greylist: delayed 418 seconds by postgrey-1.27 at vger.kernel.org; Wed, 03 Jun 2020 01:50:47 EDT
+Received: from conuserg-10.nifty.com ([10.126.8.73])by condef-05.nifty.com with ESMTP id 0535Y1N5005795
+        for <linux-efi@vger.kernel.org>; Wed, 3 Jun 2020 14:34:17 +0900
+Received: from oscar.flets-west.jp (softbank126090202047.bbtec.net [126.90.202.47]) (authenticated)
+        by conuserg-10.nifty.com with ESMTP id 0535XFsW027699;
+        Wed, 3 Jun 2020 14:33:15 +0900
+DKIM-Filter: OpenDKIM Filter v2.10.3 conuserg-10.nifty.com 0535XFsW027699
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nifty.com;
+        s=dec2015msa; t=1591162396;
+        bh=S2qfYJl3VVPFJgaHLte7Yupybv6BYwId2vGPrugcKrQ=;
+        h=From:To:Cc:Subject:Date:From;
+        b=KFtphBTePXst6vLqPvuK1CfhDSFYJXLl4lAEN0Mj2Q43jXBw/1aEgdlQj8imyBzd2
+         7OvaxoOGDIGpPo4+iVt7uSk9HzDt8mfOC9raDIn9nYTDiFQGnC49YtZ9vYFn13BhbS
+         CSW6i52tokICX16L+d7hBZH6H9a4ptUzVI29ax5NspZuhuuCsWOtFR2Idq+oMly2Kt
+         2qkP1QohWQAWh9+4hX/Se6s4elEet6KU3BvusbemSO2dGse+xf9tpfMhMbtM1GBFJc
+         GZbTtpiXDkA3kz+stcKzwweokDo00NoXZv0pyEgxY69HuSxKreymadDKM/FeuD+fjV
+         lI4Unna+N38XQ==
+X-Nifty-SrcIP: [126.90.202.47]
+From:   Masahiro Yamada <masahiroy@kernel.org>
+To:     Ard Biesheuvel <ardb@kernel.org>, linux-efi@vger.kernel.org
+Cc:     Masahiro Yamada <masahiroy@kernel.org>,
+        Arvind Sankar <nivedita@alum.mit.edu>,
+        Atish Patra <atish.patra@wdc.com>,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        Ingo Molnar <mingo@kernel.org>,
+        Kees Cook <keescook@chromium.org>,
+        Will Deacon <will@kernel.org>,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: [PATCH] efi/libstub: refactor Makefile to not use lib-y syntax
+Date:   Wed,  3 Jun 2020 14:33:13 +0900
+Message-Id: <20200603053313.3863761-1-masahiroy@kernel.org>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <202005290131.4B104937C@keescook>
-User-Agent: Mutt/1.9.4 (2018-02-28)
+Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Fri, May 29, 2020 at 01:31:54AM -0700, Kees Cook wrote:
-> On Wed, May 27, 2020 at 12:14:25PM -0500, Gustavo A. R. Silva wrote:
-> > The current codebase makes use of the zero-length array language
-> > extension to the C90 standard, but the preferred mechanism to declare
-> > variable-length types such as these ones is a flexible array member[1][2],
-> > introduced in C99:
-> > 
-> > struct foo {
-> >         int stuff;
-> >         struct boo array[];
-> > };
-> > 
-> > By making use of the mechanism above, we will get a compiler warning
-> > in case the flexible array does not occur last in the structure, which
-> > will help us prevent some kind of undefined behavior bugs from being
-> > inadvertently introduced[3] to the codebase from now on.
-> > 
-> > Also, notice that, dynamic memory allocations won't be affected by
-> > this change:
-> > 
-> > "Flexible array members have incomplete type, and so the sizeof operator
-> > may not be applied. As a quirk of the original implementation of
-> > zero-length arrays, sizeof evaluates to zero."[1]
-> > 
-> > sizeof(flexible-array-member) triggers a warning because flexible array
-> > members have incomplete type[1]. There are some instances of code in
-> > which the sizeof operator is being incorrectly/erroneously applied to
-> > zero-length arrays and the result is zero. Such instances may be hiding
-> > some bugs. So, this work (flexible-array member conversions) will also
-> > help to get completely rid of those sorts of issues.
-> > 
-> > Lastly, make use of the sizeof_field() helper instead of an open-coded
-> > version.
-> > 
-> > This issue was found with the help of Coccinelle and audited _manually_.
-> > 
-> > [1] https://gcc.gnu.org/onlinedocs/gcc/Zero-Length.html
-> > [2] https://github.com/KSPP/linux/issues/21
-> > [3] commit 76497732932f ("cxgb3/l2t: Fix undefined behaviour")
-> > 
-> > Signed-off-by: Gustavo A. R. Silva <gustavoars@kernel.org>
-> 
-> Reviewed-by: Kees Cook <keescook@chromium.org>
-> 
+Documentation/kbuild/makefiles.rst says:
 
-Thanks :)
+  Use of lib-y is normally restricted to `lib/` and `arch/*/lib`.
 
-Please, see more comments below...
+I want to disallow lib-y outside of them.
 
-> > ---
-> >  drivers/firmware/efi/efi.c | 3 ++-
-> >  include/linux/efi.h        | 7 ++-----
-> >  2 files changed, 4 insertions(+), 6 deletions(-)
-> > 
-> > diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-> > index 7f1657b6c30df..edc5d36caf54e 100644
-> > --- a/drivers/firmware/efi/efi.c
-> > +++ b/drivers/firmware/efi/efi.c
-> > @@ -622,7 +622,8 @@ int __init efi_config_parse_tables(const efi_config_table_t *config_tables,
-> >  			rsv = (void *)(p + prsv % PAGE_SIZE);
-> >  
-> >  			/* reserve the entry itself */
-> > -			memblock_reserve(prsv, EFI_MEMRESERVE_SIZE(rsv->size));
-> > +			memblock_reserve(prsv,
-> > +					 struct_size(rsv, entry, rsv->size));
-> >  
-> >  			for (i = 0; i < atomic_read(&rsv->count); i++) {
-> >  				memblock_reserve(rsv->entry[i].base,
-> > diff --git a/include/linux/efi.h b/include/linux/efi.h
-> > index c45ac969ea4eb..328cc52a5fd45 100644
-> > --- a/include/linux/efi.h
-> > +++ b/include/linux/efi.h
-> > @@ -1234,14 +1234,11 @@ struct linux_efi_memreserve {
-> >  	struct {
-> >  		phys_addr_t	base;
-> >  		phys_addr_t	size;
-> > -	} entry[0];
-> > +	} entry[];
-> >  };
-> >  
-> > -#define EFI_MEMRESERVE_SIZE(count) (sizeof(struct linux_efi_memreserve) + \
-> > -	(count) * sizeof(((struct linux_efi_memreserve *)0)->entry[0]))
-> > -
-> >  #define EFI_MEMRESERVE_COUNT(size) (((size) - sizeof(struct linux_efi_memreserve)) \
-> > -	/ sizeof(((struct linux_efi_memreserve *)0)->entry[0]))
-> > +	/ sizeof_field(struct linux_efi_memreserve, entry[0]))
-> 
-> Whoa. This is kind of a "reverse struct_size()". I wonder if any other
-> places in the kernel do a similar calculation?
-> 
+Add a custom rule to build lib.a, which is linked to the decompressor
+for ARCH=x86, ARCH=arm.
 
-So far this is the only intance of this I've run into. 
-
-What I've found is that there are many instances of the open-coded
-version of sizeof_field() and offsetof(). I'm addressing them on the
+For ARCH=arm64, use obj-y to link objects to vmlinux in the ordinary
 way.
 
-Thanks
---
-Gustavo
+Signed-off-by: Masahiro Yamada <masahiroy@kernel.org>
+---
+
+ arch/arm64/Makefile                   |  1 -
+ drivers/firmware/efi/Makefile         |  2 +-
+ drivers/firmware/efi/libstub/Makefile | 51 +++++++++++++++------------
+ 3 files changed, 30 insertions(+), 24 deletions(-)
+
+diff --git a/arch/arm64/Makefile b/arch/arm64/Makefile
+index 650e1185c190..ab79b20efc8d 100644
+--- a/arch/arm64/Makefile
++++ b/arch/arm64/Makefile
+@@ -145,7 +145,6 @@ export	TEXT_OFFSET
+ 
+ core-y		+= arch/arm64/
+ libs-y		:= arch/arm64/lib/ $(libs-y)
+-core-$(CONFIG_EFI_STUB) += $(objtree)/drivers/firmware/efi/libstub/lib.a
+ 
+ # Default target when executing plain make
+ boot		:= arch/arm64/boot
+diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+index 7a216984552b..317a05cd388b 100644
+--- a/drivers/firmware/efi/Makefile
++++ b/drivers/firmware/efi/Makefile
+@@ -20,7 +20,7 @@ obj-$(CONFIG_EFI_VARS_PSTORE)		+= efi-pstore.o
+ obj-$(CONFIG_UEFI_CPER)			+= cper.o
+ obj-$(CONFIG_EFI_RUNTIME_MAP)		+= runtime-map.o
+ obj-$(CONFIG_EFI_RUNTIME_WRAPPERS)	+= runtime-wrappers.o
+-subdir-$(CONFIG_EFI_STUB)		+= libstub
++obj-$(CONFIG_EFI_STUB)			+= libstub/
+ obj-$(CONFIG_EFI_FAKE_MEMMAP)		+= fake_map.o
+ obj-$(CONFIG_EFI_BOOTLOADER_CONTROL)	+= efibc.o
+ obj-$(CONFIG_EFI_TEST)			+= test/
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index cce4a7436052..e4e9b17fa3b2 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -44,7 +44,7 @@ OBJECT_FILES_NON_STANDARD	:= y
+ # Prevents link failures: __sanitizer_cov_trace_pc() is not linked in.
+ KCOV_INSTRUMENT			:= n
+ 
+-lib-y				:= efi-stub-helper.o gop.o secureboot.o tpm.o \
++stub-obj-y			:= efi-stub-helper.o gop.o secureboot.o tpm.o \
+ 				   file.o mem.o random.o randomalloc.o pci.o \
+ 				   skip_spaces.o lib-cmdline.o lib-ctype.o \
+ 				   alignedmem.o relocate.o vsprintf.o
+@@ -55,15 +55,19 @@ efi-deps-y := fdt_rw.c fdt_ro.c fdt_wip.c fdt.c fdt_empty_tree.c fdt_sw.c
+ $(obj)/lib-%.o: $(srctree)/lib/%.c FORCE
+ 	$(call if_changed_rule,cc_o_c)
+ 
+-lib-$(CONFIG_EFI_GENERIC_STUB)	+= efi-stub.o fdt.o string.o \
++stub-obj-$(CONFIG_EFI_GENERIC_STUB)	+= efi-stub.o fdt.o string.o \
+ 				   $(patsubst %.c,lib-%.o,$(efi-deps-y))
+ 
+-lib-$(CONFIG_ARM)		+= arm32-stub.o
+-lib-$(CONFIG_ARM64)		+= arm64-stub.o
+-lib-$(CONFIG_X86)		+= x86-stub.o
++stub-obj-$(CONFIG_ARM)		+= arm32-stub.o
++stub-obj-$(CONFIG_ARM64)	+= arm64-stub.o
++stub-obj-$(CONFIG_X86)		+= x86-stub.o
+ CFLAGS_arm32-stub.o		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
+ CFLAGS_arm64-stub.o		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
+ 
++targets				+= $(stub-obj-y)
++stub-obj-y			:= $(patsubst %.o,%.stub.o, $(stub-obj-y))
++targets				+= $(stub-obj-y)
++
+ #
+ # For x86, bootloaders like systemd-boot or grub-efi do not zero-initialize the
+ # .bss section, so the .bss section of the EFI stub needs to be included in the
+@@ -83,23 +87,6 @@ STUBCOPY_FLAGS-$(CONFIG_ARM)	+= --rename-section .data=.data.efistub	\
+ 				   --rename-section .bss=.bss.efistub,load,alloc
+ STUBCOPY_RELOC-$(CONFIG_ARM)	:= R_ARM_ABS
+ 
+-#
+-# arm64 puts the stub in the kernel proper, which will unnecessarily retain all
+-# code indefinitely unless it is annotated as __init/__initdata/__initconst etc.
+-# So let's apply the __init annotations at the section level, by prefixing
+-# the section names directly. This will ensure that even all the inline string
+-# literals are covered.
+-# The fact that the stub and the kernel proper are essentially the same binary
+-# also means that we need to be extra careful to make sure that the stub does
+-# not rely on any absolute symbol references, considering that the virtual
+-# kernel mapping that the linker uses is not active yet when the stub is
+-# executing. So build all C dependencies of the EFI stub into libstub, and do
+-# a verification pass to see if any absolute relocations exist in any of the
+-# object files.
+-#
+-extra-y				:= $(lib-y)
+-lib-y				:= $(patsubst %.o,%.stub.o,$(lib-y))
+-
+ STUBCOPY_FLAGS-$(CONFIG_ARM64)	+= --prefix-alloc-sections=.init \
+ 				   --prefix-symbols=__efistub_
+ STUBCOPY_RELOC-$(CONFIG_ARM64)	:= R_AARCH64_ABS
+@@ -121,3 +108,23 @@ quiet_cmd_stubcopy = STUBCPY $@
+ 		/bin/false;						\
+ 	fi;								\
+ 	$(OBJCOPY) $(STUBCOPY_FLAGS-y) $< $@
++
++# arm64 puts the stub in the kernel proper, which will unnecessarily retain all
++# code indefinitely unless it is annotated as __init/__initdata/__initconst etc.
++# So let's apply the __init annotations at the section level, by prefixing
++# the section names directly. This will ensure that even all the inline string
++# literals are covered.
++# The fact that the stub and the kernel proper are essentially the same binary
++# also means that we need to be extra careful to make sure that the stub does
++# not rely on any absolute symbol references, considering that the virtual
++# kernel mapping that the linker uses is not active yet when the stub is
++# executing. So build all C dependencies of the EFI stub into libstub, and do
++# a verification pass to see if any absolute relocations exist in any of the
++# object files.
++#
++obj-$(CONFIG_ARM64)		+= $(stub-obj-y)
++extra-$(CONFIG_ARM)		+= lib.a
++extra-$(CONFIG_X86)		+= lib.a
++
++$(obj)/lib.a: $(addprefix $(obj)/, $(stub-obj-y)) FORCE
++	$(call if_changed,ar)
+-- 
+2.25.1
+
