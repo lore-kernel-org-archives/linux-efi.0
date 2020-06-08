@@ -4,40 +4,40 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 54207C433E0
-	for <linux-efi@archiver.kernel.org>; Mon,  8 Jun 2020 23:06:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2FAD6C433DF
+	for <linux-efi@archiver.kernel.org>; Mon,  8 Jun 2020 23:59:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 28AF720774
-	for <linux-efi@archiver.kernel.org>; Mon,  8 Jun 2020 23:06:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0175B2078C
+	for <linux-efi@archiver.kernel.org>; Mon,  8 Jun 2020 23:59:40 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1591657609;
-	bh=B3xFYh7AMdy6830NHmMW9gIz6XlazHF4qwfRiP3z9Wo=;
+	s=default; t=1591660780;
+	bh=MdW3KQHJFjrbPO/7LWBN3FFilQj3utVGrULWCGVyXAU=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=WqRSR9ZN02sE46z06dzEJyJEL7tCYDN1A39B17mF8BN5FKHopDQ7i8hLcN2+OK217
-	 F8ZQmlTgrsmzAVI8afENvN7RmCfW0lmwIy+ZCiniKG12hUqkrOy7Ssn6uyMLtwDOox
-	 XNwfKQNiYx3ODS0bKCXUe9qvcrx24RiGtJpO0Ezk=
+	b=kp+2EKkP9NOiKi10wVd9a4c/X/SJ5tQa2H8ZyxQKfaiaMNUlb05F5cOm33BUZvtLn
+	 MvhrcxOMvp5VUkoW7CPtuyhYC6O5V9GKK61aMDLDVypIGxi1hvzh8nXqqAt76oEKGh
+	 lqHqI1K43/Bcw6v0VIbcHezmK2F0j+IPnnISOSZM=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727074AbgFHXGr (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 8 Jun 2020 19:06:47 -0400
-Received: from mail.kernel.org ([198.145.29.99]:50164 "EHLO mail.kernel.org"
+        id S1729778AbgFHXWw (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 8 Jun 2020 19:22:52 -0400
+Received: from mail.kernel.org ([198.145.29.99]:47740 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727065AbgFHXGq (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 8 Jun 2020 19:06:46 -0400
+        id S1731382AbgFHXWv (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Mon, 8 Jun 2020 19:22:51 -0400
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 56F8120820;
-        Mon,  8 Jun 2020 23:06:44 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 129A2208C7;
+        Mon,  8 Jun 2020 23:22:49 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1591657605;
-        bh=B3xFYh7AMdy6830NHmMW9gIz6XlazHF4qwfRiP3z9Wo=;
+        s=default; t=1591658571;
+        bh=MdW3KQHJFjrbPO/7LWBN3FFilQj3utVGrULWCGVyXAU=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=oKcy2C9BkzC6s21iJyLzYHi6LDHVpBHzYXsesCn/x0B6w5Pafg+wo6zGfhG5Nz2tD
-         zIQqnhqsp1OaAgKysJkfmyzT+Eni5CGqfAAc+wXOJ8X0FB6IU7R3hKbaa8CAZMEFGA
-         2+2zVjrbdLg4UJLqxTkVWXg9fFUp4lVtyaVs9KmA=
+        b=aFzj5DtNBC9rdXAHAq8LBeOGPZJb01xahgIsUFoff3dVSenc1QXKeDd9UuGK7S3X8
+         1RSxH1T1LRlZYYpmDwy3Vy/1aqLyD5j/4wstvYxYL991DTdz+04ebQOkKDDiS8N6oF
+         hSQ62adPTBoe5k8dp8KGBEzYmIVAtp7qzL+Ik0H4=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Ard Biesheuvel <ardb@kernel.org>,
@@ -48,12 +48,12 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>,
         Fangrui Song <maskray@google.com>,
         Sasha Levin <sashal@kernel.org>, linux-efi@vger.kernel.org,
         clang-built-linux@googlegroups.com
-Subject: [PATCH AUTOSEL 5.7 030/274] efi/libstub/x86: Work around LLVM ELF quirk build regression
-Date:   Mon,  8 Jun 2020 19:02:03 -0400
-Message-Id: <20200608230607.3361041-30-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 010/106] efi/libstub/x86: Work around LLVM ELF quirk build regression
+Date:   Mon,  8 Jun 2020 19:21:02 -0400
+Message-Id: <20200608232238.3368589-10-sashal@kernel.org>
 X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20200608230607.3361041-1-sashal@kernel.org>
-References: <20200608230607.3361041-1-sashal@kernel.org>
+In-Reply-To: <20200608232238.3368589-1-sashal@kernel.org>
+References: <20200608232238.3368589-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -95,10 +95,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 1 insertion(+)
 
 diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index 094eabdecfe6..d85016553f14 100644
+index d9845099635e..d3777d754984 100644
 --- a/drivers/firmware/efi/libstub/Makefile
 +++ b/drivers/firmware/efi/libstub/Makefile
-@@ -30,6 +30,7 @@ KBUILD_CFLAGS			:= $(cflags-y) -DDISABLE_BRANCH_PROFILING \
+@@ -28,6 +28,7 @@ KBUILD_CFLAGS			:= $(cflags-y) -DDISABLE_BRANCH_PROFILING \
  				   -D__NO_FORTIFY \
  				   $(call cc-option,-ffreestanding) \
  				   $(call cc-option,-fno-stack-protector) \
