@@ -7,54 +7,49 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B01A3C433E1
-	for <linux-efi@archiver.kernel.org>; Tue,  9 Jun 2020 00:29:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A0D20C433E3
+	for <linux-efi@archiver.kernel.org>; Tue,  9 Jun 2020 00:42:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8BB7F207F9
-	for <linux-efi@archiver.kernel.org>; Tue,  9 Jun 2020 00:29:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7CC732076C
+	for <linux-efi@archiver.kernel.org>; Tue,  9 Jun 2020 00:42:09 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1591662576;
-	bh=W95y8Ods8sBIE/1aomkly//9j4RKagtzuwSQZQnUEfE=;
+	s=default; t=1591663329;
+	bh=7LvtuBEfEARJ4C3bAoCTpWgj4kiNyoFDh4ndTV3l0RA=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=SzMjziUmmTXzXKx4CJjrWH96E1qtv8ozUX1PtRZV7927LUl9nNzz/woVkNcKiY5O9
-	 Ryxthps7F2oQ9aOw+YRXGrgreF6e4+yQMBAWSxL4NfIXUFnstUldb9sYoszMxlTkg8
-	 8KF9JP+NFjwfX8V7xLkbbQtk5OQg+RGzOrQag0Qs=
+	b=B+1fR2e3H3xpgPgmwc3RFSCTsnLDd6OQIEV6ZVHBgXmwxYp0PtQUgE8/wtvbuFRoi
+	 4OO9Cc8phHdVTb4TJAoAIfOiv5YaThIj5p+6/h3mh1LBRQl+TMn9JM+mxGauy/ag51
+	 4Z1HulAcZRa9FKlCOCZh9ySt7YcLg/8HzF7NPqAw=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730688AbgFIA3E (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 8 Jun 2020 20:29:04 -0400
-Received: from mail.kernel.org ([198.145.29.99]:37426 "EHLO mail.kernel.org"
+        id S1729143AbgFHXMd (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 8 Jun 2020 19:12:33 -0400
+Received: from mail.kernel.org ([198.145.29.99]:60090 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729081AbgFHXQK (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 8 Jun 2020 19:16:10 -0400
+        id S1729131AbgFHXMb (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Mon, 8 Jun 2020 19:12:31 -0400
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 6F53D20760;
-        Mon,  8 Jun 2020 23:16:08 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 8035220897;
+        Mon,  8 Jun 2020 23:12:30 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1591658169;
-        bh=W95y8Ods8sBIE/1aomkly//9j4RKagtzuwSQZQnUEfE=;
+        s=default; t=1591657951;
+        bh=7LvtuBEfEARJ4C3bAoCTpWgj4kiNyoFDh4ndTV3l0RA=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=sMxOHJSnoi+DuKBemmiut5G19m9h6gPrxzC3F5CV4HIF+4mRJwY9S9WfgtPIjfCbc
-         m0PQVB4N1AhkL8rPMpHVUnIXeqX3WpLrMY8bZdBpZCCNNlMpmHCVHJjTbMCSUiXs98
-         0cuLlo3Dha9X+uSwkLasM9BNuKpFSjYatt8K2d1w=
+        b=y2ncPrcJyYFmbitGDaC1Z9hSqsiTdmhXiBMyvriO+XKcdR+PoQL8/Ib8sfjfTpsBz
+         anuoUhbIAqFFqUgyMkxxWPBCVdH0X9MEXomtku7knBt+/m5dkH3CCTnJwx/lOb1X/d
+         eXcyh4AwCeVQYmGN0tJORTc5G1GZwDjUSWe6vqxM=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     =?UTF-8?q?Lo=C3=AFc=20Yhuel?= <loic.yhuel@gmail.com>,
-        Javier Martinez Canillas <javierm@redhat.com>,
-        Jerry Snitselaar <jsnitsel@redhat.com>,
-        Matthew Garrett <mjg59@google.com>,
-        Ard Biesheuvel <ardb@kernel.org>,
+Cc:     Linus Torvalds <torvalds@linux-foundation.org>,
         Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         linux-efi@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.6 196/606] tpm: check event log version before reading final events
-Date:   Mon,  8 Jun 2020 19:05:21 -0400
-Message-Id: <20200608231211.3363633-196-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.6 016/606] gcc-10: mark more functions __init to avoid section mismatch warnings
+Date:   Mon,  8 Jun 2020 19:02:21 -0400
+Message-Id: <20200608231211.3363633-16-sashal@kernel.org>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200608231211.3363633-1-sashal@kernel.org>
 References: <20200608231211.3363633-1-sashal@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 X-stable: review
 X-Patchwork-Hint: Ignore
 Content-Transfer-Encoding: 8bit
@@ -63,80 +58,60 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Loïc Yhuel <loic.yhuel@gmail.com>
+From: Linus Torvalds <torvalds@linux-foundation.org>
 
-commit b4f1874c62168159fdb419ced4afc77c1b51c475 upstream.
+commit e99332e7b4cda6e60f5b5916cf9943a79dbef902 upstream.
 
-This fixes the boot issues since 5.3 on several Dell models when the TPM
-is enabled. Depending on the exact grub binary, booting the kernel would
-freeze early, or just report an error parsing the final events log.
+It seems that for whatever reason, gcc-10 ends up not inlining a couple
+of functions that used to be inlined before.  Even if they only have one
+single callsite - it looks like gcc may have decided that the code was
+unlikely, and not worth inlining.
 
-We get an event log in the SHA-1 format, which doesn't have a
-tcg_efi_specid_event_head in the first event, and there is a final events
-table which doesn't match the crypto agile format.
-__calc_tpm2_event_size reads bad "count" and "efispecid->num_algs", and
-either fails, or loops long enough for the machine to be appear frozen.
+The code generation difference is harmless, but caused a few new section
+mismatch errors, since the (now no longer inlined) function wasn't in
+the __init section, but called other init functions:
 
-So we now only parse the final events table, which is per the spec always
-supposed to be in the crypto agile format, when we got a event log in this
-format.
+   Section mismatch in reference from the function kexec_free_initrd() to the function .init.text:free_initrd_mem()
+   Section mismatch in reference from the function tpm2_calc_event_log_size() to the function .init.text:early_memremap()
+   Section mismatch in reference from the function tpm2_calc_event_log_size() to the function .init.text:early_memunmap()
 
-Fixes: c46f3405692de ("tpm: Reserve the TPM final events table")
-Fixes: 166a2809d65b2 ("tpm: Don't duplicate events from the final event log in the TCG2 log")
-Bugzilla: https://bugzilla.redhat.com/show_bug.cgi?id=1779611
-Signed-off-by: Loïc Yhuel <loic.yhuel@gmail.com>
-Link: https://lore.kernel.org/r/20200512040113.277768-1-loic.yhuel@gmail.com
-Reviewed-by: Javier Martinez Canillas <javierm@redhat.com>
-Reviewed-by: Jerry Snitselaar <jsnitsel@redhat.com>
-Reviewed-by: Matthew Garrett <mjg59@google.com>
-[ardb: warn when final events table is missing or in the wrong format]
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+So add the appropriate __init annotation to make modpost not complain.
+In both cases there were trivially just a single callsite from another
+__init function.
+
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
 Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 ---
- drivers/firmware/efi/libstub/tpm.c | 5 +++--
- drivers/firmware/efi/tpm.c         | 5 ++++-
- 2 files changed, 7 insertions(+), 3 deletions(-)
+ drivers/firmware/efi/tpm.c | 2 +-
+ init/initramfs.c           | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/tpm.c b/drivers/firmware/efi/libstub/tpm.c
-index 1d59e103a2e3..e9a684637b70 100644
---- a/drivers/firmware/efi/libstub/tpm.c
-+++ b/drivers/firmware/efi/libstub/tpm.c
-@@ -54,7 +54,7 @@ void efi_retrieve_tpm2_eventlog(void)
- 	efi_status_t status;
- 	efi_physical_addr_t log_location = 0, log_last_entry = 0;
- 	struct linux_efi_tpm_eventlog *log_tbl = NULL;
--	struct efi_tcg2_final_events_table *final_events_table;
-+	struct efi_tcg2_final_events_table *final_events_table = NULL;
- 	unsigned long first_entry_addr, last_entry_addr;
- 	size_t log_size, last_entry_size;
- 	efi_bool_t truncated;
-@@ -127,7 +127,8 @@ void efi_retrieve_tpm2_eventlog(void)
- 	 * Figure out whether any events have already been logged to the
- 	 * final events structure, and if so how much space they take up
- 	 */
--	final_events_table = get_efi_config_table(LINUX_EFI_TPM_FINAL_LOG_GUID);
-+	if (version == EFI_TCG2_EVENT_LOG_FORMAT_TCG_2)
-+		final_events_table = get_efi_config_table(LINUX_EFI_TPM_FINAL_LOG_GUID);
- 	if (final_events_table && final_events_table->nr_events) {
- 		struct tcg_pcr_event2_head *header;
- 		int offset;
 diff --git a/drivers/firmware/efi/tpm.c b/drivers/firmware/efi/tpm.c
-index 55b031d2c989..c1955d320fec 100644
+index 31f9f0e369b9..55b031d2c989 100644
 --- a/drivers/firmware/efi/tpm.c
 +++ b/drivers/firmware/efi/tpm.c
-@@ -62,8 +62,11 @@ int __init efi_tpm_eventlog_init(void)
- 	tbl_size = sizeof(*log_tbl) + log_tbl->size;
- 	memblock_reserve(efi.tpm_log, tbl_size);
+@@ -16,7 +16,7 @@
+ int efi_tpm_final_log_size;
+ EXPORT_SYMBOL(efi_tpm_final_log_size);
  
--	if (efi.tpm_final_log == EFI_INVALID_TABLE_ADDR)
-+	if (efi.tpm_final_log == EFI_INVALID_TABLE_ADDR ||
-+	    log_tbl->version != EFI_TCG2_EVENT_LOG_FORMAT_TCG_2) {
-+		pr_warn(FW_BUG "TPM Final Events table missing or invalid\n");
- 		goto out;
-+	}
+-static int tpm2_calc_event_log_size(void *data, int count, void *size_info)
++static int __init tpm2_calc_event_log_size(void *data, int count, void *size_info)
+ {
+ 	struct tcg_pcr_event2_head *header;
+ 	int event_size, size = 0;
+diff --git a/init/initramfs.c b/init/initramfs.c
+index 8ec1be4d7d51..7a38012e1af7 100644
+--- a/init/initramfs.c
++++ b/init/initramfs.c
+@@ -542,7 +542,7 @@ void __weak free_initrd_mem(unsigned long start, unsigned long end)
+ }
  
- 	final_tbl = early_memremap(efi.tpm_final_log, sizeof(*final_tbl));
- 
+ #ifdef CONFIG_KEXEC_CORE
+-static bool kexec_free_initrd(void)
++static bool __init kexec_free_initrd(void)
+ {
+ 	unsigned long crashk_start = (unsigned long)__va(crashk_res.start);
+ 	unsigned long crashk_end   = (unsigned long)__va(crashk_res.end);
 -- 
 2.25.1
 
