@@ -2,132 +2,89 @@ Return-Path: <SRS0=dvEU=7Y=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-1.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CB609C433E0
-	for <linux-efi@archiver.kernel.org>; Thu, 11 Jun 2020 22:18:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 58469C433DF
+	for <linux-efi@archiver.kernel.org>; Thu, 11 Jun 2020 22:39:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AA60320835
-	for <linux-efi@archiver.kernel.org>; Thu, 11 Jun 2020 22:18:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 256162074B
+	for <linux-efi@archiver.kernel.org>; Thu, 11 Jun 2020 22:39:21 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1591913937;
-	bh=imyi61X0ra1DJYkPhcb95DNLqe+3YOzR5B5jEd+A14Q=;
+	s=default; t=1591915161;
+	bh=HBbpxuPy4IQcGtrkGpRbuKnNpPVCJCSL/JSzmiPB+Hc=;
 	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=CfJnNp/Sx2cpMgSj41PsChXisB67fCFuZrRVNyBvBPEOKdoRfEOahVA9a7V00UqRd
-	 fwojYVGt8piS53URR2SGuIVqyufbNpEo8Q53BD2lUmxLCEm/tOvnv9Q5wxspiJjBUX
-	 UHya4YWmDmTyl81HPUiMMlXd7Jq3jqYCg25GP1M8=
+	b=X6InT6cb6cOJbnNDKCcXhdBeFkN28b1/e+DeDKq5/PMTvnf/H0wQp6njx0J0Cq1Cy
+	 N2SjoXdz3dBf5ERPwdSFvnopxHP652ogxA8NOdXZU0k57r+fD+3BFNK60t2VjW/xy7
+	 7G9XwJkmlT5UDoSdOYRR45opQjBJw6+ko0UKei9A=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726305AbgFKWS5 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 11 Jun 2020 18:18:57 -0400
-Received: from mail.kernel.org ([198.145.29.99]:33430 "EHLO mail.kernel.org"
+        id S1726305AbgFKWjU (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 11 Jun 2020 18:39:20 -0400
+Received: from mail.kernel.org ([198.145.29.99]:53500 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726251AbgFKWS4 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Thu, 11 Jun 2020 18:18:56 -0400
-Received: from mail-oi1-f181.google.com (mail-oi1-f181.google.com [209.85.167.181])
+        id S1726159AbgFKWjU (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Thu, 11 Jun 2020 18:39:20 -0400
+Received: from mail-oo1-f54.google.com (mail-oo1-f54.google.com [209.85.161.54])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id F218220842
-        for <linux-efi@vger.kernel.org>; Thu, 11 Jun 2020 22:18:55 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 110552074B
+        for <linux-efi@vger.kernel.org>; Thu, 11 Jun 2020 22:39:20 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1591913936;
-        bh=imyi61X0ra1DJYkPhcb95DNLqe+3YOzR5B5jEd+A14Q=;
+        s=default; t=1591915160;
+        bh=HBbpxuPy4IQcGtrkGpRbuKnNpPVCJCSL/JSzmiPB+Hc=;
         h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=ILAXCAH8ByjFrgwxHmf7A5T1Dk/6ll22nmOWPbu7/O10zoU3xPqJuExMfjQTEojG3
-         kBJBOap0aPC7TO1TTsNyoNrj635D95vidS2WwvT66W6LVMdWkKLxHeAI2B9EY0raEH
-         JmqEVK/I1XKVz7MHQmFNAv8cH1bsnYhKzJr0+o1M=
-Received: by mail-oi1-f181.google.com with SMTP id a137so6937330oii.3
-        for <linux-efi@vger.kernel.org>; Thu, 11 Jun 2020 15:18:55 -0700 (PDT)
-X-Gm-Message-State: AOAM531GeSXXbuU8YLZFSDHlyEFo5Q02EnPkHN+qm23fknXiIci1/JBC
-        h7L7obvb3ZxTNGlIuCGpKtK5Az1IXTWHvCWSh/k=
-X-Google-Smtp-Source: ABdhPJwrDgwDHsUaFQb+w39G3rWIBANhwcpBILA0tSL2g1bjnKgBiBTM5X1nPV1nywiH2Q5nDslPNwror7sRI/FVjXI=
-X-Received: by 2002:aca:b241:: with SMTP id b62mr125033oif.47.1591913935327;
- Thu, 11 Jun 2020 15:18:55 -0700 (PDT)
+        b=VDm8SveDJ3su8/MsGDMMHmzdTaPVb5WtcLTNer0VucDc+Wt5yrVtuUEHP34MEaVQQ
+         U9Oj6zoWRXmoA/N26OOraDYIl0l6kpXYQb1Ax+tllhlr1I82Ja1VOSC5E7Ck9KhRyJ
+         YtNx35AyegoQWB4DtMs4VD0diqZk3K76A+oMEckc=
+Received: by mail-oo1-f54.google.com with SMTP id k7so1554698ooo.12
+        for <linux-efi@vger.kernel.org>; Thu, 11 Jun 2020 15:39:20 -0700 (PDT)
+X-Gm-Message-State: AOAM53145dLnAnDKE3QOSA2gwQDCGqQUxYQiFpjrhPNP8g7xDbVE/gTX
+        w8xM6LGYw5j+PPfl58G0xzX6X53tpVlPBvgUkf0=
+X-Google-Smtp-Source: ABdhPJxbrTl96LE5CGY5bB/Vvn0p/rGMbXaHS9Yk91JFHuzA0BWVkW8e9wC7xMSczU0L024lUpYVVCAXmzmSzf/bS5U=
+X-Received: by 2002:a4a:896e:: with SMTP id g43mr8468004ooi.13.1591915159403;
+ Thu, 11 Jun 2020 15:39:19 -0700 (PDT)
 MIME-Version: 1.0
 References: <20200607135834.898294-1-ardb@kernel.org> <20200607135834.898294-2-ardb@kernel.org>
  <96a36110-68e1-89e3-2d59-b16f01abae21@gmx.de> <CAMj1kXG9XTtsyLQ=njM8LPCYCE2tOrrYQtctU_acNAxLfe=5oQ@mail.gmail.com>
  <f8a485d2-1e00-1d02-58a4-2e1684bfbfb4@gmx.de> <CAMj1kXGLoKDLJAihThkkcYwNpr12inneEB3dMOqvcZFm9oR5_w@mail.gmail.com>
-In-Reply-To: <CAMj1kXGLoKDLJAihThkkcYwNpr12inneEB3dMOqvcZFm9oR5_w@mail.gmail.com>
+ <CAMj1kXFjuMy6+amsMmmepkNATCec4vsxeiVVFq9CFZ64wbmGaA@mail.gmail.com> <20200611223800.GZ1551@shell.armlinux.org.uk>
+In-Reply-To: <20200611223800.GZ1551@shell.armlinux.org.uk>
 From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Fri, 12 Jun 2020 00:18:43 +0200
-X-Gmail-Original-Message-ID: <CAMj1kXFjuMy6+amsMmmepkNATCec4vsxeiVVFq9CFZ64wbmGaA@mail.gmail.com>
-Message-ID: <CAMj1kXFjuMy6+amsMmmepkNATCec4vsxeiVVFq9CFZ64wbmGaA@mail.gmail.com>
+Date:   Fri, 12 Jun 2020 00:39:08 +0200
+X-Gmail-Original-Message-ID: <CAMj1kXE+y=Q+-wZaPT6ap278OfP2wbBM3CCvyHCL9K=AaBbO=A@mail.gmail.com>
+Message-ID: <CAMj1kXE+y=Q+-wZaPT6ap278OfP2wbBM3CCvyHCL9K=AaBbO=A@mail.gmail.com>
 Subject: Re: [PATCH v2 1/2] efi/arm: decompressor: deal with HYP mode boot gracefully
-To:     Heinrich Schuchardt <xypron.glpk@gmx.de>
-Cc:     linux-efi <linux-efi@vger.kernel.org>,
+To:     Russell King - ARM Linux admin <linux@armlinux.org.uk>
+Cc:     Heinrich Schuchardt <xypron.glpk@gmx.de>,
+        linux-efi <linux-efi@vger.kernel.org>,
         Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Marc Zyngier <maz@kernel.org>,
-        Russell King <linux@armlinux.org.uk>,
-        Chen-Yu Tsai <wens@csie.org>
+        Marc Zyngier <maz@kernel.org>, Chen-Yu Tsai <wens@csie.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, 9 Jun 2020 at 09:58, Ard Biesheuvel <ardb@kernel.org> wrote:
+On Fri, 12 Jun 2020 at 00:38, Russell King - ARM Linux admin
+<linux@armlinux.org.uk> wrote:
 >
-> On Mon, 8 Jun 2020 at 12:46, Heinrich Schuchardt <xypron.glpk@gmx.de> wrote:
+> On Fri, Jun 12, 2020 at 12:18:43AM +0200, Ard Biesheuvel wrote:
+> > I've given this a spin myself on a RPi4 running 32-bit U-boot, and
+> > everything works as expected, both with and without the GRUB hack
+> > enabled.
 > >
-> > On 6/8/20 1:08 AM, Ard Biesheuvel wrote:
-> > > On Sun, 7 Jun 2020 at 19:24, Heinrich Schuchardt <xypron.glpk@gmx.de> wrote:
-> > >>
-> > >> On 6/7/20 3:58 PM, Ard Biesheuvel wrote:
-> > >>> EFI on ARM only supports short descriptors, and given that it mandates
-> > >>> that the MMU and caches are on, it is implied that booting in HYP mode
-> > >>> is not supported.
-> > >>>
-> > >>> However, implementations of EFI exist (i.e., U-Boot) that ignore this
-> > >>> requirement, which is not entirely unreasonable, given that it makes
-> > >>> HYP mode inaccessible to the operating system.
-> > >>>
-> > >>> So let's make sure that we can deal with this condition gracefully.
-> > >>> We already tolerate booting the EFI stub with the caches off (even
-> > >>> though this violates the EFI spec as well), and so we should deal
-> > >>> with HYP mode boot with MMU and caches either on or off.
-> > >>>
-> > >>> - When the MMU and caches are on, we can ignore the HYP stub altogether,
-> > >>>   since we can carry on executing at HYP. We do need to ensure that we
-> > >>>   disable the MMU at HYP before entering the kernel proper.
-> > >>>
-> > >>> - When the MMU and caches are off, we have to drop to SVC mode so that
-> > >>>   we can set up the page tables using short descriptors. In this case,
-> > >>>   we need to install the HYP stub as usual, so that we can return to HYP
-> > >>>   mode before handing over to the kernel proper.
-> ...
-> >
-> > Hello Ard,
-> >
-> > thanks for supplying a branch for testing:
-> > https://git.kernel.org/pub/scm/linux/kernel/git/ardb/linux.git/log/?h=efi-arm-hyp-mode
-> >
-> > The OrangePi PC boots fine with this branch. PSCI is enabled. Rebooting
-> > the system works fine. See log below.
-> >
-> > With the patch 2/2 you add an output line for the exceptions level and
-> > the MMU status. Above you state "We already tolerate booting the EFI
-> > stub with the caches off." This relates to a workaround in U-Boot
-> > accomodating old GRUB versions (CONFIG_EFI_GRUB_ARM32_WORKAROUND=y).
-> >
-> > Would a further diagnostic line showing if D-cache and I-cache is
-> > enabled make sense?
-> >
-> > Tested-by: Heinrich Schuchardt <xypron.glpk@gmx.de>
-> >
-> > Loading Linux 5.7.0-armmp-lpae+ ...
-> > Loading initial ramdisk ...
-> > EFI stub: Running in HYP mode with MMU enabled
+> > Russell, given that this only affects code inside #ifdef
+> > CONFIG_EFI_STUB, do you have any objections to me taking this as a fix
+> > via the EFI tree? I have a set of fixes I need to queue up and send
+> > out anyway, and I intend to do so early next week.
 >
-> BTW is this with or without the GRUB hack?
+> Please don't, I'll be basing my branches off -rc1 (as normal), and if
+> you then submit this as a fix through the EFI tree for merging after
+> rc1, and then send me further EFI work to go through the ARM tree,
+> we'll end up in exactly the same merge issues as we did prior to this
+> merge window.
 >
 
-I've given this a spin myself on a RPi4 running 32-bit U-boot, and
-everything works as expected, both with and without the GRUB hack
-enabled.
-
-Russell, given that this only affects code inside #ifdef
-CONFIG_EFI_STUB, do you have any objections to me taking this as a fix
-via the EFI tree? I have a set of fixes I need to queue up and send
-out anyway, and I intend to do so early next week.
+Fair enough. What do you suggest instead? Shall I drop this into the
+patch system?
