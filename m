@@ -1,104 +1,117 @@
-Return-Path: <SRS0=Vmbk=73=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=UBjk=74=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E582DC433E0
-	for <linux-efi@archiver.kernel.org>; Sun, 14 Jun 2020 12:17:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ADB4FC433E0
+	for <linux-efi@archiver.kernel.org>; Mon, 15 Jun 2020 07:16:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C181A2078A
-	for <linux-efi@archiver.kernel.org>; Sun, 14 Jun 2020 12:17:32 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1592137052;
-	bh=sMT8XEhGW2sO5PvBxbDB4VNMHLRFCs6JUU+119mvjRY=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=zD/krKwn4rMrmBBSBrF4IMwRPcgGHsJmR2+lUud2OHAJL+2Z4AlOFyRpijJNUG0Ml
-	 iu+kc2DM/KMPdE+ib8R2YeoSf/dkuH39XQwMCBFVPWirqFY2EDEaRm8+a/G4brh6Ad
-	 M+9z+xlTzi19MWjcoZA5nBZ51vedAkLPJG1mwEAY=
+	by mail.kernel.org (Postfix) with ESMTP id 8AA01206D7
+	for <linux-efi@archiver.kernel.org>; Mon, 15 Jun 2020 07:16:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727079AbgFNMRc (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 14 Jun 2020 08:17:32 -0400
-Received: from mail.kernel.org ([198.145.29.99]:54608 "EHLO mail.kernel.org"
+        id S1728369AbgFOHQj (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 15 Jun 2020 03:16:39 -0400
+Received: from mx2.suse.de ([195.135.220.15]:53718 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726981AbgFNMRc (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Sun, 14 Jun 2020 08:17:32 -0400
-Received: from mail-ot1-f47.google.com (mail-ot1-f47.google.com [209.85.210.47])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id E987D20747
-        for <linux-efi@vger.kernel.org>; Sun, 14 Jun 2020 12:17:31 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1592137052;
-        bh=sMT8XEhGW2sO5PvBxbDB4VNMHLRFCs6JUU+119mvjRY=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=mQyqlVde19i4X7ptWYHDqqBAHyJ98OjNdASJbGhBp4zYB72SNuLeUsGsnCsi/Mjvl
-         GUbzjvaCEAd6N3q5q1mNKimh+EZVeeWqi1DlPalCNW993h8YUyA7xA63gcN3hZHoFZ
-         lB8KI9sFxwD5hKqlM9u5H8BkYkWoTryR6907ABCA=
-Received: by mail-ot1-f47.google.com with SMTP id s13so10945446otd.7
-        for <linux-efi@vger.kernel.org>; Sun, 14 Jun 2020 05:17:31 -0700 (PDT)
-X-Gm-Message-State: AOAM5317ZU+z/fi1RZAkbUoYatAdGNSjrUKkHat24yZ5m9ouDaGmpe66
-        aVRTi7lE1oR0TQrqJApyJ79xuZpVHldmOvXLNSI=
-X-Google-Smtp-Source: ABdhPJyHo+mRpBFV5ZF2Vmjz9NdM3kTRqCnLObB60HsJJA76yt+KEpW2QKMZzEX9ddi4Z8G5eteZ7n2HIRObkzVjlVY=
-X-Received: by 2002:a9d:476:: with SMTP id 109mr18949930otc.77.1592137051316;
- Sun, 14 Jun 2020 05:17:31 -0700 (PDT)
+        id S1726299AbgFOHQj (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Mon, 15 Jun 2020 03:16:39 -0400
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id 4FC28AEB2;
+        Mon, 15 Jun 2020 07:16:41 +0000 (UTC)
+From:   Fabian Vogt <fvogt@suse.de>
+To:     linux-efi <linux-efi@vger.kernel.org>
+Cc:     Ard Biesheuvel <ardb@kernel.org>, "Lee, Chun-Yi" <jlee@suse.com>,
+        =?ISO-8859-1?Q?Lo=EFc?= Yhuel <loic.yhuel@gmail.com>,
+        Matthew Garrett <matthewgarrett@google.com>,
+        Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
+Subject: [PATCH v2] tpm: verify that it's actually an event log header before  parsing
+Date:   Mon, 15 Jun 2020 09:16:36 +0200
+Message-ID: <1927248.evlx2EsYKh@linux-e202.suse.de>
 MIME-Version: 1.0
-References: <1592135130-4013-1-git-send-email-lingshan.zhu@intel.com>
-In-Reply-To: <1592135130-4013-1-git-send-email-lingshan.zhu@intel.com>
-From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Sun, 14 Jun 2020 14:17:20 +0200
-X-Gmail-Original-Message-ID: <CAMj1kXGqgYm2SjRo3v1k8MBMNnZMBAMofNRgwKVnbrkX0Bd33g@mail.gmail.com>
-Message-ID: <CAMj1kXGqgYm2SjRo3v1k8MBMNnZMBAMofNRgwKVnbrkX0Bd33g@mail.gmail.com>
-Subject: Re: [PATCH] efi: fix errors in building: requires -maccumulate-outgoing-args
-To:     Zhu Lingshan <lingshan.zhu@intel.com>
-Cc:     linux-efi <linux-efi@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="us-ascii"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Sun, 14 Jun 2020 at 13:49, Zhu Lingshan <lingshan.zhu@intel.com> wrote:
->
-> when build kernel with default config, efi/libstub won't build,
-> complain: sorry, unimplemented: ms_abi attribute
-> requires -maccumulate-outgoing-args or subtarget optimization
-> implying it
->
-> This commit intends to add -maccumulate-outgoing-args to Makefile
-> cflags, make builder happy.
->
-> Signed-off-by: Zhu Lingshan <lingshan.zhu@intel.com>
+It's possible that the first event in the log is not actually a log
+header at all, but rather a normal event. This leads to the cast in
+__calc_tpm2_event_size being an invalid conversion, which means that
+the values read are effectively garbage. Depending on the first event's
+contents, this leads either to apparently normal behaviour, a crash or
+a freeze.
 
-Thank you Zhu. You are number #4 to report this to the linux-efi
-mailing list, and a fix was already suggested.
+While this behaviour of the firmware is not in accordance with the
+TCG Client EFI Specification, this happens on a Dell Precision 5510
+with the TPM enabled but hidden from the OS ("TPM On" disabled, state
+otherwise untouched). The EFI claims that the TPM is present and active
+and supports the TCG 2.0 event log format.
 
-https://lore.kernel.org/linux-efi/20200605150638.1011637-1-nivedita@alum.mit.edu/
+Fortunately, this can be worked around by simply checking the header
+of the first event and the event log header signature itself.
 
-Upgrading to something more recent than GCC 4.8 could be another
-workaround, if that is an option for you. The fix should hopefully be
-in by -rc2
+Commit b4f1874c6216 ("tpm: check event log version before reading final
+events") addressed a similar issue also found on Dell models.
+
+Fixes: 6b0326190205 ("efi: Attempt to get the TCG2 event log in the boot stub")
+Bugzilla: https://bugzilla.suse.com/show_bug.cgi?id=1165773
+Signed-off-by: Fabian Vogt <fvogt@suse.de>
+---
+v2: Drop unneeded READ_ONCE around event_header derefs.
+
+ include/linux/tpm_eventlog.h | 14 +++++++++++++-
+ 1 file changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/include/linux/tpm_eventlog.h b/include/linux/tpm_eventlog.h
+index 4f8c90c93c29..64356b199e94 100644
+--- a/include/linux/tpm_eventlog.h
++++ b/include/linux/tpm_eventlog.h
+@@ -81,6 +81,8 @@ struct tcg_efi_specid_event_algs {
+ 	u16 digest_size;
+ } __packed;
+ 
++#define TCG_SPECID_SIG "Spec ID Event03"
++
+ struct tcg_efi_specid_event_head {
+ 	u8 signature[16];
+ 	u32 platform_class;
+@@ -171,6 +173,7 @@ static inline int __calc_tpm2_event_size(struct tcg_pcr_event2_head *event,
+ 	int i;
+ 	int j;
+ 	u32 count, event_type;
++	const u8 zero_digest[sizeof(event_header->digest)] = {0};
+ 
+ 	marker = event;
+ 	marker_start = marker;
+@@ -198,10 +201,19 @@ static inline int __calc_tpm2_event_size(struct tcg_pcr_event2_head *event,
+ 	count = READ_ONCE(event->count);
+ 	event_type = READ_ONCE(event->event_type);
+ 
++	/* Verify that it's the log header */
++	if (event_header->pcr_idx != 0 ||
++	    event_header->event_type != NO_ACTION ||
++	    memcmp(event_header->digest, zero_digest, sizeof(zero_digest))) {
++		size = 0;
++		goto out;
++	}
++
+ 	efispecid = (struct tcg_efi_specid_event_head *)event_header->event;
+ 
+ 	/* Check if event is malformed. */
+-	if (count > efispecid->num_algs) {
++	if (memcmp(efispecid->signature, TCG_SPECID_SIG,
++		   sizeof(TCG_SPECID_SIG)) || count > efispecid->num_algs) {
+ 		size = 0;
+ 		goto out;
+ 	}
+-- 
+2.25.1
 
 
-> ---
->  drivers/firmware/efi/libstub/Makefile | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-> index 75daaf2..a4541b2 100644
-> --- a/drivers/firmware/efi/libstub/Makefile
-> +++ b/drivers/firmware/efi/libstub/Makefile
-> @@ -6,7 +6,7 @@
->  # enabled, even if doing so doesn't break the build.
->  #
->  cflags-$(CONFIG_X86_32)                := -march=i386
-> -cflags-$(CONFIG_X86_64)                := -mcmodel=small
-> +cflags-$(CONFIG_X86_64)                := -mcmodel=small -maccumulate-outgoing-args
->  cflags-$(CONFIG_X86)           += -m$(BITS) -D__KERNEL__ \
->                                    -fPIC -fno-strict-aliasing -mno-red-zone \
->                                    -mno-mmx -mno-sse -fshort-wchar \
-> --
-> 1.8.3.1
->
+
+
