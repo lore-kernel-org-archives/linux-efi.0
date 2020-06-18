@@ -2,160 +2,149 @@ Return-Path: <SRS0=kY0h=77=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.9 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	LONGWORDS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.7 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 315F7C433E0
-	for <linux-efi@archiver.kernel.org>; Thu, 18 Jun 2020 04:59:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1806FC433E0
+	for <linux-efi@archiver.kernel.org>; Thu, 18 Jun 2020 11:58:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 16C0F21883
-	for <linux-efi@archiver.kernel.org>; Thu, 18 Jun 2020 04:59:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F250B20706
+	for <linux-efi@archiver.kernel.org>; Thu, 18 Jun 2020 11:58:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726220AbgFRE7J (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 18 Jun 2020 00:59:09 -0400
-Received: from mga09.intel.com ([134.134.136.24]:62534 "EHLO mga09.intel.com"
+        id S1727922AbgFRL6n (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 18 Jun 2020 07:58:43 -0400
+Received: from mga01.intel.com ([192.55.52.88]:28577 "EHLO mga01.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725892AbgFRE7J (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Thu, 18 Jun 2020 00:59:09 -0400
-IronPort-SDR: D61boK8TUmp3DRUWU6GaCQXJrN4ua11S08HEIt0rSSfHCXn4a1E80S3e5aNz5N+EAeKWDatPvJ
- hf1Z2RlveB0A==
-X-IronPort-AV: E=McAfee;i="6000,8403,9655"; a="143945317"
-X-IronPort-AV: E=Sophos;i="5.73,525,1583222400"; 
-   d="scan'208";a="143945317"
+        id S1726958AbgFRL6n (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Thu, 18 Jun 2020 07:58:43 -0400
+IronPort-SDR: i4y/Xs1zJdZP+AcTRpWFh5YT21eUBeGgqeZ76vKSfBaT+WIkn5nmDmFxeOZbrqFfqLWlqxTWrp
+ EZMRhh582XDA==
+X-IronPort-AV: E=McAfee;i="6000,8403,9655"; a="160639092"
+X-IronPort-AV: E=Sophos;i="5.73,526,1583222400"; 
+   d="scan'208";a="160639092"
 X-Amp-Result: SKIPPED(no attachment in message)
 X-Amp-File-Uploaded: False
-Received: from orsmga007.jf.intel.com ([10.7.209.58])
-  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Jun 2020 21:59:07 -0700
-IronPort-SDR: WW1Il2VLt6dOrtyu/wl/UmbszEQ3cM1WZBJy0m0aLnsklETgBYB5gz2BegSTKIC/uUf0jGyz7H
- Sj7KP3BcNukw==
+Received: from fmsmga003.fm.intel.com ([10.253.24.29])
+  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Jun 2020 04:58:42 -0700
+IronPort-SDR: UibvuRw/ZqmkSiHgNUM8TeuCsy55NldQuq87CSsfs6d0/u/ZH69YfkwvV8aNahOE35lRvOoCBI
+ Ho5eU1cMk51g==
 X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.73,525,1583222400"; 
-   d="scan'208";a="262798119"
-Received: from lkp-server02.sh.intel.com (HELO 5ce11009e457) ([10.239.97.151])
-  by orsmga007.jf.intel.com with ESMTP; 17 Jun 2020 21:59:06 -0700
-Received: from kbuild by 5ce11009e457 with local (Exim 4.92)
-        (envelope-from <lkp@intel.com>)
-        id 1jlmdl-00004o-Qy; Thu, 18 Jun 2020 04:59:05 +0000
-Date:   Thu, 18 Jun 2020 12:58:54 +0800
-From:   kernel test robot <lkp@intel.com>
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     linux-efi@vger.kernel.org
-Subject: [efi:urgent] BUILD SUCCESS
- 2a55280a3675203496d302463b941834228b9875
-Message-ID: <5eeaf48e.1cMPpkd63W/dO/Q4%lkp@intel.com>
-User-Agent: Heirloom mailx 12.5 6/20/10
+X-IronPort-AV: E=Sophos;i="5.73,526,1583222400"; 
+   d="scan'208";a="317806569"
+Received: from smile.fi.intel.com (HELO smile) ([10.237.68.40])
+  by FMSMGA003.fm.intel.com with ESMTP; 18 Jun 2020 04:58:41 -0700
+Received: from andy by smile with local (Exim 4.94)
+        (envelope-from <andriy.shevchenko@linux.intel.com>)
+        id 1jltBs-00EG4v-2d; Thu, 18 Jun 2020 14:58:44 +0300
+Date:   Thu, 18 Jun 2020 14:58:44 +0300
+From:   Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+To:     Ard Biesheuvel <ardb@kernel.org>, linux-efi@vger.kernel.org
+Cc:     Lukas Wunner <lukas@wunner.de>
+Subject: Re: [PATCH v2] efi/dev-path-parser: Switch to
+ acpi_dev_get_first_match_dev()
+Message-ID: <20200618115844.GS2428291@smile.fi.intel.com>
+References: <20200529130822.52370-1-andriy.shevchenko@linux.intel.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+In-Reply-To: <20200529130822.52370-1-andriy.shevchenko@linux.intel.com>
+Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-tree/branch: https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git  urgent
-branch HEAD: 2a55280a3675203496d302463b941834228b9875  efi/libstub: arm: Print CPU boot mode and MMU state at boot
+On Fri, May 29, 2020 at 04:08:22PM +0300, Andy Shevchenko wrote:
+> The acpi_dev_get_first_match_dev() helper will find and return
+> an ACPI device pointer of the first registered device in the system
+> by its HID and UID (if present). Use it instead of open coded variant.
 
-elapsed time: 720m
+Lukas, any comment on this?
 
-configs tested: 91
-configs skipped: 1
+> Cc: Lukas Wunner <lukas@wunner.de>
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+> ---
+> v2: added Lukas to Cc (Ard), updated condition to handle UID=0 case
+>  drivers/firmware/efi/dev-path-parser.c | 43 +++++++++-----------------
+>  1 file changed, 14 insertions(+), 29 deletions(-)
+> 
+> diff --git a/drivers/firmware/efi/dev-path-parser.c b/drivers/firmware/efi/dev-path-parser.c
+> index 5c9625e552f4..d3e5123ab618 100644
+> --- a/drivers/firmware/efi/dev-path-parser.c
+> +++ b/drivers/firmware/efi/dev-path-parser.c
+> @@ -12,51 +12,36 @@
+>  #include <linux/efi.h>
+>  #include <linux/pci.h>
+>  
+> -struct acpi_hid_uid {
+> -	struct acpi_device_id hid[2];
+> -	char uid[11]; /* UINT_MAX + null byte */
+> -};
+> -
+> -static int __init match_acpi_dev(struct device *dev, const void *data)
+> -{
+> -	struct acpi_hid_uid hid_uid = *(const struct acpi_hid_uid *)data;
+> -	struct acpi_device *adev = to_acpi_device(dev);
+> -
+> -	if (acpi_match_device_ids(adev, hid_uid.hid))
+> -		return 0;
+> -
+> -	if (adev->pnp.unique_id)
+> -		return !strcmp(adev->pnp.unique_id, hid_uid.uid);
+> -	else
+> -		return !strcmp("0", hid_uid.uid);
+> -}
+> -
+>  static long __init parse_acpi_path(const struct efi_dev_path *node,
+>  				   struct device *parent, struct device **child)
+>  {
+> -	struct acpi_hid_uid hid_uid = {};
+> +	char hid[3 + 4 + 1];	/* 3 characters + 4 hex digits + null byte */
+> +	char uid[10 + 1];	/* UINT_MAX + null byte */
+> +	struct acpi_device *adev;
+>  	struct device *phys_dev;
+>  
+>  	if (node->header.length != 12)
+>  		return -EINVAL;
+>  
+> -	sprintf(hid_uid.hid[0].id, "%c%c%c%04X",
+> +	sprintf(hid, "%c%c%c%04X",
+>  		'A' + ((node->acpi.hid >> 10) & 0x1f) - 1,
+>  		'A' + ((node->acpi.hid >>  5) & 0x1f) - 1,
+>  		'A' + ((node->acpi.hid >>  0) & 0x1f) - 1,
+>  			node->acpi.hid >> 16);
+> -	sprintf(hid_uid.uid, "%u", node->acpi.uid);
+> +	sprintf(uid, "%u", node->acpi.uid);
+>  
+> -	*child = bus_find_device(&acpi_bus_type, NULL, &hid_uid,
+> -				 match_acpi_dev);
+> -	if (!*child)
+> +	adev = acpi_dev_get_first_match_dev(hid, uid, -1);
+> +	if (!adev && !node->acpi.uid)
+> +		adev = acpi_dev_get_first_match_dev(hid, NULL, -1);
+> +	if (!adev)
+>  		return -ENODEV;
+>  
+> -	phys_dev = acpi_get_first_physical_node(to_acpi_device(*child));
+> +	phys_dev = acpi_get_first_physical_node(adev);
+>  	if (phys_dev) {
+> -		get_device(phys_dev);
+> -		put_device(*child);
+> -		*child = phys_dev;
+> +		*child = get_device(phys_dev);
+> +		acpi_dev_put(adev);
+> +	} else {
+> +		*child = &adev->dev;
+>  	}
+>  
+>  	return 0;
+> -- 
+> 2.26.2
+> 
 
-The following configs have been built successfully.
-More configs may be tested in the coming days.
+-- 
+With Best Regards,
+Andy Shevchenko
 
-arm64                            allyesconfig
-arm64                               defconfig
-arm64                            allmodconfig
-arm64                             allnoconfig
-arm                                 defconfig
-arm                              allyesconfig
-arm                              allmodconfig
-arm                               allnoconfig
-sh                          polaris_defconfig
-arm                         bcm2835_defconfig
-ia64                                defconfig
-parisc                generic-64bit_defconfig
-arm                       spear13xx_defconfig
-arc                          axs103_defconfig
-i386                             allyesconfig
-i386                                defconfig
-i386                              debian-10.3
-i386                              allnoconfig
-ia64                             allmodconfig
-ia64                              allnoconfig
-ia64                             allyesconfig
-m68k                             allmodconfig
-m68k                              allnoconfig
-m68k                           sun3_defconfig
-m68k                                defconfig
-m68k                             allyesconfig
-nios2                               defconfig
-nios2                            allyesconfig
-openrisc                            defconfig
-c6x                              allyesconfig
-c6x                               allnoconfig
-openrisc                         allyesconfig
-nds32                               defconfig
-nds32                             allnoconfig
-csky                             allyesconfig
-csky                                defconfig
-alpha                               defconfig
-alpha                            allyesconfig
-xtensa                           allyesconfig
-h8300                            allyesconfig
-h8300                            allmodconfig
-xtensa                              defconfig
-arc                                 defconfig
-arc                              allyesconfig
-sh                               allmodconfig
-sh                                allnoconfig
-microblaze                        allnoconfig
-mips                             allyesconfig
-mips                              allnoconfig
-mips                             allmodconfig
-parisc                            allnoconfig
-parisc                              defconfig
-parisc                           allyesconfig
-parisc                           allmodconfig
-powerpc                             defconfig
-powerpc                          allyesconfig
-powerpc                          rhel-kconfig
-powerpc                          allmodconfig
-powerpc                           allnoconfig
-i386                 randconfig-a015-20200617
-i386                 randconfig-a011-20200617
-i386                 randconfig-a014-20200617
-i386                 randconfig-a016-20200617
-i386                 randconfig-a013-20200617
-i386                 randconfig-a012-20200617
-riscv                            allyesconfig
-riscv                             allnoconfig
-riscv                               defconfig
-riscv                            allmodconfig
-s390                             allyesconfig
-s390                              allnoconfig
-s390                             allmodconfig
-s390                                defconfig
-sparc                            allyesconfig
-sparc                               defconfig
-sparc64                             defconfig
-sparc64                           allnoconfig
-sparc64                          allyesconfig
-sparc64                          allmodconfig
-um                               allmodconfig
-um                                allnoconfig
-um                               allyesconfig
-um                                  defconfig
-x86_64                                   rhel
-x86_64                         rhel-7.2-clear
-x86_64                                    lkp
-x86_64                              fedora-25
-x86_64                               rhel-7.6
-x86_64                    rhel-7.6-kselftests
-x86_64                               rhel-8.3
-x86_64                                  kexec
 
----
-0-DAY CI Kernel Test Service, Intel Corporation
-https://lists.01.org/hyperkitty/list/kbuild-all@lists.01.org
