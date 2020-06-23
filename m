@@ -1,103 +1,76 @@
-Return-Path: <SRS0=kY0h=77=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=Spkt=AE=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.0 required=3.0
+	tests=HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C59B0C433DF
-	for <linux-efi@archiver.kernel.org>; Thu, 18 Jun 2020 20:43:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C74DC433E0
+	for <linux-efi@archiver.kernel.org>; Tue, 23 Jun 2020 15:09:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A8103208C3
-	for <linux-efi@archiver.kernel.org>; Thu, 18 Jun 2020 20:43:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4D69B20776
+	for <linux-efi@archiver.kernel.org>; Tue, 23 Jun 2020 15:09:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726278AbgFRUn2 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 18 Jun 2020 16:43:28 -0400
-Received: from mail-qk1-f194.google.com ([209.85.222.194]:40201 "EHLO
-        mail-qk1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730804AbgFRUnT (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 18 Jun 2020 16:43:19 -0400
-Received: by mail-qk1-f194.google.com with SMTP id c185so6946460qke.7
-        for <linux-efi@vger.kernel.org>; Thu, 18 Jun 2020 13:43:18 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=aFaPMB2tSBxEdI9eNZVWz8iq1mr37AhdNy5TZMgC9BU=;
-        b=ewUNP3U2adgW7nF2S5rTT0yQG/rbCNhTj+pqB31okvkzLOUbkn73VWtILqsPr2ecnc
-         SSYJOk/JQB8vejjB84RgBHkvCn9LJQERxgD7Ny01i3/BLT6J269PF/ThdJlZm4I4sSjf
-         y7MeTZTAgcDOsU5H311wD2aKPVuNrKPetoXYgs04rfJ22ba6mBdHYcSFfY6oZdrPWeAs
-         Oj+Uzgirr3Jwn/hEflp8Uv2IfJpCXZPTusdPm5zanfBVtj9KSuobmmn3MJL9snlfy3YQ
-         l1kMk7tMJnRH0JPYp6nGMsw4yAmY/7tNCfsgqkhM6kiT/BliSAt/4iNoIDtLU2mFW6xk
-         jFOQ==
-X-Gm-Message-State: AOAM532IBYEO5zvBJr0a9zeDFDFIFnFZjT3/ro08qOpuLme6gUP9JyUH
-        nMs1UhyalWA5QSw3s50TMwG66lCA
-X-Google-Smtp-Source: ABdhPJyCeD9MPufQogTXzVPLkFRK5wnDyIviiiuOmZS6rIKZ9gKK/ItcfWQLG+34Ps40lrB6vx5RZQ==
-X-Received: by 2002:a37:7786:: with SMTP id s128mr241244qkc.315.1592512997568;
-        Thu, 18 Jun 2020 13:43:17 -0700 (PDT)
-Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
-        by smtp.gmail.com with ESMTPSA id l56sm4920451qtl.33.2020.06.18.13.43.16
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 18 Jun 2020 13:43:16 -0700 (PDT)
-From:   Arvind Sankar <nivedita@alum.mit.edu>
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     linux-efi@vger.kernel.org
-Subject: [PATCH] efi/x86: Only copy upto the end of setup_header
-Date:   Thu, 18 Jun 2020 16:43:15 -0400
-Message-Id: <20200618204315.3854787-1-nivedita@alum.mit.edu>
-X-Mailer: git-send-email 2.26.2
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+        id S1732910AbgFWPJn (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 23 Jun 2020 11:09:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60754 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1732908AbgFWPJm (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 23 Jun 2020 11:09:42 -0400
+Received: from laurent.telenet-ops.be (laurent.telenet-ops.be [IPv6:2a02:1800:110:4::f00:19])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8F6E9C061755
+        for <linux-efi@vger.kernel.org>; Tue, 23 Jun 2020 08:09:42 -0700 (PDT)
+Received: from ramsan ([IPv6:2a02:1810:ac12:ed20:26:93a1:ff06:f8b0])
+        by laurent.telenet-ops.be with bizsmtp
+        id uf9h220034qCYS801f9hoj; Tue, 23 Jun 2020 17:09:41 +0200
+Received: from rox.of.borg ([192.168.97.57])
+        by ramsan with esmtp (Exim 4.90_1)
+        (envelope-from <geert@linux-m68k.org>)
+        id 1jnkYO-0007jy-TP; Tue, 23 Jun 2020 17:09:40 +0200
+Received: from geert by rox.of.borg with local (Exim 4.90_1)
+        (envelope-from <geert@linux-m68k.org>)
+        id 1jnkYO-0008Nr-Qd; Tue, 23 Jun 2020 17:09:40 +0200
+From:   Geert Uytterhoeven <geert+renesas@glider.be>
+To:     Ard Biesheuvel <ardb@kernel.org>, Ingo Molnar <mingo@kernel.org>,
+        Arvind Sankar <nivedita@alum.mit.edu>
+Cc:     linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Geert Uytterhoeven <geert+renesas@glider.be>
+Subject: [PATCH] efi/libstub: EFI_GENERIC_STUB_INITRD_CMDLINE_LOADER should not default to yes
+Date:   Tue, 23 Jun 2020 17:09:35 +0200
+Message-Id: <20200623150935.32181-1-geert+renesas@glider.be>
+X-Mailer: git-send-email 2.17.1
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-When copying the setup_header into the boot_params buffer, only the data
-that is actually part of the setup_header should be copied.
+EFI_GENERIC_STUB_INITRD_CMDLINE_LOADER is deprecated, so it should not
+be enabled by default.
 
-efi_pe_entry() currently copies the entire second sector, which
-initializes some of the fields in boot_params beyond the setup_header
-with garbage (i.e. part of the real-mode boot code gets copied into
-those fields).
+In light of commit 4da0b2b7e67524cc ("efi/libstub: Re-enable command
+line initrd loading for x86"), keep the default for X86.
 
-This does not cause any issues currently because the fields that are
-overwritten are padding, BIOS EDD information that won't get used, and
-the E820 table which will get properly filled in later.
-
-Fix this to only copy data that is actually part of the setup_header
-structure.
-
-Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
+Fixes: cf6b83664895a5c7 ("efi/libstub: Make initrd file loader configurable")
+Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 ---
- drivers/firmware/efi/libstub/x86-stub.c | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+ drivers/firmware/efi/Kconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index 37e82bf397aa..3672539cb96e 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -8,6 +8,7 @@
- 
- #include <linux/efi.h>
- #include <linux/pci.h>
-+#include <linux/stddef.h>
- 
- #include <asm/efi.h>
- #include <asm/e820/types.h>
-@@ -388,8 +389,9 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
- 
- 	hdr = &boot_params->hdr;
- 
--	/* Copy the second sector to boot_params */
--	memcpy(&hdr->jump, image_base + 512, 512);
-+	/* Copy the setup header from the second sector to boot_params */
-+	memcpy(&hdr->jump, image_base + 512,
-+	       sizeof(struct setup_header) - offsetof(struct setup_header, jump));
- 
- 	/*
- 	 * Fill out some of the header fields ourselves because the
+diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+index e6fc022bc87e03ab..56055c61904e49f4 100644
+--- a/drivers/firmware/efi/Kconfig
++++ b/drivers/firmware/efi/Kconfig
+@@ -127,7 +127,7 @@ config EFI_ARMSTUB_DTB_LOADER
+ config EFI_GENERIC_STUB_INITRD_CMDLINE_LOADER
+ 	bool "Enable the command line initrd loader" if !X86
+ 	depends on EFI_STUB && (EFI_GENERIC_STUB || X86)
+-	default y
++	default y if X86
+ 	help
+ 	  Select this config option to add support for the initrd= command
+ 	  line parameter, allowing an initrd that resides on the same volume
 -- 
-2.26.2
+2.17.1
 
