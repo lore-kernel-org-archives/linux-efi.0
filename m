@@ -7,53 +7,53 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 58A2FC433E1
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B08ADC433DF
 	for <linux-efi@archiver.kernel.org>; Wed, 24 Jun 2020 01:50:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 366EE20874
+	by mail.kernel.org (Postfix) with ESMTP id 8FB6920702
 	for <linux-efi@archiver.kernel.org>; Wed, 24 Jun 2020 01:50:31 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="HU0okjxi"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="RC848NE0"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388550AbgFXBuS (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 23 Jun 2020 21:50:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46722 "EHLO
+        id S2388475AbgFXBtt (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 23 Jun 2020 21:49:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46710 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2388551AbgFXBtw (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 23 Jun 2020 21:49:52 -0400
-Received: from mail-pl1-x644.google.com (mail-pl1-x644.google.com [IPv6:2607:f8b0:4864:20::644])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8F494C061795
-        for <linux-efi@vger.kernel.org>; Tue, 23 Jun 2020 18:49:52 -0700 (PDT)
-Received: by mail-pl1-x644.google.com with SMTP id y18so337735plr.4
-        for <linux-efi@vger.kernel.org>; Tue, 23 Jun 2020 18:49:52 -0700 (PDT)
+        with ESMTP id S2388435AbgFXBts (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 23 Jun 2020 21:49:48 -0400
+Received: from mail-pl1-x642.google.com (mail-pl1-x642.google.com [IPv6:2607:f8b0:4864:20::642])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1FA4FC0613ED
+        for <linux-efi@vger.kernel.org>; Tue, 23 Jun 2020 18:49:48 -0700 (PDT)
+Received: by mail-pl1-x642.google.com with SMTP id n2so316705pld.13
+        for <linux-efi@vger.kernel.org>; Tue, 23 Jun 2020 18:49:48 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=chromium.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=l5ovQdOa53Wq08SUrbeqBNAB7olZAVfsR3FjDV/m7eY=;
-        b=HU0okjxiFMvFctCffkQ7z2I5GXmLT1gaNRYMQRFcgYl5tSYJfuUMDlXvZKj80rjKKa
-         yDPcFEuDuT1buIkUcXQlmVdjIfloGs7ZqN0zimqyc3ma6N3SZKtRnjISbLa1WJUqrcLr
-         i29IZiC5pQBaTbC59gJVAGqy18hz7C2vTrLUU=
+        bh=O2Y9k0Aoe2PsZ9fBDANRxjQwY2H7eXTSzLJBeV/fV9o=;
+        b=RC848NE0i/SynoMx88lxwIqaEnktRv/S08z+yAGNh98QRc3g4glJaSAeh83V0/+vPO
+         sjMdPL0uY1PkRniwXJCNB+xOulhCOQhUnpKwy+H221ODhthgAsjRcLSarVWaiOiWz7xt
+         Cc8BPSg3mJr7EYRRdfSeZSgwISEHMenzA02OU=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=l5ovQdOa53Wq08SUrbeqBNAB7olZAVfsR3FjDV/m7eY=;
-        b=lkqywRvmC00ccnrzl1I+NimdqBH7o1vYI1vz5RVDiNMknBUbNHvM7/aYBIp0eeEfIO
-         WJvwRsIqa31B/fxJH3kMwZXIicWk5ovyoSjd4TCt/DpqikBR5Kw9p+X+DRxy5cDzDokR
-         71iYGCA6CFqLer3U5isaixn8z5rwYH32cIhsOK6Y3PyRHhrWPg3qe6pTLmC7J6UKlF/R
-         GBjXEwt5l2H9FUb3wNFzD7GIr/9mA9/IjwQ4tsC5NFzaVMSpoQYFP2cIBAUD1e6mcbWk
-         TuDrt8qCEib/wD/Ysf56gIV4aah0y5rPtpKCWsHvfQjVASa2ksLYQBUKL/dhdXm42ASC
-         1Kig==
-X-Gm-Message-State: AOAM532uoA5KVE3hmkrYNMNrNqMlu+Dvk1rnma7l/qj5+/NcELE33hzU
-        WgVLyMIMOfRs2FYvibzqvB5ZNA==
-X-Google-Smtp-Source: ABdhPJwzVxoBS+bR4nUcdi2cBNUW1MxtFXQkch5ct6ivADYFpQcNz0i+34vFO2Sqx+gzfU7fOMW1Zg==
-X-Received: by 2002:a17:902:b184:: with SMTP id s4mr26340353plr.148.1592963392122;
-        Tue, 23 Jun 2020 18:49:52 -0700 (PDT)
+        bh=O2Y9k0Aoe2PsZ9fBDANRxjQwY2H7eXTSzLJBeV/fV9o=;
+        b=hdiBbokPAnrgmvaP8zf2V8i+SSDQw/GotB9El1ifqG5zZQ4ZP5j8EGw/HGY/mkpCw5
+         mj2EGg0eOJZf580PyoaQh7NeMPLWJaOhhWbiWg6OPZw0MRYM/vt96j1GFgsTFW+z0rtM
+         DAm5EUfOafdGHVJw/wh/hx4rOaHY78JFqpI4ACIfFhd/G9nn264T4xNY8r3V6lW3LYHo
+         IG3WQPlFU/y7/W7wN9YB/L/WXN9cK95l+Aigo7+gPof7mjn1nIdGpGVSnrI1h87A2uwE
+         gt630cyRl4CrNZEtun0TphyGXnsG2lj8d22cg9O67ypI/3CjgzQoemQ3potVvmBGzJJS
+         a45w==
+X-Gm-Message-State: AOAM530KHQaTykcEreyNjhah9ZksrR/CYbG4IQb+TMt5ENQfmMzuwxhL
+        4M0qT9aiPbwyOsVEE+i36jI0FQ==
+X-Google-Smtp-Source: ABdhPJwbPwuYwHHFtJvDEYHOAcax4lPh//ndXHRqaZjT6O+W3S86MG1guQT1J9/rY7vF5ODXFge+OA==
+X-Received: by 2002:a17:902:26f:: with SMTP id 102mr25557096plc.226.1592963387558;
+        Tue, 23 Jun 2020 18:49:47 -0700 (PDT)
 Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
-        by smtp.gmail.com with ESMTPSA id 25sm18020100pfi.7.2020.06.23.18.49.48
+        by smtp.gmail.com with ESMTPSA id mp15sm3524928pjb.45.2020.06.23.18.49.46
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 23 Jun 2020 18:49:50 -0700 (PDT)
+        Tue, 23 Jun 2020 18:49:46 -0700 (PDT)
 From:   Kees Cook <keescook@chromium.org>
 To:     Will Deacon <will@kernel.org>
 Cc:     Kees Cook <keescook@chromium.org>,
@@ -74,9 +74,9 @@ Cc:     Kees Cook <keescook@chromium.org>,
         clang-built-linux@googlegroups.com, linux-arch@vger.kernel.org,
         linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v3 6/9] arm/build: Warn on orphan section placement
-Date:   Tue, 23 Jun 2020 18:49:37 -0700
-Message-Id: <20200624014940.1204448-7-keescook@chromium.org>
+Subject: [PATCH v3 3/9] efi/libstub: Remove .note.gnu.property
+Date:   Tue, 23 Jun 2020 18:49:34 -0700
+Message-Id: <20200624014940.1204448-4-keescook@chromium.org>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200624014940.1204448-1-keescook@chromium.org>
 References: <20200624014940.1204448-1-keescook@chromium.org>
@@ -87,159 +87,29 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-We don't want to depend on the linker's orphan section placement
-heuristics as these can vary between linkers, and may change between
-versions. All sections need to be explicitly named in the linker
-script.
-
-Specifically, this would have made a recently fixed bug very obvious:
-
-ld: warning: orphan section `.fixup' from `arch/arm/lib/copy_from_user.o' being placed in section `.fixup'
-
-Refactor linker script include file for use in standard and XIP linker
-scripts, as well as in the coming boot linker script changes. Add debug
-sections explicitly. Create ARM_COMMON_DISCARD macro with unneeded
-sections .ARM.attributes, .iplt, .rel.iplt, .igot.plt, and .modinfo.
-Create ARM_STUBS_TEXT macro with missed text stub sections .vfp11_veneer,
-and .v4_bx. Finally enable orphan section warning.
+In preparation for adding --orphan-handling=warn to more architectures,
+make sure unwanted sections don't end up appearing under the .init
+section prefix that libstub adds to itself during objcopy.
 
 Signed-off-by: Kees Cook <keescook@chromium.org>
 ---
- arch/arm/Makefile                             |  4 ++++
- .../arm/{kernel => include/asm}/vmlinux.lds.h | 22 ++++++++++++++-----
- arch/arm/kernel/vmlinux-xip.lds.S             |  5 ++---
- arch/arm/kernel/vmlinux.lds.S                 |  5 ++---
- 4 files changed, 25 insertions(+), 11 deletions(-)
- rename arch/arm/{kernel => include/asm}/vmlinux.lds.h (92%)
+ drivers/firmware/efi/libstub/Makefile | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/arch/arm/Makefile b/arch/arm/Makefile
-index 59fde2d598d8..e414e3732b3a 100644
---- a/arch/arm/Makefile
-+++ b/arch/arm/Makefile
-@@ -16,6 +16,10 @@ LDFLAGS_vmlinux	+= --be8
- KBUILD_LDFLAGS_MODULE	+= --be8
- endif
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index 75daaf20374e..9d2d2e784bca 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -66,6 +66,9 @@ lib-$(CONFIG_X86)		+= x86-stub.o
+ CFLAGS_arm32-stub.o		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
+ CFLAGS_arm64-stub.o		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
  
-+# We never want expected sections to be placed heuristically by the
-+# linker. All sections should be explicitly named in the linker script.
-+LDFLAGS_vmlinux += --orphan-handling=warn
++# Remove unwanted sections first.
++STUBCOPY_FLAGS-y		+= --remove-section=.note.gnu.property
 +
- ifeq ($(CONFIG_ARM_MODULE_PLTS),y)
- KBUILD_LDS_MODULE	+= $(srctree)/arch/arm/kernel/module.lds
- endif
-diff --git a/arch/arm/kernel/vmlinux.lds.h b/arch/arm/include/asm/vmlinux.lds.h
-similarity index 92%
-rename from arch/arm/kernel/vmlinux.lds.h
-rename to arch/arm/include/asm/vmlinux.lds.h
-index 381a8e105fa5..3d88ea74f4cd 100644
---- a/arch/arm/kernel/vmlinux.lds.h
-+++ b/arch/arm/include/asm/vmlinux.lds.h
-@@ -1,4 +1,5 @@
- /* SPDX-License-Identifier: GPL-2.0 */
-+#include <asm-generic/vmlinux.lds.h>
- 
- #ifdef CONFIG_HOTPLUG_CPU
- #define ARM_CPU_DISCARD(x)
-@@ -37,6 +38,13 @@
- 		*(.idmap.text)						\
- 		__idmap_text_end = .;					\
- 
-+#define ARM_COMMON_DISCARD						\
-+		*(.ARM.attributes)					\
-+		*(.iplt) *(.rel.iplt) *(.igot.plt)			\
-+		*(.modinfo)						\
-+		*(.discard)						\
-+		*(.discard.*)
-+
- #define ARM_DISCARD							\
- 		*(.ARM.exidx.exit.text)					\
- 		*(.ARM.extab.exit.text)					\
-@@ -49,8 +57,14 @@
- 		EXIT_CALL						\
- 		ARM_MMU_DISCARD(*(.text.fixup))				\
- 		ARM_MMU_DISCARD(*(__ex_table))				\
--		*(.discard)						\
--		*(.discard.*)
-+		ARM_COMMON_DISCARD
-+
-+#define ARM_STUBS_TEXT							\
-+		*(.gnu.warning)						\
-+		*(.glue_7t)						\
-+		*(.glue_7)						\
-+		*(.vfp11_veneer)					\
-+		*(.v4_bx)
- 
- #define ARM_TEXT							\
- 		IDMAP_TEXT						\
-@@ -64,9 +78,7 @@
- 		CPUIDLE_TEXT						\
- 		LOCK_TEXT						\
- 		KPROBES_TEXT						\
--		*(.gnu.warning)						\
--		*(.glue_7)						\
--		*(.glue_7t)						\
-+		ARM_STUBS_TEXT						\
- 		. = ALIGN(4);						\
- 		*(.got)			/* Global offset table */	\
- 		ARM_CPU_KEEP(PROC_INFO)
-diff --git a/arch/arm/kernel/vmlinux-xip.lds.S b/arch/arm/kernel/vmlinux-xip.lds.S
-index 6d2be994ae58..0807f40844a2 100644
---- a/arch/arm/kernel/vmlinux-xip.lds.S
-+++ b/arch/arm/kernel/vmlinux-xip.lds.S
-@@ -9,15 +9,13 @@
- 
- #include <linux/sizes.h>
- 
--#include <asm-generic/vmlinux.lds.h>
-+#include <asm/vmlinux.lds.h>
- #include <asm/cache.h>
- #include <asm/thread_info.h>
- #include <asm/memory.h>
- #include <asm/mpu.h>
- #include <asm/page.h>
- 
--#include "vmlinux.lds.h"
--
- OUTPUT_ARCH(arm)
- ENTRY(stext)
- 
-@@ -152,6 +150,7 @@ SECTIONS
- 	_end = .;
- 
- 	STABS_DEBUG
-+	DWARF_DEBUG
- }
- 
- /*
-diff --git a/arch/arm/kernel/vmlinux.lds.S b/arch/arm/kernel/vmlinux.lds.S
-index 7f24bc08403e..969205f125ca 100644
---- a/arch/arm/kernel/vmlinux.lds.S
-+++ b/arch/arm/kernel/vmlinux.lds.S
-@@ -9,15 +9,13 @@
- #else
- 
- #include <linux/pgtable.h>
--#include <asm-generic/vmlinux.lds.h>
-+#include <asm/vmlinux.lds.h>
- #include <asm/cache.h>
- #include <asm/thread_info.h>
- #include <asm/memory.h>
- #include <asm/mpu.h>
- #include <asm/page.h>
- 
--#include "vmlinux.lds.h"
--
- OUTPUT_ARCH(arm)
- ENTRY(stext)
- 
-@@ -151,6 +149,7 @@ SECTIONS
- 	_end = .;
- 
- 	STABS_DEBUG
-+	DWARF_DEBUG
- }
- 
- #ifdef CONFIG_STRICT_KERNEL_RWX
+ #
+ # For x86, bootloaders like systemd-boot or grub-efi do not zero-initialize the
+ # .bss section, so the .bss section of the EFI stub needs to be included in the
 -- 
 2.25.1
 
