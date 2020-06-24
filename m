@@ -7,53 +7,53 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 36910C433DF
-	for <linux-efi@archiver.kernel.org>; Wed, 24 Jun 2020 01:50:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 58A2FC433E1
+	for <linux-efi@archiver.kernel.org>; Wed, 24 Jun 2020 01:50:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0850A20FC3
-	for <linux-efi@archiver.kernel.org>; Wed, 24 Jun 2020 01:50:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 366EE20874
+	for <linux-efi@archiver.kernel.org>; Wed, 24 Jun 2020 01:50:31 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="ckmxDB65"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="HU0okjxi"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388603AbgFXBuH (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 23 Jun 2020 21:50:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46754 "EHLO
+        id S2388550AbgFXBuS (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 23 Jun 2020 21:50:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46722 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2388594AbgFXBt4 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 23 Jun 2020 21:49:56 -0400
+        with ESMTP id S2388551AbgFXBtw (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 23 Jun 2020 21:49:52 -0400
 Received: from mail-pl1-x644.google.com (mail-pl1-x644.google.com [IPv6:2607:f8b0:4864:20::644])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 914E5C0617BA
-        for <linux-efi@vger.kernel.org>; Tue, 23 Jun 2020 18:49:55 -0700 (PDT)
-Received: by mail-pl1-x644.google.com with SMTP id bh7so322432plb.11
-        for <linux-efi@vger.kernel.org>; Tue, 23 Jun 2020 18:49:55 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8F494C061795
+        for <linux-efi@vger.kernel.org>; Tue, 23 Jun 2020 18:49:52 -0700 (PDT)
+Received: by mail-pl1-x644.google.com with SMTP id y18so337735plr.4
+        for <linux-efi@vger.kernel.org>; Tue, 23 Jun 2020 18:49:52 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=chromium.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=IXUgLosNUEP93cpEKoNn7oauK0Oksg2zT1r8iNc2N3M=;
-        b=ckmxDB65sTOYu6rx9OIJTqHdVaF3Rq0JK7kAA6vc5D+eoog4QFJCUkaQ7pr9Dbdqt8
-         TtXjq1UpX+tQQMj1dqLxz4cB6MRk2G2LEF5f5B4Oh7F/T4fCQlQiO3iYpi7PtQCLvvql
-         oPHshW80+ZhzYGTcFezjfbhx/X9l9btanp8ng=
+        bh=l5ovQdOa53Wq08SUrbeqBNAB7olZAVfsR3FjDV/m7eY=;
+        b=HU0okjxiFMvFctCffkQ7z2I5GXmLT1gaNRYMQRFcgYl5tSYJfuUMDlXvZKj80rjKKa
+         yDPcFEuDuT1buIkUcXQlmVdjIfloGs7ZqN0zimqyc3ma6N3SZKtRnjISbLa1WJUqrcLr
+         i29IZiC5pQBaTbC59gJVAGqy18hz7C2vTrLUU=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=IXUgLosNUEP93cpEKoNn7oauK0Oksg2zT1r8iNc2N3M=;
-        b=JJo5/Qp77NCUynOzaOO6jNDtj037sfZ9dxgJnw7sZsRZ6cgYZiH/S4OQgSrC0QyPiX
-         7ysv/fAy5TSy7+7BjfuVShsXwEtDU94ue+7QyepzoEFRKwjK6mgde/RF4ETotxAQG+MB
-         t5gemh18jn6FzcEX+lxHCDek2IaiugmyzF586B5exeUvlWc2AvqJsOJm3EjC/sjwRlvy
-         eoE5Qd6VmpV6WV3yot4hlss8D0fZqxaPYiMNIa7SY8e4i+CRQcRJzQnTf86PT3oOl/ev
-         lRTwDAQB8XhXXP0Q/ZYj0TDAcU9stwfDZ149deI0E6RwVjX78AEOSMiVAXnOA/iCp5RU
-         bYlA==
-X-Gm-Message-State: AOAM532kZvg3Q6igopB5fQbkO27+z4L3BlQQp3PKAsGxwYfqqIHZWypz
-        ZWjZ3Km5V+y8wyn+6TcsnhfkfQ==
-X-Google-Smtp-Source: ABdhPJwdum6Og6TIMupJ78tyY9GEfwXuR/37zHl5lfG7CPnDCX7KdCztzVd+hqJLR+uQSWvHTMGz/w==
-X-Received: by 2002:a17:90a:1117:: with SMTP id d23mr26427976pja.136.1592963395150;
-        Tue, 23 Jun 2020 18:49:55 -0700 (PDT)
+        bh=l5ovQdOa53Wq08SUrbeqBNAB7olZAVfsR3FjDV/m7eY=;
+        b=lkqywRvmC00ccnrzl1I+NimdqBH7o1vYI1vz5RVDiNMknBUbNHvM7/aYBIp0eeEfIO
+         WJvwRsIqa31B/fxJH3kMwZXIicWk5ovyoSjd4TCt/DpqikBR5Kw9p+X+DRxy5cDzDokR
+         71iYGCA6CFqLer3U5isaixn8z5rwYH32cIhsOK6Y3PyRHhrWPg3qe6pTLmC7J6UKlF/R
+         GBjXEwt5l2H9FUb3wNFzD7GIr/9mA9/IjwQ4tsC5NFzaVMSpoQYFP2cIBAUD1e6mcbWk
+         TuDrt8qCEib/wD/Ysf56gIV4aah0y5rPtpKCWsHvfQjVASa2ksLYQBUKL/dhdXm42ASC
+         1Kig==
+X-Gm-Message-State: AOAM532uoA5KVE3hmkrYNMNrNqMlu+Dvk1rnma7l/qj5+/NcELE33hzU
+        WgVLyMIMOfRs2FYvibzqvB5ZNA==
+X-Google-Smtp-Source: ABdhPJwzVxoBS+bR4nUcdi2cBNUW1MxtFXQkch5ct6ivADYFpQcNz0i+34vFO2Sqx+gzfU7fOMW1Zg==
+X-Received: by 2002:a17:902:b184:: with SMTP id s4mr26340353plr.148.1592963392122;
+        Tue, 23 Jun 2020 18:49:52 -0700 (PDT)
 Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
-        by smtp.gmail.com with ESMTPSA id mp15sm3525013pjb.45.2020.06.23.18.49.50
+        by smtp.gmail.com with ESMTPSA id 25sm18020100pfi.7.2020.06.23.18.49.48
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 23 Jun 2020 18:49:51 -0700 (PDT)
+        Tue, 23 Jun 2020 18:49:50 -0700 (PDT)
 From:   Kees Cook <keescook@chromium.org>
 To:     Will Deacon <will@kernel.org>
 Cc:     Kees Cook <keescook@chromium.org>,
@@ -74,9 +74,9 @@ Cc:     Kees Cook <keescook@chromium.org>,
         clang-built-linux@googlegroups.com, linux-arch@vger.kernel.org,
         linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v3 9/9] arm64/build: Warn on orphan section placement
-Date:   Tue, 23 Jun 2020 18:49:40 -0700
-Message-Id: <20200624014940.1204448-10-keescook@chromium.org>
+Subject: [PATCH v3 6/9] arm/build: Warn on orphan section placement
+Date:   Tue, 23 Jun 2020 18:49:37 -0700
+Message-Id: <20200624014940.1204448-7-keescook@chromium.org>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200624014940.1204448-1-keescook@chromium.org>
 References: <20200624014940.1204448-1-keescook@chromium.org>
@@ -92,134 +92,154 @@ heuristics as these can vary between linkers, and may change between
 versions. All sections need to be explicitly named in the linker
 script.
 
-Avoid .eh_frame* by making sure both -fno-asychronous-unwind-tables and
--fno-unwind-tables are present in both CFLAGS and AFLAGS. Remove one
-last instance of .eh_frame by removing the needless Call Frame Information
-annotations from arch/arm64/kernel/smccc-call.S.
+Specifically, this would have made a recently fixed bug very obvious:
 
-Add .plt, .data.rel.ro, .igot.*, and .iplt to discards as they are not
-actually used. While .got.plt is also not used, it must be included
-otherwise ld.bfd will fail to link with the error:
+ld: warning: orphan section `.fixup' from `arch/arm/lib/copy_from_user.o' being placed in section `.fixup'
 
-    aarch64-linux-gnu-ld: discarded output section: `.got.plt'
-
-However, as it'd be better to validate that it stays effectively empty,
-add an assert.
-
-Explicitly include debug sections when they're present.
-
-Fix a case of needless quotes in __section(), which Clang doesn't like.
-
-Finally, enable orphan section warnings.
-
-Thanks to Ard Biesheuvel for many hints on correct ways to handle
-mysterious sections. :)
+Refactor linker script include file for use in standard and XIP linker
+scripts, as well as in the coming boot linker script changes. Add debug
+sections explicitly. Create ARM_COMMON_DISCARD macro with unneeded
+sections .ARM.attributes, .iplt, .rel.iplt, .igot.plt, and .modinfo.
+Create ARM_STUBS_TEXT macro with missed text stub sections .vfp11_veneer,
+and .v4_bx. Finally enable orphan section warning.
 
 Signed-off-by: Kees Cook <keescook@chromium.org>
 ---
- arch/arm64/Makefile             |  9 ++++++++-
- arch/arm64/kernel/smccc-call.S  |  2 --
- arch/arm64/kernel/vmlinux.lds.S | 11 ++++++++++-
- arch/arm64/mm/mmu.c             |  2 +-
- 4 files changed, 19 insertions(+), 5 deletions(-)
+ arch/arm/Makefile                             |  4 ++++
+ .../arm/{kernel => include/asm}/vmlinux.lds.h | 22 ++++++++++++++-----
+ arch/arm/kernel/vmlinux-xip.lds.S             |  5 ++---
+ arch/arm/kernel/vmlinux.lds.S                 |  5 ++---
+ 4 files changed, 25 insertions(+), 11 deletions(-)
+ rename arch/arm/{kernel => include/asm}/vmlinux.lds.h (92%)
 
-diff --git a/arch/arm64/Makefile b/arch/arm64/Makefile
-index a0d94d063fa8..fb3aa2d7de4d 100644
---- a/arch/arm64/Makefile
-+++ b/arch/arm64/Makefile
-@@ -29,6 +29,10 @@ LDFLAGS_vmlinux	+= --fix-cortex-a53-843419
-   endif
+diff --git a/arch/arm/Makefile b/arch/arm/Makefile
+index 59fde2d598d8..e414e3732b3a 100644
+--- a/arch/arm/Makefile
++++ b/arch/arm/Makefile
+@@ -16,6 +16,10 @@ LDFLAGS_vmlinux	+= --be8
+ KBUILD_LDFLAGS_MODULE	+= --be8
  endif
  
 +# We never want expected sections to be placed heuristically by the
 +# linker. All sections should be explicitly named in the linker script.
 +LDFLAGS_vmlinux += --orphan-handling=warn
 +
- ifeq ($(CONFIG_ARM64_USE_LSE_ATOMICS), y)
-   ifneq ($(CONFIG_ARM64_LSE_ATOMICS), y)
- $(warning LSE atomics not supported by binutils)
-@@ -47,13 +51,16 @@ endif
+ ifeq ($(CONFIG_ARM_MODULE_PLTS),y)
+ KBUILD_LDS_MODULE	+= $(srctree)/arch/arm/kernel/module.lds
+ endif
+diff --git a/arch/arm/kernel/vmlinux.lds.h b/arch/arm/include/asm/vmlinux.lds.h
+similarity index 92%
+rename from arch/arm/kernel/vmlinux.lds.h
+rename to arch/arm/include/asm/vmlinux.lds.h
+index 381a8e105fa5..3d88ea74f4cd 100644
+--- a/arch/arm/kernel/vmlinux.lds.h
++++ b/arch/arm/include/asm/vmlinux.lds.h
+@@ -1,4 +1,5 @@
+ /* SPDX-License-Identifier: GPL-2.0 */
++#include <asm-generic/vmlinux.lds.h>
  
- KBUILD_CFLAGS	+= -mgeneral-regs-only	\
- 		   $(compat_vdso) $(cc_has_k_constraint)
--KBUILD_CFLAGS	+= -fno-asynchronous-unwind-tables
- KBUILD_CFLAGS	+= $(call cc-disable-warning, psabi)
- KBUILD_AFLAGS	+= $(compat_vdso)
+ #ifdef CONFIG_HOTPLUG_CPU
+ #define ARM_CPU_DISCARD(x)
+@@ -37,6 +38,13 @@
+ 		*(.idmap.text)						\
+ 		__idmap_text_end = .;					\
  
- KBUILD_CFLAGS	+= $(call cc-option,-mabi=lp64)
- KBUILD_AFLAGS	+= $(call cc-option,-mabi=lp64)
- 
-+# Avoid generating .eh_frame* sections.
-+KBUILD_CFLAGS	+= -fno-asynchronous-unwind-tables -fno-unwind-tables
-+KBUILD_AFLAGS	+= -fno-asynchronous-unwind-tables -fno-unwind-tables
++#define ARM_COMMON_DISCARD						\
++		*(.ARM.attributes)					\
++		*(.iplt) *(.rel.iplt) *(.igot.plt)			\
++		*(.modinfo)						\
++		*(.discard)						\
++		*(.discard.*)
 +
- ifeq ($(CONFIG_STACKPROTECTOR_PER_TASK),y)
- prepare: stack_protector_prepare
- stack_protector_prepare: prepare0
-diff --git a/arch/arm64/kernel/smccc-call.S b/arch/arm64/kernel/smccc-call.S
-index 1f93809528a4..d62447964ed9 100644
---- a/arch/arm64/kernel/smccc-call.S
-+++ b/arch/arm64/kernel/smccc-call.S
-@@ -9,7 +9,6 @@
- #include <asm/assembler.h>
+ #define ARM_DISCARD							\
+ 		*(.ARM.exidx.exit.text)					\
+ 		*(.ARM.extab.exit.text)					\
+@@ -49,8 +57,14 @@
+ 		EXIT_CALL						\
+ 		ARM_MMU_DISCARD(*(.text.fixup))				\
+ 		ARM_MMU_DISCARD(*(__ex_table))				\
+-		*(.discard)						\
+-		*(.discard.*)
++		ARM_COMMON_DISCARD
++
++#define ARM_STUBS_TEXT							\
++		*(.gnu.warning)						\
++		*(.glue_7t)						\
++		*(.glue_7)						\
++		*(.vfp11_veneer)					\
++		*(.v4_bx)
  
- 	.macro SMCCC instr
--	.cfi_startproc
- 	\instr	#0
- 	ldr	x4, [sp]
- 	stp	x0, x1, [x4, #ARM_SMCCC_RES_X0_OFFS]
-@@ -21,7 +20,6 @@
- 	b.ne	1f
- 	str	x6, [x4, ARM_SMCCC_QUIRK_STATE_OFFS]
- 1:	ret
--	.cfi_endproc
- 	.endm
+ #define ARM_TEXT							\
+ 		IDMAP_TEXT						\
+@@ -64,9 +78,7 @@
+ 		CPUIDLE_TEXT						\
+ 		LOCK_TEXT						\
+ 		KPROBES_TEXT						\
+-		*(.gnu.warning)						\
+-		*(.glue_7)						\
+-		*(.glue_7t)						\
++		ARM_STUBS_TEXT						\
+ 		. = ALIGN(4);						\
+ 		*(.got)			/* Global offset table */	\
+ 		ARM_CPU_KEEP(PROC_INFO)
+diff --git a/arch/arm/kernel/vmlinux-xip.lds.S b/arch/arm/kernel/vmlinux-xip.lds.S
+index 6d2be994ae58..0807f40844a2 100644
+--- a/arch/arm/kernel/vmlinux-xip.lds.S
++++ b/arch/arm/kernel/vmlinux-xip.lds.S
+@@ -9,15 +9,13 @@
  
- /*
-diff --git a/arch/arm64/kernel/vmlinux.lds.S b/arch/arm64/kernel/vmlinux.lds.S
-index 5427f502c3a6..f6c781768f83 100644
---- a/arch/arm64/kernel/vmlinux.lds.S
-+++ b/arch/arm64/kernel/vmlinux.lds.S
-@@ -94,7 +94,8 @@ SECTIONS
- 	/DISCARD/ : {
- 		*(.interp .dynamic)
- 		*(.dynsym .dynstr .hash .gnu.hash)
--		*(.eh_frame)
-+		*(.plt) *(.data.rel.ro)
-+		*(.igot.*) *(.iplt)
- 	}
+ #include <linux/sizes.h>
  
- 	. = KIMAGE_VADDR + TEXT_OFFSET;
-@@ -244,8 +245,16 @@ SECTIONS
+-#include <asm-generic/vmlinux.lds.h>
++#include <asm/vmlinux.lds.h>
+ #include <asm/cache.h>
+ #include <asm/thread_info.h>
+ #include <asm/memory.h>
+ #include <asm/mpu.h>
+ #include <asm/page.h>
+ 
+-#include "vmlinux.lds.h"
+-
+ OUTPUT_ARCH(arm)
+ ENTRY(stext)
+ 
+@@ -152,6 +150,7 @@ SECTIONS
  	_end = .;
  
  	STABS_DEBUG
 +	DWARF_DEBUG
- 
- 	HEAD_SYMBOLS
-+
-+	/*
-+	 * Make sure that the .got.plt is either completely empty or it
-+	 * contains only the lazy dispatch entries.
-+	 */
-+	.got.plt (INFO) : { *(.got.plt) }
-+	ASSERT(SIZEOF(.got.plt) == 0 || SIZEOF(.got.plt) == 0x18, ".got.plt not empty")
  }
  
- #include "image-vars.h"
-diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
-index 1df25f26571d..dce024ea6084 100644
---- a/arch/arm64/mm/mmu.c
-+++ b/arch/arm64/mm/mmu.c
-@@ -42,7 +42,7 @@
- u64 idmap_t0sz = TCR_T0SZ(VA_BITS);
- u64 idmap_ptrs_per_pgd = PTRS_PER_PGD;
+ /*
+diff --git a/arch/arm/kernel/vmlinux.lds.S b/arch/arm/kernel/vmlinux.lds.S
+index 7f24bc08403e..969205f125ca 100644
+--- a/arch/arm/kernel/vmlinux.lds.S
++++ b/arch/arm/kernel/vmlinux.lds.S
+@@ -9,15 +9,13 @@
+ #else
  
--u64 __section(".mmuoff.data.write") vabits_actual;
-+u64 __section(.mmuoff.data.write) vabits_actual;
- EXPORT_SYMBOL(vabits_actual);
+ #include <linux/pgtable.h>
+-#include <asm-generic/vmlinux.lds.h>
++#include <asm/vmlinux.lds.h>
+ #include <asm/cache.h>
+ #include <asm/thread_info.h>
+ #include <asm/memory.h>
+ #include <asm/mpu.h>
+ #include <asm/page.h>
  
- u64 kimage_voffset __ro_after_init;
+-#include "vmlinux.lds.h"
+-
+ OUTPUT_ARCH(arm)
+ ENTRY(stext)
+ 
+@@ -151,6 +149,7 @@ SECTIONS
+ 	_end = .;
+ 
+ 	STABS_DEBUG
++	DWARF_DEBUG
+ }
+ 
+ #ifdef CONFIG_STRICT_KERNEL_RWX
 -- 
 2.25.1
 
