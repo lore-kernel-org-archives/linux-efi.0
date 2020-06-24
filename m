@@ -2,61 +2,65 @@ Return-Path: <SRS0=eASz=AF=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+X-Spam-Status: No, score=-14.6 required=3.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_IN_DEF_DKIM_WL
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B08ADC433DF
-	for <linux-efi@archiver.kernel.org>; Wed, 24 Jun 2020 01:50:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9DB71C433DF
+	for <linux-efi@archiver.kernel.org>; Wed, 24 Jun 2020 03:31:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8FB6920702
-	for <linux-efi@archiver.kernel.org>; Wed, 24 Jun 2020 01:50:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 72DA720767
+	for <linux-efi@archiver.kernel.org>; Wed, 24 Jun 2020 03:31:47 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="RC848NE0"
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="MvLV62bG"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388475AbgFXBtt (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 23 Jun 2020 21:49:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46710 "EHLO
+        id S2388665AbgFXDbr (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 23 Jun 2020 23:31:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34078 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2388435AbgFXBts (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 23 Jun 2020 21:49:48 -0400
-Received: from mail-pl1-x642.google.com (mail-pl1-x642.google.com [IPv6:2607:f8b0:4864:20::642])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1FA4FC0613ED
-        for <linux-efi@vger.kernel.org>; Tue, 23 Jun 2020 18:49:48 -0700 (PDT)
-Received: by mail-pl1-x642.google.com with SMTP id n2so316705pld.13
-        for <linux-efi@vger.kernel.org>; Tue, 23 Jun 2020 18:49:48 -0700 (PDT)
+        with ESMTP id S2388292AbgFXDbq (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 23 Jun 2020 23:31:46 -0400
+Received: from mail-pj1-x1044.google.com (mail-pj1-x1044.google.com [IPv6:2607:f8b0:4864:20::1044])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6E9FCC061573
+        for <linux-efi@vger.kernel.org>; Tue, 23 Jun 2020 20:31:46 -0700 (PDT)
+Received: by mail-pj1-x1044.google.com with SMTP id a45so1797896pje.1
+        for <linux-efi@vger.kernel.org>; Tue, 23 Jun 2020 20:31:46 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=O2Y9k0Aoe2PsZ9fBDANRxjQwY2H7eXTSzLJBeV/fV9o=;
-        b=RC848NE0i/SynoMx88lxwIqaEnktRv/S08z+yAGNh98QRc3g4glJaSAeh83V0/+vPO
-         sjMdPL0uY1PkRniwXJCNB+xOulhCOQhUnpKwy+H221ODhthgAsjRcLSarVWaiOiWz7xt
-         Cc8BPSg3mJr7EYRRdfSeZSgwISEHMenzA02OU=
+        d=google.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=IahJt8/KJJjCX5znAGwjVoLhoLAi5KgGttIopC9m27U=;
+        b=MvLV62bGP7HuCujPeBIHKz13XUI8YQmFtRra1vib+8tF+xHHQRVE/n3L2rgdukvz0W
+         tXgg5gRG56BP2uOmEc+oEMf47b4I2KLwUM3lCVukC+NRxgYxHqsxLKDUjSfA6R0sfqEo
+         TgggLZp03MNbl6iiR1g9B+Tdp9CA3YajVJsQpkFoRyIFXvFULZrBVh7rUaJHmg4R6nNH
+         1qsvb5gRGuCH3ZPUtMEqqFW/A+OofiC/qMD5DJlvOz7Ilyyt2ZStv6KM1sJPos9n372w
+         0UbUY406dJ7GN3qOL01soPCDMdymvlW2KSQp3fukKyBl3YvdOFBaJIjT8ZDn4ePN1mFb
+         xD6w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=O2Y9k0Aoe2PsZ9fBDANRxjQwY2H7eXTSzLJBeV/fV9o=;
-        b=hdiBbokPAnrgmvaP8zf2V8i+SSDQw/GotB9El1ifqG5zZQ4ZP5j8EGw/HGY/mkpCw5
-         mj2EGg0eOJZf580PyoaQh7NeMPLWJaOhhWbiWg6OPZw0MRYM/vt96j1GFgsTFW+z0rtM
-         DAm5EUfOafdGHVJw/wh/hx4rOaHY78JFqpI4ACIfFhd/G9nn264T4xNY8r3V6lW3LYHo
-         IG3WQPlFU/y7/W7wN9YB/L/WXN9cK95l+Aigo7+gPof7mjn1nIdGpGVSnrI1h87A2uwE
-         gt630cyRl4CrNZEtun0TphyGXnsG2lj8d22cg9O67ypI/3CjgzQoemQ3potVvmBGzJJS
-         a45w==
-X-Gm-Message-State: AOAM530KHQaTykcEreyNjhah9ZksrR/CYbG4IQb+TMt5ENQfmMzuwxhL
-        4M0qT9aiPbwyOsVEE+i36jI0FQ==
-X-Google-Smtp-Source: ABdhPJwbPwuYwHHFtJvDEYHOAcax4lPh//ndXHRqaZjT6O+W3S86MG1guQT1J9/rY7vF5ODXFge+OA==
-X-Received: by 2002:a17:902:26f:: with SMTP id 102mr25557096plc.226.1592963387558;
-        Tue, 23 Jun 2020 18:49:47 -0700 (PDT)
-Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
-        by smtp.gmail.com with ESMTPSA id mp15sm3524928pjb.45.2020.06.23.18.49.46
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=IahJt8/KJJjCX5znAGwjVoLhoLAi5KgGttIopC9m27U=;
+        b=aQ3YPZZCfrjAKK2D5AmpW84lYoctOS/7QQADndw9NyCLHW4gv5Ty/pMeURk0FCvWDr
+         tq1XPCFXjkamHElXPpOD3kknuKLIigLSRZMoIcB0XVnPvDLRklL/EA4XKcparRwmtXBz
+         QaiQM6mATK+uzwkWgaFzx3EuGD1WN6peM7MocnrG1w0p8t6k45WcAXqddBbHMLQ8+wEN
+         vB5IbNfT6DbBzp686VAgNHFm9Am0VkSknHU6Ma/04Cp+TOj67nQpF657P3DF8tZxWJxA
+         byxaqxURg93Ulgs3gCs6U6hPpROvudnIf90bDjL+Nz3Q//FbaBqT7+/vpCsbybXcP66q
+         MLdA==
+X-Gm-Message-State: AOAM533dnayOlsmzPb62TxuHBIqlrFUg6Kc273CAn01+rbX9BjdOQJz9
+        Od7fWR4hvxJH6rRi9JxY8HtzjQ==
+X-Google-Smtp-Source: ABdhPJwO/hYz95xUwT1OWmJI4vtUw4+LYaBqYL3FPsRivwPfG7ygEmvTnhPAC6hvl2WpJppN7B6bFQ==
+X-Received: by 2002:a17:90a:1ac3:: with SMTP id p61mr27689014pjp.23.1592969505744;
+        Tue, 23 Jun 2020 20:31:45 -0700 (PDT)
+Received: from google.com ([2620:15c:2ce:0:9efe:9f1:9267:2b27])
+        by smtp.gmail.com with ESMTPSA id c2sm14702791pgk.77.2020.06.23.20.31.44
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 23 Jun 2020 18:49:46 -0700 (PDT)
-From:   Kees Cook <keescook@chromium.org>
-To:     Will Deacon <will@kernel.org>
-Cc:     Kees Cook <keescook@chromium.org>,
+        Tue, 23 Jun 2020 20:31:45 -0700 (PDT)
+Date:   Tue, 23 Jun 2020 20:31:42 -0700
+From:   Fangrui Song <maskray@google.com>
+To:     Kees Cook <keescook@chromium.org>
+Cc:     Will Deacon <will@kernel.org>,
         Catalin Marinas <catalin.marinas@arm.com>,
         Mark Rutland <mark.rutland@arm.com>,
         Ard Biesheuvel <ardb@kernel.org>,
@@ -74,42 +78,60 @@ Cc:     Kees Cook <keescook@chromium.org>,
         clang-built-linux@googlegroups.com, linux-arch@vger.kernel.org,
         linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v3 3/9] efi/libstub: Remove .note.gnu.property
-Date:   Tue, 23 Jun 2020 18:49:34 -0700
-Message-Id: <20200624014940.1204448-4-keescook@chromium.org>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20200624014940.1204448-1-keescook@chromium.org>
+Subject: Re: [PATCH v3 3/9] efi/libstub: Remove .note.gnu.property
+Message-ID: <20200624033142.cinvg6rbg252j46d@google.com>
 References: <20200624014940.1204448-1-keescook@chromium.org>
+ <20200624014940.1204448-4-keescook@chromium.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii; format=flowed
+Content-Disposition: inline
+In-Reply-To: <20200624014940.1204448-4-keescook@chromium.org>
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-In preparation for adding --orphan-handling=warn to more architectures,
-make sure unwanted sections don't end up appearing under the .init
-section prefix that libstub adds to itself during objcopy.
+On 2020-06-23, Kees Cook wrote:
+>In preparation for adding --orphan-handling=warn to more architectures,
+>make sure unwanted sections don't end up appearing under the .init
+>section prefix that libstub adds to itself during objcopy.
+>
+>Signed-off-by: Kees Cook <keescook@chromium.org>
+>---
+> drivers/firmware/efi/libstub/Makefile | 3 +++
+> 1 file changed, 3 insertions(+)
+>
+>diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+>index 75daaf20374e..9d2d2e784bca 100644
+>--- a/drivers/firmware/efi/libstub/Makefile
+>+++ b/drivers/firmware/efi/libstub/Makefile
+>@@ -66,6 +66,9 @@ lib-$(CONFIG_X86)		+= x86-stub.o
+> CFLAGS_arm32-stub.o		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
+> CFLAGS_arm64-stub.o		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
+>
+>+# Remove unwanted sections first.
+>+STUBCOPY_FLAGS-y		+= --remove-section=.note.gnu.property
+>+
+> #
+> # For x86, bootloaders like systemd-boot or grub-efi do not zero-initialize the
+> # .bss section, so the .bss section of the EFI stub needs to be included in the
 
-Signed-off-by: Kees Cook <keescook@chromium.org>
----
- drivers/firmware/efi/libstub/Makefile | 3 +++
- 1 file changed, 3 insertions(+)
+arch/arm64/Kconfig enables ARM64_PTR_AUTH by default. When the config is on
 
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index 75daaf20374e..9d2d2e784bca 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -66,6 +66,9 @@ lib-$(CONFIG_X86)		+= x86-stub.o
- CFLAGS_arm32-stub.o		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
- CFLAGS_arm64-stub.o		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
- 
-+# Remove unwanted sections first.
-+STUBCOPY_FLAGS-y		+= --remove-section=.note.gnu.property
-+
- #
- # For x86, bootloaders like systemd-boot or grub-efi do not zero-initialize the
- # .bss section, so the .bss section of the EFI stub needs to be included in the
--- 
-2.25.1
+ifeq ($(CONFIG_ARM64_BTI_KERNEL),y)
+branch-prot-flags-$(CONFIG_CC_HAS_BRANCH_PROT_PAC_RET_BTI) := -mbranch-protection=pac-ret+leaf+bti
+else
+branch-prot-flags-$(CONFIG_CC_HAS_BRANCH_PROT_PAC_RET) := -mbranch-protection=pac-ret+leaf
+endif
 
+This option creates .note.gnu.property:
+
+% readelf -n drivers/firmware/efi/libstub/efi-stub.o
+
+Displaying notes found in: .note.gnu.property
+   Owner                Data size        Description
+   GNU                  0x00000010       NT_GNU_PROPERTY_TYPE_0
+       Properties: AArch64 feature: PAC
+
+If .note.gnu.property is not desired in drivers/firmware/efi/libstub, specifying
+-mbranch-protection=none can override -mbranch-protection=pac-ret+leaf
