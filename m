@@ -5,59 +5,58 @@ X-Spam-Level:
 X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 273E5C433DF
-	for <linux-efi@archiver.kernel.org>; Wed, 24 Jun 2020 01:49:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E1F0C433E1
+	for <linux-efi@archiver.kernel.org>; Wed, 24 Jun 2020 01:50:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F3EFF21556
-	for <linux-efi@archiver.kernel.org>; Wed, 24 Jun 2020 01:49:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E87292078E
+	for <linux-efi@archiver.kernel.org>; Wed, 24 Jun 2020 01:50:05 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="jOZxT2Ps"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="Xc9+JYeX"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388569AbgFXBty (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 23 Jun 2020 21:49:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46730 "EHLO
+        id S2388600AbgFXBt5 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 23 Jun 2020 21:49:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46722 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2388535AbgFXBtw (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 23 Jun 2020 21:49:52 -0400
-Received: from mail-pj1-x1042.google.com (mail-pj1-x1042.google.com [IPv6:2607:f8b0:4864:20::1042])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 40B54C061799
-        for <linux-efi@vger.kernel.org>; Tue, 23 Jun 2020 18:49:51 -0700 (PDT)
-Received: by mail-pj1-x1042.google.com with SMTP id jz3so418966pjb.0
-        for <linux-efi@vger.kernel.org>; Tue, 23 Jun 2020 18:49:51 -0700 (PDT)
+        with ESMTP id S2388572AbgFXBty (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 23 Jun 2020 21:49:54 -0400
+Received: from mail-pf1-x444.google.com (mail-pf1-x444.google.com [IPv6:2607:f8b0:4864:20::444])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 68741C061799
+        for <linux-efi@vger.kernel.org>; Tue, 23 Jun 2020 18:49:54 -0700 (PDT)
+Received: by mail-pf1-x444.google.com with SMTP id a127so347213pfa.12
+        for <linux-efi@vger.kernel.org>; Tue, 23 Jun 2020 18:49:54 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=chromium.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=VSVwVb1orBbLFpFmeZIdSYi3mA1O04kaneM/R6F0kQA=;
-        b=jOZxT2PsX3nKe4zH42N/7mgdsHTdSxEFNsbLeqc6pGXimNBN5J3e1ZkCRvQrZu8na0
-         cWve30mGcnqoMlaLMT1Ce1TpJEMtZxmmZjcsXYz1KZNH95VEN1ccmVg7kI1Df/7OKFy6
-         dhDqrJzrptyGZivwT5bc3eEkH/YfH7b4ARBb8=
+        bh=r1CVChw5lv6qJCnYUjb6+Q15TOtyE7dXeIu2ryL/SHg=;
+        b=Xc9+JYeXrl67VMx0uVowsuIYnsATDq6ULZ939GoCguzhjaFWLLl4cD/FugiZrvwDVj
+         dcaX0DvDaFJH5IX/9il9Nhce+Nh90R/QQkoJjrHNRgS9PCSBBeYUl63RaVjs/jh4OgWA
+         bFr2LutY30k7TpbCrU6PqCwe82AQIBkSpbU8M=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=VSVwVb1orBbLFpFmeZIdSYi3mA1O04kaneM/R6F0kQA=;
-        b=GUW6JQy0eEH6fv9tZ9KzuSEEqwlHahqAupwUShIN8p+Bs6Wbx4zouRLPzR8IHgWOM8
-         0bc6KJ+R8WpBEVNgRe1yy03nqFzq3A7HEdcquOVOlbolqpwLu9Zz3E/r6ZMOjZZErW4+
-         w08gJlxuu80FgarnJjRwId9HIvwHb/VWo7Dzva4jvyVZkbl2MBzqEcvCdH2NonnMvTo+
-         p10FH7/DokbHQLYRhCB4RIrv3nj4YWu+sQA6K3KrxcTC3mg8aH5WXNqLq/BruprokHlY
-         OWBhI9AZh4bjjZCiN5sxtLngVrrakfHhZhxm/G6qvK84FgQbkdkGTI6MyLFKlV3WxyKW
-         UQWg==
-X-Gm-Message-State: AOAM532AZ5m0vqLJczo36pzl0fUOS2Wvz5+B3HTcC+mFrd59JtH7FN5O
-        BL8GdUS6EVRCkybzR0wjD0SIgg==
-X-Google-Smtp-Source: ABdhPJzLaOL5AabR46i7dKIOpQgrWYhTN0r11reBT85HgNmb6nhvZaSkN85dJfkjWvQbtPthllw43w==
-X-Received: by 2002:a17:902:7408:: with SMTP id g8mr24719845pll.143.1592963390847;
-        Tue, 23 Jun 2020 18:49:50 -0700 (PDT)
+        bh=r1CVChw5lv6qJCnYUjb6+Q15TOtyE7dXeIu2ryL/SHg=;
+        b=KyUQwYhVxx7KjjNdcMbW3lLBEorD2Th8ma8VczVli6khLmyfqSpwM7b//1+S9TQ3LV
+         nbo6btS6NmuzFWlNVW8FcvUt35VeAA/QcAHoIaj3N6QHyAET3ok6DvOK5homDvBfZtlt
+         nnqg+bpDki0p1zrsUQ2UM7HlE3gl6yBmUV+JJqAg77jLaoBK95B7rbEXDuDlQsEhVRPU
+         OtHWyaTsSGAO8uUdyRxUW4O0U8sGG/K63mtXc1DDSZ/kYm+7ndYCWSV5J12CKWKtmcMi
+         Xu8rrZPeGhgVH+ziy+h9ZyhCvMYnV/C6+bp/0wdpsfxxo3yuf42tLCx7nN7IsazEcHl6
+         rLxw==
+X-Gm-Message-State: AOAM5331yFDQPM53aneEGKTO7GiLqnOD0T0CxPgzf+T3CDRTbD3aLKgz
+        LAZ5C09tdCh1AzR3byhsizDAQQ==
+X-Google-Smtp-Source: ABdhPJwLyoPBCNvc6M7baPOo8YMhHaddUREkUy6nArCFg5rUy31c3O6TT7HTn6Prsx8Lzfg5bJwdKg==
+X-Received: by 2002:a62:8f8f:: with SMTP id n137mr12048606pfd.270.1592963393918;
+        Tue, 23 Jun 2020 18:49:53 -0700 (PDT)
 Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
-        by smtp.gmail.com with ESMTPSA id y9sm17907206pfr.184.2020.06.23.18.49.46
+        by smtp.gmail.com with ESMTPSA id u200sm2497659pfc.43.2020.06.23.18.49.48
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 23 Jun 2020 18:49:46 -0700 (PDT)
+        Tue, 23 Jun 2020 18:49:50 -0700 (PDT)
 From:   Kees Cook <keescook@chromium.org>
 To:     Will Deacon <will@kernel.org>
 Cc:     Kees Cook <keescook@chromium.org>,
-        Fangrui Song <maskray@google.com>,
         Catalin Marinas <catalin.marinas@arm.com>,
         Mark Rutland <mark.rutland@arm.com>,
         Ard Biesheuvel <ardb@kernel.org>,
@@ -75,9 +74,9 @@ Cc:     Kees Cook <keescook@chromium.org>,
         clang-built-linux@googlegroups.com, linux-arch@vger.kernel.org,
         linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v3 2/9] vmlinux.lds.h: Add .symtab, .strtab, and .shstrtab to STABS_DEBUG
-Date:   Tue, 23 Jun 2020 18:49:33 -0700
-Message-Id: <20200624014940.1204448-3-keescook@chromium.org>
+Subject: [PATCH v3 7/9] arm/boot: Warn on orphan section placement
+Date:   Tue, 23 Jun 2020 18:49:38 -0700
+Message-Id: <20200624014940.1204448-8-keescook@chromium.org>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200624014940.1204448-1-keescook@chromium.org>
 References: <20200624014940.1204448-1-keescook@chromium.org>
@@ -88,41 +87,84 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-When linking vmlinux with LLD, the synthetic sections .symtab, .strtab,
-and .shstrtab are listed as orphaned. Add them to the STABS_DEBUG section
-so there will be no warnings when --orphan-handling=warn is used more
-widely. (They are added above comment as it is the more common
-order[1].)
+We don't want to depend on the linker's orphan section placement
+heuristics as these can vary between linkers, and may change between
+versions. All sections need to be explicitly named in the linker
+script.
 
-ld.lld: warning: <internal>:(.symtab) is being placed in '.symtab'
-ld.lld: warning: <internal>:(.shstrtab) is being placed in '.shstrtab'
-ld.lld: warning: <internal>:(.strtab) is being placed in '.strtab'
+Use common macros for debug sections, discards, and text stubs. Add
+discards for unwanted .note, and .rel sections. Finally, enable orphan
+section warning.
 
-[1] https://lore.kernel.org/lkml/20200622224928.o2a7jkq33guxfci4@google.com/
-
-Reported-by: Fangrui Song <maskray@google.com>
-Reviewed-by: Fangrui Song <maskray@google.com>
 Signed-off-by: Kees Cook <keescook@chromium.org>
 ---
- include/asm-generic/vmlinux.lds.h | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ arch/arm/boot/compressed/Makefile      |  2 ++
+ arch/arm/boot/compressed/vmlinux.lds.S | 17 +++++++----------
+ 2 files changed, 9 insertions(+), 10 deletions(-)
 
-diff --git a/include/asm-generic/vmlinux.lds.h b/include/asm-generic/vmlinux.lds.h
-index 1248a206be8d..8e71757f485b 100644
---- a/include/asm-generic/vmlinux.lds.h
-+++ b/include/asm-generic/vmlinux.lds.h
-@@ -792,7 +792,10 @@
- 		.stab.exclstr 0 : { *(.stab.exclstr) }			\
- 		.stab.index 0 : { *(.stab.index) }			\
- 		.stab.indexstr 0 : { *(.stab.indexstr) }		\
--		.comment 0 : { *(.comment) }
-+		.comment 0 : { *(.comment) }				\
-+		.symtab 0 : { *(.symtab) }				\
-+		.strtab 0 : { *(.strtab) }				\
-+		.shstrtab 0 : { *(.shstrtab) }
+diff --git a/arch/arm/boot/compressed/Makefile b/arch/arm/boot/compressed/Makefile
+index 00602a6fba04..b8a97d81662d 100644
+--- a/arch/arm/boot/compressed/Makefile
++++ b/arch/arm/boot/compressed/Makefile
+@@ -128,6 +128,8 @@ endif
+ LDFLAGS_vmlinux += --no-undefined
+ # Delete all temporary local symbols
+ LDFLAGS_vmlinux += -X
++# Report orphan sections
++LDFLAGS_vmlinux += --orphan-handling=warn
+ # Next argument is a linker script
+ LDFLAGS_vmlinux += -T
  
- #ifdef CONFIG_GENERIC_BUG
- #define BUG_TABLE							\
+diff --git a/arch/arm/boot/compressed/vmlinux.lds.S b/arch/arm/boot/compressed/vmlinux.lds.S
+index 09ac33f52814..c2a8509f876f 100644
+--- a/arch/arm/boot/compressed/vmlinux.lds.S
++++ b/arch/arm/boot/compressed/vmlinux.lds.S
+@@ -2,6 +2,7 @@
+ /*
+  *  Copyright (C) 2000 Russell King
+  */
++#include <asm/vmlinux.lds.h>
+ 
+ #ifdef CONFIG_CPU_ENDIAN_BE8
+ #define ZIMAGE_MAGIC(x) ( (((x) >> 24) & 0x000000ff) | \
+@@ -17,8 +18,11 @@ ENTRY(_start)
+ SECTIONS
+ {
+   /DISCARD/ : {
++    ARM_COMMON_DISCARD
+     *(.ARM.exidx*)
+     *(.ARM.extab*)
++    *(.note.*)
++    *(.rel.*)
+     /*
+      * Discard any r/w data - this produces a link error if we have any,
+      * which is required for PIC decompression.  Local data generates
+@@ -36,9 +40,7 @@ SECTIONS
+     *(.start)
+     *(.text)
+     *(.text.*)
+-    *(.gnu.warning)
+-    *(.glue_7t)
+-    *(.glue_7)
++    ARM_STUBS_TEXT
+   }
+   .table : ALIGN(4) {
+     _table_start = .;
+@@ -128,12 +130,7 @@ SECTIONS
+   PROVIDE(__pecoff_data_size = ALIGN(512) - ADDR(.data));
+   PROVIDE(__pecoff_end = ALIGN(512));
+ 
+-  .stab 0		: { *(.stab) }
+-  .stabstr 0		: { *(.stabstr) }
+-  .stab.excl 0		: { *(.stab.excl) }
+-  .stab.exclstr 0	: { *(.stab.exclstr) }
+-  .stab.index 0		: { *(.stab.index) }
+-  .stab.indexstr 0	: { *(.stab.indexstr) }
+-  .comment 0		: { *(.comment) }
++  STABS_DEBUG
++  DWARF_DEBUG
+ }
+ ASSERT(_edata_real == _edata, "error: zImage file size is incorrect");
 -- 
 2.25.1
 
