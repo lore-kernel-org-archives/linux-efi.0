@@ -1,146 +1,165 @@
-Return-Path: <SRS0=EW6e=AG=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=kW9y=AH=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.5 required=3.0 tests=DKIM_SIGNED,DKIM_VALID,
+	FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 517ADC433DF
-	for <linux-efi@archiver.kernel.org>; Thu, 25 Jun 2020 23:46:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B135C433E0
+	for <linux-efi@archiver.kernel.org>; Fri, 26 Jun 2020 02:43:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2EDA4206DD
-	for <linux-efi@archiver.kernel.org>; Thu, 25 Jun 2020 23:46:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5F2B620899
+	for <linux-efi@archiver.kernel.org>; Fri, 26 Jun 2020 02:43:17 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="gbHOUEiy"
+	dkim=pass (1024-bit key) header.d=gmx.net header.i=@gmx.net header.b="D9LBXStY"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726618AbgFYXqJ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 25 Jun 2020 19:46:09 -0400
-Received: from esa4.hgst.iphmx.com ([216.71.154.42]:4091 "EHLO
-        esa4.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726380AbgFYXp0 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 25 Jun 2020 19:45:26 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1593128725; x=1624664725;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=M20HiMQD9oL/II9j9nUHwk6euEXhFNaJrLjuGryzaCg=;
-  b=gbHOUEiyGXu/kJ1BiKAve4ask7uFKVt9GmtGRlekNtq/8nrkA6LWHBpi
-   VZScGMb4abUTeRbiWIT3wN4Tf9pvuvG5yCnrd7kGHpLt0kZDP7GfAqjPg
-   rzqVosPRJwy05a0uehf8mlYIPp41parCm45GBnHrkoWnjR0SF1ayFtT/p
-   nmmQaBvm4z3W/D+GoSSL2988+9eFyxh8dyhkRqfs+u2hl6SSliQ+ItkX9
-   ytaMieXU5g/+c0y6Jqi9sjXGEXWjynotTAPD4h97s6Z+6WAoSDd6gr4wy
-   SPuw+FRx0bA+twKZ6RfCurVKxja1PYCePtsY1pgXZFW4bMysm5ZsNIUml
-   Q==;
-IronPort-SDR: Vmu/UbIHI7nielglOcG+ZdUrB+fIL55iticEcU3IDWMcj1hE8jCg77HdjvBIk5kUWWcWZKKASf
- 0Es6EAx+t/6G2VhqT2HHkDKrTFzNpExLnWShfeuaF4EdwQLmN6CDCykfaA0qS9wEie2CHv/MfI
- m7zmvbmhIvnmZzeUa+pzXovHhZW9OXGjpd4IA2+HJp6nGdxpD4ZBAKA/n1h5HP/dUCQtKzlrfY
- TvNeZBhudtgMib2j9o+JBX82747pGFWf8MRhYiO/eqlTuv5cmLheElb5rI1g9zANZ3rtybl8dg
- dt0=
-X-IronPort-AV: E=Sophos;i="5.75,280,1589212800"; 
-   d="scan'208";a="140953454"
-Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 26 Jun 2020 07:45:25 +0800
-IronPort-SDR: b+QMd6h8hb0gop6Kom53nMiQsutxugX0em5cT+9SyN3ksFyfAykZWg65JYNe0aj0u5UlyZqhNV
- IyyjJ2YqfCWOiP12PmBNjUD2GIgl0NcIc=
-Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Jun 2020 16:34:25 -0700
-IronPort-SDR: khYCqebgabkJ7OmHX9caktKOD4V4TcpsYIxqNzM9dj5nEB94M2b+iarGnwOnVnuCSjRcLYVinX
- PHvoAzKFAmkw==
-WDCIronportException: Internal
-Received: from 2349pbt5e4f.ad.shared (HELO jedi-01.hgst.com) ([10.86.58.78])
-  by uls-op-cesaip01.wdc.com with ESMTP; 25 Jun 2020 16:45:24 -0700
-From:   Atish Patra <atish.patra@wdc.com>
-To:     linux-kernel@vger.kernel.org
-Cc:     Atish Patra <atish.patra@wdc.com>,
-        Ard Biesheuvel <ardb@kernel.org>, linux-efi@vger.kernel.org,
+        id S1728099AbgFZCnR (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 25 Jun 2020 22:43:17 -0400
+Received: from mout.gmx.net ([212.227.17.20]:42843 "EHLO mout.gmx.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728132AbgFZCnQ (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Thu, 25 Jun 2020 22:43:16 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
+        s=badeba3b8450; t=1593139375;
+        bh=DYtHPfwpCJJKc0GqD63QONboqwpuMFw48ADI1vGBkfE=;
+        h=X-UI-Sender-Class:Subject:To:Cc:References:From:Date:In-Reply-To;
+        b=D9LBXStYT0ZyOfJPe078AUotHpvpwhf8u7T6/090nYLo4zv/t/yvuIaeB41sDEtHM
+         0X+58800Hz9TC1rg8vLQaLnznYmYYvELcnQEiXPqHOdIZ7MG6pfJQIVUbgUDRC7343
+         a8esRG8AVQ4orrqYxfty0FmLC0OBva/o8Ps0QObY=
+X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
+Received: from [192.168.123.51] ([88.152.145.75]) by mail.gmx.com (mrgmx105
+ [212.227.17.168]) with ESMTPSA (Nemesis) id 1N7zBb-1ikz0u2xTH-0153gH; Fri, 26
+ Jun 2020 04:42:55 +0200
+Subject: Re: [RFC PATCH 01/11] efi: Fix gcc error around __umoddi3 for 32 bit
+ builds
+To:     Atish Patra <atish.patra@wdc.com>, linux-kernel@vger.kernel.org
+Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-efi@vger.kernel.org,
         linux-riscv@lists.infradead.org,
         Masahiro Yamada <masahiroy@kernel.org>,
         Palmer Dabbelt <palmer@dabbelt.com>,
-        Heinrich Schuchardt <xypron.glpk@gmx.de>,
         linux-arm-kernel@lists.infradead.org
-Subject: [RFC PATCH 03/11] RISC-V: Setup exception vector early
-Date:   Thu, 25 Jun 2020 16:45:08 -0700
-Message-Id: <20200625234516.31406-4-atish.patra@wdc.com>
-X-Mailer: git-send-email 2.24.0
-In-Reply-To: <20200625234516.31406-1-atish.patra@wdc.com>
 References: <20200625234516.31406-1-atish.patra@wdc.com>
+ <20200625234516.31406-2-atish.patra@wdc.com>
+From:   Heinrich Schuchardt <xypron.glpk@gmx.de>
+Autocrypt: addr=xypron.glpk@gmx.de; prefer-encrypt=mutual; keydata=
+ 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 Eg==
+Message-ID: <5e2ce2ae-5458-8579-576a-76721f7d3b08@gmx.de>
+Date:   Fri, 26 Jun 2020 04:42:46 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.9.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <20200625234516.31406-2-atish.patra@wdc.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:DNir3hMAMYmQ87pJwppxYJqIekpH3I3jRR832mYeUNJrc23wAOp
+ HbPxmf10cNMzuii472N+t3Kj5r64eOm1lManQ01GefmPRkEx7/gDJlewZnR5XaDAczcFIVz
+ pm2bNrbsZi9EavGXOCyDSgh5bazavfd3XZzPTIl+JGPvZYuS6sV2SmHuQlnjXp7dXXAlgZ7
+ xpCbkt+5XAP2NRv/Zvb5A==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:Xq8K61p4ypI=:fU2r66EwJMt+drFGGv2Ny/
+ IocZxyE6K6ZixZ0rXD2jNMSWjOaS6hNqvRaeQpXiCBiWUA6ZxoTdhRBzJq/gO8xaOefbNDXjS
+ 7evuYkpsRxnc5iJe31Qvr256OHjR85Lg0/dnar70YVNHt6GJl7YeB6Sui8mTlvzy9Y7ydb5l2
+ g3PCW5HcKaNKgJdYo7MTxefe7NCiZjWadhO06t86x/XzSSLsU5gD67GzC5MDzX+hF1PMFbucP
+ /B+iSJA2ylOMcOJ17KlQuSf0JJMYD1QpsmeGrq3rn8vruKqkh8CDPaYP6yBgAwDBnFpXOkrDw
+ LK1TYKkLgsHV9ZKKMN8wxJgErkYGBB8EwPMe8diWGigebHsy1+VkCBatnA9ROs2r0cQZnA4sX
+ uxygkKJROdXLW0nGaJuQywT6qIVlaHuirlFUI7sGAddCpVBV9Rk+VlASaMpRKbR6208hG/VTU
+ NIdmSn9paIcZbJuTzfv+drOZ/jmysT6VzBxvEEloVcpDz5uFDAMvT4s43Yo091LuGS1AQu8oh
+ sEK51ZQCdZQ2JSljiXPXsHwTl9O58QLze/yTILrhOp4GbXLNxyUlOkRe5Zyq6xdr25RhiML5J
+ lxXXNZjlYaikX73NHIaDA3dupY7kakXf62qfzDlLlW17VQ/hZxu4QHhz0pgjQvLaRoFSJ/C+b
+ mf6sGNRjXuZGip71whdUIsdarm7sohO2z2VBZaF3OJwJmEAFNl3rfH9r+BxqEuL7WF4auSOo/
+ OvI6LUXXqUMFwoHowoLodsqpOT03EWgIZaeYS7ff/V97wI/w5I8R+SNjoSkK2X2UNHyzMT7Sr
+ vl6qJLuF7wHXJMQEf1BxCmglTY344dxSG3n3ukjS7Jyz23SLdPioD+0rq2GAoXkij2HG+Q4fe
+ +y9MfnO5oI2V7L1zhlIx41WQtfAbRo+p2mKSHHQEWWKEovokPVuYFeoxR2jIaxpnX0L4/WNtH
+ hjOiwirrdy+v6irBzPhxy3ICQbgypxEoNvBY8KeNtAG8jZYOdePMJBr1jINcdSBJTOeEDV4FB
+ iMiOe+mChG3fzIPp0Qf/bHyRleQgKl6e6ZDZdF2uZvrgrwl/YKJxS6FqHR/2LkHT7wZxaBQLU
+ I4D5PfIiafYWcsn9UIKKsUqUjs27tIw51IVE3tak/ebB3Z8opl64OTvGbNxTFri2WL+C8lYxw
+ 0T6Ht2YljGNLkPxKktXuUhfV4vZDZa4j8idoWlJcAMrHEC7lgwW+8PAp7BfEOI9XwHxIkJ4b+
+ p1NBpPev7YIBV4/KK
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The trap vector is set only in trap_init which may be too late in some
-cases. Early ioremap/efi spits many warning messages which may be useful.
+On 6/26/20 1:45 AM, Atish Patra wrote:
+> 32bit gcc doesn't support modulo operation on 64 bit data. It results in
+> a __umoddi3 error while building EFI for 32 bit.
+>
+> Use bitwise operations instead of modulo operations to fix the issue.
+>
+> Signed-off-by: Atish Patra <atish.patra@wdc.com>
+> ---
+>  drivers/firmware/efi/libstub/alignedmem.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/firmware/efi/libstub/alignedmem.c b/drivers/firmwar=
+e/efi/libstub/alignedmem.c
+> index cc89c4d6196f..1de9878ddd3a 100644
+> --- a/drivers/firmware/efi/libstub/alignedmem.c
+> +++ b/drivers/firmware/efi/libstub/alignedmem.c
+> @@ -44,7 +44,7 @@ efi_status_t efi_allocate_pages_aligned(unsigned long =
+size, unsigned long *addr,
+>  	*addr =3D ALIGN((unsigned long)alloc_addr, align);
+>
+>  	if (slack > 0) {
+> -		int l =3D (alloc_addr % align) / EFI_PAGE_SIZE;
+> +		int l =3D (alloc_addr & (align - 1)) / EFI_PAGE_SIZE;
 
-Setup the trap vector early so that any warning/bug can be handled before
-generic code invokes trap_init.
+Here you rely on the compiler to silently convert the division by
+EFI_PAGE_SIZE into a right shift. Wouldn't it be cleaner to use
+EFI_PAGE_SHIFT to explicitly avoid a dependency on __udivdi3()?
 
-Signed-off-by: Atish Patra <atish.patra@wdc.com>
----
- arch/riscv/kernel/head.S    | 10 ++++++++--
- arch/riscv/kernel/smpboot.c |  1 -
- arch/riscv/kernel/traps.c   |  8 +-------
- 3 files changed, 9 insertions(+), 10 deletions(-)
+slack =3D (align >> EFI_PAGE_SHIFT) - 1;
+...
+int l =3D (alloc_addr & (align - 1)) >> EFI_PAGE_SHIFT;
 
-diff --git a/arch/riscv/kernel/head.S b/arch/riscv/kernel/head.S
-index c5b529234ad8..eb123eda3663 100644
---- a/arch/riscv/kernel/head.S
-+++ b/arch/riscv/kernel/head.S
-@@ -77,10 +77,16 @@ relocate:
- 	csrw CSR_SATP, a0
- .align 2
- 1:
--	/* Set trap vector to spin forever to help debug */
--	la a0, .Lsecondary_park
-+	/* Set trap vector to exception handler */
-+	la a0, handle_exception
- 	csrw CSR_TVEC, a0
- 
-+	/*
-+	 * Set sup0 scratch register to 0, indicating to exception vector that
-+	 * we are presently executing in kernel.
-+	 */
-+	csrw CSR_SCRATCH, zero
-+
- 	/* Reload the global pointer */
- .option push
- .option norelax
-diff --git a/arch/riscv/kernel/smpboot.c b/arch/riscv/kernel/smpboot.c
-index 4e9922790f6e..5a9c127a380e 100644
---- a/arch/riscv/kernel/smpboot.c
-+++ b/arch/riscv/kernel/smpboot.c
-@@ -154,7 +154,6 @@ asmlinkage __visible void smp_callin(void)
- 	mmgrab(mm);
- 	current->active_mm = mm;
- 
--	trap_init();
- 	notify_cpu_starting(smp_processor_id());
- 	update_siblings_masks(smp_processor_id());
- 	set_cpu_online(smp_processor_id(), 1);
-diff --git a/arch/riscv/kernel/traps.c b/arch/riscv/kernel/traps.c
-index ecec1778e3a4..fbedf6c018a3 100644
---- a/arch/riscv/kernel/traps.c
-+++ b/arch/riscv/kernel/traps.c
-@@ -174,13 +174,7 @@ int is_valid_bugaddr(unsigned long pc)
- }
- #endif /* CONFIG_GENERIC_BUG */
- 
-+/* stvec & scratch is already set from head.S */
- void trap_init(void)
- {
--	/*
--	 * Set sup0 scratch register to 0, indicating to exception vector
--	 * that we are presently executing in the kernel
--	 */
--	csr_write(CSR_SCRATCH, 0);
--	/* Set the exception vector address */
--	csr_write(CSR_TVEC, &handle_exception);
- }
--- 
-2.24.0
+Best regards
+
+Heinrich
+
+>
+>  		if (l) {
+>  			efi_bs_call(free_pages, alloc_addr, slack - l + 1);
+>
 
