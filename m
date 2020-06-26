@@ -2,177 +2,134 @@ Return-Path: <SRS0=kW9y=AH=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.2 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	LONGWORDS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 53814C433E0
-	for <linux-efi@archiver.kernel.org>; Fri, 26 Jun 2020 05:45:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2972CC433DF
+	for <linux-efi@archiver.kernel.org>; Fri, 26 Jun 2020 19:00:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 32A4C20768
-	for <linux-efi@archiver.kernel.org>; Fri, 26 Jun 2020 05:45:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0FAB82088E
+	for <linux-efi@archiver.kernel.org>; Fri, 26 Jun 2020 19:00:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1593198015;
+	bh=ROZSJ4dLqKJhiMBXoRxjavbNBxHsqLSgFToIw6Fyc+s=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=ILx+izAxot1y3tetr0HLeDMqw7mri/DTxOgR9q8WHXD3UIzwtgqqneDanZE95JUm8
+	 v2bRNb4AvcKRTwgRBdwqNZw6/gH679p4fXDj2yKuoPBTHpCuYn0CU2tKZYQ5/sSd+Y
+	 GS5achRAJ90+rhFjaQh9cOSfrDrHFVTROjj3z/QI=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728042AbgFZFpJ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 26 Jun 2020 01:45:09 -0400
-Received: from mga04.intel.com ([192.55.52.120]:38787 "EHLO mga04.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728012AbgFZFpJ (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 26 Jun 2020 01:45:09 -0400
-IronPort-SDR: HjgAp0nsuAa6PrkVOKOuU27ecoCiAdXbMktuTgMZe5t+HdoKQQRYEa7LKGfF7qcolJzS96KKa+
- UzFbGq5RUoBw==
-X-IronPort-AV: E=McAfee;i="6000,8403,9663"; a="142712980"
-X-IronPort-AV: E=Sophos;i="5.75,282,1589266800"; 
-   d="scan'208";a="142712980"
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga004.fm.intel.com ([10.253.24.48])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Jun 2020 22:45:09 -0700
-IronPort-SDR: nbw1lflkgvfl/3Z8lMvoDZ0yqz+PpXIS7snaZZ4kFroSctOXX4Sbe46SOcVOJNGyVDDEdDvypT
- fxsxkRCNpavw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.75,282,1589266800"; 
-   d="scan'208";a="302238008"
-Received: from lkp-server01.sh.intel.com (HELO 538b5e3c8319) ([10.239.97.150])
-  by fmsmga004.fm.intel.com with ESMTP; 25 Jun 2020 22:45:08 -0700
-Received: from kbuild by 538b5e3c8319 with local (Exim 4.92)
-        (envelope-from <lkp@intel.com>)
-        id 1johAh-00021L-Fo; Fri, 26 Jun 2020 05:45:07 +0000
-Date:   Fri, 26 Jun 2020 13:44:13 +0800
-From:   kernel test robot <lkp@intel.com>
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     linux-efi@vger.kernel.org
-Subject: [efi:urgent] BUILD SUCCESS
- 71878bbd41cd11aa01a078dd2f882b59ad9d24d2
-Message-ID: <5ef58b2d.8RpG74UNDRQK9gqW%lkp@intel.com>
-User-Agent: Heirloom mailx 12.5 6/20/10
+        id S1725855AbgFZTAO (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 26 Jun 2020 15:00:14 -0400
+Received: from conuserg-11.nifty.com ([210.131.2.78]:61998 "EHLO
+        conuserg-11.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725819AbgFZTAN (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 26 Jun 2020 15:00:13 -0400
+Received: from oscar.flets-west.jp (softbank126090202047.bbtec.net [126.90.202.47]) (authenticated)
+        by conuserg-11.nifty.com with ESMTP id 05QIxVdb016565;
+        Sat, 27 Jun 2020 03:59:32 +0900
+DKIM-Filter: OpenDKIM Filter v2.10.3 conuserg-11.nifty.com 05QIxVdb016565
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nifty.com;
+        s=dec2015msa; t=1593197972;
+        bh=YLQjhUwHPBRq2DAWtdSXfOATkkHnCY2Fw5j0ijLSoIc=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=bVJmDujf2uItKo8FtGdsHXdwjcQnUdsZRwRzIlCwrlVDzmnreh3gR4a9taowo6F7k
+         RmbKZe2Uv0iDcAMcz1PVjTPCxyuM1MMu/2t8eUnN29uFyNidHmKC4K1O1Kwnh0upoa
+         YUVX+n67XGo6lkL3BxM3XGRAOBSpVpiHe5gUbmV7nJObPdbPmXJHkTEqd4J4xEc5oW
+         3+caTkAbJsKMk8Sb0OLLWKSiIzWvUrFE4SYsBShs2WvlDmTVFINPLCtvINrCftD067
+         kGI4TNi3RoD3W9mSRplKS0uQSOHyXf9rWXpEqcqy/FTgAMKlAL2o7eLn4wfeqXvpPV
+         YJLVXu3/zL4Eg==
+X-Nifty-SrcIP: [126.90.202.47]
+From:   Masahiro Yamada <masahiroy@kernel.org>
+To:     linux-kbuild@vger.kernel.org
+Cc:     clang-built-linux@googlegroups.com, x86@kernel.org,
+        linux-efi@vger.kernel.org, Kees Cook <keescook@chromium.org>,
+        linux-kernel@vger.kernel.org,
+        Masahiro Yamada <masahiroy@kernel.org>
+Subject: [PATCH 2/2] kbuild: remove cc-option test of -ffreestanding
+Date:   Sat, 27 Jun 2020 03:59:13 +0900
+Message-Id: <20200626185913.92890-2-masahiroy@kernel.org>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20200626185913.92890-1-masahiroy@kernel.org>
+References: <20200626185913.92890-1-masahiroy@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-tree/branch: https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git  urgent
-branch HEAD: 71878bbd41cd11aa01a078dd2f882b59ad9d24d2  efi/libstub: EFI_GENERIC_STUB_INITRD_CMDLINE_LOADER should not default to yes
+Some Makefiles already pass -ffreestanding unconditionally.
+For example, arch/arm64/lib/Makefile, arch/x86/purgatory/Makefile.
+No problem report so far about hard-coding this option. So, we can
+assume all supported compilers know -ffreestanding.
 
-elapsed time: 721m
+I confirmed GCC 4.8 and Clang manuals document this option.
 
-configs tested: 108
-configs skipped: 5
+Get rid of cc-option from -ffreestanding.
 
-The following configs have been built successfully.
-More configs may be tested in the coming days.
-
-arm                                 defconfig
-arm                              allyesconfig
-arm                              allmodconfig
-arm                               allnoconfig
-arm64                            allyesconfig
-arm64                               defconfig
-arm64                            allmodconfig
-arm64                             allnoconfig
-arc                     haps_hs_smp_defconfig
-s390                             allyesconfig
-powerpc                          g5_defconfig
-mips                        jmr3927_defconfig
-sh                           se7751_defconfig
-arm                       imx_v6_v7_defconfig
-arm                            xcep_defconfig
-arm                      pxa255-idp_defconfig
-arm                          tango4_defconfig
-arm                       mainstone_defconfig
-arm                          moxart_defconfig
-m68k                            q40_defconfig
-sh                          sdk7786_defconfig
-s390                              allnoconfig
-arm                            mps2_defconfig
-arm                             pxa_defconfig
-arm                         lpc18xx_defconfig
-mips                           ip27_defconfig
-arm                     eseries_pxa_defconfig
-mips                      loongson3_defconfig
-i386                             alldefconfig
-nds32                             allnoconfig
-sh                           se7724_defconfig
-mips                     loongson1b_defconfig
-parisc                            allnoconfig
-arm                            lart_defconfig
-i386                              allnoconfig
-i386                             allyesconfig
-i386                                defconfig
-i386                              debian-10.3
-ia64                             allmodconfig
-ia64                                defconfig
-ia64                              allnoconfig
-ia64                             allyesconfig
-m68k                             allmodconfig
-m68k                              allnoconfig
-m68k                           sun3_defconfig
-m68k                                defconfig
-m68k                             allyesconfig
-nios2                               defconfig
-nios2                            allyesconfig
-openrisc                            defconfig
-c6x                              allyesconfig
-c6x                               allnoconfig
-openrisc                         allyesconfig
-nds32                               defconfig
-csky                             allyesconfig
-csky                                defconfig
-alpha                               defconfig
-alpha                            allyesconfig
-xtensa                           allyesconfig
-h8300                            allyesconfig
-h8300                            allmodconfig
-xtensa                              defconfig
-arc                                 defconfig
-arc                              allyesconfig
-sh                               allmodconfig
-sh                                allnoconfig
-microblaze                        allnoconfig
-mips                             allyesconfig
-mips                              allnoconfig
-mips                             allmodconfig
-parisc                              defconfig
-parisc                           allyesconfig
-parisc                           allmodconfig
-powerpc                             defconfig
-powerpc                          allyesconfig
-powerpc                          rhel-kconfig
-powerpc                          allmodconfig
-powerpc                           allnoconfig
-i386                 randconfig-a013-20200624
-i386                 randconfig-a016-20200624
-i386                 randconfig-a012-20200624
-i386                 randconfig-a014-20200624
-i386                 randconfig-a011-20200624
-i386                 randconfig-a015-20200624
-riscv                            allyesconfig
-riscv                             allnoconfig
-riscv                               defconfig
-riscv                            allmodconfig
-s390                             allmodconfig
-s390                                defconfig
-sparc                            allyesconfig
-sparc                               defconfig
-sparc64                             defconfig
-sparc64                           allnoconfig
-sparc64                          allyesconfig
-sparc64                          allmodconfig
-um                               allmodconfig
-um                                allnoconfig
-um                               allyesconfig
-um                                  defconfig
-x86_64                               rhel-7.6
-x86_64                    rhel-7.6-kselftests
-x86_64                               rhel-8.3
-x86_64                                  kexec
-x86_64                                   rhel
-x86_64                         rhel-7.2-clear
-x86_64                                    lkp
-x86_64                              fedora-25
-
+Signed-off-by: Masahiro Yamada <masahiroy@kernel.org>
 ---
-0-DAY CI Kernel Test Service, Intel Corporation
-https://lists.01.org/hyperkitty/list/kbuild-all@lists.01.org
+
+ arch/s390/Makefile                    | 2 +-
+ arch/x86/Makefile                     | 2 +-
+ arch/x86/boot/compressed/Makefile     | 2 +-
+ drivers/firmware/efi/libstub/Makefile | 2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/arch/s390/Makefile b/arch/s390/Makefile
+index 8dfa2cf1f05c..ba94b03c8b2f 100644
+--- a/arch/s390/Makefile
++++ b/arch/s390/Makefile
+@@ -27,7 +27,7 @@ KBUILD_CFLAGS_DECOMPRESSOR := $(CLANG_FLAGS) -m64 -O2
+ KBUILD_CFLAGS_DECOMPRESSOR += -DDISABLE_BRANCH_PROFILING -D__NO_FORTIFY
+ KBUILD_CFLAGS_DECOMPRESSOR += -fno-delete-null-pointer-checks -msoft-float
+ KBUILD_CFLAGS_DECOMPRESSOR += -fno-asynchronous-unwind-tables
+-KBUILD_CFLAGS_DECOMPRESSOR += $(call cc-option,-ffreestanding)
++KBUILD_CFLAGS_DECOMPRESSOR += -ffreestanding
+ KBUILD_CFLAGS_DECOMPRESSOR += $(call cc-disable-warning, address-of-packed-member)
+ KBUILD_CFLAGS_DECOMPRESSOR += $(if $(CONFIG_DEBUG_INFO),-g)
+ KBUILD_CFLAGS_DECOMPRESSOR += $(if $(CONFIG_DEBUG_INFO_DWARF4), $(call cc-option, -gdwarf-4,))
+diff --git a/arch/x86/Makefile b/arch/x86/Makefile
+index 89c3cdfba753..edc68538a04e 100644
+--- a/arch/x86/Makefile
++++ b/arch/x86/Makefile
+@@ -36,7 +36,7 @@ REALMODE_CFLAGS	:= $(M16_CFLAGS) -g -Os -DDISABLE_BRANCH_PROFILING \
+ 		   -fno-strict-aliasing -fomit-frame-pointer -fno-pic \
+ 		   -mno-mmx -mno-sse
+ 
+-REALMODE_CFLAGS += $(call __cc-option, $(CC), $(REALMODE_CFLAGS), -ffreestanding)
++REALMODE_CFLAGS += -ffreestanding
+ REALMODE_CFLAGS += -fno-stack-protector
+ REALMODE_CFLAGS += $(call __cc-option, $(CC), $(REALMODE_CFLAGS), -Wno-address-of-packed-member)
+ REALMODE_CFLAGS += $(call __cc-option, $(CC), $(REALMODE_CFLAGS), $(cc_stack_align4))
+diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
+index c88a31569a5e..b7beabecef8a 100644
+--- a/arch/x86/boot/compressed/Makefile
++++ b/arch/x86/boot/compressed/Makefile
+@@ -35,7 +35,7 @@ cflags-$(CONFIG_X86_32) := -march=i386
+ cflags-$(CONFIG_X86_64) := -mcmodel=small
+ KBUILD_CFLAGS += $(cflags-y)
+ KBUILD_CFLAGS += -mno-mmx -mno-sse
+-KBUILD_CFLAGS += $(call cc-option,-ffreestanding)
++KBUILD_CFLAGS += -ffreestanding
+ KBUILD_CFLAGS += -fno-stack-protector
+ KBUILD_CFLAGS += $(call cc-disable-warning, address-of-packed-member)
+ KBUILD_CFLAGS += $(call cc-disable-warning, gnu)
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index f8418763cd79..296b18fbd7a2 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -28,7 +28,7 @@ cflags-$(CONFIG_EFI_GENERIC_STUB) += -I$(srctree)/scripts/dtc/libfdt
+ KBUILD_CFLAGS			:= $(cflags-y) -Os -DDISABLE_BRANCH_PROFILING \
+ 				   -include $(srctree)/drivers/firmware/efi/libstub/hidden.h \
+ 				   -D__NO_FORTIFY \
+-				   $(call cc-option,-ffreestanding) \
++				   -ffreestanding \
+ 				   -fno-stack-protector \
+ 				   $(call cc-option,-fno-addrsig) \
+ 				   -D__DISABLE_EXPORTS
+-- 
+2.25.1
+
