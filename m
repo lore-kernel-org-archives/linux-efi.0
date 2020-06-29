@@ -2,198 +2,203 @@ Return-Path: <SRS0=RaNn=AK=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-16.6 required=3.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,
+	USER_IN_DEF_DKIM_WL autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EFD88C433DF
-	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 21:35:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DCCE9C433DF
+	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 22:39:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C5EAC206E9
-	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 21:35:45 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1593466545;
-	bh=qBdL3tlBX+scLgBAFOGB5TLlWji+GPtg13a4shdBzo0=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=H6hfTjpacWWmVdfbmgrQJSFXGf++jIj/Z5PwkAwsELubjRql/M99v+NRtI6Tc17pN
-	 7hLC4W0kX/5o8ACIgQT7Xq1wCI3HQqZkKKUnpx7Y3iAMWpsevmncoSBBvIuljt9EEX
-	 d8y/xNbb68ZrXWm9QgfxbUFgXTRg1uudSry9J9uM=
+	by mail.kernel.org (Postfix) with ESMTP id AF76C20786
+	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 22:39:24 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="Wvv6Dtah"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728512AbgF2Vfk (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 29 Jun 2020 17:35:40 -0400
-Received: from mail.kernel.org ([198.145.29.99]:60608 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728509AbgF2Skr (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 29 Jun 2020 14:40:47 -0400
-Received: from mail-oi1-f176.google.com (mail-oi1-f176.google.com [209.85.167.176])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 764FD23EB4;
-        Mon, 29 Jun 2020 15:08:15 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1593443295;
-        bh=qBdL3tlBX+scLgBAFOGB5TLlWji+GPtg13a4shdBzo0=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=CqbNccPLqUPqB9hiyKYsfFMqH3nDDzIujQlexZjYfgmKPuDRzFqITwjtLc4SEaPIT
-         NX7+dkrumDzJth6HVgXUB7tIDxo+mOubkRrfP1ERFvFBgCZFiSuWvu5Ekl28nVWyl3
-         BT+iYJ8vFGrLyBjgUdifq4hbovppZjc7Z52B/uGQ=
-Received: by mail-oi1-f176.google.com with SMTP id e4so6522842oib.1;
-        Mon, 29 Jun 2020 08:08:15 -0700 (PDT)
-X-Gm-Message-State: AOAM5300557Le6CeZWQf0nLdoir8lOGrRYPQOS2xzVsy9qYXMKVLFCeD
-        W52XoAHDZ4guK0byG5tbY6Ka9j0v6UaCx2W0CPE=
-X-Google-Smtp-Source: ABdhPJwTia/C2SAyWRf7uRxGpRTQZVHRS1vjtLhx+E/b1Dt+tcSaaYv2NWdpuTJRHdljFla/pOrxnXThmPE1qfnRksI=
-X-Received: by 2002:aca:b241:: with SMTP id b62mr11815740oif.47.1593443294721;
- Mon, 29 Jun 2020 08:08:14 -0700 (PDT)
+        id S1728256AbgF2WjY (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 29 Jun 2020 18:39:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48380 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727943AbgF2WjY (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 29 Jun 2020 18:39:24 -0400
+Received: from mail-pj1-x1043.google.com (mail-pj1-x1043.google.com [IPv6:2607:f8b0:4864:20::1043])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A34F6C03E97A
+        for <linux-efi@vger.kernel.org>; Mon, 29 Jun 2020 15:39:23 -0700 (PDT)
+Received: by mail-pj1-x1043.google.com with SMTP id h22so8635366pjf.1
+        for <linux-efi@vger.kernel.org>; Mon, 29 Jun 2020 15:39:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=Zapdhd5wOeOGPDdB4uAKBeHEzFOq3zrNgTJZIPqzsqk=;
+        b=Wvv6Dtahe6GleCa8gnqJNTTtBdjrDG/3r9+HUHNe1jsxUhVUVDEgPWlkxSOV3+OcpV
+         v0yR4N+iEbZgX778DbNIAGbX2TIxXq8+Gi5oJu49hU17BL7Hul5QEysAexG+ydNbgMOo
+         PgZNkcokgimWBksjl3pSSevXfUPYwItR7Qx+SH3PIHn4sW66rnj1q1F8YWuGydSIXxFr
+         NVXjogMU4noRATaEN0MJ6mFh4ZeVK1i3Bij938QPTFKa5JAl6VfJKmGV/K9AeE4afg28
+         digtp2TDXdCuKL/FpFMtMWT1RH71K4pG9kI+Uky6Ez4JPeUdL50qfh7445r1NRn122Id
+         mcwA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=Zapdhd5wOeOGPDdB4uAKBeHEzFOq3zrNgTJZIPqzsqk=;
+        b=rBlClGP+IKAprDEjwETripAYqytnBzyfcAk3SLXbdReTX5YuazKk0p1QqAV35XcPYl
+         IfpQzWq7Ako1CzEzDvmGVi6ZPVg1zvYvWrpPrHYyEvofZP/3lh5a5TRMvDavzcXoeEzK
+         flJyU2qS48+YtCjXgcZLb0ZYPP3Z05slsa2+OREL+IgaQjy9fiB3X4d8HkRXjU23ZubJ
+         vd5VB4IHYIJCcMOgAd+2CAl3K0FqUtsL27RC5fSWyB9/qn0fchJNreWNagsuu8hdQC2z
+         s3KBvJU72bZo8LBZUMRYMk61sVxt/dTYMnv/B6xSx5THH0kGuyeW72zELhoOO9aOYe/w
+         Wubw==
+X-Gm-Message-State: AOAM531EhyYL+GrzA3OfQ1yr0GSFkRWxNMlQruN/PNC/z2/b31DPvmkq
+        bOimm2zQ+iApCdi3rzsKi1fYKJemhBYuQC5axv5k8A==
+X-Google-Smtp-Source: ABdhPJzKxVVA/UERXMxrjy6ojZ8dNl3GRmf36xXfXS/hUkCCbIEUj7V30jAYgp4qDheTF4tDFuQLeaTyAIpDG9yRI/I=
+X-Received: by 2002:a17:902:7208:: with SMTP id ba8mr15114728plb.179.1593470362777;
+ Mon, 29 Jun 2020 15:39:22 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200629061840.4065483-1-keescook@chromium.org>
- <20200629061840.4065483-6-keescook@chromium.org> <CAMj1kXE+toCd=Bx-zw7D9bvDRNB2aPn5-_7CY7MOKcVGA-azVg@mail.gmail.com>
- <202006290806.3BDE2A8@keescook>
-In-Reply-To: <202006290806.3BDE2A8@keescook>
-From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Mon, 29 Jun 2020 17:08:03 +0200
-X-Gmail-Original-Message-ID: <CAMj1kXHij8M5_kvh6EDaFa8ksbDBxqdaWGtR=-QnXhF7YosK6g@mail.gmail.com>
-Message-ID: <CAMj1kXHij8M5_kvh6EDaFa8ksbDBxqdaWGtR=-QnXhF7YosK6g@mail.gmail.com>
-Subject: Re: [PATCH v4 05/17] ctype: Work around Clang -mbranch-protection=none
- bug
-To:     Kees Cook <keescook@chromium.org>
-Cc:     Will Deacon <will@kernel.org>, Dave Martin <Dave.Martin@arm.com>,
+References: <20200626185913.92890-1-masahiroy@kernel.org> <CAKwvOd=V_M43CP7G87K3TqSsxua2NcXPz6BnDt-z6167O2WAzQ@mail.gmail.com>
+ <CAK7LNATcwGkSWV7NSgwG_WqzvTPphT9=KK+qvT3FK_7y1UCzTA@mail.gmail.com> <CAKwvOdntZw2k8ZZ7txPC-FD+50cPpMwctGYTW0j2zw+FVj9SgA@mail.gmail.com>
+In-Reply-To: <CAKwvOdntZw2k8ZZ7txPC-FD+50cPpMwctGYTW0j2zw+FVj9SgA@mail.gmail.com>
+From:   Nick Desaulniers <ndesaulniers@google.com>
+Date:   Mon, 29 Jun 2020 15:39:11 -0700
+Message-ID: <CAKwvOd=JbEJNdWzk_xdMiy9QewbU3ESOHcokAXKkARrgm-ibEg@mail.gmail.com>
+Subject: Re: [PATCH 1/2] kbuild: remove cc-option test of -fno-stack-protector
+To:     Masahiro Yamada <masahiroy@kernel.org>
+Cc:     Linux Kbuild mailing list <linux-kbuild@vger.kernel.org>,
         clang-built-linux <clang-built-linux@googlegroups.com>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Peter Collingbourne <pcc@google.com>,
-        James Morse <james.morse@arm.com>,
-        Borislav Petkov <bp@suse.de>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Ingo Molnar <mingo@redhat.com>,
-        Russell King <linux@armlinux.org.uk>,
-        Masahiro Yamada <masahiroy@kernel.org>,
-        Arvind Sankar <nivedita@alum.mit.edu>,
-        Nick Desaulniers <ndesaulniers@google.com>,
-        Nathan Chancellor <natechancellor@gmail.com>,
-        Arnd Bergmann <arnd@arndb.de>, X86 ML <x86@kernel.org>,
-        linux-arch <linux-arch@vger.kernel.org>,
+        "maintainer:X86 ARCHITECTURE (32-BIT AND 64-BIT)" <x86@kernel.org>,
         linux-efi <linux-efi@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+        Kees Cook <keescook@chromium.org>,
+        LKML <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Mon, 29 Jun 2020 at 17:06, Kees Cook <keescook@chromium.org> wrote:
+On Mon, Jun 29, 2020 at 11:26 AM Nick Desaulniers
+<ndesaulniers@google.com> wrote:
 >
-> On Mon, Jun 29, 2020 at 10:15:47AM +0200, Ard Biesheuvel wrote:
-> > On Mon, 29 Jun 2020 at 08:18, Kees Cook <keescook@chromium.org> wrote:
-> > >
-> > > In preparation for building efi/libstub with -mbranch-protection=none
-> > > (EFI does not support branch protection features[1]), add no-op code
-> > > to work around a Clang bug that emits an unwanted .note.gnu.property
-> > > section for object files without code[2].
-> > >
-> > > [1] https://lore.kernel.org/lkml/CAMj1kXHck12juGi=E=P4hWP_8vQhQ+-x3vBMc3TGeRWdQ-XkxQ@mail.gmail.com
-> > > [2] https://bugs.llvm.org/show_bug.cgi?id=46480
-> > >
-> > > Cc: Ard Biesheuvel <ardb@kernel.org>
-> > > Cc: Will Deacon <will@kernel.org>
-> > > Cc: Dave Martin <Dave.Martin@arm.com>
-> > > Cc: clang-built-linux@googlegroups.com
-> > > Signed-off-by: Kees Cook <keescook@chromium.org>
-> > > ---
-> > >  lib/ctype.c | 10 ++++++++++
-> > >  1 file changed, 10 insertions(+)
-> > >
-> > > diff --git a/lib/ctype.c b/lib/ctype.c
-> > > index c819fe269eb2..21245ed57d90 100644
-> > > --- a/lib/ctype.c
-> > > +++ b/lib/ctype.c
-> > > @@ -36,3 +36,13 @@ _L,_L,_L,_L,_L,_L,_L,_L,_L,_L,_L,_L,_L,_L,_L,_L,     /* 224-239 */
-> > >  _L,_L,_L,_L,_L,_L,_L,_P,_L,_L,_L,_L,_L,_L,_L,_L};      /* 240-255 */
-> > >
-> > >  EXPORT_SYMBOL(_ctype);
-> > > +
-> > > +/*
-> > > + * Clang will generate .note.gnu.property sections for object files
-> > > + * without code, even in the presence of -mbranch-protection=none.
-> > > + * To work around this, define an unused static function.
-> > > + * https://bugs.llvm.org/show_bug.cgi?id=46480
-> > > + */
-> > > +#ifdef CONFIG_CC_IS_CLANG
-> > > +void __maybe_unused __clang_needs_code_here(void) { }
-> > > +#endif
-> > > --
-> > > 2.25.1
-> > >
+> On Sat, Jun 27, 2020 at 4:59 AM Masahiro Yamada <masahiroy@kernel.org> wrote:
 > >
-> > I take it we don't need this horrible hack if we build the EFI stub
-> > with branch protections and filter out the .note.gnu.property section
-> > explicitly?
+> > On Sat, Jun 27, 2020 at 5:13 AM Nick Desaulniers
+> > <ndesaulniers@google.com> wrote:
+> > >
+> > > On Fri, Jun 26, 2020 at 12:00 PM Masahiro Yamada <masahiroy@kernel.org> wrote:
+> > > >
+> > > > diff --git a/arch/x86/kernel/cpu/Makefile b/arch/x86/kernel/cpu/Makefile
+> > > > index dba6a83bc349..93792b457b81 100644
+> > > > --- a/arch/x86/kernel/cpu/Makefile
+> > > > +++ b/arch/x86/kernel/cpu/Makefile
+> > > > @@ -17,8 +17,7 @@ KCOV_INSTRUMENT_perf_event.o := n
+> > > >  KCSAN_SANITIZE_common.o := n
+> > > >
+> > > >  # Make sure load_percpu_segment has no stackprotector
+> > > > -nostackp := $(call cc-option, -fno-stack-protector)
+> > > > -CFLAGS_common.o                := $(nostackp)
+> > > > +CFLAGS_common.o                := -fno-stack-protector
+> > >
+> > > Any time I see `:=` assignment to a CFLAGS variable, it's a red flag
+> > > for overwriting existing CFLAGS, which is a common source of bugs.  I
+> > > recognize the kernel is current a mix and match for:
+> > >
+> > > CFLAGS_<file>.o
+> > >
+> > > rules to either use `+=` or `:=`, but I wish we were consistent, and
+> > > consistent in our use of `+=`.  For those rules, is there a difference
+> > > between the use of `+=` and `:=` like there is for the more general
+> > > case of appending to KBUILD_CFLAGS?  If not, it's ok to match the
+> > > existing style, but it's curious to me in this patch to see a mixed
+> > > use of `+=` and `:=`.
 > >
-> > Sorry to backpedal, but that is probably a better approach after all,
-> > given that the instructions don't hurt, and we will hopefully be able
-> > to arm them once UEFI (as well as PE/COFF) gets around to describing
-> > this in a way that both the firmware and the OS can consume.
+> >
+> > I think Kees mostly answered your question.
+> >
+> > Let me add some comments.
+> >
+> >
+> > '+=' is the most used in kernel Makefiles, but
+> > ':=' and '=' are also used.
+> >
+> > So, you are right, we are inconsistent.
+> > This applies to not only CFLAGS_<file>.o, but also obj-y, etc.
+> >
+> > For example,
+> > https://github.com/torvalds/linux/blob/v5.7/arch/arm64/kernel/Makefile#L15
+> > 'obj-y :=' works since it is the first assignment to obj-y in that file.
+> > 'obj-y +=' also works, of course.
+> >
+> > We can consistently use '+=' everywhere, but I do not send
+> > patches for churn.
+> >
+> >
+> > You can use any assignment operator to CFLAGS_<file>.o
+> > if it is the first assignment in the Makefile.
+> > Using '+=' is robust for future code insertion/removal, though.
+> >
+> >
+> > If the right-hand side contains variable references,
+> > there is important difference in the behavior.
+> >
+> > You may know two flavors in variables
+> > (https://www.gnu.org/software/make/manual/make.html#Flavors)
 >
-> How does this look?
+> Cool, thanks for all the info.  With that, I'm happy with this patch.
+>
+> Reviewed-by: Nick Desaulniers <ndesaulniers@google.com>
 >
 >
-> commit 051ef0b75a386c3fe2f216d16246468147a48c5b
-> Author: Kees Cook <keescook@chromium.org>
-> Date:   Tue Jun 23 18:02:56 2020 -0700
+> > CFLAGS_foo.o := $(call cc-option,-fno-stack-protector)
+> > The cc-option is expanded immediately when this line is parsed.
+> > (So, the compiler is invoked for 'make clean' too)
+> >
+> >
+> > CFLAGS_foo.o += $(call cc-option,-fno-stack-protector)
+> > If this is the first assignment in the file,
+> > '+=' act as '=', so the evaluation of cc-option
+> > is delayed until $(CFLAGS_foo.o) is expanded.
+> > (So, the compiler is NOT invoked for 'make clean')
 >
->     efi/libstub: Disable -mbranch-protection
+> Ah, I think that may explain: I've been seeing the occasional warning
+> from $(NM) when running `make clean` for ARCH=arm, I'll bet that's
+> where this is coming from then.  Next time I reproduce it, I'll try to
+> find maybe where we're using `:=` or `=` with `$(NM)`.
 >
->     In preparation for adding --orphan-handling=warn to more architectures,
->     disable -mbranch-protection, as EFI does not yet support it[1].  This was
->     noticed due to it producing unwanted .note.gnu.property sections (prefixed
->     with .init due to the objcopy build step).
->
->     However, we must also work around a bug in Clang where the section is
->     still emitted for code-less object files[2], so also remove the section
->     during the objcopy.
->
->     [1] https://lore.kernel.org/lkml/CAMj1kXHck12juGi=E=P4hWP_8vQhQ+-x3vBMc3TGeRWdQ-XkxQ@mail.gmail.com
->     [2] https://bugs.llvm.org/show_bug.cgi?id=46480
->
->     Cc: Ard Biesheuvel <ardb@kernel.org>
->     Cc: Arvind Sankar <nivedita@alum.mit.edu>
->     Cc: Atish Patra <atish.patra@wdc.com>
->     Cc: linux-efi@vger.kernel.org
->     Signed-off-by: Kees Cook <keescook@chromium.org>
->
-> diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-> index 75daaf20374e..f9f1922f8f28 100644
-> --- a/drivers/firmware/efi/libstub/Makefile
-> +++ b/drivers/firmware/efi/libstub/Makefile
-> @@ -18,7 +18,8 @@ cflags-$(CONFIG_X86)          += -m$(BITS) -D__KERNEL__ \
->  # arm64 uses the full KBUILD_CFLAGS so it's necessary to explicitly
->  # disable the stackleak plugin
->  cflags-$(CONFIG_ARM64)         := $(subst $(CC_FLAGS_FTRACE),,$(KBUILD_CFLAGS)) \
-> -                                  -fpie $(DISABLE_STACKLEAK_PLUGIN)
-> +                                  -fpie $(DISABLE_STACKLEAK_PLUGIN) \
-> +                                  $(call cc-option,-mbranch-protection=none)
->  cflags-$(CONFIG_ARM)           := $(subst $(CC_FLAGS_FTRACE),,$(KBUILD_CFLAGS)) \
->                                    -fno-builtin -fpic \
->                                    $(call cc-option,-mno-single-pic-base)
-> @@ -66,6 +67,12 @@ lib-$(CONFIG_X86)            += x86-stub.o
->  CFLAGS_arm32-stub.o            := -DTEXT_OFFSET=$(TEXT_OFFSET)
->  CFLAGS_arm64-stub.o            := -DTEXT_OFFSET=$(TEXT_OFFSET)
->
-> +# Even when -mbranch-protection=none is set, Clang will generate a
-> +# .note.gnu.property for code-less object files (like lib/ctype.c),
-> +# so work around this by explicitly removing the unwanted section.
-> +# https://bugs.llvm.org/show_bug.cgi?id=46480
-> +STUBCOPY_FLAGS-y               += --remove-section=.note.gnu.property
-> +
->  #
->  # For x86, bootloaders like systemd-boot or grub-efi do not zero-initialize the
->  # .bss section, so the .bss section of the EFI stub needs to be included in the
->
+> Maybe arch/arm/boot/compressed/Makefile, KBSS_SZ is evaluated for
+> `make clean`? (If you start an arm build, but kill it before vmlinux
+> is created, then `make clean` I suspect that KBSS_SZ is evaluated?)
 
+$ ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- make LLVM=1 -j71
+$ rm vmlinux
+$ ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- make LLVM=1 -j71 clean
+llvm-nm: error: arch/arm/boot/compressed/../../../../vmlinux: No such
+file or directory.
 
-Looks fine
+I suspect I see this from doing an ARCH=arm build, then building a
+different ARCH and killing the build before vmlinux is produced or
+`make clean` for a different ARCH, then run a `make clean` for
+ARCH=arm.
 
-Acked-by: Ard Biesheuvel <ardb@kernel.org>
+Is the above (regarding lazy evaluation) not true for LDFLAGS_vmlinux?
+I would have thought this would work:
 
-if you want to keep it with the set, or I can take it as a EFI fix.
+diff --git a/arch/arm/boot/compressed/Makefile
+b/arch/arm/boot/compressed/Makefile
+index 00602a6fba04..9e7343ccc279 100644
+--- a/arch/arm/boot/compressed/Makefile
++++ b/arch/arm/boot/compressed/Makefile
+@@ -113,10 +113,9 @@ ccflags-y := -fpic $(call
+cc-option,-mno-single-pic-base,) -fno-builtin \
+ asflags-y := -DZIMAGE
+
+ # Supply kernel BSS size to the decompressor via a linker symbol.
+-KBSS_SZ = $(shell echo $$(($$($(NM) $(obj)/../../../../vmlinux | \
++LDFLAGS_vmlinux = --defsym _kernel_bss_size=$(shell echo $$(($$($(NM)
+$(obj)/../../../../vmlinux | \
+                sed -n -e 's/^\([^ ]*\) [AB] __bss_start$$/-0x\1/p' \
+-                      -e 's/^\([^ ]*\) [AB] __bss_stop$$/+0x\1/p') )) )
+-LDFLAGS_vmlinux = --defsym _kernel_bss_size=$(KBSS_SZ)
++                                        -e 's/^\([^ ]*\) [AB]
+__bss_stop$$/+0x\1/p') )) )
+
+-- 
+Thanks,
+~Nick Desaulniers
