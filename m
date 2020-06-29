@@ -2,66 +2,61 @@ Return-Path: <SRS0=RaNn=AK=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AD77CC433DF
-	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 20:55:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 73F43C433DF
+	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 20:56:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8983720663
-	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 20:55:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 53DB4206F1
+	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 20:56:48 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="s+op9n5q"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="jRyLPLKJ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2389775AbgF2Uyy (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 29 Jun 2020 16:54:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60092 "EHLO
+        id S1731491AbgF2U4r (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 29 Jun 2020 16:56:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43392 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729267AbgF2Uyw (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 29 Jun 2020 16:54:52 -0400
-Received: from mail-qk1-x744.google.com (mail-qk1-x744.google.com [IPv6:2607:f8b0:4864:20::744])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C5506C061755;
-        Mon, 29 Jun 2020 13:54:51 -0700 (PDT)
-Received: by mail-qk1-x744.google.com with SMTP id b4so16599606qkn.11;
-        Mon, 29 Jun 2020 13:54:51 -0700 (PDT)
+        with ESMTP id S1731280AbgF2TNJ (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 29 Jun 2020 15:13:09 -0400
+Received: from mail-pg1-x542.google.com (mail-pg1-x542.google.com [IPv6:2607:f8b0:4864:20::542])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 06820C08EB1E
+        for <linux-efi@vger.kernel.org>; Sun, 28 Jun 2020 23:27:30 -0700 (PDT)
+Received: by mail-pg1-x542.google.com with SMTP id e18so7832795pgn.7
+        for <linux-efi@vger.kernel.org>; Sun, 28 Jun 2020 23:27:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=sender:from:date:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=9HwG2hptkvSOrRKZDzSfX9HShvoVlZLEE89Q4pxGwKg=;
-        b=s+op9n5qGA+glqVosZzqTbnD2UvIqP3N7tNJyJ/kireTnyE28fdGxODM2aWtaXNSAC
-         t29PEGKsQHLLcaLTDHrNrMGtDXQ8YlfqGe+c+vcrvwaDrgsSi88W6vRLEzpzcdDlh1g1
-         QHWPA5CGNY+wCzuiB7BwRCYt59ZK5WRsL+IHULDPubTQnwZk71cECIxPIFoh0bWOx0AX
-         /M+hABUsvTA9G3EtAnMYeuCjL++xxyOyaLYBGYECi236pOeEmU39iaMolrQnh8DN/7QZ
-         fLO9TQVNO2jTJAUWFk/FzhFWKlPslVJzS9+zm8yEdDZJyYFUieqf87rZqYhOeAHzoYly
-         n1Lg==
+        d=chromium.org; s=google;
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=OcuGTfSUXtPYMFfpENNYu5S2NR6isuQ9uC03+go4k80=;
+        b=jRyLPLKJ/wflGnWNIhsw1/xtdO++qU/4G4jZjo+lnOqYVWgtIzMYOnTwQtGOp4VTv+
+         b8zRHjoyL25oKD4tWfpH43lrpeGB8egY2xI+HOcY319Hsy/yzaeePZ8YwW/uqTnkDoS9
+         fbCN5nnFFpuj2qqzr47ls2rlOBAuxjOrocN5I=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:sender:from:date:to:cc:subject:message-id
-         :references:mime-version:content-disposition:in-reply-to;
-        bh=9HwG2hptkvSOrRKZDzSfX9HShvoVlZLEE89Q4pxGwKg=;
-        b=a6P9aBw6ZvyY1aUxOAbqGC068wgG9pVGQ+NOs8CscNDMTkDpmw7E60UZUjtP5CQ/ar
-         86QhKW05giGa1LhLVhc50evPVW8NvD4qtHhToVPHAmHRnHmBZhAoxvyl7TObS6uovWM3
-         wb/Rcl9JLbbE28d52D4EnC9JU0/ld6CjfWWOG9WsodY1o66CGuydB4IbvLiWTycH+Gow
-         C9PEaz1SAkcjO7je2cjqvh9zHz5CEDZI+GwlFWzuOZ+teEWT8h5nrVv7+WXuJlcvyVJM
-         7p6pzWF5LgaJ/vT5MUp5jEXYcwmf5Wn1fgVjGgJRouHgIL30wwh3XclMUPiRgM1MEIUN
-         jyYg==
-X-Gm-Message-State: AOAM532F7a7ulxVRuSVLcI6Q09ce0RqPDjefG4bh3D14vO/dV3GNZBF0
-        0eHfUZb2UWUBl19HN1mqtXc=
-X-Google-Smtp-Source: ABdhPJzhU0UkI4NLmVT8XqBz5+IwnGuJPy0JQVzhW8zoa0QRRRLDmRVoyW3MbJrOFD6WdNnoAHaCyg==
-X-Received: by 2002:ae9:efc7:: with SMTP id d190mr16745385qkg.212.1593464090890;
-        Mon, 29 Jun 2020 13:54:50 -0700 (PDT)
-Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
-        by smtp.gmail.com with ESMTPSA id i22sm964461qki.4.2020.06.29.13.54.49
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=OcuGTfSUXtPYMFfpENNYu5S2NR6isuQ9uC03+go4k80=;
+        b=uKF2Jed/dVZQjvlA5v4F/FDimdqSHNgyFZfDuGnhI7TrgWtxaadT4oo2aDOMutnOhx
+         ru6EZjHohOC3jTnhTyqfwa410Vg9AOsmlHkTBV4+1cNdf9LdvvPY0HtPAS0HPphDT8J7
+         LwzFUlVQlwWRjCBN0f4lhDzw74ukYAeLoP4+Z1/Qs6sa9tjw51wuwtYWMhJq7+vm1UxI
+         mv0WUGZhwMDVd3G/ZG5BJj15wLOPgD5HvVf5cE1W174oc68eGU1r26DqeVtKUfNHrabt
+         o2R5nYLOpHj0U+Jb3lk9iJo1Ce7MtuzkPzbr1WBeIrjnBUKV+aHDGZAT4CNvXGe9+Z7S
+         Tjyw==
+X-Gm-Message-State: AOAM532m1nRy5d79Hzafwp4bStK/r2Y3BT14J391gDG8d7Q+LLM2+RZi
+        yZdl/lr/zKQ+oHQq9r2640Kwrg==
+X-Google-Smtp-Source: ABdhPJyp58Bg9f7GuaQUlT4KpenbA1Jul+PfAUND8VkiaE+umM/0tCY0B+FCqda7VoHqscVan5uu+w==
+X-Received: by 2002:a62:1646:: with SMTP id 67mr13176339pfw.281.1593412049613;
+        Sun, 28 Jun 2020 23:27:29 -0700 (PDT)
+Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
+        by smtp.gmail.com with ESMTPSA id 27sm18066808pjg.19.2020.06.28.23.27.28
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 29 Jun 2020 13:54:50 -0700 (PDT)
-From:   Arvind Sankar <nivedita@alum.mit.edu>
-X-Google-Original-From: Arvind Sankar <arvind@rani.riverdale.lan>
-Date:   Mon, 29 Jun 2020 16:54:48 -0400
-To:     Kees Cook <keescook@chromium.org>
-Cc:     Nick Desaulniers <ndesaulniers@google.com>,
-        Will Deacon <will@kernel.org>,
+        Sun, 28 Jun 2020 23:27:28 -0700 (PDT)
+From:   Kees Cook <keescook@chromium.org>
+To:     Will Deacon <will@kernel.org>
+Cc:     Kees Cook <keescook@chromium.org>,
         Catalin Marinas <catalin.marinas@arm.com>,
         Mark Rutland <mark.rutland@arm.com>,
         Ard Biesheuvel <ardb@kernel.org>,
@@ -73,78 +68,94 @@ Cc:     Nick Desaulniers <ndesaulniers@google.com>,
         Russell King <linux@armlinux.org.uk>,
         Masahiro Yamada <masahiroy@kernel.org>,
         Arvind Sankar <nivedita@alum.mit.edu>,
+        Nick Desaulniers <ndesaulniers@google.com>,
         Nathan Chancellor <natechancellor@gmail.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        "maintainer:X86 ARCHITECTURE (32-BIT AND 64-BIT)" <x86@kernel.org>,
-        clang-built-linux <clang-built-linux@googlegroups.com>,
-        linux-arch <linux-arch@vger.kernel.org>,
-        linux-efi <linux-efi@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        LKML <linux-kernel@vger.kernel.org>,
-        Joe Perches <joe@perches.com>
-Subject: Re: [PATCH v4 08/17] arm64/mm: Remove needless section quotes
-Message-ID: <20200629205448.GA1474367@rani.riverdale.lan>
+        Arnd Bergmann <arnd@arndb.de>, x86@kernel.org,
+        clang-built-linux@googlegroups.com, linux-arch@vger.kernel.org,
+        linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org
+Subject: [PATCH v4 16/17] x86/build: Warn on orphan section placement
+Date:   Sun, 28 Jun 2020 23:18:39 -0700
+Message-Id: <20200629061840.4065483-17-keescook@chromium.org>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20200629061840.4065483-1-keescook@chromium.org>
 References: <20200629061840.4065483-1-keescook@chromium.org>
- <20200629061840.4065483-9-keescook@chromium.org>
- <CAKwvOd=r6bsBfSZxVYrnbm1Utq==ApWBDjx+0Fxsm90Aq3Jghw@mail.gmail.com>
- <202006291301.46FEF3B7@keescook>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <202006291301.46FEF3B7@keescook>
+Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Mon, Jun 29, 2020 at 01:04:31PM -0700, Kees Cook wrote:
-> On Mon, Jun 29, 2020 at 12:53:47PM -0700, Nick Desaulniers wrote:
-> > On Sun, Jun 28, 2020 at 11:18 PM Kees Cook <keescook@chromium.org> wrote:
-> > >
-> > > Fix a case of needless quotes in __section(), which Clang doesn't like.
-> > >
-> > > Acked-by: Will Deacon <will@kernel.org>
-> > > Signed-off-by: Kees Cook <keescook@chromium.org>
-> > 
-> > Yep, I remember bugs from this.  Probably should scan the kernel for
-> > other instances of this.  +Joe for checkpatch.pl validation.
-> 
-> I think the others are safe because they're in macros:
+We don't want to depend on the linker's orphan section placement
+heuristics as these can vary between linkers, and may change between
+versions. All sections need to be explicitly named in the linker
+script.
 
-Why does that make it safe -- the commit msg is a bit sparse, but I
-assume the problem is that it generates
-	__attribute__((__section__("\".foo\"")))
-from
-	__section(".foo")
-after preprocessing, and clang keeps the quotes in the section name when
-generating assembly, while gcc appears to strip them off.
+Discards the unused rela, plt, and got sections that are not needed
+in the final vmlinux, stop emitting kprobe sections without kprobes,
+and enable orphan section warnings.
 
-It does that even if nested in another macro, no?
+Signed-off-by: Kees Cook <keescook@chromium.org>
+---
+ arch/x86/Makefile             | 4 ++++
+ arch/x86/include/asm/asm.h    | 6 +++++-
+ arch/x86/kernel/vmlinux.lds.S | 6 ++++++
+ 3 files changed, 15 insertions(+), 1 deletion(-)
 
-> 
-> $ git grep -4 '__section("'
-> include/linux/compiler.h-# define KENTRY(sym)                                           \
+diff --git a/arch/x86/Makefile b/arch/x86/Makefile
+index 00e378de8bc0..f8a5b2333729 100644
+--- a/arch/x86/Makefile
++++ b/arch/x86/Makefile
+@@ -51,6 +51,10 @@ ifdef CONFIG_X86_NEED_RELOCS
+         LDFLAGS_vmlinux := --emit-relocs --discard-none
+ endif
+ 
++# We never want expected sections to be placed heuristically by the
++# linker. All sections should be explicitly named in the linker script.
++LDFLAGS_vmlinux += --orphan-handling=warn
++
+ #
+ # Prevent GCC from generating any FP code by mistake.
+ #
+diff --git a/arch/x86/include/asm/asm.h b/arch/x86/include/asm/asm.h
+index 0f63585edf5f..92feec0f0a12 100644
+--- a/arch/x86/include/asm/asm.h
++++ b/arch/x86/include/asm/asm.h
+@@ -138,11 +138,15 @@
+ # define _ASM_EXTABLE_FAULT(from, to)				\
+ 	_ASM_EXTABLE_HANDLE(from, to, ex_handler_fault)
+ 
+-# define _ASM_NOKPROBE(entry)					\
++# ifdef CONFIG_KPROBES
++#  define _ASM_NOKPROBE(entry)					\
+ 	.pushsection "_kprobe_blacklist","aw" ;			\
+ 	_ASM_ALIGN ;						\
+ 	_ASM_PTR (entry);					\
+ 	.popsection
++# else
++#  define _ASM_NOKPROBE(entry)
++# endif
+ 
+ #else
+ # define _EXPAND_EXTABLE_HANDLE(x) #x
+diff --git a/arch/x86/kernel/vmlinux.lds.S b/arch/x86/kernel/vmlinux.lds.S
+index 504d16968ed8..52e2b4952a0b 100644
+--- a/arch/x86/kernel/vmlinux.lds.S
++++ b/arch/x86/kernel/vmlinux.lds.S
+@@ -413,6 +413,12 @@ SECTIONS
+ 	ELF_DETAILS
+ 
+ 	DISCARDS
++	/DISCARD/ : {
++		*(.rela.*) *(.rela_*)
++		*(.rel.*) *(.rel_*)
++		*(.got) *(.got.*)
++		*(.igot.*) *(.iplt)
++	}
+ }
+ 
+ 
+-- 
+2.25.1
 
-Am I missing something, or is KENTRY unused in the tree?
-
-> include/linux/compiler.h-       extern typeof(sym) sym;                                 \
-> include/linux/compiler.h-       static const unsigned long __kentry_##sym               \
-> include/linux/compiler.h-       __used                                                  \
-> include/linux/compiler.h:       __section("___kentry" "+" #sym )                        \
-> include/linux/compiler.h-       = (unsigned long)&sym;
-> --
-> include/linux/export.h-#define __ksym_marker(sym)       \
-> include/linux/export.h: static int __ksym_marker_##sym[0] __section(".discard.ksym") __used
-> --
-> include/linux/srcutree.h-# define __DEFINE_SRCU(name, is_static)                                \
-> include/linux/srcutree.h-       is_static struct srcu_struct name;                              \
-> include/linux/srcutree.h-       struct srcu_struct * const __srcu_struct_##name                 \
-> include/linux/srcutree.h:               __section("___srcu_struct_ptrs") = &name
-> 
-> 
-> > Reviewed-by: Nick Desaulniers <ndesaulniers@google.com>
-> 
-> Thanks!
-> 
-> -- 
-> Kees Cook
