@@ -5,55 +5,55 @@ X-Spam-Level:
 X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 14252C433E1
-	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 20:58:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D37BDC433DF
+	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 21:00:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E8575206F1
-	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 20:58:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B51BD20724
+	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 21:00:50 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="KCQ5YzkO"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="G5louE6U"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729825AbgF2U6H (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 29 Jun 2020 16:58:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43350 "EHLO
+        id S1729932AbgF2VAu (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 29 Jun 2020 17:00:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43366 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726084AbgF2TNE (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 29 Jun 2020 15:13:04 -0400
-Received: from mail-pj1-x1042.google.com (mail-pj1-x1042.google.com [IPv6:2607:f8b0:4864:20::1042])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 082C2C08EB23
-        for <linux-efi@vger.kernel.org>; Sun, 28 Jun 2020 23:27:31 -0700 (PDT)
-Received: by mail-pj1-x1042.google.com with SMTP id b92so7574367pjc.4
-        for <linux-efi@vger.kernel.org>; Sun, 28 Jun 2020 23:27:31 -0700 (PDT)
+        with ESMTP id S1731220AbgF2TM7 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 29 Jun 2020 15:12:59 -0400
+Received: from mail-pj1-x1044.google.com (mail-pj1-x1044.google.com [IPv6:2607:f8b0:4864:20::1044])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2409BC08EB03
+        for <linux-efi@vger.kernel.org>; Sun, 28 Jun 2020 23:18:51 -0700 (PDT)
+Received: by mail-pj1-x1044.google.com with SMTP id o22so2511031pjw.2
+        for <linux-efi@vger.kernel.org>; Sun, 28 Jun 2020 23:18:51 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=chromium.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=EO3sRskvzqVrSi/8WlTJ+nKIw1S19eoepjwOuVzqC+k=;
-        b=KCQ5YzkONWOo65CEsckxdgEZDidmsxzkUPEN/UJBCW/qObWNXMfEoB9r0/E7rvaRmO
-         xlnRluaPTdkLMjWOJpH+yUIspSAOF0HgZkzvSgs47FWa+/kG7rzViG86wdee3s9jODiH
-         uu4zTKxTboSZHSRTNaUsgRAj4+LH6Z0yJ6Lok=
+        bh=T0P/zigfbEYVemiv+chkLi1sxk82Ehd4Rswu0BvpDuE=;
+        b=G5louE6Uyd2kc+xV2J1VjkFKPj4o3+7iuP5vPYPCWk+r8gutkK73zgcof6KUBrCFWp
+         NA/YHDMZXOj7EKNzEtTGayNRzAljV3w+YWfaERiAi1wGVtDGv2A1+AtbnH1n8Rlsjznr
+         ZVcm+cqp/UVyef3E1570F2Ni4TsttMaQCB9Os=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=EO3sRskvzqVrSi/8WlTJ+nKIw1S19eoepjwOuVzqC+k=;
-        b=h8VYsHSTDLNV22EekXReSUPXj/lVQyYXMY4bS+bbzAJfJyJJAWi3K57UCc/rFfXmff
-         n4QhcU57kM6P/4/F57pAXsofJ+rrAE4zqCCKspmpd1+TJM7TU8omeN4ex3/9yNWhD/oP
-         bUaBIlrGwKsK7/7x8nV3N3nN5D6ZfL1prOzwT+Ilcd4J1DUrMAgzCDosE+ua5qH6HphI
-         63pQjMxLni054dZtmw2MPiWZwBVZD5sfmAAAbvVX6UN2CXOJqtGQswE9nfUJJX8iEv8E
-         bBEznMKeFJmyiMHX8kS2N6hrLqafnH+URXwFoCeKIwoH2APXwmH6KEfyIpq4CMAN4o9p
-         C2oQ==
-X-Gm-Message-State: AOAM5324Ljm4GJjtdZvsF+YyzT1VfC+OGhv4SfMHc697x2+lwL5AG4Xh
-        ibGg6eooqq0iRUBGXPBYcvXEpw==
-X-Google-Smtp-Source: ABdhPJxsnK2AsNvKawVoNrn3+ksDPrZ4SCYduO82/RDQuADusHJqjvhs/5ikZAbuEc8CjzSaMNuCrA==
-X-Received: by 2002:a17:90b:4d10:: with SMTP id mw16mr15789032pjb.143.1593412050567;
-        Sun, 28 Jun 2020 23:27:30 -0700 (PDT)
+        bh=T0P/zigfbEYVemiv+chkLi1sxk82Ehd4Rswu0BvpDuE=;
+        b=i1QHbBU+cXSektyTwD+flL+kbNQdGSGRUo7B9sci3ThRAZg3xFwg8VRrbcq0UKFkcX
+         BaKBdWG6IW83/wEFuQQ5ePBkjrqFfpxMh/tkeH1wAi2Gto7p2qx9wvrl6sR0J3LeiCow
+         EosLI7Zily34RcYon8RffGkKPQA4KFFOzPnxxdZOj/z/f1ey4OBG+ObK4puTPXfvse95
+         C1fDPs+ACb5nVbGj2IMGuqTRksbR8GblWXKJXQAuYdwJMp3pWZWeJUYlVv78DjrCe7CX
+         2vwz6+GcIkObrbdjcb2odNxGoVsxuq/tT2No4ouafWLoXl1izyQO00dQQsNnlZWimyeG
+         4gbg==
+X-Gm-Message-State: AOAM532RqBMwEAM1nXByHecoiRzVawDL2DnRQP58cQ/wLzg+PoXSq/5N
+        Jzuq+u32HSz4p7+q0nfmgtbOfA==
+X-Google-Smtp-Source: ABdhPJxGErTr5qdj/h+EXAH5O68jFfE2tqj+62XVCx45BXGt9Nz2IQt9L7atafYyKCZkdIT/G4UB5A==
+X-Received: by 2002:a17:90a:8a8b:: with SMTP id x11mr10404879pjn.127.1593411530770;
+        Sun, 28 Jun 2020 23:18:50 -0700 (PDT)
 Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
-        by smtp.gmail.com with ESMTPSA id h3sm19838700pje.28.2020.06.28.23.27.28
+        by smtp.gmail.com with ESMTPSA id mp15sm17957978pjb.45.2020.06.28.23.18.46
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 28 Jun 2020 23:27:28 -0700 (PDT)
+        Sun, 28 Jun 2020 23:18:47 -0700 (PDT)
 From:   Kees Cook <keescook@chromium.org>
 To:     Will Deacon <will@kernel.org>
 Cc:     Kees Cook <keescook@chromium.org>,
@@ -74,9 +74,9 @@ Cc:     Kees Cook <keescook@chromium.org>,
         clang-built-linux@googlegroups.com, linux-arch@vger.kernel.org,
         linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v4 17/17] x86/boot: Warn on orphan section placement
-Date:   Sun, 28 Jun 2020 23:18:40 -0700
-Message-Id: <20200629061840.4065483-18-keescook@chromium.org>
+Subject: [PATCH v4 08/17] arm64/mm: Remove needless section quotes
+Date:   Sun, 28 Jun 2020 23:18:31 -0700
+Message-Id: <20200629061840.4065483-9-keescook@chromium.org>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200629061840.4065483-1-keescook@chromium.org>
 References: <20200629061840.4065483-1-keescook@chromium.org>
@@ -87,65 +87,27 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-We don't want to depend on the linker's orphan section placement
-heuristics as these can vary between linkers, and may change between
-versions. All sections need to be explicitly named in the linker
-script.
+Fix a case of needless quotes in __section(), which Clang doesn't like.
 
-Add the common debugging sections. Discard the unused note, rel, plt,
-dyn, and hash sections that are not needed in the compressed vmlinux.
-Disable .eh_frame generation in the linker and enable orphan section
-warnings.
-
+Acked-by: Will Deacon <will@kernel.org>
 Signed-off-by: Kees Cook <keescook@chromium.org>
 ---
- arch/x86/boot/compressed/Makefile      |  3 ++-
- arch/x86/boot/compressed/vmlinux.lds.S | 10 ++++++++++
- 2 files changed, 12 insertions(+), 1 deletion(-)
+ arch/arm64/mm/mmu.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
-index 7619742f91c9..646720a05f89 100644
---- a/arch/x86/boot/compressed/Makefile
-+++ b/arch/x86/boot/compressed/Makefile
-@@ -48,6 +48,7 @@ GCOV_PROFILE := n
- UBSAN_SANITIZE :=n
+diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
+index 1df25f26571d..dce024ea6084 100644
+--- a/arch/arm64/mm/mmu.c
++++ b/arch/arm64/mm/mmu.c
+@@ -42,7 +42,7 @@
+ u64 idmap_t0sz = TCR_T0SZ(VA_BITS);
+ u64 idmap_ptrs_per_pgd = PTRS_PER_PGD;
  
- KBUILD_LDFLAGS := -m elf_$(UTS_MACHINE)
-+KBUILD_LDFLAGS += $(call ld-option,--no-ld-generated-unwind-info)
- # Compressed kernel should be built as PIE since it may be loaded at any
- # address by the bootloader.
- ifeq ($(CONFIG_X86_32),y)
-@@ -59,7 +60,7 @@ else
- KBUILD_LDFLAGS += $(shell $(LD) --help 2>&1 | grep -q "\-z noreloc-overflow" \
- 	&& echo "-z noreloc-overflow -pie --no-dynamic-linker")
- endif
--LDFLAGS_vmlinux := -T
-+LDFLAGS_vmlinux := --orphan-handling=warn -T
+-u64 __section(".mmuoff.data.write") vabits_actual;
++u64 __section(.mmuoff.data.write) vabits_actual;
+ EXPORT_SYMBOL(vabits_actual);
  
- hostprogs	:= mkpiggy
- HOST_EXTRACFLAGS += -I$(srctree)/tools/include
-diff --git a/arch/x86/boot/compressed/vmlinux.lds.S b/arch/x86/boot/compressed/vmlinux.lds.S
-index d88612e3091f..9afb8737896f 100644
---- a/arch/x86/boot/compressed/vmlinux.lds.S
-+++ b/arch/x86/boot/compressed/vmlinux.lds.S
-@@ -75,7 +75,17 @@ SECTIONS
- 	. = ALIGN(PAGE_SIZE);	/* keep ZO size page aligned */
- 	_end = .;
- 
-+	STABS_DEBUG
-+	DWARF_DEBUG
- 	ELF_DETAILS
- 
- 	DISCARDS
-+	/DISCARD/ : {
-+		*(.note.*)
-+		*(.rela.*) *(.rela_*)
-+		*(.rel.*) *(.rel_*)
-+		*(.plt) *(.plt.*)
-+		*(.dyn*)
-+		*(.hash) *(.gnu.hash)
-+	}
- }
+ u64 kimage_voffset __ro_after_init;
 -- 
 2.25.1
 
