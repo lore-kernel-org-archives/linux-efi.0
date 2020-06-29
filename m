@@ -2,132 +2,121 @@ Return-Path: <SRS0=RaNn=AK=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.3 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 01FCCC433DF
-	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 19:03:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 16AB0C433DF
+	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 19:12:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D9E492053B
-	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 19:03:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EAC24206F1
+	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 19:12:45 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=armlinux.org.uk header.i=@armlinux.org.uk header.b="N+rbp9GA"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="SPivvXbh"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730588AbgF2TDa (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 29 Jun 2020 15:03:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41872 "EHLO
+        id S1731118AbgF2TMp (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 29 Jun 2020 15:12:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43350 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730247AbgF2TD0 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 29 Jun 2020 15:03:26 -0400
-Received: from pandora.armlinux.org.uk (pandora.armlinux.org.uk [IPv6:2001:4d48:ad52:32c8:5054:ff:fe00:142])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 94700C031C40;
-        Mon, 29 Jun 2020 12:03:26 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=armlinux.org.uk; s=pandora-2019; h=Sender:In-Reply-To:Content-Type:
-        MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description:Resent-Date:
-        Resent-From:Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:List-Id:
-        List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive;
-         bh=+IitMUk+eOYapugNWdcU2qNl/SJeRY/e+GCy2zsMLo8=; b=N+rbp9GAXyeaJr2JEOHz+UXKi
-        RsSRxVTngHhTRvU12HFs410qqK0KgYvJnLV4c+gxMbCoh3lnabXdW68dUe+tiDxwUQf835ZcIukvO
-        nP+iLDAsjH6047RD10Y8a3A+vLOoAIdwFz5UwQ2vjB/iPjCPwyjp8PTOsP1erptR/bqeZGFkElxUE
-        YTaLVJEib0JGcCyLbw2ccxW1Y35fnPlTX4rz1m2859yaEtnKzdu6gF39mRrYiZLlsKQEKRCiINLWl
-        z0QldW6EbOGfQyx1S0HxtBSebUfIaVLEDFaPlc4HlkrZS+WwFMrEEJcwTNdvYY2LcRWZaTe5c6mzz
-        zvLOSXRqA==;
-Received: from shell.armlinux.org.uk ([fd8f:7570:feb6:1:5054:ff:fe00:4ec]:33208)
-        by pandora.armlinux.org.uk with esmtpsa (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <linux@armlinux.org.uk>)
-        id 1jpz3m-00088W-9q; Mon, 29 Jun 2020 20:03:18 +0100
-Received: from linux by shell.armlinux.org.uk with local (Exim 4.92)
-        (envelope-from <linux@shell.armlinux.org.uk>)
-        id 1jpz3k-0007MT-Qr; Mon, 29 Jun 2020 20:03:16 +0100
-Date:   Mon, 29 Jun 2020 20:03:16 +0100
-From:   Russell King - ARM Linux admin <linux@armlinux.org.uk>
-To:     Arvind Sankar <nivedita@alum.mit.edu>
-Cc:     Kees Cook <keescook@chromium.org>, Will Deacon <will@kernel.org>,
+        with ESMTP id S1731084AbgF2TMn (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 29 Jun 2020 15:12:43 -0400
+Received: from mail-pj1-x1042.google.com (mail-pj1-x1042.google.com [IPv6:2607:f8b0:4864:20::1042])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EF746C08EAFE
+        for <linux-efi@vger.kernel.org>; Sun, 28 Jun 2020 23:18:49 -0700 (PDT)
+Received: by mail-pj1-x1042.google.com with SMTP id h22so7569362pjf.1
+        for <linux-efi@vger.kernel.org>; Sun, 28 Jun 2020 23:18:49 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=chromium.org; s=google;
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=Sx4qtxhnzkaAUuvKla0BBnxBLtInQMeed/tdFBRnaf0=;
+        b=SPivvXbhkz1HNs4hv3hB3lAGf7mxY7QzuyuiHLUvE2NTzUDgKcMtvoCr5OvTnpEGNI
+         BKEe727LLu354Czz0UrLwsb8Oq9z1awx0ZhcCb/nUDxWPW65pd8mBz8whR+nh3hBfift
+         6e7dxeB4Nqxb9mSsbs5XD4usOXZc+u6wbNETc=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=Sx4qtxhnzkaAUuvKla0BBnxBLtInQMeed/tdFBRnaf0=;
+        b=LmNlxu8pfEhc+7Qc1qUL8ykWHkHfT5DRO3wG2hzOxVk3+bVCaD/bo2RAvBiFgGzANs
+         WdrM0LAxA0kAH7xYMGe7l+Q5UZ4lM1D12VOgu+ZE9dVZjO+GrX5TFm5WRZ+09/WiNUaY
+         zLR/1UVkBrlEvCwKo7KYAm4DpAiG7GNP6o8wL7+uu3GquNoqkFFRc4YcvV7JZNtf9Mow
+         8LZkn8fGWngtfg8kprSh9w/dxaFNigaR1kIJ5zi72x8FvTP8Bg3onK/3X5ai92voe/cW
+         iMOWoAyWGYOUVvNra9HuiE9AiidMtmG2pBzLtmsC/KDkGb5r6TjCMlKzkuxgu582IoaJ
+         W0Bg==
+X-Gm-Message-State: AOAM532nk9aNfXzGLTPRD1DqoWjPhYO02ATDBZ6FjpeAX50o6XQdl0P8
+        GexIJsj8YAcI027nbDeAW9Zj5A==
+X-Google-Smtp-Source: ABdhPJwNi3xJzPNT7Gdq2Pw3b3VdTrLvNjNwn9RzBwTGL5D87SEILQ2r1+XLJOB0Z/PotUqW7oYIyg==
+X-Received: by 2002:a17:902:6945:: with SMTP id k5mr11956092plt.336.1593411529540;
+        Sun, 28 Jun 2020 23:18:49 -0700 (PDT)
+Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
+        by smtp.gmail.com with ESMTPSA id n65sm32225037pfn.17.2020.06.28.23.18.45
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 28 Jun 2020 23:18:47 -0700 (PDT)
+From:   Kees Cook <keescook@chromium.org>
+To:     Will Deacon <will@kernel.org>
+Cc:     Kees Cook <keescook@chromium.org>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Arvind Sankar <nivedita@alum.mit.edu>,
+        Atish Patra <atish.patra@wdc.com>, linux-efi@vger.kernel.org,
         Catalin Marinas <catalin.marinas@arm.com>,
         Mark Rutland <mark.rutland@arm.com>,
-        Ard Biesheuvel <ardb@kernel.org>,
         Peter Collingbourne <pcc@google.com>,
         James Morse <james.morse@arm.com>,
         Borislav Petkov <bp@suse.de>,
         Thomas Gleixner <tglx@linutronix.de>,
         Ingo Molnar <mingo@redhat.com>,
+        Russell King <linux@armlinux.org.uk>,
         Masahiro Yamada <masahiroy@kernel.org>,
         Nick Desaulniers <ndesaulniers@google.com>,
         Nathan Chancellor <natechancellor@gmail.com>,
         Arnd Bergmann <arnd@arndb.de>, x86@kernel.org,
         clang-built-linux@googlegroups.com, linux-arch@vger.kernel.org,
-        linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v4 14/17] arm/build: Warn on orphan section placement
-Message-ID: <20200629190316.GY1551@shell.armlinux.org.uk>
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: [PATCH v4 06/17] efi/libstub: Disable -mbranch-protection
+Date:   Sun, 28 Jun 2020 23:18:29 -0700
+Message-Id: <20200629061840.4065483-7-keescook@chromium.org>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20200629061840.4065483-1-keescook@chromium.org>
 References: <20200629061840.4065483-1-keescook@chromium.org>
- <20200629061840.4065483-15-keescook@chromium.org>
- <20200629155401.GB900899@rani.riverdale.lan>
- <20200629180703.GX1551@shell.armlinux.org.uk>
- <20200629181514.GA1046442@rani.riverdale.lan>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200629181514.GA1046442@rani.riverdale.lan>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Mon, Jun 29, 2020 at 02:15:14PM -0400, Arvind Sankar wrote:
-> On Mon, Jun 29, 2020 at 07:07:04PM +0100, Russell King - ARM Linux admin wrote:
-> > On Mon, Jun 29, 2020 at 11:54:01AM -0400, Arvind Sankar wrote:
-> > > On Sun, Jun 28, 2020 at 11:18:37PM -0700, Kees Cook wrote:
-> > > > We don't want to depend on the linker's orphan section placement
-> > > > heuristics as these can vary between linkers, and may change between
-> > > > versions. All sections need to be explicitly named in the linker
-> > > > script.
-> > > > 
-> > > > Specifically, this would have made a recently fixed bug very obvious:
-> > > > 
-> > > > ld: warning: orphan section `.fixup' from `arch/arm/lib/copy_from_user.o' being placed in section `.fixup'
-> > > > 
-> > > > Discard unneeded sections .iplt, .rel.iplt, .igot.plt, and .modinfo.
-> > > > 
-> > > > Add missing text stub sections .vfp11_veneer and .v4_bx.
-> > > > 
-> > > > Add debug sections explicitly.
-> > > > 
-> > > > Finally enable orphan section warning.
-> > > 
-> > > This is unrelated to this patch as such, but I noticed that ARM32/64 places
-> > > the .got section inside .text -- is that expected on ARM?
-> > 
-> > Do you mean in general, in the kernel vmlinux, in the decompressor
-> > vmlinux or ... ?
-> > 
-> 
-> Sorry, in the kernel vmlinux. ARM_TEXT includes *(.got) for 32-bit, and
-> the 64-bit vmlinux.lds.S includes it in .text as well. The decompressor
-> for 32-bit keeps it separate for non-EFI stub kernel and puts it inside
-> .data for EFI stub.
+In preparation for adding --orphan-handling=warn to more architectures,
+this disables -mbranch-protection, as EFI does not yet support it[1].
+This was noticed due to it producing unwanted .note.gnu.property sections
+(prefixed with .init due to the objcopy build step).
 
-The main 32-bit kernel image doesn't use the .got - I don't think it
-actually even exists.
+[1] https://lore.kernel.org/lkml/CAMj1kXHck12juGi=E=P4hWP_8vQhQ+-x3vBMc3TGeRWdQ-XkxQ@mail.gmail.com
 
-The decompressor (non-EFI) uses the .got as a way of getting position
-independence, and that must be part of the binary image at a fixed
-offset from the .text section.  The decompressor self-fixes up the
-GOT entries.
+Cc: Ard Biesheuvel <ardb@kernel.org>
+Cc: Arvind Sankar <nivedita@alum.mit.edu>
+Cc: Atish Patra <atish.patra@wdc.com>
+Cc: linux-efi@vger.kernel.org
+Signed-off-by: Kees Cook <keescook@chromium.org>
+---
+ drivers/firmware/efi/libstub/Makefile | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-In the case of the decompressor being flashed and executed from NOR
-flash, the decompressor must be built for the specific address(es)
-that it will reside (which does away with the .got table.)
-
-For EFI, it needs to be in the .data section (which is in that case
-always a fixed offset from .text) so that it can be written to so the
-fix-ups work.
-
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index 75daaf20374e..10fa342ef40c 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -18,7 +18,8 @@ cflags-$(CONFIG_X86)		+= -m$(BITS) -D__KERNEL__ \
+ # arm64 uses the full KBUILD_CFLAGS so it's necessary to explicitly
+ # disable the stackleak plugin
+ cflags-$(CONFIG_ARM64)		:= $(subst $(CC_FLAGS_FTRACE),,$(KBUILD_CFLAGS)) \
+-				   -fpie $(DISABLE_STACKLEAK_PLUGIN)
++				   -fpie $(DISABLE_STACKLEAK_PLUGIN) \
++				   $(call cc-option,-mbranch-protection=none)
+ cflags-$(CONFIG_ARM)		:= $(subst $(CC_FLAGS_FTRACE),,$(KBUILD_CFLAGS)) \
+ 				   -fno-builtin -fpic \
+ 				   $(call cc-option,-mno-single-pic-base)
 -- 
-RMK's Patch system: https://www.armlinux.org.uk/developer/patches/
-FTTP is here! 40Mbps down 10Mbps up. Decent connectivity at last!
+2.25.1
+
