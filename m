@@ -2,68 +2,62 @@ Return-Path: <SRS0=RaNn=AK=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.6 required=3.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_IN_DEF_DKIM_WL
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C00BAC433DF
-	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 20:30:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EC3C0C433E2
+	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 20:38:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9F3292067D
-	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 20:30:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BE11220672
+	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 20:38:55 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="eQJ4C1Og"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="OngKzCoB"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1733310AbgF2U3v (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 29 Jun 2020 16:29:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55952 "EHLO
+        id S1732395AbgF2Uiy (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 29 Jun 2020 16:38:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43352 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1732239AbgF2U3u (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 29 Jun 2020 16:29:50 -0400
-Received: from mail-pf1-x441.google.com (mail-pf1-x441.google.com [IPv6:2607:f8b0:4864:20::441])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2D9D9C061755
-        for <linux-efi@vger.kernel.org>; Mon, 29 Jun 2020 13:29:50 -0700 (PDT)
-Received: by mail-pf1-x441.google.com with SMTP id u5so8386970pfn.7
-        for <linux-efi@vger.kernel.org>; Mon, 29 Jun 2020 13:29:50 -0700 (PDT)
+        with ESMTP id S1731709AbgF2TOQ (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 29 Jun 2020 15:14:16 -0400
+Received: from mail-pj1-x1042.google.com (mail-pj1-x1042.google.com [IPv6:2607:f8b0:4864:20::1042])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B27D7C08EB13
+        for <linux-efi@vger.kernel.org>; Sun, 28 Jun 2020 23:18:54 -0700 (PDT)
+Received: by mail-pj1-x1042.google.com with SMTP id b92so7565349pjc.4
+        for <linux-efi@vger.kernel.org>; Sun, 28 Jun 2020 23:18:54 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=1nXbjmGuO9YghPzUiSigrzs5/9GT5Q6NNhUBnZ5BL6o=;
-        b=eQJ4C1Og5DxGMyP8fWLcdR8Z3CwksZFnIGnuQop7YqAIDkKSYG4ONb22hCetVI2dMa
-         XlTHs1YnKZwKbNTsc1vYgLQApn6CEsy11cVvAH0W8MA9tpog/jILDFawLHvAbnz6wbLc
-         MOr/DpyFN5amUZuAcTF6xCkw3l5ZA5IZ2aVkLt4pQ4hbAulAODM2O4kjrlBTBDFdFrsk
-         HN+QhWO3ClmIpA86xpuWF6l/Rt/cKlJGag5/A6V0kEXZvqbq1uaiEQ7D74BMh9YiBgqt
-         uN/F18cFPt8yiVVK3bgo2KkS/XgGaS4veeK+BkZYPP8LfdLBnFFHKYruXHYXkltdQrqW
-         5tFQ==
+        d=chromium.org; s=google;
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=BRDUZAq4KUcmg3RU1pc/3G6TWWMMmiH07CaNiCk63dA=;
+        b=OngKzCoBXRqpXyn8tClMjtqQlL/nJZ8uCSAc2Uyi9PLl3HjxTANENeKwIhCN2JPXoz
+         FqUJVg+Y//PmO6nzCQnijna217nrwyVXepnIQ7lbRcXB/8nfXPbQWgx0YonaDZwf2N3K
+         MGQhaY3XJ3eFszdo735YBZhEWggFpEUOFM+H4=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=1nXbjmGuO9YghPzUiSigrzs5/9GT5Q6NNhUBnZ5BL6o=;
-        b=GdnjHE/eGEt3xhZvh2dxiwqb0hLDNUQQAlubkdKmDSZQhF9hrEZDoDhp0ea9YZUgcD
-         mHy9ioVp2D738uRyl6KS2DL77xQk46/QNaMGPuFJiD5ogk5n8DcOgVaezkJO7l+5mVy4
-         1ZldeWAo8X+OOI5sR9RYTi+rj46tWe1m01Ayfv9ZZrrSlWtQ0FJCw7U162rZSXPzIZY9
-         D9C9uIvYy6VnvNMYRWWDL7o5Lmadc+tdDqAszS/uuXhM931FYRJD9Ymuv4hsTQDybfV3
-         NFV1Sz4F145sjrgtCDdf5p/orx4mHaTBMq9hRUhL38vSYI1lnqalFhPpadQSAzjJwI+K
-         W0bQ==
-X-Gm-Message-State: AOAM531WssWU3ZoLwMaAbH4yDcohAa+rZYmZI31Z7+Vef+oLn69CsuWh
-        OAHlWQwI1MFdUYXaYbPr39ujIT/pGL2DavqAbucDEg==
-X-Google-Smtp-Source: ABdhPJwv6SUxAiJU3OMeQLtrnFcvI/h1iY82pIlt6qbyAGsh50kqhWEDWLaUBKiAJzLF7/INflMcJGpqQT2M4cbcb6s=
-X-Received: by 2002:a05:6a00:15ca:: with SMTP id o10mr16122175pfu.169.1593462589513;
- Mon, 29 Jun 2020 13:29:49 -0700 (PDT)
-MIME-Version: 1.0
-References: <20200629061840.4065483-1-keescook@chromium.org>
- <20200629061840.4065483-9-keescook@chromium.org> <CAKwvOd=r6bsBfSZxVYrnbm1Utq==ApWBDjx+0Fxsm90Aq3Jghw@mail.gmail.com>
- <9b7f9c3aed7223e49def6e775d3b250aa780e562.camel@perches.com>
-In-Reply-To: <9b7f9c3aed7223e49def6e775d3b250aa780e562.camel@perches.com>
-From:   Nick Desaulniers <ndesaulniers@google.com>
-Date:   Mon, 29 Jun 2020 13:29:38 -0700
-Message-ID: <CAKwvOdnOCEZ8LUEY6+gVcTcNuaabRnj4hXG6-pcb_6fcQJsr6w@mail.gmail.com>
-Subject: Re: [PATCH v4 08/17] arm64/mm: Remove needless section quotes
-To:     Joe Perches <joe@perches.com>
-Cc:     Kees Cook <keescook@chromium.org>, Will Deacon <will@kernel.org>,
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=BRDUZAq4KUcmg3RU1pc/3G6TWWMMmiH07CaNiCk63dA=;
+        b=uIQ+MmZatNIzfTFuBWaCAVH9IT3BDO0ZYad2SCfV8hPiiNnqiZNRzssHsRCEJsPGTK
+         4VAy0M0J3RJLXSXPsz7CyPxSoxbubwPnflTgrS348yV8yVIFlbg+lC7/67VTeeszl6lu
+         RGZDBslOr9G5gXUxYlMNH4WEqOpxupdaOfobgZBSYrCcXYg3xseuhjgn1YwO0TbzKVzO
+         2UWtylj3nSOU3Y9czUxGWtcQZEo7zMUyAY4rsRTJgU1apT8k2j2/84xMTykw8Uu6vUjF
+         uaAwMTS03Y6nSvUAOwSdbtt15zFDe/3C6ZAWqktf1XUw/Jzpc0eBIjW+iQnICfFDgtLg
+         90Jg==
+X-Gm-Message-State: AOAM531FYsQ3ZyJqthJD6TXr0PMpTotpcHmpAHmIT7VfP8mzWTfvZY41
+        TpX21n1rOpUucXGvFOgU9a7UgA==
+X-Google-Smtp-Source: ABdhPJyTzjKhJ/zzQcZEVxeXeWaUAlazIn3+rTaLERzJPA8cqWvdjUBBdLJDKJzE0WfVi/nz5T2VDw==
+X-Received: by 2002:a17:90a:d809:: with SMTP id a9mr676907pjv.74.1593411534348;
+        Sun, 28 Jun 2020 23:18:54 -0700 (PDT)
+Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
+        by smtp.gmail.com with ESMTPSA id 9sm16588148pfh.160.2020.06.28.23.18.48
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 28 Jun 2020 23:18:53 -0700 (PDT)
+From:   Kees Cook <keescook@chromium.org>
+To:     Will Deacon <will@kernel.org>
+Cc:     Kees Cook <keescook@chromium.org>,
+        Nick Desaulniers <ndesaulniers@google.com>,
         Catalin Marinas <catalin.marinas@arm.com>,
         Mark Rutland <mark.rutland@arm.com>,
         Ard Biesheuvel <ardb@kernel.org>,
@@ -76,45 +70,77 @@ Cc:     Kees Cook <keescook@chromium.org>, Will Deacon <will@kernel.org>,
         Masahiro Yamada <masahiroy@kernel.org>,
         Arvind Sankar <nivedita@alum.mit.edu>,
         Nathan Chancellor <natechancellor@gmail.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        "maintainer:X86 ARCHITECTURE (32-BIT AND 64-BIT)" <x86@kernel.org>,
-        clang-built-linux <clang-built-linux@googlegroups.com>,
-        linux-arch <linux-arch@vger.kernel.org>,
-        linux-efi <linux-efi@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        LKML <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        Arnd Bergmann <arnd@arndb.de>, x86@kernel.org,
+        clang-built-linux@googlegroups.com, linux-arch@vger.kernel.org,
+        linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org
+Subject: [PATCH v4 13/17] arm/build: Explicitly keep .ARM.attributes sections
+Date:   Sun, 28 Jun 2020 23:18:36 -0700
+Message-Id: <20200629061840.4065483-14-keescook@chromium.org>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20200629061840.4065483-1-keescook@chromium.org>
+References: <20200629061840.4065483-1-keescook@chromium.org>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Mon, Jun 29, 2020 at 1:03 PM Joe Perches <joe@perches.com> wrote:
->
-> On Mon, 2020-06-29 at 12:53 -0700, Nick Desaulniers wrote:
-> > On Sun, Jun 28, 2020 at 11:18 PM Kees Cook <keescook@chromium.org> wrote:
-> > > Fix a case of needless quotes in __section(), which Clang doesn't like.
-> > >
-> > > Acked-by: Will Deacon <will@kernel.org>
-> > > Signed-off-by: Kees Cook <keescook@chromium.org>
-> >
-> > Yep, I remember bugs from this.  Probably should scan the kernel for
-> > other instances of this.  +Joe for checkpatch.pl validation.
-> > Reviewed-by: Nick Desaulniers <ndesaulniers@google.com>
->
-> $ git grep -P -n '__section\s*\(\s*\"'
-> arch/arm64/mm/mmu.c:45:u64 __section(".mmuoff.data.write") vabits_actual;
-> include/linux/compiler.h:211:   __section("___kentry" "+" #sym )                        \
-> include/linux/export.h:133:     static int __ksym_marker_##sym[0] __section(".discard.ksym") __used
-> include/linux/srcutree.h:127:           __section("___srcu_struct_ptrs") = &name
->
-> My recollection is I submitted a patch
-> to _add_ quotes
->
-> https://lore.kernel.org/patchwork/patch/1125785/
+In preparation for adding --orphan-handling=warn, explicitly keep the
+.ARM.attributes section by expanding the existing ELF_DETAILS macro into
+ARM_DETAILS.
 
-Hey, yeah!  Did you end up sending v2?
+Suggested-by: Nick Desaulniers <ndesaulniers@google.com>
+Link: https://lore.kernel.org/lkml/CAKwvOdk-racgq5pxsoGS6Vtifbtrk5fmkmnoLxrQMaOvV0nPWw@mail.gmail.com/
+Signed-off-by: Kees Cook <keescook@chromium.org>
+---
+ arch/arm/include/asm/vmlinux.lds.h | 4 ++++
+ arch/arm/kernel/vmlinux-xip.lds.S  | 2 +-
+ arch/arm/kernel/vmlinux.lds.S      | 2 +-
+ 3 files changed, 6 insertions(+), 2 deletions(-)
 
+diff --git a/arch/arm/include/asm/vmlinux.lds.h b/arch/arm/include/asm/vmlinux.lds.h
+index 142c038b2e97..c66b16cd8837 100644
+--- a/arch/arm/include/asm/vmlinux.lds.h
++++ b/arch/arm/include/asm/vmlinux.lds.h
+@@ -56,6 +56,10 @@
+ 		ARM_MMU_DISCARD(*(__ex_table))				\
+ 		ARM_COMMON_DISCARD
+ 
++#define ARM_DETAILS							\
++		ELF_DETAILS						\
++		.ARM.attributes 0 : { *(.ARM.attributes) }
++
+ #define ARM_STUBS_TEXT							\
+ 		*(.gnu.warning)						\
+ 		*(.glue_7)						\
+diff --git a/arch/arm/kernel/vmlinux-xip.lds.S b/arch/arm/kernel/vmlinux-xip.lds.S
+index 904c31fa20ed..57fcbf55f913 100644
+--- a/arch/arm/kernel/vmlinux-xip.lds.S
++++ b/arch/arm/kernel/vmlinux-xip.lds.S
+@@ -150,7 +150,7 @@ SECTIONS
+ 	_end = .;
+ 
+ 	STABS_DEBUG
+-	ELF_DETAILS
++	ARM_DETAILS
+ }
+ 
+ /*
+diff --git a/arch/arm/kernel/vmlinux.lds.S b/arch/arm/kernel/vmlinux.lds.S
+index bb950c896a67..1d3d3b599635 100644
+--- a/arch/arm/kernel/vmlinux.lds.S
++++ b/arch/arm/kernel/vmlinux.lds.S
+@@ -149,7 +149,7 @@ SECTIONS
+ 	_end = .;
+ 
+ 	STABS_DEBUG
+-	ELF_DETAILS
++	ARM_DETAILS
+ }
+ 
+ #ifdef CONFIG_STRICT_KERNEL_RWX
 -- 
-Thanks,
-~Nick Desaulniers
+2.25.1
+
