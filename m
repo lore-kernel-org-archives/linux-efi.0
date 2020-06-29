@@ -2,63 +2,64 @@ Return-Path: <SRS0=RaNn=AK=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-0.8 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.6 required=3.0 tests=DKIMWL_WL_MED,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_IN_DEF_DKIM_WL autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B60BC433DF
-	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 19:33:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 80790C433DF
+	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 19:48:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1329820786
-	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 19:33:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 628822082F
+	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 19:48:12 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BZU/9VIc"
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="Im8v5EGy"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732303AbgF2TdT (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 29 Jun 2020 15:33:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46780 "EHLO
+        id S1731290AbgF2TsA (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 29 Jun 2020 15:48:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49278 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1733227AbgF2Tco (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 29 Jun 2020 15:32:44 -0400
-Received: from mail-qk1-x743.google.com (mail-qk1-x743.google.com [IPv6:2607:f8b0:4864:20::743])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D5E64C0307AD;
-        Mon, 29 Jun 2020 08:54:04 -0700 (PDT)
-Received: by mail-qk1-x743.google.com with SMTP id c30so11812501qka.10;
-        Mon, 29 Jun 2020 08:54:04 -0700 (PDT)
+        with ESMTP id S2388109AbgF2TrQ (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 29 Jun 2020 15:47:16 -0400
+Received: from mail-pl1-x641.google.com (mail-pl1-x641.google.com [IPv6:2607:f8b0:4864:20::641])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 09CB8C03E97B
+        for <linux-efi@vger.kernel.org>; Mon, 29 Jun 2020 12:47:16 -0700 (PDT)
+Received: by mail-pl1-x641.google.com with SMTP id g17so7485628plq.12
+        for <linux-efi@vger.kernel.org>; Mon, 29 Jun 2020 12:47:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=sender:from:date:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=aJxCpiw45uiFCKFF/Aa3ZwVBKPmiXfb3oRMSPK0K9jk=;
-        b=BZU/9VIc2Y6E9fhw3s/Nvu9omCHAjFS6JaJV5N4AxmLYc8SJERh++jMh8hnkBkk5Rj
-         nj3dy4P+rSnq/nKutiHVABK5OvmhyQTpqlnRoybjbMehxbS3dchjXD/bXVVgiUic9uiX
-         9KEIZ9SFZNWU1A1IkKVOam+79epkd7faiaeumhjdsOfstN/OVNInEuKXfKQx/sEHHahv
-         RB+f8/hLrG2qOALMJ24yNYyH+tfgwNzIZCerrom8AQJZpijMe2n8a1SdwL5fPMpUqUXp
-         m3eWJnS1YrcNRqYOxz41DsFZ6fzDkWK87qnOzwnDRL2z6um5+Tphb3hwxdh4ZFbHTXGn
-         PBAA==
+        d=google.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=1gz1zQHU9+r/YpON9C/k1EX29gyKSkYfOsfpz38zwBA=;
+        b=Im8v5EGyC2StppMSLYm6OQn+oLGyJfaUm6K7ize3Z/Umh4ZYnOr1TcUmPi9B+HpLUQ
+         cLC2XsUaCI472AeGUmVPqaS4Bmla9oHo9I+AIWRkU0tKMAkgxKOPmsmCHTRZotVKURc+
+         3Ej3S2v2UMRKvyl3Q/MUcNjQN9lw0K08BG3VVAlkAHIGdIZymVTArWa791V22RfReKvK
+         d4Xn9SrFlNP5F7C5P+8Tu8DV3TMfCi8RkBELIdz9ah/XgEYZ0E2gxGyacBn2DlN9d4M/
+         w6i7bvKZcnFz+1hsf9o46nd5nuTk8SAC+MJFu9ob0741d4CQ4emNSBIyIp+27VDHdBTP
+         6/hg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:sender:from:date:to:cc:subject:message-id
-         :references:mime-version:content-disposition:in-reply-to;
-        bh=aJxCpiw45uiFCKFF/Aa3ZwVBKPmiXfb3oRMSPK0K9jk=;
-        b=O9/E2OtiXV98xAPz8iP+4nhN496omKmdK/qPb/ff+/UeCD9HW2E2PeD335lFT9q7IL
-         /0y3zcTGXlFdR+IZiMF8WGdOvCyL2Axpmi/uRE4eQVTdocDz9BUKcOoZmVtvkJtvgT0a
-         juAbkhRCW8dBASFE+lN2rYlNOY0hvvmuizoM5WGs96/tNnvQqLTtcHH7/wlR03vuOLm/
-         Lk6T0tOBLq7Ja0L/j+4i7LY8Giqyq6slIbzVhkLPzQhAMFYyGLxQnWnU32y/wYZ8G5Zm
-         1Xe2L6/pDeXArWHcwWkyrGV5MVHJIVcjSABtM7p0Hjv8z3n6HOo7444i1IyiZRLr5A6p
-         UsIA==
-X-Gm-Message-State: AOAM530/VDNixSidB90UlbtTb5L4Oc5o7lVq85ImQWw4Fxb48SUvMk/5
-        6m2j1b4sVtEY2aWNwvUNevM=
-X-Google-Smtp-Source: ABdhPJxwuEkyqc0Vgw+drYJAZii7afEIejnAVDgmQdUScCrDEFtKnUdsKQel/JRcOrIWioge2a+zKQ==
-X-Received: by 2002:a05:620a:c08:: with SMTP id l8mr15224938qki.239.1593446044131;
-        Mon, 29 Jun 2020 08:54:04 -0700 (PDT)
-Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
-        by smtp.gmail.com with ESMTPSA id l46sm81965qtf.7.2020.06.29.08.54.03
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 29 Jun 2020 08:54:03 -0700 (PDT)
-From:   Arvind Sankar <nivedita@alum.mit.edu>
-X-Google-Original-From: Arvind Sankar <arvind@rani.riverdale.lan>
-Date:   Mon, 29 Jun 2020 11:54:01 -0400
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=1gz1zQHU9+r/YpON9C/k1EX29gyKSkYfOsfpz38zwBA=;
+        b=Zm14ibtmM6LY12ZqdawRU1Vcd76e7AiZEdFRmXcS0YYAKGdQpttkF93+dnOiBQFGqQ
+         zwh2KMBWZuyfdeC+0cMuEHMNlJaZIbrNXwb5wEpX5Oi9Tz0ddAk+RgGehZUP5BTc3+bf
+         OvksNmP6dI5/Z4dxOkhahrqewBt1laE7L4nQyQoZZPwLBGvYHjm5Iqve1eBzERyKkrpL
+         Spxg2tUiwo50xcVFW7n2w82MbsZD3Pxma1yoKJHaI9EmKZmLvRIQJ7VnWfOSU2tjmhFx
+         5tD4a2XRbrA2YHnpNhDofgBTMzE7QoymEGwyqF3lmmym2L7wEoFnr+3Ke/xXS+pQ0Xlb
+         ZTtA==
+X-Gm-Message-State: AOAM533SnNHEbP9RGqcr3L9xl6EN2YVQ4gkik2wN+UucdDoF116FWFYo
+        uVPjNTTkbtlkreNGQwlDNYc1lfVCUJ5IGKAPJmzIoA==
+X-Google-Smtp-Source: ABdhPJxD+NDMzpTLVtkwIahVlE1Ojd9ohblWdC3y8HeoT1NdlP3ApesamY48WnXvCXAzV3iGs4MYCMe98HbhJvlJHpE=
+X-Received: by 2002:a17:90a:30ea:: with SMTP id h97mr18995233pjb.32.1593460035317;
+ Mon, 29 Jun 2020 12:47:15 -0700 (PDT)
+MIME-Version: 1.0
+References: <20200629061840.4065483-1-keescook@chromium.org> <20200629061840.4065483-15-keescook@chromium.org>
+In-Reply-To: <20200629061840.4065483-15-keescook@chromium.org>
+From:   Nick Desaulniers <ndesaulniers@google.com>
+Date:   Mon, 29 Jun 2020 12:47:03 -0700
+Message-ID: <CAKwvOdnErUWrJUaw9gm3ZSOpD2JepZKod3REBctzBr4QuHLiAA@mail.gmail.com>
+Subject: Re: [PATCH v4 14/17] arm/build: Warn on orphan section placement
 To:     Kees Cook <keescook@chromium.org>
 Cc:     Will Deacon <will@kernel.org>,
         Catalin Marinas <catalin.marinas@arm.com>,
@@ -72,42 +73,109 @@ Cc:     Will Deacon <will@kernel.org>,
         Russell King <linux@armlinux.org.uk>,
         Masahiro Yamada <masahiroy@kernel.org>,
         Arvind Sankar <nivedita@alum.mit.edu>,
-        Nick Desaulniers <ndesaulniers@google.com>,
         Nathan Chancellor <natechancellor@gmail.com>,
-        Arnd Bergmann <arnd@arndb.de>, x86@kernel.org,
-        clang-built-linux@googlegroups.com, linux-arch@vger.kernel.org,
-        linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v4 14/17] arm/build: Warn on orphan section placement
-Message-ID: <20200629155401.GB900899@rani.riverdale.lan>
-References: <20200629061840.4065483-1-keescook@chromium.org>
- <20200629061840.4065483-15-keescook@chromium.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20200629061840.4065483-15-keescook@chromium.org>
+        Arnd Bergmann <arnd@arndb.de>,
+        "maintainer:X86 ARCHITECTURE (32-BIT AND 64-BIT)" <x86@kernel.org>,
+        clang-built-linux <clang-built-linux@googlegroups.com>,
+        linux-arch <linux-arch@vger.kernel.org>,
+        linux-efi <linux-efi@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        LKML <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Sun, Jun 28, 2020 at 11:18:37PM -0700, Kees Cook wrote:
+On Sun, Jun 28, 2020 at 11:18 PM Kees Cook <keescook@chromium.org> wrote:
+>
 > We don't want to depend on the linker's orphan section placement
 > heuristics as these can vary between linkers, and may change between
 > versions. All sections need to be explicitly named in the linker
 > script.
-> 
+>
 > Specifically, this would have made a recently fixed bug very obvious:
-> 
+>
 > ld: warning: orphan section `.fixup' from `arch/arm/lib/copy_from_user.o' being placed in section `.fixup'
-> 
+>
 > Discard unneeded sections .iplt, .rel.iplt, .igot.plt, and .modinfo.
-> 
+>
 > Add missing text stub sections .vfp11_veneer and .v4_bx.
-> 
+>
 > Add debug sections explicitly.
-> 
+>
 > Finally enable orphan section warning.
+>
+> Signed-off-by: Kees Cook <keescook@chromium.org>
 
-This is unrelated to this patch as such, but I noticed that ARM32/64 places
-the .got section inside .text -- is that expected on ARM?
+Thanks for following up on the previous suggestion regarding .glu_7 /
+.glu_7t ordering. LGTM
+Reviewed-by: Nick Desaulniers <ndesaulniers@google.com>
+
+> ---
+>  arch/arm/include/asm/vmlinux.lds.h | 6 +++++-
+>  arch/arm/kernel/vmlinux-xip.lds.S  | 1 +
+>  arch/arm/kernel/vmlinux.lds.S      | 1 +
+>  3 files changed, 7 insertions(+), 1 deletion(-)
+>
+> diff --git a/arch/arm/include/asm/vmlinux.lds.h b/arch/arm/include/asm/vmlinux.lds.h
+> index c66b16cd8837..d44fae722e7a 100644
+> --- a/arch/arm/include/asm/vmlinux.lds.h
+> +++ b/arch/arm/include/asm/vmlinux.lds.h
+> @@ -39,6 +39,8 @@
+>                 __idmap_text_end = .;                                   \
+>
+>  #define ARM_COMMON_DISCARD                                             \
+> +               *(.iplt) *(.rel.iplt) *(.igot.plt)                      \
+> +               *(.modinfo)                                             \
+>                 *(.discard)                                             \
+>                 *(.discard.*)
+>
+> @@ -63,7 +65,9 @@
+>  #define ARM_STUBS_TEXT                                                 \
+>                 *(.gnu.warning)                                         \
+>                 *(.glue_7)                                              \
+> -               *(.glue_7t)
+> +               *(.glue_7t)                                             \
+> +               *(.vfp11_veneer)                                        \
+> +               *(.v4_bx)
+>
+>  #define ARM_TEXT                                                       \
+>                 IDMAP_TEXT                                              \
+> diff --git a/arch/arm/kernel/vmlinux-xip.lds.S b/arch/arm/kernel/vmlinux-xip.lds.S
+> index 57fcbf55f913..11ffa79751da 100644
+> --- a/arch/arm/kernel/vmlinux-xip.lds.S
+> +++ b/arch/arm/kernel/vmlinux-xip.lds.S
+> @@ -150,6 +150,7 @@ SECTIONS
+>         _end = .;
+>
+>         STABS_DEBUG
+> +       DWARF_DEBUG
+>         ARM_DETAILS
+>  }
+>
+> diff --git a/arch/arm/kernel/vmlinux.lds.S b/arch/arm/kernel/vmlinux.lds.S
+> index 1d3d3b599635..dc672fe35de3 100644
+> --- a/arch/arm/kernel/vmlinux.lds.S
+> +++ b/arch/arm/kernel/vmlinux.lds.S
+> @@ -149,6 +149,7 @@ SECTIONS
+>         _end = .;
+>
+>         STABS_DEBUG
+> +       DWARF_DEBUG
+>         ARM_DETAILS
+>  }
+>
+> --
+> 2.25.1
+>
+> --
+> You received this message because you are subscribed to the Google Groups "Clang Built Linux" group.
+> To unsubscribe from this group and stop receiving emails from it, send an email to clang-built-linux+unsubscribe@googlegroups.com.
+> To view this discussion on the web visit https://groups.google.com/d/msgid/clang-built-linux/20200629061840.4065483-15-keescook%40chromium.org.
+
+
+
+-- 
+Thanks,
+~Nick Desaulniers
