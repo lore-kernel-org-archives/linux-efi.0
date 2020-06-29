@@ -7,53 +7,53 @@ X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7F0B4C433DF
-	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 20:58:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 14252C433E1
+	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 20:58:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 55E85206F1
-	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 20:58:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E8575206F1
+	for <linux-efi@archiver.kernel.org>; Mon, 29 Jun 2020 20:58:24 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="g7mI0xRQ"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="KCQ5YzkO"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732666AbgF2U6I (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 29 Jun 2020 16:58:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43388 "EHLO
+        id S1729825AbgF2U6H (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 29 Jun 2020 16:58:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43350 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726699AbgF2TNE (ORCPT
+        with ESMTP id S1726084AbgF2TNE (ORCPT
         <rfc822;linux-efi@vger.kernel.org>); Mon, 29 Jun 2020 15:13:04 -0400
-Received: from mail-pl1-x642.google.com (mail-pl1-x642.google.com [IPv6:2607:f8b0:4864:20::642])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 097C8C08EAF6
-        for <linux-efi@vger.kernel.org>; Sun, 28 Jun 2020 23:18:48 -0700 (PDT)
-Received: by mail-pl1-x642.google.com with SMTP id o1so116550plk.1
-        for <linux-efi@vger.kernel.org>; Sun, 28 Jun 2020 23:18:48 -0700 (PDT)
+Received: from mail-pj1-x1042.google.com (mail-pj1-x1042.google.com [IPv6:2607:f8b0:4864:20::1042])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 082C2C08EB23
+        for <linux-efi@vger.kernel.org>; Sun, 28 Jun 2020 23:27:31 -0700 (PDT)
+Received: by mail-pj1-x1042.google.com with SMTP id b92so7574367pjc.4
+        for <linux-efi@vger.kernel.org>; Sun, 28 Jun 2020 23:27:31 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=chromium.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=6hZnstVfYoPOWJe22/uMPE3GyeVYaazSg9tzCfSWEM0=;
-        b=g7mI0xRQzDC9tX/D2EXTMfRLSef8L0Y2sQz/4glsjoZ6Yj2AbQGPaF4thtUQ8/mWod
-         vga4zH3CHMGXWR+3yabUgVfDV+o/W/uegg3rEYPkUquZyo2oihOokRRdS2JdBfO0z4ze
-         SBzOKgs3B+l+APXQtOllt1mwPV0/1S7vr/9R4=
+        bh=EO3sRskvzqVrSi/8WlTJ+nKIw1S19eoepjwOuVzqC+k=;
+        b=KCQ5YzkONWOo65CEsckxdgEZDidmsxzkUPEN/UJBCW/qObWNXMfEoB9r0/E7rvaRmO
+         xlnRluaPTdkLMjWOJpH+yUIspSAOF0HgZkzvSgs47FWa+/kG7rzViG86wdee3s9jODiH
+         uu4zTKxTboSZHSRTNaUsgRAj4+LH6Z0yJ6Lok=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=6hZnstVfYoPOWJe22/uMPE3GyeVYaazSg9tzCfSWEM0=;
-        b=MZfgu2t5AxBrnAOVIPjoYzUldO1LZbUbMkHTUmmKTXvO6ABOGt8DmluwbZfzxd9BGb
-         O5JEkzXuuN9gx7FOuZfgTXrBEm3yDlWsmIjEWCGihMreDrLcn4DjTz82iR3JE3D9u2DU
-         LjQIWAyy8SzkjYr8G+egVJtH1hxAwwmG1LpJ3NG5RFzuS+KJNFgwrvWhakr/miX+iN/W
-         HSnpn+oey64YyHDcvG6QYDxr/O6rRG+CkU2UdklkqYh7uoThuOxtRQ6RWN7t/OhSuIn7
-         PT7MvJcLmBMGFF4WXmW+mgR9r2pWe8ldbmKLknT6P375xe7/jvvsW5KMfvuCZG+Kwa6U
-         hA2A==
-X-Gm-Message-State: AOAM530tM6bYrCqxjcnI4CtQlJ89u9G2a1BQtR3y/agQTLpWHLwartL9
-        st2cBu6IsqmskgQDzTNK7YmR2A==
-X-Google-Smtp-Source: ABdhPJyceFu/euSgU0RFtNpZAq+i0oZxpc9IB6mMNzAJGXQZb1GRHNknkn66laen/hCrjyrGME0o9g==
-X-Received: by 2002:a17:902:8a95:: with SMTP id p21mr11636474plo.230.1593411527513;
-        Sun, 28 Jun 2020 23:18:47 -0700 (PDT)
+        bh=EO3sRskvzqVrSi/8WlTJ+nKIw1S19eoepjwOuVzqC+k=;
+        b=h8VYsHSTDLNV22EekXReSUPXj/lVQyYXMY4bS+bbzAJfJyJJAWi3K57UCc/rFfXmff
+         n4QhcU57kM6P/4/F57pAXsofJ+rrAE4zqCCKspmpd1+TJM7TU8omeN4ex3/9yNWhD/oP
+         bUaBIlrGwKsK7/7x8nV3N3nN5D6ZfL1prOzwT+Ilcd4J1DUrMAgzCDosE+ua5qH6HphI
+         63pQjMxLni054dZtmw2MPiWZwBVZD5sfmAAAbvVX6UN2CXOJqtGQswE9nfUJJX8iEv8E
+         bBEznMKeFJmyiMHX8kS2N6hrLqafnH+URXwFoCeKIwoH2APXwmH6KEfyIpq4CMAN4o9p
+         C2oQ==
+X-Gm-Message-State: AOAM5324Ljm4GJjtdZvsF+YyzT1VfC+OGhv4SfMHc697x2+lwL5AG4Xh
+        ibGg6eooqq0iRUBGXPBYcvXEpw==
+X-Google-Smtp-Source: ABdhPJxsnK2AsNvKawVoNrn3+ksDPrZ4SCYduO82/RDQuADusHJqjvhs/5ikZAbuEc8CjzSaMNuCrA==
+X-Received: by 2002:a17:90b:4d10:: with SMTP id mw16mr15789032pjb.143.1593412050567;
+        Sun, 28 Jun 2020 23:27:30 -0700 (PDT)
 Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
-        by smtp.gmail.com with ESMTPSA id f23sm17736216pja.8.2020.06.28.23.18.43
+        by smtp.gmail.com with ESMTPSA id h3sm19838700pje.28.2020.06.28.23.27.28
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 28 Jun 2020 23:18:44 -0700 (PDT)
+        Sun, 28 Jun 2020 23:27:28 -0700 (PDT)
 From:   Kees Cook <keescook@chromium.org>
 To:     Will Deacon <will@kernel.org>
 Cc:     Kees Cook <keescook@chromium.org>,
@@ -74,9 +74,9 @@ Cc:     Kees Cook <keescook@chromium.org>,
         clang-built-linux@googlegroups.com, linux-arch@vger.kernel.org,
         linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v4 03/17] vmlinux.lds.h: Split ELF_DETAILS from STABS_DEBUG
-Date:   Sun, 28 Jun 2020 23:18:26 -0700
-Message-Id: <20200629061840.4065483-4-keescook@chromium.org>
+Subject: [PATCH v4 17/17] x86/boot: Warn on orphan section placement
+Date:   Sun, 28 Jun 2020 23:18:40 -0700
+Message-Id: <20200629061840.4065483-18-keescook@chromium.org>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200629061840.4065483-1-keescook@chromium.org>
 References: <20200629061840.4065483-1-keescook@chromium.org>
@@ -87,364 +87,65 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The .comment section doesn't belong in STABS_DEBUG. Split it out into a
-new macro named ELF_DETAILS. This will gain other non-debug sections
-that need to be accounted for when linking with --orphan-handling=warn.
+We don't want to depend on the linker's orphan section placement
+heuristics as these can vary between linkers, and may change between
+versions. All sections need to be explicitly named in the linker
+script.
+
+Add the common debugging sections. Discard the unused note, rel, plt,
+dyn, and hash sections that are not needed in the compressed vmlinux.
+Disable .eh_frame generation in the linker and enable orphan section
+warnings.
 
 Signed-off-by: Kees Cook <keescook@chromium.org>
 ---
- arch/alpha/kernel/vmlinux.lds.S           | 1 +
- arch/arc/kernel/vmlinux.lds.S             | 1 +
- arch/arm/kernel/vmlinux-xip.lds.S         | 1 +
- arch/arm/kernel/vmlinux.lds.S             | 1 +
- arch/arm64/kernel/vmlinux.lds.S           | 1 +
- arch/csky/kernel/vmlinux.lds.S            | 1 +
- arch/hexagon/kernel/vmlinux.lds.S         | 1 +
- arch/ia64/kernel/vmlinux.lds.S            | 1 +
- arch/mips/kernel/vmlinux.lds.S            | 1 +
- arch/nds32/kernel/vmlinux.lds.S           | 1 +
- arch/nios2/kernel/vmlinux.lds.S           | 1 +
- arch/openrisc/kernel/vmlinux.lds.S        | 1 +
- arch/parisc/boot/compressed/vmlinux.lds.S | 1 +
- arch/parisc/kernel/vmlinux.lds.S          | 1 +
- arch/powerpc/kernel/vmlinux.lds.S         | 2 +-
- arch/riscv/kernel/vmlinux.lds.S           | 1 +
- arch/s390/kernel/vmlinux.lds.S            | 1 +
- arch/sh/kernel/vmlinux.lds.S              | 1 +
- arch/sparc/kernel/vmlinux.lds.S           | 1 +
- arch/um/kernel/dyn.lds.S                  | 2 +-
- arch/um/kernel/uml.lds.S                  | 2 +-
- arch/unicore32/kernel/vmlinux.lds.S       | 1 +
- arch/x86/boot/compressed/vmlinux.lds.S    | 2 ++
- arch/x86/kernel/vmlinux.lds.S             | 1 +
- include/asm-generic/vmlinux.lds.h         | 8 ++++++--
- 25 files changed, 31 insertions(+), 5 deletions(-)
+ arch/x86/boot/compressed/Makefile      |  3 ++-
+ arch/x86/boot/compressed/vmlinux.lds.S | 10 ++++++++++
+ 2 files changed, 12 insertions(+), 1 deletion(-)
 
-diff --git a/arch/alpha/kernel/vmlinux.lds.S b/arch/alpha/kernel/vmlinux.lds.S
-index bc6f727278fd..5b78d640725d 100644
---- a/arch/alpha/kernel/vmlinux.lds.S
-+++ b/arch/alpha/kernel/vmlinux.lds.S
-@@ -72,6 +72,7 @@ SECTIONS
+diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
+index 7619742f91c9..646720a05f89 100644
+--- a/arch/x86/boot/compressed/Makefile
++++ b/arch/x86/boot/compressed/Makefile
+@@ -48,6 +48,7 @@ GCOV_PROFILE := n
+ UBSAN_SANITIZE :=n
  
- 	STABS_DEBUG
- 	DWARF_DEBUG
-+	ELF_DETAILS
+ KBUILD_LDFLAGS := -m elf_$(UTS_MACHINE)
++KBUILD_LDFLAGS += $(call ld-option,--no-ld-generated-unwind-info)
+ # Compressed kernel should be built as PIE since it may be loaded at any
+ # address by the bootloader.
+ ifeq ($(CONFIG_X86_32),y)
+@@ -59,7 +60,7 @@ else
+ KBUILD_LDFLAGS += $(shell $(LD) --help 2>&1 | grep -q "\-z noreloc-overflow" \
+ 	&& echo "-z noreloc-overflow -pie --no-dynamic-linker")
+ endif
+-LDFLAGS_vmlinux := -T
++LDFLAGS_vmlinux := --orphan-handling=warn -T
  
- 	DISCARDS
- }
-diff --git a/arch/arc/kernel/vmlinux.lds.S b/arch/arc/kernel/vmlinux.lds.S
-index 54139a6f469b..33ce59d91461 100644
---- a/arch/arc/kernel/vmlinux.lds.S
-+++ b/arch/arc/kernel/vmlinux.lds.S
-@@ -122,6 +122,7 @@ SECTIONS
- 	_end = . ;
- 
- 	STABS_DEBUG
-+	ELF_DETAILS
- 	DISCARDS
- 
- 	.arcextmap 0 : {
-diff --git a/arch/arm/kernel/vmlinux-xip.lds.S b/arch/arm/kernel/vmlinux-xip.lds.S
-index 6d2be994ae58..3d4e88f08196 100644
---- a/arch/arm/kernel/vmlinux-xip.lds.S
-+++ b/arch/arm/kernel/vmlinux-xip.lds.S
-@@ -152,6 +152,7 @@ SECTIONS
- 	_end = .;
- 
- 	STABS_DEBUG
-+	ELF_DETAILS
- }
- 
- /*
-diff --git a/arch/arm/kernel/vmlinux.lds.S b/arch/arm/kernel/vmlinux.lds.S
-index 7f24bc08403e..5592f14b7e35 100644
---- a/arch/arm/kernel/vmlinux.lds.S
-+++ b/arch/arm/kernel/vmlinux.lds.S
-@@ -151,6 +151,7 @@ SECTIONS
- 	_end = .;
- 
- 	STABS_DEBUG
-+	ELF_DETAILS
- }
- 
- #ifdef CONFIG_STRICT_KERNEL_RWX
-diff --git a/arch/arm64/kernel/vmlinux.lds.S b/arch/arm64/kernel/vmlinux.lds.S
-index 6827da7f3aa5..55ae731b6368 100644
---- a/arch/arm64/kernel/vmlinux.lds.S
-+++ b/arch/arm64/kernel/vmlinux.lds.S
-@@ -245,6 +245,7 @@ SECTIONS
- 	_end = .;
- 
- 	STABS_DEBUG
-+	ELF_DETAILS
- 
- 	HEAD_SYMBOLS
- }
-diff --git a/arch/csky/kernel/vmlinux.lds.S b/arch/csky/kernel/vmlinux.lds.S
-index f05b413df328..f03033e17c29 100644
---- a/arch/csky/kernel/vmlinux.lds.S
-+++ b/arch/csky/kernel/vmlinux.lds.S
-@@ -109,6 +109,7 @@ SECTIONS
- 
- 	STABS_DEBUG
- 	DWARF_DEBUG
-+	ELF_DETAILS
- 
- 	DISCARDS
- }
-diff --git a/arch/hexagon/kernel/vmlinux.lds.S b/arch/hexagon/kernel/vmlinux.lds.S
-index 0ca2471ddb9f..35b18e55eae8 100644
---- a/arch/hexagon/kernel/vmlinux.lds.S
-+++ b/arch/hexagon/kernel/vmlinux.lds.S
-@@ -67,5 +67,6 @@ SECTIONS
- 
- 	STABS_DEBUG
- 	DWARF_DEBUG
-+	ELF_DETAILS
- 
- }
-diff --git a/arch/ia64/kernel/vmlinux.lds.S b/arch/ia64/kernel/vmlinux.lds.S
-index d259690eb91a..9b265783be6a 100644
---- a/arch/ia64/kernel/vmlinux.lds.S
-+++ b/arch/ia64/kernel/vmlinux.lds.S
-@@ -218,6 +218,7 @@ SECTIONS {
- 
- 	STABS_DEBUG
- 	DWARF_DEBUG
-+	ELF_DETAILS
- 
- 	/* Default discards */
- 	DISCARDS
-diff --git a/arch/mips/kernel/vmlinux.lds.S b/arch/mips/kernel/vmlinux.lds.S
-index f185a85a27c1..5e97e9d02f98 100644
---- a/arch/mips/kernel/vmlinux.lds.S
-+++ b/arch/mips/kernel/vmlinux.lds.S
-@@ -202,6 +202,7 @@ SECTIONS
- 
- 	STABS_DEBUG
- 	DWARF_DEBUG
-+	ELF_DETAILS
- 
- 	/* These must appear regardless of  .  */
- 	.gptab.sdata : {
-diff --git a/arch/nds32/kernel/vmlinux.lds.S b/arch/nds32/kernel/vmlinux.lds.S
-index 7a6c1cefe3fe..6a91b965fb1e 100644
---- a/arch/nds32/kernel/vmlinux.lds.S
-+++ b/arch/nds32/kernel/vmlinux.lds.S
-@@ -64,6 +64,7 @@ SECTIONS
- 
- 	STABS_DEBUG
- 	DWARF_DEBUG
-+	ELF_DETAILS
- 
- 	DISCARDS
- }
-diff --git a/arch/nios2/kernel/vmlinux.lds.S b/arch/nios2/kernel/vmlinux.lds.S
-index c55a7cfa1075..126e114744cb 100644
---- a/arch/nios2/kernel/vmlinux.lds.S
-+++ b/arch/nios2/kernel/vmlinux.lds.S
-@@ -58,6 +58,7 @@ SECTIONS
- 
- 	STABS_DEBUG
- 	DWARF_DEBUG
-+	ELF_DETAILS
- 
- 	DISCARDS
- }
-diff --git a/arch/openrisc/kernel/vmlinux.lds.S b/arch/openrisc/kernel/vmlinux.lds.S
-index 60449fd7f16f..d287dbb84d0f 100644
---- a/arch/openrisc/kernel/vmlinux.lds.S
-+++ b/arch/openrisc/kernel/vmlinux.lds.S
-@@ -115,6 +115,7 @@ SECTIONS
- 	/* Throw in the debugging sections */
- 	STABS_DEBUG
- 	DWARF_DEBUG
-+	ELF_DETAILS
- 
-         /* Sections to be discarded -- must be last */
- 	DISCARDS
-diff --git a/arch/parisc/boot/compressed/vmlinux.lds.S b/arch/parisc/boot/compressed/vmlinux.lds.S
-index 2ac3a643f2eb..ab7b43990857 100644
---- a/arch/parisc/boot/compressed/vmlinux.lds.S
-+++ b/arch/parisc/boot/compressed/vmlinux.lds.S
-@@ -84,6 +84,7 @@ SECTIONS
- 	}
- 
- 	STABS_DEBUG
-+	ELF_DETAILS
- 	.note 0 : { *(.note) }
- 
- 	/* Sections to be discarded */
-diff --git a/arch/parisc/kernel/vmlinux.lds.S b/arch/parisc/kernel/vmlinux.lds.S
-index 53e29d88f99c..2769eb991f58 100644
---- a/arch/parisc/kernel/vmlinux.lds.S
-+++ b/arch/parisc/kernel/vmlinux.lds.S
-@@ -164,6 +164,7 @@ SECTIONS
- 	_end = . ;
- 
- 	STABS_DEBUG
-+	ELF_DETAILS
- 	.note 0 : { *(.note) }
- 
- 	/* Sections to be discarded */
-diff --git a/arch/powerpc/kernel/vmlinux.lds.S b/arch/powerpc/kernel/vmlinux.lds.S
-index 326e113d2e45..e0548b4950de 100644
---- a/arch/powerpc/kernel/vmlinux.lds.S
-+++ b/arch/powerpc/kernel/vmlinux.lds.S
-@@ -360,8 +360,8 @@ SECTIONS
- 	PROVIDE32 (end = .);
- 
- 	STABS_DEBUG
--
- 	DWARF_DEBUG
-+	ELF_DETAILS
- 
- 	DISCARDS
- 	/DISCARD/ : {
-diff --git a/arch/riscv/kernel/vmlinux.lds.S b/arch/riscv/kernel/vmlinux.lds.S
-index e6f8016b366a..00a325289a26 100644
---- a/arch/riscv/kernel/vmlinux.lds.S
-+++ b/arch/riscv/kernel/vmlinux.lds.S
-@@ -97,6 +97,7 @@ SECTIONS
- 
- 	STABS_DEBUG
- 	DWARF_DEBUG
-+	ELF_DETAILS
- 
- 	DISCARDS
- }
-diff --git a/arch/s390/kernel/vmlinux.lds.S b/arch/s390/kernel/vmlinux.lds.S
-index 37695499717d..177ccfbda40a 100644
---- a/arch/s390/kernel/vmlinux.lds.S
-+++ b/arch/s390/kernel/vmlinux.lds.S
-@@ -181,6 +181,7 @@ SECTIONS
- 	/* Debugging sections.	*/
- 	STABS_DEBUG
- 	DWARF_DEBUG
-+	ELF_DETAILS
- 
- 	/* Sections to be discarded */
- 	DISCARDS
-diff --git a/arch/sh/kernel/vmlinux.lds.S b/arch/sh/kernel/vmlinux.lds.S
-index bde7a6c01aaf..3161b9ccd2a5 100644
---- a/arch/sh/kernel/vmlinux.lds.S
-+++ b/arch/sh/kernel/vmlinux.lds.S
-@@ -76,6 +76,7 @@ SECTIONS
- 
- 	STABS_DEBUG
- 	DWARF_DEBUG
-+	ELF_DETAILS
- 
- 	DISCARDS
- }
-diff --git a/arch/sparc/kernel/vmlinux.lds.S b/arch/sparc/kernel/vmlinux.lds.S
-index f99e99e58075..d55ae65a07ad 100644
---- a/arch/sparc/kernel/vmlinux.lds.S
-+++ b/arch/sparc/kernel/vmlinux.lds.S
-@@ -187,6 +187,7 @@ SECTIONS
- 
- 	STABS_DEBUG
- 	DWARF_DEBUG
-+	ELF_DETAILS
- 
- 	DISCARDS
- }
-diff --git a/arch/um/kernel/dyn.lds.S b/arch/um/kernel/dyn.lds.S
-index f5001481010c..dacbfabf66d8 100644
---- a/arch/um/kernel/dyn.lds.S
-+++ b/arch/um/kernel/dyn.lds.S
-@@ -164,8 +164,8 @@ SECTIONS
-   PROVIDE (end = .);
- 
-   STABS_DEBUG
--
-   DWARF_DEBUG
-+  ELF_DETAILS
- 
-   DISCARDS
- }
-diff --git a/arch/um/kernel/uml.lds.S b/arch/um/kernel/uml.lds.S
-index 3b6dab3d4501..45d957d7004c 100644
---- a/arch/um/kernel/uml.lds.S
-+++ b/arch/um/kernel/uml.lds.S
-@@ -108,8 +108,8 @@ SECTIONS
-   PROVIDE (end = .);
- 
-   STABS_DEBUG
--
-   DWARF_DEBUG
-+  ELF_DETAILS
- 
-   DISCARDS
- }
-diff --git a/arch/unicore32/kernel/vmlinux.lds.S b/arch/unicore32/kernel/vmlinux.lds.S
-index 6fb320b337ef..22eb642c7280 100644
---- a/arch/unicore32/kernel/vmlinux.lds.S
-+++ b/arch/unicore32/kernel/vmlinux.lds.S
-@@ -54,6 +54,7 @@ SECTIONS
- 
- 	STABS_DEBUG
- 	DWARF_DEBUG
-+	ELF_DETAILS
- 
- 	DISCARDS		/* Exit code and data */
- }
+ hostprogs	:= mkpiggy
+ HOST_EXTRACFLAGS += -I$(srctree)/tools/include
 diff --git a/arch/x86/boot/compressed/vmlinux.lds.S b/arch/x86/boot/compressed/vmlinux.lds.S
-index 8f1025d1f681..d88612e3091f 100644
+index d88612e3091f..9afb8737896f 100644
 --- a/arch/x86/boot/compressed/vmlinux.lds.S
 +++ b/arch/x86/boot/compressed/vmlinux.lds.S
-@@ -75,5 +75,7 @@ SECTIONS
+@@ -75,7 +75,17 @@ SECTIONS
  	. = ALIGN(PAGE_SIZE);	/* keep ZO size page aligned */
  	_end = .;
  
-+	ELF_DETAILS
-+
- 	DISCARDS
- }
-diff --git a/arch/x86/kernel/vmlinux.lds.S b/arch/x86/kernel/vmlinux.lds.S
-index 3bfc8dd8a43d..504d16968ed8 100644
---- a/arch/x86/kernel/vmlinux.lds.S
-+++ b/arch/x86/kernel/vmlinux.lds.S
-@@ -410,6 +410,7 @@ SECTIONS
- 
- 	STABS_DEBUG
- 	DWARF_DEBUG
-+	ELF_DETAILS
++	STABS_DEBUG
++	DWARF_DEBUG
+ 	ELF_DETAILS
  
  	DISCARDS
++	/DISCARD/ : {
++		*(.note.*)
++		*(.rela.*) *(.rela_*)
++		*(.rel.*) *(.rel_*)
++		*(.plt) *(.plt.*)
++		*(.dyn*)
++		*(.hash) *(.gnu.hash)
++	}
  }
-diff --git a/include/asm-generic/vmlinux.lds.h b/include/asm-generic/vmlinux.lds.h
-index e53a2d4f47f6..c5d10bc53996 100644
---- a/include/asm-generic/vmlinux.lds.h
-+++ b/include/asm-generic/vmlinux.lds.h
-@@ -34,6 +34,7 @@
-  *
-  *	STABS_DEBUG
-  *	DWARF_DEBUG
-+ *	ELF_DETAILS
-  *
-  *	DISCARDS		// must be the last
-  * }
-@@ -784,14 +785,17 @@
- 		.debug_macro	0 : { *(.debug_macro) }			\
- 		.debug_addr	0 : { *(.debug_addr) }
- 
--		/* Stabs debugging sections.  */
-+/* Stabs debugging sections. */
- #define STABS_DEBUG							\
- 		.stab 0 : { *(.stab) }					\
- 		.stabstr 0 : { *(.stabstr) }				\
- 		.stab.excl 0 : { *(.stab.excl) }			\
- 		.stab.exclstr 0 : { *(.stab.exclstr) }			\
- 		.stab.index 0 : { *(.stab.index) }			\
--		.stab.indexstr 0 : { *(.stab.indexstr) }		\
-+		.stab.indexstr 0 : { *(.stab.indexstr) }
-+
-+/* Required sections not related to debugging. */
-+#define ELF_DETAILS							\
- 		.comment 0 : { *(.comment) }
- 
- #ifdef CONFIG_GENERIC_BUG
 -- 
 2.25.1
 
