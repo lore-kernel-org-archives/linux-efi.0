@@ -2,37 +2,37 @@ Return-Path: <SRS0=u0Bu=AM=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.0 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.0 required=3.0 tests=HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A7C0C433E1
-	for <linux-efi@archiver.kernel.org>; Wed,  1 Jul 2020 14:19:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F9F4C433DF
+	for <linux-efi@archiver.kernel.org>; Wed,  1 Jul 2020 14:19:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6959C207BB
-	for <linux-efi@archiver.kernel.org>; Wed,  1 Jul 2020 14:19:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8D71820702
+	for <linux-efi@archiver.kernel.org>; Wed,  1 Jul 2020 14:19:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731573AbgGAOTX (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 1 Jul 2020 10:19:23 -0400
-Received: from mx0a-002e3701.pphosted.com ([148.163.147.86]:23732 "EHLO
-        mx0a-002e3701.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1731331AbgGAOTW (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 1 Jul 2020 10:19:22 -0400
-Received: from pps.filterd (m0150241.ppops.net [127.0.0.1])
-        by mx0a-002e3701.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 061E3QLm032247;
-        Wed, 1 Jul 2020 14:17:36 GMT
-Received: from g9t5008.houston.hpe.com (g9t5008.houston.hpe.com [15.241.48.72])
-        by mx0a-002e3701.pphosted.com with ESMTP id 320mu6kb8f-1
+        id S1731584AbgGAOT1 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 1 Jul 2020 10:19:27 -0400
+Received: from mx0b-002e3701.pphosted.com ([148.163.143.35]:17142 "EHLO
+        mx0b-002e3701.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1731515AbgGAOTX (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 1 Jul 2020 10:19:23 -0400
+Received: from pps.filterd (m0134423.ppops.net [127.0.0.1])
+        by mx0b-002e3701.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 061E3Ev0013539;
+        Wed, 1 Jul 2020 14:17:35 GMT
+Received: from g2t2354.austin.hpe.com (g2t2354.austin.hpe.com [15.233.44.27])
+        by mx0b-002e3701.pphosted.com with ESMTP id 320qht24as-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
         Wed, 01 Jul 2020 14:17:35 +0000
 Received: from stormcage.eag.rdlabs.hpecorp.net (stormcage.eag.rdlabs.hpecorp.net [128.162.236.70])
-        by g9t5008.houston.hpe.com (Postfix) with ESMTP id B451153;
-        Wed,  1 Jul 2020 14:17:33 +0000 (UTC)
+        by g2t2354.austin.hpe.com (Postfix) with ESMTP id 18557AC;
+        Wed,  1 Jul 2020 14:17:34 +0000 (UTC)
 Received: by stormcage.eag.rdlabs.hpecorp.net (Postfix, from userid 200934)
-        id 4E6372015D84F; Wed,  1 Jul 2020 09:17:32 -0500 (CDT)
-Message-ID: <20200701141732.206155269@hpe.com>
+        id C8A882015DBC7; Wed,  1 Jul 2020 09:17:32 -0500 (CDT)
+Message-ID: <20200701141732.706351085@hpe.com>
 User-Agent: quilt/0.66
-Date:   Wed, 01 Jul 2020 09:17:37 -0500
+Date:   Wed, 01 Jul 2020 09:17:41 -0500
 From:   steve.wahl@hpe.com
 To:     Jonathan Corbet <corbet@lwn.net>, Ard Biesheuvel <ardb@kernel.org>,
         Thomas Gleixner <tglx@linutronix.de>,
@@ -67,152 +67,76 @@ To:     Jonathan Corbet <corbet@lwn.net>, Ard Biesheuvel <ardb@kernel.org>,
         linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-efi@vger.kernel.org
 Cc:     Russ Anderson <rja@hpe.com>
-Subject: [patch 06/13] Remove support for uv1 platform from uv_hub.h
+Subject: [patch 10/13] Delete SGI UV1 detection.
 References: <20200701141731.377252388@hpe.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 X-HPE-SCL: -1
 X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.235,18.0.687
  definitions=2020-07-01_08:2020-07-01,2020-07-01 signatures=0
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 bulkscore=0 malwarescore=0
- impostorscore=0 mlxlogscore=999 cotscore=-2147483648 spamscore=0
- priorityscore=1501 mlxscore=0 adultscore=0 clxscore=1015 phishscore=0
- lowpriorityscore=0 suspectscore=0 classifier=spam adjust=0 reason=mlx
- scancount=1 engine=8.12.0-2004280000 definitions=main-2007010102
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 impostorscore=0 spamscore=0
+ phishscore=0 adultscore=0 lowpriorityscore=0 suspectscore=0
+ mlxlogscore=999 clxscore=1015 malwarescore=0 priorityscore=1501
+ cotscore=-2147483648 mlxscore=0 bulkscore=0 classifier=spam adjust=0
+ reason=mlx scancount=1 engine=8.12.0-2004280000
+ definitions=main-2007010102
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-arch/x86/include/asm/uv/uv_hub.h: remove UV1 support
+As a part of UV1 platform removal, don't try to recognize the platform
+through DMI to set the EFI_UV1_MEMMAP bit.
 
 Signed-off-by: Steve Wahl <steve.wahl@hpe.com>
 ---
- arch/x86/include/asm/uv/uv_hub.h | 34 +++-------------------------------
- 1 file changed, 3 insertions(+), 31 deletions(-)
+ arch/x86/platform/efi/quirks.c |   23 -----------------------
+ 1 file changed, 23 deletions(-)
 
-diff --git a/arch/x86/include/asm/uv/uv_hub.h b/arch/x86/include/asm/uv/uv_hub.h
-index 60ca0afdeaf9..c0bcadf015fb 100644
---- a/arch/x86/include/asm/uv/uv_hub.h
-+++ b/arch/x86/include/asm/uv/uv_hub.h
-@@ -224,17 +224,11 @@ static inline struct uv_hub_info_s *uv_cpu_hub_info(int cpu)
-  * This is a software convention - NOT the hardware revision numbers in
-  * the hub chip.
-  */
--#define UV1_HUB_REVISION_BASE		1
- #define UV2_HUB_REVISION_BASE		3
- #define UV3_HUB_REVISION_BASE		5
- #define UV4_HUB_REVISION_BASE		7
- #define UV4A_HUB_REVISION_BASE		8	/* UV4 (fixed) rev 2 */
- 
--static inline int is_uv1_hub(void)
--{
--	return is_uv_hubbed(uv(1));
--}
--
- static inline int is_uv2_hub(void)
- {
- 	return is_uv_hubbed(uv(2));
-@@ -265,7 +259,7 @@ static inline int is_uvx_hub(void)
- 
- static inline int is_uv_hub(void)
- {
--	return is_uv1_hub() || is_uvx_hub();
-+	return is_uvx_hub();
+--- linux.orig/arch/x86/platform/efi/quirks.c	2020-06-17 14:29:45.510015978 -0500
++++ linux/arch/x86/platform/efi/quirks.c	2020-06-17 14:36:34.473414139 -0500
+@@ -558,16 +558,6 @@ out:
+ 	return ret;
  }
  
- union uvh_apicid {
-@@ -292,11 +286,6 @@ union uvh_apicid {
- #define UV_PNODE_TO_GNODE(p)		((p) |uv_hub_info->gnode_extra)
- #define UV_PNODE_TO_NASID(p)		(UV_PNODE_TO_GNODE(p) << 1)
- 
--#define UV1_LOCAL_MMR_BASE		0xf4000000UL
--#define UV1_GLOBAL_MMR32_BASE		0xf8000000UL
--#define UV1_LOCAL_MMR_SIZE		(64UL * 1024 * 1024)
--#define UV1_GLOBAL_MMR32_SIZE		(64UL * 1024 * 1024)
+-static const struct dmi_system_id sgi_uv1_dmi[] __initconst = {
+-	{ NULL, "SGI UV1",
+-		{	DMI_MATCH(DMI_PRODUCT_NAME,	"Stoutland Platform"),
+-			DMI_MATCH(DMI_PRODUCT_VERSION,	"1.0"),
+-			DMI_MATCH(DMI_BIOS_VENDOR,	"SGI.COM"),
+-		}
+-	},
+-	{ } /* NULL entry stops DMI scanning */
+-};
 -
- #define UV2_LOCAL_MMR_BASE		0xfa000000UL
- #define UV2_GLOBAL_MMR32_BASE		0xfc000000UL
- #define UV2_LOCAL_MMR_SIZE		(32UL * 1024 * 1024)
-@@ -313,25 +302,21 @@ union uvh_apicid {
- #define UV4_GLOBAL_MMR32_SIZE		(16UL * 1024 * 1024)
- 
- #define UV_LOCAL_MMR_BASE		(				\
--					is_uv1_hub() ? UV1_LOCAL_MMR_BASE : \
- 					is_uv2_hub() ? UV2_LOCAL_MMR_BASE : \
- 					is_uv3_hub() ? UV3_LOCAL_MMR_BASE : \
- 					/*is_uv4_hub*/ UV4_LOCAL_MMR_BASE)
- 
- #define UV_GLOBAL_MMR32_BASE		(				\
--					is_uv1_hub() ? UV1_GLOBAL_MMR32_BASE : \
- 					is_uv2_hub() ? UV2_GLOBAL_MMR32_BASE : \
- 					is_uv3_hub() ? UV3_GLOBAL_MMR32_BASE : \
- 					/*is_uv4_hub*/ UV4_GLOBAL_MMR32_BASE)
- 
- #define UV_LOCAL_MMR_SIZE		(				\
--					is_uv1_hub() ? UV1_LOCAL_MMR_SIZE : \
- 					is_uv2_hub() ? UV2_LOCAL_MMR_SIZE : \
- 					is_uv3_hub() ? UV3_LOCAL_MMR_SIZE : \
- 					/*is_uv4_hub*/ UV4_LOCAL_MMR_SIZE)
- 
- #define UV_GLOBAL_MMR32_SIZE		(				\
--					is_uv1_hub() ? UV1_GLOBAL_MMR32_SIZE : \
- 					is_uv2_hub() ? UV2_GLOBAL_MMR32_SIZE : \
- 					is_uv3_hub() ? UV3_GLOBAL_MMR32_SIZE : \
- 					/*is_uv4_hub*/ UV4_GLOBAL_MMR32_SIZE)
-@@ -352,8 +337,6 @@ union uvh_apicid {
- #define UVH_APICID		0x002D0E00L
- #define UV_APIC_PNODE_SHIFT	6
- 
--#define UV_APICID_HIBIT_MASK	0xffff0000
--
- /* Local Bus from cpu's perspective */
- #define LOCAL_BUS_BASE		0x1c00000
- #define LOCAL_BUS_SIZE		(4 * 1024 * 1024)
-@@ -560,15 +543,6 @@ static inline int uv_apicid_to_pnode(int apicid)
- 	return s2pn ? s2pn[pnode - uv_hub_info->min_socket] : pnode;
- }
- 
--/* Convert an apicid to the socket number on the blade */
--static inline int uv_apicid_to_socket(int apicid)
--{
--	if (is_uv1_hub())
--		return (apicid >> (uv_hub_info->apic_pnode_shift - 1)) & 1;
--	else
--		return 0;
--}
--
- /*
-  * Access global MMRs using the low memory MMR32 space. This region supports
-  * faster MMR access but not all MMRs are accessible in this space.
-@@ -660,7 +634,7 @@ static inline int uv_cpu_blade_processor_id(int cpu)
- 	return uv_cpu_info_per(cpu)->blade_cpu_id;
- }
- 
--/* Blade number to Node number (UV1..UV4 is 1:1) */
-+/* Blade number to Node number (UV2..UV4 is 1:1) */
- static inline int uv_blade_to_node(int blade)
+ void __init efi_apply_memmap_quirks(void)
  {
- 	return blade;
-@@ -674,7 +648,7 @@ static inline int uv_numa_blade_id(void)
- 
- /*
-  * Convert linux node number to the UV blade number.
-- * .. Currently for UV1 thru UV4 the node and the blade are identical.
-+ * .. Currently for UV2 thru UV4 the node and the blade are identical.
-  * .. If this changes then you MUST check references to this function!
-  */
- static inline int uv_node_to_blade_id(int nid)
-@@ -821,8 +795,6 @@ static inline void uv_set_cpu_scir_bits(int cpu, unsigned char value)
+ 	/*
+@@ -579,17 +569,6 @@ void __init efi_apply_memmap_quirks(void
+ 		pr_info("Setup done, disabling due to 32/64-bit mismatch\n");
+ 		efi_memmap_unmap();
  	}
+-
+-	/* UV2+ BIOS has a fix for this issue.  UV1 still needs the quirk. */
+-	if (dmi_check_system(sgi_uv1_dmi)) {
+-		if (IS_ENABLED(CONFIG_X86_UV)) {
+-			set_bit(EFI_UV1_MEMMAP, &efi.flags);
+-		} else {
+-			pr_warn("EFI runtime disabled, needs CONFIG_X86_UV=y on UV1\n");
+-			clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+-			efi_memmap_unmap();
+-		}
+-	}
  }
  
--extern unsigned int uv_apicid_hibits;
--
  /*
-  * Get the minimum revision number of the hub chips within the partition.
-  * (See UVx_HUB_REVISION_BASE above for specific values.)
--- 
-2.12.3
-
+@@ -723,8 +702,6 @@ void efi_recover_from_page_fault(unsigne
+ 
+ 	/*
+ 	 * Make sure that an efi runtime service caused the page fault.
+-	 * "efi_mm" cannot be used to check if the page fault had occurred
+-	 * in the firmware context because the UV1 memmap doesn't use efi_pgd.
+ 	 */
+ 	if (efi_rts_work.efi_rts_id == EFI_NONE)
+ 		return;
 
