@@ -7,51 +7,51 @@ X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D5DC6C433E0
-	for <linux-efi@archiver.kernel.org>; Mon,  6 Jul 2020 17:26:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7FCD1C433E1
+	for <linux-efi@archiver.kernel.org>; Mon,  6 Jul 2020 17:26:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B50D220890
-	for <linux-efi@archiver.kernel.org>; Mon,  6 Jul 2020 17:26:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 61B492083B
+	for <linux-efi@archiver.kernel.org>; Mon,  6 Jul 2020 17:26:37 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="gzBctf0j"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="VQuVvXqh"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729696AbgGFR0g (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 6 Jul 2020 13:26:36 -0400
+        id S1729711AbgGFR0h (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 6 Jul 2020 13:26:37 -0400
 Received: from esa2.hgst.iphmx.com ([68.232.143.124]:41516 "EHLO
         esa2.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729615AbgGFR0g (ORCPT
+        with ESMTP id S1729690AbgGFR0g (ORCPT
         <rfc822;linux-efi@vger.kernel.org>); Mon, 6 Jul 2020 13:26:36 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1594056420; x=1625592420;
+  t=1594056421; x=1625592421;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=5X06JHUw7otD1cmcj2n/lx5hX3r8VhRKMlY+7ax6kt0=;
-  b=gzBctf0jJmkRcUnRWlZh6eAXP7eYqlDKoL3DeJbn3rpUhBmjduLd6BKz
-   k/LZ5c9drmFHRleufi6wzhl0xShH35AD4TKqecL1EAMVLl++PFw5mKzFy
-   9SpZvbJ+wZPHdXApkE/1WfuCYJbg+Lyc4TGvGrAZdMqxPCVAD1rp3vzb3
-   O6/cwCW/5H3Y1fI2FC6v+Ze3MMx5dAdobTAPZ/xkDBOwowEDwavcdwX5g
-   NyN7mSfxRT3NOHMVq1xGENeRzHhfZOAANqvS4kJTKjoFejPuwBLpxQCtj
-   UFXXgSTSBMZ3a12KIUfUZryBW1zsjqAHoTpitZdDAfIFRZchwwtftnPZy
-   Q==;
-IronPort-SDR: uGC4d1lEWs1gZWris8ckjB0QJ1kynDEIx79rofSV8pAeIYB20/F5RBY75MuUJcaSKBNdUu2gO6
- X3rOJP4Nf8FH6+HtaffhiNhHGRokeIMDYyP4j68JirUATjaLhk95wzs94V5ZVIo6bgJ47Hl7k+
- gs6kpFSOY8MX4elRKU3KWP8ewh0U4GSyG1uWoyV6wOi2cGYeDttr8V33aEZptVuWGuawKAmjcc
- hFoa/skNNOi4H5937s92s9BJmybHwI/Bw4qLcLkbmNFt2OFHz4PSmFNFtO1DRAyGTI/NJoyVIE
- krk=
+  bh=5rYW4FEHjU+JIGZzSYacxByNR94cSOaxyWs5ncpc52A=;
+  b=VQuVvXqhEm7wKm0mRedSxEveMzY2Gb2yjbhC1NyJDkpg8aEzN5R1CtmB
+   9I0uXmjapjTEgkNkrJWV7p608FBMWeAJwh4jzauPYMTl6kk4mfOEztlW7
+   LUlaO8zcbjs42DKaRqZ6Gxrp0Kq8hOr9QmP/LFgj3etBT4dgvZnEL6E0K
+   pcBxSn7BrQa7dSqUw7DkDFQ3qpHyKXzJxAPvkspcjki6LWrXMWrrWhZjg
+   hbo/c19UobimDIeUfRFeA447DqQ+VPfTDmuL3aO0+dCR+osN52Ot8QVfy
+   i/1H/7UHdGiSWph2qWiyWRF6ysjuCD/FTpzrXuKQmOoa3kkzC02okcC3o
+   g==;
+IronPort-SDR: WBOKJGlBRrPSlwHlWVKXgQZkA6aj9e51zenO12nPi+haAzMkn3Ujm2V+Az3xCPrdFfs3W0Wyy6
+ EYIpXY9MtRbcvbRUVokVJNH8XO4whEq/apAXIx1rCZ/9K8BUTYX6g6cl4oFPnR7/2HMB24PZRR
+ 8FNlbq3FUSEmw0RqHNswkQtGjVqpvWN6dPom8P+NwvbEMRObh5DNn+2xV8WrpPL7MriJohVlzA
+ qxSH5m/xbPuw9wLeOuHJyT6qlT0EUriPEca4S9svUPSLh7Q2D7vnN8Qp0ZmIDVEPIHD7i50eaC
+ Gjw=
 X-IronPort-AV: E=Sophos;i="5.75,320,1589212800"; 
-   d="scan'208";a="244770171"
+   d="scan'208";a="244770178"
 Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 07 Jul 2020 01:26:51 +0800
-IronPort-SDR: lMBU/ddQr67XN8qJBYZD8vTdHqenVIfpdBrN1xj3R7ZYpFsItTuLSKvovGfKUHOzXzlsQETQai
- nS0bfoJsYVsCtrtsHCWMfs+mXikSah6Ps=
+  by ob1.hgst.iphmx.com with ESMTP; 07 Jul 2020 01:26:52 +0800
+IronPort-SDR: kG4zbxCTvYQmzmdoGNc+/qEYxDqlqRIgTG65p2kbRGvYgD9iS7K2Gv39D4uwMeRuCDwSS6WayM
+ WBrquLv+9kAOvUUcWaKLk42u66lcC4L3I=
 Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
   by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Jul 2020 10:14:38 -0700
-IronPort-SDR: 0rNpNsBq9dJOaB/dCBImZi7qAbAVgQqcgUJOA8uQYYQJVZAspFE89p4TnGiU1Hf8fagRuuQmdt
- XiMqzYA3FRDA==
+IronPort-SDR: JpeLRq4Gv2B6hJdrG2x8+bUFZu6OWKRYQZiJUf0qjG/GWht2sUiscYCg6ulNaKrzumxLHgpPpe
+ CuXowP9yI+XQ==
 WDCIronportException: Internal
 Received: from 6hj08h2.ad.shared (HELO jedi-01.hgst.com) ([10.86.57.161])
-  by uls-op-cesaip01.wdc.com with ESMTP; 06 Jul 2020 10:26:29 -0700
+  by uls-op-cesaip01.wdc.com with ESMTP; 06 Jul 2020 10:26:30 -0700
 From:   Atish Patra <atish.patra@wdc.com>
 To:     linux-kernel@vger.kernel.org
 Cc:     Atish Patra <atish.patra@wdc.com>,
@@ -60,9 +60,9 @@ Cc:     Atish Patra <atish.patra@wdc.com>,
         Masahiro Yamada <masahiroy@kernel.org>,
         Palmer Dabbelt <palmer@dabbelt.com>,
         Heinrich Schuchardt <xypron.glpk@gmx.de>
-Subject: [RFC PATCH v2 01/11] efi/libstub: Move the function prototypes to header file
-Date:   Mon,  6 Jul 2020 10:25:59 -0700
-Message-Id: <20200706172609.25965-2-atish.patra@wdc.com>
+Subject: [RFC PATCH v2 03/11] RISC-V: Setup exception vector early
+Date:   Mon,  6 Jul 2020 10:26:01 -0700
+Message-Id: <20200706172609.25965-4-atish.patra@wdc.com>
 X-Mailer: git-send-email 2.24.0
 In-Reply-To: <20200706172609.25965-1-atish.patra@wdc.com>
 References: <20200706172609.25965-1-atish.patra@wdc.com>
@@ -73,73 +73,73 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The prototype of the functions handle_kernel_image & efi_enter_kernel
-are defined in efi-stub.c which may result in a compiler warnings if
--Wmissing-prototypes is set in gcc compiler.
+The trap vector is set only in trap_init which may be too late in some
+cases. Early ioremap/efi spits many warning messages which may be useful.
 
-Move the prototype to efistub.h to make the compiler happy.
+Setup the trap vector early so that any warning/bug can be handled before
+generic code invokes trap_init.
 
 Signed-off-by: Atish Patra <atish.patra@wdc.com>
 ---
- drivers/firmware/efi/libstub/efi-stub.c | 17 -----------------
- drivers/firmware/efi/libstub/efistub.h  | 16 ++++++++++++++++
- 2 files changed, 16 insertions(+), 17 deletions(-)
+ arch/riscv/kernel/head.S    | 10 ++++++++--
+ arch/riscv/kernel/smpboot.c |  1 -
+ arch/riscv/kernel/traps.c   |  8 +-------
+ 3 files changed, 9 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/efi-stub.c b/drivers/firmware/efi/libstub/efi-stub.c
-index 3318ec3f8e5b..a5a405d8ab44 100644
---- a/drivers/firmware/efi/libstub/efi-stub.c
-+++ b/drivers/firmware/efi/libstub/efi-stub.c
-@@ -121,23 +121,6 @@ static unsigned long get_dram_base(void)
- 	return membase;
- }
+diff --git a/arch/riscv/kernel/head.S b/arch/riscv/kernel/head.S
+index c5b529234ad8..eb123eda3663 100644
+--- a/arch/riscv/kernel/head.S
++++ b/arch/riscv/kernel/head.S
+@@ -77,10 +77,16 @@ relocate:
+ 	csrw CSR_SATP, a0
+ .align 2
+ 1:
+-	/* Set trap vector to spin forever to help debug */
+-	la a0, .Lsecondary_park
++	/* Set trap vector to exception handler */
++	la a0, handle_exception
+ 	csrw CSR_TVEC, a0
  
--/*
-- * This function handles the architcture specific differences between arm and
-- * arm64 regarding where the kernel image must be loaded and any memory that
-- * must be reserved. On failure it is required to free all
-- * all allocations it has made.
-- */
--efi_status_t handle_kernel_image(unsigned long *image_addr,
--				 unsigned long *image_size,
--				 unsigned long *reserve_addr,
--				 unsigned long *reserve_size,
--				 unsigned long dram_base,
--				 efi_loaded_image_t *image);
--
--asmlinkage void __noreturn efi_enter_kernel(unsigned long entrypoint,
--					    unsigned long fdt_addr,
--					    unsigned long fdt_size);
--
- /*
-  * EFI entry point for the arm/arm64 EFI stubs.  This is the entrypoint
-  * that is described in the PE/COFF header.  Most of the code is the same
-diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-index 2c9d42264c29..85050f5a1b28 100644
---- a/drivers/firmware/efi/libstub/efistub.h
-+++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -776,6 +776,22 @@ efi_status_t efi_load_initrd(efi_loaded_image_t *image,
- 			     unsigned long *load_size,
- 			     unsigned long soft_limit,
- 			     unsigned long hard_limit);
-+/*
-+ * This function handles the architcture specific differences between arm and
-+ * arm64 regarding where the kernel image must be loaded and any memory that
-+ * must be reserved. On failure it is required to free all
-+ * all allocations it has made.
-+ */
-+efi_status_t handle_kernel_image(unsigned long *image_addr,
-+				 unsigned long *image_size,
-+				 unsigned long *reserve_addr,
-+				 unsigned long *reserve_size,
-+				 unsigned long dram_base,
-+				 efi_loaded_image_t *image);
++	/*
++	 * Set sup0 scratch register to 0, indicating to exception vector that
++	 * we are presently executing in kernel.
++	 */
++	csrw CSR_SCRATCH, zero
 +
-+asmlinkage void __noreturn efi_enter_kernel(unsigned long entrypoint,
-+					    unsigned long fdt_addr,
-+					    unsigned long fdt_size);
+ 	/* Reload the global pointer */
+ .option push
+ .option norelax
+diff --git a/arch/riscv/kernel/smpboot.c b/arch/riscv/kernel/smpboot.c
+index 4e9922790f6e..5a9c127a380e 100644
+--- a/arch/riscv/kernel/smpboot.c
++++ b/arch/riscv/kernel/smpboot.c
+@@ -154,7 +154,6 @@ asmlinkage __visible void smp_callin(void)
+ 	mmgrab(mm);
+ 	current->active_mm = mm;
  
- void efi_handle_post_ebs_state(void);
+-	trap_init();
+ 	notify_cpu_starting(smp_processor_id());
+ 	update_siblings_masks(smp_processor_id());
+ 	set_cpu_online(smp_processor_id(), 1);
+diff --git a/arch/riscv/kernel/traps.c b/arch/riscv/kernel/traps.c
+index 7d95cce5e47c..ad14f4466d92 100644
+--- a/arch/riscv/kernel/traps.c
++++ b/arch/riscv/kernel/traps.c
+@@ -174,13 +174,7 @@ int is_valid_bugaddr(unsigned long pc)
+ }
+ #endif /* CONFIG_GENERIC_BUG */
  
++/* stvec & scratch is already set from head.S */
+ void trap_init(void)
+ {
+-	/*
+-	 * Set sup0 scratch register to 0, indicating to exception vector
+-	 * that we are presently executing in the kernel
+-	 */
+-	csr_write(CSR_SCRATCH, 0);
+-	/* Set the exception vector address */
+-	csr_write(CSR_TVEC, &handle_exception);
+ }
 -- 
 2.24.0
 
