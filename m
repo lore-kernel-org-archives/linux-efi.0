@@ -7,62 +7,62 @@ X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 94A97C433E2
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E50CC433E1
 	for <linux-efi@archiver.kernel.org>; Mon,  6 Jul 2020 17:27:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7497C2070C
+	by mail.kernel.org (Postfix) with ESMTP id 20D972070C
 	for <linux-efi@archiver.kernel.org>; Mon,  6 Jul 2020 17:27:09 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="pvZWBdEa"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="S0MdXPU8"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729723AbgGFR0i (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 6 Jul 2020 13:26:38 -0400
-Received: from esa2.hgst.iphmx.com ([68.232.143.124]:41516 "EHLO
+        id S1729682AbgGFR0y (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 6 Jul 2020 13:26:54 -0400
+Received: from esa2.hgst.iphmx.com ([68.232.143.124]:41526 "EHLO
         esa2.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729706AbgGFR0h (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 6 Jul 2020 13:26:37 -0400
+        with ESMTP id S1729729AbgGFR0k (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 6 Jul 2020 13:26:40 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1594056421; x=1625592421;
+  t=1594056426; x=1625592426;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=ihAfLD97lU7TjJORSki+rGBXYnAkG5Afd7XbqxsjX2E=;
-  b=pvZWBdEaLS229Bo7MppuCWvCUqNHXT+JAnVrFqhqg4tgXREmASpeTeiI
-   co+Vk9lPnU7fqTbVb3Pw18AfyGse+fO+AopbbJUrbiLyY4o77C/FERUlc
-   +B0DI98cEJMRijxHLksIGX+l4ivCsQySDtXi671p9B182UpiKZwd9nZk6
-   Pmxf7GeDI8Vi+De3ivFlWyIJbb9XHaTV75st4HYZRHa1eyuHNT0Dwz5qZ
-   T2A3+/cBhJgXlMhYcjB3zATR9l6Z3FuPXrjSqKkYnZI1gdAFVdPSsJ4jI
-   C91nPdQATeu6j9cQ6L60Hb8i1gWj07+Pcg0qJAoDKAolwuBfbJyNTSZVn
-   g==;
-IronPort-SDR: MnpOxvIt8djBtwnI/s2OmuNybH68QnlDvKHFfwXx7r2N0dzEj3Hk/F9O0a5Wga9DvC2JSEjEjr
- j9N0rpTIFnsbA9HywPS+HEffEuI6ktyNX4JG/ZkLA1WnymPz+vwHkrwvf3Q2PMnWwvAze+43uj
- 6IxsCBU1XNFbrReekVhXAx2oq6BH36Nqf09mMs4UTj9buAOyQDJKxu1dnWTa9Rfj4/3q1j1kMD
- ptxDppcjKi4Ouph6j7Aq47QBPPjXr/M5aCT8ZtfwNGsgmV9qqcJAknM06LRQKmApn3U3lkQEyn
- O14=
+  bh=nHvnJiYx9m4qgpU15gJ/Ccbf7swBc96Tz27HrNbIsW8=;
+  b=S0MdXPU8SSj0ftQv+1bfQ+GMTXsQ9NoE98QbE95RNy7CiMI8zns1+wG9
+   tJnke4TkPKoLvUXPBFSfpVfBy5P6GWcxDZOV129qFZZ0gdliwMbZoYyVJ
+   s0yMAdyGRpRRFnlk5LCf8ds0clcHcMPlrJ+IA0o73Du9LNkeu5R0Jeael
+   KxkPIrqhFP0qmZMX1LSrVrqnETdwRq3vEuXeFeksV7u34CEfzo44sdKp2
+   30ohcxNAf+7ieGTJNJnbWslh5KAbaDgM3Edup+tLCl4ZwjcTA+XW1rznM
+   0T67azOwtRWaP/2ODY+AVyZB9NOlfef2oU/GOnik1QelSOi4iq74Huxwq
+   w==;
+IronPort-SDR: vxXXejTa6Tc6igjsJFPC9QKHcMuPkPgJhayWG3tvMBPcCLTpSGcXct98IyMHfR+TnirUy/rvLK
+ RZSc0OSdYc2xd7wnKMhRqBMP+ZnHTXylRmCBV78sUCqk2B7Z1rVBKrSZRVRguSGcfhLkRGXw8b
+ TKjqX9uwMjQphmbdvoQDmN5C0S8Nfm98VfcZrdF5pB8HeInqQrqFLW0t2fetjTseun+j/iqnHX
+ PDzscBwfEiM22U2KjL+tGdtSkBnwW9+qMXijTSjRszxGet6We/tNGgDI7PLunY/hfggZXmM2n7
+ Uqc=
 X-IronPort-AV: E=Sophos;i="5.75,320,1589212800"; 
-   d="scan'208";a="244770174"
+   d="scan'208";a="244770196"
 Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 07 Jul 2020 01:26:51 +0800
-IronPort-SDR: u9KUGkv8yKnDTM+j/h9WB90/gCb+L/qe2M8v/4+c6GPx2CMtcAa1bcXGbHqZS7ukqQnA4AJSZU
- tb5LF6SZt5YODRbss7wvCEtGJez78W7DE=
+  by ob1.hgst.iphmx.com with ESMTP; 07 Jul 2020 01:26:57 +0800
+IronPort-SDR: 5xzOSqXHC6Oc38y3b2Q7Md6YMXyLB0COE1awgv74GIniFfPfdL4ONoumpGRcKR6h6ObW6aMAcQ
+ FFm5MGMXtn08ny+yH3ZN45JzHusXkfB/4=
 Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Jul 2020 10:14:38 -0700
-IronPort-SDR: 8BPyeAFugfQ7vcY4FOBjK8k4D9Wq3qcPHzxx/TXBvy4o44HkaDoMMWpj8fedogoDvDgZnn0vgI
- tJlwLUq1NXtw==
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Jul 2020 10:14:42 -0700
+IronPort-SDR: Cgprnj07G5dGBMADqdujPuFH0qLhFKUzEnKP5120E4yvL9eu6Mb+tbJbLxs6wEjksNWSXjYyBy
+ XWgAnRzyznMQ==
 WDCIronportException: Internal
 Received: from 6hj08h2.ad.shared (HELO jedi-01.hgst.com) ([10.86.57.161])
-  by uls-op-cesaip01.wdc.com with ESMTP; 06 Jul 2020 10:26:29 -0700
+  by uls-op-cesaip01.wdc.com with ESMTP; 06 Jul 2020 10:26:33 -0700
 From:   Atish Patra <atish.patra@wdc.com>
 To:     linux-kernel@vger.kernel.org
-Cc:     Anup Patel <anup.patel@wdc.com>, Atish Patra <atish.patra@wdc.com>,
+Cc:     Atish Patra <atish.patra@wdc.com>,
         Ard Biesheuvel <ardb@kernel.org>, linux-efi@vger.kernel.org,
         linux-riscv@lists.infradead.org,
         Masahiro Yamada <masahiroy@kernel.org>,
         Palmer Dabbelt <palmer@dabbelt.com>,
         Heinrich Schuchardt <xypron.glpk@gmx.de>
-Subject: [RFC PATCH v2 02/11] RISC-V: Move DT mapping outof fixmap
-Date:   Mon,  6 Jul 2020 10:26:00 -0700
-Message-Id: <20200706172609.25965-3-atish.patra@wdc.com>
+Subject: [RFC PATCH v2 11/11] RISC-V: Add EFI runtime services
+Date:   Mon,  6 Jul 2020 10:26:09 -0700
+Message-Id: <20200706172609.25965-12-atish.patra@wdc.com>
 X-Mailer: git-send-email 2.24.0
 In-Reply-To: <20200706172609.25965-1-atish.patra@wdc.com>
 References: <20200706172609.25965-1-atish.patra@wdc.com>
@@ -73,192 +73,493 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Anup Patel <anup.patel@wdc.com>
+This patch adds EFI runtime service support for RISC-V.
 
-Currently, RISC-V reserves 1MB of fixmap memory for device tree. However,
-it maps only single PMD (2MB) space for fixmap which leaves only < 1MB space
-left for other kernel features such as early ioremap which requires fixmap
-as well. The fixmap size can be increased by another 2MB but it brings
-additional complexity and changes the virtual memory layout as well.
-If we require some additional feature requiring fixmap again, it has to be
-moved again.
-
-Technically, DT doesn't need a fixmap as the memory occupied by the DT is
-only used during boot. Thus, init memory section can be used for the same
-purpose as well. This simplifies fixmap implementation.
-
-Signed-off-by: Anup Patel <anup.patel@wdc.com>
 Signed-off-by: Atish Patra <atish.patra@wdc.com>
 ---
- arch/riscv/include/asm/fixmap.h |  3 ---
- arch/riscv/kernel/head.S        |  1 -
- arch/riscv/kernel/head.h        |  2 --
- arch/riscv/kernel/setup.c       |  8 +++-----
- arch/riscv/mm/init.c            | 36 ++++++++++++++-------------------
- 5 files changed, 18 insertions(+), 32 deletions(-)
+ arch/riscv/Kconfig                      |   2 +
+ arch/riscv/include/asm/efi.h            |  20 ++++
+ arch/riscv/include/asm/mmu.h            |   2 +
+ arch/riscv/include/asm/pgalloc.h        |  12 ++
+ arch/riscv/include/asm/pgtable.h        |   4 +
+ arch/riscv/kernel/Makefile              |   1 +
+ arch/riscv/kernel/efi.c                 | 106 ++++++++++++++++++
+ arch/riscv/kernel/setup.c               |   7 +-
+ arch/riscv/mm/init.c                    |   2 +-
+ drivers/firmware/efi/Makefile           |   2 +
+ drivers/firmware/efi/libstub/efi-stub.c |  11 +-
+ drivers/firmware/efi/riscv-runtime.c    | 141 ++++++++++++++++++++++++
+ 12 files changed, 306 insertions(+), 4 deletions(-)
+ create mode 100644 arch/riscv/kernel/efi.c
+ create mode 100644 drivers/firmware/efi/riscv-runtime.c
 
-diff --git a/arch/riscv/include/asm/fixmap.h b/arch/riscv/include/asm/fixmap.h
-index 1ff075a8dfc7..11613f38228a 100644
---- a/arch/riscv/include/asm/fixmap.h
-+++ b/arch/riscv/include/asm/fixmap.h
-@@ -22,9 +22,6 @@
-  */
- enum fixed_addresses {
- 	FIX_HOLE,
--#define FIX_FDT_SIZE	SZ_1M
--	FIX_FDT_END,
--	FIX_FDT = FIX_FDT_END + FIX_FDT_SIZE / PAGE_SIZE - 1,
- 	FIX_PTE,
- 	FIX_PMD,
- 	FIX_TEXT_POKE1,
-diff --git a/arch/riscv/kernel/head.S b/arch/riscv/kernel/head.S
-index 7ed1b22950fd..c5b529234ad8 100644
---- a/arch/riscv/kernel/head.S
-+++ b/arch/riscv/kernel/head.S
-@@ -244,7 +244,6 @@ clear_bss_done:
+diff --git a/arch/riscv/Kconfig b/arch/riscv/Kconfig
+index a902e98048a1..601e8b873628 100644
+--- a/arch/riscv/Kconfig
++++ b/arch/riscv/Kconfig
+@@ -399,7 +399,9 @@ config EFI
+ 	select EFI_PARAMS_FROM_FDT
+ 	select EFI_STUB
+ 	select EFI_GENERIC_STUB
++	select EFI_RUNTIME_WRAPPERS
+ 	select RISCV_ISA_C
++	depends on MMU
+ 	default y
+ 	help
+ 	  This option provides support for runtime services provided
+diff --git a/arch/riscv/include/asm/efi.h b/arch/riscv/include/asm/efi.h
+index 86da231909bb..93c305a638f4 100644
+--- a/arch/riscv/include/asm/efi.h
++++ b/arch/riscv/include/asm/efi.h
+@@ -5,11 +5,28 @@
+ #ifndef _ASM_EFI_H
+ #define _ASM_EFI_H
+ 
++#include <asm/csr.h>
+ #include <asm/io.h>
+ #include <asm/mmu_context.h>
+ #include <asm/ptrace.h>
+ #include <asm/tlbflush.h>
+ 
++#ifdef CONFIG_EFI
++extern void efi_init(void);
++#else
++#define efi_init()
++#endif
++
++int efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md);
++int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
++
++#define arch_efi_call_virt_setup()      efi_virtmap_load()
++#define arch_efi_call_virt_teardown()   efi_virtmap_unload()
++
++#define arch_efi_call_virt(p, f, args...) p->f(args)
++
++#define ARCH_EFI_IRQ_FLAGS_MASK (SR_IE | SR_SPIE)
++
+ /* on RISC-V, the FDT may be located anywhere in system RAM */
+ static inline unsigned long efi_get_max_fdt_addr(unsigned long dram_base)
+ {
+@@ -33,4 +50,7 @@ static inline void efifb_setup_from_dmi(struct screen_info *si, const char *opt)
+ {
+ }
+ 
++void efi_virtmap_load(void);
++void efi_virtmap_unload(void);
++
+ #endif /* _ASM_EFI_H */
+diff --git a/arch/riscv/include/asm/mmu.h b/arch/riscv/include/asm/mmu.h
+index 967eacb01ab5..dabcf2cfb3dc 100644
+--- a/arch/riscv/include/asm/mmu.h
++++ b/arch/riscv/include/asm/mmu.h
+@@ -20,6 +20,8 @@ typedef struct {
  #endif
- 	/* Start the kernel */
- 	call soc_early_init
--	call parse_dtb
- 	tail start_kernel
+ } mm_context_t;
  
- .Lsecondary_start:
-diff --git a/arch/riscv/kernel/head.h b/arch/riscv/kernel/head.h
-index 105fb0496b24..b48dda3d04f6 100644
---- a/arch/riscv/kernel/head.h
-+++ b/arch/riscv/kernel/head.h
-@@ -16,6 +16,4 @@ asmlinkage void __init setup_vm(uintptr_t dtb_pa);
- extern void *__cpu_up_stack_pointer[];
- extern void *__cpu_up_task_pointer[];
++void __init create_pgd_mapping(pgd_t *pgdp, uintptr_t va, phys_addr_t pa,
++			       phys_addr_t sz, pgprot_t prot);
+ #endif /* __ASSEMBLY__ */
  
--void __init parse_dtb(void);
--
- #endif /* __ASM_HEAD_H */
+ #endif /* _ASM_RISCV_MMU_H */
+diff --git a/arch/riscv/include/asm/pgalloc.h b/arch/riscv/include/asm/pgalloc.h
+index 3f601ee8233f..ad567bf0fb84 100644
+--- a/arch/riscv/include/asm/pgalloc.h
++++ b/arch/riscv/include/asm/pgalloc.h
+@@ -40,6 +40,18 @@ static inline void pud_populate(struct mm_struct *mm, pud_t *pud, pmd_t *pmd)
+ 
+ #define pmd_pgtable(pmd)	pmd_page(pmd)
+ 
++static inline pgd_t *pgd_alloc_nomap(struct mm_struct *mm)
++{
++	pgd_t *pgd;
++
++	pgd = (pgd_t *)__get_free_page(GFP_KERNEL);
++	if (likely(pgd != NULL))
++		memset(pgd, 0, USER_PTRS_PER_PGD * sizeof(pgd_t));
++
++	return pgd;
++}
++
++
+ static inline pgd_t *pgd_alloc(struct mm_struct *mm)
+ {
+ 	pgd_t *pgd;
+diff --git a/arch/riscv/include/asm/pgtable.h b/arch/riscv/include/asm/pgtable.h
+index eaea1f717010..d53ef48768ae 100644
+--- a/arch/riscv/include/asm/pgtable.h
++++ b/arch/riscv/include/asm/pgtable.h
+@@ -100,6 +100,10 @@
+ 
+ #define PAGE_KERNEL		__pgprot(_PAGE_KERNEL)
+ #define PAGE_KERNEL_EXEC	__pgprot(_PAGE_KERNEL | _PAGE_EXEC)
++#define PAGE_KERNEL_READ	__pgprot(_PAGE_KERNEL & ~_PAGE_WRITE)
++#define PAGE_KERNEL_EXEC	__pgprot(_PAGE_KERNEL | _PAGE_EXEC)
++#define PAGE_KERNEL_READ_EXEC	__pgprot((_PAGE_KERNEL & ~_PAGE_WRITE) \
++					 | _PAGE_EXEC)
+ 
+ #define PAGE_TABLE		__pgprot(_PAGE_TABLE)
+ 
+diff --git a/arch/riscv/kernel/Makefile b/arch/riscv/kernel/Makefile
+index 6f7a3b3771fd..239c44c451b6 100644
+--- a/arch/riscv/kernel/Makefile
++++ b/arch/riscv/kernel/Makefile
+@@ -36,6 +36,7 @@ OBJCOPYFLAGS := --prefix-symbols=__efistub_
+ $(obj)/%.stub.o: $(obj)/%.o FORCE
+ 	$(call if_changed,objcopy)
+ 
++obj-$(CONFIG_EFI)		+= efi.o
+ obj-$(CONFIG_FPU)		+= fpu.o
+ obj-$(CONFIG_SMP)		+= smpboot.o
+ obj-$(CONFIG_SMP)		+= smp.o
+diff --git a/arch/riscv/kernel/efi.c b/arch/riscv/kernel/efi.c
+new file mode 100644
+index 000000000000..d6c0b733f3d1
+--- /dev/null
++++ b/arch/riscv/kernel/efi.c
+@@ -0,0 +1,106 @@
++// SPDX-License-Identifier: GPL-2.0-only
++/*
++ *
++ * Copyright (C) 2020 Western Digital Corporation or its affiliates.
++ * Adapted from arch/arm64/kernel/efi.c
++ */
++
++#include <linux/efi.h>
++#include <linux/init.h>
++
++#include <asm/efi.h>
++#include <asm/pgtable.h>
++#include <asm/pgtable-bits.h>
++
++/*
++ * Only regions of type EFI_RUNTIME_SERVICES_CODE need to be
++ * executable, everything else can be mapped with the XN bits
++ * set. Also take the new (optional) RO/XP bits into account.
++ */
++static __init pgprot_t efimem_to_pgprot_map(efi_memory_desc_t *md)
++{
++	u64 attr = md->attribute;
++	u32 type = md->type;
++
++	if (type == EFI_MEMORY_MAPPED_IO)
++		return PAGE_KERNEL;
++
++	if (WARN_ONCE(!PAGE_ALIGNED(md->phys_addr),
++		      "UEFI Runtime regions are not aligned to page size -- buggy firmware?"))
++		/*
++		 * If the region is not aligned to the page size of the OS, we
++		 * can not use strict permissions, since that would also affect
++		 * the mapping attributes of the adjacent regions.
++		 */
++		return PAGE_EXEC;
++
++	/* R-- */
++	if ((attr & (EFI_MEMORY_XP | EFI_MEMORY_RO)) ==
++	    (EFI_MEMORY_XP | EFI_MEMORY_RO))
++		return PAGE_KERNEL_READ;
++
++	/* R-X */
++	if (attr & EFI_MEMORY_RO)
++		return PAGE_KERNEL_READ_EXEC;
++
++	/* RW- */
++	if (((attr & (EFI_MEMORY_RP | EFI_MEMORY_WP | EFI_MEMORY_XP)) ==
++	     EFI_MEMORY_XP) ||
++	    type != EFI_RUNTIME_SERVICES_CODE)
++		return PAGE_KERNEL;
++
++	/* RWX */
++	return PAGE_KERNEL_EXEC;
++}
++
++int __init efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md)
++{
++	pgprot_t prot = __pgprot(pgprot_val(efimem_to_pgprot_map(md)) &
++				~(_PAGE_GLOBAL));
++	int i;
++
++	/* RISC-V maps one page at a time */
++	for (i = 0; i <= md->num_pages; i++)
++		create_pgd_mapping(mm->pgd, md->virt_addr + i * PAGE_SIZE,
++				   md->phys_addr + i * PAGE_SIZE,
++				   PAGE_SIZE, prot);
++	return 0;
++}
++
++static int __init set_permissions(pte_t *ptep, unsigned long addr, void *data)
++{
++	efi_memory_desc_t *md = data;
++	pte_t pte = READ_ONCE(*ptep);
++	unsigned long val;
++
++	if (md->attribute & EFI_MEMORY_RO) {
++		val = pte_val(pte) & ~_PAGE_WRITE;
++		val = pte_val(pte) | _PAGE_READ;
++		pte = __pte(val);
++	}
++	if (md->attribute & EFI_MEMORY_XP) {
++		val = pte_val(pte) & ~_PAGE_EXEC;
++		pte = __pte(val);
++	}
++	set_pte(ptep, pte);
++
++	return 0;
++}
++
++int __init efi_set_mapping_permissions(struct mm_struct *mm,
++				       efi_memory_desc_t *md)
++{
++	BUG_ON(md->type != EFI_RUNTIME_SERVICES_CODE &&
++	       md->type != EFI_RUNTIME_SERVICES_DATA);
++
++	/*
++	 * Calling apply_to_page_range() is only safe on regions that are
++	 * guaranteed to be mapped down to pages. Since we are only called
++	 * for regions that have been mapped using efi_create_mapping() above
++	 * (and this is checked by the generic Memory Attributes table parsing
++	 * routines), there is no need to check that again here.
++	 */
++	return apply_to_page_range(mm, md->virt_addr,
++				   md->num_pages << EFI_PAGE_SHIFT,
++				   set_permissions, md);
++}
 diff --git a/arch/riscv/kernel/setup.c b/arch/riscv/kernel/setup.c
-index f04373be54a6..8519a6d29857 100644
+index 1244b433fe7c..0a725bd8d73e 100644
 --- a/arch/riscv/kernel/setup.c
 +++ b/arch/riscv/kernel/setup.c
-@@ -49,8 +49,9 @@ atomic_t hart_lottery __section(.sdata);
- unsigned long boot_cpu_hartid;
- static DEFINE_PER_CPU(struct cpu, cpu_devices);
+@@ -17,6 +17,7 @@
+ #include <linux/sched/task.h>
+ #include <linux/swiotlb.h>
+ #include <linux/smp.h>
++#include <linux/efi.h>
  
--void __init parse_dtb(void)
-+static void __init parse_dtb(void)
- {
-+	/* Early scan of device tree from init memory */
- 	if (early_init_dt_scan(dtb_early_va))
- 		return;
+ #include <asm/clint.h>
+ #include <asm/cpu_ops.h>
+@@ -26,11 +27,12 @@
+ #include <asm/tlbflush.h>
+ #include <asm/thread_info.h>
+ #include <asm/kasan.h>
++#include <asm/efi.h>
  
-@@ -63,6 +64,7 @@ void __init parse_dtb(void)
+ #include "head.h"
  
- void __init setup_arch(char **cmdline_p)
- {
-+	parse_dtb();
- 	init_mm.start_code = (unsigned long) _stext;
- 	init_mm.end_code   = (unsigned long) _etext;
- 	init_mm.end_data   = (unsigned long) _edata;
-@@ -74,11 +76,7 @@ void __init setup_arch(char **cmdline_p)
+-#ifdef CONFIG_DUMMY_CONSOLE
+-struct screen_info screen_info = {
++#if defined(CONFIG_DUMMY_CONSOLE) || defined(CONFIG_EFI)
++struct screen_info screen_info __section(.data) = {
+ 	.orig_video_lines	= 30,
+ 	.orig_video_cols	= 80,
+ 	.orig_video_mode	= 0,
+@@ -75,6 +77,7 @@ void __init setup_arch(char **cmdline_p)
+ 	early_ioremap_setup();
+ 	parse_early_param();
  
++	efi_init();
  	setup_bootmem();
  	paging_init();
--#if IS_ENABLED(CONFIG_BUILTIN_DTB)
  	unflatten_and_copy_device_tree();
--#else
--	unflatten_device_tree();
--#endif
- 	clint_init_boot_cpu();
- 
- #ifdef CONFIG_SWIOTLB
 diff --git a/arch/riscv/mm/init.c b/arch/riscv/mm/init.c
-index f4adb3684f3d..c18c94ab3b23 100644
+index c5268fe6e6de..eab96ed24065 100644
 --- a/arch/riscv/mm/init.c
 +++ b/arch/riscv/mm/init.c
-@@ -28,7 +28,6 @@ unsigned long empty_zero_page[PAGE_SIZE / sizeof(unsigned long)]
- EXPORT_SYMBOL(empty_zero_page);
+@@ -319,7 +319,7 @@ static void __init create_pmd_mapping(pmd_t *pmdp,
+ #define fixmap_pgd_next		fixmap_pte
+ #endif
  
- extern char _start[];
--void *dtb_early_va;
- 
- static void __init zone_sizes_init(void)
+-static void __init create_pgd_mapping(pgd_t *pgdp,
++void __init create_pgd_mapping(pgd_t *pgdp,
+ 				      uintptr_t va, phys_addr_t pa,
+ 				      phys_addr_t sz, pgprot_t prot)
  {
-@@ -120,8 +119,6 @@ static void __init setup_initrd(void)
- }
- #endif /* CONFIG_BLK_DEV_INITRD */
+diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+index 61fd1e8b26fb..4d628081bb2f 100644
+--- a/drivers/firmware/efi/Makefile
++++ b/drivers/firmware/efi/Makefile
+@@ -35,6 +35,8 @@ fake_map-$(CONFIG_X86)			+= x86_fake_mem.o
+ arm-obj-$(CONFIG_EFI)			:= efi-init.o arm-runtime.o
+ obj-$(CONFIG_ARM)			+= $(arm-obj-y)
+ obj-$(CONFIG_ARM64)			+= $(arm-obj-y)
++riscv-obj-$(CONFIG_EFI)			:= efi-init.o riscv-runtime.o
++obj-$(CONFIG_RISCV)			+= $(riscv-obj-y)
+ obj-$(CONFIG_EFI_CAPSULE_LOADER)	+= capsule-loader.o
+ obj-$(CONFIG_EFI_EARLYCON)		+= earlycon.o
+ obj-$(CONFIG_UEFI_CPER_ARM)		+= cper-arm.o
+diff --git a/drivers/firmware/efi/libstub/efi-stub.c b/drivers/firmware/efi/libstub/efi-stub.c
+index a5a405d8ab44..5c26725d8fd0 100644
+--- a/drivers/firmware/efi/libstub/efi-stub.c
++++ b/drivers/firmware/efi/libstub/efi-stub.c
+@@ -17,7 +17,10 @@
  
--static phys_addr_t dtb_early_pa __initdata;
--
- void __init setup_bootmem(void)
- {
- 	struct memblock_region *reg;
-@@ -158,13 +155,9 @@ void __init setup_bootmem(void)
- 	setup_initrd();
- #endif /* CONFIG_BLK_DEV_INITRD */
- 
--	/*
--	 * Avoid using early_init_fdt_reserve_self() since __pa() does
--	 * not work for DTB pointers that are fixmap addresses
--	 */
--	memblock_reserve(dtb_early_pa, fdt_totalsize(dtb_early_va));
--
-+	early_init_fdt_reserve_self();
- 	early_init_fdt_scan_reserved_mem();
+ /*
+  * This is the base address at which to start allocating virtual memory ranges
+- * for UEFI Runtime Services. This is in the low TTBR0 range so that we can use
++ * for UEFI Runtime Services.
++ *
++ * For ARM/ARM64:
++ * This is in the low TTBR0 range so that we can use
+  * any allocation we choose, and eliminate the risk of a conflict after kexec.
+  * The value chosen is the largest non-zero power of 2 suitable for this purpose
+  * both on 32-bit and 64-bit ARM CPUs, to maximize the likelihood that it can
+@@ -25,6 +28,12 @@
+  * Since 32-bit ARM could potentially execute with a 1G/3G user/kernel split,
+  * map everything below 1 GB. (512 MB is a reasonable upper bound for the
+  * entire footprint of the UEFI runtime services memory regions)
++ *
++ * For RISC-V:
++ * There is no specific reason for which, this address (512MB) can't be used
++ * EFI runtime virtual address for RISC-V. It also helps to use EFI runtime
++ * services on both RV32/RV64. Keep the same runtime virtual address for RISC-V
++ * as well to minimize the code churn.
+  */
+ #define EFI_RT_VIRTUAL_BASE	SZ_512M
+ #define EFI_RT_VIRTUAL_SIZE	SZ_512M
+diff --git a/drivers/firmware/efi/riscv-runtime.c b/drivers/firmware/efi/riscv-runtime.c
+new file mode 100644
+index 000000000000..3bc48a268f66
+--- /dev/null
++++ b/drivers/firmware/efi/riscv-runtime.c
+@@ -0,0 +1,141 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Extensible Firmware Interface
++ *
++ * Based on Extensible Firmware Interface Specification version 2.4
++ *
++ * Copyright (C) 2013, 2014 Linaro Ltd.
++ */
 +
- 	memblock_allow_resize();
- 	memblock_dump_all();
- 
-@@ -184,6 +177,10 @@ EXPORT_SYMBOL(va_pa_offset);
- unsigned long pfn_base;
- EXPORT_SYMBOL(pfn_base);
- 
-+#define DTB_EARLY_SIZE		SZ_1M
-+static char early_dtb[DTB_EARLY_SIZE] __initdata;
-+void *dtb_early_va __initdata = early_dtb;
++#include <linux/dmi.h>
++#include <linux/efi.h>
++#include <linux/io.h>
++#include <linux/memblock.h>
++#include <linux/mm_types.h>
++#include <linux/preempt.h>
++#include <linux/rbtree.h>
++#include <linux/rwsem.h>
++#include <linux/sched.h>
++#include <linux/slab.h>
++#include <linux/spinlock.h>
++#include <linux/pgtable.h>
 +
- pgd_t swapper_pg_dir[PTRS_PER_PGD] __page_aligned_bss;
- pgd_t trampoline_pg_dir[PTRS_PER_PGD] __page_aligned_bss;
- pte_t fixmap_pte[PTRS_PER_PTE] __page_aligned_bss;
-@@ -375,7 +372,8 @@ static uintptr_t __init best_map_size(phys_addr_t base, phys_addr_t size)
- 
- asmlinkage void __init setup_vm(uintptr_t dtb_pa)
- {
--	uintptr_t va, end_va;
-+	int dtb_size;
-+	uintptr_t va, pa, end_va;
- 	uintptr_t load_pa = (uintptr_t)(&_start);
- 	uintptr_t load_sz = (uintptr_t)(&_end) - load_pa;
- 	uintptr_t map_size = best_map_size(load_pa, MAX_EARLY_MAPPING_SIZE);
-@@ -424,17 +422,11 @@ asmlinkage void __init setup_vm(uintptr_t dtb_pa)
- 				   load_pa + (va - PAGE_OFFSET),
- 				   map_size, PAGE_KERNEL_EXEC);
- 
--	/* Create fixed mapping for early FDT parsing */
--	end_va = __fix_to_virt(FIX_FDT) + FIX_FDT_SIZE;
--	for (va = __fix_to_virt(FIX_FDT); va < end_va; va += PAGE_SIZE)
--		create_pte_mapping(fixmap_pte, va,
--				   dtb_pa + (va - __fix_to_virt(FIX_FDT)),
--				   PAGE_SIZE, PAGE_KERNEL);
--
--	/* Save pointer to DTB for early FDT parsing */
--	dtb_early_va = (void *)fix_to_virt(FIX_FDT) + (dtb_pa & ~PAGE_MASK);
--	/* Save physical address for memblock reservation */
--	dtb_early_pa = dtb_pa;
-+	/* Copy FDT to init memory for early scan */
-+	pa = load_pa + ((unsigned long)dtb_early_va - PAGE_OFFSET);
-+	dtb_size = fdt_totalsize((void *)dtb_pa);
-+	dtb_size = (dtb_size > DTB_EARLY_SIZE) ? DTB_EARLY_SIZE : dtb_size;
-+	memcpy((void *)pa, (void *)dtb_pa, dtb_size);
- }
- 
- static void __init setup_vm_final(void)
-@@ -481,6 +473,8 @@ static void __init setup_vm_final(void)
- 	local_flush_tlb_all();
- }
- #else
-+void *dtb_early_va __initdata;
++#include <asm/cacheflush.h>
++#include <asm/efi.h>
++#include <asm/mmu.h>
++#include <asm/pgalloc.h>
 +
- asmlinkage void __init setup_vm(uintptr_t dtb_pa)
- {
- #ifdef CONFIG_BUILTIN_DTB
++static bool __init efi_virtmap_init(void)
++{
++	efi_memory_desc_t *md;
++
++	efi_mm.pgd = pgd_alloc_nomap(&efi_mm);
++	mm_init_cpumask(&efi_mm);
++	init_new_context(NULL, &efi_mm);
++
++	for_each_efi_memory_desc(md) {
++		phys_addr_t phys = md->phys_addr;
++		int ret;
++
++		if (!(md->attribute & EFI_MEMORY_RUNTIME))
++			continue;
++		if (md->virt_addr == 0)
++			return false;
++
++		ret = efi_create_mapping(&efi_mm, md);
++		if (ret) {
++			pr_warn("  EFI remap %pa: failed to create mapping (%d)\n",
++				&phys, ret);
++			return false;
++		}
++	}
++
++	if (efi_memattr_apply_permissions(&efi_mm, efi_set_mapping_permissions))
++		return false;
++
++	return true;
++}
++
++/*
++ * Enable the UEFI Runtime Services if all prerequisites are in place, i.e.,
++ * non-early mapping of the UEFI system table and virtual mappings for all
++ * EFI_MEMORY_RUNTIME regions.
++ */
++static int __init riscv_enable_runtime_services(void)
++{
++	u64 mapsize;
++
++	if (!efi_enabled(EFI_BOOT)) {
++		pr_info("EFI services will not be available.\n");
++		return 0;
++	}
++
++	efi_memmap_unmap();
++
++	mapsize = efi.memmap.desc_size * efi.memmap.nr_map;
++
++	if (efi_memmap_init_late(efi.memmap.phys_map, mapsize)) {
++		pr_err("Failed to remap EFI memory map\n");
++		return 0;
++	}
++
++	if (efi_soft_reserve_enabled()) {
++		efi_memory_desc_t *md;
++
++		for_each_efi_memory_desc(md) {
++			int md_size = md->num_pages << EFI_PAGE_SHIFT;
++			struct resource *res;
++
++			if (!(md->attribute & EFI_MEMORY_SP))
++				continue;
++
++			res = kzalloc(sizeof(*res), GFP_KERNEL);
++			if (WARN_ON(!res))
++				break;
++
++			res->start	= md->phys_addr;
++			res->end	= md->phys_addr + md_size - 1;
++			res->name	= "Soft Reserved";
++			res->flags	= IORESOURCE_MEM;
++			res->desc	= IORES_DESC_SOFT_RESERVED;
++
++			insert_resource(&iomem_resource, res);
++		}
++	}
++
++	if (efi_runtime_disabled()) {
++		pr_info("EFI runtime services will be disabled.\n");
++		return 0;
++	}
++
++	if (efi_enabled(EFI_RUNTIME_SERVICES)) {
++		pr_info("EFI runtime services access via paravirt.\n");
++		return 0;
++	}
++
++	pr_info("Remapping and enabling EFI services.\n");
++
++	if (!efi_virtmap_init()) {
++		pr_err("UEFI virtual mapping missing or invalid -- runtime services will not be available\n");
++		return -ENOMEM;
++	}
++
++	/* Set up runtime services function pointers */
++	efi_native_runtime_setup();
++	set_bit(EFI_RUNTIME_SERVICES, &efi.flags);
++
++	return 0;
++}
++early_initcall(riscv_enable_runtime_services);
++
++void efi_virtmap_load(void)
++{
++	preempt_disable();
++	switch_mm(&efi_mm, current->active_mm, NULL);
++}
++
++void efi_virtmap_unload(void)
++{
++	switch_mm(current->active_mm, &efi_mm, NULL);
++	preempt_enable();
++}
 -- 
 2.24.0
 
