@@ -2,71 +2,68 @@ Return-Path: <SRS0=+yxC=AR=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-8.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ED49AC433DF
-	for <linux-efi@archiver.kernel.org>; Mon,  6 Jul 2020 17:27:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 09FBAC433E3
+	for <linux-efi@archiver.kernel.org>; Mon,  6 Jul 2020 17:27:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C63462070C
-	for <linux-efi@archiver.kernel.org>; Mon,  6 Jul 2020 17:27:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E35BC2083B
+	for <linux-efi@archiver.kernel.org>; Mon,  6 Jul 2020 17:27:17 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="ictaNk6E"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="DtbyC8Oh"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729297AbgGFR1J (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 6 Jul 2020 13:27:09 -0400
-Received: from esa2.hgst.iphmx.com ([68.232.143.124]:41516 "EHLO
+        id S1729609AbgGFR1O (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 6 Jul 2020 13:27:14 -0400
+Received: from esa2.hgst.iphmx.com ([68.232.143.124]:41526 "EHLO
         esa2.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729718AbgGFR0i (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 6 Jul 2020 13:26:38 -0400
+        with ESMTP id S1729648AbgGFR0g (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 6 Jul 2020 13:26:36 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1594056423; x=1625592423;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=M/aLmMoaf+R1cfTR4Mi4doOLt0MJCtDnvFjCl4cVqNk=;
-  b=ictaNk6ECWDn3089mchVRyCEGTONjp+85LlqIuaOzG4JynP05llMTYl7
-   5dXerp90/ml8dG9TzOPIFYRG63wudpriXgKz92pfL2d2odQflkpyWbrW3
-   c/ZtZsR/j69JAzKDxObIA3Tgl5l1uSEGTzNxTBVIIez2EFfMDyqBmRGNc
-   jvxHZfhc8vvbYVsSPU6F6bQP9wC98/pWbMUxRbR6WcIK+AFn2ybbxBG7S
-   E4oraGVhdsIKTIX7Uw6/9+VyqFyAt7VlqwGh4aqwqRnIJAFOQCEGU2vKR
-   t1gy/6/CsB9XXKmLFiIaRU42T2exlYWXMcmd1DcGeX5lxz1mflKdyNGUZ
-   A==;
-IronPort-SDR: 6/+Xbt0A1+A/QSejE9jmBpzs4YJatD583eAf+bOVTjN2xYHdM0LAje8YefaNSQXa3mUoNvF+t8
- o9tZWWRSZ+LiAnFp176IrMXbQahnrc7P+LJ4EKjU5WDxBXirV3t8Wc2VJsxzOyrf/js5v4fKjT
- yac7g5QTXNb/6WRs3KG+a4+rn8wm4/gnPdSM1cTcYDf1SnACsS5IMfxpWcsiVPFPCfDoreHdi7
- mB6ZMgk3Oqz4kSFouqVvM++aujEYH0VuuuT1OQb3xJvB9r8Ag7tBph2eDPp4zg4jUmRPhdEu8O
- Tms=
+  t=1594056421; x=1625592421;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=ZPLqLkRmreTTViDZafKeWTDt0ftxitDjgDKfBWiyQY4=;
+  b=DtbyC8OhDAu02Mbeupbror+DSECYI03Y6q6zP5BrjVIQ2mYp27rOzhrC
+   t7T1EsDqFHgO2zuYRJIxCHJi52Pm2aUpGEoRUfC/7h+WXxVLjJhzHcop6
+   BAaFwgryDr56pVRWeJOKpg3twwbqs55Af0evQYmJYWVQVqI79emAT43iR
+   pw6rAlO1IuE325hw+YaDbuUtGonAGGP8l7qN770KK+LxqNqbAMhQAkz7W
+   y8Scvy+i05xkqPnkcO+UfTUFgsvEkDYdUFVjsdkeL/u37j1XJ1S8//wLq
+   H0jlpXX/Mv7DRaAIxeGXEfPiaRf4mP5EK9XIot3y8ERYXXyd48EIAkWP3
+   Q==;
+IronPort-SDR: zuzS76c8cbWqSrIkGzeTNTEIM2hVT38Jfr0PwG+hE4g5WpItxscdrvMtYaI6lha52gF24gxw7v
+ XPdF1HrN1q/4IQkmig/ySyBJHLeU32mI7BqyfdOvnSmjarLLO4152Iw6rGs375SeZIkv98tC7W
+ 9AcfZEH+dclhHvaSKqdhefsQsaoDjOAPLD+r9CPFfV4mcLo5MAqGI1HhTpH5VruaiYMks/NycQ
+ yLl+9ND07BscULYDeQ1znFe93Sh5NJdLH2hXNHf1YE6Qb1ZJYjFqE50cG+lBA94vwA8Pi6ZLWR
+ S+A=
 X-IronPort-AV: E=Sophos;i="5.75,320,1589212800"; 
-   d="scan'208";a="244770187"
+   d="scan'208";a="244770170"
 Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 07 Jul 2020 01:26:54 +0800
-IronPort-SDR: O1Q9/btg6AZ3qbQSvu77tmOqIEc3IsBUPbsALeW/OudZ2WKt5eWzTBn78KArZXcKMKwIWkT4r1
- T+86sNv65k1tgVIrVv58Ydy+jner3l7wA=
+  by ob1.hgst.iphmx.com with ESMTP; 07 Jul 2020 01:26:50 +0800
+IronPort-SDR: earXIZJp3BczxZ3B2w9wcUfKuYF7FKw72BvGxwLGpaXh15AdfTlMBiQiofHb2aecwYxzlRUc3x
+ +b+X6/m5rkLVaI9EhmkyWrENV0ZxJDbd0=
 Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Jul 2020 10:14:40 -0700
-IronPort-SDR: LTnJdtYBmdu2sAHNvGIHgGHeR10ZGmc5DB5Q8zbIQxwIWgvrH9f5qhkYP2rNAS5Y7it7R/EMFq
- b2/mz85O6lyA==
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Jul 2020 10:14:37 -0700
+IronPort-SDR: V8HiVNZoUcDsr9kkXV5f0VaUWHVCf3R8abrkby7eWCdFWxsmdW292u67WeRT3k8PV66FGKa2H2
+ pfjT6DtMXfaA==
 WDCIronportException: Internal
 Received: from 6hj08h2.ad.shared (HELO jedi-01.hgst.com) ([10.86.57.161])
-  by uls-op-cesaip01.wdc.com with ESMTP; 06 Jul 2020 10:26:32 -0700
+  by uls-op-cesaip01.wdc.com with ESMTP; 06 Jul 2020 10:26:29 -0700
 From:   Atish Patra <atish.patra@wdc.com>
 To:     linux-kernel@vger.kernel.org
 Cc:     Atish Patra <atish.patra@wdc.com>,
-        Palmer Dabbelt <palmerdabbelt@google.com>,
         Ard Biesheuvel <ardb@kernel.org>, linux-efi@vger.kernel.org,
         linux-riscv@lists.infradead.org,
         Masahiro Yamada <masahiroy@kernel.org>,
         Palmer Dabbelt <palmer@dabbelt.com>,
         Heinrich Schuchardt <xypron.glpk@gmx.de>
-Subject: [RFC PATCH v2 07/11] include: pe.h: Add RISC-V related PE definition
-Date:   Mon,  6 Jul 2020 10:26:05 -0700
-Message-Id: <20200706172609.25965-8-atish.patra@wdc.com>
+Subject: [RFC PATCH v2 00/11] Add UEFI support for RISC-V 
+Date:   Mon,  6 Jul 2020 10:25:58 -0700
+Message-Id: <20200706172609.25965-1-atish.patra@wdc.com>
 X-Mailer: git-send-email 2.24.0
-In-Reply-To: <20200706172609.25965-1-atish.patra@wdc.com>
-References: <20200706172609.25965-1-atish.patra@wdc.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
@@ -74,30 +71,103 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Define RISC-V related machine types.
+This series adds UEFI support for RISC-V.
 
-Signed-off-by: Atish Patra <atish.patra@wdc.com>
-Reviewed-by: Palmer Dabbelt <palmerdabbelt@google.com>
-Link: https://lore.kernel.org/r/20200415195422.19866-3-atish.patra@wdc.com
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
----
- include/linux/pe.h | 3 +++
- 1 file changed, 3 insertions(+)
+Linux kernel: 5.8-rc4
+U-Boot: master
+OpenSBI: master
 
-diff --git a/include/linux/pe.h b/include/linux/pe.h
-index 8ad71d763a77..daf09ffffe38 100644
---- a/include/linux/pe.h
-+++ b/include/linux/pe.h
-@@ -55,6 +55,9 @@
- #define	IMAGE_FILE_MACHINE_POWERPC	0x01f0
- #define	IMAGE_FILE_MACHINE_POWERPCFP	0x01f1
- #define	IMAGE_FILE_MACHINE_R4000	0x0166
-+#define	IMAGE_FILE_MACHINE_RISCV32	0x5032
-+#define	IMAGE_FILE_MACHINE_RISCV64	0x5064
-+#define	IMAGE_FILE_MACHINE_RISCV128	0x5128
- #define	IMAGE_FILE_MACHINE_SH3		0x01a2
- #define	IMAGE_FILE_MACHINE_SH3DSP	0x01a3
- #define	IMAGE_FILE_MACHINE_SH3E		0x01a4
--- 
+Patch 1-6 are preparatory patches that fixes some of the geric efi and riscv issues.
+
+Patch 7-9 adds the efi stub support for RISC-V which was reviewed few months back.
+https://www.spinics.net/lists/linux-efi/msg19144.html
+
+Patch 10 just renames arm-init code so that it can be used across different
+architectures. Patch 11 adds the runtime services for RISC-V.
+
+The patches can also be found in following git repo.
+https://github.com/atishp04/linux/tree/uefi_riscv_5.9_v2
+
+The patches have been verified on Qemu using bootefi command in U-Boot for both
+RV32 and RV64.
+
+For RV32, maximum allocated memory should be 1G as RISC-V kernel can not map
+beyond 1G of physical memory for RV32.
+
+EDK2 can boot quite far into Linux with current series. Currently, we are seeing
+some traps from drivers (spi/network). At first glance, they don't seem to be
+caused by efi. I thought it is better to get some early feedback on the series
+while EDK2 issue is being debugged.
+
+That's why uefi runtime services are not actually well tested in RISC-V.
+Any suggestions to test the efi run time services are appreciated. 
+
+Changes from v1->v2:
+1. Removed patch 1 as it is already taken into efi-tree.
+2. Fixed compilation issues with patch 9.
+3. Moved few function prototype declaration to header file to keep kbuild happy.
+
+Changes from previous version:
+1. Added full ioremap support. 
+2. Added efi runtime services support. 
+3. Fixes mm issues
+
+Anup Patel (1):
+RISC-V: Move DT mapping outof fixmap
+
+Atish Patra (10):
+efi/libstub: Move the function prototypes to header file
+RISC-V: Setup exception vector early
+RISC-V: Add early ioremap support
+RISC-V: Set maximum number of mapped pages correctly
+riscv: Parse all memory blocks to remove unusable memory
+include: pe.h: Add RISC-V related PE definition
+RISC-V: Add PE/COFF header for EFI stub
+RISC-V: Add EFI stub support.
+efi: Rename arm-init to efi-init common for all arch
+RISC-V: Add EFI runtime services
+
+arch/riscv/Kconfig                            |  25 ++++
+arch/riscv/Makefile                           |   1 +
+arch/riscv/configs/defconfig                  |   1 +
+arch/riscv/include/asm/Kbuild                 |   1 +
+arch/riscv/include/asm/efi.h                  |  56 +++++++
+arch/riscv/include/asm/fixmap.h               |  16 +-
+arch/riscv/include/asm/io.h                   |   1 +
+arch/riscv/include/asm/mmu.h                  |   2 +
+arch/riscv/include/asm/pgalloc.h              |  12 ++
+arch/riscv/include/asm/pgtable.h              |   4 +
+arch/riscv/include/asm/sections.h             |  13 ++
+arch/riscv/kernel/Makefile                    |   5 +
+arch/riscv/kernel/efi-header.S                | 104 +++++++++++++
+arch/riscv/kernel/efi.c                       | 106 +++++++++++++
+arch/riscv/kernel/head.S                      |  27 +++-
+arch/riscv/kernel/head.h                      |   2 -
+arch/riscv/kernel/image-vars.h                |  51 +++++++
+arch/riscv/kernel/setup.c                     |  16 +-
+arch/riscv/kernel/smpboot.c                   |   1 -
+arch/riscv/kernel/traps.c                     |   8 +-
+arch/riscv/kernel/vmlinux.lds.S               |  22 ++-
+arch/riscv/mm/init.c                          | 104 ++++++++-----
+drivers/firmware/efi/Kconfig                  |   3 +-
+drivers/firmware/efi/Makefile                 |   4 +-
+.../firmware/efi/{arm-init.c => efi-init.c}   |   0
+drivers/firmware/efi/libstub/Makefile         |  10 ++
+drivers/firmware/efi/libstub/efi-stub.c       |  28 ++--
+drivers/firmware/efi/libstub/efistub.h        |  16 ++
+drivers/firmware/efi/libstub/riscv-stub.c     | 110 ++++++++++++++
+drivers/firmware/efi/riscv-runtime.c          | 141 ++++++++++++++++++
+include/linux/pe.h                            |   3 +
+31 files changed, 811 insertions(+), 82 deletions(-)
+create mode 100644 arch/riscv/include/asm/efi.h
+create mode 100644 arch/riscv/include/asm/sections.h
+create mode 100644 arch/riscv/kernel/efi-header.S
+create mode 100644 arch/riscv/kernel/efi.c
+create mode 100644 arch/riscv/kernel/image-vars.h
+rename drivers/firmware/efi/{arm-init.c => efi-init.c} (100%)
+create mode 100644 drivers/firmware/efi/libstub/riscv-stub.c
+create mode 100644 drivers/firmware/efi/riscv-runtime.c
+
+--
 2.24.0
 
