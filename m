@@ -7,51 +7,51 @@ X-Spam-Status: No, score=-9.6 required=3.0 tests=DKIM_INVALID,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9794CC433E2
-	for <linux-efi@archiver.kernel.org>; Mon,  6 Jul 2020 17:26:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D9FAFC433E1
+	for <linux-efi@archiver.kernel.org>; Mon,  6 Jul 2020 17:26:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 705D420775
-	for <linux-efi@archiver.kernel.org>; Mon,  6 Jul 2020 17:26:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B96922070C
+	for <linux-efi@archiver.kernel.org>; Mon,  6 Jul 2020 17:26:41 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="M6/F2C8Z"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="SdIdrOrD"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729728AbgGFR0j (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 6 Jul 2020 13:26:39 -0400
-Received: from esa2.hgst.iphmx.com ([68.232.143.124]:41526 "EHLO
+        id S1729734AbgGFR0k (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 6 Jul 2020 13:26:40 -0400
+Received: from esa2.hgst.iphmx.com ([68.232.143.124]:41516 "EHLO
         esa2.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729615AbgGFR0h (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 6 Jul 2020 13:26:37 -0400
+        with ESMTP id S1729726AbgGFR0j (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 6 Jul 2020 13:26:39 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1594056422; x=1625592422;
+  t=1594056425; x=1625592425;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=e1f5tFToh6jF2Fr3c6Bri7MNiVrYpT85jVmyBw2a1o8=;
-  b=M6/F2C8ZqWAg5r5MCcl68EcORmJ8sQ74mMlWkPhCBbx9ja/Vvvoi8UN1
-   ciBwnB3it0BZzPU/cn/28MWCoANb6MHn4gOLXVVofsb5Y9A9+0K18fsw8
-   Ig61ne3ZG5Yiva6+1qhpDXBoCwOWSaFRhRrdNVhjqdMbixUcryZogZr4h
-   33HxRdSwkM154g3DdX/xv8tZnP0bVVzXok16IMxoBJOx25T+iOwq77dkG
-   J1sbZH2YjKVPKa/WHFsBHTV+I4pXiDhhuqIbO+prZp8UkZaLW09wjfVsd
-   puahU7R3l85Bj6sahUatl2JBAcuXh+mVKxIKkjX8XzcIjeaZPkM/MI7/H
-   Q==;
-IronPort-SDR: sfJ26p8s6AkQv0NEBfOlN/kgtZYkQjkgE5xqv6U2lScvIw5KG73eCbBZqLUAVp7WOn/Ch7BPLK
- ZrbT4MA+80QljzQIcX5DJLMyC+SSGx52DEa1qOTwqqH1vM1IxoXkCsP3ggAoF79cvqNehq4cm3
- vMVHVTNuQbm6kFGrojo7dC4e2uGX0o1FS/bUFpbBABgaM8qf2ZJBGP3ZW3Ej7S8gvfknQAZoNs
- rbgQACVomhrLN9buEN6Tsk8PPibv7RkqtT1S4H9xUDQBoO7+OrpVDkIFq9E9NXUk2UIu1UcZnJ
- RuA=
+  bh=T6HBziqjPfpEOovieQwcPFPkqxzZPptEH0FVtMgRIac=;
+  b=SdIdrOrDpFbHjBj27yxCk+NHUU8PNW0u0peQdWCdnnhPVAODIBk0Gnx+
+   dK5Y3J0Gkijh67zt9qd2BhmBXgSbeb1cJ4mbEHZX2+SfvUtxg4+j2viqi
+   7hyhE9BZTb46px0WWfa3nBbPk1vqzIik2Y5Nt1ePP7XlJG9xni9iS1ojg
+   RI1EWbQKBbtlhcdNy4lgvEDstq6ZGjhmH9Lu/96rSNglJPv8oUD4c+Qg6
+   7omTT4C8GQCn4xGHcwzSk3ijbX7XELjATI9itRlEbd2Bmw386UD/jwA3v
+   1NA4FnfA8Qd/nZxwxj7hZRX/wadRXVdpcETDkguJZU7tSH4Ri9DTai2CN
+   A==;
+IronPort-SDR: iw4MRH1zDt0nA0KBfaVrWklw8B+zBEbj7cMpWBsVQcBPXbx/2wIbiO7NEce6h+UTFcsepbWLR6
+ Jx31DAFzMu2sPmT1/GAwVAVOqbJXtxjZJWOkRi+HkNqUoNOHV8FnrdJXOOC24GZDg92a5Uy7MW
+ M6rERywTOKEyINubO6NuxOsUcpXoGjjNjYND4pdOKlAWUfDiTMsEl7kIsZSAMN5W7azlFPO+tz
+ MJ1svWj/F+S2rCe8xvEX5Q8yFO0HRLocKvdmMRYefxWv5EeUY471AOHhAU4viXgo5jAFXiKUQ7
+ vHk=
 X-IronPort-AV: E=Sophos;i="5.75,320,1589212800"; 
-   d="scan'208";a="244770182"
+   d="scan'208";a="244770195"
 Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 07 Jul 2020 01:26:53 +0800
-IronPort-SDR: 05h9p5rfefIqdeGBqqE2bBTS5ye63Pph+oVeF5xq/JCysm3Gx7okmW8E2qK16aRwe9jmIOwYue
- r6OXxD91z80f3bwMi8SokLS4vBBxCim1w=
+  by ob1.hgst.iphmx.com with ESMTP; 07 Jul 2020 01:26:56 +0800
+IronPort-SDR: hcW3Zne+TmD4cHTdSmgSYyHUop651IyN6UoeDB6vI37z4tIRWCquunF0Qs9362CpaVUnisyyBo
+ ny4p8nrrL1/1Xo4ep0d+OqDyf6ZW1Q1xY=
 Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Jul 2020 10:14:39 -0700
-IronPort-SDR: CHjz5i2GjUVTmaMZrAcRniyPnGuPcM9Gy5cG1qRK1yg2uNoB0XlDvdxeo/vNoIt0F32gPm//zW
- EI3N8t8F03OQ==
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Jul 2020 10:14:41 -0700
+IronPort-SDR: fc+bi6bmnTcCFuCWM/PJW/yBtOU6y4/pHTfXU1Clu5VWt4q9Ry8RKZYrjsn3CC61aOfXjrlJif
+ vRay6P2HQtfQ==
 WDCIronportException: Internal
 Received: from 6hj08h2.ad.shared (HELO jedi-01.hgst.com) ([10.86.57.161])
-  by uls-op-cesaip01.wdc.com with ESMTP; 06 Jul 2020 10:26:31 -0700
+  by uls-op-cesaip01.wdc.com with ESMTP; 06 Jul 2020 10:26:33 -0700
 From:   Atish Patra <atish.patra@wdc.com>
 To:     linux-kernel@vger.kernel.org
 Cc:     Atish Patra <atish.patra@wdc.com>,
@@ -60,9 +60,9 @@ Cc:     Atish Patra <atish.patra@wdc.com>,
         Masahiro Yamada <masahiroy@kernel.org>,
         Palmer Dabbelt <palmer@dabbelt.com>,
         Heinrich Schuchardt <xypron.glpk@gmx.de>
-Subject: [RFC PATCH v2 05/11] RISC-V: Set maximum number of mapped pages correctly
-Date:   Mon,  6 Jul 2020 10:26:03 -0700
-Message-Id: <20200706172609.25965-6-atish.patra@wdc.com>
+Subject: [RFC PATCH v2 10/11] efi: Rename arm-init to efi-init common for all arch
+Date:   Mon,  6 Jul 2020 10:26:08 -0700
+Message-Id: <20200706172609.25965-11-atish.patra@wdc.com>
 X-Mailer: git-send-email 2.24.0
 In-Reply-To: <20200706172609.25965-1-atish.patra@wdc.com>
 References: <20200706172609.25965-1-atish.patra@wdc.com>
@@ -73,34 +73,35 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Currently, maximum number of mapper pages are set to the pfn calculated
-from the memblock size of the memblock containing kernel. This will work
-until that memblock spans the entire memory. However, it will be set to
-a wrong value if there are multiple memblocks defined in kernel
-(e.g. with efi runtime services).
+arm-init is responsible for setting up efi runtime and doesn't actually
+do any ARM specific stuff. RISC-V can use the same source code as it is.
 
-Set the the maximum value to the pfn calculated from dram size.
+Rename it to efi-init so that RISC-V can use it.
 
 Signed-off-by: Atish Patra <atish.patra@wdc.com>
 ---
- arch/riscv/mm/init.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/firmware/efi/Makefile                   | 2 +-
+ drivers/firmware/efi/{arm-init.c => efi-init.c} | 0
+ 2 files changed, 1 insertion(+), 1 deletion(-)
+ rename drivers/firmware/efi/{arm-init.c => efi-init.c} (100%)
 
-diff --git a/arch/riscv/mm/init.c b/arch/riscv/mm/init.c
-index bad60686d080..4021706aef81 100644
---- a/arch/riscv/mm/init.c
-+++ b/arch/riscv/mm/init.c
-@@ -147,9 +147,9 @@ void __init setup_bootmem(void)
- 	/* Reserve from the start of the kernel to the end of the kernel */
- 	memblock_reserve(vmlinux_start, vmlinux_end - vmlinux_start);
+diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+index 7a216984552b..61fd1e8b26fb 100644
+--- a/drivers/firmware/efi/Makefile
++++ b/drivers/firmware/efi/Makefile
+@@ -32,7 +32,7 @@ obj-$(CONFIG_EFI_EMBEDDED_FIRMWARE)	+= embedded-firmware.o
+ fake_map-y				+= fake_mem.o
+ fake_map-$(CONFIG_X86)			+= x86_fake_mem.o
  
--	set_max_mapnr(PFN_DOWN(mem_size));
- 	max_pfn = PFN_DOWN(memblock_end_of_DRAM());
- 	max_low_pfn = max_pfn;
-+	set_max_mapnr(max_low_pfn);
- 
- #ifdef CONFIG_BLK_DEV_INITRD
- 	setup_initrd();
+-arm-obj-$(CONFIG_EFI)			:= arm-init.o arm-runtime.o
++arm-obj-$(CONFIG_EFI)			:= efi-init.o arm-runtime.o
+ obj-$(CONFIG_ARM)			+= $(arm-obj-y)
+ obj-$(CONFIG_ARM64)			+= $(arm-obj-y)
+ obj-$(CONFIG_EFI_CAPSULE_LOADER)	+= capsule-loader.o
+diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/efi-init.c
+similarity index 100%
+rename from drivers/firmware/efi/arm-init.c
+rename to drivers/firmware/efi/efi-init.c
 -- 
 2.24.0
 
