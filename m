@@ -2,105 +2,100 @@ Return-Path: <SRS0=h3R5=AT=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-1.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.1 required=3.0 tests=DKIMWL_WL_HIGH,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 17CB2C433DF
-	for <linux-efi@archiver.kernel.org>; Wed,  8 Jul 2020 05:47:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 719A8C433DF
+	for <linux-efi@archiver.kernel.org>; Wed,  8 Jul 2020 10:09:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DB2DD20774
-	for <linux-efi@archiver.kernel.org>; Wed,  8 Jul 2020 05:47:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4568920775
+	for <linux-efi@archiver.kernel.org>; Wed,  8 Jul 2020 10:09:54 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1594187273;
-	bh=odr9trJsY+/VsC6Xosek0mSc+vQ6GbRDKEYdCCZMdSo=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=D6C8Jk9fiDo5BgdIZK7r62gH6j1Sdcs3fEEG4tfh/+nlhD7u5wTTYGenWC2YLX1mr
-	 7vGARuwObkIHvjCf+5QjMkHL6FKBYaI7ayFkJTrE9W4IoL37NLAyc/Ao5AqHUkE0Ib
-	 NGlpnjI5xIINgd9JEtrSseDizmykjz/hXQgzU+xM=
+	s=default; t=1594202994;
+	bh=3HPDilKqKFvfgsyDKY4U8Rmdl+pQHgRTapsfmcu1U64=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=Rd6+hr0czSQI6r/0Ub84pZM/qAFjeHZqg2himZjfnLOQyi6DS1wB8tayA9zOQjdss
+	 7WQ00V4idfbZzE8PSgTXe4G18+o5ZLCvCaviaE6JdUWmskFpsOwjkBlK38cTyvBB/a
+	 kD2PxGye+96Gv8VMpuCcDI8h2YNnD0U9s3jhOf/s=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729437AbgGHFrx (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 8 Jul 2020 01:47:53 -0400
-Received: from mail.kernel.org ([198.145.29.99]:36646 "EHLO mail.kernel.org"
+        id S1726196AbgGHKJy (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 8 Jul 2020 06:09:54 -0400
+Received: from mail.kernel.org ([198.145.29.99]:57482 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725794AbgGHFrx (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 8 Jul 2020 01:47:53 -0400
-Received: from mail-ot1-f46.google.com (mail-ot1-f46.google.com [209.85.210.46])
+        id S1725810AbgGHKJx (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 8 Jul 2020 06:09:53 -0400
+Received: from e123331-lin.nice.arm.com (adsl-70.109.242.21.tellas.gr [109.242.21.70])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 90A2E2078B;
-        Wed,  8 Jul 2020 05:47:52 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 61E0B204EC;
+        Wed,  8 Jul 2020 10:09:51 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1594187272;
-        bh=odr9trJsY+/VsC6Xosek0mSc+vQ6GbRDKEYdCCZMdSo=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=QdQj6NOXnMcIaEde9I8wnVhX5udKqmtjfCgAjEZarbwMx7wP1jDq6Mlf33L4TJqH4
-         ZxcsR5Xjg4pSyqPWParZr08LHAL9T2pI+rblZ2uZt92Gwmq0vFbocy33ZYi3qpz2WD
-         0FmZsuP+AWos9zMRlXTvxQ2FSgIiXfx4mRj7Wd5E=
-Received: by mail-ot1-f46.google.com with SMTP id 18so36064611otv.6;
-        Tue, 07 Jul 2020 22:47:52 -0700 (PDT)
-X-Gm-Message-State: AOAM532U/NIKnUm46iSMfhx/bj6F41s1DsSX4ZBUM3DPO5X6iPe37S4w
-        puFhB9MwTxiPSVZQPrZU6oodGvnFA6iuMrLAZp0=
-X-Google-Smtp-Source: ABdhPJxVYM8G/B91PuoHI3iKlcsxr9nlkQXIwunWm/EyQD8zmmYal7JTvWLeKxe5TkUvrvVN48Cl7uzrWGntQzgKkMs=
-X-Received: by 2002:a9d:6e85:: with SMTP id a5mr7858191otr.90.1594187271970;
- Tue, 07 Jul 2020 22:47:51 -0700 (PDT)
-MIME-Version: 1.0
-References: <20200707185818.80177-1-ebiggers@kernel.org>
-In-Reply-To: <20200707185818.80177-1-ebiggers@kernel.org>
+        s=default; t=1594202993;
+        bh=3HPDilKqKFvfgsyDKY4U8Rmdl+pQHgRTapsfmcu1U64=;
+        h=From:To:Cc:Subject:Date:From;
+        b=YLHb6EhcvcSjbdA3EMvOU4ZCMtW07+FyLskA8GUwiUy4rnf8v6AbSmSBnooJUpRNa
+         4SAo0QFkhuHQwTVtliAlq8mSuUlaJXBVEpwEnf/HytKwVZvhGpCFUkF/hFz/SSBHIa
+         2b3D3Jx4NNjVrO/A0ve5VTI22VRJXSrbtkogESZc=
 From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Wed, 8 Jul 2020 08:47:40 +0300
-X-Gmail-Original-Message-ID: <CAMj1kXHPazApxFDK9nz=1V+-dyu7dStiMOu=LdD=i9NXqxjY=g@mail.gmail.com>
-Message-ID: <CAMj1kXHPazApxFDK9nz=1V+-dyu7dStiMOu=LdD=i9NXqxjY=g@mail.gmail.com>
-Subject: Re: [PATCH 0/4] crypto: add sha256() function
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     Linux Crypto Mailing List <linux-crypto@vger.kernel.org>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        ALSA development <alsa-devel@alsa-project.org>,
-        Cheng-Yi Chiang <cychiang@chromium.org>,
-        Enric Balletbo i Serra <enric.balletbo@collabora.com>,
-        Guenter Roeck <groeck@chromium.org>,
-        Hans de Goede <hdegoede@redhat.com>,
-        linux-efi <linux-efi@vger.kernel.org>,
-        Mat Martineau <mathew.j.martineau@linux.intel.com>,
-        Matthieu Baerts <matthieu.baerts@tessares.net>,
-        mptcp@lists.01.org, Tzung-Bi Shih <tzungbi@google.com>
-Content-Type: text/plain; charset="UTF-8"
+To:     linux-efi@vger.kernel.org
+Cc:     xypron.glpk@gmx.de, Ard Biesheuvel <ardb@kernel.org>,
+        Ilias Apalodimas <ilias.apalodimas@linaro.org>
+Subject: [PATCH] fs/efivarfs: Permit read-only access on platforms that lack SetVariable
+Date:   Wed,  8 Jul 2020 13:09:44 +0300
+Message-Id: <20200708100944.7213-1-ardb@kernel.org>
+X-Mailer: git-send-email 2.17.1
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, 7 Jul 2020 at 21:59, Eric Biggers <ebiggers@kernel.org> wrote:
->
-> This series adds a function sha256() to the sha256 library so that users
-> who want to compute a hash in one step can just call sha256() instead of
-> sha256_init() + sha256_update() + sha256_final().
->
-> Patches 2-4 then convert some users to use it.
->
-> Eric Biggers (4):
->   crypto: lib/sha256 - add sha256() function
->   efi: use sha256() instead of open coding
->   mptcp: use sha256() instead of open coding
->   ASoC: cros_ec_codec: use sha256() instead of open coding
->
+Commit
 
-For the series,
+  bf67fad19e493b ("efi: Use more granular check for availability for variable services")
 
-Reviewed-by: Ard Biesheuvel <ardb@kernel.org>
+introduced a check into the efivarfs init code that aborts loading of the
+module if not all three variable runtime services (GetVariable, SetVariable
+and GetNextVariable) are supported. However, this results in efivarfs being
+unavailable entirely if only SetVariable support is missing, which is only
+needed if you want to make any modifications.
 
-Feel free to take the EFI patch through the crypto tree.
+So let's relax this restriction, and only require the GetVariable services,
+but force efivarfs to be mounted read-only if SetVariable is unsupported.
 
+Cc: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+Fixes: bf67fad19e493b ("efi: Use more granular check for availability for variable services")
+Reported-by: Heinrich Schuchardt <xypron.glpk@gmx.de>
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+---
+ fs/efivarfs/super.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
->  drivers/firmware/efi/embedded-firmware.c |  9 +++-----
->  include/crypto/sha.h                     |  1 +
->  lib/crypto/sha256.c                      | 10 +++++++++
->  net/mptcp/crypto.c                       | 15 +++----------
->  sound/soc/codecs/cros_ec_codec.c         | 27 ++----------------------
->  5 files changed, 19 insertions(+), 43 deletions(-)
->
->
-> base-commit: 57c8aa43b9f272c382c253573c82be5cb68fe22d
-> --
-> 2.27.0
->
+diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
+index 12c66f5d92dd..c12608f0dcd9 100644
+--- a/fs/efivarfs/super.c
++++ b/fs/efivarfs/super.c
+@@ -201,6 +201,9 @@ static int efivarfs_fill_super(struct super_block *sb, struct fs_context *fc)
+ 	sb->s_d_op		= &efivarfs_d_ops;
+ 	sb->s_time_gran         = 1;
+ 
++	if (!efi_rt_services_supported(EFI_RT_SUPPORTED_SET_VARIABLE))
++		sb->s_flags |= SB_RDONLY;
++
+ 	inode = efivarfs_get_inode(sb, NULL, S_IFDIR | 0755, 0, true);
+ 	if (!inode)
+ 		return -ENOMEM;
+@@ -252,7 +255,8 @@ static struct file_system_type efivarfs_type = {
+ 
+ static __init int efivarfs_init(void)
+ {
+-	if (!efi_rt_services_supported(EFI_RT_SUPPORTED_VARIABLE_SERVICES))
++	if (!efi_rt_services_supported(EFI_RT_SUPPORTED_GET_VARIABLE |
++				       EFI_RT_SUPPORTED_GET_NEXT_VARIABLE_NAME))
+ 		return -ENODEV;
+ 
+ 	if (!efivars_kobject())
+-- 
+2.17.1
+
