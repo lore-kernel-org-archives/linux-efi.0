@@ -1,290 +1,150 @@
-Return-Path: <SRS0=2MqB=AY=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=ju36=AZ=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.0 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A331AC43465
-	for <linux-efi@archiver.kernel.org>; Mon, 13 Jul 2020 21:31:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D6C6DC433E1
+	for <linux-efi@archiver.kernel.org>; Tue, 14 Jul 2020 07:43:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 84A34208FE
-	for <linux-efi@archiver.kernel.org>; Mon, 13 Jul 2020 21:31:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AEAC320890
+	for <linux-efi@archiver.kernel.org>; Tue, 14 Jul 2020 07:43:59 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="CcUqPNyh"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727119AbgGMVbg (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 13 Jul 2020 17:31:36 -0400
-Received: from mx0b-002e3701.pphosted.com ([148.163.143.35]:12708 "EHLO
-        mx0b-002e3701.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726321AbgGMVas (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 13 Jul 2020 17:30:48 -0400
-Received: from pps.filterd (m0148664.ppops.net [127.0.0.1])
-        by mx0b-002e3701.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 06DLGlg3031370;
-        Mon, 13 Jul 2020 21:30:01 GMT
-Received: from g2t2352.austin.hpe.com (g2t2352.austin.hpe.com [15.233.44.25])
-        by mx0b-002e3701.pphosted.com with ESMTP id 328ux71edk-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 13 Jul 2020 21:30:01 +0000
-Received: from stormcage.eag.rdlabs.hpecorp.net (stormcage.eag.rdlabs.hpecorp.net [128.162.236.70])
-        by g2t2352.austin.hpe.com (Postfix) with ESMTP id 5941785;
-        Mon, 13 Jul 2020 21:30:00 +0000 (UTC)
-Received: by stormcage.eag.rdlabs.hpecorp.net (Postfix, from userid 200934)
-        id 2F81F200BA02B; Mon, 13 Jul 2020 16:29:55 -0500 (CDT)
-Message-ID: <20200713212955.083309377@hpe.com>
-User-Agent: quilt/0.66
-Date:   Mon, 13 Jul 2020 16:29:59 -0500
-From:   steve.wahl@hpe.com
-To:     Steve Wahl <steve.wahl@hpe.com>, Jonathan Corbet <corbet@lwn.net>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
-        x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>,
-        Darren Hart <dvhart@infradead.org>,
-        Andy Shevchenko <andy@infradead.org>,
-        Mauro Carvalho Chehab <mchehab+huawei@kernel.org>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        "Paul E. McKenney" <paulmck@kernel.org>,
-        Pawan Gupta <pawan.kumar.gupta@linux.intel.com>,
-        Juergen Gross <jgross@suse.com>,
-        Mike Kravetz <mike.kravetz@oracle.com>,
-        Oliver Neukum <oneukum@suse.com>,
-        Mike Travis <mike.travis@hpe.com>,
-        Dimitri Sivanich <dimitri.sivanich@hpe.com>,
-        Benjamin Thiel <b.thiel@posteo.de>,
-        Andy Lutomirski <luto@kernel.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        James Morris <jmorris@namei.org>,
-        David Howells <dhowells@redhat.com>,
-        Kees Cook <keescook@chromium.org>,
-        Dave Young <dyoung@redhat.com>,
-        Dan Williams <dan.j.williams@intel.com>,
-        Logan Gunthorpe <logang@deltatee.com>,
-        Alexandre Chartre <alexandre.chartre@oracle.com>,
-        "Peter Zijlstra (Intel)" <peterz@infradead.org>,
-        Austin Kim <austindh.kim@gmail.com>,
-        Alexey Dobriyan <adobriyan@gmail.com>,
-        linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-efi@vger.kernel.org
-Cc:     Russ Anderson <rja@hpe.com>
-Subject: [patch v3 05/13] x86: Remove support for UV1 platform from uv_bau.h
-References: <20200713212954.444086564@hpe.com>
+        id S1725931AbgGNHn7 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 14 Jul 2020 03:43:59 -0400
+Received: from mailout1.w1.samsung.com ([210.118.77.11]:43323 "EHLO
+        mailout1.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725801AbgGNHn6 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 14 Jul 2020 03:43:58 -0400
+Received: from eucas1p1.samsung.com (unknown [182.198.249.206])
+        by mailout1.w1.samsung.com (KnoxPortal) with ESMTP id 20200714074357euoutp01c60d2de4e933e851eee89c87b26d1364~hjrHJUY_d0058900589euoutp01o
+        for <linux-efi@vger.kernel.org>; Tue, 14 Jul 2020 07:43:57 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout1.w1.samsung.com 20200714074357euoutp01c60d2de4e933e851eee89c87b26d1364~hjrHJUY_d0058900589euoutp01o
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+        s=mail20170921; t=1594712637;
+        bh=9FFWm4rsrO3DZUrBCqVdTmUf2OLNkpr0y/XL43tw84k=;
+        h=Subject:To:Cc:From:Date:In-Reply-To:References:From;
+        b=CcUqPNyhsViA/Idl1LClhP81wfgRxwG48w1XXx/i47+bGNdzUWbfeDfo7ZoTwUYIf
+         5Q8tW7viwh8NYjZoyUfuao0h1zEsD5fd/sIAIZx7p/stGQ2rQmmriHRIpWz/todPm4
+         zwxCClxnEVrsXRlcT6SCyyvERNLG5UamSunGorK8=
+Received: from eusmges3new.samsung.com (unknown [203.254.199.245]) by
+        eucas1p2.samsung.com (KnoxPortal) with ESMTP id
+        20200714074357eucas1p25141581b6dd71d92ae3ad81afa90e594~hjrG4ByGa2165521655eucas1p2J;
+        Tue, 14 Jul 2020 07:43:57 +0000 (GMT)
+Received: from eucas1p1.samsung.com ( [182.198.249.206]) by
+        eusmges3new.samsung.com (EUCPMTA) with SMTP id B2.23.06318.C326D0F5; Tue, 14
+        Jul 2020 08:43:56 +0100 (BST)
+Received: from eusmtrp2.samsung.com (unknown [182.198.249.139]) by
+        eucas1p1.samsung.com (KnoxPortal) with ESMTPA id
+        20200714074356eucas1p15a1f57757ad1c40e9f7531a1fecd1f6d~hjrGdqDfm0685606856eucas1p1E;
+        Tue, 14 Jul 2020 07:43:56 +0000 (GMT)
+Received: from eusmgms2.samsung.com (unknown [182.198.249.180]) by
+        eusmtrp2.samsung.com (KnoxPortal) with ESMTP id
+        20200714074356eusmtrp26e887373ffa755e3bc2d1486c78c216f~hjrGc44M72697626976eusmtrp23;
+        Tue, 14 Jul 2020 07:43:56 +0000 (GMT)
+X-AuditID: cbfec7f5-38bff700000018ae-25-5f0d623ca237
+Received: from eusmtip2.samsung.com ( [203.254.199.222]) by
+        eusmgms2.samsung.com (EUCPMTA) with SMTP id 6B.2F.06017.C326D0F5; Tue, 14
+        Jul 2020 08:43:56 +0100 (BST)
+Received: from [106.120.51.71] (unknown [106.120.51.71]) by
+        eusmtip2.samsung.com (KnoxPortal) with ESMTPA id
+        20200714074356eusmtip2b68aaccf1ec7da02052cb9604d6b0f60~hjrGDQU2G1674116741eusmtip2u;
+        Tue, 14 Jul 2020 07:43:56 +0000 (GMT)
+Subject: Re: [PATCH v2] efi: avoid error message when booting under Xen
+To:     Juergen Gross <jgross@suse.com>
+Cc:     xen-devel@lists.xenproject.org, linux-fbdev@vger.kernel.org,
+        dri-devel@lists.freedesktop.org, linux-kernel@vger.kernel.org,
+        linux-efi@vger.kernel.org, Peter Jones <pjones@redhat.com>,
+        Ard Biesheuvel <ardb@kernel.org>
+From:   Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+Message-ID: <0a5494ff-431d-5667-680f-77987cff2984@samsung.com>
+Date:   Tue, 14 Jul 2020 09:43:55 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101
+        Thunderbird/60.8.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-X-HPE-SCL: -1
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.235,18.0.687
- definitions=2020-07-13_17:2020-07-13,2020-07-13 signatures=0
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 suspectscore=0 bulkscore=0
- clxscore=1015 priorityscore=1501 malwarescore=0 spamscore=0 adultscore=0
- lowpriorityscore=0 impostorscore=0 phishscore=0 mlxscore=0 mlxlogscore=999
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
- definitions=main-2007130153
+In-Reply-To: <20200710142253.28070-1-jgross@suse.com>
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFtrKKsWRmVeSWpSXmKPExsWy7djPc7o2SbzxBu/eW1r8/PKe0eLK1/ds
+        FnNuGlm0PbzFaHGi7wOrxeVdc9gsuhbeYLf4vmUykwOHx6ZVnWwe97uPM3kc/nCFxeP9vqts
+        Huu3XGXx+LxJLoAtissmJTUnsyy1SN8ugSuj6eEN1oKlXBXfb8xga2A8ytHFyMkhIWAicenp
+        EZYuRi4OIYEVjBLXzxxnhXC+MEq0//oBlfnMKLFwziVWmJbTE+4zQSSWM0rsPjAPquUto0T3
+        yUeMIFXCAu4SRyf+ZAaxRQSUJT629rKDFDELPGKU6Fj+gQUkwSZgJTGxfRVYA6+AnUT7syVs
+        IDaLgKrEgT9/wGxRgQiJTw8Os0LUCEqcnPkErJdTwFSiu+0LWC+zgLjErSfzmSBseYntb+cw
+        gyyTEDjELnHg2Daou10kvh85xA5hC0u8Or4FypaR+L9zPhNEwzpGib8dL6C6tzNKLJ/8jw2i
+        ylrizrlfQDYH0ApNifW79EFMCQFHiRk/IiFMPokbbwUhbuCTmLRtOjNEmFeio00IYoaaxIZl
+        G9hgtnbtXMk8gVFpFpLPZiH5ZhaSb2YhrF3AyLKKUTy1tDg3PbXYOC+1XK84Mbe4NC9dLzk/
+        dxMjMDGd/nf86w7GfX+SDjEKcDAq8fBK+PPEC7EmlhVX5h5ilOBgVhLhdTp7Ok6INyWxsiq1
+        KD++qDQntfgQozQHi5I4r/Gil7FCAumJJanZqakFqUUwWSYOTqkGRqaG5mk9j6fL6LG38q+O
+        vbE04TpvxveAlJPPOfZv7ZDv2sPW61ihuiT9+58dBcvD5Yo+N7ff5RY03bmnM+FZeAbfX6kP
+        whMLWGrYjfYyF3/d1b7Q314+dafm9YKkfSemPfr2/Msx84Roi7mzStrep9naZoVN0lfavDhZ
+        K4P3fsR07a784lXeSizFGYmGWsxFxYkAAxqkn0gDAAA=
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFjrOIsWRmVeSWpSXmKPExsVy+t/xe7o2SbzxBm0TFCx+fnnPaHHl63s2
+        izk3jSzaHt5itDjR94HV4vKuOWwWXQtvsFt83zKZyYHDY9OqTjaP+93HmTwOf7jC4vF+31U2
+        j/VbrrJ4fN4kF8AWpWdTlF9akqqQkV9cYqsUbWhhpGdoaaFnZGKpZ2hsHmtlZKqkb2eTkpqT
+        WZZapG+XoJfR9PAGa8FSrorvN2awNTAe5ehi5OSQEDCROD3hPlMXIxeHkMBSRonXTW2MXYwc
+        QAkZiePryyBqhCX+XOtig6h5zSixaFkPG0hCWMBd4ujEn8wgtoiAssTH1l52kCJmgUeMEn2H
+        pzFDdHQwSnyc/YARpIpNwEpiYvsqMJtXwE6i/dkSsEksAqoSB/78AbNFBSIkDu+YBVUjKHFy
+        5hMWEJtTwFSiu+0LWJxZQF3iz7xLzBC2uMStJ/OZIGx5ie1v5zBPYBSahaR9FpKWWUhaZiFp
+        WcDIsopRJLW0ODc9t9hIrzgxt7g0L10vOT93EyMwErcd+7llB2PXu+BDjAIcjEo8vBL+PPFC
+        rIllxZW5hxglOJiVRHidzp6OE+JNSaysSi3Kjy8qzUktPsRoCvTcRGYp0eR8YJLIK4k3NDU0
+        t7A0NDc2NzazUBLn7RA4GCMkkJ5YkpqdmlqQWgTTx8TBKdXAWHBgtvj7FWmpe4U+L5JaY154
+        6MRePc8JV19PjpHanrx8d4FFl0tZ27fP3tP/mvP++3rmRDf729a9j1SCwy727wrxNTA90LNU
+        2W7Lpaa4+XtLToiGfp5nVmtwWfiv9l0BBqfv3O0rGsp/NVb+Fzc6bZDmHOcUdbL6yokZ9+xN
+        9x5q4OSZu+BqjRJLcUaioRZzUXEiAKwTzYPaAgAA
+X-CMS-MailID: 20200714074356eucas1p15a1f57757ad1c40e9f7531a1fecd1f6d
+X-Msg-Generator: CA
+Content-Type: text/plain; charset="utf-8"
+X-RootMTR: 20200710142443eucas1p120b3d15e1f7be8bb95ffb9d83875fa70
+X-EPHeader: CA
+CMS-TYPE: 201P
+X-CMS-RootMailID: 20200710142443eucas1p120b3d15e1f7be8bb95ffb9d83875fa70
+References: <CGME20200710142443eucas1p120b3d15e1f7be8bb95ffb9d83875fa70@eucas1p1.samsung.com>
+        <20200710142253.28070-1-jgross@suse.com>
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-arch/x86/include/asm/uv/uv_bau.h: Remove UV1 support
-arch/x86/platform/uv/tlb_uv.c: follow structure name change in uv_bau.h
 
-Signed-off-by: Steve Wahl <steve.wahl@hpe.com>
----
- arch/x86/include/asm/uv/uv_bau.h |  118 ++-------------------------------------
- arch/x86/platform/uv/tlb_uv.c    |    4 -
- 2 files changed, 9 insertions(+), 113 deletions(-)
+On 7/10/20 4:22 PM, Juergen Gross wrote:
+> efifb_probe() will issue an error message in case the kernel is booted
+> as Xen dom0 from UEFI as EFI_MEMMAP won't be set in this case. Avoid
+> that message by calling efi_mem_desc_lookup() only if EFI_MEMMAP is set.
+> 
+> Fixes: 38ac0287b7f4 ("fbdev/efifb: Honour UEFI memory map attributes when mapping the FB")
+> Signed-off-by: Juergen Gross <jgross@suse.com>
 
---- linux.orig/arch/x86/include/asm/uv/uv_bau.h	2020-07-07 10:49:50.265510378 -0500
-+++ linux/arch/x86/include/asm/uv/uv_bau.h	2020-07-07 10:56:14.265046872 -0500
-@@ -46,10 +46,7 @@
- #define UV_ACT_STATUS_SIZE		2
- #define UV_DISTRIBUTION_SIZE		256
- #define UV_SW_ACK_NPENDING		8
--#define UV1_NET_ENDPOINT_INTD		0x38
--#define UV2_NET_ENDPOINT_INTD		0x28
--#define UV_NET_ENDPOINT_INTD		(is_uv1_hub() ?			\
--			UV1_NET_ENDPOINT_INTD : UV2_NET_ENDPOINT_INTD)
-+#define UV_NET_ENDPOINT_INTD		0x28
- #define UV_PAYLOADQ_GNODE_SHIFT		49
- #define UV_PTC_BASENAME			"sgi_uv/ptc_statistics"
- #define UV_BAU_BASENAME			"sgi_uv/bau_tunables"
-@@ -64,14 +61,9 @@
-  * UV2: Bit 19 selects between
-  *  (0): 10 microsecond timebase and
-  *  (1): 80 microseconds
-- *  we're using 560us, similar to UV1: 65 units of 10us
-+ *  we're using 560us
-  */
--#define UV1_INTD_SOFT_ACK_TIMEOUT_PERIOD (9UL)
--#define UV2_INTD_SOFT_ACK_TIMEOUT_PERIOD (15UL)
--
--#define UV_INTD_SOFT_ACK_TIMEOUT_PERIOD	(is_uv1_hub() ?			\
--		UV1_INTD_SOFT_ACK_TIMEOUT_PERIOD :			\
--		UV2_INTD_SOFT_ACK_TIMEOUT_PERIOD)
-+#define UV_INTD_SOFT_ACK_TIMEOUT_PERIOD	(15UL)
- /* assuming UV3 is the same */
- 
- #define BAU_MISC_CONTROL_MULT_MASK	3
-@@ -148,7 +140,6 @@
- 
- #define UV_LB_SUBNODEID			0x10
- 
--/* these two are the same for UV1 and UV2: */
- #define UV_SA_SHFT UVH_LB_BAU_MISC_CONTROL_INTD_SOFT_ACK_TIMEOUT_PERIOD_SHFT
- #define UV_SA_MASK UVH_LB_BAU_MISC_CONTROL_INTD_SOFT_ACK_TIMEOUT_PERIOD_MASK
- /* 4 bits of software ack period */
-@@ -189,8 +180,7 @@
- #define BAU_DESC_QUALIFIER		0x534749
- 
- enum uv_bau_version {
--	UV_BAU_V1 = 1,
--	UV_BAU_V2,
-+	UV_BAU_V2 = 2,
- 	UV_BAU_V3,
- 	UV_BAU_V4,
- };
-@@ -233,12 +223,12 @@ struct bau_local_cpumask {
-  */
- 
- /**
-- * struct uv1_2_3_bau_msg_payload - defines payload for INTD transactions
-+ * struct uv2_3_bau_msg_payload - defines payload for INTD transactions
-  * @address:		Signifies a page or all TLB's of the cpu
-  * @sending_cpu:	CPU from which the message originates
-  * @acknowledge_count:	CPUs on the destination Hub that received the interrupt
-  */
--struct uv1_2_3_bau_msg_payload {
-+struct uv2_3_bau_msg_payload {
- 	u64 address;
- 	u16 sending_cpu;
- 	u16 acknowledge_count;
-@@ -260,89 +250,6 @@ struct uv4_bau_msg_payload {
- };
- 
- /*
-- * UV1 Message header:  16 bytes (128 bits) (bytes 0x30-0x3f of descriptor)
-- * see table 4.2.3.0.1 in broacast_assist spec.
-- */
--struct uv1_bau_msg_header {
--	unsigned int	dest_subnodeid:6;	/* must be 0x10, for the LB */
--	/* bits 5:0 */
--	unsigned int	base_dest_nasid:15;	/* nasid of the first bit */
--	/* bits 20:6 */				/* in uvhub map */
--	unsigned int	command:8;		/* message type */
--	/* bits 28:21 */
--	/* 0x38: SN3net EndPoint Message */
--	unsigned int	rsvd_1:3;		/* must be zero */
--	/* bits 31:29 */
--	/* int will align on 32 bits */
--	unsigned int	rsvd_2:9;		/* must be zero */
--	/* bits 40:32 */
--	/* Suppl_A is 56-41 */
--	unsigned int	sequence:16;		/* message sequence number */
--	/* bits 56:41 */			/* becomes bytes 16-17 of msg */
--						/* Address field (96:57) is
--						   never used as an address
--						   (these are address bits
--						   42:3) */
--
--	unsigned int	rsvd_3:1;		/* must be zero */
--	/* bit 57 */
--	/* address bits 27:4 are payload */
--	/* these next 24  (58-81) bits become bytes 12-14 of msg */
--	/* bits 65:58 land in byte 12 */
--	unsigned int	replied_to:1;		/* sent as 0 by the source to
--						   byte 12 */
--	/* bit 58 */
--	unsigned int	msg_type:3;		/* software type of the
--						   message */
--	/* bits 61:59 */
--	unsigned int	canceled:1;		/* message canceled, resource
--						   is to be freed*/
--	/* bit 62 */
--	unsigned int	payload_1a:1;		/* not currently used */
--	/* bit 63 */
--	unsigned int	payload_1b:2;		/* not currently used */
--	/* bits 65:64 */
--
--	/* bits 73:66 land in byte 13 */
--	unsigned int	payload_1ca:6;		/* not currently used */
--	/* bits 71:66 */
--	unsigned int	payload_1c:2;		/* not currently used */
--	/* bits 73:72 */
--
--	/* bits 81:74 land in byte 14 */
--	unsigned int	payload_1d:6;		/* not currently used */
--	/* bits 79:74 */
--	unsigned int	payload_1e:2;		/* not currently used */
--	/* bits 81:80 */
--
--	unsigned int	rsvd_4:7;		/* must be zero */
--	/* bits 88:82 */
--	unsigned int	swack_flag:1;		/* software acknowledge flag */
--	/* bit 89 */
--						/* INTD trasactions at
--						   destination are to wait for
--						   software acknowledge */
--	unsigned int	rsvd_5:6;		/* must be zero */
--	/* bits 95:90 */
--	unsigned int	rsvd_6:5;		/* must be zero */
--	/* bits 100:96 */
--	unsigned int	int_both:1;		/* if 1, interrupt both sockets
--						   on the uvhub */
--	/* bit 101*/
--	unsigned int	fairness:3;		/* usually zero */
--	/* bits 104:102 */
--	unsigned int	multilevel:1;		/* multi-level multicast
--						   format */
--	/* bit 105 */
--	/* 0 for TLB: endpoint multi-unicast messages */
--	unsigned int	chaining:1;		/* next descriptor is part of
--						   this activation*/
--	/* bit 106 */
--	unsigned int	rsvd_7:21;		/* must be zero */
--	/* bits 127:107 */
--};
--
--/*
-  * UV2 Message header:  16 bytes (128 bits) (bytes 0x30-0x3f of descriptor)
-  * see figure 9-2 of harp_sys.pdf
-  * assuming UV3 is the same
-@@ -418,25 +325,14 @@ struct bau_desc {
- 	 * message template, consisting of header and payload:
- 	 */
- 	union bau_msg_header {
--		struct uv1_bau_msg_header	uv1_hdr;
- 		struct uv2_3_bau_msg_header	uv2_3_hdr;
- 	} header;
- 
- 	union bau_payload_header {
--		struct uv1_2_3_bau_msg_payload	uv1_2_3;
-+		struct uv2_3_bau_msg_payload	uv2_3;
- 		struct uv4_bau_msg_payload	uv4;
- 	} payload;
- };
--/* UV1:
-- *   -payload--    ---------header------
-- *   bytes 0-11    bits 41-56  bits 58-81
-- *       A           B  (2)      C (3)
-- *
-- *            A/B/C are moved to:
-- *       A            C          B
-- *   bytes 0-11  bytes 12-14  bytes 16-17  (byte 15 filled in by hw as vector)
-- *   ------------payload queue-----------
-- */
- /* UV2:
-  *   -payload--    ---------header------
-  *   bytes 0-11    bits 70-78  bits 21-44
---- linux.orig/arch/x86/platform/uv/tlb_uv.c	2020-07-07 10:56:13.665047592 -0500
-+++ linux/arch/x86/platform/uv/tlb_uv.c	2020-07-07 10:56:14.273046863 -0500
-@@ -1050,8 +1050,8 @@ const struct cpumask *uv_flush_tlb_other
- 	switch (bcp->uvhub_version) {
- 	case UV_BAU_V2:
- 	case UV_BAU_V3:
--		bau_desc->payload.uv1_2_3.address = address;
--		bau_desc->payload.uv1_2_3.sending_cpu = cpu;
-+		bau_desc->payload.uv2_3.address = address;
-+		bau_desc->payload.uv2_3.sending_cpu = cpu;
- 		break;
- 	case UV_BAU_V4:
- 		bau_desc->payload.uv4.address = address;
+Acked-by: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+
+Best regards,
+--
+Bartlomiej Zolnierkiewicz
+Samsung R&D Institute Poland
+Samsung Electronics
+
+> ---
+>  drivers/video/fbdev/efifb.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/video/fbdev/efifb.c b/drivers/video/fbdev/efifb.c
+> index 65491ae74808..e57c00824965 100644
+> --- a/drivers/video/fbdev/efifb.c
+> +++ b/drivers/video/fbdev/efifb.c
+> @@ -453,7 +453,7 @@ static int efifb_probe(struct platform_device *dev)
+>  	info->apertures->ranges[0].base = efifb_fix.smem_start;
+>  	info->apertures->ranges[0].size = size_remap;
+>  
+> -	if (efi_enabled(EFI_BOOT) &&
+> +	if (efi_enabled(EFI_MEMMAP) &&
+>  	    !efi_mem_desc_lookup(efifb_fix.smem_start, &md)) {
+>  		if ((efifb_fix.smem_start + efifb_fix.smem_len) >
+>  		    (md.phys_addr + (md.num_pages << EFI_PAGE_SHIFT))) {
+> 
 
