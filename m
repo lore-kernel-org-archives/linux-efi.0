@@ -4,54 +4,54 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_INVALID,
 	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 23511C43445
-	for <linux-efi@archiver.kernel.org>; Thu, 16 Jul 2020 23:41:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DE937C433E0
+	for <linux-efi@archiver.kernel.org>; Thu, 16 Jul 2020 23:41:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EBA3E2074B
-	for <linux-efi@archiver.kernel.org>; Thu, 16 Jul 2020 23:41:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BCAFB207DD
+	for <linux-efi@archiver.kernel.org>; Thu, 16 Jul 2020 23:41:50 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="g7kIuAnv"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="bWozXJjW"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726870AbgGPXlj (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 16 Jul 2020 19:41:39 -0400
+        id S1726784AbgGPXlq (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 16 Jul 2020 19:41:46 -0400
 Received: from esa1.hgst.iphmx.com ([68.232.141.245]:7110 "EHLO
         esa1.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726784AbgGPXlX (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 16 Jul 2020 19:41:23 -0400
+        with ESMTP id S1725980AbgGPXlS (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 16 Jul 2020 19:41:18 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1594942882; x=1626478882;
+  t=1594942877; x=1626478877;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=T6HBziqjPfpEOovieQwcPFPkqxzZPptEH0FVtMgRIac=;
-  b=g7kIuAnvc4CQ9RnXn+Quauuvpv6nOZsyYKdYMDC+gzdF6d0+2+44/70n
-   IkffZ3HjOpdKpIu4w93MGyPuwllXlei0E5+gQY/LC4AWVcXB0/hI8P728
-   FM+SeeFsI92pYnnUyyyTwCPc2C3vkMqG1jZf7hEqL/XTxt27K0OrNQ29W
-   k0CwlouCDnfqECIld83YutRZKsP88tbA1uEnVzneiREjlbAezkXI8Gm63
-   maKFqKFEPTPGWBxHPjJT/Hw3TA83yhKpQ9Jk+W7zo4WkYjyg3bznXfRiI
-   PzIFPJlpg2ajM+YbXaiDZOlxBm/hPLW23BDIAwNmtvJLEINHTO4/SFgqA
-   w==;
-IronPort-SDR: aL/iMxBB3Qt8P3IgHN333fp3ZJf2mRL6koqvvlI8+kjEQ4/rPFr+RbbNa0hbJvB4+Kwur8qq4F
- BUlQYLvgqLNC6V/ycrXegI5jQK4xhhq42/1QjGy7ujsPqhUr+syeYe6mkFpLmY0g0fyxVvN22n
- rxzfXTW7ahT28a56A6A2c3Hc+JD+d91yaVfg+p1p6y2CHSIpk+QhIbTUzLoJ8QJJeShAdscNJr
- bTcFWOgsDaCeMS0uJzoUbjnYI2Fc9M9lNAuaj7rOJYbQDCquMfzg73mH0SIZBDKdqaXLCLag/u
- I70=
+  bh=/BM/mH4XsaV/6iCpj8IfqSeogZjHIyxg63ZlS/DCX0c=;
+  b=bWozXJjWX/dLxTFMipke3XG5IhtTUqj4XSYdvBgzXvnjtIcpgjL4Pl6+
+   9hbkSYLDgYSh8eINSJdS9rI5SGi/mHKXsHyv0xN2wkM5sDjDwE8vBGLUV
+   /TkDZZVy/FZWF90xre1wjNkC2Fxz4JT44vJyLOXBZNwvN9AiKYXP5U0c9
+   2CgzfgkUh++BtruY5kcXCtGJjgYBkohLLaAfyhUzElyDe3SK/KI0jueN4
+   c1jjn1BH0v9QK9g9b1Cw9KJ9LVb/EIRKYO3+lxPAtRIhRFxYlyPujFjls
+   KbVPqeibev9Vpb790t+BO1hGBebUFCQCQ78tA6oWqzJ2CcIXnHrhPUefj
+   g==;
+IronPort-SDR: E1qMwgvkhJXXAEncXXncfyJ4a/P1BjVROU9A+TlcQ1cgvLxTAOC2ei+mesUBZRCuIWr/FEQVqF
+ NfzQOA25+ohKVCme4k5FGKJO7TZ1zTPRI7LpQ3uCm8Vkfw0iBKcgNUc0pKMSOiJOYeHkLomYs9
+ bzWN2p8VDrlCxz2qoVlVz9nBgBdboRAdeL2AdUJeS8pDXZCxI1Z8xR/dJbbUdWquxLg+Y+6h0j
+ mhQjAzRPKadBgneGzBwzf1anJAuv4ORVTkQMU682LfzbK40kdkF3ptJ9e2sZmcKaUHBqk84Xvx
+ fMw=
 X-IronPort-AV: E=Sophos;i="5.75,360,1589212800"; 
-   d="scan'208";a="251923232"
+   d="scan'208";a="251923207"
 Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 17 Jul 2020 07:41:22 +0800
-IronPort-SDR: mfmQYQVvBMFCl+eQVd2lovOXTvZ2YQ6meDmSA5W+RWCbqgxHruRNeRxex8+6ELYwrAtmyevG18
- D9Po2kf6wSl2vEPNhPHDXRGvPEfsLXYwQ=
+  by ob1.hgst.iphmx.com with ESMTP; 17 Jul 2020 07:41:16 +0800
+IronPort-SDR: 59Rt/3fG9F5IciexHfeGgmO95EmL3uclDqx+YJIiaQPe1tLY5yFiFRaTMz+W/dmEzlO5BQfZBO
+ N9aTNqnNjguHAlhjwMA5ySakMEJYFi/OE=
 Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Jul 2020 16:29:46 -0700
-IronPort-SDR: PWbuYNsxssCn40vWmXhVNZwgTUSQ6DTTbK/IitymYljqtYtk8TxEeJt5x8q1A0677CraTBfRp3
- lXWjdBsAHw/A==
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Jul 2020 16:29:40 -0700
+IronPort-SDR: 1+ar9xAJ3WTp7oABqVmJQP3GTHTux1IitmQm3mpW+sB48jlZAs+hJYRHCo86g6rEcJCK8R9Kxq
+ CuVbwebNiq1g==
 WDCIronportException: Internal
 Received: from phd004806.ad.shared (HELO jedi-01.hgst.com) ([10.86.58.54])
-  by uls-op-cesaip02.wdc.com with ESMTP; 16 Jul 2020 16:41:21 -0700
+  by uls-op-cesaip02.wdc.com with ESMTP; 16 Jul 2020 16:41:16 -0700
 From:   Atish Patra <atish.patra@wdc.com>
 To:     linux-kernel@vger.kernel.org
 Cc:     Atish Patra <atish.patra@wdc.com>, Anup Patel <anup.patel@wdc.com>,
@@ -68,9 +68,9 @@ Cc:     Atish Patra <atish.patra@wdc.com>, Anup Patel <anup.patel@wdc.com>,
         Will Deacon <will@kernel.org>, Zong Li <zong.li@sifive.com>,
         Heinrich Schuchardt <xypron.glpk@gmx.de>,
         linux-arm-kernel@lists.infradead.org
-Subject: [RFT PATCH v3 7/9] efi: Rename arm-init to efi-init common for all arch
-Date:   Thu, 16 Jul 2020 16:41:02 -0700
-Message-Id: <20200716234104.29049-8-atish.patra@wdc.com>
+Subject: [RFT PATCH v3 3/9] RISC-V: Implement late mapping page table allocation functions
+Date:   Thu, 16 Jul 2020 16:40:58 -0700
+Message-Id: <20200716234104.29049-4-atish.patra@wdc.com>
 X-Mailer: git-send-email 2.24.0
 In-Reply-To: <20200716234104.29049-1-atish.patra@wdc.com>
 References: <20200716234104.29049-1-atish.patra@wdc.com>
@@ -81,35 +81,101 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-arm-init is responsible for setting up efi runtime and doesn't actually
-do any ARM specific stuff. RISC-V can use the same source code as it is.
+Currently, page table setup is done during setup_va_final where fixmap can
+be used to create the temporary mappings. The physical frame is allocated
+from memblock_alloc_* functions. However, this won't work if page table
+mapping needs to be created for a different mm context (i.e. efi mm) at
+a later point of time.
 
-Rename it to efi-init so that RISC-V can use it.
+Use generic kernel page allocation function & macros for any mapping
+after setup_vm_final.
 
 Signed-off-by: Atish Patra <atish.patra@wdc.com>
 ---
- drivers/firmware/efi/Makefile                   | 2 +-
- drivers/firmware/efi/{arm-init.c => efi-init.c} | 0
- 2 files changed, 1 insertion(+), 1 deletion(-)
- rename drivers/firmware/efi/{arm-init.c => efi-init.c} (100%)
+ arch/riscv/mm/init.c | 29 ++++++++++++++++++++++++-----
+ 1 file changed, 24 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-index 7a216984552b..61fd1e8b26fb 100644
---- a/drivers/firmware/efi/Makefile
-+++ b/drivers/firmware/efi/Makefile
-@@ -32,7 +32,7 @@ obj-$(CONFIG_EFI_EMBEDDED_FIRMWARE)	+= embedded-firmware.o
- fake_map-y				+= fake_mem.o
- fake_map-$(CONFIG_X86)			+= x86_fake_mem.o
+diff --git a/arch/riscv/mm/init.c b/arch/riscv/mm/init.c
+index 62c90161765f..9f3129c76985 100644
+--- a/arch/riscv/mm/init.c
++++ b/arch/riscv/mm/init.c
+@@ -209,6 +209,7 @@ pgd_t swapper_pg_dir[PTRS_PER_PGD] __page_aligned_bss;
+ pgd_t trampoline_pg_dir[PTRS_PER_PGD] __page_aligned_bss;
+ pte_t fixmap_pte[PTRS_PER_PTE] __page_aligned_bss;
+ static bool mmu_enabled;
++static bool late_mapping;
  
--arm-obj-$(CONFIG_EFI)			:= arm-init.o arm-runtime.o
-+arm-obj-$(CONFIG_EFI)			:= efi-init.o arm-runtime.o
- obj-$(CONFIG_ARM)			+= $(arm-obj-y)
- obj-$(CONFIG_ARM64)			+= $(arm-obj-y)
- obj-$(CONFIG_EFI_CAPSULE_LOADER)	+= capsule-loader.o
-diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/efi-init.c
-similarity index 100%
-rename from drivers/firmware/efi/arm-init.c
-rename to drivers/firmware/efi/efi-init.c
+ #define MAX_EARLY_MAPPING_SIZE	SZ_128M
+ 
+@@ -233,7 +234,9 @@ void __set_fixmap(enum fixed_addresses idx, phys_addr_t phys, pgprot_t prot)
+ 
+ static pte_t *__init get_pte_virt(phys_addr_t pa)
+ {
+-	if (mmu_enabled) {
++	if (late_mapping)
++		return (pte_t *) __va(pa);
++	else if (mmu_enabled) {
+ 		clear_fixmap(FIX_PTE);
+ 		return (pte_t *)set_fixmap_offset(FIX_PTE, pa);
+ 	} else {
+@@ -243,13 +246,19 @@ static pte_t *__init get_pte_virt(phys_addr_t pa)
+ 
+ static phys_addr_t __init alloc_pte(uintptr_t va)
+ {
++	unsigned long vaddr;
+ 	/*
+ 	 * We only create PMD or PGD early mappings so we
+ 	 * should never reach here with MMU disabled.
+ 	 */
+ 	BUG_ON(!mmu_enabled);
+-
+-	return memblock_phys_alloc(PAGE_SIZE, PAGE_SIZE);
++	if (late_mapping) {
++		vaddr = __get_free_page(GFP_KERNEL);
++		if (!vaddr || !pgtable_pte_page_ctor(virt_to_page(vaddr)))
++			BUG();
++		return __pa(vaddr);
++	} else
++		return memblock_phys_alloc(PAGE_SIZE, PAGE_SIZE);
+ }
+ 
+ static void __init create_pte_mapping(pte_t *ptep,
+@@ -278,7 +287,9 @@ pmd_t early_pmd[PTRS_PER_PMD * NUM_EARLY_PMDS] __initdata __aligned(PAGE_SIZE);
+ 
+ static pmd_t *__init get_pmd_virt(phys_addr_t pa)
+ {
+-	if (mmu_enabled) {
++	if (late_mapping)
++		return (pmd_t *) __va(pa);
++	else if (mmu_enabled) {
+ 		clear_fixmap(FIX_PMD);
+ 		return (pmd_t *)set_fixmap_offset(FIX_PMD, pa);
+ 	} else {
+@@ -289,8 +300,13 @@ static pmd_t *__init get_pmd_virt(phys_addr_t pa)
+ static phys_addr_t __init alloc_pmd(uintptr_t va)
+ {
+ 	uintptr_t pmd_num;
++	unsigned long vaddr;
+ 
+-	if (mmu_enabled)
++	if (late_mapping) {
++		vaddr = __get_free_page(GFP_KERNEL);
++		BUG_ON(!vaddr);
++		return __pa(vaddr);
++	} else if (mmu_enabled)
+ 		return memblock_phys_alloc(PAGE_SIZE, PAGE_SIZE);
+ 
+ 	pmd_num = (va - PAGE_OFFSET) >> PGDIR_SHIFT;
+@@ -528,6 +544,9 @@ static void __init setup_vm_final(void)
+ 	/* Move to swapper page table */
+ 	csr_write(CSR_SATP, PFN_DOWN(__pa_symbol(swapper_pg_dir)) | SATP_MODE);
+ 	local_flush_tlb_all();
++
++	/* generic page allocation function must be used to setup page table */
++	late_mapping = true;
+ }
+ #else
+ void *dtb_early_va __initdata;
 -- 
 2.24.0
 
