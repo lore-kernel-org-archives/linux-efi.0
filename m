@@ -1,64 +1,48 @@
-Return-Path: <SRS0=AXMN=A3=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=kirE=A4=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.0 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3E1A3C43457
-	for <linux-efi@archiver.kernel.org>; Thu, 16 Jul 2020 23:41:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 34881C433E1
+	for <linux-efi@archiver.kernel.org>; Fri, 17 Jul 2020 06:32:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 19270207DD
-	for <linux-efi@archiver.kernel.org>; Thu, 16 Jul 2020 23:41:47 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="PG50fNwJ"
+	by mail.kernel.org (Postfix) with ESMTP id 142DA21775
+	for <linux-efi@archiver.kernel.org>; Fri, 17 Jul 2020 06:32:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726687AbgGPXlS (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 16 Jul 2020 19:41:18 -0400
-Received: from esa1.hgst.iphmx.com ([68.232.141.245]:7103 "EHLO
-        esa1.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726525AbgGPXlQ (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 16 Jul 2020 19:41:16 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1594942875; x=1626478875;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=qPX9w03TDCYp7bNgQz0FtRslpyDBjDFxb0GnLRnufaQ=;
-  b=PG50fNwJ7HPor8UlgMVLINB0Dqmd5WeD/WcsY1BEjVrfhwPyeutAdt/O
-   RBD/iKDUEju6JY3kWxVyBpQm8XUQ2kK7DCnzQgJ/4SclIxK+TrNb2GrAV
-   aJtCJqkFm7PbF3sfylzMuV8cEBnIXXbuvGWGBvl2iZbWp0pZxuo9wnrc8
-   n6zT4V1NDiTMoMrhdb44nKKVvDSX+54M7uoUIGXnMnEOnBFlvSmU4JvvV
-   RCEwCUSR98PyvQff5+Sj+QDK7j9PDd+mcdvEZNeO/SHqym5xCkAk9PF/p
-   lpzFyeyYxo24OcpKOS27FS7NIDhkFURxHjQ0Lah3XFcvKf409jb8WMaIV
-   g==;
-IronPort-SDR: q64N6C7EtLB+PEQsb3z75+pqdBQAykb2CRh9h8BHFv3umsZ4XHGswXNzuqXaJXgoRmnXihjK1M
- kRih+g96J0mmJTHZC9w/3YaMz0fXxuAFZbJgt/aDfKC6jdU9iZQgra1OW3+HK2G7ZbMOL1HoAK
- CQuif2ov/vVebEeGh3GN2fsSxejOlL/zk9s+qQjNpOq7HRjlzT85JIKuH5iN+5Qw/1kv0wGDsc
- fFFUiucbAQh8gbp98SHUAzSXJ9AS4WGv0UuFLTH7D6GOTkSRnd8OqUNVit3/P8aVo+8k551k0R
- +yA=
-X-IronPort-AV: E=Sophos;i="5.75,360,1589212800"; 
-   d="scan'208";a="251923197"
-Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 17 Jul 2020 07:41:15 +0800
-IronPort-SDR: Vof4SdbcI7igjszK2/KduYZArNzwUGMxnepnJhD2NVi5K2073tELMQXJ+e7NZKNiGLrO8gcQr6
- 7MuDg14CqF9SMMMItJr0X2WkITXUNZ5to=
-Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Jul 2020 16:29:38 -0700
-IronPort-SDR: 1UshUQNcXTNsprKeRtIsDqnTeMiI0w4SfIFZKKNnMH/qjkqzAg8SSedlw515LvZ0cVKy0u6QxP
- uEX1mYyKMT7g==
-WDCIronportException: Internal
-Received: from phd004806.ad.shared (HELO jedi-01.hgst.com) ([10.86.58.54])
-  by uls-op-cesaip02.wdc.com with ESMTP; 16 Jul 2020 16:41:14 -0700
-From:   Atish Patra <atish.patra@wdc.com>
-To:     linux-kernel@vger.kernel.org
-Cc:     Atish Patra <atish.patra@wdc.com>, Anup Patel <anup.patel@wdc.com>,
+        id S1726201AbgGQGcc (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 17 Jul 2020 02:32:32 -0400
+Received: from mout.kundenserver.de ([212.227.126.134]:41577 "EHLO
+        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726141AbgGQGcc (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 17 Jul 2020 02:32:32 -0400
+Received: from mail-qt1-f175.google.com ([209.85.160.175]) by
+ mrelayeu.kundenserver.de (mreue010 [212.227.15.129]) with ESMTPSA (Nemesis)
+ id 1Mj8a5-1kS5lL2xyn-00f99n; Fri, 17 Jul 2020 08:32:30 +0200
+Received: by mail-qt1-f175.google.com with SMTP id w27so6864166qtb.7;
+        Thu, 16 Jul 2020 23:32:30 -0700 (PDT)
+X-Gm-Message-State: AOAM533kYu3TQTcO99/jOt/vc99YNFqP3UcqU1clYoefE8ct1nHVd3R5
+        wnruFfPcm6T+SbD1wNfFMfOuaRN8ioV+2plEJho=
+X-Google-Smtp-Source: ABdhPJyIrO2tNL5pNeYwr+F4lkpDFfuG2l4JzP4UiWOMuiMb/Y+pJ5JATQyrKH/OqOT80hdzcJy8yYsZ1YnAf3q0N6k=
+X-Received: by 2002:ac8:33d7:: with SMTP id d23mr8943304qtb.204.1594967549456;
+ Thu, 16 Jul 2020 23:32:29 -0700 (PDT)
+MIME-Version: 1.0
+References: <20200716234104.29049-1-atish.patra@wdc.com> <20200716234104.29049-2-atish.patra@wdc.com>
+In-Reply-To: <20200716234104.29049-2-atish.patra@wdc.com>
+From:   Arnd Bergmann <arnd@arndb.de>
+Date:   Fri, 17 Jul 2020 08:32:13 +0200
+X-Gmail-Original-Message-ID: <CAK8P3a2EesjQAs-YGrCO=cYfUVWFQ3CbJfVXJx3qZjCS_XW+wA@mail.gmail.com>
+Message-ID: <CAK8P3a2EesjQAs-YGrCO=cYfUVWFQ3CbJfVXJx3qZjCS_XW+wA@mail.gmail.com>
+Subject: Re: [RFT PATCH v3 1/9] RISC-V: Move DT mapping outof fixmap
+To:     Atish Patra <atish.patra@wdc.com>
+Cc:     "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        Anup Patel <anup.patel@wdc.com>,
         Ard Biesheuvel <ardb@kernel.org>,
-        Arnd Bergmann <arnd@arndb.de>,
         Greentime Hu <greentime.hu@sifive.com>,
-        Kees Cook <keescook@chromium.org>, linux-efi@vger.kernel.org,
+        Kees Cook <keescook@chromium.org>,
+        linux-efi <linux-efi@vger.kernel.org>,
         linux-riscv@lists.infradead.org,
         Mark Rutland <mark.rutland@arm.com>,
         Masahiro Yamada <masahiroy@kernel.org>,
@@ -67,155 +51,68 @@ Cc:     Atish Patra <atish.patra@wdc.com>, Anup Patel <anup.patel@wdc.com>,
         Paul Walmsley <paul.walmsley@sifive.com>,
         Will Deacon <will@kernel.org>, Zong Li <zong.li@sifive.com>,
         Heinrich Schuchardt <xypron.glpk@gmx.de>,
-        linux-arm-kernel@lists.infradead.org
-Subject: [RFT PATCH v3 2/9] RISC-V: Add early ioremap support
-Date:   Thu, 16 Jul 2020 16:40:57 -0700
-Message-Id: <20200716234104.29049-3-atish.patra@wdc.com>
-X-Mailer: git-send-email 2.24.0
-In-Reply-To: <20200716234104.29049-1-atish.patra@wdc.com>
-References: <20200716234104.29049-1-atish.patra@wdc.com>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+        Linux ARM <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="UTF-8"
+X-Provags-ID: V03:K1:zFGPvMwMNJCI4UkgWmgHsAIxbEItY1XE/2RYkSx0Rf/nPVgkQet
+ PeslIu0TxUVBt74msw23dSdmv3cOcXn482BDY94bkLjlrRspnqn8vAhbacKi0v+OwuNQA1I
+ Ixdb2qygAWDIvo6csTkBLGHr0E3GQeH9UZHEIDkckRiFTffIV2lOcK8yx1qb/WYLprDL8en
+ z2oD17NUmH2peQMRIyvdw==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:2eRsSsrUiqA=:GoMH2Ql4SXI4vdiUJFU+4X
+ TygvyZRIsmtveC50n1k9ScS4gcursFRukhJQ/uZrCo+S5RdcKNuSyMvV6hw5Rtn8VrA2rONz5
+ 1rem5XofWtf0VBH945R2g6VRJOvfUTaG+tmKGGvDW+lPpPjzFIGqPwV01n5xwr+ZFihPVuqWD
+ VRT3gJV1RiQqoOqOyxLQciTauNek+hy/YAX3BL23VfMuNB6NuPR69BJrcD0aMuiCHkufBwMKw
+ fqZSkuGmye4cj9BqtMd95RQRycnVdW+2mX6nyR6VVLbQylKiit8VengOHECajdui1ln4TBZp3
+ MH4as4a2AjYc2y8P3XabygOp+K0EhQjQB/WQaoSNBKsaMz8/g4nZtYrdgPxLqc0RJHncY1dqW
+ Rwj0XcVnzpPnn3OBMxSK9j0XXp6HfVhC+mwAVZBhgGHQUIKZNO4Py258o4/mcMpUAdVhKeC5y
+ /+YIQph654/QPfhF7aIFN0f34BDhJVTb1HtEuUNrfDi04yFkS4ZbXfS58UDWMGi2hQgOQm1Lp
+ SmfaOALZyOo1SKVLDVJ/msyjJAFfWSJQJwDwK8MjYZrytJXhc1VyY4d08Lhb3LSd5OmKhiEbH
+ fpGs6+fluaRxCy8k6/GLmelM+2ivJgafyi+lL35ZD9Ga7l2EiHUJm0BEj/MggBwf+G6DPoTw7
+ L8UHMR4xUqec9Vvj8QKSIE52yzgA2cOtHPM/NKhBcFK08Nl0KyPWg1EwWMRTCh8OujNASQxaQ
+ W1JWLNo4QkmVDUiC8qn4XSF2g5xTd+VbqYH/h+mUQ2xNaj4gwn3lRO9w2GuuV77YfOPVpvgmR
+ 8EG3gWRzbN8kATDthJ2voSQzofRWKET3YYCAYgq9tNyUUCkhD3NzgMAry0HnM+iPMhvykE3
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-UEFI uses early IO or memory mappings for runtime services before
-normal ioremap() is usable. Add the necessary fixmap bindings and
-pmd mappings for generic ioremap support to work.
+On Fri, Jul 17, 2020 at 1:41 AM Atish Patra <atish.patra@wdc.com> wrote:
+>
+> From: Anup Patel <anup.patel@wdc.com>
+>
+> Currently, RISC-V reserves 1MB of fixmap memory for device tree. However,
+> it maps only single PMD (2MB) space for fixmap which leaves only < 1MB space
+> left for other kernel features such as early ioremap which requires fixmap
+> as well. The fixmap size can be increased by another 2MB but it brings
+> additional complexity and changes the virtual memory layout as well.
+> If we require some additional feature requiring fixmap again, it has to be
+> moved again.
+>
+> Technically, DT doesn't need a fixmap as the memory occupied by the DT is
+> only used during boot. Thus, init memory section can be used for the same
+> purpose as well. This simplifies fixmap implementation.
+>
+> Signed-off-by: Anup Patel <anup.patel@wdc.com>
+> Signed-off-by: Atish Patra <atish.patra@wdc.com>
 
-Signed-off-by: Atish Patra <atish.patra@wdc.com>
----
- arch/riscv/Kconfig              |  1 +
- arch/riscv/include/asm/Kbuild   |  1 +
- arch/riscv/include/asm/fixmap.h | 13 +++++++++++++
- arch/riscv/include/asm/io.h     |  1 +
- arch/riscv/kernel/setup.c       |  1 +
- arch/riscv/mm/init.c            | 33 +++++++++++++++++++++++++++++++++
- 6 files changed, 50 insertions(+)
+The patch seems fine for the moment, but I have one concern for the
+long run:
 
-diff --git a/arch/riscv/Kconfig b/arch/riscv/Kconfig
-index 3230c1d48562..e6c1c98a53fb 100644
---- a/arch/riscv/Kconfig
-+++ b/arch/riscv/Kconfig
-@@ -34,6 +34,7 @@ config RISCV
- 	select GENERIC_ARCH_TOPOLOGY if SMP
- 	select GENERIC_ATOMIC64 if !64BIT
- 	select GENERIC_CLOCKEVENTS
-+	select GENERIC_EARLY_IOREMAP
- 	select GENERIC_GETTIMEOFDAY if HAVE_GENERIC_VDSO
- 	select GENERIC_IOREMAP
- 	select GENERIC_IRQ_MULTI_HANDLER
-diff --git a/arch/riscv/include/asm/Kbuild b/arch/riscv/include/asm/Kbuild
-index 3d9410bb4de0..59dd7be55005 100644
---- a/arch/riscv/include/asm/Kbuild
-+++ b/arch/riscv/include/asm/Kbuild
-@@ -1,4 +1,5 @@
- # SPDX-License-Identifier: GPL-2.0
-+generic-y += early_ioremap.h
- generic-y += extable.h
- generic-y += flat.h
- generic-y += kvm_para.h
-diff --git a/arch/riscv/include/asm/fixmap.h b/arch/riscv/include/asm/fixmap.h
-index 11613f38228a..54cbf07fb4e9 100644
---- a/arch/riscv/include/asm/fixmap.h
-+++ b/arch/riscv/include/asm/fixmap.h
-@@ -27,6 +27,19 @@ enum fixed_addresses {
- 	FIX_TEXT_POKE1,
- 	FIX_TEXT_POKE0,
- 	FIX_EARLYCON_MEM_BASE,
-+
-+	__end_of_permanent_fixed_addresses,
-+	/*
-+	 * Temporary boot-time mappings, used by early_ioremap(),
-+	 * before ioremap() is functional.
-+	 */
-+#define NR_FIX_BTMAPS		(SZ_256K / PAGE_SIZE)
-+#define FIX_BTMAPS_SLOTS	7
-+#define TOTAL_FIX_BTMAPS	(NR_FIX_BTMAPS * FIX_BTMAPS_SLOTS)
-+
-+	FIX_BTMAP_END = __end_of_permanent_fixed_addresses,
-+	FIX_BTMAP_BEGIN = FIX_BTMAP_END + TOTAL_FIX_BTMAPS - 1,
-+
- 	__end_of_fixed_addresses
- };
- 
-diff --git a/arch/riscv/include/asm/io.h b/arch/riscv/include/asm/io.h
-index 3835c3295dc5..c025a746a148 100644
---- a/arch/riscv/include/asm/io.h
-+++ b/arch/riscv/include/asm/io.h
-@@ -14,6 +14,7 @@
- #include <linux/types.h>
- #include <linux/pgtable.h>
- #include <asm/mmiowb.h>
-+#include <asm/early_ioremap.h>
- 
- /*
-  * MMIO access functions are separated out to break dependency cycles
-diff --git a/arch/riscv/kernel/setup.c b/arch/riscv/kernel/setup.c
-index 8519a6d29857..1244b433fe7c 100644
---- a/arch/riscv/kernel/setup.c
-+++ b/arch/riscv/kernel/setup.c
-@@ -72,6 +72,7 @@ void __init setup_arch(char **cmdline_p)
- 
- 	*cmdline_p = boot_command_line;
- 
-+	early_ioremap_setup();
- 	parse_early_param();
- 
- 	setup_bootmem();
-diff --git a/arch/riscv/mm/init.c b/arch/riscv/mm/init.c
-index 5e9328fa635b..62c90161765f 100644
---- a/arch/riscv/mm/init.c
-+++ b/arch/riscv/mm/init.c
-@@ -401,6 +401,9 @@ asmlinkage void __init setup_vm(uintptr_t dtb_pa)
- 	uintptr_t load_pa = (uintptr_t)(&_start);
- 	uintptr_t load_sz = (uintptr_t)(&_end) - load_pa;
- 	uintptr_t map_size = best_map_size(load_pa, MAX_EARLY_MAPPING_SIZE);
-+#ifndef __PAGETABLE_PMD_FOLDED
-+	pmd_t fix_bmap_spmd, fix_bmap_epmd;
-+#endif
- 
- 	va_pa_offset = PAGE_OFFSET - load_pa;
- 	pfn_base = PFN_DOWN(load_pa);
-@@ -451,6 +454,36 @@ asmlinkage void __init setup_vm(uintptr_t dtb_pa)
- 	dtb_size = fdt_totalsize((void *)dtb_pa);
- 	dtb_size = (dtb_size > DTB_EARLY_SIZE) ? DTB_EARLY_SIZE : dtb_size;
- 	memcpy((void *)pa, (void *)dtb_pa, dtb_size);
-+
-+	/*
-+	 * Bootime fixmap only can handle PMD_SIZE mapping. Thus, boot-ioremap
-+	 * range can not span multiple pmds.
-+	 */
-+	BUILD_BUG_ON((__fix_to_virt(FIX_BTMAP_BEGIN) >> PMD_SHIFT)
-+		     != (__fix_to_virt(FIX_BTMAP_END) >> PMD_SHIFT));
-+
-+#ifndef __PAGETABLE_PMD_FOLDED
-+	/*
-+	 * Early ioremap fixmap is already created as it lies within first 2MB
-+	 * of fixmap region. We always map PMD_SIZE. Thus, both FIX_BTMAP_END
-+	 * FIX_BTMAP_BEGIN should lie in the same pmd. Verify that and warn
-+	 * the user if not.
-+	 */
-+	fix_bmap_spmd = fixmap_pmd[pmd_index(__fix_to_virt(FIX_BTMAP_BEGIN))];
-+	fix_bmap_epmd = fixmap_pmd[pmd_index(__fix_to_virt(FIX_BTMAP_END))];
-+	if (pmd_val(fix_bmap_spmd) != pmd_val(fix_bmap_epmd)) {
-+		WARN_ON(1);
-+		pr_warn("fixmap btmap start [%08lx] != end [%08lx]\n",
-+			pmd_val(fix_bmap_spmd), pmd_val(fix_bmap_epmd));
-+		pr_warn("fix_to_virt(FIX_BTMAP_BEGIN): %08lx\n",
-+			fix_to_virt(FIX_BTMAP_BEGIN));
-+		pr_warn("fix_to_virt(FIX_BTMAP_END):   %08lx\n",
-+			fix_to_virt(FIX_BTMAP_END));
-+
-+		pr_warn("FIX_BTMAP_END:       %d\n", FIX_BTMAP_END);
-+		pr_warn("FIX_BTMAP_BEGIN:     %d\n", FIX_BTMAP_BEGIN);
-+	}
-+#endif
- }
- 
- static void __init setup_vm_final(void)
--- 
-2.24.0
+> +#define DTB_EARLY_SIZE         SZ_1M
+> +static char early_dtb[DTB_EARLY_SIZE] __initdata;
 
+Hardcoding the size in .bss seems slightly problematic both for
+small and for big systems. On machines with very little memory,
+this can lead to running out of free pages before .initdata gets freed,
+and it increases the size of the uncompressed vmlinux file by quite
+a bit.
+
+On some systems, the 1MB limit may get too small. While most dtbs
+would fall into the range between 10KB and 100KB, it can also be
+much larger than that, e.g. when there are DT properties that include
+blobs like device firmware that gets loaded into hardware by a kernel
+driver.
+
+Is there anything stopping you from parsing the FDT in its original
+location without the extra copy before it gets unflattened?
+
+       Arnd
