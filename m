@@ -1,139 +1,153 @@
-Return-Path: <SRS0=yVh6=BA=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=I6bG=BC=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0CC7AC433DF
-	for <linux-efi@archiver.kernel.org>; Tue, 21 Jul 2020 09:30:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 48443C433E1
+	for <linux-efi@archiver.kernel.org>; Thu, 23 Jul 2020 06:28:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DADF02072E
-	for <linux-efi@archiver.kernel.org>; Tue, 21 Jul 2020 09:30:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 20289206E3
+	for <linux-efi@archiver.kernel.org>; Thu, 23 Jul 2020 06:28:42 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=brainfault-org.20150623.gappssmtp.com header.i=@brainfault-org.20150623.gappssmtp.com header.b="yY/akW2D"
+	dkim=pass (1024-bit key) header.d=web.de header.i=@web.de header.b="SgIHvSNX"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728873AbgGUJa4 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 21 Jul 2020 05:30:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36234 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726089AbgGUJa4 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 21 Jul 2020 05:30:56 -0400
-Received: from mail-wr1-x443.google.com (mail-wr1-x443.google.com [IPv6:2a00:1450:4864:20::443])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A3F9CC0619D8
-        for <linux-efi@vger.kernel.org>; Tue, 21 Jul 2020 02:30:55 -0700 (PDT)
-Received: by mail-wr1-x443.google.com with SMTP id f7so20502826wrw.1
-        for <linux-efi@vger.kernel.org>; Tue, 21 Jul 2020 02:30:55 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=brainfault-org.20150623.gappssmtp.com; s=20150623;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=R+EF85aNDdODINrCfjjd0Lfuv95jSgpJvxBVPXo7UEI=;
-        b=yY/akW2D9+GrY1oKN3c5+dEliD4OkQM7F6PBHq+jxAt2+MgNVNgHxD8r/+H4hPWZp7
-         C6QNv/0wFMcXxVoU3TCemQtIbqkOS+zrtNK1Y3W9/SUy1XdL4jbRdKft5mJ77z/BPakH
-         TRk7m1nXqDlBfEq2paJClFRCVqFNLQp9Q5w6FvRmxQfD/BsJ8NskgIwBqJSC5msTA4Xp
-         /dPdMrboPhqh06qZbYrGbe/LnpvGSNTJlrfRctFCk5uVc/hp7RpbjH7DcmtUpXQaiP6I
-         Zghs3hCBJZfGnwUBK0nuRl6+I9AoSqXtCQRveCQ8KX9MH8VTc+oRbDCFJBxzrXW1ETJW
-         qg9g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=R+EF85aNDdODINrCfjjd0Lfuv95jSgpJvxBVPXo7UEI=;
-        b=Mr7mnRQTQdmL/g297nB+LqIhK5XqDXLs9EU0wqo+fL6VzEyXxm04z7FUpj4NqoKy0n
-         A79VRNNdaSl8GnS/mG6dXvLaVC6T0HMTWHmnDkrCj5YXEBwmWkQY+hrO/9rXCNs4jb6H
-         13Kyt54dQ3PFtstvILrB/tvS6qRQ2BrtFPUtJKxWNfbNJfkdqCfVoVcVDMqzmKMTdB/u
-         yjDWjf2vcsZsbjkgg7BHaE65t6+Ds1qR/wmkh+Ha6AQYgsjhfQTj1ljCuzPUKouyjpuV
-         Yp/WKwfaVj1WeUQX3bdUseCJMsND4P9p1NJ+XzTwuc1NWDqj/og/QwTDB6xgNLHXPhvD
-         cHAA==
-X-Gm-Message-State: AOAM532RIgYTDTpQHXHZqZGgD+e3V01MU6z0HWWRke7gwOtss0GtBYTi
-        KkAzeNuVYd2xJOenkTM+JkeVeeRuMgu6jKN9Mob2pQ==
-X-Google-Smtp-Source: ABdhPJyEHJcpxpIsrSRwyhLOvolFk/1JMt5qF29yZtthuuwIDXna9yG5CaRZAoAVzWcNKbHQE3jBtSCRybazpe/ZsxU=
-X-Received: by 2002:adf:de12:: with SMTP id b18mr27796440wrm.390.1595323854198;
- Tue, 21 Jul 2020 02:30:54 -0700 (PDT)
+        id S1726500AbgGWG2l (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 23 Jul 2020 02:28:41 -0400
+Received: from mout.web.de ([212.227.17.12]:57667 "EHLO mout.web.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725984AbgGWG2l (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Thu, 23 Jul 2020 02:28:41 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=web.de;
+        s=dbaedf251592; t=1595485707;
+        bh=1hBN9tUEwHZsp75aFn4bQ6JIGaKpS5aggvBr37cGLDw=;
+        h=X-UI-Sender-Class:To:Cc:Subject:From:Date;
+        b=SgIHvSNXEVLP1YV2x7E8cn4GGBxFqIYz2e0zJHHUlktp5vNDO275pTTVlbXkD9Z0M
+         WFMjFo8DFazMnV/GcNDrpw1a5c7dj4268JKIeqY4eg38QQa4FHgKQAUBQzuMfoQGtX
+         mH9Qy/SW/hy6Xqi1QdkwGwSDG3GPsRUQvP9BqOtc=
+X-UI-Sender-Class: c548c8c5-30a9-4db5-a2e7-cb6cb037b8f9
+Received: from [192.168.1.2] ([93.133.132.31]) by smtp.web.de (mrweb102
+ [213.165.67.124]) with ESMTPSA (Nemesis) id 0LqDUa-1kTRox2ua8-00doEZ; Thu, 23
+ Jul 2020 08:28:27 +0200
+To:     Li Heng <liheng40@huawei.com>, linux-efi@vger.kernel.org
+Cc:     linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Rui Xiang <rui.xiang@huawei.com>
+Subject: Re: [PATCH] efi: add missed destroy_workqueue when efisubsys_init
+ fails
+From:   Markus Elfring <Markus.Elfring@web.de>
+Autocrypt: addr=Markus.Elfring@web.de; prefer-encrypt=mutual; keydata=
+ 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 FEE=
+Message-ID: <9255e38a-e5fb-0a41-1b6d-5fe4226e3b42@web.de>
+Date:   Thu, 23 Jul 2020 08:28:26 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-References: <20200716234104.29049-1-atish.patra@wdc.com> <20200716234104.29049-2-atish.patra@wdc.com>
- <CAK8P3a2EesjQAs-YGrCO=cYfUVWFQ3CbJfVXJx3qZjCS_XW+wA@mail.gmail.com>
- <CAOnJCUKF-tfN-fHyRcjyAMnYVzQqp=_CLa2F4TQNO7jA4infoQ@mail.gmail.com>
- <CAK8P3a3iUdoOZrORz+aeXYiO35Lp8snrCkxSUPAY6Fh2EinaOw@mail.gmail.com>
- <CAOnJCUL2X9mK41iHLCg1_rtj7JS4p41hqXfmd=hyxK=2t5QQog@mail.gmail.com>
- <CAK8P3a3e3SBtTocpkCybKRjkBJG26G-8YdiroJbZLZYq9f0yfw@mail.gmail.com> <CAMj1kXH53V3Vu8Lq4yzSCn5ZSxn65KiVbt91PUPhkBRO6vuRSQ@mail.gmail.com>
-In-Reply-To: <CAMj1kXH53V3Vu8Lq4yzSCn5ZSxn65KiVbt91PUPhkBRO6vuRSQ@mail.gmail.com>
-From:   Anup Patel <anup@brainfault.org>
-Date:   Tue, 21 Jul 2020 15:00:41 +0530
-Message-ID: <CAAhSdy3XYYaDTC293C9pQRHMz99XGoXr1HDcGv8Zi=9Mto0BHg@mail.gmail.com>
-Subject: Re: [RFT PATCH v3 1/9] RISC-V: Move DT mapping outof fixmap
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     Arnd Bergmann <arnd@arndb.de>, Atish Patra <atishp@atishpatra.org>,
-        Atish Patra <atish.patra@wdc.com>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        Anup Patel <anup.patel@wdc.com>,
-        Greentime Hu <greentime.hu@sifive.com>,
-        Kees Cook <keescook@chromium.org>,
-        linux-efi <linux-efi@vger.kernel.org>,
-        linux-riscv <linux-riscv@lists.infradead.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Masahiro Yamada <masahiroy@kernel.org>,
-        Mike Rapoport <rppt@linux.ibm.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Will Deacon <will@kernel.org>, Zong Li <zong.li@sifive.com>,
-        Heinrich Schuchardt <xypron.glpk@gmx.de>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-GB
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:+cIvmW+B4FEKJmlRaUsn3P6wwZXOZBSo++wjam41Os7s/c8euNP
+ SkvLdaNfwjEAG+QMwmIca39uOHG0ODw3lZpFSEdGZdH7bns/yufsNIJG5Kw4HKvPQ127PA4
+ FVof1wL0RRh0Uhg3clshBzt3JnpwiqwQCTLWPW4UI8d742kS5ctOMUzQmeHvqJ+esJix2XS
+ 00lXuwEGHYOm7u4Z1vwOw==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:L/021+LXaa4=:Or5roG2IFS8LvDlPWgTW+i
+ PN/jhuE+Gae9QdBPml7nb89H4lVxRZpQSI+Eg+GgTEzyMNYPBVRmJmAzq1kFQjJOiqA21yYj8
+ H9ZPyiB7LyuYn284N/JsrvteAj23f4DM5BAkQZPwLGQPOm6R7yeRmjGlc1wDmEdgBh6Pe34dk
+ 6uxNRz72qTtC+tJg+g2FMO8DjordtRsPrA5sJOIrbwhxPR8WBGATS5wuqknUK3A04Q8C+bWlE
+ rytZ0mFAyXgYe/DTXmkGHSDe/UKY2g6hXqi4M09Tb/V6IXwp3p5Nw/9v4DFiV5syPcWtAGMYd
+ 0Ixburob0qE/QPT4//44bWT8mqxsynBOgP8bJeiFCu9ycQJ7cl+lxH/Myvhi5RSq6waPetsL1
+ 9jcvYHBwUFKoeGqz1EyNTW7ON4iaIJpOWXZvDRvtbWZ8bLrfvfUdUgSbjypnM3qSFzauKFLTw
+ KXuq1ZNcR3LmeDrXtOJ1MTBmcc1CoZZxbfRDuzX1YZYz9I3SVsqZQxFl7yPg2n+O6jLa5V++9
+ GdAFMo8mxVyQ0qpKtuB7bVvOtkLubhuzTUHKmzTypG3Tw3kzC4ImIL3a2E8LF5WMbJUx9M4oC
+ oMkAVt4DutxtSaWodz9AUSKycXcsbyzs9Jklvk6GpRdhx73uKuQJ4jccu61wMUnUIRJPmwH6a
+ QhyoQdOe782jyJudId0LPzCw/3wMX+9l/oCPwczXxrlZSwseaEKSMIEJSo+a4aFBSErXB97G1
+ vckUOShRqMtWsPe+f1S9+ygbA9ucfxBHKJ5LNX+bdR2EgOK8K/GaY/EYvq6NJbG+QQGZHdbCc
+ IW2aGYUXL5giv4VzGPFJjTQk1r20fMBwskpq4/+k5mkfybpA/TAm2xKgL3CiJKwNlJi44uPro
+ U8u6+6PoDllaAPA6y/8A81dbkSavKoCJl4FNjWcEHCJarxKh6HUczLYfV+P8ycIaEm1ZZ5Qc/
+ 3elANUSfI7L/67SNJyPKiV3YyZ7zgfhHA1Nc3UCmnI7Xr2DL1xnUF28c6R66Kr2bnSXiMrXQX
+ ZR314qy5OpaNfgxPg1ootGZ4SjKzYof55WSpYrTjpVoqzaCVCmM4/zOYtNWIz8SEtskU7QHqR
+ WRRzYOBCl+UD5TsAleatAoXyae0NTvCvXkCcKQPhKuUUhLXcsfDveAHGch4eJe8JO5Sowx9lN
+ VgF4tcJG6O/uVAEK81m5Bs4XfWczvTqX4ETz5ch3RELqBh2Mt/KsdrUA8woxLSpel01C7hkgK
+ IgHIv0BcqowWE3pjsZ2rcYlTjD8LmNwZnJemp1w==
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, Jul 21, 2020 at 2:32 PM Ard Biesheuvel <ardb@kernel.org> wrote:
->
-> On Tue, 21 Jul 2020 at 11:57, Arnd Bergmann <arnd@arndb.de> wrote:
-> >
-> > On Tue, Jul 21, 2020 at 6:18 AM Atish Patra <atishp@atishpatra.org> wrote:
-> > > On Sat, Jul 18, 2020 at 2:24 AM Arnd Bergmann <arnd@arndb.de> wrote:
-> > > > On Sat, Jul 18, 2020 at 3:05 AM Atish Patra <atishp@atishpatra.org> wrote:
-> > > > > That's what the original code was doing. A fixmap entry was added to
-> > > > > map the original fdt
-> > > > > location to a virtual so that parse_dtb can be operated on a virtual
-> > > > > address. But we can't map
-> > > > > both FDT & early ioremap within a single PMD region( 2MB ). That's why
-> > > > > we removed the DT
-> > > > > mapping from the fixmap to .bss section. The other alternate option is
-> > > > > to increase the fixmap space to 4MB which seems more fragile.
-> > > >
-> > > > Could the original location just be part of the regular linear mapping of all
-> > > > RAM?
-> > >
-> > > No. Because we don't map the entire RAM until setup_vm_final().
-> > > We need to parse DT before setup_vm_final() to get the memblocks and
-> > > reserved memory regions.
-> >
-> > Ok, I see how you create a direct mapping for the kernel image, plus
-> > the fixmap for the dtb in setup_vm(), and how moving the dtb into the
-> > kernel image simplifies that.
-> >
-> > I'm still wondering why you can't do the same kind of PGD mapping
-> > for the dtb that you do for the vmlinux, creating linear page table
-> > entries exactly for the location that holds the dtb, from dtb_pa to
-> > dtb_pa+((struct fdt_header*)dtb_pa)->totalsize.
-> >
->
-> On arm64, we limit the size of the DT to 2MB, and reserve a pair of
-> PMD entries adjacent to the fixmap so we can map it r/o statically
-> using huge pages without using fixmap/early_ioremap slots. (Using a
-> pair of PMD entries allows the DT to appear at any alignment in
-> memory, given that PMD entries cover 2 MB each on 4k pages kernels)
+> destroy_workqueue() should be called to destroy efi_rts_wq
+> when efisubsys_init() init resources fails.
 
-The arch/riscv is common for both RV32 and RV64. On RV32, we don't
-have PMD due to only two-levels in the page table.
+* Can such exception handling depend on the data structure member =E2=80=
+=9Cefi.runtime_supported_mask=E2=80=9D?
 
-Although, I like the idea of two consecutive PMD mappings which are not
-part of FIXMAP. The RISC-V early page table is totally different from the
-final init_mm page table. I think we can do two consecutive PGD mappings
-in the early page table at lower addresses (quite below PAGE_OFFSET). I
-will play-around with this idea.
+* An imperative wording would be preferred for the change description
+  (besides another bit of fine-tuning), wouldn't it?
+
+* Will the tag =E2=80=9CFixes=E2=80=9D become helpful for the commit messa=
+ge?
+
+
+=E2=80=A6
+> +++ b/drivers/firmware/efi/efi.c
+> @@ -379,6 +379,7 @@ static int __init efisubsys_init(void)
+>  	efi_kobj =3D kobject_create_and_add("efi", firmware_kobj);
+>  	if (!efi_kobj) {
+>  		pr_err("efi: Firmware registration failed.\n");
+> +		destroy_workqueue(efi_rts_wq);
+>  		return -ENOMEM;
+>  	}
+
+How do you think about to use the following statements instead
+in the if branch?
+
+-		return -ENOMEM;
++		error =3D -ENOMEM;
++		goto destroy_workqueue;
+
 
 Regards,
-Anup
+Markus
