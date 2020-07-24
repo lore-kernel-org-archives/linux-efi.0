@@ -5,55 +5,56 @@ X-Spam-Level:
 X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CCA95C43463
-	for <linux-efi@archiver.kernel.org>; Fri, 24 Jul 2020 21:37:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 54364C433DF
+	for <linux-efi@archiver.kernel.org>; Fri, 24 Jul 2020 21:37:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A32682070B
-	for <linux-efi@archiver.kernel.org>; Fri, 24 Jul 2020 21:37:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 20FF82070B
+	for <linux-efi@archiver.kernel.org>; Fri, 24 Jul 2020 21:37:29 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="dLjapM9E"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="dhMZmqit"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727091AbgGXVhQ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 24 Jul 2020 17:37:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57774 "EHLO
+        id S1727048AbgGXVhY (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 24 Jul 2020 17:37:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57756 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727058AbgGXVgz (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 24 Jul 2020 17:36:55 -0400
-Received: from mail-pf1-x444.google.com (mail-pf1-x444.google.com [IPv6:2607:f8b0:4864:20::444])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E4154C0619E8
-        for <linux-efi@vger.kernel.org>; Fri, 24 Jul 2020 14:36:53 -0700 (PDT)
-Received: by mail-pf1-x444.google.com with SMTP id a14so5999296pfi.2
-        for <linux-efi@vger.kernel.org>; Fri, 24 Jul 2020 14:36:53 -0700 (PDT)
+        with ESMTP id S1727034AbgGXVgy (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 24 Jul 2020 17:36:54 -0400
+Received: from mail-pg1-x541.google.com (mail-pg1-x541.google.com [IPv6:2607:f8b0:4864:20::541])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C3C8C08C5FC
+        for <linux-efi@vger.kernel.org>; Fri, 24 Jul 2020 14:36:52 -0700 (PDT)
+Received: by mail-pg1-x541.google.com with SMTP id p3so6140718pgh.3
+        for <linux-efi@vger.kernel.org>; Fri, 24 Jul 2020 14:36:52 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=chromium.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=uSsBvl8v7Ds0xj/sSQifUu9nBW09bsWbEdeyC6AZGnU=;
-        b=dLjapM9E/N7lvGbvlsx+AprW9iRiIQoDQg1ElvqlnD3ars/VjxKRcZkWYHwXrq1fvr
-         alndpZbMVuIDzOer7/7zv/0rFEjCk+GeLlnkPIxCJX9Y3CYy8LGv8FSXeHzYQCQmhllL
-         YYqebhzei7ubZ+mk/hBSD7CkpZI+hQMhKGZzs=
+        bh=ktfL7PCfkGNfcQML9vhQeWAuzsYDYwRwOwIVvLD1QQM=;
+        b=dhMZmqitoswhDDnqhI7fqqENsRXkbi0aJkyN67q56qBaZxyj9DBtETA5izYKPenKIb
+         IAA895SssUy35qnL6ISQ0OfrZJ/pgHBVZaFKKak6uYfydFaKj682mPWg7epXKZZyddZs
+         T3DuVuskZpdDqDA8AgzrOiVIMVdqaSpwb9xgM=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=uSsBvl8v7Ds0xj/sSQifUu9nBW09bsWbEdeyC6AZGnU=;
-        b=X4q7IAzW7A8klkcT6YUsaQaW3dNtqvdiqIHoc7WxT6MHSKGyQfR//mra5hCqGo7iYO
-         92+ZJ7JNvuF+znqOxZ4Idm10NfYpoXb0/7ZYso9UVoTFkPXhL07k4Rl5D0tMlLRkVIHP
-         /64cok0SnIqd/8BeO7jnh/5NTv6FzIYvcDWsfNLBHFm8sMKYDtCLx6XsfSQ2yHZFRuDl
-         E8IV9zapccssfxcMjDE+E1iG6aB2QC/WnhmxcheO+f8wnjw4CyOm7td1aQKnhd3FsU71
-         Bz5fL9EAKqYX3Fs5amvAvpm4FRcaE9KjT00uFQjM0TnPKv9oHeLF9lPbDz+hyEKXaLWA
-         rhPw==
-X-Gm-Message-State: AOAM530mJJSj3Y4Ss3FYmbar93FLOgMnhJGiulJc98ieUT4RUECqIQk+
-        Gv5c6AP4svdyRy1DM4YxqYJlRQ==
-X-Google-Smtp-Source: ABdhPJzsdlItUUcC+gEjAKRvNEWSjiwtxRgrL09mNMHnRl5Lf3GSrg1abMezfWwbyJZ/dPcFjpO37w==
-X-Received: by 2002:aa7:94a7:: with SMTP id a7mr10309697pfl.83.1595626613380;
-        Fri, 24 Jul 2020 14:36:53 -0700 (PDT)
+        bh=ktfL7PCfkGNfcQML9vhQeWAuzsYDYwRwOwIVvLD1QQM=;
+        b=G5gJAaLt1TVYShZlTb10vy9dhqi0qG2GiFTZfIGy5t9+KgaHFYAhnKwYfgso7V7ghG
+         Hv5QeU+M4kAd8DmbVkkYUleMEeqUI2JYdgsxeAwNbRNp5Ne3zK2jiPnslEEtrWEjFx+J
+         frspS2mcvsqsE0pf4rnfJNDM1Vc3U7tVxW56nIlryfCYEgkIe+Sd3qIep9YN+a8rxwY5
+         dJCQfmNTqmC/fgDoUkFOQdBkBo5U1fBQFwvzfZMD1UA0ITUuoBx2yMiMW3EoGsSUQ0fv
+         ES6rovtT8l30uWxFbuPai3S1v/ogpJ/KCB/J/9Xe8xtvVl38i8XQydJ1XZd4B4Swcm8a
+         j2Rg==
+X-Gm-Message-State: AOAM53285d126i83Iyd02DA2TpAAwxuB6+ZEjXF6Fm3/SKJNUu8wRazZ
+        0GLCZL8vh/xQx3TbCR4U4uET3Q==
+X-Google-Smtp-Source: ABdhPJxPiwOWumK7iB7em93WDvm1T9O9eKLXgdw3l3bdQUkE9TEj5aVjJXnsZbGTMOYCLVq9DZ99YA==
+X-Received: by 2002:aa7:8f2a:: with SMTP id y10mr10274382pfr.182.1595626612022;
+        Fri, 24 Jul 2020 14:36:52 -0700 (PDT)
 Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
-        by smtp.gmail.com with ESMTPSA id j70sm7295212pfd.208.2020.07.24.14.36.47
+        by smtp.gmail.com with ESMTPSA id y200sm7301371pfb.33.2020.07.24.14.36.46
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 24 Jul 2020 14:36:48 -0700 (PDT)
+        Fri, 24 Jul 2020 14:36:47 -0700 (PDT)
 From:   Kees Cook <keescook@chromium.org>
 To:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 Cc:     Kees Cook <keescook@chromium.org>,
@@ -65,9 +66,9 @@ Cc:     Kees Cook <keescook@chromium.org>,
         linux-security-module@vger.kernel.org,
         linux-integrity@vger.kernel.org, selinux@vger.kernel.org,
         linux-kselftest@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH v3 11/19] LSM: Introduce kernel_post_load_data() hook
-Date:   Fri, 24 Jul 2020 14:36:32 -0700
-Message-Id: <20200724213640.389191-12-keescook@chromium.org>
+Subject: [PATCH v3 09/19] fs/kernel_read_file: Switch buffer size arg to size_t
+Date:   Fri, 24 Jul 2020 14:36:30 -0700
+Message-Id: <20200724213640.389191-10-keescook@chromium.org>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200724213640.389191-1-keescook@chromium.org>
 References: <20200724213640.389191-1-keescook@chromium.org>
@@ -78,309 +79,171 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-There are a few places in the kernel where LSMs would like to have
-visibility into the contents of a kernel buffer that has been loaded or
-read. While security_kernel_post_read_file() (which includes the
-buffer) exists as a pairing for security_kernel_read_file(), no such
-hook exists to pair with security_kernel_load_data().
+In preparation for further refactoring of kernel_read_file*(), rename
+the "max_size" argument to the more accurate "buf_size", and correct
+its type to size_t. Add kerndoc to explain the specifics of how the
+arguments will be used. Note that with buf_size now size_t, it can no
+longer be negative (and was never called with a negative value). Adjust
+callers to use it as a "maximum size" when *buf is NULL.
 
-Earlier proposals for just using security_kernel_post_read_file() with a
-NULL file argument were rejected (i.e. "file" should always be valid for
-the security_..._file hooks, but it appears at least one case was
-left in the kernel during earlier refactoring. (This will be fixed in
-a subsequent patch.)
-
-Since not all cases of security_kernel_load_data() can have a single
-contiguous buffer made available to the LSM hook (e.g. kexec image
-segments are separately loaded), there needs to be a way for the LSM to
-reason about its expectations of the hook coverage. In order to handle
-this, add a "contents" argument to the "kernel_load_data" hook that
-indicates if the newly added "kernel_post_load_data" hook will be called
-with the full contents once loaded. That way, LSMs requiring full contents
-can choose to unilaterally reject "kernel_load_data" with contents=false
-(which is effectively the existing hook coverage), but when contents=true
-they can allow it and later evaluate the "kernel_post_load_data" hook
-once the buffer is loaded.
-
-With this change, LSMs can gain coverage over non-file-backed data loads
-(e.g. init_module(2) and firmware userspace helper), which will happen
-in subsequent patches.
-
-Additionally prepare IMA to start processing these cases.
-
+Acked-by: Scott Branden <scott.branden@broadcom.com>
 Signed-off-by: Kees Cook <keescook@chromium.org>
 ---
- drivers/base/firmware_loader/fallback.c       |  2 +-
- .../base/firmware_loader/fallback_platform.c  |  2 +-
- include/linux/ima.h                           | 12 +++++++++--
- include/linux/lsm_hook_defs.h                 |  4 +++-
- include/linux/lsm_hooks.h                     |  9 ++++++++
- include/linux/security.h                      | 12 +++++++++--
- kernel/kexec.c                                |  2 +-
- kernel/module.c                               |  2 +-
- security/integrity/ima/ima_main.c             | 21 ++++++++++++++++++-
- security/loadpin/loadpin.c                    |  2 +-
- security/security.c                           | 18 +++++++++++++---
- security/selinux/hooks.c                      |  2 +-
- 12 files changed, 73 insertions(+), 15 deletions(-)
+ fs/kernel_read_file.c            | 34 +++++++++++++++++++++++---------
+ include/linux/kernel_read_file.h |  8 ++++----
+ security/integrity/digsig.c      |  2 +-
+ security/integrity/ima/ima_fs.c  |  2 +-
+ 4 files changed, 31 insertions(+), 15 deletions(-)
 
-diff --git a/drivers/base/firmware_loader/fallback.c b/drivers/base/firmware_loader/fallback.c
-index 5327bfc6ba71..a196aacce22c 100644
---- a/drivers/base/firmware_loader/fallback.c
-+++ b/drivers/base/firmware_loader/fallback.c
-@@ -613,7 +613,7 @@ static bool fw_run_sysfs_fallback(u32 opt_flags)
- 		return false;
- 
- 	/* Also permit LSMs and IMA to fail firmware sysfs fallback */
--	ret = security_kernel_load_data(LOADING_FIRMWARE);
-+	ret = security_kernel_load_data(LOADING_FIRMWARE, false);
- 	if (ret < 0)
- 		return false;
- 
-diff --git a/drivers/base/firmware_loader/fallback_platform.c b/drivers/base/firmware_loader/fallback_platform.c
-index 6958ab1a8059..a12c79d47efc 100644
---- a/drivers/base/firmware_loader/fallback_platform.c
-+++ b/drivers/base/firmware_loader/fallback_platform.c
-@@ -17,7 +17,7 @@ int firmware_fallback_platform(struct fw_priv *fw_priv, u32 opt_flags)
- 	if (!(opt_flags & FW_OPT_FALLBACK_PLATFORM))
- 		return -ENOENT;
- 
--	rc = security_kernel_load_data(LOADING_FIRMWARE);
-+	rc = security_kernel_load_data(LOADING_FIRMWARE, false);
- 	if (rc)
- 		return rc;
- 
-diff --git a/include/linux/ima.h b/include/linux/ima.h
-index 148636bfcc8f..502e36ad7804 100644
---- a/include/linux/ima.h
-+++ b/include/linux/ima.h
-@@ -20,7 +20,9 @@ extern void ima_post_create_tmpfile(struct inode *inode);
- extern void ima_file_free(struct file *file);
- extern int ima_file_mmap(struct file *file, unsigned long prot);
- extern int ima_file_mprotect(struct vm_area_struct *vma, unsigned long prot);
--extern int ima_load_data(enum kernel_load_data_id id);
-+extern int ima_load_data(enum kernel_load_data_id id, bool contents);
-+extern int ima_post_load_data(char *buf, loff_t size,
-+			      enum kernel_load_data_id id);
- extern int ima_read_file(struct file *file, enum kernel_read_file_id id);
- extern int ima_post_read_file(struct file *file, void *buf, loff_t size,
- 			      enum kernel_read_file_id id);
-@@ -78,7 +80,13 @@ static inline int ima_file_mprotect(struct vm_area_struct *vma,
- 	return 0;
- }
- 
--static inline int ima_load_data(enum kernel_load_data_id id)
-+static inline int ima_load_data(enum kernel_load_data_id id, bool contents)
-+{
-+	return 0;
-+}
-+
-+static inline int ima_post_load_data(char *buf, loff_t size,
-+				     enum kernel_load_data_id id)
- {
- 	return 0;
- }
-diff --git a/include/linux/lsm_hook_defs.h b/include/linux/lsm_hook_defs.h
-index 6791813cd439..aaa2916bbae7 100644
---- a/include/linux/lsm_hook_defs.h
-+++ b/include/linux/lsm_hook_defs.h
-@@ -184,7 +184,9 @@ LSM_HOOK(void, LSM_RET_VOID, cred_getsecid, const struct cred *c, u32 *secid)
- LSM_HOOK(int, 0, kernel_act_as, struct cred *new, u32 secid)
- LSM_HOOK(int, 0, kernel_create_files_as, struct cred *new, struct inode *inode)
- LSM_HOOK(int, 0, kernel_module_request, char *kmod_name)
--LSM_HOOK(int, 0, kernel_load_data, enum kernel_load_data_id id)
-+LSM_HOOK(int, 0, kernel_load_data, enum kernel_load_data_id id, bool contents)
-+LSM_HOOK(int, 0, kernel_post_load_data, char *buf, loff_t size,
-+	 enum kernel_read_file_id id)
- LSM_HOOK(int, 0, kernel_read_file, struct file *file,
- 	 enum kernel_read_file_id id)
- LSM_HOOK(int, 0, kernel_post_read_file, struct file *file, char *buf,
-diff --git a/include/linux/lsm_hooks.h b/include/linux/lsm_hooks.h
-index 95b7c1d32062..812d626195fc 100644
---- a/include/linux/lsm_hooks.h
-+++ b/include/linux/lsm_hooks.h
-@@ -635,7 +635,16 @@
-  * @kernel_load_data:
-  *	Load data provided by userspace.
-  *	@id kernel load data identifier
-+ *	@contents if a subsequent @kernel_post_load_data will be called.
-  *	Return 0 if permission is granted.
-+ * @kernel_post_load_data:
-+ *	Load data provided by a non-file source (usually userspace buffer).
-+ *	@buf pointer to buffer containing the data contents.
-+ *	@size length of the data contents.
-+ *	@id kernel load data identifier
-+ *	Return 0 if permission is granted.
-+ *	This must be paired with a prior @kernel_load_data call that had
-+ *	@contents set to true.
-  * @kernel_read_file:
-  *	Read a file specified by userspace.
-  *	@file contains the file structure pointing to the file being read
-diff --git a/include/linux/security.h b/include/linux/security.h
-index 42df0d9b4c37..e748974c707b 100644
---- a/include/linux/security.h
-+++ b/include/linux/security.h
-@@ -387,7 +387,9 @@ void security_cred_getsecid(const struct cred *c, u32 *secid);
- int security_kernel_act_as(struct cred *new, u32 secid);
- int security_kernel_create_files_as(struct cred *new, struct inode *inode);
- int security_kernel_module_request(char *kmod_name);
--int security_kernel_load_data(enum kernel_load_data_id id);
-+int security_kernel_load_data(enum kernel_load_data_id id, bool contents);
-+int security_kernel_post_load_data(char *buf, loff_t size,
-+				   enum kernel_load_data_id id);
- int security_kernel_read_file(struct file *file, enum kernel_read_file_id id);
- int security_kernel_post_read_file(struct file *file, char *buf, loff_t size,
- 				   enum kernel_read_file_id id);
-@@ -1014,7 +1016,13 @@ static inline int security_kernel_module_request(char *kmod_name)
- 	return 0;
- }
- 
--static inline int security_kernel_load_data(enum kernel_load_data_id id)
-+static inline int security_kernel_load_data(enum kernel_load_data_id id, bool contents)
-+{
-+	return 0;
-+}
-+
-+static inline int security_kernel_post_load_data(char *buf, loff_t size,
-+						 enum kernel_load_data_id id)
- {
- 	return 0;
- }
-diff --git a/kernel/kexec.c b/kernel/kexec.c
-index f977786fe498..c82c6c06f051 100644
---- a/kernel/kexec.c
-+++ b/kernel/kexec.c
-@@ -205,7 +205,7 @@ static inline int kexec_load_check(unsigned long nr_segments,
- 		return -EPERM;
- 
- 	/* Permit LSMs and IMA to fail the kexec */
--	result = security_kernel_load_data(LOADING_KEXEC_IMAGE);
-+	result = security_kernel_load_data(LOADING_KEXEC_IMAGE, false);
- 	if (result < 0)
- 		return result;
- 
-diff --git a/kernel/module.c b/kernel/module.c
-index 860d713dd910..d56cb34d9a2f 100644
---- a/kernel/module.c
-+++ b/kernel/module.c
-@@ -2967,7 +2967,7 @@ static int copy_module_from_user(const void __user *umod, unsigned long len,
- 	if (info->len < sizeof(*(info->hdr)))
- 		return -ENOEXEC;
- 
--	err = security_kernel_load_data(LOADING_MODULE);
-+	err = security_kernel_load_data(LOADING_MODULE, false);
- 	if (err)
- 		return err;
- 
-diff --git a/security/integrity/ima/ima_main.c b/security/integrity/ima/ima_main.c
-index dab4a13221cf..85000dc8595c 100644
---- a/security/integrity/ima/ima_main.c
-+++ b/security/integrity/ima/ima_main.c
-@@ -676,6 +676,8 @@ int ima_post_read_file(struct file *file, void *buf, loff_t size,
- /**
-  * ima_load_data - appraise decision based on policy
-  * @id: kernel load data caller identifier
-+ * @contents: whether the full contents will be available in a later
-+ *	      call to ima_post_load_data().
-  *
-  * Callers of this LSM hook can not measure, appraise, or audit the
-  * data provided by userspace.  Enforce policy rules requring a file
-@@ -683,7 +685,7 @@ int ima_post_read_file(struct file *file, void *buf, loff_t size,
-  *
-  * For permission return 0, otherwise return -EACCES.
-  */
--int ima_load_data(enum kernel_load_data_id id)
-+int ima_load_data(enum kernel_load_data_id id, bool contents)
- {
- 	bool ima_enforce, sig_enforce;
- 
-@@ -723,6 +725,23 @@ int ima_load_data(enum kernel_load_data_id id)
- 	return 0;
- }
+diff --git a/fs/kernel_read_file.c b/fs/kernel_read_file.c
+index dc28a8def597..e21a76001fff 100644
+--- a/fs/kernel_read_file.c
++++ b/fs/kernel_read_file.c
+@@ -5,15 +5,31 @@
+ #include <linux/security.h>
+ #include <linux/vmalloc.h>
  
 +/**
-+ * ima_post_load_data - appraise decision based on policy
-+ * @buf: pointer to in memory file contents
-+ * @size: size of in memory file contents
-+ * @id: kernel load data caller identifier
++ * kernel_read_file() - read file contents into a kernel buffer
 + *
-+ * Measure/appraise/audit in memory buffer based on policy.  Policy rules
-+ * are written in terms of a policy identifier.
++ * @file	file to read from
++ * @buf		pointer to a "void *" buffer for reading into (if
++ *		*@buf is NULL, a buffer will be allocated, and
++ *		@buf_size will be ignored)
++ * @buf_size	size of buf, if already allocated. If @buf not
++ *		allocated, this is the largest size to allocate.
++ * @id		the kernel_read_file_id identifying the type of
++ *		file contents being read (for LSMs to examine)
 + *
-+ * On success return 0.  On integrity appraisal error, assuming the file
-+ * is in policy and IMA-appraisal is in enforcing mode, return -EACCES.
++ * Returns number of bytes read (no single read will be bigger
++ * than INT_MAX), or negative on error.
++ *
 + */
-+int ima_post_load_data(char *buf, loff_t size, enum kernel_load_data_id load_id)
-+{
-+	return 0;
-+}
-+
- /*
-  * process_buffer_measurement - Measure the buffer to ima log.
-  * @buf: pointer to the buffer that needs to be added to the log.
-diff --git a/security/loadpin/loadpin.c b/security/loadpin/loadpin.c
-index 81bc95127f92..db320a43f42e 100644
---- a/security/loadpin/loadpin.c
-+++ b/security/loadpin/loadpin.c
-@@ -176,7 +176,7 @@ static int loadpin_read_file(struct file *file, enum kernel_read_file_id id)
- 	return 0;
- }
- 
--static int loadpin_load_data(enum kernel_load_data_id id)
-+static int loadpin_load_data(enum kernel_load_data_id id, bool contents)
+ int kernel_read_file(struct file *file, void **buf,
+-		     loff_t max_size, enum kernel_read_file_id id)
++		     size_t buf_size, enum kernel_read_file_id id)
  {
- 	return loadpin_read_file(NULL, (enum kernel_read_file_id) id);
- }
-diff --git a/security/security.c b/security/security.c
-index f5920115a325..090674f1197a 100644
---- a/security/security.c
-+++ b/security/security.c
-@@ -1680,17 +1680,29 @@ int security_kernel_post_read_file(struct file *file, char *buf, loff_t size,
- }
- EXPORT_SYMBOL_GPL(security_kernel_post_read_file);
- 
--int security_kernel_load_data(enum kernel_load_data_id id)
-+int security_kernel_load_data(enum kernel_load_data_id id, bool contents)
- {
+ 	loff_t i_size, pos;
+ 	ssize_t bytes = 0;
+ 	void *allocated = NULL;
  	int ret;
  
--	ret = call_int_hook(kernel_load_data, 0, id);
-+	ret = call_int_hook(kernel_load_data, 0, id, contents);
- 	if (ret)
- 		return ret;
--	return ima_load_data(id);
-+	return ima_load_data(id, contents);
- }
- EXPORT_SYMBOL_GPL(security_kernel_load_data);
+-	if (!S_ISREG(file_inode(file)->i_mode) || max_size < 0)
++	if (!S_ISREG(file_inode(file)->i_mode))
+ 		return -EINVAL;
  
-+int security_kernel_post_load_data(char *buf, loff_t size,
-+				   enum kernel_load_data_id id)
-+{
-+	int ret;
-+
-+	ret = call_int_hook(kernel_post_load_data, 0, buf, size, id);
-+	if (ret)
-+		return ret;
-+	return ima_post_load_data(buf, size, id);
-+}
-+EXPORT_SYMBOL_GPL(security_kernel_post_load_data);
-+
- int security_task_fix_setuid(struct cred *new, const struct cred *old,
- 			     int flags)
+ 	ret = deny_write_access(file);
+@@ -29,7 +45,7 @@ int kernel_read_file(struct file *file, void **buf,
+ 		ret = -EINVAL;
+ 		goto out;
+ 	}
+-	if (i_size > INT_MAX || (max_size > 0 && i_size > max_size)) {
++	if (i_size > INT_MAX || i_size > buf_size) {
+ 		ret = -EFBIG;
+ 		goto out;
+ 	}
+@@ -75,7 +91,7 @@ int kernel_read_file(struct file *file, void **buf,
+ EXPORT_SYMBOL_GPL(kernel_read_file);
+ 
+ int kernel_read_file_from_path(const char *path, void **buf,
+-			       loff_t max_size, enum kernel_read_file_id id)
++			       size_t buf_size, enum kernel_read_file_id id)
  {
-diff --git a/security/selinux/hooks.c b/security/selinux/hooks.c
-index 5de45010fb1a..1a5c68196faf 100644
---- a/security/selinux/hooks.c
-+++ b/security/selinux/hooks.c
-@@ -4019,7 +4019,7 @@ static int selinux_kernel_read_file(struct file *file,
- 	return rc;
+ 	struct file *file;
+ 	int ret;
+@@ -87,14 +103,14 @@ int kernel_read_file_from_path(const char *path, void **buf,
+ 	if (IS_ERR(file))
+ 		return PTR_ERR(file);
+ 
+-	ret = kernel_read_file(file, buf, max_size, id);
++	ret = kernel_read_file(file, buf, buf_size, id);
+ 	fput(file);
+ 	return ret;
+ }
+ EXPORT_SYMBOL_GPL(kernel_read_file_from_path);
+ 
+ int kernel_read_file_from_path_initns(const char *path, void **buf,
+-				      loff_t max_size,
++				      size_t buf_size,
+ 				      enum kernel_read_file_id id)
+ {
+ 	struct file *file;
+@@ -113,13 +129,13 @@ int kernel_read_file_from_path_initns(const char *path, void **buf,
+ 	if (IS_ERR(file))
+ 		return PTR_ERR(file);
+ 
+-	ret = kernel_read_file(file, buf, max_size, id);
++	ret = kernel_read_file(file, buf, buf_size, id);
+ 	fput(file);
+ 	return ret;
+ }
+ EXPORT_SYMBOL_GPL(kernel_read_file_from_path_initns);
+ 
+-int kernel_read_file_from_fd(int fd, void **buf, loff_t max_size,
++int kernel_read_file_from_fd(int fd, void **buf, size_t buf_size,
+ 			     enum kernel_read_file_id id)
+ {
+ 	struct fd f = fdget(fd);
+@@ -128,7 +144,7 @@ int kernel_read_file_from_fd(int fd, void **buf, loff_t max_size,
+ 	if (!f.file)
+ 		goto out;
+ 
+-	ret = kernel_read_file(f.file, buf, max_size, id);
++	ret = kernel_read_file(f.file, buf, buf_size, id);
+ out:
+ 	fdput(f);
+ 	return ret;
+diff --git a/include/linux/kernel_read_file.h b/include/linux/kernel_read_file.h
+index 0ca0bdbed1bd..910039e7593e 100644
+--- a/include/linux/kernel_read_file.h
++++ b/include/linux/kernel_read_file.h
+@@ -36,16 +36,16 @@ static inline const char *kernel_read_file_id_str(enum kernel_read_file_id id)
  }
  
--static int selinux_kernel_load_data(enum kernel_load_data_id id)
-+static int selinux_kernel_load_data(enum kernel_load_data_id id, bool contents)
- {
- 	int rc = 0;
+ int kernel_read_file(struct file *file,
+-		     void **buf, loff_t max_size,
++		     void **buf, size_t buf_size,
+ 		     enum kernel_read_file_id id);
+ int kernel_read_file_from_path(const char *path,
+-			       void **buf, loff_t max_size,
++			       void **buf, size_t buf_size,
+ 			       enum kernel_read_file_id id);
+ int kernel_read_file_from_path_initns(const char *path,
+-				      void **buf, loff_t max_size,
++				      void **buf, size_t buf_size,
+ 				      enum kernel_read_file_id id);
+ int kernel_read_file_from_fd(int fd,
+-			     void **buf, loff_t max_size,
++			     void **buf, size_t buf_size,
+ 			     enum kernel_read_file_id id);
  
+ #endif /* _LINUX_KERNEL_READ_FILE_H */
+diff --git a/security/integrity/digsig.c b/security/integrity/digsig.c
+index 97661ffabc4e..04f779c4f5ed 100644
+--- a/security/integrity/digsig.c
++++ b/security/integrity/digsig.c
+@@ -175,7 +175,7 @@ int __init integrity_load_x509(const unsigned int id, const char *path)
+ 	int rc;
+ 	key_perm_t perm;
+ 
+-	rc = kernel_read_file_from_path(path, &data, 0,
++	rc = kernel_read_file_from_path(path, &data, INT_MAX,
+ 					READING_X509_CERTIFICATE);
+ 	if (rc < 0) {
+ 		pr_err("Unable to open file: %s (%d)", path, rc);
+diff --git a/security/integrity/ima/ima_fs.c b/security/integrity/ima/ima_fs.c
+index 602f52717757..692b83e82edf 100644
+--- a/security/integrity/ima/ima_fs.c
++++ b/security/integrity/ima/ima_fs.c
+@@ -284,7 +284,7 @@ static ssize_t ima_read_policy(char *path)
+ 	datap = path;
+ 	strsep(&datap, "\n");
+ 
+-	rc = kernel_read_file_from_path(path, &data, 0, READING_POLICY);
++	rc = kernel_read_file_from_path(path, &data, INT_MAX, READING_POLICY);
+ 	if (rc < 0) {
+ 		pr_err("Unable to open file: %s (%d)", path, rc);
+ 		return rc;
 -- 
 2.25.1
 
