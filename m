@@ -8,67 +8,67 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 09655C433F2
-	for <linux-efi@archiver.kernel.org>; Fri, 24 Jul 2020 21:36:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CAC3DC43445
+	for <linux-efi@archiver.kernel.org>; Fri, 24 Jul 2020 21:37:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D367A2070B
-	for <linux-efi@archiver.kernel.org>; Fri, 24 Jul 2020 21:36:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A37052070B
+	for <linux-efi@archiver.kernel.org>; Fri, 24 Jul 2020 21:37:02 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="IghqIwoB"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="ErJl9x76"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726838AbgGXVgu (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 24 Jul 2020 17:36:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57758 "EHLO
+        id S1726870AbgGXVhB (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 24 Jul 2020 17:37:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57782 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726938AbgGXVgs (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 24 Jul 2020 17:36:48 -0400
-Received: from mail-pj1-x1035.google.com (mail-pj1-x1035.google.com [IPv6:2607:f8b0:4864:20::1035])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7A7A3C0619E7
-        for <linux-efi@vger.kernel.org>; Fri, 24 Jul 2020 14:36:48 -0700 (PDT)
-Received: by mail-pj1-x1035.google.com with SMTP id il6so453318pjb.0
-        for <linux-efi@vger.kernel.org>; Fri, 24 Jul 2020 14:36:48 -0700 (PDT)
+        with ESMTP id S1727103AbgGXVg5 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 24 Jul 2020 17:36:57 -0400
+Received: from mail-pj1-x1044.google.com (mail-pj1-x1044.google.com [IPv6:2607:f8b0:4864:20::1044])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2CA74C08C5F6
+        for <linux-efi@vger.kernel.org>; Fri, 24 Jul 2020 14:36:56 -0700 (PDT)
+Received: by mail-pj1-x1044.google.com with SMTP id il6so453547pjb.0
+        for <linux-efi@vger.kernel.org>; Fri, 24 Jul 2020 14:36:56 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=chromium.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=2/kBhrQPbzovHh41OSaPnXat9qGyJUFnv0iXtUuMMKE=;
-        b=IghqIwoBfKGdBHowpyxVljQEPV4EvfpdQWYORYH5ljggyOoUB93bDQtlXhE3tkR1xG
-         NqF6JhgR17Y5MKkkypz0qY7Odys1mTMmr5e+6P8C5CnGiggDf6CucxbUm93J2hL0KjhG
-         WQJk6B8gXZFngzLozgAGQtzopAVTs2DRYO93s=
+        bh=Qku51F3DrWa6qngs3brRCvs/T/eVZDmg+FQ8m7DJ84Y=;
+        b=ErJl9x76PRS3MiK8WeCfMVbTqv2T1HWSOaBV6g16182sJx2KTiDvaZ66SBx1g+ohPj
+         IRVh3Mqg9H7OczMYYITojtZNthP78brV4cxTHi/IYEYpcwzAJMjxxGbCMFk1r7YXuMpN
+         ilJTX5tTBecVZbZ/0f7uMr2IwzT4Xw/bqZfaM=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=2/kBhrQPbzovHh41OSaPnXat9qGyJUFnv0iXtUuMMKE=;
-        b=fun3kCK1g7FHsQcQPK2ro/bt8ZAEpwQp37ns/mazmjXkfO+fKctOJNeB+UldEvBK4s
-         ZQOVnJkFW8SdV6MgiAVLjcEoN7gEdf/GQLXh2ItY+UsCPUBZ55ZNHy5NAJOpYehnkHHM
-         TbtXsNWR+nzsWlJplN4BeWeY5CMZ6LEBNiAz4RoytNGJr+KzxNxF+iyALh0hJ9ijETqD
-         GCgT+4RJRhfKJzU5nJ9rS9zC2nme52pypPEmhNzIk9HYCMQdIiAHA9hiAXir8fuUcqM1
-         5c4nbgmE5Z1B/wCcQabRrKfDZXza2X/Tu/RJ7B6mL8/+9AkvaONYqI5ayeCRI4+XGqja
-         GxIw==
-X-Gm-Message-State: AOAM532b5oWatR2gQdH7xdEsNklKhbLKbixuXxxdUZs3HsgDSrn6o7/T
-        bsrzFOgXL/+gzT3SzYYYIjBTmw==
-X-Google-Smtp-Source: ABdhPJzPJqhzQYIlmFMm0JvuP6Chr0PhV314mA4W5L786J7f7YtpqYDyRBviJfOTvbrBAVr9J0xosQ==
-X-Received: by 2002:a17:90b:338d:: with SMTP id ke13mr7268603pjb.60.1595626607402;
-        Fri, 24 Jul 2020 14:36:47 -0700 (PDT)
+        bh=Qku51F3DrWa6qngs3brRCvs/T/eVZDmg+FQ8m7DJ84Y=;
+        b=prVKXAWPWtwA28iutoWQ8qFAjDxI5NSCxYjROErX8vvADWxdErOozqrL3gfKuX+sLs
+         3HI4fvjRL5y/B16SThaF4tU7GnUYIxi7n+RheImmyI38riIgvHY3PSmZ6LjOKoIOAr6D
+         /8m9hFfdGFQUcYfXbWVN363DIhfLMeXkFgWJYeo71rTQP3pCH9H4ta4iMRxpZos5/ofG
+         EUqilXTrf24Wn2kSfNaQsuidJgnIi+xVyaHSZH3KRiQBbOEvWWbt5yC2PumG8M5d6mFn
+         KQHrQqlg03gm9I7aBHPO6n6E8UGnn/B5LQzhjmxmz8huF5h8nVGpaMfX68Pd6FK5WN9Y
+         WmGQ==
+X-Gm-Message-State: AOAM530mDBDYr1xiIAWzCjwUrYwm7an710SxV0cCM2XqgeZOvP42f/b4
+        8mg5PyYrLZdkH0/K4Za+Uw++kQ==
+X-Google-Smtp-Source: ABdhPJy40e6BQkhVjc5Woc4W4b4IkDw6bQdypPRWbdAX/8+gLgin1GvY06B2zXnxEa4QIBLZ4JbDBg==
+X-Received: by 2002:a17:902:8a85:: with SMTP id p5mr9869112plo.89.1595626615673;
+        Fri, 24 Jul 2020 14:36:55 -0700 (PDT)
 Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
-        by smtp.gmail.com with ESMTPSA id x10sm7377865pfp.80.2020.07.24.14.36.43
+        by smtp.gmail.com with ESMTPSA id f2sm7244500pfb.184.2020.07.24.14.36.49
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 24 Jul 2020 14:36:43 -0700 (PDT)
+        Fri, 24 Jul 2020 14:36:53 -0700 (PDT)
 From:   Kees Cook <keescook@chromium.org>
 To:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 Cc:     Kees Cook <keescook@chromium.org>,
-        SeongJae Park <sjpark@amazon.de>,
         Scott Branden <scott.branden@broadcom.com>,
         Mimi Zohar <zohar@linux.ibm.com>,
         Luis Chamberlain <mcgrof@kernel.org>,
-        Jessica Yu <jeyu@kernel.org>, KP Singh <kpsingh@chromium.org>,
-        linux-efi@vger.kernel.org, linux-security-module@vger.kernel.org,
+        Jessica Yu <jeyu@kernel.org>, SeongJae Park <sjpark@amazon.de>,
+        KP Singh <kpsingh@chromium.org>, linux-efi@vger.kernel.org,
+        linux-security-module@vger.kernel.org,
         linux-integrity@vger.kernel.org, selinux@vger.kernel.org,
         linux-kselftest@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH v3 02/19] selftest/firmware: Add selftest timeout in settings
-Date:   Fri, 24 Jul 2020 14:36:23 -0700
-Message-Id: <20200724213640.389191-3-keescook@chromium.org>
+Subject: [PATCH v3 15/19] IMA: Add support for file reads without contents
+Date:   Fri, 24 Jul 2020 14:36:36 -0700
+Message-Id: <20200724213640.389191-16-keescook@chromium.org>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200724213640.389191-1-keescook@chromium.org>
 References: <20200724213640.389191-1-keescook@chromium.org>
@@ -79,58 +79,60 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The firmware tests would always time out for me. Add a correct timeout,
-including details on how the value was reached. Additionally allow the
-test harness to skip comments in settings files and report how long a
-given timeout was.
+From: Scott Branden <scott.branden@broadcom.com>
 
-Reviewed-by: SeongJae Park <sjpark@amazon.de>
-Acked-by: Scott Branden <scott.branden@broadcom.com>
+When the kernel_read_file LSM hook is called with contents=false, IMA
+can appraise the file directly, without requiring a filled buffer. When
+such a buffer is available, though, IMA can continue to use it instead
+of forcing a double read here.
+
+Signed-off-by: Scott Branden <scott.branden@broadcom.com>
+Link: https://lore.kernel.org/lkml/20200706232309.12010-10-scott.branden@broadcom.com/
 Signed-off-by: Kees Cook <keescook@chromium.org>
 ---
- tools/testing/selftests/firmware/settings   | 8 ++++++++
- tools/testing/selftests/kselftest/runner.sh | 6 +++++-
- 2 files changed, 13 insertions(+), 1 deletion(-)
- create mode 100644 tools/testing/selftests/firmware/settings
+ security/integrity/ima/ima_main.c | 22 ++++++++++++++++------
+ 1 file changed, 16 insertions(+), 6 deletions(-)
 
-diff --git a/tools/testing/selftests/firmware/settings b/tools/testing/selftests/firmware/settings
-new file mode 100644
-index 000000000000..085e664ee093
---- /dev/null
-+++ b/tools/testing/selftests/firmware/settings
-@@ -0,0 +1,8 @@
-+# The async firmware timeout is set to 1 second (but ends up being effectively
-+# 2 seconds). There are 3 test configs, each done with and without firmware
-+# present, each with 2 "nowait" functions tested 5 times. Expected time for a
-+# normal execution should be 2 * 3 * 2 * 2 * 5 = 120 seconds for those alone.
-+# Additionally, fw_fallback may take 5 seconds for internal timeouts in each
-+# of the 3 configs, so at least another 15 seconds are needed. Add another
-+# 10 seconds for each testing config: 120 + 15 + 30
-+timeout=165
-diff --git a/tools/testing/selftests/kselftest/runner.sh b/tools/testing/selftests/kselftest/runner.sh
-index 676b3a8b114d..cd5ddf979f15 100644
---- a/tools/testing/selftests/kselftest/runner.sh
-+++ b/tools/testing/selftests/kselftest/runner.sh
-@@ -53,6 +53,10 @@ run_one()
- 	settings="$BASE_DIR/$DIR/settings"
- 	if [ -r "$settings" ] ; then
- 		while read line ; do
-+			# Skip comments.
-+			if echo "$line" | grep -q '^#'; then
-+				continue
-+			fi
- 			field=$(echo "$line" | cut -d= -f1)
- 			value=$(echo "$line" | cut -d= -f2-)
- 			eval "kselftest_$field"="$value"
-@@ -80,7 +84,7 @@ run_one()
- 			echo "not ok $test_num $TEST_HDR_MSG # SKIP"
- 		elif [ $rc -eq $timeout_rc ]; then \
- 			echo "#"
--			echo "not ok $test_num $TEST_HDR_MSG # TIMEOUT"
-+			echo "not ok $test_num $TEST_HDR_MSG # TIMEOUT $kselftest_timeout seconds"
- 		else
- 			echo "not ok $test_num $TEST_HDR_MSG # exit=$rc"
- 		fi)
+diff --git a/security/integrity/ima/ima_main.c b/security/integrity/ima/ima_main.c
+index dc4f90660aa6..459e50526a12 100644
+--- a/security/integrity/ima/ima_main.c
++++ b/security/integrity/ima/ima_main.c
+@@ -613,11 +613,8 @@ void ima_post_path_mknod(struct dentry *dentry)
+ int ima_read_file(struct file *file, enum kernel_read_file_id read_id,
+ 		  bool contents)
+ {
+-	/* Reject all partial reads during appraisal. */
+-	if (!contents) {
+-		if (ima_appraise & IMA_APPRAISE_ENFORCE)
+-			return -EACCES;
+-	}
++	enum ima_hooks func;
++	u32 secid;
+ 
+ 	/*
+ 	 * Do devices using pre-allocated memory run the risk of the
+@@ -626,7 +623,20 @@ int ima_read_file(struct file *file, enum kernel_read_file_id read_id,
+ 	 * buffers? It may be desirable to include the buffer address
+ 	 * in this API and walk all the dma_map_single() mappings to check.
+ 	 */
+-	return 0;
++
++	/*
++	 * There will be a call made to ima_post_read_file() with
++	 * a filled buffer, so we don't need to perform an extra
++	 * read early here.
++	 */
++	if (contents)
++		return 0;
++
++	/* Read entire file for all partial reads during appraisal. */
++	func = read_idmap[read_id] ?: FILE_CHECK;
++	security_task_getsecid(current, &secid);
++	return process_measurement(file, current_cred(), secid, NULL,
++				   0, MAY_READ, func);
+ }
+ 
+ const int read_idmap[READING_MAX_ID] = {
 -- 
 2.25.1
 
