@@ -1,153 +1,136 @@
-Return-Path: <SRS0=I6bG=BC=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=wFIx=BD=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 48443C433E1
-	for <linux-efi@archiver.kernel.org>; Thu, 23 Jul 2020 06:28:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 09655C433F2
+	for <linux-efi@archiver.kernel.org>; Fri, 24 Jul 2020 21:36:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 20289206E3
-	for <linux-efi@archiver.kernel.org>; Thu, 23 Jul 2020 06:28:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D367A2070B
+	for <linux-efi@archiver.kernel.org>; Fri, 24 Jul 2020 21:36:50 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=web.de header.i=@web.de header.b="SgIHvSNX"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="IghqIwoB"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726500AbgGWG2l (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 23 Jul 2020 02:28:41 -0400
-Received: from mout.web.de ([212.227.17.12]:57667 "EHLO mout.web.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725984AbgGWG2l (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Thu, 23 Jul 2020 02:28:41 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=web.de;
-        s=dbaedf251592; t=1595485707;
-        bh=1hBN9tUEwHZsp75aFn4bQ6JIGaKpS5aggvBr37cGLDw=;
-        h=X-UI-Sender-Class:To:Cc:Subject:From:Date;
-        b=SgIHvSNXEVLP1YV2x7E8cn4GGBxFqIYz2e0zJHHUlktp5vNDO275pTTVlbXkD9Z0M
-         WFMjFo8DFazMnV/GcNDrpw1a5c7dj4268JKIeqY4eg38QQa4FHgKQAUBQzuMfoQGtX
-         mH9Qy/SW/hy6Xqi1QdkwGwSDG3GPsRUQvP9BqOtc=
-X-UI-Sender-Class: c548c8c5-30a9-4db5-a2e7-cb6cb037b8f9
-Received: from [192.168.1.2] ([93.133.132.31]) by smtp.web.de (mrweb102
- [213.165.67.124]) with ESMTPSA (Nemesis) id 0LqDUa-1kTRox2ua8-00doEZ; Thu, 23
- Jul 2020 08:28:27 +0200
-To:     Li Heng <liheng40@huawei.com>, linux-efi@vger.kernel.org
-Cc:     linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Rui Xiang <rui.xiang@huawei.com>
-Subject: Re: [PATCH] efi: add missed destroy_workqueue when efisubsys_init
- fails
-From:   Markus Elfring <Markus.Elfring@web.de>
-Autocrypt: addr=Markus.Elfring@web.de; prefer-encrypt=mutual; keydata=
- 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 FEE=
-Message-ID: <9255e38a-e5fb-0a41-1b6d-5fe4226e3b42@web.de>
-Date:   Thu, 23 Jul 2020 08:28:26 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        id S1726838AbgGXVgu (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 24 Jul 2020 17:36:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57758 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726938AbgGXVgs (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 24 Jul 2020 17:36:48 -0400
+Received: from mail-pj1-x1035.google.com (mail-pj1-x1035.google.com [IPv6:2607:f8b0:4864:20::1035])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7A7A3C0619E7
+        for <linux-efi@vger.kernel.org>; Fri, 24 Jul 2020 14:36:48 -0700 (PDT)
+Received: by mail-pj1-x1035.google.com with SMTP id il6so453318pjb.0
+        for <linux-efi@vger.kernel.org>; Fri, 24 Jul 2020 14:36:48 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=chromium.org; s=google;
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=2/kBhrQPbzovHh41OSaPnXat9qGyJUFnv0iXtUuMMKE=;
+        b=IghqIwoBfKGdBHowpyxVljQEPV4EvfpdQWYORYH5ljggyOoUB93bDQtlXhE3tkR1xG
+         NqF6JhgR17Y5MKkkypz0qY7Odys1mTMmr5e+6P8C5CnGiggDf6CucxbUm93J2hL0KjhG
+         WQJk6B8gXZFngzLozgAGQtzopAVTs2DRYO93s=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=2/kBhrQPbzovHh41OSaPnXat9qGyJUFnv0iXtUuMMKE=;
+        b=fun3kCK1g7FHsQcQPK2ro/bt8ZAEpwQp37ns/mazmjXkfO+fKctOJNeB+UldEvBK4s
+         ZQOVnJkFW8SdV6MgiAVLjcEoN7gEdf/GQLXh2ItY+UsCPUBZ55ZNHy5NAJOpYehnkHHM
+         TbtXsNWR+nzsWlJplN4BeWeY5CMZ6LEBNiAz4RoytNGJr+KzxNxF+iyALh0hJ9ijETqD
+         GCgT+4RJRhfKJzU5nJ9rS9zC2nme52pypPEmhNzIk9HYCMQdIiAHA9hiAXir8fuUcqM1
+         5c4nbgmE5Z1B/wCcQabRrKfDZXza2X/Tu/RJ7B6mL8/+9AkvaONYqI5ayeCRI4+XGqja
+         GxIw==
+X-Gm-Message-State: AOAM532b5oWatR2gQdH7xdEsNklKhbLKbixuXxxdUZs3HsgDSrn6o7/T
+        bsrzFOgXL/+gzT3SzYYYIjBTmw==
+X-Google-Smtp-Source: ABdhPJzPJqhzQYIlmFMm0JvuP6Chr0PhV314mA4W5L786J7f7YtpqYDyRBviJfOTvbrBAVr9J0xosQ==
+X-Received: by 2002:a17:90b:338d:: with SMTP id ke13mr7268603pjb.60.1595626607402;
+        Fri, 24 Jul 2020 14:36:47 -0700 (PDT)
+Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
+        by smtp.gmail.com with ESMTPSA id x10sm7377865pfp.80.2020.07.24.14.36.43
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 24 Jul 2020 14:36:43 -0700 (PDT)
+From:   Kees Cook <keescook@chromium.org>
+To:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc:     Kees Cook <keescook@chromium.org>,
+        SeongJae Park <sjpark@amazon.de>,
+        Scott Branden <scott.branden@broadcom.com>,
+        Mimi Zohar <zohar@linux.ibm.com>,
+        Luis Chamberlain <mcgrof@kernel.org>,
+        Jessica Yu <jeyu@kernel.org>, KP Singh <kpsingh@chromium.org>,
+        linux-efi@vger.kernel.org, linux-security-module@vger.kernel.org,
+        linux-integrity@vger.kernel.org, selinux@vger.kernel.org,
+        linux-kselftest@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH v3 02/19] selftest/firmware: Add selftest timeout in settings
+Date:   Fri, 24 Jul 2020 14:36:23 -0700
+Message-Id: <20200724213640.389191-3-keescook@chromium.org>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20200724213640.389191-1-keescook@chromium.org>
+References: <20200724213640.389191-1-keescook@chromium.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-GB
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:+cIvmW+B4FEKJmlRaUsn3P6wwZXOZBSo++wjam41Os7s/c8euNP
- SkvLdaNfwjEAG+QMwmIca39uOHG0ODw3lZpFSEdGZdH7bns/yufsNIJG5Kw4HKvPQ127PA4
- FVof1wL0RRh0Uhg3clshBzt3JnpwiqwQCTLWPW4UI8d742kS5ctOMUzQmeHvqJ+esJix2XS
- 00lXuwEGHYOm7u4Z1vwOw==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:L/021+LXaa4=:Or5roG2IFS8LvDlPWgTW+i
- PN/jhuE+Gae9QdBPml7nb89H4lVxRZpQSI+Eg+GgTEzyMNYPBVRmJmAzq1kFQjJOiqA21yYj8
- H9ZPyiB7LyuYn284N/JsrvteAj23f4DM5BAkQZPwLGQPOm6R7yeRmjGlc1wDmEdgBh6Pe34dk
- 6uxNRz72qTtC+tJg+g2FMO8DjordtRsPrA5sJOIrbwhxPR8WBGATS5wuqknUK3A04Q8C+bWlE
- rytZ0mFAyXgYe/DTXmkGHSDe/UKY2g6hXqi4M09Tb/V6IXwp3p5Nw/9v4DFiV5syPcWtAGMYd
- 0Ixburob0qE/QPT4//44bWT8mqxsynBOgP8bJeiFCu9ycQJ7cl+lxH/Myvhi5RSq6waPetsL1
- 9jcvYHBwUFKoeGqz1EyNTW7ON4iaIJpOWXZvDRvtbWZ8bLrfvfUdUgSbjypnM3qSFzauKFLTw
- KXuq1ZNcR3LmeDrXtOJ1MTBmcc1CoZZxbfRDuzX1YZYz9I3SVsqZQxFl7yPg2n+O6jLa5V++9
- GdAFMo8mxVyQ0qpKtuB7bVvOtkLubhuzTUHKmzTypG3Tw3kzC4ImIL3a2E8LF5WMbJUx9M4oC
- oMkAVt4DutxtSaWodz9AUSKycXcsbyzs9Jklvk6GpRdhx73uKuQJ4jccu61wMUnUIRJPmwH6a
- QhyoQdOe782jyJudId0LPzCw/3wMX+9l/oCPwczXxrlZSwseaEKSMIEJSo+a4aFBSErXB97G1
- vckUOShRqMtWsPe+f1S9+ygbA9ucfxBHKJ5LNX+bdR2EgOK8K/GaY/EYvq6NJbG+QQGZHdbCc
- IW2aGYUXL5giv4VzGPFJjTQk1r20fMBwskpq4/+k5mkfybpA/TAm2xKgL3CiJKwNlJi44uPro
- U8u6+6PoDllaAPA6y/8A81dbkSavKoCJl4FNjWcEHCJarxKh6HUczLYfV+P8ycIaEm1ZZ5Qc/
- 3elANUSfI7L/67SNJyPKiV3YyZ7zgfhHA1Nc3UCmnI7Xr2DL1xnUF28c6R66Kr2bnSXiMrXQX
- ZR314qy5OpaNfgxPg1ootGZ4SjKzYof55WSpYrTjpVoqzaCVCmM4/zOYtNWIz8SEtskU7QHqR
- WRRzYOBCl+UD5TsAleatAoXyae0NTvCvXkCcKQPhKuUUhLXcsfDveAHGch4eJe8JO5Sowx9lN
- VgF4tcJG6O/uVAEK81m5Bs4XfWczvTqX4ETz5ch3RELqBh2Mt/KsdrUA8woxLSpel01C7hkgK
- IgHIv0BcqowWE3pjsZ2rcYlTjD8LmNwZnJemp1w==
+Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-> destroy_workqueue() should be called to destroy efi_rts_wq
-> when efisubsys_init() init resources fails.
+The firmware tests would always time out for me. Add a correct timeout,
+including details on how the value was reached. Additionally allow the
+test harness to skip comments in settings files and report how long a
+given timeout was.
 
-* Can such exception handling depend on the data structure member =E2=80=
-=9Cefi.runtime_supported_mask=E2=80=9D?
+Reviewed-by: SeongJae Park <sjpark@amazon.de>
+Acked-by: Scott Branden <scott.branden@broadcom.com>
+Signed-off-by: Kees Cook <keescook@chromium.org>
+---
+ tools/testing/selftests/firmware/settings   | 8 ++++++++
+ tools/testing/selftests/kselftest/runner.sh | 6 +++++-
+ 2 files changed, 13 insertions(+), 1 deletion(-)
+ create mode 100644 tools/testing/selftests/firmware/settings
 
-* An imperative wording would be preferred for the change description
-  (besides another bit of fine-tuning), wouldn't it?
+diff --git a/tools/testing/selftests/firmware/settings b/tools/testing/selftests/firmware/settings
+new file mode 100644
+index 000000000000..085e664ee093
+--- /dev/null
++++ b/tools/testing/selftests/firmware/settings
+@@ -0,0 +1,8 @@
++# The async firmware timeout is set to 1 second (but ends up being effectively
++# 2 seconds). There are 3 test configs, each done with and without firmware
++# present, each with 2 "nowait" functions tested 5 times. Expected time for a
++# normal execution should be 2 * 3 * 2 * 2 * 5 = 120 seconds for those alone.
++# Additionally, fw_fallback may take 5 seconds for internal timeouts in each
++# of the 3 configs, so at least another 15 seconds are needed. Add another
++# 10 seconds for each testing config: 120 + 15 + 30
++timeout=165
+diff --git a/tools/testing/selftests/kselftest/runner.sh b/tools/testing/selftests/kselftest/runner.sh
+index 676b3a8b114d..cd5ddf979f15 100644
+--- a/tools/testing/selftests/kselftest/runner.sh
++++ b/tools/testing/selftests/kselftest/runner.sh
+@@ -53,6 +53,10 @@ run_one()
+ 	settings="$BASE_DIR/$DIR/settings"
+ 	if [ -r "$settings" ] ; then
+ 		while read line ; do
++			# Skip comments.
++			if echo "$line" | grep -q '^#'; then
++				continue
++			fi
+ 			field=$(echo "$line" | cut -d= -f1)
+ 			value=$(echo "$line" | cut -d= -f2-)
+ 			eval "kselftest_$field"="$value"
+@@ -80,7 +84,7 @@ run_one()
+ 			echo "not ok $test_num $TEST_HDR_MSG # SKIP"
+ 		elif [ $rc -eq $timeout_rc ]; then \
+ 			echo "#"
+-			echo "not ok $test_num $TEST_HDR_MSG # TIMEOUT"
++			echo "not ok $test_num $TEST_HDR_MSG # TIMEOUT $kselftest_timeout seconds"
+ 		else
+ 			echo "not ok $test_num $TEST_HDR_MSG # exit=$rc"
+ 		fi)
+-- 
+2.25.1
 
-* Will the tag =E2=80=9CFixes=E2=80=9D become helpful for the commit messa=
-ge?
-
-
-=E2=80=A6
-> +++ b/drivers/firmware/efi/efi.c
-> @@ -379,6 +379,7 @@ static int __init efisubsys_init(void)
->  	efi_kobj =3D kobject_create_and_add("efi", firmware_kobj);
->  	if (!efi_kobj) {
->  		pr_err("efi: Firmware registration failed.\n");
-> +		destroy_workqueue(efi_rts_wq);
->  		return -ENOMEM;
->  	}
-
-How do you think about to use the following statements instead
-in the if branch?
-
--		return -ENOMEM;
-+		error =3D -ENOMEM;
-+		goto destroy_workqueue;
-
-
-Regards,
-Markus
