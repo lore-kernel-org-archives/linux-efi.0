@@ -2,73 +2,93 @@ Return-Path: <SRS0=32gl=BE=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A151FC433DF
-	for <linux-efi@archiver.kernel.org>; Sat, 25 Jul 2020 10:07:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 846DCC433E1
+	for <linux-efi@archiver.kernel.org>; Sat, 25 Jul 2020 10:26:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8046720719
-	for <linux-efi@archiver.kernel.org>; Sat, 25 Jul 2020 10:07:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2D2D2206F6
+	for <linux-efi@archiver.kernel.org>; Sat, 25 Jul 2020 10:26:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1595671621;
-	bh=DXKTp7F9hVX/ZMZ3cMvlM+waZARTWo/ANSvb7sYnEho=;
+	s=default; t=1595672764;
+	bh=J+APbsd0fEirJmTTj1oX5Mw3BNB/ycIoN90LOc29dE4=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=SSDxNdeC0ndISFj+a+4p7DP+pi1dAZQSzI38EFLIZz6TvInn10a3VBm54ao3ZHVWH
-	 RMT5fo1+gVTknQLwLJ/tQ8vAGmX9oKE6lbcKU5XZaIdb+wMXiC0nldgkUHexs4XdJk
-	 r5E8QxYpJb5wOF1DVrFHHfQNjPe0oeJgObFac5dY=
+	b=uA7phjgyMaL1jQQfCGUJ/B2Wl0h86cTC8w5Pw4QGF06gNSbpjxeHqOC1N2JO02B9H
+	 ZqNdzbM9rzOJtX5J4CsBNR653wpMpLbS390VCMRfT9RLaxK7+bdzBFaKKlaS6Jm8T0
+	 lOql5F8P6AOKCxU4ljBUaZhiEc207vt/9yqeCtC8=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726764AbgGYKHB (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 25 Jul 2020 06:07:01 -0400
-Received: from mail.kernel.org ([198.145.29.99]:47284 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726572AbgGYKHA (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Sat, 25 Jul 2020 06:07:00 -0400
-Received: from localhost (83-86-89-107.cable.dynamic.v4.ziggo.nl [83.86.89.107])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id F3EA3206D7;
-        Sat, 25 Jul 2020 10:06:59 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1595671620;
-        bh=DXKTp7F9hVX/ZMZ3cMvlM+waZARTWo/ANSvb7sYnEho=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=csoeNhZKhfy/PaKNHDzhb6fewTblIs59HKYmONeMkW7H74jifgwJGAr6lPRX4Vxlw
-         Z7+gvZk8JV6ESWik0r9XZf9nTKM+BHkr7Qjq2D4AQsu3HRqL+SabERQUdkBlDdSpup
-         e4N/tbzlVOUSYcVU4+kHmshhXryc9aBAsUBwgFMM=
-Date:   Sat, 25 Jul 2020 12:07:00 +0200
-From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To:     Kees Cook <keescook@chromium.org>
-Cc:     stable@vger.kernel.org, Scott Branden <scott.branden@broadcom.com>,
-        Mimi Zohar <zohar@linux.ibm.com>,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        Jessica Yu <jeyu@kernel.org>, SeongJae Park <sjpark@amazon.de>,
-        KP Singh <kpsingh@chromium.org>, linux-efi@vger.kernel.org,
-        linux-security-module@vger.kernel.org,
-        linux-integrity@vger.kernel.org, selinux@vger.kernel.org,
-        linux-kselftest@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v3 03/19] firmware_loader: EFI firmware loader must
- handle pre-allocated buffer
-Message-ID: <20200725100700.GB1073708@kroah.com>
-References: <20200724213640.389191-1-keescook@chromium.org>
- <20200724213640.389191-4-keescook@chromium.org>
+        id S1726613AbgGYK0D (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 25 Jul 2020 06:26:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35386 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726572AbgGYK0D (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 25 Jul 2020 06:26:03 -0400
+Received: from mail-ed1-x52e.google.com (mail-ed1-x52e.google.com [IPv6:2a00:1450:4864:20::52e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 51456C0619D3;
+        Sat, 25 Jul 2020 03:26:03 -0700 (PDT)
+Received: by mail-ed1-x52e.google.com with SMTP id z17so8711325edr.9;
+        Sat, 25 Jul 2020 03:26:03 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=sender:date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=taXyyIg9HQgDUeqgJutr9j6azE5mPr32nbXBE8+jcsA=;
+        b=heoJsy/sLGZ8AXN/DQcF3CpRSkdT16DTWOrhYJegxg0KfItLi7dPAnQi4JKgv3kfeq
+         GjKcavcYkWvSOrHRkbWGJCqFM3oxjUDNnbiAdSsXr64BjSfS5Q360TdWfXpQh+55BL5q
+         KOqY2GT9KZnz0erHQkPe0gLg7ti/LqMtx1+9aSCHO1M/GW2/55eTkVUNwFxs+kDuXq/l
+         S4bf2DDIez25tWyumCqygwHbhb/rY7HyaU8sjZvyw/2L/3ZMb6JZNKBzGdYwbdKvpFn9
+         s0s0e1HlNuPLHOuetw4HJ+RK4xlIcvOzfO2faKbUjtUCN9LRf2kHA/xrb3hafwQFQvCJ
+         9nyQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:sender:date:from:to:cc:subject:message-id
+         :references:mime-version:content-disposition:in-reply-to;
+        bh=taXyyIg9HQgDUeqgJutr9j6azE5mPr32nbXBE8+jcsA=;
+        b=VIBnUta87dFGjkq40HOXq2rSuNMIHdNHBmRB0alDiykF8cQIabtU97ygFFvdpzuXha
+         +5rk+5l18RE9IB77AuHTc+runFCtl7UaIWcPRzxhgCEVFnWV5MH7Auj4vnRTmy8S3Djq
+         lad2SSYxvODWuzw4ol+uFi7iOE9Vaxd4QcX3vrB40tDR9XWlnW7iGOaQD+ROORJLK4wc
+         82nKFywMGhWGhyfzifZe2fcUhMsvV1TiD1jEYYP0M+LZZgjkVuNOnOA+8HK9JgcgZVXH
+         cqr3Nl7P/IqoZPGZZBUbtCe1aOO6jdKYQOLmNvtaOZ9Fibf4B3oQ/v+3l1M+IpbLOORu
+         nV0A==
+X-Gm-Message-State: AOAM530Ji1V88yBhB5NDMjIXZ8ySwM/oBZojVBb2qSIdV1rZGKdLTqjb
+        ExeOJPDKtLFHkv2ncWOOgk9EJtKf
+X-Google-Smtp-Source: ABdhPJys+Ykps/4KLTuDE+mkOgM3KbhJT2sHQsbhDYUoOFDEdpRVDg1e1igOYZTLJmXVQ/nbBYtNoA==
+X-Received: by 2002:a05:6402:1bc1:: with SMTP id ch1mr4196887edb.142.1595672762017;
+        Sat, 25 Jul 2020 03:26:02 -0700 (PDT)
+Received: from gmail.com (54033286.catv.pool.telekom.hu. [84.3.50.134])
+        by smtp.gmail.com with ESMTPSA id kt1sm2571657ejb.78.2020.07.25.03.26.00
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 25 Jul 2020 03:26:01 -0700 (PDT)
+Date:   Sat, 25 Jul 2020 12:25:59 +0200
+From:   Ingo Molnar <mingo@kernel.org>
+To:     Ard Biesheuvel <ardb@kernel.org>
+Cc:     linux-efi <linux-efi@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        X86 ML <x86@kernel.org>, Thomas Gleixner <tglx@linutronix.de>,
+        Borislav Petkov <bp@alien8.de>
+Subject: Re: [GIT PULL] EFI fixes for v5.8-rc
+Message-ID: <20200725102559.GA757519@gmail.com>
+References: <20200709132807.32232-1-ardb@kernel.org>
+ <CAMj1kXGHDS7PnuPsCnHWGDFdtcaJUuXboZUZQwowzw0LfrQ+pw@mail.gmail.com>
+ <CAMj1kXFQt4f0XT6C_4_xAuDALv_jVsc+z0zkSnxh6MU-zHxj2g@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200724213640.389191-4-keescook@chromium.org>
+In-Reply-To: <CAMj1kXFQt4f0XT6C_4_xAuDALv_jVsc+z0zkSnxh6MU-zHxj2g@mail.gmail.com>
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Fri, Jul 24, 2020 at 02:36:24PM -0700, Kees Cook wrote:
-> The EFI platform firmware fallback would clobber any pre-allocated
-> buffers. Instead, correctly refuse to reallocate when too small (as
-> already done in the sysfs fallback), or perform allocation normally
-> when needed.
-> 
-> Fixes: e4c2c0ff00ec ("firmware: Add new platform fallback mechanism and firm ware_request_platform()")
 
-"firmware_request_platform()" :)
+* Ard Biesheuvel <ardb@kernel.org> wrote:
 
+> Ping again?
+
+Sorry about the delay - sending it to Linus now.
+
+Thanks,
+
+	Ingo
