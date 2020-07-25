@@ -3,75 +3,120 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
 X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 483A4C433DF
-	for <linux-efi@archiver.kernel.org>; Sat, 25 Jul 2020 12:13:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6FE60C433E3
+	for <linux-efi@archiver.kernel.org>; Sat, 25 Jul 2020 15:48:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1767120674
-	for <linux-efi@archiver.kernel.org>; Sat, 25 Jul 2020 12:13:06 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1595679186;
-	bh=zRw6d17GoVtvI1l3GK+dyKmcdnwOg4wwfjyOcWySfLA=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=wyJc/XqZwHGQqu+qt6msn0HMNiEO5H3cMEeWpaZqtR1V04mptkUE3Bvj5R6daljlV
-	 DR1SraVjBlTPl7Q2TwdikS7IQvqMwpLKH0V4H3nHT0ifoZxhIbPZIEXmQMF98i1ZL4
-	 6HipyM0MAue6huTFxxVowymzkuGUOc+mSmzqdJRE=
+	by mail.kernel.org (Postfix) with ESMTP id 470F020674
+	for <linux-efi@archiver.kernel.org>; Sat, 25 Jul 2020 15:48:24 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="LLuknkdO"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726837AbgGYMNE (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 25 Jul 2020 08:13:04 -0400
-Received: from mail.kernel.org ([198.145.29.99]:52488 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726639AbgGYMNE (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Sat, 25 Jul 2020 08:13:04 -0400
-Received: from mail-oi1-f169.google.com (mail-oi1-f169.google.com [209.85.167.169])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id B06AD20674;
-        Sat, 25 Jul 2020 12:13:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1595679183;
-        bh=zRw6d17GoVtvI1l3GK+dyKmcdnwOg4wwfjyOcWySfLA=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=LF4AzFkzLpfLbcNVWzXboAUULqsgUV1w0k5rTlIA30XvUDgEd1+uzAqP9aTeWdvZz
-         tLFG5izOhnSidxC1Ub2vtH06KIoH3dKFmPIDv98/ED1lQO9YtStdCZdEfCnjqHX1mX
-         rAh1JwLDZYAXfzoUZmuxmYbpDv4IBor1Lw59I9Dw=
-Received: by mail-oi1-f169.google.com with SMTP id j11so10353068oiw.12;
-        Sat, 25 Jul 2020 05:13:03 -0700 (PDT)
-X-Gm-Message-State: AOAM533YQ5oBSqX5tSY4zkq/iGkUcDNs1YX8igahOBK4zEoq/SV6z+Pl
-        SVvy53ZHzfloKpec18AJ2ffqQ7tRVAihxpULZtE=
-X-Google-Smtp-Source: ABdhPJzq1TXQYdywbReuouFO6wIWuSCTKIG6kI2Fi8vPYOalaOAOB/b222sBhZcBc1duguve0G1o73ZTMb8eJauRWIs=
-X-Received: by 2002:aca:cc0a:: with SMTP id c10mr711767oig.174.1595679183082;
- Sat, 25 Jul 2020 05:13:03 -0700 (PDT)
+        id S1727015AbgGYPsX (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 25 Jul 2020 11:48:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56694 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726727AbgGYPsX (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 25 Jul 2020 11:48:23 -0400
+Received: from mail-pg1-x543.google.com (mail-pg1-x543.google.com [IPv6:2607:f8b0:4864:20::543])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 15266C08C5CE
+        for <linux-efi@vger.kernel.org>; Sat, 25 Jul 2020 08:48:23 -0700 (PDT)
+Received: by mail-pg1-x543.google.com with SMTP id l63so7014936pge.12
+        for <linux-efi@vger.kernel.org>; Sat, 25 Jul 2020 08:48:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=chromium.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=/1vt+B3DVDrdrfR+H/x+bcPYzBM3lx1EeYwS9nHXkv0=;
+        b=LLuknkdOV2ZtuQPqqojqyvetQWZyKdeY9d3pGLpBMsgkaZgVvKIy/AOCpwPfbYes5B
+         H/o0kCTLgkAjS3VbyKJPiw8PQtoBi3SFOF2kTEMS3QjeeRaS8iowUPs0nb2cE46QURNP
+         7+NdSyvlQQugboxyBYham2MUGFHTQgh4+wzjg=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=/1vt+B3DVDrdrfR+H/x+bcPYzBM3lx1EeYwS9nHXkv0=;
+        b=XQVFKWliWK/AWlijO16OTm8DOJnqJDiHxyaxu0ep5N+GNx9BNoPsPc+FVUDF0eODqq
+         y8yv0wiWrxjjanNEGhAaf8zMzBe6Rhjk5tNTZcMkHIwxlOC+RPBHtK5lpgxnxG8vHQ+y
+         VHVmJz8B2FzWNKNvDK1dQ7IA3b1RUasFzcNyBbX6GZHOvLxgN9taIfVzvC9ITJrNZVpB
+         hLDSLTFusR3m3892/RASGSQ4Ez9Eg5LC6mXs0WGNYLGLPrlBtUmpCW6WlBLEmIydpH6t
+         qMSSDaoVXGBgvmYSM7oUHX6lWD3uz4ayp2pRpNhmmkfabHcNmUDEpE+o3W4ltdWmMC5I
+         9bLw==
+X-Gm-Message-State: AOAM533by//aNPQgfxgM6hD/Gx4VFwfC37GFNBf4Ja1zwYQojOAcgfVw
+        N2bTL541S63DqxdFUoAN1PmBGw==
+X-Google-Smtp-Source: ABdhPJyxdaNUWfD+EhFI99UZ6LC/JVNqOP8wI3FHvEU/crZf7bnX4W1waM+OsXoJToUlv6T15nEktw==
+X-Received: by 2002:a63:7d16:: with SMTP id y22mr12268714pgc.136.1595692102486;
+        Sat, 25 Jul 2020 08:48:22 -0700 (PDT)
+Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
+        by smtp.gmail.com with ESMTPSA id j10sm9458042pgh.28.2020.07.25.08.48.20
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 25 Jul 2020 08:48:21 -0700 (PDT)
+Date:   Sat, 25 Jul 2020 08:48:19 -0700
+From:   Kees Cook <keescook@chromium.org>
+To:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc:     Scott Branden <scott.branden@broadcom.com>,
+        Mimi Zohar <zohar@linux.ibm.com>,
+        Luis Chamberlain <mcgrof@kernel.org>,
+        Jessica Yu <jeyu@kernel.org>, SeongJae Park <sjpark@amazon.de>,
+        KP Singh <kpsingh@chromium.org>, linux-efi@vger.kernel.org,
+        linux-security-module@vger.kernel.org,
+        linux-integrity@vger.kernel.org, selinux@vger.kernel.org,
+        linux-kselftest@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v3 00/19] Introduce partial kernel_read_file() support
+Message-ID: <202007250843.534DE3DB48@keescook>
+References: <20200724213640.389191-1-keescook@chromium.org>
+ <20200725100555.GA1073708@kroah.com>
 MIME-Version: 1.0
-References: <20200709132807.32232-1-ardb@kernel.org> <CAMj1kXGHDS7PnuPsCnHWGDFdtcaJUuXboZUZQwowzw0LfrQ+pw@mail.gmail.com>
- <CAMj1kXFQt4f0XT6C_4_xAuDALv_jVsc+z0zkSnxh6MU-zHxj2g@mail.gmail.com> <20200725102559.GA757519@gmail.com>
-In-Reply-To: <20200725102559.GA757519@gmail.com>
-From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Sat, 25 Jul 2020 15:12:51 +0300
-X-Gmail-Original-Message-ID: <CAMj1kXGET_-VPpEU8QvaHT_PbBetCOjOhrL5ttRYGe=MkNCdjA@mail.gmail.com>
-Message-ID: <CAMj1kXGET_-VPpEU8QvaHT_PbBetCOjOhrL5ttRYGe=MkNCdjA@mail.gmail.com>
-Subject: Re: [GIT PULL] EFI fixes for v5.8-rc
-To:     Ingo Molnar <mingo@kernel.org>
-Cc:     linux-efi <linux-efi@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        X86 ML <x86@kernel.org>, Thomas Gleixner <tglx@linutronix.de>,
-        Borislav Petkov <bp@alien8.de>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200725100555.GA1073708@kroah.com>
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Sat, 25 Jul 2020 at 13:26, Ingo Molnar <mingo@kernel.org> wrote:
->
->
-> * Ard Biesheuvel <ardb@kernel.org> wrote:
->
-> > Ping again?
->
-> Sorry about the delay - sending it to Linus now.
->
+On Sat, Jul 25, 2020 at 12:05:55PM +0200, Greg Kroah-Hartman wrote:
+> On Fri, Jul 24, 2020 at 02:36:21PM -0700, Kees Cook wrote:
+> > v3:
+> > - add reviews/acks
+> > - add "IMA: Add support for file reads without contents" patch
+> > - trim CC list, in case that's why vger ignored v2
+> > v2: [missing from lkml archives! (CC list too long?) repeating changes here]
+> > - fix issues in firmware test suite
+> > - add firmware partial read patches
+> > - various bug fixes/cleanups
+> > v1: https://lore.kernel.org/lkml/20200717174309.1164575-1-keescook@chromium.org/
+> > 
+> > Hi,
+> > 
+> > Here's my tree for adding partial read support in kernel_read_file(),
+> > which fixes a number of issues along the way. It's got Scott's firmware
+> > and IMA patches ported and everything tests cleanly for me (even with
+> > CONFIG_IMA_APPRAISE=y).
+> > 
+> > I think the intention is for this to go via Greg's tree since Scott's
+> > driver code will depend on it?
+> 
+> I've applied the first 3 now, as I think I need some acks/reviewed-by
+> from the subsystem owners of the other patches before I can take them.
 
-Thanks Ingo
+Sounds good; thanks!
+
+(I would argue 4 and 5 are also bug fixes, 6 is already Acked by hch and
+you, and 7 is a logical follow-up to 6, but I get your point.)
+
+James, Luis, Mimi, and Jessica, the bulk of these patches are LSM,
+firmware, IMA, and modules. How does this all look to you? And KP,
+you'd mentioned privately that you were interested in being able to
+use the new kernel_post_load_data LSM hook for better visibility into
+non-file-backed blob loading.
+
+Thanks!
+
+-Kees
+
+-- 
+Kees Cook
