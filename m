@@ -1,62 +1,55 @@
-Return-Path: <SRS0=3TSP=BG=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=SrNQ=BH=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.5 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_SANE_2 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5E5ADC433F1
-	for <linux-efi@archiver.kernel.org>; Mon, 27 Jul 2020 19:18:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3E80CC433E5
+	for <linux-efi@archiver.kernel.org>; Tue, 28 Jul 2020 18:48:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3F9B120719
-	for <linux-efi@archiver.kernel.org>; Mon, 27 Jul 2020 19:18:44 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="b9Xi8EPK"
+	by mail.kernel.org (Postfix) with ESMTP id 2C17E207F5
+	for <linux-efi@archiver.kernel.org>; Tue, 28 Jul 2020 18:48:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728760AbgG0TSn (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 27 Jul 2020 15:18:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55326 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728767AbgG0TSk (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 27 Jul 2020 15:18:40 -0400
-Received: from mail-wm1-x343.google.com (mail-wm1-x343.google.com [IPv6:2a00:1450:4864:20::343])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4394AC0619D4
-        for <linux-efi@vger.kernel.org>; Mon, 27 Jul 2020 12:18:40 -0700 (PDT)
-Received: by mail-wm1-x343.google.com with SMTP id g10so14005820wmc.1
-        for <linux-efi@vger.kernel.org>; Mon, 27 Jul 2020 12:18:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=broadcom.com; s=google;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-transfer-encoding:content-language;
-        bh=AD/pgeUaAWIctoPbHAQcCg8O5lgu8H5ssjeAH3MlNAE=;
-        b=b9Xi8EPKDhPyvptqzRh9TEyHmMfd/reQxGu/+VvNXDLeNkn94+A5XsLMU4sZGwGnYc
-         VQ7cN6oppIHp7Sb9aOnqtUx8KbqUL2t0VNncf/TBpGWpM0VcUa7jrep3fZu9VV7ljCF3
-         Wx50YZGH7fXe4vbZqShyP7XqktwHUoOhIiKJk=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-transfer-encoding
-         :content-language;
-        bh=AD/pgeUaAWIctoPbHAQcCg8O5lgu8H5ssjeAH3MlNAE=;
-        b=eindm+yWqPyqvejILFXmefz+4nyWBhrV4ahIhtXvG9et8OmsgO+pOLiDD4Gk3N9Yzt
-         Coo/n1lGhckrmNIF3j2iUyevRHftatUnlT8YS7WZOuu59r31f3umEuWoUXDQxTl3Jv9H
-         FHO6PQtPZzqIFJ92qwFSwz2YOr2A2EQDpO03oQ3f+hoC/CiEcYU73CZBkR1S0m7++/6c
-         reUa1PB5oMRggKDk9Qe7T8EAyY2YseYk4uGPfqDeIzsjnJpSJfCCEuKZymf8HRQE/qux
-         3tKU07NJcoQ3wyxVw+VHJ8JlaRZbK/VmnqUNglHNkZ47UcNQHxznBSz1NPMQf5Smt09k
-         vMRQ==
-X-Gm-Message-State: AOAM532h5XhePe7EBPnVaWZ1gIg3ATivzylDLAAGD2jC6q3PWh0ZyZeE
-        iAhLaykBXzzkLhVJQikYKK4OCw==
-X-Google-Smtp-Source: ABdhPJw7IDXDgUVkm/BmOYhovEDy4epUcWGU5dwgTcbUsYWhYOQSjfwYb9HbZEpCRr1sm9NvxhoSPA==
-X-Received: by 2002:a1c:7fd3:: with SMTP id a202mr607949wmd.67.1595877518878;
-        Mon, 27 Jul 2020 12:18:38 -0700 (PDT)
-Received: from [10.136.13.65] ([192.19.228.250])
-        by smtp.gmail.com with ESMTPSA id p11sm13730030wre.32.2020.07.27.12.18.35
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 27 Jul 2020 12:18:38 -0700 (PDT)
+        id S1729342AbgG1Ssj (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 28 Jul 2020 14:48:39 -0400
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:36088 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1729124AbgG1Ssj (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 28 Jul 2020 14:48:39 -0400
+Received: from pps.filterd (m0187473.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 06SIX7C6151949;
+        Tue, 28 Jul 2020 14:48:34 -0400
+Received: from ppma06ams.nl.ibm.com (66.31.33a9.ip4.static.sl-reverse.com [169.51.49.102])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 32jj2wnc4d-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 28 Jul 2020 14:48:34 -0400
+Received: from pps.filterd (ppma06ams.nl.ibm.com [127.0.0.1])
+        by ppma06ams.nl.ibm.com (8.16.0.42/8.16.0.42) with SMTP id 06SIkGDU012513;
+        Tue, 28 Jul 2020 18:48:32 GMT
+Received: from b06cxnps3075.portsmouth.uk.ibm.com (d06relay10.portsmouth.uk.ibm.com [9.149.109.195])
+        by ppma06ams.nl.ibm.com with ESMTP id 32gcqgm3ms-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 28 Jul 2020 18:48:31 +0000
+Received: from d06av26.portsmouth.uk.ibm.com (d06av26.portsmouth.uk.ibm.com [9.149.105.62])
+        by b06cxnps3075.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 06SImTHV32178480
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 28 Jul 2020 18:48:29 GMT
+Received: from d06av26.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id B7884AE04D;
+        Tue, 28 Jul 2020 18:48:29 +0000 (GMT)
+Received: from d06av26.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id EB543AE051;
+        Tue, 28 Jul 2020 18:48:26 +0000 (GMT)
+Received: from li-f45666cc-3089-11b2-a85c-c57d1a57929f.ibm.com (unknown [9.160.76.171])
+        by d06av26.portsmouth.uk.ibm.com (Postfix) with ESMTP;
+        Tue, 28 Jul 2020 18:48:26 +0000 (GMT)
+Message-ID: <fa96a33641070b1580f21de86fedd5f8da5eff21.camel@linux.ibm.com>
 Subject: Re: [PATCH v3 00/19] Introduce partial kernel_read_file() support
-To:     Mimi Zohar <zohar@kernel.org>, Kees Cook <keescook@chromium.org>,
+From:   Mimi Zohar <zohar@linux.ibm.com>
+To:     Scott Branden <scott.branden@broadcom.com>,
+        Kees Cook <keescook@chromium.org>,
         Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 Cc:     Luis Chamberlain <mcgrof@kernel.org>, Jessica Yu <jeyu@kernel.org>,
         SeongJae Park <sjpark@amazon.de>,
@@ -64,69 +57,84 @@ Cc:     Luis Chamberlain <mcgrof@kernel.org>, Jessica Yu <jeyu@kernel.org>,
         linux-security-module@vger.kernel.org,
         linux-integrity@vger.kernel.org, selinux@vger.kernel.org,
         linux-kselftest@vger.kernel.org, linux-kernel@vger.kernel.org
+Date:   Tue, 28 Jul 2020 14:48:25 -0400
+In-Reply-To: <1a46db6f-1c8a-3509-6371-7c77999833f2@broadcom.com>
 References: <20200724213640.389191-1-keescook@chromium.org>
- <1595848589.4841.78.camel@kernel.org>
-From:   Scott Branden <scott.branden@broadcom.com>
-Message-ID: <1a46db6f-1c8a-3509-6371-7c77999833f2@broadcom.com>
-Date:   Mon, 27 Jul 2020 12:18:33 -0700
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
-MIME-Version: 1.0
-In-Reply-To: <1595848589.4841.78.camel@kernel.org>
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Content-Language: en-CA
+         <1595848589.4841.78.camel@kernel.org>
+         <1a46db6f-1c8a-3509-6371-7c77999833f2@broadcom.com>
+Content-Type: text/plain; charset="UTF-8"
+X-Mailer: Evolution 3.28.5 (3.28.5-12.el8) 
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.235,18.0.687
+ definitions=2020-07-28_15:2020-07-28,2020-07-28 signatures=0
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 phishscore=0
+ impostorscore=0 mlxlogscore=999 priorityscore=1501 lowpriorityscore=0
+ clxscore=1011 bulkscore=0 suspectscore=0 adultscore=0 spamscore=0
+ malwarescore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2006250000 definitions=main-2007280131
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Hi Mimi/Kees,
+On Mon, 2020-07-27 at 12:18 -0700, Scott Branden wrote:
+> Hi Mimi/Kees,
+> 
+> On 2020-07-27 4:16 a.m., Mimi Zohar wrote:
+> > On Fri, 2020-07-24 at 14:36 -0700, Kees Cook wrote:
+> >> v3:
+> >> - add reviews/acks
+> >> - add "IMA: Add support for file reads without contents" patch
+> >> - trim CC list, in case that's why vger ignored v2
+> >> v2: [missing from lkml archives! (CC list too long?) repeating changes
+> here]
+> >> - fix issues in firmware test suite
+> >> - add firmware partial read patches
+> >> - various bug fixes/cleanups
+> >> v1: 
+> https://lore.kernel.org/lkml/20200717174309.1164575-1-keescook@chromium.org/
+> >>
+> >> Hi,
+> >>
+> >> Here's my tree for adding partial read support in kernel_read_file(),
+> >> which fixes a number of issues along the way. It's got Scott's firmware
+> >> and IMA patches ported and everything tests cleanly for me (even with
+> >> CONFIG_IMA_APPRAISE=y).
+> > Thanks, Kees.  Other than my comments on the new
+> > security_kernel_post_load_data() hook, the patch set is really nice.
+> >
+> > In addition to compiling with CONFIG_IMA_APPRAISE enabled, have you
+> > booted the kernel with the ima_policy=tcb?  The tcb policy will add
+> > measurements to the IMA measurement list and extend the TPM with the
+> > file or buffer data digest.  Are you seeing the firmware measurements,
+> > in particular the partial read measurement?
+> I booted the kernel with ima_policy=tcb.
+> 
+> Unfortunately after enabling the following, fw_run_tests.sh does not run.
+> 
+> mkdir /sys/kernel/security
+> mount -t securityfs securityfs /sys/kernel/security
+> echo "measure func=FIRMWARE_CHECK" > /sys/kernel/security/ima/policy
+> echo "appraise func=FIRMWARE_CHECK appraise_type=imasig" >
+> /sys/kernel/security/ima/policy
+> ./fw_run_tests.sh
+> 
+> [ 1296.258052] test_firmware: loading 'test-firmware.bin'
+> [ 1296.263903] misc test_firmware: loading /lib/firmware/test-firmware.bin
+> failed with error -13
+> [ 1296.263905] audit: type=1800 audit(1595905754.266:9): pid=5696 uid=0
+> auid=4294967295 ses=4294967295 subj=kernel op=appraise_data cause=IMA-
+> signature-required comm="fw_namespace" name="/lib/firmware/test-firmware.bin"
+> dev="tmpfs" ino=4592 res=0
+> [ 1296.297085] misc test_firmware: Direct firmware load for test-firmware.bin
+> failed with error -13
+> [ 1296.305947] test_firmware: load of 'test-firmware.bin' failed: -13
 
-On 2020-07-27 4:16 a.m., Mimi Zohar wrote:
-> On Fri, 2020-07-24 at 14:36 -0700, Kees Cook wrote:
->> v3:
->> - add reviews/acks
->> - add "IMA: Add support for file reads without contents" patch
->> - trim CC list, in case that's why vger ignored v2
->> v2: [missing from lkml archives! (CC list too long?) repeating changes here]
->> - fix issues in firmware test suite
->> - add firmware partial read patches
->> - various bug fixes/cleanups
->> v1: https://lore.kernel.org/lkml/20200717174309.1164575-1-keescook@chromium.org/
->>
->> Hi,
->>
->> Here's my tree for adding partial read support in kernel_read_file(),
->> which fixes a number of issues along the way. It's got Scott's firmware
->> and IMA patches ported and everything tests cleanly for me (even with
->> CONFIG_IMA_APPRAISE=y).
-> Thanks, Kees.  Other than my comments on the new
-> security_kernel_post_load_data() hook, the patch set is really nice.
->
-> In addition to compiling with CONFIG_IMA_APPRAISE enabled, have you
-> booted the kernel with the ima_policy=tcb?  The tcb policy will add
-> measurements to the IMA measurement list and extend the TPM with the
-> file or buffer data digest.  Are you seeing the firmware measurements,
-> in particular the partial read measurement?
-I booted the kernel with ima_policy=tcb.
+The "appraise" rule verifies the IMA signature.  Unless you signed the firmware
+(evmctl) and load the public key on the IMA keyring, that's to be expected.  I
+assume you are seeing firmware measurements in the IMA measuremenet log.
 
-Unfortunately after enabling the following, fw_run_tests.sh does not run.
-
-mkdir /sys/kernel/security
-mount -t securityfs securityfs /sys/kernel/security
-echo "measure func=FIRMWARE_CHECK" > /sys/kernel/security/ima/policy
-echo "appraise func=FIRMWARE_CHECK appraise_type=imasig" > /sys/kernel/security/ima/policy
-./fw_run_tests.sh
-
-[ 1296.258052] test_firmware: loading 'test-firmware.bin'
-[ 1296.263903] misc test_firmware: loading /lib/firmware/test-firmware.bin failed with error -13
-[ 1296.263905] audit: type=1800 audit(1595905754.266:9): pid=5696 uid=0 auid=4294967295 ses=4294967295 subj=kernel op=appraise_data cause=IMA-signature-required comm="fw_namespace" name="/lib/firmware/test-firmware.bin" dev="tmpfs" ino=4592 res=0
-[ 1296.297085] misc test_firmware: Direct firmware load for test-firmware.bin failed with error -13
-[ 1296.305947] test_firmware: load of 'test-firmware.bin' failed: -13
-
->
-> thanks,
->
-> Mimi
+Mimi
 
