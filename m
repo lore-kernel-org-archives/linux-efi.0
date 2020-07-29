@@ -7,51 +7,51 @@ X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_INVALID,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BA3A8C433E1
-	for <linux-efi@archiver.kernel.org>; Wed, 29 Jul 2020 23:36:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 59E35C433E0
+	for <linux-efi@archiver.kernel.org>; Wed, 29 Jul 2020 23:36:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 93D71207E8
-	for <linux-efi@archiver.kernel.org>; Wed, 29 Jul 2020 23:36:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3130C2074B
+	for <linux-efi@archiver.kernel.org>; Wed, 29 Jul 2020 23:36:59 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="hFjfGLZR"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="DBsH8F3C"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728100AbgG2Xgz (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 29 Jul 2020 19:36:55 -0400
-Received: from esa6.hgst.iphmx.com ([216.71.154.45]:22290 "EHLO
+        id S1728163AbgG2Xg6 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 29 Jul 2020 19:36:58 -0400
+Received: from esa6.hgst.iphmx.com ([216.71.154.45]:22300 "EHLO
         esa6.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727087AbgG2Xgy (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 29 Jul 2020 19:36:54 -0400
+        with ESMTP id S1728155AbgG2Xg5 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 29 Jul 2020 19:36:57 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1596065814; x=1627601814;
+  t=1596065818; x=1627601818;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=FX6d5P98ttKncydey4fpaqPuC2G3OjiVXWjKcDsITLk=;
-  b=hFjfGLZRaxsqgYIpzbaEXUqcLhwMazi3/kUlBpbabXXiDNJafJBINdWY
-   SS9KXm8jj7SYNfP/GuF0HYfyNGcEScKlFPf4EDtY3CAbb9rnahjLRuhkc
-   9zbwniAXhUok7QvKo8w84RduuKIIMCACRwmVrkSUViEpQRd2oGLM6GlYy
-   A4CwBOPaspQZkguufWGpchke6GCr53O5ETjI9UhRcCQ4RMSPQXP5ZQprI
-   fMiw2zHwbw6AtcrSre9yB2aOyganmdmBV6fdBDpt32LPzvuU16aj6l/99
-   98u9aCbmBYG+wbuZ3WeUMfBI9TJXElLPdabX2reEpZSR1ZUpBzvkFsgcS
-   A==;
-IronPort-SDR: raW/1qcKdHAZdMSyVUgmp/qXKAL8YrUQjsmsaO0yL8zejdgtPBPMIm33A0OhSZ1mcOUdr0UzAO
- +XyVwaJ0twK40F50XULgFWq5Ia95ioUY2+8HtUpYerrVlR0Q9jtt2YqLT35EIBl7K491VMaJ+r
- P6wNVAqtGT8v4WGGJ8jdNxXYO8m/p/F/oPOO0n7GvBM2NcgkLzkckmqlow6JQC2ZyrPooEW4ZF
- qp2mWyA1xGRZq476zlQwZqMKwzHxt07shs/ITEHkrt/IwW9reW0DEG0mqxlNuDIln7SZyhkk2J
- 2Z4=
+  bh=T6HBziqjPfpEOovieQwcPFPkqxzZPptEH0FVtMgRIac=;
+  b=DBsH8F3CuZHqVjV8lRRW5iu95YW4pFuYJH23kb/VD3iYBH5m0I/DaqPs
+   vd5YXK/5nlynYeHMwhPrYueBmy6Q/Z6ERhWsl7av1m8HZVJgGHMYvZiGj
+   8xFnWTpEDueV78xeacwNwCXfDuaQpNyOc5JHDOwH01QOIKbmHkSABVm7G
+   skp2/AE9gqrvlLcolO/neL8lyjpXDOYME8oatL2H27SACV7deNQgXmKsl
+   sAlQwdXAVrN3fOdTgywzE4jpoxG/rxZnbryoZQYg3PLZdE9QGRlV+h2aV
+   3DJp5Orn8EYRSgfCJEYmQXSFJCiUvKg1JObrozIivTCws3fcAW9ZOwo/6
+   Q==;
+IronPort-SDR: wXTtYv+vL7Lm8VGw5EWjiO07F3jVTcvKPZ4Jp86UuOsj38to2gX6N38d46XcXthkn9U5fc7JIf
+ 1BY7EoWsmeTzklSIIsNlHnxyTl8pvnBeOVVlnkQ596ls8ypnRtwo8trNrbZ4TedXkFTNHBkKvQ
+ RP8Sd8NXgj3e/GPxpGwZIixDbmGG/kyducgEfY3ycY3epUjeWyWv6w38buf06FMeQ3fvuQ+JG0
+ /B4kMvaVMGjSLEf4eKEv3PtdAqKOsDOD+e9iviXRktgqDAyV9Dyug3ObkaAnOrxVb2+Ca7FkfP
+ BJg=
 X-IronPort-AV: E=Sophos;i="5.75,412,1589212800"; 
-   d="scan'208";a="144951794"
+   d="scan'208";a="144951821"
 Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 30 Jul 2020 07:36:53 +0800
-IronPort-SDR: 5pGJWzMD9R70grFvN8rO/dOG48oZnGJJeAk1ofjNaTHOdPGGDPQshrWg1krlEfYQKmRVn77xP7
- sKj1SCbncyrUL/E/tYLXfnvll79N8/1vI=
+  by ob1.hgst.iphmx.com with ESMTP; 30 Jul 2020 07:36:57 +0800
+IronPort-SDR: byKoJuvrVRv5ivqOMDHm5gtFw3G3ff7NoR0L9X9rSg9QQ45qmc6eRUXIOoR9gDdFkPFXuC3E5n
+ HsWln+XDLSNtT/TCdDkJdlpDMfYMIpUog=
 Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Jul 2020 16:25:01 -0700
-IronPort-SDR: oeqQYM7W+leQjBuSIJ5zDkSvwNFMQaSHLJCpUK1gMEg4CqAH9L9Br4XFD6nduhlGKiZDBev7kH
- B86jS/mJrqow==
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Jul 2020 16:25:05 -0700
+IronPort-SDR: be71gRvQ3Pgce42+Ak3b5nRel+0Bee347V5NKB6PgQByjA/0utLtd9N5rvAb9q7KmJrMRzzigZ
+ XbpOBDDZ4Mfw==
 WDCIronportException: Internal
 Received: from jpf009043.ad.shared (HELO jedi-01.hgst.com) ([10.86.58.210])
-  by uls-op-cesaip01.wdc.com with ESMTP; 29 Jul 2020 16:36:53 -0700
+  by uls-op-cesaip01.wdc.com with ESMTP; 29 Jul 2020 16:36:57 -0700
 From:   Atish Patra <atish.patra@wdc.com>
 To:     linux-kernel@vger.kernel.org
 Cc:     Atish Patra <atish.patra@wdc.com>, Anup Patel <anup.patel@wdc.com>,
@@ -71,9 +71,9 @@ Cc:     Atish Patra <atish.patra@wdc.com>, Anup Patel <anup.patel@wdc.com>,
         Thomas Gleixner <tglx@linutronix.de>,
         Will Deacon <will@kernel.org>,
         Yash Shah <yash.shah@sifive.com>, Zong Li <zong.li@sifive.com>
-Subject: [RFT PATCH v4 2/9] RISC-V: Add early ioremap support
-Date:   Wed, 29 Jul 2020 16:36:28 -0700
-Message-Id: <20200729233635.14406-3-atish.patra@wdc.com>
+Subject: [RFT PATCH v4 7/9] efi: Rename arm-init to efi-init common for all arch
+Date:   Wed, 29 Jul 2020 16:36:33 -0700
+Message-Id: <20200729233635.14406-8-atish.patra@wdc.com>
 X-Mailer: git-send-email 2.24.0
 In-Reply-To: <20200729233635.14406-1-atish.patra@wdc.com>
 References: <20200729233635.14406-1-atish.patra@wdc.com>
@@ -84,141 +84,35 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-UEFI uses early IO or memory mappings for runtime services before
-normal ioremap() is usable. Add the necessary fixmap bindings and
-pmd mappings for generic ioremap support to work.
+arm-init is responsible for setting up efi runtime and doesn't actually
+do any ARM specific stuff. RISC-V can use the same source code as it is.
+
+Rename it to efi-init so that RISC-V can use it.
 
 Signed-off-by: Atish Patra <atish.patra@wdc.com>
 ---
- arch/riscv/Kconfig              |  1 +
- arch/riscv/include/asm/Kbuild   |  1 +
- arch/riscv/include/asm/fixmap.h | 13 +++++++++++++
- arch/riscv/include/asm/io.h     |  1 +
- arch/riscv/kernel/setup.c       |  1 +
- arch/riscv/mm/init.c            | 33 +++++++++++++++++++++++++++++++++
- 6 files changed, 50 insertions(+)
+ drivers/firmware/efi/Makefile                   | 2 +-
+ drivers/firmware/efi/{arm-init.c => efi-init.c} | 0
+ 2 files changed, 1 insertion(+), 1 deletion(-)
+ rename drivers/firmware/efi/{arm-init.c => efi-init.c} (100%)
 
-diff --git a/arch/riscv/Kconfig b/arch/riscv/Kconfig
-index 3230c1d48562..e6c1c98a53fb 100644
---- a/arch/riscv/Kconfig
-+++ b/arch/riscv/Kconfig
-@@ -34,6 +34,7 @@ config RISCV
- 	select GENERIC_ARCH_TOPOLOGY if SMP
- 	select GENERIC_ATOMIC64 if !64BIT
- 	select GENERIC_CLOCKEVENTS
-+	select GENERIC_EARLY_IOREMAP
- 	select GENERIC_GETTIMEOFDAY if HAVE_GENERIC_VDSO
- 	select GENERIC_IOREMAP
- 	select GENERIC_IRQ_MULTI_HANDLER
-diff --git a/arch/riscv/include/asm/Kbuild b/arch/riscv/include/asm/Kbuild
-index 3d9410bb4de0..59dd7be55005 100644
---- a/arch/riscv/include/asm/Kbuild
-+++ b/arch/riscv/include/asm/Kbuild
-@@ -1,4 +1,5 @@
- # SPDX-License-Identifier: GPL-2.0
-+generic-y += early_ioremap.h
- generic-y += extable.h
- generic-y += flat.h
- generic-y += kvm_para.h
-diff --git a/arch/riscv/include/asm/fixmap.h b/arch/riscv/include/asm/fixmap.h
-index 11613f38228a..54cbf07fb4e9 100644
---- a/arch/riscv/include/asm/fixmap.h
-+++ b/arch/riscv/include/asm/fixmap.h
-@@ -27,6 +27,19 @@ enum fixed_addresses {
- 	FIX_TEXT_POKE1,
- 	FIX_TEXT_POKE0,
- 	FIX_EARLYCON_MEM_BASE,
-+
-+	__end_of_permanent_fixed_addresses,
-+	/*
-+	 * Temporary boot-time mappings, used by early_ioremap(),
-+	 * before ioremap() is functional.
-+	 */
-+#define NR_FIX_BTMAPS		(SZ_256K / PAGE_SIZE)
-+#define FIX_BTMAPS_SLOTS	7
-+#define TOTAL_FIX_BTMAPS	(NR_FIX_BTMAPS * FIX_BTMAPS_SLOTS)
-+
-+	FIX_BTMAP_END = __end_of_permanent_fixed_addresses,
-+	FIX_BTMAP_BEGIN = FIX_BTMAP_END + TOTAL_FIX_BTMAPS - 1,
-+
- 	__end_of_fixed_addresses
- };
+diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+index 7a216984552b..61fd1e8b26fb 100644
+--- a/drivers/firmware/efi/Makefile
++++ b/drivers/firmware/efi/Makefile
+@@ -32,7 +32,7 @@ obj-$(CONFIG_EFI_EMBEDDED_FIRMWARE)	+= embedded-firmware.o
+ fake_map-y				+= fake_mem.o
+ fake_map-$(CONFIG_X86)			+= x86_fake_mem.o
  
-diff --git a/arch/riscv/include/asm/io.h b/arch/riscv/include/asm/io.h
-index 3835c3295dc5..c025a746a148 100644
---- a/arch/riscv/include/asm/io.h
-+++ b/arch/riscv/include/asm/io.h
-@@ -14,6 +14,7 @@
- #include <linux/types.h>
- #include <linux/pgtable.h>
- #include <asm/mmiowb.h>
-+#include <asm/early_ioremap.h>
- 
- /*
-  * MMIO access functions are separated out to break dependency cycles
-diff --git a/arch/riscv/kernel/setup.c b/arch/riscv/kernel/setup.c
-index 6a0ee2405813..c71788e6aff4 100644
---- a/arch/riscv/kernel/setup.c
-+++ b/arch/riscv/kernel/setup.c
-@@ -72,6 +72,7 @@ void __init setup_arch(char **cmdline_p)
- 
- 	*cmdline_p = boot_command_line;
- 
-+	early_ioremap_setup();
- 	parse_early_param();
- 
- 	setup_bootmem();
-diff --git a/arch/riscv/mm/init.c b/arch/riscv/mm/init.c
-index 9c5f3e35adc2..68c608a0e91f 100644
---- a/arch/riscv/mm/init.c
-+++ b/arch/riscv/mm/init.c
-@@ -403,6 +403,9 @@ asmlinkage void __init setup_vm(uintptr_t dtb_pa)
- 	uintptr_t load_pa = (uintptr_t)(&_start);
- 	uintptr_t load_sz = (uintptr_t)(&_end) - load_pa;
- 	uintptr_t map_size = best_map_size(load_pa, MAX_EARLY_MAPPING_SIZE);
-+#ifndef __PAGETABLE_PMD_FOLDED
-+	pmd_t fix_bmap_spmd, fix_bmap_epmd;
-+#endif
- 
- 	va_pa_offset = PAGE_OFFSET - load_pa;
- 	pfn_base = PFN_DOWN(load_pa);
-@@ -456,6 +459,36 @@ asmlinkage void __init setup_vm(uintptr_t dtb_pa)
- 			   pa + PGDIR_SIZE, PGDIR_SIZE, PAGE_KERNEL);
- 	dtb_early_va = (void *)DTB_EARLY_BASE_VA + (dtb_pa & (PGDIR_SIZE - 1));
- 	dtb_early_pa = dtb_pa;
-+
-+	/*
-+	 * Bootime fixmap only can handle PMD_SIZE mapping. Thus, boot-ioremap
-+	 * range can not span multiple pmds.
-+	 */
-+	BUILD_BUG_ON((__fix_to_virt(FIX_BTMAP_BEGIN) >> PMD_SHIFT)
-+		     != (__fix_to_virt(FIX_BTMAP_END) >> PMD_SHIFT));
-+
-+#ifndef __PAGETABLE_PMD_FOLDED
-+	/*
-+	 * Early ioremap fixmap is already created as it lies within first 2MB
-+	 * of fixmap region. We always map PMD_SIZE. Thus, both FIX_BTMAP_END
-+	 * FIX_BTMAP_BEGIN should lie in the same pmd. Verify that and warn
-+	 * the user if not.
-+	 */
-+	fix_bmap_spmd = fixmap_pmd[pmd_index(__fix_to_virt(FIX_BTMAP_BEGIN))];
-+	fix_bmap_epmd = fixmap_pmd[pmd_index(__fix_to_virt(FIX_BTMAP_END))];
-+	if (pmd_val(fix_bmap_spmd) != pmd_val(fix_bmap_epmd)) {
-+		WARN_ON(1);
-+		pr_warn("fixmap btmap start [%08lx] != end [%08lx]\n",
-+			pmd_val(fix_bmap_spmd), pmd_val(fix_bmap_epmd));
-+		pr_warn("fix_to_virt(FIX_BTMAP_BEGIN): %08lx\n",
-+			fix_to_virt(FIX_BTMAP_BEGIN));
-+		pr_warn("fix_to_virt(FIX_BTMAP_END):   %08lx\n",
-+			fix_to_virt(FIX_BTMAP_END));
-+
-+		pr_warn("FIX_BTMAP_END:       %d\n", FIX_BTMAP_END);
-+		pr_warn("FIX_BTMAP_BEGIN:     %d\n", FIX_BTMAP_BEGIN);
-+	}
-+#endif
- }
- 
- static void __init setup_vm_final(void)
+-arm-obj-$(CONFIG_EFI)			:= arm-init.o arm-runtime.o
++arm-obj-$(CONFIG_EFI)			:= efi-init.o arm-runtime.o
+ obj-$(CONFIG_ARM)			+= $(arm-obj-y)
+ obj-$(CONFIG_ARM64)			+= $(arm-obj-y)
+ obj-$(CONFIG_EFI_CAPSULE_LOADER)	+= capsule-loader.o
+diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/efi-init.c
+similarity index 100%
+rename from drivers/firmware/efi/arm-init.c
+rename to drivers/firmware/efi/efi-init.c
 -- 
 2.24.0
 
