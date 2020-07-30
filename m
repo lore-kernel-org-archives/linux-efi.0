@@ -4,30 +4,29 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-8.5 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B8614C433DF
-	for <linux-efi@archiver.kernel.org>; Thu, 30 Jul 2020 02:23:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A38BEC433E0
+	for <linux-efi@archiver.kernel.org>; Thu, 30 Jul 2020 02:25:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A02BA22BEA
-	for <linux-efi@archiver.kernel.org>; Thu, 30 Jul 2020 02:23:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 89B5822B48
+	for <linux-efi@archiver.kernel.org>; Thu, 30 Jul 2020 02:25:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726519AbgG3CXD (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 29 Jul 2020 22:23:03 -0400
-Received: from namei.org ([65.99.196.166]:56338 "EHLO namei.org"
+        id S1728387AbgG3CZN (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 29 Jul 2020 22:25:13 -0400
+Received: from namei.org ([65.99.196.166]:56428 "EHLO namei.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726342AbgG3CXC (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 29 Jul 2020 22:23:02 -0400
+        id S1726367AbgG3CZM (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 29 Jul 2020 22:25:12 -0400
 Received: from localhost (localhost [127.0.0.1])
-        by namei.org (8.14.4/8.14.4) with ESMTP id 06U2MmBY004068;
-        Thu, 30 Jul 2020 02:22:48 GMT
-Date:   Thu, 30 Jul 2020 12:22:48 +1000 (AEST)
+        by namei.org (8.14.4/8.14.4) with ESMTP id 06U2P5cj004220;
+        Thu, 30 Jul 2020 02:25:05 GMT
+Date:   Thu, 30 Jul 2020 12:25:05 +1000 (AEST)
 From:   James Morris <jmorris@namei.org>
 To:     Kees Cook <keescook@chromium.org>
 cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         Scott Branden <scott.branden@broadcom.com>,
-        Christoph Hellwig <hch@lst.de>,
         Mimi Zohar <zohar@linux.ibm.com>,
         Luis Chamberlain <mcgrof@kernel.org>,
         Takashi Iwai <tiwai@suse.de>, Jessica Yu <jeyu@kernel.org>,
@@ -36,11 +35,11 @@ cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         linux-security-module@vger.kernel.org,
         linux-integrity@vger.kernel.org, selinux@vger.kernel.org,
         linux-kselftest@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v4 04/17] fs/kernel_read_file: Split into separate include
- file
-In-Reply-To: <20200729175845.1745471-5-keescook@chromium.org>
-Message-ID: <alpine.LRH.2.21.2007301222360.3625@namei.org>
-References: <20200729175845.1745471-1-keescook@chromium.org> <20200729175845.1745471-5-keescook@chromium.org>
+Subject: Re: [PATCH v4 06/17] fs/kernel_read_file: Remove redundant size
+ argument
+In-Reply-To: <20200729175845.1745471-7-keescook@chromium.org>
+Message-ID: <alpine.LRH.2.21.2007301224500.3625@namei.org>
+References: <20200729175845.1745471-1-keescook@chromium.org> <20200729175845.1745471-7-keescook@chromium.org>
 User-Agent: Alpine 2.21 (LRH 202 2017-01-01)
 MIME-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
@@ -51,24 +50,17 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 On Wed, 29 Jul 2020, Kees Cook wrote:
 
-> From: Scott Branden <scott.branden@broadcom.com>
+> In preparation for refactoring kernel_read_file*(), remove the redundant
+> "size" argument which is not needed: it can be included in the return
+> code, with callers adjusted. (VFS reads already cannot be larger than
+> INT_MAX.)
 > 
-> Move kernel_read_file* out of linux/fs.h to its own linux/kernel_read_file.h
-> include file. That header gets pulled in just about everywhere
-> and doesn't really need functions not related to the general fs interface.
-> 
-> Suggested-by: Christoph Hellwig <hch@lst.de>
-> Signed-off-by: Scott Branden <scott.branden@broadcom.com>
-> Reviewed-by: Christoph Hellwig <hch@lst.de>
-> Acked-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-> Link: https://lore.kernel.org/r/20200706232309.12010-2-scott.branden@broadcom.com
+> Acked-by: Scott Branden <scott.branden@broadcom.com>
 > Reviewed-by: Mimi Zohar <zohar@linux.ibm.com>
 > Reviewed-by: Luis Chamberlain <mcgrof@kernel.org>
 > Signed-off-by: Kees Cook <keescook@chromium.org>
 
-
-Acked-by: James Morris <jamorris@linux.microsoft.com>
-
+Reviewed-by: James Morris <jamorris@linux.microsoft.com>
 
 -- 
 James Morris
