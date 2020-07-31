@@ -7,60 +7,60 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E3004C433E3
-	for <linux-efi@archiver.kernel.org>; Fri, 31 Jul 2020 23:10:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CB1FAC433E4
+	for <linux-efi@archiver.kernel.org>; Fri, 31 Jul 2020 23:10:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B111620791
-	for <linux-efi@archiver.kernel.org>; Fri, 31 Jul 2020 23:10:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A1B8920791
+	for <linux-efi@archiver.kernel.org>; Fri, 31 Jul 2020 23:10:06 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="hrQvkFF6"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="ChTbXvzs"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727794AbgGaXJ6 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 31 Jul 2020 19:09:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45756 "EHLO
+        id S1726535AbgGaXKG (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 31 Jul 2020 19:10:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45748 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727041AbgGaXIf (ORCPT
+        with ESMTP id S1726989AbgGaXIf (ORCPT
         <rfc822;linux-efi@vger.kernel.org>); Fri, 31 Jul 2020 19:08:35 -0400
-Received: from mail-pj1-x1044.google.com (mail-pj1-x1044.google.com [IPv6:2607:f8b0:4864:20::1044])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C3688C06174A
+Received: from mail-pj1-x1042.google.com (mail-pj1-x1042.google.com [IPv6:2607:f8b0:4864:20::1042])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1511CC06179E
         for <linux-efi@vger.kernel.org>; Fri, 31 Jul 2020 16:08:35 -0700 (PDT)
-Received: by mail-pj1-x1044.google.com with SMTP id ha11so8527883pjb.1
+Received: by mail-pj1-x1042.google.com with SMTP id k1so8063874pjt.5
         for <linux-efi@vger.kernel.org>; Fri, 31 Jul 2020 16:08:35 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=chromium.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=G4Uyil/3RLKWyY67hAynjAiMWq2oklcnh8xSnmDcb3o=;
-        b=hrQvkFF60z244mOdkjjH8vTWRTxj6MFuCnLo8kbEM3Wg/2jC+TKxxdTO/XWkd+b0rI
-         g0CaufeDiLXoEMx7njzFCvwl6WyD6KBfAsMZD9VgTq42iYleDJO7cHNhgh56YmkKl1tZ
-         l6eO0or+3UHALeW21Xr936DSrkQvYiQzdD7bU=
+        bh=/YhwjFJ10iSnqHVnH+E/18OCqFOxfL3O8briALHREkQ=;
+        b=ChTbXvzsXUQoQlCmz5X8Q1Gxp3riiGCK1dNfhc3GaXY/yjlrWcZZYXu3uehyV0TVAH
+         ihRqgWMrLH5jMadKjfk+FVyA1FEBsJSXXfWVEbqpLeRYsVNgrnwSPBcfSC73bZJhBxa1
+         JLaP+A64JNtfY9YvLrYFKoPvej2TJRx4yZ0es=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=G4Uyil/3RLKWyY67hAynjAiMWq2oklcnh8xSnmDcb3o=;
-        b=mkZ+PyQbdgrno59EYBFf4dsI6BHAb9Vt3O3yEPUrLE/tXbHIZ9q81qIvYAgf0kbt7h
-         vmI2tAYFem4EMhpypcWl2cW8uyEnPS130fAVm6Gaarz5Q5Xq+YJeZpDtVEwMMCPPCe4p
-         AeFkALqHHfcg9C5fzCVUNQegLieRgOOmInARZNKs3X2F47Ty0aCAWizZptNrgBeZEoXy
-         MoxyoEogikRviqkgQ/6oZOj4rkOMv9RmU2aXE4hoPETA4R+RuK28E7SSvVOTT2rQJlPE
-         wZ3V5fdMZ1fuckswJielwYFCeFlRv1MKPkqBX7ZtQolNIUY0faRabZe5NfJX7+D0m00m
-         XvzA==
-X-Gm-Message-State: AOAM533X7wn2FMGCaDjPdYPB97QHiTXZUEZ0MG1sndqNYtYnhKtvIrIa
-        UFjGHWoArcRkIfsm65VyGJk9Kg==
-X-Google-Smtp-Source: ABdhPJwvVmZyQwFGyMl+CErylZmdSrKOai9F6LoZgV0UQW0OLBYzwJAoyOaRpEgR8OGBWkMtRNvenA==
-X-Received: by 2002:a17:902:b18b:: with SMTP id s11mr5649581plr.152.1596236915282;
-        Fri, 31 Jul 2020 16:08:35 -0700 (PDT)
+        bh=/YhwjFJ10iSnqHVnH+E/18OCqFOxfL3O8briALHREkQ=;
+        b=mZJuEMaiYaOrwmd/0MhH119EXQkFv1TzgOxPqnV9CSVrslLVFRm43upD7q5vpYAYug
+         8aMN3jCtinnacAVLyDSo5rJ6eJ/59ILGkSEN5T+RGhNcZcUeugh8hJ7tzshty111+xcx
+         LzeUTcAoz9g7G4ea1LWH3BseS6xYJaWifbpM506E0KFbwobmwlgaf9cxDY7SrU2wArmT
+         kkLETlkylq6dPmW/inG7VNp7SapKyRJU9V+F04YihbMoJn4fQ1afsGqJ8SYKE6r/1IoD
+         KDUkXrYld+hulPegxynlI/N+pgr5cHaIy8m4/7brZ0FDJZtc6MjTcdKxF0KJ6fBlDM+f
+         6H5A==
+X-Gm-Message-State: AOAM531sSc7mlmBwYPnp3aK3UtwTdZDYFBtmJSQxaWt1QX3c6aQd9Zei
+        ma7Agb00//Mf7vCMUOtREYaMkQ==
+X-Google-Smtp-Source: ABdhPJyiEsFmEcCe1WG+hFmLyNannOXDGWZ7/pGsnQqAo6NQ22CMiVZ00GK9pyuWatNfeet0DIr+ZA==
+X-Received: by 2002:a17:90a:1aee:: with SMTP id p101mr2914247pjp.138.1596236914544;
+        Fri, 31 Jul 2020 16:08:34 -0700 (PDT)
 Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
-        by smtp.gmail.com with ESMTPSA id m9sm10186094pjs.18.2020.07.31.16.08.30
+        by smtp.gmail.com with ESMTPSA id b22sm9843692pju.26.2020.07.31.16.08.30
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
         Fri, 31 Jul 2020 16:08:30 -0700 (PDT)
 From:   Kees Cook <keescook@chromium.org>
 To:     Thomas Gleixner <tglx@linutronix.de>, Will Deacon <will@kernel.org>
 Cc:     Kees Cook <keescook@chromium.org>,
         Ard Biesheuvel <ardb@kernel.org>,
-        Nick Desaulniers <ndesaulniers@google.com>,
         Arvind Sankar <nivedita@alum.mit.edu>,
         Sedat Dilek <sedat.dilek@gmail.com>,
+        Nick Desaulniers <ndesaulniers@google.com>,
         Catalin Marinas <catalin.marinas@arm.com>,
         Mark Rutland <mark.rutland@arm.com>,
         Peter Collingbourne <pcc@google.com>,
@@ -73,9 +73,9 @@ Cc:     Kees Cook <keescook@chromium.org>,
         clang-built-linux@googlegroups.com, linux-arch@vger.kernel.org,
         linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v5 03/36] x86/boot/compressed: Get rid of GOT fixup code
-Date:   Fri, 31 Jul 2020 16:07:47 -0700
-Message-Id: <20200731230820.1742553-4-keescook@chromium.org>
+Subject: [PATCH v5 01/36] x86/boot/compressed: Move .got.plt entries out of the .got section
+Date:   Fri, 31 Jul 2020 16:07:45 -0700
+Message-Id: <20200731230820.1742553-2-keescook@chromium.org>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200731230820.1742553-1-keescook@chromium.org>
 References: <20200731230820.1742553-1-keescook@chromium.org>
@@ -88,177 +88,70 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Ard Biesheuvel <ardb@kernel.org>
 
-In a previous patch, we have eliminated GOT entries from the decompressor
-binary and added an assertion that the .got section is empty. This means
-that the GOT fixup routines that exist in both the 32-bit and 64-bit
-startup routines have become dead code, and can be removed.
+The .got.plt section contains the part of the GOT which is used by PLT
+entries, and which gets updated lazily by the dynamic loader when
+function calls are dispatched through those PLT entries.
 
-While at it, drop the KEEP() from the linker script, as it has no effect
-on the contents of output sections that are created by the linker itself.
+On fully linked binaries such as the kernel proper or the decompressor,
+this never happens, and so in practice, the .got.plt section consists
+only of the first 3 magic entries that are meant to point at the _DYNAMIC
+section and at the fixup routine in the loader. However, since we don't
+use a dynamic loader, those entries are never populated or used.
+
+This means that treating those entries like ordinary GOT entries, and
+updating their values based on the actual placement of the executable in
+memory is completely pointless, and we can just ignore the .got.plt
+section entirely, provided that it has no additional entries beyond
+the first 3 ones.
+
+So add an assertion in the linker script to ensure that this assumption
+holds, and move the contents out of the [_got, _egot) memory range that
+is modified by the GOT fixup routines.
+
+While at it, drop the KEEP(), since it has no effect on the contents
+of output sections that are created by the linker itself.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
+Tested-by: Sedat Dilek <sedat.dilek@gmail.com>
 Tested-by: Nick Desaulniers <ndesaulniers@google.com>
 Reviewed-by: Kees Cook <keescook@chromium.org>
 Acked-by: Arvind Sankar <nivedita@alum.mit.edu>
-Link: https://lore.kernel.org/r/20200523120021.34996-4-ardb@kernel.org
-Tested-by: Sedat Dilek <sedat.dilek@gmail.com>
-Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
+Link: https://lore.kernel.org/r/20200523120021.34996-2-ardb@kernel.org
 Signed-off-by: Kees Cook <keescook@chromium.org>
 ---
- arch/x86/boot/compressed/head_32.S     | 24 ++---------
- arch/x86/boot/compressed/head_64.S     | 57 --------------------------
- arch/x86/boot/compressed/vmlinux.lds.S |  4 +-
- 3 files changed, 5 insertions(+), 80 deletions(-)
+ arch/x86/boot/compressed/vmlinux.lds.S | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
 
-diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
-index 03557f2174bf..39f0bb43218f 100644
---- a/arch/x86/boot/compressed/head_32.S
-+++ b/arch/x86/boot/compressed/head_32.S
-@@ -49,16 +49,13 @@
-  * Position Independent Executable (PIE) so that linker won't optimize
-  * R_386_GOT32X relocation to its fixed symbol address.  Older
-  * linkers generate R_386_32 relocations against locally defined symbols,
-- * _bss, _ebss, _got, _egot and _end, in PIE.  It isn't wrong, just less
-- * optimal than R_386_RELATIVE.  But the x86 kernel fails to properly handle
-- * R_386_32 relocations when relocating the kernel.  To generate
-- * R_386_RELATIVE relocations, we mark _bss, _ebss, _got, _egot and _end as
-- * hidden:
-+ * _bss, _ebss and _end, in PIE.  It isn't wrong, just less optimal than
-+ * R_386_RELATIVE.  But the x86 kernel fails to properly handle R_386_32
-+ * relocations when relocating the kernel.  To generate R_386_RELATIVE
-+ * relocations, we mark _bss, _ebss and _end as hidden:
-  */
- 	.hidden _bss
- 	.hidden _ebss
--	.hidden _got
--	.hidden _egot
- 	.hidden _end
- 
- 	__HEAD
-@@ -192,19 +189,6 @@ SYM_FUNC_START_LOCAL_NOALIGN(.Lrelocated)
- 	shrl	$2, %ecx
- 	rep	stosl
- 
--/*
-- * Adjust our own GOT
-- */
--	leal	_got(%ebx), %edx
--	leal	_egot(%ebx), %ecx
--1:
--	cmpl	%ecx, %edx
--	jae	2f
--	addl	%ebx, (%edx)
--	addl	$4, %edx
--	jmp	1b
--2:
--
- /*
-  * Do the extraction, and jump to the new kernel..
-  */
-diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
-index 97d37f0a34f5..bf1ab30acc5b 100644
---- a/arch/x86/boot/compressed/head_64.S
-+++ b/arch/x86/boot/compressed/head_64.S
-@@ -40,8 +40,6 @@
-  */
- 	.hidden _bss
- 	.hidden _ebss
--	.hidden _got
--	.hidden _egot
- 	.hidden _end
- 
- 	__HEAD
-@@ -353,25 +351,6 @@ SYM_CODE_START(startup_64)
- 	/* Set up the stack */
- 	leaq	boot_stack_end(%rbx), %rsp
- 
--	/*
--	 * paging_prepare() and cleanup_trampoline() below can have GOT
--	 * references. Adjust the table with address we are running at.
--	 *
--	 * Zero RAX for adjust_got: the GOT was not adjusted before;
--	 * there's no adjustment to undo.
--	 */
--	xorq	%rax, %rax
--
--	/*
--	 * Calculate the address the binary is loaded at and use it as
--	 * a GOT adjustment.
--	 */
--	call	1f
--1:	popq	%rdi
--	subq	$1b, %rdi
--
--	call	.Ladjust_got
--
- 	/*
- 	 * At this point we are in long mode with 4-level paging enabled,
- 	 * but we might want to enable 5-level paging or vice versa.
-@@ -464,21 +443,6 @@ trampoline_return:
- 	pushq	$0
- 	popfq
- 
--	/*
--	 * Previously we've adjusted the GOT with address the binary was
--	 * loaded at. Now we need to re-adjust for relocation address.
--	 *
--	 * Calculate the address the binary is loaded at, so that we can
--	 * undo the previous GOT adjustment.
--	 */
--	call	1f
--1:	popq	%rax
--	subq	$1b, %rax
--
--	/* The new adjustment is the relocation address */
--	movq	%rbx, %rdi
--	call	.Ladjust_got
--
- /*
-  * Copy the compressed kernel to the end of our buffer
-  * where decompression in place becomes safe.
-@@ -556,27 +520,6 @@ SYM_FUNC_START_LOCAL_NOALIGN(.Lrelocated)
- 	jmp	*%rax
- SYM_FUNC_END(.Lrelocated)
- 
--/*
-- * Adjust the global offset table
-- *
-- * RAX is the previous adjustment of the table to undo (use 0 if it's the
-- * first time we touch GOT).
-- * RDI is the new adjustment to apply.
-- */
--.Ladjust_got:
--	/* Walk through the GOT adding the address to the entries */
--	leaq	_got(%rip), %rdx
--	leaq	_egot(%rip), %rcx
--1:
--	cmpq	%rcx, %rdx
--	jae	2f
--	subq	%rax, (%rdx)	/* Undo previous adjustment */
--	addq	%rdi, (%rdx)	/* Apply the new adjustment */
--	addq	$8, %rdx
--	jmp	1b
--2:
--	ret
--
- 	.code32
- /*
-  * This is the 32-bit trampoline that will be copied over to low memory.
 diff --git a/arch/x86/boot/compressed/vmlinux.lds.S b/arch/x86/boot/compressed/vmlinux.lds.S
-index 4bcc943842ab..a4a4a59a2628 100644
+index 8f1025d1f681..b17d218ccdf9 100644
 --- a/arch/x86/boot/compressed/vmlinux.lds.S
 +++ b/arch/x86/boot/compressed/vmlinux.lds.S
-@@ -43,9 +43,7 @@ SECTIONS
- 		_erodata = . ;
+@@ -44,10 +44,13 @@ SECTIONS
  	}
  	.got : {
--		_got = .;
--		KEEP(*(.got))
--		_egot = .;
-+		*(.got)
+ 		_got = .;
+-		KEEP(*(.got.plt))
+ 		KEEP(*(.got))
+ 		_egot = .;
  	}
- 	.got.plt : {
- 		*(.got.plt)
++	.got.plt : {
++		*(.got.plt)
++	}
++
+ 	.data :	{
+ 		_data = . ;
+ 		*(.data)
+@@ -77,3 +80,9 @@ SECTIONS
+ 
+ 	DISCARDS
+ }
++
++#ifdef CONFIG_X86_64
++ASSERT(SIZEOF(.got.plt) == 0 || SIZEOF(.got.plt) == 0x18, "Unexpected GOT/PLT entries detected!")
++#else
++ASSERT(SIZEOF(.got.plt) == 0 || SIZEOF(.got.plt) == 0xc, "Unexpected GOT/PLT entries detected!")
++#endif
 -- 
 2.25.1
 
