@@ -5,188 +5,165 @@ X-Spam-Level:
 X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 748B8C433E1
-	for <linux-efi@archiver.kernel.org>; Fri, 31 Jul 2020 23:08:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 69A02C433E0
+	for <linux-efi@archiver.kernel.org>; Fri, 31 Jul 2020 23:08:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4FB6022B3F
-	for <linux-efi@archiver.kernel.org>; Fri, 31 Jul 2020 23:08:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3D14D22CAF
+	for <linux-efi@archiver.kernel.org>; Fri, 31 Jul 2020 23:08:48 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="MLXUvi1E"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="IPdfxoRv"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727786AbgGaXIk (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 31 Jul 2020 19:08:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45778 "EHLO
+        id S1727098AbgGaXIr (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 31 Jul 2020 19:08:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45824 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727095AbgGaXIj (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 31 Jul 2020 19:08:39 -0400
-Received: from mail-pg1-x52c.google.com (mail-pg1-x52c.google.com [IPv6:2607:f8b0:4864:20::52c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 47441C061756
-        for <linux-efi@vger.kernel.org>; Fri, 31 Jul 2020 16:08:39 -0700 (PDT)
-Received: by mail-pg1-x52c.google.com with SMTP id w2so16769241pgg.10
-        for <linux-efi@vger.kernel.org>; Fri, 31 Jul 2020 16:08:39 -0700 (PDT)
+        with ESMTP id S1727878AbgGaXIp (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 31 Jul 2020 19:08:45 -0400
+Received: from mail-pg1-x544.google.com (mail-pg1-x544.google.com [IPv6:2607:f8b0:4864:20::544])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2771FC0617A2
+        for <linux-efi@vger.kernel.org>; Fri, 31 Jul 2020 16:08:45 -0700 (PDT)
+Received: by mail-pg1-x544.google.com with SMTP id s15so5237216pgc.8
+        for <linux-efi@vger.kernel.org>; Fri, 31 Jul 2020 16:08:45 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=chromium.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=wOq+Y00LQi/3deraAM6kBuaQbRKnLYOHk6N+NuQVWdA=;
-        b=MLXUvi1EuKG0FE+rIsbID9rRvyHhHP/bC/1H8WYBKVP5ZSFhWYwP+lP5XZpTQ06Bf0
-         wv4BfOauML6dkzya4CuKy7gALZ+W+9xqlhpjxWQqkL5+umqTPynzx2CVlkxuPT6WpFPO
-         j+sa9r0Kjrijgwt3APFSfc7Wq1KUkGc2Bq+kU=
+        bh=wsZ5gbKBfJpS0kEAhEgSsyY+vol7k0zdc2IVxjvZo+s=;
+        b=IPdfxoRvS6R1x5paoBrA7xxYsYLtGQVxRFU7dvuKabenpplKg1IEjvbhFySTmU+Zh2
+         pNWc8NWMXSOA09JW8gD/0su2yMzSuM6k8hmeNUhvpGyiw2SmpiBLNR4PFrXPpgojBRMR
+         hbzjAFfKzFOv7KayapCPYkLupuCPvPBt2/X9g=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=wOq+Y00LQi/3deraAM6kBuaQbRKnLYOHk6N+NuQVWdA=;
-        b=q7adtHJc1nmhmp1tZ9RerBTxoVg1peVxDRwu+9JRVqXMsZ7HYaepYmCWtO4aUsdaew
-         rlcc6eMFoxBDfzirQLZarguxqUsO5lxMJyZSeSmMQefgCGU3lIYBifpN6It+8E4IGQIi
-         0XsEtiLumfqFQRjEwbS1ngNBKGi1uA975lez+jqfMWVlkvOvtcjRsJ7pqEpTVTc749rQ
-         XdQloFZqsqXpDFZH/FxiSd4/YM3I2zGi8jpjifcalaIxQQwKPGNTePDWcPnUQ4gddnbx
-         5XHVnZWrE3DjzO7GHDhiIpOx8V/PMHiY+fj70Fhz1ulSl8Aoi5UatQ11FFtfZemqky3U
-         uZaw==
-X-Gm-Message-State: AOAM533+ILchL/8OzOFEyiLmMzfJ6OpCSUsxWWRNcI3SgKMoDsYZQDfb
-        fYMo6O+Qrgrd9a1/N+aHu62n6w==
-X-Google-Smtp-Source: ABdhPJxilVrjiuHEI9OJNGFNpHOWI1BRRuP7pZ9ogDRckvVa3npz7ZCMJpdwxdsXaIoH3Zh78zy0uA==
-X-Received: by 2002:a65:620f:: with SMTP id d15mr5623976pgv.270.1596236918800;
-        Fri, 31 Jul 2020 16:08:38 -0700 (PDT)
+        bh=wsZ5gbKBfJpS0kEAhEgSsyY+vol7k0zdc2IVxjvZo+s=;
+        b=iNxxPQCX3yiDhRqRs/o6JhmsSero9ja5EMGYrQ+nR6G85iB8jeli6ZVDNyXJlHh2uC
+         LEWYulp3U4xe/wufdYlK+ksJaJjmp0Ub0nS/4igj/z6l/oh6rXW9e4zL6sIhd42wfHah
+         5N/WRLcAcGS60UoGPy9qrGRiLMkN5uJ5ggCXFAzgwKEm9KGY+bySsLrHymKSVUicH+V7
+         F6604fZ4OpgBxu2te+NG8inqoYFipczOjt2vlsMS8/ARTRCeXcSqAEf8uJapD8BxSLJy
+         D9CoIdnyqIaKkNXTWIFQigsYtFdyGUOz4quRU9JD4c/6t1rT2/EnI4F93712e+y7+Hqr
+         ePLA==
+X-Gm-Message-State: AOAM533EL7hoB//WNI+4WTwx+dU5jINaNYEXuDnBWLZWqMZ93G4doByi
+        ZcG2xQJYa7DGkGpRn6sogaBADA==
+X-Google-Smtp-Source: ABdhPJw+P56sPmrzKAh4KNkCFVEtBiUO7T0C8QAnvabXluMUkrjDoDQBKdjDkoM7tlMAV3f0yil7bg==
+X-Received: by 2002:a63:9246:: with SMTP id s6mr5522207pgn.22.1596236924597;
+        Fri, 31 Jul 2020 16:08:44 -0700 (PDT)
 Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
-        by smtp.gmail.com with ESMTPSA id m190sm9732049pfm.89.2020.07.31.16.08.33
+        by smtp.gmail.com with ESMTPSA id x9sm10524734pgr.57.2020.07.31.16.08.36
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 31 Jul 2020 16:08:35 -0700 (PDT)
+        Fri, 31 Jul 2020 16:08:39 -0700 (PDT)
 From:   Kees Cook <keescook@chromium.org>
 To:     Thomas Gleixner <tglx@linutronix.de>, Will Deacon <will@kernel.org>
 Cc:     Kees Cook <keescook@chromium.org>,
-        Arvind Sankar <nivedita@alum.mit.edu>,
         Nick Desaulniers <ndesaulniers@google.com>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Fangrui Song <maskray@google.com>,
-        Sedat Dilek <sedat.dilek@gmail.com>,
+        Jian Cai <jiancai@google.com>,
+        =?UTF-8?q?F=C4=81ng-ru=C3=AC=20S=C3=B2ng?= <maskray@google.com>,
+        Luis Lozano <llozano@google.com>,
+        Manoj Gupta <manojgupta@google.com>, stable@vger.kernel.org,
         Catalin Marinas <catalin.marinas@arm.com>,
         Mark Rutland <mark.rutland@arm.com>,
+        Ard Biesheuvel <ardb@kernel.org>,
         Peter Collingbourne <pcc@google.com>,
         James Morse <james.morse@arm.com>,
         Borislav Petkov <bp@suse.de>, Ingo Molnar <mingo@redhat.com>,
         Russell King <linux@armlinux.org.uk>,
         Masahiro Yamada <masahiroy@kernel.org>,
+        Arvind Sankar <nivedita@alum.mit.edu>,
         Nathan Chancellor <natechancellor@gmail.com>,
         Arnd Bergmann <arnd@arndb.de>, x86@kernel.org,
         clang-built-linux@googlegroups.com, linux-arch@vger.kernel.org,
         linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v5 07/36] x86/boot: Check that there are no run-time relocations
-Date:   Fri, 31 Jul 2020 16:07:51 -0700
-Message-Id: <20200731230820.1742553-8-keescook@chromium.org>
+Subject: [PATCH v5 13/36] vmlinux.lds.h: add PGO and AutoFDO input sections
+Date:   Fri, 31 Jul 2020 16:07:57 -0700
+Message-Id: <20200731230820.1742553-14-keescook@chromium.org>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200731230820.1742553-1-keescook@chromium.org>
 References: <20200731230820.1742553-1-keescook@chromium.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Arvind Sankar <nivedita@alum.mit.edu>
+From: Nick Desaulniers <ndesaulniers@google.com>
 
-Add a linker script check that there are no run-time relocations, and
-remove the old one that tries to check via looking for specially-named
-sections in the object files.
+Basically, consider .text.{hot|unlikely|unknown}.* part of .text, too.
 
-Drop the tests for -fPIE compiler option and -pie linker option, as they
-are available in all supported gcc and binutils versions (as well as
-clang and lld).
+When compiling with profiling information (collected via PGO
+instrumentations or AutoFDO sampling), Clang will separate code into
+.text.hot, .text.unlikely, or .text.unknown sections based on profiling
+information. After D79600 (clang-11), these sections will have a
+trailing `.` suffix, ie.  .text.hot., .text.unlikely., .text.unknown..
 
-Tested-by: Nick Desaulniers <ndesaulniers@google.com>
-Reviewed-by: Kees Cook <keescook@chromium.org>
-Reviewed-by: Ard Biesheuvel <ardb@kernel.org>
-Reviewed-by: Fangrui Song <maskray@google.com>
-Reviewed-by: Sedat Dilek <sedat.dilek@gmail.com>
-Tested-by: Sedat Dilek <sedat.dilek@gmail.com>
-Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
+When using -ffunction-sections together with profiling infomation,
+either explicitly (FGKASLR) or implicitly (LTO), code may be placed in
+sections following the convention:
+.text.hot.<foo>, .text.unlikely.<bar>, .text.unknown.<baz>
+where <foo>, <bar>, and <baz> are functions.  (This produces one section
+per function; we generally try to merge these all back via linker script
+so that we don't have 50k sections).
+
+For the above cases, we need to teach our linker scripts that such
+sections might exist and that we'd explicitly like them grouped
+together, otherwise we can wind up with code outside of the
+_stext/_etext boundaries that might not be mapped properly for some
+architectures, resulting in boot failures.
+
+If the linker script is not told about possible input sections, then
+where the section is placed as output is a heuristic-laiden mess that's
+non-portable between linkers (ie. BFD and LLD), and has resulted in many
+hard to debug bugs.  Kees Cook is working on cleaning this up by adding
+--orphan-handling=warn linker flag used in ARCH=powerpc to additional
+architectures. In the case of linker scripts, borrowing from the Zen of
+Python: explicit is better than implicit.
+
+Also, ld.bfd's internal linker script considers .text.hot AND
+.text.hot.* to be part of .text, as well as .text.unlikely and
+.text.unlikely.*. I didn't see support for .text.unknown.*, and didn't
+see Clang producing such code in our kernel builds, but I see code in
+LLVM that can produce such section names if profiling information is
+missing. That may point to a larger issue with generating or collecting
+profiles, but I would much rather be safe and explicit than have to
+debug yet another issue related to orphan section placement.
+
+Reported-by: Jian Cai <jiancai@google.com>
+Suggested-by: Fāng-ruì Sòng <maskray@google.com>
+Tested-by: Luis Lozano <llozano@google.com>
+Tested-by: Manoj Gupta <manojgupta@google.com>
+Acked-by: Kees Cook <keescook@chromium.org>
+Cc: stable@vger.kernel.org
+Link: https://sourceware.org/git/?p=binutils-gdb.git;a=commitdiff;h=add44f8d5c5c05e08b11e033127a744d61c26aee
+Link: https://sourceware.org/git/?p=binutils-gdb.git;a=commitdiff;h=1de778ed23ce7492c523d5850c6c6dbb34152655
+Link: https://reviews.llvm.org/D79600
+Link: https://bugs.chromium.org/p/chromium/issues/detail?id=1084760
+Debugged-by: Luis Lozano <llozano@google.com>
+Signed-off-by: Nick Desaulniers <ndesaulniers@google.com>
 Signed-off-by: Kees Cook <keescook@chromium.org>
 ---
- arch/x86/boot/compressed/Makefile      | 28 +++-----------------------
- arch/x86/boot/compressed/vmlinux.lds.S |  8 ++++++++
- 2 files changed, 11 insertions(+), 25 deletions(-)
+ include/asm-generic/vmlinux.lds.h | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
-index 7db0102a573d..96d53e300ab6 100644
---- a/arch/x86/boot/compressed/Makefile
-+++ b/arch/x86/boot/compressed/Makefile
-@@ -29,7 +29,7 @@ targets := vmlinux vmlinux.bin vmlinux.bin.gz vmlinux.bin.bz2 vmlinux.bin.lzma \
- 	vmlinux.bin.xz vmlinux.bin.lzo vmlinux.bin.lz4
- 
- KBUILD_CFLAGS := -m$(BITS) -O2
--KBUILD_CFLAGS += -fno-strict-aliasing $(call cc-option, -fPIE, -fPIC)
-+KBUILD_CFLAGS += -fno-strict-aliasing -fPIE
- KBUILD_CFLAGS += -DDISABLE_BRANCH_PROFILING
- cflags-$(CONFIG_X86_32) := -march=i386
- cflags-$(CONFIG_X86_64) := -mcmodel=small
-@@ -51,7 +51,7 @@ UBSAN_SANITIZE :=n
- KBUILD_LDFLAGS := -m elf_$(UTS_MACHINE)
- # Compressed kernel should be built as PIE since it may be loaded at any
- # address by the bootloader.
--LDFLAGS_vmlinux := $(call ld-option, -pie) $(call ld-option, --no-dynamic-linker)
-+LDFLAGS_vmlinux := -pie $(call ld-option, --no-dynamic-linker)
- LDFLAGS_vmlinux += -T
- 
- hostprogs	:= mkpiggy
-@@ -86,30 +86,8 @@ vmlinux-objs-$(CONFIG_ACPI) += $(obj)/acpi.o
- vmlinux-objs-$(CONFIG_EFI_MIXED) += $(obj)/efi_thunk_$(BITS).o
- efi-obj-$(CONFIG_EFI_STUB) = $(objtree)/drivers/firmware/efi/libstub/lib.a
- 
--# The compressed kernel is built with -fPIC/-fPIE so that a boot loader
--# can place it anywhere in memory and it will still run. However, since
--# it is executed as-is without any ELF relocation processing performed
--# (and has already had all relocation sections stripped from the binary),
--# none of the code can use data relocations (e.g. static assignments of
--# pointer values), since they will be meaningless at runtime. This check
--# will refuse to link the vmlinux if any of these relocations are found.
--quiet_cmd_check_data_rel = DATAREL $@
--define cmd_check_data_rel
--	for obj in $(filter %.o,$^); do \
--		$(READELF) -S $$obj | grep -qF .rel.local && { \
--			echo "error: $$obj has data relocations!" >&2; \
--			exit 1; \
--		} || true; \
--	done
--endef
--
--# We need to run two commands under "if_changed", so merge them into a
--# single invocation.
--quiet_cmd_check-and-link-vmlinux = LD      $@
--      cmd_check-and-link-vmlinux = $(cmd_check_data_rel); $(cmd_ld)
--
- $(obj)/vmlinux: $(vmlinux-objs-y) $(efi-obj-y) FORCE
--	$(call if_changed,check-and-link-vmlinux)
-+	$(call if_changed,ld)
- 
- OBJCOPYFLAGS_vmlinux.bin :=  -R .comment -S
- $(obj)/vmlinux.bin: vmlinux FORCE
-diff --git a/arch/x86/boot/compressed/vmlinux.lds.S b/arch/x86/boot/compressed/vmlinux.lds.S
-index a4a4a59a2628..29df99b6cc64 100644
---- a/arch/x86/boot/compressed/vmlinux.lds.S
-+++ b/arch/x86/boot/compressed/vmlinux.lds.S
-@@ -42,6 +42,12 @@ SECTIONS
- 		*(.rodata.*)
- 		_erodata = . ;
- 	}
-+	.rel.dyn : {
-+		*(.rel.*)
-+	}
-+	.rela.dyn : {
-+		*(.rela.*)
-+	}
- 	.got : {
- 		*(.got)
- 	}
-@@ -85,3 +91,5 @@ ASSERT(SIZEOF(.got.plt) == 0 || SIZEOF(.got.plt) == 0x18, "Unexpected GOT/PLT en
- #else
- ASSERT(SIZEOF(.got.plt) == 0 || SIZEOF(.got.plt) == 0xc, "Unexpected GOT/PLT entries detected!")
- #endif
-+
-+ASSERT(SIZEOF(.rel.dyn) == 0 && SIZEOF(.rela.dyn) == 0, "Unexpected run-time relocations detected!")
+diff --git a/include/asm-generic/vmlinux.lds.h b/include/asm-generic/vmlinux.lds.h
+index 2593957f6e8b..af5211ca857c 100644
+--- a/include/asm-generic/vmlinux.lds.h
++++ b/include/asm-generic/vmlinux.lds.h
+@@ -561,7 +561,10 @@
+  */
+ #define TEXT_TEXT							\
+ 		ALIGN_FUNCTION();					\
+-		*(.text.hot TEXT_MAIN .text.fixup .text.unlikely)	\
++		*(.text.hot .text.hot.*)				\
++		*(TEXT_MAIN .text.fixup)				\
++		*(.text.unlikely .text.unlikely.*)			\
++		*(.text.unknown .text.unknown.*)			\
+ 		NOINSTR_TEXT						\
+ 		*(.text..refcount)					\
+ 		*(.ref.text)						\
 -- 
 2.25.1
 
