@@ -7,59 +7,59 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5C145C433DF
-	for <linux-efi@archiver.kernel.org>; Fri, 31 Jul 2020 23:09:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 120DFC433DF
+	for <linux-efi@archiver.kernel.org>; Fri, 31 Jul 2020 23:09:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 39BDE2063A
-	for <linux-efi@archiver.kernel.org>; Fri, 31 Jul 2020 23:09:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DE68F20836
+	for <linux-efi@archiver.kernel.org>; Fri, 31 Jul 2020 23:09:28 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="HwWUijwC"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="klOQguEy"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728167AbgGaXJU (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 31 Jul 2020 19:09:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45788 "EHLO
+        id S1728213AbgGaXJ2 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 31 Jul 2020 19:09:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45818 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727891AbgGaXIq (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 31 Jul 2020 19:08:46 -0400
-Received: from mail-pl1-x644.google.com (mail-pl1-x644.google.com [IPv6:2607:f8b0:4864:20::644])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E942DC0617A3
-        for <linux-efi@vger.kernel.org>; Fri, 31 Jul 2020 16:08:45 -0700 (PDT)
-Received: by mail-pl1-x644.google.com with SMTP id w19so5117059plq.3
-        for <linux-efi@vger.kernel.org>; Fri, 31 Jul 2020 16:08:45 -0700 (PDT)
+        with ESMTP id S1727061AbgGaXIo (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 31 Jul 2020 19:08:44 -0400
+Received: from mail-pg1-x541.google.com (mail-pg1-x541.google.com [IPv6:2607:f8b0:4864:20::541])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 11812C06138F
+        for <linux-efi@vger.kernel.org>; Fri, 31 Jul 2020 16:08:43 -0700 (PDT)
+Received: by mail-pg1-x541.google.com with SMTP id t6so16797594pgq.1
+        for <linux-efi@vger.kernel.org>; Fri, 31 Jul 2020 16:08:43 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=chromium.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=gw0qFrlLAeGFNQICDxZAEcvNQljVuXBAcUPpDFT6mlY=;
-        b=HwWUijwCN1yHVvMTBcWpAPeJzy4e7bIML4GGEjnycX031r9VYKdxWVfS6nNaj90cTh
-         WCgBr3fpJFTJ9DUUwuFweceKIqpoU17PdRLq9usS711E+wIEnR2UVx9rK2Jqm12MH2Ly
-         leK+goXQHjXkoEk8FTiq2zz0QFdbtKl/unv3M=
+        bh=Y6H7F3yYvyF+nG4ZythWO1q4A4EGexkc0hsQxsFmb9Y=;
+        b=klOQguEyjL+W3pS7h757dA97Jss1XwCr9uiod+TUnQnifo+W8HZxqnhpghrEPuhfhz
+         orOov5palRtEjwarVacfnfixNz/3aBq8qsEHACSBEYKMfnct6CzEpn+hdJxpAimvvV6n
+         TfN5kHYecvHl4EkWHkAnabuO4KrAoCTvFJ6U4=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=gw0qFrlLAeGFNQICDxZAEcvNQljVuXBAcUPpDFT6mlY=;
-        b=M81PrSuHBVS594v8t84F1eAI6Sl6d3egWQu/ej2JSAB4fpuWLFBW50rB+DjRyz/PvH
-         soW/u/Y5WUKTFRDVCXRM+3WQucdFkA/2WgegXzVeNu785dzH0psfAZ+uyOmXCbjMiClC
-         mQOMc5zCRcEovdq6nHJ0ZYluDG8/7QCfzD8CmveQYJ4+tIdetfjO01zj1g7au7TRCrrl
-         NsG0Z/5f7EIKoFeTozbYFDlRCVsbweQVl72fwdb+qNNh1qozgnQIBL4Q+0AB2DOz+iyS
-         gwoWU0sCEk4tB9LOlCxW8S+zcbUEud2l1GME7qjsOO/CElA0XFZrcfvQyyJVALm/JO2Y
-         CLGQ==
-X-Gm-Message-State: AOAM530Xcrd/dO0LZk8iTv++juQra9IvsaJduMktidpX4cRWBMJETulY
-        /KRytglPNE0LKMbPnREqti03RQ==
-X-Google-Smtp-Source: ABdhPJz6/VTMQ01SrfhMQ/SLXbQUnTuGTkQpv8usqAy0lJH0IrS74Nhjz+iAd2EIkwdY4wSBBsMY5A==
-X-Received: by 2002:a17:90a:5d15:: with SMTP id s21mr6354051pji.154.1596236925542;
-        Fri, 31 Jul 2020 16:08:45 -0700 (PDT)
+        bh=Y6H7F3yYvyF+nG4ZythWO1q4A4EGexkc0hsQxsFmb9Y=;
+        b=kwPP/b7AeaA6DxYJNbV32YAT4oT++Yuim4Ey2JAjU9vuxnC+22LQkxFCG1LE1SjPVU
+         RA+aXm+N0OjM0ag2AyzNzAy1mVo7adrDoNAiWUUwcpoKlV0XF5LmQVEJ/FsaHI9+sWMu
+         d5P2BgVm5WGN2yU6cHVv7TCP+iqLCYjxmuXIA0DKAcECW1LxGi2SpDCZJO+f1HH2rGST
+         eHYiYRPpVvPLUqazciJu4E1Wgf8yh6tdxnJ7JHM6N2UmFBugpn1Q0g4zgru0VrOeEGxY
+         sVvlmVIvvRt/uvIOwxn8eGb/KrLoyPiNc06yIwkAHa3KIupSvIzG2BX1sF4Fy+ijL09L
+         S0Ew==
+X-Gm-Message-State: AOAM530fQhjuAralwG1ilw0+gAUXZSG1P1GDlerw0ojw3+qANrfz1ArK
+        NduZ4ueIWsZVe1kpHNE7buMUEg==
+X-Google-Smtp-Source: ABdhPJz/K7Q0NhIe2TN23D0lBoo8o7R9UHhN6RM4BLn3KCwsvDLXrhht2x1eWmeoEfDbj/ppP75PXg==
+X-Received: by 2002:a65:408b:: with SMTP id t11mr5660099pgp.407.1596236922651;
+        Fri, 31 Jul 2020 16:08:42 -0700 (PDT)
 Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
-        by smtp.gmail.com with ESMTPSA id j20sm3120709pjy.51.2020.07.31.16.08.39
+        by smtp.gmail.com with ESMTPSA id m31sm10905376pjb.52.2020.07.31.16.08.37
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 31 Jul 2020 16:08:44 -0700 (PDT)
+        Fri, 31 Jul 2020 16:08:42 -0700 (PDT)
 From:   Kees Cook <keescook@chromium.org>
 To:     Thomas Gleixner <tglx@linutronix.de>, Will Deacon <will@kernel.org>
 Cc:     Kees Cook <keescook@chromium.org>,
+        Ard Biesheuvel <ardb@kernel.org>,
         Catalin Marinas <catalin.marinas@arm.com>,
         Mark Rutland <mark.rutland@arm.com>,
-        Ard Biesheuvel <ardb@kernel.org>,
         Peter Collingbourne <pcc@google.com>,
         James Morse <james.morse@arm.com>,
         Borislav Petkov <bp@suse.de>, Ingo Molnar <mingo@redhat.com>,
@@ -72,9 +72,9 @@ Cc:     Kees Cook <keescook@chromium.org>,
         clang-built-linux@googlegroups.com, linux-arch@vger.kernel.org,
         linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v5 21/36] arm64/build: Warn on orphan section placement
-Date:   Fri, 31 Jul 2020 16:08:05 -0700
-Message-Id: <20200731230820.1742553-22-keescook@chromium.org>
+Subject: [PATCH v5 16/36] arm64/kernel: Remove needless Call Frame Information annotations
+Date:   Fri, 31 Jul 2020 16:08:00 -0700
+Message-Id: <20200731230820.1742553-17-keescook@chromium.org>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200731230820.1742553-1-keescook@chromium.org>
 References: <20200731230820.1742553-1-keescook@chromium.org>
@@ -85,34 +85,36 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-We don't want to depend on the linker's orphan section placement
-heuristics as these can vary between linkers, and may change between
-versions. All sections need to be explicitly handled in the linker
-script.
+Remove last instance of an .eh_frame section by removing the needless Call
+Frame Information annotations which were likely leftovers from 32-bit arm.
 
-With all sections now handled, enable orphan section warnings.
-
+Suggested-by: Ard Biesheuvel <ardb@kernel.org>
 Acked-by: Will Deacon <will@kernel.org>
 Signed-off-by: Kees Cook <keescook@chromium.org>
 ---
- arch/arm64/Makefile | 4 ++++
- 1 file changed, 4 insertions(+)
+ arch/arm64/kernel/smccc-call.S | 2 --
+ 1 file changed, 2 deletions(-)
 
-diff --git a/arch/arm64/Makefile b/arch/arm64/Makefile
-index 35de43c29873..b8a3142db0dd 100644
---- a/arch/arm64/Makefile
-+++ b/arch/arm64/Makefile
-@@ -29,6 +29,10 @@ LDFLAGS_vmlinux	+= --fix-cortex-a53-843419
-   endif
- endif
+diff --git a/arch/arm64/kernel/smccc-call.S b/arch/arm64/kernel/smccc-call.S
+index 1f93809528a4..d62447964ed9 100644
+--- a/arch/arm64/kernel/smccc-call.S
++++ b/arch/arm64/kernel/smccc-call.S
+@@ -9,7 +9,6 @@
+ #include <asm/assembler.h>
  
-+# We never want expected sections to be placed heuristically by the
-+# linker. All sections should be explicitly named in the linker script.
-+LDFLAGS_vmlinux += --orphan-handling=warn
-+
- ifeq ($(CONFIG_ARM64_USE_LSE_ATOMICS), y)
-   ifneq ($(CONFIG_ARM64_LSE_ATOMICS), y)
- $(warning LSE atomics not supported by binutils)
+ 	.macro SMCCC instr
+-	.cfi_startproc
+ 	\instr	#0
+ 	ldr	x4, [sp]
+ 	stp	x0, x1, [x4, #ARM_SMCCC_RES_X0_OFFS]
+@@ -21,7 +20,6 @@
+ 	b.ne	1f
+ 	str	x6, [x4, ARM_SMCCC_QUIRK_STATE_OFFS]
+ 1:	ret
+-	.cfi_endproc
+ 	.endm
+ 
+ /*
 -- 
 2.25.1
 
