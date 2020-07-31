@@ -8,51 +8,51 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C40E1C433E0
-	for <linux-efi@archiver.kernel.org>; Fri, 31 Jul 2020 23:18:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 68838C433E1
+	for <linux-efi@archiver.kernel.org>; Fri, 31 Jul 2020 23:18:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A189D20791
-	for <linux-efi@archiver.kernel.org>; Fri, 31 Jul 2020 23:18:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3FC4C2076B
+	for <linux-efi@archiver.kernel.org>; Fri, 31 Jul 2020 23:18:58 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="XLAgtFMg"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="mhl2cYQ2"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727777AbgGaXSN (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 31 Jul 2020 19:18:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47286 "EHLO
+        id S1727050AbgGaXS5 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 31 Jul 2020 19:18:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47288 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727042AbgGaXSM (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 31 Jul 2020 19:18:12 -0400
-Received: from mail-pg1-x542.google.com (mail-pg1-x542.google.com [IPv6:2607:f8b0:4864:20::542])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9BEF5C061757
-        for <linux-efi@vger.kernel.org>; Fri, 31 Jul 2020 16:18:12 -0700 (PDT)
-Received: by mail-pg1-x542.google.com with SMTP id k27so16808347pgm.2
-        for <linux-efi@vger.kernel.org>; Fri, 31 Jul 2020 16:18:12 -0700 (PDT)
+        with ESMTP id S1726471AbgGaXSN (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 31 Jul 2020 19:18:13 -0400
+Received: from mail-pl1-x644.google.com (mail-pl1-x644.google.com [IPv6:2607:f8b0:4864:20::644])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 10277C06174A
+        for <linux-efi@vger.kernel.org>; Fri, 31 Jul 2020 16:18:13 -0700 (PDT)
+Received: by mail-pl1-x644.google.com with SMTP id r4so7475786pls.2
+        for <linux-efi@vger.kernel.org>; Fri, 31 Jul 2020 16:18:13 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=chromium.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=GYWiGkzrodMZw8E6moJnKNf+2pJurSr6gU0bXIJriLs=;
-        b=XLAgtFMgltivYzdrmr7mPeCf/STVStGznvQ9AetuyotpG77ihapGJPSOw6e/9bGeJC
-         hnPfgK4hvRPSwIXsU3jsGjxizKoPAk/GU0DAj6GDqHdxtQmLultetRDJHUsYBQ5wLmRe
-         GyZCYcSM9scCXDQH2r7rsPLe7prnm0EXpd4kU=
+        bh=OztuNRy+U3SEjaM8AjX3NHKuvNzCSaFSb4g4nlKxjN8=;
+        b=mhl2cYQ2YEfGFzqu0lUm7PTEdf3xYEpybnJ2cfLPuY6LR4v/YBY5dJ0ivTK2K5UAQM
+         0k9arXuQB4cv1bpNG0r3VncPs3HFypojskLqEB3mHI/LVxckqJONf2cBzIIP4It97oIL
+         ccOz8l1eiz5ARWhIbuGZYnApCYc1UDxK86u0k=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=GYWiGkzrodMZw8E6moJnKNf+2pJurSr6gU0bXIJriLs=;
-        b=tYHrfAIGk6HVH0oVIHejEtXEO79jIUQvudmniVag+K66CfKI/g9AilB9AydvBe5Kxm
-         TmgNUGMZ21B9HRla8FBAlk3lGoqMGSuSx/mTfSUAUDMKrB1XcKMubxUeDwbapkQKtClk
-         bKWJv7TWH/rPnkRxvP006htc/hDExdhJjxKnYu1i+M6eTxe4phxOaJXev861hW8a6Hk8
-         m8yhE32fCDzp7HxuPOGrT7l3Zeg0YXEWVPXkAY4oRkbnifoI2gssGYd/COR6Jx+a3F+G
-         h4qbatZUvTkO/5MhckWr2zfY7lHeIykWzLRTCCGNu1zVFjJrJRLy63Sl+LiecilGCfO2
-         Zh3A==
-X-Gm-Message-State: AOAM531xO/62Q3O34BL76ITvW5Zm3VmH4xnZA55a2Rg+rL5r/InfW2TQ
-        Q/Hbjh/NxOhk9Z+Nkru7RqdKGw==
-X-Google-Smtp-Source: ABdhPJwz7lNV75l53ANINXJYmgu5YglRuap1WdUm9GJ6Hh16kc46QlK2SQ2/0EKz7ozsRQIWIWRvRg==
-X-Received: by 2002:a62:1c8b:: with SMTP id c133mr5904939pfc.134.1596237492142;
+        bh=OztuNRy+U3SEjaM8AjX3NHKuvNzCSaFSb4g4nlKxjN8=;
+        b=nQDo+odCbG3+XYBfQ01kmPM3+nk2Vd67hyoTJ1Yrq9imobPP8nAUsLAZ6l6xqRV2a2
+         EaI4o7ZUq3rMqETL1Fi+5cGSNq3Ph86gIhR/yVC4UmPi/3VxQbRjI+m31sD6B6XPnUtT
+         HHFdydtfFHilZL+YZ4nK1q6lvjlM63jGH+dPX69nejFRFBNkOUvdnRKQKmg/WRH8U/N6
+         lHieImMymJCmDwh8uRt0nzhK1+OwniBInU+JeaXQjUcbkmEPjPcgcOwhRg2lFtt6Ov8o
+         a+rBGZe2aY+wtJ1mD1KzMTSzC9Opge6VjjN2t/5pz3iLRQXf5FvzlJVPZwYyUw8m8WzF
+         uFKQ==
+X-Gm-Message-State: AOAM531B6S9ufZvxNXtC1qJEySSY+0gQnRr0LWONTgmXZnCXW4OYmEao
+        YZxt77luaAhaRWjmq2lgEsLPCw==
+X-Google-Smtp-Source: ABdhPJy7boJ2rVpqxGdhrmjmUcJo5jNiV0bmJoTaMG0L5+Tg8lheY4n/pMplx9rYVCtqWI1ZntGMZg==
+X-Received: by 2002:a17:90a:6c97:: with SMTP id y23mr6284010pjj.28.1596237492647;
         Fri, 31 Jul 2020 16:18:12 -0700 (PDT)
 Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
-        by smtp.gmail.com with ESMTPSA id q7sm6300502pfl.156.2020.07.31.16.18.11
+        by smtp.gmail.com with ESMTPSA id z9sm11932082pgh.94.2020.07.31.16.18.11
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
         Fri, 31 Jul 2020 16:18:11 -0700 (PDT)
 From:   Kees Cook <keescook@chromium.org>
@@ -73,9 +73,9 @@ Cc:     Kees Cook <keescook@chromium.org>,
         clang-built-linux@googlegroups.com, linux-arch@vger.kernel.org,
         linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v5 28/36] x86/asm: Avoid generating unused kprobe sections
-Date:   Fri, 31 Jul 2020 16:08:12 -0700
-Message-Id: <20200731230820.1742553-29-keescook@chromium.org>
+Subject: [PATCH v5 19/36] arm64/build: Add missing DWARF sections
+Date:   Fri, 31 Jul 2020 16:08:03 -0700
+Message-Id: <20200731230820.1742553-20-keescook@chromium.org>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200731230820.1742553-1-keescook@chromium.org>
 References: <20200731230820.1742553-1-keescook@chromium.org>
@@ -86,35 +86,25 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-When !CONFIG_KPROBES, do not generate kprobe sections. This makes
-sure there are no unexpected sections encountered by the linker scripts.
+Explicitly include DWARF sections when they're present in the build.
 
 Signed-off-by: Kees Cook <keescook@chromium.org>
 ---
- arch/x86/include/asm/asm.h | 6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
+ arch/arm64/kernel/vmlinux.lds.S | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/arch/x86/include/asm/asm.h b/arch/x86/include/asm/asm.h
-index 0f63585edf5f..92feec0f0a12 100644
---- a/arch/x86/include/asm/asm.h
-+++ b/arch/x86/include/asm/asm.h
-@@ -138,11 +138,15 @@
- # define _ASM_EXTABLE_FAULT(from, to)				\
- 	_ASM_EXTABLE_HANDLE(from, to, ex_handler_fault)
+diff --git a/arch/arm64/kernel/vmlinux.lds.S b/arch/arm64/kernel/vmlinux.lds.S
+index 5c1960406b08..4cf825301c3a 100644
+--- a/arch/arm64/kernel/vmlinux.lds.S
++++ b/arch/arm64/kernel/vmlinux.lds.S
+@@ -240,6 +240,7 @@ SECTIONS
+ 	_end = .;
  
--# define _ASM_NOKPROBE(entry)					\
-+# ifdef CONFIG_KPROBES
-+#  define _ASM_NOKPROBE(entry)					\
- 	.pushsection "_kprobe_blacklist","aw" ;			\
- 	_ASM_ALIGN ;						\
- 	_ASM_PTR (entry);					\
- 	.popsection
-+# else
-+#  define _ASM_NOKPROBE(entry)
-+# endif
+ 	STABS_DEBUG
++	DWARF_DEBUG
+ 	ELF_DETAILS
  
- #else
- # define _EXPAND_EXTABLE_HANDLE(x) #x
+ 	HEAD_SYMBOLS
 -- 
 2.25.1
 
