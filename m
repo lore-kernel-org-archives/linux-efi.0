@@ -5,61 +5,62 @@ X-Spam-Level:
 X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 43C86C433DF
-	for <linux-efi@archiver.kernel.org>; Fri, 31 Jul 2020 23:08:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 28EDEC433DF
+	for <linux-efi@archiver.kernel.org>; Fri, 31 Jul 2020 23:08:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1625D2063A
-	for <linux-efi@archiver.kernel.org>; Fri, 31 Jul 2020 23:08:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F013922B3F
+	for <linux-efi@archiver.kernel.org>; Fri, 31 Jul 2020 23:08:40 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="I2t5q3EB"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="JmjzOVU/"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726932AbgGaXId (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 31 Jul 2020 19:08:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45734 "EHLO
+        id S1727067AbgGaXIi (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 31 Jul 2020 19:08:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45766 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726804AbgGaXId (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 31 Jul 2020 19:08:33 -0400
-Received: from mail-pl1-x643.google.com (mail-pl1-x643.google.com [IPv6:2607:f8b0:4864:20::643])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CCFDEC06179E
-        for <linux-efi@vger.kernel.org>; Fri, 31 Jul 2020 16:08:32 -0700 (PDT)
-Received: by mail-pl1-x643.google.com with SMTP id o1so18116810plk.1
-        for <linux-efi@vger.kernel.org>; Fri, 31 Jul 2020 16:08:32 -0700 (PDT)
+        with ESMTP id S1726807AbgGaXIh (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 31 Jul 2020 19:08:37 -0400
+Received: from mail-pf1-x442.google.com (mail-pf1-x442.google.com [IPv6:2607:f8b0:4864:20::442])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5F822C06174A
+        for <linux-efi@vger.kernel.org>; Fri, 31 Jul 2020 16:08:37 -0700 (PDT)
+Received: by mail-pf1-x442.google.com with SMTP id s26so15178381pfm.4
+        for <linux-efi@vger.kernel.org>; Fri, 31 Jul 2020 16:08:37 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=chromium.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=Oj0JTp0iqi1GihJzW9z0GKQvDoXirBrdmVyY4Bh4CEw=;
-        b=I2t5q3EBqwnltmAS7q0OrrPpY094M59hezmnLcIULkMGdVotacbwos0bUyNY8Qo7UW
-         5B9WjiE9krbE0gsR7FuEHHXJHXmpjyUbGd3nncly9xJmQWGhXPY7dG9Zxaxp9z9A9mGY
-         a/sT85HyPr6nBhcoJFB/7T8s3fi6jGiEvsAMk=
+        bh=/1/CQp/9TCFtUhmrbGSN+G+eKG6hQ9pjXSEZQo4Ae9Q=;
+        b=JmjzOVU/RaXlOiFFOHk7V8/AgGdI46MzdU9wv+02d4f4NTpnQkxZxK1sxR8JoEbPgi
+         ekZ642W7K0Uu+DwjmLOg0sT8EtA4LTkfZsXl74fPoot53WoyOF6ezZtw8E07jBUy0kCC
+         cNh+9RsDnj6ZhCGVfH637wTcaBuJyL8eFcxd4=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=Oj0JTp0iqi1GihJzW9z0GKQvDoXirBrdmVyY4Bh4CEw=;
-        b=mdLDCCpqLY+1Ipshyar+OJ9MDOvmFBl3SWNv93YtKRtti914LPJ85DkFbrU3ktHvNe
-         DulWPBzWnltZzw9Gbenej924Tlj79zGPEF99Yx5wtKwmtLHdAF7OOGIt2hnO0JIFEhla
-         T3HW62RaMoFBl5mnOxlrLA6FhlyD/IWIxJmmW0VR6s0VDxCeRgX7sAgIsu17MsS3fmXs
-         cLRuMLEzLJFMQ8qU47Rh8iGgtf87T0wD482ssHtQo5FJN4Rwy8BwaD09uToc/sUB1Zmo
-         XJAzu4VBNSPayDeFUyQBA157famrTeH48bd3p5sA+l98s8Patjzq6KBMTpxGm1jD8wol
-         LixQ==
-X-Gm-Message-State: AOAM533YD+hiw2bIAsNdGE9HfzrJsvYIo+ershIN79GALjQOoHk+mtuH
-        +5snch8w7TWXU9Ce3FnwOQQHwQ==
-X-Google-Smtp-Source: ABdhPJwYw/AUh2eGojEQV7vm2t+ZXdHCR6d3LIaxKtl06xeidhJja+cbMxLWJ3Pii/Hx94KOAGh76A==
-X-Received: by 2002:a17:902:b489:: with SMTP id y9mr5166444plr.99.1596236912355;
-        Fri, 31 Jul 2020 16:08:32 -0700 (PDT)
+        bh=/1/CQp/9TCFtUhmrbGSN+G+eKG6hQ9pjXSEZQo4Ae9Q=;
+        b=hSOhzUj1YQRjLAsB7iKpx6DTX0cehs3jasM6bPDPT/hWu5AqHt130H5TBadvhoiYwd
+         857q2fUSnvMt1ntvfd4uS7H5yKVXGgBLiD21jGvBLqOdyX+b764m7/lTWF1tjGuMfFwL
+         v0BOem49QYiKD1FxDDFFae2VxiqImy4K2vnI4ESOPn7WbW1qm+f+PXkXZHf+g3IjCHf3
+         EWfo18pf90ubUxZWTqqAUAlQzMAzZYgnZ8i68zGuR0sz67NPF8bHeRSeAWQHTawqHsaj
+         lqMGB+HqR+70XTrRsOBVmuU4fjpTUJ1ocJqxAFJTki7mdIixWtKdlCA3D45aK4UVCTEJ
+         TMMg==
+X-Gm-Message-State: AOAM5320LfKCMwt6mAsteUFEG/tiSniNkPH4CHey1+WFMwWlRTW+ERlO
+        Soc2fTV7huEqCFjGFUoFm09GUA==
+X-Google-Smtp-Source: ABdhPJzxNgTd2XHSmAHQMBraWG3bmYByy98gr1UqwK3Ga3Zigw7n1puB/nA4EpZvqv2upYIo490LwQ==
+X-Received: by 2002:a63:5613:: with SMTP id k19mr5940172pgb.424.1596236916880;
+        Fri, 31 Jul 2020 16:08:36 -0700 (PDT)
 Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
-        by smtp.gmail.com with ESMTPSA id b185sm11019488pfa.148.2020.07.31.16.08.30
+        by smtp.gmail.com with ESMTPSA id s22sm11167471pgv.43.2020.07.31.16.08.32
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 31 Jul 2020 16:08:30 -0700 (PDT)
+        Fri, 31 Jul 2020 16:08:35 -0700 (PDT)
 From:   Kees Cook <keescook@chromium.org>
 To:     Thomas Gleixner <tglx@linutronix.de>, Will Deacon <will@kernel.org>
 Cc:     Kees Cook <keescook@chromium.org>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Nick Desaulniers <ndesaulniers@google.com>,
         Arvind Sankar <nivedita@alum.mit.edu>,
+        Nick Desaulniers <ndesaulniers@google.com>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Fangrui Song <maskray@google.com>,
         Sedat Dilek <sedat.dilek@gmail.com>,
         Catalin Marinas <catalin.marinas@arm.com>,
         Mark Rutland <mark.rutland@arm.com>,
@@ -73,9 +74,9 @@ Cc:     Kees Cook <keescook@chromium.org>,
         clang-built-linux@googlegroups.com, linux-arch@vger.kernel.org,
         linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v5 02/36] x86/boot/compressed: Force hidden visibility for all symbol references
-Date:   Fri, 31 Jul 2020 16:07:46 -0700
-Message-Id: <20200731230820.1742553-3-keescook@chromium.org>
+Subject: [PATCH v5 06/36] x86/boot: Remove run-time relocations from head_{32,64}.S
+Date:   Fri, 31 Jul 2020 16:07:50 -0700
+Message-Id: <20200731230820.1742553-7-keescook@chromium.org>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200731230820.1742553-1-keescook@chromium.org>
 References: <20200731230820.1742553-1-keescook@chromium.org>
@@ -86,110 +87,127 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Ard Biesheuvel <ardb@kernel.org>
+From: Arvind Sankar <nivedita@alum.mit.edu>
 
-Eliminate all GOT entries in the decompressor binary, by forcing hidden
-visibility for all symbol references, which informs the compiler that
-such references will be resolved at link time without the need for
-allocating GOT entries.
+The BFD linker generates run-time relocations for z_input_len and
+z_output_len, even though they are absolute symbols.
 
-To ensure that no GOT entries will creep back in, add an assertion to
-the decompressor linker script that will fire if the .got section has
-a non-zero size.
+This is fixed for binutils-2.35 [1]. Work around this for earlier
+versions by defining two variables input_len and output_len in addition
+to the symbols, and use them via position-independent references.
 
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+This eliminates the last two run-time relocations in the head code and
+allows us to drop the -z noreloc-overflow flag to the linker.
+
+Move the -pie and --no-dynamic-linker LDFLAGS to LDFLAGS_vmlinux instead
+of KBUILD_LDFLAGS. There shouldn't be anything else getting linked, but
+this is the more logical location for these flags, and modversions might
+call the linker if an EXPORT_SYMBOL is left over accidentally in one of
+the decompressors.
+
+[1] https://sourceware.org/bugzilla/show_bug.cgi?id=25754
+
 Tested-by: Nick Desaulniers <ndesaulniers@google.com>
 Reviewed-by: Kees Cook <keescook@chromium.org>
-Acked-by: Arvind Sankar <nivedita@alum.mit.edu>
-Link: https://lore.kernel.org/r/20200523120021.34996-3-ardb@kernel.org
-[Arvind: move hidden.h to include/linux instead of making a copy]
+Reviewed-by: Ard Biesheuvel <ardb@kernel.org>
+Reviewed-by: Fangrui Song <maskray@google.com>
 Tested-by: Sedat Dilek <sedat.dilek@gmail.com>
 Signed-off-by: Arvind Sankar <nivedita@alum.mit.edu>
 Signed-off-by: Kees Cook <keescook@chromium.org>
 ---
- arch/x86/boot/compressed/Makefile      |  1 +
- arch/x86/boot/compressed/vmlinux.lds.S |  1 +
- drivers/firmware/efi/libstub/Makefile  |  2 +-
- drivers/firmware/efi/libstub/hidden.h  |  6 ------
- include/linux/hidden.h                 | 19 +++++++++++++++++++
- 5 files changed, 22 insertions(+), 7 deletions(-)
- delete mode 100644 drivers/firmware/efi/libstub/hidden.h
- create mode 100644 include/linux/hidden.h
+ arch/x86/boot/compressed/Makefile  | 12 ++----------
+ arch/x86/boot/compressed/head_32.S | 17 ++++++++---------
+ arch/x86/boot/compressed/head_64.S |  4 ++--
+ arch/x86/boot/compressed/mkpiggy.c |  6 ++++++
+ 4 files changed, 18 insertions(+), 21 deletions(-)
 
 diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
-index 5a828fde7a42..489fea16bcfb 100644
+index 489fea16bcfb..7db0102a573d 100644
 --- a/arch/x86/boot/compressed/Makefile
 +++ b/arch/x86/boot/compressed/Makefile
-@@ -42,6 +42,7 @@ KBUILD_CFLAGS += $(call cc-disable-warning, gnu)
- KBUILD_CFLAGS += -Wno-pointer-sign
- KBUILD_CFLAGS += $(call cc-option,-fmacro-prefix-map=$(srctree)/=)
- KBUILD_CFLAGS += -fno-asynchronous-unwind-tables
-+KBUILD_CFLAGS += -include $(srctree)/include/linux/hidden.h
+@@ -51,16 +51,8 @@ UBSAN_SANITIZE :=n
+ KBUILD_LDFLAGS := -m elf_$(UTS_MACHINE)
+ # Compressed kernel should be built as PIE since it may be loaded at any
+ # address by the bootloader.
+-ifeq ($(CONFIG_X86_32),y)
+-KBUILD_LDFLAGS += $(call ld-option, -pie) $(call ld-option, --no-dynamic-linker)
+-else
+-# To build 64-bit compressed kernel as PIE, we disable relocation
+-# overflow check to avoid relocation overflow error with a new linker
+-# command-line option, -z noreloc-overflow.
+-KBUILD_LDFLAGS += $(shell $(LD) --help 2>&1 | grep -q "\-z noreloc-overflow" \
+-	&& echo "-z noreloc-overflow -pie --no-dynamic-linker")
+-endif
+-LDFLAGS_vmlinux := -T
++LDFLAGS_vmlinux := $(call ld-option, -pie) $(call ld-option, --no-dynamic-linker)
++LDFLAGS_vmlinux += -T
  
- KBUILD_AFLAGS  := $(KBUILD_CFLAGS) -D__ASSEMBLY__
- GCOV_PROFILE := n
-diff --git a/arch/x86/boot/compressed/vmlinux.lds.S b/arch/x86/boot/compressed/vmlinux.lds.S
-index b17d218ccdf9..4bcc943842ab 100644
---- a/arch/x86/boot/compressed/vmlinux.lds.S
-+++ b/arch/x86/boot/compressed/vmlinux.lds.S
-@@ -81,6 +81,7 @@ SECTIONS
- 	DISCARDS
- }
+ hostprogs	:= mkpiggy
+ HOST_EXTRACFLAGS += -I$(srctree)/tools/include
+diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
+index 8c1a4f5610f5..659fad53ca82 100644
+--- a/arch/x86/boot/compressed/head_32.S
++++ b/arch/x86/boot/compressed/head_32.S
+@@ -178,18 +178,17 @@ SYM_FUNC_START_LOCAL_NOALIGN(.Lrelocated)
+ /*
+  * Do the extraction, and jump to the new kernel..
+  */
+-				/* push arguments for extract_kernel: */
+-	pushl	$z_output_len	/* decompressed length, end of relocs */
++	/* push arguments for extract_kernel: */
  
-+ASSERT(SIZEOF(.got) == 0, "Unexpected GOT entries detected!")
- #ifdef CONFIG_X86_64
- ASSERT(SIZEOF(.got.plt) == 0 || SIZEOF(.got.plt) == 0x18, "Unexpected GOT/PLT entries detected!")
- #else
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index 75daaf20374e..b4f8c80cc591 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -26,7 +26,7 @@ cflags-$(CONFIG_ARM)		:= $(subst $(CC_FLAGS_FTRACE),,$(KBUILD_CFLAGS)) \
- cflags-$(CONFIG_EFI_GENERIC_STUB) += -I$(srctree)/scripts/dtc/libfdt
+-	pushl	%ebp		/* output address */
+-
+-	pushl	$z_input_len	/* input_len */
++	pushl	output_len@GOTOFF(%ebx)	/* decompressed length, end of relocs */
++	pushl	%ebp			/* output address */
++	pushl	input_len@GOTOFF(%ebx)	/* input_len */
+ 	leal	input_data@GOTOFF(%ebx), %eax
+-	pushl	%eax		/* input_data */
++	pushl	%eax			/* input_data */
+ 	leal	boot_heap@GOTOFF(%ebx), %eax
+-	pushl	%eax		/* heap area */
+-	pushl	%esi		/* real mode pointer */
+-	call	extract_kernel	/* returns kernel location in %eax */
++	pushl	%eax			/* heap area */
++	pushl	%esi			/* real mode pointer */
++	call	extract_kernel		/* returns kernel location in %eax */
+ 	addl	$24, %esp
  
- KBUILD_CFLAGS			:= $(cflags-y) -Os -DDISABLE_BRANCH_PROFILING \
--				   -include $(srctree)/drivers/firmware/efi/libstub/hidden.h \
-+				   -include $(srctree)/include/linux/hidden.h \
- 				   -D__NO_FORTIFY \
- 				   $(call cc-option,-ffreestanding) \
- 				   $(call cc-option,-fno-stack-protector) \
-diff --git a/drivers/firmware/efi/libstub/hidden.h b/drivers/firmware/efi/libstub/hidden.h
-deleted file mode 100644
-index 3493b041f419..000000000000
---- a/drivers/firmware/efi/libstub/hidden.h
-+++ /dev/null
-@@ -1,6 +0,0 @@
--/* SPDX-License-Identifier: GPL-2.0 */
--/*
-- * To prevent the compiler from emitting GOT-indirected (and thus absolute)
-- * references to any global symbols, override their visibility as 'hidden'
-- */
--#pragma GCC visibility push(hidden)
-diff --git a/include/linux/hidden.h b/include/linux/hidden.h
-new file mode 100644
-index 000000000000..49a17b6b5962
---- /dev/null
-+++ b/include/linux/hidden.h
-@@ -0,0 +1,19 @@
-+/* SPDX-License-Identifier: GPL-2.0 */
-+/*
-+ * When building position independent code with GCC using the -fPIC option,
-+ * (or even the -fPIE one on older versions), it will assume that we are
-+ * building a dynamic object (either a shared library or an executable) that
-+ * may have symbol references that can only be resolved at load time. For a
-+ * variety of reasons (ELF symbol preemption, the CoW footprint of the section
-+ * that is modified by the loader), this results in all references to symbols
-+ * with external linkage to go via entries in the Global Offset Table (GOT),
-+ * which carries absolute addresses which need to be fixed up when the
-+ * executable image is loaded at an offset which is different from its link
-+ * time offset.
-+ *
-+ * Fortunately, there is a way to inform the compiler that such symbol
-+ * references will be satisfied at link time rather than at load time, by
-+ * giving them 'hidden' visibility.
-+ */
+ /*
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index 11429092c224..9e46729cf162 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -534,9 +534,9 @@ SYM_FUNC_START_LOCAL_NOALIGN(.Lrelocated)
+ 	movq	%rsi, %rdi		/* real mode address */
+ 	leaq	boot_heap(%rip), %rsi	/* malloc area for uncompression */
+ 	leaq	input_data(%rip), %rdx  /* input_data */
+-	movl	$z_input_len, %ecx	/* input_len */
++	movl	input_len(%rip), %ecx	/* input_len */
+ 	movq	%rbp, %r8		/* output target address */
+-	movl	$z_output_len, %r9d	/* decompressed length, end of relocs */
++	movl	output_len(%rip), %r9d	/* decompressed length, end of relocs */
+ 	call	extract_kernel		/* returns kernel location in %rax */
+ 	popq	%rsi
+ 
+diff --git a/arch/x86/boot/compressed/mkpiggy.c b/arch/x86/boot/compressed/mkpiggy.c
+index 7e01248765b2..52aa56cdbacc 100644
+--- a/arch/x86/boot/compressed/mkpiggy.c
++++ b/arch/x86/boot/compressed/mkpiggy.c
+@@ -60,6 +60,12 @@ int main(int argc, char *argv[])
+ 	printf(".incbin \"%s\"\n", argv[1]);
+ 	printf("input_data_end:\n");
+ 
++	printf(".section \".rodata\",\"a\",@progbits\n");
++	printf(".globl input_len\n");
++	printf("input_len:\n\t.long %lu\n", ilen);
++	printf(".globl output_len\n");
++	printf("output_len:\n\t.long %lu\n", (unsigned long)olen);
 +
-+#pragma GCC visibility push(hidden)
+ 	retval = 0;
+ bail:
+ 	if (f)
 -- 
 2.25.1
 
