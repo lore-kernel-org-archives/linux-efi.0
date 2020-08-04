@@ -2,60 +2,65 @@ Return-Path: <SRS0=ldvT=BO=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.6 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
+X-Spam-Status: No, score=-20.6 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT,USER_IN_DEF_DKIM_WL
-	autolearn=no autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_GIT,USER_IN_DEF_DKIM_WL autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 195E4C433E1
-	for <linux-efi@archiver.kernel.org>; Tue,  4 Aug 2020 12:41:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BECE7C433DF
+	for <linux-efi@archiver.kernel.org>; Tue,  4 Aug 2020 12:42:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F3F2E21744
-	for <linux-efi@archiver.kernel.org>; Tue,  4 Aug 2020 12:41:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9CA48208C7
+	for <linux-efi@archiver.kernel.org>; Tue,  4 Aug 2020 12:42:01 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="qRIWjL/a"
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="Ea5YjJ7o"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726210AbgHDMlf (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 4 Aug 2020 08:41:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40714 "EHLO
+        id S1727116AbgHDMmA (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 4 Aug 2020 08:42:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40764 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725932AbgHDMlf (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 4 Aug 2020 08:41:35 -0400
-Received: from mail-yb1-xb4a.google.com (mail-yb1-xb4a.google.com [IPv6:2607:f8b0:4864:20::b4a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E40C0C061756
-        for <linux-efi@vger.kernel.org>; Tue,  4 Aug 2020 05:41:34 -0700 (PDT)
-Received: by mail-yb1-xb4a.google.com with SMTP id a14so42930666ybm.13
-        for <linux-efi@vger.kernel.org>; Tue, 04 Aug 2020 05:41:34 -0700 (PDT)
+        with ESMTP id S1727819AbgHDMlr (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 4 Aug 2020 08:41:47 -0400
+Received: from mail-qt1-x84a.google.com (mail-qt1-x84a.google.com [IPv6:2607:f8b0:4864:20::84a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DF141C0617A4
+        for <linux-efi@vger.kernel.org>; Tue,  4 Aug 2020 05:41:45 -0700 (PDT)
+Received: by mail-qt1-x84a.google.com with SMTP id k35so23773369qtk.9
+        for <linux-efi@vger.kernel.org>; Tue, 04 Aug 2020 05:41:45 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=google.com; s=20161025;
-        h=date:message-id:mime-version:subject:from:to:cc;
-        bh=EW4ws3cnCq+yc75UdLo6m+LVSSHzgz4WkI84lcOYn3g=;
-        b=qRIWjL/aEST9Bgmmx1TReXVYXWMihOsuP+mAYj0qjuyBiTphgrU8vG2kDlWWLDxxZc
-         Jg/LIbVqWQjdvN5QE8h4YxR5/B9yyZrsWE8c8qZW41jeLrHYTrlw9Cgi5XREl8IxDRfC
-         co///64tOPGz+FN54l2XLrTcKdQjbLgUiQfL0z3QjR2C4z46DUpqY7w/AgukOpoxYc3p
-         CD9+UVlpekMWPXavUVNf5FWgoZzMzg5BltVr5+w/viNnAaKQBsKSXLhBzBu/rH/ShMam
-         93k5taOEn8vzxT+jZUIfKqfUVPR7WK1vFT7PcRQ0StCmtlNMT8Nh+075v3BYofndZUtW
-         VoeA==
+        h=date:in-reply-to:message-id:mime-version:references:subject:from:to
+         :cc;
+        bh=OJV+wFsSuBAEdua9Kpud4j6ZGzVdRXqmU9/PZhjVLdc=;
+        b=Ea5YjJ7o620kZq8eHnshiekvC4wpoxtU/m2L83KMHr56wGFqcLIiluwTTPIuK6jPtz
+         NIbahZxx/kLpiZOWX4LifN1sYL8ve+GY+nJ4uXKX/NwgeJ66FB0oBHFDCJ7CnFI+jXp5
+         YfjHAXZMMGH3A1RBkM5ekVG/ygZ56FsWNDeUBLLVL1ABwVsRZPV6DZg8v5EyPdnyI/8q
+         u9+woephvoS6hP7AP7QtlnSDcnrQ3oLlLY/jprakwQVQNuaNzYsx0faunrqjJ1Rwi828
+         vpjJ63tAJJETQeQAfpWW300WdlbW294wpGLA7b0wjZ0R/4TF1hESmC/l3kgC9ReY8bHQ
+         oJZg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:message-id:mime-version:subject:from:to:cc;
-        bh=EW4ws3cnCq+yc75UdLo6m+LVSSHzgz4WkI84lcOYn3g=;
-        b=Jl81q8FuhzJkwWHlOEyMpKERqVPdItLakDv5dPmSpTuPFO8N6kdDlKFIoLiRl3iZYZ
-         YYRCBhXuVyIhq5V2tc1cz/1DWdAjG4uiKmcQSZFeoefcYYwpQl7YwenHXvq8TSkCK7Yw
-         VbYEke2eufoJ2Tl6yYbtSef3N0VUhWqI6H6zjsJeilHaRWh9JYB2wb1rNHiFXf4PyeOV
-         rVpF7HAgzfQHIc8s9ohUtZfP1mbgLVsHMiKp90T7culxMuXYqY9XZCGFr+/SOOz0ge66
-         Afnf1fP24v8RHBjHuKFJnjvIhCUjU2EYDShrCqXCSX2u/eWC5MVZCk/bCrTeg88T7WOx
-         qvvg==
-X-Gm-Message-State: AOAM530H9K696E1IqtIACsXCgXCwUf5XpcnnYBcvIZGltbN7rJmu8MDG
-        Vtq/jf21E1vCtaSqMx/yNa/gkjZknMmRe2yF
-X-Google-Smtp-Source: ABdhPJzh3yXfnlrh952yFi751mKOqrTYGBJNP8FaBO9bCdmzHWrwFtNMq9Jua++VtvKtWW7vV9nXY4rjJmmS8ewv
-X-Received: by 2002:a25:cc07:: with SMTP id l7mr33304214ybf.440.1596544893505;
- Tue, 04 Aug 2020 05:41:33 -0700 (PDT)
-Date:   Tue,  4 Aug 2020 14:41:23 +0200
-Message-Id: <cover.1596544734.git.andreyknvl@google.com>
+        h=x-gm-message-state:date:in-reply-to:message-id:mime-version
+         :references:subject:from:to:cc;
+        bh=OJV+wFsSuBAEdua9Kpud4j6ZGzVdRXqmU9/PZhjVLdc=;
+        b=L0txTXhJC4nnxCQhGFEjC/StDXZl6Iz4nhAIvzzHQ+4nsO6eC8LI+tKQbjsP/Mwg7d
+         aV0GSfxvZplL6AZunR6o2A4EOp78cKb4nA/1a3JPGqv2QZyKGIxJZjzQZPe7aX/l9zbv
+         ygiQBc8U6nRodcHH4QNs5LE15UaCVAnGYnwdPfWrI1y87c+winM7vTLKB8l7B8j0emSE
+         FyALEGXL8u6yv/ibHTYaaiU0UpphIoIjrvYKtrqSL95S7bqbYTHjs6GEtR5+skFm4Wjc
+         VyAnlkmwIj3KQ+6xslfWJLyrWMtP6pxqPtEARU5o31N6BKq8Dhu4DSLaD/DT083HLDG3
+         FXrQ==
+X-Gm-Message-State: AOAM5304MSXpVpShUReB3/SGPvj116M+DHaFt6d6hlO8A7GAz48ewC7F
+        y0gH+OZfIEBF8SE3cc/wyQtpikeuAjwXL085
+X-Google-Smtp-Source: ABdhPJxMCD1uy5OtH/rfQcGvmBrhxSjZNftrKmDoPQf463mdE8fRrlNv8GbsPVw+FCZ38SV1RL/Err4XbOOp0GEM
+X-Received: by 2002:a0c:b604:: with SMTP id f4mr15297001qve.68.1596544904936;
+ Tue, 04 Aug 2020 05:41:44 -0700 (PDT)
+Date:   Tue,  4 Aug 2020 14:41:28 +0200
+In-Reply-To: <cover.1596544734.git.andreyknvl@google.com>
+Message-Id: <3063ab1411e92bce36061a96e25b651212e70ba6.1596544734.git.andreyknvl@google.com>
 Mime-Version: 1.0
+References: <cover.1596544734.git.andreyknvl@google.com>
 X-Mailer: git-send-email 2.28.0.163.g6104cc2f0b6-goog
-Subject: [PATCH v2 0/5] kasan: support stack instrumentation for tag-based mode
+Subject: [PATCH v2 5/5] kasan: adjust kasan_stack_oob for tag-based mode
 From:   Andrey Konovalov <andreyknvl@google.com>
 To:     Andrew Morton <akpm@linux-foundation.org>
 Cc:     Andrey Ryabinin <aryabinin@virtuozzo.com>,
@@ -77,32 +82,27 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This goes on top of Walter's patch titled "kasan: fix KASAN unit tests
-for tag-based KASAN" (already in mm tree).
+Use OOB_TAG_OFF as access offset to land the access into the next granule.
 
-Bugzilla link: https://bugzilla.kernel.org/show_bug.cgi?id=203497
+Suggested-by: Walter Wu <walter-zh.wu@mediatek.com>
+Signed-off-by: Andrey Konovalov <andreyknvl@google.com>
+---
+ lib/test_kasan.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Thanks to Walter Wu for debugging and testing.
-
-Changes v1 -> v2:
-- Add efi patch to undefined reference to `efi_enter_virtual_mode'.
-- Reorder attributes for start_kernel().
-
-Andrey Konovalov (5):
-  kasan: don't tag stacks allocated with pagealloc
-  efi: provide empty efi_enter_virtual_mode implementation
-  kasan, arm64: don't instrument functions that enable kasan
-  kasan: allow enabling stack tagging for tag-based mode
-  kasan: adjust kasan_stack_oob for tag-based mode
-
- arch/arm64/kernel/setup.c | 2 +-
- include/linux/efi.h       | 4 ++++
- init/main.c               | 2 +-
- kernel/fork.c             | 3 ++-
- lib/test_kasan.c          | 2 +-
- scripts/Makefile.kasan    | 3 ++-
- 6 files changed, 11 insertions(+), 5 deletions(-)
-
+diff --git a/lib/test_kasan.c b/lib/test_kasan.c
+index 7674616d0c37..5d3f496893ef 100644
+--- a/lib/test_kasan.c
++++ b/lib/test_kasan.c
+@@ -488,7 +488,7 @@ static noinline void __init kasan_global_oob(void)
+ static noinline void __init kasan_stack_oob(void)
+ {
+ 	char stack_array[10];
+-	volatile int i = 0;
++	volatile int i = OOB_TAG_OFF;
+ 	char *p = &stack_array[ARRAY_SIZE(stack_array) + i];
+ 
+ 	pr_info("out-of-bounds on stack\n");
 -- 
 2.28.0.163.g6104cc2f0b6-goog
 
