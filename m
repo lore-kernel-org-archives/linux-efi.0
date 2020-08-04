@@ -5,62 +5,62 @@ X-Spam-Level:
 X-Spam-Status: No, score=-20.6 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT,USER_IN_DEF_DKIM_WL autolearn=ham autolearn_force=no
+	USER_AGENT_GIT,USER_IN_DEF_DKIM_WL autolearn=unavailable autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C5747C433DF
-	for <linux-efi@archiver.kernel.org>; Tue,  4 Aug 2020 12:42:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 239D1C433DF
+	for <linux-efi@archiver.kernel.org>; Tue,  4 Aug 2020 12:42:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A517C208A9
-	for <linux-efi@archiver.kernel.org>; Tue,  4 Aug 2020 12:42:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 05A2E208A9
+	for <linux-efi@archiver.kernel.org>; Tue,  4 Aug 2020 12:42:43 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="epaWaJlt"
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="e/emAKRK"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726282AbgHDMmc (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 4 Aug 2020 08:42:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40758 "EHLO
+        id S1727813AbgHDMmd (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 4 Aug 2020 08:42:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40726 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727069AbgHDMlr (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 4 Aug 2020 08:41:47 -0400
-Received: from mail-wr1-x449.google.com (mail-wr1-x449.google.com [IPv6:2a00:1450:4864:20::449])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 64DD1C0617A0
-        for <linux-efi@vger.kernel.org>; Tue,  4 Aug 2020 05:41:42 -0700 (PDT)
-Received: by mail-wr1-x449.google.com with SMTP id t12so12675297wrp.0
-        for <linux-efi@vger.kernel.org>; Tue, 04 Aug 2020 05:41:42 -0700 (PDT)
+        with ESMTP id S1726986AbgHDMlh (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 4 Aug 2020 08:41:37 -0400
+Received: from mail-wr1-x44a.google.com (mail-wr1-x44a.google.com [IPv6:2a00:1450:4864:20::44a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4CF66C06174A
+        for <linux-efi@vger.kernel.org>; Tue,  4 Aug 2020 05:41:37 -0700 (PDT)
+Received: by mail-wr1-x44a.google.com with SMTP id 89so12586561wrr.15
+        for <linux-efi@vger.kernel.org>; Tue, 04 Aug 2020 05:41:37 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=google.com; s=20161025;
         h=date:in-reply-to:message-id:mime-version:references:subject:from:to
          :cc;
-        bh=KTaExCeIbMBtrg6f3KaFtKJ9kXln1IxZOo4x1K8ywoo=;
-        b=epaWaJlt64ntx42FNABLMyLva14SlmdYcoGzzYGyrXWUnAJnxMu5GEZgilr7YOjQyg
-         rwN+m322Ym4K72DntPYQLTQpUlUsvtp9hOED35dktAjWzCeoMAdqgWFu+8q67qvVGdd0
-         ASSvypkGepo2fVM74GawP/zGW8ARgykh7GWGHusAgWS8l/UBxb0pdkO0TYQ7EmgRfqVS
-         +AhohRsPKYfLCyuszVYf5jaiW3P7HKDO0xMW0AxuHSElSjjWJ6UveE2t2MgCnIL+ItDv
-         /1ed6bLGDRty9mFhZhCq6dEUtquKavGW9+Vz9/sId52Rf88V2RXw/k9gqiVHbxbaBWtN
-         +9hQ==
+        bh=FcKp4QRyFHBBCVHpXykl5mFo5C8EtuBz90+P1+03xoY=;
+        b=e/emAKRKbJkdBeq2q9WKmzagPJvb8gdtqflMVkfA9U+GObzCW9ZK8iDv+fm06/lNOH
+         ajIRbU5BrRbTrBBREu3uaJou2xzNyaOCp+XZbidInFpetFzQFW1x8pTzoRCyj341z+Lk
+         wq4m5lWgeLtpP7STH34Cb53cG+ae0e77L4MzJmeQ/HMqzyEcxWEcW0LZlOw/BlZk7uoa
+         dO5RcM67ErBDoGmZ9vvLhQ54jnpx36h7CmzrXwZGP0KVeFdh2JE5X6xOlJdqsCGf3JGH
+         qx57794JnfkOQH/j1i6yWfIbZmc2qfK2k0FRmQtkn8Nc1oWCF+4s0O93QqCimgEugC/p
+         C7cQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:in-reply-to:message-id:mime-version
          :references:subject:from:to:cc;
-        bh=KTaExCeIbMBtrg6f3KaFtKJ9kXln1IxZOo4x1K8ywoo=;
-        b=Ab8VLR06G6B05Vs+YOpJHU2FSOUU3EyYk1FDCpw44nR9QRzOC/aOgbyVQy74Q/to9b
-         0ZBXe5B/HnTdDUkjzUf5qPrGwPoa0hvs6v4A145dgZI43YuCcOu8OKbtWhgQYo+HLTql
-         geIKnKNfW5wq9AFzytarGOuzbeoJljrZITi+OGtx7uFKGL5hFtRJyy8k4RT6ioZ33bss
-         IgurJcDc/KCc8s5XslccJGdLodzzrNPTnVhfjvyfS0b3V4RsMUmSCFTjE/ZedB57o1O5
-         Yuta+4AxO0gD4WEy0ufpDIW+xCr6uBxn3vPa47o1tbOI+tv71O158xu5gRMz2Mp5REYn
-         0cng==
-X-Gm-Message-State: AOAM530SpJHylOYHuZ3naSvmThoGiSoFgK4mumdLzGYH7wjd1mmMARxd
-        BFbL+3WMDhKw80494fq1Mzt9tvDyDMwrYTPr
-X-Google-Smtp-Source: ABdhPJwWjosW9Y2ZD4qtR2i07CuuW2KOWsc+Y1P+/2KrTNBkB6pCcdGVRsu0tHMa3wVdBR/M1mpyQCpyke7nl0k9
-X-Received: by 2002:a7b:cd93:: with SMTP id y19mr492659wmj.0.1596544900281;
- Tue, 04 Aug 2020 05:41:40 -0700 (PDT)
-Date:   Tue,  4 Aug 2020 14:41:26 +0200
+        bh=FcKp4QRyFHBBCVHpXykl5mFo5C8EtuBz90+P1+03xoY=;
+        b=SZd7UiUw9kJ/BA0hldKDsCHn2utT+SEKV6akCAvfzJiZ3W5ZagKnjm2AdZCXqGD+jb
+         v/+7YlH7+0XVNeBcZmrQ7NKYr/9OebEMcor8Wq0Q1rBMoRdkQa+me4XHjfHxIbFENxj5
+         gKE/uQIa8hIiz8j6JH6WsU/oqHF66VZErhuk2cktVUw9fobf1cJxtEchMQbCxn42EZOG
+         UNAYNezeAHATslcb5M+m18wGtBiQ3V04L3VmwfjRmMqJSbO2BBtOYqDpngtczVZgyPld
+         vVaJjMzTptbjRwtCKL0Nckjz0KdfZGIHEjsG4wrkzTBLhk+FYPFrXJhz4+g9gm0oGm60
+         BEXQ==
+X-Gm-Message-State: AOAM531LyGfHzmLy8iS1iCgguLIc2XJEbrCUhetWp0SpvdT3Rd6uqTAH
+        UPoFnGL4M4texIApVjhz0L4Dl8L2kDotrZDw
+X-Google-Smtp-Source: ABdhPJysUQ4oDqsJhy6xq9sHQOykVWtKsRJrE3eJ3umL4PptPqQvdYk0j95C1HF2RsOBJ7cfXSW95HsjwlUjMNSy
+X-Received: by 2002:a1c:b443:: with SMTP id d64mr4329306wmf.68.1596544895842;
+ Tue, 04 Aug 2020 05:41:35 -0700 (PDT)
+Date:   Tue,  4 Aug 2020 14:41:24 +0200
 In-Reply-To: <cover.1596544734.git.andreyknvl@google.com>
-Message-Id: <26fb6165a17abcf61222eda5184c030fb6b133d1.1596544734.git.andreyknvl@google.com>
+Message-Id: <12d8c678869268dd0884b01271ab592f30792abf.1596544734.git.andreyknvl@google.com>
 Mime-Version: 1.0
 References: <cover.1596544734.git.andreyknvl@google.com>
 X-Mailer: git-send-email 2.28.0.163.g6104cc2f0b6-goog
-Subject: [PATCH v2 3/5] kasan, arm64: don't instrument functions that enable kasan
+Subject: [PATCH v2 1/5] kasan: don't tag stacks allocated with pagealloc
 From:   Andrey Konovalov <andreyknvl@google.com>
 To:     Andrew Morton <akpm@linux-foundation.org>
 Cc:     Andrey Ryabinin <aryabinin@virtuozzo.com>,
@@ -84,50 +84,39 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 This patch prepares Software Tag-Based KASAN for stack tagging support.
 
-With stack tagging enabled, KASAN tags stack variable in each function
-in its prologue. In start_kernel() stack variables get tagged before KASAN
-is enabled via setup_arch()->kasan_init(). As the result the tags for
-start_kernel()'s stack variables end up in the temporary shadow memory.
-Later when KASAN gets enabled, switched to normal shadow, and starts
-checking tags, this leads to false-positive reports, as proper tags are
-missing in normal shadow.
+With Tag-Based KASAN when kernel stacks are allocated via pagealloc
+(which happens when CONFIG_VMAP_STACK is not enabled), they get tagged.
+KASAN instrumentation doesn't expect the sp register to be tagged, and
+this leads to false-positive reports.
 
-Disable KASAN instrumentation for start_kernel(). Also disable it for
-arm64's setup_arch() as a precaution (it doesn't have any stack variables
-right now).
+Fix by resetting the tag of kernel stack pointers after allocation.
 
 Signed-off-by: Andrey Konovalov <andreyknvl@google.com>
 ---
- arch/arm64/kernel/setup.c | 2 +-
- init/main.c               | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+ kernel/fork.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
-index 93b3844cf442..575da075a2b9 100644
---- a/arch/arm64/kernel/setup.c
-+++ b/arch/arm64/kernel/setup.c
-@@ -276,7 +276,7 @@ arch_initcall(reserve_memblock_reserved_regions);
+diff --git a/kernel/fork.c b/kernel/fork.c
+index efc5493203ae..75415f5e647c 100644
+--- a/kernel/fork.c
++++ b/kernel/fork.c
+@@ -261,7 +261,7 @@ static unsigned long *alloc_thread_stack_node(struct task_struct *tsk, int node)
+ 					     THREAD_SIZE_ORDER);
  
- u64 __cpu_logical_map[NR_CPUS] = { [0 ... NR_CPUS-1] = INVALID_HWID };
- 
--void __init setup_arch(char **cmdline_p)
-+void __init __no_sanitize_address setup_arch(char **cmdline_p)
+ 	if (likely(page)) {
+-		tsk->stack = page_address(page);
++		tsk->stack = kasan_reset_tag(page_address(page));
+ 		return tsk->stack;
+ 	}
+ 	return NULL;
+@@ -307,6 +307,7 @@ static unsigned long *alloc_thread_stack_node(struct task_struct *tsk,
  {
- 	init_mm.start_code = (unsigned long) _text;
- 	init_mm.end_code   = (unsigned long) _etext;
-diff --git a/init/main.c b/init/main.c
-index 0ead83e86b5a..7e5e25d9fe42 100644
---- a/init/main.c
-+++ b/init/main.c
-@@ -827,7 +827,7 @@ void __init __weak arch_call_rest_init(void)
- 	rest_init();
+ 	unsigned long *stack;
+ 	stack = kmem_cache_alloc_node(thread_stack_cache, THREADINFO_GFP, node);
++	stack = kasan_reset_tag(stack);
+ 	tsk->stack = stack;
+ 	return stack;
  }
- 
--asmlinkage __visible void __init start_kernel(void)
-+asmlinkage __visible void __init __no_sanitize_address start_kernel(void)
- {
- 	char *command_line;
- 	char *after_dashes;
 -- 
 2.28.0.163.g6104cc2f0b6-goog
 
