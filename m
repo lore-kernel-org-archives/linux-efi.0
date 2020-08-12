@@ -4,63 +4,62 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_INVALID,
 	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 57A23C433DF
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 77599C433E0
 	for <linux-efi@archiver.kernel.org>; Wed, 12 Aug 2020 23:48:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2F4BA2076B
+	by mail.kernel.org (Postfix) with ESMTP id 4FBA5207F7
 	for <linux-efi@archiver.kernel.org>; Wed, 12 Aug 2020 23:48:52 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="FurpFRzZ"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="O0maVcWY"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726664AbgHLXsg (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 12 Aug 2020 19:48:36 -0400
+        id S1726542AbgHLXsv (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 12 Aug 2020 19:48:51 -0400
 Received: from esa3.hgst.iphmx.com ([216.71.153.141]:52579 "EHLO
         esa3.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726126AbgHLXsf (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 12 Aug 2020 19:48:35 -0400
+        with ESMTP id S1726678AbgHLXsi (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 12 Aug 2020 19:48:38 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1597276116; x=1628812116;
+  t=1597276119; x=1628812119;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=M/aLmMoaf+R1cfTR4Mi4doOLt0MJCtDnvFjCl4cVqNk=;
-  b=FurpFRzZ2ZuhQ8LvBsxFVzQdS1WLcpb9fG7TJNHQqAgpketbdIP7VPlT
-   IzAIOHtZGOCbowaAclBa0me2gGLLIbUI5OaMvBHNXS2Xio9V0zz7TK2C1
-   qxXgU+PmWzaWFj0KEq0EffYOpYy+q6ewVfzf0Qb2FBOQ1aZ5DNP1Hf2ou
-   ahRwYwuuhHWO1hj4zYOC/fHMGUuvE2AtzOpmvONNWOguxAQtcTUk93C1u
-   h3+qvl9kbVC/bk/rMdJEGg0TpOz+KMjCJLEtlhdDgj2jyINslY/sLM9P0
-   E2CF7siRVFozbAEwxMJ7Y9sNPu68/hW84RzSUyDsYqe3XF4qTp25aswMV
-   A==;
-IronPort-SDR: VdNjFKQlHDSRckQfSy7BZcxq8U5O7GE4e5oHtJX592fhtkGJQ0gzNsA+FQqxsTrhjRRzXaRsIu
- Q/4agqjSZ5F5cFuJELI7wIB9qf0toc2jjLjxdmYXXF//etrHHAL+cc+n4iK7Kzr6L2Qgk8H1Qe
- kfnLy6XyMJfONu5aEiuKoPg9lg3v3meWkAiTHDD4USZHPi3pE4trPDAq322w3qFecmF06I0+Fk
- EO6Zz9MNYQSSAsjy5sWz0hTY7eZt7BSOsMJxKga9dTxk/VZqw6kWSvlp65zJBjncToyDiMWXKp
- 3QA=
+  bh=T6HBziqjPfpEOovieQwcPFPkqxzZPptEH0FVtMgRIac=;
+  b=O0maVcWYWJm0JpWK7Zwf6EtJmsROG1Z/4hfPcLAge2aIgCFW1e9jK8sv
+   MMJ/OXA9DAlJK3H1Et/3YDxv4CHNx4CY20iFL0z4OwRrglg+3qqw2j83M
+   dCOz8NdYj7S+IDvad51PyBmpwRwUQBdsKXm25jCVRjbo6fzfZCl/KX41W
+   NGM5p6tHfUKmOdwFIFG9MNKXY96CnzyGInRJvwgMj3Z/yDBRB3DRL7ABA
+   tn1XZr5BKv+t0gGMK+Rf4dmh6d5+9+NpnI7ZM39kjK2OLonSRRqJrw3v7
+   eN97rNUNE9n1GUDv4EI8WfFpykT0U/zp3rrf6T44LS3TrdkXiRooTM/Go
+   Q==;
+IronPort-SDR: mdWAqeG/WM5U6Me8T8iwNYlvmIQDsJ91FXsaj+5MUkPyRzFwZXObl73brhzIgp0MpJtNOUUynt
+ LPIqyJVLw+iLgRR8j6R33RZDtr5HdXkxG/fNHjB98LA1ulKorOurhFERZuUSgtkuDsH3+IYcvU
+ ehBxtZDPolGGGF94ASeVKgMqXG07MB7rtXp55TmVHw/5APO3/jVRnrR9Y++7y6ZrbVJ0nK/loc
+ N3VLdizvG8wMSfTxZbZKeL2ujo8YvN5ir8kJ16rzfRRECKKQsEStrk1ddsQKiIvCp7Fae3/nHT
+ UZA=
 X-IronPort-AV: E=Sophos;i="5.76,305,1592841600"; 
-   d="scan'208";a="149145669"
+   d="scan'208";a="149145678"
 Received: from h199-255-45-15.hgst.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 13 Aug 2020 07:48:36 +0800
-IronPort-SDR: FfatyBmrFppYGe30QXMu0ENmEv37kR0JnqgMHgV04Iy2MBoa2QXgy8vebztVwrNp4fsOXe57en
- DErI3Sip2gYQ==
+  by ob1.hgst.iphmx.com with ESMTP; 13 Aug 2020 07:48:39 +0800
+IronPort-SDR: 2cJGOk8TKvdhZPOyjZrNC3E8YJ2J9vCckyrtOKkETXy2gOVZp5ysyYwmbJrLYNLqUPDGcqd9sD
+ li9wemJyYWaA==
 Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Aug 2020 16:35:42 -0700
-IronPort-SDR: P3ovugPv+fDHQa0kXG4xONb+xNMYChSxVI7c1P6E62oC4EfAS3HLQYntJ5lU99kbUACcLa5o7B
- X4ihSkv+Dn0w==
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Aug 2020 16:35:46 -0700
+IronPort-SDR: O+vleDwdgNpf3+2oP8xArSX/++jjUSr7GNwSK8op4zl/Hvx9QM238mzPfMh8vi6BCgYI+Tv0sN
+ qx8sx+6zXXqw==
 WDCIronportException: Internal
 Received: from usa002576.ad.shared (HELO jedi-01.hgst.com) ([10.86.59.59])
-  by uls-op-cesaip01.wdc.com with ESMTP; 12 Aug 2020 16:48:32 -0700
+  by uls-op-cesaip01.wdc.com with ESMTP; 12 Aug 2020 16:48:35 -0700
 From:   Atish Patra <atish.patra@wdc.com>
 To:     linux-kernel@vger.kernel.org
 Cc:     Atish Patra <atish.patra@wdc.com>,
-        Palmer Dabbelt <palmerdabbelt@google.com>,
-        Ard Biesheuvel <ardb@kernel.org>,
         Albert Ou <aou@eecs.berkeley.edu>,
         Alistair Francis <alistair.francis@wdc.com>,
         Andrew Morton <akpm@linux-foundation.org>,
         Anup Patel <anup.patel@wdc.com>,
+        Ard Biesheuvel <ardb@kernel.org>,
         Arvind Sankar <nivedita@alum.mit.edu>,
         Borislav Petkov <bp@suse.de>,
         Greentime Hu <greentime.hu@sifive.com>,
@@ -79,9 +78,9 @@ Cc:     Atish Patra <atish.patra@wdc.com>,
         Will Deacon <will@kernel.org>,
         Daniel Schaefer <daniel.schaefer@hpe.com>,
         "abner.chang@hpe.com" <abner.chang@hpe.com>
-Subject: [PATCH v5 4/9] include: pe.h: Add RISC-V related PE definition
-Date:   Wed, 12 Aug 2020 16:47:53 -0700
-Message-Id: <20200812234758.3563-5-atish.patra@wdc.com>
+Subject: [PATCH v5 7/9] efi: Rename arm-init to efi-init common for all arch
+Date:   Wed, 12 Aug 2020 16:47:56 -0700
+Message-Id: <20200812234758.3563-8-atish.patra@wdc.com>
 X-Mailer: git-send-email 2.24.0
 In-Reply-To: <20200812234758.3563-1-atish.patra@wdc.com>
 References: <20200812234758.3563-1-atish.patra@wdc.com>
@@ -92,30 +91,35 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Define RISC-V related machine types.
+arm-init is responsible for setting up efi runtime and doesn't actually
+do any ARM specific stuff. RISC-V can use the same source code as it is.
+
+Rename it to efi-init so that RISC-V can use it.
 
 Signed-off-by: Atish Patra <atish.patra@wdc.com>
-Reviewed-by: Palmer Dabbelt <palmerdabbelt@google.com>
-Link: https://lore.kernel.org/r/20200415195422.19866-3-atish.patra@wdc.com
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- include/linux/pe.h | 3 +++
- 1 file changed, 3 insertions(+)
+ drivers/firmware/efi/Makefile                   | 2 +-
+ drivers/firmware/efi/{arm-init.c => efi-init.c} | 0
+ 2 files changed, 1 insertion(+), 1 deletion(-)
+ rename drivers/firmware/efi/{arm-init.c => efi-init.c} (100%)
 
-diff --git a/include/linux/pe.h b/include/linux/pe.h
-index 8ad71d763a77..daf09ffffe38 100644
---- a/include/linux/pe.h
-+++ b/include/linux/pe.h
-@@ -55,6 +55,9 @@
- #define	IMAGE_FILE_MACHINE_POWERPC	0x01f0
- #define	IMAGE_FILE_MACHINE_POWERPCFP	0x01f1
- #define	IMAGE_FILE_MACHINE_R4000	0x0166
-+#define	IMAGE_FILE_MACHINE_RISCV32	0x5032
-+#define	IMAGE_FILE_MACHINE_RISCV64	0x5064
-+#define	IMAGE_FILE_MACHINE_RISCV128	0x5128
- #define	IMAGE_FILE_MACHINE_SH3		0x01a2
- #define	IMAGE_FILE_MACHINE_SH3DSP	0x01a3
- #define	IMAGE_FILE_MACHINE_SH3E		0x01a4
+diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+index 7a216984552b..61fd1e8b26fb 100644
+--- a/drivers/firmware/efi/Makefile
++++ b/drivers/firmware/efi/Makefile
+@@ -32,7 +32,7 @@ obj-$(CONFIG_EFI_EMBEDDED_FIRMWARE)	+= embedded-firmware.o
+ fake_map-y				+= fake_mem.o
+ fake_map-$(CONFIG_X86)			+= x86_fake_mem.o
+ 
+-arm-obj-$(CONFIG_EFI)			:= arm-init.o arm-runtime.o
++arm-obj-$(CONFIG_EFI)			:= efi-init.o arm-runtime.o
+ obj-$(CONFIG_ARM)			+= $(arm-obj-y)
+ obj-$(CONFIG_ARM64)			+= $(arm-obj-y)
+ obj-$(CONFIG_EFI_CAPSULE_LOADER)	+= capsule-loader.o
+diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/efi-init.c
+similarity index 100%
+rename from drivers/firmware/efi/arm-init.c
+rename to drivers/firmware/efi/efi-init.c
 -- 
 2.24.0
 
