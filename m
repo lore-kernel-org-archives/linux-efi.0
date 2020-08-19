@@ -7,57 +7,58 @@ X-Spam-Status: No, score=-12.5 required=3.0 tests=BAYES_00,DKIM_INVALID,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C1112C433DF
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DE5A6C433E1
 	for <linux-efi@archiver.kernel.org>; Wed, 19 Aug 2020 22:25:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9F4FC2054F
+	by mail.kernel.org (Postfix) with ESMTP id BB6212076E
 	for <linux-efi@archiver.kernel.org>; Wed, 19 Aug 2020 22:25:26 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="m6RLBJut"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="bx9vDkpG"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728087AbgHSWZK (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        id S1728027AbgHSWZK (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
         Wed, 19 Aug 2020 18:25:10 -0400
-Received: from esa5.hgst.iphmx.com ([216.71.153.144]:16026 "EHLO
+Received: from esa5.hgst.iphmx.com ([216.71.153.144]:16020 "EHLO
         esa5.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727920AbgHSWYz (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 19 Aug 2020 18:24:55 -0400
+        with ESMTP id S1727937AbgHSWY4 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 19 Aug 2020 18:24:56 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1597875895; x=1629411895;
+  t=1597875897; x=1629411897;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=Bk2Gh/XGM+blmye1lG7fqQWiRAnoRdaJAzm3HH3f+As=;
-  b=m6RLBJutwZv54DvbEE0zT5tPbEJhpZVsXJD85n9UPOzmfcyBqiYzHlni
-   l2f78LZJvOLZn7laTe3K19d+PCD7kRbfhhzm05a3hqbGaIIZUbA0SHaJM
-   hB0j2I56cewWycEGn92Z8f20SILUTIv/1ONCgpnmWzrRATPfsHys4WsWx
-   E3FMFPkvFuq7s5CUN0S7QAwSnQ5PuEijJkr3sJVWkW4WVxenNvMZgswEy
-   zVkFG+oADJrgB0qIHkA2ATM4kFLJkmV6RP5j08oL/hywyixdVfvEM/akR
-   85Xhw+MpqRJpA7rR0aHz7sc6E1zSxN2RdrhVYgqykz7/kdGrW80nDOazM
-   g==;
-IronPort-SDR: 3CRM/tM5AjXvHmV9le7gdpeTFzUTPM77OuEaWnEokYZNDzsK3x2AQ8F5jeN0sU56UIXL90uWka
- vXk9xXRLt3+4ODnmHRCH3MnCo2SQLYgIvlfTnBQ+Nwi+UzRORpx0Vx+mJ8QxS6PU6c9pxBVeeP
- vW2MX8sqR3R7Oe9CIWrnGvimcJjLmFaqnB+CfxXXBhfbVUBdK0QeEnFvhW7euAvl11BaiK8Dwi
- D8l0c6lLsr0mdxAQLsNl2cY0FJuEPSuaHKfFYIlNBykYj5rlF6dmZsw6cANo8iLI6P92QqfJzq
- +hA=
+  bh=zACmpNxMVkpKW6XFtwU9imKwJIzxQN1bq0wJXy/9ILY=;
+  b=bx9vDkpGtdAsg3+ohp97Q8jISRVw2uLybAtvkymfGPnfE4v19sjFg1xm
+   7b73HxFXz18jvVOZLAQCmnE0txuzBdH2Cd++lI74YbA2dYRLxVcst9CzI
+   lx0B95tX9JRJjRhOPnYU8mHbJnKuHVnaI7Ow6XCc27FmY8u1F7ixXHNni
+   d4G1BcMQiIg2HJKAVSqQxIlxXNs737nECjb9xgOr5Ar39YxyIi3n3sTFn
+   v6xtM06vUavghxsBpcX9DzjsWRDO5sndXYWkwbecLHD1rPzxgqG/4T+Jm
+   eYPSly3cU2qDjEpYEZKlx1a4RpuBjPWPORum98Z0PV5C1ZFb5ky7sZhW0
+   Q==;
+IronPort-SDR: K3uO0ualYksNaWtA1KmtuhsqubSRckleeOewSbOw7CoaDjNDouc0dx4haf7LiILtlV5EUhr+TL
+ lMPY5+Dg8CmI5nBpsCFtSG3bvAx90P/XCj8Sgh8RVsu3PdnXyb7DIRFmSaypL/5XsDOtqkSf7U
+ CggtDsr43KHvE3fte/oCj3+BKwlyEnSFsKEXhqL0pOcr/qHaTAm2/x/OJZ1t17QPNkBsizZxiB
+ RG2YWAQgL6AZrb4JuR+skoeWYVF+yHR+nUnJtrzr/iOzOEQFNHUYy+QNcanuICDbfEdSssDwwN
+ KXs=
 X-IronPort-AV: E=Sophos;i="5.76,332,1592841600"; 
-   d="scan'208";a="145373616"
+   d="scan'208";a="145373624"
 Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 20 Aug 2020 06:24:38 +0800
-IronPort-SDR: m3lKB1A+CFjYqv/UgMUyjoNV5hgSh0I2AuTFxC211ekcM1t0W2D5UkOzzmJabXc1S17t1bDQCs
- Tu7AJVPAw2Ow==
+  by ob1.hgst.iphmx.com with ESMTP; 20 Aug 2020 06:24:40 +0800
+IronPort-SDR: I8Tv5nn5SXRQoc3rN34BXtYeB68jjtcZV7KCDVjvFeKpdnDpGcTXXV4QE/td3r5296OTWDeI2U
+ HyrfkTCbYAAw==
 Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Aug 2020 15:12:20 -0700
-IronPort-SDR: mR5GQ++tJdfzFRFihTJaMucU1XgxcuUoLxd/gRMkE1wzAwfBUDzf6fR7PnP8j1c4pLfeMm+J6o
- LVUXXgAWTJVA==
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Aug 2020 15:12:22 -0700
+IronPort-SDR: qeASOcpsC5tETXVvFIaf3jgrXLlmjsFJeBHh+JrZXvJm4MzlaZ4rUzKfhLKqp83wnyK6axFW5O
+ pBEe93zZ0aVQ==
 WDCIronportException: Internal
 Received: from 6hj08h2.ad.shared (HELO jedi-01.hgst.com) ([10.86.59.62])
-  by uls-op-cesaip01.wdc.com with ESMTP; 19 Aug 2020 15:24:37 -0700
+  by uls-op-cesaip01.wdc.com with ESMTP; 19 Aug 2020 15:24:39 -0700
 From:   Atish Patra <atish.patra@wdc.com>
 To:     linux-kernel@vger.kernel.org
 Cc:     Atish Patra <atish.patra@wdc.com>,
-        Ard Biesheuvel <ardb@kernel.org>,
+        Anup Patel <anup@brainfault.org>,
         Alistair Francis <alistair.francis@wdc.com>,
         Anup Patel <anup.patel@wdc.com>,
+        Ard Biesheuvel <ardb@kernel.org>,
         Arvind Sankar <nivedita@alum.mit.edu>,
         Damien Le Moal <damien.lemoal@wdc.com>,
         Greentime Hu <greentime.hu@sifive.com>,
@@ -75,9 +76,9 @@ Cc:     Atish Patra <atish.patra@wdc.com>,
         Waiman Long <longman@redhat.com>, Zong Li <zong.li@sifive.com>,
         Daniel Schaefer <daniel.schaefer@hpe.com>,
         "abner.chang@hpe.com" <abner.chang@hpe.com>
-Subject: [PATCH v6 7/9] efi: Rename arm-init to efi-init common for all arch
-Date:   Wed, 19 Aug 2020 15:24:23 -0700
-Message-Id: <20200819222425.30721-8-atish.patra@wdc.com>
+Subject: [PATCH v6 9/9] RISC-V: Add page table dump support for uefi
+Date:   Wed, 19 Aug 2020 15:24:25 -0700
+Message-Id: <20200819222425.30721-10-atish.patra@wdc.com>
 X-Mailer: git-send-email 2.24.0
 In-Reply-To: <20200819222425.30721-1-atish.patra@wdc.com>
 References: <20200819222425.30721-1-atish.patra@wdc.com>
@@ -88,36 +89,131 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-arm-init is responsible for setting up efi runtime and doesn't actually
-do any ARM specific stuff. RISC-V can use the same source code as it is.
+Extend the current page table dump support in RISC-V to include efi
+pages as well.
 
-Rename it to efi-init so that RISC-V can use it.
+Here is the output of efi runtime page table mappings.
+
+---[ UEFI runtime start ]---
+0x0000000020002000-0x0000000020003000 0x00000000be732000 4K PTE D A . . . W R V
+0x0000000020018000-0x0000000020019000 0x00000000be738000 4K PTE D A . . . W R V
+0x000000002002c000-0x000000002002d000 0x00000000be73c000 4K PTE D A . . . W R V
+0x0000000020031000-0x0000000020032000 0x00000000bff61000 4K PTE D A . . X W R V
+---[ UEFI runtime end ]---
 
 Signed-off-by: Atish Patra <atish.patra@wdc.com>
-Acked-by: Ard Biesheuvel <ardb@kernel.org>
+Reviewed-by: Anup Patel <anup@brainfault.org>
 ---
- drivers/firmware/efi/Makefile                   | 2 +-
- drivers/firmware/efi/{arm-init.c => efi-init.c} | 0
- 2 files changed, 1 insertion(+), 1 deletion(-)
- rename drivers/firmware/efi/{arm-init.c => efi-init.c} (100%)
+ arch/riscv/mm/ptdump.c | 48 ++++++++++++++++++++++++++++++++++++------
+ 1 file changed, 42 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-index 7a216984552b..61fd1e8b26fb 100644
---- a/drivers/firmware/efi/Makefile
-+++ b/drivers/firmware/efi/Makefile
-@@ -32,7 +32,7 @@ obj-$(CONFIG_EFI_EMBEDDED_FIRMWARE)	+= embedded-firmware.o
- fake_map-y				+= fake_mem.o
- fake_map-$(CONFIG_X86)			+= x86_fake_mem.o
+diff --git a/arch/riscv/mm/ptdump.c b/arch/riscv/mm/ptdump.c
+index 0831c2e61a8f..ace74dec7492 100644
+--- a/arch/riscv/mm/ptdump.c
++++ b/arch/riscv/mm/ptdump.c
+@@ -3,6 +3,7 @@
+  * Copyright (C) 2019 SiFive
+  */
  
--arm-obj-$(CONFIG_EFI)			:= arm-init.o arm-runtime.o
-+arm-obj-$(CONFIG_EFI)			:= efi-init.o arm-runtime.o
- obj-$(CONFIG_ARM)			+= $(arm-obj-y)
- obj-$(CONFIG_ARM64)			+= $(arm-obj-y)
- obj-$(CONFIG_EFI_CAPSULE_LOADER)	+= capsule-loader.o
-diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/efi-init.c
-similarity index 100%
-rename from drivers/firmware/efi/arm-init.c
-rename to drivers/firmware/efi/efi-init.c
++#include <linux/efi.h>
+ #include <linux/init.h>
+ #include <linux/debugfs.h>
+ #include <linux/seq_file.h>
+@@ -49,6 +50,14 @@ struct addr_marker {
+ 	const char *name;
+ };
+ 
++/* Private information for debugfs */
++struct ptd_mm_info {
++	struct mm_struct		*mm;
++	const struct addr_marker	*markers;
++	unsigned long base_addr;
++	unsigned long end;
++};
++
+ static struct addr_marker address_markers[] = {
+ #ifdef CONFIG_KASAN
+ 	{KASAN_SHADOW_START,	"Kasan shadow start"},
+@@ -68,6 +77,28 @@ static struct addr_marker address_markers[] = {
+ 	{-1, NULL},
+ };
+ 
++static struct ptd_mm_info kernel_ptd_info = {
++	.mm		= &init_mm,
++	.markers	= address_markers,
++	.base_addr	= KERN_VIRT_START,
++	.end		= ULONG_MAX,
++};
++
++#ifdef CONFIG_EFI
++static struct addr_marker efi_addr_markers[] = {
++		{ 0,		"UEFI runtime start" },
++		{ SZ_1G,	"UEFI runtime end" },
++		{ -1,		NULL }
++};
++
++static struct ptd_mm_info efi_ptd_info = {
++	.mm		= &efi_mm,
++	.markers	= efi_addr_markers,
++	.base_addr	= 0,
++	.end		= SZ_2G,
++};
++#endif
++
+ /* Page Table Entry */
+ struct prot_bits {
+ 	u64 mask;
+@@ -245,22 +276,22 @@ static void note_page(struct ptdump_state *pt_st, unsigned long addr,
+ 	}
+ }
+ 
+-static void ptdump_walk(struct seq_file *s)
++static void ptdump_walk(struct seq_file *s, struct ptd_mm_info *pinfo)
+ {
+ 	struct pg_state st = {
+ 		.seq = s,
+-		.marker = address_markers,
++		.marker = pinfo->markers,
+ 		.level = -1,
+ 		.ptdump = {
+ 			.note_page = note_page,
+ 			.range = (struct ptdump_range[]) {
+-				{KERN_VIRT_START, ULONG_MAX},
++				{pinfo->base_addr, pinfo->end},
+ 				{0, 0}
+ 			}
+ 		}
+ 	};
+ 
+-	ptdump_walk_pgd(&st.ptdump, &init_mm, NULL);
++	ptdump_walk_pgd(&st.ptdump, pinfo->mm, NULL);
+ }
+ 
+ void ptdump_check_wx(void)
+@@ -293,7 +324,7 @@ void ptdump_check_wx(void)
+ 
+ static int ptdump_show(struct seq_file *m, void *v)
+ {
+-	ptdump_walk(m);
++	ptdump_walk(m, m->private);
+ 
+ 	return 0;
+ }
+@@ -308,8 +339,13 @@ static int ptdump_init(void)
+ 		for (j = 0; j < ARRAY_SIZE(pte_bits); j++)
+ 			pg_level[i].mask |= pte_bits[j].mask;
+ 
+-	debugfs_create_file("kernel_page_tables", 0400, NULL, NULL,
++	debugfs_create_file("kernel_page_tables", 0400, NULL, &kernel_ptd_info,
+ 			    &ptdump_fops);
++#ifdef CONFIG_EFI
++	if (efi_enabled(EFI_RUNTIME_SERVICES))
++		debugfs_create_file("efi_page_tables", 0400, NULL, &efi_ptd_info,
++				    &ptdump_fops);
++#endif
+ 
+ 	return 0;
+ }
 -- 
 2.24.0
 
