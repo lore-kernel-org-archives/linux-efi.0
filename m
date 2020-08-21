@@ -7,53 +7,53 @@ X-Spam-Status: No, score=-12.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 15D08C433DF
-	for <linux-efi@archiver.kernel.org>; Fri, 21 Aug 2020 19:54:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8935EC433DF
+	for <linux-efi@archiver.kernel.org>; Fri, 21 Aug 2020 19:54:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DE66022B43
-	for <linux-efi@archiver.kernel.org>; Fri, 21 Aug 2020 19:54:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6792A214F1
+	for <linux-efi@archiver.kernel.org>; Fri, 21 Aug 2020 19:54:27 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="TOCS9QXF"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="Sh9vRY/S"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726624AbgHUTyD (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 21 Aug 2020 15:54:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38268 "EHLO
+        id S1726664AbgHUTy0 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 21 Aug 2020 15:54:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38288 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725831AbgHUTyB (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 21 Aug 2020 15:54:01 -0400
-Received: from mail-pl1-x641.google.com (mail-pl1-x641.google.com [IPv6:2607:f8b0:4864:20::641])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AF086C061573
-        for <linux-efi@vger.kernel.org>; Fri, 21 Aug 2020 12:54:00 -0700 (PDT)
-Received: by mail-pl1-x641.google.com with SMTP id h2so1361103plr.0
-        for <linux-efi@vger.kernel.org>; Fri, 21 Aug 2020 12:54:00 -0700 (PDT)
+        with ESMTP id S1726739AbgHUTyI (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 21 Aug 2020 15:54:08 -0400
+Received: from mail-pj1-x1042.google.com (mail-pj1-x1042.google.com [IPv6:2607:f8b0:4864:20::1042])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3C9ADC0617A1
+        for <linux-efi@vger.kernel.org>; Fri, 21 Aug 2020 12:54:05 -0700 (PDT)
+Received: by mail-pj1-x1042.google.com with SMTP id q1so1265772pjd.1
+        for <linux-efi@vger.kernel.org>; Fri, 21 Aug 2020 12:54:05 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=chromium.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=DLGrXrQrOnwocgl0d2lDlCmyCMk0LzJNzAhGu1QupvY=;
-        b=TOCS9QXFvi2sKYKTRr7ee6kse0TEhswUvVuKqMoKi3tljAuSEAQbpwLZo0K9qaprrb
-         0bsJpMg221HwjQsJw+E3oqeYuH95C/KSW+y5f5cGNHh1HZGSHWEcRCqDGVat33dSK1xj
-         BvjA1iJ703xzao5ihIUvP0L+zcmeoM7uEoJQc=
+        bh=0UnndhLoIUPQilO6J2hBojAKmFC4OCA3zcUIp6ZOMro=;
+        b=Sh9vRY/SnIiq5Ijo9twGKuJvIro+2ScdJC7L8hqNb74wvpnUXW74552MBiBf5c9ho/
+         BOqwZzPM/KRTMkdU/ope8Bau3ipHQ8VZu0l4lmJP8/F6K4yUVcmPySQ5Ug2/EOEQUcoO
+         ZdMtW7Ylxl5Y+uUwL1z39akrMncft2tc4GNeQ=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=DLGrXrQrOnwocgl0d2lDlCmyCMk0LzJNzAhGu1QupvY=;
-        b=cKjxoeioMRFIAHio1jQ8cFv41b1psSrB9SQD6lt0ydQQ32WvNGsIP2ydqEnAWjls9Q
-         jDql5KtgRhWCGRVaU9xqatJ3sVQ2UF2RKOjluc2CGyi1KX7G6Ylj+2MuLqj/PORib65K
-         4hSZCwCuNYrfnf/+yYZJlCldRBUmH5OwtiOhWXG/GE4Ap9vBrwBFfIM2fj0cAi9heKF1
-         7Hvm8eryMaVAazaS5OhVVsnAH3+xXBZjJ+xYgNNs59IXzrrCQSW1GmJ1Xra5dGlvSNDd
-         RGXoil1zX+M6jaBOao9z9WFs91sxscC8cbAa6izryJJ5YvntZREYvo1v7/vvzmAoRHH1
-         zX/g==
-X-Gm-Message-State: AOAM532/sJbB0CNvmI/ZDsSub2YC1uiryWcNTQRYV+O+9Lq7qcj3tuOD
-        dj236WhRTz2lfp3clSZafrraHw==
-X-Google-Smtp-Source: ABdhPJxQwlh39B9Zs+13fgS+Mj5RyeBXBYwZUtq7yzKxm2wrKQBpH/KK+GuDxakqY9UBFLOVsfmNSw==
-X-Received: by 2002:a17:902:c211:: with SMTP id 17mr2292148pll.343.1598039640054;
-        Fri, 21 Aug 2020 12:54:00 -0700 (PDT)
+        bh=0UnndhLoIUPQilO6J2hBojAKmFC4OCA3zcUIp6ZOMro=;
+        b=aBuMJxkJOfhEAnhVlc1Jo5wO65wxgde7m0Pwf7RFflkleg1GAcDuEKXlEA3v1pevKd
+         jdJBMTHMOmHsg/jo+4odILI0BpUmv6wnKamNtoV32U71O2RDbqnMU1CV6KOO+BnBNuNG
+         LsKKLVHEaJLOIlxdkJjrrQ8b4RutP9siVro/F76H5SDf4+tsUcYSN6uDems+IIG4owho
+         1ppuBh7oIAXaMf7KX6R4PgUejrl21zPZJqI7qNs1qoEYn1K8ZsR6Szow8P7vLM3svOYF
+         zA/fMeV2k0PLjLrbofSMr/8cYJRgHMxdz02Nre2GWBLYCe1oe9uGAoPaUZzODd8CMps9
+         9rYQ==
+X-Gm-Message-State: AOAM533ckF4XtquH6Ke/ec2eoT2L4NXghTy4nj1txfzM0/ICtqdprdjy
+        zwGnNfGV+eB/4v6tLwMb6QqRpQ==
+X-Google-Smtp-Source: ABdhPJwmCnmOTUQk1XKd+olibX9ZOXDXcitcUxjr93v5Do636rUlnfDVQTuwBKBQgeAByyk2C/5Y4Q==
+X-Received: by 2002:a17:90a:6787:: with SMTP id o7mr3611282pjj.76.1598039644813;
+        Fri, 21 Aug 2020 12:54:04 -0700 (PDT)
 Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
-        by smtp.gmail.com with ESMTPSA id x26sm3139562pfn.218.2020.08.21.12.53.58
+        by smtp.gmail.com with ESMTPSA id e2sm3424685pfm.37.2020.08.21.12.54.01
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 21 Aug 2020 12:53:59 -0700 (PDT)
+        Fri, 21 Aug 2020 12:54:02 -0700 (PDT)
 From:   Kees Cook <keescook@chromium.org>
 To:     Ingo Molnar <mingo@kernel.org>
 Cc:     Kees Cook <keescook@chromium.org>,
@@ -72,9 +72,9 @@ Cc:     Kees Cook <keescook@chromium.org>,
         clang-built-linux@googlegroups.com, linux-arch@vger.kernel.org,
         linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v6 28/29] x86/boot/compressed: Add missing debugging sections to output
-Date:   Fri, 21 Aug 2020 12:43:09 -0700
-Message-Id: <20200821194310.3089815-29-keescook@chromium.org>
+Subject: [PATCH v6 26/29] x86/boot/compressed: Reorganize zero-size section asserts
+Date:   Fri, 21 Aug 2020 12:43:07 -0700
+Message-Id: <20200821194310.3089815-27-keescook@chromium.org>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200821194310.3089815-1-keescook@chromium.org>
 References: <20200821194310.3089815-1-keescook@chromium.org>
@@ -85,27 +85,77 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Include the missing DWARF and STABS sections in the compressed image,
-when they are present.
+For readability, move the zero-sized sections to the end after DISCARDS.
 
 Signed-off-by: Kees Cook <keescook@chromium.org>
 ---
- arch/x86/boot/compressed/vmlinux.lds.S | 2 ++
- 1 file changed, 2 insertions(+)
+ arch/x86/boot/compressed/vmlinux.lds.S | 44 +++++++++++++++-----------
+ 1 file changed, 26 insertions(+), 18 deletions(-)
 
 diff --git a/arch/x86/boot/compressed/vmlinux.lds.S b/arch/x86/boot/compressed/vmlinux.lds.S
-index 02f6feb0e55b..112b2375d021 100644
+index 3c2ee9a5bf43..ca544a16724b 100644
 --- a/arch/x86/boot/compressed/vmlinux.lds.S
 +++ b/arch/x86/boot/compressed/vmlinux.lds.S
-@@ -69,6 +69,8 @@ SECTIONS
- 	. = ALIGN(PAGE_SIZE);	/* keep ZO size page aligned */
- 	_end = .;
- 
-+	STABS_DEBUG
-+	DWARF_DEBUG
+@@ -42,19 +42,6 @@ SECTIONS
+ 		*(.rodata.*)
+ 		_erodata = . ;
+ 	}
+-	.rel.dyn : {
+-		*(.rel.*)
+-	}
+-	.rela.dyn : {
+-		*(.rela.*)
+-	}
+-	.got : {
+-		*(.got)
+-	}
+-	.got.plt : {
+-		*(.got.plt)
+-	}
+-
+ 	.data :	{
+ 		_data = . ;
+ 		*(.data)
+@@ -85,13 +72,34 @@ SECTIONS
  	ELF_DETAILS
  
  	DISCARDS
+-}
+ 
+-ASSERT(SIZEOF(.got) == 0, "Unexpected GOT entries detected!")
++	.got.plt (INFO) : {
++		*(.got.plt)
++	}
++	ASSERT(SIZEOF(.got.plt) == 0 ||
+ #ifdef CONFIG_X86_64
+-ASSERT(SIZEOF(.got.plt) == 0 || SIZEOF(.got.plt) == 0x18, "Unexpected GOT/PLT entries detected!")
++	       SIZEOF(.got.plt) == 0x18,
+ #else
+-ASSERT(SIZEOF(.got.plt) == 0 || SIZEOF(.got.plt) == 0xc, "Unexpected GOT/PLT entries detected!")
++	       SIZEOF(.got.plt) == 0xc,
+ #endif
++	       "Unexpected GOT/PLT entries detected!")
++
++	/*
++	 * Sections that should stay zero sized, which is safer to
++	 * explicitly check instead of blindly discarding.
++	 */
++	.got : {
++		*(.got)
++	}
++	ASSERT(SIZEOF(.got) == 0, "Unexpected GOT entries detected!")
++
++	.rel.dyn : {
++		*(.rel.*)
++	}
++	ASSERT(SIZEOF(.rel.dyn) == 0, "Unexpected run-time relocations (.rel) detected!")
+ 
+-ASSERT(SIZEOF(.rel.dyn) == 0 && SIZEOF(.rela.dyn) == 0, "Unexpected run-time relocations detected!")
++	.rela.dyn : {
++		*(.rela.*)
++	}
++	ASSERT(SIZEOF(.rela.dyn) == 0, "Unexpected run-time relocations (.rela) detected!")
++}
 -- 
 2.25.1
 
