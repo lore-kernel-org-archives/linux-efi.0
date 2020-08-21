@@ -7,57 +7,61 @@ X-Spam-Status: No, score=-12.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 907D5C433E8
-	for <linux-efi@archiver.kernel.org>; Fri, 21 Aug 2020 19:46:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 522B2C433E4
+	for <linux-efi@archiver.kernel.org>; Fri, 21 Aug 2020 19:46:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6B56E2072D
-	for <linux-efi@archiver.kernel.org>; Fri, 21 Aug 2020 19:46:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3026D2072D
+	for <linux-efi@archiver.kernel.org>; Fri, 21 Aug 2020 19:46:21 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="k/ZAm37V"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="S9JWqqSo"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726624AbgHUTqT (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 21 Aug 2020 15:46:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36806 "EHLO
+        id S1727020AbgHUTqU (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 21 Aug 2020 15:46:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36796 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726728AbgHUTob (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 21 Aug 2020 15:44:31 -0400
-Received: from mail-pj1-x1044.google.com (mail-pj1-x1044.google.com [IPv6:2607:f8b0:4864:20::1044])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1A080C061573
-        for <linux-efi@vger.kernel.org>; Fri, 21 Aug 2020 12:44:27 -0700 (PDT)
-Received: by mail-pj1-x1044.google.com with SMTP id mw10so1251216pjb.2
-        for <linux-efi@vger.kernel.org>; Fri, 21 Aug 2020 12:44:27 -0700 (PDT)
+        with ESMTP id S1726716AbgHUTo3 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 21 Aug 2020 15:44:29 -0400
+Received: from mail-pl1-x641.google.com (mail-pl1-x641.google.com [IPv6:2607:f8b0:4864:20::641])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 82001C0617A2
+        for <linux-efi@vger.kernel.org>; Fri, 21 Aug 2020 12:44:25 -0700 (PDT)
+Received: by mail-pl1-x641.google.com with SMTP id k13so1324453plk.13
+        for <linux-efi@vger.kernel.org>; Fri, 21 Aug 2020 12:44:25 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=chromium.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=hbD6RkxNdJTcKmyBxOnwhwhFLlA3pFOZa2+9BxU1UDc=;
-        b=k/ZAm37VP1X0Kj1z64OdTHZH+kgOl4h92xzOZByWNVg3dzcR1sl/edZWM4g7/9LMAK
-         2Od2ht3mMCq299yi5RNhkiAxOqIYIKOtTPXtLMLUZ5+K4ApR8llZWbSSfqPKO9vpdM54
-         u3IVf46CxIC/7wREtzNOaKaD0JXG4ZkzQ/GcQ=
+        bh=LhHa8hwizWicyR7AmABsSaI963QK2ejKgNvGzEzQJyI=;
+        b=S9JWqqSou1s/FK9u3DQ4o9uu0Z66hNrndmRM9lwRys0IRRdCU3reoSB3x/0i4D3/0d
+         FE38SPzh4Sjdcmnpux/wEu2YEvs49KaQ4x96TdKBVxMC1MQo/Pu6aF3uTjn2T4WoNN1/
+         69NCo9CYct3Ga+OFZvqV0/uxV0gjNFTPm/uUo=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=hbD6RkxNdJTcKmyBxOnwhwhFLlA3pFOZa2+9BxU1UDc=;
-        b=FPpKelQKUMav+eh8qaiu0ZslBvIeigfeHTnMMWF+PAUCjGVmOIeeM7SHlZQEemDh60
-         gP5FBcSqWatjd7KV8d2IA9HaNiCT7btAnNL1bR9ttaqXdtUQnQV6E3aDX6LbD9AbpNXm
-         DzuRoijRCxRimGyFLks4tWaHG5jOO4MqtyZXzZ670ARd+5Tz7c90hZK4QhAvoH6V0n+C
-         i8D3T/55XLcfKQL2CHXSbmzA83fz7J2GaHsrIFfq9MwikrefrrBLc/w6yNgsWGzn0oT8
-         j1aSIytvnTdVbH2AhWvUdUOWwOVT+L3ZoHHc1IViFAxkLBy/+Lq/xPiCKpd/lwfXFlAd
-         kqGQ==
-X-Gm-Message-State: AOAM531Io8251wsppIUGYhH/VTqnEzhsZAxwnga6vtv/7+yBOEv5LqQ+
-        DMVsvkavcIuxE3g8TXQcQ5lDbg==
-X-Google-Smtp-Source: ABdhPJxDM/ng4HXO1XmyLDVgiDpkbXCWteROsynvEzbdVUNlJ67l4Ln6nf23ww8a+EXs+mGvmFV0/Q==
-X-Received: by 2002:a17:90a:307:: with SMTP id 7mr3757015pje.37.1598039066650;
-        Fri, 21 Aug 2020 12:44:26 -0700 (PDT)
-Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
-        by smtp.gmail.com with ESMTPSA id 2sm3556730pfv.27.2020.08.21.12.44.21
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        bh=LhHa8hwizWicyR7AmABsSaI963QK2ejKgNvGzEzQJyI=;
+        b=D+7Kc6srjUNxSO3WyPNy4jXKEJ6o3m+CNlCY7NvQqsVmTbiHFemJeiXDYwdHMwXidg
+         k/AQEnakvz1ptd4KllsuR/6ttc6SOyY2YkkbdN6SiLYwvhKLDEXn5E+KquM4dz9w41mE
+         oEu05J4WoReHNxXL+K9+cBXbmZMTLMtibpTAgf4FEq6sazgDEjvKRyMAcEy+l/E1pnH+
+         eRC/8vxAbwg+wjcyy2uaYAuOAzZOgo7Bkxvk9shsGATvMgTsqWgSYqjN5jYul0KGPOLW
+         4u+C5BTePIuonscMzClkpGXysnC5nW3E3YZ2Hx84r5e2YTiGobMbFOtekQAjxvvIlKdb
+         DfXg==
+X-Gm-Message-State: AOAM530EY5VB13OrYDwKiA9vHng1lbq9ylYKEUesPKe6Xu/kHgWsdWe0
+        nwmIR6JfidwYuxQbhMY6eOJtuw==
+X-Google-Smtp-Source: ABdhPJzWv+Ua2gk2lyj7ptkVCQDZcrq9EuhQmtA+I5dIDb9MoFHSNp7AHZuTqGfhtxhz0zpt9GJ9mA==
+X-Received: by 2002:a17:902:b70e:: with SMTP id d14mr3365610pls.253.1598039065065;
         Fri, 21 Aug 2020 12:44:25 -0700 (PDT)
+Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
+        by smtp.gmail.com with ESMTPSA id a193sm3460814pfa.105.2020.08.21.12.44.21
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 21 Aug 2020 12:44:21 -0700 (PDT)
 From:   Kees Cook <keescook@chromium.org>
 To:     Ingo Molnar <mingo@kernel.org>
-Cc:     Kees Cook <keescook@chromium.org>, Will Deacon <will@kernel.org>,
+Cc:     Kees Cook <keescook@chromium.org>,
         Nick Desaulniers <ndesaulniers@google.com>,
+        Jian Cai <jiancai@google.com>,
+        =?UTF-8?q?F=C4=81ng-ru=C3=AC=20S=C3=B2ng?= <maskray@google.com>,
+        Luis Lozano <llozano@google.com>,
+        Manoj Gupta <manojgupta@google.com>, stable@vger.kernel.org,
         Catalin Marinas <catalin.marinas@arm.com>,
         Mark Rutland <mark.rutland@arm.com>,
         Ard Biesheuvel <ardb@kernel.org>,
@@ -72,41 +76,94 @@ Cc:     Kees Cook <keescook@chromium.org>, Will Deacon <will@kernel.org>,
         clang-built-linux@googlegroups.com, linux-arch@vger.kernel.org,
         linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v6 08/29] arm64/mm: Remove needless section quotes
-Date:   Fri, 21 Aug 2020 12:42:49 -0700
-Message-Id: <20200821194310.3089815-9-keescook@chromium.org>
+Subject: [PATCH v6 06/29] vmlinux.lds.h: add PGO and AutoFDO input sections
+Date:   Fri, 21 Aug 2020 12:42:47 -0700
+Message-Id: <20200821194310.3089815-7-keescook@chromium.org>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200821194310.3089815-1-keescook@chromium.org>
 References: <20200821194310.3089815-1-keescook@chromium.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Fix a case of needless quotes in __section(), which Clang doesn't like.
+From: Nick Desaulniers <ndesaulniers@google.com>
 
-Acked-by: Will Deacon <will@kernel.org>
-Reviewed-by: Nick Desaulniers <ndesaulniers@google.com>
+Basically, consider .text.{hot|unlikely|unknown}.* part of .text, too.
+
+When compiling with profiling information (collected via PGO
+instrumentations or AutoFDO sampling), Clang will separate code into
+.text.hot, .text.unlikely, or .text.unknown sections based on profiling
+information. After D79600 (clang-11), these sections will have a
+trailing `.` suffix, ie.  .text.hot., .text.unlikely., .text.unknown..
+
+When using -ffunction-sections together with profiling infomation,
+either explicitly (FGKASLR) or implicitly (LTO), code may be placed in
+sections following the convention:
+.text.hot.<foo>, .text.unlikely.<bar>, .text.unknown.<baz>
+where <foo>, <bar>, and <baz> are functions.  (This produces one section
+per function; we generally try to merge these all back via linker script
+so that we don't have 50k sections).
+
+For the above cases, we need to teach our linker scripts that such
+sections might exist and that we'd explicitly like them grouped
+together, otherwise we can wind up with code outside of the
+_stext/_etext boundaries that might not be mapped properly for some
+architectures, resulting in boot failures.
+
+If the linker script is not told about possible input sections, then
+where the section is placed as output is a heuristic-laiden mess that's
+non-portable between linkers (ie. BFD and LLD), and has resulted in many
+hard to debug bugs.  Kees Cook is working on cleaning this up by adding
+--orphan-handling=warn linker flag used in ARCH=powerpc to additional
+architectures. In the case of linker scripts, borrowing from the Zen of
+Python: explicit is better than implicit.
+
+Also, ld.bfd's internal linker script considers .text.hot AND
+.text.hot.* to be part of .text, as well as .text.unlikely and
+.text.unlikely.*. I didn't see support for .text.unknown.*, and didn't
+see Clang producing such code in our kernel builds, but I see code in
+LLVM that can produce such section names if profiling information is
+missing. That may point to a larger issue with generating or collecting
+profiles, but I would much rather be safe and explicit than have to
+debug yet another issue related to orphan section placement.
+
+Reported-by: Jian Cai <jiancai@google.com>
+Suggested-by: Fāng-ruì Sòng <maskray@google.com>
+Tested-by: Luis Lozano <llozano@google.com>
+Tested-by: Manoj Gupta <manojgupta@google.com>
+Acked-by: Kees Cook <keescook@chromium.org>
+Cc: stable@vger.kernel.org
+Link: https://sourceware.org/git/?p=binutils-gdb.git;a=commitdiff;h=add44f8d5c5c05e08b11e033127a744d61c26aee
+Link: https://sourceware.org/git/?p=binutils-gdb.git;a=commitdiff;h=1de778ed23ce7492c523d5850c6c6dbb34152655
+Link: https://reviews.llvm.org/D79600
+Link: https://bugs.chromium.org/p/chromium/issues/detail?id=1084760
+Debugged-by: Luis Lozano <llozano@google.com>
+Signed-off-by: Nick Desaulniers <ndesaulniers@google.com>
 Signed-off-by: Kees Cook <keescook@chromium.org>
 ---
- arch/arm64/mm/mmu.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ include/asm-generic/vmlinux.lds.h | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
-index 75df62fea1b6..e43c805b7b8c 100644
---- a/arch/arm64/mm/mmu.c
-+++ b/arch/arm64/mm/mmu.c
-@@ -43,7 +43,7 @@
- u64 idmap_t0sz = TCR_T0SZ(VA_BITS);
- u64 idmap_ptrs_per_pgd = PTRS_PER_PGD;
- 
--u64 __section(".mmuoff.data.write") vabits_actual;
-+u64 __section(.mmuoff.data.write) vabits_actual;
- EXPORT_SYMBOL(vabits_actual);
- 
- u64 kimage_voffset __ro_after_init;
+diff --git a/include/asm-generic/vmlinux.lds.h b/include/asm-generic/vmlinux.lds.h
+index 98d013dcc11a..91dcfb91ac45 100644
+--- a/include/asm-generic/vmlinux.lds.h
++++ b/include/asm-generic/vmlinux.lds.h
+@@ -581,7 +581,10 @@
+  */
+ #define TEXT_TEXT							\
+ 		ALIGN_FUNCTION();					\
+-		*(.text.hot TEXT_MAIN .text.fixup .text.unlikely)	\
++		*(.text.hot .text.hot.*)				\
++		*(TEXT_MAIN .text.fixup)				\
++		*(.text.unlikely .text.unlikely.*)			\
++		*(.text.unknown .text.unknown.*)			\
+ 		NOINSTR_TEXT						\
+ 		*(.text..refcount)					\
+ 		*(.ref.text)						\
 -- 
 2.25.1
 
