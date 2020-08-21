@@ -5,58 +5,60 @@ X-Spam-Level:
 X-Spam-Status: No, score=-12.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C7D99C433DF
-	for <linux-efi@archiver.kernel.org>; Fri, 21 Aug 2020 19:45:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D7865C433E5
+	for <linux-efi@archiver.kernel.org>; Fri, 21 Aug 2020 19:45:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A6CFA20738
-	for <linux-efi@archiver.kernel.org>; Fri, 21 Aug 2020 19:45:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B2FE420738
+	for <linux-efi@archiver.kernel.org>; Fri, 21 Aug 2020 19:45:59 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="GF8WNGGb"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="dwH4hSFn"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726929AbgHUTps (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 21 Aug 2020 15:45:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36824 "EHLO
+        id S1726998AbgHUTp7 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 21 Aug 2020 15:45:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36826 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726825AbgHUTo5 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 21 Aug 2020 15:44:57 -0400
-Received: from mail-pl1-x641.google.com (mail-pl1-x641.google.com [IPv6:2607:f8b0:4864:20::641])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7719DC06138E
-        for <linux-efi@vger.kernel.org>; Fri, 21 Aug 2020 12:44:31 -0700 (PDT)
-Received: by mail-pl1-x641.google.com with SMTP id y6so1332782plk.10
-        for <linux-efi@vger.kernel.org>; Fri, 21 Aug 2020 12:44:31 -0700 (PDT)
+        with ESMTP id S1726746AbgHUToh (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 21 Aug 2020 15:44:37 -0400
+Received: from mail-pf1-x441.google.com (mail-pf1-x441.google.com [IPv6:2607:f8b0:4864:20::441])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 00CACC0617B9
+        for <linux-efi@vger.kernel.org>; Fri, 21 Aug 2020 12:44:28 -0700 (PDT)
+Received: by mail-pf1-x441.google.com with SMTP id f193so1553272pfa.12
+        for <linux-efi@vger.kernel.org>; Fri, 21 Aug 2020 12:44:27 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=chromium.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=2SO+UGcbCrLenHkErAflqsGtJX/MLOFJ7NqTGBJ73x8=;
-        b=GF8WNGGbz0L91U/cKK8hFCLiRU4GwBwG4dOQCTOrpJCd24QY/0vGi6vnGJMoYwqo9j
-         tg5x5+RDELdR2JEO4trH7JtQZw3eWL1PnG0VNMUjRiMWm8/9k2VtuwglST1tWIBAWTS1
-         P+x+GSWOlYP3io7XqFUjxcgSnBkW/qZP7U2eY=
+        bh=5FUB3tjALH2XvfA6zdfdUjwI0GuDEI1l9XpW++dZco8=;
+        b=dwH4hSFn+M/JShOAvoDuz49SFgRTdFlTWo6hGZr9AwLMcNzDM8CCErZhyY7e1uO/Xx
+         uqiHf1O97j60Dk9p27VnNcHgm3AvxP83RVdw0qpFJ6YHuX6CzA2/zf5uWMROb5mfhFC6
+         0KXGu5Y3b4E5gPfjCLnwSk3EL5h0NSoEoS0pw=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=2SO+UGcbCrLenHkErAflqsGtJX/MLOFJ7NqTGBJ73x8=;
-        b=jngYt6siBDtZHMJ6jh3vJZ70C8+hirlmFQjLNBGtt3Nt/2j8Q/gCL1ToZ1kuHB8GSN
-         JVutPurChtUsBIOV6Xe2WZgO9wTQD/i/dcqigEd9DuVbH2N8bDZbBPXioca6B8egChau
-         5B90YsJpPL23eMh4B72iQqWwbQhkVvm/rO6SSi6CXtnd+6+Ytc5j6XwrlCbc9z4Zplq+
-         HbOPY4+03TEYrVjf/zBPV7nv9A3z+DDleP/V2QKwN3oSKhgTIqEgon32OP4ZBSuH5qOx
-         zyq52PIramLZWgKGUZwsQCTZQc0RYG+OeWlXybAI0ZsnWfNBjAfUpJTT4m3nRTCztLTo
-         yViw==
-X-Gm-Message-State: AOAM532tiMq39ryIVbvp51J0gG9qTz3Q3A0CmJ9Da1xJhI1QJ2MlhFr2
-        ixkQ7js0pNYr+OKB44I7cfUaMg==
-X-Google-Smtp-Source: ABdhPJzikcTbC/fNRsbXZsG6J+yKOcBq9l6HMfMb0yjrQqmgOT0JeBslBYouM6YVYP4aQU9tg4bQUA==
-X-Received: by 2002:a17:902:d691:: with SMTP id v17mr3392145ply.235.1598039071121;
-        Fri, 21 Aug 2020 12:44:31 -0700 (PDT)
+        bh=5FUB3tjALH2XvfA6zdfdUjwI0GuDEI1l9XpW++dZco8=;
+        b=NS50MmXuKWu+eKxTMWljCthjeiHec+udAJetU71G5JZYAVj7sliUCLOJHCADJE4T2v
+         jxg6cS8t+LQ6YycGkrgMnYJRU1hFDrSNhmbPWgSf8n93pXv7X0SmycstnBO2+jbGPoQw
+         cqCr7XUt64WyHeUx6uP+38aggDDgXd4RSHyfD1sgYN9yP6ye4gJtDf63h4w7WAqpnXdw
+         cTL/hs8oeAj5POvRmHY7tSx8NkIQGn7Lqgco0itYqbr0DMeByFBF0nkxw/2tZdCIC+iL
+         JbI1gmGYgso4cJGXvgG+nRHNnJ5zK6T5yvqxxi0WZANnAxosr2/DeUB7U3AMzycDYdmb
+         r/gQ==
+X-Gm-Message-State: AOAM530Bu4GUgIbHcrDikkOpzKiewHEwS2FZVEEuJbB7uGyNLR/5jX+N
+        5xzVyHN8kEnHdR5Nwv+O2IdqSg==
+X-Google-Smtp-Source: ABdhPJyehd01pOgX4gGLWRe5I8XmNR/SFexjrkeURt8pREiENkcrce1cR+99MhoC96hPn3LnwhjcIA==
+X-Received: by 2002:a62:2ace:: with SMTP id q197mr3509274pfq.77.1598039067613;
+        Fri, 21 Aug 2020 12:44:27 -0700 (PDT)
 Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
-        by smtp.gmail.com with ESMTPSA id o66sm2795858pgo.25.2020.08.21.12.44.25
+        by smtp.gmail.com with ESMTPSA id u14sm3393575pfm.103.2020.08.21.12.44.25
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 21 Aug 2020 12:44:30 -0700 (PDT)
+        Fri, 21 Aug 2020 12:44:27 -0700 (PDT)
 From:   Kees Cook <keescook@chromium.org>
 To:     Ingo Molnar <mingo@kernel.org>
 Cc:     Kees Cook <keescook@chromium.org>,
+        Nick Desaulniers <ndesaulniers@google.com>,
+        Fangrui Song <maskray@google.com>,
         Catalin Marinas <catalin.marinas@arm.com>,
         Mark Rutland <mark.rutland@arm.com>,
         Ard Biesheuvel <ardb@kernel.org>,
@@ -66,15 +68,14 @@ Cc:     Kees Cook <keescook@chromium.org>,
         Russell King <linux@armlinux.org.uk>,
         Masahiro Yamada <masahiroy@kernel.org>,
         Arvind Sankar <nivedita@alum.mit.edu>,
-        Nick Desaulniers <ndesaulniers@google.com>,
         Nathan Chancellor <natechancellor@gmail.com>,
         Arnd Bergmann <arnd@arndb.de>, x86@kernel.org,
         clang-built-linux@googlegroups.com, linux-arch@vger.kernel.org,
         linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v6 18/29] arm/build: Assert for unwanted sections
-Date:   Fri, 21 Aug 2020 12:42:59 -0700
-Message-Id: <20200821194310.3089815-19-keescook@chromium.org>
+Subject: [PATCH v6 16/29] arm/build: Explicitly keep .ARM.attributes sections
+Date:   Fri, 21 Aug 2020 12:42:57 -0700
+Message-Id: <20200821194310.3089815-17-keescook@chromium.org>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20200821194310.3089815-1-keescook@chromium.org>
 References: <20200821194310.3089815-1-keescook@chromium.org>
@@ -85,62 +86,60 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-In preparation for warning on orphan sections, enforce
-expected-to-be-zero-sized sections (since discarding them might hide
-problems with them suddenly gaining unexpected entries).
+In preparation for adding --orphan-handling=warn, explicitly keep the
+.ARM.attributes section (at address 0[1]) by expanding the existing
+ELF_DETAILS macro into ARM_DETAILS.
 
+[1] https://reviews.llvm.org/D85867
+
+Suggested-by: Nick Desaulniers <ndesaulniers@google.com>
+Link: https://lore.kernel.org/lkml/CAKwvOdk-racgq5pxsoGS6Vtifbtrk5fmkmnoLxrQMaOvV0nPWw@mail.gmail.com/
+Reviewed-by: Fangrui Song <maskray@google.com>
 Signed-off-by: Kees Cook <keescook@chromium.org>
 ---
- arch/arm/include/asm/vmlinux.lds.h | 11 +++++++++++
- arch/arm/kernel/vmlinux-xip.lds.S  |  2 ++
- arch/arm/kernel/vmlinux.lds.S      |  2 ++
- 3 files changed, 15 insertions(+)
+ arch/arm/include/asm/vmlinux.lds.h | 4 ++++
+ arch/arm/kernel/vmlinux-xip.lds.S  | 2 +-
+ arch/arm/kernel/vmlinux.lds.S      | 2 +-
+ 3 files changed, 6 insertions(+), 2 deletions(-)
 
 diff --git a/arch/arm/include/asm/vmlinux.lds.h b/arch/arm/include/asm/vmlinux.lds.h
-index 6624dd97475c..4a91428c324d 100644
+index a08f4301b718..c4af5182ab48 100644
 --- a/arch/arm/include/asm/vmlinux.lds.h
 +++ b/arch/arm/include/asm/vmlinux.lds.h
-@@ -52,6 +52,17 @@
+@@ -52,6 +52,10 @@
  		ARM_MMU_DISCARD(*(__ex_table))				\
  		COMMON_DISCARDS
  
-+/*
-+ * Sections that should stay zero sized, which is safer to explicitly
-+ * check instead of blindly discarding.
-+ */
-+#define ARM_ASSERTS							\
-+	.plt : {							\
-+		*(.iplt) *(.rel.iplt) *(.iplt) *(.igot.plt)		\
-+	}								\
-+	ASSERT(SIZEOF(.plt) == 0,					\
-+	       "Unexpected run-time procedure linkages detected!")
++#define ARM_DETAILS							\
++		ELF_DETAILS						\
++		.ARM.attributes 0 : { *(.ARM.attributes) }
 +
- #define ARM_DETAILS							\
- 		ELF_DETAILS						\
- 		.ARM.attributes 0 : { *(.ARM.attributes) }
+ #define ARM_STUBS_TEXT							\
+ 		*(.gnu.warning)						\
+ 		*(.glue_7)						\
 diff --git a/arch/arm/kernel/vmlinux-xip.lds.S b/arch/arm/kernel/vmlinux-xip.lds.S
-index 11ffa79751da..50136828f5b5 100644
+index 904c31fa20ed..57fcbf55f913 100644
 --- a/arch/arm/kernel/vmlinux-xip.lds.S
 +++ b/arch/arm/kernel/vmlinux-xip.lds.S
-@@ -152,6 +152,8 @@ SECTIONS
+@@ -150,7 +150,7 @@ SECTIONS
+ 	_end = .;
+ 
  	STABS_DEBUG
- 	DWARF_DEBUG
- 	ARM_DETAILS
-+
-+	ARM_ASSERTS
+-	ELF_DETAILS
++	ARM_DETAILS
  }
  
  /*
 diff --git a/arch/arm/kernel/vmlinux.lds.S b/arch/arm/kernel/vmlinux.lds.S
-index dc672fe35de3..5f4922e858d0 100644
+index bb950c896a67..1d3d3b599635 100644
 --- a/arch/arm/kernel/vmlinux.lds.S
 +++ b/arch/arm/kernel/vmlinux.lds.S
-@@ -151,6 +151,8 @@ SECTIONS
+@@ -149,7 +149,7 @@ SECTIONS
+ 	_end = .;
+ 
  	STABS_DEBUG
- 	DWARF_DEBUG
- 	ARM_DETAILS
-+
-+	ARM_ASSERTS
+-	ELF_DETAILS
++	ARM_DETAILS
  }
  
  #ifdef CONFIG_STRICT_KERNEL_RWX
