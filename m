@@ -2,69 +2,61 @@ Return-Path: <SRS0=vbuA=B7=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-12.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
-	version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D0B1BC433E1
-	for <linux-efi@archiver.kernel.org>; Fri, 21 Aug 2020 19:18:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 59E33C433E1
+	for <linux-efi@archiver.kernel.org>; Fri, 21 Aug 2020 19:44:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id ADE5120735
-	for <linux-efi@archiver.kernel.org>; Fri, 21 Aug 2020 19:18:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3813D2224D
+	for <linux-efi@archiver.kernel.org>; Fri, 21 Aug 2020 19:44:37 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="c9nTXlQN"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="i/HEp8a1"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725801AbgHUTSR (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 21 Aug 2020 15:18:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60910 "EHLO
+        id S1726731AbgHUTob (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 21 Aug 2020 15:44:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36768 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725916AbgHUTSN (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 21 Aug 2020 15:18:13 -0400
-Received: from mail-pf1-x443.google.com (mail-pf1-x443.google.com [IPv6:2607:f8b0:4864:20::443])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 377B1C061574
-        for <linux-efi@vger.kernel.org>; Fri, 21 Aug 2020 12:18:12 -0700 (PDT)
-Received: by mail-pf1-x443.google.com with SMTP id u20so1550696pfn.0
-        for <linux-efi@vger.kernel.org>; Fri, 21 Aug 2020 12:18:12 -0700 (PDT)
+        with ESMTP id S1726598AbgHUToW (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 21 Aug 2020 15:44:22 -0400
+Received: from mail-pl1-x641.google.com (mail-pl1-x641.google.com [IPv6:2607:f8b0:4864:20::641])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 846D7C061575
+        for <linux-efi@vger.kernel.org>; Fri, 21 Aug 2020 12:44:22 -0700 (PDT)
+Received: by mail-pl1-x641.google.com with SMTP id g15so1336850plj.6
+        for <linux-efi@vger.kernel.org>; Fri, 21 Aug 2020 12:44:22 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=chromium.org; s=google;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=iH/eGhwplhANu5ngguYajhAAOM68U/Ap6x/YYMCKQeM=;
-        b=c9nTXlQNMxlTkjUEBmI7ZJXRVD9/w0VzmwP7XYcrlwJNqIvD9e/4Bg7nhro9mqIRHX
-         W7TkfsuoDy1IphU7AxA4ZmZuKL9yG5AjEURR9d4qU8313miQfcRhOmwz9VC758r41oVz
-         RNirK13ZYv7MZlL30hWsJsl0GdCKhM2nFuYk0=
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=7KJKUmMIwELFiu+Jhx3PR/flYgx4mAaM57h538oQIMM=;
+        b=i/HEp8a1E4h+pDbbs57HZpbPpxh1OsfRH2Yd/8W3bgSphxcIhvxHJMoOUFbJ6b/Lo5
+         9aJS4qOv+ZRLhprPhhQyVLMufErKaJZg4b7i1PWzbmYDeM8hm39fYJLK/IT+cxpFTdWz
+         TuXn2CWgQSDT0wuxFJZoOlwQ2qTgwxpZ9CNOg=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=iH/eGhwplhANu5ngguYajhAAOM68U/Ap6x/YYMCKQeM=;
-        b=A3I6cF2Yd4Tq5D3kPyfNuLchlbnyTRvOVN/Lp4rxrJDymfbpoxhrI5SUoKBhSKDjUR
-         o6YXSNzUFDUVM7upDlWG9kJ3/Tb8UYQmpe2H0uYkfilcsaBhWxCp/StcNfd77uwnHuvd
-         fWj5Ye+otz92WQvLTULVga9XpBLEALU+m7eCp3v+77h/lB7c+Tu+l+1lXL/CfEK3RI4y
-         EUXyiiJkb0W4ChM196WMjSMNEoAr+pbbTOZ8DPNB8wcg+kqf/sNkK4xFWTrjAqv6Gu8h
-         3VYogTxfYRfrq/2YIyA3HhMgXFshpa+AAB8oAsjsgoKOLb9hAdW+seoH10JjNW3YcJyA
-         ZEnQ==
-X-Gm-Message-State: AOAM533sPKOK5F5BgYC59Zixxe+D61lE6XjNHqH4xHyanZ9qzs0fkn/v
-        hgJYsz8lNMbBSKvrzE2gQgiGtQ==
-X-Google-Smtp-Source: ABdhPJw5LmRHZmwZ/AvZZhq0vdAI/mHYL/NERH3jKS/lDJIqSghu3bjCZwheNmuG7UoQaGfupCNrTw==
-X-Received: by 2002:a05:6a00:22c9:: with SMTP id f9mr3657627pfj.212.1598037492193;
-        Fri, 21 Aug 2020 12:18:12 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=7KJKUmMIwELFiu+Jhx3PR/flYgx4mAaM57h538oQIMM=;
+        b=ij/JRRr2phYt/rpYrmtE7rB98/Jo3bLmz8LJzeGdY/yaAeC76pkyezTL91AANPTpIr
+         r3aMZSZ4Tos75GRL8460BppDOPRCLK/5qt45iXMRDedH3zxgSMqCL92M7UgrZDtttI8d
+         2hgaBqVJjxUGYFVmQq7gu0oc5sQRMuUYScGMyu9s0y2M3g9VPX/RbSyWHTscZaK3RUBr
+         E/Z7wzZnH3807JceueyQm756cmVsZZtsiW4FjVtL3qDXskgmlsViil7rtJD6Bd0RCM6J
+         LJJQogpALvs3/HsQzxiPn9QJtDc23Hw/VlvSvRq2atP78uhkTh5ZihL9D54P9Y6WICBN
+         A4BQ==
+X-Gm-Message-State: AOAM5301n8/YBWP3JXaPKQhU60o46sElGRyH8umFSvyE0PsG4YY4jb+5
+        qe3JSKsn2QKncklegqqQqSsw9Q==
+X-Google-Smtp-Source: ABdhPJxhYfHQFi07yXAb+83c2N6Go68l40rd8GM9whIQP8616kjUIICp3ghwUq5gOnKTYPsXxrBOoA==
+X-Received: by 2002:a17:90a:4f45:: with SMTP id w5mr3754850pjl.11.1598039062148;
+        Fri, 21 Aug 2020 12:44:22 -0700 (PDT)
 Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
-        by smtp.gmail.com with ESMTPSA id z6sm3413592pfg.68.2020.08.21.12.18.10
+        by smtp.gmail.com with ESMTPSA id b9sm3354866pft.98.2020.08.21.12.44.19
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 21 Aug 2020 12:18:11 -0700 (PDT)
-Date:   Fri, 21 Aug 2020 12:18:10 -0700
+        Fri, 21 Aug 2020 12:44:21 -0700 (PDT)
 From:   Kees Cook <keescook@chromium.org>
-To:     Arvind Sankar <nivedita@alum.mit.edu>
-Cc:     Andi Kleen <ak@linux.intel.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Will Deacon <will@kernel.org>,
-        Nick Desaulniers <ndesaulniers@google.com>,
-        Jian Cai <jiancai@google.com>,
-        =?utf-8?B?RsSBbmctcnXDrCBTw7JuZw==?= <maskray@google.com>,
-        Luis Lozano <llozano@google.com>,
-        Manoj Gupta <manojgupta@google.com>, stable@vger.kernel.org,
+To:     Ingo Molnar <mingo@kernel.org>
+Cc:     Kees Cook <keescook@chromium.org>,
         Catalin Marinas <catalin.marinas@arm.com>,
         Mark Rutland <mark.rutland@arm.com>,
         Ard Biesheuvel <ardb@kernel.org>,
@@ -73,59 +65,59 @@ Cc:     Andi Kleen <ak@linux.intel.com>,
         Borislav Petkov <bp@suse.de>, Ingo Molnar <mingo@redhat.com>,
         Russell King <linux@armlinux.org.uk>,
         Masahiro Yamada <masahiroy@kernel.org>,
+        Arvind Sankar <nivedita@alum.mit.edu>,
+        Nick Desaulniers <ndesaulniers@google.com>,
         Nathan Chancellor <natechancellor@gmail.com>,
         Arnd Bergmann <arnd@arndb.de>, x86@kernel.org,
         clang-built-linux@googlegroups.com, linux-arch@vger.kernel.org,
         linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org,
-        Michal Marek <michal.lkml@markovi.net>
-Subject: Re: [PATCH v5 13/36] vmlinux.lds.h: add PGO and AutoFDO input
- sections
-Message-ID: <202008211216.3812BBA0C8@keescook>
-References: <20200731230820.1742553-1-keescook@chromium.org>
- <20200731230820.1742553-14-keescook@chromium.org>
- <20200801035128.GB2800311@rani.riverdale.lan>
- <20200803190506.GE1299820@tassilo.jf.intel.com>
- <20200803201525.GA1351390@rani.riverdale.lan>
- <20200804044532.GC1321588@tassilo.jf.intel.com>
- <20200804160649.GA2409491@rani.riverdale.lan>
+        linux-kernel@vger.kernel.org
+Subject: [PATCH v6 01/29] vmlinux.lds.h: Create COMMON_DISCARDS
+Date:   Fri, 21 Aug 2020 12:42:42 -0700
+Message-Id: <20200821194310.3089815-2-keescook@chromium.org>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20200821194310.3089815-1-keescook@chromium.org>
+References: <20200821194310.3089815-1-keescook@chromium.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200804160649.GA2409491@rani.riverdale.lan>
+Content-Transfer-Encoding: 8bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, Aug 04, 2020 at 12:06:49PM -0400, Arvind Sankar wrote:
-> On Mon, Aug 03, 2020 at 09:45:32PM -0700, Andi Kleen wrote:
-> > > Why is that? Both .text and .text.hot have alignment of 2^4 (default
-> > > function alignment on x86) by default, so it doesn't seem like it should
-> > > matter for packing density.  Avoiding interspersing cold text among
-> > 
-> > You may lose part of a cache line on each unit boundary. Linux has 
-> > a lot of units, some of them small. All these bytes add up.
-> 
-> Separating out .text.unlikely, which isn't aligned, slightly _reduces_
-> this loss, but not by much -- just over 1K on a defconfig. More
-> importantly, it moves cold code out of line (~320k on a defconfig),
-> giving better code density for the hot code.
-> 
-> For .text and .text.hot, you lose the alignment padding on every
-> function boundary, not unit boundary, because of the 16-byte alignment.
-> Whether .text.hot and .text are arranged by translation unit or not
-> makes no difference.
-> 
-> With *(.text.hot) *(.text) you get HHTT, with *(.text.hot .text) you get
-> HTHT, but in both cases the individual chunks are already aligned to 16
-> bytes. If .text.hot _had_ different alignment requirements to .text, the
-> HHTT should actually give better packing in general, I think.
+Collect the common DISCARD sections for architectures that need more
+specialized discard control than what the standard DISCARDS section
+provides.
 
-Okay, so at the end of the conversation, I think it looks like this
-patch is correct: it collects the hot, unlikely, etc into their own
-areas (e.g. HHTTUU is more correct than HTUHTU), so this patch stands
-as-is.
+Signed-off-by: Kees Cook <keescook@chromium.org>
+---
+ include/asm-generic/vmlinux.lds.h | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
 
+diff --git a/include/asm-generic/vmlinux.lds.h b/include/asm-generic/vmlinux.lds.h
+index 7616ff0b96ec..184b23d62784 100644
+--- a/include/asm-generic/vmlinux.lds.h
++++ b/include/asm-generic/vmlinux.lds.h
+@@ -954,13 +954,16 @@
+ 	EXIT_DATA
+ #endif
+ 
++#define COMMON_DISCARDS							\
++	*(.discard)							\
++	*(.discard.*)							\
++	*(.modinfo)
++
+ #define DISCARDS							\
+ 	/DISCARD/ : {							\
+ 	EXIT_DISCARDS							\
+ 	EXIT_CALL							\
+-	*(.discard)							\
+-	*(.discard.*)							\
+-	*(.modinfo)							\
++	COMMON_DISCARDS							\
+ 	}
+ 
+ /**
 -- 
-Kees Cook
+2.25.1
+
