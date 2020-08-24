@@ -2,126 +2,103 @@ Return-Path: <SRS0=LSKn=CC=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,MSGID_FROM_MTA_HEADER,RCVD_ILLEGAL_IP,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 819D7C433DF
-	for <linux-efi@archiver.kernel.org>; Mon, 24 Aug 2020 16:55:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 75FE3C433E3
+	for <linux-efi@archiver.kernel.org>; Mon, 24 Aug 2020 17:22:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5F50F204EA
-	for <linux-efi@archiver.kernel.org>; Mon, 24 Aug 2020 16:55:48 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=microsoft.com header.i=@microsoft.com header.b="J+JnWmIN"
+	by mail.kernel.org (Postfix) with ESMTP id 4CF802074D
+	for <linux-efi@archiver.kernel.org>; Mon, 24 Aug 2020 17:22:11 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1598289731;
+	bh=sH+WiNnMuk0nwT4rp2dCNtqndJKdX3eBBdQnYezdNvU=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
+	b=H9KoD10F+c95RPK0F7Bp985VrTOHGCTu8oKU1Ptr9JN00zfunWOB9329ndPPq34Ip
+	 Qc9rcxtZplggQsXo+yXvchd+EwqnNQCMVY4EWZPVjvBsNr+rMo6HcvfrtF3i5MRLS/
+	 syH0bpGq4BMChUwlI51HOi7iagsflmAKCbwaopBo=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728576AbgHXQy4 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 24 Aug 2020 12:54:56 -0400
-Received: from mail-dm6nam12on2120.outbound.protection.outlook.com ([40.107.243.120]:2560
-        "EHLO NAM12-DM6-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1728845AbgHXQr5 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 24 Aug 2020 12:47:57 -0400
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=DGausWlDjfzJ9gSEUfARqZJB/jzt88J0ZD593O/C4AAHZPenD2gXj+XACQl+2mbYEN/CS3nc2H9G2mgNJknLkNZMrUiD4xk1P96jsMDCouIENCvRKtAZXiIaEpsexxaP3VSl38HePeVOnWVzAo3Ct+J1Pby+o1rn+LiR9oOwYjWK/I5Mk1QTLNuoPPyYR56znAn1Pcp4UWpGBduYXx/rQX4RFkuhuY1c0o7YdYiJzz/ilUWc34PzkcxXGmWz9PVNp4JysB4XbhPAWu4CDJC3Z97GA/uyFfBg+4NBIxEWkaFA5B8HUap0lMcIT+fN7dctecnlDoR/QAGUjFbRDKmDYg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=vmze2nQ8/9ls2Gk++w5LIsR6HXsVIrPclx6MxH20zjI=;
- b=FVAu1HB2mssyuBpe1/5/SLzmseuV2+QgU61LqJ7RdUKTbNJMaocmPy6QUGvB1jQOQ+Vqb7aGiMEPnp6/ULQLjeXGcvwz0J+HVd9K9Sk9Ry9fqY1jMBkejHCGZDHOiRUhRqKJqPrh6a6rjaPEqT2tygMiGjMMR06m8SxICQQ0kR1OQHopq2wH9Rp0Bs/TnknDmRlwfziT+NWuIsYERrkPyZSihuLGPr/mVtuqhOQmjMvrwbqfy4RHMxzP9po6WyclvZc55cofgcgf+4449ZxxUMdFk36h4DaGM2NlSC7LC0m4qoCf82s6I9rX3cw2tWEyDmofNkUk+6+OP32zwsYKOg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=microsoft.com; dmarc=pass action=none
- header.from=microsoft.com; dkim=pass header.d=microsoft.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=vmze2nQ8/9ls2Gk++w5LIsR6HXsVIrPclx6MxH20zjI=;
- b=J+JnWmINPxscUailRBwumUc7VCnGl1GLVobPyVT1gRrWtiJOHaLA/KRpJVQgyvk5bV/SnBHBvl2MfVp2MWTmeHGusZTvz/m4B9SOSzZ57P/5+Plv6O9943RGX830u+q3Bduq/zB8C/NC1Zic+0CJ2ZfDzYdm7A1bCxMJst211QM=
-Authentication-Results: kernel.org; dkim=none (message not signed)
- header.d=none;kernel.org; dmarc=none action=none header.from=microsoft.com;
-Received: from BN8PR21MB1281.namprd21.prod.outlook.com (2603:10b6:408:a2::19)
- by BN6PR21MB0753.namprd21.prod.outlook.com (2603:10b6:404:9c::13) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3348.4; Mon, 24 Aug
- 2020 16:47:43 +0000
-Received: from BN8PR21MB1281.namprd21.prod.outlook.com
- ([fe80::e0c9:2634:6fb1:5615]) by BN8PR21MB1281.namprd21.prod.outlook.com
- ([fe80::e0c9:2634:6fb1:5615%3]) with mapi id 15.20.3326.012; Mon, 24 Aug 2020
- 16:47:43 +0000
-From:   Michael Kelley <mikelley@microsoft.com>
-To:     will@kernel.org, ardb@kernel.org, arnd@arndb.de,
-        catalin.marinas@arm.com, mark.rutland@arm.com, maz@kernel.org,
-        linux-arm-kernel@lists.infradead.org, gregkh@linuxfoundation.org,
-        linux-kernel@vger.kernel.org, linux-hyperv@vger.kernel.org,
-        linux-efi@vger.kernel.org, linux-arch@vger.kernel.org,
-        wei.liu@kernel.org, vkuznets@redhat.com, kys@microsoft.com
-Cc:     mikelley@microsoft.com, sunilmut@microsoft.com,
-        boqun.feng@gmail.com
-Subject: [PATCH v7 01/10] arm/arm64: smccc-1.1: Add vendor specific owner definition
-Date:   Mon, 24 Aug 2020 09:46:14 -0700
-Message-Id: <1598287583-71762-2-git-send-email-mikelley@microsoft.com>
-X-Mailer: git-send-email 1.8.3.1
-In-Reply-To: <1598287583-71762-1-git-send-email-mikelley@microsoft.com>
-References: <1598287583-71762-1-git-send-email-mikelley@microsoft.com>
-Content-Type: text/plain
-X-ClientProxiedBy: CO2PR04CA0145.namprd04.prod.outlook.com (2603:10b6:104::23)
- To BN8PR21MB1281.namprd21.prod.outlook.com (2603:10b6:408:a2::19)
+        id S1728036AbgHXRWD (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 24 Aug 2020 13:22:03 -0400
+Received: from mail.kernel.org ([198.145.29.99]:52800 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728286AbgHXRVY (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Mon, 24 Aug 2020 13:21:24 -0400
+Received: from mail-oo1-f51.google.com (mail-oo1-f51.google.com [209.85.161.51])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id AB5A820838;
+        Mon, 24 Aug 2020 17:21:23 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1598289683;
+        bh=sH+WiNnMuk0nwT4rp2dCNtqndJKdX3eBBdQnYezdNvU=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=2r4y2fLlZJIvd7JMQDacHVZMdE3Z4V4tBygC922SM7g2I0e8td2x/Ea1hqTRm66Dg
+         Vntlz1vxnVk+en7apoqIZgadbvM/nhhPSlBihbixtytgW6FilsO8AsPp5y2s1+mFJt
+         mGQxUtl6hsFQTlrSFfWE7wsiqA+K5zNVMxeXJBRI=
+Received: by mail-oo1-f51.google.com with SMTP id k63so2072112oob.1;
+        Mon, 24 Aug 2020 10:21:23 -0700 (PDT)
+X-Gm-Message-State: AOAM532THL6FY0Y+aHKwszQnJrn/8pJWQ6LMrtB4J7tpyNpQafRYXmYj
+        LAziORJRjTZnKuvNW818u274qxX7ZwVdoO2pYfk=
+X-Google-Smtp-Source: ABdhPJzyH85xYIGIeBE9sN+bjxkfbXh88DkmjecqfF5cPfX7TgkE1iV7HMq8OKg0j4Fz3naiB4WzW5y7/VR72XNWa/s=
+X-Received: by 2002:a4a:da4c:: with SMTP id f12mr4378791oou.41.1598289682952;
+ Mon, 24 Aug 2020 10:21:22 -0700 (PDT)
 MIME-Version: 1.0
-X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from 255.255.255.255 (255.255.255.255) by CO2PR04CA0145.namprd04.prod.outlook.com (2603:10b6:104::23) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3305.25 via Frontend Transport; Mon, 24 Aug 2020 16:47:41 +0000
-X-Mailer: git-send-email 1.8.3.1
-X-Originating-IP: [131.107.159.16]
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-HT: Tenant
-X-MS-Office365-Filtering-Correlation-Id: edd52061-fa6b-4240-9739-08d8484d6bba
-X-MS-TrafficTypeDiagnostic: BN6PR21MB0753:
-X-MS-Exchange-Transport-Forked: True
-X-LD-Processed: 72f988bf-86f1-41af-91ab-2d7cd011db47,ExtAddr
-X-Microsoft-Antispam-PRVS: <BN6PR21MB0753B20C50C32625883F711CD7560@BN6PR21MB0753.namprd21.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:2582;
-X-MS-Exchange-SenderADCheck: 1
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: x6qM1XyiJpzV2ne3wnFQM3qq3AmwBu58Cw0okP1MIPwmPpReSo8GvNSpThZYiokHqprs4GqCpcYLK1Os9xehwLgqjakgfP+9f8wUcPqkAXWliH7uDlB662Vlq/HMq/s4IQEfi/xzpS0Z3aWYc6kb8040KFp/j8GGrKX9w5PEy5mTXYZ5IqzudHTYmzqs41DnEi/rAF+p2zSB3ChdBL06vOupWacL8ipFELP/ei1cWy4PUtNlajnrroKPyGwD1o/ppcsufEWdF2xyLcGX1SACPPC47NPX4lMC+gUXuVxPRnjpEM22TY4iu39bgH/XBxu0trWMXu4I6vQo42K/ElhDjPTpzQq9MKRCIr0l5Ti/4axtQ1xDbq5Ozw09DpiSI6Da
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BN8PR21MB1281.namprd21.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(136003)(39860400002)(366004)(376002)(396003)(346002)(8676002)(86362001)(2616005)(956004)(2906002)(6486002)(8936002)(52116002)(10290500003)(5660300002)(66946007)(16576012)(66556008)(4326008)(6636002)(316002)(4744005)(36756003)(186003)(82950400001)(478600001)(26005)(6666004)(66476007)(82960400001)(7416002)(921003);DIR:OUT;SFP:1102;
-X-MS-Exchange-AntiSpam-MessageData: 0M+U9om80NEr7GgteThBukqRDQd/gYsYCpUmNEbLXIJZysjqj2E6fxRwwovUTwtyzgpS91InrVPXBp2N3+/Y6XSnWYVCyN+EhdrkX0Fad5kHA01TyyVSFN92TCtm5r+yrMS7U/GKCXOJqQh6ZbvUzssca/VvBKKE9o0ovQUz2lwxhOVOXeYuvR29JueYPT4Dm3011VXf0u+TlFwcs8vqI+Z5T+bTtx0zFsobYO5C+eFfj07EZlmibJEKFhWVkqm07WhHrUQX2gftGp25+eS71U8LIQiavktozdpTWXGAimp3K5dGFZ9TrM5FaHvtah9NCPKmdYsxiH9H1KlIZ1hAHaNDa6bFgPICTD/79PC+t4dle8H55J/9FB2xeOe6xKEK8buAfg0yW52imGJBDFnUrZGe0r5rq+boaCkqEbM6du2NgH+SevmPI/K6GOkVZ9EkzWcA8sv+o8XV0VByFgwUXWKD7nWzMJUhzwaFEtCsp1ShNcFng1pMQxAC9zkmXbAAB/qN5DuupJIUIQ/V9yl3MO6kE7Dl8To0bvgvb8z8bQwAGKXNqZGdBCLQzW4tiZUA98lUI5ZXgmJtc7bRPvczDnN7zXeOt8iYjEIFEMHXq5BgZgE6Aq+R9RKQJ6P4pA/e79SIjGBqhrGTrfgjab25Dg==
-X-OriginatorOrg: microsoft.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: edd52061-fa6b-4240-9739-08d8484d6bba
-X-MS-Exchange-CrossTenant-AuthSource: BN8PR21MB1281.namprd21.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Aug 2020 16:47:43.1916
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 72f988bf-86f1-41af-91ab-2d7cd011db47
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: Ti1rOcY+s9USJxw2aiCD0DWUW+qvMNHUqeK0jevpF6Jf3K9dYGAPcwfT0+LT0LgdJEZfvNm70nfiQtiMPm+CPA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BN6PR21MB0753
+References: <1598287583-71762-1-git-send-email-mikelley@microsoft.com> <1598287583-71762-10-git-send-email-mikelley@microsoft.com>
+In-Reply-To: <1598287583-71762-10-git-send-email-mikelley@microsoft.com>
+From:   Ard Biesheuvel <ardb@kernel.org>
+Date:   Mon, 24 Aug 2020 19:21:12 +0200
+X-Gmail-Original-Message-ID: <CAMj1kXHd2vs+O6N6FeNeJeGPh=RTs++3rGms7tCd0Oy7qt3faQ@mail.gmail.com>
+Message-ID: <CAMj1kXHd2vs+O6N6FeNeJeGPh=RTs++3rGms7tCd0Oy7qt3faQ@mail.gmail.com>
+Subject: Re: [PATCH v7 09/10] arm64: efi: Export screen_info
+To:     Michael Kelley <mikelley@microsoft.com>
+Cc:     Will Deacon <will@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Marc Zyngier <maz@kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-hyperv@vger.kernel.org,
+        linux-efi <linux-efi@vger.kernel.org>,
+        linux-arch <linux-arch@vger.kernel.org>, wei.liu@kernel.org,
+        vkuznets <vkuznets@redhat.com>,
+        KY Srinivasan <kys@microsoft.com>,
+        Sunil Muthuswamy <sunilmut@microsoft.com>,
+        Boqun Feng <boqun.feng@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-In the SMCCC v1.1 spec, the Owning Entity Number in the Function
-Identifier may have a value of 6 for a vendor specific hypervisor
-service call. Add this #define.
+On Mon, 24 Aug 2020 at 18:48, Michael Kelley <mikelley@microsoft.com> wrote:
+>
+> The Hyper-V frame buffer driver may be built as a module, and
+> it needs access to screen_info. So export screen_info.
+>
+> Signed-off-by: Michael Kelley <mikelley@microsoft.com>
 
-Signed-off-by: Michael Kelley <mikelley@microsoft.com>
----
- include/linux/arm-smccc.h | 1 +
- 1 file changed, 1 insertion(+)
+Acked-by: Ard Biesheuvel <ardb@kernel.org>
 
-diff --git a/include/linux/arm-smccc.h b/include/linux/arm-smccc.h
-index 15c706f..ee286f5 100644
---- a/include/linux/arm-smccc.h
-+++ b/include/linux/arm-smccc.h
-@@ -49,6 +49,7 @@
- #define ARM_SMCCC_OWNER_OEM		3
- #define ARM_SMCCC_OWNER_STANDARD	4
- #define ARM_SMCCC_OWNER_STANDARD_HYP	5
-+#define ARM_SMCCC_OWNER_VENDOR_HYP	6
- #define ARM_SMCCC_OWNER_TRUSTED_APP	48
- #define ARM_SMCCC_OWNER_TRUSTED_APP_END	49
- #define ARM_SMCCC_OWNER_TRUSTED_OS	50
--- 
-1.8.3.1
-
+> ---
+>  arch/arm64/kernel/efi.c | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+> index d0cf596..8ff557a 100644
+> --- a/arch/arm64/kernel/efi.c
+> +++ b/arch/arm64/kernel/efi.c
+> @@ -55,6 +55,7 @@ static __init pteval_t create_mapping_protection(efi_memory_desc_t *md)
+>
+>  /* we will fill this structure from the stub, so don't put it in .bss */
+>  struct screen_info screen_info __section(.data);
+> +EXPORT_SYMBOL(screen_info);
+>
+>  int __init efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md)
+>  {
+> --
+> 1.8.3.1
+>
