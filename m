@@ -2,44 +2,45 @@ Return-Path: <SRS0=Wh8c=CE=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
-	version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9DC05C433DF
-	for <linux-efi@archiver.kernel.org>; Wed, 26 Aug 2020 03:45:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D69FEC433E3
+	for <linux-efi@archiver.kernel.org>; Wed, 26 Aug 2020 03:45:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 722AD20719
-	for <linux-efi@archiver.kernel.org>; Wed, 26 Aug 2020 03:45:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B743E20707
+	for <linux-efi@archiver.kernel.org>; Wed, 26 Aug 2020 03:45:15 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="efmbh3bc"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="GOFYaFBY"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726763AbgHZDpG (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 25 Aug 2020 23:45:06 -0400
-Received: from us-smtp-delivery-1.mimecast.com ([207.211.31.120]:22771 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726765AbgHZDpG (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 25 Aug 2020 23:45:06 -0400
+        id S1726803AbgHZDpP (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 25 Aug 2020 23:45:15 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:59235 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726809AbgHZDpN (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 25 Aug 2020 23:45:13 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1598413505;
+        s=mimecast20190719; t=1598413511;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc; bh=LT6POVV8HSmICCQ9Cr0CByMFS3SYARiZwXUJRkcEo+U=;
-        b=efmbh3bcZVcfnEoG96S2vyrJSM+aqAF1O6DKiEZTgSHo+t0LdE4KL5euB8iO2+wwCMhZ71
-        I62aFeCRPSlnEcDb34NXqm1rR7wP9/spXVAwKvEF6jW2vYR7kA87lIjOdnsjMOgEhZNtU2
-        aKdqJbVnrOjz0a4sAjwlGfRGfLhw2EQ=
+         to:to:cc:in-reply-to:in-reply-to:references:references;
+        bh=/TBuoGPP1tG+0tOjQSeCl3WzgYge/SObbXxxTWBbxLs=;
+        b=GOFYaFBY26jRYlDbpCnFyhCSluVjqKRMkmbFQmib6yDX8FF6dhMwGullEm6zXOQAxVMyHe
+        3lm656LjPwQYMa4rDig+ow2v5/VIdyH8PLBU+iQl5jzcNKDrgwnmNzdCs+7a5C94xVuBGQ
+        zEQATHyF7fZL5/XINIOrBH4doDl9IXI=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-87-naIzhBe0MFmexAJKAilz9A-1; Tue, 25 Aug 2020 23:45:01 -0400
-X-MC-Unique: naIzhBe0MFmexAJKAilz9A-1
+ us-mta-288-vD43XxqlMSS7DJst6HmNTA-1; Tue, 25 Aug 2020 23:45:09 -0400
+X-MC-Unique: vD43XxqlMSS7DJst6HmNTA-1
 Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id DE3FA1005E5B;
-        Wed, 26 Aug 2020 03:44:59 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 131BC801AED;
+        Wed, 26 Aug 2020 03:45:08 +0000 (UTC)
 Received: from lszubowi.redhat.com (unknown [10.10.110.32])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id B1C7A5D9E4;
-        Wed, 26 Aug 2020 03:44:56 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id BE7E25D9E4;
+        Wed, 26 Aug 2020 03:45:05 +0000 (UTC)
 From:   Lenny Szubowicz <lszubowi@redhat.com>
 To:     linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
         platform-driver-x86@vger.kernel.org,
@@ -47,54 +48,131 @@ To:     linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
         jmorris@namei.org, serge@hallyn.com, keescook@chromium.org,
         zohar@linux.ibm.com, bp@alien8.de, pjones@redhat.com,
         dhowells@redhat.com, prarit@redhat.com
-Subject: [PATCH 0/3] integrity: Load certs from EFI MOK config table
-Date:   Tue, 25 Aug 2020 23:44:52 -0400
-Message-Id: <20200826034455.28707-1-lszubowi@redhat.com>
+Subject: [PATCH 2/3] integrity: Move import of MokListRT certs to a separate routine
+Date:   Tue, 25 Aug 2020 23:44:54 -0400
+Message-Id: <20200826034455.28707-3-lszubowi@redhat.com>
+In-Reply-To: <20200826034455.28707-1-lszubowi@redhat.com>
+References: <20200826034455.28707-1-lszubowi@redhat.com>
 X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Because of system-specific EFI firmware limitations,
-EFI volatile variables may not be capable of holding the
-required contents of the Machine Owner Key (MOK) certificate
-store. Therefore, an EFI boot loader may pass the MOK certs
-via a EFI configuration table created specifically for this
-purpose to avoid this firmware limitation.
+Move the loading of certs from the UEFI MokListRT into a separate
+routine to facilitate additional MokList functionality.
 
-An EFI configuration table is a simpler and more robust mechanism
-compared to EFI variables and is well suited for one-way passage
-of static information from a pre-OS environment to the kernel.
+There is no visible functional change as a result of this patch.
+Although the UEFI dbx certs are now loaded before the MokList certs,
+they are loaded onto different key rings. So the order of the keys
+on their respective key rings is the same.
 
-This patch set does not remove the support for loading certs
-from the EFI MOK variables into the platform key ring.
-However, if both the EFI MOK config table and corresponding
-EFI MOK variables are present, the MOK table is used as the
-source of MOK certs.
+Signed-off-by: Lenny Szubowicz <lszubowi@redhat.com>
+---
+ security/integrity/platform_certs/load_uefi.c | 63 +++++++++++++------
+ 1 file changed, 44 insertions(+), 19 deletions(-)
 
-The contents of the individual named MOK config table entries are
-made available to user space via read-only sysfs binary files under:
-
-	/sys/firmware/efi/mok-variables/
-
-
-Lenny Szubowicz (3):
-  efi: Support for MOK variable config table
-  integrity: Move import of MokListRT certs to a separate routine
-  integrity: Load certs from the EFI MOK config table
-
- arch/x86/kernel/setup.c                       |   1 +
- arch/x86/platform/efi/efi.c                   |   3 +
- drivers/firmware/efi/Makefile                 |   1 +
- drivers/firmware/efi/arm-init.c               |   1 +
- drivers/firmware/efi/efi.c                    |   6 +
- drivers/firmware/efi/mokvar-table.c           | 360 ++++++++++++++++++
- include/linux/efi.h                           |  34 ++
- security/integrity/platform_certs/load_uefi.c |  85 ++++-
- 8 files changed, 472 insertions(+), 19 deletions(-)
- create mode 100644 drivers/firmware/efi/mokvar-table.c
-
+diff --git a/security/integrity/platform_certs/load_uefi.c b/security/integrity/platform_certs/load_uefi.c
+index 253fb9a7fc98..547410d8ffa5 100644
+--- a/security/integrity/platform_certs/load_uefi.c
++++ b/security/integrity/platform_certs/load_uefi.c
+@@ -66,6 +66,43 @@ static __init void *get_cert_list(efi_char16_t *name, efi_guid_t *guid,
+ }
+ 
+ /*
++ * load_moklist_certs() - Load MokList certs
++ *
++ * Returns:	Summary error status
++ *
++ * Load the certs contained in the UEFI MokListRT database into the
++ * platform trusted keyring.
++ */
++static int __init load_moklist_certs(void)
++{
++	efi_guid_t mok_var = EFI_SHIM_LOCK_GUID;
++	void *mok = NULL;
++	unsigned long moksize = 0;
++	efi_status_t status;
++	int rc = 0;
++
++	/* Get MokListRT. It might not exist, so it isn't an error
++	 * if we can't get it.
++	 */
++	mok = get_cert_list(L"MokListRT", &mok_var, &moksize, &status);
++	if (!mok) {
++		if (status == EFI_NOT_FOUND)
++			pr_debug("MokListRT variable wasn't found\n");
++		else
++			pr_info("Couldn't get UEFI MokListRT\n");
++	} else {
++		rc = parse_efi_signature_list("UEFI:MokListRT",
++					      mok, moksize, get_handler_for_db);
++		if (rc)
++			pr_err("Couldn't parse MokListRT signatures: %d\n", rc);
++		kfree(mok);
++	}
++	return rc;
++}
++
++/*
++ * load_uefi_certs() - Load certs from UEFI sources
++ *
+  * Load the certs contained in the UEFI databases into the platform trusted
+  * keyring and the UEFI blacklisted X.509 cert SHA256 hashes into the blacklist
+  * keyring.
+@@ -73,17 +110,16 @@ static __init void *get_cert_list(efi_char16_t *name, efi_guid_t *guid,
+ static int __init load_uefi_certs(void)
+ {
+ 	efi_guid_t secure_var = EFI_IMAGE_SECURITY_DATABASE_GUID;
+-	efi_guid_t mok_var = EFI_SHIM_LOCK_GUID;
+-	void *db = NULL, *dbx = NULL, *mok = NULL;
+-	unsigned long dbsize = 0, dbxsize = 0, moksize = 0;
++	void *db = NULL, *dbx = NULL;
++	unsigned long dbsize = 0, dbxsize = 0;
+ 	efi_status_t status;
+ 	int rc = 0;
+ 
+ 	if (!efi_rt_services_supported(EFI_RT_SUPPORTED_GET_VARIABLE))
+ 		return false;
+ 
+-	/* Get db, MokListRT, and dbx.  They might not exist, so it isn't
+-	 * an error if we can't get them.
++	/* Get db and dbx.  They might not exist, so it isn't an error
++	 * if we can't get them.
+ 	 */
+ 	if (!uefi_check_ignore_db()) {
+ 		db = get_cert_list(L"db", &secure_var, &dbsize, &status);
+@@ -102,20 +138,6 @@ static int __init load_uefi_certs(void)
+ 		}
+ 	}
+ 
+-	mok = get_cert_list(L"MokListRT", &mok_var, &moksize, &status);
+-	if (!mok) {
+-		if (status == EFI_NOT_FOUND)
+-			pr_debug("MokListRT variable wasn't found\n");
+-		else
+-			pr_info("Couldn't get UEFI MokListRT\n");
+-	} else {
+-		rc = parse_efi_signature_list("UEFI:MokListRT",
+-					      mok, moksize, get_handler_for_db);
+-		if (rc)
+-			pr_err("Couldn't parse MokListRT signatures: %d\n", rc);
+-		kfree(mok);
+-	}
+-
+ 	dbx = get_cert_list(L"dbx", &secure_var, &dbxsize, &status);
+ 	if (!dbx) {
+ 		if (status == EFI_NOT_FOUND)
+@@ -131,6 +153,9 @@ static int __init load_uefi_certs(void)
+ 		kfree(dbx);
+ 	}
+ 
++	/* Load the MokListRT certs */
++	rc = load_moklist_certs();
++
+ 	return rc;
+ }
+ late_initcall(load_uefi_certs);
 -- 
 2.27.0
 
