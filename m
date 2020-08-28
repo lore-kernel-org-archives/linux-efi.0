@@ -2,419 +2,137 @@ Return-Path: <SRS0=XrWR=CG=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.4 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MSGID_FROM_MTA_HEADER,RCVD_ILLEGAL_IP,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2445FC433E7
-	for <linux-efi@archiver.kernel.org>; Fri, 28 Aug 2020 17:22:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F659C433E2
+	for <linux-efi@archiver.kernel.org>; Fri, 28 Aug 2020 20:34:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id ED0EE207DF
-	for <linux-efi@archiver.kernel.org>; Fri, 28 Aug 2020 17:22:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7FECE2087D
+	for <linux-efi@archiver.kernel.org>; Fri, 28 Aug 2020 20:34:01 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="JDeXq/E/"
+	dkim=pass (1024-bit key) header.d=amdcloud.onmicrosoft.com header.i=@amdcloud.onmicrosoft.com header.b="ixtDeZ2o"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727000AbgH1RWW (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 28 Aug 2020 13:22:22 -0400
-Received: from esa4.hgst.iphmx.com ([216.71.154.42]:11691 "EHLO
-        esa4.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726995AbgH1RUy (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 28 Aug 2020 13:20:54 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1598635254; x=1630171254;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=ZnGsRE3TMUiNQaxzR8fyngrL1GYNN0dMjoCwa6f4AaU=;
-  b=JDeXq/E/RxCY6iwLwZOPSVeT3Tq/v+n7OtvTGTjfmy7biTAXacZmRYUy
-   qdXVxyaKLc3fwVvCvFBYdnte/kQ5ONOA0ywNjt7uDnGiSdozDxmVdlfZd
-   7sFGKwjGIg5DYPSQDt8RC9x4KLEc6/vh5Mc3OyoitFwQUrtrifDuzjD02
-   TC4RnP7TZDy/b2gkvy6tUBEkCu9yamiSTLyjzHkRqrQg7tNrkOlIV0xM4
-   8CTsnWCILywmR+vwshOq7GBWCg4zSegMMqJdklprI6Ok5nMSKt6NVMpnx
-   DLHZabyIqeGnGgC5RsFtbuaIecdmog5FCL4a/aoQ9ct7cpOaiIxn+l5OZ
-   w==;
-IronPort-SDR: N5OckQJ1u1OdUtVAMIdYHmatJqy09puvnssAmIMCo12MFe1F9tUFbDQQbUoGwF27KGBzXRK13m
- RNDXIEdG02E56TpBH1tB7qYd66GGRdfFi90ZCJvnScDG8kQVvxlV/CqvYPnsCK8lIDB3NE+2eK
- +REnsjCWsOIdCyjSEXUJM9ftO2osYc6wdclaChtYsElyqPmWIceQ/6kSRku28RT2LPhcw6/nCm
- WZaGzC6+2LqTMGHa1jTMidVxv7ypb66GWXEAEteRh9QHwP3Z3wJhz9HwJETZr/IaFIQ1xau6YP
- G+w=
-X-IronPort-AV: E=Sophos;i="5.76,364,1592841600"; 
-   d="scan'208";a="146018518"
-Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 29 Aug 2020 01:20:45 +0800
-IronPort-SDR: 5vlzmrE51F/Y27I0yzadWvh5zSGd8e/uarIgsM6pAihfwqFrSwf5ryrCWqf9YoxUxRdcCL+/0E
- vTNWviHXMJJQ==
-Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 Aug 2020 10:08:17 -0700
-IronPort-SDR: 89L9wqPl3Nmj/NexeWaD+R4zvJ981nik/4d3VZU92n/3pz+AElin2t0CV1RPy0yef5/nqqhFoT
- kKK+zPXqAS6g==
-WDCIronportException: Internal
-Received: from 6hj08h2.ad.shared (HELO jedi-01.hgst.com) ([10.86.59.137])
-  by uls-op-cesaip01.wdc.com with ESMTP; 28 Aug 2020 10:20:45 -0700
-From:   Atish Patra <atish.patra@wdc.com>
-To:     linux-kernel@vger.kernel.org
-Cc:     Atish Patra <atish.patra@wdc.com>,
+        id S1726649AbgH1Ud6 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 28 Aug 2020 16:33:58 -0400
+Received: from mail-dm6nam10on2049.outbound.protection.outlook.com ([40.107.93.49]:31617
+        "EHLO NAM10-DM6-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726033AbgH1Ud4 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 28 Aug 2020 16:33:56 -0400
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=WTJ7EGU3MBrdduN8Txiv3OXTv4VFXh0YbK0suXyhCvrD0yOKS+AWD/8dWqzZcMbDeAWlNUnt5GJOy8E5Q4VnhqFzvyq9Hz7W4kelwr3VXgEjGHzUMd6anyFPlDri/pEwHE/7Eu14rIbzfPQP1R9QdNlp8BYBitySbVi4dfl7BhR0AmpLWxAC0ZXqj+a6FXIP/+FX/1KUhvv48/GKfBNqlfeAOgguz/Bp58XDoG/vutJTbWVoaaQB5iA3x308e7QT9a3GelC/Z7cJGdA77+jcncvyl577ULPi+Bv39S2tuag5gRVe1Il4EEHVO19VJHAJDnQJQbBJjDbqbdz/o4VHRA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=0ZwIlSKC9QKpsXkRg8yzuPvbllQOcG3DlSI7iOUMXQ4=;
+ b=MZqnnfgmJdJ+/SCax1YCXZXABbtF9ENZN7xCG8UGTaYgpT2pzqhl6bEXuy6iUOo5tiztlSF/DsNcyjMyKXAp58M2sn6fSvfJ6TBba4J233FKkBS34ofWU5f/aY2I8CaxENRB0f0u4OSgaRA/JS0TVNfei8GNgn9WXyTUp7o6Fub24uBIWxS/6ju/rAPdDlwJ99ARzgMHwf5xsQG4WRGA7GgCJYRPSZ76aJsgPvlu88IcNJ04K1Ecs8QRl2iYWiMvoJFK6rGZLZVSvqoLnzvVIdUocPWKsEoeSGqWf3O9SSRnVK/8DKXHn/S1Q3xFlSJJOTqYecAK2VvKDZFASMhNYw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=amd.com; dmarc=pass action=none header.from=amd.com; dkim=pass
+ header.d=amd.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=amdcloud.onmicrosoft.com; s=selector2-amdcloud-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=0ZwIlSKC9QKpsXkRg8yzuPvbllQOcG3DlSI7iOUMXQ4=;
+ b=ixtDeZ2oWGlp0/Hup4BcX7E/58O0JEvanhb6SHZawNeCG033lRPupjNlPjRrXdxJeGzfqfNE6CSeSI/w/IRK/8qY8boyKqel3itjcuqM/pbGEp6OL7GqaPTYydSVE+7QSGCjkfk7X8BftdvuKqapM0LIOrUGs0CBQW04MEXyr8k=
+Authentication-Results: kernel.org; dkim=none (message not signed)
+ header.d=none;kernel.org; dmarc=none action=none header.from=amd.com;
+Received: from SN6PR12MB2685.namprd12.prod.outlook.com (2603:10b6:805:67::33)
+ by SA0PR12MB4511.namprd12.prod.outlook.com (2603:10b6:806:95::9) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3326.19; Fri, 28 Aug
+ 2020 20:33:54 +0000
+Received: from SN6PR12MB2685.namprd12.prod.outlook.com
+ ([fe80::48e9:c9c:7cd7:de86]) by SN6PR12MB2685.namprd12.prod.outlook.com
+ ([fe80::48e9:c9c:7cd7:de86%5]) with mapi id 15.20.3326.019; Fri, 28 Aug 2020
+ 20:33:54 +0000
+From:   Smita Koralahalli <Smita.KoralahalliChannabasappa@amd.com>
+To:     x86@kernel.org, linux-kernel@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-edac@vger.kernel.org,
+        linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org,
+        devel@acpica.org
+Cc:     Borislav Petkov <bp@alien8.de>, Tony Luck <tony.luck@intel.com>,
+        "Rafael J . Wysocki" <rjw@rjwysocki.net>,
+        Len Brown <len.brown@intel.com>,
         Ard Biesheuvel <ardb@kernel.org>,
-        Anup Patel <anup@brainfault.org>,
-        Alistair Francis <alistair.francis@wdc.com>,
-        Anup Patel <anup.patel@wdc.com>,
-        Arvind Sankar <nivedita@alum.mit.edu>,
-        Greentime Hu <greentime.hu@sifive.com>,
-        Ingo Molnar <mingo@kernel.org>, linux-efi@vger.kernel.org,
-        linux-riscv@lists.infradead.org,
-        Masahiro Yamada <masahiroy@kernel.org>,
-        Mike Rapoport <rppt@kernel.org>,
-        Nick Desaulniers <ndesaulniers@google.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Paul Walmsley <paul.walmsley@sifive.com>
-Subject: [PATCH v7 5/9] RISC-V: Add PE/COFF header for EFI stub
-Date:   Fri, 28 Aug 2020 10:20:32 -0700
-Message-Id: <20200828172036.8056-6-atish.patra@wdc.com>
-X-Mailer: git-send-email 2.24.0
-In-Reply-To: <20200828172036.8056-1-atish.patra@wdc.com>
-References: <20200828172036.8056-1-atish.patra@wdc.com>
+        Yazen Ghannam <yazen.ghannam@amd.com>,
+        Smita Koralahalli <Smita.KoralahalliChannabasappa@amd.com>
+Subject: [PATCH v2 0/2] Decode raw MSR values of MCA registers in BERT
+Date:   Fri, 28 Aug 2020 15:33:30 -0500
+Message-Id: <20200828203332.11129-1-Smita.KoralahalliChannabasappa@amd.com>
+X-Mailer: git-send-email 2.17.1
+Content-Type: text/plain
+X-ClientProxiedBy: SN4PR0501CA0143.namprd05.prod.outlook.com
+ (2603:10b6:803:2c::21) To SN6PR12MB2685.namprd12.prod.outlook.com
+ (2603:10b6:805:67::33)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-MS-Exchange-MessageSentRepresentingType: 1
+Received: from 255.255.255.255 (255.255.255.255) by SN4PR0501CA0143.namprd05.prod.outlook.com (2603:10b6:803:2c::21) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3348.5 via Frontend Transport; Fri, 28 Aug 2020 20:33:53 +0000
+X-Mailer: git-send-email 2.17.1
+X-Originating-IP: [165.204.78.1]
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-HT: Tenant
+X-MS-Office365-Filtering-Correlation-Id: 67f18010-e37b-4dd6-e787-08d84b91ae36
+X-MS-TrafficTypeDiagnostic: SA0PR12MB4511:
+X-MS-Exchange-Transport-Forked: True
+X-Microsoft-Antispam-PRVS: <SA0PR12MB4511FE44C5AEBCE95DF68D9890520@SA0PR12MB4511.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:8273;
+X-MS-Exchange-SenderADCheck: 1
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: 0KMzaLsHqIEaNqOvv8mOBZjDGmRzM3M9JE0XOvV6lVDEYRUrVYKz/qAq0iRapxoVTIAnLA1/uc3614nMtp1A+RUtYqPYcCACKHR1lwakcKBQRU78SKBcd4ClIxixZMJCtSoWl00NsWC/zQfIjlFGH5xFhtvAeweOwQ1G63CLO+fmL8UutF59sZFVSzrFQLMT15/S0fiuL0ShY1TEwz5bvecbPMXoscvUOINjUrMTcToSORZg3Lc5AoYaFM+/S4LCM7+SLUg0LPqs36UavPGCcqZcZGJO9vHdEGGeiTu8cJSN+D751ia77OpRlEPBJgfCyfqhMrT/X1I6PByMzesGozX4qD27Nu0v9uFvJE2c25TTKooGyNrjNqDtfQ9yg8Ds3GiUNAxkshBzLqlmwUugqg==
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SN6PR12MB2685.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(39860400002)(376002)(136003)(366004)(346002)(396003)(5660300002)(8936002)(8676002)(6486002)(966005)(956004)(6666004)(2616005)(66556008)(1076003)(4326008)(7416002)(66946007)(66476007)(86362001)(83380400001)(26005)(36756003)(2906002)(186003)(52116002)(54906003)(478600001)(316002)(16576012);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData: dw19xaV0lTZ+DaDa5Yx1HfKPXeASmIpSddBYvoDs8S13qoYBEJt9lx4q4R1LF1BRdKrDTpljNrdpGbVTp0xEuURXD+6Pr3ee81wDKM2cdZZnIoGE6WvJPtoZNDgWZQdl4+DTaWZtJgbFX9vVYwpFLK/z08xG481Svq6fetNGmhdttV9pwVmJixRnq2jvUqrdxQxN9Vm7Hezu03rrvScVi6eTWD6fZFFnjO55FCGxoGO20R5e3+y473Y0sa7KfU4kARrPxSwcnGt8C9IuJlZcnFudEVoclhbPrj/llhc/TxzQZSEQYhzYFY7Nx0iwHuKYgNN5oNhJwYagZyms7omeni7hKVhM5UHKMHOzpEoXUAAcACqGNsXInnDiX5ND6T7I5gtivue+O+Qs4kT/j3NCFiMpIMkUizynHXFofD/90Wf2uTCvSXzHFZsxrAwVyvLEA9aJjlBi7bn5TgJTuJdP2eXzmUA0cv6DoURYFLvARdXQhLt3JyA1GxGR6rdy1yitlcJzazrb5nU6otX/fG5QqqR/PB+rim6rBOMTm23TSUlxmibiBWySILhStGm5CsyDR4PwtljEaYuccAmRvJ5u797rjMjAba4g/f8VBb6gSJBJWzzeBOW7DE5j9PUJ341vFRjLk946hsgGglgz6otggw==
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 67f18010-e37b-4dd6-e787-08d84b91ae36
+X-MS-Exchange-CrossTenant-AuthSource: SN6PR12MB2685.namprd12.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 28 Aug 2020 20:33:53.9919
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: 7LDTR7ke65y8i9RPGqof2VJ3mRDSuhTIRoNGGNWC7QNy0lTZGboZ4M9bKJPX1xhRHvAEPaYohTx0Jr7w+S6BQw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA0PR12MB4511
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Linux kernel Image can appear as an EFI application With appropriate
-PE/COFF header fields in the beginning of the Image header. An EFI
-application loader can directly load a Linux kernel Image and an EFI
-stub residing in kernel can boot Linux kernel directly.
+This series provides better decoding for SMCA specific raw MSR values in
+BERT reported using x86 Processor Error Common Platform Error Record
+(CPER) format.
 
-Add the necessary PE/COFF header.
+Patch 1 extracts the raw MSR values of MCA registers in BERT and passes
+it through the MCA handling chain.
 
-Signed-off-by: Atish Patra <atish.patra@wdc.com>
-Link: https://lore.kernel.org/r/20200421033336.9663-3-atish.patra@wdc.com
-[ardb: - use C prefix for c.li to ensure the expected opcode is emitted
-       - align all image sections according to PE/COFF section alignment ]
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
-Reviewed-by: Anup Patel <anup@brainfault.org>
----
- arch/riscv/include/asm/sections.h |  13 ++++
- arch/riscv/kernel/Makefile        |   4 ++
- arch/riscv/kernel/efi-header.S    | 104 ++++++++++++++++++++++++++++++
- arch/riscv/kernel/head.S          |  16 +++++
- arch/riscv/kernel/image-vars.h    |  51 +++++++++++++++
- arch/riscv/kernel/vmlinux.lds.S   |  22 ++++++-
- 6 files changed, 208 insertions(+), 2 deletions(-)
- create mode 100644 arch/riscv/include/asm/sections.h
- create mode 100644 arch/riscv/kernel/efi-header.S
- create mode 100644 arch/riscv/kernel/image-vars.h
+Patch 2 provides a fix of missing error logs as observed in Patch 1.
 
-diff --git a/arch/riscv/include/asm/sections.h b/arch/riscv/include/asm/sections.h
-new file mode 100644
-index 000000000000..3a9971b1210f
---- /dev/null
-+++ b/arch/riscv/include/asm/sections.h
-@@ -0,0 +1,13 @@
-+/* SPDX-License-Identifier: GPL-2.0-only */
-+/*
-+ * Copyright (C) 2020 Western Digital Corporation or its affiliates.
-+ */
-+#ifndef __ASM_SECTIONS_H
-+#define __ASM_SECTIONS_H
-+
-+#include <asm-generic/sections.h>
-+
-+extern char _start[];
-+extern char _start_kernel[];
-+
-+#endif /* __ASM_SECTIONS_H */
-diff --git a/arch/riscv/kernel/Makefile b/arch/riscv/kernel/Makefile
-index dc93710f0b2f..41e3895a3192 100644
---- a/arch/riscv/kernel/Makefile
-+++ b/arch/riscv/kernel/Makefile
-@@ -31,6 +31,10 @@ obj-y	+= cacheinfo.o
- obj-y	+= patch.o
- obj-$(CONFIG_MMU) += vdso.o vdso/
- 
-+OBJCOPYFLAGS := --prefix-symbols=__efistub_
-+$(obj)/%.stub.o: $(obj)/%.o FORCE
-+	$(call if_changed,objcopy)
-+
- obj-$(CONFIG_RISCV_M_MODE)	+= traps_misaligned.o
- obj-$(CONFIG_FPU)		+= fpu.o
- obj-$(CONFIG_SMP)		+= smpboot.o
-diff --git a/arch/riscv/kernel/efi-header.S b/arch/riscv/kernel/efi-header.S
-new file mode 100644
-index 000000000000..822b4c9ff2bb
---- /dev/null
-+++ b/arch/riscv/kernel/efi-header.S
-@@ -0,0 +1,104 @@
-+/* SPDX-License-Identifier: GPL-2.0-only */
-+/*
-+ * Copyright (C) 2020 Western Digital Corporation or its affiliates.
-+ * Adapted from arch/arm64/kernel/efi-header.S
-+ */
-+
-+#include <linux/pe.h>
-+#include <linux/sizes.h>
-+
-+	.macro	__EFI_PE_HEADER
-+	.long	PE_MAGIC
-+coff_header:
-+#ifdef CONFIG_64BIT
-+	.short	IMAGE_FILE_MACHINE_RISCV64		// Machine
-+#else
-+	.short	IMAGE_FILE_MACHINE_RISCV32		// Machine
-+#endif
-+	.short	section_count				// NumberOfSections
-+	.long	0 					// TimeDateStamp
-+	.long	0					// PointerToSymbolTable
-+	.long	0					// NumberOfSymbols
-+	.short	section_table - optional_header		// SizeOfOptionalHeader
-+	.short	IMAGE_FILE_DEBUG_STRIPPED | \
-+		IMAGE_FILE_EXECUTABLE_IMAGE | \
-+		IMAGE_FILE_LINE_NUMS_STRIPPED		// Characteristics
-+
-+optional_header:
-+	.short	PE_OPT_MAGIC_PE32PLUS			// PE32+ format
-+	.byte	0x02					// MajorLinkerVersion
-+	.byte	0x14					// MinorLinkerVersion
-+	.long	__pecoff_text_end - efi_header_end	// SizeOfCode
-+	.long	__pecoff_data_virt_size			// SizeOfInitializedData
-+	.long	0					// SizeOfUninitializedData
-+	.long	__efistub_efi_pe_entry - _start		// AddressOfEntryPoint
-+	.long	efi_header_end - _start			// BaseOfCode
-+
-+extra_header_fields:
-+	.quad	0					// ImageBase
-+	.long	PECOFF_SECTION_ALIGNMENT		// SectionAlignment
-+	.long	PECOFF_FILE_ALIGNMENT			// FileAlignment
-+	.short	0					// MajorOperatingSystemVersion
-+	.short	0					// MinorOperatingSystemVersion
-+	.short	LINUX_EFISTUB_MAJOR_VERSION		// MajorImageVersion
-+	.short	LINUX_EFISTUB_MINOR_VERSION		// MinorImageVersion
-+	.short	0					// MajorSubsystemVersion
-+	.short	0					// MinorSubsystemVersion
-+	.long	0					// Win32VersionValue
-+
-+	.long	_end - _start				// SizeOfImage
-+
-+	// Everything before the kernel image is considered part of the header
-+	.long	efi_header_end - _start			// SizeOfHeaders
-+	.long	0					// CheckSum
-+	.short	IMAGE_SUBSYSTEM_EFI_APPLICATION		// Subsystem
-+	.short	0					// DllCharacteristics
-+	.quad	0					// SizeOfStackReserve
-+	.quad	0					// SizeOfStackCommit
-+	.quad	0					// SizeOfHeapReserve
-+	.quad	0					// SizeOfHeapCommit
-+	.long	0					// LoaderFlags
-+	.long	(section_table - .) / 8			// NumberOfRvaAndSizes
-+
-+	.quad	0					// ExportTable
-+	.quad	0					// ImportTable
-+	.quad	0					// ResourceTable
-+	.quad	0					// ExceptionTable
-+	.quad	0					// CertificationTable
-+	.quad	0					// BaseRelocationTable
-+
-+	// Section table
-+section_table:
-+	.ascii	".text\0\0\0"
-+	.long	__pecoff_text_end - efi_header_end	// VirtualSize
-+	.long	efi_header_end - _start			// VirtualAddress
-+	.long	__pecoff_text_end - efi_header_end	// SizeOfRawData
-+	.long	efi_header_end - _start			// PointerToRawData
-+
-+	.long	0					// PointerToRelocations
-+	.long	0					// PointerToLineNumbers
-+	.short	0					// NumberOfRelocations
-+	.short	0					// NumberOfLineNumbers
-+	.long	IMAGE_SCN_CNT_CODE | \
-+		IMAGE_SCN_MEM_READ | \
-+		IMAGE_SCN_MEM_EXECUTE			// Characteristics
-+
-+	.ascii	".data\0\0\0"
-+	.long	__pecoff_data_virt_size			// VirtualSize
-+	.long	__pecoff_text_end - _start		// VirtualAddress
-+	.long	__pecoff_data_raw_size			// SizeOfRawData
-+	.long	__pecoff_text_end - _start		// PointerToRawData
-+
-+	.long	0					// PointerToRelocations
-+	.long	0					// PointerToLineNumbers
-+	.short	0					// NumberOfRelocations
-+	.short	0					// NumberOfLineNumbers
-+	.long	IMAGE_SCN_CNT_INITIALIZED_DATA | \
-+		IMAGE_SCN_MEM_READ | \
-+		IMAGE_SCN_MEM_WRITE			// Characteristics
-+
-+	.set	section_count, (. - section_table) / 40
-+
-+	.balign	0x1000
-+efi_header_end:
-+	.endm
-diff --git a/arch/riscv/kernel/head.S b/arch/riscv/kernel/head.S
-index c6a37e8231a8..3631147732ee 100644
---- a/arch/riscv/kernel/head.S
-+++ b/arch/riscv/kernel/head.S
-@@ -13,6 +13,7 @@
- #include <asm/csr.h>
- #include <asm/hwcap.h>
- #include <asm/image.h>
-+#include "efi-header.S"
- 
- __HEAD
- ENTRY(_start)
-@@ -22,10 +23,18 @@ ENTRY(_start)
- 	 * Do not modify it without modifying the structure and all bootloaders
- 	 * that expects this header format!!
- 	 */
-+#ifdef CONFIG_EFI
-+	/*
-+	 * This instruction decodes to "MZ" ASCII required by UEFI.
-+	 */
-+	c.li s4,-13
-+	j _start_kernel
-+#else
- 	/* jump to start kernel */
- 	j _start_kernel
- 	/* reserved */
- 	.word 0
-+#endif
- 	.balign 8
- #if __riscv_xlen == 64
- 	/* Image load offset(2MB) from start of RAM */
-@@ -43,7 +52,14 @@ ENTRY(_start)
- 	.ascii RISCV_IMAGE_MAGIC
- 	.balign 4
- 	.ascii RISCV_IMAGE_MAGIC2
-+#ifdef CONFIG_EFI
-+	.word pe_head_start - _start
-+pe_head_start:
-+
-+	__EFI_PE_HEADER
-+#else
- 	.word 0
-+#endif
- 
- .align 2
- #ifdef CONFIG_MMU
-diff --git a/arch/riscv/kernel/image-vars.h b/arch/riscv/kernel/image-vars.h
-new file mode 100644
-index 000000000000..8c212efb37a6
---- /dev/null
-+++ b/arch/riscv/kernel/image-vars.h
-@@ -0,0 +1,51 @@
-+/* SPDX-License-Identifier: GPL-2.0-only */
-+/*
-+ * Copyright (C) 2020 Western Digital Corporation or its affiliates.
-+ * Linker script variables to be set after section resolution, as
-+ * ld.lld does not like variables assigned before SECTIONS is processed.
-+ * Based on arch/arm64/kerne/image-vars.h
-+ */
-+#ifndef __RISCV_KERNEL_IMAGE_VARS_H
-+#define __RISCV_KERNEL_IMAGE_VARS_H
-+
-+#ifndef LINKER_SCRIPT
-+#error This file should only be included in vmlinux.lds.S
-+#endif
-+
-+#ifdef CONFIG_EFI
-+
-+/*
-+ * The EFI stub has its own symbol namespace prefixed by __efistub_, to
-+ * isolate it from the kernel proper. The following symbols are legally
-+ * accessed by the stub, so provide some aliases to make them accessible.
-+ * Only include data symbols here, or text symbols of functions that are
-+ * guaranteed to be safe when executed at another offset than they were
-+ * linked at. The routines below are all implemented in assembler in a
-+ * position independent manner
-+ */
-+__efistub_memcmp		= memcmp;
-+__efistub_memchr		= memchr;
-+__efistub_memcpy		= memcpy;
-+__efistub_memmove		= memmove;
-+__efistub_memset		= memset;
-+__efistub_strlen		= strlen;
-+__efistub_strnlen		= strnlen;
-+__efistub_strcmp		= strcmp;
-+__efistub_strncmp		= strncmp;
-+__efistub_strrchr		= strrchr;
-+
-+#ifdef CONFIG_KASAN
-+__efistub___memcpy		= memcpy;
-+__efistub___memmove		= memmove;
-+__efistub___memset		= memset;
-+#endif
-+
-+__efistub__start		= _start;
-+__efistub__start_kernel		= _start_kernel;
-+__efistub__end			= _end;
-+__efistub__edata		= _edata;
-+__efistub_screen_info		= screen_info;
-+
-+#endif
-+
-+#endif /* __RISCV_KERNEL_IMAGE_VARS_H */
-diff --git a/arch/riscv/kernel/vmlinux.lds.S b/arch/riscv/kernel/vmlinux.lds.S
-index f3586e31ed1e..6dcf790282dd 100644
---- a/arch/riscv/kernel/vmlinux.lds.S
-+++ b/arch/riscv/kernel/vmlinux.lds.S
-@@ -10,6 +10,7 @@
- #include <asm/cache.h>
- #include <asm/thread_info.h>
- #include <asm/set_memory.h>
-+#include "image-vars.h"
- 
- #include <linux/sizes.h>
- OUTPUT_ARCH(riscv)
-@@ -17,6 +18,9 @@ ENTRY(_start)
- 
- jiffies = jiffies_64;
- 
-+PECOFF_SECTION_ALIGNMENT = 0x1000;
-+PECOFF_FILE_ALIGNMENT = 0x200;
-+
- SECTIONS
- {
- 	/* Beginning of code and text segment */
-@@ -76,6 +80,10 @@ SECTIONS
- 
- 	EXCEPTION_TABLE(0x10)
- 
-+#ifdef CONFIG_EFI
-+	. = ALIGN(PECOFF_SECTION_ALIGNMENT);
-+	__pecoff_text_end = .;
-+#endif
- 	. = ALIGN(SECTION_ALIGN);
- 	_data = .;
- 
-@@ -83,16 +91,26 @@ SECTIONS
- 	.sdata : {
- 		__global_pointer$ = . + 0x800;
- 		*(.sdata*)
--		/* End of data section */
--		_edata = .;
- 	}
- 
-+#ifdef CONFIG_EFI
-+	.pecoff_edata_padding : { BYTE(0); . = ALIGN(PECOFF_FILE_ALIGNMENT); }
-+	__pecoff_data_raw_size = ABSOLUTE(. - __pecoff_text_end);
-+#endif
-+
-+	/* End of data section */
-+	_edata = .;
-+
- 	BSS_SECTION(PAGE_SIZE, PAGE_SIZE, 0)
- 
- 	.rel.dyn : {
- 		*(.rel.dyn*)
- 	}
- 
-+#ifdef CONFIG_EFI
-+	. = ALIGN(PECOFF_SECTION_ALIGNMENT);
-+	__pecoff_data_virt_size = ABSOLUTE(. - __pecoff_text_end);
-+#endif
- 	_end = .;
- 
- 	STABS_DEBUG
+Patch v2 provides a fix for the build error observed in Patch v1.
+As reported by kernel test robot, Patch 1 failed stating undefined
+reference to arch_apei_report_x86_error() in function cper_print_proc_ia.
+The failure is noticed when CONFIG_ACPI_APEI is not compiled into the
+kernel. Fix the error by returning error code if CONFIG_ACPI_APEI is not
+installed into the kernel.
+
+Links:
+https://lkml.kernel.org/r/20200825144710.23584-1-Smita.KoralahalliChannabasappa@amd.com
+https://lkml.kernel.org/r/20200825144710.23584-2-Smita.KoralahalliChannabasappa@amd.com
+https://lkml.kernel.org/r/20200825144710.23584-3-Smita.KoralahalliChannabasappa@amd.com
+
+Smita Koralahalli (2):
+  cper, apei, mce: Pass x86 CPER through the MCA handling chain
+  x86/mce/dev-mcelog: Fix updating kflags in AMD systems
+
+ arch/x86/include/asm/mce.h           |  3 +++
+ arch/x86/kernel/acpi/apei.c          |  9 +++++++
+ arch/x86/kernel/cpu/mce/apei.c       | 37 ++++++++++++++++++++++++++++
+ arch/x86/kernel/cpu/mce/dev-mcelog.c |  4 ++-
+ drivers/firmware/efi/cper-x86.c      | 10 +++++---
+ include/acpi/apei.h                  |  9 +++++++
+ 6 files changed, 67 insertions(+), 5 deletions(-)
+
 -- 
-2.24.0
+2.17.1
 
