@@ -2,119 +2,102 @@ Return-Path: <SRS0=g9GS=CH=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.9 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 81E6FC433E2
-	for <linux-efi@archiver.kernel.org>; Sat, 29 Aug 2020 05:30:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2CD05C433E6
+	for <linux-efi@archiver.kernel.org>; Sat, 29 Aug 2020 18:21:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 55A0720BED
-	for <linux-efi@archiver.kernel.org>; Sat, 29 Aug 2020 05:30:13 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1598679013;
-	bh=+F2EOPtddeC9kSdDJvGLBLqOo1a51vtmiM/5btBMX+U=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=KTF+oXCotDLjx2N51NeZ8nNuwA7L+EQRAtJrAVnQeRjA0tj3VQ4yJYeTmLP2vTEPP
-	 pnR6NN5u9srRNRjbhrWb0OS3LX5zNl6WaRy9aaUy+dFHfX9wICRTYvRQ6KirsI9Nqc
-	 8wG/8W9VCTj/GVO+5EGkhZFY7INAuVoVHZzo/iLo=
+	by mail.kernel.org (Postfix) with ESMTP id 0C24120848
+	for <linux-efi@archiver.kernel.org>; Sat, 29 Aug 2020 18:21:11 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="MxZoREBs"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725886AbgH2FaM (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 29 Aug 2020 01:30:12 -0400
-Received: from condef-08.nifty.com ([202.248.20.73]:42000 "EHLO
-        condef-08.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725901AbgH2FaK (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sat, 29 Aug 2020 01:30:10 -0400
-X-Greylist: delayed 480 seconds by postgrey-1.27 at vger.kernel.org; Sat, 29 Aug 2020 01:30:09 EDT
-Received: from conuserg-12.nifty.com ([10.126.8.75])by condef-08.nifty.com with ESMTP id 07T5Gkdn022885;
-        Sat, 29 Aug 2020 14:16:46 +0900
-Received: from oscar.flets-west.jp (softbank126090211135.bbtec.net [126.90.211.135]) (authenticated)
-        by conuserg-12.nifty.com with ESMTP id 07T5FRB7012582;
-        Sat, 29 Aug 2020 14:15:28 +0900
-DKIM-Filter: OpenDKIM Filter v2.10.3 conuserg-12.nifty.com 07T5FRB7012582
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nifty.com;
-        s=dec2015msa; t=1598678128;
-        bh=LVsIE8pOMnNIR6mtGLK7uU0ZbQuhigKtOBoHF9Cro6g=;
-        h=From:To:Cc:Subject:Date:From;
-        b=p2mhvfjq+pNdkZEq+VGJVU+MKYFBXjXGA6p0PU8N2KD08IuRIrcGbrjA8zQ+af9Nf
-         GazXaKt4Yx4PGQJyVKgvcwvj148TORAz3mEJn9VSHaOGxg/qWkCbbjEENE474n0Mzr
-         Q7aprxpqwjPAIbx5f/JNcAl1+hB+gQBkiuxgtctnc8YzRSoMy93rNGaTGMMRg96dxT
-         qXZifa8f+9nL1aj1ewlKHvbjaVzYBKNro/fhiu4X4u8btqWj+5BvmplGWwWQPla31r
-         8AJmuCoG11Ra5LFdzDTVCA5Sh8/Sm1ijoBmv1YrpXbRlEktPKeuORJGCDFThf4f8zH
-         RdPnFXgZKdj+g==
-X-Nifty-SrcIP: [126.90.211.135]
-From:   Masahiro Yamada <masahiroy@kernel.org>
-To:     Tony Luck <tony.luck@intel.com>, Fenghua Yu <fenghua.yu@intel.com>,
-        linux-ia64@vger.kernel.org
-Cc:     Randy Dunlap <rdunlap@infradead.org>, linux-kbuild@vger.kernel.org,
-        Masahiro Yamada <masahiroy@kernel.org>,
+        id S1728333AbgH2SVK (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 29 Aug 2020 14:21:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60160 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728265AbgH2SVI (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 29 Aug 2020 14:21:08 -0400
+Received: from merlin.infradead.org (merlin.infradead.org [IPv6:2001:8b0:10b:1231::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5BD04C061236;
+        Sat, 29 Aug 2020 11:21:08 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=merlin.20170209; h=Content-Transfer-Encoding:Content-Type:
+        In-Reply-To:MIME-Version:Date:Message-ID:From:References:Cc:To:Subject:Sender
+        :Reply-To:Content-ID:Content-Description;
+        bh=wM+3aUTCfqWWlQ1tJHVnOtNIBFAHIEvD/50Kk8jfavo=; b=MxZoREBsaBXG6+jt9ukV047v5Q
+        XxKgvNn4fbCZZ14UAO7X0JIWw4Rkdqw87w7xo91fqNDwEae81IntJ9bQmzZH5vLAeaABDngfPIIWO
+        Z4gI+dq8a8qu/Ezvmcs52pX52VRnNp/aTGZyZzCBNIR6y85WRcW09ga12FU4InFdcA5x+7UgsevZn
+        qnXPfXWsrOT7j7Ilkd+TlmXqakOeskDPfMUlFeT1AwvjmpIjkqHcJEvmS3mLcAMLyPxoVY2LigNvn
+        kga8QessGsBG3qdRJz6WkJhNno2tu1+yDN/R6y3NZGtaP2EohcVR+XbvWJn1MtJmMCw6BQEU77B96
+        RO2HVuBQ==;
+Received: from [2601:1c0:6280:3f0::19c2]
+        by merlin.infradead.org with esmtpsa (Exim 4.92.3 #3 (Red Hat Linux))
+        id 1kC5TL-0007at-2k; Sat, 29 Aug 2020 18:21:03 +0000
+Subject: Re: [PATCH 2/3] ia64: remove unneeded header includes from
+ <asm/mca.h>
+To:     Masahiro Yamada <masahiroy@kernel.org>,
+        Tony Luck <tony.luck@intel.com>,
+        Fenghua Yu <fenghua.yu@intel.com>, linux-ia64@vger.kernel.org
+Cc:     linux-kbuild@vger.kernel.org,
         Andrew Morton <akpm@linux-foundation.org>,
         Ard Biesheuvel <ardb@kernel.org>,
-        Arnd Bergmann <arnd@arndb.de>,
         Dmitry Safonov <0x7f454c46@gmail.com>,
         afzal mohammed <afzal.mohd.ma@gmail.com>,
         linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH 0/3] ia64: clean-up header dependency and build process, fix build warning
-Date:   Sat, 29 Aug 2020 14:15:21 +0900
-Message-Id: <20200829051524.706585-1-masahiroy@kernel.org>
-X-Mailer: git-send-email 2.25.1
+References: <20200829051524.706585-1-masahiroy@kernel.org>
+ <20200829051524.706585-3-masahiroy@kernel.org>
+From:   Randy Dunlap <rdunlap@infradead.org>
+Message-ID: <e3dabd8d-352f-7471-3e4a-4d24d74e715b@infradead.org>
+Date:   Sat, 29 Aug 2020 11:20:57 -0700
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.11.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <20200829051524.706585-3-masahiroy@kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
+On 8/28/20 10:15 PM, Masahiro Yamada wrote:
+> <asm/mca.h> includes too many unneeded headers.
+> 
+> This commit cuts off a lot of header includes.
+> 
+> What we need to include are:
+> 
+>  - <linux/percpu.h> for DECLARE_PER_CPU(u64, ia64_mca_pal_base)
+>  - <linux/threads.h> for NR_CPUS
+>  - <linux/types.h> for u8, u64, size_t, etc.
+>  - <asm/ptrace.h> for KERNEL_STACK_SIZE
+> 
+> The other header includes are actually unneeded.
+> 
+> <asm/mca.h> previously included 436 headers, and now it includes
+> only 138. I confirmed <asm/mca.h> is still self-contained.
 
-Randy Dunlap reports the following warning with CONFIG_IA64_PALINFO=m:
+Nice!
 
-../scripts/Makefile.build:68: 'arch/ia64/kernel/palinfo.ko' will not be built even though obj-m is specified.
-../scripts/Makefile.build:69: You cannot use subdir-y/m to visit a module Makefile. Use obj-y/m instead.
+> Signed-off-by: Masahiro Yamada <masahiroy@kernel.org>
 
-This comes from the fact Kbuild descends into arch/ia64/kernel/ twice.
+Reviewed-by: Randy Dunlap <rdunlap@infradead.org>
 
-First, to generate <generated/nr-irqs.h>,
-Second, to build kernel and module objects.
-
-The warning is emitted in the first descend because it is not the
-intended usage.
-
-I looked into the code closely, and noticed arch/ia64/kernel/nr-irqs.c
-was not needed in the first place.
-
-It was separated out of arch/ia64/kernel/asm-offsets.c just because
-<asm/mca.h> was including too many bogus headers.
-
-IA64 is not actively maintained, and there exists unneeded obsolete code.
-
-The first two patches are the outcome when I played with ARCH=ia64 builds,
-but not prerequisites for 3/3. Anyway I believe they are nice cleanups
-and folded in this patch set.
-
-3/3 is the important one to fix the false positive warning,
-and it is a nice cleanup too.
+> ---
+> 
+>  arch/ia64/include/asm/mca.h | 9 +++------
+>  arch/ia64/kernel/efi.c      | 1 +
+>  arch/ia64/kernel/mca.c      | 1 +
+>  3 files changed, 5 insertions(+), 6 deletions(-)
+> 
 
 
-
-Masahiro Yamada (3):
-  ia64: do not typedef struct pal_min_state_area_s
-  ia64: remove unneeded header includes from <asm/mca.h>
-  ia64: remove generated/nr-irqs.h generation to fix build warning
-
- arch/ia64/Makefile             |  6 ------
- arch/ia64/include/asm/irq.h    |  4 +++-
- arch/ia64/include/asm/mca.h    | 11 ++++-------
- arch/ia64/include/asm/pal.h    |  4 ++--
- arch/ia64/include/asm/sal.h    |  2 +-
- arch/ia64/kernel/Makefile      |  5 -----
- arch/ia64/kernel/asm-offsets.c | 18 +++++++++---------
- arch/ia64/kernel/efi.c         |  1 +
- arch/ia64/kernel/mca.c         |  5 +++--
- arch/ia64/kernel/mca_drv.c     |  2 +-
- arch/ia64/kernel/nr-irqs.c     | 22 ----------------------
- 11 files changed, 24 insertions(+), 56 deletions(-)
- delete mode 100644 arch/ia64/kernel/nr-irqs.c
-
+thanks.
 -- 
-2.25.1
+~Randy
 
