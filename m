@@ -2,98 +2,138 @@ Return-Path: <SRS0=tnJd=CU=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.3 required=3.0 tests=BAYES_00,DATE_IN_PAST_96_XX,
+	DKIM_SIGNED,DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MSGID_FROM_MTA_HEADER,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E13AC43461
-	for <linux-efi@archiver.kernel.org>; Fri, 11 Sep 2020 19:46:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4BD24C433E2
+	for <linux-efi@archiver.kernel.org>; Fri, 11 Sep 2020 20:42:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1274521D47
-	for <linux-efi@archiver.kernel.org>; Fri, 11 Sep 2020 19:46:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0DB8D221F0
+	for <linux-efi@archiver.kernel.org>; Fri, 11 Sep 2020 20:42:36 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Nu3XlVqM"
+	dkim=pass (1024-bit key) header.d=amdcloud.onmicrosoft.com header.i=@amdcloud.onmicrosoft.com header.b="fVeP8tBh"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725901AbgIKTqx (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 11 Sep 2020 15:46:53 -0400
-Received: from us-smtp-1.mimecast.com ([207.211.31.81]:53188 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1725849AbgIKTqw (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 11 Sep 2020 15:46:52 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1599853611;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=hjmdNZgB1QiAcVQQi1OwUZy+vXn3Z68cHLsliVqlB+g=;
-        b=Nu3XlVqMZ7RaBiFYoW663tf0LZPapgX+gpCDV5ywA7xqb5PbY+IwyePYS9MWtahXj5UfFJ
-        ZG3SYO/hHc1xY8u/8o4ajYMOsZqkawjNzq0+DNkii0C6bl/+49YZpPQoYNlPfTBxQEKLQd
-        SVVD+uRj0JbXc31u4/rxEDQoAlNO1rA=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-305-iOmjCR0DMIGu14XkI0guwg-1; Fri, 11 Sep 2020 15:46:47 -0400
-X-MC-Unique: iOmjCR0DMIGu14XkI0guwg-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 5330D81F005;
-        Fri, 11 Sep 2020 19:46:45 +0000 (UTC)
-Received: from [10.10.110.42] (unknown [10.10.110.42])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 7788A3782;
-        Fri, 11 Sep 2020 19:46:42 +0000 (UTC)
-Subject: Re: [PATCH V2 2/3] integrity: Move import of MokListRT certs to a
- separate routine
-To:     Mimi Zohar <zohar@linux.ibm.com>, Ard Biesheuvel <ardb@kernel.org>
-Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-efi <linux-efi@vger.kernel.org>,
-        platform-driver-x86@vger.kernel.org,
-        linux-security-module@vger.kernel.org, andy.shevchenko@gmail.com,
-        James Morris <jmorris@namei.org>, serge@hallyn.com,
-        Kees Cook <keescook@chromium.org>,
-        Borislav Petkov <bp@alien8.de>,
-        Peter Jones <pjones@redhat.com>,
-        David Howells <dhowells@redhat.com>, prarit@redhat.com
-References: <20200905013107.10457-1-lszubowi@redhat.com>
- <20200905013107.10457-3-lszubowi@redhat.com>
- <CAMj1kXEdkdeE8VSZqEzhd__Kb7_ZmG2af6iBpbY3=nsj1-phYw@mail.gmail.com>
- <f0a079b1-5f02-8618-fdfe-aea2278113c9@redhat.com>
- <cb8b4ebaa35d79eba65b011d042d20a991adf540.camel@linux.ibm.com>
- <394190b9-59bd-5cb3-317e-736852f190f4@redhat.com>
- <CAMj1kXEz8y+X6KjqWWFD=38dDowqXDBvnPbgeh30+o83KpmKrg@mail.gmail.com>
- <06ea64fec71ebd18f0c5ed6b0d9b5a7d8f1d4775.camel@linux.ibm.com>
-From:   Lenny Szubowicz <lszubowi@redhat.com>
-Message-ID: <dda103c3-9a32-df8a-131e-1e8e91b92960@redhat.com>
-Date:   Fri, 11 Sep 2020 15:46:41 -0400
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.12.0
+        id S1725835AbgIKUm3 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 11 Sep 2020 16:42:29 -0400
+Received: from mail-mw2nam10on2050.outbound.protection.outlook.com ([40.107.94.50]:55307
+        "EHLO NAM10-MW2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1725803AbgIKUm0 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 11 Sep 2020 16:42:26 -0400
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=OSr4/TylPJFgzOEQaVXZ90VUROc9x1oTx26vfb7PPgfujcVKLQTyL1cIO8rPMt2rDpy8sg1AvOY8rLssEwDXq1Lm6ESjBNVJjeYfl6cwaSNAf65DbhVqTKjv6x30A3doo4+QjlaJKmBJJ1//58ClivjAwxcSqRCms6rWzydHdXYhpDQqVtiuykTQ4ALMYQ8lal8GPMMD2K57fr2R0D4mkUfG8QrecbOUA+E6OdLXzLP3Cjcy6ShngQFonecjZIIPi7Ac2NgvmKyXyHo4CCgERVEmKKLDaoEvNicoqJcFxB4FlYs8iIbBynw14trh4VumRvDz9hbptDNb6XCvhnAR2g==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=H00Rpey9QIPRYn9fH6Pb6RC1DoDovFW8HVqA7jqXc9g=;
+ b=HRJxVf+AF89zTpRrBsv+I1uMXVWExcpckT5bE7baQTIVGo4xW06KcX9sjVQBIGNY/gqdDegMTg/pYdDpX3c5b2qHkYdsM3BrerXbDGTtd1XQbAG6ddIXqqa8j7fHs+2WT/SI8S/d8V+k1vgG0woni6UJ3wWUZEZtnktGyR2Lzh7K6hoFSaxPsESB+EbapZIulLUsDkKMyQJiwn//WM2wAofgkc3THwxM+uW4/w+t/xP6U/UvUYz4etljYCbwSz/tOay0DUzi2YSIZZfpzLNZtGLLFa0hYIEs0W1iJHx7dVbQvkF4Z1MMk7TOvyG0BZM2Bu64mCr7bkhenPGhyYmPxQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=amd.com; dmarc=pass action=none header.from=amd.com; dkim=pass
+ header.d=amd.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=amdcloud.onmicrosoft.com; s=selector2-amdcloud-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=H00Rpey9QIPRYn9fH6Pb6RC1DoDovFW8HVqA7jqXc9g=;
+ b=fVeP8tBh32nIPocC1BtZQNSYz1OyHVhvNtuiFSj8wAi3YlJd3wkTymm/IlG13r2sXrgwsjLZmCaLoRDaq7H+CxE+iXK3k89oTRIw6hw+2+e367xzPMK7K2H4301+dUGuoMinMat9EMDkxrNlThjjqBzzA/YDP/fn0lNuAuvmV7s=
+Authentication-Results: kernel.org; dkim=none (message not signed)
+ header.d=none;kernel.org; dmarc=none action=none header.from=amd.com;
+Received: from SN6PR12MB2685.namprd12.prod.outlook.com (2603:10b6:805:67::33)
+ by SA0PR12MB4431.namprd12.prod.outlook.com (2603:10b6:806:95::11) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3370.16; Fri, 11 Sep
+ 2020 20:42:24 +0000
+Received: from SN6PR12MB2685.namprd12.prod.outlook.com
+ ([fe80::c0c8:60e:9d04:1409]) by SN6PR12MB2685.namprd12.prod.outlook.com
+ ([fe80::c0c8:60e:9d04:1409%5]) with mapi id 15.20.3370.017; Fri, 11 Sep 2020
+ 20:42:24 +0000
+From:   Smita Koralahalli <Smita.KoralahalliChannabasappa@amd.com>
+To:     x86@kernel.org, linux-kernel@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-edac@vger.kernel.org,
+        linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org,
+        devel@acpica.org
+Cc:     Borislav Petkov <bp@alien8.de>, Tony Luck <tony.luck@intel.com>,
+        "Rafael J . Wysocki" <rjw@rjwysocki.net>,
+        Len Brown <len.brown@intel.com>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Yazen Ghannam <yazen.ghannam@amd.com>,
+        Smita Koralahalli <Smita.KoralahalliChannabasappa@amd.com>
+Subject: [PATCH v3 0/2] Decode raw MSR values of MCA registers in BERT
+Date:   Thu,  3 Sep 2020 18:45:29 -0500
+Message-Id: <20200903234531.162484-1-Smita.KoralahalliChannabasappa@amd.com>
+X-Mailer: git-send-email 2.17.1
+Content-Type: text/plain
+X-ClientProxiedBy: DM6PR01CA0004.prod.exchangelabs.com (2603:10b6:5:296::9) To
+ SN6PR12MB2685.namprd12.prod.outlook.com (2603:10b6:805:67::33)
 MIME-Version: 1.0
-In-Reply-To: <06ea64fec71ebd18f0c5ed6b0d9b5a7d8f1d4775.camel@linux.ibm.com>
-Content-Type: text/plain; charset=iso-8859-15; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
+X-MS-Exchange-MessageSentRepresentingType: 1
+Received: from ethanolx024ehost.amd.com (165.204.78.2) by DM6PR01CA0004.prod.exchangelabs.com (2603:10b6:5:296::9) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3370.16 via Frontend Transport; Fri, 11 Sep 2020 20:42:22 +0000
+X-Mailer: git-send-email 2.17.1
+X-Originating-IP: [165.204.78.2]
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-HT: Tenant
+X-MS-Office365-Filtering-Correlation-Id: 2dbe8b40-a576-4aca-902f-08d856932fea
+X-MS-TrafficTypeDiagnostic: SA0PR12MB4431:
+X-MS-Exchange-Transport-Forked: True
+X-Microsoft-Antispam-PRVS: <SA0PR12MB4431185ED8B64D1036C6495990240@SA0PR12MB4431.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:8273;
+X-MS-Exchange-SenderADCheck: 1
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: o0t1lxQ072Aq65tslWYgeaeaaoLIktUu1IttfH5LfogJLbqUYQAqndOcdYsUZY3DtmkPEamHd9ctjuchckIhGE49EgEJvFCdi/8iOlAR5Og15ZEUjpDPW9EO8e7lNyHz4LYlCcCbk6q+wri7j3Sv5Yp90ZqFCM6/AhCbOHN3X2tTc9z4nK1TStM1ACGV9KBRPnmhu7tELGuPu/u6ghrLdn/b+69ACRvToxlrZ/qhnRx93bPZjt+jU3qWq9wXZL9pL7rKFz+AVmSaFPats2az/0a9wfTWsZ13nBmRY44EEenQFPAJe/CWrbSnfO1KK1YgUdy1yCbtjF6MDWERaNt2BgmrXgjGV/b7AX2W09cArAeKZtKiiWqlfhHo++cBC/v+I3qUBJrEIkW6/jxDT/sV0Q==
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SN6PR12MB2685.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(39860400002)(366004)(376002)(346002)(136003)(396003)(8936002)(316002)(2616005)(8676002)(5660300002)(956004)(54906003)(83380400001)(66946007)(1076003)(66476007)(52116002)(66556008)(36756003)(7696005)(7416002)(6486002)(966005)(16526019)(4326008)(2906002)(26005)(86362001)(478600001)(186003);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData: N/5uXQHotiVEf/g7hCu42pwRYAiIK3ozGSMAzAVSqKUWA51egrLdTT6kLLad5bKbYQzm2UBREfetjEaQHvqYmts+YLT4RVAXTwTbD3+f468Gd2JTsuBbYCJKuM8rEdo0vznwUzSCyVCDv+v9GY/lms2v4viVjoddeO0Tq0f5XQOnod1la+4wbEp2FG0ZNcnEkTyiahnQNJ6fg5MM1MdTtxM7rPE2X6PD3c8TTUOSgbQPkG4QwwEIHpZE5mVWlAjdB75pOq1SmKkzkFXr5JjOuj/xEf9Ez/7o3DnwT4fU1oj8bnV9Xnr2/RTaRlEip+Sgo50PXdzGLpeRkyf+JNrbDdXzwJ1mzVhNDU6DV2G15B1LG8ddutS2lD4pj/oyp7avIL6jP8k2n6TJM0M5ELIImw/POg7NsYi8FgFXdySgREotihq5bFYuKo74TqhOefBqS2DrnpNgt6cLAtTHSonNjBATcX2cUngmSu0i56APaLUJWs7c0MVvk1woTW63ro+k41O82dRmuVX3zRexgk5oLrOYbjSnDOfLT6bbCNtKT+16L/zvnBJdpI3a2Q0jxfhaGToWnyUyXgWc5qn4nbjyjrQ4Cut+P/gCQU8MN97T4HU1JbTXJCoGDmUvmi8XnyQJaFDsoE+bA4pdAMaDgeIbDw==
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 2dbe8b40-a576-4aca-902f-08d856932fea
+X-MS-Exchange-CrossTenant-AuthSource: SN6PR12MB2685.namprd12.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 11 Sep 2020 20:42:23.8686
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: oNcAJVH0yu9lFixFurS1GcrXmeI8TVhLTYPXBWCb5A6o4TPdI+KVgF5quRBtkaAPHavEDAQDd8C5iJayqDWHaA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA0PR12MB4431
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On 9/11/20 3:08 PM, Mimi Zohar wrote:
-> On Fri, 2020-09-11 at 21:16 +0300, Ard Biesheuvel wrote:
->> I think we can just merge the patches as they are, with Mimi's R-b carried over.
-> 
-> Other than the comments beginning on the "/*" line as opposed to the
-> subsequent line, the updated 2/2 and 3/3 patches look fine.
-> 
-> thanks,
-> 
-> Mimi
-> 
+This series provides better decoding for SMCA specific raw MSR values in
+BERT reported using x86 Processor Error Common Platform Error Record
+(CPER) format.
 
-I also prefer the block comment style that you are suggesting. However, I
-kept to the style used by the load_uefi.c source file. If checkpatch.pl
-considers it acceptable, I deferred to consistency within the source module.
+Patch 1 extracts the raw MSR values of MCA registers in BERT and passes
+it through the MCA handling chain.
 
-                       -Lenny.
+Patch 2 provides a fix of missing error logs as observed in Patch 1.
+
+Patch v2 provides a fix for the build error observed in Patch v1.
+As reported by kernel test robot, Patch 1 failed stating undefined
+reference to arch_apei_report_x86_error() in function cper_print_proc_ia.
+The failure is noticed when CONFIG_ACPI_APEI is not compiled into the
+kernel. Fix the error by returning error code if CONFIG_ACPI_APEI is not
+installed into the kernel.
+
+Patch v3 separates arch specific declarations and moves them into their
+respective arch specific header files. Also, adds additional checks for
+context type and register layout.
+
+Link:
+https://lkml.kernel.org/r/20200828203332.11129-1-Smita.KoralahalliChannabasappa@amd.com
+
+Smita Koralahalli (2):
+  cper, apei, mce: Pass x86 CPER through the MCA handling chain
+  x86/mce/dev-mcelog: Fix updating kflags in AMD systems
+
+ arch/x86/include/asm/acpi.h          | 11 ++++++++
+ arch/x86/include/asm/mce.h           |  3 ++
+ arch/x86/kernel/acpi/apei.c          |  9 ++++++
+ arch/x86/kernel/cpu/mce/apei.c       | 42 ++++++++++++++++++++++++++++
+ arch/x86/kernel/cpu/mce/dev-mcelog.c |  4 ++-
+ drivers/firmware/efi/cper-x86.c      | 10 +++++--
+ 6 files changed, 75 insertions(+), 4 deletions(-)
+
+-- 
+2.17.1
 
