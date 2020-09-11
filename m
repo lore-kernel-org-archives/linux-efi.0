@@ -4,93 +4,161 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 75E4CC43461
-	for <linux-efi@archiver.kernel.org>; Fri, 11 Sep 2020 16:28:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6DA37C43461
+	for <linux-efi@archiver.kernel.org>; Fri, 11 Sep 2020 17:06:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4164722204
-	for <linux-efi@archiver.kernel.org>; Fri, 11 Sep 2020 16:28:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 37D5A214F1
+	for <linux-efi@archiver.kernel.org>; Fri, 11 Sep 2020 17:06:28 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1599841688;
-	bh=38MigC5T1jTNkx+xBK9uZViwcPm5Nh+W6vwsYFE6okI=;
+	s=default; t=1599843988;
+	bh=HtLkUWXhl5XAX6D7GAvZ5uZ8WYlaoexr13YPMrhinX8=;
 	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=q4xfE8z93m/8/3PlsCLxathBPsp7MeeV/U4CYsUWj8v369lMqfrD1Zxpy9jA89J/c
-	 16g3uj6QSubcdfxTeND02ZP9lXQktui/XQzDewVFEgwM5tA+5rMHbxOY3Og5nKw19c
-	 Yz/WLds59DUM3OkRsb8zcneztH2phpkkILDSk0kY=
+	b=P4RYQez+JWQMm6nzyvcd5J6mrOsCdWv3yVT4o2/aj5fb3KiTgsydNerWdsVYhxQFt
+	 9lNWJusnlnErlUhoK/BvwCQRYcAh2bG3veYFO7n/f9KmHiFxjDown4moxjMEM3TDUh
+	 eCWLCzt65OOqNCcGsN6kJrs6vG+N3bkrhxa7u/rY=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726260AbgIKQ2A (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 11 Sep 2020 12:28:00 -0400
-Received: from mail.kernel.org ([198.145.29.99]:53394 "EHLO mail.kernel.org"
+        id S1726120AbgIKREa (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 11 Sep 2020 13:04:30 -0400
+Received: from mail.kernel.org ([198.145.29.99]:45494 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726450AbgIKPUX (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 11 Sep 2020 11:20:23 -0400
-Received: from mail-oi1-f170.google.com (mail-oi1-f170.google.com [209.85.167.170])
+        id S1726256AbgIKPCf (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 11 Sep 2020 11:02:35 -0400
+Received: from mail-ot1-f53.google.com (mail-ot1-f53.google.com [209.85.210.53])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 4497D221ED
-        for <linux-efi@vger.kernel.org>; Fri, 11 Sep 2020 15:19:17 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 96F3E2244C;
+        Fri, 11 Sep 2020 15:01:21 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1599837557;
-        bh=38MigC5T1jTNkx+xBK9uZViwcPm5Nh+W6vwsYFE6okI=;
+        s=default; t=1599836481;
+        bh=HtLkUWXhl5XAX6D7GAvZ5uZ8WYlaoexr13YPMrhinX8=;
         h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=ztRPRRrQ9Xv5gv5cepgv6h87p9JaEOaAVp2qfNjbsVNLI+KOKVKLx5HBfErwWUHTx
-         D2JLHtnSdzqRKsKNTB5euMc5Z3uoPIIJq2lC/5aSaertsy0wj0i/uR5CHhVlTZlkyv
-         LqT0/q0exhZH28XJO8VzmWhnJVnJLvlhIhFURt7E=
-Received: by mail-oi1-f170.google.com with SMTP id n2so9805530oij.1
-        for <linux-efi@vger.kernel.org>; Fri, 11 Sep 2020 08:19:17 -0700 (PDT)
-X-Gm-Message-State: AOAM53337PiEOKPz9xHMDiI0pIJ5Sl8XiEjXtRLxXxQIkE15mFfHfZK1
-        0/UK9MRgfzUcueAyOEOr9G2A6CWPqSQ0S9vO6gI=
-X-Google-Smtp-Source: ABdhPJw8rM+Zmp4NfCd7h8YYezD3rxWRUyrI+NDefl/6qTEKTSzKlK63YFhu83AEh9ESkmxKCkoEEIpjMjdrqqjWwUM=
-X-Received: by 2002:a05:6808:8e5:: with SMTP id d5mr1550621oic.33.1599837556578;
- Fri, 11 Sep 2020 08:19:16 -0700 (PDT)
+        b=m2hilndopgpM3i5Zr85FVrHoQiXHTDnClGX8KRviAY9HEr77R/8UGRPTAjCfWD7NW
+         cMGT0YRkENBOhhs6s66uohG28ICbHaNthrJfjGTlIbVMtDzesDvy0svVkVT30QhP8n
+         4K3pTPXwBJ8w8GP6r2X9LYf2sYI902a8P9r/9cXc=
+Received: by mail-ot1-f53.google.com with SMTP id g96so8553340otb.12;
+        Fri, 11 Sep 2020 08:01:21 -0700 (PDT)
+X-Gm-Message-State: AOAM531UFkJjKx4XGGsA8Fggh2QAbrsh4UX3VfpK1VsPR7FmPY1WP1HR
+        prZXUkXrbaLuANgMS91XxScF7K7+iZm55C/PXck=
+X-Google-Smtp-Source: ABdhPJxBvUOnWvNWSxd3QQ6q9HAFDX1c50DdJzWPSuvJpfyOY08Sgy4lcuMwSkGA/qIXDW6vtgunB8B+AY4P1aKEKoo=
+X-Received: by 2002:a9d:69c9:: with SMTP id v9mr1381498oto.90.1599836480811;
+ Fri, 11 Sep 2020 08:01:20 -0700 (PDT)
 MIME-Version: 1.0
-References: <1599633872-36784-1-git-send-email-tiantao6@hisilicon.com> <20200909190142.GB474185@rani.riverdale.lan>
-In-Reply-To: <20200909190142.GB474185@rani.riverdale.lan>
+References: <20200904072905.25332-1-clin@suse.com> <20200904072905.25332-2-clin@suse.com>
+In-Reply-To: <20200904072905.25332-2-clin@suse.com>
 From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Fri, 11 Sep 2020 18:19:05 +0300
-X-Gmail-Original-Message-ID: <CAMj1kXEdoZa8dLSYSX_Q3KZrLUBHCNiJnriLPZ20za62q3HJ2w@mail.gmail.com>
-Message-ID: <CAMj1kXEdoZa8dLSYSX_Q3KZrLUBHCNiJnriLPZ20za62q3HJ2w@mail.gmail.com>
-Subject: Re: [PATCH] efi/printf: remove unneeded semicolon
-To:     Arvind Sankar <nivedita@alum.mit.edu>
-Cc:     Tian Tao <tiantao6@hisilicon.com>,
+Date:   Fri, 11 Sep 2020 18:01:09 +0300
+X-Gmail-Original-Message-ID: <CAMj1kXEXvmO5mrTcKpqYUASBAQB-1=xLa0vg7KwmvOHMjaQ34w@mail.gmail.com>
+Message-ID: <CAMj1kXEXvmO5mrTcKpqYUASBAQB-1=xLa0vg7KwmvOHMjaQ34w@mail.gmail.com>
+Subject: Re: [PATCH 1/6] efistub: pass uefi secureboot flag via fdt params
+To:     Chester Lin <clin@suse.com>
+Cc:     Catalin Marinas <catalin.marinas@arm.com>,
+        Will Deacon <will@kernel.org>, zohar@linux.ibm.com,
+        dmitry.kasatkin@gmail.com, Jonathan Corbet <corbet@lwn.net>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Vincenzo Frascino <vincenzo.frascino@arm.com>,
+        Sami Tolvanen <samitolvanen@google.com>,
+        Masahiro Yamada <masahiroy@kernel.org>,
+        Ingo Molnar <mingo@kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         linux-efi <linux-efi@vger.kernel.org>,
-        Linuxarm <linuxarm@huawei.com>
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        linux-integrity <linux-integrity@vger.kernel.org>,
+        Linux Doc Mailing List <linux-doc@vger.kernel.org>,
+        "Lee, Chun-Yi" <jlee@suse.com>
 Content-Type: text/plain; charset="UTF-8"
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Wed, 9 Sep 2020 at 22:01, Arvind Sankar <nivedita@alum.mit.edu> wrote:
+On Fri, 4 Sep 2020 at 10:29, Chester Lin <clin@suse.com> wrote:
 >
-> On Wed, Sep 09, 2020 at 02:44:32PM +0800, Tian Tao wrote:
-> > Fix the warning below.
-> > efi/libstub/vsprintf.c:135:2-3: Unneeded semicolon
-> >
-> > Signed-off-by: Tian Tao <tiantao6@hisilicon.com>
-> > ---
-> >  drivers/firmware/efi/libstub/vsprintf.c | 2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
-> >
-> > diff --git a/drivers/firmware/efi/libstub/vsprintf.c b/drivers/firmware/efi/libstub/vsprintf.c
-> > index e65ef49..1088e28 100644
-> > --- a/drivers/firmware/efi/libstub/vsprintf.c
-> > +++ b/drivers/firmware/efi/libstub/vsprintf.c
-> > @@ -135,7 +135,7 @@ char *number(char *end, unsigned long long num, int base, char locase)
-> >               break;
-> >       default:
-> >               unreachable();
-> > -     };
-> > +     }
-> >
-> >       return end;
-> >  }
-> > --
-> > 2.7.4
-> >
+> Add a new UEFI parameter: "linux,uefi-secure-boot" in fdt boot params
+> as other architectures have done in their own boot data. For example,
+> the boot_params->secure_boot in x86.
 >
-> Acked-by: Arvind Sankar <nivedita@alum.mit.edu>
+> Signed-off-by: Chester Lin <clin@suse.com>
 
-Queued in efi/next, thanks.
+Why do we need this flag? Can't the OS simply check the variable directly?
+
+> ---
+>  drivers/firmware/efi/libstub/fdt.c | 39 +++++++++++++++++++++++++++++-
+>  1 file changed, 38 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+> index 11ecf3c4640e..c9a341e4715f 100644
+> --- a/drivers/firmware/efi/libstub/fdt.c
+> +++ b/drivers/firmware/efi/libstub/fdt.c
+> @@ -136,6 +136,10 @@ static efi_status_t update_fdt(void *orig_fdt, unsigned long orig_fdt_size,
+>         if (status)
+>                 goto fdt_set_fail;
+>
+> +       status = fdt_setprop_var(fdt, node, "linux,uefi-secure-boot", fdt_val32);
+> +       if (status)
+> +               goto fdt_set_fail;
+> +
+>         if (IS_ENABLED(CONFIG_RANDOMIZE_BASE)) {
+>                 efi_status_t efi_status;
+>
+> @@ -199,6 +203,24 @@ static efi_status_t update_fdt_memmap(void *fdt, struct efi_boot_memmap *map)
+>         return EFI_SUCCESS;
+>  }
+>
+> +static efi_status_t update_fdt_secboot(void *fdt, u32 secboot)
+> +{
+> +       int node = fdt_path_offset(fdt, "/chosen");
+> +       u32 fdt_val32;
+> +       int err;
+> +
+> +       if (node < 0)
+> +               return EFI_LOAD_ERROR;
+> +
+> +       fdt_val32 = cpu_to_fdt32(secboot);
+> +
+> +       err = fdt_setprop_inplace_var(fdt, node, "linux,uefi-secure-boot", fdt_val32);
+> +       if (err)
+> +               return EFI_LOAD_ERROR;
+> +
+> +       return EFI_SUCCESS;
+> +}
+> +
+>  struct exit_boot_struct {
+>         efi_memory_desc_t       *runtime_map;
+>         int                     *runtime_entry_count;
+> @@ -208,6 +230,9 @@ struct exit_boot_struct {
+>  static efi_status_t exit_boot_func(struct efi_boot_memmap *map,
+>                                    void *priv)
+>  {
+> +       efi_status_t status;
+> +       enum efi_secureboot_mode secboot_status;
+> +       u32 secboot_var = 0;
+>         struct exit_boot_struct *p = priv;
+>         /*
+>          * Update the memory map with virtual addresses. The function will also
+> @@ -217,7 +242,19 @@ static efi_status_t exit_boot_func(struct efi_boot_memmap *map,
+>         efi_get_virtmap(*map->map, *map->map_size, *map->desc_size,
+>                         p->runtime_map, p->runtime_entry_count);
+>
+> -       return update_fdt_memmap(p->new_fdt_addr, map);
+> +       status = update_fdt_memmap(p->new_fdt_addr, map);
+> +
+> +       if (status != EFI_SUCCESS)
+> +               return status;
+> +
+> +       secboot_status = efi_get_secureboot();
+> +
+> +       if (secboot_status == efi_secureboot_mode_enabled)
+> +               secboot_var = 1;
+> +
+> +       status = update_fdt_secboot(p->new_fdt_addr, secboot_var);
+> +
+> +       return status;
+>  }
+>
+>  #ifndef MAX_FDT_SIZE
+> --
+> 2.26.1
+>
