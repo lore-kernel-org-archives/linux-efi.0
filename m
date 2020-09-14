@@ -7,37 +7,37 @@ X-Spam-Status: No, score=-14.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B998BC43461
-	for <linux-efi@archiver.kernel.org>; Mon, 14 Sep 2020 09:57:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 92E2DC43461
+	for <linux-efi@archiver.kernel.org>; Mon, 14 Sep 2020 09:57:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 832CC21BE5
-	for <linux-efi@archiver.kernel.org>; Mon, 14 Sep 2020 09:57:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5E86B221E3
+	for <linux-efi@archiver.kernel.org>; Mon, 14 Sep 2020 09:57:44 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1600077453;
-	bh=ZktTHwaeE3hkSCjdusjTsi9JrBRGAVazC164mdkYVqw=;
+	s=default; t=1600077464;
+	bh=12+uyxP3sbyITu/xtGVVeDeSUYX4EFBO8MDh0CpvfFI=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=H63f+MZS5RjluN/7aaN9Zh3bWWFnRz0yrE4QhZ5oWIVgVKMhS/zT3Au+ex5oL7bkQ
-	 qV6xAHFVdP6OdfnKqmCCsz+Gq3Wdko9/ougxZsdFbkOvlZyuOAo2mPGDyzXt5Vuovn
-	 a9Gm4QfK6xeaim6JGt6Hzvyzfjg7qk44G+stjjAY=
+	b=XZWxIZbnwCoeZd8PJnKITg4mfyyvcoqiNaOX0uJyFq4DOYCn/ZKgzXBjSy35IG7+F
+	 bUxjR6CfSSWd+tENwjkuEZ83qmJYGszZRxTDmdlGkgbPaFgmx31O9IJLaGSs+oZHJO
+	 FZaZtLMk63CxwK5RVQPqf8YN9ZYwnuhcRy+ilRDE=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726338AbgINJ5c (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 14 Sep 2020 05:57:32 -0400
-Received: from mail.kernel.org ([198.145.29.99]:48784 "EHLO mail.kernel.org"
+        id S1726340AbgINJ5m (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 14 Sep 2020 05:57:42 -0400
+Received: from mail.kernel.org ([198.145.29.99]:48846 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726239AbgINJ5c (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 14 Sep 2020 05:57:32 -0400
+        id S1726239AbgINJ5g (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Mon, 14 Sep 2020 05:57:36 -0400
 Received: from e123331-lin.nice.arm.com (unknown [37.6.197.50])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 639062192A;
-        Mon, 14 Sep 2020 09:57:28 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 779CC20732;
+        Mon, 14 Sep 2020 09:57:32 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1600077451;
-        bh=ZktTHwaeE3hkSCjdusjTsi9JrBRGAVazC164mdkYVqw=;
+        s=default; t=1600077456;
+        bh=12+uyxP3sbyITu/xtGVVeDeSUYX4EFBO8MDh0CpvfFI=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=cW1LmI0SZDI8ktFDsBtRXB0+cefaZK+U3d02oWFgqAqFKroV1hWwu2dxQMr+FoWtP
-         Bz35iuitbsrZqI5FP4T/iGWpLa3nrOucotZo/v5WSNueYQf9tqQGq2WkAYqNTf63zB
-         r/VFQ1vHghjntZcG4n5YdqvM96fQ7iioarW7Y5Sc=
+        b=rAFDHRJ5A8Ztx/KYtZir9ffaY6tEATTiWku+yOOBJnQNQdK6BRE2YIC0cY6U1d7VX
+         WvRsL44kCy2HHZ+OerbafI25Kpe/xwcl4sh58eU9rpSX8Cg4FM62t/qHHXPvePrDcA
+         IJizx7WGp3R8Vm8LBsmq+79FkgXuGAkBIz00be/E=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-arm-kernel@lists.infradead.org,
@@ -49,9 +49,9 @@ Cc:     linux-arm-kernel@lists.infradead.org,
         Stefan Agner <stefan@agner.ch>,
         Peter Smith <Peter.Smith@arm.com>,
         Marc Zyngier <maz@kernel.org>, Will Deacon <will@kernel.org>
-Subject: [PATCH 02/12] ARM: efistub: replace adrl pseudo-op with adr_l macro invocation
-Date:   Mon, 14 Sep 2020 12:56:56 +0300
-Message-Id: <20200914095706.3985-3-ardb@kernel.org>
+Subject: [PATCH 03/12] ARM: module: add support for place relative relocations
+Date:   Mon, 14 Sep 2020 12:56:57 +0300
+Message-Id: <20200914095706.3985-4-ardb@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20200914095706.3985-1-ardb@kernel.org>
 References: <20200914095706.3985-1-ardb@kernel.org>
@@ -60,35 +60,96 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The ARM 'adrl' pseudo instruction is a bit problematic, as it does not
-exist in Thumb mode, and it is not implemented by Clang either. Since
-the Thumb variant has a slightly bigger range, it is sometimes necessary
-to emit the 'adrl' variant in ARM mode where Thumb mode can use adr just
-fine. However, that still leaves the Clang issue, which does not appear
-to be supporting this any time soon.
-
-So let's switch to the adr_l macro, which works for both ARM and Thumb,
-and has unlimited range.
+When using the new adr_l/ldr_l/str_l macros to refer to external symbols
+from modules, the linker may emit place relative ELF relocations that
+need to be fixed up by the module loader. So add support for these.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/arm/boot/compressed/head.S | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+ arch/arm/include/asm/elf.h |  5 +++++
+ arch/arm/kernel/module.c   | 20 ++++++++++++++++++--
+ 2 files changed, 23 insertions(+), 2 deletions(-)
 
-diff --git a/arch/arm/boot/compressed/head.S b/arch/arm/boot/compressed/head.S
-index 434a16982e34..6a430d1f4d31 100644
---- a/arch/arm/boot/compressed/head.S
-+++ b/arch/arm/boot/compressed/head.S
-@@ -1444,8 +1444,7 @@ ENTRY(efi_enter_kernel)
- 		mov	r4, r0			@ preserve image base
- 		mov	r8, r1			@ preserve DT pointer
+diff --git a/arch/arm/include/asm/elf.h b/arch/arm/include/asm/elf.h
+index b078d992414b..0ac62a54b73c 100644
+--- a/arch/arm/include/asm/elf.h
++++ b/arch/arm/include/asm/elf.h
+@@ -51,6 +51,7 @@ typedef struct user_fp elf_fpregset_t;
+ #define R_ARM_NONE		0
+ #define R_ARM_PC24		1
+ #define R_ARM_ABS32		2
++#define R_ARM_REL32		3
+ #define R_ARM_CALL		28
+ #define R_ARM_JUMP24		29
+ #define R_ARM_TARGET1		38
+@@ -58,11 +59,15 @@ typedef struct user_fp elf_fpregset_t;
+ #define R_ARM_PREL31		42
+ #define R_ARM_MOVW_ABS_NC	43
+ #define R_ARM_MOVT_ABS		44
++#define R_ARM_MOVW_PREL_NC	45
++#define R_ARM_MOVT_PREL		46
  
-- ARM(		adrl	r0, call_cache_fn	)
-- THUMB(		adr	r0, call_cache_fn	)
-+		adr_l	r0, call_cache_fn
- 		adr	r1, 0f			@ clean the region of code we
- 		bl	cache_clean_flush	@ may run with the MMU off
+ #define R_ARM_THM_CALL		10
+ #define R_ARM_THM_JUMP24	30
+ #define R_ARM_THM_MOVW_ABS_NC	47
+ #define R_ARM_THM_MOVT_ABS	48
++#define R_ARM_THM_MOVW_PREL_NC	49
++#define R_ARM_THM_MOVT_PREL	50
  
+ /*
+  * These are used to set parameters in the core dumps.
+diff --git a/arch/arm/kernel/module.c b/arch/arm/kernel/module.c
+index e15444b25ca0..beac45e89ba6 100644
+--- a/arch/arm/kernel/module.c
++++ b/arch/arm/kernel/module.c
+@@ -185,14 +185,24 @@ apply_relocate(Elf32_Shdr *sechdrs, const char *strtab, unsigned int symindex,
+ 			*(u32 *)loc |= offset & 0x7fffffff;
+ 			break;
+ 
++		case R_ARM_REL32:
++			*(u32 *)loc += sym->st_value - loc;
++			break;
++
+ 		case R_ARM_MOVW_ABS_NC:
+ 		case R_ARM_MOVT_ABS:
++		case R_ARM_MOVW_PREL_NC:
++		case R_ARM_MOVT_PREL:
+ 			offset = tmp = __mem_to_opcode_arm(*(u32 *)loc);
+ 			offset = ((offset & 0xf0000) >> 4) | (offset & 0xfff);
+ 			offset = (offset ^ 0x8000) - 0x8000;
+ 
+ 			offset += sym->st_value;
+-			if (ELF32_R_TYPE(rel->r_info) == R_ARM_MOVT_ABS)
++			if (ELF32_R_TYPE(rel->r_info) == R_ARM_MOVT_PREL ||
++			    ELF32_R_TYPE(rel->r_info) == R_ARM_MOVW_PREL_NC)
++				offset -= loc;
++			if (ELF32_R_TYPE(rel->r_info) == R_ARM_MOVT_ABS ||
++			    ELF32_R_TYPE(rel->r_info) == R_ARM_MOVT_PREL)
+ 				offset >>= 16;
+ 
+ 			tmp &= 0xfff0f000;
+@@ -283,6 +293,8 @@ apply_relocate(Elf32_Shdr *sechdrs, const char *strtab, unsigned int symindex,
+ 
+ 		case R_ARM_THM_MOVW_ABS_NC:
+ 		case R_ARM_THM_MOVT_ABS:
++		case R_ARM_THM_MOVW_PREL_NC:
++		case R_ARM_THM_MOVT_PREL:
+ 			upper = __mem_to_opcode_thumb16(*(u16 *)loc);
+ 			lower = __mem_to_opcode_thumb16(*(u16 *)(loc + 2));
+ 
+@@ -302,7 +314,11 @@ apply_relocate(Elf32_Shdr *sechdrs, const char *strtab, unsigned int symindex,
+ 			offset = (offset ^ 0x8000) - 0x8000;
+ 			offset += sym->st_value;
+ 
+-			if (ELF32_R_TYPE(rel->r_info) == R_ARM_THM_MOVT_ABS)
++			if (ELF32_R_TYPE(rel->r_info) == R_ARM_THM_MOVT_PREL ||
++			    ELF32_R_TYPE(rel->r_info) == R_ARM_THM_MOVW_PREL_NC)
++				offset -= loc;
++			if (ELF32_R_TYPE(rel->r_info) == R_ARM_THM_MOVT_ABS ||
++			    ELF32_R_TYPE(rel->r_info) == R_ARM_THM_MOVT_PREL)
+ 				offset >>= 16;
+ 
+ 			upper = (u16)((upper & 0xfbf0) |
 -- 
 2.17.1
 
