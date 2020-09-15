@@ -7,90 +7,88 @@ X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 63868C433E2
-	for <linux-efi@archiver.kernel.org>; Tue, 15 Sep 2020 22:15:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E6175C433E2
+	for <linux-efi@archiver.kernel.org>; Tue, 15 Sep 2020 22:18:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 20FAF208E4
-	for <linux-efi@archiver.kernel.org>; Tue, 15 Sep 2020 22:15:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A158720872
+	for <linux-efi@archiver.kernel.org>; Tue, 15 Sep 2020 22:18:44 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=alien8.de header.i=@alien8.de header.b="pwO1UNl/"
+	dkim=pass (1024-bit key) header.d=alien8.de header.i=@alien8.de header.b="WOwquMcU"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727724AbgIOWO7 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 15 Sep 2020 18:14:59 -0400
-Received: from mail.skyhub.de ([5.9.137.197]:36306 "EHLO mail.skyhub.de"
+        id S1727810AbgIOWSM (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 15 Sep 2020 18:18:12 -0400
+Received: from mail.skyhub.de ([5.9.137.197]:35804 "EHLO mail.skyhub.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727725AbgIOQhQ (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Tue, 15 Sep 2020 12:37:16 -0400
+        id S1727722AbgIOQdW (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Tue, 15 Sep 2020 12:33:22 -0400
 Received: from zn.tnic (p200300ec2f0e42006096e946d741c4e4.dip0.t-ipconnect.de [IPv6:2003:ec:2f0e:4200:6096:e946:d741:c4e4])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id 647901EC0328;
-        Tue, 15 Sep 2020 18:36:15 +0200 (CEST)
+        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id 7EFAC1EC0328;
+        Tue, 15 Sep 2020 18:33:18 +0200 (CEST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alien8.de; s=dkim;
-        t=1600187775;
+        t=1600187598;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:in-reply-to:in-reply-to:  references:references;
-        bh=R4/KSvJodDTPWe9S1DH/Kj79tEBFBh4DMsZtvtyhfGw=;
-        b=pwO1UNl/PLU5GDJTdKWXGaCYxEwToe9U7hjjH5lJkbChNV5MIMN61ccu0A20tPkPka5BKU
-        ISR/sTdxp6j4xaIittEDYB5sH3SC6GDNNaH2QEHQPH2cZnIqotUSQpxHrdsUdZhd28ZEzz
-        doCBRc/L0h1jjgluquSCjcyuhG775XM=
-Date:   Tue, 15 Sep 2020 18:36:13 +0200
+        bh=ZWwBzofbLwaO1lqUGe+0uSmnKjSrhBMl5LKNuGBjotY=;
+        b=WOwquMcUbe2yULVzAwTw4t0gqRs3C/n65jZqTEGlEt3lWGoWQjEpgrEGKOHANYtlGitY2Q
+        uIEqQxxaWIIMWBFVsBepzL1mqEJueMCtafqZjhy0etuDR+dO110j5sEfGtoKu5ltzQ0Iv+
+        UoQAgaZEi2b8SVyjillCNHouaQQ95og=
+Date:   Tue, 15 Sep 2020 18:33:12 +0200
 From:   Borislav Petkov <bp@alien8.de>
 To:     Alex Kluver <alex.kluver@hpe.com>
 Cc:     linux-edac@vger.kernel.org, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org, ardb@kernel.org, mchehab@kernel.org,
         russ.anderson@hpe.com, dimitri.sivanich@hpe.com,
         kluveralex@gmail.com
-Subject: Re: [PATCH v2 2/2] cper,edac,efi: Memory Error Record: bank
- group/address and chip id
-Message-ID: <20200915163613.GP14436@zn.tnic>
+Subject: Re: [PATCH v2 1/2] edac,ghes,cper: Add Row Extension to Memory Error
+ Record
+Message-ID: <20200915163312.GO14436@zn.tnic>
 References: <20200819143544.155096-1-alex.kluver@hpe.com>
- <20200819143544.155096-3-alex.kluver@hpe.com>
+ <20200819143544.155096-2-alex.kluver@hpe.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20200819143544.155096-3-alex.kluver@hpe.com>
+In-Reply-To: <20200819143544.155096-2-alex.kluver@hpe.com>
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Wed, Aug 19, 2020 at 09:35:44AM -0500, Alex Kluver wrote:
-> Updates to the UEFI 2.8 Memory Error Record allow splitting the bank field
-> into bank address and bank group, and using the last 3 bits of the extended
-> field as a chip identifier.
+On Wed, Aug 19, 2020 at 09:35:43AM -0500, Alex Kluver wrote:
+> Memory errors could be printed with incorrect row values since the DIMM
+> size has outgrown the 16 bit row field in the CPER structure. UEFI
+> Specification Version 2.8 has increased the size of row by allowing it to
+> use the first 2 bits from a previously reserved space within the structure.
 > 
-> When needed, print correct version of bank field, bank group, and chip
-> identification
+> When needed, add the extension bits to the row value printed.
 > 
 > Based on UEFI 2.8 Table 299. Memory Error Record
-
-Whoever commits this - those last two sentences need fullstops.
-
-> Reviewed-by: Steve Wahl <steve.wahl@hpe.com>
+> 
 > Reviewed-by: Kyle Meyer <kyle.meyer@hpe.com>
-> Reviewed-by: Russ Anderson <russ.anderson@hpe.com>
+> Reviewed-by: Steve Wahl <steve.wahl@hpe.com>
+> Tested-by: Russ Anderson <russ.anderson@hpe.com>
 > Signed-off-by: Alex Kluver <alex.kluver@hpe.com>
 > ---
 > 
 > v1 -> v2:
->    * Add static inline cper_get_mem_extension() to make it
+>    * Add static inline cper_get_mem_extension() to make it 
 >     more readable, as suggested by Borislav Petkov.
 > 
 >    * Add second patch for bank field, bank group, and chip id.
 > 
 > ---
->  drivers/edac/ghes_edac.c    | 9 +++++++++
->  drivers/firmware/efi/cper.c | 9 +++++++++
->  include/linux/cper.h        | 8 ++++++++
->  3 files changed, 26 insertions(+)
+>  drivers/edac/ghes_edac.c    |  8 ++++++--
+>  drivers/firmware/efi/cper.c |  9 +++++++--
+>  include/linux/cper.h        | 16 ++++++++++++++--
+>  3 files changed, 27 insertions(+), 6 deletions(-)
 
 For the EDAC bits:
 
 Acked-by: Borislav Petkov <bp@suse.de>
 
-Thx.
+Also, I could take both through the EDAC tree, if people prefer.
 
 -- 
 Regards/Gruss,
