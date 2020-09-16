@@ -2,241 +2,136 @@ Return-Path: <SRS0=vmFw=CZ=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.5 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 301C2C43461
-	for <linux-efi@archiver.kernel.org>; Wed, 16 Sep 2020 18:26:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 707FFC43461
+	for <linux-efi@archiver.kernel.org>; Wed, 16 Sep 2020 19:06:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E8E9121D43
-	for <linux-efi@archiver.kernel.org>; Wed, 16 Sep 2020 18:26:08 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1600280769;
-	bh=tCwJf6pSywqZo1fO4aL4i9R+fquP41R+mQtn7D8AfE0=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=0LUo19DvU26VNWKgsjMzdRu2oZlBTrA4wij/ekskap/rtzNR8/RDyq+Uf+qXbOBNn
-	 tmjcNPu/4YbsWUxoW3BOnbNXOFCHUvBMdqBwk2tvV6mn0P5Y+lHlzRPs5kWPy9Vvlv
-	 HNTLBd/kSs8x0embQhL/E6TfHk4Ao3CSLKPTOa+I=
+	by mail.kernel.org (Postfix) with ESMTP id 1B70B20715
+	for <linux-efi@archiver.kernel.org>; Wed, 16 Sep 2020 19:06:02 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="F4fv9FdX"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727997AbgIPSZv (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 16 Sep 2020 14:25:51 -0400
-Received: from mail.kernel.org ([198.145.29.99]:56734 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727840AbgIPSZn (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 16 Sep 2020 14:25:43 -0400
-Received: from mail-ot1-f52.google.com (mail-ot1-f52.google.com [209.85.210.52])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id B1923224DE
-        for <linux-efi@vger.kernel.org>; Wed, 16 Sep 2020 16:02:15 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1600272135;
-        bh=tCwJf6pSywqZo1fO4aL4i9R+fquP41R+mQtn7D8AfE0=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=Hzg8tllsuNlKqYKb5LQGO+DnfkA47DQW6rzYwdkTJXvl6IqBCyNiLyWBXkD0QSD+a
-         70HIwIBbHVebNU3BhGqmlaL6jYdw6rvbfTVYdebyJbBmYmEim/sgVJUKo86WeO5Duw
-         J6YMq5vhY3UMV0XqhX+xS70BFqPi6RC5c3X/A2Hg=
-Received: by mail-ot1-f52.google.com with SMTP id u25so7158315otq.6
-        for <linux-efi@vger.kernel.org>; Wed, 16 Sep 2020 09:02:15 -0700 (PDT)
-X-Gm-Message-State: AOAM531Wo5IBOWE9nZgsv3+HUdv0R6Y5Dyqh9bT1VSZ/GHm+genLwqCH
-        OSlVpLFhN2Il+h9eNJ2385OHMnyEyoyF2x38KRY=
-X-Google-Smtp-Source: ABdhPJzHQcjfnL1R78+CRmb+RB6VI2KqwH49wlb6zMuirheVm4GoPZcWiHjbFRFpM6uoUepxw5FqhzOcOlBFlalja+s=
-X-Received: by 2002:a9d:335:: with SMTP id 50mr2809851otv.90.1600272134492;
- Wed, 16 Sep 2020 09:02:14 -0700 (PDT)
+        id S1727418AbgIPTGB (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 16 Sep 2020 15:06:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35338 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727415AbgIPRqR (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 16 Sep 2020 13:46:17 -0400
+Received: from mail-qk1-x742.google.com (mail-qk1-x742.google.com [IPv6:2607:f8b0:4864:20::742])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 90343C06174A
+        for <linux-efi@vger.kernel.org>; Wed, 16 Sep 2020 10:45:54 -0700 (PDT)
+Received: by mail-qk1-x742.google.com with SMTP id f142so9013770qke.13
+        for <linux-efi@vger.kernel.org>; Wed, 16 Sep 2020 10:45:54 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=sender:from:date:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=7nA9P7m0k+Qtks0jy0tjUYx5rLMpxFUcNHQdGm0Klos=;
+        b=F4fv9FdXaZcaZZ5aEByrFvjaSyUjpJ4+OQniaTEyxffU+KrbPaNsAX3VCl15+8vWi3
+         fE7ORl2qrD8omW+OxaXABzmDdsJO55pk8CdYD6kegUhsGL77T1UruhQSQEa5wfBeDB0X
+         LrDdr+dv3Xt6DLlrrv5UpKFkdB5+M+uG/t0yx+s0ZRllOftqJXfBgoErAPSEuk8LLuxc
+         ZPFjhsp0j2flHQPmF3kXcupfz4ZkIC7Tb7FSzk+7PSGiTiTj+6tX+isQtl+3ygDFyLEC
+         uMngujGRDfBzy96YfMMjAas1frlY6uiyS1cpTXd1H1PXh8aLglJS6/ciIkzuU72Ki7E7
+         ud1g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:sender:from:date:to:cc:subject:message-id
+         :references:mime-version:content-disposition:in-reply-to;
+        bh=7nA9P7m0k+Qtks0jy0tjUYx5rLMpxFUcNHQdGm0Klos=;
+        b=tgqckrvyHtNRROdP1D/pGigXNh/2jmgm0cxMFARnSRxSkVpYq6zyuK9LX+Te9UQMAz
+         6DJUX/wMuN1YGC3J07byhNNbuGidSi3sH5Ln5MZ5/INLzU/SF+U7y+NoYya2poEoyQH4
+         axtdQQSpO1F1NZvcMrtW/Gvovm9U4Zb+aTufj94qf5AAzCcaXISgoIi31+t00irfrDfk
+         O4YmvNmHBQuGsTHRAqwyEIuvquCr+rqO750b9po0AKBfcnk3P6dhO+xqMgE7RBXAOvVO
+         WTdhbYC2SoX2mVxKOxCgW2yb0pelpgODqHhZk+K+PHgOtqeOxhtMRh6ztU4pL7MrsdIl
+         rdUQ==
+X-Gm-Message-State: AOAM533+GCS0mh51tPjWybSsecQ1xCRzEAfWzB7T1w2HcqNWda8YpNPE
+        nF5NQyY2rTid8gWDKJxSWJM=
+X-Google-Smtp-Source: ABdhPJyRXsHXbs/hhSIlxoig6IAB0qjfL1CLpftUscXgBveYYl8oNYPPW84PEUaHZjTwBK2Nr7UoWQ==
+X-Received: by 2002:a37:6848:: with SMTP id d69mr23001770qkc.80.1600278352942;
+        Wed, 16 Sep 2020 10:45:52 -0700 (PDT)
+Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
+        by smtp.gmail.com with ESMTPSA id w94sm19451442qte.93.2020.09.16.10.45.51
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 16 Sep 2020 10:45:52 -0700 (PDT)
+From:   Arvind Sankar <nivedita@alum.mit.edu>
+X-Google-Original-From: Arvind Sankar <arvind@rani.riverdale.lan>
+Date:   Wed, 16 Sep 2020 13:45:50 -0400
+To:     Jacobo Pantoja <jacobopantoja@gmail.com>
+Cc:     Ard Biesheuvel <ardb@kernel.org>,
+        Arvind Sankar <nivedita@alum.mit.edu>,
+        "Limonciello, Mario" <Mario.Limonciello@dell.com>,
+        Peter Jones <pjones@redhat.com>,
+        linux-efi <linux-efi@vger.kernel.org>
+Subject: Re: [PATCH 2/2] efi/x86: Add a quirk to support command line
+ arguments on Dell EFI firmware
+Message-ID: <20200916174550.GA1281480@rani.riverdale.lan>
+References: <20200914213535.933454-1-nivedita@alum.mit.edu>
+ <20200914213535.933454-2-nivedita@alum.mit.edu>
+ <CAMj1kXHy4d6zEJhJtdkHyYx-jnhJJzJ4Xi+qyawhjg6hXhAQgw@mail.gmail.com>
+ <CAO18KQi9icju0YJ-dGe70NC8oFN0GL0hM1_fn8xE9dEkcrU_8A@mail.gmail.com>
 MIME-Version: 1.0
-References: <CAMj1kXG6VRXOPRhHmeyiPP06BVByEYsqYE001BZYyRDqtvyDBg@mail.gmail.com>
- <mhng-f3ca14fc-58f7-423e-8abe-a85de1a2d55b@palmerdabbelt-glaptop1> <CAMj1kXH5pA-9uWCRzvN2OKzxTr0mG8knZZnpuOPn+b5BBAn4dw@mail.gmail.com>
-In-Reply-To: <CAMj1kXH5pA-9uWCRzvN2OKzxTr0mG8knZZnpuOPn+b5BBAn4dw@mail.gmail.com>
-From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Wed, 16 Sep 2020 19:02:03 +0300
-X-Gmail-Original-Message-ID: <CAMj1kXHLkhTKy0jx3hxXPCD7aMu8Y1zWfTcrc-y1by+x-h_JLg@mail.gmail.com>
-Message-ID: <CAMj1kXHLkhTKy0jx3hxXPCD7aMu8Y1zWfTcrc-y1by+x-h_JLg@mail.gmail.com>
-Subject: Re: [PATCH RFC/RFT 0/3] efi/libstub: arm32: Remove dependency on dram_base
-To:     Palmer Dabbelt <palmer@dabbelt.com>
-Cc:     Atish Patra <atishp@atishpatra.org>,
-        linux-efi <linux-efi@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Maxim Uvarov <maxim.uvarov@linaro.org>,
-        Heinrich Schuchardt <xypron.glpk@gmx.de>,
-        Atish Patra <Atish.Patra@wdc.com>,
-        Jens Wiklander <jens.wiklander@linaro.org>,
-        =?UTF-8?Q?Fran=C3=A7ois_Ozog?= <francois.ozog@linaro.org>,
-        Etienne CARRIERE <etienne.carriere@st.com>,
-        Takahiro Akashi <takahiro.akashi@linaro.org>,
-        Patrice CHOTARD <patrice.chotard@st.com>,
-        Sumit Garg <sumit.garg@linaro.org>,
-        Grant Likely <Grant.Likely@arm.com>,
-        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-        Christophe Priouzeau <christophe.priouzeau@linaro.org>,
-        Rouven Czerwinski <r.czerwinski@pengutronix.de>,
-        Patrick Delaunay <patrick.delaunay@st.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <CAO18KQi9icju0YJ-dGe70NC8oFN0GL0hM1_fn8xE9dEkcrU_8A@mail.gmail.com>
 Sender: linux-efi-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Fri, 11 Sep 2020 at 10:56, Ard Biesheuvel <ardb@kernel.org> wrote:
->
-> On Fri, 11 Sep 2020 at 05:16, Palmer Dabbelt <palmer@dabbelt.com> wrote:
+On Wed, Sep 16, 2020 at 06:50:15PM +0200, Jacobo Pantoja wrote:
+> Hi, I'd like to update my testing and share my thoughts.
+> 
+> Regarding the patches:
+> 1) The patches in email 1/2 (the functions "efi_warn", etc.) are not working
+> properly. I got some suggestions for testing from Ard in a separate email.
+>   3a. If, in this 2nd patch, I switch the "efi_warn_once" with an
+> "efi_printk", the
+>   messages appear.
+>   1a. I've set CONFIG_CONSOLE_LOGLEVEL_DEFAULT=5, same result
+>   2a. I've switched from "efi_warn_once" to "efi_warn", same result.
+
+I had tested on QEMU, and the messages appear there. Not sure what might
+cause efi_warn to not work if efi_printk is working.
+
+> 2) Even if they would be working, since it is not logged anywhere, I
+> don't really
+> think these messages make sense. Idk if these can be made available to dmesg.
+
+They're useful mostly in the case the boot hangs in the EFI stub. If the
+boot works, they will generally disappear very quickly, making them
+difficult to notice/read.
+
+> 3) The function "efi_apply_loadoptions_quirk" is called twice, it seems to me
+> that calling it from the "file.c" is redundant, but probably I'm
+> missing something.
+
+file.c reads the original UTF-16 command line. It's possible to refactor
+the code so it doesn't have to quirk twice, but this was the smallest
+change for now.
+
+> 
+> Regarding the quirk itself, in my opinion we should wait for Mario's
+> news, since,
+> again in my opinion, this is something that should be fixed in the
+> firmware itself.
+> Being Dell a serious company, I think it is feasible that, at least
+> for their enterprise
+> products, they might fix it.
+> 
+> On Tue, 15 Sep 2020 at 17:09, Ard Biesheuvel <ardb@kernel.org> wrote:
 > >
-> > On Thu, 10 Sep 2020 07:08:07 PDT (-0700), ardb@kernel.org wrote:
-> > > On Thu, 10 Sep 2020 at 13:04, Ard Biesheuvel <ardb@kernel.org> wrote:
-> > >>
-> > >> On Thu, 10 Sep 2020 at 04:34, Atish Patra <atishp@atishpatra.org> wrote:
-> > >> >
-> > >> > On Wed, Sep 9, 2020 at 2:44 PM Atish Patra <atishp@atishpatra.org> wrote:
-> > >> > >
-> > >> > > On Wed, Sep 9, 2020 at 1:52 PM Palmer Dabbelt <palmer@dabbelt.com> wrote:
-> > >> > > >
-> > >> > > > On Wed, 09 Sep 2020 08:16:20 PDT (-0700), ardb@kernel.org wrote:
-> > >> > > > > Maxim reports boot failures on platforms that describe reserved memory
-> > >> > > > > regions in DT that are disjoint from system DRAM, and which are converted
-> > >> > > > > to EfiReservedMemory regions by the EFI subsystem in u-boot.
-> > >> > > > >
-> > >> > > > > As it turns out, the whole notion of discovering the base of DRAM is
-> > >> > > > > problematic, and it would be better to simply rely on the EFI memory
-> > >> > > > > allocation routines instead, and derive the FDT and initrd allocation
-> > >> > > > > limits from the actual placement of the kernel (which is what defines
-> > >> > > > > the start of the linear region anyway)
-> > >> > > > >
-> > >> > > > > Finally, we should be able to get rid of get_dram_base() entirely.
-> > >> > > > > However, as RISC-V only just started using it, we will need to address
-> > >> > > > > that at a later time.
-> > >> > > >
-> > >> > > > Looks like we're using dram_base to derive two argumets to
-> > >> > > > efi_relocate_kernel(): the preferred load address and the minimum load address.
-> > >> > > > I don't see any reason why we can't use the same PAGE_OFFSET-like logic that
-> > >> > > > x86 uses for the minimum load address, but I don't think we have any mechanism
-> > >> > > > like "struct boot_params" so we'd need to come up with something.
-> > >> > > >
-> > >> > >
-> > >> > > As discussed in the other thread
-> > >> > > (https://www.spinics.net/lists/linux-efi/msg20262.html),
-> > >> > > we don't need to do anything special. efi_relocate_kernel can just
-> > >> > > take preferred address as 0
-> > >> > > so that efi_bs_alloc will fail and efi_low_alloc_above will be used to
-> > >> > > allocate 2MB/4MB aligned address as per requirement.
-> > >> > >
-> > >> > > I don't think the other changes in this series will cause any issue
-> > >> > > for RISC-V. I will test it and update anyways.
-> > >> > >
-> > >> > > > > Cc: Maxim Uvarov <maxim.uvarov@linaro.org>
-> > >> > > > > Cc: Heinrich Schuchardt <xypron.glpk@gmx.de>
-> > >> > > > > Cc: Atish Patra <atish.patra@wdc.com>
-> > >> > > > > Cc: Palmer Dabbelt <palmer@dabbelt.com>
-> > >> > > > > Cc: Jens Wiklander <jens.wiklander@linaro.org>
-> > >> > > > > Cc: Francois Ozog <francois.ozog@linaro.org>
-> > >> > > > > Cc: Etienne CARRIERE <etienne.carriere@st.com>
-> > >> > > > > Cc: Takahiro Akashi <takahiro.akashi@linaro.org>
-> > >> > > > > Cc: Patrice CHOTARD <patrice.chotard@st.com>
-> > >> > > > > Cc: Sumit Garg <sumit.garg@linaro.org>
-> > >> > > > > Cc: Grant Likely <Grant.Likely@arm.com>
-> > >> > > > > Cc: Ilias Apalodimas <ilias.apalodimas@linaro.org>
-> > >> > > > > Cc: Christophe Priouzeau <christophe.priouzeau@linaro.org>
-> > >> > > > > Cc: Rouven Czerwinski <r.czerwinski@pengutronix.de>
-> > >> > > > > Cc: Patrick DELAUNAY <patrick.delaunay@st.com>
-> > >> > > > >
-> > >> > > > > Ard Biesheuvel (3):
-> > >> > > > >   efi/libstub: Export efi_low_alloc_above() to other units
-> > >> > > > >   efi/libstub: Use low allocation for the uncompressed kernel
-> > >> > > > >   efi/libstub: base FDT and initrd placement on image address not DRAM
-> > >> > > > >     base
-> > >> > > > >
-> > >> > > > >  arch/arm/include/asm/efi.h                |   6 +-
-> > >> > > > >  arch/arm64/include/asm/efi.h              |   2 +-
-> > >> > > > >  drivers/firmware/efi/libstub/arm32-stub.c | 177 ++++----------------
-> > >> > > > >  drivers/firmware/efi/libstub/efi-stub.c   |   2 +-
-> > >> > > > >  drivers/firmware/efi/libstub/efistub.h    |   3 +
-> > >> > > > >  drivers/firmware/efi/libstub/relocate.c   |   4 +-
-> > >> > > > >  6 files changed, 47 insertions(+), 147 deletions(-)
-> > >> > >
-> > >> >
-> > >> > I verified the above patches along with the following RISC-V specific changes.
-> > >> >
-> > >> > diff --git a/arch/riscv/include/asm/efi.h b/arch/riscv/include/asm/efi.h
-> > >> > index 93c305a638f4..dd6ceea9d548 100644
-> > >> > --- a/arch/riscv/include/asm/efi.h
-> > >> > +++ b/arch/riscv/include/asm/efi.h
-> > >> > @@ -37,7 +37,7 @@ static inline unsigned long
-> > >> > efi_get_max_fdt_addr(unsigned long dram_base)
-> > >> >  static inline unsigned long efi_get_max_initrd_addr(unsigned long dram_base,
-> > >> >                                                     unsigned long image_addr)
-> > >> >  {
-> > >> > -       return dram_base + SZ_256M;
-> > >> > +       return image_addr + SZ_256M;
-> > >> >  }
-> > >> >
-> > >>
-> > >> Ah yes, we need this change as well - this is a bit unfortunate since
-> > >> that creates a conflict with the RISC-V tree.
-> > >>
-> > >> > --- a/drivers/firmware/efi/libstub/riscv-stub.c
-> > >> > +++ b/drivers/firmware/efi/libstub/riscv-stub.c
-> > >> > @@ -100,7 +100,7 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
-> > >> >          */
-> > >> >         preferred_addr = round_up(dram_base, MIN_KIMG_ALIGN) + MIN_KIMG_ALIGN;
-> > >> >         status = efi_relocate_kernel(image_addr, kernel_size, *image_size,
-> > >> > -                                    preferred_addr, MIN_KIMG_ALIGN, dram_base);
-> > >> > +                                    0, MIN_KIMG_ALIGN, 0);
-> > >> >
-> > >> > FWIW: Tested-by: Atish Patra <atish.patra@wdc.com>
-> > >>
-> > >> Thanks for confirming.
+> > On Tue, 15 Sep 2020 at 00:35, Arvind Sankar <nivedita@alum.mit.edu> wrote:
 > > >
-> > > OK,
-> > >
-> > > So, just to annoy Palmer and you more than I already have up to this
-> > > point: any chance we could do a final respin of the RISC-V code on top
-> > > of these changes? They are important for ARM, and I would prefer these
-> > > to be merged in a way that makes it easy to backport them to -stable
-> > > if needed.
-> > >
-> > > So what I would suggest is:
-> > > - I will create a new 'shared-efi' tag/stable branch containing the
-> > > existing two patches, as well as these changes (in a slightly updated
-> > > form)
-> > > - Palmer creates a new topic branch in the riscv repo based on this
-> > > shared tag, and applies the [updated] RISC-V patches on top
-> > > - Palmer drops the current version of the riscv patches from
-> > > riscv/for-next, and merges the topic branch into it instead.
-> > >
-> > > Again, sorry to be a pain, but I think this is the cleanest way to get
-> > > these changes queued up for v5.10 without painting ourselves into a
-> > > corner too much when it comes to future follow-up changes.
-> >
-> > That's fine for me.
->
-> Excellent.
->
-> I have created a signed tag efi-riscv-shared-for-v5.10 in the EFI repo
-> [0], which is based on v5.9-rc1. Please merge that at the start of
-> your for-next/efi topic branch, and apply the reworked EFI for RISC-V
-> series on top.
->
+> > > At least some versions of Dell EFI firmware pass the entire
+> > > EFI_LOAD_OPTION descriptor, rather than just the OptionalData part, to
+> > > the loaded image. This was verified with firmware revision 2.15.0 on a
+> > > Dell Precision T3620 by Jacobo Pontaja.
+> 
+> Please be so kind to correct my name, if it's being included in the commit msg.
 
-Since this tag has not appeared in the riscv repo yet, and Atish's
-rebase was not sent to the list yet either, I have pushed a new
-version of this tag just now.
+Oops, sorry about that. Ard, can you fix that up?
 
-If you want, I can send you a formal PR separately.
-
-
-> I have created a preliminary version of that branch as 'riscv-tmp' on
-> [1], incorporating some changes that are needed for the rebase. Note
-> that I applied some other tweaks as well - one is in a separate patch
-> on top, the other is that I omitted the Makefile rule for .stub.o
-> objects under arch/riscv/Makefile, as it is not actually used.
->
-> Atish - please pick whatever seems useful to you from that branch when
-> you do the respin.
->
-> Thanks,
-> Ard.
->
->
->
-> [0] git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git
-> [1] git://git.kernel.org/pub/scm/linux/kernel/git/ardb/linux.git
+Thanks.
