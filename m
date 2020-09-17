@@ -2,60 +2,63 @@ Return-Path: <SRS0=vH6Q=C2=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 87BD0C43464
-	for <linux-efi@archiver.kernel.org>; Thu, 17 Sep 2020 22:47:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AF14EC43464
+	for <linux-efi@archiver.kernel.org>; Thu, 17 Sep 2020 22:47:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 19D6E208DB
-	for <linux-efi@archiver.kernel.org>; Thu, 17 Sep 2020 22:47:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 65434208DB
+	for <linux-efi@archiver.kernel.org>; Thu, 17 Sep 2020 22:47:50 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="irZOEZge"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="oyqqyF4O"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726043AbgIQWrj (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 17 Sep 2020 18:47:39 -0400
+        id S1726198AbgIQWro (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 17 Sep 2020 18:47:44 -0400
 Received: from esa2.hgst.iphmx.com ([68.232.143.124]:54146 "EHLO
         esa2.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725858AbgIQWrj (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 17 Sep 2020 18:47:39 -0400
+        with ESMTP id S1726156AbgIQWrm (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 17 Sep 2020 18:47:42 -0400
 X-Greylist: delayed 601 seconds by postgrey-1.27 at vger.kernel.org; Thu, 17 Sep 2020 18:47:38 EDT
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1600382909; x=1631918909;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=hutlet2njpyeL/sMjQX6Uq1jHOVaORsRpw7WgDF3Mgk=;
-  b=irZOEZgeNPOzJyPtJvp1Q0DFnz/2DjS2gWXeNdql2Jtz7FAyimpJZOng
-   5AdgPeQIlsVvVEH+TwZxTkYXDDsv/Yu1Bc+TG/Gs4EL1IgN8OvwFowOr1
-   Lp3xM7dln2XxbDlJ9Kg9tBJiRmvFwWyVdGFNtK1j65P5WBIO7g6HybjeO
-   unPzBcL41tZd2trm7Mw45JP2hlfwzgEFAw+OGlavCdIeqY8VSPwP5Czqo
-   1ZyYDT+TGezKime692Bno0ki8O2k/S5+GzbPLG+gWEwIg8y85rWNb+TyI
-   9X4thjTK/vDB8YT1iFNvydFpPjgLgDKeQD7pULTnl5WhvNeLsxHk9Pd98
-   w==;
-IronPort-SDR: PJq9h6zDIULzvwnr8Ieq1dhl+oDsAlBya9/cgEz92PYkeglTsjuCo2VELxtF+nmQOIl8s6iJco
- 4bs/zucSpTmBlZYq3B7ckzUPMMHFC5BxZFi45FRVmGoU5nSEHW2w8R70N05rMqjmGeuj9oFF6l
- 85c9vVt82x7qgxu8krnA0lWK+SgJHDnS9c3ZOyX/lzdeYo4NZBXp3DrGtNyNGybKm2hc3dEcbz
- zhT5z0242D2rhtJmA+B9oCD02bVBVvXvaW4uxY5X51ErOxXahTUxu9dPUshERVd8JEKL6l7uNp
- /mw=
+  t=1600382913; x=1631918913;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=0SHxP3cRZQa8gFN8WQXBGWYwQyW8SLYLuGAVjQGH2SA=;
+  b=oyqqyF4OG2sLOCOIg30/v7ll7ndw9R6WKiNWSZWSTD6xmnG8Ymd/G8Ev
+   cSfh/VzyvR+jSB8E1vgFAShElluCN2Kkv2WnH3csXyLnCUP96D9heF5Fl
+   5vr6aHgHLA3GW8z6Re0GuU4RB+gCrq0RrViIQpUAaxhJvGJBoeAC5Tgbk
+   0Fz1k9YdsjLHfQQVbZsqi7GZVKcO4LnCnmu41dTesuprm/d1jNU3XM2Ck
+   4xLwNcy/8qDBhCkmzXtwp0lZyF0svdt9SJcKNBA3SF3voyIAS+/n6+AS+
+   OjqyOoOx9W0CbmQsPsa2XUivJSS7Z5mb9avjRrf95sZ3Zi6eXilMIwr7/
+   g==;
+IronPort-SDR: F0evJ075LmbihY2SvM33P8YTmlASkXY7XHOUb/TmkSvSngsTYr+KMptmlkCNTu/Ga+C2h/+Hci
+ h8uD8U9HmLMfNxyg0/VOYWbyNmWe+1zwhxoD8zAU36pE1slk9WNVKGczKK/QJ0zC2DMQt9AcHr
+ YD6vwrshOFUNZjq9srf8rBL6oizbiaCwXMn6yQhJp6t72/yQ8ol0lyeaSAQQd2PpJFcMTuSWEf
+ BD4rAmeEbQYZP44wZqwg03pzCTJXP15mKPDCoRhUkDZ7Tdg+mYvTW3ILFkS1bXkxbQtnx6a2M2
+ 3D4=
 X-IronPort-AV: E=Sophos;i="5.77,272,1596470400"; 
-   d="scan'208";a="251021071"
+   d="scan'208";a="251021084"
 Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 18 Sep 2020 06:37:53 +0800
-IronPort-SDR: yy+kvdbWUm0J2tt1UTBeZ010Ya/HuCPV+0qQcwqnb4xmgy05D8RhsfDmLoYLRmh6Of/n2lgi4c
- Eft6Weu9n/lA==
+  by ob1.hgst.iphmx.com with ESMTP; 18 Sep 2020 06:37:57 +0800
+IronPort-SDR: Ma3kJjKpyFzT0U+hPnscuudorbtqnXWOiD/E3vdKiszPGWeUpRSQHWJKAGEQeDBmUx6vn15J2P
+ CqdLs+16Xfjw==
 Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Sep 2020 15:23:50 -0700
-IronPort-SDR: yWykapKjvrHxnljwC0B8/iCDlg/TVg2Bib8NUzBqJPFIDLrbpVBsz6wfyBOhzsCAftH8JyS+G2
- ODFBE7Y0TjIQ==
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Sep 2020 15:23:53 -0700
+IronPort-SDR: XHSfKP5Xzat0/6fCWcdjbtWjNennorxEVEIAiMPBeH3C7coIU9CooIy69HUCQx/VZpDNRHj3pv
+ 5G2HXFVW0l5A==
 WDCIronportException: Internal
 Received: from use204338.ad.shared (HELO jedi-01.hgst.com) ([10.86.60.39])
-  by uls-op-cesaip02.wdc.com with ESMTP; 17 Sep 2020 15:37:36 -0700
+  by uls-op-cesaip02.wdc.com with ESMTP; 17 Sep 2020 15:37:39 -0700
 From:   Atish Patra <atish.patra@wdc.com>
 To:     linux-kernel@vger.kernel.org
 Cc:     Atish Patra <atish.patra@wdc.com>,
+        Anup Patel <anup@brainfault.org>,
+        Mike Rapoport <rppt@linux.ibm.com>,
+        Palmer Dabbelt <palmerdabbelt@google.com>,
         Albert Ou <aou@eecs.berkeley.edu>,
         Alistair Francis <alistair.francis@wdc.com>,
         Andrew Morton <akpm@linux-foundation.org>,
@@ -77,163 +80,270 @@ Cc:     Atish Patra <atish.patra@wdc.com>,
         Paul Walmsley <paul.walmsley@sifive.com>,
         Thomas Gleixner <tglx@linutronix.de>,
         Zong Li <zong.li@sifive.com>
-Subject: [PATCH v8 0/7] Add UEFI support for RISC-V
-Date:   Thu, 17 Sep 2020 15:37:09 -0700
-Message-Id: <20200917223716.2300238-1-atish.patra@wdc.com>
+Subject: [PATCH v8 3/7] RISC-V: Implement late mapping page table allocation functions
+Date:   Thu, 17 Sep 2020 15:37:12 -0700
+Message-Id: <20200917223716.2300238-4-atish.patra@wdc.com>
 X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20200917223716.2300238-1-atish.patra@wdc.com>
+References: <20200917223716.2300238-1-atish.patra@wdc.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This series adds UEFI support for RISC-V.
+Currently, page table setup is done during setup_va_final where fixmap can
+be used to create the temporary mappings. The physical frame is allocated
+from memblock_alloc_* functions. However, this won't work if page table
+mapping needs to be created for a different mm context (i.e. efi mm) at
+a later point of time.
 
-Linux kernel: v5.9-rc5 
-U-Boot: v2020.07 
-OpenSBI: master
+Use generic kernel page allocation function & macros for any mapping
+after setup_vm_final.
 
-Patch 1-3 are generic riscv feature addition required for UEFI support.
-Patch 4-5 adds the efi stub support for RISC-V which was reviewed few months back.
-Patch 6 adds the runtime services for RISC-V.
+Signed-off-by: Atish Patra <atish.patra@wdc.com>
+Reviewed-by: Anup Patel <anup@brainfault.org>
+Acked-by: Mike Rapoport <rppt@linux.ibm.com>
+Signed-off-by: Palmer Dabbelt <palmerdabbelt@google.com>
+---
+ arch/riscv/mm/init.c | 130 ++++++++++++++++++++++++++++++++-----------
+ 1 file changed, 99 insertions(+), 31 deletions(-)
 
-The working set of patches can also be found in following git repo.
-https://github.com/atishp04/linux/tree/uefi_riscv_5.10_v8
-
-@Palmer: I have dropped the following 2 patches from last series (v7)
-as this is already part of the shared efi-tree. I am assuming you are pulling
-these two from there. The above github tree contains all the patches in order
-as per Ard's suggestion.
-
-87a1eeea8e7a include: pe.h: Add RISC-V related PE definition
-76fdd4313434 efi: Rename arm-init to efi-init common for all arch
-
-The patches have been verified on following platforms:
-1. Qemu (both RV32 & RV64) for the following bootflow
-   OpenSBI->U-Boot->Linux
-   EDK2->Linux
-2. HiFive unleashed using (RV64) for the following bootflow
-   OpenSBI->U-Boot->Linux
-   EDK2->Linux
-
-Thanks Abner & Daniel for all work done for EDK2.
-The EDK2 instructions are available here.
-https://github.com/JohnAZoidberg/riscv-edk2-docker/
-
-Note:
-1. Currently, EDK2 RISC-V port doesn't support OVMF package. That's why
-EFI_GENERIC_STUB_INITRD_CMDLINE_LOADER should be enabled to load initrd via
-commandline until OVMF patches are available.
-
-2. For RV32, maximum allocated memory should be 1G as RISC-V kernel can not map
-beyond 1G of physical memory for RV32.
-
-3. Runtime services have been verified with fwts on EDK2.
-
-***********************************************************************
-[root@fedora-riscv ~]# fwts uefirtvariable
-Running 1 tests, results appended to results.log
-Test: UEFI Runtime service variable interface tests.                        
-  Test UEFI RT service get variable interface.            1 passed             
-  Test UEFI RT service get next variable name interface.  4 passed             
-  Test UEFI RT service set variable interface.            7 passed, 1 warning  
-  Test UEFI RT service query variable info interface.     1 passed             
-  Test UEFI RT service variable interface stress test.    2 passed             
-  Test UEFI RT service set variable interface stress t..  4 passed             
-  Test UEFI RT service query variable info interface s..  1 passed             
-  Test UEFI RT service get variable interface, invalid..  5 passed             
-  Test UEFI RT variable services supported status.        1 skipped 
-
-Test           |Pass |Fail |Abort|Warn |Skip |Info |
-uefirtvariable |   25|     |     |    1|    1|     |
-Total:         |   25|    0|    0|    1|    1|    0|
-
-***********************************************************************
-
-Changes from v7->v8:
-1. Rebased on latest efi series[1].
-2. Fixed efi-header for 32 bit.
-3. Included RISC-V tweaks from Ard[2].
-4. Removed the 2 patches(pe.h & arm init) from v7 as it is going through efi tree.
-
-[1] git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git
-[2] git://git.kernel.org/pub/scm/linux/kernel/git/ardb/linux.git
-
-Changes from v6->v7:
-1. Fixed build error reported on linux-next for patch2.
-
-Changes from v5->v6:
-1. Fixed the static declaration for pt_ops.
-2. Added Reviewed/Acked-by.
-
-Changes from v4->v5:
-1. Late mappings allocations are now done through function pointers.
-2. EFI run time services are verified using full linux boot and fwts using EDK2.
-
-Changes from v3->v4:
-1. Used pgd mapping to avoid copying DT to bss.
-
-Changes from v2->v3:
-1. Fixed few bugs in run time services page table mapping.
-2. Dropped patch 1 as it is already taken into efi-tree.
-3. Sent few generic mmu fixes as a separate series to ease the merge conflicts.
-
-Changes from v1->v2:
-1. Removed patch 1 as it is already taken into efi-tree.
-2. Fixed compilation issues with patch 9.
-3. Moved few function prototype declaration to header file to keep kbuild happy.
-
-Changes from previous version:
-1. Added full ioremap support.
-2. Added efi runtime services support.
-3. Fixes mm issues
-
-Anup Patel (1):
-RISC-V: Move DT mapping outof fixmap
-
-Atish Patra (6):
-RISC-V: Add early ioremap support
-RISC-V: Implement late mapping page table allocation functions
-RISC-V: Add PE/COFF header for EFI stub
-RISC-V: Add EFI stub support.
-RISC-V: Add EFI runtime services
-RISC-V: Add page table dump support for uefi
-
-arch/riscv/Kconfig                        |  25 +++
-arch/riscv/Makefile                       |   1 +
-arch/riscv/configs/defconfig              |   1 +
-arch/riscv/include/asm/Kbuild             |   1 +
-arch/riscv/include/asm/efi.h              |  55 +++++++
-arch/riscv/include/asm/fixmap.h           |  16 +-
-arch/riscv/include/asm/io.h               |   1 +
-arch/riscv/include/asm/mmu.h              |   2 +
-arch/riscv/include/asm/pgtable.h          |   5 +
-arch/riscv/include/asm/sections.h         |  13 ++
-arch/riscv/kernel/Makefile                |   2 +
-arch/riscv/kernel/efi-header.S            | 111 +++++++++++++
-arch/riscv/kernel/efi.c                   |  96 +++++++++++
-arch/riscv/kernel/head.S                  |  17 +-
-arch/riscv/kernel/head.h                  |   2 -
-arch/riscv/kernel/image-vars.h            |  51 ++++++
-arch/riscv/kernel/setup.c                 |  18 +-
-arch/riscv/kernel/vmlinux.lds.S           |  23 ++-
-arch/riscv/mm/init.c                      | 191 ++++++++++++++++------
-arch/riscv/mm/ptdump.c                    |  48 +++++-
-drivers/firmware/efi/Kconfig              |   3 +-
-drivers/firmware/efi/Makefile             |   2 +
-drivers/firmware/efi/libstub/Makefile     |  10 ++
-drivers/firmware/efi/libstub/efi-stub.c   |  11 +-
-drivers/firmware/efi/libstub/riscv-stub.c | 109 ++++++++++++
-drivers/firmware/efi/riscv-runtime.c      | 143 ++++++++++++++++
-26 files changed, 891 insertions(+), 66 deletions(-)
-create mode 100644 arch/riscv/include/asm/efi.h
-create mode 100644 arch/riscv/include/asm/sections.h
-create mode 100644 arch/riscv/kernel/efi-header.S
-create mode 100644 arch/riscv/kernel/efi.c
-create mode 100644 arch/riscv/kernel/image-vars.h
-create mode 100644 drivers/firmware/efi/libstub/riscv-stub.c
-create mode 100644 drivers/firmware/efi/riscv-runtime.c
-
---
+diff --git a/arch/riscv/mm/init.c b/arch/riscv/mm/init.c
+index b75ebe8e7a92..63acc8185bfa 100644
+--- a/arch/riscv/mm/init.c
++++ b/arch/riscv/mm/init.c
+@@ -32,6 +32,15 @@ extern char _start[];
+ void *dtb_early_va __initdata;
+ uintptr_t dtb_early_pa __initdata;
+ 
++struct pt_alloc_ops {
++	pte_t *(*get_pte_virt)(phys_addr_t pa);
++	phys_addr_t (*alloc_pte)(uintptr_t va);
++#ifndef __PAGETABLE_PMD_FOLDED
++	pmd_t *(*get_pmd_virt)(phys_addr_t pa);
++	phys_addr_t (*alloc_pmd)(uintptr_t va);
++#endif
++};
++
+ static void __init zone_sizes_init(void)
+ {
+ 	unsigned long max_zone_pfns[MAX_NR_ZONES] = { 0, };
+@@ -203,6 +212,8 @@ void __init setup_bootmem(void)
+ }
+ 
+ #ifdef CONFIG_MMU
++static struct pt_alloc_ops pt_ops;
++
+ unsigned long va_pa_offset;
+ EXPORT_SYMBOL(va_pa_offset);
+ unsigned long pfn_base;
+@@ -211,7 +222,6 @@ EXPORT_SYMBOL(pfn_base);
+ pgd_t swapper_pg_dir[PTRS_PER_PGD] __page_aligned_bss;
+ pgd_t trampoline_pg_dir[PTRS_PER_PGD] __page_aligned_bss;
+ pte_t fixmap_pte[PTRS_PER_PTE] __page_aligned_bss;
+-static bool mmu_enabled;
+ 
+ #define MAX_EARLY_MAPPING_SIZE	SZ_128M
+ 
+@@ -234,27 +244,46 @@ void __set_fixmap(enum fixed_addresses idx, phys_addr_t phys, pgprot_t prot)
+ 	}
+ }
+ 
+-static pte_t *__init get_pte_virt(phys_addr_t pa)
++static inline pte_t *__init get_pte_virt_early(phys_addr_t pa)
+ {
+-	if (mmu_enabled) {
+-		clear_fixmap(FIX_PTE);
+-		return (pte_t *)set_fixmap_offset(FIX_PTE, pa);
+-	} else {
+-		return (pte_t *)((uintptr_t)pa);
+-	}
++	return (pte_t *)((uintptr_t)pa);
+ }
+ 
+-static phys_addr_t __init alloc_pte(uintptr_t va)
++static inline pte_t *__init get_pte_virt_fixmap(phys_addr_t pa)
++{
++	clear_fixmap(FIX_PTE);
++	return (pte_t *)set_fixmap_offset(FIX_PTE, pa);
++}
++
++static inline pte_t *get_pte_virt_late(phys_addr_t pa)
++{
++	return (pte_t *) __va(pa);
++}
++
++static inline phys_addr_t __init alloc_pte_early(uintptr_t va)
+ {
+ 	/*
+ 	 * We only create PMD or PGD early mappings so we
+ 	 * should never reach here with MMU disabled.
+ 	 */
+-	BUG_ON(!mmu_enabled);
++	BUG();
++}
+ 
++static inline phys_addr_t __init alloc_pte_fixmap(uintptr_t va)
++{
+ 	return memblock_phys_alloc(PAGE_SIZE, PAGE_SIZE);
+ }
+ 
++static phys_addr_t alloc_pte_late(uintptr_t va)
++{
++	unsigned long vaddr;
++
++	vaddr = __get_free_page(GFP_KERNEL);
++	if (!vaddr || !pgtable_pte_page_ctor(virt_to_page(vaddr)))
++		BUG();
++	return __pa(vaddr);
++}
++
+ static void __init create_pte_mapping(pte_t *ptep,
+ 				      uintptr_t va, phys_addr_t pa,
+ 				      phys_addr_t sz, pgprot_t prot)
+@@ -279,28 +308,46 @@ pmd_t fixmap_pmd[PTRS_PER_PMD] __page_aligned_bss;
+ #endif
+ pmd_t early_pmd[PTRS_PER_PMD * NUM_EARLY_PMDS] __initdata __aligned(PAGE_SIZE);
+ 
+-static pmd_t *__init get_pmd_virt(phys_addr_t pa)
++static pmd_t *__init get_pmd_virt_early(phys_addr_t pa)
+ {
+-	if (mmu_enabled) {
+-		clear_fixmap(FIX_PMD);
+-		return (pmd_t *)set_fixmap_offset(FIX_PMD, pa);
+-	} else {
+-		return (pmd_t *)((uintptr_t)pa);
+-	}
++	/* Before MMU is enabled */
++	return (pmd_t *)((uintptr_t)pa);
+ }
+ 
+-static phys_addr_t __init alloc_pmd(uintptr_t va)
++static pmd_t *__init get_pmd_virt_fixmap(phys_addr_t pa)
+ {
+-	uintptr_t pmd_num;
++	clear_fixmap(FIX_PMD);
++	return (pmd_t *)set_fixmap_offset(FIX_PMD, pa);
++}
++
++static pmd_t *get_pmd_virt_late(phys_addr_t pa)
++{
++	return (pmd_t *) __va(pa);
++}
+ 
+-	if (mmu_enabled)
+-		return memblock_phys_alloc(PAGE_SIZE, PAGE_SIZE);
++static phys_addr_t __init alloc_pmd_early(uintptr_t va)
++{
++	uintptr_t pmd_num;
+ 
+ 	pmd_num = (va - PAGE_OFFSET) >> PGDIR_SHIFT;
+ 	BUG_ON(pmd_num >= NUM_EARLY_PMDS);
+ 	return (uintptr_t)&early_pmd[pmd_num * PTRS_PER_PMD];
+ }
+ 
++static phys_addr_t __init alloc_pmd_fixmap(uintptr_t va)
++{
++	return memblock_phys_alloc(PAGE_SIZE, PAGE_SIZE);
++}
++
++static phys_addr_t alloc_pmd_late(uintptr_t va)
++{
++	unsigned long vaddr;
++
++	vaddr = __get_free_page(GFP_KERNEL);
++	BUG_ON(!vaddr);
++	return __pa(vaddr);
++}
++
+ static void __init create_pmd_mapping(pmd_t *pmdp,
+ 				      uintptr_t va, phys_addr_t pa,
+ 				      phys_addr_t sz, pgprot_t prot)
+@@ -316,28 +363,28 @@ static void __init create_pmd_mapping(pmd_t *pmdp,
+ 	}
+ 
+ 	if (pmd_none(pmdp[pmd_idx])) {
+-		pte_phys = alloc_pte(va);
++		pte_phys = pt_ops.alloc_pte(va);
+ 		pmdp[pmd_idx] = pfn_pmd(PFN_DOWN(pte_phys), PAGE_TABLE);
+-		ptep = get_pte_virt(pte_phys);
++		ptep = pt_ops.get_pte_virt(pte_phys);
+ 		memset(ptep, 0, PAGE_SIZE);
+ 	} else {
+ 		pte_phys = PFN_PHYS(_pmd_pfn(pmdp[pmd_idx]));
+-		ptep = get_pte_virt(pte_phys);
++		ptep = pt_ops.get_pte_virt(pte_phys);
+ 	}
+ 
+ 	create_pte_mapping(ptep, va, pa, sz, prot);
+ }
+ 
+ #define pgd_next_t		pmd_t
+-#define alloc_pgd_next(__va)	alloc_pmd(__va)
+-#define get_pgd_next_virt(__pa)	get_pmd_virt(__pa)
++#define alloc_pgd_next(__va)	pt_ops.alloc_pmd(__va)
++#define get_pgd_next_virt(__pa)	pt_ops.get_pmd_virt(__pa)
+ #define create_pgd_next_mapping(__nextp, __va, __pa, __sz, __prot)	\
+ 	create_pmd_mapping(__nextp, __va, __pa, __sz, __prot)
+ #define fixmap_pgd_next		fixmap_pmd
+ #else
+ #define pgd_next_t		pte_t
+-#define alloc_pgd_next(__va)	alloc_pte(__va)
+-#define get_pgd_next_virt(__pa)	get_pte_virt(__pa)
++#define alloc_pgd_next(__va)	pt_ops.alloc_pte(__va)
++#define get_pgd_next_virt(__pa)	pt_ops.get_pte_virt(__pa)
+ #define create_pgd_next_mapping(__nextp, __va, __pa, __sz, __prot)	\
+ 	create_pte_mapping(__nextp, __va, __pa, __sz, __prot)
+ #define fixmap_pgd_next		fixmap_pte
+@@ -421,6 +468,12 @@ asmlinkage void __init setup_vm(uintptr_t dtb_pa)
+ 	BUG_ON((load_pa % map_size) != 0);
+ 	BUG_ON(load_sz > MAX_EARLY_MAPPING_SIZE);
+ 
++	pt_ops.alloc_pte = alloc_pte_early;
++	pt_ops.get_pte_virt = get_pte_virt_early;
++#ifndef __PAGETABLE_PMD_FOLDED
++	pt_ops.alloc_pmd = alloc_pmd_early;
++	pt_ops.get_pmd_virt = get_pmd_virt_early;
++#endif
+ 	/* Setup early PGD for fixmap */
+ 	create_pgd_mapping(early_pg_dir, FIXADDR_START,
+ 			   (uintptr_t)fixmap_pgd_next, PGDIR_SIZE, PAGE_TABLE);
+@@ -497,9 +550,16 @@ static void __init setup_vm_final(void)
+ 	phys_addr_t pa, start, end;
+ 	struct memblock_region *reg;
+ 
+-	/* Set mmu_enabled flag */
+-	mmu_enabled = true;
+-
++	/**
++	 * MMU is enabled at this point. But page table setup is not complete yet.
++	 * fixmap page table alloc functions should be used at this point
++	 */
++	pt_ops.alloc_pte = alloc_pte_fixmap;
++	pt_ops.get_pte_virt = get_pte_virt_fixmap;
++#ifndef __PAGETABLE_PMD_FOLDED
++	pt_ops.alloc_pmd = alloc_pmd_fixmap;
++	pt_ops.get_pmd_virt = get_pmd_virt_fixmap;
++#endif
+ 	/* Setup swapper PGD for fixmap */
+ 	create_pgd_mapping(swapper_pg_dir, FIXADDR_START,
+ 			   __pa_symbol(fixmap_pgd_next),
+@@ -533,6 +593,14 @@ static void __init setup_vm_final(void)
+ 	/* Move to swapper page table */
+ 	csr_write(CSR_SATP, PFN_DOWN(__pa_symbol(swapper_pg_dir)) | SATP_MODE);
+ 	local_flush_tlb_all();
++
++	/* generic page allocation functions must be used to setup page table */
++	pt_ops.alloc_pte = alloc_pte_late;
++	pt_ops.get_pte_virt = get_pte_virt_late;
++#ifndef __PAGETABLE_PMD_FOLDED
++	pt_ops.alloc_pmd = alloc_pmd_late;
++	pt_ops.get_pmd_virt = get_pmd_virt_late;
++#endif
+ }
+ #else
+ asmlinkage void __init setup_vm(uintptr_t dtb_pa)
+-- 
 2.25.1
 
