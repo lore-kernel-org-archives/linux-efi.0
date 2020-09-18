@@ -7,49 +7,49 @@ X-Spam-Status: No, score=-16.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 87E3BC43465
-	for <linux-efi@archiver.kernel.org>; Fri, 18 Sep 2020 02:49:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 76E87C43464
+	for <linux-efi@archiver.kernel.org>; Fri, 18 Sep 2020 03:09:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4B44823770
-	for <linux-efi@archiver.kernel.org>; Fri, 18 Sep 2020 02:49:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 38B312083B
+	for <linux-efi@archiver.kernel.org>; Fri, 18 Sep 2020 03:09:14 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1600397358;
-	bh=DzHwrWBV5+QKRm69+apCH4i6fgZjV1m1ozRGG54LsPo=;
+	s=default; t=1600398554;
+	bh=U9M+zpFCNePno53yzOpfFRwLAW3GwH5HlPJWAMAnOPI=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=zgKmBwaVi5qOLPe1IMfam1brx2ex4K/3NScgnsFwzE33MbEbHLJsXb0Otr6z9nODn
-	 Rw4NmOSVXI2lgf23eb9q06ho2VepfnJf10XHeHYp+l3nUmstOvk005eEZeK1RCy4wu
-	 BuA1FQsTIsuKs4KB9Y5CAPe8ftI0ce6XCJYW29VI=
+	b=NjaOoHplXO+BcpDGtyf3sDCyty8pBVgBimrBPQme5DtYq1Sqt+jVJQXylL/e4T9lT
+	 b8FcfELH/lOL+DCe6PTF96QYF3hvpweByyBt0RY7tk1atHysqFYimnignlO2N/LKAK
+	 G6uIL4BLxFDGkINOsESfGLKxDyoffTWcp/WX7/ms=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728195AbgIRCJH (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 17 Sep 2020 22:09:07 -0400
-Received: from mail.kernel.org ([198.145.29.99]:60768 "EHLO mail.kernel.org"
+        id S1727038AbgIRDJG (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 17 Sep 2020 23:09:06 -0400
+Received: from mail.kernel.org ([198.145.29.99]:49086 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728230AbgIRCJF (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Thu, 17 Sep 2020 22:09:05 -0400
+        id S1726973AbgIRCDK (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Thu, 17 Sep 2020 22:03:10 -0400
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 1D03623770;
-        Fri, 18 Sep 2020 02:09:04 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id B98D0221EC;
+        Fri, 18 Sep 2020 02:03:06 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1600394944;
-        bh=DzHwrWBV5+QKRm69+apCH4i6fgZjV1m1ozRGG54LsPo=;
+        s=default; t=1600394587;
+        bh=U9M+zpFCNePno53yzOpfFRwLAW3GwH5HlPJWAMAnOPI=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=BvccrEsBs17ftzJOyQyvl8Qx5xQu9JSLQNweCGGux2JlTRlNV1aUU+SAWoiYg6jf1
-         akLhlvFRwRRXQgLP5vKp/MiSgumc+9XREtpDjXe9RqtPi1mQRdaCHzrrnpzdACJHn3
-         qVkQE4GBTp3H/5dnHnWRv2RQ6JCPaEOBw7eCtCW0=
+        b=cFQQILCZxrcqQ98kYeYKOFV6cZsa3rwkCH4+aIj1hOjEkfymcpnjY7Q/UxXopPzy2
+         zHKHJbE5kVE/0ZmKA6rwptQMPLAfasFV9p+qnE682GydMv3BM21s/BWL+xgVdiaLDF
+         tvHAoZbSS8OK+0MrIWKi7iRR/wEwCEmw8lYSpVMg=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Ard Biesheuvel <ardb@kernel.org>,
         Saravana Kannan <saravanak@google.com>,
         Ingo Molnar <mingo@kernel.org>,
         Sasha Levin <sashal@kernel.org>, linux-efi@vger.kernel.org
-Subject: [PATCH AUTOSEL 4.19 052/206] efi/arm: Defer probe of PCIe backed efifb on DT systems
-Date:   Thu, 17 Sep 2020 22:05:28 -0400
-Message-Id: <20200918020802.2065198-52-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.4 096/330] efi/arm: Defer probe of PCIe backed efifb on DT systems
+Date:   Thu, 17 Sep 2020 21:57:16 -0400
+Message-Id: <20200918020110.2063155-96-sashal@kernel.org>
 X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20200918020802.2065198-1-sashal@kernel.org>
-References: <20200918020802.2065198-1-sashal@kernel.org>
+In-Reply-To: <20200918020110.2063155-1-sashal@kernel.org>
+References: <20200918020110.2063155-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -85,10 +85,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 103 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
-index 1a6a77df8a5e8..85533ec55396a 100644
+index 311cd349a8628..f136b77e13d98 100644
 --- a/drivers/firmware/efi/arm-init.c
 +++ b/drivers/firmware/efi/arm-init.c
-@@ -14,10 +14,12 @@
+@@ -10,10 +10,12 @@
  #define pr_fmt(fmt)	"efi: " fmt
  
  #include <linux/efi.h>
@@ -101,7 +101,7 @@ index 1a6a77df8a5e8..85533ec55396a 100644
  #include <linux/of_fdt.h>
  #include <linux/platform_device.h>
  #include <linux/screen_info.h>
-@@ -271,15 +273,112 @@ void __init efi_init(void)
+@@ -267,15 +269,112 @@ void __init efi_init(void)
  		efi_memmap_unmap();
  }
  
