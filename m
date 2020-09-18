@@ -1,273 +1,223 @@
-Return-Path: <SRS0=vH6Q=C2=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=x5cr=C3=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 386BDC43463
-	for <linux-efi@archiver.kernel.org>; Thu, 17 Sep 2020 22:48:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D0FE9C43465
+	for <linux-efi@archiver.kernel.org>; Fri, 18 Sep 2020 02:28:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DBF942137B
-	for <linux-efi@archiver.kernel.org>; Thu, 17 Sep 2020 22:48:10 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="htxfeNHX"
+	by mail.kernel.org (Postfix) with ESMTP id 96C7C23600
+	for <linux-efi@archiver.kernel.org>; Fri, 18 Sep 2020 02:28:41 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1600396121;
+	bh=Emdl6LcUGIIFkLP0ZUBZjc38yR4HUG7iI9EtGysld80=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=d2XDHggthbKUDlDn+WnQ7Yipt8x9B84pkijJ6zY+9TWllxPKb+eLl33PisbsJgxbZ
+	 iZlHzBWhhZqY5yWTt3v7RX2wBF3DbrDTIf3OuUTqhZiJGHL+IK8dlqiJg95Mj2L1jt
+	 82SVv3UlWmDQvCb3VnAcFOGd9llJZgcDcYDruDss=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726118AbgIQWrk (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 17 Sep 2020 18:47:40 -0400
-Received: from esa2.hgst.iphmx.com ([68.232.143.124]:54146 "EHLO
-        esa2.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725900AbgIQWrk (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 17 Sep 2020 18:47:40 -0400
-X-Greylist: delayed 601 seconds by postgrey-1.27 at vger.kernel.org; Thu, 17 Sep 2020 18:47:38 EDT
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1600382910; x=1631918910;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=cF20uOFMMd9tTFHAC0Pjs+HW70yT62Ub+JgCsnEO3VM=;
-  b=htxfeNHXziNjWmey5iWwpD2Okt53+UIiugsmG7QX5PhLq2hyrwUGX2yE
-   WiSK8Bgut29HfeTUTuX9FxVYRRdYufOcN3sEsuhjOwnHt6MlcVWX1Ux0S
-   1ZvCCrG2FdoxFIC4mJy23y3yArR8UY4ngsBd0ffS7DO/ZlehTHw7XH94x
-   8OyGyO0Lzi7Q3hU4EWIuBJYXKC7RoF9BxoBK8/VAKE32cb7OxduFEitWh
-   94/2nW59fKuAr+CjjABw49Et6rM0IFJR3Rzne68P3ebb200g8kpRpZ/9Y
-   /EV2+tPH2I3LjIVD2XqjMENxfShaaKmbZc7Dlo/PHn2pZIwkepdTPTMnu
-   A==;
-IronPort-SDR: qPnZDsHjoFufEKJgn4G7yLz2pLIDVZIsRU56GegtXAWxW8w+xhGcXo4WInIeuu4cAJdT/5QB8z
- Ucbzw2EgcjbwYdIYcnwFtsBvD5sfCc5RJEAtJbj8qeIMWT8nB2I8BWq2Xg94POykuqDZeGnbQQ
- X7IJeICs+ryYQtwvvPSGx1K0tgZ8LB/tSukqGXp2nbgenEEvVZmbBnd4rUFlx7COOf0db17M6x
- MjSlGEF+7r931JmMsujIjnLrbf81r4ziaB12mYuyBQZ/0jf366W5WaHI0J+MfWSlX+2P9K9dbP
- EMw=
-X-IronPort-AV: E=Sophos;i="5.77,272,1596470400"; 
-   d="scan'208";a="251021074"
-Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 18 Sep 2020 06:37:54 +0800
-IronPort-SDR: nVAEbjGqOqkMW5E207ftZCtrxRzLbQ2A3fNZkg9kBMrvJpQpRvmJjoEJtvuQkhB533HBydbcvC
- 5zvEXe34+8pg==
-Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Sep 2020 15:23:51 -0700
-IronPort-SDR: MUPJqvCz1YSPdNZJgpZNSoQ6FVJT1OCgAetfE0XPtatLNB3mUXEOsJVh1lXfoCkcbNBcz46AxM
- 4WUBWHiMBg7g==
-WDCIronportException: Internal
-Received: from use204338.ad.shared (HELO jedi-01.hgst.com) ([10.86.60.39])
-  by uls-op-cesaip02.wdc.com with ESMTP; 17 Sep 2020 15:37:37 -0700
-From:   Atish Patra <atish.patra@wdc.com>
-To:     linux-kernel@vger.kernel.org
-Cc:     Anup Patel <anup.patel@wdc.com>, Atish Patra <atish.patra@wdc.com>,
-        Palmer Dabbelt <palmerdabbelt@google.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        Alistair Francis <alistair.francis@wdc.com>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Arvind Sankar <nivedita@alum.mit.edu>,
-        Borislav Petkov <bp@suse.de>,
-        Greentime Hu <greentime.hu@sifive.com>,
-        Heiko Carstens <hca@linux.ibm.com>,
+        id S1728646AbgIRC23 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 17 Sep 2020 22:28:29 -0400
+Received: from mail.kernel.org ([198.145.29.99]:44168 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1729220AbgIRCPX (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Thu, 17 Sep 2020 22:15:23 -0400
+Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 8B72A238E6;
+        Fri, 18 Sep 2020 02:15:21 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1600395322;
+        bh=Emdl6LcUGIIFkLP0ZUBZjc38yR4HUG7iI9EtGysld80=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=bCKYSWLLdF6nBeiRyDkHcZsnZqATY1vyukunjyqdD9ohzXr3PCR3MLH5N6nehc38L
+         ik2JiP5h8pswHt3Y1O+Y5YLUy9GPW3zzSer9QFVYrf4+KGuJ3yHiFcWoKtlw+pZLX4
+         oaEBKzBAriG6AN/1Se+7zupc6o6p5n3JebXmF6SY=
+From:   Sasha Levin <sashal@kernel.org>
+To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc:     Ard Biesheuvel <ardb@kernel.org>,
+        Saravana Kannan <saravanak@google.com>,
         Ingo Molnar <mingo@kernel.org>,
-        Kees Cook <keescook@chromium.org>, linux-efi@vger.kernel.org,
-        linux-riscv@lists.infradead.org,
-        Masahiro Yamada <masahiroy@kernel.org>,
-        Maxim Uvarov <maxim.uvarov@linaro.org>,
-        Michal Simek <michal.simek@xilinx.com>,
-        Mike Rapoport <rppt@kernel.org>,
-        Nick Desaulniers <ndesaulniers@google.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Zong Li <zong.li@sifive.com>
-Subject: [PATCH v8 1/7] RISC-V: Move DT mapping outof fixmap
-Date:   Thu, 17 Sep 2020 15:37:10 -0700
-Message-Id: <20200917223716.2300238-2-atish.patra@wdc.com>
+        Sasha Levin <sashal@kernel.org>, linux-efi@vger.kernel.org
+Subject: [PATCH AUTOSEL 4.9 23/90] efi/arm: Defer probe of PCIe backed efifb on DT systems
+Date:   Thu, 17 Sep 2020 22:13:48 -0400
+Message-Id: <20200918021455.2067301-23-sashal@kernel.org>
 X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20200917223716.2300238-1-atish.patra@wdc.com>
-References: <20200917223716.2300238-1-atish.patra@wdc.com>
+In-Reply-To: <20200918021455.2067301-1-sashal@kernel.org>
+References: <20200918021455.2067301-1-sashal@kernel.org>
 MIME-Version: 1.0
+X-stable: review
+X-Patchwork-Hint: Ignore
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Anup Patel <anup.patel@wdc.com>
+From: Ard Biesheuvel <ardb@kernel.org>
 
-Currently, RISC-V reserves 1MB of fixmap memory for device tree. However,
-it maps only single PMD (2MB) space for fixmap which leaves only < 1MB space
-left for other kernel features such as early ioremap which requires fixmap
-as well. The fixmap size can be increased by another 2MB but it brings
-additional complexity and changes the virtual memory layout as well.
-If we require some additional feature requiring fixmap again, it has to be
-moved again.
+[ Upstream commit 64c8a0cd0a535891d5905c3a1651150f0f141439 ]
 
-Technically, DT doesn't need a fixmap as the memory occupied by the DT is
-only used during boot. That's why, We map device tree in early page table
-using two consecutive PGD mappings at lower addresses (< PAGE_OFFSET).
-This frees lot of space in fixmap and also makes maximum supported
-device tree size supported as PGDIR_SIZE. Thus, init memory section can be used
-for the same purpose as well. This simplifies fixmap implementation.
+The new of_devlink support breaks PCIe probing on ARM platforms booting
+via UEFI if the firmware exposes a EFI framebuffer that is backed by a
+PCI device. The reason is that the probing order gets reversed,
+resulting in a resource conflict on the framebuffer memory window when
+the PCIe probes last, causing it to give up entirely.
 
-Signed-off-by: Anup Patel <anup.patel@wdc.com>
-Signed-off-by: Atish Patra <atish.patra@wdc.com>
-Reviewed-by: Palmer Dabbelt <palmerdabbelt@google.com>
-Signed-off-by: Palmer Dabbelt <palmerdabbelt@google.com>
+Given that we rely on PCI quirks to deal with EFI framebuffers that get
+moved around in memory, we cannot simply drop the memory reservation, so
+instead, let's use the device link infrastructure to register this
+dependency, and force the probing to occur in the expected order.
+
+Co-developed-by: Saravana Kannan <saravanak@google.com>
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+Signed-off-by: Saravana Kannan <saravanak@google.com>
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Link: https://lore.kernel.org/r/20200113172245.27925-9-ardb@kernel.org
+Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- arch/riscv/include/asm/fixmap.h  |  3 ---
- arch/riscv/include/asm/pgtable.h |  1 +
- arch/riscv/kernel/head.S         |  1 -
- arch/riscv/kernel/head.h         |  2 --
- arch/riscv/kernel/setup.c        |  9 +++++++--
- arch/riscv/mm/init.c             | 26 ++++++++++++--------------
- 6 files changed, 20 insertions(+), 22 deletions(-)
+ drivers/firmware/efi/arm-init.c | 107 ++++++++++++++++++++++++++++++--
+ 1 file changed, 103 insertions(+), 4 deletions(-)
 
-diff --git a/arch/riscv/include/asm/fixmap.h b/arch/riscv/include/asm/fixmap.h
-index 1ff075a8dfc7..11613f38228a 100644
---- a/arch/riscv/include/asm/fixmap.h
-+++ b/arch/riscv/include/asm/fixmap.h
-@@ -22,9 +22,6 @@
-  */
- enum fixed_addresses {
- 	FIX_HOLE,
--#define FIX_FDT_SIZE	SZ_1M
--	FIX_FDT_END,
--	FIX_FDT = FIX_FDT_END + FIX_FDT_SIZE / PAGE_SIZE - 1,
- 	FIX_PTE,
- 	FIX_PMD,
- 	FIX_TEXT_POKE1,
-diff --git a/arch/riscv/include/asm/pgtable.h b/arch/riscv/include/asm/pgtable.h
-index eaea1f717010..815f8c959dd4 100644
---- a/arch/riscv/include/asm/pgtable.h
-+++ b/arch/riscv/include/asm/pgtable.h
-@@ -464,6 +464,7 @@ static inline void __kernel_map_pages(struct page *page, int numpages, int enabl
- #define kern_addr_valid(addr)   (1) /* FIXME */
+diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
+index 8ee91777abce7..e4ddd6e6edb31 100644
+--- a/drivers/firmware/efi/arm-init.c
++++ b/drivers/firmware/efi/arm-init.c
+@@ -14,10 +14,12 @@
+ #define pr_fmt(fmt)	"efi: " fmt
  
- extern void *dtb_early_va;
-+extern uintptr_t dtb_early_pa;
- void setup_bootmem(void);
- void paging_init(void);
- 
-diff --git a/arch/riscv/kernel/head.S b/arch/riscv/kernel/head.S
-index 0a4e81b8dc79..c6a37e8231a8 100644
---- a/arch/riscv/kernel/head.S
-+++ b/arch/riscv/kernel/head.S
-@@ -259,7 +259,6 @@ clear_bss_done:
- #endif
- 	/* Start the kernel */
- 	call soc_early_init
--	call parse_dtb
- 	tail start_kernel
- 
- .Lsecondary_start:
-diff --git a/arch/riscv/kernel/head.h b/arch/riscv/kernel/head.h
-index 105fb0496b24..b48dda3d04f6 100644
---- a/arch/riscv/kernel/head.h
-+++ b/arch/riscv/kernel/head.h
-@@ -16,6 +16,4 @@ asmlinkage void __init setup_vm(uintptr_t dtb_pa);
- extern void *__cpu_up_stack_pointer[];
- extern void *__cpu_up_task_pointer[];
- 
--void __init parse_dtb(void);
--
- #endif /* __ASM_HEAD_H */
-diff --git a/arch/riscv/kernel/setup.c b/arch/riscv/kernel/setup.c
-index 2c6dd329312b..edea7ef88402 100644
---- a/arch/riscv/kernel/setup.c
-+++ b/arch/riscv/kernel/setup.c
-@@ -48,8 +48,9 @@ atomic_t hart_lottery __section(.sdata);
- unsigned long boot_cpu_hartid;
- static DEFINE_PER_CPU(struct cpu, cpu_devices);
- 
--void __init parse_dtb(void)
-+static void __init parse_dtb(void)
- {
-+	/* Early scan of device tree from init memory */
- 	if (early_init_dt_scan(dtb_early_va))
- 		return;
- 
-@@ -62,6 +63,7 @@ void __init parse_dtb(void)
- 
- void __init setup_arch(char **cmdline_p)
- {
-+	parse_dtb();
- 	init_mm.start_code = (unsigned long) _stext;
- 	init_mm.end_code   = (unsigned long) _etext;
- 	init_mm.end_data   = (unsigned long) _edata;
-@@ -76,7 +78,10 @@ void __init setup_arch(char **cmdline_p)
- #if IS_ENABLED(CONFIG_BUILTIN_DTB)
- 	unflatten_and_copy_device_tree();
- #else
--	unflatten_device_tree();
-+	if (early_init_dt_verify(__va(dtb_early_pa)))
-+		unflatten_device_tree();
-+	else
-+		pr_err("No DTB found in kernel mappings\n");
- #endif
- 
- #ifdef CONFIG_SWIOTLB
-diff --git a/arch/riscv/mm/init.c b/arch/riscv/mm/init.c
-index 787c75f751a5..2b651f63f5c4 100644
---- a/arch/riscv/mm/init.c
-+++ b/arch/riscv/mm/init.c
-@@ -28,7 +28,9 @@ unsigned long empty_zero_page[PAGE_SIZE / sizeof(unsigned long)]
- EXPORT_SYMBOL(empty_zero_page);
- 
- extern char _start[];
--void *dtb_early_va;
-+#define DTB_EARLY_BASE_VA      PGDIR_SIZE
-+void *dtb_early_va __initdata;
-+uintptr_t dtb_early_pa __initdata;
- 
- static void __init zone_sizes_init(void)
- {
-@@ -141,8 +143,6 @@ static void __init setup_initrd(void)
- }
- #endif /* CONFIG_BLK_DEV_INITRD */
- 
--static phys_addr_t dtb_early_pa __initdata;
--
- void __init setup_bootmem(void)
- {
- 	struct memblock_region *reg;
-@@ -399,7 +399,7 @@ static uintptr_t __init best_map_size(phys_addr_t base, phys_addr_t size)
- 
- asmlinkage void __init setup_vm(uintptr_t dtb_pa)
- {
--	uintptr_t va, end_va;
-+	uintptr_t va, pa, end_va;
- 	uintptr_t load_pa = (uintptr_t)(&_start);
- 	uintptr_t load_sz = (uintptr_t)(&_end) - load_pa;
- 	uintptr_t map_size = best_map_size(load_pa, MAX_EARLY_MAPPING_SIZE);
-@@ -448,16 +448,13 @@ asmlinkage void __init setup_vm(uintptr_t dtb_pa)
- 				   load_pa + (va - PAGE_OFFSET),
- 				   map_size, PAGE_KERNEL_EXEC);
- 
--	/* Create fixed mapping for early FDT parsing */
--	end_va = __fix_to_virt(FIX_FDT) + FIX_FDT_SIZE;
--	for (va = __fix_to_virt(FIX_FDT); va < end_va; va += PAGE_SIZE)
--		create_pte_mapping(fixmap_pte, va,
--				   dtb_pa + (va - __fix_to_virt(FIX_FDT)),
--				   PAGE_SIZE, PAGE_KERNEL);
--
--	/* Save pointer to DTB for early FDT parsing */
--	dtb_early_va = (void *)fix_to_virt(FIX_FDT) + (dtb_pa & ~PAGE_MASK);
--	/* Save physical address for memblock reservation */
-+	/* Create two consecutive PGD mappings for FDT early scan */
-+	pa = dtb_pa & ~(PGDIR_SIZE - 1);
-+	create_pgd_mapping(early_pg_dir, DTB_EARLY_BASE_VA,
-+			   pa, PGDIR_SIZE, PAGE_KERNEL);
-+	create_pgd_mapping(early_pg_dir, DTB_EARLY_BASE_VA + PGDIR_SIZE,
-+			   pa + PGDIR_SIZE, PGDIR_SIZE, PAGE_KERNEL);
-+	dtb_early_va = (void *)DTB_EARLY_BASE_VA + (dtb_pa & (PGDIR_SIZE - 1));
- 	dtb_early_pa = dtb_pa;
+ #include <linux/efi.h>
++#include <linux/fwnode.h>
+ #include <linux/init.h>
+ #include <linux/memblock.h>
+ #include <linux/mm_types.h>
+ #include <linux/of.h>
++#include <linux/of_address.h>
+ #include <linux/of_fdt.h>
+ #include <linux/platform_device.h>
+ #include <linux/screen_info.h>
+@@ -262,15 +264,112 @@ void __init efi_init(void)
+ 		efi_memmap_unmap();
  }
  
-@@ -516,6 +513,7 @@ asmlinkage void __init setup_vm(uintptr_t dtb_pa)
- #else
- 	dtb_early_va = (void *)dtb_pa;
- #endif
-+	dtb_early_pa = dtb_pa;
- }
++static bool efifb_overlaps_pci_range(const struct of_pci_range *range)
++{
++	u64 fb_base = screen_info.lfb_base;
++
++	if (screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE)
++		fb_base |= (u64)(unsigned long)screen_info.ext_lfb_base << 32;
++
++	return fb_base >= range->cpu_addr &&
++	       fb_base < (range->cpu_addr + range->size);
++}
++
++static struct device_node *find_pci_overlap_node(void)
++{
++	struct device_node *np;
++
++	for_each_node_by_type(np, "pci") {
++		struct of_pci_range_parser parser;
++		struct of_pci_range range;
++		int err;
++
++		err = of_pci_range_parser_init(&parser, np);
++		if (err) {
++			pr_warn("of_pci_range_parser_init() failed: %d\n", err);
++			continue;
++		}
++
++		for_each_of_pci_range(&parser, &range)
++			if (efifb_overlaps_pci_range(&range))
++				return np;
++	}
++	return NULL;
++}
++
++/*
++ * If the efifb framebuffer is backed by a PCI graphics controller, we have
++ * to ensure that this relation is expressed using a device link when
++ * running in DT mode, or the probe order may be reversed, resulting in a
++ * resource reservation conflict on the memory window that the efifb
++ * framebuffer steals from the PCIe host bridge.
++ */
++static int efifb_add_links(const struct fwnode_handle *fwnode,
++			   struct device *dev)
++{
++	struct device_node *sup_np;
++	struct device *sup_dev;
++
++	sup_np = find_pci_overlap_node();
++
++	/*
++	 * If there's no PCI graphics controller backing the efifb, we are
++	 * done here.
++	 */
++	if (!sup_np)
++		return 0;
++
++	sup_dev = get_dev_from_fwnode(&sup_np->fwnode);
++	of_node_put(sup_np);
++
++	/*
++	 * Return -ENODEV if the PCI graphics controller device hasn't been
++	 * registered yet.  This ensures that efifb isn't allowed to probe
++	 * and this function is retried again when new devices are
++	 * registered.
++	 */
++	if (!sup_dev)
++		return -ENODEV;
++
++	/*
++	 * If this fails, retrying this function at a later point won't
++	 * change anything. So, don't return an error after this.
++	 */
++	if (!device_link_add(dev, sup_dev, 0))
++		dev_warn(dev, "device_link_add() failed\n");
++
++	put_device(sup_dev);
++
++	return 0;
++}
++
++static const struct fwnode_operations efifb_fwnode_ops = {
++	.add_links = efifb_add_links,
++};
++
++static struct fwnode_handle efifb_fwnode = {
++	.ops = &efifb_fwnode_ops,
++};
++
+ static int __init register_gop_device(void)
+ {
+-	void *pd;
++	struct platform_device *pd;
++	int err;
  
- static inline void setup_vm_final(void)
+ 	if (screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
+ 		return 0;
+ 
+-	pd = platform_device_register_data(NULL, "efi-framebuffer", 0,
+-					   &screen_info, sizeof(screen_info));
+-	return PTR_ERR_OR_ZERO(pd);
++	pd = platform_device_alloc("efi-framebuffer", 0);
++	if (!pd)
++		return -ENOMEM;
++
++	if (IS_ENABLED(CONFIG_PCI))
++		pd->dev.fwnode = &efifb_fwnode;
++
++	err = platform_device_add_data(pd, &screen_info, sizeof(screen_info));
++	if (err)
++		return err;
++
++	return platform_device_add(pd);
+ }
+ subsys_initcall(register_gop_device);
 -- 
 2.25.1
 
