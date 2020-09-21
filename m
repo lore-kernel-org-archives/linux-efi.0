@@ -7,37 +7,37 @@ X-Spam-Status: No, score=-14.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73532C43465
-	for <linux-efi@archiver.kernel.org>; Mon, 21 Sep 2020 15:41:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8678BC43466
+	for <linux-efi@archiver.kernel.org>; Mon, 21 Sep 2020 15:41:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2FF90216C4
-	for <linux-efi@archiver.kernel.org>; Mon, 21 Sep 2020 15:41:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 421FB2193E
+	for <linux-efi@archiver.kernel.org>; Mon, 21 Sep 2020 15:41:34 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1600702892;
-	bh=5SqLf3ky4DctxaYjoXFAJllzzYlMRIzHE5aY+ufILiw=;
+	s=default; t=1600702894;
+	bh=JiKsXBQnvKUuGUwchzbQj/4Vqb53KlGKDcJSTyI8K/g=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=fWeKxYm6iBGtDCWZxruy+CQODPCXNdz+Vbz7CQ+npuD+b9JU1cEVDpiezDQGqPmGN
-	 NsdMaULFgyapOAjo/vGMmgmoqJY5e2LCEJ9skO4BJylXl9gb5k0dNiG4pKNwTFPrAo
-	 V873YNtVpzPbvVoX4Uw5Ch+DneVhv1IbiPtbsd9A=
+	b=CvvybBpybEzsa1hgFd4DAA4A8AtgxZw8ShJSk+l6hErckGW4aA+Th8cCWlxBle6dc
+	 5lWgTneC6XKX51LotUeE6iU13uipjL1qukT2bubn3RWNtP+ai0iO7CEppgf7NyQdV1
+	 dHPW7QWQJrz2HyATdhPGg/z6J5T+av1vkRQAV9uE=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726690AbgIUPlc (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 21 Sep 2020 11:41:32 -0400
-Received: from mail.kernel.org ([198.145.29.99]:54930 "EHLO mail.kernel.org"
+        id S1727432AbgIUPle (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 21 Sep 2020 11:41:34 -0400
+Received: from mail.kernel.org ([198.145.29.99]:54962 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727397AbgIUPlb (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 21 Sep 2020 11:41:31 -0400
+        id S1727397AbgIUPld (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Mon, 21 Sep 2020 11:41:33 -0400
 Received: from e123331-lin.nice.arm.com (lfbn-nic-1-188-42.w2-15.abo.wanadoo.fr [2.15.37.42])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id AAC912151B;
-        Mon, 21 Sep 2020 15:41:29 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 9E1C520EDD;
+        Mon, 21 Sep 2020 15:41:31 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1600702891;
-        bh=5SqLf3ky4DctxaYjoXFAJllzzYlMRIzHE5aY+ufILiw=;
+        s=default; t=1600702893;
+        bh=JiKsXBQnvKUuGUwchzbQj/4Vqb53KlGKDcJSTyI8K/g=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=DlmsunmZL/YkxNg28/XtHE6o9AacKV3wv0GsaiEk4pqNKh+iWTbmumYvIjYliJBUq
-         4RV7oj5eFkR0sHCzl0KaEHLOOid9ohl+0T1GukdGhEE1VaDx5+PeMM9il/mE1iuAwP
-         ltD++QqPWRpnswGbx1kKodfDYICE1Qj3mmahGrNY=
+        b=goTVIkGHU5WJaEcAB5ztCnARh52l7i0HR0xazEoumCszNaoTCYpdG8H6K8gIGKY1W
+         TuJYRzsYZk0H5jcJ4BIzSceYzl8wPp6q0SELrimsmZBs3ck1em+mjDYe1e/MKVHgU+
+         A9URO0MoIF4Q7gpN+VXpaibWGEKWxksdsOacB+b0=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-arm-kernel@lists.infradead.org
 Cc:     linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -45,9 +45,9 @@ Cc:     linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         Russell King <rmk+kernel@armlinux.org.uk>,
         Linus Walleij <linus.walleij@linaro.org>,
         Nicolas Pitre <nico@fluxnic.net>
-Subject: [PATCH v2 05/10] ARM: p2v: factor out BE8 handling
-Date:   Mon, 21 Sep 2020 17:41:12 +0200
-Message-Id: <20200921154117.757-6-ardb@kernel.org>
+Subject: [PATCH v2 06/10] ARM: p2v: drop redundant 'type' argument from __pv_stub
+Date:   Mon, 21 Sep 2020 17:41:13 +0200
+Message-Id: <20200921154117.757-7-ardb@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20200921154117.757-1-ardb@kernel.org>
 References: <20200921154117.757-1-ardb@kernel.org>
@@ -55,58 +55,52 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The big and little endian versions of the ARM p2v patching routine only
-differ in the values of the constants, so factor those out into macros
-so that we only have one version of the logic sequence to maintain.
+We always pass the same value for 'type' so pull it into the __pv_stub
+macro itself.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/arm/kernel/phys2virt.S | 30 +++++++++++---------
- 1 file changed, 16 insertions(+), 14 deletions(-)
+ arch/arm/include/asm/memory.h | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/arch/arm/kernel/phys2virt.S b/arch/arm/kernel/phys2virt.S
-index 8fb1f7bcc720..5031e5a2e78b 100644
---- a/arch/arm/kernel/phys2virt.S
-+++ b/arch/arm/kernel/phys2virt.S
-@@ -95,23 +95,25 @@ ARM_BE8(rev16	ip, ip)
- ARM_BE8(rev16	ip, ip)
- 	strh	ip, [r7]
- #else
--	moveq	r0, #0x400000		@ set bit 22, mov to mvn instruction
--	b	.Lnext
--.Lloop:	ldr	ip, [r7, r3]
- #ifdef CONFIG_CPU_ENDIAN_BE8
--	@ in BE8, we load data in BE, but instructions still in LE
--	bic	ip, ip, #0xff000000
--	tst	ip, #0x000f0000		@ check the rotation field
--	orrne	ip, ip, r6, lsl #24	@ mask in offset bits 31-24
--	biceq	ip, ip, #0x00004000	@ clear bit 22
--	orreq	ip, ip, r0, ror #8	@ mask in offset bits 7-0
-+@ in BE8, we load data in BE, but instructions still in LE
-+#define PV_BIT22	0x00004000
-+#define PV_IMM8_MASK	0xff000000
-+#define PV_ROT_MASK	0x000f0000
- #else
--	bic	ip, ip, #0x000000ff
--	tst	ip, #0xf00		@ check the rotation field
--	orrne	ip, ip, r6		@ mask in offset bits 31-24
--	biceq	ip, ip, #0x400000	@ clear bit 22
--	orreq	ip, ip, r0		@ mask in offset bits 7-0
-+#define PV_BIT22	0x00400000
-+#define PV_IMM8_MASK	0x000000ff
-+#define PV_ROT_MASK	0xf00
- #endif
-+
-+	moveq	r0, #0x400000		@ set bit 22, mov to mvn instruction
-+	b	.Lnext
-+.Lloop:	ldr	ip, [r7, r3]
-+	bic	ip, ip, #PV_IMM8_MASK
-+	tst	ip, #PV_ROT_MASK		@ check the rotation field
-+	orrne	ip, ip, r6 ARM_BE8(, lsl #24)	@ mask in offset bits 31-24
-+	biceq	ip, ip, #PV_BIT22		@ clear bit 22
-+	orreq	ip, ip, r0 ARM_BE8(, ror #8)	@ mask in offset bits 7-0 (or bit 22)
- 	str	ip, [r7, r3]
- #endif
+diff --git a/arch/arm/include/asm/memory.h b/arch/arm/include/asm/memory.h
+index 99035b5891ef..eb3c8e6e960a 100644
+--- a/arch/arm/include/asm/memory.h
++++ b/arch/arm/include/asm/memory.h
+@@ -183,14 +183,14 @@ extern const void *__pv_table_begin, *__pv_table_end;
+ #define PHYS_OFFSET	((phys_addr_t)__pv_phys_pfn_offset << PAGE_SHIFT)
+ #define PHYS_PFN_OFFSET	(__pv_phys_pfn_offset)
+ 
+-#define __pv_stub(from,to,instr,type)			\
++#define __pv_stub(from,to,instr)			\
+ 	__asm__("@ __pv_stub\n"				\
+ 	"1:	" instr "	%0, %1, %2\n"		\
+ 	"	.pushsection .pv_table,\"a\"\n"		\
+ 	"	.long	1b\n"				\
+ 	"	.popsection\n"				\
+ 	: "=r" (to)					\
+-	: "r" (from), "I" (type))
++	: "r" (from), "I" (__PV_BITS_31_24))
+ 
+ #define __pv_stub_mov_hi(t)				\
+ 	__asm__ volatile("@ __pv_stub_mov\n"		\
+@@ -217,7 +217,7 @@ static inline phys_addr_t __virt_to_phys_nodebug(unsigned long x)
+ 	phys_addr_t t;
+ 
+ 	if (sizeof(phys_addr_t) == 4) {
+-		__pv_stub(x, t, "add", __PV_BITS_31_24);
++		__pv_stub(x, t, "add");
+ 	} else {
+ 		__pv_stub_mov_hi(t);
+ 		__pv_add_carry_stub(x, t);
+@@ -235,7 +235,7 @@ static inline unsigned long __phys_to_virt(phys_addr_t x)
+ 	 * assembler expression receives 32 bit argument
+ 	 * in place where 'r' 32 bit operand is expected.
+ 	 */
+-	__pv_stub((unsigned long) x, t, "sub", __PV_BITS_31_24);
++	__pv_stub((unsigned long) x, t, "sub");
+ 	return t;
+ }
  
 -- 
 2.17.1
