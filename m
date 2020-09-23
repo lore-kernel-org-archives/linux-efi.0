@@ -2,114 +2,105 @@ Return-Path: <SRS0=lkcE=DA=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 65B4EC4727F
-	for <linux-efi@archiver.kernel.org>; Wed, 23 Sep 2020 15:39:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4AB49C2D0A8
+	for <linux-efi@archiver.kernel.org>; Wed, 23 Sep 2020 16:14:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2B0602220D
-	for <linux-efi@archiver.kernel.org>; Wed, 23 Sep 2020 15:39:55 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=alien8.de header.i=@alien8.de header.b="bq4WYVnd"
+	by mail.kernel.org (Postfix) with ESMTP id 0811C21D92
+	for <linux-efi@archiver.kernel.org>; Wed, 23 Sep 2020 16:14:56 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1600877697;
+	bh=dk+QcofUZF2WF6NY96BLfm8no50VorPOSdUmQFbAlGY=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=BnlakFc30ZHB+U8deQQi9cccnndqD6q7YhgtbzlV2UIhooTEC8dc3i87m7lGwiEu5
+	 r3dVpzw+l0aAIuwwVZzxrAIHs5EuCdJ4DglTpxaE1tM6pJ/KKfjilVkgVIEU8bG771
+	 b7uzf6L43GTHeTW3avL01GGcn9zn2JiZ9xQErWng=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726610AbgIWPjv (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 23 Sep 2020 11:39:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44210 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726504AbgIWPjv (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 23 Sep 2020 11:39:51 -0400
-Received: from mail.skyhub.de (mail.skyhub.de [IPv6:2a01:4f8:190:11c2::b:1457])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 143DFC0613CE;
-        Wed, 23 Sep 2020 08:39:51 -0700 (PDT)
-Received: from zn.tnic (p200300ec2f0d130017aaf728a0fb4ec3.dip0.t-ipconnect.de [IPv6:2003:ec:2f0d:1300:17aa:f728:a0fb:4ec3])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        id S1726413AbgIWQO4 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 23 Sep 2020 12:14:56 -0400
+Received: from mail.kernel.org ([198.145.29.99]:41820 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726130AbgIWQO4 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 23 Sep 2020 12:14:56 -0400
+Received: from e123331-lin.nice.arm.com (lfbn-nic-1-188-42.w2-15.abo.wanadoo.fr [2.15.37.42])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id AE2171EC0409;
-        Wed, 23 Sep 2020 17:39:47 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alien8.de; s=dkim;
-        t=1600875587;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:in-reply-to:in-reply-to:  references:references;
-        bh=w4olCSb8jT2RNv8xHUN26fhLNxYdkyB61t9MEo7mTLE=;
-        b=bq4WYVndAySAoDrcXMKE2j/v4xOD2eIjmidsATkH23MZkCe6wd2xyNQlmxzWR5LCLSl9D2
-        7+gK6lYDLVIOlVELUR2Kx24fmSYSDQkLBiJhOWpiel/I6b7WF2aS4IakPs4v0eqXCO8eRf
-        nTXxR4HWsYWYb1zVhkQi2nKk2Pw4EfY=
-Date:   Wed, 23 Sep 2020 17:39:41 +0200
-From:   Borislav Petkov <bp@alien8.de>
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     Punit Agrawal <punit1.agrawal@toshiba.co.jp>,
-        Smita Koralahalli <Smita.KoralahalliChannabasappa@amd.com>,
-        X86 ML <x86@kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-pm@vger.kernel.org, linux-edac@vger.kernel.org,
-        linux-efi <linux-efi@vger.kernel.org>,
-        ACPI Devel Maling List <linux-acpi@vger.kernel.org>,
-        devel@acpica.org, Tony Luck <tony.luck@intel.com>,
-        "Rafael J . Wysocki" <rjw@rjwysocki.net>,
-        Len Brown <len.brown@intel.com>,
-        Yazen Ghannam <yazen.ghannam@amd.com>
-Subject: Re: [PATCH v4] cper, apei, mce: Pass x86 CPER through the MCA
- handling chain
-Message-ID: <20200923153941.GK28545@zn.tnic>
-References: <20200904140444.161291-1-Smita.KoralahalliChannabasappa@amd.com>
- <87wo0kiz6y.fsf@kokedama.swc.toshiba.co.jp>
- <20200923140512.GJ28545@zn.tnic>
- <CAMj1kXH2uWEfAxTf_+6YN-Sp2VNKtaGhqAx4jyvhW3xR=0Jaug@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <CAMj1kXH2uWEfAxTf_+6YN-Sp2VNKtaGhqAx4jyvhW3xR=0Jaug@mail.gmail.com>
+        by mail.kernel.org (Postfix) with ESMTPSA id 22EDE208E4;
+        Wed, 23 Sep 2020 16:14:53 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1600877695;
+        bh=dk+QcofUZF2WF6NY96BLfm8no50VorPOSdUmQFbAlGY=;
+        h=From:To:Cc:Subject:Date:From;
+        b=fQzhw5RcUtCZLZhugKmm75OBE2Plj+0eJac6SezDf5ohfnAyG9s47QKWHlAOPWv+U
+         94cAPTPIf0/S4XpHK9kDtrzoyiDaFUhJ3qRtVCW+UoSRlQMD7PDAkIX+sxEbEo0kaL
+         c/ggxHbaZixzUaPGQ2kjzCafIEr0PpJbLcsZCrp4=
+From:   Ard Biesheuvel <ardb@kernel.org>
+To:     linux-kernel@vger.kernel.org
+Cc:     linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
+        Matthew Garrett <mjg59@google.com>,
+        Peter Jones <pjones@redhat.com>,
+        Kees Cook <keescook@chromium.org>,
+        Anton Vorontsov <anton@enomsg.org>,
+        Colin Cross <ccross@android.com>,
+        Tony Luck <tony.luck@intel.com>
+Subject: [PATCH 0/7] efi: deprecate/remove efivars sysfs interface
+Date:   Wed, 23 Sep 2020 18:13:57 +0200
+Message-Id: <20200923161404.17811-1-ardb@kernel.org>
+X-Mailer: git-send-email 2.17.1
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Wed, Sep 23, 2020 at 04:52:18PM +0200, Ard Biesheuvel wrote:
-> I think the question is why we are retaining this Reported-by header
-> to begin with. Even though the early feedback is appreciated,
-> crediting the bot for eternity for a version of the patch that never
-> got merged seems a bit excessive. Also, it may suggest that the bot
-> was involved in reporting an issue that the patch aims to fix but that
-> is not the case.
+This series implements the deprecation and ultimate removal of the sysfs
+interface that exposes the contents of the EFI variable store.
 
-That is supposed to be explained in [] properly so that there's no
-misreading of why that tag's there.
+I am fully aware that removing this sysfs interface entirely may be
+premature, and so patch #7 is included for reference only, and not
+proposed for inclusion right away.
 
-> The last thing we want is Sasha's bot to jump on patches adding new
-> functionality just because it has a reported-by line.
+Instead, patch #6 limits availability of the efivars module to X86
+and IA64, which is reasonable, given that the efivars module was
+superseded by the efivarfs filesystem interface before EFI support
+for ARM architectures was even available in Linux.
 
-It should jump on patches which have Fixes: tags. But Sasha's bot is
-nuts regardless. :-)
+Patches #1 to #5 remove all dependencies [true or false] on the efivars.c
+code and its CONFIG_EFI_VARS Kconfig symbol, so it can be disabled [or
+dropped] cleanly.
 
-> So I suggest dropping the Reported-by credit as well as the [] context
-> regarding v1
+Cc: Matthew Garrett <mjg59@google.com>
+Cc: Peter Jones <pjones@redhat.com>
+Cc: Kees Cook <keescook@chromium.org>
+Cc: Anton Vorontsov <anton@enomsg.org>
+Cc: Colin Cross <ccross@android.com>
+Cc: Tony Luck <tony.luck@intel.com>
 
-So I don't mind having a Reported-by: tag with an explanation of what
-it reported. We slap all kinds of tags so having some attribution for
-the work the 0day bot does to catch such errors is reasonable. I presume
-they track this way how "useful" it is, by counting the Reported-by's or
-so, as they suggest one should add a Reported-by in their reports.
+Ard Biesheuvel (7):
+  efi: pstore: disentangle from deprecated efivars module
+  efi: pstore: move workqueue handling out of efivars
+  efi: efivars: un-export efivars_sysfs_init()
+  efi: gsmi: fix false dependency on CONFIG_EFI_VARS
+  efi: remove some false dependencies on CONFIG_EFI_VARS
+  efi: efivars: limit availability to X86 builds
+  efi: efivars: remove deprecated sysfs interface
 
-And without any attribution what the 0day bot reported, it might decide
-not to report anything next time, I'd venture a guess.
-
-And the same argument can be had for Suggested-by: tags: one could
-decide not to add that tag and the person who's doing the suggesting
-might decide not to suggest anymore.
-
-So I think something like:
-
- [ Fix a build breakage in an earlier version. ]
-Reported-by: 0day bot
-
-is fine as long as it makes it perfectly clear what Reported-by tag
-is for and as long as ts purpose for being present there is clear, I
-don't see an issue...
+ .../ABI/stable/sysfs-firmware-efi-vars        |  75 --
+ Documentation/arm/uefi.rst                    |   2 +-
+ drivers/firmware/efi/Kconfig                  |  22 +-
+ drivers/firmware/efi/Makefile                 |   1 -
+ drivers/firmware/efi/efi-pstore.c             |  83 +-
+ drivers/firmware/efi/efivars.c                | 711 ------------------
+ drivers/firmware/efi/vars.c                   |  21 -
+ drivers/firmware/google/Kconfig               |   2 +-
+ drivers/firmware/google/gsmi.c                |   8 +-
+ include/linux/efi.h                           |  18 -
+ 10 files changed, 85 insertions(+), 858 deletions(-)
+ delete mode 100644 Documentation/ABI/stable/sysfs-firmware-efi-vars
+ delete mode 100644 drivers/firmware/efi/efivars.c
 
 -- 
-Regards/Gruss,
-    Boris.
+2.17.1
 
-https://people.kernel.org/tglx/notes-about-netiquette
