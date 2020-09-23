@@ -2,115 +2,120 @@ Return-Path: <SRS0=lkcE=DA=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5820DC2D0A8
-	for <linux-efi@archiver.kernel.org>; Wed, 23 Sep 2020 16:15:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CE936C2D0A8
+	for <linux-efi@archiver.kernel.org>; Wed, 23 Sep 2020 18:25:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 09FA92223E
-	for <linux-efi@archiver.kernel.org>; Wed, 23 Sep 2020 16:15:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 910602220D
+	for <linux-efi@archiver.kernel.org>; Wed, 23 Sep 2020 18:25:01 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1600877731;
-	bh=H9yseVXOZkuxMQi1C3SGB2Eins76vUkEAUkZJZSniHM=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=wbYVoEQ+v35aGseRIMyKzkPUWxrb7/hwhO+jAqI8i2i/ISHCXsfudiSC4zkiGQq1l
-	 BKW4d33IuB1/Uru5B3Lj4LkkwOMDD3HCXPGiDpBXLwc5+Ju9Ii7xtv4k9iXINo4Fu2
-	 ilBK+HL7UzxD16hGdG6r2u9aReJyBxcmegTyoZ9g=
+	s=default; t=1600885501;
+	bh=PQ694416mkyRJSudKeRj8BUutkY/M7TaA4klpl4VyS4=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
+	b=xERLTI3vMs+m8DjtIrSL53a1RouRxweNPXyq66Daan6pYcpDzd/r8099u2r1nijf+
+	 wCXTi9dgOQPLHSASm+GXgOp+mm30Wegdkb5fRDf66TZ+CVGKMEucahwNgCC0+YxAVa
+	 F8P/fW2NchR+6Q70YgMFKLQTiOIxES+Vl6tn6iXs=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726817AbgIWQPL (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 23 Sep 2020 12:15:11 -0400
-Received: from mail.kernel.org ([198.145.29.99]:42152 "EHLO mail.kernel.org"
+        id S1726665AbgIWSZB (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 23 Sep 2020 14:25:01 -0400
+Received: from mail.kernel.org ([198.145.29.99]:34278 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726796AbgIWQPJ (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 23 Sep 2020 12:15:09 -0400
-Received: from e123331-lin.nice.arm.com (lfbn-nic-1-188-42.w2-15.abo.wanadoo.fr [2.15.37.42])
+        id S1726419AbgIWSZB (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 23 Sep 2020 14:25:01 -0400
+Received: from mail-ot1-f41.google.com (mail-ot1-f41.google.com [209.85.210.41])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 5D11D2223E;
-        Wed, 23 Sep 2020 16:15:07 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 44C0323772;
+        Wed, 23 Sep 2020 18:25:00 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1600877709;
-        bh=H9yseVXOZkuxMQi1C3SGB2Eins76vUkEAUkZJZSniHM=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=sGWTzRnt6gX0XYyOGVoX7Sfz/L+1nWkp9PKH/BC0bwS4Yrg+Oej+pxxj4UWzAgK/C
-         ukCjyt6rDvLPfcagqb9MkLfc6XPsTTUOjmhxew1/6Xi3Kti1j56+OKmnlikBt/i+B/
-         zkg+OZ8IZTN6f5kpfeuLF1jc4x0Hm65xvMJcAuZc=
+        s=default; t=1600885500;
+        bh=PQ694416mkyRJSudKeRj8BUutkY/M7TaA4klpl4VyS4=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=Sp25cRCfXBwQvz8IEVyYDCihyBlbXyN9B/1NISrGs9y+1srSW97VOmUQ/DE41EM0C
+         KvIwFSmNAZVLn5+WIb1cgtc1+M9/AGEhma8J+L2VwYv8Zhv5JJSifOvibXDbjv7L/B
+         zavBT3QAfrCIoTHAYA6lJ94iYn6voP9ghpnPrRQY=
+Received: by mail-ot1-f41.google.com with SMTP id h17so697446otr.1;
+        Wed, 23 Sep 2020 11:25:00 -0700 (PDT)
+X-Gm-Message-State: AOAM531jwKoa99XqRDfVN3FFGQQQl4Ur4isnYiE3LrvozmVWPq/SRHp/
+        Gd0SGQf+8Hb3TWvj3UakWvrXBYXnuumagxhQLSQ=
+X-Google-Smtp-Source: ABdhPJy9WdySVafg27Wj/nNe1H0VU72po5OOABeeZP3D0Di8Jb0nGEdDJw+uU/MGCnmXwce3EztKeBoH4saGj0jKFD8=
+X-Received: by 2002:a9d:6250:: with SMTP id i16mr677534otk.77.1600885499444;
+ Wed, 23 Sep 2020 11:24:59 -0700 (PDT)
+MIME-Version: 1.0
+References: <20200904140444.161291-1-Smita.KoralahalliChannabasappa@amd.com>
+ <87wo0kiz6y.fsf@kokedama.swc.toshiba.co.jp> <20200923140512.GJ28545@zn.tnic>
+ <CAMj1kXH2uWEfAxTf_+6YN-Sp2VNKtaGhqAx4jyvhW3xR=0Jaug@mail.gmail.com> <20200923153941.GK28545@zn.tnic>
+In-Reply-To: <20200923153941.GK28545@zn.tnic>
 From:   Ard Biesheuvel <ardb@kernel.org>
-To:     linux-kernel@vger.kernel.org
-Cc:     linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
-        Matthew Garrett <mjg59@google.com>,
-        Peter Jones <pjones@redhat.com>,
-        Kees Cook <keescook@chromium.org>,
-        Anton Vorontsov <anton@enomsg.org>,
-        Colin Cross <ccross@android.com>,
-        Tony Luck <tony.luck@intel.com>
-Subject: [PATCH 6/7] efi: efivars: limit availability to X86 builds
-Date:   Wed, 23 Sep 2020 18:14:03 +0200
-Message-Id: <20200923161404.17811-7-ardb@kernel.org>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20200923161404.17811-1-ardb@kernel.org>
-References: <20200923161404.17811-1-ardb@kernel.org>
+Date:   Wed, 23 Sep 2020 20:24:48 +0200
+X-Gmail-Original-Message-ID: <CAMj1kXE2HR1Yd9rfyXp92WaB2k1YQ5wKskN0tZ1HwC5Ti+V3OA@mail.gmail.com>
+Message-ID: <CAMj1kXE2HR1Yd9rfyXp92WaB2k1YQ5wKskN0tZ1HwC5Ti+V3OA@mail.gmail.com>
+Subject: Re: [PATCH v4] cper, apei, mce: Pass x86 CPER through the MCA
+ handling chain
+To:     Borislav Petkov <bp@alien8.de>
+Cc:     Punit Agrawal <punit1.agrawal@toshiba.co.jp>,
+        Smita Koralahalli <Smita.KoralahalliChannabasappa@amd.com>,
+        X86 ML <x86@kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-pm@vger.kernel.org, linux-edac@vger.kernel.org,
+        linux-efi <linux-efi@vger.kernel.org>,
+        ACPI Devel Maling List <linux-acpi@vger.kernel.org>,
+        devel@acpica.org, Tony Luck <tony.luck@intel.com>,
+        "Rafael J . Wysocki" <rjw@rjwysocki.net>,
+        Len Brown <len.brown@intel.com>,
+        Yazen Ghannam <yazen.ghannam@amd.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-CONFIG_EFI_VARS controls the code that exposes EFI variables via
-sysfs entries, which was deprecated before support for non-Intel
-architectures was added to EFI. So let's limit its availability
-to Intel architectures for the time being, and hopefully remove
-it entirely in the not too distant future.
+On Wed, 23 Sep 2020 at 17:39, Borislav Petkov <bp@alien8.de> wrote:
+>
+> On Wed, Sep 23, 2020 at 04:52:18PM +0200, Ard Biesheuvel wrote:
+> > I think the question is why we are retaining this Reported-by header
+> > to begin with. Even though the early feedback is appreciated,
+> > crediting the bot for eternity for a version of the patch that never
+> > got merged seems a bit excessive. Also, it may suggest that the bot
+> > was involved in reporting an issue that the patch aims to fix but that
+> > is not the case.
+>
+> That is supposed to be explained in [] properly so that there's no
+> misreading of why that tag's there.
+>
+> > The last thing we want is Sasha's bot to jump on patches adding new
+> > functionality just because it has a reported-by line.
+>
+> It should jump on patches which have Fixes: tags. But Sasha's bot is
+> nuts regardless. :-)
+>
+> > So I suggest dropping the Reported-by credit as well as the [] context
+> > regarding v1
+>
+> So I don't mind having a Reported-by: tag with an explanation of what
+> it reported. We slap all kinds of tags so having some attribution for
+> the work the 0day bot does to catch such errors is reasonable. I presume
+> they track this way how "useful" it is, by counting the Reported-by's or
+> so, as they suggest one should add a Reported-by in their reports.
+>
+> And without any attribution what the 0day bot reported, it might decide
+> not to report anything next time, I'd venture a guess.
+>
+> And the same argument can be had for Suggested-by: tags: one could
+> decide not to add that tag and the person who's doing the suggesting
+> might decide not to suggest anymore.
+>
+> So I think something like:
+>
+>  [ Fix a build breakage in an earlier version. ]
+> Reported-by: 0day bot
+>
+> is fine as long as it makes it perfectly clear what Reported-by tag
+> is for and as long as ts purpose for being present there is clear, I
+> don't see an issue...
+>
 
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
----
- Documentation/arm/uefi.rst   |  2 +-
- drivers/firmware/efi/Kconfig | 13 ++++---------
- 2 files changed, 5 insertions(+), 10 deletions(-)
-
-diff --git a/Documentation/arm/uefi.rst b/Documentation/arm/uefi.rst
-index f868330df6be..f732f957421f 100644
---- a/Documentation/arm/uefi.rst
-+++ b/Documentation/arm/uefi.rst
-@@ -23,7 +23,7 @@ makes it possible for the kernel to support additional features:
- For actually enabling [U]EFI support, enable:
- 
- - CONFIG_EFI=y
--- CONFIG_EFI_VARS=y or m
-+- CONFIG_EFIVAR_FS=y or m
- 
- The implementation depends on receiving information about the UEFI environment
- in a Flattened Device Tree (FDT) - so is only available with CONFIG_OF.
-diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-index 80f5c67e3638..da1887f72a51 100644
---- a/drivers/firmware/efi/Kconfig
-+++ b/drivers/firmware/efi/Kconfig
-@@ -4,20 +4,15 @@ menu "EFI (Extensible Firmware Interface) Support"
- 
- config EFI_VARS
- 	tristate "EFI Variable Support via sysfs"
--	depends on EFI
-+	depends on EFI && (X86 || IA64)
- 	default n
- 	help
- 	  If you say Y here, you are able to get EFI (Extensible Firmware
- 	  Interface) variable information via sysfs.  You may read,
- 	  write, create, and destroy EFI variables through this interface.
--
--	  Note that using this driver in concert with efibootmgr requires
--	  at least test release version 0.5.0-test3 or later, which is
--	  available from:
--	  <http://linux.dell.com/efibootmgr/testing/efibootmgr-0.5.0-test3.tar.gz>
--
--	  Subsequent efibootmgr releases may be found at:
--	  <http://github.com/vathpela/efibootmgr>
-+	  Note that this driver is only retained for compatibility with
-+	  legacy users: new users should use the efivarfs filesystem
-+	  instead.
- 
- config EFI_ESRT
- 	bool
--- 
-2.17.1
-
+I don't think it adds much value tbh, but I am not going to obsess
+about it either.
