@@ -2,42 +2,42 @@ Return-Path: <SRS0=lkcE=DA=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-19.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DD9D6C4727F
-	for <linux-efi@archiver.kernel.org>; Wed, 23 Sep 2020 16:15:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5820DC2D0A8
+	for <linux-efi@archiver.kernel.org>; Wed, 23 Sep 2020 16:15:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9B5AA2223E
-	for <linux-efi@archiver.kernel.org>; Wed, 23 Sep 2020 16:15:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 09FA92223E
+	for <linux-efi@archiver.kernel.org>; Wed, 23 Sep 2020 16:15:30 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1600877729;
-	bh=mSwhGjWwRcUITwEDcMNnwemJl4eKgnir10Nm9DDTW/A=;
+	s=default; t=1600877731;
+	bh=H9yseVXOZkuxMQi1C3SGB2Eins76vUkEAUkZJZSniHM=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=whrRJ0mXNqX2rfy1duM8dKUJtTSkJEx8i/M5xWz2cPA+2DzKiPgCrMyYYUsVVtp0a
-	 s3iJMcuwUYeDyzIIz/bW1GoD0xXheMnciTS/YFA/gnn7WIiXIyhUm8EcMH9ICV7F+6
-	 /e6oSrSPOUgspQi34OhhyfbCaLJGojb7LklgQtkE=
+	b=wbYVoEQ+v35aGseRIMyKzkPUWxrb7/hwhO+jAqI8i2i/ISHCXsfudiSC4zkiGQq1l
+	 BKW4d33IuB1/Uru5B3Lj4LkkwOMDD3HCXPGiDpBXLwc5+Ju9Ii7xtv4k9iXINo4Fu2
+	 ilBK+HL7UzxD16hGdG6r2u9aReJyBxcmegTyoZ9g=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726824AbgIWQPL (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        id S1726817AbgIWQPL (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
         Wed, 23 Sep 2020 12:15:11 -0400
-Received: from mail.kernel.org ([198.145.29.99]:42036 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:42152 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726727AbgIWQPF (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 23 Sep 2020 12:15:05 -0400
+        id S1726796AbgIWQPJ (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 23 Sep 2020 12:15:09 -0400
 Received: from e123331-lin.nice.arm.com (lfbn-nic-1-188-42.w2-15.abo.wanadoo.fr [2.15.37.42])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 07EFC221EF;
-        Wed, 23 Sep 2020 16:15:02 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 5D11D2223E;
+        Wed, 23 Sep 2020 16:15:07 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1600877704;
-        bh=mSwhGjWwRcUITwEDcMNnwemJl4eKgnir10Nm9DDTW/A=;
+        s=default; t=1600877709;
+        bh=H9yseVXOZkuxMQi1C3SGB2Eins76vUkEAUkZJZSniHM=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=uGFfHb4kVusgZ/YTlY7ZvoeXP4XxFdYHq19r831O6CCVEASKcGBOtkxEAd1HMFzwv
-         +9q+X9SSJwOuG+u9PG1MpW87wVx7x8hQf3F90S6t8b8owJg6MMni+ecoDDPhdcCZLX
-         /kZPU6+STiAv8Kf0swxTsqbH/gCj/SeV2EK2QX0k=
+        b=sGWTzRnt6gX0XYyOGVoX7Sfz/L+1nWkp9PKH/BC0bwS4Yrg+Oej+pxxj4UWzAgK/C
+         ukCjyt6rDvLPfcagqb9MkLfc6XPsTTUOjmhxew1/6Xi3Kti1j56+OKmnlikBt/i+B/
+         zkg+OZ8IZTN6f5kpfeuLF1jc4x0Hm65xvMJcAuZc=
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-kernel@vger.kernel.org
 Cc:     linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -47,9 +47,9 @@ Cc:     linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         Anton Vorontsov <anton@enomsg.org>,
         Colin Cross <ccross@android.com>,
         Tony Luck <tony.luck@intel.com>
-Subject: [PATCH 4/7] efi: gsmi: fix false dependency on CONFIG_EFI_VARS
-Date:   Wed, 23 Sep 2020 18:14:01 +0200
-Message-Id: <20200923161404.17811-5-ardb@kernel.org>
+Subject: [PATCH 6/7] efi: efivars: limit availability to X86 builds
+Date:   Wed, 23 Sep 2020 18:14:03 +0200
+Message-Id: <20200923161404.17811-7-ardb@kernel.org>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20200923161404.17811-1-ardb@kernel.org>
 References: <20200923161404.17811-1-ardb@kernel.org>
@@ -57,71 +57,60 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The gsmi code does not actually rely on CONFIG_EFI_VARS, since it only
-uses the efivars abstraction that is included unconditionally when
-CONFIG_EFI is defined. CONFIG_EFI_VARS controls the inclusion of the
-code that exposes the sysfs entries, and which has been deprecated for
-some time.
+CONFIG_EFI_VARS controls the code that exposes EFI variables via
+sysfs entries, which was deprecated before support for non-Intel
+architectures was added to EFI. So let's limit its availability
+to Intel architectures for the time being, and hopefully remove
+it entirely in the not too distant future.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/firmware/google/Kconfig | 2 +-
- drivers/firmware/google/gsmi.c  | 8 ++++----
- 2 files changed, 5 insertions(+), 5 deletions(-)
+ Documentation/arm/uefi.rst   |  2 +-
+ drivers/firmware/efi/Kconfig | 13 ++++---------
+ 2 files changed, 5 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/firmware/google/Kconfig b/drivers/firmware/google/Kconfig
-index a3a6ca659ffa..97968aece54f 100644
---- a/drivers/firmware/google/Kconfig
-+++ b/drivers/firmware/google/Kconfig
-@@ -15,7 +15,7 @@ config GOOGLE_SMI
+diff --git a/Documentation/arm/uefi.rst b/Documentation/arm/uefi.rst
+index f868330df6be..f732f957421f 100644
+--- a/Documentation/arm/uefi.rst
++++ b/Documentation/arm/uefi.rst
+@@ -23,7 +23,7 @@ makes it possible for the kernel to support additional features:
+ For actually enabling [U]EFI support, enable:
+ 
+ - CONFIG_EFI=y
+-- CONFIG_EFI_VARS=y or m
++- CONFIG_EFIVAR_FS=y or m
+ 
+ The implementation depends on receiving information about the UEFI environment
+ in a Flattened Device Tree (FDT) - so is only available with CONFIG_OF.
+diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+index 80f5c67e3638..da1887f72a51 100644
+--- a/drivers/firmware/efi/Kconfig
++++ b/drivers/firmware/efi/Kconfig
+@@ -4,20 +4,15 @@ menu "EFI (Extensible Firmware Interface) Support"
+ 
+ config EFI_VARS
+ 	tristate "EFI Variable Support via sysfs"
+-	depends on EFI
++	depends on EFI && (X86 || IA64)
+ 	default n
  	help
- 	  Say Y here if you want to enable SMI callbacks for Google
- 	  platforms.  This provides an interface for writing to and
--	  clearing the event log.  If EFI_VARS is also enabled this
-+	  clearing the event log.  If CONFIG_EFI is also enabled this
- 	  driver provides an interface for reading and writing NVRAM
- 	  variables.
+ 	  If you say Y here, you are able to get EFI (Extensible Firmware
+ 	  Interface) variable information via sysfs.  You may read,
+ 	  write, create, and destroy EFI variables through this interface.
+-
+-	  Note that using this driver in concert with efibootmgr requires
+-	  at least test release version 0.5.0-test3 or later, which is
+-	  available from:
+-	  <http://linux.dell.com/efibootmgr/testing/efibootmgr-0.5.0-test3.tar.gz>
+-
+-	  Subsequent efibootmgr releases may be found at:
+-	  <http://github.com/vathpela/efibootmgr>
++	  Note that this driver is only retained for compatibility with
++	  legacy users: new users should use the efivarfs filesystem
++	  instead.
  
-diff --git a/drivers/firmware/google/gsmi.c b/drivers/firmware/google/gsmi.c
-index 5b2011ebbe26..7d9367b22010 100644
---- a/drivers/firmware/google/gsmi.c
-+++ b/drivers/firmware/google/gsmi.c
-@@ -302,7 +302,7 @@ static int gsmi_exec(u8 func, u8 sub)
- 	return rc;
- }
- 
--#ifdef CONFIG_EFI_VARS
-+#ifdef CONFIG_EFI
- 
- static struct efivars efivars;
- 
-@@ -483,7 +483,7 @@ static const struct efivar_operations efivar_ops = {
- 	.get_next_variable = gsmi_get_next_variable,
- };
- 
--#endif /* CONFIG_EFI_VARS */
-+#endif /* CONFIG_EFI */
- 
- static ssize_t eventlog_write(struct file *filp, struct kobject *kobj,
- 			       struct bin_attribute *bin_attr,
-@@ -1007,7 +1007,7 @@ static __init int gsmi_init(void)
- 		goto out_remove_bin_file;
- 	}
- 
--#ifdef CONFIG_EFI_VARS
-+#ifdef CONFIG_EFI
- 	ret = efivars_register(&efivars, &efivar_ops, gsmi_kobj);
- 	if (ret) {
- 		printk(KERN_INFO "gsmi: Failed to register efivars\n");
-@@ -1047,7 +1047,7 @@ static void __exit gsmi_exit(void)
- 	unregister_die_notifier(&gsmi_die_notifier);
- 	atomic_notifier_chain_unregister(&panic_notifier_list,
- 					 &gsmi_panic_notifier);
--#ifdef CONFIG_EFI_VARS
-+#ifdef CONFIG_EFI
- 	efivars_unregister(&efivars);
- #endif
- 
+ config EFI_ESRT
+ 	bool
 -- 
 2.17.1
 
