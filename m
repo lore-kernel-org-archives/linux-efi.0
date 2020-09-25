@@ -2,100 +2,82 @@ Return-Path: <SRS0=kHF9=DC=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 58413C4363D
-	for <linux-efi@archiver.kernel.org>; Fri, 25 Sep 2020 07:05:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D64F9C4741F
+	for <linux-efi@archiver.kernel.org>; Fri, 25 Sep 2020 07:07:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1759922211
-	for <linux-efi@archiver.kernel.org>; Fri, 25 Sep 2020 07:05:15 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1601017515;
-	bh=zuSbzzHJit1jTTi9zp2/OL6gmoxtDNrAYKnrZaniXPA=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=qq9M/qozS6amypeJqilw34unpWRxvzNrla0NPryvGqaryLZ1j25+dqBrQSuqkfJYi
-	 LQc/188ZcqP0tq6lJ7/B14TD/DAR+6W9tM2c2cBQq2xfAFBkWxC/m2NSTl7THo/sc0
-	 7WDVi+8c0NRoq1DU/3P6KcKVwOk7BqR7umXqfjQo=
+	by mail.kernel.org (Postfix) with ESMTP id 7F292238E2
+	for <linux-efi@archiver.kernel.org>; Fri, 25 Sep 2020 07:07:15 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=alien8.de header.i=@alien8.de header.b="gtkBtGDT"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727253AbgIYHFO (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 25 Sep 2020 03:05:14 -0400
-Received: from mail.kernel.org ([198.145.29.99]:38946 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727110AbgIYHFM (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 25 Sep 2020 03:05:12 -0400
-Received: from mail-oi1-f179.google.com (mail-oi1-f179.google.com [209.85.167.179])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        id S1727233AbgIYHHL (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 25 Sep 2020 03:07:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41920 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727068AbgIYHHL (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 25 Sep 2020 03:07:11 -0400
+Received: from mail.skyhub.de (mail.skyhub.de [IPv6:2a01:4f8:190:11c2::b:1457])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 20AD2C0613CE;
+        Fri, 25 Sep 2020 00:07:11 -0700 (PDT)
+Received: from zn.tnic (p200300ec2f0b3a00d3756fc4b2470eaa.dip0.t-ipconnect.de [IPv6:2003:ec:2f0b:3a00:d375:6fc4:b247:eaa])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 854A422211;
-        Fri, 25 Sep 2020 07:05:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1601017511;
-        bh=zuSbzzHJit1jTTi9zp2/OL6gmoxtDNrAYKnrZaniXPA=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=COwzg7EwHGXHnuZghZJvITz9sRCLyESwO0uVZazEayykQMqNOsPNMcxyNMlPaVqED
-         43qnSWklRHTACK9OREuOd71236kx+18dr8xg22/1iZKAj6i0mNPrUHHwdn3GBqwt09
-         9HI4fWKfLwiw/enilovPLUkhV0fSwKKnw9e6P3VU=
-Received: by mail-oi1-f179.google.com with SMTP id a3so1794090oib.4;
-        Fri, 25 Sep 2020 00:05:11 -0700 (PDT)
-X-Gm-Message-State: AOAM531PpET5mBNp14nWTzZ5wqL6aePT59x0njTmTLH/w1KWw5+/anaZ
-        1KFoy0PGShvedF5odMAmRltRjpTlu7bjVlY8z1U=
-X-Google-Smtp-Source: ABdhPJyCWVBClIovJDS4Ckc7x38d5+rCdPwrUW7K2rukfHvM6mTo/4WFTOfKelVr79t/hYl6HScpW9/hbc3R0gbrApw=
-X-Received: by 2002:aca:d845:: with SMTP id p66mr699567oig.47.1601017510722;
- Fri, 25 Sep 2020 00:05:10 -0700 (PDT)
+        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id F1EB01EC02F2;
+        Fri, 25 Sep 2020 09:07:08 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alien8.de; s=dkim;
+        t=1601017629;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:in-reply-to:in-reply-to:  references:references;
+        bh=/E6RdRBmvGwU0p8DLrUcOcaOIRZyj/g85rzHAgseeGw=;
+        b=gtkBtGDT9r0KQPIOddpeLR/7oNdnDeOHwHJ7sDH/I4mF+M/nY+L2+hyBbaviY5MEo2cKX8
+        8rDdJak7QiRepLyMQUuxd2apwfIozXvpKykayJULYoHphJG3u0qH4EAwJ01DDV0Dnpz0As
+        Kdm3YYrTFtjVYflkybQvBAWmqywG/Pg=
+Date:   Fri, 25 Sep 2020 09:07:07 +0200
+From:   Borislav Petkov <bp@alien8.de>
+To:     Punit Agrawal <punit1.agrawal@toshiba.co.jp>
+Cc:     Smita Koralahalli Channabasappa <skoralah@amd.com>,
+        Smita Koralahalli <Smita.KoralahalliChannabasappa@amd.com>,
+        x86@kernel.org, linux-kernel@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-edac@vger.kernel.org,
+        linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org,
+        devel@acpica.org, Tony Luck <tony.luck@intel.com>,
+        "Rafael J . Wysocki" <rjw@rjwysocki.net>,
+        Len Brown <len.brown@intel.com>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Yazen Ghannam <yazen.ghannam@amd.com>
+Subject: Re: [PATCH v4] cper, apei, mce: Pass x86 CPER through the MCA
+ handling chain
+Message-ID: <20200925070707.GB16872@zn.tnic>
+References: <20200904140444.161291-1-Smita.KoralahalliChannabasappa@amd.com>
+ <87wo0kiz6y.fsf@kokedama.swc.toshiba.co.jp>
+ <20200923140512.GJ28545@zn.tnic>
+ <87pn6chwil.fsf@kokedama.swc.toshiba.co.jp>
+ <52c50f37-a86c-57ad-30e0-dac0857e4ef7@amd.com>
+ <20200924175023.GN5030@zn.tnic>
+ <877dsiislt.fsf@kokedama.swc.toshiba.co.jp>
 MIME-Version: 1.0
-References: <20200918112459.918328-1-misch@google.com>
-In-Reply-To: <20200918112459.918328-1-misch@google.com>
-From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Fri, 25 Sep 2020 09:04:59 +0200
-X-Gmail-Original-Message-ID: <CAMj1kXEJ87J45D_tVZ-o9LJCQrDJig2Gscr=bHr1DMJ0wUOu-A@mail.gmail.com>
-Message-ID: <CAMj1kXEJ87J45D_tVZ-o9LJCQrDJig2Gscr=bHr1DMJ0wUOu-A@mail.gmail.com>
-Subject: Re: [PATCH] efivarfs: Replace invalid slashes with exclamation marks
- in dentries.
-To:     Michael Schaller <misch@google.com>
-Cc:     michael@5challer.de, Matthew Garrett <matthew.garrett@nebula.com>,
-        Jeremy Kerr <jk@ozlabs.org>,
-        linux-efi <linux-efi@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <877dsiislt.fsf@kokedama.swc.toshiba.co.jp>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Fri, 18 Sep 2020 at 13:25, Michael Schaller <misch@google.com> wrote:
->
-> Without this patch efivarfs_alloc_dentry creates dentries with slashes in
-> their name if the respective EFI variable has slashes in its name. This in
-> turn causes EIO on getdents64, which prevents a complete directory listing
-> of /sys/firmware/efi/efivars/.
->
-> This patch replaces the invalid shlashes with exclamation marks like
-> kobject_set_name_vargs does for /sys/firmware/efi/vars/ to have consistently
-> named dentries under /sys/firmware/efi/vars/ and /sys/firmware/efi/efivars/.
+On Fri, Sep 25, 2020 at 09:54:06AM +0900, Punit Agrawal wrote:
+> Maybe I could've used a better choice of words - I meant to define a
+> structure with meaningful member names to replace the *(ptr + i)
+> accesses in the patch.
 
-Thanks Michael
+I know exactly what you mean - I had the same question during last
+review.
 
-Can you resend this with a signed-off-by line please?
+-- 
+Regards/Gruss,
+    Boris.
 
-> ---
->  fs/efivarfs/super.c | 3 +++
->  1 file changed, 3 insertions(+)
->
-> diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
-> index 28bb5689333a..15880a68faad 100644
-> --- a/fs/efivarfs/super.c
-> +++ b/fs/efivarfs/super.c
-> @@ -141,6 +141,9 @@ static int efivarfs_callback(efi_char16_t *name16, efi_guid_t vendor,
->
->         name[len + EFI_VARIABLE_GUID_LEN+1] = '\0';
->
-> +       /* replace invalid slashes like kobject_set_name_vargs does for /sys/firmware/efi/vars. */
-> +       strreplace(name, '/', '!');
-> +
->         inode = efivarfs_get_inode(sb, d_inode(root), S_IFREG | 0644, 0,
->                                    is_removable);
->         if (!inode)
-> --
-> 2.28.0.681.g6f77f65b4e-goog
->
+https://people.kernel.org/tglx/notes-about-netiquette
