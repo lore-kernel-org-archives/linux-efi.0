@@ -7,43 +7,44 @@ X-Spam-Status: No, score=-9.0 required=3.0 tests=BAYES_00,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0DACAC4727F
-	for <linux-efi@archiver.kernel.org>; Wed, 30 Sep 2020 08:29:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D5246C2D0A8
+	for <linux-efi@archiver.kernel.org>; Wed, 30 Sep 2020 08:29:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CA05921D41
+	by mail.kernel.org (Postfix) with ESMTP id 9DC8F2184D
 	for <linux-efi@archiver.kernel.org>; Wed, 30 Sep 2020 08:29:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728358AbgI3I32 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        id S1728126AbgI3I32 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
         Wed, 30 Sep 2020 04:29:28 -0400
-Received: from mga17.intel.com ([192.55.52.151]:10651 "EHLO mga17.intel.com"
+Received: from mga18.intel.com ([134.134.136.126]:17378 "EHLO mga18.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725535AbgI3I30 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        id S1728358AbgI3I30 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
         Wed, 30 Sep 2020 04:29:26 -0400
-IronPort-SDR: rrssQznbaU8/8rt65eWvZXu+ZGhrUDFX4WIxXQM8boQtxh3aDe3HG0FY6/lADAMmAEIOH5BNvQ
- bmLe+qYkIt0Q==
-X-IronPort-AV: E=McAfee;i="6000,8403,9759"; a="142404389"
+IronPort-SDR: eyFsjGLnUOyvDTG+xXru7Snb1cmdNuDH80VUxE7HXPeX1SveT2KTPYjT71U26TOXryVraDRKvu
+ 3DuK+ZL+JTIg==
+X-IronPort-AV: E=McAfee;i="6000,8403,9759"; a="150175960"
 X-IronPort-AV: E=Sophos;i="5.77,321,1596524400"; 
-   d="scan'208";a="142404389"
+   d="scan'208";a="150175960"
 X-Amp-Result: SKIPPED(no attachment in message)
 X-Amp-File-Uploaded: False
-Received: from orsmga007.jf.intel.com ([10.7.209.58])
-  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Sep 2020 01:29:25 -0700
-IronPort-SDR: wB0MJwzxVt3KVZVO1pu2d3TTeEOth7tcgbCAQkZp/sCxxN8C76RE9uVUsQgnvbUEMKH8Jx1q39
- JZuS1fEX+eww==
+Received: from fmsmga003.fm.intel.com ([10.253.24.29])
+  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Sep 2020 01:29:25 -0700
+IronPort-SDR: d0kO9Qxz3GmIiL/jrkTru+uPaREOrxO3rL7Nvy90NOi1/7dc2Ds1dMt93UOVMc5tdUAeNresY8
+ Wfxa4S173WgQ==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.77,321,1596524400"; 
-   d="scan'208";a="351463721"
+   d="scan'208";a="350605266"
 Received: from lkp-server02.sh.intel.com (HELO de448af6ea1b) ([10.239.97.151])
-  by orsmga007.jf.intel.com with ESMTP; 30 Sep 2020 01:29:23 -0700
+  by FMSMGA003.fm.intel.com with ESMTP; 30 Sep 2020 01:29:23 -0700
 Received: from kbuild by de448af6ea1b with local (Exim 4.92)
         (envelope-from <lkp@intel.com>)
-        id 1kNXUJ-000095-7Q; Wed, 30 Sep 2020 08:29:23 +0000
-Date:   Wed, 30 Sep 2020 16:28:29 +0800
+        id 1kNXUJ-000092-6O; Wed, 30 Sep 2020 08:29:23 +0000
+Date:   Wed, 30 Sep 2020 16:28:27 +0800
 From:   kernel test robot <lkp@intel.com>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     linux-efi@vger.kernel.org
-Subject: [efi:next] BUILD SUCCESS 1e560e69302ff557718d55f2375daf8fd8d0142d
-Message-ID: <5f7441ad.XQk+Q7Ei6/x6Um1X%lkp@intel.com>
+Subject: [efi:urgent] BUILD SUCCESS
+ d32de9130f6c79533508e2c7879f18997bfbe2a0
+Message-ID: <5f7441ab.fhTamkaFQJR7uSeS%lkp@intel.com>
 User-Agent: Heirloom mailx 12.5 6/20/10
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
@@ -52,12 +53,12 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-tree/branch: https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git  next
-branch HEAD: 1e560e69302ff557718d55f2375daf8fd8d0142d  efi: efivars: remove deprecated sysfs interface
+tree/branch: https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git  urgent
+branch HEAD: d32de9130f6c79533508e2c7879f18997bfbe2a0  efi/arm64: libstub: Deal gracefully with EFI_RNG_PROTOCOL failure
 
-elapsed time: 724m
+elapsed time: 723m
 
-configs tested: 168
+configs tested: 186
 configs skipped: 2
 
 The following configs have been built successfully.
@@ -96,6 +97,11 @@ powerpc                    amigaone_defconfig
 sh                           se7751_defconfig
 mips                      malta_kvm_defconfig
 powerpc                     rainier_defconfig
+powerpc               mpc834x_itxgp_defconfig
+openrisc                            defconfig
+xtensa                          iss_defconfig
+mips                        nlm_xlr_defconfig
+powerpc                     ppa8548_defconfig
 arm                           efm32_defconfig
 arm                      tct_hammer_defconfig
 powerpc                        icon_defconfig
@@ -124,6 +130,11 @@ arm                             mxs_defconfig
 arm                         lpc32xx_defconfig
 mips                        vocore2_defconfig
 arc                          axs103_defconfig
+m68k                          hp300_defconfig
+sh                            titan_defconfig
+arm                        multi_v5_defconfig
+arm                       multi_v4t_defconfig
+arm                           sunxi_defconfig
 arc                        vdk_hs38_defconfig
 c6x                        evmc6457_defconfig
 arm                         s3c6400_defconfig
@@ -133,8 +144,6 @@ powerpc                        fsp2_defconfig
 mips                      pic32mzda_defconfig
 mips                       lemote2f_defconfig
 mips                 decstation_r4k_defconfig
-powerpc               mpc834x_itxgp_defconfig
-arm                       multi_v4t_defconfig
 sh                             shx3_defconfig
 microblaze                          defconfig
 mips                   sb1250_swarm_defconfig
@@ -145,6 +154,11 @@ sh                          r7780mp_defconfig
 m68k                       m5249evb_defconfig
 mips                       capcella_defconfig
 c6x                                 defconfig
+mips                         tb0287_defconfig
+nds32                               defconfig
+mips                           mtx1_defconfig
+arm                            pleb_defconfig
+sh                        apsh4ad0a_defconfig
 um                           x86_64_defconfig
 arm                        multi_v7_defconfig
 ia64                             allmodconfig
@@ -156,7 +170,6 @@ nios2                               defconfig
 arc                              allyesconfig
 nds32                             allnoconfig
 c6x                              allyesconfig
-nds32                               defconfig
 nios2                            allyesconfig
 csky                                defconfig
 alpha                               defconfig
@@ -184,6 +197,12 @@ i386                 randconfig-a003-20200929
 i386                 randconfig-a004-20200929
 i386                 randconfig-a005-20200929
 i386                 randconfig-a001-20200929
+i386                 randconfig-a003-20200930
+i386                 randconfig-a002-20200930
+i386                 randconfig-a006-20200930
+i386                 randconfig-a005-20200930
+i386                 randconfig-a004-20200930
+i386                 randconfig-a001-20200930
 x86_64               randconfig-a015-20200930
 x86_64               randconfig-a013-20200930
 x86_64               randconfig-a012-20200930
