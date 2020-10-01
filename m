@@ -1,259 +1,130 @@
-Return-Path: <SRS0=Khn0=DH=vger.kernel.org=linux-efi-owner@kernel.org>
+Return-Path: <SRS0=rSez=DI=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.0 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D5246C2D0A8
-	for <linux-efi@archiver.kernel.org>; Wed, 30 Sep 2020 08:29:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4FB67C4727E
+	for <linux-efi@archiver.kernel.org>; Thu,  1 Oct 2020 17:44:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9DC8F2184D
-	for <linux-efi@archiver.kernel.org>; Wed, 30 Sep 2020 08:29:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F2CCA2065C
+	for <linux-efi@archiver.kernel.org>; Thu,  1 Oct 2020 17:44:39 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BV7v1qkf"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728126AbgI3I32 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 30 Sep 2020 04:29:28 -0400
-Received: from mga18.intel.com ([134.134.136.126]:17378 "EHLO mga18.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728358AbgI3I30 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 30 Sep 2020 04:29:26 -0400
-IronPort-SDR: eyFsjGLnUOyvDTG+xXru7Snb1cmdNuDH80VUxE7HXPeX1SveT2KTPYjT71U26TOXryVraDRKvu
- 3DuK+ZL+JTIg==
-X-IronPort-AV: E=McAfee;i="6000,8403,9759"; a="150175960"
-X-IronPort-AV: E=Sophos;i="5.77,321,1596524400"; 
-   d="scan'208";a="150175960"
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga003.fm.intel.com ([10.253.24.29])
-  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Sep 2020 01:29:25 -0700
-IronPort-SDR: d0kO9Qxz3GmIiL/jrkTru+uPaREOrxO3rL7Nvy90NOi1/7dc2Ds1dMt93UOVMc5tdUAeNresY8
- Wfxa4S173WgQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.77,321,1596524400"; 
-   d="scan'208";a="350605266"
-Received: from lkp-server02.sh.intel.com (HELO de448af6ea1b) ([10.239.97.151])
-  by FMSMGA003.fm.intel.com with ESMTP; 30 Sep 2020 01:29:23 -0700
-Received: from kbuild by de448af6ea1b with local (Exim 4.92)
-        (envelope-from <lkp@intel.com>)
-        id 1kNXUJ-000092-6O; Wed, 30 Sep 2020 08:29:23 +0000
-Date:   Wed, 30 Sep 2020 16:28:27 +0800
-From:   kernel test robot <lkp@intel.com>
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     linux-efi@vger.kernel.org
-Subject: [efi:urgent] BUILD SUCCESS
- d32de9130f6c79533508e2c7879f18997bfbe2a0
-Message-ID: <5f7441ab.fhTamkaFQJR7uSeS%lkp@intel.com>
-User-Agent: Heirloom mailx 12.5 6/20/10
+        id S1732642AbgJARoj (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 1 Oct 2020 13:44:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59840 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1732096AbgJARoj (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 1 Oct 2020 13:44:39 -0400
+Received: from mail-pf1-x443.google.com (mail-pf1-x443.google.com [IPv6:2607:f8b0:4864:20::443])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 45DC5C0613D0;
+        Thu,  1 Oct 2020 10:44:39 -0700 (PDT)
+Received: by mail-pf1-x443.google.com with SMTP id 144so382443pfb.4;
+        Thu, 01 Oct 2020 10:44:39 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=xwkaw38cgwHkNtoVtJK2JhdTeVpjV+AYAxG0kMKtMnI=;
+        b=BV7v1qkfQ2xRfiu8NpANEPoUbG97BoDOHD2KhaTguGsC2qxZ7V+Gg+u52jc8XTx5dH
+         NgRPDWBJbjMK+uxRg9Weux7CPLdIo8EZZRkmpvDHsPB9D8gtkAHWDUoV7Z7CawXtGkBg
+         ct35he9NGxcYsaI6NuvvwSSrQQYDbawVCsItv/2uEsLuMRLZnugHUfB9LnbO0PD3LuFG
+         nPm7QTqrJ9LG6ADc81EHDwn/y8cglED7qHsr0wMcmOkbnL+Z7IK5kg51hb6AR96Jt1Xa
+         AxUXwqanWOKoNIwMDUZO8JVjmPaMRsGk4K8CeXAdq+Bj6JukVzAbDLYwO2n3Y60mCAp0
+         2oNw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=xwkaw38cgwHkNtoVtJK2JhdTeVpjV+AYAxG0kMKtMnI=;
+        b=L+qJb+l5pHFVLHkp8QFB/uwCtO6n/TZ0PrPdkaeEOfvnKn77l1adqtf0FXUPIzR0+4
+         mqjd+D7keAoZVSrBf5L1UgL7wOkhF4VvW6FBvuXKaAziGz0/CCd19oP2HJTma2dhx3jh
+         Jb1Il517X4BE03jWtEYbr84soOatWmTF2YPI8Z3bxS7GF5xFznUW4BDyVLvJHdx+7V3q
+         2iUVjYe3k6mJSmxsxMFzTwZVsAEqVS6sJZ3rTtGc9WXtP5v0FqJ4czGYo4CKk4OQm5E2
+         LnGuPcciS3GsBbyZEJ9Rp2FyEsCWRFwgx3mZun368cDm3HbHlI+nmrVNc68p5SrPo2zh
+         UiUg==
+X-Gm-Message-State: AOAM531NKRbaqeDysFzRuQwmTVKB+VZ2pIdGulbNwaCUpa7u2zLACn9h
+        a+96OtHTWVDQHHJqNIzHY6w=
+X-Google-Smtp-Source: ABdhPJzlg9wioDaDQeFELxBiW6SWSo+AK0dG8aWp4yY632RVWNfS7tpzlqLDRpZ9Vd9fusarLXSf5Q==
+X-Received: by 2002:a62:19c4:0:b029:13e:d13d:a081 with SMTP id 187-20020a6219c40000b029013ed13da081mr3804867pfz.24.1601574278745;
+        Thu, 01 Oct 2020 10:44:38 -0700 (PDT)
+Received: from ubuntu-m3-large-x86 ([2604:1380:45e1:2200::1])
+        by smtp.gmail.com with ESMTPSA id o4sm7001277pfh.39.2020.10.01.10.44.37
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 01 Oct 2020 10:44:38 -0700 (PDT)
+Date:   Thu, 1 Oct 2020 10:44:36 -0700
+From:   Nathan Chancellor <natechancellor@gmail.com>
+To:     Lenny Szubowicz <lszubowi@redhat.com>
+Cc:     linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
+        platform-driver-x86@vger.kernel.org,
+        linux-security-module@vger.kernel.org, andy.shevchenko@gmail.com,
+        ardb@kernel.org, jmorris@namei.org, serge@hallyn.com,
+        keescook@chromium.org, zohar@linux.ibm.com, bp@alien8.de,
+        pjones@redhat.com, dhowells@redhat.com, prarit@redhat.com
+Subject: Re: [PATCH V2 1/3] efi: Support for MOK variable config table
+Message-ID: <20201001174436.GA2622286@ubuntu-m3-large-x86>
+References: <20200905013107.10457-1-lszubowi@redhat.com>
+ <20200905013107.10457-2-lszubowi@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+In-Reply-To: <20200905013107.10457-2-lszubowi@redhat.com>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-tree/branch: https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git  urgent
-branch HEAD: d32de9130f6c79533508e2c7879f18997bfbe2a0  efi/arm64: libstub: Deal gracefully with EFI_RNG_PROTOCOL failure
+On Fri, Sep 04, 2020 at 09:31:05PM -0400, Lenny Szubowicz wrote:
+> Because of system-specific EFI firmware limitations, EFI volatile
+> variables may not be capable of holding the required contents of
+> the Machine Owner Key (MOK) certificate store when the certificate
+> list grows above some size. Therefore, an EFI boot loader may pass
+> the MOK certs via a EFI configuration table created specifically for
+> this purpose to avoid this firmware limitation.
+> 
+> An EFI configuration table is a much more primitive mechanism
+> compared to EFI variables and is well suited for one-way passage
+> of static information from a pre-OS environment to the kernel.
+> 
+> This patch adds initial kernel support to recognize, parse,
+> and validate the EFI MOK configuration table, where named
+> entries contain the same data that would otherwise be provided
+> in similarly named EFI variables.
+> 
+> Additionally, this patch creates a sysfs binary file for each
+> EFI MOK configuration table entry found. These files are read-only
+> to root and are provided for use by user space utilities such as
+> mokutil.
+> 
+> A subsequent patch will load MOK certs into the trusted platform
+> key ring using this infrastructure.
+> 
+> Signed-off-by: Lenny Szubowicz <lszubowi@redhat.com>
 
-elapsed time: 723m
+I have not seen this reported yet but this breaks arm allyesconfig and
+allmodconfig when CPU_LITTLE_ENDIAN is force selected (because CONFIG_EFI
+will actually be enabled):
 
-configs tested: 186
-configs skipped: 2
+$ cat le.config
+CONFIG_CPU_BIG_ENDIAN=n
 
-The following configs have been built successfully.
-More configs may be tested in the coming days.
+$ make -skj"$(nproc)" ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- KCONFIG_ALLCONFIG=le.config allyesconfig drivers/firmware/efi/mokvar-table.o
+drivers/firmware/efi/mokvar-table.c: In function 'efi_mokvar_table_init':
+drivers/firmware/efi/mokvar-table.c:139:5: error: implicit declaration of function 'early_memunmap' [-Werror=implicit-function-declaration]
+  139 |     early_memunmap(va, map_size);
+      |     ^~~~~~~~~~~~~~
+drivers/firmware/efi/mokvar-table.c:148:9: error: implicit declaration of function 'early_memremap' [-Werror=implicit-function-declaration]
+  148 |    va = early_memremap(efi.mokvar_table, map_size);
+      |         ^~~~~~~~~~~~~~
+drivers/firmware/efi/mokvar-table.c:148:7: warning: assignment to 'void *' from 'int' makes pointer from integer without a cast [-Wint-conversion]
+  148 |    va = early_memremap(efi.mokvar_table, map_size);
+      |       ^
+cc1: some warnings being treated as errors
+make[4]: *** [scripts/Makefile.build:283: drivers/firmware/efi/mokvar-table.o] Error 1
 
-gcc tested configs:
-arm                                 defconfig
-arm64                            allyesconfig
-arm64                               defconfig
-arm                              allyesconfig
-arm                              allmodconfig
-powerpc                 xes_mpc85xx_defconfig
-arc                      axs103_smp_defconfig
-arc                         haps_hs_defconfig
-arm                         orion5x_defconfig
-riscv                               defconfig
-arm                           h3600_defconfig
-powerpc                          g5_defconfig
-arm                       spear13xx_defconfig
-mips                           ip22_defconfig
-arm                         nhk8815_defconfig
-ia64                        generic_defconfig
-mips                       rbtx49xx_defconfig
-powerpc                      pmac32_defconfig
-powerpc64                        alldefconfig
-sh                        sh7785lcr_defconfig
-riscv                            alldefconfig
-arm                           viper_defconfig
-powerpc                 mpc834x_mds_defconfig
-m68k                       m5275evb_defconfig
-powerpc                       eiger_defconfig
-powerpc                     mpc512x_defconfig
-um                            kunit_defconfig
-sh                     magicpanelr2_defconfig
-powerpc                    amigaone_defconfig
-sh                           se7751_defconfig
-mips                      malta_kvm_defconfig
-powerpc                     rainier_defconfig
-powerpc               mpc834x_itxgp_defconfig
-openrisc                            defconfig
-xtensa                          iss_defconfig
-mips                        nlm_xlr_defconfig
-powerpc                     ppa8548_defconfig
-arm                           efm32_defconfig
-arm                      tct_hammer_defconfig
-powerpc                        icon_defconfig
-powerpc                      tqm8xx_defconfig
-powerpc                     tqm8541_defconfig
-sh                        sh7763rdp_defconfig
-mips                    maltaup_xpa_defconfig
-arm                         ebsa110_defconfig
-sparc                       sparc32_defconfig
-arm                          pxa168_defconfig
-m68k                                defconfig
-sh                          lboxre2_defconfig
-mips                           gcw0_defconfig
-powerpc                    gamecube_defconfig
-arm                             ezx_defconfig
-sh                        dreamcast_defconfig
-arm                       omap2plus_defconfig
-powerpc                    socrates_defconfig
-parisc                generic-64bit_defconfig
-xtensa                  audio_kc705_defconfig
-s390                       zfcpdump_defconfig
-powerpc                      ep88xc_defconfig
-sh                         apsh4a3a_defconfig
-arm                            u300_defconfig
-arm                             mxs_defconfig
-arm                         lpc32xx_defconfig
-mips                        vocore2_defconfig
-arc                          axs103_defconfig
-m68k                          hp300_defconfig
-sh                            titan_defconfig
-arm                        multi_v5_defconfig
-arm                       multi_v4t_defconfig
-arm                           sunxi_defconfig
-arc                        vdk_hs38_defconfig
-c6x                        evmc6457_defconfig
-arm                         s3c6400_defconfig
-arm                           sama5_defconfig
-powerpc                    mvme5100_defconfig
-powerpc                        fsp2_defconfig
-mips                      pic32mzda_defconfig
-mips                       lemote2f_defconfig
-mips                 decstation_r4k_defconfig
-sh                             shx3_defconfig
-microblaze                          defconfig
-mips                   sb1250_swarm_defconfig
-mips                malta_kvm_guest_defconfig
-h8300                     edosk2674_defconfig
-mips                         tb0219_defconfig
-sh                          r7780mp_defconfig
-m68k                       m5249evb_defconfig
-mips                       capcella_defconfig
-c6x                                 defconfig
-mips                         tb0287_defconfig
-nds32                               defconfig
-mips                           mtx1_defconfig
-arm                            pleb_defconfig
-sh                        apsh4ad0a_defconfig
-um                           x86_64_defconfig
-arm                        multi_v7_defconfig
-ia64                             allmodconfig
-ia64                                defconfig
-ia64                             allyesconfig
-m68k                             allmodconfig
-m68k                             allyesconfig
-nios2                               defconfig
-arc                              allyesconfig
-nds32                             allnoconfig
-c6x                              allyesconfig
-nios2                            allyesconfig
-csky                                defconfig
-alpha                               defconfig
-alpha                            allyesconfig
-xtensa                           allyesconfig
-h8300                            allyesconfig
-arc                                 defconfig
-sh                               allmodconfig
-parisc                              defconfig
-s390                             allyesconfig
-parisc                           allyesconfig
-s390                                defconfig
-i386                             allyesconfig
-sparc                            allyesconfig
-sparc                               defconfig
-i386                                defconfig
-mips                             allyesconfig
-mips                             allmodconfig
-powerpc                          allyesconfig
-powerpc                          allmodconfig
-powerpc                           allnoconfig
-i386                 randconfig-a006-20200929
-i386                 randconfig-a002-20200929
-i386                 randconfig-a003-20200929
-i386                 randconfig-a004-20200929
-i386                 randconfig-a005-20200929
-i386                 randconfig-a001-20200929
-i386                 randconfig-a003-20200930
-i386                 randconfig-a002-20200930
-i386                 randconfig-a006-20200930
-i386                 randconfig-a005-20200930
-i386                 randconfig-a004-20200930
-i386                 randconfig-a001-20200930
-x86_64               randconfig-a015-20200930
-x86_64               randconfig-a013-20200930
-x86_64               randconfig-a012-20200930
-x86_64               randconfig-a016-20200930
-x86_64               randconfig-a014-20200930
-x86_64               randconfig-a011-20200930
-x86_64               randconfig-a011-20200929
-x86_64               randconfig-a013-20200929
-x86_64               randconfig-a015-20200929
-x86_64               randconfig-a014-20200929
-x86_64               randconfig-a016-20200929
-x86_64               randconfig-a012-20200929
-i386                 randconfig-a011-20200930
-i386                 randconfig-a015-20200930
-i386                 randconfig-a012-20200930
-i386                 randconfig-a014-20200930
-i386                 randconfig-a016-20200930
-i386                 randconfig-a013-20200930
-i386                 randconfig-a012-20200929
-i386                 randconfig-a016-20200929
-i386                 randconfig-a014-20200929
-i386                 randconfig-a013-20200929
-i386                 randconfig-a015-20200929
-i386                 randconfig-a011-20200929
-riscv                    nommu_k210_defconfig
-riscv                            allyesconfig
-riscv                    nommu_virt_defconfig
-riscv                             allnoconfig
-riscv                          rv32_defconfig
-riscv                            allmodconfig
-x86_64                                   rhel
-x86_64                           allyesconfig
-x86_64                    rhel-7.6-kselftests
-x86_64                              defconfig
-x86_64                               rhel-8.3
-x86_64                                  kexec
-
-clang tested configs:
-x86_64               randconfig-a001-20200930
-x86_64               randconfig-a005-20200930
-x86_64               randconfig-a003-20200930
-x86_64               randconfig-a004-20200930
-x86_64               randconfig-a002-20200930
-x86_64               randconfig-a006-20200930
-x86_64               randconfig-a005-20200929
-x86_64               randconfig-a003-20200929
-x86_64               randconfig-a004-20200929
-x86_64               randconfig-a002-20200929
-x86_64               randconfig-a006-20200929
-x86_64               randconfig-a001-20200929
-
----
-0-DAY CI Kernel Test Service, Intel Corporation
-https://lists.01.org/hyperkitty/list/kbuild-all@lists.01.org
+Cheers,
+Nathan
