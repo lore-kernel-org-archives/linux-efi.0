@@ -2,155 +2,251 @@ Return-Path: <SRS0=HKmG=DJ=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E6F68C4363D
-	for <linux-efi@archiver.kernel.org>; Fri,  2 Oct 2020 17:22:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BB18CC35257
+	for <linux-efi@archiver.kernel.org>; Fri,  2 Oct 2020 17:38:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A91CC208B6
-	for <linux-efi@archiver.kernel.org>; Fri,  2 Oct 2020 17:22:07 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1601659327;
-	bh=8B3ajfrrr/Rm5NpX3zNhjHSB7gg5E+Rs6FLpsOjO7i4=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=bkxvCnyqbek2kMISX8vgk/VrDF32OBuZP/th1jG3Wz15eXY82stFHnclFfgryImeJ
-	 Ll4o1uEA6GxyO2DceBV0AXFRRKyRfOKNXrU10POvLKRefdF8zhGpMR+oiahA3zDyjg
-	 /Q3T3/jv5iGGRvl/gSr8GjFm5jgQWDyA107pfgXc=
+	by mail.kernel.org (Postfix) with ESMTP id 82BF62137B
+	for <linux-efi@archiver.kernel.org>; Fri,  2 Oct 2020 17:38:39 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="VpU7xchN"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387957AbgJBRWG (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 2 Oct 2020 13:22:06 -0400
-Received: from mail.kernel.org ([198.145.29.99]:36330 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726175AbgJBRWG (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 2 Oct 2020 13:22:06 -0400
-Received: from mail-ot1-f44.google.com (mail-ot1-f44.google.com [209.85.210.44])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 0847020679;
-        Fri,  2 Oct 2020 17:22:06 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1601659326;
-        bh=8B3ajfrrr/Rm5NpX3zNhjHSB7gg5E+Rs6FLpsOjO7i4=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=lWZyzOJpapjQpA455YXsIZVL7VqaXMbB/A2IqiEutsdg98DBHFjMpTSTw2TkXaG3H
-         pORFQt+baBV+E6jK5QUiWsRroyRBYIGPTsDYUi89B7Ld1yFod0e5MKxjNG3ngBwsqO
-         7rvys/97/D/WV0YPu4gQUgMn3DQbrTDO2VIospe0=
-Received: by mail-ot1-f44.google.com with SMTP id 60so2098486otw.3;
-        Fri, 02 Oct 2020 10:22:06 -0700 (PDT)
-X-Gm-Message-State: AOAM531LPb8j0iBMggxMunQOxLAsojH9m1eeRP6UABhYREdxoJpnGM4G
-        DDlfeQCV/I4i1ZGEvf+owvEa5Pn/EC/gHQwPg4w=
-X-Google-Smtp-Source: ABdhPJzGwYam8D7RzG6/2OxiOvDt5Rogji+L7HVZMzs+te3CDO0AywQrFo8JqpB2vzN3MK8VypeeMuyxliVhhB+QE5A=
-X-Received: by 2002:a9d:335:: with SMTP id 50mr2353365otv.90.1601659325331;
- Fri, 02 Oct 2020 10:22:05 -0700 (PDT)
+        id S2388336AbgJBRij (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 2 Oct 2020 13:38:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55784 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2388354AbgJBRii (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 2 Oct 2020 13:38:38 -0400
+Received: from mail-pg1-x544.google.com (mail-pg1-x544.google.com [IPv6:2607:f8b0:4864:20::544])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EEAE5C0613E2
+        for <linux-efi@vger.kernel.org>; Fri,  2 Oct 2020 10:38:37 -0700 (PDT)
+Received: by mail-pg1-x544.google.com with SMTP id 5so1238001pgf.5
+        for <linux-efi@vger.kernel.org>; Fri, 02 Oct 2020 10:38:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=chromium.org; s=google;
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=8Hp+7iC/qpDxM5Z+ih9Obdekn7D1QoZOPNj787JbbJI=;
+        b=VpU7xchNgw6cw9oGZU5/CcpnqfEzBAL4Dvzshosnb4RzP+PA9ABf1JrbQKjbHsZTim
+         OrtlcKNnqYHuSSeJxhZTnYYKv3w9PPfnzGqG/LqeB+xUpxHhmSJOlWulOuZFMAKFvXfW
+         7XcxuZK1TsW8mfDaTioIGtzU2mT6QC/K3m2CQ=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=8Hp+7iC/qpDxM5Z+ih9Obdekn7D1QoZOPNj787JbbJI=;
+        b=kdby05s8tKRZAsznIsQ0tXBGSdmyHBAhsQTIBmh5Vtu4D2jUG0+A2ojrbNsGQmoKGp
+         T+sCEmxl3C3XYNX7ylT8L8bjikE04qyOm6vlLsfZdNSWGnZwWH8NGVuvs9DGEOA9Yeiu
+         QiAe+iTqjeSEyNBzvgevtXihUWX0URIB3c9gdKc4gdR8NYSGVOejjJilxsYC9CeggPA3
+         l7rGOVSGXGBm6LdlDTYCFWMr78NDoOjujWrbJmqMdWMk/KHryyXr6PvaITk3FTa29Pqa
+         LCX9xBFCtFwGgTMg/UEaguhXOo710cbOQ9BJOiY87RoKpDy768VdmSCmoOZS2xQZlWg6
+         kp9A==
+X-Gm-Message-State: AOAM530+Ry1JwFvL2+2FScfPiHwLrTJIfWqbnO3rjo53FyFoE/ndvCnY
+        vfuraxTrP+SdwGfppYadgyXh7w==
+X-Google-Smtp-Source: ABdhPJy/BntAQKEnY5lvIusq1+xqLOvqEevT1O9eAGCzO9CsbBGzxwSBnuHX0A5VWfaOdB3pDAq2wg==
+X-Received: by 2002:a62:52ce:0:b029:13e:50c8:499b with SMTP id g197-20020a6252ce0000b029013e50c8499bmr3969231pfb.14.1601660317504;
+        Fri, 02 Oct 2020 10:38:37 -0700 (PDT)
+Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
+        by smtp.gmail.com with ESMTPSA id a2sm2826330pfr.104.2020.10.02.10.38.34
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 02 Oct 2020 10:38:36 -0700 (PDT)
+From:   Kees Cook <keescook@chromium.org>
+To:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc:     Kees Cook <keescook@chromium.org>,
+        Mimi Zohar <zohar@linux.ibm.com>,
+        Luis Chamberlain <mcgrof@kernel.org>,
+        James Morris <jamorris@linux.microsoft.com>,
+        Scott Branden <scott.branden@broadcom.com>,
+        Takashi Iwai <tiwai@suse.de>, Jessica Yu <jeyu@kernel.org>,
+        SeongJae Park <sjpark@amazon.de>,
+        KP Singh <kpsingh@chromium.org>, linux-efi@vger.kernel.org,
+        linux-security-module@vger.kernel.org,
+        linux-integrity@vger.kernel.org, selinux@vger.kernel.org,
+        linux-kselftest@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH v5 06/16] fs/kernel_read_file: Switch buffer size arg to size_t
+Date:   Fri,  2 Oct 2020 10:38:18 -0700
+Message-Id: <20201002173828.2099543-7-keescook@chromium.org>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20201002173828.2099543-1-keescook@chromium.org>
+References: <20201002173828.2099543-1-keescook@chromium.org>
 MIME-Version: 1.0
-References: <20201002171112.22738-1-xypron.glpk@gmx.de>
-In-Reply-To: <20201002171112.22738-1-xypron.glpk@gmx.de>
-From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Fri, 2 Oct 2020 19:21:54 +0200
-X-Gmail-Original-Message-ID: <CAMj1kXHsGcAX-DqfcpgxzZY3M+JzY-Ef9OdJ+JdysNnx1fK6zg@mail.gmail.com>
-Message-ID: <CAMj1kXHsGcAX-DqfcpgxzZY3M+JzY-Ef9OdJ+JdysNnx1fK6zg@mail.gmail.com>
-Subject: Re: [PATCH 1/1] docs: admin-guide: fdt and initrd load in EFI stub
-To:     Heinrich Schuchardt <xypron.glpk@gmx.de>
-Cc:     Jonathan Corbet <corbet@lwn.net>,
-        linux-efi <linux-efi@vger.kernel.org>,
-        Linux Doc Mailing List <linux-doc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        =?UTF-8?Q?Fran=C3=A7ois_Ozog?= <francois.ozog@linaro.org>,
-        Ilias Apalodimas <ilias.apalodimas@linaro.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Hi Heinrich,
+In preparation for further refactoring of kernel_read_file*(), rename
+the "max_size" argument to the more accurate "buf_size", and correct
+its type to size_t. Add kerndoc to explain the specifics of how the
+arguments will be used. Note that with buf_size now size_t, it can no
+longer be negative (and was never called with a negative value). Adjust
+callers to use it as a "maximum size" when *buf is NULL.
 
-Thanks for documenting this.
+Signed-off-by: Kees Cook <keescook@chromium.org>
+Reviewed-by: Mimi Zohar <zohar@linux.ibm.com>
+Reviewed-by: Luis Chamberlain <mcgrof@kernel.org>
+Reviewed-by: James Morris <jamorris@linux.microsoft.com>
+Acked-by: Scott Branden <scott.branden@broadcom.com>
+---
+ fs/kernel_read_file.c            | 34 +++++++++++++++++++++++---------
+ include/linux/kernel_read_file.h |  8 ++++----
+ security/integrity/digsig.c      |  2 +-
+ security/integrity/ima/ima_fs.c  |  2 +-
+ 4 files changed, 31 insertions(+), 15 deletions(-)
 
+diff --git a/fs/kernel_read_file.c b/fs/kernel_read_file.c
+index dc28a8def597..e21a76001fff 100644
+--- a/fs/kernel_read_file.c
++++ b/fs/kernel_read_file.c
+@@ -5,15 +5,31 @@
+ #include <linux/security.h>
+ #include <linux/vmalloc.h>
+ 
++/**
++ * kernel_read_file() - read file contents into a kernel buffer
++ *
++ * @file	file to read from
++ * @buf		pointer to a "void *" buffer for reading into (if
++ *		*@buf is NULL, a buffer will be allocated, and
++ *		@buf_size will be ignored)
++ * @buf_size	size of buf, if already allocated. If @buf not
++ *		allocated, this is the largest size to allocate.
++ * @id		the kernel_read_file_id identifying the type of
++ *		file contents being read (for LSMs to examine)
++ *
++ * Returns number of bytes read (no single read will be bigger
++ * than INT_MAX), or negative on error.
++ *
++ */
+ int kernel_read_file(struct file *file, void **buf,
+-		     loff_t max_size, enum kernel_read_file_id id)
++		     size_t buf_size, enum kernel_read_file_id id)
+ {
+ 	loff_t i_size, pos;
+ 	ssize_t bytes = 0;
+ 	void *allocated = NULL;
+ 	int ret;
+ 
+-	if (!S_ISREG(file_inode(file)->i_mode) || max_size < 0)
++	if (!S_ISREG(file_inode(file)->i_mode))
+ 		return -EINVAL;
+ 
+ 	ret = deny_write_access(file);
+@@ -29,7 +45,7 @@ int kernel_read_file(struct file *file, void **buf,
+ 		ret = -EINVAL;
+ 		goto out;
+ 	}
+-	if (i_size > INT_MAX || (max_size > 0 && i_size > max_size)) {
++	if (i_size > INT_MAX || i_size > buf_size) {
+ 		ret = -EFBIG;
+ 		goto out;
+ 	}
+@@ -75,7 +91,7 @@ int kernel_read_file(struct file *file, void **buf,
+ EXPORT_SYMBOL_GPL(kernel_read_file);
+ 
+ int kernel_read_file_from_path(const char *path, void **buf,
+-			       loff_t max_size, enum kernel_read_file_id id)
++			       size_t buf_size, enum kernel_read_file_id id)
+ {
+ 	struct file *file;
+ 	int ret;
+@@ -87,14 +103,14 @@ int kernel_read_file_from_path(const char *path, void **buf,
+ 	if (IS_ERR(file))
+ 		return PTR_ERR(file);
+ 
+-	ret = kernel_read_file(file, buf, max_size, id);
++	ret = kernel_read_file(file, buf, buf_size, id);
+ 	fput(file);
+ 	return ret;
+ }
+ EXPORT_SYMBOL_GPL(kernel_read_file_from_path);
+ 
+ int kernel_read_file_from_path_initns(const char *path, void **buf,
+-				      loff_t max_size,
++				      size_t buf_size,
+ 				      enum kernel_read_file_id id)
+ {
+ 	struct file *file;
+@@ -113,13 +129,13 @@ int kernel_read_file_from_path_initns(const char *path, void **buf,
+ 	if (IS_ERR(file))
+ 		return PTR_ERR(file);
+ 
+-	ret = kernel_read_file(file, buf, max_size, id);
++	ret = kernel_read_file(file, buf, buf_size, id);
+ 	fput(file);
+ 	return ret;
+ }
+ EXPORT_SYMBOL_GPL(kernel_read_file_from_path_initns);
+ 
+-int kernel_read_file_from_fd(int fd, void **buf, loff_t max_size,
++int kernel_read_file_from_fd(int fd, void **buf, size_t buf_size,
+ 			     enum kernel_read_file_id id)
+ {
+ 	struct fd f = fdget(fd);
+@@ -128,7 +144,7 @@ int kernel_read_file_from_fd(int fd, void **buf, loff_t max_size,
+ 	if (!f.file)
+ 		goto out;
+ 
+-	ret = kernel_read_file(f.file, buf, max_size, id);
++	ret = kernel_read_file(f.file, buf, buf_size, id);
+ out:
+ 	fdput(f);
+ 	return ret;
+diff --git a/include/linux/kernel_read_file.h b/include/linux/kernel_read_file.h
+index 0ca0bdbed1bd..910039e7593e 100644
+--- a/include/linux/kernel_read_file.h
++++ b/include/linux/kernel_read_file.h
+@@ -36,16 +36,16 @@ static inline const char *kernel_read_file_id_str(enum kernel_read_file_id id)
+ }
+ 
+ int kernel_read_file(struct file *file,
+-		     void **buf, loff_t max_size,
++		     void **buf, size_t buf_size,
+ 		     enum kernel_read_file_id id);
+ int kernel_read_file_from_path(const char *path,
+-			       void **buf, loff_t max_size,
++			       void **buf, size_t buf_size,
+ 			       enum kernel_read_file_id id);
+ int kernel_read_file_from_path_initns(const char *path,
+-				      void **buf, loff_t max_size,
++				      void **buf, size_t buf_size,
+ 				      enum kernel_read_file_id id);
+ int kernel_read_file_from_fd(int fd,
+-			     void **buf, loff_t max_size,
++			     void **buf, size_t buf_size,
+ 			     enum kernel_read_file_id id);
+ 
+ #endif /* _LINUX_KERNEL_READ_FILE_H */
+diff --git a/security/integrity/digsig.c b/security/integrity/digsig.c
+index 97661ffabc4e..04f779c4f5ed 100644
+--- a/security/integrity/digsig.c
++++ b/security/integrity/digsig.c
+@@ -175,7 +175,7 @@ int __init integrity_load_x509(const unsigned int id, const char *path)
+ 	int rc;
+ 	key_perm_t perm;
+ 
+-	rc = kernel_read_file_from_path(path, &data, 0,
++	rc = kernel_read_file_from_path(path, &data, INT_MAX,
+ 					READING_X509_CERTIFICATE);
+ 	if (rc < 0) {
+ 		pr_err("Unable to open file: %s (%d)", path, rc);
+diff --git a/security/integrity/ima/ima_fs.c b/security/integrity/ima/ima_fs.c
+index 602f52717757..692b83e82edf 100644
+--- a/security/integrity/ima/ima_fs.c
++++ b/security/integrity/ima/ima_fs.c
+@@ -284,7 +284,7 @@ static ssize_t ima_read_policy(char *path)
+ 	datap = path;
+ 	strsep(&datap, "\n");
+ 
+-	rc = kernel_read_file_from_path(path, &data, 0, READING_POLICY);
++	rc = kernel_read_file_from_path(path, &data, INT_MAX, READING_POLICY);
+ 	if (rc < 0) {
+ 		pr_err("Unable to open file: %s (%d)", path, rc);
+ 		return rc;
+-- 
+2.25.1
 
-On Fri, 2 Oct 2020 at 19:11, Heinrich Schuchardt <xypron.glpk@gmx.de> wrote:
->
-> Describe how a device tree and an initial RAM disk can be passed to the EFI
-> Boot Stub.
->
-> Signed-off-by: Heinrich Schuchardt <xypron.glpk@gmx.de>
-> ---
->  Documentation/admin-guide/efi-stub.rst | 35 ++++++++++++++++++++++++++
->  1 file changed, 35 insertions(+)
->
-> diff --git a/Documentation/admin-guide/efi-stub.rst b/Documentation/admin-guide/efi-stub.rst
-> index 833edb0d0bc4..86f50a33884c 100644
-> --- a/Documentation/admin-guide/efi-stub.rst
-> +++ b/Documentation/admin-guide/efi-stub.rst
-> @@ -38,6 +38,34 @@ arch/arm/boot/zImage should be copied to the system partition, and it
->  may not need to be renamed. Similarly for arm64, arch/arm64/boot/Image
->  should be copied but not necessarily renamed.
->
-> +Passing an initial RAM disk to the EFI Boot Stub
-> +------------------------------------------------
-> +
-> +The following means sorted by decreasing priority can be used to provide an
-> +initial RAM disk to the EFI Boot Stub:
-> +
-> +* The firmware may provide a UEFI Load File 2 Protocol. The stub will try to
-> +  load the RAM disk by calling the LoadFile() service of the protocol using
-> +  a vendor device path with the vendor GUID
-> +  5568e427-0x68fc-4f3d-ac74-ca555231cc68.
-> +* Next the EFI stub will try to load the file indicated by the "initrd=" command
-> +  line parameter.
-> +* The prior boot stage may pass the location of the initial RAM disk via the
-> +  "linux,initrd-start" and "linux,initrd-end" properties of the "/chosen" node
-> +  of the device-tree.
-> +
-
-On x86, the boot_params struct is used to pass the address and size of
-the initrd in memory. Maybe include that for completeness?
-
-> +The first two items are inhibited by the "noinitrd" command line parameter.
-> +
-
-Interesting. Are you saying noinitrd is ignored by the kernel itself?
-
-Looking at the code, it might only work for preventing the load of old
-style initrd ramdisks, whereas initramfs images are handled
-separately.
-
-This is something that we should probably fix one way or the other.
-
-
-> +Passing a device-tree to the EFI Boot Stub
-> +------------------------------------------
-> +
-> +A device-tree can be passed to the EFI Boot Stub in decreasing priority using
-> +
-> +* command line option dtb=
-> +* a UEFI configuration table with GUID b1b621d5-f19c-41a5-830b-d9152c69aae0.
-> +
-> +The command line option is only available if CONFIG_EFI_ARMSTUB_DTB_LOADER=y
-> +and secure boot is disabled.
->
->  Passing kernel parameters from the EFI shell
->  --------------------------------------------
-> @@ -46,6 +74,10 @@ Arguments to the kernel can be passed after bzImage.efi, e.g.::
->
->         fs0:> bzImage.efi console=ttyS0 root=/dev/sda4
->
-> +The "noinitrd" option
-> +---------------------
-> +
-> +The "noinitrd" option stops the EFI stub from loading an initial RAM disk.
->
->  The "initrd=" option
->  --------------------
-> @@ -98,3 +130,6 @@ CONFIGURATION TABLE.
->
->  "dtb=" is processed in the same manner as the "initrd=" option that is
->  described above.
-> +
-> +This option is only available if CONFIG_EFI_ARMSTUB_DTB_LOADER=y and secure
-> +boot is disabled.
-> --
-> 2.28.0
->
