@@ -7,58 +7,58 @@ X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
 	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 667B7C4363D
-	for <linux-efi@archiver.kernel.org>; Fri,  2 Oct 2020 17:38:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3D3D7C46466
+	for <linux-efi@archiver.kernel.org>; Fri,  2 Oct 2020 17:38:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 21E492085B
+	by mail.kernel.org (Postfix) with ESMTP id 01EDE20758
 	for <linux-efi@archiver.kernel.org>; Fri,  2 Oct 2020 17:38:47 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="SDW1aCXs"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="gIp5YUPO"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388442AbgJBRip (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 2 Oct 2020 13:38:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55828 "EHLO
+        id S2388436AbgJBRir (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 2 Oct 2020 13:38:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55820 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2388433AbgJBRip (ORCPT
+        with ESMTP id S2388441AbgJBRip (ORCPT
         <rfc822;linux-efi@vger.kernel.org>); Fri, 2 Oct 2020 13:38:45 -0400
-Received: from mail-pg1-x542.google.com (mail-pg1-x542.google.com [IPv6:2607:f8b0:4864:20::542])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2264CC0613E8
-        for <linux-efi@vger.kernel.org>; Fri,  2 Oct 2020 10:38:45 -0700 (PDT)
-Received: by mail-pg1-x542.google.com with SMTP id u24so1247446pgi.1
-        for <linux-efi@vger.kernel.org>; Fri, 02 Oct 2020 10:38:45 -0700 (PDT)
+Received: from mail-pj1-x1044.google.com (mail-pj1-x1044.google.com [IPv6:2607:f8b0:4864:20::1044])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 269BAC0610D0
+        for <linux-efi@vger.kernel.org>; Fri,  2 Oct 2020 10:38:43 -0700 (PDT)
+Received: by mail-pj1-x1044.google.com with SMTP id gm14so1300747pjb.2
+        for <linux-efi@vger.kernel.org>; Fri, 02 Oct 2020 10:38:43 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=chromium.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=WHTJVbq+NEdOn0KG7xTVbIO+EPWzmJJD7edvoSx0fhQ=;
-        b=SDW1aCXsi7GB1NUdEmgnrp+bHwHQoGoSWJOyLP0qTqqUQlVSknq7NxFIPEVQ9Y2j+P
-         QIaJOySy3FRN2lvGV0GXbU/VyifBQ99x9nCJ2UBKC3L31TPgViV4h+DoOFY1gS5NfQyc
-         8+LKzKpNMC3OpSEL4GuhCkElvCK6DRm03gm9Y=
+        bh=qJcmVj+L5ner65w+xYxx1+RLP+ut9GxY3p4hCl1LqMA=;
+        b=gIp5YUPO7PD3ieTusA8eENYMVQ+bK/n83HWEw+rMd0/t8bJ+GMNU1nfo8pmHLBGbey
+         H5JyYlqUskPhuVlpO9NQs3bVG1i7dBKQITRy7QTRKpOIYsYmg1kUj4GmG2GV8J6vT6HB
+         0O1wQzHOr+TuqSP1UO1FvcIwzyDVBM0jrcqkw=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=WHTJVbq+NEdOn0KG7xTVbIO+EPWzmJJD7edvoSx0fhQ=;
-        b=chyuFYMIqUvdhVZfTxi1GnXbe16S1i3zD2FGzEwj2z+MCOCRQo6C+c5JLzbzjGtguJ
-         6JRXe9sojD0URCdWfsqWZ8yglMv96naOi/scE7OKHCGzz9D0x5PcOXV/iHRkN/1C00LK
-         TEd4SvxU0Oejfz7xEwilrC4izNj1M0o8igitXCCyvT+ZRM3Lti3kDYVFOPb/jQQJuF0f
-         n5u+58WPDvAdpuFhNe6Psk554a2RYSutKfaHoOJeDOtfBjEj2ipEdbD31tXE28ez7bWp
-         ubM9XSmQunxVm9ITCDXf11b6zGvtGBdgzbTOvfZipB3lvcxMp43mq4ALgMc25WHBzIZL
-         U+sQ==
-X-Gm-Message-State: AOAM532oyl0ceSL+w5kzds9AFotZuLrXE+oXKopJfqKMbOu+0v9WWqJl
-        VNdON49B35dpxzm4tmKBm2cNcg==
-X-Google-Smtp-Source: ABdhPJxsFl7w0eHssgJAlItrXZUpI3j4cF+J9i83MBIGzUru+Nf9hzhT67KCdEEp/s/JO0pwtKcNbw==
-X-Received: by 2002:aa7:8f21:0:b029:142:2501:39e0 with SMTP id y1-20020aa78f210000b0290142250139e0mr3924207pfr.47.1601660324643;
-        Fri, 02 Oct 2020 10:38:44 -0700 (PDT)
-Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
-        by smtp.gmail.com with ESMTPSA id r19sm2104873pjz.23.2020.10.02.10.38.37
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        bh=qJcmVj+L5ner65w+xYxx1+RLP+ut9GxY3p4hCl1LqMA=;
+        b=ZWj5KRr1YXT0aT+89EsdqZCsFRZmXZT7JZRbQex2LtTdvU0GRrr4yj0tf0MeDoMQ3A
+         TpbreQ07jQRp+Ht3M9J0HjkgzgvpvGKjOE/Mekh0/1yfZAHCNu5xDOD+gai1Vo4yQXJ9
+         oTnbRd3PUEtkRiRGc8q/ML3IWuPPf66v3jNWKDMaiRjQEOI2Tcn83AJZ8qZiVhLQlTEE
+         q1ZkX+9ZVXm9fqMq2yzV0dVl0Jsx47YDVyEue50QK9kNj/gx7Sje+lxOkdstA8dOxEIt
+         bjHAxMx96hoF3rCsIXjPqtrWfEdH9rkNxLcij5FF8HVPRAnHDnLKNuqFL9xsggMbDbFm
+         Afiw==
+X-Gm-Message-State: AOAM531jezJKPWMf8lehZGoDeKf94MHwfTU3lt5MYc0/s6hKTmIj8mEW
+        wcbZjthJOMCPV60A4V8iyCjHAQ==
+X-Google-Smtp-Source: ABdhPJzBWNvPO4VGKoipwgCa0vomjqtbhEwBldg9Xy+e2FhhYXBi1vlX/kGVu0Jis+yqO1+GeMgDig==
+X-Received: by 2002:a17:90a:69e3:: with SMTP id s90mr3814287pjj.130.1601660322701;
         Fri, 02 Oct 2020 10:38:42 -0700 (PDT)
+Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
+        by smtp.gmail.com with ESMTPSA id q8sm2480298pfu.173.2020.10.02.10.38.35
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 02 Oct 2020 10:38:36 -0700 (PDT)
 From:   Kees Cook <keescook@chromium.org>
 To:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 Cc:     Kees Cook <keescook@chromium.org>,
-        Scott Branden <scott.branden@broadcom.com>,
         Mimi Zohar <zohar@linux.ibm.com>,
+        Scott Branden <scott.branden@broadcom.com>,
         Luis Chamberlain <mcgrof@kernel.org>,
         Takashi Iwai <tiwai@suse.de>, Jessica Yu <jeyu@kernel.org>,
         SeongJae Park <sjpark@amazon.de>,
@@ -66,9 +66,9 @@ Cc:     Kees Cook <keescook@chromium.org>,
         linux-security-module@vger.kernel.org,
         linux-integrity@vger.kernel.org, selinux@vger.kernel.org,
         linux-kselftest@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH v5 14/16] firmware: Store opt_flags in fw_priv
-Date:   Fri,  2 Oct 2020 10:38:26 -0700
-Message-Id: <20201002173828.2099543-15-keescook@chromium.org>
+Subject: [PATCH v5 09/16] firmware_loader: Use security_post_load_data()
+Date:   Fri,  2 Oct 2020 10:38:21 -0700
+Message-Id: <20201002173828.2099543-10-keescook@chromium.org>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20201002173828.2099543-1-keescook@chromium.org>
 References: <20201002173828.2099543-1-keescook@chromium.org>
@@ -78,220 +78,124 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Instead of passing opt_flags around so much, store it in the private
-structure so it can be examined by internals without needing to add more
-arguments to functions.
+Now that security_post_load_data() is wired up, use it instead
+of the NULL file argument style of security_post_read_file(),
+and update the security_kernel_load_data() call to indicate that a
+security_kernel_post_load_data() call is expected.
 
-Co-developed-by: Scott Branden <scott.branden@broadcom.com>
-Signed-off-by: Scott Branden <scott.branden@broadcom.com>
+Wire up the IMA check to match earlier logic. Perhaps a generalized
+change to ima_post_load_data() might look something like this:
+
+    return process_buffer_measurement(buf, size,
+                                      kernel_load_data_id_str(load_id),
+                                      read_idmap[load_id] ?: FILE_CHECK,
+                                      0, NULL);
+
 Signed-off-by: Kees Cook <keescook@chromium.org>
+Reviewed-by: Mimi Zohar <zohar@linux.ibm.com>
 ---
- drivers/base/firmware_loader/fallback.c       | 11 +++-----
- drivers/base/firmware_loader/fallback.h       |  5 ++--
- .../base/firmware_loader/fallback_platform.c  |  4 +--
- drivers/base/firmware_loader/firmware.h       |  3 ++-
- drivers/base/firmware_loader/main.c           | 25 +++++++++++--------
- 5 files changed, 25 insertions(+), 23 deletions(-)
+ drivers/base/firmware_loader/fallback.c       |  8 ++++----
+ .../base/firmware_loader/fallback_platform.c  |  8 +++++++-
+ security/integrity/ima/ima_main.c             | 20 +++++++++----------
+ 3 files changed, 21 insertions(+), 15 deletions(-)
 
 diff --git a/drivers/base/firmware_loader/fallback.c b/drivers/base/firmware_loader/fallback.c
-index 251d92fc8bae..c4765461a951 100644
+index bff4717cc6b5..251d92fc8bae 100644
 --- a/drivers/base/firmware_loader/fallback.c
 +++ b/drivers/base/firmware_loader/fallback.c
-@@ -490,13 +490,11 @@ fw_create_instance(struct firmware *firmware, const char *fw_name,
- /**
-  * fw_load_sysfs_fallback() - load a firmware via the sysfs fallback mechanism
-  * @fw_sysfs: firmware sysfs information for the firmware to load
-- * @opt_flags: flags of options, FW_OPT_*
-  * @timeout: timeout to wait for the load
-  *
-  * In charge of constructing a sysfs fallback interface for firmware loading.
-  **/
--static int fw_load_sysfs_fallback(struct fw_sysfs *fw_sysfs,
--				  u32 opt_flags, long timeout)
-+static int fw_load_sysfs_fallback(struct fw_sysfs *fw_sysfs, long timeout)
- {
- 	int retval = 0;
- 	struct device *f_dev = &fw_sysfs->dev;
-@@ -518,7 +516,7 @@ static int fw_load_sysfs_fallback(struct fw_sysfs *fw_sysfs,
- 	list_add(&fw_priv->pending_list, &pending_fw_head);
- 	mutex_unlock(&fw_lock);
+@@ -272,9 +272,9 @@ static ssize_t firmware_loading_store(struct device *dev,
+ 				dev_err(dev, "%s: map pages failed\n",
+ 					__func__);
+ 			else
+-				rc = security_kernel_post_read_file(NULL,
+-						fw_priv->data, fw_priv->size,
+-						READING_FIRMWARE);
++				rc = security_kernel_post_load_data(fw_priv->data,
++						fw_priv->size,
++						LOADING_FIRMWARE, "blob");
  
--	if (opt_flags & FW_OPT_UEVENT) {
-+	if (fw_priv->opt_flags & FW_OPT_UEVENT) {
- 		fw_priv->need_uevent = true;
- 		dev_set_uevent_suppress(f_dev, false);
- 		dev_dbg(f_dev, "firmware: requesting %s\n", fw_priv->fw_name);
-@@ -580,10 +578,10 @@ static int fw_load_from_user_helper(struct firmware *firmware,
- 	}
+ 			/*
+ 			 * Same logic as fw_load_abort, only the DONE bit
+@@ -613,7 +613,7 @@ static bool fw_run_sysfs_fallback(u32 opt_flags)
+ 		return false;
  
- 	fw_sysfs->fw_priv = firmware->priv;
--	ret = fw_load_sysfs_fallback(fw_sysfs, opt_flags, timeout);
-+	ret = fw_load_sysfs_fallback(fw_sysfs, timeout);
+ 	/* Also permit LSMs and IMA to fail firmware sysfs fallback */
+-	ret = security_kernel_load_data(LOADING_FIRMWARE, false);
++	ret = security_kernel_load_data(LOADING_FIRMWARE, true);
+ 	if (ret < 0)
+ 		return false;
  
- 	if (!ret)
--		ret = assign_fw(firmware, device, opt_flags);
-+		ret = assign_fw(firmware, device);
- 
- out_unlock:
- 	usermodehelper_read_unlock();
-@@ -625,7 +623,6 @@ static bool fw_run_sysfs_fallback(u32 opt_flags)
-  * @fw: pointer to firmware image
-  * @name: name of firmware file to look for
-  * @device: device for which firmware is being loaded
-- * @opt_flags: options to control firmware loading behaviour
-  * @ret: return value from direct lookup which triggered the fallback mechanism
-  *
-  * This function is called if direct lookup for the firmware failed, it enables
-diff --git a/drivers/base/firmware_loader/fallback.h b/drivers/base/firmware_loader/fallback.h
-index 2afdb6adb23f..3af7205b302f 100644
---- a/drivers/base/firmware_loader/fallback.h
-+++ b/drivers/base/firmware_loader/fallback.h
-@@ -67,10 +67,9 @@ static inline void unregister_sysfs_loader(void)
- #endif /* CONFIG_FW_LOADER_USER_HELPER */
- 
- #ifdef CONFIG_EFI_EMBEDDED_FIRMWARE
--int firmware_fallback_platform(struct fw_priv *fw_priv, u32 opt_flags);
-+int firmware_fallback_platform(struct fw_priv *fw_priv);
- #else
--static inline int firmware_fallback_platform(struct fw_priv *fw_priv,
--					     u32 opt_flags)
-+static inline int firmware_fallback_platform(struct fw_priv *fw_priv)
- {
- 	return -ENOENT;
- }
 diff --git a/drivers/base/firmware_loader/fallback_platform.c b/drivers/base/firmware_loader/fallback_platform.c
-index 8bdf88043079..00af99f0aff2 100644
+index a12c79d47efc..8bdf88043079 100644
 --- a/drivers/base/firmware_loader/fallback_platform.c
 +++ b/drivers/base/firmware_loader/fallback_platform.c
-@@ -8,13 +8,13 @@
- #include "fallback.h"
- #include "firmware.h"
- 
--int firmware_fallback_platform(struct fw_priv *fw_priv, u32 opt_flags)
-+int firmware_fallback_platform(struct fw_priv *fw_priv)
- {
- 	const u8 *data;
- 	size_t size;
- 	int rc;
- 
--	if (!(opt_flags & FW_OPT_FALLBACK_PLATFORM))
-+	if (!(fw_priv->opt_flags & FW_OPT_FALLBACK_PLATFORM))
+@@ -17,7 +17,7 @@ int firmware_fallback_platform(struct fw_priv *fw_priv, u32 opt_flags)
+ 	if (!(opt_flags & FW_OPT_FALLBACK_PLATFORM))
  		return -ENOENT;
  
- 	rc = security_kernel_load_data(LOADING_FIRMWARE, true);
-diff --git a/drivers/base/firmware_loader/firmware.h b/drivers/base/firmware_loader/firmware.h
-index d08efc77cf16..f86de5d7e0d7 100644
---- a/drivers/base/firmware_loader/firmware.h
-+++ b/drivers/base/firmware_loader/firmware.h
-@@ -68,6 +68,7 @@ struct fw_priv {
- 	void *data;
- 	size_t size;
- 	size_t allocated_size;
-+	u32 opt_flags;
- #ifdef CONFIG_FW_LOADER_PAGED_BUF
- 	bool is_paged_buf;
- 	struct page **pages;
-@@ -136,7 +137,7 @@ static inline void fw_state_done(struct fw_priv *fw_priv)
- 	__fw_state_set(fw_priv, FW_STATUS_DONE);
- }
+-	rc = security_kernel_load_data(LOADING_FIRMWARE, false);
++	rc = security_kernel_load_data(LOADING_FIRMWARE, true);
+ 	if (rc)
+ 		return rc;
  
--int assign_fw(struct firmware *fw, struct device *device, u32 opt_flags);
-+int assign_fw(struct firmware *fw, struct device *device);
+@@ -27,6 +27,12 @@ int firmware_fallback_platform(struct fw_priv *fw_priv, u32 opt_flags)
  
- #ifdef CONFIG_FW_LOADER_PAGED_BUF
- void fw_free_paged_buf(struct fw_priv *fw_priv);
-diff --git a/drivers/base/firmware_loader/main.c b/drivers/base/firmware_loader/main.c
-index 79f86466d472..78c8e44c08cb 100644
---- a/drivers/base/firmware_loader/main.c
-+++ b/drivers/base/firmware_loader/main.c
-@@ -168,7 +168,9 @@ static int fw_cache_piggyback_on_request(const char *name);
+ 	if (fw_priv->data && size > fw_priv->allocated_size)
+ 		return -ENOMEM;
++
++	rc = security_kernel_post_load_data((u8 *)data, size, LOADING_FIRMWARE,
++						"platform");
++	if (rc)
++		return rc;
++
+ 	if (!fw_priv->data)
+ 		fw_priv->data = vmalloc(size);
+ 	if (!fw_priv->data)
+diff --git a/security/integrity/ima/ima_main.c b/security/integrity/ima/ima_main.c
+index 9dd9c5f4d736..6f2b8352573a 100644
+--- a/security/integrity/ima/ima_main.c
++++ b/security/integrity/ima/ima_main.c
+@@ -648,15 +648,6 @@ int ima_post_read_file(struct file *file, void *buf, loff_t size,
+ 	enum ima_hooks func;
+ 	u32 secid;
  
- static struct fw_priv *__allocate_fw_priv(const char *fw_name,
- 					  struct firmware_cache *fwc,
--					  void *dbuf, size_t size)
-+					  void *dbuf,
-+					  size_t size,
-+					  u32 opt_flags)
- {
- 	struct fw_priv *fw_priv;
- 
-@@ -186,6 +188,7 @@ static struct fw_priv *__allocate_fw_priv(const char *fw_name,
- 	fw_priv->fwc = fwc;
- 	fw_priv->data = dbuf;
- 	fw_priv->allocated_size = size;
-+	fw_priv->opt_flags = opt_flags;
- 	fw_state_init(fw_priv);
- #ifdef CONFIG_FW_LOADER_USER_HELPER
- 	INIT_LIST_HEAD(&fw_priv->pending_list);
-@@ -210,8 +213,10 @@ static struct fw_priv *__lookup_fw_priv(const char *fw_name)
- /* Returns 1 for batching firmware requests with the same name */
- static int alloc_lookup_fw_priv(const char *fw_name,
- 				struct firmware_cache *fwc,
--				struct fw_priv **fw_priv, void *dbuf,
--				size_t size, u32 opt_flags)
-+				struct fw_priv **fw_priv,
-+				void *dbuf,
-+				size_t size,
-+				u32 opt_flags)
- {
- 	struct fw_priv *tmp;
- 
-@@ -227,7 +232,7 @@ static int alloc_lookup_fw_priv(const char *fw_name,
+-	if (!file && read_id == READING_FIRMWARE) {
+-		if ((ima_appraise & IMA_APPRAISE_FIRMWARE) &&
+-		    (ima_appraise & IMA_APPRAISE_ENFORCE)) {
+-			pr_err("Prevent firmware loading_store.\n");
+-			return -EACCES;	/* INTEGRITY_UNKNOWN */
+-		}
+-		return 0;
+-	}
+-
+ 	/* permit signed certs */
+ 	if (!file && read_id == READING_X509_CERTIFICATE)
+ 		return 0;
+@@ -706,7 +697,7 @@ int ima_load_data(enum kernel_load_data_id id, bool contents)
  		}
- 	}
- 
--	tmp = __allocate_fw_priv(fw_name, fwc, dbuf, size);
-+	tmp = __allocate_fw_priv(fw_name, fwc, dbuf, size, opt_flags);
- 	if (tmp) {
- 		INIT_LIST_HEAD(&tmp->list);
- 		if (!(opt_flags & FW_OPT_NOCACHE))
-@@ -640,7 +645,7 @@ static int fw_add_devm_name(struct device *dev, const char *name)
- }
- #endif
- 
--int assign_fw(struct firmware *fw, struct device *device, u32 opt_flags)
-+int assign_fw(struct firmware *fw, struct device *device)
+ 		break;
+ 	case LOADING_FIRMWARE:
+-		if (ima_enforce && (ima_appraise & IMA_APPRAISE_FIRMWARE)) {
++		if (ima_enforce && (ima_appraise & IMA_APPRAISE_FIRMWARE) && !contents) {
+ 			pr_err("Prevent firmware sysfs fallback loading.\n");
+ 			return -EACCES;	/* INTEGRITY_UNKNOWN */
+ 		}
+@@ -742,6 +733,15 @@ int ima_post_load_data(char *buf, loff_t size,
+ 		       enum kernel_load_data_id load_id,
+ 		       char *description)
  {
- 	struct fw_priv *fw_priv = fw->priv;
- 	int ret;
-@@ -659,8 +664,8 @@ int assign_fw(struct firmware *fw, struct device *device, u32 opt_flags)
- 	 * should be fixed in devres or driver core.
- 	 */
- 	/* don't cache firmware handled without uevent */
--	if (device && (opt_flags & FW_OPT_UEVENT) &&
--	    !(opt_flags & FW_OPT_NOCACHE)) {
-+	if (device && (fw_priv->opt_flags & FW_OPT_UEVENT) &&
-+	    !(fw_priv->opt_flags & FW_OPT_NOCACHE)) {
- 		ret = fw_add_devm_name(device, fw_priv->fw_name);
- 		if (ret) {
- 			mutex_unlock(&fw_lock);
-@@ -672,7 +677,7 @@ int assign_fw(struct firmware *fw, struct device *device, u32 opt_flags)
- 	 * After caching firmware image is started, let it piggyback
- 	 * on request firmware.
- 	 */
--	if (!(opt_flags & FW_OPT_NOCACHE) &&
-+	if (!(fw_priv->opt_flags & FW_OPT_NOCACHE) &&
- 	    fw_priv->fwc->state == FW_LOADER_START_CACHE) {
- 		if (fw_cache_piggyback_on_request(fw_priv->fw_name))
- 			kref_get(&fw_priv->ref);
-@@ -783,7 +788,7 @@ _request_firmware(const struct firmware **firmware_p, const char *name,
- #endif
++	if (load_id == LOADING_FIRMWARE) {
++		if ((ima_appraise & IMA_APPRAISE_FIRMWARE) &&
++		    (ima_appraise & IMA_APPRAISE_ENFORCE)) {
++			pr_err("Prevent firmware loading_store.\n");
++			return -EACCES; /* INTEGRITY_UNKNOWN */
++		}
++		return 0;
++	}
++
+ 	return 0;
+ }
  
- 	if (ret == -ENOENT)
--		ret = firmware_fallback_platform(fw->priv, opt_flags);
-+		ret = firmware_fallback_platform(fw->priv);
- 
- 	if (ret) {
- 		if (!(opt_flags & FW_OPT_NO_WARN))
-@@ -792,7 +797,7 @@ _request_firmware(const struct firmware **firmware_p, const char *name,
- 				 name, ret);
- 		ret = firmware_fallback_sysfs(fw, name, device, opt_flags, ret);
- 	} else
--		ret = assign_fw(fw, device, opt_flags);
-+		ret = assign_fw(fw, device);
- 
-  out:
- 	if (ret < 0) {
 -- 
 2.25.1
 
