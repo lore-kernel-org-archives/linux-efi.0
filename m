@@ -2,168 +2,171 @@ Return-Path: <SRS0=N8QU=DK=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 584DCC4727E
-	for <linux-efi@archiver.kernel.org>; Sat,  3 Oct 2020 06:38:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0A5DAC4363D
+	for <linux-efi@archiver.kernel.org>; Sat,  3 Oct 2020 07:34:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 21C5C206A5
-	for <linux-efi@archiver.kernel.org>; Sat,  3 Oct 2020 06:38:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B1980206CA
+	for <linux-efi@archiver.kernel.org>; Sat,  3 Oct 2020 07:34:39 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=gmx.net header.i=@gmx.net header.b="MR2S4uqJ"
+	dkim=pass (1024-bit key) header.d=atishpatra.org header.i=@atishpatra.org header.b="TSSOyFW/"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725781AbgJCGiO (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 3 Oct 2020 02:38:14 -0400
-Received: from mout.gmx.net ([212.227.17.20]:47939 "EHLO mout.gmx.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725681AbgJCGiO (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Sat, 3 Oct 2020 02:38:14 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
-        s=badeba3b8450; t=1601707074;
-        bh=md0r0m36JBviEhAlMywLuogQp9PqQBA26y2UxZb0WKw=;
-        h=X-UI-Sender-Class:From:To:Cc:Subject:Date:In-Reply-To:References;
-        b=MR2S4uqJT6zeEuMKunqAU8seXGD3k5im+o8JRx+AyzgzgMsGEcD8Koam5EqTpkEGi
-         DKl47rQfF9z5WXK53+nFUAmNArPXCRTUC2t3//VRvzA8D8LcCTelrot4I4Ffhurubz
-         HJYsllbeYRAS9/3sJ1z43gqo076pqTEp8G1Md0fE=
-X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
-Received: from LT02.fritz.box ([178.202.41.107]) by mail.gmx.com (mrgmx105
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1MulmF-1khESP2Q1j-00roqy; Sat, 03
- Oct 2020 08:37:54 +0200
-From:   Heinrich Schuchardt <xypron.glpk@gmx.de>
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     Jonathan Corbet <corbet@lwn.net>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>, linux-efi@vger.kernel.org,
-        linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-riscv@lists.infradead.org,
-        Atish Patra <atishp@atishpatra.org>,
-        Heinrich Schuchardt <xypron.glpk@gmx.de>
-Subject: [PATCH v2 1/2] docs: admin-guide: fdt and initrd load in EFI stub
-Date:   Sat,  3 Oct 2020 08:37:24 +0200
-Message-Id: <20201003063725.8698-2-xypron.glpk@gmx.de>
-X-Mailer: git-send-email 2.28.0
-In-Reply-To: <20201003063725.8698-1-xypron.glpk@gmx.de>
-References: <20201003063725.8698-1-xypron.glpk@gmx.de>
+        id S1725764AbgJCHej (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 3 Oct 2020 03:34:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43056 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725648AbgJCHei (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 3 Oct 2020 03:34:38 -0400
+Received: from mail-io1-xd42.google.com (mail-io1-xd42.google.com [IPv6:2607:f8b0:4864:20::d42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BFC90C0613E8
+        for <linux-efi@vger.kernel.org>; Sat,  3 Oct 2020 00:34:38 -0700 (PDT)
+Received: by mail-io1-xd42.google.com with SMTP id u19so3972393ion.3
+        for <linux-efi@vger.kernel.org>; Sat, 03 Oct 2020 00:34:38 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=atishpatra.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=A/hFuD0pWxvAf/6HKfG9LqHPnlCk2KB4TQo/QrnDyUw=;
+        b=TSSOyFW/OsE891vjDb7uTsAgAOjucA7X2yx49uUci+QgjTnsFLeKrFPpq0ohIxle46
+         oyrDjA0jZtSrhkp4pFV5Wcio2uO/B/9+FhfechaHG/ooSQfldB6CV29GjZE0QtaX4rwy
+         u6ogpq2v9R3nGD1Wqzy4jiuRkAvvRUlMAsuhc=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=A/hFuD0pWxvAf/6HKfG9LqHPnlCk2KB4TQo/QrnDyUw=;
+        b=Mej1+8QgmegoP9u+nESF3JJ4g4XsZlr0NkBoSTf1hCWvwYlkgNW0izq+ET3Q3EvPki
+         NELdyYES53fK03pws0AOSy/Ewhk7XR3QkYtsHaCGAA7hrGivcPM1BSSEwVVBrbMhSqRD
+         YteNc/P9e1bcvjW4tyyp6bgbUjSrz/k4+YDNhetCb6TOdmwAaK11OazYyqrChguzp4kt
+         GAB05gv2kTKWl6Uen8wkioVB0iySyvJCvHZHr8t2s0vgPrnrGlj5FvZEvCxao5SBMrPN
+         aPhVmVQNpf7vQFFMpghzR4e1CBpm79ZVt2+k/mhRKDknY+nIEROY6VBcxFyRQL2Iwqhc
+         Gq4Q==
+X-Gm-Message-State: AOAM5314kUGZ7y5l1T9CC0vxelVSO07nQ1LrgQJl58Hg8lXpMoDn0jey
+        w9Sktw3oIBnfxRlJKYOib/Q2padDNGq+el3kGJil
+X-Google-Smtp-Source: ABdhPJzU47BomkLH2sgLaq0NqpKKKH1s8t8ZcNa8isBsZIYcpKdYr02MEDk1Z/exFcavbhjUVNek9sg3AM9Q6uxaIdA=
+X-Received: by 2002:a05:6638:2b3:: with SMTP id d19mr5543487jaq.141.1601710477948;
+ Sat, 03 Oct 2020 00:34:37 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:GPrLsj9lxvHLBZU79XBKoGh3Tqybvf/pk+6ebZSYKfl9LsWZe9M
- BCkoXUBoP42pRKZvaX+A+f7GpZGLX8NUkJ00fdbt2e/rt22sk+FwjNk9mtxZSRZFSn5F4rw
- 8+ff7EHNinTQyOmdS5699oVnFYj+nzycp57KzC3APNGuh9q5SlCZlj5EKYdAE3W/4+AFaAZ
- VTNluNFlCUWY/fn2r0nNw==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:LQMjD0Ttnxc=:yjwDY+VJpjraaTbaIxLNtR
- UhWnTe+z00u8DzzGXQQsnF4y56JE6nS6AHEu5UXA0KG/dj2lEhhYzKP+Dw236eAMiT8gdU5aM
- IRhTjAz1HXwbOgL/Sc341q6i8M8nX9ctxs/eDdgU6np6kxjx8NqzQw5OaOEf6aCSI32mHa3C0
- 0lBj3r7iE5HO06W4ptJlCknGUA/bLpo7ceA+zFT2tSpLPI8NKKZ+S8c/BwH35/4g6vhj5+ZIo
- 7iFsNLg9a4nTFEojiXoUvcyrQ8nQScHF43GTN7fQcxc1VY65hC3Tvmn3kZKHA+AxlOG7Byb9S
- aU2otWbLiV/fL5aVsqEUbJD5Z1wZTlg6DfNAltfdbJUl0IAGTklrrek/jz+ryUHFk0Vor6kJh
- rKnHDOnw7bK41vQ63FtL7F6z5dFYDxK+5lGNRwqHfSXA+iCYXJaUK2upbQZ1c9lmYSnJIuWIa
- Hf0eR0cb3DSx154wHWndA9GVcPi2GosvYxAFxlNxsg0VVpsrDchK4fDi5qc7LdaK4zIt9IG6q
- TRQjtM6/qXxTXLsn3gC7Sk75Inq61EiqNtz/bZNQt/77dqKCcz0KsNQ2cO56VnNSPtvu2spE+
- V87zC9tE4VrPjzk0Wff1fFbMCb0kZ1dGLdzmBk76VnTFw//5ec63sH+sx/5l2PXtAQvz3m6S3
- LLiguBkWxlpX7pWvBcdkhEcplkbey2DSeuUal7s9uus99tU6cB6oHNNzIEZLsp3fqBevc+2tD
- GM0qk1c/EowmDEHGvk9XgHROXokWkMAW06pu5EpSVw1UzFP9kEWCo6zRl1sDfPj/MzlyT2n0V
- b2dCDRN96m9eWqTHGA51uhlX8BAqYd1gGWyr87IIUiceE+yW1Uj9+k7SkZ0rCjSZ2X2qQqT2U
- sHHUQrPHob3m0OmdpaZWkpDhRKVBU5dLrhnglFz8WxfbC/bh71kCiQ6sAY3dreVs8I9c3jMn3
- LLdYXsaTRTlHNazd6aaD8ugUnbVFXjqQ66Q1liVC2X4dzX9ptmDqh0RCPOcQPGfDE/st22aEt
- b0GN+5vJw0YBAfRoqqKxwwQmY9nE8jXqTjvm7zH9Bs2UB6TWAiDjwCxe6+FmwhHU4OW0wfnVl
- mj9MLhGvHeCKbndMntW6Vt59HWgVNkSnavEiiglQMjhkiNMqFZKJ9aojAmobgCzoVNYvMtJnc
- ofkekeyvD+sujIRySDwewAiapDtnirTEGN5UOELsCaA7GSNwTAbDiEirwLS77Jjbwe4Qb2yVm
- cUV0sj1rMxiFjnkuJVBHBc1z6HxD1CRxaIIkAhQ==
+References: <20201003063725.8698-1-xypron.glpk@gmx.de> <20201003063725.8698-2-xypron.glpk@gmx.de>
+In-Reply-To: <20201003063725.8698-2-xypron.glpk@gmx.de>
+From:   Atish Patra <atishp@atishpatra.org>
+Date:   Sat, 3 Oct 2020 00:34:27 -0700
+Message-ID: <CAOnJCU+kit2dHihTad9UPYUmN0+EAdVN9m97ibs=Jnu44Qe_LQ@mail.gmail.com>
+Subject: Re: [PATCH v2 1/2] docs: admin-guide: fdt and initrd load in EFI stub
+To:     Heinrich Schuchardt <xypron.glpk@gmx.de>,
+        Ard Biesheuvel <ardb@kernel.org>
+Cc:     linux-efi <linux-efi@vger.kernel.org>,
+        Linux Doc Mailing List <linux-doc@vger.kernel.org>,
+        Jonathan Corbet <corbet@lwn.net>,
+        "linux-kernel@vger.kernel.org List" <linux-kernel@vger.kernel.org>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        linux-riscv <linux-riscv@lists.infradead.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Describe how a device tree and an initial RAM disk can be passed to the EF=
-I
-Boot Stub.
+On Fri, Oct 2, 2020 at 11:38 PM Heinrich Schuchardt <xypron.glpk@gmx.de> wrote:
+>
+> Describe how a device tree and an initial RAM disk can be passed to the EFI
+> Boot Stub.
+>
+> Signed-off-by: Heinrich Schuchardt <xypron.glpk@gmx.de>
+> ---
+> v2:
+>         mention EFI_GENERIC_STUB_INITRD_CMDLINE_LOADER (thx Atish)
+> ---
+>  Documentation/admin-guide/efi-stub.rst | 35 ++++++++++++++++++++++++++
+>  1 file changed, 35 insertions(+)
+>
+> diff --git a/Documentation/admin-guide/efi-stub.rst b/Documentation/admin-guide/efi-stub.rst
+> index 833edb0d0bc4..4965dec48af4 100644
+> --- a/Documentation/admin-guide/efi-stub.rst
+> +++ b/Documentation/admin-guide/efi-stub.rst
+> @@ -38,6 +38,34 @@ arch/arm/boot/zImage should be copied to the system partition, and it
+>  may not need to be renamed. Similarly for arm64, arch/arm64/boot/Image
+>  should be copied but not necessarily renamed.
+>
+> +Passing an initial RAM disk to the EFI Boot Stub
+> +------------------------------------------------
+> +
+> +The following means sorted by decreasing priority can be used to provide an
+> +initial RAM disk to the EFI Boot Stub:
+> +
+> +* The firmware may provide a UEFI Load File 2 Protocol. The stub will try to
+> +  load the RAM disk by calling the LoadFile() service of the protocol using
+> +  a vendor device path with the vendor GUID
+> +  5568e427-0x68fc-4f3d-ac74-ca555231cc68.
+> +* Next the EFI stub will try to load the file indicated by the "initrd=" command
+> +  line parameter if CONFIG_EFI_GENERIC_STUB_INITRD_CMDLINE_LOADER is enabled.
+> +* The prior boot stage may pass the location of the initial RAM disk via the
+> +  "linux,initrd-start" and "linux,initrd-end" properties of the "/chosen" node
+> +  of the device-tree.
+> +
 
-Signed-off-by: Heinrich Schuchardt <xypron.glpk@gmx.de>
-=2D--
-v2:
-	mention EFI_GENERIC_STUB_INITRD_CMDLINE_LOADER (thx Atish)
-=2D--
- Documentation/admin-guide/efi-stub.rst | 35 ++++++++++++++++++++++++++
- 1 file changed, 35 insertions(+)
+Should we also specify which method is enabled by default for which
+ARCH and recommended methods?
 
-diff --git a/Documentation/admin-guide/efi-stub.rst b/Documentation/admin-=
-guide/efi-stub.rst
-index 833edb0d0bc4..4965dec48af4 100644
-=2D-- a/Documentation/admin-guide/efi-stub.rst
-+++ b/Documentation/admin-guide/efi-stub.rst
-@@ -38,6 +38,34 @@ arch/arm/boot/zImage should be copied to the system par=
-tition, and it
- may not need to be renamed. Similarly for arm64, arch/arm64/boot/Image
- should be copied but not necessarily renamed.
+For example, It's recommended to use the LoadFile method for RISC-V
+and new ARM systems.
+Existing ARM ones will continue to use the initrd argument as that's
+the method enabled by default.
 
-+Passing an initial RAM disk to the EFI Boot Stub
-+------------------------------------------------
-+
-+The following means sorted by decreasing priority can be used to provide =
-an
-+initial RAM disk to the EFI Boot Stub:
-+
-+* The firmware may provide a UEFI Load File 2 Protocol. The stub will try=
- to
-+  load the RAM disk by calling the LoadFile() service of the protocol usi=
-ng
-+  a vendor device path with the vendor GUID
-+  5568e427-0x68fc-4f3d-ac74-ca555231cc68.
-+* Next the EFI stub will try to load the file indicated by the "initrd=3D=
-" command
-+  line parameter if CONFIG_EFI_GENERIC_STUB_INITRD_CMDLINE_LOADER is enab=
-led.
-+* The prior boot stage may pass the location of the initial RAM disk via =
-the
-+  "linux,initrd-start" and "linux,initrd-end" properties of the "/chosen"=
- node
-+  of the device-tree.
-+
-+The first two items are inhibited by the "noinitrd" command line paramete=
-r.
-+
-+Passing a device-tree to the EFI Boot Stub
-+------------------------------------------
-+
-+A device-tree can be passed to the EFI Boot Stub in decreasing priority u=
-sing
-+
-+* command line option dtb=3D
-+* a UEFI configuration table with GUID b1b621d5-f19c-41a5-830b-d9152c69aa=
-e0.
-+
-+The command line option is only available if CONFIG_EFI_ARMSTUB_DTB_LOADE=
-R=3Dy
-+and secure boot is disabled.
+> +The first two items are inhibited by the "noinitrd" command line parameter.
+> +
+> +Passing a device-tree to the EFI Boot Stub
+> +------------------------------------------
+> +
+> +A device-tree can be passed to the EFI Boot Stub in decreasing priority using
+> +
+> +* command line option dtb=
+> +* a UEFI configuration table with GUID b1b621d5-f19c-41a5-830b-d9152c69aae0.
+> +
 
- Passing kernel parameters from the EFI shell
- --------------------------------------------
-@@ -46,6 +74,10 @@ Arguments to the kernel can be passed after bzImage.efi=
-, e.g.::
+I am just curious. Is there any specific reason why efistub tries to
+load the dtb from the command line first
+and loads from the config table only if it fails from the first approach ?
 
- 	fs0:> bzImage.efi console=3DttyS0 root=3D/dev/sda4
+> +The command line option is only available if CONFIG_EFI_ARMSTUB_DTB_LOADER=y
+> +and secure boot is disabled.
+>
+>  Passing kernel parameters from the EFI shell
+>  --------------------------------------------
+> @@ -46,6 +74,10 @@ Arguments to the kernel can be passed after bzImage.efi, e.g.::
+>
+>         fs0:> bzImage.efi console=ttyS0 root=/dev/sda4
+>
+> +The "noinitrd" option
+> +---------------------
+> +
+> +The "noinitrd" option stops the EFI stub from loading an initial RAM disk.
+>
+>  The "initrd=" option
+>  --------------------
+> @@ -98,3 +130,6 @@ CONFIGURATION TABLE.
+>
+>  "dtb=" is processed in the same manner as the "initrd=" option that is
+>  described above.
+> +
+> +This option is only available if CONFIG_EFI_ARMSTUB_DTB_LOADER=y and secure
+> +boot is disabled.
+> --
+> 2.28.0
+>
+>
+> _______________________________________________
+> linux-riscv mailing list
+> linux-riscv@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-riscv
 
-+The "noinitrd" option
-+---------------------
-+
-+The "noinitrd" option stops the EFI stub from loading an initial RAM disk=
-.
 
- The "initrd=3D" option
- --------------------
-@@ -98,3 +130,6 @@ CONFIGURATION TABLE.
 
- "dtb=3D" is processed in the same manner as the "initrd=3D" option that i=
-s
- described above.
-+
-+This option is only available if CONFIG_EFI_ARMSTUB_DTB_LOADER=3Dy and se=
-cure
-+boot is disabled.
-=2D-
-2.28.0
-
+-- 
+Regards,
+Atish
