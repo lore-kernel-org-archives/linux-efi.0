@@ -2,37 +2,36 @@ Return-Path: <SRS0=N8QU=DK=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-6.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3A572C4363D
-	for <linux-efi@archiver.kernel.org>; Sat,  3 Oct 2020 06:38:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6CDC8C41604
+	for <linux-efi@archiver.kernel.org>; Sat,  3 Oct 2020 06:38:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DF09F206A5
-	for <linux-efi@archiver.kernel.org>; Sat,  3 Oct 2020 06:38:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 329E1221E5
+	for <linux-efi@archiver.kernel.org>; Sat,  3 Oct 2020 06:38:22 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=gmx.net header.i=@gmx.net header.b="g55jZzqA"
+	dkim=pass (1024-bit key) header.d=gmx.net header.i=@gmx.net header.b="Wl6L2h2L"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725766AbgJCGiO (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        id S1725775AbgJCGiO (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
         Sat, 3 Oct 2020 02:38:14 -0400
-Received: from mout.gmx.net ([212.227.17.21]:41065 "EHLO mout.gmx.net"
+Received: from mout.gmx.net ([212.227.17.20]:43077 "EHLO mout.gmx.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725446AbgJCGiO (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        id S1725648AbgJCGiO (ORCPT <rfc822;linux-efi@vger.kernel.org>);
         Sat, 3 Oct 2020 02:38:14 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
-        s=badeba3b8450; t=1601707075;
-        bh=XRD1G/FKH5P14Qoexkz4KABtNAoyURyyM07p9s6A2yA=;
-        h=X-UI-Sender-Class:From:To:Cc:Subject:Date:In-Reply-To:References;
-        b=g55jZzqAXpsVo9RbgbGMro15/KEK4AFcMWrdbwImz473pZtOmJaiJwbz//1jX4CW9
-         Qij0VWSkZKiofX6EHL6No0kxRzRb+qu94tofYJs0DxbjcYBEA9LyNd8pIuFiNfEl6V
-         Stzs5swGlR/ESB2/krromLiah2I3ihqbn0ADvd4s=
+        s=badeba3b8450; t=1601707074;
+        bh=ZegSKPFynorzf2pHNijeVk4xWnZ06qcsVKppYuZJeIE=;
+        h=X-UI-Sender-Class:From:To:Cc:Subject:Date;
+        b=Wl6L2h2LSUeIekSLAHG8p3k9MeKhItnHe76V4UmNHlC10PN4m15X08SlX+l5rG65i
+         miCaimq6eeYfRnj7PvYDmRFrNbNPXxPn+kXFgnoxSI7Kcwdz3VbVmJD499sruJ1BKP
+         OVAQX/ZF9b0K0Q2MF4kCLzHswb9m+wQtBsPHzuYA=
 X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
 Received: from LT02.fritz.box ([178.202.41.107]) by mail.gmx.com (mrgmx105
- [212.227.17.174]) with ESMTPSA (Nemesis) id 1MvbG2-1ki3Gu4AmU-00seKf; Sat, 03
- Oct 2020 08:37:55 +0200
+ [212.227.17.174]) with ESMTPSA (Nemesis) id 1MEFvp-1kHCnX0PBN-00AH4c; Sat, 03
+ Oct 2020 08:37:54 +0200
 From:   Heinrich Schuchardt <xypron.glpk@gmx.de>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     Jonathan Corbet <corbet@lwn.net>,
@@ -43,75 +42,54 @@ Cc:     Jonathan Corbet <corbet@lwn.net>,
         linux-riscv@lists.infradead.org,
         Atish Patra <atishp@atishpatra.org>,
         Heinrich Schuchardt <xypron.glpk@gmx.de>
-Subject: [PATCH v2 2/2] docs: admin-guide: EFI stub to main Linux handoff
-Date:   Sat,  3 Oct 2020 08:37:25 +0200
-Message-Id: <20201003063725.8698-3-xypron.glpk@gmx.de>
+Subject: [PATCH v2 0/2] docs: admin-guide: EFI Boot Stub
+Date:   Sat,  3 Oct 2020 08:37:23 +0200
+Message-Id: <20201003063725.8698-1-xypron.glpk@gmx.de>
 X-Mailer: git-send-email 2.28.0
-In-Reply-To: <20201003063725.8698-1-xypron.glpk@gmx.de>
-References: <20201003063725.8698-1-xypron.glpk@gmx.de>
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:i+31IZulvm+Hkm7Jgc9slA5QQmVL8UwmQXplGyx3R1TkJGbBspR
- XPqhfjvk+xyIKZzg6xGtnym6LYGj2X/c3mml0ZtXvQELo7AglFu2XZuDPIWWAitvE8yDNgw
- 84P5xxAjcRL80fFpZUmqUIxVt9IYKZSBnVteu54lr298LBb2oa7er5OvcTaVUgSnPMADJGo
- MA9ILHeYiCfEo47WlVY5g==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:yRmdQYnLlKc=:Bgo/dGOvyZPkoTfpEazkt9
- Mq8GzYXyQz+Oy0m3rCNm0b5Z8Yx9ctatfa8KzVu1YxGvr/7lLGg88dxNX7ksWz/SOHvZ4o6xw
- Cqbf715H1RvmSXr/O5IWQV0PpQEfe5Y111J085ZTRVqZBKqQghpXxyNe0cnr6VKunrePa0ZJY
- 3hgb+oZl4joxQnHP1xBXhjuQi1AbNqZg130i9dDLz/eu4IiPxvdr6wvgqywEP1ZQMg9DB081P
- Ici7eRvEX/MrAnbYUqKu7/bycqRs4WTGZ+xueMmd2TJDJFLOKYLog/p8Dqy9Z8hGyTVIhnnyW
- PylafJUW3WcjSIrVb97waWsUdlZxjz7NDxvThFLhsqUT+Pvd54onHnwCmMpuLupgahC2JPN/o
- lLp8Yju2LqoeoRPjpNCVzZyiDFjTwe41+i2hE4QMmVt/7plCq407JxIqdS7RR4c5GaAN4D1JJ
- zrTQtTjj01+62+WHDF9wXjMjnVw15yaLemD/7X+jvCNg6mm46/CYQz8KRZS+Mv88nFXTqRALF
- 9JlT9vW51bn9Nvj8L2HMdTv3CFv4y+9VYA8OcDhWwIwIcueks3dibaMRituDGzvwhriSXDgJw
- fqhQsYEeXHfTcImiz0+V99+3yePKcIPSj6YDH0iYOEcdNGfhBgiOTirG1QKl1yzXyoc6LC51l
- zF2ppOiS65pd0/Z9HTrtEs+DWdUe5labAI0T86H3/gQkcs6B6DIZBPfC8F1cIsqEsfRoKn+gg
- ooPXVx0s/vY8XHBMDFVydea77mvPCicDCb5eZzXi3VP5fqOmObJBeJ5tg3TLYhZyrQZgwbb/l
- 3q6FcKRAV9PIp4Ammt2N8UQqI+5XqGrVSZZb904c17/6AwiAbhv0Ql7nKjOQ+aM5OBwAnf0Cg
- EHO84YCGdx1ccKy3EHnvtfLwpHxxBEiR2veTQgz+KOxjj2adkUvxkcFuUiwQ+C3APUhMCx1R2
- +r0YIjMTEQ8fdGXi7DRr2U5dKzj42MuvuAUBryBx0VolVg88+uFYPQsCMBVdLWpn1OKHNhUOr
- iQjYnMEIYv6DYGn6uaZUpKb/LwpcHvIHxW4cI/AKK8wfKASPts3ytwC5PRirceBStfhYPriYz
- sjbjt86kxYQePZGEIbHU97ghXOhwNtUl/JgIBL4VLwzD4cn1P2MILACsW6k4gX2MFa/m4TIyQ
- RqKtzI5HN9D9NIOLnYwodw09fBMmv0VPrne6BDi0DK6H8AQRxUFmTgx+qEJq8OrxFi+8CnTzR
- bdm3EpoI15W6Up1/dCwYXGh/BIDeNLYwYfe0cnw==
+X-Provags-ID: V03:K1:i4NyI44BPR448lQJvY48cLHhTdO9OzbONsVoYMawOm9/qhQtVBH
+ 6MhreeG89mbVB04RQZCyr3fqiJBsGRb2GRm7c+GLvzhsbXR/BSsPnPynLHd2b05rPT7LUFh
+ h9WnbHIh3Orbg1isYlZZkq+3HNPN4h8nNfJlAMRxmiUfRSDAHgFEfZ6VQBIF1eQWtnVyZMy
+ wAxsSPWHOs1v6/dROulxA==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:DCCHzUNE040=:EwOaPHUt5//Ko9uVYJMY5Y
+ BiF0pXYPl6rWjTtXbZKCJLJQjzA20RgSCY9Uyj6ZQPbbDcOwVWflZDYrSSOr13+q4ZjAV8lM7
+ CCBKDniVB8yoRUU2CDfBbHQdHkEWt16km8hM7aCsvN45JG5hLe9xtSXB9L36BE2gHnD2/rnYH
+ 5kc6kl/9DGbBNBWoqSYhrG64PKBPl9m53o/gfMsejCulEHxKf5IeyN64Z1CfD17gJnxRFRFoZ
+ 4fJHAa7heVx0rDAuZtPJmft3P3EyTHSmJ/+knXjzZaqn7yRAprF0V+TZ/kVrblyv7sLPMBYSU
+ n5i7sPtyRBooCM8qyjOWdqq23UitNoKbmEKFS6tiNhRI1YnlltN2zKO+IDxM3mDHgrl2hcCUO
+ /fHMbskIN3uX2CB82TQDhTb7Ys2frh5Tvxd/t9syzKt81t/cNlMp9jwaTFbNXfdPUKiICrd73
+ tuRBsspZm1FepTJVWB7rgjtqCWiEdKRUaMdtTzZznt7hmIKXYS2OcP4afr3+gwpqykzNU1Bm4
+ 7vWWKyq7nY/lLdQzDB/9/oAtE1ytXrtj3NGsCMX/UTz8m1CLAgR0MJ2nsL4JFedfCZ0eEctLK
+ WdOgTV+dQBTlottRD47UQvOq4Ztx0FN4fcOtGaWzu/Q2S8xALCRbNeL485nGklJ7YcrPnm419
+ ne5Hdm/c7OeONHzpoQykVkysC3Vk9fKTeIguiI7zbGz1kZrX0BATinwSLnff/h+ujve3hKqTs
+ sB92TWRb7+JjcyHoV7lQYZhU8HdMWWyazQEY0Nygl7LX4MAQnobP+1W3ZO1JcNV5Nm6GVIjEx
+ tdvZusMCrZM3Ix9rotHpDnRRhvfNUeDbTOQWIuhwujUpxS9yv1qUAB3m60eRZ3Tqhl+vpqIrw
+ /gijbkcyfh228iLC1qWpsMNEpZdYjuUUCwiZoTpenoTb3dgApDyg5m2zjEe+PwvwTRRyZVE36
+ woys6UBhjkqI29k1qR+K0pKjsWYQnfcdl4nC9Qhwuhp5TVznRE6PO3U4IhetpAQ2CjME4aNno
+ W/83kbeU1VvW/kfKrOBDNjBrnmi2+RgiOoujbTyJv5EjTTJBpcaPHc9VP6r1YKRnE+zR/i3MT
+ QlOVeOqBrSAufl/kqw8T8XFfOwsCWBGnF8RWlhpMQwee/xA/9c65MdVtFgBJA+rcvofYjNzve
+ Soua73JBU5bqZ6oeCNlPq3SrXTyrf9NRURHgBq+v03nnrvbAG8uAQFcoSwFKu0kGy3zjGPfIj
+ 4N9bcNDDAj9WWrTyood2hGeAbqr407l2l5Wv8/g==
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Describe the handoff from the EFI stub to the main Linux kernel.
+Describe the passing of the device tree and the initial RAM disk to the
+EFI Boot Stub.
 
-Signed-off-by: Heinrich Schuchardt <xypron.glpk@gmx.de>
-=2D--
-v2:
-	new patch
-=2D--
- Documentation/admin-guide/efi-stub.rst | 12 ++++++++++++
- 1 file changed, 12 insertions(+)
+Describe the handoff to the main Linux kernel. The links given here
+provide the necessary information about structures like boot_params that
+have to be filled by the EFI stub. So we don't have to describe them in
+the admin-guide.
 
-diff --git a/Documentation/admin-guide/efi-stub.rst b/Documentation/admin-=
-guide/efi-stub.rst
-index 4965dec48af4..669602ff4515 100644
-=2D-- a/Documentation/admin-guide/efi-stub.rst
-+++ b/Documentation/admin-guide/efi-stub.rst
-@@ -133,3 +133,15 @@ described above.
+Heinrich Schuchardt (2):
+  docs: admin-guide: fdt and initrd load in EFI stub
+  docs: admin-guide: EFI stub to main Linux handoff
 
- This option is only available if CONFIG_EFI_ARMSTUB_DTB_LOADER=3Dy and se=
-cure
- boot is disabled.
-+
-+Handoff to main Linux kernel
-+----------------------------
-+
-+Currently the EFI stub enters the main Linux kernel via the same entry po=
-ints
-+that are used when booting without UEFI. This might change in future vers=
-ions.
-+For a description of these entry points see:
-+
-+* for arm :doc:`/arm/booting`
-+* for arm64 :doc:`/arm64/booting`
-+* for riscv :doc:`/riscv/index`
-+* for x86 :doc:`/x86/boot`
+ Documentation/admin-guide/efi-stub.rst | 47 ++++++++++++++++++++++++++
+ 1 file changed, 47 insertions(+)
+
 =2D-
 2.28.0
 
