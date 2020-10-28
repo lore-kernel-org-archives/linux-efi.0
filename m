@@ -2,111 +2,84 @@ Return-Path: <SRS0=/zUi=ED=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.4 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,
-	USER_IN_DEF_DKIM_WL autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BE8F5C56201
-	for <linux-efi@archiver.kernel.org>; Wed, 28 Oct 2020 22:27:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 75056C388F7
+	for <linux-efi@archiver.kernel.org>; Wed, 28 Oct 2020 23:52:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 68C07206F4
-	for <linux-efi@archiver.kernel.org>; Wed, 28 Oct 2020 22:27:12 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux.microsoft.com header.i=@linux.microsoft.com header.b="NflQEIxO"
+	by mail.kernel.org (Postfix) with ESMTP id 24D072071A
+	for <linux-efi@archiver.kernel.org>; Wed, 28 Oct 2020 23:52:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1733115AbgJ1W0u (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 28 Oct 2020 18:26:50 -0400
-Received: from linux.microsoft.com ([13.77.154.182]:54176 "EHLO
-        linux.microsoft.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1733111AbgJ1W0t (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 28 Oct 2020 18:26:49 -0400
-Received: from sequoia (162-237-133-238.lightspeed.rcsntx.sbcglobal.net [162.237.133.238])
-        by linux.microsoft.com (Postfix) with ESMTPSA id CD3D020B9C34;
-        Wed, 28 Oct 2020 10:40:07 -0700 (PDT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 linux.microsoft.com CD3D020B9C34
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.microsoft.com;
-        s=default; t=1603906808;
-        bh=9V/wA3eXya9REkla/z2rwncx5LLcdFmF/Ap1Ekj0sjU=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=NflQEIxO3XBHmrmUqH90zd3OayoD/Scy0UPhkh0+nac9jaT38VztFcWZ5eqfaOa95
-         EaZtVM4a2uGCtavOI2YM1PfSZZEnYBWY0HmRbmIQ0sUHefFo2WPrgG23zxrgZj7Gbq
-         oLyXB3CYM3c91nbIPdZuoeXvoR5vpxAb2JvbtRp4=
-Date:   Wed, 28 Oct 2020 12:39:58 -0500
-From:   Tyler Hicks <tyhicks@linux.microsoft.com>
-To:     Kai-Heng Feng <kai.heng.feng@canonical.com>,
-        "Kenneth R . Crudup" <kenny@panix.com>,
-        Mimi Zohar <zohar@linux.ibm.com>
-Cc:     Peter Huewe <peterhuewe@gmx.de>,
-        Jarkko Sakkinen <jarkko@kernel.org>,
-        Jason Gunthorpe <jgg@ziepe.ca>,
-        linux-integrity@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-efi@vger.kernel.org,
-        =?iso-8859-1?Q?Thi=E9baud?= Weksteen <tweek@google.com>,
-        Ard Biesheuvel <ardb@kernel.org>
-Subject: Re: [PATCH] tpm: efi: Don't create binary_bios_measurements file for
- an empty log
-Message-ID: <20201028173958.GA4624@sequoia>
-References: <E1FDCCCB-CA51-4AEE-AC83-9CDE995EAE52@canonical.com>
- <20201028154102.9595-1-tyhicks@linux.microsoft.com>
- <20201028163002.GA5150@sequoia>
+        id S2389280AbgJ1XwA (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 28 Oct 2020 19:52:00 -0400
+Received: from leibniz.telenet-ops.be ([195.130.137.77]:54450 "EHLO
+        leibniz.telenet-ops.be" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2389277AbgJ1Xv7 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 28 Oct 2020 19:51:59 -0400
+X-Greylist: delayed 4201 seconds by postgrey-1.27 at vger.kernel.org; Wed, 28 Oct 2020 19:51:58 EDT
+Received: from michel.telenet-ops.be (michel.telenet-ops.be [IPv6:2a02:1800:110:4::f00:18])
+        by leibniz.telenet-ops.be (Postfix) with ESMTPS id 4CLt0F15k1zMyShy
+        for <linux-efi@vger.kernel.org>; Wed, 28 Oct 2020 16:34:05 +0100 (CET)
+Received: from ramsan.of.borg ([84.195.186.194])
+        by michel.telenet-ops.be with bizsmtp
+        id lTa42300Q4C55Sk06Ta4mw; Wed, 28 Oct 2020 16:34:04 +0100
+Received: from rox.of.borg ([192.168.97.57])
+        by ramsan.of.borg with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        (Exim 4.93)
+        (envelope-from <geert@linux-m68k.org>)
+        id 1kXnSe-000pOh-6j; Wed, 28 Oct 2020 16:34:04 +0100
+Received: from geert by rox.of.borg with local (Exim 4.93)
+        (envelope-from <geert@linux-m68k.org>)
+        id 1kXnSd-007HeQ-O3; Wed, 28 Oct 2020 16:34:03 +0100
+From:   Geert Uytterhoeven <geert+renesas@glider.be>
+To:     Ard Biesheuvel <ardb@kernel.org>, Ingo Molnar <mingo@kernel.org>,
+        Arvind Sankar <nivedita@alum.mit.edu>
+Cc:     linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Geert Uytterhoeven <geert+renesas@glider.be>
+Subject: [PATCH v2] efi/libstub: EFI_GENERIC_STUB_INITRD_CMDLINE_LOADER should not default to yes
+Date:   Wed, 28 Oct 2020 16:34:02 +0100
+Message-Id: <20201028153402.1736103-1-geert+renesas@glider.be>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20201028163002.GA5150@sequoia>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On 2020-10-28 11:30:11, Tyler Hicks wrote:
-> So, we need help from Kai, Kenneth, or Mimi to verify my assumption that
-> their firmware is providing an empty main event log and a populated
-> final event log.
+EFI_GENERIC_STUB_INITRD_CMDLINE_LOADER is deprecated, so it should not
+be enabled by default.
 
-Hi Kai, Kenneth, and Mimi - could one or two of you please follow these
-steps:
+In light of commit 4da0b2b7e67524cc ("efi/libstub: Re-enable command
+line initrd loading for x86"), keep the default for X86.
 
-1) Apply the proposed patch in the grandparent of this email so that
-   your kernel doesn't crash
-2) Revert commit 7f3d176f5f7e ("tpm: Require that all digests are
-   present in TCG_PCR_EVENT2 structures") so that
-   __calc_tpm2_event_size() goes back to being less picky and may treat
-   a final log event as a valid event log header
-3) Add some debugging warnings in efi_tpm_eventlog_init() to check for
-   an empty main event log and a populated final event log, as shown
-   below
-4) Boot the resulting kernel build, look for the warnings, and report
-   back
+Fixes: cf6b83664895a5c7 ("efi/libstub: Make initrd file loader configurable")
+Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+---
+Hopefully kernelCI has updated its QEMU firmware since v1 was posted...
 
-diff --git a/drivers/firmware/efi/tpm.c b/drivers/firmware/efi/tpm.c
-index c1955d320fec..c4d2dbd5ed42 100644
---- a/drivers/firmware/efi/tpm.c
-+++ b/drivers/firmware/efi/tpm.c
-@@ -78,6 +78,9 @@ int __init efi_tpm_eventlog_init(void)
- 		goto out;
- 	}
- 
-+	WARN(!log_tbl->size && final_tbl->nr_events,
-+	     "nr_events = %llu\n", final_tbl->nr_events);
-+
- 	tbl_size = 0;
- 	if (final_tbl->nr_events != 0) {
- 		void *events = (void *)efi.tpm_final_log
-@@ -95,6 +98,8 @@ int __init efi_tpm_eventlog_init(void)
- 		goto out_calc;
- 	}
- 
-+	WARN(!log_tbl->size && tbl_size, "tbl_size = %d\n", tbl_size);
-+
- 	memblock_reserve((unsigned long)final_tbl,
- 			 tbl_size + sizeof(*final_tbl));
- 	efi_tpm_final_log_size = tbl_size;
+v2:
+  - Rebase on top of commit d7071743db31b4f6 ("RISC-V: Add EFI stub
+    support.") in v5.10-rc1.
+---
+ drivers/firmware/efi/Kconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-For your convenience, I've created a branch with these changes on top of
-v5.9:
+diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+index 36ec1f7188934ca4..b452cfa2100b401c 100644
+--- a/drivers/firmware/efi/Kconfig
++++ b/drivers/firmware/efi/Kconfig
+@@ -122,7 +122,7 @@ config EFI_ARMSTUB_DTB_LOADER
+ config EFI_GENERIC_STUB_INITRD_CMDLINE_LOADER
+ 	bool "Enable the command line initrd loader" if !X86
+ 	depends on EFI_STUB && (EFI_GENERIC_STUB || X86)
+-	default y
++	default y if X86
+ 	depends on !RISCV
+ 	help
+ 	  Select this config option to add support for the initrd= command
+-- 
+2.25.1
 
- https://git.kernel.org/pub/scm/linux/kernel/git/tyhicks/linux.git/log/?h=tpm/bin-bios-measurements-debug
-
-Thank you!
-
-Tyler
