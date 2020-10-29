@@ -2,233 +2,165 @@ Return-Path: <SRS0=vI6a=EE=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 15723C2D0A3
-	for <linux-efi@archiver.kernel.org>; Thu, 29 Oct 2020 07:34:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D3C80C4363A
+	for <linux-efi@archiver.kernel.org>; Thu, 29 Oct 2020 13:49:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BD78D221EB
-	for <linux-efi@archiver.kernel.org>; Thu, 29 Oct 2020 07:34:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7E35820809
+	for <linux-efi@archiver.kernel.org>; Thu, 29 Oct 2020 13:49:10 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1603979350;
+	bh=rZL136yHpcK3ne8gnz6h6Y9W2J0q7UBu4PPsmTKFOf0=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=1MXKYO1OsMwdezq3T1zNaTrpA13bMuu6wUJ/Fp/FVuObfCWF1dh9QuXaBjKosvZdR
+	 kjHTCQUyQBdVuKbt85dLiuVhG75NbGrwl8BfxiPdjQa4mbt/Yolvlb9i5oJyiWuPsg
+	 5IO+hbmW30qnZql2fadqNa9Snwg1fX0+8tZIcp30=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726562AbgJ2Heo (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 29 Oct 2020 03:34:44 -0400
-Received: from mga05.intel.com ([192.55.52.43]:25689 "EHLO mga05.intel.com"
+        id S1727304AbgJ2NtK (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 29 Oct 2020 09:49:10 -0400
+Received: from mail.kernel.org ([198.145.29.99]:35834 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728570AbgJ2HeR (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Thu, 29 Oct 2020 03:34:17 -0400
-IronPort-SDR: 0Pby6qxFoTrs4ufeJHRfRw4hvWCzMYZeK+RnUD/leDSh5XF4hbtMJcoQXwN1xImEpjeyshlVkO
- 42mNjGaFEzQg==
-X-IronPort-AV: E=McAfee;i="6000,8403,9788"; a="253082124"
-X-IronPort-AV: E=Sophos;i="5.77,429,1596524400"; 
-   d="scan'208";a="253082124"
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga004.fm.intel.com ([10.253.24.48])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 Oct 2020 22:29:51 -0700
-IronPort-SDR: OjAVbjEkGoLagvREMsS3h9gy2EbxLnReyeXKRd1fZCZiHW3KDinxV8tTyG4QhtXi4MzZHFvwJC
- 64o0A++V/0yQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.77,429,1596524400"; 
-   d="scan'208";a="351292237"
-Received: from lkp-server02.sh.intel.com (HELO 72b1a4bebef6) ([10.239.97.151])
-  by fmsmga004.fm.intel.com with ESMTP; 28 Oct 2020 22:29:50 -0700
-Received: from kbuild by 72b1a4bebef6 with local (Exim 4.92)
-        (envelope-from <lkp@intel.com>)
-        id 1kY0VR-00005U-K1; Thu, 29 Oct 2020 05:29:49 +0000
-Date:   Thu, 29 Oct 2020 13:28:53 +0800
-From:   kernel test robot <lkp@intel.com>
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     linux-efi@vger.kernel.org
-Subject: [efi:arm-adrl-replacement] BUILD SUCCESS
- aaac3733171fca948c4fb66b78257620e3885339
-Message-ID: <5f9a5315.JC5gCYK7wh8nH37m%lkp@intel.com>
-User-Agent: Heirloom mailx 12.5 6/20/10
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+        id S1725973AbgJ2NtJ (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Thu, 29 Oct 2020 09:49:09 -0400
+Received: from e123331-lin.nice.arm.com (lfbn-nic-1-188-42.w2-15.abo.wanadoo.fr [2.15.37.42])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 0FD762076A;
+        Thu, 29 Oct 2020 13:49:07 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1603979349;
+        bh=rZL136yHpcK3ne8gnz6h6Y9W2J0q7UBu4PPsmTKFOf0=;
+        h=From:To:Cc:Subject:Date:From;
+        b=PFHA7oGhy4a7dVN+Wpxjn4iVizkrg9GspHqL2BAzs/v7LQaDgxcQnbdafbqOGb6GJ
+         jJMMJ3OhN2Fnvd7zInMAMlTvUzMxFsxDrXMlzfT8Vic6L6JCjo1cZ/2pfVNE6aOK+s
+         w5lBA/+pAXg8B7hu5t6ZfaDynLJzoNgO9jgMa96I=
+From:   Ard Biesheuvel <ardb@kernel.org>
+To:     linux-efi@vger.kernel.org
+Cc:     atish.patra@wdc.com, Ard Biesheuvel <ardb@kernel.org>
+Subject: [PATCH] efi: stub: get rid of efi_get_max_fdt_addr()
+Date:   Thu, 29 Oct 2020 14:49:01 +0100
+Message-Id: <20201029134901.9773-1-ardb@kernel.org>
+X-Mailer: git-send-email 2.17.1
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-tree/branch: https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git  arm-adrl-replacement
-branch HEAD: aaac3733171fca948c4fb66b78257620e3885339  ARM: kvm: replace open coded VA->PA calculations with adr_l call
+Now that ARM started following the example of arm64 and RISC-V, and
+no longer imposes any restrictions on the placement of the FDT in
+memory at boot, we no longer need per-arch implementations of
+efi_get_max_fdt_addr() to factor out the differences. So get rid of
+it.
 
-elapsed time: 721m
-
-configs tested: 161
-configs skipped: 87
-
-The following configs have been built successfully.
-More configs may be tested in the coming days.
-
-gcc tested configs:
-arm                                 defconfig
-arm64                            allyesconfig
-arm64                               defconfig
-arm                              allyesconfig
-arm                              allmodconfig
-m68k                        m5307c3_defconfig
-c6x                                 defconfig
-s390                             allyesconfig
-arm                          prima2_defconfig
-ia64                          tiger_defconfig
-arm                          pxa3xx_defconfig
-ia64                                defconfig
-ia64                        generic_defconfig
-mips                          malta_defconfig
-sh                          lboxre2_defconfig
-arm                        mvebu_v5_defconfig
-m68k                         amcore_defconfig
-arm                        mvebu_v7_defconfig
-mips                       lemote2f_defconfig
-arm                         nhk8815_defconfig
-alpha                            alldefconfig
-sh                          r7780mp_defconfig
-arm                            lart_defconfig
-mips                      bmips_stb_defconfig
-arm                        magician_defconfig
-m68k                        mvme147_defconfig
-powerpc                 mpc8313_rdb_defconfig
-arm                              zx_defconfig
-c6x                         dsk6455_defconfig
-parisc                generic-32bit_defconfig
-powerpc                    gamecube_defconfig
-arm                      integrator_defconfig
-powerpc                     mpc5200_defconfig
-powerpc                      chrp32_defconfig
-arc                     haps_hs_smp_defconfig
-m68k                       m5249evb_defconfig
-arm                           tegra_defconfig
-powerpc                 mpc834x_mds_defconfig
-arm                     davinci_all_defconfig
-mips                     loongson1b_defconfig
-powerpc64                           defconfig
-mips                             allyesconfig
-sh                           se7343_defconfig
-powerpc                 mpc836x_rdk_defconfig
-powerpc                      bamboo_defconfig
-arm                      pxa255-idp_defconfig
-xtensa                           alldefconfig
-powerpc                     tqm8560_defconfig
-arc                 nsimosci_hs_smp_defconfig
-sh                        edosk7760_defconfig
-sh                ecovec24-romimage_defconfig
-riscv                            alldefconfig
-powerpc                     asp8347_defconfig
-powerpc                     mpc512x_defconfig
-mips                       capcella_defconfig
-xtensa                  nommu_kc705_defconfig
-mips                malta_qemu_32r6_defconfig
-sh                             espt_defconfig
-arm                          ixp4xx_defconfig
-um                            kunit_defconfig
-m68k                          multi_defconfig
-nds32                            alldefconfig
-um                           x86_64_defconfig
-arm                      tct_hammer_defconfig
-mips                       bmips_be_defconfig
-arm                           viper_defconfig
-powerpc                    sam440ep_defconfig
-sh                          urquell_defconfig
-powerpc                      walnut_defconfig
-sh                          sdk7780_defconfig
-powerpc                     pseries_defconfig
-sh                              ul2_defconfig
-arm                            zeus_defconfig
-sh                          rsk7264_defconfig
-powerpc                    klondike_defconfig
-ia64                      gensparse_defconfig
-arm                          pxa168_defconfig
-ia64                             allmodconfig
-ia64                             allyesconfig
-m68k                             allmodconfig
-m68k                                defconfig
-m68k                             allyesconfig
-nios2                               defconfig
-arc                              allyesconfig
-nds32                             allnoconfig
-c6x                              allyesconfig
-nds32                               defconfig
-nios2                            allyesconfig
-csky                                defconfig
-alpha                               defconfig
-alpha                            allyesconfig
-xtensa                           allyesconfig
-h8300                            allyesconfig
-arc                                 defconfig
-sh                               allmodconfig
-parisc                              defconfig
-parisc                           allyesconfig
-s390                                defconfig
-i386                             allyesconfig
-sparc                            allyesconfig
-sparc                               defconfig
-i386                                defconfig
-mips                             allmodconfig
-powerpc                          allyesconfig
-powerpc                          allmodconfig
-powerpc                           allnoconfig
-i386                 randconfig-a002-20201029
-i386                 randconfig-a005-20201029
-i386                 randconfig-a003-20201029
-i386                 randconfig-a001-20201029
-i386                 randconfig-a004-20201029
-i386                 randconfig-a006-20201029
-i386                 randconfig-a002-20201028
-i386                 randconfig-a005-20201028
-i386                 randconfig-a003-20201028
-i386                 randconfig-a001-20201028
-i386                 randconfig-a004-20201028
-i386                 randconfig-a006-20201028
-x86_64               randconfig-a011-20201028
-x86_64               randconfig-a013-20201028
-x86_64               randconfig-a016-20201028
-x86_64               randconfig-a015-20201028
-x86_64               randconfig-a012-20201028
-x86_64               randconfig-a014-20201028
-x86_64               randconfig-a011-20201026
-x86_64               randconfig-a013-20201026
-x86_64               randconfig-a016-20201026
-x86_64               randconfig-a015-20201026
-x86_64               randconfig-a012-20201026
-x86_64               randconfig-a014-20201026
-i386                 randconfig-a016-20201028
-i386                 randconfig-a014-20201028
-i386                 randconfig-a015-20201028
-i386                 randconfig-a013-20201028
-i386                 randconfig-a012-20201028
-i386                 randconfig-a011-20201028
-riscv                    nommu_k210_defconfig
-riscv                            allyesconfig
-riscv                    nommu_virt_defconfig
-riscv                             allnoconfig
-riscv                               defconfig
-riscv                          rv32_defconfig
-riscv                            allmodconfig
-x86_64                                   rhel
-x86_64                           allyesconfig
-x86_64                    rhel-7.6-kselftests
-x86_64                              defconfig
-x86_64                               rhel-8.3
-x86_64                                  kexec
-
-clang tested configs:
-x86_64               randconfig-a001-20201028
-x86_64               randconfig-a002-20201028
-x86_64               randconfig-a003-20201028
-x86_64               randconfig-a006-20201028
-x86_64               randconfig-a005-20201028
-x86_64               randconfig-a004-20201028
-x86_64               randconfig-a001-20201026
-x86_64               randconfig-a003-20201026
-x86_64               randconfig-a002-20201026
-x86_64               randconfig-a006-20201026
-x86_64               randconfig-a004-20201026
-x86_64               randconfig-a005-20201026
-
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
-0-DAY CI Kernel Test Service, Intel Corporation
-https://lists.01.org/hyperkitty/list/kbuild-all@lists.01.org
+ arch/arm/include/asm/efi.h              | 6 ------
+ arch/arm64/include/asm/efi.h            | 6 ------
+ arch/riscv/include/asm/efi.h            | 6 ------
+ drivers/firmware/efi/libstub/efi-stub.c | 1 -
+ drivers/firmware/efi/libstub/efistub.h  | 1 -
+ drivers/firmware/efi/libstub/fdt.c      | 3 +--
+ 6 files changed, 1 insertion(+), 22 deletions(-)
+
+diff --git a/arch/arm/include/asm/efi.h b/arch/arm/include/asm/efi.h
+index 3ee4f4381985..0496bc96a092 100644
+--- a/arch/arm/include/asm/efi.h
++++ b/arch/arm/include/asm/efi.h
+@@ -74,12 +74,6 @@ static inline void efifb_setup_from_dmi(struct screen_info *si, const char *opt)
+  */
+ #define EFI_PHYS_ALIGN		SZ_16M
+ 
+-/* on ARM, the FDT should be located in a lowmem region */
+-static inline unsigned long efi_get_max_fdt_addr(unsigned long image_addr)
+-{
+-	return round_down(image_addr, EFI_PHYS_ALIGN) + SZ_512M;
+-}
+-
+ /* on ARM, the initrd should be loaded in a lowmem region */
+ static inline unsigned long efi_get_max_initrd_addr(unsigned long image_addr)
+ {
+diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
+index 973b14415271..01446a073b2e 100644
+--- a/arch/arm64/include/asm/efi.h
++++ b/arch/arm64/include/asm/efi.h
+@@ -64,12 +64,6 @@ efi_status_t __efi_rt_asm_wrapper(void *, const char *, ...);
+ #define EFI_KIMG_ALIGN	\
+ 	(SEGMENT_ALIGN > THREAD_ALIGN ? SEGMENT_ALIGN : THREAD_ALIGN)
+ 
+-/* on arm64, the FDT may be located anywhere in system RAM */
+-static inline unsigned long efi_get_max_fdt_addr(unsigned long image_addr)
+-{
+-	return ULONG_MAX;
+-}
+-
+ /*
+  * On arm64, we have to ensure that the initrd ends up in the linear region,
+  * which is a 1 GB aligned region of size '1UL << (VA_BITS_MIN - 1)' that is
+diff --git a/arch/riscv/include/asm/efi.h b/arch/riscv/include/asm/efi.h
+index 7542282f1141..6d98cd999680 100644
+--- a/arch/riscv/include/asm/efi.h
++++ b/arch/riscv/include/asm/efi.h
+@@ -27,12 +27,6 @@ int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
+ 
+ #define ARCH_EFI_IRQ_FLAGS_MASK (SR_IE | SR_SPIE)
+ 
+-/* on RISC-V, the FDT may be located anywhere in system RAM */
+-static inline unsigned long efi_get_max_fdt_addr(unsigned long image_addr)
+-{
+-	return ULONG_MAX;
+-}
+-
+ /* Load initrd at enough distance from DRAM start */
+ static inline unsigned long efi_get_max_initrd_addr(unsigned long image_addr)
+ {
+diff --git a/drivers/firmware/efi/libstub/efi-stub.c b/drivers/firmware/efi/libstub/efi-stub.c
+index 914a343c7785..ec2f3985bef3 100644
+--- a/drivers/firmware/efi/libstub/efi-stub.c
++++ b/drivers/firmware/efi/libstub/efi-stub.c
+@@ -273,7 +273,6 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
+ 	install_memreserve_table();
+ 
+ 	status = allocate_new_fdt_and_exit_boot(handle, &fdt_addr,
+-						efi_get_max_fdt_addr(image_addr),
+ 						initrd_addr, initrd_size,
+ 						cmdline_ptr, fdt_addr, fdt_size);
+ 	if (status != EFI_SUCCESS)
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index 2d7abcd99de9..c1c63e847481 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -750,7 +750,6 @@ efi_status_t efi_exit_boot_services(void *handle,
+ 
+ efi_status_t allocate_new_fdt_and_exit_boot(void *handle,
+ 					    unsigned long *new_fdt_addr,
+-					    unsigned long max_addr,
+ 					    u64 initrd_addr, u64 initrd_size,
+ 					    char *cmdline_ptr,
+ 					    unsigned long fdt_addr,
+diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+index 368cd60000ee..365c3a43a198 100644
+--- a/drivers/firmware/efi/libstub/fdt.c
++++ b/drivers/firmware/efi/libstub/fdt.c
+@@ -238,7 +238,6 @@ static efi_status_t exit_boot_func(struct efi_boot_memmap *map,
+ 
+ efi_status_t allocate_new_fdt_and_exit_boot(void *handle,
+ 					    unsigned long *new_fdt_addr,
+-					    unsigned long max_addr,
+ 					    u64 initrd_addr, u64 initrd_size,
+ 					    char *cmdline_ptr,
+ 					    unsigned long fdt_addr,
+@@ -275,7 +274,7 @@ efi_status_t allocate_new_fdt_and_exit_boot(void *handle,
+ 	efi_info("Exiting boot services and installing virtual address map...\n");
+ 
+ 	map.map = &memory_map;
+-	status = efi_allocate_pages(MAX_FDT_SIZE, new_fdt_addr, max_addr);
++	status = efi_allocate_pages(MAX_FDT_SIZE, new_fdt_addr, ULONG_MAX);
+ 	if (status != EFI_SUCCESS) {
+ 		efi_err("Unable to allocate memory for new device tree.\n");
+ 		goto fail;
+-- 
+2.17.1
+
