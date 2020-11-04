@@ -2,141 +2,111 @@ Return-Path: <SRS0=rgVR=EK=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-20.4 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT,USER_IN_DEF_DKIM_WL autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 105C7C2D0A3
-	for <linux-efi@archiver.kernel.org>; Wed,  4 Nov 2020 22:17:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BC4F4C55178
+	for <linux-efi@archiver.kernel.org>; Wed,  4 Nov 2020 23:24:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B234B2080D
-	for <linux-efi@archiver.kernel.org>; Wed,  4 Nov 2020 22:17:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1604528261;
-	bh=NOv7OWHClGcxBYpjvN6mn3rmT/y8QjeyqPOmESrkm9k=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=iTzQl/uUCL5VpCt1RkPYSJ5AyTBxQ2hbRleckvS02ti2HVH5GvGMHRbkp8rPHJ2/D
-	 Ofld9HzLINcunGBLKG4sEf/Z9RTv6A9qRVZQ179AxPpz6uY0wx1FI8gIQjW94YMJrq
-	 4QH8DO6bajOapNa8rbks+LF6F7bukV36uZBSgjxg=
+	by mail.kernel.org (Postfix) with ESMTP id 6219421527
+	for <linux-efi@archiver.kernel.org>; Wed,  4 Nov 2020 23:24:16 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="iVIITovv"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732091AbgKDWOL (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 4 Nov 2020 17:14:11 -0500
-Received: from mail.kernel.org ([198.145.29.99]:47534 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1731954AbgKDWOK (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 4 Nov 2020 17:14:10 -0500
-Received: from e123331-lin.nice.arm.com (lfbn-nic-1-188-42.w2-15.abo.wanadoo.fr [2.15.37.42])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id DEEF92074B;
-        Wed,  4 Nov 2020 22:14:07 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1604528049;
-        bh=NOv7OWHClGcxBYpjvN6mn3rmT/y8QjeyqPOmESrkm9k=;
-        h=From:To:Cc:Subject:Date:From;
-        b=bY/47qmVTLwLDq+6lqqBpsjoyvYnUK5b8q2F82+NxspPMsnv62SZAcUO004FEEuEl
-         Y7T9B5LXSJpDNRTktPwQh3NPcyO9cgzsa225cXvumxOHrUrXwtytBXFWufNV5Ko3dK
-         0MLnAxlQPVXDwW0+2GVNBDgu69Mm2Qp+pZ3M7B+s=
-From:   Ard Biesheuvel <ardb@kernel.org>
-To:     linux-efi@vger.kernel.org
-Cc:     xen-devel@lists.xenproject.org, sstabellini@kernel.org,
-        jgross@suse.com, boris.ostrovsky@oracle.com,
-        Ard Biesheuvel <ardb@kernel.org>
-Subject: [PATCH] efi: x86/xen: switch to efi_get_secureboot_mode helper
-Date:   Wed,  4 Nov 2020 23:14:00 +0100
-Message-Id: <20201104221400.7005-1-ardb@kernel.org>
-X-Mailer: git-send-email 2.17.1
+        id S1732815AbgKDXYP (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 4 Nov 2020 18:24:15 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44878 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1732817AbgKDXYN (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 4 Nov 2020 18:24:13 -0500
+Received: from mail-qt1-x849.google.com (mail-qt1-x849.google.com [IPv6:2607:f8b0:4864:20::849])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D6B2FC0613D3
+        for <linux-efi@vger.kernel.org>; Wed,  4 Nov 2020 15:24:12 -0800 (PST)
+Received: by mail-qt1-x849.google.com with SMTP id h16so71886qtr.8
+        for <linux-efi@vger.kernel.org>; Wed, 04 Nov 2020 15:24:12 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20161025;
+        h=sender:date:in-reply-to:message-id:mime-version:references:subject
+         :from:to:cc;
+        bh=u5wayZ9AVFMGS2ijaBJPPdXKpeLHXYLicPYl2nj1shI=;
+        b=iVIITovvfmdqa7ENQHfnvmD7E7Q89Vqx621sZYGic9iXL2Yt4kyuIGXc0RlopwO7eF
+         lMDFCTi295lj6kNhA98o6Zr8zYdKlcMltOwo0dfKAi9YEyQKs+nE2yXjekyLbllbELIj
+         XOJbSndFOfrxPkQaMFyE4+3GqLIp0+PMRJ31QE2eBw4/rjyfOBCwzCNzqlxsMw+/J0Ka
+         v9tyd9lhBbSnQ1BPj2z2kKMquvyq1DnDjrwCjfogbkKy/s2KInZ/EykovZhbmuijp9HT
+         3iDehlrdMA9rygPnHkxRgqbrIjoJf/sGBxoyn/J3CjHx5DAdyBhChRxqhNcejq090UIq
+         eMoQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:sender:date:in-reply-to:message-id:mime-version
+         :references:subject:from:to:cc;
+        bh=u5wayZ9AVFMGS2ijaBJPPdXKpeLHXYLicPYl2nj1shI=;
+        b=rH2EyxIa5PNLl8XdPTjgFBdQu3uPBEZZf3xVPFjfu+QXNgXE5Bg0FgUHetuw8dZYBA
+         Ru0ZmxTbeYHlLEaqwuT5SBo4yu3DDXIKOPc6q+p+SHqNXunzsEpyQfZC13XiFZ0oJ4j1
+         dV1OjVLR1UGmT2MHfyR7HGsKLgyrmB67MnyedK2H2HxNf0Kzaa4oeCICruZarpNa1AcK
+         UYMLLlf8to4WWIwGXv7KymMTLmLGwXVqbSEe4lj6gZN1NlYEZXGOHErJCnm2LcyW9ND7
+         zL0jM+2w7MziAhhyt2LuXUNrtSJUcML8REN2Dz/z68+2hl6sclaA2ksPh2bgniYdXt2p
+         5Oyg==
+X-Gm-Message-State: AOAM5305fWClpwuE0ei8wOyq0jWcMOlbTemt+hQoZnMgU6IEFwEbWtoX
+        D4yPAZEVUHCq0Ja+E3yYW7UioLzFRIfCYyQ=
+X-Google-Smtp-Source: ABdhPJwjKo0cRX9EmzXQSkYgc/ChZZniluSDDdAeEjXvu1+EPop/QjPtY/4CxN+WF6Ie5LvnM2VAnbfDX7ilMx4=
+Sender: "saravanak via sendgmr" <saravanak@saravanak.san.corp.google.com>
+X-Received: from saravanak.san.corp.google.com ([2620:15c:2d:3:7220:84ff:fe09:fedc])
+ (user=saravanak job=sendgmr) by 2002:a0c:e346:: with SMTP id
+ a6mr179397qvm.9.1604532252026; Wed, 04 Nov 2020 15:24:12 -0800 (PST)
+Date:   Wed,  4 Nov 2020 15:23:42 -0800
+In-Reply-To: <20201104232356.4038506-1-saravanak@google.com>
+Message-Id: <20201104232356.4038506-6-saravanak@google.com>
+Mime-Version: 1.0
+References: <20201104232356.4038506-1-saravanak@google.com>
+X-Mailer: git-send-email 2.29.1.341.ge80a0c044ae-goog
+Subject: [PATCH v1 05/18] Revert "of: platform: Batch fwnode parsing when
+ adding all top level devices"
+From:   Saravana Kannan <saravanak@google.com>
+To:     "Rafael J. Wysocki" <rjw@rjwysocki.net>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Len Brown <lenb@kernel.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Frank Rowand <frowand.list@gmail.com>,
+        Marc Zyngier <maz@kernel.org>,
+        Thomas Gleixner <tglx@linutronix.de>
+Cc:     Saravana Kannan <saravanak@google.com>,
+        Tomi Valkeinen <tomi.valkeinen@ti.com>,
+        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
+        Grygorii Strashko <grygorii.strashko@ti.com>,
+        kernel-team@android.com, linux-acpi@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
+        devicetree@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Now that we have a static inline helper to discover the platform's secure
-boot mode that can be shared between the EFI stub and the kernel proper,
-switch to it, and drop some comments about keeping them in sync manually.
+This reverts commit 93d2e4322aa74c1ad1e8c2160608eb9a960d69ff.
 
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+Signed-off-by: Saravana Kannan <saravanak@google.com>
 ---
- arch/x86/xen/efi.c                        | 37 +++++---------------
- drivers/firmware/efi/libstub/secureboot.c |  3 --
- 2 files changed, 9 insertions(+), 31 deletions(-)
+ drivers/of/platform.c | 2 --
+ 1 file changed, 2 deletions(-)
 
-diff --git a/arch/x86/xen/efi.c b/arch/x86/xen/efi.c
-index 205a9bc981b0..a27444acaf1e 100644
---- a/arch/x86/xen/efi.c
-+++ b/arch/x86/xen/efi.c
-@@ -93,37 +93,22 @@ static efi_system_table_t __init *xen_efi_probe(void)
+diff --git a/drivers/of/platform.c b/drivers/of/platform.c
+index b557a0fcd4ba..79bd5f5a1bf1 100644
+--- a/drivers/of/platform.c
++++ b/drivers/of/platform.c
+@@ -538,9 +538,7 @@ static int __init of_platform_default_populate_init(void)
+ 	}
  
- /*
-  * Determine whether we're in secure boot mode.
-- *
-- * Please keep the logic in sync with
-- * drivers/firmware/efi/libstub/secureboot.c:efi_get_secureboot().
-  */
- static enum efi_secureboot_mode xen_efi_get_secureboot(void)
- {
--	static efi_guid_t efi_variable_guid = EFI_GLOBAL_VARIABLE_GUID;
- 	static efi_guid_t shim_guid = EFI_SHIM_LOCK_GUID;
-+	enum efi_secureboot_mode mode;
- 	efi_status_t status;
--	u8 moksbstate, secboot, setupmode;
-+	u8 moksbstate;
- 	unsigned long size;
+ 	/* Populate everything else. */
+-	fw_devlink_pause();
+ 	of_platform_default_populate(NULL, NULL, NULL);
+-	fw_devlink_resume();
  
--	size = sizeof(secboot);
--	status = efi.get_variable(L"SecureBoot", &efi_variable_guid,
--				  NULL, &size, &secboot);
--
--	if (status == EFI_NOT_FOUND)
--		return efi_secureboot_mode_disabled;
--
--	if (status != EFI_SUCCESS)
--		goto out_efi_err;
--
--	size = sizeof(setupmode);
--	status = efi.get_variable(L"SetupMode", &efi_variable_guid,
--				  NULL, &size, &setupmode);
--
--	if (status != EFI_SUCCESS)
--		goto out_efi_err;
--
--	if (secboot == 0 || setupmode == 1)
--		return efi_secureboot_mode_disabled;
-+	mode = efi_get_secureboot_mode(efi.get_variable);
-+	if (mode == efi_secureboot_mode_unknown) {
-+		efi_err("Could not determine UEFI Secure Boot status.\n");
-+		return efi_secureboot_mode_unknown;
-+	}
-+	if (mode != efi_secureboot_mode_enabled)
-+		return mode;
- 
- 	/* See if a user has put the shim into insecure mode. */
- 	size = sizeof(moksbstate);
-@@ -140,10 +125,6 @@ static enum efi_secureboot_mode xen_efi_get_secureboot(void)
-  secure_boot_enabled:
- 	pr_info("UEFI Secure Boot is enabled.\n");
- 	return efi_secureboot_mode_enabled;
--
-- out_efi_err:
--	pr_err("Could not determine UEFI Secure Boot status.\n");
--	return efi_secureboot_mode_unknown;
+ 	return 0;
  }
- 
- void __init xen_efi_init(struct boot_params *boot_params)
-diff --git a/drivers/firmware/efi/libstub/secureboot.c b/drivers/firmware/efi/libstub/secureboot.c
-index af18d86c1604..8a18930f3eb6 100644
---- a/drivers/firmware/efi/libstub/secureboot.c
-+++ b/drivers/firmware/efi/libstub/secureboot.c
-@@ -24,9 +24,6 @@ static efi_status_t get_var(efi_char16_t *name, efi_guid_t *vendor, u32 *attr,
- 
- /*
-  * Determine whether we're in secure boot mode.
-- *
-- * Please keep the logic in sync with
-- * arch/x86/xen/efi.c:xen_efi_get_secureboot().
-  */
- enum efi_secureboot_mode efi_get_secureboot(void)
- {
 -- 
-2.17.1
+2.29.1.341.ge80a0c044ae-goog
 
