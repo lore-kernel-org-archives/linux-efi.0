@@ -8,61 +8,61 @@ X-Spam-Status: No, score=-20.4 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
 	USER_AGENT_GIT,USER_IN_DEF_DKIM_WL autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 81F37C388F7
-	for <linux-efi@archiver.kernel.org>; Wed,  4 Nov 2020 23:24:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 84A95C4741F
+	for <linux-efi@archiver.kernel.org>; Wed,  4 Nov 2020 23:24:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3972322268
-	for <linux-efi@archiver.kernel.org>; Wed,  4 Nov 2020 23:24:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1E6D420735
+	for <linux-efi@archiver.kernel.org>; Wed,  4 Nov 2020 23:24:51 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="FQOg8vXe"
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="nnx9jd2o"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1733032AbgKDXYY (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 4 Nov 2020 18:24:24 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44922 "EHLO
+        id S1733135AbgKDXYs (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 4 Nov 2020 18:24:48 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45070 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1733024AbgKDXYW (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 4 Nov 2020 18:24:22 -0500
-Received: from mail-qv1-xf49.google.com (mail-qv1-xf49.google.com [IPv6:2607:f8b0:4864:20::f49])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E54AEC0613D2
-        for <linux-efi@vger.kernel.org>; Wed,  4 Nov 2020 15:24:20 -0800 (PST)
-Received: by mail-qv1-xf49.google.com with SMTP id es11so2721qvb.10
-        for <linux-efi@vger.kernel.org>; Wed, 04 Nov 2020 15:24:20 -0800 (PST)
+        with ESMTP id S1733130AbgKDXYr (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 4 Nov 2020 18:24:47 -0500
+Received: from mail-yb1-xb49.google.com (mail-yb1-xb49.google.com [IPv6:2607:f8b0:4864:20::b49])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F120AC0613D6
+        for <linux-efi@vger.kernel.org>; Wed,  4 Nov 2020 15:24:45 -0800 (PST)
+Received: by mail-yb1-xb49.google.com with SMTP id y11so368820ybm.22
+        for <linux-efi@vger.kernel.org>; Wed, 04 Nov 2020 15:24:45 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=google.com; s=20161025;
         h=sender:date:in-reply-to:message-id:mime-version:references:subject
          :from:to:cc;
-        bh=+Pnss2jZrmflP1wbnV6Je3ogMQfHXywiMZfR1W5P9qc=;
-        b=FQOg8vXeOgd9z8U6hdMl0s35oKDTY2o/ycG2xGfWs76vwOr0bSbCe1uWfyGtLi8FY1
-         7fp8RK8A1Gt2+rZJy+F00fB7dR6NsCuPUekPmHQwz6oRXbnAJo+2PnoiRC+50ViETk1a
-         nuIVEqhY9aWLoLDh5wUpt9Lgip56yhabhc2kFoxb4bW2At5fc8tN7uL05b/ziUWUqB9d
-         Cv9N7La+66OgQ2Jc46NSc2rER/4Ss8uopOVJdI+aAwvripdE4aHzS6TJGAbOO61YTwsA
-         ZafNxqqdKNo/VXLAXgumWAkM8SKhmDufAbXpP2Z1iAsdoldKQv3kEFRV55Fj+Jz1bh7k
-         ulPg==
+        bh=orxE1MK+VCMR2ve5H0WDkTIY0N4gMeA6rHktC95zIcA=;
+        b=nnx9jd2oJEhJ3pHwIgO16YDAqaTuilWdruK/2oSYX4gvUTTrKBszRrSEFZFu6TkeeC
+         RDHPoO6yKDBTh66sk1OI4p5CAqWE5QunqsduHu6Xytct4qlbmErBEaoMxmU/R20qBu0u
+         XZtY00GxvXtqpwMHgrl+PJx5MglPgvBZqnTJsbIjzUD0lnx9pHJe+QswXalrXDcH8fy0
+         zJjCth/1qPRDL+uCAoHJjecCNlSljkn0oVcDx/BJUiQ5VcPGZltVwMdTIaaAXXrdTdBs
+         fctL+Ume5aU3MimkcwHkrcEm66vVE5Uz3nVj/MGxrTDP0FNGi9r79pD+r0Xa+yRPlohe
+         xrLw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:sender:date:in-reply-to:message-id:mime-version
          :references:subject:from:to:cc;
-        bh=+Pnss2jZrmflP1wbnV6Je3ogMQfHXywiMZfR1W5P9qc=;
-        b=pjMrl2IU+pvjDj4KKrDlRfrCPjvLSuyerxT+Xs+sxtWrUveifA3LGSxtWsZsiFmBpT
-         b0A7LgguLxTb09VwCia0NzeT0GbUU0RDLLlUbm1CQPiKB2tk01cILjUzmjs1Vs57yqJ4
-         zWl5mzr2g0AzcuZYCI612oeS9m79FgXIDyy6Ae/rpgIdZg2Y8ko1bVqDDvZjPVvEW+Gb
-         1U+M+sAYSphIJIHKpKhRUgX70C3ZIClx86h2S8jECZOj6+VdqjRDio4GE6r/CjY+KhUo
-         aSvc/1QRDsP8ORA9tftHNB23kqC9w19Zy7zXYcvzHeFvsF861PH3raZ+ux8BSZCMaK91
-         XabQ==
-X-Gm-Message-State: AOAM5334O44AybRXt4J2ZvEmuK2BsT4tVVZIV+dBT5Ob+z3demmQgInZ
-        FiY6T3T2WEqFLU1c6tFRjq/UO63N3yPGZuE=
-X-Google-Smtp-Source: ABdhPJwjwtYvM7Ivv/FR7C/GC1NY2CdbIozJW3wSd7EecAEAgIod7zxLX2aUIUJyv0xOb6b1ZAh3UM7kBIOqzf0=
+        bh=orxE1MK+VCMR2ve5H0WDkTIY0N4gMeA6rHktC95zIcA=;
+        b=N7OE6h8zPCE1SzpTKLzs3eM2foPjYYxgZzdV+HKaZGDhz+gYiplqcsy/Lgd6aheiSM
+         HCcx5YQbfWiiWtH9E3bU/g4cLyaQqsWItqG9/m1hFxZzALAGxPkYJbwQu96oO2P+J8cL
+         BR3sFO/hExZ7SVJrxo3yp59Tco6oHYCOrd3dCuBsmX/3m/IyZmCYkKNkfONMWiMkTorh
+         cUn/qNlVp0bvpm/rDvVn3ycSJiW4ScwtbYAzM3by6pnzcc/vPwoVhuYAC8GWY7b17qVL
+         cALNEyImKDp97oz54jTKE+m1FmA7KpoiK9zLtjaXgZYssBNL59QbUs23QR6ee+lWO56R
+         yjhg==
+X-Gm-Message-State: AOAM532Ezl1ALRBsmRr2Q/EhVu8WLCJY4voqIsN/Jr7GXLA2J+/5w4e0
+        OS3qqslHBYaNiTagAvXW3NX8RxgytcNK+ls=
+X-Google-Smtp-Source: ABdhPJyMvwixP2xnnsuS7H+s5t5wu3FKZYhd1nRvOCSDaSPC3lScgr6okCR4XLH8GNPZ59R7lXmTwleaul7fN4o=
 Sender: "saravanak via sendgmr" <saravanak@saravanak.san.corp.google.com>
 X-Received: from saravanak.san.corp.google.com ([2620:15c:2d:3:7220:84ff:fe09:fedc])
- (user=saravanak job=sendgmr) by 2002:ad4:59cf:: with SMTP id
- el15mr268323qvb.17.1604532260064; Wed, 04 Nov 2020 15:24:20 -0800 (PST)
-Date:   Wed,  4 Nov 2020 15:23:45 -0800
+ (user=saravanak job=sendgmr) by 2002:a25:59d5:: with SMTP id
+ n204mr318723ybb.282.1604532285157; Wed, 04 Nov 2020 15:24:45 -0800 (PST)
+Date:   Wed,  4 Nov 2020 15:23:55 -0800
 In-Reply-To: <20201104232356.4038506-1-saravanak@google.com>
-Message-Id: <20201104232356.4038506-9-saravanak@google.com>
+Message-Id: <20201104232356.4038506-19-saravanak@google.com>
 Mime-Version: 1.0
 References: <20201104232356.4038506-1-saravanak@google.com>
 X-Mailer: git-send-email 2.29.1.341.ge80a0c044ae-goog
-Subject: [PATCH v1 08/18] driver core: Add fwnode link support
+Subject: [PATCH v1 18/18] driver core: Refactor fw_devlink feature
 From:   Saravana Kannan <saravanak@google.com>
 To:     "Rafael J. Wysocki" <rjw@rjwysocki.net>,
         "Rafael J. Wysocki" <rafael@kernel.org>,
@@ -85,180 +85,215 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This patch adds support for creating supplier-consumer links between
-fwnode. It is intentionally kept simple and with limited APIs as it is
-meant to be used only by driver core and firmware code (Eg: device tree,
-ACPI, etc).
+The current implementation of fw_devlink is very inefficient because it
+tries to get away without creating fwnode links in the name of saving
+memory usage. Past attempts to optimize runtime at the cost of memory
+usage were blocked with request for data showing that the optimization
+made significant improvement for real world scenarios.
 
-We can expand the APIs later if there is ever a need for
-drivers/frameworks to start using them.
+We have those scenarios now. There have been several reports of boot
+time increase in the order of seconds in this thread [1]. Several OEMs
+and SoC manufacturers have also privately reported significant
+(350-400ms) increase in boot time due to all the parsing done by
+fw_devlink.
 
+So this patch uses all the setup done by the previous patches in this
+series to refactor fw_devlink to be more efficient. Most of the code has
+been moved out of firmware specific (DT mostly) code into driver core.
+
+This brings the following benefits:
+- Instead of parsing the device tree multiple times during bootup,
+  fw_devlink parses each fwnode node/property only once and creates
+  fwnode links. The rest of the fw_devlink code then just looks at these
+  fwnode links to do rest of the work.
+
+- Makes it much easier to debug probe issue due to fw_devlink in the
+  future. fw_devlink=on blocks the probing of devices if they depend on
+  a device that hasn't been added yet. With this refactor, it'll be very
+  easy to tell what that device is because we now have a reference to
+  the fwnode of the device.
+
+- Much easier to add fw_devlink support to ACPI and other firmware
+  types. A refactor to move the common bits from DT specific code to
+  driver core was in my TODO list as a prerequisite to adding ACPI
+  support to fw_devlink. This series gets that done.
+
+[1] - https://lore.kernel.org/linux-omap/ea02f57e-871d-cd16-4418-c1da4bbc4696@ti.com/
 Signed-off-by: Saravana Kannan <saravanak@google.com>
 ---
- drivers/base/core.c    | 95 ++++++++++++++++++++++++++++++++++++++++++
- drivers/of/dynamic.c   |  1 +
- include/linux/fwnode.h | 14 +++++++
- 3 files changed, 110 insertions(+)
+ drivers/base/core.c    | 98 +++++-------------------------------------
+ include/linux/device.h |  5 ---
+ 2 files changed, 11 insertions(+), 92 deletions(-)
 
 diff --git a/drivers/base/core.c b/drivers/base/core.c
-index 31a76159f118..1a1d9a55645c 100644
+index 0c87ff949d81..d76ca59252fb 100644
 --- a/drivers/base/core.c
 +++ b/drivers/base/core.c
-@@ -50,6 +50,101 @@ static LIST_HEAD(wait_for_suppliers);
- static DEFINE_MUTEX(wfs_lock);
+@@ -46,8 +46,6 @@ early_param("sysfs.deprecated", sysfs_deprecated_setup);
+ #endif
+ 
+ /* Device links support. */
+-static LIST_HEAD(wait_for_suppliers);
+-static DEFINE_MUTEX(wfs_lock);
  static LIST_HEAD(deferred_sync);
  static unsigned int defer_sync_state_count = 1;
-+static DEFINE_MUTEX(fwnode_link_lock);
-+
-+/**
-+ * fwnode_link_add - Create a link between two fwnode_handles.
-+ * @con: Consumer end of the link.
-+ * @sup: Supplier end of the link.
-+ *
-+ * Creates a fwnode link between two fwnode_handles. These fwnode links are
-+ * used by the driver core to automatically generate device links. Attempts to
-+ * create duplicate links are simply ignored and there is no refcounting.
-+ *
-+ * These links are automatically deleted once they are converted to device
-+ * links or when the fwnode_handles (or their corresponding devices) are
-+ * deleted.
-+ */
-+int fwnode_link_add(struct fwnode_handle *con, struct fwnode_handle *sup)
-+{
-+	struct fwnode_link *link;
-+	int ret = 0;
-+
-+	mutex_lock(&fwnode_link_lock);
-+
-+	/* Duplicate requests are intentionally not refcounted. */
-+	list_for_each_entry(link, &sup->consumers, s_hook)
-+		if (link->consumer == con)
-+			goto out;
-+
-+	link = kzalloc(sizeof(*link), GFP_KERNEL);
-+	if (!link) {
-+		ret = -ENOMEM;
-+		goto out;
-+	}
-+
-+	link->supplier = sup;
-+	INIT_LIST_HEAD(&link->s_hook);
-+	link->consumer = con;
-+	INIT_LIST_HEAD(&link->c_hook);
-+
-+	list_add(&link->s_hook, &sup->consumers);
-+	list_add(&link->c_hook, &con->suppliers);
-+out:
-+	mutex_unlock(&fwnode_link_lock);
-+
-+	return ret;
-+}
-+
-+/**
-+ * fwnode_links_purge_suppliers - Delete all supplier links of fwnode_handle.
-+ * @fwnode: fwnode whose supplier links needs to be deleted
-+ *
-+ * Deletes all supplier links connecting directly to a fwnode.
-+ */
-+static void fwnode_links_purge_suppliers(struct fwnode_handle *fwnode)
-+{
-+	struct fwnode_link *link, *tmp;
-+
-+	mutex_lock(&fwnode_link_lock);
-+	list_for_each_entry_safe(link, tmp, &fwnode->suppliers, c_hook) {
-+		list_del(&link->s_hook);
-+		list_del(&link->c_hook);
-+		kfree(link);
-+	}
-+	mutex_unlock(&fwnode_link_lock);
-+}
-+
-+/**
-+ * fwnode_links_purge_consumers - Delete all consumer links of fwnode_handle.
-+ * @fwnode: fwnode whose consumer links needs to be deleted
-+ *
-+ * Deletes all consumer links connecting directly to a fwnode.
-+ */
-+static void fwnode_links_purge_consumers(struct fwnode_handle *fwnode)
-+{
-+	struct fwnode_link *link, *tmp;
-+
-+	mutex_lock(&fwnode_link_lock);
-+	list_for_each_entry_safe(link, tmp, &fwnode->consumers, s_hook) {
-+		list_del(&link->s_hook);
-+		list_del(&link->c_hook);
-+		kfree(link);
-+	}
-+	mutex_unlock(&fwnode_link_lock);
-+}
-+
-+/**
-+ * fwnode_links_purge - Delete all links connected to a fwnode_handle.
-+ * @fwnode: fwnode whose links needs to be deleted
-+ *
-+ * Deletes all links connecting directly to a fwnode.
-+ */
-+void fwnode_links_purge(struct fwnode_handle *fwnode)
-+{
-+	fwnode_links_purge_suppliers(fwnode);
-+	fwnode_links_purge_consumers(fwnode);
-+}
+ static DEFINE_MUTEX(fwnode_link_lock);
+@@ -800,74 +798,6 @@ struct device_link *device_link_add(struct device *consumer,
+ }
+ EXPORT_SYMBOL_GPL(device_link_add);
  
+-/**
+- * device_link_wait_for_supplier - Add device to wait_for_suppliers list
+- * @consumer: Consumer device
+- *
+- * Marks the @consumer device as waiting for suppliers to become available by
+- * adding it to the wait_for_suppliers list. The consumer device will never be
+- * probed until it's removed from the wait_for_suppliers list.
+- *
+- * The caller is responsible for adding the links to the supplier devices once
+- * they are available and removing the @consumer device from the
+- * wait_for_suppliers list once links to all the suppliers have been created.
+- *
+- * This function is NOT meant to be called from the probe function of the
+- * consumer but rather from code that creates/adds the consumer device.
+- */
+-static void device_link_wait_for_supplier(struct device *consumer,
+-					  bool need_for_probe)
+-{
+-	mutex_lock(&wfs_lock);
+-	list_add_tail(&consumer->links.needs_suppliers, &wait_for_suppliers);
+-	consumer->links.need_for_probe = need_for_probe;
+-	mutex_unlock(&wfs_lock);
+-}
+-
+-static void device_link_wait_for_mandatory_supplier(struct device *consumer)
+-{
+-	device_link_wait_for_supplier(consumer, true);
+-}
+-
+-static void device_link_wait_for_optional_supplier(struct device *consumer)
+-{
+-	device_link_wait_for_supplier(consumer, false);
+-}
+-
+-/**
+- * device_link_add_missing_supplier_links - Add links from consumer devices to
+- *					    supplier devices, leaving any
+- *					    consumer with inactive suppliers on
+- *					    the wait_for_suppliers list
+- *
+- * Loops through all consumers waiting on suppliers and tries to add all their
+- * supplier links. If that succeeds, the consumer device is removed from
+- * wait_for_suppliers list. Otherwise, they are left in the wait_for_suppliers
+- * list.  Devices left on the wait_for_suppliers list will not be probed.
+- *
+- * The fwnode add_links callback is expected to return 0 if it has found and
+- * added all the supplier links for the consumer device. It should return an
+- * error if it isn't able to do so.
+- *
+- * The caller of device_link_wait_for_supplier() is expected to call this once
+- * it's aware of potential suppliers becoming available.
+- */
+-static void device_link_add_missing_supplier_links(void)
+-{
+-	struct device *dev, *tmp;
+-
+-	mutex_lock(&wfs_lock);
+-	list_for_each_entry_safe(dev, tmp, &wait_for_suppliers,
+-				 links.needs_suppliers) {
+-		int ret = fwnode_call_int_op(dev->fwnode, add_links, dev);
+-		if (!ret)
+-			list_del_init(&dev->links.needs_suppliers);
+-		else if (ret != -ENODEV)
+-			dev->links.need_for_probe = false;
+-	}
+-	mutex_unlock(&wfs_lock);
+-}
+-
  #ifdef CONFIG_SRCU
- static DEFINE_MUTEX(device_links_lock);
-diff --git a/drivers/of/dynamic.c b/drivers/of/dynamic.c
-index fe64430b438a..9a824decf61f 100644
---- a/drivers/of/dynamic.c
-+++ b/drivers/of/dynamic.c
-@@ -356,6 +356,7 @@ void of_node_release(struct kobject *kobj)
- 
- 	property_list_free(node->properties);
- 	property_list_free(node->deadprops);
-+	fwnode_links_purge(of_fwnode_handle(node));
- 
- 	kfree(node->full_name);
- 	kfree(node->data);
-diff --git a/include/linux/fwnode.h b/include/linux/fwnode.h
-index 593fb8e58f21..afde643f37a2 100644
---- a/include/linux/fwnode.h
-+++ b/include/linux/fwnode.h
-@@ -10,6 +10,7 @@
- #define _LINUX_FWNODE_H_
- 
- #include <linux/types.h>
-+#include <linux/list.h>
- 
- struct fwnode_operations;
- struct device;
-@@ -18,6 +19,15 @@ struct fwnode_handle {
- 	struct fwnode_handle *secondary;
- 	const struct fwnode_operations *ops;
- 	struct device *dev;
-+	struct list_head suppliers;
-+	struct list_head consumers;
-+};
-+
-+struct fwnode_link {
-+	struct fwnode_handle *supplier;
-+	struct list_head s_hook;
-+	struct fwnode_handle *consumer;
-+	struct list_head c_hook;
- };
- 
- /**
-@@ -173,8 +183,12 @@ static inline void fwnode_init(struct fwnode_handle *fwnode,
- 			       const struct fwnode_operations *ops)
+ static void __device_link_del(struct kref *kref)
  {
- 	fwnode->ops = ops;
-+	INIT_LIST_HEAD(&fwnode->consumers);
-+	INIT_LIST_HEAD(&fwnode->suppliers);
+@@ -1194,9 +1124,8 @@ void device_links_driver_bound(struct device *dev)
+ 	 * the device links it needs to or make new device links as it needs
+ 	 * them. So, it no longer needs to wait on any suppliers.
+ 	 */
+-	mutex_lock(&wfs_lock);
+-	list_del_init(&dev->links.needs_suppliers);
+-	mutex_unlock(&wfs_lock);
++	if (dev->fwnode && dev->fwnode->dev == dev)
++		fwnode_links_purge_suppliers(dev->fwnode);
+ 	device_remove_file(dev, &dev_attr_waiting_for_supplier);
+ 
+ 	device_links_write_lock();
+@@ -1487,10 +1416,6 @@ static void device_links_purge(struct device *dev)
+ 	if (dev->class == &devlink_class)
+ 		return;
+ 
+-	mutex_lock(&wfs_lock);
+-	list_del(&dev->links.needs_suppliers);
+-	mutex_unlock(&wfs_lock);
+-
+ 	/*
+ 	 * Delete all of the remaining links from this device to any other
+ 	 * devices (either consumers or suppliers).
+@@ -1815,17 +1740,17 @@ static void __fw_devlink_link_to_suppliers(struct device *dev,
+ 
+ static void fw_devlink_link_device(struct device *dev)
+ {
+-	int fw_ret;
++	struct fwnode_handle *fwnode = dev->fwnode;
++
++	if (!fw_devlink_flags)
++		return;
+ 
+-	device_link_add_missing_supplier_links();
++	fw_devlink_parse_fwtree(fwnode);
+ 
+-	if (fw_devlink_flags && fwnode_has_op(dev->fwnode, add_links)) {
+-		fw_ret = fwnode_call_int_op(dev->fwnode, add_links, dev);
+-		if (fw_ret == -ENODEV && !fw_devlink_is_permissive())
+-			device_link_wait_for_mandatory_supplier(dev);
+-		else if (fw_ret)
+-			device_link_wait_for_optional_supplier(dev);
+-	}
++	mutex_lock(&fwnode_link_lock);
++	__fw_devlink_link_to_consumers(dev);
++	__fw_devlink_link_to_suppliers(dev, fwnode);
++	mutex_unlock(&fwnode_link_lock);
  }
  
- extern u32 fw_devlink_get_flags(void);
-+int fwnode_link_add(struct fwnode_handle *con, struct fwnode_handle *sup);
-+void fwnode_links_purge(struct fwnode_handle *fwnode);
- 
+ /* Device links support end. */
+@@ -2683,7 +2608,6 @@ void device_initialize(struct device *dev)
  #endif
+ 	INIT_LIST_HEAD(&dev->links.consumers);
+ 	INIT_LIST_HEAD(&dev->links.suppliers);
+-	INIT_LIST_HEAD(&dev->links.needs_suppliers);
+ 	INIT_LIST_HEAD(&dev->links.defer_sync);
+ 	dev->links.status = DL_DEV_NO_DRIVER;
+ }
+diff --git a/include/linux/device.h b/include/linux/device.h
+index 1e771ea4dca6..89bb8b84173e 100644
+--- a/include/linux/device.h
++++ b/include/linux/device.h
+@@ -351,18 +351,13 @@ enum dl_dev_state {
+  * struct dev_links_info - Device data related to device links.
+  * @suppliers: List of links to supplier devices.
+  * @consumers: List of links to consumer devices.
+- * @needs_suppliers: Hook to global list of devices waiting for suppliers.
+  * @defer_sync: Hook to global list of devices that have deferred sync_state.
+- * @need_for_probe: If needs_suppliers is on a list, this indicates if the
+- *		    suppliers are needed for probe or not.
+  * @status: Driver status information.
+  */
+ struct dev_links_info {
+ 	struct list_head suppliers;
+ 	struct list_head consumers;
+-	struct list_head needs_suppliers;
+ 	struct list_head defer_sync;
+-	bool need_for_probe;
+ 	enum dl_dev_state status;
+ };
+ 
 -- 
 2.29.1.341.ge80a0c044ae-goog
 
