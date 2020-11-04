@@ -8,61 +8,61 @@ X-Spam-Status: No, score=-20.4 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
 	USER_AGENT_GIT,USER_IN_DEF_DKIM_WL autolearn=unavailable autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9EAADC55178
-	for <linux-efi@archiver.kernel.org>; Wed,  4 Nov 2020 23:25:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 33B56C55178
+	for <linux-efi@archiver.kernel.org>; Wed,  4 Nov 2020 23:25:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5436920786
-	for <linux-efi@archiver.kernel.org>; Wed,  4 Nov 2020 23:25:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D970920825
+	for <linux-efi@archiver.kernel.org>; Wed,  4 Nov 2020 23:25:37 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="I0A/S4Q3"
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="KPEQ4VrO"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732710AbgKDXZ0 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 4 Nov 2020 18:25:26 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44978 "EHLO
+        id S1732879AbgKDXZd (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 4 Nov 2020 18:25:33 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44954 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1733048AbgKDXYa (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 4 Nov 2020 18:24:30 -0500
-Received: from mail-yb1-xb4a.google.com (mail-yb1-xb4a.google.com [IPv6:2607:f8b0:4864:20::b4a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A8F13C0613D4
-        for <linux-efi@vger.kernel.org>; Wed,  4 Nov 2020 15:24:30 -0800 (PST)
-Received: by mail-yb1-xb4a.google.com with SMTP id x197so376959ybg.18
-        for <linux-efi@vger.kernel.org>; Wed, 04 Nov 2020 15:24:30 -0800 (PST)
+        with ESMTP id S1733043AbgKDXYZ (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 4 Nov 2020 18:24:25 -0500
+Received: from mail-yb1-xb49.google.com (mail-yb1-xb49.google.com [IPv6:2607:f8b0:4864:20::b49])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BA2AEC0613D4
+        for <linux-efi@vger.kernel.org>; Wed,  4 Nov 2020 15:24:25 -0800 (PST)
+Received: by mail-yb1-xb49.google.com with SMTP id w8so395166ybj.14
+        for <linux-efi@vger.kernel.org>; Wed, 04 Nov 2020 15:24:25 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=google.com; s=20161025;
         h=sender:date:in-reply-to:message-id:mime-version:references:subject
          :from:to:cc;
-        bh=HXkyO8z8X08APZbARCQP/2vgXX6ay0o50V4fzW8aU6s=;
-        b=I0A/S4Q3YJdLVtlrppRCljyO3Nbqezxq71d58jzcyH2drf1IpsBN1WngrsFLfhJTk9
-         cKkqvnL+/3U4DIuWdfhDuhwsYLFWPNF78W/a6aonqyWMtVdjVAR7eB5kwpqK0KAOOL6N
-         ZbkOjr3Nl/48a42VD9DUcuCEqznCBSw27YQ2GuEzLPSJyfF4DzgTnGjVGKpzio+WjoB4
-         ELOqLtaqJ/80inf1AL67t7zsC6/XrE5aL/v/W5ctpfs5PGfpoRpzSWRYGakuX3vfISnD
-         ktU9aHTXftzitdhU+WBUAe3RXa6WeH0zPY4VncGHbbLiZmL5g+xNvv5bSAD6wYtz7yVh
-         tnnA==
+        bh=5sRZ6jhZ+T/gutzXbCBa2cQYYZrY2SCzTIYgh1jQP+0=;
+        b=KPEQ4VrOxtoTLDuFgJFdWk6KRPwrcI/ihNJCiTdUkBKEYu92xvhA4SXzdybwWdc4ge
+         8mbUKDP9DwLAgVQ9LoAveXPNRdT77u4tYK7hgrUwH1DDg69Exao6g4YGTrFlNI7Q/w4S
+         F8eYHA6zVlAyFDxBjALghjyzMRvz5/b3Lh8CbxzbmV/WJZuXmDbovzL4rwSNauCh0lBn
+         UR471uUcXqLneNOPe1RoDFHZxIQpmAzGHUT2zgAzJHIf6ztVlw6QTzchqb6yWo3fum7e
+         8VY4oETIv6BIGaO+kuZw29D2uy/y5j6ySRsmxLo8TPojkay576ZnBosMBOA31raHLxDC
+         oTjQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:sender:date:in-reply-to:message-id:mime-version
          :references:subject:from:to:cc;
-        bh=HXkyO8z8X08APZbARCQP/2vgXX6ay0o50V4fzW8aU6s=;
-        b=L+SaHr/RlCpMk8CZqmaWDjrGDtdiDT4522VqsUwKt8vEPyIBlRSBnNEB2QUJyy5RNM
-         22sW3Eo3gd8tW1Qo5OfJrhOy3haofWjVfXgsUaVyoPGqgoJ3XaqNO0MxVr4yOdRV+zlU
-         L4JPzrN1Be+/g7WVGc1sNQEYSXhmXeulaz9dFCtIZohwteWasDgqK4jXHcGpOtCHF/eW
-         PFdEXUk7vDPWPFVVP3Jo7akCsC2cOF1WEws2PfTEytkoC53FG56Xgx3YsPueicXGgQuy
-         gm1oUxQJ/Tq7/rDr0OWwCisghBTrSGpbk3Lam4syZkuU8s7VPFZD6hCpnD/60v3xrodt
-         afJg==
-X-Gm-Message-State: AOAM531aVvCb5fXAjQODx32sDofQrQ5xMkOw3357pVF0f9pW05bHIRPS
-        eWeUF2MpK8ON+eg8LuJsJLuig6jVaVv2/k4=
-X-Google-Smtp-Source: ABdhPJxd/2TF8pjIl7zpCGZmXXH1OB+9XkGkNjTUWRF8D12cDv1hHerte9U8InbxYaLdAQ3BrkNZwCbn2uTFCK8=
+        bh=5sRZ6jhZ+T/gutzXbCBa2cQYYZrY2SCzTIYgh1jQP+0=;
+        b=g/j0UTjFhW0A2TV15DS+7eHCZ1s9uIkL71mNlMkrflBbbGWNylhvMOwdZ5qSImpnJq
+         5c0hboxWTTFGz30qujudRLzCeajoBMYxLm22TZ/3vfzWk/N7aFryt3XMzlPM8Xm9PmXL
+         gD8ppLSiaG2fWAG1XIX+sCFaifpwELAeBDTF+cGL9C3y5pt7Y1/WeHtCkN/bPEAR649V
+         GmMcHbWKAKZEOYG5mhKmlle7P75QBvjmAn5x9vL6Qzu+CRC6T5etZbUuTBYmtaGIkgzG
+         2maN8qT1PKYe2uz4SG7BMZPk/OqdQDYGoFKoxsfaj/Z/Pm5FcMzgQ5mafnq1vFTWYztu
+         M0oA==
+X-Gm-Message-State: AOAM531kchRV3ycNLsidufKKc0g2W8ud1bkBPbfPj0iyxUKLKCynqOtV
+        DyjiPwQVgdrLKthmh+ezX3B8ZpICUkkAM3A=
+X-Google-Smtp-Source: ABdhPJz+alC8yp9zBJND6Vgcoky5QjmGBoY1he5RZG8ZuTerdEihYnn+YQqUYKoT1Mk3I8zQzC9AhaaEWWckVQ4=
 Sender: "saravanak via sendgmr" <saravanak@saravanak.san.corp.google.com>
 X-Received: from saravanak.san.corp.google.com ([2620:15c:2d:3:7220:84ff:fe09:fedc])
- (user=saravanak job=sendgmr) by 2002:a25:774f:: with SMTP id
- s76mr259364ybc.235.1604532269897; Wed, 04 Nov 2020 15:24:29 -0800 (PST)
-Date:   Wed,  4 Nov 2020 15:23:49 -0800
+ (user=saravanak job=sendgmr) by 2002:a5b:389:: with SMTP id
+ k9mr265028ybp.75.1604532264967; Wed, 04 Nov 2020 15:24:24 -0800 (PST)
+Date:   Wed,  4 Nov 2020 15:23:47 -0800
 In-Reply-To: <20201104232356.4038506-1-saravanak@google.com>
-Message-Id: <20201104232356.4038506-13-saravanak@google.com>
+Message-Id: <20201104232356.4038506-11-saravanak@google.com>
 Mime-Version: 1.0
 References: <20201104232356.4038506-1-saravanak@google.com>
 X-Mailer: git-send-email 2.29.1.341.ge80a0c044ae-goog
-Subject: [PATCH v1 12/18] driver core: Add fw_devlink_parse_fwtree()
+Subject: [PATCH v1 10/18] device property: Add fwnode_is_ancestor_of()
 From:   Saravana Kannan <saravanak@google.com>
 To:     "Rafael J. Wysocki" <rjw@rjwysocki.net>,
         "Rafael J. Wysocki" <rafael@kernel.org>,
@@ -85,72 +85,66 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This function is a wrapper around fwnode_operations.add_links().
-
-This function parses each node in a fwnode tree and create fwnode links
-for each of those nodes. The information for creating the fwnode links
-(the supplier and consumer fwnode) is obtained by parsing the properties
-in each of the fwnodes.
-
-This function also ensures that no fwnode is parsed more than once by
-marking the fwnodes as parsed.
+Add a helper function to check if a fwnode is an ancestor of another
+fwnode. This will be useful for fw_devlink feature.
 
 Signed-off-by: Saravana Kannan <saravanak@google.com>
 ---
- drivers/base/core.c    | 19 +++++++++++++++++++
- include/linux/fwnode.h |  3 +++
- 2 files changed, 22 insertions(+)
+ drivers/base/property.c  | 27 +++++++++++++++++++++++++++
+ include/linux/property.h |  2 ++
+ 2 files changed, 29 insertions(+)
 
-diff --git a/drivers/base/core.c b/drivers/base/core.c
-index 4a0907574646..ee28d8c7ee85 100644
---- a/drivers/base/core.c
-+++ b/drivers/base/core.c
-@@ -1543,6 +1543,25 @@ static bool fw_devlink_is_permissive(void)
- 	return fw_devlink_flags == DL_FLAG_SYNC_STATE_ONLY;
+diff --git a/drivers/base/property.c b/drivers/base/property.c
+index 4c43d30145c6..2569ebd52e6b 100644
+--- a/drivers/base/property.c
++++ b/drivers/base/property.c
+@@ -660,6 +660,33 @@ struct fwnode_handle *fwnode_get_nth_parent(struct fwnode_handle *fwnode,
  }
+ EXPORT_SYMBOL_GPL(fwnode_get_nth_parent);
  
-+static void fw_devlink_parse_fwnode(struct fwnode_handle *fwnode)
++/**
++ * fwnode_is_ancestor_of - Test if @test_ancestor is ancestor of @test_child
++ * @test_ancestor: Firmware which is tested for being an ancestor
++ * @test_child: Firmware which is tested for being the child
++ *
++ * A node is considered an ancestor of itself too.
++ *
++ * Returns true if @test_ancestor is an ancestor of @test_child.
++ * Otherwise, returns false.
++ */
++bool fwnode_is_ancestor_of(struct fwnode_handle *test_ancestor,
++				  struct fwnode_handle *test_child)
 +{
-+	if (fwnode->flags & FWNODE_FLAG_LINKS_ADDED)
-+		return;
++	if (!test_ancestor)
++		return false;
 +
-+	fwnode_call_int_op(fwnode, add_links, NULL);
-+	fwnode->flags |= FWNODE_FLAG_LINKS_ADDED;
++	fwnode_handle_get(test_child);
++	while (test_child) {
++		if (test_child == test_ancestor) {
++			fwnode_handle_put(test_child);
++			return true;
++		}
++		test_child = fwnode_get_next_parent(test_child);
++	}
++	return false;
 +}
 +
-+static void fw_devlink_parse_fwtree(struct fwnode_handle *fwnode)
-+{
-+	struct fwnode_handle *child = NULL;
-+
-+	fw_devlink_parse_fwnode(fwnode);
-+
-+	while ((child = fwnode_get_next_available_child_node(fwnode, child)))
-+		fw_devlink_parse_fwtree(child);
-+}
-+
- static void fw_devlink_link_device(struct device *dev)
- {
- 	int fw_ret;
-diff --git a/include/linux/fwnode.h b/include/linux/fwnode.h
-index ec02e1e939cc..9aaf9e4f3994 100644
---- a/include/linux/fwnode.h
-+++ b/include/linux/fwnode.h
-@@ -15,12 +15,15 @@
- struct fwnode_operations;
- struct device;
- 
-+#define FWNODE_FLAG_LINKS_ADDED		BIT(0)
-+
- struct fwnode_handle {
- 	struct fwnode_handle *secondary;
- 	const struct fwnode_operations *ops;
- 	struct device *dev;
- 	struct list_head suppliers;
- 	struct list_head consumers;
-+	u32 flags;
- };
- 
- struct fwnode_link {
+ /**
+  * fwnode_get_next_child_node - Return the next child node handle for a node
+  * @fwnode: Firmware node to find the next child node for.
+diff --git a/include/linux/property.h b/include/linux/property.h
+index 2d4542629d80..2e5eed3ddf1c 100644
+--- a/include/linux/property.h
++++ b/include/linux/property.h
+@@ -88,6 +88,8 @@ struct fwnode_handle *fwnode_get_next_parent(
+ unsigned int fwnode_count_parents(const struct fwnode_handle *fwn);
+ struct fwnode_handle *fwnode_get_nth_parent(struct fwnode_handle *fwn,
+ 					    unsigned int depth);
++bool fwnode_is_ancestor_of(struct fwnode_handle *test_ancestor,
++				  struct fwnode_handle *test_child);
+ struct fwnode_handle *fwnode_get_next_child_node(
+ 	const struct fwnode_handle *fwnode, struct fwnode_handle *child);
+ struct fwnode_handle *fwnode_get_next_available_child_node(
 -- 
 2.29.1.341.ge80a0c044ae-goog
 
