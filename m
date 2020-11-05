@@ -2,90 +2,81 @@ Return-Path: <SRS0=3LIX=EL=vger.kernel.org=linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 37629C4742C
-	for <linux-efi@archiver.kernel.org>; Thu,  5 Nov 2020 07:55:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 523DFC00A89
+	for <linux-efi@archiver.kernel.org>; Thu,  5 Nov 2020 09:33:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D6C4321741
-	for <linux-efi@archiver.kernel.org>; Thu,  5 Nov 2020 07:55:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EE4D420936
+	for <linux-efi@archiver.kernel.org>; Thu,  5 Nov 2020 09:33:28 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1604562934;
-	bh=ILQsgNruhKDt2vPDw/jNHb6v8iE6SdKZAJxgT0uFkVs=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=QbP5j2j5KMjtzGMRpxUeImtNnvvNGD0Aw6HBDz8RmgXMtyA/313guNfbHcqesC3ac
-	 05hkIyu6ln5i7hkpLR0rSILWCCFlnDUlq4Mt+BKyqblKQCTA/MEgycsCZfB0Jumyf7
-	 953EZ5Xg0eVHhTH5uXU81AduMwvL4kYsf/HyWVi0=
+	s=default; t=1604568809;
+	bh=3esBga4idpU2CSztj4UZCUzqnXaLovO1PuuzPUcV1Io=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
+	b=Fp2P9b5xKM5pMVrXZGuFToUGoEOkHxNCgBxIN3SAKtS5lPnogICJMzL/lvVTHHb8l
+	 4Ty+g6YqW/Of6yS7bnrjx6LLdgZsqkUf+GBBhGN1OgyQP8Le3cUzXf9PqJMWsmhHEJ
+	 TBLKG0t4J3lKVGmLnUiTBifKQjLQc0HwCFAe9SMc=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727098AbgKEHze (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 5 Nov 2020 02:55:34 -0500
-Received: from mail.kernel.org ([198.145.29.99]:52842 "EHLO mail.kernel.org"
+        id S1730258AbgKEJd0 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 5 Nov 2020 04:33:26 -0500
+Received: from mail.kernel.org ([198.145.29.99]:60132 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725287AbgKEHze (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Thu, 5 Nov 2020 02:55:34 -0500
-Received: from mail-oi1-f178.google.com (mail-oi1-f178.google.com [209.85.167.178])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        id S1726428AbgKEJdZ (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Thu, 5 Nov 2020 04:33:25 -0500
+Received: from localhost (83-86-74-64.cable.dynamic.v4.ziggo.nl [83.86.74.64])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 6B85F21D81;
-        Thu,  5 Nov 2020 07:55:33 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 9E1B22080D;
+        Thu,  5 Nov 2020 09:33:24 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1604562933;
-        bh=ILQsgNruhKDt2vPDw/jNHb6v8iE6SdKZAJxgT0uFkVs=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=vm7wDrZtH8hCZZhvbWldGAC8JkAXrTIBAL+/sKUAbfT0a3u/kuqxe9vqsEoBRPBG5
-         A9z8nxFvjErl5yxH2rZUeMolxekaQ0tmMNJPHqiu7F3COIC7AdbHiQmQUuG8w6M8aE
-         J2djvof8dx5XYWt931eCmxS4RcajC5JdiQsMDJao=
-Received: by mail-oi1-f178.google.com with SMTP id w145so775687oie.9;
-        Wed, 04 Nov 2020 23:55:33 -0800 (PST)
-X-Gm-Message-State: AOAM533vk9NxI0mwwiR2he3k6RnXy/wHtgIm73fqwh92XPMNfO+E/1At
-        ynt7INMsMy2S9gUTQDUHOhanLUa1ktjVKGpbph0=
-X-Google-Smtp-Source: ABdhPJz0s48E0Uvx/LbM4nWjUD81saxN86YiaP7mZgwrihee0KkZSuk+iCMwoI2P6rp0m0uR0CBa4QMNdSLVkanFInU=
-X-Received: by 2002:aca:c60c:: with SMTP id w12mr876218oif.174.1604562932577;
- Wed, 04 Nov 2020 23:55:32 -0800 (PST)
+        s=default; t=1604568805;
+        bh=3esBga4idpU2CSztj4UZCUzqnXaLovO1PuuzPUcV1Io=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=JGGNaoA+V5Tdop3BsgFeg6nWP7EKfSbL3+02OpMkimQT9S4v6genkjnCeoZNQ9RxB
+         hACOVnqzOA8mq0q2aaY24jKKTfohJPg9W4APW/5zwtNubLJoswG1Zan7RP6/9Rx+qu
+         VrTCOw2+C0C9E9gY5H7OPnNNYKwHCGzaUUBmLHyg=
+Date:   Thu, 5 Nov 2020 10:34:13 +0100
+From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+To:     Saravana Kannan <saravanak@google.com>
+Cc:     "Rafael J. Wysocki" <rjw@rjwysocki.net>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Len Brown <lenb@kernel.org>, Ard Biesheuvel <ardb@kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Frank Rowand <frowand.list@gmail.com>,
+        Marc Zyngier <maz@kernel.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Tomi Valkeinen <tomi.valkeinen@ti.com>,
+        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
+        Grygorii Strashko <grygorii.strashko@ti.com>,
+        kernel-team@android.com, linux-acpi@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
+        devicetree@vger.kernel.org
+Subject: Re: [PATCH v1 01/18] Revert "driver core: Avoid deferred probe due
+ to fw_devlink_pause/resume()"
+Message-ID: <20201105093413.GC3439341@kroah.com>
+References: <20201104232356.4038506-1-saravanak@google.com>
+ <20201104232356.4038506-2-saravanak@google.com>
 MIME-Version: 1.0
-References: <20201102223800.12181-1-ardb@kernel.org> <2fd203414ba8ac3349f0109fea633838b4e04f05.camel@linux.ibm.com>
- <CAMj1kXEjKt0F8dZBnF=x2ShkxyvoGApXzVA-HMCY2oOj7kuKKg@mail.gmail.com>
- <c044fc25be309e7b25a4c64845fd753515c84804.camel@linux.ibm.com>
- <CAMj1kXFuHTruFRudKT512Cmj35KJjcJkTfeHtEjVbfCUZ6oBFQ@mail.gmail.com> <cee4fc79d7918a764b75a7bc38cd6323f4704086.camel@linux.ibm.com>
-In-Reply-To: <cee4fc79d7918a764b75a7bc38cd6323f4704086.camel@linux.ibm.com>
-From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Thu, 5 Nov 2020 08:55:21 +0100
-X-Gmail-Original-Message-ID: <CAMj1kXFQY-khbopEV8N2NvOakya3XXXquxDCKS9j51C1=GJd+w@mail.gmail.com>
-Message-ID: <CAMj1kXFQY-khbopEV8N2NvOakya3XXXquxDCKS9j51C1=GJd+w@mail.gmail.com>
-Subject: Re: [PATCH v4 0/3] wire up IMA secure boot for arm64
-To:     Mimi Zohar <zohar@linux.ibm.com>
-Cc:     linux-efi <linux-efi@vger.kernel.org>,
-        James Morris <jmorris@namei.org>,
-        "Serge E. Hallyn" <serge@hallyn.com>,
-        Dmitry Kasatkin <dmitry.kasatkin@gmail.com>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Will Deacon <will@kernel.org>, Chester Lin <clin@suse.com>,
-        X86 ML <x86@kernel.org>, "Lee, Chun-Yi" <jlee@suse.com>,
-        linux-integrity <linux-integrity@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20201104232356.4038506-2-saravanak@google.com>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Wed, 4 Nov 2020 at 20:55, Mimi Zohar <zohar@linux.ibm.com> wrote:
->
-> On Wed, 2020-11-04 at 20:12 +0100, Ard Biesheuvel wrote:
->
-> > > I do not have a problem with this patch set being upstream via EFI.
-> > >
-> >
-> > Ah right. That is probably better, as EFI goes via the x86 tree, and I
-> > work closely with the arm64 maintainers on other things as well.
-> >
-> > Please let me know once you are ready to ack this from IMA pov, and I
-> > will carry it further.
->
-> thanks,
->
-> Acked-by: Mimi Zohar <zohar@linux.ibm.com>
->
+On Wed, Nov 04, 2020 at 03:23:38PM -0800, Saravana Kannan wrote:
+> This reverts commit 2451e746478a6a6e981cfa66b62b791ca93b90c8.
+> 
+> Signed-off-by: Saravana Kannan <saravanak@google.com>
 
-Thanks Mimi
+You need to say _why_ you are doing this, it's obvious _what_ you are
+doing :)
+
+Same for the other reverts in this series.
+
+thanks,
+
+greg k-h
