@@ -2,57 +2,56 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=0.6 required=3.0 tests=BAYES_50,DKIM_ADSP_CUSTOM_MED,
+	FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,FREEMAIL_REPLYTO_END_DIGIT,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 43FA8C5519F
-	for <linux-efi@archiver.kernel.org>; Sat, 14 Nov 2020 12:18:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B9E59C63777
+	for <linux-efi@archiver.kernel.org>; Sun, 15 Nov 2020 16:45:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 078C822249
-	for <linux-efi@archiver.kernel.org>; Sat, 14 Nov 2020 12:18:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A01622419A
+	for <linux-efi@archiver.kernel.org>; Sun, 15 Nov 2020 16:45:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726625AbgKNMSe (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 14 Nov 2020 07:18:34 -0500
-Received: from mail.kernel.org ([198.145.29.99]:36038 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726716AbgKNMSe (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Sat, 14 Nov 2020 07:18:34 -0500
-Received: from gaia (unknown [2.26.170.190])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 4946122240;
-        Sat, 14 Nov 2020 12:18:32 +0000 (UTC)
-Date:   Sat, 14 Nov 2020 12:18:29 +0000
-From:   Catalin Marinas <catalin.marinas@arm.com>
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     linux-efi@vger.kernel.org, zohar@linux.ibm.com, jmorris@namei.org,
-        serge@hallyn.com, dmitry.kasatkin@gmail.com, will@kernel.org,
-        clin@suse.com, x86@kernel.org, jlee@suse.com,
-        linux-integrity@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org
-Subject: Re: [PATCH v4 3/3] arm64/ima: add ima_arch support
-Message-ID: <20201114121829.GB2837@gaia>
-References: <20201102223800.12181-1-ardb@kernel.org>
- <20201102223800.12181-4-ardb@kernel.org>
+        id S1727315AbgKOQn7 convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 15 Nov 2020 11:43:59 -0500
+Received: from sw73-70-41.adsl.seed.net.tw ([203.73.70.41]:33278 "EHLO
+        oa.trendtek.com.tw" rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org
+        with ESMTP id S1727316AbgKOQn6 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sun, 15 Nov 2020 11:43:58 -0500
+Received: from [156.96.44.214] ([156.96.44.214])
+        (authenticated bits=0)
+        by oa.trendtek.com.tw (8.13.8/8.13.1) with ESMTP id 0AFGhcdE030904
+        for <linux-efi@vger.kernel.org>; Mon, 16 Nov 2020 00:43:57 +0800
+Message-Id: <202011151643.0AFGhcdE030904@oa.trendtek.com.tw>
+Content-Type: text/plain; charset="iso-8859-1"
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20201102223800.12181-4-ardb@kernel.org>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Transfer-Encoding: 8BIT
+Content-Description: Mail message body
+Subject: Corporate and Personal Loan *
+To:     linux-efi@vger.kernel.org
+From:   "Investment  Corporate" <financialcapability6@gmail.com>
+Date:   Sun, 15 Nov 2020 08:43:53 -0800
+Reply-To: hmurrah39@gmail.com
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Mon, Nov 02, 2020 at 11:38:00PM +0100, Ard Biesheuvel wrote:
-> From: Chester Lin <clin@suse.com>
-> 
-> Add arm64 IMA arch support. The code and arch policy is mainly inherited
-> from x86.
-> 
-> Co-developed-by: Chester Lin <clin@suse.com>
-> Signed-off-by: Chester Lin <clin@suse.com>
-> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+Hello linux-efi@vger.kernel.org
 
-Acked-by: Catalin Marinas <catalin.marinas@arm.com>
+
+We are Base Investment Company offering Corporate and Personal Loan at 3% Interest Rate for a duration of 10Years.
+
+
+We also pay 1% commission to brokers, who introduce project owners for finance or other opportunities.
+
+
+Please get back to me if you are interested for more
+
+details.
+
+
+Yours faithfully,
+
+Hashim Murrah
