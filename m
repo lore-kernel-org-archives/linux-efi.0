@@ -8,62 +8,61 @@ X-Spam-Status: No, score=-26.3 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
 	USER_AGENT_GIT,USER_IN_DEF_DKIM_WL autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 70FDFC64E7A
-	for <linux-efi@archiver.kernel.org>; Sat, 21 Nov 2020 02:03:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F0FECC71156
+	for <linux-efi@archiver.kernel.org>; Sat, 21 Nov 2020 02:03:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 20054223B0
-	for <linux-efi@archiver.kernel.org>; Sat, 21 Nov 2020 02:03:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B16AE246A5
+	for <linux-efi@archiver.kernel.org>; Sat, 21 Nov 2020 02:03:11 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="iyIhHWCU"
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="gSBeYkC3"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727127AbgKUCCx (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 20 Nov 2020 21:02:53 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55340 "EHLO
+        id S1727221AbgKUCDE (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 20 Nov 2020 21:03:04 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55400 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727125AbgKUCCx (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 20 Nov 2020 21:02:53 -0500
-Received: from mail-yb1-xb49.google.com (mail-yb1-xb49.google.com [IPv6:2607:f8b0:4864:20::b49])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D2C95C0613CF
-        for <linux-efi@vger.kernel.org>; Fri, 20 Nov 2020 18:02:52 -0800 (PST)
-Received: by mail-yb1-xb49.google.com with SMTP id v13so14069421ybe.18
-        for <linux-efi@vger.kernel.org>; Fri, 20 Nov 2020 18:02:52 -0800 (PST)
+        with ESMTP id S1727214AbgKUCDE (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 20 Nov 2020 21:03:04 -0500
+Received: from mail-qv1-xf4a.google.com (mail-qv1-xf4a.google.com [IPv6:2607:f8b0:4864:20::f4a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BB98DC061A04
+        for <linux-efi@vger.kernel.org>; Fri, 20 Nov 2020 18:03:03 -0800 (PST)
+Received: by mail-qv1-xf4a.google.com with SMTP id b9so1241375qvj.6
+        for <linux-efi@vger.kernel.org>; Fri, 20 Nov 2020 18:03:03 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=google.com; s=20161025;
         h=sender:date:in-reply-to:message-id:mime-version:references:subject
          :from:to:cc;
-        bh=W0J7h6NLwXezG3nw9wROdbEnvnNKGLsOxhSb3UWP0QY=;
-        b=iyIhHWCU9fj/oBG0xaKujfMHdcE8iB1SHBs4M9uqPOEXOlyOZGNCOu4kJplToKtsqJ
-         fm9DBFExGlNp0BWtvnxzXaRl0F2u7jENq1EfgLZiZAfHyGLUmsUve7IGj3V4JMdosQD/
-         tpoo12lOko1CXTc92SEtontayS9W0+oxCJIHIp3E6HX/pgQ70Q4/4/DvH/6Rm0Pzddet
-         GinuxCIH3bZkCO68pDwYARdQQ0Ygh4QCrpj5fBxPcuGt1CKVwtdaMxLpxgy1flqww/JQ
-         EA1F39eN5dGotPk2TCgI2lBfxTDM4CROmmwjA0+wZ6znQee7HUsmCtDzqXxzZk1Xo/4N
-         vM9w==
+        bh=BEFBYjf850Ydzo63+5rwraIHDR8Cqu0fdfzu8DbL0fA=;
+        b=gSBeYkC3hQ7wzIslfgvOpCfXurXfCRj9ddCikE8lToem57W+ZgEmKV4/7kwvRk4nkU
+         B+Yq0fCMAX+BTSVg+KpXb7dCkTyHmv0Vs8YcqMGzKEnJxEoD6zAITT29pEfe50aT5Vw5
+         lqaeRb+2fFZDseJzctWDDDyxolv/P8Xoyt31sKR6LtFF7bu+GwPw9Wr1UAuqljOC5xmX
+         Pq3XphLdk4mVFlHUIhUGDCGBx0u3KJ7wFlsV6X/tkJO3bTCgKm7ylfq7fLqqRNeXjayQ
+         noIKMKbcbZ+xGLAnX7Dy7ijL7bpPlFFfcTjukDUZE84H2VUZflsZWWwYjXH4dawoQS7f
+         Pcsw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:sender:date:in-reply-to:message-id:mime-version
          :references:subject:from:to:cc;
-        bh=W0J7h6NLwXezG3nw9wROdbEnvnNKGLsOxhSb3UWP0QY=;
-        b=ETsPOhENkY3D0ZPLhD40P61go4o9wetNLJ55K2WYZoRFR0KpwbkPRFAcbpUp8CAg/h
-         SEQPWJfHJPxIRJG9s0KPhBqSnuN2qAaj+3icPBGyG0O+HLTgnIiTOARBkGvP2wY1/DPJ
-         iGDAl4hp5si64jHQ1mTHnkGNvyF1+6K5yvZgtj+PJA2G5OIxTgRy+abzFdQP/RSw81U3
-         AWgB5y/5aTv2zZdTqNpOIc+K5bmt3253AIsW/jqO+1BcdaTLHtiOQ8KsuEVo2zXeg51j
-         8J0RfpUjtsZcIO562XB9RiwOemRNMj5ayOPRFI/LrdZK/jLXW6UFEKFh+8lRECC5P6cs
-         tClA==
-X-Gm-Message-State: AOAM531k0LCDsIwYnHSmLpfYfVn0NsnHSsyNguYHONxarSRDpXCsZmhs
-        WwUqk9HLpJcMz3dEyVNR4MRNLNJS4yO38MM=
-X-Google-Smtp-Source: ABdhPJxaPaEuH/NuIAbXGDdgzhB6YudXw1v6b5GdSJ/2qVXcj02CQC8DkQhxDv4As8NeECYbE4iKP/J9Hk/OB9Y=
+        bh=BEFBYjf850Ydzo63+5rwraIHDR8Cqu0fdfzu8DbL0fA=;
+        b=peJT6pUwB9pgDJj9SqtOeCkniEsOPx0nrC0a39S8JiuMwpgFnubt40DwA5cyXvqOqX
+         dG3cuCHDTGqXaNYmkrGqSuukzxYZiN/uUMpNVqI1kNLOHMfjiHohlQqajxgMydZK3ly2
+         sGk5Kh0e3p6MzWoTjuwoDMHbKbseNXqjEmpc9uXiozAb+CV1hLE6Xk4z3to4IJcWNCSU
+         TWdMOo8Jtt1qWfvjbcB2mNNgln/A0jS1jkt+9ZwZ0vqFP+fv+FiEoOFiWMGEDXjxylLu
+         wGiCQwlvQ6XrY91dBS5/F6YABVthH9yosOmQjEAuVPAkVsFBQXXYLMj5g1KvbAOr2dHI
+         LTFA==
+X-Gm-Message-State: AOAM531OBZz2R+HJTizr7vdlQ/9x+vrhd9Fdc9SrJ6H6BP0oT63UmUfP
+        E1B66V8jvpvNpGXh66FcnbPL5lfrkkPQpWQ=
+X-Google-Smtp-Source: ABdhPJztIuCkrLcn+gUs8LJYiOxV3Oj6qHuVK25FKWOhywIwi1DvpSREzSMr8PjNIvYy5JgUGDysjhQxV+JLf+M=
 Sender: "saravanak via sendgmr" <saravanak@saravanak.san.corp.google.com>
 X-Received: from saravanak.san.corp.google.com ([2620:15c:2d:3:7220:84ff:fe09:fedc])
- (user=saravanak job=sendgmr) by 2002:a25:ac1a:: with SMTP id
- w26mr32786299ybi.395.1605924172031; Fri, 20 Nov 2020 18:02:52 -0800 (PST)
-Date:   Fri, 20 Nov 2020 18:02:18 -0800
+ (user=saravanak job=sendgmr) by 2002:a0c:9121:: with SMTP id
+ q30mr2362792qvq.17.1605924182604; Fri, 20 Nov 2020 18:03:02 -0800 (PST)
+Date:   Fri, 20 Nov 2020 18:02:22 -0800
 In-Reply-To: <20201121020232.908850-1-saravanak@google.com>
-Message-Id: <20201121020232.908850-4-saravanak@google.com>
+Message-Id: <20201121020232.908850-8-saravanak@google.com>
 Mime-Version: 1.0
 References: <20201121020232.908850-1-saravanak@google.com>
 X-Mailer: git-send-email 2.29.2.454.gaff20da3a2-goog
-Subject: [PATCH v2 03/17] Revert "driver core: Don't do deferred probe in
- parallel with kernel_init thread"
+Subject: [PATCH v2 07/17] driver core: Add fwnode_init()
 From:   Saravana Kannan <saravanak@google.com>
 To:     "Rafael J. Wysocki" <rjw@rjwysocki.net>,
         "Rafael J. Wysocki" <rafael@kernel.org>,
@@ -86,61 +85,130 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This reverts commit cec72f3efc6272420c2c2c699607f03d09b93e41.
-
-Commit cec72f3efc62 ("driver core: Don't do deferred probe in parallel
-with kernel_init thread") was fixing a commit 716a7a259690 ("driver
-core: fw_devlink: Add support for batching fwnode parsing"). Since the
-commit being fixed itself is going to be reverted, the fix can also be
-reverted.
+There are multiple locations in the kernel where a struct fwnode_handle
+is initialized. Add fwnode_init() so that we have one way of
+initializing a fwnode_handle.
 
 Signed-off-by: Saravana Kannan <saravanak@google.com>
 ---
- drivers/base/base.h | 1 +
- drivers/base/core.c | 1 +
- drivers/base/dd.c   | 5 +++++
- 3 files changed, 7 insertions(+)
+ drivers/acpi/property.c         | 2 +-
+ drivers/acpi/scan.c             | 2 +-
+ drivers/base/swnode.c           | 2 +-
+ drivers/firmware/efi/efi-init.c | 8 ++++----
+ include/linux/fwnode.h          | 6 ++++++
+ include/linux/of.h              | 2 +-
+ kernel/irq/irqdomain.c          | 2 +-
+ 7 files changed, 15 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/base/base.h b/drivers/base/base.h
-index 91cfb8405abd..c3562adf4789 100644
---- a/drivers/base/base.h
-+++ b/drivers/base/base.h
-@@ -156,6 +156,7 @@ extern char *make_class_name(const char *name, struct kobject *kobj);
- extern int devres_release_all(struct device *dev);
- extern void device_block_probing(void);
- extern void device_unblock_probing(void);
-+extern void driver_deferred_probe_force_trigger(void);
+diff --git a/drivers/acpi/property.c b/drivers/acpi/property.c
+index d04de10a63e4..24e87b630573 100644
+--- a/drivers/acpi/property.c
++++ b/drivers/acpi/property.c
+@@ -76,7 +76,7 @@ static bool acpi_nondev_subnode_extract(const union acpi_object *desc,
+ 		return false;
  
- /* /sys/devices directory */
- extern struct kset *devices_kset;
-diff --git a/drivers/base/core.c b/drivers/base/core.c
-index c91ff2546247..e6bb4bf4f19d 100644
---- a/drivers/base/core.c
-+++ b/drivers/base/core.c
-@@ -1548,6 +1548,7 @@ void fw_devlink_resume(void)
- 		goto out;
+ 	dn->name = link->package.elements[0].string.pointer;
+-	dn->fwnode.ops = &acpi_data_fwnode_ops;
++	fwnode_init(&dn->fwnode, &acpi_data_fwnode_ops);
+ 	dn->parent = parent;
+ 	INIT_LIST_HEAD(&dn->data.properties);
+ 	INIT_LIST_HEAD(&dn->data.subnodes);
+diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
+index bc6a79e33220..519963bcc047 100644
+--- a/drivers/acpi/scan.c
++++ b/drivers/acpi/scan.c
+@@ -1589,7 +1589,7 @@ void acpi_init_device_object(struct acpi_device *device, acpi_handle handle,
+ 	device->device_type = type;
+ 	device->handle = handle;
+ 	device->parent = acpi_bus_get_parent(handle);
+-	device->fwnode.ops = &acpi_device_fwnode_ops;
++	fwnode_init(&device->fwnode, &acpi_device_fwnode_ops);
+ 	acpi_set_device_status(device, sta);
+ 	acpi_device_get_busid(device);
+ 	acpi_set_pnp_ids(handle, &device->pnp, type);
+diff --git a/drivers/base/swnode.c b/drivers/base/swnode.c
+index 010828fc785b..4a4b2008fbc2 100644
+--- a/drivers/base/swnode.c
++++ b/drivers/base/swnode.c
+@@ -653,7 +653,7 @@ swnode_register(const struct software_node *node, struct swnode *parent,
+ 	swnode->parent = parent;
+ 	swnode->allocated = allocated;
+ 	swnode->kobj.kset = swnode_kset;
+-	swnode->fwnode.ops = &software_node_ops;
++	fwnode_init(&swnode->fwnode, &software_node_ops);
  
- 	device_link_add_missing_supplier_links();
-+	driver_deferred_probe_force_trigger();
- out:
- 	mutex_unlock(&defer_fw_devlink_lock);
- }
-diff --git a/drivers/base/dd.c b/drivers/base/dd.c
-index 148e81969e04..001caa0b447c 100644
---- a/drivers/base/dd.c
-+++ b/drivers/base/dd.c
-@@ -167,6 +167,11 @@ static void driver_deferred_probe_trigger(void)
- 	if (!driver_deferred_probe_enable)
- 		return;
+ 	ida_init(&swnode->child_ids);
+ 	INIT_LIST_HEAD(&swnode->entry);
+diff --git a/drivers/firmware/efi/efi-init.c b/drivers/firmware/efi/efi-init.c
+index f55a92ff12c0..b148f1459fb3 100644
+--- a/drivers/firmware/efi/efi-init.c
++++ b/drivers/firmware/efi/efi-init.c
+@@ -359,9 +359,7 @@ static const struct fwnode_operations efifb_fwnode_ops = {
+ 	.add_links = efifb_add_links,
+ };
  
-+	driver_deferred_probe_force_trigger();
+-static struct fwnode_handle efifb_fwnode = {
+-	.ops = &efifb_fwnode_ops,
+-};
++static struct fwnode_handle efifb_fwnode;
+ 
+ static int __init register_gop_device(void)
+ {
+@@ -375,8 +373,10 @@ static int __init register_gop_device(void)
+ 	if (!pd)
+ 		return -ENOMEM;
+ 
+-	if (IS_ENABLED(CONFIG_PCI))
++	if (IS_ENABLED(CONFIG_PCI)) {
++		fwnode_init(&efifb_fwnode, &efifb_fwnode_ops);
+ 		pd->dev.fwnode = &efifb_fwnode;
++	}
+ 
+ 	err = platform_device_add_data(pd, &screen_info, sizeof(screen_info));
+ 	if (err)
+diff --git a/include/linux/fwnode.h b/include/linux/fwnode.h
+index e0abafbb17f8..5589799708b5 100644
+--- a/include/linux/fwnode.h
++++ b/include/linux/fwnode.h
+@@ -170,6 +170,12 @@ struct fwnode_operations {
+ 	} while (false)
+ #define get_dev_from_fwnode(fwnode)	get_device((fwnode)->dev)
+ 
++static inline void fwnode_init(struct fwnode_handle *fwnode,
++			       const struct fwnode_operations *ops)
++{
++	fwnode->ops = ops;
 +}
 +
-+void driver_deferred_probe_force_trigger(void)
-+{
- 	/*
- 	 * A successful probe means that all the devices in the pending list
- 	 * should be triggered to be reprobed.  Move all the deferred devices
+ extern u32 fw_devlink_get_flags(void);
+ 
+ #endif
+diff --git a/include/linux/of.h b/include/linux/of.h
+index 5d51891cbf1a..27fba2472eee 100644
+--- a/include/linux/of.h
++++ b/include/linux/of.h
+@@ -108,7 +108,7 @@ static inline void of_node_init(struct device_node *node)
+ #if defined(CONFIG_OF_KOBJ)
+ 	kobject_init(&node->kobj, &of_node_ktype);
+ #endif
+-	node->fwnode.ops = &of_fwnode_ops;
++	fwnode_init(&node->fwnode, &of_fwnode_ops);
+ }
+ 
+ #if defined(CONFIG_OF_KOBJ)
+diff --git a/kernel/irq/irqdomain.c b/kernel/irq/irqdomain.c
+index cf8b374b892d..06fce7e39033 100644
+--- a/kernel/irq/irqdomain.c
++++ b/kernel/irq/irqdomain.c
+@@ -91,7 +91,7 @@ struct fwnode_handle *__irq_domain_alloc_fwnode(unsigned int type, int id,
+ 	fwid->type = type;
+ 	fwid->name = n;
+ 	fwid->pa = pa;
+-	fwid->fwnode.ops = &irqchip_fwnode_ops;
++	fwnode_init(&fwid->fwnode, &irqchip_fwnode_ops);
+ 	return &fwid->fwnode;
+ }
+ EXPORT_SYMBOL_GPL(__irq_domain_alloc_fwnode);
 -- 
 2.29.2.454.gaff20da3a2-goog
 
