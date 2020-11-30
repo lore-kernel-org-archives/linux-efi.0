@@ -2,142 +2,129 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,
+X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
 	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CAA2FC63798
-	for <linux-efi@archiver.kernel.org>; Sat, 28 Nov 2020 22:11:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 31009C63777
+	for <linux-efi@archiver.kernel.org>; Mon, 30 Nov 2020 08:17:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9BC7121534
-	for <linux-efi@archiver.kernel.org>; Sat, 28 Nov 2020 22:11:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EA9442087D
+	for <linux-efi@archiver.kernel.org>; Mon, 30 Nov 2020 08:17:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387807AbgK1VuF (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 28 Nov 2020 16:50:05 -0500
-Received: from youngberry.canonical.com ([91.189.89.112]:57244 "EHLO
+        id S1726671AbgK3IQz (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 30 Nov 2020 03:16:55 -0500
+Received: from youngberry.canonical.com ([91.189.89.112]:35661 "EHLO
         youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728350AbgK0Tps (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 27 Nov 2020 14:45:48 -0500
-Received: from 1.general.cking.uk.vpn ([10.172.193.212])
+        with ESMTP id S1725880AbgK3IQz (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 30 Nov 2020 03:16:55 -0500
+Received: from [106.104.74.151] (helo=[192.168.31.192])
         by youngberry.canonical.com with esmtpsa (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
         (Exim 4.86_2)
-        (envelope-from <colin.king@canonical.com>)
-        id 1kijZN-0004ws-Tl; Fri, 27 Nov 2020 19:38:13 +0000
-Subject: Re: ACK: [PATCH 1/1] efi/efi_test: read RuntimeServicesSupported
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     Heinrich Schuchardt <xypron.glpk@gmx.de>,
-        Ivan Hu <ivan.hu@canonical.com>,
-        linux-efi <linux-efi@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        (envelope-from <ivan.hu@canonical.com>)
+        id 1kjeM0-00060T-PG; Mon, 30 Nov 2020 08:16:13 +0000
+Subject: Re: [PATCH 1/1] efi/efi_test: read RuntimeServicesSupported
+To:     Heinrich Schuchardt <xypron.glpk@gmx.de>,
+        Ard Biesheuvel <ardb@kernel.org>
+Cc:     linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Colin King <colin.king@canonical.com>,
         fwts-devel@lists.ubuntu.com
 References: <20201127192051.1430-1-xypron.glpk@gmx.de>
- <98faddb2-5acc-c228-d002-71341d1c558e@canonical.com>
- <CAMj1kXFNtCJEvbhZpO9p96UNGuo-r2dXQPm0TRjmQuF4TLBUcg@mail.gmail.com>
-From:   Colin Ian King <colin.king@canonical.com>
-Message-ID: <8d4133d9-3d4b-ee3c-7bb0-927c14d37961@canonical.com>
-Date:   Fri, 27 Nov 2020 19:38:13 +0000
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.5.0
+From:   ivanhu <ivan.hu@canonical.com>
+Message-ID: <1fbab8b3-3a37-f3f5-39b4-0c8123d27b29@canonical.com>
+Date:   Mon, 30 Nov 2020 16:16:07 +0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-In-Reply-To: <CAMj1kXFNtCJEvbhZpO9p96UNGuo-r2dXQPm0TRjmQuF4TLBUcg@mail.gmail.com>
+In-Reply-To: <20201127192051.1430-1-xypron.glpk@gmx.de>
 Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
+Content-Language: en-GB
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On 27/11/2020 19:29, Ard Biesheuvel wrote:
-> On Fri, 27 Nov 2020 at 20:28, Colin Ian King <colin.king@canonical.com> wrote:
->>
->> On 27/11/2020 19:20, Heinrich Schuchardt wrote:
->>> Since the UEFI 2.8A specification the UEFI enabled firmware provides a
->>> configuration table EFI_RT_PROPERTIES_TABLE which indicates which runtime
->>> services are enabled. The EFI stub reads this table and saves the value of
->>> the field RuntimeServicesSupported internally.
->>>
->>> The Firmware Test Suite requires the value to determine if UEFI runtime
->>> services are correctly implemented.
->>>
->>> With this patch an IOCTL call is provided to read the value of the field
->>> RuntimeServicesSupported, e.g.
->>>
->>>     #define EFI_RUNTIME_GET_SUPPORTED_MASK \
->>>             _IOR('p', 0x0C, unsigned int)
->>>     unsigned int mask;
->>>     fd = open("/dev/efi_test", O_RDWR);
->>>     ret = ioctl(fd, EFI_RUNTIME_GET_SUPPORTED_MASK, &mask);
->>>
->>> Signed-off-by: Heinrich Schuchardt <xypron.glpk@gmx.de>
->>> ---
->>>  drivers/firmware/efi/test/efi_test.c | 16 ++++++++++++++++
->>>  drivers/firmware/efi/test/efi_test.h |  3 +++
->>>  2 files changed, 19 insertions(+)
->>>
->>> diff --git a/drivers/firmware/efi/test/efi_test.c b/drivers/firmware/efi/test/efi_test.c
->>> index ddf9eae396fe..47d67bb0a516 100644
->>> --- a/drivers/firmware/efi/test/efi_test.c
->>> +++ b/drivers/firmware/efi/test/efi_test.c
->>> @@ -663,6 +663,19 @@ static long efi_runtime_query_capsulecaps(unsigned long arg)
->>>       return rv;
->>>  }
->>>
->>> +static long efi_runtime_get_supported_mask(unsigned long arg)
->>> +{
->>> +     unsigned int __user *supported_mask;
->>> +     int rv = 0;
->>> +
->>> +     supported_mask = (unsigned int *)arg;
->>> +
->>> +     if (put_user(efi.runtime_supported_mask, supported_mask))
->>> +             rv = -EFAULT;
->>> +
->>> +     return rv;
->>> +}
->>> +
->>>  static long efi_test_ioctl(struct file *file, unsigned int cmd,
->>>                                                       unsigned long arg)
->>>  {
->>> @@ -699,6 +712,9 @@ static long efi_test_ioctl(struct file *file, unsigned int cmd,
->>>
->>>       case EFI_RUNTIME_RESET_SYSTEM:
->>>               return efi_runtime_reset_system(arg);
->>> +
->>> +     case EFI_RUNTIME_GET_SUPPORTED_MASK:
->>> +             return efi_runtime_get_supported_mask(arg);
->>>       }
->>>
->>>       return -ENOTTY;
->>> diff --git a/drivers/firmware/efi/test/efi_test.h b/drivers/firmware/efi/test/efi_test.h
->>> index f2446aa1c2e3..117349e57993 100644
->>> --- a/drivers/firmware/efi/test/efi_test.h
->>> +++ b/drivers/firmware/efi/test/efi_test.h
->>> @@ -118,4 +118,7 @@ struct efi_resetsystem {
->>>  #define EFI_RUNTIME_RESET_SYSTEM \
->>>       _IOW('p', 0x0B, struct efi_resetsystem)
->>>
->>> +#define EFI_RUNTIME_GET_SUPPORTED_MASK \
->>> +     _IOR('p', 0x0C, unsigned int)
->>> +
->>>  #endif /* _DRIVERS_FIRMWARE_EFI_TEST_H_ */
->>> --
->>> 2.29.2
->>>
->>
->> Looks good to me. Thanks Heinrich.
->>
->> The EFI driver needs to be also updated in the linux kernel - has that
->> fix been submitted or do you require the fwts team to do that?
+Hi Heinrich,
 
-Oops. It's been a lot week :-(
+Thanks for the patch.
+It looks good to me, but I noticed that the runtime_supported_mask was
+introduced after 5.7-rc1.
+Maybe we should add the kernel version checking for the old kernels.
 
->>
+Cheers,
+Ivan
+
+On 11/28/20 3:20 AM, Heinrich Schuchardt wrote:
+> Since the UEFI 2.8A specification the UEFI enabled firmware provides a
+> configuration table EFI_RT_PROPERTIES_TABLE which indicates which runtime
+> services are enabled. The EFI stub reads this table and saves the value of
+> the field RuntimeServicesSupported internally.
 > 
-> This /is/ the EFI driver.
+> The Firmware Test Suite requires the value to determine if UEFI runtime
+> services are correctly implemented.
 > 
-> I'll take this as an acked-by but I'd like Ivan to chime in as well.
+> With this patch an IOCTL call is provided to read the value of the field
+> RuntimeServicesSupported, e.g.
 > 
-+1
-
-
+>     #define EFI_RUNTIME_GET_SUPPORTED_MASK \
+>             _IOR('p', 0x0C, unsigned int)
+>     unsigned int mask;
+>     fd = open("/dev/efi_test", O_RDWR);
+>     ret = ioctl(fd, EFI_RUNTIME_GET_SUPPORTED_MASK, &mask);
+> 
+> Signed-off-by: Heinrich Schuchardt <xypron.glpk@gmx.de>
+> ---
+>  drivers/firmware/efi/test/efi_test.c | 16 ++++++++++++++++
+>  drivers/firmware/efi/test/efi_test.h |  3 +++
+>  2 files changed, 19 insertions(+)
+> 
+> diff --git a/drivers/firmware/efi/test/efi_test.c b/drivers/firmware/efi/test/efi_test.c
+> index ddf9eae396fe..47d67bb0a516 100644
+> --- a/drivers/firmware/efi/test/efi_test.c
+> +++ b/drivers/firmware/efi/test/efi_test.c
+> @@ -663,6 +663,19 @@ static long efi_runtime_query_capsulecaps(unsigned long arg)
+>  	return rv;
+>  }
+> 
+> +static long efi_runtime_get_supported_mask(unsigned long arg)
+> +{
+> +	unsigned int __user *supported_mask;
+> +	int rv = 0;
+> +
+> +	supported_mask = (unsigned int *)arg;
+> +
+> +	if (put_user(efi.runtime_supported_mask, supported_mask))
+> +		rv = -EFAULT;
+> +
+> +	return rv;
+> +}
+> +
+>  static long efi_test_ioctl(struct file *file, unsigned int cmd,
+>  							unsigned long arg)
+>  {
+> @@ -699,6 +712,9 @@ static long efi_test_ioctl(struct file *file, unsigned int cmd,
+> 
+>  	case EFI_RUNTIME_RESET_SYSTEM:
+>  		return efi_runtime_reset_system(arg);
+> +
+> +	case EFI_RUNTIME_GET_SUPPORTED_MASK:
+> +		return efi_runtime_get_supported_mask(arg);
+>  	}
+> 
+>  	return -ENOTTY;
+> diff --git a/drivers/firmware/efi/test/efi_test.h b/drivers/firmware/efi/test/efi_test.h
+> index f2446aa1c2e3..117349e57993 100644
+> --- a/drivers/firmware/efi/test/efi_test.h
+> +++ b/drivers/firmware/efi/test/efi_test.h
+> @@ -118,4 +118,7 @@ struct efi_resetsystem {
+>  #define EFI_RUNTIME_RESET_SYSTEM \
+>  	_IOW('p', 0x0B, struct efi_resetsystem)
+> 
+> +#define EFI_RUNTIME_GET_SUPPORTED_MASK \
+> +	_IOR('p', 0x0C, unsigned int)
+> +
+>  #endif /* _DRIVERS_FIRMWARE_EFI_TEST_H_ */
+> --
+> 2.29.2
+> 
