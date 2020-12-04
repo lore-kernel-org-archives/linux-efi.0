@@ -2,153 +2,128 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 826A1C0018C
-	for <linux-efi@archiver.kernel.org>; Fri,  4 Dec 2020 17:06:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 94E61C433FE
+	for <linux-efi@archiver.kernel.org>; Fri,  4 Dec 2020 17:08:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5EFDA22B3B
-	for <linux-efi@archiver.kernel.org>; Fri,  4 Dec 2020 17:06:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2D1E422B43
+	for <linux-efi@archiver.kernel.org>; Fri,  4 Dec 2020 17:08:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388521AbgLDRFr (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 4 Dec 2020 12:05:47 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33422 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2388510AbgLDRFq (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 4 Dec 2020 12:05:46 -0500
-Received: from latitanza.investici.org (latitanza.investici.org [IPv6:2001:888:2000:56::19])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C1612C08E85E;
-        Fri,  4 Dec 2020 09:04:50 -0800 (PST)
-Received: from mx3.investici.org (unknown [127.0.0.1])
-        by latitanza.investici.org (Postfix) with ESMTP id 4CnfF12X1nz8shk;
-        Fri,  4 Dec 2020 17:04:05 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=privacyrequired.com;
-        s=stigmate; t=1607101445;
-        bh=CNSPo3rU73iLufUhzAAlkyJdrqDxV3HykhrbciRVVqg=;
-        h=From:To:Cc:Subject:Date:From;
-        b=CAj2903IlbaunC80bM+z7sehEdvvySRvMXF2B7QVSeGl9c1o2+R49o1Johhg6BSQ4
-         Q4EMyEP3bIuGgoqirMK1uT98XPrJ1OTptjksAJf1V5Duw6RhXyRn+MKAiMRbwunKkr
-         vE228J0uaZtyVw5ECCzsQr3hgtGk8lvECyg5M/Pg=
-Received: from [82.94.249.234] (mx3.investici.org [82.94.249.234]) (Authenticated sender: laniel_francis@privacyrequired.com) by localhost (Postfix) with ESMTPSA id 4CnfDy1SRgz8sfb;
-        Fri,  4 Dec 2020 17:04:02 +0000 (UTC)
-From:   laniel_francis@privacyrequired.com
-To:     Russell King <linux@armlinux.org.uk>,
-        Hauke Mehrtens <hauke@hauke-m.de>,
-        =?UTF-8?q?Rafa=C5=82=20Mi=C5=82ecki?= <zajec5@gmail.com>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        bcm-kernel-feedback-list@broadcom.com,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        "David S. Miller" <davem@davemloft.net>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Tomi Valkeinen <tomi.valkeinen@ti.com>,
-        David Airlie <airlied@linux.ie>,
-        Daniel Vetter <daniel@ffwll.ch>,
-        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
-        Kieran Bingham <kieran.bingham+renesas@ideasonboard.com>,
-        Alasdair Kergon <agk@redhat.com>,
-        Mike Snitzer <snitzer@redhat.com>, dm-devel@redhat.com,
-        Bin Liu <b-liu@ti.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Jessica Yu <jeyu@kernel.org>
-Cc:     Francis Laniel <laniel_francis@privacyrequired.com>,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-mips@vger.kernel.org, linux-crypto@vger.kernel.org,
-        linux-efi@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-renesas-soc@vger.kernel.org, linux-ide@vger.kernel.org,
-        linux-usb@vger.kernel.org
-Subject: [RFC PATCH v1 00/12] Replace strstarts() by str_has_prefix()
-Date:   Fri,  4 Dec 2020 18:03:06 +0100
-Message-Id: <20201204170319.20383-1-laniel_francis@privacyrequired.com>
-X-Mailer: git-send-email 2.20.1
+        id S1728997AbgLDRIE (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 4 Dec 2020 12:08:04 -0500
+Received: from mail.kernel.org ([198.145.29.99]:33108 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726808AbgLDRIE (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 4 Dec 2020 12:08:04 -0500
+X-Gm-Message-State: AOAM532WzK02qD1l2kDD8y7eWat4ElxS16G6b2XSLpkoxY/YgzfS15oc
+        0WRh+iQhJRhex7xKvJt+9fiNT4yRxW416SL9B7o=
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1607101643;
+        bh=LCM/l/OFDG8l8JxKXFqzSJTqblII7JKN8AA1VZ/6a8s=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=p53xpbZuyz6nbq3yuE8eYa1fv58U4CFbTFq1qojv4C477/+3g7vnqGEIcmse2jwvP
+         uqcIBjN8MVvX4oUd4R/2Kphqx5MIHzAUfvzSQt3TUJrv3QniVTXLxXMin7R48UMdR/
+         oYppwCqYW6DsUo9Q2zDCysGVCVYGDaIryPoUhyPobfOM/sRGykTp7Tb12XTwmSZnVt
+         RDXPYe3XwiRbDchvuwCzl5iPysftAGyqMDFKuIPPoMAWKB0dQi78C2qM0TyHA4Xn0c
+         5vY48MAAC18d+QtQRbmqDm4dJWQHqe3xpVMBp2nAdNt4jJoRYsAHmm8WKI6sutJJqo
+         H5vdXycIZOigg==
+X-Google-Smtp-Source: ABdhPJy+Vxuhgyy/Mkyy0618OZF1AopKWX0x2kfN3qWuwsouZqkTNwYaHlTMUtJhgFfl8tWADf+5SsnuwX78y+h7e1I=
+X-Received: by 2002:a05:6830:214c:: with SMTP id r12mr4317113otd.90.1607101642942;
+ Fri, 04 Dec 2020 09:07:22 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20201204170319.20383-1-laniel_francis@privacyrequired.com> <20201204170319.20383-8-laniel_francis@privacyrequired.com>
+In-Reply-To: <20201204170319.20383-8-laniel_francis@privacyrequired.com>
+From:   Ard Biesheuvel <ardb@kernel.org>
+Date:   Fri, 4 Dec 2020 18:07:11 +0100
+X-Gmail-Original-Message-ID: <CAMj1kXEQhT_LF5FDBO3-S7pBn55wG59bQUVr2q58A4FhqodY8Q@mail.gmail.com>
+Message-ID: <CAMj1kXEQhT_LF5FDBO3-S7pBn55wG59bQUVr2q58A4FhqodY8Q@mail.gmail.com>
+Subject: Re: [RFC PATCH v1 07/12] efi: Replace strstarts() by str_has_prefix().
+To:     laniel_francis@privacyrequired.com
+Cc:     linux-efi <linux-efi@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Francis Laniel <laniel_francis@privacyrequired.com>
+On Fri, 4 Dec 2020 at 18:06, <laniel_francis@privacyrequired.com> wrote:
+>
+> From: Francis Laniel <laniel_francis@privacyrequired.com>
+>
+> The two functions indicates if a string begins with a given prefix.
+> The only difference is that strstarts() returns a bool while str_has_prefix()
+> returns the length of the prefix if the string begins with it or 0 otherwise.
+>
 
-Hi.
+Why?
 
-
-First, I hope you are fine and the same for your relatives.
-
-In this patch set, I replaced all calls to strstarts() by calls to
-str_has_prefix().
-Indeed, the kernel has two functions to test if a string begins with an other:
-1. strstarts() which returns a bool, so 1 if the string begins with the prefix,
-0 otherwise.
-2. str_has_prefix() which returns the length of the prefix or 0.
-
-str_has_prefix() was introduced later than strstarts(), in commit 495d714ad140
-which also stated that str_has_prefix() should replace strstarts().
-This is what this patch set does.
-
-Concerning the patches, the modifications cover different areas of the kernel.
-I compiled all of them and they compile smoothly.
-Unfortunately, I did not test all of them, so here are the status of the patches
-regarding test:
-1. Tested with qemu-system-arm using insmod.
-2. I do not have access to a bcm47xx MIPS CPU an qemu-system-mips does not
-emulate this board.
-3. Tested with qemu-system-x86_64 calling
-crypto_alloc_skcipher("essiv(authenc(hmac(sha256),cbc(aes)),sha256)", 0, 0)
-through LKDTM.
-4. Tested with qemu-system-x86_64 using crypsetup.
-5. I do not have access to a renesas board and I lack some context to test it
-with qemu-system-arm.
-6. I do not have access to an OMAP board and I lack some context to test it with
-qemu-system-arm.
-7. I did not find how to boot from the EFI_STUB with qemu. If you know how to
-do, I would be happy to try running this code.
-8. I ran qemu-system-x86_64 with a floppy disk attached but impossible to go
-through this module code...
-9. I do not have access to a bcm63xx MIPS CPU an qemu-system-mips does not
-emulate this board.
-10. Tested with qemu-system-x86_64 using insmod.
-11. I do not have access to an AM335x or DA8xx platforms and I lack some context
-to test it with qemu-system-arm.
-
-If you see a way to improve the patches or if I did something wrong with the
-mail do not hesitate to ask.
-
-
-Best regards.
-
-Francis Laniel (12):
-  arm: Replace strstarts() by str_has_prefix().
-  mips: Replace strstarts() by str_has_prefix().
-  crypto: Replace strstarts() by str_has_prefix().
-  device-mapper: Replace strstarts() by str_has_prefix().
-  renesas: Replace strstarts() by str_has_prefix().
-  omap: Replace strstarts() by str_has_prefix().
-  efi: Replace strstarts() by str_has_prefix().
-  ide: Replace strstarts() by str_has_prefix().
-  mips: Replace strstarts() by str_has_prefix().
-  module: Replace strstarts() by str_has_prefix().
-  musb: Replace strstarts() by str_has_prefix().
-  string.h: Remove strstarts().
-
- arch/arm/kernel/module.c                      | 12 +++++------
- arch/mips/bcm47xx/board.c                     |  4 ++--
- arch/mips/bcm63xx/boards/board_bcm963xx.c     |  2 +-
- crypto/essiv.c                                |  2 +-
- .../firmware/efi/libstub/efi-stub-helper.c    |  2 +-
- drivers/firmware/efi/libstub/gop.c            | 10 +++++-----
- drivers/gpu/drm/omapdrm/dss/base.c            |  2 +-
- drivers/gpu/drm/rcar-du/rcar_du_crtc.c        |  2 +-
- drivers/ide/ide-floppy.c                      |  4 ++--
- drivers/md/dm-crypt.c                         |  4 ++--
- drivers/usb/musb/musb_cppi41.c                |  4 ++--
- drivers/usb/musb/musb_debugfs.c               | 20 +++++++++----------
- include/linux/string.h                        | 10 ----------
- kernel/module.c                               |  6 +++---
- 14 files changed, 37 insertions(+), 47 deletions(-)
-
--- 
-2.20.1
-
+> Signed-off-by: Francis Laniel <laniel_francis@privacyrequired.com>
+> ---
+>  drivers/firmware/efi/libstub/efi-stub-helper.c |  2 +-
+>  drivers/firmware/efi/libstub/gop.c             | 10 +++++-----
+>  2 files changed, 6 insertions(+), 6 deletions(-)
+>
+> diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+> index aa8da0a49829..a502f549d900 100644
+> --- a/drivers/firmware/efi/libstub/efi-stub-helper.c
+> +++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+> @@ -230,7 +230,7 @@ efi_status_t efi_parse_options(char const *cmdline)
+>                         if (parse_option_str(val, "debug"))
+>                                 efi_loglevel = CONSOLE_LOGLEVEL_DEBUG;
+>                 } else if (!strcmp(param, "video") &&
+> -                          val && strstarts(val, "efifb:")) {
+> +                          val && str_has_prefix(val, "efifb:")) {
+>                         efi_parse_option_graphics(val + strlen("efifb:"));
+>                 }
+>         }
+> diff --git a/drivers/firmware/efi/libstub/gop.c b/drivers/firmware/efi/libstub/gop.c
+> index ea5da307d542..fbe95b3cc96a 100644
+> --- a/drivers/firmware/efi/libstub/gop.c
+> +++ b/drivers/firmware/efi/libstub/gop.c
+> @@ -39,7 +39,7 @@ static bool parse_modenum(char *option, char **next)
+>  {
+>         u32 m;
+>
+> -       if (!strstarts(option, "mode="))
+> +       if (!str_has_prefix(option, "mode="))
+>                 return false;
+>         option += strlen("mode=");
+>         m = simple_strtoull(option, &option, 0);
+> @@ -65,10 +65,10 @@ static bool parse_res(char *option, char **next)
+>         h = simple_strtoull(option, &option, 10);
+>         if (*option == '-') {
+>                 option++;
+> -               if (strstarts(option, "rgb")) {
+> +               if (str_has_prefix(option, "rgb")) {
+>                         option += strlen("rgb");
+>                         pf = PIXEL_RGB_RESERVED_8BIT_PER_COLOR;
+> -               } else if (strstarts(option, "bgr")) {
+> +               } else if (str_has_prefix(option, "bgr")) {
+>                         option += strlen("bgr");
+>                         pf = PIXEL_BGR_RESERVED_8BIT_PER_COLOR;
+>                 } else if (isdigit(*option))
+> @@ -90,7 +90,7 @@ static bool parse_res(char *option, char **next)
+>
+>  static bool parse_auto(char *option, char **next)
+>  {
+> -       if (!strstarts(option, "auto"))
+> +       if (!str_has_prefix(option, "auto"))
+>                 return false;
+>         option += strlen("auto");
+>         if (*option && *option++ != ',')
+> @@ -103,7 +103,7 @@ static bool parse_auto(char *option, char **next)
+>
+>  static bool parse_list(char *option, char **next)
+>  {
+> -       if (!strstarts(option, "list"))
+> +       if (!str_has_prefix(option, "list"))
+>                 return false;
+>         option += strlen("list");
+>         if (*option && *option++ != ',')
+> --
+> 2.20.1
+>
