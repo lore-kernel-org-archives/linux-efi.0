@@ -4,102 +4,96 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F06EC4361A
-	for <linux-efi@archiver.kernel.org>; Fri,  4 Dec 2020 18:03:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F2724C433FE
+	for <linux-efi@archiver.kernel.org>; Sat,  5 Dec 2020 19:10:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D997B22B4E
-	for <linux-efi@archiver.kernel.org>; Fri,  4 Dec 2020 18:03:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BC0AC22B2A
+	for <linux-efi@archiver.kernel.org>; Sat,  5 Dec 2020 19:10:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727966AbgLDSCv (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 4 Dec 2020 13:02:51 -0500
-Received: from bedivere.hansenpartnership.com ([96.44.175.130]:58148 "EHLO
-        bedivere.hansenpartnership.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1727178AbgLDSCv (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 4 Dec 2020 13:02:51 -0500
-Received: from localhost (localhost [127.0.0.1])
-        by bedivere.hansenpartnership.com (Postfix) with ESMTP id 30E731280B75;
-        Fri,  4 Dec 2020 10:02:11 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-        d=hansenpartnership.com; s=20151216; t=1607104931;
-        bh=kOups0pd4uEFpCdetzEgznZGlD3//AIfOfCED5b+e0I=;
-        h=Message-ID:Subject:From:To:Date:In-Reply-To:References:From;
-        b=SiyMTvReH4FFSnovORg1mgYJBXbQmz/EXo22Lk8D5z2wtCvENwSAtBEIHEiCXFl1t
-         nljLJqzX8eXkbedHoO8YmiwVnuUQoA8j/Q/Zd/XBzlgqBx37g8ObxbAQZwhKyvm7PC
-         +prnLWheDZKgb+CN/mZm5rHurR2QiODgOte/SiZs=
-Received: from bedivere.hansenpartnership.com ([127.0.0.1])
-        by localhost (bedivere.hansenpartnership.com [127.0.0.1]) (amavisd-new, port 10024)
-        with ESMTP id DX3AvhYmf693; Fri,  4 Dec 2020 10:02:11 -0800 (PST)
-Received: from jarvis.int.hansenpartnership.com (unknown [IPv6:2601:600:8280:66d1::527])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by bedivere.hansenpartnership.com (Postfix) with ESMTPSA id CEB241280B74;
-        Fri,  4 Dec 2020 10:02:09 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-        d=hansenpartnership.com; s=20151216; t=1607104930;
-        bh=kOups0pd4uEFpCdetzEgznZGlD3//AIfOfCED5b+e0I=;
-        h=Message-ID:Subject:From:To:Date:In-Reply-To:References:From;
-        b=ii7hqO3wVrD7YJMrWWfA626JSjOnYCNm/166zh3ZIrM1IFDN5xaeSbegcjY5SD7mu
-         tX4mnvACJxDjafeBfIf2FcqzG+AKgxddsX4e+i1r2nXwrND5x68i65ou4gVGGQKVWK
-         ejQ2qzALaSse6ukjejDyu3G9yo3wBVaEh7mAXvWI=
-Message-ID: <ab769a5188394cd3379cc627d14a0222050a1367.camel@HansenPartnership.com>
-Subject: Re: [RFC PATCH v1 07/12] efi: Replace strstarts() by
- str_has_prefix().
-From:   James Bottomley <James.Bottomley@HansenPartnership.com>
-To:     Ard Biesheuvel <ardb@kernel.org>,
-        laniel_francis@privacyrequired.com
-Cc:     linux-efi <linux-efi@vger.kernel.org>,
+        id S1726037AbgLETKa (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 5 Dec 2020 14:10:30 -0500
+Received: from [198.167.222.108] ([198.167.222.108]:40979 "EHLO
+        devianza.investici.org" rhost-flags-FAIL-FAIL-OK-OK)
+        by vger.kernel.org with ESMTP id S1725536AbgLETKa (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 5 Dec 2020 14:10:30 -0500
+Received: from mx2.investici.org (unknown [127.0.0.1])
+        by devianza.investici.org (Postfix) with ESMTP id 4CpJyb073Xz6vZP;
+        Sat,  5 Dec 2020 19:08:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=privacyrequired.com;
+        s=stigmate; t=1607195335;
+        bh=Enxbl35bWgW2k4CXkeFg1MrWekQN+UnByDQFI9Ki+mA=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=IN0WugIkKjzuabyrLtCIqrR5Dz9NmwNdrJ2PDOHkbzu+mx7X50hjdtiNjCESr/O4T
+         9G1STvvilcWHw6XLRChWJvAaKHumeLDAxPFyBlKW+m++YelIpnAUKL4YKuaKgjMXg/
+         WJBQXXLzio/SQvLNIV5MvwVfnuiJ24euv3+PB+h8=
+Received: from [198.167.222.108] (mx2.investici.org [198.167.222.108]) (Authenticated sender: laniel_francis@privacyrequired.com) by localhost (Postfix) with ESMTPSA id 4CpJyZ5dyqz6vZL;
+        Sat,  5 Dec 2020 19:08:54 +0000 (UTC)
+From:   Francis Laniel <laniel_francis@privacyrequired.com>
+To:     James Bottomley <James.Bottomley@hansenpartnership.com>
+Cc:     Ard Biesheuvel <ardb@kernel.org>,
+        linux-efi <linux-efi@vger.kernel.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Date:   Fri, 04 Dec 2020 10:02:09 -0800
-In-Reply-To: <CAMj1kXEQhT_LF5FDBO3-S7pBn55wG59bQUVr2q58A4FhqodY8Q@mail.gmail.com>
-References: <20201204170319.20383-1-laniel_francis@privacyrequired.com>
-         <20201204170319.20383-8-laniel_francis@privacyrequired.com>
-         <CAMj1kXEQhT_LF5FDBO3-S7pBn55wG59bQUVr2q58A4FhqodY8Q@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-User-Agent: Evolution 3.34.4 
+Subject: Re: [RFC PATCH v1 07/12] efi: Replace strstarts() by str_has_prefix().
+Date:   Sat, 05 Dec 2020 20:08:53 +0100
+Message-ID: <2156854.ibmmEGdOxF@machine>
+In-Reply-To: <ab769a5188394cd3379cc627d14a0222050a1367.camel@HansenPartnership.com>
+References: <20201204170319.20383-1-laniel_francis@privacyrequired.com> <CAMj1kXEQhT_LF5FDBO3-S7pBn55wG59bQUVr2q58A4FhqodY8Q@mail.gmail.com> <ab769a5188394cd3379cc627d14a0222050a1367.camel@HansenPartnership.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="iso-8859-1"
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Fri, 2020-12-04 at 18:07 +0100, Ard Biesheuvel wrote:
-> On Fri, 4 Dec 2020 at 18:06, <laniel_francis@privacyrequired.com>
-> wrote:
-> > From: Francis Laniel <laniel_francis@privacyrequired.com>
-> > 
-> > The two functions indicates if a string begins with a given prefix.
-> > The only difference is that strstarts() returns a bool while
-> > str_has_prefix()
-> > returns the length of the prefix if the string begins with it or 0
-> > otherwise.
-> > 
-> 
-> Why? 
+Le vendredi 4 d=E9cembre 2020, 19:02:09 CET James Bottomley a =E9crit :
+> On Fri, 2020-12-04 at 18:07 +0100, Ard Biesheuvel wrote:
+> > On Fri, 4 Dec 2020 at 18:06, <laniel_francis@privacyrequired.com>
+> >=20
+> > wrote:
+> > > From: Francis Laniel <laniel_francis@privacyrequired.com>
+> > >=20
+> > > The two functions indicates if a string begins with a given prefix.
+> > > The only difference is that strstarts() returns a bool while
+> > > str_has_prefix()
+> > > returns the length of the prefix if the string begins with it or 0
+> > > otherwise.
+> >=20
+> > Why?
+>=20
+> I think I can answer that.  If the conversion were done properly (which
+> it's not) you could get rid of the double strings in the code which are
+> error prone if you update one and forget another.  This gives a good
+> example: 3d739c1f6156 ("tracing: Use the return of str_has_prefix() to
+> remove open coded numbers"). so in your code you'd replace things like
+>=20
+>     if (strstarts(option, "rgb")) {
+>         option +=3D strlen("rgb");
+>         ...
+>=20
+> with
+>=20
+>     len =3D str_has_prefix(option, "rgb");
+>     if (len) {
+>         option +=3D len
+>         ...
 
-I think I can answer that.  If the conversion were done properly (which
-it's not) you could get rid of the double strings in the code which are
-error prone if you update one and forget another.  This gives a good
-example: 3d739c1f6156 ("tracing: Use the return of str_has_prefix() to
-remove open coded numbers"). so in your code you'd replace things like
+The proposed changes were a bit mechanical and I did not think about using =
+the=20
+returned value in the way you proposed.
+This a good idea though, so I can modify my patches to include this and sen=
+d a=20
+v2!
+=20
+> Obviously you also have cases where strstart is used as a boolean with
+> no need to know the length ... I think there's no value to converting
+> those.
 
-    if (strstarts(option, "rgb")) {
-        option += strlen("rgb");
-        ...
+=46or the v2, should I only change cases where using str_has_prefix() bring=
+s a=20
+benefit over strstarts() or all the cases?
 
-with 
-
-    len = str_has_prefix(option, "rgb");
-    if (len) {
-        option += len
-        ...
- 
-Obviously you also have cases where strstart is used as a boolean with
-no need to know the length ... I think there's no value to converting
-those.
-
-James
+> James
 
 
