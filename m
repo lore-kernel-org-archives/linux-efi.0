@@ -2,86 +2,162 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AC8DDC2BB40
-	for <linux-efi@archiver.kernel.org>; Mon,  7 Dec 2020 22:39:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ACB6AC4361B
+	for <linux-efi@archiver.kernel.org>; Tue,  8 Dec 2020 01:11:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7B63C239CF
-	for <linux-efi@archiver.kernel.org>; Mon,  7 Dec 2020 22:39:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6D2BD23A3C
+	for <linux-efi@archiver.kernel.org>; Tue,  8 Dec 2020 01:11:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728066AbgLGWiy (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 7 Dec 2020 17:38:54 -0500
-Received: from mail-ot1-f68.google.com ([209.85.210.68]:34720 "EHLO
-        mail-ot1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728063AbgLGWiy (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 7 Dec 2020 17:38:54 -0500
-Received: by mail-ot1-f68.google.com with SMTP id h19so14151051otr.1;
-        Mon, 07 Dec 2020 14:38:32 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=180dC8MA8XhmHcl6LPa/ct6qoxmSvA8KJAYrKrg4o6o=;
-        b=SqvgMqT1wjCy68nnpjvEimD7S++5yVJTnF9Qp0YZaHdUyPp6jcGrxS20AYs8xTEm2O
-         vbYB1X97Z1V/FLEcvio2E8xjpgNjWidGZBRzKAkfqtMk2Z9mNbBJOeN8MKD/WxUWu/1l
-         CHTaBQBgpF2fPKBQTU7ZhNzaTlfi15ZwSEBt7I1yGWOQLZHs8gstq0zU+TKyoRH9gJ01
-         tARhmbn5yHGlWG3xRyvTq0hgbRn0F4pQfNSvofKjn6JdlCn916ckf+SNXDEGXWBu0ZPk
-         FsQwii0eVRMQKOqmIokfMTyX1w8NjNnarANr9L/qxx8TFVNS2fSNR/kezMoWVWau+qPs
-         TMtw==
-X-Gm-Message-State: AOAM533TQuL+N2uwH6qs8HP7F6DyN/z9ooHylyA3Gd8gl/w+G/Qe7xyg
-        xPhtbGfV8wUAN6HlkZeK0g==
-X-Google-Smtp-Source: ABdhPJykcrsL0D8IMYg2/kYkb9R3Pr72ZsKMdicn2VFLYguiO6t9u8bdpFJw1rAzmwlMshEwJPQFhA==
-X-Received: by 2002:a05:6830:1501:: with SMTP id k1mr9591213otp.12.1607380687344;
-        Mon, 07 Dec 2020 14:38:07 -0800 (PST)
-Received: from xps15 (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
-        by smtp.gmail.com with ESMTPSA id g88sm2667237otg.64.2020.12.07.14.38.05
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 07 Dec 2020 14:38:06 -0800 (PST)
-Received: (nullmailer pid 971001 invoked by uid 1000);
-        Mon, 07 Dec 2020 22:38:05 -0000
-Date:   Mon, 7 Dec 2020 16:38:05 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Saravana Kannan <saravanak@google.com>
-Cc:     devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        "Rafael J. Wysocki" <rjw@rjwysocki.net>,
-        Tomi Valkeinen <tomi.valkeinen@ti.com>,
-        Marc Zyngier <maz@kernel.org>,
-        Frank Rowand <frowand.list@gmail.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Ard Biesheuvel <ardb@kernel.org>, Len Brown <lenb@kernel.org>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Grygorii Strashko <grygorii.strashko@ti.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        linux-acpi@vger.kernel.org, kernel-team@android.com,
-        Rob Herring <robh+dt@kernel.org>, linux-efi@vger.kernel.org,
-        Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Subject: Re: [PATCH v2 17/17] driver core: Delete pointless parameter in
- fwnode_operations.add_links
-Message-ID: <20201207223805.GA970925@robh.at.kernel.org>
-References: <20201121020232.908850-1-saravanak@google.com>
- <20201121020232.908850-18-saravanak@google.com>
+        id S1726207AbgLHBLb (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 7 Dec 2020 20:11:31 -0500
+Received: from youngberry.canonical.com ([91.189.89.112]:53245 "EHLO
+        youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725877AbgLHBLa (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 7 Dec 2020 20:11:30 -0500
+Received: from 2.general.dannf.us.vpn ([10.172.65.1] helo=localhost)
+        by youngberry.canonical.com with esmtpsa (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
+        (Exim 4.86_2)
+        (envelope-from <dann.frazier@canonical.com>)
+        id 1kmRWh-0005Ox-52; Tue, 08 Dec 2020 01:10:47 +0000
+From:   dann frazier <dann.frazier@canonical.com>
+To:     stable@vger.kernel.org, Michael Schaller <misch@google.com>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc:     Matthew Garrett <matthew.garrett@nebula.com>,
+        Jeremy Kerr <jk@ozlabs.org>, linux-efi@vger.kernel.org
+Subject: [PATCH 4.4] arm64: assembler: make adr_l work in modules under KASLR
+Date:   Mon,  7 Dec 2020 18:10:34 -0700
+Message-Id: <20201208011034.3015079-1-dann.frazier@canonical.com>
+X-Mailer: git-send-email 2.29.2
+In-Reply-To: <CALdTtnuT7fVJ17C2nq8kks_rFRGtDySx61tWpt8b+roajyi7vg@mail.gmail.com>
+References: <CALdTtnuT7fVJ17C2nq8kks_rFRGtDySx61tWpt8b+roajyi7vg@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20201121020232.908850-18-saravanak@google.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Fri, 20 Nov 2020 18:02:32 -0800, Saravana Kannan wrote:
-> The struct device input to add_links() is not used for anything. So
-> delete it.
-> 
-> Signed-off-by: Saravana Kannan <saravanak@google.com>
-> ---
->  drivers/base/core.c             | 2 +-
->  drivers/firmware/efi/efi-init.c | 3 +--
->  drivers/of/property.c           | 3 +--
->  include/linux/fwnode.h          | 3 +--
->  4 files changed, 4 insertions(+), 7 deletions(-)
-> 
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-Acked-by: Rob Herring <robh@kernel.org>
+commit 41c066f2c4d436c535616fe182331766c57838f0 upstream
+
+When CONFIG_RANDOMIZE_MODULE_REGION_FULL=y, the offset between loaded
+modules and the core kernel may exceed 4 GB, putting symbols exported
+by the core kernel out of the reach of the ordinary adrp/add instruction
+pairs used to generate relative symbol references. So make the adr_l
+macro emit a movz/movk sequence instead when executing in module context.
+
+While at it, remove the pointless special case for the stack pointer.
+
+Acked-by: Mark Rutland <mark.rutland@arm.com>
+Acked-by: Will Deacon <will.deacon@arm.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: Catalin Marinas <catalin.marinas@arm.com>
+[ dannf: backported to v4.4 by replacing the 3-arg adr_l macro in head.S
+  with it's output, as this commit drops the 3-arg variant ]
+Fixes: c042dd600f4e ("crypto: arm64/sha - avoid non-standard inline asm tricks")
+Signed-off-by: dann frazier <dann.frazier@canonical.com>
+---
+ arch/arm64/include/asm/assembler.h | 36 +++++++++++++++++++++++++++---------
+ arch/arm64/kernel/head.S           |  3 ++-
+ 2 files changed, 29 insertions(+), 10 deletions(-)
+
+diff --git a/arch/arm64/include/asm/assembler.h b/arch/arm64/include/asm/assembler.h
+index f68abb1..7c28791 100644
+--- a/arch/arm64/include/asm/assembler.h
++++ b/arch/arm64/include/asm/assembler.h
+@@ -148,22 +148,25 @@ lr	.req	x30		// link register
+ 
+ /*
+  * Pseudo-ops for PC-relative adr/ldr/str <reg>, <symbol> where
+- * <symbol> is within the range +/- 4 GB of the PC.
++ * <symbol> is within the range +/- 4 GB of the PC when running
++ * in core kernel context. In module context, a movz/movk sequence
++ * is used, since modules may be loaded far away from the kernel
++ * when KASLR is in effect.
+  */
+ 	/*
+ 	 * @dst: destination register (64 bit wide)
+ 	 * @sym: name of the symbol
+-	 * @tmp: optional scratch register to be used if <dst> == sp, which
+-	 *       is not allowed in an adrp instruction
+ 	 */
+-	.macro	adr_l, dst, sym, tmp=
+-	.ifb	\tmp
++	.macro	adr_l, dst, sym
++#ifndef MODULE
+ 	adrp	\dst, \sym
+ 	add	\dst, \dst, :lo12:\sym
+-	.else
+-	adrp	\tmp, \sym
+-	add	\dst, \tmp, :lo12:\sym
+-	.endif
++#else
++	movz	\dst, #:abs_g3:\sym
++	movk	\dst, #:abs_g2_nc:\sym
++	movk	\dst, #:abs_g1_nc:\sym
++	movk	\dst, #:abs_g0_nc:\sym
++#endif
+ 	.endm
+ 
+ 	/*
+@@ -174,6 +177,7 @@ lr	.req	x30		// link register
+ 	 *       the address
+ 	 */
+ 	.macro	ldr_l, dst, sym, tmp=
++#ifndef MODULE
+ 	.ifb	\tmp
+ 	adrp	\dst, \sym
+ 	ldr	\dst, [\dst, :lo12:\sym]
+@@ -181,6 +185,15 @@ lr	.req	x30		// link register
+ 	adrp	\tmp, \sym
+ 	ldr	\dst, [\tmp, :lo12:\sym]
+ 	.endif
++#else
++	.ifb	\tmp
++	adr_l	\dst, \sym
++	ldr	\dst, [\dst]
++	.else
++	adr_l	\tmp, \sym
++	ldr	\dst, [\tmp]
++	.endif
++#endif
+ 	.endm
+ 
+ 	/*
+@@ -190,8 +203,13 @@ lr	.req	x30		// link register
+ 	 *       while <src> needs to be preserved.
+ 	 */
+ 	.macro	str_l, src, sym, tmp
++#ifndef MODULE
+ 	adrp	\tmp, \sym
+ 	str	\src, [\tmp, :lo12:\sym]
++#else
++	adr_l	\tmp, \sym
++	str	\src, [\tmp]
++#endif
+ 	.endm
+ 
+ /*
+diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
+index 6299a8a..504bcc3 100644
+--- a/arch/arm64/kernel/head.S
++++ b/arch/arm64/kernel/head.S
+@@ -424,7 +424,8 @@ __mmap_switched:
+ 	str	xzr, [x6], #8			// Clear BSS
+ 	b	1b
+ 2:
+-	adr_l	sp, initial_sp, x4
++	adrp	x4, initial_sp
++	add	sp, x4, :lo12:initial_sp
+ 	str_l	x21, __fdt_pointer, x5		// Save FDT pointer
+ 	str_l	x24, memstart_addr, x6		// Save PHYS_OFFSET
+ 	mov	x29, #0
+-- 
+2.7.4
+
