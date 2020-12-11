@@ -2,88 +2,137 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BF182C4361B
-	for <linux-efi@archiver.kernel.org>; Fri, 11 Dec 2020 09:47:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2DF19C433FE
+	for <linux-efi@archiver.kernel.org>; Fri, 11 Dec 2020 17:20:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7E34E23C17
-	for <linux-efi@archiver.kernel.org>; Fri, 11 Dec 2020 09:47:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0682123EF1
+	for <linux-efi@archiver.kernel.org>; Fri, 11 Dec 2020 17:20:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2393876AbgLKJrL (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 11 Dec 2020 04:47:11 -0500
-Received: from eu-smtp-delivery-151.mimecast.com ([207.82.80.151]:60041 "EHLO
-        eu-smtp-delivery-151.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726086AbgLKJqz (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 11 Dec 2020 04:46:55 -0500
-Received: from AcuMS.aculab.com (156.67.243.126 [156.67.243.126]) (Using
- TLS) by relay.mimecast.com with ESMTP id
- uk-mta-252-AgPfXOr8MiC6RNWXAg0nGg-1; Fri, 11 Dec 2020 09:45:16 +0000
-X-MC-Unique: AgPfXOr8MiC6RNWXAg0nGg-1
-Received: from AcuMS.Aculab.com (fd9f:af1c:a25b:0:43c:695e:880f:8750) by
- AcuMS.aculab.com (fd9f:af1c:a25b:0:43c:695e:880f:8750) with Microsoft SMTP
- Server (TLS) id 15.0.1347.2; Fri, 11 Dec 2020 09:45:15 +0000
-Received: from AcuMS.Aculab.com ([fe80::43c:695e:880f:8750]) by
- AcuMS.aculab.com ([fe80::43c:695e:880f:8750%12]) with mapi id 15.00.1347.000;
- Fri, 11 Dec 2020 09:45:15 +0000
-From:   David Laight <David.Laight@ACULAB.COM>
-To:     'Arvind Sankar' <nivedita@alum.mit.edu>,
-        Ard Biesheuvel <ardb@kernel.org>
-CC:     James Bottomley <James.Bottomley@hansenpartnership.com>,
+        id S2390795AbgLKQLx (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 11 Dec 2020 11:11:53 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60440 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2390382AbgLKQLd (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 11 Dec 2020 11:11:33 -0500
+Received: from mail-qv1-xf43.google.com (mail-qv1-xf43.google.com [IPv6:2607:f8b0:4864:20::f43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7149CC0613D3;
+        Fri, 11 Dec 2020 08:10:53 -0800 (PST)
+Received: by mail-qv1-xf43.google.com with SMTP id j18so2491911qvu.3;
+        Fri, 11 Dec 2020 08:10:53 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=sender:from:date:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=ivnpuio/ONwC8m2sDHJB3t8+zfHEDLtHHvkUKfGXc2E=;
+        b=Ts2g+mousub8ze2Gj/nNpDc88OVX/NhYA17JdjCvAQt2N+02nYZup+dP8W0DbHLsaW
+         8n0Sr9w/G2eRCI3Uo9X17GT8CO4HgRXiwLHc/kT1fk6KtGitD8YZOJXvXsTWUdmAnenr
+         jdyDTMgUjAtn4kQxGbP/2lOhbIYuBjkuPGirt9VWPgGbz+x/ayRHRbuqKcmfHGYSIGCT
+         Co2or2zPxmyOU7EAEPckh8FqKDKxKqL0tCXqOH7eUD2Xobpm1/zyUN9LUzYNMyvU8sdn
+         wtPFQrc9EUlFUGCY7IdPz0vr93JriVKekWCtt3AlaRMOCXTGXfDTyGL/ZaRfuEmEqlif
+         918g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:sender:from:date:to:cc:subject:message-id
+         :references:mime-version:content-disposition:in-reply-to;
+        bh=ivnpuio/ONwC8m2sDHJB3t8+zfHEDLtHHvkUKfGXc2E=;
+        b=tkj+lNv7zTO4itScb9RPAXIbhYg82eaa00eGMknneXeOUCSU22zdSTIB/3wUL2uol8
+         dLo6nj+7aVOsLYyglRSeJLV6wWrT+kdGrwgUJnB/pNwxpfhfK/qNMOvsmzKJHO7+qasN
+         GVtabIxFTcv4gMD+cyGpFP1G+amGJOb31bmquqyOzeZ4S8thGS4Y8uthzNnCA+3wxwis
+         LIZdXlWK2akWf5pxqOHdawG9E7+VLTSD3PCtz/hOLdehKzhzOfotuDsP0n6gvSXoF08W
+         xmlg7HgyUqRb/dpR0Ihd4cd1SyIrtpMY+9aljqULnv8u1S0S85erstWSRRCh2YnTyhPl
+         YXyQ==
+X-Gm-Message-State: AOAM531eqoqdAgyCAy6cHY4qWYF9wwjdOT659pgEIB8Tr9aTGpXaABFM
+        M9zojSpF4Hh8Q1QzJKGNHu4=
+X-Google-Smtp-Source: ABdhPJwK9FWdm3oUSg3pX+2faWLWxHQSswaSJcz6fAEoF9gjm0rtHJ9CHiQxREGmqmDblqkxKCQc8Q==
+X-Received: by 2002:a0c:ebc2:: with SMTP id k2mr16536807qvq.24.1607703052541;
+        Fri, 11 Dec 2020 08:10:52 -0800 (PST)
+Received: from rani.riverdale.lan ([2001:470:1f07:5f3::b55f])
+        by smtp.gmail.com with ESMTPSA id f185sm7209352qkb.119.2020.12.11.08.10.50
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 11 Dec 2020 08:10:50 -0800 (PST)
+Sender: Arvind Sankar <niveditas98@gmail.com>
+From:   Arvind Sankar <nivedita@alum.mit.edu>
+X-Google-Original-From: Arvind Sankar <arvind@rani.riverdale.lan>
+Date:   Fri, 11 Dec 2020 11:10:48 -0500
+To:     David Laight <David.Laight@ACULAB.COM>
+Cc:     'Arvind Sankar' <nivedita@alum.mit.edu>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        James Bottomley <James.Bottomley@hansenpartnership.com>,
         "laniel_francis@privacyrequired.com" 
         <laniel_francis@privacyrequired.com>,
         linux-efi <linux-efi@vger.kernel.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Subject: RE: [RFC PATCH v1 07/12] efi: Replace strstarts() by
+Subject: Re: [RFC PATCH v1 07/12] efi: Replace strstarts() by
  str_has_prefix().
-Thread-Topic: [RFC PATCH v1 07/12] efi: Replace strstarts() by
- str_has_prefix().
-Thread-Index: AQHWzyB/+YxwkDE2h0210TLWUlhJ1qnxoqgg
-Date:   Fri, 11 Dec 2020 09:45:15 +0000
-Message-ID: <4c251bcaf8234dd19ca0ecd0a756cf7f@AcuMS.aculab.com>
+Message-ID: <X9OaCEPwNW3K++t+@rani.riverdale.lan>
 References: <20201204170319.20383-1-laniel_francis@privacyrequired.com>
  <20201204170319.20383-8-laniel_francis@privacyrequired.com>
  <CAMj1kXEQhT_LF5FDBO3-S7pBn55wG59bQUVr2q58A4FhqodY8Q@mail.gmail.com>
  <ab769a5188394cd3379cc627d14a0222050a1367.camel@HansenPartnership.com>
  <CAMj1kXFvCZKH-Bbvu-V5-GxcTun8yz98igeFxRc1tTswbttM0w@mail.gmail.com>
  <X9Jlfqiu/vCOAm3U@rani.riverdale.lan>
-In-Reply-To: <X9Jlfqiu/vCOAm3U@rani.riverdale.lan>
-Accept-Language: en-GB, en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-ms-exchange-transport-fromentityheader: Hosted
-x-originating-ip: [10.202.205.107]
+ <4c251bcaf8234dd19ca0ecd0a756cf7f@AcuMS.aculab.com>
 MIME-Version: 1.0
-Authentication-Results: relay.mimecast.com;
-        auth=pass smtp.auth=C51A453 smtp.mailfrom=david.laight@aculab.com
-X-Mimecast-Spam-Score: 0
-X-Mimecast-Originator: aculab.com
-Content-Language: en-US
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <4c251bcaf8234dd19ca0ecd0a756cf7f@AcuMS.aculab.com>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-RnJvbTogQXJ2aW5kIFNhbmthcg0KPiBTZW50OiAxMCBEZWNlbWJlciAyMDIwIDE4OjE0DQouLi4N
-Cj4gSSB3YXNuJ3QgYXdhcmUgb2Ygc3RyX2hhc19wcmVmaXgoKSBhdCB0aGUgdGltZS4gSXQgZG9l
-cyBzZWVtIHVzZWZ1bCB0bw0KPiBlbGltaW5hdGUgdGhlIGR1cGxpY2F0aW9uIG9mIHRoZSBzdHJp
-bmcgbGl0ZXJhbCwgSSBsaWtlIHRoZQ0KPiBza2lwX3ByZWZpeCgpIEFQSSBzdWdnZXN0aW9uLCBt
-YXliZSBldmVuDQo+IA0KPiAJYm9vbCBzdHJfc2tpcF9wcmVmaXgoY29uc3QgY2hhciAqKnMsIGNv
-bnN0IGNoYXIgKnBmeCkNCj4gCXsNCj4gCQlzaXplX3QgbGVuID0gc3RyX2hhc19wcmVmaXgoKnMs
-IHBmeCk7DQo+IAkJKnMgKz0gbGVuOw0KPiAJCXJldHVybiAhIWxlbjsNCj4gCX0NCj4gCS4uLg0K
-PiAJaWYgKHN0cl9za2lwX3ByZWZpeCgmb3B0aW9uLCBwcmVmaXgpKSB7IC4uLiB9DQo+IA0KPiB0
-byBhdm9pZCB0aGUgaW50ZXJtZWRpYXRlIHZhcmlhYmxlLg0KDQpUaGF0J2xsIGdlbmVyYXRlIGhv
-cnJpZCBjb2RlIC0gdGhlICdvcHRpb24nIHZhcmlhYmxlIGhhcyB0byBiZQ0KcmVwZWF0ZWRseSBy
-ZWxvYWRlZCBmcm9tIG1lbW9yeSAodW5sZXNzIGl0IGlzIGFsbCBpbmxpbmVkKS4NCg0KUGVyaGFw
-cyB0aGUgI2RlZmluZQ0KDQojZGVmaW5lIHN0cl9za2lwX3ByZWZpeChzdHIsIHByZWZpeCkgXA0K
-eyggXA0KCXNpemVfdCBfcGZ4X2xlbiA9IHN0cmxlbihwcmVmaXgpKTsgXA0KCW1lbWNtcChzdHIs
-IHBmeCwgX3BmeF9sZW4pID8gMCA6ICgoc3RyKSArPSBfcGZ4X2xlbiwgMSk7IFwNCil9DQoNClRo
-ZXJlJ3MgcHJvYmFibHkgc29tZXRoaW5nIHRoYXQnbGwgbGV0IHlvdSB1c2Ugc2l6ZW9mKCkgaW5z
-dGVhZA0Kb2Ygc3RybGVuKCkgZm9yIHF1b3RlZCBzdHJpbmdzIChpZiBvbmx5IHNpemVvZiBwZngg
-IT0gc2l6ZW9mIChjaGFyICopKS4NCg0KCURhdmlkDQoNCi0NClJlZ2lzdGVyZWQgQWRkcmVzcyBM
-YWtlc2lkZSwgQnJhbWxleSBSb2FkLCBNb3VudCBGYXJtLCBNaWx0b24gS2V5bmVzLCBNSzEgMVBU
-LCBVSw0KUmVnaXN0cmF0aW9uIE5vOiAxMzk3Mzg2IChXYWxlcykNCg==
+On Fri, Dec 11, 2020 at 09:45:15AM +0000, David Laight wrote:
+> From: Arvind Sankar
+> > Sent: 10 December 2020 18:14
+> ...
+> > I wasn't aware of str_has_prefix() at the time. It does seem useful to
+> > eliminate the duplication of the string literal, I like the
+> > skip_prefix() API suggestion, maybe even
+> > 
+> > 	bool str_skip_prefix(const char **s, const char *pfx)
+> > 	{
+> > 		size_t len = str_has_prefix(*s, pfx);
+> > 		*s += len;
+> > 		return !!len;
+> > 	}
+> > 	...
+> > 	if (str_skip_prefix(&option, prefix)) { ... }
+> > 
+> > to avoid the intermediate variable.
+> 
+> That'll generate horrid code - the 'option' variable has to be
+> repeatedly reloaded from memory (unless it is all inlined).
+> 
+> Perhaps the #define
+> 
+> #define str_skip_prefix(str, prefix) \
+> {( \
+> 	size_t _pfx_len = strlen(prefix)); \
+> 	memcmp(str, pfx, _pfx_len) ? 0 : ((str) += _pfx_len, 1); \
+> )}
+> 
+> There's probably something that'll let you use sizeof() instead
+> of strlen() for quoted strings (if only sizeof pfx != sizeof (char *)).
+> 
+> 	David
+> 
+> -
+> Registered Address Lakeside, Bramley Road, Mount Farm, Milton Keynes, MK1 1PT, UK
+> Registration No: 1397386 (Wales)
 
+Avoiding the intermediate varable is for readability at the call-site,
+not performance. The performance of this function shouldn't matter --
+you shouldn't be parsing strings in a hotpath anyway, and nobody cares
+if the EFI stub takes a few nanoseconds longer if that makes the code
+more robust and/or readable.
+
+That said,
+- I'd be surprised if the overhead of an L1D cache access was measurable
+  over the strncmp()/strlen() calls.
+- You can't replace strncmp() with memcmp().
+- Regarding sizeof() vs strlen(), you can simply use __builtin_strlen()
+  to optimize string literals, there's no need for hacks using the
+  preprocessor.
