@@ -2,89 +2,88 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E4D4C4167B
-	for <linux-efi@archiver.kernel.org>; Thu, 10 Dec 2020 23:08:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BF182C4361B
+	for <linux-efi@archiver.kernel.org>; Fri, 11 Dec 2020 09:47:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 448C423B85
-	for <linux-efi@archiver.kernel.org>; Thu, 10 Dec 2020 23:08:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7E34E23C17
+	for <linux-efi@archiver.kernel.org>; Fri, 11 Dec 2020 09:47:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2394197AbgLJWbZ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 10 Dec 2020 17:31:25 -0500
-Received: from mout.gmx.net ([212.227.15.19]:47963 "EHLO mout.gmx.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2405131AbgLJW0c (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Thu, 10 Dec 2020 17:26:32 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
-        s=badeba3b8450; t=1607639100;
-        bh=7URLmzolxMREC32enWTWWnTNWyOm+MhitVxzu34SbmM=;
-        h=X-UI-Sender-Class:To:Cc:From:Subject:Date;
-        b=YcINTNOWlxyDM4+JQ92XShZwnd2pltN4jg5R9udv19HTqz3UXenin8rdXpRzPv8cz
-         eKrUmblpHrRYwiavZOj9PqWJxpuUaNzcrDtUGrOdKmrcANkz+Nvuu41RX35k/pCT2L
-         FBFml5jsYmg0NVAWGM9uGf1BpxPn2yyTr3NbfJIA=
-X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
-Received: from [192.168.123.51] ([62.143.246.89]) by mail.gmx.com (mrgmx004
- [212.227.17.190]) with ESMTPSA (Nemesis) id 1N2V4P-1k8TPt1MRL-013yGM; Thu, 10
- Dec 2020 22:49:10 +0100
-To:     Ard Biesheuvel <ardb@kernel.org>, Jonathan Corbet <corbet@lwn.net>
-Cc:     Ivan Hu <ivan.hu@canonical.com>,
-        Linux Doc Mailing List <linux-doc@vger.kernel.org>,
-        linux-efi <linux-efi@vger.kernel.org>
-From:   Heinrich Schuchardt <xypron.glpk@gmx.de>
-Subject: [RFC] Documentation for /dev/efi_test
-Message-ID: <0d27217e-15c4-32e5-0dc3-47b94116ad64@gmx.de>
-Date:   Thu, 10 Dec 2020 22:49:09 +0100
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.5.1
+        id S2393876AbgLKJrL (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 11 Dec 2020 04:47:11 -0500
+Received: from eu-smtp-delivery-151.mimecast.com ([207.82.80.151]:60041 "EHLO
+        eu-smtp-delivery-151.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726086AbgLKJqz (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 11 Dec 2020 04:46:55 -0500
+Received: from AcuMS.aculab.com (156.67.243.126 [156.67.243.126]) (Using
+ TLS) by relay.mimecast.com with ESMTP id
+ uk-mta-252-AgPfXOr8MiC6RNWXAg0nGg-1; Fri, 11 Dec 2020 09:45:16 +0000
+X-MC-Unique: AgPfXOr8MiC6RNWXAg0nGg-1
+Received: from AcuMS.Aculab.com (fd9f:af1c:a25b:0:43c:695e:880f:8750) by
+ AcuMS.aculab.com (fd9f:af1c:a25b:0:43c:695e:880f:8750) with Microsoft SMTP
+ Server (TLS) id 15.0.1347.2; Fri, 11 Dec 2020 09:45:15 +0000
+Received: from AcuMS.Aculab.com ([fe80::43c:695e:880f:8750]) by
+ AcuMS.aculab.com ([fe80::43c:695e:880f:8750%12]) with mapi id 15.00.1347.000;
+ Fri, 11 Dec 2020 09:45:15 +0000
+From:   David Laight <David.Laight@ACULAB.COM>
+To:     'Arvind Sankar' <nivedita@alum.mit.edu>,
+        Ard Biesheuvel <ardb@kernel.org>
+CC:     James Bottomley <James.Bottomley@hansenpartnership.com>,
+        "laniel_francis@privacyrequired.com" 
+        <laniel_francis@privacyrequired.com>,
+        linux-efi <linux-efi@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Subject: RE: [RFC PATCH v1 07/12] efi: Replace strstarts() by
+ str_has_prefix().
+Thread-Topic: [RFC PATCH v1 07/12] efi: Replace strstarts() by
+ str_has_prefix().
+Thread-Index: AQHWzyB/+YxwkDE2h0210TLWUlhJ1qnxoqgg
+Date:   Fri, 11 Dec 2020 09:45:15 +0000
+Message-ID: <4c251bcaf8234dd19ca0ecd0a756cf7f@AcuMS.aculab.com>
+References: <20201204170319.20383-1-laniel_francis@privacyrequired.com>
+ <20201204170319.20383-8-laniel_francis@privacyrequired.com>
+ <CAMj1kXEQhT_LF5FDBO3-S7pBn55wG59bQUVr2q58A4FhqodY8Q@mail.gmail.com>
+ <ab769a5188394cd3379cc627d14a0222050a1367.camel@HansenPartnership.com>
+ <CAMj1kXFvCZKH-Bbvu-V5-GxcTun8yz98igeFxRc1tTswbttM0w@mail.gmail.com>
+ <X9Jlfqiu/vCOAm3U@rani.riverdale.lan>
+In-Reply-To: <X9Jlfqiu/vCOAm3U@rani.riverdale.lan>
+Accept-Language: en-GB, en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-ms-exchange-transport-fromentityheader: Hosted
+x-originating-ip: [10.202.205.107]
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Authentication-Results: relay.mimecast.com;
+        auth=pass smtp.auth=C51A453 smtp.mailfrom=david.laight@aculab.com
+X-Mimecast-Spam-Score: 0
+X-Mimecast-Originator: aculab.com
 Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:3AYM8Zp5TeY/xXUAv7fSWLEpWs5F99r66xB8IbuxRZ4gmka9n4Q
- YQe0zGfghVLNHbTgGtD7796lS3fCf7QgcB1tMSqg7EIETsMaYW6ZbUQ9VoOwAnLbVTg82ny
- cb7ShiZ6aR238dVMSFFdkIFu0Hi/239swWN1HbeTirKGKLgMFQOFKMDJn3iZDeCRRoI0TmD
- 0u2u3A84pkfm1NptXHYFw==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:ycO+UZuZ0IE=:VbPnMlOzETVqKaj/LMTnc4
- lH4BplfygMmmo+S0IOjiPhV1Pv3wMJTMJO2E2S5RQRZGZkYYYFD8HTD4LIxAsOHTVpgmsqoiK
- VA3qau4GHcYnxz0ydl+DgUGFcyyCvIuraGK1IzROFzCOHlMlBAAFnN8ckNGPKXwQrOTSn7hor
- cIWTgUf9ISi0v4lbcV69xj4L2UP9CoYNWyYWFXhppjWd5DMAMlK8nlYaQVK2mgCvi6ge3z06h
- S+FdFjKqU7AYmiq7ow60vvfQBrzBH7a9T6xyTO9/4uwy6K9K9D/FjpO2t6nb0///Crn9D1b2R
- rYblX5i0o7EWXZlXFiHqCplFoPhqwuHRI8VKqcFDOK4m4bkMMFc/k+M/imP2fUnoaDEkKvr7Z
- 4KozzgVjErJSJb12z5wCizAJIF2J+bz4vMLDxsK8/3Psxj4dBithB0nTFOwwm5WKB7YaAYy5a
- Q699WKfEjhZ8Hi7zce4wIB+pfW1hjr/zigVDajN2dSH1I5xF5inJG4wWBu3yuZUlbnG35BMOc
- HkfQc2KvK0cgSHfhNaseByHokpk//E8wqX3KIw1n5t3sEK1E9XzvoPDS9Efzp7byLv4TwPmn7
- IjKdrw75n8W6wZOGsxrdjGRm+32jABVi4FcUSLKoBCsoShWrpCyVKAveMy7V3GhFtU2j3jop3
- mXkgWLBZTj60m3jVlGmp/qIX1PtZIbiGhR0jLhJgMmXrF5CYep7N2bwg6zPn46TxdjacpwQpo
- srDx+H4ukP3P4jItRmvpMXVnG8dEvFJz1/XjhsMp28D5rDOOvIgqWMGlfuIb0+LpWdcZpaUW2
- nw+b7JyA43ThTxtu01MHiKax7EU6ti6gScdiChagnLzXc9+uMB5TA50sVXLrpu4OcM7KVhM0O
- lHUenSIhtBf3OPAPFSRQ==
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: base64
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Hello Ard, hello Jonathan,
-
-to test UEFI runtime services we have CONFIG_EFI_TEST which provides
-/dev/efi_test and a bunch of IOCTLs for excercising the runtime services
-(cf. drivers/firmware/efi/test/efi_test.h).
-
-Currently there is no user documentation for this ABI.
-
-Where should the documentation for the ABI be put in the documentation
-tree? Is this Documentation/ABI/stable/?
-
-Can includes be referenced in Documentation/ABI/stable/ files using
-reStructured text notation?
-
-I am hesitant to put the description into the man-pages project as this
-ABI is meant for testing only.
-
-Best regards
-
-Heinrich
-
+RnJvbTogQXJ2aW5kIFNhbmthcg0KPiBTZW50OiAxMCBEZWNlbWJlciAyMDIwIDE4OjE0DQouLi4N
+Cj4gSSB3YXNuJ3QgYXdhcmUgb2Ygc3RyX2hhc19wcmVmaXgoKSBhdCB0aGUgdGltZS4gSXQgZG9l
+cyBzZWVtIHVzZWZ1bCB0bw0KPiBlbGltaW5hdGUgdGhlIGR1cGxpY2F0aW9uIG9mIHRoZSBzdHJp
+bmcgbGl0ZXJhbCwgSSBsaWtlIHRoZQ0KPiBza2lwX3ByZWZpeCgpIEFQSSBzdWdnZXN0aW9uLCBt
+YXliZSBldmVuDQo+IA0KPiAJYm9vbCBzdHJfc2tpcF9wcmVmaXgoY29uc3QgY2hhciAqKnMsIGNv
+bnN0IGNoYXIgKnBmeCkNCj4gCXsNCj4gCQlzaXplX3QgbGVuID0gc3RyX2hhc19wcmVmaXgoKnMs
+IHBmeCk7DQo+IAkJKnMgKz0gbGVuOw0KPiAJCXJldHVybiAhIWxlbjsNCj4gCX0NCj4gCS4uLg0K
+PiAJaWYgKHN0cl9za2lwX3ByZWZpeCgmb3B0aW9uLCBwcmVmaXgpKSB7IC4uLiB9DQo+IA0KPiB0
+byBhdm9pZCB0aGUgaW50ZXJtZWRpYXRlIHZhcmlhYmxlLg0KDQpUaGF0J2xsIGdlbmVyYXRlIGhv
+cnJpZCBjb2RlIC0gdGhlICdvcHRpb24nIHZhcmlhYmxlIGhhcyB0byBiZQ0KcmVwZWF0ZWRseSBy
+ZWxvYWRlZCBmcm9tIG1lbW9yeSAodW5sZXNzIGl0IGlzIGFsbCBpbmxpbmVkKS4NCg0KUGVyaGFw
+cyB0aGUgI2RlZmluZQ0KDQojZGVmaW5lIHN0cl9za2lwX3ByZWZpeChzdHIsIHByZWZpeCkgXA0K
+eyggXA0KCXNpemVfdCBfcGZ4X2xlbiA9IHN0cmxlbihwcmVmaXgpKTsgXA0KCW1lbWNtcChzdHIs
+IHBmeCwgX3BmeF9sZW4pID8gMCA6ICgoc3RyKSArPSBfcGZ4X2xlbiwgMSk7IFwNCil9DQoNClRo
+ZXJlJ3MgcHJvYmFibHkgc29tZXRoaW5nIHRoYXQnbGwgbGV0IHlvdSB1c2Ugc2l6ZW9mKCkgaW5z
+dGVhZA0Kb2Ygc3RybGVuKCkgZm9yIHF1b3RlZCBzdHJpbmdzIChpZiBvbmx5IHNpemVvZiBwZngg
+IT0gc2l6ZW9mIChjaGFyICopKS4NCg0KCURhdmlkDQoNCi0NClJlZ2lzdGVyZWQgQWRkcmVzcyBM
+YWtlc2lkZSwgQnJhbWxleSBSb2FkLCBNb3VudCBGYXJtLCBNaWx0b24gS2V5bmVzLCBNSzEgMVBU
+LCBVSw0KUmVnaXN0cmF0aW9uIE5vOiAxMzk3Mzg2IChXYWxlcykNCg==
 
