@@ -2,100 +2,137 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,INCLUDES_PULL_REQUEST,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 93C72C4361B
-	for <linux-efi@archiver.kernel.org>; Thu, 17 Dec 2020 13:42:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 470F8C433E0
+	for <linux-efi@archiver.kernel.org>; Thu, 24 Dec 2020 09:05:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 503FF238EF
-	for <linux-efi@archiver.kernel.org>; Thu, 17 Dec 2020 13:42:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D7AF2217A0
+	for <linux-efi@archiver.kernel.org>; Thu, 24 Dec 2020 09:05:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727388AbgLQNm1 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 17 Dec 2020 08:42:27 -0500
-Received: from mail.kernel.org ([198.145.29.99]:54554 "EHLO mail.kernel.org"
+        id S1726186AbgLXJEs (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 24 Dec 2020 04:04:48 -0500
+Received: from mx2.suse.de ([195.135.220.15]:33382 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726488AbgLQNmT (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Thu, 17 Dec 2020 08:42:19 -0500
-X-Gm-Message-State: AOAM5317Opw6ppz1MsY8IjY9jnogRClsjkz+F9RlPX+ieC0LCh915wFS
-        RFENMzax91bqNRPFFWXw9Ezy3B0/8pH4hfoTFaw=
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1608212499;
-        bh=ER/3vyz6QmXexaKciGDwLoO8Jb6wAKkLOrgQjI6JTB8=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=SVgyzh07MHoiigHjzZXzYMau6P90bBcyj/kgK+ZICIcrxhvwXwerA1Q0ovOmAiPOb
-         Yg0QFXVgO7j8/Sc1DL6kIuW0ik4svhsY+U/5YsHMUS+6jtAQ8ySnCElOGQ3RDT8neD
-         SLDgftbzC+Kzr+N3UQCJkS9WOS1zsVLEgSbmML7f2+aTcv9Mptvk7fNHndNwVF81fs
-         IDXT8X8y5L5Mk1t8xEVTRL/5OMfWTndw6rSjn7KzMOH3LTIZPSSZYaG97mH6JcNEWS
-         q4cKqYM859jHf2vH7OvIHD7nW3Zpj9KOMVMUAtCxvGVcnSC6u12feZf1IVgqmTeiCY
-         bZFTDp1jjCETg==
-X-Google-Smtp-Source: ABdhPJxvfnmPF+VJoic606sWqwPtqfOLEA0PxNQEbf8WwouJ1WCMXn6kRcPWqfsVeVnGhlIpEJWcv3sCH72qoIsY7oI=
-X-Received: by 2002:a05:6830:1c24:: with SMTP id f4mr28679651ote.108.1608212498287;
- Thu, 17 Dec 2020 05:41:38 -0800 (PST)
+        id S1726159AbgLXJEq (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Thu, 24 Dec 2020 04:04:46 -0500
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.221.27])
+        by mx2.suse.de (Postfix) with ESMTP id 20357ACC4;
+        Thu, 24 Dec 2020 09:04:04 +0000 (UTC)
+Date:   Thu, 24 Dec 2020 10:04:06 +0100
+From:   Borislav Petkov <bp@suse.de>
+To:     Linus Torvalds <torvalds@linux-foundation.org>
+Cc:     linux-efi <linux-efi@vger.kernel.org>, x86-ml <x86@kernel.org>,
+        lkml <linux-kernel@vger.kernel.org>
+Subject: [GIT PULL] efi/core for v5.11
+Message-ID: <20201224090406.GA6169@zn.tnic>
 MIME-Version: 1.0
-References: <242ea718-89f8-e74f-e48a-e6b0fa436ed1@computerix.info>
- <CAMj1kXHSSZftuv-M9Gg-V+XFTJtFtii8Jfqin03kstSuF9DRJA@mail.gmail.com> <21bee914-35d0-c33d-b68c-20574f8e6fb6@computerix.info>
-In-Reply-To: <21bee914-35d0-c33d-b68c-20574f8e6fb6@computerix.info>
-From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Thu, 17 Dec 2020 14:41:27 +0100
-X-Gmail-Original-Message-ID: <CAMj1kXFDN6Y_xpywzksBhYh-S9BuFuDRgfAOdWrUN6LTuKc+WQ@mail.gmail.com>
-Message-ID: <CAMj1kXFDN6Y_xpywzksBhYh-S9BuFuDRgfAOdWrUN6LTuKc+WQ@mail.gmail.com>
-Subject: Re: Efistub patch breaks 5.10 for me
-To:     Klaus Kusche <klaus.kusche@computerix.info>
-Cc:     Arvind Sankar <nivedita@alum.mit.edu>,
-        "Limonciello, Mario" <mario.limonciello@dell.com>,
-        Jacobo Pantoja <jacobopantoja@gmail.com>,
-        Peter Jones <pjones@redhat.com>,
-        linux-efi <linux-efi@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Thu, 17 Dec 2020 at 14:39, Klaus Kusche <klaus.kusche@computerix.info> wrote:
->
->
-> Hello,
->
-> On 17/12/2020 13:41, Ard Biesheuvel wrote:
-> >> tried to boot 5.10.1 (my first attempt to boot a 5.10.x).
-> >>
-> >> Displays
-> >>
-> >> EFI stub: WARNING: [Firmware Bug]: LoadOptions is an EFI_LOAD_OPTION descriptor
-> >> EFI stub: WARNING: [Firmware Bug]: Using OptionalData as a workaround
-> >>
-> >> for one or two seconds on the notebook display.
-> >>
-> >> Then, the notebook display becomes completely black
-> >> and the notebook does not boot and does not react to anything
-> >> (hard poweroff needed).
-> >
-> > Hello Klaus,
-> >
-> > Please try reverting
-> >
-> > 4a568ce29d3f48df95919f82a80e4b9be7ea0dc1
-> >
-> > "efi/x86: Add a quirk to support command line arguments on Dell EFI firmware"
->
-> Thanks for the quick response.
->
-> Efistub is *not* the culprit:
->
-> With the patch reverted, the two efistub error messages are gone.
-> And with the two errormessages not occupying the display and my attention,
-> I noticed that the kernel actually came up for fractions of a second
-> before the display went dark.
->
-> AMD radeon seems to be the culprit:
-> After unconfiguring it, the system comes up fine in text mode,
-> both with and without the efistub patch.
->
-> And with the efistub patch applied,
-> dmesg actually shows an empty command line instead of the \x01,
-> as it should.
->
+Hi Linus,
 
-Thanks for reporting back, and good luck debugging the radeon driver :-)
+please pull the EFI updates for v5.11. They got delayed due to a last
+minute ia64 build issue which got fixed in the meantime:
+
+https://lkml.kernel.org/r/87o8iwdtbj.fsf@nanos.tec.linutronix.de
+
+and now the lot is all clear.
+
+Thx.
+
+---
+
+The following changes since commit 3650b228f83adda7e5ee532e2b90429c03f7b9ec:
+
+  Linux 5.10-rc1 (2020-10-25 15:14:11 -0700)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git tags/efi_updates_for_v5.11
+
+for you to fetch changes up to 3dcb8b53cbd2cc5618863b19ef00f8ea82f27e83:
+
+  Merge tag 'efi-next-for-v5.11-3' of git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi into efi/core (2020-12-15 12:14:38 +0100)
+
+----------------------------------------------------------------
+EFI updates collected by Ard Biesheuvel:
+
+ - Don't move BSS section around pointlessly in the x86 decompressor
+ - Refactor helper for discovering the EFI secure boot mode
+ - Wire up EFI secure boot to IMA for arm64
+ - Some fixes for the capsule loader
+ - Expose the RT_PROP table via the EFI test module
+ - Relax DT and kernel placement restrictions on ARM
+
++ followup fixes:
+
+ - fix the build breakage on IA64 caused by recent capsule loader changes
+ - suppress a type mismatch build warning in the expansion of
+       EFI_PHYS_ALIGN on ARM
+
+----------------------------------------------------------------
+Ard Biesheuvel (7):
+      efi: x86/xen: switch to efi_get_secureboot_mode helper
+      efi: capsule: use atomic kmap for transient sglist mappings
+      efi: capsule: clean scatter-gather entries from the D-cache
+      efi: arm: reduce minimum alignment of uncompressed kernel
+      efi: stub: get rid of efi_get_max_fdt_addr()
+      efi: ia64: disable the capsule loader
+      efi: arm: force use of unsigned type for EFI_PHYS_ALIGN
+
+Arvind Sankar (1):
+      efi/x86: Only copy the compressed kernel image in efi_relocate_kernel()
+
+Chester Lin (3):
+      efi: generalize efi_get_secureboot
+      ima: generalize x86/EFI arch glue for other EFI architectures
+      arm64/ima: add ima_arch support
+
+Geert Uytterhoeven (1):
+      efi/libstub: EFI_GENERIC_STUB_INITRD_CMDLINE_LOADER should not default to yes
+
+Heinrich Schuchardt (2):
+      efi/libstub/x86: simplify efi_is_native()
+      efi/efi_test: read RuntimeServicesSupported
+
+Thomas Gleixner (1):
+      Merge tag 'efi-next-for-v5.11-3' of git://git.kernel.org/.../efi/efi into efi/core
+
+ arch/arm/include/asm/efi.h                         | 24 ++++++------
+ arch/arm64/Kconfig                                 |  1 +
+ arch/arm64/include/asm/efi.h                       | 11 +++---
+ arch/riscv/include/asm/efi.h                       |  6 ---
+ arch/x86/boot/compressed/Makefile                  |  2 +-
+ arch/x86/include/asm/efi.h                         |  5 ++-
+ arch/x86/kernel/Makefile                           |  2 -
+ arch/x86/xen/efi.c                                 | 37 +++++-------------
+ drivers/firmware/efi/Kconfig                       |  4 +-
+ drivers/firmware/efi/Makefile                      |  5 ++-
+ drivers/firmware/efi/capsule.c                     | 16 +++++++-
+ drivers/firmware/efi/libstub/efi-stub.c            |  1 -
+ drivers/firmware/efi/libstub/efistub.h             |  3 +-
+ drivers/firmware/efi/libstub/fdt.c                 |  3 +-
+ drivers/firmware/efi/libstub/secureboot.c          | 44 ++++++++-------------
+ drivers/firmware/efi/libstub/x86-stub.c            |  5 ++-
+ drivers/firmware/efi/test/efi_test.c               | 16 ++++++++
+ drivers/firmware/efi/test/efi_test.h               |  3 ++
+ include/linux/efi.h                                | 33 ++++++++++++----
+ security/integrity/ima/Makefile                    |  4 ++
+ .../ima_arch.c => security/integrity/ima/ima_efi.c | 45 ++++++----------------
+ 21 files changed, 133 insertions(+), 137 deletions(-)
+ rename arch/x86/kernel/ima_arch.c => security/integrity/ima/ima_efi.c (60%)
+
+-- 
+Regards/Gruss,
+    Boris.
+
+SUSE Software Solutions Germany GmbH, GF: Felix Imendörffer, HRB 36809, AG Nürnberg
