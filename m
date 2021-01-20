@@ -2,104 +2,109 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-18.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 12AF1C433E0
-	for <linux-efi@archiver.kernel.org>; Wed, 20 Jan 2021 16:49:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 495E4C433E0
+	for <linux-efi@archiver.kernel.org>; Wed, 20 Jan 2021 18:47:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D9F7B23358
-	for <linux-efi@archiver.kernel.org>; Wed, 20 Jan 2021 16:49:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0832222473
+	for <linux-efi@archiver.kernel.org>; Wed, 20 Jan 2021 18:47:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2403894AbhATQsv (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 20 Jan 2021 11:48:51 -0500
-Received: from mail.kernel.org ([198.145.29.99]:54444 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2403876AbhATQsm (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 20 Jan 2021 11:48:42 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id C2CB023358
-        for <linux-efi@vger.kernel.org>; Wed, 20 Jan 2021 16:47:59 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1611161279;
-        bh=wlHr8FSIakTSJg6k7/Rj6OgjenxviMEpS89F+nfClzA=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=R0E8ikE5D0HJ9NTcB2oHyx7SxYf6ZZCWayPBdal9q+r1GAMQ/P0EvY/usm7x6eV2M
-         TrSx1X+b/eVKHyaZiK76PML1PONWz/JelWjuG1NpzsapoMr13uke5t87Y55EvJVok/
-         tMIURlMLBusm0BH9ZCBQW5jOYwsJPdCESR1nCT8v76JApNCUm8mLKrfcK9fvNVBkb8
-         VCIxMtOzj2oDWU9y8Os4bzBtM/PJBkYHaqEQoQS6eWM8q8Usqy6XZ7mcC80rNN2nRe
-         IZ+wlxVKwhKRyn2W4UOWBrai9UmI45P6w1S0WIzT+HLKkP8M4+6nW36Rmmli8foAjg
-         TvKEas+aP0E9A==
-Received: by mail-oi1-f177.google.com with SMTP id d189so25654249oig.11
-        for <linux-efi@vger.kernel.org>; Wed, 20 Jan 2021 08:47:59 -0800 (PST)
-X-Gm-Message-State: AOAM530A5wzKFlmhoJ0TIcgHeY1yd7T5tBHtwNaFLgOocyPZtzSfurGj
-        cUjWvzI6FkCSEXOZ8Fn3X4oZGJ7fFPg/xe0upjs=
-X-Google-Smtp-Source: ABdhPJypqczqO8KufT6AwejIsvsF5rA48VwtCCWqBuCWef8VOkwYSmWuB2bgAV3tdKJqKssbQsV+0Ddj5frpRVyoXqw=
-X-Received: by 2002:aca:210f:: with SMTP id 15mr3398826oiz.174.1611161279159;
- Wed, 20 Jan 2021 08:47:59 -0800 (PST)
+        id S1733264AbhATSqo (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 20 Jan 2021 13:46:44 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:47095 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S2387459AbhATRjk (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 20 Jan 2021 12:39:40 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1611164293;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=1YEVSMla8UOmgBC4LmzAJMeE/UB0SCvN1vHTnN1GioY=;
+        b=eRFp/dslELn1Z1K8T71nM0v6M9sdr6YvkLoStbkmEJEkXd3ZD4OYVesbtGP+C71U/y8C9n
+        RRgPs1DCiqpljKunWApaWRGpNVr/ZPjLRuru626s9yUsCWAMuRaNVsSp48P2pcks0/lo+5
+        I7hBgjEZmLB6j5DIDxlvTggHejsaBVw=
+Received: from mail-wr1-f71.google.com (mail-wr1-f71.google.com
+ [209.85.221.71]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-301-H02AeYduP--NCI5z1ZIApw-1; Wed, 20 Jan 2021 12:38:11 -0500
+X-MC-Unique: H02AeYduP--NCI5z1ZIApw-1
+Received: by mail-wr1-f71.google.com with SMTP id r8so11922927wro.22
+        for <linux-efi@vger.kernel.org>; Wed, 20 Jan 2021 09:38:11 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=1YEVSMla8UOmgBC4LmzAJMeE/UB0SCvN1vHTnN1GioY=;
+        b=J8+Z9FoG1q0GJHVWzzzE2thXikP7PMpFEW0mEuKiFZc4d8J3L4k312jPsyScL43nhd
+         Yy50uIMFQWIITxI2o9rfF0mbjuAa7Z29XcwxP1AA2VJ4laWB4VMzpvn1EVSMabCs2zKR
+         S3p4hD54Xg1wJ0mUPZWshcWflegbim16Sb3IOTu3Fm90rJdxnsIRbM+Mqcpq1fFEKZju
+         JJ2Bkx7LEvdrlihHCVSR/xfiHKgW5HrUmeHqyK4jKbPzHt8z1GkwzRuxtKJpFac6kfij
+         rgithp9fJkWnuoLaISpQh24t5fyOJSZ2DD5hixV2HH1uvjeSldPdbPgKp0WdwyGbm11t
+         fpig==
+X-Gm-Message-State: AOAM531jhHGz4jG0POGPDYmXSz++ax65yftaGjB98jCgmLqR9SaunlAx
+        xSFad/Ee5US/MlR8N5MHAb7Sra2ZCJTF6S9uAoddxmSGvNkjxufyNNNmhfYuNR69ERCmQXvwild
+        mIXBVM3KVlsLVPOZXDoib
+X-Received: by 2002:adf:d238:: with SMTP id k24mr10316323wrh.414.1611164290573;
+        Wed, 20 Jan 2021 09:38:10 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJxsXKBygCbH5ehSM3hv+i9wV2hjiG6FmiP83Wor2Wz+s8QTVOj8s3jD6nPK36EhOefk08Au5A==
+X-Received: by 2002:adf:d238:: with SMTP id k24mr10316310wrh.414.1611164290420;
+        Wed, 20 Jan 2021 09:38:10 -0800 (PST)
+Received: from redfedo.redhat.com ([2a01:cb14:499:3d00:cd47:f651:9d80:157a])
+        by smtp.gmail.com with ESMTPSA id x11sm4948325wmi.4.2021.01.20.09.38.08
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 20 Jan 2021 09:38:08 -0800 (PST)
+From:   Julien Thierry <jthierry@redhat.com>
+To:     linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc:     catalin.marinas@arm.com, will@kernel.org, ardb@kernel.org,
+        masahiroy@kernel.org, keescook@chromium.org,
+        michal.lkml@markovi.net, jpoimboe@redhat.com, peterz@infradead.org,
+        mark.rutland@arm.com, broonie@kernel.org,
+        linux-efi@vger.kernel.org, linux-hardening@vger.kernel.org,
+        Julien Thierry <jthierry@redhat.com>
+Subject: [RFC PATCH 03/17] tools: bug: Remove duplicate definition
+Date:   Wed, 20 Jan 2021 18:37:46 +0100
+Message-Id: <20210120173800.1660730-4-jthierry@redhat.com>
+X-Mailer: git-send-email 2.25.4
+In-Reply-To: <20210120173800.1660730-1-jthierry@redhat.com>
+References: <20210120173800.1660730-1-jthierry@redhat.com>
 MIME-Version: 1.0
-References: <20210120163810.14973-1-broonie@kernel.org>
-In-Reply-To: <20210120163810.14973-1-broonie@kernel.org>
-From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Wed, 20 Jan 2021 17:47:48 +0100
-X-Gmail-Original-Message-ID: <CAMj1kXFVRzvBX40sf=ue0=5ndd5gW6u+=OD-VAMGqaErd5wHYw@mail.gmail.com>
-Message-ID: <CAMj1kXFVRzvBX40sf=ue0=5ndd5gW6u+=OD-VAMGqaErd5wHYw@mail.gmail.com>
-Subject: Re: [PATCH v2] efi/arm64: Update debug prints to reflect other
- entropy sources
-To:     Mark Brown <broonie@kernel.org>
-Cc:     linux-efi <linux-efi@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Wed, 20 Jan 2021 at 17:38, Mark Brown <broonie@kernel.org> wrote:
->
-> Currently the EFI stub prints a diagnostic on boot saying that KASLR will
-> be disabled if it is unable to use the EFI RNG protocol to obtain a seed
-> for KASLR.  With the addition of support for v8.5-RNG and the SMCCC RNG
-> protocol it is now possible for KASLR to obtain entropy even if the EFI
-> RNG protocol is unsupported in the system, and the main kernel now
-> explicitly says if KASLR is active itself.  This can result in a boot
-> log where the stub says KASLR has been disabled and the main kernel says
-> that it is enabled which is confusing for users.
->
-> Remove the explicit reference to KASLR from the diagnostics, the warnings
-> are still useful as EFI is the only source of entropy the stub uses when
-> randomizing the physical address of the kernel and the other sources may
-> not be available.
->
-> Signed-off-by: Mark Brown <broonie@kernel.org>
-> ---
->
-> v2: Remove all reference to KASLR from the log messages and clarify
->     physical address randomization use of the EFI RNG seed.
->
+Under tools, bug.h only defines BUILD_BUG_ON_ZERO() which is already
+defined in build_bug.h. This prevents a file to include both headers at
+the same time.
 
-Thanks Mark. I will merge this in efi/next
+Have bug.h include build_bug.h instead.
 
->  drivers/firmware/efi/libstub/arm64-stub.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/firmware/efi/libstub/arm64-stub.c b/drivers/firmware/efi/libstub/arm64-stub.c
-> index 22ece1ad68a8..b69d63143e0d 100644
-> --- a/drivers/firmware/efi/libstub/arm64-stub.c
-> +++ b/drivers/firmware/efi/libstub/arm64-stub.c
-> @@ -61,10 +61,10 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
->                         status = efi_get_random_bytes(sizeof(phys_seed),
->                                                       (u8 *)&phys_seed);
->                         if (status == EFI_NOT_FOUND) {
-> -                               efi_info("EFI_RNG_PROTOCOL unavailable, KASLR will be disabled\n");
-> +                               efi_info("EFI_RNG_PROTOCOL unavailable\n");
->                                 efi_nokaslr = true;
->                         } else if (status != EFI_SUCCESS) {
-> -                               efi_err("efi_get_random_bytes() failed (0x%lx), KASLR will be disabled\n",
-> +                               efi_err("efi_get_random_bytes() failed (0x%lx)\n",
->                                         status);
->                                 efi_nokaslr = true;
->                         }
-> --
-> 2.20.1
->
+Signed-off-by: Julien Thierry <jthierry@redhat.com>
+---
+ tools/include/linux/bug.h | 6 +-----
+ 1 file changed, 1 insertion(+), 5 deletions(-)
+
+diff --git a/tools/include/linux/bug.h b/tools/include/linux/bug.h
+index 85f80258a15f..548be7cffa8e 100644
+--- a/tools/include/linux/bug.h
++++ b/tools/include/linux/bug.h
+@@ -2,10 +2,6 @@
+ #ifndef _TOOLS_PERF_LINUX_BUG_H
+ #define _TOOLS_PERF_LINUX_BUG_H
+ 
+-/* Force a compilation error if condition is true, but also produce a
+-   result (of value 0 and type size_t), so the expression can be used
+-   e.g. in a structure initializer (or where-ever else comma expressions
+-   aren't permitted). */
+-#define BUILD_BUG_ON_ZERO(e) (sizeof(struct { int:-!!(e); }))
++#include <linux/build_bug.h>
+ 
+ #endif	/* _TOOLS_PERF_LINUX_BUG_H */
+-- 
+2.25.4
+
