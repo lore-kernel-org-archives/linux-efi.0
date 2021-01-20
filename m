@@ -7,57 +7,57 @@ X-Spam-Status: No, score=-18.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5E5FEC4332D
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CA9D0C43331
 	for <linux-efi@archiver.kernel.org>; Wed, 20 Jan 2021 19:22:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2A32623403
+	by mail.kernel.org (Postfix) with ESMTP id 90082233EB
 	for <linux-efi@archiver.kernel.org>; Wed, 20 Jan 2021 19:22:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387673AbhATSrG (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 20 Jan 2021 13:47:06 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:52223 "EHLO
+        id S1729130AbhATSqw (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 20 Jan 2021 13:46:52 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:38790 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S2387744AbhATRjv (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 20 Jan 2021 12:39:51 -0500
+        by vger.kernel.org with ESMTP id S2387575AbhATRjo (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 20 Jan 2021 12:39:44 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1611164304;
+        s=mimecast20190719; t=1611164297;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=D/xnDCC8nOFGfsA+lStDur0FhQOLzj3Vyiz97OzDpc8=;
-        b=gUFlrtaEr7qsAtT1h1dRYUW3jycPC8WQ4rOwmnolbIFHWNmPUoEhd6J++ryIQ0s/4aMX4U
-        +XKqAMBV2pEgXfgpI1fPA8ZOlCv7uyZBsetDiK01L6ScObo2dYZ3GzBRCT7EWQQeUILb0c
-        Ow4KS0HV9M9C3pA6pW0OnT9vzBflld8=
-Received: from mail-wr1-f69.google.com (mail-wr1-f69.google.com
- [209.85.221.69]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-344-cun7JWzdMV64Uq3rRnKJgg-1; Wed, 20 Jan 2021 12:38:22 -0500
-X-MC-Unique: cun7JWzdMV64Uq3rRnKJgg-1
-Received: by mail-wr1-f69.google.com with SMTP id d7so2797307wri.23
-        for <linux-efi@vger.kernel.org>; Wed, 20 Jan 2021 09:38:21 -0800 (PST)
+        bh=5kZxUm2npMwQG1TG1qATstMBS9/a58lwU+qMaeV/pLI=;
+        b=ADEJXoOhqVNUGVjqh+0Axs0I+X4AnFUEl1klJY70TozcHDeFuPrPpRuA7T9OEGwr4NR1F9
+        SeiEv8Qj8qg9iK6C72DL2968KgmW9QZJxinKEnf8kKzj4+Sjwi4S9A8DSxkxvFstyLFCbD
+        Tr/3Ga3hNw+ewG9Fe/TdJ1GLO1ZGviw=
+Received: from mail-wr1-f72.google.com (mail-wr1-f72.google.com
+ [209.85.221.72]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-113-JrerUjulPCuzuDVDY44GkQ-1; Wed, 20 Jan 2021 12:38:15 -0500
+X-MC-Unique: JrerUjulPCuzuDVDY44GkQ-1
+Received: by mail-wr1-f72.google.com with SMTP id q18so11966152wrc.20
+        for <linux-efi@vger.kernel.org>; Wed, 20 Jan 2021 09:38:15 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=D/xnDCC8nOFGfsA+lStDur0FhQOLzj3Vyiz97OzDpc8=;
-        b=MAvxrf708ViZ9jnXrGWKsiEDgKqnikbnkiiKyb47zNQBE0NPdryi11TFWUFt6R0EOo
-         QG6SVgTbma0XW6S+clPLZgWciod2vhG7oWM61DX19ETtPqvJZ6joc9iz7T6tM3rBBMdV
-         HT52pcRxAWu1/ysm0H/9uyuPGw2aIh0GBTeCYEd6cONG+vQ9Zx1pRov2DxLy1/qB8Oi7
-         gd5UiktMKukt9JZ48tcgjGFn7Nqpa04ivFtoWuDNMXubS4prFibHBij+Uh+4k0rQLGzL
-         9MueD2Vz3TqtyGVWi9aZ5XXi4uFNDw+lwlwXnbB0ZexnNUcH+olr+firAe8XG0lX5FzP
-         dBEA==
-X-Gm-Message-State: AOAM532fa/vDtqbUWTZM4TLRp0MIA9zoe5dJwKVtxAefMFCHqzh9fqht
-        W6hb/eKcEniWHUXVpIOSVJY0dK5w8BVWMtTbnWDslzwqgQy2P7rgoBteln7TN7gRfxcbl25JIbe
-        XpXcJM98/hH4k1s2TFTpY
-X-Received: by 2002:a5d:660c:: with SMTP id n12mr10531780wru.291.1611164300887;
-        Wed, 20 Jan 2021 09:38:20 -0800 (PST)
-X-Google-Smtp-Source: ABdhPJx5Gt3Pu1qW2EdggZtB7MguFp/4lDK5HfkXjM4AsXdknZgXR2j5+4eIlyKpZr1CO2oaPexByA==
-X-Received: by 2002:a5d:660c:: with SMTP id n12mr10531762wru.291.1611164300731;
-        Wed, 20 Jan 2021 09:38:20 -0800 (PST)
+        bh=5kZxUm2npMwQG1TG1qATstMBS9/a58lwU+qMaeV/pLI=;
+        b=KBMKwDA5S+66Cey6D4OrIuFAI4M6+2TN/XAwUcYj94YRd8lCGqqGB0pks6QerY/s1Y
+         s/g/iN/whdJr0ZU9Ck3jZEW1RzRiXGU7YCjFucz1Unpo/SKF3bOu1+GbPlfPJE0suF8W
+         SYKfBS0aUzqTdi76wC7aZLGDgKDCJTxMdECs+0KijqKqC/jFq78TlJzobTKYRS3TKtSF
+         R+M+DkMLTqwr6f+FLBnSB97qsqtzz/qgGjWjFLCSLN7qkxpp3EU5DpJk3ZQuJUfAr+G/
+         9szvci11D78ja4Z1vCUPhJoK0vvUG+xd8do7iuwUKw/LejNK1MNcBAZ25ABQXbPT6f/1
+         eYOA==
+X-Gm-Message-State: AOAM531krGcIN09gZlNdfsAgfj2PL0Ec6zWFXyDekvx75blsClG0bEsk
+        PJJ481E4hNX4a52y433RjctSY4LWFMf3OpsFZyCyxVK333cohlQfI3EmZGwEoD4C8+t6Hx+7Z4J
+        RrJcuQL67mu6dkNPvaxzh
+X-Received: by 2002:adf:8145:: with SMTP id 63mr10098327wrm.8.1611164294397;
+        Wed, 20 Jan 2021 09:38:14 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJzQzDN3HBtD5u6jA4hqcs01Fugkowpn2vULtp1RxBDFANC375MC0WgDFgHupnT7fa0d1iia8Q==
+X-Received: by 2002:adf:8145:: with SMTP id 63mr10098306wrm.8.1611164294279;
+        Wed, 20 Jan 2021 09:38:14 -0800 (PST)
 Received: from redfedo.redhat.com ([2a01:cb14:499:3d00:cd47:f651:9d80:157a])
-        by smtp.gmail.com with ESMTPSA id x11sm4948325wmi.4.2021.01.20.09.38.19
+        by smtp.gmail.com with ESMTPSA id x11sm4948325wmi.4.2021.01.20.09.38.13
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 20 Jan 2021 09:38:20 -0800 (PST)
+        Wed, 20 Jan 2021 09:38:13 -0800 (PST)
 From:   Julien Thierry <jthierry@redhat.com>
 To:     linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 Cc:     catalin.marinas@arm.com, will@kernel.org, ardb@kernel.org,
@@ -66,9 +66,9 @@ Cc:     catalin.marinas@arm.com, will@kernel.org, ardb@kernel.org,
         mark.rutland@arm.com, broonie@kernel.org,
         linux-efi@vger.kernel.org, linux-hardening@vger.kernel.org,
         Julien Thierry <jthierry@redhat.com>
-Subject: [RFC PATCH 07/17] objtool: arm64: Decode other system instructions
-Date:   Wed, 20 Jan 2021 18:37:50 +0100
-Message-Id: <20210120173800.1660730-8-jthierry@redhat.com>
+Subject: [RFC PATCH 05/17] objtool: arm64: Decode add/sub instructions
+Date:   Wed, 20 Jan 2021 18:37:48 +0100
+Message-Id: <20210120173800.1660730-6-jthierry@redhat.com>
 X-Mailer: git-send-email 2.25.4
 In-Reply-To: <20210120173800.1660730-1-jthierry@redhat.com>
 References: <20210120173800.1660730-1-jthierry@redhat.com>
@@ -78,31 +78,123 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Decode ERET, BRK and NOPs
+Decode aarch64 additions and substractions and create stack_ops for
+instructions interacting with SP or FP.
 
 Signed-off-by: Julien Thierry <jthierry@redhat.com>
 ---
- tools/objtool/arch/arm64/decode.c | 7 +++++++
- 1 file changed, 7 insertions(+)
+ tools/objtool/arch/arm64/decode.c | 84 +++++++++++++++++++++++++++++++
+ 1 file changed, 84 insertions(+)
 
 diff --git a/tools/objtool/arch/arm64/decode.c b/tools/objtool/arch/arm64/decode.c
-index 924121b4b466..a4a587c400a1 100644
+index 8ae822f553ca..0f312dd1b146 100644
 --- a/tools/objtool/arch/arm64/decode.c
 +++ b/tools/objtool/arch/arm64/decode.c
-@@ -223,6 +223,13 @@ int arch_decode_instruction(const struct elf *elf, const struct section *sec,
- 			/* Remaining branch opcodes are conditional */
- 			*type = INSN_JUMP_CONDITIONAL;
- 			*immediate = aarch64_get_branch_offset(insn);
-+		} else if (aarch64_insn_is_eret(insn)) {
-+			*type = INSN_CONTEXT_SWITCH;
-+		} else if (aarch64_insn_is_steppable_hint(insn)) {
-+			*type = INSN_NOP;
-+		} else if (aarch64_insn_is_brk(insn)) {
-+			*immediate = aarch64_insn_decode_immediate(AARCH64_INSN_IMM_16, insn);
-+			*type = INSN_BUG;
- 		} else {
- 			*type = INSN_OTHER;
- 		}
+@@ -23,6 +23,13 @@
+ 
+ #include "../../../arch/arm64/lib/aarch64-insn.c"
+ 
++static unsigned long sign_extend(unsigned long x, int nbits)
++{
++	unsigned long sign_bit = (x >> (nbits - 1)) & 1;
++
++	return ((~0UL + (sign_bit ^ 1)) << nbits) | x;
++}
++
+ bool arch_callee_saved_reg(unsigned char reg)
+ {
+ 	switch (reg) {
+@@ -98,6 +105,53 @@ int arch_decode_hint_reg(struct instruction *insn, u8 sp_reg)
+ 	return -1;
+ }
+ 
++static struct stack_op *arm_make_add_op(enum aarch64_insn_register dest,
++					enum aarch64_insn_register src,
++					int val)
++{
++	struct stack_op *op;
++
++	op = calloc(1, sizeof(*op));
++	op->dest.type = OP_DEST_REG;
++	op->dest.reg = dest;
++	op->src.reg = src;
++	op->src.type = val != 0 ? OP_SRC_ADD : OP_SRC_REG;
++	op->src.offset = val;
++
++	return op;
++}
++
++static void arm_decode_add_sub_imm(u32 instr, bool set_flags,
++				   enum insn_type *type,
++				   unsigned long *immediate,
++				   struct list_head *ops_list)
++{
++	u32 rd = aarch64_insn_decode_register(AARCH64_INSN_REGTYPE_RD, instr);
++	u32 rn = aarch64_insn_decode_register(AARCH64_INSN_REGTYPE_RN, instr);
++
++	*type = INSN_OTHER;
++	*immediate = aarch64_insn_decode_immediate(AARCH64_INSN_IMM_12, instr);
++
++	if (instr & AARCH64_INSN_LSL_12)
++		*immediate <<= 12;
++
++	if ((!set_flags && rd == AARCH64_INSN_REG_SP) ||
++	    rd == AARCH64_INSN_REG_FP ||
++	    rn == AARCH64_INSN_REG_FP ||
++	    rn == AARCH64_INSN_REG_SP) {
++		struct stack_op *op;
++		int value;
++
++		if (aarch64_insn_is_subs_imm(instr) || aarch64_insn_is_sub_imm(instr))
++			value = -*immediate;
++		else
++			value = *immediate;
++
++		op = arm_make_add_op(rd, rn, value);
++		list_add_tail(&op->list, ops_list);
++	}
++}
++
+ int arch_decode_instruction(const struct elf *elf, const struct section *sec,
+ 			    unsigned long offset, unsigned int maxlen,
+ 			    unsigned int *len, enum insn_type *type,
+@@ -121,6 +175,36 @@ int arch_decode_instruction(const struct elf *elf, const struct section *sec,
+ 	case AARCH64_INSN_CLS_UNKNOWN:
+ 		WARN("can't decode instruction at %s:0x%lx", sec->name, offset);
+ 		return -1;
++	case AARCH64_INSN_CLS_DP_IMM:
++		/* Mov register to and from SP are aliases of add_imm */
++		if (aarch64_insn_is_add_imm(insn) ||
++		    aarch64_insn_is_sub_imm(insn))
++			arm_decode_add_sub_imm(insn, false, type, immediate,
++					       ops_list);
++		else if (aarch64_insn_is_adds_imm(insn) ||
++			 aarch64_insn_is_subs_imm(insn))
++			arm_decode_add_sub_imm(insn, true, type, immediate,
++					       ops_list);
++		else
++			*type = INSN_OTHER;
++		break;
++	case AARCH64_INSN_CLS_DP_REG:
++		if (aarch64_insn_is_mov_reg(insn)) {
++			enum aarch64_insn_register rd;
++			enum aarch64_insn_register rm;
++
++			rd = aarch64_insn_decode_register(AARCH64_INSN_REGTYPE_RD, insn);
++			rm = aarch64_insn_decode_register(AARCH64_INSN_REGTYPE_RM, insn);
++			if (rd == AARCH64_INSN_REG_FP || rm == AARCH64_INSN_REG_FP) {
++				struct stack_op *op;
++
++				op = arm_make_add_op(rd, rm, 0);
++				list_add_tail(&op->list, ops_list);
++				break;
++			}
++		}
++		*type = INSN_OTHER;
++		break;
+ 	default:
+ 		*type = INSN_OTHER;
+ 		break;
 -- 
 2.25.4
 
