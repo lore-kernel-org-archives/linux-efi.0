@@ -5,59 +5,59 @@ X-Spam-Level:
 X-Spam-Status: No, score=-18.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E03B9C433DB
-	for <linux-efi@archiver.kernel.org>; Wed, 20 Jan 2021 18:47:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 208B8C43381
+	for <linux-efi@archiver.kernel.org>; Wed, 20 Jan 2021 18:47:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AB64F233CE
+	by mail.kernel.org (Postfix) with ESMTP id E3B2222473
 	for <linux-efi@archiver.kernel.org>; Wed, 20 Jan 2021 18:47:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388711AbhATSrJ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 20 Jan 2021 13:47:09 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:20795 "EHLO
+        id S2388426AbhATSrM (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 20 Jan 2021 13:47:12 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:47093 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S2388426AbhATRj6 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 20 Jan 2021 12:39:58 -0500
+        by vger.kernel.org with ESMTP id S2390159AbhATRkO (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 20 Jan 2021 12:40:14 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1611164308;
+        s=mimecast20190719; t=1611164324;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=SLYnG2np6zR1YTUi6SYwuFsGaDYy69xYRKMeP5onVfI=;
-        b=BH+Mq+om61isFKXPAO6czL7qRnSkQdVUt14pQpV5xXjTjxGDjxmU9oMRBq+smfmUaIyP+j
-        XFniDxP6gx482SzAKyGl85PXOBjai70d5ZPHeCWh0YERB69m+tyCLpM+t5l2yIPtA6vVfa
-        HJGh9JMOI4b/a7rY1Y8LMfv21rVnHOE=
+        bh=h+7NJAZ5HEs+o3c9ngN8mAhWOXYs+DN99Jpiq66kpMs=;
+        b=D3qNyoZVcvH8C0V2VVeWeUCOpamLcnYtoxeqHM4csD5Ul+uhJD07H9Ep/K+ziBElpjZDdp
+        C8hfmdy9wmXUZFJz80GrkVHSUkVzOCb4UNijqSEb2mGDz4c85OdnAa3DWu6UeU86KZFlPc
+        0y840ETW9Yxp9W8L5+oDauA8Y3TQEcI=
 Received: from mail-wm1-f69.google.com (mail-wm1-f69.google.com
  [209.85.128.69]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-270-0IETbB0pMOW8PMvX7qS_JQ-1; Wed, 20 Jan 2021 12:38:26 -0500
-X-MC-Unique: 0IETbB0pMOW8PMvX7qS_JQ-1
-Received: by mail-wm1-f69.google.com with SMTP id 5so997778wmq.0
-        for <linux-efi@vger.kernel.org>; Wed, 20 Jan 2021 09:38:26 -0800 (PST)
+ us-mta-523-N92naAeXMVy1f0CzKoWd9w-1; Wed, 20 Jan 2021 12:38:43 -0500
+X-MC-Unique: N92naAeXMVy1f0CzKoWd9w-1
+Received: by mail-wm1-f69.google.com with SMTP id s24so1831824wmj.3
+        for <linux-efi@vger.kernel.org>; Wed, 20 Jan 2021 09:38:42 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=SLYnG2np6zR1YTUi6SYwuFsGaDYy69xYRKMeP5onVfI=;
-        b=FSo+Dgzjpxlx79mbPiHyyEklHVcBVZriYFoOZIkqDiMu/KjG/pGjBM3JWO10CMGXfQ
-         CIcqfaacbXr9OyLwRTHaIMgrAUedLxK3KPmCHooAlXS3kK5IBCgiJC1fGn1fAQ1fKVRY
-         y2L74meu9OPEmNlZLprDe4r1dBeM3X0/9smmZ+o743/895pfTj2VPjpUYY3i6Za6eRKS
-         Ttexb+j1uSCMoKDhb3u/QCb+zg1unwTY3uuEF+4wIJx4F9/ng5Oayv2L+TOHijfKK3Wj
-         16gUwAezXGTic/8MfS2svqXxpl1HcKl+bqPAYeplr+VIVI9ScghD8SGteo2Qp96wCjzX
-         GHWQ==
-X-Gm-Message-State: AOAM5327YkY70sH8XGS/gEPBUvBUlt3CUoOYgGWFbFnCAwd9wOcYixb+
-        Bc8KmqvGTr3/RelRb2mEeYLBod60ByTwp2TKw6fYJHOrq+xLPMxlOhMTgttLY3ks74qetJbykLZ
-        Vg5n3n81MhhfkyF+O+Ruj
-X-Received: by 2002:adf:d187:: with SMTP id v7mr10468647wrc.50.1611164305257;
-        Wed, 20 Jan 2021 09:38:25 -0800 (PST)
-X-Google-Smtp-Source: ABdhPJwXI5rY8SF1/vD1xUKEd0IWosD2vQICkqK1CgWZpdLBSm0Mws61ej9sdam8XkbTpo9ZQuIaXQ==
-X-Received: by 2002:adf:d187:: with SMTP id v7mr10468627wrc.50.1611164305073;
-        Wed, 20 Jan 2021 09:38:25 -0800 (PST)
+        bh=h+7NJAZ5HEs+o3c9ngN8mAhWOXYs+DN99Jpiq66kpMs=;
+        b=aLqOLdAMUYesM3osgNtqeBnt9wk2sRvW8trhOVWyECw22u7cWkmq+NYYxP0R6RQDko
+         xSXa7tr49x+lQAQ4Kfu+ZvPEMwbt/O15fKQHefG1RJ59ul9ocg1W0WXMzxG68XLWPWHd
+         OcXTD3wITSwLVZHpzuSllRMH30X96cn2tFZn7MSfQHtwJoGf0QeffLkPKrmKo8q1g5oL
+         286DfBACeRsAQW0ow2qoV2xiGzbFydgkz+1YC4wkjqM1xdLEAyjvbsXAyA85+3c+UnYB
+         kczyecCyM6ji4fDgscR4UP4bZ+Ncvaa3LH4jTJUDEQfgXpkgHoEj4GuwT77jLWYsSZsm
+         NmCQ==
+X-Gm-Message-State: AOAM533aC9Q49jbbX7s0zUFSimsKVV32WQaLzi1j8yT5/3fhE68OHfJ8
+        H69MnP1OFsDShPCaEbQQMVcYhv2a+epO6e5A7m3t2zVi4uB9CddiRUp/P3EzRzwRrW9ie6SOEPB
+        Kl+kFc4XFcVaqh+ZSRIU3
+X-Received: by 2002:adf:fa92:: with SMTP id h18mr4344309wrr.142.1611164320484;
+        Wed, 20 Jan 2021 09:38:40 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJzDeWheflvYEpolU09LBJTJ+72qBUJL1UqdbbjxQT7QJExRg0tyCLTSK2CpCQqblVViiEwsaA==
+X-Received: by 2002:adf:fa92:: with SMTP id h18mr4344296wrr.142.1611164320375;
+        Wed, 20 Jan 2021 09:38:40 -0800 (PST)
 Received: from redfedo.redhat.com ([2a01:cb14:499:3d00:cd47:f651:9d80:157a])
-        by smtp.gmail.com with ESMTPSA id x11sm4948325wmi.4.2021.01.20.09.38.23
+        by smtp.gmail.com with ESMTPSA id x11sm4948325wmi.4.2021.01.20.09.38.39
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 20 Jan 2021 09:38:24 -0800 (PST)
+        Wed, 20 Jan 2021 09:38:40 -0800 (PST)
 From:   Julien Thierry <jthierry@redhat.com>
 To:     linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 Cc:     catalin.marinas@arm.com, will@kernel.org, ardb@kernel.org,
@@ -66,9 +66,9 @@ Cc:     catalin.marinas@arm.com, will@kernel.org, ardb@kernel.org,
         mark.rutland@arm.com, broonie@kernel.org,
         linux-efi@vger.kernel.org, linux-hardening@vger.kernel.org,
         Julien Thierry <jthierry@redhat.com>
-Subject: [RFC PATCH 09/17] objtool: arm64: Decode LDR instructions
-Date:   Wed, 20 Jan 2021 18:37:52 +0100
-Message-Id: <20210120173800.1660730-10-jthierry@redhat.com>
+Subject: [RFC PATCH 14/17] objtool: arm64: Cache section with switch table information
+Date:   Wed, 20 Jan 2021 18:37:57 +0100
+Message-Id: <20210120173800.1660730-15-jthierry@redhat.com>
 X-Mailer: git-send-email 2.25.4
 In-Reply-To: <20210120173800.1660730-1-jthierry@redhat.com>
 References: <20210120173800.1660730-1-jthierry@redhat.com>
@@ -78,173 +78,51 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Load literal instructions can generate constants inside code sections.
-Record the locations of the constants in order to be able to remove
-their corresponding "struct instruction".
+Section ".discard.switch_table_info", created by the gcc plugin will
+be looked up for every dynamic jump in the object file while the section
+might not even exist.
+
+Cache the result of the first lookup.
 
 Signed-off-by: Julien Thierry <jthierry@redhat.com>
 ---
- tools/objtool/arch/arm64/decode.c    | 86 ++++++++++++++++++++++++++++
- tools/objtool/arch/x86/decode.c      |  5 ++
- tools/objtool/check.c                |  3 +
- tools/objtool/include/objtool/arch.h |  3 +
- 4 files changed, 97 insertions(+)
+ tools/objtool/arch/arm64/special.c | 16 ++++++++++++++--
+ 1 file changed, 14 insertions(+), 2 deletions(-)
 
-diff --git a/tools/objtool/arch/arm64/decode.c b/tools/objtool/arch/arm64/decode.c
-index 1087ede67bcd..b4d4d5b051b0 100644
---- a/tools/objtool/arch/arm64/decode.c
-+++ b/tools/objtool/arch/arm64/decode.c
-@@ -30,6 +30,73 @@ static unsigned long sign_extend(unsigned long x, int nbits)
- 	return ((~0UL + (sign_bit ^ 1)) << nbits) | x;
+diff --git a/tools/objtool/arch/arm64/special.c b/tools/objtool/arch/arm64/special.c
+index 396b9c5feebd..c9c3e0bfd581 100644
+--- a/tools/objtool/arch/arm64/special.c
++++ b/tools/objtool/arch/arm64/special.c
+@@ -33,6 +33,19 @@ bool arch_support_alt_relocation(struct special_alt *special_alt,
+ 	return false;
  }
  
-+struct insn_loc {
-+	const struct section *sec;
-+	unsigned long offset;
-+	struct hlist_node hnode;
-+	bool ignorable;
-+};
-+
-+DEFINE_HASHTABLE(invalid_insns, 16);
-+
-+static int record_invalid_insn(const struct section *sec,
-+			       unsigned long offset,
-+			       bool ignore)
++static struct section *get_switch_table_info_section(struct objtool_file *file)
 +{
-+	struct insn_loc *loc;
-+	struct hlist_head *l;
++	static bool first = true;
++	static struct section *info_section = NULL;
 +
-+	l = &invalid_insns[hash_min(offset, HASH_BITS(invalid_insns))];
-+	if (!hlist_empty(l)) {
-+		loc = hlist_entry(l->first, struct insn_loc, hnode);
-+		loc->ignorable |= ignore;
-+		return 0;
++	if (first) {
++		first = false;
++		info_section = find_section_by_name(file->elf,
++						    ".discard.switch_table_info");
 +	}
 +
-+	loc = malloc(sizeof(*loc));
-+	if (!loc) {
-+		WARN("malloc failed");
-+		return -1;
-+	}
-+
-+	loc->sec = sec;
-+	loc->offset = offset;
-+	loc->ignorable = ignore;
-+
-+	hash_add(invalid_insns, &loc->hnode, loc->offset);
-+
-+	return 0;
++	return info_section;
 +}
-+
-+int arch_post_process_instructions(struct objtool_file *file)
-+{
-+	struct hlist_node *tmp;
-+	struct insn_loc *loc;
-+	unsigned int bkt;
-+	int res = 0;
-+
-+	hash_for_each_safe(invalid_insns, bkt, tmp, loc, hnode) {
-+		struct instruction *insn;
-+
-+		insn = find_insn(file, (struct section *) loc->sec, loc->offset);
-+		if (insn) {
-+			if (loc->ignorable) {
-+				list_del(&insn->list);
-+				hash_del(&insn->hash);
-+				free(insn);
-+			} else {
-+				WARN_FUNC("can't decode instruction", insn->sec, insn->offset);
-+				return -1;
-+			}
-+		}
-+
-+		hash_del(&loc->hnode);
-+		free(loc);
-+	}
-+
-+	return res;
-+}
-+
- bool arch_callee_saved_reg(unsigned char reg)
- {
- 	switch (reg) {
-@@ -359,6 +426,25 @@ int arch_decode_instruction(const struct elf *elf, const struct section *sec,
- 	case AARCH64_INSN_CLS_LDST:
- 		if (arm_decode_load_store(insn, type, immediate, ops_list))
- 			break;
-+		if (aarch64_insn_is_ldr_lit(insn)) {
-+			long pc_offset;
-+
-+			pc_offset = insn & GENMASK(23, 5);
-+			/* Sign extend and multiply by 4 */
-+			pc_offset = (pc_offset << (64 - 23));
-+			pc_offset = ((pc_offset >> (64 - 23)) >> 5) << 2;
-+
-+			if (record_invalid_insn(sec, offset + pc_offset, true))
-+				return -1;
-+
-+			/* 64-bit literal */
-+			if (insn & BIT(30)) {
-+				if (record_invalid_insn(sec,
-+							offset + pc_offset + 4,
-+							true))
-+					return -1;
-+			}
-+		}
- 		*type = INSN_OTHER;
- 		break;
- 	default:
-diff --git a/tools/objtool/arch/x86/decode.c b/tools/objtool/arch/x86/decode.c
-index 6baa22732ca6..e76d987ce3c7 100644
---- a/tools/objtool/arch/x86/decode.c
-+++ b/tools/objtool/arch/x86/decode.c
-@@ -549,6 +549,11 @@ int arch_decode_instruction(const struct elf *elf, const struct section *sec,
- 	return 0;
- }
  
-+int arch_post_process_instructions(struct objtool_file *file)
-+{
-+	return 0;
-+}
-+
- void arch_initial_func_cfi_state(struct cfi_init_state *state)
- {
- 	int i;
-diff --git a/tools/objtool/check.c b/tools/objtool/check.c
-index 270b507e7098..d902697a388e 100644
---- a/tools/objtool/check.c
-+++ b/tools/objtool/check.c
-@@ -319,6 +319,9 @@ static int decode_instructions(struct objtool_file *file)
- 	if (stats)
- 		printf("nr_insns: %lu\n", nr_insns);
+ /*
+  * Aarch64 jump tables are just arrays of offsets (of varying size/signess)
+@@ -64,8 +77,7 @@ struct reloc *arch_find_switch_table(struct objtool_file *file,
+ 	void *sti_sec_start;
+ 	struct reloc *text_reloc;
  
-+	if (arch_post_process_instructions(file))
-+		return -1;
-+
- 	return 0;
+-	table_info_sec = find_section_by_name(file->elf,
+-					      ".discard.switch_table_info");
++	table_info_sec = get_switch_table_info_section(file);
+ 	if (!table_info_sec)
+ 		goto try_c_jmptbl;
  
- err:
-diff --git a/tools/objtool/include/objtool/arch.h b/tools/objtool/include/objtool/arch.h
-index 6ff0685f5cc5..456d0465b676 100644
---- a/tools/objtool/include/objtool/arch.h
-+++ b/tools/objtool/include/objtool/arch.h
-@@ -66,6 +66,7 @@ struct stack_op {
- 	struct list_head list;
- };
- 
-+struct objtool_file;
- struct instruction;
- 
- void arch_initial_func_cfi_state(struct cfi_init_state *state);
-@@ -76,6 +77,8 @@ int arch_decode_instruction(const struct elf *elf, const struct section *sec,
- 			    unsigned long *immediate,
- 			    struct list_head *ops_list);
- 
-+int arch_post_process_instructions(struct objtool_file *file);
-+
- bool arch_callee_saved_reg(unsigned char reg);
- 
- unsigned long arch_jump_destination(struct instruction *insn);
 -- 
 2.25.4
 
