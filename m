@@ -7,30 +7,29 @@ X-Spam-Status: No, score=-15.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1,
 	USER_IN_DEF_DKIM_WL autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 881BBC433E0
-	for <linux-efi@archiver.kernel.org>; Fri, 22 Jan 2021 21:18:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 23D1AC433DB
+	for <linux-efi@archiver.kernel.org>; Fri, 22 Jan 2021 21:20:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 54B9123B16
-	for <linux-efi@archiver.kernel.org>; Fri, 22 Jan 2021 21:18:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E747123B09
+	for <linux-efi@archiver.kernel.org>; Fri, 22 Jan 2021 21:20:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729542AbhAVVSB (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 22 Jan 2021 16:18:01 -0500
-Received: from linux.microsoft.com ([13.77.154.182]:40154 "EHLO
+        id S1728462AbhAVVUM (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 22 Jan 2021 16:20:12 -0500
+Received: from linux.microsoft.com ([13.77.154.182]:39976 "EHLO
         linux.microsoft.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729865AbhAVVRL (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 22 Jan 2021 16:17:11 -0500
+        with ESMTP id S1730013AbhAVVQG (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 22 Jan 2021 16:16:06 -0500
 Received: from [192.168.254.32] (unknown [47.187.219.45])
-        by linux.microsoft.com (Postfix) with ESMTPSA id 4884C20B6C40;
-        Fri, 22 Jan 2021 13:16:29 -0800 (PST)
-DKIM-Filter: OpenDKIM Filter v2.11.0 linux.microsoft.com 4884C20B6C40
+        by linux.microsoft.com (Postfix) with ESMTPSA id 521CE20B7192;
+        Fri, 22 Jan 2021 13:15:13 -0800 (PST)
+DKIM-Filter: OpenDKIM Filter v2.11.0 linux.microsoft.com 521CE20B7192
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.microsoft.com;
-        s=default; t=1611350190;
+        s=default; t=1611350114;
         bh=LmVa0B7QKVLtgYQ+R0kakMd+3Q+60r35qr0JwnFm7VU=;
-        h=From:Subject:To:Cc:References:Date:In-Reply-To:From;
-        b=FwpsQhKGbt6L+aq2cJ4Vst/Kqkhxev74xZv9rJNJo0ofXaqmQbSqGFApLbJxj3lDF
-         qHHygKBTPq/Lu1CF1HSa2kBg6c7GFsoOLW3AbJQZPI5dA4iEOFh1pV5HesqlHF6g26
-         vnmYb0GZw3479dSXUqrAZ+GmXjbEFoabQ1TdfXLg=
-From:   "Madhavan T. Venkataraman" <madvenka@linux.microsoft.com>
+        h=Subject:To:Cc:References:From:Date:In-Reply-To:From;
+        b=jkkEH3MPRrsvDvseero3sthB72ZWEg+KC707Ywto3Jy/Ep77Tj+qFhv1okjYDd/VE
+         /Dx5oxMI4B/ZDYDhnywVkyDim4CKfsMrBcvwer389JXBAyaa0r9CpdSjUIZvG+IbEQ
+         t5ca9vl/Myy4u6O+zq2+QpBXLlGr0Lom72t4ht7A=
 Subject: Re: [RFC PATCH 00/17] objtool: add base support for arm64
 To:     Mark Brown <broonie@kernel.org>,
         Josh Poimboeuf <jpoimboe@redhat.com>
@@ -55,8 +54,9 @@ References: <20210120173800.1660730-1-jthierry@redhat.com>
  <CAMj1kXE+675mbS66kteKHNfcrco84WTaEL6ncVkkV7tQgbMpFw@mail.gmail.com>
  <20210121185452.fxoz4ehqfv75bdzq@treble>
  <20210122174342.GG6391@sirena.org.uk>
-Message-ID: <718f8021-f423-2fc8-da70-300b19942ea8@linux.microsoft.com>
-Date:   Fri, 22 Jan 2021 15:16:28 -0600
+From:   "Madhavan T. Venkataraman" <madvenka@linux.microsoft.com>
+Message-ID: <bebccb15-1195-c004-923e-74d8444250e1@linux.microsoft.com>
+Date:   Fri, 22 Jan 2021 15:15:12 -0600
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
  Thunderbird/68.10.0
 MIME-Version: 1.0
