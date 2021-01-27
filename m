@@ -2,75 +2,87 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-24.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,INCLUDES_PULL_REQUEST,
-	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-20.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	INCLUDES_PULL_REQUEST,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ADCDEC433E6
-	for <linux-efi@archiver.kernel.org>; Wed, 27 Jan 2021 11:15:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EDBC9C433E9
+	for <linux-efi@archiver.kernel.org>; Wed, 27 Jan 2021 17:51:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4FF0A2075E
-	for <linux-efi@archiver.kernel.org>; Wed, 27 Jan 2021 11:15:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B794464DA8
+	for <linux-efi@archiver.kernel.org>; Wed, 27 Jan 2021 17:51:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236061AbhA0K7G (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 27 Jan 2021 05:59:06 -0500
-Received: from mail.kernel.org ([198.145.29.99]:55976 "EHLO mail.kernel.org"
+        id S235395AbhA0RvY (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 27 Jan 2021 12:51:24 -0500
+Received: from mail.skyhub.de ([5.9.137.197]:59072 "EHLO mail.skyhub.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S236243AbhA0K4l (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 27 Jan 2021 05:56:41 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id E02A420724;
-        Wed, 27 Jan 2021 10:55:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1611744960;
-        bh=C1qjMAXf5BSKD09p22gXGcWkx9+mBWgAZ968jY++61k=;
-        h=From:To:Cc:Subject:Date:From;
-        b=fMkGToZpdJhNQGWtAoedxEs6aF82EqzNsnlbbA1Tei+lRGlk8MeJYdZ6cXQ21/14R
-         +IwQGT80Df2lIbjjLXaAVGyM14efG09emFMXvTqa6YMbEOJvKW6bXy57gYVcL44oCW
-         9c2DdfotKodHXrpcRa6kbpSMLrv2opGnFKydyFr3aEkYNUUe2vkChP386PdM3q7KIS
-         cI67lK6Y5BWYmVXVQjofXP6KicdyP7y2Xa5KTgpuK/5OkZE3p4euOyDQuNP75ajwx0
-         G6LcB1fkaQYYf2COkkv/1eaH73Jj4GVgVy0qa3FQtoh/MFqi3w0dG1JvQ82wIYv8yd
-         nazYn4fSVC+bQ==
-From:   Ard Biesheuvel <ardb@kernel.org>
-To:     linux-efi@vger.kernel.org
-Cc:     ardb@kernel.org, Ingo Molnar <mingo@redhat.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Borislav Petkov <bp@alien8.de>
-Subject: [GIT PULL] EFI fix for v5.11
-Date:   Wed, 27 Jan 2021 11:55:53 +0100
-Message-Id: <20210127105553.37741-1-ardb@kernel.org>
-X-Mailer: git-send-email 2.20.1
+        id S1343847AbhA0RuA (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 27 Jan 2021 12:50:00 -0500
+Received: from zn.tnic (p200300ec2f0f5c00537ed9217074924f.dip0.t-ipconnect.de [IPv6:2003:ec:2f0f:5c00:537e:d921:7074:924f])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id 63BA81EC04DA;
+        Wed, 27 Jan 2021 18:49:13 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alien8.de; s=dkim;
+        t=1611769753;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:in-reply-to:in-reply-to:  references:references;
+        bh=i9m0+oixWz9KJXHOAaimW/7os4efOug2mCnKLti8z+I=;
+        b=cXwJpGiXWr0Gc5NKqcTWhKtGMAiEVe0Cl8aFoKrXzJ5SLjzNafhwTHazhoksi5gu8yfp8s
+        NF/nzfvKyHWXRf8cCjZ4WVFrpEOF1tjKfzuNaQlKD7SwSBcFaZPCPXH4IzSngTWTZ8b6WB
+        WWsSbHtn0bfHnbcejka7LAghFPDUPB4=
+Date:   Wed, 27 Jan 2021 18:49:06 +0100
+From:   Borislav Petkov <bp@alien8.de>
+To:     Ard Biesheuvel <ardb@kernel.org>
+Cc:     linux-efi@vger.kernel.org, Ingo Molnar <mingo@redhat.com>,
+        Thomas Gleixner <tglx@linutronix.de>
+Subject: Re: [GIT PULL] EFI fix for v5.11
+Message-ID: <20210127174906.GE17424@zn.tnic>
+References: <20210127105553.37741-1-ardb@kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20210127105553.37741-1-ardb@kernel.org>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The following changes since commit 5c8fe583cce542aa0b84adc939ce85293de36e5e:
+On Wed, Jan 27, 2021 at 11:55:53AM +0100, Ard Biesheuvel wrote:
+> The following changes since commit 5c8fe583cce542aa0b84adc939ce85293de36e5e:
+> 
+>   Linux 5.11-rc1 (2020-12-27 15:30:22 -0800)
+> 
+> are available in the Git repository at:
+> 
+>   git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-urgent-for-v5.11
+> 
+> for you to fetch changes up to 355845b738e76445c8522802552146d96cb4afa7:
+> 
+>   efi/apple-properties: Reinstate support for boolean properties (2020-12-31 10:28:53 +0100)
+> 
+> Cc: Ingo Molnar <mingo@redhat.com>
+> Cc: Thomas Gleixner <tglx@linutronix.de>
+> Cc: Borislav Petkov <bp@alien8.de>
+> 
+> ----------------------------------------------------------------
+> A single EFI fix from Lukas:
+> 
+> - handle boolean device properties imported from Apple firmware
+>   correctly.
+> 
+> ----------------------------------------------------------------
+> Lukas Wunner (1):
+>       efi/apple-properties: Reinstate support for boolean properties
+> 
+>  drivers/firmware/efi/apple-properties.c | 13 +++++++++----
+>  1 file changed, 9 insertions(+), 4 deletions(-)
 
-  Linux 5.11-rc1 (2020-12-27 15:30:22 -0800)
+Pulled, thanks.
 
-are available in the Git repository at:
+-- 
+Regards/Gruss,
+    Boris.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-urgent-for-v5.11
-
-for you to fetch changes up to 355845b738e76445c8522802552146d96cb4afa7:
-
-  efi/apple-properties: Reinstate support for boolean properties (2020-12-31 10:28:53 +0100)
-
-Cc: Ingo Molnar <mingo@redhat.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Borislav Petkov <bp@alien8.de>
-
-----------------------------------------------------------------
-A single EFI fix from Lukas:
-
-- handle boolean device properties imported from Apple firmware
-  correctly.
-
-----------------------------------------------------------------
-Lukas Wunner (1):
-      efi/apple-properties: Reinstate support for boolean properties
-
- drivers/firmware/efi/apple-properties.c | 13 +++++++++----
- 1 file changed, 9 insertions(+), 4 deletions(-)
+https://people.kernel.org/tglx/notes-about-netiquette
