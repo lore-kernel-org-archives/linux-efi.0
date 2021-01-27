@@ -2,122 +2,100 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-24.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,INCLUDES_PULL_REQUEST,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B712DC433E0
-	for <linux-efi@archiver.kernel.org>; Mon, 25 Jan 2021 21:28:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 96B85C433E0
+	for <linux-efi@archiver.kernel.org>; Wed, 27 Jan 2021 11:01:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6BDE222573
-	for <linux-efi@archiver.kernel.org>; Mon, 25 Jan 2021 21:28:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 46A7C20771
+	for <linux-efi@archiver.kernel.org>; Wed, 27 Jan 2021 11:01:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732623AbhAYV22 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 25 Jan 2021 16:28:28 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:39073 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1732663AbhAYVVI (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 25 Jan 2021 16:21:08 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1611609577;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=gfg/hxSYIFb+RC3VgIgWh3IEpOrZKtS57wEA5wqW8hY=;
-        b=SwrOybOEYPAvJyWi5Pq0PABaqgnKcCC6JQEZ8govD8xx30nstLKZbSqHLjcqvbW0zAEizW
-        CjjzWtpu1Amo4u5nipfn3YJScJFgEqY2LMj+6ka6tUo4dkzzOPmJ398R4OmafxRwdLiEJW
-        AJc2ygXWhPvF/gc+XEwmTBrAo1IHJS0=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-24-7J9p8aPkNCeVG5QgMZHZjg-1; Mon, 25 Jan 2021 16:19:35 -0500
-X-MC-Unique: 7J9p8aPkNCeVG5QgMZHZjg-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 133E710054FF;
-        Mon, 25 Jan 2021 21:19:33 +0000 (UTC)
-Received: from treble (ovpn-120-118.rdu2.redhat.com [10.10.120.118])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 23F015D6AB;
-        Mon, 25 Jan 2021 21:19:31 +0000 (UTC)
-Date:   Mon, 25 Jan 2021 15:19:29 -0600
-From:   Josh Poimboeuf <jpoimboe@redhat.com>
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     "Madhavan T. Venkataraman" <madvenka@linux.microsoft.com>,
-        Mark Brown <broonie@kernel.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Michal Marek <michal.lkml@markovi.net>,
-        Julien Thierry <jthierry@redhat.com>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Masahiro Yamada <masahiroy@kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-efi <linux-efi@vger.kernel.org>,
-        linux-hardening@vger.kernel.org, live-patching@vger.kernel.org,
-        Will Deacon <will@kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Kees Cook <keescook@chromium.org>
-Subject: Re: [RFC PATCH 00/17] objtool: add base support for arm64
-Message-ID: <20210125211929.62e6gzvl54hpmwn2@treble>
-References: <20210120173800.1660730-1-jthierry@redhat.com>
- <CAMj1kXHO0wgcZ4ZDxj1vS9s7Szfpz8Nz=SAW_=Dnnjy+S9AtyQ@mail.gmail.com>
- <186bb660-6e70-6bbf-4e96-1894799c79ce@redhat.com>
- <CAMj1kXHznGnN2UEai1c2UgyKuTFCS5SZ+qGR6VJwyCuccViw_A@mail.gmail.com>
- <YAlkOFwkb6/hFm1Q@hirez.programming.kicks-ass.net>
- <CAMj1kXE+675mbS66kteKHNfcrco84WTaEL6ncVkkV7tQgbMpFw@mail.gmail.com>
- <20210121185452.fxoz4ehqfv75bdzq@treble>
- <20210122174342.GG6391@sirena.org.uk>
- <bebccb15-1195-c004-923e-74d8444250e1@linux.microsoft.com>
- <CAMj1kXFr0wvx-hG6nBY4ibju9ww4x0CGhQber3MZQ2ZZn9LHWw@mail.gmail.com>
+        id S236243AbhA0K7M (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 27 Jan 2021 05:59:12 -0500
+Received: from mail.kernel.org ([198.145.29.99]:56044 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S236193AbhA0K4w (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 27 Jan 2021 05:56:52 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 11DE02076E;
+        Wed, 27 Jan 2021 10:56:08 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1611744970;
+        bh=5DebxzWfu5gdy0+dY/mNz5BUARY7uWkGBXTj5WJORF4=;
+        h=From:To:Cc:Subject:Date:From;
+        b=bKg/eZhKlWJEjW7u3x/0QZcGplbg53ogzh+2KGTekF4xS4NVzuZjZvbnVLJjnEpyZ
+         50cDdV2c903h7P/EP9R5Jxqob5o/1uhFb70mvE+tKn+X5dZQ04Sy6rUjvML6HQczJC
+         7jaM7Oao9XKuz4j96HeCGqaF2S3LXpf7bQFtkFUw4JSWwVH6UPOs3Jjmk2/OkpO5aJ
+         FYkkX6/CCijNWZsjils/KBP4jjwgQaQVhFzB68BWeoKRaBW8EuahcrH8XMG0425qFO
+         eNXkQoTA/4DMDDn6CE1EzqGZXLeylook+IZHf1+YxwtXuPxov9DP5ZVGXQWMc8OEIC
+         KNBNtYl/o3ciw==
+From:   Ard Biesheuvel <ardb@kernel.org>
+To:     linux-efi@vger.kernel.org
+Cc:     ardb@kernel.org, Ingo Molnar <mingo@redhat.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Borislav Petkov <bp@alien8.de>
+Subject: [GIT PULL] EFI changes for v5.12
+Date:   Wed, 27 Jan 2021 11:56:04 +0100
+Message-Id: <20210127105604.37790-1-ardb@kernel.org>
+X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <CAMj1kXFr0wvx-hG6nBY4ibju9ww4x0CGhQber3MZQ2ZZn9LHWw@mail.gmail.com>
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Fri, Jan 22, 2021 at 10:43:09PM +0100, Ard Biesheuvel wrote:
-> On Fri, 22 Jan 2021 at 22:15, Madhavan T. Venkataraman <madvenka@linux.microsoft.com> wrote:
-> > On 1/22/21 11:43 AM, Mark Brown wrote:
-> > > On Thu, Jan 21, 2021 at 12:54:52PM -0600, Josh Poimboeuf wrote:
-> > >
-> > >> 2) The shadow stack idea sounds promising -- how hard would it be to
-> > >>    make a prototype reliable unwinder?
-> > >
-> > > In theory it doesn't look too hard and I can't see a particular reason
-> > > not to try doing this - there's going to be edge cases but hopefully for
-> > > reliable stack trace they're all in areas where we would be happy to
-> > > just decide the stack isn't reliable anyway, things like nesting which
-> > > allocates separate shadow stacks for each nested level for example.
-> > > I'll take a look.
-> > >
-> >
-> > I am a new comer to this discussion and I am learning. Just have some
-> > questions. Pardon me if they are obvious or if they have already been
-> > asked and answered.
-> >
-> > Doesn't Clang already have support for a shadow stack implementation for ARM64?
-> > We could take a look at how Clang does it.
-> >
-> > Will there not be a significant performance hit? May be, some of it can be
-> > mitigated by using a parallel shadow stack rather than a compact one.
-> >
-> > Are there any longjmp style situations in the kernel where the stack is
-> > unwound by several frames? In these cases, the shadow stack must be unwound
-> > accordingly.
-> >
-> 
-> Hello Madhavan,
-> 
-> Let's discuss the details of shadow call stacks on a separate thread,
-> instead of further hijacking Julien's series.
+The following changes since commit 5c8fe583cce542aa0b84adc939ce85293de36e5e:
 
-It's quite relevant to this thread.  There's no need to consider merging
-Julien's patches if you have a better approach.  Why not discuss it
-here?  I'm also interested in the answers to Madhavan's questions.
+  Linux 5.11-rc1 (2020-12-27 15:30:22 -0800)
 
--- 
-Josh
+are available in the Git repository at:
 
+  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next-for-v5.12
+
+for you to fetch changes up to 1c761ee9da1ac6ba7e40d14457fac94c87eaff35:
+
+  efi/arm64: Update debug prints to reflect other entropy sources (2021-01-21 10:54:08 +0100)
+
+Cc: Ingo Molnar <mingo@redhat.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Borislav Petkov <bp@alien8.de>
+
+----------------------------------------------------------------
+EFI updates for v5.12
+
+A few cleanups left and right, some of which were part of a initrd
+measured boot series that needs some more work, and so only the cleanup
+patches have been included for this release.
+
+----------------------------------------------------------------
+Ard Biesheuvel (6):
+      efi: ia64: move IA64-only declarations to new asm/efi.h header
+      efi/libstub: whitespace cleanup
+      efi/libstub: fix prototype of efi_tcg2_protocol::get_event_log()
+      efi/libstub: move TPM related prototypes into efistub.h
+      efi: x86: move mixed mode stack PA variable out of 'efi_scratch'
+      efi: x86: clean up previous struct mm switching
+
+Mark Brown (1):
+      efi/arm64: Update debug prints to reflect other entropy sources
+
+ arch/ia64/include/asm/efi.h               | 13 +++++++++++++
+ arch/ia64/kernel/efi.c                    |  1 +
+ arch/ia64/kernel/machine_kexec.c          |  1 +
+ arch/ia64/kernel/mca.c                    |  1 +
+ arch/ia64/kernel/smpboot.c                |  1 +
+ arch/ia64/kernel/time.c                   |  1 +
+ arch/ia64/kernel/uncached.c               |  4 +---
+ arch/ia64/mm/contig.c                     |  1 +
+ arch/ia64/mm/discontig.c                  |  1 +
+ arch/ia64/mm/init.c                       |  1 +
+ arch/x86/include/asm/efi.h                | 20 ++++++--------------
+ arch/x86/platform/efi/efi_64.c            | 29 ++++++++++++++++-------------
+ arch/x86/platform/efi/efi_thunk_64.S      |  6 +++++-
+ drivers/firmware/efi/libstub/arm64-stub.c |  4 ++--
+ drivers/firmware/efi/libstub/efistub.h    | 11 ++++++++++-
+ include/linux/efi.h                       | 19 ++-----------------
+ 16 files changed, 63 insertions(+), 51 deletions(-)
+ create mode 100644 arch/ia64/include/asm/efi.h
