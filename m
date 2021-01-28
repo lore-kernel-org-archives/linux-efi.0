@@ -2,100 +2,155 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1,USER_IN_DEF_DKIM_WL
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 51BF9C433E0
-	for <linux-efi@archiver.kernel.org>; Wed, 27 Jan 2021 23:29:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 030EFC433E6
+	for <linux-efi@archiver.kernel.org>; Thu, 28 Jan 2021 22:11:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1A43E64DD0
-	for <linux-efi@archiver.kernel.org>; Wed, 27 Jan 2021 23:29:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CE61C64DE0
+	for <linux-efi@archiver.kernel.org>; Thu, 28 Jan 2021 22:11:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233301AbhA0X3l (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 27 Jan 2021 18:29:41 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:59685 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S233679AbhA0X23 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 27 Jan 2021 18:28:29 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1611790023;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=UmZtO9S6cUQ2CC3kIdExR5VZtUZQ7YeAA3zNA2d3Y68=;
-        b=V5Hf+EOsAZRBIwUwUvGVXehgBzfCp1Gf5G+xVqGPNklmZ69PNoEEnmet9tBbpUcv4BLFsS
-        7T1p9AzDDYNOaDWe+dUg22cNpu3XxYb4uUNsSXrNYFaVOQwPwDVfeci4CnTIVzibYlSioy
-        w+UJtwVrowqc8Wf6MZRLxRouwsoPfV0=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-508-yX2crCwSMlywEzTRrvJlVw-1; Wed, 27 Jan 2021 18:27:00 -0500
-X-MC-Unique: yX2crCwSMlywEzTRrvJlVw-1
-Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 25DAC911E3;
-        Wed, 27 Jan 2021 23:26:57 +0000 (UTC)
-Received: from treble (ovpn-120-118.rdu2.redhat.com [10.10.120.118])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 6681D10016FA;
-        Wed, 27 Jan 2021 23:26:53 +0000 (UTC)
-Date:   Wed, 27 Jan 2021 17:26:51 -0600
-From:   Josh Poimboeuf <jpoimboe@redhat.com>
-To:     Nick Desaulniers <ndesaulniers@google.com>
-Cc:     jthierry@redhat.com, ardb@kernel.org, broonie@kernel.org,
-        catalin.marinas@arm.com, keescook@chromium.org,
-        linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org,
-        linux-hardening@vger.kernel.org, linux-kernel@vger.kernel.org,
-        mark.rutland@arm.com, masahiroy@kernel.org,
-        michal.lkml@markovi.net, peterz@infradead.org,
-        raphael.gault@arm.com, will@kernel.org,
-        clang-built-linux@googlegroups.com
-Subject: Re: [RFC PATCH 12/17] gcc-plugins: objtool: Add plugin to detect
- switch table on arm64
-Message-ID: <20210127232651.rj3mo7c2oqh4ytsr@treble>
-References: <20210120173800.1660730-13-jthierry@redhat.com>
- <20210127221557.1119744-1-ndesaulniers@google.com>
+        id S229774AbhA1WLg (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 28 Jan 2021 17:11:36 -0500
+Received: from linux.microsoft.com ([13.77.154.182]:34908 "EHLO
+        linux.microsoft.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229677AbhA1WLe (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 28 Jan 2021 17:11:34 -0500
+Received: from [192.168.254.32] (unknown [47.187.219.45])
+        by linux.microsoft.com (Postfix) with ESMTPSA id 7F77920B7192;
+        Thu, 28 Jan 2021 14:10:52 -0800 (PST)
+DKIM-Filter: OpenDKIM Filter v2.11.0 linux.microsoft.com 7F77920B7192
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.microsoft.com;
+        s=default; t=1611871853;
+        bh=ZA2oSM80w+RdJ/gENbHPlEraVHFQ5GUGuDOI84otWqQ=;
+        h=From:Subject:To:Cc:References:Date:In-Reply-To:From;
+        b=b1XGVIJ11p8YrFEjhTOOsWPkgVJ1pwfcR9jZ+MllQtZMHIWyYefW7DKgPJatPai+7
+         Dz7hbE72mu7+23aHXEWklEXI7+cnEwZ1vcsBxJ9nq7MlZTar2idPNvNO9c86/AYmH4
+         78ogAZo3+o5tEXQX2VNOWZoF16HDXD/bYTvewRCs=
+From:   "Madhavan T. Venkataraman" <madvenka@linux.microsoft.com>
+Subject: Re: [RFC PATCH 00/17] objtool: add base support for arm64
+To:     Mark Brown <broonie@kernel.org>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Julien Thierry <jthierry@redhat.com>,
+        Josh Poimboeuf <jpoimboe@redhat.com>
+Cc:     Ard Biesheuvel <ardb@kernel.org>,
+        Michal Marek <michal.lkml@markovi.net>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        Masahiro Yamada <masahiroy@kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-efi <linux-efi@vger.kernel.org>,
+        linux-hardening@vger.kernel.org, live-patching@vger.kernel.org,
+        Will Deacon <will@kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Kees Cook <keescook@chromium.org>
+References: <20210120173800.1660730-1-jthierry@redhat.com>
+ <CAMj1kXHO0wgcZ4ZDxj1vS9s7Szfpz8Nz=SAW_=Dnnjy+S9AtyQ@mail.gmail.com>
+ <186bb660-6e70-6bbf-4e96-1894799c79ce@redhat.com>
+ <CAMj1kXHznGnN2UEai1c2UgyKuTFCS5SZ+qGR6VJwyCuccViw_A@mail.gmail.com>
+ <YAlkOFwkb6/hFm1Q@hirez.programming.kicks-ass.net>
+ <CAMj1kXE+675mbS66kteKHNfcrco84WTaEL6ncVkkV7tQgbMpFw@mail.gmail.com>
+ <20210121185452.fxoz4ehqfv75bdzq@treble>
+ <20210122174342.GG6391@sirena.org.uk>
+ <CAMj1kXF31FxCTbo4M8MX0aaegaq7AQXMUdCtsm6xrKUFSpkzjA@mail.gmail.com>
+Message-ID: <c8f0cfec-b23e-dc84-0c43-feb9d892ea26@linux.microsoft.com>
+Date:   Thu, 28 Jan 2021 16:10:51 -0600
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
+In-Reply-To: <CAMj1kXF31FxCTbo4M8MX0aaegaq7AQXMUdCtsm6xrKUFSpkzjA@mail.gmail.com>
 Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20210127221557.1119744-1-ndesaulniers@google.com>
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Wed, Jan 27, 2021 at 02:15:57PM -0800, Nick Desaulniers wrote:
-> > From: Raphael Gault <raphael.gault@arm.com>
-> > 
-> > This plugins comes into play before the final 2 RTL passes of GCC and
-> > detects switch-tables that are to be outputed in the ELF and writes
-> > information in an ".discard.switch_table_info" section which will be
-> > used by objtool.
-> > 
-> > Signed-off-by: Raphael Gault <raphael.gault@arm.com>
-> > [J.T.: Change section name to store switch table information,
-> >        Make plugin Kconfig be selected rather than opt-in by user,
-> >        Add a relocation in the switch_table_info that points to
-> >        the jump operation itself]
-> > Signed-off-by: Julien Thierry <jthierry@redhat.com>
-> 
-> Rather than tightly couple this feature to a particular toolchain via
-> plugin, it might be nice to consider what features could be spec'ed out
-> for toolchains to implement (perhaps via a -f flag).
+Hi,
 
-The problem is being able to detect switch statement jump table vectors.
+I sent this suggestion to linux-arm-kernel in response to the Reliable Stacktrace RFC from Mark Brown
+and Mark Rutland. I am repeating it here for two reasons:
 
-For a given indirect branch (due to a switch statement), what are all
-the corresponding jump targets?
+- It involves objtool.
 
-We would need the compiler to annotate that information somehow.
+- There are many more recipients in this thread that may be interested in this topic.
 
-> Distributions (like Android, CrOS) wont be able to use such a feature as
-> is.
+Please let me know if this suggestion is acceptable. If it is not, please let me know why.
+Thanks.
 
-Would a Clang plugin be out of the question?
+Also, I apologize to all of you who have received this more than once.
 
--- 
-Josh
+FP and no-FP functions
+=====================
 
+I have a suggestion for objtool and the unwinder for ARM64.
+
+IIUC, objtool is responsible for walking all the code paths (except unreachable
+and ignored ones) and making sure that every function has proper frame pointer
+code (prolog, epilog, etc). If a function is found to not have it, the kernel
+build is failed. Is this understanding correct?
+
+If so, can we take a different approach for ARM64?
+
+Instead of failing the kernel build, can we just mark the functions as:
+
+	FP	Functions that have proper FP code
+	no-FP	Functions that don't
+
+May be, we can add an "FP" flag in the symbol table entry for this.
+
+Then, the unwinder can check the functions it encounters in the stack trace and
+inform the caller if it found any no-FP functions. The caller of the unwinder can
+decide what he wants to do with that information.
+
+	- the caller can ignore it
+
+	- the caller can print the stack trace with a warning that no-FP functions
+	  were found
+
+	- if the caller is livepatch, the caller can retry until the no-FP functions
+	  disappear from the stack trace. This way, we can have live patching even
+	  when some of the functions in the kernel are no-FP.
+
+Does this make any sense? Is this acceptable? What are the pitfalls?
+
+If we can do this, the unwinder could detect cases such as:
+
+- If gcc thinks that a function is a leaf function but the function contains
+  inline assembly code that calls another function.
+
+- If a call to a function bounces through some intermediate code such as a
+  trampoline.
+
+- etc.
+
+For specific no-FP functions, the unwinder might be able to deduce the original
+caller. In these cases, the stack trace would still be reliable. For all the others,
+the stack trace would be considered unreliable.
+
+Compiler instead of objtool
+===========================
+
+If the above suggestion is acceptable, I have another suggestion.
+
+It is a lot of work for every new architecture to add frame pointer verification
+support in objtool. Can we get some help from the compiler?
+
+The compiler knows which C functions it generates the FP prolog and epilog for. It can
+mark those functions as FP. As for assembly functions, kernel developers could manually
+annotate functions that have proper FP code. The compiler/assembler would mark them
+as FP. Only a small subset of assembly functions would even have FP prolog and epilog.
+
+Is this acceptable? What are the pitfalls?
+
+This can be implemented easily for all architectures for which the compiler generates
+FP code.
+
+Can this be implemented using a GCC plugin? I know squat about GCC plugins.
+
+Thanks!
+
+Madhavan
