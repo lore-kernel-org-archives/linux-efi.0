@@ -2,153 +2,252 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
+X-Spam-Status: No, score=-13.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EFF63C433E6
-	for <linux-efi@archiver.kernel.org>; Wed,  3 Feb 2021 03:22:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7CAF0C433E9
+	for <linux-efi@archiver.kernel.org>; Wed,  3 Feb 2021 08:13:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B2FDE64F72
-	for <linux-efi@archiver.kernel.org>; Wed,  3 Feb 2021 03:22:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 398D964F72
+	for <linux-efi@archiver.kernel.org>; Wed,  3 Feb 2021 08:13:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232176AbhBCDVr (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 2 Feb 2021 22:21:47 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50786 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232735AbhBCDNZ (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 2 Feb 2021 22:13:25 -0500
-Received: from mail-pg1-x531.google.com (mail-pg1-x531.google.com [IPv6:2607:f8b0:4864:20::531])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 20572C061786
-        for <linux-efi@vger.kernel.org>; Tue,  2 Feb 2021 19:04:47 -0800 (PST)
-Received: by mail-pg1-x531.google.com with SMTP id t25so16324136pga.2
-        for <linux-efi@vger.kernel.org>; Tue, 02 Feb 2021 19:04:47 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dabbelt-com.20150623.gappssmtp.com; s=20150623;
-        h=date:subject:in-reply-to:cc:from:to:message-id:mime-version
-         :content-transfer-encoding;
-        bh=Vdh1Qq63m3XfmV6DImv16T62V42d9pjMQXcqf3Ym7EI=;
-        b=wgBkFphGweD3WECMTHTmbOH4w02odKqMUOdnQM3s7BMucZQ6IIzBeW7ZeyOq+iZ4kB
-         wGo9RbJlt91NeM+RFug+FuigT1br4iUJD1XRBbLgwqpiEYiph8kX8ZDK1MPFcwAz7Y0L
-         sNwZdy79RqP/gxQr+bCa0iYka6cCIunrnfrkrI8TmJE3wHBNq7jXaW4eWd+N+P9zAJcy
-         ci4Dex33qOWS7OBKeXfnx1BVBimDM/qJzmQrsM0Pl7WQDt48lKnbl2FjvmZQqMNAV8r6
-         KHkx4Ui8jlzbsHtJPl0xn88GCpFThOZPPHBhR61MQygy4rks7yJ026chqYViX0T7eSFL
-         sAcA==
+        id S232611AbhBCIMr (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 3 Feb 2021 03:12:47 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:51579 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S232613AbhBCIMg (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 3 Feb 2021 03:12:36 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1612339868;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=7Huq6tfU+kDDL1exMPNWAbCb858jufvEInD0eW8A0Yo=;
+        b=NkmcRBUkYOiGyPedvI+AtyBd/g0EFGcmzPWtR5OJEkV+lveICKy0U7hQnvhteKiH1JKJNi
+        6Ct2buAe1662FRJ4BoQ4DUGlWbf/JaCBgB56rL+CXliKrdg0JjFN4WrlCIF7ETLmLhpZ1o
+        LWCa2wyMLkd+SS1nvk4pexpIedmAc3I=
+Received: from mail-wr1-f69.google.com (mail-wr1-f69.google.com
+ [209.85.221.69]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-469-BIB30dqtPxGVTfFUr1VTDw-1; Wed, 03 Feb 2021 03:11:06 -0500
+X-MC-Unique: BIB30dqtPxGVTfFUr1VTDw-1
+Received: by mail-wr1-f69.google.com with SMTP id h18so14044834wrr.5
+        for <linux-efi@vger.kernel.org>; Wed, 03 Feb 2021 00:11:06 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:subject:in-reply-to:cc:from:to:message-id
-         :mime-version:content-transfer-encoding;
-        bh=Vdh1Qq63m3XfmV6DImv16T62V42d9pjMQXcqf3Ym7EI=;
-        b=hUc/LWdCrB6cxw2SPSAtQWhgW/Hwqy2VK83cX7VZ2kU7vQMe0F8n4rChV8jMzg+zdV
-         widAD3xi3Sy8moUads2NqkVYP3Yyj+8dx5aV5leceBzpqEExGdIwrLQGxZ+/Fux/K7rE
-         BTvbRMpjrWKFdUBSqem68X9fCCD1ro7z3DgkTSC1AGxzCeX/Ka7VKAjrRV71jLIlp+N3
-         MB6dSmBi23xqRQHIMcOBd7MJKJx+dLT+9ylZvZ4X3qEjVPHknkCGZqlK0ewZHzl37IPg
-         87n3em2ObwEdzaBj8NWmgKZrssF/R3PfjPgi/3IW26nH2Jc+FgVXA4wHpP2i5p8/8N7C
-         UMAg==
-X-Gm-Message-State: AOAM531CCx/jPqbvRSB5l/ka/H9Y+vaFm0dIxxpefDrLRmcSjIIHQAkd
-        PMBr5yFtZ87xuXe7GTtpUha12g==
-X-Google-Smtp-Source: ABdhPJyuyGSBM/5g+/5Iuy++F6uNnW110xi5tioCbX0ogE3WZP9UD91lzEs7Nrq937k1kDrynd8ykw==
-X-Received: by 2002:a63:4444:: with SMTP id t4mr1256237pgk.329.1612321486466;
-        Tue, 02 Feb 2021 19:04:46 -0800 (PST)
-Received: from localhost (76-210-143-223.lightspeed.sntcca.sbcglobal.net. [76.210.143.223])
-        by smtp.gmail.com with ESMTPSA id lf4sm334800pjb.0.2021.02.02.19.04.45
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 02 Feb 2021 19:04:45 -0800 (PST)
-Date:   Tue, 02 Feb 2021 19:04:45 -0800 (PST)
-X-Google-Original-Date: Tue, 02 Feb 2021 18:39:17 PST (-0800)
-Subject:     Re: [RFC PATCH 00/12] Introduce sv48 support without relocable kernel
-In-Reply-To: <f38979dc-9f8c-6fce-6b1b-70e5f110e14c@ghiti.fr>
-CC:     Paul Walmsley <paul.walmsley@sifive.com>, zong.li@sifive.com,
-        anup@brainfault.org, Christoph Hellwig <hch@lst.de>,
-        ardb@kernel.org, Arnd Bergmann <arnd@arndb.de>,
-        linux-efi@vger.kernel.org, linux-arch@vger.kernel.org,
-        linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org
-From:   Palmer Dabbelt <palmer@dabbelt.com>
-To:     alex@ghiti.fr
-Message-ID: <mhng-68df8416-8592-48e2-9040-56135ff3bc1d@penguin>
-Mime-Version: 1.0 (MHng)
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=7Huq6tfU+kDDL1exMPNWAbCb858jufvEInD0eW8A0Yo=;
+        b=Sz8WKh5QJ9JmhutQy1wto1QZJqFBGSPZs5hTNAnAW52wuaCPXFGLbFftDkFW7QRaIj
+         vQ+xsQSbgip7iuL5ilgWHtrLqfM+s0VFd3PbxKgPm6/RE6xj+vERBL4wGFbCOhrOxfRO
+         tBqFHeikxJZDQfoAKbwkc6Yk2uW9c9yFQ/xaZq3Ekc/D5+WPnGaV7erlaNZEj/8zRqpc
+         zr7LNUGUww1+gfBr61IhnJqcvjqhJnHKdJeCHspdf/7zX/6Z2qnjxEtdw5917sbmNBGR
+         WYRcqNYLH9hjxCO8DCV1hL8eU6Szm24fnSr1Ien9XBrdGtEAgpQaH+9Q5j7x4Wj3/5Ek
+         tLBw==
+X-Gm-Message-State: AOAM530wFkGP+YuDfp6+NPc/F1sXhEH7GSKYTNZ1jozVS1cxY+mObwQK
+        HlZSBtKLCjDhj967SyWV3X9KqaSg9yhz7NxVz5Q9NHAUX41kl7x8y2+AS0RyFwZFX7MJiG5WdUw
+        S3NeG82nAywEkmHmkWBkq
+X-Received: by 2002:a1c:dcd7:: with SMTP id t206mr1572560wmg.108.1612339865390;
+        Wed, 03 Feb 2021 00:11:05 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJyor899BoErX+lNV6jwHugO2N82UM+DD4bmFtKm617J/dNiWTcXQvxuZH381L0jowogxpvzow==
+X-Received: by 2002:a1c:dcd7:: with SMTP id t206mr1572547wmg.108.1612339865171;
+        Wed, 03 Feb 2021 00:11:05 -0800 (PST)
+Received: from ?IPv6:2a01:cb14:499:3d00:cd47:f651:9d80:157a? ([2a01:cb14:499:3d00:cd47:f651:9d80:157a])
+        by smtp.gmail.com with ESMTPSA id y63sm1590188wmd.21.2021.02.03.00.11.03
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 03 Feb 2021 00:11:04 -0800 (PST)
+Subject: Re: [RFC PATCH 12/17] gcc-plugins: objtool: Add plugin to detect
+ switch table on arm64
+To:     Nick Desaulniers <ndesaulniers@google.com>
+Cc:     Josh Poimboeuf <jpoimboe@redhat.com>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Mark Brown <broonie@kernel.org>,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        Kees Cook <keescook@chromium.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        linux-efi <linux-efi@vger.kernel.org>,
+        linux-hardening@vger.kernel.org,
+        LKML <linux-kernel@vger.kernel.org>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Masahiro Yamada <masahiroy@kernel.org>,
+        Michal Marek <michal.lkml@markovi.net>,
+        Peter Zijlstra <peterz@infradead.org>, raphael.gault@arm.com,
+        Will Deacon <will@kernel.org>,
+        clang-built-linux <clang-built-linux@googlegroups.com>,
+        Bill Wendling <morbo@google.com>, swine@google.com,
+        yonghyun@google.com
+References: <20210120173800.1660730-13-jthierry@redhat.com>
+ <20210127221557.1119744-1-ndesaulniers@google.com>
+ <20210127232651.rj3mo7c2oqh4ytsr@treble>
+ <CAKwvOdkOeENcM5X7X926sv2Xmtko=_nOPeKZ2+51s13CW1QAjw@mail.gmail.com>
+ <20210201214423.dhsma73k7ccscovm@treble>
+ <CAKwvOdmgNPSpY2oPHFr8EKGXYJbm7K9gySKFgyn4FERa9nTXmw@mail.gmail.com>
+ <671f1aa9-975e-1bda-6768-259adbdc24c8@redhat.com>
+ <CAKwvOdkqWyDbAvMJAd6gkc2QAEL7DiZg6_uRJ6NUE4tCip4Jvw@mail.gmail.com>
+From:   Julien Thierry <jthierry@redhat.com>
+Message-ID: <e3db542d-c1ff-ffea-60c0-f8dcc0dfb054@redhat.com>
+Date:   Wed, 3 Feb 2021 09:11:02 +0100
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.11.0
+MIME-Version: 1.0
+In-Reply-To: <CAKwvOdkqWyDbAvMJAd6gkc2QAEL7DiZg6_uRJ6NUE4tCip4Jvw@mail.gmail.com>
 Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Sat, 30 Jan 2021 01:33:20 PST (-0800), alex@ghiti.fr wrote:
-> Hi Palmer,
->
-> On 1/4/21 2:58 PM, Alexandre Ghiti wrote:
->> This patchset, contrary to the previous versions, allows to have a single
->> kernel for sv39 and sv48 without being relocatable.
->>
->> The idea comes from Arnd Bergmann who suggested to do the same as x86,
->> that is mapping the kernel to the end of the address space, which allows
->> the kernel to be linked at the same address for both sv39 and sv48 and
->> then does not require to be relocated at runtime.
->>
->> This is an RFC because I need to at least rebase a few commits and add
->> documentation. The most interesting patches where I expect feedbacks are
->> 1/12, 2/12 and 8/12. Note that moving the kernel out of the linear
->> mapping and sv48 support can be separate patchsets, I share them together
->> today to show that it works (this patchset is rebased on top of v5.10).
->>
->> If we agree about the overall idea, I'll rebase my relocatable patchset
->> on top of that and then KASLR implementation from Zong will be greatly
->> simplified since moving the kernel out of the linear mapping will avoid
->> to copy the kernel physically.
->>
->> This implements sv48 support at runtime. The kernel will try to
->> boot with 4-level page table and will fallback to 3-level if the HW does not
->> support it. Folding the 4th level into a 3-level page table has almost no
->> cost at runtime.
->>
->> Finally, the user can now ask for sv39 explicitly by using the device-tree
->> which will reduce memory footprint and reduce the number of memory accesses
->> in case of TLB miss.
->>
->> Alexandre Ghiti (12):
->>    riscv: Move kernel mapping outside of linear mapping
->>    riscv: Protect the kernel linear mapping
->>    riscv: Get rid of compile time logic with MAX_EARLY_MAPPING_SIZE
->>    riscv: Allow to dynamically define VA_BITS
->>    riscv: Simplify MAXPHYSMEM config
->>    riscv: Prepare ptdump for vm layout dynamic addresses
->>    asm-generic: Prepare for riscv use of pud_alloc_one and pud_free
->>    riscv: Implement sv48 support
->>    riscv: Allow user to downgrade to sv39 when hw supports sv48
->>    riscv: Use pgtable_l4_enabled to output mmu type in cpuinfo
->>    riscv: Explicit comment about user virtual address space size
->>    riscv: Improve virtual kernel memory layout dump
->>
->>   arch/riscv/Kconfig                      |  34 +--
->>   arch/riscv/boot/loader.lds.S            |   3 +-
->>   arch/riscv/include/asm/csr.h            |   3 +-
->>   arch/riscv/include/asm/fixmap.h         |   3 +
->>   arch/riscv/include/asm/page.h           |  33 ++-
->>   arch/riscv/include/asm/pgalloc.h        |  40 +++
->>   arch/riscv/include/asm/pgtable-64.h     | 104 ++++++-
->>   arch/riscv/include/asm/pgtable.h        |  68 +++--
->>   arch/riscv/include/asm/sparsemem.h      |   6 +-
->>   arch/riscv/kernel/cpu.c                 |  23 +-
->>   arch/riscv/kernel/head.S                |   6 +-
->>   arch/riscv/kernel/module.c              |   4 +-
->>   arch/riscv/kernel/vmlinux.lds.S         |   3 +-
->>   arch/riscv/mm/context.c                 |   2 +-
->>   arch/riscv/mm/init.c                    | 376 ++++++++++++++++++++----
->>   arch/riscv/mm/physaddr.c                |   2 +-
->>   arch/riscv/mm/ptdump.c                  |  56 +++-
->>   drivers/firmware/efi/libstub/efi-stub.c |   2 +-
->>   include/asm-generic/pgalloc.h           |  24 +-
->>   include/linux/sizes.h                   |   3 +-
->>   20 files changed, 648 insertions(+), 147 deletions(-)
->>
->
-> Any thought about the idea ? Is it going in the right direction ? I have
-> fixed quite a few things since I posted this so don't bother giving this
-> patchset a full review.
 
-My only real issue was the relocation stuff, which appears to be fixed.  I 
-haven't had the time to look at the patches, but it wouldn't hurt to send 
-another revision.  The best bet might be to just wait until 5.11 and send on 
-top of that, it's too late for this one anyway and that'll be a stable base to 
-test from.
+
+On 2/3/21 12:01 AM, Nick Desaulniers wrote:
+> On Tue, Feb 2, 2021 at 12:57 AM Julien Thierry <jthierry@redhat.com> wrote:
+>>
+>>
+>>
+>> On 2/2/21 12:17 AM, Nick Desaulniers wrote:
+>>> On Mon, Feb 1, 2021 at 1:44 PM Josh Poimboeuf <jpoimboe@redhat.com> wrote:
+>>>>
+>>>> On Fri, Jan 29, 2021 at 10:10:01AM -0800, Nick Desaulniers wrote:
+>>>>> On Wed, Jan 27, 2021 at 3:27 PM Josh Poimboeuf <jpoimboe@redhat.com> wrote:
+>>>>>>
+>>>>>> On Wed, Jan 27, 2021 at 02:15:57PM -0800, Nick Desaulniers wrote:
+>>>>>>>> From: Raphael Gault <raphael.gault@arm.com>
+>>>>>>>>
+>>>>>>>> This plugins comes into play before the final 2 RTL passes of GCC and
+>>>>>>>> detects switch-tables that are to be outputed in the ELF and writes
+>>>>>>>> information in an ".discard.switch_table_info" section which will be
+>>>>>>>> used by objtool.
+>>>>>>>>
+>>>>>>>> Signed-off-by: Raphael Gault <raphael.gault@arm.com>
+>>>>>>>> [J.T.: Change section name to store switch table information,
+>>>>>>>>          Make plugin Kconfig be selected rather than opt-in by user,
+>>>>>>>>          Add a relocation in the switch_table_info that points to
+>>>>>>>>          the jump operation itself]
+>>>>>>>> Signed-off-by: Julien Thierry <jthierry@redhat.com>
+>>>>>>>
+>>>>>>> Rather than tightly couple this feature to a particular toolchain via
+>>>>>>> plugin, it might be nice to consider what features could be spec'ed out
+>>>>>>> for toolchains to implement (perhaps via a -f flag).
+>>>>>>
+>>>>>> The problem is being able to detect switch statement jump table vectors.
+>>>>>>
+>>>>>> For a given indirect branch (due to a switch statement), what are all
+>>>>>> the corresponding jump targets?
+>>>>>>
+>>>>>> We would need the compiler to annotate that information somehow.
+>>>>>
+>>>>> Makes sense, the compiler should have this information.  How is this
+>>>>> problem solved on x86?
+>>>>
+>>>> Thus far we've been able to successfully reverse engineer it on x86,
+>>>> though it hasn't been easy.
+>>>>
+>>>> There were some particulars for arm64 which made doing so impossible.
+>>>> (I don't remember the details.)
+>>
+>> The main issue is that the tables for arm64 have more indirection than x86.
+> 
+> I wonder if PAC or BTI also make this slightly more complex?  PAC at
+> least has implications for unwinders, IIUC.
+> 
+>>
+>> On x86, the dispatching jump instruction fetches the target address from
+>> a contiguous array of addresses based on a given offset. So the list of
+>> potential targets of the jump is neatly organized in a table (and sure,
+>> before link time these are just relocation, but still processable).
+>>
+>> On arm64 (with GCC at least), what is stored in a table is an array of
+>> candidate offsets from the jump instruction. And because arm64 is
+>> limited to 32bit instructions, the encoding often requires multiple
+>> instructions to compute the target address:
+>>
+>> ldr<*>  x_offset, [x_offsets_table, x_index, ...]  // load offset
+>> adr     x_dest_base, <addr>          // load target branch for offset 0
+>> add     x_dest, x_target_base, x_offset, ...  // compute final address
+>> br      x_dest        // jump
+>>
+>> Where this gets trickier is that (with GCC) the offsets stored in the
+>> table might or might not be signed constants (and this can be seen in
+>> GCC intermediate representations, but I do not believe this information
+>> is output in the final object file). And on top of that, GCC might
+>> decide to use offsets that are seen as unsigned during intermediate
+>> representation as signed offset by sign extending them in the add
+>> instruction.
+>>
+>> So, to handle this we'd have to track the different operation done with
+>> the offset, from the load to the final jump, decoding the instructions
+>> and deducing the potential target instructions from the table of offsets.
+>>
+>> But that is error prone as we don't really know how many instructions
+>> can be between the ones doing the address computation, and I remember
+>> some messy case of a jump table inside a jump table where tracking the
+>> instruction touching one or the other offset would need a lot of corner
+>> case handling.
+>>
+>> And this of course is just for GCC, I haven't looked at what it all
+>> looks like on Clang's end.
+> 
+> Sure, but this is what production unwinders do, and they don't require
+> compiler plugins, right?  I don't doubt unwinders can be made simpler
+> with changes to toolchain output; please work with your compiler
+> vendor on making such changes rather than relying on compiler plugins
+> to do so.
+> 
+
+I think there is a small confusion. The plugin nor the data it generates 
+is not to be used by a kernel unwinder. It's here to allow objtool to 
+assess whether the code being checked can be unwound (?) reliably (not 
+omitting functions). Part of this is checking that a branch/jump in a 
+function does not end up in some code that is not related to the 
+function without setting up a call frame.
+
+This is about static validation rather than functionality.
+
+>>> I think the details are pertinent to finding a portable solution.  The
+>>> commit message of this commit in particular doesn't document such
+>>> details, such as why such an approach is necessary or how the data is
+>>> laid out for objtool to consume it.
+>>>
+>>
+>> Sorry, I will need to make that clearer. The next patch explains it a
+>> bit [1]
+>>
+>> Basically, for simplicity, the plugin creates a new section containing
+> 
+> Right, this takes a focus on simplicity, at the cost of alienating a toolchain.
+> 
+> Ard's point about 3193c0836f20 relating to -fgcse is that when
+> presented with tricky cases to unwind, the simplest approach is taken.
+> There it was disabling a compiler specific compiler optimization, here
+> it's either a compiler specific compiler plugin (or disabling another
+> compiler optimization).  The pattern seems to be "Objtool isn't smart
+> enough" ... "compiler optimization disabled" or "compiler plugin
+> dependency."
+> 
+>> tables (one per jump table) of references to the jump targets, similar
+>> to what x86 has, except that in this case this table isn't actually used
+>> by runtime code and is discarded at link time. I only chose this to
+>> minimize what needed to be changed in objtool and because the format
+>> seemed simple enough.
+>>
+>> But I'm open on some alternative, whether it's a -fjump-table-info
+> 
+> Yes, I think we could spec out something like that.  But I would
+> appreciate revisiting open questions around stack validation (frame
+> pointers), preventing the generation of jump tables to begin with
+> (-fno-jump-tables) in place of making objtool more robust, or
+> generally the need to depend on compiler plugins.
+> 
+
+I'll give it a try at least for the arm64 side.
+
+Thanks,
+
+-- 
+Julien Thierry
+
