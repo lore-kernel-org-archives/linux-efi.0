@@ -2,180 +2,102 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,INCLUDES_PULL_REQUEST,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F486C433E0
-	for <linux-efi@archiver.kernel.org>; Thu, 11 Feb 2021 08:49:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 61D72C433DB
+	for <linux-efi@archiver.kernel.org>; Mon, 15 Feb 2021 12:45:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 66BCD64E66
-	for <linux-efi@archiver.kernel.org>; Thu, 11 Feb 2021 08:49:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 360B964E68
+	for <linux-efi@archiver.kernel.org>; Mon, 15 Feb 2021 12:45:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229584AbhBKIrP (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 11 Feb 2021 03:47:15 -0500
-Received: from mail.kernel.org ([198.145.29.99]:36444 "EHLO mail.kernel.org"
+        id S229870AbhBOMpJ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 15 Feb 2021 07:45:09 -0500
+Received: from mx2.suse.de ([195.135.220.15]:40960 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229478AbhBKIkp (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Thu, 11 Feb 2021 03:40:45 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 8D45464E7D;
-        Thu, 11 Feb 2021 08:39:10 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1613032750;
-        bh=bqZJ/IZSzLA4VIQ7PM3Z5GOEZ9mZPLQ6ZRDuR1URnf8=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=hNgP4oKHV61iOtHE0Sw3R09LyLE1/MMtGx0Bv3YViJSWRJ4+7bRP6DUveKMc6feq8
-         CAUR/5nAdTJqNqpDKPmZp1lNtRDzdw3rqm7doEZH/GbOzzs9pUiL4aV0jwMm7wLhq5
-         SvKoTVTcfT18N8nlcFfwCgcVMxp//6H+oFnIG5e16/vKd6mwKUYoBhj230n0YOjNfo
-         qis/fKxR15kXUo2WdCUc5CfZXs9XzpURs/wN3jyFdZfAgdyaPqqNi2f5+h0g2lPPtY
-         SK9luynXVEoZmCxInv5nVccsT+tBe4U6Qq0n0HhIkpvTqU3wU0WM63qE9c3ngeUrWT
-         cmSbwdGRZZySg==
-Received: by mail-ot1-f42.google.com with SMTP id i20so4471838otl.7;
-        Thu, 11 Feb 2021 00:39:10 -0800 (PST)
-X-Gm-Message-State: AOAM533/C4XEfb/77h8KtbE2ctVspOyKA5BLgI5Uw6VZ6TWgPDk8XhaK
-        iEZCZUZQaBnzi0lR32bHX45hObMjVTk7K+msH/E=
-X-Google-Smtp-Source: ABdhPJySlkSf5kNF2I/QffAamswNjgwWlw5DvpDxObLmvFfQUsdJVEQUwB5QlCa4rK/oleLEVvdMU/NxCtXKVFoB8I4=
-X-Received: by 2002:a05:6830:1285:: with SMTP id z5mr5020865otp.90.1613032749813;
- Thu, 11 Feb 2021 00:39:09 -0800 (PST)
+        id S230307AbhBOMpF (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Mon, 15 Feb 2021 07:45:05 -0500
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.221.27])
+        by mx2.suse.de (Postfix) with ESMTP id C3C9FAC32;
+        Mon, 15 Feb 2021 12:44:23 +0000 (UTC)
+Date:   Mon, 15 Feb 2021 13:44:26 +0100
+From:   Borislav Petkov <bp@suse.de>
+To:     Linus Torvalds <torvalds@linux-foundation.org>
+Cc:     x86-ml <x86@kernel.org>, linux-efi <linux-efi@vger.kernel.org>,
+        lkml <linux-kernel@vger.kernel.org>
+Subject: [GIT PULL] EFI updates for v5.12
+Message-ID: <20210215124426.GG7265@zn.tnic>
 MIME-Version: 1.0
-References: <cover.1612924255.git.luto@kernel.org> <f43b1e80830dc78ed60ed8b0826f4f189254570c.1612924255.git.luto@kernel.org>
-In-Reply-To: <f43b1e80830dc78ed60ed8b0826f4f189254570c.1612924255.git.luto@kernel.org>
-From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Thu, 11 Feb 2021 09:38:58 +0100
-X-Gmail-Original-Message-ID: <CAMj1kXFVaF8_EbsdQwPagci=3==qgvqLY6bGE8fMK2V-bzG03g@mail.gmail.com>
-Message-ID: <CAMj1kXFVaF8_EbsdQwPagci=3==qgvqLY6bGE8fMK2V-bzG03g@mail.gmail.com>
-Subject: Re: [PATCH v2 14/14] x86/fault, x86/efi: Fix and rename efi_recover_from_page_fault()
-To:     Andy Lutomirski <luto@kernel.org>
-Cc:     X86 ML <x86@kernel.org>, LKML <linux-kernel@vger.kernel.org>,
-        Dave Hansen <dave.hansen@linux.intel.com>,
-        Alexei Starovoitov <ast@kernel.org>,
-        Daniel Borkmann <daniel@iogearbox.net>,
-        Yonghong Song <yhs@fb.com>,
-        Masami Hiramatsu <mhiramat@kernel.org>,
-        Peter Zijlstra <peterz@infradead.org>,
-        linux-efi <linux-efi@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Wed, 10 Feb 2021 at 03:34, Andy Lutomirski <luto@kernel.org> wrote:
->
-> efi_recover_from_page_fault() doesn't recover -- it does a special EFI
-> mini-oops.  Rename it to make it clear that it crashes.
->
-> While renaming it, I noticed a blatant bug: a page fault oops in a
-> different thread happening concurrently with an EFI runtime service call
-> would be misinterpreted as an EFI page fault.  Fix that.
->
-> This isn't quite exact.  We could do better by using a special CS for
-> calls into EFI.
->
-> Cc: Dave Hansen <dave.hansen@linux.intel.com>
-> Cc: Peter Zijlstra <peterz@infradead.org>
-> Cc: Ard Biesheuvel <ardb@kernel.org>
-> Cc: linux-efi@vger.kernel.org
-> Signed-off-by: Andy Lutomirski <luto@kernel.org>
+Hi Linus,
 
-Acked-by: Ard Biesheuvel <ardb@kernel.org>
+please pull the forwarded pile of EFI updates for v5.12.
 
-> ---
->  arch/x86/include/asm/efi.h     |  2 +-
->  arch/x86/mm/fault.c            | 11 ++++++-----
->  arch/x86/platform/efi/quirks.c | 16 ++++++++++++----
->  3 files changed, 19 insertions(+), 10 deletions(-)
->
-> diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-> index c98f78330b09..4b7706ddd8b6 100644
-> --- a/arch/x86/include/asm/efi.h
-> +++ b/arch/x86/include/asm/efi.h
-> @@ -150,7 +150,7 @@ extern void __init efi_apply_memmap_quirks(void);
->  extern int __init efi_reuse_config(u64 tables, int nr_tables);
->  extern void efi_delete_dummy_variable(void);
->  extern void efi_switch_mm(struct mm_struct *mm);
-> -extern void efi_recover_from_page_fault(unsigned long phys_addr);
-> +extern void efi_crash_gracefully_on_page_fault(unsigned long phys_addr);
->  extern void efi_free_boot_services(void);
->
->  /* kexec external ABI */
-> diff --git a/arch/x86/mm/fault.c b/arch/x86/mm/fault.c
-> index eed217d4a877..dfdd56d9c020 100644
-> --- a/arch/x86/mm/fault.c
-> +++ b/arch/x86/mm/fault.c
-> @@ -16,7 +16,7 @@
->  #include <linux/prefetch.h>            /* prefetchw                    */
->  #include <linux/context_tracking.h>    /* exception_enter(), ...       */
->  #include <linux/uaccess.h>             /* faulthandler_disabled()      */
-> -#include <linux/efi.h>                 /* efi_recover_from_page_fault()*/
-> +#include <linux/efi.h>                 /* efi_crash_gracefully_on_page_fault()*/
->  #include <linux/mm_types.h>
->
->  #include <asm/cpufeature.h>            /* boot_cpu_has, ...            */
-> @@ -25,7 +25,7 @@
->  #include <asm/vsyscall.h>              /* emulate_vsyscall             */
->  #include <asm/vm86.h>                  /* struct vm86                  */
->  #include <asm/mmu_context.h>           /* vma_pkey()                   */
-> -#include <asm/efi.h>                   /* efi_recover_from_page_fault()*/
-> +#include <asm/efi.h>                   /* efi_crash_gracefully_on_page_fault()*/
->  #include <asm/desc.h>                  /* store_idt(), ...             */
->  #include <asm/cpu_entry_area.h>                /* exception stack              */
->  #include <asm/pgtable_areas.h>         /* VMALLOC_START, ...           */
-> @@ -700,11 +700,12 @@ page_fault_oops(struct pt_regs *regs, unsigned long error_code,
->  #endif
->
->         /*
-> -        * Buggy firmware could access regions which might page fault, try to
-> -        * recover from such faults.
-> +        * Buggy firmware could access regions which might page fault.  If
-> +        * this happens, EFI has a special OOPS path that will try to
-> +        * avoid hanging the system.
->          */
->         if (IS_ENABLED(CONFIG_EFI))
-> -               efi_recover_from_page_fault(address);
-> +               efi_crash_gracefully_on_page_fault(address);
->
->  oops:
->         /*
-> diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-> index 5a40fe411ebd..0463ef9cddd6 100644
-> --- a/arch/x86/platform/efi/quirks.c
-> +++ b/arch/x86/platform/efi/quirks.c
-> @@ -687,15 +687,25 @@ int efi_capsule_setup_info(struct capsule_info *cap_info, void *kbuff,
->   * @return: Returns, if the page fault is not handled. This function
->   * will never return if the page fault is handled successfully.
->   */
-> -void efi_recover_from_page_fault(unsigned long phys_addr)
-> +void efi_crash_gracefully_on_page_fault(unsigned long phys_addr)
->  {
->         if (!IS_ENABLED(CONFIG_X86_64))
->                 return;
->
-> +       /*
-> +        * If we are in an interrupt nested inside an EFI runtime service,
-> +        * then this is a regular OOPS, not an EFI failure.
-> +        */
-> +       if (in_interrupt() || in_nmi() || in_softirq())
-> +               return;
-> +
->         /*
->          * Make sure that an efi runtime service caused the page fault.
-> +        * READ_ONCE() because we might be OOPSing in a different thread,
-> +        * and we don't want to trip KTSAN while trying to OOPS.
->          */
-> -       if (efi_rts_work.efi_rts_id == EFI_NONE)
-> +       if (READ_ONCE(efi_rts_work.efi_rts_id) == EFI_NONE ||
-> +           current_work() != &efi_rts_work.work)
->                 return;
->
->         /*
-> @@ -747,6 +757,4 @@ void efi_recover_from_page_fault(unsigned long phys_addr)
->                 set_current_state(TASK_IDLE);
->                 schedule();
->         }
-> -
-> -       return;
->  }
-> --
-> 2.29.2
->
+Thx.
+
+---
+
+The following changes since commit 5c8fe583cce542aa0b84adc939ce85293de36e5e:
+
+  Linux 5.11-rc1 (2020-12-27 15:30:22 -0800)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git tags/efi-next-for-v5.12
+
+for you to fetch changes up to 1c761ee9da1ac6ba7e40d14457fac94c87eaff35:
+
+  efi/arm64: Update debug prints to reflect other entropy sources (2021-01-21 10:54:08 +0100)
+
+----------------------------------------------------------------
+EFI updates for v5.12
+
+A few cleanups left and right, some of which were part of a initrd
+measured boot series that needs some more work, and so only the cleanup
+patches have been included for this release.
+
+----------------------------------------------------------------
+Ard Biesheuvel (6):
+      efi: ia64: move IA64-only declarations to new asm/efi.h header
+      efi/libstub: whitespace cleanup
+      efi/libstub: fix prototype of efi_tcg2_protocol::get_event_log()
+      efi/libstub: move TPM related prototypes into efistub.h
+      efi: x86: move mixed mode stack PA variable out of 'efi_scratch'
+      efi: x86: clean up previous struct mm switching
+
+Mark Brown (1):
+      efi/arm64: Update debug prints to reflect other entropy sources
+
+ arch/ia64/include/asm/efi.h               | 13 +++++++++++++
+ arch/ia64/kernel/efi.c                    |  1 +
+ arch/ia64/kernel/machine_kexec.c          |  1 +
+ arch/ia64/kernel/mca.c                    |  1 +
+ arch/ia64/kernel/smpboot.c                |  1 +
+ arch/ia64/kernel/time.c                   |  1 +
+ arch/ia64/kernel/uncached.c               |  4 +---
+ arch/ia64/mm/contig.c                     |  1 +
+ arch/ia64/mm/discontig.c                  |  1 +
+ arch/ia64/mm/init.c                       |  1 +
+ arch/x86/include/asm/efi.h                | 20 ++++++--------------
+ arch/x86/platform/efi/efi_64.c            | 29 ++++++++++++++++-------------
+ arch/x86/platform/efi/efi_thunk_64.S      |  6 +++++-
+ drivers/firmware/efi/libstub/arm64-stub.c |  4 ++--
+ drivers/firmware/efi/libstub/efistub.h    | 11 ++++++++++-
+ include/linux/efi.h                       | 19 ++-----------------
+ 16 files changed, 63 insertions(+), 51 deletions(-)
+ create mode 100644 arch/ia64/include/asm/efi.h
+
+-- 
+Regards/Gruss,
+    Boris.
+
+SUSE Software Solutions Germany GmbH, GF: Felix Imendörffer, HRB 36809, AG Nürnberg
