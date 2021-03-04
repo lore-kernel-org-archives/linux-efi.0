@@ -2,208 +2,87 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-26.3 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_GIT,USER_IN_DEF_DKIM_WL autolearn=unavailable
+X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 98937C433E6
-	for <linux-efi@archiver.kernel.org>; Thu,  4 Mar 2021 04:59:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DA4A7C4332D
+	for <linux-efi@archiver.kernel.org>; Thu,  4 Mar 2021 08:31:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 637DB64EF9
-	for <linux-efi@archiver.kernel.org>; Thu,  4 Mar 2021 04:59:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9FAEC60249
+	for <linux-efi@archiver.kernel.org>; Thu,  4 Mar 2021 08:31:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234016AbhCDE6b (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 3 Mar 2021 23:58:31 -0500
-Received: from rcdn-iport-8.cisco.com ([173.37.86.79]:46722 "EHLO
-        rcdn-iport-8.cisco.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233889AbhCDE6C (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 3 Mar 2021 23:58:02 -0500
-X-Greylist: delayed 546 seconds by postgrey-1.27 at vger.kernel.org; Wed, 03 Mar 2021 23:58:02 EST
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=cisco.com; i=@cisco.com; l=4760; q=dns/txt; s=iport;
-  t=1614833882; x=1616043482;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=tQ2KjkNmJ1N6aeJwFCAC+GVVOXowsaBAtY9t5Zi/wUA=;
-  b=d5Nq0Jwbi7F2K8PQ3ZgJEQkZ0MhGUpTQO3aLECCdQ1Rv+WqggXP5SWf2
-   SSOssgC3BsXbidVhFmCbJZIie3wHjFbgHhckayyULgrYLVEjLB0C5fZf4
-   xxlW5JbGZKo8D54icCp20CspBdJroplpBGMMJJHjtfqVbxtWgxMcvkKvk
-   c=;
-X-IronPort-Anti-Spam-Filtered: true
-X-IronPort-Anti-Spam-Result: =?us-ascii?q?A0DCAAAUZkBg/40NJK1iHAEBAQEBAQc?=
- =?us-ascii?q?BARIBAQQEAQGBfgQBAQsBgiqBTAE5MZYbiieSJwsBAQEPNAQBAYRNgXwCJTc?=
- =?us-ascii?q?GDgIDAQELAQEFAQEBAgEGBHGFboZ9ATgOgQI8ARKCcIJWAy+uHIIoiDANYoF?=
- =?us-ascii?q?EFIEkAYhbdIQZHIFJQoERg1iCGogZBIJGAXUZAQolAYFUgRuQHgYEgm2KLoE?=
- =?us-ascii?q?cmgRbgwaBH5VVhR0PIqNWlFWOP5QHgWokgVczGggbFYMkUBkNjisWjWoBXCA?=
- =?us-ascii?q?DLzgCBgoBAQMJjBMBAQ?=
-X-IronPort-AV: E=Sophos;i="5.81,221,1610409600"; 
-   d="scan'208";a="868193958"
-Received: from alln-core-8.cisco.com ([173.36.13.141])
-  by rcdn-iport-8.cisco.com with ESMTP/TLS/DHE-RSA-SEED-SHA; 04 Mar 2021 04:48:15 +0000
-Received: from zorba.cisco.com ([10.24.7.178])
-        by alln-core-8.cisco.com (8.15.2/8.15.2) with ESMTP id 1244m4X1015988;
-        Thu, 4 Mar 2021 04:48:13 GMT
-From:   Daniel Walker <danielwa@cisco.com>
-To:     Will Deacon <will@kernel.org>,
-        Christophe Leroy <christophe.leroy@csgroup.eu>,
-        ob Herring <robh@kernel.org>,
-        Daniel Gimpelevich <daniel@gimpelevich.san-francisco.ca.us>,
-        Andrew Morton <akpm@linux-foundation.org>, x86@kernel.org,
-        linux-mips@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
-        "H. Peter Anvin" <hpa@zytor.com>
-Cc:     xe-linux-external@cisco.com,
-        Ruslan Ruslichenko <rruslich@cisco.com>,
-        Ruslan Bilovol <ruslan.bilovol@gmail.com>,
-        Ard Biesheuvel <ardb@kernel.org>, linux-kernel@vger.kernel.org,
-        linux-efi@vger.kernel.org
-Subject: [PATCH 5/5] CMDLINE: x86: convert to generic builtin command line
-Date:   Wed,  3 Mar 2021 20:48:02 -0800
-Message-Id: <20210304044803.812204-5-danielwa@cisco.com>
-X-Mailer: git-send-email 2.25.1
+        id S235789AbhCDIay (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 4 Mar 2021 03:30:54 -0500
+Received: from mail.kernel.org ([198.145.29.99]:51918 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S236778AbhCDIaw (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Thu, 4 Mar 2021 03:30:52 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 089CD64F07;
+        Thu,  4 Mar 2021 08:30:12 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1614846612;
+        bh=p+LFYEJoTZPD5guFNbCgjfsD5MOV4lQEg1/noCdx6g0=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=aqbhMAJqfzqZVNTk+HxCq0YEvH0DlWywVMMT/vsKEPxai5Qtx1O+yKb2Ksqh7dQKG
+         6AD7bDyRoGLMbuJCHL7uaQ5HgWT+d1aLTr9ZlQt1D4xG8XzjwlifHkll8KNnKy9rsX
+         qi4pjB7WF6HR4m6pQZA3UxngjOZ/q5LtCGfqg4dOgD4K9j62aNAJHk9R8DkHWmSRX0
+         zx9xfelM+0ZSkreqNUN8HmUoCoACjFg6Ce0bLEjJA7/6r6JEihanJag0QOpWKsH0yU
+         LO2HMTF+hCfaHxIqIiUXHRNpMYNk3KpYaUWgPk4jz/pHqDo2Ypfkgo37omLL0Agl/K
+         xVaQ8q8ktMNnQ==
+Received: by mail-ot1-f47.google.com with SMTP id h10so15809737otm.1;
+        Thu, 04 Mar 2021 00:30:11 -0800 (PST)
+X-Gm-Message-State: AOAM530qgVfIVCXiABhjdGdPmrH+UEoJ1K1YJBrcryEesfTdgecV3usG
+        Lbe4eZtqp7HFJA6xeJDtkfveeT/e0AB0AcO3ufY=
+X-Google-Smtp-Source: ABdhPJxYBMJoudqekui521vRf42I2gPjyAMXoSs0/ZyckrKw0z9xkv8aYatVKNS2gMQxPwrCckGCNDLcWKAwPEzBhXw=
+X-Received: by 2002:a9d:7512:: with SMTP id r18mr2646719otk.90.1614846611398;
+ Thu, 04 Mar 2021 00:30:11 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Auto-Response-Suppress: DR, OOF, AutoReply
-X-Outbound-SMTP-Client: 10.24.7.178, [10.24.7.178]
-X-Outbound-Node: alln-core-8.cisco.com
+References: <20210304082837.22262-1-heikki.krogerus@linux.intel.com>
+In-Reply-To: <20210304082837.22262-1-heikki.krogerus@linux.intel.com>
+From:   Ard Biesheuvel <ardb@kernel.org>
+Date:   Thu, 4 Mar 2021 09:30:00 +0100
+X-Gmail-Original-Message-ID: <CAMj1kXHXOGidWqueyxmxSQOQ6+1DW4trTg600roLF20Zh0_Z2g@mail.gmail.com>
+Message-ID: <CAMj1kXHXOGidWqueyxmxSQOQ6+1DW4trTg600roLF20Zh0_Z2g@mail.gmail.com>
+Subject: Re: [PATCH] efi/apple-properties: Handle device properties with
+ software node API
+To:     Heikki Krogerus <heikki.krogerus@linux.intel.com>,
+        Lukas Wunner <lukas@wunner.de>
+Cc:     linux-efi <linux-efi@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This updates the x86 code to use the CONFIG_GENERIC_CMDLINE
-option.
+(+ Lukas)
 
-Cc: xe-linux-external@cisco.com
-Signed-off-by: Ruslan Ruslichenko <rruslich@cisco.com>
-Signed-off-by: Ruslan Bilovol <ruslan.bilovol@gmail.com>
-Signed-off-by: Daniel Walker <danielwa@cisco.com>
----
- arch/x86/Kconfig                        | 44 +------------------------
- arch/x86/kernel/setup.c                 | 18 ++--------
- drivers/firmware/efi/libstub/x86-stub.c |  2 +-
- 3 files changed, 4 insertions(+), 60 deletions(-)
-
-diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
-index 21f851179ff0..3950f9bf9855 100644
---- a/arch/x86/Kconfig
-+++ b/arch/x86/Kconfig
-@@ -115,6 +115,7 @@ config X86
- 	select EDAC_SUPPORT
- 	select GENERIC_CLOCKEVENTS_BROADCAST	if X86_64 || (X86_32 && X86_LOCAL_APIC)
- 	select GENERIC_CLOCKEVENTS_MIN_ADJUST
-+	select GENERIC_CMDLINE
- 	select GENERIC_CMOS_UPDATE
- 	select GENERIC_CPU_AUTOPROBE
- 	select GENERIC_CPU_VULNERABILITIES
-@@ -2368,49 +2369,6 @@ choice
- 
- endchoice
- 
--config CMDLINE_BOOL
--	bool "Built-in kernel command line"
--	help
--	  Allow for specifying boot arguments to the kernel at
--	  build time.  On some systems (e.g. embedded ones), it is
--	  necessary or convenient to provide some or all of the
--	  kernel boot arguments with the kernel itself (that is,
--	  to not rely on the boot loader to provide them.)
--
--	  To compile command line arguments into the kernel,
--	  set this option to 'Y', then fill in the
--	  boot arguments in CONFIG_CMDLINE.
--
--	  Systems with fully functional boot loaders (i.e. non-embedded)
--	  should leave this option set to 'N'.
--
--config CMDLINE
--	string "Built-in kernel command string"
--	depends on CMDLINE_BOOL
--	default ""
--	help
--	  Enter arguments here that should be compiled into the kernel
--	  image and used at boot time.  If the boot loader provides a
--	  command line at boot time, it is appended to this string to
--	  form the full kernel command line, when the system boots.
--
--	  However, you can use the CONFIG_CMDLINE_OVERRIDE option to
--	  change this behavior.
--
--	  In most cases, the command line (whether built-in or provided
--	  by the boot loader) should specify the device for the root
--	  file system.
--
--config CMDLINE_OVERRIDE
--	bool "Built-in command line overrides boot loader arguments"
--	depends on CMDLINE_BOOL && CMDLINE != ""
--	help
--	  Set this option to 'Y' to have the kernel ignore the boot loader
--	  command line, and use ONLY the built-in command line.
--
--	  This is used to work around broken boot loaders.  This should
--	  be set to 'N' under normal conditions.
--
- config MODIFY_LDT_SYSCALL
- 	bool "Enable the LDT (local descriptor table)" if EXPERT
- 	default y
-diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index 740f3bdb3f61..e748c3e5c1ae 100644
---- a/arch/x86/kernel/setup.c
-+++ b/arch/x86/kernel/setup.c
-@@ -48,6 +48,7 @@
- #include <asm/unwind.h>
- #include <asm/vsyscall.h>
- #include <linux/vmalloc.h>
-+#include <linux/cmdline.h>
- 
- /*
-  * max_low_pfn_mapped: highest directly mapped pfn < 4 GB
-@@ -162,9 +163,6 @@ unsigned long saved_video_mode;
- #define RAMDISK_LOAD_FLAG		0x4000
- 
- static char __initdata command_line[COMMAND_LINE_SIZE];
--#ifdef CONFIG_CMDLINE_BOOL
--static char __initdata builtin_cmdline[COMMAND_LINE_SIZE] = CONFIG_CMDLINE;
--#endif
- 
- #if defined(CONFIG_EDD) || defined(CONFIG_EDD_MODULE)
- struct edd edd;
-@@ -884,19 +882,7 @@ void __init setup_arch(char **cmdline_p)
- 	bss_resource.start = __pa_symbol(__bss_start);
- 	bss_resource.end = __pa_symbol(__bss_stop)-1;
- 
--#ifdef CONFIG_CMDLINE_BOOL
--#ifdef CONFIG_CMDLINE_OVERRIDE
--	strlcpy(boot_command_line, builtin_cmdline, COMMAND_LINE_SIZE);
--#else
--	if (builtin_cmdline[0]) {
--		/* append boot loader cmdline to builtin */
--		strlcat(builtin_cmdline, " ", COMMAND_LINE_SIZE);
--		strlcat(builtin_cmdline, boot_command_line, COMMAND_LINE_SIZE);
--		strlcpy(boot_command_line, builtin_cmdline, COMMAND_LINE_SIZE);
--	}
--#endif
--#endif
--
-+	cmdline_add_builtin(boot_command_line, NULL, COMMAND_LINE_SIZE);
- 	strlcpy(command_line, boot_command_line, COMMAND_LINE_SIZE);
- 	*cmdline_p = command_line;
- 
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index f14c4ff5839f..9538c9d4a0bc 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -736,7 +736,7 @@ unsigned long efi_main(efi_handle_t handle,
- 	}
- 
- #ifdef CONFIG_CMDLINE_BOOL
--	status = efi_parse_options(CONFIG_CMDLINE);
-+	status = efi_parse_options(CONFIG_CMDLINE_PREPEND " " CONFIG_CMDLINE_APPEND);
- 	if (status != EFI_SUCCESS) {
- 		efi_err("Failed to parse options\n");
- 		goto fail;
--- 
-2.25.1
-
+On Thu, 4 Mar 2021 at 09:28, Heikki Krogerus
+<heikki.krogerus@linux.intel.com> wrote:
+>
+> The old device property API is going to be removed.
+> Replacing the device_add_properties() call with the software
+> node API equivalent, device_create_managed_software_node().
+>
+> Signed-off-by: Heikki Krogerus <heikki.krogerus@linux.intel.com>
+> ---
+>  drivers/firmware/efi/apple-properties.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/firmware/efi/apple-properties.c b/drivers/firmware/efi/apple-properties.c
+> index e1926483ae2fd..4c3201e290e29 100644
+> --- a/drivers/firmware/efi/apple-properties.c
+> +++ b/drivers/firmware/efi/apple-properties.c
+> @@ -157,7 +157,7 @@ static int __init unmarshal_devices(struct properties_header *properties)
+>                 if (!entry[0].name)
+>                         goto skip_device;
+>
+> -               ret = device_add_properties(dev, entry); /* makes deep copy */
+> +               ret = device_create_managed_software_node(dev, entry, NULL);
+>                 if (ret)
+>                         dev_err(dev, "error %d assigning properties\n", ret);
+>
+> --
+> 2.30.1
+>
