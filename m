@@ -2,118 +2,147 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B41FC433DB
-	for <linux-efi@archiver.kernel.org>; Tue,  9 Mar 2021 14:53:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0028BC433E9
+	for <linux-efi@archiver.kernel.org>; Tue,  9 Mar 2021 18:11:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 02CA665243
-	for <linux-efi@archiver.kernel.org>; Tue,  9 Mar 2021 14:53:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 95F8C65238
+	for <linux-efi@archiver.kernel.org>; Tue,  9 Mar 2021 18:11:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231712AbhCIOwg (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 9 Mar 2021 09:52:36 -0500
-Received: from foss.arm.com ([217.140.110.172]:54794 "EHLO foss.arm.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231625AbhCIOwG (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Tue, 9 Mar 2021 09:52:06 -0500
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 3A04C1042;
-        Tue,  9 Mar 2021 06:52:06 -0800 (PST)
-Received: from [192.168.0.130] (unknown [172.31.20.19])
-        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 7EA983F71B;
-        Tue,  9 Mar 2021 06:52:02 -0800 (PST)
-Subject: Re: [PATCH] arm64/mm: Fix __enable_mmu() for new TGRAN range values
-To:     Will Deacon <will@kernel.org>, Marc Zyngier <maz@kernel.org>
-Cc:     linux-arm-kernel@lists.infradead.org,
-        James Morse <james.morse@arm.com>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Suzuki K Poulose <suzuki.poulose@arm.com>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        kvmarm@lists.cs.columbia.edu, linux-efi@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-References: <1614954969-14338-1-git-send-email-anshuman.khandual@arm.com>
- <8735x5zozr.wl-maz@kernel.org> <20210309140527.GB28395@willie-the-truck>
-From:   Anshuman Khandual <anshuman.khandual@arm.com>
-Message-ID: <718f4b0c-20d9-8588-1268-e5b26690899d@arm.com>
-Date:   Tue, 9 Mar 2021 20:22:38 +0530
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        id S230303AbhCISKe (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 9 Mar 2021 13:10:34 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50282 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231911AbhCISKQ (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 9 Mar 2021 13:10:16 -0500
+Received: from mail-wr1-x434.google.com (mail-wr1-x434.google.com [IPv6:2a00:1450:4864:20::434])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3E3B1C06174A;
+        Tue,  9 Mar 2021 10:10:16 -0800 (PST)
+Received: by mail-wr1-x434.google.com with SMTP id u16so17516321wrt.1;
+        Tue, 09 Mar 2021 10:10:16 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=SzNzOMmL3LWxNFZWZ4MjuPE4IoBxhndH+OpOnMvFnFM=;
+        b=XJpqnTCcD3rJKzTtEjCLK3L/1Eav0uY8rGGdlCYiKKUB+gNQB08xzfQR4hGT+d894n
+         dPC0fitBR86mE0VK1AsNBpc6cwi1NKicxU6hH2yRqklx3E7CyqlYYCQ8jeMU97ED/uo9
+         RTVGVpo7EsR8yF7kwy3MYXbQgon85qmaOZlo/uiuOn9JEpY4QF4mQkigKpHaBEcB09n7
+         6Gi58gNkL8QpNNXgDgxGvnvI+rEkTYs/ZF3Hsgxc1MRfP9BHwHWlaq0xgFRwT1BPncCe
+         qjnJWEzELT1xBGsgeKXAKor/MGQpfC/xdeJMl/lR+49PO/+/kNwlluRIJWygHidLXR2w
+         TM3Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=SzNzOMmL3LWxNFZWZ4MjuPE4IoBxhndH+OpOnMvFnFM=;
+        b=hGCpkTRCUgA5Uwcc5BC8KK5K/mp6n2eXBSGyxxwowN3PJpATf1IAHz/GCxsjtrnk41
+         1a1Ab3Q+XqY++LgP580UDteYi+XuYzZ+J0roThz+Ba8rexEmcR3jY7W11Zt/zg+c1BkV
+         P4eI9ygMpGEPSOuZc0DQKRjP3fZVpFubvWoSle0E74szQv6fXbjzpXhmo/9RHI8Niykk
+         zpCRUQuCt45FlTk/e1S7LmIvK8lKnracNLehC42r1eTHYi8gudaZ2GjDw6h9A06LsK7N
+         E8M69wbyjulp0lKJTx1vmVmNfLwvzRPBfRFDOQ0UpHSg6QvoxlvtUAkHOdNjbPqTBr0m
+         ADaQ==
+X-Gm-Message-State: AOAM533ZoHzDyx5PJbOLWHpp3/tLrp5aofqML5wqBA+AQXqb4KTWE3I4
+        GAV1pj0+XMEiL215EKBP/50YMrY5iiM6gSKFtErgezLShWY=
+X-Google-Smtp-Source: ABdhPJwE3ScQ1bpw69IoW/E49g+COZlQQ8p/WEAkLFTH9EauMwzuIfQQWf7WzBfc6ok6k0hJsW637cSOvBIdtVRlvdo=
+X-Received: by 2002:a5d:4e52:: with SMTP id r18mr31318206wrt.28.1615313415017;
+ Tue, 09 Mar 2021 10:10:15 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <20210309140527.GB28395@willie-the-truck>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <20210306113519.294287-1-ardb@kernel.org> <20210307110228.GP17424@dragon>
+ <CAMj1kXFiqXwCqJE9Wxu-tc3HYSh1qCqPLL_Csc=gW6SOYrweWw@mail.gmail.com> <20210309032248.GR17424@dragon>
+In-Reply-To: <20210309032248.GR17424@dragon>
+From:   Rob Clark <robdclark@gmail.com>
+Date:   Tue, 9 Mar 2021 10:13:22 -0800
+Message-ID: <CAF6AEGu6ZpfFK5FnQjtE33kkYL_t63J=yJLeK70_46FaLPq7eQ@mail.gmail.com>
+Subject: Re: [PATCH] efi: stub: override RT_PROP table supported mask based on
+ EFI variable
+To:     Shawn Guo <shawn.guo@linaro.org>
+Cc:     Ard Biesheuvel <ardb@kernel.org>,
+        linux-efi <linux-efi@vger.kernel.org>,
+        Jeffrey Hugo <jhugo@codeaurora.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Leif Lindholm <leif@nuviainc.com>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
+On Mon, Mar 8, 2021 at 7:22 PM Shawn Guo <shawn.guo@linaro.org> wrote:
+>
+> On Mon, Mar 08, 2021 at 02:34:48PM +0100, Ard Biesheuvel wrote:
+> > On Sun, 7 Mar 2021 at 12:02, Shawn Guo <shawn.guo@linaro.org> wrote:
+> > >
+> > > On Sat, Mar 06, 2021 at 12:35:19PM +0100, Ard Biesheuvel wrote:
+> > > > Allow EFI systems to override the set of supported runtime services
+> > > > declared via the RT_PROP table, by checking for the existence of a
+> > > > 'OverrideSupported' EFI variable of the appropriate size under the
+> > > > RT_PROP table GUID, and if it does, combine the supported mask using
+> > > > logical AND. (This means the override can only remove support, not
+> > > > add it back).
+> > > >
+> > > > Cc: Jeffrey Hugo <jhugo@codeaurora.org>,
+> > > > Cc: Bjorn Andersson <bjorn.andersson@linaro.org>
+> > > > Cc: Shawn Guo <shawn.guo@linaro.org>
+> > > > Cc: Rob Clark <robdclark@gmail.com>
+> > > > Cc: Leif Lindholm <leif@nuviainc.com>
+> > > > Cc: linux-arm-msm@vger.kernel.org
+> > > >
+> > > > Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+> > >
+> > > Awesome, Ard!  On both Lenovo Yoga C630 and Flex 5G latops:
+> > >
+> > > Tested-by: Shawn Guo <shawn.guo@linaro.org>
+> > >
+> > > With 'OverrideSupported' EFI variable added from UEFI Shell, we can drop
+> > > 'efi=novamap' kernel cmdline and get around the broken poweroff runtime
+> > > services nicely.  Thanks!
+> > >
+> >
+> > Thanks for confirming.
+> >
+> > However, I am not going to merge this without some justification, and
+> > hopefully some input from other folks (Leif?)
+> >
+> > RTPROP already provides what we need on all platforms that use
+> > DtbLoader, and the patch for that is queued up for v5.12-rcX, with a
+> > cc:stable to v5.10. This allows any RT service to be marked as
+> > disabled, including SetVirtualAddressMap().
+> >
+> > So afaict, that means that this patch would be a special case for
+> > Flex5G, right?
+>
+> It's for all Snapdragon based laptops, as we need to disable
+> SetVirtualAddressMap runtime services on all of them.
+>
+> > So how are platforms such as this one going to load the
+> > DTB? If some loader will be involved (or even just GRUB),
+>
+> Yes, GRUB.
+>
+> > shouldn't it
+> > be that component that sets RTPROP like DtbLoader will, not the kernel
+> > itself.
+> >
+> > Btw I don't think ACPI boot is a use case here. I don't see a software
+> > framebuffer with no wifi support as a usage mode that justifies
+> > carrying EFI stub hacks for everyone.
+>
+> Okay.  I'm fine to carry it as an out-of-tree patch until someday you
+> consider ACPI boot is useful for everyone.  But I do boot these laptops
+> with ACPI at daily basis right now as arm64 native build machine, with
+> USB Ethernet adapter.
 
+fwiw, the valid use-case for ACPI boot on these things is for distro
+installer.. it might not be the shiny accelerated experience, but you
+want to be able to get thru the installer and then install updates to
+get latest kernel/dtb/etc
 
-On 3/9/21 7:35 PM, Will Deacon wrote:
-> On Mon, Mar 08, 2021 at 02:42:00PM +0000, Marc Zyngier wrote:
->> On Fri, 05 Mar 2021 14:36:09 +0000,
->> Anshuman Khandual <anshuman.khandual@arm.com> wrote:
->>> -	switch (cpuid_feature_extract_unsigned_field(mmfr0, tgran_2)) {
->>> -	default:
->>> -	case 1:
->>> +	tgran_2 = cpuid_feature_extract_unsigned_field(mmfr0, tgran_2_shift);
->>> +	if (tgran_2 == ID_AA64MMFR0_TGRAN_2_SUPPORTED_NONE) {
->>>  		kvm_err("PAGE_SIZE not supported at Stage-2, giving up\n");
->>>  		return -EINVAL;
->>> -	case 0:
->>> +	} else if (tgran_2 == ID_AA64MMFR0_TGRAN_2_SUPPORTED_DEFAULT) {
->>>  		kvm_debug("PAGE_SIZE supported at Stage-2 (default)\n");
->>> -		break;
->>> -	case 2:
->>> +	} else if (tgran_2 >= ID_AA64MMFR0_TGRAN_2_SUPPORTED_MIN &&
->>> +		   tgran_2 <= ID_AA64MMFR0_TGRAN_2_SUPPORTED_MAX) {
->>>  		kvm_debug("PAGE_SIZE supported at Stage-2 (advertised)\n");
->>> -		break;
->>> +	} else {
->>> +		kvm_err("Unsupported value, giving up\n");
->>> +		return -EINVAL;
->>
->> nit: this doesn't say *what* value is unsupported, and I really
->> preferred the switch-case version, such as this:
->>
->> diff --git a/arch/arm64/kvm/reset.c b/arch/arm64/kvm/reset.c
->> index 1f22b36a0eff..d267e4b1aec6 100644
->> --- a/arch/arm64/kvm/reset.c
->> +++ b/arch/arm64/kvm/reset.c
->> @@ -312,15 +312,18 @@ int kvm_set_ipa_limit(void)
->>  
->>  	switch (cpuid_feature_extract_unsigned_field(mmfr0, tgran_2)) {
->>  	default:
->> -	case 1:
->> +	case ID_AA64MMFR0_TGRAN_2_SUPPORTED_NONE:
->>  		kvm_err("PAGE_SIZE not supported at Stage-2, giving up\n");
->>  		return -EINVAL;
->> -	case 0:
->> +	case ID_AA64MMFR0_TGRAN_2_SUPPORTED_DEFAULT:
->>  		kvm_debug("PAGE_SIZE supported at Stage-2 (default)\n");
->>  		break;
->> -	case 2:
->> +	case ID_AA64MMFR0_TGRAN_2_SUPPORTED_MIN ... ID_AA64MMFR0_TGRAN_2_SUPPORTED_MAX:
->>  		kvm_debug("PAGE_SIZE supported at Stage-2 (advertised)\n");
->>  		break;
->> +	default:
->> +		kvm_err("Unsupported value for TGRAN_2, giving up\n");
->> +		return -EINVAL;
->>  	}
->>  
->>  	kvm_ipa_limit = id_aa64mmfr0_parange_to_phys_shift(parange);
->>
->>
->> Otherwise:
->>
->> Acked-by: Marc Zyngier <maz@kernel.org>
-> 
-> Anshuman -- please can you spin a v2 with the switch syntax as suggested
-> above by Marc?
+it is a small use-case, but kinda an important step ;-)
 
-Sure, will do.
-
+BR,
+-R
