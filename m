@@ -2,101 +2,73 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 81A01C433E0
-	for <linux-efi@archiver.kernel.org>; Wed, 10 Mar 2021 08:38:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 164DAC433DB
+	for <linux-efi@archiver.kernel.org>; Wed, 10 Mar 2021 11:40:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5145C64FDE
-	for <linux-efi@archiver.kernel.org>; Wed, 10 Mar 2021 08:38:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C3A5B64FF1
+	for <linux-efi@archiver.kernel.org>; Wed, 10 Mar 2021 11:40:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230046AbhCJIhr (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 10 Mar 2021 03:37:47 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39562 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231897AbhCJIh1 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 10 Mar 2021 03:37:27 -0500
-X-Greylist: delayed 345 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 10 Mar 2021 00:37:26 PST
-Received: from ustc.edu.cn (email6.ustc.edu.cn [IPv6:2001:da8:d800::8])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 2618FC06174A
-        for <linux-efi@vger.kernel.org>; Wed, 10 Mar 2021 00:37:25 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=mail.ustc.edu.cn; s=dkim; h=Received:From:To:Cc:Subject:Date:
-        Message-Id:MIME-Version:Content-Transfer-Encoding; bh=nnm8ucZ5LQ
-        cGGIu3zt2kPvo+8H0RoC4x7aUGkFHxz0A=; b=SlfJWZkF4adwpYWN9axoLqr2o3
-        By0SRWHgTpZA1GUeJgzH0zOv9cvn2oQ9GD6qC3Ust9EVGqkep4eqlXSW0C5PiPLE
-        Gc+VPuSGWxr1oou65pqpjg8GEYPS4ft4u8sosEoLMIHdWieme6Qjj/5TMSBsl1Vo
-        PYvdJIbAI2FlUCOMo=
-Received: from ubuntu.localdomain (unknown [114.214.224.243])
-        by newmailweb.ustc.edu.cn (Coremail) with SMTP id LkAmygBXRGHpg0hgL7ECAA--.3682S4;
-        Wed, 10 Mar 2021 16:31:37 +0800 (CST)
-From:   Lv Yunlong <lyl2019@mail.ustc.edu.cn>
-To:     ardb@kernel.org, jonathan.richardson@broadcom.com
-Cc:     linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Lv Yunlong <lyl2019@mail.ustc.edu.cn>
-Subject: [PATCH] firmware/efi: Fix a use after bug in efi_mem_reserve_persistent
-Date:   Wed, 10 Mar 2021 00:31:27 -0800
-Message-Id: <20210310083127.5784-1-lyl2019@mail.ustc.edu.cn>
-X-Mailer: git-send-email 2.25.1
+        id S230522AbhCJLkR (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 10 Mar 2021 06:40:17 -0500
+Received: from mail.kernel.org ([198.145.29.99]:53118 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229813AbhCJLj0 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 10 Mar 2021 06:39:26 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 0D73564FE5;
+        Wed, 10 Mar 2021 11:39:23 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1615376365;
+        bh=aIsRlz8+KjMr611NkESIos4nUSuwP1XkbN6BEUu4+FI=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=HKpD+iC4jfRxdVMDbqZkqucj0bxrjDIFWVN85owR29Pt3ysbI1NUudEobXvDz7Exd
+         slg48riqQXVtmI5EYhs6J5XkbCSZLzLVcZ+if+qGTw93plVMFpmm0xCh+GTSZ9wVsn
+         cku85JAgoR+bPvCPCqb8eWlpnu3XFFuelvAFkXNswsGE3a3Pq0b41Ue2RJlTtRmDcq
+         f+kE1cqSTsuAw9W5vUbwoaB+zfqR0m1Mru3GHTmk4pWTXwlkRyxRkCBXqwyjFrJEEp
+         yyWeJ/3oX1ciIx9dAw8xzcCm7nRtzLOQAfxuKaFVGKbvepA9xeE7jgJNTaR12FBYyf
+         7fGjsb1ussc3g==
+From:   Will Deacon <will@kernel.org>
+To:     Anshuman Khandual <anshuman.khandual@arm.com>,
+        linux-arm-kernel@lists.infradead.org
+Cc:     catalin.marinas@arm.com, kernel-team@android.com,
+        Will Deacon <will@kernel.org>, kvmarm@lists.cs.columbia.edu,
+        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Marc Zyngier <maz@kernel.org>
+Subject: Re: [PATCH V2] arm64/mm: Fix __enable_mmu() for new TGRAN range values
+Date:   Wed, 10 Mar 2021 11:39:16 +0000
+Message-Id: <161537411789.1674334.2037758954337206352.b4-ty@kernel.org>
+X-Mailer: git-send-email 2.20.1
+In-Reply-To: <1615355590-21102-1-git-send-email-anshuman.khandual@arm.com>
+References: <1615355590-21102-1-git-send-email-anshuman.khandual@arm.com>
 MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID: LkAmygBXRGHpg0hgL7ECAA--.3682S4
-X-Coremail-Antispam: 1UD129KBjvdXoW7Wr1UZr47GryUuF4xAF4rAFb_yoWkKFcEkr
-        4rJ395K3yUKrW2vanFyrsa9asayayDXw109FnFya4fC39rAFy3ZrWkur1ktF47Cwn7Kryr
-        CF48tw4Ykw1xGjkaLaAFLSUrUUUUUb8apTn2vfkv8UJUUUU8Yxn0WfASr-VFAUDa7-sFnT
-        9fnUUIcSsGvfJTRUUUb4AFF20E14v26r4j6ryUM7CY07I20VC2zVCF04k26cxKx2IYs7xG
-        6rWj6s0DM7CIcVAFz4kK6r1j6r18M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48ve4kI8w
-        A2z4x0Y4vE2Ix0cI8IcVAFwI0_tr0E3s1l84ACjcxK6xIIjxv20xvEc7CjxVAFwI0_Gr1j
-        6F4UJwA2z4x0Y4vEx4A2jsIE14v26rxl6s0DM28EF7xvwVC2z280aVCY1x0267AKxVW0oV
-        Cq3wAac4AC62xK8xCEY4vEwIxC4wAS0I0E0xvYzxvE52x082IY62kv0487Mc02F40EFcxC
-        0VAKzVAqx4xG6I80ewAv7VC0I7IYx2IY67AKxVWUJVWUGwAv7VC2z280aVAFwI0_Jr0_Gr
-        1lOx8S6xCaFVCjc4AY6r1j6r4UM4x0Y48IcxkI7VAKI48JM4x0x7Aq67IIx4CEVc8vx2IE
-        rcIFxwCF04k20xvY0x0EwIxGrwCFx2IqxVCFs4IE7xkEbVWUJVW8JwC20s026c02F40E14
-        v26r1j6r18MI8I3I0E7480Y4vE14v26r106r1rMI8E67AF67kF1VAFwI0_JF0_Jw1lIxkG
-        c2Ij64vIr41lIxAIcVC0I7IYx2IY67AKxVWUJVWUCwCI42IY6xIIjxv20xvEc7CjxVAFwI
-        0_Jr0_Gr1lIxAIcVCF04k26cxKx2IYs7xG6rW3Jr0E3s1lIxAIcVC2z280aVAFwI0_Jr0_
-        Gr1lIxAIcVC2z280aVCY1x0267AKxVW8JVW8JrUvcSsGvfC2KfnxnUUI43ZEXa7VUbHa0D
-        UUUUU==
-X-CM-SenderInfo: ho1ojiyrz6zt1loo32lwfovvfxof0/
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-In the for loop in efi_mem_reserve_persistent(), prsv = rsv->next
-use the unmapped rsv. Use the unmapped pages will cause segment
-fault.
+On Wed, 10 Mar 2021 11:23:10 +0530, Anshuman Khandual wrote:
+> As per ARM ARM DDI 0487G.a, when FEAT_LPA2 is implemented, ID_AA64MMFR0_EL1
+> might contain a range of values to describe supported translation granules
+> (4K and 16K pages sizes in particular) instead of just enabled or disabled
+> values. This changes __enable_mmu() function to handle complete acceptable
+> range of values (depending on whether the field is signed or unsigned) now
+> represented with ID_AA64MMFR0_TGRAN_SUPPORTED_[MIN..MAX] pair. While here,
+> also fix similar situations in EFI stub and KVM as well.
 
-Fixes: 18df7577adae6 ("efi/memreserve: deal with memreserve entries in unmapped memory")
-Signed-off-by: Lv Yunlong <lyl2019@mail.ustc.edu.cn>
----
- drivers/firmware/efi/efi.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+Applied to arm64 (for-next/fixes), thanks!
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index df3f9bcab581..4b7ee3fa9224 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -927,7 +927,7 @@ int __ref efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
- 	}
- 
- 	/* first try to find a slot in an existing linked list entry */
--	for (prsv = efi_memreserve_root->next; prsv; prsv = rsv->next) {
-+	for (prsv = efi_memreserve_root->next; prsv; ) {
- 		rsv = memremap(prsv, sizeof(*rsv), MEMREMAP_WB);
- 		index = atomic_fetch_add_unless(&rsv->count, 1, rsv->size);
- 		if (index < rsv->size) {
-@@ -937,6 +937,7 @@ int __ref efi_mem_reserve_persistent(phys_addr_t addr, u64 size)
- 			memunmap(rsv);
- 			return efi_mem_reserve_iomem(addr, size);
- 		}
-+		prsv = rsv->next;
- 		memunmap(rsv);
- 	}
- 
+[1/1] arm64/mm: Fix __enable_mmu() for new TGRAN range values
+      https://git.kernel.org/arm64/c/26f55386f964
+
+Cheers,
 -- 
-2.25.1
+Will
 
-
+https://fixes.arm64.dev
+https://next.arm64.dev
+https://will.arm64.dev
