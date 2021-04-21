@@ -2,261 +2,118 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-26.3 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT,USER_IN_DEF_DKIM_WL autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 65E80C433ED
-	for <linux-efi@archiver.kernel.org>; Fri, 16 Apr 2021 04:09:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 52347C433B4
+	for <linux-efi@archiver.kernel.org>; Wed, 21 Apr 2021 19:31:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 44B9561153
-	for <linux-efi@archiver.kernel.org>; Fri, 16 Apr 2021 04:09:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2812161450
+	for <linux-efi@archiver.kernel.org>; Wed, 21 Apr 2021 19:31:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238478AbhDPEKN (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 16 Apr 2021 00:10:13 -0400
-Received: from rcdn-iport-2.cisco.com ([173.37.86.73]:51651 "EHLO
-        rcdn-iport-2.cisco.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237255AbhDPEKI (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 16 Apr 2021 00:10:08 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=cisco.com; i=@cisco.com; l=6345; q=dns/txt; s=iport;
-  t=1618546184; x=1619755784;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=T0dqf2G5BwtvYRMNblg5cdJ5G97sKXyBbLO+A5ot9gQ=;
-  b=mZiUAbMQdPMs3Swk5M3k0eO++KbtBYv1PuiQrf6EOjIwuOwFn8yOn1aP
-   rdWE1ij83j4719opjXqbzPRQ2jGBQhMdaqv1g8X3IO0mS8vY8O8P0Vmyv
-   csfhdmsfrUlD4RZgnIeVqbsbvC1mVg0GX7XQByKdeZKwbd0J0HcLmOX5F
-   A=;
-IronPort-HdrOrdr: =?us-ascii?q?A9a23=3AHWICPaoLSHeSlS+2WqACRv0aV5t2L9V00z?=
- =?us-ascii?q?AX/kB9WHVpW+aT/vrDoN0w0xjohDENHEw6kdebN6WaBV/a/5h54Y4eVI3SOD?=
- =?us-ascii?q?XOlWO0IOhZg7fK7CbnH0TFnNJ19aAlSKRmDc21MF4St7eY3CCdM/INhOaK67?=
- =?us-ascii?q?qpg+C29QYJcShPZ7t75wl0TiaXe3cWeCB8CZA0FIWR66N8zlLKRV0tYsu2HX?=
- =?us-ascii?q?UDVeTYzue79q7OWwIMBBIs9WC14g+A1biSKXWl9yZbey9Tx/MY/XLdlQvi6u?=
- =?us-ascii?q?GYr+ij0RPHzQbonvNrseqk7tNCAcCW4/J0FhzcziC1eY9mR7qO+Bcyre3H0i?=
- =?us-ascii?q?dSrPD85zE9Is9093TdOluQnCKo8Qzh3DEygkWSr2OlvQ=3D=3D?=
-X-IronPort-Anti-Spam-Filtered: true
-X-IronPort-Anti-Spam-Result: =?us-ascii?q?A0AYAACIDXlg/4sNJK1aGwEBAQEBAQE?=
- =?us-ascii?q?BBQEBARIBAQEDAwEBAYF+BgEBAQsBAYIpgU0BOTGMZ4lOmm6BfAsBAQEPNAQ?=
- =?us-ascii?q?BAYRQAoFzAiU0CQ4CAwEBDAEBBQEBAQIBBgRxE4VdQxYBhWsGJwsBRhBRVwY?=
- =?us-ascii?q?BEoJxgwisB4F4M4EBiDOBRBSBJQGHW4EQdAaDbyccgUlChHOKOQSCRz1SSwK?=
- =?us-ascii?q?CUpA7FAaNV4EgmXmBFIMWgSaYZoJrDyOkfJUYnldghCuBVDqBWTMaCBsVgyR?=
- =?us-ascii?q?QGQ6OKxaNawFbIQMvOAIGCgEBAwmJToNAAQE?=
-X-IronPort-AV: E=Sophos;i="5.82,226,1613433600"; 
-   d="scan'208";a="888361936"
-Received: from alln-core-6.cisco.com ([173.36.13.139])
-  by rcdn-iport-2.cisco.com with ESMTP/TLS/DHE-RSA-SEED-SHA; 16 Apr 2021 04:09:37 +0000
-Received: from zorba.cisco.com ([10.24.7.67])
-        by alln-core-6.cisco.com (8.15.2/8.15.2) with ESMTP id 13G49OHk016753;
-        Fri, 16 Apr 2021 04:09:36 GMT
-From:   Daniel Walker <danielwa@cisco.com>
-To:     Will Deacon <will@kernel.org>,
-        Christophe Leroy <christophe.leroy@csgroup.eu>,
-        Rob Herring <robh@kernel.org>,
-        Daniel Gimpelevich <daniel@gimpelevich.san-francisco.ca.us>,
-        Andrew Morton <akpm@linux-foundation.org>, x86@kernel.org,
-        linux-mips@vger.kernel.org, linuxppc-dev@lists.ozlabs.org
-Cc:     xe-linux-external@cisco.com, Ard Biesheuvel <ardb@kernel.org>,
+        id S237938AbhDUTc2 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 21 Apr 2021 15:32:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40576 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S236394AbhDUTc0 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 21 Apr 2021 15:32:26 -0400
+Received: from mail-ej1-x630.google.com (mail-ej1-x630.google.com [IPv6:2a00:1450:4864:20::630])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 45F89C06138A
+        for <linux-efi@vger.kernel.org>; Wed, 21 Apr 2021 12:31:51 -0700 (PDT)
+Received: by mail-ej1-x630.google.com with SMTP id sd23so56528812ejb.12
+        for <linux-efi@vger.kernel.org>; Wed, 21 Apr 2021 12:31:51 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=rasmusvillemoes.dk; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=foXVhnwT23D/qpAtyx2UOpz422ajD7V5LrdFOfsaVYc=;
+        b=TFO2BuTEkby0ABFf1OkYK/1D90LhANve4lIJJ88/sKZDsAJPhoQCSO6f82qhRXN6ec
+         CgCyxKIrUZTopeueP681KmvgiJ8Xrqm0WA7FASO/sO+pV5OxEEkbRVNqbAvDGYZQi23f
+         x6FX3N+GdEEGDOfY323qyIWLzzEsmsepQ9XoM=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=foXVhnwT23D/qpAtyx2UOpz422ajD7V5LrdFOfsaVYc=;
+        b=MfE5wanj9tCjmEpt8rMVLH5myesw4GPCkxo8MhNKnafgfsgmzX7IjbXWUTsYlguGSY
+         z0fcjR1WA6CwSJ8xh+q6QncfMvgVeXm88/BihEUtfzIzbrBY2bl+OvNpP8eWaqoeVy8T
+         0KH+p8s/ggqtGqhKeO6/zmwc2ZN38V629EN+EI+R3lUzNePTTBgHTWqJZ+Y4BhlrG1PY
+         ijlSxnwUWAgQKZ9BKif86BeQkAdzhwND1s2imtyuzHA1FWLmZAUHJl2wcvr9iyPmT/GL
+         svh119DDnjDHAeql+XQ6o794eEZMKwdpUNqHBxoqaegg7WmkQzMhrm0z8NbkDREjw0dH
+         jMPg==
+X-Gm-Message-State: AOAM532lk5qJfWkz9bVqZ40ErmG4x0xhHv3TkrzfFGdZToAgBar0Seav
+        yPTYHfypFeZeMNYlyuHbXfIoyw==
+X-Google-Smtp-Source: ABdhPJzrmiWm8xqN10Pgm6ApQ10O3qhZBNiRi56u9Q1ia2YUMP15g1RqZs30XvuXJlWLsHsUwui6Yg==
+X-Received: by 2002:a17:906:3ec1:: with SMTP id d1mr8143866ejj.523.1619033509937;
+        Wed, 21 Apr 2021 12:31:49 -0700 (PDT)
+Received: from prevas-ravi.prevas.se ([80.208.71.248])
+        by smtp.gmail.com with ESMTPSA id z6sm284781ejp.86.2021.04.21.12.31.49
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 21 Apr 2021 12:31:49 -0700 (PDT)
+From:   Rasmus Villemoes <linux@rasmusvillemoes.dk>
+To:     Ard Biesheuvel <ardb@kernel.org>
+Cc:     Alex Kluver <alex.kluver@hpe.com>,
+        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
         linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH 5/8] drivers: firmware: efi: libstub: enable generic commandline
-Date:   Thu, 15 Apr 2021 21:09:16 -0700
-Message-Id: <20210416040924.2882771-6-danielwa@cisco.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20210416040924.2882771-1-danielwa@cisco.com>
-References: <20210416040924.2882771-1-danielwa@cisco.com>
+Subject: [PATCH] efi: cper: fix scnprintf() use in cper_mem_err_location()
+Date:   Wed, 21 Apr 2021 21:31:46 +0200
+Message-Id: <20210421193146.1539649-1-linux@rasmusvillemoes.dk>
+X-Mailer: git-send-email 2.29.2
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Auto-Response-Suppress: DR, OOF, AutoReply
-X-Outbound-SMTP-Client: 10.24.7.67, [10.24.7.67]
-X-Outbound-Node: alln-core-6.cisco.com
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This adds code to handle the generic command line changes.
-The efi code appears that it doesn't benefit as much from this design
-as it could.
+The last two if-clauses fail to update n, so whatever they might have
+written at &msg[n] would be cut off by the final nul-termination.
 
-For example, if you had a prepend command line with "nokaslr" then
-you might be helpful to re-enable it in the boot loader or dts,
-but there appears to be no way to re-enable kaslr or some of the
-other options.
+That nul-termination is redundant; scnprintf(), just like snprintf(),
+guarantees a nul-terminated output buffer, provided the buffer size is
+positive.
 
-The efi command line handling is incorrect. x86 and arm have an append
-system however the efi code prepends the command line.
+And there's no need to discount one byte from the initial buffer;
+vsnprintf() expects to be given the full buffer size - it's not going
+to write the nul-terminator one beyond the given (buffer, size) pair.
 
-For example, you could have a non-upgradable bios which sends
-
-efi=disable_early_pci_dma
-
-This hypothetically could have been set because early pci dma caused
-issues on early versions of the product.
-
-Then later the early pci dma was made to work and the company desired
-to start using it. To override the bios you could set the CONFIG_CMDLINE
-to,
-
-efi=no_disable_early_pci_dma
-
-then parsing would normally start with the bios command line, then move
-to the CONFIG_CMDLINE and you would end up with early pci dma turned on.
-
-however, current efi code keeps early pci dma off because the bios
-arguments always override the built in.
-
-Per my reading this is different from the main body of x86, arm, and
-arm64.
-
-The generic command line provides both append and prepend, so it
-alleviates this issue if it's used. However not all architectures use
-it.
-
-It would be desirable to allow the efi stub to have it's builtin command
-line to be modified after compile, but I don't see a feasible way to do
-that currently.
-
-Cc: xe-linux-external@cisco.com
-Signed-off-by: Daniel Walker <danielwa@cisco.com>
+Signed-off-by: Rasmus Villemoes <linux@rasmusvillemoes.dk>
 ---
- .../firmware/efi/libstub/efi-stub-helper.c    | 29 +++++++++++++++++++
- drivers/firmware/efi/libstub/efi-stub.c       |  9 ++++++
- drivers/firmware/efi/libstub/efistub.h        |  1 +
- drivers/firmware/efi/libstub/x86-stub.c       | 13 +++++++--
- 4 files changed, 50 insertions(+), 2 deletions(-)
+ drivers/firmware/efi/cper.c | 11 +++++------
+ 1 file changed, 5 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index aa8da0a49829..16318f55f187 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -13,6 +13,7 @@
- #include <linux/efi.h>
- #include <linux/kernel.h>
- #include <linux/printk.h> /* For CONSOLE_LOGLEVEL_* */
-+#include <linux/cmdline.h>
- #include <asm/efi.h>
- #include <asm/setup.h>
+diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+index e15d484b6a5a..dfa0bd140bef 100644
+--- a/drivers/firmware/efi/cper.c
++++ b/drivers/firmware/efi/cper.c
+@@ -221,7 +221,7 @@ static int cper_mem_err_location(struct cper_mem_err_compact *mem, char *msg)
+ 		return 0;
  
-@@ -172,6 +173,34 @@ int efi_printk(const char *fmt, ...)
- 	return printed;
+ 	n = 0;
+-	len = CPER_REC_LEN - 1;
++	len = CPER_REC_LEN;
+ 	if (mem->validation_bits & CPER_MEM_VALID_NODE)
+ 		n += scnprintf(msg + n, len - n, "node: %d ", mem->node);
+ 	if (mem->validation_bits & CPER_MEM_VALID_CARD)
+@@ -258,13 +258,12 @@ static int cper_mem_err_location(struct cper_mem_err_compact *mem, char *msg)
+ 		n += scnprintf(msg + n, len - n, "responder_id: 0x%016llx ",
+ 			       mem->responder_id);
+ 	if (mem->validation_bits & CPER_MEM_VALID_TARGET_ID)
+-		scnprintf(msg + n, len - n, "target_id: 0x%016llx ",
+-			  mem->target_id);
++		n += scnprintf(msg + n, len - n, "target_id: 0x%016llx ",
++			       mem->target_id);
+ 	if (mem->validation_bits & CPER_MEM_VALID_CHIP_ID)
+-		scnprintf(msg + n, len - n, "chip_id: %d ",
+-			  mem->extended >> CPER_MEM_CHIP_ID_SHIFT);
++		n += scnprintf(msg + n, len - n, "chip_id: %d ",
++			       mem->extended >> CPER_MEM_CHIP_ID_SHIFT);
+ 
+-	msg[n] = '\0';
+ 	return n;
  }
  
-+/**
-+ * efi_handle_cmdline() - handle adding in building parts of the command line
-+ * @cmdline:	kernel command line
-+ *
-+ * Add in the generic parts of the commandline and start the parsing of the
-+ * command line.
-+ *
-+ * Return:	status code
-+ */
-+efi_status_t efi_handle_cmdline(char const *cmdline)
-+{
-+	efi_status_t status = EFI_SUCCESS;
-+
-+	if (sizeof(CMDLINE_STATIC_PREPEND) > 1)
-+		status |= efi_parse_options(CMDLINE_STATIC_PREPEND);
-+
-+	if (!IS_ENABLED(CONFIG_CMDLINE_OVERRIDE))
-+		status |= efi_parse_options(cmdline);
-+
-+	if (sizeof(CMDLINE_STATIC_APPEND) > 1)
-+		status |= efi_parse_options(CMDLINE_STATIC_APPEND);
-+
-+	if (status != EFI_SUCCESS)
-+		efi_err("Failed to parse options\n");
-+
-+	return status;
-+}
-+
- /**
-  * efi_parse_options() - Parse EFI command line options
-  * @cmdline:	kernel command line
-diff --git a/drivers/firmware/efi/libstub/efi-stub.c b/drivers/firmware/efi/libstub/efi-stub.c
-index 26e69788f27a..baa69b24cfdd 100644
---- a/drivers/firmware/efi/libstub/efi-stub.c
-+++ b/drivers/firmware/efi/libstub/efi-stub.c
-@@ -172,6 +172,14 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
- 		goto fail;
- 	}
- 
-+#ifdef CONFIG_GENERIC_CMDLINE
-+	status = efi_handle_cmdline(cmdline_ptr);
-+	if (status != EFI_SUCCESS) {
-+		goto fail_free_cmdline;
-+	}
-+#endif
-+
-+#ifdef CONFIG_CMDLINE
- 	if (IS_ENABLED(CONFIG_CMDLINE_EXTEND) ||
- 	    IS_ENABLED(CONFIG_CMDLINE_FORCE) ||
- 	    cmdline_size == 0) {
-@@ -189,6 +197,7 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
- 			goto fail_free_cmdline;
- 		}
- 	}
-+#endif
- 
- 	efi_info("Booting Linux Kernel...\n");
- 
-diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-index cde0a2ef507d..07c7f9fdfffc 100644
---- a/drivers/firmware/efi/libstub/efistub.h
-+++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -800,6 +800,7 @@ efi_status_t efi_relocate_kernel(unsigned long *image_addr,
- 				 unsigned long alignment,
- 				 unsigned long min_addr);
- 
-+efi_status_t efi_handle_cmdline(char const *cmdline);
- efi_status_t efi_parse_options(char const *cmdline);
- 
- void efi_parse_option_graphics(char *option);
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index f14c4ff5839f..30ad8fb7122d 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -673,6 +673,8 @@ unsigned long efi_main(efi_handle_t handle,
- 	unsigned long bzimage_addr = (unsigned long)startup_32;
- 	unsigned long buffer_start, buffer_end;
- 	struct setup_header *hdr = &boot_params->hdr;
-+	unsigned long cmdline_paddr = ((u64)hdr->cmd_line_ptr |
-+				       ((u64)boot_params->ext_cmd_line_ptr << 32));
- 	efi_status_t status;
- 
- 	efi_system_table = sys_table_arg;
-@@ -735,6 +737,14 @@ unsigned long efi_main(efi_handle_t handle,
- 		image_offset = 0;
- 	}
- 
-+#ifdef CONFIG_GENERIC_CMDLINE
-+	status = efi_handle_cmdline((char *)cmdline_paddr);
-+	if (status != EFI_SUCCESS) {
-+		efi_err("Failed to parse options\n");
-+		goto fail;
-+	}
-+#else /* CONFIG_GENERIC_CMDLINE */
-+
- #ifdef CONFIG_CMDLINE_BOOL
- 	status = efi_parse_options(CONFIG_CMDLINE);
- 	if (status != EFI_SUCCESS) {
-@@ -743,8 +753,6 @@ unsigned long efi_main(efi_handle_t handle,
- 	}
- #endif
- 	if (!IS_ENABLED(CONFIG_CMDLINE_OVERRIDE)) {
--		unsigned long cmdline_paddr = ((u64)hdr->cmd_line_ptr |
--					       ((u64)boot_params->ext_cmd_line_ptr << 32));
- 		status = efi_parse_options((char *)cmdline_paddr);
- 		if (status != EFI_SUCCESS) {
- 			efi_err("Failed to parse options\n");
-@@ -752,6 +760,7 @@ unsigned long efi_main(efi_handle_t handle,
- 		}
- 	}
- 
-+#endif
- 	/*
- 	 * At this point, an initrd may already have been loaded by the
- 	 * bootloader and passed via bootparams. We permit an initrd loaded
 -- 
-2.25.1
+2.29.2
 
