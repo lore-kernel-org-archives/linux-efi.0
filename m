@@ -3,64 +3,65 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
 X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 71325C43461
-	for <linux-efi@archiver.kernel.org>; Thu, 13 May 2021 06:27:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B1313C43462
+	for <linux-efi@archiver.kernel.org>; Thu, 13 May 2021 06:27:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3E51761433
-	for <linux-efi@archiver.kernel.org>; Thu, 13 May 2021 06:27:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9045F6143B
+	for <linux-efi@archiver.kernel.org>; Thu, 13 May 2021 06:27:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231329AbhEMG2M (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 13 May 2021 02:28:12 -0400
-Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:57890 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231304AbhEMG2J (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 13 May 2021 02:28:09 -0400
-Received: from pps.filterd (m0098404.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 14D6EbI7011135;
-        Thu, 13 May 2021 02:26:47 -0400
+        id S231311AbhEMG2X (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 13 May 2021 02:28:23 -0400
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:49982 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S231340AbhEMG2R (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 13 May 2021 02:28:17 -0400
+Received: from pps.filterd (m0098413.ppops.net [127.0.0.1])
+        by mx0b-001b2d01.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 14D62jUF131020;
+        Thu, 13 May 2021 02:26:59 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
- : date : message-id : content-transfer-encoding : mime-version; s=pp1;
- bh=Oy6qL1rkJBWQzYlIHt95RLl8wBSmcbdaLyxkZyIqDsk=;
- b=e9xl/vo/lIeeWsUbiIFIpnIxzsVaqDTBFoAdxTTc8hgc2CfcoRu6Yj2dI2bhjGcY6GD5
- 8T/mKG/10dilhd/YqC5EAdz9JtFwalfIpX4zTgIvueGYNvZTpDnapMpwJg9wfnwp5dFM
- WF6fsRmwgPysKxBqsPqpq8L/L6daEVKv3z02ToxUskoLx+qKBDQegIuZmk+IwZ0YKXmX
- pVIxcjbelAh2FbYrAp04LMmcZgRLJ0Ei6/yAQJRnPjpXged+VAcYMqtmvp64/HTL+IGZ
- RDgvVFGDaybq3RC7me0YoN0JMcTMKZfMng/n/UGekM2jg1RnrfcMUv1JPJmafnd3m1iJ Wg== 
+ : date : message-id : in-reply-to : references : mime-version :
+ content-transfer-encoding; s=pp1;
+ bh=atVN1mAwQ8g8XeoMl100jVG91TaBJp4y9kyiYfEfanc=;
+ b=I1Vuie6A5G55fdq2OhgL8uCET8gaWH21YfdCJFpFXFpw0ybnIj/mS2TY8utQvSldgIkK
+ 1BNsawsWhRTefZ1qyJblPjPgH3m6pxn1yuHDNZ9lnbsT9euHEMuFjTkpVCsOmuXGCLLg
+ 4w939VKPtwpiWywkEtaktjLw+zeGcNR+HCs1ORa7nMJ4BuRYoopVYpUoIZ2acjvtm9a4
+ 68jeJTmkNZcPJ2RUzpshSk4m38iUDmCFi5TGJLRbt9OoFGK8yNn068WlhZC/564SSb7t
+ NAUsDlnW1bmdQbjPNDE9v9fdnfp0ZZ+PUWQA4FSmPJmKFbNqZdnRn52UBvs8TUrYTg4s gw== 
 Received: from pps.reinject (localhost [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 38gxnvg7r8-1
+        by mx0b-001b2d01.pphosted.com with ESMTP id 38gv83k936-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 13 May 2021 02:26:47 -0400
-Received: from m0098404.ppops.net (m0098404.ppops.net [127.0.0.1])
-        by pps.reinject (8.16.0.43/8.16.0.43) with SMTP id 14D6GKuY022677;
-        Thu, 13 May 2021 02:26:47 -0400
-Received: from ppma03wdc.us.ibm.com (ba.79.3fa9.ip4.static.sl-reverse.com [169.63.121.186])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 38gxnvg7r0-1
+        Thu, 13 May 2021 02:26:58 -0400
+Received: from m0098413.ppops.net (m0098413.ppops.net [127.0.0.1])
+        by pps.reinject (8.16.0.43/8.16.0.43) with SMTP id 14D62t4E131592;
+        Thu, 13 May 2021 02:26:58 -0400
+Received: from ppma02wdc.us.ibm.com (aa.5b.37a9.ip4.static.sl-reverse.com [169.55.91.170])
+        by mx0b-001b2d01.pphosted.com with ESMTP id 38gv83k931-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 13 May 2021 02:26:46 -0400
-Received: from pps.filterd (ppma03wdc.us.ibm.com [127.0.0.1])
-        by ppma03wdc.us.ibm.com (8.16.0.43/8.16.0.43) with SMTP id 14D6C7K3002081;
-        Thu, 13 May 2021 06:26:45 GMT
-Received: from b03cxnp08025.gho.boulder.ibm.com (b03cxnp08025.gho.boulder.ibm.com [9.17.130.17])
-        by ppma03wdc.us.ibm.com with ESMTP id 38dj99axq2-1
+        Thu, 13 May 2021 02:26:58 -0400
+Received: from pps.filterd (ppma02wdc.us.ibm.com [127.0.0.1])
+        by ppma02wdc.us.ibm.com (8.16.0.43/8.16.0.43) with SMTP id 14D6Cojx024783;
+        Thu, 13 May 2021 06:26:57 GMT
+Received: from b03cxnp07027.gho.boulder.ibm.com (b03cxnp07027.gho.boulder.ibm.com [9.17.130.14])
+        by ppma02wdc.us.ibm.com with ESMTP id 38dj99u0dm-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 13 May 2021 06:26:45 +0000
+        Thu, 13 May 2021 06:26:57 +0000
 Received: from b03ledav004.gho.boulder.ibm.com (b03ledav004.gho.boulder.ibm.com [9.17.130.235])
-        by b03cxnp08025.gho.boulder.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 14D6Qiuk19726660
+        by b03cxnp07027.gho.boulder.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 14D6Queh19792242
         (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 13 May 2021 06:26:44 GMT
+        Thu, 13 May 2021 06:26:56 GMT
 Received: from b03ledav004.gho.boulder.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id F1A147805F;
-        Thu, 13 May 2021 06:26:43 +0000 (GMT)
+        by IMSVA (Postfix) with ESMTP id 17B167805F;
+        Thu, 13 May 2021 06:26:56 +0000 (GMT)
 Received: from b03ledav004.gho.boulder.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id D102678060;
-        Thu, 13 May 2021 06:26:42 +0000 (GMT)
+        by IMSVA (Postfix) with ESMTP id 048E47805C;
+        Thu, 13 May 2021 06:26:55 +0000 (GMT)
 Received: from localhost.localdomain (unknown [9.2.130.16])
         by b03ledav004.gho.boulder.ibm.com (Postfix) with ESMTP;
-        Thu, 13 May 2021 06:26:42 +0000 (GMT)
+        Thu, 13 May 2021 06:26:54 +0000 (GMT)
 From:   Dov Murik <dovmurik@linux.ibm.com>
 To:     linux-efi@vger.kernel.org
 Cc:     Tobin Feldman-Fitzthum <tobin@linux.ibm.com>,
@@ -74,118 +75,376 @@ Cc:     Tobin Feldman-Fitzthum <tobin@linux.ibm.com>,
         Ashish Kalra <ashish.kalra@amd.com>,
         Brijesh Singh <brijesh.singh@amd.com>,
         Tom Lendacky <thomas.lendacky@amd.com>,
-        Ard Biesheuvel <ardb@kernel.org>,
         James Morris <jmorris@namei.org>,
         "Serge E. Hallyn" <serge@hallyn.com>,
         linux-security-module@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [RFC PATCH 0/3] Allow access to confidential computing secret area
-Date:   Thu, 13 May 2021 06:26:31 +0000
-Message-Id: <20210513062634.2481118-1-dovmurik@linux.ibm.com>
+Subject: [RFC PATCH 3/3] virt: Add sev_secret module to expose confidential computing secrets
+Date:   Thu, 13 May 2021 06:26:34 +0000
+Message-Id: <20210513062634.2481118-4-dovmurik@linux.ibm.com>
 X-Mailer: git-send-email 2.25.1
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: zOUGFAz3faWe8gvbrT8JGwuKcdW3Rrnm
-X-Proofpoint-ORIG-GUID: l-_Ay05EdoRCc5bBau-Tg7ZDuUvMZUAz
-Content-Transfer-Encoding: 8bit
-X-Proofpoint-UnRewURL: 0 URL was un-rewritten
+In-Reply-To: <20210513062634.2481118-1-dovmurik@linux.ibm.com>
+References: <20210513062634.2481118-1-dovmurik@linux.ibm.com>
 MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-GUID: X_olEUDj-U-o3e7c-WyR1mbCgiCjfL9l
+X-Proofpoint-ORIG-GUID: dOjkf9djzGWn8PuKPO9mYpZMmLqv8xx0
 X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.391,18.0.761
  definitions=2021-05-13_03:2021-05-12,2021-05-13 signatures=0
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 malwarescore=0
- adultscore=0 priorityscore=1501 bulkscore=0 phishscore=0
- lowpriorityscore=0 clxscore=1011 suspectscore=0 impostorscore=0
- mlxlogscore=999 spamscore=0 classifier=spam adjust=0 reason=mlx
- scancount=1 engine=8.12.0-2104190000 definitions=main-2105130046
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 adultscore=0
+ priorityscore=1501 impostorscore=0 suspectscore=0 bulkscore=0
+ lowpriorityscore=0 phishscore=0 mlxlogscore=999 spamscore=0 malwarescore=0
+ clxscore=1015 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2104190000 definitions=main-2105130046
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Confidential computing hardware such as AMD SEV (Secure Encrypted
-Virtualization) allows guest owners to inject secrets into the VMs
-memory without the host/hypervisor being able to read them.  In SEV,
-secret injection is performed early in the VM launch process, before the
-guest starts running.
+The new sev_secret module exposes the confidential computing secret area
+via securityfs interface.
 
-Support for secret injection is already available in OVMF (in its AmdSev
-package; see edk2 commit 01726b6d23d4 "OvmfPkg/AmdSev: Expose the Sev
-Secret area using a configuration table" [1]), but the secrets were not
-available in the guest kernel.
+When the module is loaded (and securityfs is mounted, typically under
+/sys/kernel/security), an "sev_secret" directory is created in
+securityfs.  In it, a file is created for each secret entry.  The name
+of each such file is the GUID of the secret entry, and its content is
+the secret data.
 
-The patch series copies the secrets from the EFI-provided memory to
-kernel reserved memory, and optionally exposes them to userspace via
-securityfs using a new sev_secret kernel module.
-
-The first patch in efi/libstub copies the secret area from the EFI
-memory to specially allocated memory; the second patch reserves that
-memory block; and the third patch introduces the new sev_secret module
-that exposes the content of the secret entries as securityfs files.
-
-This has been tested with AMD SEV guests, but the kernel side of
-handling the secret area has no SEV-specific dependencies, and therefore
-should be usable for any confidential computing hardware that can
-publish the secret area via the standard EFI config table entry.
-
-Here is a simple example for usage of the sev_secret module in a guest to which
-secrets were injected during launch:
-
-# modprobe sev_secret
-# ls -la /sys/kernel/security/sev_secret
-total 0
-drwxr-xr-x 2 root root 0 May 12 18:03 .
-drwxr-xr-x 3 root root 0 May 12 18:02 ..
--r--r----- 1 root root 0 May 12 18:03 736870e5-84f0-4973-92ec-06879ce3da0b
--r--r----- 1 root root 0 May 12 18:03 83c83f7f-1356-4975-8b7e-d3a0b54312c6
--r--r----- 1 root root 0 May 12 18:03 9553f55d-3da2-43ee-ab5d-ff17f78864d2
--r--r----- 1 root root 0 May 12 18:03 e6f5a162-d67f-4750-a67c-5d065f2a9910
-
-# xxd /sys/kernel/security/sev_secret/e6f5a162-d67f-4750-a67c-5d065f2a9910
-00000000: 7468 6573 652d 6172 652d 7468 652d 6b61  these-are-the-ka
-00000010: 7461 2d73 6563 7265 7473 0001 0203 0405  ta-secrets......
-00000020: 0607                                     ..
-
-
-[1] https://github.com/tianocore/edk2/commit/01726b6d23d4
-
+This allows applications running in a confidential computing setting to
+read secrets provided by the guest owner via a secure secret injection
+mechanism (such as AMD SEV's LAUNCH_SECRET command).
 
 Cc: Laszlo Ersek <lersek@redhat.com>
 Cc: Ashish Kalra <ashish.kalra@amd.com>
 Cc: Brijesh Singh <brijesh.singh@amd.com>
 Cc: Tom Lendacky <thomas.lendacky@amd.com>
 Cc: James Bottomley <jejb@linux.ibm.com>
-Cc: Ard Biesheuvel <ardb@kernel.org>
 Cc: James Morris <jmorris@namei.org>
 Cc: "Serge E. Hallyn" <serge@hallyn.com>
-Cc: linux-efi@vger.kernel.org
 Cc: linux-security-module@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org
-
-Dov Murik (3):
-  efi/libstub: Copy confidential computing secret area
-  efi: Reserve confidential computing secret area
-  virt: Add sev_secret module to expose confidential computing secrets
-
- drivers/firmware/efi/Makefile                 |   2 +-
- drivers/firmware/efi/confidential-computing.c |  41 +++
- drivers/firmware/efi/efi.c                    |   5 +
- drivers/firmware/efi/libstub/Makefile         |   3 +-
- .../efi/libstub/confidential-computing.c      |  68 +++++
- drivers/firmware/efi/libstub/efi-stub.c       |   2 +
- drivers/firmware/efi/libstub/efistub.h        |   2 +
- drivers/firmware/efi/libstub/x86-stub.c       |   2 +
- drivers/virt/Kconfig                          |   2 +
- drivers/virt/Makefile                         |   1 +
- drivers/virt/sev_secret/Kconfig               |  11 +
- drivers/virt/sev_secret/Makefile              |   2 +
- drivers/virt/sev_secret/sev_secret.c          | 260 ++++++++++++++++++
- include/linux/efi.h                           |  11 +
- 14 files changed, 410 insertions(+), 2 deletions(-)
- create mode 100644 drivers/firmware/efi/confidential-computing.c
- create mode 100644 drivers/firmware/efi/libstub/confidential-computing.c
+Signed-off-by: Dov Murik <dovmurik@linux.ibm.com>
+---
+ drivers/virt/Kconfig                 |   2 +
+ drivers/virt/Makefile                |   1 +
+ drivers/virt/sev_secret/Kconfig      |  11 ++
+ drivers/virt/sev_secret/Makefile     |   2 +
+ drivers/virt/sev_secret/sev_secret.c | 260 +++++++++++++++++++++++++++
+ 5 files changed, 276 insertions(+)
  create mode 100644 drivers/virt/sev_secret/Kconfig
  create mode 100644 drivers/virt/sev_secret/Makefile
  create mode 100644 drivers/virt/sev_secret/sev_secret.c
 
-
-base-commit: c06a2ba62fc401b7aaefd23f5d0bc06d2457ccc1
+diff --git a/drivers/virt/Kconfig b/drivers/virt/Kconfig
+index 8061e8ef449f..c222cc625891 100644
+--- a/drivers/virt/Kconfig
++++ b/drivers/virt/Kconfig
+@@ -36,4 +36,6 @@ source "drivers/virt/vboxguest/Kconfig"
+ source "drivers/virt/nitro_enclaves/Kconfig"
+ 
+ source "drivers/virt/acrn/Kconfig"
++
++source "drivers/virt/sev_secret/Kconfig"
+ endif
+diff --git a/drivers/virt/Makefile b/drivers/virt/Makefile
+index 3e272ea60cd9..0765e5418d1d 100644
+--- a/drivers/virt/Makefile
++++ b/drivers/virt/Makefile
+@@ -8,3 +8,4 @@ obj-y				+= vboxguest/
+ 
+ obj-$(CONFIG_NITRO_ENCLAVES)	+= nitro_enclaves/
+ obj-$(CONFIG_ACRN_HSM)		+= acrn/
++obj-y				+= sev_secret/
+diff --git a/drivers/virt/sev_secret/Kconfig b/drivers/virt/sev_secret/Kconfig
+new file mode 100644
+index 000000000000..4505526b8ef1
+--- /dev/null
++++ b/drivers/virt/sev_secret/Kconfig
+@@ -0,0 +1,11 @@
++# SPDX-License-Identifier: GPL-2.0-only
++config AMD_SEV_SECRET_SECURITYFS
++	tristate "AMD SEV secret area securityfs support"
++	depends on EFI
++	select SECURITYFS
++	help
++	  This is a driver for accessing the AMD SEV secret area via
++	  securityfs.
++
++	  To compile this driver as a module, choose M here.
++	  The module will be called sev_secret.
+diff --git a/drivers/virt/sev_secret/Makefile b/drivers/virt/sev_secret/Makefile
+new file mode 100644
+index 000000000000..9671f7bb3941
+--- /dev/null
++++ b/drivers/virt/sev_secret/Makefile
+@@ -0,0 +1,2 @@
++# SPDX-License-Identifier: GPL-2.0-only
++obj-$(CONFIG_AMD_SEV_SECRET_SECURITYFS) += sev_secret.o
+diff --git a/drivers/virt/sev_secret/sev_secret.c b/drivers/virt/sev_secret/sev_secret.c
+new file mode 100644
+index 000000000000..9fff62356e74
+--- /dev/null
++++ b/drivers/virt/sev_secret/sev_secret.c
+@@ -0,0 +1,260 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * sev_secret module
++ *
++ * Copyright (C) 2021 IBM Corporation
++ * Author: Dov Murik <dovmurik@linux.ibm.com>
++ */
++
++#include <linux/seq_file.h>
++#include <linux/fs.h>
++#include <linux/kernel.h>
++#include <linux/init.h>
++#include <linux/module.h>
++#include <linux/io.h>
++#include <linux/security.h>
++#include <linux/efi.h>
++
++/**
++ * sev_secret: Allow reading confidential computing secret area via securityfs
++ * interface.
++ *
++ * When the module is loaded (and securityfs is mounted, typically under
++ * /sys/kernel/security), an "sev_secret" directory is created in securityfs.
++ * In it, a file is created for each secret entry.  The name of each such file
++ * is the GUID of the secret entry, and its content is the secret data.
++ */
++
++#define SEV_SECRET_NUM_FILES 64
++
++#define EFI_SEVSECRET_TABLE_HEADER_GUID \
++	EFI_GUID(0x1e74f542, 0x71dd, 0x4d66, 0x96, 0x3e, 0xef, 0x42, 0x87, 0xff, 0x17, 0x3b)
++
++struct sev_secret {
++	struct dentry *fs_dir;
++	struct dentry *fs_files[SEV_SECRET_NUM_FILES];
++	struct linux_efi_confidential_computing_secret_area *secret_area;
++};
++
++/*
++ * Structure of the SEV secret area
++ *
++ * Offset   Length
++ * (bytes)  (bytes)  Usage
++ * -------  -------  -----
++ *       0       16  Secret table header GUID (must be 1e74f542-71dd-4d66-963e-ef4287ff173b)
++ *      16        4  Length of bytes of the entire secret area
++ *
++ *      20       16  First secret entry's GUID
++ *      36        4  First secret entry's length in bytes (= 16 + 4 + x)
++ *      40        x  First secret entry's data
++ *
++ *    40+x       16  Second secret entry's GUID
++ *    56+x        4  Second secret entry's length in bytes (= 16 + 4 + y)
++ *    60+x        y  Second secret entry's data
++ *
++ * (... and so on for additional entries)
++ *
++ * The GUID of each secret entry designates the usage of the secret data.
++ */
++
++/**
++ * struct secret_header - Header of entire secret area; this should be followed
++ * by instances of struct secret_entry.
++ * @guid:	Must be EFI_SEVSECRET_TABLE_HEADER_GUID
++ * @len:	Length in bytes of entire secret area, including header
++ */
++struct secret_header {
++	efi_guid_t guid;
++	u32 len;
++} __attribute((packed));
++
++/**
++ * struct secret_entry - Holds one secret entry
++ * @guid:	Secret-specific GUID
++ * @len:	Length of secret entry, including its guid and len fields
++ * @data:	The secret data
++ */
++struct secret_entry {
++	efi_guid_t guid;
++	u32 len;
++	u8 data[];
++} __attribute((packed));
++
++static struct sev_secret the_sev_secret;
++
++static size_t secret_entry_data_len(struct secret_entry *e)
++{
++	return e->len - sizeof(*e);
++}
++
++static int sev_secret_bin_file_show(struct seq_file *file, void *data)
++{
++	struct secret_entry *e = file->private;
++
++	if (e)
++		seq_write(file, e->data, secret_entry_data_len(e));
++
++	return 0;
++}
++DEFINE_SHOW_ATTRIBUTE(sev_secret_bin_file);
++
++static inline struct sev_secret *sev_secret_get(void)
++{
++	return &the_sev_secret;
++}
++
++static int sev_secret_map_area(void)
++{
++	struct sev_secret *s = sev_secret_get();
++	struct linux_efi_confidential_computing_secret_area *secret_area;
++	u32 secret_area_size;
++
++	if (efi.confidential_computing_secret == EFI_INVALID_TABLE_ADDR) {
++		pr_err("Secret area address is not available\n");
++		return -EINVAL;
++	}
++
++	secret_area =
++		memremap(efi.confidential_computing_secret, sizeof(*secret_area), MEMREMAP_WB);
++	if (secret_area == NULL) {
++		pr_err("Could not map secret area header\n");
++		return -ENOMEM;
++	}
++
++	secret_area_size = sizeof(*secret_area) + secret_area->size;
++	memunmap(secret_area);
++
++	secret_area = memremap(efi.confidential_computing_secret, secret_area_size, MEMREMAP_WB);
++	if (secret_area == NULL) {
++		pr_err("Could not map secret area\n");
++		return -ENOMEM;
++	}
++
++	s->secret_area = secret_area;
++	return 0;
++}
++
++static void sev_secret_securityfs_teardown(void)
++{
++	struct sev_secret *s = sev_secret_get();
++	int i;
++
++	for (i = (SEV_SECRET_NUM_FILES - 1); i >= 0; i--)
++		if (s->fs_files[i])
++			securityfs_remove(s->fs_files[i]);
++
++	if (s->fs_dir)
++		securityfs_remove(s->fs_dir);
++
++	pr_debug("Removed sev_secret securityfs entries\n");
++}
++
++static int sev_secret_securityfs_setup(void)
++{
++	efi_guid_t tableheader_guid = EFI_SEVSECRET_TABLE_HEADER_GUID;
++	struct sev_secret *s = sev_secret_get();
++	int ret = 0, i = 0, bytes_left;
++	unsigned char *ptr;
++	struct secret_header *h;
++	struct secret_entry *e;
++	struct dentry *dent;
++	char guid_str[EFI_VARIABLE_GUID_LEN + 1];
++
++	s->fs_dir = NULL;
++	memset(s->fs_files, 0, sizeof(s->fs_files));
++
++	dent = securityfs_create_dir("sev_secret", NULL);
++	if (IS_ERR(dent)) {
++		pr_err("Error creating SEV secret securityfs directory entry");
++		return PTR_ERR(dent);
++	}
++	s->fs_dir = dent;
++
++	ptr = s->secret_area->area;
++	h = (struct secret_header *)ptr;
++	if (memcmp(&h->guid, &tableheader_guid, sizeof(h->guid))) {
++		pr_err("SEV secret area does not start with correct GUID\n");
++		ret = -EINVAL;
++		goto err_cleanup;
++	}
++	if (h->len < sizeof(*h)) {
++		pr_err("SEV secret area reported length is too small\n");
++		ret = -EINVAL;
++		goto err_cleanup;
++	}
++
++	bytes_left = h->len - sizeof(*h);
++	ptr += sizeof(*h);
++	while (bytes_left >= (int)sizeof(*e) && i < SEV_SECRET_NUM_FILES) {
++		e = (struct secret_entry *)ptr;
++		if (e->len < sizeof(*e) || e->len > (unsigned int)bytes_left) {
++			pr_err("SEV secret area is corrupted\n");
++			ret = -EINVAL;
++			goto err_cleanup;
++		}
++
++		efi_guid_to_str(&e->guid, guid_str);
++
++		dent = securityfs_create_file(guid_str, 0440, s->fs_dir, (void *)e,
++					      &sev_secret_bin_file_fops);
++		if (IS_ERR(dent)) {
++			pr_err("Error creating SEV secret securityfs entry\n");
++			ret = PTR_ERR(dent);
++			goto err_cleanup;
++		}
++
++		s->fs_files[i++] = dent;
++		ptr += e->len;
++		bytes_left -= e->len;
++	}
++
++	pr_debug("Created %d entries in sev_secret securityfs\n", i);
++	return 0;
++
++err_cleanup:
++	sev_secret_securityfs_teardown();
++	return ret;
++}
++
++static void sev_secret_unmap_area(void)
++{
++	struct sev_secret *s = sev_secret_get();
++
++	if (s->secret_area) {
++		memunmap(s->secret_area);
++		s->secret_area = NULL;
++	}
++}
++
++static int __init sev_secret_init(void)
++{
++	int ret;
++
++	ret = sev_secret_map_area();
++	if (ret)
++		return ret;
++
++	ret = sev_secret_securityfs_setup();
++	if (ret)
++		goto err_unmap;
++
++	return ret;
++
++err_unmap:
++	sev_secret_unmap_area();
++	return ret;
++}
++
++static void __exit sev_secret_exit(void)
++{
++	sev_secret_securityfs_teardown();
++	sev_secret_unmap_area();
++}
++
++module_init(sev_secret_init);
++module_exit(sev_secret_exit);
++
++MODULE_DESCRIPTION("AMD SEV confidential computing secret area access");
++MODULE_AUTHOR("IBM");
++MODULE_LICENSE("GPL");
 -- 
 2.25.1
 
