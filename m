@@ -2,242 +2,191 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,PDS_BAD_THREAD_QP_64,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.5 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,MSGID_FROM_MTA_HEADER,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1CE75C48BE8
-	for <linux-efi@archiver.kernel.org>; Wed, 16 Jun 2021 20:17:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 98410C49EA7
+	for <linux-efi@archiver.kernel.org>; Thu, 17 Jun 2021 18:46:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EC08C61164
-	for <linux-efi@archiver.kernel.org>; Wed, 16 Jun 2021 20:17:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7E0D861411
+	for <linux-efi@archiver.kernel.org>; Thu, 17 Jun 2021 18:46:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233223AbhFPUTd (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 16 Jun 2021 16:19:33 -0400
-Received: from mail-bn7nam10on2122.outbound.protection.outlook.com ([40.107.92.122]:43784
+        id S233249AbhFQSs3 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 17 Jun 2021 14:48:29 -0400
+Received: from mail-bn7nam10on2046.outbound.protection.outlook.com ([40.107.92.46]:12278
         "EHLO NAM10-BN7-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S232073AbhFPUTc (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 16 Jun 2021 16:19:32 -0400
+        id S233040AbhFQSs2 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Thu, 17 Jun 2021 14:48:28 -0400
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=ko0gYpVq8DVcHHAzs6cVlsVtRkUuVYI+1HPCzeAwxhLJ7w+mA9OFs9LVIDkbWs0c6bkWopgWEDYlBmzhQRLJDQlnPeLP9dEoW18rKKzi/Afy0TOQB5gvxS1Ny6XMCNCZqp/hPghNp1OQR0NOKC41v+0qcH22Z2dI/p+ZjXxJ8Jo14RXNTmLT+7J+f4Zb6EOFnPd6tpO0YXfOVC7qjxKGkFDYOXtl//vRnED9zIqBMb7P+CacHfN1YzcKxl2bInJ+ZvSSuGtpQV/8oJyBC4wVmZrmNYR79es0gkxaWVGVuQ+NTh/GMLCxbj3bH4bIdyFsn6T8tt5rvNdAYYhaazdyGQ==
+ b=A3FIaBolGyW/FQSq80i8RuYkm8h4omqESbIDoyU0yVzHAILFCfut/MSy6IwQ+h8cCOM/Cmi66n09cey20SCk895r9aOVRLJqU1WFoCyt2a+QzReQup6rT+aQLDZlbrjOadAMGWGSrwABFKLh372mxLfwb4nX7bti9jP1q9yC4VGq0wLJDW68nsDaJlDSBFmEhmvL0A8o1abElPwibW6RbF0vEfPdTpDmiDJsTmEAcdye5E0j4mInpV/UBXSA+huEPZ/DGnvfRgmLjiZkzIW8Ifs+hxD1U3TJYig01pyfcO9p8bG09ilYmq6h/NgAhV2naYgnD38LBfae0EV0jCrusg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=iaZYTyDROLdbxNPpjL8Y/lQC/FH1vQ1pl9d+cV5v3wA=;
- b=kV3XXrDEG64/Tr1mQqfKGLaqQcK+ZnbLMo4eAOyA5T0tYO/o7sWARVv0B0jP0zRjR4BqF2Q1iPUlARntPkMBEPl/3hB/GecK4yoRt8NBYtIR5c1DZlVI+KmcTv7H3UJQe2qiRFFdWP7tEkwRTYn103gQnPAWEuu0TKReMHcZWOyD2FHdJjdu1WIFk9pV8Q45FFsMm781iNZHZb+7VkILz+NRkQXXFesiR0Kdv+sAnBR2pYCTMlw/I/OUiEYN1oOU06e4HvYKypNr6/yaRoh2BdfQ/Y/LB2n8VznMs00y1s5TS6tF2vNSV4lFwT6kNs4by0gVyV/kIyAr4iJtlqAb/A==
+ bh=zoB28LGbzw6CufgVrXYQ5ruVMnpRzOlNv6COUXeGkgA=;
+ b=IVB7B0Z7OPSuIzVQevnidmQ4EyLwl1OS0zhmMYqQyyLtEJka2pJJ0S5goJmycz1/eQpvmgnr7BWzW+tC7x1VyweUxaS+3QJsIdcRq2mvQMp8jbUMgRCOkQgLF05cKUcTwIJ/xnKpxzsZy0zPf3if2DLsmudbHwIYBinHc12C8EofqJvVFSweyO/66M11Otb+3BwSV7VhBDvkBNIuaCpRL1h67tYWQJ4TknFt/9MLrv4Tth8IsXOYMSPINv2IpKT9wtGBMBf7nuGpMW2VmTypliYOqM9PICj2iW7c9Pubuz3nwB63R5turKp0yRb4xqx1HmURtwBxntTQDrW8mw/2iw==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=microsoft.com; dmarc=pass action=none
- header.from=microsoft.com; dkim=pass header.d=microsoft.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=selector2;
+ smtp.mailfrom=amd.com; dmarc=pass action=none header.from=amd.com; dkim=pass
+ header.d=amd.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=iaZYTyDROLdbxNPpjL8Y/lQC/FH1vQ1pl9d+cV5v3wA=;
- b=IyeTb9S7z3/kTNRgkHp0t90qUAlP4PnbxvMCWXhg24l4AAGq3uV5agZnbkhPl3MrTGLUZMTLteTvEOr5fWmwR3V5OoxHT8EEd9093iy06Bmg6hjx2SWo15fnMPJnSKGP+aafaER2oYayGC6JEz5w0M27K6Mx1Rkh86qtOZC+rTM=
-Received: from MWHPR21MB1593.namprd21.prod.outlook.com (2603:10b6:301:7c::11)
- by MW2PR2101MB1818.namprd21.prod.outlook.com (2603:10b6:302:12::11) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4264.3; Wed, 16 Jun
- 2021 20:17:19 +0000
-Received: from MWHPR21MB1593.namprd21.prod.outlook.com
- ([fe80::55bf:85c:1abe:d168]) by MWHPR21MB1593.namprd21.prod.outlook.com
- ([fe80::55bf:85c:1abe:d168%8]) with mapi id 15.20.4264.004; Wed, 16 Jun 2021
- 20:17:19 +0000
-From:   Michael Kelley <mikelley@microsoft.com>
-To:     Mark Rutland <Mark.Rutland@arm.com>
-CC:     "will@kernel.org" <will@kernel.org>,
-        "catalin.marinas@arm.com" <catalin.marinas@arm.com>,
-        "lorenzo.pieralisi@arm.com" <lorenzo.pieralisi@arm.com>,
-        "sudeep.holla@arm.com" <sudeep.holla@arm.com>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-hyperv@vger.kernel.org" <linux-hyperv@vger.kernel.org>,
-        "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>,
-        "arnd@arndb.de" <arnd@arndb.de>,
-        "wei.liu@kernel.org" <wei.liu@kernel.org>,
-        "ardb@kernel.org" <ardb@kernel.org>,
-        "daniel.lezcano@linaro.org" <daniel.lezcano@linaro.org>,
-        KY Srinivasan <kys@microsoft.com>
-Subject: RE: [PATCH v10 3/7] arm64: hyperv: Add Hyper-V clocksource/clockevent
+ bh=zoB28LGbzw6CufgVrXYQ5ruVMnpRzOlNv6COUXeGkgA=;
+ b=XDVYEORxaGbpCIsj7ZYO8c5HpKCF3pS03sxbFWbdCDhi1cTsRagnWGTe0eRumPrZyDvsNU4b/LDbHS/Oqcndzo9V7tHjrOfES7RcaHfZN5Y2/ST+F4yeBj4p4Z1Inr3ObGc801ptGtPa+JIjqO4FBRnQ9JucCAZTMvgy2s+FqPc=
+Authentication-Results: redhat.com; dkim=none (message not signed)
+ header.d=none;redhat.com; dmarc=none action=none header.from=amd.com;
+Received: from DM6PR12MB2714.namprd12.prod.outlook.com (2603:10b6:5:42::18) by
+ DM6PR12MB3035.namprd12.prod.outlook.com (2603:10b6:5:3a::24) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.4242.16; Thu, 17 Jun 2021 18:46:15 +0000
+Received: from DM6PR12MB2714.namprd12.prod.outlook.com
+ ([fe80::7df8:b0cd:fe1b:ae7b]) by DM6PR12MB2714.namprd12.prod.outlook.com
+ ([fe80::7df8:b0cd:fe1b:ae7b%5]) with mapi id 15.20.4219.022; Thu, 17 Jun 2021
+ 18:46:15 +0000
+Cc:     brijesh.singh@amd.com, x86@kernel.org,
+        linux-kernel@vger.kernel.org, kvm@vger.kernel.org,
+        linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org,
+        linux-coco@lists.linux.dev, linux-mm@kvack.org,
+        linux-crypto@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>,
+        Ingo Molnar <mingo@redhat.com>, Joerg Roedel <jroedel@suse.de>,
+        Tom Lendacky <thomas.lendacky@amd.com>,
+        "H. Peter Anvin" <hpa@zytor.com>, Ard Biesheuvel <ardb@kernel.org>,
+        Paolo Bonzini <pbonzini@redhat.com>,
+        Sean Christopherson <seanjc@google.com>,
+        Vitaly Kuznetsov <vkuznets@redhat.com>,
+        Wanpeng Li <wanpengli@tencent.com>,
+        Jim Mattson <jmattson@google.com>,
+        Andy Lutomirski <luto@kernel.org>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        Sergio Lopez <slp@redhat.com>, Peter Gonda <pgonda@google.com>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>,
+        David Rientjes <rientjes@google.com>, tony.luck@intel.com,
+        npmccallum@redhat.com
+Subject: Re: [PATCH Part1 RFC v3 06/22] x86/sev: check SEV-SNP features
  support
-Thread-Topic: [PATCH v10 3/7] arm64: hyperv: Add Hyper-V
- clocksource/clockevent support
-Thread-Index: AQHXR1WfRNuOt4THnkSQtAriU3aWFKri7Q2AgAAsnCCABJMQgIAAO7hQgAGXcACAIOKsoIADPsaAgAVVr2CABFICYA==
-Date:   Wed, 16 Jun 2021 20:17:19 +0000
-Message-ID: <MWHPR21MB1593AD0CB11802FD65108AC7D70F9@MWHPR21MB1593.namprd21.prod.outlook.com>
-References: <1620841067-46606-1-git-send-email-mikelley@microsoft.com>
- <1620841067-46606-4-git-send-email-mikelley@microsoft.com>
- <20210514123711.GB30645@C02TD0UTHF1T.local>
- <MWHPR21MB15932B44EC1E55614B219F5ED7509@MWHPR21MB1593.namprd21.prod.outlook.com>
- <20210517130815.GC62656@C02TD0UTHF1T.local>
- <MWHPR21MB15930A4EE785984292B1D72BD72D9@MWHPR21MB1593.namprd21.prod.outlook.com>
- <20210518170016.GP82842@C02TD0UTHF1T.local>
- <MWHPR21MB1593800A20B55626ACE6A844D7379@MWHPR21MB1593.namprd21.prod.outlook.com>
- <20210610164519.GB63335@C02TD0UTHF1T.local>
- <MWHPR21MB1593095A9B8B61B14D7DF08DD7319@MWHPR21MB1593.namprd21.prod.outlook.com>
-In-Reply-To: <MWHPR21MB1593095A9B8B61B14D7DF08DD7319@MWHPR21MB1593.namprd21.prod.outlook.com>
-Accept-Language: en-US
+To:     Borislav Petkov <bp@alien8.de>
+References: <20210602140416.23573-1-brijesh.singh@amd.com>
+ <20210602140416.23573-7-brijesh.singh@amd.com> <YL4zJT1v6OuH+tvI@zn.tnic>
+From:   Brijesh Singh <brijesh.singh@amd.com>
+Message-ID: <e617a0a1-bb8d-9d75-56a4-2ac1138ebf8b@amd.com>
+Date:   Thu, 17 Jun 2021 13:46:08 -0500
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
+ Thunderbird/78.11.0
+In-Reply-To: <YL4zJT1v6OuH+tvI@zn.tnic>
+Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-msip_labels: MSIP_Label_f42aa342-8706-4288-bd11-ebb85995028c_ActionId=26879e91-db56-4b35-b514-4786f8542303;MSIP_Label_f42aa342-8706-4288-bd11-ebb85995028c_ContentBits=0;MSIP_Label_f42aa342-8706-4288-bd11-ebb85995028c_Enabled=true;MSIP_Label_f42aa342-8706-4288-bd11-ebb85995028c_Method=Standard;MSIP_Label_f42aa342-8706-4288-bd11-ebb85995028c_Name=Internal;MSIP_Label_f42aa342-8706-4288-bd11-ebb85995028c_SetDate=2021-06-14T02:13:17Z;MSIP_Label_f42aa342-8706-4288-bd11-ebb85995028c_SiteId=72f988bf-86f1-41af-91ab-2d7cd011db47;
-authentication-results: arm.com; dkim=none (message not signed)
- header.d=none;arm.com; dmarc=none action=none header.from=microsoft.com;
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: 302e6695-c534-492c-1a17-08d93103be3c
-x-ms-traffictypediagnostic: MW2PR2101MB1818:
-x-ms-exchange-transport-forked: True
-x-ld-processed: 72f988bf-86f1-41af-91ab-2d7cd011db47,ExtAddr
-x-microsoft-antispam-prvs: <MW2PR2101MB1818C6AFA2C6015197D0BFCDD70F9@MW2PR2101MB1818.namprd21.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:8882;
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: 4kETpNdTKD6dSaIjeIzdguqunivPAXDxQ1wMO2CGF9kTkLSSw1pDhOaynrVxrtDqnzf1HdBy9IVhOP8KveEXpnJlCwyIQaRIMXbEJACEtONyXPUf5cw48stpJS1hhYKQGFB3mjMRRfosFfNd6YGhSq4l0HsyATFxFnmId8Th0n7TH+mzwkSBX94x91fD1vWEqPjEuIyDDOWfTYlDtG/xPueIthGGRNyBqQzkYMYssLtSfWvt6uGyAlQvSJIGuhyUu1d6H7mwItitJDPdA7hNOkYVgq4oEf1DIWjhG/1TcZOU9JLcQH+ZQn29vDnFd0YetHtdIdhKyI/X6gFHaRKIL+VGynnp54wlbd5jE2WPLQC1e0pS2s5igi5JUUDkvp+B4ZGXbzcEnr3Tz0EZ1IFWaQSXTsRuTCGz7Ep8ru6WcUKE+1e6G6XABzrGlhi8X6vxI4MTDvxf5xCwTtiym6Iqd1JNnM+poTOvDMZLwfj7dgZsBzoQDZz4hvrUhyDGg8uMZEPczm7vT7pDGEpU2IMry4FZLmI5CtRLYZFS18DUMF7vQOOg0QTv++rPPSQCoXZC3+vN6NTg+Qbv3kxxWzOZQXxVqTvnN5xtRx0TybLpqLLCe1xR2iYmSSYsk9ClFgL4Nb3KG0ftlUYbwTFhcZQuTg==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MWHPR21MB1593.namprd21.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(8990500004)(316002)(6506007)(54906003)(33656002)(5660300002)(7696005)(107886003)(122000001)(55016002)(9686003)(38100700002)(6916009)(66946007)(10290500003)(82960400001)(82950400001)(2906002)(86362001)(26005)(8936002)(52536014)(83380400001)(4326008)(7416002)(186003)(66556008)(66476007)(71200400001)(478600001)(8676002)(64756008)(76116006)(66446008);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?Yggufgdz/XvPI8+DympswM4Yb54C/NpFQZxKOlIuBoRs0K+HIs4lE2TfWkW7?=
- =?us-ascii?Q?FFXuc2+HIcrNloYjyMTijag/i6FqCrz0LiiRx1k5NSpnfFWSuWh+hZoahehp?=
- =?us-ascii?Q?LkGZjwCw1MX2u6gubLUnPC1aDIkrp+2nUewjXEM5+HiDnMC4PcmcjHh4Sy8m?=
- =?us-ascii?Q?TPmhKrL8NCm04m9gOGuwGhdPjWMzpPYSO4EJorP+JSdgig04ITM9hygKqxvp?=
- =?us-ascii?Q?tgWSy/MDeEIBcgKILji9/5jGBXmduVVg2N5MpMsAxFiWtYKnscC3kwXowzN4?=
- =?us-ascii?Q?KNH6JSu65KZ5iDRxY9FXv6oIwQ9bkEt7ClNM1fcbQRhZE7ZVqxJeu56nyFBx?=
- =?us-ascii?Q?ZtnSdw1KI6kXo1zlBvZHIf3ptjz3BmrePqNBfkCwYL7559f0EbGniG2/CEqb?=
- =?us-ascii?Q?ufXz9k23kiLOWnQiTifzNN+ATCJuBTZZbZocuh/39Lh5p0VGlwXnzoUlYZ1+?=
- =?us-ascii?Q?9BI8IECFM1nMX8qzxCfPNSlCDP1dfW/pXNFhK3z1KE376jm5zGo7X+CggYqB?=
- =?us-ascii?Q?G45iztOHRzhRkZ3ziUdQppJ63SwbQDsp5dT0iPXADN116J48KRzTeloBYFdJ?=
- =?us-ascii?Q?CVbddVpS5e2JVOpKIarnjyB5aUrfX30U/dgZaPlSbV6m1RqfxCMwzH5NR/tq?=
- =?us-ascii?Q?IU51xK9qpG5HiwwLo3G7GRL8ARK6ae9sl1R+zZ6Nk2477YXaIAX3UyxtS+yQ?=
- =?us-ascii?Q?oiOTFe/xLBPGHfAEabfZCl79gcdBfM55SMw8r7Gmd5fvyonS4d7ZoLhSnJp1?=
- =?us-ascii?Q?O8tC8u6j0Ty+kcqJosM+8vqMhmPHQaBcijTlz1/ZRxwPl/rCHG3ZVoNThSzR?=
- =?us-ascii?Q?CnkHrSD4pGrcDIu5I1LF/W5sZ77efTNovfaY4WatXrLdMgkSGJcDBefTlYWm?=
- =?us-ascii?Q?DWN54us1oF+Af0Xf/hL6m4R8zQud+n53c+GSrVZSzUGPcMPVaVFZfbYGZfoO?=
- =?us-ascii?Q?b6B1RL1wBkfiKiy9ISwTvanM6oBvMN9POPoPU9UNAqXW3EgUlYi9X7MU+r31?=
- =?us-ascii?Q?xzCUqX+lhN9RfSmHdl9iphdCUsN7kbGK5KnHqt0TqnIZ88O16vuCOC/i3NKP?=
- =?us-ascii?Q?MzZMBW1+sKdV25kuJEL1MkvIePeVjgLjQmewx6bQDCcq6HnC6Y0sK6v8CYmb?=
- =?us-ascii?Q?3K134j5ia8VktL2YdqwneLpLUyHOn0hiOHRUvFfKE44NI/MgzxBe+dE5QnNd?=
- =?us-ascii?Q?8JKU5DrpgsApIG9s2D0mQcVtDd0l79ki8/d0f5Oil1BD8wzJNGQqL0m+VI90?=
- =?us-ascii?Q?UYIRzjMAU3Z9Cr9NJja80T1tXONz2Qo7DCN0JL2BnUZ9hAO8ffkoqJOQgns3?=
- =?us-ascii?Q?3fPmOg+a4aBZqG1O2Eknm+CI?=
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [165.204.84.11]
+X-ClientProxiedBy: BN9PR03CA0431.namprd03.prod.outlook.com
+ (2603:10b6:408:113::16) To DM6PR12MB2714.namprd12.prod.outlook.com
+ (2603:10b6:5:42::18)
 MIME-Version: 1.0
-X-OriginatorOrg: microsoft.com
+X-MS-Exchange-MessageSentRepresentingType: 1
+Received: from [10.254.35.102] (165.204.84.11) by BN9PR03CA0431.namprd03.prod.outlook.com (2603:10b6:408:113::16) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4242.16 via Frontend Transport; Thu, 17 Jun 2021 18:46:11 +0000
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 47f5ed94-eb52-4cc6-8a49-08d931c02f67
+X-MS-TrafficTypeDiagnostic: DM6PR12MB3035:
+X-MS-Exchange-Transport-Forked: True
+X-Microsoft-Antispam-PRVS: <DM6PR12MB3035E7074C11DCE4497FD261E50E9@DM6PR12MB3035.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:5797;
+X-MS-Exchange-SenderADCheck: 1
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: tWmLsRq75GOFxgz5ElZdKveLYOyjCzjc803NmyHH/NgkB0W6IQObzHZ6DqwXIRvKv4GeCcaFulpv3/AvawfDRzt+nAxFsniCj2JV9XRFrhBKIBFIra8vXMWZWKJ+CPrtDbSn+8pRQWSSrq2N9+DaAoEeyvuGFj0OaT3DZ3O0fr3rst3WHK1sNG2ovB17gAXOSzpcs1zc+BbAnOkq2coPRzDF2K+Ka7WiRfKTZ4UQaQfnkQhHqZEevtD9QROPY94kmQ8o/BBjIe7mOMEHLAn1LJISd/K3etPU+QFV3PSJFjAy6ezRkMj5xR89pfJ55Grakro6jItRlwE1Eckh5fePSYSbheMiujJXSZlKFNyumNM0rcrfOXYci3maI73eitSqnZTB/VvqTpQnkuD43iaTdzH2GoyTA/aY1wgqk6AFz3KudNjKGdfSe2U34ba5nz9q/wRw5OgQDy4GuGxUraUdp21IHZaEbgxl2Y6gOH5at/ZhGtdm8WtV0OgrmhKVU2vOBDYpJgWaU3lFF8+JhgaLnP0NQQPRr5iO87EfcGkPr79Rj5JyVE2Ku6pBlRglsAI2FkGuULHApDLlZ9IG+yPpaVbbBDCado9ShZjiauBQ3VAHgQv3bCeIWHFz1PjE6j4Iydphwc4geHjIfFGqEe/J/IearrdSHvnhmyy9vc4uLzww1dffB2eBQWp9CfYERGBZoNj7+qLIl1FC2nTBeMzymA==
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR12MB2714.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(396003)(39860400002)(346002)(136003)(366004)(376002)(2906002)(8936002)(8676002)(52116002)(6666004)(66946007)(16526019)(186003)(7416002)(53546011)(26005)(31686004)(478600001)(66556008)(66476007)(83380400001)(6486002)(2616005)(31696002)(16576012)(956004)(38100700002)(38350700002)(86362001)(36756003)(54906003)(6916009)(44832011)(5660300002)(4326008)(316002)(43740500002)(45980500001);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?a3paWEtzdDVWbmtMbGZ6VFJVVTllMzlyMGpEcDlmOVM4RU1qaThCcGMzcDQ5?=
+ =?utf-8?B?dnBJZUlaSjdTQkxoazFGY1NNRGxQYWpJSUFWVXJ2VFdwNjN0ZjF0Q2drQjdk?=
+ =?utf-8?B?U05yUzBFS0FtV0FaaUpMTys2SWdkNUc5SWZvQWFSdHVsUHA0RmpCdHpmRFRG?=
+ =?utf-8?B?blRUYjkyaGpXOUUwRVQ4UGZxVDBVMFhCbjN0MGhrY0hNbmZtaHdZaCtSMDF2?=
+ =?utf-8?B?TGk0bHgwazRDU1ljWUZCMGdPUUdNUGZsbkNpeDF4L1RiUmNna1FUWlVHR29F?=
+ =?utf-8?B?SExWUDl2ZWNmVS9VUDEyNjR2TEMxRks3VU1NdXFNY0N4ZHBZY1puVkp4QUVh?=
+ =?utf-8?B?aVgvY0tEb1BOZ0YrWnREcy8zVHRjZmdtYlNzM3F0ajI4OHVKK055VG1xanBi?=
+ =?utf-8?B?SzRnT3pWY1B1TG9BNHFYcG1tVDBCNzJxQ0QwU1p2M2t1TW9hVDBiOC9rNU9N?=
+ =?utf-8?B?M3FhVkErUmdaMmx4VmNLR0V4bVhReEhkMk8yMmx3S0t2RHJCbnJRUlNGYUc5?=
+ =?utf-8?B?TVRWbkdrRjcvT1ZxdTM4d2JMQVRuOGErdEJtMlcvVzRKNGZyZWkwdDJYMDFI?=
+ =?utf-8?B?NlZoNXc5Q0liNTl5MUxHT1JZRUR4VWk3Vmo1NUw4YlRQc3ZJUXRwZk41MUV3?=
+ =?utf-8?B?UDhHdU1JQXlOQ2hqR1Uxa09DZHZjd0dESHBuNkc1YUNPSy9uNGliODUxd3Ja?=
+ =?utf-8?B?QThlRUlQa3BNYVAvZ3lxdTRFT1p0SXdmbGluekNZdEZoMXZuODNvZzhFMitn?=
+ =?utf-8?B?c244YkVOVU4xbmkyNFFFZHlpNGI1c1NyS3dUdnNmZk9qeWNaYmlMa01HSHk2?=
+ =?utf-8?B?Wmh5dXdUUnJWYTZhYitQQWtmTk1zYStHUk8vb1R6UExEOG9JbytZYk54MDdu?=
+ =?utf-8?B?OVdvOE9Ed2dQbzduaEpoQ2U3STgzemcvR1RSak5RN3EvWlNGbnlHZ0N6anZE?=
+ =?utf-8?B?NlBMcDB4UkUrWHhwdFhUeHl6NUlsZXZJbDZWQWx2QnR2Q1M3M1E3czZhdG02?=
+ =?utf-8?B?aVNMTGlmSC92V1ZsdEtFU3hwMnBDZHhXazRZSjMzV2xHTFJhM05hd3VBTXVj?=
+ =?utf-8?B?Zmt4eHNNZDRoMFlvVFk3STlHMEROZEM2V3h2Qkg2VlRGUFI2WUt5WE4vcVZ4?=
+ =?utf-8?B?eTJoYmxCcDJTcGErTStoc3hpazRkUzBwS0daNFBLbzhrcTN6YVZqSndsSlpE?=
+ =?utf-8?B?QWZrNHRiMlJUSC9zcVBqNS9DWWRBWXhENXYvNURaNGtUM2IrQkYwZlJ5UHRX?=
+ =?utf-8?B?dnhhaUlxS2p2WUdVa2tVcUh0K0tQUW5wdC9wVU4remhMSGY3RGxkT25ibFF2?=
+ =?utf-8?B?THY2SFRYU3dBNU5QVmVZcjhBYmsxSnYvY04xSlJJOG9ZU25NYmhOblg0SFZt?=
+ =?utf-8?B?MUoweWI1L2owNjgzUTRMY0l0NWdBOEQ5ZW5VZHdmZkVKdWZ1dVIvODJveHI2?=
+ =?utf-8?B?V2tUVXRYRGxtaVF0U3d3UTU4ckMwREJkMzUvWGdoamtZRVNrdHArVmR5Z3JQ?=
+ =?utf-8?B?THpQdE91UVU2dEVaTGJZQnlDRDFtZ0U0WW1hajNOZkYyYjFrWTREVU5ETEt3?=
+ =?utf-8?B?SWtnMEhvbWlqcWZ1Wit1bTQ1Wm5MRS9xMmEwVWtSNUxhaEU2VkZhaVRCQllP?=
+ =?utf-8?B?TER4dDFWUlhqOTZZeGhJNElhOFFHZE0wdmFiK2lPMFJBejRpck5JeDZUQVky?=
+ =?utf-8?B?M2ZoVTJDbWhjTVhZcnFrYWxsQ2Z0Q0kxeXlTU0ppK2tEL0Q4WVBhVFB1OGNa?=
+ =?utf-8?Q?HxtHEZd6vXeSVt0nslYHhOu4OTMnrjZ8miHEtoC?=
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 47f5ed94-eb52-4cc6-8a49-08d931c02f67
+X-MS-Exchange-CrossTenant-AuthSource: DM6PR12MB2714.namprd12.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: MWHPR21MB1593.namprd21.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 302e6695-c534-492c-1a17-08d93103be3c
-X-MS-Exchange-CrossTenant-originalarrivaltime: 16 Jun 2021 20:17:19.4749
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 17 Jun 2021 18:46:15.1320
  (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 72f988bf-86f1-41af-91ab-2d7cd011db47
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: DxjF+PyuHwMgjKCAsmZaArDc/V3Az4Ncuu5wh+9zHppEyKce++RY9OTAnaWMJ2kbq34VMKAHqJUbDnim55IK+F5+KTE/lENzmXwzqtD63NA=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MW2PR2101MB1818
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: b3SiVCvlB9ViIunsf6TBjQ7F5CVGYxvoRg8i3fdF1RcSatcHI/oZ0ChGzAPqr4G1S5Jj0Myhutw0lDPQl3c8EQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR12MB3035
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Michael Kelley <mikelley@microsoft.com> Sent: Sunday, June 13, 2021 7=
-:42 PM
->=20
-> From: Mark Rutland <mark.rutland@arm.com> Sent: Thursday, June 10, 2021 9=
-:45 AM
-> >
-> > Hi Michael,
-> >
-> > [trimming the bulk of the thrread]
-> >
-> > On Tue, Jun 08, 2021 at 03:36:06PM +0000, Michael Kelley wrote:
-> > > I've had a couple rounds of discussions with the Hyper-V team.   For
-> > > the clocksource we've agreed to table the live migration discussion, =
-and
-> > > I'll resubmit the code so that arm_arch_timer.c provides the
-> > > standard arch_sys_counter clocksource.  As noted previously, this jus=
-t
-> > > works for a Hyper-V guest.  The live migration discussion may come
-> > > back later after a deeper investigation by Hyper-V.
-> >
-> > Great; thanks for this!
-> >
-> > > For clockevents, there's not a near term fix.  It's more than just pl=
-umbing
-> > > an interrupt for Hyper-V to virtualize the ARM64 arch timer in a gues=
-t VM.
-> > > From their perspective there's also benefit in having a timer abstrac=
-tion
-> > > that's independent of the architecture, and in the Linux guest, the S=
-TIMER
-> > > code is common across x86/x64 and ARM64.  It follows the standard Lin=
-ux
-> > > clockevents model, as it should. The code is already in use in out-of=
--tree
-> > > builds in the Linux VMs included in Windows 10 on ARM64 as part of th=
-e
-> > > so-called "Windows Subsystem for Linux".
-> > >
-> > > So I'm hoping we can get this core support for ARM64 guests on Hyper-=
-V
-> > > into upstream using the existing STIMER support.  At some point, Hype=
-r-V
-> > > will do the virtualization of the ARM64 arch timer, but we don't want=
- to
-> > > have to stay out-of-tree until after that happens.
-> >
-> > My main concern here is making sure that we can rely on architected
-> > properties, and don't have to special-case architected bits for hyperv
-> > (or any other hypervisor), since that inevitably causes longer-term
-> > pain.
-> >
-> > While in abstract I'm not as worried about using the timer
-> > clock_event_device specifically, that same driver provides the
-> > clocksource and the event stream, and I want those to work as usual,
-> > without being tied into the hyperv code. IIUC that will require some
-> > work, since the driver won't register if the GTDT is missing timer
-> > interrupts (or if there is no GTDT).
-> >
-> > I think it really depends on what that looks like.
->=20
-> Mark,
->=20
-> Here are the details:
->=20
-> The existing initialization and registration code in arm_arch_timer.c
-> works in a Hyper-V guest with no changes.  As previously mentioned,
-> the GTDT exists and is correctly populated.  Even though it isn't used,
-> there's a PPI INTID specified for the virtual timer, just so
-> the "arm_sys_timer" clockevent can be initialized and registered.
-> The IRQ shows up in the output of "cat /proc/interrupts" with zero counts
-> for all CPUs since no interrupts are ever generated.  The EL1 virtual
-> timer registers (CNTV_CVAL_EL0, CNTV_TVAL_EL0, and CNTV_CTL_EL0)
-> are accessible in the VM.  The "arm_sys_timer" clockevent is left in
-> a shutdown state with CNTV_CTL_EL0.ENABLE set to zero when the
-> Hyper-V STIMER clockevent is registered with a higher rating.
->=20
-> Event streams are initialized and the __delay() implementation
-> for ARM64 inside the kernel works.  However, on the Ampere
-> eMAG hardware I'm using for testing, the WFE instruction returns
-> more quickly than it should even though the event stream fields in
-> CNTKCTL_EL1 are correct.  I have a query in to the Hyper-V team
-> to see if they are trapping WFE and just returning, vs. perhaps the
-> eMAG processor takes the easy way out and has WFE just return
-> immediately.  I'm not knowledgeable about other uses of timer
-> event streams, so let me know if there are other usage scenarios
-> I should check.
+Hi Boris,
 
-I confirmed that Hyper-V is not trapping the WFE instruction.  And
-on a Marvell TX2 and on an Ampere Altra, the counter event stream
-and WFE provide the expected delay.  Evidently WFE on the eMAG
-doesn't actually delay.  Bottom line:  event streams work as expected
-in a Hyper-V VM.  No changes needed to arm_arch_timer.[ch].
 
-Michael
+On 6/7/2021 9:54 AM, Borislav Petkov wrote:
+> On Wed, Jun 02, 2021 at 09:04:00AM -0500, Brijesh Singh wrote:
+>>  static bool early_setup_sev_es(void)
+> 
+> This function is doing SNP init now too, so it should be called
+> something generic like
+> 
+> 	do_early_sev_setup()
+> 
+> or so.
+> 
+>>  #define GHCB_SEV_ES_GEN_REQ		0
+>>  #define GHCB_SEV_ES_PROT_UNSUPPORTED	1
+>> +#define GHCB_SEV_ES_SNP_UNSUPPORTED	2
+> 
+> GHCB_SNP_UNSUPPORTED
+> 
+>> +static bool __init sev_snp_check_hypervisor_features(void)
+> 
+> check_hv_features()
+> 
 
->=20
-> Finally, the "arch_sys_counter" clocksource gets initialized and
-> setup correctly.  If the Hyper-V clocksource is also initialized,
-> you can flip between the two clocksources at runtime as expected.
-> If the Hyper-V clocksource is not setup, then Linux in the VM runs
-> fine with the "arch_sys_counter" clocksource.
->=20
-> Michael
+Based on your feedback on AP creation patch to not use the accessors, I am inclined to
+remove this helper and have the caller directly check the feature bit, is that okay ?
+
+something like:
+
+if (sev_snp_enabled() && !(hv_features & GHCB_HV_FT_SNP))
+	sev_es_terminate(GHCB_SNP_UNSUPPORTED);
+
+Let me know if you think I should still keep the accessors.
+
+-Brijesh
+
+> is nice and short.
+> 
+>> diff --git a/arch/x86/kernel/sev.c b/arch/x86/kernel/sev.c
+>> index 77a754365ba9..9b70b7332614 100644
+>> --- a/arch/x86/kernel/sev.c
+>> +++ b/arch/x86/kernel/sev.c
+>> @@ -609,6 +609,10 @@ static bool __init sev_es_setup_ghcb(void)
+> 
+> Ditto for this one: setup_ghcb()
+> 
+> Thx.
+> 
