@@ -2,212 +2,326 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	MSGID_FROM_MTA_HEADER,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-5.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,PDS_BAD_THREAD_QP_64,SPF_HELO_NONE,SPF_PASS autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D5594C2B9F4
-	for <linux-efi@archiver.kernel.org>; Fri, 25 Jun 2021 18:14:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 62A1FC49EA6
+	for <linux-efi@archiver.kernel.org>; Mon, 28 Jun 2021 02:21:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AE7CE6162A
-	for <linux-efi@archiver.kernel.org>; Fri, 25 Jun 2021 18:14:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4460A61C2F
+	for <linux-efi@archiver.kernel.org>; Mon, 28 Jun 2021 02:21:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230228AbhFYSQu (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 25 Jun 2021 14:16:50 -0400
-Received: from mail-mw2nam12on2075.outbound.protection.outlook.com ([40.107.244.75]:6240
-        "EHLO NAM12-MW2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S229586AbhFYSQu (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 25 Jun 2021 14:16:50 -0400
+        id S231935AbhF1CYF (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 27 Jun 2021 22:24:05 -0400
+Received: from mail-oln040093003009.outbound.protection.outlook.com ([40.93.3.9]:40338
+        "EHLO outbound.mail.eo.outlook.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S231678AbhF1CYE (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sun, 27 Jun 2021 22:24:04 -0400
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=GShsGsrUVuZmp0btBmADpxJaLMCDqICPfv8VjZYvcRUTFkHBRTYwaKzdTTCch2y/1eRGNw2gdb4eeYvOCYa5TrcxYmpfa0sixS05nB0iwqMiVnQoX4iKOyuIxm8KkgbEmFR6wCWekmfApfB2UYbuiNBPO50tJEjUBfkYPwwGJ7ig0kFCqpeC0G3fs21EBeomrAPbcjB8rr+gzXl/rO7OC8Biha4WHApoXjelf3p35mHp+o2HunpPbBvEauRllsFFNvrTNcaDfYgu8xC0updxkKubVUmpyWF2+p6VyNDgDccoyMyOSBGPrIRbgrjsIwW+mLbq26pRGAxc0aSSvzmshw==
+ b=GiyYzpvQMUFgZtmM/7FJOOEYpkO6zDcQw2ufQJdVwcNyNp4BbeqiuOyFVnIhzuRNUx18r349xc1Wv/32h9YTeIcEAe/niZmsabgM2naoY43181ubT2iZY0Z8l0Zy77YQDpasAxq/6Mss6ZhdbZTnWluLqfKI2j//PjW4qRrT2nxY+RK0+eaoDqPbTdGexQPorAxUewYp1YTGADy/tHtA3DpRDHpMt3+Dj4kqjSmArbuTINfvzcnAqdZYXG6FUU8fNyZlj9ylz/r6nieFbGGt9X+YO01swJe7WmHL8cV80v01GkGibqHdvnO1baFBU4oMXuPkMcOOeCEyA2XX1Abu/g==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=h87/xh0YFqNHZJunHaqvsjR6z/t5Xc+32WkGw33Am8w=;
- b=gwwZ+JcwVM7c/KJc9YgXcIfMOv81/mNvOYuJ7kka/dnJ9ME5l7dvxcqHFajWy8kcMAFj06qu6SFUaABBajfiBhv9Ii8OA8vqD/l7D2HZHR/pnMf0ofh/QsmPSrV8qjwNxJn4Wg/DDjDnROeykes3FtD6tH3r5GPNaL2DXH6ttjEKP8SfyV92f/XBYyDj6BJDpDqqdUms7BxpWHtwflPinJHPCQW+Qe2X433a0ozZXRf7xN5Nzo0mpxvxa0PLF/0X4OkvtsNWzTPBZuRc2iRl6W9vlCeKO91P/Tbo1dlxLQiSDKtQ5AOSNC/lgVQJo/plmJBd8qUgz4KUdYS2q4Pocw==
+ bh=NKj0UgAtA/6i1KiacCxWBSbs0E+bp6hqwehXMz7uJdI=;
+ b=BFbyMniLPxolbdtiq9c1WFVETrLElwM95O2VIWMH1byK3CWM/N0kgjZ0Mm1HzKtcTdM9rqTN8KjOnDCjBn4OM2DdvvyYhPOkT64jV1mK/kz83G7sMIW3ym5ey1Hiuu/ZKnGpqRT1tM7lwtMRB1Nb40E8HmLk2BWUrIqzFbaDkF+P3HuU8e4KzTriVNhzpmLoeVaDKyAUGeimLwJ8YxuaYtxf/8dWBqNnIbtbnHoqHN8eZVlLIfBzWFSCW5Sk5iu2q51Dn5HL5CLE8ECnkyGDNcUi3hpYxt1QICWNiw0Ii8TQgrvqf/2pd8l1Uc+csb2wpSrDlAtOJ9OMDWsPAbm0lg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=amd.com; dmarc=pass action=none header.from=amd.com; dkim=pass
- header.d=amd.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ smtp.mailfrom=microsoft.com; dmarc=pass action=none
+ header.from=microsoft.com; dkim=pass header.d=microsoft.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=h87/xh0YFqNHZJunHaqvsjR6z/t5Xc+32WkGw33Am8w=;
- b=PL4YAQq5lusjcWiybpNJzlKj2spb4Pvuuo8fmu6tVXrY6oEwjG2O5KBmopkQTeL6A5gha//KBJcKLS5aB4KF5rCAjMgEdZ9RoTTSkHfTx7Vppyu2H5Gp7KRYNi1H6lBeHKGozM0lKvhiwHCjMZKXrehUpwr0kBAI6Ba5VvnAnwQ=
-Authentication-Results: alien8.de; dkim=none (message not signed)
- header.d=none;alien8.de; dmarc=none action=none header.from=amd.com;
-Received: from CH2PR12MB4133.namprd12.prod.outlook.com (2603:10b6:610:7a::13)
- by CH2PR12MB4264.namprd12.prod.outlook.com (2603:10b6:610:a4::15) with
+ bh=NKj0UgAtA/6i1KiacCxWBSbs0E+bp6hqwehXMz7uJdI=;
+ b=c9IMKiKGb40nFNFTYlJvYBlPeC40yQXXy0I3UFuStGXfId3xSPn5ZZVMScQ/6sbZmjQ6XqpGzQ3Tu8nk8wtsmjpGJkQxlVC42At7tjYCO4mi7H0e22Jatu+yge9uLQA/qF5sTxURFzazi5OO6lDTKoQnmzCEgQtGFbuVM9uDTDQ=
+Received: from MWHPR21MB1593.namprd21.prod.outlook.com (2603:10b6:301:7c::11)
+ by MW4PR21MB1986.namprd21.prod.outlook.com (2603:10b6:303:7d::13) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4264.19; Fri, 25 Jun
- 2021 18:14:26 +0000
-Received: from CH2PR12MB4133.namprd12.prod.outlook.com
- ([fe80::181:e51d:a4f7:af62]) by CH2PR12MB4133.namprd12.prod.outlook.com
- ([fe80::181:e51d:a4f7:af62%5]) with mapi id 15.20.4264.023; Fri, 25 Jun 2021
- 18:14:26 +0000
-Date:   Fri, 25 Jun 2021 13:14:17 -0500
-From:   Michael Roth <michael.roth@amd.com>
-To:     Borislav Petkov <bp@alien8.de>
-Cc:     Brijesh Singh <brijesh.singh@amd.com>,
-        "Kuppuswamy, Sathyanarayanan" 
-        <sathyanarayanan.kuppuswamy@linux.intel.com>,
-        Dave Hansen <dave.hansen@intel.com>, x86@kernel.org,
-        linux-kernel@vger.kernel.org, kvm@vger.kernel.org,
-        linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org,
-        linux-coco@lists.linux.dev, linux-mm@kvack.org,
-        linux-crypto@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>,
-        Ingo Molnar <mingo@redhat.com>, Joerg Roedel <jroedel@suse.de>,
-        Tom Lendacky <thomas.lendacky@amd.com>,
-        "H. Peter Anvin" <hpa@zytor.com>, Ard Biesheuvel <ardb@kernel.org>,
-        Paolo Bonzini <pbonzini@redhat.com>,
-        Sean Christopherson <seanjc@google.com>,
-        Vitaly Kuznetsov <vkuznets@redhat.com>,
-        Wanpeng Li <wanpengli@tencent.com>,
-        Jim Mattson <jmattson@google.com>,
-        Andy Lutomirski <luto@kernel.org>,
-        Sergio Lopez <slp@redhat.com>, Peter Gonda <pgonda@google.com>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>,
-        David Rientjes <rientjes@google.com>, tony.luck@intel.com,
-        npmccallum@redhat.com
-Subject: Re: [PATCH Part1 RFC v3 20/22] x86/boot: Add Confidential Computing
- address to setup_header
-Message-ID: <20210625181417.kaylo56pz4rlwwqr@amd.com>
-References: <162442264313.98837.16983159316116149849@amd.com>
- <YNMLX6fbB3PQwSpv@zn.tnic>
- <20210624031911.eznpkbgjt4e445xj@amd.com>
- <YNQz7ZxEaSWjcjO2@zn.tnic>
- <20210624123447.zbfkohbtdusey66w@amd.com>
- <YNSAlJnXMjigpqu1@zn.tnic>
- <20210624141111.pzvb6gk5lzfelx26@amd.com>
- <YNXs1XRu31dFiR2Z@zn.tnic>
- <8faad91a-f229-dee3-0e1f-0b613596db17@amd.com>
- <YNYMAkoSoMnfhBnJ@zn.tnic>
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YNYMAkoSoMnfhBnJ@zn.tnic>
-X-Originating-IP: [165.204.77.11]
-X-ClientProxiedBy: SN6PR01CA0031.prod.exchangelabs.com (2603:10b6:805:b6::44)
- To CH2PR12MB4133.namprd12.prod.outlook.com (2603:10b6:610:7a::13)
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4308.5; Mon, 28 Jun
+ 2021 02:21:29 +0000
+Received: from MWHPR21MB1593.namprd21.prod.outlook.com
+ ([fe80::880d:4f8:748:ff07]) by MWHPR21MB1593.namprd21.prod.outlook.com
+ ([fe80::880d:4f8:748:ff07%6]) with mapi id 15.20.4308.006; Mon, 28 Jun 2021
+ 02:21:29 +0000
+From:   Michael Kelley <mikelley@microsoft.com>
+To:     Marc Zyngier <maz@kernel.org>, Mark Rutland <Mark.Rutland@arm.com>
+CC:     "will@kernel.org" <will@kernel.org>,
+        "catalin.marinas@arm.com" <catalin.marinas@arm.com>,
+        "lorenzo.pieralisi@arm.com" <lorenzo.pieralisi@arm.com>,
+        "sudeep.holla@arm.com" <sudeep.holla@arm.com>,
+        "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-hyperv@vger.kernel.org" <linux-hyperv@vger.kernel.org>,
+        "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>,
+        "arnd@arndb.de" <arnd@arndb.de>,
+        "wei.liu@kernel.org" <wei.liu@kernel.org>,
+        "ardb@kernel.org" <ardb@kernel.org>,
+        "daniel.lezcano@linaro.org" <daniel.lezcano@linaro.org>,
+        KY Srinivasan <kys@microsoft.com>
+Subject: RE: [PATCH v10 3/7] arm64: hyperv: Add Hyper-V clocksource/clockevent
+ support
+Thread-Topic: [PATCH v10 3/7] arm64: hyperv: Add Hyper-V
+ clocksource/clockevent support
+Thread-Index: AQHXR1WfRNuOt4THnkSQtAriU3aWFKri7Q2AgAAsnCCABJMQgIAAO7hQgAGXcACAIOKsoIADPsaAgAVVr2CADRNtAIABghcAgAcpprA=
+Date:   Mon, 28 Jun 2021 02:21:28 +0000
+Message-ID: <MWHPR21MB159396AA55E2270FD4BC4EECD7039@MWHPR21MB1593.namprd21.prod.outlook.com>
+References: <1620841067-46606-1-git-send-email-mikelley@microsoft.com>
+        <1620841067-46606-4-git-send-email-mikelley@microsoft.com>
+        <20210514123711.GB30645@C02TD0UTHF1T.local>
+        <MWHPR21MB15932B44EC1E55614B219F5ED7509@MWHPR21MB1593.namprd21.prod.outlook.com>
+        <20210517130815.GC62656@C02TD0UTHF1T.local>
+        <MWHPR21MB15930A4EE785984292B1D72BD72D9@MWHPR21MB1593.namprd21.prod.outlook.com>
+        <20210518170016.GP82842@C02TD0UTHF1T.local>
+        <MWHPR21MB1593800A20B55626ACE6A844D7379@MWHPR21MB1593.namprd21.prod.outlook.com>
+        <20210610164519.GB63335@C02TD0UTHF1T.local>
+        <MWHPR21MB1593095A9B8B61B14D7DF08DD7319@MWHPR21MB1593.namprd21.prod.outlook.com>
+        <20210622095412.GC67232@C02TD0UTHF1T.local>
+ <87pmwdariz.wl-maz@kernel.org>
+In-Reply-To: <87pmwdariz.wl-maz@kernel.org>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+msip_labels: MSIP_Label_f42aa342-8706-4288-bd11-ebb85995028c_ActionId=6abc58bd-18e3-4979-bf8b-30ea663433f0;MSIP_Label_f42aa342-8706-4288-bd11-ebb85995028c_ContentBits=0;MSIP_Label_f42aa342-8706-4288-bd11-ebb85995028c_Enabled=true;MSIP_Label_f42aa342-8706-4288-bd11-ebb85995028c_Method=Standard;MSIP_Label_f42aa342-8706-4288-bd11-ebb85995028c_Name=Internal;MSIP_Label_f42aa342-8706-4288-bd11-ebb85995028c_SetDate=2021-06-27T22:18:56Z;MSIP_Label_f42aa342-8706-4288-bd11-ebb85995028c_SiteId=72f988bf-86f1-41af-91ab-2d7cd011db47;
+authentication-results: kernel.org; dkim=none (message not signed)
+ header.d=none;kernel.org; dmarc=none action=none header.from=microsoft.com;
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: eac38fc1-116e-4791-f5c2-08d939db7023
+x-ms-traffictypediagnostic: MW4PR21MB1986:
+x-ms-exchange-transport-forked: True
+x-ld-processed: 72f988bf-86f1-41af-91ab-2d7cd011db47,ExtAddr
+x-microsoft-antispam-prvs: <MW4PR21MB1986BEAED0F3F37799D89B4FD7039@MW4PR21MB1986.namprd21.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:10000;
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: SUV/oST/w1nu39xbhuy1knqBAbm1WIE1BC6yOh9/X2IUmb6QnVTGraqdGPbayV03gfZHAT64Afl8vG+pwPjRzW+QBiQWoi+V0wEJWaoBpvfhqt8QcyyUAkAkl5EK0SROGBD3CtsvZI6QJOsbnCCFX/SMN7pzN2V6yymXI1pySOA0rgCJ3ZVHG89shQIN7NT+APvpHeyida9dNQwKGfmYn9myOO3hL6tAHkHtJmQ7w2HqC7TWAgD2lq+cuuVE/UmjlC1ahHz0S6Ao27B30GhQjRnT6aAG/EaiLj/NtQQIjRApJokayaViGOgF95TY9C6y20mL0oE7j7ArrjvVnx9Y+U/3DGngkp5OB3iMeadwz0x53dghfVN6HZR14mKL4ZPHjBLFJXtVlj2qWa02a/KVH3aSiAR/2jGnU23N4i8AA+w2cN+SozmIJkuEGkPHbpDpTxEgf0+8p1GhNhCD858CBm39JQRO7xB5N6yEXKbaiDXGwLeBTRvpixUaNLR/E0uxenJpEekvIYP6Lci6FNqU9PVH0+P6U9uAtly/TALcwN0qeu0m6sQ3F67FU2UvBwNJUA9JN0Rtm3OjeBcu23CVLhx8TZsV7z2bB67HyhbUE1KYfkNbq3kWZ++1BabXdWLoG9TpUFdvYFVJHTzqUR2nsom63xSQeY77VsDfzTxZm5667O+T38ABwZu/KNLSyo6H9bQRvnR3p8CXqI6paOhZ5/9KzPNSfki4ZkIFjjVHhpGgFDFbeWZjMTtbClfr9i1rhwQdlB1j6e7cTkR2A10ECg==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MWHPR21MB1593.namprd21.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(6506007)(8676002)(7696005)(186003)(107886003)(55016002)(26005)(83380400001)(82960400001)(8936002)(82950400001)(9686003)(86362001)(5660300002)(64756008)(2906002)(38100700002)(76116006)(7416002)(10290500003)(316002)(478600001)(66556008)(122000001)(966005)(66446008)(54906003)(110136005)(66476007)(66946007)(8990500004)(4326008)(71200400001)(33656002)(52536014);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?KUsssJ6fznyE0qg/uN9AEGWe3igCE/iIH4WNFOfAAdQ5X8ytKdc9aaCOgzl+?=
+ =?us-ascii?Q?VLzQZVwSipKYQGsKSD+xcoHET576p29IN3Bk2LE8CsJrln0VH5ZTHMAQLMY6?=
+ =?us-ascii?Q?VdrlWBTIg6O0AUhw3FTATgdbg2g+ampc2WTQ99yo1QVZyG0FzPFz7KmlGs6w?=
+ =?us-ascii?Q?AX0cnfMZnl1kYWVQFHb3M4ThCt+lKiNNZQPPNNP1NZ3jQy2hm2CwCS6VMGut?=
+ =?us-ascii?Q?pjNS4rn7jL4BFT/uee79CTjatwWwWmrVOyMIKM+oi2cvA4nzpPxOUDCFM9FP?=
+ =?us-ascii?Q?TCDrhdnZ4YX0Ea5nchGBSEadSNLPjKvaC7yQqfK8Y6LEHOFQX6gdlaPGun6E?=
+ =?us-ascii?Q?U+9KnUUZyWWjdjbrJPxLQdtRdcRbCmtvLNIkHH97THMRCi3Jon6JKkmBBhPD?=
+ =?us-ascii?Q?KoykT9DOxFq2ONEIsxFV1L3HNPF8H/PrlodVCl5RY+9QFLvo35XaUN1sdvYv?=
+ =?us-ascii?Q?jBcYZUgw0mk4hBJ9zSOpqEIz7zqE6+GPz1Zb3EoGE6yyhJ4sizx3XPcCaVhj?=
+ =?us-ascii?Q?Hx8ddrhOxtAYEDeuS6IStMumMe5A+k2295kjzreiitEuyd0GYz0W6G/L2Pte?=
+ =?us-ascii?Q?KHZj8p+orKuzoTlaoNRaFOi9MnETznWeDYhwwwQVrtQw/VSkBxhkwI/kXz+T?=
+ =?us-ascii?Q?/DZiAy2YFf53JPa4DiTsEIQfE7+ukz5fsqHP8pcXjG0qH0YE59dxvzu0l30R?=
+ =?us-ascii?Q?9bqD02thKUiU5iyiLosf/iQmnYRxIK8fmWSREtIf9YpH4lpYNfswgDMLuo+j?=
+ =?us-ascii?Q?meAXT6EO1cJ0aRLQB4hQrvjFdYCtL2iKAZ60xJuv9oJnDZ4KuGdlFKtMgVVG?=
+ =?us-ascii?Q?GZOCK+fvm1ZLWmgtCVObLWKARH19w0KIIT1moK6Xksmo01p+Wma25dYyWbFS?=
+ =?us-ascii?Q?OuGJgqo4mug+cdajwypMejrkk3NMgwtjXzsMwC1D9MhL97vT/JggfsHYU72m?=
+ =?us-ascii?Q?kCr/ZCtBADAYPuChMGi0Kmp/DiR8AwERvkWNK+p3UhwbE1CizQX1CYXmcmgM?=
+ =?us-ascii?Q?9YGLSWtf/0fNNsCYyL9mZVz9sTOnDq+ME1N7Pm9tcXSFq4wPGuX0DPkRMxLk?=
+ =?us-ascii?Q?Wj9eqGs1pNNdzAG9V7yL/VvJH1FTVw/bhZtaNtKGkMSx8AK3nfXq46XcknH/?=
+ =?us-ascii?Q?02TBnJuLhn+78lUCYxngsYMA+zOq2kZaiq8KYpJGoFQ1vMjUH2y2BNv7xbQD?=
+ =?us-ascii?Q?b3VlcQLIQjTXJ65ERjXKcXueLPVcjKGtr/mCHTYnDMo072iYGuj4TVuQwOyD?=
+ =?us-ascii?Q?r2KOH0hRAPOgRHDdkW+Ti538bjKukRzddnmiKZent1M+siA4lA/N+pPbWj1x?=
+ =?us-ascii?Q?Ej5rzxQHwREG69t3dWoIPjkj?=
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from localhost (165.204.77.11) by SN6PR01CA0031.prod.exchangelabs.com (2603:10b6:805:b6::44) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4264.19 via Frontend Transport; Fri, 25 Jun 2021 18:14:26 +0000
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 8c188246-55d0-43c5-5a67-08d938051112
-X-MS-TrafficTypeDiagnostic: CH2PR12MB4264:
-X-MS-Exchange-Transport-Forked: True
-X-Microsoft-Antispam-PRVS: <CH2PR12MB4264AE5E5A248B0C9C707DD595069@CH2PR12MB4264.namprd12.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:9508;
-X-MS-Exchange-SenderADCheck: 1
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: 0l08VZzPy8EUcnUi26AInkG9hUX1oF8yNCC4I5XfCLo/VFm/WdLDBVReTgkolJQT9CXXQxCEmVLLcnaJGgecwKRb7Qh+M3ST3WGYx5E5AEwU9csDaXP+5IA21H0MpcTrQy1oMUy35jzwgWAA+S6FORKkTCuCf9p9Y9wSGSCeZz3dBg5bP690dxCwudQTYVz/YuHflgFy3gM+vhCVlSCwerwFyn536BWtLx/n1cmSLVcrAKouDEAaInqXZoqvjS5WQGS25jrirppZzaypoJZuwyrEtP/GFj1gR3/ixf5CrWLAMJrv/vCt2XPdQU6G+KEuwtruSkxAtzJlfGrbPLpPhYhOwajKJdUJbNF0NuVG+golJV8vgfZku3D+hDOJgC8mCPsOz1H+ruXIydAJp44av74c46WEcbzjCCyhHY0uhwJdi085q3ELgkbGc1CymaN3sKB7yqEX5AO/lSZA7Huwo97KvPeUrvs2yIp1aAMLb6EBoPIzzCQ6+sRHX4QhaGAP2xjUVSh3DEYUPT//w4OWPbAVgYMo+rG/aa0fe6TvxZPD8pFrycMh6XrUv1llvnhEUg5HG8K7tMXoMjVA9hhYquj2vTHS5sKwKvx2w2ZlhyLdaThKySxbh5WYFcZDwkP+O//00jjNjatWDVRwd8t/YuRVFrZ3dpPmCmKWUpXCeb6b0E8Qqfy1Izj14i3UJm7wTdF6KDdCrTfUGMcSE7SWtHzrcKflOE/MKn+TqWEtSSYulhm4JJ36rTSYGHEND3wjpGUYCdDrJrnE+Vgx952L5w==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CH2PR12MB4133.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(136003)(39860400002)(366004)(396003)(346002)(376002)(66556008)(6496006)(66476007)(44832011)(316002)(54906003)(186003)(26005)(16526019)(2616005)(956004)(52116002)(1076003)(66946007)(86362001)(4326008)(6666004)(36756003)(7416002)(966005)(478600001)(45080400002)(2906002)(8676002)(6916009)(8936002)(38350700002)(38100700002)(83380400001)(5660300002)(6486002);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?3UB0A6SHxUrLBDdjzwZaDcO3Hz7DGUdWnGRniLylMWw/KgsPAuGWIp85iKGV?=
- =?us-ascii?Q?wBwm0Qt9eeC/VKHtTf7HlvrC9guiTTuLia7xkDGwRWOraewP9lu+4yqvfh1X?=
- =?us-ascii?Q?F0fmUVldjwA3+X567rJjmvmzF8Qbewtry7DbTZXCwDQgAGLVO2mXfqTYRA0b?=
- =?us-ascii?Q?FJpkgqUS8iwrSd04t/e6s69WN1d+MF7QDUb2UbZ7zsSfyTOBsEunoVNOdN6r?=
- =?us-ascii?Q?1jFKrHGMsyhn5TIzctdv5siQCUhoABK1eJc271LD/GZxgK5dYygV10VvG1s1?=
- =?us-ascii?Q?TgUzx37JiX8gE0LaaeyBBf/4mpkbCnaW9j+TI/Zz04TGsE9tI5qsHoles9S/?=
- =?us-ascii?Q?satW2yUwa91VesS1g2vfHrFGHsWEtBRnTbGClOEqCAS1jMKrU6AY47BGH2Z9?=
- =?us-ascii?Q?AZ+jisUubCwaMuhu+yIeopBEzTPNwfu22NYSeDtw+rhsmpo2mkJU5ji+fEBz?=
- =?us-ascii?Q?/tUBrHiNbq3cYs4d5lmEAYDmbPexITWPsnbwmVMi/wgocVqgor5V9j5yVFxr?=
- =?us-ascii?Q?yCVxtI98B13xi0Xnz4vQPsQeOdA4ocn5k7bIhE93sS8Og9QmM28m3Ppma/uP?=
- =?us-ascii?Q?6n8UAP2bZYxeLbHIgvvFmKxA2Otr3ifu+OR2cB764WwiLaamcQCVaWyVXyv3?=
- =?us-ascii?Q?jxHqBaCwlk991rTzmU8aWVZ2h0v6Cg8c6ShhSCTXZ/L2lU2KOfIkU5lQ/XAg?=
- =?us-ascii?Q?NRQvgZD+iqorR3cthxmrZ/M/HvVj5b2fI83QLXG2Hy3oMh79VLEJfhtHueIR?=
- =?us-ascii?Q?T+Xl4ctNKnxwm+E15JjxjsPjnBJpnibndwi4s+VKCXa6BgJjtkXoBCpovFwI?=
- =?us-ascii?Q?qb+2Wf5Jx6V9HHtSZ3bNJN68p9u9zCTjYpMZ3vlWyP8LMRN7MFCbzy7QCiJ6?=
- =?us-ascii?Q?K1pCiHWTN5S8vfKJHs6pAZejThCghF8HmJrYWmGhVz5pmLutCaUqvljWD0zQ?=
- =?us-ascii?Q?1MrwilSFYloel4sCXUYPc+eqPUgo4Ic7++doy+lfNIwBVHck97QebeFtma3Z?=
- =?us-ascii?Q?A1DIy8GmBGenqcQO2lsk76ixrDlKZH+myK3LeXYVixhMSCOB0U2sZOpAGY6A?=
- =?us-ascii?Q?HIOQk4dxPZOhGRhBrp9exv+y2rF7fC/hPvd673dOGNGySvATfO5oZ3C4dDLr?=
- =?us-ascii?Q?AE0hCKapUfWNeUbQxKO3LJwoNWJMjDPkAyt3AIbBlni/Siwvbv4mxQU7os3U?=
- =?us-ascii?Q?XjF2ve9gQDUTL9HFSiTqZGFAMoFLK15YXn0pKJ7ZSoCjoyGXt/15khRtR4O+?=
- =?us-ascii?Q?ifWDb2I0HIp9K/syUIKuhXMwPiINYJsgU8EA5rKOZWjyCMFnYw1yXa9xXwR/?=
- =?us-ascii?Q?FJlZ/7YpkWn6INqpXfAlJOGp?=
-X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 8c188246-55d0-43c5-5a67-08d938051112
-X-MS-Exchange-CrossTenant-AuthSource: CH2PR12MB4133.namprd12.prod.outlook.com
+X-OriginatorOrg: microsoft.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 25 Jun 2021 18:14:26.6105
+X-MS-Exchange-CrossTenant-AuthSource: MWHPR21MB1593.namprd21.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: eac38fc1-116e-4791-f5c2-08d939db7023
+X-MS-Exchange-CrossTenant-originalarrivaltime: 28 Jun 2021 02:21:29.0392
  (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 71UpN9Egw+hiwI8eJvjbDEZ3Mc95xFKofgTmF5owssHq76HvdGCSZ2HK+CxsQLbkStj9iDzgKO8cjLMawSDe/A==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH2PR12MB4264
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 72f988bf-86f1-41af-91ab-2d7cd011db47
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: Aa/HdXWxFq+JThPQ1HzH7UM4KYHFqDlaQMW9AObUUefmWKNACbLWKaE8Em3A6WWEhGJC3VVT6HgAvHS1WgCbz8bV4T8ekEcmFSoVxt8EFrg=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MW4PR21MB1986
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Fri, Jun 25, 2021 at 07:01:54PM +0200, Borislav Petkov wrote:
-> On Fri, Jun 25, 2021 at 10:24:01AM -0500, Brijesh Singh wrote:
-> > In the case of EFI, the CC blob structure is dynamically allocated
-> > and passed through the EFI configuration table. The grub will not
-> > know what value to pass in the cmdline unless we improve it to read
-> > the EFI configuration table and rebuild the cmdline.
-> 
-> Or simply parse the EFI table.
-> 
-> To repeat my question: why do you need the CC blob in the boot kernel?
+From: Marc Zyngier <maz@kernel.org> Sent: Wednesday, June 23, 2021 1:56 AM
+>=20
+> On Tue, 22 Jun 2021 10:54:12 +0100,
+> Mark Rutland <mark.rutland@arm.com> wrote:
+> >
+> > Hi Michael,
+> >
+> > Thanks for all this; comments inline below. I've added Marc Zyngier, wh=
+o
+> > co-maintains the architected timer code.
+> >
+> > On Mon, Jun 14, 2021 at 02:42:23AM +0000, Michael Kelley wrote:
+> > > From: Mark Rutland <mark.rutland@arm.com> Sent: Thursday, June 10, 20=
+21 9:45 AM
+> > > > On Tue, Jun 08, 2021 at 03:36:06PM +0000, Michael Kelley wrote:
+> > > > > I've had a couple rounds of discussions with the Hyper-V team.   =
+For
+> > > > > the clocksource we've agreed to table the live migration discussi=
+on, and
+> > > > > I'll resubmit the code so that arm_arch_timer.c provides the
+> > > > > standard arch_sys_counter clocksource.  As noted previously, this=
+ just
+> > > > > works for a Hyper-V guest.  The live migration discussion may com=
+e
+> > > > > back later after a deeper investigation by Hyper-V.
+> > > >
+> > > > Great; thanks for this!
+> > > >
+> > > > > For clockevents, there's not a near term fix.  It's more than jus=
+t plumbing
+> > > > > an interrupt for Hyper-V to virtualize the ARM64 arch timer in a =
+guest VM.
+> > > > > From their perspective there's also benefit in having a timer abs=
+traction
+> > > > > that's independent of the architecture, and in the Linux guest, t=
+he STIMER
+> > > > > code is common across x86/x64 and ARM64.  It follows the standard=
+ Linux
+> > > > > clockevents model, as it should. The code is already in use in ou=
+t-of-tree
+> > > > > builds in the Linux VMs included in Windows 10 on ARM64 as part o=
+f the
+> > > > > so-called "Windows Subsystem for Linux".
+> > > > >
+> > > > > So I'm hoping we can get this core support for ARM64 guests on Hy=
+per-V
+> > > > > into upstream using the existing STIMER support.  At some point, =
+Hyper-V
+> > > > > will do the virtualization of the ARM64 arch timer, but we don't =
+want to
+> > > > > have to stay out-of-tree until after that happens.
+> > > >
+> > > > My main concern here is making sure that we can rely on architected
+> > > > properties, and don't have to special-case architected bits for hyp=
+erv
+> > > > (or any other hypervisor), since that inevitably causes longer-term
+> > > > pain.
+> > > >
+> > > > While in abstract I'm not as worried about using the timer
+> > > > clock_event_device specifically, that same driver provides the
+> > > > clocksource and the event stream, and I want those to work as usual=
+,
+> > > > without being tied into the hyperv code. IIUC that will require som=
+e
+> > > > work, since the driver won't register if the GTDT is missing timer
+> > > > interrupts (or if there is no GTDT).
+> > > >
+> > > > I think it really depends on what that looks like.
+> > >
+> > > Mark,
+> > >
+> > > Here are the details:
+> > >
+> > > The existing initialization and registration code in arm_arch_timer.c
+> > > works in a Hyper-V guest with no changes.  As previously mentioned,
+> > > the GTDT exists and is correctly populated.  Even though it isn't use=
+d,
+> > > there's a PPI INTID specified for the virtual timer, just so
+> > > the "arm_sys_timer" clockevent can be initialized and registered.
+> > > The IRQ shows up in the output of "cat /proc/interrupts" with zero co=
+unts
+> > > for all CPUs since no interrupts are ever generated. The EL1 virtual
+> > > timer registers (CNTV_CVAL_EL0, CNTV_TVAL_EL0, and CNTV_CTL_EL0)
+> > > are accessible in the VM.  The "arm_sys_timer" clockevent is left in
+> > > a shutdown state with CNTV_CTL_EL0.ENABLE set to zero when the
+> > > Hyper-V STIMER clockevent is registered with a higher rating.
+> >
+> > This concerns me, since we're lying to the kernel, and assuming that it
+> > will never try to use this timer. I appreciate that evidently we don't
+> > happen to rely on that today if you register a higher priority timer,
+> > but that does open us up to future fragility (e.g. if we added sanity
+> > checks when registering timers), and IIRC there are ways for userspace
+> > to change the clockevent device today.
+>=20
+> Indeed. Userspace can perfectly unbind the clockevent using
+> /sys/devices/system/clockevents/clockevent*/unbind_device, and the
+> kernel will be happy to switch to the next per-cpu timer, which
+> happens to be the arch timer. Oh wait...
+>=20
+> >
+> > > Event streams are initialized and the __delay() implementation
+> > > for ARM64 inside the kernel works.  However, on the Ampere
+> > > eMAG hardware I'm using for testing, the WFE instruction returns
+> > > more quickly than it should even though the event stream fields in
+> > > CNTKCTL_EL1 are correct.  I have a query in to the Hyper-V team
+> > > to see if they are trapping WFE and just returning, vs. perhaps the
+> > > eMAG processor takes the easy way out and has WFE just return
+> > > immediately.  I'm not knowledgeable about other uses of timer
+> > > event streams, so let me know if there are other usage scenarios
+> > > I should check.
+> >
+> > I saw your reply confirming that this is gnerally working as expected
+> > (and that Hyper-V is not trapping WFE) so this sounds fine to me.
+> >
+> > > Finally, the "arch_sys_counter" clocksource gets initialized and
+> > > setup correctly.  If the Hyper-V clocksource is also initialized,
+> > > you can flip between the two clocksources at runtime as expected.
+> > > If the Hyper-V clocksource is not setup, then Linux in the VM runs
+> > > fine with the "arch_sys_counter" clocksource.
+> >
+> > Great!
+> >
+> > As above, my remaining concern here is fragility around the
+> > clockevent_device; I'm not keen that we're lying (in the GTDT) that
+> > interrupts are wired up when they not functional, and while you can get
+> > away with that today, that relies on kernel implementation details that
+> > could change.
+> >
+> > Ideally, Hyper-V would provide the architectural timer (as it's already
+> > claiming to in the GTDT), things would "just work", and the Hyper-V
+> > timer would be an optimization rather than a functional necessity.
+> >
+> > You mentioned above that Hyper-V will virtualize the timer "at some
+> > point" -- is that already planned, and when is that likely to be?
+> >
+> > Marc, do you have any thoughts on this?
+>=20
+> Overall, lying to the kernel is a bad idea. Only implementing half of
+> the architecture is another bad idea. I doubt the combination of two
+> bad ideas produces a good one.
+>=20
+> If Hyper-V guests need to use another timer (for migration purposes?),
+> that's fine. But we rely on both the base architecture to be
+> completely implemented *and* on advertised features to be functional.
+> I think this has been our position since the first Hyper-V patches
+> were posted... 3 years ago?
+>=20
+> What is the hold up for reliably virtualising the arch timer,
+> including interrupt delivery?
 
-We basically need to be able to access the CPUID page in any place where we
-might need to emulate a cpuid instruction, which both the boot kernel and
-proper kernel do very early on for things like probing paging support and
-checking for SEV/SME features.
+Marc (and Mark) --
 
-> 
-> Then, how does it work then in the !EFI case?
+In our early interactions about the Hyper-V clocks and timers, the code
+was a bit spread out, and you suggested moving all the clocksource
+and clockevent stuff to a driver under drivers/clocksource.  See
+https://lore.kernel.org/lkml/e0374a07-809c-cabd-2eb6-e6b5ad84742e@arm.com/.
+That was a good change independent of any ARM64 considerations,
+but I read (or perhaps overread) your comments to say that it was OK
+to use these Hyper-V para-virtualized clocks/timers instead of the ARM64
+architectural ones in a Hyper-V VM.  They work and it's what the Hyper-V
+guys wanted to do anyway, so having Hyper-V offer the ARM64 arch
+counter and timer in a VM hasn't been a priority.  They had other stuff tha=
+t
+didn't work at all on ARM64, so that's where their attention went.
 
-Currently, based on your v3 feedback, I have the following order of
-precedence for getting at the cc blob to get the cpuid page:
+I agree that it would be better to have the ARM64 arch counter/timer
+fully implemented in a Hyper-V VM.  But we're wanting to find a practical
+way to move forward, and in doing so confine any rough edges to Hyper-V
+VMs and the Hyper-V specific code in the kernel tree. We're maintaining
+and shipping the code out-of-tree based on Hyper-V ARM64 current behavior
+and would like to get this core enablement code upstream. Sure, unbinding
+the Hyper-V clockevent doesn't work, but that's not a problem in any use
+cases we see from customers.
 
-For boot/compressed kernel:
+All that said, our discussions with the Hyper-V team are continuing.  We're
+still in the process of seeing what's practical to get and when.
 
-  1) Search for CC blob in the following order/precedence:
-     - via linux boot protocol / setup_data entry
-     - via EFI configuration table
-  2) If found, initialize boot_params->cc_blob_address to point to the
-     blob so that uncompressed kernel can easily access it during very
-     early boot without the need to re-parse EFI config table
+Michael
 
-For uncompressed/proper kernel:
-
-  1) Search for CC blob in the following order/precedence:
-     - via linux boot protocol / setup_data entry
-     - via boot_params->cc_blob_address
-
-So non-EFI case would rely purely on the setup_data entry for both (though
-we could still use boot_params->cc_blob_address to avoid the need to scan
-setup_data list in proper kernel as well, but scanning it early on doesn't
-have the same issues as with EFI config table so it's not really
-necessary there).
-
-I opted to give setup_data precedence over EFI, since if a bootloader goes
-the extra mile of packaging up a setup_data argument instead of just leaving
-it to firmware/EFI config table, it might be out of some extra need.  For
-example, if we do have a shared definition for both SEV and TDX, maybe the
-bootloader needs to synthesize multiple EFI table entries, and a unified
-setup_data will be easier for the kernel to consume than replicating that same
-work, and maybe over time the fallback can be deprecated. And containers will
-more than likely prefer setup_data approach, which might drive future changes
-that aren't in lockstep with EFI definitions as well.
-
-It doesn't matter much currently though since setup_data is basically just
-pointing to the CC blob allocated by EFI.
-
-> 
-> The script glue that starts the lightweight container goes and
-> "prepares" that blob and passes it to guest kernel? In which case
-> setup_data should do the job, methinks.
-
-Brijesh can correct me if I'm wrong, but I believe that's the intent, and the
-setup_data approach definitely seems workable for that aspect.
-
-> 
-> -- 
-> Regards/Gruss,
->     Boris.
-> 
-> https://nam11.safelinks.protection.outlook.com/?url=https%3A%2F%2Fpeople.kernel.org%2Ftglx%2Fnotes-about-netiquette&amp;data=04%7C01%7CMichael.Roth%40amd.com%7Cf927ef94d7af4819892708d937faf24b%7C3dd8961fe4884e608e11a82d994e183d%7C0%7C0%7C637602373266379986%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C1000&amp;sdata=t5iRKv6RcaPazLlON1oGyyEZdxX%2FAxZz8cjJwrz7UqQ%3D&amp;reserved=0
+>=20
+> Thanks,
+>=20
+> 	M.
+>=20
+> --
+> Without deviation from the norm, progress is not possible.
