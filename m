@@ -2,196 +2,106 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A0645C11F66
-	for <linux-efi@archiver.kernel.org>; Tue, 29 Jun 2021 07:24:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A8DAFC11F66
+	for <linux-efi@archiver.kernel.org>; Tue, 29 Jun 2021 13:40:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7453A61DC7
-	for <linux-efi@archiver.kernel.org>; Tue, 29 Jun 2021 07:24:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8674C61D8A
+	for <linux-efi@archiver.kernel.org>; Tue, 29 Jun 2021 13:40:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232227AbhF2H0u (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 29 Jun 2021 03:26:50 -0400
-Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:18812 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S232182AbhF2H0u (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 29 Jun 2021 03:26:50 -0400
-Received: from pps.filterd (m0098393.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 15T73gfB055349;
-        Tue, 29 Jun 2021 03:24:02 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=subject : to : cc :
- references : from : message-id : date : mime-version : in-reply-to :
- content-type : content-transfer-encoding; s=pp1;
- bh=1vA65LUOxdzS+qRVdjMOwhh+4VfRa8ghdpzPy5WUhBs=;
- b=YTQQlzQZMmzN5XdeYiMdu3IYJBRdgRYQU1awl0Y8sl2josWMlHV0jvltKa2l3pIAh5/1
- V1OttJS1d/d4pH3AWTDZY3cyXoL5nW4jMmwLfn3j6mhlHK6zJwArZAPu+3M8gYjddhf4
- VVAMDZIjrZUeC86CvrVa46jvG0wEEaiiUkt2oUVG0rw05GX3LVRi8aUxdcLMmU+oxnCH
- rNNOsa+A4FPuJoKWMPeQ4hY93PSbCslV6UB0t6mjhqIJTbwKWci5nXoP7mSyg0UCd0Xe
- 4egSjSFamwuel87htDEvw0Q3tjT4+92fTuv58cUDjYrF2hs5qf5Hwo1kpVaGD3eIrnzl 4g== 
-Received: from pps.reinject (localhost [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 39fwa5jkw0-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 29 Jun 2021 03:24:02 -0400
-Received: from m0098393.ppops.net (m0098393.ppops.net [127.0.0.1])
-        by pps.reinject (8.16.0.43/8.16.0.43) with SMTP id 15T742Yn056895;
-        Tue, 29 Jun 2021 03:24:01 -0400
-Received: from ppma05fra.de.ibm.com (6c.4a.5195.ip4.static.sl-reverse.com [149.81.74.108])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 39fwa5jkuw-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 29 Jun 2021 03:24:01 -0400
-Received: from pps.filterd (ppma05fra.de.ibm.com [127.0.0.1])
-        by ppma05fra.de.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 15T7NxXJ014280;
-        Tue, 29 Jun 2021 07:23:59 GMT
-Received: from b06avi18878370.portsmouth.uk.ibm.com (b06avi18878370.portsmouth.uk.ibm.com [9.149.26.194])
-        by ppma05fra.de.ibm.com with ESMTP id 39ft8er1jx-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 29 Jun 2021 07:23:58 +0000
-Received: from b06wcsmtp001.portsmouth.uk.ibm.com (b06wcsmtp001.portsmouth.uk.ibm.com [9.149.105.160])
-        by b06avi18878370.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 15T7MKnE21692804
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Tue, 29 Jun 2021 07:22:20 GMT
-Received: from b06wcsmtp001.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id A2B5DA4054;
-        Tue, 29 Jun 2021 07:23:55 +0000 (GMT)
-Received: from b06wcsmtp001.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id AF727A405B;
-        Tue, 29 Jun 2021 07:23:50 +0000 (GMT)
-Received: from [9.160.49.135] (unknown [9.160.49.135])
-        by b06wcsmtp001.portsmouth.uk.ibm.com (Postfix) with ESMTP;
-        Tue, 29 Jun 2021 07:23:50 +0000 (GMT)
-Subject: Re: [RFC PATCH v2 3/3] virt: Add sev_secret module to expose
- confidential computing secrets
-To:     Borislav Petkov <bp@suse.de>
-Cc:     linux-efi@vger.kernel.org, Laszlo Ersek <lersek@redhat.com>,
-        Ashish Kalra <ashish.kalra@amd.com>,
-        Brijesh Singh <brijesh.singh@amd.com>,
-        Tom Lendacky <thomas.lendacky@amd.com>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        James Morris <jmorris@namei.org>,
-        "Serge E. Hallyn" <serge@hallyn.com>,
-        Andi Kleen <ak@linux.intel.com>,
-        "Dr. David Alan Gilbert" <dgilbert@redhat.com>,
-        James Bottomley <jejb@linux.ibm.com>,
-        Tobin Feldman-Fitzthum <tobin@linux.ibm.com>,
-        Jim Cadden <jcadden@ibm.com>, linux-coco@lists.linux.dev,
-        linux-security-module@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Dov Murik <dovmurik@linux.ibm.com>
-References: <20210628183431.953934-1-dovmurik@linux.ibm.com>
- <20210628183431.953934-4-dovmurik@linux.ibm.com> <YNojYBIwk0xCHQ0v@zn.tnic>
-From:   Dov Murik <dovmurik@linux.ibm.com>
-Message-ID: <6e35f6db-9c5b-3c75-a66b-de1392295f6a@linux.ibm.com>
-Date:   Tue, 29 Jun 2021 10:23:49 +0300
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
- Thunderbird/78.11.0
+        id S234038AbhF2NnL (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 29 Jun 2021 09:43:11 -0400
+Received: from mout.gmx.net ([212.227.17.20]:60227 "EHLO mout.gmx.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S233957AbhF2NnL (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Tue, 29 Jun 2021 09:43:11 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
+        s=badeba3b8450; t=1624974026;
+        bh=p5AhWvJObj5E48c5fHGcL6jXDuBVZdpgQb8yMlXS5lQ=;
+        h=X-UI-Sender-Class:From:To:Cc:Subject:Date;
+        b=kbNAu9qrfhjH8KLiI0jIC/qkXlvAf5WyXLSyNdHAHYUDGWZB2UDKqDUZHp4kCXDwE
+         7GreXgsYkwrIovrYN8d6/PUWSVJ3HlwnQOZhRTtrP07B//BdrpL6FPD5hKZknLbSeh
+         KdKcMrGbq5DZrA7ghlvFfDFahf0FTEtGdOlIXPhY=
+X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
+Received: from LT02.fritz.box ([88.152.144.157]) by mail.gmx.net (mrgmx104
+ [212.227.17.174]) with ESMTPSA (Nemesis) id 1MIMbU-1m3iAQ26PU-00EOFS; Tue, 29
+ Jun 2021 15:40:26 +0200
+From:   Heinrich Schuchardt <xypron.glpk@gmx.de>
+To:     Ard Biesheuvel <ardb@kernel.org>
+Cc:     Andreas Schwab <schwab@linux-m68k.org>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Atish Patra <atish.patra@wdc.com>, linux-efi@vger.kernel.org,
+        linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org,
+        Heinrich Schuchardt <xypron.glpk@gmx.de>
+Subject: [PATCH 1/1] RISC-V: load initrd wherever it fits into memory
+Date:   Tue, 29 Jun 2021 15:40:18 +0200
+Message-Id: <20210629134018.62859-1-xypron.glpk@gmx.de>
+X-Mailer: git-send-email 2.30.2
 MIME-Version: 1.0
-In-Reply-To: <YNojYBIwk0xCHQ0v@zn.tnic>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: JUDPkLjGeAeHzYs28BbUkloBVAObIJns
-X-Proofpoint-ORIG-GUID: 5-vxk4qAy8PYa_wxU5hKn0WiPMHHmLSy
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.391,18.0.790
- definitions=2021-06-29_02:2021-06-25,2021-06-29 signatures=0
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501 mlxscore=0
- lowpriorityscore=0 phishscore=0 malwarescore=0 adultscore=0
- mlxlogscore=999 impostorscore=0 clxscore=1015 spamscore=0 bulkscore=0
- suspectscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2104190000 definitions=main-2106290050
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:EgBc8Ey65V6us9wivMljuEpQjELTw45ZYekN3WeWP7EoTZQqdi9
+ lSTJfNjLwwn39LG5t+wlOV95sd/H5CVCUd2fcTQeINYy7VKpqnR5PvKUBw3tFj8vXTlLIRA
+ xdg/VFCpoGQmlBASv2EnqDMC7oyUTAD6jzc3KfeuAsAwck59dBCiQSEcBkvVgxPraBjZQWy
+ QzaGFch8Z/36PVcA2KcMQ==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:4vb5uaMYpIE=:5sDfrtR1QE2vNvA9ao0JqE
+ QCuwt/pPqkBuNXZG6n+V0YepLxjcDmHWEkz0B/7tbDMrZGb/RnsgaYGZzPLYOEl7j+euc12aY
+ XhImlGTnVQKvO0n0d/aR83TCkr5ie+etSl2BFe1F+ten38vMmkK6dH3m2/jyZCGLM1GaGHxhG
+ /NrnWeNUlldqlRm1CjK8bTxj2fgFd2qf9zo2PXx9Ha41vtJGyMGa8KapunitBeV1AmA1QcVSU
+ XmM+G3zQLGAOYSoOynunILlEH3yhiJ8LWGjSqk7hevu+vMd+z9XZKNnCD0iNhA2ku0L1frBdG
+ RSGLwQXnMzokwwZW8PMySbic0VYy5yqGo7Fk901OokEfTHoz2GkqbSDnHid9VABbWDXBRV65+
+ aT+PUuAP/iD0QHGflYWOokZXuzh3+twCKwHMMdU5GcKw1JyEv3/7zsg2WnLUSDM2xgiGwMscW
+ Hg41CcaZbAIQMbjHQ7Tecy3Ko28hQKQ3rjid0kMd3mzIh97wARBfXgm8PJukYxEPbbe4CbSGA
+ Y/2ecd0XEp2pUcsgDuaMut2NGQYgJGkddbyucAuEKt7c0n+ekRyio0GVwoQuTJwAqRoLJUZRD
+ EeH8s20BCAd56PLxDnGjaItR8G+qr72D/GxG6h3Ga4G9ZP4cYuQpEpzz4zbD9aDOc+pHJheAT
+ uFjQGNOnG4ipeXTV0ObUibh+cGmUlVZeOnqey1oaeIcvi18+a0aziBynTRKemC1rbt7pQgxeE
+ CMTHgTVfIQIzSm0zff2ftyvvj68P73k3HiRUF7yMbrUwmOsfLjEd5nTdGLV+h3nOS3SSO1Zxj
+ hHu9PBop3QFRgmjYDwwoteERFqYfTHT619wxtfXK07JYySnYm/xcneyAcuNj8XFsKXJ94+elh
+ +/jbr4Y73K+6iBruxN4XKYdmXthtKJKdKp/wwNAppODlqcCwQsAq1vvAVJnZCT75XYdvuC5AZ
+ CUIzh8gPAHE3PyQskMkvh1Wk73ICGpPKbQ0DXKUb16f1js3XVvkTpD3LGfp8uiNcYAKk8LVT/
+ YllnIUhcVaO8EqtkpePpN58I/qAaX4j2Z4Cz/h1cz786BolNO+kNT86hIDjiIm9tH69AOOEBw
+ t4xkpPWoQ4ZF1DyrfS2jXuD5ZZu3aA08NeJ
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
+Requiring that initrd is loaded below RAM start + 256 MiB led to failure
+to boot SUSE Linux with GRUB on QEMU, cf.
+https://lists.gnu.org/archive/html/grub-devel/2021-06/msg00037.html
 
+Remove the constraint.
 
-On 28/06/2021 22:30, Borislav Petkov wrote:
-> On Mon, Jun 28, 2021 at 06:34:31PM +0000, Dov Murik wrote:
->> The new sev_secret module exposes the confidential computing secret area
->> via securityfs interface.
->>
->> When the module is loaded (and securityfs is mounted, typically under
->> /sys/kernel/security), an "sev_secret" directory is created in
->> securityfs.  In it, a file is created for each secret entry.  The name
->> of each such file is the GUID of the secret entry, and its content is
->> the secret data.
->>
->> This allows applications running in a confidential computing setting to
->> read secrets provided by the guest owner via a secure secret injection
->> mechanism (such as AMD SEV's LAUNCH_SECRET command).
->>
->> Removing (unlinking) files in the "sev_secret" directory will zero out
->> the secret in memory, and remove the filesystem entry.  If the module
->> is removed and loaded again, that secret will not appear in the
->> filesystem.
->>
->> Signed-off-by: Dov Murik <dovmurik@linux.ibm.com>
->> ---
->>  drivers/virt/Kconfig                 |   2 +
->>  drivers/virt/Makefile                |   1 +
->>  drivers/virt/sev_secret/Kconfig      |  11 +
->>  drivers/virt/sev_secret/Makefile     |   2 +
->>  drivers/virt/sev_secret/sev_secret.c | 298 +++++++++++++++++++++++++++
->>  5 files changed, 314 insertions(+)
->>  create mode 100644 drivers/virt/sev_secret/Kconfig
->>  create mode 100644 drivers/virt/sev_secret/Makefile
->>  create mode 100644 drivers/virt/sev_secret/sev_secret.c
-> 
-> Same question here: maybe have 
-> 
-> drivers/virt/coco/
-> 
-> and put all coco guest stuff in there.
-> 
+Reported-by: Andreas Schwab <schwab@linux-m68k.org>
+Signed-off-by: Heinrich Schuchardt <xypron.glpk@gmx.de>
+=2D--
+ arch/riscv/include/asm/efi.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-I agree, according to what comes up of the conversation we have in
-replies to the cover letter.
+diff --git a/arch/riscv/include/asm/efi.h b/arch/riscv/include/asm/efi.h
+index 7542282f1141..649ab513dc99 100644
+=2D-- a/arch/riscv/include/asm/efi.h
++++ b/arch/riscv/include/asm/efi.h
+@@ -33,10 +33,10 @@ static inline unsigned long efi_get_max_fdt_addr(unsig=
+ned long image_addr)
 
+ #define ARCH_EFI_IRQ_FLAGS_MASK (SR_IE | SR_SPIE)
 
->> diff --git a/drivers/virt/Kconfig b/drivers/virt/Kconfig
->> index 8061e8ef449f..c222cc625891 100644
->> --- a/drivers/virt/Kconfig
->> +++ b/drivers/virt/Kconfig
->> @@ -36,4 +36,6 @@ source "drivers/virt/vboxguest/Kconfig"
->>  source "drivers/virt/nitro_enclaves/Kconfig"
->>  
->>  source "drivers/virt/acrn/Kconfig"
->> +
->> +source "drivers/virt/sev_secret/Kconfig"
->>  endif
->> diff --git a/drivers/virt/Makefile b/drivers/virt/Makefile
->> index 3e272ea60cd9..0765e5418d1d 100644
->> --- a/drivers/virt/Makefile
->> +++ b/drivers/virt/Makefile
->> @@ -8,3 +8,4 @@ obj-y				+= vboxguest/
->>  
->>  obj-$(CONFIG_NITRO_ENCLAVES)	+= nitro_enclaves/
->>  obj-$(CONFIG_ACRN_HSM)		+= acrn/
->> +obj-y				+= sev_secret/
->> diff --git a/drivers/virt/sev_secret/Kconfig b/drivers/virt/sev_secret/Kconfig
->> new file mode 100644
->> index 000000000000..4505526b8ef1
->> --- /dev/null
->> +++ b/drivers/virt/sev_secret/Kconfig
->> @@ -0,0 +1,11 @@
->> +# SPDX-License-Identifier: GPL-2.0-only
->> +config AMD_SEV_SECRET_SECURITYFS
->> +	tristate "AMD SEV secret area securityfs support"
->> +	depends on EFI
-> 
-> That probably needs to depend on CONFIG_AMD_MEM_ENCRYPT - otherwise
-> what's the point for it.
-> 
+-/* Load initrd at enough distance from DRAM start */
++/* Load initrd anywhere in system RAM */
+ static inline unsigned long efi_get_max_initrd_addr(unsigned long image_a=
+ddr)
+ {
+-	return image_addr + SZ_256M;
++	return ULONG_MAX;
+ }
 
-But not if it's a generic driver that is useful for other confidential
-computing implementations.  Consider some non-encrypting guest memory
-isolation mechanism where the host can't read most guest pages; this
-module might be useful there too.
+ #define alloc_screen_info(x...)		(&screen_info)
+=2D-
+2.30.2
 
-Also, isn't it a bit weird to depend on CONFIG_AMD_MEM_ENCRYPT but not
-use any of its APIs?
-
-
--Dov
