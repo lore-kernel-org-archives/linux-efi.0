@@ -7,44 +7,44 @@ X-Spam-Status: No, score=-18.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,MSGID_FROM_MTA_HEADER,SPF_HELO_NONE,
 	SPF_PASS,USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E2661C07E9B
-	for <linux-efi@archiver.kernel.org>; Wed,  7 Jul 2021 18:17:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E73C9C07E9B
+	for <linux-efi@archiver.kernel.org>; Wed,  7 Jul 2021 18:17:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D2B8261CB0
-	for <linux-efi@archiver.kernel.org>; Wed,  7 Jul 2021 18:17:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D1D8E61C83
+	for <linux-efi@archiver.kernel.org>; Wed,  7 Jul 2021 18:17:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232434AbhGGSUC (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 7 Jul 2021 14:20:02 -0400
-Received: from mail-bn8nam12on2067.outbound.protection.outlook.com ([40.107.237.67]:45063
-        "EHLO NAM12-BN8-obe.outbound.protection.outlook.com"
+        id S232004AbhGGSUK (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 7 Jul 2021 14:20:10 -0400
+Received: from mail-dm6nam12on2046.outbound.protection.outlook.com ([40.107.243.46]:54561
+        "EHLO NAM12-DM6-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S232136AbhGGSTe (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 7 Jul 2021 14:19:34 -0400
+        id S232245AbhGGSTm (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 7 Jul 2021 14:19:42 -0400
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=QHdhl9ptc/8r1x5fIIkIsryWS7GfKLbKbTs6iVWLP9pNE6+ISTqWtBSpH4NiHiZ6PgoZc64t7YRg7Zr487tuIJKQNl/w0pQNgUUJ6jMaX3IWcNJCxnsiXWGa/GptbI6788JdM6MfSLgYQLzs2sv1rDNytE3nju8GYBmAk1Cn4UkAsXV1ArWWDz3fEfu7jT27ZK34Jvnnesr6w8GcS+KGuawSaCczlZBao8Lt7CkShyQTpD+G4qCmJg6MY1H50q65iLTgiDVNyKhJpAn3bLCnn5RvdyIxOAdl3knJxN8OECvDLfr4o0ThSmNHuEswvYoki0Q9vLHOVIzL86gD7x6NeQ==
+ b=Of4slQiKLwMtGjxmYKnrf1DMlecyWhsSbvPzHBEn7YzWvKhDxMJTUzGWJMkEU4gPCoy4WC78pAG8CspnlcVsxh7u22VZKBm6N3tVWk2Ki9y+Yz/uKUCAf+1aH5Drjl3GIxF35LJfqiOW6p1aB4lgAhAkdqy+LfcQehOP712F0KPchGcwifX34QTQB1bXo7/KhnvPx+VxHv0EcmdIY3jnBcU+ExfFMsqcaGXhSBzgQfVicoH5kZv7P4wUKmk6a0RpryvUh6RGfbZyrUaXx9Bo2r7YhVhrbyJkW2xNn16c2cbJCmVl7OFNLao/nucKyMEiKSFXzgZvokfehx1JxHeZwQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=fx2WDBdjGaBF/g6x3agK+7pQ+o9Ag8h7WcyLfaEPrfQ=;
- b=GiGE7epdlK9IW5SQWb3Ar4TR88+QZV2vmtu5CL6UiWHFhtKdjc/27yS1BQCdEDbqeteYq1dGNN2GSIFI+H3LFmnovRLirhc9gIn6n6NgIfvP65FpuNFpyNuqJp6u3MqTEeN0RLfuLwBQAAzCkSfZAUsKk5UMoj2e+H61ujfMB2jcYAf+e6YhveuusUg33dgf7+OoezcnH45WwIbZbOembhZxWXld7iF+quRJY9QCh8bpwFQdoFaq052T8xQxQHkqSP25fT+LScpuBKu56MnOf7AzTRmfYjQKxUcHQ2suSufGgWAcMNcSAkeR/txSzYCm5K6/vcWjhF8TImkPZB4feA==
+ bh=W/IHMOVem7t7z2OV4kUnI967SHyn8TUBIuL3M5S8ay0=;
+ b=BppHbiDQXPrApQ/vUUQsFlEyu7CRznKvdGP4wvBOdYvhdSQHkuxONKO/ksoVsPwXD4w4cnOVeNZ+5ae0c6TBqyih3NQUPTLvglmiimxAefa6xUbUJShsAhcF2/bUySch5/y3g6uVpygEsZs22BvEhBb3fje2OlRAPlZirpW/8cGq0MhvX0THQlnhhrXya+Xi7rwfvLNsTZvOYDJU4JWfifBOuCPkqk014U4C7vwCXAUx8MaOhrsZVJzVmOzIch+SOmxH8wl9mp4drhWRdsadiEH36015YD33dsbo+2CbvYauj/Rxv3PdooVPTyK6I9IuaF/YLNaxXhEj0xtmX/b9Hw==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=amd.com; dmarc=pass action=none header.from=amd.com; dkim=pass
  header.d=amd.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=fx2WDBdjGaBF/g6x3agK+7pQ+o9Ag8h7WcyLfaEPrfQ=;
- b=NjOBBCtyjfX4X0LsD7Mdc2VDsL9qsplL74aaFOahWim2QmQZEesyE1UXDMxLg4WzpXehf6gd7O+xIA7CWzTVHLljuDpaIfD+oMevb9/Ry9lHLpmhVHmTWCnzpv0xKtell9fyXxowX4elwwWyaV/AchBSFCUNpbib5VNuhKsSMBw=
+ bh=W/IHMOVem7t7z2OV4kUnI967SHyn8TUBIuL3M5S8ay0=;
+ b=ScNWuFLi1miBzEuFDcjz5x/Frwzoy5kbgu80Hx6liy4J3yYBoRN0tSsFi+8TgVqgUvrLgevn64CInkzieSTLD1fB1NIS82OJaE/SwNjIVcfApkgKIKjTaMg/8TOtmnsUIcfF0IZ1CoDqi2f2mxQuPWAWCx9YBG7ba/qbWnkEtFk=
 Authentication-Results: kernel.org; dkim=none (message not signed)
  header.d=none;kernel.org; dmarc=none action=none header.from=amd.com;
 Received: from BYAPR12MB2711.namprd12.prod.outlook.com (2603:10b6:a03:63::10)
- by BY5PR12MB5016.namprd12.prod.outlook.com (2603:10b6:a03:1c5::20) with
+ by BYAPR12MB3527.namprd12.prod.outlook.com (2603:10b6:a03:13c::12) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4308.20; Wed, 7 Jul
- 2021 18:16:22 +0000
+ 2021 18:16:58 +0000
 Received: from BYAPR12MB2711.namprd12.prod.outlook.com
  ([fe80::40e3:aade:9549:4bed]) by BYAPR12MB2711.namprd12.prod.outlook.com
  ([fe80::40e3:aade:9549:4bed%7]) with mapi id 15.20.4287.033; Wed, 7 Jul 2021
- 18:16:22 +0000
+ 18:16:58 +0000
 From:   Brijesh Singh <brijesh.singh@amd.com>
 To:     x86@kernel.org, linux-kernel@vger.kernel.org, kvm@vger.kernel.org,
         linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org,
@@ -72,9 +72,9 @@ Cc:     Thomas Gleixner <tglx@linutronix.de>,
         Vlastimil Babka <vbabka@suse.cz>, tony.luck@intel.com,
         npmccallum@redhat.com, brijesh.ksingh@gmail.com,
         Brijesh Singh <brijesh.singh@amd.com>
-Subject: [PATCH Part1 RFC v4 21/36] x86/head/64: set up a startup %gs for stack protector
-Date:   Wed,  7 Jul 2021 13:14:51 -0500
-Message-Id: <20210707181506.30489-22-brijesh.singh@amd.com>
+Subject: [PATCH Part1 RFC v4 35/36] virt: sevguest: Add support to derive key
+Date:   Wed,  7 Jul 2021 13:15:05 -0500
+Message-Id: <20210707181506.30489-36-brijesh.singh@amd.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20210707181506.30489-1-brijesh.singh@amd.com>
 References: <20210707181506.30489-1-brijesh.singh@amd.com>
@@ -84,132 +84,200 @@ X-ClientProxiedBy: SA0PR11CA0104.namprd11.prod.outlook.com
  (2603:10b6:a03:63::10)
 MIME-Version: 1.0
 X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from sbrijesh-desktop.amd.com (165.204.77.1) by SA0PR11CA0104.namprd11.prod.outlook.com (2603:10b6:806:d1::19) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4308.19 via Frontend Transport; Wed, 7 Jul 2021 18:16:20 +0000
+Received: from sbrijesh-desktop.amd.com (165.204.77.1) by SA0PR11CA0104.namprd11.prod.outlook.com (2603:10b6:806:d1::19) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4308.19 via Frontend Transport; Wed, 7 Jul 2021 18:16:56 +0000
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: a99c028e-c169-415f-c418-08d94173533b
-X-MS-TrafficTypeDiagnostic: BY5PR12MB5016:
+X-MS-Office365-Filtering-Correlation-Id: 2112b32f-7620-48c1-6a87-08d9417368a5
+X-MS-TrafficTypeDiagnostic: BYAPR12MB3527:
 X-MS-Exchange-Transport-Forked: True
-X-Microsoft-Antispam-PRVS: <BY5PR12MB50162CFD6BBDB3AA0D9C8D52E51A9@BY5PR12MB5016.namprd12.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:9508;
+X-Microsoft-Antispam-PRVS: <BYAPR12MB3527C745657D1F2B148DD6AAE51A9@BYAPR12MB3527.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:2582;
 X-MS-Exchange-SenderADCheck: 1
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: BtGAYpi3IPs5rPY1/y/t4LiGBmh5rbAIfJG4NHbXRzT5XD/E+n4pGPO6mDXg8dJqTMnUFDhOxGq15wBX36JWXpIy6v9VEsvnWSL59mwQ8LwTuBn+3ufhUvxiUn/xuIBf9MEccUM76pKjOGUf21WnM9NaJyJUoYxJNaZEBK/iT013Ur2cIfoQ8fWKs9nZZuPHivw5P6U4a6G/z9pAUvs3FzGF58AIZ69oDx2m/X5n0Ee8XvIhPr2IX22FYR6nVp0gYVymg41/fP9nUTEaOMkmO6XxCPmzarT5HRnymD+SnVfpp189IBmsxl+G/loWzqivUYKGrjoikaN+DvGtOgcd5/6JiQyjakQOxGvO4fifrlwz9UMDVDOi6wh2jRt04lQKfV7QShs5RmmHeiJMKkarY0J5plTw4yEXZB1lCgF0ruJ444H5CsalossixGtmGmeieTF0mYtEXCCGEup0G2YWvajfK6mc7lERH0kEucB2QeMdAoWRnedCDKquDsKCPmNtG+GJMznBhig5l8APvS+mSkSMbBs7nsn56HkccGf4I1ccZ4H+YJZygCOM2jiwg7uPJZqEj3Gi95dOoHP0gam1jOH50rnHfY3oeBG1AM4VR1r4t589AI3L84+YoHYFYiubVVDPqdod/rC7+jqPpD9p1yPtvc4GVD6fAUSrCAtyjFxXMktU8ty1hABqKTlnGgG7CXcieG9wb4S5lR0cdfZkfg==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BYAPR12MB2711.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(346002)(396003)(376002)(366004)(39860400002)(136003)(66556008)(66476007)(186003)(7416002)(52116002)(86362001)(26005)(956004)(8936002)(478600001)(7406005)(7696005)(8676002)(83380400001)(5660300002)(2616005)(38350700002)(38100700002)(44832011)(2906002)(1076003)(54906003)(6666004)(66946007)(316002)(4326008)(36756003)(6486002);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: o5ydBn21GoXp2gFKS66M3DU/1eBS5DX4C/yWXkFHrjRLqvCvz5kvcOTwTqCkVHzCE1V//e3WNikES/2w/HF+eUGACHLP8Ast9pbD8lIs9Z0Xs1JR2nouy2Pj9xryWrt3CaeXgqL61d2tUIboYCkWSS1F3YwLXAI9+Sgm/wcx9jm0M9i/rJ30FQ9eAG3EzqxFa66SY/pbr2aekJFr+LaHpYFIUnnWJGSg0ZmJmoCyCFcdnnaU8T5CGBY8iTSvs+SK4Oh4FifUG479rtyXtgOF4kz2TqUphHsud361Do6Enz8tiS/kMjheawiGtQN5Pbf7k3/bH4gDvdoS8ZxJIy7G5P4xKudCiMmC6gBDwt8CZy8ebz8CLRnU40Uqe7BdU3YTiQFjIlbKI8xdep42TkIlziSIjYX+iGUsORg9pkwI3xxI3FKLiqJV4sVB3beyosumceXLnMrpOPX+6d38785nabbQ9uOKYk10PSw26SZbc7kYWuFOnQcdn2lbFmGW2wAPLNnfTJwkX2VI7UOGVGMIjEg0sk728CTzzcD6Eb9YRnp6xc64wIdplCmxBnGuVunr+T4jPuBPVJUDjF+9WF8O6+FCJm30yMnueDLSQS4Te0zgw22iknxOHcxMHbsrBhTnA1n3wi0TqEQcAiVkvOFTdipEc3LoiI3ZBG848/6VA+siuG5CtFZSJXnWvuT9ZRmz+v7RGXmeztbSKAuiG5yuqg==
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BYAPR12MB2711.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(26005)(2616005)(5660300002)(498600001)(44832011)(6486002)(1076003)(66946007)(66556008)(83380400001)(86362001)(186003)(956004)(66476007)(8936002)(8676002)(52116002)(36756003)(54906003)(2906002)(7696005)(38100700002)(38350700002)(4326008)(6666004)(7406005)(7416002);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?N87hNKigKyD5zHjB1BXm9lUrGOXkKm1SPKK8w6EG5HTFOJJ9ulyiSJ5WK7+Q?=
- =?us-ascii?Q?7s46GfJTxehXrBAqk9q354l4DZNIDRLjxcnqG3NnLZRYV6+SeKypQfAQ/Ets?=
- =?us-ascii?Q?KYZ71gdH2ZqskPI95Lp17ZqlR1pIsCewtm6ogxQFtYZbpNSqGrNU1iN2paFL?=
- =?us-ascii?Q?3VnsyqSmvFxl0GTGnC7QK6SCmqsurSpnaxEfZwBfyV5fo7Xz0VfNOW+Xc3LL?=
- =?us-ascii?Q?lDx8MJ8TqJCQc674VLz2w6vbmLkNL9YlUWvk11cIK2L4tpt5V66wpdPNoul+?=
- =?us-ascii?Q?+0R/eSdr6dBFJoR5p5/YkqflK4nNIRufok2MeWWwG7Eap+DtuUo8+z69soCA?=
- =?us-ascii?Q?I+74QkQ/pafw2DQADdAxV6f41iFU0vkqxAhJAQnOaO6ckOTe/AFBdgNj/K17?=
- =?us-ascii?Q?pznGV99P+ynu4m9/zDzL9hpz/Anwrw7OjfGSoUjKgx599uuMvtYCOQp7Q6SO?=
- =?us-ascii?Q?CdFR5Hhxztwl5GixP0qDWty1CJPpV8qi5zp4yIcCFCwDSiAbr7gM/Di13ddA?=
- =?us-ascii?Q?PFU2VE2Ci2gAGnSKh4XIqxohWIhrzg21Ci4DVZg04+vX2+M9gM2oPO/cT1t0?=
- =?us-ascii?Q?OZJpbCkhiqZpygGIY8RW5SbgRUdt6iU+jBS6LUoa+Djm+F3ssh0a3P/bt1UK?=
- =?us-ascii?Q?DRWRWzjQ7l5zpszxdy8cC5i/sCI0q/Rw2mnX7wAGG+uk0YKoHqurIrZhtLvo?=
- =?us-ascii?Q?JGsRtGAlHP7/cHmteODhkbOfayp+oPKQKuG6ag1gHdYLBXLy4vkVF/C+fz+5?=
- =?us-ascii?Q?qiDJU8hSJB9qcWZ99Ldp+XAGdaW65RPnTAwP9obIfl64g+EeU/k+mbu6GOFg?=
- =?us-ascii?Q?8bKgdw+Mz+2y13U+PE4DlstPp+xb9FykHIH/20ksHzknXSQ6tNY6JkE2vuXl?=
- =?us-ascii?Q?771eFNZ4QtDAFxd5Gn5CQwHn7DD6OLfvUy9A+I+vNywFU8bwximX443hETU3?=
- =?us-ascii?Q?K3QN18kHCAEjjwkIilxKKGe3KDxi9iaWjqB6/4aJY1Pxy2y1hHdMmjJcpuiK?=
- =?us-ascii?Q?ihEErktexSt+eFgPU0ldP2QSbbU3CW7ej34P2rzZ9iSbJCPXqrd1LQXMl8at?=
- =?us-ascii?Q?8L+tFGDspVnA7WumACAQmi31AlOAurdw4t2PPy6t0cmcewBz70gUwg83Ld8G?=
- =?us-ascii?Q?57UsOhEGSFulVPPzxCmCL6tqee6ADUNUk3QpQ5zzCW//idIcjeRKk/Jp5BXx?=
- =?us-ascii?Q?QG4AKoMKP+GuIzu+bAFfGxUCo+8WJ170Ry9/UlWIKM9F5NHnZ0n1j6wx8hEr?=
- =?us-ascii?Q?4B/x6BozK0lu7Ki+0tLi/VO6qqloqTC2OiHT4AeOAu7UGfY2nMpbBCCsnh0s?=
- =?us-ascii?Q?RfpWofCDYtBAKo3TcS0jSwdj?=
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?x6joJQOXuDsZ6RYp5TrE4w4WeXP5EmCBEixt/hxI4gKEyXrb9c/nvLVNjYke?=
+ =?us-ascii?Q?qvMsi0CyBOm5Yl8xiHWMJkgpJlc9fpxf44fln2Y2FadDBbZdnDYaNDpO+DB/?=
+ =?us-ascii?Q?KoycXVfdgpRJlfRwptAvXhzWtNQIs/x32rDAiFBRjXNPEurq2yuW64Chy2jX?=
+ =?us-ascii?Q?7Yl5tDNfshmUf/0Wl8QmtSAUSMMyaId+f9F9AgoT9qhhVYG1RztfLcgN7vM+?=
+ =?us-ascii?Q?bw6v03wwpq+zZJqbfmMAFeYHRV0hb2dP29lXaw6yI/rHACF+31os0tGZtLyk?=
+ =?us-ascii?Q?5F+5gMufHPUhaKs2SOhfa5OituigBBRSKtl0+586Ft4BknJoWak+glxQqco4?=
+ =?us-ascii?Q?BGMf4OlXVu7f/dZJpFF/a2WzVQTYzLybjtGtv9IdgX69Fu6a7LxVf+SkdDYM?=
+ =?us-ascii?Q?XAHRb211ZIHcivbMCMC4mXregGfwSL2GApLli5XYY/+31VeDxYEovThiNOeL?=
+ =?us-ascii?Q?oac8rWlaWcJ72L7QnOQ3A9KuhFRC0cOng2+FFhlFaNgkubMomKWoogR8otIn?=
+ =?us-ascii?Q?jebPo4eyIyPMy7TgDJx8rjNIj1CJZw+CnEjDr3YCyGwd+O80GfLqeyCJeJXo?=
+ =?us-ascii?Q?JVAWdlZsFbg/lMiZl71a68A8WTlkTUqKtY6twGmhut3/zNd3qJJ6aJIZj8N3?=
+ =?us-ascii?Q?d3wfXp1Ay5zEJXsmChXskPI0AFrYX/054heGc9NOf132dlApOBzI8a61PhDj?=
+ =?us-ascii?Q?okuY/SP5UNDiiQp3oDmGDr98LpdPqBZJ9bGKbZBXZm7VK3o8W1dqjQHhhqyU?=
+ =?us-ascii?Q?XHwqTFDOdnZCGlHOSi8+7dWKs6/OMcwbr3Rm6todb1u89mxkAE+MOLufiHwJ?=
+ =?us-ascii?Q?XNISxAOldiIlneLdHiJi0RL4TUutwW9aXSvWVYp5E5wdj4xMiQ+oSthTDWSN?=
+ =?us-ascii?Q?h6Lii+QcsAHJgcMKTkpckg0DOAx560VVDnDf1e1+4mw3juERPmOUhRDJV8vB?=
+ =?us-ascii?Q?rAd7wgkU0j6Xn+4sw2OrHrQTC7yV/CI31E2jwGFB7SiIqpORVXhc271K4YD3?=
+ =?us-ascii?Q?+eO9U5gL1PGYjK5hC93vGQcZWH1sTjQ8eZolpyNq10QiOE9eptGLOoL/r0yS?=
+ =?us-ascii?Q?ZFAxtB/H5Gh6jOIw1rCBv+9UR7G3KBhuAein9P8AqNdfhXYe7VRmgxU73t3W?=
+ =?us-ascii?Q?j54E0z8ucHNkr5PPVIxXInxhGKOWFm1pXavuGXiuMfNt9b00gWq6bc/Ocw9v?=
+ =?us-ascii?Q?twfBNVAbW2epwF2ahxmykV0DES+w1A2uzhUypNjCIyJirPZmZ4UCeYG32RVi?=
+ =?us-ascii?Q?njbB1hXDoAfJ/EV9MzktVWpbq/IY1BXRnw84Qc/ffPQX9p6t5rBN68BQHSVM?=
+ =?us-ascii?Q?4XZ4oK52UIEP1BqknX+RIYDh?=
 X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: a99c028e-c169-415f-c418-08d94173533b
+X-MS-Exchange-CrossTenant-Network-Message-Id: 2112b32f-7620-48c1-6a87-08d9417368a5
 X-MS-Exchange-CrossTenant-AuthSource: BYAPR12MB2711.namprd12.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 07 Jul 2021 18:16:22.5174
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 07 Jul 2021 18:16:58.4460
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: +9S9IF+jTOfvYLIhDNYYsKdOB10i8nOu8Ua0mTsH02HBgyuWahmBl8n/r06L2Bj3xVHsP11iB+0S6SZaqrhcnA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY5PR12MB5016
+X-MS-Exchange-CrossTenant-UserPrincipalName: OvYpKSAjJuph2bQ0VjXhid9EUr/KNOjPeQlkvVBfvGYXZ8RlF5lPxmEbh97FNPmZkSg/60qZ4qTi6lJi91aEPA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BYAPR12MB3527
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Michael Roth <michael.roth@amd.com>
+The SNP_GET_DERIVED_KEY ioctl interface can be used by the SNP guest to
+ask the firmware to provide a key derived from a root key. The derived
+key may be used by the guest for any purposes it choose, such as a
+sealing key or communicating with the external entities.
 
-As of commit 103a4908ad4d ("x86/head/64: Disable stack protection for
-head$(BITS).o") kernel/head64.c is compiled with -fno-stack-protector
-to allow a call to set_bringup_idt_handler(), which would otherwise
-have stack protection enabled with CONFIG_STACKPROTECTOR_STRONG. While
-sufficient for that case, this will still cause issues if we attempt to
-call out to any external functions that were compiled with stack
-protection enabled that in-turn make stack-protected calls, or if the
-exception handlers set up by set_bringup_idt_handler() make calls to
-stack-protected functions.
+See SEV-SNP firmware spec for more information.
 
-Subsequent patches for SEV-SNP CPUID validation support will introduce
-both such cases. Attempting to disable stack protection for everything
-in scope to address that is prohibitive since much of the code, like
-SEV-ES #VC handler, is shared code that remains in use after boot and
-could benefit from having stack protection enabled. Attempting to inline
-calls is brittle and can quickly balloon out to library/helper code
-where that's not really an option.
-
-Instead, set up %gs to point a buffer that stack protector can use for
-canary values when needed.
-
-In doing so, it's likely we can stop using -no-stack-protector for
-head64.c, but that hasn't been tested yet, and head32.c would need a
-similar solution to be safe, so that is left as a potential follow-up.
-
-Signed-off-by: Michael Roth <michael.roth@amd.com>
 Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
 ---
- arch/x86/kernel/head64.c | 18 +++++++++++++++++-
- 1 file changed, 17 insertions(+), 1 deletion(-)
+ Documentation/virt/coco/sevguest.rst  | 18 ++++++++++
+ drivers/virt/coco/sevguest/sevguest.c | 48 +++++++++++++++++++++++++++
+ include/uapi/linux/sev-guest.h        | 24 ++++++++++++++
+ 3 files changed, 90 insertions(+)
 
-diff --git a/arch/x86/kernel/head64.c b/arch/x86/kernel/head64.c
-index f4c3e632345a..8615418f98f1 100644
---- a/arch/x86/kernel/head64.c
-+++ b/arch/x86/kernel/head64.c
-@@ -74,6 +74,9 @@ static struct desc_struct startup_gdt[GDT_ENTRIES] = {
- 	[GDT_ENTRY_KERNEL_DS]           = GDT_ENTRY_INIT(0xc093, 0, 0xfffff),
- };
+diff --git a/Documentation/virt/coco/sevguest.rst b/Documentation/virt/coco/sevguest.rst
+index 52d5915037ef..25446670d816 100644
+--- a/Documentation/virt/coco/sevguest.rst
++++ b/Documentation/virt/coco/sevguest.rst
+@@ -67,3 +67,21 @@ provided by the SEV-SNP firmware to query the attestation report.
+ On success, the snp_report_resp.data will contains the report. The report
+ format is described in the SEV-SNP specification. See the SEV-SNP specification
+ for further details.
++
++2.2 SNP_GET_DERIVED_KEY
++-----------------------
++:Technology: sev-snp
++:Type: guest ioctl
++:Parameters (in): struct snp_derived_key_req
++:Returns (out): struct snp_derived_key_req on success, -negative on error
++
++The SNP_GET_DERIVED_KEY ioctl can be used to get a key derive from a root key.
++The derived key can be used by the guest for any purpose, such as sealing keys
++or communicating with external entities.
++
++The ioctl uses the SNP_GUEST_REQUEST (MSG_KEY_REQ) command provided by the
++SEV-SNP firmware to derive the key. See SEV-SNP specification for further details
++on the various fileds passed in the key derivation request.
++
++On success, the snp_derived_key_resp.data will contains the derived key
++value.
+diff --git a/drivers/virt/coco/sevguest/sevguest.c b/drivers/virt/coco/sevguest/sevguest.c
+index f3f86f9b5b22..2f20db80490a 100644
+--- a/drivers/virt/coco/sevguest/sevguest.c
++++ b/drivers/virt/coco/sevguest/sevguest.c
+@@ -304,6 +304,50 @@ static int get_report(struct snp_guest_dev *snp_dev, struct snp_user_guest_reque
+ 	return rc;
+ }
  
-+/* For use by stack protector code before switching to virtual addresses */
-+static char startup_gs_area[64];
++static int get_derived_key(struct snp_guest_dev *snp_dev, struct snp_user_guest_request *arg)
++{
++	struct snp_guest_crypto *crypto = snp_dev->crypto;
++	struct snp_derived_key_resp *resp;
++	struct snp_derived_key_req req;
++	int rc, resp_len;
 +
- /*
-  * Address needs to be set at runtime because it references the startup_gdt
-  * while the kernel still uses a direct mapping.
-@@ -598,6 +601,8 @@ void early_setup_idt(void)
-  */
- void __head startup_64_setup_env(unsigned long physbase)
- {
-+	u64 gs_area = (u64)fixup_pointer(startup_gs_area, physbase);
++	if (!arg->req_data || !arg->resp_data)
++		return -EINVAL;
 +
- 	/* Load GDT */
- 	startup_gdt_descr.address = (unsigned long)fixup_pointer(startup_gdt, physbase);
- 	native_load_gdt(&startup_gdt_descr);
-@@ -605,7 +610,18 @@ void __head startup_64_setup_env(unsigned long physbase)
- 	/* New GDT is live - reload data segment registers */
- 	asm volatile("movl %%eax, %%ds\n"
- 		     "movl %%eax, %%ss\n"
--		     "movl %%eax, %%es\n" : : "a"(__KERNEL_DS) : "memory");
-+		     "movl %%eax, %%es\n"
-+		     "movl %%eax, %%gs\n" : : "a"(__KERNEL_DS) : "memory");
++	/* Copy the request payload from the userspace */
++	if (copy_from_user(&req, (void __user *)arg->req_data, sizeof(req)))
++		return -EFAULT;
++
++	/* Message version must be non-zero */
++	if (!req.msg_version)
++		return -EINVAL;
 +
 +	/*
-+	 * GCC stack protection needs a place to store canary values. The
-+	 * default is %gs:0x28, which is what the kernel currently uses.
-+	 * Point GS base to a buffer that can be used for this purpose.
-+	 * Note that newer GCCs now allow this location to be configured,
-+	 * so if we change from the default in the future we need to ensure
-+	 * that this buffer overlaps whatever address ends up being used.
++	 * The intermediate response buffer is used while decrypting the
++	 * response payload. Make sure that it has enough space to cover the
++	 * authtag.
 +	 */
-+	native_wrmsr(MSR_GS_BASE, gs_area, gs_area >> 32);
++	resp_len = sizeof(resp->data) + crypto->a_len;
++	resp = kzalloc(resp_len, GFP_KERNEL_ACCOUNT);
++	if (!resp)
++		return -ENOMEM;
++
++	/* Issue the command to get the attestation report */
++	rc = handle_guest_request(snp_dev, req.msg_version, SNP_MSG_KEY_REQ,
++				  &req.data, sizeof(req.data), resp->data, resp_len,
++				  &arg->fw_err);
++	if (rc)
++		goto e_free;
++
++	/* Copy the response payload to userspace */
++	if (copy_to_user((void __user *)arg->resp_data, resp, sizeof(*resp)))
++		rc = -EFAULT;
++
++e_free:
++	kfree(resp);
++	return rc;
++}
++
+ static long snp_guest_ioctl(struct file *file, unsigned int ioctl, unsigned long arg)
+ {
+ 	struct snp_guest_dev *snp_dev = to_snp_dev(file);
+@@ -321,6 +365,10 @@ static long snp_guest_ioctl(struct file *file, unsigned int ioctl, unsigned long
+ 		ret = get_report(snp_dev, &input);
+ 		break;
+ 	}
++	case SNP_GET_DERIVED_KEY: {
++		ret = get_derived_key(snp_dev, &input);
++		break;
++	}
+ 	default:
+ 		break;
+ 	}
+diff --git a/include/uapi/linux/sev-guest.h b/include/uapi/linux/sev-guest.h
+index e8cfd15133f3..621a9167df7a 100644
+--- a/include/uapi/linux/sev-guest.h
++++ b/include/uapi/linux/sev-guest.h
+@@ -36,9 +36,33 @@ struct snp_user_guest_request {
+ 	__u64 fw_err;
+ };
  
- 	startup_64_load_idt(physbase);
- }
++struct __snp_derived_key_req {
++	__u32 root_key_select;
++	__u32 rsvd;
++	__u64 guest_field_select;
++	__u32 vmpl;
++	__u32 guest_svn;
++	__u64 tcb_version;
++};
++
++struct snp_derived_key_req {
++	/* message version number (must be non-zero) */
++	__u8 msg_version;
++
++	struct __snp_derived_key_req data;
++};
++
++struct snp_derived_key_resp {
++	/* response data, see SEV-SNP spec for the format */
++	__u8 data[64];
++};
++
+ #define SNP_GUEST_REQ_IOC_TYPE	'S'
+ 
+ /* Get SNP attestation report */
+ #define SNP_GET_REPORT _IOWR(SNP_GUEST_REQ_IOC_TYPE, 0x0, struct snp_user_guest_request)
+ 
++/* Get a derived key from the root */
++#define SNP_GET_DERIVED_KEY _IOWR(SNP_GUEST_REQ_IOC_TYPE, 0x1, struct snp_user_guest_request)
++
+ #endif /* __UAPI_LINUX_SEV_GUEST_H_ */
 -- 
 2.17.1
 
