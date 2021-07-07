@@ -7,44 +7,44 @@ X-Spam-Status: No, score=-18.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,MSGID_FROM_MTA_HEADER,SPF_HELO_NONE,
 	SPF_PASS,USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8AF47C11F66
-	for <linux-efi@archiver.kernel.org>; Wed,  7 Jul 2021 18:37:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E5A9CC11F6A
+	for <linux-efi@archiver.kernel.org>; Wed,  7 Jul 2021 18:37:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7459B61CCC
-	for <linux-efi@archiver.kernel.org>; Wed,  7 Jul 2021 18:37:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CFB4961CCE
+	for <linux-efi@archiver.kernel.org>; Wed,  7 Jul 2021 18:37:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232203AbhGGSkR (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 7 Jul 2021 14:40:17 -0400
-Received: from mail-dm6nam11on2042.outbound.protection.outlook.com ([40.107.223.42]:41569
-        "EHLO NAM11-DM6-obe.outbound.protection.outlook.com"
+        id S232262AbhGGSkT (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 7 Jul 2021 14:40:19 -0400
+Received: from mail-dm3nam07on2067.outbound.protection.outlook.com ([40.107.95.67]:40288
+        "EHLO NAM02-DM3-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S232084AbhGGSkL (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 7 Jul 2021 14:40:11 -0400
+        id S232054AbhGGSkO (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 7 Jul 2021 14:40:14 -0400
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=SVpmpSoA/KS/EeLKaVlpWVukJqEhfpH7DXHcUVuLtO18tucDF6m12A55qbxY0jb+0XinZb/nT8Y9BWxkWqiiEEukxgNrFJUxB74Uy0RCSD0Hfrs1vbAauvywKIU/+A9b54RHVxPbmSUmkIRllIKkrl4N8qV78xE1Nsr3x9f3uCbmn8R9cas1O0AvtwjK+q1jcU/3D2qtp/3A3MrrVMbWIcahQ3C9hugOGykJnhI0zGSQWUBFaTGy4ANDGMqzqcMNEgCEqoo/Ytu7qT3Fyp4e3LvDUTWQLiz2plB3zCD7AOxTPDZxqdcjUdYAcU0quQMpKytVm7MpPppgQa12jenwvA==
+ b=cXXYuRRSLayg6qeK74dck6jOa69BrYtBUXmxw6Q4aWnj3lSpsb7VwgKJsyhbkE/qAyXyf6g8xV4fDKAYyLqhJzVBTH7E+0juFboWJxBP3O1vXDLsiSPnv1mlrNHxvVSFMSAkUREJe/ExC34exOFEuBRfZGcRKgEPU4ApPI8ja8ao0Anu5q8NDCfTqpze64ikolXoT8LmhyzuCGN8aJrwKlbnQeHPkkRNI4/ImD1jZANQtXqR138fBdU/gMgW63AemX0yEGxTmJDYqNXOJ1m3RPrk3YLaep8qAaVypN+gNcWjFNyqj4u++mlXQLcg9cZIfovb2JeCEZrheWuRaTdDkA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=T20x7H820UMIAP6tw3oUk8JA1hwxpn6tKWvJYiGndPE=;
- b=Rv/8Ui4a/FAUHxo71IoxaSRKrniDBnhSHdgCIJECoZT+VwZKDAiKerh9drdhrRGXJU3qkm0RbUHYsctKf0oY5zvTUUNx0dXMKBFG8IqUdT5Qr4psZNLHwcEVrQlucHmehdEFWli6JZKioUreSVFW79qYoRZHkWf45zixKCizvRMuYFCfcWhKHT1gJhqwVm6aPkVqw0+QdcYzGBQVEDP+vpXyi6QrlN3ojEu/JK9nrSHxzzw8E1EpdlY064OQLfpaeFzlGbDuifBQ/P7L9XVK3kLSs+P4QeIC25eDhUR8XavEfukA3S/JMB56luRWAo0eGNG3xADwO9JEY93d7mfSzw==
+ bh=z/ObO9K6loxHrMjGpmBDX7cm6oM+IxUTu/qDRMC2Fg8=;
+ b=C14EcQpbzBGeRa87ziu/vlLeRWTeHX7wf1liFWqVl3uf4z4B1tNYjfsc2PbVkozP8j1G9GSlI4zysNzNF9tqoIcbs8O7G4iMtheuAkzeIJ8aJRtzz+YMasomfledscvdK4CoM+ImWEB9MkBGHHRbz5fJLSA19nPYxuDTCnRKk/mgQTBTSn1vAQPWcW2xAIn64ab0baAfvBNYa67hDbWsdy+RBNxmZlYaaO8uTBis2qMXgTBori2boJtVuJ8PGsVB98cP0M936oZAcJjzs7GG34Iw6Kef4T09/KhpzBT4poFcWpet8RRvl6dCYH0zM6YzfIR0xcUQF98b/Nno16nhwg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=amd.com; dmarc=pass action=none header.from=amd.com; dkim=pass
  header.d=amd.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=T20x7H820UMIAP6tw3oUk8JA1hwxpn6tKWvJYiGndPE=;
- b=vyAnE3xvrjlw+qWKowaxjdFeoKsL975AzHNoNd6Pe0p3zcy9hlCPxutXGABPyAenyNET9fkQjpYLzSm8x10GqVmT8+5sykyfITslfEDCc9rZ95kzNNXFDsKn2l8Jg8C9WncN69LcFQxhphkZQfrqv35NE6RyycUPiBrYaKtdltM=
+ bh=z/ObO9K6loxHrMjGpmBDX7cm6oM+IxUTu/qDRMC2Fg8=;
+ b=Vsbc1NUBn6H/ex2quaOko5wAvQVaAJESeRKeLcQioSXBytanGRCGQwG8VVIR9QjrKMozBkR6fpnG4d7iHed6I3f0JKGLUWPe9vngl4mpbaptg8u0G+RgVSTIzPE4LT9cQc7TYTRW2fUSpJIGCPwJumPr9AbSB5hoiIhapkObXhE=
 Authentication-Results: kernel.org; dkim=none (message not signed)
  header.d=none;kernel.org; dmarc=none action=none header.from=amd.com;
 Received: from BYAPR12MB2711.namprd12.prod.outlook.com (2603:10b6:a03:63::10)
- by BY5PR12MB4082.namprd12.prod.outlook.com (2603:10b6:a03:212::19) with
+ by BYAPR12MB2808.namprd12.prod.outlook.com (2603:10b6:a03:69::24) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4308.20; Wed, 7 Jul
- 2021 18:37:28 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4287.26; Wed, 7 Jul
+ 2021 18:37:17 +0000
 Received: from BYAPR12MB2711.namprd12.prod.outlook.com
  ([fe80::40e3:aade:9549:4bed]) by BYAPR12MB2711.namprd12.prod.outlook.com
  ([fe80::40e3:aade:9549:4bed%7]) with mapi id 15.20.4287.033; Wed, 7 Jul 2021
- 18:37:28 +0000
+ 18:37:17 +0000
 From:   Brijesh Singh <brijesh.singh@amd.com>
 To:     x86@kernel.org, linux-kernel@vger.kernel.org, kvm@vger.kernel.org,
         linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org,
@@ -72,9 +72,9 @@ Cc:     Thomas Gleixner <tglx@linutronix.de>,
         Vlastimil Babka <vbabka@suse.cz>, tony.luck@intel.com,
         npmccallum@redhat.com, brijesh.ksingh@gmail.com,
         Brijesh Singh <brijesh.singh@amd.com>
-Subject: [PATCH Part2 RFC v4 13/40] crypto: ccp: Shutdown SNP firmware on kexec
-Date:   Wed,  7 Jul 2021 13:35:49 -0500
-Message-Id: <20210707183616.5620-14-brijesh.singh@amd.com>
+Subject: [PATCH Part2 RFC v4 09/40] x86/fault: Add support to dump RMP entry on fault
+Date:   Wed,  7 Jul 2021 13:35:45 -0500
+Message-Id: <20210707183616.5620-10-brijesh.singh@amd.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20210707183616.5620-1-brijesh.singh@amd.com>
 References: <20210707183616.5620-1-brijesh.singh@amd.com>
@@ -84,188 +84,169 @@ X-ClientProxiedBy: SN6PR04CA0078.namprd04.prod.outlook.com
  (2603:10b6:a03:63::10)
 MIME-Version: 1.0
 X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from sbrijesh-desktop.amd.com (165.204.77.1) by SN6PR04CA0078.namprd04.prod.outlook.com (2603:10b6:805:f2::19) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4308.20 via Frontend Transport; Wed, 7 Jul 2021 18:37:25 +0000
+Received: from sbrijesh-desktop.amd.com (165.204.77.1) by SN6PR04CA0078.namprd04.prod.outlook.com (2603:10b6:805:f2::19) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4308.20 via Frontend Transport; Wed, 7 Jul 2021 18:37:15 +0000
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 66bffe6f-a159-43eb-4237-08d94176459f
-X-MS-TrafficTypeDiagnostic: BY5PR12MB4082:
+X-MS-Office365-Filtering-Correlation-Id: 522fa53f-4453-4343-9c05-08d941763f4c
+X-MS-TrafficTypeDiagnostic: BYAPR12MB2808:
 X-MS-Exchange-Transport-Forked: True
-X-Microsoft-Antispam-PRVS: <BY5PR12MB4082570C4179F28D1591796AE51A9@BY5PR12MB4082.namprd12.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:5797;
+X-Microsoft-Antispam-PRVS: <BYAPR12MB28087EC2F062CC470B48D5EAE51A9@BYAPR12MB2808.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:8882;
 X-MS-Exchange-SenderADCheck: 1
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: k+iBR2jNeX83nFCug2aQ1kPvdsLQpu1z75kwEb+apmrKz76qeEMOI1QAFajB7Jfu5lyYy+Wj6V+8f4uB84XjcQzleKTLxSrCX6rlhCPAKBOqpwNwLP4+5t4F96QxhJuF48k/Lf9xWAOwg8zBh4oDTrNU90n1dthrfaoBeVbPPErk0/c2Q5tg4X2mup7tu+yDybo09jB9KPub9BpM32w1FUMRpohZa7/6HpmLdjvMKJ4PgABKLovhW0vxqbf9qkidIBOnZgdhOEv9k3Dxje1Go6KakF2kb3jOgmjthsFsFT1BVn0mIltyFRwpXr9ASiTaHXQQceTyQuXNHem82vCfZB55rxISJ/lSxrJP/jDIkXhx6FaCtyrdUYg/lMTS35g6p3xBGALJB39WC3rpQo5wZxq0+feglAzyAKickyqXOcL39I81ahkW/YoURMghf+ZOVjlSmbmFpNLShlnOoHUilrGCxIpT6RLWg1v5LE/5EpR/3GkHnj54Z+ZFJhozKoqab+hCfxmFyik/+zuFM2586+bmSDqe7qfSjjoMsKX/an2OJ2GJnec3Y+22mQxz0d8/sGBk6iTQeUY1/5OwOEBHppjeLeTwdZHZv141FDvN8UAtnILEbZllzvisUeomwp5UW2HCPSV9DPaXkbYGbO7lCn7Xt74a64VEp4gOtxW08E0mTdc7gWZIB9KeNUSMCRGXtybJ2SDZD/j69lR7a/vTZA==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BYAPR12MB2711.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(39860400002)(376002)(396003)(346002)(136003)(7696005)(52116002)(44832011)(8676002)(38350700002)(66946007)(38100700002)(54906003)(66476007)(8936002)(478600001)(6666004)(956004)(6486002)(7416002)(66556008)(7406005)(186003)(2616005)(2906002)(83380400001)(1076003)(4326008)(86362001)(5660300002)(36756003)(26005)(316002);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: uU3h5mqQCFl8YkDTfRp5K4Lz7gR3wNHSM/NbqBlx2LXZTcM3vlrzHMqzMbcYtc+fQJeRGKcZzB8yyJAvXlLmVXWLMf2n0ydzx08CvrSBETPvXKYL2j7YnRMP+sItUCMPHB+AFkkCI5qs99bDVhiV6DRD8RSCnh/2OVP4SdRd3jFYN1+JNwLJDk2+ZA3zHAO2X0/RBZVkL5rlC5Pyz0/4H3ohY4k/pkSyTdYno5ijgBG9biDaS54aOp1i1U+5VHuM3JtlQYz/7+KXd1ZxXbth2tCHrHr2pxo4O+ViM/AE/0JkwREoH1hlcIOQ2TeHkyWCXN4U6w6QdY54W/oWfanlw4AqBrDS3RpdsGs0iG8IGW7I/aN38vR293LpobFZvT1NHrs6/83Feaiwbm3fz0dPDAf/uHyKSBPkxH2hXlRgsCkkfKP0hWdfOp82vh7/uRqDtjOhb+6NqlBdmU83+b23tWhORyJ8jqHilikDqqfcq+Qi+LZ5QRHBw881hsjU6ebfAbvNBj7K73sY3EgK1Pf7NSgZs3IDm5GkKkKmvzPNEGcg/ybHXnDKfAwyf5e1flYmRSGch5YRExpp9vFTerTOKLDwR/rqYFBHY7JbYP8QWAOFBAgY9q+Q4LeHXpOEUVNrdVEYTCt3dB1IcBQkVQBQJ3vYEQfs2+QbxzTXTnyVMHUXoX0BEzskgKk1C6xIvrTO
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BYAPR12MB2711.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(396003)(136003)(346002)(39860400002)(366004)(376002)(7416002)(36756003)(83380400001)(66556008)(38100700002)(52116002)(2616005)(5660300002)(956004)(2906002)(86362001)(7406005)(4326008)(1076003)(44832011)(7696005)(66946007)(54906003)(316002)(8936002)(6486002)(8676002)(478600001)(6666004)(26005)(66476007)(186003)(38350700002);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?QaWOtka+UmdsUvKC6S0I3xnummQAjDSeoN0TuYLLVa3OoCRiVIYNqzWn3ALS?=
- =?us-ascii?Q?mm0+QZozRi235kCqvXKsqRsebcm3d3haLjuQJCb6F06oSZsMpyizDGzRsSFJ?=
- =?us-ascii?Q?+gAgegtwxzwsio2hGBoDVRQ+O9ncVIRAK967LUj+JRv+mkIjqw3wSe3/hZa8?=
- =?us-ascii?Q?CCunnakcpjE/iNb17rq8hrKkDeawldDVVRlhrOuNc8dsVQsdL3C/Mk+3LfJE?=
- =?us-ascii?Q?idOMVRrGLcPk2qrgfxLStlg8MJLtNusWKNJZ5/ylhrSpANCxPhZP2qwTKkjz?=
- =?us-ascii?Q?PCU9uF7Kx0EIWnnZQ8nyknM5jYJCUxXQ2h/6M2jvqKTpq+BTAgdu0OvS8p7l?=
- =?us-ascii?Q?1zJ7j5FzmienIf6bTTEprDC5UpBLzypFjMhy/YEPLXjPPlKcChDURew8yfQU?=
- =?us-ascii?Q?LxUoUkpyIIfgWuqaPumk2zxo42SUq5E9SLCAJjYZmcilYCTtjxHjErnFa4zj?=
- =?us-ascii?Q?JFTW9Eqpn0T4dMH5aQD4GSLfMazxkHau3huWPPTDdZadjhHXKUUfBjuSueCG?=
- =?us-ascii?Q?GZlCk8+yBHKheuiDe6HcdtaV4LEJu+NMiMEcRXKQ6VObqxrErlxK02lgJJ76?=
- =?us-ascii?Q?+WSDbJgKap/rH7ktjKqLWtOSTVob/wktGpntruf75xsBIjs5VTRFeLMkB+Hr?=
- =?us-ascii?Q?m72Mi23/D6a2aWxdIYAcCyiSVARM+VTu7k1MA1mBL9F+4+PJUYx50Hvz4Ql6?=
- =?us-ascii?Q?5KVajOx8PWzq6FhEP0jfYaLHlyfhUkE2aOQoX6uSlZygA4CmhnJJ+1jYM1yK?=
- =?us-ascii?Q?lp0PgeqtiaPdj9eZ3Nww/tu2uz82ipPG9WOrq4BT1EfpNTI6Clg2bjLN8Gv/?=
- =?us-ascii?Q?FkMI97tiq8UNzfsTvRvpVXE2KyGmiOQ9TFhqUNsK6g78E6rqV/ZpGeie9gNm?=
- =?us-ascii?Q?CPv19dGbU3XIpdiHlfHLo/yi/z3pz+N8W8cLjOHroD+6/H+ODrewVknetBFW?=
- =?us-ascii?Q?qVqNqffx74WSi9Fd6XrL2Wug4yWrLHd6jI36+lYj3z4cw5ZaYDD1lzuY3Ztu?=
- =?us-ascii?Q?44hajzCOy6mXCNjzOhqwoLNSCbEQ/68SnQgj9TL4Ufk4pX25kPumODbIxX3v?=
- =?us-ascii?Q?FEgC8jB3I0Rn2NsrT1e3eYFphsn0T86TKCrVxN4qqa9Pal/YdpjU2KvAiCZ+?=
- =?us-ascii?Q?7CFdwuUwQwojtQ3XCx4CEhTsnoEyFvBQKOdjOjgGNAgyjub63GsCyz+8g3r+?=
- =?us-ascii?Q?O+SFH/3/uDiaqCGR908dEOV3wIRkPOtlm5fiIaKD4yzvOMkTzcT1tLg/SGEp?=
- =?us-ascii?Q?2fleI8f/hSUEm7eWB3yDUukPwzRgL3JnzBLT+Tg3USW3NNOVK4/P0tyUxO0I?=
- =?us-ascii?Q?F+iFFu4R3EUgNvVf7SUOlWEq?=
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?6ggORShfZ9s/xfC9r1gKV2Gg53aUkl9LzF6dJFqXF4jTERxWRjNDDJmlWvPH?=
+ =?us-ascii?Q?4GgSoY8cZTrPejSEipSODMzpmZm1PQOuSBTXcqWHk7BZEY06eozvosrQIoxt?=
+ =?us-ascii?Q?lhTFYXB/9fuzFDOsEYzsQhKhF6T7ABgd8JaH8gsGU8wt+1nZgnlA7jyCk3Vn?=
+ =?us-ascii?Q?XiKI5JeepHkgSkravSIBKkD6L1Ox2G7JIDG4lIN1qiTTp08K8fNkat/QH5W+?=
+ =?us-ascii?Q?w1rU1wscvlV5NTjH/gcm0T8aYVRw7NftdWUOhMhVQLPfUm5L+PpqpkjmWNUj?=
+ =?us-ascii?Q?7TJnYmf4jxcExMGUURPZRDzXu6nMb2kZU87NOr79nA1OzHszMguvNQNPqa9W?=
+ =?us-ascii?Q?S19EH5RrvbF5/zluh4aISRDQiuBaZe6qxGNA6/sz7lss1MBjDLL1zEmGVvPK?=
+ =?us-ascii?Q?CnFzz3O+fmEMKOsRJOpv1TtbmS+G7n15JJDYmQb0mj2yZuQ3Jvtlz1BFEIH+?=
+ =?us-ascii?Q?G/YeOEyb22s/MKZhpPsYnQnMgDHhOp34pTcyaj26/iI8eXvWLcHMXe5I9yid?=
+ =?us-ascii?Q?THLo2kkv0PbsCc0YtQxzg9fcICrCsmkdMDyHqafilsf+uQSG6g9hZfCB7oOX?=
+ =?us-ascii?Q?6/e5pnGAjVD215WTOwJ5N79q+MJ4HF6LLY6o1xDiGX+QFvD7jhZKyDnyQAwg?=
+ =?us-ascii?Q?mvfgCAMtCukio9odp4Z5YY/WKcZWMSFFzVUPn7cno1Qb0NX4bDg8r73w7NG0?=
+ =?us-ascii?Q?z9daZXD5ndTP9jQzu6lMrFLftcFz7RDjIHrXan0hm0aB1JvNRwMgzP6LR35s?=
+ =?us-ascii?Q?FHFFD3Xc+93BT/l3wwdkl4j0dOTD0NNaMDYwGTMdzlwq+ym8P0U1xg8VI79o?=
+ =?us-ascii?Q?3/L1XETJvXcZnVLJkJblFTkSdBqxCPaRLFeQ8ZHwkBjJ5Ara8gB18XjOoYwL?=
+ =?us-ascii?Q?ZHUKro4sbSFm0z8MdixnWHvGhsjZTlc8t/mxcKPwnaFmm3ZMr0Zyd253HZvY?=
+ =?us-ascii?Q?lIKX+KSVD1BooeuHKMwKkL1ijGf64i/pS4Yx1lknswdY/DXqAZ133DUmKBC2?=
+ =?us-ascii?Q?QGUC2RRSRBxPxGz31jFbrDScuOqjxHu8Ow69vJYnKuebIKJRd24F8wQn1RtW?=
+ =?us-ascii?Q?WCvV4byMIF0FmjTXDt/AvdIeSfZ5yDja9hkxGxgLsVtA6fQ536M2ppe19bTR?=
+ =?us-ascii?Q?5z7RHPUGaKwuw3WpIi3kBH+aW7QRnwmtgjzkau1Lg9Htyk0+oLsNZn0mChZf?=
+ =?us-ascii?Q?kn78LDZ6azc92t8ke8jQHs68zUdQ5UEQZHkONdZWpNeJxuJ/M3D5v7ygn7Lh?=
+ =?us-ascii?Q?hPW9yCxU6F4RFzKH/3vNthD/PC6X1RRWfJrrqPjVhsc1+K3WJu8Ssjne6+WG?=
+ =?us-ascii?Q?FHR/UWfB7q9o965GofZ5p/2x?=
 X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 66bffe6f-a159-43eb-4237-08d94176459f
+X-MS-Exchange-CrossTenant-Network-Message-Id: 522fa53f-4453-4343-9c05-08d941763f4c
 X-MS-Exchange-CrossTenant-AuthSource: BYAPR12MB2711.namprd12.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 07 Jul 2021 18:37:28.1955
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 07 Jul 2021 18:37:17.7945
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: fCRKaCdZOBelwoJ2SnslAkIX7+wxCh/FsZPK4zWWBMG6lGIqPugyjOl7/gJISNg4oEtUTdZ2TuRVMeY0ndBpJg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY5PR12MB4082
+X-MS-Exchange-CrossTenant-UserPrincipalName: HIw/1Kt2higPTPOkUnUOuWyoXPUYxsd1e3cO/BmQMirNeR1xFVqQO77gWZ0UBxKlJOED7pHKqLRrQcbXFNTYgQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BYAPR12MB2808
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-When the kernel is getting ready to kexec, it calls the device_shutdown()
-to allow drivers to cleanup before the kexec. If SEV firmware is
-initialized then shutdown it before kexec'ing the new kernel.
+When SEV-SNP is enabled globally, a write from the host goes through the
+RMP check. If the hardware encounters the check failure, then it raises
+the #PF (with RMP set). Dump the RMP table to help the debug.
 
 Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
 ---
- drivers/crypto/ccp/sev-dev.c | 53 +++++++++++++++++-------------------
- drivers/crypto/ccp/sp-pci.c  | 12 ++++++++
- 2 files changed, 37 insertions(+), 28 deletions(-)
+ arch/x86/mm/fault.c | 79 +++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 79 insertions(+)
 
-diff --git a/drivers/crypto/ccp/sev-dev.c b/drivers/crypto/ccp/sev-dev.c
-index d3c717bb5b50..84c91bab00bd 100644
---- a/drivers/crypto/ccp/sev-dev.c
-+++ b/drivers/crypto/ccp/sev-dev.c
-@@ -310,6 +310,9 @@ static int __sev_platform_shutdown_locked(int *error)
- 	struct sev_device *sev = psp_master->sev_data;
- 	int ret;
+diff --git a/arch/x86/mm/fault.c b/arch/x86/mm/fault.c
+index 2715240c757e..195149eae9b6 100644
+--- a/arch/x86/mm/fault.c
++++ b/arch/x86/mm/fault.c
+@@ -19,6 +19,7 @@
+ #include <linux/uaccess.h>		/* faulthandler_disabled()	*/
+ #include <linux/efi.h>			/* efi_crash_gracefully_on_page_fault()*/
+ #include <linux/mm_types.h>
++#include <linux/sev.h>			/* snp_lookup_page_in_rmptable() */
  
-+	if (sev->state == SEV_STATE_UNINIT)
-+		return 0;
-+
- 	ret = __sev_do_cmd_locked(SEV_CMD_SHUTDOWN, NULL, error);
- 	if (ret)
- 		return ret;
-@@ -1118,6 +1121,22 @@ int sev_dev_init(struct psp_device *psp)
- 	return ret;
+ #include <asm/cpufeature.h>		/* boot_cpu_has, ...		*/
+ #include <asm/traps.h>			/* dotraplinkage, ...		*/
+@@ -502,6 +503,81 @@ static void show_ldttss(const struct desc_ptr *gdt, const char *name, u16 index)
+ 		 name, index, addr, (desc.limit0 | (desc.limit1 << 16)));
  }
  
-+static void sev_firmware_shutdown(struct sev_device *sev)
++static void dump_rmpentry(unsigned long address)
 +{
-+	sev_platform_shutdown(NULL);
++	struct rmpentry *e;
++	unsigned long pfn;
++	pgd_t *pgd;
++	pte_t *pte;
++	int level;
 +
-+	if (sev_es_tmr) {
-+		/* The TMR area was encrypted, flush it from the cache */
-+		wbinvd_on_all_cpus();
++	pgd = __va(read_cr3_pa());
++	pgd += pgd_index(address);
 +
-+		free_pages((unsigned long)sev_es_tmr,
-+			   get_order(SEV_ES_TMR_SIZE));
-+		sev_es_tmr = NULL;
++	pte = lookup_address_in_pgd(pgd, address, &level);
++	if (unlikely(!pte))
++		return;
++
++	switch (level) {
++	case PG_LEVEL_4K: {
++		pfn = pte_pfn(*pte);
++		break;
++	}
++	case PG_LEVEL_2M: {
++		pfn = pmd_pfn(*(pmd_t *)pte);
++		break;
++	}
++	case PG_LEVEL_1G: {
++		pfn = pud_pfn(*(pud_t *)pte);
++		break;
++	}
++	case PG_LEVEL_512G: {
++		pfn = p4d_pfn(*(p4d_t *)pte);
++		break;
++	}
++	default:
++		return;
 +	}
 +
-+	sev_snp_shutdown(NULL);
-+}
-+
- void sev_dev_destroy(struct psp_device *psp)
- {
- 	struct sev_device *sev = psp->sev_data;
-@@ -1125,6 +1144,8 @@ void sev_dev_destroy(struct psp_device *psp)
- 	if (!sev)
- 		return;
- 
-+	sev_firmware_shutdown(sev);
-+
- 	if (sev->misc)
- 		kref_put(&misc_dev->refcount, sev_exit);
- 
-@@ -1155,21 +1176,6 @@ void sev_pci_init(void)
- 	if (sev_get_api_version())
- 		goto err;
- 
--	/*
--	 * If platform is not in UNINIT state then firmware upgrade and/or
--	 * platform INIT command will fail. These command require UNINIT state.
--	 *
--	 * In a normal boot we should never run into case where the firmware
--	 * is not in UNINIT state on boot. But in case of kexec boot, a reboot
--	 * may not go through a typical shutdown sequence and may leave the
--	 * firmware in INIT or WORKING state.
--	 */
--
--	if (sev->state != SEV_STATE_UNINIT) {
--		sev_platform_shutdown(NULL);
--		sev->state = SEV_STATE_UNINIT;
--	}
--
- 	if (sev_version_greater_or_equal(0, 15) &&
- 	    sev_update_firmware(sev->dev) == 0)
- 		sev_get_api_version();
-@@ -1227,19 +1233,10 @@ void sev_pci_init(void)
- 
- void sev_pci_exit(void)
- {
--	if (!psp_master->sev_data)
--		return;
--
--	sev_platform_shutdown(NULL);
--
--	if (sev_es_tmr) {
--		/* The TMR area was encrypted, flush it from the cache */
--		wbinvd_on_all_cpus();
-+	struct sev_device *sev = psp_master->sev_data;
- 
--		free_pages((unsigned long)sev_es_tmr,
--			   get_order(SEV_ES_TMR_SIZE));
--		sev_es_tmr = NULL;
--	}
-+	if (!sev)
-+		return;
- 
--	sev_snp_shutdown(NULL);
-+	sev_firmware_shutdown(sev);
- }
-diff --git a/drivers/crypto/ccp/sp-pci.c b/drivers/crypto/ccp/sp-pci.c
-index f468594ef8af..fb1b499bf04d 100644
---- a/drivers/crypto/ccp/sp-pci.c
-+++ b/drivers/crypto/ccp/sp-pci.c
-@@ -239,6 +239,17 @@ static int sp_pci_probe(struct pci_dev *pdev, const struct pci_device_id *id)
- 	return ret;
- }
- 
-+static void sp_pci_shutdown(struct pci_dev *pdev)
-+{
-+	struct device *dev = &pdev->dev;
-+	struct sp_device *sp = dev_get_drvdata(dev);
-+
-+	if (!sp)
++	e = snp_lookup_page_in_rmptable(pfn_to_page(pfn), &level);
++	if (unlikely(!e))
 +		return;
 +
-+	sp_destroy(sp);
++	/*
++	 * If the RMP entry at the faulting address was not assigned, then
++	 * dump may not provide any useful debug information. Iterate
++	 * through the entire 2MB region, and dump the RMP entries if one
++	 * of the bit in the RMP entry is set.
++	 */
++	if (rmpentry_assigned(e)) {
++		pr_alert("RMPEntry paddr 0x%lx [assigned=%d immutable=%d pagesize=%d gpa=0x%lx"
++			" asid=%d vmsa=%d validated=%d]\n", pfn << PAGE_SHIFT,
++			rmpentry_assigned(e), rmpentry_immutable(e), rmpentry_pagesize(e),
++			rmpentry_gpa(e), rmpentry_asid(e), rmpentry_vmsa(e),
++			rmpentry_validated(e));
++
++		pr_alert("RMPEntry paddr 0x%lx %016llx %016llx\n", pfn << PAGE_SHIFT,
++			e->high, e->low);
++	} else {
++		unsigned long pfn_end;
++
++		pfn = pfn & ~0x1ff;
++		pfn_end = pfn + PTRS_PER_PMD;
++
++		while (pfn < pfn_end) {
++			e = snp_lookup_page_in_rmptable(pfn_to_page(pfn), &level);
++
++			if (unlikely(!e))
++				return;
++
++			if (e->low || e->high)
++				pr_alert("RMPEntry paddr 0x%lx: %016llx %016llx\n",
++					pfn << PAGE_SHIFT, e->high, e->low);
++			pfn++;
++		}
++	}
 +}
 +
- static void sp_pci_remove(struct pci_dev *pdev)
+ static void
+ show_fault_oops(struct pt_regs *regs, unsigned long error_code, unsigned long address)
  {
- 	struct device *dev = &pdev->dev;
-@@ -369,6 +380,7 @@ static struct pci_driver sp_pci_driver = {
- 	.id_table = sp_pci_table,
- 	.probe = sp_pci_probe,
- 	.remove = sp_pci_remove,
-+	.shutdown = sp_pci_shutdown,
- 	.driver.pm = &sp_pci_pm_ops,
- };
+@@ -578,6 +654,9 @@ show_fault_oops(struct pt_regs *regs, unsigned long error_code, unsigned long ad
+ 	}
  
+ 	dump_pagetable(address);
++
++	if (error_code & X86_PF_RMP)
++		dump_rmpentry(address);
+ }
+ 
+ static noinline void
 -- 
 2.17.1
 
