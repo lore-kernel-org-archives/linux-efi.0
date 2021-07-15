@@ -7,60 +7,59 @@ X-Spam-Status: No, score=-10.4 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
 	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
 	USER_IN_DEF_DKIM_WL autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A7346C6377A
-	for <linux-efi@archiver.kernel.org>; Thu, 15 Jul 2021 19:50:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 31FB7C636CA
+	for <linux-efi@archiver.kernel.org>; Thu, 15 Jul 2021 21:53:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 92C4261285
-	for <linux-efi@archiver.kernel.org>; Thu, 15 Jul 2021 19:50:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 12CE8613DB
+	for <linux-efi@archiver.kernel.org>; Thu, 15 Jul 2021 21:53:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243448AbhGOTww (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 15 Jul 2021 15:52:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42140 "EHLO
+        id S231659AbhGOV4T (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 15 Jul 2021 17:56:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44266 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1346360AbhGOTvT (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 15 Jul 2021 15:51:19 -0400
-Received: from mail-pf1-x42f.google.com (mail-pf1-x42f.google.com [IPv6:2607:f8b0:4864:20::42f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F8A1C0225A7
-        for <linux-efi@vger.kernel.org>; Thu, 15 Jul 2021 12:18:21 -0700 (PDT)
-Received: by mail-pf1-x42f.google.com with SMTP id a127so6395828pfa.10
-        for <linux-efi@vger.kernel.org>; Thu, 15 Jul 2021 12:18:21 -0700 (PDT)
+        with ESMTP id S230126AbhGOV4S (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 15 Jul 2021 17:56:18 -0400
+Received: from mail-pl1-x632.google.com (mail-pl1-x632.google.com [IPv6:2607:f8b0:4864:20::632])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DEF26C061765
+        for <linux-efi@vger.kernel.org>; Thu, 15 Jul 2021 14:53:23 -0700 (PDT)
+Received: by mail-pl1-x632.google.com with SMTP id o8so4155184plg.11
+        for <linux-efi@vger.kernel.org>; Thu, 15 Jul 2021 14:53:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=google.com; s=20161025;
         h=date:from:to:cc:subject:message-id:references:mime-version
          :content-disposition:in-reply-to;
-        bh=elaxZZafDjVLiuc49owUeZ0204o65amFxOUC2qpgTKs=;
-        b=Q5HupHoPS4LdRZjI9aLLpJl+EXOusDVJvjG4Iz0vi484LYzH9bZJ+UVYAPgxON53tD
-         3HUhZR3sPDonrp6Rx9HVRmHE8bwdJDYe3XLJrkaVZXuJgNA1I9br3fWYQH0NR8D1K4Bh
-         wpY5QEoNAb+x/8n9tWtUWQ3oLRqyDIIHHMOiw2yPQ7Z+1WXGx+r3bT61UMlsD+Gt9KvD
-         wSosGIOovnI5kM/c/4ZOB1p0adgb7KpSr/rm6WtHEv8nbN2mbwno03HSeDBR3602UD+d
-         /PViOtSgang4WUW2+i6djc478rpbuJrqWD+lJ9Dy+1oTIcTKK+8C3zjn8Ias8jxuPdd5
-         sHkQ==
+        bh=fT5PdprpzzVdpuGRQjB10wOKBXaawvXKa53cRx1HK6I=;
+        b=svmrN+O4TI98vQfj9n2X/vE50XmQmqn1PaXKCP4Nr/CQyCC4gpvE/2A44G7O3EEASy
+         /EfSX6dHh4q+I/a6RzTa5Z+Q8thrryvjaD57bsWLXbdH95pEPz+xykR9xEgUdH4Bv4Z3
+         ZoAGTa8Dt+Ijjc+XetNUvdXC7ojCQeJcD0LZiPZWKk/RdXBOQA7PxVYGDtHqNFQ/g3+1
+         ouQ3Nz6ZGFswmzMs7fe8Jr1UislrbNvLnmgdVpL88bQPCqp5nJlc9aQYclxLYlImlTzk
+         iqbO3a14CqCw0bGU2cATmeN0NT1CTHGMNXISk50SAZ9lM50oC08Hg9k5l20FPm3XWnsR
+         s63g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=elaxZZafDjVLiuc49owUeZ0204o65amFxOUC2qpgTKs=;
-        b=qiYaYVnwC0rBoD06lSmEoJLh/wqnPCWuC8zsEyIhEhlatjyBaoCd94rjrlDpJyQ01K
-         gupPhaIAqYn+77z3EJ21Y4jnrYH9QfYA7ReLhI/zSEwAy0PdbDKubjdDFmjVD/KvfYlR
-         eFjG2Mj0UT18/0KApTOZXuXALTOnWy/BIWqLmrzNSPsysa2A7NhXwNop+3z4Gwqo1u2m
-         KazhJAaQbS3OYf9t5tN3nqZb4j7oQ3w17f97Ize38wHGQSoi22/DANV38eqHTCM3KZEz
-         QinJHXZ58/0+9p19fTEeHAd8lfDThI6El0Q10W9eHbMwbbpfxBL9Lz0U/CE9/0ly/+hS
-         S69g==
-X-Gm-Message-State: AOAM532RB7svE2xacb8v768RQXB39YQrl+ihfmQuGBW41Typ+LUjhhSi
-        yprLfMVg5Gxt6/OhLk0A9wSIlA==
-X-Google-Smtp-Source: ABdhPJxs5P265vYYEPGZ8x+HkOKGVsrc3wav0sXpzToNYrqG5Ockpl2xyO49rMlEI8CkyKvDo3JDEA==
-X-Received: by 2002:a05:6a00:d5f:b029:32c:7264:2f65 with SMTP id n31-20020a056a000d5fb029032c72642f65mr6181751pfv.40.1626376700235;
-        Thu, 15 Jul 2021 12:18:20 -0700 (PDT)
+        bh=fT5PdprpzzVdpuGRQjB10wOKBXaawvXKa53cRx1HK6I=;
+        b=DxBGmOrfTi5UMe3+otX5VXfUbBaAwJULwu/dSUBPgFe6tsDeThPS3L5hNe7RzQH+J8
+         Feh50VEe17zUdxqbvwI7LycAGrFP0wlln0F1w99AzPzJaPiHgk0EeOEQzlDCRAMejGx2
+         dHovmD0QsExVjnNF+gg2XMgsE50afCy/iV0WB1hxaM0jxnjNE4YkvHK+mFZZMf30c1Je
+         Wx0IsNvX1MRTWs/Hm2uTK3OsT6tqIw643l4l9Qftl6k6mNTDgjAXOn3Md1ae/fOz98H/
+         AKAQUipBjyrwx3X6wJWcwIS1Yojvzpnq0+1CrmPgyI9wUoS0/cDJNQ4lgMRVQHtpPJQR
+         SefA==
+X-Gm-Message-State: AOAM533NuGVaRJlE+LAeY0atYI41YylR8WdjgCs0GsnGSjVInkTa/FkX
+        nOtplsOiyvnp9IoNg24Ki+GZrQ==
+X-Google-Smtp-Source: ABdhPJwIwDUr/HSzt1W7U3WJexPF19d/NdRvrPK8Jq2C1qfjx7umE1NH31E27//HtmrPWVEOD8ZZLw==
+X-Received: by 2002:a17:90a:9b89:: with SMTP id g9mr12007893pjp.200.1626386003022;
+        Thu, 15 Jul 2021 14:53:23 -0700 (PDT)
 Received: from google.com (157.214.185.35.bc.googleusercontent.com. [35.185.214.157])
-        by smtp.gmail.com with ESMTPSA id i12sm6029283pjj.9.2021.07.15.12.18.19
+        by smtp.gmail.com with ESMTPSA id m21sm7561729pfo.159.2021.07.15.14.53.22
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 15 Jul 2021 12:18:19 -0700 (PDT)
-Date:   Thu, 15 Jul 2021 19:18:15 +0000
+        Thu, 15 Jul 2021 14:53:22 -0700 (PDT)
+Date:   Thu, 15 Jul 2021 21:53:18 +0000
 From:   Sean Christopherson <seanjc@google.com>
-To:     Dave Hansen <dave.hansen@intel.com>
-Cc:     Peter Gonda <pgonda@google.com>,
-        Brijesh Singh <brijesh.singh@amd.com>, x86@kernel.org,
-        linux-kernel@vger.kernel.org, kvm list <kvm@vger.kernel.org>,
+To:     Brijesh Singh <brijesh.singh@amd.com>
+Cc:     Dave Hansen <dave.hansen@intel.com>, x86@kernel.org,
+        linux-kernel@vger.kernel.org, kvm@vger.kernel.org,
         linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org,
         linux-coco@lists.linux.dev, linux-mm@kvack.org,
         linux-crypto@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>,
@@ -73,7 +72,7 @@ Cc:     Peter Gonda <pgonda@google.com>,
         Jim Mattson <jmattson@google.com>,
         Andy Lutomirski <luto@kernel.org>,
         Dave Hansen <dave.hansen@linux.intel.com>,
-        Sergio Lopez <slp@redhat.com>,
+        Sergio Lopez <slp@redhat.com>, Peter Gonda <pgonda@google.com>,
         Peter Zijlstra <peterz@infradead.org>,
         Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>,
         David Rientjes <rientjes@google.com>,
@@ -82,68 +81,85 @@ Cc:     Peter Gonda <pgonda@google.com>,
         Borislav Petkov <bp@alien8.de>,
         Michael Roth <michael.roth@amd.com>,
         Vlastimil Babka <vbabka@suse.cz>, tony.luck@intel.com,
-        Nathaniel McCallum <npmccallum@redhat.com>,
-        brijesh.ksingh@gmail.com
-Subject: Re: [PATCH Part2 RFC v4 06/40] x86/sev: Add helper functions for
- RMPUPDATE and PSMASH instruction
-Message-ID: <YPCJ95ABlMjxnDWX@google.com>
+        npmccallum@redhat.com, brijesh.ksingh@gmail.com
+Subject: Re: [PATCH Part2 RFC v4 10/40] x86/fault: Add support to handle the
+ RMP fault for user address
+Message-ID: <YPCuTiNET/hJHqOY@google.com>
 References: <20210707183616.5620-1-brijesh.singh@amd.com>
- <20210707183616.5620-7-brijesh.singh@amd.com>
- <CAMkAt6quzRMiEJ=iYDocRvpaYuNcV5vm=swbowK+KG=j7FjyKA@mail.gmail.com>
- <8ab309cd-8465-d543-55c8-5f6529fe74fd@intel.com>
- <YPCE5D6h7V0iZiX/@google.com>
- <a00bb4f7-ab06-5773-8c8b-3540c75b257a@intel.com>
+ <20210707183616.5620-11-brijesh.singh@amd.com>
+ <3c6b6fc4-05b2-8d18-2eb8-1bd1a965c632@intel.com>
+ <2b4accb6-b68e-02d3-6fed-975f90558099@amd.com>
+ <a249b101-87d1-2e66-d7d6-af737c045cc3@intel.com>
+ <5592d8ff-e2c3-6474-4a10-96abe1962d6f@amd.com>
+ <bfb857d2-8e3c-4a3b-c64e-96a16c0c6d49@intel.com>
+ <aef6be8a-c93a-1aaa-57fe-116e70483542@amd.com>
+ <c3c71a5b-8100-63f2-1792-d7b53731147c@intel.com>
+ <298d2e19-566d-2e58-b639-724c10885646@amd.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <a00bb4f7-ab06-5773-8c8b-3540c75b257a@intel.com>
+In-Reply-To: <298d2e19-566d-2e58-b639-724c10885646@amd.com>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Thu, Jul 15, 2021, Dave Hansen wrote:
-> On 7/15/21 11:56 AM, Sean Christopherson wrote:
-> >>>> +       /* Retry if another processor is modifying the RMP entry. */
-> >>>> +       do {
-> >>>> +               /* Binutils version 2.36 supports the PSMASH mnemonic. */
-> >>>> +               asm volatile(".byte 0xF3, 0x0F, 0x01, 0xFF"
-> >>>> +                             : "=a"(ret)
-> >>>> +                             : "a"(spa)
-> >>>> +                             : "memory", "cc");
-> >>>> +       } while (ret == FAIL_INUSE);
-> >>> Should there be some retry limit here for safety? Or do we know that
-> >>> we'll never be stuck in this loop? Ditto for the loop in rmpupdate.
-> >> It's probably fine to just leave this.  While you could *theoretically*
-> >> lose this race forever, it's unlikely to happen in practice.  If it
-> >> does, you'll get an easy-to-understand softlockup backtrace which should
-> >> point here pretty quickly.
-> > But should failure here even be tolerated?  The TDX cases spin on flows that are
-> > _not_ due to (direct) contenion, e.g. a pending interrupt while flushing the
-> > cache or lack of randomness when generating a key.  In this case, there are two
-> > CPUs racing to modify the RMP entry, which implies that the final state of the
-> > RMP entry is not deterministic.
+On Mon, Jul 12, 2021, Brijesh Singh wrote:
 > 
-> I was envisioning that two different CPUs could try to smash two
-> *different* 4k physical pages, but collide since they share
-> a 2M page.
 > 
-> But, in patch 33, this is called via:
+> On 7/12/21 11:29 AM, Dave Hansen wrote:
+> > On 7/12/21 9:24 AM, Brijesh Singh wrote:
+> > > Apologies if I was not clear in the messaging, that's exactly what I
+> > > mean that we don't feed RMP entries during the page state change.
+> > > 
+> > > The sequence of the operation is:
+> > > 
+> > > 1. Guest issues a VMGEXIT (page state change) to add a page in the RMP
+> > > 2. Hyperivosr adds the page in the RMP table.
+> > > 
+> > > The check will be inside the hypervisor (#2), to query the backing page
+> > > type, if the backing page is from the hugetlbfs, then don't add the page
+> > > in the RMP, and fail the page state change VMGEXIT.
+> > 
+> > Right, but *LOOOOOONG* before that, something walked the page tables and
+> > stuffed the PFN into the NPT (that's the AMD equivalent of EPT, right?).
+> >   You could also avoid this whole mess by refusing to allow hugetblfs to
+> > be mapped into the guest in the first place.
+> > 
 > 
-> > +		write_lock(&kvm->mmu_lock);
-> > +
-> > +		switch (op) {
-> > +		case SNP_PAGE_STATE_SHARED:
-> > +			rc = snp_make_page_shared(vcpu, gpa, pfn, level);
-> ...
-> 
-> Which should make collisions impossible.  Did I miss another call-site?
+> Ah, that should be doable. For SEV stuff, we require the VMM to register the
+> memory region to the hypervisor during the VM creation time. I can check the
+> hugetlbfs while registering the memory region and fail much earlier.
 
-Ya, there's more, e.g. sev_snp_write_page_begin() and snp_handle_rmp_page_fault(),
-both of which run without holding mmu_lock.  The PSMASH operation isn't too
-concerning, but the associated RMPUDATE is most definitely a concern, e.g. if two
-vCPUs are trying to access different variants of a page.  It's ok if KVM's
-"response" in such a situation does weird things to the guest, but one of the
-two operations should "win", which I don't think is guaranteed if multiple RMP
-violations are racing.
+That's technically unnecessary, because this patch is working on the wrong set of
+page tables when handling faults from KVM.
 
-I'll circle back to this patch after I've gone through the KVM MMU changes.
+The host page tables constrain KVM's NPT, but the two are not mirrors of each
+other.  Specifically, KVM cannot exceed the size of the host page tables because
+that would give the guest access to memory it does not own, but KVM isn't required
+to use the same size as the host.  E.g. a 1gb page in the host can be 1gb, 2mb, or
+4kb in the NPT.
+
+The code "works" because the size contraints mean it can't get false negatives,
+only false positives, false positives will never be fatal, e.g. the fault handler
+may unnecessarily demote a 1gb, and demoting a host page will further constrain
+KVM's NPT.
+
+The distinction matters because it changes our options.  For RMP violations on
+NPT due to page size mismatches, KVM can and should handle the fault without
+consulting the primary MMU, i.e. by demoting the NPT entry.  That means KVM does
+not need to care about hugetlbfs or any other backing type that cannot be split
+since KVM will never initiate a host page split in response to a #NPT RMP violation.
+
+That doesn't mean that hugetlbfs will magically work since e.g. get/put_user()
+will fault and fail, but that's a generic non-KVM problem since nothing prevents
+remapping and/or accessing the page(s) outside of KVM context.
+
+The other reason to not disallow hugetlbfs and co. is that a guest that's
+enlightened to operate at 2mb granularity, e.g. always do page state changes on
+2mb chunks, can play nice with hugetlbfs without ever hitting an RMP violation.
+
+Last thought, have we taken care in the guest side of things to work at 2mb
+granularity when possible?  AFAICT, PSMASH is effectively a one-way street since
+RMPUPDATE to restore a 2mb RMP is destructive, i.e. requires PVALIDATE on the
+entire 2mb chunk, and the guest can't safely do that without reinitializing the
+whole page, e.g. would either lose data or have to save/init/restore.
