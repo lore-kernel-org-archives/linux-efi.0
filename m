@@ -2,60 +2,61 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
+X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,FSL_HELO_FAKE,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_IN_DEF_DKIM_WL autolearn=no autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_IN_DEF_DKIM_WL autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B35BDC07E9D
-	for <linux-efi@archiver.kernel.org>; Mon, 19 Jul 2021 21:43:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 176F0C6377A
+	for <linux-efi@archiver.kernel.org>; Mon, 19 Jul 2021 21:43:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 845D461279
+	by mail.kernel.org (Postfix) with ESMTP id F400A60FF0
 	for <linux-efi@archiver.kernel.org>; Mon, 19 Jul 2021 21:43:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345628AbhGSU5c (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 19 Jul 2021 16:57:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60224 "EHLO
+        id S1354121AbhGSU6C (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 19 Jul 2021 16:58:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36806 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1383892AbhGSSPV (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 19 Jul 2021 14:15:21 -0400
-Received: from mail-pf1-x42f.google.com (mail-pf1-x42f.google.com [IPv6:2607:f8b0:4864:20::42f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 37A4DC061762
-        for <linux-efi@vger.kernel.org>; Mon, 19 Jul 2021 11:44:35 -0700 (PDT)
-Received: by mail-pf1-x42f.google.com with SMTP id j199so17269756pfd.7
-        for <linux-efi@vger.kernel.org>; Mon, 19 Jul 2021 11:55:59 -0700 (PDT)
+        with ESMTP id S1384800AbhGSShA (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 19 Jul 2021 14:37:00 -0400
+Received: from mail-pf1-x42a.google.com (mail-pf1-x42a.google.com [IPv6:2607:f8b0:4864:20::42a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 07EE1C061788
+        for <linux-efi@vger.kernel.org>; Mon, 19 Jul 2021 12:05:03 -0700 (PDT)
+Received: by mail-pf1-x42a.google.com with SMTP id y4so17304325pfi.9
+        for <linux-efi@vger.kernel.org>; Mon, 19 Jul 2021 12:14:52 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=google.com; s=20161025;
         h=date:from:to:cc:subject:message-id:references:mime-version
          :content-disposition:in-reply-to;
-        bh=lOc5+rloDVdT/oQx00DjmvvmSON6OrGGoIPjsiSNP8Y=;
-        b=g4AlSOFhPm6hVf/7SR105tRah3Aea3+9KqN56Ke/OvVzbLLxQa+2FEdnRI5yCBDV+U
-         4E04weFnBKUQ3efnvzdPhRQY+2+Od5nqIyCKNKgiFX0wtkQXrweRsh5bUaswhmgDdflh
-         twIaMTzdSaq840Cc7sDRoqigwkJn4mAzbH3OXS7gdeaYNQPustFoljMzhp71Jz/EDIPl
-         iQ0u6pB02qRWEy9NOKHisJRFVf53eOgb0bPRjLegKpAPXdgUt4CSFJjUZQnOg29L//qi
-         bWnnKN93uYWfM5tgm7e4zrwTJ+oo8OaLK8lCgwcR4sL6wlqDO3MXhRGr9K/4lw9CfxuI
-         K3uA==
+        bh=tQHel7KfmZotRt+JL+tikCTH8i4jvKerKwX4Ykhe458=;
+        b=XzM+UTgoPg+XkDOQ81Qyu9Aj1IHESyBIMhh/NFuqluTQUx/dfqwUh9CfJ7hyZrzFOq
+         98OBWEJ8SBib/jcg/gWXAgVqsGzmGzVmU1OUdWlfXwZp6TOhQz8JOPY/LhU0HLup5t60
+         MG09uBh/EZAN80GUdXbWAIzfSVF8OpL6KrxKsnW7KZT5qxtMjdXlgfFYJCVMyibNrxap
+         bI8rESzefHOSN3QAHId4wLC6/nFzqtJ5ez4iL6x1w8/BsoenbhCPqleRFd2divXFsxNi
+         r/lz770w0+7cZ8LA1ahJas+30qW/2CSV1uocE/OAPLcIqktisM8VvyTh0xw7f/nc4gbi
+         Wsfg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=lOc5+rloDVdT/oQx00DjmvvmSON6OrGGoIPjsiSNP8Y=;
-        b=V9I9NTN1Ket8ClkIuQItunypBTXT5opPtvzmDI52SM65LdT3uoztb50yyOD/rKC1Pu
-         lraOTFmiG10XWVbiFqq6nkynY8tmpyRfkqyzFWPitenfortYIyQGQ4tE2paZQ/X340aw
-         f6gp4ktBw1D/QTRamYDu8XqtWPhBT9AYvGcOootNTWIowiSnhithGOr3+Krs7Xvq8wsa
-         Oso8lNVChumBgNhQ+sXKu87aeCmB19cyc/f3N5LQC/Xy8QEzCMzjeZHYEMgkKDKy957F
-         GGnilBPGmOhjfXjc5p5EooHfVZmOKJrzclsaUJm4y0jKy4bVemw2cFBv0VthXG89O/Nf
-         Yq0g==
-X-Gm-Message-State: AOAM5322taAnqNvHFqNqeeKQRxhnKVPnKl1jQNFtlg4IfcE7uAkLoTzK
-        XgzOJSvkDkdcoB+1za5dNIsiGw==
-X-Google-Smtp-Source: ABdhPJxmSOu7+O2DfzTj7tTZcm5PtaeD09Hlmp3Y4R1m0EFLmxzdwqmHKXKDHGBPl5X7i0P9uc4f5A==
-X-Received: by 2002:a05:6a00:1951:b029:333:64d3:e1f1 with SMTP id s17-20020a056a001951b029033364d3e1f1mr24076104pfk.43.1626720959003;
-        Mon, 19 Jul 2021 11:55:59 -0700 (PDT)
+        bh=tQHel7KfmZotRt+JL+tikCTH8i4jvKerKwX4Ykhe458=;
+        b=ANOHTD1HkqiktRKTN4nkh3HpsGfiQig7jCepMblMb+Kev6BBawVgVc7PFozUSXF53s
+         t25Gk/TyKNh8eRE5JtuIkuDt449Pn/i1QPiia2iuxRIwaKKsn5kmxeauz4UJf9WwIXYY
+         /WCl7BjaUv5nz08WFalFev+0MZUr2hetHd//3eCrxd51pxQluloI/0oDCRRLgDNwXLFY
+         N8vZulKnezDWGcNoMsBtJzH+mNNJ3JGEV8fTpJA84sib2yqs0yDR8/mTKYKcv4Xz8FE5
+         Y/w3IsjNUaEUBsw+oIWgt5+80lbRxmJSBzVbHAO4nzEDQO6+9m6GW/AmxSZ/bsZCr4Fx
+         BGNw==
+X-Gm-Message-State: AOAM532PS3vXpya1W4E9dJlgpuL3jmYmbNL52e8fLhN+Hs+p1v57IBCs
+        1QJn7ZZupe3P3XLhFEg0QbL1IA==
+X-Google-Smtp-Source: ABdhPJwrFVVD96rnIFIK2jlY/ieHH+6lfcSv1ywrpxxBKG4B8nAAH7dSYEIACsmYQwT8smdf5ajGig==
+X-Received: by 2002:a65:5bc6:: with SMTP id o6mr3241244pgr.43.1626722092334;
+        Mon, 19 Jul 2021 12:14:52 -0700 (PDT)
 Received: from google.com (157.214.185.35.bc.googleusercontent.com. [35.185.214.157])
-        by smtp.gmail.com with ESMTPSA id q17sm24643642pgd.39.2021.07.19.11.55.58
+        by smtp.gmail.com with ESMTPSA id x10sm22140073pgj.73.2021.07.19.12.14.51
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 19 Jul 2021 11:55:58 -0700 (PDT)
-Date:   Mon, 19 Jul 2021 18:55:54 +0000
+        Mon, 19 Jul 2021 12:14:51 -0700 (PDT)
+Date:   Mon, 19 Jul 2021 19:14:48 +0000
 From:   Sean Christopherson <seanjc@google.com>
 To:     Brijesh Singh <brijesh.singh@amd.com>
 Cc:     x86@kernel.org, linux-kernel@vger.kernel.org, kvm@vger.kernel.org,
@@ -81,80 +82,71 @@ Cc:     x86@kernel.org, linux-kernel@vger.kernel.org, kvm@vger.kernel.org,
         Michael Roth <michael.roth@amd.com>,
         Vlastimil Babka <vbabka@suse.cz>, tony.luck@intel.com,
         npmccallum@redhat.com, brijesh.ksingh@gmail.com
-Subject: Re: [PATCH Part2 RFC v4 33/40] KVM: SVM: Add support to handle MSR
- based Page State Change VMGEXIT
-Message-ID: <YPXKuiRCjod8Wn2n@google.com>
+Subject: Re: [PATCH Part2 RFC v4 26/40] KVM: SVM: Add
+ KVM_SEV_SNP_LAUNCH_FINISH command
+Message-ID: <YPXPKLW8DvqK7yak@google.com>
 References: <20210707183616.5620-1-brijesh.singh@amd.com>
- <20210707183616.5620-34-brijesh.singh@amd.com>
- <YPHzcstus9mS8hOm@google.com>
- <b9527f12-f3ad-c6b9-2967-5d708d69d937@amd.com>
+ <20210707183616.5620-27-brijesh.singh@amd.com>
+ <YPHpk3RFSmE13ZXz@google.com>
+ <9ee5a991-3e43-3489-5ee1-ff8c66cfabc1@amd.com>
+ <YPWuVY+rKU2/DVUS@google.com>
+ <379fd4da-3ca9-3205-535b-8d1891b3a75a@amd.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <b9527f12-f3ad-c6b9-2967-5d708d69d937@amd.com>
+In-Reply-To: <379fd4da-3ca9-3205-535b-8d1891b3a75a@amd.com>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
 On Mon, Jul 19, 2021, Brijesh Singh wrote:
 > 
-> On 7/16/21 4:00 PM, Sean Christopherson wrote:
-> > On Wed, Jul 07, 2021, Brijesh Singh wrote:
-> > > +static int __snp_handle_psc(struct kvm_vcpu *vcpu, int op, gpa_t gpa, int level)
+> 
+> On 7/19/21 11:54 AM, Sean Christopherson wrote:
+> > > As I said in previous comments that by default all the memory is in the
+> > > hypervisor state. if the rmpupdate() failed that means nothing is changed in
+> > > the RMP and there is no need to reclaim. The reclaim is required only if the
+> > > pages are assigned in the RMP table.
 > > 
-> > I can live with e.g. GHCB_MSR_PSC_REQ, but I'd strongly prefer to spell this out,
-> > e.g. __snp_handle_page_state_change() or whatever.  I had a hell of a time figuring
-> > out what PSC was the first time I saw it in some random context.
-> 
-> Based on the previous review feedback I renamed from
-> __snp_handle_page_state_change to __snp_handle_psc(). I will see what others
-> say and based on that will rename accordingly.
-
-I've no objection to using PSC for enums and whatnot, and I'll happily defer to
-Boris for functions in the core kernel and guest, but for KVM I'd really like to
-spell out the name for the two or so main handler functions.
-
-> > > +	while (gpa < gpa_end) {
-> > > +		/*
-> > > +		 * Get the pfn and level for the gpa from the nested page table.
-> > > +		 *
-> > > +		 * If the TDP walk failed, then its safe to say that we don't have a valid
-> > > +		 * mapping for the gpa in the nested page table. Create a fault to map the
-> > > +		 * page is nested page table.
-> > > +		 */
-> > > +		if (!kvm_mmu_get_tdp_walk(vcpu, gpa, &pfn, &tdp_level)) {
-> > > +			pfn = kvm_mmu_map_tdp_page(vcpu, gpa, PFERR_USER_MASK, level);
-> > > +			if (is_error_noslot_pfn(pfn))
-> > > +				goto out;
-> > > +
-> > > +			if (!kvm_mmu_get_tdp_walk(vcpu, gpa, &pfn, &tdp_level))
-> > > +				goto out;
-> > > +		}
-> > > +
-> > > +		/* Adjust the level so that we don't go higher than the backing page level */
-> > > +		level = min_t(size_t, level, tdp_level);
-> > > +
-> > > +		write_lock(&kvm->mmu_lock);
-> > 
-> > Retrieving the PFN and level outside of mmu_lock is not correct.  Because the
-> > pages are pinned and the VMM is not malicious, it will function as intended, but
-> > it is far from correct.
-> 
-> Good point, I should have retrieved the pfn and level inside the lock.
-> 
-> > The overall approach also feels wrong, e.g. a guest won't be able to convert a
-> > 2mb chunk back to a 2mb large page if KVM mapped the GPA as a 4kb page in the
-> > past (from a different conversion).
+> > I wasn't referring to RMPUPDATE failing here (or anywhere).  This is the vCPU free
+> > path, which I think means the svm->vmsa page was successfully updated in the RMP
+> > during LAUNCH_UPDATE.  snp_launch_update_vmsa() goes through snp_page_reclaim()
+> > on LAUNCH_UPDATE failure, whereas this happy path does not.  Is there some other
+> > transition during teardown that obviastes the need for reclaim?  If so, a comment
+> > to explain that would be very helpful.
 > > 
 > 
-> Maybe I am missing something, I am not able to follow 'guest won't be able
-> to convert a 2mb chunk back to a 2mb large page'. The page-size used inside
-> the guest have to relationship with the RMP/NPT page-size. e.g, a guest can
-> validate the page range as a 4k and still map the page range as a 2mb or 1gb
-> in its pagetable.
+> In this patch, the sev_free_vcpu() hunk takes care of reclaiming the vmsa
+> pages before releasing it. I think it will make it more obvious after I add
+> a helper so that we don't depend on user reading the comment block to see
+> what its doing.
 
-The proposed code walks KVM's TDP and adjusts the RMP level to be the min of the
-guest+host levels.  Once KVM has installed a 4kb TDP SPTE, that walk will find
-the 4kb TDP SPTE and thus operate on the RMP at a 4kb granularity.  To allow full
-restoration of 2mb PTE+SPTE+RMP, KVM needs to zap the 4kb SPTE(s) at some point
-to allow rebuilding a 2mb SPTE.
+Where?  I feel like I'm missing something.  The only change to sev_free_vcpu() I
+see is that addition of the rmpupdate(), I don't see any reclaim path.
+
+@@ -2346,8 +2454,25 @@ void sev_free_vcpu(struct kvm_vcpu *vcpu)
+
+        if (vcpu->arch.guest_state_protected)
+                sev_flush_guest_memory(svm, svm->vmsa, PAGE_SIZE);
++
++       /*
++        * If its an SNP guest, then VMSA was added in the RMP entry as a guest owned page.
++        * Transition the page to hyperivosr state before releasing it back to the system.
++        */
++       if (sev_snp_guest(vcpu->kvm)) {
++               struct rmpupdate e = {};
++               int rc;
++
++               rc = rmpupdate(virt_to_page(svm->vmsa), &e);
++               if (rc) {
++                       pr_err("Failed to release SNP guest VMSA page (rc %d), leaking it\n", rc);
++                       goto skip_vmsa_free;
++               }
++       }
++
+        __free_page(virt_to_page(svm->vmsa));
+
++skip_vmsa_free:
+        if (svm->ghcb_sa_free)
+                kfree(svm->ghcb_sa);
+ }
