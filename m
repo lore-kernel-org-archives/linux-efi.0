@@ -2,60 +2,62 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
+X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,FSL_HELO_FAKE,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_IN_DEF_DKIM_WL autolearn=no autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_IN_DEF_DKIM_WL autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 858B9C63797
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8808EC6379A
 	for <linux-efi@archiver.kernel.org>; Mon, 19 Jul 2021 21:43:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 455F76113A
+	by mail.kernel.org (Postfix) with ESMTP id 7C3466113B
 	for <linux-efi@archiver.kernel.org>; Mon, 19 Jul 2021 21:43:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1358124AbhGSU62 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 19 Jul 2021 16:58:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48442 "EHLO
+        id S1387723AbhGSU6p (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 19 Jul 2021 16:58:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53364 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1386034AbhGSTYM (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 19 Jul 2021 15:24:12 -0400
-Received: from mail-pj1-x1034.google.com (mail-pj1-x1034.google.com [IPv6:2607:f8b0:4864:20::1034])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F7E8C061768
-        for <linux-efi@vger.kernel.org>; Mon, 19 Jul 2021 12:59:12 -0700 (PDT)
-Received: by mail-pj1-x1034.google.com with SMTP id p9so12248900pjl.3
-        for <linux-efi@vger.kernel.org>; Mon, 19 Jul 2021 13:04:52 -0700 (PDT)
+        with ESMTP id S1387039AbhGSTp0 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 19 Jul 2021 15:45:26 -0400
+Received: from mail-pg1-x529.google.com (mail-pg1-x529.google.com [IPv6:2607:f8b0:4864:20::529])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AE14FC061786
+        for <linux-efi@vger.kernel.org>; Mon, 19 Jul 2021 13:20:50 -0700 (PDT)
+Received: by mail-pg1-x529.google.com with SMTP id y4so20310294pgl.10
+        for <linux-efi@vger.kernel.org>; Mon, 19 Jul 2021 13:24:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=google.com; s=20161025;
         h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=6mrIddCBqzP9Q52MJPTxcpi1gB+yoljcisd3OcU3iwY=;
-        b=UWN1mAIBvoS4DLrVaNW+rWGV/OZ2BCPW1+LGCZCkgQnV1zqBepdR60rAsAMa59hVmO
-         nAUA+PfURyO6iS6RnTJ/RAb2NwXk0KVXwdW6NfzkuMsV4Cqx+o0gFm9aqhJKswk+l3nR
-         bNjZdMU+6WNseInEDkXhoGcgSsbVi+7dW6ND228Zz6niJ42x7HaEbUYFZznbuHQ2TRap
-         gb8xMjdUuXKbVf9BD8weBoqPaxhQIyDMb9WWs558ZtLU6bie+ua0+N2mEt2UC4UUjikh
-         UUTmXFdsL7HEujwsHb18XcFjh0PkGuAP9CZjgUN8nmIpuMxfPEwOGH3SSjtoD0x3IvKQ
-         HtVQ==
+         :content-disposition:content-transfer-encoding:in-reply-to;
+        bh=/ueH7e1R+Y/9Tjm+iXp9T6qooVmg3C+ED64P3I591HI=;
+        b=rpRYvrfz6uIHeUpHKmujhCdwk9rbm/oL9LmMIjkgkvoLoy4OntrYE11Df5glviaYn+
+         6C0Q64khcfMxVcXVTZZJn0FhXZsMIWu7qge2Ikf+ANhdDMCuolK0QajXqXOPTNNHQZdC
+         y/xBvL7a5FL6SqIsOmmCdR8XBrRAJI17s57sbB5vZLH7VyKT5Kd02Df0zVHtq3PHedc2
+         AYGbSnbqVtsE8UGU6HqfkIJfnpR8FHr2WEGoUKQqEJb0tyMcLPVkbr0kfMMru3LYCdSj
+         TFMutp7A6eXjOdVSWKArL+d8R0xMsMIgFPkOWgSOt7A4IDqP9TdzUq3FT9hlrYbGTz3z
+         kCxw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=6mrIddCBqzP9Q52MJPTxcpi1gB+yoljcisd3OcU3iwY=;
-        b=ucIukQTeAD5so34xhsp2O18+xWnqu/isCY1eG9BcdTYT2LuETGFhp9PBlHUreY9sHx
-         DuW0pEBKys7xjNHc6/h1Uf8UZ1OBJsjpP5fyzZgSLqi0tbyNKFl3XwRKpRc02ssIQxYf
-         gGxxk6UkWu48zKUO9DJp1rCoUmcC264iefPck59iXGwbfXxxUO3bOATlPRfiXga533BQ
-         l0zYR05wq5xDkcNialpMUIEKqhz5ZlH1Q3w5E2PtxAxBbqJcAdotrYxGVwRSWGMHCxLg
-         8eDoDmpkeamW2H7kelaREczFhkuPwpOBRIi20P4yymFcVK0kuATbGt4k7zObRxdylGiU
-         IyGQ==
-X-Gm-Message-State: AOAM532WbWcvibSHLuk3NTZV8YVWoAKyG/RYRvEawN1SWghqpbFPDuDH
-        GVLr2yYbSWCxQZRSrdCtmHAcIw==
-X-Google-Smtp-Source: ABdhPJyWwkctPggHtVzSznHpuN2o7lMFAaGwb6T+Lhzg1Hc0ZtDLw1R7db1DHG1Rcj+uWzfPnXseTw==
-X-Received: by 2002:a17:902:bcc3:b029:11c:5ffb:61fb with SMTP id o3-20020a170902bcc3b029011c5ffb61fbmr20657848pls.18.1626725091240;
-        Mon, 19 Jul 2021 13:04:51 -0700 (PDT)
+         :mime-version:content-disposition:content-transfer-encoding
+         :in-reply-to;
+        bh=/ueH7e1R+Y/9Tjm+iXp9T6qooVmg3C+ED64P3I591HI=;
+        b=N8W6NV3CfoFYqAKygOmoO7R5BMtYTg14TvZw9JPe22/nqjdYoFrisR/Z2NK3mA0N72
+         l2Wbd30nR1wjuE5U7q/B/326IQI7dA+cy1U1PboRCmTBEJVKeohm/RYHYiZbSNFooONy
+         hj6vPLubejM9SAzzNl2w9cogt0gnksqhltWYXNDgbBz1jMGyYkO7ZIjooDcy26QrmusK
+         /+ysppz6ZJCYUMDGgJDdSg0YNXLbatmCdHwhY57IC4WmJWMf02lvN//kjTSBqru4JwQ+
+         FdKd7TV9ftMAHuNLdp17oDveSnsEwxf/JVkOb0vrxKIsmYtpNckNQlEjbNXcMO5GHv1B
+         ZeEA==
+X-Gm-Message-State: AOAM530P4aJxJKmWe0BFJverdTPwplbenTzvU3lqHo6mnC/UqqpZkZgT
+        EvJMgQbt3dBsP92HBk3+wQiMtA==
+X-Google-Smtp-Source: ABdhPJx5z2KfcuWt/DfKkC4lsDSx4E1hp1htq+WW2Tom9he1jw05rOfD+bqBAYmCI98dUfs6qLi1hw==
+X-Received: by 2002:a62:1a47:0:b029:328:cbf8:6d42 with SMTP id a68-20020a621a470000b0290328cbf86d42mr27228516pfa.37.1626726290119;
+        Mon, 19 Jul 2021 13:24:50 -0700 (PDT)
 Received: from google.com (157.214.185.35.bc.googleusercontent.com. [35.185.214.157])
-        by smtp.gmail.com with ESMTPSA id w5sm21451077pfq.130.2021.07.19.13.04.50
+        by smtp.gmail.com with ESMTPSA id n6sm23363563pgb.60.2021.07.19.13.24.49
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 19 Jul 2021 13:04:50 -0700 (PDT)
-Date:   Mon, 19 Jul 2021 20:04:46 +0000
+        Mon, 19 Jul 2021 13:24:49 -0700 (PDT)
+Date:   Mon, 19 Jul 2021 20:24:45 +0000
 From:   Sean Christopherson <seanjc@google.com>
 To:     Brijesh Singh <brijesh.singh@amd.com>
 Cc:     x86@kernel.org, linux-kernel@vger.kernel.org, kvm@vger.kernel.org,
@@ -81,47 +83,48 @@ Cc:     x86@kernel.org, linux-kernel@vger.kernel.org, kvm@vger.kernel.org,
         Michael Roth <michael.roth@amd.com>,
         Vlastimil Babka <vbabka@suse.cz>, tony.luck@intel.com,
         npmccallum@redhat.com, brijesh.ksingh@gmail.com
-Subject: Re: [PATCH Part2 RFC v4 32/40] KVM: SVM: Add support to handle GHCB
- GPA register VMGEXIT
-Message-ID: <YPXa3gWrBW9fdGXK@google.com>
+Subject: Re: [PATCH Part2 RFC v4 22/40] KVM: SVM: Add KVM_SNP_INIT command
+Message-ID: <YPXfjYsEepISApuf@google.com>
 References: <20210707183616.5620-1-brijesh.singh@amd.com>
- <20210707183616.5620-33-brijesh.singh@amd.com>
- <YPHv0eCCOZQKne0O@google.com>
- <35b1c6c6-b8f1-6ec6-e55c-f2e552e29527@amd.com>
+ <20210707183616.5620-23-brijesh.singh@amd.com>
+ <YPHfC1mI8dQkkzyV@google.com>
+ <3f12243a-dee3-2a97-9a1b-51f4f6095349@amd.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
-In-Reply-To: <35b1c6c6-b8f1-6ec6-e55c-f2e552e29527@amd.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <3f12243a-dee3-2a97-9a1b-51f4f6095349@amd.com>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
 On Fri, Jul 16, 2021, Brijesh Singh wrote:
 > 
-> On 7/16/21 3:45 PM, Sean Christopherson wrote:
+> On 7/16/21 2:33 PM, Sean Christopherson wrote:
 > > On Wed, Jul 07, 2021, Brijesh Singh wrote:
-> >> +	/* SEV-SNP guest requires that the GHCB GPA must be registered */
-> >> +	if (sev_snp_guest(svm->vcpu.kvm) && !ghcb_gpa_is_registered(svm, ghcb_gpa)) {
-> >> +		vcpu_unimpl(&svm->vcpu, "vmgexit: GHCB GPA [%#llx] is not registered.\n", ghcb_gpa);
-> > I saw this a few other place.  vcpu_unimpl() is not the right API.  KVM supports
-> > the guest request, the problem is that the GHCB spec _requires_ KVM to terminate
-> > the guest in this case.
+> >> diff --git a/include/uapi/linux/kvm.h b/include/uapi/linux/kvm.h
+> >> index 3fd9a7e9d90c..989a64aa1ae5 100644
+> >> --- a/include/uapi/linux/kvm.h
+> >> +++ b/include/uapi/linux/kvm.h
+> >> @@ -1678,6 +1678,9 @@ enum sev_cmd_id {
+> >>  	/* Guest Migration Extension */
+> >>  	KVM_SEV_SEND_CANCEL,
+> >>  
+> >> +	/* SNP specific commands */
+> >> +	KVM_SEV_SNP_INIT = 256,
+> > Is there any meaning behind '256'?  If not, why skip a big chunk?  I wouldn't be
+> > concerned if it weren't for KVM_SEV_NR_MAX, whose existence arguably implies that
+> > 0-KVM_SEV_NR_MAX-1 are all valid SEV commands.
 > 
-> What is the preferred method to log it so that someone debugging know
-> what went wrong.
+> In previous patches, Peter highlighted that we should keep some gap
+> between the SEV/ES and SNP to leave room for legacy SEV/ES expansion. I
+> was not sure how many we need to reserve without knowing what will come
+> in the future; especially recently some of the command additional  are
+> not linked to the firmware. I am okay to reduce the gap or remove the
+> gap all together.
 
-Using the kernel log is probably a bad choice in general for this error.  Because
-this and the other GHCB GPA sanity checks can be triggered from the guest, any
-kernel logging needs to be ratelimited.  Ratelimiting is problematic because it
-means some errors may not be logged; that's quite unlikely in this case, but it's
-less than ideal.
+Unless the numbers themselves have meaning, which I don't think they do, I vote
+to keep the arbitrary numbers contiguous.  KVM_SEV_NR_MAX makes me nervous, and
+there are already cases of related commands being discontiguous, e.g. KVM_SEND_CANCEL.
 
-The other issue is that KVM can't dump the RIP because guest state is encrypted,
-e.g. KVM can provide the task PID, but that's it.
-
-The best solution I can think of at the moment would be some form of
-KVM_EXIT_INTERNAL_ERROR, i.e. kick out to userspace with a meaningful error code
-and the bad GPA so that userspace can take action.
-
-I believe Jim also has some thoughts on how to improve "logging" of guest errors,
-but he's on vacation for a few weeks.
+Peter or Paolo, any thoughts?
