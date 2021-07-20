@@ -2,92 +2,78 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-25.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,INCLUDES_PULL_REQUEST,
-	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C7695C07E95
-	for <linux-efi@archiver.kernel.org>; Tue, 20 Jul 2021 07:33:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C32E9C07E95
+	for <linux-efi@archiver.kernel.org>; Tue, 20 Jul 2021 11:16:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A03E360FEA
-	for <linux-efi@archiver.kernel.org>; Tue, 20 Jul 2021 07:33:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A337C60FDB
+	for <linux-efi@archiver.kernel.org>; Tue, 20 Jul 2021 11:16:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231366AbhGTGwm (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 20 Jul 2021 02:52:42 -0400
-Received: from mail.kernel.org ([198.145.29.99]:42244 "EHLO mail.kernel.org"
+        id S237290AbhGTKfi (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 20 Jul 2021 06:35:38 -0400
+Received: from gate.crashing.org ([63.228.1.57]:33405 "EHLO gate.crashing.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229916AbhGTGwm (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Tue, 20 Jul 2021 02:52:42 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id BD61F61165;
-        Tue, 20 Jul 2021 07:33:19 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1626766400;
-        bh=rW9S7ogWFZZraiZY3Dvv5WOzU9HQmKUcmM+vyw6+Kss=;
-        h=From:To:Cc:Subject:Date:From;
-        b=TvkQtlMNnOkK1/xAcOuz08Sb5uj9fGvO+EVXCbe24VDTEQTNsaZagR6cyCrv4i1Zc
-         l1qACGPDNzHeLnc4ghlOEgPRwNXzyPgKyP7InVFg7NhTjKDiudYtC5IEyoB33bAU8f
-         RErfpUg/Q+1LhAGJp8SyW5Okdz4JyHLTBqNXa1BjaaNeHNOVQT2ebxwfOs3TBhaf1X
-         HSYPOHST5X0ECscQVtU3OKFXWDJLAS+9A11wDQWUqa7MBbmRXnBTFG4lNdznmP16YU
-         YhTs93lvWRWjiYP0U/5Anogb4dpvHDNvp9fRIgz46DzTiTK/Fg5WxRJh/lPxFsx4X/
-         k8b1vLwoKCW6A==
-From:   Ard Biesheuvel <ardb@kernel.org>
-To:     linux-efi@vger.kernel.org
-Cc:     Ingo Molnar <mingo@redhat.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Borislav Petkov <bp@alien8.de>
-Subject: [GIT PULL] EFI fixes for v5.14-rc2
-Date:   Tue, 20 Jul 2021 09:33:11 +0200
-Message-Id: <20210720073311.55452-1-ardb@kernel.org>
-X-Mailer: git-send-email 2.20.1
+        id S237203AbhGTKfg (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Tue, 20 Jul 2021 06:35:36 -0400
+Received: from ip6-localhost (localhost.localdomain [127.0.0.1])
+        by gate.crashing.org (8.14.1/8.14.1) with ESMTP id 16KBE5N6017585;
+        Tue, 20 Jul 2021 06:14:06 -0500
+Message-ID: <c71fce9256e9caa7bd3400d525f22380b686d29e.camel@kernel.crashing.org>
+Subject: [PATCH 1/2] arm64: efi: kaslr: Fix occasional random alloc (and
+ boot) failure
+From:   Benjamin Herrenschmidt <benh@kernel.crashing.org>
+To:     linux-arm-kernel@lists.infradead.org
+Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-efi@vger.kernel.org,
+        "linux-kernel@vger.kernel.org Will Deacon" <will@kernel.org>
+Date:   Tue, 20 Jul 2021 21:14:05 +1000
+Content-Type: text/plain; charset="UTF-8"
+User-Agent: Evolution 3.36.5-0ubuntu1 
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The following changes since commit e73f0f0ee7541171d89f2e2491130c7771ba58d3:
+The EFI stub random allocator used for kaslr on arm64 has a subtle
+bug. In function get_entry_num_slots() which counts the number of
+possible allocation "slots" for the image in a given chunk of free
+EFI memory, "last_slot" can become negative if the chunk is smaller
+than the requested allocation size.
 
-  Linux 5.14-rc1 (2021-07-11 15:07:40 -0700)
+The test "if (first_slot > last_slot)" doesn't catch it because
+both first_slot and last_slot are unsigned.
 
-are available in the Git repository at:
+I chose not to make them signed to avoid problems if this is ever
+used on architectures where there are meaningful addresses with the
+top bit set. Instead, fix it with an additional test against the
+allocation size.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-urgent-for-v5.14-rc2
+This can cause a boot failure in addition to a loss of randomisation
+due to another bug in the arm64 stub fixed separately.
 
-for you to fetch changes up to 47e1e233e9d822dfda068383fb9a616451bda703:
+Signed-off-by: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+Fixes: 2ddbfc81eac8 (efi: stub: add implementation of efi_random_alloc())
+---
 
-  efi/mokvar: Reserve the table only if it is in boot services data (2021-07-20 09:28:09 +0200)
+ drivers/firmware/efi/libstub/randomalloc.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-Cc: Ingo Molnar <mingo@redhat.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Borislav Petkov <bp@alien8.de>
+diff --git a/drivers/firmware/efi/libstub/randomalloc.c b/drivers/firmware/efi/libstub/randomalloc.c
+index a408df474d83..724155b9e10d 100644
+--- a/drivers/firmware/efi/libstub/randomalloc.c
++++ b/drivers/firmware/efi/libstub/randomalloc.c
+@@ -30,6 +30,8 @@ static unsigned long get_entry_num_slots(efi_memory_desc_t *md,
+ 
+ 	region_end = min(md->phys_addr + md->num_pages * EFI_PAGE_SIZE - 1,
+ 			 (u64)ULONG_MAX);
++	if (region_end < size)
++		return 0;
+ 
+ 	first_slot = round_up(md->phys_addr, align);
+ 	last_slot = round_down(region_end - size + 1, align);
 
-----------------------------------------------------------------
-EFI fixes for v5.14-rc2:
 
-- Ensure that memblock reservations and IO reserved resources remain in
-sync when using the EFI memreserve feature.
-- Don't complain about invalid TPM final event log table if it is
-missing altogether.
-- Comment header fix for the stub.
-- Avoid a spurious warning when attempting to reserve firmware memory
-that is already reserved in the first place.
-
-----------------------------------------------------------------
-Atish Patra (1):
-      efi/libstub: Fix the efi_load_initrd function description
-
-Borislav Petkov (1):
-      efi/mokvar: Reserve the table only if it is in boot services data
-
-Marc Zyngier (1):
-      firmware/efi: Tell memblock about EFI iomem reservations
-
-Michal Suchanek (1):
-      efi/tpm: Differentiate missing and invalid final event log table.
-
- drivers/firmware/efi/efi.c                     | 13 ++++++++++++-
- drivers/firmware/efi/libstub/efi-stub-helper.c |  4 ++--
- drivers/firmware/efi/mokvar-table.c            |  5 ++++-
- drivers/firmware/efi/tpm.c                     |  8 +++++---
- 4 files changed, 23 insertions(+), 7 deletions(-)
