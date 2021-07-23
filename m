@@ -2,145 +2,212 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-20.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C7A38C6377D
-	for <linux-efi@archiver.kernel.org>; Thu, 22 Jul 2021 10:26:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F5DAC4338F
+	for <linux-efi@archiver.kernel.org>; Fri, 23 Jul 2021 05:05:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id ACDFF61285
-	for <linux-efi@archiver.kernel.org>; Thu, 22 Jul 2021 10:26:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3592460E99
+	for <linux-efi@archiver.kernel.org>; Fri, 23 Jul 2021 05:05:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231325AbhGVJqQ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 22 Jul 2021 05:46:16 -0400
-Received: from mail.kernel.org ([198.145.29.99]:57588 "EHLO mail.kernel.org"
+        id S229713AbhGWEYl (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 23 Jul 2021 00:24:41 -0400
+Received: from mga03.intel.com ([134.134.136.65]:11345 "EHLO mga03.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231667AbhGVJqN (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Thu, 22 Jul 2021 05:46:13 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 3BC4960FED;
-        Thu, 22 Jul 2021 10:26:10 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1626949571;
-        bh=fHT59LhvE3gc9fM6N3ufqFMTVW0dfEM2SVeZ98t/cB0=;
-        h=From:To:Cc:Subject:Date:From;
-        b=jLlxmgvHZyeju+fi7zxuu2/WjWE6Cbc5+kLfAtzW/jhnNuA1kcGtCe8LbdKJnmXGB
-         O3Ht0J1et3VdswiquEdvtfiHBcBH1u/ivS778uPWzOBgQE0XzdgFz0MOWO4AM72YA3
-         Pyl4a8/lstZIrPORrhJ97AOguvzx94E+cabq+Km3OCdycM2+BkvOUYdjcEP6Pj1e2A
-         qstAPldzEX3IS9SDa1S01ZEpaDQjV1N4Pk9eyM4IwMmMv1v682tT/nV+i1xBXKFeJm
-         E2b5uuGWr82sLe9fk6mxJfGWzMZa0DpehTo9VyWL92fOW7LkXRlc6d7SY+M34K3+8u
-         mIdWJTVV1PfKQ==
-From:   Ard Biesheuvel <ardb@kernel.org>
-To:     linux-efi@vger.kernel.org
-Cc:     linux-arm-kernel@lists.infradead.org,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Benjamin Herrenschmidt <benh@kernel.crashing.org>
-Subject: [PATCH] efistub: arm64: relax 2M alignment again for relocatable kernels
-Date:   Thu, 22 Jul 2021 12:26:00 +0200
-Message-Id: <20210722102600.58392-1-ardb@kernel.org>
-X-Mailer: git-send-email 2.20.1
+        id S229698AbhGWEYl (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 23 Jul 2021 00:24:41 -0400
+X-IronPort-AV: E=McAfee;i="6200,9189,10053"; a="211868138"
+X-IronPort-AV: E=Sophos;i="5.84,263,1620716400"; 
+   d="scan'208";a="211868138"
+Received: from fmsmga003.fm.intel.com ([10.253.24.29])
+  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Jul 2021 22:05:12 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.84,263,1620716400"; 
+   d="scan'208";a="502374757"
+Received: from lkp-server01.sh.intel.com (HELO d053b881505b) ([10.239.97.150])
+  by FMSMGA003.fm.intel.com with ESMTP; 22 Jul 2021 22:05:11 -0700
+Received: from kbuild by d053b881505b with local (Exim 4.92)
+        (envelope-from <lkp@intel.com>)
+        id 1m6nN0-0001G0-W0; Fri, 23 Jul 2021 05:05:10 +0000
+Date:   Fri, 23 Jul 2021 13:04:49 +0800
+From:   kernel test robot <lkp@intel.com>
+To:     Ard Biesheuvel <ardb@kernel.org>
+Cc:     linux-efi@vger.kernel.org
+Subject: [efi:urgent] BUILD SUCCESS
+ 5bb60b28ce5bee48838c3fdc667c7247e722b34d
+Message-ID: <60fa4df1.RYHI938Wwk1WVsge%lkp@intel.com>
+User-Agent: Heirloom mailx 12.5 6/20/10
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Commit 82046702e288 ("efi/libstub/arm64: Replace 'preferred' offset with
-alignment check") simplified the way the stub moves the kernel image
-around in memory before booting it, given that a relocatable image does
-not need to be copied to a 2M aligned offset if it was loaded on a 64k
-boundary by EFI.
+tree/branch: https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git urgent
+branch HEAD: 5bb60b28ce5bee48838c3fdc667c7247e722b34d  efistub: arm64: relax 2M alignment again for relocatable kernels
 
-Commit d32de9130f6c ("efi/arm64: libstub: Deal gracefully with
-EFI_RNG_PROTOCOL failure") inadvertently defeated this logic by
-overriding the value of efi_nokaslr if EFI_RNG_PROTOCOL is not
-available, which was mistaked by the loader logic as an explicit request
-on the part of the user to disable KASLR and any associated relocation
-of an Image not loaded on a 2M boundary.
+elapsed time: 1110m
 
-So let's reinstate this functionality, by capturing the value of
-efi_nokaslr at function entry to choose the minimum alignment.
+configs tested: 146
+configs skipped: 3
 
-Fixes: d32de9130f6c ("efi/arm64: libstub: Deal gracefully with EFI_RNG_PROTOCOL failure")
-Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+The following configs have been built successfully.
+More configs may be tested in the coming days.
+
+gcc tested configs:
+arm                                 defconfig
+arm64                            allyesconfig
+arm64                               defconfig
+arm                              allyesconfig
+arm                              allmodconfig
+i386                 randconfig-c001-20210722
+i386                 randconfig-c001-20210723
+parisc                           alldefconfig
+mips                  maltasmvp_eva_defconfig
+mips                           mtx1_defconfig
+arm                          exynos_defconfig
+mips                           ip22_defconfig
+alpha                            alldefconfig
+sh                          r7780mp_defconfig
+arc                        nsimosci_defconfig
+mips                        workpad_defconfig
+sh                   sh7724_generic_defconfig
+powerpc                     redwood_defconfig
+sh                         apsh4a3a_defconfig
+xtensa                  audio_kc705_defconfig
+arm                         cm_x300_defconfig
+openrisc                         alldefconfig
+powerpc                      mgcoge_defconfig
+arc                         haps_hs_defconfig
+arm                        mini2440_defconfig
+m68k                          atari_defconfig
+powerpc                 mpc832x_mds_defconfig
+arm                           u8500_defconfig
+mips                           ci20_defconfig
+powerpc                           allnoconfig
+powerpc                         ps3_defconfig
+m68k                         apollo_defconfig
+sparc                            alldefconfig
+sh                          lboxre2_defconfig
+s390                       zfcpdump_defconfig
+sh                         ap325rxa_defconfig
+x86_64                           allyesconfig
+powerpc                      bamboo_defconfig
+mips                       lemote2f_defconfig
+m68k                          hp300_defconfig
+sh                              ul2_defconfig
+powerpc                      chrp32_defconfig
+sh                          polaris_defconfig
+mips                        bcm47xx_defconfig
+nios2                               defconfig
+powerpc                   motionpro_defconfig
+m68k                        m5407c3_defconfig
+arm                       aspeed_g5_defconfig
+sh                             espt_defconfig
+arm                          collie_defconfig
+mips                             allyesconfig
+powerpc                       ppc64_defconfig
+powerpc                   microwatt_defconfig
+m68k                        mvme147_defconfig
+microblaze                          defconfig
+mips                           ip32_defconfig
+h8300                               defconfig
+powerpc                        icon_defconfig
+x86_64                            allnoconfig
+ia64                             allmodconfig
+ia64                                defconfig
+ia64                             allyesconfig
+m68k                             allmodconfig
+m68k                                defconfig
+m68k                             allyesconfig
+arc                              allyesconfig
+nds32                             allnoconfig
+nds32                               defconfig
+nios2                            allyesconfig
+csky                                defconfig
+alpha                               defconfig
+alpha                            allyesconfig
+xtensa                           allyesconfig
+h8300                            allyesconfig
+arc                                 defconfig
+sh                               allmodconfig
+parisc                              defconfig
+s390                             allyesconfig
+s390                             allmodconfig
+parisc                           allyesconfig
+s390                                defconfig
+i386                             allyesconfig
+sparc                            allyesconfig
+sparc                               defconfig
+i386                                defconfig
+mips                             allmodconfig
+powerpc                          allyesconfig
+powerpc                          allmodconfig
+x86_64               randconfig-a003-20210722
+x86_64               randconfig-a006-20210722
+x86_64               randconfig-a001-20210722
+x86_64               randconfig-a005-20210722
+x86_64               randconfig-a004-20210722
+x86_64               randconfig-a002-20210722
+i386                 randconfig-a005-20210722
+i386                 randconfig-a003-20210722
+i386                 randconfig-a004-20210722
+i386                 randconfig-a002-20210722
+i386                 randconfig-a001-20210722
+i386                 randconfig-a006-20210722
+i386                 randconfig-a005-20210723
+i386                 randconfig-a003-20210723
+i386                 randconfig-a004-20210723
+i386                 randconfig-a002-20210723
+i386                 randconfig-a001-20210723
+i386                 randconfig-a006-20210723
+i386                 randconfig-a016-20210722
+i386                 randconfig-a013-20210722
+i386                 randconfig-a012-20210722
+i386                 randconfig-a011-20210722
+i386                 randconfig-a014-20210722
+i386                 randconfig-a015-20210722
+i386                 randconfig-a016-20210723
+i386                 randconfig-a013-20210723
+i386                 randconfig-a012-20210723
+i386                 randconfig-a011-20210723
+i386                 randconfig-a014-20210723
+i386                 randconfig-a015-20210723
+riscv                    nommu_k210_defconfig
+riscv                            allyesconfig
+riscv                    nommu_virt_defconfig
+riscv                             allnoconfig
+riscv                               defconfig
+riscv                          rv32_defconfig
+riscv                            allmodconfig
+x86_64                    rhel-8.3-kselftests
+um                           x86_64_defconfig
+um                             i386_defconfig
+x86_64                              defconfig
+x86_64                               rhel-8.3
+x86_64                                  kexec
+
+clang tested configs:
+x86_64               randconfig-c001-20210723
+x86_64               randconfig-c001-20210722
+x86_64               randconfig-b001-20210722
+x86_64               randconfig-a011-20210722
+x86_64               randconfig-a016-20210722
+x86_64               randconfig-a013-20210722
+x86_64               randconfig-a014-20210722
+x86_64               randconfig-a012-20210722
+x86_64               randconfig-a015-20210722
+x86_64               randconfig-a003-20210723
+x86_64               randconfig-a006-20210723
+x86_64               randconfig-a001-20210723
+x86_64               randconfig-a005-20210723
+x86_64               randconfig-a004-20210723
+x86_64               randconfig-a002-20210723
+
 ---
-This fixes the regression that was discussed in [0], but given that it
-is very likely to break Ben's use case again, I'll sit on it for the
-time being.
-
-[0] https://lore.kernel.org/linux-efi/161920fc31ec4168290ca31b3e4ac7a75ac1df6b.camel@kernel.crashing.org/
-
- drivers/firmware/efi/libstub/arm64-stub.c | 28 +++++++++-----------
- 1 file changed, 13 insertions(+), 15 deletions(-)
-
-diff --git a/drivers/firmware/efi/libstub/arm64-stub.c b/drivers/firmware/efi/libstub/arm64-stub.c
-index 7bf0a7acae5e..98e013404ca3 100644
---- a/drivers/firmware/efi/libstub/arm64-stub.c
-+++ b/drivers/firmware/efi/libstub/arm64-stub.c
-@@ -34,18 +34,6 @@ efi_status_t check_platform_features(void)
- 	return EFI_SUCCESS;
- }
- 
--/*
-- * Although relocatable kernels can fix up the misalignment with respect to
-- * MIN_KIMG_ALIGN, the resulting virtual text addresses are subtly out of
-- * sync with those recorded in the vmlinux when kaslr is disabled but the
-- * image required relocation anyway. Therefore retain 2M alignment unless
-- * KASLR is in use.
-- */
--static u64 min_kimg_align(void)
--{
--	return efi_nokaslr ? MIN_KIMG_ALIGN : EFI_KIMG_ALIGN;
--}
--
- efi_status_t handle_kernel_image(unsigned long *image_addr,
- 				 unsigned long *image_size,
- 				 unsigned long *reserve_addr,
-@@ -56,6 +44,16 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
- 	unsigned long kernel_size, kernel_memsize = 0;
- 	u32 phys_seed = 0;
- 
-+	/*
-+	 * Although relocatable kernels can fix up the misalignment with
-+	 * respect to MIN_KIMG_ALIGN, the resulting virtual text addresses are
-+	 * subtly out of sync with those recorded in the vmlinux when kaslr is
-+	 * disabled but the image required relocation anyway. Therefore retain
-+	 * 2M alignment if KASLR was explicitly disabled, even if it was not
-+	 * going to be activated to begin with.
-+	 */
-+	u64 min_kimg_align = efi_nokaslr ? MIN_KIMG_ALIGN : EFI_KIMG_ALIGN;
-+
- 	if (IS_ENABLED(CONFIG_RANDOMIZE_BASE)) {
- 		if (!efi_nokaslr) {
- 			status = efi_get_random_bytes(sizeof(phys_seed),
-@@ -85,14 +83,14 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
- 		 * If KASLR is enabled, and we have some randomness available,
- 		 * locate the kernel at a randomized offset in physical memory.
- 		 */
--		status = efi_random_alloc(*reserve_size, min_kimg_align(),
-+		status = efi_random_alloc(*reserve_size, min_kimg_align,
- 					  reserve_addr, phys_seed);
- 	} else {
- 		status = EFI_OUT_OF_RESOURCES;
- 	}
- 
- 	if (status != EFI_SUCCESS) {
--		if (IS_ALIGNED((u64)_text, min_kimg_align())) {
-+		if (IS_ALIGNED((u64)_text, min_kimg_align)) {
- 			/*
- 			 * Just execute from wherever we were loaded by the
- 			 * UEFI PE/COFF loader if the alignment is suitable.
-@@ -103,7 +101,7 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
- 		}
- 
- 		status = efi_allocate_pages_aligned(*reserve_size, reserve_addr,
--						    ULONG_MAX, min_kimg_align());
-+						    ULONG_MAX, min_kimg_align);
- 
- 		if (status != EFI_SUCCESS) {
- 			efi_err("Failed to relocate kernel\n");
--- 
-2.20.1
-
+0-DAY CI Kernel Test Service, Intel Corporation
+https://lists.01.org/hyperkitty/list/kbuild-all@lists.01.org
