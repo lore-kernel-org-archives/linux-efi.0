@@ -8,44 +8,44 @@ X-Spam-Status: No, score=-18.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6387FC4320E
-	for <linux-efi@archiver.kernel.org>; Tue, 27 Jul 2021 22:28:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AFDE4C4338F
+	for <linux-efi@archiver.kernel.org>; Tue, 27 Jul 2021 22:28:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4D02760FA0
-	for <linux-efi@archiver.kernel.org>; Tue, 27 Jul 2021 22:28:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 99D6F60F9C
+	for <linux-efi@archiver.kernel.org>; Tue, 27 Jul 2021 22:28:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233017AbhG0W1z (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 27 Jul 2021 18:27:55 -0400
-Received: from mail-dm6nam11on2080.outbound.protection.outlook.com ([40.107.223.80]:52929
-        "EHLO NAM11-DM6-obe.outbound.protection.outlook.com"
+        id S232664AbhG0W2U (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 27 Jul 2021 18:28:20 -0400
+Received: from mail-bn7nam10on2075.outbound.protection.outlook.com ([40.107.92.75]:51599
+        "EHLO NAM10-BN7-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S232992AbhG0W1t (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Tue, 27 Jul 2021 18:27:49 -0400
+        id S233379AbhG0W2D (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Tue, 27 Jul 2021 18:28:03 -0400
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=lFk63pUovvsfTly4mfNKSrWlPYd69Huu1RLwYNQ5Gh4LB+o0UYFJmM417bjNi4CzrmCR13B6B4R3V6Y3FKoZtjmrIrkIcQ1ICcvVJQgEzd1HYQcYhsOEHeous9C0SCuiItEcVxtmSmAeYR17U1qZKNJQQzHPgysoY65/R+m5VDUL63zTX6b6sNIOqvtwLed2dxt3+dBjgayCPSsrpn8/osthBT1hxQ3vrO7ZQFWhGi+kwkWGnDz1TasC08EvupxMnD1z1Yd/1kwg4Y9Ov/Z3WQe80ukMmOIPhBm0ic2P3xVk0KBOPHwB93QOqVl9kUC9Gc30zmJs1Qtkt9cYe3BcBw==
+ b=B/CyODtLAIKHPu4OZ5HkOG8fOXcidjGJjV302Mc73LEfK7hirYJDzCGrWegs9WokcTGxp+zQKhg++GLeBAKAOMalbkAV7QH9Fk88E/790JvjvX16e5WbVGH3abdNrTf7LrrHkksQZHz+cH1rckOUmBgSbzTwWLy9Hg6jZSdpus/jyGhcKSVROBNDLsNLaVzpg6hYyyR0ZX4gVsnM4pVlHh29VTH/nqXgmRgtD4Ap9YcHcZeN+MzfdiAD7e+lsnfpOR/ar55ftDqk2zxEecsIUsqkh3K7/WAEII+nUXyex6IqKzB19kNjcIFS/AOBG9uVnXyS7EdyrR8E0uLcPNtRvQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=H0jCJGrJYBzUq2OOyibfYsm8X/ntg7WuQP5qdSVMeCs=;
- b=nKQIWLCuOtldr/fFMhlz1SOkM3OecOkcmhVK+q3JfjRO47kLNeqElbH/MjO6RyfXR1fMcMdwJDEgpkyKQBAMSsw3zP10qEHv7p3X0zYzcVaX5XPVw/0fV6Ymvsvt6viFx3N2j5xLi71Ffikj7ABt5SAb9jevmVV4tFm7sMfjbpKA0DJSEwWU0bL6+JoReT/Nuia7WMs3y73OQRhVyWYrBiv6VkaNjszd4ysD8oJBNh/hVcCe7ntBVN3wZa3F0DV7rvYdCC+n+O5hrbV/1H7kxN9lHjfIOpO2c8d+TDrCC6PRqGImzP0IdwZ9H+ulU2K/oCqGt64xaN5TX3/3fv1bOw==
+ bh=bXN4zJvX7fQnk2nAZcPyim1SCQt+IA2vttWwJbsOBZ4=;
+ b=HHYwJtnnCHcspdicxprqO6148ZhcfHQkKaMqjzb/92vhhibaY/pBn+bb0NMBgRvQDIM05/VamV4j+I/JMLwxa3dsW73B23GaQsr7zUCnFNayQb42a8JwWFWQ3f05sjCPLXipXtVQIunRevCm11EJDlWH1Rno6ip5WgO+C5c3zUJQPVIT1iNzpVHdHGzu5IMBsBVvuqiOy5WJ6S0hOQ1Q7ss850Q02KKT1WwXAQ3nDzIPYc1Q2vRhn3Ugj7cm9QPw1K9z6hRldQlyOS7DvVthgyn8irrdDm945D0QzzOpCIgsDKATpBQM/LOmAq/XHpbPRNNv1a1V8v9A0N9LsfmKxg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=amd.com; dmarc=pass action=none header.from=amd.com; dkim=pass
  header.d=amd.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=H0jCJGrJYBzUq2OOyibfYsm8X/ntg7WuQP5qdSVMeCs=;
- b=ILjQpeH+2EkofVWRFiZZRLzfGco99H+GwW8DEyqf/lCHL1Ld5m+BAlXPNmM6pDCi+eoijyedBDR6oXlGF70S9abZWxfwj37EAIBxDHbUbv1QMz+PquKgKgDPf9tOcJkxQMZenvF8cAYlvbxLYZaAqw+v04zht8D4nfVNGaJEujE=
+ bh=bXN4zJvX7fQnk2nAZcPyim1SCQt+IA2vttWwJbsOBZ4=;
+ b=SyKasOPlEm3GGOCpRIDYFV3idTz2YvN34xQTuCO7HyiA82fD+Mt1SW32rRWFTq9QG+rM9WH/+td7XrFxts9kH9K9MGjo7ZyUR7gwMurMbtpvJEX0lPsdS5i638HKSZmIlVx+dXvnzr9NpzsdNZpwICVZd3dVoND10o3jCmof4Ok=
 Authentication-Results: vger.kernel.org; dkim=none (message not signed)
  header.d=none;vger.kernel.org; dmarc=none action=none header.from=amd.com;
 Received: from DM4PR12MB5229.namprd12.prod.outlook.com (2603:10b6:5:398::12)
- by DM4PR12MB5357.namprd12.prod.outlook.com (2603:10b6:5:39b::24) with
+ by DM6PR12MB5520.namprd12.prod.outlook.com (2603:10b6:5:208::9) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4373.18; Tue, 27 Jul
- 2021 22:27:40 +0000
+ 2021 22:28:00 +0000
 Received: from DM4PR12MB5229.namprd12.prod.outlook.com
  ([fe80::73:2581:970b:3208]) by DM4PR12MB5229.namprd12.prod.outlook.com
  ([fe80::73:2581:970b:3208%3]) with mapi id 15.20.4352.031; Tue, 27 Jul 2021
- 22:27:40 +0000
+ 22:28:00 +0000
 From:   Tom Lendacky <thomas.lendacky@amd.com>
 To:     linux-kernel@vger.kernel.org, x86@kernel.org,
         linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org,
@@ -60,195 +60,94 @@ Cc:     Borislav Petkov <bp@alien8.de>,
         Andi Kleen <ak@linux.intel.com>,
         Sathyanarayanan Kuppuswamy 
         <sathyanarayanan.kuppuswamy@linux.intel.com>,
-        Tianyu Lan <Tianyu.Lan@microsoft.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Ingo Molnar <mingo@redhat.com>
-Subject: [PATCH 06/11] x86/sev: Replace occurrences of sev_es_active() with prot_guest_has()
-Date:   Tue, 27 Jul 2021 17:26:09 -0500
-Message-Id: <ba565128b88661a656fc3972f01bb2e295158a15.1627424774.git.thomas.lendacky@amd.com>
+        Tianyu Lan <Tianyu.Lan@microsoft.com>
+Subject: [PATCH 08/11] mm: Remove the now unused mem_encrypt_active() function
+Date:   Tue, 27 Jul 2021 17:26:11 -0500
+Message-Id: <fc1205e6c5cdd7ef6c4135093fb141018ca2b70d.1627424774.git.thomas.lendacky@amd.com>
 X-Mailer: git-send-email 2.32.0
 In-Reply-To: <cover.1627424773.git.thomas.lendacky@amd.com>
 References: <cover.1627424773.git.thomas.lendacky@amd.com>
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
-X-ClientProxiedBy: SN7PR04CA0109.namprd04.prod.outlook.com
- (2603:10b6:806:122::24) To DM4PR12MB5229.namprd12.prod.outlook.com
+X-ClientProxiedBy: SN6PR2101CA0019.namprd21.prod.outlook.com
+ (2603:10b6:805:106::29) To DM4PR12MB5229.namprd12.prod.outlook.com
  (2603:10b6:5:398::12)
 MIME-Version: 1.0
 X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from tlendack-t1.amd.com (165.204.77.1) by SN7PR04CA0109.namprd04.prod.outlook.com (2603:10b6:806:122::24) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4373.18 via Frontend Transport; Tue, 27 Jul 2021 22:27:38 +0000
+Received: from tlendack-t1.amd.com (165.204.77.1) by SN6PR2101CA0019.namprd21.prod.outlook.com (2603:10b6:805:106::29) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4394.2 via Frontend Transport; Tue, 27 Jul 2021 22:27:58 +0000
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 5fbe3e98-2c64-4712-feaa-08d9514dbe61
-X-MS-TrafficTypeDiagnostic: DM4PR12MB5357:
+X-MS-Office365-Filtering-Correlation-Id: 440c7b55-25c3-4298-6cdb-08d9514dcab3
+X-MS-TrafficTypeDiagnostic: DM6PR12MB5520:
 X-MS-Exchange-Transport-Forked: True
-X-Microsoft-Antispam-PRVS: <DM4PR12MB535710CD5A52CFBC064513D3ECE99@DM4PR12MB5357.namprd12.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:9508;
+X-Microsoft-Antispam-PRVS: <DM6PR12MB55201CADADE0F38F5694A64DECE99@DM6PR12MB5520.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:1107;
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: i4zO/6tLSL94W7yJHFCiYB3S0UIr0BGCVJiOU2jex3VKdsSVFC8xaWiaL7aclCkn8yJInjiy2nw5GH7vzSzLaUc5TnGk4ULGWG5wMLF6V4qP7YDe4Xk8oYAPs3YKl4Llf5Ahgvb8Sy0V7T4xuGl1GPJT9TpRdTb3z4AfHAgQ4vS6nvZg7WrnoLbh2+jIDkRVRAYLRvO2HfQO/xeomcnqx+iPepmIo0Kwbraz54f62w1WA6f0n8hIsvB+6FMGNDI4NHNmnfRBm2Ph1tj3k9nBGnP8c997TLcaTLjf/T9B5OYLCxC8XfA/VrfsznlwHpXZ689hZ4rW8+9MEd2SSetOzxrhvZIY3f4VcWV/Pd9vdITJPe/ssXUbmkz6J/gKQ/9F4RS30oj/WMY3NOox+QdMjgaV8cAd5w3R4IwTErs9f4d7+ZIVTvUZZg3O4q+VM5IvvOrBuqHP2VgJaYr+AtDuZGjOMVT46LEsRp4YKeqoijC9IQ4nkew4vNUtILVxF/LKDjbTkt3xOUxNWaAtXeSEfTqdnriP2IgK7fOT8AdegSe1XB4ve8u75bdzTzroZgF+17z9dzRBSCAK63gxdmZknRVdTnJPv1ZwHPbORAeYKWpWIYYfIGzLxUBnvT+SJqhrIZliOBvvquGPtpIstgoe5P5odsq3iIOx0gvW+VAN00Q3xI6XsSLDT1guYRZk2JTrsL/I0huPTISPbVyDrMvpnE7V3x7CMhBPrB0iyQgLar0=
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM4PR12MB5229.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(396003)(39860400002)(366004)(346002)(376002)(136003)(5660300002)(36756003)(54906003)(83380400001)(956004)(66556008)(4326008)(316002)(86362001)(8676002)(921005)(2616005)(66946007)(38350700002)(38100700002)(66476007)(7696005)(2906002)(6486002)(7416002)(478600001)(26005)(6666004)(52116002)(8936002)(186003);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: WB6gDe2S35FRxPUP7RUdFzxC1YI+kVwsS2ex2pjWrBkj17JIl8PYfwmX7u2Yn589xPAWoDmsYmnLvlJK+hFaoDzEzt4b1QNobjkONp1CjgUmWb/B+OxnPtIF8z+VyoxBEBVjRQZ6VTvahVLh2F89rO/itJX11xM1AipQYrzR2lujhPJy1P7LziuT8o49gvHTG/QHNkf/a9u1kmOy8ean5GSVrYjtiZLXxMpxl6J4urcYbSo9UFY6xuZWdhvi6GwYjTPOnSVhaA9MFozJJyG5hyeUhMhoMK14X6qShv/OXc7WLQ6JvhLVwsuZacp1zMnIFpq1cL38TDmofmKWK5EcB8odvBXoxrvXbdvwvZyaUgk9OILGs9EudFSe22AmRaLHRWFvP8A/C7zSTn6Y0ZJHtJUiVMOeMyPbED4o2g/GquUvrIiJ8mT4KWqTV7ejovzGRNGMWn+UhaCdaA7amFhlW41RKBIZV5hVnTNaoTKAJqQ7Le1btIipiI2eyx7L9vFA3WN/3FuUr610+uuQM4tFM6Bg72HxZUmh+ub3YQxDONyB4/6+pbYst1MpQyMCcwDdgoK/zphKYiAhO9UV2PRaA204tHFJOlGP+BcHrjtWQWruRFQ7BtZzgl6GNb/NuH2jHbjYwd3C7nMcH14wm/on94t67mIoFBHBpc2ACnB49IY3WLFU44ZTINWqkH+7cmvo76lZHtdDHaQdz224+RWS87jUVUFJHrnCO5g3AWozjAQ=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM4PR12MB5229.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(346002)(136003)(396003)(39860400002)(376002)(366004)(52116002)(186003)(478600001)(38350700002)(921005)(5660300002)(38100700002)(956004)(8676002)(6486002)(54906003)(4326008)(2616005)(7416002)(7696005)(86362001)(8936002)(316002)(66556008)(6666004)(66476007)(36756003)(66946007)(2906002)(83380400001)(26005)(4744005);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?4733/4SnnaH3hIDMl+IP9BB/Ydbysg/Wt82S2jred9GxdDMz6lGdacjD/bW3?=
- =?us-ascii?Q?UgfxZF13xlSFAII7KpC7Tt0DP009eAvpMeScFpGnpM8ZRgAsHdd6BDIufxSq?=
- =?us-ascii?Q?TtiF79EVoRrT7ca29hecwFS8w2qtR6KnhwHY1VdNC++cW4ofWCLIIuBCJG9O?=
- =?us-ascii?Q?aYKjkuUnnDqX7Cc3Yuh/Yxdcfrn0tlykBOq4oY1kbb32GNhqGcXcyJK7QEvj?=
- =?us-ascii?Q?vsHK1HkUoCIdN1EqCnFzoRH0xLIXsf53iz13Kwiymb4kWiD/10vTO4Y+qOdr?=
- =?us-ascii?Q?J31rfWG+KauKrMpURIDjROgB2Sndz6IMdFt7aWZ7kVDEgeyy4uVkH0SnV2QO?=
- =?us-ascii?Q?OeYhfkcf1w5FRFJOvogW1/OEwgLP2P65FZiqCfyxhT6a6+iTLZUoy1/7qyvm?=
- =?us-ascii?Q?K2jtymgYceyk758hYXDEJL9lfASzBQxWuG7OAaODkBGd9HJElQStiGnDD8ai?=
- =?us-ascii?Q?x8potUs4hERxJfAbUxMzkzmmMVWmxhJs7LnTjuyUL5/mNEsMPyC9Ax2YtOuS?=
- =?us-ascii?Q?R0CZAzO8opsiaOPTiQRTkuP0z06Sec7RrskjhVwytvAUUVxYg+GkX2RMSErC?=
- =?us-ascii?Q?wwEkufhXgWXQph6jb6qNCP3PmZenlVMyRKjGjGOag7bLrl7/inIKRIF93ev7?=
- =?us-ascii?Q?wWZfTLjoJFY3wS8hM55knBhc9Ul9kDeQEjAzvvHS+kJbIqTjPnJHvUEaiIos?=
- =?us-ascii?Q?6SSUikL7s9Ger0GVBv4bVmXQxEfR5B1ybZqwRR3dXWyP5uIVs3ie69HdDKoU?=
- =?us-ascii?Q?py1J8g81ZAbeZMrhWmbYxHvr4qTxYt+B1VDCk6yAtSErEd1y1bJsNRujnq+f?=
- =?us-ascii?Q?XV4BNwH+PEuyaY1PIp00xz/b3Rfix01NneWPfy+1YfuwbyD7N9Qm5pGbxygG?=
- =?us-ascii?Q?5AOeSWJ9xZUVnk2dML4Jz9/kd5Ny8Sgx6k1zvgwLVjljShsyzEpG7di0Adgw?=
- =?us-ascii?Q?swXVqFawcIqB2iMnsyRJ6xmy2SxNUmtRB6+2Hg/abfshH1alDfJk/BQ6B3jy?=
- =?us-ascii?Q?HHDeexHvwe7XaS/zF/t0p0j0bCu/cYw7D56f7fibLg3trvN34QDyc5bLO1Ub?=
- =?us-ascii?Q?8N/8Vd9wVzPbUBOqo3QyTFBg1YV2MgW80WNU0jH6VLWU74aTs66VzUcLWhLv?=
- =?us-ascii?Q?caMuX2p+xQ4rOcCtLu7nviCR6dDi1al33zYwVY14bwt0z8Wl32PlRiP2SkOR?=
- =?us-ascii?Q?M8inlxZrBcsJtgXxcKii2MvTTYXbqug6GuF32jggOPlCAgj0ESMlJpz4k5QH?=
- =?us-ascii?Q?nHKuf+mkxy0Vz1SZPGpM2zEj/mgIHUoMNRqigD+R0opR1zDLrDILj/6rbyG4?=
- =?us-ascii?Q?6zlsYOkHHh96TOQxEXBgRnvG?=
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?3NbPnPP9I7JALLiYBRw1I6VwYZMsnOeGvhd3dHNamDc8Q128muqLW4AtRjRT?=
+ =?us-ascii?Q?s0u0hox8FU+K8vIjCiADtpTNBjdLMkFT/Fx176iOkmi4NYRMxJkoe2o3sbRP?=
+ =?us-ascii?Q?/0HWn8T4JtpJ73af9s4TJaz0fjVMqV/zoQ8UhVGxK4myd1RmU8y07bLfR+aC?=
+ =?us-ascii?Q?PyIvy81ufP8SK429pJwlQFp3dDnoxYKHw7Gln89vlmZLblh8n6wE/mPHX4g2?=
+ =?us-ascii?Q?F+GhoUNF0Lhnl61o8f9vXHdy3z5f9y6SkEYD2wbZeg+G1jgUfT1/FOMfW8XT?=
+ =?us-ascii?Q?L+N1flZaBi6epEy+Kd5D0Gc8mSXMXdhDCkp8i+gPThOtaU/YgA9QhQISLUe8?=
+ =?us-ascii?Q?gzbClFdcvou+TNq3yC3omtZMYn6u4f/0HLvJAMvtmO11rWDH0Ul0lkToVas0?=
+ =?us-ascii?Q?vOQkX+BJgtaPjs/wDwR6C+7Xt5KHX9OQd8MdDl/j8O8gyUb4Lw/sgi5V4FrW?=
+ =?us-ascii?Q?pvBud468/GU4J7hy1hL51R2YqRV51vWRrj/pQHUWPm+EWHwHVXEtBHC2sZLf?=
+ =?us-ascii?Q?kQ3gMeEb0UKg0iCgzi4c2N+J3KSpJAH7gt92MINz3iNRmZCstgxIe3lxwaUK?=
+ =?us-ascii?Q?O4jFRI/paFZNcEanJojZZ4QM6yiguf82XwFjnehC2FMmgJ1vcq8TQbzVJWkr?=
+ =?us-ascii?Q?2YNTOOAueOSTKYtCiVaz8ERHj9kFtP3148B1j0zmr+xw2x267rf2IDbWST9M?=
+ =?us-ascii?Q?UlQYwyJ4sxwBRwJyfXY1NXuNlIvGgjq01i1vHXo0LrWzlMVYWtu/LBKUwLqr?=
+ =?us-ascii?Q?1b6Ibvpa2u1lbEVXVLQn2zHqqn2hGyQ2evmVJpRxiRBw4+WeddmOWOf/+K7l?=
+ =?us-ascii?Q?8vXcR3PSvIJpItN5k6xB6wmMFFZUL6Sru9izXYuTyIiRxQM0pnFo3hNSkbrE?=
+ =?us-ascii?Q?YnvG+tIntVOHRrHv1+EKdnPi1u8oRb7ERD3t2aFPbVzxz9LmcSz5QAargMg6?=
+ =?us-ascii?Q?QZdb1QCu7ZxgY5NE9e3AEL+6mj304LXZ/7jFzu2Qd1qYJxVhd8XfhgZppqqg?=
+ =?us-ascii?Q?DHyvLl9HpId8GFZtPBVqYekUuP5ZADVpJWuMHBAjxrQs+sHjkpt8XyAL0VRP?=
+ =?us-ascii?Q?fClM4Da48RyRECLACfw/BNIVWfHJQFp133DJ06JRYXiuD5RC/jf3g16W7/DB?=
+ =?us-ascii?Q?7TUVBWHs5Pre55sgGijTt5E2Am+b9OAU5AztiUp879kFkGXCFN8IU2sP8MgB?=
+ =?us-ascii?Q?vUOGwNamfacv1tzadFc4NoHDsDUWJP0ffVrPrk/rCtYU70PVhlqgJMr/bQ40?=
+ =?us-ascii?Q?Qu5r4UXKCZ/HxTLkdiqCqIsopqkrhp5n1y6E3KAHNdktS8L31aops3p6st9I?=
+ =?us-ascii?Q?vsAh09dlQdt2IopxlnuPaYg8?=
 X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 5fbe3e98-2c64-4712-feaa-08d9514dbe61
+X-MS-Exchange-CrossTenant-Network-Message-Id: 440c7b55-25c3-4298-6cdb-08d9514dcab3
 X-MS-Exchange-CrossTenant-AuthSource: DM4PR12MB5229.namprd12.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Jul 2021 22:27:40.1326
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Jul 2021 22:28:00.6157
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: dPPtQwjc6dQFRISYxOJdnZkEwUSi0pyffUeV6q4sEF9GRIUHvOXYsoRtTt4Up0BmlSjOx8M1RDWTY8I0okpBaA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM4PR12MB5357
+X-MS-Exchange-CrossTenant-UserPrincipalName: QnbSSh5hLkL+L4otK3IGb1kwigDVAt3HlEhpSUKc4PZsjvryPBHKnkWfUfAnG50w0GbnFJ8QvAAho+XaiLF3eA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR12MB5520
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Replace occurrences of sev_es_active() with the more generic
-prot_guest_has() using PATTR_GUEST_PROT_STATE, except for in
-arch/x86/kernel/sev*.c and arch/x86/mm/mem_encrypt*.c where PATTR_SEV_ES
-will be used. If future support is added for other memory encyrption
-techonologies, the use of PATTR_GUEST_PROT_STATE can be updated, as
-required, to specifically use PATTR_SEV_ES.
+The mem_encrypt_active() function has been replaced by prot_guest_has(),
+so remove the implementation.
 
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Ingo Molnar <mingo@redhat.com>
-Cc: Borislav Petkov <bp@alien8.de>
 Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 ---
- arch/x86/include/asm/mem_encrypt.h | 2 --
- arch/x86/kernel/sev.c              | 6 +++---
- arch/x86/mm/mem_encrypt.c          | 7 +++----
- arch/x86/realmode/init.c           | 3 +--
- 4 files changed, 7 insertions(+), 11 deletions(-)
+ include/linux/mem_encrypt.h | 4 ----
+ 1 file changed, 4 deletions(-)
 
-diff --git a/arch/x86/include/asm/mem_encrypt.h b/arch/x86/include/asm/mem_encrypt.h
-index 7e25de37c148..797146e0cd6b 100644
---- a/arch/x86/include/asm/mem_encrypt.h
-+++ b/arch/x86/include/asm/mem_encrypt.h
-@@ -50,7 +50,6 @@ void __init mem_encrypt_free_decrypted_mem(void);
- void __init mem_encrypt_init(void);
+diff --git a/include/linux/mem_encrypt.h b/include/linux/mem_encrypt.h
+index 5c4a18a91f89..ae4526389261 100644
+--- a/include/linux/mem_encrypt.h
++++ b/include/linux/mem_encrypt.h
+@@ -16,10 +16,6 @@
  
- void __init sev_es_init_vc_handling(void);
--bool sev_es_active(void);
- bool amd_prot_guest_has(unsigned int attr);
+ #include <asm/mem_encrypt.h>
  
- #define __bss_decrypted __section(".bss..decrypted")
-@@ -74,7 +73,6 @@ static inline void __init sme_encrypt_kernel(struct boot_params *bp) { }
- static inline void __init sme_enable(struct boot_params *bp) { }
+-#else	/* !CONFIG_ARCH_HAS_MEM_ENCRYPT */
+-
+-static inline bool mem_encrypt_active(void) { return false; }
+-
+ #endif	/* CONFIG_ARCH_HAS_MEM_ENCRYPT */
  
- static inline void sev_es_init_vc_handling(void) { }
--static inline bool sev_es_active(void) { return false; }
- static inline bool amd_prot_guest_has(unsigned int attr) { return false; }
- 
- static inline int __init
-diff --git a/arch/x86/kernel/sev.c b/arch/x86/kernel/sev.c
-index a6895e440bc3..66a4ab9d95d7 100644
---- a/arch/x86/kernel/sev.c
-+++ b/arch/x86/kernel/sev.c
-@@ -11,7 +11,7 @@
- 
- #include <linux/sched/debug.h>	/* For show_regs() */
- #include <linux/percpu-defs.h>
--#include <linux/mem_encrypt.h>
-+#include <linux/protected_guest.h>
- #include <linux/printk.h>
- #include <linux/mm_types.h>
- #include <linux/set_memory.h>
-@@ -615,7 +615,7 @@ int __init sev_es_efi_map_ghcbs(pgd_t *pgd)
- 	int cpu;
- 	u64 pfn;
- 
--	if (!sev_es_active())
-+	if (!prot_guest_has(PATTR_SEV_ES))
- 		return 0;
- 
- 	pflags = _PAGE_NX | _PAGE_RW;
-@@ -774,7 +774,7 @@ void __init sev_es_init_vc_handling(void)
- 
- 	BUILD_BUG_ON(offsetof(struct sev_es_runtime_data, ghcb_page) % PAGE_SIZE);
- 
--	if (!sev_es_active())
-+	if (!prot_guest_has(PATTR_SEV_ES))
- 		return;
- 
- 	if (!sev_es_check_cpu_features())
-diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
-index eb5cae93b238..451de8e84fce 100644
---- a/arch/x86/mm/mem_encrypt.c
-+++ b/arch/x86/mm/mem_encrypt.c
-@@ -383,8 +383,7 @@ static bool sme_active(void)
- 	return sme_me_mask && !sev_active();
- }
- 
--/* Needs to be called from non-instrumentable code */
--bool noinstr sev_es_active(void)
-+static bool sev_es_active(void)
- {
- 	return sev_status & MSR_AMD64_SEV_ES_ENABLED;
- }
-@@ -482,7 +481,7 @@ static void print_mem_encrypt_feature_info(void)
- 		pr_cont(" SEV");
- 
- 	/* Encrypted Register State */
--	if (sev_es_active())
-+	if (amd_prot_guest_has(PATTR_SEV_ES))
- 		pr_cont(" SEV-ES");
- 
- 	pr_cont("\n");
-@@ -501,7 +500,7 @@ void __init mem_encrypt_init(void)
- 	 * With SEV, we need to unroll the rep string I/O instructions,
- 	 * but SEV-ES supports them through the #VC handler.
- 	 */
--	if (amd_prot_guest_has(PATTR_SEV) && !sev_es_active())
-+	if (amd_prot_guest_has(PATTR_SEV) && !amd_prot_guest_has(PATTR_SEV_ES))
- 		static_branch_enable(&sev_enable_key);
- 
- 	print_mem_encrypt_feature_info();
-diff --git a/arch/x86/realmode/init.c b/arch/x86/realmode/init.c
-index 2109ae569c67..7711d0071f41 100644
---- a/arch/x86/realmode/init.c
-+++ b/arch/x86/realmode/init.c
-@@ -2,7 +2,6 @@
- #include <linux/io.h>
- #include <linux/slab.h>
- #include <linux/memblock.h>
--#include <linux/mem_encrypt.h>
- #include <linux/protected_guest.h>
- #include <linux/pgtable.h>
- 
-@@ -48,7 +47,7 @@ static void sme_sev_setup_real_mode(struct trampoline_header *th)
- 	if (prot_guest_has(PATTR_HOST_MEM_ENCRYPT))
- 		th->flags |= TH_FLAGS_SME_ACTIVE;
- 
--	if (sev_es_active()) {
-+	if (prot_guest_has(PATTR_GUEST_PROT_STATE)) {
- 		/*
- 		 * Skip the call to verify_cpu() in secondary_startup_64 as it
- 		 * will cause #VC exceptions when the AP can't handle them yet.
+ #ifdef CONFIG_AMD_MEM_ENCRYPT
 -- 
 2.32.0
 
