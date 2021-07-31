@@ -2,65 +2,67 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-9.4 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D5B4C43216
-	for <linux-efi@archiver.kernel.org>; Sat, 31 Jul 2021 18:38:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ED837C4338F
+	for <linux-efi@archiver.kernel.org>; Sat, 31 Jul 2021 18:46:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2F2C661059
-	for <linux-efi@archiver.kernel.org>; Sat, 31 Jul 2021 18:38:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BFE9460FE7
+	for <linux-efi@archiver.kernel.org>; Sat, 31 Jul 2021 18:46:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229958AbhGaSiO (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 31 Jul 2021 14:38:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39798 "EHLO
+        id S229642AbhGaSq6 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 31 Jul 2021 14:46:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42072 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229708AbhGaSiG (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sat, 31 Jul 2021 14:38:06 -0400
-Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 243BBC06175F;
-        Sat, 31 Jul 2021 11:37:59 -0700 (PDT)
-Received: by mail-lf1-x131.google.com with SMTP id z2so25213665lft.1;
-        Sat, 31 Jul 2021 11:37:59 -0700 (PDT)
+        with ESMTP id S229590AbhGaSq5 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 31 Jul 2021 14:46:57 -0400
+Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 11A09C06175F;
+        Sat, 31 Jul 2021 11:46:51 -0700 (PDT)
+Received: by mail-lf1-x132.google.com with SMTP id y34so25191752lfa.8;
+        Sat, 31 Jul 2021 11:46:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=kM2r3O6lLw7n0SLWPjQDjWc/9/9RRSabPEe6y/wgg7E=;
-        b=XEkqCEMePzc3DyOX93h/fXQ0QYmMDcwfB1n3cbRFUa3+dOjyEGlfvNpW0AmpWdGqR1
-         sLjdYHvVZckMfN8oHfZI6+y+GTKs0MMh4dnW6/F3VwmCE1lnYQ0wNPH06lDMRhXKa5t8
-         L2sKvAK3VtQHJnxlJqhCR6MqVR3DbcAB3/70DUys1WcyxErni0rdYidjZgzTZ2VpLq8B
-         pnP44AoIeJ0bWb6LkXSoqpzWjL7O8EBrK5r1TtRHu8Vu6rI3l5NUTAOXqO3Q+eQSc0hE
-         0Xe4/d6EPFcytsA7ROqPyR7AaEgdYKf+hfRQ9gC47CT4BWR6ISYq6IIHqDi7yS3lk/h8
-         kX+w==
+        h=subject:from:to:cc:references:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=f9mH7GxoUvwQhZmcblBHqMZcgMjxB0VFserqhea/TKU=;
+        b=CBqmFppPYdO06ERQx2RNzKBgI9zrYi2ri3gfb137prqZ5ZluaakXmvXjI7e27gjCq0
+         s1ZF7C3nrcEpmDj73hzhbhREHtM58okX2Re8RFBBS9h64QRtooSJuA9kwxt/DEn5h2fV
+         HYi3Q+1Jqx7y8VqSV1EN7aBHBcDvas+v/4JQfFdsp5TNqUY0XdqQDSJ8rjJXUPuFyT5u
+         0O7AAalmlTlDFe90rapJAdLlr8IB3VwWmMyFFLgVxGyh3eyMFpDURaCjx3xzQ740ub9g
+         zcbkUZnA6ch25cAaHMtjYV/RbGZQOlc2sQlZP42CmqRh1iwv7qI3Btiszn41tSyqc8c5
+         9nXw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=kM2r3O6lLw7n0SLWPjQDjWc/9/9RRSabPEe6y/wgg7E=;
-        b=fvBY/xf8WQ8cwCyrOK667sZDzteJDNqh8+B8nLE+Noy1CaACDIKqLJzR03KB6OkQKz
-         ga0TIqXF+lCJCMMVb0I+IyWRdH0Yg3bAzruSMXQ4RhRAuISaPn3Wv6tsw9bbWvYuWrW+
-         aSpVkxoJ6kxt9e8ALIBln5L+0GV/2Cop03LDvLzO/5oRBMEBWA7o7bMaUWrJefbJSfiK
-         8V7f9HcQgkyVsFD/nY44KTFPlsDjk2LGn04kjr6NX40WJPGM35Ol3A49FMyCG5MiXrcF
-         tGPyt3d5oNIjb58ZZPaQ0Nbb6THI62OhToTJdIyLipHuUC8p1f+QR6jzt+dxapBn2Tl4
-         hZcw==
-X-Gm-Message-State: AOAM530E2C6vS6mKnh86iokxrs/RLNOsDBEtLhYtLTEMsVF2Nazy5q2Q
-        WmvVygZ/M2jmIxkADEMCdno=
-X-Google-Smtp-Source: ABdhPJyT4pXvAYKOeRXsxYj/bX5/EhnjPSDlY7LNdqTS7a6IkJbtOGJBZDvuJVNnV6UUZB1skZ6Cig==
-X-Received: by 2002:ac2:53a3:: with SMTP id j3mr6456611lfh.479.1627756677062;
-        Sat, 31 Jul 2021 11:37:57 -0700 (PDT)
-Received: from localhost.localdomain (94-29-22-96.dynamic.spd-mgts.ru. [94.29.22.96])
-        by smtp.gmail.com with ESMTPSA id s7sm456396lfg.297.2021.07.31.11.37.56
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 31 Jul 2021 11:37:56 -0700 (PDT)
+        h=x-gm-message-state:subject:from:to:cc:references:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=f9mH7GxoUvwQhZmcblBHqMZcgMjxB0VFserqhea/TKU=;
+        b=rkJ1q4jKgCu8W0XA6mzZHWnBevZMfUia8WV925m/0xtvjJPFGgwjddVucNl4/7/sRZ
+         hnsKdTVD6EAuueaFWZjwtNGekHxnLhhlKu0PYmLFwiJAlcm4CGOeQ5NbeGtuVYbh3K3B
+         2UV9XA/jwaZcm1yc/AUdvitJ19GDo6YO5V7kFkI/gcBfFgcyuQ4VOpW4Dzr3bnJEY0GY
+         5k1cNbl3XqDpJZ1qFbLwmFDKx7if3URwXupHFhER6KWTTsWLVqxH3kJSFWwN6qAUEncl
+         hyZR+B3jaKUj6AZYEu5zoFtLDosvotv706O3qeoJCalcYiSZ4h66FpdutPiNA7Unc9V+
+         cq9g==
+X-Gm-Message-State: AOAM530x3egifzj3EPkd0zBq7OMqnRKaT03oncWgB7sgpt5tKBLTy6BI
+        vr8wcyQRmRgUTUzLs6K/nd+mcYKTMxU=
+X-Google-Smtp-Source: ABdhPJzzNUqZ7ZCsfj2v/sqLp+tz8+xToeofAP6yQRy4x9aPbIC1NkyegNgs72fj9ml4345TFtUZQA==
+X-Received: by 2002:a05:6512:138a:: with SMTP id p10mr6562178lfa.505.1627757209358;
+        Sat, 31 Jul 2021 11:46:49 -0700 (PDT)
+Received: from [192.168.2.145] (94-29-22-96.dynamic.spd-mgts.ru. [94.29.22.96])
+        by smtp.googlemail.com with ESMTPSA id j2sm426769ljc.49.2021.07.31.11.46.48
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sat, 31 Jul 2021 11:46:49 -0700 (PDT)
+Subject: Re: [PATCH v2 3/3] partitions/efi: Support NVIDIA Tegra devices
 From:   Dmitry Osipenko <digetx@gmail.com>
 To:     Jens Axboe <axboe@kernel.dk>,
         Thierry Reding <thierry.reding@gmail.com>,
         Jonathan Hunter <jonathanh@nvidia.com>,
-        =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>,
+        =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
         David Heidelberg <david@ixit.cz>,
         Peter Geis <pgwipeout@gmail.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
@@ -72,54 +74,38 @@ To:     Jens Axboe <axboe@kernel.dk>,
         Svyatoslav Ryhel <clamor95@gmail.com>
 Cc:     linux-tegra@vger.kernel.org, linux-block@vger.kernel.org,
         linux-efi <linux-efi@vger.kernel.org>
-Subject: [PATCH v2 1/3] mmc: core: Add raw_boot_mult field to mmc_ext_csd
-Date:   Sat, 31 Jul 2021 21:36:24 +0300
-Message-Id: <20210731183626.18568-2-digetx@gmail.com>
-X-Mailer: git-send-email 2.32.0
-In-Reply-To: <20210731183626.18568-1-digetx@gmail.com>
 References: <20210731183626.18568-1-digetx@gmail.com>
+ <20210731183626.18568-4-digetx@gmail.com>
+Message-ID: <3d175de0-3c4e-1fcd-984c-0d9bf147779f@gmail.com>
+Date:   Sat, 31 Jul 2021 21:46:48 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.11.0
 MIME-Version: 1.0
+In-Reply-To: <20210731183626.18568-4-digetx@gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Bootloader of NVIDIA Tegra devices linearizes the boot0/boot1/main
-partitions into a single virtual space, and thus, all partition addresses
-are shifted by the size of boot0 + boot1 partitions.  The offset needs to
-be known in order to find the EFI entry on EMMC storage of Tegra devices.
+31.07.2021 21:36, Dmitry Osipenko пишет:
+> diff --git a/block/partitions/efi.c b/block/partitions/efi.c
+> index e2716792ecc1..dced55c0d2e1 100644
+> --- a/block/partitions/efi.c
+> +++ b/block/partitions/efi.c
+> @@ -98,6 +98,15 @@ static int force_gpt;
+>  static int __init
+>  force_gpt_fn(char *str)
+>  {
+> +	/*
+> +	 * This check allows to properly parse cmdline variants like
+> +	 * "gpt gpt_sector=<sector>" and "gpt_sector=<sector> gpt" since
+> +	 * "gpt" overlaps with the "gpt_sector=", see tegra_gpt_sector_fn().
+> +	 * The argument is absent for a boolean cmdline option.
+> +	 */
+> +	if (strlen(str))
+> +		return 0;
 
-Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
----
- drivers/mmc/core/mmc.c   | 2 ++
- include/linux/mmc/card.h | 1 +
- 2 files changed, 3 insertions(+)
-
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 838726b68ff3..29e58ffae379 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -418,6 +418,8 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 		ext_csd[EXT_CSD_ERASE_TIMEOUT_MULT];
- 	card->ext_csd.raw_hc_erase_grp_size =
- 		ext_csd[EXT_CSD_HC_ERASE_GRP_SIZE];
-+	card->ext_csd.raw_boot_mult =
-+		ext_csd[EXT_CSD_BOOT_MULT];
- 	if (card->ext_csd.rev >= 3) {
- 		u8 sa_shift = ext_csd[EXT_CSD_S_A_TIMEOUT];
- 		card->ext_csd.part_config = ext_csd[EXT_CSD_PART_CONFIG];
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 74e6c0624d27..37f975875102 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -109,6 +109,7 @@ struct mmc_ext_csd {
- 	u8			raw_hc_erase_gap_size;	/* 221 */
- 	u8			raw_erase_timeout_mult;	/* 223 */
- 	u8			raw_hc_erase_grp_size;	/* 224 */
-+	u8			raw_boot_mult;		/* 226 */
- 	u8			raw_sec_trim_mult;	/* 229 */
- 	u8			raw_sec_erase_mult;	/* 230 */
- 	u8			raw_sec_feature_support;/* 231 */
--- 
-2.32.0
-
+This is not needed anymore in this patch, I noticed it only once v2 was
+already sent out. Will correct it in v3.
