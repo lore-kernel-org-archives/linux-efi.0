@@ -2,59 +2,60 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 51575C4320A
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EC200C43216
 	for <linux-efi@archiver.kernel.org>; Sat, 31 Jul 2021 18:38:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2A18E61050
+	by mail.kernel.org (Postfix) with ESMTP id CE07461050
 	for <linux-efi@archiver.kernel.org>; Sat, 31 Jul 2021 18:38:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229590AbhGaSiF (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 31 Jul 2021 14:38:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39790 "EHLO
+        id S229642AbhGaSiG (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 31 Jul 2021 14:38:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39802 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229475AbhGaSiF (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sat, 31 Jul 2021 14:38:05 -0400
+        with ESMTP id S229475AbhGaSiG (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 31 Jul 2021 14:38:06 -0400
 Received: from mail-lj1-x22e.google.com (mail-lj1-x22e.google.com [IPv6:2a00:1450:4864:20::22e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CBAABC0613CF;
-        Sat, 31 Jul 2021 11:37:57 -0700 (PDT)
-Received: by mail-lj1-x22e.google.com with SMTP id l17so17841626ljn.2;
-        Sat, 31 Jul 2021 11:37:57 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 61BE1C0613D3;
+        Sat, 31 Jul 2021 11:37:59 -0700 (PDT)
+Received: by mail-lj1-x22e.google.com with SMTP id b21so17746987ljo.13;
+        Sat, 31 Jul 2021 11:37:59 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=KxFpJWQtK9xa0w5gLWUipHSVysNghEYt1w+9Q+Sruzk=;
-        b=U0XbTqkiexQT8dIpEgS5EPcVLq4FcRc4Pe3geUoKP77s03RswnDuv7Ug0KTudzcBrj
-         Z9XnmrejpP2GwC1m13qZD16Ko5n8yVqhk+vqMUJ6FBKtbFvx96qOOWfz5bhNk89Ozx1c
-         aDCJzwP9HeK6ORID97iIawwu3zfw10GKo6p+E4XKEMhya4Cyg2mmnUIXGFjRTbR0y3lj
-         e4QlTNhOnxuk1uQTku76KVSCj09hNpf4plVP9kiNrPq5Xl0Hqr64gB8aAyQ2raCbw97i
-         fK9VEnSxSvnrmzWqEqn/uFfi9+LKSLs316cv8T4pTiZ2bM/mEYWyUQUxmrcGdC38UPOR
-         8eRw==
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=RWvwl8D8cTgFcx+4fHw3o3cHJEwxiQXIECV/bUKr4zM=;
+        b=cA+wddHoup3g7CKDKb9rl8JNNFwDb1qR0PtdJwJ4ipid++WWOs62gQK0NF6S5VZmqv
+         ts4UFvKAh+HwqHYeB0WeNnHjtgaimKxVKvwTBpNmBlDHjga3croZ0qT1maw/HcPAbjRL
+         DOjoXfXHx9qeljvdG/DvoXVdlZDGGvgrMqnTVBxursRAfHz2ZCHS/535B2w3m2RAaV0X
+         gmOO+86SljTnNfsM6EZ8QlYGgvnOM+fX5HaYQ5senueIXbX2bVKJpvuEeSy8wnUJ78Bm
+         3GMniTq9h/Lu/btpQxd4FUAyoxAXBuiQsDdTk4TZtV6O82qZABiQFiLroiOrDtC/2ipt
+         6yMg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=KxFpJWQtK9xa0w5gLWUipHSVysNghEYt1w+9Q+Sruzk=;
-        b=docUTVUFI9JVNxOoqcWbVEZYaPHMtoEbyX08IQ0FMmdfO6yVvyWtLjV27cUFA+3HaF
-         jrM2nPxlrA6Tipcr8sS5RE0rA9txbk4lhlaVObsH0NpXK3laBb/jh8UmyflfHjmJ6Gqz
-         6b5SJm+lVnxqc0DryvGy4sgFptxl9CWftiwXfzI4dxkdVdYyCMGypFlGNXvdzSuSE9K8
-         jQJChcZ2EI9ll6y2CXJldsjaXlhBhbU0xPIZRd8aW8zshO5eTgDlTf9LUspIjXiD7dR5
-         s/1fDsCyIddqm54Ot2SDdPtrx+5WkvL4SA50+wlN0A/RJT3nB1EjE+V6ztz2e0KVlFvx
-         UkiQ==
-X-Gm-Message-State: AOAM531qSY3mvxyaNGD9loqoxuUzgMW5rcvjf/Sxsfe5mzNHRVOYl4we
-        R0RHGKMtELgrBexHei64gvo=
-X-Google-Smtp-Source: ABdhPJzbs1TlgquigMiOkPiIVqMR8Kjdsh66zmbC/Zx6ZBeNqvgGg6+gKf9gk751vNjN1/EvzI3rZQ==
-X-Received: by 2002:a2e:9ecd:: with SMTP id h13mr6060906ljk.162.1627756676219;
-        Sat, 31 Jul 2021 11:37:56 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=RWvwl8D8cTgFcx+4fHw3o3cHJEwxiQXIECV/bUKr4zM=;
+        b=Cd+c+Cc9Q5EGIbIyfPjUnRQMxn+9UxAVBdPOCv3bWGOF7qJJhYuPwH3VlbSh0WO5iJ
+         ju91O2lHciHv8+77FKNUu5Ce/1v1it29KqPp8z2k0PUBHgDjHzwWSKQwNj7fiOxzOC76
+         2MMFT1U7cgT3qtrNCEURWNnbr797Z4ArvcFa5vr1xTczsVorqEUvM3mM8CyU7F0RUh7E
+         SFvfETjPr17MYSbD2GaRhoBiw6UP0OP8Jxrz8T8kBOOX0JfETWwWM36N8GvpB10myVRy
+         K8MTva4d5qYyq+wpC1KecCruQ43XVXF3IQ2BZsGK3oigeTB3Wbj5+QaRgbsolw1g4Inf
+         f2EQ==
+X-Gm-Message-State: AOAM533bcKmLsyBzr3qyVXYEk14T7NJ9G67XNMXd7ANghftSGWNW0MSi
+        RN1hgQ795/Jojpqa3+mNIYs=
+X-Google-Smtp-Source: ABdhPJzcOs2xpAmfU2xRebD4+0sjJp1claIvcV90/FBRHqNl/iRyve4FTVK8SvqMrsv8hAeHg0/Cag==
+X-Received: by 2002:a2e:920f:: with SMTP id k15mr5892521ljg.357.1627756677817;
+        Sat, 31 Jul 2021 11:37:57 -0700 (PDT)
 Received: from localhost.localdomain (94-29-22-96.dynamic.spd-mgts.ru. [94.29.22.96])
-        by smtp.gmail.com with ESMTPSA id s7sm456396lfg.297.2021.07.31.11.37.55
+        by smtp.gmail.com with ESMTPSA id s7sm456396lfg.297.2021.07.31.11.37.57
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 31 Jul 2021 11:37:55 -0700 (PDT)
+        Sat, 31 Jul 2021 11:37:57 -0700 (PDT)
 From:   Dmitry Osipenko <digetx@gmail.com>
 To:     Jens Axboe <axboe@kernel.dk>,
         Thierry Reding <thierry.reding@gmail.com>,
@@ -71,52 +72,81 @@ To:     Jens Axboe <axboe@kernel.dk>,
         Svyatoslav Ryhel <clamor95@gmail.com>
 Cc:     linux-tegra@vger.kernel.org, linux-block@vger.kernel.org,
         linux-efi <linux-efi@vger.kernel.org>
-Subject: [PATCH v2 0/3] Support EFI partition on NVIDIA Tegra devices
-Date:   Sat, 31 Jul 2021 21:36:23 +0300
-Message-Id: <20210731183626.18568-1-digetx@gmail.com>
+Subject: [PATCH v2 2/3] mmc: block: Add mmc_bdev_to_card() helper
+Date:   Sat, 31 Jul 2021 21:36:25 +0300
+Message-Id: <20210731183626.18568-3-digetx@gmail.com>
 X-Mailer: git-send-email 2.32.0
+In-Reply-To: <20210731183626.18568-1-digetx@gmail.com>
+References: <20210731183626.18568-1-digetx@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This series adds the most minimal EFI partition support for NVIDIA Tegra
-consumer devices, like Android tablets and game consoles, making theirs
-EMMC accessible out-of-the-box using downstream bootloader and mainline
-Linux kernel.  EMMC now works on Acer A500 tablet and Ouya game console
-that are already well supported in mainline and internal storage is the
-only biggest thing left to support.
+Add mmc_bdev_to_card() helper which is needed for checking EMMC
+parameters by partition table parser in order to find EFI entry
+on NVIDIA Tegra devices.
 
-Changelog:
-
-v2: - This is continuation of [1] where Davidlohr Bueso suggested that it
-      should be better to avoid supporting in mainline the custom gpt_sector
-      kernel cmdline parameter that downstream Android kernels use.  We can
-      do this for the devices that are already mainlined, so I dropped the
-      cmdline from the v2 and left only the variant with a fixed GPT address.
-
-[1] https://lore.kernel.org/linux-efi/20210327212100.3834-3-digetx@gmail.com/T/
-
-Dmitry Osipenko (3):
-  mmc: core: Add raw_boot_mult field to mmc_ext_csd
-  mmc: block: Add mmc_bdev_to_card() helper
-  partitions/efi: Support NVIDIA Tegra devices
-
- block/partitions/Kconfig   |  8 ++++
- block/partitions/Makefile  |  1 +
- block/partitions/check.h   |  2 +
- block/partitions/core.c    |  3 ++
- block/partitions/efi.c     | 18 ++++++++
- block/partitions/tegra.c   | 86 ++++++++++++++++++++++++++++++++++++++
- drivers/mmc/core/block.c   | 15 +++++++
- drivers/mmc/core/mmc.c     |  2 +
- include/linux/mmc/blkdev.h | 13 ++++++
- include/linux/mmc/card.h   |  1 +
- 10 files changed, 149 insertions(+)
- create mode 100644 block/partitions/tegra.c
+Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
+---
+ drivers/mmc/core/block.c   | 15 +++++++++++++++
+ include/linux/mmc/blkdev.h | 13 +++++++++++++
+ 2 files changed, 28 insertions(+)
  create mode 100644 include/linux/mmc/blkdev.h
 
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index ce8aed562929..93ca25e97259 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -42,6 +42,7 @@
+ #include <linux/debugfs.h>
+ 
+ #include <linux/mmc/ioctl.h>
++#include <linux/mmc/blkdev.h>
+ #include <linux/mmc/card.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/mmc.h>
+@@ -313,6 +314,20 @@ static ssize_t force_ro_store(struct device *dev, struct device_attribute *attr,
+ 	return ret;
+ }
+ 
++struct mmc_card *mmc_bdev_to_card(struct block_device *bdev)
++{
++	struct mmc_blk_data *md;
++
++	if (bdev->bd_disk->major != MMC_BLOCK_MAJOR)
++		return NULL;
++
++	md = mmc_blk_get(bdev->bd_disk);
++	if (!md)
++		return NULL;
++
++	return md->queue.card;
++}
++
+ static int mmc_blk_open(struct block_device *bdev, fmode_t mode)
+ {
+ 	struct mmc_blk_data *md = mmc_blk_get(bdev->bd_disk);
+diff --git a/include/linux/mmc/blkdev.h b/include/linux/mmc/blkdev.h
+new file mode 100644
+index 000000000000..67608c58de70
+--- /dev/null
++++ b/include/linux/mmc/blkdev.h
+@@ -0,0 +1,13 @@
++/* SPDX-License-Identifier: GPL-2.0-only */
++/*
++ *  linux/include/linux/mmc/blkdev.h
++ */
++#ifndef LINUX_MMC_BLOCK_DEVICE_H
++#define LINUX_MMC_BLOCK_DEVICE_H
++
++struct block_device;
++struct mmc_card;
++
++struct mmc_card *mmc_bdev_to_card(struct block_device *bdev);
++
++#endif /* LINUX_MMC_BLOCK_DEVICE_H */
 -- 
 2.32.0
 
