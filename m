@@ -2,539 +2,196 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C061C4338F
-	for <linux-efi@archiver.kernel.org>; Fri,  6 Aug 2021 13:01:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AE148C4320A
+	for <linux-efi@archiver.kernel.org>; Mon,  9 Aug 2021 01:42:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 23185611BF
-	for <linux-efi@archiver.kernel.org>; Fri,  6 Aug 2021 13:01:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 94FF560F4B
+	for <linux-efi@archiver.kernel.org>; Mon,  9 Aug 2021 01:42:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1343932AbhHFNBT (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 6 Aug 2021 09:01:19 -0400
-Received: from mail-ot1-f45.google.com ([209.85.210.45]:33626 "EHLO
-        mail-ot1-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1343928AbhHFNBS (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 6 Aug 2021 09:01:18 -0400
-Received: by mail-ot1-f45.google.com with SMTP id 61-20020a9d0d430000b02903eabfc221a9so8838688oti.0;
-        Fri, 06 Aug 2021 06:01:01 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=JR8mZQiiH7oUmHN4ES6S490WwMOYDz5AaU+8qiqrWeQ=;
-        b=NxOi/y5WoPEOFnMfwo8wGYa57XJ7GLD7vum3NcsADtADtB8TQzr3IZDXeymcJdLq8G
-         Amg6mssuKAHUel9lwUXF3j8EXCGhsjLzq9a2DA1sttMM0io44uPCVpEx4mMde7KhMoJp
-         XDpcBfC91F0l1V7XFHamKAf4sBt3GtuwzscWccYkiY9QxlXEzwLV2wzSiJXzo+lKHNuX
-         mkuG9rhq4DG2ZeCIuZvCrwn4DWnY8xQEPD9C7ckbC25c5ZlZODNoRupLC0yZY9UG8ikG
-         w6Z1IHrQAjsWxdtIETnQxk1WJQyCkVVeBlyX0heKsAKThM6Xiv/atDPAbcPkWo9HUcqx
-         +KFw==
-X-Gm-Message-State: AOAM530fOXbYbIMbtexcXnY/YTsb3o3B0o+otscuaRm/JhWnH28PipUO
-        EeHImjPOkoPFdVGHMShLbGKc4e65beBWf0MysFc=
-X-Google-Smtp-Source: ABdhPJxMBac7Go5YyuLnQZ5A458wBnHYFm67QiRCIMuqUR5gJ2vmFPp8U+i1AskIE4/Hb0mGx4UgJCSFBfKVpnRaeiE=
-X-Received: by 2002:a05:6830:1f59:: with SMTP id u25mr7539208oth.321.1628254860622;
- Fri, 06 Aug 2021 06:01:00 -0700 (PDT)
+        id S232682AbhHIBmV (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 8 Aug 2021 21:42:21 -0400
+Received: from mga12.intel.com ([192.55.52.136]:16048 "EHLO mga12.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S232678AbhHIBmU (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Sun, 8 Aug 2021 21:42:20 -0400
+X-IronPort-AV: E=McAfee;i="6200,9189,10070"; a="194200409"
+X-IronPort-AV: E=Sophos;i="5.84,305,1620716400"; 
+   d="scan'208";a="194200409"
+Received: from fmsmga006.fm.intel.com ([10.253.24.20])
+  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Aug 2021 18:41:59 -0700
+X-IronPort-AV: E=Sophos;i="5.84,305,1620716400"; 
+   d="scan'208";a="670624711"
+Received: from ctrondse-mobl.amr.corp.intel.com (HELO skuppusw-mobl5.amr.corp.intel.com) ([10.212.77.4])
+  by fmsmga006-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Aug 2021 18:41:57 -0700
+Subject: Re: [PATCH 00/11] Implement generic prot_guest_has() helper function
+To:     Tom Lendacky <thomas.lendacky@amd.com>,
+        linux-kernel@vger.kernel.org, x86@kernel.org,
+        linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org,
+        iommu@lists.linux-foundation.org, kvm@vger.kernel.org,
+        linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org,
+        linux-graphics-maintainer@vmware.com,
+        amd-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org,
+        kexec@lists.infradead.org, linux-fsdevel@vger.kernel.org
+Cc:     Borislav Petkov <bp@alien8.de>,
+        Brijesh Singh <brijesh.singh@amd.com>,
+        Joerg Roedel <joro@8bytes.org>,
+        Andi Kleen <ak@linux.intel.com>,
+        Tianyu Lan <Tianyu.Lan@microsoft.com>,
+        Andy Lutomirski <luto@kernel.org>,
+        Ard Biesheuvel <ardb@kernel.org>, Baoquan He <bhe@redhat.com>,
+        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
+        Christian Borntraeger <borntraeger@de.ibm.com>,
+        Daniel Vetter <daniel@ffwll.ch>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        Dave Young <dyoung@redhat.com>,
+        David Airlie <airlied@linux.ie>,
+        Heiko Carstens <hca@linux.ibm.com>,
+        Ingo Molnar <mingo@redhat.com>,
+        Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
+        Maxime Ripard <mripard@kernel.org>,
+        Michael Ellerman <mpe@ellerman.id.au>,
+        Paul Mackerras <paulus@samba.org>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Thomas Zimmermann <tzimmermann@suse.de>,
+        Vasily Gorbik <gor@linux.ibm.com>,
+        Will Deacon <will@kernel.org>
+References: <cover.1627424773.git.thomas.lendacky@amd.com>
+From:   "Kuppuswamy, Sathyanarayanan" 
+        <sathyanarayanan.kuppuswamy@linux.intel.com>
+Message-ID: <0d75f283-50b7-460d-3165-185cb955bd70@linux.intel.com>
+Date:   Sun, 8 Aug 2021 18:41:54 -0700
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Firefox/78.0 Thunderbird/78.11.0
 MIME-Version: 1.0
-References: <20210801201336.2224111-1-adobriyan@gmail.com> <20210801201336.2224111-2-adobriyan@gmail.com>
-In-Reply-To: <20210801201336.2224111-2-adobriyan@gmail.com>
-From:   "Rafael J. Wysocki" <rafael@kernel.org>
-Date:   Fri, 6 Aug 2021 15:00:49 +0200
-Message-ID: <CAJZ5v0iL-dG1+yYQ26ZK3WMAr=vAEcoA11+vhyRTzX3j=zU=cA@mail.gmail.com>
-Subject: Re: [PATCH 2/3] isystem: ship and use stdarg.h
-To:     Alexey Dobriyan <adobriyan@gmail.com>
-Cc:     Andrew Morton <akpm@linux-foundation.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arch <linux-arch@vger.kernel.org>,
-        Masahiro Yamada <masahiroy@kernel.org>,
-        "Rafael J. Wysocki" <rjw@rjwysocki.net>,
-        Len Brown <lenb@kernel.org>,
-        ACPI Devel Maling List <linux-acpi@vger.kernel.org>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        linux-efi <linux-efi@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <cover.1627424773.git.thomas.lendacky@amd.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Sun, Aug 1, 2021 at 10:13 PM Alexey Dobriyan <adobriyan@gmail.com> wrote:
->
-> Ship minimal stdarg.h (1 type, 4 macros) as <linux/stdarg.h>.
-> stdarg.h is the only userspace header commonly used in the kernel.
->
-> GPL 2 version of <stdarg.h> can be extracted from
-> http://archive.debian.org/debian/pool/main/g/gcc-4.2/gcc-4.2_4.2.4.orig.tar.gz
->
-> Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>
-> Cc: Len Brown <lenb@kernel.org>
-> Cc: linux-acpi@vger.kernel.org
+Hi Tom,
+
+On 7/27/21 3:26 PM, Tom Lendacky wrote:
+> This patch series provides a generic helper function, prot_guest_has(),
+> to replace the sme_active(), sev_active(), sev_es_active() and
+> mem_encrypt_active() functions.
+> 
+> It is expected that as new protected virtualization technologies are
+> added to the kernel, they can all be covered by a single function call
+> instead of a collection of specific function calls all called from the
+> same locations.
+> 
+> The powerpc and s390 patches have been compile tested only. Can the
+> folks copied on this series verify that nothing breaks for them.
+
+With this patch set, select ARCH_HAS_PROTECTED_GUEST and set
+CONFIG_AMD_MEM_ENCRYPT=n, creates following error.
+
+ld: arch/x86/mm/ioremap.o: in function `early_memremap_is_setup_data':
+arch/x86/mm/ioremap.c:672: undefined reference to `early_memremap_decrypted'
+
+It looks like early_memremap_is_setup_data() is not protected with
+appropriate config.
+
+
+> 
+> Cc: Andi Kleen <ak@linux.intel.com>
+> Cc: Andy Lutomirski <luto@kernel.org>
 > Cc: Ard Biesheuvel <ardb@kernel.org>
-> Cc: linux-efi@vger.kernel.org
-> Signed-off-by: Alexey Dobriyan <adobriyan@gmail.com>
-
-For the ACPI part:
-
-Acked-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
-
+> Cc: Baoquan He <bhe@redhat.com>
+> Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+> Cc: Borislav Petkov <bp@alien8.de>
+> Cc: Christian Borntraeger <borntraeger@de.ibm.com>
+> Cc: Daniel Vetter <daniel@ffwll.ch>
+> Cc: Dave Hansen <dave.hansen@linux.intel.com>
+> Cc: Dave Young <dyoung@redhat.com>
+> Cc: David Airlie <airlied@linux.ie>
+> Cc: Heiko Carstens <hca@linux.ibm.com>
+> Cc: Ingo Molnar <mingo@redhat.com>
+> Cc: Joerg Roedel <joro@8bytes.org>
+> Cc: Maarten Lankhorst <maarten.lankhorst@linux.intel.com>
+> Cc: Maxime Ripard <mripard@kernel.org>
+> Cc: Michael Ellerman <mpe@ellerman.id.au>
+> Cc: Paul Mackerras <paulus@samba.org>
+> Cc: Peter Zijlstra <peterz@infradead.org>
+> Cc: Thomas Gleixner <tglx@linutronix.de>
+> Cc: Thomas Zimmermann <tzimmermann@suse.de>
+> Cc: Vasily Gorbik <gor@linux.ibm.com>
+> Cc: VMware Graphics <linux-graphics-maintainer@vmware.com>
+> Cc: Will Deacon <will@kernel.org>
+> 
 > ---
->  arch/parisc/kernel/firmware.c                         |  2 +-
->  arch/powerpc/kernel/prom_init.c                       |  2 +-
->  arch/powerpc/kernel/rtas.c                            |  2 +-
->  arch/powerpc/kernel/udbg.c                            |  2 +-
->  arch/s390/boot/pgm_check_info.c                       |  2 +-
->  arch/x86/boot/boot.h                                  |  2 +-
->  drivers/firmware/efi/libstub/efi-stub-helper.c        |  2 +-
->  drivers/firmware/efi/libstub/vsprintf.c               |  2 +-
->  drivers/gpu/drm/amd/display/dc/dc_helper.c            |  2 +-
->  drivers/gpu/drm/drm_print.c                           |  2 +-
->  drivers/isdn/capi/capiutil.c                          |  2 +-
->  drivers/macintosh/via-cuda.c                          |  2 +-
->  drivers/macintosh/via-pmu.c                           |  2 +-
->  .../atomisp/pci/hive_isp_css_include/print_support.h  |  2 +-
->  drivers/staging/media/atomisp/pci/ia_css_env.h        |  2 +-
->  .../pci/runtime/debug/interface/ia_css_debug.h        |  2 +-
->  drivers/staging/media/atomisp/pci/sh_css_internal.h   |  2 +-
->  fs/befs/debug.c                                       |  2 +-
->  fs/reiserfs/prints.c                                  |  2 +-
->  fs/ufs/super.c                                        |  2 +-
->  include/acpi/platform/acgcc.h                         |  2 +-
->  include/linux/kernel.h                                |  2 +-
->  include/linux/printk.h                                |  2 +-
->  include/linux/stdarg.h                                | 11 +++++++++++
->  include/linux/string.h                                |  2 +-
->  lib/debug_info.c                                      |  3 +--
->  lib/kasprintf.c                                       |  2 +-
->  lib/kunit/string-stream.h                             |  2 +-
->  lib/vsprintf.c                                        |  2 +-
->  mm/kfence/report.c                                    |  2 +-
->  net/batman-adv/log.c                                  |  2 +-
->  31 files changed, 41 insertions(+), 31 deletions(-)
->  create mode 100644 include/linux/stdarg.h
->
-> diff --git a/arch/parisc/kernel/firmware.c b/arch/parisc/kernel/firmware.c
-> index 665b70086685..7034227dbdf3 100644
-> --- a/arch/parisc/kernel/firmware.c
-> +++ b/arch/parisc/kernel/firmware.c
-> @@ -51,7 +51,7 @@
->   *                                     prumpf  991016
->   */
->
-> -#include <stdarg.h>
-> +#include <linux/stdarg.h>
->
->  #include <linux/delay.h>
->  #include <linux/init.h>
-> diff --git a/arch/powerpc/kernel/prom_init.c b/arch/powerpc/kernel/prom_init.c
-> index a5bf355ce1d6..10664633f7e3 100644
-> --- a/arch/powerpc/kernel/prom_init.c
-> +++ b/arch/powerpc/kernel/prom_init.c
-> @@ -14,7 +14,7 @@
->  /* we cannot use FORTIFY as it brings in new symbols */
->  #define __NO_FORTIFY
->
-> -#include <stdarg.h>
-> +#include <linux/stdarg.h>
->  #include <linux/kernel.h>
->  #include <linux/string.h>
->  #include <linux/init.h>
-> diff --git a/arch/powerpc/kernel/rtas.c b/arch/powerpc/kernel/rtas.c
-> index 99f2cce635fb..ff80bbad22a5 100644
-> --- a/arch/powerpc/kernel/rtas.c
-> +++ b/arch/powerpc/kernel/rtas.c
-> @@ -7,7 +7,7 @@
->   * Copyright (C) 2001 IBM.
->   */
->
-> -#include <stdarg.h>
-> +#include <linux/stdarg.h>
->  #include <linux/kernel.h>
->  #include <linux/types.h>
->  #include <linux/spinlock.h>
-> diff --git a/arch/powerpc/kernel/udbg.c b/arch/powerpc/kernel/udbg.c
-> index 01595e8cafe7..b1544b2f6321 100644
-> --- a/arch/powerpc/kernel/udbg.c
-> +++ b/arch/powerpc/kernel/udbg.c
-> @@ -5,7 +5,7 @@
->   * c 2001 PPC 64 Team, IBM Corp
->   */
->
-> -#include <stdarg.h>
-> +#include <linux/stdarg.h>
->  #include <linux/types.h>
->  #include <linux/sched.h>
->  #include <linux/console.h>
-> diff --git a/arch/s390/boot/pgm_check_info.c b/arch/s390/boot/pgm_check_info.c
-> index 3a46abed2549..b7d8dd88bbf2 100644
-> --- a/arch/s390/boot/pgm_check_info.c
-> +++ b/arch/s390/boot/pgm_check_info.c
-> @@ -1,5 +1,6 @@
->  // SPDX-License-Identifier: GPL-2.0
->  #include <linux/kernel.h>
-> +#include <linux/stdarg.h>
->  #include <linux/string.h>
->  #include <linux/ctype.h>
->  #include <asm/stacktrace.h>
-> @@ -8,7 +9,6 @@
->  #include <asm/setup.h>
->  #include <asm/sclp.h>
->  #include <asm/uv.h>
-> -#include <stdarg.h>
->  #include "boot.h"
->
->  const char hex_asc[] = "0123456789abcdef";
-> diff --git a/arch/x86/boot/boot.h b/arch/x86/boot/boot.h
-> index ca866f1cca2e..34c9dbb6a47d 100644
-> --- a/arch/x86/boot/boot.h
-> +++ b/arch/x86/boot/boot.h
-> @@ -18,7 +18,7 @@
->
->  #ifndef __ASSEMBLY__
->
-> -#include <stdarg.h>
-> +#include <linux/stdarg.h>
->  #include <linux/types.h>
->  #include <linux/edd.h>
->  #include <asm/setup.h>
-> diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-> index ae87dded989d..d489bdc645fe 100644
-> --- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-> +++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-> @@ -7,7 +7,7 @@
->   * Copyright 2011 Intel Corporation; author Matt Fleming
->   */
->
-> -#include <stdarg.h>
-> +#include <linux/stdarg.h>
->
->  #include <linux/ctype.h>
->  #include <linux/efi.h>
-> diff --git a/drivers/firmware/efi/libstub/vsprintf.c b/drivers/firmware/efi/libstub/vsprintf.c
-> index 1088e288c04d..71c71c222346 100644
-> --- a/drivers/firmware/efi/libstub/vsprintf.c
-> +++ b/drivers/firmware/efi/libstub/vsprintf.c
-> @@ -10,7 +10,7 @@
->   * Oh, it's a waste of space, but oh-so-yummy for debugging.
->   */
->
-> -#include <stdarg.h>
-> +#include <linux/stdarg.h>
->
->  #include <linux/compiler.h>
->  #include <linux/ctype.h>
-> diff --git a/drivers/gpu/drm/amd/display/dc/dc_helper.c b/drivers/gpu/drm/amd/display/dc/dc_helper.c
-> index a612ba6dc389..ab6bc5d79012 100644
-> --- a/drivers/gpu/drm/amd/display/dc/dc_helper.c
-> +++ b/drivers/gpu/drm/amd/display/dc/dc_helper.c
-> @@ -28,9 +28,9 @@
->   */
->
->  #include <linux/delay.h>
-> +#include <linux/stdarg.h>
->
->  #include "dm_services.h"
-> -#include <stdarg.h>
->
->  #include "dc.h"
->  #include "dc_dmub_srv.h"
-> diff --git a/drivers/gpu/drm/drm_print.c b/drivers/gpu/drm/drm_print.c
-> index 111b932cf2a9..f783d4963d4b 100644
-> --- a/drivers/gpu/drm/drm_print.c
-> +++ b/drivers/gpu/drm/drm_print.c
-> @@ -25,7 +25,7 @@
->
->  #define DEBUG /* for pr_debug() */
->
-> -#include <stdarg.h>
-> +#include <linux/stdarg.h>
->
->  #include <linux/io.h>
->  #include <linux/moduleparam.h>
-> diff --git a/drivers/isdn/capi/capiutil.c b/drivers/isdn/capi/capiutil.c
-> index f26bf3c66d7e..d7ae42edc4a8 100644
-> --- a/drivers/isdn/capi/capiutil.c
-> +++ b/drivers/isdn/capi/capiutil.c
-> @@ -379,7 +379,7 @@ static char *pnames[] =
->         /*2f */ "Useruserdata"
->  };
->
-> -#include <stdarg.h>
-> +#include <linux/stdarg.h>
->
->  /*-------------------------------------------------------*/
->  static _cdebbuf *bufprint(_cdebbuf *cdb, char *fmt, ...)
-> diff --git a/drivers/macintosh/via-cuda.c b/drivers/macintosh/via-cuda.c
-> index 3581abfb0c6a..cd267392289c 100644
-> --- a/drivers/macintosh/via-cuda.c
-> +++ b/drivers/macintosh/via-cuda.c
-> @@ -9,7 +9,7 @@
->   *
->   * Copyright (C) 1996 Paul Mackerras.
->   */
-> -#include <stdarg.h>
-> +#include <linux/stdarg.h>
->  #include <linux/types.h>
->  #include <linux/errno.h>
->  #include <linux/kernel.h>
-> diff --git a/drivers/macintosh/via-pmu.c b/drivers/macintosh/via-pmu.c
-> index 4bdd4c45e7a7..4b98bc26a94b 100644
-> --- a/drivers/macintosh/via-pmu.c
-> +++ b/drivers/macintosh/via-pmu.c
-> @@ -18,7 +18,7 @@
->   *    a sleep or a freq. switch
->   *
->   */
-> -#include <stdarg.h>
-> +#include <linux/stdarg.h>
->  #include <linux/mutex.h>
->  #include <linux/types.h>
->  #include <linux/errno.h>
-> diff --git a/drivers/staging/media/atomisp/pci/hive_isp_css_include/print_support.h b/drivers/staging/media/atomisp/pci/hive_isp_css_include/print_support.h
-> index 540b405cc0f7..a3c7f3de6d17 100644
-> --- a/drivers/staging/media/atomisp/pci/hive_isp_css_include/print_support.h
-> +++ b/drivers/staging/media/atomisp/pci/hive_isp_css_include/print_support.h
-> @@ -16,7 +16,7 @@
->  #ifndef __PRINT_SUPPORT_H_INCLUDED__
->  #define __PRINT_SUPPORT_H_INCLUDED__
->
-> -#include <stdarg.h>
-> +#include <linux/stdarg.h>
->
->  extern int (*sh_css_printf)(const char *fmt, va_list args);
->  /* depends on host supplied print function in ia_css_init() */
-> diff --git a/drivers/staging/media/atomisp/pci/ia_css_env.h b/drivers/staging/media/atomisp/pci/ia_css_env.h
-> index 6b38723b27cd..3b89bbd837a0 100644
-> --- a/drivers/staging/media/atomisp/pci/ia_css_env.h
-> +++ b/drivers/staging/media/atomisp/pci/ia_css_env.h
-> @@ -17,7 +17,7 @@
->  #define __IA_CSS_ENV_H
->
->  #include <type_support.h>
-> -#include <stdarg.h> /* va_list */
-> +#include <linux/stdarg.h> /* va_list */
->  #include "ia_css_types.h"
->  #include "ia_css_acc_types.h"
->
-> diff --git a/drivers/staging/media/atomisp/pci/runtime/debug/interface/ia_css_debug.h b/drivers/staging/media/atomisp/pci/runtime/debug/interface/ia_css_debug.h
-> index 5e6e7447ae00..e37ef4232c55 100644
-> --- a/drivers/staging/media/atomisp/pci/runtime/debug/interface/ia_css_debug.h
-> +++ b/drivers/staging/media/atomisp/pci/runtime/debug/interface/ia_css_debug.h
-> @@ -19,7 +19,7 @@
->  /*! \file */
->
->  #include <type_support.h>
-> -#include <stdarg.h>
-> +#include <linux/stdarg.h>
->  #include "ia_css_types.h"
->  #include "ia_css_binary.h"
->  #include "ia_css_frame_public.h"
-> diff --git a/drivers/staging/media/atomisp/pci/sh_css_internal.h b/drivers/staging/media/atomisp/pci/sh_css_internal.h
-> index 3c669ec79b68..496faa7297a5 100644
-> --- a/drivers/staging/media/atomisp/pci/sh_css_internal.h
-> +++ b/drivers/staging/media/atomisp/pci/sh_css_internal.h
-> @@ -20,7 +20,7 @@
->  #include <math_support.h>
->  #include <type_support.h>
->  #include <platform_support.h>
-> -#include <stdarg.h>
-> +#include <linux/stdarg.h>
->
->  #if !defined(ISP2401)
->  #include "input_formatter.h"
-> diff --git a/fs/befs/debug.c b/fs/befs/debug.c
-> index eb7bd6c692c7..02fa66fb82c2 100644
-> --- a/fs/befs/debug.c
-> +++ b/fs/befs/debug.c
-> @@ -14,7 +14,7 @@
->  #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
->  #ifdef __KERNEL__
->
-> -#include <stdarg.h>
-> +#include <linux/stdarg.h>
->  #include <linux/string.h>
->  #include <linux/spinlock.h>
->  #include <linux/kernel.h>
-> diff --git a/fs/reiserfs/prints.c b/fs/reiserfs/prints.c
-> index 500f2000eb41..30319dc33c18 100644
-> --- a/fs/reiserfs/prints.c
-> +++ b/fs/reiserfs/prints.c
-> @@ -8,7 +8,7 @@
->  #include <linux/string.h>
->  #include <linux/buffer_head.h>
->
-> -#include <stdarg.h>
-> +#include <linux/stdarg.h>
->
->  static char error_buf[1024];
->  static char fmt_buf[1024];
-> diff --git a/fs/ufs/super.c b/fs/ufs/super.c
-> index 74028b5a7b0a..00a01471ea05 100644
-> --- a/fs/ufs/super.c
-> +++ b/fs/ufs/super.c
-> @@ -70,7 +70,7 @@
->  #include <linux/module.h>
->  #include <linux/bitops.h>
->
-> -#include <stdarg.h>
-> +#include <linux/stdarg.h>
->
->  #include <linux/uaccess.h>
->
-> diff --git a/include/acpi/platform/acgcc.h b/include/acpi/platform/acgcc.h
-> index f6656be81760..fb172a03a753 100644
-> --- a/include/acpi/platform/acgcc.h
-> +++ b/include/acpi/platform/acgcc.h
-> @@ -22,7 +22,7 @@ typedef __builtin_va_list va_list;
->  #define va_arg(v, l)            __builtin_va_arg(v, l)
->  #define va_copy(d, s)           __builtin_va_copy(d, s)
->  #else
-> -#include <stdarg.h>
-> +#include <linux/stdarg.h>
->  #endif
->  #endif
->
-> diff --git a/include/linux/kernel.h b/include/linux/kernel.h
-> index 1b2f0a7e00d6..2776423a587e 100644
-> --- a/include/linux/kernel.h
-> +++ b/include/linux/kernel.h
-> @@ -2,7 +2,7 @@
->  #ifndef _LINUX_KERNEL_H
->  #define _LINUX_KERNEL_H
->
-> -#include <stdarg.h>
-> +#include <linux/stdarg.h>
->  #include <linux/align.h>
->  #include <linux/limits.h>
->  #include <linux/linkage.h>
-> diff --git a/include/linux/printk.h b/include/linux/printk.h
-> index e834d78f0478..9f3f29ea348e 100644
-> --- a/include/linux/printk.h
-> +++ b/include/linux/printk.h
-> @@ -2,7 +2,7 @@
->  #ifndef __KERNEL_PRINTK__
->  #define __KERNEL_PRINTK__
->
-> -#include <stdarg.h>
-> +#include <linux/stdarg.h>
->  #include <linux/init.h>
->  #include <linux/kern_levels.h>
->  #include <linux/linkage.h>
-> diff --git a/include/linux/stdarg.h b/include/linux/stdarg.h
-> new file mode 100644
-> index 000000000000..c8dc7f4f390c
-> --- /dev/null
-> +++ b/include/linux/stdarg.h
-> @@ -0,0 +1,11 @@
-> +// SPDX-License-Identifier: GPL-2.0-or-later
-> +#ifndef _LINUX_STDARG_H
-> +#define _LINUX_STDARG_H
-> +
-> +typedef __builtin_va_list va_list;
-> +#define va_start(v, l) __builtin_va_start(v, l)
-> +#define va_end(v)      __builtin_va_end(v)
-> +#define va_arg(v, T)   __builtin_va_arg(v, T)
-> +#define va_copy(d, s)  __builtin_va_copy(d, s)
-> +
-> +#endif
-> diff --git a/include/linux/string.h b/include/linux/string.h
-> index b48d2d28e0b1..5e96d656be7a 100644
-> --- a/include/linux/string.h
-> +++ b/include/linux/string.h
-> @@ -6,7 +6,7 @@
->  #include <linux/types.h>       /* for size_t */
->  #include <linux/stddef.h>      /* for NULL */
->  #include <linux/errno.h>       /* for E2BIG */
-> -#include <stdarg.h>
-> +#include <linux/stdarg.h>
->  #include <uapi/linux/string.h>
->
->  extern char *strndup_user(const char __user *, long);
-> diff --git a/lib/debug_info.c b/lib/debug_info.c
-> index 36daf753293c..cc4723c74af5 100644
-> --- a/lib/debug_info.c
-> +++ b/lib/debug_info.c
-> @@ -5,8 +5,6 @@
->   * CONFIG_DEBUG_INFO_REDUCED. Please do not add actual code. However,
->   * adding appropriate #includes is fine.
->   */
-> -#include <stdarg.h>
-> -
->  #include <linux/cred.h>
->  #include <linux/crypto.h>
->  #include <linux/dcache.h>
-> @@ -22,6 +20,7 @@
->  #include <linux/net.h>
->  #include <linux/sched.h>
->  #include <linux/slab.h>
-> +#include <linux/stdarg.h>
->  #include <linux/types.h>
->  #include <net/addrconf.h>
->  #include <net/sock.h>
-> diff --git a/lib/kasprintf.c b/lib/kasprintf.c
-> index bacf7b83ccf0..cd2f5974ed98 100644
-> --- a/lib/kasprintf.c
-> +++ b/lib/kasprintf.c
-> @@ -5,7 +5,7 @@
->   *  Copyright (C) 1991, 1992  Linus Torvalds
->   */
->
-> -#include <stdarg.h>
-> +#include <linux/stdarg.h>
->  #include <linux/export.h>
->  #include <linux/slab.h>
->  #include <linux/types.h>
-> diff --git a/lib/kunit/string-stream.h b/lib/kunit/string-stream.h
-> index 5e94b623454f..43f9508a55b4 100644
-> --- a/lib/kunit/string-stream.h
-> +++ b/lib/kunit/string-stream.h
-> @@ -11,7 +11,7 @@
->
->  #include <linux/spinlock.h>
->  #include <linux/types.h>
-> -#include <stdarg.h>
-> +#include <linux/stdarg.h>
->
->  struct string_stream_fragment {
->         struct kunit *test;
-> diff --git a/lib/vsprintf.c b/lib/vsprintf.c
-> index 26c83943748a..3bcb7be03f93 100644
-> --- a/lib/vsprintf.c
-> +++ b/lib/vsprintf.c
-> @@ -17,7 +17,7 @@
->   * - scnprintf and vscnprintf
->   */
->
-> -#include <stdarg.h>
-> +#include <linux/stdarg.h>
->  #include <linux/build_bug.h>
->  #include <linux/clk.h>
->  #include <linux/clk-provider.h>
-> diff --git a/mm/kfence/report.c b/mm/kfence/report.c
-> index 2a319c21c939..4b891dd75650 100644
-> --- a/mm/kfence/report.c
-> +++ b/mm/kfence/report.c
-> @@ -5,7 +5,7 @@
->   * Copyright (C) 2020, Google LLC.
->   */
->
-> -#include <stdarg.h>
-> +#include <linux/stdarg.h>
->
->  #include <linux/kernel.h>
->  #include <linux/lockdep.h>
-> diff --git a/net/batman-adv/log.c b/net/batman-adv/log.c
-> index f0e5d1429662..7a93a1e94c40 100644
-> --- a/net/batman-adv/log.c
-> +++ b/net/batman-adv/log.c
-> @@ -7,7 +7,7 @@
->  #include "log.h"
->  #include "main.h"
->
-> -#include <stdarg.h>
-> +#include <linux/stdarg.h>
->
->  #include "trace.h"
->
-> --
-> 2.31.1
->
+> 
+> Patches based on:
+>    https://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git master
+>    commit 79e920060fa7 ("Merge branch 'WIP/fixes'")
+> 
+> Tom Lendacky (11):
+>    mm: Introduce a function to check for virtualization protection
+>      features
+>    x86/sev: Add an x86 version of prot_guest_has()
+>    powerpc/pseries/svm: Add a powerpc version of prot_guest_has()
+>    x86/sme: Replace occurrences of sme_active() with prot_guest_has()
+>    x86/sev: Replace occurrences of sev_active() with prot_guest_has()
+>    x86/sev: Replace occurrences of sev_es_active() with prot_guest_has()
+>    treewide: Replace the use of mem_encrypt_active() with
+>      prot_guest_has()
+>    mm: Remove the now unused mem_encrypt_active() function
+>    x86/sev: Remove the now unused mem_encrypt_active() function
+>    powerpc/pseries/svm: Remove the now unused mem_encrypt_active()
+>      function
+>    s390/mm: Remove the now unused mem_encrypt_active() function
+> 
+>   arch/Kconfig                               |  3 ++
+>   arch/powerpc/include/asm/mem_encrypt.h     |  5 --
+>   arch/powerpc/include/asm/protected_guest.h | 30 +++++++++++
+>   arch/powerpc/platforms/pseries/Kconfig     |  1 +
+>   arch/s390/include/asm/mem_encrypt.h        |  2 -
+>   arch/x86/Kconfig                           |  1 +
+>   arch/x86/include/asm/kexec.h               |  2 +-
+>   arch/x86/include/asm/mem_encrypt.h         | 13 +----
+>   arch/x86/include/asm/protected_guest.h     | 27 ++++++++++
+>   arch/x86/kernel/crash_dump_64.c            |  4 +-
+>   arch/x86/kernel/head64.c                   |  4 +-
+>   arch/x86/kernel/kvm.c                      |  3 +-
+>   arch/x86/kernel/kvmclock.c                 |  4 +-
+>   arch/x86/kernel/machine_kexec_64.c         | 19 +++----
+>   arch/x86/kernel/pci-swiotlb.c              |  9 ++--
+>   arch/x86/kernel/relocate_kernel_64.S       |  2 +-
+>   arch/x86/kernel/sev.c                      |  6 +--
+>   arch/x86/kvm/svm/svm.c                     |  3 +-
+>   arch/x86/mm/ioremap.c                      | 16 +++---
+>   arch/x86/mm/mem_encrypt.c                  | 60 +++++++++++++++-------
+>   arch/x86/mm/mem_encrypt_identity.c         |  3 +-
+>   arch/x86/mm/pat/set_memory.c               |  3 +-
+>   arch/x86/platform/efi/efi_64.c             |  9 ++--
+>   arch/x86/realmode/init.c                   |  8 +--
+>   drivers/gpu/drm/amd/amdgpu/amdgpu_drv.c    |  4 +-
+>   drivers/gpu/drm/drm_cache.c                |  4 +-
+>   drivers/gpu/drm/vmwgfx/vmwgfx_drv.c        |  4 +-
+>   drivers/gpu/drm/vmwgfx/vmwgfx_msg.c        |  6 +--
+>   drivers/iommu/amd/init.c                   |  7 +--
+>   drivers/iommu/amd/iommu.c                  |  3 +-
+>   drivers/iommu/amd/iommu_v2.c               |  3 +-
+>   drivers/iommu/iommu.c                      |  3 +-
+>   fs/proc/vmcore.c                           |  6 +--
+>   include/linux/mem_encrypt.h                |  4 --
+>   include/linux/protected_guest.h            | 37 +++++++++++++
+>   kernel/dma/swiotlb.c                       |  4 +-
+>   36 files changed, 218 insertions(+), 104 deletions(-)
+>   create mode 100644 arch/powerpc/include/asm/protected_guest.h
+>   create mode 100644 arch/x86/include/asm/protected_guest.h
+>   create mode 100644 include/linux/protected_guest.h
+> 
+
+-- 
+Sathyanarayanan Kuppuswamy
+Linux Kernel Developer
