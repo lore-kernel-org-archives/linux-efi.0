@@ -5,47 +5,47 @@ X-Spam-Level:
 X-Spam-Status: No, score=-18.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,MSGID_FROM_MTA_HEADER,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D6E16C19F39
-	for <linux-efi@archiver.kernel.org>; Fri, 13 Aug 2021 17:00:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 86321C43214
+	for <linux-efi@archiver.kernel.org>; Fri, 13 Aug 2021 17:00:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C24F8610FC
-	for <linux-efi@archiver.kernel.org>; Fri, 13 Aug 2021 17:00:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 731B16112E
+	for <linux-efi@archiver.kernel.org>; Fri, 13 Aug 2021 17:00:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229528AbhHMRAn (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 13 Aug 2021 13:00:43 -0400
-Received: from mail-bn1nam07on2053.outbound.protection.outlook.com ([40.107.212.53]:7758
+        id S232200AbhHMRBJ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 13 Aug 2021 13:01:09 -0400
+Received: from mail-bn1nam07on2058.outbound.protection.outlook.com ([40.107.212.58]:40840
         "EHLO NAM02-BN1-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S232124AbhHMRAm (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 13 Aug 2021 13:00:42 -0400
+        id S232584AbhHMRBA (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 13 Aug 2021 13:01:00 -0400
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=bUqzTUNKgDJTbc+3czmmRG/ouMQXddukoPIQarYuSl5EP+e5NqHL4u/DK+LkiTBExMzevaHth/1m7P0OoY5OHPHVhCTI2eR2QalkZZCvf2ARgAi0zele/ij+yHuqDMh1rjcDwfhNwN1B/ktPthkVcWpK8x9Xwbj6hFHlhCcWDhmTsoGUehu+bpOHsuIAw2FDcLXCrOwbcem3XSm0Ku/71xFJ8kPby3+fJeQdReifwnnMBVkBmy6fSzeb9mPYmW8ZivLhF5dJwHpjHCtwvssY2eMWoWeK+VUSF1uVbkr6lCYkiy6pf3D8Wbg5V8JBM3QndL2xhhUYK3frxSJKml4qSw==
+ b=fnVVKSDUTq9Zx77/B3hb0bqVk2jOME4n7dEZ319TRm3LtI2ytMtWHd9Zsw2XmIFILOXeCT3p1Ei+KdXvoWITGlw0eHHnHLtYShsjr15BelK7Na/kwE1ExLCgNnDMDGsmgrc+GZKwKkrpo3SoFev5z/0PaTkRMA+v8Q2qI8dD8JOhe34+L0JcYlc7lvgyJmq9vkCOdQHMlN9WGAr4l8v+NHsmjtf8Yu2xL2B5F/R4fKEPIKQl666w1M+sAp9sCYWrnIFUp3jFrOUytQjRkAwDpWihHv5RoGJ7T6xwFlsAGX9dBZ2OUzlK+jSRoSNcajkxwdWSQOb9sefxEScEy9Uk4w==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=UuLcJW+E15YGcvv29k84VPEZb+rr27P9muWMmGZdDk4=;
- b=hgyJWL4yNVx20DPg/YcChMSewOd3/1O+GeByG3JNlu1CBQdKGHeU1iRF6RS5Lk7fWm3GZsjgpqQ7qDnHTKXmiSzdDxldlwylPmBcvi6yUC359UFXAlstwB4SdNmEfgLpFNJNZgrP2dWUzlHrDPnxjF/lKAXjuQP9j6A+t8F+NNfGueUIqCt7WldRMhAnMgLATz+EPY61TkeR4Yfxwgw/T27vzGA2O+6rzZf3P0PY1hvu6R88vkCSfuq5ZlNgr9SdSrNbw24ljRm+f1wRTx6KqCgTrq7dl5n6K9G8QGHQxCCIU5lLo3hdE6LN8WvC2pM27mIrMCxaEeHgLo5bnn1NKQ==
+ bh=TbJsayd3esujUkeClICzAo+GhfoeY9yFc2WWh+yJzf4=;
+ b=Zxnb0WZCKFJT1NrB14Zm5ck+BqWSk7g4wXy3DrCt6ad066LfG2WsHL+id7hrrxVZYU4Qdje+xDuajxtFVdI3s3/3rQNBi2VClsz6IkcIiPMO5OOuFUkERhzW+0c886OkhgbxthfA0GPG2i5QdqV6epMiumaCBVYmGTdD4G2FL1MrAkjUW+QoXbLNrKuvwOjsjN7OFBrga0Z7zJlaGKRzRVWD+aKSGwZL2YyBx2epqlboqc8ZBI0HF27fZByQ2V9+jElhz5KjtI1cgWQ0M7kD/tC4i2H2llXWML9nTz8Fbfsg5Q/K/0ytsGMUKQlhO+3b0wcodklB4Xu2cOjcq+20Jg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=amd.com; dmarc=pass action=none header.from=amd.com; dkim=pass
  header.d=amd.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=UuLcJW+E15YGcvv29k84VPEZb+rr27P9muWMmGZdDk4=;
- b=h74Ok9b75CY/+Fx8CnJDKHkZvmfLwPiDkEFCY4nPjqzNpDY7IY3Phmy/PvKurpvcxozwBAfvsJyf+6GcWQMwrYpYjCBk2Fd+tlSL6/v6DcJ3pGa+FlAkNkZGPGhPGAQMNiapWAjh2v1HroCoiFMb9FOqOo80NQLbhX+7CmAKO9E=
+ bh=TbJsayd3esujUkeClICzAo+GhfoeY9yFc2WWh+yJzf4=;
+ b=189gDan4187+wg8jIlCEJGrRoMwGGS2O8AdTcwVmm4pQfbdXWPpjPJqB/OyKGFc+xv+2OdqGqrcbBa+nxX370058XVCUDrseRh1WevrGgovBQ/Vdd4ocIUUTogb/U257WoI/9ISOMKDfAkjt727OrvpEfmQ8KipSxpa9un80zXk=
 Authentication-Results: vger.kernel.org; dkim=none (message not signed)
  header.d=none;vger.kernel.org; dmarc=none action=none header.from=amd.com;
 Received: from DM4PR12MB5229.namprd12.prod.outlook.com (2603:10b6:5:398::12)
- by DM6PR12MB5518.namprd12.prod.outlook.com (2603:10b6:5:1b9::21) with
+ by DM4PR12MB5341.namprd12.prod.outlook.com (2603:10b6:5:39e::18) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4415.14; Fri, 13 Aug
- 2021 17:00:13 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4415.16; Fri, 13 Aug
+ 2021 17:00:30 +0000
 Received: from DM4PR12MB5229.namprd12.prod.outlook.com
  ([fe80::d560:d21:cd59:9418]) by DM4PR12MB5229.namprd12.prod.outlook.com
  ([fe80::d560:d21:cd59:9418%6]) with mapi id 15.20.4415.019; Fri, 13 Aug 2021
- 17:00:12 +0000
+ 17:00:30 +0000
 From:   Tom Lendacky <thomas.lendacky@amd.com>
 To:     linux-kernel@vger.kernel.org, x86@kernel.org,
         linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org,
@@ -66,77 +66,76 @@ Cc:     Borislav Petkov <bp@alien8.de>,
         Dave Hansen <dave.hansen@linux.intel.com>,
         Andy Lutomirski <luto@kernel.org>,
         Peter Zijlstra <peterz@infradead.org>,
-        Joerg Roedel <jroedel@suse.de>
-Subject: [PATCH v2 03/12] x86/sev: Add an x86 version of prot_guest_has()
-Date:   Fri, 13 Aug 2021 11:59:22 -0500
-Message-Id: <7d55bac0cf2e73f53816bce3a3097877ed9663f3.1628873970.git.thomas.lendacky@amd.com>
+        Will Deacon <will@kernel.org>, Joerg Roedel <jroedel@suse.de>
+Subject: [PATCH v2 05/12] x86/sme: Replace occurrences of sme_active() with prot_guest_has()
+Date:   Fri, 13 Aug 2021 11:59:24 -0500
+Message-Id: <c6c38d6253dc78381f9ff0f1823b6ee5ddeefacc.1628873970.git.thomas.lendacky@amd.com>
 X-Mailer: git-send-email 2.32.0
 In-Reply-To: <cover.1628873970.git.thomas.lendacky@amd.com>
 References: <cover.1628873970.git.thomas.lendacky@amd.com>
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
-X-ClientProxiedBy: SN7PR04CA0057.namprd04.prod.outlook.com
- (2603:10b6:806:120::32) To DM4PR12MB5229.namprd12.prod.outlook.com
+X-ClientProxiedBy: SA0PR12CA0001.namprd12.prod.outlook.com
+ (2603:10b6:806:6f::6) To DM4PR12MB5229.namprd12.prod.outlook.com
  (2603:10b6:5:398::12)
 MIME-Version: 1.0
 X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from tlendack-t1.amd.com (165.204.77.1) by SN7PR04CA0057.namprd04.prod.outlook.com (2603:10b6:806:120::32) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4415.14 via Frontend Transport; Fri, 13 Aug 2021 17:00:11 +0000
+Received: from tlendack-t1.amd.com (165.204.77.1) by SA0PR12CA0001.namprd12.prod.outlook.com (2603:10b6:806:6f::6) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4415.14 via Frontend Transport; Fri, 13 Aug 2021 17:00:28 +0000
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: b5f97b9c-957b-4214-04ff-08d95e7bd0d6
-X-MS-TrafficTypeDiagnostic: DM6PR12MB5518:
+X-MS-Office365-Filtering-Correlation-Id: 751ea128-7a31-4c68-2727-08d95e7bdafe
+X-MS-TrafficTypeDiagnostic: DM4PR12MB5341:
 X-MS-Exchange-Transport-Forked: True
-X-Microsoft-Antispam-PRVS: <DM6PR12MB551868AB9343F3147317D64EECFA9@DM6PR12MB5518.namprd12.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:6430;
+X-Microsoft-Antispam-PRVS: <DM4PR12MB53417CDB86BEE18B417B6A43ECFA9@DM4PR12MB5341.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:4303;
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: r/NUz6w5jJM7GGJ6YvdsS40louMSqdi7c8uC58YY1Kh3jc/VmXGyw3v1JkzukbEImPndFQ0/8V/LuhziWw64AHwpNYw9NA4nueDozLzhHrhnJhFy7y0MxIMCEI7IGftw1nI93hfRoQDHf0k147Cjid/T1o/t3ioR6Sz8XgdNbFCVc5OOaf6MY7cpcqhLK5riAbGtwS+bdnoEX9y5uLvGyDMntJvDe3sYEEwHXWVP96lHjvc/6SjY60j3nul1+v1ljPpJ4WpLoVGIFW1r9m2onPoJYdwg9SV/xg0Yjug/WuQCpdJ/2k7f6oCQx2SVqjLt1goF9hfuZGRNKIlWBJss/Nbdu/ZtStoS0x1EmtL+FpCI1R8hNpS44JMMLFKu5J7TXStd1J3PYcRXHjwEzIGsnj+clk2F6f2C/ciVia8ovtxBYwrmjtpXcjo85tBbkTGrAsm7nc/zkVOGXC/osq5tUk3DUWo5vGQpxl3XefRoqi36irbhZCqiMkqE8VQVT2P0v/MMMo5IQJXA+U/pFx1Hyr9SVIFA1E6R68O1TwtuNsKxdrU6GOozOhQtU71g4SmVQIGUIkhD0+G7tkyc+7CWLPN6rRbOsRonDDewRIcfWKRC99tG9HcH78DADrEXmUM+Nnp+CztxoI2qgKDA/ImhO3NjghS9HsQEqujbBduT0CPtyZeC1QGa/QuNRS3xjdb3G2ipYtLYvRbJlWysal59yp9Zm2oDctPLlfxlin27AQY=
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM4PR12MB5229.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(39850400004)(136003)(346002)(396003)(376002)(66946007)(66476007)(66556008)(478600001)(921005)(7696005)(8936002)(8676002)(26005)(52116002)(6666004)(36756003)(186003)(86362001)(2906002)(7416002)(83380400001)(2616005)(38100700002)(956004)(38350700002)(5660300002)(4326008)(6486002)(316002)(54906003);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: goe8bZX4HkeHHdwe1g++kyc3dX9vCO3ayoqzqa0QDqC6LpUDi/cKX5ktozSgy85Ojd0aPFNz8BlKVUu1NljIG/YTYAOaEXPSG5erD+FwH/YzWZirDe7p5P1k6X2RYI5Ar8lyQAKWLhMU4wfaQWp5SxLGT2VL9QttTUqH7YKDTNgWMW6ecWespZrIblFS2Dn6KuIo9oDvFDrUxHRq/c7+d8xC85tbi2kf2J5eFnFZ2cBTo4mW7uRqAVr12VV2qgfjEGwUF7UXTNQWD5gdnqi/tfXI7NF4+HyWWpeOxePLVJyb8bnXCd3GGyxp4wt3wwSfynVu9zv9qE4b/fnVagVrfBT8UjLE9xDezQjWbwp6b6V7JihVfFwgfKq7lLk5fWZzLCBXjkHTA2dwfNbJocL3VEk7x58+8+Uh4cWD0Ib8FrSaU66BhIh9y6dTO4kZQcscy9LCYVOHJ2MDNkyv2UBsVpOBHIg71JOaG28Rq6IKMZJzHsupmrr+NRLLWnn+ighTEN9LJQQHgFlr9YnR7XDpHBZIf+g6ASld/zTKGI7+sePV2XG9Ng2RwLzynhuomqAsmEpfb4bAWewhbRoLoWWiLHe+2HpwrmNKFuVXV0mEOD9Ntg0RFt1Fj/vdMTuDpBHkjxcjti4SMKSGlTYBm/RhRuNHBYsR4VM1z/Yz8YUUJgkqGS9H5swNSsnm6Y7UhYvROyo+b9SeLsnJFubEPnSStkFVraXx096TM0hCF9pzgIM=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM4PR12MB5229.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(39860400002)(136003)(366004)(346002)(376002)(396003)(86362001)(8676002)(2616005)(5660300002)(6666004)(54906003)(36756003)(38100700002)(7696005)(38350700002)(921005)(52116002)(8936002)(2906002)(478600001)(83380400001)(4326008)(186003)(6486002)(7416002)(26005)(956004)(66476007)(66556008)(316002)(66946007);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?KxFT9aBqUdOzsjtqL3L6GpbGsQF1fa1ZZn+lzWo0PKEIfs0BfMV0QiHItHPZ?=
- =?us-ascii?Q?8P5lGuGGM8DiVTZ2CnvwumPXgag6Y1yYTevBrBwcEe0lansLUVNnnydIj7BN?=
- =?us-ascii?Q?dgf3huF3VaL4bQ6+E7U0/o7lcNTVvR8Yqdw6J3VJjfv4arXmnfoHtQSl/dWq?=
- =?us-ascii?Q?3TLWQopKu007OmFFtq984BEG28+4IiMFbNGy01p5QMwsA9XY9Xb3DInKHwPv?=
- =?us-ascii?Q?Mlo8SWN4kD1a97WlbOFbUVxGjNFXEgI7EENGrMsVlxSJTEBlOJ64/tyNRr+w?=
- =?us-ascii?Q?U+z9ZMYcVaVOzHUYsGL5XUNUeqqu3eyGQbG/7vc0T4g7Zp5DQ1Zw7IQx6Llz?=
- =?us-ascii?Q?qGjyTGVx1bFD9Ak+DJ46docHjkjafJif40JL+c0dbOZ+srTY42xRi+c6h250?=
- =?us-ascii?Q?IwqJWco53Cc+WSs15BdzJuw2rFOEAwjA/D6wwfstOq2dczZRg8/vO1513gXy?=
- =?us-ascii?Q?v4FVtvFSs25L6bLXNgEnghp5f3oRVB9qz6k/Djv+JTlMgDZr6uncrYjqxFKk?=
- =?us-ascii?Q?l4rwihCF4hsKNY8dXTC0qeanFK2CGH+Gwc5Sbzf+EVUeXjI0vZ9VV6AiIM+Z?=
- =?us-ascii?Q?I34ZN4IFr+DCNTOIwKcUaaKPOcM/svQKOBi7dOleHBj2ApkyqTxjW1q3sApp?=
- =?us-ascii?Q?E1cuyZdON/yqGWPczZ3+8Hj7hXlKl+bCoNRwkpH015SNhMeYSuvOw6uvdtPH?=
- =?us-ascii?Q?O8jPMN1fJKHbgyNAWZGdmdvsr3+b1JnwGbRpBMElfuN6phyniCod0TUcbbAU?=
- =?us-ascii?Q?f540Ni9NsDPUheILUaQCXh0bxni4NZJpCR9lfyOVf5rV3MXYUOPdCV3BRZo+?=
- =?us-ascii?Q?fRhPpzVvRFetXGiO7nkIdymSNmmrN1GpzTicVXryHqJtTbk0+IyhEdOdtQVy?=
- =?us-ascii?Q?W8lWSNfh5MsJS5qwzEn28M9VcOQ5gdjPk7SkpiHWneEYb78zrB5EIzlqaE4e?=
- =?us-ascii?Q?Qc9MgO0fb1Xwsl716ojivbCjSe9olaHRfHWrXge66CSqOdxO7dm23qp1FrPH?=
- =?us-ascii?Q?3xCqrVRaQwtnAOyx4zbgxjh3PTL+K4pph/Y6xWV11GBq8m6j0HsvudCTOqig?=
- =?us-ascii?Q?rvGenZbIEXvV2ytn6xfHtvtpMlx9E5HttWdhvaqKhKkTwGEIS3T4yPC0moLg?=
- =?us-ascii?Q?FGRyTmYMpELfpxq+4dNQH8Gv/65v4fqEenhZpKivDecLVIuvRg372Rmt1KrR?=
- =?us-ascii?Q?syptJ6/djbeaVOiT3JHgs9GHH5bp5dlGqLBy6tDwjDX4mOxfgmcqZZyDJfNU?=
- =?us-ascii?Q?EBTE1r2OF6bc1+KP1RiK4SgpStrPvJkobuSbhRvPgXsrGWy9bK+1bT7uS+S7?=
- =?us-ascii?Q?7rx/tRAHEPJAC8JPNUX5KnUj?=
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?mNV9XDi/gVWtpABqzkWClOu+ZDTMK5kgZULs8ZTjjTQThevvFC8uK0smaX8I?=
+ =?us-ascii?Q?1j1KgcAJZyZPeeHu7FviHoGlJdxlDUzQ4VRX55+3xgMYlv+DeYraO92wNQRu?=
+ =?us-ascii?Q?2N/Q22ZTQBpWZaq7eTi+zAR/Tc7LzFvlSlFOJjl6/PXDUbOrBZ52peT1/XOn?=
+ =?us-ascii?Q?DGgK5O8PVlYK0U5MOj5sS4pyVArmwlPN56E7ODxus1WI1SmPg59XgmN+AADr?=
+ =?us-ascii?Q?KoIiHgZjVOVTpXwD9LSIC1dJiP8HGzxBAsa5SMeQlpP2dyrWGKgCEkVWj1et?=
+ =?us-ascii?Q?OWD3BZvrdaesIAUFOteWlPzdENRkI9VGAOtYjh3cn3FMYjC9MISYwyiDnrom?=
+ =?us-ascii?Q?+SGt/E7YzbRPphAWzoXZzUfmnghyANn3OF/hHsLM0pRLpRpdciyyr90BSeYe?=
+ =?us-ascii?Q?pfnrJfwtEVkhXfCXJezSyD0JgzVp9I02Ag9KrKU4GSYQnbX/uhcil5+yEaMj?=
+ =?us-ascii?Q?ODdZjGmzw2XCGVfeL61t7wf8Da66NiutdJadlv1SchcnjtOPiqEdWAJI+l1x?=
+ =?us-ascii?Q?N0awyicwHPsE361v30qYNpgmDMBHVqi8yKiXdQmS9pE2C37LrRIlFxmRWzX4?=
+ =?us-ascii?Q?2LEZA9TXN1tBk4o4hjL54y0XNMoLbO5wOB1fG5Ob/WebFMevmeWDin1KwcXj?=
+ =?us-ascii?Q?5LChWEO14sB5MEkEPgF6agJdsUfi4+6+wuDcMhKG17+B9BYDL06mK5I6dQvn?=
+ =?us-ascii?Q?4S9387mQzWHXcXRlhwDyk0Sz+KVhzPt8TnXwHdjGhOFzRfjs4tguYnlv6ROj?=
+ =?us-ascii?Q?ksN+L5u5/0uMnt4RafG6s/Yh2jyk090YyoBln4Osr4AbE/S1lbI7DEP0OCy0?=
+ =?us-ascii?Q?5dnVBrw/otYhTMLQwnY92Op4JEFzKVrUgzPfxTwjdYNFt9HakFFdllsb8WCU?=
+ =?us-ascii?Q?SDsuz0BnSgvmcXIiINPegImRU0CdyjmN+84NqFvP6YG+P5Qgv8LAeqABodsM?=
+ =?us-ascii?Q?ZnZ5pi67ieuIwQIz+asO/KPZucy29Jw0Qrb7WMCvSEGDYwuDxl654oI0vKS7?=
+ =?us-ascii?Q?sUMBYz0YKKB/udFndZxF9RtadFWVKbKNKO9mdp1k3sz0Kg7yGPKa5miEYNAf?=
+ =?us-ascii?Q?pv1fFrdupXIzkJBs6OxFzxJZevvCHIj953kBZUTANSIzwjM65srfJffU6Lch?=
+ =?us-ascii?Q?4eGwt6sZFzi75N1xfPlcQEAzTzPX7E7PJycwR5s5Gqm7EhcrIEx+ynCQH4En?=
+ =?us-ascii?Q?e9UtHCFA16tjSYxGbbOg1Q2oYIV5rUJg1MsqZfvH+sYf4BFePZNdq3NfBpur?=
+ =?us-ascii?Q?7ILfF+hHIeyIfwjZshtBMKXm52bcVDAtWBdGMmw2DligERgQDnhxeiZzz+So?=
+ =?us-ascii?Q?O+JJHGoMjHit4oRL7QhM0SfA?=
 X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: b5f97b9c-957b-4214-04ff-08d95e7bd0d6
+X-MS-Exchange-CrossTenant-Network-Message-Id: 751ea128-7a31-4c68-2727-08d95e7bdafe
 X-MS-Exchange-CrossTenant-AuthSource: DM4PR12MB5229.namprd12.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 13 Aug 2021 17:00:12.8296
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 13 Aug 2021 17:00:29.8878
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: mgJH5nvaD3AfbaqDT83Kpjzld6tRalsn09ncBpTYhmmh66wJ4mCI4bJ3NWpLx/lLSYTIc0J0vq6YzFW8Jv5GOg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR12MB5518
+X-MS-Exchange-CrossTenant-UserPrincipalName: 8Y0dqX8pqw3xJvEIJ8/VV1WUFy1n95nQYwfRjEBNbAURQk1xhrYE+Zkbc01KzYj3T6v5qk9DEkhFq+N4tShH0A==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM4PR12MB5341
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Introduce an x86 version of the prot_guest_has() function. This will be
-used in the more generic x86 code to replace vendor specific calls like
-sev_active(), etc.
-
-While the name suggests this is intended mainly for guests, it will
-also be used for host memory encryption checks in place of sme_active().
+Replace occurrences of sme_active() with the more generic prot_guest_has()
+using PATTR_HOST_MEM_ENCRYPT, except for in arch/x86/mm/mem_encrypt*.c
+where PATTR_SME will be used. If future support is added for other memory
+encryption technologies, the use of PATTR_HOST_MEM_ENCRYPT can be
+updated, as required, to use PATTR_SME.
 
 Cc: Thomas Gleixner <tglx@linutronix.de>
 Cc: Ingo Molnar <mingo@redhat.com>
@@ -144,147 +143,281 @@ Cc: Borislav Petkov <bp@alien8.de>
 Cc: Dave Hansen <dave.hansen@linux.intel.com>
 Cc: Andy Lutomirski <luto@kernel.org>
 Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Joerg Roedel <joro@8bytes.org>
+Cc: Will Deacon <will@kernel.org>
 Reviewed-by: Joerg Roedel <jroedel@suse.de>
-Co-developed-by: Andi Kleen <ak@linux.intel.com>
-Signed-off-by: Andi Kleen <ak@linux.intel.com>
-Co-developed-by: Kuppuswamy Sathyanarayanan <sathyanarayanan.kuppuswamy@linux.intel.com>
-Signed-off-by: Kuppuswamy Sathyanarayanan <sathyanarayanan.kuppuswamy@linux.intel.com>
 Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 ---
- arch/x86/Kconfig                       |  1 +
- arch/x86/include/asm/mem_encrypt.h     |  2 ++
- arch/x86/include/asm/protected_guest.h | 29 ++++++++++++++++++++++++++
- arch/x86/mm/mem_encrypt.c              | 25 ++++++++++++++++++++++
- include/linux/protected_guest.h        |  5 +++++
- 5 files changed, 62 insertions(+)
- create mode 100644 arch/x86/include/asm/protected_guest.h
+ arch/x86/include/asm/kexec.h         |  2 +-
+ arch/x86/include/asm/mem_encrypt.h   |  2 --
+ arch/x86/kernel/machine_kexec_64.c   |  3 ++-
+ arch/x86/kernel/pci-swiotlb.c        |  9 ++++-----
+ arch/x86/kernel/relocate_kernel_64.S |  2 +-
+ arch/x86/mm/ioremap.c                |  6 +++---
+ arch/x86/mm/mem_encrypt.c            | 10 +++++-----
+ arch/x86/mm/mem_encrypt_identity.c   |  3 ++-
+ arch/x86/realmode/init.c             |  5 +++--
+ drivers/iommu/amd/init.c             |  7 ++++---
+ 10 files changed, 25 insertions(+), 24 deletions(-)
 
-diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
-index 421fa9e38c60..82e5fb713261 100644
---- a/arch/x86/Kconfig
-+++ b/arch/x86/Kconfig
-@@ -1514,6 +1514,7 @@ config AMD_MEM_ENCRYPT
- 	select ARCH_HAS_FORCE_DMA_UNENCRYPTED
- 	select INSTRUCTION_DECODER
- 	select ARCH_HAS_RESTRICTED_VIRTIO_MEMORY_ACCESS
-+	select ARCH_HAS_PROTECTED_GUEST
- 	help
- 	  Say yes to enable support for the encryption of system memory.
- 	  This requires an AMD processor that supports Secure Memory
+diff --git a/arch/x86/include/asm/kexec.h b/arch/x86/include/asm/kexec.h
+index 0a6e34b07017..11b7c06e2828 100644
+--- a/arch/x86/include/asm/kexec.h
++++ b/arch/x86/include/asm/kexec.h
+@@ -129,7 +129,7 @@ relocate_kernel(unsigned long indirection_page,
+ 		unsigned long page_list,
+ 		unsigned long start_address,
+ 		unsigned int preserve_context,
+-		unsigned int sme_active);
++		unsigned int host_mem_enc_active);
+ #endif
+ 
+ #define ARCH_HAS_KIMAGE_ARCH
 diff --git a/arch/x86/include/asm/mem_encrypt.h b/arch/x86/include/asm/mem_encrypt.h
-index 9c80c68d75b5..a46d47662772 100644
+index a46d47662772..956338406cec 100644
 --- a/arch/x86/include/asm/mem_encrypt.h
 +++ b/arch/x86/include/asm/mem_encrypt.h
-@@ -53,6 +53,7 @@ void __init sev_es_init_vc_handling(void);
- bool sme_active(void);
+@@ -50,7 +50,6 @@ void __init mem_encrypt_free_decrypted_mem(void);
+ void __init mem_encrypt_init(void);
+ 
+ void __init sev_es_init_vc_handling(void);
+-bool sme_active(void);
  bool sev_active(void);
  bool sev_es_active(void);
-+bool amd_prot_guest_has(unsigned int attr);
+ bool amd_prot_guest_has(unsigned int attr);
+@@ -76,7 +75,6 @@ static inline void __init sme_encrypt_kernel(struct boot_params *bp) { }
+ static inline void __init sme_enable(struct boot_params *bp) { }
  
- #define __bss_decrypted __section(".bss..decrypted")
- 
-@@ -78,6 +79,7 @@ static inline void sev_es_init_vc_handling(void) { }
- static inline bool sme_active(void) { return false; }
+ static inline void sev_es_init_vc_handling(void) { }
+-static inline bool sme_active(void) { return false; }
  static inline bool sev_active(void) { return false; }
  static inline bool sev_es_active(void) { return false; }
-+static inline bool amd_prot_guest_has(unsigned int attr) { return false; }
- 
- static inline int __init
- early_set_memory_decrypted(unsigned long vaddr, unsigned long size) { return 0; }
-diff --git a/arch/x86/include/asm/protected_guest.h b/arch/x86/include/asm/protected_guest.h
-new file mode 100644
-index 000000000000..51e4eefd9542
---- /dev/null
-+++ b/arch/x86/include/asm/protected_guest.h
-@@ -0,0 +1,29 @@
-+/* SPDX-License-Identifier: GPL-2.0-only */
-+/*
-+ * Protected Guest (and Host) Capability checks
-+ *
-+ * Copyright (C) 2021 Advanced Micro Devices, Inc.
-+ *
-+ * Author: Tom Lendacky <thomas.lendacky@amd.com>
-+ */
-+
-+#ifndef _X86_PROTECTED_GUEST_H
-+#define _X86_PROTECTED_GUEST_H
-+
-+#include <linux/mem_encrypt.h>
-+
-+#ifndef __ASSEMBLY__
-+
-+static inline bool prot_guest_has(unsigned int attr)
-+{
-+#ifdef CONFIG_AMD_MEM_ENCRYPT
-+	if (sme_me_mask)
-+		return amd_prot_guest_has(attr);
-+#endif
-+
-+	return false;
-+}
-+
-+#endif	/* __ASSEMBLY__ */
-+
-+#endif	/* _X86_PROTECTED_GUEST_H */
-diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
-index ff08dc463634..edc67ddf065d 100644
---- a/arch/x86/mm/mem_encrypt.c
-+++ b/arch/x86/mm/mem_encrypt.c
-@@ -20,6 +20,7 @@
- #include <linux/bitops.h>
- #include <linux/dma-mapping.h>
- #include <linux/virtio_config.h>
+ static inline bool amd_prot_guest_has(unsigned int attr) { return false; }
+diff --git a/arch/x86/kernel/machine_kexec_64.c b/arch/x86/kernel/machine_kexec_64.c
+index 131f30fdcfbd..8e7b517ad738 100644
+--- a/arch/x86/kernel/machine_kexec_64.c
++++ b/arch/x86/kernel/machine_kexec_64.c
+@@ -17,6 +17,7 @@
+ #include <linux/suspend.h>
+ #include <linux/vmalloc.h>
+ #include <linux/efi.h>
 +#include <linux/protected_guest.h>
  
+ #include <asm/init.h>
  #include <asm/tlbflush.h>
- #include <asm/fixmap.h>
-@@ -389,6 +390,30 @@ bool noinstr sev_es_active(void)
- 	return sev_status & MSR_AMD64_SEV_ES_ENABLED;
+@@ -358,7 +359,7 @@ void machine_kexec(struct kimage *image)
+ 				       (unsigned long)page_list,
+ 				       image->start,
+ 				       image->preserve_context,
+-				       sme_active());
++				       prot_guest_has(PATTR_HOST_MEM_ENCRYPT));
+ 
+ #ifdef CONFIG_KEXEC_JUMP
+ 	if (image->preserve_context)
+diff --git a/arch/x86/kernel/pci-swiotlb.c b/arch/x86/kernel/pci-swiotlb.c
+index c2cfa5e7c152..bd9a9cfbc9a2 100644
+--- a/arch/x86/kernel/pci-swiotlb.c
++++ b/arch/x86/kernel/pci-swiotlb.c
+@@ -6,7 +6,7 @@
+ #include <linux/swiotlb.h>
+ #include <linux/memblock.h>
+ #include <linux/dma-direct.h>
+-#include <linux/mem_encrypt.h>
++#include <linux/protected_guest.h>
+ 
+ #include <asm/iommu.h>
+ #include <asm/swiotlb.h>
+@@ -45,11 +45,10 @@ int __init pci_swiotlb_detect_4gb(void)
+ 		swiotlb = 1;
+ 
+ 	/*
+-	 * If SME is active then swiotlb will be set to 1 so that bounce
+-	 * buffers are allocated and used for devices that do not support
+-	 * the addressing range required for the encryption mask.
++	 * Set swiotlb to 1 so that bounce buffers are allocated and used for
++	 * devices that can't support DMA to encrypted memory.
+ 	 */
+-	if (sme_active())
++	if (prot_guest_has(PATTR_HOST_MEM_ENCRYPT))
+ 		swiotlb = 1;
+ 
+ 	return swiotlb;
+diff --git a/arch/x86/kernel/relocate_kernel_64.S b/arch/x86/kernel/relocate_kernel_64.S
+index c53271aebb64..c8fe74a28143 100644
+--- a/arch/x86/kernel/relocate_kernel_64.S
++++ b/arch/x86/kernel/relocate_kernel_64.S
+@@ -47,7 +47,7 @@ SYM_CODE_START_NOALIGN(relocate_kernel)
+ 	 * %rsi page_list
+ 	 * %rdx start address
+ 	 * %rcx preserve_context
+-	 * %r8  sme_active
++	 * %r8  host_mem_enc_active
+ 	 */
+ 
+ 	/* Save the CPU context, used for jumping back */
+diff --git a/arch/x86/mm/ioremap.c b/arch/x86/mm/ioremap.c
+index ccff76cedd8f..583afd54c7e1 100644
+--- a/arch/x86/mm/ioremap.c
++++ b/arch/x86/mm/ioremap.c
+@@ -14,7 +14,7 @@
+ #include <linux/slab.h>
+ #include <linux/vmalloc.h>
+ #include <linux/mmiotrace.h>
+-#include <linux/mem_encrypt.h>
++#include <linux/protected_guest.h>
+ #include <linux/efi.h>
+ #include <linux/pgtable.h>
+ 
+@@ -703,7 +703,7 @@ bool arch_memremap_can_ram_remap(resource_size_t phys_addr, unsigned long size,
+ 	if (flags & MEMREMAP_DEC)
+ 		return false;
+ 
+-	if (sme_active()) {
++	if (prot_guest_has(PATTR_HOST_MEM_ENCRYPT)) {
+ 		if (memremap_is_setup_data(phys_addr, size) ||
+ 		    memremap_is_efi_data(phys_addr, size))
+ 			return false;
+@@ -729,7 +729,7 @@ pgprot_t __init early_memremap_pgprot_adjust(resource_size_t phys_addr,
+ 
+ 	encrypted_prot = true;
+ 
+-	if (sme_active()) {
++	if (prot_guest_has(PATTR_HOST_MEM_ENCRYPT)) {
+ 		if (early_memremap_is_setup_data(phys_addr, size) ||
+ 		    memremap_is_efi_data(phys_addr, size))
+ 			encrypted_prot = false;
+diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
+index edc67ddf065d..5635ca9a1fbe 100644
+--- a/arch/x86/mm/mem_encrypt.c
++++ b/arch/x86/mm/mem_encrypt.c
+@@ -144,7 +144,7 @@ void __init sme_unmap_bootdata(char *real_mode_data)
+ 	struct boot_params *boot_data;
+ 	unsigned long cmdline_paddr;
+ 
+-	if (!sme_active())
++	if (!amd_prot_guest_has(PATTR_SME))
+ 		return;
+ 
+ 	/* Get the command line address before unmapping the real_mode_data */
+@@ -164,7 +164,7 @@ void __init sme_map_bootdata(char *real_mode_data)
+ 	struct boot_params *boot_data;
+ 	unsigned long cmdline_paddr;
+ 
+-	if (!sme_active())
++	if (!amd_prot_guest_has(PATTR_SME))
+ 		return;
+ 
+ 	__sme_early_map_unmap_mem(real_mode_data, sizeof(boot_params), true);
+@@ -378,7 +378,7 @@ bool sev_active(void)
+ 	return sev_status & MSR_AMD64_SEV_ENABLED;
  }
  
-+bool amd_prot_guest_has(unsigned int attr)
-+{
-+	switch (attr) {
-+	case PATTR_MEM_ENCRYPT:
-+		return sme_me_mask != 0;
-+
-+	case PATTR_SME:
-+	case PATTR_HOST_MEM_ENCRYPT:
-+		return sme_active();
-+
-+	case PATTR_SEV:
-+	case PATTR_GUEST_MEM_ENCRYPT:
-+		return sev_active();
-+
-+	case PATTR_SEV_ES:
-+	case PATTR_GUEST_PROT_STATE:
-+		return sev_es_active();
-+
-+	default:
-+		return false;
-+	}
-+}
-+EXPORT_SYMBOL_GPL(amd_prot_guest_has);
-+
- /* Override for DMA direct allocation check - ARCH_HAS_FORCE_DMA_UNENCRYPTED */
- bool force_dma_unencrypted(struct device *dev)
+-bool sme_active(void)
++static bool sme_active(void)
  {
-diff --git a/include/linux/protected_guest.h b/include/linux/protected_guest.h
-index 43d4dde94793..5ddef1b6a2ea 100644
---- a/include/linux/protected_guest.h
-+++ b/include/linux/protected_guest.h
-@@ -20,6 +20,11 @@
- #define PATTR_GUEST_MEM_ENCRYPT		2	/* Guest encrypted memory */
- #define PATTR_GUEST_PROT_STATE		3	/* Guest encrypted state */
+ 	return sme_me_mask && !sev_active();
+ }
+@@ -428,7 +428,7 @@ bool force_dma_unencrypted(struct device *dev)
+ 	 * device does not support DMA to addresses that include the
+ 	 * encryption mask.
+ 	 */
+-	if (sme_active()) {
++	if (amd_prot_guest_has(PATTR_SME)) {
+ 		u64 dma_enc_mask = DMA_BIT_MASK(__ffs64(sme_me_mask));
+ 		u64 dma_dev_mask = min_not_zero(dev->coherent_dma_mask,
+ 						dev->bus_dma_limit);
+@@ -469,7 +469,7 @@ static void print_mem_encrypt_feature_info(void)
+ 	pr_info("AMD Memory Encryption Features active:");
  
-+/* 0x800 - 0x8ff reserved for AMD */
-+#define PATTR_SME			0x800
-+#define PATTR_SEV			0x801
-+#define PATTR_SEV_ES			0x802
-+
- #ifdef CONFIG_ARCH_HAS_PROTECTED_GUEST
+ 	/* Secure Memory Encryption */
+-	if (sme_active()) {
++	if (amd_prot_guest_has(PATTR_SME)) {
+ 		/*
+ 		 * SME is mutually exclusive with any of the SEV
+ 		 * features below.
+diff --git a/arch/x86/mm/mem_encrypt_identity.c b/arch/x86/mm/mem_encrypt_identity.c
+index 470b20208430..088c8ab7dcc1 100644
+--- a/arch/x86/mm/mem_encrypt_identity.c
++++ b/arch/x86/mm/mem_encrypt_identity.c
+@@ -30,6 +30,7 @@
+ #include <linux/kernel.h>
+ #include <linux/mm.h>
+ #include <linux/mem_encrypt.h>
++#include <linux/protected_guest.h>
  
- #include <asm/protected_guest.h>
+ #include <asm/setup.h>
+ #include <asm/sections.h>
+@@ -287,7 +288,7 @@ void __init sme_encrypt_kernel(struct boot_params *bp)
+ 	unsigned long pgtable_area_len;
+ 	unsigned long decrypted_base;
+ 
+-	if (!sme_active())
++	if (!prot_guest_has(PATTR_SME))
+ 		return;
+ 
+ 	/*
+diff --git a/arch/x86/realmode/init.c b/arch/x86/realmode/init.c
+index 6534c92d0f83..2109ae569c67 100644
+--- a/arch/x86/realmode/init.c
++++ b/arch/x86/realmode/init.c
+@@ -3,6 +3,7 @@
+ #include <linux/slab.h>
+ #include <linux/memblock.h>
+ #include <linux/mem_encrypt.h>
++#include <linux/protected_guest.h>
+ #include <linux/pgtable.h>
+ 
+ #include <asm/set_memory.h>
+@@ -44,7 +45,7 @@ void __init reserve_real_mode(void)
+ static void sme_sev_setup_real_mode(struct trampoline_header *th)
+ {
+ #ifdef CONFIG_AMD_MEM_ENCRYPT
+-	if (sme_active())
++	if (prot_guest_has(PATTR_HOST_MEM_ENCRYPT))
+ 		th->flags |= TH_FLAGS_SME_ACTIVE;
+ 
+ 	if (sev_es_active()) {
+@@ -81,7 +82,7 @@ static void __init setup_real_mode(void)
+ 	 * decrypted memory in order to bring up other processors
+ 	 * successfully. This is not needed for SEV.
+ 	 */
+-	if (sme_active())
++	if (prot_guest_has(PATTR_HOST_MEM_ENCRYPT))
+ 		set_memory_decrypted((unsigned long)base, size >> PAGE_SHIFT);
+ 
+ 	memcpy(base, real_mode_blob, size);
+diff --git a/drivers/iommu/amd/init.c b/drivers/iommu/amd/init.c
+index 46280e6e1535..05e770e3e631 100644
+--- a/drivers/iommu/amd/init.c
++++ b/drivers/iommu/amd/init.c
+@@ -20,7 +20,7 @@
+ #include <linux/amd-iommu.h>
+ #include <linux/export.h>
+ #include <linux/kmemleak.h>
+-#include <linux/mem_encrypt.h>
++#include <linux/protected_guest.h>
+ #include <asm/pci-direct.h>
+ #include <asm/iommu.h>
+ #include <asm/apic.h>
+@@ -965,7 +965,7 @@ static bool copy_device_table(void)
+ 		pr_err("The address of old device table is above 4G, not trustworthy!\n");
+ 		return false;
+ 	}
+-	old_devtb = (sme_active() && is_kdump_kernel())
++	old_devtb = (prot_guest_has(PATTR_HOST_MEM_ENCRYPT) && is_kdump_kernel())
+ 		    ? (__force void *)ioremap_encrypted(old_devtb_phys,
+ 							dev_table_size)
+ 		    : memremap(old_devtb_phys, dev_table_size, MEMREMAP_WB);
+@@ -3022,7 +3022,8 @@ static int __init amd_iommu_init(void)
+ 
+ static bool amd_iommu_sme_check(void)
+ {
+-	if (!sme_active() || (boot_cpu_data.x86 != 0x17))
++	if (!prot_guest_has(PATTR_HOST_MEM_ENCRYPT) ||
++	    (boot_cpu_data.x86 != 0x17))
+ 		return true;
+ 
+ 	/* For Fam17h, a specific level of support is required */
 -- 
 2.32.0
 
