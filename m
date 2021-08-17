@@ -2,158 +2,124 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E945EC4338F
-	for <linux-efi@archiver.kernel.org>; Mon, 16 Aug 2021 09:57:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C1BABC4338F
+	for <linux-efi@archiver.kernel.org>; Tue, 17 Aug 2021 01:37:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C1E8561B97
-	for <linux-efi@archiver.kernel.org>; Mon, 16 Aug 2021 09:57:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A428560E90
+	for <linux-efi@archiver.kernel.org>; Tue, 17 Aug 2021 01:37:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235368AbhHPJ5n (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 16 Aug 2021 05:57:43 -0400
-Received: from mail.kernel.org ([198.145.29.99]:36424 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S235336AbhHPJ5n (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Mon, 16 Aug 2021 05:57:43 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id C115461B80;
-        Mon, 16 Aug 2021 09:57:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1629107831;
-        bh=Ayb7keNQqIl6kxOV4S50AHDEDaPDNz8NyoQkVGazeso=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=t58Yn2UeXmWOB2wtL7wqLJfLyGH/OsS7N4yTo+ee9WMVhQ9pdFUiV6wlKEl//Ux0T
-         kjBxkY46Hv/mOYMVUzqctGvOSL9hTHJL+k+TVOosAIpJmA8A1WPbvoB+OhLeyTOdh/
-         q8FQWZR7FiozVjr+QOFR10Rh2uJ69P58eHw3W3XgflHhaIZX+HluQDJfJZrsrRv0Lf
-         aFCylpo58yKLOlqx/Yx8p3CXDA3YA+DhXUcRoiJ5Fm0y65X1+rG+xEc6TM/3oPGN9x
-         m2eAwunk2k/WBhzFP+YrZbSoMpofowUEekiJ/308uyZ/0lvFTP3Lx7Gx4/Qi8TRlWK
-         fPxudsQioxW9g==
-Received: by mail-oi1-f169.google.com with SMTP id bf25so17119398oib.10;
-        Mon, 16 Aug 2021 02:57:11 -0700 (PDT)
-X-Gm-Message-State: AOAM530a7bxTLsPLVG1vCYuUTKNJcxB2Aj98APa3RhqgoHdR9Rii01ah
-        ZVG5P1Pw/1iLtH2xGwdmRY4mmzp2Y6+tnKkFHG8=
-X-Google-Smtp-Source: ABdhPJwq0DGmPu6bRrra7HzEjbViggI2OAmDJO6gVCk0Z/NISDNWSOmmYJTNkEcfdQp0Pjzm18kxS5vbxkYHxJfY9lI=
-X-Received: by 2002:aca:dd89:: with SMTP id u131mr11130913oig.47.1629107831145;
- Mon, 16 Aug 2021 02:57:11 -0700 (PDT)
+        id S233278AbhHQBhg (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 16 Aug 2021 21:37:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49586 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229773AbhHQBhf (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 16 Aug 2021 21:37:35 -0400
+Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4DF90C061764;
+        Mon, 16 Aug 2021 18:37:03 -0700 (PDT)
+Received: by mail-lf1-x131.google.com with SMTP id d4so38130866lfk.9;
+        Mon, 16 Aug 2021 18:37:03 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=y13ssgfr6sKUkeUKlxkE5t/sIHmN7oG9hneGkaoPog4=;
+        b=HTmG7uMHTcKj2CNO6v36hEPhj00NFrlE80NEDH+zHeojdyZkWVuhZQGZEmlNEkvH7g
+         ew1SZpIbNk/bq8iaMwRKJ4v8rhdwFOrZm6RaoPePji0ndGR49VTsJ0UT2P2TvlSgeMhq
+         tXOyB6AATcz9/VTt0yOUotQYEkWUKQbGbG/wuz/+3kwi8gTY73HMpHtZ0XanhQeoS9xA
+         ugXME5zkTuelXZewyXLZ9jGBJSsAqJxxC0mXhV0b9QUtdWxJGxXSd3bKhJmjn8h6V9EQ
+         keOa9wODuQDutNVdQuDqeRwONO5eYpDm46ieeVH9RnvVve/mZErBs47x294li+7Zgnl7
+         jVQg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=y13ssgfr6sKUkeUKlxkE5t/sIHmN7oG9hneGkaoPog4=;
+        b=a0pKftuHZYpDxlDbBXZfj9/23rUmuF1fxJziCeC6gwF2d99pCPD0ftHVrGP0LlGOm7
+         bpY7wvzS2YHde8B7wKpIAee2JSmMNcCjnzQ4XB9MIi3Q36MmvIP7l19x1JlMqgwwiekd
+         R+VucG6ZrEnXxWz0I+3FoI62Y4LVktR2yvF3bdat6K9diZ9eqGpusjZ3LJM8T1srak4D
+         jCuFBq8yPCt7QL166XjkJU3UcxKysD07eNoieslWmfIh0L8pFe05mXT3s1OYSR8i321y
+         2UPbHjMFv7tFHB12vkmb8s4acLZ+KVXjkQ6y2b7EJZhrt9aeijkoGZkB+tB1BmZIT9Lp
+         t5Kw==
+X-Gm-Message-State: AOAM532Vsc9EeIS7fAg3p12XDOYJy8RSL7782GEN1DQGJWxRtZ4SaM9R
+        F4ig+Wpj/uxb64RKXydcN/w=
+X-Google-Smtp-Source: ABdhPJxRPENKda40qWNOWkQl41qMWmI0e+3KTqYXF5TovPBTtKNHJHlY+Pur3Wdx0urrmcdihJX+aw==
+X-Received: by 2002:ac2:4c2a:: with SMTP id u10mr511478lfq.631.1629164221740;
+        Mon, 16 Aug 2021 18:37:01 -0700 (PDT)
+Received: from localhost.localdomain (46-138-85-91.dynamic.spd-mgts.ru. [46.138.85.91])
+        by smtp.gmail.com with ESMTPSA id br33sm49699lfb.46.2021.08.16.18.37.00
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 16 Aug 2021 18:37:01 -0700 (PDT)
+From:   Dmitry Osipenko <digetx@gmail.com>
+To:     Jens Axboe <axboe@kernel.dk>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>,
+        David Heidelberg <david@ixit.cz>,
+        Peter Geis <pgwipeout@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Christoph Hellwig <hch@infradead.org>,
+        Davidlohr Bueso <dave@stgolabs.net>,
+        Ion Agorria <AG0RRIA@yahoo.com>,
+        Svyatoslav Ryhel <clamor95@gmail.com>
+Cc:     linux-tegra@vger.kernel.org, linux-block@vger.kernel.org,
+        linux-efi <linux-efi@vger.kernel.org>
+Subject: [PATCH v4 0/3] Support EFI partition on NVIDIA Tegra devices
+Date:   Tue, 17 Aug 2021 04:36:40 +0300
+Message-Id: <20210817013643.13061-1-digetx@gmail.com>
+X-Mailer: git-send-email 2.32.0
 MIME-Version: 1.0
-References: <20210809190157.279332-1-dovmurik@linux.ibm.com>
- <20210809190157.279332-4-dovmurik@linux.ibm.com> <YRZuIIVIzMfgjtEl@google.com>
-In-Reply-To: <YRZuIIVIzMfgjtEl@google.com>
-From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Mon, 16 Aug 2021 11:56:56 +0200
-X-Gmail-Original-Message-ID: <CAMj1kXFC-cizTw2Tv40uZHdLArKtdMNxdQXWoPWSL-8qexdkLQ@mail.gmail.com>
-Message-ID: <CAMj1kXFC-cizTw2Tv40uZHdLArKtdMNxdQXWoPWSL-8qexdkLQ@mail.gmail.com>
-Subject: Re: [PATCH 3/3] virt: Add sev_secret module to expose confidential
- computing secrets
-To:     Andrew Scull <ascull@google.com>
-Cc:     Dov Murik <dovmurik@linux.ibm.com>,
-        linux-efi <linux-efi@vger.kernel.org>,
-        Borislav Petkov <bp@suse.de>,
-        Ashish Kalra <ashish.kalra@amd.com>,
-        Brijesh Singh <brijesh.singh@amd.com>,
-        Tom Lendacky <thomas.lendacky@amd.com>,
-        James Morris <jmorris@namei.org>,
-        "Serge E. Hallyn" <serge@hallyn.com>,
-        Andi Kleen <ak@linux.intel.com>,
-        "Dr. David Alan Gilbert" <dgilbert@redhat.com>,
-        James Bottomley <jejb@linux.ibm.com>,
-        Tobin Feldman-Fitzthum <tobin@linux.ibm.com>,
-        Jim Cadden <jcadden@ibm.com>, linux-coco@lists.linux.dev,
-        linux-security-module@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Fri, 13 Aug 2021 at 15:05, Andrew Scull <ascull@google.com> wrote:
->
-> On Mon, Aug 09, 2021 at 07:01:57PM +0000, Dov Murik wrote:
-> > The new sev_secret module exposes the confidential computing (coco)
-> > secret area via securityfs interface.
-> >
-> > When the module is loaded (and securityfs is mounted, typically under
-> > /sys/kernel/security), a "coco/sev_secret" directory is created in
-> > securityfs.  In it, a file is created for each secret entry.  The name
-> > of each such file is the GUID of the secret entry, and its content is
-> > the secret data.
-> >
-> > This allows applications running in a confidential computing setting to
-> > read secrets provided by the guest owner via a secure secret injection
-> > mechanism (such as AMD SEV's LAUNCH_SECRET command).
-> >
-> > Removing (unlinking) files in the "coco/sev_secret" directory will zero
-> > out the secret in memory, and remove the filesystem entry.  If the
-> > module is removed and loaded again, that secret will not appear in the
-> > filesystem.
->
-> We've also been looking into a similar secret mechanism recently in the
-> context of Android and protected KVM [1]. Our secrets would come from a
-> different source, likely described as a reserved-memory node in the DT,
-> but would need to be exposed to userspace in the same way as the SEV
-> secrets. Originally I tried using a character device, but this approach
-> with securityfs feels neater to me.
->
+This series adds the most minimal EFI partition support for NVIDIA Tegra
+consumer devices, like Android tablets and game consoles, making theirs
+EMMC accessible out-of-the-box using downstream bootloader and mainline
+Linux kernel.  EMMC now works on Acer A500 tablet and Ouya game console
+that are already well supported in mainline and internal storage is the
+only biggest thing left to support.
 
-Agreed. I particularly like how deleting the file wipes the secret from memory.
+Changelog:
 
-> We're also looking to pass secrets from the bootloader to Linux, outside
-> of any virtualization or confidential compute context (at least a far as
-> I have understood the meaning of the term). Again, this feels like it
-> would be exposed to userspace in the same way.
->
+v4: - Rebased on top of recent linux-next.
 
-Indeed.
+v3: - Removed unnecessary v1 hunk that was left by accident in efi.c of v2.
 
-> It would be good to be able to share the parts that would be common. I
-> expect that would mean the operations for a secret file and for a
-> directory of secrets at a minimum. But it might also influence the paths
-> in securityfs; I see, looking back, that the "coco" directory was added
-> since the RFC but would a generalized "secret" subsystem make sense? Or
-> would it be preferable for each case to define their own path?
->
+v2: - This is continuation of [1] where Davidlohr Bueso suggested that it
+      should be better to avoid supporting in mainline the custom gpt_sector
+      kernel cmdline parameter that downstream Android kernels use.  We can
+      do this for the devices that are already mainlined, so I dropped the
+      cmdline from the v2 and left only the variant with a fixed GPT address.
 
-I think we should avoid 'secret', to be honest. Even if protected KVM
-is not riding the SEV/TDX wave, I think confidential computing is
-still an accurate description of its semantics.
+[1] https://lore.kernel.org/linux-efi/20210327212100.3834-3-digetx@gmail.com/T/
 
-> [1] -- https://lwn.net/Articles/836693/
->
-> > +static int sev_secret_unlink(struct inode *dir, struct dentry *dentry)
-> > +{
-> > +     struct sev_secret *s = sev_secret_get();
-> > +     struct inode *inode = d_inode(dentry);
-> > +     struct secret_entry *e = (struct secret_entry *)inode->i_private;
-> > +     int i;
-> > +
-> > +     if (e) {
-> > +             /* Zero out the secret data */
-> > +             memzero_explicit(e->data, secret_entry_data_len(e));
->
-> Would there be a benefit in flushing these zeros?
->
+Dmitry Osipenko (3):
+  mmc: core: Add raw_boot_mult field to mmc_ext_csd
+  mmc: block: Add mmc_bdev_to_card() helper
+  partitions/efi: Support NVIDIA Tegra devices
 
-Do you mean cache clean+invalidate? Better to be precise here.
+ block/partitions/Kconfig   |  8 ++++
+ block/partitions/Makefile  |  1 +
+ block/partitions/check.h   |  2 +
+ block/partitions/core.c    |  3 ++
+ block/partitions/efi.c     |  9 +++++
+ block/partitions/tegra.c   | 75 ++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/block.c   | 15 ++++++++
+ drivers/mmc/core/mmc.c     |  2 +
+ include/linux/mmc/blkdev.h | 13 +++++++
+ include/linux/mmc/card.h   |  1 +
+ 10 files changed, 129 insertions(+)
+ create mode 100644 block/partitions/tegra.c
+ create mode 100644 include/linux/mmc/blkdev.h
 
+-- 
+2.32.0
 
-> > +             e->guid = NULL_GUID;
-> > +     }
-> > +
-> > +     inode->i_private = NULL;
-> > +
-> > +     for (i = 0; i < SEV_SECRET_NUM_FILES; i++)
-> > +             if (s->fs_files[i] == dentry)
-> > +                     s->fs_files[i] = NULL;
-> > +
-> > +     /*
-> > +      * securityfs_remove tries to lock the directory's inode, but we reach
-> > +      * the unlink callback when it's already locked
-> > +      */
-> > +     inode_unlock(dir);
-> > +     securityfs_remove(dentry);
-> > +     inode_lock(dir);
-> > +
-> > +     return 0;
-> > +}
