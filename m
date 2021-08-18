@@ -2,59 +2,60 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 985F9C4320E
-	for <linux-efi@archiver.kernel.org>; Wed, 18 Aug 2021 22:19:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 06B0EC19F33
+	for <linux-efi@archiver.kernel.org>; Wed, 18 Aug 2021 22:19:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 811A460232
-	for <linux-efi@archiver.kernel.org>; Wed, 18 Aug 2021 22:19:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E3C276103A
+	for <linux-efi@archiver.kernel.org>; Wed, 18 Aug 2021 22:19:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234529AbhHRWUR (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 18 Aug 2021 18:20:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46816 "EHLO
+        id S234574AbhHRWUT (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 18 Aug 2021 18:20:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46824 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234488AbhHRWUR (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 18 Aug 2021 18:20:17 -0400
-Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B3E41C061764;
-        Wed, 18 Aug 2021 15:19:41 -0700 (PDT)
-Received: by mail-lf1-x135.google.com with SMTP id r9so7987331lfn.3;
-        Wed, 18 Aug 2021 15:19:41 -0700 (PDT)
+        with ESMTP id S234550AbhHRWUS (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 18 Aug 2021 18:20:18 -0400
+Received: from mail-lf1-x12a.google.com (mail-lf1-x12a.google.com [IPv6:2a00:1450:4864:20::12a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3AF6EC061764;
+        Wed, 18 Aug 2021 15:19:43 -0700 (PDT)
+Received: by mail-lf1-x12a.google.com with SMTP id w20so7951820lfu.7;
+        Wed, 18 Aug 2021 15:19:43 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=5BboEvAw/HXnB0UvGjpwIn05vh6cZYmjySlOfPuZwrE=;
-        b=hgZIRiaXwImTjHwfFZuPHRnszNPvCAJDpqC4f1lrhXuxiaT+osmSgA3AmTOfw2Uo5w
-         cQOGhWBaETsWQfDc2RZ8JNL4wGVJrHShTZsQXaYu/wEeU3h2FobGP+meifcvpz2pNrJ1
-         YeGa49uSV8f4yCPh6zOR+BzruY1sTtKRGRC3hL0G1TCJs12Y1dFKKB1KfpF65RzVsBbS
-         /A1RfELqzcdkyz3S+jY0VIBLj4TBRo43UPlRGNos5rMNfyM1fKqMT3pIbMGiHh2MjDvP
-         q7vOVf4/T5mOrCv00Q6+h3DbC2LC4uNxCbLtVd4DIREGQQdlDxpCaosiqTI3P5tKe6dp
-         X9vA==
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=I8m3A5ojjjGr4tuZYoRH+9ybdfTR7NPts/xjHNXW+cg=;
+        b=gCDGdNdaWu8hdnPG/tggLoVZlPxn7OWnfGa9sPTodCjCVf3q8a7+t9uzPYNJfNgvCS
+         iW5l2Z5JYtzWy/3wnZ8ZT373nNP9qioBBw2HO1j9mO1zO6m+TWvMy6oaEW5BYWkZ9iV1
+         sAyNsQmpznLGwWYDSf1jOmSO6I8E5RtPiJ7va8DDcFeAnaDjJnVZCPZfNRi9Q6O+W7oJ
+         y88+yCZu67CL8A3ANxogqBWmfNOcC0oGsiq+8IZ7/4mF1lydpk5ztuk3ReZv3HjnX6D8
+         7khYZn6djJBl7bffqNPIb+Wm7U10IDKn5avHJ5BMh6AuxBHzK13qdA6hRNIXa65Lup9F
+         wdPw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=5BboEvAw/HXnB0UvGjpwIn05vh6cZYmjySlOfPuZwrE=;
-        b=AtXVozjufvYJLZOXmW+Z9uuhC+vwvx8MkwWvWVbSldSiILxIasHjALpPq5pcgVBWLa
-         FCkxbke9Oiw1YOrD0hcoZ2D7wSye9cDS/IcQ/ddcYJ3eeBj30YSESIzdESst2PocRF0R
-         hIPaIcMuLZu9jJprylLdkPuoEH2p62MbikwICRFxn22h5VxhiLk0C4H6LlOy5n96KXbr
-         LcWjw3b0cqnyoDisdj/G7GXl2/EUDG8WueTgc2w/4zIhABOhO2/SgUpsZM974pMWZ2yI
-         PT3CqD9TzCSo+soaBgEt/vbi9bxuDgwRLqovYiv19pZ3slWMpEmNTcvoojQYOVptfAfh
-         1IVg==
-X-Gm-Message-State: AOAM533zO0822Y2EZUOayV3//2T6xE7CiYKrYQ4lyFtTwsrXYMXFssh1
-        torLUB3AhPQc8GcWmQMY4Fg=
-X-Google-Smtp-Source: ABdhPJw4cjJyL7VSkdfr2ReID0KqC3U9eHuPzSOYpi8CLcoeKk5QqBqylN1F+Y7MMSnPRz7In2yUIA==
-X-Received: by 2002:a05:6512:3d16:: with SMTP id d22mr7938119lfv.132.1629325179946;
-        Wed, 18 Aug 2021 15:19:39 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=I8m3A5ojjjGr4tuZYoRH+9ybdfTR7NPts/xjHNXW+cg=;
+        b=Bx8QKodg0+rdelS4N7amuxk8sHQkyAyaviVsDlwYpbzq6D1hbrHvenb45VxJNoRGQi
+         U3CmWMc3mPjoAXKBSIW7QfuMvyZf5EUi2PN7bLztt/fttMRrCyieqtFjg2/mXl0iSrov
+         CoLAW985flD6Vj2pJ8t45mu75e4qH2C8CarW/CDJ5RpKkJgxXrfHz6PfWIVIPy69XfFV
+         GIiT08UH3mBrCvZKCXvg/4Izc4mLpNjJT3sobkekgdV2ajTgVEBi55cKzoX5zb/Q6htw
+         7X+EQNIWEpu3x/gck6hWqu7oZppBhYHt2z0yIzkaoAM/3ysDlIteg+o1D0h2NaRFOXjz
+         +azg==
+X-Gm-Message-State: AOAM531lWkKLznK3fxKq3/hQ6JJ5ubRi7Pvzl+/aj1ViUAN0LWnTfsJ0
+        wLvUpFps1emv2KsQkFwWNDU=
+X-Google-Smtp-Source: ABdhPJxoavpH2kVL2BHylmnUL2aT6+FMjqUA6wXolJmwoncdXvHbyt6lQ7+oxUEaMeiXoXTxeNgIQA==
+X-Received: by 2002:a05:6512:401a:: with SMTP id br26mr3654435lfb.539.1629325181601;
+        Wed, 18 Aug 2021 15:19:41 -0700 (PDT)
 Received: from localhost.localdomain (46-138-85-91.dynamic.spd-mgts.ru. [46.138.85.91])
-        by smtp.gmail.com with ESMTPSA id v23sm93300lfr.208.2021.08.18.15.19.38
+        by smtp.gmail.com with ESMTPSA id v23sm93300lfr.208.2021.08.18.15.19.40
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 18 Aug 2021 15:19:39 -0700 (PDT)
+        Wed, 18 Aug 2021 15:19:41 -0700 (PDT)
 From:   Dmitry Osipenko <digetx@gmail.com>
 To:     Jens Axboe <axboe@kernel.dk>,
         Thierry Reding <thierry.reding@gmail.com>,
@@ -71,81 +72,56 @@ To:     Jens Axboe <axboe@kernel.dk>,
         Svyatoslav Ryhel <clamor95@gmail.com>
 Cc:     linux-tegra@vger.kernel.org, linux-block@vger.kernel.org,
         linux-efi <linux-efi@vger.kernel.org>
-Subject: [PATCH v6 0/5] Support EFI partition on NVIDIA Tegra devices
-Date:   Thu, 19 Aug 2021 01:19:15 +0300
-Message-Id: <20210818221920.3893-1-digetx@gmail.com>
+Subject: [PATCH v6 2/5] partitions/efi: Support non-standard GPT location
+Date:   Thu, 19 Aug 2021 01:19:17 +0300
+Message-Id: <20210818221920.3893-3-digetx@gmail.com>
 X-Mailer: git-send-email 2.32.0
+In-Reply-To: <20210818221920.3893-1-digetx@gmail.com>
+References: <20210818221920.3893-1-digetx@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This series adds the most minimal EFI partition support for NVIDIA Tegra
-consumer devices, like Android tablets and game consoles, making theirs
-eMMC accessible out-of-the-box using downstream bootloader and mainline
-Linux kernel.  eMMC now works on Acer A500 tablet and Ouya game console
-that are already well supported in mainline and internal storage is the
-only biggest thing left to support.
+Support looking up GPT at a non-standard location specified by a block
+device driver.
 
-Changelog:
+Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
+---
+ block/partitions/efi.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
 
-v6: - Added comment for the alternative_gpt_sector() callback, which
-      was asked by Christoph Hellwig.
-
-    - Changed alternative_gpt_sector() to take disk for the argument
-      instead of blkdev. This was asked by Christoph Hellwig.
-
-    - Dropped mmc_bdops check as it was suggested by Christoph Hellwig.
-
-    - Added missing mmc_blk_put() that was spotted by Christoph Hellwig.
-
-    - Moved GPT calculation into MMC core and added MMC_CAP2_ALT_GPT_SECTOR
-      flag, like it was asked by Ulf Hansson. Me and Thierry have concerns
-      about whether it's better to have Tegra-specific function in a core
-      instead of Tegra driver, but it also works, so I decided to try that
-      variant.
-
-v5: - Implemented alternative_gpt_sector() blk/mmc callback that was
-      suggested by Christoph Hellwig in a comment to v4.
-
-    - mmc_bdev_to_card() now checks blk fops instead of the major number,
-      like it was suggested by Christoph Hellwig in a comment to v4.
-
-    - Emailed Rob Herring, which was asked by Ulf Hansson in a comment
-      to v4. Although the of-match change is gone now in v5, the matching
-      is transformed into the new SDHCI quirk of the Tegra driver.
-
-v4: - Rebased on top of recent linux-next.
-
-v3: - Removed unnecessary v1 hunk that was left by accident in efi.c of v2.
-
-v2: - This is continuation of [1] where Davidlohr Bueso suggested that it
-      should be better to avoid supporting in mainline the custom gpt_sector
-      kernel cmdline parameter that downstream Android kernels use.  We can
-      do this for the devices that are already mainlined, so I dropped the
-      cmdline from the v2 and left only the variant with a fixed GPT address.
-
-[1] https://lore.kernel.org/linux-efi/20210327212100.3834-3-digetx@gmail.com/T/
-
-Dmitry Osipenko (5):
-  block: Add alternative_gpt_sector() operation
-  partitions/efi: Support non-standard GPT location
-  mmc: core: Add raw_boot_mult field to mmc_ext_csd
-  mmc: block: Support alternative_gpt_sector() operation
-  mmc: sdhci-tegra: Enable MMC_CAP2_ALT_GPT_SECTOR
-
- block/partitions/efi.c         | 12 ++++++++++++
- drivers/mmc/core/block.c       | 21 ++++++++++++++++++++
- drivers/mmc/core/core.c        | 35 ++++++++++++++++++++++++++++++++++
- drivers/mmc/core/core.h        |  2 ++
- drivers/mmc/core/mmc.c         |  2 ++
- drivers/mmc/host/sdhci-tegra.c |  9 +++++++++
- include/linux/blkdev.h         |  7 +++++++
- include/linux/mmc/card.h       |  1 +
- include/linux/mmc/host.h       |  1 +
- 9 files changed, 90 insertions(+)
-
+diff --git a/block/partitions/efi.c b/block/partitions/efi.c
+index aaa3dc487cb5..7ca5c4c374d4 100644
+--- a/block/partitions/efi.c
++++ b/block/partitions/efi.c
+@@ -585,6 +585,8 @@ static int find_valid_gpt(struct parsed_partitions *state, gpt_header **gpt,
+ 	gpt_header *pgpt = NULL, *agpt = NULL;
+ 	gpt_entry *pptes = NULL, *aptes = NULL;
+ 	legacy_mbr *legacymbr;
++	struct gendisk *disk = state->disk;
++	const struct block_device_operations *fops = disk->fops;
+ 	sector_t total_sectors = get_capacity(state->disk);
+ 	u64 lastlba;
+ 
+@@ -619,6 +621,16 @@ static int find_valid_gpt(struct parsed_partitions *state, gpt_header **gpt,
+         if (!good_agpt && force_gpt)
+                 good_agpt = is_gpt_valid(state, lastlba, &agpt, &aptes);
+ 
++	if (!good_agpt && force_gpt && fops->alternative_gpt_sector) {
++		sector_t agpt_sector;
++		int err;
++
++		err = fops->alternative_gpt_sector(disk, &agpt_sector);
++		if (!err)
++			good_agpt = is_gpt_valid(state, agpt_sector,
++						 &agpt, &aptes);
++	}
++
+         /* The obviously unsuccessful case */
+         if (!good_pgpt && !good_agpt)
+                 goto fail;
 -- 
 2.32.0
 
