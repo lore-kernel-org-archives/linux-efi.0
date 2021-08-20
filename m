@@ -8,44 +8,44 @@ X-Spam-Status: No, score=-18.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0AE52C4320E
-	for <linux-efi@archiver.kernel.org>; Fri, 20 Aug 2021 15:23:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 017E4C4320A
+	for <linux-efi@archiver.kernel.org>; Fri, 20 Aug 2021 15:23:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E85D96124A
-	for <linux-efi@archiver.kernel.org>; Fri, 20 Aug 2021 15:23:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DF20D61242
+	for <linux-efi@archiver.kernel.org>; Fri, 20 Aug 2021 15:23:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241462AbhHTPXr (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 20 Aug 2021 11:23:47 -0400
-Received: from mail-co1nam11on2041.outbound.protection.outlook.com ([40.107.220.41]:45857
-        "EHLO NAM11-CO1-obe.outbound.protection.outlook.com"
+        id S241457AbhHTPX4 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 20 Aug 2021 11:23:56 -0400
+Received: from mail-bn8nam08on2040.outbound.protection.outlook.com ([40.107.100.40]:2451
+        "EHLO NAM04-BN8-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S241392AbhHTPWw (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 20 Aug 2021 11:22:52 -0400
+        id S241464AbhHTPWx (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 20 Aug 2021 11:22:53 -0400
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=RRWn31ejX2RVtiMUhkGn34Yfr6NibhzvMhYMF4CoLSs9GVx733OqPJoUwUQhwJRaCCTd2gmA6QkD6MaraQpk9v4U/kIXs5gUMZqJbQhlHX9bIS6BrzP9xGmSlSiQQ/Kynb7ulRgIV+zefjNKuSgc2lpjR9ZDM3GeDMpkUfz/3XV0Ml3iYHueS7TnvVF8sg1h9PGsj/i+L0PzPCcNYlulz5PEWvJVfEqnb250+NMFFugp9iKKXLhxRZJuAxuT2JvaEYt/f2qmlTVOBTUtSUKS9AgzWCGU6qyN+5QufwKKp03LEc25jfczKp5E2cThrW+mLio+Ue+R4hi+XnJxIL5cyA==
+ b=HBAGl7AwNfI+GiEzUPB3q9/EnbHQAS2X9pYnfY6j76dj2ieE/q6iWKTzWMIqi8UNA+4belGjt8/VyWLJP/8+5tzc/MkmBJvpxt2PDSPtDJuiQp3HF3ML6el5Rc3hHAT69btrcvXO7MRAdypbHhsjyyKxvJ4OpUA20glNgZ+dvtZsCpGoqhREpLo7AaFip7QZBR5UmGYxeE9smg1B1Xcm3YsKDmMHor1Nue2XflUJUemOnIDdgAorGfUHRk9bZoZ8g3/WJjKXrx7dMScLLoOac/3awQded9tQUwTZHhvOGH35OOYqxzm0QqEquOStYFVFwBameN1biOkcH0D68/S6JQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=nFyCnzIPinv/+8QkBlkc8Nj8XYKgOu+lQrVr+RAOJiI=;
- b=VSFf22ZCWH9mWdd0sg0rApZqmicA+1nB0iAQ1MrZEUxOBHyqMZRw6hdIeq5sfmb5UNiGTDf0lEb5kaxKEbx0Nj7iUZ41gWbRFZpVJatEDMrlf+tch9wchoW1mQBphgHm97+hiBRb96CLPfeb65/lDIKWQW6SvhgvbnMiKXPLbfm1ElHKcDR6g7SSYgTKBcz/f+NmD3uWeBYZwgBpvWjBfdsU2hbVT9qUVuvnid/97zyj/xSe/w+XZmka7noDbAdybBnFuWO1sFE2dsjVhOsH9eWc6K5avjmahiwdKoSmSMxumy0p+HIvwXEyex9002qUo4JWbcGKQ+8BP4HxwSIaxA==
+ bh=Leho8Jmkv5yLql5LB5x4IW1bbgPiHRPzBpGLROjWfHc=;
+ b=oRqaMYPvlcGRGe85PPSSO5lhaaCXfNc9PiQi8lGCMAM/0CVClnn/ZJdGbyncnfV1heyMvzmSqAEP8UHkZhPH4UfIJoqMshLEkCPnPoQRourqXGwjPpHKNqasnHZQcofTdAm7XVyKHyzLnHH94PPxwabByH+VnD+U+4xQAjkTxW9B+JFwvJpbIJQYffPZEb5rlLBCUvruLWxI4E/Ex12CWv3fqpwRX8ujftTe+BmXDa0+Jwz2T0Wskx/6WXHsEDWKPhWbnTQCWSSOBAHeSXCb83Qugny0sbt/JYUQ+E/9niBtkoO2yZupUAaGFF1XNxOtV9Y4N0NWAMPsDzxiDdlzdw==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=amd.com; dmarc=pass action=none header.from=amd.com; dkim=pass
  header.d=amd.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=nFyCnzIPinv/+8QkBlkc8Nj8XYKgOu+lQrVr+RAOJiI=;
- b=Y1SF+QF5kLcZpXiXZKClKuARjIO47aONJPH0zdAL+49fUB4tglklY1541ASBYeH16j1FjHLcrBRoOt+VyQLPIg58b50n6O2T6qozVSg6hx2o9FCjygVnLs1Jjqf0+9V+2DiMAD4nt365ZJ046l4ulXhXZ+k2jSyi3QlDU/xPiIA=
+ bh=Leho8Jmkv5yLql5LB5x4IW1bbgPiHRPzBpGLROjWfHc=;
+ b=MeOFTVnfWalVA5MSID8xxswBtMV6NQIBSQA7JbsfNAsB4AcEssW6rlZdLPmDrVe7oDP2cQN6aFbG6PBhDK0LllJNTQv3GXd0lzg2Rzh0wAUd2/8pqaTdLqhj3m7iAoPevrhNRBTWxqND+xvZvxzE+YWK7af5UtL1tE9fcgWLCwM=
 Authentication-Results: kernel.org; dkim=none (message not signed)
  header.d=none;kernel.org; dmarc=none action=none header.from=amd.com;
 Received: from SN6PR12MB2718.namprd12.prod.outlook.com (2603:10b6:805:6f::22)
- by SN1PR12MB2446.namprd12.prod.outlook.com (2603:10b6:802:26::17) with
+ by SA0PR12MB4557.namprd12.prod.outlook.com (2603:10b6:806:9d::10) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4415.22; Fri, 20 Aug
- 2021 15:21:10 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4436.19; Fri, 20 Aug
+ 2021 15:21:20 +0000
 Received: from SN6PR12MB2718.namprd12.prod.outlook.com
  ([fe80::78b7:7336:d363:9be3]) by SN6PR12MB2718.namprd12.prod.outlook.com
  ([fe80::78b7:7336:d363:9be3%6]) with mapi id 15.20.4436.019; Fri, 20 Aug 2021
- 15:21:10 +0000
+ 15:21:20 +0000
 From:   Brijesh Singh <brijesh.singh@amd.com>
 To:     x86@kernel.org, linux-kernel@vger.kernel.org, kvm@vger.kernel.org,
         linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org,
@@ -74,9 +74,9 @@ Cc:     Thomas Gleixner <tglx@linutronix.de>,
         Andi Kleen <ak@linux.intel.com>, tony.luck@intel.com,
         marcorr@google.com, sathyanarayanan.kuppuswamy@linux.intel.com,
         Brijesh Singh <brijesh.singh@amd.com>
-Subject: [PATCH Part1 v5 18/38] KVM: SVM: Define sev_features and vmpl field in the VMSA
-Date:   Fri, 20 Aug 2021 10:19:13 -0500
-Message-Id: <20210820151933.22401-19-brijesh.singh@amd.com>
+Subject: [PATCH Part1 v5 25/38] KVM: x86: move lookup of indexed CPUID leafs to helper
+Date:   Fri, 20 Aug 2021 10:19:20 -0500
+Message-Id: <20210820151933.22401-26-brijesh.singh@amd.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20210820151933.22401-1-brijesh.singh@amd.com>
 References: <20210820151933.22401-1-brijesh.singh@amd.com>
@@ -86,111 +86,139 @@ X-ClientProxiedBy: SA9P223CA0002.NAMP223.PROD.OUTLOOK.COM
  (2603:10b6:805:6f::22)
 MIME-Version: 1.0
 X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from sbrijesh-desktop.amd.com (165.204.77.1) by SA9P223CA0002.NAMP223.PROD.OUTLOOK.COM (2603:10b6:806:26::7) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4436.19 via Frontend Transport; Fri, 20 Aug 2021 15:21:09 +0000
+Received: from sbrijesh-desktop.amd.com (165.204.77.1) by SA9P223CA0002.NAMP223.PROD.OUTLOOK.COM (2603:10b6:806:26::7) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4436.19 via Frontend Transport; Fri, 20 Aug 2021 15:21:18 +0000
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 15f3c0ec-bd06-40f8-835d-08d963ee23d0
-X-MS-TrafficTypeDiagnostic: SN1PR12MB2446:
+X-MS-Office365-Filtering-Correlation-Id: 87d552e6-b495-4996-3257-08d963ee2978
+X-MS-TrafficTypeDiagnostic: SA0PR12MB4557:
 X-MS-Exchange-Transport-Forked: True
-X-Microsoft-Antispam-PRVS: <SN1PR12MB2446A49B540E0D0CA28F23E0E5C19@SN1PR12MB2446.namprd12.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:6790;
+X-Microsoft-Antispam-PRVS: <SA0PR12MB45578B7DD682164A217D3934E5C19@SA0PR12MB4557.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:2150;
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: RHryrdF+ULNnpOzaM1PMg+YLfM7aDgpjZEsjY2HIysl1AQ8DDHNJvsM3swyWFdqU8toKjaf+Nm6Dw/Jt5e1fHgYcLArvbsAMReD+uWDNZ0tpWez+eTS9nbclofNHN38xCpWU45gAIe0Ug1cScU/Q47EiNEVAp5176xMqXzHi56I7sL9R/ylZmHJtZtKbN1Zcr0lLeM47XSPF5wV30GY0RiT+/qRCU9bVm+OqbyztKOYoTVS5Mx5qv+WEyK824ZFhBXAO0cP01pyzCUwXpxdwXPPciKtn9pH3/FxzfEY/9RkIzODgvK2bNznn2cIjXndUB9ivkm+ecFODwR2hOSN9N8kBXDiAdwMxyoQCelgTCCRURaRW7hAC8bB0p+S7S85kSjRV322t4CZNBP2myuxBuTAyBj7tSOUbivbBwj7KqKdO8avY6GQh2LIchhvlCGNe1LyLtDfWEdM04CtMEVRWBpr4oFw0hFKwlukhfwujJsDQqSaDmcKusmpFO3WOiHfhCjTJosDQTZiYzPuvx2moNzY9tXBgdRHq42e+KxYeeQ2V/0Z6ogSdEPR9hgKxjHs5N645UWYl6QB6Ju4GcVJPjl7T7u88JG2cc6fjs2thWiA6AeDhi3mntbJN7/S6VdZFpmHxU7Px10muCz85OhtcWRwc+G7sOGx9FJLVNZbbzYX4f0BrIGxqwtXEGAGXfflIzN4YIeQYFExKP+ljFJSv1A==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SN6PR12MB2718.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(136003)(396003)(376002)(39860400002)(346002)(66556008)(478600001)(54906003)(4326008)(1076003)(6486002)(7416002)(38350700002)(52116002)(83380400001)(2616005)(7696005)(38100700002)(8676002)(26005)(8936002)(2906002)(316002)(66946007)(86362001)(66476007)(44832011)(36756003)(956004)(6666004)(5660300002)(7406005)(186003);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: GIRe7PU1d0CLqbUOpp0gBMy4UIEHppyrODbISf9rqmXcY/n6v846cGcFhAgdq0eWgyseTszsUjASozOCAzJYhaynwmlugqcH2smk3WXy+eabDrczy0ZeaU74p3ivwACUy12cWd3t8TIv+18N1nEBQAHIVfYlS+6j5877CnqRwhN8kJ0vtSZStj3jZcRzRLGXhB1ZLDF+q99sT6S3nUcHwrO7zsGHR3Jl2dmeh0vLKtHlxhYMK+asjyjw5UTnVYY2eGh3ZAshsXtyeI0BOMi9FMb15+WUwmxU7CvPFNJKkmmOUkCE2FxNxGHr1EhQQLDafep+fnFIlr/4kq/65rbXO2dFBoROwjRIFwZtPJu2SxDx7umjtgmvfBJ3cH7sJHOlieIAjojFgNazvQtQaEgnzgDAW0KiJhw9OyHS9H1Ev1Ga/a4wfga1jkqFL+xmYWJRAY9GH89S9FOXd+1u19ysYgMxej0OdKO7tkspZsunSYWJAmuQfMollarYy6I9g2ou9dJN00lhsY9MAUgJ3G2rqcdgYyy7yYkPRWKoOCSf1zrlY/QB1a/7SGesFBrcRAyYQIoNLiDSf2D3xSKIvrhmGUw89ovTGqXXUja4ffpe55K1butM+oFDVthD6+ucS/Hbx6lvzanMUPln8HvqUHYlfRmGyzZGqitYfmx+uji+fw0VnfJ2BHUFvX9aGKdNHsznjAsDzU0kDK3fSLbVbfZrww==
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SN6PR12MB2718.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(346002)(396003)(366004)(39860400002)(136003)(376002)(66476007)(66946007)(4326008)(478600001)(44832011)(956004)(2616005)(7696005)(7406005)(38350700002)(52116002)(66556008)(7416002)(38100700002)(6666004)(36756003)(186003)(316002)(8936002)(2906002)(83380400001)(86362001)(26005)(54906003)(1076003)(6486002)(8676002)(5660300002);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?AT+CxfuEhLBhrPt7gaJCXNW7xLlJIoI9P96cDb32EocBHtS+fxkQK75sUl0F?=
- =?us-ascii?Q?pJqoC/5jDZA5zUGdg2eZIx2Mbr3YkPf1pFsqyWrkqAisZxPmbytvL952gTb6?=
- =?us-ascii?Q?yKvscF9deC3xncwfxcUUr9HrKWUc1zarq0CIqZyLZsVrz5Flgy/urkhos6G+?=
- =?us-ascii?Q?Xw2mHgZowwVKygTkn8/Eyr+pE83Xxwdq5R2UoFtNlHi0hME37vSI4rM6nQLX?=
- =?us-ascii?Q?Zlhyn0AcRbWA5YMw60Lnx7RvPUGI866/2ZSiYb+qyazfxrjnslIoipVKM+cu?=
- =?us-ascii?Q?tuLm60pAsf6fEM1/dvJqXqXCGt2M/Oml2DRFQ4g4+uG8dBAzP46jGOS5V/IF?=
- =?us-ascii?Q?VyvKRp39cw5eQAz4sgwaMc/VIlkBvUMEF1Q/8s1WmvoJ7AUW+y10k9qNxfJf?=
- =?us-ascii?Q?YVwlMZ0ugghgo3xIaUCh/WCbyks0l8z93ouLW589CPo7OxqqBECNNkHkTnS/?=
- =?us-ascii?Q?FPAlQWHG3rEB6ecb6TpwLMCC875g8yWL5ebxmKz1S1cNTGQ8f3G/AZLgmhVh?=
- =?us-ascii?Q?B7GSOhuNP0OJASE+ZDvHrY6HO+hdbTxIkxwalhhQ4bnekuETaJPIJnNI538F?=
- =?us-ascii?Q?Pgx31R4A4CkP80aK96TZ8XfSd2bVrEBw86J6vWwfky3iA3hjP8JYxn4Gsbfq?=
- =?us-ascii?Q?FS6kIsXI7D38PsTGXuivenolP65EraRBQGRS5DhSuA/7TRwnyXbx9Qu6tsC7?=
- =?us-ascii?Q?hxeDU0iaJe9oCgCCMUxuF9GJFuh8wGz/bAGV5dfBTpU4UkSx025EWkSUTSX9?=
- =?us-ascii?Q?0sTOe62xeTqKZgK5W3hr+NG3ZY5fLfukeQdc/4a0WQkeRYaPnCLJdbDNcmYa?=
- =?us-ascii?Q?E2flmf89X7BouhTMupo5HiAyWkUlegoY0En1FfWy60Wp43b27ADgDxJCYQXd?=
- =?us-ascii?Q?2STj5hfEZ6jwklLSBZEO3Pl/Ja7sTLw3xKMSXbnCJifM5dA8p4LFV9OuXJPI?=
- =?us-ascii?Q?riGVZn1DmlCgdhx2ZdO4IvHyORuWLJxLZSwCLvA6GtKS09vfiFh9A8grdvbY?=
- =?us-ascii?Q?dCkMLUZ732xMfj30FL1JD4O3LD0fKWxC9hk3e5knkf+B8rjuytby2ZyTnw58?=
- =?us-ascii?Q?XNL7ev8NSgy+lHW2nFcYqEw+u2y20h8jAJUPfmqlT/+g0AFcbbJi0ln1ptCr?=
- =?us-ascii?Q?xfYVA8S2oi162WQyJdgM1nwo+AlV8O7Dh5XeR1DB0cfVAfB+XtsZ3vf38cMa?=
- =?us-ascii?Q?VPOTPxlDnu/yKAQfmDsV9HcikYcQyTci8LtBFlYVpslnVhBM13jdRXMrIpnG?=
- =?us-ascii?Q?bj2vF+dfu6bwQUS/0BP/BPRygOQUfhPat5njSSPVUIXYVOFaNkwOxBTuaFMD?=
- =?us-ascii?Q?y/TUqhNXqMR9wSj9VbXyzpo3?=
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?RFGDeabkwHdw9A5ABB0Lam0EFgog80Qo729/bzQ4ZL9J39S4tnphfykg68Yg?=
+ =?us-ascii?Q?htgrAxD20ehskg2Q0DTeZBjO6H8CKLEPg3GYthKLAhi85RR6sAr0nntpe35g?=
+ =?us-ascii?Q?DOyPxsDhv62x1rP3rTI0DcVg3MpkCDWBd/dVnDZnwmtEHZEd/DjkVjV9Hq6k?=
+ =?us-ascii?Q?10x6iS/8l41NHvUzhwsjKWz5ycOAutSlwp9ALGMiT7mzw23H6tPhLd4LCX5D?=
+ =?us-ascii?Q?F7/jdLj/l4Bvh8UQqiLG8pw6n0irW1a9IT/erPVmTWxISYxdm491AwmvkLBT?=
+ =?us-ascii?Q?aOGUT1po8bSQyOhLZl53AKkX8oyrkWahhM4tFfR/O4mJDzkuVMFSNo98ZEi6?=
+ =?us-ascii?Q?AZZvZ6LxoINm8+EwVf3zhjJBrPAdwnlokYVkifmSeFH/+6Z6NpbjtfIQqwxd?=
+ =?us-ascii?Q?wug9/xPNHPEL2thUPi4/o88G5U0nsCjxCRnFjqnbiz0s/nY11zd2YkyTIo/k?=
+ =?us-ascii?Q?7qD7axzYn2Spma6h2zkjb1bPU1La2VW6QEHS2RLeiLhEye3mDk2mmNJa2VVi?=
+ =?us-ascii?Q?tajqeXwAcRSY3JODMPTWSZOgkXHznERILjqrti00qow244lPv23yoQGbrX1H?=
+ =?us-ascii?Q?Xa/00SfdecN3GHR/E8TXw1Ib4WGvrO9YuEivrmGbDw3i/dH8otf7vo5h+sw/?=
+ =?us-ascii?Q?GXkg/UaoeE6+yYgPridq3xiRRJghbKwj6cmmpJ6xfw+RvgYMzWqShicDNnoE?=
+ =?us-ascii?Q?KcAtE8DYFLZIaeXS1WgUYDNv9FBtVC7bWzorxKrzjEgbW2s9MA06WLaXP5Lm?=
+ =?us-ascii?Q?3Ggc3NdLw9XIKQ5/5wGi+abB+KPw8q9uN5E+rStzBi0CcxXIRIYetvzuVpcS?=
+ =?us-ascii?Q?y5TiGDn6i+Bn5PkqNBJ3lZMchTo3gbV9yu1mtyM0dyPjf2peZPraycj8HFsG?=
+ =?us-ascii?Q?QvLSF73Wa1t20y5ilClRNdQ/TdYzUiUH7yJk+1J3630MA8PN/LEzfXkUoBXZ?=
+ =?us-ascii?Q?cBAzX/i7+r8hFkeYdRYCS2tzNgLoyvEj3YUJwB+qmE5ji8kOn5PFjTgBKOhe?=
+ =?us-ascii?Q?0G5Kv7gV78xbrb/hx3xhADwgGfhT24tdscbWmTmA+JjwSwuniznkZ3Ha88y3?=
+ =?us-ascii?Q?SbpxaHYijpGYZwFMMURf+U0lQML58PY5oRAul1pP9Bj51wsOHPGTi3rIB/Sn?=
+ =?us-ascii?Q?osL9yPT6t2hpXiFtn7Vpb1EiaXab+AOmkxpmAm91P0bJ9HuDNRUHm8oPKZhu?=
+ =?us-ascii?Q?q0yXj32SghYDm5SiI1azZkXuP5rUG2Rx6Y0QcRFZaMK59EXhyHii9HIkGFXw?=
+ =?us-ascii?Q?t4s2y6eFO42qR9g7RTii031bba+VjbES1d6uepvN/0ibCbgWyyaIpU2YEteh?=
+ =?us-ascii?Q?rTnVxbpRQXONhc8eYfTQalfo?=
 X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 15f3c0ec-bd06-40f8-835d-08d963ee23d0
+X-MS-Exchange-CrossTenant-Network-Message-Id: 87d552e6-b495-4996-3257-08d963ee2978
 X-MS-Exchange-CrossTenant-AuthSource: SN6PR12MB2718.namprd12.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 20 Aug 2021 15:21:10.6168
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 20 Aug 2021 15:21:20.0224
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: bX7mwwalk8LbosEIEv7VT1pKlp+RfQ7KDEMnEOWCZ8MLNg3Ld6jQH22FTbuu3CL0uAdaWmTEICP4Gs9pc3HJ1w==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SN1PR12MB2446
+X-MS-Exchange-CrossTenant-UserPrincipalName: tpsMZ7O858Qb73Pq8Z0sYXXfjFVba7wwe02KcVOOgvLiHTjlZHIjnK+C11mF1spvnoQ7Ctv3mqVAEKiHPZaPlg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA0PR12MB4557
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The hypervisor uses the sev_features field (offset 3B0h) in the Save State
-Area to control the SEV-SNP guest features such as SNPActive, vTOM,
-ReflectVC etc. An SEV-SNP guest can read the SEV_FEATURES fields through
-the SEV_STATUS MSR.
+From: Michael Roth <michael.roth@amd.com>
 
-While at it, update the dump_vmcb() to log the VMPL level.
+Determining which CPUID leafs have significant ECX/index values is
+also needed by guest kernel code when doing SEV-SNP-validated CPUID
+lookups. Move this to common code to keep future updates in sync.
 
-See APM2 Table 15-34 and B-4 for more details.
-
+Signed-off-by: Michael Roth <michael.roth@amd.com>
 Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
 ---
- arch/x86/include/asm/svm.h | 6 ++++--
- arch/x86/kvm/svm/svm.c     | 4 ++--
- 2 files changed, 6 insertions(+), 4 deletions(-)
+ arch/x86/include/asm/cpuid.h | 26 ++++++++++++++++++++++++++
+ arch/x86/kvm/cpuid.c         | 17 ++---------------
+ 2 files changed, 28 insertions(+), 15 deletions(-)
+ create mode 100644 arch/x86/include/asm/cpuid.h
 
-diff --git a/arch/x86/include/asm/svm.h b/arch/x86/include/asm/svm.h
-index e322676039f4..5ac691c27dcc 100644
---- a/arch/x86/include/asm/svm.h
-+++ b/arch/x86/include/asm/svm.h
-@@ -236,7 +236,8 @@ struct vmcb_save_area {
- 	struct vmcb_seg ldtr;
- 	struct vmcb_seg idtr;
- 	struct vmcb_seg tr;
--	u8 reserved_1[43];
-+	u8 reserved_1[42];
-+	u8 vmpl;
- 	u8 cpl;
- 	u8 reserved_2[4];
- 	u64 efer;
-@@ -301,7 +302,8 @@ struct vmcb_save_area {
- 	u64 sw_exit_info_1;
- 	u64 sw_exit_info_2;
- 	u64 sw_scratch;
--	u8 reserved_11[56];
-+	u64 sev_features;
-+	u8 reserved_11[48];
- 	u64 xcr0;
- 	u8 valid_bitmap[16];
- 	u64 x87_state_gpa;
-diff --git a/arch/x86/kvm/svm/svm.c b/arch/x86/kvm/svm/svm.c
-index e8ccab50ebf6..25773bf72158 100644
---- a/arch/x86/kvm/svm/svm.c
-+++ b/arch/x86/kvm/svm/svm.c
-@@ -3237,8 +3237,8 @@ static void dump_vmcb(struct kvm_vcpu *vcpu)
- 	       "tr:",
- 	       save01->tr.selector, save01->tr.attrib,
- 	       save01->tr.limit, save01->tr.base);
--	pr_err("cpl:            %d                efer:         %016llx\n",
--		save->cpl, save->efer);
-+	pr_err("vmpl: %d   cpl:  %d               efer:          %016llx\n",
-+	       save->vmpl, save->cpl, save->efer);
- 	pr_err("%-15s %016llx %-13s %016llx\n",
- 	       "cr0:", save->cr0, "cr2:", save->cr2);
- 	pr_err("%-15s %016llx %-13s %016llx\n",
+diff --git a/arch/x86/include/asm/cpuid.h b/arch/x86/include/asm/cpuid.h
+new file mode 100644
+index 000000000000..61426eb1f665
+--- /dev/null
++++ b/arch/x86/include/asm/cpuid.h
+@@ -0,0 +1,26 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++#ifndef _ASM_X86_CPUID_H
++#define _ASM_X86_CPUID_H
++
++static __always_inline bool cpuid_function_is_indexed(u32 function)
++{
++	switch (function) {
++	case 4:
++	case 7:
++	case 0xb:
++	case 0xd:
++	case 0xf:
++	case 0x10:
++	case 0x12:
++	case 0x14:
++	case 0x17:
++	case 0x18:
++	case 0x1f:
++	case 0x8000001d:
++		return true;
++	}
++
++	return false;
++}
++
++#endif /* _ASM_X86_CPUID_H */
+diff --git a/arch/x86/kvm/cpuid.c b/arch/x86/kvm/cpuid.c
+index 739be5da3bca..9ef13775f29e 100644
+--- a/arch/x86/kvm/cpuid.c
++++ b/arch/x86/kvm/cpuid.c
+@@ -19,6 +19,7 @@
+ #include <asm/user.h>
+ #include <asm/fpu/xstate.h>
+ #include <asm/sgx.h>
++#include <asm/cpuid.h>
+ #include "cpuid.h"
+ #include "lapic.h"
+ #include "mmu.h"
+@@ -608,22 +609,8 @@ static struct kvm_cpuid_entry2 *do_host_cpuid(struct kvm_cpuid_array *array,
+ 	cpuid_count(entry->function, entry->index,
+ 		    &entry->eax, &entry->ebx, &entry->ecx, &entry->edx);
+ 
+-	switch (function) {
+-	case 4:
+-	case 7:
+-	case 0xb:
+-	case 0xd:
+-	case 0xf:
+-	case 0x10:
+-	case 0x12:
+-	case 0x14:
+-	case 0x17:
+-	case 0x18:
+-	case 0x1f:
+-	case 0x8000001d:
++	if (cpuid_function_is_indexed(function))
+ 		entry->flags |= KVM_CPUID_FLAG_SIGNIFCANT_INDEX;
+-		break;
+-	}
+ 
+ 	return entry;
+ }
 -- 
 2.17.1
 
