@@ -2,38 +2,38 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AB220C432BE
-	for <linux-efi@archiver.kernel.org>; Fri, 27 Aug 2021 16:55:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9BE21C432BE
+	for <linux-efi@archiver.kernel.org>; Fri, 27 Aug 2021 17:08:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8A29160FF2
-	for <linux-efi@archiver.kernel.org>; Fri, 27 Aug 2021 16:55:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7BC0A60FF2
+	for <linux-efi@archiver.kernel.org>; Fri, 27 Aug 2021 17:08:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233392AbhH0Q4l (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 27 Aug 2021 12:56:41 -0400
-Received: from mail.skyhub.de ([5.9.137.197]:34762 "EHLO mail.skyhub.de"
+        id S233094AbhH0RJ2 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 27 Aug 2021 13:09:28 -0400
+Received: from mail.skyhub.de ([5.9.137.197]:36594 "EHLO mail.skyhub.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230021AbhH0Q4l (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 27 Aug 2021 12:56:41 -0400
-Received: from zn.tnic (p200300ec2f1117008c66b42124dc6a0e.dip0.t-ipconnect.de [IPv6:2003:ec:2f11:1700:8c66:b421:24dc:6a0e])
+        id S230363AbhH0RJ2 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 27 Aug 2021 13:09:28 -0400
+Received: from zn.tnic (p200300ec2f111700cf40790d4c46ba75.dip0.t-ipconnect.de [IPv6:2003:ec:2f11:1700:cf40:790d:4c46:ba75])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id 91BF81EC0453;
-        Fri, 27 Aug 2021 18:55:46 +0200 (CEST)
+        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id A7EC41EC0537;
+        Fri, 27 Aug 2021 19:08:33 +0200 (CEST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alien8.de; s=dkim;
-        t=1630083346;
+        t=1630084113;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=aUIFMqNpBxjAGkdg6iAwim6KAU9KWJiRd8wcruSmexk=;
-        b=I1h1RKAoUHGmeXJ4kkuRnowXBcM3b71SUtfhRYVQSGpQpskB0KgGgSGAc6spXl+eV/pZ7h
-        VaXItU7p5N7MhDfnQ7UvLxIpnh1VImhJ5qewIYQvYtnAlq2dZHYQzALwgSeinIr7JoAOKQ
-        cocjbkwIdkj5PrLsibmWvOHTxtgh3ig=
-Date:   Fri, 27 Aug 2021 18:56:23 +0200
+         content-transfer-encoding:in-reply-to:in-reply-to:  references:references;
+        bh=1IhDUATGjQR+rNHqh/+Uq/GmihBPipVlLtbpDqPMf0w=;
+        b=NPnM1LkQ8ko86Qej3bIemFX98Q1lQZUx7A3DpeUdcaNjipgIb92mLttY4rMYgE4bmZWZfp
+        EiMriHFIUeXbOPgwR6orQhai2yMP6lSOy+CQQGsROXRT8YM26tqGPJ+IIStc9/VTPF8ZOC
+        QBm3uvJVTIx5swQMGCESZ4jpK5qi78Q=
+Date:   Fri, 27 Aug 2021 19:09:10 +0200
 From:   Borislav Petkov <bp@alien8.de>
 To:     Brijesh Singh <brijesh.singh@amd.com>
 Cc:     x86@kernel.org, linux-kernel@vger.kernel.org, kvm@vger.kernel.org,
@@ -61,30 +61,32 @@ Cc:     x86@kernel.org, linux-kernel@vger.kernel.org, kvm@vger.kernel.org,
         "Kirill A . Shutemov" <kirill@shutemov.name>,
         Andi Kleen <ak@linux.intel.com>, tony.luck@intel.com,
         marcorr@google.com, sathyanarayanan.kuppuswamy@linux.intel.com
-Subject: Re: [PATCH Part1 v5 32/38] x86/sev: enable SEV-SNP-validated CPUID
- in #VC handlers
-Message-ID: <YSkZN0Z5fs+5HOwE@zn.tnic>
+Subject: Re: [PATCH Part1 v5 17/38] x86/mm: Add support to validate memory
+ when changing C-bit
+Message-ID: <YSkcNmeDttTdX0ga@zn.tnic>
 References: <20210820151933.22401-1-brijesh.singh@amd.com>
- <20210820151933.22401-33-brijesh.singh@amd.com>
- <YSkCWVTd0ZEvphlx@zn.tnic>
- <62e8b7f2-4e0d-5836-ea37-9e0a7a797017@amd.com>
+ <20210820151933.22401-18-brijesh.singh@amd.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <62e8b7f2-4e0d-5836-ea37-9e0a7a797017@amd.com>
+In-Reply-To: <20210820151933.22401-18-brijesh.singh@amd.com>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Fri, Aug 27, 2021 at 10:47:42AM -0500, Brijesh Singh wrote:
-> Actually a  VMM could populate more than one page for the CPUID. One
-> page can include 64 entries and I believe Mike is already running into
-> limits (with Qemu) and exploring the ideas to extend it more than a page.
+On Fri, Aug 20, 2021 at 10:19:12AM -0500, Brijesh Singh wrote:
+> diff --git a/arch/x86/include/asm/sev-common.h b/arch/x86/include/asm/sev-common.h
+> index 37aa77565726..3388db814fd0 100644
+> --- a/arch/x86/include/asm/sev-common.h
+> +++ b/arch/x86/include/asm/sev-common.h
+> @@ -74,6 +74,8 @@
+>  enum psc_op {
+>  	SNP_PAGE_STATE_PRIVATE = 1,
+>  	SNP_PAGE_STATE_SHARED,
+> +	SNP_PAGE_STATE_PSMASH,
+> +	SNP_PAGE_STATE_UNSMASH,
 
-You mean, like, 2 pages?
-
-:-)
+Those two are unused in this set, AFAICT.
 
 -- 
 Regards/Gruss,
