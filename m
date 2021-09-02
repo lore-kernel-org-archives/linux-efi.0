@@ -2,229 +2,269 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 10B49C676A8
-	for <linux-efi@archiver.kernel.org>; Thu,  2 Sep 2021 16:40:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 65CFEC433EF
+	for <linux-efi@archiver.kernel.org>; Thu,  2 Sep 2021 18:14:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id ECA7F610A0
-	for <linux-efi@archiver.kernel.org>; Thu,  2 Sep 2021 16:40:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4880C610CC
+	for <linux-efi@archiver.kernel.org>; Thu,  2 Sep 2021 18:14:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234558AbhIBQlE (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 2 Sep 2021 12:41:04 -0400
-Received: from mail.skyhub.de ([5.9.137.197]:57826 "EHLO mail.skyhub.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S234478AbhIBQlD (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Thu, 2 Sep 2021 12:41:03 -0400
-Received: from zn.tnic (p200300ec2f0ed100559a5c00047fe4a9.dip0.t-ipconnect.de [IPv6:2003:ec:2f0e:d100:559a:5c00:47f:e4a9])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id 5DB381EC051F;
-        Thu,  2 Sep 2021 18:39:59 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alien8.de; s=dkim;
-        t=1630600799;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=tInBcwV8PPz5HgTlj8s9pKw/c3XcI6QQac6T1fjypAs=;
-        b=DZzM4T7hNki0hfWFToM06T3uIqTpW3S1x3aH9e5p4NtsH7K6Jdwm5Z5VMiIfsO0s2cTTXw
-        U+fCaPc/GyJmhSw7rXntDZUX6+BDp5bUMg+nlj6y21g2g1mWWZT9o8FZHVsus7nbxZUZug
-        8wKREAEDQ63F73TH7zNyF13KdEvoIKk=
-Date:   Thu, 2 Sep 2021 18:40:34 +0200
-From:   Borislav Petkov <bp@alien8.de>
-To:     Brijesh Singh <brijesh.singh@amd.com>
-Cc:     x86@kernel.org, linux-kernel@vger.kernel.org, kvm@vger.kernel.org,
-        linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org,
-        linux-coco@lists.linux.dev, linux-mm@kvack.org,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Ingo Molnar <mingo@redhat.com>, Joerg Roedel <jroedel@suse.de>,
+        id S1346939AbhIBSPx (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 2 Sep 2021 14:15:53 -0400
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:46302 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1346936AbhIBSPw (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 2 Sep 2021 14:15:52 -0400
+Received: from pps.filterd (m0187473.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 182I4CL5003960;
+        Thu, 2 Sep 2021 14:14:41 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=subject : to : cc :
+ references : from : message-id : date : mime-version : in-reply-to :
+ content-type : content-transfer-encoding; s=pp1;
+ bh=WDQr9prZoZvK59wo4XINd3RoiSuTOWHFB4TBVQYAJOY=;
+ b=aVWrF5kZt3r/P+S+uC7LXvVAF38bHgornZGrnaqCZI5U5vRIw5Fz0yDAN6NnkXfAbQNv
+ FS5R2JBvvafjjW0pz6ifNaNaxLWlc+FFhQzF5/CjQ0rJRGpmP+P6B0NpUqLqQmqKuiBk
+ ZmxrkPz1Tn228THoY7yP4Nf9fQ/6UFwoW4UQs0msAQPe/nMbkKcv3P37HW9M6b/cMnXS
+ hlZKo64GnXiFOCwJT1FNsLgSENFzApYr0gNiHZGFIkP0A1aHgvzXS6RJzzOg7Pt3TOjk
+ IcC4tT6j1ZYiw/z/yrad2FY0mebxOgb75vOq/58zEkGCb0ThawEPCdlpa8al8jNb69Ib Mg== 
+Received: from pps.reinject (localhost [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3au2mdcakp-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 02 Sep 2021 14:14:40 -0400
+Received: from m0187473.ppops.net (m0187473.ppops.net [127.0.0.1])
+        by pps.reinject (8.16.0.43/8.16.0.43) with SMTP id 182I4wcj007749;
+        Thu, 2 Sep 2021 14:14:40 -0400
+Received: from ppma04wdc.us.ibm.com (1a.90.2fa9.ip4.static.sl-reverse.com [169.47.144.26])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3au2mdcak8-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 02 Sep 2021 14:14:40 -0400
+Received: from pps.filterd (ppma04wdc.us.ibm.com [127.0.0.1])
+        by ppma04wdc.us.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 182ICxUS029580;
+        Thu, 2 Sep 2021 18:14:39 GMT
+Received: from b03cxnp08025.gho.boulder.ibm.com (b03cxnp08025.gho.boulder.ibm.com [9.17.130.17])
+        by ppma04wdc.us.ibm.com with ESMTP id 3atdxehyxp-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 02 Sep 2021 18:14:39 +0000
+Received: from b03ledav006.gho.boulder.ibm.com (b03ledav006.gho.boulder.ibm.com [9.17.130.237])
+        by b03cxnp08025.gho.boulder.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 182IEaKR34799968
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Thu, 2 Sep 2021 18:14:37 GMT
+Received: from b03ledav006.gho.boulder.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id D7C8BC607F;
+        Thu,  2 Sep 2021 18:14:36 +0000 (GMT)
+Received: from b03ledav006.gho.boulder.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 100F4C605A;
+        Thu,  2 Sep 2021 18:14:31 +0000 (GMT)
+Received: from [9.65.84.185] (unknown [9.65.84.185])
+        by b03ledav006.gho.boulder.ibm.com (Postfix) with ESMTP;
+        Thu,  2 Sep 2021 18:14:31 +0000 (GMT)
+Subject: Re: [PATCH 3/3] virt: Add sev_secret module to expose confidential
+ computing secrets
+To:     Greg KH <gregkh@linuxfoundation.org>
+Cc:     linux-efi@vger.kernel.org, Borislav Petkov <bp@suse.de>,
+        Ashish Kalra <ashish.kalra@amd.com>,
+        Brijesh Singh <brijesh.singh@amd.com>,
         Tom Lendacky <thomas.lendacky@amd.com>,
-        "H. Peter Anvin" <hpa@zytor.com>, Ard Biesheuvel <ardb@kernel.org>,
-        Paolo Bonzini <pbonzini@redhat.com>,
-        Sean Christopherson <seanjc@google.com>,
-        Vitaly Kuznetsov <vkuznets@redhat.com>,
-        Wanpeng Li <wanpengli@tencent.com>,
-        Jim Mattson <jmattson@google.com>,
-        Andy Lutomirski <luto@kernel.org>,
-        Dave Hansen <dave.hansen@linux.intel.com>,
-        Sergio Lopez <slp@redhat.com>, Peter Gonda <pgonda@google.com>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>,
-        David Rientjes <rientjes@google.com>,
-        Dov Murik <dovmurik@linux.ibm.com>,
-        Tobin Feldman-Fitzthum <tobin@ibm.com>,
-        Michael Roth <michael.roth@amd.com>,
-        Vlastimil Babka <vbabka@suse.cz>,
-        "Kirill A . Shutemov" <kirill@shutemov.name>,
-        Andi Kleen <ak@linux.intel.com>, tony.luck@intel.com,
-        marcorr@google.com, sathyanarayanan.kuppuswamy@linux.intel.com
-Subject: Re: [PATCH Part1 v5 35/38] x86/sev: Register SNP guest request
- platform device
-Message-ID: <YTD+go747TIU6k9g@zn.tnic>
-References: <20210820151933.22401-1-brijesh.singh@amd.com>
- <20210820151933.22401-36-brijesh.singh@amd.com>
+        Ard Biesheuvel <ardb@kernel.org>,
+        James Morris <jmorris@namei.org>,
+        "Serge E. Hallyn" <serge@hallyn.com>,
+        Andi Kleen <ak@linux.intel.com>,
+        "Dr. David Alan Gilbert" <dgilbert@redhat.com>,
+        James Bottomley <jejb@linux.ibm.com>,
+        Tobin Feldman-Fitzthum <tobin@linux.ibm.com>,
+        Jim Cadden <jcadden@ibm.com>, linux-coco@lists.linux.dev,
+        linux-security-module@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Dov Murik <dovmurik@linux.ibm.com>
+References: <20210809190157.279332-1-dovmurik@linux.ibm.com>
+ <20210809190157.279332-4-dovmurik@linux.ibm.com> <YTDKtr+W7wBTn/96@kroah.com>
+From:   Dov Murik <dovmurik@linux.ibm.com>
+Message-ID: <35be128e-52a4-b463-8ad7-8047810002f9@linux.ibm.com>
+Date:   Thu, 2 Sep 2021 21:14:29 +0300
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
+ Thunderbird/78.13.0
 MIME-Version: 1.0
+In-Reply-To: <YTDKtr+W7wBTn/96@kroah.com>
 Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20210820151933.22401-36-brijesh.singh@amd.com>
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-ORIG-GUID: EWRQJtOpxFqvh5K6RGLEe9ngnfz2w3Fq
+X-Proofpoint-GUID: kvvKWqCSqtdLcqoV8X3iZ3jgXpZ0VGey
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.391,18.0.790
+ definitions=2021-09-02_04:2021-09-02,2021-09-02 signatures=0
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 clxscore=1011 suspectscore=0
+ malwarescore=0 impostorscore=0 mlxscore=0 spamscore=0 adultscore=0
+ phishscore=0 priorityscore=1501 bulkscore=0 lowpriorityscore=0
+ mlxlogscore=999 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2108310000 definitions=main-2109020102
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Fri, Aug 20, 2021 at 10:19:30AM -0500, Brijesh Singh wrote:
-> Version 2 of GHCB specification provides NAEs that can be used by the SNP
 
-Resolve the "NAE" abbreviation here so that it is clear what this means.
 
-> guest to communicate with the PSP without risk from a malicious hypervisor
-> who wishes to read, alter, drop or replay the messages sent.
-
-This here says "malicious hypervisor" from which we protect from...
-
-> In order to communicate with the PSP, the guest need to locate the secrets
-> page inserted by the hypervisor during the SEV-SNP guest launch. The
-
-... but this here says the secrets page is inserted by the same
-hypervisor from which we're actually protecting.
-
-You wanna rephrase that to explain what exactly happens so that it
-doesn't sound like we're really trusting the HV with the secrets page.
-
-> secrets page contains the communication keys used to send and receive the
-> encrypted messages between the guest and the PSP. The secrets page location
-> is passed through the setup_data.
+On 02/09/2021 15:59, Greg KH wrote:
+> On Mon, Aug 09, 2021 at 07:01:57PM +0000, Dov Murik wrote:
+>> The new sev_secret module exposes the confidential computing (coco)
+>> secret area via securityfs interface.
+>>
+>> When the module is loaded (and securityfs is mounted, typically under
+>> /sys/kernel/security), a "coco/sev_secret" directory is created in
+>> securityfs.  In it, a file is created for each secret entry.  The name
+>> of each such file is the GUID of the secret entry, and its content is
+>> the secret data.
+>>
+>> This allows applications running in a confidential computing setting to
+>> read secrets provided by the guest owner via a secure secret injection
+>> mechanism (such as AMD SEV's LAUNCH_SECRET command).
+>>
+>> Removing (unlinking) files in the "coco/sev_secret" directory will zero
+>> out the secret in memory, and remove the filesystem entry.  If the
+>> module is removed and loaded again, that secret will not appear in the
+>> filesystem.
+>>
+>> Signed-off-by: Dov Murik <dovmurik@linux.ibm.com>
+>> ---
+>>  drivers/virt/Kconfig                      |   3 +
+>>  drivers/virt/Makefile                     |   1 +
+>>  drivers/virt/coco/sev_secret/Kconfig      |  11 +
+>>  drivers/virt/coco/sev_secret/Makefile     |   2 +
+>>  drivers/virt/coco/sev_secret/sev_secret.c | 313 ++++++++++++++++++++++
+>>  5 files changed, 330 insertions(+)
+>>  create mode 100644 drivers/virt/coco/sev_secret/Kconfig
+>>  create mode 100644 drivers/virt/coco/sev_secret/Makefile
+>>  create mode 100644 drivers/virt/coco/sev_secret/sev_secret.c
+>>
+>> diff --git a/drivers/virt/Kconfig b/drivers/virt/Kconfig
+>> index 8061e8ef449f..6f73672f593f 100644
+>> --- a/drivers/virt/Kconfig
+>> +++ b/drivers/virt/Kconfig
+>> @@ -36,4 +36,7 @@ source "drivers/virt/vboxguest/Kconfig"
+>>  source "drivers/virt/nitro_enclaves/Kconfig"
+>>  
+>>  source "drivers/virt/acrn/Kconfig"
+>> +
+>> +source "drivers/virt/coco/sev_secret/Kconfig"
+>> +
+>>  endif
+>> diff --git a/drivers/virt/Makefile b/drivers/virt/Makefile
+>> index 3e272ea60cd9..2a7d472478bd 100644
+>> --- a/drivers/virt/Makefile
+>> +++ b/drivers/virt/Makefile
+>> @@ -8,3 +8,4 @@ obj-y				+= vboxguest/
+>>  
+>>  obj-$(CONFIG_NITRO_ENCLAVES)	+= nitro_enclaves/
+>>  obj-$(CONFIG_ACRN_HSM)		+= acrn/
+>> +obj-$(CONFIG_AMD_SEV_SECRET)	+= coco/sev_secret/
+>> diff --git a/drivers/virt/coco/sev_secret/Kconfig b/drivers/virt/coco/sev_secret/Kconfig
+>> new file mode 100644
+>> index 000000000000..76cfb4f405e0
+>> --- /dev/null
+>> +++ b/drivers/virt/coco/sev_secret/Kconfig
+>> @@ -0,0 +1,11 @@
+>> +# SPDX-License-Identifier: GPL-2.0-only
+>> +config AMD_SEV_SECRET
+>> +	tristate "AMD SEV secret area securityfs support"
+>> +	depends on AMD_MEM_ENCRYPT && EFI
+>> +	select SECURITYFS
+>> +	help
+>> +	  This is a driver for accessing the AMD SEV secret area via
+>> +	  securityfs.
+>> +
+>> +	  To compile this driver as a module, choose M here.
+>> +	  The module will be called sev_secret.
+>> diff --git a/drivers/virt/coco/sev_secret/Makefile b/drivers/virt/coco/sev_secret/Makefile
+>> new file mode 100644
+>> index 000000000000..dca0ed3f8f94
+>> --- /dev/null
+>> +++ b/drivers/virt/coco/sev_secret/Makefile
+>> @@ -0,0 +1,2 @@
+>> +# SPDX-License-Identifier: GPL-2.0-only
+>> +obj-$(CONFIG_AMD_SEV_SECRET) += sev_secret.o
+>> diff --git a/drivers/virt/coco/sev_secret/sev_secret.c b/drivers/virt/coco/sev_secret/sev_secret.c
+>> new file mode 100644
+>> index 000000000000..d9a60166b142
+>> --- /dev/null
+>> +++ b/drivers/virt/coco/sev_secret/sev_secret.c
+>> @@ -0,0 +1,313 @@
+>> +// SPDX-License-Identifier: GPL-2.0
+>> +/*
+>> + * sev_secret module
+>> + *
+>> + * Copyright (C) 2021 IBM Corporation
+>> + * Author: Dov Murik <dovmurik@linux.ibm.com>
+>> + */
+>> +
+>> +/**
+>> + * DOC: sev_secret: Allow reading confidential computing (coco) secret area via
+>> + * securityfs interface.
+>> + *
+>> + * When the module is loaded (and securityfs is mounted, typically under
+>> + * /sys/kernel/security), a "coco/sev_secret" directory is created in
+>> + * securityfs.  In it, a file is created for each secret entry.  The name of
+>> + * each such file is the GUID of the secret entry, and its content is the
+>> + * secret data.
+>> + */
+>> +
+>> +#include <linux/seq_file.h>
+>> +#include <linux/fs.h>
+>> +#include <linux/kernel.h>
+>> +#include <linux/init.h>
+>> +#include <linux/module.h>
+>> +#include <linux/io.h>
+>> +#include <linux/security.h>
+>> +#include <linux/efi.h>
+>> +
+>> +#define SEV_SECRET_NUM_FILES 64
+>> +
+>> +#define EFI_SEVSECRET_TABLE_HEADER_GUID \
+>> +	EFI_GUID(0x1e74f542, 0x71dd, 0x4d66, 0x96, 0x3e, 0xef, 0x42, 0x87, 0xff, 0x17, 0x3b)
+>> +
+>> +struct sev_secret {
+>> +	struct dentry *coco_dir;
+>> +	struct dentry *fs_dir;
+>> +	struct dentry *fs_files[SEV_SECRET_NUM_FILES];
+>> +	struct linux_efi_coco_secret_area *secret_area;
+>> +};
+>> +
+>> +/*
+>> + * Structure of the SEV secret area
+>> + *
+>> + * Offset   Length
+>> + * (bytes)  (bytes)  Usage
+>> + * -------  -------  -----
+>> + *       0       16  Secret table header GUID (must be 1e74f542-71dd-4d66-963e-ef4287ff173b)
+>> + *      16        4  Length of bytes of the entire secret area
+>> + *
+>> + *      20       16  First secret entry's GUID
+>> + *      36        4  First secret entry's length in bytes (= 16 + 4 + x)
+>> + *      40        x  First secret entry's data
+>> + *
+>> + *    40+x       16  Second secret entry's GUID
+>> + *    56+x        4  Second secret entry's length in bytes (= 16 + 4 + y)
+>> + *    60+x        y  Second secret entry's data
+>> + *
+>> + * (... and so on for additional entries)
 > 
-> Create a platform device that the SNP guest driver can bind to get the
-> platform resources such as encryption key and message id to use to
-> communicate with the PSP. The SNP guest driver can provide userspace
-> interface to get the attestation report, key derivation, extended
-> attestation report etc.
-> 
-> Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
-> ---
->  arch/x86/kernel/sev.c     | 68 +++++++++++++++++++++++++++++++++++++++
->  include/linux/sev-guest.h |  5 +++
->  2 files changed, 73 insertions(+)
+> Why isn't all of this documented in Documentation/ABI/ which is needed
+> for any new user/kernel api that you come up with like this.  We have to
+> have it documented somewhere, otherwise how will you know how to use
+> these files?
 
-...
+Yes, you're right, I'll add such documentation.
 
-> +static u64 find_secrets_paddr(void)
-> +{
-> +	u64 pa_data = boot_params.cc_blob_address;
-> +	struct cc_blob_sev_info info;
-> +	void *map;
-> +
-> +	/*
-> +	 * The CC blob contains the address of the secrets page, check if the
-> +	 * blob is present.
-> +	 */
-> +	if (!pa_data)
-> +		return 0;
-> +
-> +	map = early_memremap(pa_data, sizeof(info));
-> +	memcpy(&info, map, sizeof(info));
-> +	early_memunmap(map, sizeof(info));
-> +
-> +	/* Verify that secrets page address is passed */
+Note that the ABI (for userspace programs) is the filesystem paths and
+usage (read + unlink), and not the GUIDed table explained above your
+comment.  That GUIDed table is passed from the Guest Owner via SEV
+secret injection into OVMF and from there to the kernel memory (patches
+1+2 in this series).  So userspace doesn't see this GUIDed table
+structure at all.
 
-That's hardly verifying something - if anything, it should say
+I should probably add this story to this file's header comment, or some
+other place which will document this module (suggestions welcome).
 
-	/* smoke-test the secrets page passed */
-
-> +	if (info.secrets_phys && info.secrets_len == PAGE_SIZE)
-> +		return info.secrets_phys;
-
-... which begs the question: how do we verify the HV is not passing some
-garbage instead of an actual secrets page?
-
-I guess it is that:
-
-"SNP_LAUNCH_UPDATE can insert two special pages into the guest’s
-memory: the secrets page and the CPUID page. The secrets page contains
-encryption keys used by the guest to interact with the firmware. Because
-the secrets page is encrypted with the guest’s memory encryption
-key, the hypervisor cannot read the keys. The CPUID page contains
-hypervisor provided CPUID function values that it passes to the guest.
-The firmware validates these values to ensure the hypervisor is not
-providing out-of-range values."
-
-From "4.5 Launching a Guest" in the SNP FW ABI spec.
-
-I think that explanation above is very important wrt to explaining the
-big picture how this all works with those pages injected into the guest
-so I guess somewhere around here a comment should say
-
-"See section 4.5 Launching a Guest in the SNP FW ABI spec for details
-about those special pages."
-
-or so.
-
-> +
-> +	return 0;
-> +}
-> +
-> +static int __init add_snp_guest_request(void)
-
-If anything, that should be called
-
-init_snp_platform_device()
-
-or so.
-
-> +{
-> +	struct snp_secrets_page_layout *layout;
-> +	struct snp_guest_platform_data data;
-> +
-> +	if (!sev_feature_enabled(SEV_SNP))
-> +		return -ENODEV;
-> +
-> +	snp_secrets_phys = find_secrets_paddr();
-> +	if (!snp_secrets_phys)
-> +		return -ENODEV;
-> +
-> +	layout = snp_map_secrets_page();
-> +	if (!layout)
-> +		return -ENODEV;
-> +
-> +	/*
-> +	 * The secrets page contains three VMPCK that can be used for
-
-What's VMPCK?
-
-> +	 * communicating with the PSP. We choose the VMPCK0 to encrypt guest
-
-"We" is?
-
-> +	 * messages send and receive by the Linux. Provide the key and
-
-"... by the Linux."?! That sentence needs more love.
-
-> +	 * id through the platform data to the driver.
-> +	 */
-> +	data.vmpck_id = 0;
-> +	memcpy_fromio(data.vmpck, layout->vmpck0, sizeof(data.vmpck));
-> +
-> +	iounmap(layout);
-> +
-> +	platform_device_add_data(&guest_req_device, &data, sizeof(data));
-
-Oh look, that function can return an error.
-
-> +
-> +	if (!platform_device_register(&guest_req_device))
-> +		dev_info(&guest_req_device.dev, "secret phys 0x%llx\n", snp_secrets_phys);
-
-Make that message human-readable - not a debug one.
-
-Thx.
-
--- 
-Regards/Gruss,
-    Boris.
-
-https://people.kernel.org/tglx/notes-about-netiquette
+-Dov
