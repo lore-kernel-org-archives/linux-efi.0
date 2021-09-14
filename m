@@ -2,82 +2,132 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 735D7C433EF
-	for <linux-efi@archiver.kernel.org>; Tue, 14 Sep 2021 14:56:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 73FBCC433FE
+	for <linux-efi@archiver.kernel.org>; Tue, 14 Sep 2021 18:25:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5DA116112E
-	for <linux-efi@archiver.kernel.org>; Tue, 14 Sep 2021 14:56:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 54BE36112D
+	for <linux-efi@archiver.kernel.org>; Tue, 14 Sep 2021 18:25:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234495AbhINO5q (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 14 Sep 2021 10:57:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44574 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234452AbhINO5n (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 14 Sep 2021 10:57:43 -0400
-Received: from mail.skyhub.de (mail.skyhub.de [IPv6:2a01:4f8:190:11c2::b:1457])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A627DC061574;
-        Tue, 14 Sep 2021 07:56:25 -0700 (PDT)
-Received: from zn.tnic (p200300ec2f1048001ab509412f10df56.dip0.t-ipconnect.de [IPv6:2003:ec:2f10:4800:1ab5:941:2f10:df56])
+        id S230035AbhINS0X (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 14 Sep 2021 14:26:23 -0400
+Received: from mail.skyhub.de ([5.9.137.197]:58876 "EHLO mail.skyhub.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229477AbhINS0W (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Tue, 14 Sep 2021 14:26:22 -0400
+Received: from zn.tnic (p200300ec2f1048008d634cac5b0c7131.dip0.t-ipconnect.de [IPv6:2003:ec:2f10:4800:8d63:4cac:5b0c:7131])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id 3AA951EC04D1;
-        Tue, 14 Sep 2021 16:56:19 +0200 (CEST)
+        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id 763B31EC04D1;
+        Tue, 14 Sep 2021 20:24:59 +0200 (CEST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alien8.de; s=dkim;
-        t=1631631379;
+        t=1631643899;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:in-reply-to:in-reply-to:  references:references;
-        bh=fC6oRVekYYeOWo6Ou3mRPO8RAeBaCtshKbuZA0gycas=;
-        b=DjTjeMWi1aTZkXxq8Lf9KyX6WC0t0Xl9olO8XFqhK7E+qGjzzzpMJxBPFDqtXa7lxuvLMF
-        BJZxFO3MGqQdmfuJdFwoNpN1Q2f2YF1GOFt4ptUcVjuOWJnOJOQqL4VXuXLUK8z4I3mRHF
-        ddNSSmZuSk4r3r8c6iL+tcOt78DT0h0=
-Date:   Tue, 14 Sep 2021 16:56:09 +0200
+        bh=ZiKIvLzxdvLHB/We39H7CYYWYKE3V9X7egkB0ENPsyE=;
+        b=GN7S7yA8avxg1KGLWQ5Wx4mPloiFO1PBUg1PdvgNlg1k2E8fi0qdXRRIE9kwM20ienZRVh
+        o8LBR3WQL8vRxBEN8UtVxzVQ4SPu4d1Dm2tyq3MgOH0kvt8jlqMPz4StWyaaodjjc84DcD
+        Q2fGTwl3VhF1WGvU/wGjdbzSHrnpkrw=
+Date:   Tue, 14 Sep 2021 20:24:52 +0200
 From:   Borislav Petkov <bp@alien8.de>
-To:     Christophe Leroy <christophe.leroy@csgroup.eu>
-Cc:     Michael Ellerman <mpe@ellerman.id.au>,
+To:     Tom Lendacky <thomas.lendacky@amd.com>
+Cc:     linux-kernel@vger.kernel.org, x86@kernel.org,
+        linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org,
+        iommu@lists.linux-foundation.org, kvm@vger.kernel.org,
+        linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org,
+        linux-graphics-maintainer@vmware.com,
+        amd-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org,
+        kexec@lists.infradead.org, linux-fsdevel@vger.kernel.org,
+        Brijesh Singh <brijesh.singh@amd.com>,
+        Joerg Roedel <joro@8bytes.org>,
+        Andi Kleen <ak@linux.intel.com>,
         Sathyanarayanan Kuppuswamy 
         <sathyanarayanan.kuppuswamy@linux.intel.com>,
-        linux-efi@vger.kernel.org, Brijesh Singh <brijesh.singh@amd.com>,
-        kvm@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        platform-driver-x86@vger.kernel.org,
-        Paul Mackerras <paulus@samba.org>, linux-s390@vger.kernel.org,
-        Andi Kleen <ak@linux.intel.com>,
-        Joerg Roedel <joro@8bytes.org>, x86@kernel.org,
-        amd-gfx@lists.freedesktop.org,
-        Christoph Hellwig <hch@infradead.org>,
-        linux-graphics-maintainer@vmware.com,
-        Tom Lendacky <thomas.lendacky@amd.com>,
         Tianyu Lan <Tianyu.Lan@microsoft.com>,
-        kexec@lists.infradead.org, linux-kernel@vger.kernel.org,
-        iommu@lists.linux-foundation.org, linux-fsdevel@vger.kernel.org,
-        linuxppc-dev@lists.ozlabs.org
-Subject: Re: [PATCH v3 4/8] powerpc/pseries/svm: Add a powerpc version of
+        Christoph Hellwig <hch@infradead.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Ingo Molnar <mingo@redhat.com>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        Andy Lutomirski <luto@kernel.org>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Will Deacon <will@kernel.org>
+Subject: Re: [PATCH v3 5/8] x86/sme: Replace occurrences of sme_active() with
  cc_platform_has()
-Message-ID: <YUC4CW02tqEttZZJ@zn.tnic>
+Message-ID: <YUDo9CWyLVa1PeUF@zn.tnic>
 References: <cover.1631141919.git.thomas.lendacky@amd.com>
- <9d4fc3f8ea7b325aaa1879beab1286876f45d450.1631141919.git.thomas.lendacky@amd.com>
- <YUCOTIPPsJJpLO/d@zn.tnic>
- <41b93dae-2f10-15a3-a079-c632381bec73@csgroup.eu>
+ <367624d43d35d61d5c97a8b289d9ddae223636e9.1631141919.git.thomas.lendacky@amd.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <41b93dae-2f10-15a3-a079-c632381bec73@csgroup.eu>
+In-Reply-To: <367624d43d35d61d5c97a8b289d9ddae223636e9.1631141919.git.thomas.lendacky@amd.com>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, Sep 14, 2021 at 04:47:41PM +0200, Christophe Leroy wrote:
-> Yes, see https://lore.kernel.org/linuxppc-dev/20210914123919.58203eef@canb.auug.org.au/T/#t
+On Wed, Sep 08, 2021 at 05:58:36PM -0500, Tom Lendacky wrote:
+> diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
+> index 18fe19916bc3..4b54a2377821 100644
+> --- a/arch/x86/mm/mem_encrypt.c
+> +++ b/arch/x86/mm/mem_encrypt.c
+> @@ -144,7 +144,7 @@ void __init sme_unmap_bootdata(char *real_mode_data)
+>  	struct boot_params *boot_data;
+>  	unsigned long cmdline_paddr;
+>  
+> -	if (!sme_active())
+> +	if (!cc_platform_has(CC_ATTR_HOST_MEM_ENCRYPT))
+>  		return;
+>  
+>  	/* Get the command line address before unmapping the real_mode_data */
+> @@ -164,7 +164,7 @@ void __init sme_map_bootdata(char *real_mode_data)
+>  	struct boot_params *boot_data;
+>  	unsigned long cmdline_paddr;
+>  
+> -	if (!sme_active())
+> +	if (!cc_platform_has(CC_ATTR_HOST_MEM_ENCRYPT))
+>  		return;
+>  
+>  	__sme_early_map_unmap_mem(real_mode_data, sizeof(boot_params), true);
+> @@ -377,11 +377,6 @@ bool sev_active(void)
+>  {
+>  	return sev_status & MSR_AMD64_SEV_ENABLED;
+>  }
+> -
+> -bool sme_active(void)
+> -{
+> -	return sme_me_mask && !sev_active();
+> -}
+>  EXPORT_SYMBOL_GPL(sev_active);
+>  
+>  /* Needs to be called from non-instrumentable code */
 
-Aha, more compiler magic stuff ;-\
+You forgot this hunk:
 
-Oh well, I guess that fix will land upstream soon.
+diff --git a/arch/x86/mm/mem_encrypt.c b/arch/x86/mm/mem_encrypt.c
+index 5635ca9a1fbe..a3a2396362a5 100644
+--- a/arch/x86/mm/mem_encrypt.c
++++ b/arch/x86/mm/mem_encrypt.c
+@@ -364,8 +364,9 @@ int __init early_set_memory_encrypted(unsigned long vaddr, unsigned long size)
+ /*
+  * SME and SEV are very similar but they are not the same, so there are
+  * times that the kernel will need to distinguish between SME and SEV. The
+- * sme_active() and sev_active() functions are used for this.  When a
+- * distinction isn't needed, the mem_encrypt_active() function can be used.
++ * PATTR_HOST_MEM_ENCRYPT and PATTR_GUEST_MEM_ENCRYPT flags to
++ * amd_prot_guest_has() are used for this. When a distinction isn't needed,
++ * the mem_encrypt_active() function can be used.
+  *
+  * The trampoline code is a good example for this requirement.  Before
+  * paging is activated, SME will access all memory as decrypted, but SEV
 
-Thx.
+because there's still a sme_active() mentioned there:
+
+$ git grep sme_active
+arch/x86/mm/mem_encrypt.c:367: * sme_active() and sev_active() functions are used for this.  When a
 
 -- 
 Regards/Gruss,
