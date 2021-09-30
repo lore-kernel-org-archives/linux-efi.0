@@ -2,153 +2,158 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E12ECC433F5
-	for <linux-efi@archiver.kernel.org>; Wed, 29 Sep 2021 15:01:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B0E22C4332F
+	for <linux-efi@archiver.kernel.org>; Thu, 30 Sep 2021 18:50:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C478560F23
-	for <linux-efi@archiver.kernel.org>; Wed, 29 Sep 2021 15:01:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9EE826134F
+	for <linux-efi@archiver.kernel.org>; Thu, 30 Sep 2021 18:50:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344966AbhI2PDc (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 29 Sep 2021 11:03:32 -0400
-Received: from smtp-relay-internal-0.canonical.com ([185.125.188.122]:60962
-        "EHLO smtp-relay-internal-0.canonical.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1344965AbhI2PDb (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 29 Sep 2021 11:03:31 -0400
-Received: from mail-wm1-f70.google.com (mail-wm1-f70.google.com [209.85.128.70])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-        (No client certificate requested)
-        by smtp-relay-internal-0.canonical.com (Postfix) with ESMTPS id 1D74640609
-        for <linux-efi@vger.kernel.org>; Wed, 29 Sep 2021 15:01:50 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-        s=20210705; t=1632927710;
-        bh=ZHeeeZbiilEHhtw/jMIzJY6AU5jy7F+74b86hE2E++U=;
-        h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-         MIME-Version;
-        b=IqVMhivacICVvtfXFPLsefCxbRQycylQxHhKhEredFyZFYFT8hiY0VEJZ13lazvsy
-         Gm0OaW2uGF+CFqGUwMZ25+isYdS5UeP3eF2IhVMRCd5hObxkhYH8dJcttjEKIcH/oT
-         +ORiiPB32oFK1BLPvtqM9j/l/m23fP/U1/3vd7lcLnHwZGM6FSfJDZyroMoc+6Wf/y
-         AzbUZVB3s9rpYLH8RxvBDdO3xMWNwWbwa0kgHKNWcrILNN3h+qAo7q23cGEfhiwcLL
-         b3s5fg0JrLZQEGVUPHKeC+gSlDFoSGwSfsEXA0CfiRUNeozCt/h5OnGnUrgAiH9z2V
-         mkd4aX7/TXKUw==
-Received: by mail-wm1-f70.google.com with SMTP id m9-20020a05600c4f4900b003057c761567so2844116wmq.1
-        for <linux-efi@vger.kernel.org>; Wed, 29 Sep 2021 08:01:50 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=ZHeeeZbiilEHhtw/jMIzJY6AU5jy7F+74b86hE2E++U=;
-        b=aa+VUISiQje2NXjpnlKmxFetUsNbQparjA3NwVq2lr6fLf2PfHCOongTH5P7jd+8eN
-         9awhklzInstWigYyDy1190opX1s/HlRVPjRa6d5h+jEPk2L5ykD25e0nx+txT+lEdOva
-         +NmKNwLVe5nMqnYr3qMcArp8qaMOU8t958OFbp+Hp4kes5NAXPKJFou+199AsVhgcVRa
-         a51wInUsdrd28VggijjPFlnUkwb0wbm3nhKXPr2wnrBgMR2Quj3qezAB8wQ1mRCzbGic
-         C4zrc8HcXmgKQpdjX6mCC2gTqfJMz0DRELo5WZNKVYUVSZV6RIat9tq4pOykSQgIwjem
-         BDcg==
-X-Gm-Message-State: AOAM532nx0KCwEVObCPoGXYgMdMdQJBs5S3GHtnMgwGBspNaRmLlLFvm
-        TvteeosN2PcaHENQb3rmGNL+1kuFgdxkNuK+U3F8tK2ID2CuR3zVTYPq1gKh4ZyYRfp2mesnQOX
-        BdT26L6yHqwhHPMlyGx3HJqXA84M/lHE8zZ7aTg==
-X-Received: by 2002:a05:6000:2c6:: with SMTP id o6mr377157wry.292.1632927708056;
-        Wed, 29 Sep 2021 08:01:48 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJy9V/fnO21N7p3bEFVhHIvHS/0Ily74/OnTsvsnaHKo/n2patag3dfQoebfGKaZ+3ZNnDo6Og==
-X-Received: by 2002:a05:6000:2c6:: with SMTP id o6mr377109wry.292.1632927707834;
-        Wed, 29 Sep 2021 08:01:47 -0700 (PDT)
-Received: from alex.home (lfbn-lyo-1-470-249.w2-7.abo.wanadoo.fr. [2.7.60.249])
-        by smtp.gmail.com with ESMTPSA id h18sm133008wrs.75.2021.09.29.08.01.46
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 29 Sep 2021 08:01:47 -0700 (PDT)
-From:   Alexandre Ghiti <alexandre.ghiti@canonical.com>
-To:     Jonathan Corbet <corbet@lwn.net>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        Zong Li <zong.li@sifive.com>, Anup Patel <anup@brainfault.org>,
-        Atish Patra <Atish.Patra@wdc.com>,
-        Christoph Hellwig <hch@lst.de>,
-        Andrey Ryabinin <ryabinin.a.a@gmail.com>,
-        Alexander Potapenko <glider@google.com>,
-        Andrey Konovalov <andreyknvl@gmail.com>,
-        Dmitry Vyukov <dvyukov@google.com>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Kees Cook <keescook@chromium.org>,
-        Guo Ren <guoren@linux.alibaba.com>,
-        Heinrich Schuchardt <heinrich.schuchardt@canonical.com>,
-        Mayuresh Chitale <mchitale@ventanamicro.com>,
-        linux-doc@vger.kernel.org, linux-riscv@lists.infradead.org,
-        linux-kernel@vger.kernel.org, kasan-dev@googlegroups.com,
-        linux-efi@vger.kernel.org, linux-arch@vger.kernel.org
-Cc:     Alexandre Ghiti <alexandre.ghiti@canonical.com>
-Subject: [PATCH v2 10/10] riscv: Allow user to downgrade to sv39 when hw supports sv48
-Date:   Wed, 29 Sep 2021 16:51:13 +0200
-Message-Id: <20210929145113.1935778-11-alexandre.ghiti@canonical.com>
-X-Mailer: git-send-email 2.30.2
-In-Reply-To: <20210929145113.1935778-1-alexandre.ghiti@canonical.com>
-References: <20210929145113.1935778-1-alexandre.ghiti@canonical.com>
+        id S1344890AbhI3Sw2 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 30 Sep 2021 14:52:28 -0400
+Received: from mail.kernel.org ([198.145.29.99]:40636 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1344879AbhI3SwZ (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Thu, 30 Sep 2021 14:52:25 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 8244C61216;
+        Thu, 30 Sep 2021 18:50:35 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1633027842;
+        bh=sHuklxRhVNrOUIGACjRjjFQjjWujtmMEebA4SOO7XVI=;
+        h=From:To:Cc:Subject:Date:From;
+        b=uHnQO7KnOuN+F6Kg/VYMCkYNZKP/FQuRQKsHlQ02RSvOU+Lsr6a/Ejf3NJuypnQ0r
+         wgcHaC0oqgL3wh/+Bjpr7enKokEpGkilkhAcBEHhE9uLRLhpb0YgHbs+X+j4bqDpV7
+         0AkfKl3RUdJBxJT+ECt+6aVhpjwQ315nbX0A7Nb4a9ZuqQ7VSnVENanCiGErOWceKw
+         TlOjeEhAK0IhpTcaKezOnHkaHC7hBR/4sk1qUNqqo7JqlIbR9UE+BEQUtaXKIMytSU
+         2kYuIhxuTpWdfCtUUQdGYdGcDoSXL5vM5e4zMX86OIlLp0nscaVxPuacUtXLN3LJw1
+         +kT+1vHV0j00g==
+From:   Mike Rapoport <rppt@kernel.org>
+To:     linux-kernel@vger.kernel.org
+Cc:     Andrew Morton <akpm@linux-foundation.org>,
+        Christophe Leroy <christophe.leroy@csgroup.eu>,
+        Juergen Gross <jgross@suse.com>,
+        Linus Torvalds <torvalds@linux-foundation.org>,
+        Mike Rapoport <rppt@kernel.org>,
+        Mike Rapoport <rppt@linux.ibm.com>,
+        Shahab Vahedi <Shahab.Vahedi@synopsys.com>,
+        devicetree@vger.kernel.org, iommu@lists.linux-foundation.org,
+        kasan-dev@googlegroups.com, kvm@vger.kernel.org,
+        linux-alpha@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-efi@vger.kernel.org, linux-mips@vger.kernel.org,
+        linux-mm@kvack.org, linux-riscv@lists.infradead.org,
+        linux-s390@vger.kernel.org, linux-sh@vger.kernel.org,
+        linux-snps-arc@lists.infradead.org, linux-um@lists.infradead.org,
+        linux-usb@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
+        sparclinux@vger.kernel.org, xen-devel@lists.xenproject.org
+Subject: [PATCH v2 0/6] memblock: cleanup memblock_free interface
+Date:   Thu, 30 Sep 2021 21:50:25 +0300
+Message-Id: <20210930185031.18648-1-rppt@kernel.org>
+X-Mailer: git-send-email 2.28.0
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This is made possible by using the mmu-type property of the cpu node of
-the device tree.
+From: Mike Rapoport <rppt@linux.ibm.com>
 
-By default, the kernel will boot with 4-level page table if the hw supports
-it but it can be interesting for the user to select 3-level page table as
-it is less memory consuming and faster since it requires less memory
-accesses in case of a TLB miss.
+Hi,
 
-Signed-off-by: Alexandre Ghiti <alexandre.ghiti@canonical.com>
----
- arch/riscv/mm/init.c | 25 +++++++++++++++++++++++--
- 1 file changed, 23 insertions(+), 2 deletions(-)
+Following the discussion on [1] this is the fix for memblock freeing APIs
+mismatch. 
 
-diff --git a/arch/riscv/mm/init.c b/arch/riscv/mm/init.c
-index a304f2b3c178..676635f5d98a 100644
---- a/arch/riscv/mm/init.c
-+++ b/arch/riscv/mm/init.c
-@@ -641,10 +641,31 @@ static void __init disable_pgtable_l4(void)
-  * then read SATP to see if the configuration was taken into account
-  * meaning sv48 is supported.
-  */
--static __init void set_satp_mode(void)
-+static __init void set_satp_mode(uintptr_t dtb_pa)
- {
- 	u64 identity_satp, hw_satp;
- 	uintptr_t set_satp_mode_pmd;
-+	int cpus_node;
-+
-+	/* Check if the user asked for sv39 explicitly in the device tree */
-+	cpus_node = fdt_path_offset((void *)dtb_pa, "/cpus");
-+	if (cpus_node >= 0) {
-+		int node;
-+
-+		fdt_for_each_subnode(node, (void *)dtb_pa, cpus_node) {
-+			const char *mmu_type = fdt_getprop((void *)dtb_pa, node,
-+					"mmu-type", NULL);
-+			if (!mmu_type)
-+				continue;
-+
-+			if (!strcmp(mmu_type, "riscv,sv39")) {
-+				disable_pgtable_l4();
-+				return;
-+			}
-+
-+			break;
-+		}
-+	}
- 
- 	set_satp_mode_pmd = ((unsigned long)set_satp_mode) & PMD_MASK;
- 	create_pgd_mapping(early_pg_dir,
-@@ -802,7 +823,7 @@ asmlinkage void __init setup_vm(uintptr_t dtb_pa)
- #endif
- 
- #if defined(CONFIG_64BIT) && !defined(CONFIG_XIP_KERNEL)
--	set_satp_mode();
-+	set_satp_mode(dtb_pa);
- #endif
- 
- 	kernel_map.va_pa_offset = PAGE_OFFSET - kernel_map.phys_addr;
+The first patch is a cleanup of numa_distance allocation in arch_numa I've
+spotted during the conversion.
+The second patch is a fix for Xen memory freeing on some of the error
+paths.
+
+I agree with Christophe that doing step by step makes the thing easier to
+review, so the patches 3-6 do the actual cleanup step by step.
+
+This time I used stricter coccinelle scripts so that only straightforward
+uses would get converted.
+
+There still a couple of (void *) castings for the cases when a virtual
+address has unsigned long type rather than a pointer type, like e.g
+initrd_start.
+
+Since scripts/get_maintainer.pl returned more than 100 addresses I've
+trimmed the distribution list only to the relevant lists.
+
+Juergen and Shahab, I didn't keep your Reviewed-by because the patches are
+a bit different this time.
+
+v2:
+* split changes into several patches
+* use stricter coccinelle scripts 
+
+[1] https://lore.kernel.org/all/CAHk-=wj9k4LZTz+svCxLYs5Y1=+yKrbAUArH1+ghyG3OLd8VVg@mail.gmail.com
+
+Mike Rapoport (6):
+  arch_numa: simplify numa_distance allocation
+  xen/x86: free_p2m_page: use memblock_free_ptr() to free a virtual pointer
+  memblock: drop memblock_free_early_nid() and memblock_free_early()
+  memblock: stop aliasing __memblock_free_late with memblock_free_late
+  memblock: rename memblock_free to memblock_phys_free
+  memblock: use memblock_free for freeing virtual pointers
+
+ arch/alpha/kernel/core_irongate.c         |  2 +-
+ arch/arc/mm/init.c                        |  2 +-
+ arch/arm/mach-hisi/platmcpm.c             |  2 +-
+ arch/arm/mm/init.c                        |  2 +-
+ arch/arm64/mm/mmu.c                       |  4 ++--
+ arch/mips/mm/init.c                       |  2 +-
+ arch/mips/sgi-ip30/ip30-setup.c           |  6 +++---
+ arch/powerpc/kernel/dt_cpu_ftrs.c         |  4 ++--
+ arch/powerpc/kernel/paca.c                |  8 ++++----
+ arch/powerpc/kernel/setup-common.c        |  2 +-
+ arch/powerpc/kernel/setup_64.c            |  2 +-
+ arch/powerpc/platforms/powernv/pci-ioda.c |  2 +-
+ arch/powerpc/platforms/pseries/svm.c      |  3 +--
+ arch/riscv/kernel/setup.c                 |  4 ++--
+ arch/s390/kernel/setup.c                  |  8 ++++----
+ arch/s390/kernel/smp.c                    |  4 ++--
+ arch/s390/kernel/uv.c                     |  2 +-
+ arch/s390/mm/kasan_init.c                 |  2 +-
+ arch/sh/boards/mach-ap325rxa/setup.c      |  2 +-
+ arch/sh/boards/mach-ecovec24/setup.c      |  4 ++--
+ arch/sh/boards/mach-kfr2r09/setup.c       |  2 +-
+ arch/sh/boards/mach-migor/setup.c         |  2 +-
+ arch/sh/boards/mach-se/7724/setup.c       |  4 ++--
+ arch/sparc/kernel/smp_64.c                |  2 +-
+ arch/um/kernel/mem.c                      |  2 +-
+ arch/x86/kernel/setup.c                   |  4 ++--
+ arch/x86/kernel/setup_percpu.c            |  2 +-
+ arch/x86/mm/init.c                        |  2 +-
+ arch/x86/mm/kasan_init_64.c               |  4 ++--
+ arch/x86/mm/numa.c                        |  2 +-
+ arch/x86/mm/numa_emulation.c              |  2 +-
+ arch/x86/xen/mmu_pv.c                     |  6 +++---
+ arch/x86/xen/p2m.c                        |  2 +-
+ arch/x86/xen/setup.c                      |  6 +++---
+ drivers/base/arch_numa.c                  | 10 ++++------
+ drivers/firmware/efi/memmap.c             |  2 +-
+ drivers/macintosh/smu.c                   |  2 +-
+ drivers/of/kexec.c                        |  3 +--
+ drivers/of/of_reserved_mem.c              |  5 +++--
+ drivers/s390/char/sclp_early.c            |  2 +-
+ drivers/usb/early/xhci-dbc.c              | 10 +++++-----
+ drivers/xen/swiotlb-xen.c                 |  2 +-
+ include/linux/memblock.h                  | 23 +++--------------------
+ init/initramfs.c                          |  2 +-
+ init/main.c                               |  2 +-
+ kernel/dma/swiotlb.c                      |  2 +-
+ kernel/printk/printk.c                    |  4 ++--
+ lib/bootconfig.c                          |  2 +-
+ lib/cpumask.c                             |  2 +-
+ mm/cma.c                                  |  2 +-
+ mm/memblock.c                             | 22 +++++++++++-----------
+ mm/memory_hotplug.c                       |  2 +-
+ mm/percpu.c                               |  8 ++++----
+ mm/sparse.c                               |  2 +-
+ 54 files changed, 99 insertions(+), 119 deletions(-)
+
+
+base-commit: 5816b3e6577eaa676ceb00a848f0fd65fe2adc29
 -- 
-2.30.2
+2.28.0
 
