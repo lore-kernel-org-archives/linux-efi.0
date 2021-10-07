@@ -2,60 +2,61 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BBD09C433EF
-	for <linux-efi@archiver.kernel.org>; Thu,  7 Oct 2021 06:19:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4751CC43219
+	for <linux-efi@archiver.kernel.org>; Thu,  7 Oct 2021 06:19:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 978E66113E
-	for <linux-efi@archiver.kernel.org>; Thu,  7 Oct 2021 06:19:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2E67C6113E
+	for <linux-efi@archiver.kernel.org>; Thu,  7 Oct 2021 06:19:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240199AbhJGGVD (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        id S240240AbhJGGVD (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
         Thu, 7 Oct 2021 02:21:03 -0400
-Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:36734 "EHLO
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:36662 "EHLO
         mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S240203AbhJGGVC (ORCPT
+        by vger.kernel.org with ESMTP id S231797AbhJGGVC (ORCPT
         <rfc822;linux-efi@vger.kernel.org>); Thu, 7 Oct 2021 02:21:02 -0400
-Received: from pps.filterd (m0098410.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 1975douw019084;
-        Thu, 7 Oct 2021 02:18:45 -0400
+Received: from pps.filterd (m0098394.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 19766soG026300;
+        Thu, 7 Oct 2021 02:18:46 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
- : date : message-id : content-transfer-encoding : mime-version; s=pp1;
- bh=g3OfHoJPvrV8tRdPiXlhQT3CLKaqzhip7yaVidL+hG0=;
- b=e+VLBKQ2XO2evYBqYGqPDwEukY1vxt4yc1BIUmtDGkMQ6cL5YaLXmIMO/e7DB/Jf4DMD
- llVU1NbDQiaDejg18rvk9bD5V3llvjJ3wsVFqMElC8fQGT4z56LN6ZVdNEVPYG1jYlTB
- hnyO157xbnS9B0JqPqOs9oiX34fbB40/OeztohGOUEPFpXWGl5udUC6CiZVPDqCKbapZ
- hLCcfy2lEXwftMmLDmGoBlrlcWQKtEd15uAqJIIYRcqU00SwXXTNWycBEpzBWB63oqId
- V17qtGZwVqxKVGAxKak3KOp2tiZ0oWbvzMjUdet2chDWGBjJM7Hg6iEXODSW+mTbrxPv 2A== 
+ : date : message-id : in-reply-to : references : mime-version :
+ content-transfer-encoding; s=pp1;
+ bh=42jey/J7MkoU4a7hbVMgG0u/fh44icbwRuYrZCzqWoE=;
+ b=BsHkd3NmovE0xNUASjtmACNzQ+QnYTA68NY1HMghZdmOwwSho1FC+0Pbeb1NSJXycAsx
+ rAkG21gLv+WPRv5kVDf6++khWcQ24s7jQuAL6vfpJHvJCzFYrcaBt7+g2Q+ADkCaPMBI
+ Ej481iFlqOLCEMKKCW7+LIWqizbXwqJPeJU70/39lOvILu5cQfpsHwhsYBVKMUFUpCWz
+ 6Jkm8dMV1Fp0WN3+oy4Eco41yOVmstE6SKYQpzW5Ffw4hzMOiiSWZJA/RA5yHGmoPHWA
+ udChiY3s/c0JVcU9/72/UX2uBHkomkHOB17IIoEMlht43WZAINW9E0/EFJfRI4p2ZyF7 3Q== 
 Received: from pps.reinject (localhost [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 3bhp04eck6-1
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3bhsgpaddm-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 07 Oct 2021 02:18:46 -0400
+Received: from m0098394.ppops.net (m0098394.ppops.net [127.0.0.1])
+        by pps.reinject (8.16.0.43/8.16.0.43) with SMTP id 1976BuQ1021710;
+        Thu, 7 Oct 2021 02:18:45 -0400
+Received: from ppma01wdc.us.ibm.com (fd.55.37a9.ip4.static.sl-reverse.com [169.55.85.253])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3bhsgpadcv-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
         Thu, 07 Oct 2021 02:18:45 -0400
-Received: from m0098410.ppops.net (m0098410.ppops.net [127.0.0.1])
-        by pps.reinject (8.16.0.43/8.16.0.43) with SMTP id 1975wlwK017115;
-        Thu, 7 Oct 2021 02:18:44 -0400
-Received: from ppma01dal.us.ibm.com (83.d6.3fa9.ip4.static.sl-reverse.com [169.63.214.131])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 3bhp04ecjv-1
+Received: from pps.filterd (ppma01wdc.us.ibm.com [127.0.0.1])
+        by ppma01wdc.us.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 1976HsY8032334;
+        Thu, 7 Oct 2021 06:18:44 GMT
+Received: from b01cxnp23032.gho.pok.ibm.com (b01cxnp23032.gho.pok.ibm.com [9.57.198.27])
+        by ppma01wdc.us.ibm.com with ESMTP id 3bef2bsuey-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 07 Oct 2021 02:18:44 -0400
-Received: from pps.filterd (ppma01dal.us.ibm.com [127.0.0.1])
-        by ppma01dal.us.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 1976IEXJ026505;
-        Thu, 7 Oct 2021 06:18:43 GMT
-Received: from b01cxnp23034.gho.pok.ibm.com (b01cxnp23034.gho.pok.ibm.com [9.57.198.29])
-        by ppma01dal.us.ibm.com with ESMTP id 3bef2efmfe-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 07 Oct 2021 06:18:43 +0000
+        Thu, 07 Oct 2021 06:18:44 +0000
 Received: from b01ledav005.gho.pok.ibm.com (b01ledav005.gho.pok.ibm.com [9.57.199.110])
-        by b01cxnp23034.gho.pok.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 1976If7e41353714
+        by b01cxnp23032.gho.pok.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 1976IgPk53936470
         (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 7 Oct 2021 06:18:41 GMT
+        Thu, 7 Oct 2021 06:18:42 GMT
 Received: from b01ledav005.gho.pok.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 0FC19AE062;
-        Thu,  7 Oct 2021 06:18:41 +0000 (GMT)
+        by IMSVA (Postfix) with ESMTP id 58B81AE062;
+        Thu,  7 Oct 2021 06:18:42 +0000 (GMT)
 Received: from b01ledav005.gho.pok.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id AE71AAE05C;
-        Thu,  7 Oct 2021 06:18:40 +0000 (GMT)
+        by IMSVA (Postfix) with ESMTP id 0721EAE063;
+        Thu,  7 Oct 2021 06:18:42 +0000 (GMT)
 Received: from amdrome3.watson.ibm.com (unknown [9.2.130.16])
         by b01ledav005.gho.pok.ibm.com (Postfix) with ESMTP;
-        Thu,  7 Oct 2021 06:18:40 +0000 (GMT)
+        Thu,  7 Oct 2021 06:18:41 +0000 (GMT)
 From:   Dov Murik <dovmurik@linux.ibm.com>
 To:     linux-efi@vger.kernel.org
 Cc:     Dov Murik <dovmurik@linux.ibm.com>, Borislav Petkov <bp@suse.de>,
@@ -75,146 +76,156 @@ Cc:     Dov Murik <dovmurik@linux.ibm.com>, Borislav Petkov <bp@suse.de>,
         Daniele Buono <dbuono@linux.vnet.ibm.com>,
         linux-coco@lists.linux.dev, linux-security-module@vger.kernel.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v2 0/4] Allow access to confidential computing secret area in SEV guests
-Date:   Thu,  7 Oct 2021 06:18:34 +0000
-Message-Id: <20211007061838.1381129-1-dovmurik@linux.ibm.com>
+Subject: [PATCH v2 3/4] efi: Reserve confidential computing secret area
+Date:   Thu,  7 Oct 2021 06:18:37 +0000
+Message-Id: <20211007061838.1381129-4-dovmurik@linux.ibm.com>
 X-Mailer: git-send-email 2.25.1
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: vrzvuigXL_kjcBhWCQLVlf-tx_m249zl
-X-Proofpoint-ORIG-GUID: kFaosjDh9HkQJ35h7nn0vFc0USuGC6RD
-Content-Transfer-Encoding: 8bit
-X-Proofpoint-UnRewURL: 0 URL was un-rewritten
+In-Reply-To: <20211007061838.1381129-1-dovmurik@linux.ibm.com>
+References: <20211007061838.1381129-1-dovmurik@linux.ibm.com>
 MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-GUID: hZ96oJHV3vQGjRymjLpIbmcL8kOMJltl
+X-Proofpoint-ORIG-GUID: n3XjYuVTlvd4cF0KPusrhhj-yEbMPyTd
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.182.1,Aquarius:18.0.790,Hydra:6.0.391,FMLib:17.0.607.475
  definitions=2021-10-06_04,2021-10-07_01,2020-04-07_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 clxscore=1015
- lowpriorityscore=0 impostorscore=0 phishscore=0 mlxscore=0 suspectscore=0
- priorityscore=1501 mlxlogscore=999 spamscore=0 bulkscore=0 adultscore=0
- malwarescore=0 classifier=spam adjust=0 reason=mlx scancount=1
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 bulkscore=0 spamscore=0
+ malwarescore=0 suspectscore=0 mlxscore=0 phishscore=0 adultscore=0
+ clxscore=1015 priorityscore=1501 mlxlogscore=999 lowpriorityscore=0
+ impostorscore=0 classifier=spam adjust=0 reason=mlx scancount=1
  engine=8.12.0-2109230001 definitions=main-2110070039
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Confidential computing (coco) hardware such as AMD SEV (Secure Encrypted
-Virtualization) allows guest owners to inject secrets into the VMs
-memory without the host/hypervisor being able to read them.  In SEV,
-secret injection is performed early in the VM launch process, before the
-guest starts running.
+When efi-stub copies an EFI-provided confidential computing (coco)
+secret area, reserve that memory block for future use within the kernel.
 
-OVMF already reserves designated area for secret injection (in its
-AmdSev package; see edk2 commit 01726b6d23d4 "OvmfPkg/AmdSev: Expose the
-Sev Secret area using a configuration table" [1]), but the secrets were
-not available in the guest kernel.
-
-The patch series copies the secrets from the EFI-provided memory to
-kernel reserved memory, and optionally exposes them to userspace via
-securityfs using a new sev_secret kernel module.
-
-Patch 1 exports the clean_cache_range function which will be used in
-patch 4.  Patch 2 in efi/libstub copies the secret area from the EFI
-memory to specially allocated memory; patch 3 reserves that
-memory block.  Finally, patch 4 introduces the new sev_secret module
-that exposes the content of the secret entries as securityfs files, and
-allows clearing out secrets with a file unlink interface.
-
-As a usage example, consider a guest performing computations on
-encrypted files.  The Guest Owner provides the decryption key (= secret)
-using the secret injection mechanism.  The guest application reads the
-secret from the sev_secret filesystem and proceeds to decrypt the files
-into memory and then performs the needed computations on the content.
-
-In this example, the host can't read the files from the disk image
-because they are encrypted.  Host can't read the decryption key because
-it is passed using the secret injection mechanism (= secure channel).
-Host can't read the decrypted content from memory because it's a
-confidential (memory-encrypted) guest.
-
-This has been tested with AMD SEV and SEV-ES guests, but the kernel side
-of handling the secret area has no SEV-specific dependencies, and
-therefore might be usable (perhaps with minor changes) for any
-confidential computing hardware that can publish the secret area via the
-standard EFI config table entry.
-
-Here is a simple example for usage of the sev_secret module in a guest
-to which a secret are with 4 secrets was injected during launch:
-
-# modprobe sev_secret
-# ls -la /sys/kernel/security/coco/sev_secret
-total 0
-drwxr-xr-x 2 root root 0 Jun 28 11:54 .
-drwxr-xr-x 3 root root 0 Jun 28 11:54 ..
--r--r----- 1 root root 0 Jun 28 11:54 736870e5-84f0-4973-92ec-06879ce3da0b
--r--r----- 1 root root 0 Jun 28 11:54 83c83f7f-1356-4975-8b7e-d3a0b54312c6
--r--r----- 1 root root 0 Jun 28 11:54 9553f55d-3da2-43ee-ab5d-ff17f78864d2
--r--r----- 1 root root 0 Jun 28 11:54 e6f5a162-d67f-4750-a67c-5d065f2a9910
-
-# xxd /sys/kernel/security/coco/sev_secret/e6f5a162-d67f-4750-a67c-5d065f2a9910
-00000000: 7468 6573 652d 6172 652d 7468 652d 6b61  these-are-the-ka
-00000010: 7461 2d73 6563 7265 7473 0001 0203 0405  ta-secrets......
-00000020: 0607                                     ..
-
-# rm /sys/kernel/security/coco/sev_secret/e6f5a162-d67f-4750-a67c-5d065f2a9910
-
-# ls -la /sys/kernel/security/coco/sev_secret
-total 0
-drwxr-xr-x 2 root root 0 Jun 28 11:55 .
-drwxr-xr-x 3 root root 0 Jun 28 11:54 ..
--r--r----- 1 root root 0 Jun 28 11:54 736870e5-84f0-4973-92ec-06879ce3da0b
--r--r----- 1 root root 0 Jun 28 11:54 83c83f7f-1356-4975-8b7e-d3a0b54312c6
--r--r----- 1 root root 0 Jun 28 11:54 9553f55d-3da2-43ee-ab5d-ff17f78864d2
-
-
-[1] https://github.com/tianocore/edk2/commit/01726b6d23d4
-
+Signed-off-by: Dov Murik <dovmurik@linux.ibm.com>
 ---
-
-v2 changes:
- - Export clean_cache_range()
- - When deleteing a secret, call clean_cache_range() after explicit_memzero
- - Add Documentation/ABI/testing/securityfs-coco-sev_secret
-
-v1: https://lore.kernel.org/linux-coco/20210809190157.279332-1-dovmurik@linux.ibm.com/
-
-RFC: https://lore.kernel.org/linux-coco/20210628183431.953934-1-dovmurik@linux.ibm.com/
-
-
-Dov Murik (4):
-  x86: Export clean_cache_range()
-  efi/libstub: Copy confidential computing secret area
-  efi: Reserve confidential computing secret area
-  virt: Add sev_secret module to expose confidential computing secrets
-
- .../ABI/testing/securityfs-coco-sev_secret    |  49 +++
- arch/x86/include/asm/cacheflush.h             |   1 +
- arch/x86/lib/usercopy_64.c                    |  21 --
- arch/x86/mm/pat/set_memory.c                  |  30 ++
- arch/x86/platform/efi/efi.c                   |   1 +
- drivers/firmware/efi/Makefile                 |   2 +-
- drivers/firmware/efi/coco.c                   |  41 +++
- drivers/firmware/efi/efi.c                    |   3 +
- drivers/firmware/efi/libstub/Makefile         |   2 +-
- drivers/firmware/efi/libstub/coco.c           |  68 ++++
- drivers/firmware/efi/libstub/efi-stub.c       |   2 +
- drivers/firmware/efi/libstub/efistub.h        |   2 +
- drivers/firmware/efi/libstub/x86-stub.c       |   2 +
- drivers/virt/Kconfig                          |   3 +
- drivers/virt/Makefile                         |   1 +
- drivers/virt/coco/sev_secret/Kconfig          |  11 +
- drivers/virt/coco/sev_secret/Makefile         |   2 +
- drivers/virt/coco/sev_secret/sev_secret.c     | 320 ++++++++++++++++++
- include/linux/efi.h                           |   9 +
- 19 files changed, 547 insertions(+), 23 deletions(-)
- create mode 100644 Documentation/ABI/testing/securityfs-coco-sev_secret
+ arch/x86/platform/efi/efi.c   |  1 +
+ drivers/firmware/efi/Makefile |  2 +-
+ drivers/firmware/efi/coco.c   | 41 +++++++++++++++++++++++++++++++++++
+ drivers/firmware/efi/efi.c    |  3 +++
+ include/linux/efi.h           |  3 +++
+ 5 files changed, 49 insertions(+), 1 deletion(-)
  create mode 100644 drivers/firmware/efi/coco.c
- create mode 100644 drivers/firmware/efi/libstub/coco.c
- create mode 100644 drivers/virt/coco/sev_secret/Kconfig
- create mode 100644 drivers/virt/coco/sev_secret/Makefile
- create mode 100644 drivers/virt/coco/sev_secret/sev_secret.c
 
-
-base-commit: 60a9483534ed0d99090a2ee1d4bb0b8179195f51
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 147c30a81f15..35e082e5f603 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -93,6 +93,7 @@ static const unsigned long * const efi_tables[] = {
+ #ifdef CONFIG_LOAD_UEFI_KEYS
+ 	&efi.mokvar_table,
+ #endif
++	&efi.coco_secret,
+ };
+ 
+ u64 efi_setup;		/* efi setup_data physical address */
+diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+index c02ff25dd477..bfd35294703e 100644
+--- a/drivers/firmware/efi/Makefile
++++ b/drivers/firmware/efi/Makefile
+@@ -12,7 +12,7 @@ KASAN_SANITIZE_runtime-wrappers.o	:= n
+ 
+ obj-$(CONFIG_ACPI_BGRT) 		+= efi-bgrt.o
+ obj-$(CONFIG_EFI)			+= efi.o vars.o reboot.o memattr.o tpm.o
+-obj-$(CONFIG_EFI)			+= memmap.o
++obj-$(CONFIG_EFI)			+= memmap.o coco.o
+ ifneq ($(CONFIG_EFI_CAPSULE_LOADER),)
+ obj-$(CONFIG_EFI)			+= capsule.o
+ endif
+diff --git a/drivers/firmware/efi/coco.c b/drivers/firmware/efi/coco.c
+new file mode 100644
+index 000000000000..42f477d6188c
+--- /dev/null
++++ b/drivers/firmware/efi/coco.c
+@@ -0,0 +1,41 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Confidential computing (coco) secret area handling
++ *
++ * Copyright (C) 2021 IBM Corporation
++ * Author: Dov Murik <dovmurik@linux.ibm.com>
++ */
++
++#define pr_fmt(fmt) "efi: " fmt
++
++#include <linux/efi.h>
++#include <linux/init.h>
++#include <linux/memblock.h>
++#include <asm/early_ioremap.h>
++
++/*
++ * Reserve the confidential computing secret area memory
++ */
++int __init efi_coco_secret_area_reserve(void)
++{
++	struct linux_efi_coco_secret_area *secret_area;
++	unsigned long secret_area_size;
++
++	if (efi.coco_secret == EFI_INVALID_TABLE_ADDR)
++		return 0;
++
++	secret_area = early_memremap(efi.coco_secret, sizeof(*secret_area));
++	if (!secret_area) {
++		pr_err("Failed to map confidential computing secret area\n");
++		efi.coco_secret = EFI_INVALID_TABLE_ADDR;
++		return -ENOMEM;
++	}
++
++	secret_area_size = sizeof(*secret_area) + secret_area->size;
++	memblock_reserve(efi.coco_secret, secret_area_size);
++
++	pr_info("Reserved memory of EFI-provided confidential computing secret area");
++
++	early_memunmap(secret_area, sizeof(*secret_area));
++	return 0;
++}
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 847f33ffc4ae..07e17ad225a6 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -526,6 +526,7 @@ static const efi_config_table_type_t common_tables[] __initconst = {
+ #ifdef CONFIG_LOAD_UEFI_KEYS
+ 	{LINUX_EFI_MOK_VARIABLE_TABLE_GUID,	&efi.mokvar_table,	"MOKvar"	},
+ #endif
++	{LINUX_EFI_COCO_SECRET_AREA_GUID,	&efi.coco_secret,	"CocoSecret"	},
+ 	{},
+ };
+ 
+@@ -613,6 +614,8 @@ int __init efi_config_parse_tables(const efi_config_table_t *config_tables,
+ 
+ 	efi_tpm_eventlog_init();
+ 
++	efi_coco_secret_area_reserve();
++
+ 	if (mem_reserve != EFI_INVALID_TABLE_ADDR) {
+ 		unsigned long prsv = mem_reserve;
+ 
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 9021dd521302..e86600af5dfd 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -550,6 +550,7 @@ extern struct efi {
+ 	unsigned long			tpm_log;		/* TPM2 Event Log table */
+ 	unsigned long			tpm_final_log;		/* TPM2 Final Events Log table */
+ 	unsigned long			mokvar_table;		/* MOK variable config table */
++	unsigned long			coco_secret;		/* Confidential computing secret table */
+ 
+ 	efi_get_time_t			*get_time;
+ 	efi_set_time_t			*set_time;
+@@ -1189,6 +1190,8 @@ extern int efi_tpm_final_log_size;
+ 
+ extern unsigned long rci2_table_phys;
+ 
++extern int efi_coco_secret_area_reserve(void);
++
+ /*
+  * efi_runtime_service() function identifiers.
+  * "NONE" is used by efi_recover_from_page_fault() to check if the page
 -- 
 2.25.1
 
