@@ -2,44 +2,44 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73C6CC433EF
-	for <linux-efi@archiver.kernel.org>; Fri,  8 Oct 2021 18:06:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AAA44C43219
+	for <linux-efi@archiver.kernel.org>; Fri,  8 Oct 2021 18:06:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 578C361263
-	for <linux-efi@archiver.kernel.org>; Fri,  8 Oct 2021 18:06:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 960E161039
+	for <linux-efi@archiver.kernel.org>; Fri,  8 Oct 2021 18:06:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242856AbhJHSIS (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 8 Oct 2021 14:08:18 -0400
-Received: from mail-bn8nam11on2079.outbound.protection.outlook.com ([40.107.236.79]:14433
-        "EHLO NAM11-BN8-obe.outbound.protection.outlook.com"
+        id S242978AbhJHSIW (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 8 Oct 2021 14:08:22 -0400
+Received: from mail-bn8nam12on2055.outbound.protection.outlook.com ([40.107.237.55]:7932
+        "EHLO NAM12-BN8-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S240772AbhJHSHj (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 8 Oct 2021 14:07:39 -0400
+        id S241072AbhJHSHv (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 8 Oct 2021 14:07:51 -0400
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=F1WirVqJYGVffunepYHan48fYPi86l99QcHsbYO7z7F3/+Ebslcl1zjWigzkcifMhxdzIko9YyDw6rHjNTyecgZ78gNuUMgv5nNOFttTtuvnl6aLt3dnl7nwWyF8SdFL4+RJqz/yEn6T24zoMh/W1YsN7hCg/rLoF4QdIEiOwVxTD9es6O0XAmyvIb3LIb2RviOzs57n6mYBCOOJ3Z4ZCHN2mRYCiyXpyAVSESSJa02dYquhQx1Pw5aQJ5ILQ22hVQxNbx25/XR38NX0bpdaj9dORxVcJa4dvkjJiQ7v0vQ0IrCtrWaGmBMQNoIMxH9E41IWaEURaUDixiUXfKbkFA==
+ b=CB9Auqcrhgb7JCeGiUNFiCIucbGFwldZIaYeFwU/4ykyF2+rLPyAcGWPWOBfs7i7ZIkyjkGRIL16snTwi3swBpIJNffCr8Z9LX6KOMXgvEFA8hJUwr9CWEuoD6O2JV7z3Ud0SOpkdL1lIzBa25kbNeANH6kbwY6hiFOL4UgL1FZrm/Up04F53r56yKiwpXXyU/YsmagmxJH0ziv4v/+7QXJdcx/H2b52m2I9MDHDpmtMyBXvnnKzLe7/8ayDYU1gIDYlwrXQnOFMnmfCtwsUDJqvtGDgrQxCYV/t96B7GSDCUy6bEgW4zzaaY4DBLk10eWywHqq8HT5fpYM1KDR4sw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=tVZzYfFIuxr09TBb5rd/Y8bwnOVMlPMxvJq6EaFo/0A=;
- b=f1Qsko1k0c3kA/gjXPP+8oj9VxMlN1aMNIs+HPGkemDJmC3vPqOPnEyarVcJvj9dPvk0iOmQfVp7WnQx2ftIOT3ftZsEA6/dQpVea8aXDbrJvsIKwDo76h5OlD6PLsv0zmmSn47kTbpSgTn4elXy9semmU8OKM1qhAtCsvCd3hWoSzbDuQjEwztywZKwat3/AcuKdejIzjqX+fZxSUDRlD4V1qvfyby9ZcjWD3MGPEskjc7MHbqh0xxFkEQOO5Jss5+CZwX1a9MeKMPLaGR0Jm4KpGKs6OVz6JCvRKhPndsjtEThYwQtDOn6/Bps2RtXY7PLD/c69hiNl4HnCtyZ9Q==
+ bh=ezeScwAExfss+B30zK2SpLkAtXrXs7MwtvPe1Myqw6M=;
+ b=TJOOcvxULSp1QoFjYuQ/uxydDzMZp85ISE5R1ckYQ9HBFp+DIeRwKUh63+gLl5QyrWnlP2JhufIDktS82ZGTygMUaWNMXiGDb5y8Kvxd14lX07Y1rKtk2wVuXoScY9G0gT6qFqyrXA0RVBR7299Mw2i04OR+d0WG3qYxLbMQuL5sbuAMXIBZN5f3ymP+oqhYKepSfARhNqJNpgOi6k4EnQA2dTk3nXJSEYs6O5A1N822RKUcq26oCI8V0DwHP7O7hl/pVAxFm+yPe9bc0kxxeZObMlsqFPj8Ll29QMKStXNbrnB86DkZgkTWU1NiDTYzSyKqXVCnzVyNCJepBMD6UA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
  165.204.84.17) smtp.rcpttodomain=kernel.org smtp.mailfrom=amd.com; dmarc=pass
  (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
  dkim=none (message not signed); arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=tVZzYfFIuxr09TBb5rd/Y8bwnOVMlPMxvJq6EaFo/0A=;
- b=PwG2oZ/wyvVSo2NwVXHhwp9DdfRlrag6u8cLzNq6PYCxxEf5ElOWGNAYnruZwCAyy5dtY4bLn1v7gi9VL+P7ufzAwhGKSHyQk8yk6U2p3wO2r5BDNRP4Mg1pNSrfJ9NvWmLRQXurCew62QsgCn2XKX7lrC2mNBKfogwBySK2Ruo=
-Received: from MWHPR15CA0058.namprd15.prod.outlook.com (2603:10b6:301:4c::20)
- by MN2PR12MB4127.namprd12.prod.outlook.com (2603:10b6:208:1d1::24) with
+ bh=ezeScwAExfss+B30zK2SpLkAtXrXs7MwtvPe1Myqw6M=;
+ b=gIe0RU6ZIZY6cfd1ZEia1z+rGSS2MrGChBQh3CjUMfKHXWqW0vhHOrfjDZjYiRgchh6hkvTmCYzaW+97W7oxO+VlJVxb1+tJ7hmXPp1/XBi0K1hfQ79f46PbF23NJ406Tja9qMWH8kb2OYsZ2fHS9HOykMpG8ztS/v8LwTThu7A=
+Received: from MWHPR22CA0041.namprd22.prod.outlook.com (2603:10b6:300:69::27)
+ by CH2PR12MB4937.namprd12.prod.outlook.com (2603:10b6:610:64::16) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4587.19; Fri, 8 Oct
- 2021 18:05:39 +0000
-Received: from CO1NAM11FT048.eop-nam11.prod.protection.outlook.com
- (2603:10b6:301:4c:cafe::34) by MWHPR15CA0058.outlook.office365.com
- (2603:10b6:301:4c::20) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4587.20 via Frontend
- Transport; Fri, 8 Oct 2021 18:05:38 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4587.20; Fri, 8 Oct
+ 2021 18:05:52 +0000
+Received: from CO1NAM11FT028.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:300:69:cafe::46) by MWHPR22CA0041.outlook.office365.com
+ (2603:10b6:300:69::27) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4587.18 via Frontend
+ Transport; Fri, 8 Oct 2021 18:05:51 +0000
 X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
  smtp.mailfrom=amd.com; kernel.org; dkim=none (message not signed)
  header.d=none;kernel.org; dmarc=pass action=none header.from=amd.com;
@@ -47,13 +47,13 @@ Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
  165.204.84.17 as permitted sender) receiver=protection.outlook.com;
  client-ip=165.204.84.17; helo=SATLEXMB04.amd.com;
 Received: from SATLEXMB04.amd.com (165.204.84.17) by
- CO1NAM11FT048.mail.protection.outlook.com (10.13.175.148) with Microsoft SMTP
+ CO1NAM11FT028.mail.protection.outlook.com (10.13.175.214) with Microsoft SMTP
  Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.4587.18 via Frontend Transport; Fri, 8 Oct 2021 18:05:38 +0000
+ 15.20.4587.18 via Frontend Transport; Fri, 8 Oct 2021 18:05:51 +0000
 Received: from sbrijesh-desktop.amd.com (10.180.168.240) by SATLEXMB04.amd.com
  (10.181.40.145) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2308.8; Fri, 8 Oct 2021
- 13:05:35 -0500
+ 13:05:47 -0500
 From:   Brijesh Singh <brijesh.singh@amd.com>
 To:     <x86@kernel.org>, <linux-kernel@vger.kernel.org>,
         <kvm@vger.kernel.org>, <linux-efi@vger.kernel.org>,
@@ -83,11 +83,10 @@ CC:     Thomas Gleixner <tglx@linutronix.de>,
         "Dr . David Alan Gilbert" <dgilbert@redhat.com>,
         <tony.luck@intel.com>, <marcorr@google.com>,
         <sathyanarayanan.kuppuswamy@linux.intel.com>,
-        Borislav Petkov <bp@suse.de>,
         Brijesh Singh <brijesh.singh@amd.com>
-Subject: [PATCH v6 15/42] x86/sev: Remove do_early_exception() forward declarations
-Date:   Fri, 8 Oct 2021 13:04:26 -0500
-Message-ID: <20211008180453.462291-16-brijesh.singh@amd.com>
+Subject: [PATCH v6 22/42] KVM: SVM: Create a separate mapping for the GHCB save area
+Date:   Fri, 8 Oct 2021 13:04:33 -0500
+Message-ID: <20211008180453.462291-23-brijesh.singh@amd.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20211008180453.462291-1-brijesh.singh@amd.com>
 References: <20211008180453.462291-1-brijesh.singh@amd.com>
@@ -99,73 +98,128 @@ X-ClientProxiedBy: SATLEXMB03.amd.com (10.181.40.144) To SATLEXMB04.amd.com
  (10.181.40.145)
 X-EOPAttributedMessage: 0
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 797cb669-f0b0-431e-579e-08d98a863be6
-X-MS-TrafficTypeDiagnostic: MN2PR12MB4127:
-X-Microsoft-Antispam-PRVS: <MN2PR12MB41273B504980F168B9146333E5B29@MN2PR12MB4127.namprd12.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:3513;
+X-MS-Office365-Filtering-Correlation-Id: 96db19f3-0c7a-41a8-72f9-08d98a864386
+X-MS-TrafficTypeDiagnostic: CH2PR12MB4937:
+X-Microsoft-Antispam-PRVS: <CH2PR12MB4937539DDC709A648235A738E5B29@CH2PR12MB4937.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:5797;
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: XVg3X9nkc5PhDrYPzU265xE3EK8yofJTpx3ZrYl1Zsk0FHvbAgKjqytZOg6ZtQioMTiv37bLVliZMIm7SM0N+tV60VJr9FUsssJd1+KHTIY9+gsQfYA3Mko3OcTzC0vDXTJDKU95LZZVzSkn0UmEJ9M45hHr629RppAsMSPPwgx+gIYsmuMnUH4JzI3KeXvm9RB+gH8r0Nyt23z6858wzRPO/2ZjLKoiXJwUtLdi6eZaEfH2yrboGBkZyk3EccEFRgAZkF/seG+uanm5gkZ0yfFTsnWMg6PmDuYPBbBv20+ez0hJhy4BHEkNDTVba5pdZVa4/2LstPUHX+sj7ECE3hccSZueyEIiOUH3i4PXcPLhczdgZSCw4W3e4XoI4S54g+HdhaM/JJz9PQw53kbLpm/tHX8tuyAKPTz6HD+f1sUwkFCdvvVUUoAmrhw6jHb5Oh+I+QcLOa4iIl7NKjvqL6ulVm+ZT+S/XJy7mQ6tBfG4rwAcBQSo6CE/zYDXhJeHaBXiIRzKtXWmF+kkxZg72G0zz6sjhQxhl0qefEtCmUZZH4EUe6N3gj7zxwYEwfnQodf6bK8yNLJYaTQYc5L5o78L+yADTl7764ooQyo7sGw2xpGVS/H5qum+Wf0BSyObjsDKVyKDkpIz5cfFMNmUxp2vfHznTdVViqurvXJnY8cE8v3XWBm/Ev8QvCNa4MM4eKxgTJj+Q5B7eDwumOgqnM9+2nqsTKJqfxxhfwqa5rWo0czS9XVVMMRxYwk2npvh
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(46966006)(36840700001)(1076003)(336012)(426003)(47076005)(36756003)(81166007)(356005)(82310400003)(83380400001)(2906002)(2616005)(6666004)(36860700001)(316002)(70206006)(86362001)(16526019)(5660300002)(26005)(8936002)(186003)(7696005)(4326008)(44832011)(54906003)(70586007)(7416002)(7406005)(8676002)(110136005)(508600001)(36900700001)(2101003);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: ftWy88xQ7tmCWZFMyQQSZKMQdSZwEH9ZGO5D7rHstWiwhOeP/PLyxpy9615qqqI/yIrU/cFlBRT1dC98uynXWJ/tMmSxBcaXOecJ5VfuW1R0RiZ/NQDFliieq44CAULlD2GZxi9gwGa5hlLZzU5nPm5oO0BSHWokVRFxpqn1oOGX/y5/KIVnPsbkVBd1xOWO1Iwycq6w/g89YVlB3QkUSfcMhJR5Il9xcMX38bcIo/WRug7OfhKuQlviykgTkAunKmvzgQ/QJMVu3oy4ndvvCi8RU8Zfa9IdHzNrXWV+xko9nqHDvsNumOQe1EGPbhqxb2mggRtwN84AU9AKhD+4wORoJ1FSUOQvQBCup+9JFvKoh+VkiU3wgN1aGeNeu6NDawLZqfRqjrJmdyGHr9fYV9UD/cFpvfB2Iid3SeGwg9dJHjTzAvy6FYTzBpuU3ape2hlDxJRyiULpvbFMOwzA0boRgl+fB1+4n8qXs5KlLuxPQ809YUO0MucWfZtyWsXykbc/X3Co/Q3UZp6xApMVbcj7SfJWvt3vfu2Z3/h6kGUPURuDHwMySQ+xY7ENe5BzOvGiM0PkJpLYa5MSD3ELN7e2umO/3cO/cFu5N/WLgsJg0i6i+a/s+knmeaBaOhNbO3Ow42b0JdELU5MM+CIvw6GdOz81suRhgyYMljETpGROl9InDm+L6lkI7P3wy44c6t2tzrTZutftPGafy/G/I9Lp0fu3Gw8lLBMT2kH0VNvNrxgKF5+ilTfi12sVO01p
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(46966006)(36840700001)(186003)(110136005)(54906003)(7406005)(1076003)(16526019)(7416002)(7696005)(70206006)(26005)(8936002)(356005)(2906002)(70586007)(81166007)(6666004)(4326008)(44832011)(83380400001)(426003)(5660300002)(508600001)(316002)(2616005)(86362001)(336012)(8676002)(36860700001)(47076005)(36756003)(82310400003)(36900700001)(2101003);DIR:OUT;SFP:1101;
 X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 08 Oct 2021 18:05:38.3308
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 08 Oct 2021 18:05:51.1122
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 797cb669-f0b0-431e-579e-08d98a863be6
+X-MS-Exchange-CrossTenant-Network-Message-Id: 96db19f3-0c7a-41a8-72f9-08d98a864386
 X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
 X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource: CO1NAM11FT048.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthSource: CO1NAM11FT028.eop-nam11.prod.protection.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR12MB4127
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH2PR12MB4937
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Borislav Petkov <bp@suse.de>
+From: Tom Lendacky <thomas.lendacky@amd.com>
 
-There's a perfectly fine prototype in the asm/setup.h header. Use it.
+The initial implementation of the GHCB spec was based on trying to keep
+the register state offsets the same relative to the VM save area. However,
+the save area for SEV-ES has changed within the hardware causing the
+relation between the SEV-ES save area to change relative to the GHCB save
+area.
 
-No functional changes.
+This is the second step in defining the multiple save areas to keep them
+separate and ensuring proper operation amongst the different types of
+guests. Create a GHCB save area that matches the GHCB specification.
 
-Signed-off-by: Borislav Petkov <bp@suse.de>
+Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
 ---
- arch/x86/kernel/sev.c | 7 +------
- 1 file changed, 1 insertion(+), 6 deletions(-)
+ arch/x86/include/asm/svm.h | 48 +++++++++++++++++++++++++++++++++++---
+ 1 file changed, 45 insertions(+), 3 deletions(-)
 
-diff --git a/arch/x86/kernel/sev.c b/arch/x86/kernel/sev.c
-index 4c891d5d9651..ad3fefb741e1 100644
---- a/arch/x86/kernel/sev.c
-+++ b/arch/x86/kernel/sev.c
-@@ -26,6 +26,7 @@
- #include <asm/fpu/internal.h>
- #include <asm/processor.h>
- #include <asm/realmode.h>
-+#include <asm/setup.h>
- #include <asm/traps.h>
- #include <asm/svm.h>
- #include <asm/smp.h>
-@@ -93,9 +94,6 @@ struct ghcb_state {
- static DEFINE_PER_CPU(struct sev_es_runtime_data*, runtime_data);
- DEFINE_STATIC_KEY_FALSE(sev_es_enable_key);
+diff --git a/arch/x86/include/asm/svm.h b/arch/x86/include/asm/svm.h
+index 0df489a70945..4a4de2454ca3 100644
+--- a/arch/x86/include/asm/svm.h
++++ b/arch/x86/include/asm/svm.h
+@@ -354,9 +354,49 @@ struct sev_es_save_area {
+ 	u64 x87_state_gpa;
+ } __packed;
  
--/* Needed in vc_early_forward_exception */
--void do_early_exception(struct pt_regs *regs, int trapnr);
--
- static __always_inline bool on_vc_stack(struct pt_regs *regs)
- {
- 	unsigned long sp = regs->sp;
-@@ -167,9 +165,6 @@ void noinstr __sev_es_ist_exit(void)
- 	this_cpu_write(cpu_tss_rw.x86_tss.ist[IST_INDEX_VC], *(unsigned long *)ist);
- }
++struct ghcb_save_area {
++	u8 reserved_1[203];
++	u8 cpl;
++	u8 reserved_2[116];
++	u64 xss;
++	u8 reserved_3[24];
++	u64 dr7;
++	u8 reserved_4[16];
++	u64 rip;
++	u8 reserved_5[88];
++	u64 rsp;
++	u8 reserved_6[24];
++	u64 rax;
++	u8 reserved_7[264];
++	u64 rcx;
++	u64 rdx;
++	u64 rbx;
++	u8 reserved_8[8];
++	u64 rbp;
++	u64 rsi;
++	u64 rdi;
++	u64 r8;
++	u64 r9;
++	u64 r10;
++	u64 r11;
++	u64 r12;
++	u64 r13;
++	u64 r14;
++	u64 r15;
++	u8 reserved_9[16];
++	u64 sw_exit_code;
++	u64 sw_exit_info_1;
++	u64 sw_exit_info_2;
++	u64 sw_scratch;
++	u8 reserved_10[56];
++	u64 xcr0;
++	u8 valid_bitmap[16];
++	u64 x87_state_gpa;
++} __packed;
++
+ struct ghcb {
+-	struct sev_es_save_area save;
+-	u8 reserved_save[2048 - sizeof(struct sev_es_save_area)];
++	struct ghcb_save_area save;
++	u8 reserved_save[2048 - sizeof(struct ghcb_save_area)];
  
--/* Needed in vc_early_forward_exception */
--void do_early_exception(struct pt_regs *regs, int trapnr);
--
- static inline u64 sev_es_rd_ghcb_msr(void)
+ 	u8 shared_buffer[2032];
+ 
+@@ -367,6 +407,7 @@ struct ghcb {
+ 
+ 
+ #define EXPECTED_VMCB_SAVE_AREA_SIZE		740
++#define EXPECTED_GHCB_SAVE_AREA_SIZE		1032
+ #define EXPECTED_SEV_ES_SAVE_AREA_SIZE		1032
+ #define EXPECTED_VMCB_CONTROL_AREA_SIZE		1024
+ #define EXPECTED_GHCB_SIZE			PAGE_SIZE
+@@ -374,6 +415,7 @@ struct ghcb {
+ static inline void __unused_size_checks(void)
  {
- 	return __rdmsr(MSR_AMD64_SEV_ES_GHCB);
+ 	BUILD_BUG_ON(sizeof(struct vmcb_save_area)	!= EXPECTED_VMCB_SAVE_AREA_SIZE);
++	BUILD_BUG_ON(sizeof(struct ghcb_save_area)	!= EXPECTED_GHCB_SAVE_AREA_SIZE);
+ 	BUILD_BUG_ON(sizeof(struct sev_es_save_area)	!= EXPECTED_SEV_ES_SAVE_AREA_SIZE);
+ 	BUILD_BUG_ON(sizeof(struct vmcb_control_area)	!= EXPECTED_VMCB_CONTROL_AREA_SIZE);
+ 	BUILD_BUG_ON(sizeof(struct ghcb)		!= EXPECTED_GHCB_SIZE);
+@@ -444,7 +486,7 @@ struct vmcb {
+ /* GHCB Accessor functions */
+ 
+ #define GHCB_BITMAP_IDX(field)							\
+-	(offsetof(struct sev_es_save_area, field) / sizeof(u64))
++	(offsetof(struct ghcb_save_area, field) / sizeof(u64))
+ 
+ #define DEFINE_GHCB_ACCESSORS(field)						\
+ 	static inline bool ghcb_##field##_is_valid(const struct ghcb *ghcb)	\
 -- 
 2.25.1
 
