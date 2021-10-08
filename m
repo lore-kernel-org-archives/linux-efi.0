@@ -2,44 +2,44 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B4CD7C433FE
-	for <linux-efi@archiver.kernel.org>; Fri,  8 Oct 2021 18:07:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2A941C433EF
+	for <linux-efi@archiver.kernel.org>; Fri,  8 Oct 2021 18:07:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 995F361183
-	for <linux-efi@archiver.kernel.org>; Fri,  8 Oct 2021 18:07:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 177B3611C3
+	for <linux-efi@archiver.kernel.org>; Fri,  8 Oct 2021 18:07:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243803AbhJHSJn (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 8 Oct 2021 14:09:43 -0400
-Received: from mail-bn8nam12on2066.outbound.protection.outlook.com ([40.107.237.66]:64768
+        id S243820AbhJHSJo (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 8 Oct 2021 14:09:44 -0400
+Received: from mail-bn8nam12on2069.outbound.protection.outlook.com ([40.107.237.69]:11104
         "EHLO NAM12-BN8-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S243010AbhJHSIX (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        id S242993AbhJHSIX (ORCPT <rfc822;linux-efi@vger.kernel.org>);
         Fri, 8 Oct 2021 14:08:23 -0400
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=cyvw4sqICaf5MneBcAigpdviHLE7RFpt+MSOGbAR/Tyh3URLjUQpksOGs0pNakcvAoaRRQ976Wo/D1duIcW46j5kySkp7f6+tGtumm3LgFgFyRC0Ogh/txWDgY9ZJAopWpkBmzaChQkvW1SYqh2dKF6s7MdreQz03nu4oaL/22afqZwSYEYxe6LJj2+Bo7vk96Lpy6Swj1HwbVXnKTfFJaRx6yQ7xclm0dR2rcjMi/poA0Urg/t8wSO39ltsKATGurqvkszlAz+PxUluMnzVBBtKwv9M6SYSYQUpmchJPProSPTQPPDy2ZmwGoKXpoTC0lpV6AvhiESr6f5ZkOq06A==
+ b=NmBQEysiC8L9FLkqRlMKzeI20H42P7bukmOCNoE43l1fjmyuXXg2zeZZtvIs9bCfQoTMgnQKm4xEMshhaXYfNv1HcFwps/Jaw6ymGVn8Q1gn791O5Qn6rOZkZhpRIOFExtS8oxgQhJxBxvJTptEKKwgw9J4shZ/g4qo9oQJYlC9QG7QrsgtdbhVOy+vhjPnE2EodBj1eQXPDTiPQtB6OpKGct5RFnj0TSBAtgKsMDFuAbIb5NAe7G1lkutmOZNS2C1y5MzxCinFsAVwTCR6r1d5YTdOc+zAYt990P01jdT21tIppGTZ2UUBjcfk+pZ9AOduxxkIiiWvCJNLLixoHzg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=oZ+aZXf3KN6ncFhQrj+V9CxSUa4Qh2kMcEbTQ601VXk=;
- b=HUmBjwS6ZOnozVSmjFwjdAjmBc9Aq19HI46hVJUlH6mbE0tmmW0ohxNE1jU6jGzTE7hxp5WAJrrOjlw5mWSLKEnAK1RR/xsrT6+BeO41+/JdpwK48Y2ftcoVLK13YlN+fimQIrag3sv8gzrZA0+Rqg+wDrfH1C4+jpUlufX1aar4K/hlHqWjFsEQUgck2tHdcDChOH+BYlLfXRkeNBbDE+CJdjfrdQBVajEHrK4Cz9jYNsS1WB5bAgRl5xQh12DrLx84Af1fyX9QFCfRGAFHPFT89I3GUWqpcvQIzgDlUVvorlbK0AOhmc1IL7QVQKZ7f3qylKUGRXZY4yqUmNNWhg==
+ bh=Lgv//ZLIILOSf7b5GeKSvJp1IMw4dXZrI9ZZsmQJ+Zw=;
+ b=axM2kgbhx6soHDnlZGB8uZOGlAymyAILI5ciqYnq5siDZc49doC/3DWquefXM8X7PsWndKZbq+2Rs0oc2PdZSgpEfSY7rnnr0YBzopAwMyN88eCivtT/QCNXZ01cRhku35Keosi4l92PM+mawQ4qcRwpL3q9ngbXrcasaTQJXZ7EsDASg0qCugpNrSTfBoojHZJljqJbvyxgxQaAVptau28pbUstvS1QycrFfD000JRMW40WBco1g7cswVqJmfsxyicI75G8g3+HRec9/zfyxq4csge3v6ei0N+6HbFFfLgfLhWumLL1Db9txTuAMmFkui487mBlQXcpyi6Hn3DLNQ==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
  165.204.84.17) smtp.rcpttodomain=kernel.org smtp.mailfrom=amd.com; dmarc=pass
  (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
  dkim=none (message not signed); arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=oZ+aZXf3KN6ncFhQrj+V9CxSUa4Qh2kMcEbTQ601VXk=;
- b=bjtPN5q5X9bFB3SPSA1JHtclPri/YF0QHs08J5XikgRt+qzMXINpMkMnsBYwMxFXKuIeJBgsVZEmwLHoyWROspQsauHIAq8Wr9+VVIPnTiHhMm9/hoiiHR9vDyeT7bU5dZlgkkv4JOu/ykOqGiXd2MY1yCZydstgp8YDUYQc9lE=
-Received: from MWHPR20CA0037.namprd20.prod.outlook.com (2603:10b6:300:ed::23)
- by MN2PR12MB4472.namprd12.prod.outlook.com (2603:10b6:208:267::11) with
+ bh=Lgv//ZLIILOSf7b5GeKSvJp1IMw4dXZrI9ZZsmQJ+Zw=;
+ b=P0JpXPLQb2ncadAnQUh1X7TCuuWnRsl4RzvajS2v5qYEmTkwNj44vlv0v/ALR4pcmncdlwbfc+imLWcriTJK5NkoDwihbliutF8K7Jc/cc4pZZADkxjydzptjW3IqDw1rjQXmEWVSFFVfPQuXaBZOCEBSPFyqaqHP0Sth8FnHRg=
+Received: from MW4PR04CA0058.namprd04.prod.outlook.com (2603:10b6:303:6a::33)
+ by MWHPR12MB1197.namprd12.prod.outlook.com (2603:10b6:300:f::9) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4587.19; Fri, 8 Oct
- 2021 18:06:23 +0000
-Received: from CO1NAM11FT044.eop-nam11.prod.protection.outlook.com
- (2603:10b6:300:ed:cafe::31) by MWHPR20CA0037.outlook.office365.com
- (2603:10b6:300:ed::23) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4587.19 via Frontend
- Transport; Fri, 8 Oct 2021 18:06:23 +0000
+ 2021 18:06:22 +0000
+Received: from CO1NAM11FT063.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:303:6a:cafe::f7) by MW4PR04CA0058.outlook.office365.com
+ (2603:10b6:303:6a::33) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4566.17 via Frontend
+ Transport; Fri, 8 Oct 2021 18:06:22 +0000
 X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
  smtp.mailfrom=amd.com; kernel.org; dkim=none (message not signed)
  header.d=none;kernel.org; dmarc=pass action=none header.from=amd.com;
@@ -47,13 +47,13 @@ Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
  165.204.84.17 as permitted sender) receiver=protection.outlook.com;
  client-ip=165.204.84.17; helo=SATLEXMB04.amd.com;
 Received: from SATLEXMB04.amd.com (165.204.84.17) by
- CO1NAM11FT044.mail.protection.outlook.com (10.13.175.188) with Microsoft SMTP
+ CO1NAM11FT063.mail.protection.outlook.com (10.13.175.37) with Microsoft SMTP
  Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
  15.20.4587.18 via Frontend Transport; Fri, 8 Oct 2021 18:06:22 +0000
 Received: from sbrijesh-desktop.amd.com (10.180.168.240) by SATLEXMB04.amd.com
  (10.181.40.145) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2308.8; Fri, 8 Oct 2021
- 13:06:20 -0500
+ 13:06:16 -0500
 From:   Brijesh Singh <brijesh.singh@amd.com>
 To:     <x86@kernel.org>, <linux-kernel@vger.kernel.org>,
         <kvm@vger.kernel.org>, <linux-efi@vger.kernel.org>,
@@ -84,195 +84,165 @@ CC:     Thomas Gleixner <tglx@linutronix.de>,
         <tony.luck@intel.com>, <marcorr@google.com>,
         <sathyanarayanan.kuppuswamy@linux.intel.com>,
         Brijesh Singh <brijesh.singh@amd.com>
-Subject: [PATCH v6 41/42] virt: sevguest: Add support to derive key
-Date:   Fri, 8 Oct 2021 13:04:52 -0500
-Message-ID: <20211008180453.462291-42-brijesh.singh@amd.com>
+Subject: [PATCH v6 39/42] x86/sev: Register SNP guest request platform device
+Date:   Fri, 8 Oct 2021 13:04:50 -0500
+Message-ID: <20211008180453.462291-40-brijesh.singh@amd.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20211008180453.462291-1-brijesh.singh@amd.com>
 References: <20211008180453.462291-1-brijesh.singh@amd.com>
 MIME-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
 X-Originating-IP: [10.180.168.240]
 X-ClientProxiedBy: SATLEXMB03.amd.com (10.181.40.144) To SATLEXMB04.amd.com
  (10.181.40.145)
 X-EOPAttributedMessage: 0
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 5c329cc3-113b-4fff-5ee0-08d98a86567d
-X-MS-TrafficTypeDiagnostic: MN2PR12MB4472:
-X-Microsoft-Antispam-PRVS: <MN2PR12MB4472ECE35B79B5C54689947AE5B29@MN2PR12MB4472.namprd12.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:2582;
+X-MS-Office365-Filtering-Correlation-Id: db846a49-5ba8-4732-a59c-08d98a865613
+X-MS-TrafficTypeDiagnostic: MWHPR12MB1197:
+X-Microsoft-Antispam-PRVS: <MWHPR12MB1197E8C2059CCE540A408A8AE5B29@MWHPR12MB1197.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:7691;
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: ZqxCwVyuXtfdMLiSleUhxX90w0agzCZjqgrBsNyQ8g/Rh5jGpB8z6ukGxG1mvREAPEMZXgA9lxfWxNes09VjyPC1v8ZA8ag+QACusXkFhT0lioDlwDu+TMWl+SNFAiIfh+KAUA12mqSaclb5wEwe9Dn9kl5p/MZpn3AAB5b8Evk/4MLsdpOytocfVzRUg02M7PvOBzks1AUFUe/9QspeaGcZis44vU/SlkXDnVd6PwJj21kHcZYAdiX7/UGzeNuKq5oW1MGRNzFLMkRgLrwl1n2J73ELVLBKTqZVM+WvH9pXo9rpJ8K8yRfOXREABo5Xx/hkfm3RLsHYBt6wduokXmXVvgz6y+puCTzgUpHg40/tRuckTMweOT4L0Hg7z9NEeY2OTgu0sYFpJ5LEVuo+uq7B+4EGhQO6PZAvnNcLTzVtqKTJ8CQ+BY3I+cQ8YNRgj1aQspfBR4k9cm98qu5aVYhQDvH5Ak6HvQ6jqA3RprlJ6kplJpNkK1GMMANAvQd4W82W+9trndeb4ifl320Gakug7+B6rfK1VI4KURhEdxo12pDL5iobrTN5BcfKsDZR7znOAQgaY+MRY4/21dmK3Dsj86oz+l90wkZP0tYvvf9YXMB+dUcezjhiqSwVHgPJc/8+ideVF1iCz3OsFQMyP/7D/HEm4U1P3ScXrRa+MTmLwivnKUjxKrVYzC/bhiS0ZpAtH0EDbUUMi/VukqHorCtasI7fq2JBcXFB4F3B8AYsRUURuCKaXeWnClZ5tNsm
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(36840700001)(46966006)(2906002)(36860700001)(186003)(5660300002)(70586007)(70206006)(86362001)(26005)(8676002)(4326008)(47076005)(7696005)(36756003)(83380400001)(16526019)(2616005)(7416002)(8936002)(81166007)(426003)(316002)(508600001)(1076003)(7406005)(356005)(336012)(110136005)(54906003)(6666004)(82310400003)(44832011)(36900700001)(2101003);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: pfjGfrwAlHyF1nWivcSu2kQKpsUzFvMaqbffjiBjfe6lVWbg+EyrWCYWSgFtxNc5ZJdgVI8AWS2IF2oBJtb4CmMu4Vc/XWUrXB6GweZ8dL+0r0pEenP5Qmw7t2cpwQtY6J8Sfhd1obJv8FgACOzoPm2EgE7Bo+yVS10UviVvzCSc6J2K7OA/b+32h2N5AWs2iawpr7I98QEyJ5zQLEpVzhJS0SEQ4WKnlrH6qPcaSYWjrXkjie+FQp7Fb6xluprwwgFpCN48nzFWd5MYgtl8zDHg0Hp1VPP1j5iNdpvy1xWvfJjxXuDTf8LKHxFfTlwaGXeGjmm8c3qjf2aaEJAUhWOAfP2rD3vTUZmIcsO5+IG3izXCGHtGnoduh06glOlFmuGuxiH0k6iUk5I2elUlqdZlcqMMy8xuKPO7n75JrHhTS1/M6KLrHbsCRgZ8r65+j/hUaZkGbOaaOqhYNqyziMp9r3bN1bC+N7wFSbHn2Zs86WN+P4uWIT4jYzuxRsLeqjinF/qFwj1nseQ1FlIyEh0gDvBaggac2txJJ17w2cCkLKlpuZY939f8SQ8qKlu+iI7Kq7IGRrtcZRpDJiLFYuGTvZPgQYbOE4PWjD56RFfLgGvi2Vtwj2lndTrFHLnxrZRS/pYH8suimsX2raNwKTQT5NI+QTdGp6xh5zv0JL39s8W3aa22RPFTSoz6Woywlv3BwhUxfjItUAlbIe4/Dhu10OdQhZF9zgGLbL7BX6kGLZC1e7EHtMNrcC7SnRma
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(36840700001)(46966006)(81166007)(7406005)(7416002)(356005)(36756003)(44832011)(8676002)(2616005)(47076005)(83380400001)(36860700001)(4326008)(16526019)(26005)(82310400003)(7696005)(2906002)(70586007)(508600001)(5660300002)(316002)(70206006)(54906003)(336012)(426003)(1076003)(86362001)(6666004)(8936002)(186003)(110136005)(36900700001)(2101003);DIR:OUT;SFP:1101;
 X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 08 Oct 2021 18:06:22.9394
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 08 Oct 2021 18:06:22.2405
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 5c329cc3-113b-4fff-5ee0-08d98a86567d
+X-MS-Exchange-CrossTenant-Network-Message-Id: db846a49-5ba8-4732-a59c-08d98a865613
 X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
 X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource: CO1NAM11FT044.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthSource: CO1NAM11FT063.eop-nam11.prod.protection.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR12MB4472
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MWHPR12MB1197
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The SNP_GET_DERIVED_KEY ioctl interface can be used by the SNP guest to
-ask the firmware to provide a key derived from a root key. The derived
-key may be used by the guest for any purposes it choose, such as a
-sealing key or communicating with the external entities.
+Version 2 of GHCB specification provides Non Automatic Exit (NAE) that can
+be used by the SNP guest to communicate with the PSP without risk from a
+malicious hypervisor who wishes to read, alter, drop or replay the messages
+sent.
 
-See SEV-SNP firmware spec for more information.
+SNP_LAUNCH_UPDATE can insert two special pages into the guest’s memory:
+the secrets page and the CPUID page. The PSP firmware populate the contents
+of the secrets page. The secrets page contains encryption keys used by the
+guest to interact with the firmware. Because the secrets page is encrypted
+with the guest’s memory encryption key, the hypervisor cannot read the keys.
+See SNP FW ABI spec for further details about the secrets page.
+
+Create a platform device that the SNP guest driver can bind to get the
+platform resources such as encryption key and message id to use to
+communicate with the PSP. The SNP guest driver provides a userspace
+interface to get the attestation report, key derivation, extended
+attestation report etc.
 
 Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
 ---
- Documentation/virt/coco/sevguest.rst  | 19 ++++++++++-
- drivers/virt/coco/sevguest/sevguest.c | 49 +++++++++++++++++++++++++++
- include/uapi/linux/sev-guest.h        | 24 +++++++++++++
- 3 files changed, 91 insertions(+), 1 deletion(-)
+ arch/x86/include/asm/sev.h |  4 +++
+ arch/x86/kernel/sev.c      | 61 ++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 65 insertions(+)
 
-diff --git a/Documentation/virt/coco/sevguest.rst b/Documentation/virt/coco/sevguest.rst
-index 002c90946b8a..4b524d1de37c 100644
---- a/Documentation/virt/coco/sevguest.rst
-+++ b/Documentation/virt/coco/sevguest.rst
-@@ -64,10 +64,27 @@ The SNP_GET_REPORT ioctl can be used to query the attestation report from the
- SEV-SNP firmware. The ioctl uses the SNP_GUEST_REQUEST (MSG_REPORT_REQ) command
- provided by the SEV-SNP firmware to query the attestation report.
- 
--On success, the snp_report_resp.data will contains the report. The report
-+On success, the snp_report_resp.data will contain the report. The report
- will contain the format described in the SEV-SNP specification. See the SEV-SNP
- specification for further details.
- 
-+2.2 SNP_GET_DERIVED_KEY
-+-----------------------
-+:Technology: sev-snp
-+:Type: guest ioctl
-+:Parameters (in): struct snp_derived_key_req
-+:Returns (out): struct snp_derived_key_req on success, -negative on error
-+
-+The SNP_GET_DERIVED_KEY ioctl can be used to get a key derive from a root key.
-+The derived key can be used by the guest for any purpose, such as sealing keys
-+or communicating with external entities.
-+
-+The ioctl uses the SNP_GUEST_REQUEST (MSG_KEY_REQ) command provided by the
-+SEV-SNP firmware to derive the key. See SEV-SNP specification for further details
-+on the various fileds passed in the key derivation request.
-+
-+On success, the snp_derived_key_resp.data will contains the derived key value. See
-+the SEV-SNP specification for further details.
- 
- Reference
- ---------
-diff --git a/drivers/virt/coco/sevguest/sevguest.c b/drivers/virt/coco/sevguest/sevguest.c
-index 2d313fb2ffae..c6ca7d861a3a 100644
---- a/drivers/virt/coco/sevguest/sevguest.c
-+++ b/drivers/virt/coco/sevguest/sevguest.c
-@@ -364,6 +364,52 @@ static int get_report(struct snp_guest_dev *snp_dev, struct snp_guest_request_io
- 	return rc;
- }
- 
-+static int get_derived_key(struct snp_guest_dev *snp_dev, struct snp_guest_request_ioctl *arg)
-+{
-+	struct snp_guest_crypto *crypto = snp_dev->crypto;
-+	struct snp_derived_key_resp resp = {0};
-+	struct snp_derived_key_req req;
-+	int rc, resp_len;
-+	u8 buf[89];
-+
-+	if (!arg->req_data || !arg->resp_data)
-+		return -EINVAL;
-+
-+	/* Copy the request payload from userspace */
-+	if (copy_from_user(&req, (void __user *)arg->req_data, sizeof(req)))
-+		return -EFAULT;
-+
-+	/* Message version must be non-zero */
-+	if (!req.msg_version)
-+		return -EINVAL;
-+
-+	/*
-+	 * The intermediate response buffer is used while decrypting the
-+	 * response payload. Make sure that it has enough space to cover the
-+	 * authtag.
-+	 */
-+	resp_len = sizeof(resp.data) + crypto->a_len;
-+	if (sizeof(buf) < resp_len)
-+		return -ENOMEM;
-+
-+	/* Issue the command to get the attestation report */
-+	rc = handle_guest_request(snp_dev, SVM_VMGEXIT_GUEST_REQUEST, req.msg_version,
-+				  SNP_MSG_KEY_REQ, &req.data, sizeof(req.data), buf, resp_len,
-+				  &arg->fw_err);
-+	if (rc)
-+		goto e_free;
-+
-+	/* Copy the response payload to userspace */
-+	memcpy(resp.data, buf, sizeof(resp.data));
-+	if (copy_to_user((void __user *)arg->resp_data, &resp, sizeof(resp)))
-+		rc = -EFAULT;
-+
-+e_free:
-+	memzero_explicit(buf, sizeof(buf));
-+	memzero_explicit(&resp, sizeof(resp));
-+	return rc;
-+}
-+
- static long snp_guest_ioctl(struct file *file, unsigned int ioctl, unsigned long arg)
- {
- 	struct snp_guest_dev *snp_dev = to_snp_dev(file);
-@@ -382,6 +428,9 @@ static long snp_guest_ioctl(struct file *file, unsigned int ioctl, unsigned long
- 	case SNP_GET_REPORT:
- 		ret = get_report(snp_dev, &input);
- 		break;
-+	case SNP_GET_DERIVED_KEY:
-+		ret = get_derived_key(snp_dev, &input);
-+		break;
- 	default:
- 		break;
- 	}
-diff --git a/include/uapi/linux/sev-guest.h b/include/uapi/linux/sev-guest.h
-index eda7edcffda8..f6d9c136ff4d 100644
---- a/include/uapi/linux/sev-guest.h
-+++ b/include/uapi/linux/sev-guest.h
-@@ -36,9 +36,33 @@ struct snp_guest_request_ioctl {
- 	__u64 fw_err;
+diff --git a/arch/x86/include/asm/sev.h b/arch/x86/include/asm/sev.h
+index 4ea8e2f73d37..2a9e6ea11242 100644
+--- a/arch/x86/include/asm/sev.h
++++ b/arch/x86/include/asm/sev.h
+@@ -88,6 +88,10 @@ struct snp_req_data {
+ 	unsigned int data_npages;
  };
  
-+struct __snp_derived_key_req {
-+	__u32 root_key_select;
-+	__u32 rsvd;
-+	__u64 guest_field_select;
-+	__u32 vmpl;
-+	__u32 guest_svn;
-+	__u64 tcb_version;
++struct snp_guest_platform_data {
++	u64 secrets_gpa;
 +};
 +
-+struct snp_derived_key_req {
-+	/* message version number (must be non-zero) */
-+	__u8 msg_version;
-+
-+	struct __snp_derived_key_req data;
-+};
-+
-+struct snp_derived_key_resp {
-+	/* response data, see SEV-SNP spec for the format */
-+	__u8 data[64];
-+};
-+
- #define SNP_GUEST_REQ_IOC_TYPE	'S'
+ #ifdef CONFIG_AMD_MEM_ENCRYPT
+ extern struct static_key_false sev_es_enable_key;
+ extern void __sev_es_ist_enter(struct pt_regs *regs);
+diff --git a/arch/x86/kernel/sev.c b/arch/x86/kernel/sev.c
+index c29a78f868ed..01505ac9c7b2 100644
+--- a/arch/x86/kernel/sev.c
++++ b/arch/x86/kernel/sev.c
+@@ -19,6 +19,9 @@
+ #include <linux/kernel.h>
+ #include <linux/mm.h>
+ #include <linux/cpumask.h>
++#include <linux/efi.h>
++#include <linux/platform_device.h>
++#include <linux/io.h>
  
- /* Get SNP attestation report */
- #define SNP_GET_REPORT _IOWR(SNP_GUEST_REQ_IOC_TYPE, 0x0, struct snp_guest_request_ioctl)
+ #include <asm/cpu_entry_area.h>
+ #include <asm/stacktrace.h>
+@@ -34,6 +37,7 @@
+ #include <asm/cpu.h>
+ #include <asm/apic.h>
+ #include <asm/cpuid.h>
++#include <asm/setup.h>
  
-+/* Get a derived key from the root */
-+#define SNP_GET_DERIVED_KEY _IOWR(SNP_GUEST_REQ_IOC_TYPE, 0x1, struct snp_guest_request_ioctl)
+ #define DR7_RESET_VALUE        0x400
+ 
+@@ -2171,3 +2175,60 @@ int snp_issue_guest_request(u64 exit_code, struct snp_req_data *input, unsigned
+ 	return ret;
+ }
+ EXPORT_SYMBOL_GPL(snp_issue_guest_request);
 +
- #endif /* __UAPI_LINUX_SEV_GUEST_H_ */
++static struct platform_device guest_req_device = {
++	.name		= "snp-guest",
++	.id		= -1,
++};
++
++static u64 get_secrets_page(void)
++{
++	u64 pa_data = boot_params.cc_blob_address;
++	struct cc_blob_sev_info info;
++	void *map;
++
++	/*
++	 * The CC blob contains the address of the secrets page, check if the
++	 * blob is present.
++	 */
++	if (!pa_data)
++		return 0;
++
++	map = early_memremap(pa_data, sizeof(info));
++	memcpy(&info, map, sizeof(info));
++	early_memunmap(map, sizeof(info));
++
++	/* smoke-test the secrets page passed */
++	if (!info.secrets_phys || info.secrets_len != PAGE_SIZE)
++		return 0;
++
++	return info.secrets_phys;
++}
++
++static int __init init_snp_platform_device(void)
++{
++	struct snp_guest_platform_data data;
++	u64 gpa;
++
++	if (!cc_platform_has(CC_ATTR_SEV_SNP))
++		return -ENODEV;
++
++	gpa = get_secrets_page();
++	if (!gpa)
++		return -ENODEV;
++
++	data.secrets_gpa = gpa;
++	if (platform_device_add_data(&guest_req_device, &data, sizeof(data)))
++		goto e_fail;
++
++	if (platform_device_register(&guest_req_device))
++		goto e_fail;
++
++	pr_info("SNP guest platform device initialized.\n");
++	return 0;
++
++e_fail:
++	pr_err("Failed to initialize SNP guest device\n");
++	return -ENODEV;
++}
++device_initcall(init_snp_platform_device);
 -- 
 2.25.1
 
