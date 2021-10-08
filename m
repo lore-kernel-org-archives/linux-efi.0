@@ -2,44 +2,44 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E9712C433EF
-	for <linux-efi@archiver.kernel.org>; Fri,  8 Oct 2021 18:05:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 37660C433FE
+	for <linux-efi@archiver.kernel.org>; Fri,  8 Oct 2021 18:05:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D029A60296
-	for <linux-efi@archiver.kernel.org>; Fri,  8 Oct 2021 18:05:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 23EB8610E5
+	for <linux-efi@archiver.kernel.org>; Fri,  8 Oct 2021 18:05:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238915AbhJHSHP (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 8 Oct 2021 14:07:15 -0400
-Received: from mail-mw2nam10on2075.outbound.protection.outlook.com ([40.107.94.75]:9281
-        "EHLO NAM10-MW2-obe.outbound.protection.outlook.com"
+        id S239538AbhJHSHR (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 8 Oct 2021 14:07:17 -0400
+Received: from mail-bn8nam12on2044.outbound.protection.outlook.com ([40.107.237.44]:32481
+        "EHLO NAM12-BN8-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S231245AbhJHSHO (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 8 Oct 2021 14:07:14 -0400
+        id S238780AbhJHSHP (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 8 Oct 2021 14:07:15 -0400
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=gEmL8lQl+GjuR1s88w3HPBeOhOMdATxntvUGmKUZGSygwpavFwRHqvggghrRbsUBYnpYeuB6Pa/pZxrOkrcRXpmpJchRTau2q8/pJsQScxx9hlHA83qjYz6fZu2AhWxWoX2TSLkL0xCqc3n93MrniEgDgakus98jSAil7O7jgMCHnEs42pI1++SB7KI520cX3RO8tRM/l5jhXD4Yp+wayHjHdBEasUFgtPpZ8jNzwplhAm/r9vRRvgeGTPucsgE7lJtBoCy6W5cfr8QxCPsFU5Kne16XhheTyLmIwBAVhp9XruanBaIk+4oarSIxgvyG0cRYXYto/RtS7xoFUKCXgQ==
+ b=g0hXifAr7xr633fHje6oV7hpFPniOI2O0KpOzjc13Bg94L0smIbsja4hclUHuz3g1kjA0x7/J/Iyjhy6Hq/RXADo13qv2m+OQeRBGB/bWvs6zWVuAs41U7aRtP7h2Q21eDpK92MMNnVrAV9iSekIPxHKkzU2C2rYCdzYWwxsTPomtGISMjUKZj0aYUxpyjX/PRq/twKdJ8yxdgR5nVtxCNKdpTZUvD3sT2vyVDrFnHJKwDtSU8gSsMUK+cZ6YoZqxo3aAbTl5nvh1hc9eC3lC8hbSusMqFfpelxM9gd2X6eijE3kjoK69bWTi+R5BvvAJtfr5y643Fx/wHDbGmxyDg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=1d1nw+Iyq8+S9Rcc+3AQlATRUWi5W+sr0T5f+6LfjGI=;
- b=ENZ6TGWQdNJhXh2OqXLeWdTOE+DDxGMNsP8Yp0c9PudREcTY9iwfNdxXuGpaI3gQ9ojy229Q/hG+UTBYH/DunnC+83Y8wFbLUDyDzQMuJ8nq12vaFp/F7jFOwqFzPq7g450PLcCN/MPS1BuKInHbddfSK0DCtlJExy1saazsr0DwsJOtBDGq9DThGGN6PsaIIAMH2ottdFBRyIE0mNMBU9aTo4VHx+cmQtzFamxHArY0E6Jd5wG5hV3EMWup5e10G8zGh8uLrgTZ4FkEtNNaTUqpsLOn4/2jeMMcMqkKxbPYfHSMN5GWWVdmU5Ir0wM8+PZK7a4XUwiQIgjpgHCcmQ==
+ bh=Cta1Fn1G2dYNvWGluLCsPeb+TsLD1MsudLayOwc6114=;
+ b=cFfGL51IEz8+tUXdxYmosq3Q8RPRXWWJ6CvNH96pFr5+rsriDRpYv4Q9hBOBeyq5zGhCMDVBDSOJeAy8r1nCG0gLMoxsfgH6kGI3NTGziCf1UOhHSq27FUPi7b6uZYmNHP82tekSsD8poEceOKbrw2lzMGzRsLyJMkmApuvYnN5F9k5D9hKwT9Z77L+GOacJoDk/Qh4kG8to1GCkxX8C+RGLoBwsJfy2LqIRWMVe+fQ64/EGU9dVY7i0GzSPD/HG0TymIGwvRI7EnocGrg2ocnVNsV6hfbmZB2M+IF2jXud1+y0nStSOgQs3CYnsXdScy27uSsfxEJFrkWIRAaD/Yg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
  165.204.84.17) smtp.rcpttodomain=kernel.org smtp.mailfrom=amd.com; dmarc=pass
  (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
  dkim=none (message not signed); arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=1d1nw+Iyq8+S9Rcc+3AQlATRUWi5W+sr0T5f+6LfjGI=;
- b=139DJKdnPd7DkHxFmH/zSMvK/anh6NV9IBEkCxMQ4Z4Yay+BZvKnSbxWeQK+lEXxrTvPnYPY5jXvCtY4eYMihilu6QmU+yt9RDbjr8jjTcg5jp1dAaUqgZeAhZ+aicJyfyFDrFlJeWf5revi5I4GTMjFociqDhD42LAOFblfOCo=
-Received: from MW4PR03CA0082.namprd03.prod.outlook.com (2603:10b6:303:b6::27)
- by MN2PR12MB4607.namprd12.prod.outlook.com (2603:10b6:208:a1::18) with
+ bh=Cta1Fn1G2dYNvWGluLCsPeb+TsLD1MsudLayOwc6114=;
+ b=DaO/LIn65FDzBhSBMMJ2GptGO35qgE9jQLucYaDS4Qv968zioe99EbILYdjJofP8T2X1tGCrsbq5mELwX/6Hl8qlFGkNrnFz6qNXdPIbiyDo30kXI1MNem7/DTUBMOECYsIxG6naWWuTIKe8C5KgA9DDVQUIBnFmGK2I1Ab4wg4=
+Received: from MW4PR03CA0090.namprd03.prod.outlook.com (2603:10b6:303:b6::35)
+ by MN2PR12MB3374.namprd12.prod.outlook.com (2603:10b6:208:c9::17) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4587.19; Fri, 8 Oct
- 2021 18:05:13 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4587.18; Fri, 8 Oct
+ 2021 18:05:15 +0000
 Received: from CO1NAM11FT004.eop-nam11.prod.protection.outlook.com
- (2603:10b6:303:b6:cafe::37) by MW4PR03CA0082.outlook.office365.com
- (2603:10b6:303:b6::27) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4587.19 via Frontend
- Transport; Fri, 8 Oct 2021 18:05:13 +0000
+ (2603:10b6:303:b6:cafe::8d) by MW4PR03CA0090.outlook.office365.com
+ (2603:10b6:303:b6::35) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4587.18 via Frontend
+ Transport; Fri, 8 Oct 2021 18:05:15 +0000
 X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
  smtp.mailfrom=amd.com; kernel.org; dkim=none (message not signed)
  header.d=none;kernel.org; dmarc=pass action=none header.from=amd.com;
@@ -49,11 +49,11 @@ Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
 Received: from SATLEXMB04.amd.com (165.204.84.17) by
  CO1NAM11FT004.mail.protection.outlook.com (10.13.175.89) with Microsoft SMTP
  Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.4587.18 via Frontend Transport; Fri, 8 Oct 2021 18:05:12 +0000
+ 15.20.4587.18 via Frontend Transport; Fri, 8 Oct 2021 18:05:15 +0000
 Received: from sbrijesh-desktop.amd.com (10.180.168.240) by SATLEXMB04.amd.com
  (10.181.40.145) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2308.8; Fri, 8 Oct 2021
- 13:05:10 -0500
+ 13:05:13 -0500
 From:   Brijesh Singh <brijesh.singh@amd.com>
 To:     <x86@kernel.org>, <linux-kernel@vger.kernel.org>,
         <kvm@vger.kernel.org>, <linux-efi@vger.kernel.org>,
@@ -83,262 +83,135 @@ CC:     Thomas Gleixner <tglx@linutronix.de>,
         "Dr . David Alan Gilbert" <dgilbert@redhat.com>,
         <tony.luck@intel.com>, <marcorr@google.com>,
         <sathyanarayanan.kuppuswamy@linux.intel.com>,
-        Brijesh Singh <brijesh.singh@amd.com>
-Subject: [PATCH v6 00/42] Add AMD Secure Nested Paging (SEV-SNP) Guest Support
-Date:   Fri, 8 Oct 2021 13:04:11 -0500
-Message-ID: <20211008180453.462291-1-brijesh.singh@amd.com>
+        Brijesh Singh <brijesh.singh@amd.com>,
+        Venu Busireddy <venu.busireddy@oracle.com>,
+        "Borislav Petkov" <bp@suse.de>
+Subject: [PATCH v6 02/42] x86/sev: Shorten GHCB terminate macro names
+Date:   Fri, 8 Oct 2021 13:04:13 -0500
+Message-ID: <20211008180453.462291-3-brijesh.singh@amd.com>
 X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20211008180453.462291-1-brijesh.singh@amd.com>
+References: <20211008180453.462291-1-brijesh.singh@amd.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 X-Originating-IP: [10.180.168.240]
 X-ClientProxiedBy: SATLEXMB03.amd.com (10.181.40.144) To SATLEXMB04.amd.com
  (10.181.40.145)
 X-EOPAttributedMessage: 0
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: db1f7ff0-23c8-4a8c-a879-08d98a862cc3
-X-MS-TrafficTypeDiagnostic: MN2PR12MB4607:
-X-Microsoft-Antispam-PRVS: <MN2PR12MB46075845E00C88472E953A14E5B29@MN2PR12MB4607.namprd12.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:7691;
+X-MS-Office365-Filtering-Correlation-Id: e3b1c6f1-87a1-40d0-b44f-08d98a862e46
+X-MS-TrafficTypeDiagnostic: MN2PR12MB3374:
+X-Microsoft-Antispam-PRVS: <MN2PR12MB3374A3271FDE81346AB3A004E5B29@MN2PR12MB3374.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:6790;
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: BoKtWPLsUYvge4o1mRu30+Gw9+VuIZeGQY6FfZ0Uy1JpbKLnFNarBQHR+Qn6sb5pQxc/VzeSM5mB5OFFXjrIB2Cc5+9d3vThdXmYPPSba+2bw5YkyhbBZbBDx35ltm5N349SxFkJpYrsTmvJrn5MUSgoa8FswPXwY/rwDAdpQc2olOdhYvR1O7fyB7QVubKUnOPTmSkmwdY1NgKaCvKvBBwOKkYXD1ycje+jLCZ/+F6hSqP402BQuubBPEc8/aZfyV984QEfPt0KY4xphhPag9Zlz+7At/CPIicP8mbKtNYLDJMC9J3wMGqhvWyAL3xMtSe4HT40XGW0C46uVclCmjJpghLUftFYhAWMEJXxRit0sTbANqNafJNtVd4QS+Six/ixxq2xU0EqdWJ8OeD87vDStgglcZJAkyFV1TowyDTtLNR9ZjLw8KpXp5TdpuZF4J2J++R5jbk+a4vkrrqMrd/UQ782LZQlJRwTiQcZj3bqDo8v2f5A1ZuPTefo+9Bl44k4lrlplSQho6ZxjB/YVXNk3ODNRmIkqVthmNyBxFl09pN/zNUuE4FHzKkB5tEKIdcGH5Oo7ujX4xuq3hy4VCTO0la/GaOKCNQB/wDr5ckbFuM3ZZNDk9gjq0jfcmB7P4zoFI591fpAtgCjSElo5v1+uXg/ZLFeS6fZk9KWkATndAvRn+m8WJpjZFPw6gDcI0eIQpr2KSQ4Y8lxR+QHunXQjaZQJ/2R1mM+fnSVhpTfrDEQrd2/nYTIc5b9V9w5KzgsQ7hXilEBYNF+mMqNRT3ikocKvF+WQQ/35DK5TnsxxGkndgNpw2NbJxuDiKq9lir9iE61L4rG9Is8M1azQLyrfE0VAmm5bp2xL6uOU/qSGEtq7GD5VyQTfvgIjt0Y
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(46966006)(36840700001)(83380400001)(70586007)(110136005)(7696005)(2616005)(47076005)(70206006)(82310400003)(4326008)(1076003)(26005)(16526019)(54906003)(8676002)(7416002)(966005)(36860700001)(36756003)(8936002)(186003)(44832011)(336012)(2906002)(508600001)(5660300002)(316002)(81166007)(7406005)(356005)(86362001)(426003)(36900700001)(2101003);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: oRPZEvmWlBz3/pdVt2GjV3C1J2kdwUn2b6AZUJT2RCBbi8hke3znAPCa7kWkyRKPqxNbHaL+WQRoyBcvWxJS+zeYnnsUguYn/pulum5FqcEOj3CiSYiMk6ldTYNvhMMkpUe3AeAGLwMSXNLekeCdG5qxB2Zr9GJQUTA+xGqjPJOh3lk2WcASbg6vrMfrFUnSEB9qX+uicEHkOrzAz/gt/Q/mncExVAJo78Nsew3o7J9ji3cAMqVT7cDt7wRLLdYIUk8RBw/yBVu0Y6AwM4rmm3yGc4sxaz1VvNIUvxAUgun7ZwXNKXZ6egWhoNCsen7lkT+udd9wYTGW7UXvHxNg4MB/mf7hTTpRFYUZwhzLl/4iuYnUXPVDV1FC1r83O137nsFDLGXkXWjbONcQGn6HdM5uyWZJJ6qRt4Zlybqo1O0ebCCiT1sdSRPsXZEJOk+3165rIrPpfHEks6Yp36hPyjGb9Kx+DaiG0upYOwQXQMtZnKjBZCMkrmssFAHCQHVp1ZVpSvRDdYEugMPhM8D8/AduIRiPYVJRl3WEwjod4ZELiJ8aDyZjApoIOOY6EjIRfenMQTnILVij2Il8w3W4ajCThyBJ38yUCDNk2Zvrv+KPI+fRvQ89t0V5IMyh+hh8ZyvF/xfiOXWLnj96hm1j5fvarNfg885s1sJpGhtl9tKQBSRfo0Ql/jehS3YAW1S36Jp4T4KDR5nnxfFBS/WUhdGDUt8TtR29HhDPNlxqkroOthgS8vKdBZ/r7q8Ni/77
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(36840700001)(46966006)(54906003)(110136005)(86362001)(5660300002)(2906002)(316002)(16526019)(82310400003)(2616005)(186003)(426003)(26005)(7416002)(7406005)(336012)(508600001)(1076003)(8676002)(8936002)(7696005)(70206006)(70586007)(4326008)(44832011)(36860700001)(36756003)(356005)(81166007)(47076005)(83380400001)(2101003)(36900700001);DIR:OUT;SFP:1101;
 X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 08 Oct 2021 18:05:12.9487
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 08 Oct 2021 18:05:15.4853
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: db1f7ff0-23c8-4a8c-a879-08d98a862cc3
+X-MS-Exchange-CrossTenant-Network-Message-Id: e3b1c6f1-87a1-40d0-b44f-08d98a862e46
 X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
 X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
 X-MS-Exchange-CrossTenant-AuthSource: CO1NAM11FT004.eop-nam11.prod.protection.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR12MB4607
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR12MB3374
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This part of Secure Encrypted Paging (SEV-SNP) series focuses on the changes
-required in a guest OS for SEV-SNP support.
+Reviewed-by: Venu Busireddy <venu.busireddy@oracle.com>
+Suggested-by: Borislav Petkov <bp@suse.de>
+Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
+---
+ arch/x86/boot/compressed/sev.c    | 6 +++---
+ arch/x86/include/asm/sev-common.h | 4 ++--
+ arch/x86/kernel/sev-shared.c      | 2 +-
+ arch/x86/kernel/sev.c             | 4 ++--
+ 4 files changed, 8 insertions(+), 8 deletions(-)
 
-SEV-SNP builds upon existing SEV and SEV-ES functionality while adding
-new hardware-based memory protections. SEV-SNP adds strong memory integrity
-protection to help prevent malicious hypervisor-based attacks like data
-replay, memory re-mapping and more in order to create an isolated memory
-encryption environment.
+diff --git a/arch/x86/boot/compressed/sev.c b/arch/x86/boot/compressed/sev.c
+index 670e998fe930..28bcf04c022e 100644
+--- a/arch/x86/boot/compressed/sev.c
++++ b/arch/x86/boot/compressed/sev.c
+@@ -122,7 +122,7 @@ static enum es_result vc_read_mem(struct es_em_ctxt *ctxt,
+ static bool early_setup_sev_es(void)
+ {
+ 	if (!sev_es_negotiate_protocol())
+-		sev_es_terminate(GHCB_SEV_ES_REASON_PROTOCOL_UNSUPPORTED);
++		sev_es_terminate(GHCB_SEV_ES_PROT_UNSUPPORTED);
  
-This series provides the basic building blocks to support booting the SEV-SNP
-VMs, it does not cover all the security enhancement introduced by the SEV-SNP
-such as interrupt protection.
-
-Many of the integrity guarantees of SEV-SNP are enforced through a new
-structure called the Reverse Map Table (RMP). Adding a new page to SEV-SNP
-VM requires a 2-step process. First, the hypervisor assigns a page to the
-guest using the new RMPUPDATE instruction. This transitions the page to
-guest-invalid. Second, the guest validates the page using the new PVALIDATE
-instruction. The SEV-SNP VMs can use the new "Page State Change Request NAE"
-defined in the GHCB specification to ask hypervisor to add or remove page
-from the RMP table.
-
-Each page assigned to the SEV-SNP VM can either be validated or unvalidated,
-as indicated by the Validated flag in the page's RMP entry. There are two
-approaches that can be taken for the page validation: Pre-validation and
-Lazy Validation.
-
-Under pre-validation, the pages are validated prior to first use. And under
-lazy validation, pages are validated when first accessed. An access to a
-unvalidated page results in a #VC exception, at which time the exception
-handler may validate the page. Lazy validation requires careful tracking of
-the validated pages to avoid validating the same GPA more than once. The
-recently introduced "Unaccepted" memory type can be used to communicate the
-unvalidated memory ranges to the Guest OS.
-
-At this time we only sypport the pre-validation, the OVMF guest BIOS
-validates the entire RAM before the control is handed over to the guest kernel.
-The early_set_memory_{encrypt,decrypt} and set_memory_{encrypt,decrypt} are
-enlightened to perform the page validation or invalidation while setting or
-clearing the encryption attribute from the page table.
-
-This series does not provide support for the Interrupt security yet which will
-be added after the base support.
-
-The series is based on tip/master
-  a6d06ef25c4e (origin/master, origin/HEAD, master) Merge branch 'irq/core
-
-Additional resources
----------------------
-SEV-SNP whitepaper
-https://www.amd.com/system/files/TechDocs/SEV-SNP-strengthening-vm-isolation-with-integrity-protection-and-more.pdf
+ 	if (set_page_decrypted((unsigned long)&boot_ghcb_page))
+ 		return false;
+@@ -175,7 +175,7 @@ void do_boot_stage2_vc(struct pt_regs *regs, unsigned long exit_code)
+ 	enum es_result result;
  
-APM 2: https://www.amd.com/system/files/TechDocs/24593.pdf
-(section 15.36)
-
-GHCB spec:
-https://developer.amd.com/wp-content/resources/56421.pdf
-
-SEV-SNP firmware specification:
-https://developer.amd.com/sev/
-
-v5: https://lore.kernel.org/lkml/20210820151933.22401-1-brijesh.singh@amd.com/
-
-Changes since v5:
- * move the seqno allocation in the sevguest driver.
- * extend snp_issue_guest_request() to accept the exit_info to simplify the logic.
- * use smaller structure names based on feedback.
- * explicitly clear the memory after the SNP guest request is completed.
- * cpuid validation: use a local copy of cpuid table instead of keeping
-   firmware table mapped throughout boot.
- * cpuid validation: coding style fix-ups and refactor cpuid-related helpers
-   as suggested.
- * cpuid validation: drop a number of BOOT_COMPRESSED-guarded defs/declarations
-   by moving things like snp_cpuid_init*() out of sev-shared.c and keeping only
-   the common bits there.
- * Break up EFI config table helpers and related acpi.c changes into separate
-   patches.
- * re-enable stack protection for 32-bit kernels as well, not just 64-bit
-
-Changes since v4:
- * Address the cpuid specific review comment
- * Simplified the macro based on the review feedback
- * Move macro definition to the patch that needs it
- * Fix the issues reported by the checkpath
- * Address the AP creation specific review comment
-
-Changes since v3:
- * Add support to use the PSP filtered CPUID.
- * Add support for the extended guest request.
- * Move sevguest driver in driver/virt/coco.
- * Add documentation for sevguest ioctl.
- * Add support to check the vmpl0.
- * Pass the VM encryption key and id to be used for encrypting guest messages
-   through the platform drv data.
- * Multiple cleanup and fixes to address the review feedbacks.
-
-Changes since v2:
- * Add support for AP startup using SNP specific vmgexit.
- * Add snp_prep_memory() helper.
- * Drop sev_snp_active() helper.
- * Add sev_feature_enabled() helper to check which SEV feature is active.
- * Sync the SNP guest message request header with latest SNP FW spec.
- * Multiple cleanup and fixes to address the review feedbacks.
-
-Changes since v1:
- * Integerate the SNP support in sev.{ch}.
- * Add support to query the hypervisor feature and detect whether SNP is supported.
- * Define Linux specific reason code for the SNP guest termination.
- * Extend the setup_header provide a way for hypervisor to pass secret and cpuid page.
- * Add support to create a platform device and driver to query the attestation report
-   and the derive a key.
- * Multiple cleanup and fixes to address Boris's review fedback.
-
-Borislav Petkov (3):
-  x86/sev: Get rid of excessive use of defines
-  x86/head64: Carve out the guest encryption postprocessing into a
-    helper
-  x86/sev: Remove do_early_exception() forward declarations
-
-Brijesh Singh (22):
-  x86/mm: Extend cc_attr to include AMD SEV-SNP
-  x86/sev: Shorten GHCB terminate macro names
-  x86/sev: Define the Linux specific guest termination reasons
-  x86/sev: Save the negotiated GHCB version
-  x86/sev: Add support for hypervisor feature VMGEXIT
-  x86/sev: Check SEV-SNP features support
-  x86/sev: Add a helper for the PVALIDATE instruction
-  x86/sev: Check the vmpl level
-  x86/compressed: Add helper for validating pages in the decompression
-    stage
-  x86/compressed: Register GHCB memory when SEV-SNP is active
-  x86/sev: Register GHCB memory when SEV-SNP is active
-  x86/sev: Add helper for validating pages in early enc attribute
-    changes
-  x86/kernel: Make the bss.decrypted section shared in RMP table
-  x86/kernel: Validate rom memory before accessing when SEV-SNP is
-    active
-  x86/mm: Add support to validate memory when changing C-bit
-  KVM: SVM: Define sev_features and vmpl field in the VMSA
-  x86/boot: Add Confidential Computing type to setup_data
-  x86/sev: Provide support for SNP guest request NAEs
-  x86/sev: Register SNP guest request platform device
-  virt: Add SEV-SNP guest driver
-  virt: sevguest: Add support to derive key
-  virt: sevguest: Add support to get extended report
-
-Michael Roth (13):
-  x86/sev-es: initialize sev_status/features within #VC handler
-  x86/head: re-enable stack protection for 32/64-bit builds
-  x86/sev: move MSR-based VMGEXITs for CPUID to helper
-  KVM: x86: move lookup of indexed CPUID leafs to helper
-  x86/compressed/acpi: move EFI system table lookup to helper
-  x86/compressed/acpi: move EFI config table lookup to helper
-  x86/compressed/acpi: move EFI vendor table lookup to helper
-  x86/compressed/64: add support for SEV-SNP CPUID table in #VC handlers
-  boot/compressed/64: use firmware-validated CPUID for SEV-SNP guests
-  x86/boot: add a pointer to Confidential Computing blob in bootparams
-  x86/compressed/64: store Confidential Computing blob address in
-    bootparams
-  x86/compressed/64: add identity mapping for Confidential Computing
-    blob
-  x86/sev: use firmware-validated CPUID for SEV-SNP guests
-
-Tom Lendacky (4):
-  KVM: SVM: Create a separate mapping for the SEV-ES save area
-  KVM: SVM: Create a separate mapping for the GHCB save area
-  KVM: SVM: Update the SEV-ES save area mapping
-  x86/sev: Use SEV-SNP AP creation to start secondary CPUs
-
- Documentation/virt/coco/sevguest.rst    | 117 ++++
- arch/x86/boot/compressed/Makefile       |   1 +
- arch/x86/boot/compressed/acpi.c         | 120 +---
- arch/x86/boot/compressed/efi.c          | 171 +++++
- arch/x86/boot/compressed/head_64.S      |   1 +
- arch/x86/boot/compressed/ident_map_64.c |  44 +-
- arch/x86/boot/compressed/idt_64.c       |   5 +-
- arch/x86/boot/compressed/misc.h         |  42 ++
- arch/x86/boot/compressed/sev.c          | 189 +++++-
- arch/x86/include/asm/bootparam_utils.h  |   1 +
- arch/x86/include/asm/cpuid.h            |  26 +
- arch/x86/include/asm/msr-index.h        |   2 +
- arch/x86/include/asm/setup.h            |   2 +-
- arch/x86/include/asm/sev-common.h       | 137 +++-
- arch/x86/include/asm/sev.h              |  80 ++-
- arch/x86/include/asm/svm.h              | 167 ++++-
- arch/x86/include/uapi/asm/bootparam.h   |   4 +-
- arch/x86/include/uapi/asm/svm.h         |  13 +
- arch/x86/kernel/Makefile                |   1 -
- arch/x86/kernel/cc_platform.c           |   2 +
- arch/x86/kernel/head64.c                |  79 ++-
- arch/x86/kernel/head_64.S               |  24 +
- arch/x86/kernel/probe_roms.c            |  13 +-
- arch/x86/kernel/sev-shared.c            | 569 +++++++++++++++-
- arch/x86/kernel/sev.c                   | 860 ++++++++++++++++++++++--
- arch/x86/kernel/smpboot.c               |   3 +
- arch/x86/kvm/cpuid.c                    |  17 +-
- arch/x86/kvm/svm/sev.c                  |  24 +-
- arch/x86/kvm/svm/svm.c                  |   4 +-
- arch/x86/kvm/svm/svm.h                  |   2 +-
- arch/x86/mm/mem_encrypt.c               |  55 +-
- arch/x86/mm/pat/set_memory.c            |  15 +
- drivers/virt/Kconfig                    |   3 +
- drivers/virt/Makefile                   |   1 +
- drivers/virt/coco/sevguest/Kconfig      |   9 +
- drivers/virt/coco/sevguest/Makefile     |   2 +
- drivers/virt/coco/sevguest/sevguest.c   | 703 +++++++++++++++++++
- drivers/virt/coco/sevguest/sevguest.h   |  98 +++
- include/linux/cc_platform.h             |   8 +
- include/linux/efi.h                     |   1 +
- include/uapi/linux/sev-guest.h          |  81 +++
- 41 files changed, 3389 insertions(+), 307 deletions(-)
- create mode 100644 Documentation/virt/coco/sevguest.rst
- create mode 100644 arch/x86/boot/compressed/efi.c
- create mode 100644 arch/x86/include/asm/cpuid.h
- create mode 100644 drivers/virt/coco/sevguest/Kconfig
- create mode 100644 drivers/virt/coco/sevguest/Makefile
- create mode 100644 drivers/virt/coco/sevguest/sevguest.c
- create mode 100644 drivers/virt/coco/sevguest/sevguest.h
- create mode 100644 include/uapi/linux/sev-guest.h
-
+ 	if (!boot_ghcb && !early_setup_sev_es())
+-		sev_es_terminate(GHCB_SEV_ES_REASON_GENERAL_REQUEST);
++		sev_es_terminate(GHCB_SEV_ES_GEN_REQ);
+ 
+ 	vc_ghcb_invalidate(boot_ghcb);
+ 	result = vc_init_em_ctxt(&ctxt, regs, exit_code);
+@@ -202,5 +202,5 @@ void do_boot_stage2_vc(struct pt_regs *regs, unsigned long exit_code)
+ 	if (result == ES_OK)
+ 		vc_finish_insn(&ctxt);
+ 	else if (result != ES_RETRY)
+-		sev_es_terminate(GHCB_SEV_ES_REASON_GENERAL_REQUEST);
++		sev_es_terminate(GHCB_SEV_ES_GEN_REQ);
+ }
+diff --git a/arch/x86/include/asm/sev-common.h b/arch/x86/include/asm/sev-common.h
+index 2cef6c5a52c2..855b0ec9c4e8 100644
+--- a/arch/x86/include/asm/sev-common.h
++++ b/arch/x86/include/asm/sev-common.h
+@@ -68,8 +68,8 @@
+ 	(((((u64)reason_set) &  GHCB_MSR_TERM_REASON_SET_MASK) << GHCB_MSR_TERM_REASON_SET_POS) | \
+ 	((((u64)reason_val) & GHCB_MSR_TERM_REASON_MASK) << GHCB_MSR_TERM_REASON_POS))
+ 
+-#define GHCB_SEV_ES_REASON_GENERAL_REQUEST	0
+-#define GHCB_SEV_ES_REASON_PROTOCOL_UNSUPPORTED	1
++#define GHCB_SEV_ES_GEN_REQ		0
++#define GHCB_SEV_ES_PROT_UNSUPPORTED	1
+ 
+ #define GHCB_RESP_CODE(v)		((v) & GHCB_MSR_INFO_MASK)
+ 
+diff --git a/arch/x86/kernel/sev-shared.c b/arch/x86/kernel/sev-shared.c
+index ff1e82ff52d9..007bc25d265c 100644
+--- a/arch/x86/kernel/sev-shared.c
++++ b/arch/x86/kernel/sev-shared.c
+@@ -210,7 +210,7 @@ void __init do_vc_no_ghcb(struct pt_regs *regs, unsigned long exit_code)
+ 
+ fail:
+ 	/* Terminate the guest */
+-	sev_es_terminate(GHCB_SEV_ES_REASON_GENERAL_REQUEST);
++	sev_es_terminate(GHCB_SEV_ES_GEN_REQ);
+ }
+ 
+ static enum es_result vc_insn_string_read(struct es_em_ctxt *ctxt,
+diff --git a/arch/x86/kernel/sev.c b/arch/x86/kernel/sev.c
+index 4d0d1c2b65e1..9b3b41a7844f 100644
+--- a/arch/x86/kernel/sev.c
++++ b/arch/x86/kernel/sev.c
+@@ -1397,7 +1397,7 @@ DEFINE_IDTENTRY_VC_KERNEL(exc_vmm_communication)
+ 		show_regs(regs);
+ 
+ 		/* Ask hypervisor to sev_es_terminate */
+-		sev_es_terminate(GHCB_SEV_ES_REASON_GENERAL_REQUEST);
++		sev_es_terminate(GHCB_SEV_ES_GEN_REQ);
+ 
+ 		/* If that fails and we get here - just panic */
+ 		panic("Returned from Terminate-Request to Hypervisor\n");
+@@ -1445,7 +1445,7 @@ bool __init handle_vc_boot_ghcb(struct pt_regs *regs)
+ 
+ 	/* Do initial setup or terminate the guest */
+ 	if (unlikely(boot_ghcb == NULL && !sev_es_setup_ghcb()))
+-		sev_es_terminate(GHCB_SEV_ES_REASON_GENERAL_REQUEST);
++		sev_es_terminate(GHCB_SEV_ES_GEN_REQ);
+ 
+ 	vc_ghcb_invalidate(boot_ghcb);
+ 
 -- 
 2.25.1
 
