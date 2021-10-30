@@ -2,128 +2,226 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 30B7DC433F5
-	for <linux-efi@archiver.kernel.org>; Fri, 29 Oct 2021 17:09:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E761AC433EF
+	for <linux-efi@archiver.kernel.org>; Sat, 30 Oct 2021 18:28:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1230E60FC4
-	for <linux-efi@archiver.kernel.org>; Fri, 29 Oct 2021 17:09:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C4E0860FC1
+	for <linux-efi@archiver.kernel.org>; Sat, 30 Oct 2021 18:28:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229888AbhJ2RLa (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 29 Oct 2021 13:11:30 -0400
-Received: from mga12.intel.com ([192.55.52.136]:60890 "EHLO mga12.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229826AbhJ2RL3 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 29 Oct 2021 13:11:29 -0400
-X-IronPort-AV: E=McAfee;i="6200,9189,10152"; a="210760063"
-X-IronPort-AV: E=Sophos;i="5.87,193,1631602800"; 
-   d="scan'208";a="210760063"
-Received: from orsmga005.jf.intel.com ([10.7.209.41])
-  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Oct 2021 10:08:55 -0700
-X-IronPort-AV: E=Sophos;i="5.87,193,1631602800"; 
-   d="scan'208";a="665898260"
-Received: from jongchoi-mobl.amr.corp.intel.com (HELO [10.212.201.61]) ([10.212.201.61])
-  by orsmga005-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Oct 2021 10:08:54 -0700
-Subject: Re: [PATCH v2 0/5] [RFC] x86: Export information about hardware
- memory encryption to sysfs
-To:     Martin Fernandez <martin.fernandez@eclypsium.com>,
-        Borislav Petkov <bp@alien8.de>
-Cc:     Richard Hughes <hughsient@gmail.com>, linux-efi@vger.kernel.org,
-        Platform Driver <platform-driver-x86@vger.kernel.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Ingo Molnar <mingo@redhat.com>, X86 ML <x86@kernel.org>,
-        "H. Peter Anvin" <hpa@zytor.com>,
-        Dave Hansen <dave.hansen@linux.intel.com>,
-        Andy Lutomirski <luto@kernel.org>,
-        Peter Zijlstra <peterz@infradead.org>, ardb@kernel.org,
-        dvhart@infradead.org, andy@infradead.org,
-        Greg KH <gregkh@linuxfoundation.org>, rafael@kernel.org,
-        Daniel Gutson <daniel.gutson@eclypsium.com>
-References: <20211027195511.207552-1-martin.fernandez@eclypsium.com>
- <8a8e0743-e54d-ec96-da4e-1d101b550274@intel.com>
- <CAKgze5Z3fT9F0S-mogfP6is9sL3=0imtCbfy6ZYrd3zgaBUqRg@mail.gmail.com>
- <YXq50yzJQqrJk13v@zn.tnic>
- <CAD2FfiFS++2-Sn5nCft8Eb-R41MM6abCjXyDn8bOVY-_miCpRA@mail.gmail.com>
- <YXrRN+pDr4Uv5p0t@zn.tnic>
- <CAKgze5av=duAc+inw6XnroT1WxHoP6pA2=Bb2tjK45yO6aDfOg@mail.gmail.com>
-From:   Dave Hansen <dave.hansen@intel.com>
-Autocrypt: addr=dave.hansen@intel.com; keydata=
- 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
- z5cecg==
-Message-ID: <b2de42c1-e973-0f4a-635f-8e8bbaebbfa5@intel.com>
-Date:   Fri, 29 Oct 2021 10:08:52 -0700
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        id S229863AbhJ3Sa5 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 30 Oct 2021 14:30:57 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:36613 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229474AbhJ3Sa5 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 30 Oct 2021 14:30:57 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1635618506;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=1cdF+sE/SLgTIc7hDDLi/Ba/YvIkdSSZy+iz0SwSwrw=;
+        b=GFfbNoDWeEW2HzHLyYPxWAQ/sge4deqZCrmgHkRb07GhLHIkRYjEXR0mGlosYxsOculS0D
+        zTjLbcgMXl8Ohxqebx4ge3qChVDF7HOVc15Fhosp3DYZD0F3E/CxqHPa654iEVCqIs0W1F
+        d5h2HsBLRsK5pxD2LoDlI59c7RQjHh0=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-268-BkS4txVNN-GYa76GsBKkJQ-1; Sat, 30 Oct 2021 14:28:22 -0400
+X-MC-Unique: BkS4txVNN-GYa76GsBKkJQ-1
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id B5E4F362F9;
+        Sat, 30 Oct 2021 18:28:20 +0000 (UTC)
+Received: from x1.localdomain (unknown [10.39.192.75])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id E95575F4E1;
+        Sat, 30 Oct 2021 18:28:17 +0000 (UTC)
+From:   Hans de Goede <hdegoede@redhat.com>
+To:     Mark Gross <markgross@kernel.org>,
+        Andy Shevchenko <andy@infradead.org>,
+        Wolfram Sang <wsa@the-dreams.de>,
+        Sebastian Reichel <sre@kernel.org>,
+        MyungJoo Ham <myungjoo.ham@samsung.com>,
+        Chanwoo Choi <cw00.choi@samsung.com>,
+        Ard Biesheuvel <ardb@kernel.org>
+Cc:     Hans de Goede <hdegoede@redhat.com>,
+        Yauhen Kharuzhy <jekhor@gmail.com>,
+        Tsuchiya Yuto <kitakar@gmail.com>,
+        platform-driver-x86@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-efi@vger.kernel.org
+Subject: [PATCH 01/13] platform/x86: Rename touchscreen_dmi to dmi_device_properties
+Date:   Sat, 30 Oct 2021 20:28:01 +0200
+Message-Id: <20211030182813.116672-2-hdegoede@redhat.com>
+In-Reply-To: <20211030182813.116672-1-hdegoede@redhat.com>
+References: <20211030182813.116672-1-hdegoede@redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <CAKgze5av=duAc+inw6XnroT1WxHoP6pA2=Bb2tjK45yO6aDfOg@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On 10/28/21 10:39 AM, Martin Fernandez wrote:
-> On 10/28/21, Borislav Petkov <bp@alien8.de> wrote:
->> Why cannot this be a userspace program, script, tool, whatever?
-> Because it's not convenient to parse dmesg. And about /proc/cpuinfo,
-> it tells you about TME, as a feature of the cpu but it doesn't tell
-> you if it is activated, and even if it is activated you will need to
-> be sure that you are storing your data in a region flagged with this
-> new attribute.
-> 
-> Here we discussed about it some time ago:
-> http://lkml.iu.edu/hypermail/linux/kernel/2006.2/06753.html . That
-> comment is what triggered this patch.
+The ability to attach device-properties to (I2C) devices based on
+a DMI + I2C device-name match to address the hw-description in
+some ACPI tables being incomplete is useful for more things then just
+touchscreens. Rename the Kconfig option and file to reflect this.
 
-Martin,
+The specific use-case triggering this change is describing the
+hardware surrounding the Whiskey Cove PMIC found on several
+Cherry Trail based devices. At least 3 configs are known:
 
-I don't think this interface makes any sense at all for something off of
-which to base firmware updates.  It's just too noisy.
+1. The WC PMIC is connected to a TI BQ24292i charger, paired with
+   a Maxim MAX17047 fuelgauge + a FUSB302 USB Type-C Controller +
+   a PI3USB30532 USB switch, for a fully functional Type-C port
 
-That said, I *do* think we are going to need something similar to what
-you propose here because folks are going to want to target memory
-allocations to NUMA nodes that have encryption capabilities.
+2. The WC PMIC is connected to a TI BQ25890 charger, paired with
+   a TI BQ27520 fuelgauge, for a USB-2 only Type-C port without PD
 
-But, I don't think what you've proposed here fits very well there.  The
-->cpu_local thing looks totally broken.  It's entirely unclear what
-users are supposed to do when the crypto_capable file is not present.
+3. The WC PMIC is connected to a TI BQ25890 charger, paired with
+   a TI BQ27542 fuelgauge, for a micro-USB port
+
+And various drivers (extcon-intel-cht-wc.c, i2c-cht-wc.c, ...) need
+to know which config they are dealing with.
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+ MAINTAINERS                                   |  2 +-
+ drivers/firmware/efi/embedded-firmware.c      |  4 ++--
+ drivers/platform/x86/Kconfig                  | 20 ++++++++++---------
+ drivers/platform/x86/Makefile                 |  2 +-
+ ...chscreen_dmi.c => dmi_device_properties.c} |  8 ++++----
+ include/linux/efi_embedded_fw.h               |  2 +-
+ 6 files changed, 20 insertions(+), 18 deletions(-)
+ rename drivers/platform/x86/{touchscreen_dmi.c => dmi_device_properties.c} (99%)
+
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 09abc1d84a7f..fe6a952c0232 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -17156,7 +17156,7 @@ L:	linux-input@vger.kernel.org
+ L:	platform-driver-x86@vger.kernel.org
+ S:	Maintained
+ F:	drivers/input/touchscreen/silead.c
+-F:	drivers/platform/x86/touchscreen_dmi.c
++F:	drivers/platform/x86/dmi_device_properties.c
+ 
+ SILICON LABS WIRELESS DRIVERS (for WFxxx series)
+ M:	Jérôme Pouiller <jerome.pouiller@silabs.com>
+diff --git a/drivers/firmware/efi/embedded-firmware.c b/drivers/firmware/efi/embedded-firmware.c
+index f5be8e22305b..f8212af0ba5e 100644
+--- a/drivers/firmware/efi/embedded-firmware.c
++++ b/drivers/firmware/efi/embedded-firmware.c
+@@ -21,8 +21,8 @@ bool efi_embedded_fw_checked;
+ EXPORT_SYMBOL_NS_GPL(efi_embedded_fw_checked, TEST_FIRMWARE);
+ 
+ static const struct dmi_system_id * const embedded_fw_table[] = {
+-#ifdef CONFIG_TOUCHSCREEN_DMI
+-	touchscreen_dmi_table,
++#ifdef CONFIG_DMI_DEVICE_PROPERTIES
++	dmi_device_properties,
+ #endif
+ 	NULL
+ };
+diff --git a/drivers/platform/x86/Kconfig b/drivers/platform/x86/Kconfig
+index b110a2e6b8f3..9cb8d33cc6e1 100644
+--- a/drivers/platform/x86/Kconfig
++++ b/drivers/platform/x86/Kconfig
+@@ -981,17 +981,19 @@ config MLX_PLATFORM
+ 
+ 	  If you have a Mellanox system, say Y or M here.
+ 
+-config TOUCHSCREEN_DMI
+-	bool "DMI based touchscreen configuration info"
+-	depends on ACPI && DMI && I2C=y && TOUCHSCREEN_SILEAD
++config DMI_DEVICE_PROPERTIES
++	bool "DMI based extra device properties"
++	depends on ACPI && DMI && I2C=y
+ 	select EFI_EMBEDDED_FIRMWARE if EFI
+ 	help
+-	  Certain ACPI based tablets with e.g. Silead or Chipone touchscreens
+-	  do not have enough data in ACPI tables for the touchscreen driver to
+-	  handle the touchscreen properly, as OEMs expect the data to be baked
+-	  into the tablet model specific version of the driver shipped with the
+-	  the OS-image for the device. This option supplies the missing info.
+-	  Enable this for x86 tablets with Silead or Chipone touchscreens.
++	  Sometimes ACPI based x86 devices do not have enough data in their ACPI
++	  tables to fully describe the hardware. This option enables support for
++	  supplying the missing info based on DMI (vendor & model string)
++	  matching for devices where this info has been added to the
++	  dmi-device-properties code.
++
++	  This option is often necessary for correct operation of x86 based
++	  tablets and 2-in-1 devices. If in doubt, say Y here.
+ 
+ config FW_ATTR_CLASS
+ 	tristate
+diff --git a/drivers/platform/x86/Makefile b/drivers/platform/x86/Makefile
+index 219478061683..3f610332b556 100644
+--- a/drivers/platform/x86/Makefile
++++ b/drivers/platform/x86/Makefile
+@@ -107,10 +107,10 @@ obj-$(CONFIG_SYSTEM76_ACPI)	+= system76_acpi.o
+ obj-$(CONFIG_TOPSTAR_LAPTOP)	+= topstar-laptop.o
+ 
+ # Platform drivers
++obj-$(CONFIG_DMI_DEVICE_PROPERTIES)	+= dmi_device_properties.o
+ obj-$(CONFIG_FW_ATTR_CLASS)		+= firmware_attributes_class.o
+ obj-$(CONFIG_I2C_MULTI_INSTANTIATE)	+= i2c-multi-instantiate.o
+ obj-$(CONFIG_MLX_PLATFORM)		+= mlx-platform.o
+-obj-$(CONFIG_TOUCHSCREEN_DMI)		+= touchscreen_dmi.o
+ obj-$(CONFIG_WIRELESS_HOTKEY)		+= wireless-hotkey.o
+ 
+ # Intel uncore drivers
+diff --git a/drivers/platform/x86/touchscreen_dmi.c b/drivers/platform/x86/dmi_device_properties.c
+similarity index 99%
+rename from drivers/platform/x86/touchscreen_dmi.c
+rename to drivers/platform/x86/dmi_device_properties.c
+index b5d007875423..1bcd14a0bc78 100644
+--- a/drivers/platform/x86/touchscreen_dmi.c
++++ b/drivers/platform/x86/dmi_device_properties.c
+@@ -1,8 +1,8 @@
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ /*
+- * Touchscreen driver DMI based configuration code
++ * DMI based device-property addition (adding info missing from ACPI tables)
+  *
+- * Copyright (c) 2017 Red Hat Inc.
++ * Copyright (c) 2017-2021 Red Hat Inc.
+  *
+  * Red Hat authors:
+  * Hans de Goede <hdegoede@redhat.com>
+@@ -979,7 +979,7 @@ static const struct ts_dmi_data vinga_twizzle_j116_data = {
+ };
+ 
+ /* NOTE: Please keep this table sorted alphabetically */
+-const struct dmi_system_id touchscreen_dmi_table[] = {
++const struct dmi_system_id dmi_device_properties[] = {
+ 	{
+ 		/* Chuwi Hi8 */
+ 		.driver_data = (void *)&chuwi_hi8_data,
+@@ -1633,7 +1633,7 @@ static int __init ts_dmi_init(void)
+ 	const struct dmi_system_id *dmi_id;
+ 	int error;
+ 
+-	dmi_id = dmi_first_match(touchscreen_dmi_table);
++	dmi_id = dmi_first_match(dmi_device_properties);
+ 	if (!dmi_id)
+ 		return 0; /* Not an error */
+ 
+diff --git a/include/linux/efi_embedded_fw.h b/include/linux/efi_embedded_fw.h
+index a97a12bb2c9e..01105c38a309 100644
+--- a/include/linux/efi_embedded_fw.h
++++ b/include/linux/efi_embedded_fw.h
+@@ -34,7 +34,7 @@ struct efi_embedded_fw_desc {
+ 	u8 sha256[32];
+ };
+ 
+-extern const struct dmi_system_id touchscreen_dmi_table[];
++extern const struct dmi_system_id dmi_device_properties[];
+ 
+ int efi_get_embedded_fw(const char *name, const u8 **dat, size_t *sz);
+ 
+-- 
+2.31.1
+
