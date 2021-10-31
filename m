@@ -2,129 +2,197 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 055D4C433EF
-	for <linux-efi@archiver.kernel.org>; Sun, 31 Oct 2021 18:08:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E6370C433EF
+	for <linux-efi@archiver.kernel.org>; Sun, 31 Oct 2021 19:50:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E013460E8F
-	for <linux-efi@archiver.kernel.org>; Sun, 31 Oct 2021 18:08:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BF7C160ED3
+	for <linux-efi@archiver.kernel.org>; Sun, 31 Oct 2021 19:50:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230285AbhJaSKs (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 31 Oct 2021 14:10:48 -0400
-Received: from sauhun.de ([88.99.104.3]:34120 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230309AbhJaSKr (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Sun, 31 Oct 2021 14:10:47 -0400
-X-Greylist: delayed 561 seconds by postgrey-1.27 at vger.kernel.org; Sun, 31 Oct 2021 14:10:47 EDT
-Received: from localhost (p5de04e1e.dip0.t-ipconnect.de [93.224.78.30])
-        by pokefinder.org (Postfix) with ESMTPSA id B2A1D2C0093;
-        Sun, 31 Oct 2021 18:58:40 +0100 (CET)
-Date:   Sun, 31 Oct 2021 18:58:37 +0100
-From:   Wolfram Sang <wsa@the-dreams.de>
+        id S229838AbhJaTwv (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 31 Oct 2021 15:52:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35360 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229745AbhJaTwu (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sun, 31 Oct 2021 15:52:50 -0400
+Received: from mail-ed1-x534.google.com (mail-ed1-x534.google.com [IPv6:2a00:1450:4864:20::534])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3E476C061570;
+        Sun, 31 Oct 2021 12:50:16 -0700 (PDT)
+Received: by mail-ed1-x534.google.com with SMTP id m14so4600486edd.0;
+        Sun, 31 Oct 2021 12:50:16 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=NZOhoPZ1UsW3Q2cSKLXaXRiYKNcpoaTbLA9PDJGYSsU=;
+        b=MYP0svOVSB///qDnzDmKDBIIkyqXDZbE02CGarXWXmdbn2ndKfCAetGjFmj9BXH05m
+         6iU+CllDu5MBIunvCLEdkmsjecvbfoBtgaliCdV1OU8oNEhTpgvQqHJ17nhgl72KQSvU
+         JdT16f6BZd4JC1e57mY2UCuBlQ6myuJWU6T7xKec2/H6P4+PoAczsqBeR5Bf+I6kFtXJ
+         IPZ0yu87mtcG8xOCueXXHh7NAtriZxrxhCOejSnNDCz8hJSRiFg9zDdBxSKVWZxpYwO8
+         6y/Wxahp1111eBJkPIjDWNppQe637dKXNxbWErCC5iv9bEAmub7aAWNc6A+9A7J6CKqC
+         Zkxg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=NZOhoPZ1UsW3Q2cSKLXaXRiYKNcpoaTbLA9PDJGYSsU=;
+        b=ClOCqW/z35VyzI+owTMK0VZadfPGmxXQiMKvM95PGx8rnOA0M/GGOhgdGMe3XkqTex
+         vUn1RML5T21uYmcZkwVOnnofwIzirqieENFkRvOwpS00aUwHDmR5RqbqAyLOPBRLHzMu
+         zMbFvvw/k029tc0jSJWiTlY9usM8hgElHH+YsT94t9Kk1UXIDu0admfZfThifnHsB8OT
+         +QU5O8nZ5UFI5EjWihx1tyDa+eRhn6C2BZ6pCxCxXvM5eeG/zyTUHFPflBDREaG88cCM
+         fRGsqgxyXykT1GKhjU5qWvRAV9zCxJNLy4d2smYChrDewkn3M/fsbnWDY0+kMY7b+xTM
+         fMhg==
+X-Gm-Message-State: AOAM5324z2O1NP1S0PJdurezVU8awjOClDyOMJVUHsrk7URc3Ng0osym
+        BuQo+OiX5yzfVITCZrMpD5KAqKyYg0xmXX+vkxw=
+X-Google-Smtp-Source: ABdhPJxPogPqOtx+XhQdhjfHNyKJ5/pSIaEuGMfO18vdCBpSYqcIgcFYEfAK6Foid49HydOdqQRy3GRsviKh/cNpzu0=
+X-Received: by 2002:a17:906:d553:: with SMTP id cr19mr30032288ejc.128.1635709814768;
+ Sun, 31 Oct 2021 12:50:14 -0700 (PDT)
+MIME-Version: 1.0
+References: <20211031162428.22368-1-hdegoede@redhat.com>
+In-Reply-To: <20211031162428.22368-1-hdegoede@redhat.com>
+From:   Andy Shevchenko <andy.shevchenko@gmail.com>
+Date:   Sun, 31 Oct 2021 21:49:38 +0200
+Message-ID: <CAHp75VdFcfEyEsFWVS_zxr-aehpqELAwN1eBs-KHVkEwxO2e5Q@mail.gmail.com>
+Subject: Re: [RFC 0/5] ACPI/power-suppy add fuel-gauge support on cht-wc PMIC
+ without USB-PD support devs
 To:     Hans de Goede <hdegoede@redhat.com>
-Cc:     Mark Gross <markgross@kernel.org>,
-        Andy Shevchenko <andy@infradead.org>,
-        Sebastian Reichel <sre@kernel.org>,
-        MyungJoo Ham <myungjoo.ham@samsung.com>,
-        Chanwoo Choi <cw00.choi@samsung.com>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Yauhen Kharuzhy <jekhor@gmail.com>,
-        Tsuchiya Yuto <kitakar@gmail.com>,
-        platform-driver-x86@vger.kernel.org, linux-i2c@vger.kernel.org,
-        linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-efi@vger.kernel.org
-Subject: Re: [PATCH 11/13] i2c: cht-wc: Add support for devices using a
- bq25890 charger
-Message-ID: <YX7ZTXbD0F+n3M36@kunai>
-Mail-Followup-To: Wolfram Sang <wsa@the-dreams.de>,
-        Hans de Goede <hdegoede@redhat.com>,
+Cc:     "Rafael J . Wysocki" <rjw@rjwysocki.net>,
+        Mika Westerberg <mika.westerberg@linux.intel.com>,
         Mark Gross <markgross@kernel.org>,
         Andy Shevchenko <andy@infradead.org>,
+        Wolfram Sang <wsa@the-dreams.de>,
         Sebastian Reichel <sre@kernel.org>,
         MyungJoo Ham <myungjoo.ham@samsung.com>,
         Chanwoo Choi <cw00.choi@samsung.com>,
-        Ard Biesheuvel <ardb@kernel.org>,
+        Ard Biesheuvel <ardb@kernel.org>, Len Brown <lenb@kernel.org>,
+        ACPI Devel Maling List <linux-acpi@vger.kernel.org>,
         Yauhen Kharuzhy <jekhor@gmail.com>,
         Tsuchiya Yuto <kitakar@gmail.com>,
-        platform-driver-x86@vger.kernel.org, linux-i2c@vger.kernel.org,
-        linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-efi@vger.kernel.org
-References: <20211030182813.116672-1-hdegoede@redhat.com>
- <20211030182813.116672-12-hdegoede@redhat.com>
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="HlSTOP0HHK83WUVH"
-Content-Disposition: inline
-In-Reply-To: <20211030182813.116672-12-hdegoede@redhat.com>
+        Platform Driver <platform-driver-x86@vger.kernel.org>,
+        linux-i2c <linux-i2c@vger.kernel.org>,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-efi <linux-efi@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
+On Sun, Oct 31, 2021 at 6:25 PM Hans de Goede <hdegoede@redhat.com> wrote:
+>
+> Hi All,
+>
+> Together with my earlier series to hookup the charger, Vbus boost converter
+> and USB role-switching:
+> https://lore.kernel.org/platform-driver-x86/20211030182813.116672-1-hdegoede@redhat.com/T/#t
+>
+> This series also adds battery-monitoring support on the Xiaomi Mi Pad 2
+> and the generic parts of it should also be usable on other devices with
+> the same PMIC setup.
+>
+> I've marked this series as a RFC because I'm not happy about the amount of
+> DMI quirks this series requires. The 3 separate quirks in
+> drivers/acpi/x86/utils.c are a bit much, but esp. when combined with also
+> the changes needed in drivers/gpio/gpiolib-acpi.c it all becomes a bit too
+> much special casing for just a single device.
+>
+> So I've been thinking about alternatives for this and I've come up with
+> 3 ways to deal with this:
+>
+> 1. This patch set.
+>
+> 2. Instead of the quirks in drivers/acpi/x86/utils.c, write an old-fashioned
+> "board" .c file/module which autoloads based on a DMI match and manually
+> instantiates i2c-clients for the BQ27520 fuel-gauge and the KTD20260 LED ctrlr.
+> Combined with not giving an IRQ to the fuel-gauge i2c-client (i), this allows
+> completely dropping the gpiolib-acpi.c changes and only requires 1 quirk for
+> the 2nd PWM controller in drivers/acpi/x86/utils.c. As an added bonus this
+> approach will also removes the need to add ACPI enumeration support to the
+> bq27xxx_battery code.
+>
+> 3. While working on this I noticed that the Mi Pad 2 DSDT actually has
+> full ac and battery ACPI code in its DSDT, which Linux was not trying to
+> use because of the Whiskey Cove PMIC ACPI HID in acpi_ac_blacklist[] in
+> drivers/apci/ac.c, resp. a missing _DEP for the ACPI battery.
+>
+> With the native drivers disabled (the default in 5.15-rc7 without patches),
+> both those things fixed and a fix to intel_pmic_regs_handler() in
+> drivers/acpi/pmic/intel_pmic.c, battery monitoring actually starts working
+> somwhat!
+>
+> I say somewhat because changes are not detected until userspace polls
+> the power_supply and switching from charge/device to host mode and
+> back does not work at all. This is due to the AML code for this relying
+> on _AEI ACPI events on virtual GPIOs on the PMIC :|  This means that we
+> would need to reverse engineer which events these virtual GPIO interrupts
+> represent; and then somehow rework the whole MFD + child driver setup
+> to deliver, e.g. extcon/pwrsrc events to a to-be-written GPIO driver
+> which supports these virtual GPIOs, while at the same time also keeping
+> normal native driver support since boards which USB-PD support need the
+> native drivers...  So OTOH this option has the promise of solving this
+> in a generic way which may work on more boards, OTOH it is a big mess
+> and we lack documentation for it.  Interestingly enough the ACPI
+> battery/ac code also takes ownership of the notification LED, downgrading
+> it from a full RGB led to a green charging LED, which is both a pre
+> and a con at the same time (since we would loose full RGB function).
+>
+> ###
 
---HlSTOP0HHK83WUVH
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+> Although I started out with implementing option 1, I now think I
+> Would personally prefer option 2. This isolates most of the code
+> needed to support some of these special boards into a single
+> (per board) file which can be build as a module which can be
+> autoloaded, rather then growing vmlinuz by adding quirks there.
 
-On Sat, Oct 30, 2021 at 08:28:11PM +0200, Hans de Goede wrote:
-> The i2c-controller on the Cherry Trail - Whiskey Cove PMIC is special
-> in that it is always connected to the I2C charger IC of the board on
-> which the PMIC is used; and the charger IC is not described in ACPI,
-> so the i2c-cht-wc code needs to instantiate an i2c-client for it itself.
->=20
-> So far there has been a rudimentary check to make sure the ACPI tables
-> are at least somewhat as expected by checking for the presence of an
-> INT33FE device and sofar the code has assumed that if this INT33FE
-> device is present that the used charger then is a bq24290i.
->=20
-> But some boards with an INT33FE device in their ACPI tables use a
-> different charger IC and some boards don't have an INT33FE device at all.
->=20
-> Since the information about the used charger + fuel-gauge + other chips is
-> necessary in other places too, the kernel now adds a "intel,cht-wc-setup"
-> string property to the Whiskey Cove PMIC i2c-client based on DMI matching,
-> which reliably describes the board's setup of the PMIC.
->=20
-> Switch to using the "intel,cht-wc-setup" property and add support for
-> instantiating an i2c-client for either a bq24292i or a bq25890 charger.
->=20
-> This has been tested on a GPD pocket (which uses the old bq24292i setup)
-> and on a Xiaomi Mi Pad 2 with a bq25890 charger.
->=20
-> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+Even before reading this my attention was on option 2 as well.
+However, we might give another round of searching the documentation
+for the vGPIO lines.
 
-In general, fine with me from the I2C side:
+Meanwhile, have you tried to see if Android tree(s) has(ve) the
+patches related to all this? (I'm a bit sceptical they do the right
+thing and most probably just fall into board files case)
 
-Acked-by: Wolfram Sang <wsa@kernel.org>
+> The downside would be this sorta re-introduces the old ARM model
+> of one board file per (special-case) board, but there are only
+> 1 or 2 more x86 tablets (ii) that I know about which may also
+> need such a board file. Which I think is managable and should
+> not run into the original objections against the original ARM
+> approach where there were way too many board files in the end.
+>
+> Option 3 IMHO is a no go unless someone at Intel manages to
+> come up with documentation on all the virtual GPIOs which the
+> Windows PMIC drivers implement as method of communicating
+> between the PMIC driver and the AML code in the DSDT.
+>
+> I'm a bit in dubio about how to progress with this, so I would
+> love to hear what others think about this. I would esp. appreciate
+> Rafael's and Mika's input on this since most of the added ugliness
+> in this RFC is in the ACPI code.
+>
+> Regards,
+>
+> Hans
+>
+>
+> i) This means that the _AEI ACPI handler for the fuel-gauge will run on
+> FG interrupts. This is fine it does a single I2C read and a couple of
+> ACPI notifies which will get ignored. Note the interrupts are "something
+> changed" pulses which don't need IRQ clearing.
+>
+> ii) There are not that many CHT boards with a Whiskey Cove PMIC, other
+> then the GPD win/pocket with full USB-PD support and the Xiaomi Mi Pad 2
+> I'm only aware of one other, the Lenovo Yoga Book YB1-X91L/F . Since this
+> whole saga has gotten me quite curious and I already have the other
+> 2 devices I've decided to spend some money on this and bought a 2nd hand
+> Lenovo Yoga Book YB1-X91L, whose setup is similar to the Mi Pad 2.
+> I should have this in about a week. I'll post a reply to this thread
+> with info no how the DSDT looks on the Lenovo Yoga Book and if e.g.
+> using the standard ACPI battery interface seems to be an option there.
+>
+> iii) Note the "power: supply: bq27xxx: Add dev helper variable to
+> bq27xxx_battery_i2c_probe()" patch applies on top of the
+> "power: supply: bq27xxx: Fix kernel crash on IRQ handler register error"
+> bug-fix which I send out earlier.
 
-
-> +	else if (!strcmp(str, "bq24292i,max17047,fusb302,pi3usb30532"))
-> +		board_info =3D &bq24190_board_info;
-> +	else if (!strcmp(str, "bq25890,bq27520"))
-> +		board_info =3D &bq25890_board_info;
-
-Very minor nit: I prefer 'strcmp() =3D=3D 0' because the above could be read
-as 'if not strcmp()' which is sadly misleading. But I am not strict with
-it.
-
-
---HlSTOP0HHK83WUVH
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmF+2UgACgkQFA3kzBSg
-KbYmyg//ZFQBxYsRGPbdXLc7APBbxDE5qYmiiYJcZJnDc5S6/lKyh4ZoaOOeTGPv
-LNw6jEPZQmjtHbZD72e4PfDY4FHmHCcj/6jZjmj3ftWzqS3wzQdzqXjC4qvkEHsd
-ZHTa0BbSdb7sXWMo32Uf2ouTAeuMluVsbkEcwrFDvSKC39o/G1FsyTw4CHKphkOw
-EmtFTRPnNhpvUKEA3PBVLojCtAIeg8d1j8t1KR7+1A/V7m82WNTRWh4MKZgCqTd9
-0AqGamhOvc9DLok/cnzFxUICbaTpohBY5jDgP3WXlZBUGgpwOAVtvl4d7hMFhPhm
-D9BJtASdC8H98ARoM8ELyrDjeVvZzxPxipyg+3oX77XAUePQUGV41ml2NKvQ5dCm
-/iQWM/8Whrp+0lOMixkgZM3OtCjCWrH/p52WxAMk6Hyx4JqHTeTB7TNJjJTb8C25
-2eYFXuC5P9gfW+FeMwt1LJ5QypNcG75JkYCO1AhoHz2eXdirSM5B2FFxUVZ4mMs9
-rawpBnTG8EYUlP7HK6cNrkfCZC9azuYJ/ODNlYL/AE7Fb0TrPjYnXSMgYvD06pkC
-Mh7NUZiz5KbXdRpgTm+IWDpevccXjslMtCmEatbmnr2tBObepvjy2qWIeZKY0jma
-0RQbCFmpAWVziKgzozj1KJ78Psuv9vTdl0MpvTPN0uSWdc1SKjM=
-=f7kV
------END PGP SIGNATURE-----
-
---HlSTOP0HHK83WUVH--
+-- 
+With Best Regards,
+Andy Shevchenko
