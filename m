@@ -2,125 +2,151 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 12FC2C433F5
-	for <linux-efi@archiver.kernel.org>; Sun, 31 Oct 2021 12:52:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 64958C433EF
+	for <linux-efi@archiver.kernel.org>; Sun, 31 Oct 2021 16:24:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DEF7F60F93
-	for <linux-efi@archiver.kernel.org>; Sun, 31 Oct 2021 12:52:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 434D360F93
+	for <linux-efi@archiver.kernel.org>; Sun, 31 Oct 2021 16:24:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229877AbhJaMzV (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 31 Oct 2021 08:55:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57620 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229798AbhJaMzV (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sun, 31 Oct 2021 08:55:21 -0400
-Received: from mail-lf1-x12c.google.com (mail-lf1-x12c.google.com [IPv6:2a00:1450:4864:20::12c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6269DC061570;
-        Sun, 31 Oct 2021 05:52:49 -0700 (PDT)
-Received: by mail-lf1-x12c.google.com with SMTP id bu18so13856717lfb.0;
-        Sun, 31 Oct 2021 05:52:49 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=KsU6C8DCbzTsNFFfktVF1wri/7sdYIU4HQYUbAWLagc=;
-        b=PhslQAKvrpeIN7feHYjaT5Px4ASWnFZP1fd1o0IpUunKpikQj842qisdh07HLB74Iy
-         +4tGrRWCvDG2rV5CDp5eA6bZ310HUXb6vtZfp98kFUnTEPlRpTL24qpi6l/iaMlg+jWZ
-         DjYjQUy0//T74C8jPP0cr9BffYT8HwbznZ5ccT+pW7pJPRVsq0ia1QN4pwDxTNz5dcHr
-         vrV95BTa2gZym8+wBR222hBgJBK0bLKgGlyqgpA5zpQxL8hhbxh6s01/1//ouL9Ju57H
-         1zgshTF8xcfZwKSepeqn5E1uvYMaMedTR4Ukvrx3WrWHOaGB3Cvg3tzIcjafR9eQdWfB
-         iKyA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=KsU6C8DCbzTsNFFfktVF1wri/7sdYIU4HQYUbAWLagc=;
-        b=O13/7zCjlVGlzoL/1OIedA0cKiFs3zHozZyVs0yBRnyRd2vDOmjDaXqcAGgJFrkI1+
-         7hvTzJ7bs43JZ55PdOxxLosAPZg4iXXAA9w3eIHl5IKkxhFz6haj2sVxDJHsrOzRHt5C
-         HRnhhJjtHepQ1BA3FaqqRLs3zIvCuiLj/24RBZ52RppJk5SVOwjoUHch4XK/umP7z1nD
-         kIeEgHHjb41BLjZe1fDQBAIY3DvX7q3fJt5/qWXZ2+FE8LFXO+fBtsn05y36FaKfSwim
-         PcOC6epQXSHnQRUPJIXq8d73LzE0BpHPuDTwe9Eq+f6uEPRFnIKMjcQ3Xyb9yAZj3RxS
-         jWGQ==
-X-Gm-Message-State: AOAM532ZyzNI1CpqU4Tz/2aUzdZylQsknOrPiA8vjwAFVDygvxW2LwL6
-        aOXqeqsdQ5JTQKc3MweA/0eRsl81fIBrAjznjHM=
-X-Google-Smtp-Source: ABdhPJzKIgyiS9xupKWX+ht1y8HzbkQ9S2BGp5QpsvkwXuwzgDgydBnU1hAMgz/1QNnxMJSFj38Hdmd26EuI/eqD7VE=
-X-Received: by 2002:a05:6512:acd:: with SMTP id n13mr21685799lfu.60.1635684767624;
- Sun, 31 Oct 2021 05:52:47 -0700 (PDT)
-MIME-Version: 1.0
-References: <20211030182813.116672-1-hdegoede@redhat.com> <20211030182813.116672-14-hdegoede@redhat.com>
-In-Reply-To: <20211030182813.116672-14-hdegoede@redhat.com>
-From:   Andy Shevchenko <andy.shevchenko@gmail.com>
-Date:   Sun, 31 Oct 2021 14:52:11 +0200
-Message-ID: <CAHp75VfRALjbGaY8rdt5HCte3_NPuwpdkr+GNZV7qMWBK1idWg@mail.gmail.com>
-Subject: Re: [PATCH 13/13] extcon: intel-cht-wc: Add support for devices with
- an USB-micro-B connector
-To:     Hans de Goede <hdegoede@redhat.com>
-Cc:     Mark Gross <markgross@kernel.org>,
+        id S230131AbhJaQ1Q (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 31 Oct 2021 12:27:16 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:37011 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S230081AbhJaQ1N (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sun, 31 Oct 2021 12:27:13 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1635697481;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=FN7A1ujpQU/zFOX8EqwJrJMl7Y0oOgtAm3LGtcEJ7Ko=;
+        b=FStI00fFlE+oEIST/8aOdLmjrip00dx0wO9etNavPKzhJ8ONDQun+1vACGyqpNx1J57mse
+        CO69qLedBQRxYiiMHwmBQNWW87IhJZkfbxkM6Clch57DeMYTOMWaRHWUIZUSdiRBNdR4j0
+        Q3/0Es3KdfajR2elYzg2Ra2MIwjn3gk=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-303-LN3JFnwcPSeZLLd5YiDyLw-1; Sun, 31 Oct 2021 12:24:39 -0400
+X-MC-Unique: LN3JFnwcPSeZLLd5YiDyLw-1
+Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 1EA8F8018AC;
+        Sun, 31 Oct 2021 16:24:37 +0000 (UTC)
+Received: from x1.localdomain.com (unknown [10.39.192.35])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 9F30B1017CE8;
+        Sun, 31 Oct 2021 16:24:33 +0000 (UTC)
+From:   Hans de Goede <hdegoede@redhat.com>
+To:     "Rafael J . Wysocki" <rjw@rjwysocki.net>,
+        Mika Westerberg <mika.westerberg@linux.intel.com>,
+        Mark Gross <markgross@kernel.org>,
         Andy Shevchenko <andy@infradead.org>,
         Wolfram Sang <wsa@the-dreams.de>,
         Sebastian Reichel <sre@kernel.org>,
         MyungJoo Ham <myungjoo.ham@samsung.com>,
         Chanwoo Choi <cw00.choi@samsung.com>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Yauhen Kharuzhy <jekhor@gmail.com>,
+        Ard Biesheuvel <ardb@kernel.org>
+Cc:     Hans de Goede <hdegoede@redhat.com>, Len Brown <lenb@kernel.org>,
+        linux-acpi@vger.kernel.org, Yauhen Kharuzhy <jekhor@gmail.com>,
         Tsuchiya Yuto <kitakar@gmail.com>,
-        Platform Driver <platform-driver-x86@vger.kernel.org>,
-        linux-i2c <linux-i2c@vger.kernel.org>,
-        Linux PM <linux-pm@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-efi <linux-efi@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        platform-driver-x86@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-efi@vger.kernel.org
+Subject: [RFC 1/5] ACPI / x86: Add 3 devices on the Xiaomi Mi Pad 2 to the always_present list
+Date:   Sun, 31 Oct 2021 17:24:24 +0100
+Message-Id: <20211031162428.22368-2-hdegoede@redhat.com>
+In-Reply-To: <20211031162428.22368-1-hdegoede@redhat.com>
+References: <20211031162428.22368-1-hdegoede@redhat.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Sat, Oct 30, 2021 at 9:29 PM Hans de Goede <hdegoede@redhat.com> wrote:
->
-> So far the extcon-intel-cht-wc code has only been tested on devices with
-> a Type-C connector with USB-PD, USB3 (superspeed) and DP-altmode support
-> through a FUSB302 Type-C controller.
->
-> Some devices with the intel-cht-wc PMIC however come with an USB-micro-B
-> connector, or an USB-2 only Type-C connector without USB-PD.
->
-> These device are identified by "intel,cht-wc-setup" = "bq25890,bq27520",
-> since there is no Type-C controller on these devices the extcon code must
-> control the Vbus 5V boost converter and the USB role switch depending on
-> the detected cable-type.
+The Xiaomi Mi Pad 2 ships in both Windows and Android variants and the BIOS
+detects the OS by looking at the EFI executable the efibootmgr entry points
+to. If this executable is not the original Android bootloader (signed with
+Xiaomi's own keys) it detects the OS as Windows and sets the OSID variable
+used in the DSDT to "1".
 
-...
+This causes the following problems when running Linux:
 
-> +       if (ext->vbus_boost && ext->vbus_boost_enabled != enable) {
-> +               if (enable)
-> +                       ret = regulator_enable(ext->vbus_boost);
-> +               else
-> +                       ret = regulator_disable(ext->vbus_boost);
+1. Like many other CHT based tablets the Xiaomi Mi Pad 2 does not have
+   a properly working ACPI battery interface instead we need to load
+   a native driver for the fuel-gauge, but the TXN27520 ACPI device for
+   the fuel-gauge gets hidden when OSID == "1".
 
-> +               if (ret == 0)
-> +                       ext->vbus_boost_enabled = enable;
-> +               else
-> +                       dev_err(ext->dev, "Error updating Vbus boost regulator: %d\n", ret);
+2. There are backlit LEDs behind the capacitive menu, home, back buttons
+   below the screen which are controlled by the second PWM controller of
+   the CHT SoC, this gets hidden when OSID == "1".
 
-if (ret)
- dev_err()
-else
- ...
+3. There is an I2C attached KTD2026 RGB LED controller for the notification
+   LED, this gets hidden when OSID != "4".
 
-?
+Add always_present_ids table entries for these devices so that they are
+always seen as present independent of the OSID value.
 
-> +       }
+Note the TXN27520 ACPI device does not have a UID set, so add support for
+matching devices with no UID.
 
-...
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+ drivers/acpi/x86/utils.c | 27 +++++++++++++++++++++++++--
+ 1 file changed, 25 insertions(+), 2 deletions(-)
 
-
-> +               /*
-> +                * Classic micro USB-B setup, this requires controling
-
-controlling
-
-> +                * the role-sw and vbus based on the id-pin.
-> +                */
-
+diff --git a/drivers/acpi/x86/utils.c b/drivers/acpi/x86/utils.c
+index f22f23933063..831949fda492 100644
+--- a/drivers/acpi/x86/utils.c
++++ b/drivers/acpi/x86/utils.c
+@@ -58,6 +58,11 @@ static const struct always_present_id always_present_ids[] = {
+ 	ENTRY("80862289", "2", X86_MATCH(ATOM_AIRMONT), {
+ 			DMI_MATCH(DMI_PRODUCT_NAME, "Lenovo YB1-X9"),
+ 		}),
++	/* The Xiaomi Mi Pad 2 uses PWM2 for touchkeys backlight control */
++	ENTRY("80862289", "2", X86_MATCH(ATOM_AIRMONT), {
++		DMI_MATCH(DMI_SYS_VENDOR, "Xiaomi Inc"),
++		DMI_MATCH(DMI_PRODUCT_NAME, "Mipad2"),
++	      }),
+ 	/*
+ 	 * The INT0002 device is necessary to clear wakeup interrupt sources
+ 	 * on Cherry Trail devices, without it we get nobody cared IRQ msgs.
+@@ -107,6 +112,24 @@ static const struct always_present_id always_present_ids[] = {
+ 		DMI_MATCH(DMI_PRODUCT_NAME, "Default string"),
+ 		DMI_MATCH(DMI_BIOS_DATE, "05/25/2017")
+ 	      }),
++	/*
++	 * The Xiaomi Mi Pad 2 does not use the ACPI battery interface
++	 * instead we need to load a native driver for the fuel-gauge,
++	 * but if the BIOS thinks we are Windows rather then Android,
++	 * the fuel-gauge ACPI device is hidden.
++	 */
++	ENTRY("TXN27520", NULL, X86_MATCH(ATOM_AIRMONT), {
++		DMI_MATCH(DMI_SYS_VENDOR, "Xiaomi Inc"),
++		DMI_MATCH(DMI_PRODUCT_NAME, "Mipad2"),
++	      }),
++	/*
++	 * The Xiaomi Mi Pad 2 has a RGB LED controller for its notifcation
++	 * LED which is hidden when the BIOS thinks we are Windows, unhide it.
++	 */
++	ENTRY("KTD20260", "1", X86_MATCH(ATOM_AIRMONT), {
++		DMI_MATCH(DMI_SYS_VENDOR, "Xiaomi Inc"),
++		DMI_MATCH(DMI_PRODUCT_NAME, "Mipad2"),
++	      }),
+ };
+ 
+ bool acpi_device_always_present(struct acpi_device *adev)
+@@ -118,8 +141,8 @@ bool acpi_device_always_present(struct acpi_device *adev)
+ 		if (acpi_match_device_ids(adev, always_present_ids[i].hid))
+ 			continue;
+ 
+-		if (!adev->pnp.unique_id ||
+-		    strcmp(adev->pnp.unique_id, always_present_ids[i].uid))
++		if (always_present_ids[i].uid && (!adev->pnp.unique_id ||
++		    strcmp(adev->pnp.unique_id, always_present_ids[i].uid)))
+ 			continue;
+ 
+ 		if (!x86_match_cpu(always_present_ids[i].cpu_ids))
 -- 
-With Best Regards,
-Andy Shevchenko
+2.31.1
+
