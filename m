@@ -2,102 +2,104 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A5E27C433FE
-	for <linux-efi@archiver.kernel.org>; Tue,  2 Nov 2021 18:44:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C009DC433F5
+	for <linux-efi@archiver.kernel.org>; Wed,  3 Nov 2021 07:17:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8960261050
-	for <linux-efi@archiver.kernel.org>; Tue,  2 Nov 2021 18:44:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A560861183
+	for <linux-efi@archiver.kernel.org>; Wed,  3 Nov 2021 07:17:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232288AbhKBSrB (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 2 Nov 2021 14:47:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45566 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231164AbhKBSrB (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 2 Nov 2021 14:47:01 -0400
-Received: from mail.skyhub.de (mail.skyhub.de [IPv6:2a01:4f8:190:11c2::b:1457])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2186EC061714;
-        Tue,  2 Nov 2021 11:44:26 -0700 (PDT)
-Received: from zn.tnic (p200300ec2f1dc300e1073f755e7fce47.dip0.t-ipconnect.de [IPv6:2003:ec:2f1d:c300:e107:3f75:5e7f:ce47])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id 4195F1EC0295;
-        Tue,  2 Nov 2021 19:44:24 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alien8.de; s=dkim;
-        t=1635878664;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:in-reply-to:in-reply-to:  references:references;
-        bh=AxuOw0DQ4Frl9MECG8Kper8H3T3XmCRerq6iet0JTvg=;
-        b=fnDosBtZdhTQHutSgr1/+RABVQIrAbm94J935ajx4Z9Kisycu7UocDnt8PckwIj3n3lTJx
-        BI19SipB4tqJQJUImPbytZWTapJ9GIoEiP27NptNIzkc92S11oTGUZeyuZe08xinQ4Gf7N
-        AyTH+RF5Fl4D+tugIqEWI0IxA6rfSSU=
-Date:   Tue, 2 Nov 2021 19:44:18 +0100
-From:   Borislav Petkov <bp@alien8.de>
-To:     Brijesh Singh <brijesh.singh@amd.com>
-Cc:     x86@kernel.org, linux-kernel@vger.kernel.org, kvm@vger.kernel.org,
-        linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org,
-        linux-coco@lists.linux.dev, linux-mm@kvack.org,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Ingo Molnar <mingo@redhat.com>, Joerg Roedel <jroedel@suse.de>,
-        Tom Lendacky <thomas.lendacky@amd.com>,
-        "H. Peter Anvin" <hpa@zytor.com>, Ard Biesheuvel <ardb@kernel.org>,
-        Paolo Bonzini <pbonzini@redhat.com>,
-        Sean Christopherson <seanjc@google.com>,
-        Vitaly Kuznetsov <vkuznets@redhat.com>,
-        Jim Mattson <jmattson@google.com>,
-        Andy Lutomirski <luto@kernel.org>,
-        Dave Hansen <dave.hansen@linux.intel.com>,
-        Sergio Lopez <slp@redhat.com>, Peter Gonda <pgonda@google.com>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>,
-        David Rientjes <rientjes@google.com>,
-        Dov Murik <dovmurik@linux.ibm.com>,
-        Tobin Feldman-Fitzthum <tobin@ibm.com>,
-        Michael Roth <michael.roth@amd.com>,
-        Vlastimil Babka <vbabka@suse.cz>,
-        "Kirill A . Shutemov" <kirill@shutemov.name>,
-        Andi Kleen <ak@linux.intel.com>,
-        "Dr . David Alan Gilbert" <dgilbert@redhat.com>,
-        tony.luck@intel.com, marcorr@google.com,
-        sathyanarayanan.kuppuswamy@linux.intel.com
-Subject: Re: [PATCH v6 14/42] x86/sev: Register GHCB memory when SEV-SNP is
- active
-Message-ID: <YYGGv6EtWrw7cnLA@zn.tnic>
-References: <20211008180453.462291-1-brijesh.singh@amd.com>
- <20211008180453.462291-15-brijesh.singh@amd.com>
- <YYFs+5UUMfyDgh/a@zn.tnic>
- <aea0e0c8-7f03-b9db-3084-f487a233c50b@amd.com>
+        id S232045AbhKCHU2 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 3 Nov 2021 03:20:28 -0400
+Received: from isilmar-4.linta.de ([136.243.71.142]:56836 "EHLO
+        isilmar-4.linta.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231960AbhKCHU2 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 3 Nov 2021 03:20:28 -0400
+X-isilmar-external: YES
+X-isilmar-external: YES
+X-isilmar-external: YES
+X-isilmar-external: YES
+X-isilmar-external: YES
+X-isilmar-external: YES
+Received: from light.dominikbrodowski.net (brodo.linta [10.2.0.102])
+        by isilmar-4.linta.de (Postfix) with ESMTPSA id 52257201319;
+        Wed,  3 Nov 2021 07:17:49 +0000 (UTC)
+Received: by light.dominikbrodowski.net (Postfix, from userid 1000)
+        id 529A1204B3; Wed,  3 Nov 2021 08:17:32 +0100 (CET)
+Date:   Wed, 3 Nov 2021 08:17:32 +0100
+From:   Dominik Brodowski <linux@dominikbrodowski.net>
+To:     tytso@mit.edu
+Cc:     "Ivan T. Ivanov" <iivanov@suse.de>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Bhupesh Sharma <bhsharma@redhat.com>,
+        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH v2] random: fix crash on multiple early calls to
+ add_bootloader_randomness()
+Message-ID: <YYI3jDgbJqy/LMre@light.dominikbrodowski.net>
+References: <20211012082708.121931-1-iivanov@suse.de>
+ <YWVKAk4h5bsUA3b6@light.dominikbrodowski.net>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <aea0e0c8-7f03-b9db-3084-f487a233c50b@amd.com>
+In-Reply-To: <YWVKAk4h5bsUA3b6@light.dominikbrodowski.net>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, Nov 02, 2021 at 01:24:01PM -0500, Brijesh Singh wrote:
-> To answer your question, GHCB is registered at the time of first #VC
-> handling by the second exception handler.
+If add_bootloader_randomness() or add_hwgenerator_randomness() is
+called for the first time during early boot, crng_init equals 0. Then,
+crng_fast_load() gets called -- which is safe to do even if the input
+pool is not yet properly set up.
 
-And this is what I don't like - register at use. Instead of init
-everything *before* use.
+If the added entropy suffices to increase crng_init to 1, future calls
+to add_bootloader_randomness() or add_hwgenerator_randomness() used to
+progress to credit_entropy_bits(). However, if the input pool is not yet
+properly set up, the cmpxchg call within that function can lead to an
+infinite recursion. This is not only a hypothetical problem, as qemu
+on arm64 may provide bootloader entropy via EFI and via devicetree.
 
-> Mike can correct me, the CPUID page check is going to happen on first
-> #VC handling inside the early exception handler (i.e case 1).
+As crng_global_init_time is set to != 0 once the input pool is properly
+set up, check (also) for this condition to determine which branch to take.
 
-What is the "CPUID page check"?
+Calls to crng_fast_load() do not modify the input pool; therefore, the
+entropy_count for the input pool must not be modified at that early
+stage.
 
-And no, you don't want to do any detection when an exception happens -
-you want to detect *everything* *first* and then do exceptions.
+Reported-by: Ivan T. Ivanov <iivanov@suse.de>
+Fixes: 18b915ac6b0a ("efi/random: Treat EFI_RNG_PROTOCOL output as bootloader randomness")
+Tested-by: Ivan T. Ivanov <iivanov@suse.de>
+Signed-off-by: Dominik Brodowski <linux@dominikbrodowski.net>
+---
+v1->v2: fix commit message; unmerge Reported-and-tested-by-tag (Ard Biesheuvel)
 
-> See if my above explanation make sense. Based on it, I don't think it
-> makes sense to register the GHCB during the CPUID page detection. The
-> CPUID page detection will occur in early VC handling.
+ drivers/char/random.c | 11 ++++++++---
+ 1 file changed, 8 insertions(+), 3 deletions(-)
 
-See above. If this needs more discussion, we can talk on IRC.
-
--- 
-Regards/Gruss,
-    Boris.
-
-https://people.kernel.org/tglx/notes-about-netiquette
+diff --git a/drivers/char/random.c b/drivers/char/random.c
+index 605969ed0f96..4211ff3092f9 100644
+--- a/drivers/char/random.c
++++ b/drivers/char/random.c
+@@ -1763,8 +1763,8 @@ static void __init init_std_data(struct entropy_store *r)
+ }
+ 
+ /*
+- * Note that setup_arch() may call add_device_randomness()
+- * long before we get here. This allows seeding of the pools
++ * add_device_randomness() or add_bootloader_randomness() may be
++ * called long before we get here. This allows seeding of the pools
+  * with some platform dependent data very early in the boot
+  * process. But it limits our options here. We must use
+  * statically allocated structures that already have all
+@@ -2274,7 +2274,12 @@ void add_hwgenerator_randomness(const char *buffer, size_t count,
+ {
+ 	struct entropy_store *poolp = &input_pool;
+ 
+-	if (unlikely(crng_init == 0)) {
++	/* We cannot do much with the input pool until it is set up in
++	 * rand_initalize(); therefore just mix into the crng state.
++	 * As this does not affect the input pool, we cannot credit
++	 * entropy for this.
++	 */
++	if (unlikely(crng_init == 0) || unlikely(crng_global_init_time == 0)) {
+ 		crng_fast_load(buffer, count);
+ 		return;
+ 	}
