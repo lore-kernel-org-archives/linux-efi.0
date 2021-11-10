@@ -2,58 +2,58 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5037BC433FE
-	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 22:09:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9EE39C43217
+	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 22:09:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3CD686112F
-	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 22:09:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8E6DB6124C
+	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 22:09:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234276AbhKJWMU (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 10 Nov 2021 17:12:20 -0500
-Received: from mail-co1nam11on2040.outbound.protection.outlook.com ([40.107.220.40]:61633
+        id S234292AbhKJWMV (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 10 Nov 2021 17:12:21 -0500
+Received: from mail-co1nam11on2050.outbound.protection.outlook.com ([40.107.220.50]:40240
         "EHLO NAM11-CO1-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S233823AbhKJWLP (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        id S233607AbhKJWLP (ORCPT <rfc822;linux-efi@vger.kernel.org>);
         Wed, 10 Nov 2021 17:11:15 -0500
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=P3kLoXL90yi/kK7u2oMIqFyIFaB96EKS6TxsHs3OlMWSX8JfWdqob+C/SiVU73qtG9yWudLzIEJ+nkpHRKLG3IroFkBFCRG3uj776kcaW58RDpurRGz/hkbxVwg82/8XMR1sHPVvUi3KN+/cm4sGZ5peSN1vDYwLyNV3ES563FCeEFyGZp2amiAIocytgxzct7WXRgecMpbPCjscns72iDMBVR7IVVpn+OpL9yqEKr17zXphk3ca+gYjdJfJgSxb0WVi1STLj0IVqrUdE+5sQJC3Z17icUxcj2K80AxeT69hkd6WdcwzL4OQ0GyHSUn8dW1NCPK6R7QwjBxB9eRDTg==
+ b=giID555+XxU8RPx2grGT4YAuYRcwcAA++QbLLR6D+m9TVU677yH1zkDyPyaF+Ikwn7wg9sLlk1JALe+zjF3mK62klkGqIS0k27RFnvGDQxrvefu5UQPisWlUyNkgvFfvOHHJrIZmdxZCAKfcpfXWxChQTzARgv5qmf06D8PCeHJTemIMSgCSA1VVTFaey3Df1ce1fQ+R6OC5RznOJV0S9lLpvsueLCqZ1WLPVbgY5x5Bo1TF//Ll1dRGHWaXHzLxuKcE9ixIy6WRlJ23SrMADV3wAYHxWhl6Q9FlPxdJveHE8gvP3gyPqHV2SaWx96XSL3ZCPY8p1CWqRBf2e/SM+Q==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=CoUlO4AnE0odgH8OA10cXh7SU1dk1gaFhA4zvIXgf7I=;
- b=kn57mHiGoUCztRyTgtojTVVn6jxOC33QWS3g251ffMc/cr+XsF7H4S3f7VrZ3sBgTXeOCkkg5FyrL86QBlbqLPRQme2lgOXqVI6lt2AH2zasNBu392VldNUQxicJlrSuQN4yi8sPKRrJil1NA8uArS64tD2I9j2NkuNzr4u8MhLaVlOL0Woerv5ds8rQaOOcsqiPURXVlt1mXcHTTLqDOj2RVJMjztKIEE8BD29EZvrU5m3enC7TegMvUcm2M5bWUih0x1wQ/fPrMODgvcjTmmdizeyiPw5KLMz3lfR1ildmI4YWczEa3PL66VPTtHOlRO2lAHm8+FVGyEZEm+4I3w==
+ bh=cife7IOICCyiVH7Aa9ZyofIqNelDnpiR2NYgGBKIphc=;
+ b=KTPYdzQ5XJ8L2ldlh6UQB5jxJfyK58N+JWxq+YKfnVwawN9nhlfpOGA+/4nTuZyfFLmLUxwPfsggEn8qWZRvpJz1k6eJGJsjE/6o6EKNJrsnn28hlJqj/ka+O/8Dc3QckVy017YUPUQMP4+45jUOuxFA/zIqO0hf1Of5Sq3lztU5M312zUQAxX6JJ2d0gEG8cCmoZ1NnE5KwB10Br6GFd0gdJ1PZIPoWhwfPYH4O9QiMIEkq7a6uxHfNrL5VguELrXPNm+N6IMR1+s2rH8dB/GfBqAdqqLuB9NSEvWG9Qu4st/i6eidDtaWPVSB4KC0VXdTWlO7GalSiKGVeup2+XQ==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
  165.204.84.17) smtp.rcpttodomain=kernel.org smtp.mailfrom=amd.com; dmarc=pass
  (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
  dkim=none (message not signed); arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=CoUlO4AnE0odgH8OA10cXh7SU1dk1gaFhA4zvIXgf7I=;
- b=JRVL3ckgLK85Jdh9dS2aLLb87aRkMKqbUNosq+NUtAXGPGyZXuJLhx2VFpYuN6Y+gqiStkHHwVlo4laoLZqqNYY8ZAtkTIQC5jq13bXJ6I+xZr1aHjQZXmwkeG+IVkIMdyY22fek0bdoxOA3oZlSWsFJUZivWlZD+BMyJfSkq0I=
-Received: from DM5PR07CA0141.namprd07.prod.outlook.com (2603:10b6:3:13e::31)
- by BN6PR12MB1313.namprd12.prod.outlook.com (2603:10b6:404:18::15) with
+ bh=cife7IOICCyiVH7Aa9ZyofIqNelDnpiR2NYgGBKIphc=;
+ b=Z6iEB7WNl/sEhwf3+QkNeEVuXnvpLNkg0Y8Hi0kHVNUFyUb6yJ2rQxnvsrGq3EXLOVQxFhtgdroj//CmmIA/Up2wcyC1UUpXLM3tmd01rpEd41juI/j/SPt4XEYkJmAv9ix2pAN6ROzQrQYcrkSHYRNVbrJDWn9FeAN8f1Ewtmk=
+Received: from DM5PR13CA0023.namprd13.prod.outlook.com (2603:10b6:3:23::33) by
+ MN2PR12MB4029.namprd12.prod.outlook.com (2603:10b6:208:167::27) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4690.18; Wed, 10 Nov
- 2021 22:08:25 +0000
-Received: from DM6NAM11FT032.eop-nam11.prod.protection.outlook.com
- (2603:10b6:3:13e:cafe::1a) by DM5PR07CA0141.outlook.office365.com
- (2603:10b6:3:13e::31) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4669.10 via Frontend
- Transport; Wed, 10 Nov 2021 22:08:24 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4669.13; Wed, 10 Nov
+ 2021 22:08:16 +0000
+Received: from DM6NAM11FT066.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:3:23:cafe::7c) by DM5PR13CA0023.outlook.office365.com
+ (2603:10b6:3:23::33) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4690.6 via Frontend
+ Transport; Wed, 10 Nov 2021 22:08:16 +0000
 X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
- smtp.mailfrom=amd.com; dkim=none (message not signed)
- header.d=none;dmarc=pass action=none header.from=amd.com;
+ smtp.mailfrom=amd.com; kernel.org; dkim=none (message not signed)
+ header.d=none;kernel.org; dmarc=pass action=none header.from=amd.com;
 Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
  165.204.84.17 as permitted sender) receiver=protection.outlook.com;
  client-ip=165.204.84.17; helo=SATLEXMB04.amd.com;
 Received: from SATLEXMB04.amd.com (165.204.84.17) by
- DM6NAM11FT032.mail.protection.outlook.com (10.13.173.93) with Microsoft SMTP
+ DM6NAM11FT066.mail.protection.outlook.com (10.13.173.179) with Microsoft SMTP
  Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.4690.15 via Frontend Transport; Wed, 10 Nov 2021 22:08:24 +0000
+ 15.20.4690.15 via Frontend Transport; Wed, 10 Nov 2021 22:08:15 +0000
 Received: from sbrijesh-desktop.amd.com (10.180.168.240) by SATLEXMB04.amd.com
  (10.181.40.145) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.17; Wed, 10 Nov
- 2021 16:08:22 -0600
+ 2021 16:08:06 -0600
 From:   Brijesh Singh <brijesh.singh@amd.com>
 To:     <x86@kernel.org>, <linux-kernel@vger.kernel.org>,
         <kvm@vger.kernel.org>, <linux-efi@vger.kernel.org>,
@@ -84,9 +84,9 @@ CC:     Thomas Gleixner <tglx@linutronix.de>,
         <tony.luck@intel.com>, <marcorr@google.com>,
         <sathyanarayanan.kuppuswamy@linux.intel.com>,
         Brijesh Singh <brijesh.singh@amd.com>
-Subject: [PATCH v7 19/45] x86/kernel: Validate rom memory before accessing when SEV-SNP is active
-Date:   Wed, 10 Nov 2021 16:07:05 -0600
-Message-ID: <20211110220731.2396491-20-brijesh.singh@amd.com>
+Subject: [PATCH v7 09/45] x86/sev: Save the negotiated GHCB version
+Date:   Wed, 10 Nov 2021 16:06:55 -0600
+Message-ID: <20211110220731.2396491-10-brijesh.singh@amd.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20211110220731.2396491-1-brijesh.singh@amd.com>
 References: <20211110220731.2396491-1-brijesh.singh@amd.com>
@@ -98,80 +98,96 @@ X-ClientProxiedBy: SATLEXMB03.amd.com (10.181.40.144) To SATLEXMB04.amd.com
  (10.181.40.145)
 X-EOPAttributedMessage: 0
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 70e6d5d7-7782-459b-1915-08d9a4969dc6
-X-MS-TrafficTypeDiagnostic: BN6PR12MB1313:
-X-Microsoft-Antispam-PRVS: <BN6PR12MB1313045ACA4F20CC7D3765C8E5939@BN6PR12MB1313.namprd12.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:6430;
+X-MS-Office365-Filtering-Correlation-Id: b50718e0-f891-4022-c09a-08d9a496987b
+X-MS-TrafficTypeDiagnostic: MN2PR12MB4029:
+X-Microsoft-Antispam-PRVS: <MN2PR12MB4029E8242508C4AB97BF1AC9E5939@MN2PR12MB4029.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:9508;
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: hfHjIuXojCbiztNVR+AZHd2XKc+P9uTobjSfi8U6mmuL2EFG5QlFtAQror0h0x6567r6XYWWkLiysToNOfXiVLiE4SZEQh1kOqY+YCHQD9mDXmc8+qH0H26VPfIQ3STLi0eaje4WKHFYZ7xg7X5QNzrlevQrnVk6LpDJkMpdog0vv2hPr8s0z9ERSUV2H0esv52xfnI/SEBTdjk3GapzityL0AiKkdZ66iIgu8bhm0OYUODOiklRCB7PgWA+rh6YIOf3xp4lepyOLF1jz/+Yvs0FJjyp/ED296hO4GGDolh6j3eQIJTgpnZGZ/qJXZ9L3t4Cip1sI/KTjrj95VEZMQlpAWgpRMFp/oQdJ02kNboztygt0ilfxwsovVV351gW9GsHB9Yf/IuDpAxQKxPCz8kwH8b/fYfHSjEs4VJvf2TYKbe948qCTs/eCP6rqHnXOoeCZUWtNRPnDCkELyCS2sbU/l73mw50PY88M0Nhp6Mj3ShxeXgEveMnFVumhsA/17T0moNqHGko3Bka+rHaX19/ey29QZCuQl5w0JCftVOelcwa1BG+k58vd1+C1jmGXIuvbTXhNhrPLH2jj3XgUaBEsOPaA9oE2dJK++dy0e9dpLMKhcPYuUbACI3naJYKiP7srl+v2/JtIzYOH4ZZdGr7oWIBNjNia4JDhsfCAtphNcN0/QHGsw4lIaofVXByQZ9T4ledX3F5xtTrwP2h/8dJLjYML0RXnQIMeAJRkcEZzNIEb2THdmlghoSw8Onj
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(36840700001)(46966006)(26005)(70206006)(1076003)(82310400003)(316002)(70586007)(2616005)(6666004)(508600001)(86362001)(426003)(336012)(186003)(8676002)(83380400001)(16526019)(44832011)(5660300002)(36860700001)(2906002)(7696005)(4326008)(36756003)(81166007)(8936002)(54906003)(47076005)(110136005)(7406005)(7416002)(15650500001)(356005)(2101003)(36900700001);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: cy0DFeCowOzF09IiQne8I+6x5DC5gyj6aXM9eOWpOQN9LK+G5fesDFl4cahDSV3wimDGPa2WV2CniEWDY+V30/u3utGw3k4vPsQbGCUXNBCIFsZcCr/GZZWXF05DA3bhJtLa4TWlbLxJZsxpFJtPMuZpXnKbcaGHs5GQx76KBoxTWjnNPnBQob/Q++rIznf0d23EKvcNo6riazIlfktIDdkNQJSF+kPFEy1fMVTdI2zFVyHXhlY48Z5TG3JExiDxI85GwAE3+ZMVbk0npUbvtiWNqnrZxol+g5HFB0E5X45QIv/GSoVn1YLwgPGkZ6DC5NRBoN6kHmxjvJz6ItNpe51zi7SzRj+xMGRgSmH2ay0yG8DePX20qjigU6YZywLtVdu/CuC9TvhouRA7Z/UeNnekk1mGgu4skHvfRs8s98s/lid+qB0u9UE0/R4A+goIs4lRsYCuYzcy8bNZ7OIlYyrLVPyZw4yUIaEEt8yYiEyx+NCJds7/1nNTj+BPnKrpYHNFQJ5bcvx/VOzwqtg4GiFFl8UplL04F2CnNCXIzbKhZDJ/uBlsWE1yamuKvsq6VlS5dyJvmrdIzmPAjX7NOxnimALtaOvMeEz/3rAapPTMbnmwq5WSw6nb4H/vj+1MOjJevQ37fFzXKowo2uZEUWjxKQ/P/dgt7gAtGwCTw0BV6Yw2bgKjKyi/+topr1Nmy5qg292U4345om0GcyZLLuXg8jqnJrFT1mY0kZvV5yXsPxoHrbkYEAVeSmp7WXVD
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(36840700001)(46966006)(2616005)(508600001)(36756003)(4326008)(70206006)(186003)(36860700001)(2906002)(426003)(110136005)(82310400003)(336012)(54906003)(26005)(44832011)(5660300002)(16526019)(86362001)(1076003)(356005)(7696005)(70586007)(316002)(8936002)(81166007)(47076005)(8676002)(83380400001)(7416002)(7406005)(6666004)(36900700001)(2101003);DIR:OUT;SFP:1101;
 X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Nov 2021 22:08:24.7871
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Nov 2021 22:08:15.8863
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 70e6d5d7-7782-459b-1915-08d9a4969dc6
+X-MS-Exchange-CrossTenant-Network-Message-Id: b50718e0-f891-4022-c09a-08d9a496987b
 X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
 X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT032.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT066.eop-nam11.prod.protection.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BN6PR12MB1313
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR12MB4029
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The probe_roms() access the memory range (0xc0000 - 0x10000) to probe
-various ROMs. The memory range is not part of the E820 system RAM
-range. The memory range is mapped as private (i.e encrypted) in page
-table.
-
-When SEV-SNP is active, all the private memory must be validated before
-the access. The ROM range was not part of E820 map, so the guest BIOS
-did not validate it. An access to invalidated memory will cause a VC
-exception. The guest does not support handling not-validated VC exception
-yet, so validate the ROM memory regions before it is accessed.
+The SEV-ES guest calls the sev_es_negotiate_protocol() to negotiate the
+GHCB protocol version before establishing the GHCB. Cache the negotiated
+GHCB version so that it can be used later.
 
 Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
 ---
- arch/x86/kernel/probe_roms.c | 13 ++++++++++++-
- 1 file changed, 12 insertions(+), 1 deletion(-)
+ arch/x86/include/asm/sev.h   |  2 +-
+ arch/x86/kernel/sev-shared.c | 17 ++++++++++++++---
+ 2 files changed, 15 insertions(+), 4 deletions(-)
 
-diff --git a/arch/x86/kernel/probe_roms.c b/arch/x86/kernel/probe_roms.c
-index 9e1def3744f2..9c09df86d167 100644
---- a/arch/x86/kernel/probe_roms.c
-+++ b/arch/x86/kernel/probe_roms.c
-@@ -21,6 +21,7 @@
- #include <asm/sections.h>
- #include <asm/io.h>
- #include <asm/setup_arch.h>
-+#include <asm/sev.h>
+diff --git a/arch/x86/include/asm/sev.h b/arch/x86/include/asm/sev.h
+index ec060c433589..9b9c190e8c3b 100644
+--- a/arch/x86/include/asm/sev.h
++++ b/arch/x86/include/asm/sev.h
+@@ -12,7 +12,7 @@
+ #include <asm/insn.h>
+ #include <asm/sev-common.h>
  
- static struct resource system_rom_resource = {
- 	.name	= "System ROM",
-@@ -197,11 +198,21 @@ static int __init romchecksum(const unsigned char *rom, unsigned long length)
+-#define GHCB_PROTO_OUR		0x0001UL
++#define GHCB_PROTOCOL_MIN	1ULL
+ #define GHCB_PROTOCOL_MAX	1ULL
+ #define GHCB_DEFAULT_USAGE	0ULL
  
- void __init probe_roms(void)
- {
--	const unsigned char *rom;
- 	unsigned long start, length, upper;
-+	const unsigned char *rom;
- 	unsigned char c;
- 	int i;
+diff --git a/arch/x86/kernel/sev-shared.c b/arch/x86/kernel/sev-shared.c
+index 2abf8a7d75e5..91105f5a02a8 100644
+--- a/arch/x86/kernel/sev-shared.c
++++ b/arch/x86/kernel/sev-shared.c
+@@ -14,6 +14,15 @@
+ #define has_cpuflag(f)	boot_cpu_has(f)
+ #endif
  
-+	/*
-+	 * The ROM memory is not part of the E820 system RAM and is not pre-validated
-+	 * by the BIOS. The kernel page table maps the ROM region as encrypted memory,
-+	 * the SEV-SNP requires the encrypted memory must be validated before the
-+	 * access. Validate the ROM before accessing it.
-+	 */
-+	snp_prep_memory(video_rom_resource.start,
-+			((system_rom_resource.end + 1) - video_rom_resource.start),
-+			SNP_PAGE_STATE_PRIVATE);
++/*
++ * Since feature negotiation related variables are set early in the boot
++ * process they must reside in the .data section so as not to be zeroed
++ * out when the .bss section is later cleared.
++ *
++ * GHCB protocol version negotiated with the hypervisor.
++ */
++static u16 ghcb_version __ro_after_init;
 +
- 	/* video rom */
- 	upper = adapter_rom_resources[0].start;
- 	for (start = video_rom_resource.start; start < upper; start += 2048) {
+ static bool __init sev_es_check_cpu_features(void)
+ {
+ 	if (!has_cpuflag(X86_FEATURE_RDRAND)) {
+@@ -51,10 +60,12 @@ static bool sev_es_negotiate_protocol(void)
+ 	if (GHCB_MSR_INFO(val) != GHCB_MSR_SEV_INFO_RESP)
+ 		return false;
+ 
+-	if (GHCB_MSR_PROTO_MAX(val) < GHCB_PROTO_OUR ||
+-	    GHCB_MSR_PROTO_MIN(val) > GHCB_PROTO_OUR)
++	if (GHCB_MSR_PROTO_MAX(val) < GHCB_PROTOCOL_MIN ||
++	    GHCB_MSR_PROTO_MIN(val) > GHCB_PROTOCOL_MAX)
+ 		return false;
+ 
++	ghcb_version = min_t(size_t, GHCB_MSR_PROTO_MAX(val), GHCB_PROTOCOL_MAX);
++
+ 	return true;
+ }
+ 
+@@ -127,7 +138,7 @@ enum es_result sev_es_ghcb_hv_call(struct ghcb *ghcb, bool set_ghcb_msr,
+ 				   u64 exit_info_1, u64 exit_info_2)
+ {
+ 	/* Fill in protocol and format specifiers */
+-	ghcb->protocol_version = GHCB_PROTOCOL_MAX;
++	ghcb->protocol_version = ghcb_version;
+ 	ghcb->ghcb_usage       = GHCB_DEFAULT_USAGE;
+ 
+ 	ghcb_set_sw_exit_code(ghcb, exit_code);
 -- 
 2.25.1
 
