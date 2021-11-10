@@ -2,44 +2,43 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9553AC4332F
-	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 22:10:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 44146C4167B
+	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 22:10:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7B87F61361
-	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 22:10:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2DD976128E
+	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 22:10:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234697AbhKJWNb (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 10 Nov 2021 17:13:31 -0500
-Received: from mail-mw2nam12on2072.outbound.protection.outlook.com ([40.107.244.72]:12896
-        "EHLO NAM12-MW2-obe.outbound.protection.outlook.com"
+        id S234705AbhKJWNd (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 10 Nov 2021 17:13:33 -0500
+Received: from mail-bn8nam12on2065.outbound.protection.outlook.com ([40.107.237.65]:26624
+        "EHLO NAM12-BN8-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S234034AbhKJWLv (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 10 Nov 2021 17:11:51 -0500
+        id S233694AbhKJWLu (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 10 Nov 2021 17:11:50 -0500
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=U9FIqf3KfYutWgqJda/jkHpU/0BHci35y6rRTOhvMMaZvsLqxcY4SrxrMMmSIiltw2CTpChIujlZjzJfyprbLVrc7r0noQjsoOANPM8fxMOgpVt9nGLbEkN+shD79l/FJY0OuXzfGE4KJ1hGofA+DjWTrC3oFvqjJGVUeUVjCBV9k2SiygLFgBVFPcRYvxl+0EMVl5zIarVoKOmZWX5lNgtKoH7ZOJHKkyIjF+NWCbEVU42SdWf5j6Qp5wTTJ+A2B3WKSZAwQ2UONHFgohH5HiRJCJDAkqZz8vTPq6PzEZm6WLD8IVKJnmXKJxm8TZqK2QCnh/sBmkFcdzbE06RSIA==
+ b=S9e5b9JBgvWmDh7Cc945xZ8MCcCtQOg5duu4cJd1VPTqMIhhk9HwB5lBhipGLFoHhvA9hT+g26g85Edu4WMJVlTahhrklphI+HVnYr/hdyudBigvLH+1KeRb0Jrr6uUWNk6UOdw5nVqfd6+m4qCYN3lL/ZykuuY6YWab4pjnuANznE1JLM7NXLXcCVlFWSHuGCMGqsGRXMOoY61K1qTERfkTPXSISNCFn+bKx92Y91Khe56eDN5LNYqJeQ3WCQf/lNlI4uXsC2uVcSYX8uON+MiwlGWd+z3dWwSTUik3OofapkYxnJHVVTQm4J/TNeQULHm3iWVjejks+s7A78waIA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=gJFWUjd0B3rTzpv8yuA5raaKMB69nrJGb4ObrnVCSEg=;
- b=bfqTXRqX1PI2TAuH9mvV0L1aSbNZ1Em8MclV/flkldWweaiPKR0Gi54USWsFc8TlDept4QWDte+uXZzeEvQmrcYnmOHT4Rpp1M0IKCIvzDdOKnmlRDePn34y6CFj2uT7t4RL19UE6WkxIX6XCqcgXul/GoEylRTxoRnxxj7+xxRdnNd0gtMQ2l2q1ybBpTa89USuJjjpjpQBwUjEv3jZZvHWvHEzMBMR44Mdf+Q9wgiLjp6ltmZBeFdIxF6zRDDANU4X2YZc7iAGZnhZMuDJb0tm6yP+0jk5cQbbHE2SjrnDqRwVg1YZXZ0Whs7e1KaDxdKPqt1Cw6eEiOcY6HlCOA==
+ bh=NtfoCMqHR8Dc7HESNfwwMHrC9Iz5WSzTtZmzrjB0Zfs=;
+ b=YULzKn/xf1sQIzqIsg/rULI/4lQnYlHiAL5BPHqRDT0voG1+yt+9ACl5oZToa+vKaRMBsEeCfP7xDUrrlVC8zDY90FSPy2cdamQjriUGkdNMysMPDkf2ON9Qopb4CCmPHbhxZ/5vdkL4ASA9fCmdIpumtN9TRIBxYMq27tvUu/6IZgdcrXYUTbrb1XMT31SjpfWjjz4/LoOaPVMNztdPzISOlVEz0zFOzJ+qV0Uqz+3dhueBbClfwHDzJZgDpeX/JXmi8/kJyoI/OLaysKdG3blZElX6Dl5RZ+VKBcAltZDa3oBBohE+MjxablD9cFY47LKksmtOzd9tIRYKmTdfBA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
  165.204.84.17) smtp.rcpttodomain=kernel.org smtp.mailfrom=amd.com; dmarc=pass
  (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
  dkim=none (message not signed); arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=gJFWUjd0B3rTzpv8yuA5raaKMB69nrJGb4ObrnVCSEg=;
- b=aCW8aTygwVJb9//amAWzIlnad6Zta6NXe1qe+0rPKm1swk6r2159BgAdWcNe1EAEct+TA/40bZT6MpGoV69oxKX0uVkrtWW5BtoBjZFm/tjWGshJXaCvvnBYH2A6X43I0087RmNVaNji/JsImwOJetkDBtKh7QOGEb4XVomshLA=
-Received: from DM5PR2001CA0005.namprd20.prod.outlook.com (2603:10b6:4:16::15)
- by DM5PR12MB2376.namprd12.prod.outlook.com (2603:10b6:4:b9::11) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4669.10; Wed, 10 Nov
- 2021 22:08:43 +0000
-Received: from DM6NAM11FT057.eop-nam11.prod.protection.outlook.com
- (2603:10b6:4:16:cafe::60) by DM5PR2001CA0005.outlook.office365.com
- (2603:10b6:4:16::15) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4690.15 via Frontend
- Transport; Wed, 10 Nov 2021 22:08:43 +0000
+ bh=NtfoCMqHR8Dc7HESNfwwMHrC9Iz5WSzTtZmzrjB0Zfs=;
+ b=KtDXBjc/tM6Dfn7xStFE7IyxcULjTnOxis6gj1tdsOET0eK3KVmqEw0isrAR7VhkIKgMfB9uEugEE2QAuo7XwiSL7u+51Efhq4bsW2iA2fZVu7Vtbxxz8BAGgNR2uVK9M/wLWn1ZAiwRmF55sp+D6j2CiQkJMZI7cPKyfjtGsS0=
+Received: from DM5PR21CA0001.namprd21.prod.outlook.com (2603:10b6:3:ac::11) by
+ DM6PR12MB3676.namprd12.prod.outlook.com (2603:10b6:5:1c7::29) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.4649.17; Wed, 10 Nov 2021 22:08:58 +0000
+Received: from DM6NAM11FT022.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:3:ac:cafe::58) by DM5PR21CA0001.outlook.office365.com
+ (2603:10b6:3:ac::11) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4713.1 via Frontend
+ Transport; Wed, 10 Nov 2021 22:08:58 +0000
 X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
  smtp.mailfrom=amd.com; kernel.org; dkim=none (message not signed)
  header.d=none;kernel.org; dmarc=pass action=none header.from=amd.com;
@@ -47,13 +46,13 @@ Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
  165.204.84.17 as permitted sender) receiver=protection.outlook.com;
  client-ip=165.204.84.17; helo=SATLEXMB04.amd.com;
 Received: from SATLEXMB04.amd.com (165.204.84.17) by
- DM6NAM11FT057.mail.protection.outlook.com (10.13.172.252) with Microsoft SMTP
+ DM6NAM11FT022.mail.protection.outlook.com (10.13.172.210) with Microsoft SMTP
  Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.4690.15 via Frontend Transport; Wed, 10 Nov 2021 22:08:43 +0000
+ 15.20.4690.15 via Frontend Transport; Wed, 10 Nov 2021 22:08:58 +0000
 Received: from sbrijesh-desktop.amd.com (10.180.168.240) by SATLEXMB04.amd.com
  (10.181.40.145) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.17; Wed, 10 Nov
- 2021 16:08:41 -0600
+ 2021 16:08:52 -0600
 From:   Brijesh Singh <brijesh.singh@amd.com>
 To:     <x86@kernel.org>, <linux-kernel@vger.kernel.org>,
         <kvm@vger.kernel.org>, <linux-efi@vger.kernel.org>,
@@ -84,9 +83,9 @@ CC:     Thomas Gleixner <tglx@linutronix.de>,
         <tony.luck@intel.com>, <marcorr@google.com>,
         <sathyanarayanan.kuppuswamy@linux.intel.com>,
         Brijesh Singh <brijesh.singh@amd.com>
-Subject: [PATCH v7 30/45] x86/compressed/acpi: move EFI config table lookup to helper
-Date:   Wed, 10 Nov 2021 16:07:16 -0600
-Message-ID: <20211110220731.2396491-31-brijesh.singh@amd.com>
+Subject: [PATCH v7 37/45] x86/compressed: use firmware-validated CPUID for SEV-SNP guests
+Date:   Wed, 10 Nov 2021 16:07:23 -0600
+Message-ID: <20211110220731.2396491-38-brijesh.singh@amd.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20211110220731.2396491-1-brijesh.singh@amd.com>
 References: <20211110220731.2396491-1-brijesh.singh@amd.com>
@@ -98,164 +97,155 @@ X-ClientProxiedBy: SATLEXMB03.amd.com (10.181.40.144) To SATLEXMB04.amd.com
  (10.181.40.145)
 X-EOPAttributedMessage: 0
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 4aa05274-370d-46ce-af91-08d9a496a8df
-X-MS-TrafficTypeDiagnostic: DM5PR12MB2376:
-X-Microsoft-Antispam-PRVS: <DM5PR12MB237681E1ACB36E78ED718542E5939@DM5PR12MB2376.namprd12.prod.outlook.com>
+X-MS-Office365-Filtering-Correlation-Id: 53b9df63-ae6b-4982-9d79-08d9a496b1f8
+X-MS-TrafficTypeDiagnostic: DM6PR12MB3676:
+X-Microsoft-Antispam-PRVS: <DM6PR12MB367664FF9DDF862907780DEFE5939@DM6PR12MB3676.namprd12.prod.outlook.com>
 X-MS-Oob-TLC-OOBClassifiers: OLM:8882;
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: 6MhNruxZX5Z/rWBM/+IdomnFxtS5A7jWQnf1/LVn58UtsU602RlaSvFCPjBSL2vjdaDZlOmh6W6IL8x/9Ni0NbvU8Y7g8CgMdQjlzFZDev3s7+SXVJNg8SDYlMMNRlJ528KZ4PfmWxWwmKS8wNv57Rb7cpDwb0CUVZUNjRMTct9j9foprnfsFAzWX9NW0yGAEAs3QhNS8Nwtq5ebUpFEXom26uzvxPjLE9jKxn31rrjNsfB1YSB0W0kbCkU0+ftyAZmVx85GuM2sBLOvYRirvL2bZmAdpZdCXKR6T3h21Av1XMxO9bNMLKz26IqjmsjOn/7RV/yO9TuVbKxgkdWeJkHfO4a0J6ZaVUIaUhqyqF7BEcd0Sd9Kne+tTBR/ySmMjFcyXALMVMw/9d22u7RHiryD7Jns3XGxubc8gFnMAWqkXej5VNtmJWRWgiw+d96BGnfaEJIaznhpD7FiIh14vgqaSKgQR6UhY3cGUT8LZPBrqN/QYmt8+zZYXl84sHPztyNvAgyO9oahVRASMbCfEKJ9AOkXiCZYKN7Y6muECynTAP9Q++8upBQtfpT1CO29ece+8neb9Mg9FRNCxSFIgUB0bABY+m3VdbVFSnkc89I/6q6vxKyVdJa7MHmHLFschDel7Wjfjh9vO4Agd5ASV9xd8VLYmsi2DA7nQxOaq8pd9lXyFs0JT7WDr+fHZnx4FVcA66Z0mM8zTaosU+i0FF6O2hqeR7tNWQd6NID5DrenYwdCEqRlBRJozKxKHMrY
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(46966006)(36840700001)(5660300002)(7696005)(8936002)(83380400001)(82310400003)(70206006)(2906002)(81166007)(8676002)(47076005)(508600001)(6666004)(70586007)(316002)(186003)(36860700001)(4326008)(44832011)(2616005)(356005)(110136005)(7406005)(1076003)(7416002)(54906003)(36756003)(426003)(86362001)(336012)(26005)(16526019)(36900700001)(2101003);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: 7t2KsirGGHwsQKgFe0c31+QMla2tEVgiDqMWhBzXBhtCh/soehQVMPHe18DkOs2oGXWVvLRb/9Ris3Lqzw8xBd4lPHc6w8//qkISAOuVUv24tslnZ0wWgHICQoAORzm2mHLYbSIN/GZsF/zMilgJUMFRmxuZjoNVC0v7qqiktJFRIApFLRfPfDBtJTbdYMz+XWQSygzEpW36zFzo+QVhHITCG+PADhCbSJ8LYaVUvlOmN5VrooteXeITTX/vVhqR0kHuFkf4M7N2mkSwqMNoue7ppBLvLnNZjOm96L5ZHFjvxLTDxluMEYBmxuu78oOyd3FPM5fJuzCH7mZA6LMPCczI7Zgl5Xk7gK6v6nwMJYbPP8qZfvsjITv8E+6/fyH+x1CjCKN9DkoCZtzRmdRutNv9FMJsw0LGOHeJujrzf00ApGDtVaxYrSVYy/9K3AJRyquXIP95H8IbgqHPXqwelhnNEeoB5JKhkrhm/6G7r5iviaeQjgqcKkeCChsFwb2dqkqeUvHCZbtWPI5lk76ZP3RlbgrUrO6PSq32f7ClQdqLAtcPk7JB0j8tzApL9YvaAYwC8SEsgHA68qmFEdmIskG4BDoap1/s0/09VT1sqyPe5jDtPI/lvXXmrkjnptD1ruJi9C9sWW8ViOZX9CnC0w0NaQaiOMXE6O+vwoP7gxmPKB6QtbJ2NOwmHAyyGLP9ZqlyAXcb5CipVoURZMF6Xlj8BVXH/hQvbQu7mwo5rtFYogtZB7hply0vu/ry7nZk
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(36840700001)(46966006)(110136005)(8676002)(15650500001)(4326008)(8936002)(86362001)(7406005)(83380400001)(7696005)(36860700001)(2616005)(70586007)(1076003)(70206006)(82310400003)(316002)(36756003)(7416002)(47076005)(44832011)(2906002)(54906003)(81166007)(6666004)(186003)(336012)(5660300002)(356005)(16526019)(508600001)(26005)(426003)(36900700001)(2101003);DIR:OUT;SFP:1101;
 X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Nov 2021 22:08:43.4037
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Nov 2021 22:08:58.6746
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 4aa05274-370d-46ce-af91-08d9a496a8df
+X-MS-Exchange-CrossTenant-Network-Message-Id: 53b9df63-ae6b-4982-9d79-08d9a496b1f8
 X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
 X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT057.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT022.eop-nam11.prod.protection.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM5PR12MB2376
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR12MB3676
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Michael Roth <michael.roth@amd.com>
 
-Future patches for SEV-SNP-validated CPUID will also require early
-parsing of the EFI configuration. Incrementally move the related code
-into a set of helpers that can be re-used for that purpose.
+SEV-SNP guests will be provided the location of special 'secrets'
+'CPUID' pages via the Confidential Computing blob. This blob is
+provided to the boot kernel either through an EFI config table entry,
+or via a setup_data structure as defined by the Linux Boot Protocol.
+
+Locate the Confidential Computing from these sources and, if found,
+use the provided CPUID page/table address to create a copy that the
+boot kernel will use when servicing cpuid instructions via a #VC
+handler.
 
 Signed-off-by: Michael Roth <michael.roth@amd.com>
 Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
 ---
- arch/x86/boot/compressed/acpi.c | 25 ++++++--------------
- arch/x86/boot/compressed/efi.c  | 42 +++++++++++++++++++++++++++++++++
- arch/x86/boot/compressed/misc.h |  9 +++++++
- 3 files changed, 58 insertions(+), 18 deletions(-)
+ arch/x86/boot/compressed/sev.c | 13 +++++++++
+ arch/x86/include/asm/sev.h     |  1 +
+ arch/x86/kernel/sev-shared.c   | 48 ++++++++++++++++++++++++++++++++++
+ 3 files changed, 62 insertions(+)
 
-diff --git a/arch/x86/boot/compressed/acpi.c b/arch/x86/boot/compressed/acpi.c
-index 9e784bd7b2e6..fea72a1504ff 100644
---- a/arch/x86/boot/compressed/acpi.c
-+++ b/arch/x86/boot/compressed/acpi.c
-@@ -117,8 +117,9 @@ static acpi_physical_address kexec_get_rsdp_addr(void) { return 0; }
- static acpi_physical_address efi_get_rsdp_addr(void)
- {
- #ifdef CONFIG_EFI
--	unsigned long systab_tbl_pa, config_tables;
--	unsigned int nr_tables;
-+	unsigned long cfg_tbl_pa = 0;
-+	unsigned long systab_tbl_pa;
-+	unsigned int cfg_tbl_len;
- 	bool efi_64;
- 	int ret;
+diff --git a/arch/x86/boot/compressed/sev.c b/arch/x86/boot/compressed/sev.c
+index a41e7d29f328..d109ec982961 100644
+--- a/arch/x86/boot/compressed/sev.c
++++ b/arch/x86/boot/compressed/sev.c
+@@ -411,6 +411,19 @@ bool snp_init(struct boot_params *bp)
+ 	if (!cc_info)
+ 		return false;
  
-@@ -134,23 +135,11 @@ static acpi_physical_address efi_get_rsdp_addr(void)
- 	if (ret)
- 		error("EFI support advertised, but unable to locate system table.");
- 
--	/* Handle EFI bitness properly */
--	if (efi_64) {
--		efi_system_table_64_t *stbl = (efi_system_table_64_t *)systab_tbl_pa;
-+	ret = efi_get_conf_table(boot_params, &cfg_tbl_pa, &cfg_tbl_len, &efi_64);
-+	if (ret || !cfg_tbl_pa)
-+		error("EFI config table not found.");
- 
--		config_tables	= stbl->tables;
--		nr_tables	= stbl->nr_tables;
--	} else {
--		efi_system_table_32_t *stbl = (efi_system_table_32_t *)systab_tbl_pa;
--
--		config_tables	= stbl->tables;
--		nr_tables	= stbl->nr_tables;
--	}
--
--	if (!config_tables)
--		error("EFI config tables not found.");
--
--	return __efi_get_rsdp_addr(config_tables, nr_tables, efi_64);
-+	return __efi_get_rsdp_addr(cfg_tbl_pa, cfg_tbl_len, efi_64);
++	/*
++	 * If SEV-SNP-specific Confidential Computing blob is present, then
++	 * firmware/bootloader have indicated SEV-SNP support. Verifying this
++	 * involves CPUID checks which will be more reliable if the SEV-SNP
++	 * CPUID table is used. See comments for snp_cpuid_info_create() for
++	 * more details.
++	 */
++	snp_cpuid_info_create(cc_info);
++
++	/* SEV-SNP CPUID table should be set up now. */
++	if (!snp_cpuid_active())
++		sev_es_terminate(1, GHCB_TERM_CPUID);
++
+ 	/*
+ 	 * Pass run-time kernel a pointer to CC info via boot_params so EFI
+ 	 * config table doesn't need to be searched again during early startup
+diff --git a/arch/x86/include/asm/sev.h b/arch/x86/include/asm/sev.h
+index cd189c20bcc4..b6a97863b71f 100644
+--- a/arch/x86/include/asm/sev.h
++++ b/arch/x86/include/asm/sev.h
+@@ -157,6 +157,7 @@ bool snp_init(struct boot_params *bp);
+  * sev-shared.c via #include and these declarations can be dropped.
+  */
+ struct cc_blob_sev_info *snp_find_cc_blob_setup_data(struct boot_params *bp);
++void __init snp_cpuid_info_create(const struct cc_blob_sev_info *cc_info);
  #else
- 	return 0;
- #endif
-diff --git a/arch/x86/boot/compressed/efi.c b/arch/x86/boot/compressed/efi.c
-index bcf1d5650e26..4398b55acd9f 100644
---- a/arch/x86/boot/compressed/efi.c
-+++ b/arch/x86/boot/compressed/efi.c
-@@ -69,3 +69,45 @@ int efi_get_system_table(struct boot_params *boot_params, unsigned long *sys_tbl
- 	*is_efi_64 = efi_64;
- 	return 0;
+ static inline void sev_es_ist_enter(struct pt_regs *regs) { }
+ static inline void sev_es_ist_exit(void) { }
+diff --git a/arch/x86/kernel/sev-shared.c b/arch/x86/kernel/sev-shared.c
+index 05cb88fa1437..4189d2808ff4 100644
+--- a/arch/x86/kernel/sev-shared.c
++++ b/arch/x86/kernel/sev-shared.c
+@@ -65,6 +65,11 @@ static u64 sev_hv_features __ro_after_init;
+ static struct snp_cpuid_info cpuid_info_copy __ro_after_init;
+ static bool snp_cpuid_initialized __ro_after_init;
+ 
++/* Copy of the SNP firmware's CPUID page. */
++static struct snp_cpuid_info cpuid_info_copy __ro_after_init;
++
++static bool snp_cpuid_initialized __ro_after_init;
++
+ /*
+  * These will be initialized based on CPUID table so that non-present
+  * all-zero leaves (for sparse tables) can be differentiated from
+@@ -413,6 +418,23 @@ snp_cpuid_find_validated_func(u32 func, u32 subfunc, u32 *eax, u32 *ebx,
+ 	return false;
  }
-+
-+/**
-+ * Given boot_params, locate EFI system table from it and return the physical
-+ * address EFI configuration table.
-+ *
-+ * @boot_params:        pointer to boot_params
-+ * @cfg_tbl_pa:         location to store physical address of config table
-+ * @cfg_tbl_len:        location to store number of config table entries
-+ * @is_efi_64:          location to store whether using 64-bit EFI or not
-+ *
-+ * Returns 0 on success. On error, return params are left unchanged.
-+ */
-+int efi_get_conf_table(struct boot_params *boot_params, unsigned long *cfg_tbl_pa,
-+		       unsigned int *cfg_tbl_len, bool *is_efi_64)
+ 
++static void __init snp_cpuid_set_ranges(void)
 +{
-+	unsigned long sys_tbl_pa = 0;
-+	int ret;
++	const struct snp_cpuid_info *cpuid_info = snp_cpuid_info_get_ptr();
++	int i;
 +
-+	if (!cfg_tbl_pa || !cfg_tbl_len || !is_efi_64)
-+		return -EINVAL;
++	for (i = 0; i < cpuid_info->count; i++) {
++		const struct snp_cpuid_fn *fn = &cpuid_info->fn[i];
 +
-+	ret = efi_get_system_table(boot_params, &sys_tbl_pa, is_efi_64);
-+	if (ret)
-+		return ret;
-+
-+	/* Handle EFI bitness properly */
-+	if (*is_efi_64) {
-+		efi_system_table_64_t *stbl =
-+			(efi_system_table_64_t *)sys_tbl_pa;
-+
-+		*cfg_tbl_pa	= stbl->tables;
-+		*cfg_tbl_len	= stbl->nr_tables;
-+	} else {
-+		efi_system_table_32_t *stbl =
-+			(efi_system_table_32_t *)sys_tbl_pa;
-+
-+		*cfg_tbl_pa	= stbl->tables;
-+		*cfg_tbl_len	= stbl->nr_tables;
++		if (fn->eax_in == 0x0)
++			cpuid_std_range_max = fn->eax;
++		else if (fn->eax_in == 0x40000000)
++			cpuid_hyp_range_max = fn->eax;
++		else if (fn->eax_in == 0x80000000)
++			cpuid_ext_range_max = fn->eax;
 +	}
-+
-+	return 0;
 +}
-diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
-index 165640f64b71..074674b89925 100644
---- a/arch/x86/boot/compressed/misc.h
-+++ b/arch/x86/boot/compressed/misc.h
-@@ -181,6 +181,8 @@ unsigned long sev_verify_cbit(unsigned long cr3);
- /* helpers for early EFI config table access */
- int efi_get_system_table(struct boot_params *boot_params,
- 			 unsigned long *sys_tbl_pa, bool *is_efi_64);
-+int efi_get_conf_table(struct boot_params *boot_params, unsigned long *cfg_tbl_pa,
-+			unsigned int *cfg_tbl_len, bool *is_efi_64);
- #else
- static inline int
- efi_get_system_table(struct boot_params *boot_params,
-@@ -188,6 +190,13 @@ efi_get_system_table(struct boot_params *boot_params,
++
+ static bool snp_cpuid_check_range(u32 func)
  {
- 	return -ENOENT;
+ 	if (func <= cpuid_std_range_max ||
+@@ -978,3 +1000,29 @@ snp_find_cc_blob_setup_data(struct boot_params *bp)
+ 
+ 	return (struct cc_blob_sev_info *)(unsigned long)sd->cc_blob_address;
  }
 +
-+static inline int
-+efi_get_conf_table(struct boot_params *boot_params, unsigned long *cfg_tbl_pa,
-+		   unsigned int *cfg_tbl_len, bool *is_efi_64)
++/*
++ * Initialize the kernel's copy of the SEV-SNP CPUID table, and set up the
++ * pointer that will be used to access it.
++ *
++ * Maintaining a direct mapping of the SEV-SNP CPUID table used by firmware
++ * would be possible as an alternative, but the approach is brittle since the
++ * mapping needs to be updated in sync with all the changes to virtual memory
++ * layout and related mapping facilities throughout the boot process.
++ */
++void __init snp_cpuid_info_create(const struct cc_blob_sev_info *cc_info)
 +{
-+	return -ENOENT;
++	const struct snp_cpuid_info *cpuid_info_fw, *cpuid_info;
++
++	if (!cc_info || !cc_info->cpuid_phys || cc_info->cpuid_len < PAGE_SIZE)
++		sev_es_terminate(1, GHCB_TERM_CPUID);
++
++	cpuid_info_fw = (const struct snp_cpuid_info *)cc_info->cpuid_phys;
++	if (!cpuid_info_fw->count || cpuid_info_fw->count > SNP_CPUID_COUNT_MAX)
++		sev_es_terminate(1, GHCB_TERM_CPUID);
++
++	cpuid_info = snp_cpuid_info_get_ptr();
++	memcpy((void *)cpuid_info, cpuid_info_fw, sizeof(*cpuid_info));
++	snp_cpuid_initialized = true;
++	snp_cpuid_set_ranges();
 +}
- #endif /* CONFIG_EFI */
- 
- #endif /* BOOT_COMPRESSED_MISC_H */
 -- 
 2.25.1
 
