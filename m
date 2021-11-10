@@ -2,57 +2,58 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 13902C433EF
-	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 22:08:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A4820C433FE
+	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 22:08:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F238F61267
-	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 22:08:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8C7076112F
+	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 22:08:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233710AbhKJWLU (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 10 Nov 2021 17:11:20 -0500
-Received: from mail-mw2nam12on2047.outbound.protection.outlook.com ([40.107.244.47]:35396
-        "EHLO NAM12-MW2-obe.outbound.protection.outlook.com"
+        id S233768AbhKJWLj (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 10 Nov 2021 17:11:39 -0500
+Received: from mail-co1nam11on2086.outbound.protection.outlook.com ([40.107.220.86]:6752
+        "EHLO NAM11-CO1-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S233711AbhKJWLG (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 10 Nov 2021 17:11:06 -0500
+        id S233780AbhKJWLL (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 10 Nov 2021 17:11:11 -0500
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=YLI8v1gl96GYw5sFofc7xUAEZkhoHZnISprMHoMv2ffJqiD//Oa0ytBpkPIcTLZZ8gDsByi7iq5xU0EPo6z3zZ/fLZY4ByvuD+AGljSfQwKK9nuwDvk7a+Dv5TE2/Ea5uzXvljqKD2gcdiuDWRsu9LNcp8+41Shw1GRrbgXKoVLWwn217J1mqsDn5II4DYVmGYOzTfB3lcZ2zdEEcR54dKIK9/P8gQ+iXkG8Zsm9WdLsHBY5T9HUxdRlHlKSoddYPadbyEk8dCaTFEf09UXuDAjtYHaEQndjtWV4h/bZHJELTApFQD8eRr1ZVmjc84ADPhrFi06Ls4ESt8/Sp/F6uQ==
+ b=Ln+0mr/JBodBBLWSNe0uyBVQAFqNvwrvCWFrrdhMiYZCuDh8+QpowqYpVV6jk9TiH0JBrI3APTF6LbepccUNs3nw7GsidU5knr3E2vNFBp1O4WgrCTKxXdjZwJlArwme9noqvm4s8LDdZVjkuqHFabCTdMlmXM3Noe8vylNyqME3Nyieqsr6MXlWqoe/hwaTrZaGXzS3KUEVr46Fqmf9tlrGpi6B4rQLOcBodYeXFJDnoY734J3dBrdVwB5Y6xcToP2qQ613RfHA9lojlJtulmPLulT54jqmD5lX6cca/9fX0ctcn5ZDVrb4prsb2UD4H8Qii4Qa98hXm0peV1wOAw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=5FyCIT+E77fmlJyxa0GOdi1Gh8JKbv+96wid3iy1kOA=;
- b=WZ1KuauUPT8Xek8scYrjfxlWrwJ20BDahbnK5v2huCuSxLE+YP+aUenY9BGE5omrm3WNyC7V+hPv4umHGJGOdj1QSW8yPaWxUZroaw3idkZw15KnaSpnFpZ0kWdSDNzMO0k3RPjkbrH4lHWxhtyE4HdAfdTefdPPaunao5V7lEEYQCgwLDt6I7qzaumEy52Oh6v+McBFa4ILgWFlEtoXGquNUAO7drAwZT4bA0yJhdpteApF/pCRm55+TuldnQ03PHxaOVHA75dN82DHXt6zEC2E9HzQNlTi+5GtcAq7a1v4TgsEJWc9urso8tvnJYGMxx4zGs9LfHIN5+O5ii1ajg==
+ bh=ONtu6WMNqJ8mScSjnIMn4JhER/6gQBui0BmaTMX7qmQ=;
+ b=ePTkKzj7gr8JQ1opnHjml0/aPkaprsiqFjED/EEy8UiM8sOt87HsodY1pUxGpPIgo3lHjEByhmPMah9f6kMaIBbKGPFxFJ+sElaumYWvJ3b8uxY9e+QXvKrbE7pGDRxvd8kj4bhj7DYLo89y/KgVIWVk5JT/fFJb7ho0mLALJARnFjf5QHkxkkyeDmIjeI54Nu2U2YT9MvGJmum366yugWXRFkh+uFozlbiEoRjE4lOjWYbuP//LIxhA7OUxbJDHZv0P1feRpqoZ5o+dlYJsKfL2PiO19lsVdUNicLNEPTHl53nC2PaBrpDjgNkhUxE4dojYYZpkQIjs0PYjc5Omzg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
  165.204.84.17) smtp.rcpttodomain=kernel.org smtp.mailfrom=amd.com; dmarc=pass
  (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
  dkim=none (message not signed); arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=5FyCIT+E77fmlJyxa0GOdi1Gh8JKbv+96wid3iy1kOA=;
- b=f94JPFOFiDQqkAAvVzbeSItSkX+sURKGsJZMQEStP2youjJnCAYBfhzHncSP7R6bPXOq5CeRZ29AQkbD89hH2bCVuBKIzGLcFm0sAsXxw9F37lcIvLbkO48s3KhsxirQOsYcZRVmCuO5TBruGlGOV+ORKUcimJzAnKegXIJRAcM=
-Received: from DM5PR13CA0020.namprd13.prod.outlook.com (2603:10b6:3:23::30) by
- BL0PR12MB2371.namprd12.prod.outlook.com (2603:10b6:207:3e::18) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.4690.16; Wed, 10 Nov 2021 22:08:15 +0000
+ bh=ONtu6WMNqJ8mScSjnIMn4JhER/6gQBui0BmaTMX7qmQ=;
+ b=ZjUSmOJi2YZYfkGDOio4GSp6Vtfut85kInUCWvUkhkNM04ZaX2ccYVB4tzaMehe+cXHVtrsZtKqri8tHBnZ3njEbEbSg6H/psFztgXcpttvkZYHvkfapCoKHQaXYFPcFixk3xD9pc0WpCNKXhA6noKbsOvptvTf6fV3OgkAFsEE=
+Received: from DM5PR13CA0024.namprd13.prod.outlook.com (2603:10b6:3:23::34) by
+ MWHPR1201MB0160.namprd12.prod.outlook.com (2603:10b6:301:50::22) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4669.11; Wed, 10 Nov
+ 2021 22:08:17 +0000
 Received: from DM6NAM11FT066.eop-nam11.prod.protection.outlook.com
- (2603:10b6:3:23:cafe::14) by DM5PR13CA0020.outlook.office365.com
- (2603:10b6:3:23::30) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4690.7 via Frontend
- Transport; Wed, 10 Nov 2021 22:08:15 +0000
+ (2603:10b6:3:23:cafe::e1) by DM5PR13CA0024.outlook.office365.com
+ (2603:10b6:3:23::34) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4690.16 via Frontend
+ Transport; Wed, 10 Nov 2021 22:08:17 +0000
 X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
- smtp.mailfrom=amd.com; dkim=none (message not signed)
- header.d=none;dmarc=pass action=none header.from=amd.com;
+ smtp.mailfrom=amd.com; kernel.org; dkim=none (message not signed)
+ header.d=none;kernel.org; dmarc=pass action=none header.from=amd.com;
 Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
  165.204.84.17 as permitted sender) receiver=protection.outlook.com;
  client-ip=165.204.84.17; helo=SATLEXMB04.amd.com;
 Received: from SATLEXMB04.amd.com (165.204.84.17) by
  DM6NAM11FT066.mail.protection.outlook.com (10.13.173.179) with Microsoft SMTP
  Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.4690.15 via Frontend Transport; Wed, 10 Nov 2021 22:08:14 +0000
+ 15.20.4690.15 via Frontend Transport; Wed, 10 Nov 2021 22:08:16 +0000
 Received: from sbrijesh-desktop.amd.com (10.180.168.240) by SATLEXMB04.amd.com
  (10.181.40.145) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.17; Wed, 10 Nov
- 2021 16:08:04 -0600
+ 2021 16:08:07 -0600
 From:   Brijesh Singh <brijesh.singh@amd.com>
 To:     <x86@kernel.org>, <linux-kernel@vger.kernel.org>,
         <kvm@vger.kernel.org>, <linux-efi@vger.kernel.org>,
@@ -83,9 +84,9 @@ CC:     Thomas Gleixner <tglx@linutronix.de>,
         <tony.luck@intel.com>, <marcorr@google.com>,
         <sathyanarayanan.kuppuswamy@linux.intel.com>,
         Brijesh Singh <brijesh.singh@amd.com>
-Subject: [PATCH v7 08/45] x86/sev: Define the Linux specific guest termination reasons
-Date:   Wed, 10 Nov 2021 16:06:54 -0600
-Message-ID: <20211110220731.2396491-9-brijesh.singh@amd.com>
+Subject: [PATCH v7 10/45] x86/sev: Add support for hypervisor feature VMGEXIT
+Date:   Wed, 10 Nov 2021 16:06:56 -0600
+Message-ID: <20211110220731.2396491-11-brijesh.singh@amd.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20211110220731.2396491-1-brijesh.singh@amd.com>
 References: <20211110220731.2396491-1-brijesh.singh@amd.com>
@@ -97,154 +98,146 @@ X-ClientProxiedBy: SATLEXMB03.amd.com (10.181.40.144) To SATLEXMB04.amd.com
  (10.181.40.145)
 X-EOPAttributedMessage: 0
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: b3663398-fa76-4a23-a080-08d9a49697e4
-X-MS-TrafficTypeDiagnostic: BL0PR12MB2371:
-X-Microsoft-Antispam-PRVS: <BL0PR12MB2371BE1653F3180B8D1761CEE5939@BL0PR12MB2371.namprd12.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:9508;
+X-MS-Office365-Filtering-Correlation-Id: f36a3b0b-deeb-4bb4-b530-08d9a4969914
+X-MS-TrafficTypeDiagnostic: MWHPR1201MB0160:
+X-Microsoft-Antispam-PRVS: <MWHPR1201MB01607247D7C61CD479D1C38FE5939@MWHPR1201MB0160.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:3826;
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: r4QtC7ysJ2m1QKXU0SEpUV4Z/8JVdw1SrghSIQC9/8H6BwCICZwfMpdpexmQdBGfXOwPYkfSAZMTznY+z7gHrUP2qH4y8YEzVdYq0uLLo+78tltY4VvroKGqV38Z/trdglZvcscODDlQeZHYc3ViVdzNwc/s8YO0vEYamVXS/qUVcyp2AqgxUJFjV7sroJmvX7OvSf1QtZDa8tQ6bAVGr6NADqMAF8fdt/o3qhAVpxnInpGCEmoKQ6jRyfQ97HnOkBvs7uKUEuhAytUiTQcI+yVTmwP6YtCaZa/f0XrfPrqk35njot02y9FJ4Tkimv3DKLL6/m7VgjvCgens8z6+62XF27P5A84EO5usJLq3+pMfwkTCpFRudqOe02jPrMep1vtLYCKMvwR9lSX4EkjM7B2sR/phM4XzXFO8+gAw6rnOhdRpKrpKIg1XUDVq5Ez9Ef7b/xVwBuTYs/XT6Ud/w4IJnPZjj2bxhLb/KW/YfuCsY3GRJS0VvBZ5jaMO4V5HWMhkl0dlHYwr0kQhgyuu+2ZelFm+SqbFzQMVJZDREfUmWel3wzJfUKgWbCT7AvQb2QLkTZ6pCL6Zh8QFwT5lqKEwT4pIrlUH+qeRtCRREIZivc9eI3r3wr8JNzcbn9jlMsNaIeytsm98dlwPV/yD6ZaT9uL17UT5Z4qTKkt8onG20d6DC2iC1YMSDZHQ+3jxJVw9z/DiAqmtyRXHEwP8wX7rMSo+LWynR7ESN6cf+NlkqpdRkXvuZ0c30/cv390J
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(46966006)(36840700001)(110136005)(54906003)(186003)(83380400001)(81166007)(26005)(16526019)(4326008)(8676002)(5660300002)(336012)(426003)(7696005)(2906002)(47076005)(316002)(2616005)(44832011)(8936002)(86362001)(508600001)(6666004)(7406005)(36756003)(70586007)(36860700001)(7416002)(70206006)(356005)(1076003)(82310400003)(36900700001)(2101003);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: 3QGM6aKFv1ry3awWEdnyNJVYLD9fE764S+Q+dK2l7+2wwGXc1kontWb/BXNsD4HmNbEGTsuY3kajrHyMkiqi9rr9egw9J93FxZs8Vit+ElY+jm03XP4dES8TMHJqfff4f/mvkOgxH+Cv9RI1eQGuKQMI8ccHvsBOoisHWflM6ZHwyOvt3ZF0vNeBV4tavMfdPpZBNuVYNXs/X7RyintZl0NwjgLLVhF36tgpJDDjnkW9Z19uozzAeY4z6iPA/Scxb84VKPbOOVmXR5mdCG9T45yAg3eqeVJT8C4SUI1EZWKEXOM8CIx8RC3ySj58lP5EILYGfoTA7gawBCgIJcVkqlNPzL1N4MbWxr/9e8IAKnGn96evuvYDf+JIC7MWQCpt2KdZEfOtX4vEucMprcOH+SQyZ3IZGiyqd8YshG75zGvxZZfI9jjRv8GwUiTnxwIDUGcUgayL7CKczN67YMjqUMF55dFxyywZzonfILg0/4/1vmb3M8pbjgVzmAdhgClxhhcI1Nfez3fcwVRXhkeQtBNpGrenKp/4koo3mRQUUAY9Wtcdjy84rwtgmjzGxvFRzBeuoYk+gFThThBIEYkCLjYaLKqR7VPxgaRBArwupnucMVyQSFJrEFc6GzGTMhx3K3F6uhtUk87Oyh9fIukgUsm5JLp8JIIr+LnuxnfJa54DTfx/YCziM+vd+g7uGJOzS1LBgy19IIklKhr8TFZMCJyxMAwtIte9diJ0GonlMEhIV5vs3OFMzJ48TrblSTOW
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(46966006)(36840700001)(186003)(7406005)(2616005)(6666004)(82310400003)(16526019)(4326008)(336012)(26005)(47076005)(8936002)(8676002)(316002)(86362001)(36860700001)(1076003)(508600001)(426003)(70586007)(83380400001)(70206006)(110136005)(54906003)(36756003)(7416002)(7696005)(81166007)(356005)(2906002)(5660300002)(44832011)(2101003)(36900700001);DIR:OUT;SFP:1101;
 X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Nov 2021 22:08:14.8969
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Nov 2021 22:08:16.8647
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: b3663398-fa76-4a23-a080-08d9a49697e4
+X-MS-Exchange-CrossTenant-Network-Message-Id: f36a3b0b-deeb-4bb4-b530-08d9a4969914
 X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
 X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
 X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT066.eop-nam11.prod.protection.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BL0PR12MB2371
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MWHPR1201MB0160
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-GHCB specification defines the reason code for reason set 0. The reason
-codes defined in the set 0 do not cover all possible causes for a guest
-to request termination.
+Version 2 of GHCB specification introduced advertisement of a features
+that are supported by the hypervisor. Add support to query the HV
+features on boot.
 
-The reason set 1 to 255 is reserved for the vendor-specific codes.
-Reseve the reason set 1 for the Linux guest. Define an error codes for
-reason set 1.
-
-While at it, change the sev_es_terminate() to accept the reason set
-parameter.
+Version 2 of GHCB specification adds several new NAEs, most of them are
+optional except the hypervisor feature. Now that hypervisor feature NAE
+is implemented, so bump the GHCB maximum support protocol version.
 
 Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
 ---
- arch/x86/boot/compressed/sev.c    |  6 +++---
- arch/x86/include/asm/sev-common.h |  8 ++++++++
- arch/x86/kernel/sev-shared.c      | 11 ++++-------
- arch/x86/kernel/sev.c             |  4 ++--
- 4 files changed, 17 insertions(+), 12 deletions(-)
+ arch/x86/include/asm/sev-common.h |  3 +++
+ arch/x86/include/asm/sev.h        |  2 +-
+ arch/x86/include/uapi/asm/svm.h   |  2 ++
+ arch/x86/kernel/sev-shared.c      | 30 ++++++++++++++++++++++++++++++
+ 4 files changed, 36 insertions(+), 1 deletion(-)
 
-diff --git a/arch/x86/boot/compressed/sev.c b/arch/x86/boot/compressed/sev.c
-index 8c6410014d22..78f8502e09b5 100644
---- a/arch/x86/boot/compressed/sev.c
-+++ b/arch/x86/boot/compressed/sev.c
-@@ -122,7 +122,7 @@ static enum es_result vc_read_mem(struct es_em_ctxt *ctxt,
- static bool early_setup_sev_es(void)
- {
- 	if (!sev_es_negotiate_protocol())
--		sev_es_terminate(GHCB_SEV_ES_PROT_UNSUPPORTED);
-+		sev_es_terminate(SEV_TERM_SET_GEN, GHCB_SEV_ES_PROT_UNSUPPORTED);
- 
- 	if (set_page_decrypted((unsigned long)&boot_ghcb_page))
- 		return false;
-@@ -175,7 +175,7 @@ void do_boot_stage2_vc(struct pt_regs *regs, unsigned long exit_code)
- 	enum es_result result;
- 
- 	if (!boot_ghcb && !early_setup_sev_es())
--		sev_es_terminate(GHCB_SEV_ES_GEN_REQ);
-+		sev_es_terminate(SEV_TERM_SET_GEN, GHCB_SEV_ES_GEN_REQ);
- 
- 	vc_ghcb_invalidate(boot_ghcb);
- 	result = vc_init_em_ctxt(&ctxt, regs, exit_code);
-@@ -202,7 +202,7 @@ void do_boot_stage2_vc(struct pt_regs *regs, unsigned long exit_code)
- 	if (result == ES_OK)
- 		vc_finish_insn(&ctxt);
- 	else if (result != ES_RETRY)
--		sev_es_terminate(GHCB_SEV_ES_GEN_REQ);
-+		sev_es_terminate(SEV_TERM_SET_GEN, GHCB_SEV_ES_GEN_REQ);
- }
- 
- static inline u64 rd_sev_status_msr(void)
 diff --git a/arch/x86/include/asm/sev-common.h b/arch/x86/include/asm/sev-common.h
-index aac44c3f839c..3278ee578937 100644
+index 3278ee578937..891569c07ed7 100644
 --- a/arch/x86/include/asm/sev-common.h
 +++ b/arch/x86/include/asm/sev-common.h
-@@ -73,9 +73,17 @@
- 	 /* GHCBData[23:16] */				\
- 	((((u64)reason_val) & 0xff) << 16))
+@@ -60,6 +60,9 @@
+ /* GHCB Hypervisor Feature Request/Response */
+ #define GHCB_MSR_HV_FT_REQ		0x080
+ #define GHCB_MSR_HV_FT_RESP		0x081
++#define GHCB_MSR_HV_FT_RESP_VAL(v)			\
++	/* GHCBData[63:12] */				\
++	(((u64)(v) & GENMASK_ULL(63, 12)) >> 12)
  
-+/* Error codes from reason set 0 */
-+#define SEV_TERM_SET_GEN		0
- #define GHCB_SEV_ES_GEN_REQ		0
- #define GHCB_SEV_ES_PROT_UNSUPPORTED	1
+ #define GHCB_MSR_TERM_REQ		0x100
+ #define GHCB_MSR_TERM_REASON_SET_POS	12
+diff --git a/arch/x86/include/asm/sev.h b/arch/x86/include/asm/sev.h
+index 9b9c190e8c3b..17b75f6ee11a 100644
+--- a/arch/x86/include/asm/sev.h
++++ b/arch/x86/include/asm/sev.h
+@@ -13,7 +13,7 @@
+ #include <asm/sev-common.h>
  
-+/* Linux-specific reason codes (used with reason set 1) */
-+#define SEV_TERM_SET_LINUX		1
-+#define GHCB_TERM_REGISTER		0	/* GHCB GPA registration failure */
-+#define GHCB_TERM_PSC			1	/* Page State Change failure */
-+#define GHCB_TERM_PVALIDATE		2	/* Pvalidate failure */
-+
- #define GHCB_RESP_CODE(v)		((v) & GHCB_MSR_INFO_MASK)
+ #define GHCB_PROTOCOL_MIN	1ULL
+-#define GHCB_PROTOCOL_MAX	1ULL
++#define GHCB_PROTOCOL_MAX	2ULL
+ #define GHCB_DEFAULT_USAGE	0ULL
  
- #endif
+ #define	VMGEXIT()			{ asm volatile("rep; vmmcall\n\r"); }
+diff --git a/arch/x86/include/uapi/asm/svm.h b/arch/x86/include/uapi/asm/svm.h
+index efa969325ede..b0ad00f4c1e1 100644
+--- a/arch/x86/include/uapi/asm/svm.h
++++ b/arch/x86/include/uapi/asm/svm.h
+@@ -108,6 +108,7 @@
+ #define SVM_VMGEXIT_AP_JUMP_TABLE		0x80000005
+ #define SVM_VMGEXIT_SET_AP_JUMP_TABLE		0
+ #define SVM_VMGEXIT_GET_AP_JUMP_TABLE		1
++#define SVM_VMGEXIT_HV_FEATURES			0x8000fffd
+ #define SVM_VMGEXIT_UNSUPPORTED_EVENT		0x8000ffff
+ 
+ /* Exit code reserved for hypervisor/software use */
+@@ -218,6 +219,7 @@
+ 	{ SVM_VMGEXIT_NMI_COMPLETE,	"vmgexit_nmi_complete" }, \
+ 	{ SVM_VMGEXIT_AP_HLT_LOOP,	"vmgexit_ap_hlt_loop" }, \
+ 	{ SVM_VMGEXIT_AP_JUMP_TABLE,	"vmgexit_ap_jump_table" }, \
++	{ SVM_VMGEXIT_HV_FEATURES,	"vmgexit_hypervisor_feature" }, \
+ 	{ SVM_EXIT_ERR,         "invalid_guest_state" }
+ 
+ 
 diff --git a/arch/x86/kernel/sev-shared.c b/arch/x86/kernel/sev-shared.c
-index ce987688bbc0..2abf8a7d75e5 100644
+index 91105f5a02a8..85b549f3ee1a 100644
 --- a/arch/x86/kernel/sev-shared.c
 +++ b/arch/x86/kernel/sev-shared.c
-@@ -24,15 +24,12 @@ static bool __init sev_es_check_cpu_features(void)
+@@ -23,6 +23,9 @@
+  */
+ static u16 ghcb_version __ro_after_init;
+ 
++/* Bitmap of SEV features supported by the hypervisor */
++static u64 sev_hv_features __ro_after_init;
++
+ static bool __init sev_es_check_cpu_features(void)
+ {
+ 	if (!has_cpuflag(X86_FEATURE_RDRAND)) {
+@@ -48,6 +51,30 @@ static void __noreturn sev_es_terminate(unsigned int set, unsigned int reason)
+ 		asm volatile("hlt\n" : : : "memory");
+ }
+ 
++/*
++ * The hypervisor features are available from GHCB version 2 onward.
++ */
++static bool get_hv_features(void)
++{
++	u64 val;
++
++	sev_hv_features = 0;
++
++	if (ghcb_version < 2)
++		return false;
++
++	sev_es_wr_ghcb_msr(GHCB_MSR_HV_FT_REQ);
++	VMGEXIT();
++
++	val = sev_es_rd_ghcb_msr();
++	if (GHCB_RESP_CODE(val) != GHCB_MSR_HV_FT_RESP)
++		return false;
++
++	sev_hv_features = GHCB_MSR_HV_FT_RESP_VAL(val);
++
++	return true;
++}
++
+ static bool sev_es_negotiate_protocol(void)
+ {
+ 	u64 val;
+@@ -66,6 +93,9 @@ static bool sev_es_negotiate_protocol(void)
+ 
+ 	ghcb_version = min_t(size_t, GHCB_MSR_PROTO_MAX(val), GHCB_PROTOCOL_MAX);
+ 
++	if (!get_hv_features())
++		return false;
++
  	return true;
  }
- 
--static void __noreturn sev_es_terminate(unsigned int reason)
-+static void __noreturn sev_es_terminate(unsigned int set, unsigned int reason)
- {
- 	u64 val = GHCB_MSR_TERM_REQ;
- 
--	/*
--	 * Tell the hypervisor what went wrong - only reason-set 0 is
--	 * currently supported.
--	 */
--	val |= GHCB_SEV_TERM_REASON(0, reason);
-+	/* Tell the hypervisor what went wrong. */
-+	val |= GHCB_SEV_TERM_REASON(set, reason);
- 
- 	/* Request Guest Termination from Hypvervisor */
- 	sev_es_wr_ghcb_msr(val);
-@@ -221,7 +218,7 @@ void __init do_vc_no_ghcb(struct pt_regs *regs, unsigned long exit_code)
- 
- fail:
- 	/* Terminate the guest */
--	sev_es_terminate(GHCB_SEV_ES_GEN_REQ);
-+	sev_es_terminate(SEV_TERM_SET_GEN, GHCB_SEV_ES_GEN_REQ);
- }
- 
- static enum es_result vc_insn_string_read(struct es_em_ctxt *ctxt,
-diff --git a/arch/x86/kernel/sev.c b/arch/x86/kernel/sev.c
-index 03f9aff9d1f7..fb48e4ddd474 100644
---- a/arch/x86/kernel/sev.c
-+++ b/arch/x86/kernel/sev.c
-@@ -1406,7 +1406,7 @@ DEFINE_IDTENTRY_VC_KERNEL(exc_vmm_communication)
- 		show_regs(regs);
- 
- 		/* Ask hypervisor to sev_es_terminate */
--		sev_es_terminate(GHCB_SEV_ES_GEN_REQ);
-+		sev_es_terminate(SEV_TERM_SET_GEN, GHCB_SEV_ES_GEN_REQ);
- 
- 		/* If that fails and we get here - just panic */
- 		panic("Returned from Terminate-Request to Hypervisor\n");
-@@ -1454,7 +1454,7 @@ bool __init handle_vc_boot_ghcb(struct pt_regs *regs)
- 
- 	/* Do initial setup or terminate the guest */
- 	if (unlikely(boot_ghcb == NULL && !sev_es_setup_ghcb()))
--		sev_es_terminate(GHCB_SEV_ES_GEN_REQ);
-+		sev_es_terminate(SEV_TERM_SET_GEN, GHCB_SEV_ES_GEN_REQ);
- 
- 	vc_ghcb_invalidate(boot_ghcb);
  
 -- 
 2.25.1
