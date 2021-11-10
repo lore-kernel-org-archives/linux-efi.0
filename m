@@ -2,58 +2,58 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9DA94C433EF
-	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 22:08:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D3EFC43219
+	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 22:08:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8D3B261250
-	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 22:08:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 35E746124C
+	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 22:08:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233672AbhKJWLC (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        id S233684AbhKJWLC (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
         Wed, 10 Nov 2021 17:11:02 -0500
-Received: from mail-mw2nam10on2072.outbound.protection.outlook.com ([40.107.94.72]:21920
-        "EHLO NAM10-MW2-obe.outbound.protection.outlook.com"
+Received: from mail-dm6nam10on2043.outbound.protection.outlook.com ([40.107.93.43]:25861
+        "EHLO NAM10-DM6-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S233592AbhKJWKx (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 10 Nov 2021 17:10:53 -0500
+        id S233607AbhKJWKy (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 10 Nov 2021 17:10:54 -0500
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=G7W7w69U1nnJIU43om0KMLjBo9JavYIfWo0l2eIc1AOoGteJqWuwtr7LvuyxPfBa+VHbnFFtJvK/rWhU5Mh+8g9CkhO8vJIka0ZtRSmKGENAdeCoXKmFrevUyxA5LYAicnGLEu2ka3vP8dFPX87XQHNfZvXrKNZUmRMEYbAknPWwfvp0GCGagoHCr/ce4fzXZvSSvOtxHxEyl65DJuSlismGlNGWp1J4gA+cGHEYbu3PwDjHI+HlBhB1t81FqPW6D926yaTDBr58GMmB0PohPauB3q9bl5fs8lu8ECw0r9bZ0oDsgna3FxnY6hodD19OyrgPrjL8EuaQ/92rIbt6uA==
+ b=f8cceQ5mHQ+CgVRp5FMBOQBjm8eqdBb66dATZefW11uuSF8nvtVxP5BLejDQm8NBafLtzN+opAahxPpQjxzFiQYtS81QbKBFrIzUDFDhsb/KPly0R2IRvA4m37vTC7iXhl3PC8h8zAI7axU1uxrYPUWGDkfSGKj+XzXPMjb5ZeINiYaGVGqfeBbPAU1hufBJKvOTcdItGNgwC7e30DSb5pR+NxwzitLw91cTU05BA97o9M6cAiJlxx4uY+vxLy1aROwRqJD2pMQBEu3dQYa7tm0k9wTBn1iKPnRmCIrDJW35FkUez/+Ux5exdJNXKfV+iaztAVjASfZTJ3sd30Xopg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=+j+qK2q5w0RYZchzZROMnIvIi0Oc7+QfDvEAR9a+BoU=;
- b=lISyewayvHWEQ4hYsO4UgsyjjOnSXhRAIYHfCRZTpoDHwk2oM6wP5ercDaX9Ps9iyBTMf8ja9jXRVTQJcK3ohgZLtgyH4OJlm35rAWAFI9yRrDPm2/X5GBQo/XqKOsbGRptDqGfb+ulXDz1tdPiWPgSRJcrvIRmQjXV6x4HfXafZVYThdKhl/f/nf/5jSUOCRWSDp3HLsRXMADO1sMiffeEAYvArGn7rK9fz8zKHJWBnwEw2UKf5HYpM5BnND8hIwT59ussmBr/VIFCdI9dcF6cpWI7G0CcRjWL2P0v4pjfQgFdWXQvj6x60kv36c1JvabdjcrIEx2osa85fHWxJdA==
+ bh=XXbWoz2GMth4nfHV5JvqdAl9EMkTXLEX8bTuYP98Zc8=;
+ b=dcwP4rG6U/0Z4Xo8KwKVQ2XGjr/e7QkkEoD2j6J3XUQw1zHhHxQwQx2NmipBtNSEiBUrNAQpLRhG6EYkDkIPHtCdHenZd9MmkjkVfcbTz7f/72WfvR78Yp2mtzxMt+A5VXizDWfUJPpuQqxdAUY02naXpQ1fjkx1M1Fr5phAmIUmLLu4FpBdMze/g+e/sN74X9HKXqUv0Mymtv12mdkfNX/aZMDTFpM009orfM8LaAIijQuXea3nXrIrzxGkFuKo7XV4bM1Zn3j1z+m3bX9D0sH3P2+OtVoGg0rpnz6SYXv/MkzPP4g76ShYRuM3hTZVT0aq+VbOIxqns2g4R6Dg2A==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
  165.204.84.17) smtp.rcpttodomain=kernel.org smtp.mailfrom=amd.com; dmarc=pass
  (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
  dkim=none (message not signed); arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=+j+qK2q5w0RYZchzZROMnIvIi0Oc7+QfDvEAR9a+BoU=;
- b=Y9amqIJHUeHjM7GLyp4p3ZoUkKfGsZqdXgIeZIMKrrt009oT9DNRNQ47fXQPi0EK/CUgzr3XND4kJb+powtuGTSSsbLkefXzzdsJZLLo7p/8vxC5589OLK4HWSzVBwzX1IgMAtAsTKeVIZLs0zWGfqSS5WDg9dQZCRBttZccv+U=
-Received: from DS7PR07CA0013.namprd07.prod.outlook.com (2603:10b6:5:3af::19)
- by MW3PR12MB4571.namprd12.prod.outlook.com (2603:10b6:303:5c::13) with
+ bh=XXbWoz2GMth4nfHV5JvqdAl9EMkTXLEX8bTuYP98Zc8=;
+ b=HUPW//LMJybB1TPxw/LEJIuvHw8LVPL4ChyeJ7nJ+mnZowbFUy3xM8tnCJh4VUuRxMIEMyCos4FkEvpRihSq5+8loS9/FYkahv4OSbYkYz2uEQJJjiu5cvsegc2azcKL3Bk1THe40QbgkANpxxDcn+bT0CL/zW7+YVPAo9gbV7o=
+Received: from DS7PR05CA0023.namprd05.prod.outlook.com (2603:10b6:5:3b9::28)
+ by MN2PR12MB3165.namprd12.prod.outlook.com (2603:10b6:208:ac::27) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4669.11; Wed, 10 Nov
- 2021 22:08:00 +0000
-Received: from DM6NAM11FT055.eop-nam11.prod.protection.outlook.com
- (2603:10b6:5:3af:cafe::f8) by DS7PR07CA0013.outlook.office365.com
- (2603:10b6:5:3af::19) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4669.11 via Frontend
- Transport; Wed, 10 Nov 2021 22:08:00 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4690.16; Wed, 10 Nov
+ 2021 22:08:03 +0000
+Received: from DM6NAM11FT049.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:5:3b9:cafe::f7) by DS7PR05CA0023.outlook.office365.com
+ (2603:10b6:5:3b9::28) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4690.6 via Frontend
+ Transport; Wed, 10 Nov 2021 22:08:03 +0000
 X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
- smtp.mailfrom=amd.com; kernel.org; dkim=none (message not signed)
- header.d=none;kernel.org; dmarc=pass action=none header.from=amd.com;
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
 Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
  165.204.84.17 as permitted sender) receiver=protection.outlook.com;
  client-ip=165.204.84.17; helo=SATLEXMB04.amd.com;
 Received: from SATLEXMB04.amd.com (165.204.84.17) by
- DM6NAM11FT055.mail.protection.outlook.com (10.13.173.103) with Microsoft SMTP
+ DM6NAM11FT049.mail.protection.outlook.com (10.13.172.188) with Microsoft SMTP
  Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.4690.15 via Frontend Transport; Wed, 10 Nov 2021 22:07:59 +0000
+ 15.20.4690.15 via Frontend Transport; Wed, 10 Nov 2021 22:08:03 +0000
 Received: from sbrijesh-desktop.amd.com (10.180.168.240) by SATLEXMB04.amd.com
  (10.181.40.145) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.17; Wed, 10 Nov
- 2021 16:07:57 -0600
+ 2021 16:08:01 -0600
 From:   Brijesh Singh <brijesh.singh@amd.com>
 To:     <x86@kernel.org>, <linux-kernel@vger.kernel.org>,
         <kvm@vger.kernel.org>, <linux-efi@vger.kernel.org>,
@@ -83,12 +83,11 @@ CC:     Thomas Gleixner <tglx@linutronix.de>,
         "Dr . David Alan Gilbert" <dgilbert@redhat.com>,
         <tony.luck@intel.com>, <marcorr@google.com>,
         <sathyanarayanan.kuppuswamy@linux.intel.com>,
-        Brijesh Singh <brijesh.singh@amd.com>,
-        Venu Busireddy <venu.busireddy@oracle.com>,
-        "Borislav Petkov" <bp@suse.de>
-Subject: [PATCH v7 04/45] x86/sev: Shorten GHCB terminate macro names
-Date:   Wed, 10 Nov 2021 16:06:50 -0600
-Message-ID: <20211110220731.2396491-5-brijesh.singh@amd.com>
+        Borislav Petkov <bp@suse.de>,
+        Brijesh Singh <brijesh.singh@amd.com>
+Subject: [PATCH v7 06/45] x86/head64: Carve out the guest encryption postprocessing into a helper
+Date:   Wed, 10 Nov 2021 16:06:52 -0600
+Message-ID: <20211110220731.2396491-7-brijesh.singh@amd.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20211110220731.2396491-1-brijesh.singh@amd.com>
 References: <20211110220731.2396491-1-brijesh.singh@amd.com>
@@ -100,122 +99,127 @@ X-ClientProxiedBy: SATLEXMB03.amd.com (10.181.40.144) To SATLEXMB04.amd.com
  (10.181.40.145)
 X-EOPAttributedMessage: 0
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: a692e087-6ea7-4702-971a-08d9a4968efb
-X-MS-TrafficTypeDiagnostic: MW3PR12MB4571:
-X-Microsoft-Antispam-PRVS: <MW3PR12MB4571B089035142ADD471F0A7E5939@MW3PR12MB4571.namprd12.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:9508;
+X-MS-Office365-Filtering-Correlation-Id: baa26f2f-11b0-4e79-742c-08d9a4969118
+X-MS-TrafficTypeDiagnostic: MN2PR12MB3165:
+X-Microsoft-Antispam-PRVS: <MN2PR12MB3165EC3EDC0C4445F8B1B088E5939@MN2PR12MB3165.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:8882;
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: nvqajCaF1cWCsC5pcf+1uWo3G8uO2UKRDuzlj9fXhf1YdaBAUnlA9xVSSClJnkL/ePjvgOhyaGddk/iswxaFY+xqti9aPaWTLn4wbxJnA8/O7O22qtg/JNP13LWrpYIGVFQxIZ0hh7fhzDPuz9G3ueKq31dUFea448EJkJ7T3ZbAy4JG4qws5mxZZBmOf/Yu4i7juoFTzl4aVbyAp5yx24cZXbCFk1ScDmhu+iwKd+J6844JSGv1m6LdGo/cxbDLhnH56qDwZXCdT88N2U28MNQAWJI4CKnDPbzB/xkbHqulQxVzPx13ZlXQw40BMx9RFJKYMx6fHFyxodcgiOWFMfUjIZdXVlxut1VZQbKGEMn6aPQZKxf7XrlZI30xaWY0Ma+R3XZqSmlXDHYnvNVCj1FalZap/DVKQoZlgZB7lQW6EhanvBxRbcDeCUVswyUeEWckFz89s3wrTtHzKoZExcgKPIkKKMrVbT7+Gz5CadvV6cR9atov3mh8KTbTGgDtieyt1lNFWb5TsHV2h+p9pQcna8ZLa+k/bsDF+kBEyWJnLkeYPvCax7VvHwQNpC6jPIRaRSP1Pp5x8Uo+wH5Ss+WtNyyD+YRiBYv/mRlJXW3nPcNYAf2zlGKH1of4bUl7+wMZQ49FaZ16GSyEFcGLeYu7ktj3ytE9CHGnZ2LNClnos6Hd3pCbbEAaqpbMGaxv3ywa2tUONaFKoIOg6sssl5lY6c+sXVVON3mAu9FXr9LL4wKnHhxFQDzoADkaswSW
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(46966006)(36840700001)(1076003)(186003)(7406005)(2906002)(26005)(47076005)(508600001)(8676002)(7696005)(4326008)(83380400001)(5660300002)(86362001)(36756003)(70586007)(16526019)(356005)(70206006)(81166007)(110136005)(8936002)(36860700001)(6666004)(426003)(44832011)(54906003)(2616005)(316002)(82310400003)(336012)(7416002)(36900700001)(2101003);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: /4FWnfhKJdtlbJFtxdt6hKPQgOuOJfv/L25G8Lx0RynvJ75ez5Uhoc9Wcc4t5dLHQNAZxQ2a2NfjHBFmTGBB+qjfdEsdV+vPYcWQlScadbr3Zb5iwJD/LVVc8HQ/Uf7MTOLkRztOH3stBEZod9c1DOpkz1ZFjxVp0VhldmNwDcLUDuaYh7WqJgSKHQqNd0nj1lAvq8DLWwx68rvmo4B0rzBovtLMfQfzt1WJ9amZWL1jASJL+Ush9bkGQc7qJL6nFFefoPw/eWQ/CHyl3ML49QirVlkln22s5vyS/JjCk8t3SoBoFjwNYc7jo3sMZx9YxvnbMRWeGNhuGZBrUr/9EVu4Qon2d2+5lQT0hOAFVzlDBTjOUxoAhBcJaQpbkIwdkgQdhr5Cc/kV8bekwQ3BUYLJdPvzwBhEraBiw2SxlnoYtHi8Cr3QxOYbNxHmXznMH1qoeePzYSS/kz5ebCuzDSho94YWoQVmxBKn4Uv2FanpuxiPBO3ARRuvB4XIW21NwB3ode/IK35V2tHaz9qUQZDWArkPRhVoc42C4wSrxlMBal8v0RccUvN79JXK5ns4zzyGfyaH7S6/o+Jj1Vc83JKjWFW+YxZYqkHyNY43EZ5z/M/tXuAunTfq+4LrT7DTekksmmBq0C61NYHWd/0YiETgL6mRCC4OEydE1NIVXANdyoXRL1huy7PHBl/9s9yiUrx7HuM8fxYD4l6SMNISWM5w7avSftnk5yDhO4Cx/znt83Orib/JbubgKT7ccnj8
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(36840700001)(46966006)(26005)(70206006)(1076003)(82310400003)(316002)(70586007)(2616005)(6666004)(508600001)(86362001)(426003)(186003)(8676002)(336012)(83380400001)(16526019)(44832011)(5660300002)(36860700001)(2906002)(7696005)(4326008)(36756003)(81166007)(8936002)(54906003)(47076005)(110136005)(7406005)(7416002)(356005)(36900700001)(2101003);DIR:OUT;SFP:1101;
 X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Nov 2021 22:07:59.9469
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Nov 2021 22:08:03.5234
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: a692e087-6ea7-4702-971a-08d9a4968efb
+X-MS-Exchange-CrossTenant-Network-Message-Id: baa26f2f-11b0-4e79-742c-08d9a4969118
 X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
 X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT055.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT049.eop-nam11.prod.protection.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MW3PR12MB4571
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR12MB3165
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Shorten macro names for improved readability.
+From: Borislav Petkov <bp@suse.de>
 
-Reviewed-by: Venu Busireddy <venu.busireddy@oracle.com>
-Suggested-by: Borislav Petkov <bp@suse.de>
+Carve it out so that it is abstracted out of the main boot path. All
+other encrypted guest-relevant processing should be placed in there.
+
+No functional changes.
+
+Signed-off-by: Borislav Petkov <bp@suse.de>
 Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
 ---
- arch/x86/boot/compressed/sev.c    | 6 +++---
- arch/x86/include/asm/sev-common.h | 4 ++--
- arch/x86/kernel/sev-shared.c      | 2 +-
- arch/x86/kernel/sev.c             | 4 ++--
- 4 files changed, 8 insertions(+), 8 deletions(-)
+ arch/x86/kernel/head64.c | 60 +++++++++++++++++++++-------------------
+ 1 file changed, 31 insertions(+), 29 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/sev.c b/arch/x86/boot/compressed/sev.c
-index c91ad835b78e..8c6410014d22 100644
---- a/arch/x86/boot/compressed/sev.c
-+++ b/arch/x86/boot/compressed/sev.c
-@@ -122,7 +122,7 @@ static enum es_result vc_read_mem(struct es_em_ctxt *ctxt,
- static bool early_setup_sev_es(void)
+diff --git a/arch/x86/kernel/head64.c b/arch/x86/kernel/head64.c
+index 4eb83ae7ceb8..54bf0603002f 100644
+--- a/arch/x86/kernel/head64.c
++++ b/arch/x86/kernel/head64.c
+@@ -126,6 +126,36 @@ static bool __head check_la57_support(unsigned long physaddr)
+ }
+ #endif
+ 
++static unsigned long sme_postprocess_startup(struct boot_params *bp, pmdval_t *pmd)
++{
++	unsigned long vaddr, vaddr_end;
++	int i;
++
++	/* Encrypt the kernel and related (if SME is active) */
++	sme_encrypt_kernel(bp);
++
++	/*
++	 * Clear the memory encryption mask from the .bss..decrypted section.
++	 * The bss section will be memset to zero later in the initialization so
++	 * there is no need to zero it after changing the memory encryption
++	 * attribute.
++	 */
++	if (sme_get_me_mask()) {
++		vaddr = (unsigned long)__start_bss_decrypted;
++		vaddr_end = (unsigned long)__end_bss_decrypted;
++		for (; vaddr < vaddr_end; vaddr += PMD_SIZE) {
++			i = pmd_index(vaddr);
++			pmd[i] -= sme_get_me_mask();
++		}
++	}
++
++	/*
++	 * Return the SME encryption mask (if SME is active) to be used as a
++	 * modifier for the initial pgdir entry programmed into CR3.
++	 */
++	return sme_get_me_mask();
++}
++
+ /* Code in __startup_64() can be relocated during execution, but the compiler
+  * doesn't have to generate PC-relative relocations when accessing globals from
+  * that function. Clang actually does not generate them, which leads to
+@@ -135,7 +165,6 @@ static bool __head check_la57_support(unsigned long physaddr)
+ unsigned long __head __startup_64(unsigned long physaddr,
+ 				  struct boot_params *bp)
  {
- 	if (!sev_es_negotiate_protocol())
--		sev_es_terminate(GHCB_SEV_ES_REASON_PROTOCOL_UNSUPPORTED);
-+		sev_es_terminate(GHCB_SEV_ES_PROT_UNSUPPORTED);
+-	unsigned long vaddr, vaddr_end;
+ 	unsigned long load_delta, *p;
+ 	unsigned long pgtable_flags;
+ 	pgdval_t *pgd;
+@@ -273,34 +302,7 @@ unsigned long __head __startup_64(unsigned long physaddr,
+ 	 */
+ 	*fixup_long(&phys_base, physaddr) += load_delta - sme_get_me_mask();
  
- 	if (set_page_decrypted((unsigned long)&boot_ghcb_page))
- 		return false;
-@@ -175,7 +175,7 @@ void do_boot_stage2_vc(struct pt_regs *regs, unsigned long exit_code)
- 	enum es_result result;
- 
- 	if (!boot_ghcb && !early_setup_sev_es())
--		sev_es_terminate(GHCB_SEV_ES_REASON_GENERAL_REQUEST);
-+		sev_es_terminate(GHCB_SEV_ES_GEN_REQ);
- 
- 	vc_ghcb_invalidate(boot_ghcb);
- 	result = vc_init_em_ctxt(&ctxt, regs, exit_code);
-@@ -202,7 +202,7 @@ void do_boot_stage2_vc(struct pt_regs *regs, unsigned long exit_code)
- 	if (result == ES_OK)
- 		vc_finish_insn(&ctxt);
- 	else if (result != ES_RETRY)
--		sev_es_terminate(GHCB_SEV_ES_REASON_GENERAL_REQUEST);
-+		sev_es_terminate(GHCB_SEV_ES_GEN_REQ);
+-	/* Encrypt the kernel and related (if SME is active) */
+-	sme_encrypt_kernel(bp);
+-
+-	/*
+-	 * Clear the memory encryption mask from the .bss..decrypted section.
+-	 * The bss section will be memset to zero later in the initialization so
+-	 * there is no need to zero it after changing the memory encryption
+-	 * attribute.
+-	 *
+-	 * This is early code, use an open coded check for SME instead of
+-	 * using cc_platform_has(). This eliminates worries about removing
+-	 * instrumentation or checking boot_cpu_data in the cc_platform_has()
+-	 * function.
+-	 */
+-	if (sme_get_me_mask()) {
+-		vaddr = (unsigned long)__start_bss_decrypted;
+-		vaddr_end = (unsigned long)__end_bss_decrypted;
+-		for (; vaddr < vaddr_end; vaddr += PMD_SIZE) {
+-			i = pmd_index(vaddr);
+-			pmd[i] -= sme_get_me_mask();
+-		}
+-	}
+-
+-	/*
+-	 * Return the SME encryption mask (if SME is active) to be used as a
+-	 * modifier for the initial pgdir entry programmed into CR3.
+-	 */
+-	return sme_get_me_mask();
++	return sme_postprocess_startup(bp, pmd);
  }
  
- static inline u64 rd_sev_status_msr(void)
-diff --git a/arch/x86/include/asm/sev-common.h b/arch/x86/include/asm/sev-common.h
-index 2cef6c5a52c2..855b0ec9c4e8 100644
---- a/arch/x86/include/asm/sev-common.h
-+++ b/arch/x86/include/asm/sev-common.h
-@@ -68,8 +68,8 @@
- 	(((((u64)reason_set) &  GHCB_MSR_TERM_REASON_SET_MASK) << GHCB_MSR_TERM_REASON_SET_POS) | \
- 	((((u64)reason_val) & GHCB_MSR_TERM_REASON_MASK) << GHCB_MSR_TERM_REASON_POS))
- 
--#define GHCB_SEV_ES_REASON_GENERAL_REQUEST	0
--#define GHCB_SEV_ES_REASON_PROTOCOL_UNSUPPORTED	1
-+#define GHCB_SEV_ES_GEN_REQ		0
-+#define GHCB_SEV_ES_PROT_UNSUPPORTED	1
- 
- #define GHCB_RESP_CODE(v)		((v) & GHCB_MSR_INFO_MASK)
- 
-diff --git a/arch/x86/kernel/sev-shared.c b/arch/x86/kernel/sev-shared.c
-index 787dc5f568b5..ce987688bbc0 100644
---- a/arch/x86/kernel/sev-shared.c
-+++ b/arch/x86/kernel/sev-shared.c
-@@ -221,7 +221,7 @@ void __init do_vc_no_ghcb(struct pt_regs *regs, unsigned long exit_code)
- 
- fail:
- 	/* Terminate the guest */
--	sev_es_terminate(GHCB_SEV_ES_REASON_GENERAL_REQUEST);
-+	sev_es_terminate(GHCB_SEV_ES_GEN_REQ);
- }
- 
- static enum es_result vc_insn_string_read(struct es_em_ctxt *ctxt,
-diff --git a/arch/x86/kernel/sev.c b/arch/x86/kernel/sev.c
-index 74f0ec955384..0a6c82e060e0 100644
---- a/arch/x86/kernel/sev.c
-+++ b/arch/x86/kernel/sev.c
-@@ -1411,7 +1411,7 @@ DEFINE_IDTENTRY_VC_KERNEL(exc_vmm_communication)
- 		show_regs(regs);
- 
- 		/* Ask hypervisor to sev_es_terminate */
--		sev_es_terminate(GHCB_SEV_ES_REASON_GENERAL_REQUEST);
-+		sev_es_terminate(GHCB_SEV_ES_GEN_REQ);
- 
- 		/* If that fails and we get here - just panic */
- 		panic("Returned from Terminate-Request to Hypervisor\n");
-@@ -1459,7 +1459,7 @@ bool __init handle_vc_boot_ghcb(struct pt_regs *regs)
- 
- 	/* Do initial setup or terminate the guest */
- 	if (unlikely(boot_ghcb == NULL && !sev_es_setup_ghcb()))
--		sev_es_terminate(GHCB_SEV_ES_REASON_GENERAL_REQUEST);
-+		sev_es_terminate(GHCB_SEV_ES_GEN_REQ);
- 
- 	vc_ghcb_invalidate(boot_ghcb);
- 
+ unsigned long __startup_secondary_64(void)
 -- 
 2.25.1
 
