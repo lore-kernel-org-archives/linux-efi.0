@@ -2,58 +2,58 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9EE39C43217
-	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 22:09:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F127C433FE
+	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 22:09:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8E6DB6124C
-	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 22:09:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1BD2E6124C
+	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 22:09:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234292AbhKJWMV (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 10 Nov 2021 17:12:21 -0500
-Received: from mail-co1nam11on2050.outbound.protection.outlook.com ([40.107.220.50]:40240
-        "EHLO NAM11-CO1-obe.outbound.protection.outlook.com"
+        id S234306AbhKJWMW (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 10 Nov 2021 17:12:22 -0500
+Received: from mail-bn7nam10on2075.outbound.protection.outlook.com ([40.107.92.75]:13274
+        "EHLO NAM10-BN7-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S233607AbhKJWLP (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 10 Nov 2021 17:11:15 -0500
+        id S233807AbhKJWLO (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 10 Nov 2021 17:11:14 -0500
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=giID555+XxU8RPx2grGT4YAuYRcwcAA++QbLLR6D+m9TVU677yH1zkDyPyaF+Ikwn7wg9sLlk1JALe+zjF3mK62klkGqIS0k27RFnvGDQxrvefu5UQPisWlUyNkgvFfvOHHJrIZmdxZCAKfcpfXWxChQTzARgv5qmf06D8PCeHJTemIMSgCSA1VVTFaey3Df1ce1fQ+R6OC5RznOJV0S9lLpvsueLCqZ1WLPVbgY5x5Bo1TF//Ll1dRGHWaXHzLxuKcE9ixIy6WRlJ23SrMADV3wAYHxWhl6Q9FlPxdJveHE8gvP3gyPqHV2SaWx96XSL3ZCPY8p1CWqRBf2e/SM+Q==
+ b=a1dCfAfupv5+bAgtmWDwEu8Y7Uht8XsCJ+jhzbv7ZWEDGeLAvmSs50VoFJTWpIqeW2Rk6qFdABxdxKeCZuMrVNv/3cONkCLfBboc7VdQq5W1z5uUYVcwM+7Fe8az5T8d++u39lGzWy0by2678NRdye88ZzKH5tbCxoUrpUL+A3duj2loQceII/ANu259mSjH9M/1vw0yyjj7+62y+QREYZzFkDtz4h1ifQdit1mShwKnAJ4WyY6MAqmnNA8ytWTFfnBtyMwvTsSbrZCrZjsQd7e8HhZXpOH5G0F1O5vqpZ6ydf8YGBeqEDFjwLtuf3eGM8VX0DZZ9hdXMJKEi20mcg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=cife7IOICCyiVH7Aa9ZyofIqNelDnpiR2NYgGBKIphc=;
- b=KTPYdzQ5XJ8L2ldlh6UQB5jxJfyK58N+JWxq+YKfnVwawN9nhlfpOGA+/4nTuZyfFLmLUxwPfsggEn8qWZRvpJz1k6eJGJsjE/6o6EKNJrsnn28hlJqj/ka+O/8Dc3QckVy017YUPUQMP4+45jUOuxFA/zIqO0hf1Of5Sq3lztU5M312zUQAxX6JJ2d0gEG8cCmoZ1NnE5KwB10Br6GFd0gdJ1PZIPoWhwfPYH4O9QiMIEkq7a6uxHfNrL5VguELrXPNm+N6IMR1+s2rH8dB/GfBqAdqqLuB9NSEvWG9Qu4st/i6eidDtaWPVSB4KC0VXdTWlO7GalSiKGVeup2+XQ==
+ bh=dvqWQ47dea77mexKn/X89OjupN7xeg4W3twGeZDKhLs=;
+ b=YHBTzJ7xZIvOy60Fdu9uLOneDqvLD6nYluRTaxxGrt0iUwS3xIz3DM2GdWxCe0mcZoIcjw5ajywbeQTjLOgWWGicd+JFvlngapPrwXstjFKEHZHfnptM6/UNcBPKBInVH1547joKCsUm3zhFX27JZCNlDdmhxPuNZXXR506AqhvybHhZ4OwFL+otR/bDgP4AzIMShBk+mAsHVSVn0sReUqHDsROggXqdZFcRCKtUDPl94sI7ti/a82tv2b4KYmdU/HKE7Tt9+zFtGFNBaKm5YU2teYsdQldz/w+GNG6O4QnMbpmZlZG9sMlufRVErxIxE7P2XFefV2grDJJyluc9PQ==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
  165.204.84.17) smtp.rcpttodomain=kernel.org smtp.mailfrom=amd.com; dmarc=pass
  (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
  dkim=none (message not signed); arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=cife7IOICCyiVH7Aa9ZyofIqNelDnpiR2NYgGBKIphc=;
- b=Z6iEB7WNl/sEhwf3+QkNeEVuXnvpLNkg0Y8Hi0kHVNUFyUb6yJ2rQxnvsrGq3EXLOVQxFhtgdroj//CmmIA/Up2wcyC1UUpXLM3tmd01rpEd41juI/j/SPt4XEYkJmAv9ix2pAN6ROzQrQYcrkSHYRNVbrJDWn9FeAN8f1Ewtmk=
-Received: from DM5PR13CA0023.namprd13.prod.outlook.com (2603:10b6:3:23::33) by
- MN2PR12MB4029.namprd12.prod.outlook.com (2603:10b6:208:167::27) with
+ bh=dvqWQ47dea77mexKn/X89OjupN7xeg4W3twGeZDKhLs=;
+ b=R5vTXZI39AhKDxZ2iteQSGWIDD7I4fO6Sr5uJK5SaRVsprsBwvy97puwFCjrNURnKDcHCi3o2meSwP5X5gOL1TySj9SeM7qFmNjQILWp1sen/k7yF5EHgpN23c1rxW29dCCyJGPSRh+zrqBZVG7JhXFkY74DizSUuNlzoZ0jePQ=
+Received: from DM6PR07CA0118.namprd07.prod.outlook.com (2603:10b6:5:330::31)
+ by MW2PR12MB2459.namprd12.prod.outlook.com (2603:10b6:907:c::24) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4669.13; Wed, 10 Nov
- 2021 22:08:16 +0000
-Received: from DM6NAM11FT066.eop-nam11.prod.protection.outlook.com
- (2603:10b6:3:23:cafe::7c) by DM5PR13CA0023.outlook.office365.com
- (2603:10b6:3:23::33) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4690.6 via Frontend
- Transport; Wed, 10 Nov 2021 22:08:16 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4690.18; Wed, 10 Nov
+ 2021 22:08:21 +0000
+Received: from DM6NAM11FT026.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:5:330:cafe::31) by DM6PR07CA0118.outlook.office365.com
+ (2603:10b6:5:330::31) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4690.16 via Frontend
+ Transport; Wed, 10 Nov 2021 22:08:21 +0000
 X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
- smtp.mailfrom=amd.com; kernel.org; dkim=none (message not signed)
- header.d=none;kernel.org; dmarc=pass action=none header.from=amd.com;
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
 Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
  165.204.84.17 as permitted sender) receiver=protection.outlook.com;
  client-ip=165.204.84.17; helo=SATLEXMB04.amd.com;
 Received: from SATLEXMB04.amd.com (165.204.84.17) by
- DM6NAM11FT066.mail.protection.outlook.com (10.13.173.179) with Microsoft SMTP
+ DM6NAM11FT026.mail.protection.outlook.com (10.13.172.161) with Microsoft SMTP
  Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.4690.15 via Frontend Transport; Wed, 10 Nov 2021 22:08:15 +0000
+ 15.20.4690.15 via Frontend Transport; Wed, 10 Nov 2021 22:08:21 +0000
 Received: from sbrijesh-desktop.amd.com (10.180.168.240) by SATLEXMB04.amd.com
  (10.181.40.145) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.17; Wed, 10 Nov
- 2021 16:08:06 -0600
+ 2021 16:08:17 -0600
 From:   Brijesh Singh <brijesh.singh@amd.com>
 To:     <x86@kernel.org>, <linux-kernel@vger.kernel.org>,
         <kvm@vger.kernel.org>, <linux-efi@vger.kernel.org>,
@@ -84,9 +84,9 @@ CC:     Thomas Gleixner <tglx@linutronix.de>,
         <tony.luck@intel.com>, <marcorr@google.com>,
         <sathyanarayanan.kuppuswamy@linux.intel.com>,
         Brijesh Singh <brijesh.singh@amd.com>
-Subject: [PATCH v7 09/45] x86/sev: Save the negotiated GHCB version
-Date:   Wed, 10 Nov 2021 16:06:55 -0600
-Message-ID: <20211110220731.2396491-10-brijesh.singh@amd.com>
+Subject: [PATCH v7 16/45] x86/sev: Register GHCB memory when SEV-SNP is active
+Date:   Wed, 10 Nov 2021 16:07:02 -0600
+Message-ID: <20211110220731.2396491-17-brijesh.singh@amd.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20211110220731.2396491-1-brijesh.singh@amd.com>
 References: <20211110220731.2396491-1-brijesh.singh@amd.com>
@@ -98,96 +98,252 @@ X-ClientProxiedBy: SATLEXMB03.amd.com (10.181.40.144) To SATLEXMB04.amd.com
  (10.181.40.145)
 X-EOPAttributedMessage: 0
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: b50718e0-f891-4022-c09a-08d9a496987b
-X-MS-TrafficTypeDiagnostic: MN2PR12MB4029:
-X-Microsoft-Antispam-PRVS: <MN2PR12MB4029E8242508C4AB97BF1AC9E5939@MN2PR12MB4029.namprd12.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:9508;
+X-MS-Office365-Filtering-Correlation-Id: 7a45f8b7-074b-4df3-c66a-08d9a4969bee
+X-MS-TrafficTypeDiagnostic: MW2PR12MB2459:
+X-Microsoft-Antispam-PRVS: <MW2PR12MB2459A5EDF7C01212C6283D0BE5939@MW2PR12MB2459.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:2657;
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: cy0DFeCowOzF09IiQne8I+6x5DC5gyj6aXM9eOWpOQN9LK+G5fesDFl4cahDSV3wimDGPa2WV2CniEWDY+V30/u3utGw3k4vPsQbGCUXNBCIFsZcCr/GZZWXF05DA3bhJtLa4TWlbLxJZsxpFJtPMuZpXnKbcaGHs5GQx76KBoxTWjnNPnBQob/Q++rIznf0d23EKvcNo6riazIlfktIDdkNQJSF+kPFEy1fMVTdI2zFVyHXhlY48Z5TG3JExiDxI85GwAE3+ZMVbk0npUbvtiWNqnrZxol+g5HFB0E5X45QIv/GSoVn1YLwgPGkZ6DC5NRBoN6kHmxjvJz6ItNpe51zi7SzRj+xMGRgSmH2ay0yG8DePX20qjigU6YZywLtVdu/CuC9TvhouRA7Z/UeNnekk1mGgu4skHvfRs8s98s/lid+qB0u9UE0/R4A+goIs4lRsYCuYzcy8bNZ7OIlYyrLVPyZw4yUIaEEt8yYiEyx+NCJds7/1nNTj+BPnKrpYHNFQJ5bcvx/VOzwqtg4GiFFl8UplL04F2CnNCXIzbKhZDJ/uBlsWE1yamuKvsq6VlS5dyJvmrdIzmPAjX7NOxnimALtaOvMeEz/3rAapPTMbnmwq5WSw6nb4H/vj+1MOjJevQ37fFzXKowo2uZEUWjxKQ/P/dgt7gAtGwCTw0BV6Yw2bgKjKyi/+topr1Nmy5qg292U4345om0GcyZLLuXg8jqnJrFT1mY0kZvV5yXsPxoHrbkYEAVeSmp7WXVD
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(36840700001)(46966006)(2616005)(508600001)(36756003)(4326008)(70206006)(186003)(36860700001)(2906002)(426003)(110136005)(82310400003)(336012)(54906003)(26005)(44832011)(5660300002)(16526019)(86362001)(1076003)(356005)(7696005)(70586007)(316002)(8936002)(81166007)(47076005)(8676002)(83380400001)(7416002)(7406005)(6666004)(36900700001)(2101003);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: ogCJFZRSMsLcjx3zfi0fdkkZX9OcyCNFoUeEHJQAsbmKOdWU/sEUkDPtJsZpoO0d49Ns5T8c5cmU0WQZJ4LdsDIBb2I+5jhEHDkVmVc/8b/CcgFtFVS8JXpeJ5bSw55c9qHP+PfeSyeB08x1U0/SjYUFlNa1/sBHKxdQppMwOrABvL5V0iNUTYEEYTIfkHcfHPtxfc17RSLfEkcAweeDZLYFvaouwbrIzy04myS74/e3J6ZerYOryCqYPAybPq8rl5wrBFfbcQnjg7MIWWvJiNk9zWumPdew2vW3bzLI06VgZI/PEhPkG9nuIt8yZYp/69dND5welu02WFISTSEB/YUlpzgFu2s48+PxntOtvbdjJruAgShNDavmthgTXPOERaM11VylTLs9UGpGl8b7j+y/KQh5M1sV6iZyYmCerMJlTsXod/DyqFh5ldpPL5gE8ZXYm0pdKMq8EwV86bKBn2JxTpdV5zDrBXU9qcd1OCzisAcmi6HmhNFgPhrIpGtU6WsQJdQHuVpXXYCCYvzXQgKnT4s7qAfAjVzZCb/mlLR29o9Od10lWTD0VhMTioJk1zqp0vaNlyRzbJqRV+SBOoGLYaiFxDMsYSVbtEVhcJaOTsZspok1qF/ZnzEA/DaMGlFRL4BwwRd4dqRhQrbbvjIULtTnhPx9KtFmCJfaK8NMhwwlwyBgDytOUnlhkXyTc2V5VpNtfmHUt/WAZ3Is8Xv0oy7XkZHfz3wgQqeCM7MSO6gd0v2vnyflNc1Dn0QZ
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(46966006)(36840700001)(110136005)(36756003)(8676002)(44832011)(4326008)(82310400003)(2906002)(508600001)(7696005)(83380400001)(6666004)(316002)(47076005)(356005)(26005)(16526019)(186003)(81166007)(70586007)(86362001)(8936002)(5660300002)(426003)(2616005)(36860700001)(70206006)(54906003)(7416002)(7406005)(1076003)(336012)(2101003)(36900700001);DIR:OUT;SFP:1101;
 X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Nov 2021 22:08:15.8863
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Nov 2021 22:08:21.6922
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: b50718e0-f891-4022-c09a-08d9a496987b
+X-MS-Exchange-CrossTenant-Network-Message-Id: 7a45f8b7-074b-4df3-c66a-08d9a4969bee
 X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
 X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT066.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT026.eop-nam11.prod.protection.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR12MB4029
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MW2PR12MB2459
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The SEV-ES guest calls the sev_es_negotiate_protocol() to negotiate the
-GHCB protocol version before establishing the GHCB. Cache the negotiated
-GHCB version so that it can be used later.
+The SEV-SNP guest is required to perform GHCB GPA registration. This is
+because the hypervisor may prefer that a guest use a consistent and/or
+specific GPA for the GHCB associated with a vCPU. For more information,
+see the GHCB specification section GHCB GPA Registration.
+
+During the boot, init_ghcb() allocates a per-cpu GHCB page. On very first
+VC exception, the exception handler switch to using the per-cpu GHCB page
+allocated during the init_ghcb(). The GHCB page must be registered in
+the current vcpu context.
 
 Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
 ---
- arch/x86/include/asm/sev.h   |  2 +-
- arch/x86/kernel/sev-shared.c | 17 ++++++++++++++---
- 2 files changed, 15 insertions(+), 4 deletions(-)
+ arch/x86/include/asm/sev.h   |   2 +
+ arch/x86/kernel/cpu/common.c |   5 ++
+ arch/x86/kernel/head64.c     |   3 +
+ arch/x86/kernel/sev.c        | 116 ++++++++++++++++++++---------------
+ 4 files changed, 77 insertions(+), 49 deletions(-)
 
 diff --git a/arch/x86/include/asm/sev.h b/arch/x86/include/asm/sev.h
-index ec060c433589..9b9c190e8c3b 100644
+index e37451849165..0df508374a35 100644
 --- a/arch/x86/include/asm/sev.h
 +++ b/arch/x86/include/asm/sev.h
-@@ -12,7 +12,7 @@
- #include <asm/insn.h>
- #include <asm/sev-common.h>
+@@ -122,6 +122,7 @@ static inline int pvalidate(unsigned long vaddr, bool rmp_psize, bool validate)
  
--#define GHCB_PROTO_OUR		0x0001UL
-+#define GHCB_PROTOCOL_MIN	1ULL
- #define GHCB_PROTOCOL_MAX	1ULL
- #define GHCB_DEFAULT_USAGE	0ULL
- 
-diff --git a/arch/x86/kernel/sev-shared.c b/arch/x86/kernel/sev-shared.c
-index 2abf8a7d75e5..91105f5a02a8 100644
---- a/arch/x86/kernel/sev-shared.c
-+++ b/arch/x86/kernel/sev-shared.c
-@@ -14,6 +14,15 @@
- #define has_cpuflag(f)	boot_cpu_has(f)
+ 	return rc;
+ }
++void sev_snp_register_ghcb(void);
+ #else
+ static inline void sev_es_ist_enter(struct pt_regs *regs) { }
+ static inline void sev_es_ist_exit(void) { }
+@@ -130,6 +131,7 @@ static inline void sev_es_nmi_complete(void) { }
+ static inline int sev_es_efi_map_ghcbs(pgd_t *pgd) { return 0; }
+ static inline int pvalidate(unsigned long vaddr, bool rmp_psize, bool validate) { return 0; }
+ static inline int rmpadjust(unsigned long vaddr, bool rmp_psize, unsigned long attrs) { return 0; }
++static inline void sev_snp_register_ghcb(void) { }
  #endif
  
-+/*
-+ * Since feature negotiation related variables are set early in the boot
-+ * process they must reside in the .data section so as not to be zeroed
-+ * out when the .bss section is later cleared.
-+ *
-+ * GHCB protocol version negotiated with the hypervisor.
-+ */
-+static u16 ghcb_version __ro_after_init;
+ #endif
+diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
+index 0083464de5e3..16b5667bbfdb 100644
+--- a/arch/x86/kernel/cpu/common.c
++++ b/arch/x86/kernel/cpu/common.c
+@@ -59,6 +59,7 @@
+ #include <asm/cpu_device_id.h>
+ #include <asm/uv/uv.h>
+ #include <asm/sigframe.h>
++#include <asm/sev.h>
+ 
+ #include "cpu.h"
+ 
+@@ -1977,6 +1978,10 @@ void cpu_init_exception_handling(void)
+ 
+ 	load_TR_desc();
+ 
++	/* Register the GHCB before taking any VC exception */
++	if (IS_ENABLED(CONFIG_AMD_MEM_ENCRYPT))
++		sev_snp_register_ghcb();
 +
- static bool __init sev_es_check_cpu_features(void)
+ 	/* Finally load the IDT */
+ 	load_current_idt();
+ }
+diff --git a/arch/x86/kernel/head64.c b/arch/x86/kernel/head64.c
+index 54bf0603002f..968105cec364 100644
+--- a/arch/x86/kernel/head64.c
++++ b/arch/x86/kernel/head64.c
+@@ -588,6 +588,9 @@ void early_setup_idt(void)
+ 
+ 	bringup_idt_descr.address = (unsigned long)bringup_idt_table;
+ 	native_load_idt(&bringup_idt_descr);
++
++	if (IS_ENABLED(CONFIG_AMD_MEM_ENCRYPT))
++		sev_snp_register_ghcb();
+ }
+ 
+ /*
+diff --git a/arch/x86/kernel/sev.c b/arch/x86/kernel/sev.c
+index 80a41e413cb8..30634e7e5c7b 100644
+--- a/arch/x86/kernel/sev.c
++++ b/arch/x86/kernel/sev.c
+@@ -158,55 +158,6 @@ void noinstr __sev_es_ist_exit(void)
+ 	this_cpu_write(cpu_tss_rw.x86_tss.ist[IST_INDEX_VC], *(unsigned long *)ist);
+ }
+ 
+-/*
+- * Nothing shall interrupt this code path while holding the per-CPU
+- * GHCB. The backup GHCB is only for NMIs interrupting this path.
+- *
+- * Callers must disable local interrupts around it.
+- */
+-static noinstr struct ghcb *__sev_get_ghcb(struct ghcb_state *state)
+-{
+-	struct sev_es_runtime_data *data;
+-	struct ghcb *ghcb;
+-
+-	WARN_ON(!irqs_disabled());
+-
+-	data = this_cpu_read(runtime_data);
+-	ghcb = &data->ghcb_page;
+-
+-	if (unlikely(data->ghcb_active)) {
+-		/* GHCB is already in use - save its contents */
+-
+-		if (unlikely(data->backup_ghcb_active)) {
+-			/*
+-			 * Backup-GHCB is also already in use. There is no way
+-			 * to continue here so just kill the machine. To make
+-			 * panic() work, mark GHCBs inactive so that messages
+-			 * can be printed out.
+-			 */
+-			data->ghcb_active        = false;
+-			data->backup_ghcb_active = false;
+-
+-			instrumentation_begin();
+-			panic("Unable to handle #VC exception! GHCB and Backup GHCB are already in use");
+-			instrumentation_end();
+-		}
+-
+-		/* Mark backup_ghcb active before writing to it */
+-		data->backup_ghcb_active = true;
+-
+-		state->ghcb = &data->backup_ghcb;
+-
+-		/* Backup GHCB content */
+-		*state->ghcb = *ghcb;
+-	} else {
+-		state->ghcb = NULL;
+-		data->ghcb_active = true;
+-	}
+-
+-	return ghcb;
+-}
+-
+ static inline u64 sev_es_rd_ghcb_msr(void)
  {
- 	if (!has_cpuflag(X86_FEATURE_RDRAND)) {
-@@ -51,10 +60,12 @@ static bool sev_es_negotiate_protocol(void)
- 	if (GHCB_MSR_INFO(val) != GHCB_MSR_SEV_INFO_RESP)
- 		return false;
+ 	return __rdmsr(MSR_AMD64_SEV_ES_GHCB);
+@@ -459,6 +410,55 @@ static enum es_result vc_slow_virt_to_phys(struct ghcb *ghcb, struct es_em_ctxt
+ /* Include code shared with pre-decompression boot stage */
+ #include "sev-shared.c"
  
--	if (GHCB_MSR_PROTO_MAX(val) < GHCB_PROTO_OUR ||
--	    GHCB_MSR_PROTO_MIN(val) > GHCB_PROTO_OUR)
-+	if (GHCB_MSR_PROTO_MAX(val) < GHCB_PROTOCOL_MIN ||
-+	    GHCB_MSR_PROTO_MIN(val) > GHCB_PROTOCOL_MAX)
- 		return false;
++/*
++ * Nothing shall interrupt this code path while holding the per-CPU
++ * GHCB. The backup GHCB is only for NMIs interrupting this path.
++ *
++ * Callers must disable local interrupts around it.
++ */
++static noinstr struct ghcb *__sev_get_ghcb(struct ghcb_state *state)
++{
++	struct sev_es_runtime_data *data;
++	struct ghcb *ghcb;
++
++	WARN_ON(!irqs_disabled());
++
++	data = this_cpu_read(runtime_data);
++	ghcb = &data->ghcb_page;
++
++	if (unlikely(data->ghcb_active)) {
++		/* GHCB is already in use - save its contents */
++
++		if (unlikely(data->backup_ghcb_active)) {
++			/*
++			 * Backup-GHCB is also already in use. There is no way
++			 * to continue here so just kill the machine. To make
++			 * panic() work, mark GHCBs inactive so that messages
++			 * can be printed out.
++			 */
++			data->ghcb_active        = false;
++			data->backup_ghcb_active = false;
++
++			instrumentation_begin();
++			panic("Unable to handle #VC exception! GHCB and Backup GHCB are already in use");
++			instrumentation_end();
++		}
++
++		/* Mark backup_ghcb active before writing to it */
++		data->backup_ghcb_active = true;
++
++		state->ghcb = &data->backup_ghcb;
++
++		/* Backup GHCB content */
++		*state->ghcb = *ghcb;
++	} else {
++		state->ghcb = NULL;
++		data->ghcb_active = true;
++	}
++
++	return ghcb;
++}
++
+ static noinstr void __sev_put_ghcb(struct ghcb_state *state)
+ {
+ 	struct sev_es_runtime_data *data;
+@@ -650,6 +650,10 @@ static bool __init setup_ghcb(void)
+ 	/* Alright - Make the boot-ghcb public */
+ 	boot_ghcb = &boot_ghcb_page;
  
-+	ghcb_version = min_t(size_t, GHCB_MSR_PROTO_MAX(val), GHCB_PROTOCOL_MAX);
++	/* SEV-SNP guest requires that GHCB GPA must be registered. */
++	if (cc_platform_has(CC_ATTR_SEV_SNP))
++		snp_register_ghcb_early(__pa(&boot_ghcb_page));
 +
  	return true;
  }
  
-@@ -127,7 +138,7 @@ enum es_result sev_es_ghcb_hv_call(struct ghcb *ghcb, bool set_ghcb_msr,
- 				   u64 exit_info_1, u64 exit_info_2)
- {
- 	/* Fill in protocol and format specifiers */
--	ghcb->protocol_version = GHCB_PROTOCOL_MAX;
-+	ghcb->protocol_version = ghcb_version;
- 	ghcb->ghcb_usage       = GHCB_DEFAULT_USAGE;
+@@ -741,6 +745,20 @@ static void __init init_ghcb(int cpu)
+ 	data->backup_ghcb_active = false;
+ }
  
- 	ghcb_set_sw_exit_code(ghcb, exit_code);
++void sev_snp_register_ghcb(void)
++{
++	struct sev_es_runtime_data *data;
++	struct ghcb *ghcb;
++
++	if (!cc_platform_has(CC_ATTR_SEV_SNP))
++		return;
++
++	data = this_cpu_read(runtime_data);
++	ghcb = &data->ghcb_page;
++
++	snp_register_ghcb_early(__pa(ghcb));
++}
++
+ void __init sev_es_init_vc_handling(void)
+ {
+ 	int cpu;
 -- 
 2.25.1
 
