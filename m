@@ -2,21 +2,21 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2BFC6C2BA4C
-	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 10:56:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 332CBC433F5
+	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 10:56:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 17C1861251
-	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 10:56:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1E1CC61251
+	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 10:56:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231499AbhKJK7k (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 10 Nov 2021 05:59:40 -0500
-Received: from mail.ispras.ru ([83.149.199.84]:53924 "EHLO mail.ispras.ru"
+        id S231517AbhKJK7l (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 10 Nov 2021 05:59:41 -0500
+Received: from mail.ispras.ru ([83.149.199.84]:53950 "EHLO mail.ispras.ru"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231420AbhKJK7i (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 10 Nov 2021 05:59:38 -0500
+        id S231478AbhKJK7k (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 10 Nov 2021 05:59:40 -0500
 Received: from localhost.localdomain (unknown [80.240.223.29])
-        by mail.ispras.ru (Postfix) with ESMTPSA id 7B58740A2BBF;
-        Wed, 10 Nov 2021 10:47:01 +0000 (UTC)
+        by mail.ispras.ru (Postfix) with ESMTPSA id BE4DF40D3BFF;
+        Wed, 10 Nov 2021 10:47:00 +0000 (UTC)
 From:   Baskov Evgeniy <baskov@ispras.ru>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     Baskov Evgeniy <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
@@ -26,9 +26,9 @@ Cc:     Baskov Evgeniy <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
         Thomas Gleixner <tglx@linutronix.de>, x86@kernel.org,
         linux-doc@vger.kernel.org, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH RFC 2/5] efi/x86_64: set page table if provided by libstub
-Date:   Wed, 10 Nov 2021 13:46:10 +0300
-Message-Id: <20211110104613.23881-3-baskov@ispras.ru>
+Subject: [PATCH RFC 1/5] efi/x86: Disable paging when booting via efistub
+Date:   Wed, 10 Nov 2021 13:46:09 +0300
+Message-Id: <20211110104613.23881-2-baskov@ispras.ru>
 X-Mailer: git-send-email 2.33.1
 In-Reply-To: <20211110104613.23881-1-baskov@ispras.ru>
 References: <20211110104613.23881-1-baskov@ispras.ru>
@@ -38,48 +38,41 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-It is desired to be able to switch pages tables before jumping
-to potentially relocated code while booting via UEFI.
-The easiest way to achieve that is to do it in assembly
-immediately after returning from efi_main().
+Some UEFI implementations protect lower 1M memory regions and memory
+regions allocated by libstub from being executable, which prevents
+Linux kernel from booting.
 
-Add mechanism to switch page table to one provided by libstub.
+Disable paging after returning from efi_main() before jumping
+to potentially relocated code to prevent page fault from happening.
 
 Signed-off-by: Baskov Evgeniy <baskov@ispras.ru>
 ---
- arch/x86/boot/compressed/head_64.S | 12 ++++++++++++
+ arch/x86/boot/compressed/head_32.S | 12 ++++++++++++
  1 file changed, 12 insertions(+)
 
-diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
-index 572c535cf45b..1e467fdefd9d 100644
---- a/arch/x86/boot/compressed/head_64.S
-+++ b/arch/x86/boot/compressed/head_64.S
-@@ -540,6 +540,17 @@ SYM_FUNC_START_ALIAS(efi_stub_entry)
- 	movq	%rdx, %rbx			/* save boot_params pointer */
+diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
+index 659fad53ca82..c66fccaa90a2 100644
+--- a/arch/x86/boot/compressed/head_32.S
++++ b/arch/x86/boot/compressed/head_32.S
+@@ -156,6 +156,18 @@ SYM_FUNC_START_ALIAS(efi_stub_entry)
+ 	add	$0x4, %esp
+ 	movl	8(%esp), %esi	/* save boot_params pointer */
  	call	efi_main
- 	movq	%rbx,%rsi
 +
++#ifdef CONFIG_EFI_STRICT_PGTABLE
 +	/*
-+	 * Switch page table to the one constructed by libstub if provided
-+	 * It is required to be done here because stack is not mapped
-+	 * in new page table.
++	 * Disable paging before jumping to relocated address to prevent
++	 * page faulting on EFI firmware versions that enforces restricted
++	 * permissions on identity page tables
 +	 */
-+	movq	efi_temp_pgtable(%rip), %rbx
-+	testq	%rbx, %rbx
-+	jz	1f
-+	movq	%rbx, %cr3
-+1:
- 	leaq	rva(startup_64)(%rax), %rax
- 	jmp	*%rax
- SYM_FUNC_END(efi64_stub_entry)
-@@ -736,6 +747,7 @@ SYM_DATA_END_LABEL(boot32_idt, SYM_L_GLOBAL, boot32_idt_end)
- 
- #ifdef CONFIG_EFI_STUB
- SYM_DATA(image_offset, .long 0)
-+SYM_DATA(efi_temp_pgtable, .quad 0)
- #endif
- #ifdef CONFIG_EFI_MIXED
- SYM_DATA_LOCAL(efi32_boot_args, .long 0, 0, 0)
++	movl	%cr0, %ecx
++	btrl	$31, %ecx
++	movl	%ecx, %cr0
++#endif
++
+ 	/* efi_main returns the possibly relocated address of startup_32 */
+ 	jmp	*%eax
+ SYM_FUNC_END(efi32_stub_entry)
 -- 
 2.33.1
 
