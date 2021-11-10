@@ -2,44 +2,43 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DE035C433F5
-	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 22:10:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 66782C43219
+	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 22:10:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C01036128E
-	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 22:10:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5057E619E2
+	for <linux-efi@archiver.kernel.org>; Wed, 10 Nov 2021 22:10:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234019AbhKJWNX (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 10 Nov 2021 17:13:23 -0500
-Received: from mail-bn8nam11on2063.outbound.protection.outlook.com ([40.107.236.63]:28448
-        "EHLO NAM11-BN8-obe.outbound.protection.outlook.com"
+        id S234674AbhKJWNZ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 10 Nov 2021 17:13:25 -0500
+Received: from mail-dm6nam11on2073.outbound.protection.outlook.com ([40.107.223.73]:61729
+        "EHLO NAM11-DM6-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S233997AbhKJWLq (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Wed, 10 Nov 2021 17:11:46 -0500
+        id S234022AbhKJWLs (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Wed, 10 Nov 2021 17:11:48 -0500
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=Ll9e3NTV8lzejwYJoMAvhfckbaGbwWSL9t63LgiS+YI8YUvns4AbyatDDr9LbuQWPF3579SFjyxL+aPHwc3xaOxXV5EqIs7h99l0Y07bQ28HC3kLrSTEnFjvKDyVtAcMGGxAzbltCW+onMa7Hpq+uClBK5jWEV+vPXOgg3pDiLj/RYC6TCEZziKzoYG+r8AzKfvJE768JwZjB84GIbgK5mVM3ktmXsd0DDw+ChzAlRmIy4FouGu1Rl84n5/R320QP1mUrt9CyysmnCvjYmDMzmEIDn4bRYih5MBxN7uW2yoh7dLWm3nK/6LwgnZ4Q5mlaL02HHNJbw3b9eBvktZbeg==
+ b=PLrgNgBYl9LOvNiy6ZrfjKIbUgkHli4iVym5i+4BRVMtfHakX9v0i8skGUIRsZwTkJXue+38uBVXceS0QWa0QF/CfPfBVINaR1xhGGtPgL1rkCKl83lIvlq0UAVUzpyEIiyhnKeBtX7Bu3tsMCXtkYFD7dj+hirAVYu8U7lutVkiUU9AOqEHY4xo6P6F8+zVnuQl/UKDTwoqvGWy/u/Y/drcnNabw6AxxYW24SpXAW6XdPZSZL8nwlNCljsXXNQGccMpR0QJdprvO+rRUw/znokI0afgvkNPPnxnNoO1YQIzScZE19X1rAbe2l/gunsZO6HE+i0ZdZFKiXJG7IxLXA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=yQtde6P+h0Ehkv2FdMpiwb5XTeW4/8AyqMOnv95qV3Q=;
- b=QgaqXCDjgfOyVUF3BvEyDVziABAVBqaKr86e70FvQkO8N0PA9PKJ8IzS13LAnJiu4MLVwogC92KtLK17unrPnhYVv+899knF7w56Ia3L6yLrmqxyc29sJwCH6i8q5ll2IyHjLFUVA5J+jFzVndXN9nV17xQMW94HF/EkYGaNvyQ4F/HGy9ERuIjwZIO5SqlBHC5IN8CsBzy/OvmZESBSauXQE0JSN2J9oQljSUDjVixsjh9K2zBtybcXmk2xYaq7o741yVIQqOJSXVA8l2xhNRMOydu9r0rBts0OZ79L8Eq58sljAvoMwAFFnGtV4SpVSYWGuc2mhIwUr7bag0avYQ==
+ bh=82su5Dmrce8hPjU1UBJUXmtPGA+4iefGfZMDjKzFveo=;
+ b=FEVC7IxR8Rbmq6DNgtPakpUcqN8d0Xi1sOaVbdwk0aX9ZeW/pUdFM8cmyrpZaDXv2hm20yNM7JY+5+C3x07hK6PKLGeDpHb0gKrEMP+u1JoN00zSPEwgACT8nt4F9aeYG6r7LNVRXrGu5UFPqH/RX1aGnuRyaYLtL1Ep+VHvcJ1SD8v2y2El9GSaiMVPN8L9T9JrET79VU0qIAALhHnIHvwq5Kf8u8xJycxefk5t5ZzJmEcGRRgtWDaxBq0CQ6TSAVdb3Sq9zjy5rTZDM40ygdPUB9s8QxEKAAR52ZQ7gvNb31G5o9J3R4Fa6oypfuExn/FfvHS0twIhyZShV8tzDQ==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
  165.204.84.17) smtp.rcpttodomain=kernel.org smtp.mailfrom=amd.com; dmarc=pass
  (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
  dkim=none (message not signed); arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=yQtde6P+h0Ehkv2FdMpiwb5XTeW4/8AyqMOnv95qV3Q=;
- b=y+LMCuOd7vVT3BOPIfDzNBuReEMfADv+BRROfctx3iMLY23aRjC3B8BpDDmIcvilZu/U6e4uGp/QgRsZ301sjWZE5KBxIDEAgu7zMWjGkrcwdpyC4U9XGXihrDjK0A774W7i+XkAxc1Z9mi44LGTY6RHy9j096cOmUYXnl91GBQ=
-Received: from DM5PR21CA0002.namprd21.prod.outlook.com (2603:10b6:3:ac::12) by
- BY5PR12MB5544.namprd12.prod.outlook.com (2603:10b6:a03:1d9::22) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4690.16; Wed, 10 Nov
- 2021 22:08:56 +0000
+ bh=82su5Dmrce8hPjU1UBJUXmtPGA+4iefGfZMDjKzFveo=;
+ b=bLRqEwm6gcA9FhwPA1pzke/GsIDk8DSalBacO5POlGMLq+mg2UwOLQxpDCLX7V60Bo4Bh8/yUkO31rC8voAulaTga7OdSUlOy+ymeeTwK5jvGGJDVUGXNeKjstlp8t9lpJFEoa5AwK+5UxHoHd8jRZYvbhiR7L4Jn8c5fM+Ajo4=
+Received: from DM5PR21CA0011.namprd21.prod.outlook.com (2603:10b6:3:ac::21) by
+ DM6PR12MB4973.namprd12.prod.outlook.com (2603:10b6:5:1b7::14) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.4690.16; Wed, 10 Nov 2021 22:08:59 +0000
 Received: from DM6NAM11FT022.eop-nam11.prod.protection.outlook.com
- (2603:10b6:3:ac:cafe::8b) by DM5PR21CA0002.outlook.office365.com
- (2603:10b6:3:ac::12) with Microsoft SMTP Server (version=TLS1_2,
+ (2603:10b6:3:ac:cafe::ab) by DM5PR21CA0011.outlook.office365.com
+ (2603:10b6:3:ac::21) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4713.4 via Frontend
- Transport; Wed, 10 Nov 2021 22:08:56 +0000
+ Transport; Wed, 10 Nov 2021 22:08:59 +0000
 X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
  smtp.mailfrom=amd.com; dkim=none (message not signed)
  header.d=none;dmarc=pass action=none header.from=amd.com;
@@ -49,11 +48,11 @@ Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
 Received: from SATLEXMB04.amd.com (165.204.84.17) by
  DM6NAM11FT022.mail.protection.outlook.com (10.13.172.210) with Microsoft SMTP
  Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.4690.15 via Frontend Transport; Wed, 10 Nov 2021 22:08:55 +0000
+ 15.20.4690.15 via Frontend Transport; Wed, 10 Nov 2021 22:08:59 +0000
 Received: from sbrijesh-desktop.amd.com (10.180.168.240) by SATLEXMB04.amd.com
  (10.181.40.145) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.17; Wed, 10 Nov
- 2021 16:08:44 -0600
+ 2021 16:08:54 -0600
 From:   Brijesh Singh <brijesh.singh@amd.com>
 To:     <x86@kernel.org>, <linux-kernel@vger.kernel.org>,
         <kvm@vger.kernel.org>, <linux-efi@vger.kernel.org>,
@@ -84,9 +83,9 @@ CC:     Thomas Gleixner <tglx@linutronix.de>,
         <tony.luck@intel.com>, <marcorr@google.com>,
         <sathyanarayanan.kuppuswamy@linux.intel.com>,
         Brijesh Singh <brijesh.singh@amd.com>
-Subject: [PATCH v7 32/45] x86/boot: Add Confidential Computing type to setup_data
-Date:   Wed, 10 Nov 2021 16:07:18 -0600
-Message-ID: <20211110220731.2396491-33-brijesh.singh@amd.com>
+Subject: [PATCH v7 38/45] x86/compressed/64: add identity mapping for Confidential Computing blob
+Date:   Wed, 10 Nov 2021 16:07:24 -0600
+Message-ID: <20211110220731.2396491-39-brijesh.singh@amd.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20211110220731.2396491-1-brijesh.singh@amd.com>
 References: <20211110220731.2396491-1-brijesh.singh@amd.com>
@@ -98,104 +97,132 @@ X-ClientProxiedBy: SATLEXMB03.amd.com (10.181.40.144) To SATLEXMB04.amd.com
  (10.181.40.145)
 X-EOPAttributedMessage: 0
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 317f1f5b-c826-4725-23a9-08d9a496b04f
-X-MS-TrafficTypeDiagnostic: BY5PR12MB5544:
-X-Microsoft-Antispam-PRVS: <BY5PR12MB55446EAEDADBEFC75589E2F8E5939@BY5PR12MB5544.namprd12.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:7219;
+X-MS-Office365-Filtering-Correlation-Id: f259b202-e125-484e-1a51-08d9a496b244
+X-MS-TrafficTypeDiagnostic: DM6PR12MB4973:
+X-Microsoft-Antispam-PRVS: <DM6PR12MB4973273C2634CAAF4454D181E5939@DM6PR12MB4973.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:7691;
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: N96a6Qf3sXrOtowBUnroQm/vN8eG7IlUpeSkcku4u4ZNmWA3teZis0Ht5Vjhw6DC3DQlaziDsEyQTyQg7vFnKFtn9IjmWHm7mfFFH9RkQd41tAApzvKWHFv3puiCTnHoDlYTBgT57559vxVayX4s38f5BwBIdCHjhXlI2NCOP9EpTTGfYh/ZzgrCXNV6lYfwo4f5jx3junHnB4hef6fC2/iEBCUvkuJbppezmDu175WqlBLPd3v0BcGKcnOdQnSzxJjurFG3/DTlRezeu2aPsO0q2Yyh8TILrE1AO4bTO089MKGv8f4GX+Pfdc93/xf6fgXOHg8SoQWROJ9EoBgX+ORatv67V+UDatxPUWSAcixx6+7JzgmPuNvZHYFfhUyTQHQA3Xoc6RQHki58DClWwwn5aJm+g3OLMT32pin/aUD5yHQYsmXMvOz9dUc97BkulctcXx8QrsJ4sXj4WLjWmbn01i0CJOUSCmjVfxfXgHqwCaoXDbbVYgysoCaqEPzfhqJF9j7ArnqjCUoKX76J7pwqGx3/NfDbWhGutoFmVgQy3zMbDTNohh7hxNM3vi++ItwHX8/e+9VDAyrVT8ZZ6PPZOEgumoAFI/MburfolatawMFOJ2gvWZcvIIwJQmqj9vkg64CTqml2cn0gFISRz2VOYNyLRkm5tYg1SXp4BWBQYjP0nKO3/PELUvKuvj4O0J63bRQHDntxU2Ds/k45xr44SB8CyVI4ga6EYZiNfES2W7QHq2fWOvkODDdNH3Y8
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(36840700001)(46966006)(36860700001)(2906002)(5660300002)(70206006)(336012)(16526019)(26005)(4326008)(36756003)(47076005)(70586007)(6666004)(186003)(54906003)(8676002)(110136005)(356005)(82310400003)(7696005)(44832011)(8936002)(508600001)(316002)(2616005)(426003)(81166007)(86362001)(1076003)(7406005)(7416002)(36900700001)(2101003);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: Ilo+NzNUFcFUWPuc5FFIK2qH7k40WHSKMT6glyXOADS3jbvnkzc21Q9fWkSui21yH9Tpy2f1e+sElhcS9DxZoSWomWITtTPhwdP5eCHEOD+0kLUms8onm4JR/m8HI0tIaCccXsNeTvi+A/wDYjeqPOPAURRJEnzoW67kwWh5cWexwe1Z4FakVbtIdHCkg8OUsTkzdEcbZIX8k/6ucVX6DTxmIN3FfbE7ezfdljEm66syeFPXasoQYBP3Ke2TZd0hFNcy0aGOyfA2UzfxxjfTlZ4R5Wep+Wed2exN8Mx+a33lvH/yhObrndxZehfwc/IBmKGUZm2YC1BKFVSTCPplhDfIzDwQa0yLHGXhJMkAdL9shqfIwXi9Ldv3UCZbMq6Jy6HaG07B3rnlMN82R3JUjnSbteSZCuQa1TjjMRqdiWaKUXV9j08iNepZAuFUlsuDqv0A77Do3DRw0pk2xu0FOcCFHTGOZK+e53atkud8FprC371Ldoqpn+KFSXEIRVXYOc7S48XCAJ7JIsU2+gphNy+JmHXAuYJiTMxaq/9mFmT7/F1ULy/40M0Sf4QAWlCtabdUQ3pXPyJmitHMKpdFTDQXJ5ta7qDsOwaNeJ62KvqqR1d3FFH60/hOEUlQOe4t1JrhVn6YMtHLk762SL1bxHwpf3es8JR0IeVRkaApkmtIL59whDk6IBEPDO/Zt8YOlQpmUFPJ9ynq9GsSQkdqI1SP+7il1xBZO0APBeOjW9nTv/8ml3Pf6tQRFXYSNX0m
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(46966006)(36840700001)(2906002)(7696005)(4326008)(44832011)(5660300002)(36860700001)(7406005)(7416002)(110136005)(356005)(8936002)(36756003)(81166007)(54906003)(47076005)(6666004)(1076003)(82310400003)(70206006)(26005)(316002)(70586007)(2616005)(186003)(336012)(8676002)(426003)(86362001)(16526019)(83380400001)(508600001)(36900700001)(2101003);DIR:OUT;SFP:1101;
 X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Nov 2021 22:08:55.8862
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Nov 2021 22:08:59.1683
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 317f1f5b-c826-4725-23a9-08d9a496b04f
+X-MS-Exchange-CrossTenant-Network-Message-Id: f259b202-e125-484e-1a51-08d9a496b244
 X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
 X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
 X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT022.eop-nam11.prod.protection.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY5PR12MB5544
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR12MB4973
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-While launching the encrypted guests, the hypervisor may need to provide
-some additional information during the guest boot. When booting under the
-EFI based BIOS, the EFI configuration table contains an entry for the
-confidential computing blob that contains the required information.
+From: Michael Roth <michael.roth@amd.com>
 
-To support booting encrypted guests on non-EFI VM, the hypervisor needs to
-pass this additional information to the kernel with a different method.
+The run-time kernel will need to access the Confidential Computing
+blob very early in boot to access the CPUID table it points to. At
+that stage of boot it will be relying on the identity-mapped page table
+set up by boot/compressed kernel, so make sure the blob and the CPUID
+table it points to are mapped in advance.
 
-For this purpose, introduce SETUP_CC_BLOB type in setup_data to hold the
-physical address of the confidential computing blob location. The boot
-loader or hypervisor may choose to use this method instead of EFI
-configuration table. The CC blob location scanning should give preference
-to setup_data data over the EFI configuration table.
-
-In AMD SEV-SNP, the CC blob contains the address of the secrets and CPUID
-pages. The secrets page includes information such as a VM to PSP
-communication key and CPUID page contains PSP filtered CPUID values.
-Define the AMD SEV confidential computing blob structure.
-
-While at it, define the EFI GUID for the confidential computing blob.
-
+Signed-off-by: Michael Roth <michael.roth@amd.com>
 Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
 ---
- arch/x86/include/asm/sev.h            | 12 ++++++++++++
- arch/x86/include/uapi/asm/bootparam.h |  1 +
- include/linux/efi.h                   |  1 +
- 3 files changed, 14 insertions(+)
+ arch/x86/boot/compressed/ident_map_64.c | 26 ++++++++++++++++++++++++-
+ arch/x86/boot/compressed/misc.h         |  4 ++++
+ arch/x86/boot/compressed/sev.c          |  2 +-
+ 3 files changed, 30 insertions(+), 2 deletions(-)
 
-diff --git a/arch/x86/include/asm/sev.h b/arch/x86/include/asm/sev.h
-index f7cbd5164136..f42fbe3c332f 100644
---- a/arch/x86/include/asm/sev.h
-+++ b/arch/x86/include/asm/sev.h
-@@ -44,6 +44,18 @@ struct es_em_ctxt {
+diff --git a/arch/x86/boot/compressed/ident_map_64.c b/arch/x86/boot/compressed/ident_map_64.c
+index 3cf7a7575f5c..10ecbc53f8bc 100644
+--- a/arch/x86/boot/compressed/ident_map_64.c
++++ b/arch/x86/boot/compressed/ident_map_64.c
+@@ -37,6 +37,8 @@
+ #include <asm/setup.h>	/* For COMMAND_LINE_SIZE */
+ #undef _SETUP
  
- void do_vc_no_ghcb(struct pt_regs *regs, unsigned long exit_code);
- 
-+/* AMD SEV Confidential computing blob structure */
-+#define CC_BLOB_SEV_HDR_MAGIC	0x45444d41
-+struct cc_blob_sev_info {
-+	u32 magic;
-+	u16 version;
-+	u16 reserved;
-+	u64 secrets_phys;
-+	u32 secrets_len;
-+	u64 cpuid_phys;
-+	u32 cpuid_len;
-+};
++#include <asm/sev.h> /* For ConfidentialComputing blob */
 +
- static inline u64 lower_bits(u64 val, unsigned int bits)
+ extern unsigned long get_cmd_line_ptr(void);
+ 
+ /* Used by PAGE_KERN* macros: */
+@@ -106,6 +108,27 @@ static void add_identity_map(unsigned long start, unsigned long end)
+ 		error("Error: kernel_ident_mapping_init() failed\n");
+ }
+ 
++void sev_prep_identity_maps(void)
++{
++	/*
++	 * The ConfidentialComputing blob is used very early in uncompressed
++	 * kernel to find the in-memory cpuid table to handle cpuid
++	 * instructions. Make sure an identity-mapping exists so it can be
++	 * accessed after switchover.
++	 */
++	if (sev_snp_enabled()) {
++		struct cc_blob_sev_info *cc_info =
++			(void *)(unsigned long)boot_params->cc_blob_address;
++
++		add_identity_map((unsigned long)cc_info,
++				 (unsigned long)cc_info + sizeof(*cc_info));
++		add_identity_map((unsigned long)cc_info->cpuid_phys,
++				 (unsigned long)cc_info->cpuid_phys + cc_info->cpuid_len);
++	}
++
++	sev_verify_cbit(top_level_pgt);
++}
++
+ /* Locates and clears a region for a new top level page table. */
+ void initialize_identity_maps(void *rmode)
  {
- 	u64 mask = (1ULL << bits) - 1;
-diff --git a/arch/x86/include/uapi/asm/bootparam.h b/arch/x86/include/uapi/asm/bootparam.h
-index b25d3f82c2f3..1ac5acca72ce 100644
---- a/arch/x86/include/uapi/asm/bootparam.h
-+++ b/arch/x86/include/uapi/asm/bootparam.h
-@@ -10,6 +10,7 @@
- #define SETUP_EFI			4
- #define SETUP_APPLE_PROPERTIES		5
- #define SETUP_JAILHOUSE			6
-+#define SETUP_CC_BLOB			7
+@@ -163,8 +186,9 @@ void initialize_identity_maps(void *rmode)
+ 	cmdline = get_cmd_line_ptr();
+ 	add_identity_map(cmdline, cmdline + COMMAND_LINE_SIZE);
  
- #define SETUP_INDIRECT			(1<<31)
++	sev_prep_identity_maps();
++
+ 	/* Load the new page-table. */
+-	sev_verify_cbit(top_level_pgt);
+ 	write_cr3(top_level_pgt);
+ }
  
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 6b5d36babfcc..75aeb2a56888 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -344,6 +344,7 @@ void efi_native_runtime_setup(void);
- #define EFI_CERT_SHA256_GUID			EFI_GUID(0xc1c41626, 0x504c, 0x4092, 0xac, 0xa9, 0x41, 0xf9, 0x36, 0x93, 0x43, 0x28)
- #define EFI_CERT_X509_GUID			EFI_GUID(0xa5c059a1, 0x94e4, 0x4aa7, 0x87, 0xb5, 0xab, 0x15, 0x5c, 0x2b, 0xf0, 0x72)
- #define EFI_CERT_X509_SHA256_GUID		EFI_GUID(0x3bd2a492, 0x96c0, 0x4079, 0xb4, 0x20, 0xfc, 0xf9, 0x8e, 0xf1, 0x03, 0xed)
-+#define EFI_CC_BLOB_GUID			EFI_GUID(0x067b1f5f, 0xcf26, 0x44c5, 0x85, 0x54, 0x93, 0xd7, 0x77, 0x91, 0x2d, 0x42)
+diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
+index bb2e884467db..61abcb885f5c 100644
+--- a/arch/x86/boot/compressed/misc.h
++++ b/arch/x86/boot/compressed/misc.h
+@@ -127,6 +127,8 @@ void sev_es_shutdown_ghcb(void);
+ extern bool sev_es_check_ghcb_fault(unsigned long address);
+ void snp_set_page_private(unsigned long paddr);
+ void snp_set_page_shared(unsigned long paddr);
++bool sev_snp_enabled(void);
++
+ #else
+ static inline void sev_enable(struct boot_params *bp) { }
+ static inline void sev_es_shutdown_ghcb(void) { }
+@@ -136,6 +138,8 @@ static inline bool sev_es_check_ghcb_fault(unsigned long address)
+ }
+ static inline void snp_set_page_private(unsigned long paddr) { }
+ static inline void snp_set_page_shared(unsigned long paddr) { }
++static inline bool sev_snp_enabled(void) { return false; }
++
+ #endif
  
- /*
-  * This GUID is used to pass to the kernel proper the struct screen_info
+ /* acpi.c */
+diff --git a/arch/x86/boot/compressed/sev.c b/arch/x86/boot/compressed/sev.c
+index d109ec982961..d24ea53f997f 100644
+--- a/arch/x86/boot/compressed/sev.c
++++ b/arch/x86/boot/compressed/sev.c
+@@ -120,7 +120,7 @@ static enum es_result vc_read_mem(struct es_em_ctxt *ctxt,
+ /* Include code for early handlers */
+ #include "../../kernel/sev-shared.c"
+ 
+-static inline bool sev_snp_enabled(void)
++bool sev_snp_enabled(void)
+ {
+ 	return sev_status & MSR_AMD64_SEV_SNP_ENABLED;
+ }
 -- 
 2.25.1
 
