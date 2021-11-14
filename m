@@ -2,40 +2,40 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F1D2CC433F5
-	for <linux-efi@archiver.kernel.org>; Sun, 14 Nov 2021 17:04:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DE6E9C4332F
+	for <linux-efi@archiver.kernel.org>; Sun, 14 Nov 2021 17:05:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E195C61075
-	for <linux-efi@archiver.kernel.org>; Sun, 14 Nov 2021 17:04:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C4F4661163
+	for <linux-efi@archiver.kernel.org>; Sun, 14 Nov 2021 17:05:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236245AbhKNRH3 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 14 Nov 2021 12:07:29 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:39351 "EHLO
+        id S236191AbhKNRHq (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 14 Nov 2021 12:07:46 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:20409 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S236250AbhKNRHM (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sun, 14 Nov 2021 12:07:12 -0500
+        by vger.kernel.org with ESMTP id S236197AbhKNRG5 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sun, 14 Nov 2021 12:06:57 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1636909458;
+        s=mimecast20190719; t=1636909442;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=nS6oXu9q+npj9BQ/P9zA52LX0msdRKmILAqmJy+h9e8=;
-        b=B/lGMSkaGhHZ0CU6qkgGelDrkalWes9D+YI/kzpQsCh91r2gLyZH4RSLsDq+iQytFmkv0N
-        AWcSST2dbatiLQtsA9eKZNZUG8sRYuCCxPPp6NQDB2drolMBwbDSbJkx9+btu1/PZGR4Tl
-        /NEvayd4QXdeoWmjlCPcqwZ1HEj9jXo=
+        bh=ucF228jFI8hX14C5XbTWy8Mnb7M46z5j9PY+ksDxCRY=;
+        b=dAyq/34NxQRj3xteYQegeofF/9zEmBUAh3czpf8oJT9L5xwFhQVsQ+UAxrPoZ/k2nxaHJ4
+        VqPqCqhqLInJhdsrb64x1wKOcS/GGbUgWfpodrkTO9xE7koCHCfHPcftTYXpZNg4ZDN38/
+        cExF3vSrFE7FBZEeNEdgccL8rEE1TVc=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-567-A3Prny0RMyCo6pBpU9DoeA-1; Sun, 14 Nov 2021 12:04:17 -0500
-X-MC-Unique: A3Prny0RMyCo6pBpU9DoeA-1
+ us-mta-458--14cuePZOXCrPuth4CaN8Q-1; Sun, 14 Nov 2021 12:04:01 -0500
+X-MC-Unique: -14cuePZOXCrPuth4CaN8Q-1
 Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 87D4A1080865;
-        Sun, 14 Nov 2021 17:04:14 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 387C3102CB29;
+        Sun, 14 Nov 2021 17:03:59 +0000 (UTC)
 Received: from x1.localdomain (unknown [10.39.192.93])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 0449219EF9;
-        Sun, 14 Nov 2021 17:04:10 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id C3C0C19EF9;
+        Sun, 14 Nov 2021 17:03:55 +0000 (UTC)
 From:   Hans de Goede <hdegoede@redhat.com>
 To:     "Rafael J . Wysocki" <rjw@rjwysocki.net>,
         Mika Westerberg <mika.westerberg@linux.intel.com>,
@@ -52,9 +52,9 @@ Cc:     Hans de Goede <hdegoede@redhat.com>, Len Brown <lenb@kernel.org>,
         platform-driver-x86@vger.kernel.org, linux-i2c@vger.kernel.org,
         linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-efi@vger.kernel.org
-Subject: [PATCH v2 09/20] power: supply: bq25890: Drop dev->platform_data == NULL check
-Date:   Sun, 14 Nov 2021 18:03:24 +0100
-Message-Id: <20211114170335.66994-10-hdegoede@redhat.com>
+Subject: [PATCH v2 05/20] power: supply: bq25890: Add a bq25890_rw_init_data() helper
+Date:   Sun, 14 Nov 2021 18:03:20 +0100
+Message-Id: <20211114170335.66994-6-hdegoede@redhat.com>
 In-Reply-To: <20211114170335.66994-1-hdegoede@redhat.com>
 References: <20211114170335.66994-1-hdegoede@redhat.com>
 MIME-Version: 1.0
@@ -64,46 +64,111 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Drop the "if (!dev->platform_data)" check, this seems to be an attempt
-for allowing loading the driver on devices without devicetree stemming
-from the initial commit of the driver (with the presumed intention being
-the "return -ENODEV" else branch getting replaced with something else).
+On most X86/ACPI devices there is no devicetree to supply the necessary
+init-data. Instead the firmware already fully initializes the bq25890
+charger at boot.
 
-With the new "linux,skip-init" and "linux,read-back-settings" properties
-the driver can actually supports devices without devicetree and this
-check no longer makes sense.
+Factor out the current code to write all the init_data from devicetree
+into a new bq25890_rw_init_data() helper which can both write the data
+to the charger (the current behavior) as well as read it back from
+the charger into the init_data struct.
 
-While at it also switch to dev_err_probe(), which is already used in
-various other places in the driver.
+This is a preparation patch for adding support for X86/ACPI device's
+where the init_data must be read back from the bq25890 charger.
 
 Signed-off-by: Hans de Goede <hdegoede@redhat.com>
 ---
- drivers/power/supply/bq25890_charger.c | 13 +++----------
- 1 file changed, 3 insertions(+), 10 deletions(-)
+ drivers/power/supply/bq25890_charger.c | 62 +++++++++++++++++---------
+ 1 file changed, 40 insertions(+), 22 deletions(-)
 
 diff --git a/drivers/power/supply/bq25890_charger.c b/drivers/power/supply/bq25890_charger.c
-index a69a2173e31a..2bdfb58cda75 100644
+index 617a653221ab..704cc15b4403 100644
 --- a/drivers/power/supply/bq25890_charger.c
 +++ b/drivers/power/supply/bq25890_charger.c
-@@ -1017,16 +1017,9 @@ static int bq25890_probe(struct i2c_client *client,
- 		return ret;
+@@ -663,29 +663,52 @@ static int bq25890_chip_reset(struct bq25890_device *bq)
+ 	return 0;
+ }
+ 
+-static int bq25890_hw_init(struct bq25890_device *bq)
++static int bq25890_rw_init_data(struct bq25890_device *bq)
+ {
++	bool write = true;
+ 	int ret;
+ 	int i;
+ 
+ 	const struct {
+ 		enum bq25890_fields id;
+-		u32 value;
++		u8 *value;
+ 	} init_data[] = {
+-		{F_ICHG,	 bq->init_data.ichg},
+-		{F_VREG,	 bq->init_data.vreg},
+-		{F_ITERM,	 bq->init_data.iterm},
+-		{F_IPRECHG,	 bq->init_data.iprechg},
+-		{F_SYSVMIN,	 bq->init_data.sysvmin},
+-		{F_BOOSTV,	 bq->init_data.boostv},
+-		{F_BOOSTI,	 bq->init_data.boosti},
+-		{F_BOOSTF,	 bq->init_data.boostf},
+-		{F_EN_ILIM,	 bq->init_data.ilim_en},
+-		{F_TREG,	 bq->init_data.treg},
+-		{F_BATCMP,	 bq->init_data.rbatcomp},
+-		{F_VCLAMP,	 bq->init_data.vclamp},
++		{F_ICHG,	 &bq->init_data.ichg},
++		{F_VREG,	 &bq->init_data.vreg},
++		{F_ITERM,	 &bq->init_data.iterm},
++		{F_IPRECHG,	 &bq->init_data.iprechg},
++		{F_SYSVMIN,	 &bq->init_data.sysvmin},
++		{F_BOOSTV,	 &bq->init_data.boostv},
++		{F_BOOSTI,	 &bq->init_data.boosti},
++		{F_BOOSTF,	 &bq->init_data.boostf},
++		{F_EN_ILIM,	 &bq->init_data.ilim_en},
++		{F_TREG,	 &bq->init_data.treg},
++		{F_BATCMP,	 &bq->init_data.rbatcomp},
++		{F_VCLAMP,	 &bq->init_data.vclamp},
+ 	};
+ 
++	for (i = 0; i < ARRAY_SIZE(init_data); i++) {
++		if (write) {
++			ret = bq25890_field_write(bq, init_data[i].id,
++						  *init_data[i].value);
++		} else {
++			ret = bq25890_field_read(bq, init_data[i].id);
++			if (ret >= 0)
++				*init_data[i].value = ret;
++		}
++		if (ret < 0) {
++			dev_dbg(bq->dev, "Accessing init data failed %d\n", ret);
++			return ret;
++		}
++	}
++
++	return 0;
++}
++
++static int bq25890_hw_init(struct bq25890_device *bq)
++{
++	int ret;
++
+ 	ret = bq25890_chip_reset(bq);
+ 	if (ret < 0) {
+ 		dev_dbg(bq->dev, "Reset failed %d\n", ret);
+@@ -700,14 +723,9 @@ static int bq25890_hw_init(struct bq25890_device *bq)
  	}
  
--	if (!dev->platform_data) {
--		ret = bq25890_fw_probe(bq);
+ 	/* initialize currents/voltages and other parameters */
+-	for (i = 0; i < ARRAY_SIZE(init_data); i++) {
+-		ret = bq25890_field_write(bq, init_data[i].id,
+-					  init_data[i].value);
 -		if (ret < 0) {
--			dev_err(dev, "Cannot read device properties: %d\n",
--				ret);
+-			dev_dbg(bq->dev, "Writing init data failed %d\n", ret);
 -			return ret;
 -		}
--	} else {
--		return -ENODEV;
 -	}
-+	ret = bq25890_fw_probe(bq);
-+	if (ret < 0)
-+		return dev_err_probe(dev, ret, "reading device properties\n");
++	ret = bq25890_rw_init_data(bq);
++	if (ret)
++		return ret;
  
- 	ret = bq25890_hw_init(bq);
+ 	ret = bq25890_get_chip_state(bq, &bq->state);
  	if (ret < 0) {
 -- 
 2.31.1
