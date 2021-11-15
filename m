@@ -2,42 +2,62 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C07CC433F5
-	for <linux-efi@archiver.kernel.org>; Sun, 14 Nov 2021 17:11:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B4275C433FE
+	for <linux-efi@archiver.kernel.org>; Mon, 15 Nov 2021 10:11:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 861CF61152
-	for <linux-efi@archiver.kernel.org>; Sun, 14 Nov 2021 17:11:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9827161C4F
+	for <linux-efi@archiver.kernel.org>; Mon, 15 Nov 2021 10:11:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236153AbhKNROm (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 14 Nov 2021 12:14:42 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:60868 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S236377AbhKNRHq (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sun, 14 Nov 2021 12:07:46 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1636909492;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=3N6Zcm6U2hRyuCD4vVxiq15MirS56+YkWGxtbdJNdv8=;
-        b=FYaJjrgYDZsNdKxoCjeXLIlFwfTSTeS8zF/fBESCFR8czZT5MU2pMTP1DNuXzIbLk6L8pi
-        7y4E2jPGLhfvdg/I7/EnAiwZFmq6gITvwbMt/zasaMD5w/FavCQNbg2Wn6FW4mt6XzcBOy
-        Z2UJbGkNo9eqLBdj0a+toWFeYcTnYlM=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-214-iWttP9EDOIOE08zyEnURTg-1; Sun, 14 Nov 2021 12:04:47 -0500
-X-MC-Unique: iWttP9EDOIOE08zyEnURTg-1
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 115CB802E62;
-        Sun, 14 Nov 2021 17:04:45 +0000 (UTC)
-Received: from x1.localdomain (unknown [10.39.192.93])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id A1E9019EF9;
-        Sun, 14 Nov 2021 17:04:41 +0000 (UTC)
-From:   Hans de Goede <hdegoede@redhat.com>
-To:     "Rafael J . Wysocki" <rjw@rjwysocki.net>,
+        id S237552AbhKOKOi (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 15 Nov 2021 05:14:38 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52786 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231127AbhKOKOP (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 15 Nov 2021 05:14:15 -0500
+Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 94B7CC061767;
+        Mon, 15 Nov 2021 02:11:18 -0800 (PST)
+Received: by mail-lf1-x135.google.com with SMTP id b1so36244253lfs.13;
+        Mon, 15 Nov 2021 02:11:18 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=uxwfsA+44ef1b7hlksCPyj8IFexX6NAJcsqLHIbZtDw=;
+        b=ED1+rjMpnaWFy7IyLpgI4t6+NWjYrk9yvRsbDXQNO4edejFPeS5Fluo5T9eRA4iZWY
+         qyAtRjrCuhzRvbF7arz5giRx/1OyeHYOPGZ8idBnsCSX89Lz1hbrQoL1Q4hSMMvQY/vY
+         sRTdgNumGFp9+brp6ZmdJVdNJA1Y1oYxwd5Rsl/tcpXCmRMO0cstWd6ECUQhnVeqMk66
+         GMbaWu75HDQfPUtV03ha+oCfVVDZbuvVHXdBj/09cnQ8kjv4gtZmPvt4twaMUl5rf6qm
+         V6HQpYyJTgipoGQBWZki3AkHxRPM7Nafs76W5lF1USMKUixqfNtzgAZBYmtw1Ok/Tfkq
+         SMzQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=uxwfsA+44ef1b7hlksCPyj8IFexX6NAJcsqLHIbZtDw=;
+        b=yHDloWQsuFZ0WRGEVlzKfVhUrOFkWqSB1jeId550atKckqs5StOQKDkZx+YQsT5LAR
+         jnTDW12I9hSb6vaUsFwJIXzGEuXDSpxYKz/MwFYXHvUF0d6jA0ymje5W3mzhdgxFFxAk
+         HXnIj0jErpYzPktDUK52PFw6Ch2G+U7rcCMURsu2nwxPvgQjwlT5N9MOk/XRGzaWWvsw
+         f8NHhY315VT/xjjyzm7WFC+Z0JprD6X/JYLcztZFFljm+f5LihD4woqUwzdYaeVyM33B
+         QIK54OQX/P+CkPJhf+VJLYU1MxYLi7pYx6oDfGooDRwnZQWW2hLp9K3Ehq/FwIAJ+Gug
+         QNOw==
+X-Gm-Message-State: AOAM532nuAg4DbUHc5b0S+JUdX559GiByuNwTzUeruA4AUb+vzJ9LRZD
+        ZlNH1zf1gtcArplj4Xbngw8=
+X-Google-Smtp-Source: ABdhPJzzG0A94HwBEFevyB5R/o6ZsnhSI8DcBgN+Z4YhggnKS037qGfUrVTsqxrckLGnY2R6XXXm3w==
+X-Received: by 2002:a05:6512:2201:: with SMTP id h1mr33409940lfu.397.1636971076884;
+        Mon, 15 Nov 2021 02:11:16 -0800 (PST)
+Received: from localhost.localdomain ([178.127.153.223])
+        by smtp.gmail.com with ESMTPSA id f15sm1246622lfq.236.2021.11.15.02.11.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 15 Nov 2021 02:11:16 -0800 (PST)
+Received: from jek by localhost.localdomain with local (Exim 4.95)
+        (envelope-from <jekhor@gmail.com>)
+        id 1mmYxH-001Bq1-5o;
+        Mon, 15 Nov 2021 13:11:15 +0300
+Date:   Mon, 15 Nov 2021 13:11:15 +0300
+From:   Yauhen Kharuzhy <jekhor@gmail.com>
+To:     Hans de Goede <hdegoede@redhat.com>
+Cc:     "Rafael J . Wysocki" <rjw@rjwysocki.net>,
         Mika Westerberg <mika.westerberg@linux.intel.com>,
         Mark Gross <markgross@kernel.org>,
         Andy Shevchenko <andy@infradead.org>,
@@ -45,204 +65,63 @@ To:     "Rafael J . Wysocki" <rjw@rjwysocki.net>,
         Sebastian Reichel <sre@kernel.org>,
         MyungJoo Ham <myungjoo.ham@samsung.com>,
         Chanwoo Choi <cw00.choi@samsung.com>,
-        Ard Biesheuvel <ardb@kernel.org>
-Cc:     Hans de Goede <hdegoede@redhat.com>, Len Brown <lenb@kernel.org>,
-        linux-acpi@vger.kernel.org, Yauhen Kharuzhy <jekhor@gmail.com>,
-        Tsuchiya Yuto <kitakar@gmail.com>,
+        Ard Biesheuvel <ardb@kernel.org>, Len Brown <lenb@kernel.org>,
+        linux-acpi@vger.kernel.org, Tsuchiya Yuto <kitakar@gmail.com>,
         platform-driver-x86@vger.kernel.org, linux-i2c@vger.kernel.org,
         linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-efi@vger.kernel.org
-Subject: [PATCH v2 17/20] extcon: intel-cht-wc: Support devs with Micro-B / USB-2 only Type-C connectors
-Date:   Sun, 14 Nov 2021 18:03:32 +0100
-Message-Id: <20211114170335.66994-18-hdegoede@redhat.com>
-In-Reply-To: <20211114170335.66994-1-hdegoede@redhat.com>
+Subject: Re: [PATCH v2 10/20] power: supply: bq25890: Add
+ bq25890_set_otg_cfg() helper
+Message-ID: <YZIyQ1BdJ0v8QTtj@jeknote.loshitsa1.net>
 References: <20211114170335.66994-1-hdegoede@redhat.com>
+ <20211114170335.66994-11-hdegoede@redhat.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.11
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20211114170335.66994-11-hdegoede@redhat.com>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-So far the extcon-intel-cht-wc code has only been tested on devices with
-a Type-C connector with USB-PD, USB3 (superspeed) and DP-altmode support
-through a FUSB302 Type-C controller.
+On Sun, Nov 14, 2021 at 06:03:25PM +0100, Hans de Goede wrote:
+> Add a bq25890_set_otg_cfg() helper function, this is a preparation
+> patch for adding regulator support.
+> 
+> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+> ---
+>  drivers/power/supply/bq25890_charger.c | 28 ++++++++++++++------------
+>  1 file changed, 15 insertions(+), 13 deletions(-)
+> 
+> diff --git a/drivers/power/supply/bq25890_charger.c b/drivers/power/supply/bq25890_charger.c
+> index 2bdfb58cda75..3c41fe86b3d3 100644
+> --- a/drivers/power/supply/bq25890_charger.c
+> +++ b/drivers/power/supply/bq25890_charger.c
+> @@ -801,6 +801,17 @@ static int bq25890_power_supply_init(struct bq25890_device *bq)
+>  	return PTR_ERR_OR_ZERO(bq->charger);
+>  }
+>  
+> +static int bq25890_set_otg_cfg(struct bq25890_device *bq, u8 val)
+> +{
+> +	int ret;
+> +
+> +	ret = bq25890_field_write(bq, F_OTG_CFG, val);
+> +	if (ret < 0)
+> +		dev_err(bq->dev, "Error switching to boost/charger mode: %d\n", ret);
 
-Some devices with the intel-cht-wc PMIC however come with an USB-micro-B
-connector, or an USB-2 only Type-C connector without USB-PD.
+Just a note: if a connected USB device has relative big capacitor
+at power wires inside, then a starting current pulse may be enough to
+overload the boost reguator and VBUS will not be powered. I met this
+at Yoga Book: the firmware set boost current limit to 1.4 A (default
+value for bq25892) but when USB hub connected, the BOOST_FAULT event
+appeared.
 
-Which device-model we are running on can be identified with the new
-intel_cht_wc_get_model() helper and on models without a Type-C controller
-the extcon code must control the Vbus 5V boost converter and the USB role
-switch depending on the detected cable-type.
+To avoid this, Lenovo uses following trick in its kernel: set a boost
+current limit to big value (2.1 A), wait some time (500 ms) and set
+the current limit to right value (1.4A). This provides enough current to
+charge capacitors in the connected device but saves desired long-time limit
+to prevent overloading if the device consumes too much power itself.
 
-Signed-off-by: Hans de Goede <hdegoede@redhat.com>
----
- drivers/extcon/Kconfig               |  3 +-
- drivers/extcon/extcon-intel-cht-wc.c | 91 ++++++++++++++++++++++++++++
- 2 files changed, 93 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/extcon/Kconfig b/drivers/extcon/Kconfig
-index c69d40ae5619..fc733689cfad 100644
---- a/drivers/extcon/Kconfig
-+++ b/drivers/extcon/Kconfig
-@@ -60,7 +60,8 @@ config EXTCON_INTEL_INT3496
- 
- config EXTCON_INTEL_CHT_WC
- 	tristate "Intel Cherrytrail Whiskey Cove PMIC extcon driver"
--	depends on INTEL_SOC_PMIC_CHTWC
-+	depends on INTEL_SOC_PMIC_CHTWC && USB_SUPPORT
-+	select USB_ROLE_SWITCH
- 	help
- 	  Say Y here to enable extcon support for charger detection / control
- 	  on the Intel Cherrytrail Whiskey Cove PMIC.
-diff --git a/drivers/extcon/extcon-intel-cht-wc.c b/drivers/extcon/extcon-intel-cht-wc.c
-index a5aeeecc44fb..119b83793123 100644
---- a/drivers/extcon/extcon-intel-cht-wc.c
-+++ b/drivers/extcon/extcon-intel-cht-wc.c
-@@ -16,7 +16,9 @@
- #include <linux/platform_device.h>
- #include <linux/property.h>
- #include <linux/regmap.h>
-+#include <linux/regulator/consumer.h>
- #include <linux/slab.h>
-+#include <linux/usb/role.h>
- 
- #include "extcon-intel.h"
- 
-@@ -102,8 +104,11 @@ struct cht_wc_extcon_data {
- 	struct device *dev;
- 	struct regmap *regmap;
- 	struct extcon_dev *edev;
-+	struct usb_role_switch *role_sw;
-+	struct regulator *vbus_boost;
- 	unsigned int previous_cable;
- 	bool usb_host;
-+	bool vbus_boost_enabled;
- };
- 
- static int cht_wc_extcon_get_id(struct cht_wc_extcon_data *ext, int pwrsrc_sts)
-@@ -217,6 +222,18 @@ static void cht_wc_extcon_set_otgmode(struct cht_wc_extcon_data *ext,
- 				 CHT_WC_CHGRCTRL1_OTGMODE, val);
- 	if (ret)
- 		dev_err(ext->dev, "Error updating CHGRCTRL1 reg: %d\n", ret);
-+
-+	if (ext->vbus_boost && ext->vbus_boost_enabled != enable) {
-+		if (enable)
-+			ret = regulator_enable(ext->vbus_boost);
-+		else
-+			ret = regulator_disable(ext->vbus_boost);
-+
-+		if (ret == 0)
-+			ext->vbus_boost_enabled = enable;
-+		else
-+			dev_err(ext->dev, "Error updating Vbus boost regulator: %d\n", ret);
-+	}
- }
- 
- static void cht_wc_extcon_enable_charging(struct cht_wc_extcon_data *ext,
-@@ -246,6 +263,7 @@ static void cht_wc_extcon_pwrsrc_event(struct cht_wc_extcon_data *ext)
- 	unsigned int cable = EXTCON_NONE;
- 	/* Ignore errors in host mode, as the 5v boost converter is on then */
- 	bool ignore_get_charger_errors = ext->usb_host;
-+	enum usb_role role;
- 
- 	ret = regmap_read(ext->regmap, CHT_WC_PWRSRC_STS, &pwrsrc_sts);
- 	if (ret) {
-@@ -289,6 +307,18 @@ static void cht_wc_extcon_pwrsrc_event(struct cht_wc_extcon_data *ext)
- 
- 	ext->usb_host = ((id == INTEL_USB_ID_GND) || (id == INTEL_USB_RID_A));
- 	extcon_set_state_sync(ext->edev, EXTCON_USB_HOST, ext->usb_host);
-+
-+	if (ext->usb_host)
-+		role = USB_ROLE_HOST;
-+	else if (pwrsrc_sts & CHT_WC_PWRSRC_VBUS)
-+		role = USB_ROLE_DEVICE;
-+	else
-+		role = USB_ROLE_NONE;
-+
-+	/* Note: this is a no-op when ext->role_sw is NULL */
-+	ret = usb_role_switch_set_role(ext->role_sw, role);
-+	if (ret)
-+		dev_err(ext->dev, "Error setting USB-role: %d\n", ret);
- }
- 
- static irqreturn_t cht_wc_extcon_isr(int irq, void *data)
-@@ -334,6 +364,61 @@ static int cht_wc_extcon_sw_control(struct cht_wc_extcon_data *ext, bool enable)
- 	return ret;
- }
- 
-+static int cht_wc_extcon_find_role_sw(struct cht_wc_extcon_data *ext)
-+{
-+	const struct software_node *swnode;
-+	struct fwnode_handle *fwnode;
-+
-+	swnode = software_node_find_by_name(NULL, "intel-xhci-usb-sw");
-+	if (!swnode)
-+		return -EPROBE_DEFER;
-+
-+	fwnode = software_node_fwnode(swnode);
-+	ext->role_sw = usb_role_switch_find_by_fwnode(fwnode);
-+	fwnode_handle_put(fwnode);
-+
-+	return ext->role_sw ? 0 : -EPROBE_DEFER;
-+}
-+
-+static void cht_wc_extcon_put_role_sw(void *data)
-+{
-+	struct cht_wc_extcon_data *ext = data;
-+
-+	usb_role_switch_put(ext->role_sw);
-+}
-+
-+/* Some boards require controlling the role-sw and vbus based on the id-pin */
-+static int cht_wc_extcon_get_role_sw_and_regulator(struct cht_wc_extcon_data *ext)
-+{
-+	int ret;
-+
-+	ret = cht_wc_extcon_find_role_sw(ext);
-+	if (ret)
-+		return ret;
-+
-+	ret = devm_add_action_or_reset(ext->dev, cht_wc_extcon_put_role_sw, ext);
-+	if (ret)
-+		return ret;
-+
-+	/*
-+	 * On x86/ACPI platforms the regulator <-> consumer link is provided
-+	 * by platform_data passed to the regulator driver. This means that
-+	 * this info is not available before the regulator driver has bound.
-+	 * Use devm_regulator_get_optional() to avoid getting a dummy
-+	 * regulator and wait for the regulator to show up if necessary.
-+	 */
-+	ext->vbus_boost = devm_regulator_get_optional(ext->dev, "vbus");
-+	if (IS_ERR(ext->vbus_boost)) {
-+		ret = PTR_ERR(ext->vbus_boost);
-+		if (ret == -ENODEV)
-+			ret = -EPROBE_DEFER;
-+
-+		return dev_err_probe(ext->dev, ret, "getting vbus regulator");
-+	}
-+
-+	return 0;
-+}
-+
- static int cht_wc_extcon_probe(struct platform_device *pdev)
- {
- 	struct intel_soc_pmic *pmic = dev_get_drvdata(pdev->dev.parent);
-@@ -376,6 +461,12 @@ static int cht_wc_extcon_probe(struct platform_device *pdev)
- 		 */
- 		cht_wc_extcon_set_5v_boost(ext, false);
- 		break;
-+	case INTEL_CHT_WC_LENOVO_YOGABOOK1:
-+	case INTEL_CHT_WC_XIAOMI_MIPAD2:
-+		ret = cht_wc_extcon_get_role_sw_and_regulator(ext);
-+		if (ret)
-+			return ret;
-+		break;
- 	default:
- 		break;
- 	}
+
 -- 
-2.31.1
-
+Yauhen Kharuzhy
