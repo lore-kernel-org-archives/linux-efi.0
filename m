@@ -2,60 +2,61 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AA35BC433EF
-	for <linux-efi@archiver.kernel.org>; Thu, 18 Nov 2021 11:34:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B5B6C433EF
+	for <linux-efi@archiver.kernel.org>; Thu, 18 Nov 2021 11:36:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 93DDF61AFB
-	for <linux-efi@archiver.kernel.org>; Thu, 18 Nov 2021 11:34:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 715D060F26
+	for <linux-efi@archiver.kernel.org>; Thu, 18 Nov 2021 11:36:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1343942AbhKRLhs (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 18 Nov 2021 06:37:48 -0500
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:59860 "EHLO
+        id S1344014AbhKRLj3 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 18 Nov 2021 06:39:29 -0500
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:44960 "EHLO
         mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1343926AbhKRLhd (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 18 Nov 2021 06:37:33 -0500
-Received: from pps.filterd (m0098419.ppops.net [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 1AIAGeSG028085;
-        Thu, 18 Nov 2021 11:34:12 GMT
+        by vger.kernel.org with ESMTP id S1344111AbhKRLiW (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 18 Nov 2021 06:38:22 -0500
+Received: from pps.filterd (m0098416.ppops.net [127.0.0.1])
+        by mx0b-001b2d01.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 1AIBJD9L008642;
+        Thu, 18 Nov 2021 11:34:11 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
- : date : message-id : in-reply-to : references : content-transfer-encoding
- : mime-version; s=pp1; bh=bJyIG1THTivVhB2BZ9QU4NOZvj9mhtZ9mG7eBiHj4Tw=;
- b=F+K/VglwBnj6dIoNKvxJBrQDqH1vKPxw6MwKrUHltUz2ADsQrPbTF85Jnf6X03bz1h12
- 8A+HLi7yYA2jzdiA5GcDbl7I5fGL+/XXuYfSz+VXR80AIWYyRw/LiKLLN5RnDjxTyK6e
- +794BsLFyez9t4x5pS9Qn47r72+myqm1Dp04aFWOJvZKMVzXy0/R94a9QZQa4qmojVgV
- B+dHUUjdnDwvqPE+azhrhjZ93kIN2EUsu6bUkYerIwK3vEerGLTS+qEnOLuEEd0KQ8vN
- S3SJH09bREx23RtHIJkqWEKQCUd8lnJDzHmB5Fa9q5vZt4Y7hxELx2cIMWxTLCuV1xXg Vw== 
+ : date : message-id : in-reply-to : references : mime-version :
+ content-transfer-encoding; s=pp1;
+ bh=SP+6dubD5vvPT0ZMA56BBNLSDVelDCWwbi0gGrBqYK0=;
+ b=SaswI4Qgg5ERJbtBigZkJ3q5F0F/bhgCl6OkWweOHwcxFtXDZDjOf44dZ/8MaCFbiyEh
+ MMjW9GI8gpORD8bsRDzl5gSSizPlHLqK/0Q9aeBg4GRIXlLMYrccU182qHOvi+WF4ban
+ W8eUBZJ7L5DEkN+wK0uBcphZ2jKk1Bd3Vsyj/qffOpZRlO03zwmGo3jr2GPkYD+pMseK
+ j2Uoy0NnnhFtSjH/9QcP/Dc2jj6FCZW3pGUwgxmgBnS8c7/z2iPGnSx5VokDyUIVNFVo
+ Iy60jDEh+0WyDF0t/Yf55AW9qqlxRhu8mmWws9DRbZ2YkRb6aG7mV06X5432rE6RgbW2 QQ== 
 Received: from pps.reinject (localhost [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com with ESMTP id 3cdmxc9n52-1
+        by mx0b-001b2d01.pphosted.com with ESMTP id 3cdnup095s-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
         Thu, 18 Nov 2021 11:34:11 +0000
-Received: from m0098419.ppops.net (m0098419.ppops.net [127.0.0.1])
-        by pps.reinject (8.16.0.43/8.16.0.43) with SMTP id 1AIArIlt014968;
+Received: from m0098416.ppops.net (m0098416.ppops.net [127.0.0.1])
+        by pps.reinject (8.16.0.43/8.16.0.43) with SMTP id 1AIBOJ7K029601;
         Thu, 18 Nov 2021 11:34:10 GMT
-Received: from ppma05wdc.us.ibm.com (1b.90.2fa9.ip4.static.sl-reverse.com [169.47.144.27])
-        by mx0b-001b2d01.pphosted.com with ESMTP id 3cdmxc9n4k-1
+Received: from ppma02dal.us.ibm.com (a.bd.3ea9.ip4.static.sl-reverse.com [169.62.189.10])
+        by mx0b-001b2d01.pphosted.com with ESMTP id 3cdnup0958-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
         Thu, 18 Nov 2021 11:34:10 +0000
-Received: from pps.filterd (ppma05wdc.us.ibm.com [127.0.0.1])
-        by ppma05wdc.us.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 1AIBRDrS023773;
+Received: from pps.filterd (ppma02dal.us.ibm.com [127.0.0.1])
+        by ppma02dal.us.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 1AIBR1Mx008954;
         Thu, 18 Nov 2021 11:34:09 GMT
-Received: from b01cxnp22034.gho.pok.ibm.com (b01cxnp22034.gho.pok.ibm.com [9.57.198.24])
-        by ppma05wdc.us.ibm.com with ESMTP id 3ca50cj2hu-1
+Received: from b01cxnp22033.gho.pok.ibm.com (b01cxnp22033.gho.pok.ibm.com [9.57.198.23])
+        by ppma02dal.us.ibm.com with ESMTP id 3ca50dhgwm-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
         Thu, 18 Nov 2021 11:34:09 +0000
 Received: from b01ledav005.gho.pok.ibm.com (b01ledav005.gho.pok.ibm.com [9.57.199.110])
-        by b01cxnp22034.gho.pok.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 1AIBY67650004236
+        by b01cxnp22033.gho.pok.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 1AIBY5mf41877840
         (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 18 Nov 2021 11:34:06 GMT
+        Thu, 18 Nov 2021 11:34:05 GMT
 Received: from b01ledav005.gho.pok.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 4B967AE077;
-        Thu, 18 Nov 2021 11:34:06 +0000 (GMT)
+        by IMSVA (Postfix) with ESMTP id 8F8A0AE068;
+        Thu, 18 Nov 2021 11:34:05 +0000 (GMT)
 Received: from b01ledav005.gho.pok.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 100E1AE06F;
-        Thu, 18 Nov 2021 11:34:06 +0000 (GMT)
+        by IMSVA (Postfix) with ESMTP id 4E5B2AE06A;
+        Thu, 18 Nov 2021 11:34:05 +0000 (GMT)
 Received: from amdrome3.watson.ibm.com (unknown [9.2.130.16])
         by b01ledav005.gho.pok.ibm.com (Postfix) with ESMTP;
-        Thu, 18 Nov 2021 11:34:06 +0000 (GMT)
+        Thu, 18 Nov 2021 11:34:05 +0000 (GMT)
 From:   Dov Murik <dovmurik@linux.ibm.com>
 To:     linux-efi@vger.kernel.org
 Cc:     Dov Murik <dovmurik@linux.ibm.com>, Borislav Petkov <bp@suse.de>,
@@ -76,175 +77,101 @@ Cc:     Dov Murik <dovmurik@linux.ibm.com>, Borislav Petkov <bp@suse.de>,
         Daniele Buono <dbuono@linux.vnet.ibm.com>,
         linux-coco@lists.linux.dev, linux-security-module@vger.kernel.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v5 4/4] docs: security: Add coco/efi_secret documentation
-Date:   Thu, 18 Nov 2021 11:33:59 +0000
-Message-Id: <20211118113359.642571-5-dovmurik@linux.ibm.com>
+Subject: [PATCH v5 2/4] efi/libstub: Reserve confidential computing secret area
+Date:   Thu, 18 Nov 2021 11:33:57 +0000
+Message-Id: <20211118113359.642571-3-dovmurik@linux.ibm.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20211118113359.642571-1-dovmurik@linux.ibm.com>
 References: <20211118113359.642571-1-dovmurik@linux.ibm.com>
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: YjJ-wr7c-NLArkOHZ2vFJaxPh-Y4Anj_
-X-Proofpoint-ORIG-GUID: Gyv5FU_GAGXKmmECFz_KincPtLYEmh5Q
-Content-Transfer-Encoding: 8bit
-X-Proofpoint-UnRewURL: 0 URL was un-rewritten
 MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-GUID: pxqOQ61q1EGWNCGJVZE-HYppBKMUbOQB
+X-Proofpoint-ORIG-GUID: ZYdRp_DSmlyFp3-Yy5cUjH1rUQ69dr8I
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.205,Aquarius:18.0.790,Hydra:6.0.425,FMLib:17.0.607.475
  definitions=2021-11-18_05,2021-11-17_01,2020-04-07_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 clxscore=1015
- lowpriorityscore=0 phishscore=0 mlxlogscore=999 spamscore=0 suspectscore=0
- impostorscore=0 adultscore=0 malwarescore=0 priorityscore=1501 mlxscore=0
- bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2110150000 definitions=main-2111180067
+ lowpriorityscore=0 phishscore=0 adultscore=0 suspectscore=0 bulkscore=0
+ malwarescore=0 mlxscore=0 mlxlogscore=999 priorityscore=1501
+ impostorscore=0 spamscore=0 classifier=spam adjust=0 reason=mlx
+ scancount=1 engine=8.12.0-2110150000 definitions=main-2111180067
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Add documentation for the efi_secret module which allows access
-to Confidential Computing injected secrets.
+Some older firmware declare the confidential computing secret area as
+EFI_BOOT_SERVICES_DATA region.  Fix this up by treating this memory
+region as EFI_RESERVED_TYPE, as it should be.
+
+If that memory region is already EFI_RESERVED_TYPE then this has no
+effect on the E820 map.
 
 Signed-off-by: Dov Murik <dovmurik@linux.ibm.com>
 ---
- Documentation/security/coco/efi_secret.rst | 103 +++++++++++++++++++++
- Documentation/security/coco/index.rst      |   9 ++
- Documentation/security/index.rst           |   1 +
- 3 files changed, 113 insertions(+)
- create mode 100644 Documentation/security/coco/efi_secret.rst
- create mode 100644 Documentation/security/coco/index.rst
+ drivers/firmware/efi/libstub/x86-stub.c | 28 +++++++++++++++++++++++++
+ 1 file changed, 28 insertions(+)
 
-diff --git a/Documentation/security/coco/efi_secret.rst b/Documentation/security/coco/efi_secret.rst
-new file mode 100644
-index 000000000000..bb7acae22e90
---- /dev/null
-+++ b/Documentation/security/coco/efi_secret.rst
-@@ -0,0 +1,103 @@
-+.. SPDX-License-Identifier: GPL-2.0
+diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
+index f14c4ff5839f..dabfa33ae2b3 100644
+--- a/drivers/firmware/efi/libstub/x86-stub.c
++++ b/drivers/firmware/efi/libstub/x86-stub.c
+@@ -24,6 +24,7 @@
+ const efi_system_table_t *efi_system_table;
+ extern u32 image_offset;
+ static efi_loaded_image_t *image = NULL;
++static u64 efi_coco_secret_phys_addr = U64_MAX;
+ 
+ static efi_status_t
+ preserve_pci_rom_image(efi_pci_io_protocol_t *pci, struct pci_setup_rom **__rom)
+@@ -443,6 +444,21 @@ static void add_e820ext(struct boot_params *params,
+ 		params->hdr.setup_data = (unsigned long)e820ext;
+ }
+ 
++#ifdef CONFIG_EFI_COCO_SECRET
++static void efi_set_coco_secret_phys_addr(void)
++{
++	struct linux_efi_coco_secret_area *secret_area =
++		get_efi_config_table(LINUX_EFI_COCO_SECRET_AREA_GUID);
 +
-+==========
-+efi_secret
-+==========
++	if (!secret_area || secret_area->size == 0 || secret_area->size >= SZ_4G)
++		return;
 +
-+This document describes how Confidential Computing secret injection is handled
-+from the firmware to the operating system.
++	efi_coco_secret_phys_addr = secret_area->base_pa;
++}
++#else
++static void efi_set_coco_secret_phys_addr(void) {}
++#endif
 +
+ static efi_status_t
+ setup_e820(struct boot_params *params, struct setup_data *e820ext, u32 e820ext_size)
+ {
+@@ -494,6 +510,16 @@ setup_e820(struct boot_params *params, struct setup_data *e820ext, u32 e820ext_s
+ 				e820_type = E820_TYPE_SOFT_RESERVED;
+ 			else
+ 				e820_type = E820_TYPE_RAM;
++#ifdef CONFIG_EFI_COCO_SECRET
++			if (d->phys_addr == efi_coco_secret_phys_addr)
++				/*
++				 * Fix a quirk in firmwares which don't mark
++				 * the EFI confidential computing area as
++				 * EFI_RESERVED_TYPE, but instead as
++				 * EFI_BOOT_SERVICES_DATA.
++				 */
++				e820_type = E820_TYPE_RESERVED;
++#endif
+ 			break;
+ 
+ 		case EFI_ACPI_MEMORY_NVS:
+@@ -793,6 +819,8 @@ unsigned long efi_main(efi_handle_t handle,
+ 
+ 	efi_retrieve_tpm2_eventlog();
+ 
++	efi_set_coco_secret_phys_addr();
 +
-+Introduction
-+============
-+
-+Confidential Computing (coco) hardware such as AMD SEV (Secure Encrypted
-+Virtualization) allows guest owners to inject secrets into the VMs
-+memory without the host/hypervisor being able to read them.  In SEV,
-+secret injection is performed early in the VM launch process, before the
-+guest starts running.
-+
-+The efi_secret kernel module allows userspace applications to access these
-+secrets via securityfs.
-+
-+
-+Secret data flow
-+================
-+
-+The guest firmware may reserve a designated memory area for secret injection,
-+and publish its location (base GPA and length) in the EFI configuration table
-+under a ``LINUX_EFI_COCO_SECRET_AREA_GUID`` entry
-+(``adf956ad-e98c-484c-ae11-b51c7d336447``).  This memory area should be marked
-+by the firmware as ``EFI_RESERVED_TYPE``, and therefore the kernel should not
-+be use it for its own purposes.
-+
-+During the VM's launch, the virtual machine manager may inject a secret to that
-+area.  In AMD SEV and SEV-ES this is performed using the
-+``KVM_SEV_LAUNCH_SECRET`` command (see [amd-mem-enc]_).  The strucutre of the
-+injected Guest Owner secret data should be a GUIDed table of secret values; the
-+binary format is described in ``drivers/virt/coco/efi_secret/efi_secret.c``
-+under "Structure of the EFI secret area".
-+
-+On kernel start, the kernel's EFI driver saves the location of the secret
-+memory (taken from the EFI configuration table) in the ``efi.coco_secret``
-+field.
-+
-+When a userspace application needs to access the secrets inside the guest VM,
-+it loads the efi_secret kernel module (``CONFIG_EFI_SECRET=m``) which exposes
-+the secrets via securityfs.  The details of the efi_secret filesystem interface
-+are in [efi-secret-abi]_.
-+
-+
-+
-+Application usage example
-+=========================
-+
-+Consider a guest performing computations on encrypted files.  The Guest Owner
-+provides the decryption key (= secret) using the secret injection mechanism.
-+The guest application reads the secret from the efi_secret filesystem and
-+proceeds to decrypt the files into memory and then performs the needed
-+computations on the content.
-+
-+In this example, the host can't read the files from the disk image
-+because they are encrypted.  Host can't read the decryption key because
-+it is passed using the secret injection mechanism (= secure channel).
-+Host can't read the decrypted content from memory because it's a
-+confidential (memory-encrypted) guest.
-+
-+Here is a simple example for usage of the efi_secret module in a guest
-+to which an EFI secret area with 4 secrets was injected during launch::
-+
-+	# modprobe efi_secret
-+	# ls -la /sys/kernel/security/coco/efi_secret
-+	total 0
-+	drwxr-xr-x 2 root root 0 Jun 28 11:54 .
-+	drwxr-xr-x 3 root root 0 Jun 28 11:54 ..
-+	-r--r----- 1 root root 0 Jun 28 11:54 736870e5-84f0-4973-92ec-06879ce3da0b
-+	-r--r----- 1 root root 0 Jun 28 11:54 83c83f7f-1356-4975-8b7e-d3a0b54312c6
-+	-r--r----- 1 root root 0 Jun 28 11:54 9553f55d-3da2-43ee-ab5d-ff17f78864d2
-+	-r--r----- 1 root root 0 Jun 28 11:54 e6f5a162-d67f-4750-a67c-5d065f2a9910
-+
-+	# xxd /sys/kernel/security/coco/efi_secret/e6f5a162-d67f-4750-a67c-5d065f2a9910
-+	00000000: 7468 6573 652d 6172 652d 7468 652d 6b61  these-are-the-ka
-+	00000010: 7461 2d73 6563 7265 7473 0001 0203 0405  ta-secrets......
-+	00000020: 0607                                     ..
-+
-+	# rm /sys/kernel/security/coco/efi_secret/e6f5a162-d67f-4750-a67c-5d065f2a9910
-+
-+	# ls -la /sys/kernel/security/coco/efi_secret
-+	total 0
-+	drwxr-xr-x 2 root root 0 Jun 28 11:55 .
-+	drwxr-xr-x 3 root root 0 Jun 28 11:54 ..
-+	-r--r----- 1 root root 0 Jun 28 11:54 736870e5-84f0-4973-92ec-06879ce3da0b
-+	-r--r----- 1 root root 0 Jun 28 11:54 83c83f7f-1356-4975-8b7e-d3a0b54312c6
-+	-r--r----- 1 root root 0 Jun 28 11:54 9553f55d-3da2-43ee-ab5d-ff17f78864d2
-+
-+
-+References
-+==========
-+
-+See [sev-api-spec]_ for more info regarding SEV ``LAUNCH_SECRET`` operation.
-+
-+.. [amd-mem-enc] :ref:`Documentation/virt/kvm/amd-memory-encryption <amdmemenc>`
-+.. [efi-secret-abi] :ref:`Documentation/ABI/testing/securityfs-coco-efi_secret <efisecret>`
-+.. [sev-api-spec] https://www.amd.com/system/files/TechDocs/55766_SEV-KM_API_Specification.pdf
-diff --git a/Documentation/security/coco/index.rst b/Documentation/security/coco/index.rst
-new file mode 100644
-index 000000000000..56b803d4b33e
---- /dev/null
-+++ b/Documentation/security/coco/index.rst
-@@ -0,0 +1,9 @@
-+.. SPDX-License-Identifier: GPL-2.0
-+
-+====================================
-+Confidential Computing documentation
-+====================================
-+
-+.. toctree::
-+
-+   efi_secret
-diff --git a/Documentation/security/index.rst b/Documentation/security/index.rst
-index 16335de04e8c..d4ef543825a7 100644
---- a/Documentation/security/index.rst
-+++ b/Documentation/security/index.rst
-@@ -17,3 +17,4 @@ Security Documentation
-    tpm/index
-    digsig
-    landlock
-+   coco
+ 	setup_graphics(boot_params);
+ 
+ 	setup_efi_pci(boot_params);
 -- 
 2.25.1
 
