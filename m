@@ -2,144 +2,95 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9670DC433EF
-	for <linux-efi@archiver.kernel.org>; Thu, 25 Nov 2021 07:38:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B348C433FE
+	for <linux-efi@archiver.kernel.org>; Thu, 25 Nov 2021 18:23:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237249AbhKYHlm (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 25 Nov 2021 02:41:42 -0500
-Received: from mail.ispras.ru ([83.149.199.84]:38090 "EHLO mail.ispras.ru"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S237334AbhKYHji (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Thu, 25 Nov 2021 02:39:38 -0500
-Received: from mail.ispras.ru (unknown [83.149.199.84])
-        by mail.ispras.ru (Postfix) with ESMTPSA id C499440D403E;
-        Thu, 25 Nov 2021 07:36:22 +0000 (UTC)
+        id S235785AbhKYS0p (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 25 Nov 2021 13:26:45 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54022 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S236050AbhKYSYp (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 25 Nov 2021 13:24:45 -0500
+Received: from mail-yb1-xb2d.google.com (mail-yb1-xb2d.google.com [IPv6:2607:f8b0:4864:20::b2d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5BCC8C061377
+        for <linux-efi@vger.kernel.org>; Thu, 25 Nov 2021 10:12:33 -0800 (PST)
+Received: by mail-yb1-xb2d.google.com with SMTP id y68so13951797ybe.1
+        for <linux-efi@vger.kernel.org>; Thu, 25 Nov 2021 10:12:33 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=eclypsium.com; s=google;
+        h=mime-version:in-reply-to:references:from:date:message-id:subject:to
+         :cc;
+        bh=k6C5uqkyNy2xtb3b3WbhQVmPCAI59RGmDlNE5qISUfA=;
+        b=SKgHyqqq6L3BZ/v38ZxKpHG71u8LWeJFx6QrDi0+oCW1TAsKedhcY8ppMoOVMEYP/2
+         WWQ0XhyHxuVUjtQ6bOM8LL92XhL+Br9bT/zft1i91EPR+g+Liy6LjqTEWb5e8CUkrhpb
+         P+hayjy80LcuVB4PJqaCuobDWt/ZKJIvh7nbjp+j4bkM0mT5N8ZDScgbcENpuKa9nLPa
+         MYTFA7UFB+sUosmbPOl1JT2SMTa82VXQgo6uRXfmLS2IdJLiiSiLMZwrwK1uY3/1ZGVl
+         tHZhkBi0C9NICLgaDJ3vA/JSEHInOEwwJU9gmGhOhqR3FxeLWpNBWa8ARhZEDPO4kpkN
+         fing==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:in-reply-to:references:from:date
+         :message-id:subject:to:cc;
+        bh=k6C5uqkyNy2xtb3b3WbhQVmPCAI59RGmDlNE5qISUfA=;
+        b=zbitBE7cjyLbHotWd7AQw25D89IwZr4PeZi7hKVwW0/6lRGQHnwIgOj4XeAX3huNIw
+         loqaWCj89S8ucKqhFN1xTXDdAU6ItsbzkkAO4GW9n6KUcDQ7DbxBiTztN6dcotFQByJH
+         p0d2dkU7LKO9aBnXU/hrn0bf83foTb6JgjLLuPufP0D3aioZO+ij8lNzLrPRkBRdpbJl
+         MCSFBB0fy2vbfIf1iDbpRENcHWUW30mQPqoL0sJYYRQ0u0bz6Kw2mMSLYp7dgnj1EOGP
+         TDEJkV/XTcCV466oy2pPW4sYlsn7eco8pi4S4vDjoiPIefV+Obl5Jyx5QjgCKqPxh8ty
+         7srg==
+X-Gm-Message-State: AOAM532BUUhNFLyVqsX+ESkZGWcFEbcgqtwuIJq/vsCZBe78ss9Shrm/
+        TQQPTM/I/0b08Vh64bZGJ0Uy0CbTRzQfG6l548g6XQ==
+X-Google-Smtp-Source: ABdhPJw1j7TflN3fccVJLKaboY0VKuo8k/SaK1enpzeQtkrcfMAqmVHXQWAVGBGC4n9kwWmne4DNL4hXOA37jJTGwwc=
+X-Received: by 2002:a25:3b4f:: with SMTP id i76mr8536738yba.217.1637863952639;
+ Thu, 25 Nov 2021 10:12:32 -0800 (PST)
 MIME-Version: 1.0
-Date:   Thu, 25 Nov 2021 10:36:22 +0300
-From:   baskov@ispras.ru
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     Borislav Petkov <bp@alien8.de>,
-        Dave Hansen <dave.hansen@linux.intel.com>,
-        Ingo Molnar <mingo@redhat.com>,
-        Jonathan Corbet <corbet@lwn.net>,
-        Thomas Gleixner <tglx@linutronix.de>, X86 ML <x86@kernel.org>,
-        Linux Doc Mailing List <linux-doc@vger.kernel.org>,
-        linux-efi <linux-efi@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH RFC 0/5] Handle UEFI NX-restricted page tables
-In-Reply-To: <CAMj1kXGzdMfj0bdNFODFZ8jfo0iMaZ5SOfueciwtY7Y4V5G2JQ@mail.gmail.com>
-References: <20211110104613.23881-1-baskov@ispras.ru>
- <CAMj1kXGzdMfj0bdNFODFZ8jfo0iMaZ5SOfueciwtY7Y4V5G2JQ@mail.gmail.com>
-User-Agent: Roundcube Webmail/1.4.4
-Message-ID: <1b013e77ec3d4c6288408b3caff093ef@ispras.ru>
-X-Sender: baskov@ispras.ru
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
+Received: by 2002:a0d:c905:0:0:0:0:0 with HTTP; Thu, 25 Nov 2021 10:12:32
+ -0800 (PST)
+In-Reply-To: <68e2a4ef-2bc7-7fa5-e5bd-58759fa57820@linux.ibm.com>
+References: <20211124203459.4578-1-martin.fernandez@eclypsium.com>
+ <20211124203459.4578-4-martin.fernandez@eclypsium.com> <68e2a4ef-2bc7-7fa5-e5bd-58759fa57820@linux.ibm.com>
+From:   Martin Fernandez <martin.fernandez@eclypsium.com>
+Date:   Thu, 25 Nov 2021 15:12:32 -0300
+Message-ID: <CAKgze5ZpO+_rsXa0C2aBscUEYcAthtZKtW5iguAYasCX0g93fQ@mail.gmail.com>
+Subject: Re: [PATCH v2 3/5] x86/e820: Tag e820_entry with crypto capabilities
+To:     Dov Murik <dovmurik@linux.ibm.com>
+Cc:     linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org,
+        linux-mm@kvack.org, tglx@linutronix.de, mingo@redhat.com,
+        bp@alien8.de, x86@kernel.org, hpa@zytor.com,
+        dave.hansen@linux.intel.com, luto@kernel.org, peterz@infradead.org,
+        ardb@kernel.org, dvhart@infradead.org, andy@infradead.org,
+        gregkh@linuxfoundation.org, rafael@kernel.org,
+        daniel.gutson@eclypsium.com, hughsient@gmail.com,
+        alison.schofield@intel.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
+On 11/25/21, Dov Murik <dovmurik@linux.ibm.com> wrote:
+> On 24/11/2021 22:34, Martin Fernandez wrote:
+>> +extern u64  e820__range_mark_as_crypto(u64 start, u64 size);
+>
+> I suggest: e820__range_mark_as_crypto_capable
+> (as you do in other function and field names)
+>
 
-Hello,
+Yes, good catch. Thanks.
 
-I apologize for delayed reply.
+>>  /* Remove a range of memory from the E820 table: */
+>> @@ -573,6 +604,9 @@ u64 __init e820__range_remove(u64 start, u64 size,
+>> enum e820_type old_type, bool
+>>  		/* Is the new range completely covered? */
+>>  		if (entry->addr < start && entry_end > end) {
+>>  			e820__range_add(end, entry_end - end, entry->type);
+>> +			if (entry->crypto_capable)
+>> +				e820__range_mark_as_crypto(end, entry_end - end);
+>> +
+>
+> Why introduce this new function call instead of adding an extra
+> 'crypto_capable' argument to e820__range_add() ?
 
-The system in question runs in a firmware that tries to achieve
-complete W^X protection. Both loader code and loader data
-are not executable, so the suggested approach does not work.
-If you would like to test this, you can set
-the PcdDxeNxMemoryProtectionPolicy in any firmware available to you.
-
-As a justification for the approach itself, I can use the fact that
-UEFI specification says nothing about the ability to execute
-self-allocated EfiLoaderCode or any other types besides the areas
-allocated by the firmware for UEFI Images. In fact, Table 7-5
-explicitly states that EfiLoaderCode is used for:
-
-> The code portions of a loaded UEFI application.
-
-While we do not think it should be interpreted as one cannot allocate
-such areas at all, it is clear that there are no guarantees about the
-other use cases and permissions of the allocations of this type besides
-those stated by 2.3.4:
-
-> Paging mode is enabled and any memory space defined by the UEFI memory
-> map is identity mapped (virtual address equals physical address),
-> although the attributes of certain regions may not have all read,
-> write, and execute attributes or be unmarked for purposes of platform
-> protection.
-
-Long story short, the kernel is not allowed to allocate such areas and
-assume they are executable, it should do paging itself, and the changes
-here address that. For the reference, Windows adheres to this convention
-and works fine on the target system.
-
-Thanks,
-Baskov Evgeniy
-
-On 2021-11-10 14:11, Ard Biesheuvel wrote:
-> On Wed, 10 Nov 2021 at 11:56, Baskov Evgeniy <baskov@ispras.ru> wrote:
->> 
->> Note, that this patch series is RFC, since it is yet untested
->> and possibly incompatible with AMD SEV and related extensions.
->> 
->> The UEFI specification states that certain memory regions may
->> not have every permission, i.e. may not be writable or executable.
->> 
->> Furthermore there exist some implementations (at least on i386/x86_64)
->> that restrict execution of memory regions expected by the kernel to
->> be executable. E.g. first megabyte of address space, where trampoline
->> for switching between 4/5 level paging is placed and memory regions,
->> allocated as loader data.
->> 
->> This patch series allows Linux kernel to boot on such UEFI
->> implementations on i386 and x86_64.
->> 
->> The simplest way to achieve that on i386 is to disable paging
->> before jumping to potentially relocated code.
->> 
->> x86_64, on the other hand, does not allow disabling paging so it
->> is required to build temporary page tables containing memory regions
->> required for Linux kernel to boot with appropriate access permissions.
->> 
-> 
-> Hello Baskov,
-> 
-> To be honest, I am truly not a fan of this approach.
-> 
-> Which systems is this issue occurring on? Did you try something like
-> the below to allocate executable memory explicitly?
-> 
-> 
-> diff --git a/drivers/firmware/efi/libstub/relocate.c
-> b/drivers/firmware/efi/libstub/relocate.c
-> index 8ee9eb2b9039..b73012a7bcdc 100644
-> --- a/drivers/firmware/efi/libstub/relocate.c
-> +++ b/drivers/firmware/efi/libstub/relocate.c
-> @@ -80,7 +80,7 @@ efi_status_t efi_low_alloc_above(unsigned long size,
-> unsigned long align,
->                         continue;
-> 
->                 status = efi_bs_call(allocate_pages, 
-> EFI_ALLOCATE_ADDRESS,
-> -                                    EFI_LOADER_DATA, nr_pages, 
-> &start);
-> +                                    EFI_LOADER_CODE, nr_pages, 
-> &start);
->                 if (status == EFI_SUCCESS) {
->                         *addr = start;
->                         break;
-> @@ -146,7 +146,7 @@ efi_status_t efi_relocate_kernel(unsigned long 
-> *image_addr,
->          */
->         nr_pages = round_up(alloc_size, EFI_ALLOC_ALIGN) / 
-> EFI_PAGE_SIZE;
->         status = efi_bs_call(allocate_pages, EFI_ALLOCATE_ADDRESS,
-> -                            EFI_LOADER_DATA, nr_pages, &efi_addr);
-> +                            EFI_LOADER_CODE, nr_pages, &efi_addr);
->         new_addr = efi_addr;
->         /*
->          * If preferred address allocation failed allocate as low as
-
-
+I thought about it, but I would like not to change the signature of
+e820__range_add. Either way, here I could use __e820__range_add which
+it does accept crypto_capable as an argument, just as I did in
+e820__range_update.
