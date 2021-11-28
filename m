@@ -2,40 +2,60 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9718CC433EF
-	for <linux-efi@archiver.kernel.org>; Sun, 28 Nov 2021 18:22:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7095C433F5
+	for <linux-efi@archiver.kernel.org>; Sun, 28 Nov 2021 19:48:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1347787AbhK1SZQ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 28 Nov 2021 13:25:16 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:21495 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1359196AbhK1SXA (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sun, 28 Nov 2021 13:23:00 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1638123584;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=QL/WD4L6XD5XSuq043YqRwsHsQuEMvnmzfJcrbvUXAg=;
-        b=Qso2/PIXVZgByalGwyIaRC5bKsDBHWROC5qD88N0HXx4A2UcwcDiLdlbkFzVagZjYiLcKt
-        nEhSsyuyY7ghmI0TqOciQT/nAdR0+geLDOQ5o0KgOtAbPQPKmdzsMocjgUs48Y+sdeW5JG
-        18/jaNiHJhguoyFnUgBLOd/Q4BWRPpw=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-160-imcYyaxWPTyhQ9t6qGhWHg-1; Sun, 28 Nov 2021 13:19:40 -0500
-X-MC-Unique: imcYyaxWPTyhQ9t6qGhWHg-1
-Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 4482910054B5;
-        Sun, 28 Nov 2021 18:19:38 +0000 (UTC)
-Received: from x1.localdomain (unknown [10.39.192.65])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 094C910016F4;
-        Sun, 28 Nov 2021 18:19:34 +0000 (UTC)
-From:   Hans de Goede <hdegoede@redhat.com>
-To:     "Rafael J . Wysocki" <rjw@rjwysocki.net>,
+        id S229871AbhK1Tva (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 28 Nov 2021 14:51:30 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49120 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S240139AbhK1Tt0 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sun, 28 Nov 2021 14:49:26 -0500
+Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 14EF5C061574;
+        Sun, 28 Nov 2021 11:46:10 -0800 (PST)
+Received: by mail-lf1-x135.google.com with SMTP id bi37so38909436lfb.5;
+        Sun, 28 Nov 2021 11:46:09 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:content-transfer-encoding:in-reply-to;
+        bh=5c2x7L/3GBh3yUpNOqfBo5XiVGRYdFLXSX4SbETDqQo=;
+        b=mKnm7iytAs3F5zG4gvNhQKUjuYRdZTaDXrdkogodsE0nfRRe6guLcGJgNkNw7/c652
+         J3cUmpVkMGnDHP42iDGhSp6ZXqH+1BxsXBGsmMRrMrSMK9JwQSkoRjWf8cd828bCl1KE
+         O6Ac0ldb+GAaxvOAiSzX3oxQGqcBylzD6TEBfYHl96VNBN8bsHGVl+qX3AWEGWukH5Ih
+         re/6cAOigJnVGjZmXWF6CGBKcB8WaVGnP4b5ox23lGs4Y5z7dj/8PcuN2VpaJq7wYucr
+         /4vokqY59uSpd/DIq8PMNS1odRBRH3xtWzI6uvh/Psfz3TsbuYBRaCAIeSde/OtuH/3G
+         nBsw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:content-transfer-encoding
+         :in-reply-to;
+        bh=5c2x7L/3GBh3yUpNOqfBo5XiVGRYdFLXSX4SbETDqQo=;
+        b=0FA8W9kOqjHbzQ3XVZHzC+KaxFQnNm6CX8C7q0omC70XTRVJiK9kroOievbB0yfmF9
+         oYPctfe81LwewKEbJXPw21hfplHWtT2q4LBx1TIw4V8USYcqmo0tcHz7J6+s5qJ7lTcG
+         G/ZePJZC66R0dUe9dq34uJAQOs2IMUZtyL3mVgfzNvHwpuW983zMcnxgyfVx+lqsbzxA
+         YT4MDatWGZO03+ImXn3KP8zMuwSaSfUIGAu0+9jlkpdDNu7KKFzbZatLjcOD9uCxQITn
+         F+WPwoVz6oq+DLn0S3F9vYYuFetvijTC7/BuIW87/+yGWB6+EebEJya2bXQ0eYsYwtFW
+         4Jxg==
+X-Gm-Message-State: AOAM530kj8sxJWBzhPUWnkq4eC7yA8RMUdso+224X4i0lKmkLyyNxSLw
+        OYM7nw1pzNlDBUYAVJVgsqw=
+X-Google-Smtp-Source: ABdhPJx4QZQBawYmjCibcf6YH73t5aAjTPkIW4EGO0RP0T+O3QOZcTbk7xlMWehAp+wIYBz2ng4YEg==
+X-Received: by 2002:a19:6412:: with SMTP id y18mr43593647lfb.494.1638128768070;
+        Sun, 28 Nov 2021 11:46:08 -0800 (PST)
+Received: from localhost.localdomain ([37.45.176.136])
+        by smtp.gmail.com with ESMTPSA id z28sm1149185ljn.77.2021.11.28.11.46.06
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 28 Nov 2021 11:46:07 -0800 (PST)
+Received: from jek by localhost.localdomain with local (Exim 4.95)
+        (envelope-from <jekhor@gmail.com>)
+        id 1mrQ7h-000qFw-SL;
+        Sun, 28 Nov 2021 22:46:05 +0300
+Date:   Sun, 28 Nov 2021 22:46:05 +0300
+From:   Yauhen Kharuzhy <jekhor@gmail.com>
+To:     Hans de Goede <hdegoede@redhat.com>
+Cc:     "Rafael J . Wysocki" <rjw@rjwysocki.net>,
         Mika Westerberg <mika.westerberg@linux.intel.com>,
         Mark Gross <markgross@kernel.org>,
         Andy Shevchenko <andy@infradead.org>,
@@ -43,187 +63,205 @@ To:     "Rafael J . Wysocki" <rjw@rjwysocki.net>,
         Sebastian Reichel <sre@kernel.org>,
         MyungJoo Ham <myungjoo.ham@samsung.com>,
         Chanwoo Choi <cw00.choi@samsung.com>,
-        Ard Biesheuvel <ardb@kernel.org>
-Cc:     Hans de Goede <hdegoede@redhat.com>, Len Brown <lenb@kernel.org>,
-        linux-acpi@vger.kernel.org, Yauhen Kharuzhy <jekhor@gmail.com>,
-        Tsuchiya Yuto <kitakar@gmail.com>,
-        platform-driver-x86@vger.kernel.org, linux-pm@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
-Subject: [PATCH v3 19/20] extcon: intel-cht-wc: Add support for registering a power_supply class-device
-Date:   Sun, 28 Nov 2021 19:18:08 +0100
-Message-Id: <20211128181809.326736-20-hdegoede@redhat.com>
-In-Reply-To: <20211128181809.326736-1-hdegoede@redhat.com>
-References: <20211128181809.326736-1-hdegoede@redhat.com>
+        Ard Biesheuvel <ardb@kernel.org>, Len Brown <lenb@kernel.org>,
+        linux-acpi@vger.kernel.org, Tsuchiya Yuto <kitakar@gmail.com>,
+        Platform Driver <platform-driver-x86@vger.kernel.org>,
+        linux-i2c@vger.kernel.org, linux-pm@vger.kernel.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-efi@vger.kernel.org
+Subject: Re: [PATCH v2 10/20] power: supply: bq25890: Add
+ bq25890_set_otg_cfg() helper
+Message-ID: <YaPcfZQ8OsPNUjwK@jeknote.loshitsa1.net>
+References: <20211114170335.66994-1-hdegoede@redhat.com>
+ <20211114170335.66994-11-hdegoede@redhat.com>
+ <YZIyQ1BdJ0v8QTtj@jeknote.loshitsa1.net>
+ <66fbed75-7b48-6d91-1ef5-5df1c075e91c@redhat.com>
+ <CAKWEGV7WVsZK=890UG=t3dhqCuoD-6N44DPMzk-_8TSPBm4_Dg@mail.gmail.com>
+ <fbc88a7a-317f-9b81-fc76-2ceefcf6c7f5@redhat.com>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
+In-Reply-To: <fbc88a7a-317f-9b81-fc76-2ceefcf6c7f5@redhat.com>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The bq25890 used on the Yogabook YB1-X90 / -X91 models relies on
-the extcon-driver's BC-1.2 charger detection, and the bq25890 driver
-expect this info to be  available through a parent power_supply
-class-device which models the detected charger (idem to how the Type-C
-TCPM code registers a power_supply classdev for the connected charger).
+On Sun, Nov 28, 2021 at 04:02:06PM +0100, Hans de Goede wrote:
+> Hi,
+> 
+> On 11/16/21 12:07, Yauhen Kharuzhy wrote:
+> > 
+> > 
+> > аў, 16 ліс 2021, 12:33 карыстальнік Hans de Goede <hdegoede@redhat.com <mailto:hdegoede@redhat.com>> напісаў:
+> > 
+> >     Hi Yauhen,
+> > 
+> >     On 11/15/21 11:11, Yauhen Kharuzhy wrote:
+> >     > On Sun, Nov 14, 2021 at 06:03:25PM +0100, Hans de Goede wrote:
+> >     >> Add a bq25890_set_otg_cfg() helper function, this is a preparation
+> >     >> patch for adding regulator support.
+> >     >>
+> >     >> Signed-off-by: Hans de Goede <hdegoede@redhat.com <mailto:hdegoede@redhat.com>>
+> >     >> ---
+> >     >>  drivers/power/supply/bq25890_charger.c | 28 ++++++++++++++------------
+> >     >>  1 file changed, 15 insertions(+), 13 deletions(-)
+> >     >>
+> >     >> diff --git a/drivers/power/supply/bq25890_charger.c b/drivers/power/supply/bq25890_charger.c
+> >     >> index 2bdfb58cda75..3c41fe86b3d3 100644
+> >     >> --- a/drivers/power/supply/bq25890_charger.c
+> >     >> +++ b/drivers/power/supply/bq25890_charger.c
+> >     >> @@ -801,6 +801,17 @@ static int bq25890_power_supply_init(struct bq25890_device *bq)
+> >     >>      return PTR_ERR_OR_ZERO(bq->charger);
+> >     >>  }
+> >     >> 
+> >     >> +static int bq25890_set_otg_cfg(struct bq25890_device *bq, u8 val)
+> >     >> +{
+> >     >> +    int ret;
+> >     >> +
+> >     >> +    ret = bq25890_field_write(bq, F_OTG_CFG, val);
+> >     >> +    if (ret < 0)
+> >     >> +            dev_err(bq->dev, "Error switching to boost/charger mode: %d\n", ret);
+> >     >
+> >     > Just a note: if a connected USB device has relative big capacitor
+> >     > at power wires inside, then a starting current pulse may be enough to
+> >     > overload the boost reguator and VBUS will not be powered. I met this
+> >     > at Yoga Book: the firmware set boost current limit to 1.4 A (default
+> >     > value for bq25892) but when USB hub connected, the BOOST_FAULT event
+> >     > appeared.
+> >     >
+> >     > To avoid this, Lenovo uses following trick in its kernel: set a boost
+> >     > current limit to big value (2.1 A), wait some time (500 ms) and set
+> >     > the current limit to right value (1.4A). This provides enough current to
+> >     > charge capacitors in the connected device but saves desired long-time limit
+> >     > to prevent overloading if the device consumes too much power itself.
+> > 
+> >     Right I saw this in your git repo, but I cannot reproduce the issue (1)
+> >     I was hoping that since you can reproduce this, that you can rebase
+> >     your fix on top of my patch-set ?
+> > 
+> >     Also I'm wondering if this behavior should be the default, I believe
+> >     that the max. boost current may also be dependent on some external
+> >     factors, so maybe we should make this behavior conditional on a
+> >     new device-property ?
+> > 
+> > Yes, defining of max VBUS current may be a good idea. Another possible approach may be to use some empirical multiplier, like 150% of max 'long time' current limit setting. I almost sure that all hardware will work with short impulse of such current, its usual condition at device connection.
+> > 
+> > 
+> >     Regards,
+> > 
+> >     Hans
+> > 
+> > 
+> > 
+> >     1) I must admit I did not try really hard, I guess I could try an
+> >     USB powered hdd enclosure with a spinning disk
+> > 
+> >     What device are you seeing this with?
+> > 
+> > I cannot remember exactly device but this was a USB hub, possible with keyboard, mouse receiver and USB dongle inserted. I can recheck this issue but one week after, when will return home.
+> 
+> So as I mentioned before I've just tried to reproduce this problem, but
+> I cannot reproduce it with an 2.5" USB disk enclosure with a spinning
+> disk, which typically will cause a nice current-peak when spinning up.
+> 
+> I think this might also require an almost empty battery to reproduce ?
 
-Add support for registering the power_supply class-device expected
-by this setup.
+Hi.
 
-Signed-off-by: Hans de Goede <hdegoede@redhat.com>
----
-Changes in v3:
-- Some minor tweaks based on Andy's review
----
- drivers/extcon/extcon-intel-cht-wc.c | 81 ++++++++++++++++++++++++++++
- 1 file changed, 81 insertions(+)
+I tried to reproduce just now with success.
 
-diff --git a/drivers/extcon/extcon-intel-cht-wc.c b/drivers/extcon/extcon-intel-cht-wc.c
-index 150637bea417..144cb5d8cd47 100644
---- a/drivers/extcon/extcon-intel-cht-wc.c
-+++ b/drivers/extcon/extcon-intel-cht-wc.c
-@@ -14,6 +14,7 @@
- #include <linux/module.h>
- #include <linux/mod_devicetable.h>
- #include <linux/platform_device.h>
-+#include <linux/power_supply.h>
- #include <linux/property.h>
- #include <linux/regmap.h>
- #include <linux/regulator/consumer.h>
-@@ -106,6 +107,8 @@ struct cht_wc_extcon_data {
- 	struct extcon_dev *edev;
- 	struct usb_role_switch *role_sw;
- 	struct regulator *vbus_boost;
-+	struct power_supply *psy;
-+	enum power_supply_usb_type usb_type;
- 	unsigned int previous_cable;
- 	bool usb_host;
- 	bool vbus_boost_enabled;
-@@ -170,18 +173,23 @@ static int cht_wc_extcon_get_charger(struct cht_wc_extcon_data *ext,
- 		dev_warn(ext->dev,
- 			"Unhandled charger type %d, defaulting to SDP\n",
- 			 ret);
-+		ext->usb_type = POWER_SUPPLY_USB_TYPE_SDP;
- 		return EXTCON_CHG_USB_SDP;
- 	case CHT_WC_USBSRC_TYPE_SDP:
- 	case CHT_WC_USBSRC_TYPE_FLOATING:
- 	case CHT_WC_USBSRC_TYPE_OTHER:
-+		ext->usb_type = POWER_SUPPLY_USB_TYPE_SDP;
- 		return EXTCON_CHG_USB_SDP;
- 	case CHT_WC_USBSRC_TYPE_CDP:
-+		ext->usb_type = POWER_SUPPLY_USB_TYPE_CDP;
- 		return EXTCON_CHG_USB_CDP;
- 	case CHT_WC_USBSRC_TYPE_DCP:
- 	case CHT_WC_USBSRC_TYPE_DCP_EXTPHY:
- 	case CHT_WC_USBSRC_TYPE_MHL: /* MHL2+ delivers upto 2A, treat as DCP */
-+		ext->usb_type = POWER_SUPPLY_USB_TYPE_DCP;
- 		return EXTCON_CHG_USB_DCP;
- 	case CHT_WC_USBSRC_TYPE_ACA:
-+		ext->usb_type = POWER_SUPPLY_USB_TYPE_ACA;
- 		return EXTCON_CHG_USB_ACA;
- 	}
- }
-@@ -266,6 +274,8 @@ static void cht_wc_extcon_pwrsrc_event(struct cht_wc_extcon_data *ext)
- 	bool ignore_get_charger_errors = ext->usb_host;
- 	enum usb_role role;
- 
-+	ext->usb_type = POWER_SUPPLY_USB_TYPE_UNKNOWN;
-+
- 	ret = regmap_read(ext->regmap, CHT_WC_PWRSRC_STS, &pwrsrc_sts);
- 	if (ret) {
- 		dev_err(ext->dev, "Error reading pwrsrc status: %d\n", ret);
-@@ -320,6 +330,9 @@ static void cht_wc_extcon_pwrsrc_event(struct cht_wc_extcon_data *ext)
- 	ret = usb_role_switch_set_role(ext->role_sw, role);
- 	if (ret)
- 		dev_err(ext->dev, "Error setting USB-role: %d\n", ret);
-+
-+	if (ext->psy)
-+		power_supply_changed(ext->psy);
- }
- 
- static irqreturn_t cht_wc_extcon_isr(int irq, void *data)
-@@ -420,6 +433,59 @@ static int cht_wc_extcon_get_role_sw_and_regulator(struct cht_wc_extcon_data *ex
- 	return 0;
- }
- 
-+static int cht_wc_extcon_psy_get_prop(struct power_supply *psy,
-+				      enum power_supply_property psp,
-+				      union power_supply_propval *val)
-+{
-+	struct cht_wc_extcon_data *ext = power_supply_get_drvdata(psy);
-+
-+	switch (psp) {
-+	case POWER_SUPPLY_PROP_USB_TYPE:
-+		val->intval = ext->usb_type;
-+		break;
-+	case POWER_SUPPLY_PROP_ONLINE:
-+		val->intval = ext->usb_type ? 1 : 0;
-+		break;
-+	default:
-+		return -EINVAL;
-+	}
-+
-+	return 0;
-+}
-+
-+static const enum power_supply_usb_type cht_wc_extcon_psy_usb_types[] = {
-+	POWER_SUPPLY_USB_TYPE_SDP,
-+	POWER_SUPPLY_USB_TYPE_CDP,
-+	POWER_SUPPLY_USB_TYPE_DCP,
-+	POWER_SUPPLY_USB_TYPE_ACA,
-+	POWER_SUPPLY_USB_TYPE_UNKNOWN,
-+};
-+
-+static const enum power_supply_property cht_wc_extcon_psy_props[] = {
-+	POWER_SUPPLY_PROP_USB_TYPE,
-+	POWER_SUPPLY_PROP_ONLINE,
-+};
-+
-+static const struct power_supply_desc cht_wc_extcon_psy_desc = {
-+	.name = "cht_wcove_pwrsrc",
-+	.type = POWER_SUPPLY_TYPE_USB,
-+	.usb_types = cht_wc_extcon_psy_usb_types,
-+	.num_usb_types = ARRAY_SIZE(cht_wc_extcon_psy_usb_types),
-+	.properties = cht_wc_extcon_psy_props,
-+	.num_properties = ARRAY_SIZE(cht_wc_extcon_psy_props),
-+	.get_property = cht_wc_extcon_psy_get_prop,
-+};
-+
-+static int cht_wc_extcon_register_psy(struct cht_wc_extcon_data *ext)
-+{
-+	struct power_supply_config psy_cfg = { .drv_data = ext };
-+
-+	ext->psy = devm_power_supply_register(ext->dev,
-+					      &cht_wc_extcon_psy_desc,
-+					      &psy_cfg);
-+	return PTR_ERR_OR_ZERO(ext->psy);
-+}
-+
- static int cht_wc_extcon_probe(struct platform_device *pdev)
- {
- 	struct intel_soc_pmic *pmic = dev_get_drvdata(pdev->dev.parent);
-@@ -463,6 +529,21 @@ static int cht_wc_extcon_probe(struct platform_device *pdev)
- 		cht_wc_extcon_set_5v_boost(ext, false);
- 		break;
- 	case INTEL_CHT_WC_LENOVO_YOGABOOK1:
-+		/* Do this first, as it may very well return -EPROBE_DEFER. */
-+		ret = cht_wc_extcon_get_role_sw_and_regulator(ext);
-+		if (ret)
-+			return ret;
-+		/*
-+		 * The bq25890 used here relies on this driver's BC-1.2 charger
-+		 * detection, and the bq25890 driver expect this info to be
-+		 * available through a parent power_supply class device which
-+		 * models the detected charger (idem to how the Type-C TCPM code
-+		 * registers a power_supply classdev for the connected charger).
-+		 */
-+		ret = cht_wc_extcon_register_psy(ext);
-+		if (ret)
-+			return ret;
-+		break;
- 	case INTEL_CHT_WC_XIAOMI_MIPAD2:
- 		ret = cht_wc_extcon_get_role_sw_and_regulator(ext);
- 		if (ret)
+I have the UNITEK Y-2165B OTG USB hub with cardreader. It has three
+100 uF capacitors connected to the VBUS inside.
+
+If the boost current limit is set to 1.4A, boot failure condition is appeared
+when the hub connected, there is no USB device detected.
+
+If the limit is set to 2.15A, the device detected and works, there is no
+fault condition appeared.
+
+So, I think that you may add 1-3 100uF capacitors to
+any USB device or cable and try to reproduce.
+
+Debug I2C dumps are below.
+
+Before connection of the hub:
+
+root@yogabook:/home/jek# i2cdump -f -y 7 0x6b
+No size specified (using byte-data access)
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f    0123456789abcdef
+00: 00 06 00 0a 42 13 80 cc 03 44 73 02 00 8d 58 57    .?.?B????Ds?.?XW
+10: 4e 00 00 00 05 ff ff ff ff ff ff ff ff ff ff ff    N...?...........
+20: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+30: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+40: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+50: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+60: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+70: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+80: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+90: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+a0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+b0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+c0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+d0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+e0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+f0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+
+Immediately after connection (look to 0x0c register):
+
+root@yogabook:/home/jek# i2cdump -f -y 7 0x6b
+No size specified (using byte-data access)
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f    0123456789abcdef
+00: 00 06 00 2a 42 13 82 cc 03 44 73 e2 40 8d 57 57    .?.*B????Ds?@?WW
+10: 4d 00 00 00 05 ff ff ff ff ff ff ff ff ff ff ff    M...?...........
+20: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+30: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+40: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+50: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+60: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+70: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+80: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+90: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+a0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+b0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+c0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+d0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+e0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+f0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+
+Increase current limit manually and restart the boost converter:
+
+root@yogabook:/home/jek# i2cset -f -y 7 0x6b 0x0a 0x76
+root@yogabook:/home/jek# i2cset -f -y 7 0x6b 0x03 0x0a
+root@yogabook:/home/jek# i2cset -f -y 7 0x6b 0x03 0x2a
+
+root@yogabook:/home/jek# i2cdump -f -y 7 0x6b
+No size specified (using byte-data access)
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f    0123456789abcdef
+00: 00 06 00 2a 42 13 82 cc 03 44 76 e2 00 8d 57 57    .?.*B????Dv?.?WW
+10: 4d 00 00 00 05 ff ff ff ff ff ff ff ff ff ff ff    M...?...........
+20: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+30: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+40: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+50: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+60: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+70: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+80: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+90: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+a0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+b0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+c0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+d0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+e0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+f0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
+
+
+
+> 
+> Regards,
+> 
+> Hans
+> 
+
 -- 
-2.33.1
-
+Yauhen Kharuzhy
