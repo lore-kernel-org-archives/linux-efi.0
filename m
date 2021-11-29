@@ -2,266 +2,204 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A7095C433F5
-	for <linux-efi@archiver.kernel.org>; Sun, 28 Nov 2021 19:48:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 14C36C433F5
+	for <linux-efi@archiver.kernel.org>; Mon, 29 Nov 2021 11:45:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229871AbhK1Tva (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 28 Nov 2021 14:51:30 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49120 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240139AbhK1Tt0 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sun, 28 Nov 2021 14:49:26 -0500
-Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 14EF5C061574;
-        Sun, 28 Nov 2021 11:46:10 -0800 (PST)
-Received: by mail-lf1-x135.google.com with SMTP id bi37so38909436lfb.5;
-        Sun, 28 Nov 2021 11:46:09 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:content-transfer-encoding:in-reply-to;
-        bh=5c2x7L/3GBh3yUpNOqfBo5XiVGRYdFLXSX4SbETDqQo=;
-        b=mKnm7iytAs3F5zG4gvNhQKUjuYRdZTaDXrdkogodsE0nfRRe6guLcGJgNkNw7/c652
-         J3cUmpVkMGnDHP42iDGhSp6ZXqH+1BxsXBGsmMRrMrSMK9JwQSkoRjWf8cd828bCl1KE
-         O6Ac0ldb+GAaxvOAiSzX3oxQGqcBylzD6TEBfYHl96VNBN8bsHGVl+qX3AWEGWukH5Ih
-         re/6cAOigJnVGjZmXWF6CGBKcB8WaVGnP4b5ox23lGs4Y5z7dj/8PcuN2VpaJq7wYucr
-         /4vokqY59uSpd/DIq8PMNS1odRBRH3xtWzI6uvh/Psfz3TsbuYBRaCAIeSde/OtuH/3G
-         nBsw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:content-transfer-encoding
-         :in-reply-to;
-        bh=5c2x7L/3GBh3yUpNOqfBo5XiVGRYdFLXSX4SbETDqQo=;
-        b=0FA8W9kOqjHbzQ3XVZHzC+KaxFQnNm6CX8C7q0omC70XTRVJiK9kroOievbB0yfmF9
-         oYPctfe81LwewKEbJXPw21hfplHWtT2q4LBx1TIw4V8USYcqmo0tcHz7J6+s5qJ7lTcG
-         G/ZePJZC66R0dUe9dq34uJAQOs2IMUZtyL3mVgfzNvHwpuW983zMcnxgyfVx+lqsbzxA
-         YT4MDatWGZO03+ImXn3KP8zMuwSaSfUIGAu0+9jlkpdDNu7KKFzbZatLjcOD9uCxQITn
-         F+WPwoVz6oq+DLn0S3F9vYYuFetvijTC7/BuIW87/+yGWB6+EebEJya2bXQ0eYsYwtFW
-         4Jxg==
-X-Gm-Message-State: AOAM530kj8sxJWBzhPUWnkq4eC7yA8RMUdso+224X4i0lKmkLyyNxSLw
-        OYM7nw1pzNlDBUYAVJVgsqw=
-X-Google-Smtp-Source: ABdhPJx4QZQBawYmjCibcf6YH73t5aAjTPkIW4EGO0RP0T+O3QOZcTbk7xlMWehAp+wIYBz2ng4YEg==
-X-Received: by 2002:a19:6412:: with SMTP id y18mr43593647lfb.494.1638128768070;
-        Sun, 28 Nov 2021 11:46:08 -0800 (PST)
-Received: from localhost.localdomain ([37.45.176.136])
-        by smtp.gmail.com with ESMTPSA id z28sm1149185ljn.77.2021.11.28.11.46.06
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 28 Nov 2021 11:46:07 -0800 (PST)
-Received: from jek by localhost.localdomain with local (Exim 4.95)
-        (envelope-from <jekhor@gmail.com>)
-        id 1mrQ7h-000qFw-SL;
-        Sun, 28 Nov 2021 22:46:05 +0300
-Date:   Sun, 28 Nov 2021 22:46:05 +0300
-From:   Yauhen Kharuzhy <jekhor@gmail.com>
-To:     Hans de Goede <hdegoede@redhat.com>
-Cc:     "Rafael J . Wysocki" <rjw@rjwysocki.net>,
-        Mika Westerberg <mika.westerberg@linux.intel.com>,
-        Mark Gross <markgross@kernel.org>,
-        Andy Shevchenko <andy@infradead.org>,
-        Wolfram Sang <wsa@the-dreams.de>,
-        Sebastian Reichel <sre@kernel.org>,
-        MyungJoo Ham <myungjoo.ham@samsung.com>,
-        Chanwoo Choi <cw00.choi@samsung.com>,
-        Ard Biesheuvel <ardb@kernel.org>, Len Brown <lenb@kernel.org>,
-        linux-acpi@vger.kernel.org, Tsuchiya Yuto <kitakar@gmail.com>,
-        Platform Driver <platform-driver-x86@vger.kernel.org>,
-        linux-i2c@vger.kernel.org, linux-pm@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-efi@vger.kernel.org
-Subject: Re: [PATCH v2 10/20] power: supply: bq25890: Add
- bq25890_set_otg_cfg() helper
-Message-ID: <YaPcfZQ8OsPNUjwK@jeknote.loshitsa1.net>
-References: <20211114170335.66994-1-hdegoede@redhat.com>
- <20211114170335.66994-11-hdegoede@redhat.com>
- <YZIyQ1BdJ0v8QTtj@jeknote.loshitsa1.net>
- <66fbed75-7b48-6d91-1ef5-5df1c075e91c@redhat.com>
- <CAKWEGV7WVsZK=890UG=t3dhqCuoD-6N44DPMzk-_8TSPBm4_Dg@mail.gmail.com>
- <fbc88a7a-317f-9b81-fc76-2ceefcf6c7f5@redhat.com>
+        id S238525AbhK2Lsq (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 29 Nov 2021 06:48:46 -0500
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:45758 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S235717AbhK2Lqq (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 29 Nov 2021 06:46:46 -0500
+Received: from pps.filterd (m0098409.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 1ATBFYDP001515;
+        Mon, 29 Nov 2021 11:43:07 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
+ : date : message-id : in-reply-to : references : mime-version :
+ content-transfer-encoding; s=pp1;
+ bh=mIYzRuO7LvXm0r/YjJvj8zXWEHXksOAcpjzZMQASRg4=;
+ b=Zwrs4QboPJ2QlV61kC3KXr3tg6ndnaZXXawLttRK9YwzzyYLB/P0VzYVoyKvc3YRjX1P
+ lmw0R72jlPEOrj/PTukHraQ8XKAfJ5KvTJgG4oRH/O9VvdBY41XKiUk9BNWWBnh3oiag
+ p7UJFMcWIbpkqYUFyILBopbJOOiwdhCBybm9wF0IsP+zxYTU9PEpk9A5MdHoPtNr+qXS
+ netp4Gh4e76Be17JFHXg7HsPR9lX35rfwuWhomVrld261UPvYgwxPXeyKLvxDl0Ctk7Q
+ kIgaRQ+2f6fMOSnGXQ4qB53JRgtTTlyjFSA3Q/i4GAhjRa1dtauHzyMEEqxaKjqOPMYz qg== 
+Received: from pps.reinject (localhost [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3cmwu50m4d-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 29 Nov 2021 11:43:07 +0000
+Received: from m0098409.ppops.net (m0098409.ppops.net [127.0.0.1])
+        by pps.reinject (8.16.0.43/8.16.0.43) with SMTP id 1ATBLLgB023171;
+        Mon, 29 Nov 2021 11:43:06 GMT
+Received: from ppma05wdc.us.ibm.com (1b.90.2fa9.ip4.static.sl-reverse.com [169.47.144.27])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3cmwu50m3y-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 29 Nov 2021 11:43:05 +0000
+Received: from pps.filterd (ppma05wdc.us.ibm.com [127.0.0.1])
+        by ppma05wdc.us.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 1ATBY5LW015073;
+        Mon, 29 Nov 2021 11:43:04 GMT
+Received: from b01cxnp23033.gho.pok.ibm.com (b01cxnp23033.gho.pok.ibm.com [9.57.198.28])
+        by ppma05wdc.us.ibm.com with ESMTP id 3ckca9yded-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 29 Nov 2021 11:43:04 +0000
+Received: from b01ledav002.gho.pok.ibm.com (b01ledav002.gho.pok.ibm.com [9.57.199.107])
+        by b01cxnp23033.gho.pok.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 1ATBh1L734931050
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 29 Nov 2021 11:43:01 GMT
+Received: from b01ledav002.gho.pok.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 1F692124069;
+        Mon, 29 Nov 2021 11:43:01 +0000 (GMT)
+Received: from b01ledav002.gho.pok.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id BDAE012405B;
+        Mon, 29 Nov 2021 11:43:00 +0000 (GMT)
+Received: from amdrome3.watson.ibm.com (unknown [9.2.130.16])
+        by b01ledav002.gho.pok.ibm.com (Postfix) with ESMTP;
+        Mon, 29 Nov 2021 11:43:00 +0000 (GMT)
+From:   Dov Murik <dovmurik@linux.ibm.com>
+To:     linux-efi@vger.kernel.org
+Cc:     Dov Murik <dovmurik@linux.ibm.com>, Borislav Petkov <bp@suse.de>,
+        Ashish Kalra <ashish.kalra@amd.com>,
+        Brijesh Singh <brijesh.singh@amd.com>,
+        Tom Lendacky <thomas.lendacky@amd.com>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        James Morris <jmorris@namei.org>,
+        "Serge E. Hallyn" <serge@hallyn.com>,
+        Andi Kleen <ak@linux.intel.com>,
+        Greg KH <gregkh@linuxfoundation.org>,
+        Andrew Scull <ascull@google.com>,
+        Dave Hansen <dave.hansen@intel.com>,
+        "Dr. David Alan Gilbert" <dgilbert@redhat.com>,
+        James Bottomley <jejb@linux.ibm.com>,
+        Tobin Feldman-Fitzthum <tobin@linux.ibm.com>,
+        Jim Cadden <jcadden@ibm.com>,
+        Daniele Buono <dbuono@linux.vnet.ibm.com>,
+        linux-coco@lists.linux.dev, linux-security-module@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: [PATCH v6 4/5] efi: Load efi_secret module if EFI secret area is populated
+Date:   Mon, 29 Nov 2021 11:42:50 +0000
+Message-Id: <20211129114251.3741721-5-dovmurik@linux.ibm.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20211129114251.3741721-1-dovmurik@linux.ibm.com>
+References: <20211129114251.3741721-1-dovmurik@linux.ibm.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <fbc88a7a-317f-9b81-fc76-2ceefcf6c7f5@redhat.com>
+X-TM-AS-GCONF: 00
+X-Proofpoint-ORIG-GUID: 3vPTbit5rA4g2mpeIvK6B77Q0YY_AIOt
+X-Proofpoint-GUID: y9WMW21SbCLKBNYjq75xLwrZdkq_tDbw
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.790,Hydra:6.0.425,FMLib:17.0.607.475
+ definitions=2021-11-29_07,2021-11-28_01,2020-04-07_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 impostorscore=0 clxscore=1015
+ priorityscore=1501 lowpriorityscore=0 bulkscore=0 malwarescore=0
+ phishscore=0 suspectscore=0 mlxlogscore=999 mlxscore=0 spamscore=0
+ adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2110150000 definitions=main-2111290058
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Sun, Nov 28, 2021 at 04:02:06PM +0100, Hans de Goede wrote:
-> Hi,
-> 
-> On 11/16/21 12:07, Yauhen Kharuzhy wrote:
-> > 
-> > 
-> > аў, 16 ліс 2021, 12:33 карыстальнік Hans de Goede <hdegoede@redhat.com <mailto:hdegoede@redhat.com>> напісаў:
-> > 
-> >     Hi Yauhen,
-> > 
-> >     On 11/15/21 11:11, Yauhen Kharuzhy wrote:
-> >     > On Sun, Nov 14, 2021 at 06:03:25PM +0100, Hans de Goede wrote:
-> >     >> Add a bq25890_set_otg_cfg() helper function, this is a preparation
-> >     >> patch for adding regulator support.
-> >     >>
-> >     >> Signed-off-by: Hans de Goede <hdegoede@redhat.com <mailto:hdegoede@redhat.com>>
-> >     >> ---
-> >     >>  drivers/power/supply/bq25890_charger.c | 28 ++++++++++++++------------
-> >     >>  1 file changed, 15 insertions(+), 13 deletions(-)
-> >     >>
-> >     >> diff --git a/drivers/power/supply/bq25890_charger.c b/drivers/power/supply/bq25890_charger.c
-> >     >> index 2bdfb58cda75..3c41fe86b3d3 100644
-> >     >> --- a/drivers/power/supply/bq25890_charger.c
-> >     >> +++ b/drivers/power/supply/bq25890_charger.c
-> >     >> @@ -801,6 +801,17 @@ static int bq25890_power_supply_init(struct bq25890_device *bq)
-> >     >>      return PTR_ERR_OR_ZERO(bq->charger);
-> >     >>  }
-> >     >> 
-> >     >> +static int bq25890_set_otg_cfg(struct bq25890_device *bq, u8 val)
-> >     >> +{
-> >     >> +    int ret;
-> >     >> +
-> >     >> +    ret = bq25890_field_write(bq, F_OTG_CFG, val);
-> >     >> +    if (ret < 0)
-> >     >> +            dev_err(bq->dev, "Error switching to boost/charger mode: %d\n", ret);
-> >     >
-> >     > Just a note: if a connected USB device has relative big capacitor
-> >     > at power wires inside, then a starting current pulse may be enough to
-> >     > overload the boost reguator and VBUS will not be powered. I met this
-> >     > at Yoga Book: the firmware set boost current limit to 1.4 A (default
-> >     > value for bq25892) but when USB hub connected, the BOOST_FAULT event
-> >     > appeared.
-> >     >
-> >     > To avoid this, Lenovo uses following trick in its kernel: set a boost
-> >     > current limit to big value (2.1 A), wait some time (500 ms) and set
-> >     > the current limit to right value (1.4A). This provides enough current to
-> >     > charge capacitors in the connected device but saves desired long-time limit
-> >     > to prevent overloading if the device consumes too much power itself.
-> > 
-> >     Right I saw this in your git repo, but I cannot reproduce the issue (1)
-> >     I was hoping that since you can reproduce this, that you can rebase
-> >     your fix on top of my patch-set ?
-> > 
-> >     Also I'm wondering if this behavior should be the default, I believe
-> >     that the max. boost current may also be dependent on some external
-> >     factors, so maybe we should make this behavior conditional on a
-> >     new device-property ?
-> > 
-> > Yes, defining of max VBUS current may be a good idea. Another possible approach may be to use some empirical multiplier, like 150% of max 'long time' current limit setting. I almost sure that all hardware will work with short impulse of such current, its usual condition at device connection.
-> > 
-> > 
-> >     Regards,
-> > 
-> >     Hans
-> > 
-> > 
-> > 
-> >     1) I must admit I did not try really hard, I guess I could try an
-> >     USB powered hdd enclosure with a spinning disk
-> > 
-> >     What device are you seeing this with?
-> > 
-> > I cannot remember exactly device but this was a USB hub, possible with keyboard, mouse receiver and USB dongle inserted. I can recheck this issue but one week after, when will return home.
-> 
-> So as I mentioned before I've just tried to reproduce this problem, but
-> I cannot reproduce it with an 2.5" USB disk enclosure with a spinning
-> disk, which typically will cause a nice current-peak when spinning up.
-> 
-> I think this might also require an almost empty battery to reproduce ?
+If the efi_secret module is built, register a late_initcall in the EFI
+driver which checks whether the EFI secret area is available and
+populated, and then requests to load the efi_secret module.
 
-Hi.
+This will cause the <securityfs>/coco/efi_secret directory to appear in
+guests into which secrets were injected; in other cases, the module is
+not loaded.
 
-I tried to reproduce just now with success.
+Signed-off-by: Dov Murik <dovmurik@linux.ibm.com>
+---
+ drivers/firmware/efi/Makefile        |  1 +
+ drivers/firmware/efi/coco.c          | 58 ++++++++++++++++++++++++++++
+ drivers/virt/coco/efi_secret/Kconfig |  3 ++
+ 3 files changed, 62 insertions(+)
+ create mode 100644 drivers/firmware/efi/coco.c
 
-I have the UNITEK Y-2165B OTG USB hub with cardreader. It has three
-100 uF capacitors connected to the VBUS inside.
-
-If the boost current limit is set to 1.4A, boot failure condition is appeared
-when the hub connected, there is no USB device detected.
-
-If the limit is set to 2.15A, the device detected and works, there is no
-fault condition appeared.
-
-So, I think that you may add 1-3 100uF capacitors to
-any USB device or cable and try to reproduce.
-
-Debug I2C dumps are below.
-
-Before connection of the hub:
-
-root@yogabook:/home/jek# i2cdump -f -y 7 0x6b
-No size specified (using byte-data access)
-     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f    0123456789abcdef
-00: 00 06 00 0a 42 13 80 cc 03 44 73 02 00 8d 58 57    .?.?B????Ds?.?XW
-10: 4e 00 00 00 05 ff ff ff ff ff ff ff ff ff ff ff    N...?...........
-20: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-30: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-40: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-50: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-60: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-70: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-80: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-90: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-a0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-b0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-c0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-d0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-e0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-f0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-
-Immediately after connection (look to 0x0c register):
-
-root@yogabook:/home/jek# i2cdump -f -y 7 0x6b
-No size specified (using byte-data access)
-     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f    0123456789abcdef
-00: 00 06 00 2a 42 13 82 cc 03 44 73 e2 40 8d 57 57    .?.*B????Ds?@?WW
-10: 4d 00 00 00 05 ff ff ff ff ff ff ff ff ff ff ff    M...?...........
-20: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-30: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-40: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-50: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-60: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-70: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-80: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-90: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-a0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-b0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-c0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-d0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-e0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-f0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-
-Increase current limit manually and restart the boost converter:
-
-root@yogabook:/home/jek# i2cset -f -y 7 0x6b 0x0a 0x76
-root@yogabook:/home/jek# i2cset -f -y 7 0x6b 0x03 0x0a
-root@yogabook:/home/jek# i2cset -f -y 7 0x6b 0x03 0x2a
-
-root@yogabook:/home/jek# i2cdump -f -y 7 0x6b
-No size specified (using byte-data access)
-     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f    0123456789abcdef
-00: 00 06 00 2a 42 13 82 cc 03 44 76 e2 00 8d 57 57    .?.*B????Dv?.?WW
-10: 4d 00 00 00 05 ff ff ff ff ff ff ff ff ff ff ff    M...?...........
-20: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-30: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-40: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-50: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-60: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-70: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-80: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-90: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-a0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-b0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-c0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-d0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-e0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-f0: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff    ................
-
-
-
-> 
-> Regards,
-> 
-> Hans
-> 
-
+diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+index c02ff25dd477..49c4a8c0bfc4 100644
+--- a/drivers/firmware/efi/Makefile
++++ b/drivers/firmware/efi/Makefile
+@@ -32,6 +32,7 @@ obj-$(CONFIG_APPLE_PROPERTIES)		+= apple-properties.o
+ obj-$(CONFIG_EFI_RCI2_TABLE)		+= rci2-table.o
+ obj-$(CONFIG_EFI_EMBEDDED_FIRMWARE)	+= embedded-firmware.o
+ obj-$(CONFIG_LOAD_UEFI_KEYS)		+= mokvar-table.o
++obj-$(CONFIG_EFI_COCO_SECRET)		+= coco.o
+ 
+ fake_map-y				+= fake_mem.o
+ fake_map-$(CONFIG_X86)			+= x86_fake_mem.o
+diff --git a/drivers/firmware/efi/coco.c b/drivers/firmware/efi/coco.c
+new file mode 100644
+index 000000000000..9885ab75e12f
+--- /dev/null
++++ b/drivers/firmware/efi/coco.c
+@@ -0,0 +1,58 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Confidential computing (coco) secret area handling
++ *
++ * Copyright (C) 2021 IBM Corporation
++ * Author: Dov Murik <dovmurik@linux.ibm.com>
++ */
++
++#define pr_fmt(fmt) "efi: " fmt
++
++#include <linux/efi.h>
++#include <linux/init.h>
++#include <linux/io.h>
++#include <linux/kmod.h>
++
++#ifdef CONFIG_EFI_SECRET_MODULE
++
++/*
++ * Load the efi_secret module if the EFI secret area is populated
++ */
++static int __init load_efi_secret_module(void)
++{
++	struct linux_efi_coco_secret_area *area;
++	efi_guid_t *header_guid;
++	int ret = 0;
++
++	if (efi.coco_secret == EFI_INVALID_TABLE_ADDR)
++		return 0;
++
++	area = memremap(efi.coco_secret, sizeof(*area), MEMREMAP_WB);
++	if (!area) {
++		pr_err("Failed to map confidential computing secret area descriptor\n");
++		return -ENOMEM;
++	}
++	if (!area->base_pa || area->size < sizeof(*header_guid))
++		goto unmap_desc;
++
++	header_guid = ioremap_encrypted(area->base_pa, sizeof(*header_guid));
++	if (!header_guid) {
++		pr_err("Failed to map secret area\n");
++		ret = -ENOMEM;
++		goto unmap_desc;
++	}
++	if (efi_guidcmp(*header_guid, EFI_SECRET_TABLE_HEADER_GUID))
++		goto unmap_encrypted;
++
++	ret = request_module("efi_secret");
++
++unmap_encrypted:
++	iounmap(header_guid);
++
++unmap_desc:
++	memunmap(area);
++	return ret;
++}
++late_initcall(load_efi_secret_module);
++
++#endif
+diff --git a/drivers/virt/coco/efi_secret/Kconfig b/drivers/virt/coco/efi_secret/Kconfig
+index be363ed48f24..06a32613815e 100644
+--- a/drivers/virt/coco/efi_secret/Kconfig
++++ b/drivers/virt/coco/efi_secret/Kconfig
+@@ -9,3 +9,6 @@ config EFI_SECRET
+ 
+ 	  To compile this driver as a module, choose M here.
+ 	  The module will be called efi_secret.
++
++	  The module is loaded automatically by the EFI driver if the EFI
++	  secret area is populated.
 -- 
-Yauhen Kharuzhy
+2.25.1
+
