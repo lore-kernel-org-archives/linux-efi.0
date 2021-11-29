@@ -2,265 +2,209 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 83536C433F5
-	for <linux-efi@archiver.kernel.org>; Mon, 29 Nov 2021 11:46:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5207BC433EF
+	for <linux-efi@archiver.kernel.org>; Mon, 29 Nov 2021 14:41:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231848AbhK2Ltn (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 29 Nov 2021 06:49:43 -0500
-Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:36874 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231970AbhK2Lrj (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 29 Nov 2021 06:47:39 -0500
-Received: from pps.filterd (m0098410.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 1ATBMXXN021178;
-        Mon, 29 Nov 2021 11:43:04 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
- : date : message-id : content-transfer-encoding : mime-version; s=pp1;
- bh=QkgCNX39Ds3w5IajFtTaNxfUo2zlSU3d42VvCxSZEcw=;
- b=KgFR57Nc//IEruZLkCXoseRTdDPApp+2UGzVZj0tHxT72smxNKsRxvPgRqUcfO26scNN
- q3USocMUzVD6e1MfOCVtmDzkmbqo4TgXy0JIaWcvCXRg/vFo/ElflkkW2M1L+qOp/wga
- x6x8H6flz2GaXEXt/95JRbdSpZiFjdni2XG2TtJ45WsuZJDk/zYLQJ6+TQ1fDmsN8ThS
- /bXUe/p/ioraxPiU4fUZn+kJKAyp1cpKvva37tyu7NAB3hzQS8PBZe/1jjx2a+Q0oR30
- FeCIM8ms7S4e0wkMdfwWqiZptoH6RdnALOkN/GJ4GrGgb+MrjMRON2e5xL0adepTU2LI fA== 
-Received: from pps.reinject (localhost [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 3cmwxd8dna-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 29 Nov 2021 11:43:03 +0000
-Received: from m0098410.ppops.net (m0098410.ppops.net [127.0.0.1])
-        by pps.reinject (8.16.0.43/8.16.0.43) with SMTP id 1ATBRcYU003926;
-        Mon, 29 Nov 2021 11:43:03 GMT
-Received: from ppma01wdc.us.ibm.com (fd.55.37a9.ip4.static.sl-reverse.com [169.55.85.253])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 3cmwxd8dmu-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 29 Nov 2021 11:43:03 +0000
-Received: from pps.filterd (ppma01wdc.us.ibm.com [127.0.0.1])
-        by ppma01wdc.us.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 1ATBXsD4008620;
-        Mon, 29 Nov 2021 11:43:01 GMT
-Received: from b01cxnp22034.gho.pok.ibm.com (b01cxnp22034.gho.pok.ibm.com [9.57.198.24])
-        by ppma01wdc.us.ibm.com with ESMTP id 3ckca9yc9h-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 29 Nov 2021 11:43:01 +0000
-Received: from b01ledav002.gho.pok.ibm.com (b01ledav002.gho.pok.ibm.com [9.57.199.107])
-        by b01cxnp22034.gho.pok.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 1ATBgxQ041222452
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 29 Nov 2021 11:42:59 GMT
-Received: from b01ledav002.gho.pok.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 77285124053;
-        Mon, 29 Nov 2021 11:42:59 +0000 (GMT)
-Received: from b01ledav002.gho.pok.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 1850112405B;
-        Mon, 29 Nov 2021 11:42:59 +0000 (GMT)
-Received: from amdrome3.watson.ibm.com (unknown [9.2.130.16])
-        by b01ledav002.gho.pok.ibm.com (Postfix) with ESMTP;
-        Mon, 29 Nov 2021 11:42:59 +0000 (GMT)
-From:   Dov Murik <dovmurik@linux.ibm.com>
-To:     linux-efi@vger.kernel.org
-Cc:     Dov Murik <dovmurik@linux.ibm.com>, Borislav Petkov <bp@suse.de>,
-        Ashish Kalra <ashish.kalra@amd.com>,
-        Brijesh Singh <brijesh.singh@amd.com>,
-        Tom Lendacky <thomas.lendacky@amd.com>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        James Morris <jmorris@namei.org>,
-        "Serge E. Hallyn" <serge@hallyn.com>,
-        Andi Kleen <ak@linux.intel.com>,
-        Greg KH <gregkh@linuxfoundation.org>,
-        Andrew Scull <ascull@google.com>,
-        Dave Hansen <dave.hansen@intel.com>,
-        "Dr. David Alan Gilbert" <dgilbert@redhat.com>,
-        James Bottomley <jejb@linux.ibm.com>,
-        Tobin Feldman-Fitzthum <tobin@linux.ibm.com>,
-        Jim Cadden <jcadden@ibm.com>,
-        Daniele Buono <dbuono@linux.vnet.ibm.com>,
-        linux-coco@lists.linux.dev, linux-security-module@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH v6 0/5] Allow guest access to EFI confidential computing secret area
-Date:   Mon, 29 Nov 2021 11:42:46 +0000
-Message-Id: <20211129114251.3741721-1-dovmurik@linux.ibm.com>
-X-Mailer: git-send-email 2.25.1
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: jd8LkPIZyXb4_PGZNelfu-pMVwc7xHXv
-X-Proofpoint-ORIG-GUID: FJxzge9UL3qFr_1GtlB0wPTCJKOoONI9
-Content-Transfer-Encoding: 8bit
-X-Proofpoint-UnRewURL: 0 URL was un-rewritten
+        id S1377976AbhK2Oov (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 29 Nov 2021 09:44:51 -0500
+Received: from smtp-out2.suse.de ([195.135.220.29]:46232 "EHLO
+        smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1378848AbhK2Omk (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 29 Nov 2021 09:42:40 -0500
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id 82EB71FCA1;
+        Mon, 29 Nov 2021 14:39:20 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1638196760; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=g7uRp09YN+2wwoLXxVBcU3pfHZe88L/deD7R42M+YS8=;
+        b=bDuBVaOCI2Jte50hcwFHZesvTNeoIHO47fD7LtWPgm3eNoKRZq8wsqCNHXR4oq64LqIUal
+        Pd0RhrRj4sEpboM+ubV2MaMEcaDhw4XSYlSX6W0QJ+A5wm43EOsvpCFewNqPp7w+TFDuB6
+        JAQrt2poofsGS6s5XP5S7WCzu/aO+lI=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1638196760;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=g7uRp09YN+2wwoLXxVBcU3pfHZe88L/deD7R42M+YS8=;
+        b=YrRKqm8hESMq65g/AmZkNHO/Edk1fC7lkhXr4UvthN2XPdISdmKptwUvOk88XdoA5bQ14L
+        S/AJ0FqIBpSraDAQ==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 0B70B13B15;
+        Mon, 29 Nov 2021 14:39:19 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id eJFpMBfmpGEjCAAAMHmgww
+        (envelope-from <tzimmermann@suse.de>); Mon, 29 Nov 2021 14:39:19 +0000
+Message-ID: <800280a5-ea6f-2f9c-1ae1-d626f3a18e23@suse.de>
+Date:   Mon, 29 Nov 2021 15:39:19 +0100
 MIME-Version: 1.0
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.790,Hydra:6.0.425,FMLib:17.0.607.475
- definitions=2021-11-29_07,2021-11-28_01,2020-04-07_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 malwarescore=0
- phishscore=0 priorityscore=1501 adultscore=0 lowpriorityscore=0
- spamscore=0 clxscore=1015 impostorscore=0 suspectscore=0 mlxlogscore=999
- bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2110150000 definitions=main-2111290058
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.3.2
+Subject: Re: [PATCH] efi: Move efifb_setup_from_dmi() prototype from arch
+ headers
+Content-Language: en-US
+To:     Javier Martinez Canillas <javierm@redhat.com>,
+        linux-kernel@vger.kernel.org
+Cc:     kernel test robot <lkp@intel.com>, kbuild-all@lists.01.org,
+        stable@vger.kernel.org, Albert Ou <aou@eecs.berkeley.edu>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Borislav Petkov <bp@alien8.de>,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        Daniel Vetter <daniel.vetter@ffwll.ch>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Russell King <linux@armlinux.org.uk>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Will Deacon <will@kernel.org>,
+        linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org,
+        linux-riscv@lists.infradead.org, x86@kernel.org
+References: <20211126001333.555514-1-javierm@redhat.com>
+From:   Thomas Zimmermann <tzimmermann@suse.de>
+In-Reply-To: <20211126001333.555514-1-javierm@redhat.com>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+ protocol="application/pgp-signature";
+ boundary="------------zGJ8z5U3jir98KXlGDVY7zsl"
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Confidential computing (coco) hardware such as AMD SEV (Secure Encrypted
-Virtualization) allows guest owners to inject secrets into the VMs
-memory without the host/hypervisor being able to read them.  In SEV,
-secret injection is performed early in the VM launch process, before the
-guest starts running.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--------------zGJ8z5U3jir98KXlGDVY7zsl
+Content-Type: multipart/mixed; boundary="------------6KQ91Ngk6Y2LlxOCUjB8Gk4a";
+ protected-headers="v1"
+From: Thomas Zimmermann <tzimmermann@suse.de>
+To: Javier Martinez Canillas <javierm@redhat.com>,
+ linux-kernel@vger.kernel.org
+Cc: kernel test robot <lkp@intel.com>, kbuild-all@lists.01.org,
+ stable@vger.kernel.org, Albert Ou <aou@eecs.berkeley.edu>,
+ Ard Biesheuvel <ardb@kernel.org>, Borislav Petkov <bp@alien8.de>,
+ Catalin Marinas <catalin.marinas@arm.com>,
+ Daniel Vetter <daniel.vetter@ffwll.ch>,
+ Dave Hansen <dave.hansen@linux.intel.com>, "H. Peter Anvin" <hpa@zytor.com>,
+ Ingo Molnar <mingo@redhat.com>, Palmer Dabbelt <palmer@dabbelt.com>,
+ Paul Walmsley <paul.walmsley@sifive.com>,
+ Russell King <linux@armlinux.org.uk>, Thomas Gleixner <tglx@linutronix.de>,
+ Will Deacon <will@kernel.org>, linux-arm-kernel@lists.infradead.org,
+ linux-efi@vger.kernel.org, linux-riscv@lists.infradead.org, x86@kernel.org
+Message-ID: <800280a5-ea6f-2f9c-1ae1-d626f3a18e23@suse.de>
+Subject: Re: [PATCH] efi: Move efifb_setup_from_dmi() prototype from arch
+ headers
+References: <20211126001333.555514-1-javierm@redhat.com>
+In-Reply-To: <20211126001333.555514-1-javierm@redhat.com>
 
-OVMF already reserves designated area for secret injection (in its
-AmdSev package; see edk2 commit 01726b6d23d4 "OvmfPkg/AmdSev: Expose the
-Sev Secret area using a configuration table" [1]), but the secrets were
-not available in the guest kernel.
+--------------6KQ91Ngk6Y2LlxOCUjB8Gk4a
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: base64
 
-The patch series keeps the address of the EFI-provided memory for
-injected secrets, and exposes the secrets to userspace via securityfs
-using a new efi_secret kernel module.  The module is autoloaded (by the
-EFI driver) if the secret area is populated.
+SGkNCg0KQW0gMjYuMTEuMjEgdW0gMDE6MTMgc2NocmllYiBKYXZpZXIgTWFydGluZXogQ2Fu
+aWxsYXM6DQo+IENvbW1pdCA4NjMzZWY4MmYxMDEgKCJkcml2ZXJzL2Zpcm13YXJlOiBjb25z
+b2xpZGF0ZSBFRkkgZnJhbWVidWZmZXIgc2V0dXANCj4gZm9yIGFsbCBhcmNoZXMiKSBtYWRl
+IHRoZSBHZW5lcmljIFN5c3RlbSBGcmFtZWJ1ZmZlcnMgKHN5c2ZiKSBkcml2ZXIgYWJsZQ0K
+PiB0byBiZSBidWlsdCBvbiBub24teDg2IGFyY2hpdGVjdHVyZXMuDQo+IA0KPiBCdXQgbGVm
+dCB0aGUgZWZpZmJfc2V0dXBfZnJvbV9kbWkoKSBmdW5jdGlvbiBwcm90b3R5cGUgZGVjbGFy
+YXRpb24gaW4gdGhlDQo+IGFyY2hpdGVjdHVyZSBzcGVjaWZpYyBoZWFkZXJzLiBUaGlzIGNv
+dWxkIGxlYWQgdG8gdGhlIGZvbGxvd2luZyBjb21waWxlcg0KPiB3YXJuaW5nIGFzIHJlcG9y
+dGVkIGJ5IHRoZSBrZXJuZWwgdGVzdCByb2JvdDoNCj4gDQo+ICAgICBkcml2ZXJzL2Zpcm13
+YXJlL2VmaS9zeXNmYl9lZmkuYzo3MDo2OiB3YXJuaW5nOiBubyBwcmV2aW91cyBwcm90b3R5
+cGUgZm9yIGZ1bmN0aW9uICdlZmlmYl9zZXR1cF9mcm9tX2RtaScgWy1XbWlzc2luZy1wcm90
+b3R5cGVzXQ0KPiAgICAgdm9pZCBlZmlmYl9zZXR1cF9mcm9tX2RtaShzdHJ1Y3Qgc2NyZWVu
+X2luZm8gKnNpLCBjb25zdCBjaGFyICpvcHQpDQo+ICAgICAgICAgIF4NCj4gICAgIGRyaXZl
+cnMvZmlybXdhcmUvZWZpL3N5c2ZiX2VmaS5jOjcwOjE6IG5vdGU6IGRlY2xhcmUgJ3N0YXRp
+YycgaWYgdGhlIGZ1bmN0aW9uIGlzIG5vdCBpbnRlbmRlZCB0byBiZSB1c2VkIG91dHNpZGUg
+b2YgdGhpcyB0cmFuc2xhdGlvbiB1bml0DQo+ICAgICB2b2lkIGVmaWZiX3NldHVwX2Zyb21f
+ZG1pKHN0cnVjdCBzY3JlZW5faW5mbyAqc2ksIGNvbnN0IGNoYXIgKm9wdCkNCj4gDQo+IEZp
+eGVzOiA4NjMzZWY4MmYxMDEgKCJkcml2ZXJzL2Zpcm13YXJlOiBjb25zb2xpZGF0ZSBFRkkg
+ZnJhbWVidWZmZXIgc2V0dXAgZm9yIGFsbCBhcmNoZXMiKQ0KPiBSZXBvcnRlZC1ieToga2Vy
+bmVsIHRlc3Qgcm9ib3QgPGxrcEBpbnRlbC5jb20+DQo+IENjOiA8c3RhYmxlQHZnZXIua2Vy
+bmVsLm9yZz4gIyA1LjE1LngNCj4gU2lnbmVkLW9mZi1ieTogSmF2aWVyIE1hcnRpbmV6IENh
+bmlsbGFzIDxqYXZpZXJtQHJlZGhhdC5jb20+DQoNCkFja2VkLWJ5OiBUaG9tYXMgWmltbWVy
+bWFubiA8dHppbW1lcm1hbm5Ac3VzZS5kZT4NCg0KPiAtLS0NCj4gDQo+ICAgYXJjaC9hcm0v
+aW5jbHVkZS9hc20vZWZpLmggICB8IDEgLQ0KPiAgIGFyY2gvYXJtNjQvaW5jbHVkZS9hc20v
+ZWZpLmggfCAxIC0NCj4gICBhcmNoL3Jpc2N2L2luY2x1ZGUvYXNtL2VmaS5oIHwgMSAtDQo+
+ICAgYXJjaC94ODYvaW5jbHVkZS9hc20vZWZpLmggICB8IDIgLS0NCj4gICBpbmNsdWRlL2xp
+bnV4L2VmaS5oICAgICAgICAgIHwgNiArKysrKysNCj4gICA1IGZpbGVzIGNoYW5nZWQsIDYg
+aW5zZXJ0aW9ucygrKSwgNSBkZWxldGlvbnMoLSkNCj4gDQo+IGRpZmYgLS1naXQgYS9hcmNo
+L2FybS9pbmNsdWRlL2FzbS9lZmkuaCBiL2FyY2gvYXJtL2luY2x1ZGUvYXNtL2VmaS5oDQo+
+IGluZGV4IGE2ZjNiMTc5ZThhOS4uMjcyMThlYWJiZjlhIDEwMDY0NA0KPiAtLS0gYS9hcmNo
+L2FybS9pbmNsdWRlL2FzbS9lZmkuaA0KPiArKysgYi9hcmNoL2FybS9pbmNsdWRlL2FzbS9l
+ZmkuaA0KPiBAQCAtMTcsNyArMTcsNiBAQA0KPiAgIA0KPiAgICNpZmRlZiBDT05GSUdfRUZJ
+DQo+ICAgdm9pZCBlZmlfaW5pdCh2b2lkKTsNCj4gLWV4dGVybiB2b2lkIGVmaWZiX3NldHVw
+X2Zyb21fZG1pKHN0cnVjdCBzY3JlZW5faW5mbyAqc2ksIGNvbnN0IGNoYXIgKm9wdCk7DQo+
+ICAgDQo+ICAgaW50IGVmaV9jcmVhdGVfbWFwcGluZyhzdHJ1Y3QgbW1fc3RydWN0ICptbSwg
+ZWZpX21lbW9yeV9kZXNjX3QgKm1kKTsNCj4gICBpbnQgZWZpX3NldF9tYXBwaW5nX3Blcm1p
+c3Npb25zKHN0cnVjdCBtbV9zdHJ1Y3QgKm1tLCBlZmlfbWVtb3J5X2Rlc2NfdCAqbWQpOw0K
+PiBkaWZmIC0tZ2l0IGEvYXJjaC9hcm02NC9pbmNsdWRlL2FzbS9lZmkuaCBiL2FyY2gvYXJt
+NjQvaW5jbHVkZS9hc20vZWZpLmgNCj4gaW5kZXggZDNlMTgyNTMzN2JlLi5hZDU1MDc5YWJl
+NDcgMTAwNjQ0DQo+IC0tLSBhL2FyY2gvYXJtNjQvaW5jbHVkZS9hc20vZWZpLmgNCj4gKysr
+IGIvYXJjaC9hcm02NC9pbmNsdWRlL2FzbS9lZmkuaA0KPiBAQCAtMTQsNyArMTQsNiBAQA0K
+PiAgIA0KPiAgICNpZmRlZiBDT05GSUdfRUZJDQo+ICAgZXh0ZXJuIHZvaWQgZWZpX2luaXQo
+dm9pZCk7DQo+IC1leHRlcm4gdm9pZCBlZmlmYl9zZXR1cF9mcm9tX2RtaShzdHJ1Y3Qgc2Ny
+ZWVuX2luZm8gKnNpLCBjb25zdCBjaGFyICpvcHQpOw0KPiAgICNlbHNlDQo+ICAgI2RlZmlu
+ZSBlZmlfaW5pdCgpDQo+ICAgI2VuZGlmDQo+IGRpZmYgLS1naXQgYS9hcmNoL3Jpc2N2L2lu
+Y2x1ZGUvYXNtL2VmaS5oIGIvYXJjaC9yaXNjdi9pbmNsdWRlL2FzbS9lZmkuaA0KPiBpbmRl
+eCA0OWIzOThmZTk5ZjEuLmNjNGY2Nzg3ZjkzNyAxMDA2NDQNCj4gLS0tIGEvYXJjaC9yaXNj
+di9pbmNsdWRlL2FzbS9lZmkuaA0KPiArKysgYi9hcmNoL3Jpc2N2L2luY2x1ZGUvYXNtL2Vm
+aS5oDQo+IEBAIC0xMyw3ICsxMyw2IEBADQo+ICAgDQo+ICAgI2lmZGVmIENPTkZJR19FRkkN
+Cj4gICBleHRlcm4gdm9pZCBlZmlfaW5pdCh2b2lkKTsNCj4gLWV4dGVybiB2b2lkIGVmaWZi
+X3NldHVwX2Zyb21fZG1pKHN0cnVjdCBzY3JlZW5faW5mbyAqc2ksIGNvbnN0IGNoYXIgKm9w
+dCk7DQo+ICAgI2Vsc2UNCj4gICAjZGVmaW5lIGVmaV9pbml0KCkNCj4gICAjZW5kaWYNCj4g
+ZGlmZiAtLWdpdCBhL2FyY2gveDg2L2luY2x1ZGUvYXNtL2VmaS5oIGIvYXJjaC94ODYvaW5j
+bHVkZS9hc20vZWZpLmgNCj4gaW5kZXggNGQwYjEyNjgzNWI4Li42MzE1OGZkNTU4NTYgMTAw
+NjQ0DQo+IC0tLSBhL2FyY2gveDg2L2luY2x1ZGUvYXNtL2VmaS5oDQo+ICsrKyBiL2FyY2gv
+eDg2L2luY2x1ZGUvYXNtL2VmaS5oDQo+IEBAIC0xOTcsOCArMTk3LDYgQEAgc3RhdGljIGlu
+bGluZSBib29sIGVmaV9ydW50aW1lX3N1cHBvcnRlZCh2b2lkKQ0KPiAgIA0KPiAgIGV4dGVy
+biB2b2lkIHBhcnNlX2VmaV9zZXR1cCh1NjQgcGh5c19hZGRyLCB1MzIgZGF0YV9sZW4pOw0K
+PiAgIA0KPiAtZXh0ZXJuIHZvaWQgZWZpZmJfc2V0dXBfZnJvbV9kbWkoc3RydWN0IHNjcmVl
+bl9pbmZvICpzaSwgY29uc3QgY2hhciAqb3B0KTsNCj4gLQ0KPiAgIGV4dGVybiB2b2lkIGVm
+aV90aHVua19ydW50aW1lX3NldHVwKHZvaWQpOw0KPiAgIGVmaV9zdGF0dXNfdCBlZmlfc2V0
+X3ZpcnR1YWxfYWRkcmVzc19tYXAodW5zaWduZWQgbG9uZyBtZW1vcnlfbWFwX3NpemUsDQo+
+ICAgCQkJCQkgdW5zaWduZWQgbG9uZyBkZXNjcmlwdG9yX3NpemUsDQo+IGRpZmYgLS1naXQg
+YS9pbmNsdWRlL2xpbnV4L2VmaS5oIGIvaW5jbHVkZS9saW51eC9lZmkuaA0KPiBpbmRleCBk
+YmQzOWIyMGUwMzQuLmVmOGRiYzBhMTUyMiAxMDA2NDQNCj4gLS0tIGEvaW5jbHVkZS9saW51
+eC9lZmkuaA0KPiArKysgYi9pbmNsdWRlL2xpbnV4L2VmaS5oDQo+IEBAIC0xMjgzLDQgKzEy
+ODMsMTAgQEAgc3RhdGljIGlubGluZSBzdHJ1Y3QgZWZpX21va3Zhcl90YWJsZV9lbnRyeSAq
+ZWZpX21va3Zhcl9lbnRyeV9maW5kKA0KPiAgIH0NCj4gICAjZW5kaWYNCj4gICANCj4gKyNp
+ZmRlZiBDT05GSUdfU1lTRkINCj4gK2V4dGVybiB2b2lkIGVmaWZiX3NldHVwX2Zyb21fZG1p
+KHN0cnVjdCBzY3JlZW5faW5mbyAqc2ksIGNvbnN0IGNoYXIgKm9wdCk7DQo+ICsjZWxzZQ0K
+PiArc3RhdGljIGlubGluZSB2b2lkIGVmaWZiX3NldHVwX2Zyb21fZG1pKHN0cnVjdCBzY3Jl
+ZW5faW5mbyAqc2ksIGNvbnN0IGNoYXIgKm9wdCkgeyB9DQo+ICsjZW5kaWYNCj4gKw0KPiAg
+ICNlbmRpZiAvKiBfTElOVVhfRUZJX0ggKi8NCj4gDQoNCi0tIA0KVGhvbWFzIFppbW1lcm1h
+bm4NCkdyYXBoaWNzIERyaXZlciBEZXZlbG9wZXINClNVU0UgU29mdHdhcmUgU29sdXRpb25z
+IEdlcm1hbnkgR21iSA0KTWF4ZmVsZHN0ci4gNSwgOTA0MDkgTsO8cm5iZXJnLCBHZXJtYW55
+DQooSFJCIDM2ODA5LCBBRyBOw7xybmJlcmcpDQpHZXNjaMOkZnRzZsO8aHJlcjogSXZvIFRv
+dGV2DQo=
 
-The first patch in EFI keeps the address of the secret area as passed in
-the EFI configuration table.  The second patch is a quirk fix for older
-firmwares didn't mark the secrets page as EFI_RESERVED_TYPE.  The third
-patch introduces the new efi_secret module that exposes the content of
-the secret entries as securityfs files, and allows clearing out secrets
-with a file unlink interface.  The fourth patch auto-loads the
-efi_secret module during startup if the injected secrets area is
-populated.  The last patch documents the data flow of confidential
-computing secret injection.
+--------------6KQ91Ngk6Y2LlxOCUjB8Gk4a--
 
-As a usage example, consider a guest performing computations on
-encrypted files.  The Guest Owner provides the decryption key (= secret)
-using the secret injection mechanism.  The guest application reads the
-secret from the efi_secret filesystem and proceeds to decrypt the files
-into memory and then performs the needed computations on the content.
+--------------zGJ8z5U3jir98KXlGDVY7zsl
+Content-Type: application/pgp-signature; name="OpenPGP_signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="OpenPGP_signature"
 
-In this example, the host can't read the files from the disk image
-because they are encrypted.  Host can't read the decryption key because
-it is passed using the secret injection mechanism (= secure channel).
-Host can't read the decrypted content from memory because it's a
-confidential (memory-encrypted) guest.
+-----BEGIN PGP SIGNATURE-----
 
-This has been tested with AMD SEV and SEV-ES guests, but the kernel side
-of handling the secret area has no SEV-specific dependencies, and
-therefore might be usable (perhaps with minor changes) for any
-confidential computing hardware that can publish the secret area via the
-standard EFI config table entry.
+wsF5BAABCAAjFiEExndm/fpuMUdwYFFolh/E3EQov+AFAmGk5hcFAwAAAAAACgkQlh/E3EQov+BU
+IBAAsrJse0TjcHf8zr6/2DkGksRGeAdo2qzMsN++QB4k5UCY7x3qo3kE8iSOU5BPtBE+EI9ColSs
+mSjE4reGmcjo6RKpPqhUQGFyhwG5Aa2TQcXmobdSnMrAZUa3eoNpg0K4joRJoFTzujG2Ap0zawr1
+pv7ygAzexGU8UzhxYW1p+4kwoHL7ehz3VA6wUqYaUlE22zk3Mr1Nnkhqz3XQ2pGbdTSqY9c7j3/q
+4QDBZhVvS0W6kHcRGw/nHypwpAYUH8GgFjr5NOUntm6K2oZRRR9tg+hm97igR/FDF6wkQkIDDH0A
+vtRIVKWq+ByLF9djP5Wj9csmUQ4GckdHGYsD+jmAcJFSBkIFer87NGJABa+TfL2Nc4R70cEiMfeQ
+PcrL7cu6jAFJQ/MCh660ByMoV8t905fjhV0xZicNdBc4bMRY3zxepxgwuWttrTwcBkAlF1TqdLuP
+PgcpEKQxCFXay7b+rWuWkH7A4ewbrIOfqljftsCbAPgYP3JXJyi66Wx7vEiS53cZsYzNyUEJgnTT
+45nqSIT4xiTCdQF2zHKiYZjacCqzUMV1zAEn2CF3+wSNB1DKOjiKfKQHOMdZUgV0IAHP2aXYxdJz
+hqAaSED/o1wFc95toK42TyKgLh0zRHVTDM1OdP94SRPB2bGQkJ4yWxVxZuAGJohKWWGv0pEFNr+c
+Jx8=
+=+2u3
+-----END PGP SIGNATURE-----
 
-To enable this functionality, set CONFIG_EFI_SECRET=m when building the
-guest kernel.
-
-Here is a simple example for usage of the efi_secret module in a guest
-to which an EFI secret area with 4 secrets was injected during launch:
-
-# ls -la /sys/kernel/security/coco/efi_secret
-total 0
-drwxr-xr-x 2 root root 0 Jun 28 11:54 .
-drwxr-xr-x 3 root root 0 Jun 28 11:54 ..
--r--r----- 1 root root 0 Jun 28 11:54 736870e5-84f0-4973-92ec-06879ce3da0b
--r--r----- 1 root root 0 Jun 28 11:54 83c83f7f-1356-4975-8b7e-d3a0b54312c6
--r--r----- 1 root root 0 Jun 28 11:54 9553f55d-3da2-43ee-ab5d-ff17f78864d2
--r--r----- 1 root root 0 Jun 28 11:54 e6f5a162-d67f-4750-a67c-5d065f2a9910
-
-# xxd /sys/kernel/security/coco/efi_secret/e6f5a162-d67f-4750-a67c-5d065f2a9910
-00000000: 7468 6573 652d 6172 652d 7468 652d 6b61  these-are-the-ka
-00000010: 7461 2d73 6563 7265 7473 0001 0203 0405  ta-secrets......
-00000020: 0607                                     ..
-
-# rm /sys/kernel/security/coco/efi_secret/e6f5a162-d67f-4750-a67c-5d065f2a9910
-
-# ls -la /sys/kernel/security/coco/efi_secret
-total 0
-drwxr-xr-x 2 root root 0 Jun 28 11:55 .
-drwxr-xr-x 3 root root 0 Jun 28 11:54 ..
--r--r----- 1 root root 0 Jun 28 11:54 736870e5-84f0-4973-92ec-06879ce3da0b
--r--r----- 1 root root 0 Jun 28 11:54 83c83f7f-1356-4975-8b7e-d3a0b54312c6
--r--r----- 1 root root 0 Jun 28 11:54 9553f55d-3da2-43ee-ab5d-ff17f78864d2
-
-
-[1] https://github.com/tianocore/edk2/commit/01726b6d23d4
-
-
----
-
-v6 changes:
- - Autoload the efi_secret module if the secret area is populated
-   (thanks Greg KH).
- - efi_secret: Depend on X86_64 because we use ioremap_encrypted() which
-   is only defined for this arch.
- - efi_secret.c: Remove unneeded tableheader_guid local variable.
- - Documentation fixes.
-
-v5: https://lore.kernel.org/linux-coco/20211118113359.642571-1-dovmurik@linux.ibm.com/
-v5 changes:
- - Simplify EFI code: instead of copying the secret area, the firmware
-   marks the secret area as EFI_RESERVED_TYPE, and then the uefi_init()
-   code just keeps the pointer as it appears in the EFI configuration
-   table.  The use of reserved pages is similar to the AMD SEV-SNP
-   patches for handling SNP-Secrets and SNP-CPUID pages.
- - In order to handle OVMF releases out there which mark the
-   confidential computing secrets page as EFI_BOOT_SERVICES_DATA, add
-   efi/libstub code that detects this and fixes the E820 map to reserve
-   this page.
- - In the efi_secret module code, map the secrets page using
-   ioremap_encrypted (again, similar to the AMD SEV-SNP guest patches
-   for accessing SNP-Secrets and SNP-CPUID pages).
- - Add documentation in Documentation/security/coco/efi_secret.
-
-v4: https://lore.kernel.org/linux-coco/20211020061408.3447533-1-dovmurik@linux.ibm.com/
-v4 changes:
- - Guard all the new EFI and efi-stub code (patches 1+2) with #ifdef
-   CONFIG_EFI_COCO_SECRET (thanks Greg KH).  Selecting
-   CONFIG_EFI_SECRET=m (patch 3) will enable the EFI parts as well.
- - Guard call to clflush_cache_range() with #ifdef CONFIG_X86
-   (Reported-by: kernel test robot <lkp@intel.com>)
-
-v3: https://lore.kernel.org/linux-coco/20211014130848.592611-1-dovmurik@linux.ibm.com/
-v3 changes:
- - Rename the module to efi_secret
- - Remove the exporting of clean_cache_range
- - Use clflush_cache_range in wipe_memory
- - Document function wipe_memory
- - Initialize efi.coco_secret to EFI_INVALID_TABLE_ADDR to correctly detect
-   when there's no secret area published in the EFI configuration tables
-
-v2: https://lore.kernel.org/linux-coco/20211007061838.1381129-1-dovmurik@linux.ibm.com
-v2 changes:
- - Export clean_cache_range()
- - When deleteing a secret, call clean_cache_range() after explicit_memzero
- - Add Documentation/ABI/testing/securityfs-coco-sev_secret
-
-v1: https://lore.kernel.org/linux-coco/20210809190157.279332-1-dovmurik@linux.ibm.com/
-
-RFC: https://lore.kernel.org/linux-coco/20210628183431.953934-1-dovmurik@linux.ibm.com/
-
-
-Dov Murik (5):
-  efi: Save location of EFI confidential computing area
-  efi/libstub: Reserve confidential computing secret area
-  virt: Add efi_secret module to expose confidential computing secrets
-  efi: Load efi_secret module if EFI secret area is populated
-  docs: security: Add coco/efi_secret documentation
-
- .../ABI/testing/securityfs-coco-efi_secret    |  51 +++
- Documentation/security/coco/efi_secret.rst    | 102 ++++++
- Documentation/security/coco/index.rst         |   9 +
- Documentation/security/index.rst              |   1 +
- arch/x86/platform/efi/efi.c                   |   3 +
- drivers/firmware/efi/Kconfig                  |  16 +
- drivers/firmware/efi/Makefile                 |   1 +
- drivers/firmware/efi/coco.c                   |  58 +++
- drivers/firmware/efi/efi.c                    |   6 +
- drivers/firmware/efi/libstub/x86-stub.c       |  28 ++
- drivers/virt/Kconfig                          |   3 +
- drivers/virt/Makefile                         |   1 +
- drivers/virt/coco/efi_secret/Kconfig          |  14 +
- drivers/virt/coco/efi_secret/Makefile         |   2 +
- drivers/virt/coco/efi_secret/efi_secret.c     | 337 ++++++++++++++++++
- include/linux/efi.h                           |  10 +
- 16 files changed, 642 insertions(+)
- create mode 100644 Documentation/ABI/testing/securityfs-coco-efi_secret
- create mode 100644 Documentation/security/coco/efi_secret.rst
- create mode 100644 Documentation/security/coco/index.rst
- create mode 100644 drivers/firmware/efi/coco.c
- create mode 100644 drivers/virt/coco/efi_secret/Kconfig
- create mode 100644 drivers/virt/coco/efi_secret/Makefile
- create mode 100644 drivers/virt/coco/efi_secret/efi_secret.c
-
-
-base-commit: 42eb8fdac2fc5d62392dcfcf0253753e821a97b0
--- 
-2.25.1
-
+--------------zGJ8z5U3jir98KXlGDVY7zsl--
