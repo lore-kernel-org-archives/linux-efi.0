@@ -2,57 +2,57 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E86A8C4332F
-	for <linux-efi@archiver.kernel.org>; Mon,  6 Dec 2021 10:50:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7FD8AC433FE
+	for <linux-efi@archiver.kernel.org>; Mon,  6 Dec 2021 10:52:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241258AbhLFKxu (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 6 Dec 2021 05:53:50 -0500
-Received: from smtp-relay-internal-1.canonical.com ([185.125.188.123]:47620
+        id S241821AbhLFKzw (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 6 Dec 2021 05:55:52 -0500
+Received: from smtp-relay-internal-1.canonical.com ([185.125.188.123]:47830
         "EHLO smtp-relay-internal-1.canonical.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S241217AbhLFKxt (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 6 Dec 2021 05:53:49 -0500
-Received: from mail-wr1-f70.google.com (mail-wr1-f70.google.com [209.85.221.70])
+        by vger.kernel.org with ESMTP id S241772AbhLFKzw (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 6 Dec 2021 05:55:52 -0500
+Received: from mail-wm1-f69.google.com (mail-wm1-f69.google.com [209.85.128.69])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
         (No client certificate requested)
-        by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id A706C3F1B8
-        for <linux-efi@vger.kernel.org>; Mon,  6 Dec 2021 10:50:20 +0000 (UTC)
+        by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id 136723F1B2
+        for <linux-efi@vger.kernel.org>; Mon,  6 Dec 2021 10:52:23 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-        s=20210705; t=1638787820;
-        bh=AamuRCUDtOeG1u1NXrTV8g0J3yQ8ijBKUVLSOIso31U=;
+        s=20210705; t=1638787943;
+        bh=9ySCV26avDqOMq3ybehcXkQhwvvZ5wxe1+MhhnplIPU=;
         h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
          MIME-Version;
-        b=SbqC6I/wHRc9zF/caGYex6nPjNy3q/4x7atXFMl8/m82LnWd4f3xikkhlqiuokx32
-         dUDyIyzoxhZKTegy9ll/ydfyV2A6s+v4s0nUPLmJwPlSXwefcjro+ehuoeMeIBSU0F
-         zgLMlXW7iAXhjrmjojLCJ7j+/Dqp92ha1CsierjwCiVPdFFk0sXAVmWN8BLUAYRW0y
-         6Hb/WSisv90MOYv+UMaxdAgkHf3tAdu8MCl6/5Sp3XvNlXNqpm/DTs2nCbpZ38FLs5
-         C9hC70QCjzG/BieSTLl2EAI76R0pa9/M6CrIHl17Qjr9ICOjD2tRmY7YwprNZ9BSuX
-         D1BASt6bsxNsA==
-Received: by mail-wr1-f70.google.com with SMTP id v18-20020a5d5912000000b001815910d2c0so1905947wrd.1
-        for <linux-efi@vger.kernel.org>; Mon, 06 Dec 2021 02:50:20 -0800 (PST)
+        b=UYaXq9O6pwsUGZwb6iKUO+bpEpV7o9GD0YvP/WvzYl8m0qzZEq6oEkpc+oiKjZG8L
+         Cz2ZAf3PublRNK9RnbvG3h1P9mB5J1Kkt38N9iSSzj7noH8hhko0AXq54BTK5+DQx6
+         MiFZkiSGnqgsMzBh9PE6baSvp4ESY/KYjUqMVugYcoh8hEDJjB5tRxhHfGGjtLOlL1
+         Z77STNKnYYf7IXIrBLoGOPkUEgietTQzAs3J2QZFlowQZDt1aGJfH/gTMSm1HpE3Bx
+         BZAHNVacTqI94BYcijuPA7SoZUxFVKmkwwjgZulQKo/aAnXu3+3HJKKf32ZS4iojgW
+         nJk4dOfu3nqZQ==
+Received: by mail-wm1-f69.google.com with SMTP id i131-20020a1c3b89000000b00337f92384e0so7674854wma.5
+        for <linux-efi@vger.kernel.org>; Mon, 06 Dec 2021 02:52:23 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=AamuRCUDtOeG1u1NXrTV8g0J3yQ8ijBKUVLSOIso31U=;
-        b=Xf3yhFzvHeuzlRm+Cuy+SG5YyYKVQvWrJItiAZk97820p2G4Ob8Pa/FOAw/Qsojiza
-         4JNuDp13LdfQMsgNZtXyzVNQhPlmV9/1WNlgOQOowen0m7eRuWquLsMa7ipeoUlTJ2yF
-         FEr9iUfqmbKapM8CAtr0DWkhceJee9SoSz4DGctFVrUZLiGHq8hWCmOlRwVnzad6MDJK
-         c3vyP9BQQAA8+H9S1EKBk4OM3KRsAwdocPfAmOwsjhxxcpG4vGJjXwyhNjL4fCi/hNVs
-         faLGpBODP18iG1qxRz6L5MJpCizSJ+A6Rg4r5LVABXahzLIr0f05x77AmNYCxqRJ0+/S
-         59Jw==
-X-Gm-Message-State: AOAM533s441jBW+TZFu3senGEOR1+fPwR7j+R4VIfUOsshhzPUCyMIFb
-        AA1O6hhJJscopVvO0POjFLYmhxmUc3ROvNeYkpkwPp3MPCpyzdwCUR32ZOCRYoqbjWKy1hCJkda
-        DUY5F/nVOTF6r6zGxsPDzBcn2rCaodP6g1cjmcQ==
-X-Received: by 2002:a05:600c:1d0e:: with SMTP id l14mr36985895wms.64.1638787820340;
-        Mon, 06 Dec 2021 02:50:20 -0800 (PST)
-X-Google-Smtp-Source: ABdhPJxALIP8HpicmnY++XN1dNgeUaGcBdRgBM6p5oDSIMlTtJifsil7mmXshzdKlsFj3cPBOgFI3g==
-X-Received: by 2002:a05:600c:1d0e:: with SMTP id l14mr36985880wms.64.1638787820171;
-        Mon, 06 Dec 2021 02:50:20 -0800 (PST)
+        bh=9ySCV26avDqOMq3ybehcXkQhwvvZ5wxe1+MhhnplIPU=;
+        b=tkAIdUIE5aYaC7mlY9I6RTNcC3mklqqJbidYZ8QINTPo+mQml+0Idj6W3wxPOc+dtz
+         uGPau3czycHLj4OuRhINCseZzzDsvysKT6ERLtLzEATfFBFzHdPD++uHvd0obBgDFuSk
+         Ex26OdnUDqxN7tz8CeP08UtHFoCrwE2SUqADHsJcOOl1BEXqYwLZMlNNEY/zxd7iZIrm
+         qvs4mv6hPJAsXOI2FGIAVxiGXC8DY1X3bDPYLUTchwqdZawD9QS/JB56BR/NETjHRKR/
+         iNKxTGio4VrZGulorsG4hKZJinQ6lnOJ/bmQriqeeuDjP3iFTVWbE5r4eV7D7OLsGJpV
+         KG1g==
+X-Gm-Message-State: AOAM530x/DCxAOOpa8jgYqh0y4/STChC39BrU1NvTh5KjxD1iBjD3U+Z
+        d3uck/zKjuQMKp0W1lZLfUUqeVeaW35pmguWuHRRxYGY/ha2YS8M8uITOCE/FetTUyAqagTPtvw
+        PkkMtVdbXAVyg/Ll8mOtDCsVEo9UP75O3K/E5VA==
+X-Received: by 2002:a5d:6acc:: with SMTP id u12mr41541830wrw.628.1638787942764;
+        Mon, 06 Dec 2021 02:52:22 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJyG45T87x/hgkvmCoRGy/akWlcOnI21JXsfnjT5Dkr0Aq51ptEmkRfn19MELBpl7ATpCMOj8g==
+X-Received: by 2002:a5d:6acc:: with SMTP id u12mr41541802wrw.628.1638787942625;
+        Mon, 06 Dec 2021 02:52:22 -0800 (PST)
 Received: from localhost.localdomain (lfbn-lyo-1-470-249.w2-7.abo.wanadoo.fr. [2.7.60.249])
-        by smtp.gmail.com with ESMTPSA id y7sm10770064wrw.55.2021.12.06.02.50.19
+        by smtp.gmail.com with ESMTPSA id l2sm13828074wmq.42.2021.12.06.02.52.21
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 06 Dec 2021 02:50:19 -0800 (PST)
+        Mon, 06 Dec 2021 02:52:22 -0800 (PST)
 From:   Alexandre Ghiti <alexandre.ghiti@canonical.com>
 To:     Jonathan Corbet <corbet@lwn.net>,
         Paul Walmsley <paul.walmsley@sifive.com>,
@@ -76,9 +76,9 @@ To:     Jonathan Corbet <corbet@lwn.net>,
         kasan-dev@googlegroups.com, linux-efi@vger.kernel.org,
         linux-arch@vger.kernel.org
 Cc:     Alexandre Ghiti <alexandre.ghiti@canonical.com>
-Subject: [PATCH v3 03/13] riscv: Introduce functions to switch pt_ops
-Date:   Mon,  6 Dec 2021 11:46:47 +0100
-Message-Id: <20211206104657.433304-4-alexandre.ghiti@canonical.com>
+Subject: [PATCH v3 05/13] riscv: Get rid of MAXPHYSMEM configs
+Date:   Mon,  6 Dec 2021 11:46:49 +0100
+Message-Id: <20211206104657.433304-6-alexandre.ghiti@canonical.com>
 X-Mailer: git-send-email 2.32.0
 In-Reply-To: <20211206104657.433304-1-alexandre.ghiti@canonical.com>
 References: <20211206104657.433304-1-alexandre.ghiti@canonical.com>
@@ -88,128 +88,101 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This simply gathers the different pt_ops initialization in functions
-where a comment was added to explain why the page table operations must
-be changed along the boot process.
+CONFIG_MAXPHYSMEM_* were actually never used, even the nommu defconfigs
+selecting the MAXPHYSMEM_2GB had no effects on PAGE_OFFSET since it was
+preempted by !MMU case right before.
+
+In addition, I suspect that commit 2bfc6cd81bd1 ("riscv: Move kernel
+mapping outside of linear mapping") which moved the kernel to
+0xffffffff80000000 broke the MAXPHYSMEM_2GB config which defined
+PAGE_OFFSET at the same address.
 
 Signed-off-by: Alexandre Ghiti <alexandre.ghiti@canonical.com>
 ---
- arch/riscv/mm/init.c | 74 ++++++++++++++++++++++++++++++--------------
- 1 file changed, 51 insertions(+), 23 deletions(-)
+ arch/riscv/Kconfig                            | 23 ++-----------------
+ arch/riscv/configs/nommu_k210_defconfig       |  1 -
+ .../riscv/configs/nommu_k210_sdcard_defconfig |  1 -
+ arch/riscv/configs/nommu_virt_defconfig       |  1 -
+ 4 files changed, 2 insertions(+), 24 deletions(-)
 
-diff --git a/arch/riscv/mm/init.c b/arch/riscv/mm/init.c
-index 5010eba52738..1552226fb6bd 100644
---- a/arch/riscv/mm/init.c
-+++ b/arch/riscv/mm/init.c
-@@ -582,6 +582,52 @@ static void __init create_fdt_early_page_table(pgd_t *pgdir, uintptr_t dtb_pa)
- 	dtb_early_pa = dtb_pa;
- }
+diff --git a/arch/riscv/Kconfig b/arch/riscv/Kconfig
+index c3a167eea011..ac6c0cd9bc29 100644
+--- a/arch/riscv/Kconfig
++++ b/arch/riscv/Kconfig
+@@ -148,10 +148,9 @@ config MMU
  
-+/*
-+ * MMU is not enabled, the page tables are allocated directly using
-+ * early_pmd/pud/p4d and the address returned is the physical one.
-+ */
-+void pt_ops_set_early(void)
-+{
-+	pt_ops.alloc_pte = alloc_pte_early;
-+	pt_ops.get_pte_virt = get_pte_virt_early;
-+#ifndef __PAGETABLE_PMD_FOLDED
-+	pt_ops.alloc_pmd = alloc_pmd_early;
-+	pt_ops.get_pmd_virt = get_pmd_virt_early;
-+#endif
-+}
-+
-+/*
-+ * MMU is enabled but page table setup is not complete yet.
-+ * fixmap page table alloc functions must be used as a means to temporarily
-+ * map the allocated physical pages since the linear mapping does not exist yet.
-+ *
-+ * Note that this is called with MMU disabled, hence kernel_mapping_pa_to_va,
-+ * but it will be used as described above.
-+ */
-+void pt_ops_set_fixmap(void)
-+{
-+	pt_ops.alloc_pte = kernel_mapping_pa_to_va((uintptr_t)alloc_pte_fixmap);
-+	pt_ops.get_pte_virt = kernel_mapping_pa_to_va((uintptr_t)get_pte_virt_fixmap);
-+#ifndef __PAGETABLE_PMD_FOLDED
-+	pt_ops.alloc_pmd = kernel_mapping_pa_to_va((uintptr_t)alloc_pmd_fixmap);
-+	pt_ops.get_pmd_virt = kernel_mapping_pa_to_va((uintptr_t)get_pmd_virt_fixmap);
-+#endif
-+}
-+
-+/*
-+ * MMU is enabled and page table setup is complete, so from now, we can use
-+ * generic page allocation functions to setup page table.
-+ */
-+void pt_ops_set_late(void)
-+{
-+	pt_ops.alloc_pte = alloc_pte_late;
-+	pt_ops.get_pte_virt = get_pte_virt_late;
-+#ifndef __PAGETABLE_PMD_FOLDED
-+	pt_ops.alloc_pmd = alloc_pmd_late;
-+	pt_ops.get_pmd_virt = get_pmd_virt_late;
-+#endif
-+}
-+
- asmlinkage void __init setup_vm(uintptr_t dtb_pa)
- {
- 	pmd_t __maybe_unused fix_bmap_spmd, fix_bmap_epmd;
-@@ -626,12 +672,8 @@ asmlinkage void __init setup_vm(uintptr_t dtb_pa)
- 	BUG_ON((kernel_map.virt_addr + kernel_map.size) > ADDRESS_SPACE_END - SZ_4K);
- #endif
+ config PAGE_OFFSET
+ 	hex
+-	default 0xC0000000 if 32BIT && MAXPHYSMEM_1GB
++	default 0xC0000000 if 32BIT
+ 	default 0x80000000 if 64BIT && !MMU
+-	default 0xffffffff80000000 if 64BIT && MAXPHYSMEM_2GB
+-	default 0xffffffd800000000 if 64BIT && MAXPHYSMEM_128GB
++	default 0xffffffd800000000 if 64BIT
  
--	pt_ops.alloc_pte = alloc_pte_early;
--	pt_ops.get_pte_virt = get_pte_virt_early;
--#ifndef __PAGETABLE_PMD_FOLDED
--	pt_ops.alloc_pmd = alloc_pmd_early;
--	pt_ops.get_pmd_virt = get_pmd_virt_early;
--#endif
-+	pt_ops_set_early();
-+
- 	/* Setup early PGD for fixmap */
- 	create_pgd_mapping(early_pg_dir, FIXADDR_START,
- 			   (uintptr_t)fixmap_pgd_next, PGDIR_SIZE, PAGE_TABLE);
-@@ -695,6 +737,8 @@ asmlinkage void __init setup_vm(uintptr_t dtb_pa)
- 		pr_warn("FIX_BTMAP_BEGIN:     %d\n", FIX_BTMAP_BEGIN);
- 	}
- #endif
-+
-+	pt_ops_set_fixmap();
- }
+ config KASAN_SHADOW_OFFSET
+ 	hex
+@@ -260,24 +259,6 @@ config MODULE_SECTIONS
+ 	bool
+ 	select HAVE_MOD_ARCH_SPECIFIC
  
- static void __init setup_vm_final(void)
-@@ -703,16 +747,6 @@ static void __init setup_vm_final(void)
- 	phys_addr_t pa, start, end;
- 	u64 i;
- 
--	/**
--	 * MMU is enabled at this point. But page table setup is not complete yet.
--	 * fixmap page table alloc functions should be used at this point
--	 */
--	pt_ops.alloc_pte = alloc_pte_fixmap;
--	pt_ops.get_pte_virt = get_pte_virt_fixmap;
--#ifndef __PAGETABLE_PMD_FOLDED
--	pt_ops.alloc_pmd = alloc_pmd_fixmap;
--	pt_ops.get_pmd_virt = get_pmd_virt_fixmap;
--#endif
- 	/* Setup swapper PGD for fixmap */
- 	create_pgd_mapping(swapper_pg_dir, FIXADDR_START,
- 			   __pa_symbol(fixmap_pgd_next),
-@@ -754,13 +788,7 @@ static void __init setup_vm_final(void)
- 	csr_write(CSR_SATP, PFN_DOWN(__pa_symbol(swapper_pg_dir)) | SATP_MODE);
- 	local_flush_tlb_all();
- 
--	/* generic page allocation functions must be used to setup page table */
--	pt_ops.alloc_pte = alloc_pte_late;
--	pt_ops.get_pte_virt = get_pte_virt_late;
--#ifndef __PAGETABLE_PMD_FOLDED
--	pt_ops.alloc_pmd = alloc_pmd_late;
--	pt_ops.get_pmd_virt = get_pmd_virt_late;
--#endif
-+	pt_ops_set_late();
- }
- #else
- asmlinkage void __init setup_vm(uintptr_t dtb_pa)
+-choice
+-	prompt "Maximum Physical Memory"
+-	default MAXPHYSMEM_1GB if 32BIT
+-	default MAXPHYSMEM_2GB if 64BIT && CMODEL_MEDLOW
+-	default MAXPHYSMEM_128GB if 64BIT && CMODEL_MEDANY
+-
+-	config MAXPHYSMEM_1GB
+-		depends on 32BIT
+-		bool "1GiB"
+-	config MAXPHYSMEM_2GB
+-		depends on 64BIT && CMODEL_MEDLOW
+-		bool "2GiB"
+-	config MAXPHYSMEM_128GB
+-		depends on 64BIT && CMODEL_MEDANY
+-		bool "128GiB"
+-endchoice
+-
+-
+ config SMP
+ 	bool "Symmetric Multi-Processing"
+ 	help
+diff --git a/arch/riscv/configs/nommu_k210_defconfig b/arch/riscv/configs/nommu_k210_defconfig
+index b16a2a12c82a..dae9179984cc 100644
+--- a/arch/riscv/configs/nommu_k210_defconfig
++++ b/arch/riscv/configs/nommu_k210_defconfig
+@@ -30,7 +30,6 @@ CONFIG_SLOB=y
+ # CONFIG_MMU is not set
+ CONFIG_SOC_CANAAN=y
+ CONFIG_SOC_CANAAN_K210_DTB_SOURCE="k210_generic"
+-CONFIG_MAXPHYSMEM_2GB=y
+ CONFIG_SMP=y
+ CONFIG_NR_CPUS=2
+ CONFIG_CMDLINE="earlycon console=ttySIF0"
+diff --git a/arch/riscv/configs/nommu_k210_sdcard_defconfig b/arch/riscv/configs/nommu_k210_sdcard_defconfig
+index 61f887f65419..03f91525a059 100644
+--- a/arch/riscv/configs/nommu_k210_sdcard_defconfig
++++ b/arch/riscv/configs/nommu_k210_sdcard_defconfig
+@@ -22,7 +22,6 @@ CONFIG_SLOB=y
+ # CONFIG_MMU is not set
+ CONFIG_SOC_CANAAN=y
+ CONFIG_SOC_CANAAN_K210_DTB_SOURCE="k210_generic"
+-CONFIG_MAXPHYSMEM_2GB=y
+ CONFIG_SMP=y
+ CONFIG_NR_CPUS=2
+ CONFIG_CMDLINE="earlycon console=ttySIF0 rootdelay=2 root=/dev/mmcblk0p1 ro"
+diff --git a/arch/riscv/configs/nommu_virt_defconfig b/arch/riscv/configs/nommu_virt_defconfig
+index e046a0babde4..f224be697785 100644
+--- a/arch/riscv/configs/nommu_virt_defconfig
++++ b/arch/riscv/configs/nommu_virt_defconfig
+@@ -27,7 +27,6 @@ CONFIG_SLOB=y
+ # CONFIG_SLAB_MERGE_DEFAULT is not set
+ # CONFIG_MMU is not set
+ CONFIG_SOC_VIRT=y
+-CONFIG_MAXPHYSMEM_2GB=y
+ CONFIG_SMP=y
+ CONFIG_CMDLINE="root=/dev/vda rw earlycon=uart8250,mmio,0x10000000,115200n8 console=ttyS0"
+ CONFIG_CMDLINE_FORCE=y
 -- 
 2.32.0
 
