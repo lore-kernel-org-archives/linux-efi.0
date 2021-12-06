@@ -2,38 +2,38 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CB859C433FE
-	for <linux-efi@archiver.kernel.org>; Mon,  6 Dec 2021 09:35:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A8C04C433EF
+	for <linux-efi@archiver.kernel.org>; Mon,  6 Dec 2021 09:36:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241114AbhLFJjT (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 6 Dec 2021 04:39:19 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.129.124]:36646 "EHLO
+        id S241477AbhLFJjn (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 6 Dec 2021 04:39:43 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:23666 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S241349AbhLFJjE (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 6 Dec 2021 04:39:04 -0500
+        by vger.kernel.org with ESMTP id S241392AbhLFJjc (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 6 Dec 2021 04:39:32 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1638783336;
+        s=mimecast20190719; t=1638783363;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=UJ60w9l5x9z7ezkDeL8gMwQfAMNkzdnrdHE2RsyKQDs=;
-        b=E9v+HzkfYAQrOroHo4geNmshbByKZj4BbChoLtLYhz0zstqJU7DdjarofCZbFfju7zVrbb
-        40SrLzMjW3kesv6+50wfQ/3UAUfs916qfSj2Keu1xeLZzvupZA9d785m/fJ27+doP1bhEz
-        Sw5u7m8dJcObhg9ANYcRTTFwGFd9ga4=
+        bh=sr9N+4rBOSx/ejwQHSxYEsrO8rbvi23wqALjHTHnWJM=;
+        b=aJXdJfC+XxMyTe8xIqdVd1Krhy41g4ihCy+JNx2B+hNBP3AxyEDI/2hl+WWh5naXdUKJQG
+        LCR3+71EAj9JQ+KCjeoulD+4ULKsYNXOLqU6aHSn6jcQO5sXvtzQtqFqz0/ojoCHxUyeVz
+        Po9fittaeA4/7nPYg6DyHFCz9BzWYTg=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-215-wAupVm9qOCuQ-sKq7nCHaA-1; Mon, 06 Dec 2021 04:35:34 -0500
-X-MC-Unique: wAupVm9qOCuQ-sKq7nCHaA-1
+ us-mta-124-C6InJl1JND28_0SfcgMRkQ-1; Mon, 06 Dec 2021 04:35:22 -0500
+X-MC-Unique: C6InJl1JND28_0SfcgMRkQ-1
 Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 9E585835B47;
-        Mon,  6 Dec 2021 09:35:31 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 41255185302A;
+        Mon,  6 Dec 2021 09:35:20 +0000 (UTC)
 Received: from x1.localdomain.com (unknown [10.39.194.76])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 184D75DAA5;
-        Mon,  6 Dec 2021 09:35:27 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id B5F0F5DF2E;
+        Mon,  6 Dec 2021 09:35:16 +0000 (UTC)
 From:   Hans de Goede <hdegoede@redhat.com>
 To:     "Rafael J . Wysocki" <rjw@rjwysocki.net>,
         Mika Westerberg <mika.westerberg@linux.intel.com>,
@@ -50,9 +50,9 @@ Cc:     Hans de Goede <hdegoede@redhat.com>, Len Brown <lenb@kernel.org>,
         Tsuchiya Yuto <kitakar@gmail.com>,
         platform-driver-x86@vger.kernel.org, linux-pm@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
-Subject: [PATCH v4 20/20] extcon: intel-cht-wc: Report RID_A for ACA adapters
-Date:   Mon,  6 Dec 2021 10:33:18 +0100
-Message-Id: <20211206093318.45214-21-hdegoede@redhat.com>
+Subject: [PATCH v4 17/20] extcon: intel-cht-wc: Support devs with Micro-B / USB-2 only Type-C connectors
+Date:   Mon,  6 Dec 2021 10:33:15 +0100
+Message-Id: <20211206093318.45214-18-hdegoede@redhat.com>
 In-Reply-To: <20211206093318.45214-1-hdegoede@redhat.com>
 References: <20211206093318.45214-1-hdegoede@redhat.com>
 MIME-Version: 1.0
@@ -62,57 +62,187 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Make cht_wc_extcon_get_id() report RID_A for ACA adapters, instead of
-reporting ID_FLOAT.
+So far the extcon-intel-cht-wc code has only been tested on devices with
+a Type-C connector with USB-PD, USB3 (superspeed) and DP-altmode support
+through a FUSB302 Type-C controller.
 
-According to the spec. we should read the USB-ID pin ADC value
-to determine the resistance of the used pull-down resister and
-then return RID_A / RID_B / RID_C based on this. But all "Accessory
-Charger Adapter"s (ACAs) which users can actually buy always use
-a combination of a charging port with one or more USB-A ports, so
-they should always use a resistor indicating RID_A. But the spec
-is hard to read / badly-worded so some of them actually indicate
-they are a RID_B ACA even though they clearly are a RID_A ACA.
+Some devices with the intel-cht-wc PMIC however come with an USB-micro-B
+connector, or an USB-2 only Type-C connector without USB-PD.
 
-To workaround this simply always return INTEL_USB_RID_A, which
-matches all the ACAs which users can actually buy.
+Which device-model we are running on can be identified with the new
+cht_wc_model intel_soc_pmic field. On models without a Type-C controller
+the extcon code must control the Vbus 5V boost converter and the USB role
+switch depending on the detected cable-type.
 
 Signed-off-by: Hans de Goede <hdegoede@redhat.com>
 ---
- drivers/extcon/extcon-intel-cht-wc.c | 18 +++++++++++++-----
- 1 file changed, 13 insertions(+), 5 deletions(-)
+Changes in v3:
+- Some minor tweaks / spelling fixes based on Andy's review
+---
+ drivers/extcon/Kconfig               |  2 +
+ drivers/extcon/extcon-intel-cht-wc.c | 91 ++++++++++++++++++++++++++++
+ 2 files changed, 93 insertions(+)
 
+diff --git a/drivers/extcon/Kconfig b/drivers/extcon/Kconfig
+index aab87c9b35c8..0d42e49105dd 100644
+--- a/drivers/extcon/Kconfig
++++ b/drivers/extcon/Kconfig
+@@ -61,6 +61,8 @@ config EXTCON_INTEL_INT3496
+ config EXTCON_INTEL_CHT_WC
+ 	tristate "Intel Cherrytrail Whiskey Cove PMIC extcon driver"
+ 	depends on INTEL_SOC_PMIC_CHTWC
++	depends on USB_SUPPORT
++	select USB_ROLE_SWITCH
+ 	help
+ 	  Say Y here to enable extcon support for charger detection / control
+ 	  on the Intel Cherrytrail Whiskey Cove PMIC.
 diff --git a/drivers/extcon/extcon-intel-cht-wc.c b/drivers/extcon/extcon-intel-cht-wc.c
-index 144cb5d8cd47..2a8d41cbf41c 100644
+index 81cae8c75850..edc386937dee 100644
 --- a/drivers/extcon/extcon-intel-cht-wc.c
 +++ b/drivers/extcon/extcon-intel-cht-wc.c
-@@ -121,13 +121,21 @@ static int cht_wc_extcon_get_id(struct cht_wc_extcon_data *ext, int pwrsrc_sts)
- 		return INTEL_USB_ID_GND;
- 	case CHT_WC_PWRSRC_RID_FLOAT:
- 		return INTEL_USB_ID_FLOAT;
-+	/*
-+	 * According to the spec. we should read the USB-ID pin ADC value here
-+	 * to determine the resistance of the used pull-down resister and then
-+	 * return RID_A / RID_B / RID_C based on this. But all "Accessory
-+	 * Charger Adapter"s (ACAs) which users can actually buy always use
-+	 * a combination of a charging port with one or more USB-A ports, so
-+	 * they should always use a resistor indicating RID_A. But the spec
-+	 * is hard to read / badly-worded so some of them actually indicate
-+	 * they are a RID_B ACA evnen though they clearly are a RID_A ACA.
-+	 * To workaround this simply always return INTEL_USB_RID_A, which
-+	 * matches all the ACAs which users can actually buy.
-+	 */
- 	case CHT_WC_PWRSRC_RID_ACA:
-+		return INTEL_USB_RID_A;
- 	default:
--		/*
--		 * Once we have IIO support for the GPADC we should read
--		 * the USBID GPADC channel here and determine ACA role
--		 * based on that.
--		 */
- 		return INTEL_USB_ID_FLOAT;
- 	}
+@@ -16,7 +16,9 @@
+ #include <linux/platform_device.h>
+ #include <linux/property.h>
+ #include <linux/regmap.h>
++#include <linux/regulator/consumer.h>
+ #include <linux/slab.h>
++#include <linux/usb/role.h>
+ 
+ #include "extcon-intel.h"
+ 
+@@ -102,8 +104,11 @@ struct cht_wc_extcon_data {
+ 	struct device *dev;
+ 	struct regmap *regmap;
+ 	struct extcon_dev *edev;
++	struct usb_role_switch *role_sw;
++	struct regulator *vbus_boost;
+ 	unsigned int previous_cable;
+ 	bool usb_host;
++	bool vbus_boost_enabled;
+ };
+ 
+ static int cht_wc_extcon_get_id(struct cht_wc_extcon_data *ext, int pwrsrc_sts)
+@@ -217,6 +222,18 @@ static void cht_wc_extcon_set_otgmode(struct cht_wc_extcon_data *ext,
+ 				 CHT_WC_CHGRCTRL1_OTGMODE, val);
+ 	if (ret)
+ 		dev_err(ext->dev, "Error updating CHGRCTRL1 reg: %d\n", ret);
++
++	if (ext->vbus_boost && ext->vbus_boost_enabled != enable) {
++		if (enable)
++			ret = regulator_enable(ext->vbus_boost);
++		else
++			ret = regulator_disable(ext->vbus_boost);
++
++		if (ret == 0)
++			ext->vbus_boost_enabled = enable;
++		else
++			dev_err(ext->dev, "Error updating Vbus boost regulator: %d\n", ret);
++	}
  }
+ 
+ static void cht_wc_extcon_enable_charging(struct cht_wc_extcon_data *ext,
+@@ -246,6 +263,7 @@ static void cht_wc_extcon_pwrsrc_event(struct cht_wc_extcon_data *ext)
+ 	unsigned int cable = EXTCON_NONE;
+ 	/* Ignore errors in host mode, as the 5v boost converter is on then */
+ 	bool ignore_get_charger_errors = ext->usb_host;
++	enum usb_role role;
+ 
+ 	ret = regmap_read(ext->regmap, CHT_WC_PWRSRC_STS, &pwrsrc_sts);
+ 	if (ret) {
+@@ -289,6 +307,18 @@ static void cht_wc_extcon_pwrsrc_event(struct cht_wc_extcon_data *ext)
+ 
+ 	ext->usb_host = ((id == INTEL_USB_ID_GND) || (id == INTEL_USB_RID_A));
+ 	extcon_set_state_sync(ext->edev, EXTCON_USB_HOST, ext->usb_host);
++
++	if (ext->usb_host)
++		role = USB_ROLE_HOST;
++	else if (pwrsrc_sts & CHT_WC_PWRSRC_VBUS)
++		role = USB_ROLE_DEVICE;
++	else
++		role = USB_ROLE_NONE;
++
++	/* Note: this is a no-op when ext->role_sw is NULL */
++	ret = usb_role_switch_set_role(ext->role_sw, role);
++	if (ret)
++		dev_err(ext->dev, "Error setting USB-role: %d\n", ret);
+ }
+ 
+ static irqreturn_t cht_wc_extcon_isr(int irq, void *data)
+@@ -334,6 +364,61 @@ static int cht_wc_extcon_sw_control(struct cht_wc_extcon_data *ext, bool enable)
+ 	return ret;
+ }
+ 
++static int cht_wc_extcon_find_role_sw(struct cht_wc_extcon_data *ext)
++{
++	const struct software_node *swnode;
++	struct fwnode_handle *fwnode;
++
++	swnode = software_node_find_by_name(NULL, "intel-xhci-usb-sw");
++	if (!swnode)
++		return -EPROBE_DEFER;
++
++	fwnode = software_node_fwnode(swnode);
++	ext->role_sw = usb_role_switch_find_by_fwnode(fwnode);
++	fwnode_handle_put(fwnode);
++
++	return ext->role_sw ? 0 : -EPROBE_DEFER;
++}
++
++static void cht_wc_extcon_put_role_sw(void *data)
++{
++	struct cht_wc_extcon_data *ext = data;
++
++	usb_role_switch_put(ext->role_sw);
++}
++
++/* Some boards require controlling the role-sw and Vbus based on the id-pin */
++static int cht_wc_extcon_get_role_sw_and_regulator(struct cht_wc_extcon_data *ext)
++{
++	int ret;
++
++	ret = cht_wc_extcon_find_role_sw(ext);
++	if (ret)
++		return ret;
++
++	ret = devm_add_action_or_reset(ext->dev, cht_wc_extcon_put_role_sw, ext);
++	if (ret)
++		return ret;
++
++	/*
++	 * On x86/ACPI platforms the regulator <-> consumer link is provided
++	 * by platform_data passed to the regulator driver. This means that
++	 * this info is not available before the regulator driver has bound.
++	 * Use devm_regulator_get_optional() to avoid getting a dummy
++	 * regulator and wait for the regulator to show up if necessary.
++	 */
++	ext->vbus_boost = devm_regulator_get_optional(ext->dev, "vbus");
++	if (IS_ERR(ext->vbus_boost)) {
++		ret = PTR_ERR(ext->vbus_boost);
++		if (ret == -ENODEV)
++			ret = -EPROBE_DEFER;
++
++		return dev_err_probe(ext->dev, ret, "getting Vbus regulator");
++	}
++
++	return 0;
++}
++
+ static int cht_wc_extcon_probe(struct platform_device *pdev)
+ {
+ 	struct intel_soc_pmic *pmic = dev_get_drvdata(pdev->dev.parent);
+@@ -376,6 +461,12 @@ static int cht_wc_extcon_probe(struct platform_device *pdev)
+ 		 */
+ 		cht_wc_extcon_set_5v_boost(ext, false);
+ 		break;
++	case INTEL_CHT_WC_LENOVO_YOGABOOK1:
++	case INTEL_CHT_WC_XIAOMI_MIPAD2:
++		ret = cht_wc_extcon_get_role_sw_and_regulator(ext);
++		if (ret)
++			return ret;
++		break;
+ 	default:
+ 		break;
+ 	}
 -- 
 2.33.1
 
