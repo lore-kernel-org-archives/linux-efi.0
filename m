@@ -2,41 +2,41 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8CCC2C433FE
-	for <linux-efi@archiver.kernel.org>; Fri, 10 Dec 2021 15:44:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5EB3DC433FE
+	for <linux-efi@archiver.kernel.org>; Fri, 10 Dec 2021 15:44:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243490AbhLJPsM (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 10 Dec 2021 10:48:12 -0500
-Received: from mail-mw2nam10on2067.outbound.protection.outlook.com ([40.107.94.67]:19169
+        id S243347AbhLJPsS (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 10 Dec 2021 10:48:18 -0500
+Received: from mail-mw2nam10on2088.outbound.protection.outlook.com ([40.107.94.88]:16865
         "EHLO NAM10-MW2-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S243269AbhLJPrs (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 10 Dec 2021 10:47:48 -0500
+        id S243350AbhLJPr6 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 10 Dec 2021 10:47:58 -0500
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=clfQsC+j21YC071vWRSry0xvoD2JdsP+KFU5mWXkOMKiEqjfYNCxo0DRYL+4ZDwuCDQvxEqnFwWQBnAmaoAm6aM4QYLM360oG4G4nykZrWMDUtcAfx0APkjb+ywu2Ggfw2vi5t/FIpOspe5vO+uCXtE9uWNjXdAHn8wIDcVsL74uILVGokLRxulWSsXiKgVtKZdlD6UffBU6uyIXh4oOsmhc0VkEyWxkJSuodYt7IpoHj96XGGP+xWBJPvFoE093E7ViEcEmHc2C9MQ40OguGjw3zNzFeGosDCL0T8f/WQ0d7WroILKPVF0t4pXpYWGk4qW00dLlA7p+qryeejv4xQ==
+ b=GF1aEf0m1Ois5ZSPSTrc/oE4yV6WO/d1wTsIGYH1ETP9By1/8A452UmpGKntab8Buei/sxA39blBH6fQvfLs5sD501ZNo5U6dH1YQNoS4n+YMVPTRUP9jN1WskHedE2yodYZBByoKOviW9Q/pKbbIH8QURYeQEmoQgW9NROd1W1sAfzm0NO2BflXLUJ7MqDqP3tIkbhc1YS2vI6h9xe4HzxdR8sRSNmq1zVWqUl8u9us2/ktyeflYvq/tBpUOcUlavhGj8o2GLCZeUet4AbzPEt5K6hCZDynv+cOEsEeyyeIJoH26vcMsimt9tIeQsy5OwSCfOr0zXbf9OEl2lS+QQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=/9qkDL0jQbWkyJtlUNI5YnTU3a8nQtpo5XmoFULdacc=;
- b=MMYjjYvpZ5vqMosY0jF8VxWjf1C6cSF6bN9sWRJwq3f7PRQXK7TeeiyqRR48ZAZmHEVEhh061F47tNVLfGqnl3jf2sSaLpiAMEAl5jmcfeBF8v0SN8KUPceOxnaiJAHB0YeaLHX/j+YVEZCY3/BE4dy/XuRosHRgkpZXUyE07Zap0Yuecwl07MaFwgBbz8+HJzYyy6ZdY6uUuogarLGtWYCuonzz/2DrseONaXOnxCAIt1H20/Gt+U8JwQXFQEY2JA4MjG172g2xZugMY7qx7JmuOTN2Il4TmucqAyF239kWZdtvRKpEVSwLvI0ISJTP2wvVWRyXCnvOCyWCVGZ7HQ==
+ bh=5yYGZkXYbkKsCZF4e6t1+n+SfDJC4kr8FCySTr9HpfQ=;
+ b=h9NbfzTWeDCu2pok3E36k1ByYSt6vAAzuH0LZpiqA/TZi9fF4aYi5nO8JL6TH0TIZ/Y2EOSYJaPoPxHILgLsLunRCvuLlfD0N1dY/5DoMIkqHaWWVY/t/72tMZcGmYgTowCM0CPUkv2fYsVuctk2dvVBT/btGPbSL4663nIfcyo6igx6jN1bY7n6HaVOyQYZI0/dZsQCc9/nmsYegP2majgnGBDeNUl2RLoJ7taNB9/NdbEfmlByVcYt28Z8mbW5Xl0CYDQfDgN42pZZC8nIuOasLb9Wq9a4gC9ilE1C15XZujooHIb4E+Fp+N6oEf/faL9wWw0j56MtjEyBdBBNsw==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
  165.204.84.17) smtp.rcpttodomain=kernel.org smtp.mailfrom=amd.com; dmarc=pass
  (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
  dkim=none (message not signed); arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=/9qkDL0jQbWkyJtlUNI5YnTU3a8nQtpo5XmoFULdacc=;
- b=PchwCzsz1dc++TDwMWXouCrjqofZ3Nbp7LTIqBJN2kTdBI48mQ1XVnaBbsbk88/C6887XGxr6onxccyV5JdMrkZ5ZDPkCU/hqUMtcxRMk2m5G+M5/WrGrKn/wgYgZiS/zoLKaLlVlPopvx50bfkGgrKkfFdi/F8lQggKFV6e7C4=
-Received: from BN9PR03CA0988.namprd03.prod.outlook.com (2603:10b6:408:109::33)
- by BY5PR12MB5016.namprd12.prod.outlook.com (2603:10b6:a03:1c5::20) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4778.11; Fri, 10 Dec
- 2021 15:44:11 +0000
-Received: from BN8NAM11FT018.eop-nam11.prod.protection.outlook.com
- (2603:10b6:408:109:cafe::df) by BN9PR03CA0988.outlook.office365.com
- (2603:10b6:408:109::33) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4755.21 via Frontend
- Transport; Fri, 10 Dec 2021 15:44:11 +0000
+ bh=5yYGZkXYbkKsCZF4e6t1+n+SfDJC4kr8FCySTr9HpfQ=;
+ b=L3k/03hQqkqH74729uheE08ztAowQPLi4ytHOc/+Li9cNgfDUmtO2ZQ9lBaBJTUu/OdG3uVEh2cIxl8yGDZjkDXSxi6b14H/zGTQks//4GEqMaKxVCOGgF4LTr04hPm/JbCqA7kjUKUsWv/wCNalGA+j0czBZj5aBxMioZUJ0a8=
+Received: from BN6PR1201CA0008.namprd12.prod.outlook.com
+ (2603:10b6:405:4c::18) by MN2PR12MB3021.namprd12.prod.outlook.com
+ (2603:10b6:208:c2::30) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4755.21; Fri, 10 Dec
+ 2021 15:44:20 +0000
+Received: from BN8NAM11FT067.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:405:4c:cafe::b7) by BN6PR1201CA0008.outlook.office365.com
+ (2603:10b6:405:4c::18) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4755.19 via Frontend
+ Transport; Fri, 10 Dec 2021 15:44:20 +0000
 X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
  smtp.mailfrom=amd.com; dkim=none (message not signed)
  header.d=none;dmarc=pass action=none header.from=amd.com;
@@ -44,13 +44,13 @@ Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
  165.204.84.17 as permitted sender) receiver=protection.outlook.com;
  client-ip=165.204.84.17; helo=SATLEXMB03.amd.com;
 Received: from SATLEXMB03.amd.com (165.204.84.17) by
- BN8NAM11FT018.mail.protection.outlook.com (10.13.176.89) with Microsoft SMTP
+ BN8NAM11FT067.mail.protection.outlook.com (10.13.177.159) with Microsoft SMTP
  Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.4778.13 via Frontend Transport; Fri, 10 Dec 2021 15:44:11 +0000
+ 15.20.4778.13 via Frontend Transport; Fri, 10 Dec 2021 15:44:20 +0000
 Received: from sbrijesh-desktop.amd.com (10.180.168.240) by SATLEXMB03.amd.com
  (10.181.40.144) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.17; Fri, 10 Dec
- 2021 09:44:09 -0600
+ 2021 09:44:17 -0600
 From:   Brijesh Singh <brijesh.singh@amd.com>
 To:     <x86@kernel.org>, <linux-kernel@vger.kernel.org>,
         <kvm@vger.kernel.org>, <linux-efi@vger.kernel.org>,
@@ -81,9 +81,9 @@ CC:     Thomas Gleixner <tglx@linutronix.de>,
         <tony.luck@intel.com>, <marcorr@google.com>,
         <sathyanarayanan.kuppuswamy@linux.intel.com>,
         Brijesh Singh <brijesh.singh@amd.com>
-Subject: [PATCH v8 14/40] x86/kernel: Validate rom memory before accessing when SEV-SNP is active
-Date:   Fri, 10 Dec 2021 09:43:06 -0600
-Message-ID: <20211210154332.11526-15-brijesh.singh@amd.com>
+Subject: [PATCH v8 19/40] KVM: SVM: Update the SEV-ES save area mapping
+Date:   Fri, 10 Dec 2021 09:43:11 -0600
+Message-ID: <20211210154332.11526-20-brijesh.singh@amd.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20211210154332.11526-1-brijesh.singh@amd.com>
 References: <20211210154332.11526-1-brijesh.singh@amd.com>
@@ -95,80 +95,160 @@ X-ClientProxiedBy: SATLEXMB03.amd.com (10.181.40.144) To SATLEXMB03.amd.com
  (10.181.40.144)
 X-EOPAttributedMessage: 0
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 17618043-88ee-43ae-588e-08d9bbf3e952
-X-MS-TrafficTypeDiagnostic: BY5PR12MB5016:EE_
-X-Microsoft-Antispam-PRVS: <BY5PR12MB501623E80F62CE484CA8815CE5719@BY5PR12MB5016.namprd12.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:6430;
+X-MS-Office365-Filtering-Correlation-Id: a3600ff1-76fc-42d9-4934-08d9bbf3ee90
+X-MS-TrafficTypeDiagnostic: MN2PR12MB3021:EE_
+X-Microsoft-Antispam-PRVS: <MN2PR12MB30217353BD8A3A04EE6A53DBE5719@MN2PR12MB3021.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:5236;
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: xaRY82HeU5QeEJ6LQ8dkgSSgcb0LWz/uMzQsZWSKf8xd8Y8HrDww4AVXI418R/tqhv/V9qGhvq0ypr3Rs/tzU1j/9X2NqJ20EuOt8MiKMe29Rf0yewSgEiItOynksfOcMAuvHAIEymGsdIQBNnYSd/Y8WuLfn1vanphgC/50XIJa87El5mNcjA8x3GlhoQFXu7Zj5hfeKFMEom+IrRA+mcOvK+SNDnHaB74BZv44jroQFGiGOFwH8lwyT6GiuhDRrFzHE3WsaRsIahpZYd0Nd2Z0MEN0eiSZg3nm7OF6AgajHj1doLQ52bSL5OBP12y5tkVdqFcJIKacFiDJ+a43nxoCi1wJiLkBgCr43ehO2/8Tg4k0RrJ2WwMvX4l6CjgUl/9MDxMtxmE/DqTBqweM+bpUGMUTe0J5P/CWqrqrhzoOcgdy26HvIVduEKrz7/6uZBANE6MPx/bpwaqd/gXGhuNo44l8tda75xShedcvyMEtmvEjzw8KjFmsWaGyJThvhf8zGK2RO4oqxJKrmnnuBNLmtYSYRtKkUc+aODsvYPRMIdvvNcQgi+ADKqpYBh7TOiDTdXvgElaKA9yfoXzkKM3i46EoXJcmMV8UQBLppTzbTjryTW9YwdP1Lrnb0yyZjyq6d4uGct9foSkI0D+N1YLUwhGrM1r+kVAiaO4wTAKb5joCv6riNe6II1rdgYulw+Z64j7qtmcg746ycWNGp6QFltoJpUU9rI31vngmKcghNQRiJZ7qiDW9NBKmyRFi1p8MRR+flJNLSMoKlMe75hLvIoCYywQUk1/j9Ch/IdTsQtKlGMn1xpmH6QT8GxeG
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB03.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(46966006)(36840700001)(40470700001)(70206006)(86362001)(15650500001)(6666004)(5660300002)(47076005)(4326008)(36756003)(7696005)(110136005)(54906003)(316002)(2616005)(36860700001)(16526019)(8676002)(356005)(83380400001)(82310400004)(44832011)(26005)(186003)(426003)(336012)(1076003)(40460700001)(70586007)(81166007)(2906002)(7406005)(7416002)(8936002)(508600001)(2101003)(36900700001);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: GqFzzQsa4zAGqf+2auGZ6Uehl545yVDyszs7lHqW1dkpa2YCHhQ4PV51xCFry1PLfph8dTnJ7aqqNnqiweldg6yu9a/FbjODd0flb35/iLUnXDthvccUmZo6i8nKuUSHYox/0odzTMDJEMFr4tZzuoRwY4jxqK/B2ISZ23ylw+4ErzKoUiyn/ux1FqvtzcppQOWCFT5PdFQW2s0YZ7Bz4TC03zcKywsnr5hiF0DL4LTj5nk6UJ6jkkfkkpIZfY2eFZo/nEfNgRrwaqEjcwNPFxj3i9WFcQxCOfuno67vB+qjrtjmJY0wafWyFmU6TOMU/chsNMen1aedIikKhVzgvQVwqvc0iNnNJRYSOQb0DOmYh2QsFlNcDP8p9JYMhbVLB9lOx4mPNvwbAqPYP0Pr9hlj6amrw13xF0UCSMK7gRYFYIXigJ6krP6LcdkFKGgXfO2Lqlf4nvo+oyJpTnbzQMcjM6jFqyBwJf1qZ2RKz7GjMII3cY+aEFcr0alNONQiBN0AylRM/9ujmdjG+ZDp0au+9HQRoljAPBjO4A37Sx2W+M30yQVhp54y/6cx+kdwQ2binJoUwpbO8o4Z7yagXUpGo59hFSz/y99qujI/QV2Hg6ti800Q1dbu55LsMnmi14QjnZIPOMmcfpgNr46kYYtKyRykfeU5YuTTqxb+b3ilKJNF3RyKH1n22ctVGB+oWrfSM+d/bPyEn64aH2DHJCuND6Ein+u6ydS4ds+gsZOk1evoZxR+yD+2twGHV1C/wgBP6+TYtUlOU85dm1v/SKY8HLwsp3vQpRB4EICxgUQra9yT/gmwAOycag08p3oS
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB03.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(36840700001)(46966006)(40470700001)(70586007)(2616005)(70206006)(186003)(336012)(16526019)(82310400004)(8676002)(508600001)(316002)(7406005)(6666004)(81166007)(36860700001)(356005)(26005)(7416002)(40460700001)(47076005)(4326008)(86362001)(5660300002)(83380400001)(426003)(7696005)(15650500001)(54906003)(110136005)(1076003)(8936002)(2906002)(44832011)(36756003)(2101003)(36900700001);DIR:OUT;SFP:1101;
 X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Dec 2021 15:44:11.5102
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Dec 2021 15:44:20.3047
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 17618043-88ee-43ae-588e-08d9bbf3e952
+X-MS-Exchange-CrossTenant-Network-Message-Id: a3600ff1-76fc-42d9-4934-08d9bbf3ee90
 X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
 X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB03.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource: BN8NAM11FT018.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthSource: BN8NAM11FT067.eop-nam11.prod.protection.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY5PR12MB5016
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR12MB3021
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The probe_roms() access the memory range (0xc0000 - 0x10000) to probe
-various ROMs. The memory range is not part of the E820 system RAM
-range. The memory range is mapped as private (i.e encrypted) in page
-table.
+From: Tom Lendacky <thomas.lendacky@amd.com>
 
-When SEV-SNP is active, all the private memory must be validated before
-the access. The ROM range was not part of E820 map, so the guest BIOS
-did not validate it. An access to invalidated memory will cause a VC
-exception. The guest does not support handling not-validated VC exception
-yet, so validate the ROM memory regions before it is accessed.
+This is the final step in defining the multiple save areas to keep them
+separate and ensuring proper operation amongst the different types of
+guests. Update the SEV-ES/SEV-SNP save area to match the APM. This save
+area will be used for the upcoming SEV-SNP AP Creation NAE event support.
 
+Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
 Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
 ---
- arch/x86/kernel/probe_roms.c | 13 ++++++++++++-
- 1 file changed, 12 insertions(+), 1 deletion(-)
+ arch/x86/include/asm/svm.h | 66 +++++++++++++++++++++++++++++---------
+ 1 file changed, 50 insertions(+), 16 deletions(-)
 
-diff --git a/arch/x86/kernel/probe_roms.c b/arch/x86/kernel/probe_roms.c
-index 36e84d904260..d19a80565252 100644
---- a/arch/x86/kernel/probe_roms.c
-+++ b/arch/x86/kernel/probe_roms.c
-@@ -21,6 +21,7 @@
- #include <asm/sections.h>
- #include <asm/io.h>
- #include <asm/setup_arch.h>
-+#include <asm/sev.h>
- 
- static struct resource system_rom_resource = {
- 	.name	= "System ROM",
-@@ -197,11 +198,21 @@ static int __init romchecksum(const unsigned char *rom, unsigned long length)
- 
- void __init probe_roms(void)
- {
--	const unsigned char *rom;
- 	unsigned long start, length, upper;
-+	const unsigned char *rom;
- 	unsigned char c;
- 	int i;
- 
-+	/*
-+	 * The ROM memory is not part of the E820 system RAM and is not pre-validated
-+	 * by the BIOS. The kernel page table maps the ROM region as encrypted memory,
-+	 * the SEV-SNP requires the encrypted memory must be validated before the
-+	 * access. Validate the ROM before accessing it.
-+	 */
-+	snp_prep_memory(video_rom_resource.start,
-+			((system_rom_resource.end + 1) - video_rom_resource.start),
-+			SNP_PAGE_STATE_PRIVATE);
+diff --git a/arch/x86/include/asm/svm.h b/arch/x86/include/asm/svm.h
+index 5ff1fa364a31..7d90321e7775 100644
+--- a/arch/x86/include/asm/svm.h
++++ b/arch/x86/include/asm/svm.h
+@@ -290,7 +290,13 @@ struct sev_es_save_area {
+ 	struct vmcb_seg ldtr;
+ 	struct vmcb_seg idtr;
+ 	struct vmcb_seg tr;
+-	u8 reserved_1[43];
++	u64 vmpl0_ssp;
++	u64 vmpl1_ssp;
++	u64 vmpl2_ssp;
++	u64 vmpl3_ssp;
++	u64 u_cet;
++	u8 reserved_1[2];
++	u8 vmpl;
+ 	u8 cpl;
+ 	u8 reserved_2[4];
+ 	u64 efer;
+@@ -303,9 +309,19 @@ struct sev_es_save_area {
+ 	u64 dr6;
+ 	u64 rflags;
+ 	u64 rip;
+-	u8 reserved_4[88];
++	u64 dr0;
++	u64 dr1;
++	u64 dr2;
++	u64 dr3;
++	u64 dr0_addr_mask;
++	u64 dr1_addr_mask;
++	u64 dr2_addr_mask;
++	u64 dr3_addr_mask;
++	u8 reserved_4[24];
+ 	u64 rsp;
+-	u8 reserved_5[24];
++	u64 s_cet;
++	u64 ssp;
++	u64 isst_addr;
+ 	u64 rax;
+ 	u64 star;
+ 	u64 lstar;
+@@ -316,7 +332,7 @@ struct sev_es_save_area {
+ 	u64 sysenter_esp;
+ 	u64 sysenter_eip;
+ 	u64 cr2;
+-	u8 reserved_6[32];
++	u8 reserved_5[32];
+ 	u64 g_pat;
+ 	u64 dbgctl;
+ 	u64 br_from;
+@@ -325,12 +341,12 @@ struct sev_es_save_area {
+ 	u64 last_excp_to;
+ 	u8 reserved_7[80];
+ 	u32 pkru;
+-	u8 reserved_9[20];
+-	u64 reserved_10;	/* rax already available at 0x01f8 */
++	u8 reserved_8[20];
++	u64 reserved_9;		/* rax already available at 0x01f8 */
+ 	u64 rcx;
+ 	u64 rdx;
+ 	u64 rbx;
+-	u64 reserved_11;	/* rsp already available at 0x01d8 */
++	u64 reserved_10;	/* rsp already available at 0x01d8 */
+ 	u64 rbp;
+ 	u64 rsi;
+ 	u64 rdi;
+@@ -342,16 +358,34 @@ struct sev_es_save_area {
+ 	u64 r13;
+ 	u64 r14;
+ 	u64 r15;
+-	u8 reserved_12[16];
+-	u64 sw_exit_code;
+-	u64 sw_exit_info_1;
+-	u64 sw_exit_info_2;
+-	u64 sw_scratch;
++	u8 reserved_11[16];
++	u64 guest_exit_info_1;
++	u64 guest_exit_info_2;
++	u64 guest_exit_int_info;
++	u64 guest_nrip;
+ 	u64 sev_features;
+-	u8 reserved_13[48];
++	u64 vintr_ctrl;
++	u64 guest_exit_code;
++	u64 virtual_tom;
++	u64 tlb_id;
++	u64 pcpu_id;
++	u64 event_inj;
+ 	u64 xcr0;
+-	u8 valid_bitmap[16];
+-	u64 x87_state_gpa;
++	u8 reserved_12[16];
 +
- 	/* video rom */
- 	upper = adapter_rom_resources[0].start;
- 	for (start = video_rom_resource.start; start < upper; start += 2048) {
++	/* Floating point area */
++	u64 x87_dp;
++	u32 mxcsr;
++	u16 x87_ftw;
++	u16 x87_fsw;
++	u16 x87_fcw;
++	u16 x87_fop;
++	u16 x87_ds;
++	u16 x87_cs;
++	u64 x87_rip;
++	u8 fpreg_x87[80];
++	u8 fpreg_xmm[256];
++	u8 fpreg_ymm[256];
+ } __packed;
+ 
+ struct ghcb_save_area {
+@@ -410,7 +444,7 @@ struct ghcb {
+ 
+ #define EXPECTED_VMCB_SAVE_AREA_SIZE		740
+ #define EXPECTED_GHCB_SAVE_AREA_SIZE		1032
+-#define EXPECTED_SEV_ES_SAVE_AREA_SIZE		1032
++#define EXPECTED_SEV_ES_SAVE_AREA_SIZE		1648
+ #define EXPECTED_VMCB_CONTROL_AREA_SIZE		1024
+ #define EXPECTED_GHCB_SIZE			PAGE_SIZE
+ 
 -- 
 2.25.1
 
