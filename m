@@ -2,253 +2,338 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4358AC433FE
-	for <linux-efi@archiver.kernel.org>; Fri, 10 Dec 2021 13:40:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6640DC433FE
+	for <linux-efi@archiver.kernel.org>; Fri, 10 Dec 2021 15:43:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236200AbhLJNoL (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 10 Dec 2021 08:44:11 -0500
-Received: from out30-133.freemail.mail.aliyun.com ([115.124.30.133]:38551 "EHLO
-        out30-133.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S235951AbhLJNoD (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 10 Dec 2021 08:44:03 -0500
-X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R101e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=e01e04394;MF=xueshuai@linux.alibaba.com;NM=1;PH=DS;RN=12;SR=0;TI=SMTPD_---0V-ADOcC_1639143620;
-Received: from localhost.localdomain(mailfrom:xueshuai@linux.alibaba.com fp:SMTPD_---0V-ADOcC_1639143620)
-          by smtp.aliyun-inc.com(127.0.0.1);
-          Fri, 10 Dec 2021 21:40:25 +0800
-From:   Shuai Xue <xueshuai@linux.alibaba.com>
-To:     mchehab@kernel.org, bp@alien8.de, tony.luck@intel.com,
-        james.morse@arm.com, rric@kernel.org, ardb@kernel.org,
-        linux-edac@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-efi@vger.kernel.org
-Cc:     xueshuai@linux.alibaba.com, zhangliguang@linux.alibaba.com,
-        zhuo.song@linux.alibaba.com
-Subject: [PATCH v2 3/3] ghes_edac: refactor error status fields decoding
-Date:   Fri, 10 Dec 2021 21:40:19 +0800
-Message-Id: <20211210134019.28536-4-xueshuai@linux.alibaba.com>
-X-Mailer: git-send-email 2.30.1 (Apple Git-130)
-In-Reply-To: <20211210134019.28536-1-xueshuai@linux.alibaba.com>
-References: <20211210134019.28536-1-xueshuai@linux.alibaba.com>
+        id S235666AbhLJPrb (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 10 Dec 2021 10:47:31 -0500
+Received: from mail-dm6nam12on2075.outbound.protection.outlook.com ([40.107.243.75]:56289
+        "EHLO NAM12-DM6-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S230255AbhLJPrb (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 10 Dec 2021 10:47:31 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=fU3sOnm7qj6oNITa6ZrXccfvzEj/BN3lm4xE/HV7jnIpM0FwL+yTZyqGnTVuuY/2QY9yv0Z3XPm56/eZvyIGystsklQd2APe61Wp2i4W/J3KuaWL0rKtu1VgJZc18d5SZ1t2NnbopShrpX3PyFwA4Sz9CwBV6OOBNdVSxFgy4uePvU7N9fgs7Y5KITtwoPlikG+Gbiebfv0RqBiTMNvzRRD2LVRyzZqzQiZxFaCDkgbOjtUwGpnbMsoMu3t9NI87eOluqAgzHK74IfQt3sj9+IySx9ci4yhBKD6im+xhF5Lm6Ij07e01lbYO/hExapjPPu20EuIlTUpCTyZ2oW6r7Q==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=cWICdsmfsM13g03TlnnuhKN8aNv8hpSqWxZLvsomreQ=;
+ b=CNlz7l5uRlMogeqffxFFX1K0J1VaKTrJslPATvqP7ruUQP9miXerarxdekymEJcm8bKLhWLQ+3W6avAJpxkyseWWHDYMq7iU5dj6FewHDerbUXYcJCpuWP9fRAm6tSb5GmQxchZu/eiCpf8cmxa0wAhvbVYlCw2twQYhTToVDJwarTT9f4BRSOuqKAzJPDKzmXCfHNWDkhIfxDBcRcdNGUsLihENtzwQfovkEtqDcHWS/eD7zJAT/TYN3ywN9SbERWLtIfzdPn9EG+inks5xzv+42KHipX7Wj8rfDtmVCdfj0wGuw+Poz1aZdMaI3kXfsup8/D6JEzENTMNzV9V2NQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=kernel.org smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=cWICdsmfsM13g03TlnnuhKN8aNv8hpSqWxZLvsomreQ=;
+ b=v7CTAgAujO+DAWAt51IKifFHeti1rcXB3M/KudzJ70KsdwQCuCa8V7aCFdpL2tWdAgeX7NWq0EfVSDoAqGv1+C+lU8BIBJRTSvg9wCJCm7sKF2Mwof2f/eItrHGuRJXT6467DWFqnq4aAa0B9wsBLGlsUetM5nRKxTrp043mPsA=
+Received: from BN9PR03CA0076.namprd03.prod.outlook.com (2603:10b6:408:fc::21)
+ by BL0PR12MB2355.namprd12.prod.outlook.com (2603:10b6:207:3f::25) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4755.21; Fri, 10 Dec
+ 2021 15:43:53 +0000
+Received: from BN8NAM11FT065.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:408:fc:cafe::af) by BN9PR03CA0076.outlook.office365.com
+ (2603:10b6:408:fc::21) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4755.21 via Frontend
+ Transport; Fri, 10 Dec 2021 15:43:53 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB03.amd.com;
+Received: from SATLEXMB03.amd.com (165.204.84.17) by
+ BN8NAM11FT065.mail.protection.outlook.com (10.13.177.63) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.4778.13 via Frontend Transport; Fri, 10 Dec 2021 15:43:52 +0000
+Received: from sbrijesh-desktop.amd.com (10.180.168.240) by SATLEXMB03.amd.com
+ (10.181.40.144) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.17; Fri, 10 Dec
+ 2021 09:43:48 -0600
+From:   Brijesh Singh <brijesh.singh@amd.com>
+To:     <x86@kernel.org>, <linux-kernel@vger.kernel.org>,
+        <kvm@vger.kernel.org>, <linux-efi@vger.kernel.org>,
+        <platform-driver-x86@vger.kernel.org>,
+        <linux-coco@lists.linux.dev>, <linux-mm@kvack.org>
+CC:     Thomas Gleixner <tglx@linutronix.de>,
+        Ingo Molnar <mingo@redhat.com>, Joerg Roedel <jroedel@suse.de>,
+        Tom Lendacky <thomas.lendacky@amd.com>,
+        "H. Peter Anvin" <hpa@zytor.com>, Ard Biesheuvel <ardb@kernel.org>,
+        Paolo Bonzini <pbonzini@redhat.com>,
+        Sean Christopherson <seanjc@google.com>,
+        "Vitaly Kuznetsov" <vkuznets@redhat.com>,
+        Jim Mattson <jmattson@google.com>,
+        "Andy Lutomirski" <luto@kernel.org>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        Sergio Lopez <slp@redhat.com>, Peter Gonda <pgonda@google.com>,
+        "Peter Zijlstra" <peterz@infradead.org>,
+        Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>,
+        David Rientjes <rientjes@google.com>,
+        Dov Murik <dovmurik@linux.ibm.com>,
+        Tobin Feldman-Fitzthum <tobin@ibm.com>,
+        Borislav Petkov <bp@alien8.de>,
+        Michael Roth <michael.roth@amd.com>,
+        Vlastimil Babka <vbabka@suse.cz>,
+        "Kirill A . Shutemov" <kirill@shutemov.name>,
+        Andi Kleen <ak@linux.intel.com>,
+        "Dr . David Alan Gilbert" <dgilbert@redhat.com>,
+        <tony.luck@intel.com>, <marcorr@google.com>,
+        <sathyanarayanan.kuppuswamy@linux.intel.com>,
+        Brijesh Singh <brijesh.singh@amd.com>
+Subject: [PATCH v8 01/40] x86/compressed/64: detect/setup SEV/SME features earlier in boot
+Date:   Fri, 10 Dec 2021 09:42:53 -0600
+Message-ID: <20211210154332.11526-2-brijesh.singh@amd.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20211210154332.11526-1-brijesh.singh@amd.com>
+References: <20211210154332.11526-1-brijesh.singh@amd.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB03.amd.com (10.181.40.144) To SATLEXMB03.amd.com
+ (10.181.40.144)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 7728a01d-f5a5-4562-0bb3-08d9bbf3de7b
+X-MS-TrafficTypeDiagnostic: BL0PR12MB2355:EE_
+X-Microsoft-Antispam-PRVS: <BL0PR12MB2355D8933827589CB5926599E5719@BL0PR12MB2355.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:7691;
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: 383ekUieqgFrNa5uUzs53ofdKOSMM9aO9zRQ6RoYQZoNKXiIQ5V/iws20HJDl4KXbNkOlmffEuDsX4i1YlIYFFwO/VH5euEtMyZb6nenvDInz5yDfGIC0PSaZ4b/g08SkMiH5julwDb889cy4My3AeHh59R61PbLXdmkfyECs0zwuCXapDcigKbIOqCABUK0CAJtwzEA5xHN2c+oD2J6cEmKsBRygXziCkQIO5TY1l5WDTfpGz413yRcK7+ty4LnoknXJ82ONi5vUH2034Lg2TU40WWwz6BSMro0SjuP8UWqy6YSrVTQwmN2WsozmdwoPGPsYBOz4IDuV9ODV4BU9At9fdYcaYrtzhkvnklCYsYvmRlXmhK3XU/ZzwL5iTsADhbWMDs+04WRJGSbx5MkPY6Xg8Li4JyjySjmqjjV/o0PrnZO4UzgnZB2qmv9+6wrcN9B5ROmIAjW17VcliaChJNnOqd3ymznGa/VEcIBAn09GframhAJRE/E2plUpZ19EQTe1dcwIGILk1VPvt3sjxNWCmbY2jPH132vUP2MKFKjGBkNX3MscE1zR9k2pAYP0DJcOQ+XQED6Dpg0iLATcZ8aEYrwc4tkmFRjNCkjfkRAozJ7fC+jiQTNi0J52eO7n0z+zj7OhoTo70zjb9y8OIq7ipi0PiP0e3uEgVRgXL5qIwa58bMGISka0OPNkxmYRnG7Y52GBdkPSenU9O6yCsHkYRSYxY0H7oHG6yY/iVHWJRsz1uMEslQdFkoLPzHJgCLFTJnHb1UOibPIuwFOOQClqOMNovYrcS/hP0vpK9BxiyvfvR4g91u0jcEFvkdu
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB03.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(46966006)(36840700001)(40470700001)(186003)(36860700001)(4326008)(8936002)(16526019)(110136005)(82310400004)(5660300002)(81166007)(7696005)(83380400001)(6666004)(40460700001)(1076003)(47076005)(316002)(36756003)(426003)(54906003)(26005)(70586007)(8676002)(356005)(2616005)(2906002)(336012)(7416002)(44832011)(508600001)(70206006)(86362001)(7406005)(2101003)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Dec 2021 15:43:52.5169
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 7728a01d-f5a5-4562-0bb3-08d9bbf3de7b
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB03.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: BN8NAM11FT065.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BL0PR12MB2355
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-ghes_edac_report_mem_error() in ghes_edac.c is a Long Method in which the
-error status fields decoding could be refactored for reuse. On the other
-hand, the cper_print_mem() only reports the error status and misses its
-description.
+From: Michael Roth <michael.roth@amd.com>
 
-This patch introduces a new helper function cper_mem_err_status_str() which
-is used to wrap up the decoding logics, and the cper_print_mem() will call
-it and report the details of error status description.
+With upcoming SEV-SNP support, SEV-related features need to be
+initialized earlier in boot, at the same point the initial #VC handler
+is set up, so that the SEV-SNP CPUID table can be utilized during the
+initial feature checks. Also, SEV-SNP feature detection will rely on
+EFI helper functions to scan the EFI config table for the Confidential
+Computing blob, and so would need to be implemented at least partially
+in C.
 
-The cper error log is now properly reporting the error as follows (all
-Validation Bits are enabled):
+Currently set_sev_encryption_mask() is used to initialize the
+sev_status and sme_me_mask globals that advertise what SEV/SME features
+are available in a guest. Rename it to sev_enable() to better reflect
+that (SME is only enabled in the case of SEV guests in the
+boot/compressed kernel), and move it to just after the stage1 #VC
+handler is set up so that it can be used to initialize SEV-SNP as well
+in future patches.
 
-[37863.026267] EDAC MC0: 1 CE single-symbol chipkill ECC on unknown memory (node: 0 card: 0 module: 0 rank: 0 bank: 1282 bank_group: 5 bank_address: 2 device: 0 row: 11387 column: 1544 bit_position: 0 requestor_id: 0x0000000000000000 responder_id: 0x0000000000000000 DIMM location: not present. DMI handle: 0x0000 page:0x963d9b offset:0x20 grain:1 syndrome:0x0 - APEI location: node: 0 card: 0 module: 0 rank: 0 bank: 1282 bank_group: 5 bank_address: 2 device: 0 row: 11387 column: 1544 bit_position: 0 requestor_id: 0x0000000000000000 responder_id: 0x0000000000000000 DIMM location: not present. DMI handle: 0x0000 status(0x0000000000000000): reserved)
-[37863.026272] {2}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 2
-[37863.026273] {2}[Hardware Error]: It has been corrected by h/w and requires no further action
-[37863.026275] {2}[Hardware Error]: event severity: corrected
-[37863.026276] {2}[Hardware Error]:  Error 0, type: corrected
-[37863.026278] {2}[Hardware Error]:   section_type: memory error
-[37863.026279] {2}[Hardware Error]:   error_status: 0x0000000000000000, reserved
-[37863.026279] {2}[Hardware Error]:   physical_address: 0x0000000963d9b020
-[37863.026280] {2}[Hardware Error]:   physical_address_mask: 0x0000000000000000
-[37863.026282] {2}[Hardware Error]:   node: 0 card: 0 module: 0 rank: 0 bank: 1282 bank_group: 5 bank_address: 2 device: 0 row: 11387 column: 1544 bit_position: 0 requestor_id: 0x0000000000000000 responder_id: 0x0000000000000000
-[37863.026283] {2}[Hardware Error]:   error_type: 4, single-symbol chipkill ECC
-[37863.026284] {2}[Hardware Error]:   DIMM location: not present. DMI handle: 0x0000
+While at it, re-implement it as C code so that all SEV feature
+detection can be better consolidated with upcoming SEV-SNP feature
+detection, which will also be in C.
 
-Signed-off-by: Shuai Xue <xueshuai@linux.alibaba.com>
+The 32-bit entry path remains unchanged, as it never relied on the
+set_sev_encryption_mask() initialization to begin with, possibly due to
+the normal rva() helper for accessing globals only being usable by code
+in .head.text. Either way, 32-bit entry for SEV-SNP would likely only
+be supported for non-EFI boot paths, and so wouldn't rely on existing
+EFI helper functions, and so could be handled by a separate/simpler
+32-bit initializer in the future if needed.
+
+Signed-off-by: Michael Roth <michael.roth@amd.com>
+Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
 ---
- drivers/edac/ghes_edac.c    | 89 +++++++++++--------------------------
- drivers/firmware/efi/cper.c | 46 ++++++++++++++++++-
- include/linux/cper.h        |  1 +
- 3 files changed, 72 insertions(+), 64 deletions(-)
+ arch/x86/boot/compressed/head_64.S     | 32 ++++++++++--------
+ arch/x86/boot/compressed/mem_encrypt.S | 36 ---------------------
+ arch/x86/boot/compressed/misc.h        |  4 +--
+ arch/x86/boot/compressed/sev.c         | 45 ++++++++++++++++++++++++++
+ 4 files changed, 66 insertions(+), 51 deletions(-)
 
-diff --git a/drivers/edac/ghes_edac.c b/drivers/edac/ghes_edac.c
-index 103ad5b3a018..986276557c93 100644
---- a/drivers/edac/ghes_edac.c
-+++ b/drivers/edac/ghes_edac.c
-@@ -235,6 +235,31 @@ static void ghes_scan_system(void)
- 	system_scanned = true;
- }
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index 572c535cf45b..20b174adca51 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -191,9 +191,8 @@ SYM_FUNC_START(startup_32)
+ 	/*
+ 	 * Mark SEV as active in sev_status so that startup32_check_sev_cbit()
+ 	 * will do a check. The sev_status memory will be fully initialized
+-	 * with the contents of MSR_AMD_SEV_STATUS later in
+-	 * set_sev_encryption_mask(). For now it is sufficient to know that SEV
+-	 * is active.
++	 * with the contents of MSR_AMD_SEV_STATUS later via sev_enable(). For
++	 * now it is sufficient to know that SEV is active.
+ 	 */
+ 	movl	$1, rva(sev_status)(%ebp)
+ 1:
+@@ -447,6 +446,23 @@ SYM_CODE_START(startup_64)
+ 	call	load_stage1_idt
+ 	popq	%rsi
  
-+static int ghes_edac_mem_err_other_detail(const struct cper_sec_mem_err *mem,
-+				char *msg, const char *location)
-+{
-+	u32 len, n;
++#ifdef CONFIG_AMD_MEM_ENCRYPT
++	/*
++	 * Now that the stage1 interrupt handlers are set up, #VC exceptions from
++	 * CPUID instructions can be properly handled for SEV-ES guests.
++	 *
++	 * For SEV-SNP, the CPUID table also needs to be set up in advance of any
++	 * CPUID instructions being issued, so go ahead and do that now via
++	 * sev_enable(), which will also handle the rest of the SEV-related
++	 * detection/setup to ensure that has been done in advance of any dependent
++	 * code.
++	 */
++	pushq	%rsi
++	movq	%rsi, %rdi		/* real mode address */
++	call	sev_enable
++	popq	%rsi
++#endif
 +
-+	if (!msg)
-+		return 0;
-+
-+	n = 0;
-+	len = 2 * CPER_REC_LEN - 1;
-+
-+	n += snprintf(msg + n, len - n, "APEI location: %s ", location);
-+
-+	if (mem->validation_bits & CPER_MEM_VALID_ERROR_STATUS) {
-+		u64 status = mem->error_status;
-+
-+		n += snprintf(msg + n, len - n,  "status(0x%016llx): ",
-+				(long long)status);
-+		n += snprintf(msg + n, len - n, "%s ", cper_mem_err_status_str(status));
-+	}
-+
-+	msg[n] = '\0';
-+	return n;
-+}
-+
- void ghes_edac_report_mem_error(int sev, struct cper_sec_mem_err *mem_err)
- {
- 	struct edac_raw_error_desc *e;
-@@ -335,69 +360,7 @@ void ghes_edac_report_mem_error(int sev, struct cper_sec_mem_err *mem_err)
+ 	/*
+ 	 * paging_prepare() sets up the trampoline and checks if we need to
+ 	 * enable 5-level paging.
+@@ -559,17 +575,7 @@ SYM_FUNC_START_LOCAL_NOALIGN(.Lrelocated)
+ 	shrq	$3, %rcx
+ 	rep	stosq
  
- 	/* All other fields are mapped on e->other_detail */
- 	p = pvt->other_detail;
--	p += snprintf(p, sizeof(pvt->other_detail),
--		"APEI location: %s ", e->location);
--	if (mem_err->validation_bits & CPER_MEM_VALID_ERROR_STATUS) {
--		u64 status = mem_err->error_status;
+-/*
+- * If running as an SEV guest, the encryption mask is required in the
+- * page-table setup code below. When the guest also has SEV-ES enabled
+- * set_sev_encryption_mask() will cause #VC exceptions, but the stage2
+- * handler can't map its GHCB because the page-table is not set up yet.
+- * So set up the encryption mask here while still on the stage1 #VC
+- * handler. Then load stage2 IDT and switch to the kernel's own
+- * page-table.
+- */
+ 	pushq	%rsi
+-	call	set_sev_encryption_mask
+ 	call	load_stage2_idt
+ 
+ 	/* Pass boot_params to initialize_identity_maps() */
+diff --git a/arch/x86/boot/compressed/mem_encrypt.S b/arch/x86/boot/compressed/mem_encrypt.S
+index c1e81a848b2a..311d40f35a4b 100644
+--- a/arch/x86/boot/compressed/mem_encrypt.S
++++ b/arch/x86/boot/compressed/mem_encrypt.S
+@@ -187,42 +187,6 @@ SYM_CODE_END(startup32_vc_handler)
+ 	.code64
+ 
+ #include "../../kernel/sev_verify_cbit.S"
+-SYM_FUNC_START(set_sev_encryption_mask)
+-#ifdef CONFIG_AMD_MEM_ENCRYPT
+-	push	%rbp
+-	push	%rdx
 -
--		p += sprintf(p, "status(0x%016llx):", (long long)status);
--		switch ((status >> 8) & 0xff) {
--		case 1:
--			p += sprintf(p, "Error detected internal to the component ");
--			break;
--		case 16:
--			p += sprintf(p, "Error detected in the bus ");
--			break;
--		case 4:
--			p += sprintf(p, "Storage error in DRAM memory ");
--			break;
--		case 5:
--			p += sprintf(p, "Storage error in TLB ");
--			break;
--		case 6:
--			p += sprintf(p, "Storage error in cache ");
--			break;
--		case 7:
--			p += sprintf(p, "Error in one or more functional units ");
--			break;
--		case 8:
--			p += sprintf(p, "component failed self test ");
--			break;
--		case 9:
--			p += sprintf(p, "Overflow or undervalue of internal queue ");
--			break;
--		case 17:
--			p += sprintf(p, "Virtual address not found on IO-TLB or IO-PDIR ");
--			break;
--		case 18:
--			p += sprintf(p, "Improper access error ");
--			break;
--		case 19:
--			p += sprintf(p, "Access to a memory address which is not mapped to any component ");
--			break;
--		case 20:
--			p += sprintf(p, "Loss of Lockstep ");
--			break;
--		case 21:
--			p += sprintf(p, "Response not associated with a request ");
--			break;
--		case 22:
--			p += sprintf(p, "Bus parity error - must also set the A, C, or D Bits ");
--			break;
--		case 23:
--			p += sprintf(p, "Detection of a PATH_ERROR ");
--			break;
--		case 25:
--			p += sprintf(p, "Bus operation timeout ");
--			break;
--		case 26:
--			p += sprintf(p, "A read was issued to data that has been poisoned ");
--			break;
--		default:
--			p += sprintf(p, "reserved ");
--			break;
--		}
--	}
-+	p += ghes_edac_mem_err_other_detail(mem_err, p, e->location);
+-	movq	%rsp, %rbp		/* Save current stack pointer */
+-
+-	call	get_sev_encryption_bit	/* Get the encryption bit position */
+-	testl	%eax, %eax
+-	jz	.Lno_sev_mask
+-
+-	bts	%rax, sme_me_mask(%rip)	/* Create the encryption mask */
+-
+-	/*
+-	 * Read MSR_AMD64_SEV again and store it to sev_status. Can't do this in
+-	 * get_sev_encryption_bit() because this function is 32-bit code and
+-	 * shared between 64-bit and 32-bit boot path.
+-	 */
+-	movl	$MSR_AMD64_SEV, %ecx	/* Read the SEV MSR */
+-	rdmsr
+-
+-	/* Store MSR value in sev_status */
+-	shlq	$32, %rdx
+-	orq	%rdx, %rax
+-	movq	%rax, sev_status(%rip)
+-
+-.Lno_sev_mask:
+-	movq	%rbp, %rsp		/* Restore original stack pointer */
+-
+-	pop	%rdx
+-	pop	%rbp
+-#endif
+-
+-	xor	%rax, %rax
+-	ret
+-SYM_FUNC_END(set_sev_encryption_mask)
  
- 	if (p > pvt->other_detail)
- 		*(p - 1) = '\0';
-diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-index 7553fecf2819..f604cb38da7e 100644
---- a/drivers/firmware/efi/cper.c
-+++ b/drivers/firmware/efi/cper.c
-@@ -211,6 +211,49 @@ const char *cper_mem_err_type_str(unsigned int etype)
- }
- EXPORT_SYMBOL_GPL(cper_mem_err_type_str);
+ 	.data
  
-+const char *cper_mem_err_status_str(u64 status)
-+{
-+	switch ((status >> 8) & 0xff) {
-+	case 1:
-+		return "Error detected internal to the component";
-+	case 16:
-+		return "Error detected in the bus";
-+	case 4:
-+		return "Storage error in DRAM memory";
-+	case 5:
-+		return "Storage error in TLB";
-+	case 6:
-+		return "Storage error in cache";
-+	case 7:
-+		return "Error in one or more functional units";
-+	case 8:
-+		return "component failed self test";
-+	case 9:
-+		return "Overflow or undervalue of internal queue";
-+	case 17:
-+		return "Virtual address not found on IO-TLB or IO-PDIR";
-+	case 18:
-+		return "Improper access error";
-+	case 19:
-+		return "Access to a memory address which is not mapped to any component";
-+	case 20:
-+		return "Loss of Lockstep";
-+	case 21:
-+		return "Response not associated with a request";
-+	case 22:
-+		return "Bus parity error - must also set the A, C, or D Bits";
-+	case 23:
-+		return "Detection of a PATH_ERROR ";
-+	case 25:
-+		return "Bus operation timeout";
-+	case 26:
-+		return "A read was issued to data that has been poisoned";
-+	default:
-+		return "reserved";
-+	}
-+}
-+EXPORT_SYMBOL_GPL(cper_mem_err_status_str);
-+
- int cper_mem_err_location(struct cper_mem_err_compact *mem, char *msg)
+diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
+index 16ed360b6692..23e0e395084a 100644
+--- a/arch/x86/boot/compressed/misc.h
++++ b/arch/x86/boot/compressed/misc.h
+@@ -120,12 +120,12 @@ static inline void console_init(void)
+ { }
+ #endif
+ 
+-void set_sev_encryption_mask(void);
+-
+ #ifdef CONFIG_AMD_MEM_ENCRYPT
++void sev_enable(struct boot_params *bp);
+ void sev_es_shutdown_ghcb(void);
+ extern bool sev_es_check_ghcb_fault(unsigned long address);
+ #else
++static inline void sev_enable(struct boot_params *bp) { }
+ static inline void sev_es_shutdown_ghcb(void) { }
+ static inline bool sev_es_check_ghcb_fault(unsigned long address)
  {
- 	u32 len, n;
-@@ -336,7 +379,8 @@ static void cper_print_mem(const char *pfx, const struct cper_sec_mem_err *mem,
- 		return;
- 	}
- 	if (mem->validation_bits & CPER_MEM_VALID_ERROR_STATUS)
--		printk("%s""error_status: 0x%016llx\n", pfx, mem->error_status);
-+		printk("%s""error_status: 0x%016llx, %s\n", pfx, mem->error_status,
-+				cper_mem_err_status_str(mem->error_status));
- 	if (mem->validation_bits & CPER_MEM_VALID_PA)
- 		printk("%s""physical_address: 0x%016llx\n",
- 		       pfx, mem->physical_addr);
-diff --git a/include/linux/cper.h b/include/linux/cper.h
-index 918e7efffb60..eacb7dd7b3af 100644
---- a/include/linux/cper.h
-+++ b/include/linux/cper.h
-@@ -558,6 +558,7 @@ extern const char *const cper_proc_error_type_strs[4];
- u64 cper_next_record_id(void);
- const char *cper_severity_str(unsigned int);
- const char *cper_mem_err_type_str(unsigned int);
-+const char *cper_mem_err_status_str(u64 status);
- void cper_print_bits(const char *prefix, unsigned int bits,
- 		     const char * const strs[], unsigned int strs_size);
- void cper_mem_err_pack(const struct cper_sec_mem_err *,
+diff --git a/arch/x86/boot/compressed/sev.c b/arch/x86/boot/compressed/sev.c
+index 28bcf04c022e..8eebdf589a90 100644
+--- a/arch/x86/boot/compressed/sev.c
++++ b/arch/x86/boot/compressed/sev.c
+@@ -204,3 +204,48 @@ void do_boot_stage2_vc(struct pt_regs *regs, unsigned long exit_code)
+ 	else if (result != ES_RETRY)
+ 		sev_es_terminate(GHCB_SEV_ES_GEN_REQ);
+ }
++
++static inline u64 rd_sev_status_msr(void)
++{
++	unsigned long low, high;
++
++	asm volatile("rdmsr" : "=a" (low), "=d" (high) :
++			"c" (MSR_AMD64_SEV));
++
++	return ((high << 32) | low);
++}
++
++void sev_enable(struct boot_params *bp)
++{
++	unsigned int eax, ebx, ecx, edx;
++
++	/* Check for the SME/SEV support leaf */
++	eax = 0x80000000;
++	ecx = 0;
++	native_cpuid(&eax, &ebx, &ecx, &edx);
++	if (eax < 0x8000001f)
++		return;
++
++	/*
++	 * Check for the SME/SEV feature:
++	 *   CPUID Fn8000_001F[EAX]
++	 *   - Bit 0 - Secure Memory Encryption support
++	 *   - Bit 1 - Secure Encrypted Virtualization support
++	 *   CPUID Fn8000_001F[EBX]
++	 *   - Bits 5:0 - Pagetable bit position used to indicate encryption
++	 */
++	eax = 0x8000001f;
++	ecx = 0;
++	native_cpuid(&eax, &ebx, &ecx, &edx);
++	/* Check whether SEV is supported */
++	if (!(eax & BIT(1)))
++		return;
++
++	/* Set the SME mask if this is an SEV guest. */
++	sev_status   = rd_sev_status_msr();
++
++	if (!(sev_status & MSR_AMD64_SEV_ENABLED))
++		return;
++
++	sme_me_mask = BIT_ULL(ebx & 0x3f);
++}
 -- 
-2.20.1.12.g72788fdb
+2.25.1
 
