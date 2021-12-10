@@ -2,72 +2,55 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CB803C433F5
-	for <linux-efi@archiver.kernel.org>; Fri, 10 Dec 2021 15:47:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D7FAC433EF
+	for <linux-efi@archiver.kernel.org>; Fri, 10 Dec 2021 18:47:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243110AbhLJPum (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 10 Dec 2021 10:50:42 -0500
-Received: from mail-dm6nam10on2085.outbound.protection.outlook.com ([40.107.93.85]:63072
-        "EHLO NAM10-DM6-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S239918AbhLJPrh (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 10 Dec 2021 10:47:37 -0500
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=NlYYhgzs4Xk9UuTxgq+RGYYmCZD3yjLHTtb/5BfD2yft+f/3SXr61/SVagaT8ErLHxKYT48qOAf9YNo+QQhar19FRAvKOTlQlK/canStmliBP3/mJ0dSMIevGjPNgSG/gSsZQKH7AKXuy7pKWwK9xyNwV+f2UZnwMUiT6BbTjvnZNbX6+BX6adyA5jnft2kgh2i+J0WdUw6yd+gFajQ4O7FfoYVMel1nLrbRihDd2i3xibbl56BmsziMzbTiqDI0WDnilp0aBBx8PmbbdDokFRSB05RG/L8vH4i2klLgEbc4uZy7R4BWzZaD1Q0ZStOPFMdoUDokKhDaRk4iCR+cWQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=E27CZCHmAjOrojktVJgM8HaiFTkozVXgtHlrxMKFm2U=;
- b=d1xPtlkUuVPzhPqRrh/IVlit+SxKF1Js3SdMPY6DOvUZaIo6PAU/MFYrR/B2DTHITMXVdE1F9TPnFSkxbkXgiLv0jleDIzV36//jUzhNj7ZoHIiXh1sc+4VsN+1ZIQG84j0f7gt/Vm68nPg4ehesE4wJ2AI1tzc8gBqSEjQrQxGCi82nSr32Dq+xG7d6a9Xp+3bHX0q17vo7suxdPsIqbdSc01Fw1ix+WoIePmH2fsY8Dv2jLRyYha0DUkTVrxNt84J1+FLgL5YoP0L/oT3mjgvE3i2iPOK4Yf5GeAChnPTfTZoqEIsKQA85BLGIazhUZDa2TbarTc+uBmzrMIMLmg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 165.204.84.17) smtp.rcpttodomain=kernel.org smtp.mailfrom=amd.com; dmarc=pass
- (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
- dkim=none (message not signed); arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=E27CZCHmAjOrojktVJgM8HaiFTkozVXgtHlrxMKFm2U=;
- b=QsEws0RvUNJPotHybCVGGCMyHBoeGEIv9/Zw5GuahZcEMFbKp9xOZzdRQVGmJupf8kaGZvpNAi0t15AC4Bmap0Vo7/Nk49Hs4W3jle33qrmxD3j10/VIVgxta/8A0+4wpJlu95U0Rh/tBjgz9dR9thdxOoJdNUqZmqwzWfGEqVg=
-Received: from BN1PR14CA0030.namprd14.prod.outlook.com (2603:10b6:408:e3::35)
- by DM6PR12MB3788.namprd12.prod.outlook.com (2603:10b6:5:1c5::13) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4778.15; Fri, 10 Dec
- 2021 15:44:01 +0000
-Received: from BN8NAM11FT029.eop-nam11.prod.protection.outlook.com
- (2603:10b6:408:e3:cafe::6) by BN1PR14CA0030.outlook.office365.com
- (2603:10b6:408:e3::35) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4778.12 via Frontend
- Transport; Fri, 10 Dec 2021 15:44:00 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
- smtp.mailfrom=amd.com; dkim=none (message not signed)
- header.d=none;dmarc=pass action=none header.from=amd.com;
-Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
- 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
- client-ip=165.204.84.17; helo=SATLEXMB03.amd.com;
-Received: from SATLEXMB03.amd.com (165.204.84.17) by
- BN8NAM11FT029.mail.protection.outlook.com (10.13.177.68) with Microsoft SMTP
- Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.4778.13 via Frontend Transport; Fri, 10 Dec 2021 15:44:00 +0000
-Received: from sbrijesh-desktop.amd.com (10.180.168.240) by SATLEXMB03.amd.com
- (10.181.40.144) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.17; Fri, 10 Dec
- 2021 09:43:58 -0600
-From:   Brijesh Singh <brijesh.singh@amd.com>
-To:     <x86@kernel.org>, <linux-kernel@vger.kernel.org>,
-        <kvm@vger.kernel.org>, <linux-efi@vger.kernel.org>,
-        <platform-driver-x86@vger.kernel.org>,
-        <linux-coco@lists.linux.dev>, <linux-mm@kvack.org>
-CC:     Thomas Gleixner <tglx@linutronix.de>,
+        id S245526AbhLJSvR (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 10 Dec 2021 13:51:17 -0500
+Received: from mga09.intel.com ([134.134.136.24]:44586 "EHLO mga09.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S234780AbhLJSvQ (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 10 Dec 2021 13:51:16 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1639162061; x=1670698061;
+  h=subject:to:cc:references:from:message-id:date:
+   mime-version:in-reply-to:content-transfer-encoding;
+  bh=MvIm5dhnOrJG4xnyo8yJ97M0A5lSqv0u1ydfL7oLCgU=;
+  b=I/YuIJb4ieB059Sov1K/izgiGLmZGgpBz+pK0FPVWNf7Gcd3eQ6TRoTg
+   mLL6PRJwzQj4/bx7V6D4LjWraWBoj1yXry3DtigpY44lF/jyPhJdobVna
+   c3ElPsUIyCDHIVeYfImFSugl2y1Z7PveAdct931yTAkoYHnQu6T3C9iYI
+   2s6YVyuvfLCd7c3tIR2Jw41VZoD1QXgRgmFA02Zh0565wsxEc+1jCLWxA
+   NOvKpRKdBSbHQYl4uQ37iGC6k0Z0F0NjF4GrkeeHX1gUvRO6AYLwYG+C4
+   d4lWnqBcRYjPrRmQ/pxGAkGadiFwXjfWFvVT4VXyG0fPA9einhwr8TTii
+   Q==;
+X-IronPort-AV: E=McAfee;i="6200,9189,10194"; a="238217689"
+X-IronPort-AV: E=Sophos;i="5.88,196,1635231600"; 
+   d="scan'208";a="238217689"
+Received: from fmsmga002.fm.intel.com ([10.253.24.26])
+  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Dec 2021 10:47:40 -0800
+X-IronPort-AV: E=Sophos;i="5.88,196,1635231600"; 
+   d="scan'208";a="607568677"
+Received: from klarson-mobl.amr.corp.intel.com (HELO [10.251.16.229]) ([10.251.16.229])
+  by fmsmga002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Dec 2021 10:47:37 -0800
+Subject: Re: [PATCH v8 01/40] x86/compressed/64: detect/setup SEV/SME features
+ earlier in boot
+To:     Brijesh Singh <brijesh.singh@amd.com>, x86@kernel.org,
+        linux-kernel@vger.kernel.org, kvm@vger.kernel.org,
+        linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org,
+        linux-coco@lists.linux.dev, linux-mm@kvack.org
+Cc:     Thomas Gleixner <tglx@linutronix.de>,
         Ingo Molnar <mingo@redhat.com>, Joerg Roedel <jroedel@suse.de>,
         Tom Lendacky <thomas.lendacky@amd.com>,
         "H. Peter Anvin" <hpa@zytor.com>, Ard Biesheuvel <ardb@kernel.org>,
         Paolo Bonzini <pbonzini@redhat.com>,
         Sean Christopherson <seanjc@google.com>,
-        "Vitaly Kuznetsov" <vkuznets@redhat.com>,
+        Vitaly Kuznetsov <vkuznets@redhat.com>,
         Jim Mattson <jmattson@google.com>,
-        "Andy Lutomirski" <luto@kernel.org>,
+        Andy Lutomirski <luto@kernel.org>,
         Dave Hansen <dave.hansen@linux.intel.com>,
         Sergio Lopez <slp@redhat.com>, Peter Gonda <pgonda@google.com>,
-        "Peter Zijlstra" <peterz@infradead.org>,
+        Peter Zijlstra <peterz@infradead.org>,
         Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>,
         David Rientjes <rientjes@google.com>,
         Dov Murik <dovmurik@linux.ibm.com>,
@@ -78,104 +61,70 @@ CC:     Thomas Gleixner <tglx@linutronix.de>,
         "Kirill A . Shutemov" <kirill@shutemov.name>,
         Andi Kleen <ak@linux.intel.com>,
         "Dr . David Alan Gilbert" <dgilbert@redhat.com>,
-        <tony.luck@intel.com>, <marcorr@google.com>,
-        <sathyanarayanan.kuppuswamy@linux.intel.com>,
-        Brijesh Singh <brijesh.singh@amd.com>
-Subject: [PATCH v8 07/40] x86/sev: Add a helper for the PVALIDATE instruction
-Date:   Fri, 10 Dec 2021 09:42:59 -0600
-Message-ID: <20211210154332.11526-8-brijesh.singh@amd.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20211210154332.11526-1-brijesh.singh@amd.com>
+        tony.luck@intel.com, marcorr@google.com,
+        sathyanarayanan.kuppuswamy@linux.intel.com
 References: <20211210154332.11526-1-brijesh.singh@amd.com>
+ <20211210154332.11526-2-brijesh.singh@amd.com>
+From:   Dave Hansen <dave.hansen@intel.com>
+Autocrypt: addr=dave.hansen@intel.com; keydata=
+ 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
+ z5cecg==
+Message-ID: <0069a800-7275-a3c3-2c7e-2a028def3715@intel.com>
+Date:   Fri, 10 Dec 2021 10:47:34 -0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <20211210154332.11526-2-brijesh.singh@amd.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
 Content-Transfer-Encoding: 8bit
-X-Originating-IP: [10.180.168.240]
-X-ClientProxiedBy: SATLEXMB03.amd.com (10.181.40.144) To SATLEXMB03.amd.com
- (10.181.40.144)
-X-EOPAttributedMessage: 0
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 62af3dcb-2b5c-4e22-3807-08d9bbf3e2f8
-X-MS-TrafficTypeDiagnostic: DM6PR12MB3788:EE_
-X-Microsoft-Antispam-PRVS: <DM6PR12MB3788C4858392E6AF666F040FE5719@DM6PR12MB3788.namprd12.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:6108;
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: g5zX6w8SKAC5uhkFQr7l0/jCKBbHgsPokGZrf07IgoyolKjuU21CUAJRDpnsr+Ah9wEgcvByqMw83i0lQ3ul2iAb0KjampkElNCDs9MFuSZHONRlpJfcg27O1cN6KgbDND+aSXSqkzozD9yBOMjr/IQD+A30QW00RNWzqyYyJ2nFctWTZzLa4J1Lys35fYaWlMEFHWvRE8QF6AspDWvwFl0qmAHNzfymuBsWoyCO1egyEqHVOUeKxxSUQDBCT5ZTwPV2wt2hq3uZPDn30xDvSQrP4Bf2dMUy7B+PVBrDzlq/qpjpEN1Ofn4iiG7q94VrxVSVhouxkWFZ2SssAv4NlfPL04oZpm+1oO4/QvuCeIf4Yvh5F0sO4N1O++muNtft9bcuPv9OW19PRjm9/YIw4B6CEydGuOlgOQJRVBa42+E4tcbI4M42cqcNYQev6XTV1g8zZ/xUZ73E2pnugziS49glghtr7Jdyjf0rwEFntRSwXZ9g3Wd6Jmh+P6nKf31+PFxOQCQVZGfio6Ddny03rFBqyRRfa94Yd8/AuFfIRK0PUFQ3P30nDbWlsYJiJ2//m2zB0+ZQPpwFgGIyoky5bJ5gf/Kc1nm6bwStiWX/hghSqlpPsT8aVb0FXuLh5iQdeqKWYxqr2gQx1OnYvcK4rpJgZbgFtbZAwIOyPvI/uq+l5XLywwTr97Vdzqh1R0D7BoSx4sPqY6ZvRa6KZ2dhPTarCQCnzxL4IECLyE/crmVydl6pgIy0nzw+oxAvb8mXrEmfIHAyfEs6usXtUETRnM72joJmIzJ2NbcNAMKWD4xmg+NPe+xRybEkWal5LLg4
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB03.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(36840700001)(46966006)(40470700001)(36756003)(82310400004)(8936002)(26005)(81166007)(8676002)(7696005)(2906002)(508600001)(7406005)(44832011)(70586007)(2616005)(70206006)(7416002)(1076003)(86362001)(356005)(316002)(36860700001)(4326008)(336012)(83380400001)(5660300002)(110136005)(54906003)(426003)(40460700001)(16526019)(186003)(47076005)(36900700001)(2101003);DIR:OUT;SFP:1101;
-X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Dec 2021 15:44:00.5095
- (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 62af3dcb-2b5c-4e22-3807-08d9bbf3e2f8
-X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB03.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource: BN8NAM11FT029.eop-nam11.prod.protection.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Anonymous
-X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR12MB3788
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-An SNP-active guest uses the PVALIDATE instruction to validate or
-rescind the validation of a guest page’s RMP entry. Upon completion,
-a return code is stored in EAX and rFLAGS bits are set based on the
-return code. If the instruction completed successfully, the CF
-indicates if the content of the RMP were changed or not.
+On 12/10/21 7:42 AM, Brijesh Singh wrote:
+> +	/* Set the SME mask if this is an SEV guest. */
+> +	sev_status   = rd_sev_status_msr();
 
-See AMD APM Volume 3 for additional details.
-
-Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
----
- arch/x86/include/asm/sev.h | 21 +++++++++++++++++++++
- 1 file changed, 21 insertions(+)
-
-diff --git a/arch/x86/include/asm/sev.h b/arch/x86/include/asm/sev.h
-index 17b75f6ee11a..4ee98976aed8 100644
---- a/arch/x86/include/asm/sev.h
-+++ b/arch/x86/include/asm/sev.h
-@@ -60,6 +60,9 @@ extern void vc_no_ghcb(void);
- extern void vc_boot_ghcb(void);
- extern bool handle_vc_boot_ghcb(struct pt_regs *regs);
- 
-+/* Software defined (when rFlags.CF = 1) */
-+#define PVALIDATE_FAIL_NOUPDATE		255
-+
- #ifdef CONFIG_AMD_MEM_ENCRYPT
- extern struct static_key_false sev_es_enable_key;
- extern void __sev_es_ist_enter(struct pt_regs *regs);
-@@ -87,12 +90,30 @@ extern enum es_result sev_es_ghcb_hv_call(struct ghcb *ghcb,
- 					  struct es_em_ctxt *ctxt,
- 					  u64 exit_code, u64 exit_info_1,
- 					  u64 exit_info_2);
-+static inline int pvalidate(unsigned long vaddr, bool rmp_psize, bool validate)
-+{
-+	bool no_rmpupdate;
-+	int rc;
-+
-+	/* "pvalidate" mnemonic support in binutils 2.36 and newer */
-+	asm volatile(".byte 0xF2, 0x0F, 0x01, 0xFF\n\t"
-+		     CC_SET(c)
-+		     : CC_OUT(c) (no_rmpupdate), "=a"(rc)
-+		     : "a"(vaddr), "c"(rmp_psize), "d"(validate)
-+		     : "memory", "cc");
-+
-+	if (no_rmpupdate)
-+		return PVALIDATE_FAIL_NOUPDATE;
-+
-+	return rc;
-+}
- #else
- static inline void sev_es_ist_enter(struct pt_regs *regs) { }
- static inline void sev_es_ist_exit(void) { }
- static inline int sev_es_setup_ap_jump_table(struct real_mode_header *rmh) { return 0; }
- static inline void sev_es_nmi_complete(void) { }
- static inline int sev_es_efi_map_ghcbs(pgd_t *pgd) { return 0; }
-+static inline int pvalidate(unsigned long vaddr, bool rmp_psize, bool validate) { return 0; }
- #endif
- 
- #endif
--- 
-2.25.1
-
+Nit: there's some weird extra whitespace there.  Might be some some old
+attempts at vertical alignment.
