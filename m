@@ -2,138 +2,70 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C662BC433EF
-	for <linux-efi@archiver.kernel.org>; Thu,  9 Dec 2021 07:19:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3A600C433FE
+	for <linux-efi@archiver.kernel.org>; Fri, 10 Dec 2021 13:40:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233645AbhLIHXW (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 9 Dec 2021 02:23:22 -0500
-Received: from mail-4325.protonmail.ch ([185.70.43.25]:46373 "EHLO
-        mail-4325.protonmail.ch" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233467AbhLIHXW (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 9 Dec 2021 02:23:22 -0500
-Date:   Thu, 09 Dec 2021 07:19:37 +0000
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=protonmail.com;
-        s=protonmail2; t=1639034387;
-        bh=ylG/kDOZ8xUJwFkV+j+MTR5/1hNMGnn5X+gVJt2Eg7o=;
-        h=Date:To:From:Cc:Reply-To:Subject:Message-ID:In-Reply-To:
-         References:From:To:Cc;
-        b=W9VPUvTslasBIQlfqO9EpuseZOpL4g/fHWByft8WWXJY012wDomaw3F/V7xIkqK6C
-         H+qsQkkzxwj6Rz576uXp6zzbwpgAkkCgPyozuFLlLqgxniq2+9Vi2wxVDnCjViW97D
-         eCjB7WDG09BfEx1C0IGQuZ4h4Ve0S5n9nySmqcLDvgISb9aohY6AN5dltr7W3jc9r4
-         g1XN9rB8POWxxHST8YsNjDMSHqjc/uxxDkKeVkXvTHrNKAahSkp4iFpK09Yz7RPpUi
-         kqYUKjYbXPEKPUGXKvEuPMHqCrouXMmS1VZ/uPmpRvjfRrzL32qv+29j5UwmAHbbw5
-         kB2rsrL6jvOSQ==
-To:     Aditya Garg <gargaditya08@live.com>
-From:   Orlando Chamberlain <redecorating@protonmail.com>
-Cc:     "matthew.garrett@nebula.com" <matthew.garrett@nebula.com>,
-        "jk@ozlabs.org" <jk@ozlabs.org>,
-        "ardb@kernel.org" <ardb@kernel.org>,
-        "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Reply-To: Orlando Chamberlain <redecorating@protonmail.com>
-Subject: Re: [BUG] Enabling EFI runtime services causes panics in the T2 security chip on Macs equipped with it.
-Message-ID: <20211209071935.13996bb1@localhost>
-In-Reply-To: <74ACDCF3-6996-4CB4-8899-A625D154FB0C@live.com>
-References: <74ACDCF3-6996-4CB4-8899-A625D154FB0C@live.com>
+        id S231148AbhLJNoA (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 10 Dec 2021 08:44:00 -0500
+Received: from out30-45.freemail.mail.aliyun.com ([115.124.30.45]:33655 "EHLO
+        out30-45.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229993AbhLJNn7 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 10 Dec 2021 08:43:59 -0500
+X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R111e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=e01e04400;MF=xueshuai@linux.alibaba.com;NM=1;PH=DS;RN=12;SR=0;TI=SMTPD_---0V-ADOcC_1639143620;
+Received: from localhost.localdomain(mailfrom:xueshuai@linux.alibaba.com fp:SMTPD_---0V-ADOcC_1639143620)
+          by smtp.aliyun-inc.com(127.0.0.1);
+          Fri, 10 Dec 2021 21:40:22 +0800
+From:   Shuai Xue <xueshuai@linux.alibaba.com>
+To:     mchehab@kernel.org, bp@alien8.de, tony.luck@intel.com,
+        james.morse@arm.com, rric@kernel.org, ardb@kernel.org,
+        linux-edac@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-efi@vger.kernel.org
+Cc:     xueshuai@linux.alibaba.com, zhangliguang@linux.alibaba.com,
+        zhuo.song@linux.alibaba.com
+Subject: [PATCH v2 0/3] ghes_edac: refactor memory error reporting to avoid code duplication
+Date:   Fri, 10 Dec 2021 21:40:16 +0800
+Message-Id: <20211210134019.28536-1-xueshuai@linux.alibaba.com>
+X-Mailer: git-send-email 2.30.1 (Apple Git-130)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Thu, 09 Dec 2021 18:05:35 +1100
-"Aditya Garg" <gargaditya08@live.com> wrote:
+ghes_edac_report_mem_error() in ghes_edac.c is Long Method and have
+Duplicated Code with cper_mem_err_location(), cper_dimm_err_location(), and
+cper_mem_err_type_str() in drivers/firmware/efi/cper.c. In addition, the
+cper_print_mem() in drivers/firmware/efi/cper.c only reports the error
+status and misses its description.
 
-> On enabling EFI runtime services on Macs with the T2 security chip,
-> kernel fails to boot due panics in the T2 security chip. Using
+This patch set is to refactor ghes_edac_report_mem_error with:
 
-I think it only fails to boot if something is set up to write to nvram
-at boot, I can boot fine on a MacBookPro16,1 as long as I don't have
-anything writing to nvram (deleting and reading variables is fine).
+- Patch 01 is to unify memory error report format with cper;
+- Patch 02 is to introduces cper_*(), into ghes_edac_report_mem_error(),
+  this can avoid bunch of duplicate code lines;
+- Patch 02 is to wrap up error status decoding logics and reuse it in
+    cper_print_mem().
 
-> efi=3Dnoruntine (or noefi) as a kernel parameter seems to fix the
-> issue. Also, making NVRAM read-only makes kernels boot. A fix for
-> that would be appreciated.
->=20
-> Link :- https://bugzilla.kernel.org/show_bug.cgi?id=3D215277
+Changes since v1:
+https://lore.kernel.org/all/20211207031905.61906-2-xueshuai@linux.alibaba.com/
 
-The t2 security chip handles nvram and loading bootloaders on these
-macs. Its bridgeOS had an update that was bundled with macOS Catalina
-(this can't be downgraded, and some computers shipped with macOS
-Catalina), that made writing to nvram from Linux cause an invalid
-opcode error and a frozen system:
+- add a new patch to unify ghes and cper before removing duplication.
+- document the changes in patch description
+- add EXPORT_SYMBOL_GPL()s for cper_*()
+- document and the dependency and add UEFI_CPER dependency explicitly
+Thanks Robert Richter for review comments.
 
-invalid opcode: 0000 [#1] PREEMPT SMP PTI
-CPU: 9 PID: 135 Comm: kworker/u24:2 Tainted: G S   U   C        5.16.0-rc4-=
-00054-g6c3ecb47bb75-dirty #72
-Hardware name: Apple Inc. MacBookPro16,1/Mac-E1008331FDC96864, BIOS 1715.40=
-.15.0.0 (iBridge: 19.16.10548.0.0,0) 10/03/2021
-Workqueue: efi_rts_wq efi_call_rts
-RIP: 0010:0xfffffffeefc46877
-Code: 8b 58 18 0f b6 0d e1 09 00 00 48 c1 e1 04 e8 30 03 00 00 48 89 05 d9 =
-09 00 00 80 3d a2 09 00 00 01 75 09 48 c7 07 00 10 00 00 <0f> 0b 48 8b 05 a=
-8 07 00 00 8b 40 08 48 83 c0 f0 48 89 07 48 c7 06
-RSP: 0018:ffff998d40513dd0 EFLAGS: 00010246
-RAX: ffff998d40513eb0 RBX: ffff998d43f17dd8 RCX: 0000000000000007
-RDX: ffff998d43f17dc8 RSI: ffff998d43f17dd8 RDI: ffff998d43f17dc8
-RBP: ffff998d40513e00 R08: ffff998d43f17dd0 R09: ffff998d43f17dd8
-R10: ffff998d40513c80 R11: ffffffff9b4cabe8 R12: ffff998d43f17dc8
-R13: ffff998d43f17dd0 R14: 0000000000000246 R15: 0000000000000048
-FS:  0000000000000000(0000) GS:ffff8cf8bec40000(0000) knlGS:000000000000000=
-0
-CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-CR2: 00007f9133594374 CR3: 0000000100200005 CR4: 00000000003706e0
-Call Trace:
- <TASK>
- ? _printk+0x58/0x6f
- __efi_call+0x28/0x30
- efi_call_rts.cold+0x83/0x104
- process_one_work+0x219/0x3f0
- worker_thread+0x4d/0x3d0
- ? rescuer_thread+0x390/0x390
- kthread+0x15c/0x180
- ? set_kthread_struct+0x40/0x40
- ret_from_fork+0x22/0x30
- </TASK>
-Modules linked in: xt_CHECKSUM xt_MASQUERADE xt_conntrack ipt_REJECT nf_rej=
-ect_ipv4 xt_tcpudp nft_compat amdgpu nft_chain_nat nf_nat nf_conntrack nf_d=
-efrag_ipv6 nf_defrag_ipv4 nft_counter nf_tables n
- sysimgblt fb_sys_fops cec crc16 intel_pch_thermal sbs ecdh_generic ecc rfk=
-ill apple_bl video acpi_tad mac_hid sbshc pkcs8_key_parser drm fuse crypto_=
-user bpf_preload ip_tables x_tables crct10dif_pcl
----[ end trace 22f8aad91761cc4a ]---
-RIP: 0010:0xfffffffeefc46877
-Code: 8b 58 18 0f b6 0d e1 09 00 00 48 c1 e1 04 e8 30 03 00 00 48 89 05 d9 =
-09 00 00 80 3d a2 09 00 00 01 75 09 48 c7 07 00 10 00 00 <0f> 0b 48 8b 05 a=
-8 07 00 00 8b 40 08 48 83 c0 f0 48 89 07 48 c7 06
-RSP: 0018:ffff998d40513dd0 EFLAGS: 00010246
-RAX: ffff998d40513eb0 RBX: ffff998d43f17dd8 RCX: 0000000000000007
-RDX: ffff998d43f17dc8 RSI: ffff998d43f17dd8 RDI: ffff998d43f17dc8
-RBP: ffff998d40513e00 R08: ffff998d43f17dd0 R09: ffff998d43f17dd8
-R10: ffff998d40513c80 R11: ffffffff9b4cabe8 R12: ffff998d43f17dc8
-R13: ffff998d43f17dd0 R14: 0000000000000246 R15: 0000000000000048
-FS:  0000000000000000(0000) GS:ffff8cf8bec40000(0000) knlGS:000000000000000=
-0
-CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-CR2: 00007f9133594374 CR3: 0000000100200005 CR4: 00000000003706e0
-BUG: kernel NULL pointer dereference, address: 0000000000000008
-#PF: supervisor write access in kernel mode
-#PF: error_code(0x0002) - not-present page
+Shuai Xue (3):
+  ghes_edac: unify memory error report format with cper
+  ghes_edac: refactor memory error location processing
+  ghes_edac: refactor error status fields decoding
 
-This seems to be triggered by EFI_QUERY_VARIABLE_INFO here
-https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/dri=
-vers/firmware/efi/runtime-wrappers.c#n220
-and within that section, the invalid opcode seems to be occurring in
-this bit of assembly:
-https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/arc=
-h/x86/platform/efi/efi_stub_64.S
+ drivers/edac/Kconfig        |   1 +
+ drivers/edac/ghes_edac.c    | 196 +++++++-----------------------------
+ drivers/firmware/efi/cper.c |  86 ++++++++++++----
+ include/linux/cper.h        |   3 +
+ 4 files changed, 105 insertions(+), 181 deletions(-)
 
-printing efi_call_virt's arguments with
-pr_err("1: %d, 2: %d, 3: %d, 4: %d", *(u32 *)arg1, (u64 *)arg2, (u64 *)arg3=
-, (u64 *)arg4);
-gets me "1: 7, 2: -2079343160, 3: -2079343152, 4: -2079343144"
-
-
---=20
+-- 
+2.20.1.12.g72788fdb
 
