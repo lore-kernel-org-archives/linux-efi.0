@@ -2,44 +2,45 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 18920C433F5
-	for <linux-efi@archiver.kernel.org>; Fri, 10 Dec 2021 19:17:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 88CEEC433EF
+	for <linux-efi@archiver.kernel.org>; Fri, 10 Dec 2021 19:23:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239443AbhLJTV2 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 10 Dec 2021 14:21:28 -0500
-Received: from mga14.intel.com ([192.55.52.115]:15844 "EHLO mga14.intel.com"
+        id S242740AbhLJT1D (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 10 Dec 2021 14:27:03 -0500
+Received: from mga09.intel.com ([134.134.136.24]:47932 "EHLO mga09.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S235292AbhLJTV2 (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 10 Dec 2021 14:21:28 -0500
+        id S239364AbhLJT1C (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 10 Dec 2021 14:27:02 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1639163873; x=1670699873;
+  t=1639164207; x=1670700207;
   h=subject:to:cc:references:from:message-id:date:
    mime-version:in-reply-to:content-transfer-encoding;
-  bh=3EHValpJ29nH+vMGckzz7nU/Iej7vZerlJ9zwjcABL8=;
-  b=ONP4pCSm5AIU1NtbdRZgIJkqi3f8dgfBu17u+csxeza40d3v4NEq5Y+u
-   cidU+lK4Q3rKmLWNlVSDwgJxbpx+R59qmkuDh5/bB7F19eZBZXttGl0cc
-   S1UH/ktK0cKij2bqool5/KVNtdIfrVo3s1/bMUiS4q7TIwwzoDD50faC8
-   sn7/tmuFT+t6Ez32WyI2jJbBm/0i/h1Dx2w6DGec9apgPYxFGFInWewq/
-   npQDQKgPSqko9cUkGbYZfrm9aSrHPrdEjuLBJGyStYiT8n8yPmAzdsMUx
-   mt27uQu9VfGRJ9IPMA2q8Vhoi8NMjRkLIQhlbk37bj8zNwS5A9GWwwIVb
+  bh=rrCqaJN+S8sOEdCwX1001mKh5ysngWNZ6PVZKH3ouis=;
+  b=jaKifoK0hA+dgQsdhXOQPDx9QYVYhxMzzmx22uMNcsYxixmPlrL8PB80
+   YLmWC76WIqNRrUOKXp25yirpKDDZRLTZB2CEZ0XKpeXzIlD7seSBqQJyF
+   8wfL8t7hlbqHI1ixLRz/q0vsQkugP4dvwZJiaxLO475MUzvxv9EB23n6r
+   YZYByJJo52tH50UGJ6S0V0ZRus3CdxxxeQUGK1zZFov9R/5HlT/NVAD+2
+   /8mGZMnRsf5ZG6HxPNuvl31NWb/Xb24cLWvFvz077EjbRk2KTZkAVPLWN
+   6/DhB7djyU+Wd+bztlecBqkaOygPmWs9ch0mlQO4LPveHBETvkxGhQc9v
    Q==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10194"; a="238646741"
+X-IronPort-AV: E=McAfee;i="6200,9189,10194"; a="238226715"
 X-IronPort-AV: E=Sophos;i="5.88,196,1635231600"; 
-   d="scan'208";a="238646741"
+   d="scan'208";a="238226715"
 Received: from fmsmga002.fm.intel.com ([10.253.24.26])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Dec 2021 11:13:01 -0800
+  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Dec 2021 11:23:27 -0800
 X-IronPort-AV: E=Sophos;i="5.88,196,1635231600"; 
-   d="scan'208";a="607606386"
+   d="scan'208";a="607610040"
 Received: from klarson-mobl.amr.corp.intel.com (HELO [10.251.16.229]) ([10.251.16.229])
-  by fmsmga002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Dec 2021 11:12:57 -0800
-Subject: Re: [PATCH v8 27/40] x86/boot: Add Confidential Computing type to
- setup_data
-To:     Brijesh Singh <brijesh.singh@amd.com>, x86@kernel.org,
-        linux-kernel@vger.kernel.org, kvm@vger.kernel.org,
+  by fmsmga002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Dec 2021 11:23:24 -0800
+Subject: Re: [PATCH v8 01/40] x86/compressed/64: detect/setup SEV/SME features
+ earlier in boot
+To:     Borislav Petkov <bp@alien8.de>,
+        Brijesh Singh <brijesh.singh@amd.com>
+Cc:     x86@kernel.org, linux-kernel@vger.kernel.org, kvm@vger.kernel.org,
         linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org,
-        linux-coco@lists.linux.dev, linux-mm@kvack.org
-Cc:     Thomas Gleixner <tglx@linutronix.de>,
+        linux-coco@lists.linux.dev, linux-mm@kvack.org,
+        Thomas Gleixner <tglx@linutronix.de>,
         Ingo Molnar <mingo@redhat.com>, Joerg Roedel <jroedel@suse.de>,
         Tom Lendacky <thomas.lendacky@amd.com>,
         "H. Peter Anvin" <hpa@zytor.com>, Ard Biesheuvel <ardb@kernel.org>,
@@ -55,7 +56,6 @@ Cc:     Thomas Gleixner <tglx@linutronix.de>,
         David Rientjes <rientjes@google.com>,
         Dov Murik <dovmurik@linux.ibm.com>,
         Tobin Feldman-Fitzthum <tobin@ibm.com>,
-        Borislav Petkov <bp@alien8.de>,
         Michael Roth <michael.roth@amd.com>,
         Vlastimil Babka <vbabka@suse.cz>,
         "Kirill A . Shutemov" <kirill@shutemov.name>,
@@ -64,7 +64,7 @@ Cc:     Thomas Gleixner <tglx@linutronix.de>,
         tony.luck@intel.com, marcorr@google.com,
         sathyanarayanan.kuppuswamy@linux.intel.com
 References: <20211210154332.11526-1-brijesh.singh@amd.com>
- <20211210154332.11526-28-brijesh.singh@amd.com>
+ <20211210154332.11526-2-brijesh.singh@amd.com> <YbOmt+tYvzAqOiTY@zn.tnic>
 From:   Dave Hansen <dave.hansen@intel.com>
 Autocrypt: addr=dave.hansen@intel.com; keydata=
  xsFNBE6HMP0BEADIMA3XYkQfF3dwHlj58Yjsc4E5y5G67cfbt8dvaUq2fx1lR0K9h1bOI6fC
@@ -109,12 +109,12 @@ Autocrypt: addr=dave.hansen@intel.com; keydata=
  OPsw5tV/LmQ5GXH0JQ/TZXWygyRFyyI2FqNTx4WHqUn3yFj8rwTAU1tluRUYyeLy0ayUlKBH
  ybj0N71vWO936MqP6haFERzuPAIpxj2ezwu0xb1GjTk4ynna6h5GjnKgdfOWoRtoWndMZxbA
  z5cecg==
-Message-ID: <1fdaca61-884a-ac13-fb33-a47db198f050@intel.com>
-Date:   Fri, 10 Dec 2021 11:12:54 -0800
+Message-ID: <0e09e98c-c013-e9a0-c4b9-279ef41ab0ff@intel.com>
+Date:   Fri, 10 Dec 2021 11:23:24 -0800
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
  Thunderbird/68.10.0
 MIME-Version: 1.0
-In-Reply-To: <20211210154332.11526-28-brijesh.singh@amd.com>
+In-Reply-To: <YbOmt+tYvzAqOiTY@zn.tnic>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 8bit
@@ -122,26 +122,37 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On 12/10/21 7:43 AM, Brijesh Singh wrote:
-> +/* AMD SEV Confidential computing blob structure */
-> +#define CC_BLOB_SEV_HDR_MAGIC	0x45444d41
-> +struct cc_blob_sev_info {
-> +	u32 magic;
-> +	u16 version;
-> +	u16 reserved;
-> +	u64 secrets_phys;
-> +	u32 secrets_len;
-> +	u64 cpuid_phys;
-> +	u32 cpuid_len;
-> +};
+On 12/10/21 11:12 AM, Borislav Petkov wrote:
+> On Fri, Dec 10, 2021 at 09:42:53AM -0600, Brijesh Singh wrote:
+>> @@ -447,6 +446,23 @@ SYM_CODE_START(startup_64)
+>>  	call	load_stage1_idt
+>>  	popq	%rsi
+>>  
+>> +#ifdef CONFIG_AMD_MEM_ENCRYPT
+> 
+> I guess that ifdeffery is not needed.
 
-This is an ABI structure rather than some purely kernel construct, right?
+I think sev_enable() is only defined in arch/x86/boot/compressed/sev.c,
+which is compiled via:
 
-I searched through all of the specs to which you linked in the cover
-letter.  I looked for "blob", "guid", the magic and part of the GUID
-itself trying to find where this is defined to see if the struct is correct.
+        vmlinux-objs-$(CONFIG_AMD_MEM_ENCRYPT) += $(obj)/sev.o
 
-I couldn't find anything.
+So I think we either need the #ifdef or a stub for sev_enable()
+somewhere else.
 
-Where is the spec for this blob?  How large is it?  Did you mean to
-leave a 4-byte hole after secrets_len and before cpuid_phys?
+>> +	/*
+>> +	 * Now that the stage1 interrupt handlers are set up, #VC exceptions from
+>> +	 * CPUID instructions can be properly handled for SEV-ES guests.
+>> +	 *
+>> +	 * For SEV-SNP, the CPUID table also needs to be set up in advance of any
+>> +	 * CPUID instructions being issued, so go ahead and do that now via
+>> +	 * sev_enable(), which will also handle the rest of the SEV-related
+>> +	 * detection/setup to ensure that has been done in advance of any dependent
+>> +	 * code.
+>> +	 */
+>> +	pushq	%rsi
+>> +	movq	%rsi, %rdi		/* real mode address */
+>> +	call	sev_enable
+>> +	popq	%rsi
+>> +#endif
+
