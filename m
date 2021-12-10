@@ -2,41 +2,41 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B976C4332F
-	for <linux-efi@archiver.kernel.org>; Fri, 10 Dec 2021 15:46:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 46041C433EF
+	for <linux-efi@archiver.kernel.org>; Fri, 10 Dec 2021 15:47:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243101AbhLJPuc (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 10 Dec 2021 10:50:32 -0500
-Received: from mail-bn1nam07on2042.outbound.protection.outlook.com ([40.107.212.42]:12775
-        "EHLO NAM02-BN1-obe.outbound.protection.outlook.com"
+        id S236904AbhLJPul (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 10 Dec 2021 10:50:41 -0500
+Received: from mail-sn1anam02on2081.outbound.protection.outlook.com ([40.107.96.81]:20186
+        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S243199AbhLJPrn (ORCPT <rfc822;linux-efi@vger.kernel.org>);
-        Fri, 10 Dec 2021 10:47:43 -0500
+        id S243138AbhLJPrk (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Fri, 10 Dec 2021 10:47:40 -0500
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=j31xwdi32Oz3TEJF+qyMl3rW4aq1vUTMhOf3R5fuZr8bxL5C8OtW3pEwE24MYPmtj9Ar0d8uofo9DKWyEh371HEdXicFTe9XR40POgLxuR2Fo2dLsxnLOTQYFFktSnyIB4wKk6+dPfu75Iou9qUY557a1IeZAv1jS62Fe4pjSbb6XCHVMrl+tEGMt8+bpXFvnZNB9Nf0Frml+CZsvKUfpYRpcnVmiA3hTfqjppb1LtKszxSmGkWycjE+nEGsHDcv3kO4WcekPfyqzrLGc18q0ms6tPCOjYbr3KKSlPRU59Jg3fGdMCWmufP5Y6jIYwgh4FJwzovebvtpZ+QMW8StAQ==
+ b=Nzix1tfAxTDsabbqIoHz0PK6VCnS4b2JBi1J/6sATL9SHXSJ/BHUpiB+P2FSx6hrFw0ZyvrNJWcp50K1FzYN5kyWFdq1CakUviwv2mc4xqlodPUOzorkNR8Ag6Dv2HqIyQSkvadfWzGDabhqZv7WTVoUkzn3rzOteQ4Z92ij5nt9IKd3k7bHMTsxaYnWgOynPOdW5FfGDqn7+S1fMBz1NBkJmqEKHeYGCMRsuNVvBJW3ORCZZzOiEr6bccBpUPBaRSWD+D+DmW1uLLNXP1t/4XT+6GracZ5vIEtSfkP2Jet+LQyw3k6I7N/0xYU12CrjAYtUTohMxvLHP/g5ZB6Dpg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=oTVF+9INwXu2z6IrRfSvsUg30zVuSnG1qdTzQNLzDSM=;
- b=exLcox0qL6xh/1Rt18YAkKJDOl/gPs7bL3htMp9qat3OqVU3Ee0m6GXAkpYwpQcd/a9hl80/969/ce12TcsuO82R2O2C6RN9CjbkZbOqFuGwtix56MNN09eQIU4BUtt3dWYe/+PDgzh26gDNV9k7iyglopt+YMFcVaRILsgY1QgSECKVPoQH6YuY4cfwaiTukivXINhfxaL5pIy0hsbdATzPyZQZbPO+FzGyRnbkWKwUJQfe+UPanz/cuEejZYjhCThYtcIoV4o/bvW0xMbKvAxdhr5wjzLGrDj+sgfuWv2KtdSpvkK986NkQID9hF0vy/QntwwPTDYymn+JJTZaaA==
+ bh=56Tw3SjleaH3DWBreTAjkg8V/BlMybEBB0IM0kENb6k=;
+ b=oOlY4wz8ia1WMwB7ZADXyzWBppwJGo+fB638vcP6SXbPgiv1dqOUWaqIZgV77eVsPFMEQOmPRdPpixZo+gphmvOvb05q4uInUKlavQwCk0nsz3lY7ZXlE3C+8ZYPvREHUtt7HnA2NSt2+Qubk+9UcF7kg9aHLDk+UB4SSwBd/EG/FoSVauXr+RzcB9HdoEzQlW5HOOyL0r7jmRvpO+QQhcoZ6YFpHtaZ/zB/yTlhisTGHCCYg6mV9Yl2wEl60n7FmAPqo2FqbWvRwDn3i5KkbfsAdoydz24FSABtF0l/4cgiiNuJY+SJaSW0noVgYFbP4GJAHAXV4ebA98g4I1wBdA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
  165.204.84.17) smtp.rcpttodomain=kernel.org smtp.mailfrom=amd.com; dmarc=pass
  (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
  dkim=none (message not signed); arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=oTVF+9INwXu2z6IrRfSvsUg30zVuSnG1qdTzQNLzDSM=;
- b=PWh56UgeJGM2uqX1f/l1/tUp7vcBk7Ckjq92UxLxobqOZgGoIlVWbfYyRGtO4/XQLz0KLnsT8rJq4P7jrAQxvyFIaoamO58J6M5d53ZJ+eBi5seuqwMz8x4DcYW5r/a0SnWjgrThwYHMknH3/piEBe9ByA23g26eZrKNk3AmcNg=
-Received: from BN9PR03CA0297.namprd03.prod.outlook.com (2603:10b6:408:f5::32)
- by DM6PR12MB4513.namprd12.prod.outlook.com (2603:10b6:5:2ad::19) with
+ bh=56Tw3SjleaH3DWBreTAjkg8V/BlMybEBB0IM0kENb6k=;
+ b=C7vpoXL/TrSX0cZqrhupjEg2C1c/OJdVlyps9UN+PGWxj/XgNys11yZNFLVzY4qPEHYwmv6TayZo3PGAkkZiDXCr5NuADfBRNscH6xGlbwj+FJ9Dg0ly9WaJU/C6T6YOOxNOhISdiimHTkRw3AflJsbHyV54jmqWI18LvbocECY=
+Received: from BN1PR14CA0025.namprd14.prod.outlook.com (2603:10b6:408:e3::30)
+ by DM6PR12MB4356.namprd12.prod.outlook.com (2603:10b6:5:2aa::8) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4755.15; Fri, 10 Dec
- 2021 15:44:05 +0000
-Received: from BN8NAM11FT012.eop-nam11.prod.protection.outlook.com
- (2603:10b6:408:f5:cafe::a3) by BN9PR03CA0297.outlook.office365.com
- (2603:10b6:408:f5::32) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4755.21 via Frontend
- Transport; Fri, 10 Dec 2021 15:44:05 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4755.21; Fri, 10 Dec
+ 2021 15:44:02 +0000
+Received: from BN8NAM11FT029.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:408:e3:cafe::49) by BN1PR14CA0025.outlook.office365.com
+ (2603:10b6:408:e3::30) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4778.12 via Frontend
+ Transport; Fri, 10 Dec 2021 15:44:02 +0000
 X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
  smtp.mailfrom=amd.com; dkim=none (message not signed)
  header.d=none;dmarc=pass action=none header.from=amd.com;
@@ -44,13 +44,13 @@ Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
  165.204.84.17 as permitted sender) receiver=protection.outlook.com;
  client-ip=165.204.84.17; helo=SATLEXMB03.amd.com;
 Received: from SATLEXMB03.amd.com (165.204.84.17) by
- BN8NAM11FT012.mail.protection.outlook.com (10.13.177.55) with Microsoft SMTP
+ BN8NAM11FT029.mail.protection.outlook.com (10.13.177.68) with Microsoft SMTP
  Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.4778.13 via Frontend Transport; Fri, 10 Dec 2021 15:44:05 +0000
+ 15.20.4778.13 via Frontend Transport; Fri, 10 Dec 2021 15:44:02 +0000
 Received: from sbrijesh-desktop.amd.com (10.180.168.240) by SATLEXMB03.amd.com
  (10.181.40.144) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.17; Fri, 10 Dec
- 2021 09:44:02 -0600
+ 2021 09:43:59 -0600
 From:   Brijesh Singh <brijesh.singh@amd.com>
 To:     <x86@kernel.org>, <linux-kernel@vger.kernel.org>,
         <kvm@vger.kernel.org>, <linux-efi@vger.kernel.org>,
@@ -81,9 +81,9 @@ CC:     Thomas Gleixner <tglx@linutronix.de>,
         <tony.luck@intel.com>, <marcorr@google.com>,
         <sathyanarayanan.kuppuswamy@linux.intel.com>,
         Brijesh Singh <brijesh.singh@amd.com>
-Subject: [PATCH v8 10/40] x86/compressed: Register GHCB memory when SEV-SNP is active
-Date:   Fri, 10 Dec 2021 09:43:02 -0600
-Message-ID: <20211210154332.11526-11-brijesh.singh@amd.com>
+Subject: [PATCH v8 08/40] x86/sev: Check the vmpl level
+Date:   Fri, 10 Dec 2021 09:43:00 -0600
+Message-ID: <20211210154332.11526-9-brijesh.singh@amd.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20211210154332.11526-1-brijesh.singh@amd.com>
 References: <20211210154332.11526-1-brijesh.singh@amd.com>
@@ -95,111 +95,158 @@ X-ClientProxiedBy: SATLEXMB03.amd.com (10.181.40.144) To SATLEXMB03.amd.com
  (10.181.40.144)
 X-EOPAttributedMessage: 0
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 0012379f-c4bb-45e2-2dcf-08d9bbf3e5bc
-X-MS-TrafficTypeDiagnostic: DM6PR12MB4513:EE_
-X-Microsoft-Antispam-PRVS: <DM6PR12MB4513CB2A7F08027A7F0478A3E5719@DM6PR12MB4513.namprd12.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:6430;
+X-MS-Office365-Filtering-Correlation-Id: 69d1bff6-1042-4156-9dff-08d9bbf3e3e6
+X-MS-TrafficTypeDiagnostic: DM6PR12MB4356:EE_
+X-Microsoft-Antispam-PRVS: <DM6PR12MB435635538F3AF4A9DE118FB9E5719@DM6PR12MB4356.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:10000;
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: sLk+ue66h0jAQ+vo3V0yB+n+7jFCrzZkLySjYHwnyeOk0AiG6zRY+xSNnUrguvPH4cNifITPCs3wcdPN7NMmtPYywoKKoJk9Xc39MpURq6lpxCLwYNZk163/EVZO6iNqOdeIZk5qUwrkLXtowrgLiuhpD5Wso5B3qwIDgwDnaNuUvstegFuklVsNZjU6+DQsbsOoSAe282/jM0tnzlDRV7jzA2j3fSkBgaFbNYKGfK+Rxg0TXZnuquRhkKdOiUB1nisyJnTXXvu5/1ZxoFS4FduMCYsWmQLGftOxvOGaS0JvSIybZcoKbnp1p+ybHZ+mb4n9EAyCDBnAszja2gdNr1ZKN3BGSuZHxBNC3wAG/a4XA6zo6qW/OAx/MXufJrNWWOqVasLgUKzsYTixG46jOzcIfV6mgjZATsc4lYYCEGA/wThFi2gdw6ORuNy9gk5bSwdEDQyVJXiLB8DyhIYCGAoKxWv2FciAVTdZUCxedGRxD5owPGkUp/wWhMN8j90W4cNzU4dTRXr5lKrebDtNoD6zN06+UWUDYij3vyuiyKuB9xmwi9HahLCGEDNbWCon67y/3lbV9KMv+izZx2khCFy20kQWcNkjUi9CpRw+i60AGBNYx5ZZeCOLAt7CuFYDi4/AqCDPnhGJ2TNtUwkbHvyftI9ID8hOw/4Hf/wm8ybJh4uFmnFOb759JmzbLNUmmCD3sbqVmOUcg9O1iXUQNv5hkXUiAPsxMEHUzyl8ps2mItu/l5xWicwpeo5RTdPh5/1NPIVxuBDH4eUKp7NO0rfljRGIAA4kjJl8AM9rEC8m4hT6J6UJCdn/+Cj5Q16P
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB03.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(36840700001)(46966006)(40470700001)(356005)(2906002)(81166007)(7406005)(426003)(7416002)(316002)(8676002)(336012)(36860700001)(5660300002)(186003)(7696005)(40460700001)(8936002)(36756003)(70586007)(4326008)(86362001)(70206006)(82310400004)(26005)(1076003)(2616005)(16526019)(54906003)(47076005)(110136005)(508600001)(44832011)(2101003)(36900700001);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: NUKc1XnLEjF2wU7iwN+9+PojWUxPxCvHOI1+l8qYnWIS3rFPZvWeQ3BAJq0cSl7twCRRvY9ivZsISgDKAg0MbWwDWZdwlKVA091G5ENuMMvaEOs7f/j0JZCiL0maiaNIaXJBbNfHCqvxeefTBXCdiXaq4sc8m9G5EHeXsgulriDc39e1IWn9Ps5sgc3ZlccHmuncuoQsK3zH2Wmju0ecYR8mc9XbsMtApPH3uvCmwHjhpA2vYhSXCiRNm+YkE8IppCCgODqW4k2Q1am8UGhS+BLBxYDe+deVQBHqYoS5k+CJfzhkujbqZ1gdh7w6TTbt0vZBZM5R9L7JqgnMPQjlkLiuM5OSROrrno4gOipovS5HYqJlJ00cB4k8ahcuo5+ZDkW+eAmZwAKmHDlKbvroijp1Saa34qpxBmByuQ4UUFQhiEEpY66Xz/yxaSjEmmSCazPWx8Ukjh4f8oCpOGM8feP3ZGCQ8C4dHcGzGWuMw/dBfMXOitIZGndRUefriQQmFf7tzhkPX98o7Qw0Kf3j/3qTmDnuHUYdKZhEZiBDQQCgTmXgJb7oZyZ2V1+wY2F0KGRIflahpS5ORmq0il+clwMzB8nKbGpV9gQERpN+lQDet8UUeJu8Gjy+qHyTNwaGdpwNlOznAkRCL51J7X4+CS7kUQQ/RknhdWabwuuxGuJ/qcWRoZ8TlCtvKYy+LBi+CeRdbelrGwSK6oq+29Cxhkzf4FzZqEaM2YVsk/vgE3WNWv2UsGQ67ea/0dGqMudH4g8Z1WrsEylOYYpRQ0M0tAMKaMEuCLIxQOXjfGojFBSYCMAoCKmT//pHzEnF2FeR
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB03.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(4636009)(36840700001)(46966006)(40470700001)(186003)(16526019)(8936002)(508600001)(26005)(83380400001)(8676002)(36756003)(316002)(54906003)(81166007)(426003)(110136005)(336012)(6666004)(1076003)(2616005)(44832011)(356005)(5660300002)(2906002)(82310400004)(7696005)(40460700001)(86362001)(7416002)(7406005)(70206006)(4326008)(36860700001)(47076005)(70586007)(2101003)(36900700001);DIR:OUT;SFP:1101;
 X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Dec 2021 15:44:05.4929
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Dec 2021 15:44:02.3999
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 0012379f-c4bb-45e2-2dcf-08d9bbf3e5bc
+X-MS-Exchange-CrossTenant-Network-Message-Id: 69d1bff6-1042-4156-9dff-08d9bbf3e3e6
 X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
 X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB03.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource: BN8NAM11FT012.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthSource: BN8NAM11FT029.eop-nam11.prod.protection.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR12MB4513
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR12MB4356
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The SEV-SNP guest is required by the GHCB spec to register the GHCB's
-Guest Physical Address (GPA). This is because the hypervisor may prefer
-that a guest use a consistent and/or specific GPA for the GHCB associated
-with a vCPU. For more information, see the GHCB specification section
-"GHCB GPA Registration".
+Virtual Machine Privilege Level (VMPL) feature in the SEV-SNP architecture
+allows a guest VM to divide its address space into four levels. The level
+can be used to provide the hardware isolated abstraction layers with a VM.
+The VMPL0 is the highest privilege, and VMPL3 is the least privilege.
+Certain operations must be done by the VMPL0 software, such as:
 
-If hypervisor can not work with the guest provided GPA then terminate the
-guest boot.
+* Validate or invalidate memory range (PVALIDATE instruction)
+* Allocate VMSA page (RMPADJUST instruction when VMSA=1)
+
+The initial SEV-SNP support requires that the guest kernel is running on
+VMPL0. Add a check to make sure that kernel is running at VMPL0 before
+continuing the boot. There is no easy method to query the current VMPL
+level, so use the RMPADJUST instruction to determine whether the guest is
+running at the VMPL0.
 
 Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
 ---
- arch/x86/boot/compressed/sev.c    |  4 ++++
- arch/x86/include/asm/sev-common.h | 13 +++++++++++++
- arch/x86/kernel/sev-shared.c      | 16 ++++++++++++++++
- 3 files changed, 33 insertions(+)
+ arch/x86/boot/compressed/sev.c    | 34 ++++++++++++++++++++++++++++---
+ arch/x86/include/asm/sev-common.h |  1 +
+ arch/x86/include/asm/sev.h        | 16 +++++++++++++++
+ 3 files changed, 48 insertions(+), 3 deletions(-)
 
 diff --git a/arch/x86/boot/compressed/sev.c b/arch/x86/boot/compressed/sev.c
-index 12a93acc94ba..348f7711c3ea 100644
+index a0708f359a46..9be369f72299 100644
 --- a/arch/x86/boot/compressed/sev.c
 +++ b/arch/x86/boot/compressed/sev.c
-@@ -178,6 +178,10 @@ static bool early_setup_ghcb(void)
- 	/* Initialize lookup tables for the instruction decoder */
- 	inat_init_tables();
- 
-+	/* SEV-SNP guest requires the GHCB GPA must be registered */
-+	if (sev_snp_enabled())
-+		snp_register_ghcb_early(__pa(&boot_ghcb_page));
-+
- 	return true;
+@@ -212,6 +212,31 @@ static inline u64 rd_sev_status_msr(void)
+ 	return ((high << 32) | low);
  }
  
-diff --git a/arch/x86/include/asm/sev-common.h b/arch/x86/include/asm/sev-common.h
-index a2f956cfafba..6dc27963690e 100644
---- a/arch/x86/include/asm/sev-common.h
-+++ b/arch/x86/include/asm/sev-common.h
-@@ -57,6 +57,19 @@
- #define GHCB_MSR_AP_RESET_HOLD_REQ	0x006
- #define GHCB_MSR_AP_RESET_HOLD_RESP	0x007
- 
-+/* GHCB GPA Register */
-+#define GHCB_MSR_REG_GPA_REQ		0x012
-+#define GHCB_MSR_REG_GPA_REQ_VAL(v)			\
-+	/* GHCBData[63:12] */				\
-+	(((u64)((v) & GENMASK_ULL(51, 0)) << 12) |	\
-+	/* GHCBData[11:0] */				\
-+	GHCB_MSR_REG_GPA_REQ)
-+
-+#define GHCB_MSR_REG_GPA_RESP		0x013
-+#define GHCB_MSR_REG_GPA_RESP_VAL(v)			\
-+	/* GHCBData[63:12] */				\
-+	(((u64)(v) & GENMASK_ULL(63, 12)) >> 12)
-+
- /*
-  * SNP Page State Change Operation
-  *
-diff --git a/arch/x86/kernel/sev-shared.c b/arch/x86/kernel/sev-shared.c
-index 4a876e684f67..e9ff13cd90b0 100644
---- a/arch/x86/kernel/sev-shared.c
-+++ b/arch/x86/kernel/sev-shared.c
-@@ -68,6 +68,22 @@ static u64 get_hv_features(void)
- 	return GHCB_MSR_HV_FT_RESP_VAL(val);
- }
- 
-+static void __maybe_unused snp_register_ghcb_early(unsigned long paddr)
++static void enforce_vmpl0(void)
 +{
-+	unsigned long pfn = paddr >> PAGE_SHIFT;
-+	u64 val;
++	u64 attrs;
++	int err;
 +
-+	sev_es_wr_ghcb_msr(GHCB_MSR_REG_GPA_REQ_VAL(pfn));
-+	VMGEXIT();
++	/*
++	 * There is no straightforward way to query the current VMPL level. The
++	 * simplest method is to use the RMPADJUST instruction to change a page
++	 * permission to a VMPL level-1, and if the guest kernel is launched at
++	 * a level <= 1, then RMPADJUST instruction will return an error.
++	 */
++	attrs = 1;
 +
-+	val = sev_es_rd_ghcb_msr();
-+
-+	/* If the response GPA is not ours then abort the guest */
-+	if ((GHCB_RESP_CODE(val) != GHCB_MSR_REG_GPA_RESP) ||
-+	    (GHCB_MSR_REG_GPA_RESP_VAL(val) != pfn))
-+		sev_es_terminate(SEV_TERM_SET_LINUX, GHCB_TERM_REGISTER);
++	/*
++	 * Any page-aligned virtual address is sufficient to test the VMPL level.
++	 * The boot_ghcb_page is page aligned memory, so use for the test.
++	 *
++	 * The RMPADJUST operation below clears the permission for the boot_ghcb_page
++	 * on VMPL1. If the guest is booted at the VMPL0, then there is no need to
++	 * restore the permissions because VMPL1 permission will be all zero.
++	 */
++	if (rmpadjust((unsigned long)&boot_ghcb_page, RMP_PG_SIZE_4K, attrs))
++		sev_es_terminate(SEV_TERM_SET_LINUX, GHCB_TERM_NOT_VMPL0);
 +}
 +
- static bool sev_es_negotiate_protocol(void)
+ void sev_enable(struct boot_params *bp)
  {
- 	u64 val;
+ 	unsigned int eax, ebx, ecx, edx;
+@@ -252,11 +277,14 @@ void sev_enable(struct boot_params *bp)
+ 	/*
+ 	 * SNP is supported in v2 of the GHCB spec which mandates support for HV
+ 	 * features. If SEV-SNP is enabled, then check if the hypervisor supports
+-	 * the SEV-SNP features.
++	 * the SEV-SNP features and is launched at VMPL0 level.
+ 	 */
+-	if (sev_status & MSR_AMD64_SEV_SNP_ENABLED && !(get_hv_features() & GHCB_HV_FT_SNP))
+-		sev_es_terminate(SEV_TERM_SET_GEN, GHCB_SNP_UNSUPPORTED);
++	if (sev_status & MSR_AMD64_SEV_SNP_ENABLED) {
++		if (!(get_hv_features() & GHCB_HV_FT_SNP))
++			sev_es_terminate(SEV_TERM_SET_GEN, GHCB_SNP_UNSUPPORTED);
+ 
++		enforce_vmpl0();
++	}
+ 
+ 	sme_me_mask = BIT_ULL(ebx & 0x3f);
+ }
+diff --git a/arch/x86/include/asm/sev-common.h b/arch/x86/include/asm/sev-common.h
+index 6f037c29a46e..7ac5842e32b6 100644
+--- a/arch/x86/include/asm/sev-common.h
++++ b/arch/x86/include/asm/sev-common.h
+@@ -89,6 +89,7 @@
+ #define GHCB_TERM_REGISTER		0	/* GHCB GPA registration failure */
+ #define GHCB_TERM_PSC			1	/* Page State Change failure */
+ #define GHCB_TERM_PVALIDATE		2	/* Pvalidate failure */
++#define GHCB_TERM_NOT_VMPL0		3	/* SNP guest is not running at VMPL-0 */
+ 
+ #define GHCB_RESP_CODE(v)		((v) & GHCB_MSR_INFO_MASK)
+ 
+diff --git a/arch/x86/include/asm/sev.h b/arch/x86/include/asm/sev.h
+index 4ee98976aed8..e37451849165 100644
+--- a/arch/x86/include/asm/sev.h
++++ b/arch/x86/include/asm/sev.h
+@@ -63,6 +63,9 @@ extern bool handle_vc_boot_ghcb(struct pt_regs *regs);
+ /* Software defined (when rFlags.CF = 1) */
+ #define PVALIDATE_FAIL_NOUPDATE		255
+ 
++/* RMP page size */
++#define RMP_PG_SIZE_4K			0
++
+ #ifdef CONFIG_AMD_MEM_ENCRYPT
+ extern struct static_key_false sev_es_enable_key;
+ extern void __sev_es_ist_enter(struct pt_regs *regs);
+@@ -90,6 +93,18 @@ extern enum es_result sev_es_ghcb_hv_call(struct ghcb *ghcb,
+ 					  struct es_em_ctxt *ctxt,
+ 					  u64 exit_code, u64 exit_info_1,
+ 					  u64 exit_info_2);
++static inline int rmpadjust(unsigned long vaddr, bool rmp_psize, unsigned long attrs)
++{
++	int rc;
++
++	/* "rmpadjust" mnemonic support in binutils 2.36 and newer */
++	asm volatile(".byte 0xF3,0x0F,0x01,0xFE\n\t"
++		     : "=a"(rc)
++		     : "a"(vaddr), "c"(rmp_psize), "d"(attrs)
++		     : "memory", "cc");
++
++	return rc;
++}
+ static inline int pvalidate(unsigned long vaddr, bool rmp_psize, bool validate)
+ {
+ 	bool no_rmpupdate;
+@@ -114,6 +129,7 @@ static inline int sev_es_setup_ap_jump_table(struct real_mode_header *rmh) { ret
+ static inline void sev_es_nmi_complete(void) { }
+ static inline int sev_es_efi_map_ghcbs(pgd_t *pgd) { return 0; }
+ static inline int pvalidate(unsigned long vaddr, bool rmp_psize, bool validate) { return 0; }
++static inline int rmpadjust(unsigned long vaddr, bool rmp_psize, unsigned long attrs) { return 0; }
+ #endif
+ 
+ #endif
 -- 
 2.25.1
 
