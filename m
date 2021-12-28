@@ -2,94 +2,185 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D25A8C433F5
-	for <linux-efi@archiver.kernel.org>; Tue, 28 Dec 2021 14:06:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A97AC433EF
+	for <linux-efi@archiver.kernel.org>; Tue, 28 Dec 2021 15:39:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233070AbhL1OGW (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 28 Dec 2021 09:06:22 -0500
-Received: from dfw.source.kernel.org ([139.178.84.217]:45360 "EHLO
-        dfw.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231987AbhL1OGV (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 28 Dec 2021 09:06:21 -0500
+        id S235310AbhL1PjA (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 28 Dec 2021 10:39:00 -0500
+Received: from ams.source.kernel.org ([145.40.68.75]:50214 "EHLO
+        ams.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S235256AbhL1Pi7 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 28 Dec 2021 10:38:59 -0500
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 869206120B;
-        Tue, 28 Dec 2021 14:06:21 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A6159C36AE8;
-        Tue, 28 Dec 2021 14:06:20 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 15F85B81232;
+        Tue, 28 Dec 2021 15:38:58 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E5E9DC36AE7;
+        Tue, 28 Dec 2021 15:38:55 +0000 (UTC)
 Authentication-Results: smtp.kernel.org;
-        dkim=pass (1024-bit key) header.d=zx2c4.com header.i=@zx2c4.com header.b="nmjVFMYC"
+        dkim=pass (1024-bit key) header.d=zx2c4.com header.i=@zx2c4.com header.b="AEsFxnvG"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=zx2c4.com; s=20210105;
-        t=1640700378;
+        t=1640705934;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=JCnRXacLhMlITNkmUnJxWexg4OJiJS91riEkz6/i8ZE=;
-        b=nmjVFMYCaquZ9/Y7p7HDXk1eisGXD+W11sfsa2FHqJKg6xwOqpYvfwxbl7fZ2MCT5yYX5D
-        oewASSvWw6tpT6D53xiZjeBawCmEOa24+FGoXvzJ5xnVxQB5E9NdjnrRpNAfflOB5cpHNa
-        HdkUHA7nvnBu/jM34QP9ODBP/e1+KfY=
-Received: by mail.zx2c4.com (ZX2C4 Mail Server) with ESMTPSA id 036db282 (TLSv1.3:AEAD-AES256-GCM-SHA384:256:NO);
-        Tue, 28 Dec 2021 14:06:18 +0000 (UTC)
-Received: by mail-yb1-f179.google.com with SMTP id j83so35513424ybg.2;
-        Tue, 28 Dec 2021 06:06:17 -0800 (PST)
-X-Gm-Message-State: AOAM532RmZbM3euKBrAG6KJ0ESvgQ+ybAAQMUbM9EbWf7QHYd6vBdw/r
-        8WSIt8Hf4ppR0pMVsEtobEP4hMleF+61UoZTi+E=
-X-Google-Smtp-Source: ABdhPJxRQD+FL/QGhASL4oa0sY15DOVcn9SLxdvLN283YUr2MBQHWGARB6KFbqpE80ytTICehqJLV/HKfT13S6i56R8=
-X-Received: by 2002:a25:854f:: with SMTP id f15mr17186357ybn.121.1640700376442;
- Tue, 28 Dec 2021 06:06:16 -0800 (PST)
-MIME-Version: 1.0
-References: <YcTIM+MWEbMGLpRa@light.dominikbrodowski.net>
-In-Reply-To: <YcTIM+MWEbMGLpRa@light.dominikbrodowski.net>
+        bh=xTlLiKh0j/yvjLyt9s1R3EwDW867RrzxbKV3/tx4QBE=;
+        b=AEsFxnvGo2dkabBTC4ailIgpKyZfbzaJM6/4wr1QzIHtiCs971fi/3XvMmpgdtZdcxMivI
+        Rvb2VWZoBhFAojU3lpGPBeTB2+vbUmLaNLD6dIXdspYP3C8N9cRrBdU/I6XevHhU/FGyfb
+        mMD8rbO7xJFuxrmNTmz2SxCIGg7HoEw=
+Received: by mail.zx2c4.com (ZX2C4 Mail Server) with ESMTPSA id 36d37c32 (TLSv1.3:AEAD-AES256-GCM-SHA384:256:NO);
+        Tue, 28 Dec 2021 15:38:54 +0000 (UTC)
 From:   "Jason A. Donenfeld" <Jason@zx2c4.com>
-Date:   Tue, 28 Dec 2021 15:06:05 +0100
-X-Gmail-Original-Message-ID: <CAHmME9qC2iX5EvDLj5YBZBdDJ_n8xTUYZT73qonsEhbKCwizFw@mail.gmail.com>
-Message-ID: <CAHmME9qC2iX5EvDLj5YBZBdDJ_n8xTUYZT73qonsEhbKCwizFw@mail.gmail.com>
-Subject: Re: [PATCH v6] random: fix crash on multiple early calls to add_bootloader_randomness()
-To:     Dominik Brodowski <linux@dominikbrodowski.net>
-Cc:     "Theodore Ts'o" <tytso@mit.edu>,
+To:     linux-kernel@vger.kernel.org,
+        Dominik Brodowski <linux@dominikbrodowski.net>,
+        "Theodore Ts'o" <tytso@mit.edu>,
         Hsin-Yi Wang <hsinyi@chromium.org>,
         "Ivan T. Ivanov" <iivanov@suse.de>,
-        Ard Biesheuvel <ardb@kernel.org>, linux-efi@vger.kernel.org,
-        LKML <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        Ard Biesheuvel <ardb@kernel.org>, linux-efi@vger.kernel.org
+Cc:     stable@vger.kernel.org, "Jason A . Donenfeld" <Jason@zx2c4.com>
+Subject: [PATCH v7 1/4] random: fix crash on multiple early calls to add_bootloader_randomness()
+Date:   Tue, 28 Dec 2021 16:38:23 +0100
+Message-Id: <20211228153826.448805-1-Jason@zx2c4.com>
+In-Reply-To: <CAHmME9qC2iX5EvDLj5YBZBdDJ_n8xTUYZT73qonsEhbKCwizFw@mail.gmail.com>
+References: <CAHmME9qC2iX5EvDLj5YBZBdDJ_n8xTUYZT73qonsEhbKCwizFw@mail.gmail.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Hi Dominik,
+From: Dominik Brodowski <linux@dominikbrodowski.net>
 
-Thanks. I like where this is going. It seems like we can tackle this
-problem and the other one separately like this as you've done. It'd be
-helpful though if you could send the patches for all the problems in
-one patchset so that I'm not left wondering, "hey what about this
-other thing; did you forget it?" Since these issues are kind of
-intermingled, it'd be nice to see how the puzzle pieces fit together.
+Currently, if CONFIG_RANDOM_TRUST_BOOTLOADER is enabled, multiple calls
+to add_bootloader_randomness() are broken and can cause a NULL pointer
+dereference, as noted by Ivan T. Ivanov. This is not only a hypothetical
+problem, as qemu on arm64 may provide bootloader entropy via EFI and via
+devicetree.
 
-One question about this patch:
-- If crng_reseed is called early, before system_wq is non-NULL, that
-block will be skipped. When will it be called again?
-- There's no call to it in crng_initialize_primary/rand_initialize
-when not trusting the CPU and such, and that block there isn't quite
-the same as crng_reseed either.
+On the first call to add_hwgenerator_randomness(), crng_fast_load() is
+executed, and if the seed is long enough, crng_init will be set to 1.
+On subsequent calls to add_bootloader_randomness() and then to
+add_hwgenerator_randomness(), crng_fast_load() will be skipped. Instead,
+wait_event_interruptible() and then credit_entropy_bits() will be called.
+If the entropy count for that second seed is large enough, that proceeds
+to crng_reseed().
 
-Also, something I noticed when looking at this, which I'm not sure has
-come up yet in the various problems identified:
-- If crng_reseed is called early, but not too early, and that block is
-called, we'll set crng_init=2 and do various things and print, "crng
-init done\n".
-- Later, when rand_initialize is called, if we're trusting the CPU and
-such, we'll re-initialize it and print, "crng done (trusting CPU's
-manufacturer)\n".
-That seems like a problem, though I assume we haven't hit that yet
-because the race window is pretty small, so we've mostly been crashing
-on a NULL system_wq instead, or having crng_reseed called _after_
-crng_initialize_primary/rand_initialize anyway.
+However, both wait_event_interruptible() and crng_reseed() depends
+(at least in numa_crng_init()) on workqueues. Therefore, test whether
+system_wq is already initialized, which is a sufficient indicator that
+workqueue_init_early() has progressed far enough.
 
-Thanks a lot for working on this. If you get tired of this back and
-forth, by the way, and want me to start proposing patches for you to
-look at instead, we can trade off. I'm also happy to keep looking at
-what you send; it's just that as we're already on v6 here, I'm hoping
-you won't get too frustrated.
+If we wind up hitting the !system_wq case, we later want to do what
+would have been done there when wqs are up, so set a flag, and do that
+work later from the rand_initialize() call.
 
-Jason
+Reported-by: Ivan T. Ivanov <iivanov@suse.de>
+Fixes: 18b915ac6b0a ("efi/random: Treat EFI_RNG_PROTOCOL output as bootloader randomness")
+Cc: stable@vger.kernel.org
+Signed-off-by: Dominik Brodowski <linux@dominikbrodowski.net>
+[Jason: added crng_need_done state and related logic.]
+Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
+---
+ drivers/char/random.c | 56 +++++++++++++++++++++++++++----------------
+ 1 file changed, 36 insertions(+), 20 deletions(-)
+
+diff --git a/drivers/char/random.c b/drivers/char/random.c
+index 82db125aaed7..b003e266a499 100644
+--- a/drivers/char/random.c
++++ b/drivers/char/random.c
+@@ -468,6 +468,7 @@ static struct crng_state primary_crng = {
+  * its value (from 0->1->2).
+  */
+ static int crng_init = 0;
++static bool crng_need_done = false;
+ #define crng_ready() (likely(crng_init > 1))
+ static int crng_init_cnt = 0;
+ static unsigned long crng_global_init_time = 0;
+@@ -835,6 +836,36 @@ static void __init crng_initialize_primary(struct crng_state *crng)
+ 	crng->init_time = jiffies - CRNG_RESEED_INTERVAL - 1;
+ }
+ 
++static void crng_init_done(struct crng_state *crng)
++{
++	if (crng != &primary_crng || crng_init >= 2)
++		return;
++	if (!system_wq) {
++		/* We can't call numa_crng_init until we have workqueues,
++		 * so mark this for processing later. */
++		crng_need_done = true;
++		return;
++	}
++
++	invalidate_batched_entropy();
++	numa_crng_init();
++	crng_init = 2;
++	process_random_ready_list();
++	wake_up_interruptible(&crng_init_wait);
++	kill_fasync(&fasync, SIGIO, POLL_IN);
++	pr_notice("crng init done\n");
++	if (unseeded_warning.missed) {
++		pr_notice("%d get_random_xx warning(s) missed due to ratelimiting\n",
++			  unseeded_warning.missed);
++		unseeded_warning.missed = 0;
++	}
++	if (urandom_warning.missed) {
++		pr_notice("%d urandom warning(s) missed due to ratelimiting\n",
++			  urandom_warning.missed);
++		urandom_warning.missed = 0;
++	}
++}
++
+ #ifdef CONFIG_NUMA
+ static void do_numa_crng_init(struct work_struct *work)
+ {
+@@ -989,25 +1020,7 @@ static void crng_reseed(struct crng_state *crng, struct entropy_store *r)
+ 	memzero_explicit(&buf, sizeof(buf));
+ 	WRITE_ONCE(crng->init_time, jiffies);
+ 	spin_unlock_irqrestore(&crng->lock, flags);
+-	if (crng == &primary_crng && crng_init < 2) {
+-		invalidate_batched_entropy();
+-		numa_crng_init();
+-		crng_init = 2;
+-		process_random_ready_list();
+-		wake_up_interruptible(&crng_init_wait);
+-		kill_fasync(&fasync, SIGIO, POLL_IN);
+-		pr_notice("crng init done\n");
+-		if (unseeded_warning.missed) {
+-			pr_notice("%d get_random_xx warning(s) missed due to ratelimiting\n",
+-				  unseeded_warning.missed);
+-			unseeded_warning.missed = 0;
+-		}
+-		if (urandom_warning.missed) {
+-			pr_notice("%d urandom warning(s) missed due to ratelimiting\n",
+-				  urandom_warning.missed);
+-			urandom_warning.missed = 0;
+-		}
+-	}
++	crng_init_done(crng);
+ }
+ 
+ static void _extract_crng(struct crng_state *crng,
+@@ -1780,6 +1793,8 @@ static void __init init_std_data(struct entropy_store *r)
+ int __init rand_initialize(void)
+ {
+ 	init_std_data(&input_pool);
++	if (crng_need_done)
++		crng_init_done(&primary_crng);
+ 	crng_initialize_primary(&primary_crng);
+ 	crng_global_init_time = jiffies;
+ 	if (ratelimit_disable) {
+@@ -2288,7 +2303,8 @@ void add_hwgenerator_randomness(const char *buffer, size_t count,
+ 	 * We'll be woken up again once below random_write_wakeup_thresh,
+ 	 * or when the calling thread is about to terminate.
+ 	 */
+-	wait_event_interruptible(random_write_wait, kthread_should_stop() ||
++	wait_event_interruptible(random_write_wait,
++			!system_wq || kthread_should_stop() ||
+ 			ENTROPY_BITS(&input_pool) <= random_write_wakeup_bits);
+ 	mix_pool_bytes(poolp, buffer, count);
+ 	credit_entropy_bits(poolp, entropy);
+-- 
+2.34.1
+
