@@ -2,36 +2,35 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3E8D3C433EF
-	for <linux-efi@archiver.kernel.org>; Fri, 31 Dec 2021 15:36:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 20864C433F5
+	for <linux-efi@archiver.kernel.org>; Mon,  3 Jan 2022 16:49:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229573AbhLaPga (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 31 Dec 2021 10:36:30 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57018 "EHLO
+        id S234788AbiACQtr (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 3 Jan 2022 11:49:47 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44094 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229453AbhLaPga (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 31 Dec 2021 10:36:30 -0500
+        with ESMTP id S234996AbiACQtr (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 3 Jan 2022 11:49:47 -0500
 Received: from mail.skyhub.de (mail.skyhub.de [IPv6:2a01:4f8:190:11c2::b:1457])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0C1A6C061574;
-        Fri, 31 Dec 2021 07:36:30 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9A83BC061761;
+        Mon,  3 Jan 2022 08:49:46 -0800 (PST)
 Received: from zn.tnic (dslb-088-067-202-008.088.067.pools.vodafone-ip.de [88.67.202.8])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id 238141EC018B;
-        Fri, 31 Dec 2021 16:36:23 +0100 (CET)
+        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id DBB481EC0380;
+        Mon,  3 Jan 2022 17:49:39 +0100 (CET)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alien8.de; s=dkim;
-        t=1640964983;
+        t=1641228580;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:in-reply-to:in-reply-to:  references:references;
-        bh=e73K8Umx7rvCjEFSc9t/jc9In98gI9J2YopzbA2lLtU=;
-        b=bGMf3G697Am5T2hdwQXD8IbqbPLMoHyZmpRcs/O32MUOVhvUqO+tOieqtakP1xVwuo7QLB
-        qo/KxkT1sdlvncplcBsybyI5UmzJNrDAMGCZ2fgPtfDx3kn/XRl7BmscW7KX0Nq5AcTwLH
-        W3FzyP/86itFcuf73PUPJsXqh+u8FDE=
-Date:   Fri, 31 Dec 2021 16:36:26 +0100
+        bh=P798RWaZTr+okBNMCVL+1sl56MgtJUmphTduCouvUIE=;
+        b=ip+HPwItP/DquYMql6pC3Po65Wa5C8XWBZLq6hy+3IQt1D9EWyxbEfUBkQZGd+h8+zSPWi
+        X5/4SIi5AAR2dbjqWQjWlH/qDK5OuQxoQakMhvKtmHNJnB/4mtQS1N5aMHi698V0TubJ9X
+        yB2kwu78JKqbDVvlBS/bSARKlFBV54g=
+Date:   Mon, 3 Jan 2022 17:49:42 +0100
 From:   Borislav Petkov <bp@alien8.de>
-To:     Brijesh Singh <brijesh.singh@amd.com>,
-        Vlastimil Babka <vbabka@suse.cz>
+To:     Brijesh Singh <brijesh.singh@amd.com>
 Cc:     x86@kernel.org, linux-kernel@vger.kernel.org, kvm@vger.kernel.org,
         linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org,
         linux-coco@lists.linux.dev, linux-mm@kvack.org,
@@ -52,339 +51,195 @@ Cc:     x86@kernel.org, linux-kernel@vger.kernel.org, kvm@vger.kernel.org,
         Dov Murik <dovmurik@linux.ibm.com>,
         Tobin Feldman-Fitzthum <tobin@ibm.com>,
         Michael Roth <michael.roth@amd.com>,
+        Vlastimil Babka <vbabka@suse.cz>,
         "Kirill A . Shutemov" <kirill@shutemov.name>,
         Andi Kleen <ak@linux.intel.com>,
         "Dr . David Alan Gilbert" <dgilbert@redhat.com>,
         tony.luck@intel.com, marcorr@google.com,
         sathyanarayanan.kuppuswamy@linux.intel.com
-Subject: Re: [PATCH v8 20/40] x86/sev: Use SEV-SNP AP creation to start
- secondary CPUs
-Message-ID: <Yc8jerEP5CrxfFi4@zn.tnic>
+Subject: Re: [PATCH v8 21/40] x86/head: re-enable stack protection for
+ 32/64-bit builds
+Message-ID: <YdMpJg3YSdoYMKaZ@zn.tnic>
 References: <20211210154332.11526-1-brijesh.singh@amd.com>
- <20211210154332.11526-21-brijesh.singh@amd.com>
+ <20211210154332.11526-22-brijesh.singh@amd.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20211210154332.11526-21-brijesh.singh@amd.com>
+In-Reply-To: <20211210154332.11526-22-brijesh.singh@amd.com>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Fri, Dec 10, 2021 at 09:43:12AM -0600, Brijesh Singh wrote:
-> diff --git a/arch/x86/include/asm/sev-common.h b/arch/x86/include/asm/sev-common.h
-> index 123a96f7dff2..38c14601ae4a 100644
-> --- a/arch/x86/include/asm/sev-common.h
-> +++ b/arch/x86/include/asm/sev-common.h
-> @@ -104,6 +104,7 @@ enum psc_op {
->  	(((u64)(v) & GENMASK_ULL(63, 12)) >> 12)
+On Fri, Dec 10, 2021 at 09:43:13AM -0600, Brijesh Singh wrote:
+
+> Subject: Re: [PATCH v8 21/40] x86/head: re-enable stack protection for 32/64-bit builds
+
+The tip tree preferred format for patch subject prefixes is
+'subsys/component:', e.g. 'x86/apic:', 'x86/mm/fault:', 'sched/fair:',
+'genirq/core:'. Please do not use file names or complete file paths as
+prefix. 'git log path/to/file' should give you a reasonable hint in most
+cases.
+
+The condensed patch description in the subject line should start with a
+uppercase letter and should be written in imperative tone.
+
+In this case:
+
+x86/head/64: Re-enable stack protection
+
+There's no need for 32/64-bit builds - we don't have anything else :-)
+
+Please check all your subjects.
+
+> From: Michael Roth <michael.roth@amd.com>
+> 
+> As of commit 103a4908ad4d ("x86/head/64: Disable stack protection for
+> head$(BITS).o")
+
+verify_commit_quotation: Warning: The proper commit quotation format is:
+<newline>
+[  ]<sha1, 12 chars> ("commit name")
+<newline>
+
+> kernel/head64.c is compiled with -fno-stack-protector
+> to allow a call to set_bringup_idt_handler(), which would otherwise
+> have stack protection enabled with CONFIG_STACKPROTECTOR_STRONG. While
+> sufficient for that case, there may still be issues with calls to any
+> external functions that were compiled with stack protection enabled that
+> in-turn make stack-protected calls, or if the exception handlers set up
+> by set_bringup_idt_handler() make calls to stack-protected functions.
+> As part of 103a4908ad4d, stack protection was also disabled for
+> kernel/head32.c as a precaution.
+> 
+> Subsequent patches for SEV-SNP CPUID validation support will introduce
+> both such cases. Attempting to disable stack protection for everything
+> in scope to address that is prohibitive since much of the code, like
+> SEV-ES #VC handler, is shared code that remains in use after boot and
+> could benefit from having stack protection enabled. Attempting to inline
+> calls is brittle and can quickly balloon out to library/helper code
+> where that's not really an option.
+> 
+> Instead, re-enable stack protection for head32.c/head64.c and make the
+> appropriate changes to ensure the segment used for the stack canary is
+> initialized in advance of any stack-protected C calls.
+> 
+> for head64.c:
+> 
+> - The BSP will enter from startup_64 and call into C code
+
+Function names need to end with "()" so that it is clear they're
+functions.
+
+>   (startup_64_setup_env) shortly after setting up the stack, which may
+>   result in calls to stack-protected code. Set up %gs early to allow
+>   for this safely.
+> - APs will enter from secondary_startup_64*, and %gs will be set up
+>   soon after. There is one call to C code prior to this
+>   (__startup_secondary_64), but it is only to fetch sme_me_mask, and
+>   unlikely to be stack-protected, so leave things as they are, but add
+>   a note about this in case things change in the future.
+> 
+> for head32.c:
+> 
+> - BSPs/APs will set %fs to __BOOT_DS prior to any C calls. In recent
+>   kernels, the compiler is configured to access the stack canary at
+>   %fs:__stack_chk_guard,
+
+Add here somewhere:
+
+"See
+
+  3fb0fdb3bbe7 ("x86/stackprotector/32: Make the canary into a regular percpu variable")
+
+for details."
+
+> which overlaps with the initial per-cpu
+>   __stack_chk_guard variable in the initial/'master' .data..percpu
+>   area. This is sufficient to allow access to the canary for use
+>   during initial startup, so no changes are needed there.
+> 
+> Suggested-by: Joerg Roedel <jroedel@suse.de> #for 64-bit %gs set up
+> Signed-off-by: Michael Roth <michael.roth@amd.com>
+> Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
+> ---
+>  arch/x86/kernel/Makefile  |  1 -
+>  arch/x86/kernel/head_64.S | 24 ++++++++++++++++++++++++
+>  2 files changed, 24 insertions(+), 1 deletion(-)
+> 
+> diff --git a/arch/x86/kernel/Makefile b/arch/x86/kernel/Makefile
+> index 2ff3e600f426..4df8c8f7d2ac 100644
+> --- a/arch/x86/kernel/Makefile
+> +++ b/arch/x86/kernel/Makefile
+> @@ -48,7 +48,6 @@ endif
+>  # non-deterministic coverage.
+>  KCOV_INSTRUMENT		:= n
 >  
->  #define GHCB_HV_FT_SNP			BIT_ULL(0)
-> +#define GHCB_HV_FT_SNP_AP_CREATION	(BIT_ULL(1) | GHCB_HV_FT_SNP)
-
-Why is bit 0 ORed in? Because it "Requires SEV-SNP Feature."?
-
-You can still enforce that requirement in the test though.
-
-Or all those SEV features should not be bits but masks -
-GHCB_HV_FT_SNP_AP_CREATION_MASK for example, seeing how the others
-require the previous bits to be set too.
-
-...
-
->  static DEFINE_PER_CPU(struct sev_es_runtime_data*, runtime_data);
->  DEFINE_STATIC_KEY_FALSE(sev_es_enable_key);
+> -CFLAGS_head$(BITS).o	+= -fno-stack-protector
+>  CFLAGS_cc_platform.o	+= -fno-stack-protector
 >  
-> +static DEFINE_PER_CPU(struct sev_es_save_area *, snp_vmsa);
-
-This is what I mean: the struct is called "sev_es... " but the variable
-"snp_...". I.e., it is all sev_<something>.
-
-> +
->  static __always_inline bool on_vc_stack(struct pt_regs *regs)
->  {
->  	unsigned long sp = regs->sp;
-> @@ -814,6 +818,231 @@ void snp_set_memory_private(unsigned long vaddr, unsigned int npages)
->  	pvalidate_pages(vaddr, npages, 1);
->  }
+>  CFLAGS_irq.o := -I $(srctree)/$(src)/../include/asm/trace
+> diff --git a/arch/x86/kernel/head_64.S b/arch/x86/kernel/head_64.S
+> index 99de8fd461e8..9f8a7e48aca7 100644
+> --- a/arch/x86/kernel/head_64.S
+> +++ b/arch/x86/kernel/head_64.S
+> @@ -65,6 +65,22 @@ SYM_CODE_START_NOALIGN(startup_64)
+>  	leaq	(__end_init_task - FRAME_SIZE)(%rip), %rsp
 >  
-> +static int snp_set_vmsa(void *va, bool vmsa)
-> +{
-> +	u64 attrs;
+>  	leaq	_text(%rip), %rdi
 > +
 > +	/*
-> +	 * The RMPADJUST instruction is used to set or clear the VMSA bit for
-> +	 * a page. A change to the VMSA bit is only performed when running
-> +	 * at VMPL0 and is ignored at other VMPL levels. If too low of a target
+> +	 * initial_gs points to initial fixed_per_cpu struct with storage for
 
-What does "too low" mean here exactly?
+$ git grep fixed_per_cpu
+$
 
-The kernel is not at VMPL0 but the specified level is lower? Weird...
+??
 
-> +	 * VMPL level is specified, the instruction can succeed without changing
-> +	 * the VMSA bit should the kernel not be in VMPL0. Using a target VMPL
-> +	 * level of 1 will return a FAIL_PERMISSION error if the kernel is not
-> +	 * at VMPL0, thus ensuring that the VMSA bit has been properly set when
-> +	 * no error is returned.
+Do you mean this:
 
-We do check whether we run at VMPL0 earlier when starting the guest -
-see enforce_vmpl0().
+SYM_DATA(initial_gs,    .quad INIT_PER_CPU_VAR(fixed_percpu_data))
 
-I don't think you need any of that additional verification here - just
-assume you are at VMPL0.
+?
 
+> +	 * the stack protector canary. Global pointer fixups are needed at this
+> +	 * stage, so apply them as is done in fixup_pointer(), and initialize %gs
+> +	 * such that the canary can be accessed at %gs:40 for subsequent C calls.
 > +	 */
-> +	attrs = 1;
-> +	if (vmsa)
-> +		attrs |= RMPADJUST_VMSA_PAGE_BIT;
+> +	movl	$MSR_GS_BASE, %ecx
+> +	movq	initial_gs(%rip), %rax
+> +	movq	$_text, %rdx
+> +	subq	%rdx, %rax
+> +	addq	%rdi, %rax
+> +	movq	%rax, %rdx
+> +	shrq	$32,  %rdx
+> +	wrmsr
 > +
-> +	return rmpadjust((unsigned long)va, RMP_PG_SIZE_4K, attrs);
-> +}
-> +
-> +#define __ATTR_BASE		(SVM_SELECTOR_P_MASK | SVM_SELECTOR_S_MASK)
-> +#define INIT_CS_ATTRIBS		(__ATTR_BASE | SVM_SELECTOR_READ_MASK | SVM_SELECTOR_CODE_MASK)
-> +#define INIT_DS_ATTRIBS		(__ATTR_BASE | SVM_SELECTOR_WRITE_MASK)
-> +
-> +#define INIT_LDTR_ATTRIBS	(SVM_SELECTOR_P_MASK | 2)
-> +#define INIT_TR_ATTRIBS		(SVM_SELECTOR_P_MASK | 3)
-> +
-> +static void *snp_safe_alloc_page(void)
+>  	pushq	%rsi
+>  	call	startup_64_setup_env
+>  	popq	%rsi
+> @@ -146,6 +162,14 @@ SYM_INNER_LABEL(secondary_startup_64_no_verify, SYM_L_GLOBAL)
+>  	 * added to the initial pgdir entry that will be programmed into CR3.
+>  	 */
+>  	pushq	%rsi
 
-safe?
+<---- newline here.
 
-And you don't need to say "safe" - snp_alloc_vmsa_page() is perfectly fine.
-
-> +{
-> +	unsigned long pfn;
-> +	struct page *p;
-> +
 > +	/*
-> +	 * Allocate an SNP safe page to workaround the SNP erratum where
-> +	 * the CPU will incorrectly signal an RMP violation  #PF if a
-> +	 * hugepage (2mb or 1gb) collides with the RMP entry of VMSA page.
-
-		2MB or 1GB
-
-Collides how? The 4K frame is inside the hugepage?
-
-> +	 * The recommeded workaround is to not use the large page.
-
-Unknown word [recommeded] in comment, suggestions:
-        ['recommended', 'recommend', 'recommitted', 'commended', 'commandeered']
-
-> +	 *
-> +	 * Allocate one extra page, use a page which is not 2mb aligned
-
-2MB-aligned
-
-> +	 * and free the other.
+> +	 * NOTE: %gs at this point is a stale data segment left over from the
+> +	 * real-mode trampoline, so the default stack protector canary location
+> +	 * at %gs:40 does not yet coincide with the expected fixed_per_cpu struct
+> +	 * that contains storage for the stack canary. So take care not to add
+> +	 * anything to the C functions in this path that would result in stack
+> +	 * protected C code being generated.
 > +	 */
-> +	p = alloc_pages(GFP_KERNEL_ACCOUNT | __GFP_ZERO, 1);
-> +	if (!p)
-> +		return NULL;
-> +
-> +	split_page(p, 1);
-> +
-> +	pfn = page_to_pfn(p);
-> +	if (IS_ALIGNED(__pfn_to_phys(pfn), PMD_SIZE)) {
-> +		pfn++;
-> +		__free_page(p);
-> +	} else {
-> +		__free_page(pfn_to_page(pfn + 1));
-> +	}
+>  	call	__startup_secondary_64
+>  	popq	%rsi
 
-AFAICT, this is doing all this stuff so that you can make sure you get a
-non-2M-aligned page. I wonder if there's a way to simply ask mm to give
-you such page directly.
+Can't you simply do
 
-vbabka?
+	movq    sme_me_mask, %rax
 
-> +
-> +	return page_address(pfn_to_page(pfn));
-> +}
-> +
-> +static int wakeup_cpu_via_vmgexit(int apic_id, unsigned long start_ip)
-> +{
-> +	struct sev_es_save_area *cur_vmsa, *vmsa;
-> +	struct ghcb_state state;
-> +	unsigned long flags;
-> +	struct ghcb *ghcb;
-> +	int cpu, err, ret;
-> +	u8 sipi_vector;
-> +	u64 cr4;
-> +
-> +	if ((sev_hv_features & GHCB_HV_FT_SNP_AP_CREATION) != GHCB_HV_FT_SNP_AP_CREATION)
-> +		return -EOPNOTSUPP;
-> +
-> +	/*
-> +	 * Verify the desired start IP against the known trampoline start IP
-> +	 * to catch any future new trampolines that may be introduced that
-> +	 * would require a new protected guest entry point.
-> +	 */
-> +	if (WARN_ONCE(start_ip != real_mode_header->trampoline_start,
-> +		      "Unsupported SEV-SNP start_ip: %lx\n", start_ip))
-> +		return -EINVAL;
-> +
-> +	/* Override start_ip with known protected guest start IP */
-> +	start_ip = real_mode_header->sev_es_trampoline_start;
-> +
-> +	/* Find the logical CPU for the APIC ID */
-> +	for_each_present_cpu(cpu) {
-> +		if (arch_match_cpu_phys_id(cpu, apic_id))
-> +			break;
-> +	}
-> +	if (cpu >= nr_cpu_ids)
-> +		return -EINVAL;
-> +
-> +	cur_vmsa = per_cpu(snp_vmsa, cpu);
-> +
-> +	/*
-> +	 * A new VMSA is created each time because there is no guarantee that
-> +	 * the current VMSA is the kernels or that the vCPU is not running. If
-
-kernel's.
-
-And if it is not the kernel's, whose it is?
-
-> +	 * an attempt was done to use the current VMSA with a running vCPU, a
-> +	 * #VMEXIT of that vCPU would wipe out all of the settings being done
-> +	 * here.
-
-I don't understand - this is waking up a CPU, how can it ever be a
-running vCPU which is using the current VMSA?!
-
-There is per_cpu(snp_vmsa, cpu), who else can be using that one currently?
-
-> +	 */
-> +	vmsa = (struct sev_es_save_area *)snp_safe_alloc_page();
-> +	if (!vmsa)
-> +		return -ENOMEM;
-> +
-> +	/* CR4 should maintain the MCE value */
-> +	cr4 = native_read_cr4() & X86_CR4_MCE;
-> +
-> +	/* Set the CS value based on the start_ip converted to a SIPI vector */
-> +	sipi_vector		= (start_ip >> 12);
-> +	vmsa->cs.base		= sipi_vector << 12;
-> +	vmsa->cs.limit		= 0xffff;
-> +	vmsa->cs.attrib		= INIT_CS_ATTRIBS;
-> +	vmsa->cs.selector	= sipi_vector << 8;
-> +
-> +	/* Set the RIP value based on start_ip */
-> +	vmsa->rip		= start_ip & 0xfff;
-> +
-> +	/* Set VMSA entries to the INIT values as documented in the APM */
-> +	vmsa->ds.limit		= 0xffff;
-> +	vmsa->ds.attrib		= INIT_DS_ATTRIBS;
-> +	vmsa->es		= vmsa->ds;
-> +	vmsa->fs		= vmsa->ds;
-> +	vmsa->gs		= vmsa->ds;
-> +	vmsa->ss		= vmsa->ds;
-> +
-> +	vmsa->gdtr.limit	= 0xffff;
-> +	vmsa->ldtr.limit	= 0xffff;
-> +	vmsa->ldtr.attrib	= INIT_LDTR_ATTRIBS;
-> +	vmsa->idtr.limit	= 0xffff;
-> +	vmsa->tr.limit		= 0xffff;
-> +	vmsa->tr.attrib		= INIT_TR_ATTRIBS;
-> +
-> +	vmsa->efer		= 0x1000;	/* Must set SVME bit */
-
-verify_comment_style: Warning: No tail comments please:
- arch/x86/kernel/sev.c:954 [+   vmsa->efer              = 0x1000;       /* Must set SVME bit */]
-
-> +	vmsa->cr4		= cr4;
-> +	vmsa->cr0		= 0x60000010;
-> +	vmsa->dr7		= 0x400;
-> +	vmsa->dr6		= 0xffff0ff0;
-> +	vmsa->rflags		= 0x2;
-> +	vmsa->g_pat		= 0x0007040600070406ULL;
-> +	vmsa->xcr0		= 0x1;
-> +	vmsa->mxcsr		= 0x1f80;
-> +	vmsa->x87_ftw		= 0x5555;
-> +	vmsa->x87_fcw		= 0x0040;
-
-Yah, those definitely need macros or at least comments ontop denoting
-what those naked values are.
-
-> +
-> +	/*
-> +	 * Set the SNP-specific fields for this VMSA:
-> +	 *   VMPL level
-> +	 *   SEV_FEATURES (matches the SEV STATUS MSR right shifted 2 bits)
-> +	 */
-
-Like this^^
-
-> +	vmsa->vmpl		= 0;
-> +	vmsa->sev_features	= sev_status >> 2;
-> +
-> +	/* Switch the page over to a VMSA page now that it is initialized */
-> +	ret = snp_set_vmsa(vmsa, true);
-> +	if (ret) {
-> +		pr_err("set VMSA page failed (%u)\n", ret);
-> +		free_page((unsigned long)vmsa);
-> +
-> +		return -EINVAL;
-> +	}
-> +
-> +	/* Issue VMGEXIT AP Creation NAE event */
-> +	local_irq_save(flags);
-> +
-> +	ghcb = __sev_get_ghcb(&state);
-> +
-> +	vc_ghcb_invalidate(ghcb);
-> +	ghcb_set_rax(ghcb, vmsa->sev_features);
-> +	ghcb_set_sw_exit_code(ghcb, SVM_VMGEXIT_AP_CREATION);
-> +	ghcb_set_sw_exit_info_1(ghcb, ((u64)apic_id << 32) | SVM_VMGEXIT_AP_CREATE);
-> +	ghcb_set_sw_exit_info_2(ghcb, __pa(vmsa));
-> +
-> +	sev_es_wr_ghcb_msr(__pa(ghcb));
-> +	VMGEXIT();
-> +
-> +	if (!ghcb_sw_exit_info_1_is_valid(ghcb) ||
-> +	    lower_32_bits(ghcb->save.sw_exit_info_1)) {
-> +		pr_alert("SNP AP Creation error\n");
-
-alert?
-
-> +		ret = -EINVAL;
-> +	}
-> +
-> +	__sev_put_ghcb(&state);
-> +
-> +	local_irq_restore(flags);
-> +
-> +	/* Perform cleanup if there was an error */
-> +	if (ret) {
-> +		err = snp_set_vmsa(vmsa, false);
-> +		if (err)
-> +			pr_err("clear VMSA page failed (%u), leaking page\n", err);
-> +		else
-> +			free_page((unsigned long)vmsa);
-
-That...
-
-> +
-> +		vmsa = NULL;
-> +	}
-> +
-> +	/* Free up any previous VMSA page */
-> +	if (cur_vmsa) {
-> +		err = snp_set_vmsa(cur_vmsa, false);
-> +		if (err)
-> +			pr_err("clear VMSA page failed (%u), leaking page\n", err);
-> +		else
-> +			free_page((unsigned long)cur_vmsa);
-
-.. and that wants to be in a common helper.
-
-> +	}
-> +
-> +	/* Record the current VMSA page */
-> +	per_cpu(snp_vmsa, cpu) = vmsa;
-> +
-> +	return ret;
-> +}
+here instead and avoid the issue altogether?
 
 -- 
 Regards/Gruss,
