@@ -2,129 +2,130 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F6B2C433F5
-	for <linux-efi@archiver.kernel.org>; Thu, 13 Jan 2022 21:31:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D9D9AC433EF
+	for <linux-efi@archiver.kernel.org>; Fri, 14 Jan 2022 00:10:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235906AbiAMVbb (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 13 Jan 2022 16:31:31 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47292 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236060AbiAMVbR (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 13 Jan 2022 16:31:17 -0500
-Received: from mail-oi1-x236.google.com (mail-oi1-x236.google.com [IPv6:2607:f8b0:4864:20::236])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 55EB2C06161C
-        for <linux-efi@vger.kernel.org>; Thu, 13 Jan 2022 13:31:17 -0800 (PST)
-Received: by mail-oi1-x236.google.com with SMTP id i9so9675588oih.4
-        for <linux-efi@vger.kernel.org>; Thu, 13 Jan 2022 13:31:17 -0800 (PST)
+        id S238373AbiANAKy (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 13 Jan 2022 19:10:54 -0500
+Received: from smtp-fw-6002.amazon.com ([52.95.49.90]:36845 "EHLO
+        smtp-fw-6002.amazon.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S238356AbiANAKx (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 13 Jan 2022 19:10:53 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=eclypsium.com; s=google;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=yVN27if4TLsRCEMhCF/aqw8r/7THOayqDLYA7IAtavc=;
-        b=cl/0zLZFJiGx8sFR5y9ZQu0me7yAE4sNXzqAJwzAbdsxRpWRMgUShOFWYq8N1hPJY2
-         48lcCYaUXpUWBAmmXMep3197PfpmGKcgBMTygUt3HNfyP7uOOgBxNz99RILKcZoRYfqs
-         Zt/3R6UjOLJefC5vcjn7sL1MXjc3KjmC+NQjSymVxGXKyYrGFTRPKZcRuLkkEg6NPefk
-         U12lx/o3FRe8+qmMzea5DJ5DLvKXyzTANaRZcV9oVsgPU8w8f/XvJ3Tac1oXIB+RUkGf
-         hwj4x2EZC7kxNZHRPe0QXebw4HB5BaulW7Esu1JdDEw+fpJCtRbhSQoxMNwuGdoSTe3I
-         L08Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=yVN27if4TLsRCEMhCF/aqw8r/7THOayqDLYA7IAtavc=;
-        b=h/6RNEMe5WTbnnThWnvSo4sy7ofQ/1PrnPPJ8nF5FTce0FonhDHErLT6q14W0NA5dm
-         0sNbMsN09Fws8SX1mMw4orjF85uhNd4sutshWe5UrBqni0SWL8oFsXzLFMTdXV+v+4eb
-         Fi4RSC+Ndd/vn9YMegtvLDNyfN3w52bqiUVpUbHpWXxmQTCoER77inpp6+lUsDhAnZ+N
-         jkxQzKBCTZOf/7x/r0N4qKpI/QjOqcYouu9VImyKFc05yOatI7nC02p/p9qD98YApsS+
-         DCUGKup2mwphmfCbNM78CfYs9yWxxVq6blZ5A5/rWheypla2RAdZk/1dcUDbH+EJTt8+
-         dX8w==
-X-Gm-Message-State: AOAM531WGMvAmh20Ji5/EizfCjLleNVuLoU34vDb77fdhjhIi/Am9oK9
-        d6jYxoHT5XZN9sPcW9CCTJaFRg==
-X-Google-Smtp-Source: ABdhPJxJcXPnlOWnI9M6Jnqh9i6KsB4TBvlTnQrIc/FadDEsjuKYa97ar6lwUiV86vnw2DEkK9FwHA==
-X-Received: by 2002:a05:6808:1a83:: with SMTP id bm3mr3785579oib.53.1642109476722;
-        Thu, 13 Jan 2022 13:31:16 -0800 (PST)
-Received: from localhost (115-127-16-190.fibertel.com.ar. [190.16.127.115])
-        by smtp.gmail.com with ESMTPSA id o130sm1040829oig.26.2022.01.13.13.31.11
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 13 Jan 2022 13:31:16 -0800 (PST)
-From:   Martin Fernandez <martin.fernandez@eclypsium.com>
-To:     linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
-        platform-driver-x86@vger.kernel.org, linux-mm@kvack.org
-Cc:     tglx@linutronix.de, mingo@redhat.com, bp@alien8.de,
-        dave.hansen@linux.intel.com, x86@kernel.org, hpa@zytor.com,
-        ardb@kernel.org, dvhart@infradead.org, andy@infradead.org,
-        gregkh@linuxfoundation.org, rafael@kernel.org, rppt@kernel.org,
-        akpm@linux-foundation.org, daniel.gutson@eclypsium.com,
-        hughsient@gmail.com, alex.bazhaniuk@eclypsium.com,
-        alison.schofield@intel.com,
-        Martin Fernandez <martin.fernandez@eclypsium.com>
-Subject: [PATCH v5 5/5] drivers/node: Show in sysfs node's crypto capabilities
-Date:   Thu, 13 Jan 2022 18:30:27 -0300
-Message-Id: <20220113213027.457282-6-martin.fernandez@eclypsium.com>
-X-Mailer: git-send-email 2.30.2
-In-Reply-To: <20220113213027.457282-1-martin.fernandez@eclypsium.com>
-References: <20220113213027.457282-1-martin.fernandez@eclypsium.com>
+  d=amazon.com; i=@amazon.com; q=dns/txt; s=amazon201209;
+  t=1642119055; x=1673655055;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=sZ0Q13DS9ckI0r0N0o++8V1Ury3/fcldI1Z3JXkEwlc=;
+  b=EQzd5bG4CrzTcBZOrRQUnobH60cCj2aPHEfNulrRU+QWCi2f5eH9yQ2S
+   Y0EJW4PjLFfJeeqhNr6AMO5GEwBpIh4ozKFATOxvcwy4CrT22ZqSF/lWi
+   GmiSAdLiJqIrZ8iaFPjdMcAcqUhWy10fKI2NuWpg+KWkOuio9ipMz8rSI
+   s=;
+X-IronPort-AV: E=Sophos;i="5.88,286,1635206400"; 
+   d="scan'208";a="168914631"
+Received: from iad12-co-svc-p1-lb1-vlan2.amazon.com (HELO email-inbound-relay-pdx-2b-22c2b493.us-west-2.amazon.com) ([10.43.8.2])
+  by smtp-border-fw-6002.iad6.amazon.com with ESMTP; 14 Jan 2022 00:10:53 +0000
+Received: from EX13MTAUEE002.ant.amazon.com (pdx1-ws-svc-p6-lb9-vlan2.pdx.amazon.com [10.236.137.194])
+        by email-inbound-relay-pdx-2b-22c2b493.us-west-2.amazon.com (Postfix) with ESMTPS id 640AA41501;
+        Fri, 14 Jan 2022 00:10:48 +0000 (UTC)
+Received: from EX13D08UEE002.ant.amazon.com (10.43.62.92) by
+ EX13MTAUEE002.ant.amazon.com (10.43.62.24) with Microsoft SMTP Server (TLS)
+ id 15.0.1497.28; Fri, 14 Jan 2022 00:10:47 +0000
+Received: from EX13MTAUEE002.ant.amazon.com (10.43.62.24) by
+ EX13D08UEE002.ant.amazon.com (10.43.62.92) with Microsoft SMTP Server (TLS)
+ id 15.0.1497.28; Fri, 14 Jan 2022 00:10:47 +0000
+Received: from dev-dsk-fllinden-2c-d7720709.us-west-2.amazon.com
+ (172.19.206.175) by mail-relay.amazon.com (10.43.62.224) with Microsoft SMTP
+ Server id 15.0.1497.28 via Frontend Transport; Fri, 14 Jan 2022 00:10:47
+ +0000
+Received: by dev-dsk-fllinden-2c-d7720709.us-west-2.amazon.com (Postfix, from userid 6262777)
+        id 6BE7EC6; Fri, 14 Jan 2022 00:10:46 +0000 (UTC)
+Date:   Fri, 14 Jan 2022 00:10:46 +0000
+From:   Frank van der Linden <fllinden@amazon.com>
+To:     Mike Rapoport <rppt@kernel.org>
+CC:     <linux-arm-kernel@lists.infradead.org>, <robh+dt@kernel.org>,
+        <frowand.list@gmail.com>, <ardb@kernel.org>, <linux-mm@kvack.org>,
+        <devicetree@vger.kernel.org>, <linux-efi@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <kexec@lists.infradead.org>,
+        <catalin.marinas@arm.com>, <will@kernel.org>,
+        <geert+renesas@glider.be>
+Subject: Re: [PATCH 1/3] memblock: define functions to set the usable memory
+ range
+Message-ID: <20220114001046.GA10609@dev-dsk-fllinden-2c-d7720709.us-west-2.amazon.com>
+References: <20220110210809.3528-1-fllinden@amazon.com>
+ <20220110210809.3528-2-fllinden@amazon.com> <Yd1cnquQFZoNE7FP@kernel.org>
+ <20220111204441.GA36458@dev-dsk-fllinden-2c-d7720709.us-west-2.amazon.com>
+ <YeBiV8fuCCLWyHYb@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Disposition: inline
+In-Reply-To: <YeBiV8fuCCLWyHYb@kernel.org>
+User-Agent: Mutt/1.5.21 (2010-09-15)
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Show in each node in sysfs if its memory is able to do be encrypted by
-the CPU, ie. if all its memory is marked with EFI_MEMORY_CPU_CRYPTO in
-the EFI memory map.
+On Thu, Jan 13, 2022 at 07:33:11PM +0200, Mike Rapoport wrote:
+> On Tue, Jan 11, 2022 at 08:44:41PM +0000, Frank van der Linden wrote:
+> > On Tue, Jan 11, 2022 at 12:31:58PM +0200, Mike Rapoport wrote:
+> > > > --- a/include/linux/memblock.h
+> > > > +++ b/include/linux/memblock.h
+> > > > @@ -481,6 +481,8 @@ phys_addr_t memblock_reserved_size(void);
+> > > >  phys_addr_t memblock_start_of_DRAM(void);
+> > > >  phys_addr_t memblock_end_of_DRAM(void);
+> > > >  void memblock_enforce_memory_limit(phys_addr_t memory_limit);
+> > > > +void memblock_set_usable_range(phys_addr_t base, phys_addr_t size);
+> > > > +void memblock_enforce_usable_range(void);
+> > > >  void memblock_cap_memory_range(phys_addr_t base, phys_addr_t size);
+> > > >  void memblock_mem_limit_remove_map(phys_addr_t limit);
+> > >
+> > > We already have 3 very similar interfaces that deal with memory capping.
+> > > Now you suggest to add fourth that will "generically" solve a single use
+> > > case of DT, EFI and kdump interaction on arm64.
+> > >
+> > > Looks like a workaround for a fundamental issue of incompatibility between
+> > > DT and EFI wrt memory registration.
+> >
+> > Yep, I figured this would be the main argument against this - arm64
+> > already added several other more-or-less special cased interfaces over
+> > time.
+> >
+> > I'm more than happy to solve this in a different way.
+> >
+> > What would you suggest:
+> >
+> > 1) Try to merge the similar interfaces in to one.
+> > 2) Just deal with it at a lower (arm64) level?
+> > 3) Some other way?
+> 
+> We've discussed this with Ard on IRC, and our conclusion was that on arm64
+> kdump kernel should have memblock.memory exactly the same as the normal
+> kernel. Then, the memory outside usable-memory-range should be reserved so
+> that kdump kernel won't step over it.
+> 
+> With that, simple (untested) patch below could be what we need:
+> 
+> diff --git a/drivers/of/fdt.c b/drivers/of/fdt.c
+> index bdca35284ceb..371418dffaf1 100644
+> --- a/drivers/of/fdt.c
+> +++ b/drivers/of/fdt.c
+> @@ -1275,7 +1275,8 @@ void __init early_init_dt_scan_nodes(void)
+>         of_scan_flat_dt(early_init_dt_scan_memory, NULL);
+> 
+>         /* Handle linux,usable-memory-range property */
+> -       memblock_cap_memory_range(cap_mem_addr, cap_mem_size);
+> +       memblock_reserve(0, cap_mem_addr);
+> +       memblock_reserve(cap_mem_addr + cap_mem_size, PHYS_ADDR_MAX);
+>  }
+> 
+>  bool __init early_init_dt_scan(void *params)
 
-Signed-off-by: Martin Fernandez <martin.fernandez@eclypsium.com>
----
- Documentation/ABI/testing/sysfs-devices-node | 10 ++++++++++
- drivers/base/node.c                          | 10 ++++++++++
- 2 files changed, 20 insertions(+)
- create mode 100644 Documentation/ABI/testing/sysfs-devices-node
+Thanks for discussing this further! I tried the above change, although
+I wrapped it in an if (cap_mem_size != 0), so that a normal kernel
+doesn't get its entire memory marked as reserved.
 
-diff --git a/Documentation/ABI/testing/sysfs-devices-node b/Documentation/ABI/testing/sysfs-devices-node
-new file mode 100644
-index 000000000000..7c0480580670
---- /dev/null
-+++ b/Documentation/ABI/testing/sysfs-devices-node
-@@ -0,0 +1,10 @@
-+What:		/sys/devices/system/node/nodeX/crypto_capable
-+Date:		January 2022
-+Contact:	Martin Fernandez <martin.fernandez@eclypsium.com>
-+Users:		fwupd (https://fwupd.org)
-+Description:
-+		This value is 1 if all system memory in this node is
-+		marked with EFI_MEMORY_CPU_CRYPTO, indicating that the
-+		system memory is capable of being protected with the
-+		CPU’s memory cryptographic capabilities. It is 0
-+		otherwise.
-\ No newline at end of file
-diff --git a/drivers/base/node.c b/drivers/base/node.c
-index 87acc47e8951..dabaed997ecd 100644
---- a/drivers/base/node.c
-+++ b/drivers/base/node.c
-@@ -560,11 +560,21 @@ static ssize_t node_read_distance(struct device *dev,
- }
- static DEVICE_ATTR(distance, 0444, node_read_distance, NULL);
- 
-+static ssize_t crypto_capable_show(struct device *dev,
-+				   struct device_attribute *attr, char *buf)
-+{
-+	struct pglist_data *pgdat = NODE_DATA(dev->id);
-+
-+	return sysfs_emit(buf, "%d\n", pgdat->crypto_capable);
-+}
-+static DEVICE_ATTR_RO(crypto_capable);
-+
- static struct attribute *node_dev_attrs[] = {
- 	&dev_attr_meminfo.attr,
- 	&dev_attr_numastat.attr,
- 	&dev_attr_distance.attr,
- 	&dev_attr_vmstat.attr,
-+	&dev_attr_crypto_capable.attr,
- 	NULL
- };
- 
--- 
-2.30.2
+The crash kernel hung without producing output - I haven't chased that
+down. This particular kernel was a bit older (5.15), so I'll try again
+with 5.17-rc to make sure.
 
+- Frank
