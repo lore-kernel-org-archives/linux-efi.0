@@ -2,188 +2,87 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5AB15C433FE
-	for <linux-efi@archiver.kernel.org>; Sun, 16 Jan 2022 20:11:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 675F9C43219
+	for <linux-efi@archiver.kernel.org>; Mon, 17 Jan 2022 12:42:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236109AbiAPULD (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 16 Jan 2022 15:11:03 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47822 "EHLO
+        id S239969AbiAQMmC (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 17 Jan 2022 07:42:02 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41952 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236106AbiAPULD (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sun, 16 Jan 2022 15:11:03 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 66A1DC061574;
-        Sun, 16 Jan 2022 12:11:02 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 1F922B80D49;
-        Sun, 16 Jan 2022 20:11:01 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1C6D3C36AE7;
-        Sun, 16 Jan 2022 20:10:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1642363859;
-        bh=K8dq2SS/1E+MId/jLcvnwzthKldgV0LgxQD+HLDX/hs=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=heOAdNTz/aUqMZPUeB9F0UtRH9Lly8SoLlhjUh91VDyfjSozHaCEjZiE9JDLTo4yK
-         l4MyM3+FWAdlgN5o11OyOiQCF5CzE22NqOUFDoMESe2kH/5DXW11/0soNv+h49dkjc
-         cUAS1I7VAyUtRqmwoVhB6JzL1vuv12NQIAC9F2rNP2D505LSpmIYP/UHxzrM2mNa9y
-         GtUT72ZpI7LNG+fg4vpPSuQE0PqBtJ2lM2TOG40ElMlzuVnsNcc8afN7DGTaVFU+nr
-         8Z4C9Wo7jcYa0swkLzo9I7usOHwOLfdqn9Uyu0ivrlOXx+cg7+Ba5kSeBqA/hrOnir
-         m7iX6Fam6SODQ==
-Date:   Sun, 16 Jan 2022 22:10:47 +0200
-From:   Jarkko Sakkinen <jarkko@kernel.org>
-To:     Mimi Zohar <zohar@linux.ibm.com>, eric.snowberg@oracle.com
-Cc:     David Howells <dhowells@redhat.com>,
-        "dwmw2@infradead.org" <dwmw2@infradead.org>,
-        "ardb@kernel.org" <ardb@kernel.org>,
-        "jmorris@namei.org" <jmorris@namei.org>,
-        "serge@hallyn.com" <serge@hallyn.com>,
-        "nayna@linux.ibm.com" <nayna@linux.ibm.com>,
-        "keescook@chromium.org" <keescook@chromium.org>,
-        "torvalds@linux-foundation.org" <torvalds@linux-foundation.org>,
-        "weiyongjun1@huawei.com" <weiyongjun1@huawei.com>,
-        "keyrings@vger.kernel.org" <keyrings@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>,
-        "linux-security-module@vger.kernel.org" 
-        <linux-security-module@vger.kernel.org>,
-        "James.Bottomley@hansenpartnership.com" 
-        <James.Bottomley@hansenpartnership.com>,
-        "pjones@redhat.com" <pjones@redhat.com>,
-        Konrad Wilk <konrad.wilk@oracle.com>
-Subject: Re: [PATCH v9 2/8] integrity: Introduce a Linux keyring called
- machine
-Message-ID: <YeR7x9fMuvW/dvRA@iki.fi>
-References: <100B070F-7EB4-4BF7-B2B9-E5AE78D3066A@oracle.com>
- <a384fcf8bdd9ff79456e9669fc61ab50ec4e1c55.camel@linux.ibm.com>
- <F1F41DB2-171A-4A6F-9AE7-E03C4D3B7DD0@oracle.com>
- <eece68eba2beceeb410748c1f9f32162793d2057.camel@linux.ibm.com>
- <2d681148b6ea57241f6a7c518dd331068a5f47b0.camel@linux.ibm.com>
- <YeMAURSR8/fRjBHD@iki.fi>
- <153F495F-EAF9-4C11-A476-293CC3B78F0A@oracle.com>
- <YeMdIrMXbSq7BgzY@iki.fi>
- <YeMdY+FLM32tmRMz@iki.fi>
- <f8598ca4e51e0b98aa98a1386c6f40bd04acdf15.camel@linux.ibm.com>
+        with ESMTP id S239965AbiAQMmB (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 17 Jan 2022 07:42:01 -0500
+Received: from mail-yb1-xb2a.google.com (mail-yb1-xb2a.google.com [IPv6:2607:f8b0:4864:20::b2a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A064AC061574
+        for <linux-efi@vger.kernel.org>; Mon, 17 Jan 2022 04:42:01 -0800 (PST)
+Received: by mail-yb1-xb2a.google.com with SMTP id p5so45288409ybd.13
+        for <linux-efi@vger.kernel.org>; Mon, 17 Jan 2022 04:42:01 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=eclypsium.com; s=google;
+        h=mime-version:in-reply-to:references:from:date:message-id:subject:to
+         :cc;
+        bh=vAmFUqrC0PksSSA2pMtmtsSscMtr7L+ruC6Pf2vhQnE=;
+        b=e2bMOzD6lFvxfjU1JWi/EP+qcCLvVyTMOV06myYdjWq34wqNWJzOikTOYQ47Fiuw/X
+         pSkOTE+pLL7w8DbMB9AEWd4xKCTPZfAP5WR6vW1ebgqvqXcx+bTDNMEHFSllfIeb8VFz
+         9h4iD8hED19+5Kp2Qw8HPKyDauoLc1HyQxURhgIgLLiMueg85slmtbft0dfJVAamzSUo
+         V+aeGqgnX8FU4h6LWcS9AeA5pxShh3CkY80HKJ4X+AgpAmB9tLNzVQZ/9tmLq4tbk/xS
+         MQnLnHfy7eD4X8ws9cLWfX3s4s7H4keEnjxEESQuLldmZtHkmSLWptYn+j2p86vKI8p3
+         jaPw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:in-reply-to:references:from:date
+         :message-id:subject:to:cc;
+        bh=vAmFUqrC0PksSSA2pMtmtsSscMtr7L+ruC6Pf2vhQnE=;
+        b=Usv87kZGbTbn4RWDRj/oUJpVMhOOgm/fN5Uuid617xS0i4x9ywKtE7XIjkoQT9cP1N
+         2dQ4HD0uKIxGl++bwh0qZkGKZDYlmmtuUqFE89TMY3TIYCFtafXd7ufh7XdsLFYMGpgd
+         UOn9Uw2H8OSRp2zStEGwpF444dMsvbn73udodv+xwf4wex5XBe3qWVqocJ5khn1KU0oe
+         vMIGvGSiNn72QMyYJUBVrkIfM621akzDreJMY+9XZLsC1YKvtePtDtjhcYnzSfIYzRj9
+         yFgV0/Ts6W/1pqOrOW185Hlnkmz+RBNg0ezX29Rcx7MvJaR2vmRZ+wkz+xweJ1ajSGGf
+         7s5Q==
+X-Gm-Message-State: AOAM530VLkI9QRZa5K6kXmlZyI1sKfJJryubkK0nErPW0my+046Mx2q6
+        pinY2miJnFbQkiRbnP7WGtuaS6AjonMQ373nHaxX7Q==
+X-Google-Smtp-Source: ABdhPJwFcWegAP/aLBiQS2RDOI0Vfg/3kYpQ7IAjve/Fx5jG6zBvjvW74xJsvC4FSVsUwOS9wCM3NvGN1aPUjQAvZa8=
+X-Received: by 2002:a05:6902:1141:: with SMTP id p1mr3065197ybu.393.1642423320797;
+ Mon, 17 Jan 2022 04:42:00 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <f8598ca4e51e0b98aa98a1386c6f40bd04acdf15.camel@linux.ibm.com>
+Received: by 2002:a81:3cd:0:0:0:0:0 with HTTP; Mon, 17 Jan 2022 04:42:00 -0800 (PST)
+In-Reply-To: <eea2c529-b874-58e6-f0b2-1483cc7e30a6@intel.com>
+References: <20220113213027.457282-1-martin.fernandez@eclypsium.com>
+ <20220113213027.457282-4-martin.fernandez@eclypsium.com> <eea2c529-b874-58e6-f0b2-1483cc7e30a6@intel.com>
+From:   Martin Fernandez <martin.fernandez@eclypsium.com>
+Date:   Mon, 17 Jan 2022 09:42:00 -0300
+Message-ID: <CAKgze5Z7U0R+HJ8_GajUsspYw+52+i2MW75KBGVOmE8zmT_BDQ@mail.gmail.com>
+Subject: Re: [PATCH v5 3/5] x86/e820: Tag e820_entry with crypto capabilities
+To:     Dave Hansen <dave.hansen@intel.com>
+Cc:     linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
+        platform-driver-x86@vger.kernel.org, linux-mm@kvack.org,
+        tglx@linutronix.de, mingo@redhat.com, bp@alien8.de,
+        dave.hansen@linux.intel.com, x86@kernel.org, hpa@zytor.com,
+        ardb@kernel.org, dvhart@infradead.org, andy@infradead.org,
+        gregkh@linuxfoundation.org, rafael@kernel.org, rppt@kernel.org,
+        akpm@linux-foundation.org, daniel.gutson@eclypsium.com,
+        hughsient@gmail.com, alex.bazhaniuk@eclypsium.com,
+        alison.schofield@intel.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Sat, Jan 15, 2022 at 09:55:47PM -0500, Mimi Zohar wrote:
-> On Sat, 2022-01-15 at 21:15 +0200, Jarkko Sakkinen wrote:
-> > On Sat, Jan 15, 2022 at 09:14:45PM +0200, Jarkko Sakkinen wrote:
-> > > On Sat, Jan 15, 2022 at 07:12:35PM +0000, Eric Snowberg wrote:
-> > > > 
-> > > > 
-> > > > > On Jan 15, 2022, at 10:11 AM, Jarkko Sakkinen <jarkko@kernel.org> wrote:
-> > > > > 
-> > > > > On Wed, Jan 12, 2022 at 02:41:47PM -0500, Mimi Zohar wrote:
-> > > > >> On Tue, 2022-01-11 at 20:14 -0500, Mimi Zohar wrote:
-> > > > >>> On Tue, 2022-01-11 at 21:26 +0000, Eric Snowberg wrote:
-> > > > >>>> 
-> > > > >>>>> On Jan 11, 2022, at 11:16 AM, Mimi Zohar <zohar@linux.ibm.com> wrote:
-> > > > >>>>> 
-> > > > >>>>> On Mon, 2022-01-10 at 23:25 +0000, Eric Snowberg wrote:
-> > > > >>>>>>> Jarkko, my concern is that once this version of the patch set is
-> > > > >>>>>>> upstreamed, would limiting which keys may be loaded onto the .machine
-> > > > >>>>>>> keyring be considered a regression?
-> > > > >>>>>> 
-> > > > >>>>>> 
-> > > > >>>>>> Currently certificates built into the kernel do not have a CA restriction on them.  
-> > > > >>>>>> IMA will trust anything in this keyring even if the CA bit is not set.  While it would 
-> > > > >>>>>> be advisable for a kernel to be built with a CA, nothing currently enforces it. 
-> > > > >>>>>> 
-> > > > >>>>>> My thinking for the dropped CA restriction patches was to introduce a new Kconfig.  
-> > > > >>>>>> This Kconfig would do the CA enforcement on the machine keyring.  However if the 
-> > > > >>>>>> Kconfig option was not set for enforcement, it would work as it does in this series, 
-> > > > >>>>>> plus it would allow IMA to work with non-CA keys.  This would be done by removing 
-> > > > >>>>>> the restriction placed in this patch. Let me know your thoughts on whether this would 
-> > > > >>>>>> be an appropriate solution.  I believe this would get around what you are identifying as 
-> > > > >>>>>> a possible regression.
-> > > > >>>>> 
-> > > > >>>>> True the problem currently exists with the builtin keys, but there's a
-> > > > >>>>> major difference between trusting the builtin keys and those being
-> > > > >>>>> loading via MOK.  This is an integrity gap that needs to be closed and
-> > > > >>>>> shouldn't be expanded to keys on the .machine keyring.
-> > > > >>>>> 
-> > > > >>>>> "plus it would allow IMA to work with non-CA keys" is unacceptable.
-> > > > >>>> 
-> > > > >>>> Ok, I’ll leave that part out.  Could you clarify the wording I should include in the future 
-> > > > >>>> cover letter, which adds IMA support, on why it is unacceptable for the end-user to
-> > > > >>>> make this decision?
-> > > > >>> 
-> > > > >>> The Kconfig IMA_KEYRINGS_PERMIT_SIGNED_BY_BUILTIN_OR_SECONDARY
-> > > > >>> "help" is very clear:
-> > > > >> 
-> > > > >> [Reposting the text due to email formatting issues.]
-> > > > >> 
-> > > > >> help
-> > > > >>  Keys may be added to the IMA or IMA blacklist keyrings, if the
-> > > > >>  key is validly signed by a CA cert in the system built-in or
-> > > > >>  secondary trusted keyrings.
-> > > > >> 
-> > > > >>  Intermediate keys between those the kernel has compiled in and the 
-> > > > >>  IMA keys to be added may be added to the system secondary keyring,
-> > > > >>  provided they are validly signed by a key already resident in the
-> > > > >>  built-in or secondary trusted keyrings.
-> > > > >> 
-> > > > >> 
-> > > > >> The first paragraph requires "validly signed by a CA cert in the system
-> > > > >> built-in or secondary trusted keyrings" for keys to be loaded onto the
-> > > > >> IMA keyring.  This Kconfig is limited to just the builtin and secondary
-> > > > >> keyrings.  Changing this silently to include the ".machine" keyring
-> > > > >> introduces integrity risks that previously did not exist.  A new IMA
-> > > > >> Kconfig needs to be defined to allow all three keyrings - builtin,
-> > > > >> machine, and secondary.
-> > > > >> 
-> > > > >> The second paragraph implies that only CA and intermediate CA keys are
-> > > > >> on secondary keyring, or as in our case the ".machine" keyring linked
-> > > > >> to the secondary keyring.
-> > > > >> 
-> > > > >> Mimi
-> > > > >> 
-> > > > > I have also now test environment for this patch set but if there are
-> > > > > any possible changes, I'm waiting for a new version, as it is anyway
-> > > > > for 5.18 cycle earliest.
-> > > > 
-> > > > Other than the two sentence changes, I have not seen anything identified 
-> > > > code wise requiring a change.  If you’d like me to respin a v10 with the sentence 
-> > > > changes let me know.  Or if you want to remove the ima reference, that works 
-> > > > too.  Just let me know how you want to handle this.  Thanks.
-> > > 
-> > > I'm basically waiting also Mimi to test this as I do not have IMA test
-> > > environment.
-> > > 
-> > > From my side:
-> > > 
-> > > Tested-by: Jarkko Sakkinen <jarkko@kernel.org>
-> > 
-> > I can pick the whole thing at the time when I get green light.
-> 
-> The MOK keys are not loaded onto the .machine keyring if
-> CONFIG_IMA_KEYRINGS_PERMIT_SIGNED_BY_BUILTIN_OR_SECONDARY is enabled. 
-> From an IMA perspective nothing has changed.
-> 
-> After the IMA references in the patch descriptions are removed, feel
-> free to add Tested-by: Mimi Zohar <zohar@linux.ibm.com> on patches 1 -
-> 5.
-> 
-> thanks,
-> 
-> Mimi
+On 1/14/22, Dave Hansen <dave.hansen@intel.com> wrote:
+> On 1/13/22 1:30 PM, Martin Fernandez wrote:
+>> +/*
+>> + * Update crypto capabilities in a range
+>> + */
+>> +static u64 __init __e820__range_update_crypto(struct e820_table *table,
+>> +					      u64 start, u64 size,
+>> +					      enum e820_crypto_capabilities crypto_capable)
+>
+> This looks like an almost pure copy-and-paste of a 70-line function.
+> That's not the end of the world, but it does seem like a place where
+> refactoring is in order.
+>
+> The rest of this series looks pretty straightforward, but this part in
+> particular is the most worrying.
+>
 
-Eric, for me it would be at least a convenience, and overally it would
-make sure that I pick the right thing if you would fix the typos (and
-you can add all the tested-by tags of course as no functional changes).
-
-There's been times when I've manually "just fixed typos", and failed in a
-way or another because of human error. Just want to make sure that we
-have exactly the right content applied, I hope you understand my point
-of view. And we are early for the 5.18 release cycle anyway.
-
-BR, Jarkko
+Yep, I'm not super happy with this either. I'll check it out to see
+what we can do. Btw e820__range_remove is quite similiar too.
