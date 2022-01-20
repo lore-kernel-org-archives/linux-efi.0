@@ -2,203 +2,185 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 14B4CC433F5
-	for <linux-efi@archiver.kernel.org>; Thu, 20 Jan 2022 10:06:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 939B7C4332F
+	for <linux-efi@archiver.kernel.org>; Thu, 20 Jan 2022 12:18:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1359716AbiATKGE (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 20 Jan 2022 05:06:04 -0500
-Received: from smtp-relay-internal-1.canonical.com ([185.125.188.123]:49184
-        "EHLO smtp-relay-internal-1.canonical.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1359699AbiATKGD (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 20 Jan 2022 05:06:03 -0500
-Received: from mail-ed1-f72.google.com (mail-ed1-f72.google.com [209.85.208.72])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        id S240235AbiATMSg (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 20 Jan 2022 07:18:36 -0500
+Received: from mail.skyhub.de ([5.9.137.197]:44738 "EHLO mail.skyhub.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S237697AbiATMSe (ORCPT <rfc822;linux-efi@vger.kernel.org>);
+        Thu, 20 Jan 2022 07:18:34 -0500
+Received: from zn.tnic (dslb-088-067-202-008.088.067.pools.vodafone-ip.de [88.67.202.8])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id DCDA140024
-        for <linux-efi@vger.kernel.org>; Thu, 20 Jan 2022 10:05:57 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-        s=20210705; t=1642673157;
-        bh=w26SyRlRb1I1H6K/gmJqzdX3K4fWh5zNRWtuBCu0Vhg=;
-        h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-         To:Cc:Content-Type;
-        b=e6hXJ0IeM+a3TZvnftPzACQUC/BTo148mKyEaRzmMMatFoA204htx69CQOI3YB5OO
-         sriUGwnpfgmuijm7iGKzVu9gsZXNszndfh7JcmME+dZHAkCqlJjY+s2SY/j8b0RfAM
-         y5tigLyYcUgxXDLPupnKq/7rUCSt/dWuGzLB/VgcvHVAkGEV50ulXl+qUPlZvTqVW7
-         Yih4CcfKH1m9RXvM5LhOQkubPZDw5xfyLw3jI+jFlwKAhqXqrlZZoPWTIIrs+REZVe
-         y1OsmlSegpYeq51n6Z86bERKNT0XGQUqnsLme9MAbJtafug0lyRkA6CjzJjACCXmtq
-         W6twBPcAijYVA==
-Received: by mail-ed1-f72.google.com with SMTP id a18-20020aa7d752000000b00403d18712beso5424200eds.17
-        for <linux-efi@vger.kernel.org>; Thu, 20 Jan 2022 02:05:57 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=w26SyRlRb1I1H6K/gmJqzdX3K4fWh5zNRWtuBCu0Vhg=;
-        b=rsxauTrNO6+kSGbVr+5GvTQsR62GjW+DYSM+/KTrmXj0PorBBxvMVx6Lri/MJPBsY5
-         /8LDr5KkniUFyQDQLm+c2W0jcozPnPAbTHVqxem6BIWCUJgUibDmDlx02ml7gQzCsfQw
-         Qoso/YbyD14ib8lfKIagwrxWcuzVbpe6/sPb52qHfxSfuBu2y7IrxBd40+Yl27MTe+fQ
-         WIqJ8tbjFq5l4Zv1M6FTMaAoPcdj3faxdFZq24uQizix6ZHEh2ibTz5Edgsw+YvsbtpH
-         FfB2GZkUnDa7SVFBP7u8Y1cscG3EPXm1YiSHzqv1BWchpSeQ1eQ96G9Mjr2T31u4ABJ8
-         33Uw==
-X-Gm-Message-State: AOAM531DRcC7tM15yVXgLbEso3fOcpTnGCkcvKFt0RpR6cy83c5lsHcn
-        Jjx+TnTfJQaBkD57L8e5Zc+Qb2/NgXM3+YR8LspGzo3Vq2XBJ4mBVRR71ad8Td4LHnyYnUq9hfT
-        8G4SaDyWFzMIus7cS1gWV7xWWKY9ed4K5JwqigM3BtsCp4msyx5y9+Q==
-X-Received: by 2002:a05:6402:b33:: with SMTP id bo19mr7643853edb.70.1642673157481;
-        Thu, 20 Jan 2022 02:05:57 -0800 (PST)
-X-Google-Smtp-Source: ABdhPJynv0ocn7NF6vgUdF1oJY52IvmBizAszTcAGapgjCakCzI58Vihpn2W5C5OjIWMX2LmXdeXWqskyns8624yTaM=
-X-Received: by 2002:a05:6402:b33:: with SMTP id bo19mr7643811edb.70.1642673157166;
- Thu, 20 Jan 2022 02:05:57 -0800 (PST)
+        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id A0B6F1EC01B5;
+        Thu, 20 Jan 2022 13:18:28 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alien8.de; s=dkim;
+        t=1642681108;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:in-reply-to:in-reply-to:  references:references;
+        bh=XO6AT+gIfZtH9EDaR1V0c6Fkovljr0vEcHMLtYZNXi0=;
+        b=ZvS9JkdJCYllJDFBD0tsEGn3u9iKtDu9RRyiFn28RlB9ttb3/cSuVBse0GV9xDiAmJXru1
+        G7WhLPYYU8EKqnivp/dBPCdF6YYQ7q3y6G8vJIsVo2jZaCOyhOigOuYlQCmxRcEn/trNns
+        hHEBxqnny4SO9CJxR0abXyH3IFJubqs=
+Date:   Thu, 20 Jan 2022 13:18:22 +0100
+From:   Borislav Petkov <bp@alien8.de>
+To:     Brijesh Singh <brijesh.singh@amd.com>
+Cc:     x86@kernel.org, linux-kernel@vger.kernel.org, kvm@vger.kernel.org,
+        linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org,
+        linux-coco@lists.linux.dev, linux-mm@kvack.org,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Ingo Molnar <mingo@redhat.com>, Joerg Roedel <jroedel@suse.de>,
+        Tom Lendacky <thomas.lendacky@amd.com>,
+        "H. Peter Anvin" <hpa@zytor.com>, Ard Biesheuvel <ardb@kernel.org>,
+        Paolo Bonzini <pbonzini@redhat.com>,
+        Sean Christopherson <seanjc@google.com>,
+        Vitaly Kuznetsov <vkuznets@redhat.com>,
+        Jim Mattson <jmattson@google.com>,
+        Andy Lutomirski <luto@kernel.org>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        Sergio Lopez <slp@redhat.com>, Peter Gonda <pgonda@google.com>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>,
+        David Rientjes <rientjes@google.com>,
+        Dov Murik <dovmurik@linux.ibm.com>,
+        Tobin Feldman-Fitzthum <tobin@ibm.com>,
+        Michael Roth <michael.roth@amd.com>,
+        Vlastimil Babka <vbabka@suse.cz>,
+        "Kirill A . Shutemov" <kirill@shutemov.name>,
+        Andi Kleen <ak@linux.intel.com>,
+        "Dr . David Alan Gilbert" <dgilbert@redhat.com>,
+        tony.luck@intel.com, marcorr@google.com,
+        sathyanarayanan.kuppuswamy@linux.intel.com
+Subject: Re: [PATCH v8 32/40] x86/compressed: use firmware-validated CPUID
+ for SEV-SNP guests
+Message-ID: <YelTDp4gsEyscWTI@zn.tnic>
+References: <20211210154332.11526-1-brijesh.singh@amd.com>
+ <20211210154332.11526-33-brijesh.singh@amd.com>
 MIME-Version: 1.0
-References: <20211206104657.433304-1-alexandre.ghiti@canonical.com>
- <mhng-cdec292e-aea2-4b76-8853-b8465521e94f@palmer-ri-x1c9> <CA+zEjCuTSjOCmNExSN1jO50tsuXNzL9x6K6jWjG4+vVky5eWsw@mail.gmail.com>
-In-Reply-To: <CA+zEjCuTSjOCmNExSN1jO50tsuXNzL9x6K6jWjG4+vVky5eWsw@mail.gmail.com>
-From:   Alexandre Ghiti <alexandre.ghiti@canonical.com>
-Date:   Thu, 20 Jan 2022 11:05:46 +0100
-Message-ID: <CA+zEjCuTYmk-dLPhJ=9CkNrqf7VbCNyRDSZUGYkJSUWqZDWHpA@mail.gmail.com>
-Subject: Re: [PATCH v3 00/13] Introduce sv48 support without relocatable kernel
-To:     Palmer Dabbelt <palmer@dabbelt.com>
-Cc:     corbet@lwn.net, Paul Walmsley <paul.walmsley@sifive.com>,
-        aou@eecs.berkeley.edu, zong.li@sifive.com, anup@brainfault.org,
-        Atish.Patra@rivosinc.com, Christoph Hellwig <hch@lst.de>,
-        ryabinin.a.a@gmail.com, glider@google.com, andreyknvl@gmail.com,
-        dvyukov@google.com, ardb@kernel.org, Arnd Bergmann <arnd@arndb.de>,
-        keescook@chromium.org, guoren@linux.alibaba.com,
-        heinrich.schuchardt@canonical.com, mchitale@ventanamicro.com,
-        panqinglin2020@iscas.ac.cn, linux-doc@vger.kernel.org,
-        linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org,
-        kasan-dev@googlegroups.com, linux-efi@vger.kernel.org,
-        linux-arch@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20211210154332.11526-33-brijesh.singh@amd.com>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Thu, Jan 20, 2022 at 8:30 AM Alexandre Ghiti
-<alexandre.ghiti@canonical.com> wrote:
->
-> On Thu, Jan 20, 2022 at 5:18 AM Palmer Dabbelt <palmer@dabbelt.com> wrote:
-> >
-> > On Mon, 06 Dec 2021 02:46:44 PST (-0800), alexandre.ghiti@canonical.com wrote:
-> > > * Please note notable changes in memory layouts and kasan population *
-> > >
-> > > This patchset allows to have a single kernel for sv39 and sv48 without
-> > > being relocatable.
-> > >
-> > > The idea comes from Arnd Bergmann who suggested to do the same as x86,
-> > > that is mapping the kernel to the end of the address space, which allows
-> > > the kernel to be linked at the same address for both sv39 and sv48 and
-> > > then does not require to be relocated at runtime.
-> > >
-> > > This implements sv48 support at runtime. The kernel will try to
-> > > boot with 4-level page table and will fallback to 3-level if the HW does not
-> > > support it. Folding the 4th level into a 3-level page table has almost no
-> > > cost at runtime.
-> > >
-> > > Note that kasan region had to be moved to the end of the address space
-> > > since its location must be known at compile-time and then be valid for
-> > > both sv39 and sv48 (and sv57 that is coming).
-> > >
-> > > Tested on:
-> > >   - qemu rv64 sv39: OK
-> > >   - qemu rv64 sv48: OK
-> > >   - qemu rv64 sv39 + kasan: OK
-> > >   - qemu rv64 sv48 + kasan: OK
-> > >   - qemu rv32: OK
-> > >
-> > > Changes in v3:
-> > >   - Fix SZ_1T, thanks to Atish
-> > >   - Fix warning create_pud_mapping, thanks to Atish
-> > >   - Fix k210 nommu build, thanks to Atish
-> > >   - Fix wrong rebase as noted by Samuel
-> > >   - * Downgrade to sv39 is only possible if !KASAN (see commit changelog) *
-> > >   - * Move KASAN next to the kernel: virtual layouts changed and kasan population *
-> > >
-> > > Changes in v2:
-> > >   - Rebase onto for-next
-> > >   - Fix KASAN
-> > >   - Fix stack canary
-> > >   - Get completely rid of MAXPHYSMEM configs
-> > >   - Add documentation
-> > >
-> > > Alexandre Ghiti (13):
-> > >   riscv: Move KASAN mapping next to the kernel mapping
-> > >   riscv: Split early kasan mapping to prepare sv48 introduction
-> > >   riscv: Introduce functions to switch pt_ops
-> > >   riscv: Allow to dynamically define VA_BITS
-> > >   riscv: Get rid of MAXPHYSMEM configs
-> > >   asm-generic: Prepare for riscv use of pud_alloc_one and pud_free
-> > >   riscv: Implement sv48 support
-> > >   riscv: Use pgtable_l4_enabled to output mmu_type in cpuinfo
-> > >   riscv: Explicit comment about user virtual address space size
-> > >   riscv: Improve virtual kernel memory layout dump
-> > >   Documentation: riscv: Add sv48 description to VM layout
-> > >   riscv: Initialize thread pointer before calling C functions
-> > >   riscv: Allow user to downgrade to sv39 when hw supports sv48 if !KASAN
-> > >
-> > >  Documentation/riscv/vm-layout.rst             |  48 ++-
-> > >  arch/riscv/Kconfig                            |  37 +-
-> > >  arch/riscv/configs/nommu_k210_defconfig       |   1 -
-> > >  .../riscv/configs/nommu_k210_sdcard_defconfig |   1 -
-> > >  arch/riscv/configs/nommu_virt_defconfig       |   1 -
-> > >  arch/riscv/include/asm/csr.h                  |   3 +-
-> > >  arch/riscv/include/asm/fixmap.h               |   1
-> > >  arch/riscv/include/asm/kasan.h                |  11 +-
-> > >  arch/riscv/include/asm/page.h                 |  20 +-
-> > >  arch/riscv/include/asm/pgalloc.h              |  40 ++
-> > >  arch/riscv/include/asm/pgtable-64.h           | 108 ++++-
-> > >  arch/riscv/include/asm/pgtable.h              |  47 +-
-> > >  arch/riscv/include/asm/sparsemem.h            |   6 +-
-> > >  arch/riscv/kernel/cpu.c                       |  23 +-
-> > >  arch/riscv/kernel/head.S                      |   4 +-
-> > >  arch/riscv/mm/context.c                       |   4 +-
-> > >  arch/riscv/mm/init.c                          | 408 ++++++++++++++----
-> > >  arch/riscv/mm/kasan_init.c                    | 250 ++++++++---
-> > >  drivers/firmware/efi/libstub/efi-stub.c       |   2
-> > >  drivers/pci/controller/pci-xgene.c            |   2 +-
-> > >  include/asm-generic/pgalloc.h                 |  24 +-
-> > >  include/linux/sizes.h                         |   1
-> > >  22 files changed, 833 insertions(+), 209 deletions(-)
-> >
-> > Sorry this took a while.  This is on for-next, with a bit of juggling: a
-> > handful of trivial fixes for configs that were failing to build/boot and
-> > some merge issues.  I also pulled out that MAXPHYSMEM fix to the top, so
-> > it'd be easier to backport.  This is bigger than something I'd normally like to
-> > take late in the cycle, but given there's a lot of cleanups, likely some fixes,
-> > and it looks like folks have been testing this I'm just going to go with it.
-> >
->
-> Yes yes yes! That's fantastic news :)
->
-> > Let me know if there's any issues with the merge, it was a bit hairy.
-> > Probably best to just send along a fixup patch at this point.
->
-> I'm going to take a look at that now, and I'll fix anything that comes
-> up quickly :)
+On Fri, Dec 10, 2021 at 09:43:24AM -0600, Brijesh Singh wrote:
+> Subject: Re: [PATCH v8 32/40] x86/compressed: use firmware-validated CPUID for SEV-SNP guests
+									    ^
+									    leafs
 
-I see in for-next that you did not take the following patches:
+or so.
 
-  riscv: Improve virtual kernel memory layout dump
-  Documentation: riscv: Add sv48 description to VM layout
-  riscv: Initialize thread pointer before calling C functions
-  riscv: Allow user to downgrade to sv39 when hw supports sv48 if !KASAN
+> From: Michael Roth <michael.roth@amd.com>
+> 
+> SEV-SNP guests will be provided the location of special 'secrets'
+> 'CPUID' pages via the Confidential Computing blob. This blob is
+> provided to the boot kernel either through an EFI config table entry,
+> or via a setup_data structure as defined by the Linux Boot Protocol.
+> 
+> Locate the Confidential Computing from these sources and, if found,
+> use the provided CPUID page/table address to create a copy that the
+> boot kernel will use when servicing cpuid instructions via a #VC
 
-I'm not sure this was your intention. If it was, I believe that at
-least the first 2 patches are needed in this series, the 3rd one is a
-useful fix and we can discuss the 4th if that's an issue for you.
+CPUID
 
-I tested for-next on both sv39 and sv48 successfully, I took a glance
-at the code and noticed you fixed the PTRS_PER_PGD error, thanks for
-that. Otherwise nothing obvious has popped.
+> handler.
+> 
+> Signed-off-by: Michael Roth <michael.roth@amd.com>
+> Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
+> ---
+>  arch/x86/boot/compressed/sev.c | 13 ++++++++++
+>  arch/x86/include/asm/sev.h     |  1 +
+>  arch/x86/kernel/sev-shared.c   | 43 ++++++++++++++++++++++++++++++++++
+>  3 files changed, 57 insertions(+)
+> 
+> diff --git a/arch/x86/boot/compressed/sev.c b/arch/x86/boot/compressed/sev.c
+> index 93e125da12cf..29dfb34b5907 100644
+> --- a/arch/x86/boot/compressed/sev.c
+> +++ b/arch/x86/boot/compressed/sev.c
+> @@ -415,6 +415,19 @@ bool snp_init(struct boot_params *bp)
+>  	if (!cc_info)
+>  		return false;
+>  
+> +	/*
+> +	 * If SEV-SNP-specific Confidential Computing blob is present, then
+	     ^
+	     a
 
-Thanks again,
 
-Alex
+> +	 * firmware/bootloader have indicated SEV-SNP support. Verifying this
+> +	 * involves CPUID checks which will be more reliable if the SEV-SNP
+> +	 * CPUID table is used. See comments for snp_cpuid_info_create() for
 
->
-> Thanks!
->
-> Alex
->
-> >
-> > Thanks!
+s/for/over/ ?
+
+> +	 * more details.
+> +	 */
+> +	snp_cpuid_info_create(cc_info);
+> +
+> +	/* SEV-SNP CPUID table should be set up now. */
+> +	if (!snp_cpuid_active())
+> +		sev_es_terminate(1, GHCB_TERM_CPUID);
+
+Right, that is not needed now.
+
+>  	 * Pass run-time kernel a pointer to CC info via boot_params so EFI
+>  	 * config table doesn't need to be searched again during early startup
+> diff --git a/arch/x86/include/asm/sev.h b/arch/x86/include/asm/sev.h
+> index cd189c20bcc4..4fa7ca20d7c9 100644
+> --- a/arch/x86/include/asm/sev.h
+> +++ b/arch/x86/include/asm/sev.h
+> @@ -157,6 +157,7 @@ bool snp_init(struct boot_params *bp);
+>   * sev-shared.c via #include and these declarations can be dropped.
+>   */
+>  struct cc_blob_sev_info *snp_find_cc_blob_setup_data(struct boot_params *bp);
+> +void snp_cpuid_info_create(const struct cc_blob_sev_info *cc_info);
+>  #else
+>  static inline void sev_es_ist_enter(struct pt_regs *regs) { }
+>  static inline void sev_es_ist_exit(void) { }
+> diff --git a/arch/x86/kernel/sev-shared.c b/arch/x86/kernel/sev-shared.c
+> index bd58a4ce29c8..5cb8f87df4b3 100644
+> --- a/arch/x86/kernel/sev-shared.c
+> +++ b/arch/x86/kernel/sev-shared.c
+> @@ -403,6 +403,23 @@ snp_cpuid_find_validated_func(u32 func, u32 subfunc, u32 *eax, u32 *ebx,
+>  	return false;
+>  }
+>  
+> +static void __init snp_cpuid_set_ranges(void)
+> +{
+> +	const struct snp_cpuid_info *cpuid_info = snp_cpuid_info_get_ptr();
+> +	int i;
+> +
+> +	for (i = 0; i < cpuid_info->count; i++) {
+> +		const struct snp_cpuid_fn *fn = &cpuid_info->fn[i];
+> +
+> +		if (fn->eax_in == 0x0)
+> +			cpuid_std_range_max = fn->eax;
+> +		else if (fn->eax_in == 0x40000000)
+> +			cpuid_hyp_range_max = fn->eax;
+> +		else if (fn->eax_in == 0x80000000)
+> +			cpuid_ext_range_max = fn->eax;
+> +	}
+> +}
+
+Kinda arbitrary to have a separate function which has a single caller.
+You can just as well move the loop into snp_cpuid_info_create() and put
+a comment above it:
+
+	/* Set CPUID ranges. */
+	for (i = 0; i < cpuid_info->count; i++) {
+		...
+
+Also, snp_cpuid_info_create() should be called snp_setup_cpuid_table()
+which is what this thing does.
+
+Thx.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+https://people.kernel.org/tglx/notes-about-netiquette
