@@ -2,152 +2,117 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E9B06C3526F
-	for <linux-efi@archiver.kernel.org>; Mon, 24 Jan 2022 21:47:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 28EF1C4167B
+	for <linux-efi@archiver.kernel.org>; Tue, 25 Jan 2022 00:19:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1574088AbiAXVrQ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 24 Jan 2022 16:47:16 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56588 "EHLO
+        id S1351716AbiAYASz (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 24 Jan 2022 19:18:55 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47162 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1458150AbiAXVmr (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 24 Jan 2022 16:42:47 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3E4C7C07A959;
-        Mon, 24 Jan 2022 12:31:12 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        with ESMTP id S1383368AbiAXXFt (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 24 Jan 2022 18:05:49 -0500
+Received: from mail.skyhub.de (mail.skyhub.de [IPv6:2a01:4f8:190:11c2::b:1457])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5F323C02980A;
+        Mon, 24 Jan 2022 13:16:47 -0800 (PST)
+Received: from zn.tnic (dslb-088-067-221-104.088.067.pools.vodafone-ip.de [88.67.221.104])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id CCBE761536;
-        Mon, 24 Jan 2022 20:31:11 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AB8A5C340E5;
-        Mon, 24 Jan 2022 20:31:10 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-        s=korg; t=1643056271;
-        bh=31xC9mtUNmT5ViszQgZGChLa+pmB3GlMeXbvgzxJHR8=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=ZEC+ROZ5fwELLGQggQwH3O7XtHiu4BKen5E3aew2BR2HA4n/Dw6lLtTpiUEXwCWcW
-         Gjaja2Yx3flS2bBHQFjpUDI6gdvp27rEwJs2W0O7GTkYiwqvZjxEdRY06UgUjavtwv
-         YBbIyX0hmx7rBuv3Z30GBhW2zVkZ4aV8t3YxElwY=
-From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To:     linux-kernel@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-efi@vger.kernel.org
-Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        stable@vger.kernel.org, Rob Herring <robh@kernel.org>,
-        Zhen Lei <thunder.leizhen@huawei.com>,
-        Pingfan Liu <kernelfans@gmail.com>,
-        Dave Kleikamp <dave.kleikamp@oracle.com>,
-        John Donnelly <john.p.donnelly@oracle.com>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Will Deacon <will@kernel.org>,
-        linux-arm-kernel@lists.infradead.org,
-        Sasha Levin <sashal@kernel.org>
-Subject: [PATCH 5.15 427/846] of: fdt: Aggregate the processing of "linux,usable-memory-range"
-Date:   Mon, 24 Jan 2022 19:39:04 +0100
-Message-Id: <20220124184115.705813438@linuxfoundation.org>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20220124184100.867127425@linuxfoundation.org>
-References: <20220124184100.867127425@linuxfoundation.org>
-User-Agent: quilt/0.66
+        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id 7AE631EC0441;
+        Mon, 24 Jan 2022 22:16:40 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alien8.de; s=dkim;
+        t=1643059000;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:in-reply-to:in-reply-to:  references:references;
+        bh=2NXgmmDv+ocvq+rd99D4kGdoHRWuQ11s8nfd6a2ykIk=;
+        b=JeFsNaeW1bXEh73iheAO7YAnF6esRbl9JrXJU3kMpTLFhpyM/6aF9jxKDGjNW6da+Y/D6p
+        xG9hcbb78SVNkZ5Azg05/V03p28IxiXtJi8hiSJcOmsn8g3q6HQTncLrJPt8lgRTN6Q2z5
+        keoKJGXH8ynwl8GLF0SXWRJfVZRaUgQ=
+Date:   Mon, 24 Jan 2022 22:16:34 +0100
+From:   Borislav Petkov <bp@alien8.de>
+To:     Shuai Xue <xueshuai@linux.alibaba.com>
+Cc:     rric@kernel.org, mchehab@kernel.org, tony.luck@intel.com,
+        james.morse@arm.com, ardb@kernel.org, linux-edac@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
+        zhangliguang@linux.alibaba.com, zhuo.song@linux.alibaba.com
+Subject: Re: [RESEND PATCH v3 1/2] efi/cper: add cper_mem_err_status_str to
+ decode error description
+Message-ID: <Ye8XMvfXCetzJLTH@zn.tnic>
+References: <20211210134019.28536-1-xueshuai@linux.alibaba.com>
+ <20220124024759.19176-2-xueshuai@linux.alibaba.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20220124024759.19176-2-xueshuai@linux.alibaba.com>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Zhen Lei <thunder.leizhen@huawei.com>
+On Mon, Jan 24, 2022 at 10:47:58AM +0800, Shuai Xue wrote:
+> Introduce a new helper function cper_mem_err_status_str() which is used to
+> decode the description of error status, and the cper_print_mem() will call
+> it and report the details of error status.
+> 
+> Signed-off-by: Shuai Xue <xueshuai@linux.alibaba.com>
+> ---
+>  drivers/firmware/efi/cper.c | 46 ++++++++++++++++++++++++++++++++++++-
+>  include/linux/cper.h        |  1 +
+>  2 files changed, 46 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+> index 6ec8edec6329..addafccecd84 100644
+> --- a/drivers/firmware/efi/cper.c
+> +++ b/drivers/firmware/efi/cper.c
+> @@ -211,6 +211,49 @@ const char *cper_mem_err_type_str(unsigned int etype)
+>  }
+>  EXPORT_SYMBOL_GPL(cper_mem_err_type_str);
+>  
+> +const char *cper_mem_err_status_str(u64 status)
+> +{
+> +	switch ((status >> 8) & 0xff) {
+> +	case 1:
+> +		return "Error detected internal to the component";
 
-[ Upstream commit 8347b41748c3019157312fbe7f8a6792ae396eb7 ]
+You can make that table a lot more compact:
 
-Currently, we parse the "linux,usable-memory-range" property in
-early_init_dt_scan_chosen(), to obtain the specified memory range of the
-crash kernel. We then reserve the required memory after
-early_init_dt_scan_memory() has identified all available physical memory.
-Because the two pieces of code are separated far, the readability and
-maintainability are reduced. So bring them together.
+        switch ((status >> 8) & 0xff) {
+        case  1:        return "Error detected internal to the component";
+        case  4:        return "Storage error in DRAM memory";
+        case  5:        return "Storage error in TLB";
+        case  6:        return "Storage error in cache";
+        case  7:        return "Error in one or more functional units";
+        case  8:        return "component failed self test";
+        case  9:        return "Overflow or undervalue of internal queue";
+        case 16:        return "Error detected in the bus";
+	...
 
-Suggested-by: Rob Herring <robh@kernel.org>
-Signed-off-by: Zhen Lei <thunder.leizhen@huawei.com>
-(change the prototype of early_init_dt_check_for_usable_mem_range(), in
-order to use it outside)
-Signed-off-by: Pingfan Liu <kernelfans@gmail.com>
-Tested-by: Dave Kleikamp <dave.kleikamp@oracle.com>
-Acked-by: John Donnelly <john.p.donnelly@oracle.com>
-Reviewed-by: Rob Herring <robh@kernel.org>
-Cc: Catalin Marinas <catalin.marinas@arm.com>
-Cc: Will Deacon <will@kernel.org>
-Cc: linux-arm-kernel@lists.infradead.org
-To: devicetree@vger.kernel.org
-To: linux-efi@vger.kernel.org
-Signed-off-by: Rob Herring <robh@kernel.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- drivers/of/fdt.c | 19 +++++++++++++------
- 1 file changed, 13 insertions(+), 6 deletions(-)
+> +	case 16:
+> +		return "Error detected in the bus";
 
-diff --git a/drivers/of/fdt.c b/drivers/of/fdt.c
-index 4546572af24bb..105b1a47905ab 100644
---- a/drivers/of/fdt.c
-+++ b/drivers/of/fdt.c
-@@ -969,18 +969,22 @@ static void __init early_init_dt_check_for_elfcorehdr(unsigned long node)
- 		 elfcorehdr_addr, elfcorehdr_size);
- }
- 
--static phys_addr_t cap_mem_addr;
--static phys_addr_t cap_mem_size;
-+static unsigned long chosen_node_offset = -FDT_ERR_NOTFOUND;
- 
- /**
-  * early_init_dt_check_for_usable_mem_range - Decode usable memory range
-  * location from flat tree
-- * @node: reference to node containing usable memory range location ('chosen')
-  */
--static void __init early_init_dt_check_for_usable_mem_range(unsigned long node)
-+static void __init early_init_dt_check_for_usable_mem_range(void)
- {
- 	const __be32 *prop;
- 	int len;
-+	phys_addr_t cap_mem_addr;
-+	phys_addr_t cap_mem_size;
-+	unsigned long node = chosen_node_offset;
-+
-+	if ((long)node < 0)
-+		return;
- 
- 	pr_debug("Looking for usable-memory-range property... ");
- 
-@@ -993,6 +997,8 @@ static void __init early_init_dt_check_for_usable_mem_range(unsigned long node)
- 
- 	pr_debug("cap_mem_start=%pa cap_mem_size=%pa\n", &cap_mem_addr,
- 		 &cap_mem_size);
-+
-+	memblock_cap_memory_range(cap_mem_addr, cap_mem_size);
- }
- 
- #ifdef CONFIG_SERIAL_EARLYCON
-@@ -1141,9 +1147,10 @@ int __init early_init_dt_scan_chosen(unsigned long node, const char *uname,
- 	    (strcmp(uname, "chosen") != 0 && strcmp(uname, "chosen@0") != 0))
- 		return 0;
- 
-+	chosen_node_offset = node;
-+
- 	early_init_dt_check_for_initrd(node);
- 	early_init_dt_check_for_elfcorehdr(node);
--	early_init_dt_check_for_usable_mem_range(node);
- 
- 	/* Retrieve command line */
- 	p = of_get_flat_dt_prop(node, "bootargs", &l);
-@@ -1279,7 +1286,7 @@ void __init early_init_dt_scan_nodes(void)
- 	of_scan_flat_dt(early_init_dt_scan_memory, NULL);
- 
- 	/* Handle linux,usable-memory-range property */
--	memblock_cap_memory_range(cap_mem_addr, cap_mem_size);
-+	early_init_dt_check_for_usable_mem_range();
- }
- 
- bool __init early_init_dt_scan(void *params)
+And yes, that 16 needs to come before 17, ofc.
+
+> @@ -334,7 +377,8 @@ static void cper_print_mem(const char *pfx, const struct cper_sec_mem_err *mem,
+>  		return;
+>  	}
+>  	if (mem->validation_bits & CPER_MEM_VALID_ERROR_STATUS)
+> -		printk("%s""error_status: 0x%016llx\n", pfx, mem->error_status);
+> +		printk("%s""error_status: 0x%016llx, %s\n", pfx, mem->error_status,
+> +				cper_mem_err_status_str(mem->error_status));
+
+Arguments need to be aligned at opening brace, i.e.:
+
+                printk("%s""error_status: 0x%016llx, %s\n",
+                        pfx, mem->error_status, cper_mem_err_status_str(mem->error_status));
+
+
+Also, the naked error status number is not as user-friendly when we have
+the decoded string. So the format should be:
+
+                printk("%s error_status: %s (0x%016llx)\n",
+                        pfx, cper_mem_err_status_str(mem->error_status), mem->error_status);
+
 -- 
-2.34.1
+Regards/Gruss,
+    Boris.
 
-
-
+https://people.kernel.org/tglx/notes-about-netiquette
