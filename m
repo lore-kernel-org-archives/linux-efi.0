@@ -2,38 +2,38 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 95CC4C43217
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BD2D8C43219
 	for <linux-efi@archiver.kernel.org>; Sun, 30 Jan 2022 20:49:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238732AbiA3Utg (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 30 Jan 2022 15:49:36 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:32077 "EHLO
+        id S243466AbiA3Uth (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 30 Jan 2022 15:49:37 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:57950 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1356322AbiA3Ure (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sun, 30 Jan 2022 15:47:34 -0500
+        by vger.kernel.org with ESMTP id S1356372AbiA3Urk (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sun, 30 Jan 2022 15:47:40 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1643575654;
+        s=mimecast20190719; t=1643575660;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=IN0mnNEwFmzq1najf8olbC/23ovGo+/79HPbN8C12RI=;
-        b=YB+tgiiQ20IVWiSNJe3iuHUYFs5aVeIJHAnjY0yezh+PUrbk8qr2RYqqQPCmYZ6pS++/hl
-        9E5sYR5AfohMvcyQ6eqp67xfLayTaN1Ak4eD84OTGaF//Sno0ad8SYtHgqlZipPQyVvjUT
-        u08qrdyegblipT5qnRETA9EphF3tsNA=
+        bh=A90HaalXBx1gVGuJBR3n6goMO3ddmchQxDA4Piw5CdM=;
+        b=Iq6RMHuieaGYnHksUoB4pL2EyyOVegohSufLfD4TRm2fx3ehUz9LHXkwsWnHbhtEO62u/9
+        FMjqRXGiZv2E7bHBtbtFnP1gd6LUzgJOlIoLDaRQdQ2NOfOcuR/kh7cweVdxMnRqnnXasE
+        +hHEPalwawVFQMTT7BYAoDkUuTDf3Zs=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-310-wui-KgJ2N6-6azXhttTlww-1; Sun, 30 Jan 2022 15:47:28 -0500
-X-MC-Unique: wui-KgJ2N6-6azXhttTlww-1
+ us-mta-524-9YUagjr8NeuwZS4pdvgEIQ-1; Sun, 30 Jan 2022 15:47:36 -0500
+X-MC-Unique: 9YUagjr8NeuwZS4pdvgEIQ-1
 Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 28AD7835B47;
-        Sun, 30 Jan 2022 20:47:26 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 431681083F60;
+        Sun, 30 Jan 2022 20:47:34 +0000 (UTC)
 Received: from shalem.redhat.com (unknown [10.39.192.60])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 91F4C61093;
-        Sun, 30 Jan 2022 20:47:22 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 2DB7461093;
+        Sun, 30 Jan 2022 20:47:30 +0000 (UTC)
 From:   Hans de Goede <hdegoede@redhat.com>
 To:     "Rafael J . Wysocki" <rafael@kernel.org>,
         Mika Westerberg <mika.westerberg@linux.intel.com>,
@@ -50,11 +50,10 @@ Cc:     Hans de Goede <hdegoede@redhat.com>, Len Brown <lenb@kernel.org>,
         Tsuchiya Yuto <kitakar@gmail.com>,
         Fabio Aiuto <fabioaiuto83@gmail.com>,
         platform-driver-x86@vger.kernel.org, linux-pm@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
-        Andy Shevchenko <andy.shevchenko@gmail.com>
-Subject: [PATCH v4 14/20] mfd: intel_soc_pmic_chtwc: Add cht_wc_model data to struct intel_soc_pmic
-Date:   Sun, 30 Jan 2022 21:45:51 +0100
-Message-Id: <20220130204557.15662-15-hdegoede@redhat.com>
+        linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
+Subject: [PATCH v4 16/20] extcon: intel-cht-wc: Use new cht_wc_model intel_soc_pmic field
+Date:   Sun, 30 Jan 2022 21:45:53 +0100
+Message-Id: <20220130204557.15662-17-hdegoede@redhat.com>
 In-Reply-To: <20220130204557.15662-1-hdegoede@redhat.com>
 References: <20220130204557.15662-1-hdegoede@redhat.com>
 MIME-Version: 1.0
@@ -64,164 +63,82 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Tablet / laptop designs using an Intel Cherry Trail x86 main SoC with
-an Intel Whiskey Cove PMIC do not use a single standard setup for
-the charger, fuel-gauge and other chips surrounding the PMIC /
-charging+data USB port.
+The CHT_WC_VBUS_GPIO_CTLO GPIO actually driving an external 5V Vboost
+converter for Vbus depends on the board on which the Cherry Trail -
+Whiskey Cove PMIC is actually used.
 
-Unlike what is normal on x86 this diversity in designs is not handled
-by the ACPI tables. On 2 of the 3 known designs there are no standard
-(PNP0C0A) ACPI battery devices and on the 3th design the ACPI battery
-device does not work under Linux due to it requiring non-standard
-and undocumented ACPI behavior.
+Since the information about the exact PMIC setup is necessary in other
+places too, struct intel_soc_pmic now has a new cht_wc_model field
+indicating the board model.
 
-So to make things work under Linux we use native charger and fuel-gauge
-drivers on these devices, re-using the native drivers used on ARM boards
-with the same charger / fuel-gauge ICs.
+Only poke the CHT_WC_VBUS_GPIO_CTLO GPIO if this new field is set to
+INTEL_CHT_WC_GPD_WIN_POCKET, which indicates the Type-C (with PD and
+DP-altmode) setup used on the GPD pocket and GPD win; and on which
+this GPIO actually controls an external 5V Vboost converter.
 
-This requires various MFD-cell drivers for the CHT-WC PMIC cells to
-know which model they are exactly running on so that they can e.g.
-instantiate an I2C-client for the right model charger-IC (the charger
-is connected to an I2C-controller which is part of the PMIC).
-
-Rather then duplicating DMI-id matching to check which model we are
-running on in each MFD-cell driver, add a check for this to the
-shared drivers/mfd/intel_soc_pmic_chtwc.c code by using a
-DMI table for all 3 known models:
-
-1. The GPD Win and GPD Pocket mini-laptops, these are really 2 models
-but the Pocket re-uses the GPD Win's design in a different housing:
-
-The WC PMIC is connected to a TI BQ24292i charger, paired with
-a Maxim MAX17047 fuelgauge + a FUSB302 USB Type-C Controller +
-a PI3USB30532 USB switch, for a fully functional Type-C port.
-
-2. The Xiaomi Mi Pad 2:
-
-The WC PMIC is connected to a TI BQ25890 charger, paired with
-a TI BQ27520 fuelgauge, using the TI BQ25890 for BC1.2 charger type
-detection, for a USB-2 only Type-C port without PD.
-
-3. The Lenovo Yoga Book YB1-X90 / Lenovo Yoga Book YB1-X91 series:
-
-The WC PMIC is connected to a TI BQ25892 charger, paired with
-a TI BQ27542 fuelgauge, using the WC PMIC for BC1.2 charger type
-detection and using the BQ25892's Mediatek Pump Express+ (1.0)
-support to enable charging with up to 12V through a micro-USB port.
-
-Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
-Acked-by: Lee Jones <lee.jones@linaro.org>
+Acked-by: Chanwoo Choi <cw00.choi@samsung.com>
 Signed-off-by: Hans de Goede <hdegoede@redhat.com>
 ---
-Changes in v4:
-- Put '{' and comment of DMI entries on separate lines (requested by Lee)
-- Drop comment on terminating empty entry in DMI table
-
 Changes in v3:
-- Store the model in struct intel_soc_pmic instead of adding a helper
-  function to retreive it
-
-Changes in v2:
-- New patch in v2 of this patch-set
+- Use the new cht_wc_model intel_soc_pmic field which replaces the
+  intel_cht_wc_get_model() helper and adjust the commit msg to match
 ---
- drivers/mfd/intel_soc_pmic_chtwc.c | 40 ++++++++++++++++++++++++++++++
- include/linux/mfd/intel_soc_pmic.h |  8 ++++++
- 2 files changed, 48 insertions(+)
+ drivers/extcon/extcon-intel-cht-wc.c | 35 +++++++++++++++++-----------
+ 1 file changed, 21 insertions(+), 14 deletions(-)
 
-diff --git a/drivers/mfd/intel_soc_pmic_chtwc.c b/drivers/mfd/intel_soc_pmic_chtwc.c
-index 49c5f71664bc..4eab191e053a 100644
---- a/drivers/mfd/intel_soc_pmic_chtwc.c
-+++ b/drivers/mfd/intel_soc_pmic_chtwc.c
-@@ -10,6 +10,7 @@
- 
- #include <linux/acpi.h>
- #include <linux/delay.h>
-+#include <linux/dmi.h>
- #include <linux/err.h>
- #include <linux/i2c.h>
- #include <linux/interrupt.h>
-@@ -134,9 +135,44 @@ static const struct regmap_irq_chip cht_wc_regmap_irq_chip = {
- 	.num_regs = 1,
- };
- 
-+static const struct dmi_system_id cht_wc_model_dmi_ids[] = {
-+	{
-+		/* GPD win / GPD pocket mini laptops */
-+		.driver_data = (void *)(long)INTEL_CHT_WC_GPD_WIN_POCKET,
-+		/*
-+		 * This DMI match may not seem unique, but it is. In the 67000+
-+		 * DMI decode dumps from linux-hardware.org only 116 have
-+		 * board_vendor set to "AMI Corporation" and of those 116 only
-+		 * the GPD win's and pocket's board_name is "Default string".
-+		 */
-+		.matches = {
-+			DMI_EXACT_MATCH(DMI_BOARD_VENDOR, "AMI Corporation"),
-+			DMI_EXACT_MATCH(DMI_BOARD_NAME, "Default string"),
-+			DMI_EXACT_MATCH(DMI_BOARD_SERIAL, "Default string"),
-+			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, "Default string"),
-+		},
-+	}, {
-+		/* Xiaomi Mi Pad 2 */
-+		.driver_data = (void *)(long)INTEL_CHT_WC_XIAOMI_MIPAD2,
-+		.matches = {
-+			DMI_MATCH(DMI_SYS_VENDOR, "Xiaomi Inc"),
-+			DMI_MATCH(DMI_PRODUCT_NAME, "Mipad2"),
-+		},
-+	}, {
-+		/* Lenovo Yoga Book X90F / X91F / X91L */
-+		.driver_data = (void *)(long)INTEL_CHT_WC_LENOVO_YOGABOOK1,
-+		.matches = {
-+			/* Non exact match to match all versions */
-+			DMI_MATCH(DMI_PRODUCT_NAME, "Lenovo YB1-X9"),
-+		},
-+	},
-+	{ }
-+};
-+
- static int cht_wc_probe(struct i2c_client *client)
- {
- 	struct device *dev = &client->dev;
-+	const struct dmi_system_id *id;
- 	struct intel_soc_pmic *pmic;
- 	acpi_status status;
- 	unsigned long long hrv;
-@@ -160,6 +196,10 @@ static int cht_wc_probe(struct i2c_client *client)
- 	if (!pmic)
- 		return -ENOMEM;
- 
-+	id = dmi_first_match(cht_wc_model_dmi_ids);
-+	if (id)
-+		pmic->cht_wc_model = (long)id->driver_data;
-+
- 	pmic->irq = client->irq;
- 	pmic->dev = dev;
- 	i2c_set_clientdata(client, pmic);
-diff --git a/include/linux/mfd/intel_soc_pmic.h b/include/linux/mfd/intel_soc_pmic.h
-index 6a88e34cb955..945bde1fe55c 100644
---- a/include/linux/mfd/intel_soc_pmic.h
-+++ b/include/linux/mfd/intel_soc_pmic.h
-@@ -13,6 +13,13 @@
- 
+diff --git a/drivers/extcon/extcon-intel-cht-wc.c b/drivers/extcon/extcon-intel-cht-wc.c
+index 771f6f4cf92e..81cae8c75850 100644
+--- a/drivers/extcon/extcon-intel-cht-wc.c
++++ b/drivers/extcon/extcon-intel-cht-wc.c
+@@ -14,6 +14,7 @@
+ #include <linux/module.h>
+ #include <linux/mod_devicetable.h>
+ #include <linux/platform_device.h>
++#include <linux/property.h>
  #include <linux/regmap.h>
+ #include <linux/slab.h>
  
-+enum intel_cht_wc_models {
-+	INTEL_CHT_WC_UNKNOWN,
-+	INTEL_CHT_WC_GPD_WIN_POCKET,
-+	INTEL_CHT_WC_XIAOMI_MIPAD2,
-+	INTEL_CHT_WC_LENOVO_YOGABOOK1,
-+};
-+
- /**
-  * struct intel_soc_pmic - Intel SoC PMIC data
-  * @irq: Master interrupt number of the parent PMIC device
-@@ -39,6 +46,7 @@ struct intel_soc_pmic {
- 	struct regmap_irq_chip_data *irq_chip_data_crit;
- 	struct device *dev;
- 	struct intel_scu_ipc_dev *scu;
-+	enum intel_cht_wc_models cht_wc_model;
- };
+@@ -358,20 +359,26 @@ static int cht_wc_extcon_probe(struct platform_device *pdev)
+ 	if (IS_ERR(ext->edev))
+ 		return PTR_ERR(ext->edev);
  
- int intel_soc_pmic_exec_mipi_pmic_seq_element(u16 i2c_address, u32 reg_address,
+-	/*
+-	 * When a host-cable is detected the BIOS enables an external 5v boost
+-	 * converter to power connected devices there are 2 problems with this:
+-	 * 1) This gets seen by the external battery charger as a valid Vbus
+-	 *    supply and it then tries to feed Vsys from this creating a
+-	 *    feedback loop which causes aprox. 300 mA extra battery drain
+-	 *    (and unless we drive the external-charger-disable pin high it
+-	 *    also tries to charge the battery causing even more feedback).
+-	 * 2) This gets seen by the pwrsrc block as a SDP USB Vbus supply
+-	 * Since the external battery charger has its own 5v boost converter
+-	 * which does not have these issues, we simply turn the separate
+-	 * external 5v boost converter off and leave it off entirely.
+-	 */
+-	cht_wc_extcon_set_5v_boost(ext, false);
++	switch (pmic->cht_wc_model) {
++	case INTEL_CHT_WC_GPD_WIN_POCKET:
++		/*
++		 * When a host-cable is detected the BIOS enables an external 5v boost
++		 * converter to power connected devices there are 2 problems with this:
++		 * 1) This gets seen by the external battery charger as a valid Vbus
++		 *    supply and it then tries to feed Vsys from this creating a
++		 *    feedback loop which causes aprox. 300 mA extra battery drain
++		 *    (and unless we drive the external-charger-disable pin high it
++		 *    also tries to charge the battery causing even more feedback).
++		 * 2) This gets seen by the pwrsrc block as a SDP USB Vbus supply
++		 * Since the external battery charger has its own 5v boost converter
++		 * which does not have these issues, we simply turn the separate
++		 * external 5v boost converter off and leave it off entirely.
++		 */
++		cht_wc_extcon_set_5v_boost(ext, false);
++		break;
++	default:
++		break;
++	}
+ 
+ 	/* Enable sw control */
+ 	ret = cht_wc_extcon_sw_control(ext, true);
 -- 
 2.33.1
 
