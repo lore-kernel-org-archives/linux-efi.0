@@ -2,113 +2,146 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DF8B9C433EF
-	for <linux-efi@archiver.kernel.org>; Tue,  8 Feb 2022 16:13:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E625C4332F
+	for <linux-efi@archiver.kernel.org>; Tue,  8 Feb 2022 22:26:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1382804AbiBHQNG (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 8 Feb 2022 11:13:06 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46016 "EHLO
+        id S1386460AbiBHW0k (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 8 Feb 2022 17:26:40 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35644 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1343745AbiBHQNF (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 8 Feb 2022 11:13:05 -0500
-Received: from smtp-relay-internal-0.canonical.com (smtp-relay-internal-0.canonical.com [185.125.188.122])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 59E10C061579
-        for <linux-efi@vger.kernel.org>; Tue,  8 Feb 2022 08:13:04 -0800 (PST)
-Received: from mail-ed1-f71.google.com (mail-ed1-f71.google.com [209.85.208.71])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-        (No client certificate requested)
-        by smtp-relay-internal-0.canonical.com (Postfix) with ESMTPS id 2F66C3F1E9
-        for <linux-efi@vger.kernel.org>; Tue,  8 Feb 2022 16:13:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-        s=20210705; t=1644336783;
-        bh=KanVwVycwVyhWEVvbA3CqdPulguy8dZ41O1L+1VqM/M=;
-        h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-         Content-Type:In-Reply-To;
-        b=uEOugRExfbycM4AnDhk/zVkroQY8yWyxr1KeAXqLR2EcFHMa8Il3r0zPKpg2GQaAf
-         1i2mxjXa7qI9LNEJhHtcaFgSPaTN5mjcWxFYZJr3HlprHrlLbM+yAmIAbiBQqSiT2X
-         HSV+XgnRWYRezhk5fp9FJq736TFMqEZ209Un2/Uypsgy1+sAJYGnjTFYgHNv2YUhM6
-         QlsWFpFObK1ijJeCum4JFh2AAEnPfZZDgSP4ax3TVIvuwzrGtwtKh9Hu6kk3blNfvN
-         xYqczezkdQ2WZUttX1qIgXuXzTEqIwZ+8tM91vaxuxggxcwBzekmKoT78D59HwB28/
-         1t67EPlz52UCw==
-Received: by mail-ed1-f71.google.com with SMTP id w3-20020a50c443000000b0040696821132so9926725edf.22
-        for <linux-efi@vger.kernel.org>; Tue, 08 Feb 2022 08:13:03 -0800 (PST)
+        with ESMTP id S1386766AbiBHVJd (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 8 Feb 2022 16:09:33 -0500
+Received: from mail-yb1-xb29.google.com (mail-yb1-xb29.google.com [IPv6:2607:f8b0:4864:20::b29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0260FC0612B8
+        for <linux-efi@vger.kernel.org>; Tue,  8 Feb 2022 13:09:33 -0800 (PST)
+Received: by mail-yb1-xb29.google.com with SMTP id p5so191917ybd.13
+        for <linux-efi@vger.kernel.org>; Tue, 08 Feb 2022 13:09:32 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=eclypsium.com; s=google;
+        h=mime-version:in-reply-to:references:from:date:message-id:subject:to
+         :cc;
+        bh=Voz9w9zuaut5zzPtd6DrE9JLrle0cFN3rE5oW1AaY2M=;
+        b=H86Fkha4NgU8OTWhaHjE4JlGaizgjjoCxAoxzH6KuMHph8fpqwf03RaVnEuLk2P/bp
+         yY61kdvApYE6qxRpAaZcrq1arCGYhyP64OfxKZGk/ZOoOi/ltDcqSmSvBtCoQmeyEyLR
+         FYKxeVXO0j/kENA0AQ+2vCrGOl0VUKu3hWvpH/6m/A6hDV0bT0QlgbAqfNsNBafihzt3
+         2DJiAdstGP57WhN+4kYnrr97E23PJoqPkDXeN4LhN/1bMFwtonqt5k3vmcslxFSVGhxw
+         1hFhSiwDhUci9XkHK8tdvuB1zULSZaI7zSssvL59P/voaJjScrGEK282mnejgUsEtNCb
+         E5kA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :accept-language:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=KanVwVycwVyhWEVvbA3CqdPulguy8dZ41O1L+1VqM/M=;
-        b=65pWkhdMrGOGz+bHMc/WY6PIqeyX9YQ5R+NPRx2bkHrQUbcQUatjAvJ9hH8UoOFTu+
-         FT3n7vTGEtYNMincGGyIBu/RdMsoNj44QTXoLWAKXvZIDiGbxtKxgJYWlKeFmavanmy8
-         HnFTZ/wHgX/uEWaFmJku+xOrifZjn89/aL+F5SBktwNBdQYTnMprChe7uFIX0PtjF/69
-         nZr0WfmJanZVGY67uaSai28ilSqw8unMTjyTKoJb6FukpAJ54AjNe5kO2oXK2mvmTIE+
-         uSsl7x48DLywYQAREgqt2fpplbaJlX8ujRKb4LEW6bdJLZXG3khDYigHcXKnQpFyxROm
-         MSSg==
-X-Gm-Message-State: AOAM5322cG4YnFTboYpdg/NiydxLneR1kVHlUkaBr/yo3YuXm9EEL81E
-        iNgf614cXU0hgHQbwRpvuO4QXxS00QO4bEABSnIITxpZboVYDt9fz5J5KFaoB1OktN9LSN6EeAl
-        IWYA/O/gHg2qhILAWCZ8FzwAj/IIHYhODT5AfKA==
-X-Received: by 2002:a17:906:149a:: with SMTP id x26mr4163273ejc.103.1644336782824;
-        Tue, 08 Feb 2022 08:13:02 -0800 (PST)
-X-Google-Smtp-Source: ABdhPJxIoXQ5FP2mUMkS1vwu5r7VNsMHe9wRfg35egcyMzltRFbVzxZ7vtguy695zr1PYIsyi+5vBg==
-X-Received: by 2002:a17:906:149a:: with SMTP id x26mr4163255ejc.103.1644336782633;
-        Tue, 08 Feb 2022 08:13:02 -0800 (PST)
-Received: from jak-t480s ([2a02:908:2816:fb20:ab02:eec7:2fa9:ece7])
-        by smtp.gmail.com with ESMTPSA id y5sm1721678ejf.142.2022.02.08.08.13.01
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 08 Feb 2022 08:13:01 -0800 (PST)
-Date:   Tue, 8 Feb 2022 17:12:59 +0100
-From:   Julian Andres Klode <julian.klode@canonical.com>
-To:     Matthew Wilcox <willy@infradead.org>
-Cc:     Masahiro Yamada <masahiroy@kernel.org>,
-        Ben Hutchings <ben@decadent.org.uk>,
-        linux-efi <linux-efi@vger.kernel.org>,
-        Linux Kbuild mailing list <linux-kbuild@vger.kernel.org>,
-        efi@lists.einval.com,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        David Howells <dhowells@redhat.com>, keyrings@vger.kernel.org,
-        David Woodhouse <dwmw2@infradead.org>,
-        debian-kernel <debian-kernel@lists.debian.org>
-Subject: Re: [PATCH v2] builddeb: Support signing kernels with the module
- signing key
-Message-ID: <20220208161259.inytmx6gm4w34gct@jak-t480s>
-Accept-Language: de-DE, de, en-GB, en-US, en
-References: <20211218031122.4117631-1-willy@infradead.org>
- <CAK7LNAQUChvX3NoukBnjBfJJGu+a96pfbM--xHEHOygWPgE9eA@mail.gmail.com>
- <YdSOV7LL0vWCMcWl@casper.infradead.org>
- <CAK7LNAQgixJSnDUMfjc+tg90oMdVoh+i5faEn-rqgmHR3Bk6dQ@mail.gmail.com>
- <20220208110122.2z4cmbqexmnxuxld@jak-t480s>
- <YgJrypdQium7AcWV@casper.infradead.org>
+        h=x-gm-message-state:mime-version:in-reply-to:references:from:date
+         :message-id:subject:to:cc;
+        bh=Voz9w9zuaut5zzPtd6DrE9JLrle0cFN3rE5oW1AaY2M=;
+        b=vhNI1JhlOdqhKkelPyz5JDcJfnlWitCmOlCW0n4XXOBndOUw1IdtLx3rY/GYD1tc3W
+         Un9t0/mkJvmpX9asLNyPIba0TCNq1beC+qUV1lxH3H0//Ul9kmU1NuB1Bg81Uusf33Fx
+         IEBlouVq7P0r+fsed3COJIQ7Ei1qnVZ/d5r3uW8G+QE3uBYyzREklEe2x/3o6fgFTVIR
+         Q3TuFrR1MZxz961GHkb5xB0VKzm0YazTrmGWZPBzQoSvpvRjprAZwsGWXxazDg+GJQ+H
+         R+jrXb4fe3bp126WbcPE/kKAEc3fmxP2XFFz2PY+8amPy+9CIf2JT9IMcTGF9/EyeZvq
+         esMw==
+X-Gm-Message-State: AOAM531oYQGe31KpRfHmJq88BJkwxvpZroa93ZCHAOsBkvgD8wZZ4FcK
+        d+J93Gfvfqwnn5y1lL1W9+FRAVAH5tLnCcxUGt7c2w==
+X-Google-Smtp-Source: ABdhPJwq0oxAvAIPreUivsgDVcSG53+v8LdcVF+reGL+9mzDGy2lOfjCUp4XCtrNh7PS7fr/4/oEr1Bunn9utBnAgNA=
+X-Received: by 2002:a25:9988:: with SMTP id p8mr6404360ybo.128.1644354572175;
+ Tue, 08 Feb 2022 13:09:32 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YgJrypdQium7AcWV@casper.infradead.org>
+Received: by 2002:a81:174d:0:0:0:0:0 with HTTP; Tue, 8 Feb 2022 13:09:31 -0800 (PST)
+In-Reply-To: <202202071325.F8450B3B2D@keescook>
+References: <20220203164328.203629-1-martin.fernandez@eclypsium.com>
+ <20220203164328.203629-4-martin.fernandez@eclypsium.com> <202202071325.F8450B3B2D@keescook>
+From:   Martin Fernandez <martin.fernandez@eclypsium.com>
+Date:   Tue, 8 Feb 2022 18:09:31 -0300
+Message-ID: <CAKgze5YtTMmmqmrNjkCey84nSRxGpa_yajH8+9kwQLckb2dFoA@mail.gmail.com>
+Subject: Re: [PATCH v6 3/6] x86/e820: Refactor range_update and range_remove
+To:     Kees Cook <keescook@chromium.org>
+Cc:     linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
+        platform-driver-x86@vger.kernel.org, linux-mm@kvack.org,
+        tglx@linutronix.de, mingo@redhat.com, bp@alien8.de,
+        dave.hansen@linux.intel.com, x86@kernel.org, hpa@zytor.com,
+        ardb@kernel.org, dvhart@infradead.org, andy@infradead.org,
+        gregkh@linuxfoundation.org, rafael@kernel.org, rppt@kernel.org,
+        akpm@linux-foundation.org, daniel.gutson@eclypsium.com,
+        hughsient@gmail.com, alex.bazhaniuk@eclypsium.com,
+        alison.schofield@intel.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, Feb 08, 2022 at 01:10:34PM +0000, Matthew Wilcox wrote:
-> On Tue, Feb 08, 2022 at 12:01:22PM +0100, Julian Andres Klode wrote:
-> > It's worth pointing out that in Ubuntu, the generated MOK key
-> > is for module signing only (extended key usage 1.3.6.1.4.1.2312.16.1.2),
-> > kernels signed with it will NOT be bootable.
-> 
-> Why should these be separate keys?  There's no meaningful security
-> boundary between a kernel module and the ernel itself; a kernel
-> modulecan, for example, write to CR3, and that's game over for
-> any pretence at separation.
+On 2/7/22, Kees Cook <keescook@chromium.org> wrote:
+> On Thu, Feb 03, 2022 at 01:43:25PM -0300, Martin Fernandez wrote:
+>> __e820__range_update and e820__range_remove had a very similar
+>> I propose a refactor of those functions, given that I need to create a
+>> similar one for this patchset.
+>
+> The diff here is pretty hard (for me) to review; I'll need more time
+> to check it. What might make review easier (at least for me), is to
+> incrementally change these routines. i.e. separate patches to:
+>
+> - add the new infrastructure
+> - replace e820__range_remove
+> - replace __e820__range_update
+>
+> If that's not actually useful, no worries. I'll just stare at it a bit
+> more. :)
+>
 
-I don't really _know_, but I believe the difference is that the
-kernel binaries runs in boot services, and calls ExitBootServices,
-whereas modules are loaded after ExitBootServices.
+Yep, that's a good idea. I'll keep that in mind for the next patch.
 
-But I don't know the full rationale why (a) the feature exists in
-the first place and (b) why the Ubuntu security team chose to require
-that constraint.
+>>
+>> Add a function to modify a E820 table in a given range. This
+>> modification is done backed up by two helper structs:
+>> e820_entry_updater and e820_*_data.
+>>
+>> The first one, e820_entry_updater, carries 3 callbacks which function
+>> as the actions to take on the table.
+>>
+>> The other one, e820_*_data carries information needed by the
+>> callbacks, for example in the case of range_update it will carry the
+>> type that we are targeting.
+>
+> Something I think would be really amazing here is if you could add KUnit
+> tests here to exercise the corner cases and validate the changes. It
+> should be pretty easy to add. Here's a quick example for the boilerplate
+> and testing a bit of __e820__range_add():
+>
+> #ifdef CONFIG_E820_KUNIT_TEST
+> #include <kunit/test.h>
+>
+> static void __init test_e820_range_add(struct kunit *context)
+> {
+> 	struct e820_table table;
+> 	u32 full;
+>
+> 	full = ARRAY_SIZE(table.entries);
+> 	/* Add last entry. */
+> 	table->nr_entries = full - 1;
+> 	__e820__range_add(&table, 0, 15, 0);
+> 	KUNIT_EXPECT_EQ(table->nr_entries, full)
+> 	/* Skip new entry when full. */
+> 	__e820__range_add(&table, 0, 15, 0);
+> 	KUNIT_EXPECT_EQ(table->nr_entries, full)
+> }
+>
+> static void __init test_e820_update(struct kunit *context)
+> {
+> ...
+> }
+>
+> static struct kunit_case __refdata e820_test_cases[] = {
+>         KUNIT_CASE(test_e820_range_add),
+>         KUNIT_CASE(test_e820_update),
+> 	...
+>         {}
+> };
+>
+> static struct kunit_suite e820_test_suite = {
+>         .name = "e820",
+>         .test_cases = e820_test_cases,
+> };
+>
+> kunit_test_suites(&e820_test_suite);
+> #endif
+>
 
-My goal is just to make people aware of that so they can make
-informed decisions :)
-
--- 
-debian developer - deb.li/jak | jak-linux.org - free software dev
-ubuntu core developer                              i speak de, en
+Oh that's awesome! I'll definitely take a look into KUnit and integrate
+it to this patch. Thanks for the code snippet!
