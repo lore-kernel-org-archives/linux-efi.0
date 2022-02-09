@@ -2,43 +2,43 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E0E7DC433EF
-	for <linux-efi@archiver.kernel.org>; Wed,  9 Feb 2022 18:14:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1A3FFC433FE
+	for <linux-efi@archiver.kernel.org>; Wed,  9 Feb 2022 18:14:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238904AbiBISOG (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 9 Feb 2022 13:14:06 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60252 "EHLO
+        id S239001AbiBISOQ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 9 Feb 2022 13:14:16 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60442 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238979AbiBISNM (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 9 Feb 2022 13:13:12 -0500
-Received: from NAM04-BN8-obe.outbound.protection.outlook.com (mail-bn8nam08on2056.outbound.protection.outlook.com [40.107.100.56])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 494E2C03C1B0;
-        Wed,  9 Feb 2022 10:12:16 -0800 (PST)
+        with ESMTP id S239045AbiBISNK (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 9 Feb 2022 13:13:10 -0500
+Received: from NAM11-DM6-obe.outbound.protection.outlook.com (mail-dm6nam11on2087.outbound.protection.outlook.com [40.107.223.87])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 74037C03E937;
+        Wed,  9 Feb 2022 10:12:11 -0800 (PST)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=bn/0C9rP3wrvwi9guojajFVeoeO3BY+XMp6tQ8Q0B7clL2/6q55xdUKbGBpBeg9Wfpc7YwcGKtiZ174mn2xp5KnwAVyM9Q24jtraizy4/QmlUybS2sApgyWMLRfUDVmUTeGzmbK0XTaX54V4+yBrDbfsOdcvfGTRbHjocwHP/Z+nbzn1IvGpucOHMzLKfjTZuSedDI9IH9kdpMWVlxGAtiTiQB5AhhnN1qGCpctKhHzfe92as0BUOL3MXDjlTUqJo2mXFsiAl5Pm7F703A+gY/JRk/mIwyod8zIWodROBbu3byQ9gRz1bpE3jnUfRohSqeMQ8biVKcSU/vlLm267rA==
+ b=doMBFE2jnwVB7QXJA9OUWnc48eyrVxg2D/ke4c1c/lb13y7t8Ue9rc72GX/fs8+zteKG+1nDSwXiZSAi6sa6DOoMHcUlt9bpjfRTJ+vDRnledojzfS6KBydRBWcm+lEMmO+sreiN1ZVIZCw6gPjDxb8w5V5r7V1/MEm4xYiSDCdOh6gHXv3eWuB8T5aNT5LmJ5Ekylymx+aOURyC5fyzFH2YafbGTqp0jB3/tir3vxZWqZcXHqaEmx4TH0jTZMSqGK7E9AAc+olH8kzn3s0R2jypVg8df3yYd/i9gnSZoPFo9Z8VpBPJYoZOY0SJe77AiSWPjVaViVw/vKo5BHKkeA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=7THHF0Wx2FA67KQYmtOOB2p8rCK5n19XwVdJIoJW5Yo=;
- b=XZpOjGALR0ScpteJHP4FGNrFaANIV+GXHWeFg7RiZMRHMc7LhfOirIQjTWmeLiUF3bjLQyjAFc7VrRMmDLcGX8wQDM9Xc0TCIIP6aZqVr6gXZBAl0pKt43uUauf1y9wTNHYOjt7/hB0+zJnWWMNf59ROwgaB+OYVvnlv0jkf6rw5cV5OthWqABbWR1bXW8mouUqL/h2vuIp7gtTTwvCVsWZysnEdtuPgVwsiK18ThrLNvq3MeAASVsKc8vEx82TMfqr024NW2M58UTpmdciYDb4t5LSb3z/sjmiMQzjQfNWOEI25EiDSNAnraPoZCiuSIAzbafXCpx1Zlohl9+go3Q==
+ bh=u5YDI9jYo57S6MwXjaweiTblRtur/Xu4GgKjk7NYpcg=;
+ b=GSkvOKd/I9AyHlLSCQHhJU3PcGh08snBkzEV38H+FzRt0o4iJAIbyCJT3KPNyfFDyb7ZsHWG3pwYp7GwTJiqCSylP25XoOk2np7ePtAK2DqdGZ5ftPRVhXAq0r/WZPK1ZJ3aigwd5fjJZiQhjf0QuwAS0ewtcpMOAVU+/K/h8aUfwQcVDiTaaxEO1Vly3iSLrG63s0WB0nCDT6q/Y91W6S8vu0PMtmMlzX2jDY7TN5/yQ9rd5emHzddnUaMVGkERaupNy1MadxPAEY9tp11hqkMHqBREWNyBsPIfcepNmq3SIQZrW6A+3RC+bIK6Ub5PI1c9+Il0nSOMY+0gmhwM1A==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
  165.204.84.17) smtp.rcpttodomain=kernel.org smtp.mailfrom=amd.com; dmarc=pass
  (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
  dkim=none (message not signed); arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=7THHF0Wx2FA67KQYmtOOB2p8rCK5n19XwVdJIoJW5Yo=;
- b=YG4jO9BXpyka97zf8+z5L9UN69xkemVqvwdk1xxN+16W/hQeL0mGYhckB7QkPCD74e4iuu71gMvJbiDwvKOxeu3m9lMo0amV8VvTBdrcW9QqDQq3i4YPgt6gawwOzUW26BMAVcf3oVLKEvywsg2qtdsqBOzuHgy/p/OPHrPpCMg=
-Received: from BN9P223CA0001.NAMP223.PROD.OUTLOOK.COM (2603:10b6:408:10b::6)
- by BY5PR12MB4853.namprd12.prod.outlook.com (2603:10b6:a03:1da::18) with
+ bh=u5YDI9jYo57S6MwXjaweiTblRtur/Xu4GgKjk7NYpcg=;
+ b=ua0rl/Q6onabCQrvCMTGMrScshGOmR1jr7rR4iEE1Os7/E6/craY3O8vrA7o4gHnN/M2PrsC+irQA38Ac5daBAQwVCxRWMtExfrVdTGJOucRXGwev3kvbWljRLcmo87LNl4LgQdEnMrq1utUOq1mgaOjcTGNI9SjdlvTFSy7exs=
+Received: from BN9PR03CA0142.namprd03.prod.outlook.com (2603:10b6:408:fe::27)
+ by BYAPR12MB2743.namprd12.prod.outlook.com (2603:10b6:a03:61::28) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4975.11; Wed, 9 Feb
- 2022 18:12:13 +0000
-Received: from BN8NAM11FT018.eop-nam11.prod.protection.outlook.com
- (2603:10b6:408:10b:cafe::12) by BN9P223CA0001.outlook.office365.com
- (2603:10b6:408:10b::6) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4951.17; Wed, 9 Feb
+ 2022 18:12:07 +0000
+Received: from BN8NAM11FT032.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:408:fe:cafe::1c) by BN9PR03CA0142.outlook.office365.com
+ (2603:10b6:408:fe::27) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4975.11 via Frontend
- Transport; Wed, 9 Feb 2022 18:12:13 +0000
+ Transport; Wed, 9 Feb 2022 18:12:07 +0000
 X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
  smtp.mailfrom=amd.com; dkim=none (message not signed)
  header.d=none;dmarc=pass action=none header.from=amd.com;
@@ -46,13 +46,13 @@ Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
  165.204.84.17 as permitted sender) receiver=protection.outlook.com;
  client-ip=165.204.84.17; helo=SATLEXMB04.amd.com;
 Received: from SATLEXMB04.amd.com (165.204.84.17) by
- BN8NAM11FT018.mail.protection.outlook.com (10.13.176.89) with Microsoft SMTP
+ BN8NAM11FT032.mail.protection.outlook.com (10.13.177.88) with Microsoft SMTP
  Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.4975.11 via Frontend Transport; Wed, 9 Feb 2022 18:12:13 +0000
+ 15.20.4975.11 via Frontend Transport; Wed, 9 Feb 2022 18:12:06 +0000
 Received: from sbrijesh-desktop.amd.com (10.180.168.240) by SATLEXMB04.amd.com
  (10.181.40.145) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.18; Wed, 9 Feb
- 2022 12:12:09 -0600
+ 2022 12:12:04 -0600
 From:   Brijesh Singh <brijesh.singh@amd.com>
 To:     <x86@kernel.org>, <linux-kernel@vger.kernel.org>,
         <kvm@vger.kernel.org>, <linux-efi@vger.kernel.org>,
@@ -83,9 +83,9 @@ CC:     Thomas Gleixner <tglx@linutronix.de>,
         <brijesh.ksingh@gmail.com>, <tony.luck@intel.com>,
         <marcorr@google.com>, <sathyanarayanan.kuppuswamy@linux.intel.com>,
         Brijesh Singh <brijesh.singh@amd.com>
-Subject: [PATCH v10 26/45] x86/compressed/acpi: Move EFI config table lookup to helper
-Date:   Wed, 9 Feb 2022 12:10:20 -0600
-Message-ID: <20220209181039.1262882-27-brijesh.singh@amd.com>
+Subject: [PATCH v10 23/45] x86/head/64: Re-enable stack protection
+Date:   Wed, 9 Feb 2022 12:10:17 -0600
+Message-ID: <20220209181039.1262882-24-brijesh.singh@amd.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20220209181039.1262882-1-brijesh.singh@amd.com>
 References: <20220209181039.1262882-1-brijesh.singh@amd.com>
@@ -97,168 +97,174 @@ X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB04.amd.com
  (10.181.40.145)
 X-EOPAttributedMessage: 0
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: afbc553f-3929-48a2-03ee-08d9ebf7b284
-X-MS-TrafficTypeDiagnostic: BY5PR12MB4853:EE_
-X-Microsoft-Antispam-PRVS: <BY5PR12MB48537AE1993EEC8CCDBFC8EAE52E9@BY5PR12MB4853.namprd12.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:8882;
+X-MS-Office365-Filtering-Correlation-Id: 669ff59e-08a4-4c6c-2a0c-08d9ebf7aeb8
+X-MS-TrafficTypeDiagnostic: BYAPR12MB2743:EE_
+X-Microsoft-Antispam-PRVS: <BYAPR12MB27430DC91CA0D69B2E53984CE52E9@BYAPR12MB2743.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:10000;
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: fxpuZvNXOTBx6kyONxXwH4vXMjMRYa6dRZBaxAYVEpNX9zahgQtNpupw3dEjVoyjRY4g89eb6Bfl4zI9vh37kyoqNSwOdQ5doiz843Dqs9MiDlWAFBzjXuyRhtJHtaRioWDWP9UCLufFUFBicvrlt6+1n2F8lbJlN/JPlp7ApO8AApJzJy7S/eg/u4/XdqrzbplcW84+kAfut8+FUHLpx94aYchqm5NMYBBh6VWik5Ngn4ARK8JUY0SKfGEdSi+KyqTPdYPT1eTrsQTFn61ZSBy9jWp/vm1rsxK2eCAsl65ryAt0vN8MYgflH5CLVC9RB8h5zAPyTCylrqqa+0g6ieQjztM+taac5qR+s9rTs0pUoC03q/+QLskBZIgNNAubqMAn6Kcf1RTaA23QNRxXIxcV9HGeh9+WDraiYxVxdPOp+0iicX8ali4uMmDxYWCSJNJb1O5Zfszb+IH4yH2rUnDftcBzglAnj9jikiCAZb3mH0NkzIjLmnJjwP3kMrrJKDLCZIs0ibScB/bC+p1Enn9d28Ef0sBR4z9WFVcuyO/odwdqxNDivTQoF/Ok35vrqbm9UvgbldG5Fn0z9ClVkhuG3casBqr4Ne6stvtG/gxeFdaiCAMvggNM0nUtvOvv+wB7R7I7/wIuJ6GfX4MEeetKmcsBOnxAr2P8t6vt39Q9lYFA537TX1HOg5QrarSBr66tl2pe8nO9X7JbCat0ElcX3dQTfeOScxU/+R8voRE=
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230001)(4636009)(46966006)(36840700001)(40470700004)(47076005)(83380400001)(36860700001)(110136005)(1076003)(54906003)(186003)(2616005)(426003)(336012)(7416002)(36756003)(16526019)(316002)(7406005)(44832011)(2906002)(26005)(8936002)(86362001)(81166007)(356005)(508600001)(4326008)(6666004)(82310400004)(7696005)(40460700003)(5660300002)(8676002)(70206006)(70586007)(36900700001)(2101003);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: YtpRhq+7L7juzOSrQ7g/mJa9usWcd5+B4FDGxsDmY69wQN1LWvXTYb1SemQAl3pvhEGl6iVE6Mw5pH1EftNChig6oRSji5KiCiwfWoUtAWxe7VEJ/RKzuWldEG58mwJNtnBL29sflxhIElK+JdYKQZYk1Z29noBpHkXkIoJqxuT+z4t6qXVEyiwpUvDc5IB8xKGuEGCkaUHmXSRRZ0Fnqq1G+NBQXmzKrZQFcke/HPzfyI/Ly7TcUXPM5wr8sfxYY6FbVyWi0hz9jqrZHFv6DYB547OAw54FLEMHv3vwrMr8X8Y0qX30JTN1Izy3LPHhavcuRI42YhHuadq4YfKHN1CJlXxbGb64MipdDZN84HoOkcy3n93lhyNbx+y98dsU5HK8nCNvmwQaUqz2mkXbwUna2kI7lNub/6CKagvPPiXM1H/2jhobDjKO/ITlrldKCkcimgmQO+Q5KGD61+4zvyr3VkpvCBsFuVJ91/KFUIJEhbKyBSWfUN3Zz1fha2PUCPAIqNnYOt6d43laI7EACZ8fToMUvhCmM9Ml1YJIr3jBpCQ0wJpsEfXYNsO3sOiNTlXySIOVE2K2MhK2btQEaFhNcZ2u6PurPAE10R1Yx1rTz/HG9Hu59imH7zUCVkAtHYTUCcOZ4r2XOZNqw4GiObLyB+fwa1OxZEgJA9xRIHxRckHdOicrFgv+0nTpwpBOzq7K6caZI0nCBBA6t2pmPvahCRvJDXOG2IgYlNY2A30=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230001)(4636009)(46966006)(36840700001)(40470700004)(81166007)(8676002)(54906003)(7696005)(6666004)(8936002)(70586007)(70206006)(316002)(356005)(508600001)(110136005)(86362001)(47076005)(36860700001)(36756003)(82310400004)(7406005)(7416002)(2906002)(2616005)(40460700003)(4326008)(16526019)(83380400001)(26005)(336012)(186003)(1076003)(44832011)(426003)(5660300002)(2101003)(36900700001);DIR:OUT;SFP:1101;
 X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 09 Feb 2022 18:12:13.3300
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 09 Feb 2022 18:12:06.9609
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: afbc553f-3929-48a2-03ee-08d9ebf7b284
+X-MS-Exchange-CrossTenant-Network-Message-Id: 669ff59e-08a4-4c6c-2a0c-08d9ebf7aeb8
 X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
 X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource: BN8NAM11FT018.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthSource: BN8NAM11FT032.eop-nam11.prod.protection.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY5PR12MB4853
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BYAPR12MB2743
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Michael Roth <michael.roth@amd.com>
 
-Future patches for SEV-SNP-validated CPUID will also require early
-parsing of the EFI configuration. Incrementally move the related code
-into a set of helpers that can be re-used for that purpose.
+Due to commit 103a4908ad4d ("x86/head/64: Disable stack protection for
+head$(BITS).o"), kernel/head{32,64}.c are compiled with
+-fno-stack-protector to allow a call to set_bringup_idt_handler(), which
+would otherwise have stack protection enabled with
+CONFIG_STACKPROTECTOR_STRONG.
 
+While sufficient for that case, there may still be issues with calls to
+any external functions that were compiled with stack protection enabled
+that in-turn make stack-protected calls, or if the exception handlers
+set up by set_bringup_idt_handler() make calls to stack-protected
+functions.
+
+Subsequent patches for SEV-SNP CPUID validation support will introduce
+both such cases. Attempting to disable stack protection for everything
+in scope to address that is prohibitive since much of the code, like
+SEV-ES #VC handler, is shared code that remains in use after boot and
+could benefit from having stack protection enabled. Attempting to inline
+calls is brittle and can quickly balloon out to library/helper code
+where that's not really an option.
+
+Instead, re-enable stack protection for head32.c/head64.c, and make the
+appropriate changes to ensure the segment used for the stack canary is
+initialized in advance of any stack-protected C calls.
+
+For head64.c:
+
+- The BSP will enter from startup_64() and call into C code
+  (startup_64_setup_env()) shortly after setting up the stack, which
+  may result in calls to stack-protected code. Set up %gs early to allow
+  for this safely.
+- APs will enter from secondary_startup_64*(), and %gs will be set up
+  soon after. There is one call to C code prior to %gs being setup
+  (__startup_secondary_64()), but it is only to fetch 'sme_me_mask'
+  global, so just load 'sme_me_mask' directly instead, and remove the
+  now-unused __startup_secondary_64() function.
+
+For head32.c:
+
+- BSPs/APs will set %fs to __BOOT_DS prior to any C calls. In recent
+  kernels, the compiler is configured to access the stack canary at
+  %fs:__stack_chk_guard [1], which overlaps with the initial per-cpu
+  '__stack_chk_guard' variable in the initial/"master" .data..percpu
+  area. This is sufficient to allow access to the canary for use
+  during initial startup, so no changes are needed there.
+
+[1] commit 3fb0fdb3bbe7 ("x86/stackprotector/32: Make the canary into a regular percpu variable")
+
+Suggested-by: Joerg Roedel <jroedel@suse.de> #for 64-bit %gs set up
 Signed-off-by: Michael Roth <michael.roth@amd.com>
 Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
 ---
- arch/x86/boot/compressed/acpi.c | 25 ++++++-------------
- arch/x86/boot/compressed/efi.c  | 43 +++++++++++++++++++++++++++++++++
- arch/x86/boot/compressed/misc.h |  9 +++++++
- 3 files changed, 60 insertions(+), 17 deletions(-)
+ arch/x86/include/asm/setup.h |  1 -
+ arch/x86/kernel/Makefile     |  1 -
+ arch/x86/kernel/head64.c     |  9 ---------
+ arch/x86/kernel/head_64.S    | 24 +++++++++++++++++++++---
+ 4 files changed, 21 insertions(+), 14 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/acpi.c b/arch/x86/boot/compressed/acpi.c
-index 58a3d3f3e305..9a824af69961 100644
---- a/arch/x86/boot/compressed/acpi.c
-+++ b/arch/x86/boot/compressed/acpi.c
-@@ -118,10 +118,13 @@ static acpi_physical_address kexec_get_rsdp_addr(void) { return 0; }
- static acpi_physical_address efi_get_rsdp_addr(void)
- {
- #ifdef CONFIG_EFI
--	unsigned long systab_pa, config_tables;
-+	unsigned long cfg_tbl_pa = 0;
-+	unsigned int cfg_tbl_len;
-+	unsigned long systab_pa;
- 	unsigned int nr_tables;
- 	enum efi_type et;
- 	bool efi_64;
-+	int ret;
+diff --git a/arch/x86/include/asm/setup.h b/arch/x86/include/asm/setup.h
+index a12458a7a8d4..72ede9159951 100644
+--- a/arch/x86/include/asm/setup.h
++++ b/arch/x86/include/asm/setup.h
+@@ -49,7 +49,6 @@ extern unsigned long saved_video_mode;
+ extern void reserve_standard_io_resources(void);
+ extern void i386_reserve_resources(void);
+ extern unsigned long __startup_64(unsigned long physaddr, struct boot_params *bp);
+-extern unsigned long __startup_secondary_64(void);
+ extern void startup_64_setup_env(unsigned long physbase);
+ extern void early_setup_idt(void);
+ extern void __init do_early_exception(struct pt_regs *regs, int trapnr);
+diff --git a/arch/x86/kernel/Makefile b/arch/x86/kernel/Makefile
+index 6aef9ee28a39..bd45e5ee6fe3 100644
+--- a/arch/x86/kernel/Makefile
++++ b/arch/x86/kernel/Makefile
+@@ -48,7 +48,6 @@ endif
+ # non-deterministic coverage.
+ KCOV_INSTRUMENT		:= n
  
- 	et = efi_get_type(boot_params);
- 	if (et == EFI_TYPE_64)
-@@ -135,23 +138,11 @@ static acpi_physical_address efi_get_rsdp_addr(void)
- 	if (!systab_pa)
- 		error("EFI support advertised, but unable to locate system table.");
+-CFLAGS_head$(BITS).o	+= -fno-stack-protector
+ CFLAGS_cc_platform.o	+= -fno-stack-protector
  
--	/* Handle EFI bitness properly */
--	if (efi_64) {
--		efi_system_table_64_t *stbl = (efi_system_table_64_t *)systab_pa;
--
--		config_tables	= stbl->tables;
--		nr_tables	= stbl->nr_tables;
--	} else {
--		efi_system_table_32_t *stbl = (efi_system_table_32_t *)systab_pa;
--
--		config_tables	= stbl->tables;
--		nr_tables	= stbl->nr_tables;
--	}
--
--	if (!config_tables)
--		error("EFI config tables not found.");
-+	ret = efi_get_conf_table(boot_params, &cfg_tbl_pa, &cfg_tbl_len);
-+	if (ret || !cfg_tbl_pa)
-+		error("EFI config table not found.");
- 
--	return __efi_get_rsdp_addr(config_tables, nr_tables, efi_64);
-+	return __efi_get_rsdp_addr(cfg_tbl_pa, cfg_tbl_len, efi_64);
- #else
- 	return 0;
- #endif
-diff --git a/arch/x86/boot/compressed/efi.c b/arch/x86/boot/compressed/efi.c
-index 72a81ba1f87b..70acddbbe7af 100644
---- a/arch/x86/boot/compressed/efi.c
-+++ b/arch/x86/boot/compressed/efi.c
-@@ -77,3 +77,46 @@ unsigned long efi_get_system_table(struct boot_params *bp)
- 
- 	return sys_tbl_pa;
+ CFLAGS_irq.o := -I $(srctree)/$(src)/../include/asm/trace
+diff --git a/arch/x86/kernel/head64.c b/arch/x86/kernel/head64.c
+index 4a24b121a2ba..e94e32ba9636 100644
+--- a/arch/x86/kernel/head64.c
++++ b/arch/x86/kernel/head64.c
+@@ -318,15 +318,6 @@ unsigned long __head __startup_64(unsigned long physaddr,
+ 	return sme_postprocess_startup(bp, pmd);
  }
-+
-+/**
-+ * efi_get_conf_table - Given a pointer to boot_params, locate and return the physical
-+ *                      address of EFI configuration table.
-+ *
-+ * @bp:                 pointer to boot_params
-+ * @cfg_tbl_pa:         location to store physical address of config table
-+ * @cfg_tbl_len:        location to store number of config table entries
-+ *
-+ * Return: 0 on success. On error, return params are left unchanged.
-+ */
-+int efi_get_conf_table(struct boot_params *bp, unsigned long *cfg_tbl_pa,
-+		       unsigned int *cfg_tbl_len)
-+{
-+	unsigned long sys_tbl_pa = 0;
-+	enum efi_type et;
-+	int ret;
-+
-+	if (!cfg_tbl_pa || !cfg_tbl_len)
-+		return -EINVAL;
-+
-+	sys_tbl_pa = efi_get_system_table(bp);
-+	if (!sys_tbl_pa)
-+		return -EINVAL;
-+
-+	/* Handle EFI bitness properly */
-+	et = efi_get_type(bp);
-+	if (et == EFI_TYPE_64) {
-+		efi_system_table_64_t *stbl = (efi_system_table_64_t *)sys_tbl_pa;
-+
-+		*cfg_tbl_pa = stbl->tables;
-+		*cfg_tbl_len = stbl->nr_tables;
-+	} else if (et == EFI_TYPE_32) {
-+		efi_system_table_32_t *stbl = (efi_system_table_32_t *)sys_tbl_pa;
-+
-+		*cfg_tbl_pa = stbl->tables;
-+		*cfg_tbl_len = stbl->nr_tables;
-+	} else {
-+		return -EINVAL;
-+	}
-+
-+	return 0;
-+}
-diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
-index b2acd3ac6525..8815af092a10 100644
---- a/arch/x86/boot/compressed/misc.h
-+++ b/arch/x86/boot/compressed/misc.h
-@@ -186,6 +186,8 @@ enum efi_type {
- /* helpers for early EFI config table access */
- enum efi_type efi_get_type(struct boot_params *bp);
- unsigned long efi_get_system_table(struct boot_params *bp);
-+int efi_get_conf_table(struct boot_params *bp, unsigned long *cfg_tbl_pa,
-+		       unsigned int *cfg_tbl_len);
- #else
- static inline enum efi_type efi_get_type(struct boot_params *bp)
- {
-@@ -196,6 +198,13 @@ static inline unsigned long efi_get_system_table(struct boot_params *bp)
- {
- 	return 0;
- }
-+
-+static inline int efi_get_conf_table(struct boot_params *bp,
-+				     unsigned long *cfg_tbl_pa,
-+				     unsigned int *cfg_tbl_len)
-+{
-+	return -ENOENT;
-+}
- #endif /* CONFIG_EFI */
  
- #endif /* BOOT_COMPRESSED_MISC_H */
+-unsigned long __startup_secondary_64(void)
+-{
+-	/*
+-	 * Return the SME encryption mask (if SME is active) to be used as a
+-	 * modifier for the initial pgdir entry programmed into CR3.
+-	 */
+-	return sme_get_me_mask();
+-}
+-
+ /* Wipe all early page tables except for the kernel symbol map */
+ static void __init reset_early_page_tables(void)
+ {
+diff --git a/arch/x86/kernel/head_64.S b/arch/x86/kernel/head_64.S
+index 9c2c3aff5ee4..9e84263bcb94 100644
+--- a/arch/x86/kernel/head_64.S
++++ b/arch/x86/kernel/head_64.S
+@@ -65,6 +65,22 @@ SYM_CODE_START_NOALIGN(startup_64)
+ 	leaq	(__end_init_task - FRAME_SIZE)(%rip), %rsp
+ 
+ 	leaq	_text(%rip), %rdi
++
++	/*
++	 * initial_gs points to initial fixed_percpu_data struct with storage for
++	 * the stack protector canary. Global pointer fixups are needed at this
++	 * stage, so apply them as is done in fixup_pointer(), and initialize %gs
++	 * such that the canary can be accessed at %gs:40 for subsequent C calls.
++	 */
++	movl	$MSR_GS_BASE, %ecx
++	movq	initial_gs(%rip), %rax
++	movq	$_text, %rdx
++	subq	%rdx, %rax
++	addq	%rdi, %rax
++	movq	%rax, %rdx
++	shrq	$32,  %rdx
++	wrmsr
++
+ 	pushq	%rsi
+ 	call	startup_64_setup_env
+ 	popq	%rsi
+@@ -145,9 +161,11 @@ SYM_INNER_LABEL(secondary_startup_64_no_verify, SYM_L_GLOBAL)
+ 	 * Retrieve the modifier (SME encryption mask if SME is active) to be
+ 	 * added to the initial pgdir entry that will be programmed into CR3.
+ 	 */
+-	pushq	%rsi
+-	call	__startup_secondary_64
+-	popq	%rsi
++#ifdef CONFIG_AMD_MEM_ENCRYPT
++	movq	sme_me_mask, %rax
++#else
++	xorq	%rax, %rax
++#endif
+ 
+ 	/* Form the CR3 value being sure to include the CR3 modifier */
+ 	addq	$(init_top_pgt - __START_KERNEL_map), %rax
 -- 
 2.25.1
 
