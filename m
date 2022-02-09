@@ -2,42 +2,43 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EEE04C433EF
-	for <linux-efi@archiver.kernel.org>; Wed,  9 Feb 2022 18:16:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A6F1C433FE
+	for <linux-efi@archiver.kernel.org>; Wed,  9 Feb 2022 18:16:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239232AbiBISQI (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 9 Feb 2022 13:16:08 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60632 "EHLO
+        id S239432AbiBISQJ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 9 Feb 2022 13:16:09 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32836 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239225AbiBISOw (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 9 Feb 2022 13:14:52 -0500
-Received: from NAM10-DM6-obe.outbound.protection.outlook.com (mail-dm6nam10on2046.outbound.protection.outlook.com [40.107.93.46])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C1C59C094C9C;
-        Wed,  9 Feb 2022 10:12:46 -0800 (PST)
+        with ESMTP id S239244AbiBISOx (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 9 Feb 2022 13:14:53 -0500
+Received: from NAM02-DM3-obe.outbound.protection.outlook.com (mail-dm3nam07on2049.outbound.protection.outlook.com [40.107.95.49])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2699AC094CAA;
+        Wed,  9 Feb 2022 10:12:48 -0800 (PST)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=mu2NnVN6lE6X3q5OHnECQdigGAjmiqgM9PuDV3pUPCrvjzEopNywqTb9nBdBH/VpigfD84c3tXWsQ7WQfusyXLgIwkkT07N1rlFqZlilmvtkJzho4hM0flisUk6c/YmvF60BI6RpdXnZH7Dpfk2cOlWNbKYY8t9BaoMZSZvnLuuKWu7zYinQz/IwdLN4ESH1zhXbaYzkKQcOODZ2UEkVtBHaNAP1vR09GbeRE7lYPzMBbzwyeXqgkfm+KjqZWBSvpNm2a65VkHNbsZRj3w0ZGZArBpRGzxxoxInDZFb5ZU1jWWRQiiwLHqQCY2Mnt+fT4Gny5EjxKmGdrjux/JsATg==
+ b=PlCe023BfK5oUkFGRlXGL8BbwVveJfmjqlRA13n2uomUnwSHbIkK+tOIdzoAYsLmqrIKH5glEYsuNbgR7yLKkNIqSSWfP+Rxbi/ac4z3VRx9IVza6k/WBUYy9cN17ddzVYlav3TS5TndDH4klaCCOaptQKAK1PMphqJdHRb4NazDpmaP2En7HKJkUvmqjDgXUgeecn0HdZ0PJPZ+BXT+eCiB1VNQwoGZDklABy34UtBt9qWelrgxlE0I+Kj3x/nVEt8G0Ect/a9300iJwtTh8+5/G6poy8YOgfnuq58jTpH6IcEUG80kyIPeFCnGch/liFZEgvBM6gQ1NoN6a4LQOQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=6fi9I656e4S7H65ZCsOcfeus2dxhg7jtErrinnMHud8=;
- b=Ri0Ki+vOLgubHRw+Z5oX+30GAQV9RbtSUaO7DP9vNBo5myAubO9sz3D6TclGdg03dm+80ZR9TSJs8XAWVOGZnvbBjFHPFl1rszevazJFb1IHURQb7qqiyituD7ElizYsK1cQECkWW8msLE7J/GAD23NSYf2EBw+HLCG8K082ooj3ehJssSQuMEON19V+duu1heocNTKaAtXvYO+ebv/K7+hGGofWjCnZ15e8AYO6pQ3PYsenCfwTShk6F/ucnYUvMDdkYJesP88lrFOPlqEg0M6RblrDSjnDISUviqpvPkj5x8EtQkbUthkUu22f35+F21gFgnSHberIV+oR+YplMg==
+ bh=1P1mVAqa7rfPQ11e+g/qBDxCymwI83pIEwF66yR0vMA=;
+ b=H0uQ28NPwfoe82BcIjsHAC3PSapBrCiyg1NBIz9MOP13L93W8ucjStduU2SAV5eu0qSbh7bebndYtFXo5OQm2OeP5CHJi/OQh/Ew1qf/iqTTXJvoeNqz/AHXFbPMmkG9dCmMHzSWzE3NyVcs/j5mJnXDKtnN/DcegRfxpJf167sKYvfZ9cqOifn0n5ZZEIfKQCggsXPVqO36xy9LYapPI/V2XXFnQMI2EGAxcq6b0T29o5zN9KnLusLesqve7ROn899jV7K4EeO74Icxs9nx7czH2yJl3vSyTcmh8Kb+hjT2n7f7O3ncKNa9MHZWXXvj4gU9ePPYfXwDCGAtdfx1vg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
  165.204.84.17) smtp.rcpttodomain=kernel.org smtp.mailfrom=amd.com; dmarc=pass
  (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
  dkim=none (message not signed); arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=6fi9I656e4S7H65ZCsOcfeus2dxhg7jtErrinnMHud8=;
- b=SVG7ftNm9k5JnA/gYocRTJpeWMe8XyarA++e+UDmf243eZUyydPmkMvQVlkRqwturesMphPbakzspfqXZsBs5SR9R2db9lL+/l1ya50a1dZI7OycpP4f4+nv1bLh6qFAVMFKdLZeDk2jhEaKZhJ6cgLZb9Xn6XMxkNB7TIVxjXI=
-Received: from CO2PR04CA0134.namprd04.prod.outlook.com (2603:10b6:104::12) by
- MN2PR12MB3327.namprd12.prod.outlook.com (2603:10b6:208:cd::20) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.4951.17; Wed, 9 Feb 2022 18:12:38 +0000
-Received: from CO1NAM11FT026.eop-nam11.prod.protection.outlook.com
- (2603:10b6:104:0:cafe::fc) by CO2PR04CA0134.outlook.office365.com
- (2603:10b6:104::12) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4951.17 via Frontend
- Transport; Wed, 9 Feb 2022 18:12:37 +0000
+ bh=1P1mVAqa7rfPQ11e+g/qBDxCymwI83pIEwF66yR0vMA=;
+ b=Vx0srS3TlbWl9vd4NhD/m7x9clzuSHkgQTo7fp3FCDRJDZK1TIxuAN0CLSirL+VHD+Bcf8MZ13hHV0hI/MRp+2z0u7JfVpWXCeKrBDo2r/9pMVR1PR2YqL5i8p3upyqVXSNvoCQDMH6l8FmSDcqzLgM4+Q/GgvPVM5vbYBXctSc=
+Received: from MWHPR1201CA0002.namprd12.prod.outlook.com
+ (2603:10b6:301:4a::12) by BN9PR12MB5162.namprd12.prod.outlook.com
+ (2603:10b6:408:11b::14) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4951.11; Wed, 9 Feb
+ 2022 18:12:42 +0000
+Received: from CO1NAM11FT013.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:301:4a:cafe::26) by MWHPR1201CA0002.outlook.office365.com
+ (2603:10b6:301:4a::12) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4951.12 via Frontend
+ Transport; Wed, 9 Feb 2022 18:12:42 +0000
 X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
  smtp.mailfrom=amd.com; dkim=none (message not signed)
  header.d=none;dmarc=pass action=none header.from=amd.com;
@@ -45,13 +46,13 @@ Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
  165.204.84.17 as permitted sender) receiver=protection.outlook.com;
  client-ip=165.204.84.17; helo=SATLEXMB04.amd.com;
 Received: from SATLEXMB04.amd.com (165.204.84.17) by
- CO1NAM11FT026.mail.protection.outlook.com (10.13.175.67) with Microsoft SMTP
+ CO1NAM11FT013.mail.protection.outlook.com (10.13.174.227) with Microsoft SMTP
  Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.4975.11 via Frontend Transport; Wed, 9 Feb 2022 18:12:37 +0000
+ 15.20.4975.11 via Frontend Transport; Wed, 9 Feb 2022 18:12:42 +0000
 Received: from sbrijesh-desktop.amd.com (10.180.168.240) by SATLEXMB04.amd.com
  (10.181.40.145) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.18; Wed, 9 Feb
- 2022 12:12:34 -0600
+ 2022 12:12:39 -0600
 From:   Brijesh Singh <brijesh.singh@amd.com>
 To:     <x86@kernel.org>, <linux-kernel@vger.kernel.org>,
         <kvm@vger.kernel.org>, <linux-efi@vger.kernel.org>,
@@ -81,10 +82,11 @@ CC:     Thomas Gleixner <tglx@linutronix.de>,
         "Dr . David Alan Gilbert" <dgilbert@redhat.com>,
         <brijesh.ksingh@gmail.com>, <tony.luck@intel.com>,
         <marcorr@google.com>, <sathyanarayanan.kuppuswamy@linux.intel.com>,
-        Brijesh Singh <brijesh.singh@amd.com>
-Subject: [PATCH v10 40/45] x86/sev: Provide support for SNP guest request NAEs
-Date:   Wed, 9 Feb 2022 12:10:34 -0600
-Message-ID: <20220209181039.1262882-41-brijesh.singh@amd.com>
+        Brijesh Singh <brijesh.singh@amd.com>,
+        Liam Merwick <liam.merwick@oracle.com>
+Subject: [PATCH v10 43/45] virt: sevguest: Add support to derive key
+Date:   Wed, 9 Feb 2022 12:10:37 -0600
+Message-ID: <20220209181039.1262882-44-brijesh.singh@amd.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20220209181039.1262882-1-brijesh.singh@amd.com>
 References: <20220209181039.1262882-1-brijesh.singh@amd.com>
@@ -96,184 +98,168 @@ X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB04.amd.com
  (10.181.40.145)
 X-EOPAttributedMessage: 0
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 61189f15-3ff3-4a41-6c1c-08d9ebf7c0d0
-X-MS-TrafficTypeDiagnostic: MN2PR12MB3327:EE_
-X-Microsoft-Antispam-PRVS: <MN2PR12MB332714D2025178EE28BC9057E52E9@MN2PR12MB3327.namprd12.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:6430;
+X-MS-Office365-Filtering-Correlation-Id: 64b4fbdc-7ffd-4dbc-6dc4-08d9ebf7c3d2
+X-MS-TrafficTypeDiagnostic: BN9PR12MB5162:EE_
+X-Microsoft-Antispam-PRVS: <BN9PR12MB51623706AB2A4A03CF2906C6E52E9@BN9PR12MB5162.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:2582;
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: 2Hjw+tEJyQxZkQxTWVTc0HiPUuIQFmIbweAaYsd6hYxrTwvSmWu02qpapeeAefE/KZHO3c3/U+xhjMwHkhPG42cKdAK0WBrOu2je5Xb1msaw8n0O/f85KHDqPBOSVcCosr4EEeUi9qZ08aYZyCGiSr5uAah7fsq+5/5ZuSIhrLID4hdAvoTTLeWFBb6ckF4Qes4WGVzmxvaoED0JrastlXCbwJF4nUGKLUCk/l+SXS+rqTBLnkD4AHBw0JUA6LDOXHsonquQVINKnD8iMUy5j6AHmSqDJz1hIx88uQ4H3YoUOXQyKoruw815X4IEPg1flOI1QAx0aGBKdzH/6zrTAFsJ5LzvNcoEYIY9i5h4pL9oKV5AW/Tf00f3FbyFDW7Ff22Xt3TDDWaB4VHoGVGHsYi8T3epcOlsNGK6CNh04gKWUglJhAH6Ia67oUtsI+obi2v3TWLKRSG5EbRFFZaRhOyjafwC9IaJLU0hd8oAilNqpApSGh5Q7fK3oCCT1NkWw7sjIg+y/7crPI8XvJ0fcDwPRFjf3jF9JG8T6odWb8eOpTjWu3C7f2GjwihlPY23ptmyKtOOCK/I9S93sXMGDQo3ogD+nYshLJgaJJj5gvVQ4jW5d5lHjRcB2YfiNWf1M1j/DbiintToHv9UuC23vA6ii0KQdUydN+9Gn8QJJ+DIsUCM4duUvBf8eO9ABEAsZBXipi6X1Tgk3UC4oNmTbSmejeXg5wxft6o4ntYxaEw=
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230001)(4636009)(46966006)(40470700004)(36840700001)(36860700001)(36756003)(40460700003)(16526019)(26005)(186003)(1076003)(336012)(2616005)(426003)(7696005)(508600001)(82310400004)(70206006)(83380400001)(70586007)(4326008)(47076005)(8676002)(8936002)(81166007)(7406005)(86362001)(356005)(5660300002)(54906003)(7416002)(2906002)(44832011)(110136005)(316002)(2101003)(36900700001);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: 6/OFHpJkHdum9092BHoGfxwYPHGqGyadt5dZv/YWu0gBBy2v7wExnAHVe03nj8mNiCQe02+G9hbKvTTpvqA9s/kDA9rYFLAcL2CG4SieZX3CziOQlRKXE4MS9/avVFXl3M69AyOdkQJ6mdcaYFZYVALcgvh0Gb+imsNXIGnL5c8QaECvuagkZLiBXxsCIgNx9mL/M2K6GoZd1quD9k7E2ZO9Te34fT1lyy03AQNdhDdUGogsGtcy8kmUYTTPBiYcXQk2G3ORylJDtJOiEy6Qt5nAwzd3AScVJw5+HOJIdu5qZT6ABuTsk6tc9g8W4tZeGPcgvpIvsqQbEbzuGllxyyMAitLfD3tmFZKNYPQ6gwCaXFE1zvmTN2Q+1Ygu9xJ2xtOGF5K4a3WEvLQGzkTQxtVD1OEtnNnSWJTrV94yK0+JmuStsrYKS+/5JtG5MVYRUFQPE2TmnYETXbmbVdyMflrrc5Cofh09hsapC5cHyLa96PdWD/GuQWPf4lyDC8zOxqfOpCWJccsePoaJeXMpjL9d6pSDvnwRXPwYWB8l7rqlReJ2//5xhHW/cDLWtDDcIu3ZB0ZQ6D2KepxO780rvD5//E0/GKhMq6cvfDzi7Ed4nJiRFnMPxU7AcHNqRim0SMYcKUmak0DcUFJXuC+0X03hc0iCtJILoO3dEaDLIvTno8MOacvSkMqsLdY1CvBgyzXh75AlSV/iB5anDTdeDS7ag6gWUx0ZPV1UkN3toLs=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230001)(4636009)(36840700001)(40470700004)(46966006)(110136005)(2906002)(7406005)(7416002)(5660300002)(36860700001)(54906003)(44832011)(83380400001)(47076005)(508600001)(40460700003)(16526019)(4326008)(81166007)(356005)(70206006)(70586007)(36756003)(186003)(426003)(336012)(1076003)(26005)(7696005)(316002)(2616005)(8676002)(8936002)(82310400004)(86362001)(2101003)(36900700001);DIR:OUT;SFP:1101;
 X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 09 Feb 2022 18:12:37.2095
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 09 Feb 2022 18:12:42.1620
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 61189f15-3ff3-4a41-6c1c-08d9ebf7c0d0
+X-MS-Exchange-CrossTenant-Network-Message-Id: 64b4fbdc-7ffd-4dbc-6dc4-08d9ebf7c3d2
 X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
 X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource: CO1NAM11FT026.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthSource: CO1NAM11FT013.eop-nam11.prod.protection.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR12MB3327
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BN9PR12MB5162
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Version 2 of GHCB specification provides SNP_GUEST_REQUEST and
-SNP_EXT_GUEST_REQUEST NAE that can be used by the SNP guest to communicate
-with the PSP.
+The SNP_GET_DERIVED_KEY ioctl interface can be used by the SNP guest to
+ask the firmware to provide a key derived from a root key. The derived
+key may be used by the guest for any purposes it chooses, such as a
+sealing key or communicating with the external entities.
 
-While at it, add a snp_issue_guest_request() helper that will be used by
-driver or other subsystem to issue the request to PSP.
+See SEV-SNP firmware spec for more information.
 
-See SEV-SNP firmware and GHCB spec for more details.
-
+Reviewed-by: Liam Merwick <liam.merwick@oracle.com>
 Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
 ---
- arch/x86/include/asm/sev-common.h |  3 ++
- arch/x86/include/asm/sev.h        | 14 ++++++++
- arch/x86/include/uapi/asm/svm.h   |  4 +++
- arch/x86/kernel/sev.c             | 55 +++++++++++++++++++++++++++++++
- 4 files changed, 76 insertions(+)
+ Documentation/virt/coco/sevguest.rst  | 17 ++++++++++
+ drivers/virt/coco/sevguest/sevguest.c | 45 +++++++++++++++++++++++++++
+ include/uapi/linux/sev-guest.h        | 17 ++++++++++
+ 3 files changed, 79 insertions(+)
 
-diff --git a/arch/x86/include/asm/sev-common.h b/arch/x86/include/asm/sev-common.h
-index 0759af9b1acf..b8357d6ecd47 100644
---- a/arch/x86/include/asm/sev-common.h
-+++ b/arch/x86/include/asm/sev-common.h
-@@ -128,6 +128,9 @@ struct snp_psc_desc {
- 	struct psc_entry entries[VMGEXIT_PSC_MAX_ENTRY];
- } __packed;
+diff --git a/Documentation/virt/coco/sevguest.rst b/Documentation/virt/coco/sevguest.rst
+index 34feff6d5940..ae2e76f59435 100644
+--- a/Documentation/virt/coco/sevguest.rst
++++ b/Documentation/virt/coco/sevguest.rst
+@@ -77,6 +77,23 @@ On success, the snp_report_resp.data will contains the report. The report
+ contain the format described in the SEV-SNP specification. See the SEV-SNP
+ specification for further details.
  
-+/* Guest message request error code */
-+#define SNP_GUEST_REQ_INVALID_LEN	BIT_ULL(32)
++2.2 SNP_GET_DERIVED_KEY
++-----------------------
++:Technology: sev-snp
++:Type: guest ioctl
++:Parameters (in): struct snp_derived_key_req
++:Returns (out): struct snp_derived_key_resp on success, -negative on error
 +
- #define GHCB_MSR_TERM_REQ		0x100
- #define GHCB_MSR_TERM_REASON_SET_POS	12
- #define GHCB_MSR_TERM_REASON_SET_MASK	0xf
-diff --git a/arch/x86/include/asm/sev.h b/arch/x86/include/asm/sev.h
-index 219abb4590f2..9830ee1d6ef0 100644
---- a/arch/x86/include/asm/sev.h
-+++ b/arch/x86/include/asm/sev.h
-@@ -87,6 +87,14 @@ extern bool handle_vc_boot_ghcb(struct pt_regs *regs);
- 
- #define RMPADJUST_VMSA_PAGE_BIT		BIT(16)
- 
-+/* SNP Guest message request */
-+struct snp_req_data {
-+	unsigned long req_gpa;
-+	unsigned long resp_gpa;
-+	unsigned long data_gpa;
-+	unsigned int data_npages;
-+};
++The SNP_GET_DERIVED_KEY ioctl can be used to get a key derive from a root key.
++The derived key can be used by the guest for any purpose, such as sealing keys
++or communicating with external entities.
 +
- #ifdef CONFIG_AMD_MEM_ENCRYPT
- extern struct static_key_false sev_es_enable_key;
- extern void __sev_es_ist_enter(struct pt_regs *regs);
-@@ -154,6 +162,7 @@ void snp_set_memory_private(unsigned long vaddr, unsigned int npages);
- void snp_set_wakeup_secondary_cpu(void);
- bool snp_init(struct boot_params *bp);
- void snp_abort(void);
-+int snp_issue_guest_request(u64 exit_code, struct snp_req_data *input, unsigned long *fw_err);
- #else
- static inline void sev_es_ist_enter(struct pt_regs *regs) { }
- static inline void sev_es_ist_exit(void) { }
-@@ -173,6 +182,11 @@ static inline void snp_set_memory_private(unsigned long vaddr, unsigned int npag
- static inline void snp_set_wakeup_secondary_cpu(void) { }
- static inline bool snp_init(struct boot_params *bp) { return false; }
- static inline void snp_abort(void) { }
-+static inline int snp_issue_guest_request(u64 exit_code, struct snp_req_data *input,
-+					  unsigned long *fw_err)
-+{
-+	return -ENOTTY;
-+}
- #endif
++The ioctl uses the SNP_GUEST_REQUEST (MSG_KEY_REQ) command provided by the
++SEV-SNP firmware to derive the key. See SEV-SNP specification for further details
++on the various fields passed in the key derivation request.
++
++On success, the snp_derived_key_resp.data contains the derived key value. See
++the SEV-SNP specification for further details.
  
- #endif
-diff --git a/arch/x86/include/uapi/asm/svm.h b/arch/x86/include/uapi/asm/svm.h
-index 8b4c57baec52..5b8bc2b65a5e 100644
---- a/arch/x86/include/uapi/asm/svm.h
-+++ b/arch/x86/include/uapi/asm/svm.h
-@@ -109,6 +109,8 @@
- #define SVM_VMGEXIT_SET_AP_JUMP_TABLE		0
- #define SVM_VMGEXIT_GET_AP_JUMP_TABLE		1
- #define SVM_VMGEXIT_PSC				0x80000010
-+#define SVM_VMGEXIT_GUEST_REQUEST		0x80000011
-+#define SVM_VMGEXIT_EXT_GUEST_REQUEST		0x80000012
- #define SVM_VMGEXIT_AP_CREATION			0x80000013
- #define SVM_VMGEXIT_AP_CREATE_ON_INIT		0
- #define SVM_VMGEXIT_AP_CREATE			1
-@@ -225,6 +227,8 @@
- 	{ SVM_VMGEXIT_AP_HLT_LOOP,	"vmgexit_ap_hlt_loop" }, \
- 	{ SVM_VMGEXIT_AP_JUMP_TABLE,	"vmgexit_ap_jump_table" }, \
- 	{ SVM_VMGEXIT_PSC,	"vmgexit_page_state_change" }, \
-+	{ SVM_VMGEXIT_GUEST_REQUEST,		"vmgexit_guest_request" }, \
-+	{ SVM_VMGEXIT_EXT_GUEST_REQUEST,	"vmgexit_ext_guest_request" }, \
- 	{ SVM_VMGEXIT_AP_CREATION,	"vmgexit_ap_creation" }, \
- 	{ SVM_VMGEXIT_HV_FEATURES,	"vmgexit_hypervisor_feature" }, \
- 	{ SVM_EXIT_ERR,         "invalid_guest_state" }
-diff --git a/arch/x86/kernel/sev.c b/arch/x86/kernel/sev.c
-index 7bef422b428f..cafced2237f3 100644
---- a/arch/x86/kernel/sev.c
-+++ b/arch/x86/kernel/sev.c
-@@ -2093,3 +2093,58 @@ static int __init report_cpuid_table(void)
+ Reference
+ ---------
+diff --git a/drivers/virt/coco/sevguest/sevguest.c b/drivers/virt/coco/sevguest/sevguest.c
+index 4fac82fd3e4c..2062f94fdc38 100644
+--- a/drivers/virt/coco/sevguest/sevguest.c
++++ b/drivers/virt/coco/sevguest/sevguest.c
+@@ -389,6 +389,48 @@ static int get_report(struct snp_guest_dev *snp_dev, struct snp_guest_request_io
+ 	return rc;
  }
  
- arch_initcall(report_cpuid_table);
-+
-+int snp_issue_guest_request(u64 exit_code, struct snp_req_data *input, unsigned long *fw_err)
++static int get_derived_key(struct snp_guest_dev *snp_dev, struct snp_guest_request_ioctl *arg)
 +{
-+	struct ghcb_state state;
-+	struct es_em_ctxt ctxt;
-+	unsigned long flags;
-+	struct ghcb *ghcb;
-+	int ret;
++	struct snp_guest_crypto *crypto = snp_dev->crypto;
++	struct snp_derived_key_resp resp = {0};
++	struct snp_derived_key_req req = {0};
++	int rc, resp_len;
++	/* Response data is 64 bytes and max authsize for GCM is 16 bytes. */
++	u8 buf[64 + 16];
 +
-+	if (!cc_platform_has(CC_ATTR_GUEST_SEV_SNP))
-+		return -ENODEV;
++	lockdep_assert_held(&snp_cmd_mutex);
++
++	if (!arg->req_data || !arg->resp_data)
++		return -EINVAL;
 +
 +	/*
-+	 * __sev_get_ghcb() needs to run with IRQs disabled because it is using
-+	 * a per-CPU GHCB.
++	 * The intermediate response buffer is used while decrypting the
++	 * response payload. Make sure that it has enough space to cover the
++	 * authtag.
 +	 */
-+	local_irq_save(flags);
++	resp_len = sizeof(resp.data) + crypto->a_len;
++	if (sizeof(buf) < resp_len)
++		return -ENOMEM;
 +
-+	ghcb = __sev_get_ghcb(&state);
-+	if (!ghcb) {
-+		ret = -EIO;
-+		goto e_restore_irq;
-+	}
++	if (copy_from_user(&req, (void __user *)arg->req_data, sizeof(req)))
++		return -EFAULT;
 +
-+	vc_ghcb_invalidate(ghcb);
++	rc = handle_guest_request(snp_dev, SVM_VMGEXIT_GUEST_REQUEST, arg->msg_version,
++				  SNP_MSG_KEY_REQ, &req, sizeof(req), buf, resp_len,
++				  &arg->fw_err);
++	if (rc)
++		return rc;
 +
-+	if (exit_code == SVM_VMGEXIT_EXT_GUEST_REQUEST) {
-+		ghcb_set_rax(ghcb, input->data_gpa);
-+		ghcb_set_rbx(ghcb, input->data_npages);
-+	}
++	memcpy(resp.data, buf, sizeof(resp.data));
++	if (copy_to_user((void __user *)arg->resp_data, &resp, sizeof(resp)))
++		rc = -EFAULT;
 +
-+	ret = sev_es_ghcb_hv_call(ghcb, true, &ctxt, exit_code, input->req_gpa, input->resp_gpa);
-+	if (ret)
-+		goto e_put;
-+
-+	if (ghcb->save.sw_exit_info_2) {
-+		/* Number of expected pages are returned in RBX */
-+		if (exit_code == SVM_VMGEXIT_EXT_GUEST_REQUEST &&
-+		    ghcb->save.sw_exit_info_2 == SNP_GUEST_REQ_INVALID_LEN)
-+			input->data_npages = ghcb_get_rbx(ghcb);
-+
-+		if (fw_err)
-+			*fw_err = ghcb->save.sw_exit_info_2;
-+
-+		ret = -EIO;
-+	}
-+
-+e_put:
-+	__sev_put_ghcb(&state);
-+e_restore_irq:
-+	local_irq_restore(flags);
-+
-+	return ret;
++	/* The response buffer contains the sensitive data, explicitly clear it. */
++	memzero_explicit(buf, sizeof(buf));
++	memzero_explicit(&resp, sizeof(resp));
++	return rc;
 +}
-+EXPORT_SYMBOL_GPL(snp_issue_guest_request);
++
+ static long snp_guest_ioctl(struct file *file, unsigned int ioctl, unsigned long arg)
+ {
+ 	struct snp_guest_dev *snp_dev = to_snp_dev(file);
+@@ -418,6 +460,9 @@ static long snp_guest_ioctl(struct file *file, unsigned int ioctl, unsigned long
+ 	case SNP_GET_REPORT:
+ 		ret = get_report(snp_dev, &input);
+ 		break;
++	case SNP_GET_DERIVED_KEY:
++		ret = get_derived_key(snp_dev, &input);
++		break;
+ 	default:
+ 		break;
+ 	}
+diff --git a/include/uapi/linux/sev-guest.h b/include/uapi/linux/sev-guest.h
+index 38f11d723c68..598367f12064 100644
+--- a/include/uapi/linux/sev-guest.h
++++ b/include/uapi/linux/sev-guest.h
+@@ -30,6 +30,20 @@ struct snp_report_resp {
+ 	__u8 data[4000];
+ };
+ 
++struct snp_derived_key_req {
++	__u32 root_key_select;
++	__u32 rsvd;
++	__u64 guest_field_select;
++	__u32 vmpl;
++	__u32 guest_svn;
++	__u64 tcb_version;
++};
++
++struct snp_derived_key_resp {
++	/* response data, see SEV-SNP spec for the format */
++	__u8 data[64];
++};
++
+ struct snp_guest_request_ioctl {
+ 	/* message version number (must be non-zero) */
+ 	__u8 msg_version;
+@@ -47,4 +61,7 @@ struct snp_guest_request_ioctl {
+ /* Get SNP attestation report */
+ #define SNP_GET_REPORT _IOWR(SNP_GUEST_REQ_IOC_TYPE, 0x0, struct snp_guest_request_ioctl)
+ 
++/* Get a derived key from the root */
++#define SNP_GET_DERIVED_KEY _IOWR(SNP_GUEST_REQ_IOC_TYPE, 0x1, struct snp_guest_request_ioctl)
++
+ #endif /* __UAPI_LINUX_SEV_GUEST_H_ */
 -- 
 2.25.1
 
