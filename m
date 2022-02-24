@@ -2,43 +2,42 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C5550C433FE
-	for <linux-efi@archiver.kernel.org>; Thu, 24 Feb 2022 16:58:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A19BFC4332F
+	for <linux-efi@archiver.kernel.org>; Thu, 24 Feb 2022 16:58:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231166AbiBXQ6n (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 24 Feb 2022 11:58:43 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50500 "EHLO
+        id S231407AbiBXQ7E (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 24 Feb 2022 11:59:04 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50704 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231127AbiBXQ6g (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 24 Feb 2022 11:58:36 -0500
-Received: from NAM02-BN1-obe.outbound.protection.outlook.com (mail-bn1nam07on2059.outbound.protection.outlook.com [40.107.212.59])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AC5C45D1B6;
-        Thu, 24 Feb 2022 08:58:01 -0800 (PST)
+        with ESMTP id S231268AbiBXQ6i (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 24 Feb 2022 11:58:38 -0500
+Received: from NAM11-CO1-obe.outbound.protection.outlook.com (mail-co1nam11on2073.outbound.protection.outlook.com [40.107.220.73])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 63DC95F4C5;
+        Thu, 24 Feb 2022 08:58:06 -0800 (PST)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=coDDjmD3d/fW90MfmQYlW0VPpMN4TbSgVNYlEX4LuK3p3pBSy8TUT4gogijtDVrDWJt0W8qOxRmA47YsgJ0h6bhfX69yuZdY5reOUqHhoJnE+1FRh0RdcdOwnxcKaGC47Z/NJ+Ic4dRoGrb/b7zVLoAn6v04O59JMIxRxoOTcZklhyw7KWZAuXiQ5nTovdsbu9NJ95rGTpkGtQaiSXZFVey+wHW4Pofo4p00SZ6rEmHZ2w6Vv3H9gnPWe1Ik5xvGlF17wEhnc9sIrYA2SmAGQPjfVgwZ8ppHH+N5241x8OHGeVdvfJt/ur3Zk2tPgiuyLujE2l6hmnerkU7KRD5KUg==
+ b=BZq5Co6L76a5oJIh2IrKzwbIVdpQrRC3GdkmK59gKeNvp+F0ba4N3ZF5cGOFXJuOhO0xVfJd8MOFulyb81Qp+OBboWxh3b+Iv1bsLGqG/BwrKr2DDt0YYaXfw4IWx9rZtB75t9WQ1VywNxNT6t75ntc+vF4VEJ9YQONx1aIN65/ebZGkSy1ziJDw7vm3l99E0kL3ajUTSjohBKsZwpQoWp/gRBeQjOBMfee9R1fAPTaw+SiPhpY+8pUX52D+Nffo/hz0uuEMsBu/luolhsLa1+91M/RXo39xTfYbAT7V/d7+X0z8075hb+gACITWp+swXaBbUBwWguNNmZF66ZJVtA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=Xpty5kmwM2i/MklGipgcFQvhXKgpuuRpXZ2Y2DaVX5w=;
- b=fPWzaiMh86sc14sV7kAsbKwb9V0fDnM64yrAYdhUAW+GLXULbQOvQX09DDW5b0UxQlUgpZjvWIRQCnHPqk6NRO48i5v8iVKIfno1jr9B1BSAhQ67eXAcRbcp0FTPyntZoORtId8moJAaaD7pozGub06L/BJ6JzxKY1AEYikQBnLZiYWC0ZroGOkbtX+GF7LCdsWMc4lerpEK/9hjNGyckOMydVlmpx5ohBDdvwuray22Uykpp38afuCcv5f+Hm4bLadh7zf0ISIlsbEACj6b0lJXmcMd61C1YLZvwAsO/dKAens3tOJ06R9iBbwCqhvWYLpsRCUKfIVQ1tYqjfgspg==
+ bh=d2B8/eKcdZO8Q6zMcKvymJSknbhAEnFEcNq7aU86tXY=;
+ b=JfbwcdGu5AGldLP/KqEKmFGxA7+KF2rKzeOd74EdU3k4LEf2zKgX+RItU+n1p6IAiJqD1c6bVAiXNupQvqIL+3TpossT61mGI9yrrrn6D0LwKFC+YjvvvoNYLV0dAsX/iJSxFHgs4mMP9BulpSLqsNNoC6+3Zq6juLfV83RrPR21F4Vt4pewnoC06bgaizB6XXk1kBzgcTY/bdn3xu/mfCWSk2+Ne59eB4H9ydndEN+7C+cstNA1BCEFS/ZmLAcXoRCDB1ZzkyEzsr8xsY1NVQfru+t1oBqU9PH8T2eJtDtz9lwPxrfSyuV2eBC+Osr0AZd4hjfAGCL5bO+91kqFBw==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
  165.204.84.17) smtp.rcpttodomain=kernel.org smtp.mailfrom=amd.com; dmarc=pass
  (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
  dkim=none (message not signed); arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=Xpty5kmwM2i/MklGipgcFQvhXKgpuuRpXZ2Y2DaVX5w=;
- b=Eqq9J6kVKndakL1+DjGi4wZaWjXOz8VCwQNyuZGHoErJIGgkwR8kKKELcs3OrbCSuqq6FUQPmuUjxOwBK21N9VE0ULhIJWjnwokrVydarCHnYIZhG8PS62fQoVj1k7bBsyorS0uqC9wbi9xzA1ZXIWAH0h5ahQF7KM325WaXH2Y=
-Received: from DM5PR22CA0015.namprd22.prod.outlook.com (2603:10b6:3:101::25)
- by DM6PR12MB4880.namprd12.prod.outlook.com (2603:10b6:5:1bc::10) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5017.23; Thu, 24 Feb
- 2022 16:57:59 +0000
-Received: from DM6NAM11FT030.eop-nam11.prod.protection.outlook.com
- (2603:10b6:3:101:cafe::d0) by DM5PR22CA0015.outlook.office365.com
- (2603:10b6:3:101::25) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5017.24 via Frontend
- Transport; Thu, 24 Feb 2022 16:57:59 +0000
+ bh=d2B8/eKcdZO8Q6zMcKvymJSknbhAEnFEcNq7aU86tXY=;
+ b=Q/e0ejWvnkItik0T92pyRtf1x0/DFuszCtIk0LRnietTjyJNwO1hpUshx2zcyyJrPdTDODXueAOVxmiT7hMFNgeh3GGAMCSwFz3aHlxChsKqc9lN7SDJGF+UoLi90vpbjMW6IEzEsVcC0gl9ZhsereBS6pmRegynIkjhU+cDTHs=
+Received: from DM5PR05CA0001.namprd05.prod.outlook.com (2603:10b6:3:d4::11) by
+ SN6PR12MB5693.namprd12.prod.outlook.com (2603:10b6:805:ed::10) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.5017.22; Thu, 24 Feb 2022 16:58:04 +0000
+Received: from DM6NAM11FT032.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:3:d4:cafe::e7) by DM5PR05CA0001.outlook.office365.com
+ (2603:10b6:3:d4::11) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5038.9 via Frontend
+ Transport; Thu, 24 Feb 2022 16:58:04 +0000
 X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
  smtp.mailfrom=amd.com; dkim=none (message not signed)
  header.d=none;dmarc=pass action=none header.from=amd.com;
@@ -46,13 +45,13 @@ Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
  165.204.84.17 as permitted sender) receiver=protection.outlook.com;
  client-ip=165.204.84.17; helo=SATLEXMB04.amd.com;
 Received: from SATLEXMB04.amd.com (165.204.84.17) by
- DM6NAM11FT030.mail.protection.outlook.com (10.13.172.146) with Microsoft SMTP
+ DM6NAM11FT032.mail.protection.outlook.com (10.13.173.93) with Microsoft SMTP
  Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.5017.22 via Frontend Transport; Thu, 24 Feb 2022 16:57:59 +0000
+ 15.20.5017.22 via Frontend Transport; Thu, 24 Feb 2022 16:58:03 +0000
 Received: from sbrijesh-desktop.amd.com (10.180.168.240) by SATLEXMB04.amd.com
  (10.181.40.145) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.18; Thu, 24 Feb
- 2022 10:57:56 -0600
+ 2022 10:58:00 -0600
 From:   Brijesh Singh <brijesh.singh@amd.com>
 To:     <x86@kernel.org>, <linux-kernel@vger.kernel.org>,
         <kvm@vger.kernel.org>, <linux-efi@vger.kernel.org>,
@@ -81,12 +80,10 @@ CC:     Thomas Gleixner <tglx@linutronix.de>,
         Andi Kleen <ak@linux.intel.com>,
         "Dr . David Alan Gilbert" <dgilbert@redhat.com>,
         <brijesh.ksingh@gmail.com>, <tony.luck@intel.com>,
-        <marcorr@google.com>, <sathyanarayanan.kuppuswamy@linux.intel.com>,
-        Venu Busireddy <venu.busireddy@oracle.com>,
-        Brijesh Singh <brijesh.singh@amd.com>
-Subject: [PATCH v11 03/45] KVM: SVM: Create a separate mapping for the GHCB save area
-Date:   Thu, 24 Feb 2022 10:55:43 -0600
-Message-ID: <20220224165625.2175020-4-brijesh.singh@amd.com>
+        <marcorr@google.com>, <sathyanarayanan.kuppuswamy@linux.intel.com>
+Subject: [PATCH v11 05/45] x86/boot: Introduce helpers for MSR reads/writes
+Date:   Thu, 24 Feb 2022 10:55:45 -0600
+Message-ID: <20220224165625.2175020-6-brijesh.singh@amd.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20220224165625.2175020-1-brijesh.singh@amd.com>
 References: <20220224165625.2175020-1-brijesh.singh@amd.com>
@@ -98,130 +95,129 @@ X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB04.amd.com
  (10.181.40.145)
 X-EOPAttributedMessage: 0
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 424ed86a-5570-4496-e4a7-08d9f7b6cff3
-X-MS-TrafficTypeDiagnostic: DM6PR12MB4880:EE_
-X-Microsoft-Antispam-PRVS: <DM6PR12MB4880AA42CA1CF762C6E24B63E53D9@DM6PR12MB4880.namprd12.prod.outlook.com>
+X-MS-Office365-Filtering-Correlation-Id: d23db98a-ca4a-41ce-1962-08d9f7b6d284
+X-MS-TrafficTypeDiagnostic: SN6PR12MB5693:EE_
+X-Microsoft-Antispam-PRVS: <SN6PR12MB569352089FCA3D5378AD31B3E53D9@SN6PR12MB5693.namprd12.prod.outlook.com>
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: +MgQeim6mu3xOwYa4f5u0I8ZcOXcL/vE1gdrrlcey4qb9O+22ji4RviUkdYKHSP7gh94m/xIbQZQNQgWmJ/watIi0CV7AhaopOtxsvKJD6LX4QbPQrB9C5xfeXTQX0mrMEjjCzYAgNlRJ+b46RRMLHBmQE37hPXlm2xCSB3ErgDNx4OPN5s+cPeOiLj8YF09+nJvg2ZjVGpE697TBtlKScgO3M+EP6P0fBIBDbESMOf+2S1XvTimqSHWWUfTlrVMOU2cIW4UWr0GYaQcdk+8GmxKyeitReSsOas2ABNpTthPzQiBMYFlVcbljiJjRD45by57Frg6xUb+VP+ZolQsatW5ckAJG1PudFTxGDuRVM8T3y5C+CdQ+B45fYYfd1bOCJdc56ETPIpO8Uep2nChpPQXIXI8r4Z+EdKNVqYFtVt8rDC2NSmERD6lA5b3KXD1OUmbuc6pt1SPnbiOhefA/2Sk6BkM0wtaMQ5v0/957hQAJhKmEF0jX1itFh+iyPoVGIjS+mn9I/chES/kkZP2OT1r3TIvr9DB5cLBuKVq6f36Z/A6JB9yiAs1yp1aLW/sGW4iYB/8vhahuh/KEvgRsYmbyMj2p0LgAWKFU/QiFwuPGHXAOSgXlX40RYR1p2M43c0trkdvkjx1pTaR+zmXSdaYJ0S6SbIVZLnBNIdgPJiTwOXMLUvW21CjzK0YkXwk+d3HIyKJ65Hxb9WMwoNnl+KvY0kfgh0VQ/FOAFAaztQ=
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230001)(4636009)(40470700004)(46966006)(36840700001)(47076005)(336012)(426003)(36860700001)(82310400004)(83380400001)(44832011)(8936002)(110136005)(86362001)(54906003)(7406005)(316002)(5660300002)(1076003)(6666004)(7416002)(508600001)(7696005)(36756003)(4326008)(356005)(16526019)(2616005)(81166007)(186003)(26005)(70586007)(70206006)(2906002)(8676002)(40460700003)(36900700001)(2101003);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: FVsr81qB1e1Hky4+mjt7VodKw1qU8UoQJZ/16mbeD3nETwYZtRVguT1AfQ+cEk3WbOQuXKTLXHeZjw0bYBlKn8HtukFVzRl4U4ZPbP0nWAzLQQuWZHUJUisakwCZKxJPDXSs6gZCjR9Dv/EqwbChegAj+jIIQj7jw625rc3YdT9rjDMMF+uIw5qu21p8M0cnN0A4BtNJj12dk/P5GfNW+M/XT86I+9hjUcxVCXFAbhToH2XOnRJXgPLEC/kDM5682qT2h5gZOSOXAx0V7b+SWGzGB0EDB9/vrd/wFhPELDDFFXw9N0+oG55SIAQ/F5kD95OVsOUojX8EgWBdD96vSnDT9OmbnSf5OClACOVG8PjTbrHpwdSl8XjqjGPPDjEI2bBYLtdFjM3sBhoxt7SmheII/4fG7Z0fBBoSw+5AGgDoBgqQB0D7jWWSsM4KWLSWgyhEZhdM3/A2ABAh/7EBA+pts6HpanBELhembLG9YZOi3C+a9V/j5FFCoWzj0qShg16g0haIMUoqx7G5FTja+0v0EjB3RQvHgsM4lVwQcxodzTmSG1Xvcj36DxoSuVrCVH5EEMmYuByIgQjVUFuTl9VT0CC0cHS7qh3/m4EilWzFFhiFcdpHVdJVfNZQ6/DtiWtNaeNoOfa587fUjHVd3PZm/kEGORTL9soiXfLNvaV9nObVxZyfa6tt403zN/3n8bDlKsthBr7bPlHbnyqCwy24HnHATeljAMO7M2Kg4f4=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230001)(4636009)(46966006)(40470700004)(36840700001)(508600001)(82310400004)(83380400001)(6666004)(7696005)(70586007)(70206006)(4326008)(47076005)(2906002)(40460700003)(2616005)(1076003)(426003)(36756003)(16526019)(26005)(336012)(186003)(356005)(81166007)(86362001)(36860700001)(8936002)(7416002)(7406005)(44832011)(5660300002)(8676002)(110136005)(316002)(54906003)(36900700001)(2101003);DIR:OUT;SFP:1101;
 X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Feb 2022 16:57:59.3518
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Feb 2022 16:58:03.6523
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 424ed86a-5570-4496-e4a7-08d9f7b6cff3
+X-MS-Exchange-CrossTenant-Network-Message-Id: d23db98a-ca4a-41ce-1962-08d9f7b6d284
 X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
 X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT030.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT032.eop-nam11.prod.protection.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR12MB4880
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SN6PR12MB5693
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Tom Lendacky <thomas.lendacky@amd.com>
+From: Michael Roth <michael.roth@amd.com>
 
-The initial implementation of the GHCB spec was based on trying to keep
-the register state offsets the same relative to the VM save area. However,
-the save area for SEV-ES has changed within the hardware causing the
-relation between the SEV-ES save area to change relative to the GHCB save
-area.
+The current set of helpers used throughout the run-time kernel have
+dependencies on code/facilities outside of the boot kernel, so there
+are a number of call-sites throughout the boot kernel where inline
+assembly is used instead. More will be added with subsequent patches
+that add support for SEV-SNP, so take the opportunity to provide a basic
+set of helpers that can be used by the boot kernel to reduce reliance on
+inline assembly.
 
-This is the second step in defining the multiple save areas to keep them
-separate and ensuring proper operation amongst the different types of
-guests. Create a GHCB save area that matches the GHCB specification.
+Use boot_* prefix so that it's clear these are helpers specific to the
+boot kernel to avoid any confusion with the various other MSR read/write
+helpers.
 
-Reviewed-by: Venu Busireddy <venu.busireddy@oracle.com>
-Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
-Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
+Suggested-by: Borislav Petkov <bp@alien8.de>
+Signed-off-by: Michael Roth <michael.roth@amd.com>
 ---
- arch/x86/include/asm/svm.h | 48 +++++++++++++++++++++++++++++++++++---
- 1 file changed, 45 insertions(+), 3 deletions(-)
+ arch/x86/boot/msr.h               | 28 ++++++++++++++++++++++++++++
+ arch/x86/include/asm/msr.h        | 11 +----------
+ arch/x86/include/asm/shared/msr.h | 15 +++++++++++++++
+ 3 files changed, 44 insertions(+), 10 deletions(-)
+ create mode 100644 arch/x86/boot/msr.h
+ create mode 100644 arch/x86/include/asm/shared/msr.h
 
-diff --git a/arch/x86/include/asm/svm.h b/arch/x86/include/asm/svm.h
-index e748aa33c355..eae5c7ab9c6c 100644
---- a/arch/x86/include/asm/svm.h
-+++ b/arch/x86/include/asm/svm.h
-@@ -390,11 +390,51 @@ struct sev_es_save_area {
- 	u64 x87_state_gpa;
- } __packed;
- 
-+struct ghcb_save_area {
-+	u8 reserved_1[203];
-+	u8 cpl;
-+	u8 reserved_2[116];
-+	u64 xss;
-+	u8 reserved_3[24];
-+	u64 dr7;
-+	u8 reserved_4[16];
-+	u64 rip;
-+	u8 reserved_5[88];
-+	u64 rsp;
-+	u8 reserved_6[24];
-+	u64 rax;
-+	u8 reserved_7[264];
-+	u64 rcx;
-+	u64 rdx;
-+	u64 rbx;
-+	u8 reserved_8[8];
-+	u64 rbp;
-+	u64 rsi;
-+	u64 rdi;
-+	u64 r8;
-+	u64 r9;
-+	u64 r10;
-+	u64 r11;
-+	u64 r12;
-+	u64 r13;
-+	u64 r14;
-+	u64 r15;
-+	u8 reserved_9[16];
-+	u64 sw_exit_code;
-+	u64 sw_exit_info_1;
-+	u64 sw_exit_info_2;
-+	u64 sw_scratch;
-+	u8 reserved_10[56];
-+	u64 xcr0;
-+	u8 valid_bitmap[16];
-+	u64 x87_state_gpa;
-+} __packed;
+diff --git a/arch/x86/boot/msr.h b/arch/x86/boot/msr.h
+new file mode 100644
+index 000000000000..b6bb2161da27
+--- /dev/null
++++ b/arch/x86/boot/msr.h
+@@ -0,0 +1,28 @@
++/* SPDX-License-Identifier: GPL-2.0-only */
++/*
++ * Helpers/definitions related to MSR access.
++ */
 +
- #define GHCB_SHARED_BUF_SIZE	2032
++#ifndef BOOT_MSR_H
++#define BOOT_MSR_H
++
++#include <asm/shared/msr.h>
++
++/*
++ * The kernel proper already defines rdmsr()/wrmsr(), but they are not for the
++ * boot kernel since they rely tracepoint/exception handling infrastructure
++ * that's not available here, hence these boot_{rd,wr}msr helpers which serve
++ * the singular purpose of wrapping the RDMSR/WRMSR instructions to reduce the
++ * need for inline assembly calls throughout the boot kernel code.
++ */
++static inline void boot_rdmsr(unsigned int msr, struct msr *m)
++{
++	asm volatile("rdmsr" : "=a" (m->l), "=d" (m->h) : "c" (msr));
++}
++
++static inline void boot_wrmsr(unsigned int msr, const struct msr *m)
++{
++	asm volatile("wrmsr" : : "c" (msr), "a"(m->l), "d" (m->h) : "memory");
++}
++
++#endif /* BOOT_MSR_H */
+diff --git a/arch/x86/include/asm/msr.h b/arch/x86/include/asm/msr.h
+index d42e6c6b47b1..65ec1965cd28 100644
+--- a/arch/x86/include/asm/msr.h
++++ b/arch/x86/include/asm/msr.h
+@@ -10,16 +10,7 @@
+ #include <asm/errno.h>
+ #include <asm/cpumask.h>
+ #include <uapi/asm/msr.h>
+-
+-struct msr {
+-	union {
+-		struct {
+-			u32 l;
+-			u32 h;
+-		};
+-		u64 q;
+-	};
+-};
++#include <asm/shared/msr.h>
  
- struct ghcb {
--	struct sev_es_save_area save;
--	u8 reserved_save[2048 - sizeof(struct sev_es_save_area)];
-+	struct ghcb_save_area save;
-+	u8 reserved_save[2048 - sizeof(struct ghcb_save_area)];
- 
- 	u8 shared_buffer[GHCB_SHARED_BUF_SIZE];
- 
-@@ -405,6 +445,7 @@ struct ghcb {
- 
- 
- #define EXPECTED_VMCB_SAVE_AREA_SIZE		740
-+#define EXPECTED_GHCB_SAVE_AREA_SIZE		1032
- #define EXPECTED_SEV_ES_SAVE_AREA_SIZE		1032
- #define EXPECTED_VMCB_CONTROL_AREA_SIZE		1024
- #define EXPECTED_GHCB_SIZE			PAGE_SIZE
-@@ -412,6 +453,7 @@ struct ghcb {
- static inline void __unused_size_checks(void)
- {
- 	BUILD_BUG_ON(sizeof(struct vmcb_save_area)	!= EXPECTED_VMCB_SAVE_AREA_SIZE);
-+	BUILD_BUG_ON(sizeof(struct ghcb_save_area)	!= EXPECTED_GHCB_SAVE_AREA_SIZE);
- 	BUILD_BUG_ON(sizeof(struct sev_es_save_area)	!= EXPECTED_SEV_ES_SAVE_AREA_SIZE);
- 	BUILD_BUG_ON(sizeof(struct vmcb_control_area)	!= EXPECTED_VMCB_CONTROL_AREA_SIZE);
- 	BUILD_BUG_ON(sizeof(struct ghcb)		!= EXPECTED_GHCB_SIZE);
-@@ -482,7 +524,7 @@ struct vmcb {
- /* GHCB Accessor functions */
- 
- #define GHCB_BITMAP_IDX(field)							\
--	(offsetof(struct sev_es_save_area, field) / sizeof(u64))
-+	(offsetof(struct ghcb_save_area, field) / sizeof(u64))
- 
- #define DEFINE_GHCB_ACCESSORS(field)						\
- 	static inline bool ghcb_##field##_is_valid(const struct ghcb *ghcb)	\
+ struct msr_info {
+ 	u32 msr_no;
+diff --git a/arch/x86/include/asm/shared/msr.h b/arch/x86/include/asm/shared/msr.h
+new file mode 100644
+index 000000000000..1e6ec10b3a15
+--- /dev/null
++++ b/arch/x86/include/asm/shared/msr.h
+@@ -0,0 +1,15 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++#ifndef _ASM_X86_SHARED_MSR_H
++#define _ASM_X86_SHARED_MSR_H
++
++struct msr {
++	union {
++		struct {
++			u32 l;
++			u32 h;
++		};
++		u64 q;
++	};
++};
++
++#endif /* _ASM_X86_SHARED_MSR_H */
 -- 
 2.25.1
 
