@@ -2,70 +2,57 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73AF0C433F5
-	for <linux-efi@archiver.kernel.org>; Mon, 28 Feb 2022 11:44:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A1B24C433FE
+	for <linux-efi@archiver.kernel.org>; Mon, 28 Feb 2022 12:49:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231493AbiB1LpB (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 28 Feb 2022 06:45:01 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50770 "EHLO
+        id S232589AbiB1MuN (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 28 Feb 2022 07:50:13 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53276 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235976AbiB1Los (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 28 Feb 2022 06:44:48 -0500
-Received: from mx0a-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7E46457150;
-        Mon, 28 Feb 2022 03:43:58 -0800 (PST)
-Received: from pps.filterd (m0098416.ppops.net [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 21SAuqg8014857;
-        Mon, 28 Feb 2022 11:43:02 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
- : date : message-id : in-reply-to : references : mime-version :
- content-transfer-encoding; s=pp1;
- bh=MsEQHlRc5s0kB5gw3dEIoCSQBugOphAjhjTsJWExk10=;
- b=Q19JM8lNn03cejT5FXbtxsH0aGatqPs84nQP25Vuh8oV69sUEtEtE79+4vmWrLOb0TDg
- h/nqtsWGshYrB0uPoYrvlwGeSQYNNfL5Nl/ZIwcvlQdH2MxqFm6KuvY5YAGDiVGTVCL2
- NFAOnZ8tt9CsVpzSaIGXPgpq5JT3h7lsTo+USmRMXelL43VvTeetj8l2imZNKX9UbkNS
- QuR4n5/4RmKGXUO3NpwfAUVcGGCrVMOfBVJ8I5RHAqM7gTgRZnGdyoJnCbbRiNNrSKWX
- j3CK6jKX6M4MhhinDw7Dpj2eOQyXmGaL+dja0VCyZ5The9xBsct1T54rvh2l6ZO85O37 Yg== 
-Received: from pps.reinject (localhost [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com with ESMTP id 3egw3912nv-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 28 Feb 2022 11:43:02 +0000
-Received: from m0098416.ppops.net (m0098416.ppops.net [127.0.0.1])
-        by pps.reinject (8.16.0.43/8.16.0.43) with SMTP id 21SAwIYj024689;
-        Mon, 28 Feb 2022 11:43:01 GMT
-Received: from ppma02wdc.us.ibm.com (aa.5b.37a9.ip4.static.sl-reverse.com [169.55.91.170])
-        by mx0b-001b2d01.pphosted.com with ESMTP id 3egw3912n9-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 28 Feb 2022 11:43:01 +0000
-Received: from pps.filterd (ppma02wdc.us.ibm.com [127.0.0.1])
-        by ppma02wdc.us.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 21SBXZPk013415;
-        Mon, 28 Feb 2022 11:43:00 GMT
-Received: from b01cxnp22035.gho.pok.ibm.com (b01cxnp22035.gho.pok.ibm.com [9.57.198.25])
-        by ppma02wdc.us.ibm.com with ESMTP id 3efbu9kmsc-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 28 Feb 2022 11:43:00 +0000
-Received: from b01ledav004.gho.pok.ibm.com (b01ledav004.gho.pok.ibm.com [9.57.199.109])
-        by b01cxnp22035.gho.pok.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 21SBgxWL50397680
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 28 Feb 2022 11:42:59 GMT
-Received: from b01ledav004.gho.pok.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id E670F112061;
-        Mon, 28 Feb 2022 11:42:58 +0000 (GMT)
-Received: from b01ledav004.gho.pok.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 8F68811206D;
-        Mon, 28 Feb 2022 11:42:58 +0000 (GMT)
-Received: from amdrome3.watson.ibm.com (unknown [9.2.130.16])
-        by b01ledav004.gho.pok.ibm.com (Postfix) with ESMTP;
-        Mon, 28 Feb 2022 11:42:58 +0000 (GMT)
-From:   Dov Murik <dovmurik@linux.ibm.com>
-To:     linux-efi@vger.kernel.org
-Cc:     Dov Murik <dovmurik@linux.ibm.com>,
+        with ESMTP id S231563AbiB1MuM (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 28 Feb 2022 07:50:12 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0863D54FAD;
+        Mon, 28 Feb 2022 04:49:34 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 39CA2B81120;
+        Mon, 28 Feb 2022 12:49:32 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B6F7CC340EE;
+        Mon, 28 Feb 2022 12:49:30 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1646052570;
+        bh=YNCjDWYFLy8kk5Lc6yfDNb4ICpsaXUgkOhGfWYb2mkg=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=Gc2oLdRhB79LqW2fWFa177bVCgVNvknFSspQ4Nx5BBRQEOH9JGJYOzWeIdtF4QlFa
+         Vm6UwbbeLBmvY6Iq2ESWhfaFgokcE1digjq997sEXhVM8APqrUEJvlJLp74Pvk2mC9
+         yRNCBOSSjomfbtGeQKNyOnmqvTLha8I0x+wfPOqaqZ59Vjpa9evMvPCHvgY/DxynWG
+         py3f1VJxEJwBxXBGz72y7KAMH2QQlJ7pCSCLQBPOevRDSXsr0bSWZpICpprumq0DyN
+         qc9B98cda5m7nLqFZBXESQTvAejiVjGQ+uQ2nokVTcxtk4fkfKfF16U43qXoqK6Aoo
+         G+FEWlvZxX7Vw==
+Received: by mail-yw1-f180.google.com with SMTP id 00721157ae682-2d07c4a0d06so106264137b3.13;
+        Mon, 28 Feb 2022 04:49:30 -0800 (PST)
+X-Gm-Message-State: AOAM530pRLkjn3F9zF8Me5GJnEZPnwIjsZ6crvXmh3vjAHvygJcnU8iL
+        l6ZX4Ahb4Tu+jgrAPxZUXCe13I7yS1aoIahGOEY=
+X-Google-Smtp-Source: ABdhPJwXH3KFl4x5Rc0RFSsToohrsPYhCK8XUjA94rh6d7jiY3THMitYZZ/tsMG+hNHW5uuID/0rygMJxULOVjBiqpw=
+X-Received: by 2002:a81:854:0:b0:2db:255b:dd6 with SMTP id 81-20020a810854000000b002db255b0dd6mr13412601ywi.140.1646052569778;
+ Mon, 28 Feb 2022 04:49:29 -0800 (PST)
+MIME-Version: 1.0
+References: <20220228114254.1099945-1-dovmurik@linux.ibm.com> <20220228114254.1099945-4-dovmurik@linux.ibm.com>
+In-Reply-To: <20220228114254.1099945-4-dovmurik@linux.ibm.com>
+From:   Ard Biesheuvel <ardb@kernel.org>
+Date:   Mon, 28 Feb 2022 13:49:19 +0100
+X-Gmail-Original-Message-ID: <CAMj1kXFybkGtxH2U6oAi_Qeqe-i_kH-hZjUZKY3-UzPHUg55vg@mail.gmail.com>
+Message-ID: <CAMj1kXFybkGtxH2U6oAi_Qeqe-i_kH-hZjUZKY3-UzPHUg55vg@mail.gmail.com>
+Subject: Re: [PATCH v8 3/4] efi: Load efi_secret module if EFI secret area is populated
+To:     Dov Murik <dovmurik@linux.ibm.com>
+Cc:     linux-efi <linux-efi@vger.kernel.org>,
         Gerd Hoffmann <kraxel@redhat.com>,
         Borislav Petkov <bp@suse.de>,
         Ashish Kalra <ashish.kalra@amd.com>,
         Brijesh Singh <brijesh.singh@amd.com>,
         Tom Lendacky <thomas.lendacky@amd.com>,
-        Ard Biesheuvel <ardb@kernel.org>,
         James Morris <jmorris@namei.org>,
         "Serge E. Hallyn" <serge@hallyn.com>,
         Andi Kleen <ak@linux.intel.com>,
@@ -81,152 +68,125 @@ Cc:     Dov Murik <dovmurik@linux.ibm.com>,
         Jim Cadden <jcadden@ibm.com>,
         Daniele Buono <dbuono@linux.vnet.ibm.com>,
         linux-coco@lists.linux.dev, linux-security-module@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH v8 1/4] efi: Save location of EFI confidential computing area
-Date:   Mon, 28 Feb 2022 11:42:51 +0000
-Message-Id: <20220228114254.1099945-2-dovmurik@linux.ibm.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20220228114254.1099945-1-dovmurik@linux.ibm.com>
-References: <20220228114254.1099945-1-dovmurik@linux.ibm.com>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: 5dgvx0-NlTGN8L1iL3YRW9aTAbtKE1j4
-X-Proofpoint-ORIG-GUID: 41A8e3ZCkLqmet8vl7XWFGxsJlupa0Vj
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.816,Hydra:6.0.425,FMLib:17.11.64.514
- definitions=2022-02-28_04,2022-02-26_01,2022-02-23_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 malwarescore=0
- mlxlogscore=999 adultscore=0 mlxscore=0 bulkscore=0 lowpriorityscore=0
- suspectscore=0 impostorscore=0 spamscore=0 clxscore=1015 phishscore=0
- priorityscore=1501 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2201110000 definitions=main-2202280065
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Confidential computing (coco) hardware such as AMD SEV (Secure Encrypted
-Virtualization) allows a guest owner to inject secrets into the VMs
-memory without the host/hypervisor being able to read them.
+On Mon, 28 Feb 2022 at 12:43, Dov Murik <dovmurik@linux.ibm.com> wrote:
+>
+> If the efi_secret module is built, register a late_initcall in the EFI
+> driver which checks whether the EFI secret area is available and
+> populated, and then requests to load the efi_secret module.
+>
+> This will cause the <securityfs>/secrets/coco directory to appear in
+> guests into which secrets were injected; in other cases, the module is
+> not loaded.
+>
+> Signed-off-by: Dov Murik <dovmurik@linux.ibm.com>
+> Reviewed-by: Gerd Hoffmann <kraxel@redhat.com>
 
-Firmware support for secret injection is available in OVMF, which
-reserves a memory area for secret injection and includes a pointer to it
-the in EFI config table entry LINUX_EFI_COCO_SECRET_TABLE_GUID.
+It would be better to simply expose a platform device and associated
+driver, instead of hooking into the module machinery directly.
 
-If EFI exposes such a table entry, uefi_init() will keep a pointer to
-the EFI config table entry in efi.coco_secret, so it can be used later
-by the kernel (specifically drivers/virt/coco/efi_secret).  It will also
-appear in the kernel log as "CocoSecret=ADDRESS"; for example:
+We already do something similar for the EFI rtc and the efivars
+subsystem, using platform_device_register_simple()
 
-    [    0.000000] efi: EFI v2.70 by EDK II
-    [    0.000000] efi: CocoSecret=0x7f22e680 SMBIOS=0x7f541000 ACPI=0x7f77e000 ACPI 2.0=0x7f77e014 MEMATTR=0x7ea0c018
 
-The new functionality can be enabled with CONFIG_EFI_COCO_SECRET=y.
-
-Signed-off-by: Dov Murik <dovmurik@linux.ibm.com>
-Reviewed-by: Gerd Hoffmann <kraxel@redhat.com>
----
- arch/x86/platform/efi/efi.c  |  3 +++
- drivers/firmware/efi/Kconfig | 16 ++++++++++++++++
- drivers/firmware/efi/efi.c   |  6 ++++++
- include/linux/efi.h          | 10 ++++++++++
- 4 files changed, 35 insertions(+)
-
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 147c30a81f15..1591d67e0bcd 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -93,6 +93,9 @@ static const unsigned long * const efi_tables[] = {
- #ifdef CONFIG_LOAD_UEFI_KEYS
- 	&efi.mokvar_table,
- #endif
-+#ifdef CONFIG_EFI_COCO_SECRET
-+	&efi.coco_secret,
-+#endif
- };
- 
- u64 efi_setup;		/* efi setup_data physical address */
-diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-index 2c3dac5ecb36..6fa251b3709f 100644
---- a/drivers/firmware/efi/Kconfig
-+++ b/drivers/firmware/efi/Kconfig
-@@ -284,3 +284,19 @@ config EFI_CUSTOM_SSDT_OVERLAYS
- 
- 	  See Documentation/admin-guide/acpi/ssdt-overlays.rst for more
- 	  information.
-+
-+config EFI_COCO_SECRET
-+	bool "EFI Confidential Computing Secret Area Support"
-+	depends on EFI
-+	help
-+	  Confidential Computing platforms (such as AMD SEV) allow the
-+	  Guest Owner to securely inject secrets during guest VM launch.
-+	  The secrets are placed in a designated EFI reserved memory area.
-+
-+	  In order to use the secrets in the kernel, the location of the secret
-+	  area (as published in the EFI config table) must be kept.
-+
-+	  If you say Y here, the address of the EFI secret area will be kept
-+	  for usage inside the kernel.  This will allow the
-+	  virt/coco/efi_secret module to access the secrets, which in turn
-+	  allows userspace programs to access the injected secrets.
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 7de3f5b6e8d0..378d044b2463 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -46,6 +46,9 @@ struct efi __read_mostly efi = {
- #ifdef CONFIG_LOAD_UEFI_KEYS
- 	.mokvar_table		= EFI_INVALID_TABLE_ADDR,
- #endif
-+#ifdef CONFIG_EFI_COCO_SECRET
-+	.coco_secret		= EFI_INVALID_TABLE_ADDR,
-+#endif
- };
- EXPORT_SYMBOL(efi);
- 
-@@ -528,6 +531,9 @@ static const efi_config_table_type_t common_tables[] __initconst = {
- #endif
- #ifdef CONFIG_LOAD_UEFI_KEYS
- 	{LINUX_EFI_MOK_VARIABLE_TABLE_GUID,	&efi.mokvar_table,	"MOKvar"	},
-+#endif
-+#ifdef CONFIG_EFI_COCO_SECRET
-+	{LINUX_EFI_COCO_SECRET_AREA_GUID,	&efi.coco_secret,	"CocoSecret"	},
- #endif
- 	{},
- };
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index ccd4d3f91c98..771d4cd06b56 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -405,6 +405,7 @@ void efi_native_runtime_setup(void);
- #define LINUX_EFI_MEMRESERVE_TABLE_GUID		EFI_GUID(0x888eb0c6, 0x8ede, 0x4ff5,  0xa8, 0xf0, 0x9a, 0xee, 0x5c, 0xb9, 0x77, 0xc2)
- #define LINUX_EFI_INITRD_MEDIA_GUID		EFI_GUID(0x5568e427, 0x68fc, 0x4f3d,  0xac, 0x74, 0xca, 0x55, 0x52, 0x31, 0xcc, 0x68)
- #define LINUX_EFI_MOK_VARIABLE_TABLE_GUID	EFI_GUID(0xc451ed2b, 0x9694, 0x45d3,  0xba, 0xba, 0xed, 0x9f, 0x89, 0x88, 0xa3, 0x89)
-+#define LINUX_EFI_COCO_SECRET_AREA_GUID		EFI_GUID(0xadf956ad, 0xe98c, 0x484c,  0xae, 0x11, 0xb5, 0x1c, 0x7d, 0x33, 0x64, 0x47)
- 
- /* OEM GUIDs */
- #define DELLEMC_EFI_RCI2_TABLE_GUID		EFI_GUID(0x2d9f28a2, 0xa886, 0x456a,  0x97, 0xa8, 0xf1, 0x1e, 0xf2, 0x4f, 0xf4, 0x55)
-@@ -596,6 +597,7 @@ extern struct efi {
- 	unsigned long			tpm_log;		/* TPM2 Event Log table */
- 	unsigned long			tpm_final_log;		/* TPM2 Final Events Log table */
- 	unsigned long			mokvar_table;		/* MOK variable config table */
-+	unsigned long			coco_secret;		/* Confidential computing secret table */
- 
- 	efi_get_time_t			*get_time;
- 	efi_set_time_t			*set_time;
-@@ -1335,4 +1337,12 @@ extern void efifb_setup_from_dmi(struct screen_info *si, const char *opt);
- static inline void efifb_setup_from_dmi(struct screen_info *si, const char *opt) { }
- #endif
- 
-+struct linux_efi_coco_secret_area {
-+	u64	base_pa;
-+	u64	size;
-+};
-+
-+/* Header of a populated EFI secret area */
-+#define EFI_SECRET_TABLE_HEADER_GUID	EFI_GUID(0x1e74f542, 0x71dd, 0x4d66,  0x96, 0x3e, 0xef, 0x42, 0x87, 0xff, 0x17, 0x3b)
-+
- #endif /* _LINUX_EFI_H */
--- 
-2.25.1
-
+> ---
+>  drivers/firmware/efi/Makefile        |  1 +
+>  drivers/firmware/efi/coco.c          | 58 ++++++++++++++++++++
+>  drivers/virt/coco/efi_secret/Kconfig |  3 +
+>  3 files changed, 62 insertions(+)
+>
+> diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+> index c02ff25dd477..49c4a8c0bfc4 100644
+> --- a/drivers/firmware/efi/Makefile
+> +++ b/drivers/firmware/efi/Makefile
+> @@ -32,6 +32,7 @@ obj-$(CONFIG_APPLE_PROPERTIES)                += apple-properties.o
+>  obj-$(CONFIG_EFI_RCI2_TABLE)           += rci2-table.o
+>  obj-$(CONFIG_EFI_EMBEDDED_FIRMWARE)    += embedded-firmware.o
+>  obj-$(CONFIG_LOAD_UEFI_KEYS)           += mokvar-table.o
+> +obj-$(CONFIG_EFI_COCO_SECRET)          += coco.o
+>
+>  fake_map-y                             += fake_mem.o
+>  fake_map-$(CONFIG_X86)                 += x86_fake_mem.o
+> diff --git a/drivers/firmware/efi/coco.c b/drivers/firmware/efi/coco.c
+> new file mode 100644
+> index 000000000000..f8efd240ab05
+> --- /dev/null
+> +++ b/drivers/firmware/efi/coco.c
+> @@ -0,0 +1,58 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +/*
+> + * Confidential computing (coco) secret area handling
+> + *
+> + * Copyright (C) 2021 IBM Corporation
+> + * Author: Dov Murik <dovmurik@linux.ibm.com>
+> + */
+> +
+> +#define pr_fmt(fmt) "efi: " fmt
+> +
+> +#include <linux/efi.h>
+> +#include <linux/init.h>
+> +#include <linux/io.h>
+> +#include <linux/kmod.h>
+> +
+> +#ifdef CONFIG_EFI_SECRET_MODULE
+> +
+> +/*
+> + * Load the efi_secret module if the EFI secret area is populated
+> + */
+> +static int __init load_efi_secret_module(void)
+> +{
+> +       struct linux_efi_coco_secret_area *area;
+> +       efi_guid_t *header_guid;
+> +       int ret = 0;
+> +
+> +       if (efi.coco_secret == EFI_INVALID_TABLE_ADDR)
+> +               return 0;
+> +
+> +       area = memremap(efi.coco_secret, sizeof(*area), MEMREMAP_WB);
+> +       if (!area) {
+> +               pr_err("Failed to map confidential computing secret area descriptor\n");
+> +               return -ENOMEM;
+> +       }
+> +       if (!area->base_pa || area->size < sizeof(*header_guid))
+> +               goto unmap_desc;
+> +
+> +       header_guid = (void __force *)ioremap_encrypted(area->base_pa, sizeof(*header_guid));
+> +       if (!header_guid) {
+> +               pr_err("Failed to map secret area\n");
+> +               ret = -ENOMEM;
+> +               goto unmap_desc;
+> +       }
+> +       if (efi_guidcmp(*header_guid, EFI_SECRET_TABLE_HEADER_GUID))
+> +               goto unmap_encrypted;
+> +
+> +       ret = request_module("efi_secret");
+> +
+> +unmap_encrypted:
+> +       iounmap((void __iomem *)header_guid);
+> +
+> +unmap_desc:
+> +       memunmap(area);
+> +       return ret;
+> +}
+> +late_initcall(load_efi_secret_module);
+> +
+> +#endif
+> diff --git a/drivers/virt/coco/efi_secret/Kconfig b/drivers/virt/coco/efi_secret/Kconfig
+> index 4404d198f3b2..dc8da2921e36 100644
+> --- a/drivers/virt/coco/efi_secret/Kconfig
+> +++ b/drivers/virt/coco/efi_secret/Kconfig
+> @@ -14,3 +14,6 @@ config EFI_SECRET
+>
+>           To compile this driver as a module, choose M here.
+>           The module will be called efi_secret.
+> +
+> +         The module is loaded automatically by the EFI driver if the EFI
+> +         secret area is populated.
+> --
+> 2.25.1
+>
