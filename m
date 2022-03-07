@@ -2,43 +2,43 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EC25DC43219
-	for <linux-efi@archiver.kernel.org>; Mon,  7 Mar 2022 21:35:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F21F7C4167E
+	for <linux-efi@archiver.kernel.org>; Mon,  7 Mar 2022 21:35:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245653AbiCGVf5 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 7 Mar 2022 16:35:57 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36358 "EHLO
+        id S245659AbiCGVf6 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 7 Mar 2022 16:35:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36508 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S245600AbiCGVfn (ORCPT
+        with ESMTP id S245597AbiCGVfn (ORCPT
         <rfc822;linux-efi@vger.kernel.org>); Mon, 7 Mar 2022 16:35:43 -0500
-Received: from NAM12-BN8-obe.outbound.protection.outlook.com (mail-bn8nam12on2047.outbound.protection.outlook.com [40.107.237.47])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 79F7C70F5F;
-        Mon,  7 Mar 2022 13:34:43 -0800 (PST)
+Received: from NAM10-MW2-obe.outbound.protection.outlook.com (mail-mw2nam10on2086.outbound.protection.outlook.com [40.107.94.86])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9E1FF70CE2;
+        Mon,  7 Mar 2022 13:34:42 -0800 (PST)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=atJ6+Stmb6FxeQsZe1WVsIAMDd+2oakJJtR5/ki+SYHPhsthAwxsdFGO8VDKP+QQOp/tg1d9D0YXWwyClinaBGpKBMJkCXXWoWfe2uo1zMKjYjMx6JjsxmR3Q4JcH3/UJMqBwsf8d0KiVI/T8/I0yKrRHNcGZhHgm/Bdo1SkGKe/eNUw8qsPn/m0CPHPRkpZJeAmZCkI4e/TBQka0JXt6Sap+SA4rYRsRHWJRiPkbHe3i4lyy37YFWpMm95EOuY2N39x92lv9KBPb+N/dglMKGLIn7C6IG/u4Mvi+HSFoLcO4AmFU172amwpjPXsVtA4GStVol9oWstHfu9dKhXM0A==
+ b=JqjumSOMOwgDqtsrrHUMk/aJPZ2/BIC0eMNCsYEGG95Eb7/4TfavFVf4HurLo/iw+lBycxjF3UmcSDDndpq/koA+LQenrjGBlfJG6M4vYkrIBuoBDBYnknXMhO+y7ZqlG516IUpTH/B4KrqPYlBRWGUbo0xh7AzNxxcuOcrn4q1gbCdJfy9uXpUFsM13PenexN1EUsJOFIAOWpAEr+aPLEesw+zWrwJmIhlnL+a/oi5/ba0X/+XSDX4wmurlFnPJAwM2vLyQ9CZtWF1gyElCvnoHhsDgeH3ioZLU3EitwlZjPZiLL/5IFt7v+frks5t06XRgdpacNL74UNapw8EKvA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=NW12IGctCHQ59PAs+7VbIe+Nhdv+NxvQBr3aNl1R/eU=;
- b=TCBLGAkkqYm9I7FXqxloxO6tgyF0KLU/W7dxGAL1Xz1Tmi672o0eTqm2s9DAuMNc7soy/VvbbXyFo1wF9uG2gKpZmutxSF+tsO2z1+SPEW14EtFYg8l5U1AJvtTmJudNL32nbcAFgo1LBTlAniS0MRUVPTsCWjkUldF0Hx4l4y6TZu2n9BKW6PRANwPErgVayd3jU3XxBgrfK3pRoF0ZD5scfwiFsoJIl8uftRrzrIvWe5Eh/d1Azgc05NDPrwI+WSgG186u9ie1ieJis2CdsY59Qsq4YosxrMAdsCRYgqXixapfseHfb10jiVrERj+7vnLVtdGRlTBp7OJfm5O9MA==
+ bh=ntl5F5XU60OWCFaYtPlwYC+9J/gONwjzf4p6mWBsqy8=;
+ b=NRLgZlpGvl3HBao8opEyTnJQsJfC8WTEp9rXUlEgiv/mmCoT7/KRcmircuJ089ey8Tphdx+/FUE+DpMldGnLWjEEFWC/8Q7eG6CMMm0Nc9eA5mZC2vbUVkeBahvKzP/UnETyk7Q+ur5f30rKPYpl20Yp0lLBfMOdqCK5FkHA/yl5YbM4Xo5CpHMpzUkALdjcNzi/WHUtQYZ72rkKOMhwl0yVwZW4Dgp1m8NaWyDHi40bsIvAFufjBtb0exBktX/6esLThD5oaT/qfQgkoZPGZLbSkuMOZ3BETns96ZIJCZp9Xwm43FPPWFi4tZDYX+YqSZd/NZzf+lO5LcB7Ez6dOw==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
  165.204.84.17) smtp.rcpttodomain=kernel.org smtp.mailfrom=amd.com; dmarc=pass
  (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
  dkim=none (message not signed); arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=NW12IGctCHQ59PAs+7VbIe+Nhdv+NxvQBr3aNl1R/eU=;
- b=CteKe0Mc23WTbrq/q2IDtd67hLJIJtfx0xSJv/ieOP9PSJWKGpuMg178dgCALCg5rWiVMqBLmq9rxH7n0mhu7v/tn6bPZtEJMlthXHRW6AB14j91bo+4qDzZZxr8ya+mQUYqm9407Pf5184Dc1mtmvSp8o7LUcoFkQ0B6RmafSc=
-Received: from BN6PR18CA0001.namprd18.prod.outlook.com (2603:10b6:404:121::11)
- by CY4PR12MB1575.namprd12.prod.outlook.com (2603:10b6:910:f::23) with
+ bh=ntl5F5XU60OWCFaYtPlwYC+9J/gONwjzf4p6mWBsqy8=;
+ b=jVwiQuOsRGPgVmzuTgqj4XdfOygQ8WF3mgrxdksQOARl+OplAECEFN2NBm73zSLyRLpTIukQ70xyyJbXi0DUWa+tm9lc4mUCO4NQ5aMdSeHCeoTjAPdGsBpD776fC4PMn6kY6QiLj9+04qLhDKb1Zxzry8jEu1Mxr72KQOoCalI=
+Received: from BN9PR03CA0045.namprd03.prod.outlook.com (2603:10b6:408:fb::20)
+ by MN2PR12MB3823.namprd12.prod.outlook.com (2603:10b6:208:168::26) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5038.26; Mon, 7 Mar
- 2022 21:34:39 +0000
-Received: from BN8NAM11FT029.eop-nam11.prod.protection.outlook.com
- (2603:10b6:404:121:cafe::31) by BN6PR18CA0001.outlook.office365.com
- (2603:10b6:404:121::11) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5038.14; Mon, 7 Mar
+ 2022 21:34:38 +0000
+Received: from BN8NAM11FT060.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:408:fb:cafe::46) by BN9PR03CA0045.outlook.office365.com
+ (2603:10b6:408:fb::20) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5038.14 via Frontend
- Transport; Mon, 7 Mar 2022 21:34:39 +0000
+ Transport; Mon, 7 Mar 2022 21:34:38 +0000
 X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
  smtp.mailfrom=amd.com; dkim=none (message not signed)
  header.d=none;dmarc=pass action=none header.from=amd.com;
@@ -46,13 +46,13 @@ Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
  165.204.84.17 as permitted sender) receiver=protection.outlook.com;
  client-ip=165.204.84.17; helo=SATLEXMB04.amd.com;
 Received: from SATLEXMB04.amd.com (165.204.84.17) by
- BN8NAM11FT029.mail.protection.outlook.com (10.13.177.68) with Microsoft SMTP
+ BN8NAM11FT060.mail.protection.outlook.com (10.13.177.211) with Microsoft SMTP
  Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.5038.14 via Frontend Transport; Mon, 7 Mar 2022 21:34:39 +0000
+ 15.20.5038.14 via Frontend Transport; Mon, 7 Mar 2022 21:34:38 +0000
 Received: from sbrijesh-desktop.amd.com (10.180.168.240) by SATLEXMB04.amd.com
  (10.181.40.145) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.18; Mon, 7 Mar
- 2022 15:34:36 -0600
+ 2022 15:34:30 -0600
 From:   Brijesh Singh <brijesh.singh@amd.com>
 To:     <x86@kernel.org>, <linux-kernel@vger.kernel.org>,
         <kvm@vger.kernel.org>, <linux-efi@vger.kernel.org>,
@@ -82,11 +82,11 @@ CC:     Thomas Gleixner <tglx@linutronix.de>,
         "Dr . David Alan Gilbert" <dgilbert@redhat.com>,
         <brijesh.ksingh@gmail.com>, <tony.luck@intel.com>,
         <marcorr@google.com>, <sathyanarayanan.kuppuswamy@linux.intel.com>,
-        Brijesh Singh <brijesh.singh@amd.com>,
-        Venu Busireddy <venu.busireddy@oracle.com>
-Subject: [PATCH v12 11/46] x86/sev: Save the negotiated GHCB version
-Date:   Mon, 7 Mar 2022 15:33:21 -0600
-Message-ID: <20220307213356.2797205-12-brijesh.singh@amd.com>
+        Venu Busireddy <venu.busireddy@oracle.com>,
+        Brijesh Singh <brijesh.singh@amd.com>
+Subject: [PATCH v12 08/46] x86/sev: Detect/setup SEV/SME features earlier in boot
+Date:   Mon, 7 Mar 2022 15:33:18 -0600
+Message-ID: <20220307213356.2797205-9-brijesh.singh@amd.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20220307213356.2797205-1-brijesh.singh@amd.com>
 References: <20220307213356.2797205-1-brijesh.singh@amd.com>
@@ -98,96 +98,81 @@ X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB04.amd.com
  (10.181.40.145)
 X-EOPAttributedMessage: 0
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: da8d6c11-80d0-4cb5-4539-08da008248db
-X-MS-TrafficTypeDiagnostic: CY4PR12MB1575:EE_
-X-Microsoft-Antispam-PRVS: <CY4PR12MB1575DC599D3DD26022F2F9E0E5089@CY4PR12MB1575.namprd12.prod.outlook.com>
+X-MS-Office365-Filtering-Correlation-Id: e9390f74-6135-4dbd-e40b-08da0082482f
+X-MS-TrafficTypeDiagnostic: MN2PR12MB3823:EE_
+X-Microsoft-Antispam-PRVS: <MN2PR12MB38231D989185BBC5DEB44DC4E5089@MN2PR12MB3823.namprd12.prod.outlook.com>
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: uKv3AvFGJjl/eUVLhEnrEoDGIFl5CII3dUDDop+9ZY+WFNaeLl0jjlRZblWcnSA6mJewXDzdq+Q3DIdJ7jcFY1SqNDsmKQTZZvovA0vfJRBYu/R9UF24Ln0oNwkvudwFiP+NQymJjYlI9I0KipzGO7yzxhD+cGJFnaPAgnsgsblbEtKi68VIV+7yUuXsp3nfg38emLgOzyDjEigASn4abZL/wnapL6iP8YYW5928K+i/k6PTB/yjOuFYHcAs985Gz7LmmuTrPZxbM+tkmdDjpZ+lela0jnEUbmGp7A94AOSYEXyAnaaI0YFtvtX6Y0jE46bSc7lgeo/Wu81qOKOBwr6ei5VeJXN1hUp/4jgeFFLVJqfaQ1H6ldE0/0kSiLU9FIO4CfB+hdUyX0dkweyinjXlMb1KQblLRcar27Xy5WXqvDNRdS9cuWDRCwyvD1zNH5FqROggolhGqsKdFxQ+wdS+hKNkWIFizaxetjqWjHkMR9C6nl+4TS34+Ql3EZftrhqAtyznSuMb2bcprktE2zRCcJPPWq+HOTkRjbpsPQzk9IpnXflnMhq+qijdwvzPTo9aKmXLd3ow9NKZVh0VAzheYA5acCm8FUCQvn0OQnzyAZMEgUftD2YnkTJhNUizNBUcGC5COVAy297uU+8VFZpaMLbT9L9O7+9kA3NUNSrlABDhvNHTSxFxAZvJ5GyCWppvxa094dYmKnVywsNduh0W67Abprippy1yz15s10A=
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230001)(4636009)(36840700001)(46966006)(40470700004)(82310400004)(426003)(336012)(83380400001)(8936002)(4326008)(7696005)(508600001)(86362001)(6666004)(1076003)(70586007)(2616005)(70206006)(8676002)(26005)(186003)(16526019)(316002)(110136005)(54906003)(36756003)(47076005)(36860700001)(40460700003)(7406005)(356005)(7416002)(5660300002)(81166007)(44832011)(2906002)(36900700001)(2101003);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: iXlz8aabFmX+NxXfrZeEVrzdInHOGHOr0FgEzBBYNG/4UjOZxiw2NYsPRVJCbPsrqyKYKMWk+9WjduPT3bD+Sjd/HmzpaSvdwxhI+ydGBcfvYshSiKPOVeVIcvvQYCPlv7PwD+LvWoz85EtyXneac3KF5JExYqumCSgf6/MfyT+ju7gDXvScowu+Bu9UnLXKOlGaY9rWxrq8sEImSsx+wXfqSAbZ5wLnpWY8ibqrnIMQccf0M0Perrw7O75x6XY76RLhXYrtv/lcW1gG5qWcxn+99gstoShUqRpCkDTHdHucZasAYi8/GgmTtodIXtuNSiQtSZSp2od8q2a3ewOY2itO7DJLK1YNdNZYGzsdoM+lh7RaMpNGxyEkbBjzWwJvQc+9JSDPM5vF0/+6fYrWHmpwJB7S5pDtmV/IYOQI9JExlaD3VDGYK9m2nGblGhRUdK7RYrA+I2lxG+u3PFl7ENMUUzTZ2Jf/dDNfvyJsGLCkbprV+/EaVPVk+VxR/nixH+ZIinSXlMALkra1lXA4mxVHmH90qtxGzh+e5NPsjoKTBCfykxbRKl62rmbd1dyzT0cacVaWcVmxzuzBruECrtMWDk2coIv3fmzJ5BNkYRR9k2XgV6KGSKodPtscK8JXD8foB7R368xOsg9JnTxEu3gdwhiQpnFQMXp9IseDysp//gbh1ph1z4fUdTUppu7Jol4tVlLExax9hExPK01FHciNJmkNSUUOPit17DkMiJQ=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230001)(4636009)(36840700001)(46966006)(40470700004)(1076003)(2616005)(36860700001)(70586007)(8936002)(2906002)(356005)(81166007)(508600001)(316002)(110136005)(54906003)(36756003)(82310400004)(4326008)(44832011)(7696005)(70206006)(8676002)(5660300002)(7416002)(7406005)(47076005)(40460700003)(16526019)(26005)(186003)(83380400001)(6666004)(426003)(336012)(86362001)(2101003)(36900700001);DIR:OUT;SFP:1101;
 X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 07 Mar 2022 21:34:39.3799
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 07 Mar 2022 21:34:38.2568
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: da8d6c11-80d0-4cb5-4539-08da008248db
+X-MS-Exchange-CrossTenant-Network-Message-Id: e9390f74-6135-4dbd-e40b-08da0082482f
 X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
 X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource: BN8NAM11FT029.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthSource: BN8NAM11FT060.eop-nam11.prod.protection.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CY4PR12MB1575
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR12MB3823
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The SEV-ES guest calls the sev_es_negotiate_protocol() to negotiate the
-GHCB protocol version before establishing the GHCB. Cache the negotiated
-GHCB version so that it can be used later.
+From: Michael Roth <michael.roth@amd.com>
+
+sme_enable() handles feature detection for both SEV and SME. Future
+patches will also use it for SEV-SNP feature detection/setup, which
+will need to be done immediately after the first #VC handler is set up.
+Move it now in preparation.
 
 Reviewed-by: Venu Busireddy <venu.busireddy@oracle.com>
+Signed-off-by: Michael Roth <michael.roth@amd.com>
 Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
 ---
- arch/x86/include/asm/sev.h   |  2 +-
- arch/x86/kernel/sev-shared.c | 17 ++++++++++++++---
- 2 files changed, 15 insertions(+), 4 deletions(-)
+ arch/x86/kernel/head64.c  |  3 ---
+ arch/x86/kernel/head_64.S | 13 +++++++++++++
+ 2 files changed, 13 insertions(+), 3 deletions(-)
 
-diff --git a/arch/x86/include/asm/sev.h b/arch/x86/include/asm/sev.h
-index ec060c433589..9b9c190e8c3b 100644
---- a/arch/x86/include/asm/sev.h
-+++ b/arch/x86/include/asm/sev.h
-@@ -12,7 +12,7 @@
- #include <asm/insn.h>
- #include <asm/sev-common.h>
+diff --git a/arch/x86/kernel/head64.c b/arch/x86/kernel/head64.c
+index 4f5ecbbaae77..cbc285ddc4ac 100644
+--- a/arch/x86/kernel/head64.c
++++ b/arch/x86/kernel/head64.c
+@@ -192,9 +192,6 @@ unsigned long __head __startup_64(unsigned long physaddr,
+ 	if (load_delta & ~PMD_PAGE_MASK)
+ 		for (;;);
  
--#define GHCB_PROTO_OUR		0x0001UL
-+#define GHCB_PROTOCOL_MIN	1ULL
- #define GHCB_PROTOCOL_MAX	1ULL
- #define GHCB_DEFAULT_USAGE	0ULL
+-	/* Activate Secure Memory Encryption (SME) if supported and enabled */
+-	sme_enable(bp);
+-
+ 	/* Include the SME encryption mask in the fixup value */
+ 	load_delta += sme_get_me_mask();
  
-diff --git a/arch/x86/kernel/sev-shared.c b/arch/x86/kernel/sev-shared.c
-index 2abf8a7d75e5..91105f5a02a8 100644
---- a/arch/x86/kernel/sev-shared.c
-+++ b/arch/x86/kernel/sev-shared.c
-@@ -14,6 +14,15 @@
- #define has_cpuflag(f)	boot_cpu_has(f)
- #endif
+diff --git a/arch/x86/kernel/head_64.S b/arch/x86/kernel/head_64.S
+index 9c63fc5988cd..9c2c3aff5ee4 100644
+--- a/arch/x86/kernel/head_64.S
++++ b/arch/x86/kernel/head_64.S
+@@ -69,6 +69,19 @@ SYM_CODE_START_NOALIGN(startup_64)
+ 	call	startup_64_setup_env
+ 	popq	%rsi
  
-+/*
-+ * Since feature negotiation related variables are set early in the boot
-+ * process they must reside in the .data section so as not to be zeroed
-+ * out when the .bss section is later cleared.
-+ *
-+ * GHCB protocol version negotiated with the hypervisor.
-+ */
-+static u16 ghcb_version __ro_after_init;
++#ifdef CONFIG_AMD_MEM_ENCRYPT
++	/*
++	 * Activate SEV/SME memory encryption if supported/enabled. This needs to
++	 * be done now, since this also includes setup of the SEV-SNP CPUID table,
++	 * which needs to be done before any CPUID instructions are executed in
++	 * subsequent code.
++	 */
++	movq	%rsi, %rdi
++	pushq	%rsi
++	call	sme_enable
++	popq	%rsi
++#endif
 +
- static bool __init sev_es_check_cpu_features(void)
- {
- 	if (!has_cpuflag(X86_FEATURE_RDRAND)) {
-@@ -51,10 +60,12 @@ static bool sev_es_negotiate_protocol(void)
- 	if (GHCB_MSR_INFO(val) != GHCB_MSR_SEV_INFO_RESP)
- 		return false;
- 
--	if (GHCB_MSR_PROTO_MAX(val) < GHCB_PROTO_OUR ||
--	    GHCB_MSR_PROTO_MIN(val) > GHCB_PROTO_OUR)
-+	if (GHCB_MSR_PROTO_MAX(val) < GHCB_PROTOCOL_MIN ||
-+	    GHCB_MSR_PROTO_MIN(val) > GHCB_PROTOCOL_MAX)
- 		return false;
- 
-+	ghcb_version = min_t(size_t, GHCB_MSR_PROTO_MAX(val), GHCB_PROTOCOL_MAX);
-+
- 	return true;
- }
- 
-@@ -127,7 +138,7 @@ enum es_result sev_es_ghcb_hv_call(struct ghcb *ghcb, bool set_ghcb_msr,
- 				   u64 exit_info_1, u64 exit_info_2)
- {
- 	/* Fill in protocol and format specifiers */
--	ghcb->protocol_version = GHCB_PROTOCOL_MAX;
-+	ghcb->protocol_version = ghcb_version;
- 	ghcb->ghcb_usage       = GHCB_DEFAULT_USAGE;
- 
- 	ghcb_set_sw_exit_code(ghcb, exit_code);
+ 	/* Now switch to __KERNEL_CS so IRET works reliably */
+ 	pushq	$__KERNEL_CS
+ 	leaq	.Lon_kernel_cs(%rip), %rax
 -- 
 2.25.1
 
