@@ -2,43 +2,43 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F3CEAC43217
-	for <linux-efi@archiver.kernel.org>; Mon,  7 Mar 2022 21:35:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B652C4332F
+	for <linux-efi@archiver.kernel.org>; Mon,  7 Mar 2022 21:35:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1343530AbiCGVgo (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 7 Mar 2022 16:36:44 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37326 "EHLO
+        id S1343537AbiCGVgp (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 7 Mar 2022 16:36:45 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36508 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S245626AbiCGVg2 (ORCPT
+        with ESMTP id S245686AbiCGVg2 (ORCPT
         <rfc822;linux-efi@vger.kernel.org>); Mon, 7 Mar 2022 16:36:28 -0500
-Received: from NAM12-MW2-obe.outbound.protection.outlook.com (mail-mw2nam12on2045.outbound.protection.outlook.com [40.107.244.45])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 89C72888FD;
-        Mon,  7 Mar 2022 13:35:03 -0800 (PST)
+Received: from NAM02-DM3-obe.outbound.protection.outlook.com (mail-dm3nam07on2058.outbound.protection.outlook.com [40.107.95.58])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4DDA888B10;
+        Mon,  7 Mar 2022 13:35:04 -0800 (PST)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=IAOrdI9H57G1BD96N9lwL/tViUEieD06fY8c9QLjIXsaGScaZvwDA75ChiKI7UEeKypc3+4aohx/NDEfJCiv/JlIeJS0QKZ/mhgu6x1jC5CEZSPfFxJZ3E+78/oSn1euZgAv/geOhd9AQt7m+ogjwJX83PkFRtASTPay8Seip9Kt5SH1UwWkQtjSVf497tlEyvQ/jnKoikfx2KdeH1/zfrQTMzqVv56i5wzHuDounF+Bg9VWkhpzmu08+Hvrin9uLKbeL3Sq5nIXIeMlP7cjQuoyI1iMuSEGQ4o6ahbhMhQM5/LH/au0/Tj1BykDNMa5Yu95jy2mKNFD/EM34v6SEQ==
+ b=aLYIGAHS6HZ784uknugDkJzZNdMsFo1efVzWYHVz/utLlKLQChJ9RROvVgrjF8hIXgt1S8y+eSF83k2Hjp0cQPGHiwt6ql8JbgV6dbG2b5j1E/EaD7mwqmEf9Rf9ah04PySEpoUJzXEX2Prh0yA8RG8EJzq61v/58ZbeEm/ADymsgYmOahBwQccTcLG9hzP9Dtj1y8wkHpvn0yiVQdP6Hke+AHnA55BUOq1zSdkknXAheQrzbFWqjizWviXCXoCfcnJe1w1EEnRzBs8c71rGtdv7sj8poYz3FvhiyJL8LXXLKhZi7K9RVZmEH53KQwzv9bNLFCVBpuD7FOn3eQe5rw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=4Qoa3GE/PvZqDew1v4prOu26bqexSkadMT5+HigHZUI=;
- b=Nq/QO7X6DFzlrx9AG9eHdlUnHB5Bf5FmIb9FaybAPhUbMBFAt+/dQZZEbGzkhJYsg74sGRW0H+pFw0JUupmxb2tRBjUBdQhApWpWDMOqJGXDFZNpwpxqE5YBxcZCO0V4eFLriwlYuQS0e+R/pr4HqM291wkvt0ZS5WHEF6gwWIwMqy/nZxydFHGco/S/JKjun5iUakngR5TnMylbRXf/1KI83sO9AkvauHGbX7uaW1fj0wOVpz1EanPwcv/b2JQrk8FyreG3Xm60pOhDVr0IsXh7l7hu2Wj6f5dwrzidHwdXEUAa9hY0PtRQVQckz9hRmr+ssK2XvxlV/Z5uMfFGDw==
+ bh=T29/2TaTjE6y2w/cbm8PhGEi49TMVSH6O9SJYjUyJsI=;
+ b=ZKGCAbznB55CFsyaOLnVQwmurUZRX0eW4iSp+EwytQ3+qBvmJQLE8v/nhWJZavYvWdEhBZzei/Ad4qaSgZXGjn3vwQExqNtAxB6QONzphwGPMRDwxGF0lNU9q5lcBEtQKXBtvfJjpftznRXJ0T71FxQ/o3zQMYAxFjQ4H/uEe3PeuI1mJLoxAN/i+wS5tqiBWnmkUAD4i1k3kAeewEGQIyJ7xgXDVkupjUl1p/2/RQzVbE7f/lrPYQNEhz5osMdKtA//LmQku7izZknIdfJHG5dHDaxITa8D5UNYD+nbbqlVSGdFuTo8dVpUB0Q1ms7fLiMm+5vzu1kuq5C6vjij0g==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
  165.204.84.17) smtp.rcpttodomain=kernel.org smtp.mailfrom=amd.com; dmarc=pass
  (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
  dkim=none (message not signed); arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=4Qoa3GE/PvZqDew1v4prOu26bqexSkadMT5+HigHZUI=;
- b=ktWrZricvqqs1yhzEtsacu/JVWN6EEfRAaahQactlsCHwIIhXC+KTnVT4He1uyg8fSqb0lyE/SmJ9JcrIQgy64oTmnDtKqy9TXbQnY18IR62anDwiUuWFihTwtRZePm1vq7IR7SIgiuHphOQUiZSgrnqwqtJS5NCIzWtU2pIo1U=
-Received: from BN0PR10CA0005.namprd10.prod.outlook.com (2603:10b6:408:143::19)
- by SA1PR12MB5616.namprd12.prod.outlook.com (2603:10b6:806:22a::11) with
+ bh=T29/2TaTjE6y2w/cbm8PhGEi49TMVSH6O9SJYjUyJsI=;
+ b=cc75/DpOa75wl/G0WwgvGsjebDBpax7285+lF3vFaOzIA4tQBMIsPSwx2AaBEFJ4XyyK7wwXgxbzLqOK/T8f/etbloJdf6r8T7pDugmdOD17ITPzVlpaup2bGqzUM1pBE0TQFX5tzj7xLTH3eUcHUXpoTmbpMPkCDOd6HIiZTsw=
+Received: from BN6PR22CA0060.namprd22.prod.outlook.com (2603:10b6:404:ca::22)
+ by MN0PR12MB5785.namprd12.prod.outlook.com (2603:10b6:208:374::17) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5038.14; Mon, 7 Mar
- 2022 21:35:00 +0000
-Received: from BN8NAM11FT048.eop-nam11.prod.protection.outlook.com
- (2603:10b6:408:143:cafe::22) by BN0PR10CA0005.outlook.office365.com
- (2603:10b6:408:143::19) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5038.13 via Frontend
- Transport; Mon, 7 Mar 2022 21:34:59 +0000
+ 2022 21:35:02 +0000
+Received: from BN8NAM11FT011.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:404:ca:cafe::70) by BN6PR22CA0060.outlook.office365.com
+ (2603:10b6:404:ca::22) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5038.14 via Frontend
+ Transport; Mon, 7 Mar 2022 21:35:02 +0000
 X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
  smtp.mailfrom=amd.com; dkim=none (message not signed)
  header.d=none;dmarc=pass action=none header.from=amd.com;
@@ -46,13 +46,13 @@ Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
  165.204.84.17 as permitted sender) receiver=protection.outlook.com;
  client-ip=165.204.84.17; helo=SATLEXMB04.amd.com;
 Received: from SATLEXMB04.amd.com (165.204.84.17) by
- BN8NAM11FT048.mail.protection.outlook.com (10.13.177.117) with Microsoft SMTP
+ BN8NAM11FT011.mail.protection.outlook.com (10.13.176.140) with Microsoft SMTP
  Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.5038.14 via Frontend Transport; Mon, 7 Mar 2022 21:34:59 +0000
+ 15.20.5038.14 via Frontend Transport; Mon, 7 Mar 2022 21:35:01 +0000
 Received: from sbrijesh-desktop.amd.com (10.180.168.240) by SATLEXMB04.amd.com
  (10.181.40.145) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.18; Mon, 7 Mar
- 2022 15:34:55 -0600
+ 2022 15:34:59 -0600
 From:   Brijesh Singh <brijesh.singh@amd.com>
 To:     <x86@kernel.org>, <linux-kernel@vger.kernel.org>,
         <kvm@vger.kernel.org>, <linux-efi@vger.kernel.org>,
@@ -83,9 +83,9 @@ CC:     Thomas Gleixner <tglx@linutronix.de>,
         <brijesh.ksingh@gmail.com>, <tony.luck@intel.com>,
         <marcorr@google.com>, <sathyanarayanan.kuppuswamy@linux.intel.com>,
         Brijesh Singh <brijesh.singh@amd.com>
-Subject: [PATCH v12 22/46] x86/sev: Use SEV-SNP AP creation to start secondary CPUs
-Date:   Mon, 7 Mar 2022 15:33:32 -0600
-Message-ID: <20220307213356.2797205-23-brijesh.singh@amd.com>
+Subject: [PATCH v12 24/46] x86/compressed/acpi: Move EFI detection to helper
+Date:   Mon, 7 Mar 2022 15:33:34 -0600
+Message-ID: <20220307213356.2797205-25-brijesh.singh@amd.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20220307213356.2797205-1-brijesh.singh@amd.com>
 References: <20220307213356.2797205-1-brijesh.singh@amd.com>
@@ -97,417 +97,200 @@ X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB04.amd.com
  (10.181.40.145)
 X-EOPAttributedMessage: 0
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 63f07fff-d5a4-4a84-6fa4-08da008254fa
-X-MS-TrafficTypeDiagnostic: SA1PR12MB5616:EE_
-X-Microsoft-Antispam-PRVS: <SA1PR12MB5616CF2CB3F1292E8D2D6EE5E5089@SA1PR12MB5616.namprd12.prod.outlook.com>
+X-MS-Office365-Filtering-Correlation-Id: 094d072f-d88d-4d23-d52b-08da0082561a
+X-MS-TrafficTypeDiagnostic: MN0PR12MB5785:EE_
+X-Microsoft-Antispam-PRVS: <MN0PR12MB578519753C1213AFF791F12FE5089@MN0PR12MB5785.namprd12.prod.outlook.com>
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: 8FHuCOhBU7lY4hjAfu9qFHz3sJ5Z+AKTec3zQvBHYy9BhhEbApBOGGsQl8WSRjs5JDYytzc3m3e0r5h59hqn+YSmE76wei9N1ITgdDWNM/J+HX+pFLTbp5hsrZIibfIqQyDzwzuxCP0eh8+6MeO4Yxdlh5yUV0pIVqaq0JvfU1RXbr86vVzmQjAoe2r1jBUcMqgnfGS3phbE2O604nZuScxNwyWt13LQVWf3BMCZ+nzRLpXXRBMWJudptiWrG1jvLeqaNNbgNC0nF5ypfNfi5w6COU+xN5PnHaXMsUz0bMMMJKwDb1BQvA58yz8emub/a3eD50TiaHjA+u3OTjjTIG/ZXlsAIcL3ATyaWRvPTyJ54VO0FHXBLWG6Ni5gfDqG83+bObeK94kaYE37hn2WckB7v+LnJPkSIvjK9fj581L40pmqPoF3w4P+SOj6UpdYD+kfHV1iNRUNGzrkz91i4DJ4iOiwt5CGG/bS0saFW6Kcbrb1VwN0IftT/Pmjj6nIZcS5mNU4bC8g9460lH3ro+HsVtZjAvXw8ArLGQsycnKmzzLgbzsXZ0pv7MlxzqSuOtb2YaJoHFcnjbvhnMLHx12gpyHLd1kU4+vX339DnlW/Gcl7OKDs6BFH6avfSuDVLBjMi/IK0b1xFWKmC+My+7ZTCLhGb/T18UBqKSz0yFf1ubvOMmPSNw0ii/So2+9BEzJJ60Eg9PBdxQ4H9Fuk/yIRtpTWHxxVOlILaRzZb6M=
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230001)(4636009)(40470700004)(46966006)(36840700001)(82310400004)(2616005)(508600001)(7406005)(5660300002)(7416002)(86362001)(6666004)(30864003)(7696005)(2906002)(81166007)(44832011)(1076003)(54906003)(26005)(336012)(426003)(186003)(40460700003)(16526019)(83380400001)(47076005)(36860700001)(8676002)(4326008)(316002)(70206006)(36756003)(110136005)(70586007)(356005)(8936002)(2101003)(36900700001);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: K7M5WsClN5OWhtqCgqxnj/COU0kIf95Wmz+1aqTEa+DfbvrnFLYch2BopGtKoI30r+toida+iZb2TLwyQzewL5kTrfoXddZ+wZ3uaPFbiMLBm5U8fGsQnqjOWt7fpMYNncBM+t6Xr451vvlRK0wy7kDdZvahC6MY8iyWjFh8ME3rClGpgZd3aFVv0JmvMXejxkURgcI0lkw/fCA711UwmxkCam86+uapzInjjCTjfbDiPkNQqG+Nk48a/EyQrOiN6Re2bt/3HxArph59Wc7Cb+Cp0VfMTP4+XdSKP1IePUBLTpEHfjTecoJb/rZg4CU+bIgP2npW8kfRI2PoNqZ9hXIGmkCE4xwjDjL6wKPPKPtmImMea2aP+jVfjLKVIFu+fDIvX4pFUtT1kB2ZJ9M1fgQlqoTRDyKnvs4Ka6FuNi7R2fJK2KN4yVQ1oXU4QAQbkdvtYPSY0stDVhi2QqRLJmJ82JyN0zrQ4wR1LxhrzHPO0Z+vHHZuNDq8gqKq37U+qpkdISWp9c6FgVixohavZs6H+G0pquK3d2ED7iOBVRpJkw17TFDEuWHGdrAY5zLLONqi3HPzsMRazhLeqk27s6BqXr9IYENxg1SVXyrsWv8P4hNOTioIzpAkMs0YciJrxbRCTdZo0Wh31NfnRRFUijby2/w6T7BHOM7rw+MhjhBZEtvkAdOo4+veXSyZUn4W+zkOW9BthtV38335dSAmUjXSPML+cNQ6324WDESNVNQ=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230001)(4636009)(36840700001)(40470700004)(46966006)(86362001)(83380400001)(47076005)(356005)(40460700003)(81166007)(36860700001)(4326008)(8676002)(70206006)(70586007)(54906003)(508600001)(316002)(110136005)(36756003)(7696005)(7406005)(7416002)(82310400004)(6666004)(186003)(26005)(336012)(426003)(8936002)(16526019)(2906002)(44832011)(1076003)(2616005)(5660300002)(36900700001)(2101003);DIR:OUT;SFP:1101;
 X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 07 Mar 2022 21:34:59.7012
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 07 Mar 2022 21:35:01.5912
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 63f07fff-d5a4-4a84-6fa4-08da008254fa
+X-MS-Exchange-CrossTenant-Network-Message-Id: 094d072f-d88d-4d23-d52b-08da0082561a
 X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
 X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource: BN8NAM11FT048.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthSource: BN8NAM11FT011.eop-nam11.prod.protection.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA1PR12MB5616
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN0PR12MB5785
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Tom Lendacky <thomas.lendacky@amd.com>
+From: Michael Roth <michael.roth@amd.com>
 
-To provide a more secure way to start APs under SEV-SNP, use the SEV-SNP
-AP Creation NAE event. This allows for guest control over the AP register
-state rather than trusting the hypervisor with the SEV-ES Jump Table
-address.
+Future patches for SEV-SNP-validated CPUID will also require early
+parsing of the EFI configuration. Incrementally move the related
+code into a set of helpers that can be re-used for that purpose.
 
-During native_smp_prepare_cpus(), invoke an SEV-SNP function that, if
-SEV-SNP is active, will set/override apic->wakeup_secondary_cpu. This
-will allow the SEV-SNP AP Creation NAE event method to be used to boot
-the APs. As a result of installing the override when SEV-SNP is active,
-this method of starting the APs becomes the required method. The override
-function will fail to start the AP if the hypervisor does not have
-support for AP creation.
-
-Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+Signed-off-by: Michael Roth <michael.roth@amd.com>
 Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
 ---
- arch/x86/include/asm/sev-common.h |   1 +
- arch/x86/include/asm/sev.h        |   4 +
- arch/x86/include/uapi/asm/svm.h   |   5 +
- arch/x86/kernel/sev.c             | 244 ++++++++++++++++++++++++++++++
- arch/x86/kernel/smpboot.c         |   3 +
- 5 files changed, 257 insertions(+)
+ arch/x86/boot/compressed/Makefile |  1 +
+ arch/x86/boot/compressed/acpi.c   | 28 +++++++----------
+ arch/x86/boot/compressed/efi.c    | 50 +++++++++++++++++++++++++++++++
+ arch/x86/boot/compressed/misc.h   | 16 ++++++++++
+ 4 files changed, 77 insertions(+), 18 deletions(-)
+ create mode 100644 arch/x86/boot/compressed/efi.c
 
-diff --git a/arch/x86/include/asm/sev-common.h b/arch/x86/include/asm/sev-common.h
-index 1aa72b5c2490..e9b6815b3b3d 100644
---- a/arch/x86/include/asm/sev-common.h
-+++ b/arch/x86/include/asm/sev-common.h
-@@ -104,6 +104,7 @@ enum psc_op {
- 	(((u64)(v) & GENMASK_ULL(63, 12)) >> 12)
+diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
+index 6115274fe10f..e69c3d2e0628 100644
+--- a/arch/x86/boot/compressed/Makefile
++++ b/arch/x86/boot/compressed/Makefile
+@@ -103,6 +103,7 @@ endif
+ vmlinux-objs-$(CONFIG_ACPI) += $(obj)/acpi.o
  
- #define GHCB_HV_FT_SNP			BIT_ULL(0)
-+#define GHCB_HV_FT_SNP_AP_CREATION	BIT_ULL(1)
+ vmlinux-objs-$(CONFIG_EFI_MIXED) += $(obj)/efi_thunk_$(BITS).o
++vmlinux-objs-$(CONFIG_EFI) += $(obj)/efi.o
+ efi-obj-$(CONFIG_EFI_STUB) = $(objtree)/drivers/firmware/efi/libstub/lib.a
  
- /* SNP Page State Change NAE event */
- #define VMGEXIT_PSC_MAX_ENTRY		253
-diff --git a/arch/x86/include/asm/sev.h b/arch/x86/include/asm/sev.h
-index feeb93e6ec97..a3203b2caaca 100644
---- a/arch/x86/include/asm/sev.h
-+++ b/arch/x86/include/asm/sev.h
-@@ -66,6 +66,8 @@ extern bool handle_vc_boot_ghcb(struct pt_regs *regs);
- /* RMP page size */
- #define RMP_PG_SIZE_4K			0
+ $(obj)/vmlinux: $(vmlinux-objs-y) $(efi-obj-y) FORCE
+diff --git a/arch/x86/boot/compressed/acpi.c b/arch/x86/boot/compressed/acpi.c
+index 8bcbcee54aa1..db6c561920f0 100644
+--- a/arch/x86/boot/compressed/acpi.c
++++ b/arch/x86/boot/compressed/acpi.c
+@@ -87,7 +87,7 @@ static acpi_physical_address kexec_get_rsdp_addr(void)
+ 	efi_system_table_64_t *systab;
+ 	struct efi_setup_data *esd;
+ 	struct efi_info *ei;
+-	char *sig;
++	enum efi_type et;
  
-+#define RMPADJUST_VMSA_PAGE_BIT		BIT(16)
-+
- #ifdef CONFIG_AMD_MEM_ENCRYPT
- extern struct static_key_false sev_es_enable_key;
- extern void __sev_es_ist_enter(struct pt_regs *regs);
-@@ -130,6 +132,7 @@ void __init early_snp_set_memory_shared(unsigned long vaddr, unsigned long paddr
- void __init snp_prep_memory(unsigned long paddr, unsigned int sz, enum psc_op op);
- void snp_set_memory_shared(unsigned long vaddr, unsigned int npages);
- void snp_set_memory_private(unsigned long vaddr, unsigned int npages);
-+void snp_set_wakeup_secondary_cpu(void);
- #else
- static inline void sev_es_ist_enter(struct pt_regs *regs) { }
- static inline void sev_es_ist_exit(void) { }
-@@ -146,6 +149,7 @@ early_snp_set_memory_shared(unsigned long vaddr, unsigned long paddr, unsigned i
- static inline void __init snp_prep_memory(unsigned long paddr, unsigned int sz, enum psc_op op) { }
- static inline void snp_set_memory_shared(unsigned long vaddr, unsigned int npages) { }
- static inline void snp_set_memory_private(unsigned long vaddr, unsigned int npages) { }
-+static inline void snp_set_wakeup_secondary_cpu(void) { }
- #endif
+ 	esd = (struct efi_setup_data *)get_kexec_setup_data_addr();
+ 	if (!esd)
+@@ -98,10 +98,9 @@ static acpi_physical_address kexec_get_rsdp_addr(void)
+ 		return 0;
+ 	}
  
- #endif
-diff --git a/arch/x86/include/uapi/asm/svm.h b/arch/x86/include/uapi/asm/svm.h
-index 0dcdb6e0c913..8b4c57baec52 100644
---- a/arch/x86/include/uapi/asm/svm.h
-+++ b/arch/x86/include/uapi/asm/svm.h
-@@ -109,6 +109,10 @@
- #define SVM_VMGEXIT_SET_AP_JUMP_TABLE		0
- #define SVM_VMGEXIT_GET_AP_JUMP_TABLE		1
- #define SVM_VMGEXIT_PSC				0x80000010
-+#define SVM_VMGEXIT_AP_CREATION			0x80000013
-+#define SVM_VMGEXIT_AP_CREATE_ON_INIT		0
-+#define SVM_VMGEXIT_AP_CREATE			1
-+#define SVM_VMGEXIT_AP_DESTROY			2
- #define SVM_VMGEXIT_HV_FEATURES			0x8000fffd
- #define SVM_VMGEXIT_UNSUPPORTED_EVENT		0x8000ffff
+-	ei = &boot_params->efi_info;
+-	sig = (char *)&ei->efi_loader_signature;
+-	if (strncmp(sig, EFI64_LOADER_SIGNATURE, 4)) {
+-		debug_putstr("Wrong kexec EFI loader signature.\n");
++	et = efi_get_type(boot_params);
++	if (et != EFI_TYPE_64) {
++		debug_putstr("Unexpected kexec EFI environment (expected 64-bit EFI).\n");
+ 		return 0;
+ 	}
  
-@@ -221,6 +225,7 @@
- 	{ SVM_VMGEXIT_AP_HLT_LOOP,	"vmgexit_ap_hlt_loop" }, \
- 	{ SVM_VMGEXIT_AP_JUMP_TABLE,	"vmgexit_ap_jump_table" }, \
- 	{ SVM_VMGEXIT_PSC,	"vmgexit_page_state_change" }, \
-+	{ SVM_VMGEXIT_AP_CREATION,	"vmgexit_ap_creation" }, \
- 	{ SVM_VMGEXIT_HV_FEATURES,	"vmgexit_hypervisor_feature" }, \
- 	{ SVM_EXIT_ERR,         "invalid_guest_state" }
+@@ -122,29 +121,22 @@ static acpi_physical_address efi_get_rsdp_addr(void)
+ 	unsigned long systab, config_tables;
+ 	unsigned int nr_tables;
+ 	struct efi_info *ei;
++	enum efi_type et;
+ 	bool efi_64;
+-	char *sig;
+-
+-	ei = &boot_params->efi_info;
+-	sig = (char *)&ei->efi_loader_signature;
  
-diff --git a/arch/x86/kernel/sev.c b/arch/x86/kernel/sev.c
-index 4315be1602d1..bc9bb7e0c04d 100644
---- a/arch/x86/kernel/sev.c
-+++ b/arch/x86/kernel/sev.c
-@@ -18,6 +18,7 @@
- #include <linux/memblock.h>
- #include <linux/kernel.h>
- #include <linux/mm.h>
-+#include <linux/cpumask.h>
- 
- #include <asm/cpu_entry_area.h>
- #include <asm/stacktrace.h>
-@@ -31,9 +32,26 @@
- #include <asm/svm.h>
- #include <asm/smp.h>
- #include <asm/cpu.h>
-+#include <asm/apic.h>
- 
- #define DR7_RESET_VALUE        0x400
- 
-+/* AP INIT values as documented in the APM2  section "Processor Initialization State" */
-+#define AP_INIT_CS_LIMIT		0xffff
-+#define AP_INIT_DS_LIMIT		0xffff
-+#define AP_INIT_LDTR_LIMIT		0xffff
-+#define AP_INIT_GDTR_LIMIT		0xffff
-+#define AP_INIT_IDTR_LIMIT		0xffff
-+#define AP_INIT_TR_LIMIT		0xffff
-+#define AP_INIT_RFLAGS_DEFAULT		0x2
-+#define AP_INIT_DR6_DEFAULT		0xffff0ff0
-+#define AP_INIT_GPAT_DEFAULT		0x0007040600070406ULL
-+#define AP_INIT_XCR0_DEFAULT		0x1
-+#define AP_INIT_X87_FTW_DEFAULT		0x5555
-+#define AP_INIT_X87_FCW_DEFAULT		0x0040
-+#define AP_INIT_CR0_DEFAULT		0x60000010
-+#define AP_INIT_MXCSR_DEFAULT		0x1f80
-+
- /* For early boot hypervisor communication in SEV-ES enabled guests */
- static struct ghcb boot_ghcb_page __bss_decrypted __aligned(PAGE_SIZE);
- 
-@@ -90,6 +108,8 @@ struct ghcb_state {
- static DEFINE_PER_CPU(struct sev_es_runtime_data*, runtime_data);
- DEFINE_STATIC_KEY_FALSE(sev_es_enable_key);
- 
-+static DEFINE_PER_CPU(struct sev_es_save_area *, sev_vmsa);
-+
- static __always_inline bool on_vc_stack(struct pt_regs *regs)
- {
- 	unsigned long sp = regs->sp;
-@@ -823,6 +843,230 @@ void snp_set_memory_private(unsigned long vaddr, unsigned int npages)
- 	pvalidate_pages(vaddr, npages, true);
- }
- 
-+static int snp_set_vmsa(void *va, bool vmsa)
-+{
-+	u64 attrs;
-+
-+	/*
-+	 * Running at VMPL0 allows the kernel to change the VMSA bit for a page
-+	 * using the RMPADJUST instruction. However, for the instruction to
-+	 * succeed it must target the permissions of a lesser privileged
-+	 * VMPL level, so use VMPL1 (refer to the RMPADJUST instruction in the
-+	 * AMD64 APM Volume 3).
-+	 */
-+	attrs = 1;
-+	if (vmsa)
-+		attrs |= RMPADJUST_VMSA_PAGE_BIT;
-+
-+	return rmpadjust((unsigned long)va, RMP_PG_SIZE_4K, attrs);
-+}
-+
-+#define __ATTR_BASE		(SVM_SELECTOR_P_MASK | SVM_SELECTOR_S_MASK)
-+#define INIT_CS_ATTRIBS		(__ATTR_BASE | SVM_SELECTOR_READ_MASK | SVM_SELECTOR_CODE_MASK)
-+#define INIT_DS_ATTRIBS		(__ATTR_BASE | SVM_SELECTOR_WRITE_MASK)
-+
-+#define INIT_LDTR_ATTRIBS	(SVM_SELECTOR_P_MASK | 2)
-+#define INIT_TR_ATTRIBS		(SVM_SELECTOR_P_MASK | 3)
-+
-+static void *snp_alloc_vmsa_page(void)
-+{
-+	struct page *p;
-+
-+	/*
-+	 * Allocate VMSA page to work around the SNP erratum where the CPU will
-+	 * incorrectly signal an RMP violation #PF if a large page (2MB or 1GB)
-+	 * collides with the RMP entry of VMSA page. The recommended workaround
-+	 * is to not use a large page.
-+	 */
-+
-+	/* Allocate an 8k page which is also 8k-aligned */
-+	p = alloc_pages(GFP_KERNEL_ACCOUNT | __GFP_ZERO, 1);
-+	if (!p)
-+		return NULL;
-+
-+	split_page(p, 1);
-+
-+	/* Free the first 4k. This page may be 2M/1G aligned and cannot be used. */
-+	__free_page(p);
-+
-+	return page_address(p + 1);
-+}
-+
-+static void snp_cleanup_vmsa(struct sev_es_save_area *vmsa)
-+{
-+	int err;
-+
-+	err = snp_set_vmsa(vmsa, false);
-+	if (err)
-+		pr_err("clear VMSA page failed (%u), leaking page\n", err);
+-	if (!strncmp(sig, EFI64_LOADER_SIGNATURE, 4)) {
++	et = efi_get_type(boot_params);
++	if (et == EFI_TYPE_64)
+ 		efi_64 = true;
+-	} else if (!strncmp(sig, EFI32_LOADER_SIGNATURE, 4)) {
++	else if (et == EFI_TYPE_32)
+ 		efi_64 = false;
+-	} else {
+-		debug_putstr("Wrong EFI loader signature.\n");
 +	else
-+		free_page((unsigned long)vmsa);
-+}
+ 		return 0;
+-	}
+ 
+ 	/* Get systab from boot params. */
++	ei = &boot_params->efi_info;
+ #ifdef CONFIG_X86_64
+ 	systab = ei->efi_systab | ((__u64)ei->efi_systab_hi << 32);
+ #else
+-	if (ei->efi_systab_hi || ei->efi_memmap_hi) {
+-		debug_putstr("Error getting RSDP address: EFI system table located above 4GB.\n");
+-		return 0;
+-	}
+ 	systab = ei->efi_systab;
+ #endif
+ 	if (!systab)
+diff --git a/arch/x86/boot/compressed/efi.c b/arch/x86/boot/compressed/efi.c
+new file mode 100644
+index 000000000000..bad0ce3e2ef6
+--- /dev/null
++++ b/arch/x86/boot/compressed/efi.c
+@@ -0,0 +1,50 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Helpers for early access to EFI configuration table.
++ *
++ * Originally derived from arch/x86/boot/compressed/acpi.c
++ */
 +
-+static int wakeup_cpu_via_vmgexit(int apic_id, unsigned long start_ip)
++#include "misc.h"
++#include <linux/efi.h>
++#include <asm/efi.h>
++
++/**
++ * efi_get_type - Given a pointer to boot_params, determine the type of EFI environment.
++ *
++ * @bp:         pointer to boot_params
++ *
++ * Return: EFI_TYPE_{32,64} for valid EFI environments, EFI_TYPE_NONE otherwise.
++ */
++enum efi_type efi_get_type(struct boot_params *bp)
 +{
-+	struct sev_es_save_area *cur_vmsa, *vmsa;
-+	struct ghcb_state state;
-+	unsigned long flags;
-+	struct ghcb *ghcb;
-+	u8 sipi_vector;
-+	int cpu, ret;
-+	u64 cr4;
++	struct efi_info *ei;
++	enum efi_type et;
++	const char *sig;
 +
-+	/*
-+	 * SNP AP creation requires that the hypervisor must support SNP and
-+	 * the AP creation feature. The SNP feature check was already checked
-+	 * prior to getting here, so just check for the AP_CREATION feature
-+	 * flag.
-+	 */
-+	if (!(sev_hv_features & GHCB_HV_FT_SNP_AP_CREATION))
-+		return -EOPNOTSUPP;
++	ei = &bp->efi_info;
++	sig = (char *)&ei->efi_loader_signature;
 +
-+	/*
-+	 * Verify the desired start IP against the known trampoline start IP
-+	 * to catch any future new trampolines that may be introduced that
-+	 * would require a new protected guest entry point.
-+	 */
-+	if (WARN_ONCE(start_ip != real_mode_header->trampoline_start,
-+		      "Unsupported SNP start_ip: %lx\n", start_ip))
-+		return -EINVAL;
-+
-+	/* Override start_ip with known protected guest start IP */
-+	start_ip = real_mode_header->sev_es_trampoline_start;
-+
-+	/* Find the logical CPU for the APIC ID */
-+	for_each_present_cpu(cpu) {
-+		if (arch_match_cpu_phys_id(cpu, apic_id))
-+			break;
-+	}
-+	if (cpu >= nr_cpu_ids)
-+		return -EINVAL;
-+
-+	cur_vmsa = per_cpu(sev_vmsa, cpu);
-+
-+	/*
-+	 * A new VMSA is created each time because there is no guarantee that
-+	 * the current VMSA is the kernels or that the vCPU is not running. If
-+	 * an attempt was done to use the current VMSA with a running vCPU, a
-+	 * #VMEXIT of that vCPU would wipe out all of the settings being done
-+	 * here.
-+	 */
-+	vmsa = (struct sev_es_save_area *)snp_alloc_vmsa_page();
-+	if (!vmsa)
-+		return -ENOMEM;
-+
-+	/* CR4 should maintain the MCE value */
-+	cr4 = native_read_cr4() & X86_CR4_MCE;
-+
-+	/* Set the CS value based on the start_ip converted to a SIPI vector */
-+	sipi_vector		= (start_ip >> 12);
-+	vmsa->cs.base		= sipi_vector << 12;
-+	vmsa->cs.limit		= AP_INIT_CS_LIMIT;
-+	vmsa->cs.attrib		= INIT_CS_ATTRIBS;
-+	vmsa->cs.selector	= sipi_vector << 8;
-+
-+	/* Set the RIP value based on start_ip */
-+	vmsa->rip		= start_ip & 0xfff;
-+
-+	/* Set AP INIT defaults as documented in the APM */
-+	vmsa->ds.limit		= AP_INIT_DS_LIMIT;
-+	vmsa->ds.attrib		= INIT_DS_ATTRIBS;
-+	vmsa->es		= vmsa->ds;
-+	vmsa->fs		= vmsa->ds;
-+	vmsa->gs		= vmsa->ds;
-+	vmsa->ss		= vmsa->ds;
-+
-+	vmsa->gdtr.limit	= AP_INIT_GDTR_LIMIT;
-+	vmsa->ldtr.limit	= AP_INIT_LDTR_LIMIT;
-+	vmsa->ldtr.attrib	= INIT_LDTR_ATTRIBS;
-+	vmsa->idtr.limit	= AP_INIT_IDTR_LIMIT;
-+	vmsa->tr.limit		= AP_INIT_TR_LIMIT;
-+	vmsa->tr.attrib		= INIT_TR_ATTRIBS;
-+
-+	vmsa->cr4		= cr4;
-+	vmsa->cr0		= AP_INIT_CR0_DEFAULT;
-+	vmsa->dr7		= DR7_RESET_VALUE;
-+	vmsa->dr6		= AP_INIT_DR6_DEFAULT;
-+	vmsa->rflags		= AP_INIT_RFLAGS_DEFAULT;
-+	vmsa->g_pat		= AP_INIT_GPAT_DEFAULT;
-+	vmsa->xcr0		= AP_INIT_XCR0_DEFAULT;
-+	vmsa->mxcsr		= AP_INIT_MXCSR_DEFAULT;
-+	vmsa->x87_ftw		= AP_INIT_X87_FTW_DEFAULT;
-+	vmsa->x87_fcw		= AP_INIT_X87_FCW_DEFAULT;
-+
-+	/* SVME must be set. */
-+	vmsa->efer		= EFER_SVME;
-+
-+	/*
-+	 * Set the SNP-specific fields for this VMSA:
-+	 *   VMPL level
-+	 *   SEV_FEATURES (matches the SEV STATUS MSR right shifted 2 bits)
-+	 */
-+	vmsa->vmpl		= 0;
-+	vmsa->sev_features	= sev_status >> 2;
-+
-+	/* Switch the page over to a VMSA page now that it is initialized */
-+	ret = snp_set_vmsa(vmsa, true);
-+	if (ret) {
-+		pr_err("set VMSA page failed (%u)\n", ret);
-+		free_page((unsigned long)vmsa);
-+
-+		return -EINVAL;
++	if (!strncmp(sig, EFI64_LOADER_SIGNATURE, 4)) {
++		et = EFI_TYPE_64;
++	} else if (!strncmp(sig, EFI32_LOADER_SIGNATURE, 4)) {
++		et = EFI_TYPE_32;
++	} else {
++		debug_putstr("No EFI environment detected.\n");
++		et = EFI_TYPE_NONE;
 +	}
 +
-+	/* Issue VMGEXIT AP Creation NAE event */
-+	local_irq_save(flags);
-+
-+	ghcb = __sev_get_ghcb(&state);
-+
-+	vc_ghcb_invalidate(ghcb);
-+	ghcb_set_rax(ghcb, vmsa->sev_features);
-+	ghcb_set_sw_exit_code(ghcb, SVM_VMGEXIT_AP_CREATION);
-+	ghcb_set_sw_exit_info_1(ghcb, ((u64)apic_id << 32) | SVM_VMGEXIT_AP_CREATE);
-+	ghcb_set_sw_exit_info_2(ghcb, __pa(vmsa));
-+
-+	sev_es_wr_ghcb_msr(__pa(ghcb));
-+	VMGEXIT();
-+
-+	if (!ghcb_sw_exit_info_1_is_valid(ghcb) ||
-+	    lower_32_bits(ghcb->save.sw_exit_info_1)) {
-+		pr_err("SNP AP Creation error\n");
-+		ret = -EINVAL;
++#ifndef CONFIG_X86_64
++	/*
++	 * Existing callers like acpi.c treat this case as an indicator to
++	 * fall-through to non-EFI, rather than an error, so maintain that
++	 * functionality here as well.
++	 */
++	if (ei->efi_systab_hi || ei->efi_memmap_hi) {
++		debug_putstr("EFI system table is located above 4GB and cannot be accessed.\n");
++		et = EFI_TYPE_NONE;
 +	}
++#endif
 +
-+	__sev_put_ghcb(&state);
-+
-+	local_irq_restore(flags);
-+
-+	/* Perform cleanup if there was an error */
-+	if (ret) {
-+		snp_cleanup_vmsa(vmsa);
-+		vmsa = NULL;
-+	}
-+
-+	/* Free up any previous VMSA page */
-+	if (cur_vmsa)
-+		snp_cleanup_vmsa(cur_vmsa);
-+
-+	/* Record the current VMSA page */
-+	per_cpu(sev_vmsa, cpu) = vmsa;
-+
-+	return ret;
++	return et;
 +}
+diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
+index 01cc13c12059..fede1afa39e9 100644
+--- a/arch/x86/boot/compressed/misc.h
++++ b/arch/x86/boot/compressed/misc.h
+@@ -176,4 +176,20 @@ void boot_stage2_vc(void);
+ 
+ unsigned long sev_verify_cbit(unsigned long cr3);
+ 
++enum efi_type {
++	EFI_TYPE_64,
++	EFI_TYPE_32,
++	EFI_TYPE_NONE,
++};
 +
-+void snp_set_wakeup_secondary_cpu(void)
++#ifdef CONFIG_EFI
++/* helpers for early EFI config table access */
++enum efi_type efi_get_type(struct boot_params *bp);
++#else
++static inline enum efi_type efi_get_type(struct boot_params *bp)
 +{
-+	if (!cc_platform_has(CC_ATTR_GUEST_SEV_SNP))
-+		return;
-+
-+	/*
-+	 * Always set this override if SNP is enabled. This makes it the
-+	 * required method to start APs under SNP. If the hypervisor does
-+	 * not support AP creation, then no APs will be started.
-+	 */
-+	apic->wakeup_secondary_cpu = wakeup_cpu_via_vmgexit;
++	return EFI_TYPE_NONE;
 +}
++#endif /* CONFIG_EFI */
 +
- int sev_es_setup_ap_jump_table(struct real_mode_header *rmh)
- {
- 	u16 startup_cs, startup_ip;
-diff --git a/arch/x86/kernel/smpboot.c b/arch/x86/kernel/smpboot.c
-index 617012f4619f..ad23d53b39ac 100644
---- a/arch/x86/kernel/smpboot.c
-+++ b/arch/x86/kernel/smpboot.c
-@@ -82,6 +82,7 @@
- #include <asm/spec-ctrl.h>
- #include <asm/hw_irq.h>
- #include <asm/stackprotector.h>
-+#include <asm/sev.h>
- 
- #ifdef CONFIG_ACPI_CPPC_LIB
- #include <acpi/cppc_acpi.h>
-@@ -1436,6 +1437,8 @@ void __init native_smp_prepare_cpus(unsigned int max_cpus)
- 	smp_quirk_init_udelay();
- 
- 	speculative_store_bypass_ht_init();
-+
-+	snp_set_wakeup_secondary_cpu();
- }
- 
- void arch_thaw_secondary_cpus_begin(void)
+ #endif /* BOOT_COMPRESSED_MISC_H */
 -- 
 2.25.1
 
