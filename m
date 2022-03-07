@@ -2,43 +2,43 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C4319C4167E
-	for <linux-efi@archiver.kernel.org>; Mon,  7 Mar 2022 21:38:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D2A72C3526E
+	for <linux-efi@archiver.kernel.org>; Mon,  7 Mar 2022 21:39:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1343524AbiCGVjv (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 7 Mar 2022 16:39:51 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39370 "EHLO
+        id S1343551AbiCGVjx (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 7 Mar 2022 16:39:53 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37326 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1343738AbiCGVh5 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 7 Mar 2022 16:37:57 -0500
-Received: from NAM11-CO1-obe.outbound.protection.outlook.com (mail-co1nam11on2061.outbound.protection.outlook.com [40.107.220.61])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F14618B6FB;
-        Mon,  7 Mar 2022 13:36:00 -0800 (PST)
+        with ESMTP id S1343525AbiCGVgn (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 7 Mar 2022 16:36:43 -0500
+Received: from NAM02-SN1-obe.outbound.protection.outlook.com (mail-sn1anam02on2041.outbound.protection.outlook.com [40.107.96.41])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 37BF289CFC;
+        Mon,  7 Mar 2022 13:35:19 -0800 (PST)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=LcaYWnPtXgvhJ4sd+SQVffCcMsS2QJ3PbZ+VU45kuTk/qdlBzEyan33nM1B8OEWZJ9MPf8kAFYzc/nBTyDC64clAsjJ/DtW1gKHiQxQBRm5wYJRkgHiZqxwRbQZujR/PYUiUx5rkGMwN+Css9Ce0P51Sx3yslRNXGuweNc7D9TIRlqzZhNlMAEMygt6M2peyBX+/TMnVd6nm1RiqXBEqk5Uje7DSV8eF8015Fci5mohji4mggWrhq9x7vgRmPWajqQZ1WRZ+EFnvtMJSyrcSND5q70o4/SZAsU8bFqFW1NMFDdlaW9sI5Luqfe5IAwHnZE3rLbz/2W7Lu5pFuVudiQ==
+ b=E3LAQgrjUz6jfIm8Dz7eqLjcCHkinuJZUUIhqIxmdkv508C+olH3KIc65ROeF6etqEQmWT/L4xSnSNgp9KmE7MfhtQOwqiNOV+/S4lkcKpcMBGAZ7ZWQxJr3lfsBt2tg+2cOrqcMEJSO430GK8ZWa37MXKv+NiDILQtVqdIZhzjfAJxQUuHugi8eTV4iVdtoY1PseyvCXbFs4nsbGBWKPGAqRRmD4HnPNtFwubotDHq7y3j9NmykrhRIkAXrhmrV0uI9bT4yq0OM7S1GjUEgaV7L4myMOPrzZAJs4nIIgwE2JTcLvbGQatsg6+p0nVzO+y0pvM7TaAvnFI1NMdVhJQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=qqagch64G11O0SigeH8VO6YRsAxrQAPIs7uum6soLxg=;
- b=B//x1R+pkA2TDaQ319/nQXagXvP61q4lXaZTrJ9KhFAsxuA9NkH5j5QZHQY+YBEIJjhnshVINRV+sNiifB5oWvUxKGK1GZFT1fd9M9p5U9qcHoD/qfpZC7lkLVuh3hFhH9UucPdDVoQKSYSTt/0MQAotVuBnAK39CP/JF7KElHwXziI+F+tOaaDKt2zwetXT0u3v8OZcMx2kiUrUhZ2gFvGAgqXzqbe1ek3r+HVfxHUtCLq3jyyvBbG4GUxyPTpvj8WZIvZY4k5QKpYYTqGyZYZqbr7+OmfhYbNWWdrHJrRtaBdRA+MauxFX6K9yGVFWPUzyXy6huLH4DqIML77JYg==
+ bh=H6s1C/Zn/hZRROUmwhJnVXMc2cu/EWhVAXRDi+KITkc=;
+ b=hQa1fvvauKphvqU/25YWPYgb4GKrRQGDfTWLGoDtVoaWoVVUYZPTwLRwagpxOKXrf7xjCYUPHLt+57uXV4yleVkLrHf4EcWKpkC6BEmTbzS7KgumFcppuVyAahWgRo8gixSfszDRff13F+QEYANBHy1SFDnvwaZdTzoF/lw4mD+RUYt84T4bymgk25xWn7e386lqBy8w9g30l/3/stZ53Jz9HG9y+gUhFngJThhIHdR3QYXw8hVk0UoQAN+PnJl4G578lHPhkJu0YFH4U5aUIcJ8PjLGzkj/GnzVoscp78GCLJx3lozEa+DsfB7Hct4PrvY0EbKlc6e8l3PWYrVCYw==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
  165.204.84.17) smtp.rcpttodomain=kernel.org smtp.mailfrom=amd.com; dmarc=pass
  (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
  dkim=none (message not signed); arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=qqagch64G11O0SigeH8VO6YRsAxrQAPIs7uum6soLxg=;
- b=neUTiNGylguXVbTJ5rZvYyW9HPGHU88BBFhOIOG0KTBo+IfgCIB2rQpcecp9i0cESYX57Ez8DOEsHHAUPzupTyjP9Gu8xybF8WKin4WJXHobY7mYYx2pAz5LaMW6BC/+QK5LiDEHbJM6cRK9HMwQvck5Z8+fgGSaDsx1dtsPHVc=
-Received: from BN9PR03CA0148.namprd03.prod.outlook.com (2603:10b6:408:fe::33)
- by MWHPR12MB1166.namprd12.prod.outlook.com (2603:10b6:300:7::21) with
+ bh=H6s1C/Zn/hZRROUmwhJnVXMc2cu/EWhVAXRDi+KITkc=;
+ b=Tng3dtiI400SQA52GEoA8YhkDKDos8YHZnrUhDsuccj4mFjl1k6En/Gn8dJFkUOLwXf/HkLwBDBFt1/BDlMBrM1PRD5x4FWTBhseMuWLssEqqQ+FqB4z6bn9OramHcDpm1foGkLUWhWtNNPSEMXZOlcQI+Bt/rIfVFZchjFIgNk=
+Received: from BN9PR03CA0145.namprd03.prod.outlook.com (2603:10b6:408:fe::30)
+ by CY4PR12MB1381.namprd12.prod.outlook.com (2603:10b6:903:42::18) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5038.14; Mon, 7 Mar
- 2022 21:35:35 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5038.19; Mon, 7 Mar
+ 2022 21:35:16 +0000
 Received: from BN8NAM11FT009.eop-nam11.prod.protection.outlook.com
- (2603:10b6:408:fe:cafe::3) by BN9PR03CA0148.outlook.office365.com
- (2603:10b6:408:fe::33) with Microsoft SMTP Server (version=TLS1_2,
+ (2603:10b6:408:fe:cafe::f3) by BN9PR03CA0145.outlook.office365.com
+ (2603:10b6:408:fe::30) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5038.14 via Frontend
- Transport; Mon, 7 Mar 2022 21:35:34 +0000
+ Transport; Mon, 7 Mar 2022 21:35:16 +0000
 X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
  smtp.mailfrom=amd.com; dkim=none (message not signed)
  header.d=none;dmarc=pass action=none header.from=amd.com;
@@ -48,11 +48,11 @@ Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
 Received: from SATLEXMB04.amd.com (165.204.84.17) by
  BN8NAM11FT009.mail.protection.outlook.com (10.13.176.65) with Microsoft SMTP
  Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.5038.14 via Frontend Transport; Mon, 7 Mar 2022 21:35:33 +0000
+ 15.20.5038.14 via Frontend Transport; Mon, 7 Mar 2022 21:35:15 +0000
 Received: from sbrijesh-desktop.amd.com (10.180.168.240) by SATLEXMB04.amd.com
  (10.181.40.145) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.18; Mon, 7 Mar
- 2022 15:35:25 -0600
+ 2022 15:35:11 -0600
 From:   Brijesh Singh <brijesh.singh@amd.com>
 To:     <x86@kernel.org>, <linux-kernel@vger.kernel.org>,
         <kvm@vger.kernel.org>, <linux-efi@vger.kernel.org>,
@@ -83,9 +83,9 @@ CC:     Thomas Gleixner <tglx@linutronix.de>,
         <brijesh.ksingh@gmail.com>, <tony.luck@intel.com>,
         <marcorr@google.com>, <sathyanarayanan.kuppuswamy@linux.intel.com>,
         Brijesh Singh <brijesh.singh@amd.com>
-Subject: [PATCH v12 39/46] x86/sev: Use firmware-validated CPUID for SEV-SNP guests
-Date:   Mon, 7 Mar 2022 15:33:49 -0600
-Message-ID: <20220307213356.2797205-40-brijesh.singh@amd.com>
+Subject: [PATCH v12 31/46] x86/sev: Move MSR-based VMGEXITs for CPUID to helper
+Date:   Mon, 7 Mar 2022 15:33:41 -0600
+Message-ID: <20220307213356.2797205-32-brijesh.singh@amd.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20220307213356.2797205-1-brijesh.singh@amd.com>
 References: <20220307213356.2797205-1-brijesh.singh@amd.com>
@@ -97,188 +97,186 @@ X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB04.amd.com
  (10.181.40.145)
 X-EOPAttributedMessage: 0
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 2793f8e0-3e55-40a8-9b3d-08da00826969
-X-MS-TrafficTypeDiagnostic: MWHPR12MB1166:EE_
-X-Microsoft-Antispam-PRVS: <MWHPR12MB11660B283328A62DE097E4A8E5089@MWHPR12MB1166.namprd12.prod.outlook.com>
+X-MS-Office365-Filtering-Correlation-Id: 96d1ccc5-acc4-4de4-6877-08da00825e97
+X-MS-TrafficTypeDiagnostic: CY4PR12MB1381:EE_
+X-Microsoft-Antispam-PRVS: <CY4PR12MB13817BD477F4C30B695CFFA2E5089@CY4PR12MB1381.namprd12.prod.outlook.com>
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: LxUFm7Yhyr+CvbxC4Fd9tqrN9Q39IQRn0QCXS2qNXahrfIMIBSQHy6XmMLOtjPDmVTwN0LK9ODf9KXkbWZivexI3evGLK4q/LmJ/xyewWsDw3wPGe8P0D0xCyf3Qd6WWRRyGuuoia3ZDp/+iv2rHkUqOMD7TeWjRPYRx54rlTNWiN79GNP09rkujs4zXxB0Ltl29Dafj48ZvUsdrsWnuqdXlr3RqUHi4v+3ngtEmsWcEe95Cjc+7qeOtfmEqLHUE3GIFuhRwddYkhySTYoOxJ3e/34XJooEYnE9Lj0+6TBlGbHalayPp5QtHxfx7cdtBbQ9P/q6x/1CMpcYCoNXCA+nreFSGUNFLWRS8PHGy4WtpL0Re/qQQi9lh0Htq62gUq2baLQlFG2/kptrr1SyFMndEy23vhnWMBy8tjpMs7v5pzsF/8tLVd9rRIynfNE67TUR984AqQk6grb+5gEadtX0JJV5/rQ7uI3mAnHwQUT5x52Ue7N8Et0RumCCD7MfZ3KLWQAz1HUOjgmusykKcqUu/cYovC0jiBvg/sP6V9FESzvrfymktieCCPW8FMtR8B8ZABnrPT7oznzty3cZI0YQ5utpjHOXL482DiVDSHVrtW1tAYSbgPlNF+2JD1rvDTDRAdQwue+RsuaDv9ze4f7WOOINr/lAoI5wg3tEE22rPnq77FifEDkEOzIPvJBfXl1fs70PZz/q8eQ3QyBjCqQwPr2LXBn4Yj/18NB485lk=
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230001)(4636009)(46966006)(36840700001)(40470700004)(47076005)(82310400004)(36860700001)(2616005)(81166007)(356005)(426003)(83380400001)(1076003)(336012)(40460700003)(26005)(186003)(16526019)(8676002)(70206006)(4326008)(70586007)(86362001)(36756003)(316002)(2906002)(44832011)(15650500001)(7406005)(7416002)(8936002)(5660300002)(6666004)(7696005)(508600001)(110136005)(54906003)(2101003)(36900700001);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: kjecHdwwKIYS1WqG2Es40+lCwhHuEE3kX38solBv3odjlxU+HZ7uxH6yMhqz5RMNKVoSQmUGM/iF410HuByNQVoYeqVGLMBM9ZX8j+0oVdzVlqFQ6fezwThTRh01R4NpHMR/6q8NeStOfALpTWpGBzweHQx+A8dN+KtawC2/6a8PQ5m97iyHLJU+1gVVb2GqdSIH+MmWStAePpdQu+g4x6y3Iss/DRvaOZvLeZn8wP0rl3K9O87cWiSGUMO1hOGz7hd6/sxf8XAbcwiAEsjFdwX4tlFI9ipbWDWSST/ZuSAgGSOMru2cL1WOuFDFZ5h7S9rQJoOsjQ58G3WPE/0fqUE19kBYzahWxlzAf3/Aeab8C9zIXHrscCroEucdo7/1iDUlmK8r7h/XjMxA35t3XTuViqKrm9CfUkooZnQ9HnUzgFC9Pl+RP72HRQc/PdRQ9FSC3I37mOVAN2bVYaYzZgoSZUXKCjJU96LgY7mWt+hxXnURV09B87ctpCpLel1xYYFXsYD21yTvGfPZzWM4wGcRnXXEeay5BuWtqDHuh1J6DzOKJ7JD/JZjUmCciICSexsii16ZmGspqyQMu6hJg7SvxltpWcp7lC9xkQhAZUTibZuvP76BY6afCzIerFMjRROgFTT9bl59Qn9wUbT5xmWVu1tjwdWv8HPCLjOL+upZIfJa5w5sVExyZPGriHgo10jsg4SemtzL22/g9xSxMsqa9xpLrKNYTu7PTIpiij8=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230001)(4636009)(46966006)(40470700004)(36840700001)(86362001)(16526019)(186003)(2616005)(1076003)(26005)(81166007)(40460700003)(356005)(83380400001)(426003)(70586007)(336012)(82310400004)(36860700001)(47076005)(8676002)(36756003)(54906003)(70206006)(110136005)(316002)(4326008)(8936002)(2906002)(5660300002)(7416002)(44832011)(7406005)(508600001)(7696005)(6666004)(36900700001)(2101003);DIR:OUT;SFP:1101;
 X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 07 Mar 2022 21:35:33.9998
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 07 Mar 2022 21:35:15.8294
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 2793f8e0-3e55-40a8-9b3d-08da00826969
+X-MS-Exchange-CrossTenant-Network-Message-Id: 96d1ccc5-acc4-4de4-6877-08da00825e97
 X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
 X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
 X-MS-Exchange-CrossTenant-AuthSource: BN8NAM11FT009.eop-nam11.prod.protection.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MWHPR12MB1166
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CY4PR12MB1381
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Michael Roth <michael.roth@amd.com>
 
-SEV-SNP guests will be provided the location of special 'secrets' and
-'CPUID' pages via the Confidential Computing blob. This blob is
-provided to the run-time kernel either through a bootparams field that
-was initialized by the boot/compressed kernel, or via a setup_data
-structure as defined by the Linux Boot Protocol.
+This code will also be used later for SEV-SNP-validated CPUID code in
+some cases, so move it to a common helper.
 
-Locate the Confidential Computing blob from these sources and, if found,
-use the provided CPUID page/table address to create a copy that the
-run-time kernel will use when servicing CPUID instructions via a #VC
-handler.
+While here, also add a check to terminate in cases where the CPUID
+function/subfunction is indexed and the subfunction is non-zero, since
+the GHCB MSR protocol does not support non-zero subfunctions.
 
+Suggested-by: Sean Christopherson <seanjc@google.com>
 Signed-off-by: Michael Roth <michael.roth@amd.com>
 Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
 ---
- arch/x86/boot/compressed/sev.c | 37 ----------------------------------
- arch/x86/kernel/sev-shared.c   | 37 ++++++++++++++++++++++++++++++++++
- arch/x86/kernel/sev.c          | 24 ++++++++++++++++++++++
- 3 files changed, 61 insertions(+), 37 deletions(-)
+ arch/x86/boot/compressed/sev.c |  1 +
+ arch/x86/kernel/sev-shared.c   | 83 +++++++++++++++++++++++-----------
+ arch/x86/kernel/sev.c          |  1 +
+ 3 files changed, 59 insertions(+), 26 deletions(-)
 
 diff --git a/arch/x86/boot/compressed/sev.c b/arch/x86/boot/compressed/sev.c
-index 2911137bf37f..79a59027f3d8 100644
+index 485410a182b0..ed717b6dd246 100644
 --- a/arch/x86/boot/compressed/sev.c
 +++ b/arch/x86/boot/compressed/sev.c
-@@ -381,43 +381,6 @@ static struct cc_blob_sev_info *find_cc_blob(struct boot_params *bp)
- 	return cc_info;
- }
+@@ -20,6 +20,7 @@
+ #include <asm/fpu/xcr.h>
+ #include <asm/ptrace.h>
+ #include <asm/svm.h>
++#include <asm/cpuid.h>
  
--/*
-- * Initialize the kernel's copy of the SNP CPUID table, and set up the
-- * pointer that will be used to access it.
-- *
-- * Maintaining a direct mapping of the SNP CPUID table used by firmware would
-- * be possible as an alternative, but the approach is brittle since the
-- * mapping needs to be updated in sync with all the changes to virtual memory
-- * layout and related mapping facilities throughout the boot process.
-- */
--static void setup_cpuid_table(const struct cc_blob_sev_info *cc_info)
--{
--	const struct snp_cpuid_table *cpuid_table_fw, *cpuid_table;
--	int i;
--
--	if (!cc_info || !cc_info->cpuid_phys || cc_info->cpuid_len < PAGE_SIZE)
--		sev_es_terminate(SEV_TERM_SET_LINUX, GHCB_TERM_CPUID);
--
--	cpuid_table_fw = (const struct snp_cpuid_table *)cc_info->cpuid_phys;
--	if (!cpuid_table_fw->count || cpuid_table_fw->count > SNP_CPUID_COUNT_MAX)
--		sev_es_terminate(SEV_TERM_SET_LINUX, GHCB_TERM_CPUID);
--
--	cpuid_table = snp_cpuid_get_table();
--	memcpy((void *)cpuid_table, cpuid_table_fw, sizeof(*cpuid_table));
--
--	/* Initialize CPUID ranges for range-checking. */
--	for (i = 0; i < cpuid_table->count; i++) {
--		const struct snp_cpuid_fn *fn = &cpuid_table->fn[i];
--
--		if (fn->eax_in == 0x0)
--			cpuid_std_range_max = fn->eax;
--		else if (fn->eax_in == 0x40000000)
--			cpuid_hyp_range_max = fn->eax;
--		else if (fn->eax_in == 0x80000000)
--			cpuid_ext_range_max = fn->eax;
--	}
--}
--
- /*
-  * Indicate SNP based on presence of SNP-specific CC blob. Subsequent checks
-  * will verify the SNP CPUID/MSR bits.
+ #include "error.h"
+ #include "../msr.h"
 diff --git a/arch/x86/kernel/sev-shared.c b/arch/x86/kernel/sev-shared.c
-index a7a1c0fb298e..2b4270d5559e 100644
+index 3aaef1a18ffe..b4d5558c9d0a 100644
 --- a/arch/x86/kernel/sev-shared.c
 +++ b/arch/x86/kernel/sev-shared.c
-@@ -964,3 +964,40 @@ static struct cc_blob_sev_info *find_cc_blob_setup_data(struct boot_params *bp)
+@@ -14,6 +14,16 @@
+ #define has_cpuflag(f)	boot_cpu_has(f)
+ #endif
  
- 	return NULL;
++/* I/O parameters for CPUID-related helpers */
++struct cpuid_leaf {
++	u32 fn;
++	u32 subfn;
++	u32 eax;
++	u32 ebx;
++	u32 ecx;
++	u32 edx;
++};
++
+ /*
+  * Since feature negotiation related variables are set early in the boot
+  * process they must reside in the .data section so as not to be zeroed
+@@ -194,6 +204,44 @@ enum es_result sev_es_ghcb_hv_call(struct ghcb *ghcb, bool set_ghcb_msr,
+ 	return verify_exception_info(ghcb, ctxt);
  }
-+
-+/*
-+ * Initialize the kernel's copy of the SNP CPUID table, and set up the
-+ * pointer that will be used to access it.
-+ *
-+ * Maintaining a direct mapping of the SNP CPUID table used by firmware would
-+ * be possible as an alternative, but the approach is brittle since the
-+ * mapping needs to be updated in sync with all the changes to virtual memory
-+ * layout and related mapping facilities throughout the boot process.
-+ */
-+static void __init setup_cpuid_table(const struct cc_blob_sev_info *cc_info)
+ 
++static int __sev_cpuid_hv(u32 fn, int reg_idx, u32 *reg)
 +{
-+	const struct snp_cpuid_table *cpuid_table_fw, *cpuid_table;
-+	int i;
++	u64 val;
 +
-+	if (!cc_info || !cc_info->cpuid_phys || cc_info->cpuid_len < PAGE_SIZE)
-+		sev_es_terminate(SEV_TERM_SET_LINUX, GHCB_TERM_CPUID);
++	sev_es_wr_ghcb_msr(GHCB_CPUID_REQ(fn, reg_idx));
++	VMGEXIT();
++	val = sev_es_rd_ghcb_msr();
++	if (GHCB_RESP_CODE(val) != GHCB_MSR_CPUID_RESP)
++		return -EIO;
 +
-+	cpuid_table_fw = (const struct snp_cpuid_table *)cc_info->cpuid_phys;
-+	if (!cpuid_table_fw->count || cpuid_table_fw->count > SNP_CPUID_COUNT_MAX)
-+		sev_es_terminate(SEV_TERM_SET_LINUX, GHCB_TERM_CPUID);
-+
-+	cpuid_table = snp_cpuid_get_table();
-+	memcpy((void *)cpuid_table, cpuid_table_fw, sizeof(*cpuid_table));
-+
-+	/* Initialize CPUID ranges for range-checking. */
-+	for (i = 0; i < cpuid_table->count; i++) {
-+		const struct snp_cpuid_fn *fn = &cpuid_table->fn[i];
-+
-+		if (fn->eax_in == 0x0)
-+			cpuid_std_range_max = fn->eax;
-+		else if (fn->eax_in == 0x40000000)
-+			cpuid_hyp_range_max = fn->eax;
-+		else if (fn->eax_in == 0x80000000)
-+			cpuid_ext_range_max = fn->eax;
-+	}
-+}
-diff --git a/arch/x86/kernel/sev.c b/arch/x86/kernel/sev.c
-index 5a7df617394b..c6b2e0c58255 100644
---- a/arch/x86/kernel/sev.c
-+++ b/arch/x86/kernel/sev.c
-@@ -34,6 +34,7 @@
- #include <asm/cpu.h>
- #include <asm/apic.h>
- #include <asm/cpuid.h>
-+#include <asm/cmdline.h>
- 
- #define DR7_RESET_VALUE        0x400
- 
-@@ -2028,6 +2029,8 @@ bool __init snp_init(struct boot_params *bp)
- 	if (!cc_info)
- 		return false;
- 
-+	setup_cpuid_table(cc_info);
-+
- 	/*
- 	 * The CC blob will be used later to access the secrets page. Cache
- 	 * it here like the boot kernel does.
-@@ -2041,3 +2044,24 @@ void __init snp_abort(void)
- {
- 	sev_es_terminate(SEV_TERM_SET_GEN, GHCB_SNP_UNSUPPORTED);
- }
-+
-+/*
-+ * It is useful from an auditing/testing perspective to provide an easy way
-+ * for the guest owner to know that the CPUID table has been initialized as
-+ * expected, but that initialization happens too early in boot to print any
-+ * sort of indicator, and there's not really any other good place to do it,
-+ * so do it here.
-+ */
-+static int __init report_cpuid_table(void)
-+{
-+	const struct snp_cpuid_table *cpuid_table = snp_cpuid_get_table();
-+
-+	if (!cpuid_table->count)
-+		return 0;
-+
-+	pr_info("Using SNP CPUID table, %d entries present.\n",
-+		cpuid_table->count);
++	*reg = (val >> 32);
 +
 +	return 0;
 +}
-+arch_initcall(report_cpuid_table);
++
++static int sev_cpuid_hv(struct cpuid_leaf *leaf)
++{
++	int ret;
++
++	/*
++	 * MSR protocol does not support fetching non-zero subfunctions, but is
++	 * sufficient to handle current early-boot cases. Should that change,
++	 * make sure to report an error rather than ignoring the index and
++	 * grabbing random values. If this issue arises in the future, handling
++	 * can be added here to use GHCB-page protocol for cases that occur late
++	 * enough in boot that GHCB page is available.
++	 */
++	if (cpuid_function_is_indexed(leaf->fn) && leaf->subfn)
++		return -EINVAL;
++
++	ret =         __sev_cpuid_hv(leaf->fn, GHCB_CPUID_REQ_EAX, &leaf->eax);
++	ret = ret ? : __sev_cpuid_hv(leaf->fn, GHCB_CPUID_REQ_EBX, &leaf->ebx);
++	ret = ret ? : __sev_cpuid_hv(leaf->fn, GHCB_CPUID_REQ_ECX, &leaf->ecx);
++	ret = ret ? : __sev_cpuid_hv(leaf->fn, GHCB_CPUID_REQ_EDX, &leaf->edx);
++
++	return ret;
++}
++
+ /*
+  * Boot VC Handler - This is the first VC handler during boot, there is no GHCB
+  * page yet, so it only supports the MSR based communication with the
+@@ -201,40 +249,23 @@ enum es_result sev_es_ghcb_hv_call(struct ghcb *ghcb, bool set_ghcb_msr,
+  */
+ void __init do_vc_no_ghcb(struct pt_regs *regs, unsigned long exit_code)
+ {
++	unsigned int subfn = lower_bits(regs->cx, 32);
+ 	unsigned int fn = lower_bits(regs->ax, 32);
+-	unsigned long val;
++	struct cpuid_leaf leaf;
+ 
+ 	/* Only CPUID is supported via MSR protocol */
+ 	if (exit_code != SVM_EXIT_CPUID)
+ 		goto fail;
+ 
+-	sev_es_wr_ghcb_msr(GHCB_CPUID_REQ(fn, GHCB_CPUID_REQ_EAX));
+-	VMGEXIT();
+-	val = sev_es_rd_ghcb_msr();
+-	if (GHCB_RESP_CODE(val) != GHCB_MSR_CPUID_RESP)
+-		goto fail;
+-	regs->ax = val >> 32;
+-
+-	sev_es_wr_ghcb_msr(GHCB_CPUID_REQ(fn, GHCB_CPUID_REQ_EBX));
+-	VMGEXIT();
+-	val = sev_es_rd_ghcb_msr();
+-	if (GHCB_RESP_CODE(val) != GHCB_MSR_CPUID_RESP)
+-		goto fail;
+-	regs->bx = val >> 32;
+-
+-	sev_es_wr_ghcb_msr(GHCB_CPUID_REQ(fn, GHCB_CPUID_REQ_ECX));
+-	VMGEXIT();
+-	val = sev_es_rd_ghcb_msr();
+-	if (GHCB_RESP_CODE(val) != GHCB_MSR_CPUID_RESP)
++	leaf.fn = fn;
++	leaf.subfn = subfn;
++	if (sev_cpuid_hv(&leaf))
+ 		goto fail;
+-	regs->cx = val >> 32;
+ 
+-	sev_es_wr_ghcb_msr(GHCB_CPUID_REQ(fn, GHCB_CPUID_REQ_EDX));
+-	VMGEXIT();
+-	val = sev_es_rd_ghcb_msr();
+-	if (GHCB_RESP_CODE(val) != GHCB_MSR_CPUID_RESP)
+-		goto fail;
+-	regs->dx = val >> 32;
++	regs->ax = leaf.eax;
++	regs->bx = leaf.ebx;
++	regs->cx = leaf.ecx;
++	regs->dx = leaf.edx;
+ 
+ 	/*
+ 	 * This is a VC handler and the #VC is only raised when SEV-ES is
+diff --git a/arch/x86/kernel/sev.c b/arch/x86/kernel/sev.c
+index bc9bb7e0c04d..97c0aa44ce2d 100644
+--- a/arch/x86/kernel/sev.c
++++ b/arch/x86/kernel/sev.c
+@@ -33,6 +33,7 @@
+ #include <asm/smp.h>
+ #include <asm/cpu.h>
+ #include <asm/apic.h>
++#include <asm/cpuid.h>
+ 
+ #define DR7_RESET_VALUE        0x400
+ 
 -- 
 2.25.1
 
