@@ -2,35 +2,35 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 68C8DC433F5
-	for <linux-efi@archiver.kernel.org>; Mon, 14 Mar 2022 08:27:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 51C05C433EF
+	for <linux-efi@archiver.kernel.org>; Mon, 14 Mar 2022 08:27:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232439AbiCNI2M (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 14 Mar 2022 04:28:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59026 "EHLO
+        id S231159AbiCNI2R (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 14 Mar 2022 04:28:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59052 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231159AbiCNI2L (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 14 Mar 2022 04:28:11 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 518101C90D
-        for <linux-efi@vger.kernel.org>; Mon, 14 Mar 2022 01:27:02 -0700 (PDT)
+        with ESMTP id S237028AbiCNI2P (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 14 Mar 2022 04:28:15 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B72421CB0B
+        for <linux-efi@vger.kernel.org>; Mon, 14 Mar 2022 01:27:06 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id E22326124F
-        for <linux-efi@vger.kernel.org>; Mon, 14 Mar 2022 08:27:01 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 92184C340E9;
-        Mon, 14 Mar 2022 08:26:59 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 4F6DC6125C
+        for <linux-efi@vger.kernel.org>; Mon, 14 Mar 2022 08:27:06 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id F4005C340F6;
+        Mon, 14 Mar 2022 08:27:03 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1647246421;
-        bh=sIQV0KigsF9VL9HA872oOMHiHrPBTf/WVLidEKFWSVY=;
-        h=From:To:Cc:Subject:Date:From;
-        b=fIPRb/p1kTzJJeActzbh9oONBLA30qVDCvl+DplxY1iBvchQ8RueOILwhK/trL32A
-         pPFuzc+6hJQ0lnfozJ5dpzKIozD2V+FOUBjRMKsZ5xFnMh8HCVaOMCn4KpkxoUPMCl
-         fUjDPKfWnK0egEDYobtLtHi6oaw83hSlWc6fUNSz401e4ts2dSnqJR77WlsWPBgIha
-         DzKl5pWwN+TrhtKEMczkzG+yD8JZouChf/YQM4w3qngXfY4DnkSbdr1+rpHD8Deh0l
-         7mD/HQ5WK9XvzOH6hDBzYQHR0DMTnhH9zrHRTxis4PCNHRSxJ7PI1eytJtjlgqNXRC
-         tFmNq8gNYh6kw==
+        s=k20201202; t=1647246425;
+        bh=vzSBjJ1sxDwQUc1X0CmXZXicnEitrFeXZRaxKaqJLb8=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=hOmF36EguKA2IrnDnWkzFjcwzCUk5QZ6sGQF3A6qqs4LegPuTtWerBg3orBrpoQPk
+         vJoxzdM/RZB6DRTJxyiBqvgI2A2JU7Irawf4F8sc1zuZeuVHNGj8Ms0bBksPsc0N1L
+         WbCi1DiynEFA8DQXQcbhHwtEWWZVt1VkdeUy9NzDoC1in5gBTHOl0aEua5Viq7adEW
+         J1Oxk9GC1h6mqj18JEbxV5W8fy6CQSoumoH7TcJXqsPnhFAG92X1NWyeYGLLHYPmvJ
+         qYlrnKz0fB1LMtdykJ/Dr9CX1NX4hIEuKf80Q/+DXJ9/ROaYgKOayQSwWTh7wFidlw
+         UrYbJkrMj1JFQ==
 From:   ardb@kernel.org
 To:     linux-efi@vger.kernel.org
 Cc:     Ard Biesheuvel <ardb@google.com>, Marc Zyngier <maz@kernel.org>,
@@ -39,10 +39,12 @@ Cc:     Ard Biesheuvel <ardb@google.com>, Marc Zyngier <maz@kernel.org>,
         David Brazdil <dbrazdil@google.com>,
         Fuad Tabba <tabba@google.com>,
         Kees Cook <keescook@chromium.org>
-Subject: [RFC PATCH v0 0/6] Minimal Linux/arm64 VM firmware (written in Rust)
-Date:   Mon, 14 Mar 2022 09:26:38 +0100
-Message-Id: <20220314082644.3436071-1-ardb@kernel.org>
+Subject: [RFC PATCH v0 2/6] Add DTB processing
+Date:   Mon, 14 Mar 2022 09:26:40 +0100
+Message-Id: <20220314082644.3436071-3-ardb@kernel.org>
 X-Mailer: git-send-email 2.30.2
+In-Reply-To: <20220314082644.3436071-1-ardb@kernel.org>
+References: <20220314082644.3436071-1-ardb@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
@@ -51,122 +53,79 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Ard Biesheuvel <ardb@google.com>
 
-One of the tedious bits of booting a virtual machine under KVM on ARM is
-dealing with guest memory coherency. This is due the fact that running
-with the MMU off is problematic, as manipulations of memory by the guest
-are incoherent with the host's cached view of memory. For this reason,
-KVM needs to keep track of the MMU state of the guest, and perform cache
-maintenance to the point of coherency (PoC) on all memory that is
-exposed to the guest (and populated at stage 2) at that point.
+Add handling of the QEMU provided DTB, which we will need to consult to
+find the DRAM layout and the fwcfg device. Initially, just dump the
+/chosen/bootargs only, if one is provided.
+---
+ Cargo.lock  |  7 +++++++
+ Cargo.toml  |  1 +
+ src/main.rs | 10 ++++++++++
+ 3 files changed, 18 insertions(+)
 
-Existing VM firmware is often based on bare metal firmware, which sets
-up page tables with the MMU and caches off, and does the necessary (as
-well as unnecessary *) cache maintenance to ensure that all
-manipulations of memory performed with the MMU off are coherent, and not
-covered by stale cachelines (either clean or dirty) that either obstruct
-the view of the real memory contents, or are at risk of corrupting them
-if such dirty cachelines are evicted and written back inadvertently.
-
-As firmware is usually intimately tied to the memory topology of the
-platform, we can do much better than this. Instead of setting up the
-initial page tables at runtime, we can bake the into the boot image,
-provided that it runs at an a priori known address. This means we can
-enable MMU and caches straight out of reset, and defer all memory
-accesses that go via the D side until after.
-
-This is the approach taken by this series: it implements a minimal
-firmware/bootloader for booting a Linux arm64 kernel on QEMU's
-mach-virt, which does minimal code execution and no memory access (other
-than instruction fetching) with the MMU disabled. Combined with the
-series that I sent out recently [0] for Linux, which implements
-something similar for the kernel itself, virtually all cache maintenance
-to the PoC can be dropped from the boot flow (with the exception of the
-.idmap page in the kernel itself). Given that no stores to memory occur
-at all with the MMU off, KVM should be able to detect that the PoC
-maintenance is no longer necessary when the MMU is turned on.
-
-This is not only a simplification in itself, it also means that minimal
-code execution occurs while restricted memory permissions are being
-honoured: the firmware boots with WXN protections enabled, and the Rust
-code itself as well as the text section of the loaded kernel Image need
-to be mapped with read-only permissions in order to execute them.
-
-This prototype is presented as v0, as it cuts some corners, while the
-intent is to make this an implementation of EFI that provides all that
-Linux needs to boot. Most notably,
-
-- only ~900 MiB of DRAM is supported, due to the fact that the page
-  table code I nicked greedily maps down to pages, and the heap is only
-  around 2 MiB, so we run out of memory if we try to map more.
-
-- it boots via the kernel's 'bare metal' entrypoint as EFI features are
-  entirely missing for the moment.
-
-- only uncompressed kernels are supported
-
-How to build and run:
-
-(first, build a kernel with [0] applied, so the image tolerates being
-booted with MMU and caches enabled)
-
-$ cargo build  # using a nightly Rust compiler
-
-$ objcopy -O binary target/aarch64-unknown-linux-gnu/debug/efilite efilite.bin
-
-$ qemu-system-aarch64 \
-    -M virt,gic-version=host -cpu host -enable-kvm -smp 4 \
-    -net none -nographic -m 900m -bios efilite.bin -kernel path/to/Image \
-    -drive if=virtio,file=path/to/hda.xxx,format=xxx -append root=/dev/vda2
-
-* U-Boot in particular carries a lot of set/way cache maintenance that
-  was cargo culted from the v7 days, and should never be needed in VM
-
-[0] https://lore.kernel.org/all/20220304175657.2744400-1-ardb@kernel.org/
-
-Cc: Marc Zyngier <maz@kernel.org>
-Cc: Will Deacon <will@kernel.org>
-Cc: Quentin Perret <qperret@google.com>
-Cc: David Brazdil <dbrazdil@google.com>
-Cc: Fuad Tabba <tabba@google.com>
-Cc: Kees Cook <keescook@chromium.org>
-
-Ard Biesheuvel (6):
-  Implement a bare metal Rust runtime on top of QEMU's mach-virt
-  Add DTB processing
-  Add paging code to manage the full ID map
-  Discover QEMU fwcfg device and use it to load the kernel
-  Remap code section of loaded kernel and boot it
-  Temporarily pass the kaslr seed via register X1
-
- .cargo/config    |   5 +
- .gitignore       |   2 +
- Cargo.lock       |  87 ++++
- Cargo.toml       |  12 +
- efilite.lds      |  62 +++
- src/cmo.rs       |  37 ++
- src/console.rs   |  57 +++
- src/cstring.rs   |   9 +
- src/fwcfg.rs     |  85 ++++
- src/head.S       | 121 +++++
- src/main.rs      | 155 +++++-
- src/pagealloc.rs |  44 ++
- src/paging.rs    | 499 ++++++++++++++++++++
- src/pecoff.rs    |  23 +
- src/ttable.S     |  37 ++
- 15 files changed, 1233 insertions(+), 2 deletions(-)
- create mode 100644 .cargo/config
- create mode 100644 Cargo.lock
- create mode 100644 efilite.lds
- create mode 100644 src/cmo.rs
- create mode 100644 src/console.rs
- create mode 100644 src/cstring.rs
- create mode 100644 src/fwcfg.rs
- create mode 100644 src/head.S
- create mode 100644 src/pagealloc.rs
- create mode 100644 src/paging.rs
- create mode 100644 src/pecoff.rs
- create mode 100644 src/ttable.S
-
+diff --git a/Cargo.lock b/Cargo.lock
+index 617acc9c6086..2750d4a3937c 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -12,12 +12,19 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
+ name = "efilite"
+ version = "0.1.0"
+ dependencies = [
++ "fdt",
+  "linked_list_allocator",
+  "log",
+  "mmio",
+  "rlibc",
+ ]
+ 
++[[package]]
++name = "fdt"
++version = "0.1.3"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "b643857cf70949306b81d7e92cb9d47add673868edac9863c4a49c42feaf3f1e"
++
+ [[package]]
+ name = "linked_list_allocator"
+ version = "0.9.1"
+diff --git a/Cargo.toml b/Cargo.toml
+index 9bc2b39f6e9b..b073376d9e16 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -10,6 +10,7 @@ rlibc = "1.0.0"
+ linked_list_allocator = "0.9.1"
+ log = "0.4.14"
+ mmio = "2.1.0"
++fdt = "0.1.3"
+ 
+ [profile.dev]
+ panic = "abort"
+diff --git a/src/main.rs b/src/main.rs
+index 698e9c5724bf..6d880732b469 100644
+--- a/src/main.rs
++++ b/src/main.rs
+@@ -13,6 +13,10 @@ use log::{error, info};
+ #[global_allocator]
+ pub static ALLOCATOR: LockedHeap = LockedHeap::empty();
+ 
++extern "C" {
++    static _dtb: u8;
++}
++
+ #[no_mangle]
+ extern "C" fn efilite_main(base: usize, mapped: usize, used: usize) {
+     #[cfg(debug_assertions)]
+@@ -28,6 +32,12 @@ extern "C" fn efilite_main(base: usize, mapped: usize, used: usize) {
+     unsafe {
+         ALLOCATOR.lock().init(base + used, mapped - used);
+     }
++
++    let fdt = unsafe { fdt::Fdt::from_ptr(&_dtb).expect("Failed to parse device tree") };
++
++    fdt.chosen()
++        .bootargs()
++        .map(|args| info!("/chosen/bootargs: {:?}\n", args));
+ }
+ 
+ #[no_mangle]
 -- 
 2.30.2
 
