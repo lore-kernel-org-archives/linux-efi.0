@@ -2,35 +2,35 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 25D52C433F5
-	for <linux-efi@archiver.kernel.org>; Mon, 14 Mar 2022 08:27:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BAF7CC433EF
+	for <linux-efi@archiver.kernel.org>; Mon, 14 Mar 2022 08:27:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236676AbiCNI2Q (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 14 Mar 2022 04:28:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59050 "EHLO
+        id S237690AbiCNI2U (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 14 Mar 2022 04:28:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59078 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231159AbiCNI2P (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 14 Mar 2022 04:28:15 -0400
+        with ESMTP id S237028AbiCNI2T (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 14 Mar 2022 04:28:19 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8EAB61C90D
-        for <linux-efi@vger.kernel.org>; Mon, 14 Mar 2022 01:27:05 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 289CC1C90D
+        for <linux-efi@vger.kernel.org>; Mon, 14 Mar 2022 01:27:09 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 1D69B61244
-        for <linux-efi@vger.kernel.org>; Mon, 14 Mar 2022 08:27:04 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C53F9C340EE;
-        Mon, 14 Mar 2022 08:27:01 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id A917D6124F
+        for <linux-efi@vger.kernel.org>; Mon, 14 Mar 2022 08:27:08 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2F444C340EE;
+        Mon, 14 Mar 2022 08:27:06 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1647246423;
-        bh=uEYMh97A01Bpv6vYFf1w8esIt7Uwp6A86+/ymKZ/QmY=;
+        s=k20201202; t=1647246428;
+        bh=ubbdt9lUOLVXhY8roFjfmBcF2EH6IX9ywQRSlISbxk4=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=cFZIQ2VAIElAX2RcajF3ADu3sOABlNhYz7hm682nuUXpv0InwdA3y7ExTtkrn5aRm
-         /u1+gq/3ialsb9lM03XQR43jWofOuVVdSEVlnX5JQt9eC8SIQlqDzwkv3Yr2FdOkbb
-         aOFstDA5qNUIzOf5+299IAj3tSEHxw5ZwZQdsf3RzRTKpFUYqeBvytmp/1puEA/2Wm
-         XVbCTMW5+/cEWbgTEJiThuIbw0J4ZIz3glL8dqS2niPkPlBqrQmMmAEq1XtAfygd/W
-         H9ybQzqFKKzb5EaOYj1QmKPbzS6ooT3pEVWsd+WCdpay58O8RlM4iUjWzRTCWtzjgt
-         nw923Aev7tCUw==
+        b=jkT3yxu/Vdlndvx1q/NdeAIfYBwwKClIi13/NhQYfl+3+hlB10tlbIGp+Ps61uelG
+         PJD0QiO5qtjy13I/7ecMwpN/2SQozdWtW0utEVVcS/eal2fVqXyCScxyanzGhcRYs8
+         LA+Gs7eYSUBqK3SJNzd4y8qQiQtVfYuui/8pU+eUtGq9oVn4HFAWnS2mkGT7MDcQbz
+         w3XS2fBb2Kzbu3DcknId+OEtvR4Xn04gxaSFdcVDA3edmCSCyyX2zhNIvfeFdwQy5V
+         qQfdzx6lXKtIs53h3/srMydxIVM9oe/gEh2dBSU4atwCavOoZiUjo5DtYCOExiX8j+
+         36M21a1jEr0Aw==
 From:   ardb@kernel.org
 To:     linux-efi@vger.kernel.org
 Cc:     Ard Biesheuvel <ardb@google.com>, Marc Zyngier <maz@kernel.org>,
@@ -39,9 +39,9 @@ Cc:     Ard Biesheuvel <ardb@google.com>, Marc Zyngier <maz@kernel.org>,
         David Brazdil <dbrazdil@google.com>,
         Fuad Tabba <tabba@google.com>,
         Kees Cook <keescook@chromium.org>
-Subject: [RFC PATCH v0 1/6] Implement a bare metal Rust runtime on top of QEMU's mach-virt
-Date:   Mon, 14 Mar 2022 09:26:39 +0100
-Message-Id: <20220314082644.3436071-2-ardb@kernel.org>
+Subject: [RFC PATCH v0 3/6] Add paging code to manage the full ID map
+Date:   Mon, 14 Mar 2022 09:26:41 +0100
+Message-Id: <20220314082644.3436071-4-ardb@kernel.org>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20220314082644.3436071-1-ardb@kernel.org>
 References: <20220314082644.3436071-1-ardb@kernel.org>
@@ -53,520 +53,705 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Ard Biesheuvel <ardb@google.com>
 
-Implement the startup sequence to set up a runtime for Rust code, and
-populate it with a logger wired to the QEMU emulated PL011 UART, and a
-heap allocator.
+We enter with a minimal ID map carried in NOR flash, but in order to
+load anything into DRAM and boot it, we need to map the memory first.
 
-The .text and .rodata parts are in emulated NOR flash, and the
-executable pieces execute in place. The .data and .bss sections as well
-as the stack are disjoint from the flash image, and reside in DRAM. The
-assembler startup code sets up the stack pointer and initializes the
-writable sections.
+So add a paging module loosely based on the libhermit project's code,
+but with a few tweaks and necessary fixes. (In particular, remove all
+the code that is irrelevant for 1:1 mappings)
 
-The startup code programs the MMU with a set of translation tables in
-NOR flash, which describe a 2M R-X region in flash, a 2 M R-- region
-covering the base of DRAM (which is where QEMU's mach-virt puts the
-device tree), and 2M RW- region used for the stack, .data/.bss and the
-heap.
+This code needs some more work: it currently greedily maps all memory
+ranges down to pages, which is unnecessary, and costly in terms of heap
+footprint. It also fails to deal with the need to split block mappings
+into table mappings.
 ---
- .cargo/config  |   5 +
- .gitignore     |   2 +
- Cargo.lock     |  73 ++++++++++++
- Cargo.toml     |  10 ++
- efilite.lds    |  61 ++++++++++
- src/console.rs |  57 +++++++++
- src/cstring.rs |   9 ++
- src/head.S     | 121 ++++++++++++++++++++
- src/main.rs    |  49 +++++++-
- src/ttable.S   |  37 ++++++
- 10 files changed, 422 insertions(+), 2 deletions(-)
+ Cargo.lock       |   7 +
+ Cargo.toml       |   1 +
+ efilite.lds      |   1 +
+ src/main.rs      |  44 ++
+ src/pagealloc.rs |  44 ++
+ src/paging.rs    | 499 ++++++++++++++++++++
+ 6 files changed, 596 insertions(+)
 
-diff --git a/.cargo/config b/.cargo/config
-new file mode 100644
-index 000000000000..584568a162de
---- /dev/null
-+++ b/.cargo/config
-@@ -0,0 +1,5 @@
-+[target.aarch64-unknown-linux-gnu]
-+rustflags = ["-C", "relocation-model=static", "-C", "link-arg=-Wl,-Tefilite.lds,--orphan-handling=warn", "-C", "link-arg=-nostartfiles"]
-+
-+[build]
-+target = "aarch64-unknown-linux-gnu"
-diff --git a/.gitignore b/.gitignore
-index ea8c4bf7f35f..c5a7561a896d 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -1 +1,3 @@
- /target
-+*.bin
-+.*.swp
 diff --git a/Cargo.lock b/Cargo.lock
-new file mode 100644
-index 000000000000..617acc9c6086
---- /dev/null
+index 2750d4a3937c..8ad5db72fef6 100644
+--- a/Cargo.lock
 +++ b/Cargo.lock
-@@ -0,0 +1,73 @@
-+# This file is automatically @generated by Cargo.
-+# It is not intended for manual editing.
-+version = 3
-+
+@@ -2,6 +2,12 @@
+ # It is not intended for manual editing.
+ version = 3
+ 
 +[[package]]
-+name = "cfg-if"
-+version = "1.0.0"
++name = "bitflags"
++version = "1.3.2"
 +source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
++checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 +
-+[[package]]
-+name = "efilite"
-+version = "0.1.0"
-+dependencies = [
-+ "linked_list_allocator",
-+ "log",
-+ "mmio",
-+ "rlibc",
-+]
-+
-+[[package]]
-+name = "linked_list_allocator"
-+version = "0.9.1"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "549ce1740e46b291953c4340adcd74c59bcf4308f4cac050fd33ba91b7168f4a"
-+dependencies = [
-+ "spinning_top",
-+]
-+
-+[[package]]
-+name = "lock_api"
-+version = "0.4.6"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "88943dd7ef4a2e5a4bfa2753aaab3013e34ce2533d1996fb18ef591e315e2b3b"
-+dependencies = [
-+ "scopeguard",
-+]
-+
-+[[package]]
-+name = "log"
-+version = "0.4.14"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "51b9bbe6c47d51fc3e1a9b945965946b4c44142ab8792c50835a980d362c2710"
-+dependencies = [
-+ "cfg-if",
-+]
-+
-+[[package]]
-+name = "mmio"
-+version = "2.1.0"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "ee857bfd0b37394f3507d78ee7bd4b712a2179a2ce50e47d36bbb481672f5408"
-+
-+[[package]]
-+name = "rlibc"
-+version = "1.0.0"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "fc874b127765f014d792f16763a81245ab80500e2ad921ed4ee9e82481ee08fe"
-+
-+[[package]]
-+name = "scopeguard"
-+version = "1.1.0"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "d29ab0c6d3fc0ee92fe66e2d99f700eab17a8d57d1c1d3b748380fb20baa78cd"
-+
-+[[package]]
-+name = "spinning_top"
-+version = "0.2.4"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "75adad84ee84b521fb2cca2d4fd0f1dab1d8d026bda3c5bea4ca63b5f9f9293c"
-+dependencies = [
-+ "lock_api",
-+]
+ [[package]]
+ name = "cfg-if"
+ version = "1.0.0"
+@@ -12,6 +18,7 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
+ name = "efilite"
+ version = "0.1.0"
+ dependencies = [
++ "bitflags",
+  "fdt",
+  "linked_list_allocator",
+  "log",
 diff --git a/Cargo.toml b/Cargo.toml
-index 07cf0efb7baf..9bc2b39f6e9b 100644
+index b073376d9e16..defa16ec4ab1 100644
 --- a/Cargo.toml
 +++ b/Cargo.toml
-@@ -6,3 +6,13 @@ edition = "2021"
- # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+@@ -11,6 +11,7 @@ linked_list_allocator = "0.9.1"
+ log = "0.4.14"
+ mmio = "2.1.0"
+ fdt = "0.1.3"
++bitflags = "1.3"
  
- [dependencies]
-+rlibc = "1.0.0"
-+linked_list_allocator = "0.9.1"
-+log = "0.4.14"
-+mmio = "2.1.0"
-+
-+[profile.dev]
-+panic = "abort"
-+
-+[profile.release]
-+panic = "abort"
+ [profile.dev]
+ panic = "abort"
 diff --git a/efilite.lds b/efilite.lds
-new file mode 100644
-index 000000000000..0632cbaf8e4e
---- /dev/null
+index 0632cbaf8e4e..e460f9e9b917 100644
+--- a/efilite.lds
 +++ b/efilite.lds
-@@ -0,0 +1,61 @@
-+/* SPDX-License-Identifier: GPL-2.0 */
-+
-+MEMORY
-+{
-+	flash	: ORIGIN = 0,          LENGTH = 2M
-+	ram	: ORIGIN = 0x40000000, LENGTH = 4M
-+}
-+
-+PROVIDE(_init_base = 0x40000000);
-+PROVIDE(_init_size = 0x400000);
-+
-+ENTRY(__init)
-+
-+SECTIONS
-+{
-+	.text : {
-+		*(.head)
-+		*(.text .text*)
-+		*(.rodata .rodata*)
-+		*(.got .got.plt)
-+	} >flash
-+
-+	/*
-+	 * QEMU passes the DT blob by storing it at the base of DRAM
-+	 * before starting the guest
-+	 */
-+	.dtb (NOLOAD) : {
-+		_dtb = .;
-+		. += 0x200000;
-+	} >ram
-+
-+	/*
-+	 * put the stack first so we will notice if we overrun and
-+	 * hit the R/O mapping of the DT blob
-+	 */
-+	.stack (NOLOAD) : {
-+		. += 0x4000;
-+		_stack_end = .;
-+	} >ram
-+
-+	.data : ALIGN(32) {
-+		_data = .;
-+		*(.data .data*)
-+		. = ALIGN(32);
-+		_edata = .;
-+	} >ram AT >flash
-+
-+	data_lma = LOADADDR(.data);
-+
-+	.bss : ALIGN (32) {
-+		_bss_start = .;
-+		*(.bss .bss*)
-+		. = ALIGN(32);
-+		_bss_end = .;
-+		_end = .;
-+	} >ram
-+
-+	/DISCARD/ : {
-+		*(.note*)
-+	}
-+}
-diff --git a/src/console.rs b/src/console.rs
-new file mode 100644
-index 000000000000..3841c6cb2dd0
---- /dev/null
-+++ b/src/console.rs
-@@ -0,0 +1,57 @@
-+/* SPDX-License-Identifier: GPL-2.0 */
-+
-+use core::fmt::Write;
-+use log::{Level, Metadata, Record};
-+use mmio::{Allow, Deny, VolBox};
-+
-+pub struct QemuSerialConsole {
-+    base: u64,
-+}
-+
-+struct QemuSerialConsoleWriter<'a> {
-+    console: &'a QemuSerialConsole,
-+}
-+
-+impl QemuSerialConsole {
-+    fn puts(&self, s: &str) {
-+        //
-+        // This is technically racy, as nothing is preventing concurrent accesses to the UART if we
-+        // model it this way. However, this is a debug tool only, and we never read back the
-+        // register value so any races cannot have any observeable side effects to the program
-+        // itself.
-+        //
-+        let mut out = unsafe { VolBox::<u32, Deny, Allow>::new(self.base as *mut u32) };
-+
-+        for b in s.as_bytes().iter() {
-+            if *b == b'\n' {
-+                out.write(b'\r' as u32);
-+            }
-+            out.write(*b as u32)
-+        }
-+    }
-+}
-+
-+impl Write for QemuSerialConsoleWriter<'_> {
-+    fn write_str(&mut self, s: &str) -> core::fmt::Result {
-+        self.console.puts(s);
-+        Ok(())
-+    }
-+}
-+
-+impl log::Log for QemuSerialConsole {
-+    fn enabled(&self, metadata: &Metadata) -> bool {
-+        metadata.level() <= Level::Info
-+    }
-+
-+    fn log(&self, record: &Record) {
-+        if self.enabled(record.metadata()) {
-+            let mut out = QemuSerialConsoleWriter { console: &self };
-+            write!(&mut out, "{} - {}", record.level(), record.args()).unwrap();
-+        }
-+    }
-+
-+    fn flush(&self) {}
-+}
-+
-+// The primary UART of QEMU's mach-virt
-+pub static OUT: QemuSerialConsole = QemuSerialConsole { base: 0x900_0000 };
-diff --git a/src/cstring.rs b/src/cstring.rs
-new file mode 100644
-index 000000000000..b6a5c4308067
---- /dev/null
-+++ b/src/cstring.rs
-@@ -0,0 +1,9 @@
-+/* SPDX-License-Identifier: GPL-2.0 */
-+
-+extern crate rlibc;
-+use rlibc::memcmp;
-+
-+#[no_mangle]
-+pub unsafe extern "C" fn bcmp(s1: *const u8, s2: *const u8, len: usize) -> i32 {
-+    memcmp(s1, s2, len)
-+}
-diff --git a/src/head.S b/src/head.S
-new file mode 100644
-index 000000000000..b82dca4325fa
---- /dev/null
-+++ b/src/head.S
-@@ -0,0 +1,121 @@
-+/* SPDX-License-Identifier: GPL-2.0 */
-+
-+	.macro	adr_l, reg:req, sym:req
-+	adrp	\reg, \sym
-+	add	\reg, \reg, :lo12:\sym
-+	.endm
-+
-+	.macro	mov_i, reg:req, imm:req
-+	movz	\reg, :abs_g2:\imm
-+	movk	\reg, :abs_g1_nc:\imm
-+	movk	\reg, :abs_g0_nc:\imm
-+	.endm
-+
-+	.section ".head", "ax", %progbits
-+	.globl	__init
-+__init:
-+	mov_i	x0, mairval
-+	mov_i	x1, tcrval
-+	adrp	x2, idmap
-+	mov_i	x3, sctlrval
-+	mov_i	x4, cpacrval
-+	adr_l	x5, vector_table
-+
-+	msr	mair_el1, x0		// set up the 1:1 mapping
-+	msr	tcr_el1, x1
-+	msr	ttbr0_el1, x2
-+	isb
-+
-+	tlbi	vmalle1			// invalidate any cached translations
-+	ic	iallu			// invalidate the I-cache
-+	dsb	nsh
-+	isb
-+
-+	msr	sctlr_el1, x3		// enable MMU and caches
-+	msr	cpacr_el1, x4		// enable FP/SIMD
-+	msr	vbar_el1, x5		// enable exception handling
-+	isb
-+
-+	adr_l	x0, _data		// initialize the .data section
-+	adr_l	x1, _edata
-+	adr_l	x2, data_lma
-+0:	cmp	x0, x1
-+	b.ge	1f
-+	ldp	q0, q1, [x2], #32
-+	stp	q0, q1, [x0], #32
-+	b	0b
-+
-+1:	adr_l	x0, _bss_start		// wipe the .bss section
-+	adr_l	x1, _bss_end
-+	movi	v0.16b, #0
-+2:	cmp	x0, x1
-+	b.ge	3f
-+	stp	q0, q0, [x0], #32
-+	b	2b
-+
-+3:	mov	x29, xzr		// initialize the frame pointer
-+	adrp	x0, _stack_end
-+	mov	sp, x0
-+	adrp	x0, _init_base		// initial DRAM base address
-+	movz	x1, :abs_g1:_init_size	// initially mapped area
-+	adr_l	x2, _end		// statically allocated by program
-+	sub	x2, x2, x0
-+	bl	efilite_main
-+
-+4:	mov_i	x0, 0x84000008		// PSCI SYSTEM OFF
-+	hvc	#0
-+	wfi
-+	b	4b
-+
-+	.macro	vector_entry
-+	adrp	x0, idmap
-+	adrp	x1, _stack_end
-+	msr	ttbr0_el1, x0		// switch back to the initial ID map
-+	isb
-+	mov	sp, x1			// reset the stack pointer
-+	mov	x29, xzr
-+	mrs	x0, esr_el1
-+	mrs	x1, elr_el1
-+	mrs	x2, far_el1
-+	bl	handle_exception
-+	.endm
-+
-+	.section ".text", "ax", %progbits
-+	.align	11
-+vector_table:
-+	vector_entry
-+	.org	vector_table + 0x200
-+	vector_entry
-+	.org	vector_table + 0x400
-+	vector_entry
-+	.org	vector_table + 0x600
-+	vector_entry
-+
-+	.set	.L_MAIR_DEV_nGnRE,	0x04
-+	.set	.L_MAIR_MEM_WBWA,	0xff
-+	.set	mairval, .L_MAIR_DEV_nGnRE | (.L_MAIR_MEM_WBWA << 8)
-+
-+	.set	.L_TCR_TG0_4KB,		0x0 << 14
-+	.set	.L_TCR_TG1_4KB,		0x2 << 30
-+	.set	.L_TCR_IPS_64GB,	0x1 << 32
-+	.set	.L_TCR_EPD1,		0x1 << 23
-+	.set	.L_TCR_SH_INNER,	0x3 << 12
-+	.set	.L_TCR_RGN_OWB,		0x1 << 10
-+	.set	.L_TCR_RGN_IWB,		0x1 << 8
-+	.set	tcrval,	.L_TCR_TG0_4KB | .L_TCR_TG1_4KB | .L_TCR_EPD1 | .L_TCR_IPS_64GB | .L_TCR_RGN_OWB
-+	.set	tcrval, tcrval | .L_TCR_RGN_IWB | .L_TCR_SH_INNER | (64 - 36) // TCR_T0SZ
-+
-+	.set	.L_SCTLR_ELx_I,		0x1 << 12
-+	.set	.L_SCTLR_ELx_SA,	0x1 << 3
-+	.set	.L_SCTLR_ELx_C,		0x1 << 2
-+	.set	.L_SCTLR_ELx_M,		0x1 << 0
-+	.set	.L_SCTLR_EL1_SPAN,	0x1 << 23
-+	.set	.L_SCTLR_EL1_WXN,	0x1 << 19
-+	.set	.L_SCTLR_EL1_SED,	0x1 << 8
-+	.set	.L_SCTLR_EL1_ITD,	0x1 << 7
-+	.set	.L_SCTLR_EL1_RES1,	(0x1 << 11) | (0x1 << 20) | (0x1 << 22) | (0x1 << 28) | (0x1 << 29)
-+	.set	sctlrval, .L_SCTLR_ELx_M | .L_SCTLR_ELx_C | .L_SCTLR_ELx_SA | .L_SCTLR_EL1_ITD | .L_SCTLR_EL1_SED
-+	.set	sctlrval, sctlrval | .L_SCTLR_ELx_I | .L_SCTLR_EL1_WXN | .L_SCTLR_EL1_SPAN | .L_SCTLR_EL1_RES1
-+
-+	.set	.L_CPACR_EL1_FPEN,	0x3 << 20
-+	.set	cpacrval, .L_CPACR_EL1_FPEN
+@@ -27,6 +27,7 @@ SECTIONS
+ 	.dtb (NOLOAD) : {
+ 		_dtb = .;
+ 		. += 0x200000;
++		_dtb_end = .;
+ 	} >ram
+ 
+ 	/*
 diff --git a/src/main.rs b/src/main.rs
-index e7a11a969c03..698e9c5724bf 100644
+index 6d880732b469..af58ccc0318d 100644
 --- a/src/main.rs
 +++ b/src/main.rs
-@@ -1,3 +1,48 @@
--fn main() {
--    println!("Hello, world!");
-+/* SPDX-License-Identifier: GPL-2.0 */
+@@ -2,19 +2,30 @@
+ 
+ #![no_std]
+ #![no_main]
++// needed by the paging code
++#![allow(incomplete_features)]
++#![feature(specialization)]
+ 
+ mod console;
+ mod cstring;
++mod pagealloc;
++mod paging;
+ 
+ use core::{arch::global_asm, panic::PanicInfo};
+ use linked_list_allocator::LockedHeap;
+ use log::{error, info};
+ 
++use crate::paging::{PageTableEntryFlags, VirtAddr};
 +
-+#![no_std]
-+#![no_main]
++#[macro_use]
++extern crate bitflags;
 +
-+mod console;
-+mod cstring;
-+
-+use core::{arch::global_asm, panic::PanicInfo};
-+use linked_list_allocator::LockedHeap;
-+use log::{error, info};
-+
-+#[global_allocator]
-+pub static ALLOCATOR: LockedHeap = LockedHeap::empty();
-+
-+#[no_mangle]
-+extern "C" fn efilite_main(base: usize, mapped: usize, used: usize) {
-+    #[cfg(debug_assertions)]
-+    log::set_logger(&console::OUT)
-+        .map(|()| log::set_max_level(log::LevelFilter::Info))
-+        .unwrap();
-+
-+    // Give the mapped but unused memory to the heap allocator
-+    info!(
-+        "Heap allocator with {} KB of memory\n",
-+        (mapped - used) / 1024
-+    );
-+    unsafe {
-+        ALLOCATOR.lock().init(base + used, mapped - used);
-+    }
+ #[global_allocator]
+ pub static ALLOCATOR: LockedHeap = LockedHeap::empty();
+ 
+ extern "C" {
+     static _dtb: u8;
++    static _dtb_end: u8;
  }
+ 
+ #[no_mangle]
+@@ -38,6 +49,39 @@ extern "C" fn efilite_main(base: usize, mapped: usize, used: usize) {
+     fdt.chosen()
+         .bootargs()
+         .map(|args| info!("/chosen/bootargs: {:?}\n", args));
 +
-+#[no_mangle]
-+extern "C" fn handle_exception(esr: u64, elr: u64, far: u64) -> ! {
-+    panic!(
-+        "Unhandled exception: ESR = 0x{:X}, ELR = 0x{:X}, FAR = 0x{:X}.",
-+        esr, elr, far
++    paging::init();
++
++    let mut mem_flags = PageTableEntryFlags::empty();
++    mem_flags.normal().non_global().execute_disable();
++
++    info!("Mapping all DRAM regions found in the DT:\n");
++    for reg in fdt.memory().regions() {
++        if let Some(size) = reg.size {
++            paging::map_range(reg.starting_address as VirtAddr, size as u64, mem_flags);
++        }
++    }
++
++    info!("Remapping initial DRAM regions:\n");
++
++    // Ensure that the initial DRAM region remains mapped
++    paging::map_range(base as VirtAddr, mapped as u64, mem_flags);
++
++    // Ensure that the DT retains its global R/O mapping
++    let mut nor_flags = PageTableEntryFlags::empty();
++    nor_flags.normal().read_only();
++    paging::map_range(
++        unsafe { &_dtb as *const _ } as VirtAddr,
++        unsafe { &_dtb_end as *const _ as u64 - &_dtb as *const _ as u64 },
++        nor_flags,
++    );
++
++    // Switch to the new ID map so we can use all of DRAM
++    paging::activate();
++
++    // Switch back to the initial ID map so we can remap
++    // the loaded kernel image with different permissions
++    paging::deactivate();
+ }
+ 
+ #[no_mangle]
+diff --git a/src/pagealloc.rs b/src/pagealloc.rs
+new file mode 100644
+index 000000000000..f91043000033
+--- /dev/null
++++ b/src/pagealloc.rs
+@@ -0,0 +1,44 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++
++use core::alloc::GlobalAlloc;
++use core::arch::asm;
++
++use crate::paging::{BasePageSize, PageSize};
++use crate::ALLOCATOR;
++
++const DCZID_BS_MASK: u64 = 0xf;
++
++pub fn get_zeroed_page() -> u64 {
++    let layout =
++        core::alloc::Layout::from_size_align(BasePageSize::SIZE, BasePageSize::SIZE).unwrap();
++    let page = unsafe { ALLOCATOR.alloc(layout) };
++    if page.is_null() {
++        panic!("Out of memory!");
++    }
++
++    let dczid = unsafe {
++        let mut l: u64;
++        asm!("mrs {reg}, dczid_el0",
++             reg = out(reg) l,
++             options(pure, nomem, nostack, preserves_flags),
++        );
++        l
++    };
++
++    let line_shift = 2 + (dczid & DCZID_BS_MASK);
++    let line_size: isize = 1 << line_shift;
++    let num_lines = BasePageSize::SIZE >> line_shift;
++    let mut offset: isize = 0;
++
++    for _ in 1..=num_lines {
++        unsafe {
++            asm!(
++                "dc zva, {line}",
++                 line = in(reg) page.offset(offset),
++                 options(nostack, preserves_flags),
++            );
++        }
++        offset += line_size;
++    }
++    page as u64
++}
+diff --git a/src/paging.rs b/src/paging.rs
+new file mode 100644
+index 000000000000..222c40e47c78
+--- /dev/null
++++ b/src/paging.rs
+@@ -0,0 +1,499 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++
++// Mostly derived from
++// https://github.com/hermitcore/libhermit-rs/blob/master/src/arch/aarch64/mm/paging.rs
++
++use core::arch::asm;
++use core::marker::PhantomData;
++use core::mem;
++use log::info;
++
++use crate::pagealloc;
++
++// Use a different ASID for the full ID map, as well as non-global attributes
++// for all its DRAM mappings. This way, we can ignore break-before-make rules
++// entirely when breaking down block mappings, as long as we don't do so while
++// the full ID map is active.
++const ASID: u64 = 1;
++
++// Number of Offset bits of a virtual address for a 4 KiB page, which are shifted away to get its Page Frame Number (PFN).
++const PAGE_BITS: usize = 12;
++
++// Number of bits of the index in each table (L0Table, L1Table, L2Table, L3Table).
++const PAGE_MAP_BITS: usize = 9;
++
++// A mask where PAGE_MAP_BITS are set to calculate a table index.
++const PAGE_MAP_MASK: usize = 0x1FF;
++
++#[repr(C, align(512))]
++struct IdMap {
++    entries: [u64; 64],
++}
++
++extern "C" {
++    // Root level of the initial ID map in NOR flash
++    static idmap: IdMap;
++}
++
++// Root level of the full ID map managed by this code
++static mut IDMAP: IdMap = IdMap {
++    entries: [0u64; 64],
++};
++
++macro_rules! align_down {
++    ($value:expr, $alignment:expr) => {
++        ($value) & !($alignment - 1)
++    };
++}
++
++pub fn init() {
++    // Clone the first entry, which covers the first 1 GB of PA space
++    // It contains the NOR flash and most peripherals
++    unsafe {
++        IDMAP.entries[0] = idmap.entries[0];
++    }
++}
++
++pub type VirtAddr = u64;
++pub type PhysAddr = u64;
++
++// A memory page of the size given by S.
++#[derive(Clone, Copy)]
++struct Page<S: PageSize> {
++    // Virtual memory address of this page.
++    // This is rounded to a page size boundary on creation.
++    virtual_address: VirtAddr,
++
++    // Required by Rust to support the S parameter.
++    size: PhantomData<S>,
++}
++
++impl<S: PageSize> Page<S> {
++    // Returns a PageIter to iterate from the given first Page to the given last Page (inclusive).
++    fn range(first: Self, last: Self) -> PageIter<S> {
++        assert!(first.virtual_address <= last.virtual_address);
++        PageIter {
++            current: first,
++            last: last,
++        }
++    }
++
++    // Returns a Page including the given virtual address.
++    // That means, the address is rounded down to a page size boundary.
++    fn including_address(virtual_address: VirtAddr) -> Self {
++        Self {
++            virtual_address: align_down!(virtual_address, S::SIZE as u64),
++            size: PhantomData,
++        }
++    }
++
++    // Returns the index of this page in the table given by L.
++    fn table_index<L: PageTableLevel>(&self) -> usize {
++        assert!(L::LEVEL <= S::MAP_LEVEL);
++        self.virtual_address as usize >> PAGE_BITS >> (3 - L::LEVEL) * PAGE_MAP_BITS & PAGE_MAP_MASK
++    }
++}
++
++struct PageIter<S: PageSize> {
++    current: Page<S>,
++    last: Page<S>,
++}
++
++impl<S: PageSize> Iterator for PageIter<S> {
++    type Item = Page<S>;
++
++    fn next(&mut self) -> Option<Page<S>> {
++        if self.current.virtual_address <= self.last.virtual_address {
++            let p = self.current;
++            self.current.virtual_address += S::SIZE as u64;
++            Some(p)
++        } else {
++            None
++        }
++    }
++}
++
++fn get_page_range<S: PageSize>(virtual_address: VirtAddr, count: u64) -> PageIter<S> {
++    let first_page = Page::<S>::including_address(virtual_address);
++    let last_page = Page::<S>::including_address(virtual_address + (count - 1) * S::SIZE as u64);
++    Page::range(first_page, last_page)
++}
++
++fn map<S: PageSize>(base: VirtAddr, size: u64, flags: PageTableEntryFlags) {
++    info!(
++        "Mapping memory at [0x{:X} - 0x{:X}] {:?}\n",
++        base,
++        base + size - 1,
++        flags
++    );
++
++    let range = get_page_range::<S>(base, size / S::SIZE as u64);
++    let root_pagetable = unsafe {
++        &mut *mem::transmute::<*mut u64, *mut PageTable<L1Table>>(&IDMAP as *const _ as *mut u64)
++    };
++    root_pagetable.map_pages(range, base, flags);
++}
++
++pub fn map_range(base: VirtAddr, size: u64, flags: PageTableEntryFlags) {
++    map::<BasePageSize>(base, size, flags);
++}
++
++pub fn activate() {
++    unsafe {
++        asm!(
++            "msr   ttbr0_el1, {ttbrval}",
++            "isb",
++            ttbrval = in(reg) &IDMAP as *const _ as u64 | (ASID << 48),
++            options(preserves_flags),
++        );
++    }
++}
++
++pub fn deactivate() {
++    unsafe {
++        asm!(
++            "msr   ttbr0_el1, {ttbrval}",
++            "isb",
++            "tlbi  aside1, {asid}",
++            "dsb   nsh",
++            "isb",
++            asid = in(reg) ASID << 48,
++            ttbrval = in(reg) &idmap as *const _ as u64,
++            options(preserves_flags),
++        );
++    }
++}
++
++bitflags! {
++    // Useful flags for an entry in either table (L0Table, L1Table, L2Table, L3Table).
++    //
++    // See ARM Architecture Reference Manual, ARMv8, for ARMv8-A Reference Profile, Issue C.a, Chapter D4.3.3
++    pub struct PageTableEntryFlags: u64 {
++        // Set if this entry is valid.
++        const PRESENT = 1 << 0;
++
++        // Set if this entry points to a table or a 4 KiB page.
++        const TABLE_OR_4KIB_PAGE = 1 << 1;
++
++        // Set if this entry points to device memory (non-gathering, non-reordering, no early write acknowledgement)
++        const DEVICE_NGNRE = 0 << 4 | 0 << 3 | 0 << 2;
++
++        // Set if this entry points to normal memory (cacheable)
++        const NORMAL = 0 << 4 | 0 << 3 | 1 << 2;
++
++        // Set if memory referenced by this entry shall be read-only.
++        const READ_ONLY = 1 << 7;
++
++        // Set if this entry shall be shared between all cores of the system.
++        const INNER_SHAREABLE = 1 << 8 | 1 << 9;
++
++        // Set if software has accessed this entry (for memory access or address translation).
++        const ACCESSED = 1 << 10;
++
++        // Set if this entry is scoped by ASID
++        const NON_GLOBAL = 1 << 11;
++
++        // Set if code execution shall be disabled for memory referenced by this entry in privileged mode.
++        const PRIVILEGED_EXECUTE_NEVER = 1 << 53;
++
++        // Set if code execution shall be disabled for memory referenced by this entry in unprivileged mode.
++        const UNPRIVILEGED_EXECUTE_NEVER = 1 << 54;
++
++        // Self-reference to the Level 0 page table
++        const SELF = 1 << 55;
++    }
++}
++
++impl PageTableEntryFlags {
++    // An empty set of flags for unused/zeroed table entries.
++    // Needed as long as empty() is no const function.
++    const BLANK: PageTableEntryFlags = PageTableEntryFlags { bits: 0 };
++
++    //	pub fn device(&mut self) -> &mut Self {
++    //		self.insert(PageTableEntryFlags::DEVICE_NGNRE);
++    //		self
++    //	}
++
++    pub fn normal(&mut self) -> &mut Self {
++        self.insert(PageTableEntryFlags::NORMAL);
++        self
++    }
++
++    pub fn read_only(&mut self) -> &mut Self {
++        self.insert(PageTableEntryFlags::READ_ONLY);
++        self
++    }
++
++    //	pub fn writable(&mut self) -> &mut Self {
++    //		self.remove(PageTableEntryFlags::READ_ONLY);
++    //		self
++    //	}
++
++    pub fn non_global(&mut self) -> &mut Self {
++        self.insert(PageTableEntryFlags::NON_GLOBAL);
++        self
++    }
++
++    pub fn execute_disable(&mut self) -> &mut Self {
++        self.insert(PageTableEntryFlags::PRIVILEGED_EXECUTE_NEVER);
++        self.insert(PageTableEntryFlags::UNPRIVILEGED_EXECUTE_NEVER);
++        self
++    }
++}
++
++// An interface to allow for a generic implementation of struct PageTable for all 4 page tables.
++// Must be implemented by all page tables.
++trait PageTableLevel {
++    // Numeric page table level
++    const LEVEL: usize;
++}
++
++trait PageTableLevelWithSubtables: PageTableLevel {
++    type SubtableLevel;
++}
++
++// The Level 1 Table (can map 1 GiB pages)
++enum L1Table {}
++impl PageTableLevel for L1Table {
++    const LEVEL: usize = 1;
++}
++
++impl PageTableLevelWithSubtables for L1Table {
++    type SubtableLevel = L2Table;
++}
++
++// The Level 2 Table (can map 2 MiB pages)
++enum L2Table {}
++impl PageTableLevel for L2Table {
++    const LEVEL: usize = 2;
++}
++
++impl PageTableLevelWithSubtables for L2Table {
++    type SubtableLevel = L3Table;
++}
++
++// The Level 3 Table (can map 4 KiB pages)
++enum L3Table {}
++impl PageTableLevel for L3Table {
++    const LEVEL: usize = 3;
++}
++
++// Representation of any page table in memory.
++// Parameter L supplies information for Rust's typing system to distinguish between the different tables.
++#[repr(align(4096))]
++struct PageTable<L: PageTableLevel> {
++    // Each page table has at most 512 entries (can be calculated using PAGE_MAP_BITS).
++    entries: [PageTableEntry; 1 << PAGE_MAP_BITS],
++
++    // Required by Rust to support the L parameter.
++    level: PhantomData<L>,
++}
++
++// A trait defining methods every page table has to implement.
++// This additional trait is necessary to make use of Rust's specialization feature and provide a default
++// implementation of some methods.
++trait PageTableMethods {
++    fn map_page_in_this_table<S: PageSize>(
++        &mut self,
++        page: Page<S>,
++        physical_address: PhysAddr,
++        flags: PageTableEntryFlags,
++    );
++    fn map_page<S: PageSize>(
++        &mut self,
++        page: Page<S>,
++        physical_address: PhysAddr,
++        flags: PageTableEntryFlags,
 +    );
 +}
 +
-+#[panic_handler]
-+fn panic(info: &PanicInfo) -> ! {
-+    error!("{}\n", info);
-+    loop {}
++// An entry in either table
++#[derive(Clone, Copy)]
++pub struct PageTableEntry {
++    // Physical memory address this entry refers, combined with flags from PageTableEntryFlags.
++    physical_address_and_flags: PhysAddr,
 +}
 +
-+global_asm!(include_str!("head.S"));
-+global_asm!(include_str!("ttable.S"));
-diff --git a/src/ttable.S b/src/ttable.S
-new file mode 100644
-index 000000000000..b6fdadb6dbdc
---- /dev/null
-+++ b/src/ttable.S
-@@ -0,0 +1,37 @@
-+/* SPDX-License-Identifier: GPL-2.0 */
++impl PageTableEntry {
++    // Returns whether this entry is valid (present).
++    fn is_present(&self) -> bool {
++        (self.physical_address_and_flags & PageTableEntryFlags::PRESENT.bits()) != 0
++    }
 +
-+	.set		.L_TT_TYPE_BLOCK, 0x1
-+	.set		.L_TT_TYPE_TABLE, 0x3
++    // Mark this as a valid (present) entry and set address translation and flags.
++    //
++    // # Arguments
++    //
++    // * `physical_address` - The physical memory address this entry shall translate to
++    // * `flags` - Flags from PageTableEntryFlags (note that the PRESENT, INNER_SHAREABLE, and ACCESSED flags are set automatically)
++    fn set(&mut self, physical_address: PhysAddr, flags: PageTableEntryFlags) {
++        // Verify that the offset bits for a 4 KiB page are zero.
++        assert_eq!(
++            physical_address % BasePageSize::SIZE as u64,
++            0,
++            "Physical address is not on a 4 KiB page boundary (physical_address = {:#X})",
++            physical_address
++        );
 +
-+	.set		.L_TT_AF, 0x1 << 10
-+	.set		.L_TT_NG, 0x3 << 11
-+	.set		.L_TT_RO, 0x2 << 6
-+	.set		.L_TT_XN, 0x3 << 53
++        let mut flags_to_set = flags;
++        flags_to_set.insert(PageTableEntryFlags::PRESENT);
++        self.physical_address_and_flags = physical_address | flags_to_set.bits();
++    }
++}
 +
-+	.set		.L_TT_MT_DEV, 0x0 << 2			// MAIR #0
-+	.set		.L_TT_MT_MEM, (0x1 << 2) | (0x3 << 8)	// MAIR #1
++impl<L: PageTableLevel> PageTableMethods for PageTable<L> {
++    // Maps a single page in this table to the given physical address.
++    //
++    // Must only be called if a page of this size is mapped at this page table level!
++    fn map_page_in_this_table<S: PageSize>(
++        &mut self,
++        page: Page<S>,
++        physical_address: PhysAddr,
++        flags: PageTableEntryFlags,
++    ) {
++        assert_eq!(L::LEVEL, S::MAP_LEVEL);
++        let index = page.table_index::<L>();
 +
-+	.set		BLOCK_XIP, .L_TT_TYPE_BLOCK | .L_TT_MT_MEM | .L_TT_AF | .L_TT_RO
-+	.set		BLOCK_DEV, .L_TT_TYPE_BLOCK | .L_TT_MT_DEV | .L_TT_AF | .L_TT_XN
-+	.set		BLOCK_MEM, .L_TT_TYPE_BLOCK | .L_TT_MT_MEM | .L_TT_AF | .L_TT_XN | .L_TT_NG
++        if flags == PageTableEntryFlags::BLANK {
++            // in this case we unmap the pages
++            self.entries[index].set(physical_address, flags);
++        } else {
++            let mut flags_to_set = flags;
++            flags_to_set.insert(PageTableEntryFlags::INNER_SHAREABLE);
++            flags_to_set.insert(PageTableEntryFlags::ACCESSED);
++            self.entries[index].set(physical_address, S::MAP_EXTRA_FLAG | flags_to_set);
++        }
++    }
 +
-+	.section ".rodata", "a", %progbits
-+	.align	12
-+	/* level 2 */
-+0:	.quad		BLOCK_XIP			// 2 MB of R-X flash
-+	.fill		63, 8, 0x0			// 126 MB of unused flash
-+	.set		idx, 64
-+	.rept		448
-+	.quad		BLOCK_DEV | (idx << 21)		// 896 MB of RW- device mappings
-+	.set		idx, idx + 1
-+	.endr
-+1:	.quad		BLOCK_XIP | 0x40000000		// DT provided by VMM
-+	.quad		BLOCK_MEM | 0x40200000		// 2 MB of DRAM
-+	.fill		510, 8, 0x0
++    // Maps a single page to the given physical address.
++    //
++    // This is the default implementation that just calls the map_page_in_this_table method.
++    // It is overridden by a specialized implementation for all tables with sub tables (all except L3Table).
++    default fn map_page<S: PageSize>(
++        &mut self,
++        page: Page<S>,
++        physical_address: PhysAddr,
++        flags: PageTableEntryFlags,
++    ) {
++        self.map_page_in_this_table::<S>(page, physical_address, flags)
++    }
++}
 +
-+	.globl		idmap
-+idmap:
-+	/* level 1 */
-+	.quad		0b + .L_TT_TYPE_TABLE		// flash and device mappings
-+	.quad		1b + .L_TT_TYPE_TABLE		// up to 1 GB of DRAM
-+	.fill		62, 8, 0x0			// 62 GB of remaining VA space
++impl<L: PageTableLevelWithSubtables> PageTable<L>
++where
++    L::SubtableLevel: PageTableLevel,
++{
++    // Returns the next subtable for the given page in the page table hierarchy.
++    //
++    // Must only be called if a page of this size is mapped in a subtable!
++    fn subtable<S: PageSize>(&self, page: Page<S>) -> &mut PageTable<L::SubtableLevel> {
++        assert!(L::LEVEL < S::MAP_LEVEL);
++
++        // Calculate the address of the subtable.
++        let index = page.table_index::<L>();
++        let subtable_address =
++            self.entries[index].physical_address_and_flags & !((1 << PAGE_BITS) - 1);
++        unsafe { &mut *(subtable_address as *mut PageTable<L::SubtableLevel>) }
++    }
++
++    // Maps a continuous range of pages.
++    //
++    // # Arguments
++    //
++    // * `range` - The range of pages of size S
++    // * `physical_address` - First physical address to map these pages to
++    // * `flags` - Flags from PageTableEntryFlags to set for the page table entry (e.g. WRITABLE or EXECUTE_DISABLE).
++    //             The PRESENT and ACCESSED are already set automatically.
++    fn map_pages<S: PageSize>(
++        &mut self,
++        range: PageIter<S>,
++        physical_address: PhysAddr,
++        flags: PageTableEntryFlags,
++    ) {
++        let mut current_physical_address = physical_address;
++
++        for page in range {
++            self.map_page::<S>(page, current_physical_address, flags);
++            current_physical_address += S::SIZE as u64;
++        }
++    }
++}
++
++impl<L: PageTableLevelWithSubtables> PageTableMethods for PageTable<L>
++where
++    L::SubtableLevel: PageTableLevel,
++{
++    // Maps a single page to the given physical address.
++    //
++    // This is the implementation for all tables with subtables (L0Table, L1Table, L2Table).
++    // It overrides the default implementation above.
++    fn map_page<S: PageSize>(
++        &mut self,
++        page: Page<S>,
++        physical_address: PhysAddr,
++        flags: PageTableEntryFlags,
++    ) {
++        assert!(L::LEVEL <= S::MAP_LEVEL);
++
++        if L::LEVEL < S::MAP_LEVEL {
++            let index = page.table_index::<L>();
++
++            // Does the table exist yet?
++            if !self.entries[index].is_present() {
++                // Allocate a single 4 KiB page for the new entry and mark it as a valid, writable subtable.
++                let physical_address = pagealloc::get_zeroed_page();
++                self.entries[index].set(physical_address, PageTableEntryFlags::TABLE_OR_4KIB_PAGE);
++            }
++
++            let subtable = self.subtable::<S>(page);
++            subtable.map_page::<S>(page, physical_address, flags)
++        } else {
++            // Calling the default implementation from a specialized one is not supported (yet),
++            // so we have to resort to an extra function.
++            self.map_page_in_this_table::<S>(page, physical_address, flags)
++        }
++    }
++}
++
++// A generic interface to support all possible page sizes.
++//
++// This is defined as a subtrait of Copy to enable #[derive(Clone, Copy)] for Page.
++// Currently, deriving implementations for these traits only works if all dependent types implement it as well.
++pub trait PageSize: Copy {
++    // The page size in bytes.
++    const SIZE: usize;
++
++    // The page table level at which a page of this size is mapped
++    const MAP_LEVEL: usize;
++
++    // Any extra flag that needs to be set to map a page of this size.
++    // For example: PageTableEntryFlags::TABLE_OR_4KIB_PAGE.
++    const MAP_EXTRA_FLAG: PageTableEntryFlags;
++}
++
++// A 4 KiB page mapped in the L3Table.
++#[derive(Clone, Copy)]
++pub enum BasePageSize {}
++impl PageSize for BasePageSize {
++    const SIZE: usize = 4096;
++    const MAP_LEVEL: usize = 3;
++    const MAP_EXTRA_FLAG: PageTableEntryFlags = PageTableEntryFlags::TABLE_OR_4KIB_PAGE;
++}
++
++// A 2 MiB page mapped in the L2Table.
++#[derive(Clone, Copy)]
++pub enum LargePageSize {}
++impl PageSize for LargePageSize {
++    const SIZE: usize = 2 * 1024 * 1024;
++    const MAP_LEVEL: usize = 2;
++    const MAP_EXTRA_FLAG: PageTableEntryFlags = PageTableEntryFlags::BLANK;
++}
++
++// A 1 GiB page mapped in the L1Table.
++#[derive(Clone, Copy)]
++pub enum HugePageSize {}
++impl PageSize for HugePageSize {
++    const SIZE: usize = 1024 * 1024 * 1024;
++    const MAP_LEVEL: usize = 1;
++    const MAP_EXTRA_FLAG: PageTableEntryFlags = PageTableEntryFlags::BLANK;
++}
 -- 
 2.30.2
 
