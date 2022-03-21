@@ -2,32 +2,32 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BA74BC433F5
-	for <linux-efi@archiver.kernel.org>; Mon, 21 Mar 2022 13:58:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 21754C433EF
+	for <linux-efi@archiver.kernel.org>; Mon, 21 Mar 2022 14:00:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1348367AbiCUOAC (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 21 Mar 2022 10:00:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43654 "EHLO
+        id S1348526AbiCUOCB (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 21 Mar 2022 10:02:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35092 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1348944AbiCUN6m (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 21 Mar 2022 09:58:42 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2EA04160140;
-        Mon, 21 Mar 2022 06:56:48 -0700 (PDT)
+        with ESMTP id S1348580AbiCUOBS (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 21 Mar 2022 10:01:18 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 95CFB41FA3;
+        Mon, 21 Mar 2022 06:59:15 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id E664FB81598;
-        Mon, 21 Mar 2022 13:56:44 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1CB84C340F2;
-        Mon, 21 Mar 2022 13:56:43 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 39718B816E1;
+        Mon, 21 Mar 2022 13:59:07 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 47F59C340ED;
+        Mon, 21 Mar 2022 13:59:05 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-        s=korg; t=1647871003;
-        bh=xtTh4I9hVgdpR1VDucgu0Zv5fcwvFPkzhUf7+w9kffs=;
+        s=korg; t=1647871145;
+        bh=WXRZNREbEysgY3ucIvbUH+IXo9ESUOMduBe4vKaz5f0=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=GGN3zof5/LYJ1j2RBy5QBIRbl87xwjR2jWov0Jx0RusR2qloVPaITVYdIq8sClsIZ
-         17XXBrsNcgObcDMcepvtcaz5JdZvnLWVbnlmhPw67xel5XyHKt0cfPKrL+No2lcJ+N
-         J6f5X7vpUFCd0UxqhAV4eO5pNASEcM9ANtwcYRZc=
+        b=fpb7unY5pqUTqIAEdKKtMBP0BdcMYeLMEBpmO+PCyaobHZSQj1zblEqRRvUdMVq/c
+         3Iff73EeetcadfezHcfWsuq+55XvlUX3YM9C7hJUxB9L6hHu4juAymoNWib0UPDu5G
+         gVCZ5uzDLDWNTrOPZSOGOe43wCxsty0Lo22+g8x0=
 From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 To:     linux-kernel@vger.kernel.org
 Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
@@ -39,12 +39,12 @@ Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         "Rafael J. Wysocki" <rafael@kernel.org>,
         Matt Fleming <matt@codeblueprint.co.uk>,
         Sasha Levin <sashal@kernel.org>
-Subject: [PATCH 4.19 47/57] efi: fix return value of __setup handlers
-Date:   Mon, 21 Mar 2022 14:52:28 +0100
-Message-Id: <20220321133223.354570592@linuxfoundation.org>
+Subject: [PATCH 5.10 04/30] efi: fix return value of __setup handlers
+Date:   Mon, 21 Mar 2022 14:52:34 +0100
+Message-Id: <20220321133219.774098049@linuxfoundation.org>
 X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20220321133221.984120927@linuxfoundation.org>
-References: <20220321133221.984120927@linuxfoundation.org>
+In-Reply-To: <20220321133219.643490199@linuxfoundation.org>
+References: <20220321133219.643490199@linuxfoundation.org>
 User-Agent: quilt/0.66
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -102,10 +102,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/firmware/efi/apple-properties.c b/drivers/firmware/efi/apple-properties.c
-index 60a95719ecb8..726a23d45da4 100644
+index e1926483ae2f..e51838d749e2 100644
 --- a/drivers/firmware/efi/apple-properties.c
 +++ b/drivers/firmware/efi/apple-properties.c
-@@ -34,7 +34,7 @@ static bool dump_properties __initdata;
+@@ -24,7 +24,7 @@ static bool dump_properties __initdata;
  static int __init dump_properties_enable(char *arg)
  {
  	dump_properties = true;
@@ -115,10 +115,10 @@ index 60a95719ecb8..726a23d45da4 100644
  
  __setup("dump_apple_properties", dump_properties_enable);
 diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index a8180f9090fa..7098744f9276 100644
+index 9fa86288b78a..e3df82d5d37a 100644
 --- a/drivers/firmware/efi/efi.c
 +++ b/drivers/firmware/efi/efi.c
-@@ -245,7 +245,7 @@ static int __init efivar_ssdt_setup(char *str)
+@@ -209,7 +209,7 @@ static int __init efivar_ssdt_setup(char *str)
  		memcpy(efivar_ssdt, str, strlen(str));
  	else
  		pr_warn("efivar_ssdt: name too long: %s\n", str);
