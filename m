@@ -2,29 +2,29 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 45337C433EF
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A55E4C4167D
 	for <linux-efi@archiver.kernel.org>; Sat, 26 Mar 2022 06:27:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231491AbiCZG3S (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 26 Mar 2022 02:29:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53790 "EHLO
+        id S231482AbiCZG3Q (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 26 Mar 2022 02:29:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53682 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231487AbiCZG3Q (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sat, 26 Mar 2022 02:29:16 -0400
-Received: from szxga08-in.huawei.com (szxga08-in.huawei.com [45.249.212.255])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6F81127B;
-        Fri, 25 Mar 2022 23:27:39 -0700 (PDT)
-Received: from dggpemm500022.china.huawei.com (unknown [172.30.72.55])
-        by szxga08-in.huawei.com (SkyGuard) with ESMTP id 4KQTXF2rzLz1GCxF;
-        Sat, 26 Mar 2022 14:27:25 +0800 (CST)
+        with ESMTP id S231460AbiCZG3N (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 26 Mar 2022 02:29:13 -0400
+Received: from szxga01-in.huawei.com (szxga01-in.huawei.com [45.249.212.187])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E4C4427B;
+        Fri, 25 Mar 2022 23:27:37 -0700 (PDT)
+Received: from dggpemm500020.china.huawei.com (unknown [172.30.72.53])
+        by szxga01-in.huawei.com (SkyGuard) with ESMTP id 4KQTVc4bgHzfZK4;
+        Sat, 26 Mar 2022 14:26:00 +0800 (CST)
 Received: from dggpemm500014.china.huawei.com (7.185.36.153) by
- dggpemm500022.china.huawei.com (7.185.36.162) with Microsoft SMTP Server
+ dggpemm500020.china.huawei.com (7.185.36.49) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2308.21; Sat, 26 Mar 2022 14:27:37 +0800
+ 15.1.2308.21; Sat, 26 Mar 2022 14:27:35 +0800
 Received: from localhost.localdomain (10.175.112.125) by
  dggpemm500014.china.huawei.com (7.185.36.153) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2308.21; Sat, 26 Mar 2022 14:27:35 +0800
+ 15.1.2308.21; Sat, 26 Mar 2022 14:27:34 +0800
 From:   Wupeng Ma <mawupeng1@huawei.com>
 To:     <akpm@linux-foundation.org>, <catalin.marinas@arm.com>,
         <will@kernel.org>, <corbet@lwn.net>
@@ -42,9 +42,9 @@ CC:     <ardb@kernel.org>, <tglx@linutronix.de>, <mingo@redhat.com>,
         <linux-arm-kernel@lists.infradead.org>,
         <linux-efi@vger.kernel.org>, <linux-ia64@vger.kernel.org>,
         <platform-driver-x86@vger.kernel.org>, <linux-mm@kvack.org>
-Subject: [PATCH 3/9] efi: Make efi_find_mirror() public
-Date:   Sat, 26 Mar 2022 14:46:26 +0800
-Message-ID: <20220326064632.131637-4-mawupeng1@huawei.com>
+Subject: [PATCH 2/9] arm64: efi: Add fake memory support
+Date:   Sat, 26 Mar 2022 14:46:25 +0800
+Message-ID: <20220326064632.131637-3-mawupeng1@huawei.com>
 X-Mailer: git-send-email 2.18.0.huawei.25
 In-Reply-To: <20220326064632.131637-1-mawupeng1@huawei.com>
 References: <20220326064632.131637-1-mawupeng1@huawei.com>
@@ -60,130 +60,71 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Ma Wupeng <mawupeng1@huawei.com>
 
-Commit b05b9f5f9dcf ("x86, mirror: x86 enabling - find mirrored memory
-ranges") introduce the efi_find_mirror function on x86. In order to reuse
-the API we make it public in preparation for arm64 to support mirrord
-memory.
+Fake memory map is used for faking memory's attribute values.
+Commit 0f96a99dab36 ("efi: Add "efi_fake_mem" boot option") introduce the
+efi_fake_mem function. Now it can support arm64 with this patch.
+For example you can mark 0-6G memory as EFI_MEMORY_MORE_RELIABLE by adding
+efi_fake_mem=6G@0:0x10000 in the bootarg. You find more info about
+fake memmap in kernel-parameters.txt.
+
+Variable memstart_addr is only confirmed after arm64_memblock_init(). So
+efi_fake_memmap() is needed to add after arm64_memblock_init().
+
+Otherwise:
+
+efi_memmap_alloc
+   memblock_phys_alloc
+     kmemleak_alloc_phys
+        kmemleak_alloc(__va(phys), size, min_count, gfp);
+
+this __va() will convert phys to a fault va and lead to a kmemleak error.
 
 Signed-off-by: Ma Wupeng <mawupeng1@huawei.com>
 ---
- arch/x86/include/asm/efi.h  |  4 ----
- arch/x86/platform/efi/efi.c | 23 -----------------------
- drivers/firmware/efi/efi.c  | 23 +++++++++++++++++++++++
- include/linux/efi.h         |  3 +++
- 4 files changed, 26 insertions(+), 27 deletions(-)
+ Documentation/admin-guide/kernel-parameters.txt | 2 +-
+ arch/arm64/kernel/setup.c                       | 2 ++
+ drivers/firmware/efi/Kconfig                    | 2 +-
+ 3 files changed, 4 insertions(+), 2 deletions(-)
 
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index f0cc7766f53c..aae5933b7954 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -363,7 +363,6 @@ static inline bool efi_is_64bit(void)
- extern bool efi_reboot_required(void);
- extern bool efi_is_table_address(unsigned long phys_addr);
+diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
+index b7ccaa2ea867..e064839895ee 100644
+--- a/Documentation/admin-guide/kernel-parameters.txt
++++ b/Documentation/admin-guide/kernel-parameters.txt
+@@ -1357,7 +1357,7 @@
+ 			you are really sure that your UEFI does sane gc and
+ 			fulfills the spec otherwise your board may brick.
  
--extern void efi_find_mirror(void);
- extern void efi_reserve_boot_services(void);
- #else
- static inline void parse_efi_setup(u64 phys_addr, u32 data_len) {}
-@@ -375,9 +374,6 @@ static inline  bool efi_is_table_address(unsigned long phys_addr)
- {
- 	return false;
- }
--static inline void efi_find_mirror(void)
--{
--}
- static inline void efi_reserve_boot_services(void)
- {
- }
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 7b130f39d841..fedbb228faea 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -105,29 +105,6 @@ static int __init setup_add_efi_memmap(char *arg)
- }
- early_param("add_efi_memmap", setup_add_efi_memmap);
+-	efi_fake_mem=	nn[KMG]@ss[KMG]:aa[,nn[KMG]@ss[KMG]:aa,..] [EFI; X86]
++	efi_fake_mem=	nn[KMG]@ss[KMG]:aa[,nn[KMG]@ss[KMG]:aa,..] [EFI; X86; ARM64]
+ 			Add arbitrary attribute to specific memory range by
+ 			updating original EFI memory map.
+ 			Region of memory which aa attribute is added to is
+diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
+index 3505789cf4bd..daade64889ff 100644
+--- a/arch/arm64/kernel/setup.c
++++ b/arch/arm64/kernel/setup.c
+@@ -344,6 +344,8 @@ void __init __no_sanitize_address setup_arch(char **cmdline_p)
  
--void __init efi_find_mirror(void)
--{
--	efi_memory_desc_t *md;
--	u64 mirror_size = 0, total_size = 0;
--
--	if (!efi_enabled(EFI_MEMMAP))
--		return;
--
--	for_each_efi_memory_desc(md) {
--		unsigned long long start = md->phys_addr;
--		unsigned long long size = md->num_pages << EFI_PAGE_SHIFT;
--
--		total_size += size;
--		if (md->attribute & EFI_MEMORY_MORE_RELIABLE) {
--			memblock_mark_mirror(start, size);
--			mirror_size += size;
--		}
--	}
--	if (mirror_size)
--		pr_info("Memory: %lldM/%lldM mirrored memory\n",
--			mirror_size>>20, total_size>>20);
--}
--
- /*
-  * Tell the kernel about the EFI memory map.  This might include
-  * more than the max 128 entries that can fit in the passed in e820
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 5502e176d51b..eb9ebf4efea1 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -438,6 +438,29 @@ static int __init efisubsys_init(void)
+ 	arm64_memblock_init();
  
- subsys_initcall(efisubsys_init);
++	efi_fake_memmap();
++
+ 	paging_init();
  
-+void __init efi_find_mirror(void)
-+{
-+	efi_memory_desc_t *md;
-+	u64 mirror_size = 0, total_size = 0;
-+
-+	if (!efi_enabled(EFI_MEMMAP))
-+		return;
-+
-+	for_each_efi_memory_desc(md) {
-+		unsigned long long start = md->phys_addr;
-+		unsigned long long size = md->num_pages << EFI_PAGE_SHIFT;
-+
-+		total_size += size;
-+		if (md->attribute & EFI_MEMORY_MORE_RELIABLE) {
-+			memblock_mark_mirror(start, size);
-+			mirror_size += size;
-+		}
-+	}
-+	if (mirror_size)
-+		pr_info("Memory: %lldM/%lldM mirrored memory\n",
-+			mirror_size>>20, total_size>>20);
-+}
-+
- /*
-  * Find the efi memory descriptor for a given physical address.  Given a
-  * physical address, determine if it exists within an EFI Memory Map entry,
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index de05682b233b..950c84ce3f16 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -853,6 +853,7 @@ static inline bool efi_rt_services_supported(unsigned int mask)
- {
- 	return (efi.runtime_supported_mask & mask) == mask;
- }
-+extern void efi_find_mirror(void);
- #else
- static inline bool efi_enabled(int feature)
- {
-@@ -870,6 +871,8 @@ static inline bool efi_rt_services_supported(unsigned int mask)
- {
- 	return false;
- }
-+
-+static inline void efi_find_mirror(void) {}
- #endif
+ 	acpi_table_upgrade();
+diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+index 2c3dac5ecb36..3c91bbd4097a 100644
+--- a/drivers/firmware/efi/Kconfig
++++ b/drivers/firmware/efi/Kconfig
+@@ -50,7 +50,7 @@ config EFI_RUNTIME_MAP
  
- extern int efi_status_to_err(efi_status_t status);
+ config EFI_FAKE_MEMMAP
+ 	bool "Enable EFI fake memory map"
+-	depends on EFI && X86
++	depends on EFI && (X86 || ARM64)
+ 	default n
+ 	help
+ 	  Saying Y here will enable "efi_fake_mem" boot option.
 -- 
 2.18.0.huawei.25
 
