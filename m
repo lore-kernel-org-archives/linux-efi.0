@@ -2,29 +2,29 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CC769C43217
-	for <linux-efi@archiver.kernel.org>; Sat, 26 Mar 2022 06:28:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4DB42C433EF
+	for <linux-efi@archiver.kernel.org>; Sat, 26 Mar 2022 06:28:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231635AbiCZG35 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 26 Mar 2022 02:29:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54116 "EHLO
+        id S231716AbiCZG36 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 26 Mar 2022 02:29:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56772 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231504AbiCZG3U (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sat, 26 Mar 2022 02:29:20 -0400
-Received: from szxga08-in.huawei.com (szxga08-in.huawei.com [45.249.212.255])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C7D392E68F;
-        Fri, 25 Mar 2022 23:27:44 -0700 (PDT)
-Received: from dggpemm500020.china.huawei.com (unknown [172.30.72.53])
-        by szxga08-in.huawei.com (SkyGuard) with ESMTP id 4KQTXM0QM2z1GD24;
-        Sat, 26 Mar 2022 14:27:31 +0800 (CST)
+        with ESMTP id S231586AbiCZG3z (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 26 Mar 2022 02:29:55 -0400
+Received: from szxga01-in.huawei.com (szxga01-in.huawei.com [45.249.212.187])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A32BE171EE5;
+        Fri, 25 Mar 2022 23:27:47 -0700 (PDT)
+Received: from dggpemm500023.china.huawei.com (unknown [172.30.72.54])
+        by szxga01-in.huawei.com (SkyGuard) with ESMTP id 4KQTXP3XcCzcbQS;
+        Sat, 26 Mar 2022 14:27:33 +0800 (CST)
 Received: from dggpemm500014.china.huawei.com (7.185.36.153) by
- dggpemm500020.china.huawei.com (7.185.36.49) with Microsoft SMTP Server
+ dggpemm500023.china.huawei.com (7.185.36.83) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2308.21; Sat, 26 Mar 2022 14:27:43 +0800
+ 15.1.2308.21; Sat, 26 Mar 2022 14:27:45 +0800
 Received: from localhost.localdomain (10.175.112.125) by
  dggpemm500014.china.huawei.com (7.185.36.153) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2308.21; Sat, 26 Mar 2022 14:27:41 +0800
+ 15.1.2308.21; Sat, 26 Mar 2022 14:27:44 +0800
 From:   Wupeng Ma <mawupeng1@huawei.com>
 To:     <akpm@linux-foundation.org>, <catalin.marinas@arm.com>,
         <will@kernel.org>, <corbet@lwn.net>
@@ -42,9 +42,9 @@ CC:     <ardb@kernel.org>, <tglx@linutronix.de>, <mingo@redhat.com>,
         <linux-arm-kernel@lists.infradead.org>,
         <linux-efi@vger.kernel.org>, <linux-ia64@vger.kernel.org>,
         <platform-driver-x86@vger.kernel.org>, <linux-mm@kvack.org>
-Subject: [PATCH 7/9] mm: Calc the right pfn if page size is not 4K
-Date:   Sat, 26 Mar 2022 14:46:30 +0800
-Message-ID: <20220326064632.131637-8-mawupeng1@huawei.com>
+Subject: [PATCH 9/9] ia64/efi: Code simplification in efi_init
+Date:   Sat, 26 Mar 2022 14:46:32 +0800
+Message-ID: <20220326064632.131637-10-mawupeng1@huawei.com>
 X-Mailer: git-send-email 2.18.0.huawei.25
 In-Reply-To: <20220326064632.131637-1-mawupeng1@huawei.com>
 References: <20220326064632.131637-1-mawupeng1@huawei.com>
@@ -60,29 +60,62 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Ma Wupeng <mawupeng1@huawei.com>
 
-Pervious 0x100000 is used to check the 4G limit in
-find_zone_movable_pfns_for_nodes(). This is right in x86 because
-the page size can only be 4K. But 16K and 64K are available in
-arm64. So replate it with SIZE_4G >> PAGE_SHIFT.
+Since efi_print_memmap() was made public, print EFI memory map in
+efi_init() can be simplified by using efi_print_memmap().
 
 Signed-off-by: Ma Wupeng <mawupeng1@huawei.com>
 ---
- mm/page_alloc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ arch/ia64/kernel/efi.c | 37 +------------------------------------
+ 1 file changed, 1 insertion(+), 36 deletions(-)
 
-diff --git a/mm/page_alloc.c b/mm/page_alloc.c
-index 6e0b4596cde9..41fd987b5b93 100644
---- a/mm/page_alloc.c
-+++ b/mm/page_alloc.c
-@@ -7811,7 +7811,7 @@ static void __init find_zone_movable_pfns_for_nodes(void)
+diff --git a/arch/ia64/kernel/efi.c b/arch/ia64/kernel/efi.c
+index 31149e41f9be..4b8209b8797d 100644
+--- a/arch/ia64/kernel/efi.c
++++ b/arch/ia64/kernel/efi.c
+@@ -557,42 +557,7 @@ efi_init (void)
  
- 			usable_startpfn = memblock_region_memory_base_pfn(r);
+ #if EFI_DEBUG
+ 	/* print EFI memory map: */
+-	{
+-		efi_memory_desc_t *md;
+-		void *p;
+-		unsigned int i;
+-
+-		for (i = 0, p = efi_map_start; p < efi_map_end;
+-		     ++i, p += efi_desc_size)
+-		{
+-			const char *unit;
+-			unsigned long size;
+-			char buf[64];
+-
+-			md = p;
+-			size = md->num_pages << EFI_PAGE_SHIFT;
+-
+-			if ((size >> 40) > 0) {
+-				size >>= 40;
+-				unit = "TB";
+-			} else if ((size >> 30) > 0) {
+-				size >>= 30;
+-				unit = "GB";
+-			} else if ((size >> 20) > 0) {
+-				size >>= 20;
+-				unit = "MB";
+-			} else {
+-				size >>= 10;
+-				unit = "KB";
+-			}
+-
+-			printk("mem%02d: %s "
+-			       "range=[0x%016llx-0x%016llx) (%4lu%s)\n",
+-			       i, efi_md_typeattr_format(buf, sizeof(buf), md),
+-			       md->phys_addr,
+-			       md->phys_addr + efi_md_size(md), size, unit);
+-		}
+-	}
++	efi_print_memmap();
+ #endif
  
--			if (usable_startpfn < 0x100000) {
-+			if (usable_startpfn < (SZ_4G >> PAGE_SHIFT)) {
- 				mem_below_4gb_not_mirrored = true;
- 				continue;
- 			}
+ 	efi_map_pal_code();
 -- 
 2.18.0.huawei.25
 
