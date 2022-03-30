@@ -2,147 +2,93 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 68E8AC433EF
-	for <linux-efi@archiver.kernel.org>; Wed, 30 Mar 2022 15:42:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CD374C433EF
+	for <linux-efi@archiver.kernel.org>; Wed, 30 Mar 2022 15:42:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1348362AbiC3PoZ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 30 Mar 2022 11:44:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56042 "EHLO
+        id S1348363AbiC3Po1 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 30 Mar 2022 11:44:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56462 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1348370AbiC3PoV (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 30 Mar 2022 11:44:21 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 16C443615F
-        for <linux-efi@vger.kernel.org>; Wed, 30 Mar 2022 08:42:35 -0700 (PDT)
+        with ESMTP id S1348361AbiC3Po0 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 30 Mar 2022 11:44:26 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 66AD334B91
+        for <linux-efi@vger.kernel.org>; Wed, 30 Mar 2022 08:42:41 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 6F36261729
-        for <linux-efi@vger.kernel.org>; Wed, 30 Mar 2022 15:42:35 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 79648C340F2;
-        Wed, 30 Mar 2022 15:42:33 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 012E561562
+        for <linux-efi@vger.kernel.org>; Wed, 30 Mar 2022 15:42:41 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 02C69C340F2;
+        Wed, 30 Mar 2022 15:42:38 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1648654954;
-        bh=NKARMdFIpPuUO+fngR3uplP5bKMzLEZRMWLNCU6j1kE=;
+        s=k20201202; t=1648654960;
+        bh=iX0Rj2iCJkNigKrUwgpSQHOCUux2R+JAh6rETtOOk80=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=R8Rd9RJut7Nn9lpz7AetrlSRRW8rA+5kZYVD+70C+DVhrLO19BNe9/EKVVgRSCQqQ
-         a36mO0etxVjm0FUUEP2r5YkfAq7/CwaCWC7hrvSWLyGpvTqy3nAurrJLt4CiZ4VC+D
-         I4jx3XbZSzmqwX5Cxwk1sO5Loqb2zWtswPQSi0z4LNwZrS2otIp+mRQe0vF45O7BD5
-         2pHuvh+6BNOM/ani7lzBI+jkzYg2NGvumlSkXqjmP9stSvIWaxYqH+dXK3F5gh0Adm
-         4Vt/X6lbxETjACk5U3vx6uz1iB5QW20nAF8PJa6vnNvfspgTeO0+5UsqTyZCMuPIc9
-         0o3zXiMB5hHxw==
+        b=VAt519OGKKlHFSAvGBJsakM3TUiZyFZHQvq6AiXlRGI3emTsfWMM5reF2s4voymSQ
+         /e2XwO6rtQZR6vgT2jOH+7k90wD/I7u0hrJA7QBnDwMh6t9f5UbkgJTR0/8nKTU/Of
+         3Lx5KjqEUKooo51HJzAxkbkg1/Senada/+LJUMwAmGHWxHzwCcfKRM0OtMeItj5LmV
+         NVlRYCzbqc8mglaHjmD3Vlrn+KWcjq7NterMehNghhO5+ASPDQPR3SgIYDo7JPbDrd
+         3mix/omLMkUaLeeUvUETdTrea6OEGDc67xSbiDQ6lvV22sVyjI9BcTXnQb8jKd39EO
+         9bO0f0O5FQDFg==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-arm-kernel@lists.infradead.org, keescook@chromium.org,
         mark.rutland@arm.com, catalin.marinas@arm.com,
         Ard Biesheuvel <ardb@kernel.org>
-Subject: [RFC PATCH v2 12/18] arm64: head: avoid cache invalidation when entering with the MMU on
-Date:   Wed, 30 Mar 2022 17:41:59 +0200
-Message-Id: <20220330154205.2483167-13-ardb@kernel.org>
+Subject: [RFC PATCH v2 15/18] arm64: lds: move idmap_pg_dir out of .rodata
+Date:   Wed, 30 Mar 2022 17:42:02 +0200
+Message-Id: <20220330154205.2483167-16-ardb@kernel.org>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20220330154205.2483167-1-ardb@kernel.org>
 References: <20220330154205.2483167-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2876; h=from:subject; bh=NKARMdFIpPuUO+fngR3uplP5bKMzLEZRMWLNCU6j1kE=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBiRHpCqqsO4VFBa2X4f5zJeq/GZgYbbyd4r4kj7Kwu SyJa3WOJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYkR6QgAKCRDDTyI5ktmPJO4LDA CNR59DspwJN3JhnhbtoSuLvXaz04oPBpP7bhp8CgIzzQ4RE7flSCs6C5xdA+Zuz6XrMir0r7+wgroG YvynNADmkE1gcQJWMQ0E2a8vrMoiYr5U2GQ0I95cEnITN1WCR2vbUNtH4GHGx3cs7Q87lKLFmYwg9i CZJvnOoFkYJO9g7IJ9xPlNxAWGZTDRVu9WKm1w6opMnCVRqmF8yWx9ytRrJIiU/A9FHgbveayokBXW AZYN9jQuR8qK4ZMaaM2MN9Y/ZWFFxwii51jYk8k4OhjUOj+pLmIVzLmgPNE6hpffcp0OWpLuwifu7O pNZw2+8e5E34JYzu21A2tzO2VFb50v1qjHhYDrwxWcXN705iWbhXEyXgjFt1SpD/9YUdK6i6/dCOLR LqEMgq1UU5yq+3tePK2KNSqGOZtPhQlBCS9BZ2U3FwJUVpY/l6/WPVex3/yKQdFPM6FlbI02WOviae pCVSjBWNnrb9FhqtKpEPhKqotNzk24uLGWWZRYURA8uYM=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1199; h=from:subject; bh=iX0Rj2iCJkNigKrUwgpSQHOCUux2R+JAh6rETtOOk80=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBiRHpHslUvi3THUV2q/rluhKlo/8jbI/WIJWe7S3gR OuhxZ+KJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYkR6RwAKCRDDTyI5ktmPJAdxC/ 0Z8oTyxDlocoO5MkJ++fqTdE+UTagr09e3u7FOvGhCoZzFp6heaO0p1dQJCqcRUvt/Lgeq7/yhET93 6yYWYNY9a4gQix4zPLDK+F1ucf0X2av6Qr3qHL7+8s4n6y3ta/f/e3uagB4hEwAfx/0iHGKD6odTdv RWqHWeJkWzod1GVcoBCOaWg96bA1AXHjzvpMtyyRuZz4T5TMjI8b4p0rxrXcfA7PKM8f0OYrYdnf2n rItoyOoZ378bG3vTdWdUEs20t29JT1lDqkYCBRcLN5Sga2+5Oa/ECDwoQSbH4FJJ8u2H/KYBDgraEB PBM/8V0Htyyw6ITiEIPX/KXsl0TSXghFIxVWcE5t7i/cy+dNIsG5VEXqX/NbUAwNcBA8Joo1/OzgOJ ecKq8cSTc/jNsFH9TEBXwjcSvXgc20cwXBR020EUfKiO0nRB4izqHr8lJg2B6nL8A9H1xFEXWShkoc qxRWFdVICv0UKBWkfHfWkR9EY+mtVWpqEdyVxL+jABLlw=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-If we enter with the MMU on, there is no need for explicit cache
-invalidation for stores to memory, as they will be coherent with the
-caches.
-
-Let's take advantage of this, and create the ID map with the MMU still
-enabled if that is how we entered, and avoid any cache invalidation
-calls in that case.
+After future changes, the ID map may be set up by the boot entry code
+with the MMU and caches enabled, which means we will reuse the identity
+map set up by the firmware. This means that memory we describe as
+read-only in the PE/COFF header may not be writable, preventing us from
+creating the new identity map if the root level is located in such a
+region.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/arm64/kernel/head.S | 15 +++++++++++----
- 1 file changed, 11 insertions(+), 4 deletions(-)
+ arch/arm64/kernel/vmlinux.lds.S | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
 
-diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
-index 836237289ffb..db315129f15d 100644
---- a/arch/arm64/kernel/head.S
-+++ b/arch/arm64/kernel/head.S
-@@ -89,9 +89,9 @@
- SYM_CODE_START(primary_entry)
- 	bl	record_mmu_state
- 	bl	preserve_boot_args
-+	bl	create_idmap
- 	bl	init_kernel_el			// w0=cpu_boot_mode
- 	bl	set_cpu_boot_mode_flag
--	bl	create_idmap
+diff --git a/arch/arm64/kernel/vmlinux.lds.S b/arch/arm64/kernel/vmlinux.lds.S
+index edaf0faf766f..2231ccba45f7 100644
+--- a/arch/arm64/kernel/vmlinux.lds.S
++++ b/arch/arm64/kernel/vmlinux.lds.S
+@@ -194,10 +194,6 @@ SECTIONS
  
- 	/*
- 	 * The following calls CPU setup code, see arch/arm64/mm/proc.S for
-@@ -124,11 +124,13 @@ SYM_CODE_START_LOCAL(preserve_boot_args)
- 	stp	x21, x1, [x0]			// x0 .. x3 at kernel entry
- 	stp	x2, x3, [x0, #16]
+ 	HYPERVISOR_DATA_SECTIONS
  
-+	cbnz	x22, 0f				// skip cache invalidation if MMU is on
- 	dmb	sy				// needed before dc ivac with
- 						// MMU off
- 
- 	add	x1, x0, #0x20			// 4 x 8 bytes
- 	b	dcache_inval_poc		// tail call
-+0:	ret
- SYM_CODE_END(preserve_boot_args)
- 
- SYM_FUNC_START_LOCAL(clear_page_tables)
-@@ -292,8 +294,10 @@ SYM_FUNC_START_LOCAL(create_idmap)
- 1:
- 	adr_l	x6, vabits_actual
- 	str	x5, [x6]
-+	cbnz	x22, 2f			// skip cache invalidation if MMU is on
- 	dmb	sy
- 	dc	ivac, x6		// Invalidate potentially stale cache line
-+2:
- #endif
- 	/*
- 	 * VA_BITS may be too small to allow for an ID mapping to be created
-@@ -311,13 +315,14 @@ SYM_FUNC_START_LOCAL(create_idmap)
- 	adrp	x5, _end
- 	clz	x5, x5
- 	cmp	x5, TCR_T0SZ(VA_BITS_MIN) // default T0SZ small enough?
--	b.ge	1f			// .. then skip VA range extension
-+	b.ge	4f			// .. then skip VA range extension
- 
- 	adr_l	x6, idmap_t0sz
- 	str	x5, [x6]
-+	cbnz	x22, 3f			// skip cache invalidation if MMU is on
- 	dmb	sy
- 	dc	ivac, x6		// Invalidate potentially stale cache line
+-	idmap_pg_dir = .;
+-	. += IDMAP_DIR_SIZE;
+-	idmap_pg_end = .;
 -
-+3:
- #if (VA_BITS < 48)
- #define EXTRA_SHIFT	(PGDIR_SHIFT + PAGE_SHIFT - 3)
- #define EXTRA_PTRS	(1 << (PHYS_MASK_SHIFT - EXTRA_SHIFT))
-@@ -343,7 +348,7 @@ SYM_FUNC_START_LOCAL(create_idmap)
- 	 */
- 	mov	x4, #1 << (PHYS_MASK_SHIFT - PGDIR_SHIFT)
- #endif
--1:
-+4:
- 	adr_l	x6, _end			// __pa(_end)
- 	mov	x7, SWAPPER_MM_MMUFLAGS
+ #ifdef CONFIG_UNMAP_KERNEL_AT_EL0
+ 	tramp_pg_dir = .;
+ 	. += PAGE_SIZE;
+@@ -291,6 +287,11 @@ SECTIONS
+ 		__mmuoff_data_end = .;
+ 	}
  
-@@ -354,11 +359,13 @@ SYM_FUNC_START_LOCAL(create_idmap)
- 	 * accesses (MMU disabled), invalidate those tables again to
- 	 * remove any speculatively loaded cache lines.
- 	 */
-+	cbnz	x22, 5f			// skip cache invalidation if MMU is on
- 	dmb	sy
- 
- 	adrp	x0, idmap_pg_dir
- 	adrp	x1, idmap_pg_end
- 	b	dcache_inval_poc		// tail call
-+5:	ret
- SYM_FUNC_END(create_idmap)
- 
- SYM_FUNC_START_LOCAL(create_kernel_mapping)
++	. = ALIGN(PAGE_SIZE);
++	idmap_pg_dir = .;
++	. += IDMAP_DIR_SIZE;
++	idmap_pg_end = .;
++
+ 	PECOFF_EDATA_PADDING
+ 	__pecoff_data_rawsize = ABSOLUTE(. - __initdata_begin);
+ 	_edata = .;
 -- 
 2.30.2
 
