@@ -2,60 +2,61 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B443C433EF
-	for <linux-efi@archiver.kernel.org>; Thu, 31 Mar 2022 21:56:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9265CC433F5
+	for <linux-efi@archiver.kernel.org>; Thu, 31 Mar 2022 21:56:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239212AbiCaV60 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 31 Mar 2022 17:58:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47524 "EHLO
+        id S242076AbiCaV62 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 31 Mar 2022 17:58:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47696 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233135AbiCaV6Z (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 31 Mar 2022 17:58:25 -0400
+        with ESMTP id S241964AbiCaV61 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 31 Mar 2022 17:58:27 -0400
 Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C251A30F7A;
-        Thu, 31 Mar 2022 14:56:36 -0700 (PDT)
-Received: from pps.filterd (m0187473.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 22VJYWs9028753;
-        Thu, 31 Mar 2022 21:56:19 GMT
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 254EB30F7A;
+        Thu, 31 Mar 2022 14:56:39 -0700 (PDT)
+Received: from pps.filterd (m0098396.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 22VL6xLA029520;
+        Thu, 31 Mar 2022 21:56:23 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
- : date : message-id : content-transfer-encoding : mime-version; s=pp1;
- bh=YasENBrV7DzKBvg/cguB2BEpD8shuvJLEmenExKEPO0=;
- b=l1ZTqDW9JTam/WoowlMNJSIstqRD+nIovbQ3pR67cZSn3JI3JRO7rFhEQJezYVo8ojNf
- NsLWh6+K9wiKlux4VPn+sadXBE+c19HiCBHLWYc8gyyi71M4SIGVjjFUc79NXDyL8+pt
- ROduDsYCE9C5zEQof3FcqpB02fa26omqOXgn/gJW5t1z+TVXux0qqPSG+NeN+3oEU4C8
- d6NQXJPPjmpxi7WXUXKOKsAZ8Pmwzpn9NQfsRF8ycbX9ji5XZ+DKHf9OikVKtNFLby6y
- godXVnf5EhbD8N7gDSoWrCVRump032n5rlrl7HoVpHc/JJxzuR+jF6oHL+Cy3h2AgFbx vg== 
+ : date : message-id : in-reply-to : references : mime-version :
+ content-transfer-encoding; s=pp1;
+ bh=GV6/c72g2g0WKVWoPs9fryJSiK3Ed0n+4iAJZsEyhB0=;
+ b=RJ4gaywJEXCTJPg4VA8XtG8FAGGLkaEDuAYZNN5bY2RYZ9NRE31fpiIuqEliM5X4oxo0
+ C6AwFAYx+ZESkndmdsFWL56Tb4Q5lE/PMmA1hQIBqyvHeWdbCNCTWYsILp/8LPcHkaLI
+ 5XI/jgdkz7hsB660jhBlQ/8vnN8lSoVHDgGfQrEK5brLODkkxYFjuVkoASWl+1Rqc5L3
+ 3swqclQC2Av89LusRceHsSGN+pqedHpCfi+nrEUv98NXjvvC3L9ZmcuRzrAQHejNoVen
+ jMixTe/GGZEPCRhxjMGDKTfFZZWEKcx3zcgM/Zx0xz/7+q3O3ZiMSIZjXELjS3kgL0m3 Ag== 
 Received: from pps.reinject (localhost [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 3f51hw0fs6-1
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3f556tvktb-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 31 Mar 2022 21:56:18 +0000
-Received: from m0187473.ppops.net (m0187473.ppops.net [127.0.0.1])
-        by pps.reinject (8.16.0.43/8.16.0.43) with SMTP id 22VLbVvC027540;
-        Thu, 31 Mar 2022 21:56:18 GMT
-Received: from ppma04dal.us.ibm.com (7a.29.35a9.ip4.static.sl-reverse.com [169.53.41.122])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 3f51hw0fru-1
+        Thu, 31 Mar 2022 21:56:22 +0000
+Received: from m0098396.ppops.net (m0098396.ppops.net [127.0.0.1])
+        by pps.reinject (8.16.0.43/8.16.0.43) with SMTP id 22VLsM0s000347;
+        Thu, 31 Mar 2022 21:56:21 GMT
+Received: from ppma03wdc.us.ibm.com (ba.79.3fa9.ip4.static.sl-reverse.com [169.63.121.186])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3f556tvksu-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 31 Mar 2022 21:56:17 +0000
-Received: from pps.filterd (ppma04dal.us.ibm.com [127.0.0.1])
-        by ppma04dal.us.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 22VLpmpR001683;
-        Thu, 31 Mar 2022 21:56:16 GMT
-Received: from b03cxnp08028.gho.boulder.ibm.com (b03cxnp08028.gho.boulder.ibm.com [9.17.130.20])
-        by ppma04dal.us.ibm.com with ESMTP id 3f1tfahkj6-1
+        Thu, 31 Mar 2022 21:56:21 +0000
+Received: from pps.filterd (ppma03wdc.us.ibm.com [127.0.0.1])
+        by ppma03wdc.us.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 22VLq5M8026904;
+        Thu, 31 Mar 2022 21:56:20 GMT
+Received: from b03cxnp08027.gho.boulder.ibm.com (b03cxnp08027.gho.boulder.ibm.com [9.17.130.19])
+        by ppma03wdc.us.ibm.com with ESMTP id 3f1tfa7qfr-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 31 Mar 2022 21:56:16 +0000
+        Thu, 31 Mar 2022 21:56:20 +0000
 Received: from b03ledav002.gho.boulder.ibm.com (b03ledav002.gho.boulder.ibm.com [9.17.130.233])
-        by b03cxnp08028.gho.boulder.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 22VLuFdp26280282
+        by b03cxnp08027.gho.boulder.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 22VLuIQt14025072
         (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 31 Mar 2022 21:56:15 GMT
+        Thu, 31 Mar 2022 21:56:18 GMT
 Received: from b03ledav002.gho.boulder.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 484D8136053;
-        Thu, 31 Mar 2022 21:56:15 +0000 (GMT)
+        by IMSVA (Postfix) with ESMTP id C6345136053;
+        Thu, 31 Mar 2022 21:56:18 +0000 (GMT)
 Received: from b03ledav002.gho.boulder.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id ABD8713605D;
-        Thu, 31 Mar 2022 21:56:13 +0000 (GMT)
+        by IMSVA (Postfix) with ESMTP id 25E22136055;
+        Thu, 31 Mar 2022 21:56:17 +0000 (GMT)
 Received: from amdrome3.watson.ibm.com (unknown [9.2.130.16])
         by b03ledav002.gho.boulder.ibm.com (Postfix) with ESMTP;
-        Thu, 31 Mar 2022 21:56:13 +0000 (GMT)
+        Thu, 31 Mar 2022 21:56:17 +0000 (GMT)
 From:   Dov Murik <dovmurik@linux.ibm.com>
 To:     linux-efi@vger.kernel.org
 Cc:     Dov Murik <dovmurik@linux.ibm.com>, Borislav Petkov <bp@suse.de>,
@@ -80,223 +81,519 @@ Cc:     Dov Murik <dovmurik@linux.ibm.com>, Borislav Petkov <bp@suse.de>,
         Daniele Buono <dbuono@linux.vnet.ibm.com>,
         linux-coco@lists.linux.dev, linux-security-module@vger.kernel.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v9 0/4] Allow guest access to EFI confidential computing secret area
-Date:   Thu, 31 Mar 2022 21:56:03 +0000
-Message-Id: <20220331215607.3182232-1-dovmurik@linux.ibm.com>
+Subject: [PATCH v9 2/4] virt: Add efi_secret module to expose confidential computing secrets
+Date:   Thu, 31 Mar 2022 21:56:05 +0000
+Message-Id: <20220331215607.3182232-3-dovmurik@linux.ibm.com>
 X-Mailer: git-send-email 2.25.1
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: HMQ2yf8G45BXyQmjcU0dDDD2p_NU1sOv
-X-Proofpoint-ORIG-GUID: cx37SeB8QQ97rqSYGRxTPCYKrXbkNeUH
-Content-Transfer-Encoding: 8bit
-X-Proofpoint-UnRewURL: 0 URL was un-rewritten
+In-Reply-To: <20220331215607.3182232-1-dovmurik@linux.ibm.com>
+References: <20220331215607.3182232-1-dovmurik@linux.ibm.com>
 MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-GUID: XyTT2PWjRBe8ypfyKdEzimWA3YVwWRkm
+X-Proofpoint-ORIG-GUID: Xz7nS6tbEZX7fTtKbGG6pv4hR0MYlc0U
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.205,Aquarius:18.0.850,Hydra:6.0.425,FMLib:17.11.64.514
  definitions=2022-03-31_06,2022-03-31_01,2022-02-23_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 lowpriorityscore=0
- priorityscore=1501 bulkscore=0 spamscore=0 phishscore=0 impostorscore=0
- adultscore=0 mlxscore=0 suspectscore=0 clxscore=1015 malwarescore=0
- mlxlogscore=999 classifier=spam adjust=0 reason=mlx scancount=1
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 bulkscore=0 mlxlogscore=999
+ lowpriorityscore=0 impostorscore=0 adultscore=0 spamscore=0
+ priorityscore=1501 malwarescore=0 mlxscore=0 phishscore=0 suspectscore=0
+ clxscore=1015 classifier=spam adjust=0 reason=mlx scancount=1
  engine=8.12.0-2202240000 definitions=main-2203310112
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Confidential computing (coco) hardware such as AMD SEV (Secure Encrypted
-Virtualization) allows guest owners to inject secrets into the VMs
-memory without the host/hypervisor being able to read them.  In SEV,
-secret injection is performed early in the VM launch process, before the
-guest starts running.
+The new efi_secret module exposes the confidential computing (coco)
+EFI secret area via securityfs interface.
 
-OVMF already reserves designated area for secret injection (in its
-AmdSev package; see edk2 commit 01726b6d23d4 "OvmfPkg/AmdSev: Expose the
-Sev Secret area using a configuration table" [1]), but the secrets were
-not available in the guest kernel.
+When the module is loaded (and securityfs is mounted, typically under
+/sys/kernel/security), a "secrets/coco" directory is created in
+securityfs.  In it, a file is created for each secret entry.  The name
+of each such file is the GUID of the secret entry, and its content is
+the secret data.
 
-The patch series keeps the address of the EFI-provided memory for
-injected secrets, and exposes the secrets to userspace via securityfs
-using a new efi_secret kernel module.  The module is autoloaded (by the
-EFI driver) if the secret area is populated.
+This allows applications running in a confidential computing setting to
+read secrets provided by the guest owner via a secure secret injection
+mechanism (such as AMD SEV's LAUNCH_SECRET command).
 
-The first patch in EFI keeps the address of the secret area as passed in
-the EFI configuration table.  The second patch introduces the new
-efi_secret module that exposes the content of the secret entries as
-securityfs files, and allows clearing out secrets with a file unlink
-interface.  The third patch auto-loads the efi_secret module during
-startup if the injected secrets area is populated.  The last patch
-documents the data flow of confidential computing secret injection.
+Removing (unlinking) files in the "secrets/coco" directory will zero out
+the secret in memory, and remove the filesystem entry.  If the module is
+removed and loaded again, that secret will not appear in the filesystem.
 
-As a usage example, consider a guest performing computations on
-encrypted files.  The Guest Owner provides the decryption key (= secret)
-using the secret injection mechanism.  The guest application reads the
-secret from the efi_secret filesystem and proceeds to decrypt the files
-into memory and then performs the needed computations on the content.
-
-In this example, the host can't read the files from the disk image
-because they are encrypted.  Host can't read the decryption key because
-it is passed using the secret injection mechanism (= secure channel).
-Host can't read the decrypted content from memory because it's a
-confidential (memory-encrypted) guest.
-
-This has been tested with AMD SEV and SEV-ES guests, but the kernel side
-of handling the secret area has no SEV-specific dependencies, and
-therefore might be usable (perhaps with minor changes) for any
-confidential computing hardware that can publish the secret area via the
-standard EFI config table entry.
-
-To enable this functionality, set CONFIG_EFI_SECRET=m when building the
-guest kernel.
-
-Here is a simple example for usage of the efi_secret module in a guest
-to which an EFI secret area with 4 secrets was injected during launch:
-
-...
-[    0.000000] efi: EFI v2.70 by EDK II
-[    0.000000] efi: CocoSecret=0x7f222680 SMBIOS=0x7f541000 ACPI=0x7f77e000 ACPI 2.0=0x7f77e014 MEMATTR=0x7ea16418
-...
-[    1.127627] Run /init as init process
-Loading, please wait...
-Starting version 245.4-4ubuntu3.15
-...
-[    0.763204] efi_secret efi_secret.0: Created 4 entries in securityfs secrets/coco
-...
-
-# ls -la /sys/kernel/security/secrets/coco
-total 0
-drwxr-xr-x 2 root root 0 Jun 28 11:54 .
-drwxr-xr-x 3 root root 0 Jun 28 11:54 ..
--r--r----- 1 root root 0 Jun 28 11:54 736870e5-84f0-4973-92ec-06879ce3da0b
--r--r----- 1 root root 0 Jun 28 11:54 83c83f7f-1356-4975-8b7e-d3a0b54312c6
--r--r----- 1 root root 0 Jun 28 11:54 9553f55d-3da2-43ee-ab5d-ff17f78864d2
--r--r----- 1 root root 0 Jun 28 11:54 e6f5a162-d67f-4750-a67c-5d065f2a9910
-
-# hd /sys/kernel/security/secrets/coco/e6f5a162-d67f-4750-a67c-5d065f2a9910
-00000000  74 68 65 73 65 2d 61 72  65 2d 74 68 65 2d 6b 61  |these-are-the-ka|
-00000010  74 61 2d 73 65 63 72 65  74 73 00 01 02 03 04 05  |ta-secrets......|
-00000020  06 07                                             |..|
-00000022
-
-# rm /sys/kernel/security/secrets/coco/e6f5a162-d67f-4750-a67c-5d065f2a9910
-
-# ls -la /sys/kernel/security/secrets/coco
-total 0
-drwxr-xr-x 2 root root 0 Jun 28 11:55 .
-drwxr-xr-x 3 root root 0 Jun 28 11:54 ..
--r--r----- 1 root root 0 Jun 28 11:54 736870e5-84f0-4973-92ec-06879ce3da0b
--r--r----- 1 root root 0 Jun 28 11:54 83c83f7f-1356-4975-8b7e-d3a0b54312c6
--r--r----- 1 root root 0 Jun 28 11:54 9553f55d-3da2-43ee-ab5d-ff17f78864d2
-
-
-[1] https://github.com/tianocore/edk2/commit/01726b6d23d4
-
-
+Signed-off-by: Dov Murik <dovmurik@linux.ibm.com>
 ---
-
-v9 changes:
-- Change the module into a platform driver (thanks Ard)
-- Remove special auto-loading code in efi; instead register a platform
-  device (udev will load the efi_secret module) (thanks Ard)
-- Change logging in the efi_secret module to dev_err() etc.
-- efi_secret: first check that the secret area header is valid; only then start
-  creating securityfs dirs.
-
-v8: https://lore.kernel.org/linux-coco/20220228114254.1099945-1-dovmurik@linux.ibm.com/
-v8 changes:
- - Change path of filesystem to <securityfs>/secrets/coco and fix the
-   documentation accordingly (Thanks Gerd, Matthew)
- - Remove patch 2/5 (of v7) because the latest OVMF release (edk2-stable202202)
-   already contains the fix to mark the launch secret page as EFI_RESERVED_TYPE.
-
-v7: https://lore.kernel.org/linux-coco/20220201124413.1093099-1-dovmurik@linux.ibm.com/
-v7 changes:
- - Improve description of efi_secret module in Kconfig.
- - Fix sparse warnings on pointer address space mismatch
-   (Reported-by: kernel test robot <lkp@intel.com>)
-
-v6: https://lore.kernel.org/linux-coco/20211129114251.3741721-1-dovmurik@linux.ibm.com/
-v6 changes:
- - Autoload the efi_secret module if the secret area is populated
-   (thanks Greg KH).
- - efi_secret: Depend on X86_64 because we use ioremap_encrypted() which
-   is only defined for this arch.
- - efi_secret.c: Remove unneeded tableheader_guid local variable.
- - Documentation fixes.
-
-v5: https://lore.kernel.org/linux-coco/20211118113359.642571-1-dovmurik@linux.ibm.com/
-v5 changes:
- - Simplify EFI code: instead of copying the secret area, the firmware
-   marks the secret area as EFI_RESERVED_TYPE, and then the uefi_init()
-   code just keeps the pointer as it appears in the EFI configuration
-   table.  The use of reserved pages is similar to the AMD SEV-SNP
-   patches for handling SNP-Secrets and SNP-CPUID pages.
- - In order to handle OVMF releases out there which mark the
-   confidential computing secrets page as EFI_BOOT_SERVICES_DATA, add
-   efi/libstub code that detects this and fixes the E820 map to reserve
-   this page.
- - In the efi_secret module code, map the secrets page using
-   ioremap_encrypted (again, similar to the AMD SEV-SNP guest patches
-   for accessing SNP-Secrets and SNP-CPUID pages).
- - Add documentation in Documentation/security/coco/efi_secret.
-
-v4: https://lore.kernel.org/linux-coco/20211020061408.3447533-1-dovmurik@linux.ibm.com/
-v4 changes:
- - Guard all the new EFI and efi-stub code (patches 1+2) with #ifdef
-   CONFIG_EFI_COCO_SECRET (thanks Greg KH).  Selecting
-   CONFIG_EFI_SECRET=m (patch 3) will enable the EFI parts as well.
- - Guard call to clflush_cache_range() with #ifdef CONFIG_X86
-   (Reported-by: kernel test robot <lkp@intel.com>)
-
-v3: https://lore.kernel.org/linux-coco/20211014130848.592611-1-dovmurik@linux.ibm.com/
-v3 changes:
- - Rename the module to efi_secret
- - Remove the exporting of clean_cache_range
- - Use clflush_cache_range in wipe_memory
- - Document function wipe_memory
- - Initialize efi.coco_secret to EFI_INVALID_TABLE_ADDR to correctly detect
-   when there's no secret area published in the EFI configuration tables
-
-v2: https://lore.kernel.org/linux-coco/20211007061838.1381129-1-dovmurik@linux.ibm.com
-v2 changes:
- - Export clean_cache_range()
- - When deleteing a secret, call clean_cache_range() after explicit_memzero
- - Add Documentation/ABI/testing/securityfs-coco-sev_secret
-
-v1: https://lore.kernel.org/linux-coco/20210809190157.279332-1-dovmurik@linux.ibm.com/
-
-RFC: https://lore.kernel.org/linux-coco/20210628183431.953934-1-dovmurik@linux.ibm.com/
-
-
-
-Dov Murik (4):
-  efi: Save location of EFI confidential computing area
-  virt: Add efi_secret module to expose confidential computing secrets
-  efi: Register efi_secret platform device if EFI secret area is
-    declared
-  docs: security: Add secrets/coco documentation
-
  Documentation/ABI/testing/securityfs-secrets-coco |  51 +++
- Documentation/security/index.rst                  |   1 +
- Documentation/security/secrets/coco.rst           | 103 ++++++
- Documentation/security/secrets/index.rst          |   9 +
- arch/x86/platform/efi/efi.c                       |   3 +
- drivers/firmware/efi/Kconfig                      |  16 +
- drivers/firmware/efi/efi.c                        |   9 +
  drivers/virt/Kconfig                              |   3 +
  drivers/virt/Makefile                             |   1 +
  drivers/virt/coco/efi_secret/Kconfig              |  16 +
  drivers/virt/coco/efi_secret/Makefile             |   2 +
  drivers/virt/coco/efi_secret/efi_secret.c         | 349 ++++++++++++++++++++
- include/linux/efi.h                               |  10 +
- 13 files changed, 573 insertions(+)
- create mode 100644 Documentation/ABI/testing/securityfs-secrets-coco
- create mode 100644 Documentation/security/secrets/coco.rst
- create mode 100644 Documentation/security/secrets/index.rst
- create mode 100644 drivers/virt/coco/efi_secret/Kconfig
- create mode 100644 drivers/virt/coco/efi_secret/Makefile
- create mode 100644 drivers/virt/coco/efi_secret/efi_secret.c
+ 6 files changed, 422 insertions(+)
 
-
-base-commit: 7e57714cd0ad2d5bb90e50b5096a0e671dec1ef3
+diff --git a/Documentation/ABI/testing/securityfs-secrets-coco b/Documentation/ABI/testing/securityfs-secrets-coco
+new file mode 100644
+index 000000000000..f2b6909155f9
+--- /dev/null
++++ b/Documentation/ABI/testing/securityfs-secrets-coco
+@@ -0,0 +1,51 @@
++What:		security/secrets/coco
++Date:		February 2022
++Contact:	Dov Murik <dovmurik@linux.ibm.com>
++Description:
++		Exposes confidential computing (coco) EFI secrets to
++		userspace via securityfs.
++
++		EFI can declare memory area used by confidential computing
++		platforms (such as AMD SEV and SEV-ES) for secret injection by
++		the Guest Owner during VM's launch.  The secrets are encrypted
++		by the Guest Owner and decrypted inside the trusted enclave,
++		and therefore are not readable by the untrusted host.
++
++		The efi_secret module exposes the secrets to userspace.  Each
++		secret appears as a file under <securityfs>/secrets/coco,
++		where the filename is the GUID of the entry in the secrets
++		table.  This module is loaded automatically by the EFI driver
++		if the EFI secret area is populated.
++
++		Two operations are supported for the files: read and unlink.
++		Reading the file returns the content of secret entry.
++		Unlinking the file overwrites the secret data with zeroes and
++		removes the entry from the filesystem.  A secret cannot be read
++		after it has been unlinked.
++
++		For example, listing the available secrets::
++
++		  # modprobe efi_secret
++		  # ls -l /sys/kernel/security/secrets/coco
++		  -r--r----- 1 root root 0 Jun 28 11:54 736870e5-84f0-4973-92ec-06879ce3da0b
++		  -r--r----- 1 root root 0 Jun 28 11:54 83c83f7f-1356-4975-8b7e-d3a0b54312c6
++		  -r--r----- 1 root root 0 Jun 28 11:54 9553f55d-3da2-43ee-ab5d-ff17f78864d2
++		  -r--r----- 1 root root 0 Jun 28 11:54 e6f5a162-d67f-4750-a67c-5d065f2a9910
++
++		Reading the secret data by reading a file::
++
++		  # cat /sys/kernel/security/secrets/coco/e6f5a162-d67f-4750-a67c-5d065f2a9910
++		  the-content-of-the-secret-data
++
++		Wiping a secret by unlinking a file::
++
++		  # rm /sys/kernel/security/secrets/coco/e6f5a162-d67f-4750-a67c-5d065f2a9910
++		  # ls -l /sys/kernel/security/secrets/coco
++		  -r--r----- 1 root root 0 Jun 28 11:54 736870e5-84f0-4973-92ec-06879ce3da0b
++		  -r--r----- 1 root root 0 Jun 28 11:54 83c83f7f-1356-4975-8b7e-d3a0b54312c6
++		  -r--r----- 1 root root 0 Jun 28 11:54 9553f55d-3da2-43ee-ab5d-ff17f78864d2
++
++		Note: The binary format of the secrets table injected by the
++		Guest Owner is described in
++		drivers/virt/coco/efi_secret/efi_secret.c under "Structure of
++		the EFI secret area".
+diff --git a/drivers/virt/Kconfig b/drivers/virt/Kconfig
+index 8061e8ef449f..fe7a6579b974 100644
+--- a/drivers/virt/Kconfig
++++ b/drivers/virt/Kconfig
+@@ -36,4 +36,7 @@ source "drivers/virt/vboxguest/Kconfig"
+ source "drivers/virt/nitro_enclaves/Kconfig"
+ 
+ source "drivers/virt/acrn/Kconfig"
++
++source "drivers/virt/coco/efi_secret/Kconfig"
++
+ endif
+diff --git a/drivers/virt/Makefile b/drivers/virt/Makefile
+index 3e272ea60cd9..efdb015783f9 100644
+--- a/drivers/virt/Makefile
++++ b/drivers/virt/Makefile
+@@ -8,3 +8,4 @@ obj-y				+= vboxguest/
+ 
+ obj-$(CONFIG_NITRO_ENCLAVES)	+= nitro_enclaves/
+ obj-$(CONFIG_ACRN_HSM)		+= acrn/
++obj-$(CONFIG_EFI_SECRET)	+= coco/efi_secret/
+diff --git a/drivers/virt/coco/efi_secret/Kconfig b/drivers/virt/coco/efi_secret/Kconfig
+new file mode 100644
+index 000000000000..4404d198f3b2
+--- /dev/null
++++ b/drivers/virt/coco/efi_secret/Kconfig
+@@ -0,0 +1,16 @@
++# SPDX-License-Identifier: GPL-2.0-only
++config EFI_SECRET
++	tristate "EFI secret area securityfs support"
++	depends on EFI && X86_64
++	select EFI_COCO_SECRET
++	select SECURITYFS
++	help
++	  This is a driver for accessing the EFI secret area via securityfs.
++	  The EFI secret area is a memory area designated by the firmware for
++	  confidential computing secret injection (for example for AMD SEV
++	  guests).  The driver exposes the secrets as files in
++	  <securityfs>/secrets/coco.  Files can be read and deleted (deleting
++	  a file wipes the secret from memory).
++
++	  To compile this driver as a module, choose M here.
++	  The module will be called efi_secret.
+diff --git a/drivers/virt/coco/efi_secret/Makefile b/drivers/virt/coco/efi_secret/Makefile
+new file mode 100644
+index 000000000000..c7047ce804f7
+--- /dev/null
++++ b/drivers/virt/coco/efi_secret/Makefile
+@@ -0,0 +1,2 @@
++# SPDX-License-Identifier: GPL-2.0-only
++obj-$(CONFIG_EFI_SECRET) += efi_secret.o
+diff --git a/drivers/virt/coco/efi_secret/efi_secret.c b/drivers/virt/coco/efi_secret/efi_secret.c
+new file mode 100644
+index 000000000000..e700a5ef7043
+--- /dev/null
++++ b/drivers/virt/coco/efi_secret/efi_secret.c
+@@ -0,0 +1,349 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * efi_secret module
++ *
++ * Copyright (C) 2022 IBM Corporation
++ * Author: Dov Murik <dovmurik@linux.ibm.com>
++ */
++
++/**
++ * DOC: efi_secret: Allow reading EFI confidential computing (coco) secret area
++ * via securityfs interface.
++ *
++ * When the module is loaded (and securityfs is mounted, typically under
++ * /sys/kernel/security), a "secrets/coco" directory is created in securityfs.
++ * In it, a file is created for each secret entry.  The name of each such file
++ * is the GUID of the secret entry, and its content is the secret data.
++ */
++
++#include <linux/platform_device.h>
++#include <linux/seq_file.h>
++#include <linux/fs.h>
++#include <linux/kernel.h>
++#include <linux/init.h>
++#include <linux/module.h>
++#include <linux/io.h>
++#include <linux/security.h>
++#include <linux/efi.h>
++#include <linux/cacheflush.h>
++
++#define EFI_SECRET_NUM_FILES 64
++
++struct efi_secret {
++	struct dentry *secrets_dir;
++	struct dentry *fs_dir;
++	struct dentry *fs_files[EFI_SECRET_NUM_FILES];
++	void __iomem *secret_data;
++	u64 secret_data_len;
++};
++
++/*
++ * Structure of the EFI secret area
++ *
++ * Offset   Length
++ * (bytes)  (bytes)  Usage
++ * -------  -------  -----
++ *       0       16  Secret table header GUID (must be 1e74f542-71dd-4d66-963e-ef4287ff173b)
++ *      16        4  Length of bytes of the entire secret area
++ *
++ *      20       16  First secret entry's GUID
++ *      36        4  First secret entry's length in bytes (= 16 + 4 + x)
++ *      40        x  First secret entry's data
++ *
++ *    40+x       16  Second secret entry's GUID
++ *    56+x        4  Second secret entry's length in bytes (= 16 + 4 + y)
++ *    60+x        y  Second secret entry's data
++ *
++ * (... and so on for additional entries)
++ *
++ * The GUID of each secret entry designates the usage of the secret data.
++ */
++
++/**
++ * struct secret_header - Header of entire secret area; this should be followed
++ * by instances of struct secret_entry.
++ * @guid:	Must be EFI_SECRET_TABLE_HEADER_GUID
++ * @len:	Length in bytes of entire secret area, including header
++ */
++struct secret_header {
++	efi_guid_t guid;
++	u32 len;
++} __attribute((packed));
++
++/**
++ * struct secret_entry - Holds one secret entry
++ * @guid:	Secret-specific GUID (or NULL_GUID if this secret entry was deleted)
++ * @len:	Length of secret entry, including its guid and len fields
++ * @data:	The secret data (full of zeros if this secret entry was deleted)
++ */
++struct secret_entry {
++	efi_guid_t guid;
++	u32 len;
++	u8 data[];
++} __attribute((packed));
++
++static size_t secret_entry_data_len(struct secret_entry *e)
++{
++	return e->len - sizeof(*e);
++}
++
++static struct efi_secret the_efi_secret;
++
++static inline struct efi_secret *efi_secret_get(void)
++{
++	return &the_efi_secret;
++}
++
++static int efi_secret_bin_file_show(struct seq_file *file, void *data)
++{
++	struct secret_entry *e = file->private;
++
++	if (e)
++		seq_write(file, e->data, secret_entry_data_len(e));
++
++	return 0;
++}
++DEFINE_SHOW_ATTRIBUTE(efi_secret_bin_file);
++
++/*
++ * Overwrite memory content with zeroes, and ensure that dirty cache lines are
++ * actually written back to memory, to clear out the secret.
++ */
++static void wipe_memory(void *addr, size_t size)
++{
++	memzero_explicit(addr, size);
++#ifdef CONFIG_X86
++	clflush_cache_range(addr, size);
++#endif
++}
++
++static int efi_secret_unlink(struct inode *dir, struct dentry *dentry)
++{
++	struct efi_secret *s = efi_secret_get();
++	struct inode *inode = d_inode(dentry);
++	struct secret_entry *e = (struct secret_entry *)inode->i_private;
++	int i;
++
++	if (e) {
++		/* Zero out the secret data */
++		wipe_memory(e->data, secret_entry_data_len(e));
++		e->guid = NULL_GUID;
++	}
++
++	inode->i_private = NULL;
++
++	for (i = 0; i < EFI_SECRET_NUM_FILES; i++)
++		if (s->fs_files[i] == dentry)
++			s->fs_files[i] = NULL;
++
++	/*
++	 * securityfs_remove tries to lock the directory's inode, but we reach
++	 * the unlink callback when it's already locked
++	 */
++	inode_unlock(dir);
++	securityfs_remove(dentry);
++	inode_lock(dir);
++
++	return 0;
++}
++
++static const struct inode_operations efi_secret_dir_inode_operations = {
++	.lookup         = simple_lookup,
++	.unlink         = efi_secret_unlink,
++};
++
++static int efi_secret_map_area(struct platform_device *dev)
++{
++	int ret;
++	struct efi_secret *s = efi_secret_get();
++	struct linux_efi_coco_secret_area *secret_area;
++
++	if (efi.coco_secret == EFI_INVALID_TABLE_ADDR) {
++		dev_err(&dev->dev, "Secret area address is not available\n");
++		return -EINVAL;
++	}
++
++	secret_area = memremap(efi.coco_secret, sizeof(*secret_area), MEMREMAP_WB);
++	if (secret_area == NULL) {
++		dev_err(&dev->dev, "Could not map secret area EFI config entry\n");
++		return -ENOMEM;
++	}
++	if (!secret_area->base_pa || secret_area->size < sizeof(struct secret_header)) {
++		dev_err(&dev->dev,
++			"Invalid secret area memory location (base_pa=0x%llx size=0x%llx)\n",
++			secret_area->base_pa, secret_area->size);
++		ret = -EINVAL;
++		goto unmap;
++	}
++
++	s->secret_data = ioremap_encrypted(secret_area->base_pa, secret_area->size);
++	if (s->secret_data == NULL) {
++		dev_err(&dev->dev, "Could not map secret area\n");
++		ret = -ENOMEM;
++		goto unmap;
++	}
++
++	s->secret_data_len = secret_area->size;
++	ret = 0;
++
++unmap:
++	memunmap(secret_area);
++	return ret;
++}
++
++static void efi_secret_securityfs_teardown(struct platform_device *dev)
++{
++	struct efi_secret *s = efi_secret_get();
++	int i;
++
++	for (i = (EFI_SECRET_NUM_FILES - 1); i >= 0; i--) {
++		securityfs_remove(s->fs_files[i]);
++		s->fs_files[i] = NULL;
++	}
++
++	securityfs_remove(s->fs_dir);
++	s->fs_dir = NULL;
++
++	securityfs_remove(s->secrets_dir);
++	s->secrets_dir = NULL;
++
++	dev_dbg(&dev->dev, "Removed securityfs entries\n");
++}
++
++static int efi_secret_securityfs_setup(struct platform_device *dev)
++{
++	struct efi_secret *s = efi_secret_get();
++	int ret = 0, i = 0, bytes_left;
++	unsigned char *ptr;
++	struct secret_header *h;
++	struct secret_entry *e;
++	struct dentry *dent;
++	char guid_str[EFI_VARIABLE_GUID_LEN + 1];
++
++	ptr = (void __force *)s->secret_data;
++	h = (struct secret_header *)ptr;
++	if (efi_guidcmp(h->guid, EFI_SECRET_TABLE_HEADER_GUID)) {
++		/*
++		 * This is not an error: it just means that EFI defines secret
++		 * area but it was not populated by the Guest Owner.
++		 */
++		dev_dbg(&dev->dev, "EFI secret area does not start with correct GUID\n");
++		return -ENODEV;
++	}
++	if (h->len < sizeof(*h)) {
++		dev_err(&dev->dev, "EFI secret area reported length is too small\n");
++		return -EINVAL;
++	}
++	if (h->len > s->secret_data_len) {
++		dev_err(&dev->dev, "EFI secret area reported length is too big\n");
++		return -EINVAL;
++	}
++
++	s->secrets_dir = NULL;
++	s->fs_dir = NULL;
++	memset(s->fs_files, 0, sizeof(s->fs_files));
++
++	dent = securityfs_create_dir("secrets", NULL);
++	if (IS_ERR(dent)) {
++		dev_err(&dev->dev, "Error creating secrets securityfs directory entry err=%ld\n",
++			PTR_ERR(dent));
++		return PTR_ERR(dent);
++	}
++	s->secrets_dir = dent;
++
++	dent = securityfs_create_dir("coco", s->secrets_dir);
++	if (IS_ERR(dent)) {
++		dev_err(&dev->dev, "Error creating coco securityfs directory entry err=%ld\n",
++			PTR_ERR(dent));
++		return PTR_ERR(dent);
++	}
++	d_inode(dent)->i_op = &efi_secret_dir_inode_operations;
++	s->fs_dir = dent;
++
++	bytes_left = h->len - sizeof(*h);
++	ptr += sizeof(*h);
++	while (bytes_left >= (int)sizeof(*e) && i < EFI_SECRET_NUM_FILES) {
++		e = (struct secret_entry *)ptr;
++		if (e->len < sizeof(*e) || e->len > (unsigned int)bytes_left) {
++			dev_err(&dev->dev, "EFI secret area is corrupted\n");
++			ret = -EINVAL;
++			goto err_cleanup;
++		}
++
++		/* Skip deleted entries (which will have NULL_GUID) */
++		if (efi_guidcmp(e->guid, NULL_GUID)) {
++			efi_guid_to_str(&e->guid, guid_str);
++
++			dent = securityfs_create_file(guid_str, 0440, s->fs_dir, (void *)e,
++						      &efi_secret_bin_file_fops);
++			if (IS_ERR(dent)) {
++				dev_err(&dev->dev, "Error creating efi_secret securityfs entry\n");
++				ret = PTR_ERR(dent);
++				goto err_cleanup;
++			}
++
++			s->fs_files[i++] = dent;
++		}
++		ptr += e->len;
++		bytes_left -= e->len;
++	}
++
++	dev_info(&dev->dev, "Created %d entries in securityfs secrets/coco\n", i);
++	return 0;
++
++err_cleanup:
++	efi_secret_securityfs_teardown(dev);
++	return ret;
++}
++
++static void efi_secret_unmap_area(void)
++{
++	struct efi_secret *s = efi_secret_get();
++
++	if (s->secret_data) {
++		iounmap(s->secret_data);
++		s->secret_data = NULL;
++		s->secret_data_len = 0;
++	}
++}
++
++static int efi_secret_probe(struct platform_device *dev)
++{
++	int ret;
++
++	ret = efi_secret_map_area(dev);
++	if (ret)
++		return ret;
++
++	ret = efi_secret_securityfs_setup(dev);
++	if (ret)
++		goto err_unmap;
++
++	return ret;
++
++err_unmap:
++	efi_secret_unmap_area();
++	return ret;
++}
++
++static int efi_secret_remove(struct platform_device *dev)
++{
++	efi_secret_securityfs_teardown(dev);
++	efi_secret_unmap_area();
++	return 0;
++}
++
++static struct platform_driver efi_secret_driver = {
++	.probe = efi_secret_probe,
++	.remove = efi_secret_remove,
++	.driver = {
++		.name = "efi_secret",
++	},
++};
++
++module_platform_driver(efi_secret_driver);
++
++MODULE_DESCRIPTION("Confidential computing EFI secret area access");
++MODULE_AUTHOR("IBM");
++MODULE_LICENSE("GPL");
++MODULE_ALIAS("platform:efi_secret");
 -- 
 2.25.1
 
