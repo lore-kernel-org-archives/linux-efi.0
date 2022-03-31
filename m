@@ -2,113 +2,120 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E9F1C433FE
-	for <linux-efi@archiver.kernel.org>; Thu, 31 Mar 2022 22:11:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0A0D5C433F5
+	for <linux-efi@archiver.kernel.org>; Thu, 31 Mar 2022 22:20:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242298AbiCaWN3 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 31 Mar 2022 18:13:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45040 "EHLO
+        id S240576AbiCaWWC (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 31 Mar 2022 18:22:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39662 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242292AbiCaWN2 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 31 Mar 2022 18:13:28 -0400
-Received: from mail-ej1-x635.google.com (mail-ej1-x635.google.com [IPv6:2a00:1450:4864:20::635])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E6BCF2467D4;
-        Thu, 31 Mar 2022 15:11:39 -0700 (PDT)
-Received: by mail-ej1-x635.google.com with SMTP id c10so2036289ejs.13;
-        Thu, 31 Mar 2022 15:11:39 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=DvaX5NXvnnhCONDjD2TggHPkVfcRk9lluokmAGVTnZM=;
-        b=ZMW4W/JXgOmdAE/uk7oLtCBZGANvEkTZm27+6vll59icGjEh1fmGtj9aHhF+N8VwWe
-         cFImyl/m3yOuxHZf2mR+o6SqxnFrCk7PmuiTKnwhWSS4mMhMp8MhqK3+dxnFksGHc1f9
-         E7ao7/8B5qUyV+7zEKkTwcnPhXmeYwEAsKTo9hEfom5PMgh98phNWgamRIoeGTGvbr8u
-         A6iICD5lPCAwiqMRDgxcI0OXWaB5gQA61TQwpxYCn1ox2tZdGYgklyfRXAcsjYxOPqE2
-         v4vKCcK8OAuzr11Q6MUj4xDVz9Llhn8evvyKM5jYcZKJAFLK7zmTkhphCPrKnhU1EnCd
-         K8sw==
+        with ESMTP id S242373AbiCaWWB (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 31 Mar 2022 18:22:01 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 4667E174BB3
+        for <linux-efi@vger.kernel.org>; Thu, 31 Mar 2022 15:20:12 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1648765212;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=lcacMdqd3bf9RhdWBIFn3jh9EYGsuLJ5EDgnlxHe6hY=;
+        b=Fl8KZtA1UjKncuRQwhuJ/kfcnWl+tIaFxovzxBX9KsFJrnxDEVFZxFv4MIHWX3ZQvMM+s3
+        8V8laQhr2MAmaAgIqeB8svyzK1JeMBI0zF9xVfNpcQMY4fse20BX7/+JWweITs5fZ3rQ5P
+        QCbHyPz+tZGbh7izNfih0WJBndSqIBU=
+Received: from mail-ej1-f72.google.com (mail-ej1-f72.google.com
+ [209.85.218.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-447-qgfvOY4vO1yfegBOWyvX7Q-1; Thu, 31 Mar 2022 18:20:10 -0400
+X-MC-Unique: qgfvOY4vO1yfegBOWyvX7Q-1
+Received: by mail-ej1-f72.google.com with SMTP id de52-20020a1709069bf400b006dffb966922so524462ejc.2
+        for <linux-efi@vger.kernel.org>; Thu, 31 Mar 2022 15:20:10 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=DvaX5NXvnnhCONDjD2TggHPkVfcRk9lluokmAGVTnZM=;
-        b=DRIA3f0P4GeCLEEOjcrCSVXX/tDIgTrWRkVGQvUmLGvYYWQBsOoC5eOEUwkdCP96GX
-         +ff46RcCUqYfHxogHoYcu/gj4ao/UofGhHfDkSYUgnb+todJiIDs/df+jmKGQraKsbQA
-         CawSU2DUPU9rqHqaO4Td6QSmVnEgDa/2tSXm03NwvYdULr/OpN3aQdEjBlt31x5xJude
-         TkxktPkaVyknVRDP+/z28J6DzoFoJwu8pFSjpc0v31sX4A2Gqx/YDBkWh7mQ7JuwOalM
-         4+fTmJOZzlVqLZ1vAf1iWmmwTOW+CDPVcx4uoJB0R62qRkcCbMFtF3xXlRqFBvw7ilnv
-         AXLA==
-X-Gm-Message-State: AOAM531ZhvpmAATvbHX1Py7PXJ6jqeB1y1oR4J9DTDlr/I8AUvUXoVBX
-        niMwGaWD3N81Z2FzcQ/FAMo=
-X-Google-Smtp-Source: ABdhPJxCUKRSlGZtTUbpQVH7NVvnrmeHu9U5lXqC5ZbW3RbN0yM+3Cb5dTyZj+0ARepqIki5fTdfzg==
-X-Received: by 2002:a17:907:c16:b0:6da:7d72:1357 with SMTP id ga22-20020a1709070c1600b006da7d721357mr6718359ejc.251.1648764698305;
-        Thu, 31 Mar 2022 15:11:38 -0700 (PDT)
-Received: from localhost.localdomain (i130160.upc-i.chello.nl. [62.195.130.160])
-        by smtp.googlemail.com with ESMTPSA id z6-20020a056402274600b004194fc1b7casm321322edd.48.2022.03.31.15.11.37
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 31 Mar 2022 15:11:37 -0700 (PDT)
-From:   Jakob Koschel <jakobkoschel@gmail.com>
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Mike Rapoport <rppt@kernel.org>,
-        "Brian Johannesmeyer" <bjohannesmeyer@gmail.com>,
-        Cristiano Giuffrida <c.giuffrida@vu.nl>,
-        "Bos, H.J." <h.j.bos@vu.nl>, Jakob Koschel <jakobkoschel@gmail.com>
-Subject: [PATCH 1/2] efi: remove use of list iterator variable after loop
-Date:   Fri,  1 Apr 2022 00:10:29 +0200
-Message-Id: <20220331221030.889718-1-jakobkoschel@gmail.com>
-X-Mailer: git-send-email 2.25.1
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=lcacMdqd3bf9RhdWBIFn3jh9EYGsuLJ5EDgnlxHe6hY=;
+        b=K22yreVyY0senyZLA3sD6AxHVYZbGnE2417Gl+y/Rlks3RsvHTI+wKz1Ai0z58yK5v
+         GPf/bo3F4DiGcu9k0P21d4lok7+7RiongQweZrqCqIU5jE4C7MNsUQn3a7Ckm1Ny71Cv
+         CUrq1BIP4h0pEOJFWfX2EIV7KqdUzJsN9nEpl61dEXVoVMAW9YsjfDc44FrS8Kbkejht
+         m+y6lueQpxv/3iQXrB1+Wxj1axLWKwTG07a/5NRloCxybakhssc4OKuCZxt7XJXqpY2L
+         L8EqXIsXAA6rhgl98ZxYg+jtg85fJoJUecZclAxU6BrPJtB46w8clw1+kFGJUHE/lWaG
+         qQxg==
+X-Gm-Message-State: AOAM531/MNb7LGlgFpUNzgBc/SrK45c4vWNgSgUzJhNIheQsp8YaVL/Z
+        GpC12jKgHg0x85cDtuLTCfIE3ZAZnVJ+sc8ZEUFI5qPQI5SJZQ8t+5oYVuMoBhiudsUW2R970ca
+        KADrrHI5s7Gm+h/+dg0NCIvGQyEauYNI9cA2h
+X-Received: by 2002:aa7:c789:0:b0:413:605d:8d17 with SMTP id n9-20020aa7c789000000b00413605d8d17mr18443749eds.100.1648765208973;
+        Thu, 31 Mar 2022 15:20:08 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJxJS+G0lRPGKhUebBKREDAXsEcg0UrX4NCWqjao2fTUSk/VCXDWb6txzdyF194RLS6KRUjV8UwtsdLq0U1h44U=
+X-Received: by 2002:aa7:c789:0:b0:413:605d:8d17 with SMTP id
+ n9-20020aa7c789000000b00413605d8d17mr18443736eds.100.1648765208701; Thu, 31
+ Mar 2022 15:20:08 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20220331151654.184433-1-javierm@redhat.com> <CAMj1kXHgyjB_BVzXx+CK0tBuJpZ3h=8XKus7nWiyovECjVQ0gw@mail.gmail.com>
+ <YkYA/Wpqa/PMczkp@lx-t490>
+In-Reply-To: <YkYA/Wpqa/PMczkp@lx-t490>
+From:   Javier Martinez Canillas <javierm@redhat.com>
+Date:   Fri, 1 Apr 2022 00:19:57 +0200
+Message-ID: <CAFOAJEeKNy0HW82W6HV_49d5sc5L0m62QDfY9qA1906_ZzGRYg@mail.gmail.com>
+Subject: Re: [PATCH v2] efi: Allow to enable EFI runtime services by default
+ on RT
+To:     "Ahmed S. Darwish" <a.darwish@linutronix.de>
+Cc:     Ard Biesheuvel <ardb@kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-efi <linux-efi@vger.kernel.org>,
+        Brian Masney <bmasney@redhat.com>,
+        Sebastian Andrzej Siewior <bigeasy@linutronix.de>,
+        Al Stone <ahs3@redhat.com>,
+        Peter Robinson <pbrobinson@gmail.com>,
+        Robbie Harwood <rharwood@redhat.com>,
+        Peter Jones <pjones@redhat.com>,
+        Alexander Larsson <alexl@redhat.com>,
+        Andrew Halaney <ahalaney@redhat.com>,
+        linux-rt-users@vger.kernel.org,
+        Thomas Gleixner <tglx@linutronix.de>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-In preparation to limiting the scope of a list iterator to the list
-traversal loop, use a dedicated pointer to iterate through the list [1].
+Hello Ahmed,
 
-In the current state the list_for_each_entry() is guaranteed to
-hit a break or goto in order to work properly. If the list iterator
-executes completely or the list is empty the iterator variable contains
-a type confused bogus value infered from the head of the list.
+On Thu, Mar 31, 2022 at 9:36 PM Ahmed S. Darwish
+<a.darwish@linutronix.de> wrote:
+>
+> Hi Ard, Javier,
+>
+> Am Do, Mar 31, 2022, schrieb Ard Biesheuvel:
+> > On Thu, 31 Mar 2022 at 17:17, Javier Martinez Canillas
+> > <javierm@redhat.com> wrote:
+>
 
-With this patch the variable used past the list iterator is only set
-if the list exists early and is NULL otherwise. It should therefore
-be safe to just set *prev = NULL (as it was before).
+[snip]
 
-Link: https://lore.kernel.org/all/CAHk-=wgRr_D8CB-D9Kg-c=EHreAsk5SqXPwr9Y7k9sA6cWXJ6w@mail.gmail.com/
-Signed-off-by: Jakob Koschel <jakobkoschel@gmail.com>
----
- drivers/firmware/efi/vars.c | 10 ++++++----
- 1 file changed, 6 insertions(+), 4 deletions(-)
+> In case of (CONFIG_PREEMPT_RT=y && CONFIG_EFI_DISABLE_RUNTIME=n),
+> shouldn't we add a small message in the kernel log warning that EFI
+> runtime services are enabled for the RT kernel?
+>
+> In almost all HW, except custom ones with "verified" firmware, such a
+> warning would be useful... This is especially true since in the embedded
 
-diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
-index cae590bd08f2..3994aad38661 100644
---- a/drivers/firmware/efi/vars.c
-+++ b/drivers/firmware/efi/vars.c
-@@ -1081,14 +1081,16 @@ int __efivar_entry_iter(int (*func)(struct efivar_entry *, void *),
- 			struct list_head *head, void *data,
- 			struct efivar_entry **prev)
- {
--	struct efivar_entry *entry, *n;
-+	struct efivar_entry *entry = NULL, *iter, *n;
- 	int err = 0;
- 
- 	if (!prev || !*prev) {
--		list_for_each_entry_safe(entry, n, head, list) {
--			err = func(entry, data);
--			if (err)
-+		list_for_each_entry_safe(iter, n, head, list) {
-+			err = func(iter, data);
-+			if (err) {
-+				entry = iter;
- 				break;
-+			}
- 		}
- 
- 		if (prev)
+I considered that as well but was not sure about what that message should be.
 
-base-commit: d888c83fcec75194a8a48ccd283953bdba7b2550
--- 
-2.25.1
+Since it will be printed even on systems whose EFI firmwares do not
+have such long call times as the ones described in the commit that
+disabled the runtime services for RT.
+
+And in that case the warning may be misleading and make users believe
+that a problem exists, which might not be accurate.
+
+> domain, manually-configured RT kernels are almost always the norm.
+>
+
+Agreed. That is why the default for CONFIG_EFI_DISABLE_RUNTIME=y, if
+CONFIG_PREEMPT_RT=y. So users will need to explicitly disable the
+option if they want the EFI runtime services to be enabled with
+CONFIG_PREEMPT_RT.
+
+Best regards,
+Javier
 
