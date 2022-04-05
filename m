@@ -2,43 +2,43 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6EE85C4167D
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E54BC4167E
 	for <linux-efi@archiver.kernel.org>; Wed,  6 Apr 2022 04:05:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244323AbiDFEFC (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 6 Apr 2022 00:05:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45004 "EHLO
+        id S1388059AbiDFEFx (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 6 Apr 2022 00:05:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47710 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1850041AbiDFCrJ (ORCPT
+        with ESMTP id S1850058AbiDFCrJ (ORCPT
         <rfc822;linux-efi@vger.kernel.org>); Tue, 5 Apr 2022 22:47:09 -0400
-Received: from mga18.intel.com (mga18.intel.com [134.134.136.126])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 627D2294A32;
-        Tue,  5 Apr 2022 16:48:41 -0700 (PDT)
+Received: from mga01.intel.com (mga01.intel.com [192.55.52.88])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3DE511E111F;
+        Tue,  5 Apr 2022 16:48:48 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1649202521; x=1680738521;
+  t=1649202529; x=1680738529;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=uxOljjKX+qk9GQuCznjSBxeTYqGSyAmKn+lWvo4axDU=;
-  b=krarkGPDArAarEZszI0oXyaf94CLU31PWcatsi8sGKsr5v18hezKkWQ+
-   fESXE3GMRzy1V2mA5qVovpECViAHxVMLUG/wKcbRTHxzut0zzDtuAoxgB
-   /GSsui3ed3hHescEwHWLdQVQO+vnaFsULPc71JGEAdAeeSVosWoKXMjN7
-   HcJssFK0Wke7ST5zcdjFUz7PfSs1nulF0zv6m1P8lhI/55adQLMs3s62S
-   DQ/CI9wYFxSmXWeUx2H66kJquaZfdCcrNmI3KWL+O+MoEQvd8Tj4e8YJ2
-   RR+S3Aa1Qo02ekoLY2PXmB+Ut2WGYICeK9hV7aFs9HVn/Vsb7K6my8MxT
+  bh=olocThm3w1DRSupMBiWIGBr2Nhg3m7XH5eFavATvzHQ=;
+  b=dmwnhRsmAbGFeKbgiWuukgUaCyQceP67P5NBCMCHfK3ZeOb7reDFyq04
+   LpMuwPo6NQ86tLnEfkWScVXT9pInYsHFOlY2mF7mitJPhYeK3kzIIA2+v
+   wt3f94UO9jovkcRz3g61jZeWeqIGIv45nwKpd23sByAboRWQOiH5lLIqP
+   8N7ZAKSE+O0Sqn910r+yaq9PS58d4H+5u38528Vbz81vKmYVzkOkjjBxz
+   2BpbQ7lH3DswfIKI5onnPY2ZQUxDnWRmTeU3cfo7dRnv+KdbATDmJPJCR
+   25DgeYpDa5Va3oRvUBl58GB0+hbDRPAQEn77MZ6LI0tvVVlQxKe9tWdUv
    A==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10308"; a="243035267"
+X-IronPort-AV: E=McAfee;i="6200,9189,10308"; a="285858014"
 X-IronPort-AV: E=Sophos;i="5.90,238,1643702400"; 
-   d="scan'208";a="243035267"
-Received: from fmsmga008.fm.intel.com ([10.253.24.58])
-  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Apr 2022 16:48:40 -0700
+   d="scan'208";a="285858014"
+Received: from fmsmga005.fm.intel.com ([10.253.24.32])
+  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Apr 2022 16:48:48 -0700
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.90,238,1643702400"; 
-   d="scan'208";a="608658168"
+   d="scan'208";a="851044908"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by fmsmga008.fm.intel.com with ESMTP; 05 Apr 2022 16:48:35 -0700
+  by fmsmga005.fm.intel.com with ESMTP; 05 Apr 2022 16:48:41 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1000)
-        id 98F0C32E; Wed,  6 Apr 2022 02:43:47 +0300 (EEST)
+        id CEF3260A; Wed,  6 Apr 2022 02:43:47 +0300 (EEST)
 From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
 To:     Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>,
         Sean Christopherson <seanjc@google.com>,
@@ -64,9 +64,9 @@ Cc:     Andi Kleen <ak@linux.intel.com>,
         linux-mm@kvack.org, linux-coco@lists.linux.dev,
         linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
         "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-Subject: [PATCHv4 2/8] efi/x86: Get full memory map in allocate_e820()
-Date:   Wed,  6 Apr 2022 02:43:37 +0300
-Message-Id: <20220405234343.74045-3-kirill.shutemov@linux.intel.com>
+Subject: [PATCHv4 6/8] x86/mm: Provide helpers for unaccepted memory
+Date:   Wed,  6 Apr 2022 02:43:41 +0300
+Message-Id: <20220405234343.74045-7-kirill.shutemov@linux.intel.com>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220405234343.74045-1-kirill.shutemov@linux.intel.com>
 References: <20220405234343.74045-1-kirill.shutemov@linux.intel.com>
@@ -76,81 +76,119 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Currently allocate_e820() only interested in the size of map and size of
-memory descriptor to determine how many e820 entries the kernel needs.
+Core-mm requires few helpers to support unaccepted memory:
 
-UEFI Specification version 2.9 introduces a new memory type --
-unaccepted memory. To track unaccepted memory kernel needs to allocate
-a bitmap. The size of the bitmap is dependent on the maximum physical
-address present in the system. A full memory map is required to find
-the maximum address.
+ - accept_memory() checks the range of addresses against the bitmap and
+   accept memory if needed.
 
-Modify allocate_e820() to get a full memory map.
-
-This is preparation for the next patch that implements handling of
-unaccepted memory in EFI stub.
+ - memory_is_unaccepted() check if anything within the range requires
+   acceptance.
 
 Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
 ---
- drivers/firmware/efi/libstub/x86-stub.c | 28 ++++++++++++-------------
- 1 file changed, 13 insertions(+), 15 deletions(-)
+ arch/x86/include/asm/page.h              |  5 +++
+ arch/x86/include/asm/unaccepted_memory.h |  1 +
+ arch/x86/mm/Makefile                     |  2 +
+ arch/x86/mm/unaccepted_memory.c          | 53 ++++++++++++++++++++++++
+ 4 files changed, 61 insertions(+)
+ create mode 100644 arch/x86/mm/unaccepted_memory.c
 
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index 01ddd4502e28..d18cac8ab436 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -569,30 +569,28 @@ static efi_status_t alloc_e820ext(u32 nr_desc, struct setup_data **e820ext,
- }
+diff --git a/arch/x86/include/asm/page.h b/arch/x86/include/asm/page.h
+index 9cc82f305f4b..9ae0064f97e5 100644
+--- a/arch/x86/include/asm/page.h
++++ b/arch/x86/include/asm/page.h
+@@ -19,6 +19,11 @@
+ struct page;
  
- static efi_status_t allocate_e820(struct boot_params *params,
-+				  struct efi_boot_memmap *map,
- 				  struct setup_data **e820ext,
- 				  u32 *e820ext_size)
- {
--	unsigned long map_size, desc_size, map_key;
- 	efi_status_t status;
--	__u32 nr_desc, desc_version;
-+	__u32 nr_desc;
+ #include <linux/range.h>
++
++#ifdef CONFIG_UNACCEPTED_MEMORY
++#include <asm/unaccepted_memory.h>
++#endif
++
+ extern struct range pfn_mapped[];
+ extern int nr_pfn_mapped;
  
--	/* Only need the size of the mem map and size of each mem descriptor */
--	map_size = 0;
--	status = efi_bs_call(get_memory_map, &map_size, NULL, &map_key,
--			     &desc_size, &desc_version);
--	if (status != EFI_BUFFER_TOO_SMALL)
--		return (status != EFI_SUCCESS) ? status : EFI_UNSUPPORTED;
--
--	nr_desc = map_size / desc_size + EFI_MMAP_NR_SLACK_SLOTS;
-+	status = efi_get_memory_map(map);
-+	if (status != EFI_SUCCESS)
-+		return status;
+diff --git a/arch/x86/include/asm/unaccepted_memory.h b/arch/x86/include/asm/unaccepted_memory.h
+index f1f835d3cd78..a8d12ef1bda8 100644
+--- a/arch/x86/include/asm/unaccepted_memory.h
++++ b/arch/x86/include/asm/unaccepted_memory.h
+@@ -10,5 +10,6 @@ struct boot_params;
+ void mark_unaccepted(struct boot_params *params, u64 start, u64 num);
  
--	if (nr_desc > ARRAY_SIZE(params->e820_table)) {
--		u32 nr_e820ext = nr_desc - ARRAY_SIZE(params->e820_table);
-+	nr_desc = *map->map_size / *map->desc_size;
-+	if (nr_desc > ARRAY_SIZE(params->e820_table) - EFI_MMAP_NR_SLACK_SLOTS) {
-+		u32 nr_e820ext = nr_desc - ARRAY_SIZE(params->e820_table) +
-+			EFI_MMAP_NR_SLACK_SLOTS;
+ void accept_memory(phys_addr_t start, phys_addr_t end);
++bool memory_is_unaccepted(phys_addr_t start, phys_addr_t end);
  
- 		status = alloc_e820ext(nr_e820ext, e820ext, e820ext_size);
- 		if (status != EFI_SUCCESS)
--			return status;
-+			goto out;
- 	}
--
-+out:
-+	efi_bs_call(free_pool, *map->map);
- 	return EFI_SUCCESS;
- }
+ #endif
+diff --git a/arch/x86/mm/Makefile b/arch/x86/mm/Makefile
+index fe3d3061fc11..e327f83e6bbf 100644
+--- a/arch/x86/mm/Makefile
++++ b/arch/x86/mm/Makefile
+@@ -60,3 +60,5 @@ obj-$(CONFIG_AMD_MEM_ENCRYPT)	+= mem_encrypt_amd.o
  
-@@ -642,7 +640,7 @@ static efi_status_t exit_boot(struct boot_params *boot_params, void *handle)
- 	priv.boot_params	= boot_params;
- 	priv.efi		= &boot_params->efi_info;
- 
--	status = allocate_e820(boot_params, &e820ext, &e820ext_size);
-+	status = allocate_e820(boot_params, &map, &e820ext, &e820ext_size);
- 	if (status != EFI_SUCCESS)
- 		return status;
- 
+ obj-$(CONFIG_AMD_MEM_ENCRYPT)	+= mem_encrypt_identity.o
+ obj-$(CONFIG_AMD_MEM_ENCRYPT)	+= mem_encrypt_boot.o
++
++obj-$(CONFIG_UNACCEPTED_MEMORY)	+= unaccepted_memory.o
+diff --git a/arch/x86/mm/unaccepted_memory.c b/arch/x86/mm/unaccepted_memory.c
+new file mode 100644
+index 000000000000..3588a7cb954c
+--- /dev/null
++++ b/arch/x86/mm/unaccepted_memory.c
+@@ -0,0 +1,53 @@
++// SPDX-License-Identifier: GPL-2.0-only
++#include <linux/memblock.h>
++#include <linux/mm.h>
++#include <linux/pfn.h>
++#include <linux/spinlock.h>
++
++#include <asm/io.h>
++#include <asm/setup.h>
++#include <asm/unaccepted_memory.h>
++
++static DEFINE_SPINLOCK(unaccepted_memory_lock);
++
++void accept_memory(phys_addr_t start, phys_addr_t end)
++{
++	unsigned long *unaccepted_memory;
++	unsigned long flags;
++	unsigned int rs, re;
++
++	if (!boot_params.unaccepted_memory)
++		return;
++
++	unaccepted_memory = __va(boot_params.unaccepted_memory);
++	rs = start / PMD_SIZE;
++
++	spin_lock_irqsave(&unaccepted_memory_lock, flags);
++	for_each_set_bitrange_from(rs, re, unaccepted_memory,
++				   DIV_ROUND_UP(end, PMD_SIZE)) {
++		/* Platform-specific memory-acceptance call goes here */
++		panic("Cannot accept memory");
++		bitmap_clear(unaccepted_memory, rs, re - rs);
++	}
++	spin_unlock_irqrestore(&unaccepted_memory_lock, flags);
++}
++
++bool memory_is_unaccepted(phys_addr_t start, phys_addr_t end)
++{
++	unsigned long *unaccepted_memory = __va(boot_params.unaccepted_memory);
++	unsigned long flags;
++	bool ret = false;
++
++	spin_lock_irqsave(&unaccepted_memory_lock, flags);
++	while (start < end) {
++		if (test_bit(start / PMD_SIZE, unaccepted_memory)) {
++			ret = true;
++			break;
++		}
++
++		start += PMD_SIZE;
++	}
++	spin_unlock_irqrestore(&unaccepted_memory_lock, flags);
++
++	return ret;
++}
 -- 
 2.35.1
 
