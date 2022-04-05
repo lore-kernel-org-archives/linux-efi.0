@@ -2,173 +2,348 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 59A28C43219
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 22E35C4332F
 	for <linux-efi@archiver.kernel.org>; Wed,  6 Apr 2022 04:05:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1351617AbiDFEFa (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 6 Apr 2022 00:05:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43466 "EHLO
+        id S1350035AbiDFEFY (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 6 Apr 2022 00:05:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47722 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1573697AbiDETnG (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 5 Apr 2022 15:43:06 -0400
-Received: from mail-pg1-x536.google.com (mail-pg1-x536.google.com [IPv6:2607:f8b0:4864:20::536])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A0782BE05
-        for <linux-efi@vger.kernel.org>; Tue,  5 Apr 2022 12:41:07 -0700 (PDT)
-Received: by mail-pg1-x536.google.com with SMTP id s72so272410pgc.5
-        for <linux-efi@vger.kernel.org>; Tue, 05 Apr 2022 12:41:07 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=mSWn+bwJl0JXyj3IYwZGhRTiDd7qYXvMXLFtGw/g+rg=;
-        b=AlCCPq+JKrSyY6/MdAWK+LJuFWEhXLOG2iRM8eu949iBowZOgYJpjjEZpvcwItS8+d
-         FEsIJdYmNNMsbMLSdUVjIs4nmz5vT7bZ7g0IC7PS/W33SVLgyOhPMKVc1hrkM/ybgdzd
-         i2jtISpWLxcxVWQR/Nn5bREeHtnuDwJpw37LvO7wCQo11vKt0AwUemLOuwYj1VFxKVXR
-         hMIICCbOonqXvUjzSbqP4umdws0neDr1awH1mbCXQOE1HRfpfmMRHUA++iIBc/IcROVl
-         uvLnKsuTqIOV5nEgg1TUvo47C8T7k/JqnB0mapIqQiPSvV58KN+OHoUlSQjUoTb3h1mP
-         6oAw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=mSWn+bwJl0JXyj3IYwZGhRTiDd7qYXvMXLFtGw/g+rg=;
-        b=MiEH44GR6qw3rIAr7HX+rem9PsMqgm1zLOp2nBVQcbvE/QHDXMq55wg+lxgK7dzUTR
-         8eROVQkF98e6mqC/dNezFTnWq6DRMlM8gJzxiPE2KLuToUTbtrVeY86ItYukm+J7HsZB
-         QT0du7SVBTNpbD6FE5TZz7/N6RUSMJCYFARK7J3bLGDCRlbd4of8odxCjlIanucRLmYM
-         c/ILj5lZw8LCxTJhBW0vHysDEQRnvF1yIpjvegXCzbUtJHbBx9IeAJsF7CDwPaWbkjTn
-         CwJrdglD9cLWJKQYi3342FJ4UDkIQkGmH28rwYqWUlKdwiOHtdEFOYwHraVOaGJusNoU
-         djBA==
-X-Gm-Message-State: AOAM533KRZajlywzqENvFYbCPmzcAWX9OWUFg6ux8wEeF5RBCTcuqy7f
-        iB8G4ySVknrjBa9eDbkVinVRig==
-X-Google-Smtp-Source: ABdhPJwz4yMK7s1pjudVER/qr9fFsGeQA/N/GsijRhlaiArSrhqko6pULldJx680awQe2eXzGIRGzw==
-X-Received: by 2002:a05:6a00:1828:b0:4fd:e0e5:6115 with SMTP id y40-20020a056a00182800b004fde0e56115mr5257368pfa.52.1649187666833;
-        Tue, 05 Apr 2022 12:41:06 -0700 (PDT)
-Received: from google.com (157.214.185.35.bc.googleusercontent.com. [35.185.214.157])
-        by smtp.gmail.com with ESMTPSA id j9-20020aa78009000000b004fde2dd78b0sm11969754pfi.109.2022.04.05.12.41.05
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 05 Apr 2022 12:41:06 -0700 (PDT)
-Date:   Tue, 5 Apr 2022 19:41:02 +0000
-From:   Sean Christopherson <seanjc@google.com>
-To:     Brijesh Singh <brijesh.singh@amd.com>
-Cc:     x86@kernel.org, linux-kernel@vger.kernel.org, kvm@vger.kernel.org,
-        linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org,
-        linux-coco@lists.linux.dev, linux-mm@kvack.org,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Ingo Molnar <mingo@redhat.com>, Joerg Roedel <jroedel@suse.de>,
-        Tom Lendacky <thomas.lendacky@amd.com>,
-        "H. Peter Anvin" <hpa@zytor.com>, Ard Biesheuvel <ardb@kernel.org>,
-        Paolo Bonzini <pbonzini@redhat.com>,
-        Vitaly Kuznetsov <vkuznets@redhat.com>,
-        Jim Mattson <jmattson@google.com>,
-        Andy Lutomirski <luto@kernel.org>,
-        Dave Hansen <dave.hansen@linux.intel.com>,
-        Sergio Lopez <slp@redhat.com>, Peter Gonda <pgonda@google.com>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>,
+        with ESMTP id S1850045AbiDFCrJ (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 5 Apr 2022 22:47:09 -0400
+Received: from mga11.intel.com (mga11.intel.com [192.55.52.93])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 64D50294A33;
+        Tue,  5 Apr 2022 16:48:41 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1649202521; x=1680738521;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=bHjOpRF0FH9a4fKmacsGbqTcyKL/garGb9vIFX8+JmU=;
+  b=d2xudDnw/rXJ16zDW0kypN9CMrA754m4j6/tOfQCQhtBDx+ExaF7Y9gM
+   jned6Y5a6Ksz2EUEdFoBdN3G35SjMhhhxUT4K0xFoOwmnzmc9B+sOVfz2
+   5TC6T0u2rVE2my18epAkxVKqVLiUc4V36WnWVdPE03PF0pOAPPz1XAwsO
+   mth46lQIxPKDm9OTvY3vWsHoZfhwKPZlyRpmS2ei1qHw3ACYk8Lp5dkmk
+   1//wGmIEU5PhHxOK0SqobObFBopSWtp9hzhklLMkSkGz5mXbp31ww3vcx
+   ZxYaXlt+BoIo7YeeudVT6PyUWlc4qoBow1B9z8uBVyR+Ktmm4+H89hdFZ
+   Q==;
+X-IronPort-AV: E=McAfee;i="6200,9189,10308"; a="258479964"
+X-IronPort-AV: E=Sophos;i="5.90,238,1643702400"; 
+   d="scan'208";a="258479964"
+Received: from fmsmga007.fm.intel.com ([10.253.24.52])
+  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Apr 2022 16:48:41 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.90,238,1643702400"; 
+   d="scan'208";a="556723611"
+Received: from black.fi.intel.com ([10.237.72.28])
+  by fmsmga007.fm.intel.com with ESMTP; 05 Apr 2022 16:48:34 -0700
+Received: by black.fi.intel.com (Postfix, from userid 1000)
+        id 838195C; Wed,  6 Apr 2022 02:43:47 +0300 (EEST)
+From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
+To:     Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>,
+        Sean Christopherson <seanjc@google.com>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Joerg Roedel <jroedel@suse.de>,
+        Ard Biesheuvel <ardb@kernel.org>
+Cc:     Andi Kleen <ak@linux.intel.com>,
+        Kuppuswamy Sathyanarayanan 
+        <sathyanarayanan.kuppuswamy@linux.intel.com>,
         David Rientjes <rientjes@google.com>,
-        Dov Murik <dovmurik@linux.ibm.com>,
-        Tobin Feldman-Fitzthum <tobin@ibm.com>,
-        Borislav Petkov <bp@alien8.de>,
-        Michael Roth <michael.roth@amd.com>,
         Vlastimil Babka <vbabka@suse.cz>,
-        "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>,
-        Andi Kleen <ak@linux.intel.com>,
-        "Dr . David Alan Gilbert" <dgilbert@redhat.com>,
-        brijesh.ksingh@gmail.com, tony.luck@intel.com, marcorr@google.com,
-        sathyanarayanan.kuppuswamy@linux.intel.com
-Subject: Re: [PATCH v12 22/46] x86/sev: Use SEV-SNP AP creation to start
- secondary CPUs
-Message-ID: <YkybTnVYBKZ1zvz6@google.com>
-References: <20220307213356.2797205-1-brijesh.singh@amd.com>
- <20220307213356.2797205-23-brijesh.singh@amd.com>
- <YkuMTdckSgSB9M6f@google.com>
- <f4369605-7c8d-1a89-bd0e-b82710d0772a@amd.com>
+        Tom Lendacky <thomas.lendacky@amd.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Paolo Bonzini <pbonzini@redhat.com>,
+        Ingo Molnar <mingo@redhat.com>,
+        Varad Gautam <varad.gautam@suse.com>,
+        Dario Faggioli <dfaggioli@suse.com>,
+        Dave Hansen <dave.hansen@intel.com>,
+        Brijesh Singh <brijesh.singh@amd.com>,
+        Mike Rapoport <rppt@kernel.org>,
+        David Hildenbrand <david@redhat.com>, x86@kernel.org,
+        linux-mm@kvack.org, linux-coco@lists.linux.dev,
+        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
+        "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
+        Mike Rapoport <rppt@linux.ibm.com>
+Subject: [PATCHv4 1/8] mm: Add support for unaccepted memory
+Date:   Wed,  6 Apr 2022 02:43:36 +0300
+Message-Id: <20220405234343.74045-2-kirill.shutemov@linux.intel.com>
+X-Mailer: git-send-email 2.35.1
+In-Reply-To: <20220405234343.74045-1-kirill.shutemov@linux.intel.com>
+References: <20220405234343.74045-1-kirill.shutemov@linux.intel.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <f4369605-7c8d-1a89-bd0e-b82710d0772a@amd.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, Apr 05, 2022, Brijesh Singh wrote:
-> Hi Sean,
->
-> On 4/4/22 19:24, Sean Christopherson wrote:
->
-> > > +static void snp_cleanup_vmsa(struct sev_es_save_area *vmsa)
-> > > +{
-> > > + int err;
-> > > +
-> > > + err = snp_set_vmsa(vmsa, false);
-> >
-> > Uh, so what happens if a malicious guest does RMPADJUST to convert a VMSA page
-> > back to a "normal" page while the host is trying to VMRUN that VMSA?  Does VMRUN
-> > fault?
->
-> When SEV-SNP is enabled, the VMRUN instruction performs an additional
-> security checks on various memory pages. In the case of VMSA page, hardware
-> enforce that page is marked as "VMSA" in the RMP table. If not,  VMRUN will
-> fail with VMEXIT_INVALID.
->
-> After the VMRUN is successful, the VMSA page is marked IN_USE by the
-> hardware, any attempt to modify the RMP entries will result in FAIL_INUSE
-> error. The IN_USE marking is automatically cleared by the hardware after the
-> #VMEXIT.
->
-> Please see the APM vol2 section 15.36.12 for additional information.
+UEFI Specification version 2.9 introduces the concept of memory
+acceptance. Some Virtual Machine platforms, such as Intel TDX or AMD
+SEV-SNP, requiring memory to be accepted before it can be used by the
+guest. Accepting happens via a protocol specific for the Virtual Machine
+platform.
 
-Thanks!
+Accepting memory is costly and it makes VMM allocate memory for the
+accepted guest physical address range. It's better to postpone memory
+acceptance until memory is needed. It lowers boot time and reduces
+memory overhead.
 
-> > Can Linux refuse to support this madness and instead require the ACPI MP wakeup
-> > protocol being proposed/implemented for TDX?  That would allow KVM to have at
->
-> My two cents
->
-> In the current architecture, the HV track VMSAs by their SPA and guest
-> controls when they are runnable. It provides flexibility to the guest, which
-> can add and remove the VMSA. This flexibility may come in handy to support
-> the kexec and reboot use cases.
+Support of such memory requires a few changes in core-mm code:
 
-I understand it provides the guest flexibility, but IMO it completely inverts the
-separation of concerns between host and guest.  The host should have control of
-when a vCPU is added/removed and with what state, and the guest should be able to
-verify/acknowledge any changes.  This scheme gives the guest the bulk of the control,
-and doesn't even let the host verify much at all since the VMSA is opaque.
+  - memblock has to accept memory on allocation;
 
-That the guest can yank the rug out from the host at any time just adds to the pain.
-VMEXIT_INVALID isn't the end of the world, but it breaks the assumption that such
-errors are host bugs.  To guard against such behavior, the host would have to unmap
-the VMSA page in order to prevent unwanted RMPADJUST, and that gets ugly fast if a
-VMSA can be any arbitrary guest page.
+  - page allocator has to accept memory on the first allocation of the
+    page;
 
-Another example is the 2mb alignment erratum.  Technically, the guest can't workaround
-the erratum with 100% certainty because there's no guarantee that the host uses the
-same alignment for gfns and pfns.  I don't actually expect a host to use unaligned
-mappings, just pointing out how backwards this is.
+Memblock change is trivial.
 
-I fully realize there's basically zero chance of getting any of this changed in
-hardware/firmware, but I'm hoping we can concoct a software/GHCB solution to the
-worst issues.
+The page allocator is modified to accept pages on the first allocation.
+PageUnaccepted() is used to indicate that the page requires acceptance.
 
-I don't see an way easy to address the guest getting to shove state directly into
-the VMSA, but the location of the VMSA gfn/pfn is a very solvable problem.  E.g.
-the host gets full control over each vCPU's VMSA, and the host-provided VMSA is
-discoverable in the guest.  That allows the guest to change vCPU state, e.g. for AP
-bringup, kexec, etc..., but gives the host the ability to protect itself without
-having to support arbitrary VMSA pages.  E.g. the host can dynamically map/unmap the
-VMSA from the guest: map on fault, unmap on AP "creation", refuse to run the vCPU if
-its VMSA isn't in the unmap state.  The VMSA pfn is fully host controlled, so
-there's no need for the guest to be aware of the 2mb alignment erratum.
+Kernel only needs to accept memory once after boot, so during the boot
+and warm up phase there will be a lot of memory acceptance. After things
+are settled down the only price of the feature if couple of checks for
+PageUnaccepted() in allocate and free paths. The check refers a hot
+variable (that also encodes PageBuddy()), so it is cheap and not visible
+on profiles.
 
-Requiring such GHCB extensions in the guest would make Linux incompatible with
-hypervisors that aren't updated, but IMO that's not a ridiculous ask given that
-it would be in the best interested of any hypervisor that isn't running a fully
-trusted, paravirt VMPL0.
+Architecture has to provide two helpers if it wants to support
+unaccepted memory:
 
-> The current approach does not depend on
-> ACPI; it will also come in handy to support microvm (minimalist machine type
-> without PCI nor ACPI support).
+ - accept_memory() makes a range of physical addresses accepted.
 
-Eh, a microvm really shouldn't need AP bringup in the first place, just run all
-APs from time zero and route them to where they need to be.
+ - memory_is_unaccepted() checks anything within the range of physical
+   addresses requires acceptance.
+
+Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
+Acked-by: Mike Rapoport <rppt@linux.ibm.com>	# memblock
+---
+ include/linux/page-flags.h | 24 ++++++++++++++++
+ mm/internal.h              | 11 ++++++++
+ mm/memblock.c              |  9 ++++++
+ mm/page_alloc.c            | 57 ++++++++++++++++++++++++++++++++++++--
+ 4 files changed, 99 insertions(+), 2 deletions(-)
+
+diff --git a/include/linux/page-flags.h b/include/linux/page-flags.h
+index 9d8eeaa67d05..aaaedc111092 100644
+--- a/include/linux/page-flags.h
++++ b/include/linux/page-flags.h
+@@ -928,6 +928,7 @@ static inline bool is_page_hwpoison(struct page *page)
+ #define PG_offline	0x00000100
+ #define PG_table	0x00000200
+ #define PG_guard	0x00000400
++#define PG_unaccepted	0x00000800
+ 
+ #define PageType(page, flag)						\
+ 	((page->page_type & (PAGE_TYPE_BASE | flag)) == PAGE_TYPE_BASE)
+@@ -953,6 +954,18 @@ static __always_inline void __ClearPage##uname(struct page *page)	\
+ 	page->page_type |= PG_##lname;					\
+ }
+ 
++#define PAGE_TYPE_OPS_FALSE(uname)					\
++static __always_inline int Page##uname(struct page *page)		\
++{									\
++	return false;							\
++}									\
++static __always_inline void __SetPage##uname(struct page *page)		\
++{									\
++}									\
++static __always_inline void __ClearPage##uname(struct page *page)	\
++{									\
++}
++
+ /*
+  * PageBuddy() indicates that the page is free and in the buddy system
+  * (see mm/page_alloc.c).
+@@ -983,6 +996,17 @@ PAGE_TYPE_OPS(Buddy, buddy)
+  */
+ PAGE_TYPE_OPS(Offline, offline)
+ 
++ /*
++  * PageUnaccepted() indicates that the page has to be "accepted" before it can
++  * be used. Page allocator has to call accept_page() before returning the page
++  * to the caller.
++  */
++#ifdef CONFIG_UNACCEPTED_MEMORY
++PAGE_TYPE_OPS(Unaccepted, unaccepted)
++#else
++PAGE_TYPE_OPS_FALSE(Unaccepted)
++#endif
++
+ extern void page_offline_freeze(void);
+ extern void page_offline_thaw(void);
+ extern void page_offline_begin(void);
+diff --git a/mm/internal.h b/mm/internal.h
+index cf16280ce132..10302fe857c4 100644
+--- a/mm/internal.h
++++ b/mm/internal.h
+@@ -758,4 +758,15 @@ struct folio *try_grab_folio(struct page *page, int refs, unsigned int flags);
+ 
+ DECLARE_PER_CPU(struct per_cpu_nodestat, boot_nodestats);
+ 
++#ifndef CONFIG_UNACCEPTED_MEMORY
++static inline bool memory_is_unaccepted(phys_addr_t start, phys_addr_t end)
++{
++	return false;
++}
++
++static inline void accept_memory(phys_addr_t start, phys_addr_t end)
++{
++}
++#endif
++
+ #endif	/* __MM_INTERNAL_H */
+diff --git a/mm/memblock.c b/mm/memblock.c
+index e4f03a6e8e56..a1f7f8b304d5 100644
+--- a/mm/memblock.c
++++ b/mm/memblock.c
+@@ -1405,6 +1405,15 @@ phys_addr_t __init memblock_alloc_range_nid(phys_addr_t size,
+ 		 */
+ 		kmemleak_alloc_phys(found, size, 0, 0);
+ 
++	/*
++	 * Some Virtual Machine platforms, such as Intel TDX or AMD SEV-SNP,
++	 * require memory to be accepted before it can be used by the
++	 * guest.
++	 *
++	 * Accept the memory of the allocated buffer.
++	 */
++	accept_memory(found, found + size);
++
+ 	return found;
+ }
+ 
+diff --git a/mm/page_alloc.c b/mm/page_alloc.c
+index 2db95780e003..53f4aa1c92a7 100644
+--- a/mm/page_alloc.c
++++ b/mm/page_alloc.c
+@@ -121,6 +121,12 @@ typedef int __bitwise fpi_t;
+  */
+ #define FPI_SKIP_KASAN_POISON	((__force fpi_t)BIT(2))
+ 
++/*
++ * Check if the page needs to be marked as PageUnaccepted().
++ * Used for the new pages added to the buddy allocator for the first time.
++ */
++#define FPI_UNACCEPTED		((__force fpi_t)BIT(3))
++
+ /* prevent >1 _updater_ of zone percpu pageset ->high and ->batch fields */
+ static DEFINE_MUTEX(pcp_batch_high_lock);
+ #define MIN_PERCPU_PAGELIST_HIGH_FRACTION (8)
+@@ -1023,6 +1029,26 @@ buddy_merge_likely(unsigned long pfn, unsigned long buddy_pfn,
+ 	return page_is_buddy(higher_page, higher_buddy, order + 1);
+ }
+ 
++static void accept_page(struct page *page, unsigned int order)
++{
++	phys_addr_t start = page_to_phys(page);
++	int i;
++
++	accept_memory(start, start + (PAGE_SIZE << order));
++
++	for (i = 0; i < (1 << order); i++) {
++		if (PageUnaccepted(page + i))
++			__ClearPageUnaccepted(page + i);
++	}
++}
++
++static bool page_is_unaccepted(struct page *page, unsigned int order)
++{
++	phys_addr_t start = page_to_phys(page);
++
++	return memory_is_unaccepted(start, start + (PAGE_SIZE << order));
++}
++
+ /*
+  * Freeing function for a buddy system allocator.
+  *
+@@ -1058,6 +1084,7 @@ static inline void __free_one_page(struct page *page,
+ 	unsigned long combined_pfn;
+ 	struct page *buddy;
+ 	bool to_tail;
++	bool unaccepted = PageUnaccepted(page);
+ 
+ 	VM_BUG_ON(!zone_is_initialized(zone));
+ 	VM_BUG_ON_PAGE(page->flags & PAGE_FLAGS_CHECK_AT_PREP, page);
+@@ -1089,6 +1116,11 @@ static inline void __free_one_page(struct page *page,
+ 			clear_page_guard(zone, buddy, order, migratetype);
+ 		else
+ 			del_page_from_free_list(buddy, zone, order);
++
++		/* Mark page unaccepted if any of merged pages were unaccepted */
++		if (PageUnaccepted(buddy))
++			unaccepted = true;
++
+ 		combined_pfn = buddy_pfn & pfn;
+ 		page = page + (combined_pfn - pfn);
+ 		pfn = combined_pfn;
+@@ -1124,6 +1156,17 @@ static inline void __free_one_page(struct page *page,
+ done_merging:
+ 	set_buddy_order(page, order);
+ 
++	/*
++	 * Check if the page needs to be marked as PageUnaccepted().
++	 * Used for the new pages added to the buddy allocator for the first
++	 * time.
++	 */
++	if (!unaccepted && (fpi_flags & FPI_UNACCEPTED))
++		unaccepted = page_is_unaccepted(page, order);
++
++	if (unaccepted)
++		__SetPageUnaccepted(page);
++
+ 	if (fpi_flags & FPI_TO_TAIL)
+ 		to_tail = true;
+ 	else if (is_shuffle_order(order))
+@@ -1149,7 +1192,8 @@ static inline void __free_one_page(struct page *page,
+ static inline bool page_expected_state(struct page *page,
+ 					unsigned long check_flags)
+ {
+-	if (unlikely(atomic_read(&page->_mapcount) != -1))
++	if (unlikely(atomic_read(&page->_mapcount) != -1) &&
++	    !PageUnaccepted(page))
+ 		return false;
+ 
+ 	if (unlikely((unsigned long)page->mapping |
+@@ -1654,7 +1698,8 @@ void __free_pages_core(struct page *page, unsigned int order)
+ 	 * Bypass PCP and place fresh pages right to the tail, primarily
+ 	 * relevant for memory onlining.
+ 	 */
+-	__free_pages_ok(page, order, FPI_TO_TAIL | FPI_SKIP_KASAN_POISON);
++	__free_pages_ok(page, order,
++			FPI_TO_TAIL | FPI_SKIP_KASAN_POISON | FPI_UNACCEPTED);
+ }
+ 
+ #ifdef CONFIG_NUMA
+@@ -1807,6 +1852,7 @@ static void __init deferred_free_range(unsigned long pfn,
+ 		return;
+ 	}
+ 
++	accept_memory(pfn << PAGE_SHIFT, (pfn + nr_pages) << PAGE_SHIFT);
+ 	for (i = 0; i < nr_pages; i++, page++, pfn++) {
+ 		if ((pfn & (pageblock_nr_pages - 1)) == 0)
+ 			set_pageblock_migratetype(page, MIGRATE_MOVABLE);
+@@ -2266,6 +2312,10 @@ static inline void expand(struct zone *zone, struct page *page,
+ 		if (set_page_guard(zone, &page[size], high, migratetype))
+ 			continue;
+ 
++		/* Transfer PageUnaccepted() to the newly split pages */
++		if (PageUnaccepted(page))
++			__SetPageUnaccepted(&page[size]);
++
+ 		add_to_free_list(&page[size], zone, high, migratetype);
+ 		set_buddy_order(&page[size], high);
+ 	}
+@@ -2396,6 +2446,9 @@ inline void post_alloc_hook(struct page *page, unsigned int order,
+ 	 */
+ 	kernel_unpoison_pages(page, 1 << order);
+ 
++	if (PageUnaccepted(page))
++		accept_page(page, order);
++
+ 	/*
+ 	 * As memory initialization might be integrated into KASAN,
+ 	 * KASAN unpoisoning and memory initializion code must be
+-- 
+2.35.1
+
