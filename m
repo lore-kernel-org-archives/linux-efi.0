@@ -2,104 +2,97 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CE4B4C433FE
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B8C32C433F5
 	for <linux-efi@archiver.kernel.org>; Wed,  6 Apr 2022 04:05:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1392415AbiDFEGQ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 6 Apr 2022 00:06:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58388 "EHLO
+        id S1389962AbiDFEGE (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 6 Apr 2022 00:06:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45886 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1573366AbiDES5N (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 5 Apr 2022 14:57:13 -0400
-Received: from mail.skyhub.de (mail.skyhub.de [5.9.137.197])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A90F7B8239;
-        Tue,  5 Apr 2022 11:55:12 -0700 (PDT)
-Received: from zn.tnic (p2e55dff8.dip0.t-ipconnect.de [46.85.223.248])
+        with ESMTP id S1457662AbiDEQ2k (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 5 Apr 2022 12:28:40 -0400
+Received: from ms.lwn.net (ms.lwn.net [IPv6:2600:3c01:e000:3a1::42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5BB287C166;
+        Tue,  5 Apr 2022 09:26:42 -0700 (PDT)
+Received: from localhost (unknown [IPv6:2601:281:8300:35:2589:2a93:190d:b787])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id 37C3B1EC0374;
-        Tue,  5 Apr 2022 20:55:07 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alien8.de; s=dkim;
-        t=1649184907;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:in-reply-to:in-reply-to:  references:references;
-        bh=v2FjWdRnczI9WKt4ClfJ913bandBLADmN4fX24w4Ui4=;
-        b=CW65VH61kzlILvC1aaS6x77amEDhT358yeIFIwhXHg0LUuLo1KxyindYNWNBcB1Epm/PUa
-        Jqj4LEo84G6aE0DNebEuwx7BIznR/jTVutvGPaZnMXa8z6VxzJHewH2E+sqx/sDun0fsBh
-        Oj7RQRh1ieLt6mNg0xVJpuSJWuKqmes=
-Date:   Tue, 5 Apr 2022 20:55:05 +0200
-From:   Borislav Petkov <bp@alien8.de>
-To:     Brijesh Singh <brijesh.singh@amd.com>,
-        Paolo Bonzini <pbonzini@redhat.com>
-Cc:     x86@kernel.org, linux-kernel@vger.kernel.org, kvm@vger.kernel.org,
-        linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org,
-        linux-coco@lists.linux.dev, linux-mm@kvack.org,
+        by ms.lwn.net (Postfix) with ESMTPSA id DA08F608;
+        Tue,  5 Apr 2022 16:26:41 +0000 (UTC)
+DKIM-Filter: OpenDKIM Filter v2.11.0 ms.lwn.net DA08F608
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=lwn.net; s=20201203;
+        t=1649176002; bh=hdowXzq/NUai0/4J9T9jKyuof812l1GFSJ0ykV3EZkg=;
+        h=From:To:Cc:Subject:In-Reply-To:References:Date:From;
+        b=nktbmN+5YYLHdx1ydR8Midr+mqkwl9GMf76yqvmv1uQerX1B+W/BGdR2toWFXiCOb
+         qzH0Lsa3/sMI7VqKP65V8hfYGSTWhsB+s1XkwESyXV3plSKUxgPIq7/BM4S56fnocJ
+         RxJAXwsjS6M38bq7g688zWIzY9/vo+rARpE7EpiellJ+MRTMeCFIC5FbdLK3WgutVV
+         5M22JeWazCuQO+HoZ7E4P7zkMXCu38VIwE+O4Gg9NFTsN2GcskHMRtw9puTl5hkZ3B
+         E7fJCiNJb0n1Rdmaap7B5c3yTWjh+aR/GbcPRQ01xwiSXbRufB6tixq4+H7u0dB2uJ
+         d7rMR5z6VyoEw==
+From:   Jonathan Corbet <corbet@lwn.net>
+To:     Akihiko Odaki <akihiko.odaki@gmail.com>
+Cc:     linux-kernel@vger.kernel.org, linux-doc@vger.kernel.org,
+        linux-efi@vger.kernel.org, x86@kernel.org,
         Thomas Gleixner <tglx@linutronix.de>,
-        Ingo Molnar <mingo@redhat.com>, Joerg Roedel <jroedel@suse.de>,
-        Tom Lendacky <thomas.lendacky@amd.com>,
-        "H. Peter Anvin" <hpa@zytor.com>, Ard Biesheuvel <ardb@kernel.org>,
-        Sean Christopherson <seanjc@google.com>,
-        Vitaly Kuznetsov <vkuznets@redhat.com>,
-        Jim Mattson <jmattson@google.com>,
-        Andy Lutomirski <luto@kernel.org>,
+        Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
         Dave Hansen <dave.hansen@linux.intel.com>,
-        Sergio Lopez <slp@redhat.com>, Peter Gonda <pgonda@google.com>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>,
-        David Rientjes <rientjes@google.com>,
-        Dov Murik <dovmurik@linux.ibm.com>,
-        Tobin Feldman-Fitzthum <tobin@ibm.com>,
-        Michael Roth <michael.roth@amd.com>,
-        Vlastimil Babka <vbabka@suse.cz>,
-        "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>,
-        Andi Kleen <ak@linux.intel.com>,
-        "Dr . David Alan Gilbert" <dgilbert@redhat.com>,
-        brijesh.ksingh@gmail.com, tony.luck@intel.com, marcorr@google.com,
-        sathyanarayanan.kuppuswamy@linux.intel.com,
-        Venu Busireddy <venu.busireddy@oracle.com>
-Subject: Re: [PATCH v12 2.1/46] KVM: SVM: Create a separate mapping for the
- SEV-ES save area
-Message-ID: <YkyQib4Jda1epH3G@zn.tnic>
-References: <20220307213356.2797205-3-brijesh.singh@amd.com>
- <20220405182743.308853-1-brijesh.singh@amd.com>
+        "H . Peter Anvin" <hpa@zytor.com>,
+        Akihiko Odaki <akihiko.odaki@gmail.com>,
+        Ard Biesheuvel <ardb@kernel.org>
+Subject: Re: [PATCH] x86/efi: Remove references of EFI earlyprintk from
+ documentation
+In-Reply-To: <20220321045853.3324-1-akihiko.odaki@gmail.com>
+References: <20220321045853.3324-1-akihiko.odaki@gmail.com>
+Date:   Tue, 05 Apr 2022 10:26:41 -0600
+Message-ID: <87bkxfebsu.fsf@meer.lwn.net>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20220405182743.308853-1-brijesh.singh@amd.com>
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, Apr 05, 2022 at 01:27:43PM -0500, Brijesh Singh wrote:
-> From: Tom Lendacky <thomas.lendacky@amd.com>
-> 
-> The save area for SEV-ES/SEV-SNP guests, as used by the hardware, is
-> different from the save area of a non SEV-ES/SEV-SNP guest.
-> 
-> This is the first step in defining the multiple save areas to keep them
-> separate and ensuring proper operation amongst the different types of
-> guests. Create an SEV-ES/SEV-SNP save area and adjust usage to the new
-> save area definition where needed.
-> 
-> Reviewed-by: Venu Busireddy <venu.busireddy@oracle.com>
-> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
-> Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
+Akihiko Odaki <akihiko.odaki@gmail.com> writes:
+
+> x86 EFI earlyprink was removed with commit 69c1f396f25b ("efi/x86:
+> Convert x86 EFI earlyprintk into generic earlycon implementation").
+
+So I will confess that I don't know this area well enough to know
+whether this patch makes sense or not.  To help with that, it would have
+been good to CC Ard, who is the author of the patch you cite above.
+Adding him now.
+
+Ard, do you agree with this change (preserved below)?
+
+Thanks,
+
+jon
+
+> Signed-off-by: Akihiko Odaki <akihiko.odaki@gmail.com>
 > ---
-> 
-> Hi Paolo,
-> 
-> Now there is a conflict when applying this patch on 5.18-rc1. Please
-> use the updated patch when merging the first four patches from the
-> series.
-
-Right, or if you'd prefer I carried them through the tip tree, lemme
-know.
-
-Thx.
-
--- 
-Regards/Gruss,
-    Boris.
-
-https://people.kernel.org/tglx/notes-about-netiquette
+>  Documentation/admin-guide/kernel-parameters.txt | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
+> index f5a27f067db9..fb39337f4123 100644
+> --- a/Documentation/admin-guide/kernel-parameters.txt
+> +++ b/Documentation/admin-guide/kernel-parameters.txt
+> @@ -1252,7 +1252,7 @@
+>  			Append ",keep" to not disable it when the real console
+>  			takes over.
+>  
+> -			Only one of vga, efi, serial, or usb debug port can
+> +			Only one of vga, serial, or usb debug port can
+>  			be used at a time.
+>  
+>  			Currently only ttyS0 and ttyS1 may be specified by
+> @@ -1267,7 +1267,7 @@
+>  			Interaction with the standard serial driver is not
+>  			very good.
+>  
+> -			The VGA and EFI output is eventually overwritten by
+> +			The VGA output is eventually overwritten by
+>  			the real console.
+>  
+>  			The xen option can only be used in Xen domains.
+> -- 
+> 2.35.1
