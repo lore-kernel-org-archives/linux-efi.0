@@ -2,193 +2,104 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E54BC4167E
-	for <linux-efi@archiver.kernel.org>; Wed,  6 Apr 2022 04:05:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CE4B4C433FE
+	for <linux-efi@archiver.kernel.org>; Wed,  6 Apr 2022 04:05:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1388059AbiDFEFx (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 6 Apr 2022 00:05:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47710 "EHLO
+        id S1392415AbiDFEGQ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 6 Apr 2022 00:06:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58388 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1850058AbiDFCrJ (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 5 Apr 2022 22:47:09 -0400
-Received: from mga01.intel.com (mga01.intel.com [192.55.52.88])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3DE511E111F;
-        Tue,  5 Apr 2022 16:48:48 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1649202529; x=1680738529;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=olocThm3w1DRSupMBiWIGBr2Nhg3m7XH5eFavATvzHQ=;
-  b=dmwnhRsmAbGFeKbgiWuukgUaCyQceP67P5NBCMCHfK3ZeOb7reDFyq04
-   LpMuwPo6NQ86tLnEfkWScVXT9pInYsHFOlY2mF7mitJPhYeK3kzIIA2+v
-   wt3f94UO9jovkcRz3g61jZeWeqIGIv45nwKpd23sByAboRWQOiH5lLIqP
-   8N7ZAKSE+O0Sqn910r+yaq9PS58d4H+5u38528Vbz81vKmYVzkOkjjBxz
-   2BpbQ7lH3DswfIKI5onnPY2ZQUxDnWRmTeU3cfo7dRnv+KdbATDmJPJCR
-   25DgeYpDa5Va3oRvUBl58GB0+hbDRPAQEn77MZ6LI0tvVVlQxKe9tWdUv
-   A==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10308"; a="285858014"
-X-IronPort-AV: E=Sophos;i="5.90,238,1643702400"; 
-   d="scan'208";a="285858014"
-Received: from fmsmga005.fm.intel.com ([10.253.24.32])
-  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Apr 2022 16:48:48 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.90,238,1643702400"; 
-   d="scan'208";a="851044908"
-Received: from black.fi.intel.com ([10.237.72.28])
-  by fmsmga005.fm.intel.com with ESMTP; 05 Apr 2022 16:48:41 -0700
-Received: by black.fi.intel.com (Postfix, from userid 1000)
-        id CEF3260A; Wed,  6 Apr 2022 02:43:47 +0300 (EEST)
-From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-To:     Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>,
-        Sean Christopherson <seanjc@google.com>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Joerg Roedel <jroedel@suse.de>,
-        Ard Biesheuvel <ardb@kernel.org>
-Cc:     Andi Kleen <ak@linux.intel.com>,
-        Kuppuswamy Sathyanarayanan 
-        <sathyanarayanan.kuppuswamy@linux.intel.com>,
-        David Rientjes <rientjes@google.com>,
-        Vlastimil Babka <vbabka@suse.cz>,
-        Tom Lendacky <thomas.lendacky@amd.com>,
+        with ESMTP id S1573366AbiDES5N (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 5 Apr 2022 14:57:13 -0400
+Received: from mail.skyhub.de (mail.skyhub.de [5.9.137.197])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A90F7B8239;
+        Tue,  5 Apr 2022 11:55:12 -0700 (PDT)
+Received: from zn.tnic (p2e55dff8.dip0.t-ipconnect.de [46.85.223.248])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id 37C3B1EC0374;
+        Tue,  5 Apr 2022 20:55:07 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alien8.de; s=dkim;
+        t=1649184907;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:in-reply-to:in-reply-to:  references:references;
+        bh=v2FjWdRnczI9WKt4ClfJ913bandBLADmN4fX24w4Ui4=;
+        b=CW65VH61kzlILvC1aaS6x77amEDhT358yeIFIwhXHg0LUuLo1KxyindYNWNBcB1Epm/PUa
+        Jqj4LEo84G6aE0DNebEuwx7BIznR/jTVutvGPaZnMXa8z6VxzJHewH2E+sqx/sDun0fsBh
+        Oj7RQRh1ieLt6mNg0xVJpuSJWuKqmes=
+Date:   Tue, 5 Apr 2022 20:55:05 +0200
+From:   Borislav Petkov <bp@alien8.de>
+To:     Brijesh Singh <brijesh.singh@amd.com>,
+        Paolo Bonzini <pbonzini@redhat.com>
+Cc:     x86@kernel.org, linux-kernel@vger.kernel.org, kvm@vger.kernel.org,
+        linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org,
+        linux-coco@lists.linux.dev, linux-mm@kvack.org,
         Thomas Gleixner <tglx@linutronix.de>,
+        Ingo Molnar <mingo@redhat.com>, Joerg Roedel <jroedel@suse.de>,
+        Tom Lendacky <thomas.lendacky@amd.com>,
+        "H. Peter Anvin" <hpa@zytor.com>, Ard Biesheuvel <ardb@kernel.org>,
+        Sean Christopherson <seanjc@google.com>,
+        Vitaly Kuznetsov <vkuznets@redhat.com>,
+        Jim Mattson <jmattson@google.com>,
+        Andy Lutomirski <luto@kernel.org>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        Sergio Lopez <slp@redhat.com>, Peter Gonda <pgonda@google.com>,
         Peter Zijlstra <peterz@infradead.org>,
-        Paolo Bonzini <pbonzini@redhat.com>,
-        Ingo Molnar <mingo@redhat.com>,
-        Varad Gautam <varad.gautam@suse.com>,
-        Dario Faggioli <dfaggioli@suse.com>,
-        Dave Hansen <dave.hansen@intel.com>,
-        Brijesh Singh <brijesh.singh@amd.com>,
-        Mike Rapoport <rppt@kernel.org>,
-        David Hildenbrand <david@redhat.com>, x86@kernel.org,
-        linux-mm@kvack.org, linux-coco@lists.linux.dev,
-        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
-        "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-Subject: [PATCHv4 6/8] x86/mm: Provide helpers for unaccepted memory
-Date:   Wed,  6 Apr 2022 02:43:41 +0300
-Message-Id: <20220405234343.74045-7-kirill.shutemov@linux.intel.com>
-X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20220405234343.74045-1-kirill.shutemov@linux.intel.com>
-References: <20220405234343.74045-1-kirill.shutemov@linux.intel.com>
+        Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>,
+        David Rientjes <rientjes@google.com>,
+        Dov Murik <dovmurik@linux.ibm.com>,
+        Tobin Feldman-Fitzthum <tobin@ibm.com>,
+        Michael Roth <michael.roth@amd.com>,
+        Vlastimil Babka <vbabka@suse.cz>,
+        "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>,
+        Andi Kleen <ak@linux.intel.com>,
+        "Dr . David Alan Gilbert" <dgilbert@redhat.com>,
+        brijesh.ksingh@gmail.com, tony.luck@intel.com, marcorr@google.com,
+        sathyanarayanan.kuppuswamy@linux.intel.com,
+        Venu Busireddy <venu.busireddy@oracle.com>
+Subject: Re: [PATCH v12 2.1/46] KVM: SVM: Create a separate mapping for the
+ SEV-ES save area
+Message-ID: <YkyQib4Jda1epH3G@zn.tnic>
+References: <20220307213356.2797205-3-brijesh.singh@amd.com>
+ <20220405182743.308853-1-brijesh.singh@amd.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20220405182743.308853-1-brijesh.singh@amd.com>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Core-mm requires few helpers to support unaccepted memory:
+On Tue, Apr 05, 2022 at 01:27:43PM -0500, Brijesh Singh wrote:
+> From: Tom Lendacky <thomas.lendacky@amd.com>
+> 
+> The save area for SEV-ES/SEV-SNP guests, as used by the hardware, is
+> different from the save area of a non SEV-ES/SEV-SNP guest.
+> 
+> This is the first step in defining the multiple save areas to keep them
+> separate and ensuring proper operation amongst the different types of
+> guests. Create an SEV-ES/SEV-SNP save area and adjust usage to the new
+> save area definition where needed.
+> 
+> Reviewed-by: Venu Busireddy <venu.busireddy@oracle.com>
+> Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+> Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
+> ---
+> 
+> Hi Paolo,
+> 
+> Now there is a conflict when applying this patch on 5.18-rc1. Please
+> use the updated patch when merging the first four patches from the
+> series.
 
- - accept_memory() checks the range of addresses against the bitmap and
-   accept memory if needed.
+Right, or if you'd prefer I carried them through the tip tree, lemme
+know.
 
- - memory_is_unaccepted() check if anything within the range requires
-   acceptance.
+Thx.
 
-Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
----
- arch/x86/include/asm/page.h              |  5 +++
- arch/x86/include/asm/unaccepted_memory.h |  1 +
- arch/x86/mm/Makefile                     |  2 +
- arch/x86/mm/unaccepted_memory.c          | 53 ++++++++++++++++++++++++
- 4 files changed, 61 insertions(+)
- create mode 100644 arch/x86/mm/unaccepted_memory.c
-
-diff --git a/arch/x86/include/asm/page.h b/arch/x86/include/asm/page.h
-index 9cc82f305f4b..9ae0064f97e5 100644
---- a/arch/x86/include/asm/page.h
-+++ b/arch/x86/include/asm/page.h
-@@ -19,6 +19,11 @@
- struct page;
- 
- #include <linux/range.h>
-+
-+#ifdef CONFIG_UNACCEPTED_MEMORY
-+#include <asm/unaccepted_memory.h>
-+#endif
-+
- extern struct range pfn_mapped[];
- extern int nr_pfn_mapped;
- 
-diff --git a/arch/x86/include/asm/unaccepted_memory.h b/arch/x86/include/asm/unaccepted_memory.h
-index f1f835d3cd78..a8d12ef1bda8 100644
---- a/arch/x86/include/asm/unaccepted_memory.h
-+++ b/arch/x86/include/asm/unaccepted_memory.h
-@@ -10,5 +10,6 @@ struct boot_params;
- void mark_unaccepted(struct boot_params *params, u64 start, u64 num);
- 
- void accept_memory(phys_addr_t start, phys_addr_t end);
-+bool memory_is_unaccepted(phys_addr_t start, phys_addr_t end);
- 
- #endif
-diff --git a/arch/x86/mm/Makefile b/arch/x86/mm/Makefile
-index fe3d3061fc11..e327f83e6bbf 100644
---- a/arch/x86/mm/Makefile
-+++ b/arch/x86/mm/Makefile
-@@ -60,3 +60,5 @@ obj-$(CONFIG_AMD_MEM_ENCRYPT)	+= mem_encrypt_amd.o
- 
- obj-$(CONFIG_AMD_MEM_ENCRYPT)	+= mem_encrypt_identity.o
- obj-$(CONFIG_AMD_MEM_ENCRYPT)	+= mem_encrypt_boot.o
-+
-+obj-$(CONFIG_UNACCEPTED_MEMORY)	+= unaccepted_memory.o
-diff --git a/arch/x86/mm/unaccepted_memory.c b/arch/x86/mm/unaccepted_memory.c
-new file mode 100644
-index 000000000000..3588a7cb954c
---- /dev/null
-+++ b/arch/x86/mm/unaccepted_memory.c
-@@ -0,0 +1,53 @@
-+// SPDX-License-Identifier: GPL-2.0-only
-+#include <linux/memblock.h>
-+#include <linux/mm.h>
-+#include <linux/pfn.h>
-+#include <linux/spinlock.h>
-+
-+#include <asm/io.h>
-+#include <asm/setup.h>
-+#include <asm/unaccepted_memory.h>
-+
-+static DEFINE_SPINLOCK(unaccepted_memory_lock);
-+
-+void accept_memory(phys_addr_t start, phys_addr_t end)
-+{
-+	unsigned long *unaccepted_memory;
-+	unsigned long flags;
-+	unsigned int rs, re;
-+
-+	if (!boot_params.unaccepted_memory)
-+		return;
-+
-+	unaccepted_memory = __va(boot_params.unaccepted_memory);
-+	rs = start / PMD_SIZE;
-+
-+	spin_lock_irqsave(&unaccepted_memory_lock, flags);
-+	for_each_set_bitrange_from(rs, re, unaccepted_memory,
-+				   DIV_ROUND_UP(end, PMD_SIZE)) {
-+		/* Platform-specific memory-acceptance call goes here */
-+		panic("Cannot accept memory");
-+		bitmap_clear(unaccepted_memory, rs, re - rs);
-+	}
-+	spin_unlock_irqrestore(&unaccepted_memory_lock, flags);
-+}
-+
-+bool memory_is_unaccepted(phys_addr_t start, phys_addr_t end)
-+{
-+	unsigned long *unaccepted_memory = __va(boot_params.unaccepted_memory);
-+	unsigned long flags;
-+	bool ret = false;
-+
-+	spin_lock_irqsave(&unaccepted_memory_lock, flags);
-+	while (start < end) {
-+		if (test_bit(start / PMD_SIZE, unaccepted_memory)) {
-+			ret = true;
-+			break;
-+		}
-+
-+		start += PMD_SIZE;
-+	}
-+	spin_unlock_irqrestore(&unaccepted_memory_lock, flags);
-+
-+	return ret;
-+}
 -- 
-2.35.1
+Regards/Gruss,
+    Boris.
 
+https://people.kernel.org/tglx/notes-about-netiquette
