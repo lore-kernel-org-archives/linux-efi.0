@@ -2,348 +2,397 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 22E35C4332F
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E751C4167B
 	for <linux-efi@archiver.kernel.org>; Wed,  6 Apr 2022 04:05:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1350035AbiDFEFY (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 6 Apr 2022 00:05:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47722 "EHLO
+        id S1377026AbiDFEFo (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 6 Apr 2022 00:05:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44696 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1850045AbiDFCrJ (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 5 Apr 2022 22:47:09 -0400
-Received: from mga11.intel.com (mga11.intel.com [192.55.52.93])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 64D50294A33;
-        Tue,  5 Apr 2022 16:48:41 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1649202521; x=1680738521;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=bHjOpRF0FH9a4fKmacsGbqTcyKL/garGb9vIFX8+JmU=;
-  b=d2xudDnw/rXJ16zDW0kypN9CMrA754m4j6/tOfQCQhtBDx+ExaF7Y9gM
-   jned6Y5a6Ksz2EUEdFoBdN3G35SjMhhhxUT4K0xFoOwmnzmc9B+sOVfz2
-   5TC6T0u2rVE2my18epAkxVKqVLiUc4V36WnWVdPE03PF0pOAPPz1XAwsO
-   mth46lQIxPKDm9OTvY3vWsHoZfhwKPZlyRpmS2ei1qHw3ACYk8Lp5dkmk
-   1//wGmIEU5PhHxOK0SqobObFBopSWtp9hzhklLMkSkGz5mXbp31ww3vcx
-   ZxYaXlt+BoIo7YeeudVT6PyUWlc4qoBow1B9z8uBVyR+Ktmm4+H89hdFZ
-   Q==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10308"; a="258479964"
-X-IronPort-AV: E=Sophos;i="5.90,238,1643702400"; 
-   d="scan'208";a="258479964"
-Received: from fmsmga007.fm.intel.com ([10.253.24.52])
-  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Apr 2022 16:48:41 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.90,238,1643702400"; 
-   d="scan'208";a="556723611"
-Received: from black.fi.intel.com ([10.237.72.28])
-  by fmsmga007.fm.intel.com with ESMTP; 05 Apr 2022 16:48:34 -0700
-Received: by black.fi.intel.com (Postfix, from userid 1000)
-        id 838195C; Wed,  6 Apr 2022 02:43:47 +0300 (EEST)
-From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-To:     Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>,
-        Sean Christopherson <seanjc@google.com>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Joerg Roedel <jroedel@suse.de>,
-        Ard Biesheuvel <ardb@kernel.org>
-Cc:     Andi Kleen <ak@linux.intel.com>,
-        Kuppuswamy Sathyanarayanan 
-        <sathyanarayanan.kuppuswamy@linux.intel.com>,
-        David Rientjes <rientjes@google.com>,
-        Vlastimil Babka <vbabka@suse.cz>,
+        with ESMTP id S1573230AbiDESa2 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 5 Apr 2022 14:30:28 -0400
+Received: from NAM10-MW2-obe.outbound.protection.outlook.com (mail-mw2nam10on2056.outbound.protection.outlook.com [40.107.94.56])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C756325C2;
+        Tue,  5 Apr 2022 11:28:28 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=g4JcdFsEFAUisViN1/OsQ/awlkZ33sxcSmJxfxo73KDG2KHXvKyfQAI6WqBMGGTeYIHbd52kuKauHEeplUMp5kFGU3wVcCvJIVFkE27v77mQB13p6OkGSqqko++v8ogkSrxPErrSijedfAeOOyfFsw+ks3kCWht/G/VGnBWwR8JEnKYKAbXykUXD8wopP4z96It3Xxtn87oPgi8npWzNln/D39pdkbl3+kKRipiRMK6/ZR9U1KvNgrBAJP0mt2tbCJR6t7o+4q4v9IHvaCg/Lsk3dd0hx6tbbU0xE45aQfOUMl4IAotV3Pxy3tMXilkGWyfJjfYtUl1l+a5wzc0YuA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=oVxiQWdA/+y1jdfHCZL9sICHf0Z28UIfsZdRfAZlh9U=;
+ b=Va+2Qlbo/IwryPkE2G6snovgm/v/XHeKfiFsy1tnbv8vTzEBrvNDWf8LLbcOdOKoeSt0QY58k9sGAS9FtyO4mO+IErPLFo4gHivT1diQeijPCkej+d9ARt1PklINITUQQLg7ej1uSyLjDFfqg/KzRqslnz30rsvHsDWhdkSc0KwmmTtkQsy8x0N6OOPjZNsRMv3dtE4vplNnziVR2Ja0nkH9tG7Cfj9ARCbpdZAy5C83u7u2UpaZkhVspxcO1MFszni3dtZthmf+EN+KrgMyqJ8N2HBj3G3af8aU6POuAkN6dJ49lhthjqKviQH9pbfAEHw/k0sL4fpEq9R45XDRjQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=kernel.org smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=oVxiQWdA/+y1jdfHCZL9sICHf0Z28UIfsZdRfAZlh9U=;
+ b=H6AddttlJcBriGG9IAsbUGSxN/zq9hHzGCdvekkTW2RZxpFugEDvPJiT6CJ4t0e6ebjUNk5ssPuQ2k2yj9nKbFtPllVnw2EEs4Kb+mCOMBcNyn2vCPI0IDlLAnibV+ShKkMq2e1FG4RKuV+kj/0ejmsUaxEqPMvQycoLB2hRcLs=
+Received: from BN6PR11CA0072.namprd11.prod.outlook.com (2603:10b6:404:f7::34)
+ by DM6PR12MB2809.namprd12.prod.outlook.com (2603:10b6:5:4a::16) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5123.31; Tue, 5 Apr
+ 2022 18:28:25 +0000
+Received: from BN8NAM11FT024.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:404:f7:cafe::6a) by BN6PR11CA0072.outlook.office365.com
+ (2603:10b6:404:f7::34) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5123.31 via Frontend
+ Transport; Tue, 5 Apr 2022 18:28:25 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB04.amd.com;
+Received: from SATLEXMB04.amd.com (165.204.84.17) by
+ BN8NAM11FT024.mail.protection.outlook.com (10.13.177.38) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.5123.19 via Frontend Transport; Tue, 5 Apr 2022 18:28:25 +0000
+Received: from sbrijesh-desktop.amd.com (10.180.168.240) by SATLEXMB04.amd.com
+ (10.181.40.145) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.24; Tue, 5 Apr
+ 2022 13:28:23 -0500
+From:   Brijesh Singh <brijesh.singh@amd.com>
+To:     <x86@kernel.org>, <linux-kernel@vger.kernel.org>,
+        <kvm@vger.kernel.org>, <linux-efi@vger.kernel.org>,
+        <platform-driver-x86@vger.kernel.org>,
+        <linux-coco@lists.linux.dev>, <linux-mm@kvack.org>
+CC:     Thomas Gleixner <tglx@linutronix.de>,
+        Ingo Molnar <mingo@redhat.com>, Joerg Roedel <jroedel@suse.de>,
         Tom Lendacky <thomas.lendacky@amd.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Peter Zijlstra <peterz@infradead.org>,
+        "H. Peter Anvin" <hpa@zytor.com>, Ard Biesheuvel <ardb@kernel.org>,
         Paolo Bonzini <pbonzini@redhat.com>,
-        Ingo Molnar <mingo@redhat.com>,
-        Varad Gautam <varad.gautam@suse.com>,
-        Dario Faggioli <dfaggioli@suse.com>,
-        Dave Hansen <dave.hansen@intel.com>,
-        Brijesh Singh <brijesh.singh@amd.com>,
-        Mike Rapoport <rppt@kernel.org>,
-        David Hildenbrand <david@redhat.com>, x86@kernel.org,
-        linux-mm@kvack.org, linux-coco@lists.linux.dev,
-        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
-        "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
-        Mike Rapoport <rppt@linux.ibm.com>
-Subject: [PATCHv4 1/8] mm: Add support for unaccepted memory
-Date:   Wed,  6 Apr 2022 02:43:36 +0300
-Message-Id: <20220405234343.74045-2-kirill.shutemov@linux.intel.com>
-X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20220405234343.74045-1-kirill.shutemov@linux.intel.com>
-References: <20220405234343.74045-1-kirill.shutemov@linux.intel.com>
+        Sean Christopherson <seanjc@google.com>,
+        "Vitaly Kuznetsov" <vkuznets@redhat.com>,
+        Jim Mattson <jmattson@google.com>,
+        "Andy Lutomirski" <luto@kernel.org>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        Sergio Lopez <slp@redhat.com>, Peter Gonda <pgonda@google.com>,
+        "Peter Zijlstra" <peterz@infradead.org>,
+        Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>,
+        David Rientjes <rientjes@google.com>,
+        Dov Murik <dovmurik@linux.ibm.com>,
+        Tobin Feldman-Fitzthum <tobin@ibm.com>,
+        Borislav Petkov <bp@alien8.de>,
+        Michael Roth <michael.roth@amd.com>,
+        Vlastimil Babka <vbabka@suse.cz>,
+        "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>,
+        Andi Kleen <ak@linux.intel.com>,
+        "Dr . David Alan Gilbert" <dgilbert@redhat.com>,
+        <brijesh.ksingh@gmail.com>, <tony.luck@intel.com>,
+        <marcorr@google.com>, <sathyanarayanan.kuppuswamy@linux.intel.com>,
+        Venu Busireddy <venu.busireddy@oracle.com>,
+        Brijesh Singh <brijesh.singh@amd.com>
+Subject: [PATCH v12 2.1/46] KVM: SVM: Create a separate mapping for the SEV-ES save area
+Date:   Tue, 5 Apr 2022 13:27:43 -0500
+Message-ID: <20220405182743.308853-1-brijesh.singh@amd.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20220307213356.2797205-3-brijesh.singh@amd.com>
+References: <20220307213356.2797205-3-brijesh.singh@amd.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB03.amd.com (10.181.40.144) To SATLEXMB04.amd.com
+ (10.181.40.145)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 85d25259-9114-429b-81b6-08da173212c3
+X-MS-TrafficTypeDiagnostic: DM6PR12MB2809:EE_
+X-Microsoft-Antispam-PRVS: <DM6PR12MB28098EC4C6E525F165388EABE5E49@DM6PR12MB2809.namprd12.prod.outlook.com>
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: 66JyBK9iR3ZHHbuIWrXhWT3KitXHv/kzAmrKEjTjph+ZShghBf38aFz5GZiTzbtPTF7JMeYfqwDxygcl0ClE+9p3vxdCbHuaQ04CxCkBcc0l1YLL85WATRk/4wD3apoa6mvnGE8J7MlHwiiIfjAqbchNk6WfVwPO1nx3IUl1EUnnxusVG3fQU4f+bx59qtcg1dxW/8DyeRSR0e9GoVS9c29V/5yYulJLtZinIC1iBZVhPlDY4dzaVZIztfpOWoiqs2lZm3rx7ugQc1crpbKYRutHzvOuSCrGLMbmMmuoyhOZze17hQsQv28/z1sr7fDS/nrhwmdZ9VOI3LFDl4Tb1Y3r/MdTdG8zIM+u61oX+jCR0pC5s11GhIMA/tRBC6YPoEUNYkvFIMfqw3Z2iEqUX9Nr7W+6arlO4PINmWiB0MPIgBk+lfSTy4juMpOGmmitLlRIKdqJ8yAf5Omy5+VbiY8jil9Dtf8dJqk1DsTPAMIIhgXsZ+1KrjM8SPTB4W2UjGdbuv1M+1eKJ6lc0d3btzcnAvMWfqclJYng0h+tiXr/ABxqmX0PAntb02lejgA2iMmkjoH6+3h9fw6Pikjl9R1SkXpOohi6frn0Ib5GllhZicfAjF1ogOnua1okbzKWno5cRiZfv1AWUpPKBXDxX0YtlAxFMvBQWZofAgdKHZnjRURMVEcFcJOBkDr1sZs5WnJCVnOzTF89fE7EE66DUBBFrvm0llr78c5QKT6TrLU=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230001)(4636009)(46966006)(36840700001)(40470700004)(81166007)(6666004)(2616005)(40460700003)(83380400001)(2906002)(336012)(426003)(26005)(16526019)(110136005)(54906003)(186003)(86362001)(316002)(1076003)(8676002)(70586007)(36860700001)(70206006)(82310400005)(8936002)(356005)(44832011)(4326008)(7406005)(7416002)(36756003)(5660300002)(47076005)(508600001)(7696005)(36900700001)(2101003);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 05 Apr 2022 18:28:25.6171
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 85d25259-9114-429b-81b6-08da173212c3
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: BN8NAM11FT024.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR12MB2809
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-UEFI Specification version 2.9 introduces the concept of memory
-acceptance. Some Virtual Machine platforms, such as Intel TDX or AMD
-SEV-SNP, requiring memory to be accepted before it can be used by the
-guest. Accepting happens via a protocol specific for the Virtual Machine
-platform.
+From: Tom Lendacky <thomas.lendacky@amd.com>
 
-Accepting memory is costly and it makes VMM allocate memory for the
-accepted guest physical address range. It's better to postpone memory
-acceptance until memory is needed. It lowers boot time and reduces
-memory overhead.
+The save area for SEV-ES/SEV-SNP guests, as used by the hardware, is
+different from the save area of a non SEV-ES/SEV-SNP guest.
 
-Support of such memory requires a few changes in core-mm code:
+This is the first step in defining the multiple save areas to keep them
+separate and ensuring proper operation amongst the different types of
+guests. Create an SEV-ES/SEV-SNP save area and adjust usage to the new
+save area definition where needed.
 
-  - memblock has to accept memory on allocation;
-
-  - page allocator has to accept memory on the first allocation of the
-    page;
-
-Memblock change is trivial.
-
-The page allocator is modified to accept pages on the first allocation.
-PageUnaccepted() is used to indicate that the page requires acceptance.
-
-Kernel only needs to accept memory once after boot, so during the boot
-and warm up phase there will be a lot of memory acceptance. After things
-are settled down the only price of the feature if couple of checks for
-PageUnaccepted() in allocate and free paths. The check refers a hot
-variable (that also encodes PageBuddy()), so it is cheap and not visible
-on profiles.
-
-Architecture has to provide two helpers if it wants to support
-unaccepted memory:
-
- - accept_memory() makes a range of physical addresses accepted.
-
- - memory_is_unaccepted() checks anything within the range of physical
-   addresses requires acceptance.
-
-Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
-Acked-by: Mike Rapoport <rppt@linux.ibm.com>	# memblock
+Reviewed-by: Venu Busireddy <venu.busireddy@oracle.com>
+Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+Signed-off-by: Brijesh Singh <brijesh.singh@amd.com>
 ---
- include/linux/page-flags.h | 24 ++++++++++++++++
- mm/internal.h              | 11 ++++++++
- mm/memblock.c              |  9 ++++++
- mm/page_alloc.c            | 57 ++++++++++++++++++++++++++++++++++++--
- 4 files changed, 99 insertions(+), 2 deletions(-)
 
-diff --git a/include/linux/page-flags.h b/include/linux/page-flags.h
-index 9d8eeaa67d05..aaaedc111092 100644
---- a/include/linux/page-flags.h
-+++ b/include/linux/page-flags.h
-@@ -928,6 +928,7 @@ static inline bool is_page_hwpoison(struct page *page)
- #define PG_offline	0x00000100
- #define PG_table	0x00000200
- #define PG_guard	0x00000400
-+#define PG_unaccepted	0x00000800
+Hi Paolo,
+
+Now there is a conflict when applying this patch on 5.18-rc1. Please
+use the updated patch when merging the first four patches from the
+series.
+
+thanks
+
+ arch/x86/include/asm/svm.h | 87 +++++++++++++++++++++++++++++---------
+ arch/x86/kvm/svm/sev.c     | 22 +++++-----
+ arch/x86/kvm/svm/svm.c     |  4 +-
+ arch/x86/kvm/svm/svm.h     |  4 +-
+ 4 files changed, 82 insertions(+), 35 deletions(-)
+
+diff --git a/arch/x86/include/asm/svm.h b/arch/x86/include/asm/svm.h
+index f2d01f351e95..788a43f99080 100644
+--- a/arch/x86/include/asm/svm.h
++++ b/arch/x86/include/asm/svm.h
+@@ -271,6 +271,7 @@ struct vmcb_seg {
+ 	u64 base;
+ } __packed;
  
- #define PageType(page, flag)						\
- 	((page->page_type & (PAGE_TYPE_BASE | flag)) == PAGE_TYPE_BASE)
-@@ -953,6 +954,18 @@ static __always_inline void __ClearPage##uname(struct page *page)	\
- 	page->page_type |= PG_##lname;					\
- }
++/* Save area definition for legacy and SEV-MEM guests */
+ struct vmcb_save_area {
+ 	struct vmcb_seg es;
+ 	struct vmcb_seg cs;
+@@ -287,8 +288,58 @@ struct vmcb_save_area {
+ 	u8 cpl;
+ 	u8 reserved_2[4];
+ 	u64 efer;
++	u8 reserved_3[112];
++	u64 cr4;
++	u64 cr3;
++	u64 cr0;
++	u64 dr7;
++	u64 dr6;
++	u64 rflags;
++	u64 rip;
++	u8 reserved_4[88];
++	u64 rsp;
++	u64 s_cet;
++	u64 ssp;
++	u64 isst_addr;
++	u64 rax;
++	u64 star;
++	u64 lstar;
++	u64 cstar;
++	u64 sfmask;
++	u64 kernel_gs_base;
++	u64 sysenter_cs;
++	u64 sysenter_esp;
++	u64 sysenter_eip;
++	u64 cr2;
++	u8 reserved_5[32];
++	u64 g_pat;
++	u64 dbgctl;
++	u64 br_from;
++	u64 br_to;
++	u64 last_excp_from;
++	u64 last_excp_to;
++	u8 reserved_6[72];
++	u32 spec_ctrl;		/* Guest version of SPEC_CTRL at 0x2E0 */
++} __packed;
++
++/* Save area definition for SEV-ES and SEV-SNP guests */
++struct sev_es_save_area {
++	struct vmcb_seg es;
++	struct vmcb_seg cs;
++	struct vmcb_seg ss;
++	struct vmcb_seg ds;
++	struct vmcb_seg fs;
++	struct vmcb_seg gs;
++	struct vmcb_seg gdtr;
++	struct vmcb_seg ldtr;
++	struct vmcb_seg idtr;
++	struct vmcb_seg tr;
++	u8 reserved_1[43];
++	u8 cpl;
++	u8 reserved_2[4];
++	u64 efer;
+ 	u8 reserved_3[104];
+-	u64 xss;		/* Valid for SEV-ES only */
++	u64 xss;
+ 	u64 cr4;
+ 	u64 cr3;
+ 	u64 cr0;
+@@ -316,22 +367,14 @@ struct vmcb_save_area {
+ 	u64 br_to;
+ 	u64 last_excp_from;
+ 	u64 last_excp_to;
+-
+-	/*
+-	 * The following part of the save area is valid only for
+-	 * SEV-ES guests when referenced through the GHCB or for
+-	 * saving to the host save area.
+-	 */
+-	u8 reserved_7[72];
+-	u32 spec_ctrl;		/* Guest version of SPEC_CTRL at 0x2E0 */
+-	u8 reserved_7b[4];
++	u8 reserved_7[80];
+ 	u32 pkru;
+-	u8 reserved_7a[20];
+-	u64 reserved_8;		/* rax already available at 0x01f8 */
++	u8 reserved_9[20];
++	u64 reserved_10;	/* rax already available at 0x01f8 */
+ 	u64 rcx;
+ 	u64 rdx;
+ 	u64 rbx;
+-	u64 reserved_9;		/* rsp already available at 0x01d8 */
++	u64 reserved_11;	/* rsp already available at 0x01d8 */
+ 	u64 rbp;
+ 	u64 rsi;
+ 	u64 rdi;
+@@ -343,23 +386,25 @@ struct vmcb_save_area {
+ 	u64 r13;
+ 	u64 r14;
+ 	u64 r15;
+-	u8 reserved_10[16];
++	u8 reserved_12[16];
+ 	u64 sw_exit_code;
+ 	u64 sw_exit_info_1;
+ 	u64 sw_exit_info_2;
+ 	u64 sw_scratch;
+ 	u64 sev_features;
+-	u8 reserved_11[48];
++	u8 reserved_13[48];
+ 	u64 xcr0;
+ 	u8 valid_bitmap[16];
+ 	u64 x87_state_gpa;
+ } __packed;
  
-+#define PAGE_TYPE_OPS_FALSE(uname)					\
-+static __always_inline int Page##uname(struct page *page)		\
-+{									\
-+	return false;							\
-+}									\
-+static __always_inline void __SetPage##uname(struct page *page)		\
-+{									\
-+}									\
-+static __always_inline void __ClearPage##uname(struct page *page)	\
-+{									\
-+}
++#define GHCB_SHARED_BUF_SIZE	2032
 +
- /*
-  * PageBuddy() indicates that the page is free and in the buddy system
-  * (see mm/page_alloc.c).
-@@ -983,6 +996,17 @@ PAGE_TYPE_OPS(Buddy, buddy)
-  */
- PAGE_TYPE_OPS(Offline, offline)
+ struct ghcb {
+-	struct vmcb_save_area save;
+-	u8 reserved_save[2048 - sizeof(struct vmcb_save_area)];
++	struct sev_es_save_area save;
++	u8 reserved_save[2048 - sizeof(struct sev_es_save_area)];
  
-+ /*
-+  * PageUnaccepted() indicates that the page has to be "accepted" before it can
-+  * be used. Page allocator has to call accept_page() before returning the page
-+  * to the caller.
-+  */
-+#ifdef CONFIG_UNACCEPTED_MEMORY
-+PAGE_TYPE_OPS(Unaccepted, unaccepted)
-+#else
-+PAGE_TYPE_OPS_FALSE(Unaccepted)
-+#endif
-+
- extern void page_offline_freeze(void);
- extern void page_offline_thaw(void);
- extern void page_offline_begin(void);
-diff --git a/mm/internal.h b/mm/internal.h
-index cf16280ce132..10302fe857c4 100644
---- a/mm/internal.h
-+++ b/mm/internal.h
-@@ -758,4 +758,15 @@ struct folio *try_grab_folio(struct page *page, int refs, unsigned int flags);
+-	u8 shared_buffer[2032];
++	u8 shared_buffer[GHCB_SHARED_BUF_SIZE];
  
- DECLARE_PER_CPU(struct per_cpu_nodestat, boot_nodestats);
+ 	u8 reserved_1[10];
+ 	u16 protocol_version;	/* negotiated SEV-ES/GHCB protocol version */
+@@ -367,13 +412,15 @@ struct ghcb {
+ } __packed;
  
-+#ifndef CONFIG_UNACCEPTED_MEMORY
-+static inline bool memory_is_unaccepted(phys_addr_t start, phys_addr_t end)
-+{
-+	return false;
-+}
-+
-+static inline void accept_memory(phys_addr_t start, phys_addr_t end)
-+{
-+}
-+#endif
-+
- #endif	/* __MM_INTERNAL_H */
-diff --git a/mm/memblock.c b/mm/memblock.c
-index e4f03a6e8e56..a1f7f8b304d5 100644
---- a/mm/memblock.c
-+++ b/mm/memblock.c
-@@ -1405,6 +1405,15 @@ phys_addr_t __init memblock_alloc_range_nid(phys_addr_t size,
- 		 */
- 		kmemleak_alloc_phys(found, size, 0, 0);
  
-+	/*
-+	 * Some Virtual Machine platforms, such as Intel TDX or AMD SEV-SNP,
-+	 * require memory to be accepted before it can be used by the
-+	 * guest.
-+	 *
-+	 * Accept the memory of the allocated buffer.
-+	 */
-+	accept_memory(found, found + size);
-+
- 	return found;
- }
+-#define EXPECTED_VMCB_SAVE_AREA_SIZE		1032
++#define EXPECTED_VMCB_SAVE_AREA_SIZE		740
++#define EXPECTED_SEV_ES_SAVE_AREA_SIZE		1032
+ #define EXPECTED_VMCB_CONTROL_AREA_SIZE		1024
+ #define EXPECTED_GHCB_SIZE			PAGE_SIZE
  
-diff --git a/mm/page_alloc.c b/mm/page_alloc.c
-index 2db95780e003..53f4aa1c92a7 100644
---- a/mm/page_alloc.c
-+++ b/mm/page_alloc.c
-@@ -121,6 +121,12 @@ typedef int __bitwise fpi_t;
-  */
- #define FPI_SKIP_KASAN_POISON	((__force fpi_t)BIT(2))
- 
-+/*
-+ * Check if the page needs to be marked as PageUnaccepted().
-+ * Used for the new pages added to the buddy allocator for the first time.
-+ */
-+#define FPI_UNACCEPTED		((__force fpi_t)BIT(3))
-+
- /* prevent >1 _updater_ of zone percpu pageset ->high and ->batch fields */
- static DEFINE_MUTEX(pcp_batch_high_lock);
- #define MIN_PERCPU_PAGELIST_HIGH_FRACTION (8)
-@@ -1023,6 +1029,26 @@ buddy_merge_likely(unsigned long pfn, unsigned long buddy_pfn,
- 	return page_is_buddy(higher_page, higher_buddy, order + 1);
- }
- 
-+static void accept_page(struct page *page, unsigned int order)
-+{
-+	phys_addr_t start = page_to_phys(page);
-+	int i;
-+
-+	accept_memory(start, start + (PAGE_SIZE << order));
-+
-+	for (i = 0; i < (1 << order); i++) {
-+		if (PageUnaccepted(page + i))
-+			__ClearPageUnaccepted(page + i);
-+	}
-+}
-+
-+static bool page_is_unaccepted(struct page *page, unsigned int order)
-+{
-+	phys_addr_t start = page_to_phys(page);
-+
-+	return memory_is_unaccepted(start, start + (PAGE_SIZE << order));
-+}
-+
- /*
-  * Freeing function for a buddy system allocator.
-  *
-@@ -1058,6 +1084,7 @@ static inline void __free_one_page(struct page *page,
- 	unsigned long combined_pfn;
- 	struct page *buddy;
- 	bool to_tail;
-+	bool unaccepted = PageUnaccepted(page);
- 
- 	VM_BUG_ON(!zone_is_initialized(zone));
- 	VM_BUG_ON_PAGE(page->flags & PAGE_FLAGS_CHECK_AT_PREP, page);
-@@ -1089,6 +1116,11 @@ static inline void __free_one_page(struct page *page,
- 			clear_page_guard(zone, buddy, order, migratetype);
- 		else
- 			del_page_from_free_list(buddy, zone, order);
-+
-+		/* Mark page unaccepted if any of merged pages were unaccepted */
-+		if (PageUnaccepted(buddy))
-+			unaccepted = true;
-+
- 		combined_pfn = buddy_pfn & pfn;
- 		page = page + (combined_pfn - pfn);
- 		pfn = combined_pfn;
-@@ -1124,6 +1156,17 @@ static inline void __free_one_page(struct page *page,
- done_merging:
- 	set_buddy_order(page, order);
- 
-+	/*
-+	 * Check if the page needs to be marked as PageUnaccepted().
-+	 * Used for the new pages added to the buddy allocator for the first
-+	 * time.
-+	 */
-+	if (!unaccepted && (fpi_flags & FPI_UNACCEPTED))
-+		unaccepted = page_is_unaccepted(page, order);
-+
-+	if (unaccepted)
-+		__SetPageUnaccepted(page);
-+
- 	if (fpi_flags & FPI_TO_TAIL)
- 		to_tail = true;
- 	else if (is_shuffle_order(order))
-@@ -1149,7 +1192,8 @@ static inline void __free_one_page(struct page *page,
- static inline bool page_expected_state(struct page *page,
- 					unsigned long check_flags)
+ static inline void __unused_size_checks(void)
  {
--	if (unlikely(atomic_read(&page->_mapcount) != -1))
-+	if (unlikely(atomic_read(&page->_mapcount) != -1) &&
-+	    !PageUnaccepted(page))
- 		return false;
+ 	BUILD_BUG_ON(sizeof(struct vmcb_save_area)	!= EXPECTED_VMCB_SAVE_AREA_SIZE);
++	BUILD_BUG_ON(sizeof(struct sev_es_save_area)	!= EXPECTED_SEV_ES_SAVE_AREA_SIZE);
+ 	BUILD_BUG_ON(sizeof(struct vmcb_control_area)	!= EXPECTED_VMCB_CONTROL_AREA_SIZE);
+ 	BUILD_BUG_ON(sizeof(struct ghcb)		!= EXPECTED_GHCB_SIZE);
+ }
+@@ -443,7 +490,7 @@ struct vmcb {
+ /* GHCB Accessor functions */
  
- 	if (unlikely((unsigned long)page->mapping |
-@@ -1654,7 +1698,8 @@ void __free_pages_core(struct page *page, unsigned int order)
- 	 * Bypass PCP and place fresh pages right to the tail, primarily
- 	 * relevant for memory onlining.
- 	 */
--	__free_pages_ok(page, order, FPI_TO_TAIL | FPI_SKIP_KASAN_POISON);
-+	__free_pages_ok(page, order,
-+			FPI_TO_TAIL | FPI_SKIP_KASAN_POISON | FPI_UNACCEPTED);
+ #define GHCB_BITMAP_IDX(field)							\
+-	(offsetof(struct vmcb_save_area, field) / sizeof(u64))
++	(offsetof(struct sev_es_save_area, field) / sizeof(u64))
+ 
+ #define DEFINE_GHCB_ACCESSORS(field)						\
+ 	static inline bool ghcb_##field##_is_valid(const struct ghcb *ghcb)	\
+diff --git a/arch/x86/kvm/svm/sev.c b/arch/x86/kvm/svm/sev.c
+index 75fa6dd268f0..6e18ec1839f0 100644
+--- a/arch/x86/kvm/svm/sev.c
++++ b/arch/x86/kvm/svm/sev.c
+@@ -559,12 +559,20 @@ static int sev_launch_update_data(struct kvm *kvm, struct kvm_sev_cmd *argp)
+ 
+ static int sev_es_sync_vmsa(struct vcpu_svm *svm)
+ {
+-	struct vmcb_save_area *save = &svm->vmcb->save;
++	struct sev_es_save_area *save = svm->sev_es.vmsa;
+ 
+ 	/* Check some debug related fields before encrypting the VMSA */
+-	if (svm->vcpu.guest_debug || (save->dr7 & ~DR7_FIXED_1))
++	if (svm->vcpu.guest_debug || (svm->vmcb->save.dr7 & ~DR7_FIXED_1))
+ 		return -EINVAL;
+ 
++	/*
++	 * SEV-ES will use a VMSA that is pointed to by the VMCB, not
++	 * the traditional VMSA that is part of the VMCB. Copy the
++	 * traditional VMSA as it has been built so far (in prep
++	 * for LAUNCH_UPDATE_VMSA) to be the initial SEV-ES state.
++	 */
++	memcpy(save, &svm->vmcb->save, sizeof(svm->vmcb->save));
++
+ 	/* Sync registgers */
+ 	save->rax = svm->vcpu.arch.regs[VCPU_REGS_RAX];
+ 	save->rbx = svm->vcpu.arch.regs[VCPU_REGS_RBX];
+@@ -592,14 +600,6 @@ static int sev_es_sync_vmsa(struct vcpu_svm *svm)
+ 	save->xss  = svm->vcpu.arch.ia32_xss;
+ 	save->dr6  = svm->vcpu.arch.dr6;
+ 
+-	/*
+-	 * SEV-ES will use a VMSA that is pointed to by the VMCB, not
+-	 * the traditional VMSA that is part of the VMCB. Copy the
+-	 * traditional VMSA as it has been built so far (in prep
+-	 * for LAUNCH_UPDATE_VMSA) to be the initial SEV-ES state.
+-	 */
+-	memcpy(svm->sev_es.vmsa, save, sizeof(*save));
+-
+ 	return 0;
  }
  
- #ifdef CONFIG_NUMA
-@@ -1807,6 +1852,7 @@ static void __init deferred_free_range(unsigned long pfn,
- 		return;
- 	}
+@@ -2932,7 +2932,7 @@ void sev_es_vcpu_reset(struct vcpu_svm *svm)
+ 					    sev_enc_bit));
+ }
  
-+	accept_memory(pfn << PAGE_SHIFT, (pfn + nr_pages) << PAGE_SHIFT);
- 	for (i = 0; i < nr_pages; i++, page++, pfn++) {
- 		if ((pfn & (pageblock_nr_pages - 1)) == 0)
- 			set_pageblock_migratetype(page, MIGRATE_MOVABLE);
-@@ -2266,6 +2312,10 @@ static inline void expand(struct zone *zone, struct page *page,
- 		if (set_page_guard(zone, &page[size], high, migratetype))
- 			continue;
- 
-+		/* Transfer PageUnaccepted() to the newly split pages */
-+		if (PageUnaccepted(page))
-+			__SetPageUnaccepted(&page[size]);
-+
- 		add_to_free_list(&page[size], zone, high, migratetype);
- 		set_buddy_order(&page[size], high);
- 	}
-@@ -2396,6 +2446,9 @@ inline void post_alloc_hook(struct page *page, unsigned int order,
- 	 */
- 	kernel_unpoison_pages(page, 1 << order);
- 
-+	if (PageUnaccepted(page))
-+		accept_page(page, order);
-+
+-void sev_es_prepare_switch_to_guest(struct vmcb_save_area *hostsa)
++void sev_es_prepare_switch_to_guest(struct sev_es_save_area *hostsa)
+ {
  	/*
- 	 * As memory initialization might be integrated into KASAN,
- 	 * KASAN unpoisoning and memory initializion code must be
+ 	 * As an SEV-ES guest, hardware will restore the host state on VMEXIT,
+diff --git a/arch/x86/kvm/svm/svm.c b/arch/x86/kvm/svm/svm.c
+index 81cb518170a8..6ff595f74e3a 100644
+--- a/arch/x86/kvm/svm/svm.c
++++ b/arch/x86/kvm/svm/svm.c
+@@ -1270,8 +1270,8 @@ static void svm_prepare_switch_to_guest(struct kvm_vcpu *vcpu)
+ 	 */
+ 	vmsave(__sme_page_pa(sd->save_area));
+ 	if (sev_es_guest(vcpu->kvm)) {
+-		struct vmcb_save_area *hostsa;
+-		hostsa = (struct vmcb_save_area *)(page_address(sd->save_area) + 0x400);
++		struct sev_es_save_area *hostsa;
++		hostsa = (struct sev_es_save_area *)(page_address(sd->save_area) + 0x400);
+ 
+ 		sev_es_prepare_switch_to_guest(hostsa);
+ 	}
+diff --git a/arch/x86/kvm/svm/svm.h b/arch/x86/kvm/svm/svm.h
+index f77a7d2d39dd..cc857deaee5e 100644
+--- a/arch/x86/kvm/svm/svm.h
++++ b/arch/x86/kvm/svm/svm.h
+@@ -181,7 +181,7 @@ struct svm_nested_state {
+ 
+ struct vcpu_sev_es_state {
+ 	/* SEV-ES support */
+-	struct vmcb_save_area *vmsa;
++	struct sev_es_save_area *vmsa;
+ 	struct ghcb *ghcb;
+ 	struct kvm_host_map ghcb_map;
+ 	bool received_first_sipi;
+@@ -620,7 +620,7 @@ int sev_es_string_io(struct vcpu_svm *svm, int size, unsigned int port, int in);
+ void sev_es_init_vmcb(struct vcpu_svm *svm);
+ void sev_es_vcpu_reset(struct vcpu_svm *svm);
+ void sev_vcpu_deliver_sipi_vector(struct kvm_vcpu *vcpu, u8 vector);
+-void sev_es_prepare_switch_to_guest(struct vmcb_save_area *hostsa);
++void sev_es_prepare_switch_to_guest(struct sev_es_save_area *hostsa);
+ void sev_es_unmap_ghcb(struct vcpu_svm *svm);
+ 
+ /* vmenter.S */
 -- 
-2.35.1
+2.25.1
 
