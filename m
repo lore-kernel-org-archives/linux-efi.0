@@ -2,35 +2,35 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 68964C433FE
-	for <linux-efi@archiver.kernel.org>; Mon, 11 Apr 2022 09:49:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B1857C433F5
+	for <linux-efi@archiver.kernel.org>; Mon, 11 Apr 2022 09:49:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344866AbiDKJwC (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 11 Apr 2022 05:52:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39328 "EHLO
+        id S1344848AbiDKJwH (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 11 Apr 2022 05:52:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38806 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344827AbiDKJvy (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 11 Apr 2022 05:51:54 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 47B3D4131C
-        for <linux-efi@vger.kernel.org>; Mon, 11 Apr 2022 02:48:58 -0700 (PDT)
+        with ESMTP id S1344839AbiDKJv4 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 11 Apr 2022 05:51:56 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 20EC140E76
+        for <linux-efi@vger.kernel.org>; Mon, 11 Apr 2022 02:49:03 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id B73A4611D8
-        for <linux-efi@vger.kernel.org>; Mon, 11 Apr 2022 09:48:57 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 37874C385AC;
-        Mon, 11 Apr 2022 09:48:55 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 82B18611E3
+        for <linux-efi@vger.kernel.org>; Mon, 11 Apr 2022 09:49:02 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 00951C385AC;
+        Mon, 11 Apr 2022 09:48:59 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1649670537;
-        bh=tP8R1xHI6gZfqXXfZqQtZ+TXUEOhPzFX2O0GeERgqzc=;
+        s=k20201202; t=1649670541;
+        bh=2XVgmsF56y1icz9ml/x4C3CrLOrJjhf8ku8guxGluyA=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=BjwGPjotMV83lseT4RVC08AQfTu51QLb6KDG/iPRphy59mvnpEmG1xdww7Whe4vs9
-         n1aXZIsmGpsrq0VOcZX0i48xvQ5HZnRewjwopyxnNQo2qj6Td3BBcmEFCFRaQ3qRIq
-         X+Xh1NgrXK5PQ71G5VA1OB9JUarLp8ZZqbRUqhjM6NCcdlfm8IXd0Luj5/ZHG8ozk+
-         ZEJcy5+6QtOqTvmEF20vESPgSYlFD9Ju6Bz9+zFG3kfTUrCoQ+4p6s7hpdIUsft/gv
-         I3E0R5ufSCH3tftd2jqWKaCDU4CloxDsOXh+kP+70OnqxeI45SFE0kEPBDtuABGQoq
-         Wi50VzziyYwVg==
+        b=Ngk8j4RxYGLWKxrKc2fZet+byMzDrhtKAFCxTXbx5HodYN3jFG0kP+cIxSXZoU6Fr
+         Y9C83S9i/Kq1r+HKGsxgOrrzRjLTSkULR216PTQ/WObQjkw0TUErgF9yJCVz+zvW2K
+         HXQ09cPO+x/lRZQ4NL51vMrCZe7tTmX/tJebeu/wiZIHNoV3S3cgLFEDNRe8MaYg/r
+         I+9+UcHm7PwcWJlKAiHn2v/s1dlS5W6vr3mJiniXvqitUXwgcgI0nfiyJvkMyZg+PQ
+         i2thcEFa0xg1OqIM4QicYnbIhNXpVE/L3uQfJbnd1eSjhM5p5rON9Xuqs3N03kCLhm
+         6UU5yWncb9XiQ==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-arm-kernel@lists.infradead.org
 Cc:     linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -39,167 +39,74 @@ Cc:     linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         Kees Cook <keescook@chromium.org>,
         Catalin Marinas <catalin.marinas@arm.com>,
         Mark Brown <broonie@kernel.org>
-Subject: [PATCH v3 06/30] arm64: head: switch to map_memory macro for the extended ID map
-Date:   Mon, 11 Apr 2022 11:48:00 +0200
-Message-Id: <20220411094824.4176877-7-ardb@kernel.org>
+Subject: [PATCH v3 08/30] arm64: kernel: drop unnecessary PoC cache clean+invalidate
+Date:   Mon, 11 Apr 2022 11:48:02 +0200
+Message-Id: <20220411094824.4176877-9-ardb@kernel.org>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20220411094824.4176877-1-ardb@kernel.org>
 References: <20220411094824.4176877-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=6360; h=from:subject; bh=tP8R1xHI6gZfqXXfZqQtZ+TXUEOhPzFX2O0GeERgqzc=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBiU/k/w3V5UYIKiCXjI91akig/McBpdcqTLhu/dp6m 6mD3u+qJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYlP5PwAKCRDDTyI5ktmPJB2mC/ 9JNH5D3KzhCgS+Ey65CRlkPxg87Sk1r5IhaVORqwaAzKWF8efarzfL6vE70s1/lpIS26selE8526ua 5YMuSz2tCuph3y5NYiiQqQbLR2w5leQrcoLMzOI8YbDu0qC1K5GI1a1zZR00zsBBNacE7tg0W4+WYe CUK6rSeLJPB56Xh4OE9ZsEne0Y1+PN9jxniRwytKyCx82j90OD2I8rqst1Pj65ymY6uhPx5dKVkvgX y8lIx92PwT7yGSgkAGNVrfyUsLGlcskk5iP/aNcIYWBbfym228lEhugMOaipyR+Ux4w/aIr2bTPQx6 qSCJRWXAKTpl8tS0v3iz1FsbFNyGI053URdrOEfjBfBu553B5i3b6jq3HUYIkmO/R6bOCn2Rk2A5gH 6o7APALWdvy8PWGIsfJQ7NWi3zjgITjjFs4GaPqE8dfgfUTomOl+iWOHK6fwSyNEG4EChfpDbO7/hH w1JOAEP16v3yAui0c/cbML3byjXw7NeekNNF4wc6qZl50=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2088; h=from:subject; bh=2XVgmsF56y1icz9ml/x4C3CrLOrJjhf8ku8guxGluyA=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBiU/lC8v9i+97hjHtxztia+HkW+5AUge3p9D73EZan Mu7BTKeJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYlP5QgAKCRDDTyI5ktmPJCxdC/ 0ROPrXD/TI1KNw24bQy4IZ0mZZeeqF4ofwfZr423kNAPNilB0ov82Hya/BlusaFwxDSj92ZvIEyCk0 bsURVyk/ZvFm46XYU/zYsodh88bXWh+URzmCg4WrZ5muvnwfGFnEJmaa+bd3zBLF3PvFa+emVDj2Ee H7ekQtRbOB8Eg2JdJxHAZLPfX7SqLMS9LC+K24815HtfT9GSkNhB/hmljXlQqNrOBe15iTy1b40mYt KxWzxVA5Uix/Wo81QdPu5hxlTGk4ryeeKgvA9V20lQPpaQGS0C8AAuXxm+qMJFk263Zy/mNKbpb4z5 TmolO8b2AchxZbKXKaslkTXZ0zV2cEHeTKYOhwhokP9WJn+6jXdd0vV1s/ajrlghBnVPC3M2xJjfuu 7mjWQ/S4bCrJTGgoACPmFcvGFC1EDUopsN31HlqR2Y2w2mohHccpQeesGJacDdHFWZxJxMxnPkNcPS BjhmQzg+vLeV78dT00GVIp7MecQD/26DyTuBWVNQu7NHM=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-In a future patch, we will start using an ID map that covers the entire
-image, rather than a single page. This means that we need to deal with
-the pathological case of an extended ID map where the kernel image does
-not fit neatly inside a single entry at the root level, which means we
-will need to create additional table entries and map additional pages
-for page tables.
+Some early boot code runs before the virtual placement of the kernel is
+finalized, and we used to go back to the very start and recreate the ID
+map along with the page tables describing the virtual kernel mapping,
+and this involved setting some global variables with the caches off.
 
-The existing map_memory macro already takes care of most of that, so
-let's just extend it to deal with this case as well. While at it, drop
-the conditional branch on the value of T0SZ: we don't set the variable
-anymore in the entry code, and so we can just let the map_memory macro
-deal with the case where the output address exceeds VA_BITS.
+In order to ensure that global state created by the KASLR code is not
+corrupted by the cache invalidation that occurs in that case, we needed
+to clean those global variables to the PoC explicitly.
+
+This is no longer needed now that the ID map is created only once (and
+the associated global variable updates are no longer repeated). So drop
+the cache maintenance that is no longer necessary.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/arm64/kernel/head.S | 76 ++++++++++----------
- 1 file changed, 37 insertions(+), 39 deletions(-)
+ arch/arm64/kernel/kaslr.c | 11 -----------
+ 1 file changed, 11 deletions(-)
 
-diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
-index 9fdde2f9cc0f..eb54c0289c8a 100644
---- a/arch/arm64/kernel/head.S
-+++ b/arch/arm64/kernel/head.S
-@@ -122,29 +122,6 @@ SYM_CODE_START_LOCAL(preserve_boot_args)
- 	b	dcache_inval_poc		// tail call
- SYM_CODE_END(preserve_boot_args)
+diff --git a/arch/arm64/kernel/kaslr.c b/arch/arm64/kernel/kaslr.c
+index 418b2bba1521..d5542666182f 100644
+--- a/arch/arm64/kernel/kaslr.c
++++ b/arch/arm64/kernel/kaslr.c
+@@ -13,7 +13,6 @@
+ #include <linux/pgtable.h>
+ #include <linux/random.h>
  
--/*
-- * Macro to create a table entry to the next page.
-- *
-- *	tbl:	page table address
-- *	virt:	virtual address
-- *	shift:	#imm page table shift
-- *	ptrs:	#imm pointers per table page
-- *
-- * Preserves:	virt
-- * Corrupts:	ptrs, tmp1, tmp2
-- * Returns:	tbl -> next level table page address
-- */
--	.macro	create_table_entry, tbl, virt, shift, ptrs, tmp1, tmp2
--	add	\tmp1, \tbl, #PAGE_SIZE
--	phys_to_pte \tmp2, \tmp1
--	orr	\tmp2, \tmp2, #PMD_TYPE_TABLE	// address of next table and entry type
--	lsr	\tmp1, \virt, #\shift
--	sub	\ptrs, \ptrs, #1
--	and	\tmp1, \tmp1, \ptrs		// table index
--	str	\tmp2, [\tbl, \tmp1, lsl #3]
--	add	\tbl, \tbl, #PAGE_SIZE		// next level table page
--	.endm
--
- /*
-  * Macro to populate page table entries, these entries can be pointers to the next level
-  * or last level entries pointing to physical memory.
-@@ -209,15 +186,27 @@ SYM_CODE_END(preserve_boot_args)
-  *	phys:	physical address corresponding to vstart - physical memory is contiguous
-  *	order:  #imm 2log(number of entries in PGD table)
-  *
-+ * If extra_shift is set, an extra level will be populated if the end address does
-+ * not fit in 'extra_shift' bits. This assumes vend is in the TTBR0 range.
-+ *
-  * Temporaries:	istart, iend, tmp, count, sv - these need to be different registers
-  * Preserves:	vstart, flags
-  * Corrupts:	tbl, rtbl, vend, istart, iend, tmp, count, sv
-  */
--	.macro map_memory, tbl, rtbl, vstart, vend, flags, phys, order, istart, iend, tmp, count, sv
-+	.macro map_memory, tbl, rtbl, vstart, vend, flags, phys, order, istart, iend, tmp, count, sv, extra_shift
- 	sub \vend, \vend, #1
- 	add \rtbl, \tbl, #PAGE_SIZE
- 	mov \count, #0
- 
-+	.ifnb	\extra_shift
-+	tst	\vend, #~((1 << (\extra_shift)) - 1)
-+	b.eq	.L_\@
-+	compute_indices \vstart, \vend, #\extra_shift, #(PAGE_SHIFT - 3), \istart, \iend, \count
-+	mov \sv, \rtbl
-+	populate_entries \tbl, \rtbl, \istart, \iend, #PMD_TYPE_TABLE, #PAGE_SIZE, \tmp
-+	mov \tbl, \sv
-+	.endif
-+.L_\@:
- 	compute_indices \vstart, \vend, #PGDIR_SHIFT, #\order, \istart, \iend, \count
- 	mov \sv, \rtbl
- 	populate_entries \tbl, \rtbl, \istart, \iend, #PMD_TYPE_TABLE, #PAGE_SIZE, \tmp
-@@ -284,20 +273,32 @@ SYM_FUNC_START_LOCAL(__create_page_tables)
- 	adrp	x3, __idmap_text_start		// __pa(__idmap_text_start)
- 
- 	/*
--	 * VA_BITS may be too small to allow for an ID mapping to be created
--	 * that covers system RAM if that is located sufficiently high in the
--	 * physical address space. So for the ID map, use an extended virtual
--	 * range in that case, and configure an additional translation level
--	 * if needed.
-+	 * The ID map carries a 1:1 mapping of the physical address range
-+	 * covered by the loaded image, which could be anywhere in DRAM. This
-+	 * means that the required size of the VA (== PA) space is decided at
-+	 * boot time, and could be more than the configured size of the VA
-+	 * space for ordinary kernel and user space mappings.
-+	 *
-+	 * There are three cases to consider here:
-+	 * - 39 <= VA_BITS < 48, and the ID map needs up to 48 VA bits to cover
-+	 *   the placement of the image. In this case, we configure one extra
-+	 *   level of translation on the fly for the ID map only. (This case
-+	 *   also covers 42-bit VA/52-bit PA on 64k pages).
-+	 *
-+	 * - VA_BITS == 48, and the ID map needs more than 48 VA bits. This can
-+	 *   only happen when using 64k pages, in which case we need to extend
-+	 *   the root level table rather than add a level. Note that we can
-+	 *   treat this case as 'always extended' as long as we take care not
-+	 *   to program an unsupported T0SZ value into the TCR register.
-+	 *
-+	 * - Combinations that would require two additional levels of
-+	 *   translation are not supported, e.g., VA_BITS==36 on 16k pages, or
-+	 *   VA_BITS==39/4k pages with 5-level paging, where the input address
-+	 *   requires more than 47 or 48 bits, respectively.
+-#include <asm/cacheflush.h>
+ #include <asm/fixmap.h>
+ #include <asm/kernel-pgtable.h>
+ #include <asm/memory.h>
+@@ -72,9 +71,6 @@ u64 __init kaslr_early_init(void)
+ 	 * we end up running with module randomization disabled.
  	 */
--	idmap_get_t0sz x5
--	cmp	x5, TCR_T0SZ(VA_BITS_MIN) // default T0SZ small enough?
--	b.ge	1f			// .. then skip VA range extension
+ 	module_alloc_base = (u64)_etext - MODULES_VSIZE;
+-	dcache_clean_inval_poc((unsigned long)&module_alloc_base,
+-			    (unsigned long)&module_alloc_base +
+-				    sizeof(module_alloc_base));
+ 
+ 	/*
+ 	 * Try to map the FDT early. If this fails, we simply bail,
+@@ -174,13 +170,6 @@ u64 __init kaslr_early_init(void)
+ 	module_alloc_base += (module_range * (seed & ((1 << 21) - 1))) >> 21;
+ 	module_alloc_base &= PAGE_MASK;
+ 
+-	dcache_clean_inval_poc((unsigned long)&module_alloc_base,
+-			    (unsigned long)&module_alloc_base +
+-				    sizeof(module_alloc_base));
+-	dcache_clean_inval_poc((unsigned long)&memstart_offset_seed,
+-			    (unsigned long)&memstart_offset_seed +
+-				    sizeof(memstart_offset_seed));
 -
- #if (VA_BITS < 48)
- #define IDMAP_PGD_ORDER	(VA_BITS - PGDIR_SHIFT)
- #define EXTRA_SHIFT	(PGDIR_SHIFT + PAGE_SHIFT - 3)
--#define EXTRA_PTRS	(1 << (PHYS_MASK_SHIFT - EXTRA_SHIFT))
+ 	return offset;
+ }
  
- 	/*
- 	 * If VA_BITS < 48, we have to configure an additional table level.
-@@ -309,20 +310,17 @@ SYM_FUNC_START_LOCAL(__create_page_tables)
- #if VA_BITS != EXTRA_SHIFT
- #error "Mismatch between VA_BITS and page size/number of translation levels"
- #endif
--
--	mov	x2, EXTRA_PTRS
--	create_table_entry x0, x3, EXTRA_SHIFT, x2, x5, x6
- #else
- #define IDMAP_PGD_ORDER	(PHYS_MASK_SHIFT - PGDIR_SHIFT)
-+#define EXTRA_SHIFT
- 	/*
- 	 * If VA_BITS == 48, we don't have to configure an additional
- 	 * translation level, but the top-level table has more entries.
- 	 */
- #endif
--1:
- 	adr_l	x6, __idmap_text_end		// __pa(__idmap_text_end)
- 
--	map_memory x0, x1, x3, x6, x7, x3, IDMAP_PGD_ORDER, x10, x11, x12, x13, x14
-+	map_memory x0, x1, x3, x6, x7, x3, IDMAP_PGD_ORDER, x10, x11, x12, x13, x14, EXTRA_SHIFT
- 
- 	/*
- 	 * Map the kernel image (starting with PHYS_OFFSET).
 -- 
 2.30.2
 
