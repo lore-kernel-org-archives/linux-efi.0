@@ -2,35 +2,35 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C60BDC433FE
-	for <linux-efi@archiver.kernel.org>; Mon, 11 Apr 2022 09:51:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4AF45C4167B
+	for <linux-efi@archiver.kernel.org>; Mon, 11 Apr 2022 09:51:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344689AbiDKJyD (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 11 Apr 2022 05:54:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38408 "EHLO
+        id S1344716AbiDKJyE (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 11 Apr 2022 05:54:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38358 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344892AbiDKJwL (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 11 Apr 2022 05:52:11 -0400
-Received: from sin.source.kernel.org (sin.source.kernel.org [IPv6:2604:1380:40e1:4800::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0C12141322
-        for <linux-efi@vger.kernel.org>; Mon, 11 Apr 2022 02:49:48 -0700 (PDT)
+        with ESMTP id S1344903AbiDKJwR (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 11 Apr 2022 05:52:17 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BBF883F8A5
+        for <linux-efi@vger.kernel.org>; Mon, 11 Apr 2022 02:49:52 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by sin.source.kernel.org (Postfix) with ESMTPS id A6F9ECE16CA
-        for <linux-efi@vger.kernel.org>; Mon, 11 Apr 2022 09:49:46 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 30A23C385AD;
-        Mon, 11 Apr 2022 09:49:43 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 40D77B811CB
+        for <linux-efi@vger.kernel.org>; Mon, 11 Apr 2022 09:49:51 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id ED4DCC385A3;
+        Mon, 11 Apr 2022 09:49:47 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1649670585;
-        bh=XxI2AF5xD7GY4EBoXrk7Kfh7spE/Yd2cWMa8RrYU8ig=;
+        s=k20201202; t=1649670589;
+        bh=1CikZ2pxQ07LdCOKvbfGEUejKhtp/ShmFjaqIdNlSrM=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=OMfDo/w27ac+Zmx7u5TbY0enbL1V8QgtgQu+POfQSNfvCHJc8OVsdhHz0DzwwIigg
-         hSRAGiHKg12uKIyyoaPgjJGnnrEjTcfcEkhrq33KmexE08/m5AGIb8F04gP+ne4MjX
-         kWt3zJKKrJuFdjKs9Eg2UjKEGhixu6YjCX/sYokHJ4XCcWtT1XnyHCmdiq8aBiCEE9
-         +sDaejeZR3KGrYdFe//bZjHoWLQtGJx1jNBsP7MPuRatFsUTFlnnvfAy3TGxU9O2xQ
-         vdsUGlwIq2HwDH+krwa3r++rjznpOQAaoBx35E6FsQEPXg5l67lxBEw4d5XXJchTUu
-         J+drsu1wRy3lw==
+        b=askvxoerYFZVWC3aTFAuLQ8ozaFSpZLh3vN+hJg/ga9uduRUPmHaz0V8EQHS8XUQs
+         HsPlZ/uClJrxldIleFdaYLTO2bRkCwqHuU1Npz2xu83HTHaDH8PMZpqCm2g3m2CcKG
+         z3SOHA+ffWqY7ogEIBqTu2gn0pa7svdT+QSsF0be5oZuOesHUonM9CF2godsjprGaH
+         xvApoTmo4YM/kF3GcwqI7jjdjTSfAHVy1WEDlzwluHFHLZamAj9Z5RToVjZBKN8mwi
+         fzWd6zc2pfZWGvH1OB1HU0QkNDiSp5IalyPa2YnZKR1YYGRqA0PyK++nirev3SLQ1j
+         tWOLUmQbLabMg==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-arm-kernel@lists.infradead.org
 Cc:     linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -39,77 +39,103 @@ Cc:     linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         Kees Cook <keescook@chromium.org>,
         Catalin Marinas <catalin.marinas@arm.com>,
         Mark Brown <broonie@kernel.org>
-Subject: [PATCH v3 26/30] arm64: head: avoid cache invalidation when entering with the MMU on
-Date:   Mon, 11 Apr 2022 11:48:20 +0200
-Message-Id: <20220411094824.4176877-27-ardb@kernel.org>
+Subject: [PATCH v3 28/30] efi: libstub: pass image handle to handle_kernel_image()
+Date:   Mon, 11 Apr 2022 11:48:22 +0200
+Message-Id: <20220411094824.4176877-29-ardb@kernel.org>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20220411094824.4176877-1-ardb@kernel.org>
 References: <20220411094824.4176877-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1782; h=from:subject; bh=XxI2AF5xD7GY4EBoXrk7Kfh7spE/Yd2cWMa8RrYU8ig=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBiU/lgbxCxfVzMmOVUpp7oJCq0arLzzk6ZpS/U7ovI vsF/ammJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYlP5YAAKCRDDTyI5ktmPJMdhC/ 9scjqLQCdqy+vMsxBUhfgC/i7tIgDvfjYGcXusyIZIdzZAuTAsf0tbxBpZ+gXtq9jGISpEDXzp18n2 duSpaEYNBlRjxHwtk4oFpgC9Hmgs+hjy7w2j4N/uuT+XCFJH4zwNBb7x+mhPzUBOzZ+hPPrYut6+df O+337jwEvIS4SjnMvtFcZmUdZV1vTyykvpiRESyWjduFibIkfKMdCvyv5+8Xs9ScZAb2ChtsMNhJ4w 3N8vwSWSf4yekXBAKyIe29StocbdT2hy5AEVwHIZCJ/l3aeaj7yr1ah7nn1PRmegaNSSunbroQgVFX AtdBy+BvWUNjaUupfprEdoPPS3HMUTg9No8qYiF1e2aGEeViBs5NCY02ibhXyL0A49KXnasSJNJF4M g+1bpoDIY7HxlC9TthsgBcQJYS+8nfNdBkAa7OPrUUEsUk0Om5XyOYpGrGF43QQgOCqvh/Tg1SzYNj 6yEHv9uBgVvVN7NMr53s2bRmDHl9L3vRu+lLopHnCxLa0=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3709; h=from:subject; bh=1CikZ2pxQ07LdCOKvbfGEUejKhtp/ShmFjaqIdNlSrM=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBiU/ljZUSNQ0i79wjfMTAXX35/YMEC9rq9fAqQAUIR lU19mgKJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYlP5YwAKCRDDTyI5ktmPJIeDDA C4vlBkQeiUY0osUjwpoTqwmpaOdhVYUhcgz6ZEUUMF31/QgaOJRhjn69q4yzo9DNCDk9Zs/VyDV+Ws DJfMGC74IBHh1qSzJk8BmcLmpUQJSG6qSIol9727lvkhPgsb3ySym2N2C7exI0ZJfFOsNLhBRqQW19 5/DsiIrxrqk+cr8L90aoPRNkAF1fmylEbU2a/rAQy6iwOTTNpnmVUDnje3zmhe+BuN5MXrBUzd3/X+ AmCTUOyK9HrWLS27vYGz8HFBtZCA5dp4DX90iBJXWRL5OEm64KCkorJjc1DcQkGk3DD4kFZ/t9356I izppl16pPOVjUxKZBBHipSYaYljN2hJoMDNwRzM3gi/hTKuWzDk3qxwD6qUEkHP6o39ViClnBJEwjY crnu4NK45W+qj6HTcptrmP5ss/YvCPm9CxpyKgBiC8hjCMN5H29RNs/vHatJSwkQlbi1l/fIX09TGi S3XvVyzGveaF0V6AOWNs8UQ1tr5ZaebtuArBMfOc0lwQw=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-If we enter with the MMU on, there is no need for explicit cache
-invalidation for stores to memory, as they will be coherent with the
-caches.
-
-Let's take advantage of this, and create the ID map with the MMU still
-enabled if that is how we entered, and avoid any cache invalidation
-calls in that case.
+In a future patch, arm64's implementation of handle_kernel_image() will
+omit randomizing the placement of the kernel if the load address was
+chosen randomly by the loader. In order to do this, it needs to locate a
+protocol on the image handle, so pass it to handle_kernel_image().
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/arm64/kernel/head.S | 7 +++++--
- 1 file changed, 5 insertions(+), 2 deletions(-)
+ drivers/firmware/efi/libstub/arm32-stub.c | 3 ++-
+ drivers/firmware/efi/libstub/arm64-stub.c | 3 ++-
+ drivers/firmware/efi/libstub/efi-stub.c   | 2 +-
+ drivers/firmware/efi/libstub/efistub.h    | 3 ++-
+ drivers/firmware/efi/libstub/riscv-stub.c | 3 ++-
+ 5 files changed, 9 insertions(+), 5 deletions(-)
 
-diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
-index 1ff474701e99..4a05f4480207 100644
---- a/arch/arm64/kernel/head.S
-+++ b/arch/arm64/kernel/head.S
-@@ -92,9 +92,9 @@
- SYM_CODE_START(primary_entry)
- 	bl	record_mmu_state
- 	bl	preserve_boot_args
-+	bl	create_idmap
- 	bl	init_kernel_el			// w0=cpu_boot_mode
- 	mov	x20, x0
--	bl	create_idmap
+diff --git a/drivers/firmware/efi/libstub/arm32-stub.c b/drivers/firmware/efi/libstub/arm32-stub.c
+index 4b5b2403b3a0..0131e3aaa605 100644
+--- a/drivers/firmware/efi/libstub/arm32-stub.c
++++ b/drivers/firmware/efi/libstub/arm32-stub.c
+@@ -117,7 +117,8 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
+ 				 unsigned long *image_size,
+ 				 unsigned long *reserve_addr,
+ 				 unsigned long *reserve_size,
+-				 efi_loaded_image_t *image)
++				 efi_loaded_image_t *image,
++				 efi_handle_t image_handle)
+ {
+ 	const int slack = TEXT_OFFSET - 5 * PAGE_SIZE;
+ 	int alloc_size = MAX_UNCOMP_KERNEL_SIZE + EFI_PHYS_ALIGN;
+diff --git a/drivers/firmware/efi/libstub/arm64-stub.c b/drivers/firmware/efi/libstub/arm64-stub.c
+index 9cc556013d08..00c91a3807ea 100644
+--- a/drivers/firmware/efi/libstub/arm64-stub.c
++++ b/drivers/firmware/efi/libstub/arm64-stub.c
+@@ -83,7 +83,8 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
+ 				 unsigned long *image_size,
+ 				 unsigned long *reserve_addr,
+ 				 unsigned long *reserve_size,
+-				 efi_loaded_image_t *image)
++				 efi_loaded_image_t *image,
++				 efi_handle_t image_handle)
+ {
+ 	efi_status_t status;
+ 	unsigned long kernel_size, kernel_memsize = 0;
+diff --git a/drivers/firmware/efi/libstub/efi-stub.c b/drivers/firmware/efi/libstub/efi-stub.c
+index da93864d7abc..f515394cce6e 100644
+--- a/drivers/firmware/efi/libstub/efi-stub.c
++++ b/drivers/firmware/efi/libstub/efi-stub.c
+@@ -198,7 +198,7 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
+ 	status = handle_kernel_image(&image_addr, &image_size,
+ 				     &reserve_addr,
+ 				     &reserve_size,
+-				     image);
++				     image, handle);
+ 	if (status != EFI_SUCCESS) {
+ 		efi_err("Failed to relocate kernel\n");
+ 		goto fail_free_screeninfo;
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index edb77b0621ea..c4f4f078087d 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -865,7 +865,8 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
+ 				 unsigned long *image_size,
+ 				 unsigned long *reserve_addr,
+ 				 unsigned long *reserve_size,
+-				 efi_loaded_image_t *image);
++				 efi_loaded_image_t *image,
++				 efi_handle_t image_handle);
  
- 	/*
- 	 * The following calls CPU setup code, see arch/arm64/mm/proc.S for
-@@ -127,11 +127,13 @@ SYM_CODE_START_LOCAL(preserve_boot_args)
- 	stp	x21, x1, [x0]			// x0 .. x3 at kernel entry
- 	stp	x2, x3, [x0, #16]
- 
-+	cbnz	x22, 0f				// skip cache invalidation if MMU is on
- 	dmb	sy				// needed before dc ivac with
- 						// MMU off
- 
- 	add	x1, x0, #0x20			// 4 x 8 bytes
- 	b	dcache_inval_poc		// tail call
-+0:	ret
- SYM_CODE_END(preserve_boot_args)
- 
- SYM_FUNC_START_LOCAL(clear_page_tables)
-@@ -366,12 +368,13 @@ SYM_FUNC_START_LOCAL(create_idmap)
- 	 * accesses (MMU disabled), invalidate those tables again to
- 	 * remove any speculatively loaded cache lines.
- 	 */
-+	cbnz	x22, 0f				// skip cache invalidation if MMU is on
- 	dmb	sy
- 
- 	adrp	x0, init_idmap_pg_dir
- 	adrp	x1, init_idmap_pg_end
- 	bl	dcache_inval_poc
--	ret	x28
-+0:	ret	x28
- SYM_FUNC_END(create_idmap)
- 
- SYM_FUNC_START_LOCAL(create_kernel_mapping)
+ asmlinkage void __noreturn efi_enter_kernel(unsigned long entrypoint,
+ 					    unsigned long fdt_addr,
+diff --git a/drivers/firmware/efi/libstub/riscv-stub.c b/drivers/firmware/efi/libstub/riscv-stub.c
+index 9c460843442f..eec043873354 100644
+--- a/drivers/firmware/efi/libstub/riscv-stub.c
++++ b/drivers/firmware/efi/libstub/riscv-stub.c
+@@ -80,7 +80,8 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
+ 				 unsigned long *image_size,
+ 				 unsigned long *reserve_addr,
+ 				 unsigned long *reserve_size,
+-				 efi_loaded_image_t *image)
++				 efi_loaded_image_t *image,
++				 efi_handle_t image_handle)
+ {
+ 	unsigned long kernel_size = 0;
+ 	unsigned long preferred_addr;
 -- 
 2.30.2
 
