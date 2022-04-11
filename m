@@ -2,120 +2,121 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5353EC433FE
-	for <linux-efi@archiver.kernel.org>; Mon, 11 Apr 2022 09:52:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E733CC433EF
+	for <linux-efi@archiver.kernel.org>; Mon, 11 Apr 2022 10:07:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344727AbiDKJyb (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 11 Apr 2022 05:54:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38856 "EHLO
+        id S1344188AbiDKKJ5 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 11 Apr 2022 06:09:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41042 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344900AbiDKJwR (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 11 Apr 2022 05:52:17 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4C0E040E79
-        for <linux-efi@vger.kernel.org>; Mon, 11 Apr 2022 02:49:53 -0700 (PDT)
+        with ESMTP id S243588AbiDKKJ4 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 11 Apr 2022 06:09:56 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C33D620BD2;
+        Mon, 11 Apr 2022 03:07:42 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id D6656611DF
-        for <linux-efi@vger.kernel.org>; Mon, 11 Apr 2022 09:49:52 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 57BC0C385AF;
-        Mon, 11 Apr 2022 09:49:50 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 859AEB81195;
+        Mon, 11 Apr 2022 10:07:41 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id AD17FC385A4;
+        Mon, 11 Apr 2022 10:07:33 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1649670592;
-        bh=nY5MgIoq4fA9USqK31dnu7E3Bd7d2UqYghLsLSuHjOs=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=U5tlWgFXnRecHK9IysL2hLGfp66fZjtr3JhUYjQkqGQAKEVPTy0jcJnza67eAKEN7
-         jmFLUtyz2CEA0NN+qP1rj0FYZvFBbe6MPAFpTJe1pDzFf0GXehw/aUyEKH3Weo8aEv
-         Ag0aB5iKYSJKcpPTUBijw9L1ECPXDCOnLWhOYYLR39ww8RC5ScoATsWKZeIuxpZMEt
-         1Awg4o1M1HqIpoDoPAouphp/Ef2l87GVyvwEs3gs6dUIw/MpZvAZ1R0IpryFq1vy9j
-         CwLdrO+qyAdRf3f5VKhkM5vczbZ3Cj/FTKBmoSizKTsSKQwYDx638AnamDkBtdlTWi
-         3OlfcwuoWFycw==
-From:   Ard Biesheuvel <ardb@kernel.org>
-To:     linux-arm-kernel@lists.infradead.org
-Cc:     linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
-        Marc Zyngier <maz@kernel.org>, Will Deacon <will@kernel.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Kees Cook <keescook@chromium.org>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Mark Brown <broonie@kernel.org>
-Subject: [PATCH v3 29/30] efi/arm64: libstub: run image in place if randomized by the loader
-Date:   Mon, 11 Apr 2022 11:48:23 +0200
-Message-Id: <20220411094824.4176877-30-ardb@kernel.org>
-X-Mailer: git-send-email 2.30.2
-In-Reply-To: <20220411094824.4176877-1-ardb@kernel.org>
-References: <20220411094824.4176877-1-ardb@kernel.org>
+        s=k20201202; t=1649671660;
+        bh=7d4Fz2YovE5nbd9DXkYQpMdwcvwOp0v8/bguDOqmFSY=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=BFtbQd/iq+rlCNPGaxfC3Ir2HvIQQgsq/Vp2+3JtHAGSDwgjp8Xd5w2caZTe8PAXA
+         eHsQqWA1+krPxZyVFaVbYdrqMp8DMvGob+k/4ZGEKf29Ahye/B2GdlV92VVfWYnr8m
+         l0ULaiEvF5/6bu/SR0XQZK85N7o0i8G8+zOPUcz2ilXYjPcdgecr+7alIM6T1xg4PH
+         zYWXQRqH1KSvIhFvCdaJkxSgZKH7wHaLOTRaePBuQBkjmpSc8p0VPiM5Bh9Ds4ELGd
+         g8uGUUGlAY7+59ndecOzR57Fv6XdUEPFsDhoy6VyqJ301LTYFhzVY8yH9yzSysRmHQ
+         GiefvKC1Z25dw==
+Date:   Mon, 11 Apr 2022 13:07:29 +0300
+From:   Mike Rapoport <rppt@kernel.org>
+To:     Dave Hansen <dave.hansen@intel.com>
+Cc:     "Kirill A. Shutemov" <kirill@shutemov.name>,
+        "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
+        Borislav Petkov <bp@alien8.de>,
+        Andy Lutomirski <luto@kernel.org>,
+        Sean Christopherson <seanjc@google.com>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Joerg Roedel <jroedel@suse.de>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Andi Kleen <ak@linux.intel.com>,
+        Kuppuswamy Sathyanarayanan 
+        <sathyanarayanan.kuppuswamy@linux.intel.com>,
+        David Rientjes <rientjes@google.com>,
+        Vlastimil Babka <vbabka@suse.cz>,
+        Tom Lendacky <thomas.lendacky@amd.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Paolo Bonzini <pbonzini@redhat.com>,
+        Ingo Molnar <mingo@redhat.com>,
+        Varad Gautam <varad.gautam@suse.com>,
+        Dario Faggioli <dfaggioli@suse.com>,
+        Brijesh Singh <brijesh.singh@amd.com>,
+        David Hildenbrand <david@redhat.com>, x86@kernel.org,
+        linux-mm@kvack.org, linux-coco@lists.linux.dev,
+        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Mike Rapoport <rppt@linux.ibm.com>
+Subject: Re: [PATCHv4 1/8] mm: Add support for unaccepted memory
+Message-ID: <YlP94T1ACwxKTgep@kernel.org>
+References: <20220405234343.74045-1-kirill.shutemov@linux.intel.com>
+ <20220405234343.74045-2-kirill.shutemov@linux.intel.com>
+ <767c2100-c171-1fd3-6a92-0af2e4bf3067@intel.com>
+ <20220409155423.iv2arckmvavvpegt@box.shutemov.name>
+ <6c976344-fdd6-95cd-2cb0-b0e817bf0392@intel.com>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2987; h=from:subject; bh=nY5MgIoq4fA9USqK31dnu7E3Bd7d2UqYghLsLSuHjOs=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBiU/llzSWWWLuFC4/Pg5EMCFfx8VQCtcysoeuYuZ+r VfZf23yJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYlP5ZQAKCRDDTyI5ktmPJBWTC/ 9gJy6GiRy8IrgDMdqxEgGLv0O/5AYyxtBfyTH4jNdznL7YmRWRRb78h+Of7Jx9vaDMGa1hGgLYLBka NTYTVMSvpd5oyt15T0wdchMUBdn5492PQA6Pv4yT6qZB5KiqEZaBoWTsttFbDBKcr9YUfneMuTsY25 hD2EVQ4mi0ZKdJReP69LYy5jYjkQXItHMhS7wCTOjUun47NRebqBus3rAKfQ4RnmQ0lwWERf2RY+4A ACYHM8leENh5hhlh62OaNHLYdXvP9GVBuoZlyXPEaeybUqyBcX+tCodudAV6ID21bGmICXHGOTDn1/ ssi8jWbw1kqtpr5r08iUciggaUXh4a6XIJnxPUKjqES8i9SikzAB6S++9qw8QkjL+1Qn76In12zGIr rtnCssk6QdtyByBvgDAFQ1Yc6qU8s47WkN5Z47sZz4tdx1r/KDln7019CcJJMU4wttsds0Fs4VLI+M LPbG0csnzg7k0onYzsSj1lRf8IpsbUTUPSYVsuFNiD5iY=
-X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <6c976344-fdd6-95cd-2cb0-b0e817bf0392@intel.com>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-If the loader has already placed the EFI kernel image randomly in
-physical memory, and indicates having done so by installing the 'fixed
-placement' protocol onto the image handle, don't bother randomizing the
-placement again in the EFI stub.
+On Sun, Apr 10, 2022 at 11:38:08PM -0700, Dave Hansen wrote:
+> On 4/9/22 08:54, Kirill A. Shutemov wrote:
+> > On Fri, Apr 08, 2022 at 11:55:43AM -0700, Dave Hansen wrote:
+> 
+> >>>  	if (fpi_flags & FPI_TO_TAIL)
+> >>>  		to_tail = true;
+> >>>  	else if (is_shuffle_order(order))
+> >>> @@ -1149,7 +1192,8 @@ static inline void __free_one_page(struct page *page,
+> >>>  static inline bool page_expected_state(struct page *page,
+> >>>  					unsigned long check_flags)
+> >>>  {
+> >>> -	if (unlikely(atomic_read(&page->_mapcount) != -1))
+> >>> +	if (unlikely(atomic_read(&page->_mapcount) != -1) &&
+> >>> +	    !PageUnaccepted(page))
+> >>>  		return false;
+> >>
+> >> That probably deserves a comment, and maybe its own if() statement.
+> > 
+> > Own if does not work. PageUnaccepted() is encoded in _mapcount.
+> > 
+> > What about this:
+> > 
+> > 	/*
+> > 	 * page->_mapcount is expected to be -1.
+> > 	 *
+> > 	 * There is an exception for PageUnaccepted(). The page type can be set
+> > 	 * for pages on free list. Page types are encoded in _mapcount.
+> > 	 *
+> > 	 * PageUnaccepted() will get cleared in post_alloc_hook().
+> > 	 */
+> > 	if (unlikely((atomic_read(&page->_mapcount) | PG_unaccepted) != -1))
 
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
----
- drivers/firmware/efi/libstub/arm64-stub.c | 12 +++++++++---
- include/linux/efi.h                       | 11 +++++++++++
- 2 files changed, 20 insertions(+), 3 deletions(-)
+Maybe I'm missing something, but isn't this true for any PageType?
 
-diff --git a/drivers/firmware/efi/libstub/arm64-stub.c b/drivers/firmware/efi/libstub/arm64-stub.c
-index 00c91a3807ea..577173ee1f83 100644
---- a/drivers/firmware/efi/libstub/arm64-stub.c
-+++ b/drivers/firmware/efi/libstub/arm64-stub.c
-@@ -101,7 +101,15 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
- 	u64 min_kimg_align = efi_nokaslr ? MIN_KIMG_ALIGN : EFI_KIMG_ALIGN;
- 
- 	if (IS_ENABLED(CONFIG_RANDOMIZE_BASE)) {
--		if (!efi_nokaslr) {
-+		efi_guid_t li_fixed_proto = LINUX_EFI_LOADED_IMAGE_FIXED_GUID;
-+		void *p;
-+
-+		if (efi_nokaslr) {
-+			efi_info("KASLR disabled on kernel command line\n");
-+		} else if (efi_bs_call(handle_protocol, image_handle,
-+				       &li_fixed_proto, &p) == EFI_SUCCESS) {
-+			efi_info("Image placement fixed by loader\n");
-+		} else {
- 			status = efi_get_random_bytes(sizeof(phys_seed),
- 						      (u8 *)&phys_seed);
- 			if (status == EFI_NOT_FOUND) {
-@@ -112,8 +120,6 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
- 					status);
- 				efi_nokaslr = true;
- 			}
--		} else {
--			efi_info("KASLR disabled on kernel command line\n");
- 		}
- 	}
- 
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index ccd4d3f91c98..d7567006e151 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -406,6 +406,17 @@ void efi_native_runtime_setup(void);
- #define LINUX_EFI_INITRD_MEDIA_GUID		EFI_GUID(0x5568e427, 0x68fc, 0x4f3d,  0xac, 0x74, 0xca, 0x55, 0x52, 0x31, 0xcc, 0x68)
- #define LINUX_EFI_MOK_VARIABLE_TABLE_GUID	EFI_GUID(0xc451ed2b, 0x9694, 0x45d3,  0xba, 0xba, 0xed, 0x9f, 0x89, 0x88, 0xa3, 0x89)
- 
-+/*
-+ * This GUID may be installed onto the kernel image's handle as a NULL protocol
-+ * to signal to the stub that the placement of the image should be respected,
-+ * and moving the image in physical memory is undesirable. To ensure
-+ * compatibility with 64k pages kernels with virtually mapped stacks, and to
-+ * avoid defeating physical randomization, this protocol should only be
-+ * installed if the image was placed at a randomized 128k aligned address in
-+ * memory.
-+ */
-+#define LINUX_EFI_LOADED_IMAGE_FIXED_GUID	EFI_GUID(0xf5a37b6d, 0x3344, 0x42a5,  0xb6, 0xbb, 0x97, 0x86, 0x48, 0xc1, 0x89, 0x0a)
-+
- /* OEM GUIDs */
- #define DELLEMC_EFI_RCI2_TABLE_GUID		EFI_GUID(0x2d9f28a2, 0xa886, 0x456a,  0x97, 0xa8, 0xf1, 0x1e, 0xf2, 0x4f, 0xf4, 0x55)
- #define AMD_SEV_MEM_ENCRYPT_GUID		EFI_GUID(0x0cf29b71, 0x9e51, 0x433a,  0xa3, 0xb7, 0x81, 0xf3, 0xab, 0x16, 0xb8, 0x75)
+> > 		return false;
+> > 
+> > ?
+> 
+> That's better.  But, aren't the PG_* names usually reserved for real
+> page->flags bits?  That naming might be part of my confusion.
+
+We use them for PageType as well like PG_buddy, PG_offline, PG_Table.
+
 -- 
-2.30.2
-
+Sincerely yours,
+Mike.
