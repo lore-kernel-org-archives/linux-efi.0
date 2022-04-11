@@ -2,35 +2,35 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CEAACC433F5
-	for <linux-efi@archiver.kernel.org>; Mon, 11 Apr 2022 09:51:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0CABBC433EF
+	for <linux-efi@archiver.kernel.org>; Mon, 11 Apr 2022 09:51:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345161AbiDKJx4 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        id S1344875AbiDKJx4 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
         Mon, 11 Apr 2022 05:53:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38746 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38946 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344875AbiDKJwH (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 11 Apr 2022 05:52:07 -0400
+        with ESMTP id S1344839AbiDKJwI (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 11 Apr 2022 05:52:08 -0400
 Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7A10EB1FB
-        for <linux-efi@vger.kernel.org>; Mon, 11 Apr 2022 02:49:35 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D6AE04162A
+        for <linux-efi@vger.kernel.org>; Mon, 11 Apr 2022 02:49:40 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 85592B811AF
-        for <linux-efi@vger.kernel.org>; Mon, 11 Apr 2022 09:49:34 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3DBF8C385A4;
-        Mon, 11 Apr 2022 09:49:31 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 2887EB80F97
+        for <linux-efi@vger.kernel.org>; Mon, 11 Apr 2022 09:49:39 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 099B8C385AD;
+        Mon, 11 Apr 2022 09:49:35 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1649670573;
-        bh=dfvrz+2dbg6t5hlmtDi/5B3nL5WpnhfCyf6Bzny7Qlk=;
+        s=k20201202; t=1649670578;
+        bh=YtSuSXiDuWch666ErRH9dPdBAf8I6jd+Df9mu/gOaZw=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=osW2+eO5J1Za7vl701HD9MyfJota6a3mPqz2/3Riqb/wpEcR5erdEua8IhdtTlddw
-         r5AcnL8jdDAcitjF4iVHaUYu1z7MtZeIjpkWs8GfNdKZPGJa9xqKaKfJd1ig3W/L7c
-         o95vZPqA5T8VdVbD1MV1aYXj+AAUdxXmpVw/DnuITK92wONuhPXPvS+uUBjqw3v4Of
-         CJ2rYsTDI7qAJsccXs2LbRLNM0qt/3NUHcBREc9svuzdkpUP7EyvxdXjuV50QgQNId
-         IqRTh1Rw/ftF49MmT7KB4TZNGjR7yK4MkKPVKbLzEpdv8CZv2wquE5j4Ss5csw2yF5
-         NPD1nsWDYzGyg==
+        b=DzLw3aWBy8WmRMoMjWoqIcOelOmc7L1YCVZO87zpXRuv7AQfJhAoKh9XgmWGLXbQg
+         1s0Rxku6fCCVr1cfEvyngjAwWXap3S5+R25Xow4Lr+s5VZjvURR1ODfMrRL+iC3QAT
+         tXRDd67rvKibOmOkwksJ2IpCVDMw0/cR98e+KiXCptX3ON4UwIdzo+K7defpnD351c
+         SK9PO65fFW9VN6tKyEUnaA8xO9qwEfJcnaYQwqNfk4A6+USAdnZTAji07U6Wsgqj0l
+         AKQ0/bJVAKkWdfPG1Rs506goNeoBKp67y8Y6iuIQxLVt4S+6M+d2DGASlYVYRyWDnz
+         yYKHIphhJH8OA==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-arm-kernel@lists.infradead.org
 Cc:     linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -39,153 +39,167 @@ Cc:     linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         Kees Cook <keescook@chromium.org>,
         Catalin Marinas <catalin.marinas@arm.com>,
         Mark Brown <broonie@kernel.org>
-Subject: [PATCH v3 21/30] arm64: head: remap the kernel text/inittext region read-only
-Date:   Mon, 11 Apr 2022 11:48:15 +0200
-Message-Id: <20220411094824.4176877-22-ardb@kernel.org>
+Subject: [PATCH v3 23/30] arm64: mm: move ro_after_init section into the data segment
+Date:   Mon, 11 Apr 2022 11:48:17 +0200
+Message-Id: <20220411094824.4176877-24-ardb@kernel.org>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20220411094824.4176877-1-ardb@kernel.org>
 References: <20220411094824.4176877-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=4347; h=from:subject; bh=dfvrz+2dbg6t5hlmtDi/5B3nL5WpnhfCyf6Bzny7Qlk=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBiU/lYf9kmlG7qsfci8zLXeSNfoLU11+RwfIKrWzAl fh8M6gmJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYlP5WAAKCRDDTyI5ktmPJO2YC/ 9410Y/X6yaWlLqu96vn1eKF4S0xb9JWjwCFezuOuj2VHsnVAkYQdNcBQeAUfQi0Olz4YcI8Q4Zl8Y2 nlEHSCXEVuI9NpG/bXJiUEw41xSCRwQ6VkgQ1lpEm8iP9ztJpwDU8EPhVi+XSqOIAN0jKiBDVmWRM5 VdiHdSh4U6Tj720Z7wLxJ/A0PyR/8J7fZnzWcMl/dK+/U+BAHvGzTuj/UC3DpndgMiy4jiiLmJ7XXK s2SJiFmCnfp3Dm8uyzG1lGYdAjxvsPi12dGr0B2cchyUTcY7P4NVNm2C9UzhmV7mFeA0AVVHesuhAW AyYpjKgmKwcxTY+FRMjZ6QdEDmLvpgkEEGJzUpTLYI38kH4oPzRrjBKXD27CgHk6sDKR81KY0P+lVg ogKIqgUkcDt2HDQt8UAroDuSKuvYdgp+BIB0TFf+2UCXjTJgIE31CUQ1CYP2Q/Uyc+NlaLlRxs6yPf re/nVjU2dvhkOdl2ENIOODo1u+VBghH5DdjrIl+qZ6rGc=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=5001; h=from:subject; bh=YtSuSXiDuWch666ErRH9dPdBAf8I6jd+Df9mu/gOaZw=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBiU/lbsbTLg/fLmyhtxio90Ih3mCllrNJrjvzr0JA3 YnjysQGJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYlP5WwAKCRDDTyI5ktmPJO44C/ 99Mc64RsrOpbZiSXzUz24edLR0Dx3KSU/rQpBTVvLaCGh4xktmqYkCltVxTlYkDcb8ncSYOBvgN/Wu Zviqaxhfm5iWgQHVwcL8b0cVieNBTLgud6/hPQWcHPwfnW+Cny4oCnpbwQCj4iayX1wI+xG7tFgoab jHLDtbnBxtKRy0uKNfuFlKHKmOFxQDReXQQlz2FzRlw5/x2gcxddiouIAMpBvvWML0Zwlkp1aTPkLG NUw3u5aOFA/BmAEG+WjT3ZjymCSpRMuBjB1eBFN5EDs5P0vBQAp+OSzzmwpl3vQBQvOSVSeuAI2epo SJZ1fyZEfWXMH2eAGUvjVyCs7umdHxmYSe7HpILabyL/WpvpTm9W1XnREeHcKg1Vz5Eii18TgTycNG 1//gYVgoXlQrsYUUo/FeBRhXTdpZF27/HCh43x/sgPB6E0TtDKa7hE5zeCd+Cs5ms1UuDgSjDVZJSp KJ04aIiU+zC3rm99GbxEtHoc3VfKxfrOKGRMQt0wH46l8=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-In order to be able to run with WXN from boot (which could potentially
-be under a hypervisor regime that mandates this), update the temporary
-kernel page tables with read-only attributes for the text regions before
-attempting to execute from them.
+Currently, the ro_after_init sections sits right in the middle of the
+text/rodata/inittext segment, making it difficult to map any of those
+non-writable during early boot. So instead, move it to the start of
+.data, and update the init sequences so that the section is remapped
+read-only once startup completes.
 
-This is rather straight-forward for 16k and 64k granule configurations,
-as the split between executable and writable regions is guaranteed to be
-aligned to the granule used for the early kernel page tables. For 4k, it
-involves installing a single table entry and populating it accordingly.
+Note that this moves the entire HYP data section into .data as well -
+this likely needs to remain as a single block for now, but could perhaps
+split into a .rodata and .data..ro_after_init section later.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/arm64/kernel/head.S        | 71 +++++++++++++++++++-
- arch/arm64/kernel/vmlinux.lds.S |  2 +-
- 2 files changed, 69 insertions(+), 4 deletions(-)
+ arch/arm64/kernel/vmlinux.lds.S | 41 ++++++++++++--------
+ arch/arm64/mm/mmu.c             | 29 ++++++++------
+ 2 files changed, 42 insertions(+), 28 deletions(-)
 
-diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
-index 87498e414725..54886c4b6347 100644
---- a/arch/arm64/kernel/head.S
-+++ b/arch/arm64/kernel/head.S
-@@ -86,7 +86,7 @@
- 	 *  x20        primary_entry() .. __primary_switch()    CPU boot mode
- 	 *  x21        primary_entry() .. start_kernel()        FDT pointer passed at boot in x0
- 	 *  x23        __primary_switch() .. relocate_kernel()  physical misalignment/KASLR offset
--	 *  x28        create_idmap()                           callee preserved temp register
-+	 *  x28        create_idmap(), remap_kernel_text()      callee preserved temp register
- 	 */
- SYM_CODE_START(primary_entry)
- 	bl	preserve_boot_args
-@@ -372,10 +372,62 @@ SYM_FUNC_START_LOCAL(create_kernel_mapping)
- 	mov	x7, SWAPPER_RW_MMUFLAGS
- 
- 	map_memory x0, x1, x5, x6, x7, x3, (VA_BITS - PGDIR_SHIFT), x10, x11, x12, x13, x14
--
- 	ret
- SYM_FUNC_END(create_kernel_mapping)
- 
-+SYM_FUNC_START_LOCAL(remap_kernel_text)
-+	mov	x28, lr
-+
-+	ldr	x1, =_text
-+	mov	x2, x1
-+	ldr	x3, =__initdata_begin - 1
-+	adrp	x4, _text
-+	bic	x4, x4, #SWAPPER_BLOCK_SIZE - 1
-+	mov	x5, SWAPPER_RX_MMUFLAGS
-+	mov	x6, #SWAPPER_BLOCK_SHIFT
-+	bl	remap_region
-+
-+#if SWAPPER_BLOCK_SHIFT > PAGE_SHIFT
-+	/*
-+	 * If the boundary between inittext and initdata happens to be aligned
-+	 * sufficiently, we are done here. Otherwise, we have to replace its block
-+	 * entry with a table entry, and populate the lower level table accordingly.
-+	 */
-+	ldr	x3, =__initdata_begin
-+	tst	x3, #SWAPPER_BLOCK_SIZE - 1
-+	b.eq	0f
-+
-+	/* First, create a table mapping to replace the block mapping */
-+	ldr	x1, =_text
-+	bic	x2, x3, #SWAPPER_BLOCK_SIZE - 1
-+	adrp	x4, init_pg_end - PAGE_SIZE
-+	mov	x5, #PMD_TYPE_TABLE
-+	mov	x6, #SWAPPER_BLOCK_SHIFT
-+	bl	remap_region
-+
-+	/* Apply executable permissions to the first subregion */
-+	adrp	x0, init_pg_end - PAGE_SIZE
-+	ldr	x3, =__initdata_begin - 1
-+	bic	x1, x3, #SWAPPER_BLOCK_SIZE - 1
-+	mov	x2, x1
-+	adrp	x4, __initdata_begin
-+	bic	x4, x4, #SWAPPER_BLOCK_SIZE - 1
-+	mov	x5, SWAPPER_RX_MMUFLAGS | PTE_TYPE_PAGE
-+	mov	x6, #PAGE_SHIFT
-+	bl	remap_region
-+
-+	/* Apply writable permissions to the second subregion */
-+	ldr	x2, =__initdata_begin
-+	bic	x1, x2, #SWAPPER_BLOCK_SIZE - 1
-+	orr	x3, x1, #SWAPPER_BLOCK_SIZE - 1
-+	adrp	x4, __initdata_begin
-+	mov	x5, SWAPPER_RW_MMUFLAGS | PTE_TYPE_PAGE
-+	mov	x6, #PAGE_SHIFT
-+	bl	remap_region
-+#endif
-+0:	ret	x28
-+SYM_FUNC_END(remap_kernel_text)
-+
- 	/*
- 	 * Initialize CPU registers with task-specific and cpu-specific context.
- 	 *
-@@ -805,12 +857,25 @@ SYM_FUNC_START_LOCAL(__primary_switch)
- #endif
- 	bl	clear_page_tables
- 	bl	create_kernel_mapping
-+#ifdef CONFIG_RELOCATABLE
-+	mov	x29, x0			// preserve returned page table pointer
- 
- 	adrp	x1, init_pg_dir
- 	load_ttbr1 x1, x2
--#ifdef CONFIG_RELOCATABLE
- 	bl	__relocate_kernel
-+	adrp	x1, reserved_pg_dir
-+	load_ttbr1 x1, x2
-+
-+	tlbi	vmalle1
-+	dsb	nsh
-+	isb
-+
-+	mov	x0, x29			// pass page table pointer to remap_kernel_text
- #endif
-+	bl	remap_kernel_text
-+	adrp	x1, init_pg_dir
-+	load_ttbr1 x1, x2
-+
- 	ldr	x8, =__primary_switched
- 	adrp	x0, __PHYS_OFFSET
- 	br	x8
 diff --git a/arch/arm64/kernel/vmlinux.lds.S b/arch/arm64/kernel/vmlinux.lds.S
-index 21ca72e7ad22..cb4821c411f4 100644
+index cb4821c411f4..5b465295335a 100644
 --- a/arch/arm64/kernel/vmlinux.lds.S
 +++ b/arch/arm64/kernel/vmlinux.lds.S
-@@ -298,7 +298,7 @@ SECTIONS
+@@ -59,6 +59,7 @@
  
- 	. = ALIGN(PAGE_SIZE);
- 	init_pg_dir = .;
--	. += INIT_DIR_SIZE;
-+	. += INIT_DIR_SIZE + PAGE_SIZE;
- 	init_pg_end = .;
+ #define RO_EXCEPTION_TABLE_ALIGN	4
+ #define RUNTIME_DISCARD_EXIT
++#define RO_AFTER_INIT_DATA
  
+ #include <asm-generic/vmlinux.lds.h>
+ #include <asm/cache.h>
+@@ -192,22 +193,6 @@ SECTIONS
+ 	/* everything from this point to __init_begin will be marked RO NX */
+ 	RO_DATA(PAGE_SIZE)
+ 
+-	HYPERVISOR_DATA_SECTIONS
+-
+-	idmap_pg_dir = .;
+-	. += PAGE_SIZE;
+-
+-#ifdef CONFIG_UNMAP_KERNEL_AT_EL0
+-	tramp_pg_dir = .;
+-	. += PAGE_SIZE;
+-#endif
+-
+-	reserved_pg_dir = .;
+-	. += PAGE_SIZE;
+-
+-	swapper_pg_dir = .;
+-	. += PAGE_SIZE;
+-
  	. = ALIGN(SEGMENT_ALIGN);
+ 	__init_begin = .;
+ 	__inittext_begin = .;
+@@ -270,6 +255,30 @@ SECTIONS
+ 
+ 	_data = .;
+ 	_sdata = .;
++
++	__start_ro_after_init = .;
++	idmap_pg_dir = .;
++	. += PAGE_SIZE;
++
++#ifdef CONFIG_UNMAP_KERNEL_AT_EL0
++	tramp_pg_dir = .;
++	. += PAGE_SIZE;
++#endif
++	reserved_pg_dir = .;
++	. += PAGE_SIZE;
++
++	swapper_pg_dir = .;
++	. += PAGE_SIZE;
++
++	HYPERVISOR_DATA_SECTIONS
++
++	.data.ro_after_init : {
++		*(.data..ro_after_init)
++		JUMP_TABLE_DATA
++		. = ALIGN(SEGMENT_ALIGN);
++		__end_ro_after_init = .;
++	}
++
+ 	RW_DATA(L1_CACHE_BYTES, PAGE_SIZE, THREAD_ALIGN)
+ 
+ 	/*
+diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
+index e7145f0281be..ef1f01da387d 100644
+--- a/arch/arm64/mm/mmu.c
++++ b/arch/arm64/mm/mmu.c
+@@ -488,11 +488,17 @@ static void __init __map_memblock(pgd_t *pgdp, phys_addr_t start,
+ void __init mark_linear_text_alias_ro(void)
+ {
+ 	/*
+-	 * Remove the write permissions from the linear alias of .text/.rodata
++	 * Remove the write permissions from the linear alias of .text/.rodata/ro_after_init
+ 	 */
+ 	update_mapping_prot(__pa_symbol(_stext), (unsigned long)lm_alias(_stext),
+ 			    (unsigned long)__init_begin - (unsigned long)_stext,
+ 			    PAGE_KERNEL_RO);
++
++	update_mapping_prot(__pa_symbol(__start_ro_after_init),
++			    (unsigned long)lm_alias(__start_ro_after_init),
++			    (unsigned long)__end_ro_after_init -
++			    (unsigned long)__start_ro_after_init,
++			    PAGE_KERNEL_RO);
+ }
+ 
+ static bool crash_mem_map __initdata;
+@@ -601,12 +607,10 @@ void mark_rodata_ro(void)
+ {
+ 	unsigned long section_size;
+ 
+-	/*
+-	 * mark .rodata as read only. Use __init_begin rather than __end_rodata
+-	 * to cover NOTES and EXCEPTION_TABLE.
+-	 */
+-	section_size = (unsigned long)__init_begin - (unsigned long)__start_rodata;
+-	update_mapping_prot(__pa_symbol(__start_rodata), (unsigned long)__start_rodata,
++	section_size = (unsigned long)__end_ro_after_init -
++		       (unsigned long)__start_ro_after_init;
++	update_mapping_prot(__pa_symbol(__start_ro_after_init),
++			    (unsigned long)__start_ro_after_init,
+ 			    section_size, PAGE_KERNEL_RO);
+ 
+ 	debug_checkwx();
+@@ -730,18 +734,19 @@ static void __init map_kernel(pgd_t *pgdp)
+ 		text_prot = __pgprot_modify(text_prot, PTE_GP, PTE_GP);
+ 
+ 	/*
+-	 * Only rodata will be remapped with different permissions later on,
+-	 * all other segments are allowed to use contiguous mappings.
++	 * Only data will be partially remapped with different permissions
++	 * later on, all other segments are allowed to use contiguous mappings.
+ 	 */
+ 	map_kernel_segment(pgdp, _stext, _etext, text_prot, &vmlinux_text, 0,
+ 			   VM_NO_GUARD);
+-	map_kernel_segment(pgdp, __start_rodata, __inittext_begin, PAGE_KERNEL,
+-			   &vmlinux_rodata, NO_CONT_MAPPINGS, VM_NO_GUARD);
++	map_kernel_segment(pgdp, __start_rodata, __inittext_begin, PAGE_KERNEL_RO,
++			   &vmlinux_rodata, 0, VM_NO_GUARD);
+ 	map_kernel_segment(pgdp, __inittext_begin, __inittext_end, text_prot,
+ 			   &vmlinux_inittext, 0, VM_NO_GUARD);
+ 	map_kernel_segment(pgdp, __initdata_begin, __initdata_end, PAGE_KERNEL,
+ 			   &vmlinux_initdata, 0, VM_NO_GUARD);
+-	map_kernel_segment(pgdp, _data, _end, PAGE_KERNEL, &vmlinux_data, 0, 0);
++	map_kernel_segment(pgdp, _data, _end, PAGE_KERNEL, &vmlinux_data,
++			   NO_CONT_MAPPINGS | NO_BLOCK_MAPPINGS, 0);
+ 
+ 	if (!READ_ONCE(pgd_val(*pgd_offset_pgd(pgdp, FIXADDR_START)))) {
+ 		/*
 -- 
 2.30.2
 
