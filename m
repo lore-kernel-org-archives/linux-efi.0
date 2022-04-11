@@ -2,35 +2,35 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D5FFC43217
-	for <linux-efi@archiver.kernel.org>; Mon, 11 Apr 2022 09:50:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BB513C4332F
+	for <linux-efi@archiver.kernel.org>; Mon, 11 Apr 2022 09:50:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344776AbiDKJwZ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 11 Apr 2022 05:52:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38702 "EHLO
+        id S1344709AbiDKJw1 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 11 Apr 2022 05:52:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38778 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344731AbiDKJv5 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 11 Apr 2022 05:51:57 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BFDA34132A
-        for <linux-efi@vger.kernel.org>; Mon, 11 Apr 2022 02:49:09 -0700 (PDT)
+        with ESMTP id S1344826AbiDKJvy (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 11 Apr 2022 05:51:54 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 66CB2419A1
+        for <linux-efi@vger.kernel.org>; Mon, 11 Apr 2022 02:48:57 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id A1A4061179
-        for <linux-efi@vger.kernel.org>; Mon, 11 Apr 2022 09:49:09 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 28460C385A3;
-        Mon, 11 Apr 2022 09:49:06 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 57E166115F
+        for <linux-efi@vger.kernel.org>; Mon, 11 Apr 2022 09:48:55 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CDA45C385AD;
+        Mon, 11 Apr 2022 09:48:52 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1649670549;
-        bh=F3be8Bl2OWrM+QxnbwAWqaDIE8d9sl2JmSobwHloz2Q=;
+        s=k20201202; t=1649670534;
+        bh=CrPCfA3V4PBM2GL+sj5SJDi9iVpmtimBzj/JgVJ0+Lw=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=G819WruuA9Y9oawya7YT7CWi7+BAX/8v2AuMI/JlC7oVvqE2pgJe4N9Bn9x+6S6/K
-         wQ772tpK6gTTLpJRik5Cjf0wJ+mjcvuL2HgUSMEiyuVPEm3NIHyp56MojF8waPAZo+
-         VYXpMco1y9857aUZkZaFXuDBjq64Cj0RJHE3bmyeLGCFhJLgFcJydr4yC5FLumkLAI
-         Vw2X+FGUIAaPF52NY0qSz5KYFg0jCQePAsppi775B3O33IxRrQHF9Jyj7a9EAtj6GY
-         ziMOsjDo/tGbbVjBrKxBpRi0aA9Af5TBLtVXQFgXfreWmXkBK5vm1Nky/GiAiV/4XB
-         HNMY2wx6k62+Q==
+        b=G85PtY6NVLLrpuoR3LPfgT8UT15JuDeXNijSMKWFLUEwHqlz+buRDQUNOJGH8TCtt
+         ByumpKdGuQLP4orGFNlmDWW4KWRl98pojbS/Iz7dV5GjijHwGyW+EWJxOaxkjKXMjC
+         vd+CgeQ7E6RjWbNQ3n69c8J2vIuWotcvLwJp8/Hwqk9jBpECtobnaeXj8Dy85hAVLd
+         4Qsa89oiV3cKAvoTfDjcBvoArRP5jNsXNe3wS1iUCYsRyTP7P+Pqg0i+rK6uEHZYBV
+         806I9Qx2ogbSg7oEEawgVxB13ecIfKMW/3t960+oJLZ7oZQygJ9oPEfK3AR8r8lmel
+         6MJzZlrAsKBnA==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-arm-kernel@lists.infradead.org
 Cc:     linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -39,77 +39,183 @@ Cc:     linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         Kees Cook <keescook@chromium.org>,
         Catalin Marinas <catalin.marinas@arm.com>,
         Mark Brown <broonie@kernel.org>
-Subject: [PATCH v3 11/30] arm64: head: add helper function to remap regions in early page tables
-Date:   Mon, 11 Apr 2022 11:48:05 +0200
-Message-Id: <20220411094824.4176877-12-ardb@kernel.org>
+Subject: [PATCH v3 05/30] arm64: head: simplify page table mapping macros (slightly)
+Date:   Mon, 11 Apr 2022 11:47:59 +0200
+Message-Id: <20220411094824.4176877-6-ardb@kernel.org>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20220411094824.4176877-1-ardb@kernel.org>
 References: <20220411094824.4176877-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2095; h=from:subject; bh=F3be8Bl2OWrM+QxnbwAWqaDIE8d9sl2JmSobwHloz2Q=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBiU/lHRuF5psCGBCvTqubIc33ylcXyPLqTFqMroy5z 4YTK4gSJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYlP5RwAKCRDDTyI5ktmPJB5YC/ oClu5IeEtRKbfo2BZ7Cy8kmZ9lseFgFG36j3po4xZgFIcueDxqY46svaMfrSYeV/mgBiBkc9sNfklC L7daOcb4W1XFe5O4PEPPaVod1IsQZuDZv5OHzCITmzGIMBKdVcCW8tInJUA7NJH7PkbdOKETg6IDuh BxnYnbA1YiBLvlwYbMmPfnhaeYnCeKkJOc7Slw6cEAGJbPHPWOHlbEWr3GebsEIkbrHjO0HeA1i+bZ HsBrvX2RQRBH1yhgnY+9mhQOIqyFLPeK8roKWNx+hHU7O+K2hwjTvZuSbos9AdIgqGTVlVDQxzHqgl A3ngODVoIqWls3AsM11D56no16yOTYYQSvt6x7xOEKoGrSeHXM9YSJLstnAO1JI3ZFJqf4CV8rIBCE c7reuUXNYjRBK+OxQJOSi/4imPYv4SOtlL46Pv1SYfLv0t1z6IlXh73NYkXh/T1u8pDv7NivhO/BQ1 Qxj+RP4HN4rfdWBTYYOq1EQr7nk9S65cnO4d5xS3v9Pyw=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=6906; h=from:subject; bh=CrPCfA3V4PBM2GL+sj5SJDi9iVpmtimBzj/JgVJ0+Lw=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBiU/k9FXSc03bKRkbZZivAv4z6021AB3/YP9xUV9nI oLbsa+OJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYlP5PQAKCRDDTyI5ktmPJBJzC/ 9Ro+R6drJNZXHy8IEK8YalAoFVJCt3N+Wt5e6WIx75e9A2wT6Z/Ok18MPFcj1zrh6CiHjg566alNtf chcCM+t/ctY+Dej6MFTwN9hfae+E/JFcXI+alkgZVVcpg+I8ymyzHRnR3/poOrhFPLHulOvl+HafY5 V1lr2oUfZwa4MUaLVWR5FV41dgcH8jVMdMJTuWgKg9s0/iesnxwO/Kb18rrNSLMGfbdtzi6laOEzq9 wpmIprb1VRYr0fd+hUKKLx4FkNQGrgFRdlKv3mAJPYGR5h7p/03xtrk0Uvao1eq6QBPR2HVTA61fqj HQY0uIbhykZJlmzLSkTXwVkoL/EFJuATHtxcyzu9ycwTz/oBFpO16OR5u/ylbolDuDCz//FCHgIF2u OgStc/AVgkPsOwQa3i6GbFxutEZmvBzH3TIn+NOuMvqKCprGWjmTCPRVks9H7HPwJDemCJgdooi0bU uNJH15qhOaBGwuNTLk2t0QntBEbTiDOfdLu6iuLGYahgg=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The asm macros used to create the initial ID map and kernel mappings
-don't support randomly remapping parts of the address space after it has
-been populated. What we can do, however, given that all block or page
-mappings are created at the final level, is take a subset of the mapped
-range and update its attributes or output address. This will permit us
-to make parts of these page tables read-only, or remap a part of it to
-cover the device tree.
+Simplify the macros in head.S that are used to set up the early page
+tables, by switching to immediates for the number of bits that are
+interpreted as the table index at each level. This makes it much
+easier to infer from the instruction stream what is going on, and
+reduces the number of instructions emitted substantially.
 
-So add a helper that encapsulates this.
+Note that the extended ID map for cases where no additional level needs
+to be configured now uses a compile time size as well, which means that
+we interpret up to 10 bits as the table index at the root level (for
+52-bit physical addressing), without taking into account whether or not
+this is supported on the current system.  However, those bits can only
+be set if we are executing the image from an address that exceeds the
+48-bit PA range, and are guaranteed to be cleared otherwise, and given
+that we are dealing with a mapping in the lower TTBR0 range of the
+address space, the result is therefore the same as if we'd mask off only
+6 bits.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/arm64/kernel/head.S | 31 ++++++++++++++++++++
- 1 file changed, 31 insertions(+)
+ arch/arm64/kernel/head.S | 55 ++++++++------------
+ 1 file changed, 22 insertions(+), 33 deletions(-)
 
 diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
-index 70c462bbd6bf..6fc8f7f88a1a 100644
+index 53126a35d73c..9fdde2f9cc0f 100644
 --- a/arch/arm64/kernel/head.S
 +++ b/arch/arm64/kernel/head.S
-@@ -263,6 +263,37 @@ SYM_FUNC_END(clear_page_tables)
- 	populate_entries \tbl, \rtbl, \istart, \iend, \flags, #SWAPPER_BLOCK_SIZE, \tmp
+@@ -179,31 +179,20 @@ SYM_CODE_END(preserve_boot_args)
+  *	vstart:	virtual address of start of range
+  *	vend:	virtual address of end of range - we map [vstart, vend]
+  *	shift:	shift used to transform virtual address into index
+- *	ptrs:	number of entries in page table
++ *	order:  #imm 2log(number of entries in page table)
+  *	istart:	index in table corresponding to vstart
+  *	iend:	index in table corresponding to vend
+  *	count:	On entry: how many extra entries were required in previous level, scales
+  *			  our end index.
+  *		On exit: returns how many extra entries required for next page table level
+  *
+- * Preserves:	vstart, vend, shift, ptrs
++ * Preserves:	vstart, vend
+  * Returns:	istart, iend, count
+  */
+-	.macro compute_indices, vstart, vend, shift, ptrs, istart, iend, count
+-	lsr	\iend, \vend, \shift
+-	mov	\istart, \ptrs
+-	sub	\istart, \istart, #1
+-	and	\iend, \iend, \istart	// iend = (vend >> shift) & (ptrs - 1)
+-	mov	\istart, \ptrs
+-	mul	\istart, \istart, \count
+-	add	\iend, \iend, \istart	// iend += count * ptrs
+-					// our entries span multiple tables
+-
+-	lsr	\istart, \vstart, \shift
+-	mov	\count, \ptrs
+-	sub	\count, \count, #1
+-	and	\istart, \istart, \count
+-
++	.macro compute_indices, vstart, vend, shift, order, istart, iend, count
++	ubfx	\istart, \vstart, \shift, \order
++	ubfx	\iend, \vend, \shift, \order
++	add	\iend, \iend, \count, lsl \order
+ 	sub	\count, \iend, \istart
  	.endm
  
-+/*
-+ * Remap a subregion created with the map_memory macro with modified attributes
-+ * or output address. The entire remapped region must have been covered in the
-+ * invocation of map_memory.
-+ *
-+ * x0: last level table address (returned in first argument to map_memory)
-+ * x1: start VA of the existing mapping
-+ * x2: start VA of the region to update
-+ * x3: end VA of the region to update (inclusive)
-+ * x4: start PA associated with the region to update
-+ * x5: attributes to set on the updated region
-+ * x6: order of the last level mappings
-+ */
-+SYM_FUNC_START_LOCAL(remap_region)
-+	// Get the index offset for the start of the last level table
-+	lsr	x1, x1, x6
-+	bfc	x1, #0, #PAGE_SHIFT - 3
+@@ -218,38 +207,39 @@ SYM_CODE_END(preserve_boot_args)
+  *	vend:	virtual address of end of range - we map [vstart, vend - 1]
+  *	flags:	flags to use to map last level entries
+  *	phys:	physical address corresponding to vstart - physical memory is contiguous
+- *	pgds:	the number of pgd entries
++ *	order:  #imm 2log(number of entries in PGD table)
+  *
+  * Temporaries:	istart, iend, tmp, count, sv - these need to be different registers
+  * Preserves:	vstart, flags
+  * Corrupts:	tbl, rtbl, vend, istart, iend, tmp, count, sv
+  */
+-	.macro map_memory, tbl, rtbl, vstart, vend, flags, phys, pgds, istart, iend, tmp, count, sv
++	.macro map_memory, tbl, rtbl, vstart, vend, flags, phys, order, istart, iend, tmp, count, sv
+ 	sub \vend, \vend, #1
+ 	add \rtbl, \tbl, #PAGE_SIZE
+-	mov \sv, \rtbl
+ 	mov \count, #0
+-	compute_indices \vstart, \vend, #PGDIR_SHIFT, \pgds, \istart, \iend, \count
 +
-+	// Derive the start and end indexes into the last level table
-+	// associated with the provided region
-+	lsr	x2, x2, x6
-+	lsr	x3, x3, x6
-+	sub	x2, x2, x1
-+	sub	x3, x3, x1
-+
-+	mov	x1, #1
-+	lsl	x6, x1, x6		// block size at this level
-+
-+	populate_entries x0, x4, x2, x3, x5, x6, x7
-+	ret
-+SYM_FUNC_END(remap_region)
++	compute_indices \vstart, \vend, #PGDIR_SHIFT, #\order, \istart, \iend, \count
++	mov \sv, \rtbl
+ 	populate_entries \tbl, \rtbl, \istart, \iend, #PMD_TYPE_TABLE, #PAGE_SIZE, \tmp
+ 	mov \tbl, \sv
+-	mov \sv, \rtbl
  
- SYM_FUNC_START_LOCAL(create_idmap)
- 	adrp	x0, idmap_pg_dir
+ #if SWAPPER_PGTABLE_LEVELS > 3
+-	compute_indices \vstart, \vend, #PUD_SHIFT, #PTRS_PER_PUD, \istart, \iend, \count
++	compute_indices \vstart, \vend, #PUD_SHIFT, #(PAGE_SHIFT - 3), \istart, \iend, \count
++	mov \sv, \rtbl
+ 	populate_entries \tbl, \rtbl, \istart, \iend, #PMD_TYPE_TABLE, #PAGE_SIZE, \tmp
+ 	mov \tbl, \sv
+-	mov \sv, \rtbl
+ #endif
+ 
+ #if SWAPPER_PGTABLE_LEVELS > 2
+-	compute_indices \vstart, \vend, #SWAPPER_TABLE_SHIFT, #PTRS_PER_PMD, \istart, \iend, \count
++	compute_indices \vstart, \vend, #SWAPPER_TABLE_SHIFT, #(PAGE_SHIFT - 3), \istart, \iend, \count
++	mov \sv, \rtbl
+ 	populate_entries \tbl, \rtbl, \istart, \iend, #PMD_TYPE_TABLE, #PAGE_SIZE, \tmp
+ 	mov \tbl, \sv
+ #endif
+ 
+-	compute_indices \vstart, \vend, #SWAPPER_BLOCK_SHIFT, #PTRS_PER_PTE, \istart, \iend, \count
+-	bic \count, \phys, #SWAPPER_BLOCK_SIZE - 1
+-	populate_entries \tbl, \count, \istart, \iend, \flags, #SWAPPER_BLOCK_SIZE, \tmp
++	compute_indices \vstart, \vend, #SWAPPER_BLOCK_SHIFT, #(PAGE_SHIFT - 3), \istart, \iend, \count
++	bic \rtbl, \phys, #SWAPPER_BLOCK_SIZE - 1
++	populate_entries \tbl, \rtbl, \istart, \iend, \flags, #SWAPPER_BLOCK_SIZE, \tmp
+ 	.endm
+ 
+ /*
+@@ -300,12 +290,12 @@ SYM_FUNC_START_LOCAL(__create_page_tables)
+ 	 * range in that case, and configure an additional translation level
+ 	 * if needed.
+ 	 */
+-	mov	x4, #PTRS_PER_PGD
+ 	idmap_get_t0sz x5
+ 	cmp	x5, TCR_T0SZ(VA_BITS_MIN) // default T0SZ small enough?
+ 	b.ge	1f			// .. then skip VA range extension
+ 
+ #if (VA_BITS < 48)
++#define IDMAP_PGD_ORDER	(VA_BITS - PGDIR_SHIFT)
+ #define EXTRA_SHIFT	(PGDIR_SHIFT + PAGE_SHIFT - 3)
+ #define EXTRA_PTRS	(1 << (PHYS_MASK_SHIFT - EXTRA_SHIFT))
+ 
+@@ -323,16 +313,16 @@ SYM_FUNC_START_LOCAL(__create_page_tables)
+ 	mov	x2, EXTRA_PTRS
+ 	create_table_entry x0, x3, EXTRA_SHIFT, x2, x5, x6
+ #else
++#define IDMAP_PGD_ORDER	(PHYS_MASK_SHIFT - PGDIR_SHIFT)
+ 	/*
+ 	 * If VA_BITS == 48, we don't have to configure an additional
+ 	 * translation level, but the top-level table has more entries.
+ 	 */
+-	mov	x4, #1 << (PHYS_MASK_SHIFT - PGDIR_SHIFT)
+ #endif
+ 1:
+ 	adr_l	x6, __idmap_text_end		// __pa(__idmap_text_end)
+ 
+-	map_memory x0, x1, x3, x6, x7, x3, x4, x10, x11, x12, x13, x14
++	map_memory x0, x1, x3, x6, x7, x3, IDMAP_PGD_ORDER, x10, x11, x12, x13, x14
+ 
+ 	/*
+ 	 * Map the kernel image (starting with PHYS_OFFSET).
+@@ -340,13 +330,12 @@ SYM_FUNC_START_LOCAL(__create_page_tables)
+ 	adrp	x0, init_pg_dir
+ 	mov_q	x5, KIMAGE_VADDR		// compile time __va(_text)
+ 	add	x5, x5, x23			// add KASLR displacement
+-	mov	x4, PTRS_PER_PGD
+ 	adrp	x6, _end			// runtime __pa(_end)
+ 	adrp	x3, _text			// runtime __pa(_text)
+ 	sub	x6, x6, x3			// _end - _text
+ 	add	x6, x6, x5			// runtime __va(_end)
+ 
+-	map_memory x0, x1, x5, x6, x7, x3, x4, x10, x11, x12, x13, x14
++	map_memory x0, x1, x5, x6, x7, x3, (VA_BITS - PGDIR_SHIFT), x10, x11, x12, x13, x14
+ 
+ 	/*
+ 	 * Since the page tables have been populated with non-cacheable
 -- 
 2.30.2
 
