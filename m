@@ -2,85 +2,143 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CB56AC433EF
-	for <linux-efi@archiver.kernel.org>; Tue, 12 Apr 2022 16:59:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ADB6DC4332F
+	for <linux-efi@archiver.kernel.org>; Tue, 12 Apr 2022 23:22:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1357903AbiDLRBn (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 12 Apr 2022 13:01:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35430 "EHLO
+        id S229969AbiDLXY3 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 12 Apr 2022 19:24:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39048 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1357912AbiDLRBk (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 12 Apr 2022 13:01:40 -0400
-Received: from mail-pl1-x635.google.com (mail-pl1-x635.google.com [IPv6:2607:f8b0:4864:20::635])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 78C1E11A1E
-        for <linux-efi@vger.kernel.org>; Tue, 12 Apr 2022 09:59:22 -0700 (PDT)
-Received: by mail-pl1-x635.google.com with SMTP id q3so6082919plg.3
-        for <linux-efi@vger.kernel.org>; Tue, 12 Apr 2022 09:59:22 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=sbmtZUHdeimKmpPh1bMlzq0hwzuYX2yluMhfz3rlFSU=;
-        b=HWCdYoytGsbjpCL3FGrjxUsGb1RC/BkyeetyCir4NM7dpKTa2umTcHsZYPt8Ts5ZRT
-         kkj+OUC2PEuL0b3WmGpSF+16uQqDbUJ5pdvod+3q8BfrGWryansUrTEPMW6R1H6nzHnO
-         E+fPvRLMTZAMVhvfA8aSE9c3Z3BjJxvKXteXI=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=sbmtZUHdeimKmpPh1bMlzq0hwzuYX2yluMhfz3rlFSU=;
-        b=jtPcZvUtHQBHm3ahO2h0mh8uFKwRnMLKCiLQ4UC9QExr7RxHc8YmAh/USJuozybRPv
-         3Z7T31+3QV1p/hI0nzFCYplwGp8ERSgfK0nSdXMU5E4P6f6hX/55i7NN2FDaGPwDTxbF
-         Q5H/cdCeLaBpNA+OxzoKYIiDnlazUNdX4tJunMuKi2I0i7fb9CWAYfT30FGRenq+tsNM
-         vAuIyxKHDzKxcNgtm2XyMxRw/GIEPlnVZ84YnBGuvDDplc6TKSlRxN/8MoQsPtBXNS/T
-         /9yX/aouPdDd9Ia0kdgZr6W5jOj4xC28SpdNGvMSSe4ysn0j4lmXGb54p+O4OXXUTJw9
-         HvyQ==
-X-Gm-Message-State: AOAM533e/bsEC0hpBjfcwQVPaMpotUIey/6Iuf22LyDp31opnCXt3d/X
-        Z1r2QkpNtG5iBJ3giAu5Qiqvrw==
-X-Google-Smtp-Source: ABdhPJw7iU/gNPjilL7EEmCqgRzrhmwbFxKjdbW0t3zk1Pz/3+QxpbfZlGwcC2qUvSClQTbZ5U1T+Q==
-X-Received: by 2002:a17:90b:4d01:b0:1cd:46e8:215a with SMTP id mw1-20020a17090b4d0100b001cd46e8215amr618262pjb.73.1649782761864;
-        Tue, 12 Apr 2022 09:59:21 -0700 (PDT)
-Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
-        by smtp.gmail.com with ESMTPSA id l4-20020a056a0016c400b004f79504ef9csm39595061pfc.3.2022.04.12.09.59.21
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 12 Apr 2022 09:59:21 -0700 (PDT)
-Date:   Tue, 12 Apr 2022 09:59:20 -0700
-From:   Kees Cook <keescook@chromium.org>
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org,
-        Marc Zyngier <maz@kernel.org>, Will Deacon <will@kernel.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Mark Brown <broonie@kernel.org>
-Subject: Re: [PATCH v3 00/30] arm64: support WXN and entry with MMU enabled
-Message-ID: <202204120956.B0ECA2FC@keescook>
-References: <20220411094824.4176877-1-ardb@kernel.org>
+        with ESMTP id S229746AbiDLXYY (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 12 Apr 2022 19:24:24 -0400
+Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 851C225597;
+        Tue, 12 Apr 2022 15:46:29 -0700 (PDT)
+Received: from pps.filterd (m0098421.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 23CIq6ti008918;
+        Tue, 12 Apr 2022 21:21:44 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
+ : date : message-id : in-reply-to : references : mime-version :
+ content-transfer-encoding; s=pp1;
+ bh=aIldCVQRoNdnC3Z1iVnCtTVi9LvUbjghv4ynjTs66E4=;
+ b=Vz3Kp5UD1OsNmMvfPmC9OJ+lamGQ148Kar2OiY4KFBhai/5u9psrBB7g4JLrvVrqjL9o
+ 90jscwMAun2+KdArjyx0fK50DfHsblmYy22jn7/uuwQ9X1KXo84ZOPBxyP7lnIh6wVes
+ G++tGOhA0pySmpof0Ih/Nj0I5+XsmtXNqYeejNOTEV0tzKRzL29I6G4lObIgH73Mik7N
+ PlG8GppIJba1CvgZB+f5wSWct8yiOpRJdaylCHECcTF5B/vaxB4rZ1NKnbmgup9uVzlL
+ 1ULKW+Gz65C/oK8I4fnNnRLRn6eADoenEIkO7h2kHtOCnk+PGB7fJQtuoIFePgVLss7p hw== 
+Received: from pps.reinject (localhost [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3fdf30aubm-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 12 Apr 2022 21:21:44 +0000
+Received: from m0098421.ppops.net (m0098421.ppops.net [127.0.0.1])
+        by pps.reinject (8.16.0.43/8.16.0.43) with SMTP id 23CLEPmZ012122;
+        Tue, 12 Apr 2022 21:21:43 GMT
+Received: from ppma04wdc.us.ibm.com (1a.90.2fa9.ip4.static.sl-reverse.com [169.47.144.26])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3fdf30aubc-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 12 Apr 2022 21:21:43 +0000
+Received: from pps.filterd (ppma04wdc.us.ibm.com [127.0.0.1])
+        by ppma04wdc.us.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 23CLDUWx025013;
+        Tue, 12 Apr 2022 21:21:42 GMT
+Received: from b03cxnp08027.gho.boulder.ibm.com (b03cxnp08027.gho.boulder.ibm.com [9.17.130.19])
+        by ppma04wdc.us.ibm.com with ESMTP id 3fb1s9u3x2-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 12 Apr 2022 21:21:42 +0000
+Received: from b03ledav002.gho.boulder.ibm.com (b03ledav002.gho.boulder.ibm.com [9.17.130.233])
+        by b03cxnp08027.gho.boulder.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 23CLLfq912976668
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 12 Apr 2022 21:21:41 GMT
+Received: from b03ledav002.gho.boulder.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id A334B13604F;
+        Tue, 12 Apr 2022 21:21:41 +0000 (GMT)
+Received: from b03ledav002.gho.boulder.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id BEF66136053;
+        Tue, 12 Apr 2022 21:21:39 +0000 (GMT)
+Received: from amdrome3.watson.ibm.com (unknown [9.2.130.16])
+        by b03ledav002.gho.boulder.ibm.com (Postfix) with ESMTP;
+        Tue, 12 Apr 2022 21:21:39 +0000 (GMT)
+From:   Dov Murik <dovmurik@linux.ibm.com>
+To:     linux-efi@vger.kernel.org
+Cc:     Dov Murik <dovmurik@linux.ibm.com>,
+        Gerd Hoffmann <kraxel@redhat.com>,
+        Borislav Petkov <bp@suse.de>,
+        Ashish Kalra <ashish.kalra@amd.com>,
+        Brijesh Singh <brijesh.singh@amd.com>,
+        Tom Lendacky <thomas.lendacky@amd.com>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        James Morris <jmorris@namei.org>,
+        "Serge E. Hallyn" <serge@hallyn.com>,
+        Andi Kleen <ak@linux.intel.com>,
+        Greg KH <gregkh@linuxfoundation.org>,
+        Andrew Scull <ascull@google.com>,
+        Dave Hansen <dave.hansen@intel.com>,
+        "Dr. David Alan Gilbert" <dgilbert@redhat.com>,
+        Lenny Szubowicz <lszubowi@redhat.com>,
+        Peter Gonda <pgonda@google.com>,
+        Matthew Garrett <mjg59@srcf.ucam.org>,
+        James Bottomley <jejb@linux.ibm.com>,
+        Tobin Feldman-Fitzthum <tobin@linux.ibm.com>,
+        Jim Cadden <jcadden@ibm.com>,
+        Daniele Buono <dbuono@linux.vnet.ibm.com>,
+        linux-coco@lists.linux.dev, linux-security-module@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: [PATCH v10 3/4] efi: Register efi_secret platform device if EFI secret area is declared
+Date:   Tue, 12 Apr 2022 21:21:26 +0000
+Message-Id: <20220412212127.154182-4-dovmurik@linux.ibm.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20220412212127.154182-1-dovmurik@linux.ibm.com>
+References: <20220412212127.154182-1-dovmurik@linux.ibm.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220411094824.4176877-1-ardb@kernel.org>
+Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-GUID: u2uTO1zImiDvv4PXQBKeJLTtOesbo-J2
+X-Proofpoint-ORIG-GUID: xXX4t1_Acjk5qWhE6wrxt_BfOhH5jdEX
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.858,Hydra:6.0.486,FMLib:17.11.64.514
+ definitions=2022-04-12_06,2022-04-12_02,2022-02-23_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 impostorscore=0 mlxscore=0
+ suspectscore=0 phishscore=0 priorityscore=1501 malwarescore=0 bulkscore=0
+ clxscore=1015 adultscore=0 spamscore=0 mlxlogscore=999 lowpriorityscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2202240000
+ definitions=main-2204120097
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Mon, Apr 11, 2022 at 11:47:54AM +0200, Ard Biesheuvel wrote:
->   - allow WXN to be enabled (with an opt-out) so writable mappings are
->     never executable;
+During efi initialization, check if coco_secret is defined in the EFI
+configuration table; in such case, register platform device
+"efi_secret".  This allows udev to automatically load the efi_secret
+module (platform driver), which in turn will populate the
+<securityfs>/secrets/coco directory in guests into which secrets were
+injected.
 
-Besides all the rest of this series's awesomeness; this really stands
-out to me. I didn't even know this was a feature in aarch64. Nice! I
-really like the idea of having this enabled -- anything executing out of
-a writable mapping should already be considered a mistake (and tons of
-work over the last 2 decades has already gone into making stuff this
-doesn't happen in both the kernel and userspace). We could even make a
-new LKDTM test for this. (Right now stuff like EXEC_DATA just verifies
-that the .data segment doesn't have the X bit... but adding something
-like EXEC_WXN where a memory region is made explicitly W+X, and it
-_still_ can't be executed would be great.)
+Note that a declared address of an EFI secret area doesn't mean that
+secrets where indeed injected to that area; if the secret area is not
+populated, the driver will not load (but the platform device will still
+be registered).
 
-Cool!
+Signed-off-by: Dov Murik <dovmurik@linux.ibm.com>
+Reviewed-by: Gerd Hoffmann <kraxel@redhat.com>
+---
+ drivers/firmware/efi/efi.c | 5 +++++
+ 1 file changed, 5 insertions(+)
 
--Kees
-
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 378d044b2463..b8e68a121119 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -425,6 +425,11 @@ static int __init efisubsys_init(void)
+ 	if (efi_enabled(EFI_DBG) && efi_enabled(EFI_PRESERVE_BS_REGIONS))
+ 		efi_debugfs_init();
+ 
++#ifdef CONFIG_EFI_COCO_SECRET
++	if (efi.coco_secret != EFI_INVALID_TABLE_ADDR)
++		platform_device_register_simple("efi_secret", 0, NULL, 0);
++#endif
++
+ 	return 0;
+ 
+ err_remove_group:
 -- 
-Kees Cook
+2.25.1
+
