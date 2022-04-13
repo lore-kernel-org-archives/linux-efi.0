@@ -2,67 +2,48 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A6311C433FE
-	for <linux-efi@archiver.kernel.org>; Wed, 13 Apr 2022 16:07:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6EA27C433F5
+	for <linux-efi@archiver.kernel.org>; Wed, 13 Apr 2022 16:13:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236659AbiDMQKO (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 13 Apr 2022 12:10:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37496 "EHLO
+        id S232877AbiDMQPf (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 13 Apr 2022 12:15:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40630 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235184AbiDMQKN (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 13 Apr 2022 12:10:13 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id AD9D66472D
-        for <linux-efi@vger.kernel.org>; Wed, 13 Apr 2022 09:07:51 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1649866070;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=QOkajocQ8odh3i+hVeTJ63TIENzeAVOjDB6rWovHQzA=;
-        b=UHIRHKdaNGk4SBrBx7HwHJXCuwjgGgSa/Vw0YYtzSnCRFsNgcqSfOw2rYwtmfv/COUkxKr
-        d+eBqd23BIB+AcbGQwIHN7FwHpXQcDDYiBRKYhCIi66AvbmgYXebfIZ03gMI5BegmHRUpG
-        OnY+xppIf9JF5ZUlBtbSwDOGZwXfKXI=
-Received: from mail-wm1-f69.google.com (mail-wm1-f69.google.com
- [209.85.128.69]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-501-ZcHOfVyXPCKiuAPBKZtPtA-1; Wed, 13 Apr 2022 12:07:49 -0400
-X-MC-Unique: ZcHOfVyXPCKiuAPBKZtPtA-1
-Received: by mail-wm1-f69.google.com with SMTP id z16-20020a05600c0a1000b0038bebbd8548so3030027wmp.3
-        for <linux-efi@vger.kernel.org>; Wed, 13 Apr 2022 09:07:49 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:organization:in-reply-to
-         :content-transfer-encoding;
-        bh=QOkajocQ8odh3i+hVeTJ63TIENzeAVOjDB6rWovHQzA=;
-        b=fgxgylO6rAyKmMv0jW10AMJGpSn5A87668a5snOSQFkAqL2iOEoPwLwta3g1XMGC2j
-         EzwkqbJI3li65ATSuMuO+MDLLBVLxBwXMjIGk6o3dvzm6aWK4KoZ828zkaX3Iu3Iou3A
-         9RNLUIcabgyRAeBH/NPiVdsHHE1Xu3MedErsjYf1IjEbNDXB0PjQ9Y1da/GVTz+Ay1wV
-         t4Et0GQKOkKFXUdU/+J1cctxL7TjT2jmC025mmQW7howsx/dPM7HHdZUu9nLeJ8fH6Op
-         DLy1+FjyP+sujtYlRDpPn/ZX5/qzJjQuYOWZ3Z13DyxQDhJWGcVf4kuS+Dga1/grp+Hi
-         epJQ==
-X-Gm-Message-State: AOAM530sJuz6nQ56kt/aHbZl6VXaeFuxAuzEJejKM5UqVSkR6aeVKqFS
-        D48BzfId0vzqY06hQQUNvw0+No3azhQdaaJTMnGjY3oRvDSM6TqyCVgmGhxlaUtsyuCywlIUB90
-        cLm8AgP699x0XyQu5vjhQ
-X-Received: by 2002:adf:eb86:0:b0:1e6:8c92:af6b with SMTP id t6-20020adfeb86000000b001e68c92af6bmr33002762wrn.116.1649866068379;
-        Wed, 13 Apr 2022 09:07:48 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJymHGhx5mZYHX4qc0LA34JUWjZS8Rn5QEmfvMvUVt0DpiviRON0T5cX/n3xjfGY/yDNO9s2GQ==
-X-Received: by 2002:adf:eb86:0:b0:1e6:8c92:af6b with SMTP id t6-20020adfeb86000000b001e68c92af6bmr33002738wrn.116.1649866068071;
-        Wed, 13 Apr 2022 09:07:48 -0700 (PDT)
-Received: from ?IPV6:2003:cb:c704:5800:1078:ebb9:e2c3:ea8c? (p200300cbc70458001078ebb9e2c3ea8c.dip0.t-ipconnect.de. [2003:cb:c704:5800:1078:ebb9:e2c3:ea8c])
-        by smtp.gmail.com with ESMTPSA id l126-20020a1c2584000000b00387d4f35651sm2895911wml.10.2022.04.13.09.07.46
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 13 Apr 2022 09:07:47 -0700 (PDT)
-Message-ID: <dd197d57-ce40-82f6-fa5f-c0450b39e23f@redhat.com>
-Date:   Wed, 13 Apr 2022 18:07:46 +0200
+        with ESMTP id S230442AbiDMQPe (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 13 Apr 2022 12:15:34 -0400
+Received: from mga17.intel.com (mga17.intel.com [192.55.52.151])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 72427120BE;
+        Wed, 13 Apr 2022 09:13:13 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1649866393; x=1681402393;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=DWtb2usfjznadWpJhU4OziLP1yrGa1nabsKTrAq6jcE=;
+  b=cY9Nq4FQTGglMfxAklIPjtdtTa+IZ2U/7LuKpuMnZTWE/6SEZzICXgN4
+   t4jAon9zsN7k0AxajSSCHYg4waVrQqbq+0m7BmaVH/ehU3DXs5JAF1WhA
+   3uhp1Uq2EvPJCOosxyboqerb4c5D0nVFaoeosGHn2ruQeFGmwPYfWP/1a
+   nWeROQVjY67oVCzpx/f9/42m+WtEvRARFP6mu/e5hqOit40gUdXGZsAbW
+   2hTZrJqPQh4e682HM3/1jFtSFDqxpkgxdsDubkBxPQ5B1jMzzEiG2Ytc1
+   DO2LDhSLI3drNsXM2sxQ9wXChdxEp8sRG0VnAGpex1VTBNPq7jKlFzLJ5
+   Q==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10316"; a="243295317"
+X-IronPort-AV: E=Sophos;i="5.90,257,1643702400"; 
+   d="scan'208";a="243295317"
+Received: from fmsmga007.fm.intel.com ([10.253.24.52])
+  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 13 Apr 2022 09:13:12 -0700
+X-IronPort-AV: E=Sophos;i="5.90,257,1643702400"; 
+   d="scan'208";a="559803224"
+Received: from jmsepko-mobl.amr.corp.intel.com (HELO [10.212.61.150]) ([10.212.61.150])
+  by fmsmga007-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 13 Apr 2022 09:13:10 -0700
+Message-ID: <6848cde8-697a-3fb5-e517-ae6e3413f188@intel.com>
+Date:   Wed, 13 Apr 2022 09:13:17 -0700
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.6.2
+ Thunderbird/91.7.0
 Subject: Re: [PATCHv4 1/8] mm: Add support for unaccepted memory
 Content-Language: en-US
-To:     Dave Hansen <dave.hansen@intel.com>,
+To:     David Hildenbrand <david@redhat.com>,
         "Kirill A. Shutemov" <kirill@shutemov.name>
 Cc:     "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
         Borislav Petkov <bp@alien8.de>,
@@ -96,74 +77,17 @@ References: <20220405234343.74045-1-kirill.shutemov@linux.intel.com>
  <a458c13f-9994-b227-ff61-bfdfec10bc27@redhat.com>
  <20220413113024.ycvocn6ynerl3b7m@box.shutemov.name>
  <cfcf9f82-7e5f-58b6-7b47-9ac552832596@intel.com>
-From:   David Hildenbrand <david@redhat.com>
-Organization: Red Hat
-In-Reply-To: <cfcf9f82-7e5f-58b6-7b47-9ac552832596@intel.com>
+ <dd197d57-ce40-82f6-fa5f-c0450b39e23f@redhat.com>
+From:   Dave Hansen <dave.hansen@intel.com>
+In-Reply-To: <dd197d57-ce40-82f6-fa5f-c0450b39e23f@redhat.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On 13.04.22 17:36, Dave Hansen wrote:
-> On 4/13/22 04:30, Kirill A. Shutemov wrote:
->>> 2) Fast boot; after boot, all memory will slowly but steadily get
->>>    accepted in the background. After a while, all memory is accepted and
->>>    can be signaled to user space.
-> ...
->> Frankly, I think option 2 is the worst one. You still CPU cycles from the
->> workload after boot to do the job that may or may not be needed. It is an
->> half-measure that helps nobody.
-> 
-> Let's not be too hyperbolic here.  "Worst" is entirely subjective and it
-> totally depends on your perspective and what you care about.
+On 4/13/22 09:07, David Hildenbrand wrote:
+> Simplest meaning: accept everything during early boot and don't touch
+> core-mm/buddy code, correct?
 
-Right. Some people might want to start their workload as soon as the
-pain is really over. Some might want to have a functional system before
-that, others might not care.
-
-> 
-> There are basically four options:
-> 
->  * Accept everything in early boot
->  * Accept with deferred page free
->  * Accept with kthread after boot
->  * Accept on demand
-> 
-> and four things that matter:
-> 
->  * Code complexity
->  * Time to a shell prompt
->  * CPU/Memory waste
->  * Deterministic overhead
-> 
-> Did I miss any?
-
-Nothing that comes to mind.
-
-> 
-> News flash: none of the options wins on all the things that matter.
-> We're going to have to pick one (or maybe two).  I'm also not horribly
-> convinced that there's a problem here worth solving, especially one that
-> requires surgery in the core of the buddy allocator.
-> 
-> This is essentially making a performance argument: it takes too long to
-> boot if we go with a simpler solution.  Yet, I haven't seen any data.  I
-> think we need to go with the simplest approach(es) until there's some
-> actual data to guide us here.
-
-Simplest meaning: accept everything during early boot and don't touch
-core-mm/buddy code, correct?
-
-> 
-> Here's another way to look at it:
-> 
->> https://docs.google.com/spreadsheets/d/1Fpv0Yp0CTF5_JXHR2pywvNtImTwUVGTxDMlJ5t8qiis/edit?usp=sharing
-> 
-
-
--- 
-Thanks,
-
-David / dhildenb
-
+Yes, exactly.
