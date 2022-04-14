@@ -2,29 +2,29 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C741EC433EF
-	for <linux-efi@archiver.kernel.org>; Thu, 14 Apr 2022 09:54:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B0F44C433F5
+	for <linux-efi@archiver.kernel.org>; Thu, 14 Apr 2022 09:55:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242108AbiDNJ5P (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 14 Apr 2022 05:57:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51334 "EHLO
+        id S242096AbiDNJ5X (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 14 Apr 2022 05:57:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51388 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242009AbiDNJ5D (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 14 Apr 2022 05:57:03 -0400
+        with ESMTP id S242089AbiDNJ5M (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 14 Apr 2022 05:57:12 -0400
 Received: from szxga03-in.huawei.com (szxga03-in.huawei.com [45.249.212.189])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 32E1F13D7D;
-        Thu, 14 Apr 2022 02:54:38 -0700 (PDT)
-Received: from dggpemm500022.china.huawei.com (unknown [172.30.72.57])
-        by szxga03-in.huawei.com (SkyGuard) with ESMTP id 4KfF7Y2TgCzCr14;
-        Thu, 14 Apr 2022 17:50:17 +0800 (CST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0506418376;
+        Thu, 14 Apr 2022 02:54:41 -0700 (PDT)
+Received: from dggpemm500024.china.huawei.com (unknown [172.30.72.55])
+        by szxga03-in.huawei.com (SkyGuard) with ESMTP id 4KfF7c0sJlzCqxc;
+        Thu, 14 Apr 2022 17:50:20 +0800 (CST)
 Received: from dggpemm500014.china.huawei.com (7.185.36.153) by
- dggpemm500022.china.huawei.com (7.185.36.162) with Microsoft SMTP Server
+ dggpemm500024.china.huawei.com (7.185.36.203) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.24; Thu, 14 Apr 2022 17:54:36 +0800
+ 15.1.2375.24; Thu, 14 Apr 2022 17:54:39 +0800
 Received: from localhost.localdomain (10.175.112.125) by
  dggpemm500014.china.huawei.com (7.185.36.153) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.24; Thu, 14 Apr 2022 17:54:34 +0800
+ 15.1.2375.24; Thu, 14 Apr 2022 17:54:37 +0800
 From:   Wupeng Ma <mawupeng1@huawei.com>
 To:     <akpm@linux-foundation.org>, <catalin.marinas@arm.com>,
         <will@kernel.org>, <corbet@lwn.net>
@@ -42,9 +42,9 @@ CC:     <ardb@kernel.org>, <tglx@linutronix.de>, <mingo@redhat.com>,
         <linux-arm-kernel@lists.infradead.org>,
         <linux-efi@vger.kernel.org>, <linux-ia64@vger.kernel.org>,
         <platform-driver-x86@vger.kernel.org>, <linux-mm@kvack.org>
-Subject: [PATCH v2 6/9] mm: Demote warning message in vmemmap_verify() to debug level
-Date:   Thu, 14 Apr 2022 18:13:11 +0800
-Message-ID: <20220414101314.1250667-7-mawupeng1@huawei.com>
+Subject: [PATCH v2 8/9] efi: Disable mirror feature if kernelcore is not specified
+Date:   Thu, 14 Apr 2022 18:13:13 +0800
+Message-ID: <20220414101314.1250667-9-mawupeng1@huawei.com>
 X-Mailer: git-send-email 2.18.0.huawei.25
 In-Reply-To: <20220414101314.1250667-1-mawupeng1@huawei.com>
 References: <20220414101314.1250667-1-mawupeng1@huawei.com>
@@ -60,32 +60,66 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Ma Wupeng <mawupeng1@huawei.com>
 
-For a system only have limited mirrored memory or some numa node without
-mirrored memory, the per node vmemmap page_structs prefer to allocate
-memory from mirrored region, which will lead to vmemmap_verify() report
-lots of warning message.
+With this patch, kernel will check mirrored_kernelcore before calling
+efi_find_mirror() which will enable basic mirrored feature.
 
-This patch demote the "potential offnode page_structs" warning messages
-to debug level to avoid a very long print during bootup.
+If system have some mirrored memory and mirrored feature is not specified
+in boot parameter, the basic mirrored feature will be enabled and this will
+lead to the following situations:
+
+- memblock memory allocation perfers mirrored region. This may have some
+  unexpected influence on numa affinity.
+
+- contiguous memory will be splited into several parts if parts of them
+  is mirrored memory via memblock_mark_mirror().
 
 Signed-off-by: Ma Wupeng <mawupeng1@huawei.com>
 ---
- mm/sparse-vmemmap.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/firmware/efi/efi.c | 3 +++
+ include/linux/mm.h         | 2 ++
+ mm/page_alloc.c            | 2 +-
+ 3 files changed, 6 insertions(+), 1 deletion(-)
 
-diff --git a/mm/sparse-vmemmap.c b/mm/sparse-vmemmap.c
-index 8aecd6b3896c..a63470dafc35 100644
---- a/mm/sparse-vmemmap.c
-+++ b/mm/sparse-vmemmap.c
-@@ -528,7 +528,7 @@ void __meminit vmemmap_verify(pte_t *pte, int node,
- 	int actual_node = early_pfn_to_nid(pfn);
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index eb9ebf4efea1..18d86602424a 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -446,6 +446,9 @@ void __init efi_find_mirror(void)
+ 	if (!efi_enabled(EFI_MEMMAP))
+ 		return;
  
- 	if (node_distance(actual_node, node) > LOCAL_DISTANCE)
--		pr_warn("[%lx-%lx] potential offnode page_structs\n",
-+		pr_debug("[%lx-%lx] potential offnode page_structs\n",
- 			start, end - 1);
- }
++	if (!mirrored_kernelcore)
++		return;
++
+ 	for_each_efi_memory_desc(md) {
+ 		unsigned long long start = md->phys_addr;
+ 		unsigned long long size = md->num_pages << EFI_PAGE_SHIFT;
+diff --git a/include/linux/mm.h b/include/linux/mm.h
+index e34edb775334..544717cc7a75 100644
+--- a/include/linux/mm.h
++++ b/include/linux/mm.h
+@@ -2536,6 +2536,8 @@ extern void get_pfn_range_for_nid(unsigned int nid,
+ 			unsigned long *start_pfn, unsigned long *end_pfn);
+ extern unsigned long find_min_pfn_with_active_regions(void);
  
++extern bool mirrored_kernelcore;
++
+ #ifndef CONFIG_NUMA
+ static inline int early_pfn_to_nid(unsigned long pfn)
+ {
+diff --git a/mm/page_alloc.c b/mm/page_alloc.c
+index 570d0ebf98df..909d5f7d97bb 100644
+--- a/mm/page_alloc.c
++++ b/mm/page_alloc.c
+@@ -355,7 +355,7 @@ static unsigned long required_kernelcore_percent __initdata;
+ static unsigned long required_movablecore __initdata;
+ static unsigned long required_movablecore_percent __initdata;
+ static unsigned long zone_movable_pfn[MAX_NUMNODES] __initdata;
+-static bool mirrored_kernelcore __meminitdata;
++bool mirrored_kernelcore __meminitdata;
+ 
+ /* movable_zone is the "real" zone pages in ZONE_MOVABLE are taken from */
+ int movable_zone;
 -- 
 2.18.0.huawei.25
 
