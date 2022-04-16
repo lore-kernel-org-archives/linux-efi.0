@@ -2,142 +2,77 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2CA98C4332F
-	for <linux-efi@archiver.kernel.org>; Sat, 16 Apr 2022 02:17:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 62E36C433F5
+	for <linux-efi@archiver.kernel.org>; Sat, 16 Apr 2022 08:48:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229577AbiDPCT0 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 15 Apr 2022 22:19:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51876 "EHLO
+        id S230435AbiDPIuz (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 16 Apr 2022 04:50:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34994 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229454AbiDPCTA (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 15 Apr 2022 22:19:00 -0400
-Received: from szxga03-in.huawei.com (szxga03-in.huawei.com [45.249.212.189])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A45A93C72F;
-        Fri, 15 Apr 2022 19:16:24 -0700 (PDT)
-Received: from dggpemm500021.china.huawei.com (unknown [172.30.72.55])
-        by szxga03-in.huawei.com (SkyGuard) with ESMTP id 4KgFtl21SZzCr3Z;
-        Sat, 16 Apr 2022 09:27:43 +0800 (CST)
-Received: from dggpemm500014.china.huawei.com (7.185.36.153) by
- dggpemm500021.china.huawei.com (7.185.36.109) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.24; Sat, 16 Apr 2022 09:32:04 +0800
-Received: from [10.174.178.120] (10.174.178.120) by
- dggpemm500014.china.huawei.com (7.185.36.153) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.24; Sat, 16 Apr 2022 09:32:02 +0800
-Message-ID: <6de859df-e1c3-e9aa-4530-3b61b9c69a28@huawei.com>
-Date:   Sat, 16 Apr 2022 09:32:01 +0800
+        with ESMTP id S229871AbiDPIuy (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 16 Apr 2022 04:50:54 -0400
+Received: from ms.lwn.net (ms.lwn.net [IPv6:2600:3c01:e000:3a1::42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 00549D9E8B;
+        Sat, 16 Apr 2022 01:48:21 -0700 (PDT)
+Received: from localhost (mdns.lwn.net [45.79.72.68])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ms.lwn.net (Postfix) with ESMTPSA id 2B92A2CC;
+        Sat, 16 Apr 2022 08:48:20 +0000 (UTC)
+DKIM-Filter: OpenDKIM Filter v2.11.0 ms.lwn.net 2B92A2CC
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=lwn.net; s=20201203;
+        t=1650098901; bh=wL3NkiIKFRdID28VPA7Y7koeQlHQ1FfnpEFD9gBGabE=;
+        h=From:To:Cc:Subject:In-Reply-To:References:Date:From;
+        b=IuQQnXtH7YOY0hKaNn75/nwtHB8ScUrzlWYrQ9//YLDGKrwYtXAmDDHbkZqbF2dtJ
+         VxyHvnRSWGdKgiQKkkriH1W5clEMFgmn05MHwn3NxfkC+C2jEW8CsI2jQdAr4LowxB
+         PHaa/sxgo1jH0YXwNBH+xV1sMuPaxBEYgnmP69BWWqFHb2qeEpLRvosQ060MJEY2Ri
+         1Fypoean6uBLsIgIkv+hiEmxvJWF9I3F+3aiOmbbx46Ur4z8ROaBrGBeFBZTEdwrcl
+         iM4hxInGzLf8q9fNgBkK/8DT9FgGi16RJJpUSzkzBlRz6TPEQWfS587+y8zJE5tJsV
+         x9N5q+hAG8CGw==
+From:   Jonathan Corbet <corbet@lwn.net>
+To:     Ard Biesheuvel <ardb@kernel.org>
+Cc:     Akihiko Odaki <akihiko.odaki@gmail.com>,
+        linux-kernel@vger.kernel.org, linux-doc@vger.kernel.org,
+        linux-efi@vger.kernel.org, x86@kernel.org,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        "H . Peter Anvin" <hpa@zytor.com>
+Subject: Re: [PATCH] x86/efi: Remove references of EFI earlyprintk from
+ documentation
+In-Reply-To: <CAMj1kXGHQm7yy2QPCEVRiXBzb8HWOHzKMCuoS+mbnBKujEXQnA@mail.gmail.com>
+References: <20220321045853.3324-1-akihiko.odaki@gmail.com>
+ <87bkxfebsu.fsf@meer.lwn.net>
+ <CAMj1kXGHQm7yy2QPCEVRiXBzb8HWOHzKMCuoS+mbnBKujEXQnA@mail.gmail.com>
+Date:   Sat, 16 Apr 2022 02:48:17 -0600
+Message-ID: <87v8v92z3i.fsf@meer.lwn.net>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.8.0
-Subject: Re: [PATCH v2 0/9] introduce mirrored memory support for arm64
-To:     <ardb@kernel.org>
-CC:     <akpm@linux-foundation.org>, <catalin.marinas@arm.com>,
-        <will@kernel.org>, <corbet@lwn.net>, <tglx@linutronix.de>,
-        <mingo@redhat.com>, <bp@alien8.de>, <dave.hansen@linux.intel.com>,
-        <x86@kernel.org>, <hpa@zyccr.com>, <dvhart@infradead.org>,
-        <andy@infradead.org>, <rppt@kernel.org>, <paulmck@kernel.org>,
-        <peterz@infradead.org>, <jroedel@suse.de>,
-        <songmuchun@bytedance.com>, <macro@orcam.me.uk>,
-        <frederic@kernel.org>, <W_Armin@gmx.de>, <john.garry@huawei.com>,
-        <seanjc@google.com>, <tsbogend@alpha.franken.de>,
-        <anshuman.khandual@arm.com>, <chenhuacai@kernel.org>,
-        <david@redhat.com>, <gpiccoli@igalia.com>, <mark.rutland@arm.com>,
-        <wangkefeng.wang@huawei.com>, <linux-doc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-efi@vger.kernel.org>, <linux-ia64@vger.kernel.org>,
-        <platform-driver-x86@vger.kernel.org>, <linux-mm@kvack.org>
-References: <20220414101314.1250667-1-mawupeng1@huawei.com>
- <CAMj1kXGSStDgj9ABmUaTLnBmpQFksh3wx4tx=mJohum4GQe3Gg@mail.gmail.com>
-From:   mawupeng <mawupeng1@huawei.com>
-In-Reply-To: <CAMj1kXGSStDgj9ABmUaTLnBmpQFksh3wx4tx=mJohum4GQe3Gg@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 8bit
-X-Originating-IP: [10.174.178.120]
-X-ClientProxiedBy: dggems706-chm.china.huawei.com (10.3.19.183) To
- dggpemm500014.china.huawei.com (7.185.36.153)
-X-CFilter-Loop: Reflected
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
+Ard Biesheuvel <ardb@kernel.org> writes:
 
-
-在 2022/4/14 18:22, Ard Biesheuvel 写道:
-> On Thu, 14 Apr 2022 at 11:54, Wupeng Ma <mawupeng1@huawei.com> wrote:
+> On Tue, 5 Apr 2022 at 18:26, Jonathan Corbet <corbet@lwn.net> wrote:
 >>
->> From: Ma Wupeng <mawupeng1@huawei.com>
+>> Akihiko Odaki <akihiko.odaki@gmail.com> writes:
 >>
->> Commit b05b9f5f9dcf ("x86, mirror: x86 enabling - find mirrored memory ranges")
->> introduced mirrored memory support for x86. This support rely on UEFI to
->> report mirrored memory address ranges.  See UEFI 2.5 spec pages 157-158:
+>> > x86 EFI earlyprink was removed with commit 69c1f396f25b ("efi/x86:
+>> > Convert x86 EFI earlyprintk into generic earlycon implementation").
 >>
->>    http://www.uefi.org/sites/default/files/resources/UEFI%202_5.pdf
+>> So I will confess that I don't know this area well enough to know
+>> whether this patch makes sense or not.  To help with that, it would have
+>> been good to CC Ard, who is the author of the patch you cite above.
+>> Adding him now.
 >>
->> Memory mirroring is a technique used to separate memory into two separate
->> channels, usually on a memory device, like a server. In memory mirroring,
->> one channel is copied to another to create redundancy. This method makes
->> input/output (I/O) registers and memory appear with more than one address
->> range because the same physical byte is accessible at more than one
->> address. Using memory mirroring, higher memory reliability and a higher
->> level of memory consolidation are possible.
+>> Ard, do you agree with this change (preserved below)?
 >>
->> Arm64 can support this too. So mirrored memory support is added to support
->> arm64.
->>
->> Efi_fake_mem is used for testing mirrored features and will not be used in
->> production environment. This test features can fake memory's attribute
->> values.
->>
->> The reason why efi_fake_mem support is put first is that memory's attribute
->> is reported by BIOS which is hard to simulate. With this support, any arm64
->> machines with efi support can easily test mirrored features.
->>
->> The main purpose of this patchset is to introduce mirrored support for
->> arm64 and we have already fixed the problems we had which is shown in
->> patch #5 to patch #7 and try to bring total isolation in patch #8 which
->> will disable mirror feature if kernelcore is not specified.
->>
->> In order to test this support in arm64:
->> - patch this patchset
->> - add efi_fake_mem=8G@0:0x10000 in kernel parameter to simulate mirrored
->>    memroy between phy addr 0-8G.
->> - add kernelcore=mirror in kernel parameter
->> - start you kernel
->>
-> 
-> As I explained before:
-> 
-> - NAK to EFI fake_mem support on arm64
+>
+> Yes, it looks fine to me.
+>
+> Reviewed-by: Ard Biesheuvel <ardb@kernel.org>
 
-fake_mem support on arm64 will be removed in subsequent version.
+Great.  Applied, thanks.
 
-> - NAK to the whole series until you come up with a proposal on how to
-> locate the static kernel image itself into more reliable memory, as
-> there is really no point to any of this otherwise.
-
-Sorry I am not familiar with this, as you metioned before,
-
- > you have to iterate over the memory map and look for regions with
- > the desired attribute, and allocate those pages explicitly.
-
-Do you mean this is x86, commit c05cd79750fb
-("x86/boot/KASLR: Prefer mirrored memory regions for the kernel physical address").
-I will do some research.
-
- > I'd prefer to implement this in the bootloader, and only add minimal
- > logic to the stub to respect the placement of the kernel by the loader
- > if the loader signals it to do so.
-
-Does this bootloader refer to grub and then add minimal logic to arm64-stub.c?
-
-What is the loader signal?
-System exists mirrored memory reported by uefi?
-
-Thanks for reviewing, sorry for my ignorance on this.
-
-> .
-
-
-
+jon
