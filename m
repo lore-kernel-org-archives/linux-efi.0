@@ -2,127 +2,108 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 30F55C4167D
-	for <linux-efi@archiver.kernel.org>; Tue, 19 Apr 2022 18:35:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A4452C433F5
+	for <linux-efi@archiver.kernel.org>; Tue, 19 Apr 2022 19:23:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244228AbiDSSi0 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 19 Apr 2022 14:38:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39218 "EHLO
+        id S1348965AbiDST0l (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 19 Apr 2022 15:26:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42352 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1357578AbiDSShl (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 19 Apr 2022 14:37:41 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9C7464EA28;
-        Tue, 19 Apr 2022 11:29:40 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        with ESMTP id S234737AbiDST0k (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 19 Apr 2022 15:26:40 -0400
+Received: from mail.skyhub.de (mail.skyhub.de [5.9.137.197])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 11BB43E5E0;
+        Tue, 19 Apr 2022 12:23:57 -0700 (PDT)
+Received: from zn.tnic (p200300ea971b5839329c23fffea6a903.dip0.t-ipconnect.de [IPv6:2003:ea:971b:5839:329c:23ff:fea6:a903])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 3811E61598;
-        Tue, 19 Apr 2022 18:29:40 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 92EA2C385A5;
-        Tue, 19 Apr 2022 18:29:39 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650392979;
-        bh=P3K1tP6cpjTFzC+59oPXafdJm30VtMZbfwvyBn+l0nE=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=KGDjP4xyx8qxb3jFDHz8SacfWd77hO7wBWOMnWzPRIf+36togREFgtvY+2GisJ5ua
-         EHD0M8aZbVy49xB218L2eVROCktRHVlRDvSaLidilao+Y7wl7Xx0LYiLyJmIsL03a8
-         bfW9XhwszwFNoSqXz0JnBmWXMG8R7GlFmt6q1YIPhRWQEz7n4rc2ff5LPJp2cPtXxi
-         xa07K/QiNPc9XT3RmJMMChldEU66W8w7gOIpgjivdwmaolnQBl7AxOI1yM09fKC4Aj
-         f/FYgrjmGmOaSrNgobpe1cKny6M9qVvgfpDYRTw/gRU6hssP9eo9T4rMq5ZDQevZWI
-         0o4WyjwLZNeRQ==
-Received: by mail-ot1-f44.google.com with SMTP id w23-20020a056830111700b00603c6d1ce73so8591016otq.9;
-        Tue, 19 Apr 2022 11:29:39 -0700 (PDT)
-X-Gm-Message-State: AOAM531U5wTZFEqw1TVcTgTASE88ztCsgEsa2eCEZVrz+95Xsj3B0K3z
-        o63NrQwtHVl1MO2P0f0Z9+HK/skzfYQiAvZU99M=
-X-Google-Smtp-Source: ABdhPJx9o5nnG+qju6sQJMbe2eMJR893omMynSTe6NVIGWkG2uzYm2akaRvmqHO268QDgzdEY4zNawIK3ayZ+NJ0zEc=
-X-Received: by 2002:a05:6830:33eb:b0:5f8:d36d:3831 with SMTP id
- i11-20020a05683033eb00b005f8d36d3831mr6341951otu.265.1650392978707; Tue, 19
- Apr 2022 11:29:38 -0700 (PDT)
-MIME-Version: 1.0
-References: <20220414101314.1250667-1-mawupeng1@huawei.com>
- <20220414101314.1250667-8-mawupeng1@huawei.com> <672ff459-81bd-38ef-882d-e718992d295c@arm.com>
-In-Reply-To: <672ff459-81bd-38ef-882d-e718992d295c@arm.com>
-From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Tue, 19 Apr 2022 20:29:27 +0200
-X-Gmail-Original-Message-ID: <CAMj1kXFnEhJ4Qu50Ads9psY6kmT3ddw5Za+6-YqUM+eYj1Oafw@mail.gmail.com>
-Message-ID: <CAMj1kXFnEhJ4Qu50Ads9psY6kmT3ddw5Za+6-YqUM+eYj1Oafw@mail.gmail.com>
-Subject: Re: [PATCH v2 7/9] mm: Calc the right pfn if page size is not 4K
-To:     Anshuman Khandual <anshuman.khandual@arm.com>,
-        Andrew Morton <akpm@linux-foundation.org>
-Cc:     Wupeng Ma <mawupeng1@huawei.com>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Will Deacon <will@kernel.org>,
-        Jonathan Corbet <corbet@lwn.net>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
-        Dave Hansen <dave.hansen@linux.intel.com>,
-        X86 ML <x86@kernel.org>, hpa@zyccr.com,
-        Darren Hart <dvhart@infradead.org>,
-        Andy Shevchenko <andy@infradead.org>,
-        Mike Rapoport <rppt@kernel.org>,
-        "Paul E. McKenney" <paulmck@kernel.org>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Joerg Roedel <jroedel@suse.de>, songmuchun@bytedance.com,
-        macro@orcam.me.uk, Frederic Weisbecker <frederic@kernel.org>,
-        W_Armin@gmx.de, John Garry <john.garry@huawei.com>,
+        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id 94A9C1EC0559;
+        Tue, 19 Apr 2022 21:23:51 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alien8.de; s=dkim;
+        t=1650396231;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:in-reply-to:in-reply-to:  references:references;
+        bh=29ILHsZsLNI1cHkGwMzPc7ayyznGcYHN5+bzv1pE4pk=;
+        b=aOCYh/K44Q0EvpEMzkaAkbuIouuG5B+e3XnIHMcNGSqGDlq43m1JcEwpdibQBrvwv4q3/4
+        lpCszkih78a7WOxtjAwh9GrByUAHbvIgTuaQBP/HCbisa1Dwtwg3qHo3J0+uWJAwYS2ems
+        JD2I1GH9VQDeinJxeKVOZFTVW7jM0CA=
+Date:   Tue, 19 Apr 2022 21:23:48 +0200
+From:   Borislav Petkov <bp@alien8.de>
+To:     "Kirill A. Shutemov" <kirill@shutemov.name>
+Cc:     "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
+        Andy Lutomirski <luto@kernel.org>,
         Sean Christopherson <seanjc@google.com>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        chenhuacai@kernel.org, David Hildenbrand <david@redhat.com>,
-        gpiccoli@igalia.com, Mark Rutland <mark.rutland@arm.com>,
-        Kefeng Wang <wangkefeng.wang@huawei.com>,
-        Linux Doc Mailing List <linux-doc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        linux-efi <linux-efi@vger.kernel.org>,
-        linux-ia64@vger.kernel.org, platform-driver-x86@vger.kernel.org,
-        Linux Memory Management List <linux-mm@kvack.org>
-Content-Type: text/plain; charset="UTF-8"
+        Andrew Morton <akpm@linux-foundation.org>,
+        Joerg Roedel <jroedel@suse.de>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Andi Kleen <ak@linux.intel.com>,
+        Kuppuswamy Sathyanarayanan 
+        <sathyanarayanan.kuppuswamy@linux.intel.com>,
+        David Rientjes <rientjes@google.com>,
+        Vlastimil Babka <vbabka@suse.cz>,
+        Tom Lendacky <thomas.lendacky@amd.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Paolo Bonzini <pbonzini@redhat.com>,
+        Ingo Molnar <mingo@redhat.com>,
+        Varad Gautam <varad.gautam@suse.com>,
+        Dario Faggioli <dfaggioli@suse.com>,
+        Dave Hansen <dave.hansen@intel.com>,
+        Brijesh Singh <brijesh.singh@amd.com>,
+        Mike Rapoport <rppt@kernel.org>,
+        David Hildenbrand <david@redhat.com>, x86@kernel.org,
+        linux-mm@kvack.org, linux-coco@lists.linux.dev,
+        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCHv4 3/8] efi/x86: Implement support for unaccepted memory
+Message-ID: <Yl8MRA6MxgNiLYv3@zn.tnic>
+References: <20220405234343.74045-1-kirill.shutemov@linux.intel.com>
+ <20220405234343.74045-4-kirill.shutemov@linux.intel.com>
+ <Ylnwmvygp796+qcA@zn.tnic>
+ <20220418155545.a567xnxa6elglapl@box.shutemov.name>
+ <Yl2UHOQ4iZJ29k0q@zn.tnic>
+ <20220418202431.whvql4w57c7l5vpw@box.shutemov.name>
+ <Yl3RmPhdZieSr8W2@zn.tnic>
+ <20220418235015.mnujtlmmlyin7y6m@box.shutemov.name>
+ <Yl5nSSC4HpSWqfY7@zn.tnic>
+ <20220419153002.ffh2ybdl7x2mm7zw@box.shutemov.name>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20220419153002.ffh2ybdl7x2mm7zw@box.shutemov.name>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, 19 Apr 2022 at 13:13, Anshuman Khandual
-<anshuman.khandual@arm.com> wrote:
->
->
->
-> On 4/14/22 15:43, Wupeng Ma wrote:
-> > From: Ma Wupeng <mawupeng1@huawei.com>
-> >
-> > Previous 0x100000 is used to check the 4G limit in
-> > find_zone_movable_pfns_for_nodes(). This is right in x86 because
-> > the page size can only be 4K. But 16K and 64K are available in
-> > arm64. So replace it with PHYS_PFN(SZ_4G).
-> >
-> > Signed-off-by: Ma Wupeng <mawupeng1@huawei.com>
-> > ---
-> >  mm/page_alloc.c | 2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
-> >
-> > diff --git a/mm/page_alloc.c b/mm/page_alloc.c
-> > index 6e5b4488a0c5..570d0ebf98df 100644
-> > --- a/mm/page_alloc.c
-> > +++ b/mm/page_alloc.c
-> > @@ -7870,7 +7870,7 @@ static void __init find_zone_movable_pfns_for_nodes(void)
-> >
-> >                       usable_startpfn = memblock_region_memory_base_pfn(r);
-> >
-> > -                     if (usable_startpfn < 0x100000) {
-> > +                     if (usable_startpfn < PHYS_PFN(SZ_4G)) {
-> >                               mem_below_4gb_not_mirrored = true;
-> >                               continue;
-> >                       }
->
-> Regardless PFN value should never be encoded directly.
->
-> Reviewed-by: Anshuman Khandual <anshuman.khandual@arm.com>
+On Tue, Apr 19, 2022 at 06:30:02PM +0300, Kirill A. Shutemov wrote:
+> Hm. Dave was worried about having copies of _find_next_bit() and
+> __bitmap_*() inside compressed/.
 
-Acked-by: Ard Biesheuvel <ardb@kernel.org>
+That's fine.
 
-Andrew, can you please take this one through the -mm tree? The rest of
-the series needs a bit more work, but is an obvious fix and there is
-no point in holding it up.
+> How do we rectify code duplication and making decompresser self-contained?
 
-Thanks,
-Ard.
+Also fine - as long as the decompressor and kernel-proper are
+independent.
+
+> Do we care about multiple copies of the same code in the kernel?
+
+The copied versions in the decompressor should be simply sufficient for
+its use. And there shouldn't be that much of duplication.
+
+Note that we're using the same strategy with perf tool - it does copy
+kernel facilities when it needs them.
+
+> Do we care about keeping them in sync?
+
+Nope - as long as they're sufficient for the decompressor. My
+expectation here is that the decompressor won't need too many
+facilities.
+
+Thx.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+https://people.kernel.org/tglx/notes-about-netiquette
