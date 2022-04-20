@@ -2,108 +2,164 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A4452C433F5
-	for <linux-efi@archiver.kernel.org>; Tue, 19 Apr 2022 19:23:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 61D62C433FE
+	for <linux-efi@archiver.kernel.org>; Wed, 20 Apr 2022 02:13:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1348965AbiDST0l (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 19 Apr 2022 15:26:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42352 "EHLO
+        id S1358829AbiDTCQ3 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 19 Apr 2022 22:16:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47834 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234737AbiDST0k (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 19 Apr 2022 15:26:40 -0400
-Received: from mail.skyhub.de (mail.skyhub.de [5.9.137.197])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 11BB43E5E0;
-        Tue, 19 Apr 2022 12:23:57 -0700 (PDT)
-Received: from zn.tnic (p200300ea971b5839329c23fffea6a903.dip0.t-ipconnect.de [IPv6:2003:ea:971b:5839:329c:23ff:fea6:a903])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id 94A9C1EC0559;
-        Tue, 19 Apr 2022 21:23:51 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alien8.de; s=dkim;
-        t=1650396231;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:in-reply-to:in-reply-to:  references:references;
-        bh=29ILHsZsLNI1cHkGwMzPc7ayyznGcYHN5+bzv1pE4pk=;
-        b=aOCYh/K44Q0EvpEMzkaAkbuIouuG5B+e3XnIHMcNGSqGDlq43m1JcEwpdibQBrvwv4q3/4
-        lpCszkih78a7WOxtjAwh9GrByUAHbvIgTuaQBP/HCbisa1Dwtwg3qHo3J0+uWJAwYS2ems
-        JD2I1GH9VQDeinJxeKVOZFTVW7jM0CA=
-Date:   Tue, 19 Apr 2022 21:23:48 +0200
-From:   Borislav Petkov <bp@alien8.de>
-To:     "Kirill A. Shutemov" <kirill@shutemov.name>
-Cc:     "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
-        Andy Lutomirski <luto@kernel.org>,
-        Sean Christopherson <seanjc@google.com>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Joerg Roedel <jroedel@suse.de>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Andi Kleen <ak@linux.intel.com>,
-        Kuppuswamy Sathyanarayanan 
-        <sathyanarayanan.kuppuswamy@linux.intel.com>,
-        David Rientjes <rientjes@google.com>,
-        Vlastimil Babka <vbabka@suse.cz>,
-        Tom Lendacky <thomas.lendacky@amd.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Paolo Bonzini <pbonzini@redhat.com>,
-        Ingo Molnar <mingo@redhat.com>,
-        Varad Gautam <varad.gautam@suse.com>,
-        Dario Faggioli <dfaggioli@suse.com>,
-        Dave Hansen <dave.hansen@intel.com>,
-        Brijesh Singh <brijesh.singh@amd.com>,
-        Mike Rapoport <rppt@kernel.org>,
-        David Hildenbrand <david@redhat.com>, x86@kernel.org,
-        linux-mm@kvack.org, linux-coco@lists.linux.dev,
-        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCHv4 3/8] efi/x86: Implement support for unaccepted memory
-Message-ID: <Yl8MRA6MxgNiLYv3@zn.tnic>
-References: <20220405234343.74045-1-kirill.shutemov@linux.intel.com>
- <20220405234343.74045-4-kirill.shutemov@linux.intel.com>
- <Ylnwmvygp796+qcA@zn.tnic>
- <20220418155545.a567xnxa6elglapl@box.shutemov.name>
- <Yl2UHOQ4iZJ29k0q@zn.tnic>
- <20220418202431.whvql4w57c7l5vpw@box.shutemov.name>
- <Yl3RmPhdZieSr8W2@zn.tnic>
- <20220418235015.mnujtlmmlyin7y6m@box.shutemov.name>
- <Yl5nSSC4HpSWqfY7@zn.tnic>
- <20220419153002.ffh2ybdl7x2mm7zw@box.shutemov.name>
+        with ESMTP id S229791AbiDTCQ2 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 19 Apr 2022 22:16:28 -0400
+Received: from szxga01-in.huawei.com (szxga01-in.huawei.com [45.249.212.187])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 90B50289BC;
+        Tue, 19 Apr 2022 19:13:43 -0700 (PDT)
+Received: from dggpemm500020.china.huawei.com (unknown [172.30.72.56])
+        by szxga01-in.huawei.com (SkyGuard) with ESMTP id 4Kjkjr0kH9zhXYf;
+        Wed, 20 Apr 2022 10:13:36 +0800 (CST)
+Received: from dggpemm500014.china.huawei.com (7.185.36.153) by
+ dggpemm500020.china.huawei.com (7.185.36.49) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.24; Wed, 20 Apr 2022 10:13:41 +0800
+Received: from [10.174.178.120] (10.174.178.120) by
+ dggpemm500014.china.huawei.com (7.185.36.153) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.24; Wed, 20 Apr 2022 10:13:40 +0800
+Message-ID: <b2864968-3cc7-dba3-5361-d8ee4cc3482a@huawei.com>
+Date:   Wed, 20 Apr 2022 10:13:40 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20220419153002.ffh2ybdl7x2mm7zw@box.shutemov.name>
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
+ Thunderbird/91.8.0
+Subject: Re: [PATCH v2 0/9] introduce mirrored memory support for arm64
+To:     <ardb@kernel.org>
+CC:     <akpm@linux-foundation.org>, <catalin.marinas@arm.com>,
+        <will@kernel.org>, <corbet@lwn.net>, <tglx@linutronix.de>,
+        <mingo@redhat.com>, <bp@alien8.de>, <dave.hansen@linux.intel.com>,
+        <x86@kernel.org>, <dvhart@infradead.org>, <andy@infradead.org>,
+        <rppt@kernel.org>, <paulmck@kernel.org>, <peterz@infradead.org>,
+        <jroedel@suse.de>, <songmuchun@bytedance.com>, <macro@orcam.me.uk>,
+        <frederic@kernel.org>, <W_Armin@gmx.de>, <john.garry@huawei.com>,
+        <seanjc@google.com>, <tsbogend@alpha.franken.de>,
+        <anshuman.khandual@arm.com>, <chenhuacai@kernel.org>,
+        <david@redhat.com>, <gpiccoli@igalia.com>, <mark.rutland@arm.com>,
+        <wangkefeng.wang@huawei.com>, <linux-doc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-efi@vger.kernel.org>, <linux-ia64@vger.kernel.org>,
+        <platform-driver-x86@vger.kernel.org>, <linux-mm@kvack.org>
+References: <20220414101314.1250667-1-mawupeng1@huawei.com>
+ <CAMj1kXGSStDgj9ABmUaTLnBmpQFksh3wx4tx=mJohum4GQe3Gg@mail.gmail.com>
+ <6de859df-e1c3-e9aa-4530-3b61b9c69a28@huawei.com>
+ <CAMj1kXGyKQMeFWSK-s84pdL89qPTyTN_x3WHTgp_R7sH1+qOfA@mail.gmail.com>
+From:   mawupeng <mawupeng1@huawei.com>
+In-Reply-To: <CAMj1kXGyKQMeFWSK-s84pdL89qPTyTN_x3WHTgp_R7sH1+qOfA@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 8bit
+X-Originating-IP: [10.174.178.120]
+X-ClientProxiedBy: dggems704-chm.china.huawei.com (10.3.19.181) To
+ dggpemm500014.china.huawei.com (7.185.36.153)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, Apr 19, 2022 at 06:30:02PM +0300, Kirill A. Shutemov wrote:
-> Hm. Dave was worried about having copies of _find_next_bit() and
-> __bitmap_*() inside compressed/.
 
-That's fine.
 
-> How do we rectify code duplication and making decompresser self-contained?
+在 2022/4/20 2:32, Ard Biesheuvel 写道:
+> On Sat, 16 Apr 2022 at 03:32, mawupeng <mawupeng1@huawei.com> wrote:
+>>
+>>
+>>
+>> 在 2022/4/14 18:22, Ard Biesheuvel 写道:
+>>> On Thu, 14 Apr 2022 at 11:54, Wupeng Ma <mawupeng1@huawei.com> wrote:
+>>>>
+>>>> From: Ma Wupeng <mawupeng1@huawei.com>
+>>>>
+>>>> Commit b05b9f5f9dcf ("x86, mirror: x86 enabling - find mirrored memory ranges")
+>>>> introduced mirrored memory support for x86. This support rely on UEFI to
+>>>> report mirrored memory address ranges.  See UEFI 2.5 spec pages 157-158:
+>>>>
+>>>>     http://www.uefi.org/sites/default/files/resources/UEFI%202_5.pdf
+>>>>
+>>>> Memory mirroring is a technique used to separate memory into two separate
+>>>> channels, usually on a memory device, like a server. In memory mirroring,
+>>>> one channel is copied to another to create redundancy. This method makes
+>>>> input/output (I/O) registers and memory appear with more than one address
+>>>> range because the same physical byte is accessible at more than one
+>>>> address. Using memory mirroring, higher memory reliability and a higher
+>>>> level of memory consolidation are possible.
+>>>>
+>>>> Arm64 can support this too. So mirrored memory support is added to support
+>>>> arm64.
+>>>>
+>>>> Efi_fake_mem is used for testing mirrored features and will not be used in
+>>>> production environment. This test features can fake memory's attribute
+>>>> values.
+>>>>
+>>>> The reason why efi_fake_mem support is put first is that memory's attribute
+>>>> is reported by BIOS which is hard to simulate. With this support, any arm64
+>>>> machines with efi support can easily test mirrored features.
+>>>>
+>>>> The main purpose of this patchset is to introduce mirrored support for
+>>>> arm64 and we have already fixed the problems we had which is shown in
+>>>> patch #5 to patch #7 and try to bring total isolation in patch #8 which
+>>>> will disable mirror feature if kernelcore is not specified.
+>>>>
+>>>> In order to test this support in arm64:
+>>>> - patch this patchset
+>>>> - add efi_fake_mem=8G@0:0x10000 in kernel parameter to simulate mirrored
+>>>>     memroy between phy addr 0-8G.
+>>>> - add kernelcore=mirror in kernel parameter
+>>>> - start you kernel
+>>>>
+>>>
+>>> As I explained before:
+>>>
+>>> - NAK to EFI fake_mem support on arm64
+>>
+>> fake_mem support on arm64 will be removed in subsequent version.
+>>
+>>> - NAK to the whole series until you come up with a proposal on how to
+>>> locate the static kernel image itself into more reliable memory, as
+>>> there is really no point to any of this otherwise.
+>>
+>> Sorry I am not familiar with this, as you metioned before,
+>>
+>>   > you have to iterate over the memory map and look for regions with
+>>   > the desired attribute, and allocate those pages explicitly.
+>>
+>> Do you mean this is x86, commit c05cd79750fb
+>> ("x86/boot/KASLR: Prefer mirrored memory regions for the kernel physical address").
+>> I will do some research.
+>>
+>>   > I'd prefer to implement this in the bootloader, and only add minimal
+>>   > logic to the stub to respect the placement of the kernel by the loader
+>>   > if the loader signals it to do so.
+>>
+>> Does this bootloader refer to grub and then add minimal logic to arm64-stub.c?
+>>
+> 
+> Any bootloader, yes.
+> 
+>> What is the loader signal?
+> 
+> A protocol installed onto the image handle, as I suggested before. I
+> even cc'ed you on a patch that implements this.
 
-Also fine - as long as the decompressor and kernel-proper are
-independent.
+Sorry to bother you.
+I didn't receive any patches.
+Could you share the link?
 
-> Do we care about multiple copies of the same code in the kernel?
+> 
+>> System exists mirrored memory reported by uefi?
+>>
+> 
+> What on earth is the point of any of this if the only use case being
+> targeted is efi_fake_mem with arbitrary fake mirrored regions?
+> 
+> So yes, unless there are systems that need this, I don't see a point
+> in merging any of this
+We do have mirrored memory reported by uefi and efi_fake_mem is added for easy testing
+with qemu/hardware without update UEFI.
 
-The copied versions in the decompressor should be simply sufficient for
-its use. And there shouldn't be that much of duplication.
-
-Note that we're using the same strategy with perf tool - it does copy
-kernel facilities when it needs them.
-
-> Do we care about keeping them in sync?
-
-Nope - as long as they're sufficient for the decompressor. My
-expectation here is that the decompressor won't need too many
-facilities.
-
-Thx.
-
--- 
-Regards/Gruss,
-    Boris.
-
-https://people.kernel.org/tglx/notes-about-netiquette
+> .
