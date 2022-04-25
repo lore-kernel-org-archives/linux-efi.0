@@ -2,24 +2,24 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7CCA9C433F5
-	for <linux-efi@archiver.kernel.org>; Mon, 25 Apr 2022 15:00:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8D963C433F5
+	for <linux-efi@archiver.kernel.org>; Mon, 25 Apr 2022 15:04:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242658AbiDYPDb (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 25 Apr 2022 11:03:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51322 "EHLO
+        id S232990AbiDYPHu (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 25 Apr 2022 11:07:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39360 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242578AbiDYPDa (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 25 Apr 2022 11:03:30 -0400
+        with ESMTP id S242775AbiDYPHq (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 25 Apr 2022 11:07:46 -0400
 Received: from fudo.makrotopia.org (fudo.makrotopia.org [IPv6:2a07:2ec0:3002::71])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 72EBA56205;
-        Mon, 25 Apr 2022 08:00:26 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CBEBF5468C;
+        Mon, 25 Apr 2022 08:04:42 -0700 (PDT)
 Received: from local
         by fudo.makrotopia.org with esmtpsa (TLS1.3:TLS_AES_256_GCM_SHA384:256)
          (Exim 4.94.2)
         (envelope-from <daniel@makrotopia.org>)
-        id 1nj0CO-0000qd-Ii; Mon, 25 Apr 2022 17:00:24 +0200
-Date:   Mon, 25 Apr 2022 16:00:19 +0100
+        id 1nj0A3-0000oD-HJ; Mon, 25 Apr 2022 16:57:59 +0200
+Date:   Mon, 25 Apr 2022 15:57:54 +0100
 From:   Daniel Golle <daniel@makrotopia.org>
 To:     linux-block@vger.kernel.org, linux-efi@vger.kernel.org,
         linux-mtd@lists.infradead.org, linux-kernel@vger.kernel.org
@@ -29,9 +29,8 @@ Cc:     Tom Rini <trini@konsulko.com>, Jens Axboe <axboe@kernel.dk>,
         Richard Weinberger <richard@nod.at>,
         Vignesh Raghavendra <vigneshr@ti.com>,
         Masahiro Yamada <masahiroy@kernel.org>
-Subject: [RFC PATCH 5/5] mtd/ubi/block: scan for partitions in case
- FIT_PARTITION is set
-Message-ID: <Yma3gy3Olkr73aRR@makrotopia.org>
+Subject: [RFC PATCH 1/5] block: add new flag to add partitions read-only
+Message-ID: <Yma28m867FD98Bgz@makrotopia.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
@@ -39,28 +38,45 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Enable partition parsers on plain ubiblock devices in case of
-CONFIG_FIT_PARTITION being selected.
+Add flag ADDPART_FLAG_READONLY to allow partition parsers marking a
+partition to be set read-only.
+This is needed for the uImage.FIT partition parser added by a follow-up
+commit: we need to be sure the contents of uImage.FIT sub-images
+remain unaltered they are validated using a hash within the uImage.FIT
+structure which also serves as partition table.
 
 Signed-off-by: Daniel Golle <daniel@makrotopia.org>
 ---
- drivers/mtd/ubi/block.c | 2 ++
- 1 file changed, 2 insertions(+)
+ block/blk.h             | 1 +
+ block/partitions/core.c | 3 +++
+ 2 files changed, 4 insertions(+)
 
-diff --git a/drivers/mtd/ubi/block.c b/drivers/mtd/ubi/block.c
-index 18683d1c1bf501..b0f1f4565c719b 100644
---- a/drivers/mtd/ubi/block.c
-+++ b/drivers/mtd/ubi/block.c
-@@ -431,7 +431,9 @@ int ubiblock_create(struct ubi_volume_info *vi)
- 		ret = -ENODEV;
- 		goto out_cleanup_disk;
+diff --git a/block/blk.h b/block/blk.h
+index 434017701403fb..c20592fe9bed4b 100644
+--- a/block/blk.h
++++ b/block/blk.h
+@@ -404,6 +404,7 @@ void blk_free_ext_minor(unsigned int minor);
+ #define ADDPART_FLAG_NONE	0
+ #define ADDPART_FLAG_RAID	1
+ #define ADDPART_FLAG_WHOLEDISK	2
++#define ADDPART_FLAG_READONLY	4
+ int bdev_add_partition(struct gendisk *disk, int partno, sector_t start,
+ 		sector_t length);
+ int bdev_del_partition(struct gendisk *disk, int partno);
+diff --git a/block/partitions/core.c b/block/partitions/core.c
+index 8a0ec929023bcd..3e70860beb655e 100644
+--- a/block/partitions/core.c
++++ b/block/partitions/core.c
+@@ -399,6 +399,9 @@ static struct block_device *add_partition(struct gendisk *disk, int partno,
+ 			goto out_del;
  	}
-+#ifndef CONFIG_FIT_PARTITION
- 	gd->flags |= GENHD_FL_NO_PART;
-+#endif
- 	gd->private_data = dev;
- 	sprintf(gd->disk_name, "ubiblock%d_%d", dev->ubi_num, dev->vol_id);
- 	set_capacity(gd, disk_capacity);
+ 
++	if (flags & ADDPART_FLAG_READONLY)
++		bdev->bd_read_only = true;
++
+ 	/* everything is up and running, commence */
+ 	err = xa_insert(&disk->part_tbl, partno, bdev, GFP_KERNEL);
+ 	if (err)
 -- 
 2.36.0
 
