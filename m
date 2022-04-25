@@ -2,43 +2,43 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3EEE1C433EF
-	for <linux-efi@archiver.kernel.org>; Mon, 25 Apr 2022 03:40:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 48DDDC433F5
+	for <linux-efi@archiver.kernel.org>; Mon, 25 Apr 2022 03:40:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240721AbiDYDnO (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 24 Apr 2022 23:43:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56162 "EHLO
+        id S240743AbiDYDnQ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 24 Apr 2022 23:43:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55912 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240726AbiDYDnC (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sun, 24 Apr 2022 23:43:02 -0400
-Received: from mga18.intel.com (mga18.intel.com [134.134.136.126])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9C89D2F01D;
-        Sun, 24 Apr 2022 20:39:54 -0700 (PDT)
+        with ESMTP id S240716AbiDYDm6 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sun, 24 Apr 2022 23:42:58 -0400
+Received: from mga11.intel.com (mga11.intel.com [192.55.52.93])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B79622F02C;
+        Sun, 24 Apr 2022 20:39:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1650857994; x=1682393994;
+  t=1650857990; x=1682393990;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=5hPx0r3OWxS+lz/D+l0BiGQBbeJJHb52sFjAF/68dVQ=;
-  b=Bpd6NcKA0XJRrq2U5Jl6i/oyVXFhvsM76P4Lwcljbhqf60OiH3TVVl+1
-   W1oiy3x1Cs8hS6wlE+Uk2/6fi+mBS25xH8wO3DnYRMmklRYQR3I+fV++4
-   7i1jbZnW1D+aqk0Y7yIgRi/pr1uXYU1OoVsXRqShiba//mztPlO8nFM1C
-   X7kx0MIQoGyYklb+iRVVpkiOSznOd7Kk5gpKhAw8VGD44lOJj7A/vvmlz
-   X7B/nSxJ/hbFQpZ/bQv0Taz9po55XLtQUUqybWiWotTO3LhRsmDnVttvA
-   kJ2b03AqqIl0V4My9m7j7O3HxMGk3fIcGsVsBrSj47h99GdhykDvMkCbK
-   w==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10327"; a="247051030"
+  bh=B6xQElVKXMmk7bVMoMJbz0U88Nts50RHxDgA813tPNs=;
+  b=Mn2BW/5XwbM1o86DPiRSBW5QByDzIwAfqWC8eRSI7yrhMi8wgpv5Lo8T
+   rC/yg0U3uENqLi7nc1s1Rr0/xmxKI8rNpyds6xJlToHLE63Jr0gpPLRLs
+   cRd3fcQszX7U9623NmrBFe1/YidmvTz6tXO0IyMUiYrN4gPncqX11UdNu
+   6y2iRleZi0oYD9SF9jAN5AbA84tiTqK+0ja3vAGmfG3eiEEK+qDB7cXFX
+   rvMO5Cwz+3uuelJTALiGXDCYKG4KO7YsRZBov2+6i5Yd8txZQaW+df+vg
+   SS3Uf06EADhpSxPHc87o8VCg+dnXLvqjEqE6X5ukGssZBC4ViW/hHOmbC
+   A==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10327"; a="262727698"
 X-IronPort-AV: E=Sophos;i="5.90,287,1643702400"; 
-   d="scan'208";a="247051030"
-Received: from fmsmga003.fm.intel.com ([10.253.24.29])
-  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Apr 2022 20:39:51 -0700
+   d="scan'208";a="262727698"
+Received: from fmsmga005.fm.intel.com ([10.253.24.32])
+  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Apr 2022 20:39:50 -0700
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.90,287,1643702400"; 
-   d="scan'208";a="649514099"
+   d="scan'208";a="871799384"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by FMSMGA003.fm.intel.com with ESMTP; 24 Apr 2022 20:39:43 -0700
+  by fmsmga005.fm.intel.com with ESMTP; 24 Apr 2022 20:39:43 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1000)
-        id 1D2DC739; Mon, 25 Apr 2022 06:39:36 +0300 (EEST)
+        id DC3785F2; Mon, 25 Apr 2022 06:39:35 +0300 (EEST)
 From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
 To:     Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>,
         Sean Christopherson <seanjc@google.com>,
@@ -63,10 +63,11 @@ Cc:     Andi Kleen <ak@linux.intel.com>,
         David Hildenbrand <david@redhat.com>, x86@kernel.org,
         linux-mm@kvack.org, linux-coco@lists.linux.dev,
         linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
-        "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-Subject: [PATCHv5 11/12] mm/vmstat: Add counter for memory accepting
-Date:   Mon, 25 Apr 2022 06:39:33 +0300
-Message-Id: <20220425033934.68551-12-kirill.shutemov@linux.intel.com>
+        "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
+        Mike Rapoport <rppt@linux.ibm.com>
+Subject: [PATCHv5 07/12] x86/mm: Reserve unaccepted memory bitmap
+Date:   Mon, 25 Apr 2022 06:39:29 +0300
+Message-Id: <20220425033934.68551-8-kirill.shutemov@linux.intel.com>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220425033934.68551-1-kirill.shutemov@linux.intel.com>
 References: <20220425033934.68551-1-kirill.shutemov@linux.intel.com>
@@ -76,58 +77,53 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The counter increased every time kernel accepts a memory region.
+A given page of memory can only be accepted once. The kernel has a need
+to accept memory both in the early decompression stage and during normal
+runtime.
 
-The counter allows to see if memory acceptation is still ongoing and
-contributes to memory allocation latency.
+A bitmap used to communicate the acceptance state of each page between the
+decompression stage and normal runtime.
+
+boot_params is used to communicate location of the bitmap through out
+the boot. The bitmap is allocated and initially populated in EFI stub.
+Decompression stage accepts pages required for kernel/initrd and mark
+these pages accordingly in the bitmap. The main kernel picks up the
+bitmap from the same boot_params and uses it to determinate what has to
+be accepted on allocation.
+
+In the runtime kernel, reserve the bitmap's memory to ensure nothing
+overwrites it.
+
+The size of bitmap is determinated with e820__end_of_ram_pfn() which
+relies on setup_e820() marking unaccepted memory as E820_TYPE_RAM.
 
 Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
+Acked-by: Mike Rapoport <rppt@linux.ibm.com>
 ---
- arch/x86/mm/unaccepted_memory.c | 1 +
- include/linux/vm_event_item.h   | 3 +++
- mm/vmstat.c                     | 3 +++
- 3 files changed, 7 insertions(+)
+ arch/x86/kernel/e820.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
-diff --git a/arch/x86/mm/unaccepted_memory.c b/arch/x86/mm/unaccepted_memory.c
-index de0790af1824..65cd49b93c50 100644
---- a/arch/x86/mm/unaccepted_memory.c
-+++ b/arch/x86/mm/unaccepted_memory.c
-@@ -38,6 +38,7 @@ void accept_memory(phys_addr_t start, phys_addr_t end)
- 		}
+diff --git a/arch/x86/kernel/e820.c b/arch/x86/kernel/e820.c
+index f267205f2d5a..22d1fe48dcba 100644
+--- a/arch/x86/kernel/e820.c
++++ b/arch/x86/kernel/e820.c
+@@ -1316,6 +1316,16 @@ void __init e820__memblock_setup(void)
+ 	int i;
+ 	u64 end;
  
- 		bitmap_clear(unaccepted_memory, range_start, len);
-+		count_vm_events(ACCEPT_MEMORY, len * PMD_SIZE / PAGE_SIZE);
- 	}
- 	spin_unlock_irqrestore(&unaccepted_memory_lock, flags);
- }
-diff --git a/include/linux/vm_event_item.h b/include/linux/vm_event_item.h
-index 16a0a4fd000b..6a468164a2f9 100644
---- a/include/linux/vm_event_item.h
-+++ b/include/linux/vm_event_item.h
-@@ -136,6 +136,9 @@ enum vm_event_item { PGPGIN, PGPGOUT, PSWPIN, PSWPOUT,
- #ifdef CONFIG_X86
- 		DIRECT_MAP_LEVEL2_SPLIT,
- 		DIRECT_MAP_LEVEL3_SPLIT,
-+#endif
-+#ifdef CONFIG_UNACCEPTED_MEMORY
-+		ACCEPT_MEMORY,
- #endif
- 		NR_VM_EVENT_ITEMS
- };
-diff --git a/mm/vmstat.c b/mm/vmstat.c
-index b75b1a64b54c..4c9197f32406 100644
---- a/mm/vmstat.c
-+++ b/mm/vmstat.c
-@@ -1397,6 +1397,9 @@ const char * const vmstat_text[] = {
- 	"direct_map_level2_splits",
- 	"direct_map_level3_splits",
- #endif
-+#ifdef CONFIG_UNACCEPTED_MEMORY
-+	"accept_memory",
-+#endif
- #endif /* CONFIG_VM_EVENT_COUNTERS || CONFIG_MEMCG */
- };
- #endif /* CONFIG_PROC_FS || CONFIG_SYSFS || CONFIG_NUMA || CONFIG_MEMCG */
++	/* Mark unaccepted memory bitmap reserved */
++	if (boot_params.unaccepted_memory) {
++		unsigned long size;
++
++		/* One bit per 2MB */
++		size = DIV_ROUND_UP(e820__end_of_ram_pfn() * PAGE_SIZE,
++				    PMD_SIZE * BITS_PER_BYTE);
++		memblock_reserve(boot_params.unaccepted_memory, size);
++	}
++
+ 	/*
+ 	 * The bootstrap memblock region count maximum is 128 entries
+ 	 * (INIT_MEMBLOCK_REGIONS), but EFI might pass us more E820 entries
 -- 
 2.35.1
 
