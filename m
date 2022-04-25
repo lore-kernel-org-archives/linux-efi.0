@@ -2,255 +2,157 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 93964C433EF
-	for <linux-efi@archiver.kernel.org>; Sat, 23 Apr 2022 01:50:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0FAA6C433FE
+	for <linux-efi@archiver.kernel.org>; Mon, 25 Apr 2022 03:39:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231552AbiDWBxp (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 22 Apr 2022 21:53:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50876 "EHLO
+        id S240691AbiDYDms (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 24 Apr 2022 23:42:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55412 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230231AbiDWBxp (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 22 Apr 2022 21:53:45 -0400
-Received: from mail-pf1-x42f.google.com (mail-pf1-x42f.google.com [IPv6:2607:f8b0:4864:20::42f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 395331148
-        for <linux-efi@vger.kernel.org>; Fri, 22 Apr 2022 18:50:49 -0700 (PDT)
-Received: by mail-pf1-x42f.google.com with SMTP id h1so9551933pfv.12
-        for <linux-efi@vger.kernel.org>; Fri, 22 Apr 2022 18:50:49 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=dabbelt-com.20210112.gappssmtp.com; s=20210112;
-        h=date:subject:in-reply-to:cc:from:to:message-id:mime-version
-         :content-transfer-encoding;
-        bh=iuHt4Iz4FeZBvfTekgoBxhqf7wWZiBSKlKE/b+2tuYo=;
-        b=goIqv8VMZbjl/c21Jd/hdMFrKYsyG7ZmdvPyMP0a/LfpPFogQ2pz0rqGGlL/AbTqAs
-         9pSaiVPXATwgYFD5N5J3yDUb/pSsg0GPEKelq16yimQnW972dgloHJe65mdFFqD9Do1K
-         rfbVg7wta3owfIXNgtPf9exTJ5PLWsXRn7YHotwHXiR3Lkj659kCquaRDrj310oN7KKB
-         jMZM6HpvA98IESGZVPUiQud4tbPccE2u3eNVzqTqrXy3s0yTKF6yVKnJ7iGeA60/fd96
-         +GWnu5/SHFOm3yjfGlSdAu7G7dd4BdX/igL9srOjG3lvbYLAaHSMkweQg27Zn7pzyHq/
-         VUDA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:subject:in-reply-to:cc:from:to:message-id
-         :mime-version:content-transfer-encoding;
-        bh=iuHt4Iz4FeZBvfTekgoBxhqf7wWZiBSKlKE/b+2tuYo=;
-        b=R6Qbkve3WCJpUbOyLhv43IItVtEhUWj+dW0hcLJackoJ7a3Bbu2aY98nLKu15HHhyK
-         X+k3n1fOHe9XDTW8S0Hkn5Y1tGZ6GJ/g/f7HqNWtgyriiRykP5cGqVAdSDH38pYWHrOs
-         g+CPXI4LblWAGyj/6E1qV2PK5JjzcLa+OshCEukj2df9t3jB1gUBzClTmxlh5cJIKWs7
-         A7OBIL1ylKU1bV2UClzEePLP3mGPPDy0Wl1rY9c3cok6noG/C2cfjUqRnrTJLELFayBO
-         dsJgiXv4Dus8Ro9XedVvAyOtHmTbqovwgDoEFf8uJYCJHzdMVzIAouxcB9I+ArPbd3xo
-         TnOg==
-X-Gm-Message-State: AOAM530GNzysJbgJE/09D/rc379QAYdCsXVt850v8d0gSeS+ycoss3OJ
-        Qrm7CZiX2z04fBii3y/v3Upqkw==
-X-Google-Smtp-Source: ABdhPJxJGqglrviMvw8Swe1RM63k2IYS5w00YAqVduQcH5u9WbhL2yia4TEU96zrIIxxdu1APdK0XA==
-X-Received: by 2002:a63:c5:0:b0:3aa:9882:9f91 with SMTP id 188-20020a6300c5000000b003aa98829f91mr6164187pga.574.1650678648423;
-        Fri, 22 Apr 2022 18:50:48 -0700 (PDT)
-Received: from localhost ([12.3.194.138])
-        by smtp.gmail.com with ESMTPSA id 123-20020a620681000000b004fa7c20d732sm3684931pfg.133.2022.04.22.18.50.47
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 22 Apr 2022 18:50:47 -0700 (PDT)
-Date:   Fri, 22 Apr 2022 18:50:47 -0700 (PDT)
-X-Google-Original-Date: Fri, 22 Apr 2022 18:50:27 PDT (-0700)
-Subject:     Re: [PATCH v3 00/13] Introduce sv48 support without relocatable kernel
-In-Reply-To: <CA+zEjCuyEsB0cHoL=zepejcRbn9Rwg9nRXLMZCOXe_daSWbvig@mail.gmail.com>
-CC:     corbet@lwn.net, Paul Walmsley <paul.walmsley@sifive.com>,
-        aou@eecs.berkeley.edu, zong.li@sifive.com, anup@brainfault.org,
-        Atish.Patra@rivosinc.com, Christoph Hellwig <hch@lst.de>,
-        ryabinin.a.a@gmail.com, glider@google.com, andreyknvl@gmail.com,
-        dvyukov@google.com, ardb@kernel.org, Arnd Bergmann <arnd@arndb.de>,
-        keescook@chromium.org, guoren@linux.alibaba.com,
-        heinrich.schuchardt@canonical.com, mchitale@ventanamicro.com,
-        panqinglin2020@iscas.ac.cn, linux-doc@vger.kernel.org,
-        linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org,
-        kasan-dev@googlegroups.com, linux-efi@vger.kernel.org,
-        linux-arch@vger.kernel.org
-From:   Palmer Dabbelt <palmer@dabbelt.com>
-To:     alexandre.ghiti@canonical.com
-Message-ID: <mhng-f386a42e-77d9-4644-914f-552a8e721f5c@palmer-ri-x1c9>
-Mime-Version: 1.0 (MHng)
-Content-Type: text/plain; charset=utf-8; format=flowed
+        with ESMTP id S237995AbiDYDmr (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sun, 24 Apr 2022 23:42:47 -0400
+Received: from mga03.intel.com (mga03.intel.com [134.134.136.65])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7405F2ED7F;
+        Sun, 24 Apr 2022 20:39:42 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1650857984; x=1682393984;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=uq7WbkY0GvTQhFT7oa2kwzHtvnsgmaIdyx/9kdIYCD0=;
+  b=Ulsfxi1ekNtLj4dkY7y+V8QrMwHzN0Wt07eYSoWF0/guIQTs4R0ftY5M
+   sDPQqqOM7lZjYXMebDCVSh4l3XTKIeKBSRLHPGOjMo3LV2oFQk9Tg/n04
+   N8EBf2Rk54DVfuzRWfNrsAQji6yVAcJVa4J38zUDXXs4NKCR24WG9n4ly
+   WpGa79OTLjPHECSqNtDCcK6kX0oEUmzWvDgIyzFlw6sT6+V9HAqWzNVSm
+   jLoGxW2bffd7YeKhLd1vJX6b6wXgz01xpho40UC2yJSOlM8eZB+8KCAUF
+   i/iZXNbXjDprDhOuHkf/9I+gxCZtQGhULpXNqRB9g3EujXiQihSzWSbCU
+   w==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10327"; a="264925569"
+X-IronPort-AV: E=Sophos;i="5.90,287,1643702400"; 
+   d="scan'208";a="264925569"
+Received: from orsmga005.jf.intel.com ([10.7.209.41])
+  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Apr 2022 20:39:42 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.90,287,1643702400"; 
+   d="scan'208";a="729520378"
+Received: from black.fi.intel.com ([10.237.72.28])
+  by orsmga005.jf.intel.com with ESMTP; 24 Apr 2022 20:39:35 -0700
+Received: by black.fi.intel.com (Postfix, from userid 1000)
+        id A608B3A8; Mon, 25 Apr 2022 06:39:35 +0300 (EEST)
+From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
+To:     Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>,
+        Sean Christopherson <seanjc@google.com>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Joerg Roedel <jroedel@suse.de>,
+        Ard Biesheuvel <ardb@kernel.org>
+Cc:     Andi Kleen <ak@linux.intel.com>,
+        Kuppuswamy Sathyanarayanan 
+        <sathyanarayanan.kuppuswamy@linux.intel.com>,
+        David Rientjes <rientjes@google.com>,
+        Vlastimil Babka <vbabka@suse.cz>,
+        Tom Lendacky <thomas.lendacky@amd.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Paolo Bonzini <pbonzini@redhat.com>,
+        Ingo Molnar <mingo@redhat.com>,
+        Varad Gautam <varad.gautam@suse.com>,
+        Dario Faggioli <dfaggioli@suse.com>,
+        Dave Hansen <dave.hansen@intel.com>,
+        Brijesh Singh <brijesh.singh@amd.com>,
+        Mike Rapoport <rppt@kernel.org>,
+        David Hildenbrand <david@redhat.com>, x86@kernel.org,
+        linux-mm@kvack.org, linux-coco@lists.linux.dev,
+        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
+        "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
+Subject: [PATCHv5 03/12] efi/x86: Get full memory map in allocate_e820()
+Date:   Mon, 25 Apr 2022 06:39:25 +0300
+Message-Id: <20220425033934.68551-4-kirill.shutemov@linux.intel.com>
+X-Mailer: git-send-email 2.35.1
+In-Reply-To: <20220425033934.68551-1-kirill.shutemov@linux.intel.com>
+References: <20220425033934.68551-1-kirill.shutemov@linux.intel.com>
+MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Fri, 01 Apr 2022 05:56:30 PDT (-0700), alexandre.ghiti@canonical.com wrote:
-> On Fri, Feb 18, 2022 at 11:45 AM Alexandre Ghiti
-> <alexandre.ghiti@canonical.com> wrote:
->>
->> Hi Palmer,
->>
->> On Thu, Jan 20, 2022 at 11:05 AM Alexandre Ghiti
->> <alexandre.ghiti@canonical.com> wrote:
->> >
->> > On Thu, Jan 20, 2022 at 8:30 AM Alexandre Ghiti
->> > <alexandre.ghiti@canonical.com> wrote:
->> > >
->> > > On Thu, Jan 20, 2022 at 5:18 AM Palmer Dabbelt <palmer@dabbelt.com> wrote:
->> > > >
->> > > > On Mon, 06 Dec 2021 02:46:44 PST (-0800), alexandre.ghiti@canonical.com wrote:
->> > > > > * Please note notable changes in memory layouts and kasan population *
->> > > > >
->> > > > > This patchset allows to have a single kernel for sv39 and sv48 without
->> > > > > being relocatable.
->> > > > >
->> > > > > The idea comes from Arnd Bergmann who suggested to do the same as x86,
->> > > > > that is mapping the kernel to the end of the address space, which allows
->> > > > > the kernel to be linked at the same address for both sv39 and sv48 and
->> > > > > then does not require to be relocated at runtime.
->> > > > >
->> > > > > This implements sv48 support at runtime. The kernel will try to
->> > > > > boot with 4-level page table and will fallback to 3-level if the HW does not
->> > > > > support it. Folding the 4th level into a 3-level page table has almost no
->> > > > > cost at runtime.
->> > > > >
->> > > > > Note that kasan region had to be moved to the end of the address space
->> > > > > since its location must be known at compile-time and then be valid for
->> > > > > both sv39 and sv48 (and sv57 that is coming).
->> > > > >
->> > > > > Tested on:
->> > > > >   - qemu rv64 sv39: OK
->> > > > >   - qemu rv64 sv48: OK
->> > > > >   - qemu rv64 sv39 + kasan: OK
->> > > > >   - qemu rv64 sv48 + kasan: OK
->> > > > >   - qemu rv32: OK
->> > > > >
->> > > > > Changes in v3:
->> > > > >   - Fix SZ_1T, thanks to Atish
->> > > > >   - Fix warning create_pud_mapping, thanks to Atish
->> > > > >   - Fix k210 nommu build, thanks to Atish
->> > > > >   - Fix wrong rebase as noted by Samuel
->> > > > >   - * Downgrade to sv39 is only possible if !KASAN (see commit changelog) *
->> > > > >   - * Move KASAN next to the kernel: virtual layouts changed and kasan population *
->> > > > >
->> > > > > Changes in v2:
->> > > > >   - Rebase onto for-next
->> > > > >   - Fix KASAN
->> > > > >   - Fix stack canary
->> > > > >   - Get completely rid of MAXPHYSMEM configs
->> > > > >   - Add documentation
->> > > > >
->> > > > > Alexandre Ghiti (13):
->> > > > >   riscv: Move KASAN mapping next to the kernel mapping
->> > > > >   riscv: Split early kasan mapping to prepare sv48 introduction
->> > > > >   riscv: Introduce functions to switch pt_ops
->> > > > >   riscv: Allow to dynamically define VA_BITS
->> > > > >   riscv: Get rid of MAXPHYSMEM configs
->> > > > >   asm-generic: Prepare for riscv use of pud_alloc_one and pud_free
->> > > > >   riscv: Implement sv48 support
->> > > > >   riscv: Use pgtable_l4_enabled to output mmu_type in cpuinfo
->> > > > >   riscv: Explicit comment about user virtual address space size
->> > > > >   riscv: Improve virtual kernel memory layout dump
->> > > > >   Documentation: riscv: Add sv48 description to VM layout
->> > > > >   riscv: Initialize thread pointer before calling C functions
->> > > > >   riscv: Allow user to downgrade to sv39 when hw supports sv48 if !KASAN
->> > > > >
->> > > > >  Documentation/riscv/vm-layout.rst             |  48 ++-
->> > > > >  arch/riscv/Kconfig                            |  37 +-
->> > > > >  arch/riscv/configs/nommu_k210_defconfig       |   1 -
->> > > > >  .../riscv/configs/nommu_k210_sdcard_defconfig |   1 -
->> > > > >  arch/riscv/configs/nommu_virt_defconfig       |   1 -
->> > > > >  arch/riscv/include/asm/csr.h                  |   3 +-
->> > > > >  arch/riscv/include/asm/fixmap.h               |   1
->> > > > >  arch/riscv/include/asm/kasan.h                |  11 +-
->> > > > >  arch/riscv/include/asm/page.h                 |  20 +-
->> > > > >  arch/riscv/include/asm/pgalloc.h              |  40 ++
->> > > > >  arch/riscv/include/asm/pgtable-64.h           | 108 ++++-
->> > > > >  arch/riscv/include/asm/pgtable.h              |  47 +-
->> > > > >  arch/riscv/include/asm/sparsemem.h            |   6 +-
->> > > > >  arch/riscv/kernel/cpu.c                       |  23 +-
->> > > > >  arch/riscv/kernel/head.S                      |   4 +-
->> > > > >  arch/riscv/mm/context.c                       |   4 +-
->> > > > >  arch/riscv/mm/init.c                          | 408 ++++++++++++++----
->> > > > >  arch/riscv/mm/kasan_init.c                    | 250 ++++++++---
->> > > > >  drivers/firmware/efi/libstub/efi-stub.c       |   2
->> > > > >  drivers/pci/controller/pci-xgene.c            |   2 +-
->> > > > >  include/asm-generic/pgalloc.h                 |  24 +-
->> > > > >  include/linux/sizes.h                         |   1
->> > > > >  22 files changed, 833 insertions(+), 209 deletions(-)
->> > > >
->> > > > Sorry this took a while.  This is on for-next, with a bit of juggling: a
->> > > > handful of trivial fixes for configs that were failing to build/boot and
->> > > > some merge issues.  I also pulled out that MAXPHYSMEM fix to the top, so
->> > > > it'd be easier to backport.  This is bigger than something I'd normally like to
->> > > > take late in the cycle, but given there's a lot of cleanups, likely some fixes,
->> > > > and it looks like folks have been testing this I'm just going to go with it.
->> > > >
->> > >
->> > > Yes yes yes! That's fantastic news :)
->> > >
->> > > > Let me know if there's any issues with the merge, it was a bit hairy.
->> > > > Probably best to just send along a fixup patch at this point.
->> > >
->> > > I'm going to take a look at that now, and I'll fix anything that comes
->> > > up quickly :)
->> >
->> > I see in for-next that you did not take the following patches:
->> >
->> >   riscv: Improve virtual kernel memory layout dump
->> >   Documentation: riscv: Add sv48 description to VM layout
->> >   riscv: Initialize thread pointer before calling C functions
->> >   riscv: Allow user to downgrade to sv39 when hw supports sv48 if !KASAN
->> >
->> > I'm not sure this was your intention. If it was, I believe that at
->> > least the first 2 patches are needed in this series, the 3rd one is a
->> > useful fix and we can discuss the 4th if that's an issue for you.
->>
->> Can you confirm that this was intentional and maybe explain the
->> motivation behind it? Because I see value in those patches.
->
-> Palmer,
->
-> I read that you were still taking patches for 5.18, so I confirm again
-> that the patches above are needed IMO.
+Currently allocate_e820() only interested in the size of map and size of
+memory descriptor to determine how many e820 entries the kernel needs.
 
-It was too late for this when it was sent (I saw it then, but just got 
-around to actually doing the work to sort it out).
+UEFI Specification version 2.9 introduces a new memory type --
+unaccepted memory. To track unaccepted memory kernel needs to allocate
+a bitmap. The size of the bitmap is dependent on the maximum physical
+address present in the system. A full memory map is required to find
+the maximum address.
 
-It took me a while to figure out exactly what was going on here, but I 
-think I remember now: that downgrade patch (and the follow-on I just 
-sent) is broken for medlow, because mm/init.c must be built medany 
-(which we're using for the mostly-PIC qualities).  I remember being in 
-the middle of rebasing/debugging this a while ago, I must have forgotten 
-I was in the middle of that and accidentally merged the branch as-is.  
-Certainly wasn't trying to silently take half the patch set and leave 
-the rest in limbo, that's the wrong way to do things. 
+Modify allocate_e820() to get a full memory map.
 
-I'm not sure what the right answer is here, but I just sent a patch to 
-drop support for medlow.  We'll have to talk about that, for now I 
-cleaned up some other minor issues, rearranged that docs and fix to come 
-first, and put this at palmer/riscv-sv48.  I think that fix is 
-reasonable to take the doc and fix into fixes, then the dump improvement 
-on for-next.  We'll have to see what folks think about the medany-only 
-kernels, the other option would be to build FDT as medany which seems a 
-bit awkward.  
+This is preparation for the next patch that implements handling of
+unaccepted memory in EFI stub.
 
-> Maybe even the relocatable series?
+Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
+---
+ drivers/firmware/efi/libstub/x86-stub.c | 30 ++++++++++++-------------
+ 1 file changed, 14 insertions(+), 16 deletions(-)
 
-Do you mind giving me a pointer?  I'm not sure why I'm so drop-prone 
-with your patches, I promise I'm not doing it on purpose.
+diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
+index 01ddd4502e28..5401985901f5 100644
+--- a/drivers/firmware/efi/libstub/x86-stub.c
++++ b/drivers/firmware/efi/libstub/x86-stub.c
+@@ -569,31 +569,29 @@ static efi_status_t alloc_e820ext(u32 nr_desc, struct setup_data **e820ext,
+ }
+ 
+ static efi_status_t allocate_e820(struct boot_params *params,
++				  struct efi_boot_memmap *map,
+ 				  struct setup_data **e820ext,
+ 				  u32 *e820ext_size)
+ {
+-	unsigned long map_size, desc_size, map_key;
+ 	efi_status_t status;
+-	__u32 nr_desc, desc_version;
++	__u32 nr_desc;
+ 
+-	/* Only need the size of the mem map and size of each mem descriptor */
+-	map_size = 0;
+-	status = efi_bs_call(get_memory_map, &map_size, NULL, &map_key,
+-			     &desc_size, &desc_version);
+-	if (status != EFI_BUFFER_TOO_SMALL)
+-		return (status != EFI_SUCCESS) ? status : EFI_UNSUPPORTED;
+-
+-	nr_desc = map_size / desc_size + EFI_MMAP_NR_SLACK_SLOTS;
++	status = efi_get_memory_map(map);
++	if (status != EFI_SUCCESS)
++		return status;
+ 
+-	if (nr_desc > ARRAY_SIZE(params->e820_table)) {
+-		u32 nr_e820ext = nr_desc - ARRAY_SIZE(params->e820_table);
++	nr_desc = *map->map_size / *map->desc_size;
++	if (nr_desc > ARRAY_SIZE(params->e820_table) - EFI_MMAP_NR_SLACK_SLOTS) {
++		u32 nr_e820ext = nr_desc - ARRAY_SIZE(params->e820_table) +
++			EFI_MMAP_NR_SLACK_SLOTS;
+ 
+ 		status = alloc_e820ext(nr_e820ext, e820ext, e820ext_size);
+ 		if (status != EFI_SUCCESS)
+-			return status;
++			goto out;
+ 	}
+-
+-	return EFI_SUCCESS;
++out:
++	efi_bs_call(free_pool, *map->map);
++	return status;
+ }
+ 
+ struct exit_boot_struct {
+@@ -642,7 +640,7 @@ static efi_status_t exit_boot(struct boot_params *boot_params, void *handle)
+ 	priv.boot_params	= boot_params;
+ 	priv.efi		= &boot_params->efi_info;
+ 
+-	status = allocate_e820(boot_params, &e820ext, &e820ext_size);
++	status = allocate_e820(boot_params, &map, &e820ext, &e820ext_size);
+ 	if (status != EFI_SUCCESS)
+ 		return status;
+ 
+-- 
+2.35.1
 
->
-> Thanks,
->
-> Alex
->
->>
->> Thanks,
->>
->> Alex
->>
->> >
->> > I tested for-next on both sv39 and sv48 successfully, I took a glance
->> > at the code and noticed you fixed the PTRS_PER_PGD error, thanks for
->> > that. Otherwise nothing obvious has popped.
->> >
->> > Thanks again,
->> >
->> > Alex
->> >
->> > >
->> > > Thanks!
->> > >
->> > > Alex
->> > >
->> > > >
->> > > > Thanks!
