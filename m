@@ -2,106 +2,158 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D075C433EF
-	for <linux-efi@archiver.kernel.org>; Tue, 26 Apr 2022 06:17:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 33F3AC433F5
+	for <linux-efi@archiver.kernel.org>; Tue, 26 Apr 2022 06:18:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235751AbiDZGUK (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 26 Apr 2022 02:20:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51554 "EHLO
+        id S244142AbiDZGVQ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 26 Apr 2022 02:21:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56618 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232042AbiDZGUI (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 26 Apr 2022 02:20:08 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 07BD7101FC;
-        Mon, 25 Apr 2022 23:17:02 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 9B5C0B81B3A;
-        Tue, 26 Apr 2022 06:17:00 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D7B91C385A0;
-        Tue, 26 Apr 2022 06:16:52 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650953819;
-        bh=ANH3UTZLZ+hrLRQUGigFumQFldVbaQC5gsVuGlcgcGc=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=lWgfMDM+ZJ60+fK3LlOiWlrEb0jOc3QwdWyzxmKvqG2Qstz4rqSTKh/b5UVRorkvr
-         rdo5xaJI7jflFyoYq1LYu1ds9aY9rpiEr6XtxisLN+Tbeq4A4ReBcJlixUNFKOtCVA
-         Cg4bgDpHANgPWx9q9PECu8I0tSOwwbtuQ0KK7AuPKlmCEFmX1VAi8KPLs4W1t4DNtO
-         a19ZR22jmqTtZ+a1FPq499wlc1vDaUqawRFizxC0ImwB3Aerlr5Jg6b2GstX66J9JL
-         UOynuNg+6YXYNG/XGKs1rl6UpJs7w1AGIWxr2+WndT28AZ91UHh0nzhonGdw3a1jN0
-         2SIyHBB1zSLZQ==
-Date:   Tue, 26 Apr 2022 09:16:48 +0300
-From:   Mike Rapoport <rppt@kernel.org>
-To:     Martin Fernandez <martin.fernandez@eclypsium.com>
-Cc:     linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
-        platform-driver-x86@vger.kernel.org, linux-mm@kvack.org,
-        tglx@linutronix.de, mingo@redhat.com, bp@alien8.de,
-        dave.hansen@linux.intel.com, x86@kernel.org, hpa@zytor.com,
-        ardb@kernel.org, dvhart@infradead.org, andy@infradead.org,
-        gregkh@linuxfoundation.org, rafael@kernel.org,
-        akpm@linux-foundation.org, daniel.gutson@eclypsium.com,
-        hughsient@gmail.com, alex.bazhaniuk@eclypsium.com,
-        alison.schofield@intel.com, keescook@chromium.org
-Subject: Re: [PATCH v7 2/8] mm/mmzone: Tag pg_data_t with crypto capabilities
-Message-ID: <YmeOUEyGIp6HPCM4@kernel.org>
-References: <20220425171526.44925-1-martin.fernandez@eclypsium.com>
- <20220425171526.44925-3-martin.fernandez@eclypsium.com>
+        with ESMTP id S232042AbiDZGVP (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 26 Apr 2022 02:21:15 -0400
+X-Greylist: delayed 1235 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Mon, 25 Apr 2022 23:18:09 PDT
+Received: from mailgate.ics.forth.gr (mailgate.ics.forth.gr [139.91.1.2])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 38A8313CF4
+        for <linux-efi@vger.kernel.org>; Mon, 25 Apr 2022 23:18:08 -0700 (PDT)
+Received: from av3.ics.forth.gr (av3in.ics.forth.gr [139.91.1.77])
+        by mailgate.ics.forth.gr (8.15.2/ICS-FORTH/V10-1.8-GATE) with ESMTP id 23Q5vVS3063351
+        for <linux-efi@vger.kernel.org>; Tue, 26 Apr 2022 08:57:31 +0300 (EEST)
+DKIM-Signature: v=1; a=rsa-sha256; d=ics.forth.gr; s=av; c=relaxed/simple;
+        q=dns/txt; i=@ics.forth.gr; t=1650952645; x=1653544645;
+        h=From:Sender:Reply-To:Subject:Date:Message-ID:To:Cc:MIME-Version:Content-Type:
+        Content-Transfer-Encoding:Content-ID:Content-Description:Resent-Date:Resent-From:
+        Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:In-Reply-To:References:List-Id:
+        List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive;
+        bh=LL28OJv509egBstFeV2Ig3Njtp/Ayo/hHdAQn0ETPec=;
+        b=inL8gMH1cWEb8U7PIiRtwnnf7GjL0T6zk5P4mLcmVnQKraiGPCW26ZMn5iYuHdZO
+        AZepokb2YUfIpjs60yqFS/QWUkH/djpkRawTJrAYBqC/m1DaBLBF8eRS96GpM+OH
+        IuTtb578KJ13c4XPndM0b1Yvk2he35rQYyKLHiyaxwUeiUDmGziGvc0HibvBmOV7
+        pTmUr89xvwVvQzyanmsERc96wk7UWsVWyeBZhnh2hoJy95KGRYuHvYlTbUGEtpJt
+        0UsKF081i4iAG43/bmtnm4yObPosq92f0OOcDeAOHo6QCSzhvbqP/4pOasl/UFUn
+        CcvdEM211o5gHpxie02+sA==;
+X-AuditID: 8b5b014d-f2ab27000000641e-1f-626789c58245
+Received: from enigma.ics.forth.gr (enigma.ics.forth.gr [139.91.151.35])
+        by av3.ics.forth.gr (Symantec Messaging Gateway) with SMTP id C3.C0.25630.5C987626; Tue, 26 Apr 2022 08:57:25 +0300 (EEST)
+X-ICS-AUTH-INFO: Authenticated user: mick at ics.forth.gr
+Message-ID: <ff85cdc4-b1e3-06a3-19fc-a7e1acf99d40@ics.forth.gr>
+Date:   Tue, 26 Apr 2022 08:57:19 +0300
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220425171526.44925-3-martin.fernandez@eclypsium.com>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.7.0
+Subject: Re: [PATCH v3 07/13] riscv: Implement sv48 support
+Content-Language: el-en
+To:     Alexandre Ghiti <alexandre.ghiti@canonical.com>,
+        Jonathan Corbet <corbet@lwn.net>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Zong Li <zong.li@sifive.com>, Anup Patel <anup@brainfault.org>,
+        Atish Patra <Atish.Patra@rivosinc.com>,
+        Christoph Hellwig <hch@lst.de>,
+        Andrey Ryabinin <ryabinin.a.a@gmail.com>,
+        Alexander Potapenko <glider@google.com>,
+        Andrey Konovalov <andreyknvl@gmail.com>,
+        Dmitry Vyukov <dvyukov@google.com>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Kees Cook <keescook@chromium.org>,
+        Guo Ren <guoren@linux.alibaba.com>,
+        Heinrich Schuchardt <heinrich.schuchardt@canonical.com>,
+        Mayuresh Chitale <mchitale@ventanamicro.com>,
+        panqinglin2020@iscas.ac.cn, linux-doc@vger.kernel.org,
+        linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org,
+        kasan-dev@googlegroups.com, linux-efi@vger.kernel.org,
+        linux-arch@vger.kernel.org
+References: <20211206104657.433304-1-alexandre.ghiti@canonical.com>
+ <20211206104657.433304-8-alexandre.ghiti@canonical.com>
+From:   Nick Kossifidis <mick@ics.forth.gr>
+In-Reply-To: <20211206104657.433304-8-alexandre.ghiti@canonical.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Brightmail-Tracker: H4sIAAAAAAAAA02Rf0yMcRzH973n6Xmezo5vV/jKsF0MISw/vtTC2HpMfi3ze+Oqx/VL9HQ1
+        vx3ydN1hV6R5dPTjSsVC59JdIlnESlcNpd24MnNNhAiN0cXWf6993p/3+/3ZPgwhf0n6MjEJ
+        ao5PUMYrKCmp35btN6suXRUx5+a5QFyWb/fA/RnZNE7t/eCBLQMijX/0fQT4V+ZDGuutWgK/
+        qUkD2OAUaJz2qZrAjzptJC65WifB9mPtNC5++0qCG/S7sdb2lcR5gonEgvMlwK22HApXfEml
+        cFZ9F4ldracIfPlTL4UFcRR+ZLlF4F7HRWqpLzvwMxOwWQMNJCtqTlPsRU0zyb53uUj2gbaP
+        Zq2ig2Zzy5PZOxmPKfZupRmw5aXpFGt1LmLNpqNsVbuGYgvOnPVg28TN67y3SoOjuPiYFI6f
+        HbJTGv3678F7NfJ9TelGWgNKR+qAJ4PgPNR2wkDpgJSRwzqAclL7wJCwCJk/u8hBlsElqKtM
+        oAeZhFNQY3kHMTT3Qo8vvHHvjIabUZEty83eMAjdtJjdOQQci2wtOslggQ+sYVB9r9EdJIeH
+        kenJOzdTcDq63HL/r5lhPOEKlP5NPeRdgHQW3b+cSeh2Tw5hAKPEYdXisApxmEUcZskFZCmA
+        ypTAgJjIpIBde3h1dICKLwfu94PVlaDD3BNQCyQMqAWIIRQ+sqwpuyLksijl/gMcv2cHnxzP
+        JdWC8QypGCuj326KkEOVUs3Fcdxejv+vShhPX40ERDqrT9pvREQvb6yyLR7Zlg8tE88fmqCI
+        LNqy9nl/Siq89O1glDT8Wr598tQSR2PIVB+bv/lHN0z0exrkLxRKqrbLuaYKXWhlact0LdR3
+        tJnzjBmGLV1SU0H1jnFHRqwpenB//k/HEiGxInZOdzOZ2KrqDj/F+7vCus9Vh60MNlQCB0Gk
+        5RbeE7zM9jFN1lDvS2vHnS0JWv9bMiK3+Pv+1/mynuvqbGeB/vO7muCBhNiqkMS40ECDX/8R
+        r9irB7XWmZ2zjM9ySmQ+T6c9+74hLlJV1t5wRedYMSNPWmesCd8YVhy7bKewynQ32WPiws4X
+        25ufK3+tmly/5rhYOLu/RUEmRSvn+hN8kvIP4RAOL20DAAA=
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Mon, Apr 25, 2022 at 02:15:20PM -0300, Martin Fernandez wrote:
-> Add a new member in the pg_data_t struct to tell whether the node
-> corresponding to that pg_data_t is able to do hardware memory
-> encryption.
-> 
-> This will be read from sysfs.
-> 
-> Signed-off-by: Martin Fernandez <martin.fernandez@eclypsium.com>
+Hello Alex,
 
-Reviewed-by: Mike Rapoport <rppt@linux.ibm.com>
-
-> ---
->  include/linux/mmzone.h | 3 +++
->  mm/page_alloc.c        | 1 +
->  2 files changed, 4 insertions(+)
+On 12/6/21 12:46, Alexandre Ghiti wrote:
 > 
-> diff --git a/include/linux/mmzone.h b/include/linux/mmzone.h
-> index 46ffab808f03..89054af9e599 100644
-> --- a/include/linux/mmzone.h
-> +++ b/include/linux/mmzone.h
-> @@ -886,6 +886,9 @@ typedef struct pglist_data {
->  	struct task_struct *kcompactd;
->  	bool proactive_compact_trigger;
->  #endif
+> +#ifdef CONFIG_64BIT
+> +static void __init disable_pgtable_l4(void)
+> +{
+> +	pgtable_l4_enabled = false;
+> +	kernel_map.page_offset = PAGE_OFFSET_L3;
+> +	satp_mode = SATP_MODE_39;
+> +}
 > +
-> +	bool crypto_capable;
+> +/*
+> + * There is a simple way to determine if 4-level is supported by the
+> + * underlying hardware: establish 1:1 mapping in 4-level page table mode
+> + * then read SATP to see if the configuration was taken into account
+> + * meaning sv48 is supported.
+> + */
+> +static __init void set_satp_mode(void)
+> +{
+> +	u64 identity_satp, hw_satp;
+> +	uintptr_t set_satp_mode_pmd;
 > +
->  	/*
->  	 * This is a per-node reserve of pages that are not available
->  	 * to userspace allocations.
-> diff --git a/mm/page_alloc.c b/mm/page_alloc.c
-> index 0e42038382c1..a244151045b4 100644
-> --- a/mm/page_alloc.c
-> +++ b/mm/page_alloc.c
-> @@ -7699,6 +7699,7 @@ static void __init free_area_init_node(int nid)
->  	pgdat->node_id = nid;
->  	pgdat->node_start_pfn = start_pfn;
->  	pgdat->per_cpu_nodestats = NULL;
-> +	pgdat->crypto_capable = memblock_node_is_crypto_capable(nid);
->  
->  	if (start_pfn != end_pfn) {
->  		pr_info("Initmem setup node %d [mem %#018Lx-%#018Lx]\n", nid,
-> -- 
-> 2.30.2
-> 
-> 
+> +	set_satp_mode_pmd = ((unsigned long)set_satp_mode) & PMD_MASK;
+> +	create_pgd_mapping(early_pg_dir,
+> +			   set_satp_mode_pmd, (uintptr_t)early_pud,
+> +			   PGDIR_SIZE, PAGE_TABLE);
+> +	create_pud_mapping(early_pud,
+> +			   set_satp_mode_pmd, (uintptr_t)early_pmd,
+> +			   PUD_SIZE, PAGE_TABLE);
+> +	/* Handle the case where set_satp_mode straddles 2 PMDs */
+> +	create_pmd_mapping(early_pmd,
+> +			   set_satp_mode_pmd, set_satp_mode_pmd,
+> +			   PMD_SIZE, PAGE_KERNEL_EXEC);
+> +	create_pmd_mapping(early_pmd,
+> +			   set_satp_mode_pmd + PMD_SIZE,
+> +			   set_satp_mode_pmd + PMD_SIZE,
+> +			   PMD_SIZE, PAGE_KERNEL_EXEC);
+> +
+> +	identity_satp = PFN_DOWN((uintptr_t)&early_pg_dir) | satp_mode;
+> +
+> +	local_flush_tlb_all();
+> +	csr_write(CSR_SATP, identity_satp);
+> +	hw_satp = csr_swap(CSR_SATP, 0ULL);
+> +	local_flush_tlb_all();
+> +
+> +	if (hw_satp != identity_satp)
+> +		disable_pgtable_l4();
+> +
+> +	memset(early_pg_dir, 0, PAGE_SIZE);
+> +	memset(early_pud, 0, PAGE_SIZE);
+> +	memset(early_pmd, 0, PAGE_SIZE);
+> +}
+> +#endif
+> +
 
--- 
-Sincerely yours,
-Mike.
+When doing the 1:1 mapping you don't take into account the limitation 
+that all bits above 47 need to have the same value as bit 47. If the 
+kernel exists at a high physical address with bit 47 set the 
+corresponding virtual address will be invalid, resulting an instruction 
+fetch fault as the privilege spec mandates. We verified this bug on our 
+prototype. I suggest we re-write this in assembly and do a proper satp 
+switch like we do on head.S, so that we don't need the 1:1 mapping and 
+we also have a way to recover in case this fails.
+
+Regards,
+Nick
