@@ -2,337 +2,103 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D854C433EF
-	for <linux-efi@archiver.kernel.org>; Mon,  2 May 2022 11:17:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A01FEC433FE
+	for <linux-efi@archiver.kernel.org>; Mon,  2 May 2022 13:36:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1384662AbiEBLU7 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 2 May 2022 07:20:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34988 "EHLO
+        id S233529AbiEBNkI (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 2 May 2022 09:40:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45648 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231325AbiEBLU5 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 2 May 2022 07:20:57 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C1D88BC17;
-        Mon,  2 May 2022 04:17:28 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 773AEB81058;
-        Mon,  2 May 2022 11:17:27 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8E30FC385B1;
-        Mon,  2 May 2022 11:17:24 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1651490246;
-        bh=XZW/JCwgq6tAw7SBVFrShBag6VMdsc/+bw/ci9pjai8=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=meMSGpfLtiqiULufuetTFyooi5QvodYIOaB5T5MTHvniaV4y6KWwIgcoYX4wOyU5D
-         TA49uykteL1QTu3HrWw7etPRbxupDe0Ho1VmFo5X77RWEiap7aGziyQZ+Ac6igpK3V
-         SyVwtqbsxTkXeypY+mLIFP6/rOBZGL8UYLVuTXz8U4+u/5D/UaRu//3Yw6R2MKLf9P
-         KtR/nzrh+K0QoAsacvlOKA2XTvFocohhV43OzYhzpfTfMKSBcL5AnnpBy8lwdp57ob
-         RvvqHLbYxph5Y04LYj/eUkgSkzpwzNZlu8JoELW8gFC6wH6oB24dDmKd82GU3NY1ks
-         HNaTFH58s0DVQ==
-From:   Ard Biesheuvel <ardb@kernel.org>
-To:     linux-efi@vger.kernel.org, linux-arch@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org
-Cc:     catalin.marinas@arm.com, will@kernel.org,
+        with ESMTP id S1385368AbiEBNkF (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 2 May 2022 09:40:05 -0400
+Received: from mail-lf1-x12a.google.com (mail-lf1-x12a.google.com [IPv6:2a00:1450:4864:20::12a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F306115702
+        for <linux-efi@vger.kernel.org>; Mon,  2 May 2022 06:36:28 -0700 (PDT)
+Received: by mail-lf1-x12a.google.com with SMTP id w1so25293064lfa.4
+        for <linux-efi@vger.kernel.org>; Mon, 02 May 2022 06:36:28 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=shutemov-name.20210112.gappssmtp.com; s=20210112;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=sPNChsGYk7kHE/rCDooMX11EJCDPE+Ox4AJuqojjAS4=;
+        b=oMyzTIQDDDkGSqMMk6jcH3Jg3mOWazFOFwqR8EyExlL855INKMIuaBkCZwvdgRpQSD
+         biuD4BmyhgnU+ANzhEkwdNHyFuPiASTFGfXH7JoHfMhBtseilEctTctKHd1Z5QYpIeyh
+         XCBKI9nH1N78fYzf8GPhsTsXjmLO8rakFYZrfwhEpi9DGSBHuyM7Kyzd7RCTX53lpQV2
+         AAgicbO0zVpm57tZpTUKqHTOhO/EJQ9lQ16JCpzBQasFSbKey6Q9NKDvke2t9g+Su53U
+         XrVFnmOMFo0w1Fu6ajlfu9QgB04IgkrRWFpyWkdh+dnaXEjEmg6QDV7a4CYqhpLi/K7r
+         jzBA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=sPNChsGYk7kHE/rCDooMX11EJCDPE+Ox4AJuqojjAS4=;
+        b=M7Pyy2C1DTPutK/mRGDt3ebimL1wP/NtudRzKA8nkn4hbEedK04wq6rvvOkF943XUZ
+         72B4Uum8X4aZqg51b04hCAwhp8uajNDcjBCiFD486hq+jltdjSMayw9hjlEtWGj7llV7
+         lMajTTrbcyDyGsJLLg+2MKhYPpadRoGRyU+enNSI+HDIlq0b7mhQbQGYMMLfceQgIOhH
+         5o/xCT2UDXAybfPHzHiyGiOJqpXx81WT1qNGbbKtOV4VRpcw4e6LaQ94LxvOofJQj1Bx
+         tl8NrFb04Cdt6KgTug3PhRoRkw/xMnrGqSt+zdUwy91Db7SIjeUGD6JfeXUgN7U7GW/6
+         e8Rg==
+X-Gm-Message-State: AOAM531wx1bVVt7yJMqr9DGs6MrPICB8N00MLu4pzu0HvJRzX7FTmeMO
+        UWASxkQpMBmFuVr0XrVohaqgQQ==
+X-Google-Smtp-Source: ABdhPJxn5B/JuXc6CCfatjGdv/+EBL9v9FlbJORmKz12IPtE+wybn1otAHjNPLgeBTtopFpf2dEoaA==
+X-Received: by 2002:a05:6512:3986:b0:472:4f5:33a0 with SMTP id j6-20020a056512398600b0047204f533a0mr8679514lfu.341.1651498587285;
+        Mon, 02 May 2022 06:36:27 -0700 (PDT)
+Received: from box.localdomain ([86.57.175.117])
+        by smtp.gmail.com with ESMTPSA id h18-20020ac25d72000000b0047255d210e2sm704383lft.17.2022.05.02.06.36.26
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 02 May 2022 06:36:26 -0700 (PDT)
+Received: by box.localdomain (Postfix, from userid 1000)
+        id 6096C104AD8; Mon,  2 May 2022 16:38:10 +0300 (+03)
+Date:   Mon, 2 May 2022 16:38:10 +0300
+From:   "Kirill A. Shutemov" <kirill@shutemov.name>
+To:     Wander Lairson Costa <wander@redhat.com>
+Cc:     "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
+        Borislav Petkov <bp@alien8.de>,
+        Andy Lutomirski <luto@kernel.org>,
+        Sean Christopherson <seanjc@google.com>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Joerg Roedel <jroedel@suse.de>,
         Ard Biesheuvel <ardb@kernel.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Huacai Chen <chenhuacai@loongson.cn>
-Subject: [RFC PATCH 3/4] efi: stub: implement generic EFI zboot
-Date:   Mon,  2 May 2022 13:17:09 +0200
-Message-Id: <20220502111710.4093567-4-ardb@kernel.org>
-X-Mailer: git-send-email 2.30.2
-In-Reply-To: <20220502111710.4093567-1-ardb@kernel.org>
-References: <20220502111710.4093567-1-ardb@kernel.org>
+        Andi Kleen <ak@linux.intel.com>,
+        Kuppuswamy Sathyanarayanan 
+        <sathyanarayanan.kuppuswamy@linux.intel.com>,
+        David Rientjes <rientjes@google.com>,
+        Vlastimil Babka <vbabka@suse.cz>,
+        Tom Lendacky <thomas.lendacky@amd.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Paolo Bonzini <pbonzini@redhat.com>,
+        Ingo Molnar <mingo@redhat.com>,
+        Varad Gautam <varad.gautam@suse.com>,
+        Dario Faggioli <dfaggioli@suse.com>,
+        Dave Hansen <dave.hansen@intel.com>,
+        Brijesh Singh <brijesh.singh@amd.com>,
+        Mike Rapoport <rppt@kernel.org>,
+        David Hildenbrand <david@redhat.com>, x86@kernel.org,
+        linux-mm@kvack.org, linux-coco@lists.linux.dev,
+        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCHv5 04/12] x86/boot: Add infrastructure required for
+ unaccepted memory support
+Message-ID: <20220502133810.gvmaqxvspzdvzrhv@box.shutemov.name>
+References: <20220425033934.68551-1-kirill.shutemov@linux.intel.com>
+ <20220425033934.68551-5-kirill.shutemov@linux.intel.com>
+ <YmvExncBpvDdfTjd@fedora>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=7694; h=from:subject; bh=XZW/JCwgq6tAw7SBVFrShBag6VMdsc/+bw/ci9pjai8=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBib720DoYS1bUZZqROM1Mfg1BFpkY8ohlfCZ05VNuj EZm9+suJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYm+9tAAKCRDDTyI5ktmPJFEKC/ 0drSc8Ho8I6aLTjcpoamZCH+R6SoI0sjd2wraHC7ZcEB8BPaNgYg6m1FgUoquOi1Te4zRDR4bV5dfy KjLF5vBGKl7auXLXe5BwvvQsWYd/+8KhPTZV5kYIsI9NAx5OyyjZ4J9RX/p69HZk0GYJut6PC50A5C 2KsikHg+fnNPESpyl4J9lQEN7Um6yJPv/y82WrEfQz7Jdd12BFAswjTQMP69K3PDcoZZ+BBuaBD9NA SfdJ8gwNPS9yY82wIpRZ+T+kC5bJokuL1wV+fR6QNVu8DZxWphLuDKpPGrcG2eVB+Xhv5BlKPEomac Hcx/Q6JvC0V55cFEhLqatprR+rKNugVgX55a8VRop+O8kbpteSz5ojcvXSDWdamxQRciG62SAZn9x4 vvkOQEtswViTWS8gRWAc3xzxFpPaIVvpDRblelK9j93HrfE2rV53GiGt1rgc88VZ232bcIGUeFT56G FrlFtP4F2Miv3t+LAdXjRWyNiZs65wH+PAOUl1T+wgT10=
-X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <YmvExncBpvDdfTjd@fedora>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Implement a minimal EFI app that decompresses the real kernel image and
-launches it using the firmware's LoadImage and StartImage boot services.
-This removes the need for any arch-specific hacks.
+On Fri, Apr 29, 2022 at 07:58:14AM -0300, Wander Lairson Costa wrote:
+> On Mon, Apr 25, 2022 at 06:39:26AM +0300, Kirill A. Shutemov wrote:
+> 
+> [snip]
 
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
----
- drivers/firmware/efi/Kconfig                |  6 ++
- drivers/firmware/efi/libstub/Makefile       |  2 +
- drivers/firmware/efi/libstub/zboot-header.S | 88 ++++++++++++++++++++
- drivers/firmware/efi/libstub/zboot.c        | 86 +++++++++++++++++++
- drivers/firmware/efi/libstub/zboot.lds      | 44 ++++++++++
- 5 files changed, 226 insertions(+)
+As I said in the commit message, all that code added by the patch is copy
+of the battle-tested code from the main kernel. I'm not sure what the
+value of these review comment. Hm?
 
-diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-index 4720ba98cec3..5fc986f66505 100644
---- a/drivers/firmware/efi/Kconfig
-+++ b/drivers/firmware/efi/Kconfig
-@@ -116,6 +116,12 @@ config EFI_RUNTIME_WRAPPERS
- config EFI_GENERIC_STUB
- 	bool
- 
-+config EFI_ZBOOT
-+	bool "Enable the generic EFI decompressor"
-+	depends on EFI_GENERIC_STUB
-+	depends on !ARM && !X86
-+	select HAVE_KERNEL_GZIP
-+
- config EFI_ARMSTUB_DTB_LOADER
- 	bool "Enable the DTB loader"
- 	depends on EFI_GENERIC_STUB && !RISCV
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index 475224be08e1..71bd877077b1 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -111,8 +111,10 @@ STUBCOPY_RELOC-$(CONFIG_ARM)	:= R_ARM_ABS
- # a verification pass to see if any absolute relocations exist in any of the
- # object files.
- #
-+lib-$(CONFIG_EFI_ZBOOT)		+= zboot.o
- extra-y				:= $(lib-y)
- lib-y				:= $(patsubst %.o,%.stub.o,$(lib-y))
-+lib-$(CONFIG_EFI_ZBOOT)		+= zboot-header.o
- 
- STUBCOPY_FLAGS-$(CONFIG_ARM64)	+= --prefix-alloc-sections=.init \
- 				   --prefix-symbols=__efistub_
-diff --git a/drivers/firmware/efi/libstub/zboot-header.S b/drivers/firmware/efi/libstub/zboot-header.S
-new file mode 100644
-index 000000000000..8f471866081a
---- /dev/null
-+++ b/drivers/firmware/efi/libstub/zboot-header.S
-@@ -0,0 +1,88 @@
-+/* SPDX-License-Identifier: GPL-2.0 */
-+
-+#include <linux/pe.h>
-+
-+	.section	".head", "a"
-+	.globl		__efistub_efi_zboot_header
-+__efistub_efi_zboot_header:
-+.Ldoshdr:
-+	.long		MZ_MAGIC
-+	.org		.Ldoshdr + 0x3c
-+	.long		.Lpehdr - .Ldoshdr
-+
-+.Lpehdr:
-+	.long		PE_MAGIC
-+	.short		pe_machine_type
-+	.short		.Lsection_count
-+	.long		0
-+	.long		0
-+	.long		0
-+	.short		.Lsection_table - .Loptional_header
-+	.short		IMAGE_FILE_DEBUG_STRIPPED | \
-+			IMAGE_FILE_EXECUTABLE_IMAGE | \
-+			IMAGE_FILE_LINE_NUMS_STRIPPED
-+
-+.Loptional_header:
-+#ifdef CONFIG_64BIT
-+	.short		PE_OPT_MAGIC_PE32PLUS
-+#else
-+	.short		PE_OPT_MAGIC_PE32
-+#endif
-+	.byte		0, 0
-+	.long		_etext - .Lefi_header_end
-+	.long		__data_size
-+	.long		0
-+	.long		__efistub_efi_zboot_entry - .Ldoshdr
-+	.long		.Lefi_header_end - .Ldoshdr
-+
-+#ifdef CONFIG_64BIT
-+	.quad		0
-+#else
-+	.long		_etext - .Lhead
-+	.long		0
-+#endif
-+	.long		4096
-+	.long		512
-+	.short		0, 0, 0, 0, 0, 0
-+	.long		0
-+	.long		_end - .Ldoshdr
-+
-+	.long		.Lefi_header_end - .Ldoshdr
-+	.long		0
-+	.short		IMAGE_SUBSYSTEM_EFI_APPLICATION
-+	.short		0
-+	.quad		0, 0, 0, 0
-+	.long		0
-+	.long		(.Lsection_table - .) / 8
-+	.quad		0, 0, 0, 0, 0, 0
-+
-+.Lsection_table:
-+	.ascii		".text\0\0\0"
-+	.long		_etext - .Lefi_header_end
-+	.long		.Lefi_header_end - .Ldoshdr
-+	.long		_etext - .Lefi_header_end
-+	.long		.Lefi_header_end - .Ldoshdr
-+
-+	.long		0, 0
-+	.short		0, 0
-+	.long		IMAGE_SCN_CNT_CODE | \
-+			IMAGE_SCN_MEM_READ | \
-+			IMAGE_SCN_MEM_EXECUTE
-+
-+	.ascii		".data\0\0\0"
-+	.long		__data_size
-+	.long		_etext - .Ldoshdr
-+	.long		__data_rawsize
-+	.long		_etext - .Ldoshdr
-+
-+	.long		0, 0
-+	.short		0, 0
-+	.long		IMAGE_SCN_CNT_INITIALIZED_DATA | \
-+			IMAGE_SCN_MEM_READ | \
-+			IMAGE_SCN_MEM_WRITE
-+
-+	.set		.Lsection_count, (. - .Lsection_table) / 40
-+
-+	.align		12
-+.Lefi_header_end:
-+
-diff --git a/drivers/firmware/efi/libstub/zboot.c b/drivers/firmware/efi/libstub/zboot.c
-new file mode 100644
-index 000000000000..edb3390c808c
---- /dev/null
-+++ b/drivers/firmware/efi/libstub/zboot.c
-@@ -0,0 +1,86 @@
-+// SPDX-License-Identifier: GPL-2.0
-+
-+#include <linux/efi.h>
-+#include <asm/efi.h>
-+
-+#include "efistub.h"
-+
-+#define STATIC static
-+
-+static unsigned char zboot_heap[SZ_64K] __aligned(64);
-+static unsigned long free_mem_ptr, free_mem_end_ptr;
-+
-+#ifdef CONFIG_KERNEL_GZIP
-+#include "../../../../lib/decompress_inflate.c"
-+#endif
-+
-+const efi_system_table_t *efi_system_table;
-+
-+extern char _gzdata_start[], _gzdata_end[];
-+extern u32 uncompressed_size __aligned(1);
-+
-+static void error(char *x)
-+{
-+	efi_err("%s\n", x);
-+}
-+
-+efi_status_t __efiapi efi_zboot_entry(efi_handle_t handle,
-+				      efi_system_table_t *systab)
-+{
-+	efi_guid_t loaded_image = LOADED_IMAGE_PROTOCOL_GUID;
-+	efi_loaded_image_t *parent, *child;
-+	efi_handle_t child_handle = NULL;
-+	unsigned long image_buffer;
-+	efi_status_t status;
-+
-+	free_mem_ptr = (unsigned long)&zboot_heap;
-+	free_mem_end_ptr = free_mem_ptr + sizeof(zboot_heap);
-+
-+	efi_system_table = systab;
-+
-+	efi_info("Entering EFI decompressor\n");
-+
-+	status = efi_bs_call(handle_protocol, handle, &loaded_image,
-+			     (void **)&parent);
-+	if (status != EFI_SUCCESS) {
-+		efi_err("Failed to locate parent's loaded image protocol\n");
-+		return status;
-+	}
-+
-+	status = efi_allocate_pages(uncompressed_size, &image_buffer, ULONG_MAX);
-+	if (status != EFI_SUCCESS) {
-+		efi_err("Failed to allocate memory\n");
-+		return status;
-+	}
-+
-+	if (__decompress(_gzdata_start, _gzdata_end - _gzdata_start, NULL,
-+			 NULL, (unsigned char *)image_buffer, 0, NULL,
-+			 error) < 0)
-+		return EFI_LOAD_ERROR;
-+
-+	status = efi_bs_call(load_image, true, handle, NULL,
-+			     (void *)image_buffer, uncompressed_size,
-+			     &child_handle);
-+	if (status != EFI_SUCCESS) {
-+		efi_err("Failed to load image: %lx\n", status);
-+		return status;
-+	}
-+
-+	status = efi_bs_call(handle_protocol, child_handle, &loaded_image,
-+			     (void **)&child);
-+	if (status != EFI_SUCCESS) {
-+		efi_err("Failed to locate child's loaded image protocol\n");
-+		return status;
-+	}
-+
-+	// Copy the kernel command line
-+	child->load_options = parent->load_options;
-+	child->load_options_size = parent->load_options_size;
-+
-+	status = efi_bs_call(start_image, child_handle, NULL, NULL);
-+	if (status != EFI_SUCCESS) {
-+		efi_err("Failed to start image: %lx\n", status);
-+		return status;
-+	}
-+	return EFI_SUCCESS;
-+}
-diff --git a/drivers/firmware/efi/libstub/zboot.lds b/drivers/firmware/efi/libstub/zboot.lds
-new file mode 100644
-index 000000000000..56777b5f2668
---- /dev/null
-+++ b/drivers/firmware/efi/libstub/zboot.lds
-@@ -0,0 +1,44 @@
-+/* SPDX-License-Identifier: GPL-2.0 */
-+
-+ENTRY(__efistub_efi_zboot_header);
-+
-+SECTIONS
-+{
-+	.text : ALIGN(4096) {
-+		*(.head)
-+		*(.text* .init.text*)
-+	}
-+
-+	.rodata : ALIGN(8) {
-+		__efistub__gzdata_start = .;
-+		*(.gzdata)
-+		__efistub__gzdata_end = . - 4;
-+		__efistub_uncompressed_size = . - 4;
-+		*(.rodata* .init.rodata*)
-+		_etext = ALIGN(4096);
-+		. = _etext;
-+	}
-+
-+	.data : ALIGN(4096) {
-+		*(.data* .init.data*)
-+		_edata = ALIGN(512);
-+		. = _edata;
-+	}
-+
-+	.bss : {
-+		*(.bss* .init.bss*)
-+		_end = ALIGN(512);
-+		. = _end;
-+	}
-+
-+	/DISCARD/ : {
-+		*(__ksymtab_strings ___ksymtab+*)
-+	}
-+}
-+
-+PROVIDE(__data_rawsize = ABSOLUTE(_edata - _etext));
-+PROVIDE(__data_size = ABSOLUTE(_end - _etext));
-+
-+PROVIDE(__efistub_memcpy = __pi_memcpy);
-+PROVIDE(__efistub_memset = __pi_memset);
-+PROVIDE(__efistub_strnlen = __pi_strnlen);
 -- 
-2.30.2
-
+ Kirill A. Shutemov
