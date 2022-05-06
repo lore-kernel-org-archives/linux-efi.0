@@ -2,58 +2,94 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D5328C433EF
-	for <linux-efi@archiver.kernel.org>; Fri,  6 May 2022 07:52:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F0E0FC433EF
+	for <linux-efi@archiver.kernel.org>; Fri,  6 May 2022 12:44:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236670AbiEFH4d (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 6 May 2022 03:56:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46154 "EHLO
+        id S1376601AbiEFMsW (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 6 May 2022 08:48:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47536 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1389730AbiEFH43 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 6 May 2022 03:56:29 -0400
-X-Greylist: delayed 413 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Fri, 06 May 2022 00:52:47 PDT
-Received: from mail.greatagencyonline.pl (mail.greatagencyonline.pl [89.40.125.71])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 404C067D02
-        for <linux-efi@vger.kernel.org>; Fri,  6 May 2022 00:52:47 -0700 (PDT)
-Received: by mail.greatagencyonline.pl (Postfix, from userid 1001)
-        id 37F82AA1E3; Fri,  6 May 2022 08:41:55 +0100 (BST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=greatagencyonline.pl;
-        s=mail; t=1651822959;
-        bh=ksvwLPFdjL017OLwir5xHXy3Vmrj/5fhZ5DwBI62qzc=;
-        h=Date:From:To:Subject:From;
-        b=QGoxLQBVpzmnZCFJHha51+z2YGR6hrr1hK1HekbE97MI4DCBajxBWGCAUEcol5eRj
-         /4fM0npInAJOaLhnZwsqSi2rBZJicAmc7L2DM2tpUfZbya788+6takmzT8Fz0rcpsR
-         FjwsHEWmwVaJQiJuz+DQJfViyO3WttcUgHJTUaTkDo8SqzZtoQ786iWNZ2hHePjAzn
-         SSxNxVUy0ZBxlxPRDio2YMTae45xr4Tp+IPXQzMH5JmKfYsJ8Kl07B6UpXBXZiU7N9
-         Spr30yhybibtD6nKQHPPAcNFgvmFFqtWz0Gg98EWFwsPaLLOY0LB7TssDv5sryTkvz
-         KG+SqlexaqPHw==
-Received: by mail.greatagencyonline.pl for <linux-efi@vger.kernel.org>; Fri,  6 May 2022 07:38:48 GMT
-Message-ID: <20220506073002-0.1.3r.k15r.0.64n0ckm85c@greatagencyonline.pl>
-Date:   Fri,  6 May 2022 07:38:48 GMT
-From:   =?UTF-8?Q? "Miko=C5=82aj_Rudzik" ?= 
-        <mikolaj.rudzik@greatagencyonline.pl>
-To:     <linux-efi@vger.kernel.org>
-Subject: =?UTF-8?Q?Nap=C5=82yw_Klient=C3=B3w_ze_strony?=
-X-Mailer: mail.greatagencyonline.pl
+        with ESMTP id S1349759AbiEFMsS (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 6 May 2022 08:48:18 -0400
+Received: from mail.skyhub.de (mail.skyhub.de [5.9.137.197])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E71046622A;
+        Fri,  6 May 2022 05:44:34 -0700 (PDT)
+Received: from zn.tnic (p5de8eeb4.dip0.t-ipconnect.de [93.232.238.180])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id 4FC151EC0535;
+        Fri,  6 May 2022 14:44:29 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alien8.de; s=dkim;
+        t=1651841069;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:in-reply-to:in-reply-to:  references:references;
+        bh=w5a6VyPh1Kscuhtqek949cERiqs3llXbkMpRPLQU5xk=;
+        b=dpv0sfJ5xO11IrTCW6v14olvNOOwGrPsTwhjEfGvy52/IQq+4XMU7KoitZrS39tyViUorp
+        OR+MmdaGZEgHm0e4Ni5J6+hp0htSwMKucCTk81kI0MzRsJk0513S9YBDSBJAFM08racC6c
+        eEYzCqDeC8PmWbUkGHxbSx/eOo6xEks=
+Date:   Fri, 6 May 2022 14:44:28 +0200
+From:   Borislav Petkov <bp@alien8.de>
+To:     Martin Fernandez <martin.fernandez@eclypsium.com>
+Cc:     linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
+        platform-driver-x86@vger.kernel.org, linux-mm@kvack.org,
+        tglx@linutronix.de, mingo@redhat.com, dave.hansen@linux.intel.com,
+        x86@kernel.org, hpa@zytor.com, ardb@kernel.org,
+        dvhart@infradead.org, andy@infradead.org,
+        gregkh@linuxfoundation.org, rafael@kernel.org, rppt@kernel.org,
+        akpm@linux-foundation.org, daniel.gutson@eclypsium.com,
+        hughsient@gmail.com, alex.bazhaniuk@eclypsium.com,
+        alison.schofield@intel.com, keescook@chromium.org
+Subject: Re: [PATCH v8 0/8] x86: Show in sysfs if a memory node is able to do
+ encryption
+Message-ID: <YnUYLDjIThbIz/Uf@zn.tnic>
+References: <20220429201717.1946178-1-martin.fernandez@eclypsium.com>
+ <YnKr+aMf4PspDpHZ@zn.tnic>
+ <CAKgze5YDD02AsrF0yESv2sptZ4qxyTMgCDmnOKcbQWjKQsJRsw@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <CAKgze5YDD02AsrF0yESv2sptZ4qxyTMgCDmnOKcbQWjKQsJRsw@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Dzie=C5=84 dobry,
+On Wed, May 04, 2022 at 02:18:30PM -0300, Martin Fernandez wrote:
+> The use case is to know if a user is using hardware encryption or
+> not. This new sysfs file plus knowing if tme/sev is active you can be
+> pretty sure about that.
 
-chcia=C5=82bym poinformowa=C4=87 Pa=C5=84stwa o mo=C5=BCliwo=C5=9Bci pozy=
-skania nowych zlece=C5=84 ze strony www.
+Then please explain it in detail and in the text so that it is clear. As
+it is now, the reader is left wondering what that file is supposed to
+state.
 
-Widzimy zainteresowanie potencjalnych Klient=C3=B3w Pa=C5=84stwa firm=C4=85=
-, dlatego ch=C4=99tnie pomo=C5=BCemy Pa=C5=84stwu dotrze=C4=87 z ofert=C4=
-=85 do wi=C4=99kszego grona odbiorc=C3=B3w poprzez efektywne metody pozyc=
-jonowania strony w Google.
+> Dave Hansen pointed those out in a previuos patch serie, here is the
+> quote:
+> 
+> > CXL devices will have normal RAM on them, be exposed as "System RAM" and
+> > they won't have encryption capabilities.  I think these devices were
+> > probably the main motivation for EFI_MEMORY_CPU_CRYPTO.
 
-Czy m=C3=B3g=C5=82bym liczy=C4=87 na kontakt zwrotny?
+So this would mean that if a system doesn't have CXL devices and has
+TME/SME/SEV-* enabled, then it is running with encrypted memory.
 
+Which would then also mean, you don't need any of that code - you only
+need to enumerate CXL devices which, it seems, do not support memory
+encryption, and then state that memory encryption is enabled on the
+whole system, except for the memory of those devices.
 
-Pozdrawiam,
-Miko=C5=82aj Rudzik
+I.e.,
+
+$ dmesg | grep -i SME
+[    1.783650] AMD Memory Encryption Features active: SME
+
+Done - memory is encrypted on the whole system.
+
+We could export it into /proc/cpuinfo so that you don't have to grep
+dmesg and problem solved.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+https://people.kernel.org/tglx/notes-about-netiquette
