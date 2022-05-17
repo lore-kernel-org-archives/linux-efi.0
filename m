@@ -2,43 +2,43 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 53C02C433EF
-	for <linux-efi@archiver.kernel.org>; Tue, 17 May 2022 15:35:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 811EAC433F5
+	for <linux-efi@archiver.kernel.org>; Tue, 17 May 2022 15:35:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234863AbiEQPf2 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 17 May 2022 11:35:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36852 "EHLO
+        id S1350269AbiEQPfu (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 17 May 2022 11:35:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36932 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1350219AbiEQPfU (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 17 May 2022 11:35:20 -0400
-Received: from mga09.intel.com (mga09.intel.com [134.134.136.24])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3CAD65007A;
-        Tue, 17 May 2022 08:35:12 -0700 (PDT)
+        with ESMTP id S1350213AbiEQPfV (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 17 May 2022 11:35:21 -0400
+Received: from mga18.intel.com (mga18.intel.com [134.134.136.126])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 47E3F50469;
+        Tue, 17 May 2022 08:35:18 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1652801712; x=1684337712;
+  t=1652801719; x=1684337719;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=OKRcLw6QsuGpSKY4/BO13xavP65NgCLYIODNZJ7MeM4=;
-  b=dbtZI3y2Y3r1LRtyGe7F6r22+6KEO/uVKXb3/58OMsyr+2xKpq2fOt+V
-   4bZxkLl2gvxvRAw9oozwdrEDziQhlcQlsQyIED95MT4c1zNjeYldPEXxT
-   PZDzBFBt6SI9FNDzM4xfHxmHdMcNPDI3iuCkNC4b78kfLCzWUW/5ptSRJ
-   +CpeB2agYD6t+7LLlSV5jEF5r3VG+MtSfNLsToQFxQhrJ0Ofma0K1W1NU
-   TIB8/SqaKr1TcNCX+eAGxPYuRNXbk3Lf43UEEiVxX+PO8/RqnN5p6m06m
-   ebQbbAg87i+MfsYpYvh6V58k3ub5RqnVy4o2lzCZMgnxXvb4NQ8M73kJG
-   Q==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10350"; a="270911635"
+  bh=J64a/BEEWsUxrDMmj+uUH7zOqhAj4bsQNa/njKbNxuM=;
+  b=XDoo4jSdKD81TXpJYnxxL6NVmzpS7qX80AfPR6YlbIXa4epjIYGM5vbf
+   zC+88//eF6tig3qEn9J8r2S3627Q7huqMbeUmEpYJliOM0zEhCT00oo4w
+   qE0NCS4tJSPPqd6YhJgPzo02dRTPQ10QPP7AnklgRBB3hsbFD8wQ/oC9h
+   9GjPGloI6Nq8HkfXi+a2x7sYnpIOp1fJ1rp46gDlc352DBcZW54TCpcY3
+   vpzbaUTx1wCMdyXl7yZHYhAOGbnPWgjIwiE9DwVsl1GspFICk+DW+r3Sx
+   MhyXkgEcXG8WG6jGV9os4pRjZzl/+tnFgR7jXmaqsyl3HjzRsJGZX5BuU
+   A==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10350"; a="253270616"
 X-IronPort-AV: E=Sophos;i="5.91,233,1647327600"; 
-   d="scan'208";a="270911635"
+   d="scan'208";a="253270616"
 Received: from fmsmga002.fm.intel.com ([10.253.24.26])
-  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 May 2022 08:35:11 -0700
+  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 May 2022 08:35:04 -0700
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.91,233,1647327600"; 
-   d="scan'208";a="672905613"
+   d="scan'208";a="672905582"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by fmsmga002.fm.intel.com with ESMTP; 17 May 2022 08:35:05 -0700
+  by fmsmga002.fm.intel.com with ESMTP; 17 May 2022 08:34:57 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1000)
-        id 03686EAF; Tue, 17 May 2022 18:34:50 +0300 (EEST)
+        id A2D239D4; Tue, 17 May 2022 18:34:50 +0300 (EEST)
 From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
 To:     Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>,
         Sean Christopherson <seanjc@google.com>,
@@ -65,9 +65,9 @@ Cc:     Andi Kleen <ak@linux.intel.com>,
         x86@kernel.org, linux-mm@kvack.org, linux-coco@lists.linux.dev,
         linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
         "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-Subject: [PATCHv6 15/15] mm/vmstat: Add counter for memory accepting
-Date:   Tue, 17 May 2022 18:34:44 +0300
-Message-Id: <20220517153444.11195-16-kirill.shutemov@linux.intel.com>
+Subject: [PATCHv6 08/15] x86/mm: Provide helpers for unaccepted memory
+Date:   Tue, 17 May 2022 18:34:37 +0300
+Message-Id: <20220517153444.11195-9-kirill.shutemov@linux.intel.com>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220517153444.11195-1-kirill.shutemov@linux.intel.com>
 References: <20220517153444.11195-1-kirill.shutemov@linux.intel.com>
@@ -77,58 +77,124 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The counter increased every time kernel accepts a memory region.
+Core-mm requires few helpers to support unaccepted memory:
 
-The counter allows to see if memory acceptation is still ongoing and
-contributes to memory allocation latency.
+ - accept_memory() checks the range of addresses against the bitmap and
+   accept memory if needed.
+
+ - memory_is_unaccepted() check if anything within the range requires
+   acceptance.
 
 Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
 ---
- arch/x86/mm/unaccepted_memory.c | 1 +
- include/linux/vm_event_item.h   | 3 +++
- mm/vmstat.c                     | 3 +++
- 3 files changed, 7 insertions(+)
+ arch/x86/include/asm/page.h              |  3 ++
+ arch/x86/include/asm/unaccepted_memory.h |  4 ++
+ arch/x86/mm/Makefile                     |  2 +
+ arch/x86/mm/unaccepted_memory.c          | 56 ++++++++++++++++++++++++
+ 4 files changed, 65 insertions(+)
+ create mode 100644 arch/x86/mm/unaccepted_memory.c
 
+diff --git a/arch/x86/include/asm/page.h b/arch/x86/include/asm/page.h
+index 9cc82f305f4b..df4ec3a988dc 100644
+--- a/arch/x86/include/asm/page.h
++++ b/arch/x86/include/asm/page.h
+@@ -19,6 +19,9 @@
+ struct page;
+ 
+ #include <linux/range.h>
++
++#include <asm/unaccepted_memory.h>
++
+ extern struct range pfn_mapped[];
+ extern int nr_pfn_mapped;
+ 
+diff --git a/arch/x86/include/asm/unaccepted_memory.h b/arch/x86/include/asm/unaccepted_memory.h
+index 41fbfc798100..89fc91c61560 100644
+--- a/arch/x86/include/asm/unaccepted_memory.h
++++ b/arch/x86/include/asm/unaccepted_memory.h
+@@ -7,6 +7,10 @@ struct boot_params;
+ 
+ void process_unaccepted_memory(struct boot_params *params, u64 start, u64 num);
+ 
++#ifdef CONFIG_UNACCEPTED_MEMORY
++
+ void accept_memory(phys_addr_t start, phys_addr_t end);
++bool range_contains_unaccepted_memory(phys_addr_t start, phys_addr_t end);
+ 
+ #endif
++#endif
+diff --git a/arch/x86/mm/Makefile b/arch/x86/mm/Makefile
+index d957dc15b371..92438ad3d3b6 100644
+--- a/arch/x86/mm/Makefile
++++ b/arch/x86/mm/Makefile
+@@ -59,3 +59,5 @@ obj-$(CONFIG_AMD_MEM_ENCRYPT)	+= mem_encrypt_amd.o
+ 
+ obj-$(CONFIG_AMD_MEM_ENCRYPT)	+= mem_encrypt_identity.o
+ obj-$(CONFIG_AMD_MEM_ENCRYPT)	+= mem_encrypt_boot.o
++
++obj-$(CONFIG_UNACCEPTED_MEMORY)	+= unaccepted_memory.o
 diff --git a/arch/x86/mm/unaccepted_memory.c b/arch/x86/mm/unaccepted_memory.c
-index 6ecd79101922..fe1dabfae326 100644
---- a/arch/x86/mm/unaccepted_memory.c
+new file mode 100644
+index 000000000000..0a86380b2478
+--- /dev/null
 +++ b/arch/x86/mm/unaccepted_memory.c
-@@ -74,6 +74,7 @@ void accept_memory(phys_addr_t start, phys_addr_t end)
- 		}
- 
- 		bitmap_clear(bitmap, range_start, len);
-+		count_vm_events(ACCEPT_MEMORY, len * PMD_SIZE / PAGE_SIZE);
- 
- 		/* In early boot nr_unaccepted is not yet initialized */
- 		if (nr_unaccepted) {
-diff --git a/include/linux/vm_event_item.h b/include/linux/vm_event_item.h
-index 16a0a4fd000b..6a468164a2f9 100644
---- a/include/linux/vm_event_item.h
-+++ b/include/linux/vm_event_item.h
-@@ -136,6 +136,9 @@ enum vm_event_item { PGPGIN, PGPGOUT, PSWPIN, PSWPOUT,
- #ifdef CONFIG_X86
- 		DIRECT_MAP_LEVEL2_SPLIT,
- 		DIRECT_MAP_LEVEL3_SPLIT,
-+#endif
-+#ifdef CONFIG_UNACCEPTED_MEMORY
-+		ACCEPT_MEMORY,
- #endif
- 		NR_VM_EVENT_ITEMS
- };
-diff --git a/mm/vmstat.c b/mm/vmstat.c
-index b75b1a64b54c..4c9197f32406 100644
---- a/mm/vmstat.c
-+++ b/mm/vmstat.c
-@@ -1397,6 +1397,9 @@ const char * const vmstat_text[] = {
- 	"direct_map_level2_splits",
- 	"direct_map_level3_splits",
- #endif
-+#ifdef CONFIG_UNACCEPTED_MEMORY
-+	"accept_memory",
-+#endif
- #endif /* CONFIG_VM_EVENT_COUNTERS || CONFIG_MEMCG */
- };
- #endif /* CONFIG_PROC_FS || CONFIG_SYSFS || CONFIG_NUMA || CONFIG_MEMCG */
+@@ -0,0 +1,56 @@
++// SPDX-License-Identifier: GPL-2.0-only
++#include <linux/memblock.h>
++#include <linux/mm.h>
++#include <linux/pfn.h>
++#include <linux/spinlock.h>
++
++#include <asm/io.h>
++#include <asm/setup.h>
++#include <asm/unaccepted_memory.h>
++
++/* Protects unaccepted memory bitmap */
++static DEFINE_SPINLOCK(unaccepted_memory_lock);
++
++void accept_memory(phys_addr_t start, phys_addr_t end)
++{
++	unsigned long range_start, range_end;
++	unsigned long *bitmap;
++	unsigned long flags;
++
++	if (!boot_params.unaccepted_memory)
++		return;
++
++	bitmap = __va(boot_params.unaccepted_memory);
++	range_start = start / PMD_SIZE;
++
++	spin_lock_irqsave(&unaccepted_memory_lock, flags);
++	for_each_set_bitrange_from(range_start, range_end, bitmap,
++				   DIV_ROUND_UP(end, PMD_SIZE)) {
++		unsigned long len = range_end - range_start;
++
++		/* Platform-specific memory-acceptance call goes here */
++		panic("Cannot accept memory: unknown platform\n");
++		bitmap_clear(bitmap, range_start, len);
++	}
++	spin_unlock_irqrestore(&unaccepted_memory_lock, flags);
++}
++
++bool range_contains_unaccepted_memory(phys_addr_t start, phys_addr_t end)
++{
++	unsigned long *bitmap = __va(boot_params.unaccepted_memory);
++	unsigned long flags;
++	bool ret = false;
++
++	spin_lock_irqsave(&unaccepted_memory_lock, flags);
++	while (start < end) {
++		if (test_bit(start / PMD_SIZE, bitmap)) {
++			ret = true;
++			break;
++		}
++
++		start += PMD_SIZE;
++	}
++	spin_unlock_irqrestore(&unaccepted_memory_lock, flags);
++
++	return ret;
++}
 -- 
 2.35.1
 
