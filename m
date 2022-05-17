@@ -2,43 +2,43 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DD357C4332F
-	for <linux-efi@archiver.kernel.org>; Tue, 17 May 2022 15:36:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C40ECC433FE
+	for <linux-efi@archiver.kernel.org>; Tue, 17 May 2022 15:36:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237471AbiEQPgg (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 17 May 2022 11:36:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36914 "EHLO
+        id S1347265AbiEQPgi (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 17 May 2022 11:36:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36820 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1350191AbiEQPfX (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 17 May 2022 11:35:23 -0400
+        with ESMTP id S1350287AbiEQPfY (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 17 May 2022 11:35:24 -0400
 Received: from mga18.intel.com (mga18.intel.com [134.134.136.126])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 80AE950073;
-        Tue, 17 May 2022 08:35:21 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 482694F9E4;
+        Tue, 17 May 2022 08:35:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1652801721; x=1684337721;
+  t=1652801723; x=1684337723;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=ZlxeDiZ2Ogy8lAspacIgsZZ/Yy5DPmqPGpLnxSiDxx8=;
-  b=FB3Lxs8KsiDH4BjEDme3o7840QQNGTahHF3oeFq1n8yPwS9Hf4hHgSDP
-   V7j0GQLafYWR1kKOHY/NC1AuiVvY7EPYfzbJj/2bsEkLDLFJ3ylO6/KKS
-   u2DN2zfogtdPS2KGAjaYlGa1yVZY+1Dhc9nS36UGfErlmQjwLtysbTL/A
-   B8CFyCGb5BO77zd+UsA0kfgKnn2wnzrEG8qejxCS2sRVMv2uTnjToeVKw
-   00Oi01nO5w4Q16zz4fu9m3q0oEYpUVxbGJTrJtTGel+0YsZoXxUukATZZ
-   ZbUfJ+UOQvaqRHh/cSNFp9ULxYKHiLX33/Y946MlHLqRYethxmZ7EE0zE
-   A==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10350"; a="253270621"
+  bh=xF84dLhyksFpMyCb7NPvfM3NGwTlY5bjd8sAol6pl90=;
+  b=TMYtVfDZgaBZGMHR8c6G5saRyd6A//WHxkW6YdnM+feS8lxIoVvUFkln
+   bhOqBajPGLii3l5RapKBm+YZMOeXu1Wzzvy6EjUzUiRHCMT2iWXi4eH28
+   ZQjq5Ggz426zmgCXIzns5i1p1tl3QvPwiwKC71hS14lrV1oU5ghhf5CjI
+   97zVgCm83npGSh45rMVVOxgwvj7jOfklyYD9ka7Ye3Lg1ptTvOc6C3uyF
+   2Mr8ltkxgme92WASguTm3+czpk9H5+h2zovznMkEDKlpFGsDOiC11ByLr
+   R6VVoegZbEwm9GKuB8Ta6FU1v+BjuJQgbFv4grr0zp2D3q8ZCU9USYS6U
+   Q==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10350"; a="253270625"
 X-IronPort-AV: E=Sophos;i="5.91,233,1647327600"; 
-   d="scan'208";a="253270621"
-Received: from fmsmga002.fm.intel.com ([10.253.24.26])
+   d="scan'208";a="253270625"
+Received: from orsmga002.jf.intel.com ([10.7.209.21])
   by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 May 2022 08:35:05 -0700
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.91,233,1647327600"; 
-   d="scan'208";a="672905589"
+   d="scan'208";a="555823109"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by fmsmga002.fm.intel.com with ESMTP; 17 May 2022 08:34:58 -0700
+  by orsmga002.jf.intel.com with ESMTP; 17 May 2022 08:34:58 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1000)
-        id E3A8BD7B; Tue, 17 May 2022 18:34:50 +0300 (EEST)
+        id CBC23D38; Tue, 17 May 2022 18:34:50 +0300 (EEST)
 From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
 To:     Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>,
         Sean Christopherson <seanjc@google.com>,
@@ -65,9 +65,9 @@ Cc:     Andi Kleen <ak@linux.intel.com>,
         x86@kernel.org, linux-mm@kvack.org, linux-coco@lists.linux.dev,
         linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
         "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-Subject: [PATCHv6 13/15] x86/tdx: Refactor try_accept_one()
-Date:   Tue, 17 May 2022 18:34:42 +0300
-Message-Id: <20220517153444.11195-14-kirill.shutemov@linux.intel.com>
+Subject: [PATCHv6 11/15] x86: Disable kexec if system has unaccepted memory
+Date:   Tue, 17 May 2022 18:34:40 +0300
+Message-Id: <20220517153444.11195-12-kirill.shutemov@linux.intel.com>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220517153444.11195-1-kirill.shutemov@linux.intel.com>
 References: <20220517153444.11195-1-kirill.shutemov@linux.intel.com>
@@ -77,96 +77,45 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Rework try_accept_one() to return accepted size instead of modifying
-'start' inside the helper. It makes 'start' in-only argumaent and
-streamlines code on the caller side.
+On kexec, the target kernel has to know what memory has been accepted.
+Information in EFI map is out of date and cannot be used.
+
+boot_params.unaccepted_memory can be used to pass the bitmap between two
+kernels on kexec, but the use-case is not yet implemented.
+
+Disable kexec on machines with unaccepted memory for now.
 
 Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
-Suggested-by: Borislav Petkov <bp@alien8.de>
 ---
- arch/x86/coco/tdx/tdx.c | 38 +++++++++++++++++++-------------------
- 1 file changed, 19 insertions(+), 19 deletions(-)
+ arch/x86/mm/unaccepted_memory.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
-diff --git a/arch/x86/coco/tdx/tdx.c b/arch/x86/coco/tdx/tdx.c
-index 6a62d3950619..90237700a942 100644
---- a/arch/x86/coco/tdx/tdx.c
-+++ b/arch/x86/coco/tdx/tdx.c
-@@ -561,18 +561,18 @@ static bool tdx_cache_flush_required(void)
- 	return true;
- }
+diff --git a/arch/x86/mm/unaccepted_memory.c b/arch/x86/mm/unaccepted_memory.c
+index 1ca71eb98c24..b4c43e6089b0 100644
+--- a/arch/x86/mm/unaccepted_memory.c
++++ b/arch/x86/mm/unaccepted_memory.c
+@@ -1,4 +1,5 @@
+ // SPDX-License-Identifier: GPL-2.0-only
++#include <linux/kexec.h>
+ #include <linux/memblock.h>
+ #include <linux/mm.h>
+ #include <linux/pfn.h>
+@@ -114,6 +115,15 @@ static int __init unaccepted_init(void)
+ 	if (!boot_params.unaccepted_memory)
+ 		return 0;
  
--static bool try_accept_one(phys_addr_t *start, unsigned long len,
--			  enum pg_level pg_level)
-+static unsigned long try_accept_one(phys_addr_t start, unsigned long len,
-+				    enum pg_level pg_level)
- {
- 	unsigned long accept_size = page_level_size(pg_level);
- 	u64 tdcall_rcx;
- 	u8 page_size;
++#ifdef CONFIG_KEXEC_CORE
++	/*
++	 * TODO: Information on memory acceptance status has to be communicated
++	 * between kernel.
++	 */
++	pr_warn("Disable kexec: not yet supported on systems with unaccepted memory\n");
++	kexec_load_disabled = 1;
++#endif
++
+ 	bitmap_size = e820__end_of_ram_pfn() * PAGE_SIZE / PMD_SIZE;
+ 	unaccepted_memory = __va(boot_params.unaccepted_memory);
  
--	if (!IS_ALIGNED(*start, accept_size))
--		return false;
-+	if (!IS_ALIGNED(start, accept_size))
-+		return 0;
- 
- 	if (len < accept_size)
--		return false;
-+		return 0;
- 
- 	/*
- 	 * Pass the page physical address to the TDX module to accept the
-@@ -591,15 +591,14 @@ static bool try_accept_one(phys_addr_t *start, unsigned long len,
- 		page_size = 2;
- 		break;
- 	default:
--		return false;
-+		return 0;
- 	}
- 
--	tdcall_rcx = *start | page_size;
-+	tdcall_rcx = start | page_size;
- 	if (__tdx_module_call(TDX_ACCEPT_PAGE, tdcall_rcx, 0, 0, 0, NULL))
--		return false;
-+		return 0;
- 
--	*start += accept_size;
--	return true;
-+	return accept_size;
- }
- 
- /*
-@@ -636,21 +635,22 @@ static bool tdx_enc_status_changed(unsigned long vaddr, int numpages, bool enc)
- 	 */
- 	while (start < end) {
- 		unsigned long len = end - start;
-+		unsigned long accept_size;
- 
- 		/*
- 		 * Try larger accepts first. It gives chance to VMM to keep
--		 * 1G/2M SEPT entries where possible and speeds up process by
--		 * cutting number of hypercalls (if successful).
-+		 * 1G/2M Secure EPT entries where possible and speeds up
-+		 * process by cutting number of hypercalls (if successful).
- 		 */
- 
--		if (try_accept_one(&start, len, PG_LEVEL_1G))
--			continue;
--
--		if (try_accept_one(&start, len, PG_LEVEL_2M))
--			continue;
--
--		if (!try_accept_one(&start, len, PG_LEVEL_4K))
-+		accept_size = try_accept_one(start, len, PG_LEVEL_1G);
-+		if (!accept_size)
-+			accept_size = try_accept_one(start, len, PG_LEVEL_2M);
-+		if (!accept_size)
-+			accept_size = try_accept_one(start, len, PG_LEVEL_4K);
-+		if (!accept_size)
- 			return false;
-+		start += accept_size;
- 	}
- 
- 	return true;
 -- 
 2.35.1
 
