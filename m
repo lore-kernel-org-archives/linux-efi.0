@@ -2,43 +2,43 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 31192C43217
-	for <linux-efi@archiver.kernel.org>; Tue, 17 May 2022 15:35:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 30E0DC43217
+	for <linux-efi@archiver.kernel.org>; Tue, 17 May 2022 15:35:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1350200AbiEQPfO (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 17 May 2022 11:35:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36510 "EHLO
+        id S1350049AbiEQPfT (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 17 May 2022 11:35:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36554 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1347265AbiEQPfH (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 17 May 2022 11:35:07 -0400
+        with ESMTP id S1345240AbiEQPfI (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 17 May 2022 11:35:08 -0400
 Received: from mga06.intel.com (mga06b.intel.com [134.134.136.31])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 45DE84F9E4;
-        Tue, 17 May 2022 08:35:06 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 699964FC60;
+        Tue, 17 May 2022 08:35:07 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1652801706; x=1684337706;
+  t=1652801707; x=1684337707;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=ba5aaba6CYtwjhjErhM4Hq7HhJDf0ny+Fwb4XqWMwfA=;
-  b=XKZqZopmk+lKFTgjrYbDQ8JkLcBBfa0WvcdLtMpgGrXESuzJFLXN0Wmz
-   H7z5dKbEqUdDMFMNBGnAwAM27F9UM7gtsiL03tJD9juLVJOOZd4NqHntc
-   jjdVlfsFq2qH7Ro09fP/Yr/k2rGJn7tQJutiZalbMXH6/H05njWV9Vnjc
-   NJdWF2ZalVc12ttDFXqBE3VVOO61CzWp52BYNHIzcWkEt3P2tLIJf2obQ
-   ol3wBa6G2nEDOc7jBxtvs23B4pDMLdgrxL470nHUDCgNHWZkTji90ZbAy
-   SgRjQggkX+ZD6v13C0790UL1D1d4HMKZqVMMizXHXEU2fYWlnQIk+ybrH
-   A==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10350"; a="331837229"
+  bh=yWrGuxKKjQPoN2agiveNwFxbSi1odWGF+uMe0iktT3E=;
+  b=B9EI4nIc83c9enBwtfofqUPmRVWTMndulvKrHibubhqjGpSSFDhKk2pt
+   XZppK0Z59lLcbb1EtRecd7r1uizrzYqAzKMy6aNpdacnJe0IJi69TMt4v
+   6BD3RYwKFILsvd1/KrPnNhSdtH/Fw2E/cxPN0ioNz1YWGuQxhSLWr4jv7
+   L/aVybSD016KZ8PeT6DOHTsY7CGB4wIxscbo3XBOcPmijoQlQGMjc44uZ
+   Z4wTZqm8SRFwY9avdkqdrDCPJ+w8sVxBRlQa02beAvrE59Ildzo80+WMK
+   s9QNAVLC+bMQ1g8Z6fdqprzNIhuzS6teFX0BP/d2uAe28lEYMDag4oKjJ
+   g==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10350"; a="331837231"
 X-IronPort-AV: E=Sophos;i="5.91,233,1647327600"; 
-   d="scan'208";a="331837229"
-Received: from fmsmga003.fm.intel.com ([10.253.24.29])
+   d="scan'208";a="331837231"
+Received: from fmsmga007.fm.intel.com ([10.253.24.52])
   by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 May 2022 08:35:05 -0700
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.91,233,1647327600"; 
-   d="scan'208";a="660661437"
+   d="scan'208";a="574566798"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by FMSMGA003.fm.intel.com with ESMTP; 17 May 2022 08:34:58 -0700
+  by fmsmga007.fm.intel.com with ESMTP; 17 May 2022 08:34:57 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1000)
-        id D232269F; Tue, 17 May 2022 18:34:50 +0300 (EEST)
+        id 8050C719; Tue, 17 May 2022 18:34:50 +0300 (EEST)
 From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
 To:     Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>,
         Sean Christopherson <seanjc@google.com>,
@@ -65,9 +65,9 @@ Cc:     Andi Kleen <ak@linux.intel.com>,
         x86@kernel.org, linux-mm@kvack.org, linux-coco@lists.linux.dev,
         linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
         "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-Subject: [PATCHv6 12/15] x86/tdx: Make _tdx_hypercall() and __tdx_module_call() available in boot stub
-Date:   Tue, 17 May 2022 18:34:41 +0300
-Message-Id: <20220517153444.11195-13-kirill.shutemov@linux.intel.com>
+Subject: [PATCHv6 05/15] efi/x86: Implement support for unaccepted memory
+Date:   Tue, 17 May 2022 18:34:34 +0300
+Message-Id: <20220517153444.11195-6-kirill.shutemov@linux.intel.com>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220517153444.11195-1-kirill.shutemov@linux.intel.com>
 References: <20220517153444.11195-1-kirill.shutemov@linux.intel.com>
@@ -77,164 +77,342 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Memory acceptance requires a hypercall and one or multiple module calls.
+UEFI Specification version 2.9 introduces the concept of memory
+acceptance: Some Virtual Machine platforms, such as Intel TDX or AMD
+SEV-SNP, requiring memory to be accepted before it can be used by the
+guest. Accepting happens via a protocol specific for the Virtual
+Machine platform.
 
-Make helpers for the calls available in boot stub. It has to accept
-memory where kernel image and initrd are placed.
+Accepting memory is costly and it makes VMM allocate memory for the
+accepted guest physical address range. It's better to postpone memory
+acceptance until memory is needed. It lowers boot time and reduces
+memory overhead.
+
+The kernel needs to know what memory has been accepted. Firmware
+communicates this information via memory map: a new memory type --
+EFI_UNACCEPTED_MEMORY -- indicates such memory.
+
+Range-based tracking works fine for firmware, but it gets bulky for
+the kernel: e820 has to be modified on every page acceptance. It leads
+to table fragmentation, but there's a limited number of entries in the
+e820 table
+
+Another option is to mark such memory as usable in e820 and track if the
+range has been accepted in a bitmap. One bit in the bitmap represents
+2MiB in the address space: one 4k page is enough to track 64GiB or
+physical address space.
+
+In the worst-case scenario -- a huge hole in the middle of the
+address space -- It needs 256MiB to handle 4PiB of the address
+space.
+
+Any unaccepted memory that is not aligned to 2M gets accepted upfront.
+
+The bitmap is allocated and constructed in the EFI stub and passed down
+to the kernel via boot_params. allocate_e820() allocates the bitmap if
+unaccepted memory is present, according to the maximum address in the
+memory map.
+
+The same boot_params.unaccepted_memory can be used to pass the bitmap
+between two kernels on kexec, but the use-case is not yet implemented.
+
+The implementation requires some basic helpers in boot stub. They
+provided by linux/ includes in the main kernel image, but is not present
+in boot stub. Create copy of required functionality in the boot stub.
 
 Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
 ---
- arch/x86/coco/tdx/tdx.c           | 26 ------------------
- arch/x86/include/asm/shared/tdx.h | 45 +++++++++++++++++++++++++++++++
- arch/x86/include/asm/tdx.h        | 19 -------------
- 3 files changed, 45 insertions(+), 45 deletions(-)
+ Documentation/x86/zero-page.rst          |  1 +
+ arch/x86/boot/compressed/Makefile        |  1 +
+ arch/x86/boot/compressed/mem.c           | 68 ++++++++++++++++++++++++
+ arch/x86/include/asm/unaccepted_memory.h | 10 ++++
+ arch/x86/include/uapi/asm/bootparam.h    |  2 +-
+ drivers/firmware/efi/Kconfig             | 14 +++++
+ drivers/firmware/efi/efi.c               |  1 +
+ drivers/firmware/efi/libstub/x86-stub.c  | 68 ++++++++++++++++++++++++
+ include/linux/efi.h                      |  3 +-
+ 9 files changed, 166 insertions(+), 2 deletions(-)
+ create mode 100644 arch/x86/boot/compressed/mem.c
+ create mode 100644 arch/x86/include/asm/unaccepted_memory.h
 
-diff --git a/arch/x86/coco/tdx/tdx.c b/arch/x86/coco/tdx/tdx.c
-index 5fbdda2f2b86..6a62d3950619 100644
---- a/arch/x86/coco/tdx/tdx.c
-+++ b/arch/x86/coco/tdx/tdx.c
-@@ -14,14 +14,6 @@
- #include <asm/trapnr.h>
- #include <asm/extable.h>
+diff --git a/Documentation/x86/zero-page.rst b/Documentation/x86/zero-page.rst
+index 45aa9cceb4f1..f21905e61ade 100644
+--- a/Documentation/x86/zero-page.rst
++++ b/Documentation/x86/zero-page.rst
+@@ -20,6 +20,7 @@ Offset/Size	Proto	Name			Meaning
+ 060/010		ALL	ist_info		Intel SpeedStep (IST) BIOS support information
+ 						(struct ist_info)
+ 070/008		ALL	acpi_rsdp_addr		Physical address of ACPI RSDP table
++078/008		ALL	unaccepted_memory	Bitmap of unaccepted memory (1bit == 2M)
+ 080/010		ALL	hd0_info		hd0 disk parameter, OBSOLETE!!
+ 090/010		ALL	hd1_info		hd1 disk parameter, OBSOLETE!!
+ 0A0/010		ALL	sys_desc_table		System description table (struct sys_desc_table),
+diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
+index 19e1905dcbf6..67732478323f 100644
+--- a/arch/x86/boot/compressed/Makefile
++++ b/arch/x86/boot/compressed/Makefile
+@@ -102,6 +102,7 @@ endif
  
--/* TDX module Call Leaf IDs */
--#define TDX_GET_INFO			1
--#define TDX_GET_VEINFO			3
--#define TDX_ACCEPT_PAGE			6
--
--/* TDX hypercall Leaf IDs */
--#define TDVMCALL_MAP_GPA		0x10001
--
- /* MMIO direction */
- #define EPT_READ	0
- #define EPT_WRITE	1
-@@ -36,24 +28,6 @@
- #define VE_GET_PORT_NUM(e)	((e) >> 16)
- #define VE_IS_IO_STRING(e)	((e) & BIT(4))
+ vmlinux-objs-$(CONFIG_ACPI) += $(obj)/acpi.o
+ vmlinux-objs-$(CONFIG_INTEL_TDX_GUEST) += $(obj)/tdx.o $(obj)/tdcall.o
++vmlinux-objs-$(CONFIG_UNACCEPTED_MEMORY) += $(obj)/bitmap.o $(obj)/mem.o
  
--/*
-- * Wrapper for standard use of __tdx_hypercall with no output aside from
-- * return code.
-- */
--static inline u64 _tdx_hypercall(u64 fn, u64 r12, u64 r13, u64 r14, u64 r15)
--{
--	struct tdx_hypercall_args args = {
--		.r10 = TDX_HYPERCALL_STANDARD,
--		.r11 = fn,
--		.r12 = r12,
--		.r13 = r13,
--		.r14 = r14,
--		.r15 = r15,
--	};
--
--	return __tdx_hypercall(&args, 0);
--}
--
- /* Called from __tdx_hypercall() for unrecoverable failure */
- void __tdx_hypercall_failed(void)
- {
-diff --git a/arch/x86/include/asm/shared/tdx.h b/arch/x86/include/asm/shared/tdx.h
-index e53f26228fbb..956ced04c3be 100644
---- a/arch/x86/include/asm/shared/tdx.h
-+++ b/arch/x86/include/asm/shared/tdx.h
-@@ -13,6 +13,14 @@
- #define TDX_CPUID_LEAF_ID	0x21
- #define TDX_IDENT		"IntelTDX    "
- 
-+/* TDX module Call Leaf IDs */
-+#define TDX_GET_INFO			1
-+#define TDX_GET_VEINFO			3
-+#define TDX_ACCEPT_PAGE			6
+ vmlinux-objs-$(CONFIG_EFI_MIXED) += $(obj)/efi_thunk_$(BITS).o
+ vmlinux-objs-$(CONFIG_EFI) += $(obj)/efi.o
+diff --git a/arch/x86/boot/compressed/mem.c b/arch/x86/boot/compressed/mem.c
+new file mode 100644
+index 000000000000..415df0d3bc81
+--- /dev/null
++++ b/arch/x86/boot/compressed/mem.c
+@@ -0,0 +1,68 @@
++// SPDX-License-Identifier: GPL-2.0-only
 +
-+/* TDX hypercall Leaf IDs */
-+#define TDVMCALL_MAP_GPA		0x10001
++#include "../cpuflags.h"
++#include "bitmap.h"
++#include "error.h"
++#include "math.h"
 +
- #ifndef __ASSEMBLY__
- 
- /*
-@@ -33,8 +41,45 @@ struct tdx_hypercall_args {
- /* Used to request services from the VMM */
- u64 __tdx_hypercall(struct tdx_hypercall_args *args, unsigned long flags);
- 
-+/*
-+ * Wrapper for standard use of __tdx_hypercall with no output aside from
-+ * return code.
-+ */
-+static inline u64 _tdx_hypercall(u64 fn, u64 r12, u64 r13, u64 r14, u64 r15)
++#define PMD_SHIFT	21
++#define PMD_SIZE	(_AC(1, UL) << PMD_SHIFT)
++#define PMD_MASK	(~(PMD_SIZE - 1))
++
++static inline void __accept_memory(phys_addr_t start, phys_addr_t end)
 +{
-+	struct tdx_hypercall_args args = {
-+		.r10 = TDX_HYPERCALL_STANDARD,
-+		.r11 = fn,
-+		.r12 = r12,
-+		.r13 = r13,
-+		.r14 = r14,
-+		.r15 = r15,
-+	};
-+
-+	return __tdx_hypercall(&args, 0);
++	/* Platform-specific memory-acceptance call goes here */
++	error("Cannot accept memory");
 +}
 +
-+
- /* Called from __tdx_hypercall() for unrecoverable failure */
- void __tdx_hypercall_failed(void);
- 
 +/*
-+ * Used in __tdx_module_call() to gather the output registers' values of the
-+ * TDCALL instruction when requesting services from the TDX module. This is a
-+ * software only structure and not part of the TDX module/VMM ABI
++ * The accepted memory bitmap only works at PMD_SIZE granularity. If a request
++ * comes in to mark memory as unaccepted which is not PMD_SIZE-aligned, simply
++ * accept the memory now since it can not be *marked* as unaccepted.
 + */
-+struct tdx_module_output {
-+	u64 rcx;
-+	u64 rdx;
-+	u64 r8;
-+	u64 r9;
-+	u64 r10;
-+	u64 r11;
-+};
++void process_unaccepted_memory(struct boot_params *params, u64 start, u64 end)
++{
++	/*
++	 * Accept small regions that might not be able to be represented
++	 * in the bitmap.  This is a bit imprecise and may accept some
++	 * areas that could have been represented in the bitmap instead.
++	 *
++	 * Consider case like this:
++	 *
++	 * | 4k | 2044k |    2048k   |
++	 * ^ 0x0        ^ 2MB        ^ 4MB
++	 *
++	 * all memory in the range is unaccepted, except for the first 4k.
++	 * The second 2M can be represented in the bitmap, but kernel accept it
++	 * right away. The imprecision makes the code simpler by ensuring that
++	 * at least one bit will be set int the bitmap below.
++	 */
++	if (end - start < 2 * PMD_SIZE) {
++		__accept_memory(start, end);
++		return;
++	}
 +
-+/* Used to communicate with the TDX module */
-+u64 __tdx_module_call(u64 fn, u64 rcx, u64 rdx, u64 r8, u64 r9,
-+		      struct tdx_module_output *out);
++	/*
++	 * No matter how the start and end are aligned, at least one unaccepted
++	 * PMD_SIZE area will remain.
++	 */
 +
- #endif /* !__ASSEMBLY__ */
- #endif /* _ASM_X86_SHARED_TDX_H */
-diff --git a/arch/x86/include/asm/tdx.h b/arch/x86/include/asm/tdx.h
-index 020c81a7c729..d9106d3e89f8 100644
---- a/arch/x86/include/asm/tdx.h
-+++ b/arch/x86/include/asm/tdx.h
-@@ -20,21 +20,6 @@
++	/* Immediately accept a <PMD_SIZE piece at the start: */
++	if (start & ~PMD_MASK) {
++		__accept_memory(start, round_up(start, PMD_SIZE));
++		start = round_up(start, PMD_SIZE);
++	}
++
++	/* Immediately accept a <PMD_SIZE piece at the end: */
++	if (end & ~PMD_MASK) {
++		__accept_memory(round_down(end, PMD_SIZE), end);
++		end = round_down(end, PMD_SIZE);
++	}
++
++	/*
++	 * 'start' and 'end' are now both PMD-aligned.
++	 * Record the range as being unaccepted:
++	 */
++	bitmap_set((unsigned long *)params->unaccepted_memory,
++		   start / PMD_SIZE, (end - start) / PMD_SIZE);
++}
+diff --git a/arch/x86/include/asm/unaccepted_memory.h b/arch/x86/include/asm/unaccepted_memory.h
+new file mode 100644
+index 000000000000..df0736d32858
+--- /dev/null
++++ b/arch/x86/include/asm/unaccepted_memory.h
+@@ -0,0 +1,10 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++/* Copyright (C) 2020 Intel Corporation */
++#ifndef _ASM_X86_UNACCEPTED_MEMORY_H
++#define _ASM_X86_UNACCEPTED_MEMORY_H
++
++struct boot_params;
++
++void process_unaccepted_memory(struct boot_params *params, u64 start, u64 num);
++
++#endif
+diff --git a/arch/x86/include/uapi/asm/bootparam.h b/arch/x86/include/uapi/asm/bootparam.h
+index bea5cdcdf532..c62f6ee4b6f0 100644
+--- a/arch/x86/include/uapi/asm/bootparam.h
++++ b/arch/x86/include/uapi/asm/bootparam.h
+@@ -180,7 +180,7 @@ struct boot_params {
+ 	__u64  tboot_addr;				/* 0x058 */
+ 	struct ist_info ist_info;			/* 0x060 */
+ 	__u64 acpi_rsdp_addr;				/* 0x070 */
+-	__u8  _pad3[8];					/* 0x078 */
++	__u64 unaccepted_memory;			/* 0x078 */
+ 	__u8  hd0_info[16];	/* obsolete! */		/* 0x080 */
+ 	__u8  hd1_info[16];	/* obsolete! */		/* 0x090 */
+ 	struct sys_desc_table sys_desc_table; /* obsolete! */	/* 0x0a0 */
+diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+index 2c3dac5ecb36..80d0e802107f 100644
+--- a/drivers/firmware/efi/Kconfig
++++ b/drivers/firmware/efi/Kconfig
+@@ -243,6 +243,20 @@ config EFI_DISABLE_PCI_DMA
+ 	  options "efi=disable_early_pci_dma" or "efi=no_disable_early_pci_dma"
+ 	  may be used to override this option.
  
- #ifndef __ASSEMBLY__
++config UNACCEPTED_MEMORY
++	bool
++	depends on EFI_STUB
++	help
++	   Some Virtual Machine platforms, such as Intel TDX, require
++	   some memory to be "accepted" by the guest before it can be used.
++	   This mechanism helps prevent malicious hosts from making changes
++	   to guest memory.
++
++	   UEFI specification v2.9 introduced EFI_UNACCEPTED_MEMORY memory type.
++
++	   This option adds support for unaccepted memory and makes such memory
++	   usable by the kernel.
++
+ endmenu
  
--/*
-- * Used to gather the output registers values of the TDCALL and SEAMCALL
-- * instructions when requesting services from the TDX module.
-- *
-- * This is a software only structure and not part of the TDX module/VMM ABI.
-- */
--struct tdx_module_output {
--	u64 rcx;
--	u64 rdx;
--	u64 r8;
--	u64 r9;
--	u64 r10;
--	u64 r11;
--};
--
- /*
-  * Used by the #VE exception handler to gather the #VE exception
-  * info from the TDX module. This is a software only structure
-@@ -55,10 +40,6 @@ struct ve_info {
+ config EFI_EMBEDDED_FIRMWARE
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 5502e176d51b..2c055afb1b11 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -747,6 +747,7 @@ static __initdata char memory_type_name[][13] = {
+ 	"MMIO Port",
+ 	"PAL Code",
+ 	"Persistent",
++	"Unaccepted",
+ };
  
- void __init tdx_early_init(void);
+ char * __init efi_md_typeattr_format(char *buf, size_t size,
+diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
+index 252ee222ca1e..ec14a9a6436b 100644
+--- a/drivers/firmware/efi/libstub/x86-stub.c
++++ b/drivers/firmware/efi/libstub/x86-stub.c
+@@ -15,6 +15,7 @@
+ #include <asm/setup.h>
+ #include <asm/desc.h>
+ #include <asm/boot.h>
++#include <asm/unaccepted_memory.h>
  
--/* Used to communicate with the TDX module */
--u64 __tdx_module_call(u64 fn, u64 rcx, u64 rdx, u64 r8, u64 r9,
--		      struct tdx_module_output *out);
--
- void tdx_get_ve_info(struct ve_info *ve);
+ #include "efistub.h"
  
- bool tdx_handle_virt_exception(struct pt_regs *regs, struct ve_info *ve);
+@@ -504,6 +505,17 @@ setup_e820(struct boot_params *params, struct setup_data *e820ext, u32 e820ext_s
+ 			e820_type = E820_TYPE_PMEM;
+ 			break;
+ 
++		case EFI_UNACCEPTED_MEMORY:
++			if (!IS_ENABLED(CONFIG_UNACCEPTED_MEMORY)) {
++				efi_warn_once("The system has unaccepted memory,"
++					     " but kernel does not support it\n");
++				efi_warn_once("Consider enabling CONFIG_UNACCEPTED_MEMORY\n");
++				continue;
++			}
++			e820_type = E820_TYPE_RAM;
++			process_unaccepted_memory(params, d->phys_addr,
++						  d->phys_addr + PAGE_SIZE * d->num_pages);
++			break;
+ 		default:
+ 			continue;
+ 		}
+@@ -568,6 +580,59 @@ static efi_status_t alloc_e820ext(u32 nr_desc, struct setup_data **e820ext,
+ 	return status;
+ }
+ 
++static efi_status_t allocate_unaccepted_memory(struct boot_params *params,
++					       __u32 nr_desc,
++					       struct efi_boot_memmap *map)
++{
++	unsigned long *mem = NULL;
++	u64 size, max_addr = 0;
++	efi_status_t status;
++	bool found = false;
++	int i;
++
++	/* Check if there's any unaccepted memory and find the max address */
++	for (i = 0; i < nr_desc; i++) {
++		efi_memory_desc_t *d;
++
++		d = efi_early_memdesc_ptr(*map->map, *map->desc_size, i);
++		if (d->type == EFI_UNACCEPTED_MEMORY)
++			found = true;
++		if (d->phys_addr + d->num_pages * PAGE_SIZE > max_addr)
++			max_addr = d->phys_addr + d->num_pages * PAGE_SIZE;
++	}
++
++	if (!found) {
++		params->unaccepted_memory = 0;
++		return EFI_SUCCESS;
++	}
++
++	/*
++	 * If unaccepted memory is present allocate a bitmap to track what
++	 * memory has to be accepted before access.
++	 *
++	 * One bit in the bitmap represents 2MiB in the address space:
++	 * A 4k bitmap can track 64GiB of physical address space.
++	 *
++	 * In the worst case scenario -- a huge hole in the middle of the
++	 * address space -- It needs 256MiB to handle 4PiB of the address
++	 * space.
++	 *
++	 * TODO: handle situation if params->unaccepted_memory is already set.
++	 * It's required to deal with kexec.
++	 *
++	 * The bitmap will be populated in setup_e820() according to the memory
++	 * map after efi_exit_boot_services().
++	 */
++	size = DIV_ROUND_UP(max_addr, PMD_SIZE * BITS_PER_BYTE);
++	status = efi_allocate_pages(size, (unsigned long *)&mem, ULONG_MAX);
++	if (status == EFI_SUCCESS) {
++		memset(mem, 0, size);
++		params->unaccepted_memory = (unsigned long)mem;
++	}
++
++	return status;
++}
++
+ static efi_status_t allocate_e820(struct boot_params *params,
+ 				  struct efi_boot_memmap *map,
+ 				  struct setup_data **e820ext,
+@@ -588,6 +653,9 @@ static efi_status_t allocate_e820(struct boot_params *params,
+ 		status = alloc_e820ext(nr_e820ext, e820ext, e820ext_size);
+ 	}
+ 
++	if (IS_ENABLED(CONFIG_UNACCEPTED_MEMORY) && status == EFI_SUCCESS)
++		status = allocate_unaccepted_memory(params, nr_desc, map);
++
+ 	efi_bs_call(free_pool, *map->map);
+ 	return status;
+ }
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 984aa688997a..8b03dc37bc29 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -108,7 +108,8 @@ typedef	struct {
+ #define EFI_MEMORY_MAPPED_IO_PORT_SPACE	12
+ #define EFI_PAL_CODE			13
+ #define EFI_PERSISTENT_MEMORY		14
+-#define EFI_MAX_MEMORY_TYPE		15
++#define EFI_UNACCEPTED_MEMORY		15
++#define EFI_MAX_MEMORY_TYPE		16
+ 
+ /* Attribute values: */
+ #define EFI_MEMORY_UC		((u64)0x0000000000000001ULL)	/* uncached */
 -- 
 2.35.1
 
