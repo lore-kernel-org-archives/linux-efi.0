@@ -2,43 +2,43 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73E4DC433EF
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D2DEFC4332F
 	for <linux-efi@archiver.kernel.org>; Tue, 17 May 2022 15:35:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1350154AbiEQPfK (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 17 May 2022 11:35:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36508 "EHLO
+        id S1350193AbiEQPfL (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 17 May 2022 11:35:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36518 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1350185AbiEQPfH (ORCPT
+        with ESMTP id S1346491AbiEQPfH (ORCPT
         <rfc822;linux-efi@vger.kernel.org>); Tue, 17 May 2022 11:35:07 -0400
-Received: from mga02.intel.com (mga02.intel.com [134.134.136.20])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 320BF4F9E1;
+Received: from mga01.intel.com (mga01.intel.com [192.55.52.88])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6E3384132D;
         Tue, 17 May 2022 08:35:06 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
   t=1652801706; x=1684337706;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=fZtxSqO4KIAh0ipO8K6wy8wKDprGI920JXd4BfH9/jE=;
-  b=NzISyU43lkVJSQxsKDicFgVaDysEqMw4Yl/mCdZr6HDwVcVWdzltkMKV
-   J7AQ0+W8VR7wXV0MK0NCrjr8i+zl1+zoGeLkFT42khnmDdyJVFWEM/cF+
-   dlCxwR0YOstoylAFePNyFFmCCgqQEcXTuWka/mS1uso5A6oKIzWEw3G5m
-   oZ+AFys80dHI5MfuqASsWpgx9AcPp3PUfqiZcXwwETDkQVCWcoR2U5xAS
-   /HC2Y/RQXBKwFWvfhlduDHkBMElwPBip40YBJha5A0mmNhWgfZnVlcQVC
-   wnHkWbWUzdmuizTX2QG/joVAEDS6CwQkLUmT5p4vJP9Os/CGO0kmeHCWN
-   g==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10350"; a="258783173"
+  bh=Vt7QSmHfxcGQwi2CPob9vBQysbMDXN+N63yj2aSmEdc=;
+  b=D9ByoT0nD+tEvppwyoVkfoTQrkn5ceZ/PIdMisNTxYbtR9yaQQmNil/r
+   q9Vl9isVjxY/6b0a2Nlyy8+BM7GZtkVVybZ6zqP5ZgZYgp+Vsp8GELgIw
+   3tDkx2K5LN4Nsdxw8NIkV5fF4vBNAzgXKA00pHIvJ4FEO0IjXzWVZ73wo
+   8GUBmgboumzUaXucU+H0O8y4FrhISphXJJAqvZA9lknEqT2xeSpCNo3IP
+   A6uwCNsJPOetZzhpEPuxP15yPKLv46AA35/H5RGbbxAgEf0wVTXNOKRNy
+   Kw3C5AApZlK2juG1Bg/tBspWrDffQ1/TbHS+BiNtYxjzFrU7bhZiG8ebQ
+   Q==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10350"; a="296502079"
 X-IronPort-AV: E=Sophos;i="5.91,233,1647327600"; 
-   d="scan'208";a="258783173"
-Received: from orsmga001.jf.intel.com ([10.7.209.18])
-  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 May 2022 08:35:05 -0700
+   d="scan'208";a="296502079"
+Received: from orsmga005.jf.intel.com ([10.7.209.41])
+  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 May 2022 08:35:06 -0700
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.91,233,1647327600"; 
-   d="scan'208";a="605408170"
+   d="scan'208";a="741831016"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by orsmga001.jf.intel.com with ESMTP; 17 May 2022 08:34:58 -0700
+  by orsmga005.jf.intel.com with ESMTP; 17 May 2022 08:34:58 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1000)
-        id AE7C5B80; Tue, 17 May 2022 18:34:50 +0300 (EEST)
+        id 979578F9; Tue, 17 May 2022 18:34:50 +0300 (EEST)
 From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
 To:     Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>,
         Sean Christopherson <seanjc@google.com>,
@@ -64,132 +64,67 @@ Cc:     Andi Kleen <ak@linux.intel.com>,
         khalid.elmously@canonical.com, philip.cox@canonical.com,
         x86@kernel.org, linux-mm@kvack.org, linux-coco@lists.linux.dev,
         linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
-        "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-Subject: [PATCHv6 09/15] x86/mm: Avoid load_unaligned_zeropad() stepping into unaccepted memory
-Date:   Tue, 17 May 2022 18:34:38 +0300
-Message-Id: <20220517153444.11195-10-kirill.shutemov@linux.intel.com>
+        "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
+        Mike Rapoport <rppt@linux.ibm.com>
+Subject: [PATCHv6 07/15] x86/mm: Reserve unaccepted memory bitmap
+Date:   Tue, 17 May 2022 18:34:36 +0300
+Message-Id: <20220517153444.11195-8-kirill.shutemov@linux.intel.com>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220517153444.11195-1-kirill.shutemov@linux.intel.com>
 References: <20220517153444.11195-1-kirill.shutemov@linux.intel.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-load_unaligned_zeropad() can lead to unwanted loads across page boundaries.
-The unwanted loads are typically harmless. But, they might be made to
-totally unrelated or even unmapped memory. load_unaligned_zeropad()
-relies on exception fixup (#PF, #GP and now #VE) to recover from these
-unwanted loads.
+A given page of memory can only be accepted once. The kernel has to
+accept memory both in the early decompression stage and during normal
+runtime.
 
-But, this approach does not work for unaccepted memory. For TDX, a load
-from unaccepted memory will not lead to a recoverable exception within
-the guest. The guest will exit to the VMM where the only recourse is to
-terminate the guest.
+A bitmap is used to communicate the acceptance state of each page
+between the decompression stage and normal runtime.
 
-There are three parts to fix this issue and comprehensively avoid access
-to unaccepted memory. Together these ensure that an extra “guard” page
-is accepted in addition to the memory that needs to be used.
+boot_params is used to communicate location of the bitmap throughout
+the boot. The bitmap is allocated and initially populated in EFI stub.
+Decompression stage accepts pages required for kernel/initrd and marks
+these pages accordingly in the bitmap. The main kernel picks up the
+bitmap from the same boot_params and uses it to determine what has to
+be accepted on allocation.
 
-1. Implicitly extend the memory_is_unaccepted(start, end) checks up to
-   end+2M if ‘end’ is aligned on a 2M boundary.
-2. Implicitly extend accept_memory(start, end) to end+2M if ‘end’ is
-   aligned on a 2M boundary.
-3. Set PageUnaccepted() on both memory that itself needs to be accepted
-   *and* memory where the next page needs to be accepted. Essentially,
-   make PageUnaccepted(page) a marker for whether work needs to be done
-   to make ‘page’ usable. That work might include accepting pages in
-   addition to ‘page’ itself.
+In the runtime kernel, reserve the bitmap's memory to ensure nothing
+overwrites it.
 
-Side note: This leads to something strange. Pages which were accepted
-	   at boot, marked by the firmware as accepted and will never
-	   _need_ to be accepted might have PageUnaccepted() set on
-	   them. PageUnaccepted(page) is a cue to ensure that the next
-	   page is accepted before ‘page’ can be used.
-
-This is an actual, real-world problem which was discovered during TDX
-testing.
+The size of bitmap is determined with e820__end_of_ram_pfn() which
+relies on setup_e820() marking unaccepted memory as E820_TYPE_RAM.
 
 Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
+Acked-by: Mike Rapoport <rppt@linux.ibm.com>
 ---
- arch/x86/mm/unaccepted_memory.c         | 36 +++++++++++++++++++++++++
- drivers/firmware/efi/libstub/x86-stub.c |  7 +++++
- 2 files changed, 43 insertions(+)
+ arch/x86/kernel/e820.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
-diff --git a/arch/x86/mm/unaccepted_memory.c b/arch/x86/mm/unaccepted_memory.c
-index 0a86380b2478..33bf70592a46 100644
---- a/arch/x86/mm/unaccepted_memory.c
-+++ b/arch/x86/mm/unaccepted_memory.c
-@@ -23,6 +23,38 @@ void accept_memory(phys_addr_t start, phys_addr_t end)
- 	bitmap = __va(boot_params.unaccepted_memory);
- 	range_start = start / PMD_SIZE;
+diff --git a/arch/x86/kernel/e820.c b/arch/x86/kernel/e820.c
+index f267205f2d5a..22d1fe48dcba 100644
+--- a/arch/x86/kernel/e820.c
++++ b/arch/x86/kernel/e820.c
+@@ -1316,6 +1316,16 @@ void __init e820__memblock_setup(void)
+ 	int i;
+ 	u64 end;
  
-+	/*
-+	 * load_unaligned_zeropad() can lead to unwanted loads across page
-+	 * boundaries. The unwanted loads are typically harmless. But, they
-+	 * might be made to totally unrelated or even unmapped memory.
-+	 * load_unaligned_zeropad() relies on exception fixup (#PF, #GP and now
-+	 * #VE) to recover from these unwanted loads.
-+	 *
-+	 * But, this approach does not work for unaccepted memory. For TDX, a
-+	 * load from unaccepted memory will not lead to a recoverable exception
-+	 * within the guest. The guest will exit to the VMM where the only
-+	 * recourse is to terminate the guest.
-+	 *
-+	 * There are three parts to fix this issue and comprehensively avoid
-+	 * access to unaccepted memory. Together these ensure that an extra
-+	 * “guard” page is accepted in addition to the memory that needs to be
-+	 * used:
-+	 *
-+	 * 1. Implicitly extend the range_contains_unaccepted_memory(start, end)
-+	 *    checks up to end+2M if ‘end’ is aligned on a 2M boundary.
-+	 *
-+	 * 2. Implicitly extend accept_memory(start, end) to end+2M if ‘end’ is
-+	 *    aligned on a 2M boundary.
-+	 *
-+	 * 3. Set PageUnaccepted() on both memory that itself needs to be
-+	 *    accepted *and* memory where the next page needs to be accepted.
-+	 *    Essentially, make PageUnaccepted(page) a marker for whether work
-+	 *    needs to be done to make ‘page’ usable. That work might include
-+	 *    accepting pages in addition to ‘page’ itself.
-+	 */
-+	if (!(end % PMD_SIZE))
-+		end += PMD_SIZE;
++	/* Mark unaccepted memory bitmap reserved */
++	if (boot_params.unaccepted_memory) {
++		unsigned long size;
 +
- 	spin_lock_irqsave(&unaccepted_memory_lock, flags);
- 	for_each_set_bitrange_from(range_start, range_end, bitmap,
- 				   DIV_ROUND_UP(end, PMD_SIZE)) {
-@@ -41,6 +73,10 @@ bool range_contains_unaccepted_memory(phys_addr_t start, phys_addr_t end)
- 	unsigned long flags;
- 	bool ret = false;
- 
-+	/* See comment on load_unaligned_zeropad() in accept_memory() */
-+	if (!(end % PMD_SIZE))
-+		end += PMD_SIZE;
-+
- 	spin_lock_irqsave(&unaccepted_memory_lock, flags);
- 	while (start < end) {
- 		if (test_bit(start / PMD_SIZE, bitmap)) {
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index ec14a9a6436b..89705ae69cbf 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -606,6 +606,13 @@ static efi_status_t allocate_unaccepted_memory(struct boot_params *params,
- 		return EFI_SUCCESS;
- 	}
- 
-+	/*
-+	 * range_contains_unaccepted_memory() may need to check one 2M chunk
-+	 * beyond the end of RAM to deal with load_unaligned_zeropad(). Make
-+	 * sure that the bitmap is large enough handle it.
-+	 */
-+	max_addr += PMD_SIZE;
++		/* One bit per 2MB */
++		size = DIV_ROUND_UP(e820__end_of_ram_pfn() * PAGE_SIZE,
++				    PMD_SIZE * BITS_PER_BYTE);
++		memblock_reserve(boot_params.unaccepted_memory, size);
++	}
 +
  	/*
- 	 * If unaccepted memory is present allocate a bitmap to track what
- 	 * memory has to be accepted before access.
+ 	 * The bootstrap memblock region count maximum is 128 entries
+ 	 * (INIT_MEMBLOCK_REGIONS), but EFI might pass us more E820 entries
 -- 
 2.35.1
 
