@@ -2,70 +2,57 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 90220C433EF
-	for <linux-efi@archiver.kernel.org>; Wed, 25 May 2022 16:09:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C16A4C433EF
+	for <linux-efi@archiver.kernel.org>; Wed, 25 May 2022 23:11:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237127AbiEYQJM (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 25 May 2022 12:09:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60808 "EHLO
+        id S239952AbiEYXLy (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 25 May 2022 19:11:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45184 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234454AbiEYQJM (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 25 May 2022 12:09:12 -0400
-Received: from smtp-relay-internal-0.canonical.com (smtp-relay-internal-0.canonical.com [185.125.188.122])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 504ACAE27A
-        for <linux-efi@vger.kernel.org>; Wed, 25 May 2022 09:09:11 -0700 (PDT)
-Received: from mail-ed1-f69.google.com (mail-ed1-f69.google.com [209.85.208.69])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-        (No client certificate requested)
-        by smtp-relay-internal-0.canonical.com (Postfix) with ESMTPS id AFBFA3FBC9
-        for <linux-efi@vger.kernel.org>; Wed, 25 May 2022 16:09:09 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-        s=20210705; t=1653494949;
-        bh=d8wzs0GJmElvjOENQNOKSUNkK9vo5WqYmuRjW9+dNXI=;
-        h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-         In-Reply-To:Content-Type;
-        b=uzvbVzPg57zawLEoif9hNY8Cvh9w868svVFrpMiNCK/PSjubMfYKgtdRZqddogKoi
-         4Vi+XjaUEd04hjrf5LpkpZBYHYTuGuDheXrx3oGiWcMrsg9cZ9mS4n0o8nj1ei7Ujp
-         /nY9vMtzOQNT+pL8LadCNzJn65Tfjd9Z/t42HJnY7Ewb3iG+YdrfyP5AvFpaU80k9/
-         LaWC/RTGeEDzSEyeKjZtLmezhfEv/Of2rKAZPYMR7F/o06LZcdxpz2D7nPHEbjQEVX
-         y35idsoiFak2lIVbc3JESME5Z3CpPXMJZk1OntD/TGmxHvQGYJ0pr4imbSBzIWEgPo
-         EyjamqBmJkuvw==
-Received: by mail-ed1-f69.google.com with SMTP id u1-20020aa7d981000000b0042acd1f2253so15156916eds.4
-        for <linux-efi@vger.kernel.org>; Wed, 25 May 2022 09:09:09 -0700 (PDT)
+        with ESMTP id S234786AbiEYXLx (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 25 May 2022 19:11:53 -0400
+Received: from mail-yw1-x112e.google.com (mail-yw1-x112e.google.com [IPv6:2607:f8b0:4864:20::112e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EAB90A5AA5
+        for <linux-efi@vger.kernel.org>; Wed, 25 May 2022 16:11:51 -0700 (PDT)
+Received: by mail-yw1-x112e.google.com with SMTP id 00721157ae682-2ec42eae76bso230131407b3.10
+        for <linux-efi@vger.kernel.org>; Wed, 25 May 2022 16:11:51 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=atishpatra.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=3mm1aY/BdEGgm5C/qzynm8Cyr6ViPrOaHpTh3MCfMy4=;
+        b=RyvnfDJs0Rseco3iLXTZ+iPwdihRyFfVKRrDTwspg4Qc3DIVeyzY+dHix2zI4nSgHn
+         D8VGUZY6SG3XLMpJMLvsRxqaow/KD3Q905Gxx2t9oItcjYyMWz554n7MBnDqjhXq8zB0
+         EAbgqyX8qFiN6NI545xyN0PB9sgEr5xtDCb08=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=d8wzs0GJmElvjOENQNOKSUNkK9vo5WqYmuRjW9+dNXI=;
-        b=Vw/vfpRMyWmBJnQVGFh0bUkG3rsm/kCb3PTqkbmcDWmZ7Bj9ngG6Eu4RmRzcpdOueT
-         2QDcuK0YscKX5cOJXKVShyUvxISMrC0//IBTkHoKxf97unnt1CjNDAqT3PrpHhhX2VHD
-         v42qrHGyZaMyJ88TvF2Ddui80cL7C9w9m+teyfCqpYQ2MZgicT+Ls+KITS5IWpTFMKMR
-         +NdgHhigbO1UTNsVt0f3Igqoufqcf/Z25/32NDn3B0FponVaYrClnYSOXiqe5CE9+UTO
-         Fo1+L7Zhf76DmsZvlvyPc9kncY3Mst20JdQBSL7Bx1G47YxSkFHl/r5Uzr3UndNYmF2I
-         8ArQ==
-X-Gm-Message-State: AOAM530RQwvMqp6vp4UU0XJKzbj8BfMSwIKQQ6MY9I0r8faTYNuPcfC4
-        ZbobHGeor/2JTSenUC9GZxd3pRyH4T80ftWCkSas9ozPxgRAnYXtLuZAhX1ui1GG12ayxfuQK35
-        vSrzpdLefaYq865gJORKJh3554lNgAuDxW4UuHw==
-X-Received: by 2002:a05:6402:1914:b0:42b:73ae:e082 with SMTP id e20-20020a056402191400b0042b73aee082mr14382693edz.31.1653494948054;
-        Wed, 25 May 2022 09:09:08 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJxpqXsCgcavHTP6/CfZQf4opU8VPdadSWqUfI+xqHjR9H80zRw2o39oJtqvERVspav9HAZUAA==
-X-Received: by 2002:a05:6402:1914:b0:42b:73ae:e082 with SMTP id e20-20020a056402191400b0042b73aee082mr14382654edz.31.1653494947825;
-        Wed, 25 May 2022 09:09:07 -0700 (PDT)
-Received: from [192.168.123.67] (ip-062-143-094-109.um16.pools.vodafone-ip.de. [62.143.94.109])
-        by smtp.gmail.com with ESMTPSA id vw13-20020a170907058d00b006feec47dae7sm2963066ejb.149.2022.05.25.09.09.06
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 25 May 2022 09:09:06 -0700 (PDT)
-Message-ID: <1e90b15b-8c73-0de8-2885-1292923b7575@canonical.com>
-Date:   Wed, 25 May 2022 18:09:05 +0200
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=3mm1aY/BdEGgm5C/qzynm8Cyr6ViPrOaHpTh3MCfMy4=;
+        b=jzj6QQQn/x6CLoDQzHZ9nvUSSp+OMq9ZVAKYbqfr7MuQ+RIiX9jv6IGgy9co/3sLsI
+         XBQ+K/qg89Hc/0r3L5mwsV4ciVcBEMKKL56PgHE9JVVdrO7H13dtPWzF6/6jvton6eIe
+         0NPR2Jh64YJPs3OJF6n489MTp7gJakZHeopZr2hbUcNwdyfGNCKwdyubSiClzL0Xryms
+         j56LoRsmPj1eYh2FHHJPN7Wjsu4M5AlsqX9LuTLvL7ljeLmX+mZ2F0pUSo0p5NacDhdF
+         BMiGUkAOeA9cHUNdCeBL0S1jdByL+/+n3hth6VDdEQb0CZcp52YBWSCM8sWBIRvCBfVz
+         Odhg==
+X-Gm-Message-State: AOAM531CQ5zm/RLZWQCDyWez5OfUBVHOSqL494S7nn7Ifw0U96Qyz7Ql
+        MC/tpRnQoz/xeN0wweJh1hV2hpIlOjkvly/IVc8D
+X-Google-Smtp-Source: ABdhPJx3ULvZXcVEBtgdS0E5XoYo/4N3FYTfZ2i5Gw2cvII72BCF9nS2480KdMribBkprxpRJSb7p87PCzEiQIU3yFI=
+X-Received: by 2002:a0d:e88c:0:b0:2fe:da96:1b77 with SMTP id
+ r134-20020a0de88c000000b002feda961b77mr35598083ywe.262.1653520311153; Wed, 25
+ May 2022 16:11:51 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.9.0
+References: <20220525151106.2176147-1-sunilvl@ventanamicro.com>
+ <20220525151106.2176147-6-sunilvl@ventanamicro.com> <CAMj1kXFhEBv7MVCKZuXdx9=hZx3qWbkATdLDwXAe_Zn9Xyx=dg@mail.gmail.com>
+ <1e90b15b-8c73-0de8-2885-1292923b7575@canonical.com>
+In-Reply-To: <1e90b15b-8c73-0de8-2885-1292923b7575@canonical.com>
+From:   Atish Patra <atishp@atishpatra.org>
+Date:   Wed, 25 May 2022 16:11:40 -0700
+Message-ID: <CAOnJCU+r6KgR7bd2dx5QLmmVLjJX8GhETHb6rG65wq0e_m6FVA@mail.gmail.com>
 Subject: Re: [PATCH 5/5] riscv/efi_stub: Support for 64bit boot-hartid
-Content-Language: en-US
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     Paul Walmsley <paul.walmsley@sifive.com>,
+To:     Heinrich Schuchardt <heinrich.schuchardt@canonical.com>
+Cc:     Ard Biesheuvel <ardb@kernel.org>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
         Palmer Dabbelt <palmer@dabbelt.com>,
         Albert Ou <aou@eecs.berkeley.edu>,
         Daniel Lezcano <daniel.lezcano@linaro.org>,
@@ -78,80 +65,94 @@ Cc:     Paul Walmsley <paul.walmsley@sifive.com>,
         linux-efi <linux-efi@vger.kernel.org>,
         Sunil V L <sunil.vl@gmail.com>,
         Sunil V L <sunilvl@ventanamicro.com>
-References: <20220525151106.2176147-1-sunilvl@ventanamicro.com>
- <20220525151106.2176147-6-sunilvl@ventanamicro.com>
- <CAMj1kXFhEBv7MVCKZuXdx9=hZx3qWbkATdLDwXAe_Zn9Xyx=dg@mail.gmail.com>
-From:   Heinrich Schuchardt <heinrich.schuchardt@canonical.com>
-In-Reply-To: <CAMj1kXFhEBv7MVCKZuXdx9=hZx3qWbkATdLDwXAe_Zn9Xyx=dg@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On 5/25/22 17:48, Ard Biesheuvel wrote:
-> On Wed, 25 May 2022 at 17:11, Sunil V L <sunilvl@ventanamicro.com> wrote:
->>
->> The boot-hartid can be a 64bit value on RV64 platforms. Currently,
->> the "boot-hartid" in DT is assumed to be 32bit only. This patch
->> detects the size of the "boot-hartid" and uses 32bit or 64bit
->> FDT reads appropriately.
->>
->> Signed-off-by: Sunil V L <sunilvl@ventanamicro.com>
->> ---
->>   drivers/firmware/efi/libstub/riscv-stub.c | 12 +++++++++---
->>   1 file changed, 9 insertions(+), 3 deletions(-)
->>
->> diff --git a/drivers/firmware/efi/libstub/riscv-stub.c b/drivers/firmware/efi/libstub/riscv-stub.c
->> index 9e85e58d1f27..d748533f1329 100644
->> --- a/drivers/firmware/efi/libstub/riscv-stub.c
->> +++ b/drivers/firmware/efi/libstub/riscv-stub.c
->> @@ -29,7 +29,7 @@ static int get_boot_hartid_from_fdt(void)
->>   {
->>          const void *fdt;
->>          int chosen_node, len;
->> -       const fdt32_t *prop;
->> +       const void *prop;
->>
->>          fdt = get_efi_config_table(DEVICE_TREE_GUID);
->>          if (!fdt)
->> @@ -40,10 +40,16 @@ static int get_boot_hartid_from_fdt(void)
->>                  return -EINVAL;
->>
->>          prop = fdt_getprop((void *)fdt, chosen_node, "boot-hartid", &len);
->> -       if (!prop || len != sizeof(u32))
->> +       if (!prop)
->> +               return -EINVAL;
->> +
->> +       if (len == sizeof(u32))
->> +               hartid = (unsigned long) fdt32_to_cpu(*(fdt32_t *)prop);
->> +       else if (len == sizeof(u64))
->> +               hartid = (unsigned long) fdt64_to_cpu(*(fdt64_t *)prop);
-> 
-> Does RISC-V care about alignment? A 64-bit quantity is not guaranteed
-> to appear 64-bit aligned in the DT, and the cast violates C alignment
-> rules, so this should probably used get_unaligned_be64() or something
-> like that.
+On Wed, May 25, 2022 at 9:09 AM Heinrich Schuchardt
+<heinrich.schuchardt@canonical.com> wrote:
+>
+> On 5/25/22 17:48, Ard Biesheuvel wrote:
+> > On Wed, 25 May 2022 at 17:11, Sunil V L <sunilvl@ventanamicro.com> wrote:
+> >>
+> >> The boot-hartid can be a 64bit value on RV64 platforms. Currently,
+> >> the "boot-hartid" in DT is assumed to be 32bit only. This patch
+> >> detects the size of the "boot-hartid" and uses 32bit or 64bit
+> >> FDT reads appropriately.
+> >>
+> >> Signed-off-by: Sunil V L <sunilvl@ventanamicro.com>
+> >> ---
+> >>   drivers/firmware/efi/libstub/riscv-stub.c | 12 +++++++++---
+> >>   1 file changed, 9 insertions(+), 3 deletions(-)
+> >>
+> >> diff --git a/drivers/firmware/efi/libstub/riscv-stub.c b/drivers/firmware/efi/libstub/riscv-stub.c
+> >> index 9e85e58d1f27..d748533f1329 100644
+> >> --- a/drivers/firmware/efi/libstub/riscv-stub.c
+> >> +++ b/drivers/firmware/efi/libstub/riscv-stub.c
+> >> @@ -29,7 +29,7 @@ static int get_boot_hartid_from_fdt(void)
+> >>   {
+> >>          const void *fdt;
+> >>          int chosen_node, len;
+> >> -       const fdt32_t *prop;
+> >> +       const void *prop;
+> >>
+> >>          fdt = get_efi_config_table(DEVICE_TREE_GUID);
+> >>          if (!fdt)
+> >> @@ -40,10 +40,16 @@ static int get_boot_hartid_from_fdt(void)
+> >>                  return -EINVAL;
+> >>
+> >>          prop = fdt_getprop((void *)fdt, chosen_node, "boot-hartid", &len);
+> >> -       if (!prop || len != sizeof(u32))
+> >> +       if (!prop)
+> >> +               return -EINVAL;
+> >> +
+> >> +       if (len == sizeof(u32))
+> >> +               hartid = (unsigned long) fdt32_to_cpu(*(fdt32_t *)prop);
+> >> +       else if (len == sizeof(u64))
+> >> +               hartid = (unsigned long) fdt64_to_cpu(*(fdt64_t *)prop);
+> >
+> > Does RISC-V care about alignment? A 64-bit quantity is not guaranteed
+> > to appear 64-bit aligned in the DT, and the cast violates C alignment
+> > rules, so this should probably used get_unaligned_be64() or something
+> > like that.
+>
+> When running in S-mode the SBI handles unaligned access but this has a
+> performance penalty.
+>
+> We could use fdt64_to_cpu(__get_unaligned_t(fdt64_t, prop)) here.
+>
 
-When running in S-mode the SBI handles unaligned access but this has a 
-performance penalty.
+It is better to avoid unaligned access in the kernel. There are some
+plans to disable
+misaligned load/store emulation in the firmware if user space requests
+it via prctl.
 
-We could use fdt64_to_cpu(__get_unaligned_t(fdt64_t, prop)) here.
+We need another SBI extension to do that. The idea is to keep it
+enabled by default in the firmware but
+userspace should have an option to disable it via prctl. If we make
+sure that the kernel doesn't invoke any
+unaligned access, this feature can be implemented easily.
 
-Best regards
+> Best regards
+>
+> Heinrich
+>
+> >
+> >
+> >> +       else
+> >>                  return -EINVAL;
+> >>
+> >> -       hartid = fdt32_to_cpu(*prop);
+> >>          return 0;
+> >>   }
+> >>
+> >> --
+> >> 2.25.1
+> >>
+>
 
-Heinrich
 
-> 
-> 
->> +       else
->>                  return -EINVAL;
->>
->> -       hartid = fdt32_to_cpu(*prop);
->>          return 0;
->>   }
->>
->> --
->> 2.25.1
->>
-
+-- 
+Regards,
+Atish
