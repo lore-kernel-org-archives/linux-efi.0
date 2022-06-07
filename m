@@ -2,29 +2,29 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8D2C7CCA485
-	for <linux-efi@archiver.kernel.org>; Tue,  7 Jun 2022 09:16:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0C3C0CCA486
+	for <linux-efi@archiver.kernel.org>; Tue,  7 Jun 2022 09:16:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239191AbiFGJQ5 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 7 Jun 2022 05:16:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41816 "EHLO
+        id S239226AbiFGJQ6 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 7 Jun 2022 05:16:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41814 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239198AbiFGJQu (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 7 Jun 2022 05:16:50 -0400
-Received: from szxga01-in.huawei.com (szxga01-in.huawei.com [45.249.212.187])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 794FFB7DF7;
-        Tue,  7 Jun 2022 02:16:48 -0700 (PDT)
-Received: from dggpemm500021.china.huawei.com (unknown [172.30.72.54])
-        by szxga01-in.huawei.com (SkyGuard) with ESMTP id 4LHPps2DC1zjdbL;
-        Tue,  7 Jun 2022 17:15:49 +0800 (CST)
+        with ESMTP id S239187AbiFGJQ4 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 7 Jun 2022 05:16:56 -0400
+Received: from szxga02-in.huawei.com (szxga02-in.huawei.com [45.249.212.188])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 83B91B82C7;
+        Tue,  7 Jun 2022 02:16:54 -0700 (PDT)
+Received: from dggpemm500024.china.huawei.com (unknown [172.30.72.54])
+        by szxga02-in.huawei.com (SkyGuard) with ESMTP id 4LHPpY6XYQzjdM9;
+        Tue,  7 Jun 2022 17:15:33 +0800 (CST)
 Received: from dggpemm500014.china.huawei.com (7.185.36.153) by
- dggpemm500021.china.huawei.com (7.185.36.109) with Microsoft SMTP Server
+ dggpemm500024.china.huawei.com (7.185.36.203) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.24; Tue, 7 Jun 2022 17:16:45 +0800
+ 15.1.2375.24; Tue, 7 Jun 2022 17:16:52 +0800
 Received: from localhost.localdomain (10.175.112.125) by
  dggpemm500014.china.huawei.com (7.185.36.153) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.24; Tue, 7 Jun 2022 17:16:44 +0800
+ 15.1.2375.24; Tue, 7 Jun 2022 17:16:51 +0800
 From:   Wupeng Ma <mawupeng1@huawei.com>
 To:     <corbet@lwn.net>, <will@kernel.org>, <ardb@kernel.org>,
         <catalin.marinas@arm.com>
@@ -46,9 +46,9 @@ CC:     <tglx@linutronix.de>, <mingo@redhat.com>, <bp@alien8.de>,
         <linux-arm-kernel@lists.infradead.org>,
         <linux-efi@vger.kernel.org>, <platform-driver-x86@vger.kernel.org>,
         <linux-mm@kvack.org>, <linux-riscv@lists.infradead.org>
-Subject: [PATCH v3 2/6] arm64/mirror: arm64 enabling - find mirrored memory ranges
-Date:   Tue, 7 Jun 2022 17:38:01 +0800
-Message-ID: <20220607093805.1354256-3-mawupeng1@huawei.com>
+Subject: [PATCH v3 6/6] efi: Disable mirror feature if kernelcore is not specified
+Date:   Tue, 7 Jun 2022 17:38:05 +0800
+Message-ID: <20220607093805.1354256-7-mawupeng1@huawei.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20220607093805.1354256-1-mawupeng1@huawei.com>
 References: <20220607093805.1354256-1-mawupeng1@huawei.com>
@@ -65,44 +65,67 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Ma Wupeng <mawupeng1@huawei.com>
 
-Commit b05b9f5f9dcf ("x86, mirror: x86 enabling - find mirrored memory ranges")
-introduced mirrored memory support for x86 and this could be used on arm64.
+If system have some mirrored memory and mirrored feature is not specified
+in boot parameter, the basic mirrored feature will be enabled and this will
+lead to the following situations:
 
-Since we only support this feature on arm64, efi_find_mirror() won't be placed
-into efi_init(), which is used by riscv/arm/arm64, it is added in setup_arch()
-to scan the memory map and mark mirrored memory in memblock.
+- memblock memory allocation prefers mirrored region. This may have some
+  unexpected influence on numa affinity.
+
+- contiguous memory will be split into several parts if parts of them
+  is mirrored memory via memblock_mark_mirror().
+
+To fix this, variable mirrored_kernelcore will be checked before calling
+efi_find_mirror() which will enable basic mirrored feature and this
+variable is true if kernelcore=mirror is added in the kernel parameters.
 
 Signed-off-by: Ma Wupeng <mawupeng1@huawei.com>
 ---
- Documentation/admin-guide/kernel-parameters.txt | 2 +-
- arch/arm64/kernel/setup.c                       | 1 +
- 2 files changed, 2 insertions(+), 1 deletion(-)
+ drivers/firmware/efi/efi.c | 3 +++
+ include/linux/mm.h         | 2 ++
+ mm/page_alloc.c            | 2 +-
+ 3 files changed, 6 insertions(+), 1 deletion(-)
 
-diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index 8090130b544b..e3537646b6f7 100644
---- a/Documentation/admin-guide/kernel-parameters.txt
-+++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -2301,7 +2301,7 @@
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 79c232e07de7..8a5edcb0dd82 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -454,6 +454,9 @@ void __init efi_find_mirror(void)
+ 	if (!efi_enabled(EFI_MEMMAP))
+ 		return;
  
- 	keepinitrd	[HW,ARM]
++	if (!mirrored_kernelcore)
++		return;
++
+ 	for_each_efi_memory_desc(md) {
+ 		unsigned long long start = md->phys_addr;
+ 		unsigned long long size = md->num_pages << EFI_PAGE_SHIFT;
+diff --git a/include/linux/mm.h b/include/linux/mm.h
+index bc8f326be0ce..741ac7d022c3 100644
+--- a/include/linux/mm.h
++++ b/include/linux/mm.h
+@@ -2540,6 +2540,8 @@ extern void get_pfn_range_for_nid(unsigned int nid,
+ 			unsigned long *start_pfn, unsigned long *end_pfn);
+ extern unsigned long find_min_pfn_with_active_regions(void);
  
--	kernelcore=	[KNL,X86,IA-64,PPC]
-+	kernelcore=	[KNL,X86,IA-64,PPC,ARM64]
- 			Format: nn[KMGTPE] | nn% | "mirror"
- 			This parameter specifies the amount of memory usable by
- 			the kernel for non-movable allocations.  The requested
-diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
-index cf3a759f10d4..6e9acd7ecf0f 100644
---- a/arch/arm64/kernel/setup.c
-+++ b/arch/arm64/kernel/setup.c
-@@ -328,6 +328,7 @@ void __init __no_sanitize_address setup_arch(char **cmdline_p)
++extern bool mirrored_kernelcore;
++
+ #ifndef CONFIG_NUMA
+ static inline int early_pfn_to_nid(unsigned long pfn)
+ {
+diff --git a/mm/page_alloc.c b/mm/page_alloc.c
+index e008a3df0485..cf6f70aba787 100644
+--- a/mm/page_alloc.c
++++ b/mm/page_alloc.c
+@@ -356,7 +356,7 @@ static unsigned long required_kernelcore_percent __initdata;
+ static unsigned long required_movablecore __initdata;
+ static unsigned long required_movablecore_percent __initdata;
+ static unsigned long zone_movable_pfn[MAX_NUMNODES] __initdata;
+-static bool mirrored_kernelcore __meminitdata;
++bool mirrored_kernelcore __meminitdata;
  
- 	xen_early_init();
- 	efi_init();
-+	efi_find_mirror();
- 
- 	if (!efi_enabled(EFI_BOOT) && ((u64)_text % MIN_KIMG_ALIGN) != 0)
- 	     pr_warn(FW_BUG "Kernel image misaligned at boot, please fix your bootloader!");
+ /* movable_zone is the "real" zone pages in ZONE_MOVABLE are taken from */
+ int movable_zone;
 -- 
 2.25.1
 
