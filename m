@@ -2,40 +2,38 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4A48DCCA481
-	for <linux-efi@archiver.kernel.org>; Wed,  8 Jun 2022 04:54:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A17A0CCA482
+	for <linux-efi@archiver.kernel.org>; Wed,  8 Jun 2022 07:59:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231261AbiFHEyv (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 8 Jun 2022 00:54:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60706 "EHLO
+        id S231245AbiFHH7Z (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 8 Jun 2022 03:59:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56784 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233445AbiFHEyM (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 8 Jun 2022 00:54:12 -0400
-Received: from szxga08-in.huawei.com (szxga08-in.huawei.com [45.249.212.255])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6665E26C0D9;
-        Tue,  7 Jun 2022 18:26:37 -0700 (PDT)
-Received: from dggpemm500020.china.huawei.com (unknown [172.30.72.55])
-        by szxga08-in.huawei.com (SkyGuard) with ESMTP id 4LHqJv1XQ4z1KH3V;
-        Wed,  8 Jun 2022 09:24:47 +0800 (CST)
+        with ESMTP id S232952AbiFHH6E (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 8 Jun 2022 03:58:04 -0400
+Received: from szxga01-in.huawei.com (szxga01-in.huawei.com [45.249.212.187])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4E76B1E2269;
+        Wed,  8 Jun 2022 00:27:14 -0700 (PDT)
+Received: from dggpemm500021.china.huawei.com (unknown [172.30.72.56])
+        by szxga01-in.huawei.com (SkyGuard) with ESMTP id 4LHzKy3CJYzYsQl;
+        Wed,  8 Jun 2022 15:26:14 +0800 (CST)
 Received: from dggpemm500014.china.huawei.com (7.185.36.153) by
- dggpemm500020.china.huawei.com (7.185.36.49) with Microsoft SMTP Server
+ dggpemm500021.china.huawei.com (7.185.36.109) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.24; Wed, 8 Jun 2022 09:26:35 +0800
+ 15.1.2375.24; Wed, 8 Jun 2022 15:27:12 +0800
 Received: from [10.174.178.120] (10.174.178.120) by
  dggpemm500014.china.huawei.com (7.185.36.153) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.24; Wed, 8 Jun 2022 09:26:33 +0800
-Message-ID: <a820f287-e879-6183-a917-6a577b6160ab@huawei.com>
-Date:   Wed, 8 Jun 2022 09:26:33 +0800
+ 15.1.2375.24; Wed, 8 Jun 2022 15:27:10 +0800
+Message-ID: <29900b05-ec44-76a2-645a-22a13399d7fd@huawei.com>
+Date:   Wed, 8 Jun 2022 15:27:09 +0800
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
  Thunderbird/91.9.1
-From:   mawupeng <mawupeng1@huawei.com>
-Subject: Re: [PATCH v3 4/6] mm: Demote warning message in vmemmap_verify() to
- debug level
-To:     <david@redhat.com>, <corbet@lwn.net>, <will@kernel.org>,
-        <ardb@kernel.org>, <catalin.marinas@arm.com>
-CC:     <tglx@linutronix.de>, <mingo@redhat.com>, <bp@alien8.de>,
+Subject: Re: [PATCH v3 5/6] mm: Add mirror flag back on initrd memory
+To:     <ardb@kernel.org>, <david@redhat.com>
+CC:     <corbet@lwn.net>, <will@kernel.org>, <catalin.marinas@arm.com>,
+        <tglx@linutronix.de>, <mingo@redhat.com>, <bp@alien8.de>,
         <dave.hansen@linux.intel.com>, <x86@kernel.org>, <hpa@zytor.com>,
         <dvhart@infradead.org>, <andy@infradead.org>, <rppt@kernel.org>,
         <akpm@linux-foundation.org>, <paul.walmsley@sifive.com>,
@@ -47,20 +45,22 @@ CC:     <tglx@linutronix.de>, <mingo@redhat.com>, <bp@alien8.de>,
         <anshuman.khandual@arm.com>, <thunder.leizhen@huawei.com>,
         <wangkefeng.wang@huawei.com>, <gpiccoli@igalia.com>,
         <chenhuacai@kernel.org>, <geert@linux-m68k.org>,
-        <vijayb@linux.microsoft.com>, <linux-doc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>,
+        <chenzhou10@huawei.com>, <vijayb@linux.microsoft.com>,
+        <linux-doc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
         <linux-arm-kernel@lists.infradead.org>,
         <linux-efi@vger.kernel.org>, <platform-driver-x86@vger.kernel.org>,
         <linux-mm@kvack.org>, <linux-riscv@lists.infradead.org>,
         <mawupeng1@huawei.com>
 References: <20220607093805.1354256-1-mawupeng1@huawei.com>
- <20220607093805.1354256-5-mawupeng1@huawei.com>
- <b1975f44-2552-a03c-bb6f-1452f1fd99c0@redhat.com>
-In-Reply-To: <b1975f44-2552-a03c-bb6f-1452f1fd99c0@redhat.com>
+ <20220607093805.1354256-6-mawupeng1@huawei.com>
+ <99900b31-2605-2c85-a1b7-9ef2666b58da@redhat.com>
+ <CAMj1kXGkzjq3koW_sgO4uzrdtwqSqzsJfT5ABYyvodf+ggXT2w@mail.gmail.com>
+From:   mawupeng <mawupeng1@huawei.com>
+In-Reply-To: <CAMj1kXGkzjq3koW_sgO4uzrdtwqSqzsJfT5ABYyvodf+ggXT2w@mail.gmail.com>
 Content-Type: text/plain; charset="UTF-8"; format=flowed
 Content-Transfer-Encoding: 8bit
 X-Originating-IP: [10.174.178.120]
-X-ClientProxiedBy: dggems701-chm.china.huawei.com (10.3.19.178) To
+X-ClientProxiedBy: dggems705-chm.china.huawei.com (10.3.19.182) To
  dggpemm500014.china.huawei.com (7.185.36.153)
 X-CFilter-Loop: Reflected
 Precedence: bulk
@@ -69,43 +69,88 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 
 
-在 2022/6/7 20:25, David Hildenbrand 写道:
-> On 07.06.22 11:38, Wupeng Ma wrote:
->> From: Ma Wupeng <mawupeng1@huawei.com>
+在 2022/6/7 22:49, Ard Biesheuvel 写道:
+> On Tue, 7 Jun 2022 at 14:22, David Hildenbrand <david@redhat.com> wrote:
 >>
->> For a system only have limited mirrored memory or some numa node without
->> mirrored memory, the per node vmemmap page_structs prefer to allocate
->> memory from mirrored region, which will lead to vmemmap_verify() in
->> vmemmap_populate_basepages() report lots of warning message.
+>> On 07.06.22 11:38, Wupeng Ma wrote:
+>>> From: Ma Wupeng <mawupeng1@huawei.com>
+>>>
+>>> Initrd memory will be removed and then added in arm64_memblock_init() and this
+>>> will cause it to lose all of its memblock flags. The lost of MEMBLOCK_MIRROR
+>>> flag will lead to error log printed by find_zone_movable_pfns_for_nodes if
+>>> the lower 4G range has some non-mirrored memory.
+>>>
+>>> In order to solve this problem, the lost MEMBLOCK_MIRROR flag will be
+>>> reinstalled if the origin memblock has this flag.
+>>>
+>>> Signed-off-by: Ma Wupeng <mawupeng1@huawei.com>
+>>> ---
+>>>   arch/arm64/mm/init.c     |  9 +++++++++
+>>>   include/linux/memblock.h |  1 +
+>>>   mm/memblock.c            | 20 ++++++++++++++++++++
+>>>   3 files changed, 30 insertions(+)
+>>>
+>>> diff --git a/arch/arm64/mm/init.c b/arch/arm64/mm/init.c
+>>> index 339ee84e5a61..11641f924d08 100644
+>>> --- a/arch/arm64/mm/init.c
+>>> +++ b/arch/arm64/mm/init.c
+>>> @@ -350,9 +350,18 @@ void __init arm64_memblock_init(void)
+>>>                        "initrd not fully accessible via the linear mapping -- please check your bootloader ...\n")) {
+>>>                        phys_initrd_size = 0;
+>>>                } else {
+>>> +                     int flags, ret;
+>>> +
+>>> +                     ret = memblock_get_flags(base, &flags);
+>>> +                     if (ret)
+>>> +                             flags = 0;
+>>> +
+>>>                        memblock_remove(base, size); /* clear MEMBLOCK_ flags */
+>>>                        memblock_add(base, size);
+>>>                        memblock_reserve(base, size);
 >>
->> This patch demote the "potential offnode page_structs" warning messages
->> to debug level to avoid a very long print during bootup.
+>> Can you explain why we're removing+re-adding here exactly? Is it just to
+>> clear flags as the comment indicates?
 >>
->> Signed-off-by: Ma Wupeng <mawupeng1@huawei.com>
->> ---
->>   mm/sparse-vmemmap.c | 2 +-
->>   1 file changed, 1 insertion(+), 1 deletion(-)
->>
->> diff --git a/mm/sparse-vmemmap.c b/mm/sparse-vmemmap.c
->> index f4fa61dbbee3..78debdb89eb1 100644
->> --- a/mm/sparse-vmemmap.c
->> +++ b/mm/sparse-vmemmap.c
->> @@ -528,7 +528,7 @@ void __meminit vmemmap_verify(pte_t *pte, int node,
->>   	int actual_node = early_pfn_to_nid(pfn);
->>   
->>   	if (node_distance(actual_node, node) > LOCAL_DISTANCE)
->> -		pr_warn("[%lx-%lx] potential offnode page_structs\n",
->> +		pr_debug("[%lx-%lx] potential offnode page_structs\n",
->>   			start, end - 1);
->>   }
->>   
 > 
-> This will possibly hide it in environments where this might indeed
-> indicate performance issues.
+> This should only happen if the placement of the initrd conflicts with
+> a mem= command line parameter or it is not covered by memblock for
+> some other reason.
 > 
-> What about a pr_warn_once()?
-> 
+> IOW, this should never happen, and if re-memblock_add'ing this memory
+> unconditionally is causing problems, we should fix that instead of
+> working around it.
 
-Sure.
+This will happen if we use initrdmem=3G,100M to reserve initrd memory below
+the 4G limit to test this scenario(just for testing, I have trouble to boot
+qemu with initrd enabled and memory below 4G are all mirror memory).
 
-This will works. We can certainly use a pr_warn_once().
+Re-memblock_add'ing this memory unconditionally seems fine but clear all
+flags(especially MEMBLOCK_MIRROR) may lead to some error log.
+
+> 
+>> If it's really just about clearing flags, I wonder if we rather want to
+>> have an interface that does exactly that, and hides the way this is
+>> actually implemented (obtain flags, remove, re-add ...), internally.
+>>
+>> But most probably there is more magic in the code and clearing flags
+>> isn't all it ends up doing.
+>>
+> 
+> I don't remember exactly why we needed to clear the flags, but I think
+> it had to do with some corner case we hit when the initrd was
+> partially covered.
+If "mem=" is set in command line, memblock_mem_limit_remove_map() will
+remove all memory block without MEMBLOCK_NOMAP. Maybe this will bring the
+memory back if this initrd mem has the MEMBLOCK_NOMAP flag?
+
+The rfc version [1] introduce and use memblock_clear_nomap() to clear the
+MEMBLOCK_NOMAP of this initrd memblock.
+So maybe the usage of memblock_remove() is just to avoid introducing new
+function(memblock_clear_nomap)?
+
+Since commit 4c546b8a3469 ("memblock: add memblock_clear_nomap()") already
+introduced memblock_clear_nomap(). Can we use this to remove flag MEMBLOCK_NOMAP
+to solve this problem rather than bring flag MEMBLOCK_MIRROR back?
+
+[1] https://lore.kernel.org/linux-arm-kernel/20160202180622.GP10166@arm.com/T/#t
+> .
