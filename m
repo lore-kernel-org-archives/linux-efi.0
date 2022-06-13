@@ -2,148 +2,144 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 11E58C43334
-	for <linux-efi@archiver.kernel.org>; Sat, 11 Jun 2022 19:40:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B3874CCA47F
+	for <linux-efi@archiver.kernel.org>; Mon, 13 Jun 2022 08:00:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231239AbiFKTkZ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 11 Jun 2022 15:40:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36280 "EHLO
+        id S230387AbiFMIAh (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 13 Jun 2022 04:00:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46050 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231250AbiFKTkY (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sat, 11 Jun 2022 15:40:24 -0400
-Received: from mail-pl1-x631.google.com (mail-pl1-x631.google.com [IPv6:2607:f8b0:4864:20::631])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B98B547062
-        for <linux-efi@vger.kernel.org>; Sat, 11 Jun 2022 12:40:23 -0700 (PDT)
-Received: by mail-pl1-x631.google.com with SMTP id i1so1937220plg.7
-        for <linux-efi@vger.kernel.org>; Sat, 11 Jun 2022 12:40:23 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=date:from:to:subject:message-id:mime-version:content-disposition;
-        bh=cSm2NJt9iaLHTCu/twYKHMGYlgx5OqEZL1E0jaqACLM=;
-        b=LgpgBpd1DRnB3U/CgS6UnJuPjx4mhkZF+sOz/y8/z/59l1Mm7mjGpOcccR8ghQrAb3
-         ZSClv+AFuqjTkn6Zco/NWJNi3wejJcNyGoBurm6beR0ElvoAxv4KLXT/jzX365XtnCqR
-         OXzosIEV+HXMToAJqrVLSSY7c71MbLgGqq5a1hQffhj3vnslTV9jla/r+WIXPmbaHnGR
-         nNw4bFum8Ux7GgrclUjpCDp3OKZZBRYE4A+JcSwCS7bkERHY1mzb36C8yBaZ4DojyH1N
-         uLyV6bPR25lMOaGOSTJ5dAPddF0/rtDeMwRXKvvlz+yfjaqtte1tTJfDoZgQhZPE7JiK
-         xYlw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:subject:message-id:mime-version
-         :content-disposition;
-        bh=cSm2NJt9iaLHTCu/twYKHMGYlgx5OqEZL1E0jaqACLM=;
-        b=axJIWIZZYFkuIF7j0DdftFC2URSreBpJz+PJ63SEVcsU6Ua9ysseEfkMebuYX7Wj6V
-         kzz0tJD/cM7We4e1nN7YOFyFkq1Mmh8gjDbPGywm7lPSPp1qIbGzPypsyYPvj++UMqRJ
-         aGwxiw4xNccbL+JtWK7ieQXOpaALbvVBVZnws1jzeySc8D3idn1gmZ8E+cOy4vs/OGQT
-         f/yUHvNYRGSKVJczV2vusosBR3eS5/hwM/M0ANYDJi/YFz9tyTKIWv6XQNTYbYpgqpJH
-         6k1q3bx+qNOX1hDp90JucMI4hM7bmPc+/xOssxIrjxo8+ayCaIMJZmWDaMUlIrME9JzK
-         biVg==
-X-Gm-Message-State: AOAM530y0I3/nYjvHNMhAXsHnZGWipBQzFn6bXJ//tzQGv07zZ9mslyo
-        NRCHqdnz/0KVBW5JoT1lZ9u+uUIdcgK3SA==
-X-Google-Smtp-Source: ABdhPJxhV4KUf4Torzjeb/AlD1Nuq6luY5mBqVZQ49gUnnbaDGgGuDi0+KbsfxQc0+TsBhJtkdelzg==
-X-Received: by 2002:a17:902:b282:b0:163:ffe6:2cf9 with SMTP id u2-20020a170902b28200b00163ffe62cf9mr51782965plr.76.1654976423241;
-        Sat, 11 Jun 2022 12:40:23 -0700 (PDT)
-Received: from ubuntu ([175.124.254.119])
-        by smtp.gmail.com with ESMTPSA id h10-20020a62830a000000b0051b62689ec2sm1940612pfe.129.2022.06.11.12.40.22
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 11 Jun 2022 12:40:22 -0700 (PDT)
-Date:   Sat, 11 Jun 2022 12:40:19 -0700
-From:   Hyunwoo Kim <imv4bel@gmail.com>
-To:     ardb@kernel.org, linux-efi@vger.kernel.org
-Subject: [PATCH] efi/capsule-loader: Add write mutex to prevent uaf
-Message-ID: <20220611194019.GA483211@ubuntu>
+        with ESMTP id S232426AbiFMIAb (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 13 Jun 2022 04:00:31 -0400
+Received: from szxga01-in.huawei.com (szxga01-in.huawei.com [45.249.212.187])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1991465CD;
+        Mon, 13 Jun 2022 01:00:29 -0700 (PDT)
+Received: from dggpemm500023.china.huawei.com (unknown [172.30.72.53])
+        by szxga01-in.huawei.com (SkyGuard) with ESMTP id 4LM3qt6nPZzjXZ3;
+        Mon, 13 Jun 2022 15:59:22 +0800 (CST)
+Received: from dggpemm500014.china.huawei.com (7.185.36.153) by
+ dggpemm500023.china.huawei.com (7.185.36.83) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.24; Mon, 13 Jun 2022 16:00:25 +0800
+Received: from localhost.localdomain (10.175.112.125) by
+ dggpemm500014.china.huawei.com (7.185.36.153) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.24; Mon, 13 Jun 2022 16:00:24 +0800
+From:   Wupeng Ma <mawupeng1@huawei.com>
+To:     <corbet@lwn.net>, <will@kernel.org>, <ardb@kernel.org>,
+        <catalin.marinas@arm.com>
+CC:     <tglx@linutronix.de>, <mingo@redhat.com>, <bp@alien8.de>,
+        <dave.hansen@linux.intel.com>, <x86@kernel.org>, <hpa@zytor.com>,
+        <dvhart@infradead.org>, <andy@infradead.org>, <rppt@kernel.org>,
+        <akpm@linux-foundation.org>, <paul.walmsley@sifive.com>,
+        <palmer@dabbelt.com>, <aou@eecs.berkeley.edu>,
+        <paulmck@kernel.org>, <keescook@chromium.org>,
+        <songmuchun@bytedance.com>, <rdunlap@infradead.org>,
+        <damien.lemoal@opensource.wdc.com>, <swboyd@chromium.org>,
+        <wei.liu@kernel.org>, <robin.murphy@arm.com>, <david@redhat.com>,
+        <mawupeng1@huawei.com>, <anshuman.khandual@arm.com>,
+        <thunder.leizhen@huawei.com>, <wangkefeng.wang@huawei.com>,
+        <gpiccoli@igalia.com>, <chenhuacai@kernel.org>,
+        <geert@linux-m68k.org>, <vijayb@linux.microsoft.com>,
+        <linux-doc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-efi@vger.kernel.org>, <platform-driver-x86@vger.kernel.org>,
+        <linux-mm@kvack.org>, <linux-riscv@lists.infradead.org>
+Subject: [PATCH v4 0/6] introduce mirrored memory support for arm64
+Date:   Mon, 13 Jun 2022 16:21:41 +0800
+Message-ID: <20220613082147.183145-1-mawupeng1@huawei.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-Originating-IP: [10.175.112.125]
+X-ClientProxiedBy: dggems702-chm.china.huawei.com (10.3.19.179) To
+ dggpemm500014.china.huawei.com (7.185.36.153)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-If the user calls close() in the middle of copy operation in
-copy_from_user() of efi_capsule_write(),
-the user buffer may be copied to the released page.
+From: Ma Wupeng <mawupeng1@huawei.com>
 
-This is because ->flush is called unconditionally regardless
-of f_count, unlike ->release.
-This driver is not a security vulnerability, as only
-root privileges can write to it.
-However, it seems to be a good idea to add mutexes to 
-efi_capsule_write() and efi_capsule_flush() as root can 
-accidentally break the page while in use.
+Commit b05b9f5f9dcf ("x86, mirror: x86 enabling - find mirrored memory ranges")
+introduced mirrored memory support for x86. This support rely on UEFI to
+report mirrored memory address ranges.  See UEFI 2.5 spec pages 157-158:
 
-Signed-off-by: Hyunwoo Kim <imv4bel@gmail.com>
----
- drivers/firmware/efi/capsule-loader.c | 12 ++++++++++++
- include/linux/efi.h                   |  1 +
- 2 files changed, 13 insertions(+)
+  http://www.uefi.org/sites/default/files/resources/UEFI%202_5.pdf
 
-diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
-index 4dde8edd53b6..e50ede51ef38 100644
---- a/drivers/firmware/efi/capsule-loader.c
-+++ b/drivers/firmware/efi/capsule-loader.c
-@@ -177,6 +177,8 @@ static ssize_t efi_capsule_write(struct file *file, const char __user *buff,
- 	if (count == 0)
- 		return 0;
- 
-+	mutex_lock(&cap_info->write_lock);
-+
- 	/* Return error while NO_FURTHER_WRITE_ACTION is flagged */
- 	if (cap_info->index < 0)
- 		return -EIO;
-@@ -233,12 +235,16 @@ static ssize_t efi_capsule_write(struct file *file, const char __user *buff,
- 			goto failed;
- 	}
- 
-+	mutex_unlock(&cap_info->write_lock);
-+
- 	return write_byte;
- 
- fail_unmap:
- 	kunmap(page);
- failed:
- 	efi_free_all_buff_pages(cap_info);
-+	mutex_unlock(&cap_info->write_lock);
-+
- 	return ret;
- }
- 
-@@ -256,12 +262,16 @@ static int efi_capsule_flush(struct file *file, fl_owner_t id)
- 	int ret = 0;
- 	struct capsule_info *cap_info = file->private_data;
- 
-+	mutex_lock(&cap_info->write_lock);
-+
- 	if (cap_info->index > 0) {
- 		pr_err("capsule upload not complete\n");
- 		efi_free_all_buff_pages(cap_info);
- 		ret = -ECANCELED;
- 	}
- 
-+	mutex_unlock(&cap_info->write_lock);
-+
- 	return ret;
- }
- 
-@@ -315,6 +325,8 @@ static int efi_capsule_open(struct inode *inode, struct file *file)
- 		return -ENOMEM;
- 	}
- 
-+	mutex_init(&cap_info->write_lock);
-+
- 	file->private_data = cap_info;
- 
- 	return 0;
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 7d9b0bb47eb3..e274c4e8d7c6 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -204,6 +204,7 @@ struct efi_image_auth {
- struct capsule_info {
- 	efi_capsule_header_t	header;
- 	efi_capsule_header_t	*capsule;
-+	struct mutex		write_mutex;
- 	int			reset_type;
- 	long			index;
- 	size_t			count;
+Memory mirroring is a technique used to separate memory into two separate
+channels, usually on a memory device, like a server. In memory mirroring,
+one channel is copied to another to create redundancy. This method makes
+input/output (I/O) registers and memory appear with more than one address
+range because the same physical byte is accessible at more than one
+address. Using memory mirroring, higher memory reliability and a higher
+level of memory consolidation are possible.
+
+These EFI memory regions have various attributes, and the "mirrored"
+attribute is one of them. The physical memory region whose descriptors
+in EFI memory map has EFI_MEMORY_MORE_RELIABLE attribute (bit: 16) are
+mirrored. The address range mirroring feature of the kernel arranges such
+mirrored regions into normal zones and other regions into movable zones.
+
+Arm64 can support this too. So mirrored memory support is added to support
+arm64.
+
+The main purpose of this patch set is to introduce mirrored support for
+arm64 and we have already fixed the problems we had which is shown in
+patch #5 to patch #8 and try to bring total isolation in patch #9 which
+will disable mirror feature if kernelcore is not specified.
+
+In order to test this support in arm64:
+- patch this patch set
+- add kernelcore=mirror in kernel parameter
+- start you kernel
+
+Patch #1-#2 introduce mirrored memory support form arm64.
+Patch #3-#5 fix some bugs for arm64 if memory reliable is enabled.
+Patch #6 disable mirror feature if kernelcore is not specified.
+
+Thanks to Ard Biesheuvel's hard work [1], now kernel will perfer mirrored
+memory if kaslr is enabled.
+
+[1] https://lore.kernel.org/linux-arm-kernel/CAMj1kXEPVEzMgOM4+Yj6PxHA-jFuDOAUdDJSiSxy_XaP4P7LSw@mail.gmail.com/T/
+
+Changelog since v3:
+- limit warning message in vmemmap_verify via pr_warn_once()
+- only clear memblock_nomap flags rather than bring the mirrored flag back
+- disable mirrored feature in memblock_mark_mirror()
+
+Changelog since v2:
+- remove efi_fake_mem support
+- remove Commit ("remove some redundant code in ia64 efi_init") since
+  efi_print_memmap() is not public
+- add mirror flag back on initrd memory
+
+Changelog since v1:
+- update changelog in cover letter
+- use PHYS_PFN in patch #7
+
+Ma Wupeng (6):
+  efi: Make efi_find_mirror() public
+  arm64/mirror: arm64 enabling - find mirrored memory ranges
+  mm: Ratelimited mirrored memory related warning messages
+  mm: Limit warning message in vmemmap_verify() to once
+  mm: Only remove nomap flag for initrd
+  memblock: Disable mirror feature if kernelcore is not specified
+
+ .../admin-guide/kernel-parameters.txt         |  2 +-
+ arch/arm64/kernel/setup.c                     |  1 +
+ arch/arm64/mm/init.c                          |  2 +-
+ arch/x86/include/asm/efi.h                    |  4 ----
+ arch/x86/platform/efi/efi.c                   | 23 -------------------
+ drivers/firmware/efi/efi.c                    | 23 +++++++++++++++++++
+ include/linux/efi.h                           |  3 +++
+ mm/internal.h                                 |  2 ++
+ mm/memblock.c                                 |  7 ++++--
+ mm/page_alloc.c                               |  2 +-
+ mm/sparse-vmemmap.c                           |  2 +-
+ 11 files changed, 38 insertions(+), 33 deletions(-)
+
 -- 
 2.25.1
 
