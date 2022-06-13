@@ -2,29 +2,29 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 772C2CCA47F
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A340ACCA481
 	for <linux-efi@archiver.kernel.org>; Mon, 13 Jun 2022 08:01:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232503AbiFMIAi (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        id S234823AbiFMIAi (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
         Mon, 13 Jun 2022 04:00:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46032 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46044 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229505AbiFMIAd (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 13 Jun 2022 04:00:33 -0400
-Received: from szxga02-in.huawei.com (szxga02-in.huawei.com [45.249.212.188])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2E13F1163;
-        Mon, 13 Jun 2022 01:00:31 -0700 (PDT)
-Received: from dggpemm500021.china.huawei.com (unknown [172.30.72.57])
-        by szxga02-in.huawei.com (SkyGuard) with ESMTP id 4LM3nN2LhNzRhyk;
-        Mon, 13 Jun 2022 15:57:12 +0800 (CST)
+        with ESMTP id S231630AbiFMIAf (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 13 Jun 2022 04:00:35 -0400
+Received: from szxga01-in.huawei.com (szxga01-in.huawei.com [45.249.212.187])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AEBDF2AC0;
+        Mon, 13 Jun 2022 01:00:33 -0700 (PDT)
+Received: from dggpemm500022.china.huawei.com (unknown [172.30.72.54])
+        by szxga01-in.huawei.com (SkyGuard) with ESMTP id 4LM3q01pKfzgYpM;
+        Mon, 13 Jun 2022 15:58:36 +0800 (CST)
 Received: from dggpemm500014.china.huawei.com (7.185.36.153) by
- dggpemm500021.china.huawei.com (7.185.36.109) with Microsoft SMTP Server
+ dggpemm500022.china.huawei.com (7.185.36.162) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.24; Mon, 13 Jun 2022 16:00:28 +0800
+ 15.1.2375.24; Mon, 13 Jun 2022 16:00:31 +0800
 Received: from localhost.localdomain (10.175.112.125) by
  dggpemm500014.china.huawei.com (7.185.36.153) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.24; Mon, 13 Jun 2022 16:00:27 +0800
+ 15.1.2375.24; Mon, 13 Jun 2022 16:00:30 +0800
 From:   Wupeng Ma <mawupeng1@huawei.com>
 To:     <corbet@lwn.net>, <will@kernel.org>, <ardb@kernel.org>,
         <catalin.marinas@arm.com>
@@ -45,9 +45,9 @@ CC:     <tglx@linutronix.de>, <mingo@redhat.com>, <bp@alien8.de>,
         <linux-arm-kernel@lists.infradead.org>,
         <linux-efi@vger.kernel.org>, <platform-driver-x86@vger.kernel.org>,
         <linux-mm@kvack.org>, <linux-riscv@lists.infradead.org>
-Subject: [PATCH v4 2/6] arm64/mirror: arm64 enabling - find mirrored memory ranges
-Date:   Mon, 13 Jun 2022 16:21:43 +0800
-Message-ID: <20220613082147.183145-3-mawupeng1@huawei.com>
+Subject: [PATCH v4 4/6] mm: Limit warning message in vmemmap_verify() to once
+Date:   Mon, 13 Jun 2022 16:21:45 +0800
+Message-ID: <20220613082147.183145-5-mawupeng1@huawei.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20220613082147.183145-1-mawupeng1@huawei.com>
 References: <20220613082147.183145-1-mawupeng1@huawei.com>
@@ -64,45 +64,32 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Ma Wupeng <mawupeng1@huawei.com>
 
-Commit b05b9f5f9dcf ("x86, mirror: x86 enabling - find mirrored memory ranges")
-introduced mirrored memory support for x86 and this could be used on arm64.
+For a system only have limited mirrored memory or some numa node without
+mirrored memory, the per node vmemmap page_structs prefer to allocate
+memory from mirrored region, which will lead to vmemmap_verify() in
+vmemmap_populate_basepages() report lots of warning message.
 
-Since we only support this feature on arm64, efi_find_mirror() won't be placed
-into efi_init(), which is used by riscv/arm/arm64, it is added in setup_arch()
-to scan the memory map and mark mirrored memory in memblock.
+This patch change the frequency of "potential offnode page_structs" warning
+messages to only once to avoid a very long print during bootup.
 
 Signed-off-by: Ma Wupeng <mawupeng1@huawei.com>
-Reviewed-by: Kefeng Wang <wangkefeng.wang@huawei.com>
 ---
- Documentation/admin-guide/kernel-parameters.txt | 2 +-
- arch/arm64/kernel/setup.c                       | 1 +
- 2 files changed, 2 insertions(+), 1 deletion(-)
+ mm/sparse-vmemmap.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index 8090130b544b..e3537646b6f7 100644
---- a/Documentation/admin-guide/kernel-parameters.txt
-+++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -2301,7 +2301,7 @@
+diff --git a/mm/sparse-vmemmap.c b/mm/sparse-vmemmap.c
+index f4fa61dbbee3..f34c6889b0a6 100644
+--- a/mm/sparse-vmemmap.c
++++ b/mm/sparse-vmemmap.c
+@@ -528,7 +528,7 @@ void __meminit vmemmap_verify(pte_t *pte, int node,
+ 	int actual_node = early_pfn_to_nid(pfn);
  
- 	keepinitrd	[HW,ARM]
+ 	if (node_distance(actual_node, node) > LOCAL_DISTANCE)
+-		pr_warn("[%lx-%lx] potential offnode page_structs\n",
++		pr_warn_once("[%lx-%lx] potential offnode page_structs\n",
+ 			start, end - 1);
+ }
  
--	kernelcore=	[KNL,X86,IA-64,PPC]
-+	kernelcore=	[KNL,X86,IA-64,PPC,ARM64]
- 			Format: nn[KMGTPE] | nn% | "mirror"
- 			This parameter specifies the amount of memory usable by
- 			the kernel for non-movable allocations.  The requested
-diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
-index cf3a759f10d4..6e9acd7ecf0f 100644
---- a/arch/arm64/kernel/setup.c
-+++ b/arch/arm64/kernel/setup.c
-@@ -328,6 +328,7 @@ void __init __no_sanitize_address setup_arch(char **cmdline_p)
- 
- 	xen_early_init();
- 	efi_init();
-+	efi_find_mirror();
- 
- 	if (!efi_enabled(EFI_BOOT) && ((u64)_text % MIN_KIMG_ALIGN) != 0)
- 	     pr_warn(FW_BUG "Kernel image misaligned at boot, please fix your bootloader!");
 -- 
 2.25.1
 
