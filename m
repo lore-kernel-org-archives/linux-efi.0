@@ -2,29 +2,29 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D359CC433EF
-	for <linux-efi@archiver.kernel.org>; Tue, 14 Jun 2022 09:01:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D3C2CCA47C
+	for <linux-efi@archiver.kernel.org>; Tue, 14 Jun 2022 09:01:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238355AbiFNJBJ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 14 Jun 2022 05:01:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39176 "EHLO
+        id S242202AbiFNJBQ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 14 Jun 2022 05:01:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39278 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241913AbiFNJBI (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 14 Jun 2022 05:01:08 -0400
-Received: from szxga02-in.huawei.com (szxga02-in.huawei.com [45.249.212.188])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F3CD827B37;
-        Tue, 14 Jun 2022 02:01:06 -0700 (PDT)
-Received: from dggpemm500024.china.huawei.com (unknown [172.30.72.55])
-        by szxga02-in.huawei.com (SkyGuard) with ESMTP id 4LMj4q5qWfzRhtq;
-        Tue, 14 Jun 2022 16:57:47 +0800 (CST)
+        with ESMTP id S242481AbiFNJBO (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 14 Jun 2022 05:01:14 -0400
+Received: from szxga01-in.huawei.com (szxga01-in.huawei.com [45.249.212.187])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 212682C117;
+        Tue, 14 Jun 2022 02:01:14 -0700 (PDT)
+Received: from dggpemm500020.china.huawei.com (unknown [172.30.72.55])
+        by szxga01-in.huawei.com (SkyGuard) with ESMTP id 4LMj6V5WpdzgZCJ;
+        Tue, 14 Jun 2022 16:59:14 +0800 (CST)
 Received: from dggpemm500014.china.huawei.com (7.185.36.153) by
- dggpemm500024.china.huawei.com (7.185.36.203) with Microsoft SMTP Server
+ dggpemm500020.china.huawei.com (7.185.36.49) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.24; Tue, 14 Jun 2022 17:00:35 +0800
+ 15.1.2375.24; Tue, 14 Jun 2022 17:00:38 +0800
 Received: from localhost.localdomain (10.175.112.125) by
  dggpemm500014.china.huawei.com (7.185.36.153) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.24; Tue, 14 Jun 2022 17:00:33 +0800
+ 15.1.2375.24; Tue, 14 Jun 2022 17:00:36 +0800
 From:   Wupeng Ma <mawupeng1@huawei.com>
 To:     <corbet@lwn.net>, <will@kernel.org>, <ardb@kernel.org>,
         <catalin.marinas@arm.com>
@@ -44,11 +44,14 @@ CC:     <tglx@linutronix.de>, <mingo@redhat.com>, <bp@alien8.de>,
         <linux-doc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
         <linux-arm-kernel@lists.infradead.org>,
         <linux-efi@vger.kernel.org>, <platform-driver-x86@vger.kernel.org>,
-        <linux-mm@kvack.org>, <linux-riscv@lists.infradead.org>
-Subject: [PATCH v5 0/5] introduce mirrored memory support for arm64
-Date:   Tue, 14 Jun 2022 17:21:51 +0800
-Message-ID: <20220614092156.1972846-1-mawupeng1@huawei.com>
+        <linux-mm@kvack.org>, <linux-riscv@lists.infradead.org>,
+        Mike Rapoport <rppt@linux.ibm.com>
+Subject: [PATCH v5 2/5] mm: Ratelimited mirrored memory related warning messages
+Date:   Tue, 14 Jun 2022 17:21:53 +0800
+Message-ID: <20220614092156.1972846-3-mawupeng1@huawei.com>
 X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20220614092156.1972846-1-mawupeng1@huawei.com>
+References: <20220614092156.1972846-1-mawupeng1@huawei.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7BIT
 Content-Type:   text/plain; charset=US-ASCII
@@ -62,86 +65,45 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Ma Wupeng <mawupeng1@huawei.com>
 
-Commit b05b9f5f9dcf ("x86, mirror: x86 enabling - find mirrored memory ranges")
-introduced mirrored memory support for x86. This support rely on UEFI to
-report mirrored memory address ranges.  See UEFI 2.5 spec pages 157-158:
+If system has mirrored memory, memblock will try to allocate mirrored
+memory firstly and fallback to non-mirrored memory when fails, but if with
+limited mirrored memory or some numa node without mirrored memory, lots of
+warning message about memblock allocation will occur.
 
-  http://www.uefi.org/sites/default/files/resources/UEFI%202_5.pdf
+This patch ratelimit the warning message to avoid a very long print during
+bootup.
 
-Memory mirroring is a technique used to separate memory into two separate
-channels, usually on a memory device, like a server. In memory mirroring,
-one channel is copied to another to create redundancy. This method makes
-input/output (I/O) registers and memory appear with more than one address
-range because the same physical byte is accessible at more than one
-address. Using memory mirroring, higher memory reliability and a higher
-level of memory consolidation are possible.
+Signed-off-by: Ma Wupeng <mawupeng1@huawei.com>
+Reviewed-by: David Hildenbrand <david@redhat.com>
+Acked-by: Mike Rapoport <rppt@linux.ibm.com>
+Reviewed-by: Anshuman Khandual <anshuman.khandual@arm.com>
+Reviewed-by: Kefeng Wang <wangkefeng.wang@huawei.com>
+---
+ mm/memblock.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-These EFI memory regions have various attributes, and the "mirrored"
-attribute is one of them. The physical memory region whose descriptors
-in EFI memory map has EFI_MEMORY_MORE_RELIABLE attribute (bit: 16) are
-mirrored. The address range mirroring feature of the kernel arranges such
-mirrored regions into normal zones and other regions into movable zones.
-
-Arm64 can support this too. So mirrored memory support is added to support
-arm64.
-
-The main purpose of this patch set is to introduce mirrored support for
-arm64 and we have already fixed the problems we had which is shown in
-patch #5 to patch #8 and try to bring total isolation in patch #9 which
-will disable mirror feature if kernelcore is not specified.
-
-In order to test this support in arm64:
-- patch this patch set
-- add kernelcore=mirror in kernel parameter
-- start you kernel
-
-Patch #1 introduce mirrored memory support form arm64.
-Patch #2-#4 fix some bugs for arm64 if memory reliable is enabled.
-Patch #5 disable mirror feature if kernelcore is not specified.
-
-Thanks to Ard Biesheuvel's hard work [1], now kernel will perfer mirrored
-memory if kaslr is enabled.
-
-[1] https://lore.kernel.org/linux-arm-kernel/CAMj1kXEPVEzMgOM4+Yj6PxHA-jFuDOAUdDJSiSxy_XaP4P7LSw@mail.gmail.com/T/
-
-Changelog since v4:
-- merge the first two patches into one
-- change __initdata to __initdata_memblock in patch #5
-
-Changelog since v3:
-- limit warning message in vmemmap_verify via pr_warn_once()
-- only clear memblock_nomap flags rather than bring the mirrored flag back
-- disable mirrored feature in memblock_mark_mirror()
-
-Changelog since v2:
-- remove efi_fake_mem support
-- remove Commit ("remove some redundant code in ia64 efi_init") since
-  efi_print_memmap() is not public
-- add mirror flag back on initrd memory
-
-Changelog since v1:
-- update changelog in cover letter
-- use PHYS_PFN in patch #7
-
-Ma Wupeng (5):
-  efi: arm64: Introduce ability to find mirrored memory ranges
-  mm: Ratelimited mirrored memory related warning messages
-  mm: Limit warning message in vmemmap_verify() to once
-  arm64: mm: Only remove nomap flag for initrd
-  memblock: Disable mirror feature if kernelcore is not specified
-
- arch/arm64/mm/init.c            |  2 +-
- arch/x86/include/asm/efi.h      |  4 ----
- arch/x86/platform/efi/efi.c     | 23 -----------------------
- drivers/firmware/efi/efi-init.c |  1 +
- drivers/firmware/efi/efi.c      | 23 +++++++++++++++++++++++
- include/linux/efi.h             |  3 +++
- mm/internal.h                   |  2 ++
- mm/memblock.c                   |  7 +++++--
- mm/page_alloc.c                 |  2 +-
- mm/sparse-vmemmap.c             |  2 +-
- 10 files changed, 37 insertions(+), 32 deletions(-)
-
+diff --git a/mm/memblock.c b/mm/memblock.c
+index e4f03a6e8e56..b1d2a0009733 100644
+--- a/mm/memblock.c
++++ b/mm/memblock.c
+@@ -327,7 +327,7 @@ static phys_addr_t __init_memblock memblock_find_in_range(phys_addr_t start,
+ 					    NUMA_NO_NODE, flags);
+ 
+ 	if (!ret && (flags & MEMBLOCK_MIRROR)) {
+-		pr_warn("Could not allocate %pap bytes of mirrored memory\n",
++		pr_warn_ratelimited("Could not allocate %pap bytes of mirrored memory\n",
+ 			&size);
+ 		flags &= ~MEMBLOCK_MIRROR;
+ 		goto again;
+@@ -1384,7 +1384,7 @@ phys_addr_t __init memblock_alloc_range_nid(phys_addr_t size,
+ 
+ 	if (flags & MEMBLOCK_MIRROR) {
+ 		flags &= ~MEMBLOCK_MIRROR;
+-		pr_warn("Could not allocate %pap bytes of mirrored memory\n",
++		pr_warn_ratelimited("Could not allocate %pap bytes of mirrored memory\n",
+ 			&size);
+ 		goto again;
+ 	}
 -- 
 2.25.1
 
