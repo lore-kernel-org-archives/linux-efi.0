@@ -2,43 +2,43 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1FBF1CCA47A
-	for <linux-efi@archiver.kernel.org>; Tue, 14 Jun 2022 12:02:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 10A07C433EF
+	for <linux-efi@archiver.kernel.org>; Tue, 14 Jun 2022 12:02:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1356143AbiFNMCo (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        id S1356187AbiFNMCo (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
         Tue, 14 Jun 2022 08:02:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53880 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53882 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1356147AbiFNMCi (ORCPT
+        with ESMTP id S1356186AbiFNMCi (ORCPT
         <rfc822;linux-efi@vger.kernel.org>); Tue, 14 Jun 2022 08:02:38 -0400
-Received: from mga11.intel.com (mga11.intel.com [192.55.52.93])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 20F6219287;
-        Tue, 14 Jun 2022 05:02:36 -0700 (PDT)
+Received: from mga04.intel.com (mga04.intel.com [192.55.52.120])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0848218B0F;
+        Tue, 14 Jun 2022 05:02:35 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
   t=1655208156; x=1686744156;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=Gepnq+G3FqhcuUO0CXCxB2ziSQE4OecO4NsW7OsOcao=;
-  b=LCiUB6pwhNOhDG9oFdfqau+hrlQGOEnKCGW2VG2R2hC9+oxCt2DmlY5s
-   z4ir6FppSsTVctCq/zjYPOyhoVWyhDc5WrxEng1SXBCPMx7qKnOEfuFFd
-   AunJ+a+Ssct7Y+qUvKTN4M85NvzUv+X7p0sabjnquauuQioJH5wmPnL19
-   bYLiFg8T+52r2hklDUBPLCev0IDVNr0HgnAOGc+ZPz9cJjPKbWgTDMX3B
-   UGU+MDCcoRhTIZnqO+4dVgTZdGEkTzD8dBPZj1f0u4PRQgCEp34kR3+E+
-   Y5x4/hZrIrdANO3t8Gs3tnSrVQss727ohPj/nQ6npWwDtzsvf7wsUzITb
-   A==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10377"; a="276138210"
+  bh=z3vk4MiFaMowdZHoqTpUcMK79OckKcSoieuVm3Gi93o=;
+  b=ky3RaF4EmmAnUZNGSbxuoxsdS8YEX7+RCp7nD6jah/6yxNCq6nuaA2dq
+   VMUc8V6xSJhKbETzAHXyZLKrJzVYQztrVqyvDKnGWSr+pjtEX2qQKCBaE
+   JJZmV9pt566MQVddgyDKYQ2Q0VWeCmSQXW0g1CTB+19UI99TARPjLtiaL
+   peOgIhfza6qi1Y8fzKhpVsxGsA3c+YnRah0Wo87dxMmvoD6t1nZiNuR9e
+   VWQXGYO7aKZzeswjJ7DFDaLep0k2q0+L+HAg1to9maWCaZFcetmD0LqpQ
+   IE6luplQVtgWcVMPA4gfISzg/FS++Ec534RjPX/QkXjByBOv1DT4eCoF/
+   Q==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10377"; a="277380181"
 X-IronPort-AV: E=Sophos;i="5.91,300,1647327600"; 
-   d="scan'208";a="276138210"
-Received: from orsmga004.jf.intel.com ([10.7.209.38])
-  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Jun 2022 05:02:35 -0700
+   d="scan'208";a="277380181"
+Received: from fmsmga004.fm.intel.com ([10.253.24.48])
+  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Jun 2022 05:02:35 -0700
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.91,300,1647327600"; 
-   d="scan'208";a="712440884"
+   d="scan'208";a="652001263"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by orsmga004.jf.intel.com with ESMTP; 14 Jun 2022 05:02:28 -0700
+  by fmsmga004.fm.intel.com with ESMTP; 14 Jun 2022 05:02:28 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1000)
-        id 825B118F; Tue, 14 Jun 2022 15:02:32 +0300 (EEST)
+        id 9CB1660E; Tue, 14 Jun 2022 15:02:32 +0300 (EEST)
 From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
 To:     Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>,
         Sean Christopherson <seanjc@google.com>,
@@ -64,11 +64,10 @@ Cc:     Andi Kleen <ak@linux.intel.com>,
         khalid.elmously@canonical.com, philip.cox@canonical.com,
         x86@kernel.org, linux-mm@kvack.org, linux-coco@lists.linux.dev,
         linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
-        "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
-        Mike Rapoport <rppt@linux.ibm.com>
-Subject: [PATCHv7 01/14] x86/boot: Centralize __pa()/__va() definitions
-Date:   Tue, 14 Jun 2022 15:02:18 +0300
-Message-Id: <20220614120231.48165-2-kirill.shutemov@linux.intel.com>
+        "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
+Subject: [PATCHv7 04/14] efi/x86: Get full memory map in allocate_e820()
+Date:   Tue, 14 Jun 2022 15:02:21 +0300
+Message-Id: <20220614120231.48165-5-kirill.shutemov@linux.intel.com>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220614120231.48165-1-kirill.shutemov@linux.intel.com>
 References: <20220614120231.48165-1-kirill.shutemov@linux.intel.com>
@@ -78,69 +77,80 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Replace multiple __pa()/__va() definitions with a single one in misc.h.
+Currently allocate_e820() only interested in the size of map and size of
+memory descriptor to determine how many e820 entries the kernel needs.
+
+UEFI Specification version 2.9 introduces a new memory type --
+unaccepted memory. To track unaccepted memory kernel needs to allocate
+a bitmap. The size of the bitmap is dependent on the maximum physical
+address present in the system. A full memory map is required to find
+the maximum address.
+
+Modify allocate_e820() to get a full memory map.
+
+This is preparation for the next patch that implements handling of
+unaccepted memory in EFI stub.
 
 Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
-Reviewed-by: David Hildenbrand <david@redhat.com>
-Reviewed-by: Mike Rapoport <rppt@linux.ibm.com>
 ---
- arch/x86/boot/compressed/ident_map_64.c | 8 --------
- arch/x86/boot/compressed/misc.h         | 9 +++++++++
- arch/x86/boot/compressed/sev.c          | 2 --
- 3 files changed, 9 insertions(+), 10 deletions(-)
+ drivers/firmware/efi/libstub/x86-stub.c | 28 +++++++++++--------------
+ 1 file changed, 12 insertions(+), 16 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/ident_map_64.c b/arch/x86/boot/compressed/ident_map_64.c
-index 44c350d627c7..66a2e992c5f5 100644
---- a/arch/x86/boot/compressed/ident_map_64.c
-+++ b/arch/x86/boot/compressed/ident_map_64.c
-@@ -8,14 +8,6 @@
-  * Copyright (C)      2016  Kees Cook
-  */
- 
--/*
-- * Since we're dealing with identity mappings, physical and virtual
-- * addresses are the same, so override these defines which are ultimately
-- * used by the headers in misc.h.
-- */
--#define __pa(x)  ((unsigned long)(x))
--#define __va(x)  ((void *)((unsigned long)(x)))
--
- /* No PAGE_TABLE_ISOLATION support needed either: */
- #undef CONFIG_PAGE_TABLE_ISOLATION
- 
-diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
-index 4910bf230d7b..245cf8f2a0bd 100644
---- a/arch/x86/boot/compressed/misc.h
-+++ b/arch/x86/boot/compressed/misc.h
-@@ -19,6 +19,15 @@
- /* cpu_feature_enabled() cannot be used this early */
- #define USE_EARLY_PGTABLE_L5
- 
-+/*
-+ * Boot stub deals with identity mappings, physical and virtual addresses are
-+ * the same, so override these defines.
-+ *
-+ * <asm/page.h> will not define them if they are already defined.
-+ */
-+#define __pa(x)  ((unsigned long)(x))
-+#define __va(x)  ((void *)((unsigned long)(x)))
-+
- #include <linux/linkage.h>
- #include <linux/screen_info.h>
- #include <linux/elf.h>
-diff --git a/arch/x86/boot/compressed/sev.c b/arch/x86/boot/compressed/sev.c
-index 52f989f6acc2..730c4677e9db 100644
---- a/arch/x86/boot/compressed/sev.c
-+++ b/arch/x86/boot/compressed/sev.c
-@@ -104,9 +104,7 @@ static enum es_result vc_read_mem(struct es_em_ctxt *ctxt,
+diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
+index 05ae8bcc9d67..504955368934 100644
+--- a/drivers/firmware/efi/libstub/x86-stub.c
++++ b/drivers/firmware/efi/libstub/x86-stub.c
+@@ -672,31 +672,27 @@ static efi_status_t alloc_e820ext(u32 nr_desc, struct setup_data **e820ext,
  }
  
- #undef __init
--#undef __pa
- #define __init
--#define __pa(x)	((unsigned long)(x))
+ static efi_status_t allocate_e820(struct boot_params *params,
++				  struct efi_boot_memmap *map,
+ 				  struct setup_data **e820ext,
+ 				  u32 *e820ext_size)
+ {
+-	unsigned long map_size, desc_size, map_key;
+ 	efi_status_t status;
+-	__u32 nr_desc, desc_version;
++	__u32 nr_desc;
  
- #define __BOOT_COMPRESSED
+-	/* Only need the size of the mem map and size of each mem descriptor */
+-	map_size = 0;
+-	status = efi_bs_call(get_memory_map, &map_size, NULL, &map_key,
+-			     &desc_size, &desc_version);
+-	if (status != EFI_BUFFER_TOO_SMALL)
+-		return (status != EFI_SUCCESS) ? status : EFI_UNSUPPORTED;
+-
+-	nr_desc = map_size / desc_size + EFI_MMAP_NR_SLACK_SLOTS;
++	status = efi_get_memory_map(map);
++	if (status != EFI_SUCCESS)
++		return status;
+ 
+-	if (nr_desc > ARRAY_SIZE(params->e820_table)) {
+-		u32 nr_e820ext = nr_desc - ARRAY_SIZE(params->e820_table);
++	nr_desc = *map->map_size / *map->desc_size;
++	if (nr_desc > ARRAY_SIZE(params->e820_table) - EFI_MMAP_NR_SLACK_SLOTS) {
++		u32 nr_e820ext = nr_desc - ARRAY_SIZE(params->e820_table) +
++			EFI_MMAP_NR_SLACK_SLOTS;
+ 
+ 		status = alloc_e820ext(nr_e820ext, e820ext, e820ext_size);
+-		if (status != EFI_SUCCESS)
+-			return status;
+ 	}
+ 
+-	return EFI_SUCCESS;
++	efi_bs_call(free_pool, *map->map);
++	return status;
+ }
+ 
+ struct exit_boot_struct {
+@@ -745,7 +741,7 @@ static efi_status_t exit_boot(struct boot_params *boot_params, void *handle)
+ 	priv.boot_params	= boot_params;
+ 	priv.efi		= &boot_params->efi_info;
+ 
+-	status = allocate_e820(boot_params, &e820ext, &e820ext_size);
++	status = allocate_e820(boot_params, &map, &e820ext, &e820ext_size);
+ 	if (status != EFI_SUCCESS)
+ 		return status;
  
 -- 
 2.35.1
