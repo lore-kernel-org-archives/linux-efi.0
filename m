@@ -2,43 +2,43 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0436DC433EF
-	for <linux-efi@archiver.kernel.org>; Tue, 14 Jun 2022 12:02:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EC383C43334
+	for <linux-efi@archiver.kernel.org>; Tue, 14 Jun 2022 12:02:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1356225AbiFNMCu (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 14 Jun 2022 08:02:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54014 "EHLO
+        id S1356255AbiFNMCv (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 14 Jun 2022 08:02:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54150 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1356177AbiFNMCp (ORCPT
+        with ESMTP id S1356238AbiFNMCp (ORCPT
         <rfc822;linux-efi@vger.kernel.org>); Tue, 14 Jun 2022 08:02:45 -0400
-Received: from mga02.intel.com (mga02.intel.com [134.134.136.20])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 13C00248DC;
+Received: from mga05.intel.com (mga05.intel.com [192.55.52.43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7335B17A89;
         Tue, 14 Jun 2022 05:02:43 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
   t=1655208163; x=1686744163;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=bnmPasYwK1tEXbmq+WdrNZgsMzPIJOhzZ78wHIORri8=;
-  b=nSvzxOXN+sVuzyK2UIToh60YlO7PtG0z7YHbrtNi6GXezYICbycVcmMd
-   YMlIgjGDqG+/KFhSNxoRiHZyPrpKDsFrhv00TAvFMaX4fHic5R3wA2EqN
-   QgaOI0zOlBSl5xt8x5PphTm0q8Rh9UiEJ45gC2Nh7916QEBk77zIVKpBC
-   Rn6ZSbw3DWpQ+Oskjvez+9xXaZDT0fsCg0rbhEvbTIy+yDeGSwvexqR0J
-   CE17kQZ6AFYlvp0rHeSirgxf6eI+3MDx5PO+LWymu3yGl5qzGUZHAv6MH
-   vHtNv/fty/3WILwfjXHw6uzSwwzmdpnImGiv+A8GKXZSBtPOTp+zFQgTY
-   w==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10377"; a="267281640"
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=ifzU/1O3tKgZxe0qDTIUj1kc7Q7SWbzosWaglEBdNsA=;
+  b=K0YBibIwXDqfSnscdTMIohWVIoCkrrSjH77Rv0B2RWny2pgumGClihSa
+   lX7MvCgHhamTBRZ1fFyLeolfT9lWetbqKHB/u7n/8oW7aSs8FJuf1XTNh
+   ldLQ7LHKD7R+3pJ//iDB4xbecLPQcXUBoPV8v4VaiwaTflUfAhDhl+UI2
+   8x68dCAB2Tdzyuz//2gDc9gM8uKsDi7d6RbPaYTVHF/aNbayVpJ0Dl1qk
+   VBn6wVRaTt12zP/Ar0n1ZP73FMTT6BCkXScIvJKeG7qtMHDCB/XeoajmB
+   MX/RKH0GxUJgTwSXLmnvg31OlBVQr0MHWwFGehHSvT+otLdyOjvQnrOaE
+   Q==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10377"; a="364934677"
 X-IronPort-AV: E=Sophos;i="5.91,300,1647327600"; 
-   d="scan'208";a="267281640"
-Received: from fmsmga005.fm.intel.com ([10.253.24.32])
-  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Jun 2022 05:02:35 -0700
+   d="scan'208";a="364934677"
+Received: from fmsmga003.fm.intel.com ([10.253.24.29])
+  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Jun 2022 05:02:43 -0700
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.91,300,1647327600"; 
-   d="scan'208";a="910967478"
+   d="scan'208";a="673838645"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by fmsmga005.fm.intel.com with ESMTP; 14 Jun 2022 05:02:28 -0700
+  by FMSMGA003.fm.intel.com with ESMTP; 14 Jun 2022 05:02:36 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1000)
-        id 75F37346; Tue, 14 Jun 2022 15:02:32 +0300 (EEST)
+        id EB0E69E6; Tue, 14 Jun 2022 15:02:32 +0300 (EEST)
 From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
 To:     Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>,
         Sean Christopherson <seanjc@google.com>,
@@ -65,169 +65,176 @@ Cc:     Andi Kleen <ak@linux.intel.com>,
         x86@kernel.org, linux-mm@kvack.org, linux-coco@lists.linux.dev,
         linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
         "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-Subject: [PATCHv7 00/14] mm, x86/cc: Implement support for unaccepted memory
-Date:   Tue, 14 Jun 2022 15:02:17 +0300
-Message-Id: <20220614120231.48165-1-kirill.shutemov@linux.intel.com>
+Subject: [PATCHv7 12/14] x86/tdx: Make _tdx_hypercall() and __tdx_module_call() available in boot stub
+Date:   Tue, 14 Jun 2022 15:02:29 +0300
+Message-Id: <20220614120231.48165-13-kirill.shutemov@linux.intel.com>
 X-Mailer: git-send-email 2.35.1
+In-Reply-To: <20220614120231.48165-1-kirill.shutemov@linux.intel.com>
+References: <20220614120231.48165-1-kirill.shutemov@linux.intel.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-UEFI Specification version 2.9 introduces the concept of memory
-acceptance: some Virtual Machine platforms, such as Intel TDX or AMD
-SEV-SNP, requiring memory to be accepted before it can be used by the
-guest. Accepting happens via a protocol specific for the Virtual
-Machine platform.
+Memory acceptance requires a hypercall and one or multiple module calls.
 
-Accepting memory is costly and it makes VMM allocate memory for the
-accepted guest physical address range. It's better to postpone memory
-acceptance until memory is needed. It lowers boot time and reduces
-memory overhead.
+Make helpers for the calls available in boot stub. It has to accept
+memory where kernel image and initrd are placed.
 
-The kernel needs to know what memory has been accepted. Firmware
-communicates this information via memory map: a new memory type --
-EFI_UNACCEPTED_MEMORY -- indicates such memory.
+Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
+---
+ arch/x86/coco/tdx/tdx.c           | 26 ------------------
+ arch/x86/include/asm/shared/tdx.h | 45 +++++++++++++++++++++++++++++++
+ arch/x86/include/asm/tdx.h        | 19 -------------
+ 3 files changed, 45 insertions(+), 45 deletions(-)
 
-Range-based tracking works fine for firmware, but it gets bulky for
-the kernel: e820 has to be modified on every page acceptance. It leads
-to table fragmentation, but there's a limited number of entries in the
-e820 table
-
-Another option is to mark such memory as usable in e820 and track if the
-range has been accepted in a bitmap. One bit in the bitmap represents
-2MiB in the address space: one 4k page is enough to track 64GiB or
-physical address space.
-
-In the worst-case scenario -- a huge hole in the middle of the
-address space -- It needs 256MiB to handle 4PiB of the address
-space.
-
-Any unaccepted memory that is not aligned to 2M gets accepted upfront.
-
-The approach lowers boot time substantially. Boot to shell is ~2.5x
-faster for 4G TDX VM and ~4x faster for 64G.
-
-TDX-specific code isolated from the core of unaccepted memory support. It
-supposed to help to plug-in different implementation of unaccepted memory
-such as SEV-SNP.
-
-The tree can be found here:
-
-https://github.com/intel/tdx.git guest-unaccepted-memory
-
-v7:
- - Rework meminfo counter to use PageUnaccepted() and move to generic code;
- - Fix range_contains_unaccepted_memory() on machines without unaccepted memory;
- - Add Reviewed-by from David;
-v6:
- - Fix load_unaligned_zeropad() on machine with unaccepted memory;
- - Clear PageUnaccepted() on merged pages, leaving it only on head;
- - Clarify error handling in allocate_e820();
- - Fix build with CONFIG_UNACCEPTED_MEMORY=y, but without TDX;
- - Disable kexec at boottime instead of build conflict;
- - Rebased to tip/master;
- - Spelling fixes;
- - Add Reviewed-by from Mike and David;
-v5:
- - Updates comments and commit messages;
-   + Explain options for unaccepted memory handling;
- - Expose amount of unaccepted memory in /proc/meminfo
- - Adjust check in page_expected_state();
- - Fix error code handling in allocate_e820();
- - Centralize __pa()/__va() definitions in the boot stub;
- - Avoid includes from the main kernel in the boot stub;
- - Use an existing hole in boot_param for unaccepted_memory, instead of adding
-   to the end of the structure;
- - Extract allocate_unaccepted_memory() form allocate_e820();
- - Complain if there's unaccepted memory, but kernel does not support it;
- - Fix vmstat counter;
- - Split up few preparatory patches;
- - Random readability adjustments;
-v4:
- - PageBuddyUnaccepted() -> PageUnaccepted;
- - Use separate page_type, not shared with offline;
- - Rework interface between core-mm and arch code;
- - Adjust commit messages;
- - Ack from Mike;
-
-Kirill A. Shutemov (14):
-  x86/boot: Centralize __pa()/__va() definitions
-  mm: Add support for unaccepted memory
-  mm: Report unaccepted memory in meminfo
-  efi/x86: Get full memory map in allocate_e820()
-  x86/boot: Add infrastructure required for unaccepted memory support
-  efi/x86: Implement support for unaccepted memory
-  x86/boot/compressed: Handle unaccepted memory
-  x86/mm: Reserve unaccepted memory bitmap
-  x86/mm: Provide helpers for unaccepted memory
-  x86/mm: Avoid load_unaligned_zeropad() stepping into unaccepted memory
-  x86: Disable kexec if system has unaccepted memory
-  x86/tdx: Make _tdx_hypercall() and __tdx_module_call() available in
-    boot stub
-  x86/tdx: Refactor try_accept_one()
-  x86/tdx: Add unaccepted memory support
-
- Documentation/x86/zero-page.rst          |   1 +
- arch/x86/Kconfig                         |   1 +
- arch/x86/boot/bitops.h                   |  40 ++++++++
- arch/x86/boot/compressed/Makefile        |   1 +
- arch/x86/boot/compressed/align.h         |  14 +++
- arch/x86/boot/compressed/bitmap.c        |  43 ++++++++
- arch/x86/boot/compressed/bitmap.h        |  49 +++++++++
- arch/x86/boot/compressed/bits.h          |  36 +++++++
- arch/x86/boot/compressed/compiler.h      |   9 ++
- arch/x86/boot/compressed/efi.h           |   1 +
- arch/x86/boot/compressed/find.c          |  54 ++++++++++
- arch/x86/boot/compressed/find.h          |  80 +++++++++++++++
- arch/x86/boot/compressed/ident_map_64.c  |   8 --
- arch/x86/boot/compressed/kaslr.c         |  35 ++++---
- arch/x86/boot/compressed/math.h          |  37 +++++++
- arch/x86/boot/compressed/mem.c           | 111 ++++++++++++++++++++
- arch/x86/boot/compressed/minmax.h        |  61 +++++++++++
- arch/x86/boot/compressed/misc.c          |   6 ++
- arch/x86/boot/compressed/misc.h          |  15 +++
- arch/x86/boot/compressed/pgtable_types.h |  25 +++++
- arch/x86/boot/compressed/sev.c           |   2 -
- arch/x86/boot/compressed/tdx.c           |  78 ++++++++++++++
- arch/x86/coco/tdx/tdx.c                  |  94 ++++++++---------
- arch/x86/include/asm/page.h              |   3 +
- arch/x86/include/asm/shared/tdx.h        |  47 +++++++++
- arch/x86/include/asm/tdx.h               |  19 ----
- arch/x86/include/asm/unaccepted_memory.h |  16 +++
- arch/x86/include/uapi/asm/bootparam.h    |   2 +-
- arch/x86/kernel/e820.c                   |  10 ++
- arch/x86/mm/Makefile                     |   2 +
- arch/x86/mm/unaccepted_memory.c          | 123 +++++++++++++++++++++++
- drivers/base/node.c                      |   7 ++
- drivers/firmware/efi/Kconfig             |  14 +++
- drivers/firmware/efi/efi.c               |   1 +
- drivers/firmware/efi/libstub/x86-stub.c  | 103 ++++++++++++++++---
- fs/proc/meminfo.c                        |   5 +
- include/linux/efi.h                      |   3 +-
- include/linux/mmzone.h                   |   1 +
- include/linux/page-flags.h               |  31 ++++++
- mm/internal.h                            |  12 +++
- mm/memblock.c                            |   9 ++
- mm/page_alloc.c                          |  96 +++++++++++++++++-
- mm/vmstat.c                              |   1 +
- 43 files changed, 1191 insertions(+), 115 deletions(-)
- create mode 100644 arch/x86/boot/compressed/align.h
- create mode 100644 arch/x86/boot/compressed/bitmap.c
- create mode 100644 arch/x86/boot/compressed/bitmap.h
- create mode 100644 arch/x86/boot/compressed/bits.h
- create mode 100644 arch/x86/boot/compressed/compiler.h
- create mode 100644 arch/x86/boot/compressed/find.c
- create mode 100644 arch/x86/boot/compressed/find.h
- create mode 100644 arch/x86/boot/compressed/math.h
- create mode 100644 arch/x86/boot/compressed/mem.c
- create mode 100644 arch/x86/boot/compressed/minmax.h
- create mode 100644 arch/x86/boot/compressed/pgtable_types.h
- create mode 100644 arch/x86/include/asm/unaccepted_memory.h
- create mode 100644 arch/x86/mm/unaccepted_memory.c
-
+diff --git a/arch/x86/coco/tdx/tdx.c b/arch/x86/coco/tdx/tdx.c
+index 3bcaf2170ede..b75fe670032b 100644
+--- a/arch/x86/coco/tdx/tdx.c
++++ b/arch/x86/coco/tdx/tdx.c
+@@ -12,14 +12,6 @@
+ #include <asm/insn-eval.h>
+ #include <asm/pgtable.h>
+ 
+-/* TDX module Call Leaf IDs */
+-#define TDX_GET_INFO			1
+-#define TDX_GET_VEINFO			3
+-#define TDX_ACCEPT_PAGE			6
+-
+-/* TDX hypercall Leaf IDs */
+-#define TDVMCALL_MAP_GPA		0x10001
+-
+ /* MMIO direction */
+ #define EPT_READ	0
+ #define EPT_WRITE	1
+@@ -34,24 +26,6 @@
+ #define VE_GET_PORT_NUM(e)	((e) >> 16)
+ #define VE_IS_IO_STRING(e)	((e) & BIT(4))
+ 
+-/*
+- * Wrapper for standard use of __tdx_hypercall with no output aside from
+- * return code.
+- */
+-static inline u64 _tdx_hypercall(u64 fn, u64 r12, u64 r13, u64 r14, u64 r15)
+-{
+-	struct tdx_hypercall_args args = {
+-		.r10 = TDX_HYPERCALL_STANDARD,
+-		.r11 = fn,
+-		.r12 = r12,
+-		.r13 = r13,
+-		.r14 = r14,
+-		.r15 = r15,
+-	};
+-
+-	return __tdx_hypercall(&args, 0);
+-}
+-
+ /* Called from __tdx_hypercall() for unrecoverable failure */
+ void __tdx_hypercall_failed(void)
+ {
+diff --git a/arch/x86/include/asm/shared/tdx.h b/arch/x86/include/asm/shared/tdx.h
+index e53f26228fbb..956ced04c3be 100644
+--- a/arch/x86/include/asm/shared/tdx.h
++++ b/arch/x86/include/asm/shared/tdx.h
+@@ -13,6 +13,14 @@
+ #define TDX_CPUID_LEAF_ID	0x21
+ #define TDX_IDENT		"IntelTDX    "
+ 
++/* TDX module Call Leaf IDs */
++#define TDX_GET_INFO			1
++#define TDX_GET_VEINFO			3
++#define TDX_ACCEPT_PAGE			6
++
++/* TDX hypercall Leaf IDs */
++#define TDVMCALL_MAP_GPA		0x10001
++
+ #ifndef __ASSEMBLY__
+ 
+ /*
+@@ -33,8 +41,45 @@ struct tdx_hypercall_args {
+ /* Used to request services from the VMM */
+ u64 __tdx_hypercall(struct tdx_hypercall_args *args, unsigned long flags);
+ 
++/*
++ * Wrapper for standard use of __tdx_hypercall with no output aside from
++ * return code.
++ */
++static inline u64 _tdx_hypercall(u64 fn, u64 r12, u64 r13, u64 r14, u64 r15)
++{
++	struct tdx_hypercall_args args = {
++		.r10 = TDX_HYPERCALL_STANDARD,
++		.r11 = fn,
++		.r12 = r12,
++		.r13 = r13,
++		.r14 = r14,
++		.r15 = r15,
++	};
++
++	return __tdx_hypercall(&args, 0);
++}
++
++
+ /* Called from __tdx_hypercall() for unrecoverable failure */
+ void __tdx_hypercall_failed(void);
+ 
++/*
++ * Used in __tdx_module_call() to gather the output registers' values of the
++ * TDCALL instruction when requesting services from the TDX module. This is a
++ * software only structure and not part of the TDX module/VMM ABI
++ */
++struct tdx_module_output {
++	u64 rcx;
++	u64 rdx;
++	u64 r8;
++	u64 r9;
++	u64 r10;
++	u64 r11;
++};
++
++/* Used to communicate with the TDX module */
++u64 __tdx_module_call(u64 fn, u64 rcx, u64 rdx, u64 r8, u64 r9,
++		      struct tdx_module_output *out);
++
+ #endif /* !__ASSEMBLY__ */
+ #endif /* _ASM_X86_SHARED_TDX_H */
+diff --git a/arch/x86/include/asm/tdx.h b/arch/x86/include/asm/tdx.h
+index 020c81a7c729..d9106d3e89f8 100644
+--- a/arch/x86/include/asm/tdx.h
++++ b/arch/x86/include/asm/tdx.h
+@@ -20,21 +20,6 @@
+ 
+ #ifndef __ASSEMBLY__
+ 
+-/*
+- * Used to gather the output registers values of the TDCALL and SEAMCALL
+- * instructions when requesting services from the TDX module.
+- *
+- * This is a software only structure and not part of the TDX module/VMM ABI.
+- */
+-struct tdx_module_output {
+-	u64 rcx;
+-	u64 rdx;
+-	u64 r8;
+-	u64 r9;
+-	u64 r10;
+-	u64 r11;
+-};
+-
+ /*
+  * Used by the #VE exception handler to gather the #VE exception
+  * info from the TDX module. This is a software only structure
+@@ -55,10 +40,6 @@ struct ve_info {
+ 
+ void __init tdx_early_init(void);
+ 
+-/* Used to communicate with the TDX module */
+-u64 __tdx_module_call(u64 fn, u64 rcx, u64 rdx, u64 r8, u64 r9,
+-		      struct tdx_module_output *out);
+-
+ void tdx_get_ve_info(struct ve_info *ve);
+ 
+ bool tdx_handle_virt_exception(struct pt_regs *regs, struct ve_info *ve);
 -- 
 2.35.1
 
