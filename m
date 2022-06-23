@@ -2,55 +2,38 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 725BFC433EF
-	for <linux-efi@archiver.kernel.org>; Thu, 23 Jun 2022 18:36:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A6084C433EF
+	for <linux-efi@archiver.kernel.org>; Thu, 23 Jun 2022 21:49:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232517AbiFWSg4 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 23 Jun 2022 14:36:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49730 "EHLO
+        id S229527AbiFWVti (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 23 Jun 2022 17:49:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33000 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235046AbiFWSge (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 23 Jun 2022 14:36:34 -0400
-Received: from mga04.intel.com (mga04.intel.com [192.55.52.120])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D7EBDB1FB;
-        Thu, 23 Jun 2022 10:38:26 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1656005906; x=1687541906;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=ge8OT7HLhcFlVbvHiA8m+7kVqj79aSFXytPp7Abwn4s=;
-  b=KTAG1de30dwoAycsXKYsU+JlTZJoZXWk77qY8AoxEknbM5ibLsITinKW
-   hsLxqlgUQWefCwHAqZ/CeTnyj+USWnjIUQmN8qrRKbOBSZDoN/Fjzab+1
-   zQ7R5y28amKIOFEdEyGvxT2eHseI7ht+PcD1yW6AHTNOqy+kL80QgISuG
-   IEuyCIWqDQt6p2fqxbc7rm36reKedlsloUrxn+4vlivlLTAIibnyyvSV9
-   gZRxLOwes8zTegTpnQsd879o1bQ1v4T34myS06ddLyQo5FCnWFxzfHcBO
-   TKDjaARDmCbugatgkGDv4H811IcsBVPjMH2YeZ90MDTWoP4gg/j9MWtQU
-   w==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10387"; a="279557652"
-X-IronPort-AV: E=Sophos;i="5.92,216,1650956400"; 
-   d="scan'208";a="279557652"
-Received: from orsmga006.jf.intel.com ([10.7.209.51])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Jun 2022 10:38:26 -0700
-X-IronPort-AV: E=Sophos;i="5.92,216,1650956400"; 
-   d="scan'208";a="563536244"
-Received: from ckeane-mobl1.amr.corp.intel.com (HELO [10.209.81.98]) ([10.209.81.98])
-  by orsmga006-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Jun 2022 10:38:25 -0700
-Message-ID: <6321fc25-ea69-df76-208b-856daf81afe6@intel.com>
-Date:   Thu, 23 Jun 2022 10:37:59 -0700
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.9.1
-Subject: Re: [PATCHv7 01/14] x86/boot: Centralize __pa()/__va() definitions
-Content-Language: en-US
-To:     "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
+        with ESMTP id S229469AbiFWVti (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 23 Jun 2022 17:49:38 -0400
+Received: from out03.mta.xmission.com (out03.mta.xmission.com [166.70.13.233])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D67D8609D6;
+        Thu, 23 Jun 2022 14:49:36 -0700 (PDT)
+Received: from in02.mta.xmission.com ([166.70.13.52]:50126)
+        by out03.mta.xmission.com with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        (Exim 4.93)
+        (envelope-from <ebiederm@xmission.com>)
+        id 1o4Uhd-00DJj7-3e; Thu, 23 Jun 2022 15:49:29 -0600
+Received: from ip68-227-174-4.om.om.cox.net ([68.227.174.4]:57444 helo=email.froward.int.ebiederm.org.xmission.com)
+        by in02.mta.xmission.com with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        (Exim 4.93)
+        (envelope-from <ebiederm@xmission.com>)
+        id 1o4Uhb-0022ce-V4; Thu, 23 Jun 2022 15:49:28 -0600
+From:   "Eric W. Biederman" <ebiederm@xmission.com>
+To:     Dave Hansen <dave.hansen@intel.com>
+Cc:     "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
         Borislav Petkov <bp@alien8.de>,
         Andy Lutomirski <luto@kernel.org>,
         Sean Christopherson <seanjc@google.com>,
         Andrew Morton <akpm@linux-foundation.org>,
         Joerg Roedel <jroedel@suse.de>,
-        Ard Biesheuvel <ardb@kernel.org>
-Cc:     Andi Kleen <ak@linux.intel.com>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Andi Kleen <ak@linux.intel.com>,
         Kuppuswamy Sathyanarayanan 
         <sathyanarayanan.kuppuswamy@linux.intel.com>,
         David Rientjes <rientjes@google.com>,
@@ -68,27 +51,82 @@ Cc:     Andi Kleen <ak@linux.intel.com>,
         khalid.elmously@canonical.com, philip.cox@canonical.com,
         x86@kernel.org, linux-mm@kvack.org, linux-coco@lists.linux.dev,
         linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Mike Rapoport <rppt@linux.ibm.com>
+        kexec@lists.infradead.org
 References: <20220614120231.48165-1-kirill.shutemov@linux.intel.com>
- <20220614120231.48165-2-kirill.shutemov@linux.intel.com>
-From:   Dave Hansen <dave.hansen@intel.com>
-In-Reply-To: <20220614120231.48165-2-kirill.shutemov@linux.intel.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+        <20220614120231.48165-12-kirill.shutemov@linux.intel.com>
+        <6be29d38-5c93-7cc9-0de7-235d3f83773c@intel.com>
+Date:   Thu, 23 Jun 2022 16:48:59 -0500
+In-Reply-To: <6be29d38-5c93-7cc9-0de7-235d3f83773c@intel.com> (Dave Hansen's
+        message of "Thu, 23 Jun 2022 10:23:59 -0700")
+Message-ID: <87a6a3aw50.fsf@email.froward.int.ebiederm.org>
+User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/27.1 (gnu/linux)
+MIME-Version: 1.0
+Content-Type: text/plain
+X-XM-SPF: eid=1o4Uhb-0022ce-V4;;;mid=<87a6a3aw50.fsf@email.froward.int.ebiederm.org>;;;hst=in02.mta.xmission.com;;;ip=68.227.174.4;;;frm=ebiederm@xmission.com;;;spf=softfail
+X-XM-AID: U2FsdGVkX18FcaF4uvLQyjo+A0LkxE1aFqSrnDlgmHM=
+X-SA-Exim-Connect-IP: 68.227.174.4
+X-SA-Exim-Mail-From: ebiederm@xmission.com
+Subject: Re: [PATCHv7 11/14] x86: Disable kexec if system has unaccepted memory
+X-SA-Exim-Version: 4.2.1 (built Sat, 08 Feb 2020 21:53:50 +0000)
+X-SA-Exim-Scanned: Yes (on in02.mta.xmission.com)
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On 6/14/22 05:02, Kirill A. Shutemov wrote:
-> Replace multiple __pa()/__va() definitions with a single one in misc.h.
-> 
-> Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
-> Reviewed-by: David Hildenbrand <david@redhat.com>
-> Reviewed-by: Mike Rapoport <rppt@linux.ibm.com>
-> ---
->  arch/x86/boot/compressed/ident_map_64.c | 8 --------
->  arch/x86/boot/compressed/misc.h         | 9 +++++++++
->  arch/x86/boot/compressed/sev.c          | 2 --
->  3 files changed, 9 insertions(+), 10 deletions(-)
+Dave Hansen <dave.hansen@intel.com> writes:
 
-Reviewed-by: Dave Hansen <dave.hansen@linux.intel.com>
+> ... adding kexec folks
+>
+> On 6/14/22 05:02, Kirill A. Shutemov wrote:
+>> On kexec, the target kernel has to know what memory has been accepted.
+>> Information in EFI map is out of date and cannot be used.
+>> 
+>> boot_params.unaccepted_memory can be used to pass the bitmap between two
+>> kernels on kexec, but the use-case is not yet implemented.
+>> 
+>> Disable kexec on machines with unaccepted memory for now.
+> ...
+>> +static int __init unaccepted_init(void)
+>> +{
+>> +	if (!boot_params.unaccepted_memory)
+>> +		return 0;
+>> +
+>> +#ifdef CONFIG_KEXEC_CORE
+>> +	/*
+>> +	 * TODO: Information on memory acceptance status has to be communicated
+>> +	 * between kernel.
+>> +	 */
+>> +	pr_warn("Disable kexec: not yet supported on systems with unaccepted memory\n");
+>> +	kexec_load_disabled = 1;
+>> +#endif
+>
+> This looks to be the *only* in-kernel user tweaking kexec_load_disabled.
+>  It doesn't feel great to just be disabling kexec like this.  Why not
+> just fix it properly?
+>
+> What do the kexec folks think?
+
+I didn't realized someone had implemented kexec_load_disabled.  I am not
+particularly happy about that.  It looks like an over-broad stick that
+we will have to support forever.
+
+This change looks like it just builds on that bad decision.
+
+If people don't want to deal with this situation right now, then I
+recommend they make this new code and KEXEC conflict at the Kconfig
+level.  That would give serious incentive to adding the missing
+implementation.
+
+If there is some deep and fundamental why this can not be supported
+then it probably makes sense to put some code in the arch_kexec_load
+hook that verifies that deep and fundamental reason is present.
+
+With the kexec code all we have to verify it works is a little testing
+and careful code review.  Something like this makes code review much
+harder because the entire kernel has to be checked to see if some random
+driver without locking changed a variable.  Rather than having it
+apparent that this special case exists when reading through the kexec
+code.
+
+Eric
+
