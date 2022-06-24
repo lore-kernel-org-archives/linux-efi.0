@@ -2,24 +2,24 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F25ACCA473
-	for <linux-efi@archiver.kernel.org>; Fri, 24 Jun 2022 15:23:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1D4B0CCA473
+	for <linux-efi@archiver.kernel.org>; Fri, 24 Jun 2022 15:23:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232114AbiFXPXs (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 24 Jun 2022 11:23:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33924 "EHLO
+        id S232333AbiFXPX5 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 24 Jun 2022 11:23:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33950 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232190AbiFXPXr (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 24 Jun 2022 11:23:47 -0400
+        with ESMTP id S232203AbiFXPXt (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 24 Jun 2022 11:23:49 -0400
 Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 0148E47042;
-        Fri, 24 Jun 2022 08:23:46 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id C367A2F657;
+        Fri, 24 Jun 2022 08:23:48 -0700 (PDT)
 Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id F274E143D;
-        Fri, 24 Jun 2022 08:23:45 -0700 (PDT)
+        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id B17C814BF;
+        Fri, 24 Jun 2022 08:23:48 -0700 (PDT)
 Received: from usa.arm.com (e103737-lin.cambridge.arm.com [10.1.197.49])
-        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPA id A00FC3F534;
-        Fri, 24 Jun 2022 08:23:44 -0700 (PDT)
+        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPA id 5F5E03F534;
+        Fri, 24 Jun 2022 08:23:47 -0700 (PDT)
 From:   Sudeep Holla <sudeep.holla@arm.com>
 To:     linux-acpi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         linux-efi@vger.kernel.org
@@ -29,9 +29,9 @@ Cc:     Sudeep Holla <sudeep.holla@arm.com>,
         Will Deacon <will@kernel.org>,
         "Rafael J . Wysocki" <rafael@kernel.org>,
         Jose Marinho <jose.marinho@arm.com>
-Subject: [PATCH 1/3] arm64: efi: Simplify arch_efi_call_virt macro by not using efi_##f##_t type
-Date:   Fri, 24 Jun 2022 16:23:29 +0100
-Message-Id: <20220624152331.4009502-2-sudeep.holla@arm.com>
+Subject: [PATCH 3/3] ACPI: Move PRM config option under the main ACPI config
+Date:   Fri, 24 Jun 2022 16:23:31 +0100
+Message-Id: <20220624152331.4009502-4-sudeep.holla@arm.com>
 X-Mailer: git-send-email 2.36.1
 In-Reply-To: <20220624152331.4009502-1-sudeep.holla@arm.com>
 References: <20220624152331.4009502-1-sudeep.holla@arm.com>
@@ -41,48 +41,65 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Currently, the arch_efi_call_virt() assumes all users of it will have
-defined a type 'efi_##f##_t' to make use of it. It is unnecessarily
-forcing the users to create a new typedef when __efi_rt_asm_wrapper()
-actually expects void pointer.
+Currently PRM(Platform Runtime Mechanism) config options is list along
+with the mainA CPI (Advanced Configuration and Power Interface) option
+at the same level. On ARM64 platforms unlike x86, ACPI option is listed
+at the topmost level of configuration menu. It is rather very confusing
+to see PRM option also listed along with ACPI in the topmost level.
 
-Simplify the arch_efi_call_virt() macro by typecasting p->f to (void *)
-as required by __efi_rt_asm_wrapper() and eliminate the explicit need
-for efi_##f##_t type for every user of this macro.
-
-This is needed now in preparation to enable PRMT support on ARM64.
+Move the same under ACPI config option. No functional change, just changes
+the level of visibility of this option under the configuration menu.
 
 Signed-off-by: Sudeep Holla <sudeep.holla@arm.com>
 ---
- arch/arm64/include/asm/efi.h | 4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
+ drivers/acpi/Kconfig | 30 +++++++++++++++---------------
+ 1 file changed, 15 insertions(+), 15 deletions(-)
 
-Hi Ard,
-
-I am not sure if you prefer to add type for each users of this or this
-is acceptable. I see only compile time advantage but I am not sure if
-it make sense to add typedefs in ACPI PRMT driver just for this reason.
-
-Let me know.
-
-Regards,
-Sudeep
-
-diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
-index ad55079abe47..263d7fd67207 100644
---- a/arch/arm64/include/asm/efi.h
-+++ b/arch/arm64/include/asm/efi.h
-@@ -29,9 +29,7 @@ int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
+diff --git a/drivers/acpi/Kconfig b/drivers/acpi/Kconfig
+index d08b7408f0a5..218b5b59df31 100644
+--- a/drivers/acpi/Kconfig
++++ b/drivers/acpi/Kconfig
+@@ -572,6 +572,21 @@ source "drivers/acpi/pmic/Kconfig"
+ config ACPI_VIOT
+ 	bool
  
- #define arch_efi_call_virt(p, f, args...)				\
- ({									\
--	efi_##f##_t *__f;						\
--	__f = p->f;							\
--	__efi_rt_asm_wrapper(__f, #f, args);				\
-+	__efi_rt_asm_wrapper((void *)p->f, #f, args);			\
- })
++config ACPI_PRMT
++	bool "Platform Runtime Mechanism Support"
++	depends on EFI && (X86_64 || ARM64)
++	default y
++	help
++	  Platform Runtime Mechanism (PRM) is a firmware interface exposing a
++	  set of binary executables that can be called from the AML interpreter
++	  or directly from device drivers.
++
++	  Say Y to enable the AML interpreter to execute the PRM code.
++
++	  While this feature is optional in principle, leaving it out may
++	  substantially increase computational overhead related to the
++	  initialization of some server systems.
++
+ endif	# ACPI
  
- #define arch_efi_call_virt_teardown()					\
+ config X86_PM_TIMER
+@@ -589,18 +604,3 @@ config X86_PM_TIMER
+ 
+ 	  You should nearly always say Y here because many modern
+ 	  systems require this timer.
+-
+-config ACPI_PRMT
+-	bool "Platform Runtime Mechanism Support"
+-	depends on EFI && (X86_64 || ARM64)
+-	default y
+-	help
+-	  Platform Runtime Mechanism (PRM) is a firmware interface exposing a
+-	  set of binary executables that can be called from the AML interpreter
+-	  or directly from device drivers.
+-
+-	  Say Y to enable the AML interpreter to execute the PRM code.
+-
+-	  While this feature is optional in principle, leaving it out may
+-	  substantially increase computational overhead related to the
+-	  initialization of some server systems.
 -- 
 2.36.1
 
