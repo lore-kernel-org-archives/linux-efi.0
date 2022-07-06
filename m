@@ -2,61 +2,116 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0AD4BC43334
-	for <linux-efi@archiver.kernel.org>; Wed,  6 Jul 2022 00:21:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2D688C43334
+	for <linux-efi@archiver.kernel.org>; Wed,  6 Jul 2022 06:38:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231296AbiGFAVP (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 5 Jul 2022 20:21:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34340 "EHLO
+        id S229497AbiGFGin (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 6 Jul 2022 02:38:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37338 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229454AbiGFAVP (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 5 Jul 2022 20:21:15 -0400
-X-Greylist: delayed 515 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Tue, 05 Jul 2022 17:21:11 PDT
-Received: from cavan.codon.org.uk (irc.codon.org.uk [IPv6:2a00:1098:84:22e::2])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0219313F43;
-        Tue,  5 Jul 2022 17:21:10 -0700 (PDT)
-Received: by cavan.codon.org.uk (Postfix, from userid 1000)
-        id C2FD140A60; Wed,  6 Jul 2022 01:12:33 +0100 (BST)
-Date:   Wed, 6 Jul 2022 01:12:33 +0100
-From:   Matthew Garrett <mjg59@srcf.ucam.org>
-To:     Brendan Trotter <btrotter@gmail.com>
-Cc:     The development of GNU GRUB <grub-devel@gnu.org>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Daniel Kiper <daniel.kiper@oracle.com>,
-        Alec Brown <alec.r.brown@oracle.com>,
-        Kanth Ghatraju <kanth.ghatraju@oracle.com>,
-        Ross Philipson <ross.philipson@oracle.com>,
-        "piotr.krol@3mdeb.com" <piotr.krol@3mdeb.com>,
-        "krystian.hebel@3mdeb.com" <krystian.hebel@3mdeb.com>,
-        "persaur@gmail.com" <persaur@gmail.com>,
-        "Yoder, Stuart" <stuart.yoder@arm.com>,
-        Andrew Cooper <andrew.cooper3@citrix.com>,
-        "michal.zygowski@3mdeb.com" <michal.zygowski@3mdeb.com>,
-        James Bottomley <James.Bottomley@hansenpartnership.com>,
-        "lukasz@hawrylko.pl" <lukasz@hawrylko.pl>,
-        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
-        James Morris <jmorris@namei.org>
-Subject: Re: Linux DRTM on UEFI platforms
-Message-ID: <20220706001233.GA5802@srcf.ucam.org>
-References: <20220329174057.GA17778@srcf.ucam.org>
- <f9622b47-c45f-8c91-cb85-e5db7fd541cf@apertussolutions.com>
- <CAMj1kXEUT8BK_akqjF1Wx0JkLniFyV_h9s1TfQnPqfxCHsKfWw@mail.gmail.com>
- <7aab2990-9c57-2456-b08d-299ae96ac919@apertussolutions.com>
- <CAELHeEfZ-feZnexp7Gx3VAJPerENcoO1Uccbe3xxUX95jvLUdA@mail.gmail.com>
+        with ESMTP id S229455AbiGFGin (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 6 Jul 2022 02:38:43 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 83E12167CA;
+        Tue,  5 Jul 2022 23:38:40 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 62D2361D84;
+        Wed,  6 Jul 2022 06:38:40 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 39758C3411C;
+        Wed,  6 Jul 2022 06:38:39 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
+        s=korg; t=1657089519;
+        bh=sIhADMY3Ddiwqu/4zmrMxVcxGylkvp6d6ylGolHrEgY=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=dv8K6kxrFf7OTnxoy7BJoYTK27INCS/dp6gsLZU+mDz0eG+7Cfsq3vGkwutzzXz77
+         jOM4u9OlUDKwA1RaRr22Fe34PTWi+7e+iuBGypoSgP3RRd1neORWeqv6u+fz4YMohn
+         QmQwowyzodvSl9o04hklMK59Etq0P85n2f5nOg/4=
+Date:   Wed, 6 Jul 2022 08:38:37 +0200
+From:   Greg KH <gregkh@linuxfoundation.org>
+To:     Martin Fernandez <martin.fernandez@eclypsium.com>
+Cc:     linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
+        platform-driver-x86@vger.kernel.org, linux-mm@kvack.org,
+        kunit-dev@googlegroups.com, linux-kselftest@vger.kernel.org,
+        tglx@linutronix.de, mingo@redhat.com, bp@alien8.de,
+        dave.hansen@linux.intel.com, x86@kernel.org, hpa@zytor.com,
+        ardb@kernel.org, dvhart@infradead.org, andy@infradead.org,
+        rafael@kernel.org, rppt@kernel.org, akpm@linux-foundation.org,
+        daniel.gutson@eclypsium.com, hughsient@gmail.com,
+        alex.bazhaniuk@eclypsium.com, alison.schofield@intel.com,
+        keescook@chromium.org
+Subject: Re: [PATCH v9 9/9] drivers/node: Show in sysfs node's crypto
+ capabilities
+Message-ID: <YsUt7X6HLIY6wt1Z@kroah.com>
+References: <20220704135833.1496303-1-martin.fernandez@eclypsium.com>
+ <20220704135833.1496303-10-martin.fernandez@eclypsium.com>
+ <YsL6XCWmgiIeLKJ9@kroah.com>
+ <CAKgze5aD3vJwMQwzJ1syzAKvSvPgYDFvtapDea_zBki5taoFEQ@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAELHeEfZ-feZnexp7Gx3VAJPerENcoO1Uccbe3xxUX95jvLUdA@mail.gmail.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+In-Reply-To: <CAKgze5aD3vJwMQwzJ1syzAKvSvPgYDFvtapDea_zBki5taoFEQ@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Wed, Jul 06, 2022 at 09:33:23AM +0930, Brendan Trotter wrote:
+On Tue, Jul 05, 2022 at 02:35:18PM -0300, Martin Fernandez wrote:
+> On 7/4/22, Greg KH <gregkh@linuxfoundation.org> wrote:
+> > On Mon, Jul 04, 2022 at 10:58:33AM -0300, Martin Fernandez wrote:
+> >> Show in each node in sysfs if its memory is able to do be encrypted by
+> >> the CPU; on EFI systems: if all its memory is marked with
+> >> EFI_MEMORY_CPU_CRYPTO in the EFI memory map.
+> >>
+> >> Signed-off-by: Martin Fernandez <martin.fernandez@eclypsium.com>
+> >> ---
+> >>  Documentation/ABI/testing/sysfs-devices-node | 10 ++++++++++
+> >>  drivers/base/node.c                          | 10 ++++++++++
+> >>  2 files changed, 20 insertions(+)
+> >>  create mode 100644 Documentation/ABI/testing/sysfs-devices-node
+> >>
+> >> diff --git a/Documentation/ABI/testing/sysfs-devices-node
+> >> b/Documentation/ABI/testing/sysfs-devices-node
+> >> new file mode 100644
+> >> index 000000000000..0e95420bd7c5
+> >> --- /dev/null
+> >> +++ b/Documentation/ABI/testing/sysfs-devices-node
+> >> @@ -0,0 +1,10 @@
+> >> +What:		/sys/devices/system/node/nodeX/crypto_capable
+> >> +Date:		April 2022
+> >> +Contact:	Martin Fernandez <martin.fernandez@eclypsium.com>
+> >> +Users:		fwupd (https://fwupd.org)
+> >> +Description:
+> >> +		This value is 1 if all system memory in this node is
+> >> +		capable of being protected with the CPU's memory
+> >> +		cryptographic capabilities.  It is 0 otherwise.
+> >> +		On EFI systems the node will be marked with
+> >> +		EFI_MEMORY_CPU_CRYPTO.
+> >
+> > Where will such a node be "marked"?  I do not understand this last
+> > sentence, sorry, can you please reword this?
+> 
+> What I meant is that if all the memory regions in a given node are
+> flagged with EFI_MEMORY_CPU_CRYPTO then that file will hold a 1.
+> 
+> Maybe it's a little confusing if you don't know what
+> EFI_MEMORY_CPU_CRYPTO is.
+> 
+> > And why is EFI an issue here at all?
+> 
+> Checking for EFI_MEMORY_CPU_CRYPTO is the way to know if a memory
+> region is able to be encrypted by the CPU on EFI platforms. It's not
+> really an issue and it's currently the only implementation for this
+> file.
+> 
+> Is it clearer here?
+> 
+>   This value is 1 if the memory in this node is capable of being
+>   protected with the CPU's memory cryptographic capabilities.  It is 0
+>   otherwise.
+>   On EFI systems this means that all the memory regions of the node
+>   have the EFI_MEMORY_CPU_CRYPTO attribute set.
 
-> The only correct approach is "efi-stub -> head_64.S -> kernel's own
-> secure init"; where (on UEFI systems) neither GRUB nor Trenchboot has
-> a valid reason to exist and should never be installed.
+Much better, thanks.
 
-Surely the entire point of DRTM is that we *don't* have to trust the 
-bootloader?
+greg k-h
