@@ -2,116 +2,73 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2D688C43334
-	for <linux-efi@archiver.kernel.org>; Wed,  6 Jul 2022 06:38:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DFAF2C433EF
+	for <linux-efi@archiver.kernel.org>; Thu,  7 Jul 2022 06:18:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229497AbiGFGin (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 6 Jul 2022 02:38:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37338 "EHLO
+        id S230090AbiGGGSo convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 7 Jul 2022 02:18:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53424 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229455AbiGFGin (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 6 Jul 2022 02:38:43 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 83E12167CA;
-        Tue,  5 Jul 2022 23:38:40 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 62D2361D84;
-        Wed,  6 Jul 2022 06:38:40 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 39758C3411C;
-        Wed,  6 Jul 2022 06:38:39 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-        s=korg; t=1657089519;
-        bh=sIhADMY3Ddiwqu/4zmrMxVcxGylkvp6d6ylGolHrEgY=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=dv8K6kxrFf7OTnxoy7BJoYTK27INCS/dp6gsLZU+mDz0eG+7Cfsq3vGkwutzzXz77
-         jOM4u9OlUDKwA1RaRr22Fe34PTWi+7e+iuBGypoSgP3RRd1neORWeqv6u+fz4YMohn
-         QmQwowyzodvSl9o04hklMK59Etq0P85n2f5nOg/4=
-Date:   Wed, 6 Jul 2022 08:38:37 +0200
-From:   Greg KH <gregkh@linuxfoundation.org>
-To:     Martin Fernandez <martin.fernandez@eclypsium.com>
-Cc:     linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
-        platform-driver-x86@vger.kernel.org, linux-mm@kvack.org,
-        kunit-dev@googlegroups.com, linux-kselftest@vger.kernel.org,
-        tglx@linutronix.de, mingo@redhat.com, bp@alien8.de,
-        dave.hansen@linux.intel.com, x86@kernel.org, hpa@zytor.com,
-        ardb@kernel.org, dvhart@infradead.org, andy@infradead.org,
-        rafael@kernel.org, rppt@kernel.org, akpm@linux-foundation.org,
-        daniel.gutson@eclypsium.com, hughsient@gmail.com,
-        alex.bazhaniuk@eclypsium.com, alison.schofield@intel.com,
-        keescook@chromium.org
-Subject: Re: [PATCH v9 9/9] drivers/node: Show in sysfs node's crypto
- capabilities
-Message-ID: <YsUt7X6HLIY6wt1Z@kroah.com>
-References: <20220704135833.1496303-1-martin.fernandez@eclypsium.com>
- <20220704135833.1496303-10-martin.fernandez@eclypsium.com>
- <YsL6XCWmgiIeLKJ9@kroah.com>
- <CAKgze5aD3vJwMQwzJ1syzAKvSvPgYDFvtapDea_zBki5taoFEQ@mail.gmail.com>
+        with ESMTP id S229538AbiGGGSn (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 7 Jul 2022 02:18:43 -0400
+Received: from mail.dica.am (mail.inntech.am [109.75.47.174])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1CBD964F0
+        for <linux-efi@vger.kernel.org>; Wed,  6 Jul 2022 23:18:38 -0700 (PDT)
+X-Footer: aW5udGVjaC5hbQ==
+Received: from johnlewis.com ([3.140.195.239])
+        (authenticated user info@inntech.am)
+        by mail.dica.am (Kerio Connect 9.2.1) with ESMTPSA
+        (using TLSv1 with cipher ECDHE-RSA-AES256-SHA (256 bits))
+        for linux-efi@vger.kernel.org;
+        Thu, 7 Jul 2022 10:19:11 +0400
+Reply-To: robert_turner@johnlewis-trades.com
+From:   John Lewis & Partnership <robert_turner49@johnlewis.com>
+To:     linux-efi@vger.kernel.org
+Subject: (8/07/22)-Order_Enquiry JL
+Date:   07 Jul 2022 16:18:24 +1000
+Message-ID: <20220707053414.BAA25296D6AEC145@johnlewis.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAKgze5aD3vJwMQwzJ1syzAKvSvPgYDFvtapDea_zBki5taoFEQ@mail.gmail.com>
+Content-Type: text/plain;
+        charset="utf-8"
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, Jul 05, 2022 at 02:35:18PM -0300, Martin Fernandez wrote:
-> On 7/4/22, Greg KH <gregkh@linuxfoundation.org> wrote:
-> > On Mon, Jul 04, 2022 at 10:58:33AM -0300, Martin Fernandez wrote:
-> >> Show in each node in sysfs if its memory is able to do be encrypted by
-> >> the CPU; on EFI systems: if all its memory is marked with
-> >> EFI_MEMORY_CPU_CRYPTO in the EFI memory map.
-> >>
-> >> Signed-off-by: Martin Fernandez <martin.fernandez@eclypsium.com>
-> >> ---
-> >>  Documentation/ABI/testing/sysfs-devices-node | 10 ++++++++++
-> >>  drivers/base/node.c                          | 10 ++++++++++
-> >>  2 files changed, 20 insertions(+)
-> >>  create mode 100644 Documentation/ABI/testing/sysfs-devices-node
-> >>
-> >> diff --git a/Documentation/ABI/testing/sysfs-devices-node
-> >> b/Documentation/ABI/testing/sysfs-devices-node
-> >> new file mode 100644
-> >> index 000000000000..0e95420bd7c5
-> >> --- /dev/null
-> >> +++ b/Documentation/ABI/testing/sysfs-devices-node
-> >> @@ -0,0 +1,10 @@
-> >> +What:		/sys/devices/system/node/nodeX/crypto_capable
-> >> +Date:		April 2022
-> >> +Contact:	Martin Fernandez <martin.fernandez@eclypsium.com>
-> >> +Users:		fwupd (https://fwupd.org)
-> >> +Description:
-> >> +		This value is 1 if all system memory in this node is
-> >> +		capable of being protected with the CPU's memory
-> >> +		cryptographic capabilities.  It is 0 otherwise.
-> >> +		On EFI systems the node will be marked with
-> >> +		EFI_MEMORY_CPU_CRYPTO.
-> >
-> > Where will such a node be "marked"?  I do not understand this last
-> > sentence, sorry, can you please reword this?
-> 
-> What I meant is that if all the memory regions in a given node are
-> flagged with EFI_MEMORY_CPU_CRYPTO then that file will hold a 1.
-> 
-> Maybe it's a little confusing if you don't know what
-> EFI_MEMORY_CPU_CRYPTO is.
-> 
-> > And why is EFI an issue here at all?
-> 
-> Checking for EFI_MEMORY_CPU_CRYPTO is the way to know if a memory
-> region is able to be encrypted by the CPU on EFI platforms. It's not
-> really an issue and it's currently the only implementation for this
-> file.
-> 
-> Is it clearer here?
-> 
->   This value is 1 if the memory in this node is capable of being
->   protected with the CPU's memory cryptographic capabilities.  It is 0
->   otherwise.
->   On EFI systems this means that all the memory regions of the node
->   have the EFI_MEMORY_CPU_CRYPTO attribute set.
+Dear linux-efi
 
-Much better, thanks.
 
-greg k-h
+ 
+The world famous brand John Lewis & Partners, is UK's largest 
+multi-channel retailer with over 126 shops and multiple expansion 
+in Africa furnished by European/Asian/American products. We are
+sourcing new products to attract new customers and also retain 
+our existing ones, create new partnerships with companies dealing 
+with different kinds of goods globally.
+ 
+Your company's products are of interest to our market as we have 
+an amazing market for your products.Provide us your current 
+catalog through email to review more. We hope to be able to order
+with you and start a long-term friendly, respectable and solid 
+business partnership. Please we would appreciate it if you could 
+send us your stock availability via email if any.
+
+ 
+Our payment terms are 15 days net in Europe, 30 days Net in UK 
+and 30 days net in Asia/USA as we have operated with over 5297 
+suppliers around the globe for the past 50 years now. For
+immediate response Send your reply to "robert_turner@johnlewis-
+trades.com" for us to be able to treat with care and urgency.
+
+ 
+Best Regards
+Rob Turner
+Head Of Procurement Operations
+John Lewis & Partners.
+robert_turner@johnlewis-trades.com
+Tel: +44-7451-274090
+WhatsApp: +447497483925
+www.johnlewis.com
+REGISTERED OFFICE: 171 VICTORIA STREET, LONDON SW1E 5NN
+
