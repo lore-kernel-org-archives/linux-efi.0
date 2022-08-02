@@ -2,138 +2,57 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B281C00144
-	for <linux-efi@archiver.kernel.org>; Mon,  1 Aug 2022 13:41:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 32131C00140
+	for <linux-efi@archiver.kernel.org>; Tue,  2 Aug 2022 07:59:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231593AbiHANld (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 1 Aug 2022 09:41:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40264 "EHLO
+        id S236270AbiHBH70 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 2 Aug 2022 03:59:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37672 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231797AbiHANlc (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 1 Aug 2022 09:41:32 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 836BEBC39
-        for <linux-efi@vger.kernel.org>; Mon,  1 Aug 2022 06:41:31 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 44DDAB811FE
-        for <linux-efi@vger.kernel.org>; Mon,  1 Aug 2022 13:41:30 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id ED261C433B5;
-        Mon,  1 Aug 2022 13:41:27 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1659361289;
-        bh=GT2/eqO48zHlN+Lpd5wrh+z4tBVfFRIRNEhveSM9j98=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=EN0ZCl2kHsORTmHqPqAiv4BLhb6fxu8nknxA5Oa1vUKnkCdGaL8xG6Z1eORaaOQb6
-         IQETmPA6i+xBGyZe4I7exSJAPsWwqnApHXHpQ9UZjsoYeuMXEbtwNINdo4PgE0ZGok
-         4FhDMxHK/tfq+Y7FHBHm3ekjJq/jEeuyoNDSXANdMrTJFiMq+dJIvERnz695Tr7wNC
-         JG/xE12dbtufEg5L84yUDdFvEMsdGuWz3aE3jhVwOWvmfiiFXBlYg3sC2eUpfsz6ex
-         Z/EBKtnvxhoqgtmTELj5fewFBLDCQPLCYdLoRFvffsx4Zu4npFKIez5/V0rnGW/k/z
-         rm/IGTA0ZBu1w==
-From:   Ard Biesheuvel <ardb@kernel.org>
-To:     torvalds@linux-foundation.org
-Cc:     linux-efi@vger.kernel.org, keescook@chromium.org,
-        Ard Biesheuvel <ardb@kernel.org>
-Subject: [GIT PULL 1/2] EFI updates for v5.20
-Date:   Mon,  1 Aug 2022 15:41:16 +0200
-Message-Id: <20220801134117.1605678-2-ardb@kernel.org>
-X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20220801134117.1605678-1-ardb@kernel.org>
-References: <20220801134117.1605678-1-ardb@kernel.org>
+        with ESMTP id S236254AbiHBH7X (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 2 Aug 2022 03:59:23 -0400
+X-Greylist: delayed 497 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Tue, 02 Aug 2022 00:59:22 PDT
+Received: from mail.lokoho.com (mail.lokoho.com [217.61.105.98])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A38EA3F321
+        for <linux-efi@vger.kernel.org>; Tue,  2 Aug 2022 00:59:22 -0700 (PDT)
+Received: by mail.lokoho.com (Postfix, from userid 1001)
+        id 67E57824A8; Tue,  2 Aug 2022 08:51:00 +0100 (BST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=lokoho.com; s=mail;
+        t=1659426663; bh=Z0N5VlX9/JlryGOL5I747Le9USomZJCRNNGRT3LbbKc=;
+        h=Date:From:To:Subject:From;
+        b=UkM+g4VFLf8/NoYN0gh7VNxie1OmoJrWjFUZA6tZ2izl1d0mMkaOrOJhUZHtcwTok
+         qcYYneB/EXj/HT1FzARhTtqYD/nlSQbHuZWZDbr2OYDHdgU8ua5ws0nN6jxnH1V9Uv
+         sRLmRqwpoWeYk5rIoObYRrSh2sKty8aHYGefpI75hzv0axNShPN3OQ9157Jxf4XW13
+         kEQNPc0uEkiZwkxQHK3jrn2LSfwOR04qLBiUd/LFsPkcJx6PmuBQXq7p+nHdJan9T5
+         wemGbcp/j0Ydkrckg4CfJIOY9BRiAHmUXxZdIwborPfaDp/1QGpZ6UZEQbh/856Lrx
+         yRehfDnWFYPKA==
+Received: by mail.lokoho.com for <linux-efi@vger.kernel.org>; Tue,  2 Aug 2022 07:50:56 GMT
+Message-ID: <20220802074500-0.1.d.my5.0.2t8ajrp2uk@lokoho.com>
+Date:   Tue,  2 Aug 2022 07:50:56 GMT
+From:   "Adam Charachuta" <adam.charachuta@lokoho.com>
+To:     <linux-efi@vger.kernel.org>
+Subject: =?UTF-8?Q?S=C5=82owa_kluczowe_do_wypozycjonowania?=
+X-Mailer: mail.lokoho.com
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=4457; i=ardb@kernel.org; h=from:subject; bh=GT2/eqO48zHlN+Lpd5wrh+z4tBVfFRIRNEhveSM9j98=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBi59f45MyBgsDbo29ARWbCQCG1TtaY1pRr15wYkQ5g xRkK/DKJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYufX+AAKCRDDTyI5ktmPJGL4DA CVKCpcLBZcMTLOeNOQhLQ0sAyjCFBT1JF2jf1f3DMGVUtDCbUPk43k6eoyW4MAf9sIcJdPlEhFiuDh c2sW+9eh8WMLVMxSM/3vqMRtjCGf8KdwTO/T9vpz7NUkV9DB/au0rAE7bTQlm6bESX0JPU78uYHwKA orK96GS/2c0e7k5n14WOmKyqswFgOrU0g/sgcVHd+IXKyvgW4o8skxBjh8xHYS3hhjwL4nidZuu18K yc9HOIUh1eypv+R3G5jvN9uAph/eKJ5O0jz6tRNB7ThBbgKxPbi/+nC8bNMXwpleNUhJz2BAj0K5G8 uymq2pLWNskxRB4oPPs3velQ09/gJI/tLbCQOLIg5ocXJUQEE3N7E0fLwh82uNc9meyL37FEuEHX2l bhN3VF63lquLHydfGbb0zi/3pVEPXsL1C0R0AgS4fsVrUjsJ5YZiaEFykjgvBR8blQ2tQIhr/DT2F8 1jbz/CUpa5FcC1BUtHLXBFJHGTSXyke7feGkgA5AdVO2s=
-X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The following changes since commit f2906aa863381afb0015a9eb7fefad885d4e5a56:
+Dzie=C5=84 dobry,
 
-  Linux 5.19-rc1 (2022-06-05 17:18:54 -0700)
+zapozna=C5=82em si=C4=99 z Pa=C5=84stwa ofert=C4=85 i z przyjemno=C5=9Bci=
+=C4=85 przyznaj=C4=99, =C5=BCe przyci=C4=85ga uwag=C4=99 i zach=C4=99ca d=
+o dalszych rozm=C3=B3w.=20
 
-are available in the Git repository at:
+Pomy=C5=9Bla=C5=82em, =C5=BCe mo=C5=BCe m=C3=B3g=C5=82bym mie=C4=87 sw=C3=
+=B3j wk=C5=82ad w Pa=C5=84stwa rozw=C3=B3j i pom=C3=B3c dotrze=C4=87 z t=C4=
+=85 ofert=C4=85 do wi=C4=99kszego grona odbiorc=C3=B3w. Pozycjonuj=C4=99 =
+strony www, dzi=C4=99ki czemu generuj=C4=85 =C5=9Bwietny ruch w sieci.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next-for-v5.20
+Mo=C5=BCemy porozmawia=C4=87 w najbli=C5=BCszym czasie?
 
-for you to fetch changes up to e3435fff6ae03ca3ec1279299664f968478067e2:
 
-  ACPI: Move PRM config option under the main ACPI config (2022-06-30 17:36:03 +0200)
-
-----------------------------------------------------------------
-EFI updates for v5.20
-
-- Enable mirrored memory for arm64
-- Fix up several abuses of the efivar API
-- Refactor the efivar API in preparation for moving the 'business logic'
-  part of it into efivarfs
-- Enable ACPI PRM on arm64
-
-----------------------------------------------------------------
-Ard Biesheuvel (13):
-      efi: avoid efivars layer when loading SSDTs from variables
-      efi: efibc: avoid efivar API for setting variables
-      media: atomisp_gmin_platform: stop abusing efivar API
-      iwlwifi: Switch to proper EFI variable store interface
-      brcmfmac: Switch to appropriate helper to load EFI variable contents
-      selftests/kexec: remove broken EFI_VARS secure boot fallback check
-      Input: applespi - avoid efivars API and invoke EFI services directly
-      pstore: Add priv field to pstore_record for backend specific use
-      efi: vars: Don't drop lock in the middle of efivar_init()
-      efi: vars: Add thin wrapper around EFI get/set variable interface
-      efi: pstore: Omit efivars caching EFI varstore access layer
-      efi: vars: Use locking version to iterate over efivars linked lists
-      efi: vars: Drop __efivar_entry_iter() helper which is no longer used
-
-Liu Zixian (1):
-      efi: Correct comment on efi_memmap_alloc
-
-Ma Wupeng (5):
-      efi: Make code to find mirrored memory ranges generic
-      mm: Ratelimited mirrored memory related warning messages
-      mm: Limit warning message in vmemmap_verify() to once
-      arm64: mm: Only remove nomap flag for initrd
-      memblock: Disable mirror feature if kernelcore is not specified
-
-Sudeep Holla (4):
-      efi: Simplify arch_efi_call_virt() macro
-      ACPI: PRM: Change handler_addr type to void pointer
-      ACPI: Enable Platform Runtime Mechanism(PRM) support on ARM64
-      ACPI: Move PRM config option under the main ACPI config
-
-Zheng Zhi Yuan (1):
-      drivers: fix typo in firmware/efi/memmap.c
-
- arch/arm/include/asm/efi.h                         |   7 -
- arch/arm64/include/asm/efi.h                       |   7 +-
- arch/arm64/mm/init.c                               |   2 +-
- arch/loongarch/include/asm/efi.h                   |  16 +-
- arch/riscv/include/asm/efi.h                       |   2 -
- arch/x86/include/asm/efi.h                         |   7 +-
- arch/x86/platform/efi/efi.c                        |  23 --
- drivers/acpi/Kconfig                               |  30 +-
- drivers/acpi/prmt.c                                |   4 +-
- drivers/firmware/efi/Kconfig                       |   2 +
- drivers/firmware/efi/efi-init.c                    |   1 +
- drivers/firmware/efi/efi-pstore.c                  | 377 +++++----------------
- drivers/firmware/efi/efi.c                         | 126 +++----
- drivers/firmware/efi/efibc.c                       |  76 ++---
- drivers/firmware/efi/efivars.c                     |  25 +-
- drivers/firmware/efi/memmap.c                      |   5 +-
- drivers/firmware/efi/vars.c                        | 258 +++++++++-----
- drivers/input/keyboard/applespi.c                  |  42 +--
- .../broadcom/brcm80211/brcmfmac/firmware.c         |  25 +-
- drivers/net/wireless/intel/iwlwifi/fw/uefi.c       |  96 ++----
- .../media/atomisp/pci/atomisp_gmin_platform.c      |  27 +-
- fs/efivarfs/super.c                                |  15 +-
- fs/pstore/inode.c                                  |   1 +
- fs/pstore/platform.c                               |   1 +
- include/linux/efi.h                                |  33 +-
- include/linux/pstore.h                             |   4 +
- mm/internal.h                                      |   2 +
- mm/memblock.c                                      |   7 +-
- mm/page_alloc.c                                    |   2 +-
- mm/sparse-vmemmap.c                                |   2 +-
- tools/testing/selftests/kexec/kexec_common_lib.sh  |  36 +-
- 31 files changed, 486 insertions(+), 775 deletions(-)
+Pozdrawiam
+Adam Charachuta
