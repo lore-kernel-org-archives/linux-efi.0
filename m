@@ -2,178 +2,130 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1980CC28B2B
-	for <linux-efi@archiver.kernel.org>; Mon,  8 Aug 2022 15:44:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 75F2EC00140
+	for <linux-efi@archiver.kernel.org>; Mon,  8 Aug 2022 15:55:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235852AbiHHPoJ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 8 Aug 2022 11:44:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50040 "EHLO
+        id S242339AbiHHPzc (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 8 Aug 2022 11:55:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59596 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238062AbiHHPoH (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 8 Aug 2022 11:44:07 -0400
-Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 024C82BCB;
-        Mon,  8 Aug 2022 08:44:06 -0700 (PDT)
-Received: from pps.filterd (m0127361.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 278EnZYQ024030;
-        Mon, 8 Aug 2022 15:43:52 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
- : date : message-id : in-reply-to : references : mime-version :
- content-transfer-encoding; s=pp1;
- bh=vCkjYYMr8qi+Dx9V5Urxb8UXElS0dbRq92qE6ZnPnaE=;
- b=V/zuB6j7JbxrQX/EQlMfEBUCyYbhdRKQ3Oen+m3kKrnc2BP2VT63Kwi+CwOPVswnhvLC
- 57ZKFRKdG0tzqW94IkgXCNvn69kmXhyyKV0rtPxm2gNM4tIzaMnF0bOxSWpf2ZY8o+Wa
- REc1/SffV1JZ7wiVKV8exEHtckG1NhJaHeVVpL84iziRCT53EQ3AozvGuAZVqKd2ewZa
- G7DxtgaxTtECnYaSr3EhYox7zQnCXVoCFVpo4kJm1+HHEvKpeweW4nxxPEwfTWRxhPwv
- gH8NuZxu2S064q/6VYcqIQfejk3EvxvLai4JUeSWKmsTbpQMsI9mPjkJk61VT/5Nv+ib qQ== 
-Received: from ppma04dal.us.ibm.com (7a.29.35a9.ip4.static.sl-reverse.com [169.53.41.122])
-        by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3hu4kf9t3x-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 08 Aug 2022 15:43:52 +0000
-Received: from pps.filterd (ppma04dal.us.ibm.com [127.0.0.1])
-        by ppma04dal.us.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 278FZqlK014644;
-        Mon, 8 Aug 2022 15:43:51 GMT
-Received: from b03cxnp07028.gho.boulder.ibm.com (b03cxnp07028.gho.boulder.ibm.com [9.17.130.15])
-        by ppma04dal.us.ibm.com with ESMTP id 3hsfx98rgk-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 08 Aug 2022 15:43:51 +0000
-Received: from b03ledav004.gho.boulder.ibm.com (b03ledav004.gho.boulder.ibm.com [9.17.130.235])
-        by b03cxnp07028.gho.boulder.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 278FhoqD15663370
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 8 Aug 2022 15:43:50 GMT
-Received: from b03ledav004.gho.boulder.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 5CDD278063;
-        Mon,  8 Aug 2022 15:43:50 +0000 (GMT)
-Received: from b03ledav004.gho.boulder.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id DD42078060;
-        Mon,  8 Aug 2022 15:43:48 +0000 (GMT)
-Received: from rhel-laptop.ibm.com.com (unknown [9.160.34.213])
-        by b03ledav004.gho.boulder.ibm.com (Postfix) with ESMTP;
-        Mon,  8 Aug 2022 15:43:48 +0000 (GMT)
-From:   gjoyce@linux.vnet.ibm.com
-To:     linux-block@vger.kernel.org
-Cc:     linuxppc-dev@lists.ozlabs.org, jonathan.derrick@linux.dev,
-        brking@linux.vnet.ibm.com, msuchanek@suse.de, mpe@ellerman.id.au,
-        nayna@linux.ibm.com, axboe@kernel.dk, akpm@linux-foundation.org,
-        gjoyce@linux.vnet.ibm.com, linux-efi@vger.kernel.org,
-        keyrings@vger.kernel.org
-Subject: [PATCH v3a 1/2] lib: generic accessor functions for arch keystore
-Date:   Mon,  8 Aug 2022 10:43:44 -0500
-Message-Id: <20220808154345.11240-2-gjoyce@linux.vnet.ibm.com>
-X-Mailer: git-send-email 2.27.0
-In-Reply-To: <20220808154345.11240-1-gjoyce@linux.vnet.ibm.com>
-References: <20220808154345.11240-1-gjoyce@linux.vnet.ibm.com>
+        with ESMTP id S235696AbiHHPzc (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 8 Aug 2022 11:55:32 -0400
+Received: from mga09.intel.com (mga09.intel.com [134.134.136.24])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3AD8EA450;
+        Mon,  8 Aug 2022 08:55:31 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1659974131; x=1691510131;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=adBjDflubgueY7hGEhT8HFxQtuN3PdKVUrGiUqSnREU=;
+  b=QNl8boFMSdd13fHRMSLuu6+NrsXbgOEBFB63vn1QA34ztvfht9YrpV4j
+   RNht1lLlATlrr9mudTlGBhSDGParDryEqrFWshfi7VyNXdHWX/iPLYr4D
+   lGwlcgJn1MXEiEubNmtsiQX6mckyrxo6bQ2nzOGm5VPfMV+R1XiOKsKYJ
+   pzQg9c0RP55Stryj7BZHi+DyY0WZhHrEa3nNNvFVwZ8uaNizAeWsRZ6/h
+   jOIb2VTBsOTy40JiD0Kr6uenlovaJQYmWRWf1xRacDqpo8Wd0pcmQmPfb
+   eH9WL0zenRFMT/KBGYXZQPaepgx5lkssOUmlwxyoSycMNiHfDTPWer7Oo
+   g==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10433"; a="291406259"
+X-IronPort-AV: E=Sophos;i="5.93,222,1654585200"; 
+   d="scan'208";a="291406259"
+Received: from orsmga002.jf.intel.com ([10.7.209.21])
+  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Aug 2022 08:55:08 -0700
+X-IronPort-AV: E=Sophos;i="5.93,222,1654585200"; 
+   d="scan'208";a="604416918"
+Received: from sankarka-mobl1.amr.corp.intel.com (HELO [10.212.251.15]) ([10.212.251.15])
+  by orsmga002-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Aug 2022 08:55:08 -0700
+Message-ID: <4992c5b3-b9a9-b4ff-b09c-1383faf1ea6f@intel.com>
+Date:   Mon, 8 Aug 2022 08:55:09 -0700
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-TM-AS-GCONF: 00
-X-Proofpoint-ORIG-GUID: 3jKGgdTabMg7G_nunuX-UgB3NGt8eIGU
-X-Proofpoint-GUID: 3jKGgdTabMg7G_nunuX-UgB3NGt8eIGU
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.883,Hydra:6.0.517,FMLib:17.11.122.1
- definitions=2022-08-08_10,2022-08-08_01,2022-06-22_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 malwarescore=0
- spamscore=0 suspectscore=0 clxscore=1015 bulkscore=0 mlxlogscore=999
- impostorscore=0 priorityscore=1501 adultscore=0 phishscore=0
- lowpriorityscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2206140000 definitions=main-2208080075
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.11.0
+Subject: Re: [PATCHv7 02/14] mm: Add support for unaccepted memory
+Content-Language: en-US
+To:     Vlastimil Babka <vbabka@suse.cz>,
+        David Hildenbrand <david@redhat.com>,
+        "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
+        Borislav Petkov <bp@alien8.de>,
+        Andy Lutomirski <luto@kernel.org>,
+        Sean Christopherson <seanjc@google.com>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Joerg Roedel <jroedel@suse.de>,
+        Ard Biesheuvel <ardb@kernel.org>
+Cc:     Andi Kleen <ak@linux.intel.com>,
+        Kuppuswamy Sathyanarayanan 
+        <sathyanarayanan.kuppuswamy@linux.intel.com>,
+        David Rientjes <rientjes@google.com>,
+        Tom Lendacky <thomas.lendacky@amd.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Paolo Bonzini <pbonzini@redhat.com>,
+        Ingo Molnar <mingo@redhat.com>,
+        Dario Faggioli <dfaggioli@suse.com>,
+        Mike Rapoport <rppt@kernel.org>, marcelo.cerri@canonical.com,
+        tim.gardner@canonical.com, khalid.elmously@canonical.com,
+        philip.cox@canonical.com, x86@kernel.org, linux-mm@kvack.org,
+        linux-coco@lists.linux.dev, linux-efi@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Mike Rapoport <rppt@linux.ibm.com>,
+        Mel Gorman <mgorman@techsingularity.net>
+References: <20220614120231.48165-1-kirill.shutemov@linux.intel.com>
+ <20220614120231.48165-3-kirill.shutemov@linux.intel.com>
+ <8cf143e7-2b62-1a1e-de84-e3dcc6c027a4@suse.cz>
+ <cb9d3310-3bc0-8ecf-5e71-becce980235f@redhat.com>
+ <f936b024-43e1-5390-e33f-ad7d355a2802@suse.cz>
+ <eb83fcd9-f331-4d54-1ab9-78db106ee66d@intel.com>
+ <cecbaa10-6d0a-8925-004b-ff53d9f56e83@suse.cz>
+From:   Dave Hansen <dave.hansen@intel.com>
+In-Reply-To: <cecbaa10-6d0a-8925-004b-ff53d9f56e83@suse.cz>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Greg Joyce <gjoyce@linux.vnet.ibm.com>
+On 8/5/22 11:17, Vlastimil Babka wrote:
+>> 3. Pull the page off the 2M/4M lists, drop the zone lock, accept it,
+>>    then put it back.
+> Worth trying, IMHO. Perhaps easier to manage if the lists are distinct from
+> the normal ones, as I suggested.
 
-Generic kernel subsystems may rely on platform specific persistent
-KeyStore to store objects containing sensitive key material. In such case,
-they need to access architecture specific functions to perform read/write
-operations on these variables.
+I was playing with another series recently where I did this, momentarily
+taking pages off some of the high-order lists and dropping the zone lock.
 
-Define the generic variable read/write prototypes to be implemented by
-architecture specific versions. The default(weak) implementations of
-these prototypes return -EOPNOTSUPP unless overridden by architecture
-versions.
+Kirill, if you go looking at this, just make sure that you don't let
+this happen to too much memory at once.  You might end up yanking memory
+out of the allocator that's not reflected in NR_FREE_PAGES.
 
-Signed-off-by: Greg Joyce <gjoyce@linux.vnet.ibm.com>
----
- include/linux/arch_vars.h | 23 +++++++++++++++++++++++
- lib/Makefile              |  2 +-
- lib/arch_vars.c           | 25 +++++++++++++++++++++++++
- 3 files changed, 49 insertions(+), 1 deletion(-)
- create mode 100644 include/linux/arch_vars.h
- create mode 100644 lib/arch_vars.c
+You might, for instance want to make sure that only a small number of
+threads can have pulled memory off the free lists at once.  Something
+*logically* like this:
 
-diff --git a/include/linux/arch_vars.h b/include/linux/arch_vars.h
-new file mode 100644
-index 000000000000..9c280ff9432e
---- /dev/null
-+++ b/include/linux/arch_vars.h
-@@ -0,0 +1,23 @@
-+/* SPDX-License-Identifier: GPL-2.0 */
-+/*
-+ * Platform variable opearations.
-+ *
-+ * Copyright (C) 2022 IBM Corporation
-+ *
-+ * These are the accessor functions (read/write) for architecture specific
-+ * variables. Specific architectures can provide overrides.
-+ *
-+ */
-+
-+#include <linux/kernel.h>
-+
-+enum arch_variable_type {
-+	ARCH_VAR_OPAL_KEY      = 0,     /* SED Opal Authentication Key */
-+	ARCH_VAR_OTHER         = 1,     /* Other type of variable */
-+	ARCH_VAR_MAX           = 1,     /* Maximum type value */
-+};
-+
-+int arch_read_variable(enum arch_variable_type type, char *varname,
-+		       void *varbuf, u_int *varlen);
-+int arch_write_variable(enum arch_variable_type type, char *varname,
-+			void *varbuf, u_int varlen);
-diff --git a/lib/Makefile b/lib/Makefile
-index f99bf61f8bbc..b90c4cb0dbbb 100644
---- a/lib/Makefile
-+++ b/lib/Makefile
-@@ -48,7 +48,7 @@ obj-y += bcd.o sort.o parser.o debug_locks.o random32.o \
- 	 bsearch.o find_bit.o llist.o memweight.o kfifo.o \
- 	 percpu-refcount.o rhashtable.o \
- 	 once.o refcount.o usercopy.o errseq.o bucket_locks.o \
--	 generic-radix-tree.o
-+	 generic-radix-tree.o arch_vars.o
- obj-$(CONFIG_STRING_SELFTEST) += test_string.o
- obj-y += string_helpers.o
- obj-$(CONFIG_TEST_STRING_HELPERS) += test-string_helpers.o
-diff --git a/lib/arch_vars.c b/lib/arch_vars.c
-new file mode 100644
-index 000000000000..e6f16d7d09c1
---- /dev/null
-+++ b/lib/arch_vars.c
-@@ -0,0 +1,25 @@
-+// SPDX-License-Identifier: GPL-2.0-only
-+/*
-+ * Platform variable operations.
-+ *
-+ * Copyright (C) 2022 IBM Corporation
-+ *
-+ * These are the accessor functions (read/write) for architecture specific
-+ * variables. Specific architectures can provide overrides.
-+ *
-+ */
-+
-+#include <linux/kernel.h>
-+#include <linux/arch_vars.h>
-+
-+int __weak arch_read_variable(enum arch_variable_type type, char *varname,
-+			      void *varbuf, u_int *varlen)
-+{
-+	return -EOPNOTSUPP;
-+}
-+
-+int __weak arch_write_variable(enum arch_variable_type type, char *varname,
-+			       void *varbuf, u_int varlen)
-+{
-+	return -EOPNOTSUPP;
-+}
--- 
-2.27.0
+// Limit to two threads at once:
+atomic_t nr_accepting_threads = ATOMIC_INIT(2);
 
+	page = del_page_from_free_list();
+	if (!PageAccepted(page)) {
+		if (atomic_dec_and_test(&nr_accepting_threads)) {
+			// already at the thread limit
+			add_page_from_free_list(page, ...);
+			spin_unlock_irq(&zone->lock);
+			// wait for a slot...
+			spin_lock_irq(&zone->lock);
+			goto retry;
+		} else {
+			spin_unlock_irq(&zone->lock);
+			accept_page(page);
+			spin_lock_irq(&zone->lock);
+			add_page_from_free_list(page, ...);
+			// do merging if it was a 2M page
+		}
+	}
+
+It's a little nasty because the whole thing is not a sleepable context.
+ I also know that the merging code needs some refactoring if you want to
+do merging with 2M pages here.  It might all get easier if you move all
+the page allocator stuff to only work at the 4M granularity.
+
+In any case, I'm not trying to dissuade anyone from listening to the
+other reviewer feedback.  Just trying to save you a few cycles on a
+similar problem I was looking at recently.
