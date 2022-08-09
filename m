@@ -2,66 +2,50 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A069BC19F2D
-	for <linux-efi@archiver.kernel.org>; Tue,  9 Aug 2022 11:36:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 65D8AC3F6B0
+	for <linux-efi@archiver.kernel.org>; Tue,  9 Aug 2022 11:42:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242641AbiHILgr (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 9 Aug 2022 07:36:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58820 "EHLO
+        id S231235AbiHILmx (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 9 Aug 2022 07:42:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34186 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243032AbiHILgQ (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 9 Aug 2022 07:36:16 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2FBF4248ED;
-        Tue,  9 Aug 2022 04:36:15 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 5347761052;
-        Tue,  9 Aug 2022 11:36:14 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B8405C4314F;
-        Tue,  9 Aug 2022 11:36:13 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1660044973;
-        bh=lYmz63lvuOJC10qqhICk6CNKKBSIvT6UEu1+sVeFf/k=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=D8QCs4Zj0JxgBqIzIxwpwwjb22fBVf+C+1AoftP/A8nRz1cQfyn8lFxwji36lncyt
-         JuCkgqsB5cTNUm2lOkZ+6oRB4NTxNI/Re7wpgbTa6hhhqd8wysFp6PM0UUeYJxsEpY
-         c8IWAF8y4FtI9zkEheIKNd37sRY80/IHnVK1T1yXtcYcEu+mfojpviDU70qOZZj3dz
-         t9i1I5caWSJquFPHA/V70vbnzVf5pWmWvxBX4pQzhS1rULsACI6hhhqCgCC/3BsIIV
-         aHDfelJCT2uCk2bj+lnnhqKWF2X+E9f0apbY2qhogUdxg1aKLHFQlocQ3L1+02XJZY
-         eW85zPGCMg86Q==
-Received: by mail-wm1-f54.google.com with SMTP id c187-20020a1c35c4000000b003a30d88fe8eso8806874wma.2;
-        Tue, 09 Aug 2022 04:36:13 -0700 (PDT)
-X-Gm-Message-State: ACgBeo1slgIy4kXlKtQHWxNjhClF7ArtICivn61lWoTIqsw/1Sc/HHdY
-        i7PuUdRs6G5ciQMF/jTnwnxWmugy4B55V69z534=
-X-Google-Smtp-Source: AA6agR5YA4d5EiVi8IsQGMnr87dAaHnFiJPv49l2QVm+YXZcWXaPa07a+M4tje74nlRqsJgaMdFnW1wJLZwN8ljidRQ=
-X-Received: by 2002:a05:600c:509:b0:3a5:2c2:fb40 with SMTP id
- i9-20020a05600c050900b003a502c2fb40mr18927723wmc.163.1660044971866; Tue, 09
- Aug 2022 04:36:11 -0700 (PDT)
-MIME-Version: 1.0
-References: <CAAH4kHaB2tL+sAn0NAciu5DQeX5hpNkDees=n=f83S=Ph9Y6tw@mail.gmail.com>
- <YtcCWfCQuEsVhH6W@zn.tnic> <CAMj1kXEKtcieycyyFMyuLKJK61FgaDwtLieC0N47W1Sa5LaBsA@mail.gmail.com>
- <YtcgxxMyFTReuuRw@zn.tnic> <bb7479df-7871-9861-600d-c2fed783b659@intel.com>
- <YtcnQbiRgZPtR+rQ@zn.tnic> <22d54786-bc12-ecc5-2b37-cbaa56090aa8@intel.com>
- <CAA03e5FMEyswDhoXRJ5U_n9RG4QM524aQYpF4473ydnAVJr1PA@mail.gmail.com>
- <ffb4ae72-7fd4-d2a0-df10-3969cf8ca07f@intel.com> <CAMj1kXHEc=vEt=CtfdiPEsUe2i8QogAi+jvtY6h1awo7GZ-nRg@mail.gmail.com>
- <20220809111436.kudwg2nprnnsfvuh@box.shutemov.name>
-In-Reply-To: <20220809111436.kudwg2nprnnsfvuh@box.shutemov.name>
-From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Tue, 9 Aug 2022 13:36:00 +0200
-X-Gmail-Original-Message-ID: <CAMj1kXE67H_cgYbufUxQ7HXg929dFopWH+cKX5ijAdePP8Zt-g@mail.gmail.com>
-Message-ID: <CAMj1kXE67H_cgYbufUxQ7HXg929dFopWH+cKX5ijAdePP8Zt-g@mail.gmail.com>
-Subject: Re: [PATCHv7 00/14] mm, x86/cc: Implement support for unaccepted memory
-To:     "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-Cc:     Dave Hansen <dave.hansen@intel.com>, Marc Orr <marcorr@google.com>,
-        Borislav Petkov <bp@alien8.de>,
-        Dionna Amalie Glaze <dionnaglaze@google.com>,
-        Peter Gonda <pgonda@google.com>,
-        Andy Lutomirski <luto@kernel.org>,
+        with ESMTP id S230508AbiHILmw (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 9 Aug 2022 07:42:52 -0400
+Received: from mga01.intel.com (mga01.intel.com [192.55.52.88])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C879B22B3F;
+        Tue,  9 Aug 2022 04:42:51 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1660045371; x=1691581371;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=k+q8/MfB6T1wOsTh6u+efttkxB0NTXmq/yeTF+WM02Y=;
+  b=BS8gHBrr8mSU/7/oaXgZFwM0jZ2QfqPh8VfkF7+2HX3k/hHTG0eUi14k
+   VSw9K+gK9JzK5jKOEGcQ8c+7wYpyqvOKWnYdeM/QHqo8ZyWijerft4+HB
+   BFVgxQhaZ+kLgM8gThn2i9yZuLBVJWM9NTc45bDsZZYPCwDglXHCOdXJk
+   XiSWgObzf3ozAcEE+uc/c9A4+279DjY41uw515jXqGwSflR8pSUtHq0vs
+   RtWN8HblbDebpEorFJq8e9fcAY05EwZTcpw2MoCHg34jKKGqKD8x5IxIk
+   3PJjC43I1aITMP114VfOVDe2zlnmjrcKCb6bpa8NLQl6nMfJ8ERbzdzqJ
+   g==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10433"; a="316743304"
+X-IronPort-AV: E=Sophos;i="5.93,224,1654585200"; 
+   d="scan'208";a="316743304"
+Received: from fmsmga002.fm.intel.com ([10.253.24.26])
+  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Aug 2022 04:42:51 -0700
+X-IronPort-AV: E=Sophos;i="5.93,224,1654585200"; 
+   d="scan'208";a="707796787"
+Received: from labukara-mobl.ger.corp.intel.com (HELO box.shutemov.name) ([10.251.214.212])
+  by fmsmga002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Aug 2022 04:42:45 -0700
+Received: by box.shutemov.name (Postfix, from userid 1000)
+        id 867B1103886; Tue,  9 Aug 2022 14:45:44 +0300 (+03)
+Date:   Tue, 9 Aug 2022 14:45:44 +0300
+From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
+To:     Borislav Petkov <bp@alien8.de>
+Cc:     Andy Lutomirski <luto@kernel.org>,
         Sean Christopherson <seanjc@google.com>,
         Andrew Morton <akpm@linux-foundation.org>,
         Joerg Roedel <jroedel@suse.de>,
+        Ard Biesheuvel <ardb@kernel.org>,
         Andi Kleen <ak@linux.intel.com>,
         Kuppuswamy Sathyanarayanan 
         <sathyanarayanan.kuppuswamy@linux.intel.com>,
@@ -74,50 +58,106 @@ Cc:     Dave Hansen <dave.hansen@intel.com>, Marc Orr <marcorr@google.com>,
         Ingo Molnar <mingo@redhat.com>,
         Varad Gautam <varad.gautam@suse.com>,
         Dario Faggioli <dfaggioli@suse.com>,
+        Dave Hansen <dave.hansen@intel.com>,
         Mike Rapoport <rppt@kernel.org>,
         David Hildenbrand <david@redhat.com>,
-        Marcelo Cerri <marcelo.cerri@canonical.com>,
-        tim.gardner@canonical.com,
-        Khalid ElMously <khalid.elmously@canonical.com>,
-        philip.cox@canonical.com,
-        "the arch/x86 maintainers" <x86@kernel.org>,
-        Linux Memory Management List <linux-mm@kvack.org>,
-        linux-coco@lists.linux.dev, linux-efi <linux-efi@vger.kernel.org>,
-        LKML <linux-kernel@vger.kernel.org>,
-        "Yao, Jiewen" <jiewen.yao@intel.com>
-Content-Type: text/plain; charset="UTF-8"
+        marcelo.cerri@canonical.com, tim.gardner@canonical.com,
+        khalid.elmously@canonical.com, philip.cox@canonical.com,
+        x86@kernel.org, linux-mm@kvack.org, linux-coco@lists.linux.dev,
+        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCHv7 14/14] x86/tdx: Add unaccepted memory support
+Message-ID: <20220809114544.q4f7cetqgv2gj5tx@box.shutemov.name>
+References: <20220614120231.48165-1-kirill.shutemov@linux.intel.com>
+ <20220614120231.48165-15-kirill.shutemov@linux.intel.com>
+ <Yt//ZMrxtTwtKBqu@zn.tnic>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Yt//ZMrxtTwtKBqu@zn.tnic>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, 9 Aug 2022 at 13:11, Kirill A. Shutemov
-<kirill.shutemov@linux.intel.com> wrote:
->
-> On Sat, Jul 23, 2022 at 01:14:07PM +0200, Ard Biesheuvel wrote:
-> > On Thu, 21 Jul 2022 at 19:13, Dave Hansen <dave.hansen@intel.com> wrote:
-> > >
-> > > On 7/19/22 17:26, Marc Orr wrote:
-> > > > - Dave's suggestion to "2. Boot some intermediate thing like a
-> > > > bootloader that does acceptance ..." is pretty clever! So if upstream
-> > > > thinks this FW-kernel negotiation is not a good direction, maybe we
-> > > > (Google) can pursue this idea to avoid introducing yet another tag on
-> > > > our images.
-> > >
-> > > I'm obviously speaking only for myself here and not for "upstream" as a
-> > > whole, but I clearly don't like the FW/kernel negotiation thing.  It's a
-> > > permanent pain in our necks to solve a very temporary problem.
-> >
-> > EFI is basically our existing embodiment of this fw/kernel negotiation
-> > thing, and iff we need it, I have no objection to using it for this
-> > purpose, i.e., to allow the firmware to infer whether or not it should
-> > accept all available memory on behalf of the OS before exiting boot
-> > services. But if we don't need this, even better.
->
-> FW/kernel negotiation does not work if there's a boot loader in the middle
-> that does ExitBootServices(). By the time kernel can announce if it
-> supports unaccepted memory there's nobody to announce to.
->
+On Tue, Jul 26, 2022 at 04:51:16PM +0200, Borislav Petkov wrote:
+> On Tue, Jun 14, 2022 at 03:02:31PM +0300, Kirill A. Shutemov wrote:
+> > +static bool is_tdx_guest(void)
+> > +{
+> > +	static bool once;
+> > +	static bool is_tdx;
+> > +
+> > +	if (!IS_ENABLED(CONFIG_INTEL_TDX_GUEST))
+> > +		return false;
+> > +
+> > +	if (!once) {
+> > +		u32 eax, sig[3];
+> > +
+> > +		cpuid_count(TDX_CPUID_LEAF_ID, 0, &eax,
+> > +			    &sig[0], &sig[2],  &sig[1]);
+> > +		is_tdx = !memcmp(TDX_IDENT, sig, sizeof(sig));
+> > +		once = true;
+> > +	}
+> > +
+> > +	return is_tdx;
+> > +}
+> 
+> early_tdx_detect() already calls this CPUID function. It assigns
+> function pointers too.
+> 
+> So why can't you assign an accept_memory() function pointer there and
+> get rid of this sprinkled if (tdx) everywhere?
 
-Why would you want to support such bootloaders for TDX anyway? TDX
-heavily relies on measured boot abstractions and other things that are
-heavily tied to firmware.
+This code called from EFI stub which runs before decompressor code and
+therefore before early_tdx_detect().
+
+> > diff --git a/arch/x86/boot/compressed/tdx.c b/arch/x86/boot/compressed/tdx.c
+> > index 918a7606f53c..8518a75e5dd5 100644
+> > --- a/arch/x86/boot/compressed/tdx.c
+> > +++ b/arch/x86/boot/compressed/tdx.c
+> > @@ -3,12 +3,15 @@
+> >  #include "../cpuflags.h"
+> >  #include "../string.h"
+> >  #include "../io.h"
+> > +#include "align.h"
+> >  #include "error.h"
+> > +#include "pgtable_types.h"
+> >  
+> >  #include <vdso/limits.h>
+> >  #include <uapi/asm/vmx.h>
+> >  
+> >  #include <asm/shared/tdx.h>
+> > +#include <asm/page_types.h>
+> >  
+> >  /* Called from __tdx_hypercall() for unrecoverable failure */
+> >  void __tdx_hypercall_failed(void)
+> > @@ -75,3 +78,78 @@ void early_tdx_detect(void)
+> >  	pio_ops.f_outb = tdx_outb;
+> >  	pio_ops.f_outw = tdx_outw;
+> >  }
+> > +
+> > +static unsigned long try_accept_one(phys_addr_t start, unsigned long len,
+> > +				    enum pg_level level)
+> 
+> That's pretty much a copy of the same function in arch/x86/coco/tdx/tdx.c.
+> 
+> Yeah, you need a tdx-shared.c which you include in both places just like
+> it is done with sev-shared.c
+
+Okay, will look into this.
+
+> > +		accept_size = try_accept_one(start, len, PG_LEVEL_1G);
+> > +		if (!accept_size)
+> > +			accept_size = try_accept_one(start, len, PG_LEVEL_2M);
+> > +		if (!accept_size)
+> > +			accept_size = try_accept_one(start, len, PG_LEVEL_4K);
+> > +		if (!accept_size)
+> > +			error("Accepting memory failed\n");
+> > +		start += accept_size;
+> 
+> This series of calls to try_accept_one() appear in at least three
+> places. Please carve them out into a separate function can put it in
+> tdx-shared.c.
+
+Okay.
+
+-- 
+  Kiryl Shutsemau / Kirill A. Shutemov
