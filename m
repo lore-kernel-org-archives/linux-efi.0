@@ -2,145 +2,216 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CA1ACC25B08
-	for <linux-efi@archiver.kernel.org>; Wed, 17 Aug 2022 10:17:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 05674C32772
+	for <linux-efi@archiver.kernel.org>; Wed, 17 Aug 2022 11:04:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230480AbiHQKRN (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 17 Aug 2022 06:17:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51170 "EHLO
+        id S238909AbiHQLEI (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 17 Aug 2022 07:04:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43384 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229752AbiHQKRM (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 17 Aug 2022 06:17:12 -0400
-Received: from loongson.cn (mail.loongson.cn [114.242.206.163])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 2083658DCE
-        for <linux-efi@vger.kernel.org>; Wed, 17 Aug 2022 03:17:10 -0700 (PDT)
-Received: from [10.20.42.170] (unknown [10.20.42.170])
-        by localhost.localdomain (Coremail) with SMTP id AQAAf8BxnmsawPxi+zUDAA--.3662S3;
-        Wed, 17 Aug 2022 18:16:58 +0800 (CST)
-Message-ID: <62f83c65-7e8c-cbe4-0ec1-a8dc8ce0d6b6@loongson.cn>
-Date:   Wed, 17 Aug 2022 18:16:58 +0800
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.9.0
-Subject: Re: EFI zboot on LoongArch [was: LoongArch: Add efistub booting
- support]
-Content-Language: en-US
-To:     Huacai Chen <chenhuacai@kernel.org>,
-        Ard Biesheuvel <ardb@kernel.org>
-Cc:     Xi Ruoyao <xry111@xry111.site>,
+        with ESMTP id S239138AbiHQLED (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 17 Aug 2022 07:04:03 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A8E4352DD7
+        for <linux-efi@vger.kernel.org>; Wed, 17 Aug 2022 04:04:00 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 446A8B81CD3
+        for <linux-efi@vger.kernel.org>; Wed, 17 Aug 2022 11:03:59 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 49170C433B5;
+        Wed, 17 Aug 2022 11:03:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1660734238;
+        bh=3PrJjnOGtOD0UKlkOGdoGZPYOPQoP/mzktlyZiou0eg=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=cFSEPM9iCVJs2nZ05M/iZHgZR3Mwkt6rtFtFMpXry1jnFEli+Yc3h/uhd4YhbJG67
+         vc9nOx4IUAfndzWet4MLG6V5VCcGI5itwmHMt/bTByxNAwTfFjQlyiU0KqnhQ9nmq2
+         KMGt6+b8a/T0U5HO+NlHalhNFZrwh1OY1pIsa/X6q6uUYxC/jR/WtxmN5zfkXaEMaT
+         8KhMXasuGCFfbH2nZxQH/php3izftAW8tHmC06NgUcQmI5g8cITuVhxE+fMy+lCgOq
+         cH4XhGpdw4zfWKm+DMweCSBcWs+5vTYcqT00rL+BO8UBZ9M7aTJgVcGsQRPhS76Vhf
+         PVV5HnVbgRfng==
+From:   Ard Biesheuvel <ardb@kernel.org>
+To:     linux-efi@vger.kernel.org
+Cc:     Ard Biesheuvel <ardb@kernel.org>,
+        "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
+        Matthew Garrett <mjg59@srcf.ucam.org>,
+        Peter Jones <pjones@redhat.com>,
+        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+        Heinrich Schuchardt <heinrich.schuchardt@canonical.com>,
+        AKASHI Takahiro <takahiro.akashi@linaro.org>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Atish Patra <atishp@atishpatra.org>,
+        Arnd Bergmann <arnd@arndb.de>,
         Huacai Chen <chenhuacai@loongson.cn>,
-        loongarch@lists.linux.dev, Xuefeng Li <lixuefeng@loongson.cn>,
-        Xuerui Wang <kernel@xen0n.name>,
-        Jiaxun Yang <jiaxun.yang@flygoat.com>,
-        linux-efi <linux-efi@vger.kernel.org>
-References: <20220617145754.582056-1-chenhuacai@loongson.cn>
- <CAMj1kXERN209b7dbVs_hy4BeUwrmk2p9_vF+Wq2W8PUeHOQTkg@mail.gmail.com>
- <CAAhV-H60CJDRY4c+Eu+L=rNgHsXQqx=HK9nNSqg69WVV+Bm3SQ@mail.gmail.com>
- <CAMj1kXE1MijqonkPeH+Ydg8ti4_4YFXxBKK6Wztb=HtSY5EAgQ@mail.gmail.com>
- <CAAhV-H503hgyUZND2MmZ2h3qVb3SRt79HcQy7HrFmfGBci-QMA@mail.gmail.com>
- <CAMj1kXEzzAXYP3nXo8-Ny+iwuDorrO-JqoKjg3R+4kmhV_v_KQ@mail.gmail.com>
- <CAAhV-H60mSKx3k1CwBCdubswosgqe+NuVaMtKA=hpjBhq5w5wA@mail.gmail.com>
- <CAMj1kXFi0o3dOmpW9qarJPH2L2EWKCPKE--3z=jsGjaYh1JrTQ@mail.gmail.com>
- <CAAhV-H5CXeG9mNxqJLouvSGLqno4DSwbpPOO5xG2D6ptF2dSTQ@mail.gmail.com>
- <CAMj1kXEuQMy4+uMxg3A0W=F=PnRHUNLfrN=BPpR3pi_kbWaVpQ@mail.gmail.com>
- <137f829f227602593327461b6349abeaf4bb1f26.camel@xry111.site>
- <CAMj1kXF=kosmBuF7fd_+gkcxxF0MnB8OdvJ+k3k0uL+Oh3haXg@mail.gmail.com>
- <CAAhV-H6e9WH5GxYiK9CFnUnJC=NzG=bsmNwuR7Waiz7LadV5xg@mail.gmail.com>
-From:   maobibo <maobibo@loongson.cn>
-In-Reply-To: <CAAhV-H6e9WH5GxYiK9CFnUnJC=NzG=bsmNwuR7Waiz7LadV5xg@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
+        Lennart Poettering <lennart@poettering.net>,
+        Jeremy Linton <jeremy.linton@arm.com>
+Subject: [PATCH v3 1/6] efi/libstub: use EFI provided memcpy/memset routines
+Date:   Wed, 17 Aug 2022 13:03:40 +0200
+Message-Id: <20220817110345.1771267-2-ardb@kernel.org>
+X-Mailer: git-send-email 2.35.1
+In-Reply-To: <20220817110345.1771267-1-ardb@kernel.org>
+References: <20220817110345.1771267-1-ardb@kernel.org>
+MIME-Version: 1.0
+X-Developer-Signature: v=1; a=openpgp-sha256; l=5962; i=ardb@kernel.org; h=from:subject; bh=3PrJjnOGtOD0UKlkOGdoGZPYOPQoP/mzktlyZiou0eg=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBi/MsEVN9/aOFe4exvn4xjsTaddu1D5BPP/D+AXZzo JgLh5A2JAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYvzLBAAKCRDDTyI5ktmPJMHcC/ 486HzEeFpQ9oSYux6evpO4iM7RTPjdp/8SPrXU9uDcRFWjdav9zAOrrQhHwNwVV2w+FWSKxZIQl/0f Pw8nDxhXfkph8FniAqPJufMRwPgLT//mBOUtSau14B1YAdig1zfr/wCkX/cFEuioMKpYMSF1OoFMFg y1MkNz7kkT2kzUvObcvgH2fMU7q/jj/NFmMgx72MAh58ufGHL9RMOBKKXpA3Zqge/wMeke9Jx03fSX 9TQRc7GOyCW94Sr8/KvPcQlEbX7a/Sf3VG3jamHrfVIOecMkOEpY01Lu3y0Qs6oMmE4D1z6Hm+1kWX o+KyTPOsbxZ91WDxYkglRqy0pxTsiwY9bBWrAvZ/g3dBH8UIGglEAR7p5xpm6VTBpXgi3qbOrGPZGU QWNPAwERVQKCQAO39zJZyjOMHshzzpiUwh5ef1v1A6vYZbDxfXpDI+I4tHMJWhEvB7pPZIBOhfhxIf dgeuN2gKDMC6b7fp5rUSuCpDdvojiCj9LALGW6/pq9Oyw=
+X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID: AQAAf8BxnmsawPxi+zUDAA--.3662S3
-X-Coremail-Antispam: 1UD129KBjvJXoW7WrWrZFyDWFW5WF17WF4Uurg_yoW8AFW3pa
-        yxAFyqyFs5tF48tr1vvw1DX342ywsFyryvqw15XryIkFn0qr1UJr1UtFykWrZrJFWrJwn0
-        va4Sqas7Cr4qv3DanT9S1TB71UUUUUUqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-        9KBjDU0xBIdaVrnRJUUUv0b7Iv0xC_KF4lb4IE77IF4wAFF20E14v26r4j6ryUM7CY07I2
-        0VC2zVCF04k26cxKx2IYs7xG6rWj6s0DM7CIcVAFz4kK6r1j6r18M28lY4IEw2IIxxk0rw
-        A2F7IY1VAKz4vEj48ve4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_Xr0_Ar1l84ACjcxK6xII
-        jxv20xvEc7CjxVAFwI0_Cr0_Gr1UM28EF7xvwVC2z280aVAFwI0_Cr1j6rxdM28EF7xvwV
-        C2z280aVCY1x0267AKxVW0oVCq3wAS0I0E0xvYzxvE52x082IY62kv0487Mc02F40EFcxC
-        0VAKzVAqx4xG6I80ewAv7VC0I7IYx2IY67AKxVWUJVWUGwAv7VC2z280aVAFwI0_Jr0_Gr
-        1lOx8S6xCaFVCjc4AY6r1j6r4UM4x0Y48IcVAKI48JMxk0xIA0c2IEe2xFo4CEbIxvr21l
-        c2xSY4AK6svPMxAIw28IcxkI7VAKI48JMxC20s026xCaFVCjc4AY6r1j6r4UMI8I3I0E5I
-        8CrVAFwI0_Jr0_Jr4lx2IqxVCjr7xvwVAFwI0_JrI_JrWlx4CE17CEb7AF67AKxVWUtVW8
-        ZwCIc40Y0x0EwIxGrwCI42IY6xIIjxv20xvE14v26r1j6r1xMIIF0xvE2Ix0cI8IcVCY1x
-        0267AKxVWUJVW8JwCI42IY6xAIw20EY4v20xvaj40_Jr0_JF4lIxAIcVC2z280aVAFwI0_
-        Jr0_Gr1lIxAIcVC2z280aVCY1x0267AKxVW8JVW8JrUvcSsGvfC2KfnxnUUI43ZEXa7IU8
-        IzuJUUUUU==
-X-CM-SenderInfo: xpdruxter6z05rqj20fqof0/
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
+The stub is used in different execution environments, but on arm64 and
+RISC-V, we still use the core kernel's implementation of memcpy and
+memset, as they are just a branch instruction away, and can generally be
+reused even from code such as the EFI stub that runs in a completely
+different address space.
 
+KAsan complicates this slightly, resulting in the need for some hacks to
+expose the uninstrumented, __ prefixed versions as the normal ones, as
+the latter are instrumented to include the KAsan checks, which only work
+in the core kernel.
 
-在 2022/8/17 17:09, Huacai Chen 写道:
-> Hi, Ard,
-> 
-> On Wed, Aug 17, 2022 at 4:36 PM Ard Biesheuvel <ardb@kernel.org> wrote:
->>
->> On Wed, 17 Aug 2022 at 09:59, Xi Ruoyao <xry111@xry111.site> wrote:
->>>
->>> On Wed, 2022-08-17 at 09:49 +0200, Ard Biesheuvel wrote:
->>>
->>>>>>>>
->>>> I am trying to port the generic EFI zboot support to LoongArch, but I
->>>> am running into a problem:
->>>>
->>>> The zboot EFI image consists of
->>>>
->>>> zImage.o, created with objcopy -O binary
->>>> zboot-header.o, created using the assembler
->>>> libstub.a, created as usual
->>>>
->>>> This results in errors such as
->>>> arch/loongarch/boot/zboot-header.o: can't link different ABI object.
->>>> failed to merge target specific data of file
->>>> arch/loongarch/boot/zboot-header.o
->>>>
->>>> which I think is caused by the fact that objcopy does not set the LP64
->>>> soft float flags on the ELF object it creates.
->>>>
->>>> Do you see any way around this limitation?
->>>
->>> Update to Binutils-2.39
->>> (https://sourceware.org/git/?p=binutils-gdb.git;a=commit;h=83c5f3a)
->>>
->>
->> Thanks, that worked. I can now build the LoongArch EFI stub and the
->> zboot decompressor.
->>
->> Unfortunately, while the normal EFI stub kernel boots ok in QEMU/edk2,
->> the zboot one crashes with
->>
->> CRMD   0xB0
->> PRMD   0x4
->> ECFG  0x800
->> ESTAT   0x40000
->> ERA    0x17B87719C
->> BADV    0x17C634000
->> BADI 0x381031A5
->> PC 0x00017B87719C
->>
->> or
->>
->> CRMD   0xB0
->> PRMD   0x4
->> ECFG  0x800
->> ESTAT   0x40000
->> ERA    0x17B138D10
->> BADV    0x17C3CC000
->> BADI 0x294000F7
->> PC 0x00017B138D10
+Unfortunately, #define'ing memcpy to __memcpy when building C code does
+not guarantee that no explicit memcpy() calls will be emitted. And with
+the upcoming zboot support, which consists of a separate binary which
+therefore needs its own implementation of memcpy/memset anyway, it's
+better to provide one explicitly instead of linking to the existing one.
 
-From the ESTAT 0x40000, it seems that it is writing unallocated
-memory in efi stage with address 0x17C3CC000 or 0x17C634000.
+Given that EFI exposes implementations of memmove() and memset() via the
+boot services table, let's wire those up in the appropriate way, and
+drop the references to the core kernel ones.
 
-regards
-bibo,mao
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+---
+ arch/arm64/kernel/image-vars.h            | 13 ---------
+ arch/riscv/kernel/image-vars.h            |  9 ------
+ drivers/firmware/efi/libstub/Makefile     |  3 +-
+ drivers/firmware/efi/libstub/efistub.h    |  4 +--
+ drivers/firmware/efi/libstub/intrinsics.c | 30 ++++++++++++++++++++
+ 5 files changed, 34 insertions(+), 25 deletions(-)
 
-> 
-> Bibo is a key developer of QEMU/EDK2, maybe he can give some help.
-> 
-> Huacai
+diff --git a/arch/arm64/kernel/image-vars.h b/arch/arm64/kernel/image-vars.h
+index 3285b9847871..6e94c728295b 100644
+--- a/arch/arm64/kernel/image-vars.h
++++ b/arch/arm64/kernel/image-vars.h
+@@ -23,9 +23,6 @@ PROVIDE(__efistub_primary_entry		= primary_entry);
+  */
+ PROVIDE(__efistub_memcmp		= __pi_memcmp);
+ PROVIDE(__efistub_memchr		= __pi_memchr);
+-PROVIDE(__efistub_memcpy		= __pi_memcpy);
+-PROVIDE(__efistub_memmove		= __pi_memmove);
+-PROVIDE(__efistub_memset		= __pi_memset);
+ PROVIDE(__efistub_strlen		= __pi_strlen);
+ PROVIDE(__efistub_strnlen		= __pi_strnlen);
+ PROVIDE(__efistub_strcmp		= __pi_strcmp);
+@@ -38,16 +35,6 @@ PROVIDE(__efistub__edata		= _edata);
+ PROVIDE(__efistub_screen_info		= screen_info);
+ PROVIDE(__efistub__ctype		= _ctype);
+ 
+-/*
+- * The __ prefixed memcpy/memset/memmove symbols are provided by KASAN, which
+- * instruments the conventional ones. Therefore, any references from the EFI
+- * stub or other position independent, low level C code should be redirected to
+- * the non-instrumented versions as well.
+- */
+-PROVIDE(__efistub___memcpy		= __pi_memcpy);
+-PROVIDE(__efistub___memmove		= __pi_memmove);
+-PROVIDE(__efistub___memset		= __pi_memset);
+-
+ PROVIDE(__pi___memcpy			= __pi_memcpy);
+ PROVIDE(__pi___memmove			= __pi_memmove);
+ PROVIDE(__pi___memset			= __pi_memset);
+diff --git a/arch/riscv/kernel/image-vars.h b/arch/riscv/kernel/image-vars.h
+index 71a76a623257..d6e5f739905e 100644
+--- a/arch/riscv/kernel/image-vars.h
++++ b/arch/riscv/kernel/image-vars.h
+@@ -25,21 +25,12 @@
+  */
+ __efistub_memcmp		= memcmp;
+ __efistub_memchr		= memchr;
+-__efistub_memcpy		= memcpy;
+-__efistub_memmove		= memmove;
+-__efistub_memset		= memset;
+ __efistub_strlen		= strlen;
+ __efistub_strnlen		= strnlen;
+ __efistub_strcmp		= strcmp;
+ __efistub_strncmp		= strncmp;
+ __efistub_strrchr		= strrchr;
+ 
+-#ifdef CONFIG_KASAN
+-__efistub___memcpy		= memcpy;
+-__efistub___memmove		= memmove;
+-__efistub___memset		= memset;
+-#endif
+-
+ __efistub__start		= _start;
+ __efistub__start_kernel		= _start_kernel;
+ __efistub__end			= _end;
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index d0537573501e..d7303c94b4a7 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -55,7 +55,8 @@ KCOV_INSTRUMENT			:= n
+ lib-y				:= efi-stub-helper.o gop.o secureboot.o tpm.o \
+ 				   file.o mem.o random.o randomalloc.o pci.o \
+ 				   skip_spaces.o lib-cmdline.o lib-ctype.o \
+-				   alignedmem.o relocate.o vsprintf.o
++				   alignedmem.o relocate.o vsprintf.o \
++				   intrinsics.o
+ 
+ # include the stub's generic dependencies from lib/ when building for ARM/arm64
+ efi-deps-y := fdt_rw.c fdt_ro.c fdt_wip.c fdt.c fdt_empty_tree.c fdt_sw.c
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index ab9e990447d3..a3377f0b1251 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -280,8 +280,8 @@ union efi_boot_services {
+ 		void *install_multiple_protocol_interfaces;
+ 		void *uninstall_multiple_protocol_interfaces;
+ 		void *calculate_crc32;
+-		void *copy_mem;
+-		void *set_mem;
++		void (__efiapi *copy_mem)(void *, const void *, unsigned long);
++		void (__efiapi *set_mem)(void *, unsigned long, unsigned char);
+ 		void *create_event_ex;
+ 	};
+ 	struct {
+diff --git a/drivers/firmware/efi/libstub/intrinsics.c b/drivers/firmware/efi/libstub/intrinsics.c
+new file mode 100644
+index 000000000000..a04ab39292b6
+--- /dev/null
++++ b/drivers/firmware/efi/libstub/intrinsics.c
+@@ -0,0 +1,30 @@
++// SPDX-License-Identifier: GPL-2.0
++
++#include <linux/efi.h>
++#include <asm/efi.h>
++#include <asm/string.h>
++
++#include "efistub.h"
++
++#ifdef CONFIG_KASAN
++#undef memcpy
++#undef memmove
++#undef memset
++void *__memcpy(void *__dest, const void *__src, size_t __n) __alias(memcpy);
++void *__memmove(void *__dest, const void *__src, size_t count) __alias(memmove);
++void *__memset(void *s, int c, size_t count) __alias(memset);
++#endif
++
++void *memcpy(void *dst, const void *src, size_t len)
++{
++	efi_bs_call(copy_mem, dst, src, len);
++	return dst;
++}
++
++extern void *memmove(void *dst, const void *src, size_t len) __alias(memcpy);
++
++void *memset(void *dst, int c, size_t len)
++{
++	efi_bs_call(set_mem, dst, len, c & U8_MAX);
++	return dst;
++}
+-- 
+2.35.1
 
