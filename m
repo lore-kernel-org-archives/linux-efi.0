@@ -2,150 +2,168 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 21974C32771
-	for <linux-efi@archiver.kernel.org>; Fri, 19 Aug 2022 22:23:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 50E66C32792
+	for <linux-efi@archiver.kernel.org>; Fri, 19 Aug 2022 22:32:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241857AbiHSWXK (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 19 Aug 2022 18:23:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47064 "EHLO
+        id S242215AbiHSWcI (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 19 Aug 2022 18:32:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35322 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241663AbiHSWXI (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 19 Aug 2022 18:23:08 -0400
-Received: from mail-pj1-x102f.google.com (mail-pj1-x102f.google.com [IPv6:2607:f8b0:4864:20::102f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2887210E967
-        for <linux-efi@vger.kernel.org>; Fri, 19 Aug 2022 15:23:07 -0700 (PDT)
-Received: by mail-pj1-x102f.google.com with SMTP id t2-20020a17090a4e4200b001f21572f3a4so6127910pjl.0
-        for <linux-efi@vger.kernel.org>; Fri, 19 Aug 2022 15:23:07 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc;
-        bh=DiD4CnpJAqNu3hqPGqLHXBPJRdRKzJcEPRfsf06JCts=;
-        b=C0XkBg5lC40VWkVP+ckZwjH7A4M2qY5jtWG3UWq2hux6RGM0Kska2H/PBT8sQ2YQzh
-         jrJlCcgxHphGXj/1GF59/Zy71pqOP1s+ArzOefwSfj1+se9tseNvdUd80knbjmeQDwzk
-         ZCnrbVhQ0H6eCP991aFgio7QjAj036jk8g5d4=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc;
-        bh=DiD4CnpJAqNu3hqPGqLHXBPJRdRKzJcEPRfsf06JCts=;
-        b=RhzU9WOLomxaEgwYITu9E5iArvj6xKqFw5hKcmbjDw7MoeClVcDFmOMraD9xBaUMGM
-         xXozPYzs2+XKF4ea7DaPpd16Ah0oNMrI7eOFkqFs2RvO30VteCfUELXu9Hfgg3hi2/Go
-         07a+7TJOjXrLjAIjBV8iacWF9YTmp9UYvhrF/CDC18ptao4Na3M556rilSBtzi+qyjAA
-         UAv1rRPRdljknXqxYlmVvHC7JQPtlUzYTtyq5Jj1ymtAcqfDT20TL8r5zwArL7rpW5yo
-         wMO+TNMRWsFEf3Dz6u32TxKu07X6Zj9Vi++QxZKvBHOlYMwNzq/FCyOXciIp/sAKdp6X
-         WGcg==
-X-Gm-Message-State: ACgBeo0uttPdtbwJA6cROnvH81p0AbhpeSXtzXk8NN6GwJ9AAdXBEW/j
-        rpzRfpOB1DRGbnGrgAuchQyk1NqBNHe9aA==
-X-Google-Smtp-Source: AA6agR4xt1/JLnfBFhIhhTYwMX9CD+eAl4nblxQAkiFTGBaps9PRk5Wj3EobXD8t3+a694ymdUOiNw==
-X-Received: by 2002:a17:902:b58a:b0:16e:f91a:486b with SMTP id a10-20020a170902b58a00b0016ef91a486bmr9816941pls.119.1660947786589;
-        Fri, 19 Aug 2022 15:23:06 -0700 (PDT)
-Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
-        by smtp.gmail.com with ESMTPSA id v31-20020a63481f000000b004277f43b736sm3204677pga.92.2022.08.19.15.23.05
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 19 Aug 2022 15:23:05 -0700 (PDT)
-Date:   Fri, 19 Aug 2022 15:23:04 -0700
-From:   Kees Cook <keescook@chromium.org>
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     Daniel Marth <daniel.marth@inso.tuwien.ac.at>,
-        linux-efi@vger.kernel.org, clemens.hlauschek@inso.tuwien.ac.at
-Subject: Re: [PATCH] efi/libstub: Disable RNG structure randomization
-Message-ID: <202208191519.6C4804CA53@keescook>
-References: <20220818065635.243057-1-daniel.marth@inso.tuwien.ac.at>
- <CAMj1kXHEODYxkafLgTA83gYqJV+jFxOopWgJJNsURCVjbHR6Uw@mail.gmail.com>
- <202208180858.70C1B5A@keescook>
- <CAMj1kXHyV1+ttxaWrsY1xitBRUfoXobv-Cv0+a6P=Zs9Rhsfag@mail.gmail.com>
+        with ESMTP id S229595AbiHSWcH (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 19 Aug 2022 18:32:07 -0400
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C8AF7104450;
+        Fri, 19 Aug 2022 15:32:03 -0700 (PDT)
+Received: from pps.filterd (m0098410.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 27JMS28H021500;
+        Fri, 19 Aug 2022 22:31:46 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
+ : date : message-id : in-reply-to : references : mime-version :
+ content-transfer-encoding; s=pp1;
+ bh=TwzknhRicYYNocvxfZO+q646avv14efPS6Kl1DzWT88=;
+ b=C9hM9KIFarvImNWddwz4R6NV3CTg3BMdRv/suNxkMFjcAlthv4NFQzyFq+sWuaU/BBu9
+ smdrzcYuR7xP+mx2oMvbCc6la0s2csj8mUJllu/BWSKYiuFy7dYeedEQ4gBHA+ua8ber
+ FdG1uEb9+uhGH/7WPQnykt31RE1gq7bYJO7u8/cQVMbIPQoXPdM9hfRMNPU9dObXCHha
+ lW0Ny2YzVqs9YvKAhLdba5zDON6bSK/e5A5UvBEqQfq4kuP5k/bxywYLJv5oJB+s5Fns
+ opTfmjp0YkI4WDzRj4DKrb48Y9G1XxzIHbS/+obouG6qIfdKEmeEnuyeTgI3reZUNoru xw== 
+Received: from pps.reinject (localhost [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3j2kbb82eq-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Fri, 19 Aug 2022 22:31:46 +0000
+Received: from m0098410.ppops.net (m0098410.ppops.net [127.0.0.1])
+        by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 27JMS3Kb021514;
+        Fri, 19 Aug 2022 22:31:45 GMT
+Received: from ppma02wdc.us.ibm.com (aa.5b.37a9.ip4.static.sl-reverse.com [169.55.91.170])
+        by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3j2kbb82ee-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Fri, 19 Aug 2022 22:31:45 +0000
+Received: from pps.filterd (ppma02wdc.us.ibm.com [127.0.0.1])
+        by ppma02wdc.us.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 27JMKCcR021066;
+        Fri, 19 Aug 2022 22:31:44 GMT
+Received: from b03cxnp08025.gho.boulder.ibm.com (b03cxnp08025.gho.boulder.ibm.com [9.17.130.17])
+        by ppma02wdc.us.ibm.com with ESMTP id 3hx3kafarw-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Fri, 19 Aug 2022 22:31:44 +0000
+Received: from b03ledav003.gho.boulder.ibm.com (b03ledav003.gho.boulder.ibm.com [9.17.130.234])
+        by b03cxnp08025.gho.boulder.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 27JMVhrE29753718
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Fri, 19 Aug 2022 22:31:43 GMT
+Received: from b03ledav003.gho.boulder.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 8D9F66A05D;
+        Fri, 19 Aug 2022 22:31:43 +0000 (GMT)
+Received: from b03ledav003.gho.boulder.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 395106A058;
+        Fri, 19 Aug 2022 22:31:42 +0000 (GMT)
+Received: from rhel-laptop.ibm.com.com (unknown [9.65.239.18])
+        by b03ledav003.gho.boulder.ibm.com (Postfix) with ESMTP;
+        Fri, 19 Aug 2022 22:31:42 +0000 (GMT)
+From:   gjoyce@linux.vnet.ibm.com
+To:     linux-block@vger.kernel.org
+Cc:     linuxppc-dev@lists.ozlabs.org, jonathan.derrick@linux.dev,
+        brking@linux.vnet.ibm.com, msuchanek@suse.de, mpe@ellerman.id.au,
+        nayna@linux.ibm.com, axboe@kernel.dk, akpm@linux-foundation.org,
+        gjoyce@linux.vnet.ibm.com, linux-efi@vger.kernel.org,
+        keyrings@vger.kernel.org, dhowells@redhat.com, jarkko@kernel.org
+Subject: [PATCH v4 1/3] block: sed-opal: SED Opal keystore
+Date:   Fri, 19 Aug 2022 17:31:36 -0500
+Message-Id: <20220819223138.1457091-2-gjoyce@linux.vnet.ibm.com>
+X-Mailer: git-send-email 2.31.1
+In-Reply-To: <20220819223138.1457091-1-gjoyce@linux.vnet.ibm.com>
+References: <20220819223138.1457091-1-gjoyce@linux.vnet.ibm.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAMj1kXHyV1+ttxaWrsY1xitBRUfoXobv-Cv0+a6P=Zs9Rhsfag@mail.gmail.com>
+Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-GUID: EMAV2lNhiCenaEsooqfkk6JGiDhNJ4Nt
+X-Proofpoint-ORIG-GUID: 4drFvgrlpk4TD0u2qGcdlWsh_WGqohF2
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.895,Hydra:6.0.517,FMLib:17.11.122.1
+ definitions=2022-08-19_12,2022-08-18_01,2022-06-22_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 impostorscore=0
+ spamscore=0 mlxlogscore=899 suspectscore=0 lowpriorityscore=0 phishscore=0
+ clxscore=1011 adultscore=0 priorityscore=1501 bulkscore=0 malwarescore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2207270000
+ definitions=main-2208190083
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Thu, Aug 18, 2022 at 06:12:55PM +0200, Ard Biesheuvel wrote:
-> On Thu, 18 Aug 2022 at 18:02, Kees Cook <keescook@chromium.org> wrote:
-> >
-> > On Thu, Aug 18, 2022 at 09:10:23AM +0200, Ard Biesheuvel wrote:
-> > > (cc Kees)
-> > >
-> > > On Thu, 18 Aug 2022 at 08:58, Daniel Marth
-> > > <daniel.marth@inso.tuwien.ac.at> wrote:
-> > > >
-> > > > Randstruct by default randomizes structures that consist entirely of
-> > > > function pointers, even if they are not explicitly labeled for
-> > > > randomization. efi_rng_protocol contains an anonymous structure that is
-> > > > affected by this implicit selection process. Randomization of this
-> > > > structure causes a data layout inconsistency between the kernel and the
-> > > > EFI. In this scenario the Arm64 boot process fails with the following
-> > > > output:
-> > > >     EFI stub: Booting Linux Kernel...
-> > > >     EFI stub: ERROR: efi_get_random_bytes() failed (0x8000000000000002)
-> > > >     EFI stub: Using DTB from configuration table
-> > > >     EFI stub: Loaded initrd from LINUX_EFI_INITRD_MEDIA_GUID device path
-> > > >     Synchronous Exception at 0x0000000081310C90
-> > > >     Synchronous Exception at 0x0000000081310C90
-> > > >
-> > > > efi_get_random_bytes() fails in handle_kernel_image (arm64-stub.c)
-> > > > because it uses an incorrect structure layout for efi_call_proto. Add
-> > > > the __no_randomize_layout annotation to the anonymous structure within
-> > > > efi_rng_protocol to prevent its randomization and resolve this issue.
-> > > >
-> > > > This patch was tested for the Arm64 architecture using QEMU. In
-> > > > addition to the current next branch of this subsystem, also minor
-> > > > versions 4.16 to 5.1, 5.5 and 5.6 were tested successfully with a
-> > > > (backported) version of this patch.
-> > > >
-> > > > Signed-off-by: Daniel Marth <daniel.marth@inso.tuwien.ac.at>
-> > >
-> > > Thanks for the patch.
-> > >
-> > > > ---
-> > > >  drivers/firmware/efi/libstub/random.c | 2 +-
-> > > >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > > >
-> > > > diff --git a/drivers/firmware/efi/libstub/random.c b/drivers/firmware/efi/libstub/random.c
-> > > > index 24aa37535372..54fa980cf1af 100644
-> > > > --- a/drivers/firmware/efi/libstub/random.c
-> > > > +++ b/drivers/firmware/efi/libstub/random.c
-> > > > @@ -18,7 +18,7 @@ union efi_rng_protocol {
-> > > >                 efi_status_t (__efiapi *get_rng)(efi_rng_protocol_t *,
-> > > >                                                  efi_guid_t *, unsigned long,
-> > > >                                                  u8 *out);
-> > > > -       };
-> > > > +       } __no_randomize_layout;
-> > > >         struct {
-> > > >                 u32 get_info;
-> > > >                 u32 get_rng;
-> > >
-> > > This may work around the problem, but I'd like to fix this more
-> > > thoroughly if we can. EFI protocols are not randomizable by nature, as
-> > > they are a contract between the firmware and the OS, so struct
-> > > randomization should just be disabled for the entire EFI stub, i.e.,
-> > > everything below libstub/
-> >
-> > So, yeah, any external interface that uses function pointer tables
-> > needs to be marked as not randomized. I think disabling randstruct for
-> > the entire subdirectory may run into a reverse problem, if anything gets
-> > used in there that is randomized by the rest of the kernel. I'm not clear
-> > where there boundaries are on that, though, so I leave it up to your
-> > judgement. IMO, it seems cleanest to just mark any all-function-pointer
-> > structs as __no_randomize_layout.
-> >
-> 
-> But there are *lots* of those, and this makes it a moving target as well.
-> 
-> The handover from EFI to the kernel proper passes very little state,
-> so turning it off in the stub should not be an issue afaict.
-> 
-> What would be even better is a pragma push/pop that disables it for
-> all type definitions in between, Did anyone ever look into that?
+From: Greg Joyce <gjoyce@linux.vnet.ibm.com>
 
-I don't know if that got looked at -- there wasn't a place where such a
-mixture was needed before. Everywhere else just marks individual
-structs. Places like vDSO do stuff like this for their Makefile:
+Add read and write functions that allow SED Opal keys to stored
+in a permanent keystore.
 
-KBUILD_CFLAGS := $(filter-out $(RANDSTRUCT_CFLAGS),$(KBUILD_CFLAGS))
+Signed-off-by: Greg Joyce <gjoyce@linux.vnet.ibm.com>
+---
+ block/Makefile               |  2 +-
+ block/sed-opal-key.c         | 23 +++++++++++++++++++++++
+ include/linux/sed-opal-key.h | 15 +++++++++++++++
+ 3 files changed, 39 insertions(+), 1 deletion(-)
+ create mode 100644 block/sed-opal-key.c
+ create mode 100644 include/linux/sed-opal-key.h
 
+diff --git a/block/Makefile b/block/Makefile
+index 4e01bb71ad6e..464a9f209552 100644
+--- a/block/Makefile
++++ b/block/Makefile
+@@ -35,7 +35,7 @@ obj-$(CONFIG_BLK_DEV_ZONED)	+= blk-zoned.o
+ obj-$(CONFIG_BLK_WBT)		+= blk-wbt.o
+ obj-$(CONFIG_BLK_DEBUG_FS)	+= blk-mq-debugfs.o
+ obj-$(CONFIG_BLK_DEBUG_FS_ZONED)+= blk-mq-debugfs-zoned.o
+-obj-$(CONFIG_BLK_SED_OPAL)	+= sed-opal.o
++obj-$(CONFIG_BLK_SED_OPAL)	+= sed-opal.o sed-opal-key.o
+ obj-$(CONFIG_BLK_PM)		+= blk-pm.o
+ obj-$(CONFIG_BLK_INLINE_ENCRYPTION)	+= blk-crypto.o blk-crypto-profile.o \
+ 					   blk-crypto-sysfs.o
+diff --git a/block/sed-opal-key.c b/block/sed-opal-key.c
+new file mode 100644
+index 000000000000..32ef988cd53b
+--- /dev/null
++++ b/block/sed-opal-key.c
+@@ -0,0 +1,23 @@
++// SPDX-License-Identifier: GPL-2.0-only
++/*
++ * SED key operations.
++ *
++ * Copyright (C) 2022 IBM Corporation
++ *
++ * These are the accessor functions (read/write) for SED Opal
++ * keys. Specific keystores can provide overrides.
++ *
++ */
++
++#include <linux/kernel.h>
++#include <linux/sed-opal-key.h>
++
++int __weak sed_read_key(char *keyname, char *key, u_int *keylen)
++{
++	return -EOPNOTSUPP;
++}
++
++int __weak sed_write_key(char *keyname, char *key, u_int keylen)
++{
++	return -EOPNOTSUPP;
++}
+diff --git a/include/linux/sed-opal-key.h b/include/linux/sed-opal-key.h
+new file mode 100644
+index 000000000000..c9b1447986d8
+--- /dev/null
++++ b/include/linux/sed-opal-key.h
+@@ -0,0 +1,15 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++/*
++ * SED key operations.
++ *
++ * Copyright (C) 2022 IBM Corporation
++ *
++ * These are the accessor functions (read/write) for SED Opal
++ * keys. Specific keystores can provide overrides.
++ *
++ */
++
++#include <linux/kernel.h>
++
++int sed_read_key(char *keyname, char *key, u_int *keylen);
++int sed_write_key(char *keyname, char *key, u_int keylen);
 -- 
-Kees Cook
+gjoyce@linux.vnet.ibm.com
+
