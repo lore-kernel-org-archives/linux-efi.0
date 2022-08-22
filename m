@@ -2,24 +2,24 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 56E69C3F6B0
-	for <linux-efi@archiver.kernel.org>; Mon, 22 Aug 2022 15:43:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8BD49C28D13
+	for <linux-efi@archiver.kernel.org>; Mon, 22 Aug 2022 15:43:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235580AbiHVPnM (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 22 Aug 2022 11:43:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51244 "EHLO
+        id S236717AbiHVPnX (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 22 Aug 2022 11:43:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51190 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236836AbiHVPmf (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 22 Aug 2022 11:42:35 -0400
+        with ESMTP id S236718AbiHVPma (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 22 Aug 2022 11:42:30 -0400
 Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id A942F1CB2D;
-        Mon, 22 Aug 2022 08:42:30 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 8A4F61CFD5;
+        Mon, 22 Aug 2022 08:42:12 -0700 (PDT)
 Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id A072C1424;
-        Mon, 22 Aug 2022 08:42:33 -0700 (PDT)
+        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 857C5ED1;
+        Mon, 22 Aug 2022 08:42:15 -0700 (PDT)
 Received: from entos-ampere-02.shanghai.arm.com (entos-ampere-02.shanghai.arm.com [10.169.212.212])
-        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPA id E1ECB3F70D;
-        Mon, 22 Aug 2022 08:42:21 -0700 (PDT)
+        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPA id 8779E3F70D;
+        Mon, 22 Aug 2022 08:42:03 -0700 (PDT)
 From:   Jia He <justin.he@arm.com>
 To:     Len Brown <lenb@kernel.org>, James Morse <james.morse@arm.com>,
         Tony Luck <tony.luck@intel.com>,
@@ -44,10 +44,11 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-acpi@vger.kernel.org,
         Randy Dunlap <rdunlap@infradead.org>,
         Damien Le Moal <damien.lemoal@opensource.wdc.com>,
         Muchun Song <songmuchun@bytedance.com>,
-        linux-doc@vger.kernel.org, Jia He <justin.he@arm.com>
-Subject: [RESEND PATCH v3 9/9] edac: Don't load Arm specific edac drivers when ghes_edac is preferred
-Date:   Mon, 22 Aug 2022 15:40:48 +0000
-Message-Id: <20220822154048.188253-10-justin.he@arm.com>
+        linux-doc@vger.kernel.org, Jia He <justin.he@arm.com>,
+        kernel test robot <lkp@intel.com>
+Subject: [RESEND PATCH v3 7/9] apei/ghes: Use unrcu_pointer for cmpxchg
+Date:   Mon, 22 Aug 2022 15:40:46 +0000
+Message-Id: <20220822154048.188253-8-justin.he@arm.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20220822154048.188253-1-justin.he@arm.com>
 References: <20220822154048.188253-1-justin.he@arm.com>
@@ -57,73 +58,47 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-edac_mc_add_mc* is too late in the init path and that check should happen
-as the very first thing in the driver init function.
+ghes_estatus_caches should be add rcu annotation to avoid sparse warnings.
+   drivers/acpi/apei/ghes.c:733:25: sparse: sparse: incompatible types in comparison expression (different address spaces):
+   drivers/acpi/apei/ghes.c:733:25: sparse:    struct ghes_estatus_cache [noderef] __rcu *
+   drivers/acpi/apei/ghes.c:733:25: sparse:    struct ghes_estatus_cache *
+   drivers/acpi/apei/ghes.c:813:25: sparse: sparse: incompatible types in comparison expression (different address spaces):
+   drivers/acpi/apei/ghes.c:813:25: sparse:    struct ghes_estatus_cache [noderef] __rcu *
+   drivers/acpi/apei/ghes.c:813:25: sparse:    struct ghes_estatus_cache *
 
+unrcu_pointer is to strip the __rcu in cmpxchg.
+
+Reported-by: kernel test robot <lkp@intel.com>
 Signed-off-by: Jia He <justin.he@arm.com>
 ---
- drivers/edac/armada_xp_edac.c  | 3 +++
- drivers/edac/layerscape_edac.c | 3 +++
- drivers/edac/thunderx_edac.c   | 3 +++
- drivers/edac/xgene_edac.c      | 3 +++
- 4 files changed, 12 insertions(+)
+ drivers/acpi/apei/ghes.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/edac/armada_xp_edac.c b/drivers/edac/armada_xp_edac.c
-index 038abbb83f4b..486532b92ce0 100644
---- a/drivers/edac/armada_xp_edac.c
-+++ b/drivers/edac/armada_xp_edac.c
-@@ -599,6 +599,9 @@ static int __init armada_xp_edac_init(void)
- {
- 	int res;
+diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+index 31c674639e86..94e3a15c9b06 100644
+--- a/drivers/acpi/apei/ghes.c
++++ b/drivers/acpi/apei/ghes.c
+@@ -165,7 +165,7 @@ struct ghes_vendor_record_entry {
+ static struct gen_pool *ghes_estatus_pool;
+ static unsigned long ghes_estatus_pool_size_request;
  
-+	if (ghes_edac_preferred())
-+		return -EBUSY;
-+
- 	/* only polling is supported */
- 	edac_op_state = EDAC_OPSTATE_POLL;
+-static struct ghes_estatus_cache *ghes_estatus_caches[GHES_ESTATUS_CACHES_SIZE];
++static struct ghes_estatus_cache __rcu *ghes_estatus_caches[GHES_ESTATUS_CACHES_SIZE];
+ static atomic_t ghes_estatus_cache_alloced;
  
-diff --git a/drivers/edac/layerscape_edac.c b/drivers/edac/layerscape_edac.c
-index 94cac7686a56..60ff4c6674cd 100644
---- a/drivers/edac/layerscape_edac.c
-+++ b/drivers/edac/layerscape_edac.c
-@@ -38,6 +38,9 @@ static int __init fsl_ddr_mc_init(void)
- {
- 	int res;
- 
-+	if (ghes_edac_preferred())
-+		return -EBUSY;
-+
- 	/* make sure error reporting method is sane */
- 	switch (edac_op_state) {
- 	case EDAC_OPSTATE_POLL:
-diff --git a/drivers/edac/thunderx_edac.c b/drivers/edac/thunderx_edac.c
-index f13674081cb6..2c4baa6817a9 100644
---- a/drivers/edac/thunderx_edac.c
-+++ b/drivers/edac/thunderx_edac.c
-@@ -2114,6 +2114,9 @@ static int __init thunderx_edac_init(void)
- {
- 	int rc = 0;
- 
-+	if (ghes_edac_preferred())
-+		return -EBUSY;
-+
- 	rc = pci_register_driver(&thunderx_lmc_driver);
- 	if (rc)
- 		return rc;
-diff --git a/drivers/edac/xgene_edac.c b/drivers/edac/xgene_edac.c
-index 54081403db4f..9aa68220b625 100644
---- a/drivers/edac/xgene_edac.c
-+++ b/drivers/edac/xgene_edac.c
-@@ -2004,6 +2004,9 @@ static int __init xgene_edac_init(void)
- {
- 	int rc;
- 
-+	if (ghes_edac_preferred())
-+		return -EBUSY;
-+
- 	/* Make sure error reporting method is sane */
- 	switch (edac_op_state) {
- 	case EDAC_OPSTATE_POLL:
+ static int ghes_panic_timeout __read_mostly = 30;
+@@ -855,8 +855,9 @@ static void ghes_estatus_cache_add(
+ 	}
+ 	/* new_cache must be put into array after its contents are written */
+ 	smp_wmb();
+-	if (slot != -1 && cmpxchg(ghes_estatus_caches + slot,
+-				  slot_cache, new_cache) == slot_cache) {
++	if (slot != -1 && unrcu_pointer(cmpxchg(ghes_estatus_caches + slot,
++				RCU_INITIALIZER(slot_cache),
++				RCU_INITIALIZER(new_cache))) == slot_cache) {
+ 		if (slot_cache)
+ 			call_rcu(&slot_cache->rcu, ghes_estatus_cache_rcu_free);
+ 	} else
 -- 
 2.25.1
 
