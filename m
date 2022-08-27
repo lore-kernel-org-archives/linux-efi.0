@@ -2,70 +2,99 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CC65EC0502C
-	for <linux-efi@archiver.kernel.org>; Sat, 27 Aug 2022 07:14:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0C409ECAAD2
+	for <linux-efi@archiver.kernel.org>; Sat, 27 Aug 2022 08:39:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230232AbiH0HOP (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 27 Aug 2022 03:14:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43850 "EHLO
+        id S233155AbiH0IjT (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 27 Aug 2022 04:39:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38470 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232507AbiH0HOP (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sat, 27 Aug 2022 03:14:15 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DE1BAB941F;
-        Sat, 27 Aug 2022 00:14:13 -0700 (PDT)
+        with ESMTP id S233037AbiH0IjQ (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 27 Aug 2022 04:39:16 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 37FD0C00D9
+        for <linux-efi@vger.kernel.org>; Sat, 27 Aug 2022 01:39:13 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id A56ECB82B8D;
-        Sat, 27 Aug 2022 07:14:12 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4F6ABC4347C;
-        Sat, 27 Aug 2022 07:14:11 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 7524C61306
+        for <linux-efi@vger.kernel.org>; Sat, 27 Aug 2022 08:39:13 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CF344C4347C;
+        Sat, 27 Aug 2022 08:39:09 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1661584451;
-        bh=bQaVKBfsaLgFQiFbtFaJvcqVdo/u/g4Ip0tVdWmYieQ=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=MuvtgXa0YJPctLv2mT8DfNi0I5KdPrtZD8YgtzWdktEzyf/YogOa/LKGqu5nVWK+H
-         Z/Jy1DsA5qi5+ZmGLhJTw6q30Ixe9S4To6brhk8PzAfRbitjd7TULsBwhQrwEU+S4h
-         KxTieZLSV2ngyyRacvTGeGvMRvGYw4ccE17vx4jHnsYBEyv0AA26+Egw8EjTGWz6zz
-         CdUTbOKzSpAfbv61qT2Cw2DFQvVD2BYJcfIDHAFaHnppPgtv9Qsp48xZUnifVtj70O
-         VZzHlRQZpQsXV/vyoNG1zSmyCYj6BoKL7bKeQbWWnpybGFjp6Biny5JZA/EOkd2Qqf
-         sqjS9WTInxJAg==
-Received: by mail-wm1-f53.google.com with SMTP id n23-20020a7bc5d7000000b003a62f19b453so5455948wmk.3;
-        Sat, 27 Aug 2022 00:14:11 -0700 (PDT)
-X-Gm-Message-State: ACgBeo2crqYSz1YLQi25NSxQUVPF3Gc74q4m02TB91HuiLt87Z6MTQaZ
-        wdF6KqZTUldAGrH6OIaHaz65FW6i/rhIjK9ze8w=
-X-Google-Smtp-Source: AA6agR7p8GijcUOtJGznPBKhpfg9HyxCqjidJlhRFBvsrg/twaTrPlEhxNPEg5Uu1s2eYVOnl4WfetJWsHoWy5eWk/c=
-X-Received: by 2002:a1c:3b55:0:b0:3a6:7b62:3901 with SMTP id
- i82-20020a1c3b55000000b003a67b623901mr1520421wma.113.1661584449515; Sat, 27
- Aug 2022 00:14:09 -0700 (PDT)
-MIME-Version: 1.0
-References: <20220819102037.2697798-1-chenhuacai@loongson.cn> <9b6f0aeaebbd36882b5b40d655f9ccd20c7be496.camel@xry111.site>
-In-Reply-To: <9b6f0aeaebbd36882b5b40d655f9ccd20c7be496.camel@xry111.site>
+        s=k20201202; t=1661589552;
+        bh=UBp2rsf+kAYyhi4UTfKRx+3XtvgjAWXJSN1PjteFpa0=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=QJh+RIMj2yHv5usj+e7kSp2UNb9l8iRHV2YojKri/zn1OJJy2V1UM1D01mVXJeY0Q
+         lbIch9uwZNKKOSks36nRvEsQ83HQaKHEDnlxB2g8kk3fau4fm2f3gAqLU6W85CQVe3
+         Ws6KqkK3ggWa0bJ568EAqcH7i8Y1IeRQfumCMCoKpunN/AU0cLlL8D23XgkBWYHqls
+         bRJMqCNwo2xNp+wAdW5/FiWRHfSaLqZr7/vcPszn73u1csjMWEgrfMzybO7/PdcKuJ
+         ep96bpj3n+Syuxk8WZI4k++WduB+js4j0K5j7dt71FgPQAZyCR8MF8je8KAwNt1fFN
+         ILxqbzGw2cPCA==
 From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Sat, 27 Aug 2022 09:13:58 +0200
-X-Gmail-Original-Message-ID: <CAMj1kXFOd+gMHbi6MH0KHWkBEKN9V0LeZbyGRw8h630OxtMrdA@mail.gmail.com>
-Message-ID: <CAMj1kXFOd+gMHbi6MH0KHWkBEKN9V0LeZbyGRw8h630OxtMrdA@mail.gmail.com>
-Subject: Re: [PATCH V3] LoongArch: Add efistub booting support
-To:     Xi Ruoyao <xry111@xry111.site>
-Cc:     Huacai Chen <chenhuacai@loongson.cn>,
+To:     linux-efi@vger.kernel.org
+Cc:     linux-arm-kernel@lists.infradead.org,
+        Ard Biesheuvel <ardb@kernel.org>,
+        "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
+        Matthew Garrett <mjg59@srcf.ucam.org>,
+        Peter Jones <pjones@redhat.com>,
+        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+        Heinrich Schuchardt <heinrich.schuchardt@canonical.com>,
+        AKASHI Takahiro <takahiro.akashi@linaro.org>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Atish Patra <atishp@atishpatra.org>,
         Arnd Bergmann <arnd@arndb.de>,
-        Huacai Chen <chenhuacai@kernel.org>, loongarch@lists.linux.dev,
-        linux-arch@vger.kernel.org, Xuefeng Li <lixuefeng@loongson.cn>,
-        Guo Ren <guoren@kernel.org>, Xuerui Wang <kernel@xen0n.name>,
-        Jiaxun Yang <jiaxun.yang@flygoat.com>,
-        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+        Huacai Chen <chenhuacai@loongson.cn>,
+        Xi Ruoyao <xry111@xry111.site>,
+        Lennart Poettering <lennart@poettering.net>,
+        Jeremy Linton <jeremy.linton@arm.com>
+Subject: [PATCH v4 1/9] efi: name the ARCH-stub.c files uniformly
+Date:   Sat, 27 Aug 2022 10:38:42 +0200
+Message-Id: <20220827083850.2702465-2-ardb@kernel.org>
+X-Mailer: git-send-email 2.35.1
+In-Reply-To: <20220827083850.2702465-1-ardb@kernel.org>
+References: <20220827083850.2702465-1-ardb@kernel.org>
+MIME-Version: 1.0
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1454; i=ardb@kernel.org; h=from:subject; bh=UBp2rsf+kAYyhi4UTfKRx+3XtvgjAWXJSN1PjteFpa0=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjCdgMJ+OTI3g3MW65ksCNSsGYFYf3xucYV1AaZnYt V0tkkf+JAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYwnYDAAKCRDDTyI5ktmPJHr6DA CGE1MLFtM3JEBNaUraczdMjavnW77GeexWClyvombsh5GkWHA17x398PlsmqmD3U60qYETig5ul/4I Dsx8voo0yXNiu9luLZFns69k8y0fST45Pg3jYJKLp/z+NkpanpuA7S905/WlFyIXca5Bd7BFYPPgSo MbHjFKIgE2xTlpT/NwIaHiJsky7eTtzLPRscboCaTXXN40epQiWS4k90S0qdHI6weZ03B8ZnzG5EXj XP+VdMmmIy+PYh/PgPdEtNodZ6LqYVSSQkL2U9oYXUraWI9nPsgipYTWWr97/41FWxpSitMg+w95gn cg6zCoscsKZrvtj5x/ZuTBIt9rSs49gS5AEJH8pgw87cXmZp0yc5AeJp49aLnX2V99vG1cUU5I7Yry 0Ak1j+yLc1xtePMONRWkcy+qxK7qy+NUW3dhgRwEEZWqovcfgx0hgJ1FQcHwxKa8dlCOfR3MGiF+oC nTGdAH5b/dz8HQPKH3rAU+KPA2q1X2YLTk40AG/fWp8Dw=
+X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Sat, 27 Aug 2022 at 06:41, Xi Ruoyao <xry111@xry111.site> wrote:
->
-> Tested V3 with the magic number check manually removed in my GRUB build.
-> The system boots successfully.  I've not tested Arnd's zBoot patch yet.
+Rename arm32-stub.c to arm-stub.c so that we can refer to all of them as
+$(ARCH)-stub.c
 
-I am Ard not Arnd :-)
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+---
+ drivers/firmware/efi/libstub/Makefile                     | 9 ++-------
+ drivers/firmware/efi/libstub/{arm32-stub.c => arm-stub.c} | 0
+ 2 files changed, 2 insertions(+), 7 deletions(-)
 
-Please use this branch when testing the EFI decompressor:
-https://git.kernel.org/pub/scm/linux/kernel/git/ardb/linux.git/log/?h=efi-decompressor-v4
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index a4915cc499f3..68c181dcb8cf 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -68,13 +68,8 @@ $(obj)/lib-%.o: $(srctree)/lib/%.c FORCE
+ lib-$(CONFIG_EFI_GENERIC_STUB)	+= efi-stub.o fdt.o string.o \
+ 				   $(patsubst %.c,lib-%.o,$(efi-deps-y))
+ 
+-lib-$(CONFIG_ARM)		+= arm32-stub.o
+-lib-$(CONFIG_ARM64)		+= arm64-stub.o
+-lib-$(CONFIG_X86)		+= x86-stub.o
+-lib-$(CONFIG_RISCV)		+= riscv-stub.o
+-lib-$(CONFIG_LOONGARCH)		+= loongarch-stub.o
+-
+-CFLAGS_arm32-stub.o		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
++lib-y				+= $(ARCH)-stub.o
++CFLAGS_arm-stub.o		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
+ 
+ # Even when -mbranch-protection=none is set, Clang will generate a
+ # .note.gnu.property for code-less object files (like lib/ctype.c),
+diff --git a/drivers/firmware/efi/libstub/arm32-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+similarity index 100%
+rename from drivers/firmware/efi/libstub/arm32-stub.c
+rename to drivers/firmware/efi/libstub/arm-stub.c
+-- 
+2.35.1
+
