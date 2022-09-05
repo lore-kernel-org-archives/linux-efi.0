@@ -2,242 +2,194 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DCD4AECAAD3
-	for <linux-efi@archiver.kernel.org>; Mon,  5 Sep 2022 11:47:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 919F1ECAAD3
+	for <linux-efi@archiver.kernel.org>; Mon,  5 Sep 2022 14:33:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238295AbiIELrg (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 5 Sep 2022 07:47:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35336 "EHLO
+        id S236555AbiIEOd3 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 5 Sep 2022 10:33:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58362 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238324AbiIELrR (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 5 Sep 2022 07:47:17 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ECDBB5C976;
-        Mon,  5 Sep 2022 04:47:10 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 4C09FB81116;
-        Mon,  5 Sep 2022 11:47:09 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E0745C433D6;
-        Mon,  5 Sep 2022 11:47:07 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1662378427;
-        bh=NHuH20RrQjxRSqiH0mBVZk8zTQuLxuDS7k7p+r4UxA0=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=VmsO4/rrmylf8/u2/pk96SzSMvTQRigqOOVMVv/F+2rcKfVibHN50t5Ci/AkViS2D
-         /1qKssYq733OPSahQv7niTSffy4hTNp4Hh68Y0MUtCwbHm9Bohc3JX/Ve4W3cOBUQq
-         lcrrbCkRo74vijamxAJIG88UIKkbxNsLfXGztX/9fgOaHStHuOKCXU5uy502mSPhFX
-         jsaY/YTxs+e35PkZX26ypa0aixYJ5pivEkDO5he42wLqBcPlp/85obB6sHiBo94qF7
-         I1XEzbL4Z7EdhBhua8TCf+zRDc4LvGNK4Frar9/jdc1pNW0iOcAK/Z6uoIn3vzq23G
-         Ki1PWLlwSdnIQ==
-Received: by mail-lj1-f177.google.com with SMTP id x10so8983992ljq.4;
-        Mon, 05 Sep 2022 04:47:07 -0700 (PDT)
-X-Gm-Message-State: ACgBeo18nHLuScDqVbeWhhGU1ZmeJnskp5VjEOTsn42oaqoOAO1pFqrB
-        aErQBSqXLmbcUnPjjCQ4sQTe5OcHm6HoQ9k+mcg=
-X-Google-Smtp-Source: AA6agR7BAfNwXqTdiA+9ukiurbQmio6yAhB7Swj2kfchvdOlIHXq4ha1E1EZD4MjF6Zgfu08ZnI0Zywhrl+jacxNRI0=
-X-Received: by 2002:a2e:710c:0:b0:264:ed38:e57f with SMTP id
- m12-20020a2e710c000000b00264ed38e57fmr9678972ljc.189.1662378425797; Mon, 05
- Sep 2022 04:47:05 -0700 (PDT)
+        with ESMTP id S231635AbiIEOd2 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 5 Sep 2022 10:33:28 -0400
+Received: from EUR04-HE1-obe.outbound.protection.outlook.com (mail-eopbgr70087.outbound.protection.outlook.com [40.107.7.87])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5EE1344558;
+        Mon,  5 Sep 2022 07:33:27 -0700 (PDT)
+ARC-Seal: i=2; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=pass;
+ b=DWri+F+WRi0MqhONLe8fe2y1sxneugFJWJf0z2QUTlUAJ5hUojNUvQH+ndWUonq3mdau6kDVbq/Jvkgep/nBO5zDi3B81jKQJOMa3cMAWcr6EEQp2HP9/3t2a4rt2xRZKlyntlVwWtqfkjoLhwaKRPFDSzWJmDm+5rGJ3+UHr6tOXB/P6KRBm6a5TZRo/OTjWvOmWBGs0lQYEZprz1/EzqTRH4wsOkP16rz80TXZy9F388ci4F3BrFY7LbDSyN/ZEWUtuFw4UaH4IVaS8yj8nIwRVwvXxbBqGNgnlG70frzKgAwgLMeuabqnnHC+/UWkUDqdPJbqHWpUGswTfF/DnQ==
+ARC-Message-Signature: i=2; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=5k+rtzwD52E2mJV4rDYVMkPAZqJrBAs/8ARx//tFZ0A=;
+ b=FC8d40E0iysA1PwCrSV4ydSH/X5RdrsbTvw2fNo43YmjwgYYtt57n/htJSTpDfkgPcN1dxGec3fKqlcW8i0fKR8U84Q2eoCxA6RYI1PGQRbQADYiVG8EgX/zwzS+fqh7XNch/2Zf+bO4FlK3T8uS9xaIBHfY2r5LGxvHCts10YNv1xYK5yB/op32K8uQD/+j1NwW8nOjR6XSwu6ha2cG30zIJND50ptKx62oJrG57OUcrygVSkuQZnBE1PqP5t0wy2M1hARf5DgcZWreRrc6BciEnBZOqoaGvtXl9ySD8CLVHlRfMhIEA4/irT68ynlfg/Wqm0YtkCOHxlx4zEUJvg==
+ARC-Authentication-Results: i=2; mx.microsoft.com 1; spf=pass (sender ip is
+ 63.35.35.123) smtp.rcpttodomain=vger.kernel.org smtp.mailfrom=arm.com;
+ dmarc=pass (p=none sp=none pct=100) action=none header.from=arm.com;
+ dkim=pass (signature was verified) header.d=armh.onmicrosoft.com; arc=pass (0
+ oda=1 ltdi=1 spf=[1,1,smtp.mailfrom=arm.com] dkim=[1,1,header.d=arm.com]
+ dmarc=[1,1,header.from=arm.com])
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=armh.onmicrosoft.com;
+ s=selector2-armh-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=5k+rtzwD52E2mJV4rDYVMkPAZqJrBAs/8ARx//tFZ0A=;
+ b=R2RJYBmvtKpPESwLRGCliUUIenrzzKjbLlFpnzUIUVHT122jZub4i8SfEZC/bGgLLyihq3D9Azwyesrqljjq5Uo3lCHhJcC24Zi8zabVWmholqpNaHZYxUtffhTcyWnf61VNnPoWSHOeyWYHJUKUQjriU1qB/v784Ik3I/Q1e4c=
+Received: from DU2PR04CA0086.eurprd04.prod.outlook.com (2603:10a6:10:232::31)
+ by AS8PR08MB6535.eurprd08.prod.outlook.com (2603:10a6:20b:336::12) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5588.10; Mon, 5 Sep
+ 2022 14:33:24 +0000
+Received: from DBAEUR03FT050.eop-EUR03.prod.protection.outlook.com
+ (2603:10a6:10:232:cafe::5c) by DU2PR04CA0086.outlook.office365.com
+ (2603:10a6:10:232::31) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5588.18 via Frontend
+ Transport; Mon, 5 Sep 2022 14:33:24 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 63.35.35.123)
+ smtp.mailfrom=arm.com; dkim=pass (signature was verified)
+ header.d=armh.onmicrosoft.com;dmarc=pass action=none header.from=arm.com;
+Received-SPF: Pass (protection.outlook.com: domain of arm.com designates
+ 63.35.35.123 as permitted sender) receiver=protection.outlook.com;
+ client-ip=63.35.35.123; helo=64aa7808-outbound-1.mta.getcheckrecipient.com;
+ pr=C
+Received: from 64aa7808-outbound-1.mta.getcheckrecipient.com (63.35.35.123) by
+ DBAEUR03FT050.mail.protection.outlook.com (100.127.142.250) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.5588.10 via Frontend Transport; Mon, 5 Sep 2022 14:33:24 +0000
+Received: ("Tessian outbound 73dd6a25223d:v123"); Mon, 05 Sep 2022 14:33:24 +0000
+X-CheckRecipientChecked: true
+X-CR-MTA-CID: bf4cc00f9f8f795d
+X-CR-MTA-TID: 64aa7808
+Received: from ceac383323c3.2
+        by 64aa7808-outbound-1.mta.getcheckrecipient.com id D3762454-DBA2-4F80-B2FA-053FA6D88EA9.1;
+        Mon, 05 Sep 2022 14:33:13 +0000
+Received: from EUR01-VE1-obe.outbound.protection.outlook.com
+    by 64aa7808-outbound-1.mta.getcheckrecipient.com with ESMTPS id ceac383323c3.2
+    (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384);
+    Mon, 05 Sep 2022 14:33:13 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=JrROeI8iheLu8I5On5nkCFvJ2sKmjpHdNLaj25PSmV2Y4YsqwxJLwgZ9kcOZQ4Wtv2Y2T0/yhu4DoyGuIN+CNOCjPMBJu4Ji4dytr5SOIzgpa8h47MBLihPIovAhr5UdykOZSAAC/7fnIrnsxrERvtxkeArpev+qRzBd1bSfOvm5eV+G69coxYnQPBkvdzYZmefksXDxTnpArgNIYP0lL8xkpZwvjK5RsNzbQ2BJhABVYm1QeHgjo4YktZpNeotCodu1j9Ufp7Aac837D/JLc94u+tFMaOKUI3oHi35rGSeepwmADG5biUPrbID+jgs13B88IZ3iRFFyss5UCaoYxA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=5k+rtzwD52E2mJV4rDYVMkPAZqJrBAs/8ARx//tFZ0A=;
+ b=nahB7v0YOlZMPZlMt/+bNNRRKlgvZEBuT4ytLkk1maR/JGzBeObuAggA3vO5+SZ28PdmGCCwrnJeOQGE8xzU4sX3wKH/vnFHUHH18I7xEMAnV72x7xqXmG/0fFmFCGLdk/Nm8AgXkfUjN1cL/C2b2DFIORNyYAGKzD8w7zOKtunQcBVdV5hdSzRqyLwXpcyRO32L1C0AYRiY153HeM++Xo6OGbY6AIg4It3gH/sQFcVh0787kkilk7cpb8PnQYtdpRLDgb18aci7T+FYVT77qDY2qSWdc43gRfj8dckUUJqRoDUt28VuxdmhQHCeUvCsjMqDjIqD/jUMYJ2CtBx2dg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=arm.com; dmarc=pass action=none header.from=arm.com; dkim=pass
+ header.d=arm.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=armh.onmicrosoft.com;
+ s=selector2-armh-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=5k+rtzwD52E2mJV4rDYVMkPAZqJrBAs/8ARx//tFZ0A=;
+ b=R2RJYBmvtKpPESwLRGCliUUIenrzzKjbLlFpnzUIUVHT122jZub4i8SfEZC/bGgLLyihq3D9Azwyesrqljjq5Uo3lCHhJcC24Zi8zabVWmholqpNaHZYxUtffhTcyWnf61VNnPoWSHOeyWYHJUKUQjriU1qB/v784Ik3I/Q1e4c=
+Received: from DBBPR08MB4538.eurprd08.prod.outlook.com (2603:10a6:10:d2::15)
+ by AM9PR08MB6099.eurprd08.prod.outlook.com (2603:10a6:20b:286::18) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5588.12; Mon, 5 Sep
+ 2022 14:33:10 +0000
+Received: from DBBPR08MB4538.eurprd08.prod.outlook.com
+ ([fe80::c426:e28d:64d9:9d0f]) by DBBPR08MB4538.eurprd08.prod.outlook.com
+ ([fe80::c426:e28d:64d9:9d0f%7]) with mapi id 15.20.5588.018; Mon, 5 Sep 2022
+ 14:33:10 +0000
+From:   Justin He <Justin.He@arm.com>
+To:     "Kani, Toshi" <toshi.kani@hpe.com>, Len Brown <lenb@kernel.org>,
+        James Morse <James.Morse@arm.com>,
+        Tony Luck <tony.luck@intel.com>,
+        Borislav Petkov <bp@alien8.de>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Robert Richter <rric@kernel.org>,
+        Robert Moore <robert.moore@intel.com>,
+        Qiuxu Zhuo <qiuxu.zhuo@intel.com>,
+        Yazen Ghannam <yazen.ghannam@amd.com>,
+        Jan Luebbe <jlu@pengutronix.de>,
+        Khuong Dinh <khuong@os.amperecomputing.com>
+CC:     Ard Biesheuvel <ardb@kernel.org>,
+        "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-edac@vger.kernel.org" <linux-edac@vger.kernel.org>,
+        "devel@acpica.org" <devel@acpica.org>,
+        "Rafael J . Wysocki" <rafael@kernel.org>,
+        Shuai Xue <xueshuai@linux.alibaba.com>,
+        Jarkko Sakkinen <jarkko@kernel.org>,
+        "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>,
+        nd <nd@arm.com>
+Subject: RE: [PATCH v4 5/8] EDAC/ghes: Make ghes_edac a proper module to
+ remove the dependency on ghes
+Thread-Topic: [PATCH v4 5/8] EDAC/ghes: Make ghes_edac a proper module to
+ remove the dependency on ghes
+Thread-Index: AQHYvQ0mwst0fCgW/0KIW0mdjbCxYq3MZIKAgAR7I1A=
+Date:   Mon, 5 Sep 2022 14:33:10 +0000
+Message-ID: <DBBPR08MB4538916D8C9AF314A71D2C29F77F9@DBBPR08MB4538.eurprd08.prod.outlook.com>
+References: <20220831074027.13849-1-justin.he@arm.com>
+ <20220831074027.13849-6-justin.he@arm.com>
+ <DM4PR84MB1853F07391E61292D4119F21827A9@DM4PR84MB1853.NAMPRD84.PROD.OUTLOOK.COM>
+In-Reply-To: <DM4PR84MB1853F07391E61292D4119F21827A9@DM4PR84MB1853.NAMPRD84.PROD.OUTLOOK.COM>
+Accept-Language: en-US, zh-CN
+Content-Language: zh-CN
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+Authentication-Results-Original: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=arm.com;
+X-MS-Office365-Filtering-Correlation-Id: a8df4ff8-2cea-491d-f269-08da8f4b971f
+x-ms-traffictypediagnostic: AM9PR08MB6099:EE_|DBAEUR03FT050:EE_|AS8PR08MB6535:EE_
+x-checkrecipientrouted: true
+nodisclaimer: true
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam-Untrusted: BCL:0;
+X-Microsoft-Antispam-Message-Info-Original: ODYdUG9vP5d3fCrqDOLnQ+bLyDjyA7G+plC7y53uezVQMRIGX+9OGQ+pT+5RGyr+d3QT9WAPgI99rCbOmnhN0xJuGlUq5Avnfd/nkdr1XLCJHRYgN4l+Qe4iZMfGLpIbRevlrxFGF8XFiqx4bk8hcPVg13GsvhI+5oMgqSlNLR6PC7p6V5/rv+QjRj1W7bRVOpulamfA7nR9RmrYq+1jvuvNIHd+V/D8BDgsxZsKeW4chc5AvSK1uc7tvLwm4n0DhbxOr/SbJbAehV5Oa6UJXtlwjtPdxNEdtFroN+97uly+wuXwp/o5C4OTg36FGzjfN59ckKfXdqDT6YM3SVOzvJ456UjBVJQPV21B4jOQzo95verk2s336TZuRL2jK4iQJk1rYqEyZCdE596v1wP/UR+ySdq/gt21qLmxNJTWRB0+T903dLDsML5g4U0ynweh+xmETEWlFI5aY/oSLTU9/JPbSDAqGou3K8cYRJJmARx4gTXr2g4XvJAcmBLvTaqjhbNJ5bkHSs9hatNz0ts2/+GdZZYAll3HoKwe+1UzcklCcBBIy5Z/ckPffnZXsCkhJ3rm97wzGQCCgFeKCeBcpS0l0gOBA1Fj3OYr8b+cbMyO7M3xtwG25qUhidreXUoJ7twuL6O5OG82NABJ7LqarI+paWM861Barp0KfP7dbpIBJYZFGQWHWv1PLmvTYnfK9YNbkyb8e1OOvSrKaQo0Jmdj8j0C4TodTlPDm4vjoFYtJkLuHZyeBWoGeJWjFffMpeNH/P3GXD36f3qoLIsJKzJyUm9omX9uLps1k1Cu8E8=
+X-Forefront-Antispam-Report-Untrusted: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DBBPR08MB4538.eurprd08.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230016)(4636009)(39860400002)(366004)(136003)(396003)(346002)(376002)(83380400001)(38100700002)(122000001)(66556008)(921005)(38070700005)(4326008)(55016003)(76116006)(66446008)(64756008)(8676002)(66946007)(296002)(110136005)(316002)(66476007)(54906003)(2906002)(8936002)(4744005)(7416002)(6506007)(7696005)(9686003)(26005)(186003)(52536014)(5660300002)(71200400001)(41300700001)(478600001)(33656002)(86362001);DIR:OUT;SFP:1101;
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-References: <20220828025158.1455-1-demi@invisiblethingslab.com>
-In-Reply-To: <20220828025158.1455-1-demi@invisiblethingslab.com>
-From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Mon, 5 Sep 2022 13:46:54 +0200
-X-Gmail-Original-Message-ID: <CAMj1kXF5eH-HE1dkAEGGZ1qfG1eRThsNK7ayWkRmaHSO36sjfA@mail.gmail.com>
-Message-ID: <CAMj1kXF5eH-HE1dkAEGGZ1qfG1eRThsNK7ayWkRmaHSO36sjfA@mail.gmail.com>
-Subject: Re: [PATCH v2] Add support for ESRT loading under Xen
-To:     Demi Marie Obenour <demi@invisiblethingslab.com>
-Cc:     Juergen Gross <jgross@suse.com>,
-        Stefano Stabellini <sstabellini@kernel.org>,
-        Oleksandr Tyshchenko <oleksandr_tyshchenko@epam.com>,
-        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
-        xen-devel@lists.xenproject.org
-Content-Type: text/plain; charset="UTF-8"
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: AM9PR08MB6099
+Original-Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=arm.com;
+X-EOPAttributedMessage: 0
+X-MS-Exchange-Transport-CrossTenantHeadersStripped: DBAEUR03FT050.eop-EUR03.prod.protection.outlook.com
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id-Prvs: 449fbc3e-b99a-49e6-b976-08da8f4b8eaf
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: yOWS7zELPWSZy9fK5xE2/h7xn/2ViUGwTpUKpEelMJ8BFt99RIlBNwa+DAdLwMGxVQ1N7RMOmEqE35tLG53p/6DTqikQqyGpUfPUDymqOY19l5tF8iO1wFe1XddV8Ii396WeXqrOo0bQzmXmGOeRNOCnXtJubo3/X1AeYLQeojLHnxM9cB0dNA7MvK8vpHrSoxXdf/M9GmSeiho1iRLqJjUkD1rPr8I+oBqMIZzIMw+DDc5jTCvVhvSYO9hw6E+aJzYPLVySwm/4DozQFm8nMMTuvGHhCSL3HH5nBYMdMhJN9F2n3Kmr8j6+oXHkzNIvasK6dLpy7SUS1PmIkMm6CqPGowIthY3MVBY0jYB/u4++nRxXYgCZItlBjZhZjWY1lExuDCi20tX/xgja/017YZB9UAqmCKUOhYue63DR2/ab7T+bgSEytqujyjWLnr9OTVrUJiixf/k85FzKx2lBapU8r7KW8XOX6r9mGge7UMCNAQwpzS2VjrycNKLtb4Wo8hlGfrezfzI+YQlejQcB5fc++U0m+CujNuFJUh73DSm+h4HB3CpiZRzUfcU7MlS2wX90Gwyh/GIBh8qSfa7bpEsWT1W++eUjsxTHrDvvg/OfLkEVUCKE7A2gfB+XYYuISgIGuvWqJkbxR+x2oc+InIr9uxwVWlfyfrunrubUnz/Yh7uHHWXA1NfyosV/KUieSXt9dd6R6s0WZsREFN12CmDNQ5yb7mLSu4nAAk2PWWqltoyC3Tn48XwJ3pVTlyiwnAUBy9B4jch1DCJNwd/Z2Ebs67mc7fTdGgtjPegSBcU=
+X-Forefront-Antispam-Report: CIP:63.35.35.123;CTRY:IE;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:64aa7808-outbound-1.mta.getcheckrecipient.com;PTR:ec2-63-35-35-123.eu-west-1.compute.amazonaws.com;CAT:NONE;SFS:(13230016)(4636009)(346002)(396003)(136003)(376002)(39860400002)(40470700004)(46966006)(36840700001)(26005)(7696005)(47076005)(186003)(336012)(40480700001)(52536014)(4744005)(5660300002)(8936002)(9686003)(6506007)(86362001)(33656002)(478600001)(41300700001)(2906002)(40460700003)(36860700001)(83380400001)(110136005)(8676002)(70206006)(82310400005)(316002)(70586007)(82740400003)(81166007)(921005)(356005)(54906003)(55016003)(450100002)(4326008);DIR:OUT;SFP:1101;
+X-OriginatorOrg: arm.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 05 Sep 2022 14:33:24.6962
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: a8df4ff8-2cea-491d-f269-08da8f4b971f
+X-MS-Exchange-CrossTenant-Id: f34e5979-57d9-4aaa-ad4d-b122a662184d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=f34e5979-57d9-4aaa-ad4d-b122a662184d;Ip=[63.35.35.123];Helo=[64aa7808-outbound-1.mta.getcheckrecipient.com]
+X-MS-Exchange-CrossTenant-AuthSource: DBAEUR03FT050.eop-EUR03.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: AS8PR08MB6535
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Sun, 28 Aug 2022 at 04:52, Demi Marie Obenour
-<demi@invisiblethingslab.com> wrote:
->
-> This is needed for fwupd to work in Qubes OS.
->
+Hi Kani
+As per your review for previous patches, I will update the commit log in th=
+e next version.
+Please see my comments below:
 
-Please elaborate on:
-- the current situation
-- why this is a problem
-- why your approach is a reasonable solution.
+> -----Original Message-----
+> > @@ -454,7 +437,7 @@ int ghes_edac_register(struct ghes *ghes, struct
+> > device *dev)
+> >  		pr_info("This system has a very crappy BIOS: It doesn't even list
+> > the DIMMS.\n");
+> >  		pr_info("Its SMBIOS info is wrong. It is doubtful that the error
+> > report would\n");
+> >  		pr_info("work on such system. Use this driver with caution\n");
+> > -	} else if (idx < 0) {
+> > +	} else if (ghes_edac_force_load) {
+>=20
+> This change causes the following messages to start showing up on Arm.
+> Is that what you intend to do?
+>=20
+No
 
-> Signed-off-by: Demi Marie Obenour <demi@invisiblethingslab.com>
-> ---
-> Changes since v1:
->
-> - Use a different type (struct xen_efi_mem_info) for memory information
->   provided by Xen, as Xen reports it in a different way than the
->   standard Linux functions do.
->
->  drivers/firmware/efi/esrt.c | 49 +++++++++++++++++++++++++++----------
->  drivers/xen/efi.c           | 32 ++++++++++++++++++++++++++
->  include/linux/efi.h         | 18 ++++++++++++++
->  3 files changed, 86 insertions(+), 13 deletions(-)
->
-> diff --git a/drivers/firmware/efi/esrt.c b/drivers/firmware/efi/esrt.c
-> index 2a2f52b017e736dd995c69e8aeb5fbd7761732e5..c0fc149a838044cc16bb08a374a0c8ea6b7dcbff 100644
-> --- a/drivers/firmware/efi/esrt.c
-> +++ b/drivers/firmware/efi/esrt.c
-> @@ -243,27 +243,50 @@ void __init efi_esrt_init(void)
->         void *va;
->         struct efi_system_resource_table tmpesrt;
->         size_t size, max, entry_size, entries_size;
-> -       efi_memory_desc_t md;
-> -       int rc;
->         phys_addr_t end;
-> -
-> -       if (!efi_enabled(EFI_MEMMAP))
-> -               return;
-> +       uint32_t type;
->
->         pr_debug("esrt-init: loading.\n");
->         if (!esrt_table_exists())
->                 return;
->
-> -       rc = efi_mem_desc_lookup(efi.esrt, &md);
-> -       if (rc < 0 ||
-> -           (!(md.attribute & EFI_MEMORY_RUNTIME) &&
-> -            md.type != EFI_BOOT_SERVICES_DATA &&
-> -            md.type != EFI_RUNTIME_SERVICES_DATA)) {
-> -               pr_warn("ESRT header is not in the memory map.\n");
-> +       if (efi_enabled(EFI_MEMMAP)) {
-> +               efi_memory_desc_t md;
-> +
-> +               if (efi_mem_desc_lookup(efi.esrt, &md) < 0 ||
-> +                   (!(md.attribute & EFI_MEMORY_RUNTIME) &&
-> +                    md.type != EFI_BOOT_SERVICES_DATA &&
-> +                    md.type != EFI_RUNTIME_SERVICES_DATA)) {
-> +                       pr_warn("ESRT header is not in the memory map.\n");
-> +                       return;
-> +               }
-> +
-> +               type = md.type;
-> +               max = efi_mem_desc_end(&md);
-> +       } else if (IS_ENABLED(CONFIG_XEN_EFI) && efi_enabled(EFI_PARAVIRT)) {
-> +               struct xen_efi_mem_info info;
-> +
-> +               if (!xen_efi_mem_info_query(efi.esrt, &info)) {
-> +                       pr_warn("Failed to lookup ESRT header in Xen memory map\n");
-> +                       return;
-> +               }
-> +
-> +               type = info.type;
-> +               max = info.addr + info.size;
-> +
-> +               /* Recent Xen versions relocate the ESRT to memory of type
-> +                * EfiRuntimeServicesData, which Xen will not reuse.  If the ESRT
+> The messages can be avoided by not setting the force flag on Arm
+> unconditionally.
+> This will need some change to the flag check in ghes_edac_unregister() th=
+ough.
+Yes, looks like I can remove the ghes_edac_force_load check in the ghes_eda=
+c_unregister()
+since it had been checked in the ghes_edac_init
 
-This violates the EFI spec, which spells out very clearly that the
-ESRT must be in EfiBootServicesData memory. Why are you deviating from
-this?
 
-> +                * is not in EfiRuntimeServicesData memory, it has not been reserved
-> +                * by Xen and might be allocated to other guests, so it cannot
-> +                * safely be used. */
-> +               if (type != EFI_RUNTIME_SERVICES_DATA) {
-> +                       pr_warn("Xen did not reserve ESRT, ignoring it\n");
-> +                       return;
-> +               }
-> +       } else {
->                 return;
->         }
->
-> -       max = efi_mem_desc_end(&md);
->         if (max < efi.esrt) {
->                 pr_err("EFI memory descriptor is invalid. (esrt: %p max: %p)\n",
->                        (void *)efi.esrt, (void *)max);
-> @@ -333,7 +356,7 @@ void __init efi_esrt_init(void)
->
->         end = esrt_data + size;
->         pr_info("Reserving ESRT space from %pa to %pa.\n", &esrt_data, &end);
-> -       if (md.type == EFI_BOOT_SERVICES_DATA)
-> +       if (type == EFI_BOOT_SERVICES_DATA)
->                 efi_mem_reserve(esrt_data, esrt_data_size);
->
->         pr_debug("esrt-init: loaded.\n");
-> diff --git a/drivers/xen/efi.c b/drivers/xen/efi.c
-> index d1ff2186ebb48a7c0981ecb6d4afcbbb25ffcea0..b313f213822f0fd5ba6448f6f6f453cfda4c7e23 100644
-> --- a/drivers/xen/efi.c
-> +++ b/drivers/xen/efi.c
-> @@ -26,6 +26,7 @@
->
->  #include <xen/interface/xen.h>
->  #include <xen/interface/platform.h>
-> +#include <xen/page.h>
->  #include <xen/xen.h>
->  #include <xen/xen-ops.h>
->
-> @@ -40,6 +41,37 @@
->
->  #define efi_data(op)   (op.u.efi_runtime_call)
->
-> +static_assert(XEN_PAGE_SHIFT == EFI_PAGE_SHIFT,
-> +              "Mismatch between EFI_PAGE_SHIFT and XEN_PAGE_SHIFT");
-> +
-> +bool xen_efi_mem_info_query(u64 phys_addr, struct xen_efi_mem_info *md)
-> +{
-> +       struct xen_platform_op op = {
-> +               .cmd = XENPF_firmware_info,
-> +               .u.firmware_info = {
-> +                       .type = XEN_FW_EFI_INFO,
-> +                       .index = XEN_FW_EFI_MEM_INFO,
-> +                       .u.efi_info.mem.addr = phys_addr,
-> +                       .u.efi_info.mem.size = ((u64)-1ULL) - phys_addr,
-> +               }
-> +       };
-> +       union xenpf_efi_info *info = &op.u.firmware_info.u.efi_info;
-> +       int rc;
-> +
-> +       memset(md, 0, sizeof(*md)); /* initialize md even on failure */
-> +       rc = HYPERVISOR_platform_op(&op);
-> +       if (rc) {
-> +               pr_warn("Could not obtain information on address %llu from Xen: "
-> +                       "error %d\n", phys_addr, rc);
-> +               return false;
-> +       }
-> +       md->addr = info->mem.addr;
-> +       md->size = info->mem.size;
-> +       md->attr = info->mem.attr;
-> +       md->type = info->mem.type;
-> +       return true;
-> +}
-> +
->  static efi_status_t xen_efi_get_time(efi_time_t *tm, efi_time_cap_t *tc)
->  {
->         struct xen_platform_op op = INIT_EFI_OP(get_time);
-> diff --git a/include/linux/efi.h b/include/linux/efi.h
-> index d2b84c2fec39f0268324d1a38a73ed67786973c9..0598869cdc924aef0e2b9cacc4450b728e1a98c7 100644
-> --- a/include/linux/efi.h
-> +++ b/include/linux/efi.h
-> @@ -1327,1 +1327,19 @@ struct linux_efi_coco_secret_area {
-> +/* Result of a XEN_FW_EFI_MEM_INFO query */
-> +struct xen_efi_mem_info {
-> +    uint64_t addr; /* address queried */
-> +    uint64_t size; /* remaining bytes in memory region */
-> +    uint64_t attr; /* attributes */
-> +    uint32_t type; /* type */
-> +};
-> +
-> +#if IS_ENABLED(CONFIG_XEN_EFI)
-> +extern bool xen_efi_mem_info_query(u64 phys_addr, struct xen_efi_mem_info *out_md);
-> +#else
-> +static inline bool xen_efi_mem_info_query(u64 phys_addr, struct xen_efi_mem_info *out_md)
-> +{
-> +       BUILD_BUG();
-> +       return false;
-> +}
-> +#endif
-> +
->  #endif /* _LINUX_EFI_H */
-> --
-> Sincerely,
-> Demi Marie Obenour (she/her/hers)
-> Invisible Things Lab
