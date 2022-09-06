@@ -2,21 +2,21 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A18CC38145
-	for <linux-efi@archiver.kernel.org>; Tue,  6 Sep 2022 10:42:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 81049C54EE9
+	for <linux-efi@archiver.kernel.org>; Tue,  6 Sep 2022 10:42:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239515AbiIFKmF (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 6 Sep 2022 06:42:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56876 "EHLO
+        id S233406AbiIFKmH (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 6 Sep 2022 06:42:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56864 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239250AbiIFKl6 (ORCPT
+        with ESMTP id S238932AbiIFKl6 (ORCPT
         <rfc822;linux-efi@vger.kernel.org>); Tue, 6 Sep 2022 06:41:58 -0400
 Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 866E961D4E;
-        Tue,  6 Sep 2022 03:41:50 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7081D5FF4D;
+        Tue,  6 Sep 2022 03:41:47 -0700 (PDT)
 Received: from localhost.localdomain (unknown [83.149.199.65])
-        by mail.ispras.ru (Postfix) with ESMTPSA id 1EF3F4076263;
-        Tue,  6 Sep 2022 10:41:40 +0000 (UTC)
+        by mail.ispras.ru (Postfix) with ESMTPSA id 4FD22407625C;
+        Tue,  6 Sep 2022 10:41:39 +0000 (UTC)
 From:   Evgeniy Baskov <baskov@ispras.ru>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
@@ -29,9 +29,9 @@ Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
         lvc-project@linuxtesting.org, x86@kernel.org,
         linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-hardening@vger.kernel.org
-Subject: [PATCH 16/16] efi/libstub: Use memory attribute protocol
-Date:   Tue,  6 Sep 2022 13:41:20 +0300
-Message-Id: <5de2d80398986b81b6cfcdd35436bba8bf62c0e7.1662459668.git.baskov@ispras.ru>
+Subject: [PATCH 10/16] x86/boot: Make console interface more abstract
+Date:   Tue,  6 Sep 2022 13:41:14 +0300
+Message-Id: <7a4b8d6827503ae0e30745014504c72f0c5d6316.1662459668.git.baskov@ispras.ru>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <cover.1662459668.git.baskov@ispras.ru>
 References: <cover.1662459668.git.baskov@ispras.ru>
@@ -41,271 +41,380 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Add EFI_MEMORY_ATTRIBUTE_PROTOCOL as preferred alternative to DXE
-services for changing memory attributes in the EFISTUB.
+To be able to extract kernel from EFI, console output functions
+need to be replaceable by alternative implementations.
 
-Use DXE services only as a fallback in case aforementioned protocol
-is not supported by UEFI implementation.
-
-Move DXE services initialization code closer to the place they are used
-to match EFI_MEMORY_ATTRIBUTE_PROTOCOL initialization code.
+Make all of those functions pointers.
+Move serial console code to separate file.
 
 Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
 ---
- drivers/firmware/efi/libstub/mem.c      | 166 ++++++++++++++++++------
- drivers/firmware/efi/libstub/x86-stub.c |  17 ---
- 2 files changed, 127 insertions(+), 56 deletions(-)
+ arch/x86/boot/compressed/Makefile       |   2 +-
+ arch/x86/boot/compressed/ident_map_64.c |  15 ++-
+ arch/x86/boot/compressed/misc.c         | 109 +--------------------
+ arch/x86/boot/compressed/misc.h         |  13 ++-
+ arch/x86/boot/compressed/putstr.c       | 124 ++++++++++++++++++++++++
+ 5 files changed, 146 insertions(+), 117 deletions(-)
+ create mode 100644 arch/x86/boot/compressed/putstr.c
 
-diff --git a/drivers/firmware/efi/libstub/mem.c b/drivers/firmware/efi/libstub/mem.c
-index 89ebc8ad2c22..8c8782993b30 100644
---- a/drivers/firmware/efi/libstub/mem.c
-+++ b/drivers/firmware/efi/libstub/mem.c
-@@ -5,6 +5,9 @@
+diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
+index 35ce1a64068b..29411864bfcd 100644
+--- a/arch/x86/boot/compressed/Makefile
++++ b/arch/x86/boot/compressed/Makefile
+@@ -92,7 +92,7 @@ $(obj)/misc.o: $(obj)/../voffset.h
  
- #include "efistub.h"
+ vmlinux-objs-y := $(obj)/vmlinux.lds $(obj)/kernel_info.o $(obj)/head_$(BITS).o \
+ 	$(obj)/misc.o $(obj)/string.o $(obj)/cmdline.o $(obj)/error.o \
+-	$(obj)/piggy.o $(obj)/cpuflags.o
++	$(obj)/piggy.o $(obj)/cpuflags.o $(obj)/putstr.o
  
-+const efi_dxe_services_table_t *efi_dxe_table;
-+efi_memory_attribute_protocol_t *efi_mem_attrib_proto;
+ vmlinux-objs-$(CONFIG_EARLY_PRINTK) += $(obj)/early_serial_console.o
+ vmlinux-objs-$(CONFIG_RANDOMIZE_BASE) += $(obj)/kaslr.o
+diff --git a/arch/x86/boot/compressed/ident_map_64.c b/arch/x86/boot/compressed/ident_map_64.c
+index c20cd31e665f..c39373687e50 100644
+--- a/arch/x86/boot/compressed/ident_map_64.c
++++ b/arch/x86/boot/compressed/ident_map_64.c
+@@ -89,12 +89,20 @@ phys_addr_t physical_mask = (1ULL << __PHYSICAL_MASK_SHIFT) - 1;
+ static struct x86_mapping_info mapping_info;
+ int has_nx;
+ 
++/*
++ * This points to actual implementation of mapping function.
++ * Either the one down below or the UEFI API wrapper.
++ */
++unsigned long (*kernel_add_identity_map)(unsigned long start,
++					 unsigned long end,
++					 unsigned int flags);
 +
- static inline bool mmap_has_headroom(unsigned long buff_size,
- 				     unsigned long map_size,
- 				     unsigned long desc_size)
-@@ -131,50 +134,32 @@ void efi_free(unsigned long size, unsigned long addr)
- 	efi_bs_call(free_pages, addr, nr_pages);
- }
- 
--/**
-- * efi_adjust_memory_range_protection() - change memory range protection attributes
-- * @start:	memory range start address
-- * @size:	memory range size
-- *
-- * Actual memory range for which memory attributes are modified is
-- * the smallest ranged with start address and size aligned to EFI_PAGE_SIZE
-- * that includes [start, start + size].
-- *
-- * @return: status code
-- */
--efi_status_t efi_adjust_memory_range_protection(unsigned long start,
--						unsigned long size,
--						unsigned long attributes)
-+static void retrive_dxe_table(void)
-+{
-+	efi_dxe_table = get_efi_config_table(EFI_DXE_SERVICES_TABLE_GUID);
-+	if (efi_dxe_table &&
-+	    efi_dxe_table->hdr.signature != EFI_DXE_SERVICES_TABLE_SIGNATURE) {
-+		efi_warn("Ignoring DXE services table: invalid signature\n");
-+		efi_dxe_table = NULL;
-+	}
-+}
-+
-+static efi_status_t adjust_mem_attrib_dxe(efi_physical_addr_t rounded_start,
-+					  efi_physical_addr_t rounded_end,
-+					  unsigned long attributes)
+ /*
+  * Adds the specified range to the identity mappings.
+  */
+-unsigned long kernel_add_identity_map(unsigned long start,
+-				      unsigned long end,
+-				      unsigned int flags)
++unsigned long kernel_add_identity_map_(unsigned long start,
++				       unsigned long end,
++				       unsigned int flags)
  {
- 	efi_status_t status;
- 	efi_gcd_memory_space_desc_t desc;
--	efi_physical_addr_t end, next;
--	efi_physical_addr_t rounded_start, rounded_end;
-+	efi_physical_addr_t end, next, start;
- 	efi_physical_addr_t unprotect_start, unprotect_size;
- 	int has_system_memory = 0;
+ 	int ret;
  
--	if (efi_dxe_table == NULL)
--		return EFI_UNSUPPORTED;
-+	if (!efi_dxe_table) {
-+		retrive_dxe_table();
+@@ -136,6 +144,7 @@ void initialize_identity_maps(void *rmode)
+ 	struct setup_data *sd;
  
--	/*
--	 * This function should not be used to modify attributes
--	 * other than writable/executable.
--	 */
+ 	boot_params = rmode;
++	kernel_add_identity_map = kernel_add_identity_map_;
+ 
+ 	/* Exclude the encryption mask from __PHYSICAL_MASK */
+ 	physical_mask &= ~sme_me_mask;
+diff --git a/arch/x86/boot/compressed/misc.c b/arch/x86/boot/compressed/misc.c
+index d377e434c4e3..e2c0d05ac293 100644
+--- a/arch/x86/boot/compressed/misc.c
++++ b/arch/x86/boot/compressed/misc.c
+@@ -53,13 +53,6 @@ struct port_io_ops pio_ops;
+ memptr free_mem_ptr;
+ memptr free_mem_end_ptr;
+ 
+-static char *vidmem;
+-static int vidport;
 -
--	if ((attributes & ~(EFI_MEMORY_RO | EFI_MEMORY_XP)) != 0)
--		return EFI_INVALID_PARAMETER;
+-/* These might be accessed before .bss is cleared, so use .data instead. */
+-static int lines __section(".data");
+-static int cols __section(".data");
 -
--	/*
--	 * Disallow simultaniously executable and writable memory
--	 * to inforce W^X policy if direct extraction code is enabled.
--	 */
+ #ifdef CONFIG_KERNEL_GZIP
+ #include "../../../../lib/decompress_inflate.c"
+ #endif
+@@ -92,95 +85,6 @@ static int cols __section(".data");
+  * ../header.S.
+  */
+ 
+-static void scroll(void)
+-{
+-	int i;
 -
--	if ((attributes & (EFI_MEMORY_RO | EFI_MEMORY_XP)) == 0 &&
--	    IS_ENABLED(CONFIG_EFI_STUB_EXTRACT_DIRECT))
--		return EFI_INVALID_PARAMETER;
+-	memmove(vidmem, vidmem + cols * 2, (lines - 1) * cols * 2);
+-	for (i = (lines - 1) * cols * 2; i < lines * cols * 2; i += 2)
+-		vidmem[i] = ' ';
+-}
 -
--	rounded_start = rounddown(start, EFI_PAGE_SIZE);
--	rounded_end = roundup(start + size, EFI_PAGE_SIZE);
-+		if (!efi_dxe_table)
-+			return EFI_UNSUPPORTED;
-+	}
+-#define XMTRDY          0x20
+-
+-#define TXR             0       /*  Transmit register (WRITE) */
+-#define LSR             5       /*  Line Status               */
+-static void serial_putchar(int ch)
+-{
+-	unsigned timeout = 0xffff;
+-
+-	while ((inb(early_serial_base + LSR) & XMTRDY) == 0 && --timeout)
+-		cpu_relax();
+-
+-	outb(ch, early_serial_base + TXR);
+-}
+-
+-void __putstr(const char *s)
+-{
+-	int x, y, pos;
+-	char c;
+-
+-	if (early_serial_base) {
+-		const char *str = s;
+-		while (*str) {
+-			if (*str == '\n')
+-				serial_putchar('\r');
+-			serial_putchar(*str++);
+-		}
+-	}
+-
+-	if (lines == 0 || cols == 0)
+-		return;
+-
+-	x = boot_params->screen_info.orig_x;
+-	y = boot_params->screen_info.orig_y;
+-
+-	while ((c = *s++) != '\0') {
+-		if (c == '\n') {
+-			x = 0;
+-			if (++y >= lines) {
+-				scroll();
+-				y--;
+-			}
+-		} else {
+-			vidmem[(x + cols * y) * 2] = c;
+-			if (++x >= cols) {
+-				x = 0;
+-				if (++y >= lines) {
+-					scroll();
+-					y--;
+-				}
+-			}
+-		}
+-	}
+-
+-	boot_params->screen_info.orig_x = x;
+-	boot_params->screen_info.orig_y = y;
+-
+-	pos = (x + cols * y) * 2;	/* Update cursor position */
+-	outb(14, vidport);
+-	outb(0xff & (pos >> 9), vidport+1);
+-	outb(15, vidport);
+-	outb(0xff & (pos >> 1), vidport+1);
+-}
+-
+-void __puthex(unsigned long value)
+-{
+-	char alpha[2] = "0";
+-	int bits;
+-
+-	for (bits = sizeof(value) * 8 - 4; bits >= 0; bits -= 4) {
+-		unsigned long digit = (value >> bits) & 0xf;
+-
+-		if (digit < 0xA)
+-			alpha[0] = '0' + digit;
+-		else
+-			alpha[0] = 'a' + (digit - 0xA);
+-
+-		__putstr(alpha);
+-	}
+-}
+-
+ #ifdef CONFIG_X86_NEED_RELOCS
+ static void handle_relocations(void *output, unsigned long output_len,
+ 			       unsigned long virt_addr)
+@@ -407,17 +311,6 @@ asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
+ 
+ 	sanitize_boot_params(boot_params);
+ 
+-	if (boot_params->screen_info.orig_video_mode == 7) {
+-		vidmem = (char *) 0xb0000;
+-		vidport = 0x3b4;
+-	} else {
+-		vidmem = (char *) 0xb8000;
+-		vidport = 0x3d4;
+-	}
+-
+-	lines = boot_params->screen_info.orig_video_lines;
+-	cols = boot_params->screen_info.orig_video_cols;
+-
+ 	init_default_io_ops();
  
  	/*
- 	 * Don't modify memory region attributes, they are
-@@ -182,14 +167,15 @@ efi_status_t efi_adjust_memory_range_protection(unsigned long start,
- 	 * encounter firmware bugs.
+@@ -428,7 +321,7 @@ asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
  	 */
+ 	early_tdx_detect();
  
--	for (end = start + size; start < end; start = next) {
+-	console_init();
++	init_bare_console();
+ 
+ 	/*
+ 	 * Save RSDP address for later use. Have this after console_init()
+diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
+index a4f99516f310..39dc3de50268 100644
+--- a/arch/x86/boot/compressed/misc.h
++++ b/arch/x86/boot/compressed/misc.h
+@@ -53,8 +53,8 @@ extern memptr free_mem_end_ptr;
+ void *malloc(int size);
+ void free(void *where);
+ extern struct boot_params *boot_params;
+-void __putstr(const char *s);
+-void __puthex(unsigned long value);
++extern void (*__putstr)(const char *s);
++extern void (*__puthex)(unsigned long value);
+ #define error_putstr(__x)  __putstr(__x)
+ #define error_puthex(__x)  __puthex(__x)
+ 
+@@ -124,6 +124,9 @@ static inline void console_init(void)
+ { }
+ #endif
+ 
++/* putstr.c */
++void init_bare_console(void);
 +
-+	for (start = rounded_start, end = rounded_end; start < end; start = next) {
- 
- 		status = efi_dxe_call(get_memory_space_descriptor,
- 				      start, &desc);
- 
- 		if (status != EFI_SUCCESS) {
- 			efi_warn("Unable to get memory descriptor at %lx\n",
--				 start);
-+				 (unsigned long)start);
- 			return status;
- 		}
- 
-@@ -231,3 +217,105 @@ efi_status_t efi_adjust_memory_range_protection(unsigned long start,
- 
- 	return EFI_SUCCESS;
- }
+ #ifdef CONFIG_AMD_MEM_ENCRYPT
+ void sev_enable(struct boot_params *bp);
+ void sev_es_shutdown_ghcb(void);
+@@ -172,9 +175,9 @@ static inline int count_immovable_mem_regions(void) { return 0; }
+ extern unsigned int __pgtable_l5_enabled, pgdir_shift, ptrs_per_p4d;
+ #endif
+ #ifdef CONFIG_X86_64
+-extern unsigned long kernel_add_identity_map(unsigned long start,
+-					     unsigned long end,
+-					     unsigned int flags);
++extern unsigned long (*kernel_add_identity_map)(unsigned long start,
++						unsigned long end,
++						unsigned int flags);
+ #else
+ static inline unsigned long kernel_add_identity_map(unsigned long start,
+ 						    unsigned long end,
+diff --git a/arch/x86/boot/compressed/putstr.c b/arch/x86/boot/compressed/putstr.c
+new file mode 100644
+index 000000000000..accba0de8be9
+--- /dev/null
++++ b/arch/x86/boot/compressed/putstr.c
+@@ -0,0 +1,124 @@
++// SPDX-License-Identifier: GPL-2.0
++#include "misc.h"
 +
-+static void retrive_memory_attributes_proto(void)
++/* These might be accessed before .bss is cleared, so use .data instead. */
++static char *vidmem __section(".data");
++static int vidport __section(".data");
++static int lines __section(".data");
++static int cols __section(".data");
++
++void (*__putstr)(const char *s);
++void (*__puthex)(unsigned long value);
++
++static void putstr(const char *s);
++static void puthex(unsigned long value);
++
++void init_bare_console(void)
 +{
-+	efi_status_t status;
-+	efi_guid_t guid = EFI_MEMORY_ATTRIBUTE_PROTOCOL_GUID;
++	__putstr = putstr;
++	__puthex = puthex;
 +
-+	status = efi_bs_call(locate_protocol, &guid, NULL,
-+			     (void **)&efi_mem_attrib_proto);
-+	if (status != EFI_SUCCESS)
-+		efi_mem_attrib_proto = NULL;
++	if (boot_params->screen_info.orig_video_mode == 7) {
++		vidmem = (char *) 0xb0000;
++		vidport = 0x3b4;
++	} else {
++		vidmem = (char *) 0xb8000;
++		vidport = 0x3d4;
++	}
++
++	lines = boot_params->screen_info.orig_video_lines;
++	cols = boot_params->screen_info.orig_video_cols;
++
++	console_init();
 +}
 +
-+/**
-+ * efi_adjust_memory_range_protection() - change memory range protection attributes
-+ * @start:	memory range start address
-+ * @size:	memory range size
-+ *
-+ * Actual memory range for which memory attributes are modified is
-+ * the smallest ranged with start address and size aligned to EFI_PAGE_SIZE
-+ * that includes [start, start + size].
-+ *
-+ * This function first attempts to use EFI_MEMORY_ATTRIBUTE_PROTOCOL,
-+ * that is a part of UEFI Specification since version 2.10.
-+ * If the protocol is unavailable it falls back to DXE services functions.
-+ *
-+ * @return: status code
-+ */
-+efi_status_t efi_adjust_memory_range_protection(unsigned long start,
-+						unsigned long size,
-+						unsigned long attributes)
++static void scroll(void)
 +{
-+	efi_status_t status;
-+	efi_physical_addr_t rounded_start, rounded_end;
-+	unsigned long attr_clear;
++	int i;
 +
-+	/*
-+	 * This function should not be used to modify attributes
-+	 * other than writable/executable.
-+	 */
++	memmove(vidmem, vidmem + cols * 2, (lines - 1) * cols * 2);
++	for (i = (lines - 1) * cols * 2; i < lines * cols * 2; i += 2)
++		vidmem[i] = ' ';
++}
 +
-+	if ((attributes & ~(EFI_MEMORY_RO | EFI_MEMORY_XP)) != 0)
-+		return EFI_INVALID_PARAMETER;
++#define XMTRDY          0x20
 +
-+	/*
-+	 * Disallow simultaniously executable and writable memory
-+	 * to inforce W^X policy if direct extraction code is enabled.
-+	 */
++#define TXR             0       /*  Transmit register (WRITE) */
++#define LSR             5       /*  Line Status               */
 +
-+	if ((attributes & (EFI_MEMORY_RO | EFI_MEMORY_XP)) == 0 &&
-+	    IS_ENABLED(CONFIG_EFI_STUB_EXTRACT_DIRECT))
-+		return EFI_INVALID_PARAMETER;
++static void serial_putchar(int ch)
++{
++	unsigned int timeout = 0xffff;
 +
-+	rounded_start = rounddown(start, EFI_PAGE_SIZE);
-+	rounded_end = roundup(start + size, EFI_PAGE_SIZE);
++	while ((inb(early_serial_base + LSR) & XMTRDY) == 0 && --timeout)
++		cpu_relax();
 +
-+	if (!efi_mem_attrib_proto) {
-+		retrive_memory_attributes_proto();
++	outb(ch, early_serial_base + TXR);
++}
 +
-+		/* Fall back to DXE services if unsupported */
-+		if (!efi_mem_attrib_proto) {
-+			return adjust_mem_attrib_dxe(rounded_start,
-+						     rounded_end,
-+						     attributes);
++static void putstr(const char *s)
++{
++	int x, y, pos;
++	char c;
++
++	if (early_serial_base) {
++		const char *str = s;
++
++		while (*str) {
++			if (*str == '\n')
++				serial_putchar('\r');
++			serial_putchar(*str++);
 +		}
 +	}
 +
-+	/*
-+	 * Unlike DXE services functions, EFI_MEMORY_ATTRIBUTE_PROTOCOL
-+	 * does not clear unset protection bit, so it needs to be cleared
-+	 * explcitly
-+	 */
++	if (lines == 0 || cols == 0)
++		return;
 +
-+	attr_clear = ~attributes &
-+		     (EFI_MEMORY_RO | EFI_MEMORY_XP | EFI_MEMORY_RP);
++	x = boot_params->screen_info.orig_x;
++	y = boot_params->screen_info.orig_y;
 +
-+	status = efi_call_proto(efi_mem_attrib_proto,
-+				clear_memory_attributes,
-+				rounded_start,
-+				rounded_end - rounded_start,
-+				attr_clear);
-+	if (status != EFI_SUCCESS) {
-+		efi_warn("Failed to clear memory attributes at [%08lx,%08lx]: %lx",
-+			 (unsigned long)rounded_start,
-+			 (unsigned long)rounded_end,
-+			 status);
-+		return status;
++	while ((c = *s++) != '\0') {
++		if (c == '\n') {
++			x = 0;
++			if (++y >= lines) {
++				scroll();
++				y--;
++			}
++		} else {
++			vidmem[(x + cols * y) * 2] = c;
++			if (++x >= cols) {
++				x = 0;
++				if (++y >= lines) {
++					scroll();
++					y--;
++				}
++			}
++		}
 +	}
 +
-+	status = efi_call_proto(efi_mem_attrib_proto,
-+				set_memory_attributes,
-+				rounded_start,
-+				rounded_end - rounded_start,
-+				attributes);
-+	if (status != EFI_SUCCESS) {
-+		efi_warn("Failed to set memory attributes at [%08lx,%08lx]: %lx",
-+			 (unsigned long)rounded_start,
-+			 (unsigned long)rounded_end,
-+			 status);
-+	}
++	boot_params->screen_info.orig_x = x;
++	boot_params->screen_info.orig_y = y;
 +
-+	return status;
++	pos = (x + cols * y) * 2;	/* Update cursor position */
++	outb(14, vidport);
++	outb(0xff & (pos >> 9), vidport+1);
++	outb(15, vidport);
++	outb(0xff & (pos >> 1), vidport+1);
 +}
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index 914106d547a6..dd1e1e663072 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -22,7 +22,6 @@
- #define MAXMEM_X86_64_4LEVEL (1ull << 46)
- 
- const efi_system_table_t *efi_system_table;
--const efi_dxe_services_table_t *efi_dxe_table;
- extern u32 image_offset;
- static efi_loaded_image_t *image = NULL;
- 
-@@ -401,15 +400,6 @@ static void setup_sections_memory_protection(void *image_base,
- 					     unsigned long init_size)
- {
- #ifdef CONFIG_EFI_DXE_MEM_ATTRIBUTES
--	efi_dxe_table = get_efi_config_table(EFI_DXE_SERVICES_TABLE_GUID);
--
--	if (!efi_dxe_table ||
--	    efi_dxe_table->hdr.signature != EFI_DXE_SERVICES_TABLE_SIGNATURE) {
--		efi_warn("Unable to locate EFI DXE services table\n");
--		efi_dxe_table = NULL;
--		return;
--	}
--
- 	extern char _head[], _ehead[];
- 	extern char _compressed[], _ecompressed[];
- 	extern char _text[], _etext[];
-@@ -791,13 +781,6 @@ unsigned long efi_main(efi_handle_t handle,
- 	if (efi_system_table->hdr.signature != EFI_SYSTEM_TABLE_SIGNATURE)
- 		efi_exit(handle, EFI_INVALID_PARAMETER);
- 
--	efi_dxe_table = get_efi_config_table(EFI_DXE_SERVICES_TABLE_GUID);
--	if (efi_dxe_table &&
--	    efi_dxe_table->hdr.signature != EFI_DXE_SERVICES_TABLE_SIGNATURE) {
--		efi_warn("Ignoring DXE services table: invalid signature\n");
--		efi_dxe_table = NULL;
--	}
--
- #ifndef CONFIG_EFI_STUB_EXTRACT_DIRECT
- 	/*
- 	 * If the kernel isn't already loaded at a suitable address,
++
++static void puthex(unsigned long value)
++{
++	char alpha[2] = "0";
++	int bits;
++
++	for (bits = sizeof(value) * 8 - 4; bits >= 0; bits -= 4) {
++		unsigned long digit = (value >> bits) & 0xf;
++
++		if (digit < 0xA)
++			alpha[0] = '0' + digit;
++		else
++			alpha[0] = 'a' + (digit - 0xA);
++
++		putstr(alpha);
++	}
++}
 -- 
 2.35.1
 
