@@ -2,21 +2,21 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 86CC2C6FA8E
-	for <linux-efi@archiver.kernel.org>; Tue,  6 Sep 2022 10:42:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9CF88C38145
+	for <linux-efi@archiver.kernel.org>; Tue,  6 Sep 2022 10:42:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239484AbiIFKmA (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 6 Sep 2022 06:42:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56874 "EHLO
+        id S239491AbiIFKmB (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 6 Sep 2022 06:42:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56894 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234166AbiIFKl4 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 6 Sep 2022 06:41:56 -0400
+        with ESMTP id S234187AbiIFKl5 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 6 Sep 2022 06:41:57 -0400
 Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 701DA5FAFE;
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7904C60515;
         Tue,  6 Sep 2022 03:41:47 -0700 (PDT)
 Received: from localhost.localdomain (unknown [83.149.199.65])
-        by mail.ispras.ru (Postfix) with ESMTPSA id DBE584076259;
-        Tue,  6 Sep 2022 10:41:38 +0000 (UTC)
+        by mail.ispras.ru (Postfix) with ESMTPSA id 73EC6407625D;
+        Tue,  6 Sep 2022 10:41:39 +0000 (UTC)
 From:   Evgeniy Baskov <baskov@ispras.ru>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
@@ -29,9 +29,9 @@ Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
         lvc-project@linuxtesting.org, x86@kernel.org,
         linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-hardening@vger.kernel.org
-Subject: [PATCH 07/16] x86/boot: Map memory explicitly
-Date:   Tue,  6 Sep 2022 13:41:11 +0300
-Message-Id: <0e61be4896f0d6dc700e75ae4d5b0c4eedc7848b.1662459668.git.baskov@ispras.ru>
+Subject: [PATCH 11/16] x86/boot: Split trampoline and pt init code
+Date:   Tue,  6 Sep 2022 13:41:15 +0300
+Message-Id: <73823188b635f008dfb26168e5eb47ffa29b505b.1662459668.git.baskov@ispras.ru>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <cover.1662459668.git.baskov@ispras.ru>
 References: <cover.1662459668.git.baskov@ispras.ru>
@@ -41,156 +41,125 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Implicit mappings hide possible memory errors, e.g. allocations for
-ACPI tables were not included in boot page table size.
+When allocating trampoline from libstub trampoline allocation is
+performed separately, so it needs to be skipped.
 
-Replace all implicit mappings from page fault handler with
-explicit mappings.
+Split trampoline initialization and allocation code into two
+functions to make them invokable separately.
 
 Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
 ---
- arch/x86/boot/compressed/acpi.c  | 21 ++++++++++++++++++++-
- arch/x86/boot/compressed/efi.c   | 19 ++++++++++++++++++-
- arch/x86/boot/compressed/kaslr.c |  4 ++++
- 3 files changed, 42 insertions(+), 2 deletions(-)
+ arch/x86/boot/compressed/pgtable_64.c | 73 +++++++++++++++++----------
+ 1 file changed, 46 insertions(+), 27 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/acpi.c b/arch/x86/boot/compressed/acpi.c
-index 9caf89063e77..633ac56262ee 100644
---- a/arch/x86/boot/compressed/acpi.c
-+++ b/arch/x86/boot/compressed/acpi.c
-@@ -93,6 +93,8 @@ static u8 *scan_mem_for_rsdp(u8 *start, u32 length)
+diff --git a/arch/x86/boot/compressed/pgtable_64.c b/arch/x86/boot/compressed/pgtable_64.c
+index c7cf5a1059a8..1f7169248612 100644
+--- a/arch/x86/boot/compressed/pgtable_64.c
++++ b/arch/x86/boot/compressed/pgtable_64.c
+@@ -106,12 +106,8 @@ static unsigned long find_trampoline_placement(void)
+ 	return bios_start - TRAMPOLINE_32BIT_SIZE;
+ }
  
- 	end = start + length;
- 
-+	kernel_add_identity_map((unsigned long)start, (unsigned long)end, 0);
-+
- 	/* Search from given start address for the requested length */
- 	for (address = start; address < end; address += ACPI_RSDP_SCAN_STEP) {
- 		/*
-@@ -128,6 +130,9 @@ static acpi_physical_address bios_get_rsdp_addr(void)
- 	unsigned long address;
- 	u8 *rsdp;
- 
-+	kernel_add_identity_map((unsigned long)ACPI_EBDA_PTR_LOCATION,
-+				(unsigned long)ACPI_EBDA_PTR_LOCATION + 2, 0);
-+
- 	/* Get the location of the Extended BIOS Data Area (EBDA) */
- 	address = *(u16 *)ACPI_EBDA_PTR_LOCATION;
- 	address <<= 4;
-@@ -215,6 +220,9 @@ static unsigned long get_acpi_srat_table(void)
- 	if (!rsdp)
- 		return 0;
- 
-+	kernel_add_identity_map((unsigned long)rsdp,
-+				(unsigned long)(rsdp + 1), 0);
-+
- 	/* Get ACPI root table from RSDP.*/
- 	if (!(cmdline_find_option("acpi", arg, sizeof(arg)) == 4 &&
- 	    !strncmp(arg, "rsdt", 4)) &&
-@@ -235,6 +243,9 @@ static unsigned long get_acpi_srat_table(void)
- 	if (len < sizeof(struct acpi_table_header) + size)
- 		return 0;
- 
-+	kernel_add_identity_map((unsigned long)header,
-+				(unsigned long)header + len, 0);
-+
- 	num_entries = (len - sizeof(struct acpi_table_header)) / size;
- 	entry = (u8 *)(root_table + sizeof(struct acpi_table_header));
- 
-@@ -247,8 +258,16 @@ static unsigned long get_acpi_srat_table(void)
- 		if (acpi_table) {
- 			header = (struct acpi_table_header *)acpi_table;
- 
--			if (ACPI_COMPARE_NAMESEG(header->signature, ACPI_SIG_SRAT))
-+			kernel_add_identity_map(acpi_table,
-+						acpi_table + sizeof(*header),
-+						0);
-+
-+			if (ACPI_COMPARE_NAMESEG(header->signature, ACPI_SIG_SRAT)) {
-+				kernel_add_identity_map(acpi_table,
-+							acpi_table + header->length,
-+							0);
- 				return acpi_table;
-+			}
- 		}
- 		entry += size;
- 	}
-diff --git a/arch/x86/boot/compressed/efi.c b/arch/x86/boot/compressed/efi.c
-index 6edd034b0b30..ce70103fbbc0 100644
---- a/arch/x86/boot/compressed/efi.c
-+++ b/arch/x86/boot/compressed/efi.c
-@@ -57,10 +57,14 @@ enum efi_type efi_get_type(struct boot_params *bp)
-  */
- unsigned long efi_get_system_table(struct boot_params *bp)
+-struct paging_config paging_prepare(void *rmode)
++bool trampoline_pgtable_init(struct boot_params *boot_params)
  {
--	unsigned long sys_tbl_pa;
-+	static unsigned long sys_tbl_pa __section(".data");
- 	struct efi_info *ei;
-+	unsigned long sys_tbl_size;
- 	enum efi_type et;
+-	struct paging_config paging_config = {};
+-
+-	/* Initialize boot_params. Required for cmdline_find_option_bool(). */
+-	boot_params = rmode;
  
-+	if (sys_tbl_pa)
-+		return sys_tbl_pa;
-+
- 	/* Get systab from boot params. */
- 	ei = &bp->efi_info;
- #ifdef CONFIG_X86_64
-@@ -73,6 +77,13 @@ unsigned long efi_get_system_table(struct boot_params *bp)
- 		return 0;
+ 	/*
+ 	 * Check if LA57 is desired and supported.
+@@ -125,26 +121,10 @@ struct paging_config paging_prepare(void *rmode)
+ 	 *
+ 	 * That's substitute for boot_cpu_has() in early boot code.
+ 	 */
+-	if (IS_ENABLED(CONFIG_X86_5LEVEL) &&
+-			!cmdline_find_option_bool("no5lvl") &&
+-			native_cpuid_eax(0) >= 7 &&
+-			(native_cpuid_ecx(7) & (1 << (X86_FEATURE_LA57 & 31)))) {
+-		paging_config.l5_required = 1;
+-	}
+-
+-	paging_config.trampoline_start = find_trampoline_placement();
+-
+-	trampoline_32bit = (unsigned long *)paging_config.trampoline_start;
+-
+-	/* Preserve trampoline memory */
+-	memcpy(trampoline_save, trampoline_32bit, TRAMPOLINE_32BIT_SIZE);
+-
+-	/* Clear trampoline memory first */
+-	memset(trampoline_32bit, 0, TRAMPOLINE_32BIT_SIZE);
+-
+-	/* Copy trampoline code in place */
+-	memcpy(trampoline_32bit + TRAMPOLINE_32BIT_CODE_OFFSET / sizeof(unsigned long),
+-			&trampoline_32bit_src, TRAMPOLINE_32BIT_CODE_SIZE);
++	bool l5_required = IS_ENABLED(CONFIG_X86_5LEVEL) &&
++			   !cmdline_find_option_bool("no5lvl") &&
++			   native_cpuid_eax(0) >= 7 &&
++			   (native_cpuid_ecx(7) & (1 << (X86_FEATURE_LA57 & 31)));
+ 
+ 	/*
+ 	 * The code below prepares page table in trampoline memory.
+@@ -160,10 +140,10 @@ struct paging_config paging_prepare(void *rmode)
+ 	 * We are not going to use the page table in trampoline memory if we
+ 	 * are already in the desired paging mode.
+ 	 */
+-	if (paging_config.l5_required == !!(native_read_cr4() & X86_CR4_LA57))
++	if (l5_required == !!(native_read_cr4() & X86_CR4_LA57))
+ 		goto out;
+ 
+-	if (paging_config.l5_required) {
++	if (l5_required) {
+ 		/*
+ 		 * For 4- to 5-level paging transition, set up current CR3 as
+ 		 * the first and the only entry in a new top-level page table.
+@@ -185,6 +165,45 @@ struct paging_config paging_prepare(void *rmode)
+ 		       (void *)src, PAGE_SIZE);
  	}
  
-+	if (efi_get_type(bp) == EFI_TYPE_64)
-+		sys_tbl_size = sizeof(efi_system_table_64_t);
-+	else
-+		sys_tbl_size = sizeof(efi_system_table_32_t);
++out:
++	return l5_required;
++}
 +
-+	kernel_add_identity_map(sys_tbl_pa, sys_tbl_pa + sys_tbl_size, 0);
++struct paging_config paging_prepare(void *rmode)
++{
++	struct paging_config paging_config = {};
++	bool early_trampoline_alloc = 0;
 +
- 	return sys_tbl_pa;
++	/* Initialize boot_params. Required for cmdline_find_option_bool(). */
++	boot_params = rmode;
++
++	/*
++	 * We only need to find trampoline placement, if we have
++	 * not already done it from libstub.
++	 */
++
++	paging_config.trampoline_start = find_trampoline_placement();
++	trampoline_32bit = (unsigned long *)paging_config.trampoline_start;
++	early_trampoline_alloc = 0;
++
++	/*
++	 * Preserve trampoline memory.
++	 * When trampoline is located in memory
++	 * owned by us, i.e. allocated in EFISTUB,
++	 * we don't care about previous contents
++	 * of this memory so copying can also be skipped.
++	 */
++	memcpy(trampoline_save, trampoline_32bit, TRAMPOLINE_32BIT_SIZE);
++
++	/* Clear trampoline memory first */
++	memset(trampoline_32bit, 0, TRAMPOLINE_32BIT_SIZE);
++
++	/* Copy trampoline code in place */
++	memcpy(trampoline_32bit + TRAMPOLINE_32BIT_CODE_OFFSET / sizeof(unsigned long),
++			&trampoline_32bit_src, TRAMPOLINE_32BIT_CODE_SIZE);
++
++	paging_config.l5_required = trampoline_pgtable_init(boot_params);
++
+ out:
+ 	return paging_config;
  }
- 
-@@ -92,6 +103,10 @@ static struct efi_setup_data *get_kexec_setup_data(struct boot_params *bp,
- 
- 	pa_data = bp->hdr.setup_data;
- 	while (pa_data) {
-+		unsigned long pa_data_end = pa_data + sizeof(struct setup_data)
-+					  + sizeof(struct efi_setup_data);
-+		kernel_add_identity_map(pa_data, pa_data_end, 0);
-+
- 		data = (struct setup_data *)pa_data;
- 		if (data->type == SETUP_EFI) {
- 			esd = (struct efi_setup_data *)(pa_data + sizeof(struct setup_data));
-@@ -160,6 +175,8 @@ int efi_get_conf_table(struct boot_params *bp, unsigned long *cfg_tbl_pa,
- 		return -EINVAL;
- 	}
- 
-+	kernel_add_identity_map(*cfg_tbl_pa, *cfg_tbl_pa + *cfg_tbl_len, 0);
-+
- 	return 0;
- }
- 
-diff --git a/arch/x86/boot/compressed/kaslr.c b/arch/x86/boot/compressed/kaslr.c
-index 4a3f223973f4..073c7cfbd785 100644
---- a/arch/x86/boot/compressed/kaslr.c
-+++ b/arch/x86/boot/compressed/kaslr.c
-@@ -687,6 +687,8 @@ process_efi_entries(unsigned long minimum, unsigned long image_size)
- 	u32 nr_desc;
- 	int i;
- 
-+	kernel_add_identity_map((unsigned long)e, (unsigned long)(e + 1), 0);
-+
- 	signature = (char *)&e->efi_loader_signature;
- 	if (strncmp(signature, EFI32_LOADER_SIGNATURE, 4) &&
- 	    strncmp(signature, EFI64_LOADER_SIGNATURE, 4))
-@@ -703,6 +705,8 @@ process_efi_entries(unsigned long minimum, unsigned long image_size)
- 	pmap = (e->efi_memmap | ((__u64)e->efi_memmap_hi << 32));
- #endif
- 
-+	kernel_add_identity_map(pmap, pmap + e->efi_memmap_size, 0);
-+
- 	nr_desc = e->efi_memmap_size / e->efi_memdesc_size;
- 	for (i = 0; i < nr_desc; i++) {
- 		md = efi_early_memdesc_ptr(pmap, e->efi_memdesc_size, i);
 -- 
 2.35.1
 
