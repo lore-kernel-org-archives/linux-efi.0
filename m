@@ -2,20 +2,20 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9994FC6FA8C
-	for <linux-efi@archiver.kernel.org>; Tue,  6 Sep 2022 10:42:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 15768ECAAA1
+	for <linux-efi@archiver.kernel.org>; Tue,  6 Sep 2022 10:42:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239445AbiIFKmC (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 6 Sep 2022 06:42:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56904 "EHLO
+        id S234031AbiIFKmE (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 6 Sep 2022 06:42:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56912 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238694AbiIFKl5 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 6 Sep 2022 06:41:57 -0400
+        with ESMTP id S239096AbiIFKl6 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 6 Sep 2022 06:41:58 -0400
 Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7979660683;
-        Tue,  6 Sep 2022 03:41:47 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8857261D66;
+        Tue,  6 Sep 2022 03:41:50 -0700 (PDT)
 Received: from localhost.localdomain (unknown [83.149.199.65])
-        by mail.ispras.ru (Postfix) with ESMTPSA id 8D727407625F;
+        by mail.ispras.ru (Postfix) with ESMTPSA id EE00D4076262;
         Tue,  6 Sep 2022 10:41:39 +0000 (UTC)
 From:   Evgeniy Baskov <baskov@ispras.ru>
 To:     Ard Biesheuvel <ardb@kernel.org>
@@ -29,9 +29,9 @@ Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
         lvc-project@linuxtesting.org, x86@kernel.org,
         linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-hardening@vger.kernel.org
-Subject: [PATCH 12/16] x86/boot: Add EFI kernel extraction interface
-Date:   Tue,  6 Sep 2022 13:41:16 +0300
-Message-Id: <8e9f2d7b0645e17efaa9eec0423f6d2c4a55fc16.1662459668.git.baskov@ispras.ru>
+Subject: [PATCH 15/16] efi/libstub: Add memory attribute protocol definitions
+Date:   Tue,  6 Sep 2022 13:41:19 +0300
+Message-Id: <c923e39f76baedfdb743ab9c9c6aa638f94f9aff.1662459668.git.baskov@ispras.ru>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <cover.1662459668.git.baskov@ispras.ru>
 References: <cover.1662459668.git.baskov@ispras.ru>
@@ -41,222 +41,92 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-To enable extraction of kernel image from EFI stub code directly
-extraction code needs to have separate interface that avoid part
-of low level initialization logic, i.e. serial port setup.
+EFI_MEMORY_ATTRIBUTE_PROTOCOL servers as a better alternative to
+DXE services for setting memory attributes in EFI Boot Services
+environment. This protocol is better since it is a part of UEFI
+specification itself and not UEFI PI specification like DXE
+services.
 
-Add kernel extraction function callable from libstub as a part
-of preparation for extracting the kernel directly from EFI environment.
+Add EFI_MEMORY_ATTRIBUTE_PROTOCOL definitions.
+Support mixed mode properly for its calls.
 
 Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
 ---
- arch/x86/boot/compressed/head_32.S |  3 +-
- arch/x86/boot/compressed/head_64.S |  2 +-
- arch/x86/boot/compressed/misc.c    | 85 +++++++++++++++++++++---------
- arch/x86/boot/compressed/misc.h    |  2 +
- arch/x86/boot/compressed/putstr.c  |  9 ++++
- 5 files changed, 73 insertions(+), 28 deletions(-)
+ arch/x86/include/asm/efi.h             |  7 +++++++
+ drivers/firmware/efi/libstub/efistub.h | 22 ++++++++++++++++++++++
+ include/linux/efi.h                    |  1 +
+ 3 files changed, 30 insertions(+)
 
-diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
-index 3b354eb9516d..b46a1c4109cf 100644
---- a/arch/x86/boot/compressed/head_32.S
-+++ b/arch/x86/boot/compressed/head_32.S
-@@ -217,8 +217,7 @@ SYM_DATA(image_offset, .long 0)
-  */
- 	.bss
- 	.balign 4
--boot_heap:
--	.fill BOOT_HEAP_SIZE, 1, 0
-+SYM_DATA(boot_heap,	.fill BOOT_HEAP_SIZE, 1, 0)
- boot_stack:
- 	.fill BOOT_STACK_SIZE, 1, 0
- boot_stack_end:
-diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
-index 889ca7176aa7..37ce094571b5 100644
---- a/arch/x86/boot/compressed/head_64.S
-+++ b/arch/x86/boot/compressed/head_64.S
-@@ -1007,7 +1007,7 @@ SYM_FUNC_END(startup32_check_sev_cbit)
-  */
- 	.bss
- 	.balign 4
--SYM_DATA_LOCAL(boot_heap,	.fill BOOT_HEAP_SIZE, 1, 0)
-+SYM_DATA(boot_heap,	.fill BOOT_HEAP_SIZE, 1, 0)
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index 233ae6986d6f..522ff2e443b3 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -325,6 +325,13 @@ static inline u32 efi64_convert_status(efi_status_t status)
+ #define __efi64_argmap_set_memory_space_attributes(phys, size, flags) \
+ 	(__efi64_split(phys), __efi64_split(size), __efi64_split(flags))
  
- SYM_DATA_START_LOCAL(boot_stack)
- 	.fill BOOT_STACK_SIZE, 1, 0
-diff --git a/arch/x86/boot/compressed/misc.c b/arch/x86/boot/compressed/misc.c
-index e2c0d05ac293..8016cc5c300e 100644
---- a/arch/x86/boot/compressed/misc.c
-+++ b/arch/x86/boot/compressed/misc.c
-@@ -293,11 +293,11 @@ static void parse_elf(void *output, unsigned long output_len,
-  *             |-------uncompressed kernel image---------|
-  *
-  */
--asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
--				  unsigned char *input_data,
--				  unsigned long input_len,
--				  unsigned char *output,
--				  unsigned long output_len)
-+static void *do_extract_kernel(void *rmode,
-+			       unsigned char *input_data,
-+			       unsigned long input_len,
-+			       unsigned char *output,
-+			       unsigned long output_len)
- {
- 	const unsigned long kernel_total_size = VO__end - VO__text;
- 	unsigned long virt_addr = LOAD_PHYSICAL_ADDR;
-@@ -311,18 +311,6 @@ asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
++/* Memory Attribute Protocol */
++#define __efi64_argmap_set_memory_attributes(protocol, phys, size, flags) \
++	((protocol), __efi64_split(phys), __efi64_split(size), __efi64_split(flags))
++
++#define __efi64_argmap_clear_memory_attributes(protocol, phys, size, flags) \
++	((protocol), __efi64_split(phys), __efi64_split(size), __efi64_split(flags))
++
+ /*
+  * The macros below handle the plumbing for the argument mapping. To add a
+  * mapping for a specific EFI method, simply define a macro
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index cdd1bb50c786..87973f104731 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -39,6 +39,9 @@ extern const efi_system_table_t *efi_system_table;
+ typedef union efi_dxe_services_table efi_dxe_services_table_t;
+ extern const efi_dxe_services_table_t *efi_dxe_table;
  
- 	sanitize_boot_params(boot_params);
++typedef union efi_memory_attribute_protocol efi_memory_attribute_protocol_t;
++extern efi_memory_attribute_protocol_t *efi_mem_attrib_proto;
++
+ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
+ 				   efi_system_table_t *sys_table_arg);
  
--	init_default_io_ops();
--
--	/*
--	 * Detect TDX guest environment.
--	 *
--	 * It has to be done before console_init() in order to use
--	 * paravirtualized port I/O operations if needed.
--	 */
--	early_tdx_detect();
--
--	init_bare_console();
--
- 	/*
- 	 * Save RSDP address for later use. Have this after console_init()
- 	 * so that early debugging output from the RSDP parsing code can be
-@@ -330,11 +318,6 @@ asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
- 	 */
- 	boot_params->acpi_rsdp_addr = get_rsdp_addr();
+@@ -403,6 +406,25 @@ union efi_dxe_services_table {
+ 	} mixed_mode;
+ };
  
--	debug_putstr("early console in extract_kernel\n");
--
--	free_mem_ptr     = heap;	/* Heap */
--	free_mem_end_ptr = heap + BOOT_HEAP_SIZE;
--
- 	/*
- 	 * The memory hole needed for the kernel is the larger of either
- 	 * the entire decompressed kernel plus relocation table, or the
-@@ -387,12 +370,12 @@ asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
- 	if (virt_addr & (MIN_KERNEL_ALIGN - 1))
- 		error("Destination virtual address inappropriately aligned");
- #ifdef CONFIG_X86_64
--	if (heap > 0x3fffffffffffUL)
-+	if (phys_addr > 0x3fffffffffffUL)
- 		error("Destination address too large");
- 	if (virt_addr + max(output_len, kernel_total_size) > KERNEL_IMAGE_SIZE)
- 		error("Destination virtual address is beyond the kernel mapping area");
- #else
--	if (heap > ((-__PAGE_OFFSET-(128<<20)-1) & 0x7fffffff))
-+	if (phys_addr > ((-__PAGE_OFFSET-(128<<20)-1) & 0x7fffffff))
- 		error("Destination address too large");
- #endif
- #ifndef CONFIG_RELOCATABLE
-@@ -406,12 +389,64 @@ asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
- 	parse_elf(output, output_len, virt_addr);
- 	debug_putstr("done.\nBooting the kernel.\n");
++union  efi_memory_attribute_protocol {
++	struct {
++		void *get_memory_attributes;
++		efi_status_t (__efiapi *set_memory_attributes)(efi_memory_attribute_protocol_t *,
++								efi_physical_addr_t,
++								u64,
++								u64);
++		efi_status_t (__efiapi *clear_memory_attributes)(efi_memory_attribute_protocol_t *,
++								  efi_physical_addr_t,
++								  u64,
++								  u64);
++	};
++	struct {
++		u32 get_memory_attributes;
++		u32 set_memory_attributes;
++		u32 clear_memory_attributes;
++	} mixed_mode;
++};
++
+ typedef union efi_uga_draw_protocol efi_uga_draw_protocol_t;
  
-+	return output;
-+}
-+
-+asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
-+				  unsigned char *input_data,
-+				  unsigned long input_len,
-+				  unsigned char *output,
-+				  unsigned long output_len)
-+{
-+	void *entry;
-+
-+	init_default_io_ops();
-+
-+	/*
-+	 * Detect TDX guest environment.
-+	 *
-+	 * It has to be done before console_init() in order to use
-+	 * paravirtualized port I/O operations if needed.
-+	 */
-+	early_tdx_detect();
-+
-+	init_bare_console();
-+
-+	debug_putstr("early console in extract_kernel\n");
-+
-+	free_mem_ptr     = heap;	/* Heap */
-+	free_mem_end_ptr = heap + BOOT_HEAP_SIZE;
-+
-+	entry = do_extract_kernel(rmode, input_data,
-+				  input_len, output, output_len);
-+
- 	/* Disable exception handling before booting the kernel */
- 	cleanup_exception_handling();
+ union efi_uga_draw_protocol {
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index d2b84c2fec39..d32368a32285 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -386,6 +386,7 @@ void efi_native_runtime_setup(void);
+ #define EFI_LOAD_FILE2_PROTOCOL_GUID		EFI_GUID(0x4006c0c1, 0xfcb3, 0x403e,  0x99, 0x6d, 0x4a, 0x6c, 0x87, 0x24, 0xe0, 0x6d)
+ #define EFI_RT_PROPERTIES_TABLE_GUID		EFI_GUID(0xeb66918a, 0x7eef, 0x402a,  0x84, 0x2e, 0x93, 0x1d, 0x21, 0xc3, 0x8a, 0xe9)
+ #define EFI_DXE_SERVICES_TABLE_GUID		EFI_GUID(0x05ad34ba, 0x6f02, 0x4214,  0x95, 0x2e, 0x4d, 0xa0, 0x39, 0x8e, 0x2b, 0xb9)
++#define EFI_MEMORY_ATTRIBUTE_PROTOCOL_GUID	EFI_GUID(0xf4560cf6, 0x40ec, 0x4b4a,  0xa1, 0x92, 0xbf, 0x1d, 0x57, 0xd0, 0xb1, 0x89)
  
--	return output;
-+	return entry;
- }
- 
-+void *efi_extract_kernel(struct boot_params *rmode,
-+			 struct efi_iofunc *iofunc,
-+			 unsigned char *input_data,
-+			 unsigned long input_len,
-+			 unsigned char *output,
-+			 unsigned long output_len)
-+{
-+	extern char boot_heap[BOOT_HEAP_SIZE];
-+
-+	free_mem_ptr     = (unsigned long)boot_heap;	/* Heap */
-+	free_mem_end_ptr = (unsigned long)boot_heap + BOOT_HEAP_SIZE;
-+
-+	init_efi_console(iofunc);
-+
-+	return do_extract_kernel(rmode, input_data,
-+				 input_len, output, output_len);
-+}
-+
-+
-+
-+
- void fortify_panic(const char *name)
- {
- 	error("detected buffer overflow");
-diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
-index 39dc3de50268..b5aa0af6c59e 100644
---- a/arch/x86/boot/compressed/misc.h
-+++ b/arch/x86/boot/compressed/misc.h
-@@ -26,6 +26,7 @@
- #include <asm/boot.h>
- #include <asm/bootparam.h>
- #include <asm/desc_defs.h>
-+#include <asm/shared/extract.h>
- 
- #include "tdx.h"
- 
-@@ -126,6 +127,7 @@ static inline void console_init(void)
- 
- /* putstr.c */
- void init_bare_console(void);
-+void init_efi_console(struct efi_iofunc *iofunc);
- 
- #ifdef CONFIG_AMD_MEM_ENCRYPT
- void sev_enable(struct boot_params *bp);
-diff --git a/arch/x86/boot/compressed/putstr.c b/arch/x86/boot/compressed/putstr.c
-index accba0de8be9..238d9677df61 100644
---- a/arch/x86/boot/compressed/putstr.c
-+++ b/arch/x86/boot/compressed/putstr.c
-@@ -32,6 +32,15 @@ void init_bare_console(void)
- 	console_init();
- }
- 
-+void init_efi_console(struct efi_iofunc *iofunc)
-+{
-+	__putstr = iofunc->putstr;
-+	__puthex = iofunc->puthex;
-+#ifdef CONFIG_X86_64
-+	kernel_add_identity_map = iofunc->map_range;
-+#endif
-+}
-+
- static void scroll(void)
- {
- 	int i;
+ #define EFI_IMAGE_SECURITY_DATABASE_GUID	EFI_GUID(0xd719b2cb, 0x3d3a, 0x4596,  0xa3, 0xbc, 0xda, 0xd0, 0x0e, 0x67, 0x65, 0x6f)
+ #define EFI_SHIM_LOCK_GUID			EFI_GUID(0x605dab50, 0xe046, 0x4300,  0xab, 0xb6, 0x3d, 0xd8, 0x10, 0xdd, 0x8b, 0x23)
 -- 
 2.35.1
 
