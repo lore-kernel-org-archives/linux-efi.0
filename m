@@ -2,136 +2,280 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6109BECAAD5
-	for <linux-efi@archiver.kernel.org>; Tue,  6 Sep 2022 10:42:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4CE21ECAAA1
+	for <linux-efi@archiver.kernel.org>; Tue,  6 Sep 2022 10:42:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239574AbiIFKmI (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 6 Sep 2022 06:42:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56906 "EHLO
+        id S239564AbiIFKmK (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 6 Sep 2022 06:42:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56910 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239449AbiIFKl7 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 6 Sep 2022 06:41:59 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A754A5F224;
-        Tue,  6 Sep 2022 03:41:56 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id E66146148B;
-        Tue,  6 Sep 2022 10:41:55 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8FD60C433D7;
-        Tue,  6 Sep 2022 10:41:54 +0000 (UTC)
-Authentication-Results: smtp.kernel.org;
-        dkim=pass (1024-bit key) header.d=zx2c4.com header.i=@zx2c4.com header.b="N/lSShvq"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=zx2c4.com; s=20210105;
-        t=1662460912;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=sxwyXgPnrfZoO4XIqVDt6gjxOKUSRHK702YIPLqC1Ic=;
-        b=N/lSShvq9fxySefxYGSkHa25GjAlvdsMcoIy5rKkxWgt27H8ifhPgrxC8s/uSChk5kJhFb
-        ZeBKJjL7icS4Ch7/LyYTc8HyPWqutJN3nFMi3m/M+H4s6tcc5TRlrgpjNE/qnOckzJkwh5
-        0ZorBg57L0779IP4AqXayvUH8iNNycE=
-Received: by mail.zx2c4.com (ZX2C4 Mail Server) with ESMTPSA id c1062930 (TLSv1.3:TLS_AES_256_GCM_SHA384:256:NO);
-        Tue, 6 Sep 2022 10:41:52 +0000 (UTC)
-From:   "Jason A. Donenfeld" <Jason@zx2c4.com>
-To:     ardb@kernel.org, linux-efi@vger.kernel.org,
-        linux-kernel@vger.kernel.org, x86@kernel.org, bp@alien8.de
-Cc:     "Jason A. Donenfeld" <Jason@zx2c4.com>,
-        Borislav Petkov <bp@suse.de>
-Subject: [PATCH v2] efi: x86: Wipe setup_data on pure EFI boot
-Date:   Tue,  6 Sep 2022 12:41:47 +0200
-Message-Id: <20220906104147.287726-1-Jason@zx2c4.com>
-In-Reply-To: <CAHmME9ozPTL7tpj-QoFK3Dfyq58VAJgmM6MjUBW4VVM_TXo3VA@mail.gmail.com>
-References: <CAHmME9ozPTL7tpj-QoFK3Dfyq58VAJgmM6MjUBW4VVM_TXo3VA@mail.gmail.com>
+        with ESMTP id S238804AbiIFKl5 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 6 Sep 2022 06:41:57 -0400
+Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6DC8E5F12A;
+        Tue,  6 Sep 2022 03:41:47 -0700 (PDT)
+Received: from localhost.localdomain (unknown [83.149.199.65])
+        by mail.ispras.ru (Postfix) with ESMTPSA id 2F3AC407625B;
+        Tue,  6 Sep 2022 10:41:39 +0000 (UTC)
+From:   Evgeniy Baskov <baskov@ispras.ru>
+To:     Ard Biesheuvel <ardb@kernel.org>
+Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
+        Andy Lutomirski <luto@kernel.org>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        Ingo Molnar <mingo@redhat.com>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Alexey Khoroshilov <khoroshilov@ispras.ru>,
+        lvc-project@linuxtesting.org, x86@kernel.org,
+        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-hardening@vger.kernel.org
+Subject: [PATCH 09/16] efi/libstub: Move helper function to related file
+Date:   Tue,  6 Sep 2022 13:41:13 +0300
+Message-Id: <a1c01892bad6e4f05da96380b63ff14a82842d27.1662459668.git.baskov@ispras.ru>
+X-Mailer: git-send-email 2.35.1
+In-Reply-To: <cover.1662459668.git.baskov@ispras.ru>
+References: <cover.1662459668.git.baskov@ispras.ru>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-When booting the x86 kernel via EFI using the LoadImage/StartImage boot
-services [as opposed to the deprecated EFI handover protocol], the setup
-header is taken from the image directly, and given that EFI's LoadImage
-has no Linux/x86 specific knowledge regarding struct bootparams or
-struct setup_header, any absolute addresses in the setup header must
-originate from the file and not from a prior loading stage.
+efi_adjust_memory_range_protection() can be useful outside x86-stub.c.
 
-Since we cannot generally predict where LoadImage() decides to load an
-image (*), such absolute addresses must be treated as suspect: even if a
-prior boot stage intended to make them point somewhere inside the
-[signed] image, there is no way to validate that, and if they point at
-an arbitrary location in memory, the setup_data nodes will not be
-covered by any signatures or TPM measurements either, and could be made
-to contain an arbitrary sequence of SETUP_xxx nodes, which could
-interfere quite badly with the early x86 boot sequence.
+Move it to mem.c, where memory related code resides and make it
+non-static.
 
-(*) Note that, while LoadImage() does take a buffer/size tuple in
-addition to a device path, which can be used to provide the image
-contents directly, it will re-allocate such images, as the memory
-footprint of an image is generally larger than the PE/COFF file
-representation.
+Change its behavior to setup exact attibutes and disallow making memory
+regions readable and writable simultaniosly for supported
+configurations.
 
-Next, in order to allow hypervisors to still use setup_data in scenarios
-where it may be useful, bump the x86 boot protocol version, so that
-hypervisors, e.g. QEMU in the linked patch, can do the right thing
-automatically depending on whether it is safe.
-
-Link: https://lore.kernel.org/qemu-devel/20220904165058.1140503-1-Jason@zx2c4.com/
-Coauthored-by: Ard Biesheuvel <ardb@kernel.org>
-Cc: Borislav Petkov <bp@suse.de>
-Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
+Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
 ---
- Documentation/x86/boot.rst              | 2 ++
- arch/x86/boot/header.S                  | 2 +-
- drivers/firmware/efi/libstub/x86-stub.c | 7 +++++++
- 3 files changed, 10 insertions(+), 1 deletion(-)
+ drivers/firmware/efi/libstub/efistub.h  |   4 +
+ drivers/firmware/efi/libstub/mem.c      | 101 ++++++++++++++++++++++++
+ drivers/firmware/efi/libstub/x86-stub.c |  67 ++--------------
+ 3 files changed, 111 insertions(+), 61 deletions(-)
 
-diff --git a/Documentation/x86/boot.rst b/Documentation/x86/boot.rst
-index 894a19897005..9181f905937d 100644
---- a/Documentation/x86/boot.rst
-+++ b/Documentation/x86/boot.rst
-@@ -75,6 +75,8 @@ Protocol 2.14	BURNT BY INCORRECT COMMIT
- 		DO NOT USE!!! ASSUME SAME AS 2.13.
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index b0ae0a454404..22fe28385db7 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -907,6 +907,10 @@ efi_status_t efi_relocate_kernel(unsigned long *image_addr,
+ 				 unsigned long alignment,
+ 				 unsigned long min_addr);
  
- Protocol 2.15	(Kernel 5.5) Added the kernel_info and kernel_info.setup_type_max.
++efi_status_t efi_adjust_memory_range_protection(unsigned long start,
++						unsigned long size,
++						unsigned long attributes);
 +
-+Protocol 2.16   (Kernel 6.0) EFI stub loader ignores setup_data pointer.
- =============	============================================================
+ efi_status_t efi_parse_options(char const *cmdline);
  
- .. note::
-diff --git a/arch/x86/boot/header.S b/arch/x86/boot/header.S
-index f912d7770130..e4e2d6e33924 100644
---- a/arch/x86/boot/header.S
-+++ b/arch/x86/boot/header.S
-@@ -307,7 +307,7 @@ _start:
- 	# Part 2 of the header, from the old setup.S
- 
- 		.ascii	"HdrS"		# header signature
--		.word	0x020f		# header version number (>= 0x0105)
-+		.word	0x0210		# header version number (>= 0x0105)
- 					# or else old loadlin-1.5 will fail)
- 		.globl realmode_swtch
- realmode_swtch:	.word	0, 0		# default_switch, SETUPSEG
+ void efi_parse_option_graphics(char *option);
+diff --git a/drivers/firmware/efi/libstub/mem.c b/drivers/firmware/efi/libstub/mem.c
+index feef8d4be113..89ebc8ad2c22 100644
+--- a/drivers/firmware/efi/libstub/mem.c
++++ b/drivers/firmware/efi/libstub/mem.c
+@@ -130,3 +130,104 @@ void efi_free(unsigned long size, unsigned long addr)
+ 	nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
+ 	efi_bs_call(free_pages, addr, nr_pages);
+ }
++
++/**
++ * efi_adjust_memory_range_protection() - change memory range protection attributes
++ * @start:	memory range start address
++ * @size:	memory range size
++ *
++ * Actual memory range for which memory attributes are modified is
++ * the smallest ranged with start address and size aligned to EFI_PAGE_SIZE
++ * that includes [start, start + size].
++ *
++ * @return: status code
++ */
++efi_status_t efi_adjust_memory_range_protection(unsigned long start,
++						unsigned long size,
++						unsigned long attributes)
++{
++	efi_status_t status;
++	efi_gcd_memory_space_desc_t desc;
++	efi_physical_addr_t end, next;
++	efi_physical_addr_t rounded_start, rounded_end;
++	efi_physical_addr_t unprotect_start, unprotect_size;
++	int has_system_memory = 0;
++
++	if (efi_dxe_table == NULL)
++		return EFI_UNSUPPORTED;
++
++	/*
++	 * This function should not be used to modify attributes
++	 * other than writable/executable.
++	 */
++
++	if ((attributes & ~(EFI_MEMORY_RO | EFI_MEMORY_XP)) != 0)
++		return EFI_INVALID_PARAMETER;
++
++	/*
++	 * Disallow simultaniously executable and writable memory
++	 * to inforce W^X policy if direct extraction code is enabled.
++	 */
++
++	if ((attributes & (EFI_MEMORY_RO | EFI_MEMORY_XP)) == 0 &&
++	    IS_ENABLED(CONFIG_EFI_STUB_EXTRACT_DIRECT))
++		return EFI_INVALID_PARAMETER;
++
++	rounded_start = rounddown(start, EFI_PAGE_SIZE);
++	rounded_end = roundup(start + size, EFI_PAGE_SIZE);
++
++	/*
++	 * Don't modify memory region attributes, they are
++	 * already suitable, to lower the possibility to
++	 * encounter firmware bugs.
++	 */
++
++	for (end = start + size; start < end; start = next) {
++
++		status = efi_dxe_call(get_memory_space_descriptor,
++				      start, &desc);
++
++		if (status != EFI_SUCCESS) {
++			efi_warn("Unable to get memory descriptor at %lx\n",
++				 start);
++			return status;
++		}
++
++		next = desc.base_address + desc.length;
++
++		/*
++		 * Only system memory is suitable for trampoline/kernel image
++		 * placement, so only this type of memory needs its attributes
++		 * to be modified.
++		 */
++
++		if (desc.gcd_memory_type != EfiGcdMemoryTypeSystemMemory) {
++			efi_warn("Attempted to change protection of special memory range\n");
++			return EFI_UNSUPPORTED;
++		}
++
++		if (((desc.attributes ^ attributes) &
++		     (EFI_MEMORY_RO | EFI_MEMORY_XP)) == 0)
++			continue;
++
++		desc.attributes &= ~(EFI_MEMORY_RO | EFI_MEMORY_XP);
++		desc.attributes |= attributes;
++
++		unprotect_start = max(rounded_start, desc.base_address);
++		unprotect_size = min(rounded_end, next) - unprotect_start;
++
++		status = efi_dxe_call(set_memory_space_attributes,
++				      unprotect_start, unprotect_size,
++				      desc.attributes);
++
++		if (status != EFI_SUCCESS) {
++			efi_warn("Unable to unprotect memory range [%08lx,%08lx]: %lx\n",
++				 (unsigned long)unprotect_start,
++				 (unsigned long)(unprotect_start + unprotect_size),
++				 status);
++			return status;
++		}
++	}
++
++	return EFI_SUCCESS;
++}
 diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index 05ae8bcc9d67..9780f32a9f24 100644
+index 05ae8bcc9d67..678f9c2ccafc 100644
 --- a/drivers/firmware/efi/libstub/x86-stub.c
 +++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -517,6 +517,13 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
- 	hdr->ramdisk_image = 0;
- 	hdr->ramdisk_size = 0;
+@@ -212,62 +212,6 @@ static void retrieve_apple_device_properties(struct boot_params *boot_params)
+ 	}
+ }
  
-+	/*
-+	 * Disregard any setup data that was provided by the bootloader:
-+	 * setup_data could be pointing anywhere, and we have no way of
-+	 * authenticating or validating the payload.
-+	 */
-+	hdr->setup_data = 0;
-+
- 	efi_stub_entry(handle, sys_table_arg, boot_params);
- 	/* not reached */
+-static void
+-adjust_memory_range_protection(unsigned long start, unsigned long size)
+-{
+-	efi_status_t status;
+-	efi_gcd_memory_space_desc_t desc;
+-	unsigned long end, next;
+-	unsigned long rounded_start, rounded_end;
+-	unsigned long unprotect_start, unprotect_size;
+-	int has_system_memory = 0;
+-
+-	if (efi_dxe_table == NULL)
+-		return;
+-
+-	rounded_start = rounddown(start, EFI_PAGE_SIZE);
+-	rounded_end = roundup(start + size, EFI_PAGE_SIZE);
+-
+-	/*
+-	 * Don't modify memory region attributes, they are
+-	 * already suitable, to lower the possibility to
+-	 * encounter firmware bugs.
+-	 */
+-
+-	for (end = start + size; start < end; start = next) {
+-
+-		status = efi_dxe_call(get_memory_space_descriptor, start, &desc);
+-
+-		if (status != EFI_SUCCESS)
+-			return;
+-
+-		next = desc.base_address + desc.length;
+-
+-		/*
+-		 * Only system memory is suitable for trampoline/kernel image placement,
+-		 * so only this type of memory needs its attributes to be modified.
+-		 */
+-
+-		if (desc.gcd_memory_type != EfiGcdMemoryTypeSystemMemory ||
+-		    (desc.attributes & (EFI_MEMORY_RO | EFI_MEMORY_XP)) == 0)
+-			continue;
+-
+-		unprotect_start = max(rounded_start, (unsigned long)desc.base_address);
+-		unprotect_size = min(rounded_end, next) - unprotect_start;
+-
+-		status = efi_dxe_call(set_memory_space_attributes,
+-				      unprotect_start, unprotect_size,
+-				      EFI_MEMORY_WB);
+-
+-		if (status != EFI_SUCCESS) {
+-			efi_warn("Unable to unprotect memory range [%08lx,%08lx]: %lx\n",
+-				 unprotect_start,
+-				 unprotect_start + unprotect_size,
+-				 status);
+-		}
+-	}
+-}
+-
+ /*
+  * Trampoline takes 2 pages and can be loaded in first megabyte of memory
+  * with its end placed between 128k and 640k where BIOS might start.
+@@ -291,12 +235,12 @@ setup_memory_protection(unsigned long image_base, unsigned long image_size)
+ 	 * and relocated kernel image.
+ 	 */
+ 
+-	adjust_memory_range_protection(TRAMPOLINE_PLACEMENT_BASE,
+-				       TRAMPOLINE_PLACEMENT_SIZE);
++	efi_adjust_memory_range_protection(TRAMPOLINE_PLACEMENT_BASE,
++					   TRAMPOLINE_PLACEMENT_SIZE, 0);
+ 
+ #ifdef CONFIG_64BIT
+ 	if (image_base != (unsigned long)startup_32)
+-		adjust_memory_range_protection(image_base, image_size);
++		efi_adjust_memory_range_protection(image_base, image_size, 0);
+ #else
+ 	/*
+ 	 * Clear protection flags on a whole range of possible
+@@ -306,8 +250,9 @@ setup_memory_protection(unsigned long image_base, unsigned long image_size)
+ 	 * need to remove possible protection on relocated image
+ 	 * itself disregarding further relocations.
+ 	 */
+-	adjust_memory_range_protection(LOAD_PHYSICAL_ADDR,
+-				       KERNEL_IMAGE_SIZE - LOAD_PHYSICAL_ADDR);
++	efi_adjust_memory_range_protection(LOAD_PHYSICAL_ADDR,
++					   KERNEL_IMAGE_SIZE - LOAD_PHYSICAL_ADDR,
++					   0);
+ #endif
+ }
  
 -- 
-2.37.3
+2.35.1
 
