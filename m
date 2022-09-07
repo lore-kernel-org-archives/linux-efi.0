@@ -2,43 +2,43 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D7A6C38145
-	for <linux-efi@archiver.kernel.org>; Wed,  7 Sep 2022 16:56:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 202F6C6FA86
+	for <linux-efi@archiver.kernel.org>; Wed,  7 Sep 2022 16:58:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230241AbiIGQ4l (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 7 Sep 2022 12:56:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46762 "EHLO
+        id S229893AbiIGQ6M (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 7 Sep 2022 12:58:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48104 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230029AbiIGQ4b (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 7 Sep 2022 12:56:31 -0400
-Received: from mga03.intel.com (mga03.intel.com [134.134.136.65])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 28439B9F9B;
-        Wed,  7 Sep 2022 09:56:22 -0700 (PDT)
+        with ESMTP id S229761AbiIGQ5w (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 7 Sep 2022 12:57:52 -0400
+Received: from mga09.intel.com (mga09.intel.com [134.134.136.24])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A168ABD090;
+        Wed,  7 Sep 2022 09:57:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1662569782; x=1694105782;
+  t=1662569865; x=1694105865;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=GVYgnFuqeArS+VSqk9IjZd0qcqmew4m2Zul+wVsLztM=;
-  b=J1m7zL/O45mwQjDCwc/l3OvMc/wLGAwlKmr8yoENFVKDyickmYXQFsN4
-   RulrnW2hPXkym7Ws8nKRMyhBi/6yl4WzVHf6d8tOJEf6TutQ17o+btw5M
-   ixuCNnJTItQlIQ8bqYh6TVVp2D5c0eDn00tzSFMfIOL41r5n9enUARGnt
-   Fwe6jejCmyJdxa97wP8BRLjFR01ZFOAOPk6xuT/V6GiSI3HVnvAAQiCx+
-   bGR+NU1Wq+mMD1Amue1WbNw8IhMQh41nDi+/c2f/IkLK4DnhgUFzJ77Gi
-   isonKWUOgqQUTV0avWywRtilhkA0zNwHc15IwGKLDZwZgPhHjDBH5yOeT
-   g==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10463"; a="298272029"
+  bh=6djZzfesjXmWCyiZuKYgE8QLWSt9qAJBAVV89VeFhJk=;
+  b=gnuyuiQ9J/ktQ0WyuVcyzSuv465YL4gCk5AazSYMF65EbJqwa4hTEg1L
+   zdiwU7fvqoEV6iAiC7c3z6pMzBEsPGANcgtdt1XwYaUv1U9FeJ6jsw/2l
+   BrQhbYjWL3dCCiYmYAzdATjWUmtS+lwVrZVyNRcWKZC+VgRF8JE20jdxe
+   xdYCsAMUxgxFummkB63jH4lm5MMdLZm002NjAZaAmbs/0UkSVg706xNWt
+   WwTmgipVSTut8oSREixA4GvweD5zx9fCxpPDgxHLYBf7p06AqXi58IbHM
+   9/CxODv3IusaaD8rzcTgrPTkKPXsgvK+70EdzrNc5IY9RGlDvINqE/Odp
+   A==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10463"; a="297740725"
 X-IronPort-AV: E=Sophos;i="5.93,297,1654585200"; 
-   d="scan'208";a="298272029"
-Received: from fmsmga002.fm.intel.com ([10.253.24.26])
-  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Sep 2022 09:46:10 -0700
+   d="scan'208";a="297740725"
+Received: from fmsmga004.fm.intel.com ([10.253.24.48])
+  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Sep 2022 09:46:10 -0700
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.93,297,1654585200"; 
-   d="scan'208";a="718212972"
+   d="scan'208";a="682886539"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by fmsmga002.fm.intel.com with ESMTP; 07 Sep 2022 09:46:03 -0700
+  by fmsmga004.fm.intel.com with ESMTP; 07 Sep 2022 09:46:03 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1003)
-        id 27B0D57F; Wed,  7 Sep 2022 19:46:12 +0300 (EEST)
+        id 427CF6CD; Wed,  7 Sep 2022 19:46:12 +0300 (EEST)
 From:   Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 To:     "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>,
         Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
@@ -66,9 +66,9 @@ Cc:     "Rafael J. Wysocki" <rafael@kernel.org>,
         Mark Brown <broonie@kernel.org>,
         Robert Moore <robert.moore@intel.com>,
         Wolfram Sang <wsa@kernel.org>
-Subject: [PATCH v1 6/8] perf: qcom_l2_pmu: Refactor _UID handling to use acpi_dev_uid_to_integer()
-Date:   Wed,  7 Sep 2022 19:46:04 +0300
-Message-Id: <20220907164606.65742-7-andriy.shevchenko@linux.intel.com>
+Subject: [PATCH v1 8/8] efi/dev-path-parser: Refactor _UID handling to use acpi_dev_uid_to_integer()
+Date:   Wed,  7 Sep 2022 19:46:06 +0300
+Message-Id: <20220907164606.65742-9-andriy.shevchenko@linux.intel.com>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220907164606.65742-1-andriy.shevchenko@linux.intel.com>
 References: <20220907164606.65742-1-andriy.shevchenko@linux.intel.com>
@@ -83,31 +83,42 @@ an integer. Use it instead of custom approach.
 
 Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 ---
- drivers/perf/qcom_l2_pmu.c | 7 ++++---
- 1 file changed, 4 insertions(+), 3 deletions(-)
+ drivers/firmware/efi/dev-path-parser.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/perf/qcom_l2_pmu.c b/drivers/perf/qcom_l2_pmu.c
-index 30234c261b05..aa68e230e020 100644
---- a/drivers/perf/qcom_l2_pmu.c
-+++ b/drivers/perf/qcom_l2_pmu.c
-@@ -843,13 +843,14 @@ static int l2_cache_pmu_probe_cluster(struct device *dev, void *data)
- 	struct acpi_device *adev = ACPI_COMPANION(dev);
- 	struct l2cache_pmu *l2cache_pmu = data;
- 	struct cluster_pmu *cluster;
--	unsigned long fw_cluster_id;
-+	u64 fw_cluster_id;
- 	int err;
- 	int irq;
+diff --git a/drivers/firmware/efi/dev-path-parser.c b/drivers/firmware/efi/dev-path-parser.c
+index eb9c65f97841..113b3ca1bd76 100644
+--- a/drivers/firmware/efi/dev-path-parser.c
++++ b/drivers/firmware/efi/dev-path-parser.c
+@@ -15,9 +15,11 @@
+ static long __init parse_acpi_path(const struct efi_dev_path *node,
+ 				   struct device *parent, struct device **child)
+ {
+-	char hid[ACPI_ID_LEN], uid[11]; /* UINT_MAX + null byte */
+ 	struct acpi_device *adev;
+ 	struct device *phys_dev;
++	char hid[ACPI_ID_LEN];
++	long ret;
++	u64 uid;
  
--	if (!adev || kstrtoul(adev->pnp.unique_id, 10, &fw_cluster_id) < 0) {
-+	err = acpi_dev_uid_to_integer(adev, &fw_cluster_id);
-+	if (err) {
- 		dev_err(&pdev->dev, "unable to read ACPI uid\n");
--		return -ENODEV;
-+		return err;
+ 	if (node->header.length != 12)
+ 		return -EINVAL;
+@@ -27,12 +29,12 @@ static long __init parse_acpi_path(const struct efi_dev_path *node,
+ 		'A' + ((node->acpi.hid >>  5) & 0x1f) - 1,
+ 		'A' + ((node->acpi.hid >>  0) & 0x1f) - 1,
+ 			node->acpi.hid >> 16);
+-	sprintf(uid, "%u", node->acpi.uid);
+ 
+ 	for_each_acpi_dev_match(adev, hid, NULL, -1) {
+-		if (adev->pnp.unique_id && !strcmp(adev->pnp.unique_id, uid))
++		ret = acpi_dev_uid_to_integer(adev, &uid);
++		if (ret == -ENODATA && node->acpi.uid == 0)
+ 			break;
+-		if (!adev->pnp.unique_id && node->acpi.uid == 0)
++		if (ret == 0 && node->acpi.uid == uid)
+ 			break;
  	}
- 
- 	cluster = devm_kzalloc(&pdev->dev, sizeof(*cluster), GFP_KERNEL);
+ 	if (!adev)
 -- 
 2.35.1
 
