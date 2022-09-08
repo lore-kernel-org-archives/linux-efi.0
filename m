@@ -2,43 +2,43 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7BC89C54EE9
-	for <linux-efi@archiver.kernel.org>; Thu,  8 Sep 2022 13:29:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 13610C6FA93
+	for <linux-efi@archiver.kernel.org>; Thu,  8 Sep 2022 13:29:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232536AbiIHN3c (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 8 Sep 2022 09:29:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58596 "EHLO
+        id S232574AbiIHN3d (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 8 Sep 2022 09:29:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58606 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232544AbiIHN3H (ORCPT
+        with ESMTP id S232548AbiIHN3H (ORCPT
         <rfc822;linux-efi@vger.kernel.org>); Thu, 8 Sep 2022 09:29:07 -0400
-Received: from mga18.intel.com (mga18.intel.com [134.134.136.126])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B7E6212C4A0;
+Received: from mga12.intel.com (mga12.intel.com [192.55.52.136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F1C5AED3B4;
         Thu,  8 Sep 2022 06:29:04 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
   t=1662643745; x=1694179745;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=V80BdvPU7ap78HoolUzQor9A2iHpp5rs73DM1e1058s=;
-  b=UM4rIvKu4Op9DzSNQ0BNa2HPZ7Urdr1NuLdbp3wYNhk/cgId9lWDPRr0
-   auCKpvGm7azkU2z3P0t+9qKf9S7DrOe5/O6Q872MUnfk9G92f4Pfqrjfe
-   Px/V+URUVJ74/Hh8+MnPDBa/+oO4H/3hEFsKciaWpUd1VIWXWG6tMEcSy
-   H1JVougd9JPu987tcLlqiGmXYtVNQl7S3zXZ3787LdlqtJFCgwve2VA7W
-   PIzS7j0rd31UAo3k6OdK18zGuRTuMKsgTNbzy32JmXkShHSiEtRFWI8sQ
-   Yw8cnUE82bfvMzBh6gjs1St4GaHFh5ldyXBJRMANQo/C9xNxuf5lHnFH/
-   w==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10464"; a="280196135"
+  bh=adHNCOHaDWaBW06VxfUdXxmZS2GrV/y8MfNhTXjAr2s=;
+  b=nMcyp4gvCSnD6OW9SAdeRA/coxnY/HzE80qsHvWJ+y3V/XCrEW3WpzBy
+   R2Pxb/4ujhDPO7lbPCftmPxdqmKVqczhNTzs2nja1C6A2RpiD8hcmTAp4
+   qYkUj1VJxU7LYliA/UeFszB2nTzf2HUsvU0iEKub6DBgDf6MT8tlBK5vs
+   Ddqm02tyujV/mAPAtLHoKw2uC833MTloVOByEbswv8iQHuW0dgL9q6OJ2
+   AnRHTK6u9iYhsebJLx1SJEtFGCH39BwurLqj0hnqewcU475jD20YVnSe6
+   keD4Fw0LQT/6hrO9HYVDhAfUYkWnFgLANkR9qaXE3SRwljwh+AzJvQSt+
+   g==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10464"; a="276901058"
 X-IronPort-AV: E=Sophos;i="5.93,300,1654585200"; 
-   d="scan'208";a="280196135"
-Received: from fmsmga004.fm.intel.com ([10.253.24.48])
-  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Sep 2022 06:29:03 -0700
+   d="scan'208";a="276901058"
+Received: from orsmga007.jf.intel.com ([10.7.209.58])
+  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Sep 2022 06:29:03 -0700
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.93,300,1654585200"; 
-   d="scan'208";a="683232432"
+   d="scan'208";a="610693597"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by fmsmga004.fm.intel.com with ESMTP; 08 Sep 2022 06:28:56 -0700
+  by orsmga007.jf.intel.com with ESMTP; 08 Sep 2022 06:28:56 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1003)
-        id B2183F7; Thu,  8 Sep 2022 16:29:12 +0300 (EEST)
+        id DFCE450D; Thu,  8 Sep 2022 16:29:12 +0300 (EEST)
 From:   Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 To:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
         Hans de Goede <hdegoede@redhat.com>,
@@ -64,9 +64,9 @@ Cc:     "Rafael J. Wysocki" <rafael@kernel.org>,
         Robert Jarzmik <robert.jarzmik@free.fr>,
         Robert Moore <robert.moore@intel.com>,
         Wolfram Sang <wsa@kernel.org>
-Subject: [PATCH v2 1/8] ACPI: utils: Add acpi_dev_uid_to_integer() helper to get _UID as integer
-Date:   Thu,  8 Sep 2022 16:29:03 +0300
-Message-Id: <20220908132910.62122-2-andriy.shevchenko@linux.intel.com>
+Subject: [PATCH v2 4/8] i2c: amd-mp2-plat: Refactor _UID handling to use acpi_dev_uid_to_integer()
+Date:   Thu,  8 Sep 2022 16:29:06 +0300
+Message-Id: <20220908132910.62122-5-andriy.shevchenko@linux.intel.com>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220908132910.62122-1-andriy.shevchenko@linux.intel.com>
 References: <20220908132910.62122-1-andriy.shevchenko@linux.intel.com>
@@ -76,80 +76,71 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Some users interpret _UID only as integer and for them it's easier to
-have an integer representation of _UID. Add respective helper for that.
+ACPI utils provide acpi_dev_uid_to_integer() helper to extract _UID as
+an integer. Use it instead of custom approach.
 
 Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 Reviewed-by: Hans de Goede <hdegoede@redhat.com>
 ---
- drivers/acpi/utils.c    | 24 ++++++++++++++++++++++++
- include/acpi/acpi_bus.h |  1 +
- include/linux/acpi.h    |  5 +++++
- 3 files changed, 30 insertions(+)
+ drivers/i2c/busses/i2c-amd-mp2-plat.c | 27 +++++++++------------------
+ 1 file changed, 9 insertions(+), 18 deletions(-)
 
-diff --git a/drivers/acpi/utils.c b/drivers/acpi/utils.c
-index 4acd6f7d1395..2ea14648a661 100644
---- a/drivers/acpi/utils.c
-+++ b/drivers/acpi/utils.c
-@@ -793,6 +793,30 @@ bool acpi_dev_hid_uid_match(struct acpi_device *adev,
- }
- EXPORT_SYMBOL(acpi_dev_hid_uid_match);
+diff --git a/drivers/i2c/busses/i2c-amd-mp2-plat.c b/drivers/i2c/busses/i2c-amd-mp2-plat.c
+index 84b7e6cbc67b..423fe0c8a471 100644
+--- a/drivers/i2c/busses/i2c-amd-mp2-plat.c
++++ b/drivers/i2c/busses/i2c-amd-mp2-plat.c
+@@ -244,14 +244,18 @@ static const struct i2c_adapter_quirks amd_i2c_dev_quirks = {
  
-+/**
-+ * acpi_dev_uid_to_integer - treat ACPI device _UID as integer
-+ * @adev: ACPI device to get _UID from
-+ * @integer: output buffer for integer
-+ *
-+ * Considers _UID as integer and converts it to @integer.
-+ *
-+ * Returns 0 on success, or negative error code otherwise.
-+ */
-+int acpi_dev_uid_to_integer(struct acpi_device *adev, u64 *integer)
-+{
-+	const char *uid;
-+
-+	if (!adev)
-+		return -ENODEV;
-+
-+	uid = acpi_device_uid(adev);
-+	if (!uid)
-+		return -ENODATA;
-+
-+	return kstrtou64(uid, 0, integer);
-+}
-+EXPORT_SYMBOL(acpi_dev_uid_to_integer);
-+
- /**
-  * acpi_dev_found - Detect presence of a given ACPI device in the namespace.
-  * @hid: Hardware ID of the device.
-diff --git a/include/acpi/acpi_bus.h b/include/acpi/acpi_bus.h
-index 42f76f2c2d49..1804d7a70918 100644
---- a/include/acpi/acpi_bus.h
-+++ b/include/acpi/acpi_bus.h
-@@ -739,6 +739,7 @@ static inline bool acpi_device_can_poweroff(struct acpi_device *adev)
- }
- 
- bool acpi_dev_hid_uid_match(struct acpi_device *adev, const char *hid2, const char *uid2);
-+int acpi_dev_uid_to_integer(struct acpi_device *adev, u64 *integer);
- 
- void acpi_dev_clear_dependencies(struct acpi_device *supplier);
- bool acpi_dev_ready_for_enumeration(const struct acpi_device *device);
-diff --git a/include/linux/acpi.h b/include/linux/acpi.h
-index ed4aa395cc49..619b2b1e4fb4 100644
---- a/include/linux/acpi.h
-+++ b/include/linux/acpi.h
-@@ -799,6 +799,11 @@ acpi_dev_hid_uid_match(struct acpi_device *adev, const char *hid2, const char *u
- 	return false;
- }
- 
-+static inline int acpi_dev_uid_to_integer(struct acpi_device *adev, u64 *integer)
-+{
-+	return -ENODEV;
-+}
-+
- static inline struct acpi_device *
- acpi_dev_get_first_match_dev(const char *hid, const char *uid, s64 hrv)
+ static int i2c_amd_probe(struct platform_device *pdev)
  {
++	struct device *dev = &pdev->dev;
+ 	int ret;
+ 	struct amd_i2c_dev *i2c_dev;
+-	struct acpi_device *adev = ACPI_COMPANION(&pdev->dev);
+ 	struct amd_mp2_dev *mp2_dev;
+-	const char *uid;
++	u64 uid;
+ 
+-	if (!adev)
+-		return -ENODEV;
++	ret = acpi_dev_uid_to_integer(ACPI_COMPANION(dev), &uid);
++	if (ret)
++		return dev_err_probe(dev, ret, "missing UID/bus id!\n");
++	if (uid >= 2)
++		return dev_err_probe(dev, -EINVAL, "incorrect UID/bus id \"%llu\"!\n", uid);
++	dev_dbg(dev, "bus id is %llu\n", uid);
+ 
+ 	/* The ACPI namespace doesn't contain information about which MP2 PCI
+ 	 * device an AMDI0011 ACPI device is related to, so assume that there's
+@@ -266,6 +270,7 @@ static int i2c_amd_probe(struct platform_device *pdev)
+ 	if (!i2c_dev)
+ 		return -ENOMEM;
+ 
++	i2c_dev->common.bus_id = uid;
+ 	i2c_dev->common.mp2_dev = mp2_dev;
+ 	i2c_dev->pdev = pdev;
+ 	platform_set_drvdata(pdev, i2c_dev);
+@@ -276,20 +281,6 @@ static int i2c_amd_probe(struct platform_device *pdev)
+ 	i2c_dev->common.resume = &i2c_amd_resume;
+ #endif
+ 
+-	uid = adev->pnp.unique_id;
+-	if (!uid) {
+-		dev_err(&pdev->dev, "missing UID/bus id!\n");
+-		return -EINVAL;
+-	} else if (strcmp(uid, "0") == 0) {
+-		i2c_dev->common.bus_id = 0;
+-	} else if (strcmp(uid, "1") == 0) {
+-		i2c_dev->common.bus_id = 1;
+-	} else {
+-		dev_err(&pdev->dev, "incorrect UID/bus id \"%s\"!\n", uid);
+-		return -EINVAL;
+-	}
+-	dev_dbg(&pdev->dev, "bus id is %u\n", i2c_dev->common.bus_id);
+-
+ 	/* Register the adapter */
+ 	amd_mp2_pm_runtime_get(mp2_dev);
+ 
 -- 
 2.35.1
 
