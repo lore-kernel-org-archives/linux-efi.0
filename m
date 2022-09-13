@@ -2,55 +2,59 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0864AC6FA8A
-	for <linux-efi@archiver.kernel.org>; Tue, 13 Sep 2022 17:40:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 163AFECAAD8
+	for <linux-efi@archiver.kernel.org>; Tue, 13 Sep 2022 17:41:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233390AbiIMRk6 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 13 Sep 2022 13:40:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52740 "EHLO
+        id S233413AbiIMRlc (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 13 Sep 2022 13:41:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54356 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230141AbiIMRjt (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 13 Sep 2022 13:39:49 -0400
-Received: from mga01.intel.com (mga01.intel.com [192.55.52.88])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6667B7D1C0;
-        Tue, 13 Sep 2022 09:32:57 -0700 (PDT)
+        with ESMTP id S233152AbiIMRkJ (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 13 Sep 2022 13:40:09 -0400
+Received: from mga11.intel.com (mga11.intel.com [192.55.52.93])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 612F56C12D;
+        Tue, 13 Sep 2022 09:33:48 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1663086777; x=1694622777;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=k11LCc77TrkmYe+60oQhVeO6H7+ymxQKl+achfaYq9M=;
-  b=Qy2qfX95XoSvSDptAj6nZS02cVKogvI6tHxUHYBmJKf1T2oe3arXGJ5g
-   LYwLQ523M8qvZuNztuWzWRdq0RCkP1ky8WEH1RIrbOKCkUhx7XZDufVdU
-   bhYPZk7FZgImD4eUsMNywjDKvPOU17esjPOxYuJOCrOY0IS3REbRnvT9d
-   WyOclyqH8FwA1TD1TvFNJUVHcsIBbejIwcH6WExc8q64VCcHDnFzZii3U
-   qgHsefyEpZCEQjSdm5NiWx/gRrdAuWgxcWkzaAeJinMapXX7XXKK/DFCy
-   mYKWOQ/lLRvGhvkoIGa4Rw8LuFDLuvqarntmLhwyE+ZwFBE126AU7iF1T
-   Q==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10469"; a="324433037"
+  t=1663086828; x=1694622828;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=Qwr5ms5q+Z7ve8a7ukY4qstUnie8LtphKGzGWejbU+Y=;
+  b=T6A+Is1AMgpldxYhyUOOmpKSuQF3fy/bZm850aGYSnDaDQ5FO0zuwodW
+   bMhuX20eU2HyivOTnQE6HHii1MAYiTzLzOfjb6Pl1A3rHn2rxUC4mr7lS
+   cKdh1fG0NmV+xtBNm7Ez7pYRtNMl9vjP5/2AXus4p61lP6n/R3qIQUi1O
+   1IooFxzZ+fwOtq3SpRPUKp93KMys5fbyxwFD9ovrxH3S23h9hH2Qn0MDF
+   dXgOCn0VynDwNSw0v2ZIO+IWbukqe5WaAIl6+Ye+dAc/X3l4lOMLwp7zy
+   BFz5Yoj60IsPAssfyz5LjnzczAhfsM3WCrCiF7UJBmYstyEuEtVTdym+a
+   w==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10469"; a="295777096"
 X-IronPort-AV: E=Sophos;i="5.93,313,1654585200"; 
-   d="scan'208";a="324433037"
-Received: from orsmga006.jf.intel.com ([10.7.209.51])
-  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 13 Sep 2022 09:31:47 -0700
-X-ExtLoop1: 1
+   d="scan'208";a="295777096"
+Received: from orsmga004.jf.intel.com ([10.7.209.38])
+  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 13 Sep 2022 09:32:59 -0700
 X-IronPort-AV: E=Sophos;i="5.93,313,1654585200"; 
-   d="scan'208";a="594008320"
-Received: from black.fi.intel.com ([10.237.72.28])
-  by orsmga006.jf.intel.com with ESMTP; 13 Sep 2022 09:31:40 -0700
-Received: by black.fi.intel.com (Postfix, from userid 1003)
-        id 8A2235E4; Tue, 13 Sep 2022 19:31:49 +0300 (EEST)
+   d="scan'208";a="742222406"
+Received: from smile.fi.intel.com ([10.237.72.54])
+  by orsmga004-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 13 Sep 2022 09:32:45 -0700
+Received: from andy by smile.fi.intel.com with local (Exim 4.96)
+        (envelope-from <andriy.shevchenko@linux.intel.com>)
+        id 1oY8q1-001qD0-2E;
+        Tue, 13 Sep 2022 19:32:41 +0300
+Date:   Tue, 13 Sep 2022 19:32:41 +0300
 From:   Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-To:     "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Hans de Goede <hdegoede@redhat.com>,
+To:     "Rafael J. Wysocki" <rafael@kernel.org>
+Cc:     Hans de Goede <hdegoede@redhat.com>,
+        "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>,
         Ard Biesheuvel <ardb@kernel.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Mark Brown <broonie@kernel.org>, linux-acpi@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
-        linux-i2c@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-spi@vger.kernel.org,
-        devel@acpica.org
-Cc:     "Rafael J. Wysocki" <rafael@kernel.org>,
+        Mark Brown <broonie@kernel.org>,
+        ACPI Devel Maling List <linux-acpi@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-efi <linux-efi@vger.kernel.org>,
+        linux-i2c <linux-i2c@vger.kernel.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        linux-spi <linux-spi@vger.kernel.org>,
+        "open list:ACPI COMPONENT ARCHITECTURE (ACPICA)" <devel@acpica.org>,
         Len Brown <lenb@kernel.org>, Elie Morisse <syniurge@gmail.com>,
         Nehal Shah <nehal-bakulchandra.shah@amd.com>,
         Shyam Sundar S K <shyam-sundar.s-k@amd.com>,
@@ -63,97 +67,44 @@ Cc:     "Rafael J. Wysocki" <rafael@kernel.org>,
         Daniel Mack <daniel@zonque.org>,
         Haojian Zhuang <haojian.zhuang@gmail.com>,
         Robert Jarzmik <robert.jarzmik@free.fr>,
-        Robert Moore <robert.moore@intel.com>
-Subject: [PATCH v3 7/8] spi: pxa2xx: Refactor _UID handling to use acpi_dev_uid_to_integer()
-Date:   Tue, 13 Sep 2022 19:31:46 +0300
-Message-Id: <20220913163147.24258-8-andriy.shevchenko@linux.intel.com>
-X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20220913163147.24258-1-andriy.shevchenko@linux.intel.com>
-References: <20220913163147.24258-1-andriy.shevchenko@linux.intel.com>
+        Robert Moore <robert.moore@intel.com>,
+        Wolfram Sang <wsa@kernel.org>
+Subject: Re: [PATCH v2 0/8] ACPI: unify _UID handling as integer
+Message-ID: <YyCwqeQ35F2P9v82@smile.fi.intel.com>
+References: <20220908132910.62122-1-andriy.shevchenko@linux.intel.com>
+ <YxnwMLvgQAPOkeeK@smile.fi.intel.com>
+ <CAJZ5v0j5FO+OcX6VdiR-tuDCrHFwErquxzZGUu3ZLQ1G57T-+Q@mail.gmail.com>
+ <Yx8MRPxPrNG1XRqV@smile.fi.intel.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Yx8MRPxPrNG1XRqV@smile.fi.intel.com>
+Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-ACPI utils provide acpi_dev_uid_to_integer() helper to extract _UID as
-an integer. Use it instead of custom approach.
+On Mon, Sep 12, 2022 at 01:39:00PM +0300, Andy Shevchenko wrote:
+> On Sat, Sep 10, 2022 at 06:32:10PM +0200, Rafael J. Wysocki wrote:
+> > On Thu, Sep 8, 2022 at 3:38 PM Andy Shevchenko
+> > <andriy.shevchenko@linux.intel.com> wrote:
 
-Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Reviewed-by: Hans de Goede <hdegoede@redhat.com>
-Acked-by: Mark Brown <broonie@kernel.org>
----
- drivers/spi/spi-pxa2xx.c | 37 ++++++++++---------------------------
- 1 file changed, 10 insertions(+), 27 deletions(-)
+...
 
-diff --git a/drivers/spi/spi-pxa2xx.c b/drivers/spi/spi-pxa2xx.c
-index 986ffc4bf1ed..2bf21c2e7a52 100644
---- a/drivers/spi/spi-pxa2xx.c
-+++ b/drivers/spi/spi-pxa2xx.c
-@@ -1441,31 +1441,6 @@ static const struct of_device_id pxa2xx_spi_of_match[] = {
- };
- MODULE_DEVICE_TABLE(of, pxa2xx_spi_of_match);
- 
--#ifdef CONFIG_ACPI
--
--static int pxa2xx_spi_get_port_id(struct device *dev)
--{
--	struct acpi_device *adev;
--	unsigned int devid;
--	int port_id = -1;
--
--	adev = ACPI_COMPANION(dev);
--	if (adev && adev->pnp.unique_id &&
--	    !kstrtouint(adev->pnp.unique_id, 0, &devid))
--		port_id = devid;
--	return port_id;
--}
--
--#else /* !CONFIG_ACPI */
--
--static int pxa2xx_spi_get_port_id(struct device *dev)
--{
--	return -1;
--}
--
--#endif /* CONFIG_ACPI */
--
--
- #ifdef CONFIG_PCI
- 
- static bool pxa2xx_spi_idma_filter(struct dma_chan *chan, void *param)
-@@ -1479,13 +1454,16 @@ static struct pxa2xx_spi_controller *
- pxa2xx_spi_init_pdata(struct platform_device *pdev)
- {
- 	struct pxa2xx_spi_controller *pdata;
-+	struct device *dev = &pdev->dev;
-+	struct device *parent = dev->parent;
- 	struct ssp_device *ssp;
- 	struct resource *res;
--	struct device *parent = pdev->dev.parent;
- 	struct pci_dev *pcidev = dev_is_pci(parent) ? to_pci_dev(parent) : NULL;
- 	const struct pci_device_id *pcidev_id = NULL;
- 	enum pxa_ssp_type type;
- 	const void *match;
-+	int status;
-+	u64 uid;
- 
- 	if (pcidev)
- 		pcidev_id = pci_match_id(pxa2xx_spi_pci_compound_match, pcidev);
-@@ -1529,7 +1507,12 @@ pxa2xx_spi_init_pdata(struct platform_device *pdev)
- 
- 	ssp->type = type;
- 	ssp->dev = &pdev->dev;
--	ssp->port_id = pxa2xx_spi_get_port_id(&pdev->dev);
-+
-+	status = acpi_dev_uid_to_integer(ACPI_COMPANION(dev), &uid);
-+	if (status)
-+		ssp->port_id = -1;
-+	else
-+		ssp->port_id = uid;
- 
- 	pdata->is_slave = device_property_read_bool(&pdev->dev, "spi-slave");
- 	pdata->num_chipselect = 1;
+> > Tentatively applied as 6.1 material.
+> 
+> Thanks!
+> 
+> > If there are updates, we'll make changes as they go.
+> 
+> There is one at least to fix a warning in the perf patch. Should I resend
+> a fixed patch, just a fix, or entire series with a fixed patch?
+
+Since LKP found one small issue with SPI patch when CONFIG_ACPI=n, I decided
+to send a v3. Please, replace this by a new version in your tree, thanks!
+
 -- 
-2.35.1
+With Best Regards,
+Andy Shevchenko
+
 
