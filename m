@@ -2,43 +2,43 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 964B1C54EE9
-	for <linux-efi@archiver.kernel.org>; Tue, 13 Sep 2022 17:40:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2E6AAC6FA8D
+	for <linux-efi@archiver.kernel.org>; Tue, 13 Sep 2022 17:40:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233217AbiIMRkc (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 13 Sep 2022 13:40:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57776 "EHLO
+        id S233202AbiIMRke (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 13 Sep 2022 13:40:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54538 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233225AbiIMRjr (ORCPT
+        with ESMTP id S233221AbiIMRjr (ORCPT
         <rfc822;linux-efi@vger.kernel.org>); Tue, 13 Sep 2022 13:39:47 -0400
-Received: from mga01.intel.com (mga01.intel.com [192.55.52.88])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1DBBF7CAAC;
-        Tue, 13 Sep 2022 09:32:55 -0700 (PDT)
+Received: from mga03.intel.com (mga03.intel.com [134.134.136.65])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D85A0A7215;
+        Tue, 13 Sep 2022 09:32:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1663086775; x=1694622775;
+  t=1663086759; x=1694622759;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=Li1WN8sCVHEAq82ItBnE/csBRZWXw+X9ZOrYZ4j6bLY=;
-  b=H6Npwu+med9T8WQFfoUfFHGlR23/O51b3Cw1mFpLHPyl2VWv/TaoUcxH
-   +q9vCE8QqqDoJJIg7b6roSJzFYw4aiewo0dqj8QmW0KARlbXvQjlU1WLq
-   fJ2R5LmOWC++Mqup4UvUtohx6LyvwVTIJBmLjd7P6HgFjevkoZVMRBDMa
-   Au6ZPS0OLSQR4TJ5KgKtU0ZwnRgyFb6bA5hxFtVpeDwzNTf0FYZJiLFbV
-   Cmky9DAQVFDT+kzfiofamtbKN99Gt+rW+VnZ7aSy/GpO6ahQLmdDoancU
-   jmBlQCDBZCdeIOKdfBLiD1QjCoGGdVm+uOdGSuLzN0czmjiATOeG2d8Oi
-   g==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10469"; a="324432995"
+  bh=xgxQe/9VuRknZlyDDD0FzxD71AXddVq2scuKrzOQ48U=;
+  b=PQKh8CcCmDfCtZShfS4csAnrpi+MmrtSYBAGy/mt2jDQuV8+HXAXAUkX
+   V42vPtaBqCWinHhRwgg/GANyPx9sqHny3SfnKTHVhOaEtSyEQEtDHuNPk
+   ivQEOLe6JFgNs8scWVd9g438Fp7WCLd3oXWnN/Z2JUT9wgvyHIkD/ee7d
+   h8lHTatN/XMUkzi/R0hk9yaFRbcL5jKy3sCVH6Bfmos0nND3QeypLvrsb
+   Mvk3b34ctYrOLuk/oQTLeyYfz8Z454rCk29gp0WsGsMf9obkLPWd9GxKy
+   ljKI4iKGKWAEAqjv8H15gdSTHQaRp+SIOTZPOe0jXcRiJNWABh/TrcCOU
+   Q==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10469"; a="299523979"
 X-IronPort-AV: E=Sophos;i="5.93,313,1654585200"; 
-   d="scan'208";a="324432995"
-Received: from fmsmga001.fm.intel.com ([10.253.24.23])
-  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 13 Sep 2022 09:31:39 -0700
+   d="scan'208";a="299523979"
+Received: from orsmga004.jf.intel.com ([10.7.209.38])
+  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 13 Sep 2022 09:31:47 -0700
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.93,313,1654585200"; 
-   d="scan'208";a="758857587"
+   d="scan'208";a="742221651"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by fmsmga001.fm.intel.com with ESMTP; 13 Sep 2022 09:31:32 -0700
+  by orsmga004.jf.intel.com with ESMTP; 13 Sep 2022 09:31:40 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1003)
-        id 522A7363; Tue, 13 Sep 2022 19:31:49 +0300 (EEST)
+        id 978916CD; Tue, 13 Sep 2022 19:31:49 +0300 (EEST)
 From:   Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 To:     "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>,
         Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
@@ -64,9 +64,9 @@ Cc:     "Rafael J. Wysocki" <rafael@kernel.org>,
         Haojian Zhuang <haojian.zhuang@gmail.com>,
         Robert Jarzmik <robert.jarzmik@free.fr>,
         Robert Moore <robert.moore@intel.com>
-Subject: [PATCH v3 3/8] ACPI: x86: Refactor _UID handling to use acpi_dev_uid_to_integer()
-Date:   Tue, 13 Sep 2022 19:31:42 +0300
-Message-Id: <20220913163147.24258-4-andriy.shevchenko@linux.intel.com>
+Subject: [PATCH v3 8/8] efi/dev-path-parser: Refactor _UID handling to use acpi_dev_uid_to_integer()
+Date:   Tue, 13 Sep 2022 19:31:47 +0300
+Message-Id: <20220913163147.24258-9-andriy.shevchenko@linux.intel.com>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220913163147.24258-1-andriy.shevchenko@linux.intel.com>
 References: <20220913163147.24258-1-andriy.shevchenko@linux.intel.com>
@@ -81,47 +81,44 @@ an integer. Use it instead of custom approach.
 
 Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 Reviewed-by: Hans de Goede <hdegoede@redhat.com>
+Reviewed-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/acpi/x86/utils.c | 14 ++++++++++----
- 1 file changed, 10 insertions(+), 4 deletions(-)
+ drivers/firmware/efi/dev-path-parser.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/acpi/x86/utils.c b/drivers/acpi/x86/utils.c
-index 664070fc8349..2764b4778ce7 100644
---- a/drivers/acpi/x86/utils.c
-+++ b/drivers/acpi/x86/utils.c
-@@ -351,11 +351,17 @@ int acpi_quirk_skip_serdev_enumeration(struct device *controller_parent, bool *s
- 	struct acpi_device *adev = ACPI_COMPANION(controller_parent);
- 	const struct dmi_system_id *dmi_id;
- 	long quirks = 0;
+diff --git a/drivers/firmware/efi/dev-path-parser.c b/drivers/firmware/efi/dev-path-parser.c
+index eb9c65f97841..f80d87c199c3 100644
+--- a/drivers/firmware/efi/dev-path-parser.c
++++ b/drivers/firmware/efi/dev-path-parser.c
+@@ -15,9 +15,11 @@
+ static long __init parse_acpi_path(const struct efi_dev_path *node,
+ 				   struct device *parent, struct device **child)
+ {
+-	char hid[ACPI_ID_LEN], uid[11]; /* UINT_MAX + null byte */
+ 	struct acpi_device *adev;
+ 	struct device *phys_dev;
++	char hid[ACPI_ID_LEN];
 +	u64 uid;
 +	int ret;
  
- 	*skip = false;
+ 	if (node->header.length != 12)
+ 		return -EINVAL;
+@@ -27,12 +29,12 @@ static long __init parse_acpi_path(const struct efi_dev_path *node,
+ 		'A' + ((node->acpi.hid >>  5) & 0x1f) - 1,
+ 		'A' + ((node->acpi.hid >>  0) & 0x1f) - 1,
+ 			node->acpi.hid >> 16);
+-	sprintf(uid, "%u", node->acpi.uid);
  
--	/* !dev_is_platform() to not match on PNP enumerated debug UARTs */
--	if (!adev || !adev->pnp.unique_id || !dev_is_platform(controller_parent))
-+	ret = acpi_dev_uid_to_integer(adev, &uid);
-+	if (ret)
-+		return 0;
-+
-+	/* to not match on PNP enumerated debug UARTs */
-+	if (!dev_is_platform(controller_parent))
- 		return 0;
- 
- 	dmi_id = dmi_first_match(acpi_quirk_skip_dmi_ids);
-@@ -363,10 +369,10 @@ int acpi_quirk_skip_serdev_enumeration(struct device *controller_parent, bool *s
- 		quirks = (unsigned long)dmi_id->driver_data;
- 
- 	if (quirks & ACPI_QUIRK_UART1_TTY_UART2_SKIP) {
--		if (!strcmp(adev->pnp.unique_id, "1"))
-+		if (uid == 1)
- 			return -ENODEV; /* Create tty cdev instead of serdev */
- 
--		if (!strcmp(adev->pnp.unique_id, "2"))
-+		if (uid == 2)
- 			*skip = true;
+ 	for_each_acpi_dev_match(adev, hid, NULL, -1) {
+-		if (adev->pnp.unique_id && !strcmp(adev->pnp.unique_id, uid))
++		ret = acpi_dev_uid_to_integer(adev, &uid);
++		if (ret == 0 && node->acpi.uid == uid)
+ 			break;
+-		if (!adev->pnp.unique_id && node->acpi.uid == 0)
++		if (ret == -ENODATA && node->acpi.uid == 0)
+ 			break;
  	}
- 
+ 	if (!adev)
 -- 
 2.35.1
 
