@@ -2,35 +2,35 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1A916ECAAD8
-	for <linux-efi@archiver.kernel.org>; Sun, 18 Sep 2022 21:36:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E32B5ECAAD8
+	for <linux-efi@archiver.kernel.org>; Sun, 18 Sep 2022 21:36:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229551AbiIRVgX (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 18 Sep 2022 17:36:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40614 "EHLO
+        id S229601AbiIRVg1 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 18 Sep 2022 17:36:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40636 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229581AbiIRVgW (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sun, 18 Sep 2022 17:36:22 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A06A913FAB
-        for <linux-efi@vger.kernel.org>; Sun, 18 Sep 2022 14:36:21 -0700 (PDT)
+        with ESMTP id S229561AbiIRVg0 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sun, 18 Sep 2022 17:36:26 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F3B7313FAB
+        for <linux-efi@vger.kernel.org>; Sun, 18 Sep 2022 14:36:25 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 3DA5D612AC
-        for <linux-efi@vger.kernel.org>; Sun, 18 Sep 2022 21:36:21 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DF854C433D7;
-        Sun, 18 Sep 2022 21:36:18 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 8FCF561599
+        for <linux-efi@vger.kernel.org>; Sun, 18 Sep 2022 21:36:25 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 41E1AC433B5;
+        Sun, 18 Sep 2022 21:36:23 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1663536980;
-        bh=RXnNlaksocyhUCf1TtF0nCIv72jfeLTz6q5C8n0AChA=;
+        s=k20201202; t=1663536985;
+        bh=MJHabceJjCWQVg/sduyUYpKDir7hmmzhm7sjKN5i5A4=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=uEd4qGpaydhAQZM4Eh/z8tvEwtXPV6dry7iBPzVXVad6Q/UttBdQi4U0wPFOMXZJj
-         du2Zcub3ND9c0w+xkYkYrPJnRmtgZgFIydrLhkuFhoh0r+mdGR0HLkynJA59Utmsmu
-         TJtYbRquddob9HEHvKP/JQuN02qVihWAkHuLIpR+cjJtU+rDNR0KUb1c6Q+RFlb+qu
-         gs/0tpsABEsQ9ff9hjlIOeDRjXETpKUyobLnGHRqaK4BZOOAGgAeINKRqQpw82S789
-         WJNh4C4GNBJufoYUKOgF6Zt4gvwiZeYWUIyQ2kbt7Z8u03o2xpjzRcXpA6Xe49/RZD
-         lPTMjmQexvDCQ==
+        b=ZGDAcSsxvgf7t8oouaGalmV/SGj6kjO3ox+b67ik27jhDfRWgssRORUDNcl7hgDll
+         e5mnjyms0aj1ClU+N1y/2zFWzjVspM/dUmOdKGNJbp+3j9FqRNBKjswP37iD4l7p6h
+         KeV7YNF1giOzSfoL+1TjfYWchsE5Ctvfs1VPvZOMDRM+3hMNGiLKC1loRrKy9X2KUb
+         X6J11JcfYA8/d1BSydySj+K47gS8PFmut7fzl2U+DaPvuoMOkelJ1wn/G7gIsxso90
+         9djYvCHQCdTAiSdgNuP4cYncOVg15jtlw3qxCDExvAT8dzTeMJ0hmY+kT5P9fKmQpv
+         kjaY1uKvRXaDQ==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     loongarch@lists.linux.dev, linux@armlinux.org.uk,
@@ -39,78 +39,119 @@ Cc:     loongarch@lists.linux.dev, linux@armlinux.org.uk,
         Ilias Apalodimas <ilias.apalodimas@linaro.org>,
         Huacai Chen <chenhuacai@loongson.cn>,
         Xi Ruoyao <xry111@xry111.site>
-Subject: [PATCH 10/12] efi: libstub: remove pointless goto kludge
-Date:   Sun, 18 Sep 2022 23:35:42 +0200
-Message-Id: <20220918213544.2176249-11-ardb@kernel.org>
+Subject: [PATCH 12/12] efi: loongarch: add support for DT hardware descriptions
+Date:   Sun, 18 Sep 2022 23:35:44 +0200
+Message-Id: <20220918213544.2176249-13-ardb@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220918213544.2176249-1-ardb@kernel.org>
 References: <20220918213544.2176249-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1666; i=ardb@kernel.org; h=from:subject; bh=RXnNlaksocyhUCf1TtF0nCIv72jfeLTz6q5C8n0AChA=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjJ48rArpB44oOut+AD+EXPPAeJWwXajGeoY705IPX GHglvjmJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYyePKwAKCRDDTyI5ktmPJOJGC/ 9DEPaBJRIdXZQRWuiEk5KEatwI3jwBhslPT98LZnUlBqiZuVnfLhfzAvEydp7o0Ztf4ctowibWBCcI Hu21WWZNPHT4FxUQGSYxwfyJiCrSl/N305v2GuMydhD9Jr2VWqMFsfrGgaDIF83aoaNgpYVGfGNpB/ QiBjp62e+GmAM6gMYUG0Q2IS1CdW8hLtGbAw/+IMy16GfK3MnP3Ab7FaTfF9bqHgYLpGnKOvScU5Vw x+vUFpz81Rar3s28ZQ3XTiUuUhWnvSH0snWgGg79vLeakx7urMyB3YU8khuQ7ZesVzb+/18qihXvGZ uNf5hq6n7tvPPDRCesgvLPeZUMc/3INCtUT2t+ZPnUAS7ki4kaQAqh71r8qZkudMzCzXxnfslGEzau 2o0hii7SuFMFhvBFzBDycTQr3zxFM7v0fJ1+ABcpc5lwlKGzKY94ZG3QCmXWcwcH5U57sFuQ9Tz1XR WMqTfKXcJh1Bwc7hPqzSFvpQBXRPDN0ZsU3ZMyW/DWhag=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3282; i=ardb@kernel.org; h=from:subject; bh=MJHabceJjCWQVg/sduyUYpKDir7hmmzhm7sjKN5i5A4=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjJ48v8zXv8FfbQcQtAcYHvMvFjY74Go4gdwo8EnV2 25O2DWuJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYyePLwAKCRDDTyI5ktmPJHZ5C/ 4xPhD5tRO6GsKh08CLM2v/WGfIinP5OnGhqyVMiRKdYZH38r9Hjnp0hJw0MxSnwLIPj1uWYIlRpjLY ntHC/HRYvUIBUJCESsnMPgxBv4WBsuSr27QidBgh7sP/f75E7h9cWc9swGOdEr8IUzEBzek8RQN+x6 dArD1fYyNI2ssKdv3Xq7D5apO0tXD70zd9Bcung/TexMt/CHcYuGYcYN/r+aqjYrLpU4gM9GYH542A RMjqo+ZvQ9QrcpnC/64VOFt8EqOwTq3aAsSyKevBuOxber8hNH+es70YOTzo9TGCf9bgM3twOixT6H TYQoKv4XwZXcZp6IUrbbKgNfIQ6y5EpStmEgNBwZcklhNv9dXT9nrpVBOBtclDD43bfMSTm4cAhO7f QtNaD0cwWMJ33UWr81juJAvL5uQarltTqa9ItPm6scp49CsmXXoKM8szeVZKZkeOE153Cj0IZPOXEZ waKhLYd7SL/17nfyGAi5Aqf+GgfSgkwXqOExSg4V6jMqo=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Remove some goto cruft that serves no purpose and obfuscates the code.
+Treat device tree data in the same way as we treat ACPI tables: discover
+them from the EFI configuration table array, and parse the properties
+that describe hardware. This means we omit /chosen and the /memory
+nodes, which carry information that we should be receiving from EFI. not
+from the device tree.
+
+On the non-EFI boot path, parse the DT passed via the boot entrypoint as
+usual: things like bootargs, initrd and other bootloader generated data
+are all loaded from the DT /chosen node, along with memory descriptions
+and other things we would otherwise get from EFI.
+
+Note that this approach is similar to x86, which also supports FDT for
+hardware descriptions but not for boottime generated data.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/firmware/efi/libstub/efi-stub-helper.c | 22 +++++++-------------
- 1 file changed, 7 insertions(+), 15 deletions(-)
+ arch/loongarch/Kconfig      |  2 ++
+ arch/loongarch/kernel/efi.c | 14 ++++++++++++++
+ arch/loongarch/kernel/env.c |  6 ++++++
+ 3 files changed, 22 insertions(+)
 
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index f1f7a823be17..76a1a395fad4 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -439,13 +439,14 @@ efi_status_t efi_exit_boot_services(void *handle, void *priv,
- 	efi_status_t status;
+diff --git a/arch/loongarch/Kconfig b/arch/loongarch/Kconfig
+index 14a2a1ec8561..721b1dc38bdf 100644
+--- a/arch/loongarch/Kconfig
++++ b/arch/loongarch/Kconfig
+@@ -104,6 +104,8 @@ config LOONGARCH
+ 	select MODULES_USE_ELF_RELA if MODULES
+ 	select NEED_PER_CPU_EMBED_FIRST_CHUNK
+ 	select NEED_PER_CPU_PAGE_FIRST_CHUNK
++	select OF
++	select OF_EARLY_FLATTREE
+ 	select PCI
+ 	select PCI_DOMAINS_GENERIC
+ 	select PCI_ECAM if ACPI
+diff --git a/arch/loongarch/kernel/efi.c b/arch/loongarch/kernel/efi.c
+index 3b80675726ec..96c8621da2ba 100644
+--- a/arch/loongarch/kernel/efi.c
++++ b/arch/loongarch/kernel/efi.c
+@@ -17,6 +17,7 @@
+ #include <linux/io.h>
+ #include <linux/kobject.h>
+ #include <linux/memblock.h>
++#include <linux/of_fdt.h>
+ #include <linux/reboot.h>
+ #include <linux/uaccess.h>
  
- 	status = efi_get_memory_map(&map, true);
--
- 	if (status != EFI_SUCCESS)
--		goto fail;
-+		return status;
+@@ -28,10 +29,12 @@ static unsigned long efi_nr_tables;
+ static unsigned long efi_config_table;
  
- 	status = priv_func(map, priv);
--	if (status != EFI_SUCCESS)
--		goto free_map;
-+	if (status != EFI_SUCCESS) {
-+		efi_bs_call(free_pool, map);
-+		return status;
-+	}
+ static unsigned long __initdata boot_memmap = EFI_INVALID_TABLE_ADDR;
++static unsigned long __initdata boot_fdt = EFI_INVALID_TABLE_ADDR;
  
- 	if (efi_disable_pci_dma)
- 		efi_pci_disable_bridge_busmaster();
-@@ -476,25 +477,16 @@ efi_status_t efi_exit_boot_services(void *handle, void *priv,
+ static efi_system_table_t *efi_systab;
+ static efi_config_table_type_t arch_tables[] __initdata = {
+ 	{LINUX_EFI_BOOT_MEMMAP_GUID,	&boot_memmap,	"MEMMAP" },
++	{DEVICE_TREE_GUID,		&boot_fdt,	"FDT" },
+ 	{},
+ };
  
- 		/* exit_boot_services() was called, thus cannot free */
- 		if (status != EFI_SUCCESS)
--			goto fail;
-+			return status;
- 
- 		status = priv_func(map, priv);
- 		/* exit_boot_services() was called, thus cannot free */
- 		if (status != EFI_SUCCESS)
--			goto fail;
-+			return status;
- 
- 		status = efi_bs_call(exit_boot_services, handle, map->map_key);
+@@ -100,4 +103,15 @@ void __init efi_init(void)
+ 			early_memunmap(tbl, sizeof(*tbl));
+ 		}
  	}
- 
--	/* exit_boot_services() was called, thus cannot free */
--	if (status != EFI_SUCCESS)
--		goto fail;
--
--	return EFI_SUCCESS;
--
--free_map:
--	efi_bs_call(free_pool, map);
--fail:
- 	return status;
++
++	if (boot_fdt != EFI_INVALID_TABLE_ADDR) {
++		void *tbl;
++
++		tbl = early_memremap_ro(boot_fdt, sizeof(*tbl));
++		if (tbl) {
++			early_init_dt_verify(tbl);
++			early_init_dt_scan_root();
++			early_init_fdt_reserve_self();
++		}
++	}
  }
- 
+diff --git a/arch/loongarch/kernel/env.c b/arch/loongarch/kernel/env.c
+index 05c38d28476e..3267063df1f9 100644
+--- a/arch/loongarch/kernel/env.c
++++ b/arch/loongarch/kernel/env.c
+@@ -8,6 +8,7 @@
+ #include <linux/efi.h>
+ #include <linux/export.h>
+ #include <linux/memblock.h>
++#include <linux/of_fdt.h>
+ #include <asm/early_ioremap.h>
+ #include <asm/bootinfo.h>
+ #include <asm/loongson.h>
+@@ -29,6 +30,11 @@ void __init init_environ(void)
+ 		efi_system_table = fw_arg1;
+ 		set_bit(EFI_BOOT, &efi.flags);
+ 	} else {
++		void *fdt_ptr = early_memremap_ro(fw_arg1, SZ_64K);
++
++		early_init_dt_scan(fdt_ptr);
++		early_init_fdt_reserve_self();
++
+ 		clear_bit(EFI_BOOT, &efi.flags);
+ 	}
+ }
 -- 
 2.35.1
 
