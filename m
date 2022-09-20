@@ -2,221 +2,253 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5826BC6FA8B
-	for <linux-efi@archiver.kernel.org>; Tue, 20 Sep 2022 12:28:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 506E4C54EE9
+	for <linux-efi@archiver.kernel.org>; Tue, 20 Sep 2022 12:30:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230300AbiITM2F (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 20 Sep 2022 08:28:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42736 "EHLO
+        id S230520AbiITMaP (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 20 Sep 2022 08:30:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46404 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230011AbiITM2E (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 20 Sep 2022 08:28:04 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D9C7E75391
-        for <linux-efi@vger.kernel.org>; Tue, 20 Sep 2022 05:28:02 -0700 (PDT)
+        with ESMTP id S230075AbiITMaN (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 20 Sep 2022 08:30:13 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9D97E52FE3
+        for <linux-efi@vger.kernel.org>; Tue, 20 Sep 2022 05:30:11 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 65D5662055
-        for <linux-efi@vger.kernel.org>; Tue, 20 Sep 2022 12:28:02 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 46FDBC433D7;
-        Tue, 20 Sep 2022 12:28:00 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 48D79B80C98
+        for <linux-efi@vger.kernel.org>; Tue, 20 Sep 2022 12:30:10 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 14CEBC43140
+        for <linux-efi@vger.kernel.org>; Tue, 20 Sep 2022 12:30:09 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1663676881;
-        bh=DZRyGE7/rIGWTDjMSq22KgTGDkZuurYQy+zWFRn5e9Q=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=qH8NcIj8Xp+HyOtitIG9c3DdkXhrca/CdPL3SZpIrrqWIQU22PbgeKWgF75X9pItS
-         GyIklWyf8YR829nSoky2qV8N7xcZEiMh4VpVUNV6Z8KtRXS+aLQITEjswJhZTa/LvK
-         vbi6+S/pTKgsUNavUtBfLcRDrluMK6TwY96cQkaaNpwtZh278yZWRQZ1Efr3mcicAN
-         qlZwCyyp2mzJyMrsuJ1h8quvmmwkethIaNPmVfXnFOQr0YQAXUTBk0BXxwmv/NKZxh
-         gQEyzmeBbpu7e42mI29Jaf29CcCTNLMpIWnR9eeZMA73A/udiujjDxpbqqxGkzLEY2
-         xzvzhaTPH0QVQ==
-From:   Ard Biesheuvel <ardb@kernel.org>
-To:     linux-efi@vger.kernel.org
-Cc:     Ard Biesheuvel <ardb@kernel.org>, Peter Jones <pjones@redhat.com>,
-        Matthew Garrett <mjg59@google.com>,
-        Daniel Kiper <daniel.kiper@oracle.com>,
-        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-        "Xu, Min M" <min.m.xu@intel.com>
-Subject: [PATCH v2 1/2] efi/libstub: refactor the initrd measuring functions
-Date:   Tue, 20 Sep 2022 14:27:45 +0200
-Message-Id: <20220920122746.3553306-2-ardb@kernel.org>
-X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20220920122746.3553306-1-ardb@kernel.org>
-References: <20220920122746.3553306-1-ardb@kernel.org>
+        s=k20201202; t=1663677009;
+        bh=ySM1SiKXSFmMheLh/vOPVVXIzghFY7PPauxXoYGEx1A=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=JXhJuHfRJMzKPW9QS/fYZbAKVSLrqlsrNXyRLU/7m3iVsYLO/nuXrJxfNZ7H22OGh
+         IbjsTQY2s4Z5z/cvAhsPra9tUjvd0aaY3sBxrKSHJq6ZHrZ7JPjmKzRuCQozhu4nKq
+         yh51+PeC2srtiZzd+1VrREnXMG9Qdb65lxfD6gwNvioLF/ihIBqfkCHNP602NrWsop
+         RRVNKH5vT0/ITwxIKvqgSv3EwmjtlUkuKxQ4bBnCcDPCKmk92UvE8yTKBYoXTv2/FH
+         i0hz2n35eh2Bii0TXiNX/iicV4ZUrot80G/rtfMhzqqMBTO8gVqhFbSNVrKTtyk87Q
+         4z1axQC/4UUSw==
+Received: by mail-lf1-f52.google.com with SMTP id f14so3517438lfg.5
+        for <linux-efi@vger.kernel.org>; Tue, 20 Sep 2022 05:30:08 -0700 (PDT)
+X-Gm-Message-State: ACrzQf0c9EtpLIQPxbsQM2613aEw2KwMwLLHkGz8ISQmfLUsnwQB5U+x
+        Kgwu9v5UHWaolI7nSQNfYtFTrj9QIXkljhy1GKk=
+X-Google-Smtp-Source: AMsMyM7TKRtmORblIOSmvNY25cwkS9v8/nHoewLrF7AIObbJ5CGt5T/9J6YH+NeCzZ1sScGUxB2ut1qslOpXTVELwbg=
+X-Received: by 2002:a05:6512:4024:b0:497:4db:6ad0 with SMTP id
+ br36-20020a056512402400b0049704db6ad0mr8382518lfb.637.1663677006962; Tue, 20
+ Sep 2022 05:30:06 -0700 (PDT)
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=5459; i=ardb@kernel.org; h=from:subject; bh=srQKs7p3PC5iOf/ljqR6rUVwt+Y767+YpdciVWnF3DM=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjKbG/eAkKO02pkR+1khnWorCaal7avQCWzQVYXACi YjMXmsWJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYymxvwAKCRDDTyI5ktmPJD/PDA CqsKNJIkIuUZbjs5A/Slc6JlfloYTx4TuqxIp4kFWmF3BUrG7J9HbEzOPlk72tV8e72SNM0/fl871/ Zl+V75GPAwHbs3c0ZahoZg4/OVXQqirvG811vBSROT8LmwkFG0wFkdi/xDVIB5eMi3EXMCAGsp+BbY jxr9mtx+GaHrVNvxfuVwyV+OS7CDcfbW8Ea/TXjUiEcV8+MDqkNTPoTTOD7m8bHm03iXYcRsiYsPyx mdxiPLerZ+BQuXRdn2juqT8p6rh+Jk64o3h8LJGSnycwUOWIe7B7kdYMKQuauxHhJg9DsIGK4Xzs6H MGXi8FLoS4HiR3eg3AgABF9zScsFE9SSmEDx3X56cw6VxkaXFBbvehXIpvFls0CjWyBr03Q4WZ3C0Z Qb5LIJ2Q0rISe7m08I/KxE4Uz7F0XYvL3H+cglCSXM+Kf1Ifx6QHaqR6sdBDZwk0ZC74wDzApOIxwX /ZD9BaG382S8az43Nz+Jl9s2pVwIjD0blaDD5d0adzl7U=
-X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-Content-Transfer-Encoding: 8bit
+References: <PH0PR11MB50644F564BA1A112DF60D44EC54B9@PH0PR11MB5064.namprd11.prod.outlook.com>
+ <CAMj1kXEVvOWPdVr6VrsCGR1LnVBZvepLcVOpBXqS6zGj-h23Qw@mail.gmail.com>
+ <PH0PR11MB50640586CDB43B707746038BC54D9@PH0PR11MB5064.namprd11.prod.outlook.com>
+ <CAMj1kXG7OSn9ypnN4tZGPH-RhqCBZjYNy6xZ2XU2Bvpnq+0X+A@mail.gmail.com> <PH0PR11MB50642815C0F26C5C48FCED25C54C9@PH0PR11MB5064.namprd11.prod.outlook.com>
+In-Reply-To: <PH0PR11MB50642815C0F26C5C48FCED25C54C9@PH0PR11MB5064.namprd11.prod.outlook.com>
+From:   Ard Biesheuvel <ardb@kernel.org>
+Date:   Tue, 20 Sep 2022 14:29:55 +0200
+X-Gmail-Original-Message-ID: <CAMj1kXHK+DWaug7trfEP1u6MHUT8_Mfk_ofk89fVVkDmx5JTBg@mail.gmail.com>
+Message-ID: <CAMj1kXHK+DWaug7trfEP1u6MHUT8_Mfk_ofk89fVVkDmx5JTBg@mail.gmail.com>
+Subject: Re: [edk2-devel] measurement to command-line/initrd for loading
+ kernel via -kernel option
+To:     "Xu, Min M" <min.m.xu@intel.com>,
+        Matthew Garrett <mjg59@srcf.ucam.org>,
+        Peter Jones <pjones@redhat.com>,
+        Peter Gonda <pgonda@google.com>
+Cc:     "devel@edk2.groups.io" <devel@edk2.groups.io>,
+        "Aktas, Erdem" <erdemaktas@google.com>,
+        James Bottomley <jejb@linux.ibm.com>,
+        "Yao, Jiewen" <jiewen.yao@intel.com>,
+        Gerd Hoffmann <kraxel@redhat.com>,
+        "Lu, Ken" <ken.lu@intel.com>,
+        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+        Daniel Kiper <daniel.kiper@oracle.com>,
+        "Daniel P. Smith" <dpsmith@apertussolutions.com>,
+        linux-efi <linux-efi@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+(cc Ilias, Matt, Peter[], Daniel[])
 
-Currently, from the efi-stub, we are only measuring the loaded initrd,
-using the TCG2 measured boot protocols.  A following patch is
-introducing measurements of additional components, such as the kernel
-command line. On top of that, we will shortly have to support other
-types of measured boot that don't expose the TCG2 protocols.
-
-So let's prepare for that, by rejigging the efi_measure_initrd() routine
-into something that we should be able to reuse for measuring other
-assets, and which can be extended later to support other measured boot
-protocols.
-
-Co-developed-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
-Signed-off-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
----
- drivers/firmware/efi/libstub/efi-stub-helper.c | 120 +++++++++++++-------
- 1 file changed, 77 insertions(+), 43 deletions(-)
-
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index 829f732c5f37..8f9a79bc4e8e 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -334,6 +334,79 @@ void efi_apply_loadoptions_quirk(const void **load_options, u32 *load_options_si
- 	*load_options_size = load_option_unpacked.optional_data_size;
- }
- 
-+enum efistub_event {
-+	EFISTUB_EVT_INITRD,
-+	EFISTUB_EVT_COUNT,
-+};
-+
-+#define STR_WITH_SIZE(s)	sizeof(s), s
-+
-+static const struct {
-+	u32		pcr_index;
-+	u32		event_id;
-+	u32		event_data_len;
-+	u8		event_data[52];
-+} events[] = {
-+	[EFISTUB_EVT_INITRD] = {
-+		9,
-+		INITRD_EVENT_TAG_ID,
-+		STR_WITH_SIZE("Linux initrd")
-+	},
-+};
-+
-+static efi_status_t efi_measure_tagged_event(unsigned long load_addr,
-+					     unsigned long load_size,
-+					     enum efistub_event event)
-+{
-+	efi_guid_t tcg2_guid = EFI_TCG2_PROTOCOL_GUID;
-+	efi_tcg2_protocol_t *tcg2 = NULL;
-+	efi_status_t status;
-+
-+	efi_bs_call(locate_protocol, &tcg2_guid, NULL, (void **)&tcg2);
-+	if (tcg2) {
-+		struct efi_measured_event {
-+			efi_tcg2_event_t	event_data;
-+			efi_tcg2_tagged_event_t tagged_event;
-+			u8			tagged_event_data[];
-+		} *evt;
-+		int size = sizeof(*evt) + events[event].event_data_len;
-+
-+		status = efi_bs_call(allocate_pool, EFI_LOADER_DATA, size,
-+				     (void **)&evt);
-+		if (status != EFI_SUCCESS)
-+			goto fail;
-+
-+		evt->event_data = (struct efi_tcg2_event){
-+			.event_size			= size,
-+			.event_header.header_size	= sizeof(evt->event_data.event_header),
-+			.event_header.header_version	= EFI_TCG2_EVENT_HEADER_VERSION,
-+			.event_header.pcr_index		= events[event].pcr_index,
-+			.event_header.event_type	= EV_EVENT_TAG,
-+		};
-+
-+		evt->tagged_event = (struct efi_tcg2_tagged_event){
-+			.tagged_event_id		= events[event].event_id,
-+			.tagged_event_data_size		= events[event].event_data_len,
-+		};
-+
-+		memcpy(evt->tagged_event_data, events[event].event_data,
-+		       events[event].event_data_len);
-+
-+		status = efi_call_proto(tcg2, hash_log_extend_event, 0,
-+					load_addr, load_size, &evt->event_data);
-+		efi_bs_call(free_pool, evt);
-+
-+		if (status != EFI_SUCCESS)
-+			goto fail;
-+		return EFI_SUCCESS;
-+	}
-+
-+	return EFI_UNSUPPORTED;
-+fail:
-+	efi_warn("Failed to measure data for event %d: 0x%lx\n", event, status);
-+	return status;
-+}
-+
- /*
-  * Convert the unicode UEFI command line to ASCII to pass to kernel.
-  * Size of memory allocated return in *cmd_line_len.
-@@ -626,47 +699,6 @@ efi_status_t efi_load_initrd_cmdline(efi_loaded_image_t *image,
- 				    load_addr, load_size);
- }
- 
--static const struct {
--	efi_tcg2_event_t	event_data;
--	efi_tcg2_tagged_event_t tagged_event;
--	u8			tagged_event_data[];
--} initrd_tcg2_event = {
--	{
--		sizeof(initrd_tcg2_event) + sizeof("Linux initrd"),
--		{
--			sizeof(initrd_tcg2_event.event_data.event_header),
--			EFI_TCG2_EVENT_HEADER_VERSION,
--			9,
--			EV_EVENT_TAG,
--		},
--	},
--	{
--		INITRD_EVENT_TAG_ID,
--		sizeof("Linux initrd"),
--	},
--	{ "Linux initrd" },
--};
+On Tue, 20 Sept 2022 at 02:20, Xu, Min M <min.m.xu@intel.com> wrote:
+>
+> On September 19, 2022 2:59 PM, Ard Biesheuvel wrote:
+> > On Mon, 19 Sept 2022 at 04:13, Xu, Min M <min.m.xu@intel.com> wrote:
+> > >
+> > > On September 18, 2022 8:52 PM, Ard Biesheuvel wrote:
+> > > > Hello Min Xu,
+> > > >
+> > > > On Sat, 17 Sept 2022 at 04:53, Xu, Min M <min.m.xu@intel.com> wrote=
+:
+> > > > >
+> > > > > Hi, Ard
+> > > > >
+> > > > > I am checking the measurement behavior when loading the kernel vi=
+a
+> > > > > the
+> > > > QEMU -kernel option. I find it is implemented by below 2 driver/lib=
+:
+> > > > >
+> > > > > - OvmfPkg/QemuKernelLoaderFsDxe
+> > > > >
+> > > > >  This is a separate DXE driver that exposes the virtual
+> > > > > SimpleFileSystem
+> > > > implementation that carries the kernel and initrd passed via the
+> > > > QEMU command line.
+> > > > >
+> > > > > - OvmfPkg/Library/X86QemuLoadImageLib
+> > > > >
+> > > > >   This is the library that consumes above driver and call
+> > > > LoadImage/StartImage so that the kernel image gets authenticated
+> > > > and/or measured.
+> > > > >
+> > > > > See https://edk2.groups.io/g/devel/message/55381
+> > > > >
+> > > > >
+> > > > >
+> > > > > I have some questions about the implementation need your help.
+> > > > >
+> > > > > 2. Kernel image is authenticated and/or measured in LoadImage. I
+> > > > > am
+> > > > wondering if =E2=80=9Ccommand line=E2=80=9D is measured as well? =
+=E2=80=9CCommand line=E2=80=9D can
+> > > > be treated as an external input and in my opinion it should be meas=
+ured
+> > too.
+> > > > >
+> > > > > 3. The same question to initrd. Is it measured?
+> > > > >
+> > > >
+> > > > The initrd is measured by the EFI stub in Linux, and we are
+> > > > currently adding measurement of the load options to that as well:
+> > > > https://lore.kernel.org/all/20220916081441.1993492-2-
+> > > > ilias.apalodimas@linaro.org/
+> > > >
+> > > > The initrd is Linux specific in any case, so there, the Linux OS
+> > > > loader is a natural place to take care of this. The load options ar=
+e
+> > > > being added because of the oversight in the TCG spec, which only
+> > > > covers load options if they are part of a Boot#### option, but
+> > > > between
+> > > > LoadImage() and StartImage, you can pass any load options you want
+> > > > via the loaded image protocol, so it needs to be measured as well.
+> > > >
+> > > Thanks Ard for the explanation.
+> > > I was told that in grub boot cmd-line/initrd will be measured as well=
+. So my
+> > question is that will they be measured twice? One in grub.efi, the othe=
+r in efi-
+> > stub?
+> > >
+> >
+> > The EFI stub may be the only OS loader, so the EFI stub should measure =
+the
+> > command line and the initrd.
+> >
+> > Whether or not a previous loader stage exists that may or may not measu=
+re
+> > the same pieces is not for the EFI stub to reason about. And in any cas=
+e,
+> > measuring the same thing twice is much less of an issue than not measur=
+ing it
+> > at all.
+> >
+> > > My understanding is that the loader should take the responsibility to=
+ do the
+> > measurement.
+> > > For grub boot, grub.efi is the loader so it measures kernel-image/cmd=
 -
--static void efi_measure_initrd(unsigned long load_addr, unsigned long load_size)
--{
--	efi_guid_t tcg2_guid = EFI_TCG2_PROTOCOL_GUID;
--	efi_tcg2_protocol_t *tcg2 = NULL;
--	efi_status_t status;
--
--	efi_bs_call(locate_protocol, &tcg2_guid, NULL, (void **)&tcg2);
--	if (tcg2) {
--		status = efi_call_proto(tcg2, hash_log_extend_event,
--					0, load_addr, load_size,
--					&initrd_tcg2_event.event_data);
--		if (status != EFI_SUCCESS)
--			efi_warn("Failed to measure initrd data: 0x%lx\n",
--				 status);
--		else
--			efi_info("Measured initrd data into PCR %d\n",
--				 initrd_tcg2_event.event_data.event_header.pcr_index);
--	}
--}
--
- /**
-  * efi_load_initrd() - Load initial RAM disk
-  * @image:	EFI loaded image protocol
-@@ -692,8 +724,10 @@ efi_status_t efi_load_initrd(efi_loaded_image_t *image,
- 		status = efi_load_initrd_dev_path(load_addr, load_size, hard_limit);
- 		if (status == EFI_SUCCESS) {
- 			efi_info("Loaded initrd from LINUX_EFI_INITRD_MEDIA_GUID device path\n");
--			if (*load_size > 0)
--				efi_measure_initrd(*load_addr, *load_size);
-+			if (*load_size > 0 &&
-+			    efi_measure_tagged_event(*load_addr, *load_size,
-+						     EFISTUB_EVT_INITRD) == EFI_SUCCESS)
-+				efi_info("Measured initrd data into PCR 9\n");
- 		} else if (status == EFI_NOT_FOUND) {
- 			status = efi_load_initrd_cmdline(image, load_addr, load_size,
- 							 soft_limit, hard_limit);
--- 
-2.35.1
+> > line/initrd.
+> >
+> > If the EFI stub is invoked, the EFI stub is the OS loader. We should no=
+t be
+> > relying on the presence of absence of GRUB (or shim) in the boot chain.
+> >
+> > > For direct boot, TryRunningQemuKernel() now measures kernel image (in
+> > CoreLoadImage). Shall it also measure cmd-line/initrd in the same time?
+> > >
+> >
+> > No, I don't think it should. This is why we are adding this to the EFI =
+stub
+> > instead.
+> >
+> > If we measure the initrd and command line in the EFI stub, we don't hav=
+e to
+> > measure it anywhere else, and we can use any generic EFI loader on a
+> > measured boot system.
+> >
+> Ard, thanks for the explanation.
+> The reason why I am checking the measurement of cmd-line and initrd is th=
+at I am thinking how to measure cmd-line and initrd in TDVF with the EFI_CC=
+_MEASUREMENT_PROTOCOL which is defined in MdePkg/Include/Protocol/CcMeasure=
+ment.h. Actually EFI_CC_MEASUREMENT_PROTOCOL is designed for the Confidenti=
+al Computing guest to support measurement.
+>
+> I check the patch in https://lore.kernel.org/all/20220916081441.1993492-1=
+-ilias.apalodimas@linaro.org/. It supports the EFI_TCG2_PROTOCOL. I think i=
+t can also support EFI_CC_MEASUREMENT_PROTOCOL like below:
+>   efi_tcg2_protocol_t *tcg2 =3D NULL;
+>   efi_cc_protocol_t *cc =3D NULL;
+>   efi_bs_call(locate_protocol, &tcg2_guild, NULL, (void**)&tcg2);
+>   efi_bs_call(locate_protocol, &cc_guild, NULL, (void**)&cc);
+>   if (tcg2) {
+>       do_tcg2_measurement ();
+>   } else if (cc) {
+>       cc-> MapPcrToMrIndex ();  // because there is a map between TPM-PCR=
+ index to CC-MeasureRegister Index.
+>       do_cc_measurement ();
+>   }
+>
 
+Thanks for the example, this is helpful.
+
+I am anticipating this if () to grow more branches pretty soon, so it
+is high time we have a discussion about how to abstract this properly.
+
+We will need to measure various assets for:
+- TCG measured boot
+- TDX measure boot
+- SEV/SNP measured boot?
+- DICE attestation
+- ARM RME
+- Trenchboot DRTM
+
+The latter is the odd one out here, but it will also need to capture
+system state at different times throughout the execution of the EFI
+stub, so it makes sense to mention it here.
+
+Ilias's patches add the following function to the Linux EFI stub
+
+struct efi_measured_event {
+   efi_tcg2_event_t event_data;
+   efi_tcg2_tagged_event_t tagged_event;
+   u8 tagged_event_data[];
+};
+
+void efi_measure_tagged_event(unsigned long load_addr, unsigned long load_s=
+ize,
+         const struct efi_measured_event *event);
+
+which is geared towards the TCG2 types. I imagine this will need to
+evolve into something more generic over time, making the use of the
+TCG2 types specific to that particular measurement path.
+
+As the Linux/EFI and OVMF maintainer, I am somewhat involved in all of
+these efforts, but I am by no means an expert on any of them. So this
+is really a call for collaboration to ensure that we converge on
+something that is usable for everyone and not a constant source of
+churn.
+
+> I am wondering when your 2 patches would be accepted and merged so that I=
+ can submit my patch based on yours.
+>
+
+I just sent a v2 of Ilias's patches with some preliminary changes to
+make these abstractions easier in the future. If there are no
+objections, I will queue those patches tomorrow, so they should be in
+linux-next by friday
+
+https://lore.kernel.org/r/20220920122746.3553306-1-ardb@kernel.org
