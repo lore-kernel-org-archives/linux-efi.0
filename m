@@ -2,35 +2,35 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DF0B2ECAAD8
-	for <linux-efi@archiver.kernel.org>; Tue, 20 Sep 2022 12:28:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 39C4AC6FA8E
+	for <linux-efi@archiver.kernel.org>; Tue, 20 Sep 2022 12:28:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230201AbiITM2E (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 20 Sep 2022 08:28:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42724 "EHLO
+        id S230353AbiITM2G (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 20 Sep 2022 08:28:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42764 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229911AbiITM2D (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 20 Sep 2022 08:28:03 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5ED0C53021
-        for <linux-efi@vger.kernel.org>; Tue, 20 Sep 2022 05:28:02 -0700 (PDT)
+        with ESMTP id S230333AbiITM2F (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 20 Sep 2022 08:28:05 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CE18275389
+        for <linux-efi@vger.kernel.org>; Tue, 20 Sep 2022 05:28:04 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 16033B80C98
-        for <linux-efi@vger.kernel.org>; Tue, 20 Sep 2022 12:28:01 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 461B8C433D6;
-        Tue, 20 Sep 2022 12:27:58 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 63B7A61F2E
+        for <linux-efi@vger.kernel.org>; Tue, 20 Sep 2022 12:28:04 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4663CC433D6;
+        Tue, 20 Sep 2022 12:28:02 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1663676879;
-        bh=jpEOe7b88xXqsPjF5/O4qxu0XBjc4SBUVOWyo4qWcxI=;
-        h=From:To:Cc:Subject:Date:From;
-        b=AVSKAztjOoY2lL/aLbZ9URioO1VmlEXJHCiwZm2fu827+gbq/sKkVI1ptrhlUuNKG
-         sWze547QyQdFTZ/vIIM/HMVly6AdreEaAdgB/XI1FuMsWFL8JpYTmbLq4jARVCfmTi
-         SyK65CQtT+cyOnFzp9jTMWc/oMRsjjwgKnbfyz6oizUBd6eeIR7f03oaMb+SGBAE0y
-         D7FC/hFNRPjfrsvmi10TbNkgR/0jVA66Ub7ws2qBeYV+U3hysWfpeSKvHwywcPBZxa
-         rXwvDRgcri1DzhFbeOE25YM6FDvyMSHeTP0JNU0HrdOFaeZCtx6bS7Pi5paHDQsARn
-         nbzXZOYZAETlw==
+        s=k20201202; t=1663676883;
+        bh=hOm5zcpZJLun8U4GW7Meg2Ojpzde3h4spCZwffF8n5s=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=URLpsWsQh6B1na7flwFziWsmFgEQhJRKdu8JF20gpkUY7lHCT2/PkA1XC4yNKEJ2M
+         Pk5udmukcuv7wHkSTfgizjemaBHQgTm/LhEZUhFF1sy+MlvciIwh0cOONq8XqjN5CB
+         PCNdNaRplg5l5oMd8jGHNVwNPR1BE/qTlsy7qBxpEWStlX4gPvt5KngVXQPkNB6vUp
+         dK2lu+/O1Q68rgTyVFvEOH9wYRThdldqUXEUwmWOrdVWD8FvwdoHO9C6gBzUsZG8QW
+         LMZwFgqUKBeTGVI0ZZbVIdpoaQG9yszpaYfWPD1eYytGI7HqAraZ2+jublEJjmj5d2
+         jGPfQt6XoX91A==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     Ard Biesheuvel <ardb@kernel.org>, Peter Jones <pjones@redhat.com>,
@@ -38,44 +38,103 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>, Peter Jones <pjones@redhat.com>,
         Daniel Kiper <daniel.kiper@oracle.com>,
         Ilias Apalodimas <ilias.apalodimas@linaro.org>,
         "Xu, Min M" <min.m.xu@intel.com>
-Subject: [PATCH v2 0/2] efi: measure kernel command line
-Date:   Tue, 20 Sep 2022 14:27:44 +0200
-Message-Id: <20220920122746.3553306-1-ardb@kernel.org>
+Subject: [PATCH v2 2/2] efi/libstub: measure EFI LoadOptions
+Date:   Tue, 20 Sep 2022 14:27:46 +0200
+Message-Id: <20220920122746.3553306-3-ardb@kernel.org>
 X-Mailer: git-send-email 2.35.1
+In-Reply-To: <20220920122746.3553306-1-ardb@kernel.org>
+References: <20220920122746.3553306-1-ardb@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1082; i=ardb@kernel.org; h=from:subject; bh=jpEOe7b88xXqsPjF5/O4qxu0XBjc4SBUVOWyo4qWcxI=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjKbG+0dYXWuC/oUDruXOC6Hs82jLxqSm6e/HBq03c WRru8RuJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYymxvgAKCRDDTyI5ktmPJO4SC/ 9OnOTWxsiT0DkP7ieKqODVBrU/KAiY6ACSz/3++f+bBVn6ayzqMo6mTRD/DcTlKylJD58og/fyDJUV VVQCLqWqRmNPGqzJmsPnFWPwS4Q+048EDGQs0iIWcof8Qu7x90H+wMmQKBtNjh72d7x6d+sdUuVxVd g0DEgFtF3vgw0zmaYJhFG2acgdF0aYm+6Ghbw1vgrkROTBD6fbWzZRSqp3uVyy7b6E6B2SUv7SAH9n zqku4OcaUlt0Ge95YrvSs3dRVJpVs0vYwI8pCVJfEpGb28SQtEfDuWj0zXIJ8d/jcLy9Ll+SveBR1E mVoNp67loW2F667bLSahY2FshRK+ISF3o1JPGpq1P47NYoPcEypkh7me/zoowCYwyPpaWrdiMdR3xI 6iuEaI7KyhunXZLCtdaHTilhkiX0L7FhX7g8MnJM05Knc8p9H/1cTP4VjJs/lgNeTrr2hW9PxbPScE 7P1NaRaDlSVP0/pu9X5hT6TBo/8njNk4f/ckBlE8KEHpI=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3346; i=ardb@kernel.org; h=from:subject; bh=L3KrP8TAQav5SOxL416PJKl+GuaHSlN6f4btetHQnEY=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjKbHBkeOlVBWudtBigm+xWOum+xwt1qjppPqCsOHM O6DAyiqJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYymxwQAKCRDDTyI5ktmPJGAgC/ 9NJl2iZNT0cpIJ+KMFShW/t0yc/HhPlOVYUMVUT6gZZ/D45iehvIv73Ir+FKzxU4XoMf/PMzy/NFSr OHgSrBW3YL3IHrjQ+QUTuRxdMXZhKFobRMcV34A/e/TiGd2N4Axy1mUFzRL9OHVRDmuYOCMI6ktEfz aIK4bKxXBU3E6jXl3JSMPCEULtE86fIGGsBfWD4e9vhi1IykAo1m0DltRiaFws+kDHOlPM+kwulYRU Em3rI2ou97nJ1RzXS/im24Z1AeSVr2RaHuuWqkcXk0NSSx2UZUYcpE3OTF0GpFKbzTt2OKGRZkVoR5 PIRMky97Xim58FEETttkW8iy48eT1v+WvJwrExuuiHEM1DybXDRu/94iQaXajE9otAwJTXPNMtP7AW SjLCIuUZ+11TaQ4qhYX0p2cWK+SbPD7tQIV1cZblOQ4C4jnZSxq677iiHi1ITmQn8VKMy8ACgpjG9x yrC/i3oYC1XlHW+dBEKxTi3pmSS14s4XmMsK/KtYf2ebQ=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Measuring the kernel command line (or more generically, image load
-options in EFI parlance) is not covered by the TCG spec, which only
-reasons about images started as boot options.
+From: Ilias Apalodimas <ilias.apalodimas@linaro.org>
 
-Let's work around this oversight by measuring the kernel command line
-from the EFI stub itself. Since load options is essentially just a
-sequence of bytes, which happens to be interpreted as UTF-16 and
-subsequently converted into ASCII before being used as the kernel
-command line, let's just measure the whole thing and not the resulting
-ASCII string.
+The EFI TCG spec, in §10.2.6 "Measuring UEFI Variables and UEFI GPT
+Data", only reasons about the load options passed to a loaded image in
+the context of boot options booted directly from the BDS, which are
+measured into PCR #5 along with the rest of the Boot#### EFI variable.
 
-Cc: Peter Jones <pjones@redhat.com>
-Cc: Matthew Garrett <mjg59@google.com>
-Cc: Daniel Kiper <daniel.kiper@oracle.com>
-Cc: Ilias Apalodimas <ilias.apalodimas@linaro.org>
-Cc: "Xu, Min M" <min.m.xu@intel.com>
+However, the UEFI spec mentions the following in the documentation of
+the LoadImage() boot service and the EFI_LOADED_IMAGE protocol:
 
-Ilias Apalodimas (2):
-  efi/libstub: refactor the initrd measuring functions
-  efi/libstub: measure EFI LoadOptions
+  The caller may fill in the image’s "load options" data, or add
+  additional protocol support to the handle before passing control to
+  the newly loaded image by calling EFI_BOOT_SERVICES.StartImage().
 
- drivers/firmware/efi/libstub/efi-stub-helper.c | 130 +++++++++++++-------
- drivers/firmware/efi/libstub/efistub.h         |   1 +
- 2 files changed, 88 insertions(+), 43 deletions(-)
+The typical boot sequence for Linux EFI systems is to load GRUB via a
+boot option from the BDS, which [hopefully] calls LoadImage to load the
+kernel image, passing the kernel command line via the mechanism
+described above. This means that we cannot rely on the firmware
+implementing TCG measured boot to ensure that the kernel command line
+gets measured before the image is started, so the EFI stub will have to
+take care of this itself.
 
+Given that PCR #5 has an official use in the TCG measured boot spec,
+let's avoid it in this case. Instead, add a measurement in PCR #9 (which
+we already use for our initrd) and extend it with the LoadOptions
+measurements
+
+Co-developed-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+Signed-off-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+---
+ drivers/firmware/efi/libstub/efi-stub-helper.c | 10 ++++++++++
+ drivers/firmware/efi/libstub/efistub.h         |  1 +
+ 2 files changed, 11 insertions(+)
+
+diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+index 8f9a79bc4e8e..c26c59a69c76 100644
+--- a/drivers/firmware/efi/libstub/efi-stub-helper.c
++++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+@@ -336,6 +336,7 @@ void efi_apply_loadoptions_quirk(const void **load_options, u32 *load_options_si
+ 
+ enum efistub_event {
+ 	EFISTUB_EVT_INITRD,
++	EFISTUB_EVT_LOAD_OPTIONS,
+ 	EFISTUB_EVT_COUNT,
+ };
+ 
+@@ -352,6 +353,11 @@ static const struct {
+ 		INITRD_EVENT_TAG_ID,
+ 		STR_WITH_SIZE("Linux initrd")
+ 	},
++	[EFISTUB_EVT_LOAD_OPTIONS] = {
++		9,
++		LOAD_OPTIONS_EVENT_TAG_ID,
++		STR_WITH_SIZE("LOADED_IMAGE::LoadOptions")
++	},
+ };
+ 
+ static efi_status_t efi_measure_tagged_event(unsigned long load_addr,
+@@ -423,6 +429,10 @@ char *efi_convert_cmdline(efi_loaded_image_t *image, int *cmd_line_len)
+ 	efi_status_t status;
+ 	u32 options_chars;
+ 
++	if (options_size > 0)
++		efi_measure_tagged_event((unsigned long)options, options_size,
++					 EFISTUB_EVT_LOAD_OPTIONS);
++
+ 	efi_apply_loadoptions_quirk((const void **)&options, &options_size);
+ 	options_chars = options_size / sizeof(efi_char16_t);
+ 
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index 02fb5f7c8eff..8ad6705b555e 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -762,6 +762,7 @@ union apple_properties_protocol {
+ typedef u32 efi_tcg2_event_log_format;
+ 
+ #define INITRD_EVENT_TAG_ID 0x8F3B22ECU
++#define LOAD_OPTIONS_EVENT_TAG_ID 0x8F3B22EDU
+ #define EV_EVENT_TAG 0x00000006U
+ #define EFI_TCG2_EVENT_HEADER_VERSION	0x1
+ 
 -- 
 2.35.1
 
