@@ -2,35 +2,35 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A9291ECAAD8
-	for <linux-efi@archiver.kernel.org>; Wed, 21 Sep 2022 14:54:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0AA66C6FA82
+	for <linux-efi@archiver.kernel.org>; Wed, 21 Sep 2022 14:54:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230177AbiIUOys (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 21 Sep 2022 10:54:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43244 "EHLO
+        id S230110AbiIUOyw (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 21 Sep 2022 10:54:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43850 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230098AbiIUOyk (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 21 Sep 2022 10:54:40 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 848FE64CA;
-        Wed, 21 Sep 2022 07:54:38 -0700 (PDT)
+        with ESMTP id S230116AbiIUOyn (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 21 Sep 2022 10:54:43 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 381422AFC;
+        Wed, 21 Sep 2022 07:54:41 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id E0DD4B82FFB;
-        Wed, 21 Sep 2022 14:54:36 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CCD05C43470;
-        Wed, 21 Sep 2022 14:54:33 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id C69F3630CF;
+        Wed, 21 Sep 2022 14:54:40 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 63092C433B5;
+        Wed, 21 Sep 2022 14:54:38 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1663772075;
-        bh=f4hAaP+nZQiGjfEdHOfloyDSCBg7MiQpQpgjB8eSSLU=;
+        s=k20201202; t=1663772080;
+        bh=hjePMKZyCOenQTSHV4pGP5IYB9bZ4b3la+cxQPIBsrY=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=qx9uT5gdNAZ+8XcoMzrMKWSAxEYyRB4B05jTvbm2uNa+xui/lTdSXF7GX2N+QE2Nv
-         rlNtBzUgbF1wE249SbfGb/sTZTwWyZlwPLt2WalBpsbchtLRIPjrADCNTUM0b3Dc+8
-         SGJFeMGzNj7m5nAImxr5HUdUqbONIZ/rlfdL8L0Vma4XNYL56ovesZtVVxZoSSQvVF
-         eW+5PgrZt1yIXnJWCHeVeWuB7M3AusvsnO801MCiS2ghe+33qldA0k1EXGLuRtuZJP
-         SwDTHEk1bHMBljSqxwglw8Gov6nisAvPOXSjUFZxqrJYteOJjn83WBAukIBigv+ziO
-         H9o+eeqFTRKYA==
+        b=eOGQpxsG98m6Fox2F5dU2wuSzf0M6XmV8Ilp83LqMUqc9w2xhZMr5nojVmeWH47ea
+         XJzRdKCfW+MYXDzQPjPIXnXz8aNprXJhaW2VvzC6dPNmQ/wTfpoj4C7guudElhgfUA
+         I0JCUIHPtLF3OAneuP4KxLdhLAAZ9JC6jaETXIWj9XMXwJ8+zgg78q8Ui5arFrh22x
+         t7bnu7XmktKlhaVFY2l/FdX6VoT7VpR1a9gp/f6H7LkeuJ3XUHhjU3q5CTFqcBNCZX
+         u4VaOu1nepHFRLEknOOgPgotPMESUvtQly/bAXdeSaXlRj1b+eW29c9zM1Dv3KBZr1
+         t/HX77vUxcVhA==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -38,127 +38,149 @@ Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
         Dave Hansen <dave.hansen@linux.intel.com>,
         Michael Roth <michael.roth@amd.com>
-Subject: [PATCH v2 03/16] x86/compressed: efi-mixed: move bootargs parsing out of 32-bit startup code
-Date:   Wed, 21 Sep 2022 16:54:09 +0200
-Message-Id: <20220921145422.437618-4-ardb@kernel.org>
+Subject: [PATCH v2 05/16] x86/compressed: efi-mixed: move efi32_entry out of head_64.S
+Date:   Wed, 21 Sep 2022 16:54:11 +0200
+Message-Id: <20220921145422.437618-6-ardb@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220921145422.437618-1-ardb@kernel.org>
 References: <20220921145422.437618-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=4615; i=ardb@kernel.org; h=from:subject; bh=f4hAaP+nZQiGjfEdHOfloyDSCBg7MiQpQpgjB8eSSLU=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjKyWHvdK1Lg7oMDR8exKa/vsM1svazbixC/Fq3jBe 9YXmSZeJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYyslhwAKCRDDTyI5ktmPJI8sDA CV2vV5iKwTQSd3XuGdHUY3eNptgd3hcn7rkx9I5PiI/RkRGuE21kgPg6OGcWgwQSL1kYjR7AxVKulD nU8x7L3wXd0By0CUqGqpxKCHX2Bg6R31HGjp7a9SPxNOnU5LRjPBiQ61IVgvFq8kKDsMCOrArnq8dY 7hdwOAXpwf30+QtJhAS3vE8BdQw9dbn8jeC2YpyI0hqkgwNPXBYKY+P4whsqlHxdtZyIXdAs8liTHD nbBn4OgagUSlgPsmVokLzEsQBe4QSjbd+Set1C/8EV5bNK0Sbjy/CdCdHy78leCaWgoGdvEULYdYh+ MIbsdcTfoYZ7H+4yFe+qz/dpJ3UBg/f5CHe5i/L2qqaRyXAn+eepLsqiCL74JjuncQSY/ok7RjVGWH 4q9j91L1uiiwO6VhbXbaAJ5da4750Y4wUk8rD5lmhlil/FqETbKf0X+GXU27ZEyF5M5lyKVuiekRJ7 Hz6qtIErrWzhNQRIYDIE0atcmhj1BqlhYzsoHTsr9V+so=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3927; i=ardb@kernel.org; h=from:subject; bh=hjePMKZyCOenQTSHV4pGP5IYB9bZ4b3la+cxQPIBsrY=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjKyWLVXF3ze3IV/DZKGamQFIJQTrLYmFVZTd1mPTv UeKZFKyJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYysliwAKCRDDTyI5ktmPJKjNC/ 9QxC+Hyf23IsALZspJ4N4tYNyyXNS/9AJ9F84+vyLnuSO4wk7quDdWvjKBH4rfsgTnQhci8jd5PY/L oXK7dVE4Hy60kRq0PzMjR84XkIuXFb3BKIr7o7a3CZcQXBI1PCfgpX57sfdgCMovbqDgM6X28FrOSt LZ1ZZOp719f3ZE5XfxG8xDH3XGeYz2WKSPODWihkCkp3jr5elPIhNapebM60x6zZEqKD6TmDxvsJ0g BOY5L4xvT4xKTV5+pFbylST3+QAMoXWruIrrYC2pAUmVZ7Co821SupIANUX8yh090aRZ9qTa4LCxv8 dlD6AUjg9ysEgBrVWAx2sGa6mwUs7uuDfFeJACB7vFlBrWRC0+fyPj1/ITX5/Q9obt5wg+BPq/e+bg s4zR68NBvQkdscFT3uu++fAzB5Sn46EWKo8q1p56R4QEs0jEligSU+hrD8+HwajnaSIJN7XsD8WTTO KXQTTOo3eieCtdRK5kbbUQTHjyX/Fk+mILFBfPZMxy1X4=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Move the logic that chooses between the different EFI entrypoints out of
-the 32-bit boot path, and into a 64-bit helper that can perform the same
-task much more cleanly. While at it, document the mixed mode boot flow
-in a code comment.
+Move the efi32_entry() routine out of head_64.S and into efi-mixed.S,
+which reduces clutter in the complicated startup routines. It also
+permits linkage of some symbols used by code to be made local.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/boot/compressed/efi_mixed.S | 43 ++++++++++++++++++++
- arch/x86/boot/compressed/head_64.S   | 24 ++---------
- 2 files changed, 47 insertions(+), 20 deletions(-)
+ arch/x86/boot/compressed/efi_mixed.S | 44 +++++++++++++++-----
+ arch/x86/boot/compressed/head_64.S   | 32 --------------
+ 2 files changed, 34 insertions(+), 42 deletions(-)
 
 diff --git a/arch/x86/boot/compressed/efi_mixed.S b/arch/x86/boot/compressed/efi_mixed.S
-index 67e7edcdfea8..77e77c3ea393 100644
+index 77e77c3ea393..5007a44cd966 100644
 --- a/arch/x86/boot/compressed/efi_mixed.S
 +++ b/arch/x86/boot/compressed/efi_mixed.S
-@@ -22,6 +22,49 @@
+@@ -105,7 +105,7 @@ SYM_FUNC_START(__efi64_thunk)
+ 	/*
+ 	 * Switch to IDT and GDT with 32-bit segments. This is the firmware GDT
+ 	 * and IDT that was installed when the kernel started executing. The
+-	 * pointers were saved at the EFI stub entry point in head_64.S.
++	 * pointers were saved by the efi32_entry() routine below.
+ 	 *
+ 	 * Pass the saved DS selector to the 32-bit code, and use far return to
+ 	 * restore the saved CS selector.
+@@ -217,22 +217,46 @@ SYM_FUNC_START_LOCAL(efi_enter32)
+ 	lret
+ SYM_FUNC_END(efi_enter32)
  
- 	.code64
- 	.text
-+/*
-+ * When booting in 64-bit mode on 32-bit EFI firmware, startup_64_mixedmode()
-+ * is the first thing that runs after switching to long mode. Depending on
-+ * whether the EFI handover protocol or the compat entry point was used to
-+ * enter the kernel, it will either branch to the 64-bit EFI handover
-+ * entrypoint at offset 0x390 in the image, or to the 64-bit EFI PE/COFF
-+ * entrypoint efi_pe_entry(). In the former case, the bootloader must provide a
-+ * struct bootparams pointer as the third argument, so the presence of such a
-+ * pointer is used to disambiguate.
-+ *
-+ *                                                             +--------------+
-+ *  +------------------+     +------------+            +------>| efi_pe_entry |
-+ *  | efi32_pe_entry   |---->|            |            |       +-----------+--+
-+ *  +------------------+     |            |     +------+---------------+   |
-+ *                           | startup_32 |---->| startup_64_mixedmode |   |
-+ *  +------------------+     |            |     +------+---------------+   V
-+ *  | efi32_stub_entry |---->|            |            |     +------------------+
-+ *  +------------------+     +------------+            +---->| efi64_stub_entry |
-+ *                                                           +-------------+----+
-+ *                           +------------+     +----------+               |
-+ *                           | startup_64 |<----| efi_main |<--------------+
-+ *                           +------------+     +----------+
-+ */
-+SYM_FUNC_START(startup_64_mixedmode)
-+	lea	efi32_boot_args(%rip), %rdx
-+	mov	0(%rdx), %edi
-+	mov	4(%rdx), %esi
-+	mov	8(%rdx), %edx		// saved bootparams pointer
-+	test	%edx, %edx
-+	jnz	efi64_stub_entry
-+	/*
-+	 * efi_pe_entry uses MS calling convention, which requires 32 bytes of
-+	 * shadow space on the stack even if all arguments are passed in
-+	 * registers. We also need an additional 8 bytes for the space that
-+	 * would be occupied by the return address, and this also results in
-+	 * the correct stack alignment for entry.
-+	 */
-+	sub	$40, %rsp
-+	mov	%rdi, %rcx		// MS calling convention
-+	mov	%rsi, %rdx
-+	jmp	efi_pe_entry
-+SYM_FUNC_END(startup_64_mixedmode)
++SYM_FUNC_START(efi32_entry)
++	call	1f
++1:	pop	%ebx
 +
- SYM_FUNC_START(__efi64_thunk)
- 	push	%rbp
- 	push	%rbx
++	/* Save firmware GDTR and code/data selectors */
++	sgdtl	(efi32_boot_gdt - 1b)(%ebx)
++	movw	%cs, (efi32_boot_cs - 1b)(%ebx)
++	movw	%ds, (efi32_boot_ds - 1b)(%ebx)
++
++	/* Store firmware IDT descriptor */
++	sidtl	(efi32_boot_idt - 1b)(%ebx)
++
++	/* Store boot arguments */
++	leal	(efi32_boot_args - 1b)(%ebx), %ebx
++	movl	%ecx, 0(%ebx)
++	movl	%edx, 4(%ebx)
++	movl	%esi, 8(%ebx)
++	movb	$0x0, 12(%ebx)          // efi_is64
++
++	/* Disable paging */
++	movl	%cr0, %eax
++	btrl	$X86_CR0_PG_BIT, %eax
++	movl	%eax, %cr0
++
++	jmp	startup_32
++SYM_FUNC_END(efi32_entry)
++
+ 	.data
+ 	.balign	8
+-SYM_DATA_START(efi32_boot_gdt)
++SYM_DATA_START_LOCAL(efi32_boot_gdt)
+ 	.word	0
+ 	.quad	0
+ SYM_DATA_END(efi32_boot_gdt)
+ 
+-SYM_DATA_START(efi32_boot_idt)
++SYM_DATA_START_LOCAL(efi32_boot_idt)
+ 	.word	0
+ 	.quad	0
+ SYM_DATA_END(efi32_boot_idt)
+ 
+-SYM_DATA_START(efi32_boot_cs)
+-	.word	0
+-SYM_DATA_END(efi32_boot_cs)
+-
+-SYM_DATA_START(efi32_boot_ds)
+-	.word	0
+-SYM_DATA_END(efi32_boot_ds)
++SYM_DATA_LOCAL(efi32_boot_cs, .word 0)
++SYM_DATA_LOCAL(efi32_boot_ds, .word 0)
++SYM_DATA_LOCAL(efi32_boot_args, .long 0, 0, 0)
++SYM_DATA(efi_is64, .byte 1)
 diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
-index 1ba2fc2357e6..b51f0e107c2e 100644
+index 9ae6ddccd3ef..be95d5685717 100644
 --- a/arch/x86/boot/compressed/head_64.S
 +++ b/arch/x86/boot/compressed/head_64.S
-@@ -261,25 +261,9 @@ SYM_FUNC_START(startup_32)
- 	 */
- 	leal	rva(startup_64)(%ebp), %eax
- #ifdef CONFIG_EFI_MIXED
--	movl	rva(efi32_boot_args)(%ebp), %edi
--	testl	%edi, %edi
--	jz	1f
--	leal	rva(efi64_stub_entry)(%ebp), %eax
--	movl	rva(efi32_boot_args+4)(%ebp), %esi
--	movl	rva(efi32_boot_args+8)(%ebp), %edx	// saved bootparams pointer
--	testl	%edx, %edx
--	jnz	1f
--	/*
--	 * efi_pe_entry uses MS calling convention, which requires 32 bytes of
--	 * shadow space on the stack even if all arguments are passed in
--	 * registers. We also need an additional 8 bytes for the space that
--	 * would be occupied by the return address, and this also results in
--	 * the correct stack alignment for entry.
--	 */
--	subl	$40, %esp
--	leal	rva(efi_pe_entry)(%ebp), %eax
--	movl	%edi, %ecx			// MS calling convention
--	movl	%esi, %edx
-+	cmpb	$1, rva(efi_is64)(%ebp)
-+	je	1f
-+	leal	rva(startup_64_mixedmode)(%ebp), %eax
- 1:
+@@ -289,35 +289,6 @@ SYM_FUNC_START(efi32_stub_entry)
+ 	popl	%esi
+ 	jmp	efi32_entry
+ SYM_FUNC_END(efi32_stub_entry)
+-
+-	.text
+-SYM_FUNC_START_LOCAL(efi32_entry)
+-	call	1f
+-1:	pop	%ebx
+-
+-	/* Save firmware GDTR and code/data selectors */
+-	sgdtl	(efi32_boot_gdt - 1b)(%ebx)
+-	movw	%cs, (efi32_boot_cs - 1b)(%ebx)
+-	movw	%ds, (efi32_boot_ds - 1b)(%ebx)
+-
+-	/* Store firmware IDT descriptor */
+-	sidtl	(efi32_boot_idt - 1b)(%ebx)
+-
+-	/* Store boot arguments */
+-	leal	(efi32_boot_args - 1b)(%ebx), %ebx
+-	movl	%ecx, 0(%ebx)
+-	movl	%edx, 4(%ebx)
+-	movl	%esi, 8(%ebx)
+-	movb	$0x0, 12(%ebx)          // efi_is64
+-
+-	/* Disable paging */
+-	movl	%cr0, %eax
+-	btrl	$X86_CR0_PG_BIT, %eax
+-	movl	%eax, %cr0
+-
+-	jmp	startup_32
+-SYM_FUNC_END(efi32_entry)
+-	__HEAD
  #endif
- 	/* Check if the C-bit position is correct when SEV is active */
-@@ -766,7 +750,7 @@ SYM_DATA_END_LABEL(boot32_idt, SYM_L_GLOBAL, boot32_idt_end)
+ 
+ 	.code64
+@@ -750,9 +721,6 @@ SYM_DATA_END_LABEL(boot32_idt, SYM_L_GLOBAL, boot32_idt_end)
  SYM_DATA(image_offset, .long 0)
  #endif
  #ifdef CONFIG_EFI_MIXED
--SYM_DATA_LOCAL(efi32_boot_args, .long 0, 0, 0)
-+SYM_DATA(efi32_boot_args, .long 0, 0, 0)
- SYM_DATA(efi_is64, .byte 1)
- 
+-SYM_DATA(efi32_boot_args, .long 0, 0, 0)
+-SYM_DATA(efi_is64, .byte 1)
+-
  #define ST32_boottime		60 // offsetof(efi_system_table_32_t, boottime)
+ #define BS32_handle_protocol	88 // offsetof(efi_boot_services_32_t, handle_protocol)
+ #define LI32_image_base		32 // offsetof(efi_loaded_image_32_t, image_base)
 -- 
 2.35.1
 
