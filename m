@@ -2,35 +2,35 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A1280C6FA90
-	for <linux-efi@archiver.kernel.org>; Wed, 21 Sep 2022 14:54:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D49BFECAAD8
+	for <linux-efi@archiver.kernel.org>; Wed, 21 Sep 2022 14:54:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230078AbiIUOyg (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 21 Sep 2022 10:54:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43246 "EHLO
+        id S230103AbiIUOyk (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 21 Sep 2022 10:54:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43248 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230030AbiIUOyd (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 21 Sep 2022 10:54:33 -0400
+        with ESMTP id S229718AbiIUOyi (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 21 Sep 2022 10:54:38 -0400
 Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8E1FF101A;
-        Wed, 21 Sep 2022 07:54:31 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 33113AE6E;
+        Wed, 21 Sep 2022 07:54:36 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 20202B83028;
-        Wed, 21 Sep 2022 14:54:30 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EB35CC43143;
-        Wed, 21 Sep 2022 14:54:26 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id ADAFFB83028;
+        Wed, 21 Sep 2022 14:54:34 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 86383C433B5;
+        Wed, 21 Sep 2022 14:54:31 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1663772068;
-        bh=nFP0scq5YobaddyVWT3m2QrQwK3XasOpsdihcJcMWvs=;
-        h=From:To:Cc:Subject:Date:From;
-        b=MdLgc5Ovj0cZhtRpiTEK/9khPOVzGA+itzCsItU4KhlP+/n2E3JFJdKNbEwIauGbK
-         d2py0uUcAdjOzJo+Jll5zypItKWydiYwo5c3haJ20EPr2DyH23SCQHqcNIqp1qsvQu
-         NYjzizfnHJ8bNPd0cxm4B7INClPDmffssYDBmCqgSkBx5e1P2d3kRJzWSKRp+hXwnQ
-         u5e8xoZyc+BoadNPeCRFB+yqggN/Gig8tMK0k87ZkBLlMVBd+bKtbWdQZO+Jb1L9/n
-         +f0+Pm2Ih7G+Z42OMgNORznBODbp0WRSIPq5RMYRf3I9JXhVk0CrhQ3nUZtGJHWfTV
-         PVzY2ieNxH+Iw==
+        s=k20201202; t=1663772073;
+        bh=5V76Xsth0euhhz1QsgMDnrfFoaPcgyyzA5zjmBHSST0=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=IGZREX0JzehUBdZFbLHBuO+8ZumcoyIPaEJjKhgSfqr5KC6P6Jb91+2EyjX+H/2zj
+         REqs9iOkkS/b7NhxfKoe0SgQFLJhancGTMD2E6oWNY2KHJPDDtpM7qwzyawcRveOjb
+         HopCH44DDZxFkDLAWHntcheLQuLJuu6ocEw4BYQTlYDJ/3RvUQQCYcARaFrMCiz57O
+         A4tAOiHKduk7ykULICr3nphkeWQHyqUTwooi6Xgr1VSD51SAdTtJSF6BgV47UfoyW6
+         x+Qdvgfk1lvioLA7ahO0RPCaBemTW7Gg+Xl0AdYk2/LMu8P1IdAcF2RR+pjw6Auf9W
+         gRf5YOMq2z72w==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -38,71 +38,94 @@ Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
         Dave Hansen <dave.hansen@linux.intel.com>,
         Michael Roth <michael.roth@amd.com>
-Subject: [PATCH v2 00/16] x86: head_64.S spring cleaning
-Date:   Wed, 21 Sep 2022 16:54:06 +0200
-Message-Id: <20220921145422.437618-1-ardb@kernel.org>
+Subject: [PATCH v2 02/16] x86/compressed: efi-mixed: move 32-bit entrypoint code into .text section
+Date:   Wed, 21 Sep 2022 16:54:08 +0200
+Message-Id: <20220921145422.437618-3-ardb@kernel.org>
 X-Mailer: git-send-email 2.35.1
+In-Reply-To: <20220921145422.437618-1-ardb@kernel.org>
+References: <20220921145422.437618-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2607; i=ardb@kernel.org; h=from:subject; bh=nFP0scq5YobaddyVWT3m2QrQwK3XasOpsdihcJcMWvs=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjKyWCyvtsYeIsjdqQWTxLVWqKcXc+MFORFb12WmtW 6JOLSkmJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYyslggAKCRDDTyI5ktmPJKoVC/ 4p1kCtUecDTAGcjgK8TjHwBQgP+f2J7wUVFQO4Ryhj6AChJp5Mhds3YKWdvngsRDJ/JYpNEXw/Sllu cvyVGhS9rcuE3Lzfe58J1JG5hoiY75I98w1QBmV+4L5vvuwVleQxB5NtRs9kuzOk7grXppVOWkEiWV 0gXHDms6oZO0j7iiS0HXPiqxnJIiyifij0V9d9aL/hA5uki9Fykub7rgEeWWAK1dAKKUA2GaLQCN1/ UUBFb5lrM7mLeGRr7PtlbpFJ2fDFaeXqGbfcqA+uOpTXK//7EH0Szaw/4tgTi5SLWFhMJqvm+urRfe 0Nsr0HH0Y9xvKxOX4eiCef4yw5b9mR3zcwVFl11bRy6UZ0S3+CrfguOyNASw7O5/Yhlq6W7aeX+ZGk YUqDGI1wqD6kka/rqFsy8m1Pt4EvepzzwJ8qtuNxLpnOvK63j1zGIU2zcFjWOiVmE8DF73bOzrMB8f xsW4KuLprOMEkEuem3KzkwnoF8LT1b+UBVp8uXbH2Ck3E=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2148; i=ardb@kernel.org; h=from:subject; bh=5V76Xsth0euhhz1QsgMDnrfFoaPcgyyzA5zjmBHSST0=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjKyWGnPukk4waMSCu0HVqcFUn8kLOxKo4Gy9c8qZx ydwjOiiJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYyslhgAKCRDDTyI5ktmPJKmUC/ 0QiVgehXCkiHIq44VgWErny0BR4Q0khljnRiqzWqAJOGiyWsDSlEHAtB+8uDc+IlFelxvTHi+JtOp3 3iqafseDNfQsyqfhnvQHQQ/kCR8iC5Dm/4nRHiZHq0iDEceUGi4rVzCkQb61UTUy4sy3cc+aZvXJ42 y7tqRCO6LHu1NMhETQfGw4jXtypMId2UNfckHGwwlhJ8lROl/Ibh23aw7kQ1uLQtH6L636jpBE6e9f 3vwnLG1MkcYFbhqstBZUmWX809AGsHVryr+hoBt00sHBgjh0RZCyYQoxCjJ4DZUg9Ynk6931u0ChPD A9iKMno/g0QOumoBrhcOnA9ZuWn76cFvL9KvPN4r2yPZ80J9VaiLguzGBJhdQ91W4fQJX233mH/KlZ KCXmnGUjpacZOnVISgMbrMuHEEHQ4aEOjQzRBhAYqEfCh3gN+FUCSqUXaIrbLBK5Ij1yJPQiG1dUN3 jRYa4LvppmzoHy62OvqgFmSRLTsjEwljXgwtCWwDnTydE=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-After doing some cleanup work on the EFI code in head_64.S, the mixed
-mode code in particular, I noticed that the memory encryption pieces
-could use some attention as well, so I cleaned that up too.
+Move the code that stores the arguments passed to the EFI entrypoint
+into the .text section, so that it can be moved into a separate
+compilation unit in a subsequent patch.
 
-I have been sitting on these patches since November, waiting for the
-right time to post them, i.e., after the SEV/SNP review had finished.
-This has yet to happen, so I'm posting them now instead. Please feel
-free to disregard for the time being, and propose a suitable timeframe
-to repost them if this is likely to conflict with ongoing work.
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+---
+ arch/x86/boot/compressed/head_64.S | 34 ++++++++++++--------
+ 1 file changed, 20 insertions(+), 14 deletions(-)
 
-Changes since v1:
-- at Boris's request, split the patches into smaller ones that are
-  easier to review
-
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Ingo Molnar <mingo@redhat.com>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Dave Hansen <dave.hansen@linux.intel.com>
-Cc: Michael Roth <michael.roth@amd.com>
-
-Ard Biesheuvel (16):
-  x86/compressed: efi-mixed: rename efi_thunk_64.S to efi-mixed.S
-  x86/compressed: efi-mixed: move 32-bit entrypoint code into .text
-    section
-  x86/compressed: efi-mixed: move bootargs parsing out of 32-bit startup
-    code
-  x86/compressed: efi-mixed: move efi32_pe_entry into .text section
-  x86/compressed: efi-mixed: move efi32_entry out of head_64.S
-  x86/compressed: efi-mixed: move efi32_pe_entry() out of head_64.S
-  x86/compressed: efi: merge multiple definitions of image_offset into
-    one
-  x86/compressed: efi-mixed: simplify IDT/GDT preserve/restore
-  x86/compressed: avoid touching ECX in startup32_set_idt_entry()
-  x86/compressed: pull global variable ref up into startup32_load_idt()
-  x86/compressed: move startup32_load_idt() into .text section
-  x86/compressed: move startup32_load_idt() out of head_64.S
-  x86/compressed: move startup32_check_sev_cbit() into .text
-  x86/compressed: move startup32_check_sev_cbit() out of head_64.S
-  x86/compressed: adhere to calling convention in
-    get_sev_encryption_bit()
-  x86/compressed: only build mem_encrypt.S if AMD_MEM_ENCRYPT=y
-
- arch/x86/boot/compressed/Makefile       |   8 +-
- arch/x86/boot/compressed/efi_mixed.S    | 337 ++++++++++++++++++++
- arch/x86/boot/compressed/efi_thunk_64.S | 195 -----------
- arch/x86/boot/compressed/head_32.S      |   4 -
- arch/x86/boot/compressed/head_64.S      | 299 +----------------
- arch/x86/boot/compressed/mem_encrypt.S  | 152 ++++++++-
- drivers/firmware/efi/libstub/x86-stub.c |   2 +-
- 7 files changed, 496 insertions(+), 501 deletions(-)
- create mode 100644 arch/x86/boot/compressed/efi_mixed.S
- delete mode 100644 arch/x86/boot/compressed/efi_thunk_64.S
-
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index d33f060900d2..1ba2fc2357e6 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -303,24 +303,28 @@ SYM_FUNC_START(efi32_stub_entry)
+ 	popl	%ecx
+ 	popl	%edx
+ 	popl	%esi
++	jmp	efi32_entry
++SYM_FUNC_END(efi32_stub_entry)
+ 
++	.text
++SYM_FUNC_START_LOCAL(efi32_entry)
+ 	call	1f
+-1:	pop	%ebp
+-	subl	$ rva(1b), %ebp
+-
+-	movl	%esi, rva(efi32_boot_args+8)(%ebp)
+-SYM_INNER_LABEL(efi32_pe_stub_entry, SYM_L_LOCAL)
+-	movl	%ecx, rva(efi32_boot_args)(%ebp)
+-	movl	%edx, rva(efi32_boot_args+4)(%ebp)
+-	movb	$0, rva(efi_is64)(%ebp)
++1:	pop	%ebx
+ 
+ 	/* Save firmware GDTR and code/data selectors */
+-	sgdtl	rva(efi32_boot_gdt)(%ebp)
+-	movw	%cs, rva(efi32_boot_cs)(%ebp)
+-	movw	%ds, rva(efi32_boot_ds)(%ebp)
++	sgdtl	(efi32_boot_gdt - 1b)(%ebx)
++	movw	%cs, (efi32_boot_cs - 1b)(%ebx)
++	movw	%ds, (efi32_boot_ds - 1b)(%ebx)
+ 
+ 	/* Store firmware IDT descriptor */
+-	sidtl	rva(efi32_boot_idt)(%ebp)
++	sidtl	(efi32_boot_idt - 1b)(%ebx)
++
++	/* Store boot arguments */
++	leal	(efi32_boot_args - 1b)(%ebx), %ebx
++	movl	%ecx, 0(%ebx)
++	movl	%edx, 4(%ebx)
++	movl	%esi, 8(%ebx)
++	movb	$0x0, 12(%ebx)          // efi_is64
+ 
+ 	/* Disable paging */
+ 	movl	%cr0, %eax
+@@ -328,7 +332,8 @@ SYM_INNER_LABEL(efi32_pe_stub_entry, SYM_L_LOCAL)
+ 	movl	%eax, %cr0
+ 
+ 	jmp	startup_32
+-SYM_FUNC_END(efi32_stub_entry)
++SYM_FUNC_END(efi32_entry)
++	__HEAD
+ #endif
+ 
+ 	.code64
+@@ -831,7 +836,8 @@ SYM_FUNC_START(efi32_pe_entry)
+ 	 */
+ 	subl	%esi, %ebx
+ 	movl	%ebx, rva(image_offset)(%ebp)	// save image_offset
+-	jmp	efi32_pe_stub_entry
++	xorl	%esi, %esi
++	jmp	efi32_entry
+ 
+ 2:	popl	%edi				// restore callee-save registers
+ 	popl	%ebx
 -- 
 2.35.1
 
