@@ -2,35 +2,35 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 90847C6FA91
-	for <linux-efi@archiver.kernel.org>; Wed, 21 Sep 2022 14:55:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57B57ECAAD8
+	for <linux-efi@archiver.kernel.org>; Wed, 21 Sep 2022 14:56:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230461AbiIUOz6 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 21 Sep 2022 10:55:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46222 "EHLO
+        id S230075AbiIUO4D (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 21 Sep 2022 10:56:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43266 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230346AbiIUOz1 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 21 Sep 2022 10:55:27 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6B0A13C8F0;
-        Wed, 21 Sep 2022 07:55:01 -0700 (PDT)
+        with ESMTP id S229995AbiIUOzn (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 21 Sep 2022 10:55:43 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B18681834C;
+        Wed, 21 Sep 2022 07:55:04 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id B51B9B83034;
-        Wed, 21 Sep 2022 14:54:59 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A8BD9C433D7;
-        Wed, 21 Sep 2022 14:54:56 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id A981F630B4;
+        Wed, 21 Sep 2022 14:55:03 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 40560C433B5;
+        Wed, 21 Sep 2022 14:55:01 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1663772098;
-        bh=x9QO33G0fBHlsuj0aKM/8I+ExRaFzYG1mzjARFUKdJo=;
+        s=k20201202; t=1663772103;
+        bh=WbgVHaEsv5DRy1pEnyeBQ/OqX8UNa7Fs1hsnZgK0mbI=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=ewcr9Qou6blbp16BAOckV+lTnOAxrp/LCppV9UzzKOt2fXy/Uomr6shLKwNWYUYxc
-         hq9fqz7+/ew/5uF86IyfllLNU+26mZvOtDmI7xlEwbMPRxExCqrAlW5S25udqcwhXS
-         t9TmSU8GB57UEo2xlvnvqQrN6E4lLrR50AVegXNqhvU7bgJlx2PtCgIaCaHrQUOouf
-         t3zQMS/VQvlqCBFDZXg74rM3ecGDt1NkZUHYKSqC6ss/tA3+e5qoyx46W1TzEwmONg
-         HJoOGhw3AF0xBYvUM48HXdLIdxBI5HhG/4qZE3ph2cn0H573i56/u1ijih5phwhSed
-         XnnNqGmaVdUrw==
+        b=p2bc0kbCvcuAPSActZg/u0iWc9IK+6wA6qp3E6RksO7tBA12uIpO8X6MVHspBtSs8
+         AuBdbZoSJ3cu8I0ThN0e0RLbPoss8DZNUdKSVs5eh9fcpaF6YzijJapfB6Psuv4xLD
+         hcitweaOVUCj22DCGCTE+HRNZN7OdlQXL+7O9TFuVnG3qcCfof4xiKZNsfs/LEEP3D
+         A/ocLuRwUfyCi+ypkK6V1FGPXRFO7Ya+LG4lTnDo2N3dUTM7AzTMbiyQ9J+8qUvbpg
+         obfaDAOAH72/yVUhdnW6Pe3sk15SHpSIwlwY5Hhld85X2LS/xfRAVnJR28+5rg2DIw
+         jYwuPapccNYPg==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -38,123 +38,81 @@ Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
         Dave Hansen <dave.hansen@linux.intel.com>,
         Michael Roth <michael.roth@amd.com>
-Subject: [PATCH v2 13/16] x86/compressed: move startup32_check_sev_cbit() into .text
-Date:   Wed, 21 Sep 2022 16:54:19 +0200
-Message-Id: <20220921145422.437618-14-ardb@kernel.org>
+Subject: [PATCH v2 15/16] x86/compressed: adhere to calling convention in get_sev_encryption_bit()
+Date:   Wed, 21 Sep 2022 16:54:21 +0200
+Message-Id: <20220921145422.437618-16-ardb@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220921145422.437618-1-ardb@kernel.org>
 References: <20220921145422.437618-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=3026; i=ardb@kernel.org; h=from:subject; bh=x9QO33G0fBHlsuj0aKM/8I+ExRaFzYG1mzjARFUKdJo=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjKyWYJKX7uFQWXpZctogrnphhHrnCH05LWnz8ZuZ1 RZI5PVaJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYyslmAAKCRDDTyI5ktmPJAcPDA CPpNdahgItmk3RFn+NLP19E2XOFiv7zhzJ8YkkaHjNi3Yx5bpz+TLdt3nZAJ2SsUh39m0fRfY739TK bFzAF9FkJQAOEw+XFkIPzIG9YZKbjdTZjY5AdBw6bYyPR6QtfCauxBFnpE4+3wTiHffXT5M0kpWgyn ejCeRpPqafLj6OvPoGynsWijtjCamIXVghDiVJt8hxotku4enQwP2YQnL6SQiNnrvM33dOeZjchpO3 1NTGyPhWYRV3fyBQtq4Nh9BMHtwL91t3lS6u8T9OUqF5XvudEFzfx/SecrzTvbyGKmWycqr6SHztDY 6/6EXq758Epl9oz435crIz7qNts6fnF+UPz07+0naAWB+qT4rl476oNEQPCs3OPqbwmeawIAxNQvfo m7DHellT6Pcx2M8GCu2HFF87J+fGSiPZtKe9nPPr8XJGQGaZ/AytLXoJyjVBjPxqOFQP6I8vvhzWxe 9RgcJhLDCGAwfE8/50jBP9YxRfzX8lpgJ6rzQle/1Y6V0=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1893; i=ardb@kernel.org; h=from:subject; bh=WbgVHaEsv5DRy1pEnyeBQ/OqX8UNa7Fs1hsnZgK0mbI=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjKyWcevoeMnFcfMXlfXHL30Iq3+wkmMmF/rwOYRei I6uhA3WJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYyslnAAKCRDDTyI5ktmPJCUmC/ 9PIkfSMlPNkplXoVMIGJv1kha8yGwZcGkLAusvMD/tOWh7GhO77LFwxHgAdqqGV++BRskKw5CCpR7p kyWMqZVadBPVk36naHLD3eOwi1pI7IAbYVc8aCkY77OFZxd9kzWcfRzGNzQlrWo6tx1uFdV8q+jjIm VRdWFfI7z2vsnM28gg+DGlw+N1vPCJJ/V6tSqITg7aXuK7JHJW0Zjs5iz13DhC78gBaq4B+canV6Ps Uz/o/bt1X7suyIJA7CmCWMLr2bN4W7m99J/DCq2JiiU0Ilz0FCg9zDn18ssoIW5+QbSwP75WsTgNE7 aEPXOzap/8hRadAa6Cwr2Vy83CnkLPDmRFkJ0UOH5vRQ5c+ULFyYO9v4E8neTxCMNSmSDLdHsviI8x TXlfNp6egbZhFIxAufVJo1szP2/laiYOA22vETgDaCZGLyKWgh5bRxBkaIXOTNrvFmdaYFfZImsBqS hw262c2MifxwvCyt7C6xe7QVB+Nf5ox3Uie/lMPEtiQQA=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Move startup32_check_sev_cbit() into the .text section and turn it into
-an ordinary function using the ordinary 32-bit calling convention,
-instead of saving/restoring the registers that are known to be live at
-the only call site. This improves maintainability, and makes it possible
-to move this function out of head_64.S and into a separate compilation
-unit that is specific to memory encryption.
-
-Note that this requires the call site to be moved before the mixed mode
-check, as %eax will be live otherwise.
+Make get_sev_encryption_bit() follow the ordinary i386 calling
+convention, and only call it if CONFIG_AMD_MEM_ENCRYPT is actually
+enabled. This clarifies the calling code, and makes it more
+maintainable.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/boot/compressed/head_64.S | 35 +++++++++++---------
- 1 file changed, 19 insertions(+), 16 deletions(-)
+ arch/x86/boot/compressed/head_64.S     |  5 +++--
+ arch/x86/boot/compressed/mem_encrypt.S | 10 ----------
+ 2 files changed, 3 insertions(+), 12 deletions(-)
 
 diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
-index abb5a650a816..639f688e4949 100644
+index 232cd3fa3e84..a7bbc8d73a08 100644
 --- a/arch/x86/boot/compressed/head_64.S
 +++ b/arch/x86/boot/compressed/head_64.S
-@@ -251,6 +251,11 @@ SYM_FUNC_START(startup_32)
- 	movl    $__BOOT_TSS, %eax
- 	ltr	%ax
- 
-+#ifdef CONFIG_AMD_MEM_ENCRYPT
-+	/* Check if the C-bit position is correct when SEV is active */
-+	call	startup32_check_sev_cbit
-+#endif
-+
+@@ -180,12 +180,13 @@ SYM_FUNC_START(startup_32)
+   */
  	/*
- 	 * Setup for the jump to 64bit mode
- 	 *
-@@ -268,8 +273,6 @@ SYM_FUNC_START(startup_32)
- 	leal	rva(startup_64_mixedmode)(%ebp), %eax
- 1:
- #endif
--	/* Check if the C-bit position is correct when SEV is active */
--	call	startup32_check_sev_cbit
- 
- 	pushl	$__KERNEL_CS
- 	pushl	%eax
-@@ -724,16 +727,17 @@ SYM_DATA_END_LABEL(boot_idt, SYM_L_GLOBAL, boot_idt_end)
-  * succeed. An incorrect C-bit position will map all memory unencrypted, so that
-  * the compare will use the encrypted random data and fail.
-  */
--	__HEAD
--SYM_FUNC_START(startup32_check_sev_cbit)
- #ifdef CONFIG_AMD_MEM_ENCRYPT
--	pushl	%eax
-+	.text
-+SYM_FUNC_START(startup32_check_sev_cbit)
- 	pushl	%ebx
--	pushl	%ecx
--	pushl	%edx
-+	pushl	%ebp
-+
-+	call	0f
-+0:	popl	%ebp
- 
- 	/* Check for non-zero sev_status */
--	movl	rva(sev_status)(%ebp), %eax
-+	movl	(sev_status - 0b)(%ebp), %eax
+ 	 * If SEV is active then set the encryption mask in the page tables.
+-	 * This will insure that when the kernel is copied and decompressed
++	 * This will ensure that when the kernel is copied and decompressed
+ 	 * it will be done so encrypted.
+ 	 */
+-	call	get_sev_encryption_bit
+ 	xorl	%edx, %edx
+ #ifdef	CONFIG_AMD_MEM_ENCRYPT
++	call	get_sev_encryption_bit
++	xorl	%edx, %edx
  	testl	%eax, %eax
- 	jz	4f
+ 	jz	1f
+ 	subl	$32, %eax	/* Encryption bit is always above bit 31 */
+diff --git a/arch/x86/boot/compressed/mem_encrypt.S b/arch/x86/boot/compressed/mem_encrypt.S
+index 14cf04a1ed09..e69674588a31 100644
+--- a/arch/x86/boot/compressed/mem_encrypt.S
++++ b/arch/x86/boot/compressed/mem_encrypt.S
+@@ -18,12 +18,7 @@
+ 	.text
+ 	.code32
+ SYM_FUNC_START(get_sev_encryption_bit)
+-	xor	%eax, %eax
+-
+-#ifdef CONFIG_AMD_MEM_ENCRYPT
+ 	push	%ebx
+-	push	%ecx
+-	push	%edx
  
-@@ -748,17 +752,18 @@ SYM_FUNC_START(startup32_check_sev_cbit)
- 	jnc	2b
+ 	movl	$0x80000000, %eax	/* CPUID to check the highest leaf */
+ 	cpuid
+@@ -54,12 +49,7 @@ SYM_FUNC_START(get_sev_encryption_bit)
+ 	xor	%eax, %eax
  
- 	/* Store to memory and keep it in the registers */
--	movl	%eax, rva(sev_check_data)(%ebp)
--	movl	%ebx, rva(sev_check_data+4)(%ebp)
-+	leal	(sev_check_data - 0b)(%ebp), %ebp
-+	movl	%eax, 0(%ebp)
-+	movl	%ebx, 4(%ebp)
- 
- 	/* Enable paging to see if encryption is active */
- 	movl	%cr0, %edx			 /* Backup %cr0 in %edx */
- 	movl	$(X86_CR0_PG | X86_CR0_PE), %ecx /* Enable Paging and Protected mode */
- 	movl	%ecx, %cr0
- 
--	cmpl	%eax, rva(sev_check_data)(%ebp)
-+	cmpl	%eax, 0(%ebp)
- 	jne	3f
--	cmpl	%ebx, rva(sev_check_data+4)(%ebp)
-+	cmpl	%ebx, 4(%ebp)
- 	jne	3f
- 
- 	movl	%edx, %cr0	/* Restore previous %cr0 */
-@@ -770,13 +775,11 @@ SYM_FUNC_START(startup32_check_sev_cbit)
- 	jmp	3b
- 
- 4:
--	popl	%edx
--	popl	%ecx
-+	popl	%ebp
- 	popl	%ebx
--	popl	%eax
--#endif
+ .Lsev_exit:
+-	pop	%edx
+-	pop	%ecx
+ 	pop	%ebx
+-
+-#endif	/* CONFIG_AMD_MEM_ENCRYPT */
+-
  	RET
- SYM_FUNC_END(startup32_check_sev_cbit)
-+#endif
+ SYM_FUNC_END(get_sev_encryption_bit)
  
- /*
-  * Stack and heap for uncompression
 -- 
 2.35.1
 
