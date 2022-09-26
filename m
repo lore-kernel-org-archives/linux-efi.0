@@ -2,152 +2,99 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B9A92C6FA8E
-	for <linux-efi@archiver.kernel.org>; Mon, 26 Sep 2022 16:49:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 494E2C32771
+	for <linux-efi@archiver.kernel.org>; Mon, 26 Sep 2022 22:52:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229547AbiIZQtC (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 26 Sep 2022 12:49:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49784 "EHLO
+        id S229734AbiIZWwf (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 26 Sep 2022 18:52:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49232 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229790AbiIZQsL (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 26 Sep 2022 12:48:11 -0400
-Received: from mga11.intel.com (mga11.intel.com [192.55.52.93])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8D2BC13F9A;
-        Mon, 26 Sep 2022 08:42:15 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1664206935; x=1695742935;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=tM/bAWc4lIOzRDGri9usGwnWw/hVhQodCyKKUpoDK+8=;
-  b=jmNwy5DpPJXLlqBrxmv8a7UDyiLrrk+HKInodQ+cOUpBMD1+kIlfMsi+
-   VHXRj3I3IX+19gSMh1tlxfWnLQpfRcOX3HcL3rjEtSNQlbPGxwYNMp+9J
-   wZuOtc6orcd0ChOFUHpSAAgJ0o6huVmuIl0zmC2dhrKa77LKBxd6S6Nhz
-   tzN8XNXpw52NtQ5lrtk2gpJjC9gpm7xLlZFR+L3daN539+9cVh1E5ReC+
-   VR/gbLWxhemwbpmzMEhpcb14I+y3YyKDxy18v+YhIlQFJBMO9lBGZxqcn
-   3OFwr0nZm2tDxDZvTa3R9BOilrMswH9eA9oxDJsAtc9fR87K89lmNEwm1
-   A==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10482"; a="298661884"
-X-IronPort-AV: E=Sophos;i="5.93,346,1654585200"; 
-   d="scan'208";a="298661884"
-Received: from fmsmga003.fm.intel.com ([10.253.24.29])
-  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Sep 2022 08:42:15 -0700
-X-IronPort-AV: E=McAfee;i="6500,9779,10482"; a="710164368"
-X-IronPort-AV: E=Sophos;i="5.93,346,1654585200"; 
-   d="scan'208";a="710164368"
-Received: from hluxenbu-mobl1.ger.corp.intel.com (HELO box.shutemov.name) ([10.249.32.142])
-  by fmsmga003-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Sep 2022 08:42:08 -0700
-Received: by box.shutemov.name (Postfix, from userid 1000)
-        id 64280104928; Mon, 26 Sep 2022 18:42:06 +0300 (+03)
-Date:   Mon, 26 Sep 2022 18:42:06 +0300
-From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-To:     Tom Lendacky <thomas.lendacky@amd.com>
-Cc:     "Kirill A. Shutemov" <kirill@shutemov.name>,
-        Dionna Amalie Glaze <dionnaglaze@google.com>,
-        Dave Hansen <dave.hansen@intel.com>,
-        Mel Gorman <mgorman@techsingularity.net>,
-        Vlastimil Babka <vbabka@suse.cz>,
-        Borislav Petkov <bp@alien8.de>,
-        Andy Lutomirski <luto@kernel.org>,
-        Sean Christopherson <seanjc@google.com>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Joerg Roedel <jroedel@suse.de>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Andi Kleen <ak@linux.intel.com>,
-        Kuppuswamy Sathyanarayanan 
-        <sathyanarayanan.kuppuswamy@linux.intel.com>,
-        David Rientjes <rientjes@google.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Paolo Bonzini <pbonzini@redhat.com>,
-        Ingo Molnar <mingo@redhat.com>,
-        Dario Faggioli <dfaggioli@suse.com>,
-        Mike Rapoport <rppt@kernel.org>,
-        David Hildenbrand <david@redhat.com>,
-        Marcelo Cerri <marcelo.cerri@canonical.com>,
-        tim.gardner@canonical.com,
-        Khalid ElMously <khalid.elmously@canonical.com>,
-        philip.cox@canonical.com,
-        the arch/x86 maintainers <x86@kernel.org>,
-        Linux Memory Management List <linux-mm@kvack.org>,
-        linux-coco@lists.linux.dev, linux-efi <linux-efi@vger.kernel.org>,
-        LKML <linux-kernel@vger.kernel.org>,
-        Mike Rapoport <rppt@linux.ibm.com>
-Subject: Re: [PATCHv7 02/14] mm: Add support for unaccepted memory
-Message-ID: <20220926154206.skzqxhw23wuaegtk@box.shutemov.name>
-References: <CAAH4kHbcfnVWNQHf6Mrg__bSFT6196Sx4kno6o0Zo7hsgOgnNw@mail.gmail.com>
- <984e07ed-914f-93ca-a141-3fc8677878e0@intel.com>
- <CAAH4kHawguTEuDVyz1ysSbH0X_mT=SvxLi=UhwEzXM0abbWefg@mail.gmail.com>
- <YxncAElGrPEGRYg1@linux.ibm.com>
- <CAAH4kHaP8JUh0Z4rF83=2RZTGMATT5MHot6rAnAwt79PL64mVQ@mail.gmail.com>
- <YxpCaQARczhZQmq2@linux.ibm.com>
- <f72f7325-adc6-89d5-7cbc-647442308233@amd.com>
- <20220924010302.bwas4zbro37rrxai@box.shutemov.name>
- <20220926121027.xc2cgzuiafcssmea@box.shutemov.name>
- <6a38e382-b9d6-98a1-d2ca-cd92fdfd8ecd@amd.com>
+        with ESMTP id S229457AbiIZWwe (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 26 Sep 2022 18:52:34 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4D7487F134;
+        Mon, 26 Sep 2022 15:52:33 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id E97CAB815D7;
+        Mon, 26 Sep 2022 22:52:31 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9030BC433B5;
+        Mon, 26 Sep 2022 22:52:30 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1664232750;
+        bh=X+i9bYu7/jWxfKAIE3i62yvVnxdBvG/IiRya+AP0Akw=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=k+WJCcJepmSQ14q6DF5jb4UgCKZYbXeY7nACK6WAMaM/uPrYsQ+x8Qku3yU28PjFn
+         PBeq/7jXzTW5J7/I1aqFgjDWN6Qv9cXBfLIQh5FAgNZfj+dcU2GHS9dh5S7NTNVbP6
+         OsuUnzF7FrpO3kLanOffFkQtonPMofZ/ELbU56XCKeHwvPoSLxg+bV/2f7ehoFgFJl
+         FKdtkqoi+DknB7qodCR5V55GUwjO6qJ3LfnKEwE5FJhXqV8k/JlVDRy2jzgrI1B4JE
+         2KQ4vLyOR6v+Ll4oUKdjtWIV0Q+QHJHHuHkzMqbZFkJTnaS6fPFr9x02dCBwO2e9Nb
+         ora+TTneLbDhg==
+Received: by mail-ua1-f44.google.com with SMTP id p89so2961343uap.12;
+        Mon, 26 Sep 2022 15:52:30 -0700 (PDT)
+X-Gm-Message-State: ACrzQf3UgtrfHDvTiB1MppHlZEiA8+Ofmk1wyQQ74kYZ8h1tM28qy/zP
+        KYOJkx3l7yOalzXNOecd+Ivx9qdBeEZ9YQPXSg==
+X-Google-Smtp-Source: AMsMyM43QjpEBGgBdeXDtHcyhT0+TUAlXLvP8qGgbv5J2u9gIos+nqDadyw2zzx9fWZeWcsqwCL4JDInZkzVBkDATYI=
+X-Received: by 2002:ab0:2715:0:b0:3c9:90c2:1aea with SMTP id
+ s21-20020ab02715000000b003c990c21aeamr7366736uao.77.1664232749469; Mon, 26
+ Sep 2022 15:52:29 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <6a38e382-b9d6-98a1-d2ca-cd92fdfd8ecd@amd.com>
+References: <20210416040924.2882771-1-danielwa@cisco.com> <b517fac5-2fdc-a8c9-75d0-174c67f5a2de@seco.com>
+ <20220922205334.GV4320@zorba> <dcff9b0f-82c8-5aa7-0fff-b749a05fcb20@seco.com>
+ <20220922211026.GW4320@zorba> <1663881344.25129.23.camel@chimera>
+In-Reply-To: <1663881344.25129.23.camel@chimera>
+From:   Rob Herring <robh@kernel.org>
+Date:   Mon, 26 Sep 2022 17:52:18 -0500
+X-Gmail-Original-Message-ID: <CAL_JsqLibRSi2n389Q7cf+1gQSidvfiZHjHCcGirgi0hgJ53-A@mail.gmail.com>
+Message-ID: <CAL_JsqLibRSi2n389Q7cf+1gQSidvfiZHjHCcGirgi0hgJ53-A@mail.gmail.com>
+Subject: Re: [PATCH 0/8] generic command line v4
+To:     Daniel Gimpelevich <daniel@gimpelevich.san-francisco.ca.us>,
+        Daniel Walker <danielwa@cisco.com>
+Cc:     Sean Anderson <sean.anderson@seco.com>,
+        Will Deacon <will@kernel.org>,
+        Christophe Leroy <christophe.leroy@csgroup.eu>,
+        Andrew Morton <akpm@linux-foundation.org>, x86@kernel.org,
+        linux-mips@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
+        "H. Peter Anvin" <hpa@zytor.com>,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kbuild@vger.kernel.org,
+        linux-efi@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Mon, Sep 26, 2022 at 08:38:34AM -0500, Tom Lendacky wrote:
-> On 9/26/22 07:10, Kirill A. Shutemov wrote:
-> > On Sat, Sep 24, 2022 at 04:03:02AM +0300, Kirill A. Shutemov wrote:
-> > > On Thu, Sep 22, 2022 at 09:31:12AM -0500, Tom Lendacky wrote:
-> > > > On 9/8/22 14:28, Mike Rapoport wrote:
-> > > > > On Thu, Sep 08, 2022 at 09:23:07AM -0700, Dionna Amalie Glaze wrote:
-> > > > > > > 
-> > > > > > > Looks like the first access to the memory map fails, although I think
-> > > > > > > it's not in INIT_LIST_HEAD() but rather in init_page_count().
-> > > > > > > 
-> > > > > > > I'd start with making sure that page_alloc::memmap_alloc() actually returns
-> > > > > > > accepted memory. If you build kernel with CONFIG_DEBUG_VM=y the memory map
-> > > > > > > will poisoned in this function, so my guess is it'd crash there.
-> > > > > > > 
-> > > > > > 
-> > > > > > That's a wonderful hint, thank you! I did not run this test
-> > > > > > CONFIG_DEBUG_VM set, but you think it's possible it could still be
-> > > > > > here?
-> > > > > 
-> > > > > It depends on how you configured your kernel. Say, defconfig does not set
-> > > > > it.
-> > > > > 
-> > > > 
-> > > > I also hit the issue at 256GB. My config is using CONFIG_SPARSEMEM_VMEMMAP
-> > > > and fails in memmap_init_range() when attempting to add the first PFN. It
-> > > > looks like the underlying page that is backing the vmemmap has not been
-> > > > accepted (I receive a #VC 0x404 => page not validated).
-> > > > 
-> > > > Kirill, is this a path that you've looked at? It would appear that somewhere
-> > > > in the vmemmap_populate_hugepages() path, some memory acceptance needs to be
-> > > > done for the pages that are used to back vmemmap. I'm not very familiar with
-> > > > this code, so I'm not sure why everything works for a guest with 255GB of
-> > > > memory, but then fails for a guest with 256GB of memory.
-> > > 
-> > > Hm. I don't have machine that large at hands at the moment. And I have not
-> > > looked at the codepath before.
-> > > 
-> > > I will try to look into the issue.
-> > 
-> > I'm not able to trigger the bug.
-> > 
-> > With help of vm.overcommit_memory=1, I was managed boot TDX guest to shell
-> > with 256G and 1T of guest memory just fine.
-> > 
-> > Any chance it is SEV-SNP specific?
-> 
-> There's always a chance. I'll do some more tracing and see what I can find
-> to try and be certain.
-> 
-> > 
-> > Or maybe there some difference in kernel config? Could you share yours?
-> 
-> Yes, I'll send that to you off-list.
+On Thu, Sep 22, 2022 at 4:15 PM Daniel Gimpelevich
+<daniel@gimpelevich.san-francisco.ca.us> wrote:
+>
+> On Thu, 2022-09-22 at 14:10 -0700, Daniel Walker wrote:
+> > On Thu, Sep 22, 2022 at 05:03:46PM -0400, Sean Anderson wrote:
+> [snip]
+> > > As recently as last month, someone's patch to add such support was
+> > > rejected for this reason [1].
+> > >
+> > > --Sean
+> > >
+> > > [1] https://lore.kernel.org/linux-arm-kernel/20220812084613.GA3107@willie-the-truck/
+> >
+> >
+> > I had no idea.. Thanks for pointing that out. I guess I will re-submit in that
+> > case.
+> >
+> > Daniel
+>
+> This has been happening repeatedly since circa 2014, on multiple
+> architectures. It's quite frustrating, really.
 
-Still nothing with your config :/
+It must not be that important. From the last time, IMO Christophe's
+version was much closer to being merged than this series. This is not
+how you get things upstream:
 
--- 
-  Kiryl Shutsemau / Kirill A. Shutemov
+> * Dropped powerpc changes
+>   Christophe Leroy has reservations about the features for powerpc. I
+>   don't think his reservations are founded, and these changes should
+>   fully work on powerpc. However, I dropped these changes so Christophe
+>   can have more time to get comfortable with the changes.
+
+Rob
