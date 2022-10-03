@@ -2,35 +2,35 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E7FC3C433FE
-	for <linux-efi@archiver.kernel.org>; Mon,  3 Oct 2022 11:26:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D9C75C4332F
+	for <linux-efi@archiver.kernel.org>; Mon,  3 Oct 2022 11:26:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229479AbiJCL0p (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 3 Oct 2022 07:26:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33212 "EHLO
+        id S229446AbiJCL0q (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 3 Oct 2022 07:26:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33236 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229839AbiJCL0n (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 3 Oct 2022 07:26:43 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0435411C16
-        for <linux-efi@vger.kernel.org>; Mon,  3 Oct 2022 04:26:40 -0700 (PDT)
+        with ESMTP id S229480AbiJCL0o (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 3 Oct 2022 07:26:44 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2F3232A94E
+        for <linux-efi@vger.kernel.org>; Mon,  3 Oct 2022 04:26:44 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 9E473B8105A
-        for <linux-efi@vger.kernel.org>; Mon,  3 Oct 2022 11:26:38 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AF3ECC4347C;
-        Mon,  3 Oct 2022 11:26:34 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id BDBE46103A
+        for <linux-efi@vger.kernel.org>; Mon,  3 Oct 2022 11:26:43 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id AD778C433D6;
+        Mon,  3 Oct 2022 11:26:40 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1664796397;
-        bh=ZjDr14OxWTrew0/fwyFI+XUBboCoGDstHicLfif2Djw=;
+        s=k20201202; t=1664796403;
+        bh=W8obWGwmcyzn5+VXhc6GfBg92Z+wLrsUyqrdMHjxep0=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=TxY/bRfjhtxLaZp+RLCj8LsBeH7rHezBCOV0B0BosD9Voq51KCp6mICHNQZ5Ug4lI
-         fukIwRaNQit/mbut/F+dmvt07Pbuanyh5ido7DTpsVSXiX/SGgnxx7OyTPsF1lxU2W
-         WJ2FQ4K0Bf2lg64zbnlGBEWb8U/xZkt5fxKrmmmedFuW2CY2PpZIlZwR54Zse2l6kV
-         wd6LXmtYDCLfh7Zd+voJ6uPiUqaHhylCrSUSomr0erOhQTtmUnvFvzLr1MmVyoMJwi
-         bJF8A1MWl8fxpuXoc7j2iCZnP2pZmVJy8Uw4cYU25gqBrSZj9i5tQlem3iuh5mTo5j
-         SPvnR6hX5M1jA==
+        b=YTGegz+V40gx32fSy3+ERPuWauQ9SGX/uyZftYxZvb467SzxmwKVEXTMytzhQH7M4
+         1V2VKfiVYH7TcozRWRHaiRvjYuXJnU7IvA2olmMY0WGaftBs2Wudq34NFeznUROMkf
+         eEKT2c2BHrvwIO56Rzxa+c2tXnHsopKi5rFQ8dcQVnCQmh0iLDqkj0BYghKh88t0pV
+         ULDcjx0TaFehBTvC0LpqUhrWXl8AuGFXSEa+GLPK6LQT0oJW1e//vLHd+Ci6+dIj7n
+         xxJvJpZglhpkIcm+iL9P6RnGDwu7fekz6jzPSYG5rUJjgpQsCa8Ggp2E/znkC/Nfmw
+         X2n7ROAkqY1Aw==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     xen-devel@lists.xenproject.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -45,585 +45,105 @@ Cc:     xen-devel@lists.xenproject.org, Ard Biesheuvel <ardb@kernel.org>,
         Tony Luck <tony.luck@intel.com>,
         =?UTF-8?q?Marek=20Marczykowski-G=C3=B3recki?= 
         <marmarek@invisiblethingslab.com>
-Subject: [PATCH v2 2/6] efi: memmap: Move manipulation routines into x86 arch tree
-Date:   Mon,  3 Oct 2022 13:26:21 +0200
-Message-Id: <20221003112625.972646-3-ardb@kernel.org>
+Subject: [PATCH v2 4/6] efi: memmap: Disregard bogus entries instead of returning them
+Date:   Mon,  3 Oct 2022 13:26:23 +0200
+Message-Id: <20221003112625.972646-5-ardb@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20221003112625.972646-1-ardb@kernel.org>
 References: <20221003112625.972646-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=17368; i=ardb@kernel.org; h=from:subject; bh=ZjDr14OxWTrew0/fwyFI+XUBboCoGDstHicLfif2Djw=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjOsbYg6dqX0FgOlAp0B3+vbe93/8K1X6EJXBcxSer Yrj6+geJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYzrG2AAKCRDDTyI5ktmPJP2YC/ 9WT0L6a3hxPwo9zokLU/i5YXQBAxRuRvN1iiXsD2aWDn0MhaURJXR3BtmTvAOwnKdqu5D3aHBk8VZC zjpzyBOyo/dufs4+tx0LAO8RBRUU8VSHa0/UlkIG8xJXui8s2LcA/EF4ym62OyVqD5f4N+KtKVo9wL BWW+axOJ1KnRj2Su2S8XYoK4Wn0DRaUQJsfAKAmZZnRBe+gE2hXrv71b3zQErfaGF/eSOKWncDym8+ 7LKamaAPo1+dWZP7QZyURbypNI03XyQb4AuE8cUlDjqDVNrZORmTubs2PZqrkj9febHXtteZYEKuCH nr4mvsF0o+VDcOcmY5/ZMWlAjdEgQBopSt514lEBdVphFBuqoa3OA1FIbZhDUnjfOAzlY2QhWVnOrM msyBu3Wnb8obJtr7j2lbmyS48g/Mi7qTNJZa59ZzYW3J0QrwSDAGnfSke2ax4D7ayknBRkBIOq5KKC ZEahyULh4jtcvHic9eggO6E77OtHGkgR4/Ht1dgz/4bfA=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2717; i=ardb@kernel.org; h=from:subject; bh=W8obWGwmcyzn5+VXhc6GfBg92Z+wLrsUyqrdMHjxep0=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjOsbbl+ejDPGi0x7EecnkWLLI5uBb8hfx+mNuYEHL SGFCPwKJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCYzrG2wAKCRDDTyI5ktmPJBDfC/ 9BMiukxbjQZgrq2K+4VvI3jjsxzxCI4AmtyKuHFCUBrg62qhcftHWoNGouY0pXptyDabOuNA8Tczdq x93UinMLN5X0NyKvuGmQty4oFhA8rEpRD6B2KX/VHKtu6kwGFBF8gaXmWeGfFv8ZNaQUzZCW51+Ah6 xt81Vx4p8RGFSrmoIzV6bamToULbrhLug9i/9Jsd6mg7Ggpisdj5E2rLXjTIYgtsnnoEXnwZsp9gXW PeBo+4rcj7CsYM7PfupkE6/uX6qAiYPA3UV2nJ9mBJTahiFmwKA58HVUtsv3j16lIEdROHb/bqPvTY /Iw/rmhC+gDxqBhlWoytmTnJWKB1EZpKPo3WESWHuZFKxwFAoqgMWHTFXe5dTWPeEsDBh6rC4WLY7q ylZMZsE9c0QQw1zdPhqNFcK1cGUaorxsMrxlPNm8LYO+qpRsl4HaWKrvSoGF9BMB8PI9R2X+LmbP2Y lhrKABraz+MgDmjFbkI55I1cVGbvO3j4AVGjPmERfskUM=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The EFI memory map is a description of the memory layout as provided by
-the firmware, and only x86 manipulates it in various different ways for
-its own memory bookkeeping. So let's move the memmap routines that are
-only used by x86 into the x86 arch tree.
+The ESRT code currently contains some sanity checks on the memory
+descriptor it obtains, but these can only trigger when the descriptor is
+invalid (if at all).
+
+So let's drop these checks, and instead, disregard descriptors entirely
+if the start address is misaligned, or the number of pages reaches
+beyond the end of the address space. Note that the memory map as a whole
+could still be inconsistent, i.e., multiple entries might cover the same
+area, or the address could be outside of the addressable VA space, but
+validating that goes beyond the scope of these helpers.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/include/asm/efi.h     |  11 +
- arch/x86/platform/efi/Makefile |   3 +-
- arch/x86/platform/efi/memmap.c | 235 ++++++++++++++++++++
- drivers/firmware/efi/memmap.c  | 221 +-----------------
- include/linux/efi.h            |  10 +-
- 5 files changed, 251 insertions(+), 229 deletions(-)
+ drivers/firmware/efi/efi.c  | 13 +++++++------
+ drivers/firmware/efi/esrt.c | 18 +-----------------
+ 2 files changed, 8 insertions(+), 23 deletions(-)
 
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index 68414d924332..1fb4686f3d12 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -415,6 +415,17 @@ static inline void efi_fake_memmap(void)
- }
- #endif
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 11857af72859..55bd3f4aab28 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -461,19 +461,20 @@ int efi_mem_desc_lookup(u64 phys_addr, efi_memory_desc_t *out_md)
+ 	efi_memory_desc_t *md;
  
-+extern int __init efi_memmap_alloc(unsigned int num_entries,
-+				   struct efi_memory_map_data *data);
-+extern void __efi_memmap_free(u64 phys, unsigned long size,
-+			      unsigned long flags);
-+
-+extern int __init efi_memmap_install(struct efi_memory_map_data *data);
-+extern int __init efi_memmap_split_count(efi_memory_desc_t *md,
-+					 struct range *range);
-+extern void __init efi_memmap_insert(struct efi_memory_map *old_memmap,
-+				     void *buf, struct efi_mem_range *mem);
-+
- #define arch_ima_efi_boot_mode	\
- 	({ extern struct boot_params boot_params; boot_params.secure_boot; })
+ 	if (!efi_enabled(EFI_MEMMAP)) {
+-		pr_err_once("EFI_MEMMAP is not enabled.\n");
++		pr_warn_once("EFI_MEMMAP is not enabled.\n");
+ 		return -EINVAL;
+ 	}
  
-diff --git a/arch/x86/platform/efi/Makefile b/arch/x86/platform/efi/Makefile
-index b481719b16cc..ed5502a5185d 100644
---- a/arch/x86/platform/efi/Makefile
-+++ b/arch/x86/platform/efi/Makefile
-@@ -2,6 +2,7 @@
- KASAN_SANITIZE := n
- GCOV_PROFILE := n
+-	if (!out_md) {
+-		pr_err_once("out_md is null.\n");
+-		return -EINVAL;
+-        }
+-
+ 	for_each_efi_memory_desc(md) {
+ 		u64 size;
+ 		u64 end;
  
--obj-$(CONFIG_EFI) 		+= quirks.o efi.o efi_$(BITS).o efi_stub_$(BITS).o
-+obj-$(CONFIG_EFI) 		+= memmap.o quirks.o efi.o efi_$(BITS).o \
-+				   efi_stub_$(BITS).o
- obj-$(CONFIG_EFI_MIXED)		+= efi_thunk_$(BITS).o
- obj-$(CONFIG_EFI_FAKE_MEMMAP)	+= fake_mem.o
-diff --git a/arch/x86/platform/efi/memmap.c b/arch/x86/platform/efi/memmap.c
-new file mode 100644
-index 000000000000..44b886acf301
---- /dev/null
-+++ b/arch/x86/platform/efi/memmap.c
-@@ -0,0 +1,235 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/*
-+ * Common EFI memory map functions.
-+ */
++		/* skip bogus entries */
++		if ((md->phys_addr & (EFI_PAGE_SIZE - 1)) ||
++		    (md->phys_addr > 0 &&
++		     (md->num_pages > (U64_MAX - md->phys_addr + 1) >> EFI_PAGE_SHIFT)))
++			continue;
 +
-+#define pr_fmt(fmt) "efi: " fmt
-+
-+#include <linux/init.h>
-+#include <linux/kernel.h>
-+#include <linux/efi.h>
-+#include <linux/io.h>
-+#include <asm/early_ioremap.h>
-+#include <linux/memblock.h>
-+#include <linux/slab.h>
-+
-+static phys_addr_t __init __efi_memmap_alloc_early(unsigned long size)
-+{
-+	return memblock_phys_alloc(size, SMP_CACHE_BYTES);
-+}
-+
-+static phys_addr_t __init __efi_memmap_alloc_late(unsigned long size)
-+{
-+	unsigned int order = get_order(size);
-+	struct page *p = alloc_pages(GFP_KERNEL, order);
-+
-+	if (!p)
-+		return 0;
-+
-+	return PFN_PHYS(page_to_pfn(p));
-+}
-+
-+void __init __efi_memmap_free(u64 phys, unsigned long size, unsigned long flags)
-+{
-+	if (flags & EFI_MEMMAP_MEMBLOCK) {
-+		if (slab_is_available())
-+			memblock_free_late(phys, size);
-+		else
-+			memblock_phys_free(phys, size);
-+	} else if (flags & EFI_MEMMAP_SLAB) {
-+		struct page *p = pfn_to_page(PHYS_PFN(phys));
-+		unsigned int order = get_order(size);
-+
-+		free_pages((unsigned long) page_address(p), order);
-+	}
-+}
-+
-+/**
-+ * efi_memmap_alloc - Allocate memory for the EFI memory map
-+ * @num_entries: Number of entries in the allocated map.
-+ * @data: efi memmap installation parameters
-+ *
-+ * Depending on whether mm_init() has already been invoked or not,
-+ * either memblock or "normal" page allocation is used.
-+ *
-+ * Returns zero on success, a negative error code on failure.
-+ */
-+int __init efi_memmap_alloc(unsigned int num_entries,
-+		struct efi_memory_map_data *data)
-+{
-+	/* Expect allocation parameters are zero initialized */
-+	WARN_ON(data->phys_map || data->size);
-+
-+	data->size = num_entries * efi.memmap.desc_size;
-+	data->desc_version = efi.memmap.desc_version;
-+	data->desc_size = efi.memmap.desc_size;
-+	data->flags &= ~(EFI_MEMMAP_SLAB | EFI_MEMMAP_MEMBLOCK);
-+	data->flags |= efi.memmap.flags & EFI_MEMMAP_LATE;
-+
-+	if (slab_is_available()) {
-+		data->flags |= EFI_MEMMAP_SLAB;
-+		data->phys_map = __efi_memmap_alloc_late(data->size);
-+	} else {
-+		data->flags |= EFI_MEMMAP_MEMBLOCK;
-+		data->phys_map = __efi_memmap_alloc_early(data->size);
-+	}
-+
-+	if (!data->phys_map)
-+		return -ENOMEM;
-+	return 0;
-+}
-+
-+/**
-+ * efi_memmap_install - Install a new EFI memory map in efi.memmap
-+ * @ctx: map allocation parameters (address, size, flags)
-+ *
-+ * Unlike efi_memmap_init_*(), this function does not allow the caller
-+ * to switch from early to late mappings. It simply uses the existing
-+ * mapping function and installs the new memmap.
-+ *
-+ * Returns zero on success, a negative error code on failure.
-+ */
-+int __init efi_memmap_install(struct efi_memory_map_data *data)
-+{
-+	efi_memmap_unmap();
-+
-+	return __efi_memmap_init(data);
-+}
-+
-+/**
-+ * efi_memmap_split_count - Count number of additional EFI memmap entries
-+ * @md: EFI memory descriptor to split
-+ * @range: Address range (start, end) to split around
-+ *
-+ * Returns the number of additional EFI memmap entries required to
-+ * accommodate @range.
-+ */
-+int __init efi_memmap_split_count(efi_memory_desc_t *md, struct range *range)
-+{
-+	u64 m_start, m_end;
-+	u64 start, end;
-+	int count = 0;
-+
-+	start = md->phys_addr;
-+	end = start + (md->num_pages << EFI_PAGE_SHIFT) - 1;
-+
-+	/* modifying range */
-+	m_start = range->start;
-+	m_end = range->end;
-+
-+	if (m_start <= start) {
-+		/* split into 2 parts */
-+		if (start < m_end && m_end < end)
-+			count++;
-+	}
-+
-+	if (start < m_start && m_start < end) {
-+		/* split into 3 parts */
-+		if (m_end < end)
-+			count += 2;
-+		/* split into 2 parts */
-+		if (end <= m_end)
-+			count++;
-+	}
-+
-+	return count;
-+}
-+
-+/**
-+ * efi_memmap_insert - Insert a memory region in an EFI memmap
-+ * @old_memmap: The existing EFI memory map structure
-+ * @buf: Address of buffer to store new map
-+ * @mem: Memory map entry to insert
-+ *
-+ * It is suggested that you call efi_memmap_split_count() first
-+ * to see how large @buf needs to be.
-+ */
-+void __init efi_memmap_insert(struct efi_memory_map *old_memmap, void *buf,
-+			      struct efi_mem_range *mem)
-+{
-+	u64 m_start, m_end, m_attr;
-+	efi_memory_desc_t *md;
-+	u64 start, end;
-+	void *old, *new;
-+
-+	/* modifying range */
-+	m_start = mem->range.start;
-+	m_end = mem->range.end;
-+	m_attr = mem->attribute;
-+
-+	/*
-+	 * The EFI memory map deals with regions in EFI_PAGE_SIZE
-+	 * units. Ensure that the region described by 'mem' is aligned
-+	 * correctly.
-+	 */
-+	if (!IS_ALIGNED(m_start, EFI_PAGE_SIZE) ||
-+	    !IS_ALIGNED(m_end + 1, EFI_PAGE_SIZE)) {
-+		WARN_ON(1);
-+		return;
-+	}
-+
-+	for (old = old_memmap->map, new = buf;
-+	     old < old_memmap->map_end;
-+	     old += old_memmap->desc_size, new += old_memmap->desc_size) {
-+
-+		/* copy original EFI memory descriptor */
-+		memcpy(new, old, old_memmap->desc_size);
-+		md = new;
-+		start = md->phys_addr;
-+		end = md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT) - 1;
-+
-+		if (m_start <= start && end <= m_end)
-+			md->attribute |= m_attr;
-+
-+		if (m_start <= start &&
-+		    (start < m_end && m_end < end)) {
-+			/* first part */
-+			md->attribute |= m_attr;
-+			md->num_pages = (m_end - md->phys_addr + 1) >>
-+				EFI_PAGE_SHIFT;
-+			/* latter part */
-+			new += old_memmap->desc_size;
-+			memcpy(new, old, old_memmap->desc_size);
-+			md = new;
-+			md->phys_addr = m_end + 1;
-+			md->num_pages = (end - md->phys_addr + 1) >>
-+				EFI_PAGE_SHIFT;
-+		}
-+
-+		if ((start < m_start && m_start < end) && m_end < end) {
-+			/* first part */
-+			md->num_pages = (m_start - md->phys_addr) >>
-+				EFI_PAGE_SHIFT;
-+			/* middle part */
-+			new += old_memmap->desc_size;
-+			memcpy(new, old, old_memmap->desc_size);
-+			md = new;
-+			md->attribute |= m_attr;
-+			md->phys_addr = m_start;
-+			md->num_pages = (m_end - m_start + 1) >>
-+				EFI_PAGE_SHIFT;
-+			/* last part */
-+			new += old_memmap->desc_size;
-+			memcpy(new, old, old_memmap->desc_size);
-+			md = new;
-+			md->phys_addr = m_end + 1;
-+			md->num_pages = (end - m_end) >>
-+				EFI_PAGE_SHIFT;
-+		}
-+
-+		if ((start < m_start && m_start < end) &&
-+		    (end <= m_end)) {
-+			/* first part */
-+			md->num_pages = (m_start - md->phys_addr) >>
-+				EFI_PAGE_SHIFT;
-+			/* latter part */
-+			new += old_memmap->desc_size;
-+			memcpy(new, old, old_memmap->desc_size);
-+			md = new;
-+			md->phys_addr = m_start;
-+			md->num_pages = (end - md->phys_addr + 1) >>
-+				EFI_PAGE_SHIFT;
-+			md->attribute |= m_attr;
-+		}
-+	}
-+}
-diff --git a/drivers/firmware/efi/memmap.c b/drivers/firmware/efi/memmap.c
-index 6ec7970dbd40..3501d3814f22 100644
---- a/drivers/firmware/efi/memmap.c
-+++ b/drivers/firmware/efi/memmap.c
-@@ -13,35 +13,8 @@
- #include <linux/memblock.h>
- #include <linux/slab.h>
+ 		size = md->num_pages << EFI_PAGE_SHIFT;
+ 		end = md->phys_addr + size;
+ 		if (phys_addr >= md->phys_addr && phys_addr < end) {
+diff --git a/drivers/firmware/efi/esrt.c b/drivers/firmware/efi/esrt.c
+index 2a2f52b017e7..8f86f2b0734b 100644
+--- a/drivers/firmware/efi/esrt.c
++++ b/drivers/firmware/efi/esrt.c
+@@ -247,9 +247,6 @@ void __init efi_esrt_init(void)
+ 	int rc;
+ 	phys_addr_t end;
  
--static phys_addr_t __init __efi_memmap_alloc_early(unsigned long size)
-+void __weak __efi_memmap_free(u64 phys, unsigned long size, unsigned long flags)
- {
--	return memblock_phys_alloc(size, SMP_CACHE_BYTES);
--}
+-	if (!efi_enabled(EFI_MEMMAP))
+-		return;
 -
--static phys_addr_t __init __efi_memmap_alloc_late(unsigned long size)
--{
--	unsigned int order = get_order(size);
--	struct page *p = alloc_pages(GFP_KERNEL, order);
--
--	if (!p)
--		return 0;
--
--	return PFN_PHYS(page_to_pfn(p));
--}
--
--void __init __efi_memmap_free(u64 phys, unsigned long size, unsigned long flags)
--{
--	if (flags & EFI_MEMMAP_MEMBLOCK) {
--		if (slab_is_available())
--			memblock_free_late(phys, size);
--		else
--			memblock_phys_free(phys, size);
--	} else if (flags & EFI_MEMMAP_SLAB) {
--		struct page *p = pfn_to_page(PHYS_PFN(phys));
--		unsigned int order = get_order(size);
--
--		free_pages((unsigned long) page_address(p), order);
--	}
- }
+ 	pr_debug("esrt-init: loading.\n");
+ 	if (!esrt_table_exists())
+ 		return;
+@@ -263,21 +260,8 @@ void __init efi_esrt_init(void)
+ 		return;
+ 	}
  
- static void __init efi_memmap_free(void)
-@@ -51,41 +24,6 @@ static void __init efi_memmap_free(void)
- 			efi.memmap.flags);
- }
- 
--/**
-- * efi_memmap_alloc - Allocate memory for the EFI memory map
-- * @num_entries: Number of entries in the allocated map.
-- * @data: efi memmap installation parameters
-- *
-- * Depending on whether mm_init() has already been invoked or not,
-- * either memblock or "normal" page allocation is used.
-- *
-- * Returns zero on success, a negative error code on failure.
-- */
--int __init efi_memmap_alloc(unsigned int num_entries,
--		struct efi_memory_map_data *data)
--{
--	/* Expect allocation parameters are zero initialized */
--	WARN_ON(data->phys_map || data->size);
--
--	data->size = num_entries * efi.memmap.desc_size;
--	data->desc_version = efi.memmap.desc_version;
--	data->desc_size = efi.memmap.desc_size;
--	data->flags &= ~(EFI_MEMMAP_SLAB | EFI_MEMMAP_MEMBLOCK);
--	data->flags |= efi.memmap.flags & EFI_MEMMAP_LATE;
--
--	if (slab_is_available()) {
--		data->flags |= EFI_MEMMAP_SLAB;
--		data->phys_map = __efi_memmap_alloc_late(data->size);
--	} else {
--		data->flags |= EFI_MEMMAP_MEMBLOCK;
--		data->phys_map = __efi_memmap_alloc_early(data->size);
--	}
--
--	if (!data->phys_map)
--		return -ENOMEM;
--	return 0;
--}
--
- /**
-  * __efi_memmap_init - Common code for mapping the EFI memory map
-  * @data: EFI memory map data
-@@ -101,7 +39,7 @@ int __init efi_memmap_alloc(unsigned int num_entries,
-  *
-  * Returns zero on success, a negative error code on failure.
-  */
--static int __init __efi_memmap_init(struct efi_memory_map_data *data)
-+int __init __efi_memmap_init(struct efi_memory_map_data *data)
- {
- 	struct efi_memory_map map;
- 	phys_addr_t phys_map;
-@@ -220,158 +158,3 @@ int __init efi_memmap_init_late(phys_addr_t addr, unsigned long size)
- 
- 	return __efi_memmap_init(&data);
- }
--
--/**
-- * efi_memmap_install - Install a new EFI memory map in efi.memmap
-- * @ctx: map allocation parameters (address, size, flags)
-- *
-- * Unlike efi_memmap_init_*(), this function does not allow the caller
-- * to switch from early to late mappings. It simply uses the existing
-- * mapping function and installs the new memmap.
-- *
-- * Returns zero on success, a negative error code on failure.
-- */
--int __init efi_memmap_install(struct efi_memory_map_data *data)
--{
--	efi_memmap_unmap();
--
--	return __efi_memmap_init(data);
--}
--
--/**
-- * efi_memmap_split_count - Count number of additional EFI memmap entries
-- * @md: EFI memory descriptor to split
-- * @range: Address range (start, end) to split around
-- *
-- * Returns the number of additional EFI memmap entries required to
-- * accommodate @range.
-- */
--int __init efi_memmap_split_count(efi_memory_desc_t *md, struct range *range)
--{
--	u64 m_start, m_end;
--	u64 start, end;
--	int count = 0;
--
--	start = md->phys_addr;
--	end = start + (md->num_pages << EFI_PAGE_SHIFT) - 1;
--
--	/* modifying range */
--	m_start = range->start;
--	m_end = range->end;
--
--	if (m_start <= start) {
--		/* split into 2 parts */
--		if (start < m_end && m_end < end)
--			count++;
--	}
--
--	if (start < m_start && m_start < end) {
--		/* split into 3 parts */
--		if (m_end < end)
--			count += 2;
--		/* split into 2 parts */
--		if (end <= m_end)
--			count++;
--	}
--
--	return count;
--}
--
--/**
-- * efi_memmap_insert - Insert a memory region in an EFI memmap
-- * @old_memmap: The existing EFI memory map structure
-- * @buf: Address of buffer to store new map
-- * @mem: Memory map entry to insert
-- *
-- * It is suggested that you call efi_memmap_split_count() first
-- * to see how large @buf needs to be.
-- */
--void __init efi_memmap_insert(struct efi_memory_map *old_memmap, void *buf,
--			      struct efi_mem_range *mem)
--{
--	u64 m_start, m_end, m_attr;
--	efi_memory_desc_t *md;
--	u64 start, end;
--	void *old, *new;
--
--	/* modifying range */
--	m_start = mem->range.start;
--	m_end = mem->range.end;
--	m_attr = mem->attribute;
--
--	/*
--	 * The EFI memory map deals with regions in EFI_PAGE_SIZE
--	 * units. Ensure that the region described by 'mem' is aligned
--	 * correctly.
--	 */
--	if (!IS_ALIGNED(m_start, EFI_PAGE_SIZE) ||
--	    !IS_ALIGNED(m_end + 1, EFI_PAGE_SIZE)) {
--		WARN_ON(1);
+-	max = efi_mem_desc_end(&md);
+-	if (max < efi.esrt) {
+-		pr_err("EFI memory descriptor is invalid. (esrt: %p max: %p)\n",
+-		       (void *)efi.esrt, (void *)max);
 -		return;
 -	}
 -
--	for (old = old_memmap->map, new = buf;
--	     old < old_memmap->map_end;
--	     old += old_memmap->desc_size, new += old_memmap->desc_size) {
++	max = efi_mem_desc_end(&md) - efi.esrt;
+ 	size = sizeof(*esrt);
+-	max -= efi.esrt;
 -
--		/* copy original EFI memory descriptor */
--		memcpy(new, old, old_memmap->desc_size);
--		md = new;
--		start = md->phys_addr;
--		end = md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT) - 1;
--
--		if (m_start <= start && end <= m_end)
--			md->attribute |= m_attr;
--
--		if (m_start <= start &&
--		    (start < m_end && m_end < end)) {
--			/* first part */
--			md->attribute |= m_attr;
--			md->num_pages = (m_end - md->phys_addr + 1) >>
--				EFI_PAGE_SHIFT;
--			/* latter part */
--			new += old_memmap->desc_size;
--			memcpy(new, old, old_memmap->desc_size);
--			md = new;
--			md->phys_addr = m_end + 1;
--			md->num_pages = (end - md->phys_addr + 1) >>
--				EFI_PAGE_SHIFT;
--		}
--
--		if ((start < m_start && m_start < end) && m_end < end) {
--			/* first part */
--			md->num_pages = (m_start - md->phys_addr) >>
--				EFI_PAGE_SHIFT;
--			/* middle part */
--			new += old_memmap->desc_size;
--			memcpy(new, old, old_memmap->desc_size);
--			md = new;
--			md->attribute |= m_attr;
--			md->phys_addr = m_start;
--			md->num_pages = (m_end - m_start + 1) >>
--				EFI_PAGE_SHIFT;
--			/* last part */
--			new += old_memmap->desc_size;
--			memcpy(new, old, old_memmap->desc_size);
--			md = new;
--			md->phys_addr = m_end + 1;
--			md->num_pages = (end - m_end) >>
--				EFI_PAGE_SHIFT;
--		}
--
--		if ((start < m_start && m_start < end) &&
--		    (end <= m_end)) {
--			/* first part */
--			md->num_pages = (m_start - md->phys_addr) >>
--				EFI_PAGE_SHIFT;
--			/* latter part */
--			new += old_memmap->desc_size;
--			memcpy(new, old, old_memmap->desc_size);
--			md = new;
--			md->phys_addr = m_start;
--			md->num_pages = (end - md->phys_addr + 1) >>
--				EFI_PAGE_SHIFT;
--			md->attribute |= m_attr;
--		}
+-	if (max < size) {
+-		pr_err("ESRT header doesn't fit on single memory map entry. (size: %zu max: %zu)\n",
+-		       size, max);
+-		return;
 -	}
--}
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index a6dbf354d2c3..256e70e42114 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -707,18 +707,10 @@ static inline efi_status_t efi_query_variable_store(u32 attributes,
- #endif
- extern void __iomem *efi_lookup_mapped_addr(u64 phys_addr);
  
--extern int __init efi_memmap_alloc(unsigned int num_entries,
--				   struct efi_memory_map_data *data);
--extern void __efi_memmap_free(u64 phys, unsigned long size,
--			      unsigned long flags);
-+extern int __init __efi_memmap_init(struct efi_memory_map_data *data);
- extern int __init efi_memmap_init_early(struct efi_memory_map_data *data);
- extern int __init efi_memmap_init_late(phys_addr_t addr, unsigned long size);
- extern void __init efi_memmap_unmap(void);
--extern int __init efi_memmap_install(struct efi_memory_map_data *data);
--extern int __init efi_memmap_split_count(efi_memory_desc_t *md,
--					 struct range *range);
--extern void __init efi_memmap_insert(struct efi_memory_map *old_memmap,
--				     void *buf, struct efi_mem_range *mem);
- 
- #ifdef CONFIG_EFI_ESRT
- extern void __init efi_esrt_init(void);
+ 	va = early_memremap(efi.esrt, size);
+ 	if (!va) {
 -- 
 2.35.1
 
