@@ -2,35 +2,35 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CAAF7C43217
-	for <linux-efi@archiver.kernel.org>; Mon, 17 Oct 2022 17:18:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7CAA8C4332F
+	for <linux-efi@archiver.kernel.org>; Mon, 17 Oct 2022 17:18:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230182AbiJQRSV (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 17 Oct 2022 13:18:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37156 "EHLO
+        id S230290AbiJQRSs (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 17 Oct 2022 13:18:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37262 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230162AbiJQRSU (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 17 Oct 2022 13:18:20 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F4C671BE5
-        for <linux-efi@vger.kernel.org>; Mon, 17 Oct 2022 10:18:17 -0700 (PDT)
+        with ESMTP id S229867AbiJQRS0 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 17 Oct 2022 13:18:26 -0400
+Received: from sin.source.kernel.org (sin.source.kernel.org [IPv6:2604:1380:40e1:4800::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B55B171989
+        for <linux-efi@vger.kernel.org>; Mon, 17 Oct 2022 10:18:24 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 20B59B816B3
-        for <linux-efi@vger.kernel.org>; Mon, 17 Oct 2022 17:18:16 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E9F2BC433D7;
-        Mon, 17 Oct 2022 17:18:11 +0000 (UTC)
+        by sin.source.kernel.org (Postfix) with ESMTPS id 2F8DCCE1817
+        for <linux-efi@vger.kernel.org>; Mon, 17 Oct 2022 17:18:23 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9E742C43470;
+        Mon, 17 Oct 2022 17:18:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1666027094;
-        bh=gm4NPhu3zzk3cCptn9LomJfkU5uNciRUxGMp83dhxoA=;
+        s=k20201202; t=1666027101;
+        bh=pn3uv7rgLxZ1qF/hkwLpf5AbiChNI8X5Ui+Q4jez+ok=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=JOHQddawMMa2113kkNky8zmhi0El0ePxha0XibJ8TUJs9aDly//k/bKJ4ti6kOFWL
-         XbHLdJRO8UwUHD+SrDXJ+bAuPieFZ4Z8yW1MVU6OGfOBAG+CM3Mmfy9cm9a7TjCTSX
-         aC2btwwjqxUkBoa+rFLedwPRoMOQO5932uBMPAX+rJlSB8WfRR1Kxkt4V711wRTRhE
-         M7r+n29iDznOakIRRy72j7M1V/9Evuj3Qi1j1SzlW4S7xAJucfBz64JsOE2/uK2NcO
-         TT7l7P16OHFjYsgwBRJkbUP2xMh3Cjzua/V5bVb3eiHwVAV+mm0Qr3eq1XwAcsvgM4
-         NwLthPs+gKsRQ==
+        b=L8/WTUxC/SrRBer1k8VhowsrWfuZetEQ0B08vLSbi2M2flKwuVIwe6jyAclDcUDxM
+         3349+sW7CKUHhuPE99ncRaCVkvIA+VeuXWar87wB8bZIhMhpbionfpqdwXo/enIU6h
+         bZ8Eojz/eEx8UX8aXwf0DZYjgrHx45a1nfEhipz05OrH4mVvQJQ35xjRLBxcHvzGYP
+         Ssr7uRjMPhvMLl+dOtP7V5uN6HS2ujLIwNwQczKdWiT5sCCRiO2ry7U+0EHYEfQ3Vm
+         Yu7/LHpT1KzTwuDkXJ1fOlxN2Ik19WHfJnCSWTVH3geH12XX5OtfIBfFoqL23Q9Isi
+         a1A9GaqiHxE7g==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     keescook@chromium.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -46,268 +46,114 @@ Cc:     keescook@chromium.org, Ard Biesheuvel <ardb@kernel.org>,
         Jeremy Linton <jeremy.linton@arm.com>,
         Will Deacon <will@kernel.org>,
         Catalin Marinas <catalin.marinas@arm.com>
-Subject: [PATCH 17/21] efi/riscv: libstub: Split off kernel image relocation for builtin stub
-Date:   Mon, 17 Oct 2022 19:16:56 +0200
-Message-Id: <20221017171700.3736890-18-ardb@kernel.org>
+Subject: [PATCH 19/21] efi/loongarch: Don't jump to kernel entry via the old image
+Date:   Mon, 17 Oct 2022 19:16:58 +0200
+Message-Id: <20221017171700.3736890-20-ardb@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20221017171700.3736890-1-ardb@kernel.org>
 References: <20221017171700.3736890-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=7550; i=ardb@kernel.org; h=from:subject; bh=gm4NPhu3zzk3cCptn9LomJfkU5uNciRUxGMp83dhxoA=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjTY4EYxAAplGcOBOEu9pU5tYGVlTCGy89TUzZvHdR Q3JgQsaJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCY02OBAAKCRDDTyI5ktmPJOAMDA CePNhHam2Cn2pBH7weo4+97ntuftHsUxkx4+U+fLmYQN4IFFhOQBbKt58T5rfCOpZVRTmq/lUTWN3B qF8HKO1uRuQw1SKbHnS3sl5n5rv7InRWMlQx5XRd5ryjfPys08I9j66mvFt+PS67zoWB2tEUFokwcv lwzE4WHi4dABUu8vtA6q46IPn9Yzjrursy6uH04qXcWG92NK+PN6aIIGn+oitZTdzBL0XVIObobLXy OChlYzc29wehkD+cvalYh74ZHyJMADB4mWluwLHbGeGNncMXh4vimKeBK+/R4yaeVJpdEreTjcDvQL 1Ju+kf2Xt54eZon8NPlKEsJVd0cqFe/8wSSYNPOknMXd0BcNmxIC8APjLFRRwR0IClrWn/qqjLBnKY kzDba/Uo8PCBn6ukf/ONadqRjlMiFZN1HikxTJ5WV4uxqrt2RNxaDCKNG++3cEmMbpXX4rLG6lH/ZZ r2MieskU4hoZuiYzK1NHUOigwAy+IA6DVhjoPHojM4ifc=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3808; i=ardb@kernel.org; h=from:subject; bh=pn3uv7rgLxZ1qF/hkwLpf5AbiChNI8X5Ui+Q4jez+ok=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjTY4IZ2PoRAFM/JT+vkOW2DBoFSBXayZqnRYpdKbT ooPHSHqJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCY02OCAAKCRDDTyI5ktmPJPMgC/ 9Sn5+mBl/WnYA8wO/uksISMAHyUgfoL3RmbGPuwG/eQuYZm+2HatQOcRTzED+6B3ceHnfOUlSWm6hf b6pyP+/q4Vzty2yW7KQxFhCZGC6svsE0Gb+9i0FIUENbkCiCBdnQ5bRG8dX0qN+eoO2ToZ37lu0EWA z+Mw2gQeaXM2pChzLfMEx1oy+9jKBR3oK891Gh9wBkCqXSD8Jy2iFMjHMirqk3Rn2eHwcF4xqlFtF5 6qESynn5N/uO8n03Omo03pcw+BcMlw6ThjMhoppOb0q+cshkSwVJdklMSoy8mqm4SEgDfahLLSsJ+q P11OOKoWzB8ybrjH1p2sW5pMtOkfmT+qSP8gJ4Hjep4/1MqM5D/YXXYRuTunXz4/snoAnQHP8yYA52 y4/jJQDQlSJNhFiHFK5fwDJs8s2I/0wM4jkCoTi0ptlN87YCRBnjCYmv6OCzoVWIDt/LnpM+L1jiT+ 6RC91FpWyMPqC+5nlBhjLfOTmukKjXfsIuq+h/N9SeoRg=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The RISC-V build of the EFI stub is part of the core kernel image, and
-therefore accesses section markers directly when it needs to figure out
-the size of the various section.
+Currently, the EFI entry code for LoongArch is set up to copy the
+executable image to the preferred offset, but instead of branching
+directly into that image, it branches to the local copy of kernel_entry,
+and relies on the logic in that function to switch to the link time
+address instead.
 
-The zboot decompressor does not have access to those symbols, but
-doesn't really need that either. So let's move handle_kernel_image()
-into a separate file (or rather, move everything else into a separate
-file) so that the zboot build does not pull in unused code that links to
-symbols that it does not define.
+This is a bit sloppy, and not something we can support once we merge the
+EFI decompressor with the EFI stub. So let's clean this up a bit, by
+adding a helper that computes the offset of kernel_entry from the start
+of the image, and simply adding the result to VMLINUX_LOAD_ADDRESS.
+
+And considering that we cannot execute from anywhere else anyway, let's
+avoid efi_relocate_kernel() and just allocate the pages instead.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/riscv/include/asm/efi.h              |  2 +
- drivers/firmware/efi/libstub/Makefile     |  2 +-
- drivers/firmware/efi/libstub/riscv-stub.c | 81 ++--------------
- drivers/firmware/efi/libstub/riscv.c      | 98 ++++++++++++++++++++
- 4 files changed, 108 insertions(+), 75 deletions(-)
+ arch/loongarch/include/asm/efi.h              |  2 ++
+ drivers/firmware/efi/libstub/loongarch-stub.c | 33 ++++++++++++++------
+ 2 files changed, 26 insertions(+), 9 deletions(-)
 
-diff --git a/arch/riscv/include/asm/efi.h b/arch/riscv/include/asm/efi.h
-index a742868eb23c..6cbc7437d886 100644
---- a/arch/riscv/include/asm/efi.h
-+++ b/arch/riscv/include/asm/efi.h
-@@ -45,4 +45,6 @@ static inline unsigned long efi_get_kimg_min_align(void)
- void efi_virtmap_load(void);
- void efi_virtmap_unload(void);
+diff --git a/arch/loongarch/include/asm/efi.h b/arch/loongarch/include/asm/efi.h
+index 5a470c8d2bbc..97f16e60c6ff 100644
+--- a/arch/loongarch/include/asm/efi.h
++++ b/arch/loongarch/include/asm/efi.h
+@@ -31,4 +31,6 @@ static inline unsigned long efi_get_kimg_min_align(void)
  
-+unsigned long stext_offset(void);
+ #define EFI_KIMG_PREFERRED_ADDRESS	PHYSADDR(VMLINUX_LOAD_ADDRESS)
+ 
++unsigned long kernel_entry_address(void);
 +
- #endif /* _ASM_EFI_H */
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index d5d6c6239f9c..28c8300c6a61 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -86,7 +86,7 @@ lib-$(CONFIG_EFI_GENERIC_STUB)	+= efi-stub.o string.o intrinsics.o systable.o \
- lib-$(CONFIG_ARM)		+= arm32-stub.o
- lib-$(CONFIG_ARM64)		+= arm64-stub.o arm64-entry.o
- lib-$(CONFIG_X86)		+= x86-stub.o
--lib-$(CONFIG_RISCV)		+= riscv-stub.o
-+lib-$(CONFIG_RISCV)		+= riscv.o riscv-stub.o
- lib-$(CONFIG_LOONGARCH)		+= loongarch-stub.o
- 
- CFLAGS_arm32-stub.o		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
-diff --git a/drivers/firmware/efi/libstub/riscv-stub.c b/drivers/firmware/efi/libstub/riscv-stub.c
-index c5a551f69a7f..145c9f0ba217 100644
---- a/drivers/firmware/efi/libstub/riscv-stub.c
-+++ b/drivers/firmware/efi/libstub/riscv-stub.c
-@@ -4,7 +4,6 @@
-  */
- 
- #include <linux/efi.h>
--#include <linux/libfdt.h>
- 
- #include <asm/efi.h>
- #include <asm/sections.h>
-@@ -12,82 +11,16 @@
- 
- #include "efistub.h"
- 
--typedef void __noreturn (*jump_kernel_func)(unsigned long, unsigned long);
--
--static unsigned long hartid;
--
--static int get_boot_hartid_from_fdt(void)
--{
--	const void *fdt;
--	int chosen_node, len;
--	const void *prop;
--
--	fdt = get_efi_config_table(DEVICE_TREE_GUID);
--	if (!fdt)
--		return -EINVAL;
--
--	chosen_node = fdt_path_offset(fdt, "/chosen");
--	if (chosen_node < 0)
--		return -EINVAL;
--
--	prop = fdt_getprop((void *)fdt, chosen_node, "boot-hartid", &len);
--	if (!prop)
--		return -EINVAL;
--
--	if (len == sizeof(u32))
--		hartid = (unsigned long) fdt32_to_cpu(*(fdt32_t *)prop);
--	else if (len == sizeof(u64))
--		hartid = (unsigned long) fdt64_to_cpu(__get_unaligned_t(fdt64_t, prop));
--	else
--		return -EINVAL;
--
--	return 0;
--}
--
--static efi_status_t get_boot_hartid_from_efi(void)
-+unsigned long stext_offset(void)
+ #endif /* _ASM_LOONGARCH_EFI_H */
+diff --git a/drivers/firmware/efi/libstub/loongarch-stub.c b/drivers/firmware/efi/libstub/loongarch-stub.c
+index a2e55e5c4003..6b30fc281458 100644
+--- a/drivers/firmware/efi/libstub/loongarch-stub.c
++++ b/drivers/firmware/efi/libstub/loongarch-stub.c
+@@ -29,18 +29,27 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
+ 				 efi_loaded_image_t *image,
+ 				 efi_handle_t image_handle)
  {
--	efi_guid_t boot_protocol_guid = RISCV_EFI_BOOT_PROTOCOL_GUID;
--	struct riscv_efi_boot_protocol *boot_protocol;
--	efi_status_t status;
--
--	status = efi_bs_call(locate_protocol, &boot_protocol_guid, NULL,
--			     (void **)&boot_protocol);
--	if (status != EFI_SUCCESS)
--		return status;
--	return efi_call_proto(boot_protocol, get_boot_hartid, &hartid);
--}
--
--efi_status_t check_platform_features(void)
--{
--	efi_status_t status;
--	int ret;
--
--	status = get_boot_hartid_from_efi();
--	if (status != EFI_SUCCESS) {
--		ret = get_boot_hartid_from_fdt();
--		if (ret) {
--			efi_err("Failed to get boot hartid!\n");
--			return EFI_UNSUPPORTED;
--		}
--	}
--	return EFI_SUCCESS;
--}
--
--void __noreturn efi_enter_kernel(unsigned long entrypoint, unsigned long fdt,
--				 unsigned long fdt_size)
--{
--	unsigned long stext_offset = _start_kernel - _start;
--	unsigned long kernel_entry = entrypoint + stext_offset;
--	jump_kernel_func jump_kernel = (jump_kernel_func)kernel_entry;
--
- 	/*
--	 * Jump to real kernel here with following constraints.
--	 * 1. MMU should be disabled.
--	 * 2. a0 should contain hartid
--	 * 3. a1 should DT address
-+	 * When built as part of the kernel, the EFI stub cannot branch to the
-+	 * kernel proper via the image header, as the PE/COFF header is
-+	 * strictly not part of the in-memory presentation of the image, only
-+	 * of the file representation. So instead, we need to jump to the
-+	 * actual entrypoint in the .text region of the image.
- 	 */
--	csr_write(CSR_SATP, 0);
--	jump_kernel(hartid, fdt);
-+	return _start_kernel - _start;
- }
++	int nr_pages = round_up(kernel_asize, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
++	efi_physical_addr_t kernel_addr = EFI_KIMG_PREFERRED_ADDRESS;
+ 	efi_status_t status;
+-	unsigned long kernel_addr = 0;
  
- efi_status_t handle_kernel_image(unsigned long *image_addr,
-diff --git a/drivers/firmware/efi/libstub/riscv.c b/drivers/firmware/efi/libstub/riscv.c
-new file mode 100644
-index 000000000000..8022b104c3e6
---- /dev/null
-+++ b/drivers/firmware/efi/libstub/riscv.c
-@@ -0,0 +1,98 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/*
-+ * Copyright (C) 2020 Western Digital Corporation or its affiliates.
-+ */
-+
-+#include <linux/efi.h>
-+#include <linux/libfdt.h>
-+
-+#include <asm/efi.h>
-+#include <asm/unaligned.h>
-+
-+#include "efistub.h"
-+
-+typedef void __noreturn (*jump_kernel_func)(unsigned long, unsigned long);
-+
-+static unsigned long hartid;
-+
-+static int get_boot_hartid_from_fdt(void)
-+{
-+	const void *fdt;
-+	int chosen_node, len;
-+	const void *prop;
-+
-+	fdt = get_efi_config_table(DEVICE_TREE_GUID);
-+	if (!fdt)
-+		return -EINVAL;
-+
-+	chosen_node = fdt_path_offset(fdt, "/chosen");
-+	if (chosen_node < 0)
-+		return -EINVAL;
-+
-+	prop = fdt_getprop((void *)fdt, chosen_node, "boot-hartid", &len);
-+	if (!prop)
-+		return -EINVAL;
-+
-+	if (len == sizeof(u32))
-+		hartid = (unsigned long) fdt32_to_cpu(*(fdt32_t *)prop);
-+	else if (len == sizeof(u64))
-+		hartid = (unsigned long) fdt64_to_cpu(__get_unaligned_t(fdt64_t, prop));
-+	else
-+		return -EINVAL;
-+
-+	return 0;
-+}
-+
-+static efi_status_t get_boot_hartid_from_efi(void)
-+{
-+	efi_guid_t boot_protocol_guid = RISCV_EFI_BOOT_PROTOCOL_GUID;
-+	struct riscv_efi_boot_protocol *boot_protocol;
-+	efi_status_t status;
-+
-+	status = efi_bs_call(locate_protocol, &boot_protocol_guid, NULL,
-+			     (void **)&boot_protocol);
+-	kernel_addr = (unsigned long)&kernel_offset - kernel_offset;
+-
+-	status = efi_relocate_kernel(&kernel_addr, kernel_fsize, kernel_asize,
+-				     EFI_KIMG_PREFERRED_ADDRESS,
+-				     efi_get_kimg_min_align(), 0x0);
++	/*
++	 * Allocate space for the kernel image at the preferred offset. This is
++	 * the only location in memory from where we can execute the image, so
++	 * no point in falling back to another allocation.
++	 */
++	status = efi_bs_call(allocate_pages, EFI_ALLOCATE_ADDRESS,
++			     EFI_LOADER_DATA, nr_pages, &kernel_addr);
 +	if (status != EFI_SUCCESS)
 +		return status;
-+	return efi_call_proto(boot_protocol, get_boot_hartid, &hartid);
-+}
+ 
+-	*image_addr = kernel_addr;
++	*image_addr = EFI_KIMG_PREFERRED_ADDRESS;
+ 	*image_size = kernel_asize;
+ 
++	memcpy((void *)EFI_KIMG_PREFERRED_ADDRESS,
++	       (void *)&kernel_offset - kernel_offset,
++	       kernel_fsize);
 +
-+efi_status_t check_platform_features(void)
+ 	return status;
+ }
+ 
+@@ -64,6 +73,13 @@ static efi_status_t exit_boot_func(struct efi_boot_memmap *map, void *priv)
+ 	return EFI_SUCCESS;
+ }
+ 
++unsigned long kernel_entry_address(void)
 +{
-+	efi_status_t status;
-+	int ret;
++	unsigned long base = (unsigned long)&kernel_offset - kernel_offset;
 +
-+	status = get_boot_hartid_from_efi();
-+	if (status != EFI_SUCCESS) {
-+		ret = get_boot_hartid_from_fdt();
-+		if (ret) {
-+			efi_err("Failed to get boot hartid!\n");
-+			return EFI_UNSUPPORTED;
-+		}
-+	}
-+	return EFI_SUCCESS;
++	return (unsigned long)&kernel_entry - base + VMLINUX_LOAD_ADDRESS;
 +}
 +
-+unsigned long __weak stext_offset(void)
-+{
-+	/*
-+	 * This fallback definition is used by the EFI zboot stub, which loads
-+	 * the entire image so it can branch via the image header at offset #0.
-+	 */
-+	return 0;
-+}
-+
-+void __noreturn efi_enter_kernel(unsigned long entrypoint, unsigned long fdt,
-+				 unsigned long fdt_size)
-+{
-+	unsigned long kernel_entry = entrypoint + stext_offset();
-+	jump_kernel_func jump_kernel = (jump_kernel_func)kernel_entry;
-+
-+	/*
-+	 * Jump to real kernel here with following constraints.
-+	 * 1. MMU should be disabled.
-+	 * 2. a0 should contain hartid
-+	 * 3. a1 should DT address
-+	 */
-+	csr_write(CSR_SATP, 0);
-+	jump_kernel(hartid, fdt);
-+}
+ efi_status_t efi_boot_kernel(void *handle, efi_loaded_image_t *image,
+ 			     unsigned long kernel_addr, char *cmdline_ptr)
+ {
+@@ -95,8 +111,7 @@ efi_status_t efi_boot_kernel(void *handle, efi_loaded_image_t *image,
+ 	csr_write64(CSR_DMW0_INIT, LOONGARCH_CSR_DMWIN0);
+ 	csr_write64(CSR_DMW1_INIT, LOONGARCH_CSR_DMWIN1);
+ 
+-	real_kernel_entry = (kernel_entry_t)
+-		((unsigned long)&kernel_entry - kernel_addr + VMLINUX_LOAD_ADDRESS);
++	real_kernel_entry = (void *)kernel_entry_address();
+ 
+ 	real_kernel_entry(true, (unsigned long)cmdline_ptr,
+ 			  (unsigned long)efi_system_table);
 -- 
 2.35.1
 
