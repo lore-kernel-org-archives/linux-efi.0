@@ -2,35 +2,35 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E4586C4332F
-	for <linux-efi@archiver.kernel.org>; Mon, 17 Oct 2022 17:18:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CB926C433FE
+	for <linux-efi@archiver.kernel.org>; Mon, 17 Oct 2022 17:18:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229748AbiJQRSO (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 17 Oct 2022 13:18:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36950 "EHLO
+        id S230178AbiJQRSV (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 17 Oct 2022 13:18:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37158 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230170AbiJQRSO (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 17 Oct 2022 13:18:14 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8B52671989
-        for <linux-efi@vger.kernel.org>; Mon, 17 Oct 2022 10:18:12 -0700 (PDT)
+        with ESMTP id S230085AbiJQRSU (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 17 Oct 2022 13:18:20 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2A476719AC
+        for <linux-efi@vger.kernel.org>; Mon, 17 Oct 2022 10:18:19 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 18E2E611E7
-        for <linux-efi@vger.kernel.org>; Mon, 17 Oct 2022 17:18:12 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 97C23C4347C;
-        Mon, 17 Oct 2022 17:18:08 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id BD141611D5
+        for <linux-efi@vger.kernel.org>; Mon, 17 Oct 2022 17:18:18 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4B6A8C4347C;
+        Mon, 17 Oct 2022 17:18:15 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1666027091;
-        bh=+H157anxM+2dX1+H3yTb4uNIwJjI/6G+gPOrkXznwzI=;
+        s=k20201202; t=1666027098;
+        bh=uA10ts1bdJgyd9JKzcEXcregBLnghxvJwJwfubfNmN4=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=LQiPdyEwZUdNhUc6R8L8XBz1qUT7AION3quF1TyMWmpsNqfHAdXnB6N9ZlpZvrrjU
-         ahS47UZ2hhM9k1H3atDyPAYzZ+xr7uoXRDudps9YGv+IdfEMG5LBP5bKA3XzwkGln1
-         Ao9cQuLLXneHmCwgMf4gTL4pWzm2RB+fmhIUH8k0ar4GuU7lAuZS6ksW9vTsga1hHO
-         NlVPrCqyYrMF5th4XkghSGUEQsLzYOg5RRS2Y3o9/0mQlMs+E/8Fo1slZkldI0ULo/
-         xs2JZvwbr4LCeV2YK7Fdo2U8BpqiUppu7idefG/ufhS3gToKg4CDCL4rDgv8XMtpaM
-         eEqG19uZVA9TA==
+        b=A9lfz39hFwUK+eJC1wahYrfkT216YfaIxqCB5egtSromgAfTzUm4A1OWQnD1EWrZ8
+         4w9QUrWoW5xhSUqx1VAC+JGE/HmHy9BUKftpgEBNAKyIpyer7eUdDZ7VSFEwl2kGMf
+         d7fN17Ldq0eVwwmwoSoz47DtqxpVwRrvNYKwK7dYyHWpz7zYeT65G2RM+Rrvt+jgbY
+         bqE/3pmC2M9OircXGCwWXgaDpV56rBWjL1g0rffqiD54NDPMiUeteZow8mLIhGfcTn
+         J8j7kNq0FzK9cECKzi9mIE8LuSrbhiY2HzhakciXWcqVvJb3fekjGvmW5ncrp9kkeK
+         Z+TaM2E6baOlg==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     keescook@chromium.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -46,168 +46,201 @@ Cc:     keescook@chromium.org, Ard Biesheuvel <ardb@kernel.org>,
         Jeremy Linton <jeremy.linton@arm.com>,
         Will Deacon <will@kernel.org>,
         Catalin Marinas <catalin.marinas@arm.com>
-Subject: [PATCH 16/21] efi: libstub: Factor out min alignment and preferred kernel load address
-Date:   Mon, 17 Oct 2022 19:16:55 +0200
-Message-Id: <20221017171700.3736890-17-ardb@kernel.org>
+Subject: [PATCH 18/21] efi/arm64: libstub: Split off kernel image relocation for builtin stub
+Date:   Mon, 17 Oct 2022 19:16:57 +0200
+Message-Id: <20221017171700.3736890-19-ardb@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20221017171700.3736890-1-ardb@kernel.org>
 References: <20221017171700.3736890-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=5774; i=ardb@kernel.org; h=from:subject; bh=+H157anxM+2dX1+H3yTb4uNIwJjI/6G+gPOrkXznwzI=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjTY4D7rgYdfP6lOh+IB2haaTnryrtxuLKqO7UDJNJ qBm2mmCJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCY02OAwAKCRDDTyI5ktmPJOQ7C/ 9+Qqym373prC9KJZvyv1lzYk3TwacrpLaPJ2eCTREfWMe3hVWz3amR8IAgKAItsqkZnETjzT/FHRxg sIbe2fC8D5FGhGm18obLwD6/ySF8VI1Wtx8y12oj5oWizuuiot2fVfpy5e0ozGVccCWTrxm64vqx5O V8EWGOq8HQy6DHt6hhaEi5DLtbQXfcPnrIetdUKx0to9KKEWhKMioD4SSqJSDnirKdOqAKF73tu1cI WH6kyfR4840+HtVPgkiBGhf2Ae50TtcwqxJGMl7+CwAYjeQOzJdsayXhxB57vGGChwkS8OvW4GsovJ L/bCve/RwdKoCKnaR4RlNLTyubLUaXJGwXC7UOZdW2w7e9X2Eq3fLpOey2r7eJbBdhK9KR+JLbQiew hVo1pKnFNJgitYuWIVhI6qSfOXxsT8u7EetAp6e+qA+QUcBczfgyVJahL6xSzGemfoSBpEvwmt12aO 4F2831KJHB2gRYSWFVAJi2oZ2KlBpbqL99HVc2ewjP9ak=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=6592; i=ardb@kernel.org; h=from:subject; bh=uA10ts1bdJgyd9JKzcEXcregBLnghxvJwJwfubfNmN4=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjTY4GM4L2eMPdXaZ58c7tKf6cEQdcrAVRM8SyYdMY GSrc2miJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCY02OBgAKCRDDTyI5ktmPJByrDA C1Bb3N6ckOJnFeVeX/7nxNRxFxtQ8uJa3RgqQy568UaKCHXLg+P5tl6ZBbagICJgBdbcro7edx+TQ8 fR4W/91W0daNjr50BLj4TJgW7oKW/GZebuGzJqP/+NzFcYnZo+v43GCg9B1Ma4VZm4cYT5iiOzQV+o OA0HlPcJkfwsjjQKRgzoQ+8AbLRpF2GXstf0isPReVtRIqrT/o8hJitTlsQKZCE+Mkn8nC4dtYFRzV ESa0N/wA78M7OaxSNcu+24xahOf02Se2bER0lTH/PDYPmwnzY9FfAjxZbv0gPDelE3T4ESSvGeyPyt j3ZeDRbrWlJ5fnVMe5fVAyS48DrHsa+LHfRfpAE7N+czn52XtORldO9puOoi7bGVCYpdG1pT1Fsyxf tjubJNNqwjrY4GIRNEJyUvrgzCTPIg0IEudSTcl8UYgzihZHmwhso54J2kv+p8VZyf2VP1/Bx6kRH2 /xw6koU6ZkwQmufvVot2wPCwvpANBtgoTJvifkQbh03PE=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Factor out the expressions that describe the preferred placement of the
-loaded image as well as the minimum alignment so we can reuse them in
-the decompressor.
+The arm64 build of the EFI stub is part of the core kernel image, and
+therefore accesses section markers directly when it needs to figure out
+the size of the various section.
+
+The zboot decompressor does not have access to those symbols, but
+doesn't really need that either. So let's move handle_kernel_image()
+into a separate file (or rather, move everything else into a separate
+file) so that the zboot build does not pull in unused code that links to
+symbols that it does not define.
+
+While at it, introduce a helper routine that the generic zboot loader
+will need to invoke after decompressing the image but before invoking
+it, to ensure that the I-side view of memory is consistent.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/arm64/include/asm/efi.h                  | 15 +++++++++++++++
- arch/loongarch/include/asm/efi.h              |  7 +++++++
- arch/riscv/include/asm/efi.h                  | 11 +++++++++++
- drivers/firmware/efi/libstub/arm64-stub.c     | 11 +----------
- drivers/firmware/efi/libstub/loongarch-stub.c |  3 ++-
- drivers/firmware/efi/libstub/riscv-stub.c     | 15 +++------------
- 6 files changed, 39 insertions(+), 23 deletions(-)
+ drivers/firmware/efi/libstub/Makefile      |  2 +-
+ drivers/firmware/efi/libstub/arm64-entry.S | 12 ++++
+ drivers/firmware/efi/libstub/arm64-stub.c  | 28 ---------
+ drivers/firmware/efi/libstub/arm64.c       | 61 ++++++++++++++++++++
+ drivers/firmware/efi/libstub/efistub.h     |  4 ++
+ 5 files changed, 78 insertions(+), 29 deletions(-)
 
-diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
-index af35ad671754..108b115dbf5b 100644
---- a/arch/arm64/include/asm/efi.h
-+++ b/arch/arm64/include/asm/efi.h
-@@ -76,6 +76,21 @@ static inline unsigned long efi_get_max_initrd_addr(unsigned long image_addr)
- 	return (image_addr & ~(SZ_1G - 1UL)) + (1UL << (VA_BITS_MIN - 1));
- }
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index 28c8300c6a61..ee24b222489c 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -84,7 +84,7 @@ lib-$(CONFIG_EFI_GENERIC_STUB)	+= efi-stub.o string.o intrinsics.o systable.o \
+ 				   screen_info.o
  
-+static inline unsigned long efi_get_kimg_min_align(void)
-+{
-+	extern bool efi_nokaslr;
-+
+ lib-$(CONFIG_ARM)		+= arm32-stub.o
+-lib-$(CONFIG_ARM64)		+= arm64-stub.o arm64-entry.o
++lib-$(CONFIG_ARM64)		+= arm64.o arm64-stub.o arm64-entry.o
+ lib-$(CONFIG_X86)		+= x86-stub.o
+ lib-$(CONFIG_RISCV)		+= riscv.o riscv-stub.o
+ lib-$(CONFIG_LOONGARCH)		+= loongarch-stub.o
+diff --git a/drivers/firmware/efi/libstub/arm64-entry.S b/drivers/firmware/efi/libstub/arm64-entry.S
+index 87082b222a87..ec5492a738fe 100644
+--- a/drivers/firmware/efi/libstub/arm64-entry.S
++++ b/drivers/firmware/efi/libstub/arm64-entry.S
+@@ -8,6 +8,18 @@
+ #include <linux/linkage.h>
+ #include <asm/assembler.h>
+ 
 +	/*
-+	 * Although relocatable kernels can fix up the misalignment with
-+	 * respect to MIN_KIMG_ALIGN, the resulting virtual text addresses are
-+	 * subtly out of sync with those recorded in the vmlinux when kaslr is
-+	 * disabled but the image required relocation anyway. Therefore retain
-+	 * 2M alignment if KASLR was explicitly disabled, even if it was not
-+	 * going to be activated to begin with.
++	 * The entrypoint of a arm64 bare metal image is at offset #0 of the
++	 * image, so this is a reasonable default for primary_entry_offset.
++	 * Only when the EFI stub is integrated into the core kernel, it is not
++	 * guaranteed that the PE/COFF header has been copied to memory too, so
++	 * in this case, primary_entry_offset should be overridden by the
++	 * linker and point to primary_entry() directly.
 +	 */
-+	return efi_nokaslr ? MIN_KIMG_ALIGN : EFI_KIMG_ALIGN;
-+}
++	.globl	primary_entry_offset
++	.weak	primary_entry_offset
++	.set	primary_entry_offset, 0
 +
- #define EFI_ALLOC_ALIGN		SZ_64K
- 
- /*
-diff --git a/arch/loongarch/include/asm/efi.h b/arch/loongarch/include/asm/efi.h
-index 60d6a170c18d..5a470c8d2bbc 100644
---- a/arch/loongarch/include/asm/efi.h
-+++ b/arch/loongarch/include/asm/efi.h
-@@ -24,4 +24,11 @@ static inline unsigned long efi_get_max_initrd_addr(unsigned long image_addr)
- 	return ULONG_MAX;
- }
- 
-+static inline unsigned long efi_get_kimg_min_align(void)
-+{
-+	return SZ_2M;
-+}
-+
-+#define EFI_KIMG_PREFERRED_ADDRESS	PHYSADDR(VMLINUX_LOAD_ADDRESS)
-+
- #endif /* _ASM_LOONGARCH_EFI_H */
-diff --git a/arch/riscv/include/asm/efi.h b/arch/riscv/include/asm/efi.h
-index d0570936cb8c..a742868eb23c 100644
---- a/arch/riscv/include/asm/efi.h
-+++ b/arch/riscv/include/asm/efi.h
-@@ -31,6 +31,17 @@ static inline unsigned long efi_get_max_initrd_addr(unsigned long image_addr)
- 	return ULONG_MAX;
- }
- 
-+static inline unsigned long efi_get_kimg_min_align(void)
-+{
-+	/*
-+	 * RISC-V requires the kernel image to placed 2 MB aligned base for 64
-+	 * bit and 4MB for 32 bit.
-+	 */
-+	return IS_ENABLED(CONFIG_64BIT) ? SZ_2M : SZ_4M;
-+}
-+
-+#define EFI_KIMG_PREFERRED_ADDRESS	efi_get_kimg_min_align()
-+
- void efi_virtmap_load(void);
- void efi_virtmap_unload(void);
- 
+ SYM_CODE_START(efi_enter_kernel)
+ 	/*
+ 	 * efi_pe_entry() will have copied the kernel image if necessary and we
 diff --git a/drivers/firmware/efi/libstub/arm64-stub.c b/drivers/firmware/efi/libstub/arm64-stub.c
-index e767a5ac8c3d..dd21b7b7309a 100644
+index dd21b7b7309a..7f0aab3a8ab3 100644
 --- a/drivers/firmware/efi/libstub/arm64-stub.c
 +++ b/drivers/firmware/efi/libstub/arm64-stub.c
-@@ -88,16 +88,7 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
- 	efi_status_t status;
- 	unsigned long kernel_size, kernel_memsize = 0;
- 	u32 phys_seed = 0;
--
--	/*
--	 * Although relocatable kernels can fix up the misalignment with
--	 * respect to MIN_KIMG_ALIGN, the resulting virtual text addresses are
--	 * subtly out of sync with those recorded in the vmlinux when kaslr is
--	 * disabled but the image required relocation anyway. Therefore retain
--	 * 2M alignment if KASLR was explicitly disabled, even if it was not
--	 * going to be activated to begin with.
--	 */
--	u64 min_kimg_align = efi_nokaslr ? MIN_KIMG_ALIGN : EFI_KIMG_ALIGN;
-+	u64 min_kimg_align = efi_get_kimg_min_align();
- 
- 	if (IS_ENABLED(CONFIG_RANDOMIZE_BASE)) {
- 		efi_guid_t li_fixed_proto = LINUX_EFI_LOADED_IMAGE_FIXED_GUID;
-diff --git a/drivers/firmware/efi/libstub/loongarch-stub.c b/drivers/firmware/efi/libstub/loongarch-stub.c
-index 32329f2a92f9..a2e55e5c4003 100644
---- a/drivers/firmware/efi/libstub/loongarch-stub.c
-+++ b/drivers/firmware/efi/libstub/loongarch-stub.c
-@@ -35,7 +35,8 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
- 	kernel_addr = (unsigned long)&kernel_offset - kernel_offset;
- 
- 	status = efi_relocate_kernel(&kernel_addr, kernel_fsize, kernel_asize,
--				     PHYSADDR(VMLINUX_LOAD_ADDRESS), SZ_2M, 0x0);
-+				     EFI_KIMG_PREFERRED_ADDRESS,
-+				     efi_get_kimg_min_align(), 0x0);
- 
- 	*image_addr = kernel_addr;
- 	*image_size = kernel_asize;
-diff --git a/drivers/firmware/efi/libstub/riscv-stub.c b/drivers/firmware/efi/libstub/riscv-stub.c
-index b450ebf95977..c5a551f69a7f 100644
---- a/drivers/firmware/efi/libstub/riscv-stub.c
-+++ b/drivers/firmware/efi/libstub/riscv-stub.c
-@@ -12,16 +12,6 @@
+@@ -11,37 +11,9 @@
+ #include <asm/efi.h>
+ #include <asm/memory.h>
+ #include <asm/sections.h>
+-#include <asm/sysreg.h>
  
  #include "efistub.h"
  
--/*
-- * RISC-V requires the kernel image to placed 2 MB aligned base for 64 bit and
-- * 4MB for 32 bit.
-- */
--#ifdef CONFIG_64BIT
--#define MIN_KIMG_ALIGN		SZ_2M
--#else
--#define MIN_KIMG_ALIGN		SZ_4M
--#endif
+-efi_status_t check_platform_features(void)
+-{
+-	u64 tg;
 -
- typedef void __noreturn (*jump_kernel_func)(unsigned long, unsigned long);
+-	/*
+-	 * If we have 48 bits of VA space for TTBR0 mappings, we can map the
+-	 * UEFI runtime regions 1:1 and so calling SetVirtualAddressMap() is
+-	 * unnecessary.
+-	 */
+-	if (VA_BITS_MIN >= 48)
+-		efi_novamap = true;
+-
+-	/* UEFI mandates support for 4 KB granularity, no need to check */
+-	if (IS_ENABLED(CONFIG_ARM64_4K_PAGES))
+-		return EFI_SUCCESS;
+-
+-	tg = (read_cpuid(ID_AA64MMFR0_EL1) >> ID_AA64MMFR0_EL1_TGRAN_SHIFT) & 0xf;
+-	if (tg < ID_AA64MMFR0_EL1_TGRAN_SUPPORTED_MIN || tg > ID_AA64MMFR0_EL1_TGRAN_SUPPORTED_MAX) {
+-		if (IS_ENABLED(CONFIG_ARM64_64K_PAGES))
+-			efi_err("This 64 KB granular kernel is not supported by your CPU\n");
+-		else
+-			efi_err("This 16 KB granular kernel is not supported by your CPU\n");
+-		return EFI_UNSUPPORTED;
+-	}
+-	return EFI_SUCCESS;
+-}
+-
+ /*
+  * Distro versions of GRUB may ignore the BSS allocation entirely (i.e., fail
+  * to provide space, and fail to zero it). Check for this condition by double
+diff --git a/drivers/firmware/efi/libstub/arm64.c b/drivers/firmware/efi/libstub/arm64.c
+new file mode 100644
+index 000000000000..d2e94972c5fa
+--- /dev/null
++++ b/drivers/firmware/efi/libstub/arm64.c
+@@ -0,0 +1,61 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Copyright (C) 2013, 2014 Linaro Ltd;  <roy.franz@linaro.org>
++ *
++ * This file implements the EFI boot stub for the arm64 kernel.
++ * Adapted from ARM version by Mark Salter <msalter@redhat.com>
++ */
++
++
++#include <linux/efi.h>
++#include <asm/efi.h>
++#include <asm/memory.h>
++#include <asm/sysreg.h>
++
++#include "efistub.h"
++
++efi_status_t check_platform_features(void)
++{
++	u64 tg;
++
++	/*
++	 * If we have 48 bits of VA space for TTBR0 mappings, we can map the
++	 * UEFI runtime regions 1:1 and so calling SetVirtualAddressMap() is
++	 * unnecessary.
++	 */
++	if (VA_BITS_MIN >= 48)
++		efi_novamap = true;
++
++	/* UEFI mandates support for 4 KB granularity, no need to check */
++	if (IS_ENABLED(CONFIG_ARM64_4K_PAGES))
++		return EFI_SUCCESS;
++
++	tg = (read_cpuid(ID_AA64MMFR0_EL1) >> ID_AA64MMFR0_EL1_TGRAN_SHIFT) & 0xf;
++	if (tg < ID_AA64MMFR0_EL1_TGRAN_SUPPORTED_MIN || tg > ID_AA64MMFR0_EL1_TGRAN_SUPPORTED_MAX) {
++		if (IS_ENABLED(CONFIG_ARM64_64K_PAGES))
++			efi_err("This 64 KB granular kernel is not supported by your CPU\n");
++		else
++			efi_err("This 16 KB granular kernel is not supported by your CPU\n");
++		return EFI_UNSUPPORTED;
++	}
++	return EFI_SUCCESS;
++}
++
++void efi_cache_sync_image(unsigned long image_base,
++			  unsigned long alloc_size,
++			  unsigned long code_size)
++{
++	u32 ctr = read_cpuid_effective_cachetype();
++	u64 lsize = 4 << cpuid_feature_extract_unsigned_field(ctr,
++						CTR_EL0_DminLine_SHIFT);
++
++	do {
++		asm("dc civac, %0" :: "r"(image_base));
++		image_base += lsize;
++		alloc_size -= lsize;
++	} while (alloc_size >= lsize);
++
++	asm("ic ialluis");
++	dsb(ish);
++	isb();
++}
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index a2fc0727880a..576e5cfec980 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -1038,4 +1038,8 @@ void efi_retrieve_tpm2_eventlog(void);
+ struct screen_info *alloc_screen_info(void);
+ void free_screen_info(struct screen_info *si);
  
- static unsigned long hartid;
-@@ -125,9 +115,10 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
- 	 * lowest possible memory region as long as the address and size meets
- 	 * the alignment constraints.
- 	 */
--	preferred_addr = MIN_KIMG_ALIGN;
-+	preferred_addr = EFI_KIMG_PREFERRED_ADDRESS;
- 	status = efi_relocate_kernel(image_addr, kernel_size, *image_size,
--				     preferred_addr, MIN_KIMG_ALIGN, 0x0);
-+				     preferred_addr, efi_get_kimg_min_align(),
-+				     0x0);
- 
- 	if (status != EFI_SUCCESS) {
- 		efi_err("Failed to relocate kernel\n");
++void efi_cache_sync_image(unsigned long image_base,
++			  unsigned long alloc_size,
++			  unsigned long code_size);
++
+ #endif
 -- 
 2.35.1
 
