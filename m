@@ -2,105 +2,178 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CC065C4332F
-	for <linux-efi@archiver.kernel.org>; Thu, 20 Oct 2022 08:40:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CEC5CC433FE
+	for <linux-efi@archiver.kernel.org>; Thu, 20 Oct 2022 08:40:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229902AbiJTIkf (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 20 Oct 2022 04:40:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32778 "EHLO
+        id S229956AbiJTIkp (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 20 Oct 2022 04:40:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33312 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230220AbiJTIke (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 20 Oct 2022 04:40:34 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 652BDF9879
-        for <linux-efi@vger.kernel.org>; Thu, 20 Oct 2022 01:40:27 -0700 (PDT)
+        with ESMTP id S230285AbiJTIkm (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 20 Oct 2022 04:40:42 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1E67FFBCFC
+        for <linux-efi@vger.kernel.org>; Thu, 20 Oct 2022 01:40:32 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id EF96361A88
-        for <linux-efi@vger.kernel.org>; Thu, 20 Oct 2022 08:40:26 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2985EC433B5;
-        Thu, 20 Oct 2022 08:40:24 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 317D561A7B
+        for <linux-efi@vger.kernel.org>; Thu, 20 Oct 2022 08:40:32 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 653B8C433B5;
+        Thu, 20 Oct 2022 08:40:30 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1666255226;
-        bh=XtIQJsCTkMPCGGxo/Q66j2lRYHPPE+WjTmD1il3tO4k=;
-        h=From:To:Cc:Subject:Date:From;
-        b=bgmab7kAanKEW0qMn5IXqEP4A6qMDfjO5KCV87C8Td4Uam+yBC0K0A++pYIkAdSRv
-         HghYRP4JUE5itFFvqFboVXY7x79FrxSDnfz6Jakm1ORkILn5hfXDJinlunJEeY9imD
-         XlCatGMmSixIR8lu4BqH7iOcwJTtEJifyVfivpcvj24yP0qtPr0+MnmAYMwVpjJIs8
-         oXfqJGbNd0zI2b4yJKvhHWg+H78nG2KvCQC2mOSBjY1/j35jbcIWIS5Gy4kkfnI3s4
-         lef0CiAEE0j6/kT6xxyKyJB5CP1LZxk+e2S7Gp4CVxdWFLgVzxiXvLGni3vkunvUxh
-         CRddrCcPeVaVg==
+        s=k20201202; t=1666255231;
+        bh=DidgXi01vs3QJl79fyJMKey6h/6Z2yoooMXAGEGQbow=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=m7LzqgqVvMu7nn9U+HYnAtm98jxrS4jEaqCs4h1wMIwew/WjzhAzGATI81nHR1rt9
+         n4zElTkByRzWgcoawhMwLEPp+4KFpzbRPAceg+/WMWctdu0bPcDfpk4yRfJvhcyYCH
+         gp2OPD9Go0pvWTRbW24IDGlerOkR32xeGkYZQGN63oj+Ha+pOSSAgE78zG7Pn5Vep/
+         5muDCkuM6I8jDw09hnk5I3xVeCo8sYUy2uKZwYGMcwEedUWMitxdCIMlkHfXCuBs2Y
+         oxgK7vfMKquPVRmSH1FmRZTuqJVDiQwAZ8hq/+jX5G0dnBJ0OR3X/ahHQEXJrInmia
+         IEt3zVFFNahcQ==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     Ard Biesheuvel <ardb@kernel.org>,
         Ilias Apalodimas <ilias.apalodimas@linaro.org>,
         "Jason A . Donenfeld" <Jason@zx2c4.com>,
         Lennart Poettering <lennart@poettering.net>
-Subject: [PATCH v3 0/3] efi: consume random seed provided by loader
-Date:   Thu, 20 Oct 2022 10:39:07 +0200
-Message-Id: <20221020083910.1902009-1-ardb@kernel.org>
+Subject: [PATCH v3 3/3] efi: random: combine bootloader provided RNG seed with RNG protocol output
+Date:   Thu, 20 Oct 2022 10:39:10 +0200
+Message-Id: <20221020083910.1902009-4-ardb@kernel.org>
 X-Mailer: git-send-email 2.35.1
+In-Reply-To: <20221020083910.1902009-1-ardb@kernel.org>
+References: <20221020083910.1902009-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2436; i=ardb@kernel.org; h=from:subject; bh=XtIQJsCTkMPCGGxo/Q66j2lRYHPPE+WjTmD1il3tO4k=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjUQkowl1hHLsFT3Tn37WoAEEJFz8bqXdztLIWgkxX hjhJ9hOJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCY1EJKAAKCRDDTyI5ktmPJCcwC/ 0UI2LfLW/fUh55ZT/zsIJhauFQA8s4qJXeHLlea4+I6HM84Wz9qziQEiuVKKv5jd4jc237RaqzM9RI CbvLGe1A3XBSub0BCWYJW23nBPNRzpSNdFFdN+B5zbr5N8cFYDyk85HynOjSgHDtgdgWcC/TIsheBn DZRhsbqbx/okhYQfdZtdzeXDHycQUpxNgb2WFItUd4JdtsuQoEdaeI63PjiOc+6OHvl695u9ReJiyL xLCmj5v1W5i0DttIXHo4atDcQ81FIuXxGVW4WJBlDwq3Sr108xmKatyhrD9tEXZGDTjQ7N1DJRTK4H VUxYH1RiWJH28z+kMsbVHn+Yoyi1lexjmMmnmGPif9u93w5F1Up1nWPmELSqx9qT2ZUHLYx4k3UNn3 WaNRUzXejliWDw/tt4ldr0UmXrm5n5TCIDsZrQJr3ttEbMEpP5y9WdCsHAhBXEE0ChyX6HXtiN680q xVEda2kApho6wLn/Hy89USafjA3NLDudltjUVml2Y+/Ao=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=4851; i=ardb@kernel.org; h=from:subject; bh=DidgXi01vs3QJl79fyJMKey6h/6Z2yoooMXAGEGQbow=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjUQktk5UXFUYdATXiXa5lDEJuzxwgsQagUOLcYPvL 4zN6F3OJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCY1EJLQAKCRDDTyI5ktmPJH4JDA C7pruCaWEkzlKz1sBf0/C3n3u/EdIxPemexn/uXwibNGWozqWqrPX3At4F27NaTy+hXnQaLgG47TYW TxBd4FVvARI+5jl0lmJeJgv64pn1NmDbgiDy8k1DPoCX0z34Cc7JrwdIymfylHsCv4laJEAvI1ONsA Od89CIuTGb52GpR+DIWLRzKmQ2lWRRt5BFMNVH3lrtZr6HipMZD3fG6JaV+tJN4+5tyT69sRoDP1Pv HAbKB/PoEsbTK3NVeH5lO3J2Bsu04+vzaK6XaEBs80XFvGOOqI3Ab5EgyOKGIvo1Nscg4vMlSXWsDn 9QxfKo3AyfdzsWYwda0XnYavJ9dWHzMX5KDp0iyYLyTdm0V4APQ8+VB34O9Y9EmnHIBdaLRCZtpmyJ 9Yx6rt1lekD3vqr+4Ol0WJuuJaK4rgZQcx50xBOV8AgjSJxglImquIFouJOAEPwt9ggl5buMcnP89y IGCRX6frHfNHryuaqyA1FLSjlI73HCAPiClVrvwoleGS4=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Getting a random seed into the kernel very early is important for data
-structures that rely on the random number generator at initialization
-time, but hardware based RNGs may not become available until much later
-in the boot.
+Instead of blindly creating the EFI random seed configuration table if
+the RNG protocol is implemented and works, check whether such a EFI
+configuration table was provided by an earlier boot stage and if so,
+concatenate the existing and the new seeds, leaving it up to the core
+code to mix it in and credit it the way it sees fit.
 
-For this reason, the EFI stub will currently invoke the EFI RNG protocol
-to get a random seed from the hardware before tearing down the EFI boot
-services and performing the low level boot of the kernel proper. The
-generated seed is passed via a EFI configuration table, which is
-available very early, and so the random number generator comes up much
-earlier as well.
+This can be used for, e.g., systemd-boot, to pass an additional seed to
+Linux in a way that can be consumed by the kernel very early. In that
+case, the following definitions should be used to pass the seed to the
+EFI stub:
 
-Any boot stage preceding the EFI stub can install configuration tables,
-so we can decide to expose the same mechanism to other loaders.  This
-allows, e.g., systemd-boot to pass the seed it keeps in a file on the
-ESP without having to rely on PID #1 dd'ing it into /dev/random, which
-is much too late to be useful.
+struct linux_efi_random_seed {
+      u32     size; // of the 'seed' array in bytes
+      u8      seed[];
+};
 
-For maximum simplicity, just concatenate the existing seed with the one
-obtained from EFI_RNG_PROTOCOL if both are available, and leave it to
-the core kernel code to mix it in and credit it appropriately. This way,
-we have no need for copies of the Blake2s library in the EFI stub and in
-the zboot decompressor.
+The memory for the struct must be allocated as EFI_ACPI_RECLAIM_MEMORY
+pool memory, and the address of the struct in memory should be installed
+as a EFI configuration table using the following GUID:
 
-Older kernels will simply supersede the bootloader provided seed, unless
-the RNG protocol is not available, in which case the bootloader seed
-will be forwarded untouched if one is present. This should not be an
-issue, but let's reduce the seed size to blake2's output size, and
-switch to the correct memory type in separate changes so they can be
-backported.
+LINUX_EFI_RANDOM_SEED_TABLE_GUID        1ce1e5bc-7ceb-42f2-81e5-8aadf180f57b
 
-Changes since v2:
-- rebase onto v6.1-rc1
-- drop blake2s library from the stub - we'd need it in two places with
-  the zboot changes landed, and concatenation is fine for our needs
+Note that doing so is safe even on kernels that were built without this
+patch applied, but the seed will simply be overwritten with a seed
+derived from the EFI RNG protocol, if available. The recommended seed
+size is 32 bytes, anything beyond that is disregarded when the seeds are
+concatenated.
 
-Cc: Ilias Apalodimas <ilias.apalodimas@linaro.org>
-Cc: Jason A. Donenfeld <Jason@zx2c4.com>
-Cc: Lennart Poettering <lennart@poettering.net>
-
-Ard Biesheuvel (3):
-  efi: random: reduce seed size to 32 bytes
-  efi: random: Use 'ACPI reclaim' memory for random seed
-  efi: random: combine bootloader provided RNG seed with RNG protocol
-    output
-
- drivers/firmware/efi/efi.c             |  2 +-
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+---
  drivers/firmware/efi/libstub/efistub.h |  2 ++
- drivers/firmware/efi/libstub/random.c  | 31 +++++++++++++++++---
- include/linux/efi.h                    |  4 +--
- 4 files changed, 31 insertions(+), 8 deletions(-)
+ drivers/firmware/efi/libstub/random.c  | 29 ++++++++++++++++++--
+ include/linux/efi.h                    |  2 --
+ 3 files changed, 28 insertions(+), 5 deletions(-)
 
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index a30fb5d8ef05..75280b800eee 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -882,6 +882,8 @@ efi_status_t efi_get_random_bytes(unsigned long size, u8 *out);
+ efi_status_t efi_random_alloc(unsigned long size, unsigned long align,
+ 			      unsigned long *addr, unsigned long random_seed);
+ 
++efi_status_t efi_random_get_seed(void);
++
+ efi_status_t check_platform_features(void);
+ 
+ void *get_efi_config_table(efi_guid_t guid);
+diff --git a/drivers/firmware/efi/libstub/random.c b/drivers/firmware/efi/libstub/random.c
+index 183dc5cdb8ed..080012e837c3 100644
+--- a/drivers/firmware/efi/libstub/random.c
++++ b/drivers/firmware/efi/libstub/random.c
+@@ -67,16 +67,28 @@ efi_status_t efi_random_get_seed(void)
+ 	efi_guid_t rng_proto = EFI_RNG_PROTOCOL_GUID;
+ 	efi_guid_t rng_algo_raw = EFI_RNG_ALGORITHM_RAW;
+ 	efi_guid_t rng_table_guid = LINUX_EFI_RANDOM_SEED_TABLE_GUID;
++	struct linux_efi_random_seed *prev_seed, *seed = NULL;
++	int prev_seed_size, seed_size = EFI_RANDOM_SEED_SIZE;
+ 	efi_rng_protocol_t *rng = NULL;
+-	struct linux_efi_random_seed *seed = NULL;
+ 	efi_status_t status;
+ 
+ 	status = efi_bs_call(locate_protocol, &rng_proto, NULL, (void **)&rng);
+ 	if (status != EFI_SUCCESS)
+ 		return status;
+ 
++	/*
++	 * Check whether a seed was provided by a prior boot stage. In that
++	 * case, instead of overwriting it, let's create a new buffer that can
++	 * hold both, and concatenate the existing and the new seeds.
++	 */
++	prev_seed = get_efi_config_table(LINUX_EFI_RANDOM_SEED_TABLE_GUID);
++	if (prev_seed) {
++		prev_seed_size = min(prev_seed->size, EFI_RANDOM_SEED_SIZE);
++		seed_size += prev_seed_size;
++	}
++
+ 	status = efi_bs_call(allocate_pool, EFI_ACPI_RECLAIM_MEMORY,
+-			     sizeof(*seed) + EFI_RANDOM_SEED_SIZE,
++			     struct_size(seed, bits, seed_size),
+ 			     (void **)&seed);
+ 	if (status != EFI_SUCCESS)
+ 		return status;
+@@ -95,14 +107,25 @@ efi_status_t efi_random_get_seed(void)
+ 	if (status != EFI_SUCCESS)
+ 		goto err_freepool;
+ 
+-	seed->size = EFI_RANDOM_SEED_SIZE;
++	seed->size = seed_size;
++	if (prev_seed)
++		memcpy(seed->bits + EFI_RANDOM_SEED_SIZE, prev_seed->bits,
++		       prev_seed_size);
++
+ 	status = efi_bs_call(install_configuration_table, &rng_table_guid, seed);
+ 	if (status != EFI_SUCCESS)
+ 		goto err_freepool;
+ 
++	if (prev_seed) {
++		/* wipe and free the old seed if we managed to install the new one */
++		memzero_explicit(prev_seed->bits, prev_seed_size);
++		efi_bs_call(free_pool, prev_seed);
++	}
+ 	return EFI_SUCCESS;
+ 
+ err_freepool:
++	efi_warn("Failed to obtain seed from EFI_RNG_PROTOCOL%s\n",
++		 prev_seed ? ", retaining bootloader supplied seed only" : "");
+ 	efi_bs_call(free_pool, seed);
+ 	return status;
+ }
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index cf96f8d5f15f..69454a7ccc6f 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1172,8 +1172,6 @@ void efi_check_for_embedded_firmwares(void);
+ static inline void efi_check_for_embedded_firmwares(void) { }
+ #endif
+ 
+-efi_status_t efi_random_get_seed(void);
+-
+ #define arch_efi_call_virt(p, f, args...)	((p)->f(args))
+ 
+ /*
 -- 
 2.35.1
 
