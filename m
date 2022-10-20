@@ -2,99 +2,75 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A274C433FE
-	for <linux-efi@archiver.kernel.org>; Thu, 20 Oct 2022 08:40:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 384F3C4332F
+	for <linux-efi@archiver.kernel.org>; Thu, 20 Oct 2022 09:30:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229978AbiJTIkr (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 20 Oct 2022 04:40:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33338 "EHLO
+        id S229900AbiJTJac (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 20 Oct 2022 05:30:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50474 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230340AbiJTIkn (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 20 Oct 2022 04:40:43 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 542C4FE910;
-        Thu, 20 Oct 2022 01:40:30 -0700 (PDT)
+        with ESMTP id S230132AbiJTJaD (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 20 Oct 2022 05:30:03 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9B9787E015
+        for <linux-efi@vger.kernel.org>; Thu, 20 Oct 2022 02:30:02 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 74DB0B826A1;
-        Thu, 20 Oct 2022 08:40:29 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C78BFC433C1;
-        Thu, 20 Oct 2022 08:40:26 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 37C4F61A78
+        for <linux-efi@vger.kernel.org>; Thu, 20 Oct 2022 09:30:02 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E48DCC433C1;
+        Thu, 20 Oct 2022 09:30:00 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1666255228;
-        bh=+9bMSJ0X4Yjn8yLu6yBGJtoukl8NU5/yiaxkP9nsKi4=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=B36vHDFHBJs6hHEaHMyjxe1wh+DcvDlRFCDQYVuTjgT+acfIGU+saTpvMxdQxlk1T
-         8TlfBvXwLDxX+eGkk3lQjYjuPA23m9L4Jvci00/mdtEsdTJgxktNiL27Cid/EFBJU9
-         0jLMJOtiTlJmiHbR5a2aZ/vJo02P8LQJto6OTbwFCUfY/yR9uSgRj+KRgGXCrTioLW
-         RgTyIjae5oL995mOMIaZYthuMfnybMAFi3/EhmRlOC20Dp9Uz6YlpiNbkcp6waw8oy
-         1wda+VoWOWJ8c435wgvwcqA23zJ9Rs3OgkuC6gJoyVWo+qvGG5lVnhlKMk5W0ukBKg
-         rwn/BHMIFslLg==
+        s=k20201202; t=1666258201;
+        bh=3W9QPW5KF1fQepWi9EgSwfrqMzwaLloYaM+QWD7N5Cs=;
+        h=From:To:Cc:Subject:Date:From;
+        b=rzjjfcApVSKxXNXwQNoCnRplBWkv4heDR/lg+2bz9/xHjulp2rf2GmDloNNaCpjzC
+         bfo3XOsCKN7dOapAcxnK45EgaWOFn+1UGQPm+1bVSQZ3ODg4mE3yl+BdgBRvTyqtnA
+         pNprS0PNnfOpb9bV5Gc59/i7cjMPBa04Tz479bs5o3S/SUj47m0JZrx3YeDcgOXkSL
+         P2KJ3RCD04kqazaYplrUsq68jkbcQxsPdRGYhdbTWSEj+du7l91lemguIwyn+Dy/KK
+         vknsL5YeR5/dLfvgXgQPnS2JXdrfxoSZvFMoSADwlD/ERWD4xoCd0p3HmVV6fehTut
+         mXt1njN13qP6A==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
-Cc:     Ard Biesheuvel <ardb@kernel.org>,
-        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-        "Jason A . Donenfeld" <Jason@zx2c4.com>,
-        Lennart Poettering <lennart@poettering.net>,
-        stable@vger.kernel.org
-Subject: [PATCH v3 1/3] efi: random: reduce seed size to 32 bytes
-Date:   Thu, 20 Oct 2022 10:39:08 +0200
-Message-Id: <20221020083910.1902009-2-ardb@kernel.org>
+Cc:     Ard Biesheuvel <ardb@kernel.org>
+Subject: [PATCH] efi: libstub: Fix incorrect payload size in zboot header
+Date:   Thu, 20 Oct 2022 11:29:55 +0200
+Message-Id: <20221020092955.1919627-1-ardb@kernel.org>
 X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20221020083910.1902009-1-ardb@kernel.org>
-References: <20221020083910.1902009-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1656; i=ardb@kernel.org; h=from:subject; bh=+9bMSJ0X4Yjn8yLu6yBGJtoukl8NU5/yiaxkP9nsKi4=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjUQkqg0qt7nSGhTRI40z0ewqgrZPZ4lMqOdNYP6j8 xnKM1D+JAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCY1EJKgAKCRDDTyI5ktmPJENzC/ 4vYmMEMsuIj+WaTXdML+3JJw2kkRxTAZdg6xm2yFfjuqw+04pJGXHTp40sJQRHHpTbHKxIWKYA8lHF RLeEjRy5s6BQ3V2q1iJ5ttAVEsRJKmLTrzJ1dxk8DDykjW29NCDc6lDoh4Ag9JPcGIrcXc3eKrYa7A E8NnH2s3shVFZjcmPFTbYgDEj/t6IZ+tIKwknt6w2RDodnf4Vv2eyf3qfxvIkMx2aJpOp7RFM2NIlD ypGnTf38d5gXVaMtpoolIP1GFLmOUcr5UNpJ2TlmmxRxUK3qK9UKYcmt8+ZRGXgA+74MxYMCY6JmsV V4qs1FKHDN/FQRw/fCyCiZSVlMua8XxMRW7CE5RaP13ioodvUINDH/uShZGJCfMHw/TFSPEVRWfkKk 8z2Jt/b3e1d4E2kiQv/gK8aBLovalQaoJlt46n/ZmfGxrUZqKgLYJP9pa40rmZbQkgCkQ4LhXH/RJj ZaUY5yWXP2oq48UTTtNXeznwWaddk5l44tJHF5TVEnOHA=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1052; i=ardb@kernel.org; h=from:subject; bh=3W9QPW5KF1fQepWi9EgSwfrqMzwaLloYaM+QWD7N5Cs=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjURUSPNEB0DXFPpeY1n2zpqHnvxLx54L1KUZU5NiV 9+kX2UWJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCY1EVEgAKCRDDTyI5ktmPJKGnC/ 4qxoI7yazlNr3knGK6vc2v59yGphQ1xC60DbYUjrxVei+iesgIg9EtFEuM7BStgCLuMpW47wc4DIjc u6v9ri8zozaiHg4qT9Tz0VqAobe3Mt52Ik0GnfyYuzKop5ullYdquFZ5Culz4nknmlt9A+d9nzaU7H YEs5gPKezA0fsX+oQA9G2DXPWCPq+99mL3/LVlzkwzqPxBPCJwospUt1AbdvKKCUnmS7wYw4yRrQCF JuLA9Rd/+gTIMC8Wb1w10WRvPtwvJQXepvegrbSzjnyjwZgtdfQAZjAc2gT5Z4/+YBsAjZN8gXu4cp EN+VYuzyuFHaMQf/lcPXPtZul4tJxmCXc9QX9iciM2It7qdmORSgDXGG/BrZantqUFdOgqDk7fYD9u 1/8TbqGtjCYkyAbCQcObBxFe+CBVzAEWhqRMWdtHmbr5hQdt/N85uFX1wDysEs/kfH+a8SFPuMHrUe FVnvANa4kH+pymeWs72dUbO6OdwMEOf4mtPYH4sTD3/A0=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-We no longer need at least 64 bytes of random seed to permit the early
-crng init to complete. The RNG is now based on Blake2s, so reduce the
-EFI seed size to the Blake2s hash size, which is sufficient for our
-purposes.
+The linker script symbol definition that captures the size of the
+compressed payload inside the zboot decompressor (which is exposed via
+the image header) refers to '.' for the end of the region, which does
+not give the correct result as the expression is not placed at the end
+of the payload. So use the symbol name explicitly.
 
-While at it, drop the READ_ONCE(), which was supposed to prevent size
-from being evaluated after seed was unmapped. However, this cannot
-actually happen, so READ_ONCE() is unnecessary here.
-
-Cc: <stable@vger.kernel.org> # v4.14+
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
-Reviewed-by: Jason A. Donenfeld <Jason@zx2c4.com>
 ---
- drivers/firmware/efi/efi.c | 2 +-
- include/linux/efi.h        | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+ drivers/firmware/efi/libstub/zboot.lds | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 9624735f1575..a949509de62f 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -609,7 +609,7 @@ int __init efi_config_parse_tables(const efi_config_table_t *config_tables,
+diff --git a/drivers/firmware/efi/libstub/zboot.lds b/drivers/firmware/efi/libstub/zboot.lds
+index 87a62765bafd..93d33f68333b 100644
+--- a/drivers/firmware/efi/libstub/zboot.lds
++++ b/drivers/firmware/efi/libstub/zboot.lds
+@@ -38,7 +38,8 @@ SECTIONS
+ 	}
+ }
  
- 		seed = early_memremap(efi_rng_seed, sizeof(*seed));
- 		if (seed != NULL) {
--			size = READ_ONCE(seed->size);
-+			size = min(seed->size, EFI_RANDOM_SEED_SIZE);
- 			early_memunmap(seed, sizeof(*seed));
- 		} else {
- 			pr_err("Could not map UEFI random seed!\n");
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index da3974bf05d3..cf96f8d5f15f 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1225,7 +1225,7 @@ efi_status_t efi_random_get_seed(void);
- 	arch_efi_call_virt_teardown();					\
- })
+-PROVIDE(__efistub__gzdata_size = ABSOLUTE(. - __efistub__gzdata_start));
++PROVIDE(__efistub__gzdata_size =
++		ABSOLUTE(__efistub__gzdata_end - __efistub__gzdata_start));
  
--#define EFI_RANDOM_SEED_SIZE		64U
-+#define EFI_RANDOM_SEED_SIZE		32U // BLAKE2S_HASH_SIZE
- 
- struct linux_efi_random_seed {
- 	u32	size;
+ PROVIDE(__data_rawsize = ABSOLUTE(_edata - _etext));
+ PROVIDE(__data_size = ABSOLUTE(_end - _etext));
 -- 
 2.35.1
 
