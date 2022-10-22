@@ -2,36 +2,36 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 25545C04A95
-	for <linux-efi@archiver.kernel.org>; Sat, 22 Oct 2022 10:26:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E3654C04A95
+	for <linux-efi@archiver.kernel.org>; Sat, 22 Oct 2022 10:44:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230332AbiJVK0J (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 22 Oct 2022 06:26:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34214 "EHLO
+        id S230372AbiJVKoe (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 22 Oct 2022 06:44:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46834 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229987AbiJVKZg (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sat, 22 Oct 2022 06:25:36 -0400
+        with ESMTP id S231178AbiJVKoQ (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 22 Oct 2022 06:44:16 -0400
 Received: from mail.skyhub.de (mail.skyhub.de [IPv6:2a01:4f8:190:11c2::b:1457])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EB91530A0C3;
-        Sat, 22 Oct 2022 02:41:14 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DA96631BF6E;
+        Sat, 22 Oct 2022 03:01:54 -0700 (PDT)
 Received: from zn.tnic (p200300ea9733e714329c23fffea6a903.dip0.t-ipconnect.de [IPv6:2003:ea:9733:e714:329c:23ff:fea6:a903])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id D2ED81EC081C;
-        Sat, 22 Oct 2022 10:43:55 +0200 (CEST)
+        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id 752A21EC0629;
+        Sat, 22 Oct 2022 12:00:36 +0200 (CEST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alien8.de; s=dkim;
-        t=1666428235;
+        t=1666432836;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:in-reply-to:in-reply-to:  references:references;
-        bh=LAAUutkMNwRJvSBRF7vXejNpYFemGCHXaPI20oOLK6A=;
-        b=Eh7nlzGA8kY5yyMI6zaYUPf6irbjDwP+32esWnYNvsyLyabGUl9Fiwk10vvskGV2GqK8M1
-        Tnj4H0l0KFO3HYYqYvbDj20M/1soB4FM4lYI3eyfZE++okvEPWgMWRd9KssoyXDJu/f+av
-        HWk6Zt/Yb4DM/hsbUpH6fuZlwZrqzps=
-Date:   Sat, 22 Oct 2022 10:43:50 +0200
+        bh=8JIbHKcJJ+kMxdbJLrXmFhUHK09tqfA4e7vxfuzOL3s=;
+        b=BJfz4jtTpZ9Fd4zl2nfhPjfuGwymwBFYWxmyqQiqR59npXdqgP1XxhKZEyqsL4qQcdMFod
+        sxt+i/g3gZQBqiqetv9wP6LHjSdq5L6WGr9BGq6iHeq78+eSG1fIN+cgPL6x3AowP1L5Xa
+        K54bH9dY+mAb/8fZoipOD5o+lL0angc=
+Date:   Sat, 22 Oct 2022 12:00:32 +0200
 From:   Borislav Petkov <bp@alien8.de>
-To:     Jia He <justin.he@arm.com>
-Cc:     Ard Biesheuvel <ardb@kernel.org>, Len Brown <lenb@kernel.org>,
+To:     Ard Biesheuvel <ardb@kernel.org>
+Cc:     Jia He <justin.he@arm.com>, Len Brown <lenb@kernel.org>,
         Tony Luck <tony.luck@intel.com>,
         Mauro Carvalho Chehab <mchehab@kernel.org>,
         Robert Richter <rric@kernel.org>,
@@ -49,60 +49,51 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>, Len Brown <lenb@kernel.org>,
         nd@arm.com, Peter Zijlstra <peterz@infradead.org>
 Subject: Re: [PATCH v10 6/7] apei/ghes: Use xchg_release() for updating new
  cache slot instead of cmpxchg()
-Message-ID: <Y1OtRpLRwPPG/4Il@zn.tnic>
+Message-ID: <Y1O/QN32d2AlzEiA@zn.tnic>
 References: <20221018082214.569504-1-justin.he@arm.com>
  <20221018082214.569504-7-justin.he@arm.com>
+ <Y1OtRpLRwPPG/4Il@zn.tnic>
+ <CAMj1kXFu36faTPoGSGPs9KhcKsoh_DE9X2rmwdenxaJwa3P_yw@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20221018082214.569504-7-justin.he@arm.com>
+In-Reply-To: <CAMj1kXFu36faTPoGSGPs9KhcKsoh_DE9X2rmwdenxaJwa3P_yw@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, Oct 18, 2022 at 08:22:13AM +0000, Jia He wrote:
-> From: Ard Biesheuvel <ardb@kernel.org>
-> 
-> From: Ard Biesheuvel <ardb@kernel.org>
-> 
-> ghes_estatus_cache_add() selects a slot, and either succeeds in
-> replacing its contents with a pointer to a new cached item, or it just
-> gives up and frees the new item again, without attempting to select
-> another slot even if one might be available.
-> 
-> Since only inserting new items is needed, the race can only cause a failure
-> if the selected slot was updated with another new item concurrently,
-> which means that it is arbitrary which of those two items gets
-> dropped. This means the cmpxchg() and the special case are not necessary,
+On Sat, Oct 22, 2022 at 11:01:01AM +0200, Ard Biesheuvel wrote:
+> But the point is that the new element we are adding has the same
+> properties as the one we want to avoid replacing inadvertently,
 
-Hmm, are you sure about this?
+No, we're removing the oldest element we found. The new one is anything
+but we don't compare it to slot_cache which we're about to remove.
 
-Looking at this complex code, I *think* the intent of the cache is to
-collect already reported errors - the ghes_estatus_cached() checks - and
-the adding happens when you report a new one:
+> and if the cmpxchg() failed, we just drop it on the floor.
 
-        if (!ghes_estatus_cached(estatus)) {
-                if (ghes_print_estatus(NULL, ghes->generic, estatus))
-                        ghes_estatus_cache_add(ghes->generic, estatus);
+Yeah, I guess the intent here was: oh well, we'll log that thing again
+because our "throttling cache" didn't manage to enter it.
 
-Now, the loop in ghes_estatus_cache_add() is trying to pick out the,
-well, oldest element in there. Meaning, something which got reported
-already but a long while ago. There's even a sentence trying to say what
-this does:
+> So instead of dropping 'our' new element, we now drop 'the other' new
+> element.
 
-/*
- * GHES error status reporting throttle, to report more kinds of
- * errors, instead of just most frequently occurred errors.
- */
+Aha, this is what you mean with logging something twice. That other new
+element gets dropped so if it happens again, it'll get logged and if it
+then gets entered in the cache properly, then it gets ignored on the
+next logging run.
 
-And the cmpxchg() is there to make sure when that selected element
-slot_cache is removed, it really *is* that element that gets removed and
-not one which replaced it in the meantime.
+Oh well, fine with me.
 
-So it is likely I'm missing something here but it sure looks like this
-is some sort of a complex, lockless, LRU scheme...
+> The correct approach here would be to rerun the selection loop on
+> failure, but I doubt whether it is worth it. This is just a fancy rate
+> limiter.
 
-Hmmm.
+Yap, exactly.
+
+Ok, so I'll try to summarize what we talked here in the commit message
+so that it is written down somewhere for later.
+
+Thx.
 
 -- 
 Regards/Gruss,
