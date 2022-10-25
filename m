@@ -2,29 +2,29 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E4CBFA3742
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 34DCCFA3743
 	for <linux-efi@archiver.kernel.org>; Tue, 25 Oct 2022 14:13:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233081AbiJYONu (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 25 Oct 2022 10:13:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46200 "EHLO
+        id S233080AbiJYONt (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 25 Oct 2022 10:13:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46156 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233032AbiJYONp (ORCPT
+        with ESMTP id S233015AbiJYONp (ORCPT
         <rfc822;linux-efi@vger.kernel.org>); Tue, 25 Oct 2022 10:13:45 -0400
 Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6C713A9248;
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E54CCAA363;
         Tue, 25 Oct 2022 07:13:33 -0700 (PDT)
 Received: from localhost.localdomain (unknown [83.149.199.65])
-        by mail.ispras.ru (Postfix) with ESMTPSA id C443A419E9F4;
-        Tue, 25 Oct 2022 14:13:31 +0000 (UTC)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru C443A419E9F4
+        by mail.ispras.ru (Postfix) with ESMTPSA id 63828419E9FB;
+        Tue, 25 Oct 2022 14:13:32 +0000 (UTC)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 63828419E9FB
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ispras.ru;
-        s=default; t=1666707211;
-        bh=HCDH+Dyxwl2opOER2fj3tRFR/GK0Aa8tACTpFrJgl+Q=;
+        s=default; t=1666707212;
+        bh=TgF/dEc5rFCa2gaH9d/TLmtWto+OhrZYHWLxPeQxdHE=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=OKoHvzwuR98etIuMypvPEgFzcM05e5/0d1I27QjhTO6kkF+DNCORc1o13E2S+ztoQ
-         Y/TjcUYWzRwE8pkeXCjpZR4t7dVAUr/GNvIO6j4BXV/l8I/sXMv1j5yA+QInZPYhKs
-         WARPhKiuekr3ZZMZRg28iWjiaZXj9NovlPI5xlhU=
+        b=fHk7VFkc1CLIdnc+EEDmhy048E+NlY4CpHHcT9ME3mgQRPbcpze9f9aeJvW3trJcV
+         0n/2ohG5wzmfLHTHZ48tRsi+P7mMYS7Px4iukC0Alng/PnWNLTjNyGPYpIfVaN0h+O
+         Q1gfKnVu6XaqBqcqyRADuhd5++8qXXvEd8NLMxPo=
 From:   Evgeniy Baskov <baskov@ispras.ru>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
@@ -37,9 +37,9 @@ Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
         Peter Jones <pjones@redhat.com>, lvc-project@linuxtesting.org,
         x86@kernel.org, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org
-Subject: [PATCH v2 05/23] x86/boot: Support 4KB pages for identity mapping
-Date:   Tue, 25 Oct 2022 17:12:43 +0300
-Message-Id: <383998a1c7fca8ba0481cf15ead0c0408b887a48.1666705333.git.baskov@ispras.ru>
+Subject: [PATCH v2 08/23] x86/boot: Map memory explicitly
+Date:   Tue, 25 Oct 2022 17:12:46 +0300
+Message-Id: <2f973ac2ec6f2e661dc9c5965103ee7769632449.1666705333.git.baskov@ispras.ru>
 X-Mailer: git-send-email 2.37.4
 In-Reply-To: <cover.1666705333.git.baskov@ispras.ru>
 References: <cover.1666705333.git.baskov@ispras.ru>
@@ -49,306 +49,156 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Current identity mapping code only supports 2M and 1G pages.
-4KB pages are desirable for better memory protection granularity
-in compressed kernel code.
+Implicit mappings hide possible memory errors, e.g. allocations for
+ACPI tables were not included in boot page table size.
 
-Change identity mapping code to support 4KB pages and
-memory remapping with different attributes.
+Replace all implicit mappings from page fault handler with
+explicit mappings.
 
 Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
 ---
- arch/x86/include/asm/init.h |   1 +
- arch/x86/mm/ident_map.c     | 185 +++++++++++++++++++++++++++++-------
- 2 files changed, 154 insertions(+), 32 deletions(-)
+ arch/x86/boot/compressed/acpi.c  | 21 ++++++++++++++++++++-
+ arch/x86/boot/compressed/efi.c   | 19 ++++++++++++++++++-
+ arch/x86/boot/compressed/kaslr.c |  4 ++++
+ 3 files changed, 42 insertions(+), 2 deletions(-)
 
-diff --git a/arch/x86/include/asm/init.h b/arch/x86/include/asm/init.h
-index 5f1d3c421f68..a8277ee82c51 100644
---- a/arch/x86/include/asm/init.h
-+++ b/arch/x86/include/asm/init.h
-@@ -8,6 +8,7 @@ struct x86_mapping_info {
- 	unsigned long page_flag;	 /* page flag for PMD or PUD entry */
- 	unsigned long offset;		 /* ident mapping offset */
- 	bool direct_gbpages;		 /* PUD level 1GB page support */
-+	bool allow_4kpages;		 /* Allow more granular mappings with 4K pages */
- 	unsigned long kernpg_flag;	 /* kernel pagetable flag override */
- };
+diff --git a/arch/x86/boot/compressed/acpi.c b/arch/x86/boot/compressed/acpi.c
+index 9caf89063e77..633ac56262ee 100644
+--- a/arch/x86/boot/compressed/acpi.c
++++ b/arch/x86/boot/compressed/acpi.c
+@@ -93,6 +93,8 @@ static u8 *scan_mem_for_rsdp(u8 *start, u32 length)
  
-diff --git a/arch/x86/mm/ident_map.c b/arch/x86/mm/ident_map.c
-index 968d7005f4a7..662e794a325d 100644
---- a/arch/x86/mm/ident_map.c
-+++ b/arch/x86/mm/ident_map.c
-@@ -4,24 +4,127 @@
-  * included by both the compressed kernel and the regular kernel.
+ 	end = start + length;
+ 
++	kernel_add_identity_map((unsigned long)start, (unsigned long)end, 0);
++
+ 	/* Search from given start address for the requested length */
+ 	for (address = start; address < end; address += ACPI_RSDP_SCAN_STEP) {
+ 		/*
+@@ -128,6 +130,9 @@ static acpi_physical_address bios_get_rsdp_addr(void)
+ 	unsigned long address;
+ 	u8 *rsdp;
+ 
++	kernel_add_identity_map((unsigned long)ACPI_EBDA_PTR_LOCATION,
++				(unsigned long)ACPI_EBDA_PTR_LOCATION + 2, 0);
++
+ 	/* Get the location of the Extended BIOS Data Area (EBDA) */
+ 	address = *(u16 *)ACPI_EBDA_PTR_LOCATION;
+ 	address <<= 4;
+@@ -215,6 +220,9 @@ static unsigned long get_acpi_srat_table(void)
+ 	if (!rsdp)
+ 		return 0;
+ 
++	kernel_add_identity_map((unsigned long)rsdp,
++				(unsigned long)(rsdp + 1), 0);
++
+ 	/* Get ACPI root table from RSDP.*/
+ 	if (!(cmdline_find_option("acpi", arg, sizeof(arg)) == 4 &&
+ 	    !strncmp(arg, "rsdt", 4)) &&
+@@ -235,6 +243,9 @@ static unsigned long get_acpi_srat_table(void)
+ 	if (len < sizeof(struct acpi_table_header) + size)
+ 		return 0;
+ 
++	kernel_add_identity_map((unsigned long)header,
++				(unsigned long)header + len, 0);
++
+ 	num_entries = (len - sizeof(struct acpi_table_header)) / size;
+ 	entry = (u8 *)(root_table + sizeof(struct acpi_table_header));
+ 
+@@ -247,8 +258,16 @@ static unsigned long get_acpi_srat_table(void)
+ 		if (acpi_table) {
+ 			header = (struct acpi_table_header *)acpi_table;
+ 
+-			if (ACPI_COMPARE_NAMESEG(header->signature, ACPI_SIG_SRAT))
++			kernel_add_identity_map(acpi_table,
++						acpi_table + sizeof(*header),
++						0);
++
++			if (ACPI_COMPARE_NAMESEG(header->signature, ACPI_SIG_SRAT)) {
++				kernel_add_identity_map(acpi_table,
++							acpi_table + header->length,
++							0);
+ 				return acpi_table;
++			}
+ 		}
+ 		entry += size;
+ 	}
+diff --git a/arch/x86/boot/compressed/efi.c b/arch/x86/boot/compressed/efi.c
+index 6edd034b0b30..ce70103fbbc0 100644
+--- a/arch/x86/boot/compressed/efi.c
++++ b/arch/x86/boot/compressed/efi.c
+@@ -57,10 +57,14 @@ enum efi_type efi_get_type(struct boot_params *bp)
   */
- 
--static void ident_pmd_init(struct x86_mapping_info *info, pmd_t *pmd_page,
--			   unsigned long addr, unsigned long end)
-+static void ident_pte_init(struct x86_mapping_info *info, pte_t *pte_page,
-+			   unsigned long addr, unsigned long end,
-+			   unsigned long flags)
+ unsigned long efi_get_system_table(struct boot_params *bp)
  {
--	addr &= PMD_MASK;
--	for (; addr < end; addr += PMD_SIZE) {
-+	addr &= PAGE_MASK;
-+	for (; addr < end; addr += PAGE_SIZE) {
-+		pte_t *pte = pte_page + pte_index(addr);
-+
-+		set_pte(pte, __pte((addr - info->offset) | flags));
-+	}
-+}
-+
-+pte_t *ident_split_large_pmd(struct x86_mapping_info *info,
-+			     pmd_t *pmdp, unsigned long page_addr)
-+{
-+	unsigned long pmd_addr, page_flags;
-+	pte_t *pte;
-+
-+	pte = (pte_t *)info->alloc_pgt_page(info->context);
-+	if (!pte)
-+		return NULL;
-+
-+	pmd_addr = page_addr & PMD_MASK;
-+
-+	/* Not a large page - clear PSE flag */
-+	page_flags = pmd_flags(*pmdp) & ~_PSE;
-+	ident_pte_init(info, pte, pmd_addr, pmd_addr + PMD_SIZE, page_flags);
-+
-+	return pte;
-+}
-+
-+static int ident_pmd_init(struct x86_mapping_info *info, pmd_t *pmd_page,
-+			  unsigned long addr, unsigned long end,
-+			  unsigned long flags)
-+{
-+	unsigned long next;
-+	bool new_table = 0;
-+
-+	for (; addr < end; addr = next) {
- 		pmd_t *pmd = pmd_page + pmd_index(addr);
-+		pte_t *pte;
+-	unsigned long sys_tbl_pa;
++	static unsigned long sys_tbl_pa __section(".data");
+ 	struct efi_info *ei;
++	unsigned long sys_tbl_size;
+ 	enum efi_type et;
  
--		if (pmd_present(*pmd))
-+		next = (addr & PMD_MASK) + PMD_SIZE;
-+		if (next > end)
-+			next = end;
++	if (sys_tbl_pa)
++		return sys_tbl_pa;
 +
-+		/*
-+		 * Use 2M pages if 4k pages are not allowed or
-+		 * we are not mapping extra, i.e. address and size are aligned.
-+		 */
-+
-+		if (!info->allow_4kpages ||
-+		    (!(addr & ~PMD_MASK) && next == addr + PMD_SIZE)) {
-+
-+			pmd_t pmdval;
-+
-+			addr &= PMD_MASK;
-+			pmdval = __pmd((addr - info->offset) | flags | _PSE);
-+			set_pmd(pmd, pmdval);
- 			continue;
-+		}
-+
-+		/*
-+		 * If currently mapped page is large, we need to split it.
-+		 * The case when we don't can remap 2M page to 2M page
-+		 * with different flags is already covered above.
-+		 *
-+		 * If there's nothing mapped to desired address,
-+		 * we need to allocate new page table.
-+		 */
- 
--		set_pmd(pmd, __pmd((addr - info->offset) | info->page_flag));
-+		if (pmd_large(*pmd)) {
-+			pte = ident_split_large_pmd(info, pmd, addr);
-+			new_table = 1;
-+		} else if (!pmd_present(*pmd)) {
-+			pte = (pte_t *)info->alloc_pgt_page(info->context);
-+			new_table = 1;
-+		} else {
-+			pte = pte_offset_kernel(pmd, 0);
-+			new_table = 0;
-+		}
-+
-+		if (!pte)
-+			return -ENOMEM;
-+
-+		ident_pte_init(info, pte, addr, next, flags);
-+
-+		if (new_table)
-+			set_pmd(pmd, __pmd(__pa(pte) | info->kernpg_flag));
+ 	/* Get systab from boot params. */
+ 	ei = &bp->efi_info;
+ #ifdef CONFIG_X86_64
+@@ -73,6 +77,13 @@ unsigned long efi_get_system_table(struct boot_params *bp)
+ 		return 0;
  	}
+ 
++	if (efi_get_type(bp) == EFI_TYPE_64)
++		sys_tbl_size = sizeof(efi_system_table_64_t);
++	else
++		sys_tbl_size = sizeof(efi_system_table_32_t);
 +
-+	return 0;
++	kernel_add_identity_map(sys_tbl_pa, sys_tbl_pa + sys_tbl_size, 0);
++
+ 	return sys_tbl_pa;
  }
  
-+
-+pmd_t *ident_split_large_pud(struct x86_mapping_info *info,
-+			     pud_t *pudp, unsigned long page_addr)
-+{
-+	unsigned long pud_addr, page_flags;
-+	pmd_t *pmd;
-+
-+	pmd = (pmd_t *)info->alloc_pgt_page(info->context);
-+	if (!pmd)
-+		return NULL;
-+
-+	pud_addr = page_addr & PUD_MASK;
-+
-+	/* Not a large page - clear PSE flag */
-+	page_flags = pud_flags(*pudp) & ~_PSE;
-+	ident_pmd_init(info, pmd, pud_addr, pud_addr + PUD_SIZE, page_flags);
-+
-+	return pmd;
-+}
-+
-+
- static int ident_pud_init(struct x86_mapping_info *info, pud_t *pud_page,
- 			  unsigned long addr, unsigned long end)
- {
- 	unsigned long next;
-+	bool new_table = 0;
-+	int result;
+@@ -92,6 +103,10 @@ static struct efi_setup_data *get_kexec_setup_data(struct boot_params *bp,
  
- 	for (; addr < end; addr = next) {
- 		pud_t *pud = pud_page + pud_index(addr);
-@@ -31,28 +134,39 @@ static int ident_pud_init(struct x86_mapping_info *info, pud_t *pud_page,
- 		if (next > end)
- 			next = end;
- 
-+		/* Use 1G pages only if forced, even if they are supported. */
- 		if (info->direct_gbpages) {
- 			pud_t pudval;
--
--			if (pud_present(*pud))
--				continue;
-+			unsigned long flags;
- 
- 			addr &= PUD_MASK;
--			pudval = __pud((addr - info->offset) | info->page_flag);
-+			flags = info->page_flag | _PSE;
-+			pudval = __pud((addr - info->offset) | flags);
+ 	pa_data = bp->hdr.setup_data;
+ 	while (pa_data) {
++		unsigned long pa_data_end = pa_data + sizeof(struct setup_data)
++					  + sizeof(struct efi_setup_data);
++		kernel_add_identity_map(pa_data, pa_data_end, 0);
 +
- 			set_pud(pud, pudval);
- 			continue;
- 		}
- 
--		if (pud_present(*pud)) {
-+		if (pud_large(*pud)) {
-+			pmd = ident_split_large_pud(info, pud, addr);
-+			new_table = 1;
-+		} else if (!pud_present(*pud)) {
-+			pmd = (pmd_t *)info->alloc_pgt_page(info->context);
-+			new_table = 1;
-+		} else {
- 			pmd = pmd_offset(pud, 0);
--			ident_pmd_init(info, pmd, addr, next);
--			continue;
-+			new_table = 0;
- 		}
--		pmd = (pmd_t *)info->alloc_pgt_page(info->context);
-+
- 		if (!pmd)
- 			return -ENOMEM;
--		ident_pmd_init(info, pmd, addr, next);
--		set_pud(pud, __pud(__pa(pmd) | info->kernpg_flag));
-+
-+		result = ident_pmd_init(info, pmd, addr, next, info->page_flag);
-+		if (result)
-+			return result;
-+
-+		if (new_table)
-+			set_pud(pud, __pud(__pa(pmd) | info->kernpg_flag));
+ 		data = (struct setup_data *)pa_data;
+ 		if (data->type == SETUP_EFI) {
+ 			esd = (struct efi_setup_data *)(pa_data + sizeof(struct setup_data));
+@@ -160,6 +175,8 @@ int efi_get_conf_table(struct boot_params *bp, unsigned long *cfg_tbl_pa,
+ 		return -EINVAL;
  	}
  
- 	return 0;
-@@ -63,6 +177,7 @@ static int ident_p4d_init(struct x86_mapping_info *info, p4d_t *p4d_page,
- {
- 	unsigned long next;
- 	int result;
-+	bool new_table = 0;
- 
- 	for (; addr < end; addr = next) {
- 		p4d_t *p4d = p4d_page + p4d_index(addr);
-@@ -72,15 +187,14 @@ static int ident_p4d_init(struct x86_mapping_info *info, p4d_t *p4d_page,
- 		if (next > end)
- 			next = end;
- 
--		if (p4d_present(*p4d)) {
-+		if (!p4d_present(*p4d)) {
-+			pud = (pud_t *)info->alloc_pgt_page(info->context);
-+			new_table = 1;
-+		} else {
- 			pud = pud_offset(p4d, 0);
--			result = ident_pud_init(info, pud, addr, next);
--			if (result)
--				return result;
--
--			continue;
-+			new_table = 0;
- 		}
--		pud = (pud_t *)info->alloc_pgt_page(info->context);
++	kernel_add_identity_map(*cfg_tbl_pa, *cfg_tbl_pa + *cfg_tbl_len, 0);
 +
- 		if (!pud)
- 			return -ENOMEM;
- 
-@@ -88,19 +202,22 @@ static int ident_p4d_init(struct x86_mapping_info *info, p4d_t *p4d_page,
- 		if (result)
- 			return result;
- 
--		set_p4d(p4d, __p4d(__pa(pud) | info->kernpg_flag));
-+		if (new_table)
-+			set_p4d(p4d, __p4d(__pa(pud) | info->kernpg_flag));
- 	}
- 
  	return 0;
  }
  
--int kernel_ident_mapping_init(struct x86_mapping_info *info, pgd_t *pgd_page,
--			      unsigned long pstart, unsigned long pend)
-+int kernel_ident_mapping_init(struct x86_mapping_info *info,
-+			      pgd_t *pgd_page, unsigned long pstart,
-+			      unsigned long pend)
- {
- 	unsigned long addr = pstart + info->offset;
- 	unsigned long end = pend + info->offset;
- 	unsigned long next;
- 	int result;
-+	bool new_table;
+diff --git a/arch/x86/boot/compressed/kaslr.c b/arch/x86/boot/compressed/kaslr.c
+index e476bcbd9b42..7e09d65f7b57 100644
+--- a/arch/x86/boot/compressed/kaslr.c
++++ b/arch/x86/boot/compressed/kaslr.c
+@@ -688,6 +688,8 @@ process_efi_entries(unsigned long minimum, unsigned long image_size)
+ 	u32 nr_desc;
+ 	int i;
  
- 	/* Set the default pagetable flags if not supplied */
- 	if (!info->kernpg_flag)
-@@ -117,20 +234,24 @@ int kernel_ident_mapping_init(struct x86_mapping_info *info, pgd_t *pgd_page,
- 		if (next > end)
- 			next = end;
++	kernel_add_identity_map((unsigned long)e, (unsigned long)(e + 1), 0);
++
+ 	signature = (char *)&e->efi_loader_signature;
+ 	if (strncmp(signature, EFI32_LOADER_SIGNATURE, 4) &&
+ 	    strncmp(signature, EFI64_LOADER_SIGNATURE, 4))
+@@ -704,6 +706,8 @@ process_efi_entries(unsigned long minimum, unsigned long image_size)
+ 	pmap = (e->efi_memmap | ((__u64)e->efi_memmap_hi << 32));
+ #endif
  
--		if (pgd_present(*pgd)) {
-+		if (!pgd_present(*pgd)) {
-+			p4d = (p4d_t *)info->alloc_pgt_page(info->context);
-+			new_table = 1;
-+		} else {
- 			p4d = p4d_offset(pgd, 0);
--			result = ident_p4d_init(info, p4d, addr, next);
--			if (result)
--				return result;
--			continue;
-+			new_table = 0;
- 		}
- 
--		p4d = (p4d_t *)info->alloc_pgt_page(info->context);
- 		if (!p4d)
- 			return -ENOMEM;
++	kernel_add_identity_map(pmap, pmap + e->efi_memmap_size, 0);
 +
- 		result = ident_p4d_init(info, p4d, addr, next);
- 		if (result)
- 			return result;
-+
-+		if (!new_table)
-+			continue;
-+
- 		if (pgtable_l5_enabled()) {
- 			set_pgd(pgd, __pgd(__pa(p4d) | info->kernpg_flag));
- 		} else {
+ 	nr_desc = e->efi_memmap_size / e->efi_memdesc_size;
+ 	for (i = 0; i < nr_desc; i++) {
+ 		md = efi_early_memdesc_ptr(pmap, e->efi_memdesc_size, i);
 -- 
 2.37.4
 
