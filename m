@@ -2,29 +2,29 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A7490C38A2D
-	for <linux-efi@archiver.kernel.org>; Tue, 25 Oct 2022 14:14:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1766AC04A95
+	for <linux-efi@archiver.kernel.org>; Tue, 25 Oct 2022 14:15:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233043AbiJYOOY (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 25 Oct 2022 10:14:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46230 "EHLO
+        id S233171AbiJYOPJ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 25 Oct 2022 10:15:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46788 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232978AbiJYONu (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 25 Oct 2022 10:13:50 -0400
+        with ESMTP id S233133AbiJYOOW (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 25 Oct 2022 10:14:22 -0400
 Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 64423A3A98;
-        Tue, 25 Oct 2022 07:13:49 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BDC95B14F4;
+        Tue, 25 Oct 2022 07:14:21 -0700 (PDT)
 Received: from localhost.localdomain (unknown [83.149.199.65])
-        by mail.ispras.ru (Postfix) with ESMTPSA id D439340737A1;
-        Tue, 25 Oct 2022 14:13:47 +0000 (UTC)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru D439340737A1
+        by mail.ispras.ru (Postfix) with ESMTPSA id 2F52D40737BC;
+        Tue, 25 Oct 2022 14:14:20 +0000 (UTC)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 2F52D40737BC
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ispras.ru;
-        s=default; t=1666707227;
-        bh=EwGUAT+V+D/fvt7ukarce/X9DVxbqrCy0Vh2rp1s7+o=;
+        s=default; t=1666707260;
+        bh=IPQq2DUkqvsePNeMmcO13zCtRaNzLNzLzqZArfZzb4I=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=AVqWWoXZI9tBYsQ1lkC5/lEq7XnwOexMTfKDrNHL1M/ZC+on1RfeFA7tv+ivI/1Qo
-         eEOlnvVGLge1fCmbJEk9UYgrYLqOvD7Xdg+W+c0KhlASU5I7eQ8O5DsdsZ2ZpZyX9w
-         V+i3ag0LEcvC/Fr8qcFi5yOroDGOpFJ1P4ab/NwI=
+        b=sFbQd/6JEhEySWp3agtsqOQbk7vueRFcbOkkchDsC0kBV/iaWjiSLSOkFQXYreNgX
+         6iNASS1kdM9WHP1asr4DURYn5aZrpHSftjWk2mcZiBNblqsKk8JgIiuNB1h8uiX+j1
+         K50cozUr/nZTEahpCPSaFFs+0LDvF3OWVNi6jXfQ=
 From:   Evgeniy Baskov <baskov@ispras.ru>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
@@ -37,9 +37,9 @@ Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
         Peter Jones <pjones@redhat.com>, lvc-project@linuxtesting.org,
         x86@kernel.org, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org
-Subject: [PATCH v2 10/23] efi/libstub: Move helper function to related file
-Date:   Tue, 25 Oct 2022 17:12:48 +0300
-Message-Id: <70dd035f58199cb933526303792ef238080a235c.1666705333.git.baskov@ispras.ru>
+Subject: [PATCH v2 21/23] efi/x86: Explicitly set sections memory attributes
+Date:   Tue, 25 Oct 2022 17:12:59 +0300
+Message-Id: <d1e825c2210767d6dd251a3dfb16d39ba22117c8.1666705333.git.baskov@ispras.ru>
 X-Mailer: git-send-email 2.37.4
 In-Reply-To: <cover.1666705333.git.baskov@ispras.ru>
 References: <cover.1666705333.git.baskov@ispras.ru>
@@ -49,241 +49,98 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-efi_adjust_memory_range_protection() can be useful outside x86-stub.c.
-
-Move it to mem.c, where memory related code resides and make it
-non-static.
-
-Change its behavior to setup exact attributes and disallow making
-memory regions readable and writable simultaneously for supported
-configurations.
+Explicitly change sections memory attributes in efi_pe_entry in case
+of incorrect EFI implementations and to reduce access rights to
+compressed kernel blob. By default it is set executable due to
+restriction in maximum number of sections that can fit before zero
+page.
 
 Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
 ---
- drivers/firmware/efi/libstub/efistub.h  |   4 +
- drivers/firmware/efi/libstub/mem.c      | 102 ++++++++++++++++++++++++
- drivers/firmware/efi/libstub/x86-stub.c |  66 ++-------------
- 3 files changed, 112 insertions(+), 60 deletions(-)
+ drivers/firmware/efi/libstub/x86-stub.c | 56 +++++++++++++++++++++++++
+ 1 file changed, 56 insertions(+)
 
-diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-index a30fb5d8ef05..63f5157341fe 100644
---- a/drivers/firmware/efi/libstub/efistub.h
-+++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -917,6 +917,10 @@ efi_status_t efi_relocate_kernel(unsigned long *image_addr,
- 				 unsigned long alignment,
- 				 unsigned long min_addr);
- 
-+efi_status_t efi_adjust_memory_range_protection(unsigned long start,
-+						unsigned long size,
-+						unsigned long attributes);
-+
- efi_status_t efi_parse_options(char const *cmdline);
- 
- void efi_parse_option_graphics(char *option);
-diff --git a/drivers/firmware/efi/libstub/mem.c b/drivers/firmware/efi/libstub/mem.c
-index 45841ef55a9f..cdf1e6fb6430 100644
---- a/drivers/firmware/efi/libstub/mem.c
-+++ b/drivers/firmware/efi/libstub/mem.c
-@@ -125,3 +125,105 @@ void efi_free(unsigned long size, unsigned long addr)
- 	nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
- 	efi_bs_call(free_pages, addr, nr_pages);
- }
-+
-+/**
-+ * efi_adjust_memory_range_protection() - change memory range protection attributes
-+ * @start:	memory range start address
-+ * @size:	memory range size
-+ *
-+ * Actual memory range for which memory attributes are modified is
-+ * the smallest ranged with start address and size aligned to EFI_PAGE_SIZE
-+ * that includes [start, start + size].
-+ *
-+ * @return: status code
-+ */
-+efi_status_t efi_adjust_memory_range_protection(unsigned long start,
-+						unsigned long size,
-+						unsigned long attributes)
-+{
-+	efi_status_t status;
-+	efi_gcd_memory_space_desc_t desc;
-+	efi_physical_addr_t end, next;
-+	efi_physical_addr_t rounded_start, rounded_end;
-+	efi_physical_addr_t unprotect_start, unprotect_size;
-+
-+	if (efi_dxe_table == NULL)
-+		return EFI_UNSUPPORTED;
-+
-+	/*
-+	 * This function should not be used to modify attributes
-+	 * other than writable/executable.
-+	 */
-+
-+	if ((attributes & ~(EFI_MEMORY_RO | EFI_MEMORY_XP)) != 0)
-+		return EFI_INVALID_PARAMETER;
-+
-+	/*
-+	 * Disallow simultaniously executable and writable memory
-+	 * to inforce W^X policy if direct extraction code is enabled.
-+	 */
-+
-+	if ((attributes & (EFI_MEMORY_RO | EFI_MEMORY_XP)) == 0) {
-+		efi_warn("W^X violation at [%08lx,%08lx]\n",
-+			 (unsigned long)rounded_start,
-+			 (unsigned long)rounded_end);
-+	}
-+
-+	rounded_start = rounddown(start, EFI_PAGE_SIZE);
-+	rounded_end = roundup(start + size, EFI_PAGE_SIZE);
-+
-+	/*
-+	 * Don't modify memory region attributes, they are
-+	 * already suitable, to lower the possibility to
-+	 * encounter firmware bugs.
-+	 */
-+
-+	for (end = start + size; start < end; start = next) {
-+
-+		status = efi_dxe_call(get_memory_space_descriptor,
-+				      start, &desc);
-+
-+		if (status != EFI_SUCCESS) {
-+			efi_warn("Unable to get memory descriptor at %lx\n",
-+				 start);
-+			return status;
-+		}
-+
-+		next = desc.base_address + desc.length;
-+
-+		/*
-+		 * Only system memory is suitable for trampoline/kernel image
-+		 * placement, so only this type of memory needs its attributes
-+		 * to be modified.
-+		 */
-+
-+		if (desc.gcd_memory_type != EfiGcdMemoryTypeSystemMemory) {
-+			efi_warn("Attempted to change protection of special memory range\n");
-+			return EFI_UNSUPPORTED;
-+		}
-+
-+		if (((desc.attributes ^ attributes) &
-+		     (EFI_MEMORY_RO | EFI_MEMORY_XP)) == 0)
-+			continue;
-+
-+		desc.attributes &= ~(EFI_MEMORY_RO | EFI_MEMORY_XP);
-+		desc.attributes |= attributes;
-+
-+		unprotect_start = max(rounded_start, desc.base_address);
-+		unprotect_size = min(rounded_end, next) - unprotect_start;
-+
-+		status = efi_dxe_call(set_memory_space_attributes,
-+				      unprotect_start, unprotect_size,
-+				      desc.attributes);
-+
-+		if (status != EFI_SUCCESS) {
-+			efi_warn("Unable to unprotect memory range [%08lx,%08lx]: %lx\n",
-+				 (unsigned long)unprotect_start,
-+				 (unsigned long)(unprotect_start + unprotect_size),
-+				 status);
-+			return status;
-+		}
-+	}
-+
-+	return EFI_SUCCESS;
-+}
 diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index 33a7811e12c6..2fddb88613cd 100644
+index 4d9588d33479..d9bb9125d518 100644
 --- a/drivers/firmware/efi/libstub/x86-stub.c
 +++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -212,61 +212,6 @@ static void retrieve_apple_device_properties(struct boot_params *boot_params)
- 	}
+@@ -27,6 +27,12 @@ const efi_dxe_services_table_t *efi_dxe_table;
+ extern u32 image_offset;
+ static efi_loaded_image_t *image = NULL;
+ 
++extern char _head[], _ehead[];
++extern char _compressed[], _ecompressed[];
++extern char _text[], _etext[];
++extern char _rodata[], _erodata[];
++extern char _data[];
++
+ static efi_status_t
+ preserve_pci_rom_image(efi_pci_io_protocol_t *pci, struct pci_setup_rom **__rom)
+ {
+@@ -343,6 +349,54 @@ static void __noreturn efi_exit(efi_handle_t handle, efi_status_t status)
+ 		asm("hlt");
  }
  
--static void
--adjust_memory_range_protection(unsigned long start, unsigned long size)
--{
--	efi_status_t status;
--	efi_gcd_memory_space_desc_t desc;
--	unsigned long end, next;
--	unsigned long rounded_start, rounded_end;
--	unsigned long unprotect_start, unprotect_size;
--
--	if (efi_dxe_table == NULL)
--		return;
--
--	rounded_start = rounddown(start, EFI_PAGE_SIZE);
--	rounded_end = roundup(start + size, EFI_PAGE_SIZE);
--
--	/*
--	 * Don't modify memory region attributes, they are
--	 * already suitable, to lower the possibility to
--	 * encounter firmware bugs.
--	 */
--
--	for (end = start + size; start < end; start = next) {
--
--		status = efi_dxe_call(get_memory_space_descriptor, start, &desc);
--
--		if (status != EFI_SUCCESS)
--			return;
--
--		next = desc.base_address + desc.length;
--
--		/*
--		 * Only system memory is suitable for trampoline/kernel image placement,
--		 * so only this type of memory needs its attributes to be modified.
--		 */
--
--		if (desc.gcd_memory_type != EfiGcdMemoryTypeSystemMemory ||
--		    (desc.attributes & (EFI_MEMORY_RO | EFI_MEMORY_XP)) == 0)
--			continue;
--
--		unprotect_start = max(rounded_start, (unsigned long)desc.base_address);
--		unprotect_size = min(rounded_end, next) - unprotect_start;
--
--		status = efi_dxe_call(set_memory_space_attributes,
--				      unprotect_start, unprotect_size,
--				      EFI_MEMORY_WB);
--
--		if (status != EFI_SUCCESS) {
--			efi_warn("Unable to unprotect memory range [%08lx,%08lx]: %lx\n",
--				 unprotect_start,
--				 unprotect_start + unprotect_size,
--				 status);
--		}
--	}
--}
--
- /*
-  * Trampoline takes 2 pages and can be loaded in first megabyte of memory
-  * with its end placed between 128k and 640k where BIOS might start.
-@@ -290,12 +235,12 @@ setup_memory_protection(unsigned long image_base, unsigned long image_size)
- 	 * and relocated kernel image.
- 	 */
++
++/*
++ * Manually setup memory protection attributes for each ELF section
++ * since we cannot do it properly by using PE sections.
++ */
++static void setup_sections_memory_protection(void *image_base,
++					     unsigned long init_size)
++{
++#ifdef CONFIG_EFI_DXE_MEM_ATTRIBUTES
++	efi_dxe_table = get_efi_config_table(EFI_DXE_SERVICES_TABLE_GUID);
++
++	if (!efi_dxe_table ||
++	    efi_dxe_table->hdr.signature != EFI_DXE_SERVICES_TABLE_SIGNATURE) {
++		efi_warn("Unable to locate EFI DXE services table\n");
++		efi_dxe_table = NULL;
++		return;
++	}
++
++	/* .setup [image_base, _head] */
++	efi_adjust_memory_range_protection((unsigned long)image_base,
++					   (unsigned long)_head - (unsigned long)image_base,
++					   EFI_MEMORY_RO | EFI_MEMORY_XP);
++	/* .head.text [_head, _ehead] */
++	efi_adjust_memory_range_protection((unsigned long)_head,
++					   (unsigned long)_ehead - (unsigned long)_head,
++					   EFI_MEMORY_RO);
++	/* .rodata..compressed [_compressed, _ecompressed] */
++	efi_adjust_memory_range_protection((unsigned long)_compressed,
++					   (unsigned long)_ecompressed - (unsigned long)_compressed,
++					   EFI_MEMORY_RO | EFI_MEMORY_XP);
++	/* .text [_text, _etext] */
++	efi_adjust_memory_range_protection((unsigned long)_text,
++					   (unsigned long)_etext - (unsigned long)_text,
++					   EFI_MEMORY_RO);
++	/* .rodata [_rodata, _erodata] */
++	efi_adjust_memory_range_protection((unsigned long)_rodata,
++					   (unsigned long)_erodata - (unsigned long)_rodata,
++					   EFI_MEMORY_RO | EFI_MEMORY_XP);
++	/* .data, .bss [_data, image_base + init_size] */
++	efi_adjust_memory_range_protection((unsigned long)_data,
++					   (unsigned long)image_base + init_size - (unsigned long)_rodata,
++					   EFI_MEMORY_XP);
++#else
++	(void)image_base;
++	(void)init_size;
++#endif
++}
++
+ void __noreturn efi_stub_entry(efi_handle_t handle,
+ 			       efi_system_table_t *sys_table_arg,
+ 			       struct boot_params *boot_params);
+@@ -396,6 +450,8 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
+ 	memcpy(&hdr->jump, image_base + 0x1000,
+ 	       sizeof(struct setup_header) - offsetof(struct setup_header, jump));
  
--	adjust_memory_range_protection(TRAMPOLINE_PLACEMENT_BASE,
--				       TRAMPOLINE_PLACEMENT_SIZE);
-+	efi_adjust_memory_range_protection(TRAMPOLINE_PLACEMENT_BASE,
-+					   TRAMPOLINE_PLACEMENT_SIZE, 0);
- 
- #ifdef CONFIG_64BIT
- 	if (image_base != (unsigned long)startup_32)
--		adjust_memory_range_protection(image_base, image_size);
-+		efi_adjust_memory_range_protection(image_base, image_size, 0);
- #else
++	setup_sections_memory_protection(image_base, hdr->init_size);
++
  	/*
- 	 * Clear protection flags on a whole range of possible
-@@ -305,8 +250,9 @@ setup_memory_protection(unsigned long image_base, unsigned long image_size)
- 	 * need to remove possible protection on relocated image
- 	 * itself disregarding further relocations.
- 	 */
--	adjust_memory_range_protection(LOAD_PHYSICAL_ADDR,
--				       KERNEL_IMAGE_SIZE - LOAD_PHYSICAL_ADDR);
-+	efi_adjust_memory_range_protection(LOAD_PHYSICAL_ADDR,
-+					   KERNEL_IMAGE_SIZE - LOAD_PHYSICAL_ADDR,
-+					   0);
- #endif
- }
- 
+ 	 * Fill out some of the header fields ourselves because the
+ 	 * EFI firmware loader doesn't load the first sector.
 -- 
 2.37.4
 
