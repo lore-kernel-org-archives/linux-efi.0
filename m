@@ -2,29 +2,29 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 35F6FECDFA1
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8FA16FA3740
 	for <linux-efi@archiver.kernel.org>; Tue, 25 Oct 2022 14:13:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232621AbiJYONV (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        id S232953AbiJYONV (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
         Tue, 25 Oct 2022 10:13:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45724 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45726 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232465AbiJYONU (ORCPT
+        with ESMTP id S232627AbiJYONU (ORCPT
         <rfc822;linux-efi@vger.kernel.org>); Tue, 25 Oct 2022 10:13:20 -0400
 Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 65B1D9C23B;
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 664F79C2EE;
         Tue, 25 Oct 2022 07:13:19 -0700 (PDT)
 Received: from localhost.localdomain (unknown [83.149.199.65])
-        by mail.ispras.ru (Postfix) with ESMTPSA id 4B05C419E9CE;
-        Tue, 25 Oct 2022 14:13:16 +0000 (UTC)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 4B05C419E9CE
+        by mail.ispras.ru (Postfix) with ESMTPSA id DF7AD419E9C1;
+        Tue, 25 Oct 2022 14:13:15 +0000 (UTC)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru DF7AD419E9C1
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ispras.ru;
         s=default; t=1666707196;
-        bh=GUsxEZYsjagqsnIlo2HdS3ccrH9SY23SsZJ1t0JcDlI=;
+        bh=Q9fnWgrDqNAEfbyyDhr1NF2k/eQWdzIJiBg8GZcJcfM=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=X6dhjPzAU9dm7k8w7yB3bDXecalPdxUvRW9oxgirXw/MoH9p4cYkOshbLwILP4S3S
-         gGLz/3JOL9dT3NS1Hv/HlnNmY23Vxp0kBbVYEmD5A7NIlIwMyz7/rA7hF98msrbbae
-         3FCD2JmOLln5/XJA2ujE1bKt7wXznWndmBj7PQ2g=
+        b=YQzgIw4H4258IJy13u2s453qRvWd3gEaFSmUfhIfBnTcPR02DI6f4rRjsryOmM992
+         bcEZElVn4CDB4tHTuSGZ2yjgnk32eHiZDlNZ37tmt0Y/qZ9ZouwvnnBAupdnDxiumv
+         vEgb/WsHxuTS6TtCOpexu8QvN95m+L1RsHO4mbOM=
 From:   Evgeniy Baskov <baskov@ispras.ru>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
@@ -37,9 +37,9 @@ Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
         Peter Jones <pjones@redhat.com>, lvc-project@linuxtesting.org,
         x86@kernel.org, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org
-Subject: [PATCH v2 03/23] x86/boot: Set cr0 to known state in trampoline
-Date:   Tue, 25 Oct 2022 17:12:41 +0300
-Message-Id: <7286289c51a932f804a694bd7f605e70160534ea.1666705333.git.baskov@ispras.ru>
+Subject: [PATCH v2 01/23] x86/boot: Align vmlinuz sections on page size
+Date:   Tue, 25 Oct 2022 17:12:39 +0300
+Message-Id: <f71669e1847b03f1aa51305128fa1fa26bba1f91.1666705333.git.baskov@ispras.ru>
 X-Mailer: git-send-email 2.37.4
 In-Reply-To: <cover.1666705333.git.baskov@ispras.ru>
 References: <cover.1666705333.git.baskov@ispras.ru>
@@ -49,30 +49,52 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Ensure WP bit to be set to prevent boot code from writing to
-non-writable memory pages.
+To protect sections on page table level each section
+needs to be aligned on page size (4KB).
+
+Set sections alignment in linker script.
+
+Add _compressed/_ecompressed symbols to access '.rodata..compressed'
+section content in the same way other sections are accessed.
+This is useful when applying memory attributes of the section.
 
 Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
 ---
- arch/x86/boot/compressed/head_64.S | 5 ++---
- 1 file changed, 2 insertions(+), 3 deletions(-)
+ arch/x86/boot/compressed/vmlinux.lds.S | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
-index d33f060900d2..2a4372b84fc8 100644
---- a/arch/x86/boot/compressed/head_64.S
-+++ b/arch/x86/boot/compressed/head_64.S
-@@ -684,9 +684,8 @@ SYM_CODE_START(trampoline_32bit_src)
- 	pushl	$__KERNEL_CS
- 	pushl	%eax
- 
--	/* Enable paging again. */
--	movl	%cr0, %eax
--	btsl	$X86_CR0_PG_BIT, %eax
-+	/* Enable paging and set CR0 to known state (this also sets WP flag) */
-+	movl	$CR0_STATE, %eax
- 	movl	%eax, %cr0
- 
- 	lret
+diff --git a/arch/x86/boot/compressed/vmlinux.lds.S b/arch/x86/boot/compressed/vmlinux.lds.S
+index 112b2375d021..6be90f1a1198 100644
+--- a/arch/x86/boot/compressed/vmlinux.lds.S
++++ b/arch/x86/boot/compressed/vmlinux.lds.S
+@@ -27,21 +27,27 @@ SECTIONS
+ 		HEAD_TEXT
+ 		_ehead = . ;
+ 	}
++	. = ALIGN(PAGE_SIZE);
+ 	.rodata..compressed : {
++		_compressed = .;
+ 		*(.rodata..compressed)
++		_ecompressed = .;
+ 	}
++	. = ALIGN(PAGE_SIZE);
+ 	.text :	{
+ 		_text = .; 	/* Text */
+ 		*(.text)
+ 		*(.text.*)
+ 		_etext = . ;
+ 	}
++	. = ALIGN(PAGE_SIZE);
+ 	.rodata : {
+ 		_rodata = . ;
+ 		*(.rodata)	 /* read-only data */
+ 		*(.rodata.*)
+ 		_erodata = . ;
+ 	}
++	. = ALIGN(PAGE_SIZE);
+ 	.data :	{
+ 		_data = . ;
+ 		*(.data)
 -- 
 2.37.4
 
