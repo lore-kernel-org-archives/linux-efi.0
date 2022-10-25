@@ -2,29 +2,29 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B3399C04A95
-	for <linux-efi@archiver.kernel.org>; Tue, 25 Oct 2022 14:14:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7490C38A2D
+	for <linux-efi@archiver.kernel.org>; Tue, 25 Oct 2022 14:14:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233185AbiJYOOY (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        id S233043AbiJYOOY (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
         Tue, 25 Oct 2022 10:14:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46244 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46230 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233171AbiJYOOH (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 25 Oct 2022 10:14:07 -0400
+        with ESMTP id S232978AbiJYONu (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 25 Oct 2022 10:13:50 -0400
 Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 089F19DD83;
-        Tue, 25 Oct 2022 07:14:06 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 64423A3A98;
+        Tue, 25 Oct 2022 07:13:49 -0700 (PDT)
 Received: from localhost.localdomain (unknown [83.149.199.65])
-        by mail.ispras.ru (Postfix) with ESMTPSA id 8023B40737B8;
-        Tue, 25 Oct 2022 14:14:04 +0000 (UTC)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 8023B40737B8
+        by mail.ispras.ru (Postfix) with ESMTPSA id D439340737A1;
+        Tue, 25 Oct 2022 14:13:47 +0000 (UTC)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru D439340737A1
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ispras.ru;
-        s=default; t=1666707244;
-        bh=BGZ61LjohLBjygE9oVNsVrWMCWDIov1gXSSQiqeLX90=;
+        s=default; t=1666707227;
+        bh=EwGUAT+V+D/fvt7ukarce/X9DVxbqrCy0Vh2rp1s7+o=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=SymMFRIRU95Ul0iB2hpJ9bBIvRReWZh/5COfFoqPBngR8KXd+CachZ1l/QtlZ9HNP
-         RHebtnBSiojalue+V6u6RF1XMm7iBPrBeTFX/dMEP1B92ftA0Eunjwy3sof/Z1eLMj
-         TpHBPDaU7vIdiaptdvyFrHvnCeaqFKML7F7OKIlY=
+        b=AVqWWoXZI9tBYsQ1lkC5/lEq7XnwOexMTfKDrNHL1M/ZC+on1RfeFA7tv+ivI/1Qo
+         eEOlnvVGLge1fCmbJEk9UYgrYLqOvD7Xdg+W+c0KhlASU5I7eQ8O5DsdsZ2ZpZyX9w
+         V+i3ag0LEcvC/Fr8qcFi5yOroDGOpFJ1P4ab/NwI=
 From:   Evgeniy Baskov <baskov@ispras.ru>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
@@ -37,9 +37,9 @@ Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
         Peter Jones <pjones@redhat.com>, lvc-project@linuxtesting.org,
         x86@kernel.org, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org
-Subject: [PATCH v2 18/23] tools/include: Add simplified version of pe.h
-Date:   Tue, 25 Oct 2022 17:12:56 +0300
-Message-Id: <c6436f1a185d510e7f44bc72f8b387c4837fa357.1666705333.git.baskov@ispras.ru>
+Subject: [PATCH v2 10/23] efi/libstub: Move helper function to related file
+Date:   Tue, 25 Oct 2022 17:12:48 +0300
+Message-Id: <70dd035f58199cb933526303792ef238080a235c.1666705333.git.baskov@ispras.ru>
 X-Mailer: git-send-email 2.37.4
 In-Reply-To: <cover.1666705333.git.baskov@ispras.ru>
 References: <cover.1666705333.git.baskov@ispras.ru>
@@ -49,171 +49,241 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This is needed to remove magic numbers from x86 bzImage building tool
-(arch/x86/boot/tools/build.c).
+efi_adjust_memory_range_protection() can be useful outside x86-stub.c.
+
+Move it to mem.c, where memory related code resides and make it
+non-static.
+
+Change its behavior to setup exact attributes and disallow making
+memory regions readable and writable simultaneously for supported
+configurations.
 
 Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
 ---
- tools/include/linux/pe.h | 150 +++++++++++++++++++++++++++++++++++++++
- 1 file changed, 150 insertions(+)
- create mode 100644 tools/include/linux/pe.h
+ drivers/firmware/efi/libstub/efistub.h  |   4 +
+ drivers/firmware/efi/libstub/mem.c      | 102 ++++++++++++++++++++++++
+ drivers/firmware/efi/libstub/x86-stub.c |  66 ++-------------
+ 3 files changed, 112 insertions(+), 60 deletions(-)
 
-diff --git a/tools/include/linux/pe.h b/tools/include/linux/pe.h
-new file mode 100644
-index 000000000000..41c09ec371d8
---- /dev/null
-+++ b/tools/include/linux/pe.h
-@@ -0,0 +1,150 @@
-+/* SPDX-License-Identifier: GPL-2.0-only */
-+/*
-+ * Simplified version of include/linux/pe.h:
-+ *  Copyright 2011 Red Hat, Inc. All rights reserved.
-+ *  Author(s): Peter Jones <pjones@redhat.com>
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index a30fb5d8ef05..63f5157341fe 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -917,6 +917,10 @@ efi_status_t efi_relocate_kernel(unsigned long *image_addr,
+ 				 unsigned long alignment,
+ 				 unsigned long min_addr);
+ 
++efi_status_t efi_adjust_memory_range_protection(unsigned long start,
++						unsigned long size,
++						unsigned long attributes);
++
+ efi_status_t efi_parse_options(char const *cmdline);
+ 
+ void efi_parse_option_graphics(char *option);
+diff --git a/drivers/firmware/efi/libstub/mem.c b/drivers/firmware/efi/libstub/mem.c
+index 45841ef55a9f..cdf1e6fb6430 100644
+--- a/drivers/firmware/efi/libstub/mem.c
++++ b/drivers/firmware/efi/libstub/mem.c
+@@ -125,3 +125,105 @@ void efi_free(unsigned long size, unsigned long addr)
+ 	nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
+ 	efi_bs_call(free_pages, addr, nr_pages);
+ }
++
++/**
++ * efi_adjust_memory_range_protection() - change memory range protection attributes
++ * @start:	memory range start address
++ * @size:	memory range size
++ *
++ * Actual memory range for which memory attributes are modified is
++ * the smallest ranged with start address and size aligned to EFI_PAGE_SIZE
++ * that includes [start, start + size].
++ *
++ * @return: status code
 + */
-+#ifndef __LINUX_PE_H
-+#define __LINUX_PE_H
++efi_status_t efi_adjust_memory_range_protection(unsigned long start,
++						unsigned long size,
++						unsigned long attributes)
++{
++	efi_status_t status;
++	efi_gcd_memory_space_desc_t desc;
++	efi_physical_addr_t end, next;
++	efi_physical_addr_t rounded_start, rounded_end;
++	efi_physical_addr_t unprotect_start, unprotect_size;
 +
-+#include <linux/types.h>
++	if (efi_dxe_table == NULL)
++		return EFI_UNSUPPORTED;
 +
-+#define	IMAGE_FILE_MACHINE_I386		0x014c
++	/*
++	 * This function should not be used to modify attributes
++	 * other than writable/executable.
++	 */
 +
-+#define IMAGE_SCN_CNT_CODE	0x00000020 /* .text */
-+#define IMAGE_SCN_CNT_INITIALIZED_DATA 0x00000040 /* .data */
-+#define IMAGE_SCN_ALIGN_4096BYTES 0x00d00000
-+#define IMAGE_SCN_MEM_DISCARDABLE 0x02000000 /* scn can be discarded */
-+#define IMAGE_SCN_MEM_EXECUTE	0x20000000 /* can be executed as code */
-+#define IMAGE_SCN_MEM_READ	0x40000000 /* readable */
-+#define IMAGE_SCN_MEM_WRITE	0x80000000 /* writeable */
++	if ((attributes & ~(EFI_MEMORY_RO | EFI_MEMORY_XP)) != 0)
++		return EFI_INVALID_PARAMETER;
 +
-+#define MZ_HEADER_PEADDR_OFFSET 0x3c
++	/*
++	 * Disallow simultaniously executable and writable memory
++	 * to inforce W^X policy if direct extraction code is enabled.
++	 */
 +
-+struct pe_hdr {
-+	uint32_t magic;		/* PE magic */
-+	uint16_t machine;	/* machine type */
-+	uint16_t sections;	/* number of sections */
-+	uint32_t timestamp;	/* time_t */
-+	uint32_t symbol_table;	/* symbol table offset */
-+	uint32_t symbols;	/* number of symbols */
-+	uint16_t opt_hdr_size;	/* size of optional header */
-+	uint16_t flags;		/* flags */
-+};
++	if ((attributes & (EFI_MEMORY_RO | EFI_MEMORY_XP)) == 0) {
++		efi_warn("W^X violation at [%08lx,%08lx]\n",
++			 (unsigned long)rounded_start,
++			 (unsigned long)rounded_end);
++	}
 +
-+/* the fact that pe32 isn't padded where pe32+ is 64-bit means union won't
-+ * work right.  vomit. */
-+struct pe32_opt_hdr {
-+	/* "standard" header */
-+	uint16_t magic;		/* file type */
-+	uint8_t  ld_major;	/* linker major version */
-+	uint8_t  ld_minor;	/* linker minor version */
-+	uint32_t text_size;	/* size of text section(s) */
-+	uint32_t data_size;	/* size of data section(s) */
-+	uint32_t bss_size;	/* size of bss section(s) */
-+	uint32_t entry_point;	/* file offset of entry point */
-+	uint32_t code_base;	/* relative code addr in ram */
-+	uint32_t data_base;	/* relative data addr in ram */
-+	/* "windows" header */
-+	uint32_t image_base;	/* preferred load address */
-+	uint32_t section_align;	/* alignment in bytes */
-+	uint32_t file_align;	/* file alignment in bytes */
-+	uint16_t os_major;	/* major OS version */
-+	uint16_t os_minor;	/* minor OS version */
-+	uint16_t image_major;	/* major image version */
-+	uint16_t image_minor;	/* minor image version */
-+	uint16_t subsys_major;	/* major subsystem version */
-+	uint16_t subsys_minor;	/* minor subsystem version */
-+	uint32_t win32_version;	/* reserved, must be 0 */
-+	uint32_t image_size;	/* image size */
-+	uint32_t header_size;	/* header size rounded up to
-+				   file_align */
-+	uint32_t csum;		/* checksum */
-+	uint16_t subsys;	/* subsystem */
-+	uint16_t dll_flags;	/* more flags! */
-+	uint32_t stack_size_req;/* amt of stack requested */
-+	uint32_t stack_size;	/* amt of stack required */
-+	uint32_t heap_size_req;	/* amt of heap requested */
-+	uint32_t heap_size;	/* amt of heap required */
-+	uint32_t loader_flags;	/* reserved, must be 0 */
-+	uint32_t data_dirs;	/* number of data dir entries */
-+};
++	rounded_start = rounddown(start, EFI_PAGE_SIZE);
++	rounded_end = roundup(start + size, EFI_PAGE_SIZE);
 +
-+struct pe32plus_opt_hdr {
-+	uint16_t magic;		/* file type */
-+	uint8_t  ld_major;	/* linker major version */
-+	uint8_t  ld_minor;	/* linker minor version */
-+	uint32_t text_size;	/* size of text section(s) */
-+	uint32_t data_size;	/* size of data section(s) */
-+	uint32_t bss_size;	/* size of bss section(s) */
-+	uint32_t entry_point;	/* file offset of entry point */
-+	uint32_t code_base;	/* relative code addr in ram */
-+	/* "windows" header */
-+	uint64_t image_base;	/* preferred load address */
-+	uint32_t section_align;	/* alignment in bytes */
-+	uint32_t file_align;	/* file alignment in bytes */
-+	uint16_t os_major;	/* major OS version */
-+	uint16_t os_minor;	/* minor OS version */
-+	uint16_t image_major;	/* major image version */
-+	uint16_t image_minor;	/* minor image version */
-+	uint16_t subsys_major;	/* major subsystem version */
-+	uint16_t subsys_minor;	/* minor subsystem version */
-+	uint32_t win32_version;	/* reserved, must be 0 */
-+	uint32_t image_size;	/* image size */
-+	uint32_t header_size;	/* header size rounded up to
-+				   file_align */
-+	uint32_t csum;		/* checksum */
-+	uint16_t subsys;	/* subsystem */
-+	uint16_t dll_flags;	/* more flags! */
-+	uint64_t stack_size_req;/* amt of stack requested */
-+	uint64_t stack_size;	/* amt of stack required */
-+	uint64_t heap_size_req;	/* amt of heap requested */
-+	uint64_t heap_size;	/* amt of heap required */
-+	uint32_t loader_flags;	/* reserved, must be 0 */
-+	uint32_t data_dirs;	/* number of data dir entries */
-+};
++	/*
++	 * Don't modify memory region attributes, they are
++	 * already suitable, to lower the possibility to
++	 * encounter firmware bugs.
++	 */
 +
-+struct data_dirent {
-+	uint32_t virtual_address;	/* relative to load address */
-+	uint32_t size;
-+};
++	for (end = start + size; start < end; start = next) {
 +
-+struct data_directory {
-+	struct data_dirent exports;		/* .edata */
-+	struct data_dirent imports;		/* .idata */
-+	struct data_dirent resources;		/* .rsrc */
-+	struct data_dirent exceptions;		/* .pdata */
-+	struct data_dirent certs;		/* certs */
-+	struct data_dirent base_relocations;	/* .reloc */
-+	struct data_dirent debug;		/* .debug */
-+	struct data_dirent arch;		/* reservered */
-+	struct data_dirent global_ptr;		/* global pointer reg. Size=0 */
-+	struct data_dirent tls;			/* .tls */
-+	struct data_dirent load_config;		/* load configuration structure */
-+	struct data_dirent bound_imports;	/* no idea */
-+	struct data_dirent import_addrs;	/* import address table */
-+	struct data_dirent delay_imports;	/* delay-load import table */
-+	struct data_dirent clr_runtime_hdr;	/* .cor (object only) */
-+	struct data_dirent reserved;
-+};
++		status = efi_dxe_call(get_memory_space_descriptor,
++				      start, &desc);
 +
-+struct section_header {
-+	char name[8];			/* name or "/12\0" string tbl offset */
-+	uint32_t virtual_size;		/* size of loaded section in ram */
-+	uint32_t virtual_address;	/* relative virtual address */
-+	uint32_t raw_data_size;		/* size of the section */
-+	uint32_t data_addr;		/* file pointer to first page of sec */
-+	uint32_t relocs;		/* file pointer to relocation entries */
-+	uint32_t line_numbers;		/* line numbers! */
-+	uint16_t num_relocs;		/* number of relocations */
-+	uint16_t num_lin_numbers;	/* srsly. */
-+	uint32_t flags;
-+};
++		if (status != EFI_SUCCESS) {
++			efi_warn("Unable to get memory descriptor at %lx\n",
++				 start);
++			return status;
++		}
 +
-+struct coff_reloc {
-+	uint32_t virtual_address;
-+	uint32_t symbol_table_index;
-+	uint16_t data;
-+};
++		next = desc.base_address + desc.length;
 +
-+#endif /* __LINUX_PE_H */
++		/*
++		 * Only system memory is suitable for trampoline/kernel image
++		 * placement, so only this type of memory needs its attributes
++		 * to be modified.
++		 */
++
++		if (desc.gcd_memory_type != EfiGcdMemoryTypeSystemMemory) {
++			efi_warn("Attempted to change protection of special memory range\n");
++			return EFI_UNSUPPORTED;
++		}
++
++		if (((desc.attributes ^ attributes) &
++		     (EFI_MEMORY_RO | EFI_MEMORY_XP)) == 0)
++			continue;
++
++		desc.attributes &= ~(EFI_MEMORY_RO | EFI_MEMORY_XP);
++		desc.attributes |= attributes;
++
++		unprotect_start = max(rounded_start, desc.base_address);
++		unprotect_size = min(rounded_end, next) - unprotect_start;
++
++		status = efi_dxe_call(set_memory_space_attributes,
++				      unprotect_start, unprotect_size,
++				      desc.attributes);
++
++		if (status != EFI_SUCCESS) {
++			efi_warn("Unable to unprotect memory range [%08lx,%08lx]: %lx\n",
++				 (unsigned long)unprotect_start,
++				 (unsigned long)(unprotect_start + unprotect_size),
++				 status);
++			return status;
++		}
++	}
++
++	return EFI_SUCCESS;
++}
+diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
+index 33a7811e12c6..2fddb88613cd 100644
+--- a/drivers/firmware/efi/libstub/x86-stub.c
++++ b/drivers/firmware/efi/libstub/x86-stub.c
+@@ -212,61 +212,6 @@ static void retrieve_apple_device_properties(struct boot_params *boot_params)
+ 	}
+ }
+ 
+-static void
+-adjust_memory_range_protection(unsigned long start, unsigned long size)
+-{
+-	efi_status_t status;
+-	efi_gcd_memory_space_desc_t desc;
+-	unsigned long end, next;
+-	unsigned long rounded_start, rounded_end;
+-	unsigned long unprotect_start, unprotect_size;
+-
+-	if (efi_dxe_table == NULL)
+-		return;
+-
+-	rounded_start = rounddown(start, EFI_PAGE_SIZE);
+-	rounded_end = roundup(start + size, EFI_PAGE_SIZE);
+-
+-	/*
+-	 * Don't modify memory region attributes, they are
+-	 * already suitable, to lower the possibility to
+-	 * encounter firmware bugs.
+-	 */
+-
+-	for (end = start + size; start < end; start = next) {
+-
+-		status = efi_dxe_call(get_memory_space_descriptor, start, &desc);
+-
+-		if (status != EFI_SUCCESS)
+-			return;
+-
+-		next = desc.base_address + desc.length;
+-
+-		/*
+-		 * Only system memory is suitable for trampoline/kernel image placement,
+-		 * so only this type of memory needs its attributes to be modified.
+-		 */
+-
+-		if (desc.gcd_memory_type != EfiGcdMemoryTypeSystemMemory ||
+-		    (desc.attributes & (EFI_MEMORY_RO | EFI_MEMORY_XP)) == 0)
+-			continue;
+-
+-		unprotect_start = max(rounded_start, (unsigned long)desc.base_address);
+-		unprotect_size = min(rounded_end, next) - unprotect_start;
+-
+-		status = efi_dxe_call(set_memory_space_attributes,
+-				      unprotect_start, unprotect_size,
+-				      EFI_MEMORY_WB);
+-
+-		if (status != EFI_SUCCESS) {
+-			efi_warn("Unable to unprotect memory range [%08lx,%08lx]: %lx\n",
+-				 unprotect_start,
+-				 unprotect_start + unprotect_size,
+-				 status);
+-		}
+-	}
+-}
+-
+ /*
+  * Trampoline takes 2 pages and can be loaded in first megabyte of memory
+  * with its end placed between 128k and 640k where BIOS might start.
+@@ -290,12 +235,12 @@ setup_memory_protection(unsigned long image_base, unsigned long image_size)
+ 	 * and relocated kernel image.
+ 	 */
+ 
+-	adjust_memory_range_protection(TRAMPOLINE_PLACEMENT_BASE,
+-				       TRAMPOLINE_PLACEMENT_SIZE);
++	efi_adjust_memory_range_protection(TRAMPOLINE_PLACEMENT_BASE,
++					   TRAMPOLINE_PLACEMENT_SIZE, 0);
+ 
+ #ifdef CONFIG_64BIT
+ 	if (image_base != (unsigned long)startup_32)
+-		adjust_memory_range_protection(image_base, image_size);
++		efi_adjust_memory_range_protection(image_base, image_size, 0);
+ #else
+ 	/*
+ 	 * Clear protection flags on a whole range of possible
+@@ -305,8 +250,9 @@ setup_memory_protection(unsigned long image_base, unsigned long image_size)
+ 	 * need to remove possible protection on relocated image
+ 	 * itself disregarding further relocations.
+ 	 */
+-	adjust_memory_range_protection(LOAD_PHYSICAL_ADDR,
+-				       KERNEL_IMAGE_SIZE - LOAD_PHYSICAL_ADDR);
++	efi_adjust_memory_range_protection(LOAD_PHYSICAL_ADDR,
++					   KERNEL_IMAGE_SIZE - LOAD_PHYSICAL_ADDR,
++					   0);
+ #endif
+ }
+ 
 -- 
 2.37.4
 
