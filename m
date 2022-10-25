@@ -2,80 +2,77 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BECA2ECDFA1
-	for <linux-efi@archiver.kernel.org>; Tue, 25 Oct 2022 14:10:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 35F6FECDFA1
+	for <linux-efi@archiver.kernel.org>; Tue, 25 Oct 2022 14:13:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233040AbiJYOKi (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 25 Oct 2022 10:10:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58144 "EHLO
+        id S232621AbiJYONV (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 25 Oct 2022 10:13:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45724 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231663AbiJYOKM (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 25 Oct 2022 10:10:12 -0400
-Received: from mail.skyhub.de (mail.skyhub.de [5.9.137.197])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 21CBBDF6B;
-        Tue, 25 Oct 2022 07:08:34 -0700 (PDT)
-Received: from zn.tnic (p200300ea9733e753329c23fffea6a903.dip0.t-ipconnect.de [IPv6:2003:ea:9733:e753:329c:23ff:fea6:a903])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id 7C3C11EC06BD;
-        Tue, 25 Oct 2022 16:08:33 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alien8.de; s=dkim;
-        t=1666706913;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:in-reply-to:in-reply-to:  references:references;
-        bh=Jc8a/OSsnYlaB3S1Nvjq3uClUaYYpKLD90hg9EtVTPg=;
-        b=dNsHnIjdnHhC8+xUB97zasgFuOmSYMWY39W1wTEtyQctFCxqF7QDUUKixfu/4CcfLNMdSq
-        pvCsskZxRpiBYEWK3OCLR4Cez0qzINVFnqBRP9REuCyAM8VPtJeHpbX8+Cd17qdC6vELCO
-        BERkzd/7dBx7uKASQkGyGGay3hVKIHs=
-Date:   Tue, 25 Oct 2022 16:08:28 +0200
-From:   Borislav Petkov <bp@alien8.de>
-To:     Jia He <justin.he@arm.com>
-Cc:     Ard Biesheuvel <ardb@kernel.org>, Len Brown <lenb@kernel.org>,
-        Tony Luck <tony.luck@intel.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Robert Richter <rric@kernel.org>,
-        Robert Moore <robert.moore@intel.com>,
-        Qiuxu Zhuo <qiuxu.zhuo@intel.com>,
-        Yazen Ghannam <yazen.ghannam@amd.com>,
-        Jan Luebbe <jlu@pengutronix.de>,
-        Khuong Dinh <khuong@os.amperecomputing.com>,
-        Kani Toshi <toshi.kani@hpe.com>,
-        James Morse <james.morse@arm.com>, linux-acpi@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-edac@vger.kernel.org,
-        devel@acpica.org, "Rafael J . Wysocki" <rafael@kernel.org>,
-        Shuai Xue <xueshuai@linux.alibaba.com>,
-        Jarkko Sakkinen <jarkko@kernel.org>, linux-efi@vger.kernel.org,
-        nd@arm.com, Peter Zijlstra <peterz@infradead.org>
-Subject: Re: [PATCH v10 0/7] Make ghes_edac a proper module
-Message-ID: <Y1ft3KxOGXd7I6F9@zn.tnic>
-References: <20221018082214.569504-1-justin.he@arm.com>
+        with ESMTP id S232465AbiJYONU (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 25 Oct 2022 10:13:20 -0400
+Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 65B1D9C23B;
+        Tue, 25 Oct 2022 07:13:19 -0700 (PDT)
+Received: from localhost.localdomain (unknown [83.149.199.65])
+        by mail.ispras.ru (Postfix) with ESMTPSA id 4B05C419E9CE;
+        Tue, 25 Oct 2022 14:13:16 +0000 (UTC)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 4B05C419E9CE
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ispras.ru;
+        s=default; t=1666707196;
+        bh=GUsxEZYsjagqsnIlo2HdS3ccrH9SY23SsZJ1t0JcDlI=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=X6dhjPzAU9dm7k8w7yB3bDXecalPdxUvRW9oxgirXw/MoH9p4cYkOshbLwILP4S3S
+         gGLz/3JOL9dT3NS1Hv/HlnNmY23Vxp0kBbVYEmD5A7NIlIwMyz7/rA7hF98msrbbae
+         3FCD2JmOLln5/XJA2ujE1bKt7wXznWndmBj7PQ2g=
+From:   Evgeniy Baskov <baskov@ispras.ru>
+To:     Ard Biesheuvel <ardb@kernel.org>
+Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
+        Andy Lutomirski <luto@kernel.org>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        Ingo Molnar <mingo@redhat.com>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Alexey Khoroshilov <khoroshilov@ispras.ru>,
+        Peter Jones <pjones@redhat.com>, lvc-project@linuxtesting.org,
+        x86@kernel.org, linux-efi@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org
+Subject: [PATCH v2 03/23] x86/boot: Set cr0 to known state in trampoline
+Date:   Tue, 25 Oct 2022 17:12:41 +0300
+Message-Id: <7286289c51a932f804a694bd7f605e70160534ea.1666705333.git.baskov@ispras.ru>
+X-Mailer: git-send-email 2.37.4
+In-Reply-To: <cover.1666705333.git.baskov@ispras.ru>
+References: <cover.1666705333.git.baskov@ispras.ru>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20221018082214.569504-1-justin.he@arm.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, Oct 18, 2022 at 08:22:07AM +0000, Jia He wrote:
-> Commit dc4e8c07e9e2 ("ACPI: APEI: explicit init of HEST and GHES in
-> apci_init()") introduced a bug that ghes_edac_register() would be invoked
-> before edac_init(). Because at that time, the bus "edac" hasn't been even
-> registered, this created sysfs /devices/mc0 instead of
-> /sys/devices/system/edac/mc/mc0 on an Ampere eMag server.
-> 
-> The solution is to make ghes_edac a proper module.
-> 
-> Changelog:
-> v10:
+Ensure WP bit to be set to prevent boot code from writing to
+non-writable memory pages.
 
-All queued, thanks for the effort.
+Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
+---
+ arch/x86/boot/compressed/head_64.S | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
 
-It'll appear in Linux next soon.
-
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index d33f060900d2..2a4372b84fc8 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -684,9 +684,8 @@ SYM_CODE_START(trampoline_32bit_src)
+ 	pushl	$__KERNEL_CS
+ 	pushl	%eax
+ 
+-	/* Enable paging again. */
+-	movl	%cr0, %eax
+-	btsl	$X86_CR0_PG_BIT, %eax
++	/* Enable paging and set CR0 to known state (this also sets WP flag) */
++	movl	$CR0_STATE, %eax
+ 	movl	%eax, %cr0
+ 
+ 	lret
 -- 
-Regards/Gruss,
-    Boris.
+2.37.4
 
-https://people.kernel.org/tglx/notes-about-netiquette
