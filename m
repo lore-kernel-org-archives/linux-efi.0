@@ -2,52 +2,53 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DB123ECAAA1
-	for <linux-efi@archiver.kernel.org>; Fri, 28 Oct 2022 04:02:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 95986C38A02
+	for <linux-efi@archiver.kernel.org>; Fri, 28 Oct 2022 04:02:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229531AbiJ1ECH (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        id S229497AbiJ1ECH (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
         Fri, 28 Oct 2022 00:02:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41454 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41484 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229497AbiJ1ECF (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 28 Oct 2022 00:02:05 -0400
-Received: from mga17.intel.com (mga17.intel.com [192.55.52.151])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 20C08D8F53
-        for <linux-efi@vger.kernel.org>; Thu, 27 Oct 2022 21:02:05 -0700 (PDT)
+        with ESMTP id S229528AbiJ1ECG (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 28 Oct 2022 00:02:06 -0400
+Received: from mga01.intel.com (mga01.intel.com [192.55.52.88])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DBBCEDB55D
+        for <linux-efi@vger.kernel.org>; Thu, 27 Oct 2022 21:02:04 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1666929725; x=1698465725;
+  t=1666929724; x=1698465724;
   h=date:from:to:cc:subject:message-id:mime-version:
    content-transfer-encoding;
-  bh=/uqAAXMcKbk8mrzTd4SUkwJJHu8XcskoeaRUyUd2Jgw=;
-  b=HHsPeuzyLxRlcElA8lNYNOnQWTNiuj5bdB4ehhB5uI8gw5lYZp3Z6YUC
-   M/1IJXGIqALU9mzcDG5y34KHDVD3ek9ScPb+LgFlw7ugioD0d9BD2haO9
-   BlIwZ5y015fDnMBL5mJjp6zJY6IZeDP02TyDuFFcs7dpXtRpj3qgOQoxJ
-   SpxZ0Fb9g44qOS0KTlEXr/JfEzstFtX1lEu/RANYzn5CEB1Oms/EH9jnK
-   gGq0EIEhJn0dJ/gsx1dDX/eeFD+TCV0H1uXikoH1JLspqP8Io0YoVb7Yi
-   VJFisGWdpSmC+QAxuCNx+JYoeLihQ8bTe361/2X229PtLv8cUT/0z6/fc
-   g==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10513"; a="288799773"
+  bh=71kV4kntg8+hxP3zWilx5eO7bK0luagYfaLRVFo7ycY=;
+  b=c6WrbrwfVMAdKpo0dxbokMcFxXSuYtltUUSx5x9grstYMF/qRjOJC2la
+   UC1hrA79v2XA3+S9h+rXCYsIhrevqoBN+zaY2jIaw/IziQrxjGzZaCudI
+   u/CEvkTIiGKNzyG1frFE330zZTwVJX8194WQKrjEFdVF1GUKITHW5ck4n
+   KXhWPEFKiF07X7LmxKWo4Q5h17haJ17b50W/DEozcW9ORwUnotDs3PR0f
+   FQz7WqeXM1VsLQtCPnATXMtzpOKpdAqWGJc5nTbwpn48hdyuyi1vNLY05
+   DWr+bj78wMo0po0XwsD0I/atHwfxord17LC0bFzs8EDAXrGYigvkO9xgc
+   w==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10513"; a="335042353"
 X-IronPort-AV: E=Sophos;i="5.95,219,1661842800"; 
-   d="scan'208";a="288799773"
-Received: from orsmga003.jf.intel.com ([10.7.209.27])
-  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Oct 2022 21:02:04 -0700
+   d="scan'208";a="335042353"
+Received: from fmsmga001.fm.intel.com ([10.253.24.23])
+  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Oct 2022 21:02:04 -0700
 X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6500,9779,10513"; a="583790809"
+X-IronPort-AV: E=McAfee;i="6500,9779,10513"; a="775236746"
 X-IronPort-AV: E=Sophos;i="5.95,219,1661842800"; 
-   d="scan'208";a="583790809"
+   d="scan'208";a="775236746"
 Received: from lkp-server02.sh.intel.com (HELO b6d29c1a0365) ([10.239.97.151])
-  by orsmga003.jf.intel.com with ESMTP; 27 Oct 2022 21:02:03 -0700
+  by fmsmga001.fm.intel.com with ESMTP; 27 Oct 2022 21:02:03 -0700
 Received: from kbuild by b6d29c1a0365 with local (Exim 4.96)
         (envelope-from <lkp@intel.com>)
-        id 1ooGZH-0009TM-0I;
+        id 1ooGZH-0009TP-0M;
         Fri, 28 Oct 2022 04:02:03 +0000
-Date:   Fri, 28 Oct 2022 12:02:01 +0800
+Date:   Fri, 28 Oct 2022 12:01:53 +0800
 From:   kernel test robot <lkp@intel.com>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     linux-efi@vger.kernel.org
-Subject: [efi:next] BUILD SUCCESS 7f8342cdfdfc644a58a10db13d1cfb9f159f8f43
-Message-ID: <635b5439.J/mWw21354ax6H5f%lkp@intel.com>
+Subject: [efi:urgent] BUILD SUCCESS
+ 4f50f041554c78aaa821585ce583946ecdae91b3
+Message-ID: <635b5431.C3KEUasXFSIP4ZCY%lkp@intel.com>
 User-Agent: Heirloom mailx 12.5 6/20/10
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
@@ -56,10 +57,10 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-tree/branch: https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git next
-branch HEAD: 7f8342cdfdfc644a58a10db13d1cfb9f159f8f43  efi: libstub: Enable efi_printk() in zboot decompressor
+tree/branch: https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git urgent
+branch HEAD: 4f50f041554c78aaa821585ce583946ecdae91b3  efi: efivars: Fix variable writes with unsupported query_variable_store()
 
-elapsed time: 725m
+elapsed time: 724m
 
 configs tested: 38
 configs skipped: 2
@@ -75,27 +76,27 @@ s390                             allmodconfig
 alpha                               defconfig
 s390                                defconfig
 x86_64                              defconfig
+x86_64                           allyesconfig
+x86_64                               rhel-8.3
 s390                             allyesconfig
-i386                                defconfig
-x86_64                           rhel-8.3-syz
-x86_64                         rhel-8.3-kunit
-x86_64                           rhel-8.3-kvm
-m68k                             allmodconfig
-arc                              allyesconfig
 x86_64                          rhel-8.3-func
-alpha                            allyesconfig
 x86_64                    rhel-8.3-kselftests
 powerpc                           allnoconfig
-m68k                             allyesconfig
 powerpc                          allmodconfig
 mips                             allyesconfig
-x86_64                               rhel-8.3
 sh                               allmodconfig
-x86_64                           allyesconfig
+m68k                             allmodconfig
+arc                              allyesconfig
+alpha                            allyesconfig
+m68k                             allyesconfig
+i386                                defconfig
+x86_64                         rhel-8.3-kunit
+x86_64                           rhel-8.3-kvm
+x86_64                           rhel-8.3-syz
 i386                             allyesconfig
 arm                                 defconfig
-arm64                            allyesconfig
 arm                              allyesconfig
+arm64                            allyesconfig
 ia64                             allmodconfig
 x86_64                        randconfig-a006
 x86_64                        randconfig-a004
