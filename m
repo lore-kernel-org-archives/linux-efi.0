@@ -2,112 +2,113 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4EE79FA373D
-	for <linux-efi@archiver.kernel.org>; Fri, 28 Oct 2022 02:19:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DB123ECAAA1
+	for <linux-efi@archiver.kernel.org>; Fri, 28 Oct 2022 04:02:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236085AbiJ1CTB (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 27 Oct 2022 22:19:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52116 "EHLO
+        id S229531AbiJ1ECH (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 28 Oct 2022 00:02:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41454 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235973AbiJ1CS5 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 27 Oct 2022 22:18:57 -0400
-Received: from szxga01-in.huawei.com (szxga01-in.huawei.com [45.249.212.187])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5E757B879E;
-        Thu, 27 Oct 2022 19:18:56 -0700 (PDT)
-Received: from dggemv711-chm.china.huawei.com (unknown [172.30.72.57])
-        by szxga01-in.huawei.com (SkyGuard) with ESMTP id 4Mz5jq1J5qzpWFv;
-        Fri, 28 Oct 2022 10:15:27 +0800 (CST)
-Received: from kwepemm600007.china.huawei.com (7.193.23.208) by
- dggemv711-chm.china.huawei.com (10.1.198.66) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.31; Fri, 28 Oct 2022 10:18:54 +0800
-Received: from [10.174.185.179] (10.174.185.179) by
- kwepemm600007.china.huawei.com (7.193.23.208) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.31; Fri, 28 Oct 2022 10:18:53 +0800
-Subject: Re: [PATCH V2] arm64/mm: Fix __enable_mmu() for new TGRAN range
- values
-To:     Anders Roxell <anders.roxell@linaro.org>
-CC:     Anshuman Khandual <anshuman.khandual@arm.com>,
-        <linux-arm-kernel@lists.infradead.org>,
-        James Morse <james.morse@arm.com>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Will Deacon <will@kernel.org>, Marc Zyngier <maz@kernel.org>,
-        Suzuki K Poulose <suzuki.poulose@arm.com>,
-        "Ard Biesheuvel" <ardb@kernel.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        <kvmarm@lists.cs.columbia.edu>, <linux-efi@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <alex.bennee@linaro.org>,
-        <arnd@arndb.de>
-References: <1615355590-21102-1-git-send-email-anshuman.khandual@arm.com>
- <20220826120020.GB520@mutt>
-From:   Zenghui Yu <yuzenghui@huawei.com>
-Message-ID: <84e674ab-3eee-3f2b-28c1-a08ff99d6d3b@huawei.com>
-Date:   Fri, 28 Oct 2022 10:18:41 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
- Thunderbird/68.9.0
+        with ESMTP id S229497AbiJ1ECF (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 28 Oct 2022 00:02:05 -0400
+Received: from mga17.intel.com (mga17.intel.com [192.55.52.151])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 20C08D8F53
+        for <linux-efi@vger.kernel.org>; Thu, 27 Oct 2022 21:02:05 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1666929725; x=1698465725;
+  h=date:from:to:cc:subject:message-id:mime-version:
+   content-transfer-encoding;
+  bh=/uqAAXMcKbk8mrzTd4SUkwJJHu8XcskoeaRUyUd2Jgw=;
+  b=HHsPeuzyLxRlcElA8lNYNOnQWTNiuj5bdB4ehhB5uI8gw5lYZp3Z6YUC
+   M/1IJXGIqALU9mzcDG5y34KHDVD3ek9ScPb+LgFlw7ugioD0d9BD2haO9
+   BlIwZ5y015fDnMBL5mJjp6zJY6IZeDP02TyDuFFcs7dpXtRpj3qgOQoxJ
+   SpxZ0Fb9g44qOS0KTlEXr/JfEzstFtX1lEu/RANYzn5CEB1Oms/EH9jnK
+   gGq0EIEhJn0dJ/gsx1dDX/eeFD+TCV0H1uXikoH1JLspqP8Io0YoVb7Yi
+   VJFisGWdpSmC+QAxuCNx+JYoeLihQ8bTe361/2X229PtLv8cUT/0z6/fc
+   g==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10513"; a="288799773"
+X-IronPort-AV: E=Sophos;i="5.95,219,1661842800"; 
+   d="scan'208";a="288799773"
+Received: from orsmga003.jf.intel.com ([10.7.209.27])
+  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Oct 2022 21:02:04 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6500,9779,10513"; a="583790809"
+X-IronPort-AV: E=Sophos;i="5.95,219,1661842800"; 
+   d="scan'208";a="583790809"
+Received: from lkp-server02.sh.intel.com (HELO b6d29c1a0365) ([10.239.97.151])
+  by orsmga003.jf.intel.com with ESMTP; 27 Oct 2022 21:02:03 -0700
+Received: from kbuild by b6d29c1a0365 with local (Exim 4.96)
+        (envelope-from <lkp@intel.com>)
+        id 1ooGZH-0009TM-0I;
+        Fri, 28 Oct 2022 04:02:03 +0000
+Date:   Fri, 28 Oct 2022 12:02:01 +0800
+From:   kernel test robot <lkp@intel.com>
+To:     Ard Biesheuvel <ardb@kernel.org>
+Cc:     linux-efi@vger.kernel.org
+Subject: [efi:next] BUILD SUCCESS 7f8342cdfdfc644a58a10db13d1cfb9f159f8f43
+Message-ID: <635b5439.J/mWw21354ax6H5f%lkp@intel.com>
+User-Agent: Heirloom mailx 12.5 6/20/10
 MIME-Version: 1.0
-In-Reply-To: <20220826120020.GB520@mutt>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Language: en-US
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.174.185.179]
-X-ClientProxiedBy: dggems705-chm.china.huawei.com (10.3.19.182) To
- kwepemm600007.china.huawei.com (7.193.23.208)
-X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On 2022/8/26 20:00, Anders Roxell wrote:
-> On 2021-03-10 11:23, Anshuman Khandual wrote:
->> From: James Morse <james.morse@arm.com>
->>
->> As per ARM ARM DDI 0487G.a, when FEAT_LPA2 is implemented, ID_AA64MMFR0_EL1
->> might contain a range of values to describe supported translation granules
->> (4K and 16K pages sizes in particular) instead of just enabled or disabled
->> values. This changes __enable_mmu() function to handle complete acceptable
->> range of values (depending on whether the field is signed or unsigned) now
->> represented with ID_AA64MMFR0_TGRAN_SUPPORTED_[MIN..MAX] pair. While here,
->> also fix similar situations in EFI stub and KVM as well.
->>
->> Cc: Catalin Marinas <catalin.marinas@arm.com>
->> Cc: Will Deacon <will@kernel.org>
->> Cc: Marc Zyngier <maz@kernel.org>
->> Cc: James Morse <james.morse@arm.com>
->> Cc: Suzuki K Poulose <suzuki.poulose@arm.com>
->> Cc: Ard Biesheuvel <ardb@kernel.org>
->> Cc: Mark Rutland <mark.rutland@arm.com>
->> Cc: linux-arm-kernel@lists.infradead.org
->> Cc: kvmarm@lists.cs.columbia.edu
->> Cc: linux-efi@vger.kernel.org
->> Cc: linux-kernel@vger.kernel.org
->> Acked-by: Marc Zyngier <maz@kernel.org>
->> Signed-off-by: James Morse <james.morse@arm.com>
->> Signed-off-by: Anshuman Khandual <anshuman.khandual@arm.com>
-> 
-> Hi,
-> 
-> When building an arm64 defconfig kernel from stable/linux-5.10.y and
-> booting that in QEMU (version: 1:7.0+dfsg-2~bpo11+2) with '-cpu max' the
-> kernel doesn't boot. I don't get any output.  The kernel boots fine if I
-> change to '-cpu cortex-a72'.
-> 
-> If I cherry-pick this patch to stable/linux-5.10.y I'm able too boot the
-> kernel with '-cpu max'.
+tree/branch: https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git next
+branch HEAD: 7f8342cdfdfc644a58a10db13d1cfb9f159f8f43  efi: libstub: Enable efi_printk() in zboot decompressor
 
-You can workaround the kernel boot failure by specifying
-'-cpu max,lpa2=off' [*] in the QEMU command line.
+elapsed time: 725m
 
-> However, I'm not comfortable to backport this patch to older kernels
-> since there are a lot of conflicts.
-> Can someone help out to do the packport?
+configs tested: 38
+configs skipped: 2
 
-Upstream commit 26f55386f964 ("arm64/mm: Fix __enable_mmu() for new
-TGRAN range values") can still be applied cleanly on top of
-linux-5.10.y. I can send it to <stable@vger.kernel.org> if maintainers
-are okay with the stable-5.10 backport.
+The following configs have been built successfully.
+More configs may be tested in the coming days.
 
-[*] https://gitlab.com/qemu-project/qemu/-/commit/69b2265d5fe8
+gcc tested configs:
+um                             i386_defconfig
+um                           x86_64_defconfig
+arc                                 defconfig
+s390                             allmodconfig
+alpha                               defconfig
+s390                                defconfig
+x86_64                              defconfig
+s390                             allyesconfig
+i386                                defconfig
+x86_64                           rhel-8.3-syz
+x86_64                         rhel-8.3-kunit
+x86_64                           rhel-8.3-kvm
+m68k                             allmodconfig
+arc                              allyesconfig
+x86_64                          rhel-8.3-func
+alpha                            allyesconfig
+x86_64                    rhel-8.3-kselftests
+powerpc                           allnoconfig
+m68k                             allyesconfig
+powerpc                          allmodconfig
+mips                             allyesconfig
+x86_64                               rhel-8.3
+sh                               allmodconfig
+x86_64                           allyesconfig
+i386                             allyesconfig
+arm                                 defconfig
+arm64                            allyesconfig
+arm                              allyesconfig
+ia64                             allmodconfig
+x86_64                        randconfig-a006
+x86_64                        randconfig-a004
+x86_64                        randconfig-a002
+arm                        keystone_defconfig
+powerpc                mpc7448_hpc2_defconfig
+x86_64                           alldefconfig
 
-Zenghui
+clang tested configs:
+arm                       mainstone_defconfig
+arm                        multi_v5_defconfig
+mips                  cavium_octeon_defconfig
+
+-- 
+0-DAY CI Kernel Test Service
+https://01.org/lkp
