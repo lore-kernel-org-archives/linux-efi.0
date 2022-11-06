@@ -2,61 +2,61 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 46FC5C433FE
-	for <linux-efi@archiver.kernel.org>; Sun,  6 Nov 2022 21:08:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 54D66C4321E
+	for <linux-efi@archiver.kernel.org>; Sun,  6 Nov 2022 21:08:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230203AbiKFVIx (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sun, 6 Nov 2022 16:08:53 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34254 "EHLO
+        id S230222AbiKFVIy (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 6 Nov 2022 16:08:54 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34390 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230173AbiKFVIq (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sun, 6 Nov 2022 16:08:46 -0500
-Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 89FBD10BA;
-        Sun,  6 Nov 2022 13:08:44 -0800 (PST)
-Received: from pps.filterd (m0098417.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 2A6Go9d7010545;
-        Sun, 6 Nov 2022 21:08:13 GMT
+        with ESMTP id S229962AbiKFVIt (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sun, 6 Nov 2022 16:08:49 -0500
+Received: from mx0a-001b2d01.pphosted.com (mx0a-001b2d01.pphosted.com [148.163.156.1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 62DDA12B;
+        Sun,  6 Nov 2022 13:08:48 -0800 (PST)
+Received: from pps.filterd (m0098410.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 2A6HV7x8007449;
+        Sun, 6 Nov 2022 21:08:26 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=from : to : cc : subject
  : date : message-id : in-reply-to : references : mime-version :
  content-transfer-encoding; s=pp1;
- bh=vyKXMiJNltHgwUz76VjitY5UHxk/04FjszPG4Qsf8gI=;
- b=lv2qo9eFFhk3xL/pW2aYjcbbT8EFSsOxP14ahAlv1Z4A8sP4x7/RXnRooOO9rpVNHPOJ
- YTpE/yzRtn4s1z6Qea0CgOKqPLfGHZAkDOA0A1EATpg/Osgwag7hhO+/lIQUckfyZJuj
- B+FpAgtAlaEqVZ//uSIMFjDBoptAdOdumQxtO5OB71Tf46WzjJlGDcw7BZGK9aVl7Ded
- 29RkUewpHihuOmYHGU3qvX+FYhwkNNeykKFkt4rIn6IiGK4YPxpwKYihe9vc93IdDMH5
- HxEgvS/HbzZl/Q2jFWgNrX4hLbRgHqgvHVx5bWrEXnvmyKFUzmMdUruSah9RHgIpLgo3 Jg== 
+ bh=5MhZFFjlk0VZoRGHVW0Rss+S9jLEMjHRQ1D6yVxO9a4=;
+ b=AF8xOBGbAaL0VYOH536tpKhB8Ye1r9impz11ZryPUcjIOLpxCjz1Wd7MzeHXTqAiZZ3A
+ SLTFir2b9vIh8RUHOTtwBLPHAURItRkpw6vNRvAH5K0AH0bBfJB/rSowmzAdd48QpBMp
+ 09G0BjlIydTJcHYKKydVw21Ikj50n1lo1nFsphOCdKL/5dbSpYEhGjl0wmjaSv3bAgk6
+ E+OVEfVxGN4VjUIWH0dO9bcEa2Uutn72cXX3uwzskIybIxKXDsCR6X5yEKtAkiVcZgOL
+ cAX1ekKoagbOW/T/PCP4Ve/DyWNWCc1bVJxZeVj5r5769hZpILLmudZv46vZvNFL5QqJ +g== 
 Received: from pps.reinject (localhost [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3kp1utvtfk-1
+        by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3kp1mrvxu9-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Sun, 06 Nov 2022 21:08:13 +0000
-Received: from m0098417.ppops.net (m0098417.ppops.net [127.0.0.1])
-        by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 2A6L3BZp025014;
-        Sun, 6 Nov 2022 21:08:12 GMT
-Received: from ppma04fra.de.ibm.com (6a.4a.5195.ip4.static.sl-reverse.com [149.81.74.106])
-        by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3kp1utvtf5-1
+        Sun, 06 Nov 2022 21:08:26 +0000
+Received: from m0098410.ppops.net (m0098410.ppops.net [127.0.0.1])
+        by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 2A6L0X41003881;
+        Sun, 6 Nov 2022 21:08:25 GMT
+Received: from ppma01fra.de.ibm.com (46.49.7a9f.ip4.static.sl-reverse.com [159.122.73.70])
+        by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3kp1mrvxtp-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Sun, 06 Nov 2022 21:08:12 +0000
-Received: from pps.filterd (ppma04fra.de.ibm.com [127.0.0.1])
-        by ppma04fra.de.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 2A6L6Bfn012616;
-        Sun, 6 Nov 2022 21:08:10 GMT
-Received: from b06cxnps4074.portsmouth.uk.ibm.com (d06relay11.portsmouth.uk.ibm.com [9.149.109.196])
-        by ppma04fra.de.ibm.com with ESMTP id 3kngmqh79p-1
+        Sun, 06 Nov 2022 21:08:25 +0000
+Received: from pps.filterd (ppma01fra.de.ibm.com [127.0.0.1])
+        by ppma01fra.de.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 2A6L5fOT031604;
+        Sun, 6 Nov 2022 21:08:23 GMT
+Received: from b06avi18878370.portsmouth.uk.ibm.com (b06avi18878370.portsmouth.uk.ibm.com [9.149.26.194])
+        by ppma01fra.de.ibm.com with ESMTP id 3kngs4h753-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Sun, 06 Nov 2022 21:08:10 +0000
+        Sun, 06 Nov 2022 21:08:23 +0000
 Received: from d06av25.portsmouth.uk.ibm.com (d06av25.portsmouth.uk.ibm.com [9.149.105.61])
-        by b06cxnps4074.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 2A6L86Uq60883340
+        by b06avi18878370.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 2A6L8vvh52953468
         (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Sun, 6 Nov 2022 21:08:07 GMT
+        Sun, 6 Nov 2022 21:08:57 GMT
 Received: from d06av25.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id DBCCB11C04C;
-        Sun,  6 Nov 2022 21:08:06 +0000 (GMT)
+        by IMSVA (Postfix) with ESMTP id A076B11C050;
+        Sun,  6 Nov 2022 21:08:19 +0000 (GMT)
 Received: from d06av25.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id ACC1511C04A;
-        Sun,  6 Nov 2022 21:08:02 +0000 (GMT)
+        by IMSVA (Postfix) with ESMTP id A050B11C04A;
+        Sun,  6 Nov 2022 21:08:15 +0000 (GMT)
 Received: from li-4b5937cc-25c4-11b2-a85c-cea3a66903e4.ibm.com.com (unknown [9.211.78.124])
         by d06av25.portsmouth.uk.ibm.com (Postfix) with ESMTP;
-        Sun,  6 Nov 2022 21:08:02 +0000 (GMT)
+        Sun,  6 Nov 2022 21:08:15 +0000 (GMT)
 From:   Nayna Jain <nayna@linux.ibm.com>
 To:     linuxppc-dev@lists.ozlabs.org, linux-fsdevel@vger.kernel.org
 Cc:     linux-efi@vger.kernel.org,
@@ -74,274 +74,515 @@ Cc:     linux-efi@vger.kernel.org,
         Andrew Donnellan <ajd@linux.ibm.com>,
         Stefan Berger <stefanb@linux.ibm.com>,
         Nayna Jain <nayna@linux.ibm.com>
-Subject: [PATCH 1/4] powerpc/pseries: Add new functions to PLPKS driver
-Date:   Sun,  6 Nov 2022 16:07:41 -0500
-Message-Id: <20221106210744.603240-2-nayna@linux.ibm.com>
+Subject: [PATCH 4/4] powerpc/pseries: expose authenticated variables stored in LPAR PKS
+Date:   Sun,  6 Nov 2022 16:07:44 -0500
+Message-Id: <20221106210744.603240-5-nayna@linux.ibm.com>
 X-Mailer: git-send-email 2.31.1
 In-Reply-To: <20221106210744.603240-1-nayna@linux.ibm.com>
 References: <20221106210744.603240-1-nayna@linux.ibm.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: 7YCJKVa3OSt0_THGSkn_BGba6mQ2w3mA
-X-Proofpoint-ORIG-GUID: HjjwrpVYZbrllcQTouJXDFGYBBKTAB2M
+X-Proofpoint-GUID: fHT35PKex5OwM3ebL0FRXNCV6qcoAKaV
+X-Proofpoint-ORIG-GUID: 3PodlQ9DGmkF2yW6-5SiV_Sx-vcyEglU
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.219,Aquarius:18.0.895,Hydra:6.0.545,FMLib:17.11.122.1
  definitions=2022-11-06_14,2022-11-03_01,2022-06-22_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 suspectscore=0 bulkscore=0
- mlxlogscore=999 clxscore=1015 impostorscore=0 malwarescore=0
- lowpriorityscore=0 mlxscore=0 adultscore=0 spamscore=0 phishscore=0
- priorityscore=1501 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2210170000 definitions=main-2211060188
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 malwarescore=0 suspectscore=0
+ bulkscore=0 phishscore=0 spamscore=0 clxscore=1015 priorityscore=1501
+ mlxscore=0 adultscore=0 impostorscore=0 mlxlogscore=999 lowpriorityscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2210170000
+ definitions=main-2211060188
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-PowerVM stores authenticated variables in the PowerVM LPAR Platform
-KeyStore(PLPKS).
+PowerVM Guest Secure boot feature need to expose firmware managed
+secure variables for user management. These variables store keys for
+grub/kernel verification and also corresponding denied list.
 
-Add signed update H_CALL to PLPKS driver to support authenticated
-variables. Additionally, expose config values outside the PLPKS
-driver.
+Expose these variables to the userpace via fwsecurityfs.
+
+Example:
+
+$ pwd
+/sys/firmware/security/plpks/secvars
+
+$ ls -ltrh
+total 0
+-rw-r--r-- 1 root root 831 Sep 12 18:34 PK
+-rw-r--r-- 1 root root 831 Sep 12 18:34 KEK
+-rw-r--r-- 1 root root 831 Sep 12 18:34 db
+
+$ hexdump -C db
+00000000  00 00 00 08 a1 59 c0 a5  e4 94 a7 4a 87 b5 ab 15  |.....Y.....J....|
+00000010  5c 2b f0 72 3f 03 00 00  00 00 00 00 23 03 00 00  |\+.r?.......#...|
+00000020  ca 18 1d 1c 01 7d eb 11  9a 71 08 94 ef 31 fb e4  |.....}...q...1..|
+00000030  30 82 03 0f 30 82 01 f7  a0 03 02 01 02 02 14 22  |0...0.........."|
+00000040  ab 18 2f d5 aa dd c5 ba  98 27 60 26 f1 63 89 54  |../......'`&.c.T|
+00000050  4c 52 d9 30 0d 06 09 2a  86 48 86 f7 0d 01 01 0b  |LR.0...*.H......|
+00000060  05 00 30 17 31 15 30 13  06 03 55 04 03 0c 0c 72  |..0.1.0...U....r|
+...
 
 Signed-off-by: Nayna Jain <nayna@linux.ibm.com>
 ---
- arch/powerpc/include/asm/hvcall.h      |   3 +-
- arch/powerpc/platforms/pseries/plpks.c | 112 +++++++++++++++++++++++--
- arch/powerpc/platforms/pseries/plpks.h |  35 ++++++++
- 3 files changed, 144 insertions(+), 6 deletions(-)
+ arch/powerpc/platforms/pseries/Kconfig        |  10 +
+ arch/powerpc/platforms/pseries/Makefile       |   1 +
+ .../platforms/pseries/fwsecurityfs_arch.c     |   8 +
+ arch/powerpc/platforms/pseries/plpks.h        |   3 +
+ arch/powerpc/platforms/pseries/secvars.c      | 365 ++++++++++++++++++
+ 5 files changed, 387 insertions(+)
+ create mode 100644 arch/powerpc/platforms/pseries/secvars.c
 
-diff --git a/arch/powerpc/include/asm/hvcall.h b/arch/powerpc/include/asm/hvcall.h
-index 95fd7f9485d5..33b26c0cb69b 100644
---- a/arch/powerpc/include/asm/hvcall.h
-+++ b/arch/powerpc/include/asm/hvcall.h
-@@ -336,7 +336,8 @@
- #define H_SCM_FLUSH		0x44C
- #define H_GET_ENERGY_SCALE_INFO	0x450
- #define H_WATCHDOG		0x45C
--#define MAX_HCALL_OPCODE	H_WATCHDOG
-+#define H_PKS_SIGNED_UPDATE	0x454
-+#define MAX_HCALL_OPCODE	H_PKS_SIGNED_UPDATE
+diff --git a/arch/powerpc/platforms/pseries/Kconfig b/arch/powerpc/platforms/pseries/Kconfig
+index 5fb45e601982..41c17f60dfe9 100644
+--- a/arch/powerpc/platforms/pseries/Kconfig
++++ b/arch/powerpc/platforms/pseries/Kconfig
+@@ -172,6 +172,16 @@ config PSERIES_FWSECURITYFS_ARCH
  
- /* Scope args for H_SCM_UNBIND_ALL */
- #define H_UNBIND_SCOPE_ALL (0x1)
-diff --git a/arch/powerpc/platforms/pseries/plpks.c b/arch/powerpc/platforms/pseries/plpks.c
-index 4edd1585e245..d0fa7b55a900 100644
---- a/arch/powerpc/platforms/pseries/plpks.c
-+++ b/arch/powerpc/platforms/pseries/plpks.c
-@@ -40,6 +40,10 @@ static u16 ospasswordlength;
- // Retrieved with H_PKS_GET_CONFIG
- static u16 maxpwsize;
- static u16 maxobjsize;
-+static s16 maxobjlabelsize;
-+static u32 totalsize;
-+static u32 usedspace;
-+static u8 version;
+ 	  If you are unsure how to use it, say N.
  
- struct plpks_auth {
- 	u8 version;
-@@ -87,6 +91,12 @@ static int pseries_status_to_err(int rc)
- 		err = -ENOENT;
- 		break;
- 	case H_BUSY:
-+	case H_LONG_BUSY_ORDER_1_MSEC:
-+	case H_LONG_BUSY_ORDER_10_MSEC:
-+	case H_LONG_BUSY_ORDER_100_MSEC:
-+	case H_LONG_BUSY_ORDER_1_SEC:
-+	case H_LONG_BUSY_ORDER_10_SEC:
-+	case H_LONG_BUSY_ORDER_100_SEC:
- 		err = -EBUSY;
- 		break;
- 	case H_AUTHORITY:
-@@ -187,14 +197,17 @@ static struct label *construct_label(char *component, u8 varos, u8 *name,
- 				     u16 namelen)
++config PSERIES_PLPKS_SECVARS
++       depends on PSERIES_PLPKS
++       select PSERIES_FWSECURITYFS_ARCH
++       tristate "Support for secvars"
++       help
++         This interface exposes authenticated variables stored in the LPAR
++         Platform KeyStore using fwsecurityfs interface.
++
++         If you are unsure how to use it, say N.
++
+ config PAPR_SCM
+ 	depends on PPC_PSERIES && MEMORY_HOTPLUG && LIBNVDIMM
+ 	tristate "Support for the PAPR Storage Class Memory interface"
+diff --git a/arch/powerpc/platforms/pseries/Makefile b/arch/powerpc/platforms/pseries/Makefile
+index 2903cff26258..6833f6b02798 100644
+--- a/arch/powerpc/platforms/pseries/Makefile
++++ b/arch/powerpc/platforms/pseries/Makefile
+@@ -29,6 +29,7 @@ obj-$(CONFIG_PPC_SVM)		+= svm.o
+ obj-$(CONFIG_FA_DUMP)		+= rtas-fadump.o
+ obj-$(CONFIG_PSERIES_PLPKS) += plpks.o
+ obj-$(CONFIG_PSERIES_FWSECURITYFS_ARCH) += fwsecurityfs_arch.o
++obj-$(CONFIG_PSERIES_PLPKS_SECVARS) += secvars.o
+ 
+ obj-$(CONFIG_SUSPEND)		+= suspend.o
+ obj-$(CONFIG_PPC_VAS)		+= vas.o vas-sysfs.o
+diff --git a/arch/powerpc/platforms/pseries/fwsecurityfs_arch.c b/arch/powerpc/platforms/pseries/fwsecurityfs_arch.c
+index b43bd3cf7889..1cc651ad6434 100644
+--- a/arch/powerpc/platforms/pseries/fwsecurityfs_arch.c
++++ b/arch/powerpc/platforms/pseries/fwsecurityfs_arch.c
+@@ -58,6 +58,7 @@ static int create_plpks_dir(void)
  {
- 	struct label *label;
--	size_t slen;
-+	size_t slen = 0;
+ 	struct dentry *config_dir;
+ 	struct dentry *fdentry;
++	int rc;
  
- 	if (!name || namelen > MAX_NAME_SIZE)
- 		return ERR_PTR(-EINVAL);
+ 	if (!IS_ENABLED(CONFIG_PSERIES_PLPKS) || !plpks_is_available()) {
+ 		pr_warn("Platform KeyStore is not available on this LPAR\n");
+@@ -107,6 +108,13 @@ static int create_plpks_dir(void)
+ 	if (IS_ERR(fdentry))
+ 		pr_err("Could not create version %ld\n", PTR_ERR(fdentry));
  
--	slen = strlen(component);
--	if (component && slen > sizeof(label->attr.prefix))
--		return ERR_PTR(-EINVAL);
-+	/* Support NULL component for signed updates */
-+	if (component) {
-+		slen = strlen(component);
-+		if (slen > sizeof(label->attr.prefix))
-+			return ERR_PTR(-EINVAL);
++	if (IS_ENABLED(CONFIG_PSERIES_PLPKS_SECVARS)) {
++		rc = plpks_secvars_init(plpks_dir);
++		if (rc)
++			pr_err("Secure Variables initialization failed with error %d\n", rc);
++		return rc;
 +	}
- 
- 	label = kzalloc(sizeof(*label), GFP_KERNEL);
- 	if (!label)
-@@ -240,10 +253,51 @@ static int _plpks_get_config(void)
- 
- 	maxpwsize = be16_to_cpu(config.maxpwsize);
- 	maxobjsize = be16_to_cpu(config.maxobjsize);
-+	maxobjlabelsize = be16_to_cpu(config.maxobjlabelsize) -
-+			  MAX_LABEL_ATTR_SIZE;
-+	maxobjlabelsize = maxobjlabelsize < 0 ? 0 : maxobjlabelsize;
-+	totalsize = be32_to_cpu(config.totalsize);
-+	usedspace = be32_to_cpu(config.usedspace);
- 
++
  	return 0;
  }
  
-+u8 plpks_get_version(void)
-+{
-+	return version;
-+}
-+
-+u16 plpks_get_maxobjectsize(void)
-+{
-+	return maxobjsize;
-+}
-+
-+u16 plpks_get_maxobjectlabelsize(void)
-+{
-+	return maxobjlabelsize;
-+}
-+
-+u32 plpks_get_totalsize(void)
-+{
-+	return totalsize;
-+}
-+
-+u32 plpks_get_usedspace(void)
-+{
-+	return usedspace;
-+}
-+
-+bool plpks_is_available(void)
-+{
-+	int rc;
-+
-+	rc = _plpks_get_config();
-+	if (rc)
-+		return false;
-+
-+	return true;
-+}
-+
- static int plpks_confirm_object_flushed(struct label *label,
- 					struct plpks_auth *auth)
- {
-@@ -277,6 +331,54 @@ static int plpks_confirm_object_flushed(struct label *label,
- 	return rc;
- }
+diff --git a/arch/powerpc/platforms/pseries/plpks.h b/arch/powerpc/platforms/pseries/plpks.h
+index fb483658549f..2d572fe4b522 100644
+--- a/arch/powerpc/platforms/pseries/plpks.h
++++ b/arch/powerpc/platforms/pseries/plpks.h
+@@ -11,6 +11,7 @@
  
-+int plpks_signed_update_var(struct plpks_var var, u64 flags)
+ #include <linux/types.h>
+ #include <linux/list.h>
++#include <linux/dcache.h>
+ 
+ #define OSSECBOOTAUDIT 0x40000000
+ #define OSSECBOOTENFORCE 0x20000000
+@@ -103,4 +104,6 @@ u32 plpks_get_totalsize(void);
+  */
+ u32 plpks_get_usedspace(void);
+ 
++int plpks_secvars_init(struct dentry *parent);
++
+ #endif
+diff --git a/arch/powerpc/platforms/pseries/secvars.c b/arch/powerpc/platforms/pseries/secvars.c
+new file mode 100644
+index 000000000000..3d5a251d0571
+--- /dev/null
++++ b/arch/powerpc/platforms/pseries/secvars.c
+@@ -0,0 +1,365 @@
++// SPDX-License-Identifier: GPL-2.0-only
++/*
++ * Expose secure(authenticated) variables for user key management.
++ * Copyright (C) 2022 IBM Corporation
++ * Author: Nayna Jain <nayna@linux.ibm.com>
++ *
++ */
++
++#include <linux/fwsecurityfs.h>
++#include "plpks.h"
++
++static struct dentry *secvar_dir;
++
++static const char * const names[] = {
++	"PK",
++	"KEK",
++	"db",
++	"dbx",
++	"grubdb",
++	"sbat",
++	"moduledb",
++	"trustedcadb",
++	NULL
++};
++
++static u16 get_ucs2name(const char *name, uint8_t **ucs2_name)
 +{
-+	unsigned long retbuf[PLPAR_HCALL9_BUFSIZE] = {0};
-+	int rc;
-+	struct label *label;
-+	struct plpks_auth *auth;
-+	u64 continuetoken = 0;
++	int i = 0;
++	int j = 0;
++	int namelen = 0;
 +
-+	if (!var.data || var.datalen <= 0 || var.namelen > MAX_NAME_SIZE)
++	namelen = strlen(name) * 2;
++
++	*ucs2_name = kzalloc(namelen, GFP_KERNEL);
++	if (!*ucs2_name)
++		return 0;
++
++	while (name[i]) {
++		(*ucs2_name)[j++] = name[i];
++		(*ucs2_name)[j++] = '\0';
++		pr_debug("ucs2name is %c\n", (*ucs2_name)[j - 2]);
++		i++;
++	}
++
++	return namelen;
++}
++
++static int validate_name(const char *name)
++{
++	int i = 0;
++
++	while (names[i]) {
++		if ((strcmp(name, names[i]) == 0))
++			return 0;
++		i++;
++	}
++	pr_err("Invalid name, allowed ones are (PK,KEK,db,dbx,grubdb,sbat,moduledb,trustedcadb)\n");
++
++	return -EINVAL;
++}
++
++static u32 get_policy(const char *name)
++{
++	if ((strcmp(name, "db") == 0) ||
++	    (strcmp(name, "dbx") == 0) ||
++	    (strcmp(name, "grubdb") == 0) ||
++	    (strcmp(name, "sbat") == 0))
++		return (WORLDREADABLE | SIGNEDUPDATE);
++	else
++		return SIGNEDUPDATE;
++}
++
++static ssize_t plpks_secvar_file_write(struct file *file,
++				       const char __user *userbuf,
++				       size_t count, loff_t *ppos)
++{
++	struct plpks_var var;
++	void *data;
++	u16 ucs2_namelen;
++	u8 *ucs2_name = NULL;
++	u64 flags;
++	ssize_t rc;
++	bool exist = true;
++	u16 datasize = count;
++	struct inode *inode = file->f_mapping->host;
++
++	if (count <= sizeof(flags))
 +		return -EINVAL;
 +
-+	if (!(var.policy & SIGNEDUPDATE))
-+		return -EINVAL;
++	ucs2_namelen = get_ucs2name(file_dentry(file)->d_iname, &ucs2_name);
++	if (ucs2_namelen == 0)
++		return -ENOMEM;
 +
-+	auth = construct_auth(PKS_OS_OWNER);
-+	if (IS_ERR(auth))
-+		return PTR_ERR(auth);
++	rc = copy_from_user(&flags, userbuf, sizeof(flags));
++	if (rc)
++		return -EFAULT;
 +
-+	label = construct_label(var.component, var.os, var.name, var.namelen);
-+	if (IS_ERR(label)) {
-+		rc = PTR_ERR(label);
++	datasize = count - sizeof(flags);
++
++	data = memdup_user(userbuf + sizeof(flags), datasize);
++	if (IS_ERR(data))
++		return PTR_ERR(data);
++
++	var.component = NULL;
++	var.name = ucs2_name;
++	var.namelen = ucs2_namelen;
++	var.os = PLPKS_VAR_LINUX;
++	var.datalen = 0;
++	var.data = NULL;
++
++	/* If PKS variable doesn't exist, it implies first time creation */
++	rc = plpks_read_os_var(&var);
++	if (rc) {
++		if (rc == -ENOENT) {
++			exist = false;
++		} else {
++			pr_err("Reading variable %s failed with error %ld\n",
++			       file_dentry(file)->d_iname, rc);
++			goto out;
++		}
++	}
++
++	var.datalen = datasize;
++	var.data = data;
++	var.policy = get_policy(file_dentry(file)->d_iname);
++	rc = plpks_signed_update_var(var, flags);
++	if (rc) {
++		pr_err("Update of the variable %s failed with error %ld\n",
++		       file_dentry(file)->d_iname, rc);
++		if (!exist)
++			fwsecurityfs_remove_file(file_dentry(file));
 +		goto out;
 +	}
 +
-+	do {
-+		rc = plpar_hcall9(H_PKS_SIGNED_UPDATE, retbuf,
-+				  virt_to_phys(auth), virt_to_phys(label),
-+				  label->size, var.policy, flags,
-+				  virt_to_phys(var.data), var.datalen,
-+				  continuetoken);
++	/* Read variable again to get updated size of the object */
++	var.datalen = 0;
++	var.data = NULL;
++	rc = plpks_read_os_var(&var);
++	if (rc)
++		pr_err("Error updating file size\n");
 +
-+		continuetoken = retbuf[0];
-+		rc = pseries_status_to_err(rc);
-+	} while (rc == -EBUSY);
++	inode_lock(inode);
++	i_size_write(inode, var.datalen);
++	inode->i_mtime = current_time(inode);
++	inode_unlock(inode);
 +
-+	if (!rc) {
-+		rc = plpks_confirm_object_flushed(label, auth);
-+		rc = pseries_status_to_err(rc);
-+	}
-+
-+	kfree(label);
++	rc = count;
 +out:
-+	kfree(auth);
++	kfree(data);
++	kfree(ucs2_name);
 +
 +	return rc;
 +}
-+EXPORT_SYMBOL(plpks_signed_update_var);
 +
- int plpks_write_var(struct plpks_var var)
- {
- 	unsigned long retbuf[PLPAR_HCALL_BUFSIZE] = { 0 };
-@@ -323,7 +425,7 @@ int plpks_remove_var(char *component, u8 varos, struct plpks_var_name vname)
- 	struct label *label;
- 	int rc;
- 
--	if (!component || vname.namelen > MAX_NAME_SIZE)
-+	if (vname.namelen > MAX_NAME_SIZE)
- 		return -EINVAL;
- 
- 	auth = construct_auth(PKS_OS_OWNER);
-diff --git a/arch/powerpc/platforms/pseries/plpks.h b/arch/powerpc/platforms/pseries/plpks.h
-index 275ccd86bfb5..fb483658549f 100644
---- a/arch/powerpc/platforms/pseries/plpks.h
-+++ b/arch/powerpc/platforms/pseries/plpks.h
-@@ -40,6 +40,11 @@ struct plpks_var_name_list {
- 	struct plpks_var_name varlist[];
- };
- 
-+/**
-+ * Updates the authenticated variable. It expects NULL as the component.
-+ */
-+int plpks_signed_update_var(struct plpks_var var, u64 flags);
++static ssize_t __secvar_os_file_read(char *name, char **out, u32 *outlen)
++{
++	struct plpks_var var;
++	int rc;
++	u8 *ucs2_name = NULL;
++	u16 ucs2_namelen;
 +
- /**
-  * Writes the specified var and its data to PKS.
-  * Any caller of PKS driver should present a valid component type for
-@@ -68,4 +73,34 @@ int plpks_read_fw_var(struct plpks_var *var);
-  */
- int plpks_read_bootloader_var(struct plpks_var *var);
- 
-+/**
-+ * Returns if PKS is available on this LPAR.
-+ */
-+bool plpks_is_available(void);
++	ucs2_namelen = get_ucs2name(name, &ucs2_name);
++	if (ucs2_namelen == 0)
++		return -ENOMEM;
 +
-+/**
-+ * Returns version of the Platform KeyStore.
-+ */
-+u8 plpks_get_version(void);
++	var.component = NULL;
++	var.name = ucs2_name;
++	var.namelen = ucs2_namelen;
++	var.os = PLPKS_VAR_LINUX;
++	var.datalen = 0;
++	var.data = NULL;
++	rc = plpks_read_os_var(&var);
++	if (rc) {
++		pr_err("Error %d reading object %s from firmware\n", rc, name);
++		kfree(ucs2_name);
++		return rc;
++	}
 +
-+/**
-+ * Returns maximum object size supported by Platform KeyStore.
-+ */
-+u16 plpks_get_maxobjectsize(void);
++	*outlen = sizeof(var.policy) + var.datalen;
++	*out = kzalloc(*outlen, GFP_KERNEL);
++	if (!*out) {
++		rc = -ENOMEM;
++		goto err;
++	}
 +
-+/**
-+ * Returns maximum object label size supported by Platform KeyStore.
-+ */
-+u16 plpks_get_maxobjectlabelsize(void);
++	memcpy(*out, &var.policy, sizeof(var.policy));
 +
-+/**
-+ * Returns total size of the configured Platform KeyStore.
-+ */
-+u32 plpks_get_totalsize(void);
++	memcpy(*out + sizeof(var.policy), var.data, var.datalen);
 +
-+/**
-+ * Returns used space from the total size of the Platform KeyStore.
-+ */
-+u32 plpks_get_usedspace(void);
++err:
++	kfree(ucs2_name);
++	kfree(var.data);
++	return rc;
++}
 +
- #endif
++static ssize_t __secvar_fw_file_read(char *name, char **out, u32 *outlen)
++{
++	struct plpks_var var;
++	int rc;
++
++	var.component = NULL;
++	var.name = name;
++	var.namelen = strlen(name);
++	var.datalen = 0;
++	var.data = NULL;
++	rc = plpks_read_fw_var(&var);
++	if (rc) {
++		if (rc == -ENOENT) {
++			var.datalen = 1;
++			var.data = kzalloc(var.datalen, GFP_KERNEL);
++			rc = 0;
++		} else {
++			pr_err("Error %d reading object %s from firmware\n",
++			       rc, name);
++			return rc;
++		}
++	}
++
++	*outlen = var.datalen;
++	*out = kzalloc(*outlen, GFP_KERNEL);
++	if (!*out) {
++		kfree(var.data);
++		return -ENOMEM;
++	}
++
++	memcpy(*out, var.data, var.datalen);
++
++	kfree(var.data);
++	return 0;
++}
++
++static ssize_t plpks_secvar_file_read(struct file *file, char __user *userbuf,
++				      size_t count, loff_t *ppos)
++{
++	int rc;
++	char *out = NULL;
++	u32 outlen;
++	char *fname = file_dentry(file)->d_iname;
++
++	if (strcmp(fname, "SB_VERSION") == 0)
++		rc = __secvar_fw_file_read(fname, &out, &outlen);
++	else
++		rc = __secvar_os_file_read(fname, &out, &outlen);
++	if (!rc)
++		rc = simple_read_from_buffer(userbuf, count, ppos,
++					     out, outlen);
++
++	kfree(out);
++
++	return rc;
++}
++
++static const struct file_operations plpks_secvar_file_operations = {
++	.open   = simple_open,
++	.read   = plpks_secvar_file_read,
++	.write  = plpks_secvar_file_write,
++	.llseek = no_llseek,
++};
++
++static int plpks_secvar_create(struct user_namespace *mnt_userns,
++			       struct inode *dir, struct dentry *dentry,
++			       umode_t mode, bool excl)
++{
++	const char *varname;
++	struct dentry *ldentry;
++	int rc;
++
++	varname = dentry->d_name.name;
++
++	rc = validate_name(varname);
++	if (rc)
++		goto out;
++
++	ldentry = fwsecurityfs_create_file(varname, S_IFREG | 0644, 0,
++					   secvar_dir, dentry, NULL,
++					   &plpks_secvar_file_operations);
++	if (IS_ERR(ldentry)) {
++		rc = PTR_ERR(ldentry);
++		pr_err("Creation of variable %s failed with error %d\n",
++		       varname, rc);
++	}
++
++out:
++	return rc;
++}
++
++static const struct inode_operations plpks_secvar_dir_inode_operations = {
++	.lookup = simple_lookup,
++	.create = plpks_secvar_create,
++};
++
++static int plpks_fill_secvars(void)
++{
++	struct plpks_var var;
++	int rc = 0;
++	int i = 0;
++	u8 *ucs2_name = NULL;
++	u16 ucs2_namelen;
++	struct dentry *dentry;
++
++	dentry = fwsecurityfs_create_file("SB_VERSION", S_IFREG | 0444, 1,
++					  secvar_dir, NULL, NULL,
++					  &plpks_secvar_file_operations);
++	if (IS_ERR(dentry)) {
++		rc = PTR_ERR(dentry);
++		pr_err("Creation of variable SB_VERSION failed with error %d\n", rc);
++		return rc;
++	}
++
++	while (names[i]) {
++		ucs2_namelen = get_ucs2name(names[i], &ucs2_name);
++		if (ucs2_namelen == 0) {
++			i++;
++			continue;
++		}
++
++		i++;
++		var.component = NULL;
++		var.name = ucs2_name;
++		var.namelen = ucs2_namelen;
++		var.os = PLPKS_VAR_LINUX;
++		var.datalen = 0;
++		var.data = NULL;
++		rc = plpks_read_os_var(&var);
++		kfree(ucs2_name);
++		if (rc) {
++			rc = 0;
++			continue;
++		}
++
++		dentry = fwsecurityfs_create_file(names[i - 1], S_IFREG | 0644,
++						  var.datalen, secvar_dir,
++						  NULL, NULL,
++						  &plpks_secvar_file_operations);
++
++		kfree(var.data);
++		if (IS_ERR(dentry)) {
++			rc = PTR_ERR(dentry);
++			pr_err("Creation of variable %s failed with error %d\n",
++			       names[i - 1], rc);
++			break;
++		}
++	}
++
++	return rc;
++};
++
++int plpks_secvars_init(struct dentry *parent)
++{
++	int rc;
++
++	secvar_dir = fwsecurityfs_create_dir("secvars", S_IFDIR | 0755, parent,
++					     &plpks_secvar_dir_inode_operations);
++	if (IS_ERR(secvar_dir)) {
++		rc = PTR_ERR(secvar_dir);
++		pr_err("Unable to create secvars dir: %d\n", rc);
++		return rc;
++	}
++
++	rc = plpks_fill_secvars();
++	if (rc)
++		pr_err("Filling secvars failed %d\n", rc);
++
++	return rc;
++};
 -- 
 2.31.1
 
