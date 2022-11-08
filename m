@@ -2,108 +2,169 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C85E5C433FE
-	for <linux-efi@archiver.kernel.org>; Tue,  8 Nov 2022 13:57:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7AE41C4332F
+	for <linux-efi@archiver.kernel.org>; Tue,  8 Nov 2022 15:15:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234853AbiKHN5Y (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 8 Nov 2022 08:57:24 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59262 "EHLO
+        id S233809AbiKHPPY (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 8 Nov 2022 10:15:24 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40562 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234866AbiKHN5U (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 8 Nov 2022 08:57:20 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 32E6E66C98
-        for <linux-efi@vger.kernel.org>; Tue,  8 Nov 2022 05:57:19 -0800 (PST)
+        with ESMTP id S233607AbiKHPPX (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 8 Nov 2022 10:15:23 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B44FD186F8
+        for <linux-efi@vger.kernel.org>; Tue,  8 Nov 2022 07:15:22 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id E631DB81AE4
-        for <linux-efi@vger.kernel.org>; Tue,  8 Nov 2022 13:57:17 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9CDD2C43470
-        for <linux-efi@vger.kernel.org>; Tue,  8 Nov 2022 13:57:16 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 4E5FD614E4
+        for <linux-efi@vger.kernel.org>; Tue,  8 Nov 2022 15:15:22 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 58C47C433D7;
+        Tue,  8 Nov 2022 15:15:20 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1667915836;
-        bh=6QgA7zxZr+06ErVA5yLWjruENerkbvVZ8g40ZACW0Qw=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=o5hlcTdSWBRBBBlzBv7mgPeCk2O/1omOozvo/2MmX0KLYUyARlkcxc4XCFScYrrDa
-         W0dG30T7hOq309UWG15pl/aD8Ffe3jDlvCZ7dENRO2k5sPs4XZ6pZLD2N/JcqyyHpy
-         RE6mYTzvSVBwf0AnHKzeMcxs7HVXO6Ch9+C2XfMc3mr6cRLglNWqNOXQfnOTGl7C5r
-         hLqk2Pe2s5wspuHJvRoOIG8Zr8Z9ENgnvldm5Xg72+J8GFesROMfp/NiLiOS5V5lmU
-         NZFAtc+LLNaxLlX/D/YIeEJ0ZVlJeJlYzGr0lWLNkwfB7mQlLIGHgqjX5OL9efo25r
-         DqHkm+TZVCvgg==
-Received: by mail-lj1-f175.google.com with SMTP id b9so21215044ljr.5
-        for <linux-efi@vger.kernel.org>; Tue, 08 Nov 2022 05:57:16 -0800 (PST)
-X-Gm-Message-State: ACrzQf0U2V20Kkr18Qg5ISwligb/SEIR/SpuS3KVPq5wDE953sgiDGa7
-        HeTWpYivfoz2zQM4IQ2xZf3C4OfTfTRKQq7s18U=
-X-Google-Smtp-Source: AMsMyM4DrU6m7IQbAp2gogLHTqpm2L4TWLX3iaTEyeI9HvgJ1PcAZHtzwCl6Cw9AnRk5yppPDMeMk8hgdAW5vt++tHU=
-X-Received: by 2002:a2e:3a1a:0:b0:277:7eef:1d97 with SMTP id
- h26-20020a2e3a1a000000b002777eef1d97mr5895000lja.516.1667915834647; Tue, 08
- Nov 2022 05:57:14 -0800 (PST)
-MIME-Version: 1.0
-References: <d799b60c-ff4e-44ae-84be-d9ade761ec6d@redhat.com>
- <CAMj1kXHDtwkMgqqwePEKdOdO=7-1_TYyuVNPJ7PkyreaMySjCw@mail.gmail.com>
- <d469f6b9-d23a-abe6-27b7-f58f9de12a45@redhat.com> <CAMj1kXFUfAE6bGTxTFDQe9HxAZAuAOXenU+GC-39QJfaBOt4tA@mail.gmail.com>
- <34d7f903-9d1a-d63b-0d32-b72ae775f26a@leemhuis.info>
-In-Reply-To: <34d7f903-9d1a-d63b-0d32-b72ae775f26a@leemhuis.info>
+        s=k20201202; t=1667920521;
+        bh=PvBh27PBFCXtaQOidNxO6/5nh6d8hNXS9H8TeEJQGWY=;
+        h=From:To:Cc:Subject:Date:From;
+        b=s1r61w9en84boi854UCmYMIKi+URkrejGTIqnlaUXCqsCQR0EumUvOMOa3/NQgqHa
+         IOGJot8qHZjFfTdKFcdXPWUSsseD6FaxpXhLijTjW1rtr6IOPtR81lvFFvI/mdVLtV
+         kowEpr7QuXXFM8bJbQ7NBqYzzsxLSogdoMnFJWD9sumo44Ux/pVWpTSZnquTcHmMi4
+         WUAsQ5p+B1SjZQbUage81W8gc3CGIrt7UJ8mOy5BmK2pX2II3ei32dWkQ+pWnJFJHY
+         IDdpyRf4EU7/thqL8sEGBWjd/ktuok/yRXGsm5zZPTjrlM+Z92h+yAAFFoM/9ptbsv
+         Z3OuwaxRs6bDw==
 From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Tue, 8 Nov 2022 14:57:03 +0100
-X-Gmail-Original-Message-ID: <CAMj1kXFtitTuxVSBsxX0j_NHxwnX2oVupip4xy7TKqe-rja_Vw@mail.gmail.com>
-Message-ID: <CAMj1kXFtitTuxVSBsxX0j_NHxwnX2oVupip4xy7TKqe-rja_Vw@mail.gmail.com>
-Subject: Re: [Issue] EFI runtime-wrapper is broken
-To:     Thorsten Leemhuis <regressions@leemhuis.info>
-Cc:     Gavin Shan <gshan@redhat.com>,
-        linux-efi <linux-efi@vger.kernel.org>,
-        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
-Content-Type: text/plain; charset="UTF-8"
+To:     linux-efi@vger.kernel.org
+Cc:     linux-arm-kernel@lists.infradead.org, catalin.marinas@arm.com,
+        will@kernel.org, Ard Biesheuvel <ardb@kernel.org>,
+        Alexandru Elisei <alexandru.elisei@arm.com>
+Subject: [PATCH] arm64: efi: Disable only the misbehaving runtime service on sync exceptions
+Date:   Tue,  8 Nov 2022 16:15:09 +0100
+Message-Id: <20221108151509.2250968-1-ardb@kernel.org>
+X-Mailer: git-send-email 2.35.1
+MIME-Version: 1.0
+X-Developer-Signature: v=1; a=openpgp-sha256; l=4972; i=ardb@kernel.org; h=from:subject; bh=PvBh27PBFCXtaQOidNxO6/5nh6d8hNXS9H8TeEJQGWY=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjanJ80PTGETJgys6kgJwZxUIz77EdYcHZ/wxrk78y sCw2lJyJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCY2pyfAAKCRDDTyI5ktmPJA5zDA CXGiAN9bRURjddHoqlSB55gc3DSZAghsHOpY0Vqj8ACmNii/IkbTzzIs8EAZ/5U/20X04ORDjI3J76 pfNis9Ij+mvTU/GoOL6ZXI6bo+onEeYRg63CAvSCnxNYsLcmMAdXHkKafZwRyPUR0DsGfCyqA36HzK quyMdiX02AaYnAhEqwG6G2TRJBd84rFBEDCZ48Lb1ubAKBoc1fjlcCeVd1n4oyVSy1bUy7Tz3D2k1s KYizqIiL8m2qnFJxlzW8uT9l5KmiUhULbT02fch+MHlakpLNIyzFDucHY8knKxSqc/Uu8ffTJysl/j 8ld46XSBygXCLF1BNLbSTB5CIVgAqzjprcZiOq+O11JJEd06eMxCmndnE5O21ANOvlFG9moFjN2qTS J26ng13DVOB7b07qzXf2H3r37qeNl0WTCVYwrbV6eAFhCgWEgRz5HSgFPN6EstpCbiVeb/lnzfWwqc blG6+lEL6sU39m8oTdPw68mXthAO8jGzeT4PCMBIxiRDM=
+X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, 8 Nov 2022 at 13:26, Thorsten Leemhuis
-<regressions@leemhuis.info> wrote:
->
-> Hi, this is your Linux kernel regression tracker. CCing the regression
-> mailing list, as it should be in the loop for all regressions, as
-> explained here:
-> https://www.kernel.org/doc/html/latest/admin-guide/reporting-issues.html
->
-> On 28.10.22 11:39, Ard Biesheuvel wrote:
-> > On Fri, 28 Oct 2022 at 11:38, Gavin Shan <gshan@redhat.com> wrote:
-> >> On 10/28/22 5:21 PM, Ard Biesheuvel wrote:
-> >>> On Fri, 28 Oct 2022 at 11:10, Gavin Shan <gshan@redhat.com> wrote:
-> >>>> I ran into the following crash with v6.1.rc2. I'm not sure if it's known
-> >>>> issue. Last good version is v6.0.rc6/rc7. The kernel configuration is attached.
-> >>>
-> >>> This is probably related to the patch below. It means the firmware is
-> >>> buggy, and does not work as it should if the firmware never calls
-> >>> SetVirtualAddressMap() [and doing so is explicitly described as
-> >>> OPTIONAL by the EFI specification].
-> >>>
-> >>> The problem here is that other EFI implementations (primarily the
-> >>> Qualcomm ones used on Windows-on-ARM laptops) are buggy too, and don't
-> >>> tolerate SetVirtualAddressMap().
-> >>>
-> >>> Can you try whether reverting the patch below helps?
-> >>
-> >> I ran into the issue on server, equipped with Ampere CPUs. With d3549a938b73
-> >> reverted, the crash disappeared.
-> >
-> > Thanks for confirming
-> >
-> > Can you please share the complete boot log and the DMI/SMBIOS data? Thanks.
->
-> Gavin, did you ever send this?
->
-> Or Ard, was there any progress to get the issue fixed?
->
-> I ask because I have this on the list of tracked regression -- and I
-> noticed there is another report about problems caused by d3549a938b73
-> now from Alexandru Elisei:
-> https://lore.kernel.org/lkml/Y2lAB508TrrjpDPi@monolith.localdoman/
->
+Alexandru reports that his Ampere Altra machine, whose buggy firmware
+triggers a synchronous exception in its implementation of SetTime() when
+called without SetVirtualAddressMap() having been called first, doesn't
+quite recover from this, and starts spewing error messages into the log
+that are unrelated to the buggy runtime service.
 
-Yes, this is essentially the exact same problem, only on a different
-type of Ampere hardware
+The driver in question is the EFI RTC driver, which should be fixed in
+any case, as flooding the log like that (or doing any logging to the
+kernel log at all on something whuch is not a severe issue) is not ok.
 
-I have an idea how to fix this more comprehensively - I'll work with
-Alexandru to converge on a fix and get it queued up.
+However, in this particular case, it would be beneficial for both
+ordinary use as well as diagnostics regarding broken firmware if we only
+prevent the broken runtime service from being called again, and permit
+others (such as GetTime() which triggers the logging or the variable
+services) from being used as normal.
+
+So wire up the existing efi.runtime_supported_mask, and clear the
+service's bit in the mask if the generic runtime service wrapper
+observes a return value of EFI_ABORTED, which only happens if a service
+call is aborted due to an exception. (EFI_ABORTED is not documented as a
+valid error code for any of the EFI runtime services).
+
+Cc: Alexandru Elisei <alexandru.elisei@arm.com>
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+---
+ arch/arm64/kernel/efi.c                 |  1 -
+ arch/x86/platform/efi/quirks.c          |  2 +-
+ drivers/firmware/efi/runtime-wrappers.c |  6 ++++--
+ include/linux/efi.h                     | 24 ++++++++++++------------
+ 4 files changed, 17 insertions(+), 16 deletions(-)
+
+diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+index ee53f2a0aa03f54a..a3b8852f2698d9f7 100644
+--- a/arch/arm64/kernel/efi.c
++++ b/arch/arm64/kernel/efi.c
+@@ -153,7 +153,6 @@ asmlinkage efi_status_t __efi_rt_asm_recover(void);
+ asmlinkage efi_status_t efi_handle_runtime_exception(const char *f)
+ {
+ 	pr_err(FW_BUG "Synchronous exception occurred in EFI runtime service %s()\n", f);
+-	clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+ 	return EFI_ABORTED;
+ }
+ 
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index b0b848d6933afbcf..3f48fdf42d97dc1f 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -757,9 +757,9 @@ void efi_crash_gracefully_on_page_fault(unsigned long phys_addr)
+ 
+ 	/* Signal error status to the efi caller process */
+ 	efi_rts_work.status = EFI_ABORTED;
++	efi.runtime_supported_mask = 0;
+ 	complete(&efi_rts_work.efi_rts_comp);
+ 
+-	clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+ 	pr_info("Froze efi_rts_wq and disabled EFI Runtime Services\n");
+ 
+ 	/*
+diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
+index f3e54f6616f02475..336b8bcec86d0127 100644
+--- a/drivers/firmware/efi/runtime-wrappers.c
++++ b/drivers/firmware/efi/runtime-wrappers.c
+@@ -60,8 +60,8 @@ struct efi_runtime_work efi_rts_work;
+ ({									\
+ 	efi_rts_work.status = EFI_ABORTED;				\
+ 									\
+-	if (!efi_enabled(EFI_RUNTIME_SERVICES)) {			\
+-		pr_warn_once("EFI Runtime Services are disabled!\n");	\
++	if (!efi_rt_services_supported(efi_rts_work.efi_rts_id)) {	\
++		pr_warn_ratelimited("EFI Runtime Service is disabled!\n");\
+ 		goto exit;						\
+ 	}								\
+ 									\
+@@ -83,6 +83,8 @@ struct efi_runtime_work efi_rts_work;
+ 	else								\
+ 		pr_err("Failed to queue work to efi_rts_wq.\n");	\
+ 									\
++	if (efi_rts_work.status == EFI_ABORTED)				\
++		efi.runtime_supported_mask &= ~efi_rts_work.efi_rts_id;	\
+ exit:									\
+ 	efi_rts_work.efi_rts_id = EFI_NONE;				\
+ 	efi_rts_work.status;						\
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 929d559ad41d29c6..61b252386d61cc4d 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1254,18 +1254,18 @@ extern unsigned long rci2_table_phys;
+  */
+ enum efi_rts_ids {
+ 	EFI_NONE,
+-	EFI_GET_TIME,
+-	EFI_SET_TIME,
+-	EFI_GET_WAKEUP_TIME,
+-	EFI_SET_WAKEUP_TIME,
+-	EFI_GET_VARIABLE,
+-	EFI_GET_NEXT_VARIABLE,
+-	EFI_SET_VARIABLE,
+-	EFI_QUERY_VARIABLE_INFO,
+-	EFI_GET_NEXT_HIGH_MONO_COUNT,
+-	EFI_RESET_SYSTEM,
+-	EFI_UPDATE_CAPSULE,
+-	EFI_QUERY_CAPSULE_CAPS,
++	EFI_GET_TIME			= EFI_RT_SUPPORTED_GET_TIME,
++	EFI_SET_TIME			= EFI_RT_SUPPORTED_SET_TIME,
++	EFI_GET_WAKEUP_TIME		= EFI_RT_SUPPORTED_GET_WAKEUP_TIME,
++	EFI_SET_WAKEUP_TIME		= EFI_RT_SUPPORTED_SET_WAKEUP_TIME,
++	EFI_GET_VARIABLE		= EFI_RT_SUPPORTED_GET_VARIABLE,
++	EFI_GET_NEXT_VARIABLE		= EFI_RT_SUPPORTED_GET_NEXT_VARIABLE_NAME,
++	EFI_SET_VARIABLE		= EFI_RT_SUPPORTED_SET_VARIABLE,
++	EFI_GET_NEXT_HIGH_MONO_COUNT	= EFI_RT_SUPPORTED_GET_NEXT_HIGH_MONOTONIC_COUNT,
++	EFI_RESET_SYSTEM		= EFI_RT_SUPPORTED_RESET_SYSTEM,
++	EFI_UPDATE_CAPSULE		= EFI_RT_SUPPORTED_UPDATE_CAPSULE,
++	EFI_QUERY_CAPSULE_CAPS		= EFI_RT_SUPPORTED_QUERY_CAPSULE_CAPABILITIES,
++	EFI_QUERY_VARIABLE_INFO		= EFI_RT_SUPPORTED_QUERY_VARIABLE_INFO,
+ };
+ 
+ /*
+-- 
+2.35.1
+
