@@ -2,108 +2,112 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C168C4167B
-	for <linux-efi@archiver.kernel.org>; Wed, 16 Nov 2022 16:17:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C701C4332F
+	for <linux-efi@archiver.kernel.org>; Wed, 16 Nov 2022 16:17:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234127AbiKPQRV (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 16 Nov 2022 11:17:21 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53970 "EHLO
+        id S233835AbiKPQRW (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 16 Nov 2022 11:17:22 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54140 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234776AbiKPQRB (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 16 Nov 2022 11:17:01 -0500
+        with ESMTP id S234897AbiKPQRH (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 16 Nov 2022 11:17:07 -0500
 Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B303E57B7C;
-        Wed, 16 Nov 2022 08:16:59 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B5DD156EDD;
+        Wed, 16 Nov 2022 08:17:06 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 6A3AFB81DE0;
-        Wed, 16 Nov 2022 16:16:58 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 708CFC433C1;
-        Wed, 16 Nov 2022 16:16:56 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 7550DB81DA7;
+        Wed, 16 Nov 2022 16:17:05 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4B540C433C1;
+        Wed, 16 Nov 2022 16:17:03 +0000 (UTC)
 Authentication-Results: smtp.kernel.org;
-        dkim=pass (1024-bit key) header.d=zx2c4.com header.i=@zx2c4.com header.b="L3qpjO+h"
+        dkim=pass (1024-bit key) header.d=zx2c4.com header.i=@zx2c4.com header.b="BnW7RkGC"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=zx2c4.com; s=20210105;
-        t=1668615414;
+        t=1668615421;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=7081WT2vIv2P593Em1s6an5/PNnBOO7eRlHKQoDe8bM=;
-        b=L3qpjO+hA//nPICVxX6CEoFke5uoMjJPXe77EoYqr8paiIG2qZARvNIxdH2kXppvCokuzO
-        t3D6umAOT59195cQnZ3y3NYCT5LrvJad7gpDHbq++Zip2Bwpyu57wXsHEEQm0dbhOHsF/4
-        mIOkuGtdbh1b0ZOpC3kGn4b1D8KxeoQ=
-Received: by mail.zx2c4.com (ZX2C4 Mail Server) with ESMTPSA id d4ea79a6 (TLSv1.3:TLS_AES_256_GCM_SHA384:256:NO);
-        Wed, 16 Nov 2022 16:16:53 +0000 (UTC)
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=v24y1wfuWLq5Cu92sfEtPK6DD/spL3fwX1JCpyFIa2M=;
+        b=BnW7RkGC9Fcq2ZG1RT/d/CIyFvNnzxI+y3tkfmX8qqtcxb7VHTah3KU6Df9TGBZnCjZL2h
+        0CUAvsVt5vYzI7yOSV8tJkqq+2g8cFt4djJoqXUmtnOVb/wACoUWpyZt3MGKLIMK91kcRG
+        YJqSKfBTQd6IdUnDbhvx9XW3ApqlwBA=
+Received: by mail.zx2c4.com (ZX2C4 Mail Server) with ESMTPSA id fb4bb795 (TLSv1.3:TLS_AES_256_GCM_SHA384:256:NO);
+        Wed, 16 Nov 2022 16:17:01 +0000 (UTC)
 From:   "Jason A. Donenfeld" <Jason@zx2c4.com>
 To:     linux-efi@vger.kernel.org, linux-crypto@vger.kernel.org
 Cc:     "Jason A. Donenfeld" <Jason@zx2c4.com>,
         Ard Biesheuvel <ardb@kernel.org>,
-        Lennart Poettering <lennart@poettering.net>
-Subject: [PATCH RFC v1 0/6] Use EFI variables for random seed
-Date:   Wed, 16 Nov 2022 17:16:36 +0100
-Message-Id: <20221116161642.1670235-1-Jason@zx2c4.com>
+        Lennart Poettering <lennart@poettering.net>,
+        Mike Galbraith <efault@gmx.de>,
+        Sebastian Andrzej Siewior <bigeasy@linutronix.de>,
+        Petr Mladek <pmladek@suse.com>
+Subject: [PATCH RFC v1 2/6] vsprintf: initialize siphash key using notifier
+Date:   Wed, 16 Nov 2022 17:16:38 +0100
+Message-Id: <20221116161642.1670235-3-Jason@zx2c4.com>
+In-Reply-To: <20221116161642.1670235-1-Jason@zx2c4.com>
+References: <20221116161642.1670235-1-Jason@zx2c4.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This is a rough sketch of a proposal to use non-volatile EFI variables
-as random seeds for EFISTUB to manage.
+Rather than polling every second, use the new notifier to do this at
+exactly the right moment.
 
-Patch 1 adds (back) the random.c async notifier, so we can learn when
-the RNG is initialized.
+Cc: Mike Galbraith <efault@gmx.de>
+Cc: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+Cc: Petr Mladek <pmladek@suse.com>
+Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
+---
+ lib/vsprintf.c | 14 +++++---------
+ 1 file changed, 5 insertions(+), 9 deletions(-)
 
-Patch 2 uses it in vsprintf, because I promised Sebastian we'd do that
-if it ever gets added back for whatever reason.
-
-Patch 3 is already in efi.git and isn't new here, but is a pre-req for
-the next patch.
-
-Patch 4 uses the random seed from an EFI variable to pass to Linux.
-
-Patch 5 prevents the variable from being read by efivarfs. [Note:
-probably the legacy efifs needs updating too? Or has this been removed?]
-
-Patch 6 uses patch 1 to refresh the EFI variable when the RNG is
-initialized.
-
-If folks like this idea and it moves forward, 1,2,6 will be taken into
-my tree, and 3,4,5 will go via Ard's.
-
-Commit messages are rather sparse at the moment. I'll fill those out for
-the next non-RFC patchset if this idea isn't immediately demolished.
-
-The biggest consideration is wear leveling on the EFI variable flash
-chips. However, EFI *already* winds up writing to non-volatile memory on
-every single boot anyway, so maybe it's not actually a big deal?
-
-Thoughts?
-
-Cc: Ard Biesheuvel <ardb@kernel.org>
-Cc: Lennart Poettering <lennart@poettering.net>
-
-Ard Biesheuvel (1):
-  efi: random: combine bootloader provided RNG seed with RNG protocol
-    output
-
-Jason A. Donenfeld (5):
-  random: add back async readiness notifier
-  vsprintf: initialize siphash key using notifier
-  efi: stub: use random seed from EFI variable
-  efi: efivarfs: prohibit reading random seed variables
-  efi: refresh non-volatile random seed when RNG is initialized
-
- drivers/char/random.c                  | 30 +++++++++
- drivers/firmware/efi/efi.c             | 14 +++++
- drivers/firmware/efi/libstub/efistub.h |  2 +
- drivers/firmware/efi/libstub/random.c  | 85 +++++++++++++++++++++++---
- fs/efivarfs/file.c                     |  3 +
- include/linux/efi.h                    |  3 +-
- include/linux/random.h                 |  1 +
- lib/vsprintf.c                         | 14 ++---
- 8 files changed, 131 insertions(+), 21 deletions(-)
-
+diff --git a/lib/vsprintf.c b/lib/vsprintf.c
+index 24f37bab8bc1..70aa5de3c330 100644
+--- a/lib/vsprintf.c
++++ b/lib/vsprintf.c
+@@ -41,6 +41,7 @@
+ #include <linux/siphash.h>
+ #include <linux/compiler.h>
+ #include <linux/property.h>
++#include <linux/notifier.h>
+ #ifdef CONFIG_BLOCK
+ #include <linux/blkdev.h>
+ #endif
+@@ -752,26 +753,21 @@ early_param("debug_boot_weak_hash", debug_boot_weak_hash_enable);
+ 
+ static bool filled_random_ptr_key __read_mostly;
+ static siphash_key_t ptr_key __read_mostly;
+-static void fill_ptr_key_workfn(struct work_struct *work);
+-static DECLARE_DELAYED_WORK(fill_ptr_key_work, fill_ptr_key_workfn);
+ 
+-static void fill_ptr_key_workfn(struct work_struct *work)
++static int fill_ptr_key(struct notifier_block *nb, unsigned long action, void *data)
+ {
+-	if (!rng_is_initialized()) {
+-		queue_delayed_work(system_unbound_wq, &fill_ptr_key_work, HZ  * 2);
+-		return;
+-	}
+-
+ 	get_random_bytes(&ptr_key, sizeof(ptr_key));
+ 
+ 	/* Pairs with smp_rmb() before reading ptr_key. */
+ 	smp_wmb();
+ 	WRITE_ONCE(filled_random_ptr_key, true);
++	return 0;
+ }
+ 
+ static int __init vsprintf_init_hashval(void)
+ {
+-	fill_ptr_key_workfn(NULL);
++	static struct notifier_block fill_ptr_key_nb = { .notifier_call = fill_ptr_key };
++	notify_on_rng_initialized(&fill_ptr_key_nb);
+ 	return 0;
+ }
+ subsys_initcall(vsprintf_init_hashval)
 -- 
 2.38.1
 
