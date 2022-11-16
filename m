@@ -2,107 +2,184 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A049CC433FE
-	for <linux-efi@archiver.kernel.org>; Tue, 15 Nov 2022 11:32:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 46DB7C4332F
+	for <linux-efi@archiver.kernel.org>; Wed, 16 Nov 2022 16:17:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238109AbiKOLcm (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 15 Nov 2022 06:32:42 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37642 "EHLO
+        id S231221AbiKPQRU (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 16 Nov 2022 11:17:20 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54214 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238059AbiKOLcA (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 15 Nov 2022 06:32:00 -0500
+        with ESMTP id S237798AbiKPQRM (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 16 Nov 2022 11:17:12 -0500
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 56AA224948
-        for <linux-efi@vger.kernel.org>; Tue, 15 Nov 2022 03:31:41 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 188F556ED6;
+        Wed, 16 Nov 2022 08:17:12 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id D6740616C5
-        for <linux-efi@vger.kernel.org>; Tue, 15 Nov 2022 11:31:40 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DE9E4C433C1;
-        Tue, 15 Nov 2022 11:31:38 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1668511900;
-        bh=rn62bIUKfNDs4qARPw8jT2XBwnVNQ2diPDoNbFA7xA4=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=KY29oRW2w4aAlkXurwuEG+jqzSnvtn1NDiyN2U07IkVhG5TYvW4jfOtLuDdhjV5ht
-         A9V4+arFWeqC2y0OEzo2yDiL6Q+c81iqkwj00YwQB8mLoDaydNQJgGkMa2W7YisMJS
-         PI5XLYyzvs17nR+o87VHDt0/t/5495n7eBPuhl5CHC6NjinRzhfC+4OnB79gDZIchQ
-         Jf/Ftw55MxSfynsQTaZmakYOq3KtpLHjsdtfghm26SSmync5JPg+gYzkJMsghXJFYB
-         0Y1rMNIFMvKYNlz6JlWPt+cqwFC4ABNsKalydZtj157OgtNqELlSuga/3yZc4C0c9W
-         9zZj/3kGkPIqA==
-Date:   Tue, 15 Nov 2022 11:31:35 +0000
-From:   Will Deacon <will@kernel.org>
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     Mark Rutland <mark.rutland@arm.com>,
-        linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org,
-        keescook@chromium.org, Catalin Marinas <catalin.marinas@arm.com>,
-        Marc Zyngier <maz@kernel.org>
-Subject: Re: [PATCH v5 0/7] arm64: efi: leave MMU and caches on at boot
-Message-ID: <20221115113134.GC32523@willie-the-truck>
-References: <20221108182204.2447664-1-ardb@kernel.org>
- <Y26IE5NEVhyId4KH@FVFF77S0Q05N.cambridge.arm.com>
- <20221115111658.GA32523@willie-the-truck>
- <CAMj1kXFGakOpTyUqDrFGDRoRsSzG2bYQ=iZA86DahbjL_zvE7w@mail.gmail.com>
+        by dfw.source.kernel.org (Postfix) with ESMTPS id AC68161EA1;
+        Wed, 16 Nov 2022 16:17:11 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 71899C433D6;
+        Wed, 16 Nov 2022 16:17:10 +0000 (UTC)
+Authentication-Results: smtp.kernel.org;
+        dkim=pass (1024-bit key) header.d=zx2c4.com header.i=@zx2c4.com header.b="LMtT5g0j"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=zx2c4.com; s=20210105;
+        t=1668615429;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=CtDPiLK4h3/qHxrwQ4LOLbCxpSziESOZ1KCyGGtwumM=;
+        b=LMtT5g0jbC2n+YnsJpCMOismh75conFLfg9ZfXbF3B4K+4Cdpx+P3xEycUSpeDoIb3L1+f
+        PaDeZDIuBn2qmyEaYUzK/TP6VWZuLGyCGF46Q8ZJABCXgPm0ZeLbYiPAceevFmxQGaICQP
+        80fKEVsVLBK/swJSk1z8LnuUnUIGcw0=
+Received: by mail.zx2c4.com (ZX2C4 Mail Server) with ESMTPSA id 99e58ae7 (TLSv1.3:TLS_AES_256_GCM_SHA384:256:NO);
+        Wed, 16 Nov 2022 16:17:09 +0000 (UTC)
+From:   "Jason A. Donenfeld" <Jason@zx2c4.com>
+To:     linux-efi@vger.kernel.org, linux-crypto@vger.kernel.org
+Cc:     "Jason A. Donenfeld" <Jason@zx2c4.com>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Lennart Poettering <lennart@poettering.net>
+Subject: [PATCH RFC v1 4/6] efi: stub: use random seed from EFI variable
+Date:   Wed, 16 Nov 2022 17:16:40 +0100
+Message-Id: <20221116161642.1670235-5-Jason@zx2c4.com>
+In-Reply-To: <20221116161642.1670235-1-Jason@zx2c4.com>
+References: <20221116161642.1670235-1-Jason@zx2c4.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAMj1kXFGakOpTyUqDrFGDRoRsSzG2bYQ=iZA86DahbjL_zvE7w@mail.gmail.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, Nov 15, 2022 at 12:21:55PM +0100, Ard Biesheuvel wrote:
-> On Tue, 15 Nov 2022 at 12:17, Will Deacon <will@kernel.org> wrote:
-> >
-> > On Fri, Nov 11, 2022 at 05:36:19PM +0000, Mark Rutland wrote:
-> > > On Tue, Nov 08, 2022 at 07:21:57PM +0100, Ard Biesheuvel wrote:
-> > > > The purpose of this series is to remove any explicit cache maintenance
-> > > > for coherency during early boot that becomes unnecessary if we simply
-> > > > retain the cacheable 1:1 mapping of all of system RAM provided by EFI,
-> > > > and use it to populate the ID map page tables. After setting up this
-> > > > preliminary ID map, we disable the MMU, drop to EL1, reprogram the MAIR,
-> > > > TCR and SCTLR registers as before, and proceed as usual, avoiding the
-> > > > need for any manipulations of memory while the MMU and caches are off.
-> > > >
-> > > > The only properties of the firmware provided 1:1 map we rely on is that
-> > > > it does not require any explicit cache maintenance for coherency, and
-> > > > that it covers the entire memory footprint of the image, including the
-> > > > BSS and padding at the end - all else is under control of the kernel
-> > > > itself, as before.
-> > >
-> > > As a high-level thing, I'm still very much not keen on entering the kernel with
-> > > the MMU on. Given that we have to support booting with the MMU off for !EFI
-> > > boot (including kexec when EFI is in use), I think this makes it harder to
-> > > reason about the boot code overall (e.g. due to the conditional maintenance
-> > > added to head.S), and adds more scope for error, even if it simplifies the EFI
-> > > stub itself.
-> >
-> > As discussed offline, two things that would help the current series are:
-> >
-> >   (1) Some performance numbers comparing MMU off vs MMU on boot
-> >
-> >   (2) Use of a separate entry point for the MMU on case, potentially failing
-> >       the boot if the MMU is on and we're not using EFI
-> >
-> 
-> Ack.
-> 
-> But thinking about (2) again, failing the boot is better done at a
-> time when you can inform the user about it, no?
-> 
-> IOW, just going into a deadloop really early if you enter the bare
-> metal entry point with the MMU on is going to be hard to distinguish
-> from other issues, whereas panicking after the console up is more
-> likely to help getting the actual issue diagnosed.
+Since we have some storage, we can manage non-volatile seeds directly
+from EFISTUB. This commit passes the contents of an EFI variable to the
+kernel via the existing configuration table.
 
-Agreed.
+Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
+---
+ drivers/firmware/efi/libstub/random.c | 59 +++++++++++++++++++++------
+ include/linux/efi.h                   |  1 +
+ 2 files changed, 48 insertions(+), 12 deletions(-)
 
-> So perhaps we should panic() instead of warn+taint when this condition
-> occurs, and do it from an early initcall instead of from setup_arch().
+diff --git a/drivers/firmware/efi/libstub/random.c b/drivers/firmware/efi/libstub/random.c
+index f85d2c066877..1e72013a6457 100644
+--- a/drivers/firmware/efi/libstub/random.c
++++ b/drivers/firmware/efi/libstub/random.c
+@@ -67,14 +67,25 @@ efi_status_t efi_random_get_seed(void)
+ 	efi_guid_t rng_proto = EFI_RNG_PROTOCOL_GUID;
+ 	efi_guid_t rng_algo_raw = EFI_RNG_ALGORITHM_RAW;
+ 	efi_guid_t rng_table_guid = LINUX_EFI_RANDOM_SEED_TABLE_GUID;
++	efi_char16_t rng_nv_seed_var[] = LINUX_EFI_RANDOM_NV_SEED_VAR;
+ 	struct linux_efi_random_seed *prev_seed, *seed = NULL;
+-	int prev_seed_size = 0, seed_size = EFI_RANDOM_SEED_SIZE;
++	u8 nv_seed[EFI_RANDOM_SEED_SIZE];
++	unsigned long prev_seed_size = 0, nv_seed_size = sizeof(nv_seed), seed_size = 0, offset = 0;
+ 	efi_rng_protocol_t *rng = NULL;
+ 	efi_status_t status;
+ 
+ 	status = efi_bs_call(locate_protocol, &rng_proto, NULL, (void **)&rng);
+-	if (status != EFI_SUCCESS)
+-		return status;
++	if (status == EFI_SUCCESS)
++		seed_size += EFI_RANDOM_SEED_SIZE;
++
++	status = get_efi_var(rng_nv_seed_var, &rng_table_guid, NULL, &nv_seed_size, nv_seed);
++	if (status == EFI_SUCCESS)
++		seed_size += nv_seed_size;
++	else
++		nv_seed_size = 0;
++
++	if (!seed_size)
++		return EFI_NOT_FOUND;
+ 
+ 	/*
+ 	 * Check whether a seed was provided by a prior boot stage. In that
+@@ -83,7 +94,7 @@ efi_status_t efi_random_get_seed(void)
+ 	 * Note that we should read the seed size with caution, in case the
+ 	 * table got corrupted in memory somehow.
+ 	 */
+-	prev_seed = get_efi_config_table(LINUX_EFI_RANDOM_SEED_TABLE_GUID);
++	prev_seed = get_efi_config_table(rng_table_guid);
+ 	if (prev_seed && prev_seed->size <= 512U) {
+ 		prev_seed_size = prev_seed->size;
+ 		seed_size += prev_seed_size;
+@@ -103,7 +114,7 @@ efi_status_t efi_random_get_seed(void)
+ 	}
+ 
+ 	status = efi_call_proto(rng, get_rng, &rng_algo_raw,
+-				EFI_RANDOM_SEED_SIZE, seed->bits);
++				EFI_RANDOM_SEED_SIZE, seed->bits + offset);
+ 
+ 	if (status == EFI_UNSUPPORTED)
+ 		/*
+@@ -111,16 +122,40 @@ efi_status_t efi_random_get_seed(void)
+ 		 * is not implemented.
+ 		 */
+ 		status = efi_call_proto(rng, get_rng, NULL,
+-					EFI_RANDOM_SEED_SIZE, seed->bits);
++					EFI_RANDOM_SEED_SIZE, seed->bits + offset);
+ 
+-	if (status != EFI_SUCCESS)
++	if (status == EFI_SUCCESS)
++		offset += EFI_RANDOM_SEED_SIZE;
++
++	if (nv_seed_size) {
++		memcpy(seed->bits + offset, nv_seed, nv_seed_size);
++		memzero_explicit(nv_seed, nv_seed_size);
++		/*
++		 * Zero it out before committing to using it. TODO: in the
++		 * future, maybe we can hash it forward instead, which is
++		 * better and also reduces the amount of writes here.
++		 */
++		status = set_efi_var(rng_nv_seed_var, &rng_table_guid,
++				     EFI_VARIABLE_NON_VOLATILE |
++				     EFI_VARIABLE_BOOTSERVICE_ACCESS |
++				     EFI_VARIABLE_RUNTIME_ACCESS, nv_seed_size, nv_seed);
++		if (status == EFI_SUCCESS)
++			status = set_efi_var(rng_nv_seed_var, &rng_table_guid, 0, 0, NULL);
++		if (status == EFI_SUCCESS)
++			offset += nv_seed_size;
++		else
++			memzero_explicit(seed->bits + offset, nv_seed_size);
++	}
++
++	if (!offset)
+ 		goto err_freepool;
+ 
+-	seed->size = seed_size;
+-	if (prev_seed_size)
+-		memcpy(seed->bits + EFI_RANDOM_SEED_SIZE, prev_seed->bits,
+-		       prev_seed_size);
++	if (prev_seed_size) {
++		memcpy(seed->bits + offset, prev_seed->bits, prev_seed_size);
++		offset += prev_seed_size;
++	}
+ 
++	seed->size = offset;
+ 	status = efi_bs_call(install_configuration_table, &rng_table_guid, seed);
+ 	if (status != EFI_SUCCESS)
+ 		goto err_freepool;
+@@ -135,7 +170,7 @@ efi_status_t efi_random_get_seed(void)
+ err_freepool:
+ 	memzero_explicit(seed, struct_size(seed, bits, seed_size));
+ 	efi_bs_call(free_pool, seed);
+-	efi_warn("Failed to obtain seed from EFI_RNG_PROTOCOL\n");
++	efi_warn("Failed to obtain seed from EFI_RNG_PROTOCOL and EFI variable\n");
+ err_warn:
+ 	if (prev_seed)
+ 		efi_warn("Retaining bootloader-supplied seed only");
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 4aa1dbc7b064..0e93510b23b5 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -408,6 +408,7 @@ void efi_native_runtime_setup(void);
+ #define LINUX_EFI_ARM_CPU_STATE_TABLE_GUID	EFI_GUID(0xef79e4aa, 0x3c3d, 0x4989,  0xb9, 0x02, 0x07, 0xa9, 0x43, 0xe5, 0x50, 0xd2)
+ #define LINUX_EFI_LOADER_ENTRY_GUID		EFI_GUID(0x4a67b082, 0x0a4c, 0x41cf,  0xb6, 0xc7, 0x44, 0x0b, 0x29, 0xbb, 0x8c, 0x4f)
+ #define LINUX_EFI_RANDOM_SEED_TABLE_GUID	EFI_GUID(0x1ce1e5bc, 0x7ceb, 0x42f2,  0x81, 0xe5, 0x8a, 0xad, 0xf1, 0x80, 0xf5, 0x7b)
++#define LINUX_EFI_RANDOM_NV_SEED_VAR		L"RandomNVSeed"
+ #define LINUX_EFI_TPM_EVENT_LOG_GUID		EFI_GUID(0xb7799cb0, 0xeca2, 0x4943,  0x96, 0x67, 0x1f, 0xae, 0x07, 0xb7, 0x47, 0xfa)
+ #define LINUX_EFI_TPM_FINAL_LOG_GUID		EFI_GUID(0x1e2ed096, 0x30e2, 0x4254,  0xbd, 0x89, 0x86, 0x3b, 0xbe, 0xf8, 0x23, 0x25)
+ #define LINUX_EFI_MEMRESERVE_TABLE_GUID		EFI_GUID(0x888eb0c6, 0x8ede, 0x4ff5,  0xa8, 0xf0, 0x9a, 0xee, 0x5c, 0xb9, 0x77, 0xc2)
+-- 
+2.38.1
 
-To be honest, and I appreciate that this is unhelpful, but I'm fine with
-the warn+taint and prefer that to a fatal stop.
-
-Will
