@@ -2,35 +2,35 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7083EC433FE
-	for <linux-efi@archiver.kernel.org>; Tue, 22 Nov 2022 16:11:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A070C4321E
+	for <linux-efi@archiver.kernel.org>; Tue, 22 Nov 2022 16:12:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234306AbiKVQLr (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 22 Nov 2022 11:11:47 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43458 "EHLO
+        id S229507AbiKVQMR (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 22 Nov 2022 11:12:17 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43154 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234232AbiKVQLU (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 22 Nov 2022 11:11:20 -0500
+        with ESMTP id S234297AbiKVQLi (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 22 Nov 2022 11:11:38 -0500
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0E6FB74A89;
-        Tue, 22 Nov 2022 08:11:05 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 66EAB74AA5;
+        Tue, 22 Nov 2022 08:11:09 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 8948461767;
-        Tue, 22 Nov 2022 16:11:04 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2C2F6C433C1;
-        Tue, 22 Nov 2022 16:11:02 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id EB0526178F;
+        Tue, 22 Nov 2022 16:11:08 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 98F21C433B5;
+        Tue, 22 Nov 2022 16:11:06 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1669133463;
-        bh=iYbIjrknrGRSBysYjlJW1iQdlzPwOmOOE6edC0L0zHc=;
+        s=k20201202; t=1669133468;
+        bh=WhXdkD4dUeFlbCa2uQ7/WXKYDJLeVqOD82K+vPxNRBU=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=InX5b41Lk7aO+j7mr91zm2S094vIgHGRu96RW42bGv7bTu209E7UZ/BemYc3mANJr
-         JmVMGJLFjRElkY3sL+cAaHNXRv1ZXmkIiVs8XQzLiLkUiTe8YlV4Vykdomvd0QdcMj
-         r5bUYIFsLOCv0dxQo4GetJL75n9C59S+zN/muNWveo9WerIqqca9MSfaJ8t1GUhgoT
-         0aYLeI/E9zItK+NIsdTC8YkMdtmPtshl+TQIZQOwNgyeE3CENgcVU0/Jf1k3/aJpja
-         OAKGjIjAbBzCR+YERcFP85AxH6IezpgbufDzYWEyFxDtcgZKJoGhCElZCqaaWUlIEA
-         3WZfxWT8tVcfA==
+        b=XP2d5Vn5IhYOWUComKlIB6Z9cXXN/cA51C1aeGE9gGN8yeNbmQRq1ICdueb71n0lH
+         obE7QRwE3PL44uUF9iCUvBppYz/p3rsCzWPsPAOnMa/cjNsCIlQwIsrJKVa7mptG6J
+         3K0iR9VKg97H5GHa10EkGRiPp4/jy9qoW+kyovoGqWrewCTfC+PVBlCtoVtrtnNKrF
+         hP46x1yNmA4pxsd08Hlxx0jM1nJ+jpcVyJIImgIdBTbOwnDnBYMj+gMEVXZT646uQI
+         vNWOzqoeSG2rOb2eLvu9krtCbJPnR8tf105bt+sEt9SiYVAD9DOlL3fOZnZ3JYa/ob
+         3Ha6DFMdavgKw==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -38,191 +38,59 @@ Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
         Dave Hansen <dave.hansen@linux.intel.com>,
         Michael Roth <michael.roth@amd.com>
-Subject: [PATCH v3 14/17] x86/compressed: move startup32_check_sev_cbit() out of head_64.S
-Date:   Tue, 22 Nov 2022 17:10:14 +0100
-Message-Id: <20221122161017.2426828-15-ardb@kernel.org>
+Subject: [PATCH v3 16/17] x86/compressed: only build mem_encrypt.S if AMD_MEM_ENCRYPT=y
+Date:   Tue, 22 Nov 2022 17:10:16 +0100
+Message-Id: <20221122161017.2426828-17-ardb@kernel.org>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20221122161017.2426828-1-ardb@kernel.org>
 References: <20221122161017.2426828-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=5291; i=ardb@kernel.org; h=from:subject; bh=iYbIjrknrGRSBysYjlJW1iQdlzPwOmOOE6edC0L0zHc=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjfPRjYXZDaUISly8JZvkN6lWigmkVa29XxkMwdVUp 3JxEe9mJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCY3z0YwAKCRDDTyI5ktmPJOWuDA CyuwiYOaZkQCmzL2X7SSqPNjEpNsTbNtIsntl6ESJ6uEYBcUbZEMVksW98EGtXOlE1vRyxi2NgJwML D7Qdtl8+mVR8lXEv12WOXVyz9A38ycBSAt+TLdNlG0mwVyROKiMZflyfNPKGGlwtaaJ2Nryg2ugyKP uTcoBYaLegt4jDGDHWZN66opymyizekQf1qaO9bEiMlfdmbzCAGS/ieTGfLURHwBGDJkuHv27WHWeb gpYgSp39fD1cvY4xckmBwTg5aC+D/QiUQ1xv31X7WBoX5/eFRj7wGdIkwg+5lC1yPDdJyb9DmuVlo9 WRkBAazwQNWbBOhB3aU/aQ6OaAzmCSl9yqECBEAM8PNMX/Ftn/k67FAfLIOCyqlTA0W050mdry+Svn 4q8svDEvfyYTkbOxtGz/b4zQ/3RsoD3BywJdz/tELS3GRYsyjBdOgxr6IMGOqUYmuLOz9WrKIV92GR pfykD6yymOP+I4htLWJP3EKGf/QqtA7ilmrDc05ukFXBs=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1513; i=ardb@kernel.org; h=from:subject; bh=WhXdkD4dUeFlbCa2uQ7/WXKYDJLeVqOD82K+vPxNRBU=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjfPRmkT6ecGA/cAN7llRJkxgNCUnGuU4XlPtqQLSt MJfoSUKJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCY3z0ZgAKCRDDTyI5ktmPJIROC/ 47FixYSC5DsCya9EY2tPWjzFOO3btlyqulJ0T+UDx2P378vfkSo7epzYht6hTrbu0eyKl8sbBbOJod HOzI5it103YIBtch6jbzm+ecyPY/6Liuku1ipJgc7uCOmfoHVUWa4/2CUinI0+lPqV2ZQmOlPXw9eS VeowN57ItdpLsaYa4kph88PLKON7dl7eZlIAi/lATz1moiBiuiHHo+HUQBQw+V6NW0feamxq7zD+cS XLotitFVa3AccaAAzAI1Pw960takGXHX7h+fVe60wZVHwI9LedRUcESNqpnjZKqZpPkvdotIQsyHaW 78iubNh1PsE8xpHF1GlcaCqaMg1iXb652wywgjIySJg8lmIAo5dM8hUUPtTRUHb69VOQJnYDiv/O8Q 7WnF4vfyjCRDhMqSy+ofLnqY2SS+flxH/p/8TTX+afsj8e63dc/WmCfIjPqfU955GIg2Flj1oSPi1S DVK98PcqjDCeIfDfwDzWB3sEh/W64p5dt4vTlomv+Qc3Q=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Now that the startup32_check_sev_cbit() routine can execute from
-anywhere and behaves like an ordinary function, we no longer need to
-keep it in head_64.S.
+Avoid building the mem_encrypt.o object if memory encryption support is
+not enabled to begin with.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/boot/compressed/head_64.S     | 71 --------------------
- arch/x86/boot/compressed/mem_encrypt.S | 68 +++++++++++++++++++
- 2 files changed, 68 insertions(+), 71 deletions(-)
+ arch/x86/boot/compressed/Makefile      | 2 +-
+ arch/x86/boot/compressed/mem_encrypt.S | 2 --
+ 2 files changed, 1 insertion(+), 3 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
-index 272b2e97456f0dcf..0cfc8ce273a2731c 100644
---- a/arch/x86/boot/compressed/head_64.S
-+++ b/arch/x86/boot/compressed/head_64.S
-@@ -718,77 +718,6 @@ SYM_DATA_START(boot_idt)
- 	.endr
- SYM_DATA_END_LABEL(boot_idt, SYM_L_GLOBAL, boot_idt_end)
- 
--/*
-- * Check for the correct C-bit position when the startup_32 boot-path is used.
-- *
-- * The check makes use of the fact that all memory is encrypted when paging is
-- * disabled. The function creates 64 bits of random data using the RDRAND
-- * instruction. RDRAND is mandatory for SEV guests, so always available. If the
-- * hypervisor violates that the kernel will crash right here.
-- *
-- * The 64 bits of random data are stored to a memory location and at the same
-- * time kept in the %eax and %ebx registers. Since encryption is always active
-- * when paging is off the random data will be stored encrypted in main memory.
-- *
-- * Then paging is enabled. When the C-bit position is correct all memory is
-- * still mapped encrypted and comparing the register values with memory will
-- * succeed. An incorrect C-bit position will map all memory unencrypted, so that
-- * the compare will use the encrypted random data and fail.
-- */
--#ifdef CONFIG_AMD_MEM_ENCRYPT
--	.text
--SYM_FUNC_START(startup32_check_sev_cbit)
--	pushl	%ebx
--	pushl	%ebp
--
--	call	0f
--0:	popl	%ebp
--
--	/* Check for non-zero sev_status */
--	movl	(sev_status - 0b)(%ebp), %eax
--	testl	%eax, %eax
--	jz	4f
--
--	/*
--	 * Get two 32-bit random values - Don't bail out if RDRAND fails
--	 * because it is better to prevent forward progress if no random value
--	 * can be gathered.
--	 */
--1:	rdrand	%eax
--	jnc	1b
--2:	rdrand	%ebx
--	jnc	2b
--
--	/* Store to memory and keep it in the registers */
--	leal	(sev_check_data - 0b)(%ebp), %ebp
--	movl	%eax, 0(%ebp)
--	movl	%ebx, 4(%ebp)
--
--	/* Enable paging to see if encryption is active */
--	movl	%cr0, %edx			 /* Backup %cr0 in %edx */
--	movl	$(X86_CR0_PG | X86_CR0_PE), %ecx /* Enable Paging and Protected mode */
--	movl	%ecx, %cr0
--
--	cmpl	%eax, 0(%ebp)
--	jne	3f
--	cmpl	%ebx, 4(%ebp)
--	jne	3f
--
--	movl	%edx, %cr0	/* Restore previous %cr0 */
--
--	jmp	4f
--
--3:	/* Check failed - hlt the machine */
--	hlt
--	jmp	3b
--
--4:
--	popl	%ebp
--	popl	%ebx
--	RET
--SYM_FUNC_END(startup32_check_sev_cbit)
--#endif
--
- /*
-  * Stack and heap for uncompression
-  */
+diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
+index cd1a6295b957ea1d..3dc5db651dd0a197 100644
+--- a/arch/x86/boot/compressed/Makefile
++++ b/arch/x86/boot/compressed/Makefile
+@@ -100,7 +100,7 @@ vmlinux-objs-$(CONFIG_RANDOMIZE_BASE) += $(obj)/kaslr.o
+ ifdef CONFIG_X86_64
+ 	vmlinux-objs-y += $(obj)/ident_map_64.o
+ 	vmlinux-objs-y += $(obj)/idt_64.o $(obj)/idt_handlers_64.o
+-	vmlinux-objs-y += $(obj)/mem_encrypt.o
++	vmlinux-objs-$(CONFIG_AMD_MEM_ENCRYPT) += $(obj)/mem_encrypt.o
+ 	vmlinux-objs-y += $(obj)/pgtable_64.o
+ 	vmlinux-objs-$(CONFIG_AMD_MEM_ENCRYPT) += $(obj)/sev.o
+ endif
 diff --git a/arch/x86/boot/compressed/mem_encrypt.S b/arch/x86/boot/compressed/mem_encrypt.S
-index 6747e5e4c696637c..14cf04a1ed091655 100644
+index e69674588a31c81f..32f7cc8a862547e4 100644
 --- a/arch/x86/boot/compressed/mem_encrypt.S
 +++ b/arch/x86/boot/compressed/mem_encrypt.S
-@@ -243,6 +243,74 @@ SYM_FUNC_START(startup32_load_idt)
- 	RET
- SYM_FUNC_END(startup32_load_idt)
+@@ -307,7 +307,6 @@ SYM_FUNC_END(startup32_check_sev_cbit)
  
-+/*
-+ * Check for the correct C-bit position when the startup_32 boot-path is used.
-+ *
-+ * The check makes use of the fact that all memory is encrypted when paging is
-+ * disabled. The function creates 64 bits of random data using the RDRAND
-+ * instruction. RDRAND is mandatory for SEV guests, so always available. If the
-+ * hypervisor violates that the kernel will crash right here.
-+ *
-+ * The 64 bits of random data are stored to a memory location and at the same
-+ * time kept in the %eax and %ebx registers. Since encryption is always active
-+ * when paging is off the random data will be stored encrypted in main memory.
-+ *
-+ * Then paging is enabled. When the C-bit position is correct all memory is
-+ * still mapped encrypted and comparing the register values with memory will
-+ * succeed. An incorrect C-bit position will map all memory unencrypted, so that
-+ * the compare will use the encrypted random data and fail.
-+ */
-+SYM_FUNC_START(startup32_check_sev_cbit)
-+	pushl	%ebx
-+	pushl	%ebp
-+
-+	call	0f
-+0:	popl	%ebp
-+
-+	/* Check for non-zero sev_status */
-+	movl	(sev_status - 0b)(%ebp), %eax
-+	testl	%eax, %eax
-+	jz	4f
-+
-+	/*
-+	 * Get two 32-bit random values - Don't bail out if RDRAND fails
-+	 * because it is better to prevent forward progress if no random value
-+	 * can be gathered.
-+	 */
-+1:	rdrand	%eax
-+	jnc	1b
-+2:	rdrand	%ebx
-+	jnc	2b
-+
-+	/* Store to memory and keep it in the registers */
-+	leal	(sev_check_data - 0b)(%ebp), %ebp
-+	movl	%eax, 0(%ebp)
-+	movl	%ebx, 4(%ebp)
-+
-+	/* Enable paging to see if encryption is active */
-+	movl	%cr0, %edx			 /* Backup %cr0 in %edx */
-+	movl	$(X86_CR0_PG | X86_CR0_PE), %ecx /* Enable Paging and Protected mode */
-+	movl	%ecx, %cr0
-+
-+	cmpl	%eax, 0(%ebp)
-+	jne	3f
-+	cmpl	%ebx, 4(%ebp)
-+	jne	3f
-+
-+	movl	%edx, %cr0	/* Restore previous %cr0 */
-+
-+	jmp	4f
-+
-+3:	/* Check failed - hlt the machine */
-+	hlt
-+	jmp	3b
-+
-+4:
-+	popl	%ebp
-+	popl	%ebx
-+	RET
-+SYM_FUNC_END(startup32_check_sev_cbit)
-+
- 	.code64
+ 	.data
  
- #include "../../kernel/sev_verify_cbit.S"
+-#ifdef CONFIG_AMD_MEM_ENCRYPT
+ 	.balign	8
+ SYM_DATA(sme_me_mask,		.quad 0)
+ SYM_DATA(sev_status,		.quad 0)
+@@ -323,4 +322,3 @@ SYM_DATA_START_LOCAL(boot32_idt_desc)
+ 	.word	. - boot32_idt - 1
+ 	.long	0
+ SYM_DATA_END(boot32_idt_desc)
+-#endif
 -- 
 2.35.1
 
