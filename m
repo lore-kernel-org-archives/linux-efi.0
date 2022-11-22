@@ -2,29 +2,29 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 84FF3C47088
-	for <linux-efi@archiver.kernel.org>; Tue, 22 Nov 2022 11:13:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EDE42C43217
+	for <linux-efi@archiver.kernel.org>; Tue, 22 Nov 2022 11:13:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232779AbiKVLNF (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 22 Nov 2022 06:13:05 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59632 "EHLO
+        id S233119AbiKVLNG (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 22 Nov 2022 06:13:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59822 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233033AbiKVLMu (ORCPT
+        with ESMTP id S233042AbiKVLMu (ORCPT
         <rfc822;linux-efi@vger.kernel.org>); Tue, 22 Nov 2022 06:12:50 -0500
 Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2F8002673;
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F23FD2BD2;
         Tue, 22 Nov 2022 03:12:48 -0800 (PST)
 Received: from localhost.localdomain (unknown [83.149.199.65])
-        by mail.ispras.ru (Postfix) with ESMTPSA id 5F9CF40737BF;
-        Tue, 22 Nov 2022 11:12:41 +0000 (UTC)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 5F9CF40737BF
+        by mail.ispras.ru (Postfix) with ESMTPSA id 7B3A340737DC;
+        Tue, 22 Nov 2022 11:12:43 +0000 (UTC)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 7B3A340737DC
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ispras.ru;
-        s=default; t=1669115561;
-        bh=yLQbGes8MGXboxk0W0ZEpZH6+wuhbRcghPYnIxLpUGE=;
+        s=default; t=1669115563;
+        bh=PQtsrCYU1PKgl/tUvA5tLuxewf/SvD2lWTLiW0J0hPU=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=nXF1x2Zs9hgLsP6hyg+4GamD9SM67ZWEuTf5NPpXk1gRC1LYnMzHVmlsTYWjMZQka
-         j2KMoOit5Cl6d5Gh4iITL6MLul5NRLNQmCEQDNmQz8ySaheTi2NzeaozLsPBNU7di1
-         8dkuNtO6oJGySRYudBBLyTcachKtdGNhrjqAUumI=
+        b=aoR9o6GCQktf0NJUvawuKROyXeRphTzk4l2u/3i189V58z4DVD61ktH5HW92MSIrk
+         ohC0y4cHtZYMLLJVe/K/zZIfQ2MYcuyfqlcjjq0Tu2rP3nERn4wRC19etwywnbR9SP
+         wq32Lt78Hns8pUov/+JGW3NfR/aeb0gAkg6qF/3U=
 From:   Evgeniy Baskov <baskov@ispras.ru>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
@@ -39,9 +39,9 @@ Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
         joeyli <jlee@suse.com>, lvc-project@linuxtesting.org,
         x86@kernel.org, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org
-Subject: [PATCH v3 05/24] x86/boot: Support 4KB pages for identity mapping
-Date:   Tue, 22 Nov 2022 14:12:14 +0300
-Message-Id: <4fe2e1ba651511d279f6c32af1f0c993083e64ac.1668958803.git.baskov@ispras.ru>
+Subject: [PATCH v3 13/24] x86/boot: Split trampoline and pt init code
+Date:   Tue, 22 Nov 2022 14:12:22 +0300
+Message-Id: <c0eb4bb3d9ab15b0076eebfaa4f281cfa2df75fc.1668958803.git.baskov@ispras.ru>
 X-Mailer: git-send-email 2.37.4
 In-Reply-To: <cover.1668958803.git.baskov@ispras.ru>
 References: <cover.1668958803.git.baskov@ispras.ru>
@@ -51,307 +51,126 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Current identity mapping code only supports 2M and 1G pages.
-4KB pages are desirable for better memory protection granularity
-in compressed kernel code.
+When allocating trampoline from libstub trampoline allocation is
+performed separately, so it needs to be skipped.
 
-Change identity mapping code to support 4KB pages and
-memory remapping with different attributes.
+Split trampoline initialization and allocation code into two
+functions to make them invokable separately.
 
 Tested-by: Mario Limonciello <mario.limonciello@amd.com>
 Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
 ---
- arch/x86/include/asm/init.h |   1 +
- arch/x86/mm/ident_map.c     | 185 +++++++++++++++++++++++++++++-------
- 2 files changed, 154 insertions(+), 32 deletions(-)
+ arch/x86/boot/compressed/pgtable_64.c | 73 +++++++++++++++++----------
+ 1 file changed, 46 insertions(+), 27 deletions(-)
 
-diff --git a/arch/x86/include/asm/init.h b/arch/x86/include/asm/init.h
-index 5f1d3c421f68..a8277ee82c51 100644
---- a/arch/x86/include/asm/init.h
-+++ b/arch/x86/include/asm/init.h
-@@ -8,6 +8,7 @@ struct x86_mapping_info {
- 	unsigned long page_flag;	 /* page flag for PMD or PUD entry */
- 	unsigned long offset;		 /* ident mapping offset */
- 	bool direct_gbpages;		 /* PUD level 1GB page support */
-+	bool allow_4kpages;		 /* Allow more granular mappings with 4K pages */
- 	unsigned long kernpg_flag;	 /* kernel pagetable flag override */
- };
- 
-diff --git a/arch/x86/mm/ident_map.c b/arch/x86/mm/ident_map.c
-index 968d7005f4a7..662e794a325d 100644
---- a/arch/x86/mm/ident_map.c
-+++ b/arch/x86/mm/ident_map.c
-@@ -4,24 +4,127 @@
-  * included by both the compressed kernel and the regular kernel.
-  */
- 
--static void ident_pmd_init(struct x86_mapping_info *info, pmd_t *pmd_page,
--			   unsigned long addr, unsigned long end)
-+static void ident_pte_init(struct x86_mapping_info *info, pte_t *pte_page,
-+			   unsigned long addr, unsigned long end,
-+			   unsigned long flags)
- {
--	addr &= PMD_MASK;
--	for (; addr < end; addr += PMD_SIZE) {
-+	addr &= PAGE_MASK;
-+	for (; addr < end; addr += PAGE_SIZE) {
-+		pte_t *pte = pte_page + pte_index(addr);
-+
-+		set_pte(pte, __pte((addr - info->offset) | flags));
-+	}
-+}
-+
-+pte_t *ident_split_large_pmd(struct x86_mapping_info *info,
-+			     pmd_t *pmdp, unsigned long page_addr)
-+{
-+	unsigned long pmd_addr, page_flags;
-+	pte_t *pte;
-+
-+	pte = (pte_t *)info->alloc_pgt_page(info->context);
-+	if (!pte)
-+		return NULL;
-+
-+	pmd_addr = page_addr & PMD_MASK;
-+
-+	/* Not a large page - clear PSE flag */
-+	page_flags = pmd_flags(*pmdp) & ~_PSE;
-+	ident_pte_init(info, pte, pmd_addr, pmd_addr + PMD_SIZE, page_flags);
-+
-+	return pte;
-+}
-+
-+static int ident_pmd_init(struct x86_mapping_info *info, pmd_t *pmd_page,
-+			  unsigned long addr, unsigned long end,
-+			  unsigned long flags)
-+{
-+	unsigned long next;
-+	bool new_table = 0;
-+
-+	for (; addr < end; addr = next) {
- 		pmd_t *pmd = pmd_page + pmd_index(addr);
-+		pte_t *pte;
- 
--		if (pmd_present(*pmd))
-+		next = (addr & PMD_MASK) + PMD_SIZE;
-+		if (next > end)
-+			next = end;
-+
-+		/*
-+		 * Use 2M pages if 4k pages are not allowed or
-+		 * we are not mapping extra, i.e. address and size are aligned.
-+		 */
-+
-+		if (!info->allow_4kpages ||
-+		    (!(addr & ~PMD_MASK) && next == addr + PMD_SIZE)) {
-+
-+			pmd_t pmdval;
-+
-+			addr &= PMD_MASK;
-+			pmdval = __pmd((addr - info->offset) | flags | _PSE);
-+			set_pmd(pmd, pmdval);
- 			continue;
-+		}
-+
-+		/*
-+		 * If currently mapped page is large, we need to split it.
-+		 * The case when we don't can remap 2M page to 2M page
-+		 * with different flags is already covered above.
-+		 *
-+		 * If there's nothing mapped to desired address,
-+		 * we need to allocate new page table.
-+		 */
- 
--		set_pmd(pmd, __pmd((addr - info->offset) | info->page_flag));
-+		if (pmd_large(*pmd)) {
-+			pte = ident_split_large_pmd(info, pmd, addr);
-+			new_table = 1;
-+		} else if (!pmd_present(*pmd)) {
-+			pte = (pte_t *)info->alloc_pgt_page(info->context);
-+			new_table = 1;
-+		} else {
-+			pte = pte_offset_kernel(pmd, 0);
-+			new_table = 0;
-+		}
-+
-+		if (!pte)
-+			return -ENOMEM;
-+
-+		ident_pte_init(info, pte, addr, next, flags);
-+
-+		if (new_table)
-+			set_pmd(pmd, __pmd(__pa(pte) | info->kernpg_flag));
- 	}
-+
-+	return 0;
+diff --git a/arch/x86/boot/compressed/pgtable_64.c b/arch/x86/boot/compressed/pgtable_64.c
+index c7cf5a1059a8..1f7169248612 100644
+--- a/arch/x86/boot/compressed/pgtable_64.c
++++ b/arch/x86/boot/compressed/pgtable_64.c
+@@ -106,12 +106,8 @@ static unsigned long find_trampoline_placement(void)
+ 	return bios_start - TRAMPOLINE_32BIT_SIZE;
  }
  
-+
-+pmd_t *ident_split_large_pud(struct x86_mapping_info *info,
-+			     pud_t *pudp, unsigned long page_addr)
-+{
-+	unsigned long pud_addr, page_flags;
-+	pmd_t *pmd;
-+
-+	pmd = (pmd_t *)info->alloc_pgt_page(info->context);
-+	if (!pmd)
-+		return NULL;
-+
-+	pud_addr = page_addr & PUD_MASK;
-+
-+	/* Not a large page - clear PSE flag */
-+	page_flags = pud_flags(*pudp) & ~_PSE;
-+	ident_pmd_init(info, pmd, pud_addr, pud_addr + PUD_SIZE, page_flags);
-+
-+	return pmd;
+-struct paging_config paging_prepare(void *rmode)
++bool trampoline_pgtable_init(struct boot_params *boot_params)
+ {
+-	struct paging_config paging_config = {};
+-
+-	/* Initialize boot_params. Required for cmdline_find_option_bool(). */
+-	boot_params = rmode;
+ 
+ 	/*
+ 	 * Check if LA57 is desired and supported.
+@@ -125,26 +121,10 @@ struct paging_config paging_prepare(void *rmode)
+ 	 *
+ 	 * That's substitute for boot_cpu_has() in early boot code.
+ 	 */
+-	if (IS_ENABLED(CONFIG_X86_5LEVEL) &&
+-			!cmdline_find_option_bool("no5lvl") &&
+-			native_cpuid_eax(0) >= 7 &&
+-			(native_cpuid_ecx(7) & (1 << (X86_FEATURE_LA57 & 31)))) {
+-		paging_config.l5_required = 1;
+-	}
+-
+-	paging_config.trampoline_start = find_trampoline_placement();
+-
+-	trampoline_32bit = (unsigned long *)paging_config.trampoline_start;
+-
+-	/* Preserve trampoline memory */
+-	memcpy(trampoline_save, trampoline_32bit, TRAMPOLINE_32BIT_SIZE);
+-
+-	/* Clear trampoline memory first */
+-	memset(trampoline_32bit, 0, TRAMPOLINE_32BIT_SIZE);
+-
+-	/* Copy trampoline code in place */
+-	memcpy(trampoline_32bit + TRAMPOLINE_32BIT_CODE_OFFSET / sizeof(unsigned long),
+-			&trampoline_32bit_src, TRAMPOLINE_32BIT_CODE_SIZE);
++	bool l5_required = IS_ENABLED(CONFIG_X86_5LEVEL) &&
++			   !cmdline_find_option_bool("no5lvl") &&
++			   native_cpuid_eax(0) >= 7 &&
++			   (native_cpuid_ecx(7) & (1 << (X86_FEATURE_LA57 & 31)));
+ 
+ 	/*
+ 	 * The code below prepares page table in trampoline memory.
+@@ -160,10 +140,10 @@ struct paging_config paging_prepare(void *rmode)
+ 	 * We are not going to use the page table in trampoline memory if we
+ 	 * are already in the desired paging mode.
+ 	 */
+-	if (paging_config.l5_required == !!(native_read_cr4() & X86_CR4_LA57))
++	if (l5_required == !!(native_read_cr4() & X86_CR4_LA57))
+ 		goto out;
+ 
+-	if (paging_config.l5_required) {
++	if (l5_required) {
+ 		/*
+ 		 * For 4- to 5-level paging transition, set up current CR3 as
+ 		 * the first and the only entry in a new top-level page table.
+@@ -185,6 +165,45 @@ struct paging_config paging_prepare(void *rmode)
+ 		       (void *)src, PAGE_SIZE);
+ 	}
+ 
++out:
++	return l5_required;
 +}
 +
++struct paging_config paging_prepare(void *rmode)
++{
++	struct paging_config paging_config = {};
++	bool early_trampoline_alloc = 0;
 +
- static int ident_pud_init(struct x86_mapping_info *info, pud_t *pud_page,
- 			  unsigned long addr, unsigned long end)
- {
- 	unsigned long next;
-+	bool new_table = 0;
-+	int result;
- 
- 	for (; addr < end; addr = next) {
- 		pud_t *pud = pud_page + pud_index(addr);
-@@ -31,28 +134,39 @@ static int ident_pud_init(struct x86_mapping_info *info, pud_t *pud_page,
- 		if (next > end)
- 			next = end;
- 
-+		/* Use 1G pages only if forced, even if they are supported. */
- 		if (info->direct_gbpages) {
- 			pud_t pudval;
--
--			if (pud_present(*pud))
--				continue;
-+			unsigned long flags;
- 
- 			addr &= PUD_MASK;
--			pudval = __pud((addr - info->offset) | info->page_flag);
-+			flags = info->page_flag | _PSE;
-+			pudval = __pud((addr - info->offset) | flags);
++	/* Initialize boot_params. Required for cmdline_find_option_bool(). */
++	boot_params = rmode;
 +
- 			set_pud(pud, pudval);
- 			continue;
- 		}
- 
--		if (pud_present(*pud)) {
-+		if (pud_large(*pud)) {
-+			pmd = ident_split_large_pud(info, pud, addr);
-+			new_table = 1;
-+		} else if (!pud_present(*pud)) {
-+			pmd = (pmd_t *)info->alloc_pgt_page(info->context);
-+			new_table = 1;
-+		} else {
- 			pmd = pmd_offset(pud, 0);
--			ident_pmd_init(info, pmd, addr, next);
--			continue;
-+			new_table = 0;
- 		}
--		pmd = (pmd_t *)info->alloc_pgt_page(info->context);
++	/*
++	 * We only need to find trampoline placement, if we have
++	 * not already done it from libstub.
++	 */
 +
- 		if (!pmd)
- 			return -ENOMEM;
--		ident_pmd_init(info, pmd, addr, next);
--		set_pud(pud, __pud(__pa(pmd) | info->kernpg_flag));
++	paging_config.trampoline_start = find_trampoline_placement();
++	trampoline_32bit = (unsigned long *)paging_config.trampoline_start;
++	early_trampoline_alloc = 0;
 +
-+		result = ident_pmd_init(info, pmd, addr, next, info->page_flag);
-+		if (result)
-+			return result;
++	/*
++	 * Preserve trampoline memory.
++	 * When trampoline is located in memory
++	 * owned by us, i.e. allocated in EFISTUB,
++	 * we don't care about previous contents
++	 * of this memory so copying can also be skipped.
++	 */
++	memcpy(trampoline_save, trampoline_32bit, TRAMPOLINE_32BIT_SIZE);
 +
-+		if (new_table)
-+			set_pud(pud, __pud(__pa(pmd) | info->kernpg_flag));
- 	}
- 
- 	return 0;
-@@ -63,6 +177,7 @@ static int ident_p4d_init(struct x86_mapping_info *info, p4d_t *p4d_page,
- {
- 	unsigned long next;
- 	int result;
-+	bool new_table = 0;
- 
- 	for (; addr < end; addr = next) {
- 		p4d_t *p4d = p4d_page + p4d_index(addr);
-@@ -72,15 +187,14 @@ static int ident_p4d_init(struct x86_mapping_info *info, p4d_t *p4d_page,
- 		if (next > end)
- 			next = end;
- 
--		if (p4d_present(*p4d)) {
-+		if (!p4d_present(*p4d)) {
-+			pud = (pud_t *)info->alloc_pgt_page(info->context);
-+			new_table = 1;
-+		} else {
- 			pud = pud_offset(p4d, 0);
--			result = ident_pud_init(info, pud, addr, next);
--			if (result)
--				return result;
--
--			continue;
-+			new_table = 0;
- 		}
--		pud = (pud_t *)info->alloc_pgt_page(info->context);
++	/* Clear trampoline memory first */
++	memset(trampoline_32bit, 0, TRAMPOLINE_32BIT_SIZE);
 +
- 		if (!pud)
- 			return -ENOMEM;
- 
-@@ -88,19 +202,22 @@ static int ident_p4d_init(struct x86_mapping_info *info, p4d_t *p4d_page,
- 		if (result)
- 			return result;
- 
--		set_p4d(p4d, __p4d(__pa(pud) | info->kernpg_flag));
-+		if (new_table)
-+			set_p4d(p4d, __p4d(__pa(pud) | info->kernpg_flag));
- 	}
- 
- 	return 0;
++	/* Copy trampoline code in place */
++	memcpy(trampoline_32bit + TRAMPOLINE_32BIT_CODE_OFFSET / sizeof(unsigned long),
++			&trampoline_32bit_src, TRAMPOLINE_32BIT_CODE_SIZE);
++
++	paging_config.l5_required = trampoline_pgtable_init(boot_params);
++
+ out:
+ 	return paging_config;
  }
- 
--int kernel_ident_mapping_init(struct x86_mapping_info *info, pgd_t *pgd_page,
--			      unsigned long pstart, unsigned long pend)
-+int kernel_ident_mapping_init(struct x86_mapping_info *info,
-+			      pgd_t *pgd_page, unsigned long pstart,
-+			      unsigned long pend)
- {
- 	unsigned long addr = pstart + info->offset;
- 	unsigned long end = pend + info->offset;
- 	unsigned long next;
- 	int result;
-+	bool new_table;
- 
- 	/* Set the default pagetable flags if not supplied */
- 	if (!info->kernpg_flag)
-@@ -117,20 +234,24 @@ int kernel_ident_mapping_init(struct x86_mapping_info *info, pgd_t *pgd_page,
- 		if (next > end)
- 			next = end;
- 
--		if (pgd_present(*pgd)) {
-+		if (!pgd_present(*pgd)) {
-+			p4d = (p4d_t *)info->alloc_pgt_page(info->context);
-+			new_table = 1;
-+		} else {
- 			p4d = p4d_offset(pgd, 0);
--			result = ident_p4d_init(info, p4d, addr, next);
--			if (result)
--				return result;
--			continue;
-+			new_table = 0;
- 		}
- 
--		p4d = (p4d_t *)info->alloc_pgt_page(info->context);
- 		if (!p4d)
- 			return -ENOMEM;
-+
- 		result = ident_p4d_init(info, p4d, addr, next);
- 		if (result)
- 			return result;
-+
-+		if (!new_table)
-+			continue;
-+
- 		if (pgtable_l5_enabled()) {
- 			set_pgd(pgd, __pgd(__pa(p4d) | info->kernpg_flag));
- 		} else {
 -- 
 2.37.4
 
