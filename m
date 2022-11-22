@@ -2,46 +2,45 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 55C34C433FE
-	for <linux-efi@archiver.kernel.org>; Tue, 22 Nov 2022 11:18:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 63359C433FE
+	for <linux-efi@archiver.kernel.org>; Tue, 22 Nov 2022 11:18:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233283AbiKVLSp (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 22 Nov 2022 06:18:45 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60876 "EHLO
+        id S233296AbiKVLSq (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 22 Nov 2022 06:18:46 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60458 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233139AbiKVLRe (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 22 Nov 2022 06:17:34 -0500
+        with ESMTP id S229553AbiKVLRf (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 22 Nov 2022 06:17:35 -0500
 Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 22C4E6069B;
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 537CD6069E;
         Tue, 22 Nov 2022 03:14:50 -0800 (PST)
 Received: from localhost.localdomain (unknown [83.149.199.65])
-        by mail.ispras.ru (Postfix) with ESMTPSA id EE34D40737CB;
-        Tue, 22 Nov 2022 11:14:45 +0000 (UTC)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru EE34D40737CB
+        by mail.ispras.ru (Postfix) with ESMTPSA id 5DD6140737D3;
+        Tue, 22 Nov 2022 11:14:46 +0000 (UTC)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 5DD6140737D3
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ispras.ru;
         s=default; t=1669115686;
-        bh=cllZgKoFdcdi/05M19KDo6OekyVBAAVXha3SArZmxSY=;
+        bh=gi2WlP5Zdwk8PRGKzYD5z08u+9dLExeKMbf/xGGfE+4=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=eLhoxF/G4zVE5KxP8xburRpYWx4NgyifFg3DSHui5TJGtnehXeepnViHh+C/nSs+Z
-         XetFDHQVTc9Y1ybMUPgIN/+wbtI9DcmgCjUJUMkup9itgOOiLUhbqMSkNyiW7Uq7ez
-         2RCk1w68y+kKFjiLcpYObRT9/fbnjp+xN/74jdxg=
+        b=SdIP03hTfI1NPSEvLMieLadei3nHwxitjzhDFs1oysvYyePn46+906Ot4745cHGst
+         IaGVBW2lNi1wB8XP7f7X/4a8NaCKlORCVX6e8y9GH6kgsYYfn/+TiGmeNgYRGzloyw
+         6WqHplq1pX/a8Vnb8HXX/mktbJo0UxhQ4BuNZlGI=
 From:   Evgeniy Baskov <baskov@ispras.ru>
 To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
+Cc:     Peter Jones <pjones@redhat.com>, Borislav Petkov <bp@alien8.de>,
         Andy Lutomirski <luto@kernel.org>,
         Dave Hansen <dave.hansen@linux.intel.com>,
         Ingo Molnar <mingo@redhat.com>,
         Peter Zijlstra <peterz@infradead.org>,
         Thomas Gleixner <tglx@linutronix.de>,
         Alexey Khoroshilov <khoroshilov@ispras.ru>,
-        Peter Jones <pjones@redhat.com>,
         "Limonciello, Mario" <mario.limonciello@amd.com>,
         joeyli <jlee@suse.com>, lvc-project@linuxtesting.org,
         x86@kernel.org, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org
-Subject: [PATCH v3 22/24] efi/libstub: Add memory attribute protocol definitions
-Date:   Tue, 22 Nov 2022 14:12:31 +0300
-Message-Id: <44539c8c6afdba66f791942deae95c7b13d1e13b.1668958803.git.baskov@ispras.ru>
+Subject: [PATCH v3 24/24] efi/libstub: Make memory protection warnings include newlines
+Date:   Tue, 22 Nov 2022 14:12:33 +0300
+Message-Id: <0bcea49ef39c76f84ee9a79976c91aa6e94080fa.1668958803.git.baskov@ispras.ru>
 X-Mailer: git-send-email 2.37.4
 In-Reply-To: <cover.1668958803.git.baskov@ispras.ru>
 References: <cover.1668958803.git.baskov@ispras.ru>
@@ -51,93 +50,38 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-EFI_MEMORY_ATTRIBUTE_PROTOCOL servers as a better alternative to
-DXE services for setting memory attributes in EFI Boot Services
-environment. This protocol is better since it is a part of UEFI
-specification itself and not UEFI PI specification like DXE
-services.
+From: Peter Jones <pjones@redhat.com>
 
-Add EFI_MEMORY_ATTRIBUTE_PROTOCOL definitions.
-Support mixed mode properly for its calls.
+efi_warn() doesn't put newlines on messages, and that makes reading
+warnings without newlines hard to do.
 
-Tested-by: Mario Limonciello <mario.limonciello@amd.com>
-Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
+Signed-off-by: Peter Jones <pjones@redhat.com>
 ---
- arch/x86/include/asm/efi.h             |  7 +++++++
- drivers/firmware/efi/libstub/efistub.h | 22 ++++++++++++++++++++++
- include/linux/efi.h                    |  1 +
- 3 files changed, 30 insertions(+)
+ drivers/firmware/efi/libstub/mem.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index 233ae6986d6f..522ff2e443b3 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -325,6 +325,13 @@ static inline u32 efi64_convert_status(efi_status_t status)
- #define __efi64_argmap_set_memory_space_attributes(phys, size, flags) \
- 	(__efi64_split(phys), __efi64_split(size), __efi64_split(flags))
- 
-+/* Memory Attribute Protocol */
-+#define __efi64_argmap_set_memory_attributes(protocol, phys, size, flags) \
-+	((protocol), __efi64_split(phys), __efi64_split(size), __efi64_split(flags))
-+
-+#define __efi64_argmap_clear_memory_attributes(protocol, phys, size, flags) \
-+	((protocol), __efi64_split(phys), __efi64_split(size), __efi64_split(flags))
-+
- /*
-  * The macros below handle the plumbing for the argument mapping. To add a
-  * mapping for a specific EFI method, simply define a macro
-diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-index c74ac2875e31..343cae662bec 100644
---- a/drivers/firmware/efi/libstub/efistub.h
-+++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -39,6 +39,9 @@ extern const efi_system_table_t *efi_system_table;
- typedef union efi_dxe_services_table efi_dxe_services_table_t;
- extern const efi_dxe_services_table_t *efi_dxe_table;
- 
-+typedef union efi_memory_attribute_protocol efi_memory_attribute_protocol_t;
-+extern efi_memory_attribute_protocol_t *efi_mem_attrib_proto;
-+
- efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
- 				   efi_system_table_t *sys_table_arg);
- 
-@@ -415,6 +418,25 @@ union efi_dxe_services_table {
- 	} mixed_mode;
- };
- 
-+union  efi_memory_attribute_protocol {
-+	struct {
-+		void *get_memory_attributes;
-+		efi_status_t (__efiapi *set_memory_attributes)(efi_memory_attribute_protocol_t *,
-+								efi_physical_addr_t,
-+								u64,
-+								u64);
-+		efi_status_t (__efiapi *clear_memory_attributes)(efi_memory_attribute_protocol_t *,
-+								  efi_physical_addr_t,
-+								  u64,
-+								  u64);
-+	};
-+	struct {
-+		u32 get_memory_attributes;
-+		u32 set_memory_attributes;
-+		u32 clear_memory_attributes;
-+	} mixed_mode;
-+};
-+
- typedef union efi_uga_draw_protocol efi_uga_draw_protocol_t;
- 
- union efi_uga_draw_protocol {
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 7603fc58c47c..5f880e8f96bd 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -390,6 +390,7 @@ void efi_native_runtime_setup(void);
- #define EFI_RT_PROPERTIES_TABLE_GUID		EFI_GUID(0xeb66918a, 0x7eef, 0x402a,  0x84, 0x2e, 0x93, 0x1d, 0x21, 0xc3, 0x8a, 0xe9)
- #define EFI_DXE_SERVICES_TABLE_GUID		EFI_GUID(0x05ad34ba, 0x6f02, 0x4214,  0x95, 0x2e, 0x4d, 0xa0, 0x39, 0x8e, 0x2b, 0xb9)
- #define EFI_SMBIOS_PROTOCOL_GUID		EFI_GUID(0x03583ff6, 0xcb36, 0x4940,  0x94, 0x7e, 0xb9, 0xb3, 0x9f, 0x4a, 0xfa, 0xf7)
-+#define EFI_MEMORY_ATTRIBUTE_PROTOCOL_GUID	EFI_GUID(0xf4560cf6, 0x40ec, 0x4b4a,  0xa1, 0x92, 0xbf, 0x1d, 0x57, 0xd0, 0xb1, 0x89)
- 
- #define EFI_IMAGE_SECURITY_DATABASE_GUID	EFI_GUID(0xd719b2cb, 0x3d3a, 0x4596,  0xa3, 0xbc, 0xda, 0xd0, 0x0e, 0x67, 0x65, 0x6f)
- #define EFI_SHIM_LOCK_GUID			EFI_GUID(0x605dab50, 0xe046, 0x4300,  0xab, 0xb6, 0x3d, 0xd8, 0x10, 0xdd, 0x8b, 0x23)
+diff --git a/drivers/firmware/efi/libstub/mem.c b/drivers/firmware/efi/libstub/mem.c
+index 35acec241dd3..d10996e4eb01 100644
+--- a/drivers/firmware/efi/libstub/mem.c
++++ b/drivers/firmware/efi/libstub/mem.c
+@@ -294,7 +294,7 @@ efi_status_t efi_adjust_memory_range_protection(unsigned long start,
+ 				rounded_end - rounded_start,
+ 				attr_clear);
+ 	if (status != EFI_SUCCESS) {
+-		efi_warn("Failed to clear memory attributes at [%08lx,%08lx]: %lx",
++		efi_warn("Failed to clear memory attributes at [%08lx,%08lx]: %lx\n",
+ 			 (unsigned long)rounded_start,
+ 			 (unsigned long)rounded_end,
+ 			 status);
+@@ -307,7 +307,7 @@ efi_status_t efi_adjust_memory_range_protection(unsigned long start,
+ 				rounded_end - rounded_start,
+ 				attributes);
+ 	if (status != EFI_SUCCESS) {
+-		efi_warn("Failed to set memory attributes at [%08lx,%08lx]: %lx",
++		efi_warn("Failed to set memory attributes at [%08lx,%08lx]: %lx\n",
+ 			 (unsigned long)rounded_start,
+ 			 (unsigned long)rounded_end,
+ 			 status);
 -- 
 2.37.4
 
