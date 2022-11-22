@@ -2,29 +2,29 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 948C0C4167E
-	for <linux-efi@archiver.kernel.org>; Tue, 22 Nov 2022 11:13:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DF79EC433FE
+	for <linux-efi@archiver.kernel.org>; Tue, 22 Nov 2022 11:18:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233141AbiKVLNJ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 22 Nov 2022 06:13:09 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59366 "EHLO
+        id S232903AbiKVLSb (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 22 Nov 2022 06:18:31 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33602 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232730AbiKVLMu (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 22 Nov 2022 06:12:50 -0500
+        with ESMTP id S232359AbiKVLRa (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 22 Nov 2022 06:17:30 -0500
 Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B62862AC7;
-        Tue, 22 Nov 2022 03:12:48 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B2C5DDEA6;
+        Tue, 22 Nov 2022 03:14:45 -0800 (PST)
 Received: from localhost.localdomain (unknown [83.149.199.65])
-        by mail.ispras.ru (Postfix) with ESMTPSA id 8D6E840737CB;
-        Tue, 22 Nov 2022 11:12:42 +0000 (UTC)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 8D6E840737CB
+        by mail.ispras.ru (Postfix) with ESMTPSA id E6204419E9E1;
+        Tue, 22 Nov 2022 11:14:43 +0000 (UTC)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru E6204419E9E1
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ispras.ru;
-        s=default; t=1669115562;
-        bh=6oUI8mIWLd1Fo2Wh2YHphseFjFuqPo1vi/6/ODurdpA=;
+        s=default; t=1669115684;
+        bh=C0wdUkoBNkkj74+4YteFOuj6BOgFxwgpQdiOJl7Kz50=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Qlx40wQ5kSLXszjhsQVxrO7xRhMyp9Oeuf12SIidIpokRDaEqNZ0ZRiVGEDVJVEVw
-         Xo1PjqI0fJjpP8NhqxzQ+0D/QKO4G4UgcycPQVTvRJjf/mZXYg3Dhf50S0Z2+PWHK0
-         RWWb5DFfcPIQe+twwUa/qAqFFUbJtoOnF8anC/3Y=
+        b=KYTcQl4xwtKAx1WryRu3Ijb/h7jNqUPh4Bn8jPzkxIm/t74PWtcAz+hfnfKjeGz61
+         nOyAaeHRFXdDvpr98xxnydpmthXCJveYHvOrlhsdbHWI11Mtqmcp5cEkCkDxqWOib1
+         Rtw+W6I0yXntLnKZYvDwHI0GyNHPbHNM8Nf/ANaE=
 From:   Evgeniy Baskov <baskov@ispras.ru>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
@@ -39,9 +39,9 @@ Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
         joeyli <jlee@suse.com>, lvc-project@linuxtesting.org,
         x86@kernel.org, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org
-Subject: [PATCH v3 09/24] x86/boot: Remove mapping from page fault handler
-Date:   Tue, 22 Nov 2022 14:12:18 +0300
-Message-Id: <7438db5fded11a28310267a7b51b483a5f61d0d4.1668958803.git.baskov@ispras.ru>
+Subject: [PATCH v3 14/24] x86/boot: Add EFI kernel extraction interface
+Date:   Tue, 22 Nov 2022 14:12:23 +0300
+Message-Id: <78403fb657e0099e9c2c9df4b1a4af14d174fe25.1668958803.git.baskov@ispras.ru>
 X-Mailer: git-send-email 2.37.4
 In-Reply-To: <cover.1668958803.git.baskov@ispras.ru>
 References: <cover.1668958803.git.baskov@ispras.ru>
@@ -51,59 +51,243 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-After every implicit mapping is removed, this code is no longer needed.
+To enable extraction of kernel image from EFI stub code directly
+extraction code needs to have separate interface that avoid part
+of low level initialization logic, i.e. serial port setup.
 
-Remove memory mapping from page fault handler to ensure that there are
-no hidden invalid memory accesses.
+Add kernel extraction function callable from libstub as a part
+of preparation for extracting the kernel directly from EFI environment.
 
 Tested-by: Mario Limonciello <mario.limonciello@amd.com>
 Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
 ---
- arch/x86/boot/compressed/ident_map_64.c | 26 ++++++++++---------------
- 1 file changed, 10 insertions(+), 16 deletions(-)
+ arch/x86/boot/compressed/head_32.S    |   3 +-
+ arch/x86/boot/compressed/head_64.S    |   2 +-
+ arch/x86/boot/compressed/misc.c       | 100 +++++++++++++++++---------
+ arch/x86/boot/compressed/misc.h       |   1 +
+ arch/x86/include/asm/shared/extract.h |  26 +++++++
+ 5 files changed, 96 insertions(+), 36 deletions(-)
+ create mode 100644 arch/x86/include/asm/shared/extract.h
 
-diff --git a/arch/x86/boot/compressed/ident_map_64.c b/arch/x86/boot/compressed/ident_map_64.c
-index fec795a4ce23..ba5108c58a4e 100644
---- a/arch/x86/boot/compressed/ident_map_64.c
-+++ b/arch/x86/boot/compressed/ident_map_64.c
-@@ -386,27 +386,21 @@ void do_boot_page_fault(struct pt_regs *regs, unsigned long error_code)
+diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
+index 3b354eb9516d..b46a1c4109cf 100644
+--- a/arch/x86/boot/compressed/head_32.S
++++ b/arch/x86/boot/compressed/head_32.S
+@@ -217,8 +217,7 @@ SYM_DATA(image_offset, .long 0)
+  */
+ 	.bss
+ 	.balign 4
+-boot_heap:
+-	.fill BOOT_HEAP_SIZE, 1, 0
++SYM_DATA(boot_heap,	.fill BOOT_HEAP_SIZE, 1, 0)
+ boot_stack:
+ 	.fill BOOT_STACK_SIZE, 1, 0
+ boot_stack_end:
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index 73a2ac2b063d..6cfcdeb4531b 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -1006,7 +1006,7 @@ SYM_FUNC_END(startup32_check_sev_cbit)
+  */
+ 	.bss
+ 	.balign 4
+-SYM_DATA_LOCAL(boot_heap,	.fill BOOT_HEAP_SIZE, 1, 0)
++SYM_DATA(boot_heap,	.fill BOOT_HEAP_SIZE, 1, 0)
+ 
+ SYM_DATA_START_LOCAL(boot_stack)
+ 	.fill BOOT_STACK_SIZE, 1, 0
+diff --git a/arch/x86/boot/compressed/misc.c b/arch/x86/boot/compressed/misc.c
+index c9c235d65d16..ebf229c38b3b 100644
+--- a/arch/x86/boot/compressed/misc.c
++++ b/arch/x86/boot/compressed/misc.c
+@@ -308,11 +308,11 @@ static inline unsigned long kernel_add_identity_map_dummy(unsigned long start,
+  *             |-------uncompressed kernel image---------|
+  *
+  */
+-asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
+-				  unsigned char *input_data,
+-				  unsigned long input_len,
+-				  unsigned char *output,
+-				  unsigned long output_len)
++static void *do_extract_kernel(void *rmode,
++			       unsigned char *input_data,
++			       unsigned long input_len,
++			       unsigned char *output,
++			       unsigned long output_len)
  {
- 	unsigned long address = native_read_cr2();
- 	unsigned long end;
--	bool ghcb_fault;
-+	char *msg;
+ 	const unsigned long kernel_total_size = VO__end - VO__text;
+ 	unsigned long virt_addr = LOAD_PHYSICAL_ADDR;
+@@ -326,26 +326,6 @@ asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
  
--	ghcb_fault = sev_es_check_ghcb_fault(address);
-+	if (sev_es_check_ghcb_fault(address))
-+		msg = "Page-fault on GHCB page:";
-+	else
-+		msg = "Unexpected page-fault:";
+ 	sanitize_boot_params(boot_params);
  
- 	address   &= PMD_MASK;
- 	end        = address + PMD_SIZE;
- 
- 	/*
--	 * Check for unexpected error codes. Unexpected are:
--	 *	- Faults on present pages
--	 *	- User faults
--	 *	- Reserved bits set
--	 */
--	if (error_code & (X86_PF_PROT | X86_PF_USER | X86_PF_RSVD))
--		do_pf_error("Unexpected page-fault:", error_code, address, regs->ip);
--	else if (ghcb_fault)
--		do_pf_error("Page-fault on GHCB page:", error_code, address, regs->ip);
+-	init_default_io_ops();
 -
 -	/*
--	 * Error code is sane - now identity map the 2M region around
--	 * the faulting address.
-+	 * Since all memory allocations are made explicit
-+	 * now, every page fault at this stage is an
-+	 * error and the error handler is there only
-+	 * for debug purposes.
+-	 * On 64-bit this pointer is set during page table uninitialization,
+-	 * but on 32-bit it remains uninitialized, since paging is disabled.
+-	 */
+-	if (IS_ENABLED(CONFIG_X86_32))
+-		kernel_add_identity_map = kernel_add_identity_map_dummy;
+-
+-
+-	/*
+-	 * Detect TDX guest environment.
+-	 *
+-	 * It has to be done before console_init() in order to use
+-	 * paravirtualized port I/O operations if needed.
+-	 */
+-	early_tdx_detect();
+-
+-	init_bare_console();
+-
+ 	/*
+ 	 * Save RSDP address for later use. Have this after console_init()
+ 	 * so that early debugging output from the RSDP parsing code can be
+@@ -353,11 +333,6 @@ asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
  	 */
--	kernel_add_identity_map(address, end, MAP_WRITE);
-+	do_pf_error(msg, error_code, address, regs->ip);
+ 	boot_params->acpi_rsdp_addr = get_rsdp_addr();
+ 
+-	debug_putstr("early console in extract_kernel\n");
+-
+-	free_mem_ptr     = heap;	/* Heap */
+-	free_mem_end_ptr = heap + BOOT_HEAP_SIZE;
+-
+ 	/*
+ 	 * The memory hole needed for the kernel is the larger of either
+ 	 * the entire decompressed kernel plus relocation table, or the
+@@ -411,12 +386,12 @@ asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
+ 	if (virt_addr & (MIN_KERNEL_ALIGN - 1))
+ 		error("Destination virtual address inappropriately aligned");
+ #ifdef CONFIG_X86_64
+-	if (heap > 0x3fffffffffffUL)
++	if (phys_addr > 0x3fffffffffffUL)
+ 		error("Destination address too large");
+ 	if (virt_addr + max(output_len, kernel_total_size) > KERNEL_IMAGE_SIZE)
+ 		error("Destination virtual address is beyond the kernel mapping area");
+ #else
+-	if (heap > ((-__PAGE_OFFSET-(128<<20)-1) & 0x7fffffff))
++	if (phys_addr > ((-__PAGE_OFFSET-(128<<20)-1) & 0x7fffffff))
+ 		error("Destination address too large");
+ #endif
+ #ifndef CONFIG_RELOCATABLE
+@@ -430,12 +405,71 @@ asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
+ 	parse_elf(output, output_len, virt_addr);
+ 	debug_putstr("done.\nBooting the kernel.\n");
+ 
++	return output;
++}
++
++asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
++				  unsigned char *input_data,
++				  unsigned long input_len,
++				  unsigned char *output,
++				  unsigned long output_len)
++{
++	void *entry;
++
++	init_default_io_ops();
++
++	/*
++	 * On 64-bit this pointer is set during page table uninitialization,
++	 * but on 32-bit it remains uninitialized, since paging is disabled.
++	 */
++	if (IS_ENABLED(CONFIG_X86_32))
++		kernel_add_identity_map = kernel_add_identity_map_dummy;
++
++	/*
++	 * Detect TDX guest environment.
++	 *
++	 * It has to be done before console_init() in order to use
++	 * paravirtualized port I/O operations if needed.
++	 */
++	early_tdx_detect();
++
++	init_bare_console();
++
++	debug_putstr("early console in extract_kernel\n");
++
++	free_mem_ptr     = heap;	/* Heap */
++	free_mem_end_ptr = heap + BOOT_HEAP_SIZE;
++
++	entry = do_extract_kernel(rmode, input_data,
++				  input_len, output, output_len);
++
+ 	/* Disable exception handling before booting the kernel */
+ 	cleanup_exception_handling();
+ 
+-	return output;
++	return entry;
  }
+ 
++void *efi_extract_kernel(struct boot_params *rmode,
++			 struct efi_extract_callbacks *cb,
++			 unsigned char *input_data,
++			 unsigned long input_len,
++			 unsigned long output_len)
++{
++	extern char boot_heap[BOOT_HEAP_SIZE];
++
++	free_mem_ptr     = (unsigned long)boot_heap;	/* Heap */
++	free_mem_end_ptr = (unsigned long)boot_heap + BOOT_HEAP_SIZE;
++
++	init_console_func(cb->putstr, cb->puthex);
++	kernel_add_identity_map = cb->map_range;
++
++	return do_extract_kernel(rmode, input_data,
++				 input_len, (void *)LOAD_PHYSICAL_ADDR, output_len);
++}
++
++
++
++
+ void fortify_panic(const char *name)
+ {
+ 	error("detected buffer overflow");
+diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
+index 0076b2845b4b..379c4a3ca7dd 100644
+--- a/arch/x86/boot/compressed/misc.h
++++ b/arch/x86/boot/compressed/misc.h
+@@ -26,6 +26,7 @@
+ #include <asm/boot.h>
+ #include <asm/bootparam.h>
+ #include <asm/desc_defs.h>
++#include <asm/shared/extract.h>
+ 
+ #include "tdx.h"
+ 
+diff --git a/arch/x86/include/asm/shared/extract.h b/arch/x86/include/asm/shared/extract.h
+new file mode 100644
+index 000000000000..46bf56348a86
+--- /dev/null
++++ b/arch/x86/include/asm/shared/extract.h
+@@ -0,0 +1,26 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++#ifndef ASM_SHARED_EXTRACT_H
++#define ASM_SHARED_EXTRACT_H
++
++#include <asm/bootparam.h>
++
++#define MAP_WRITE	0x02 /* Writable memory */
++#define MAP_EXEC	0x04 /* Executable memory */
++#define MAP_ALLOC	0x10 /* Range needs to be allocated */
++#define MAP_PROTECT	0x20 /* Set exact memory attributes for memory range */
++
++struct efi_extract_callbacks {
++	void (*putstr)(const char *msg);
++	void (*puthex)(unsigned long x);
++	unsigned long (*map_range)(unsigned long start,
++				   unsigned long end,
++				   unsigned int flags);
++};
++
++void *efi_extract_kernel(struct boot_params *rmode,
++			 struct efi_extract_callbacks *cb,
++			 unsigned char *input_data,
++			 unsigned long input_len,
++			 unsigned long output_len);
++
++#endif /* ASM_SHARED_EXTRACT_H */
 -- 
 2.37.4
 
