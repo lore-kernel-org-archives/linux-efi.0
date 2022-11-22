@@ -2,29 +2,29 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 19203C43217
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A98AC4321E
 	for <linux-efi@archiver.kernel.org>; Tue, 22 Nov 2022 11:18:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232359AbiKVLSi (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 22 Nov 2022 06:18:38 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60746 "EHLO
+        id S232849AbiKVLSj (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 22 Nov 2022 06:18:39 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60756 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233002AbiKVLRc (ORCPT
+        with ESMTP id S232942AbiKVLRc (ORCPT
         <rfc822;linux-efi@vger.kernel.org>); Tue, 22 Nov 2022 06:17:32 -0500
 Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 20CFB11A35;
-        Tue, 22 Nov 2022 03:14:47 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 12B3060696;
+        Tue, 22 Nov 2022 03:14:46 -0800 (PST)
 Received: from localhost.localdomain (unknown [83.149.199.65])
-        by mail.ispras.ru (Postfix) with ESMTPSA id 1A92140737BF;
-        Tue, 22 Nov 2022 11:14:45 +0000 (UTC)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 1A92140737BF
+        by mail.ispras.ru (Postfix) with ESMTPSA id 595BB419E9F3;
+        Tue, 22 Nov 2022 11:14:44 +0000 (UTC)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 595BB419E9F3
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ispras.ru;
-        s=default; t=1669115685;
-        bh=n5AAiEOOYWrwvzMdBWF1U0sf/6pYWwLzWndZJS/v8Q8=;
+        s=default; t=1669115684;
+        bh=Ss356NQlLHFQmRucCyOdDLckrSSf+QzMafadlEEPMI4=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=LBil9KppqQewrqN1HAVvDjCoE9soUaQxF8RjkHSaSEOnZAfaBWK2/Y/sJroNE4RF+
-         Et7Cwy5nwpKwStyx9DDAf6/zBMRcc46YAhOosSY4JYlyNnK9RQWabOXvvVA+HPi9L8
-         LgwIMcKxXE3fuEd4kQB4vpRAcEejVAiye/ps6Q38=
+        b=kKovBRsEfkLP3gf6unpoKP5ACLzOCnch5N/MEtH/YNWVQ07erCyfeMxx41otRAeiK
+         zRB1KiFQi23sWcrXorqeZEFXvRIeFXx/du8NDt1UV9Ym/yQHxY4CRIHIkWU060Dut0
+         jJOXgDkf7znBIrNho7Oa5oUMQ5UFFF8jIJ5oBstk=
 From:   Evgeniy Baskov <baskov@ispras.ru>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
@@ -39,9 +39,9 @@ Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
         joeyli <jlee@suse.com>, lvc-project@linuxtesting.org,
         x86@kernel.org, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org
-Subject: [PATCH v3 18/24] tools/include: Add simplified version of pe.h
-Date:   Tue, 22 Nov 2022 14:12:27 +0300
-Message-Id: <77698e99062c376d0146e093b61ee189322f6a94.1668958803.git.baskov@ispras.ru>
+Subject: [PATCH v3 15/24] efi/x86: Support extracting kernel from libstub
+Date:   Tue, 22 Nov 2022 14:12:24 +0300
+Message-Id: <1d9f0e6590a949de4a9692c82ec32259383c3c3f.1668958803.git.baskov@ispras.ru>
 X-Mailer: git-send-email 2.37.4
 In-Reply-To: <cover.1668958803.git.baskov@ispras.ru>
 References: <cover.1668958803.git.baskov@ispras.ru>
@@ -51,172 +51,606 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-This is needed to remove magic numbers from x86 bzImage building tool
-(arch/x86/boot/tools/build.c).
+Doing it that way allows setting up stricter memory attributes,
+simplifies boot code path and removes potential relocation
+of kernel image.
 
-Tested-by: Mario Limonciello <mario.limonciello@amd.com>
+Wire up required interfaces and minimally initialize zero page
+fields needed for it to function correctly.
+
 Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
----
- tools/include/linux/pe.h | 150 +++++++++++++++++++++++++++++++++++++++
- 1 file changed, 150 insertions(+)
- create mode 100644 tools/include/linux/pe.h
 
-diff --git a/tools/include/linux/pe.h b/tools/include/linux/pe.h
-new file mode 100644
-index 000000000000..41c09ec371d8
---- /dev/null
-+++ b/tools/include/linux/pe.h
-@@ -0,0 +1,150 @@
-+/* SPDX-License-Identifier: GPL-2.0-only */
+ create mode 100644 arch/x86/include/asm/shared/extract.h
+ create mode 100644 drivers/firmware/efi/libstub/x86-extract-direct.c
+---
+ arch/x86/boot/compressed/head_32.S            |  50 ++++-
+ arch/x86/boot/compressed/head_64.S            |  58 ++++-
+ drivers/firmware/efi/Kconfig                  |   2 +
+ drivers/firmware/efi/libstub/Makefile         |   2 +-
+ .../firmware/efi/libstub/x86-extract-direct.c | 208 ++++++++++++++++++
+ drivers/firmware/efi/libstub/x86-stub.c       | 119 +---------
+ drivers/firmware/efi/libstub/x86-stub.h       |  14 ++
+ 7 files changed, 338 insertions(+), 115 deletions(-)
+ create mode 100644 drivers/firmware/efi/libstub/x86-extract-direct.c
+ create mode 100644 drivers/firmware/efi/libstub/x86-stub.h
+
+diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
+index b46a1c4109cf..65a1d060ab15 100644
+--- a/arch/x86/boot/compressed/head_32.S
++++ b/arch/x86/boot/compressed/head_32.S
+@@ -152,11 +152,57 @@ SYM_FUNC_END(startup_32)
+ 
+ #ifdef CONFIG_EFI_STUB
+ SYM_FUNC_START(efi32_stub_entry)
 +/*
-+ * Simplified version of include/linux/pe.h:
-+ *  Copyright 2011 Red Hat, Inc. All rights reserved.
-+ *  Author(s): Peter Jones <pjones@redhat.com>
++ * Calculate the delta between where we were compiled to run
++ * at and where we were actually loaded at.  This can only be done
++ * with a short local call on x86.  Nothing  else will tell us what
++ * address we are running at.  The reserved chunk of the real-mode
++ * data at 0x1e4 (defined as a scratch field) are used as the stack
++ * for this calculation. Only 4 bytes are needed.
 + */
-+#ifndef __LINUX_PE_H
-+#define __LINUX_PE_H
++	call	1f
++1:	popl	%ebx
++	addl	$_GLOBAL_OFFSET_TABLE_+(.-1b), %ebx
 +
-+#include <linux/types.h>
++	/* Clear BSS */
++	xorl	%eax, %eax
++	leal	_bss@GOTOFF(%ebx), %edi
++	leal	_ebss@GOTOFF(%ebx), %ecx
++	subl	%edi, %ecx
++	shrl	$2, %ecx
++	rep	stosl
 +
-+#define	IMAGE_FILE_MACHINE_I386		0x014c
+ 	add	$0x4, %esp
+ 	movl	8(%esp), %esi	/* save boot_params pointer */
++	movl	%edx, %edi	/* save GOT address */
+ 	call	efi_main
+-	/* efi_main returns the possibly relocated address of startup_32 */
+-	jmp	*%eax
++	movl	%eax, %ecx
 +
-+#define IMAGE_SCN_CNT_CODE	0x00000020 /* .text */
-+#define IMAGE_SCN_CNT_INITIALIZED_DATA 0x00000040 /* .data */
-+#define IMAGE_SCN_ALIGN_4096BYTES 0x00d00000
-+#define IMAGE_SCN_MEM_DISCARDABLE 0x02000000 /* scn can be discarded */
-+#define IMAGE_SCN_MEM_EXECUTE	0x20000000 /* can be executed as code */
-+#define IMAGE_SCN_MEM_READ	0x40000000 /* readable */
-+#define IMAGE_SCN_MEM_WRITE	0x80000000 /* writeable */
++	/*
++	 * efi_main returns the possibly
++	 * relocated address of extracted kernel entry point.
++	 */
 +
-+#define MZ_HEADER_PEADDR_OFFSET 0x3c
++	cli
 +
-+struct pe_hdr {
-+	uint32_t magic;		/* PE magic */
-+	uint16_t machine;	/* machine type */
-+	uint16_t sections;	/* number of sections */
-+	uint32_t timestamp;	/* time_t */
-+	uint32_t symbol_table;	/* symbol table offset */
-+	uint32_t symbols;	/* number of symbols */
-+	uint16_t opt_hdr_size;	/* size of optional header */
-+	uint16_t flags;		/* flags */
-+};
++	/* Load new GDT */
++	leal	gdt@GOTOFF(%ebx), %eax
++	movl	%eax, 2(%eax)
++	lgdt	(%eax)
 +
-+/* the fact that pe32 isn't padded where pe32+ is 64-bit means union won't
-+ * work right.  vomit. */
-+struct pe32_opt_hdr {
-+	/* "standard" header */
-+	uint16_t magic;		/* file type */
-+	uint8_t  ld_major;	/* linker major version */
-+	uint8_t  ld_minor;	/* linker minor version */
-+	uint32_t text_size;	/* size of text section(s) */
-+	uint32_t data_size;	/* size of data section(s) */
-+	uint32_t bss_size;	/* size of bss section(s) */
-+	uint32_t entry_point;	/* file offset of entry point */
-+	uint32_t code_base;	/* relative code addr in ram */
-+	uint32_t data_base;	/* relative data addr in ram */
-+	/* "windows" header */
-+	uint32_t image_base;	/* preferred load address */
-+	uint32_t section_align;	/* alignment in bytes */
-+	uint32_t file_align;	/* file alignment in bytes */
-+	uint16_t os_major;	/* major OS version */
-+	uint16_t os_minor;	/* minor OS version */
-+	uint16_t image_major;	/* major image version */
-+	uint16_t image_minor;	/* minor image version */
-+	uint16_t subsys_major;	/* major subsystem version */
-+	uint16_t subsys_minor;	/* minor subsystem version */
-+	uint32_t win32_version;	/* reserved, must be 0 */
-+	uint32_t image_size;	/* image size */
-+	uint32_t header_size;	/* header size rounded up to
-+				   file_align */
-+	uint32_t csum;		/* checksum */
-+	uint16_t subsys;	/* subsystem */
-+	uint16_t dll_flags;	/* more flags! */
-+	uint32_t stack_size_req;/* amt of stack requested */
-+	uint32_t stack_size;	/* amt of stack required */
-+	uint32_t heap_size_req;	/* amt of heap requested */
-+	uint32_t heap_size;	/* amt of heap required */
-+	uint32_t loader_flags;	/* reserved, must be 0 */
-+	uint32_t data_dirs;	/* number of data dir entries */
-+};
++	/* Load segment registers with our descriptors */
++	movl	$__BOOT_DS, %eax
++	movl	%eax, %ds
++	movl	%eax, %es
++	movl	%eax, %fs
++	movl	%eax, %gs
++	movl	%eax, %ss
 +
-+struct pe32plus_opt_hdr {
-+	uint16_t magic;		/* file type */
-+	uint8_t  ld_major;	/* linker major version */
-+	uint8_t  ld_minor;	/* linker minor version */
-+	uint32_t text_size;	/* size of text section(s) */
-+	uint32_t data_size;	/* size of data section(s) */
-+	uint32_t bss_size;	/* size of bss section(s) */
-+	uint32_t entry_point;	/* file offset of entry point */
-+	uint32_t code_base;	/* relative code addr in ram */
-+	/* "windows" header */
-+	uint64_t image_base;	/* preferred load address */
-+	uint32_t section_align;	/* alignment in bytes */
-+	uint32_t file_align;	/* file alignment in bytes */
-+	uint16_t os_major;	/* major OS version */
-+	uint16_t os_minor;	/* minor OS version */
-+	uint16_t image_major;	/* major image version */
-+	uint16_t image_minor;	/* minor image version */
-+	uint16_t subsys_major;	/* major subsystem version */
-+	uint16_t subsys_minor;	/* minor subsystem version */
-+	uint32_t win32_version;	/* reserved, must be 0 */
-+	uint32_t image_size;	/* image size */
-+	uint32_t header_size;	/* header size rounded up to
-+				   file_align */
-+	uint32_t csum;		/* checksum */
-+	uint16_t subsys;	/* subsystem */
-+	uint16_t dll_flags;	/* more flags! */
-+	uint64_t stack_size_req;/* amt of stack requested */
-+	uint64_t stack_size;	/* amt of stack required */
-+	uint64_t heap_size_req;	/* amt of heap requested */
-+	uint64_t heap_size;	/* amt of heap required */
-+	uint32_t loader_flags;	/* reserved, must be 0 */
-+	uint32_t data_dirs;	/* number of data dir entries */
-+};
++	/* Zero EFLAGS */
++	pushl	$0
++	popfl
 +
-+struct data_dirent {
-+	uint32_t virtual_address;	/* relative to load address */
-+	uint32_t size;
-+};
++	jmp	*%ecx
+ SYM_FUNC_END(efi32_stub_entry)
+ SYM_FUNC_ALIAS(efi_stub_entry, efi32_stub_entry)
+ #endif
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index 6cfcdeb4531b..384706d12354 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -553,12 +553,64 @@ SYM_CODE_END(startup_64)
+ #ifdef CONFIG_EFI_STUB
+ 	.org 0x390
+ SYM_FUNC_START(efi64_stub_entry)
++	/* Preserve first parameter */
++	movq	%rdi, %r10
 +
-+struct data_directory {
-+	struct data_dirent exports;		/* .edata */
-+	struct data_dirent imports;		/* .idata */
-+	struct data_dirent resources;		/* .rsrc */
-+	struct data_dirent exceptions;		/* .pdata */
-+	struct data_dirent certs;		/* certs */
-+	struct data_dirent base_relocations;	/* .reloc */
-+	struct data_dirent debug;		/* .debug */
-+	struct data_dirent arch;		/* reservered */
-+	struct data_dirent global_ptr;		/* global pointer reg. Size=0 */
-+	struct data_dirent tls;			/* .tls */
-+	struct data_dirent load_config;		/* load configuration structure */
-+	struct data_dirent bound_imports;	/* no idea */
-+	struct data_dirent import_addrs;	/* import address table */
-+	struct data_dirent delay_imports;	/* delay-load import table */
-+	struct data_dirent clr_runtime_hdr;	/* .cor (object only) */
-+	struct data_dirent reserved;
-+};
++	/* Clear BSS */
++	xorl	%eax, %eax
++	leaq	_bss(%rip), %rdi
++	leaq	_ebss(%rip), %rcx
++	subq	%rdi, %rcx
++	shrq	$3, %rcx
++	rep	stosq
 +
-+struct section_header {
-+	char name[8];			/* name or "/12\0" string tbl offset */
-+	uint32_t virtual_size;		/* size of loaded section in ram */
-+	uint32_t virtual_address;	/* relative virtual address */
-+	uint32_t raw_data_size;		/* size of the section */
-+	uint32_t data_addr;		/* file pointer to first page of sec */
-+	uint32_t relocs;		/* file pointer to relocation entries */
-+	uint32_t line_numbers;		/* line numbers! */
-+	uint16_t num_relocs;		/* number of relocations */
-+	uint16_t num_lin_numbers;	/* srsly. */
-+	uint32_t flags;
-+};
+ 	and	$~0xf, %rsp			/* realign the stack */
+ 	movq	%rdx, %rbx			/* save boot_params pointer */
++	movq	%r10, %rdi
+ 	call	efi_main
+-	movq	%rbx,%rsi
+-	leaq	rva(startup_64)(%rax), %rax
+-	jmp	*%rax
 +
-+struct coff_reloc {
-+	uint32_t virtual_address;
-+	uint32_t symbol_table_index;
-+	uint16_t data;
-+};
++	cld
++	cli
 +
-+#endif /* __LINUX_PE_H */
++	movq	%rbx, %rdi /* boot_params */
++	movq	%rax, %rsi /* decompressed kernel address */
++
++	/* Make sure we have GDT with 32-bit code segment */
++	leaq	gdt64(%rip), %rax
++	addq	%rax, 2(%rax)
++	lgdt	(%rax)
++
++	/* Setup data segments. */
++	xorl	%eax, %eax
++	movl	%eax, %ds
++	movl	%eax, %es
++	movl	%eax, %ss
++	movl	%eax, %fs
++	movl	%eax, %gs
++
++	pushq	%rsi
++	pushq	%rdi
++
++	call	load_stage1_idt
++	call	enable_nx_if_supported
++
++	call	trampoline_pgtable_init
++	movq	%rax, %rdx
++
++
++	/* Swap %rsi and %rsi */
++	popq	%rsi
++	popq	%rdi
++
++	/* Save the trampoline address in RCX */
++	movq	trampoline_32bit(%rip), %rcx
++
++	/* Switch to compatibility mode (CS.L = 0 CS.D = 1) via far return */
++	pushq	$__KERNEL32_CS
++	leaq	TRAMPOLINE_32BIT_CODE_OFFSET(%rcx), %rax
++	pushq	%rax
++	lretq
++
+ SYM_FUNC_END(efi64_stub_entry)
+ SYM_FUNC_ALIAS(efi_stub_entry, efi64_stub_entry)
+ #endif
+diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+index 6787ed8dfacf..388b2a0b4781 100644
+--- a/drivers/firmware/efi/Kconfig
++++ b/drivers/firmware/efi/Kconfig
+@@ -91,6 +91,8 @@ config EFI_DXE_MEM_ATTRIBUTES
+ 	  Use DXE services to check and alter memory protection
+ 	  attributes during boot via EFISTUB to ensure that memory
+ 	  ranges used by the kernel are writable and executable.
++	  This option also enables stricter memory attributes
++	  on compressed kernel PE image.
+ 
+ config EFI_PARAMS_FROM_FDT
+ 	bool
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index ef5045a53ce0..f10e67c9a8b0 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -83,7 +83,7 @@ lib-$(CONFIG_EFI_GENERIC_STUB)	+= efi-stub.o string.o intrinsics.o systable.o
+ 
+ lib-$(CONFIG_ARM)		+= arm32-stub.o
+ lib-$(CONFIG_ARM64)		+= arm64-stub.o smbios.o
+-lib-$(CONFIG_X86)		+= x86-stub.o
++lib-$(CONFIG_X86)		+= x86-stub.o x86-extract-direct.o
+ lib-$(CONFIG_RISCV)		+= riscv-stub.o
+ lib-$(CONFIG_LOONGARCH)		+= loongarch-stub.o
+ 
+diff --git a/drivers/firmware/efi/libstub/x86-extract-direct.c b/drivers/firmware/efi/libstub/x86-extract-direct.c
+new file mode 100644
+index 000000000000..4ecbc4a9b3ed
+--- /dev/null
++++ b/drivers/firmware/efi/libstub/x86-extract-direct.c
+@@ -0,0 +1,208 @@
++// SPDX-License-Identifier: GPL-2.0-only
++
++#include <linux/acpi.h>
++#include <linux/efi.h>
++#include <linux/elf.h>
++#include <linux/stddef.h>
++
++#include <asm/efi.h>
++#include <asm/e820/types.h>
++#include <asm/desc.h>
++#include <asm/boot.h>
++#include <asm/bootparam_utils.h>
++#include <asm/shared/extract.h>
++#include <asm/shared/pgtable.h>
++
++#include "efistub.h"
++#include "x86-stub.h"
++
++static efi_handle_t image_handle;
++
++static void do_puthex(unsigned long value)
++{
++	efi_printk("%08lx", value);
++}
++
++static void do_putstr(const char *msg)
++{
++	efi_printk("%s", msg);
++}
++
++static unsigned long do_map_range(unsigned long start,
++				  unsigned long end,
++				  unsigned int flags)
++{
++	efi_status_t status;
++
++	unsigned long size = end - start;
++
++	if (flags & MAP_ALLOC) {
++		unsigned long addr;
++
++		status = efi_low_alloc_above(size, CONFIG_PHYSICAL_ALIGN,
++					     &addr, start);
++		if (status != EFI_SUCCESS) {
++			efi_err("Unable to allocate memory for uncompressed kernel");
++			efi_exit(image_handle, EFI_OUT_OF_RESOURCES);
++		}
++
++		if (start != addr) {
++			efi_debug("Unable to allocate at given address"
++				  " (desired=0x%lx, actual=0x%lx)",
++				  (unsigned long)start, addr);
++			start = addr;
++		}
++	}
++
++	if ((flags & (MAP_PROTECT | MAP_ALLOC)) &&
++	    IS_ENABLED(CONFIG_EFI_DXE_MEM_ATTRIBUTES)) {
++		unsigned long attr = 0;
++
++		if (!(flags & MAP_EXEC))
++			attr |= EFI_MEMORY_XP;
++
++		if (!(flags & MAP_WRITE))
++			attr |= EFI_MEMORY_RO;
++
++		status = efi_adjust_memory_range_protection(start, size, attr);
++		if (status != EFI_SUCCESS)
++			efi_err("Unable to protect memory range");
++	}
++
++	return start;
++}
++
++/*
++ * Trampoline takes 3 pages and can be loaded in first megabyte of memory
++ * with its end placed between 0 and 640k where BIOS might start.
++ * (see arch/x86/boot/compressed/pgtable_64.c)
++ */
++
++#ifdef CONFIG_64BIT
++static efi_status_t prepare_trampoline(void)
++{
++	efi_status_t status;
++
++	status = efi_allocate_pages(TRAMPOLINE_32BIT_SIZE,
++				    (unsigned long *)&trampoline_32bit,
++				    TRAMPOLINE_32BIT_PLACEMENT_MAX);
++
++	if (status != EFI_SUCCESS)
++		return status;
++
++	unsigned long trampoline_start = (unsigned long)trampoline_32bit;
++
++	memset(trampoline_32bit, 0, TRAMPOLINE_32BIT_SIZE);
++
++	if (IS_ENABLED(CONFIG_EFI_DXE_MEM_ATTRIBUTES)) {
++		/* First page of trampoline is a top level page table */
++		efi_adjust_memory_range_protection(trampoline_start,
++						   PAGE_SIZE,
++						   EFI_MEMORY_XP);
++	}
++
++	/* Second page of trampoline is the code (with a padding) */
++
++	void *caddr = (void *)trampoline_32bit + TRAMPOLINE_32BIT_CODE_OFFSET;
++
++	memcpy(caddr, trampoline_32bit_src, TRAMPOLINE_32BIT_CODE_SIZE);
++
++	if (IS_ENABLED(CONFIG_EFI_DXE_MEM_ATTRIBUTES)) {
++		efi_adjust_memory_range_protection((unsigned long)caddr,
++						   PAGE_SIZE,
++						   EFI_MEMORY_RO);
++
++		/* And the last page of trampoline is the stack */
++
++		efi_adjust_memory_range_protection(trampoline_start + 2 * PAGE_SIZE,
++						   PAGE_SIZE,
++						   EFI_MEMORY_XP);
++	}
++
++	return EFI_SUCCESS;
++}
++#else
++static inline efi_status_t prepare_trampoline(void)
++{
++	return EFI_SUCCESS;
++}
++#endif
++
++static efi_status_t init_loader_data(efi_handle_t handle,
++				     struct boot_params *params,
++				     struct efi_boot_memmap **map)
++{
++	struct efi_info *efi = (void *)&params->efi_info;
++	efi_status_t status;
++
++	status = efi_get_memory_map(map, false);
++
++	if (status != EFI_SUCCESS) {
++		efi_err("Unable to get EFI memory map...\n");
++		return status;
++	}
++
++	const char *signature = efi_is_64bit() ? EFI64_LOADER_SIGNATURE
++					       : EFI32_LOADER_SIGNATURE;
++
++	memcpy(&efi->efi_loader_signature, signature, sizeof(__u32));
++
++	efi->efi_memdesc_size = (*map)->desc_size;
++	efi->efi_memdesc_version = (*map)->desc_ver;
++	efi->efi_memmap_size = (*map)->map_size;
++
++	efi_set_u64_split((unsigned long)(*map)->map,
++			  &efi->efi_memmap, &efi->efi_memmap_hi);
++
++	efi_set_u64_split((unsigned long)efi_system_table,
++			  &efi->efi_systab, &efi->efi_systab_hi);
++
++	image_handle = handle;
++
++	return EFI_SUCCESS;
++}
++
++static void free_loader_data(struct boot_params *params, struct efi_boot_memmap *map)
++{
++	struct efi_info *efi = (void *)&params->efi_info;
++
++	efi_bs_call(free_pool, map);
++
++	efi->efi_memdesc_size = 0;
++	efi->efi_memdesc_version = 0;
++	efi->efi_memmap_size = 0;
++	efi_set_u64_split(0, &efi->efi_memmap, &efi->efi_memmap_hi);
++}
++
++extern unsigned char input_data[];
++extern unsigned int input_len, output_len;
++
++unsigned long extract_kernel_direct(efi_handle_t handle, struct boot_params *params)
++{
++
++	void *res;
++	efi_status_t status;
++	struct efi_extract_callbacks cb = { 0 };
++
++	status = prepare_trampoline();
++
++	if (status != EFI_SUCCESS)
++		return 0;
++
++	/* Prepare environment for do_extract_kernel() call */
++	struct efi_boot_memmap *map = NULL;
++	status = init_loader_data(handle, params, &map);
++
++	if (status != EFI_SUCCESS)
++		return 0;
++
++	cb.puthex = do_puthex;
++	cb.putstr = do_putstr;
++	cb.map_range = do_map_range;
++
++	res = efi_extract_kernel(params, &cb, input_data, input_len, output_len);
++
++	free_loader_data(params, map);
++
++	return (unsigned long)res;
++}
+diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
+index 2fddb88613cd..0b05e1042fdb 100644
+--- a/drivers/firmware/efi/libstub/x86-stub.c
++++ b/drivers/firmware/efi/libstub/x86-stub.c
+@@ -17,6 +17,7 @@
+ #include <asm/boot.h>
+ 
+ #include "efistub.h"
++#include "x86-stub.h"
+ 
+ /* Maximum physical address for 64-bit kernel with 4-level paging */
+ #define MAXMEM_X86_64_4LEVEL (1ull << 46)
+@@ -24,7 +25,7 @@
+ const efi_system_table_t *efi_system_table;
+ const efi_dxe_services_table_t *efi_dxe_table;
+ extern u32 image_offset;
+-static efi_loaded_image_t *image = NULL;
++static efi_loaded_image_t *image __section(".data");
+ 
+ static efi_status_t
+ preserve_pci_rom_image(efi_pci_io_protocol_t *pci, struct pci_setup_rom **__rom)
+@@ -212,55 +213,9 @@ static void retrieve_apple_device_properties(struct boot_params *boot_params)
+ 	}
+ }
+ 
+-/*
+- * Trampoline takes 2 pages and can be loaded in first megabyte of memory
+- * with its end placed between 128k and 640k where BIOS might start.
+- * (see arch/x86/boot/compressed/pgtable_64.c)
+- *
+- * We cannot find exact trampoline placement since memory map
+- * can be modified by UEFI, and it can alter the computed address.
+- */
+-
+-#define TRAMPOLINE_PLACEMENT_BASE ((128 - 8)*1024)
+-#define TRAMPOLINE_PLACEMENT_SIZE (640*1024 - (128 - 8)*1024)
+-
+-void startup_32(struct boot_params *boot_params);
+-
+-static void
+-setup_memory_protection(unsigned long image_base, unsigned long image_size)
+-{
+-	/*
+-	 * Allow execution of possible trampoline used
+-	 * for switching between 4- and 5-level page tables
+-	 * and relocated kernel image.
+-	 */
+-
+-	efi_adjust_memory_range_protection(TRAMPOLINE_PLACEMENT_BASE,
+-					   TRAMPOLINE_PLACEMENT_SIZE, 0);
+-
+-#ifdef CONFIG_64BIT
+-	if (image_base != (unsigned long)startup_32)
+-		efi_adjust_memory_range_protection(image_base, image_size, 0);
+-#else
+-	/*
+-	 * Clear protection flags on a whole range of possible
+-	 * addresses used for KASLR. We don't need to do that
+-	 * on x86_64, since KASLR/extraction is performed after
+-	 * dedicated identity page tables are built and we only
+-	 * need to remove possible protection on relocated image
+-	 * itself disregarding further relocations.
+-	 */
+-	efi_adjust_memory_range_protection(LOAD_PHYSICAL_ADDR,
+-					   KERNEL_IMAGE_SIZE - LOAD_PHYSICAL_ADDR,
+-					   0);
+-#endif
+-}
+-
+ static const efi_char16_t apple[] = L"Apple";
+ 
+-static void setup_quirks(struct boot_params *boot_params,
+-			 unsigned long image_base,
+-			 unsigned long image_size)
++static void setup_quirks(struct boot_params *boot_params)
+ {
+ 	efi_char16_t *fw_vendor = (efi_char16_t *)(unsigned long)
+ 		efi_table_attr(efi_system_table, fw_vendor);
+@@ -269,9 +224,6 @@ static void setup_quirks(struct boot_params *boot_params,
+ 		if (IS_ENABLED(CONFIG_APPLE_PROPERTIES))
+ 			retrieve_apple_device_properties(boot_params);
+ 	}
+-
+-	if (IS_ENABLED(CONFIG_EFI_DXE_MEM_ATTRIBUTES))
+-		setup_memory_protection(image_base, image_size);
+ }
+ 
+ /*
+@@ -384,7 +336,7 @@ static void setup_graphics(struct boot_params *boot_params)
+ }
+ 
+ 
+-static void __noreturn efi_exit(efi_handle_t handle, efi_status_t status)
++void __noreturn efi_exit(efi_handle_t handle, efi_status_t status)
+ {
+ 	efi_bs_call(exit, handle, status, 0, NULL);
+ 	for(;;)
+@@ -707,8 +659,7 @@ static efi_status_t exit_boot(struct boot_params *boot_params, void *handle)
+ }
+ 
+ /*
+- * On success, we return the address of startup_32, which has potentially been
+- * relocated by efi_relocate_kernel.
++ * On success, we return extracted kernel entry point.
+  * On failure, we exit to the firmware via efi_exit instead of returning.
+  */
+ asmlinkage unsigned long efi_main(efi_handle_t handle,
+@@ -733,60 +684,6 @@ asmlinkage unsigned long efi_main(efi_handle_t handle,
+ 		efi_dxe_table = NULL;
+ 	}
+ 
+-	/*
+-	 * If the kernel isn't already loaded at a suitable address,
+-	 * relocate it.
+-	 *
+-	 * It must be loaded above LOAD_PHYSICAL_ADDR.
+-	 *
+-	 * The maximum address for 64-bit is 1 << 46 for 4-level paging. This
+-	 * is defined as the macro MAXMEM, but unfortunately that is not a
+-	 * compile-time constant if 5-level paging is configured, so we instead
+-	 * define our own macro for use here.
+-	 *
+-	 * For 32-bit, the maximum address is complicated to figure out, for
+-	 * now use KERNEL_IMAGE_SIZE, which will be 512MiB, the same as what
+-	 * KASLR uses.
+-	 *
+-	 * Also relocate it if image_offset is zero, i.e. the kernel wasn't
+-	 * loaded by LoadImage, but rather by a bootloader that called the
+-	 * handover entry. The reason we must always relocate in this case is
+-	 * to handle the case of systemd-boot booting a unified kernel image,
+-	 * which is a PE executable that contains the bzImage and an initrd as
+-	 * COFF sections. The initrd section is placed after the bzImage
+-	 * without ensuring that there are at least init_size bytes available
+-	 * for the bzImage, and thus the compressed kernel's startup code may
+-	 * overwrite the initrd unless it is moved out of the way.
+-	 */
+-
+-	buffer_start = ALIGN(bzimage_addr - image_offset,
+-			     hdr->kernel_alignment);
+-	buffer_end = buffer_start + hdr->init_size;
+-
+-	if ((buffer_start < LOAD_PHYSICAL_ADDR)				     ||
+-	    (IS_ENABLED(CONFIG_X86_32) && buffer_end > KERNEL_IMAGE_SIZE)    ||
+-	    (IS_ENABLED(CONFIG_X86_64) && buffer_end > MAXMEM_X86_64_4LEVEL) ||
+-	    (image_offset == 0)) {
+-		extern char _bss[];
+-
+-		status = efi_relocate_kernel(&bzimage_addr,
+-					     (unsigned long)_bss - bzimage_addr,
+-					     hdr->init_size,
+-					     hdr->pref_address,
+-					     hdr->kernel_alignment,
+-					     LOAD_PHYSICAL_ADDR);
+-		if (status != EFI_SUCCESS) {
+-			efi_err("efi_relocate_kernel() failed!\n");
+-			goto fail;
+-		}
+-		/*
+-		 * Now that we've copied the kernel elsewhere, we no longer
+-		 * have a set up block before startup_32(), so reset image_offset
+-		 * to zero in case it was set earlier.
+-		 */
+-		image_offset = 0;
+-	}
+-
+ #ifdef CONFIG_CMDLINE_BOOL
+ 	status = efi_parse_options(CONFIG_CMDLINE);
+ 	if (status != EFI_SUCCESS) {
+@@ -843,7 +740,11 @@ asmlinkage unsigned long efi_main(efi_handle_t handle,
+ 
+ 	setup_efi_pci(boot_params);
+ 
+-	setup_quirks(boot_params, bzimage_addr, buffer_end - buffer_start);
++	setup_quirks(boot_params);
++
++	bzimage_addr = extract_kernel_direct(handle, boot_params);
++	if (!bzimage_addr)
++		goto fail;
+ 
+ 	status = exit_boot(boot_params, handle);
+ 	if (status != EFI_SUCCESS) {
+diff --git a/drivers/firmware/efi/libstub/x86-stub.h b/drivers/firmware/efi/libstub/x86-stub.h
+new file mode 100644
+index 000000000000..baecc7c6e602
+--- /dev/null
++++ b/drivers/firmware/efi/libstub/x86-stub.h
+@@ -0,0 +1,14 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++
++#ifndef _DRIVERS_FIRMWARE_EFI_X86STUB_H
++#define _DRIVERS_FIRMWARE_EFI_X86STUB_H
++
++#include <linux/efi.h>
++
++#include <asm/bootparam.h>
++
++void __noreturn efi_exit(efi_handle_t handle, efi_status_t status);
++unsigned long extract_kernel_direct(efi_handle_t handle, struct boot_params *boot_params);
++void startup_32(struct boot_params *boot_params);
++
++#endif
 -- 
 2.37.4
 
