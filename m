@@ -2,29 +2,29 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F111C43217
-	for <linux-efi@archiver.kernel.org>; Tue, 22 Nov 2022 11:13:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 51823C46467
+	for <linux-efi@archiver.kernel.org>; Tue, 22 Nov 2022 11:13:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233105AbiKVLNA (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 22 Nov 2022 06:13:00 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59264 "EHLO
+        id S232707AbiKVLNB (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 22 Nov 2022 06:13:01 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59364 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233015AbiKVLMt (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 22 Nov 2022 06:12:49 -0500
+        with ESMTP id S233028AbiKVLMu (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 22 Nov 2022 06:12:50 -0500
 Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 302E22679;
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B65D42AEC;
         Tue, 22 Nov 2022 03:12:48 -0800 (PST)
 Received: from localhost.localdomain (unknown [83.149.199.65])
-        by mail.ispras.ru (Postfix) with ESMTPSA id 3BA8740737C9;
-        Tue, 22 Nov 2022 11:12:42 +0000 (UTC)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 3BA8740737C9
+        by mail.ispras.ru (Postfix) with ESMTPSA id 47A1840737D8;
+        Tue, 22 Nov 2022 11:12:43 +0000 (UTC)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 47A1840737D8
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ispras.ru;
-        s=default; t=1669115562;
-        bh=6LbB1uBc1uJCmmb4a8uDsumRWsUg2xKiizxsfNVpfWY=;
+        s=default; t=1669115563;
+        bh=crSlzJwK96YW/rE+r+0VuFq2u4zO2iJQEIttDiLLC3Y=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=n1F+9R+RWehzXcuBSqjA4fm/8ZLNLbdiiV9hfYVRBKJgSMWrJgMzf10J5xdAFjVi0
-         MD/r1Jay3tfrKfn3wrEzzHSswIaAiqAOl8SRJolRSyV72NJCYvfDcWRFFXypHjh6EI
-         O+3KQoFAfEVYL4AmCvR7yVoOMVPG0i3JAJFmKxGQ=
+        b=HZvlcI6T9aWDGQqrRXS8cjF5H0rQ63ngSLaMc5ftyOH5hUATAk1DdStVQkfo7oYa+
+         Hr2z4elSgKFLllD0x7YSGln3+LloM9wKWOzd3QOMia+1FToMaLIfBCV0VSfSn6QuM3
+         YgM8Vr9UDc4wHe0S8gfs9/kiR/akD7MgLSopsf7I=
 From:   Evgeniy Baskov <baskov@ispras.ru>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
@@ -39,9 +39,9 @@ Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
         joeyli <jlee@suse.com>, lvc-project@linuxtesting.org,
         x86@kernel.org, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org
-Subject: [PATCH v3 08/24] x86/boot: Map memory explicitly
-Date:   Tue, 22 Nov 2022 14:12:17 +0300
-Message-Id: <661b7828c7a7b059dba1cca05e3fc80a0e31eccd.1668958803.git.baskov@ispras.ru>
+Subject: [PATCH v3 12/24] x86/boot: Make kernel_add_identity_map() a pointer
+Date:   Tue, 22 Nov 2022 14:12:21 +0300
+Message-Id: <9251fb0d8dbb6fbb3a4730952314170c6771df0e.1668958803.git.baskov@ispras.ru>
 X-Mailer: git-send-email 2.37.4
 In-Reply-To: <cover.1668958803.git.baskov@ispras.ru>
 References: <cover.1668958803.git.baskov@ispras.ru>
@@ -51,157 +51,111 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Implicit mappings hide possible memory errors, e.g. allocations for
-ACPI tables were not included in boot page table size.
-
-Replace all implicit mappings from page fault handler with
-explicit mappings.
+Convert kernel_add_identity_map() into a function pointer to be able
+to provide alternative implementations of this function. Required
+to enable calling the code using this function from EFI environment.
 
 Tested-by: Mario Limonciello <mario.limonciello@amd.com>
 Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
 ---
- arch/x86/boot/compressed/acpi.c  | 21 ++++++++++++++++++++-
- arch/x86/boot/compressed/efi.c   | 19 ++++++++++++++++++-
- arch/x86/boot/compressed/kaslr.c |  4 ++++
- 3 files changed, 42 insertions(+), 2 deletions(-)
+ arch/x86/boot/compressed/ident_map_64.c |  7 ++++---
+ arch/x86/boot/compressed/misc.c         | 24 ++++++++++++++++++++++++
+ arch/x86/boot/compressed/misc.h         | 15 +++------------
+ 3 files changed, 31 insertions(+), 15 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/acpi.c b/arch/x86/boot/compressed/acpi.c
-index 9caf89063e77..633ac56262ee 100644
---- a/arch/x86/boot/compressed/acpi.c
-+++ b/arch/x86/boot/compressed/acpi.c
-@@ -93,6 +93,8 @@ static u8 *scan_mem_for_rsdp(u8 *start, u32 length)
- 
- 	end = start + length;
- 
-+	kernel_add_identity_map((unsigned long)start, (unsigned long)end, 0);
-+
- 	/* Search from given start address for the requested length */
- 	for (address = start; address < end; address += ACPI_RSDP_SCAN_STEP) {
- 		/*
-@@ -128,6 +130,9 @@ static acpi_physical_address bios_get_rsdp_addr(void)
- 	unsigned long address;
- 	u8 *rsdp;
- 
-+	kernel_add_identity_map((unsigned long)ACPI_EBDA_PTR_LOCATION,
-+				(unsigned long)ACPI_EBDA_PTR_LOCATION + 2, 0);
-+
- 	/* Get the location of the Extended BIOS Data Area (EBDA) */
- 	address = *(u16 *)ACPI_EBDA_PTR_LOCATION;
- 	address <<= 4;
-@@ -215,6 +220,9 @@ static unsigned long get_acpi_srat_table(void)
- 	if (!rsdp)
- 		return 0;
- 
-+	kernel_add_identity_map((unsigned long)rsdp,
-+				(unsigned long)(rsdp + 1), 0);
-+
- 	/* Get ACPI root table from RSDP.*/
- 	if (!(cmdline_find_option("acpi", arg, sizeof(arg)) == 4 &&
- 	    !strncmp(arg, "rsdt", 4)) &&
-@@ -235,6 +243,9 @@ static unsigned long get_acpi_srat_table(void)
- 	if (len < sizeof(struct acpi_table_header) + size)
- 		return 0;
- 
-+	kernel_add_identity_map((unsigned long)header,
-+				(unsigned long)header + len, 0);
-+
- 	num_entries = (len - sizeof(struct acpi_table_header)) / size;
- 	entry = (u8 *)(root_table + sizeof(struct acpi_table_header));
- 
-@@ -247,8 +258,16 @@ static unsigned long get_acpi_srat_table(void)
- 		if (acpi_table) {
- 			header = (struct acpi_table_header *)acpi_table;
- 
--			if (ACPI_COMPARE_NAMESEG(header->signature, ACPI_SIG_SRAT))
-+			kernel_add_identity_map(acpi_table,
-+						acpi_table + sizeof(*header),
-+						0);
-+
-+			if (ACPI_COMPARE_NAMESEG(header->signature, ACPI_SIG_SRAT)) {
-+				kernel_add_identity_map(acpi_table,
-+							acpi_table + header->length,
-+							0);
- 				return acpi_table;
-+			}
- 		}
- 		entry += size;
- 	}
-diff --git a/arch/x86/boot/compressed/efi.c b/arch/x86/boot/compressed/efi.c
-index 6edd034b0b30..ce70103fbbc0 100644
---- a/arch/x86/boot/compressed/efi.c
-+++ b/arch/x86/boot/compressed/efi.c
-@@ -57,10 +57,14 @@ enum efi_type efi_get_type(struct boot_params *bp)
+diff --git a/arch/x86/boot/compressed/ident_map_64.c b/arch/x86/boot/compressed/ident_map_64.c
+index ba5108c58a4e..1aee524d3c2b 100644
+--- a/arch/x86/boot/compressed/ident_map_64.c
++++ b/arch/x86/boot/compressed/ident_map_64.c
+@@ -92,9 +92,9 @@ bool has_nx; /* set in head_64.S */
+ /*
+  * Adds the specified range to the identity mappings.
   */
- unsigned long efi_get_system_table(struct boot_params *bp)
+-unsigned long kernel_add_identity_map(unsigned long start,
+-				      unsigned long end,
+-				      unsigned int flags)
++unsigned long kernel_add_identity_map_(unsigned long start,
++				       unsigned long end,
++				       unsigned int flags)
  {
--	unsigned long sys_tbl_pa;
-+	static unsigned long sys_tbl_pa __section(".data");
- 	struct efi_info *ei;
-+	unsigned long sys_tbl_size;
- 	enum efi_type et;
+ 	int ret;
  
-+	if (sys_tbl_pa)
-+		return sys_tbl_pa;
-+
- 	/* Get systab from boot params. */
- 	ei = &bp->efi_info;
- #ifdef CONFIG_X86_64
-@@ -73,6 +77,13 @@ unsigned long efi_get_system_table(struct boot_params *bp)
- 		return 0;
- 	}
+@@ -142,6 +142,7 @@ void initialize_identity_maps(void *rmode)
+ 	struct setup_data *sd;
  
-+	if (efi_get_type(bp) == EFI_TYPE_64)
-+		sys_tbl_size = sizeof(efi_system_table_64_t);
-+	else
-+		sys_tbl_size = sizeof(efi_system_table_32_t);
-+
-+	kernel_add_identity_map(sys_tbl_pa, sys_tbl_pa + sys_tbl_size, 0);
-+
- 	return sys_tbl_pa;
+ 	boot_params = rmode;
++	kernel_add_identity_map = kernel_add_identity_map_;
+ 
+ 	/* Exclude the encryption mask from __PHYSICAL_MASK */
+ 	physical_mask &= ~sme_me_mask;
+diff --git a/arch/x86/boot/compressed/misc.c b/arch/x86/boot/compressed/misc.c
+index aa4a22bc9cf9..c9c235d65d16 100644
+--- a/arch/x86/boot/compressed/misc.c
++++ b/arch/x86/boot/compressed/misc.c
+@@ -275,6 +275,22 @@ static void parse_elf(void *output, unsigned long output_len,
+ 	free(phdrs);
  }
  
-@@ -92,6 +103,10 @@ static struct efi_setup_data *get_kexec_setup_data(struct boot_params *bp,
- 
- 	pa_data = bp->hdr.setup_data;
- 	while (pa_data) {
-+		unsigned long pa_data_end = pa_data + sizeof(struct setup_data)
-+					  + sizeof(struct efi_setup_data);
-+		kernel_add_identity_map(pa_data, pa_data_end, 0);
++/*
++ * This points to actual implementation of mapping function
++ * for current environment: either EFI API wrapper,
++ * own implementation or dummy implementation below.
++ */
++unsigned long (*kernel_add_identity_map)(unsigned long start,
++					 unsigned long end,
++					 unsigned int flags);
 +
- 		data = (struct setup_data *)pa_data;
- 		if (data->type == SETUP_EFI) {
- 			esd = (struct efi_setup_data *)(pa_data + sizeof(struct setup_data));
-@@ -160,6 +175,8 @@ int efi_get_conf_table(struct boot_params *bp, unsigned long *cfg_tbl_pa,
- 		return -EINVAL;
- 	}
- 
-+	kernel_add_identity_map(*cfg_tbl_pa, *cfg_tbl_pa + *cfg_tbl_len, 0);
++static inline unsigned long kernel_add_identity_map_dummy(unsigned long start,
++							  unsigned long end,
++							  unsigned int flags)
++{
++	return start;
++}
 +
- 	return 0;
- }
+ /*
+  * The compressed kernel image (ZO), has been moved so that its position
+  * is against the end of the buffer used to hold the uncompressed kernel
+@@ -312,6 +328,14 @@ asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
  
-diff --git a/arch/x86/boot/compressed/kaslr.c b/arch/x86/boot/compressed/kaslr.c
-index e476bcbd9b42..7e09d65f7b57 100644
---- a/arch/x86/boot/compressed/kaslr.c
-+++ b/arch/x86/boot/compressed/kaslr.c
-@@ -688,6 +688,8 @@ process_efi_entries(unsigned long minimum, unsigned long image_size)
- 	u32 nr_desc;
- 	int i;
+ 	init_default_io_ops();
  
-+	kernel_add_identity_map((unsigned long)e, (unsigned long)(e + 1), 0);
++	/*
++	 * On 64-bit this pointer is set during page table uninitialization,
++	 * but on 32-bit it remains uninitialized, since paging is disabled.
++	 */
++	if (IS_ENABLED(CONFIG_X86_32))
++		kernel_add_identity_map = kernel_add_identity_map_dummy;
 +
- 	signature = (char *)&e->efi_loader_signature;
- 	if (strncmp(signature, EFI32_LOADER_SIGNATURE, 4) &&
- 	    strncmp(signature, EFI64_LOADER_SIGNATURE, 4))
-@@ -704,6 +706,8 @@ process_efi_entries(unsigned long minimum, unsigned long image_size)
- 	pmap = (e->efi_memmap | ((__u64)e->efi_memmap_hi << 32));
++
+ 	/*
+ 	 * Detect TDX guest environment.
+ 	 *
+diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
+index 38d31bec062d..0076b2845b4b 100644
+--- a/arch/x86/boot/compressed/misc.h
++++ b/arch/x86/boot/compressed/misc.h
+@@ -180,18 +180,9 @@ static inline int count_immovable_mem_regions(void) { return 0; }
+ #ifdef CONFIG_X86_5LEVEL
+ extern unsigned int __pgtable_l5_enabled, pgdir_shift, ptrs_per_p4d;
  #endif
+-#ifdef CONFIG_X86_64
+-extern unsigned long kernel_add_identity_map(unsigned long start,
+-					     unsigned long end,
+-					     unsigned int flags);
+-#else
+-static inline unsigned long kernel_add_identity_map(unsigned long start,
+-						    unsigned long end,
+-						    unsigned int flags)
+-{
+-	return start;
+-}
+-#endif
++extern unsigned long (*kernel_add_identity_map)(unsigned long start,
++						unsigned long end,
++						unsigned int flags);
+ /* Used by PAGE_KERN* macros: */
+ extern pteval_t __default_kernel_pte_mask;
  
-+	kernel_add_identity_map(pmap, pmap + e->efi_memmap_size, 0);
-+
- 	nr_desc = e->efi_memmap_size / e->efi_memdesc_size;
- 	for (i = 0; i < nr_desc; i++) {
- 		md = efi_early_memdesc_ptr(pmap, e->efi_memdesc_size, i);
 -- 
 2.37.4
 
