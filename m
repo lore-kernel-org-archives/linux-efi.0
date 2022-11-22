@@ -2,29 +2,29 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EDE42C43217
-	for <linux-efi@archiver.kernel.org>; Tue, 22 Nov 2022 11:13:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A4FE6C433FE
+	for <linux-efi@archiver.kernel.org>; Tue, 22 Nov 2022 11:13:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233119AbiKVLNG (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 22 Nov 2022 06:13:06 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59822 "EHLO
+        id S233130AbiKVLNH (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 22 Nov 2022 06:13:07 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59814 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233042AbiKVLMu (ORCPT
+        with ESMTP id S233039AbiKVLMu (ORCPT
         <rfc822;linux-efi@vger.kernel.org>); Tue, 22 Nov 2022 06:12:50 -0500
 Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F23FD2BD2;
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B5E9526FA;
         Tue, 22 Nov 2022 03:12:48 -0800 (PST)
 Received: from localhost.localdomain (unknown [83.149.199.65])
-        by mail.ispras.ru (Postfix) with ESMTPSA id 7B3A340737DC;
-        Tue, 22 Nov 2022 11:12:43 +0000 (UTC)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 7B3A340737DC
+        by mail.ispras.ru (Postfix) with ESMTPSA id CC8C240737CC;
+        Tue, 22 Nov 2022 11:12:42 +0000 (UTC)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru CC8C240737CC
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ispras.ru;
-        s=default; t=1669115563;
-        bh=PQtsrCYU1PKgl/tUvA5tLuxewf/SvD2lWTLiW0J0hPU=;
+        s=default; t=1669115562;
+        bh=SyAOkYnseG0Uos1vl9yELMIm+8XSmRWWJz9H09Ph6/A=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=aoR9o6GCQktf0NJUvawuKROyXeRphTzk4l2u/3i189V58z4DVD61ktH5HW92MSIrk
-         ohC0y4cHtZYMLLJVe/K/zZIfQ2MYcuyfqlcjjq0Tu2rP3nERn4wRC19etwywnbR9SP
-         wq32Lt78Hns8pUov/+JGW3NfR/aeb0gAkg6qF/3U=
+        b=Txr7GSjA7zFvtuOxrb1hTS+/g9wVvNNMVag0GKKxt91hFRuPhXxd2k6sobAi50M3c
+         qQvLvoXCG5hfPk2q/3WH966AFIMCmnfaewjSrHBaGx+hZhAaRUJ6+qAz8kenLiJV9u
+         3T3r5u30Vv9Ee/H/5V93/SGrfORzvSs4FR9H+pjM=
 From:   Evgeniy Baskov <baskov@ispras.ru>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
@@ -39,9 +39,9 @@ Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
         joeyli <jlee@suse.com>, lvc-project@linuxtesting.org,
         x86@kernel.org, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org
-Subject: [PATCH v3 13/24] x86/boot: Split trampoline and pt init code
-Date:   Tue, 22 Nov 2022 14:12:22 +0300
-Message-Id: <c0eb4bb3d9ab15b0076eebfaa4f281cfa2df75fc.1668958803.git.baskov@ispras.ru>
+Subject: [PATCH v3 10/24] efi/libstub: Move helper function to related file
+Date:   Tue, 22 Nov 2022 14:12:19 +0300
+Message-Id: <52c400c83da25419f2aa9c2539bf0f8d99511744.1668958803.git.baskov@ispras.ru>
 X-Mailer: git-send-email 2.37.4
 In-Reply-To: <cover.1668958803.git.baskov@ispras.ru>
 References: <cover.1668958803.git.baskov@ispras.ru>
@@ -51,126 +51,242 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-When allocating trampoline from libstub trampoline allocation is
-performed separately, so it needs to be skipped.
+efi_adjust_memory_range_protection() can be useful outside x86-stub.c.
 
-Split trampoline initialization and allocation code into two
-functions to make them invokable separately.
+Move it to mem.c, where memory related code resides and make it
+non-static.
+
+Change its behavior to setup exact attributes and disallow making
+memory regions readable and writable simultaneously for supported
+configurations.
 
 Tested-by: Mario Limonciello <mario.limonciello@amd.com>
 Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
 ---
- arch/x86/boot/compressed/pgtable_64.c | 73 +++++++++++++++++----------
- 1 file changed, 46 insertions(+), 27 deletions(-)
+ drivers/firmware/efi/libstub/efistub.h  |   4 +
+ drivers/firmware/efi/libstub/mem.c      | 102 ++++++++++++++++++++++++
+ drivers/firmware/efi/libstub/x86-stub.c |  66 ++-------------
+ 3 files changed, 112 insertions(+), 60 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/pgtable_64.c b/arch/x86/boot/compressed/pgtable_64.c
-index c7cf5a1059a8..1f7169248612 100644
---- a/arch/x86/boot/compressed/pgtable_64.c
-+++ b/arch/x86/boot/compressed/pgtable_64.c
-@@ -106,12 +106,8 @@ static unsigned long find_trampoline_placement(void)
- 	return bios_start - TRAMPOLINE_32BIT_SIZE;
- }
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index eb03d5a9aac8..c74ac2875e31 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -917,6 +917,10 @@ efi_status_t efi_relocate_kernel(unsigned long *image_addr,
+ 				 unsigned long alignment,
+ 				 unsigned long min_addr);
  
--struct paging_config paging_prepare(void *rmode)
-+bool trampoline_pgtable_init(struct boot_params *boot_params)
- {
--	struct paging_config paging_config = {};
--
--	/* Initialize boot_params. Required for cmdline_find_option_bool(). */
--	boot_params = rmode;
- 
- 	/*
- 	 * Check if LA57 is desired and supported.
-@@ -125,26 +121,10 @@ struct paging_config paging_prepare(void *rmode)
- 	 *
- 	 * That's substitute for boot_cpu_has() in early boot code.
- 	 */
--	if (IS_ENABLED(CONFIG_X86_5LEVEL) &&
--			!cmdline_find_option_bool("no5lvl") &&
--			native_cpuid_eax(0) >= 7 &&
--			(native_cpuid_ecx(7) & (1 << (X86_FEATURE_LA57 & 31)))) {
--		paging_config.l5_required = 1;
--	}
--
--	paging_config.trampoline_start = find_trampoline_placement();
--
--	trampoline_32bit = (unsigned long *)paging_config.trampoline_start;
--
--	/* Preserve trampoline memory */
--	memcpy(trampoline_save, trampoline_32bit, TRAMPOLINE_32BIT_SIZE);
--
--	/* Clear trampoline memory first */
--	memset(trampoline_32bit, 0, TRAMPOLINE_32BIT_SIZE);
--
--	/* Copy trampoline code in place */
--	memcpy(trampoline_32bit + TRAMPOLINE_32BIT_CODE_OFFSET / sizeof(unsigned long),
--			&trampoline_32bit_src, TRAMPOLINE_32BIT_CODE_SIZE);
-+	bool l5_required = IS_ENABLED(CONFIG_X86_5LEVEL) &&
-+			   !cmdline_find_option_bool("no5lvl") &&
-+			   native_cpuid_eax(0) >= 7 &&
-+			   (native_cpuid_ecx(7) & (1 << (X86_FEATURE_LA57 & 31)));
- 
- 	/*
- 	 * The code below prepares page table in trampoline memory.
-@@ -160,10 +140,10 @@ struct paging_config paging_prepare(void *rmode)
- 	 * We are not going to use the page table in trampoline memory if we
- 	 * are already in the desired paging mode.
- 	 */
--	if (paging_config.l5_required == !!(native_read_cr4() & X86_CR4_LA57))
-+	if (l5_required == !!(native_read_cr4() & X86_CR4_LA57))
- 		goto out;
- 
--	if (paging_config.l5_required) {
-+	if (l5_required) {
- 		/*
- 		 * For 4- to 5-level paging transition, set up current CR3 as
- 		 * the first and the only entry in a new top-level page table.
-@@ -185,6 +165,45 @@ struct paging_config paging_prepare(void *rmode)
- 		       (void *)src, PAGE_SIZE);
- 	}
- 
-+out:
-+	return l5_required;
-+}
++efi_status_t efi_adjust_memory_range_protection(unsigned long start,
++						unsigned long size,
++						unsigned long attributes);
 +
-+struct paging_config paging_prepare(void *rmode)
+ efi_status_t efi_parse_options(char const *cmdline);
+ 
+ void efi_parse_option_graphics(char *option);
+diff --git a/drivers/firmware/efi/libstub/mem.c b/drivers/firmware/efi/libstub/mem.c
+index 45841ef55a9f..cdf1e6fb6430 100644
+--- a/drivers/firmware/efi/libstub/mem.c
++++ b/drivers/firmware/efi/libstub/mem.c
+@@ -125,3 +125,105 @@ void efi_free(unsigned long size, unsigned long addr)
+ 	nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
+ 	efi_bs_call(free_pages, addr, nr_pages);
+ }
++
++/**
++ * efi_adjust_memory_range_protection() - change memory range protection attributes
++ * @start:	memory range start address
++ * @size:	memory range size
++ *
++ * Actual memory range for which memory attributes are modified is
++ * the smallest ranged with start address and size aligned to EFI_PAGE_SIZE
++ * that includes [start, start + size].
++ *
++ * @return: status code
++ */
++efi_status_t efi_adjust_memory_range_protection(unsigned long start,
++						unsigned long size,
++						unsigned long attributes)
 +{
-+	struct paging_config paging_config = {};
-+	bool early_trampoline_alloc = 0;
++	efi_status_t status;
++	efi_gcd_memory_space_desc_t desc;
++	efi_physical_addr_t end, next;
++	efi_physical_addr_t rounded_start, rounded_end;
++	efi_physical_addr_t unprotect_start, unprotect_size;
 +
-+	/* Initialize boot_params. Required for cmdline_find_option_bool(). */
-+	boot_params = rmode;
-+
-+	/*
-+	 * We only need to find trampoline placement, if we have
-+	 * not already done it from libstub.
-+	 */
-+
-+	paging_config.trampoline_start = find_trampoline_placement();
-+	trampoline_32bit = (unsigned long *)paging_config.trampoline_start;
-+	early_trampoline_alloc = 0;
++	if (efi_dxe_table == NULL)
++		return EFI_UNSUPPORTED;
 +
 +	/*
-+	 * Preserve trampoline memory.
-+	 * When trampoline is located in memory
-+	 * owned by us, i.e. allocated in EFISTUB,
-+	 * we don't care about previous contents
-+	 * of this memory so copying can also be skipped.
++	 * This function should not be used to modify attributes
++	 * other than writable/executable.
 +	 */
-+	memcpy(trampoline_save, trampoline_32bit, TRAMPOLINE_32BIT_SIZE);
 +
-+	/* Clear trampoline memory first */
-+	memset(trampoline_32bit, 0, TRAMPOLINE_32BIT_SIZE);
++	if ((attributes & ~(EFI_MEMORY_RO | EFI_MEMORY_XP)) != 0)
++		return EFI_INVALID_PARAMETER;
 +
-+	/* Copy trampoline code in place */
-+	memcpy(trampoline_32bit + TRAMPOLINE_32BIT_CODE_OFFSET / sizeof(unsigned long),
-+			&trampoline_32bit_src, TRAMPOLINE_32BIT_CODE_SIZE);
++	/*
++	 * Disallow simultaniously executable and writable memory
++	 * to inforce W^X policy if direct extraction code is enabled.
++	 */
 +
-+	paging_config.l5_required = trampoline_pgtable_init(boot_params);
++	if ((attributes & (EFI_MEMORY_RO | EFI_MEMORY_XP)) == 0) {
++		efi_warn("W^X violation at [%08lx,%08lx]\n",
++			 (unsigned long)rounded_start,
++			 (unsigned long)rounded_end);
++	}
 +
- out:
- 	return paging_config;
++	rounded_start = rounddown(start, EFI_PAGE_SIZE);
++	rounded_end = roundup(start + size, EFI_PAGE_SIZE);
++
++	/*
++	 * Don't modify memory region attributes, they are
++	 * already suitable, to lower the possibility to
++	 * encounter firmware bugs.
++	 */
++
++	for (end = start + size; start < end; start = next) {
++
++		status = efi_dxe_call(get_memory_space_descriptor,
++				      start, &desc);
++
++		if (status != EFI_SUCCESS) {
++			efi_warn("Unable to get memory descriptor at %lx\n",
++				 start);
++			return status;
++		}
++
++		next = desc.base_address + desc.length;
++
++		/*
++		 * Only system memory is suitable for trampoline/kernel image
++		 * placement, so only this type of memory needs its attributes
++		 * to be modified.
++		 */
++
++		if (desc.gcd_memory_type != EfiGcdMemoryTypeSystemMemory) {
++			efi_warn("Attempted to change protection of special memory range\n");
++			return EFI_UNSUPPORTED;
++		}
++
++		if (((desc.attributes ^ attributes) &
++		     (EFI_MEMORY_RO | EFI_MEMORY_XP)) == 0)
++			continue;
++
++		desc.attributes &= ~(EFI_MEMORY_RO | EFI_MEMORY_XP);
++		desc.attributes |= attributes;
++
++		unprotect_start = max(rounded_start, desc.base_address);
++		unprotect_size = min(rounded_end, next) - unprotect_start;
++
++		status = efi_dxe_call(set_memory_space_attributes,
++				      unprotect_start, unprotect_size,
++				      desc.attributes);
++
++		if (status != EFI_SUCCESS) {
++			efi_warn("Unable to unprotect memory range [%08lx,%08lx]: %lx\n",
++				 (unsigned long)unprotect_start,
++				 (unsigned long)(unprotect_start + unprotect_size),
++				 status);
++			return status;
++		}
++	}
++
++	return EFI_SUCCESS;
++}
+diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
+index 33a7811e12c6..2fddb88613cd 100644
+--- a/drivers/firmware/efi/libstub/x86-stub.c
++++ b/drivers/firmware/efi/libstub/x86-stub.c
+@@ -212,61 +212,6 @@ static void retrieve_apple_device_properties(struct boot_params *boot_params)
+ 	}
  }
+ 
+-static void
+-adjust_memory_range_protection(unsigned long start, unsigned long size)
+-{
+-	efi_status_t status;
+-	efi_gcd_memory_space_desc_t desc;
+-	unsigned long end, next;
+-	unsigned long rounded_start, rounded_end;
+-	unsigned long unprotect_start, unprotect_size;
+-
+-	if (efi_dxe_table == NULL)
+-		return;
+-
+-	rounded_start = rounddown(start, EFI_PAGE_SIZE);
+-	rounded_end = roundup(start + size, EFI_PAGE_SIZE);
+-
+-	/*
+-	 * Don't modify memory region attributes, they are
+-	 * already suitable, to lower the possibility to
+-	 * encounter firmware bugs.
+-	 */
+-
+-	for (end = start + size; start < end; start = next) {
+-
+-		status = efi_dxe_call(get_memory_space_descriptor, start, &desc);
+-
+-		if (status != EFI_SUCCESS)
+-			return;
+-
+-		next = desc.base_address + desc.length;
+-
+-		/*
+-		 * Only system memory is suitable for trampoline/kernel image placement,
+-		 * so only this type of memory needs its attributes to be modified.
+-		 */
+-
+-		if (desc.gcd_memory_type != EfiGcdMemoryTypeSystemMemory ||
+-		    (desc.attributes & (EFI_MEMORY_RO | EFI_MEMORY_XP)) == 0)
+-			continue;
+-
+-		unprotect_start = max(rounded_start, (unsigned long)desc.base_address);
+-		unprotect_size = min(rounded_end, next) - unprotect_start;
+-
+-		status = efi_dxe_call(set_memory_space_attributes,
+-				      unprotect_start, unprotect_size,
+-				      EFI_MEMORY_WB);
+-
+-		if (status != EFI_SUCCESS) {
+-			efi_warn("Unable to unprotect memory range [%08lx,%08lx]: %lx\n",
+-				 unprotect_start,
+-				 unprotect_start + unprotect_size,
+-				 status);
+-		}
+-	}
+-}
+-
+ /*
+  * Trampoline takes 2 pages and can be loaded in first megabyte of memory
+  * with its end placed between 128k and 640k where BIOS might start.
+@@ -290,12 +235,12 @@ setup_memory_protection(unsigned long image_base, unsigned long image_size)
+ 	 * and relocated kernel image.
+ 	 */
+ 
+-	adjust_memory_range_protection(TRAMPOLINE_PLACEMENT_BASE,
+-				       TRAMPOLINE_PLACEMENT_SIZE);
++	efi_adjust_memory_range_protection(TRAMPOLINE_PLACEMENT_BASE,
++					   TRAMPOLINE_PLACEMENT_SIZE, 0);
+ 
+ #ifdef CONFIG_64BIT
+ 	if (image_base != (unsigned long)startup_32)
+-		adjust_memory_range_protection(image_base, image_size);
++		efi_adjust_memory_range_protection(image_base, image_size, 0);
+ #else
+ 	/*
+ 	 * Clear protection flags on a whole range of possible
+@@ -305,8 +250,9 @@ setup_memory_protection(unsigned long image_base, unsigned long image_size)
+ 	 * need to remove possible protection on relocated image
+ 	 * itself disregarding further relocations.
+ 	 */
+-	adjust_memory_range_protection(LOAD_PHYSICAL_ADDR,
+-				       KERNEL_IMAGE_SIZE - LOAD_PHYSICAL_ADDR);
++	efi_adjust_memory_range_protection(LOAD_PHYSICAL_ADDR,
++					   KERNEL_IMAGE_SIZE - LOAD_PHYSICAL_ADDR,
++					   0);
+ #endif
+ }
+ 
 -- 
 2.37.4
 
