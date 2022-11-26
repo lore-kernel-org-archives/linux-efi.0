@@ -2,159 +2,109 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 875C6C4332F
-	for <linux-efi@archiver.kernel.org>; Wed, 23 Nov 2022 19:12:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6725FC47088
+	for <linux-efi@archiver.kernel.org>; Sat, 26 Nov 2022 14:16:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239836AbiKWTMx (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 23 Nov 2022 14:12:53 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43482 "EHLO
+        id S229446AbiKZOQZ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 26 Nov 2022 09:16:25 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58414 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239695AbiKWTMt (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 23 Nov 2022 14:12:49 -0500
-Received: from mail-oa1-x2f.google.com (mail-oa1-x2f.google.com [IPv6:2001:4860:4864:20::2f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 260909FCE
-        for <linux-efi@vger.kernel.org>; Wed, 23 Nov 2022 11:12:46 -0800 (PST)
-Received: by mail-oa1-x2f.google.com with SMTP id 586e51a60fabf-142b72a728fso14159905fac.9
-        for <linux-efi@vger.kernel.org>; Wed, 23 Nov 2022 11:12:46 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=atishpatra.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=xYNUdKeKDvT8mT9/ZHcNVoishfiUIhq0BFNbiLz19yA=;
-        b=GkcQ4aDShxTS/4JJ20x52W1asLWeep8pqcGzmv6Dc8t7/RytG/dgK1GAiBGHIoG7Jx
-         tczb1a1x73VjicRSW1kWfAi31UZ5tUgBU0ZUXf248ak/5xaTu+LFg6f8dW57NDqJBuJh
-         1wIhteLDo9cI+ZCcHbud0ARTw2Hdq39z3Dw1o=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=xYNUdKeKDvT8mT9/ZHcNVoishfiUIhq0BFNbiLz19yA=;
-        b=jm1cfujqOUnKTyjULJTiWtwNbe4G/Nm+fkEONOUP+JpVpg+WkLpgph942mlM0wGrJW
-         xU+bhsIoMmULmeUhxTdz58z7g331+AW/uO/r2z/V42Mm0bZxSQNjr2tsQHgVcihDd1Xs
-         URQxY7+F64GRWdmYM3ij9s9m2+nvsYu7PcwJ3IThvW5NuzLB/XBxfC1IICmYsMkn5Lzt
-         f9IMdXeEClf/+ey5dnvZvcs+HsGkShyoRy5Cz0IuxpbstJQWuCJsnHg04tRiPoBeXDwP
-         QZddE4ZnPnX+yrNjQS3RLqSy7C3Blzq7aUiCrOrP1GCmHzBNHGjNP6CnLPYWkzLFH48r
-         QYEg==
-X-Gm-Message-State: ANoB5plr+B+ZwVVLsBA4f4epwoBTKjzMDg6CLIH0FOXTYoZy/KIqC56S
-        bLD7L+ySPAZQwcAm/iAES3IASUa4ct6xncWOeJc9
-X-Google-Smtp-Source: AA0mqf6d8vQn5ev/ye6UXLq4CqtVLPskx6ulLg13YkrxhwLoJns2WzFhIK+fFbFPYH268AZACOKu9GGMmCXIwqcrxa4=
-X-Received: by 2002:a05:6870:60a4:b0:132:79b1:f85 with SMTP id
- t36-20020a05687060a400b0013279b10f85mr8030534oae.274.1669230765966; Wed, 23
- Nov 2022 11:12:45 -0800 (PST)
+        with ESMTP id S229436AbiKZOQY (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 26 Nov 2022 09:16:24 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8254D1D30B
+        for <linux-efi@vger.kernel.org>; Sat, 26 Nov 2022 06:16:23 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 2C11DB811A3
+        for <linux-efi@vger.kernel.org>; Sat, 26 Nov 2022 14:16:22 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C8F9CC4347C
+        for <linux-efi@vger.kernel.org>; Sat, 26 Nov 2022 14:16:20 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1669472180;
+        bh=j2dP27BREILsixgq78ObbeEfjycpQjysrlO+l5htKJU=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=VG8vu+rBy2h3qAfYWyvMj+mIcmz7o3wIt8m5UG8xDSsby32wSmKEuJGKSzl0MIvDD
+         12Z250j7QVIyl2b79oQlXLYOyf+QR5xbMdVUjX3jkiFYGjapx7pqpbIC/W71IL84Tp
+         jw75s6zuTPpken1EP7jaBCuVKBIz/KlmC9VfuEL8JpOo1EAawQlLKBg7VaahSAkX6k
+         y8PbpuRISGjlkXvt9tTwzd11kgmTeZXFZmO0A1zbGE1zijYFChLM4YzxDJmM0Pn66G
+         RfS40xO5VGPtSFoZam7i2lUDLXRlQ2SXAp8kKHt1viLt+GN5g48lBvcxSQhuDMWs4u
+         DH4DQfMnwI6Qg==
+Received: by mail-lj1-f173.google.com with SMTP id z4so8149860ljq.6
+        for <linux-efi@vger.kernel.org>; Sat, 26 Nov 2022 06:16:20 -0800 (PST)
+X-Gm-Message-State: ANoB5pkzoU3k3QT/K7sCGpRUXrWvV9WetHpR1PzuwQGh6DSy7MmgG+m2
+        1VAXX+4VLyCrKrN00W85RjIBZsUJ2JwtHGWsK58=
+X-Google-Smtp-Source: AA0mqf6LqTiH2i4NVZ9BOJAR2/NHYkiSyGNLVlOoiOQJUOuncmt1DTcS3Q5u24keG+r6Q3MmIfn44qEIuz169/wVli4=
+X-Received: by 2002:a05:651c:1056:b0:279:96cd:8c66 with SMTP id
+ x22-20020a05651c105600b0027996cd8c66mr1733581ljm.352.1669472178782; Sat, 26
+ Nov 2022 06:16:18 -0800 (PST)
 MIME-Version: 1.0
-References: <20221121133303.1782246-1-alexghiti@rivosinc.com> <CAJM55Z8+QyYKEwnMia2wjg+uYYnB=J40oSU8yDxoKm8Se+TnVA@mail.gmail.com>
-In-Reply-To: <CAJM55Z8+QyYKEwnMia2wjg+uYYnB=J40oSU8yDxoKm8Se+TnVA@mail.gmail.com>
-From:   Atish Patra <atishp@atishpatra.org>
-Date:   Wed, 23 Nov 2022 11:12:35 -0800
-Message-ID: <CAOnJCUKd+aUDc8a8xQO6sxViWwEp6-fDhJqAjt+ZfsipPFSJ0g@mail.gmail.com>
-Subject: Re: [PATCH] riscv: Sync efi page table's kernel mappings before switching
-To:     Emil Renner Berthing <emil.renner.berthing@canonical.com>
-Cc:     Alexandre Ghiti <alexghiti@rivosinc.com>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        Heinrich Schuchardt <heinrich.schuchardt@canonical.com>,
-        linux-efi@vger.kernel.org, linux-riscv@lists.infradead.org,
-        linux-kernel@vger.kernel.org
+References: <20221108182204.2447664-1-ardb@kernel.org> <Y26IE5NEVhyId4KH@FVFF77S0Q05N.cambridge.arm.com>
+ <20221115111658.GA32523@willie-the-truck> <CAMj1kXFGakOpTyUqDrFGDRoRsSzG2bYQ=iZA86DahbjL_zvE7w@mail.gmail.com>
+ <20221115113134.GC32523@willie-the-truck>
+In-Reply-To: <20221115113134.GC32523@willie-the-truck>
+From:   Ard Biesheuvel <ardb@kernel.org>
+Date:   Sat, 26 Nov 2022 15:16:07 +0100
+X-Gmail-Original-Message-ID: <CAMj1kXFdJHvT-XKaEC0tXpxM_RMfCic_sS-JkMkVYfKZCYkZuA@mail.gmail.com>
+Message-ID: <CAMj1kXFdJHvT-XKaEC0tXpxM_RMfCic_sS-JkMkVYfKZCYkZuA@mail.gmail.com>
+Subject: Re: [PATCH v5 0/7] arm64: efi: leave MMU and caches on at boot
+To:     Will Deacon <will@kernel.org>
+Cc:     Mark Rutland <mark.rutland@arm.com>,
+        linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org,
+        keescook@chromium.org, Catalin Marinas <catalin.marinas@arm.com>,
+        Marc Zyngier <maz@kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Wed, Nov 23, 2022 at 9:19 AM Emil Renner Berthing
-<emil.renner.berthing@canonical.com> wrote:
+On Tue, 15 Nov 2022 at 12:31, Will Deacon <will@kernel.org> wrote:
 >
-> Hi Alexandre,
->
-> On Mon, 21 Nov 2022 at 14:33, Alexandre Ghiti <alexghiti@rivosinc.com> wrote:
-> >
-> > The EFI page table is initially created as a copy of the kernel page table.
-> > With VMAP_STACK enabled, kernel stacks are allocated in the vmalloc area:
-> > if the stack is allocated in a new PGD (one that was not present at the
-> > moment of the efi page table creation or not synced in a previous vmalloc
-> > fault), the kernel will take a trap when switching to the efi page table
-> > when the vmalloc kernel stack is accessed, resulting in a kernel panic.
-> >
-> > Fix that by updating the efi kernel mappings before switching to the efi
-> > page table.
-> >
-> > Signed-off-by: Alexandre Ghiti <alexghiti@rivosinc.com>
->
-> Thanks for the patch! With this applied on the Ubuntu 5.19 kernel I
-> can enable CONFIG_VMAP_STACK and cat /sys/firmware/efi/efivars/* on
-> the Unmatched without locking up. So
->
-> Tested-by: Emil Renner Berthing <emil.renner.berthing@canonical.com>
->
-> > ---
-> >  arch/riscv/include/asm/efi.h     |  6 +++++-
-> >  arch/riscv/include/asm/pgalloc.h | 11 ++++++++---
-> >  2 files changed, 13 insertions(+), 4 deletions(-)
-> >
-> > diff --git a/arch/riscv/include/asm/efi.h b/arch/riscv/include/asm/efi.h
-> > index f74879a8f1ea..e229d7be4b66 100644
-> > --- a/arch/riscv/include/asm/efi.h
-> > +++ b/arch/riscv/include/asm/efi.h
-> > @@ -10,6 +10,7 @@
-> >  #include <asm/mmu_context.h>
-> >  #include <asm/ptrace.h>
-> >  #include <asm/tlbflush.h>
-> > +#include <asm/pgalloc.h>
-> >
-> >  #ifdef CONFIG_EFI
-> >  extern void efi_init(void);
-> > @@ -20,7 +21,10 @@ extern void efi_init(void);
-> >  int efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md);
-> >  int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
-> >
-> > -#define arch_efi_call_virt_setup()      efi_virtmap_load()
-> > +#define arch_efi_call_virt_setup()      ({             \
-> > +               sync_kernel_mappings(efi_mm.pgd);       \
-> > +               efi_virtmap_load();                     \
-> > +       })
-> >  #define arch_efi_call_virt_teardown()   efi_virtmap_unload()
-> >
-> >  #define ARCH_EFI_IRQ_FLAGS_MASK (SR_IE | SR_SPIE)
-> > diff --git a/arch/riscv/include/asm/pgalloc.h b/arch/riscv/include/asm/pgalloc.h
-> > index 947f23d7b6af..59dc12b5b7e8 100644
-> > --- a/arch/riscv/include/asm/pgalloc.h
-> > +++ b/arch/riscv/include/asm/pgalloc.h
-> > @@ -127,6 +127,13 @@ static inline void p4d_free(struct mm_struct *mm, p4d_t *p4d)
-> >  #define __p4d_free_tlb(tlb, p4d, addr)  p4d_free((tlb)->mm, p4d)
-> >  #endif /* __PAGETABLE_PMD_FOLDED */
-> >
-> > +static inline void sync_kernel_mappings(pgd_t *pgd)
-> > +{
-> > +       memcpy(pgd + USER_PTRS_PER_PGD,
-> > +              init_mm.pgd + USER_PTRS_PER_PGD,
-> > +              (PTRS_PER_PGD - USER_PTRS_PER_PGD) * sizeof(pgd_t));
-> > +}
-> > +
-> >  static inline pgd_t *pgd_alloc(struct mm_struct *mm)
-> >  {
-> >         pgd_t *pgd;
-> > @@ -135,9 +142,7 @@ static inline pgd_t *pgd_alloc(struct mm_struct *mm)
-> >         if (likely(pgd != NULL)) {
-> >                 memset(pgd, 0, USER_PTRS_PER_PGD * sizeof(pgd_t));
-> >                 /* Copy kernel mappings */
-> > -               memcpy(pgd + USER_PTRS_PER_PGD,
-> > -                       init_mm.pgd + USER_PTRS_PER_PGD,
-> > -                       (PTRS_PER_PGD - USER_PTRS_PER_PGD) * sizeof(pgd_t));
-> > +               sync_kernel_mappings(pgd);
-> >         }
-> >         return pgd;
-> >  }
-> > --
-> > 2.37.2
-> >
+> On Tue, Nov 15, 2022 at 12:21:55PM +0100, Ard Biesheuvel wrote:
+> > On Tue, 15 Nov 2022 at 12:17, Will Deacon <will@kernel.org> wrote:
+> > >
+> > > On Fri, Nov 11, 2022 at 05:36:19PM +0000, Mark Rutland wrote:
+> > > > On Tue, Nov 08, 2022 at 07:21:57PM +0100, Ard Biesheuvel wrote:
+> > > > > The purpose of this series is to remove any explicit cache maintenance
+> > > > > for coherency during early boot that becomes unnecessary if we simply
+> > > > > retain the cacheable 1:1 mapping of all of system RAM provided by EFI,
+> > > > > and use it to populate the ID map page tables. After setting up this
+> > > > > preliminary ID map, we disable the MMU, drop to EL1, reprogram the MAIR,
+> > > > > TCR and SCTLR registers as before, and proceed as usual, avoiding the
+> > > > > need for any manipulations of memory while the MMU and caches are off.
+> > > > >
+> > > > > The only properties of the firmware provided 1:1 map we rely on is that
+> > > > > it does not require any explicit cache maintenance for coherency, and
+> > > > > that it covers the entire memory footprint of the image, including the
+> > > > > BSS and padding at the end - all else is under control of the kernel
+> > > > > itself, as before.
+> > > >
+> > > > As a high-level thing, I'm still very much not keen on entering the kernel with
+> > > > the MMU on. Given that we have to support booting with the MMU off for !EFI
+> > > > boot (including kexec when EFI is in use), I think this makes it harder to
+> > > > reason about the boot code overall (e.g. due to the conditional maintenance
+> > > > added to head.S), and adds more scope for error, even if it simplifies the EFI
+> > > > stub itself.
+> > >
+> > > As discussed offline, two things that would help the current series are:
+> > >
+> > >   (1) Some performance numbers comparing MMU off vs MMU on boot
+> > >
 
-Thanks for the fix. With the correct Fixes tag in commit description:A
+Finally got around to measuring this - I lost access to my TX2 machine
+for a couple of days during the past week,
 
-Reviewed-by: Atish Patra <atishp@rivosinc.com>
+With the patch below applied to mainline, I measure ~6 ms spent
+cleaning the entire image to the PoC (which is the bulk of it) and
+subsequently populating the initial ID map and activating it.
 
+This drops to about 0.6 ms with my changes applied. This is unlikely
+to ever matter in practice, perhaps, but I will note that booting a VM
+in EFI mode using Tianocore/EDK2 from the point where KVM clears the
+counter to the point where we start user space can be done (on the
+same machine) in 500-700 ms so it is not entirely insignificant
+either.
 
--- 
-Regards,
-Atish
+I could try and measure it on bare metal as well, but I suppose that
+launch times are even less relevant there so I didn't bother.
