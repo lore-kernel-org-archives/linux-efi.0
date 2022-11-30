@@ -2,23 +2,23 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ECBABC4321E
-	for <linux-efi@archiver.kernel.org>; Wed, 30 Nov 2022 22:57:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 83942C4321E
+	for <linux-efi@archiver.kernel.org>; Wed, 30 Nov 2022 22:57:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229706AbiK3W5X (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 30 Nov 2022 17:57:23 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34332 "EHLO
+        id S229608AbiK3W5d (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 30 Nov 2022 17:57:33 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34562 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229732AbiK3W5W (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 30 Nov 2022 17:57:22 -0500
+        with ESMTP id S229762AbiK3W5c (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 30 Nov 2022 17:57:32 -0500
 Received: from gloria.sntech.de (gloria.sntech.de [185.11.138.130])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DF2B6950C6
-        for <linux-efi@vger.kernel.org>; Wed, 30 Nov 2022 14:57:19 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2E3B0110
+        for <linux-efi@vger.kernel.org>; Wed, 30 Nov 2022 14:57:31 -0800 (PST)
 Received: from ip5b412258.dynamic.kabel-deutschland.de ([91.65.34.88] helo=phil.lan)
         by gloria.sntech.de with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
         (Exim 4.94.2)
         (envelope-from <heiko@sntech.de>)
-        id 1p0W0N-0005PW-Pj; Wed, 30 Nov 2022 23:56:39 +0100
+        id 1p0W0M-0005PW-TQ; Wed, 30 Nov 2022 23:56:38 +0100
 From:   Heiko Stuebner <heiko@sntech.de>
 To:     linux-riscv@lists.infradead.org, palmer@dabbelt.com
 Cc:     christoph.muellner@vrull.eu, prabhakar.csengg@gmail.com,
@@ -28,9 +28,9 @@ Cc:     christoph.muellner@vrull.eu, prabhakar.csengg@gmail.com,
         linux-efi@vger.kernel.org,
         Heiko Stuebner <heiko.stuebner@vrull.eu>,
         Conor Dooley <conor.dooley@microchip.com>
-Subject: [PATCH v3 12/14] efi/riscv: libstub: mark when compiling libstub
-Date:   Wed, 30 Nov 2022 23:56:12 +0100
-Message-Id: <20221130225614.1594256-13-heiko@sntech.de>
+Subject: [PATCH v3 10/14] RISC-V: add rd reg parsing to insn.h header
+Date:   Wed, 30 Nov 2022 23:56:10 +0100
+Message-Id: <20221130225614.1594256-11-heiko@sntech.de>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20221130225614.1594256-1-heiko@sntech.de>
 References: <20221130225614.1594256-1-heiko@sntech.de>
@@ -42,34 +42,38 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Heiko Stuebner <heiko.stuebner@vrull.eu>
 
-We may want to runtime-optimize some core functions (str*, mem*),
-but not have this leak into libstub and cause build issues.
-Instead libstub, for the short while it's running, should just use
-the generic implementation.
-
-So, to be able to determine whether functions, that are used both in
-libstub and the main kernel, are getting compiled as part of libstub or
-not, add a compile-flag we can check via #ifdef.
+Add a macro to allow parsing of the rd register from an instruction.
 
 Reviewed-by: Conor Dooley <conor.dooley@microchip.com>
+Reviewed-by: Andrew Jones <ajones@ventanamicro.com>
 Signed-off-by: Heiko Stuebner <heiko.stuebner@vrull.eu>
 ---
- drivers/firmware/efi/libstub/Makefile | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ arch/riscv/include/asm/insn.h | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index ef5045a53ce0..777d1ab059e3 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -25,7 +25,7 @@ cflags-$(CONFIG_ARM)		:= $(subst $(CC_FLAGS_FTRACE),,$(KBUILD_CFLAGS)) \
- 				   -fno-builtin -fpic \
- 				   $(call cc-option,-mno-single-pic-base)
- cflags-$(CONFIG_RISCV)		:= $(subst $(CC_FLAGS_FTRACE),,$(KBUILD_CFLAGS)) \
--				   -fpic
-+				   -fpic -DRISCV_EFISTUB
- cflags-$(CONFIG_LOONGARCH)	:= $(subst $(CC_FLAGS_FTRACE),,$(KBUILD_CFLAGS)) \
- 				   -fpie
+diff --git a/arch/riscv/include/asm/insn.h b/arch/riscv/include/asm/insn.h
+index 21ec817abec1..2a23890b4577 100644
+--- a/arch/riscv/include/asm/insn.h
++++ b/arch/riscv/include/asm/insn.h
+@@ -60,6 +60,7 @@
+ #define RVG_RS1_OPOFF		15
+ #define RVG_RS2_OPOFF		20
+ #define RVG_RD_OPOFF		7
++#define RVG_RD_MASK		GENMASK(4, 0)
  
+ /* The bit field of immediate value in RVC J instruction */
+ #define RVC_J_IMM_SIGN_OPOFF	12
+@@ -244,6 +245,10 @@ static __always_inline bool riscv_insn_is_branch(u32 code)
+ #define RV_X(X, s, mask)  (((X) >> (s)) & (mask))
+ #define RVC_X(X, s, mask) RV_X(X, s, mask)
+ 
++#define RV_EXTRACT_RD_REG(x) \
++	({typeof(x) x_ = (x); \
++	(RV_X(x_, RVG_RD_OPOFF, RVG_RD_MASK)); })
++
+ #define RV_EXTRACT_UTYPE_IMM(x) \
+ 	({typeof(x) x_ = (x); \
+ 	(RV_X(x_, RV_U_IMM_31_12_OPOFF, RV_U_IMM_31_12_MASK)); })
 -- 
 2.35.1
 
