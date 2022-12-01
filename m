@@ -2,185 +2,198 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 291B0C47088
-	for <linux-efi@archiver.kernel.org>; Wed, 30 Nov 2022 22:58:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7F960C636F8
+	for <linux-efi@archiver.kernel.org>; Thu,  1 Dec 2022 00:06:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229569AbiK3W6B (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 30 Nov 2022 17:58:01 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35928 "EHLO
+        id S230303AbiLAAGr (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 30 Nov 2022 19:06:47 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46756 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229499AbiK3W6A (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 30 Nov 2022 17:58:00 -0500
-Received: from gloria.sntech.de (gloria.sntech.de [185.11.138.130])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D3F624AF28
-        for <linux-efi@vger.kernel.org>; Wed, 30 Nov 2022 14:57:56 -0800 (PST)
-Received: from ip5b412258.dynamic.kabel-deutschland.de ([91.65.34.88] helo=phil.lan)
-        by gloria.sntech.de with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-        (Exim 4.94.2)
-        (envelope-from <heiko@sntech.de>)
-        id 1p0W0N-0005PW-Bg; Wed, 30 Nov 2022 23:56:39 +0100
-From:   Heiko Stuebner <heiko@sntech.de>
-To:     linux-riscv@lists.infradead.org, palmer@dabbelt.com
+        with ESMTP id S230240AbiLAAEn (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 30 Nov 2022 19:04:43 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3439495802
+        for <linux-efi@vger.kernel.org>; Wed, 30 Nov 2022 16:02:13 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 8AC1161E6C
+        for <linux-efi@vger.kernel.org>; Thu,  1 Dec 2022 00:02:13 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7EF49C433D6;
+        Thu,  1 Dec 2022 00:02:10 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1669852932;
+        bh=lFbpQju0LYAyA4JDJno4ubTWIcXTZRKwPLUuIF23GHE=;
+        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+        b=TRUuHyatpNvvg14Os7laEijCKTdhxazYDqmEZp4j2Ol4Zva+dLGutnqpc7c/UKeFj
+         nqzasadYW67rWBfKdlm9GOzJN3YPy/d525nw9UZHsbecBQFGsDO5GrdHhB5yn8gjEM
+         gTEyAfdpzOhYgjixn2L1DJf8vLcNR4fPuokQR9qTX6lgoaZ+4VVYj5Sw5BN/ErgM1h
+         PLsjkMM916TT8e/chaNAO1UpcH9EV/ztc9Cod5GRn92WX+yLjaPf+fGUca/D0MbvYj
+         WNebNy1RhgzprWDk/gLXmTnpH9mBnDZlLCgbtjW0X8JDavsuSb9/VBtWcFzSA8rRvH
+         5R3vqIQsvLCtA==
+Message-ID: <81679d42-7800-3f77-eac8-d7d942e3065f@kernel.org>
+Date:   Thu, 1 Dec 2022 00:02:08 +0000
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.4.2
+Subject: Re: [PATCH v3 0/14] Zbb string optimizations and call support in
+ alternatives
+To:     Heiko Stuebner <heiko@sntech.de>, linux-riscv@lists.infradead.org,
+        palmer@dabbelt.com
 Cc:     christoph.muellner@vrull.eu, prabhakar.csengg@gmail.com,
         conor@kernel.org, philipp.tomsich@vrull.eu,
-        ajones@ventanamicro.com, heiko@sntech.de,
-        emil.renner.berthing@canonical.com, ardb@kernel.org,
-        linux-efi@vger.kernel.org,
-        Heiko Stuebner <heiko.stuebner@vrull.eu>,
-        Conor Dooley <conor.dooley@microchip.com>
-Subject: [PATCH v3 11/14] RISC-V: fix auipc-jalr addresses in patched alternatives
-Date:   Wed, 30 Nov 2022 23:56:11 +0100
-Message-Id: <20221130225614.1594256-12-heiko@sntech.de>
-X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20221130225614.1594256-1-heiko@sntech.de>
+        ajones@ventanamicro.com, emil.renner.berthing@canonical.com,
+        ardb@kernel.org, linux-efi@vger.kernel.org,
+        Heiko Stuebner <heiko.stuebner@vrull.eu>
 References: <20221130225614.1594256-1-heiko@sntech.de>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Language: en-US
+From:   Conor Dooley <conor@kernel.org>
+In-Reply-To: <20221130225614.1594256-1-heiko@sntech.de>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Heiko Stuebner <heiko.stuebner@vrull.eu>
+On 30/11/2022 22:56, Heiko Stuebner wrote:
+> EXTERNAL EMAIL: Do not click links or open attachments unless you know the content is safe
+> 
+> From: Heiko Stuebner <heiko.stuebner@vrull.eu>
+> 
+> The Zbb extension can be used to make string functions run a lot
+> faster.
+> 
+> To allow There are essentially two problems to solve:
+> - making it possible for str* functions to replace what they do
+>   in a performant way
+> 
+>   This is done by inlining the core functions and then
+>   using alternatives to call the actual variant.
+> 
+>   This of course will need a more intelligent selection mechanism
+>   down the road when more variants may exist using different
+>   available extensions.
+> 
+> - actually allowing calls in alternatives
+>   Function calls use auipc + jalr to reach those 32bit relative
+>   addresses but when they're compiled the offset will be wrong
+>   as alternatives live in a different section. So when the patch
+>   gets applied the address will point to the wrong location.
+> 
+>   So similar to arm64 the target addresses need to be updated.
+> 
+>   This is probably also helpful for other things needing more
+>   complex code in alternatives.
+> 
+> 
+> In my half-scientific test-case of running the functions in question
+> on a 95 character string in a loop of 10000 iterations, the Zbb
+> variants shave off around 2/3 of the original runtime.
+> 
+> 
+> For v2 I got into some sort of cleanup spree for the general instruction
+> parsing that already existed. A number of places do their own
+> instruction parsing and I tried consolidating some of them.
+> 
+> Noteable, the kvm parts still do, but I had to stop somewhere :-)
+> 
+> The series is based on v6.1-rc7 right now.
+> 
+> changes since v2:
+> - add patch fixing the c.jalr funct4 value
+> - reword some commit messages
+> - fix position of auipc addition patch (earlier)
+> - fix compile errors from patch-reordering gone wrong
+>   (worked at the end of v2, but compiling individual patches
+>    caused issues) - patches are now tested individually
+> - limit Zbb variants for GNU as for now
+>   (LLVM support for .option arch is still under review)
 
-Alternatives live in a different section, so addresses used by call
-functions will point to wrong locations after the patch got applied.
+Still no good on that front chief:
+ld.lld: error: undefined symbol: __strlen_generic
+>>> referenced by ctype.c
+>>>               arch/riscv/purgatory/purgatory.ro:(strlcpy)
+>>> referenced by ctype.c
+>>>               arch/riscv/purgatory/purgatory.ro:(strlcat)
+>>> referenced by ctype.c
+>>>               arch/riscv/purgatory/purgatory.ro:(strlcat)
+>>> referenced 3 more times
+make[5]: *** [/stuff/linux/arch/riscv/purgatory/Makefile:85: arch/riscv/purgatory/purgatory.chk] Error 1
+make[5]: Target 'arch/riscv/purgatory/' not remade because of errors.
+make[4]: *** [/stuff/linux/scripts/Makefile.build:500: arch/riscv/purgatory] Error 2
 
-Similar to arm64, adjust the location to consider that offset.
+allmodconfig, same toolchain as before.
 
-Reviewed-by: Conor Dooley <conor.dooley@microchip.com>
-Signed-off-by: Heiko Stuebner <heiko.stuebner@vrull.eu>
----
- arch/riscv/include/asm/alternative.h |  3 ++
- arch/riscv/kernel/alternative.c      | 72 ++++++++++++++++++++++++++++
- arch/riscv/kernel/cpufeature.c       | 11 ++++-
- 3 files changed, 84 insertions(+), 2 deletions(-)
-
-diff --git a/arch/riscv/include/asm/alternative.h b/arch/riscv/include/asm/alternative.h
-index 6511dd73e812..c58ec3cc4bc3 100644
---- a/arch/riscv/include/asm/alternative.h
-+++ b/arch/riscv/include/asm/alternative.h
-@@ -27,6 +27,9 @@ void __init apply_boot_alternatives(void);
- void __init apply_early_boot_alternatives(void);
- void apply_module_alternatives(void *start, size_t length);
- 
-+void riscv_alternative_fix_auipc_jalr(void *alt_ptr, unsigned int len,
-+				      int patch_offset);
-+
- struct alt_entry {
- 	void *old_ptr;		 /* address of original instruciton or data  */
- 	void *alt_ptr;		 /* address of replacement instruction or data */
-diff --git a/arch/riscv/kernel/alternative.c b/arch/riscv/kernel/alternative.c
-index a7d26a00beea..292cc42dc3be 100644
---- a/arch/riscv/kernel/alternative.c
-+++ b/arch/riscv/kernel/alternative.c
-@@ -15,6 +15,8 @@
- #include <asm/vendorid_list.h>
- #include <asm/sbi.h>
- #include <asm/csr.h>
-+#include <asm/insn.h>
-+#include <asm/patch.h>
- 
- struct cpu_manufacturer_info_t {
- 	unsigned long vendor_id;
-@@ -53,6 +55,76 @@ static void __init_or_module riscv_fill_cpu_mfr_info(struct cpu_manufacturer_inf
- 	}
- }
- 
-+static unsigned int riscv_instruction_at(void *p, unsigned int offset)
-+{
-+	u16 *parcel = p + (offset * sizeof(u32));
-+
-+	return (unsigned int)parcel[0] | (unsigned int)parcel[1] << 16;
-+}
-+
-+static inline bool riscv_insn_is_auipc_jalr(u32 insn1, u32 insn2)
-+{
-+	return riscv_insn_is_auipc(insn1) && riscv_insn_is_jalr(insn2);
-+}
-+
-+#define JALR_SIGN_MASK		BIT(RV_I_IMM_SIGN_OPOFF - RV_I_IMM_11_0_OPOFF)
-+#define AUIPC_PAD		(0x00001000)
-+
-+#define to_jalr_imm(value)						\
-+	((value & RV_I_IMM_11_0_MASK) << RV_I_IMM_11_0_OPOFF)
-+
-+#define to_auipc_imm(value)						\
-+	((value & JALR_SIGN_MASK) ?					\
-+	((value & RV_U_IMM_31_12_MASK) + AUIPC_PAD) :	\
-+	(value & RV_U_IMM_31_12_MASK))
-+
-+void riscv_alternative_fix_auipc_jalr(void *alt_ptr, unsigned int len,
-+				      int patch_offset)
-+{
-+	int num_instr = len / sizeof(u32);
-+	unsigned int call[2];
-+	int i;
-+	int imm;
-+	u32 rd1;
-+
-+	/*
-+	 * stop one instruction before the end, as we're checking
-+	 * for auipc + jalr
-+	 */
-+	for (i = 0; i < num_instr - 1; i++) {
-+		u32 inst1 = riscv_instruction_at(alt_ptr, i);
-+		u32 inst2 = riscv_instruction_at(alt_ptr, i + 1);
-+
-+		if (!riscv_insn_is_auipc_jalr(inst1, inst2))
-+			continue;
-+
-+		/* call will use ra register */
-+		rd1 = RV_EXTRACT_RD_REG(inst1);
-+		if (rd1 != 1)
-+			continue;
-+
-+		/* get and adjust new target address */
-+		imm = RV_EXTRACT_UTYPE_IMM(inst1);
-+		imm += RV_EXTRACT_ITYPE_IMM(inst2);
-+		imm -= patch_offset;
-+
-+		/* pick the original auipc + jalr */
-+		call[0] = inst1;
-+		call[1] = inst2;
-+
-+		/* drop the old IMMs */
-+		call[0] &= ~(RV_U_IMM_31_12_MASK);
-+		call[1] &= ~(RV_I_IMM_11_0_MASK << RV_I_IMM_11_0_OPOFF);
-+
-+		/* add the adapted IMMs */
-+		call[0] |= to_auipc_imm(imm);
-+		call[1] |= to_jalr_imm(imm);
-+
-+		/* patch the call place again */
-+		patch_text_nosync(alt_ptr + i * sizeof(u32), call, 8);
-+	}
-+}
-+
- /*
-  * This is called very early in the boot process (directly after we run
-  * a feature detect on the boot CPU). No need to worry about other CPUs
-diff --git a/arch/riscv/kernel/cpufeature.c b/arch/riscv/kernel/cpufeature.c
-index 694267d1fe81..ba62a4ff5ccd 100644
---- a/arch/riscv/kernel/cpufeature.c
-+++ b/arch/riscv/kernel/cpufeature.c
-@@ -316,8 +316,15 @@ void __init_or_module riscv_cpufeature_patch_func(struct alt_entry *begin,
- 		}
- 
- 		tmp = (1U << alt->errata_id);
--		if (cpu_req_feature & tmp)
--			patch_text_nosync(alt->old_ptr, alt->alt_ptr, alt->alt_len);
-+		if (cpu_req_feature & tmp) {
-+			/* do the basic patching */
-+			patch_text_nosync(alt->old_ptr, alt->alt_ptr,
-+					  alt->alt_len);
-+
-+			riscv_alternative_fix_auipc_jalr(alt->old_ptr,
-+							 alt->alt_len,
-+							 alt->old_ptr - alt->alt_ptr);
-+		}
- 	}
- }
- #endif
--- 
-2.35.1
+> - prevent str-functions from getting optimized to builtin-variants
+> 
+> changes since v1:
+> - a number of generalizations/cleanups for instruction parsing
+> - use accessor function to access instructions (Emil)
+> - actually patch the correct location when having more than one
+>   instruction in an alternative block
+> - string function cleanups (comments etc) (Conor)
+> - move zbb extension above s* extensions in cpu.c lists
+> 
+> changes since rfc:
+> - make Zbb code actually work
+> - drop some unneeded patches
+> - a lot of cleanups
+> 
+> Heiko Stuebner (14):
+>   RISC-V: fix funct4 definition for c.jalr in parse_asm.h
+>   RISC-V: add prefix to all constants/macros in parse_asm.h
+>   RISC-V: detach funct-values from their offset
+>   RISC-V: add ebreak instructions to definitions
+>   RISC-V: add auipc elements to parse_asm header
+>   RISC-V: Move riscv_insn_is_* macros into a common header
+>   RISC-V: rename parse_asm.h to insn.h
+>   RISC-V: kprobes: use central defined funct3 constants
+>   RISC-V: add U-type imm parsing to insn.h header
+>   RISC-V: add rd reg parsing to insn.h header
+>   RISC-V: fix auipc-jalr addresses in patched alternatives
+>   efi/riscv: libstub: mark when compiling libstub
+>   RISC-V: add infrastructure to allow different str* implementations
+>   RISC-V: add zbb support to string functions
+> 
+>  arch/riscv/Kconfig                       |  24 ++
+>  arch/riscv/Makefile                      |   3 +
+>  arch/riscv/include/asm/alternative.h     |   3 +
+>  arch/riscv/include/asm/errata_list.h     |   3 +-
+>  arch/riscv/include/asm/hwcap.h           |   1 +
+>  arch/riscv/include/asm/insn.h            | 292 +++++++++++++++++++++++
+>  arch/riscv/include/asm/parse_asm.h       | 219 -----------------
+>  arch/riscv/include/asm/string.h          |  83 +++++++
+>  arch/riscv/kernel/alternative.c          |  72 ++++++
+>  arch/riscv/kernel/cpu.c                  |   1 +
+>  arch/riscv/kernel/cpufeature.c           |  29 ++-
+>  arch/riscv/kernel/image-vars.h           |   6 +-
+>  arch/riscv/kernel/kgdb.c                 |  63 ++---
+>  arch/riscv/kernel/probes/simulate-insn.c |  19 +-
+>  arch/riscv/kernel/probes/simulate-insn.h |  26 +-
+>  arch/riscv/lib/Makefile                  |   6 +
+>  arch/riscv/lib/strcmp.S                  |  38 +++
+>  arch/riscv/lib/strcmp_zbb.S              |  96 ++++++++
+>  arch/riscv/lib/strlen.S                  |  29 +++
+>  arch/riscv/lib/strlen_zbb.S              | 115 +++++++++
+>  arch/riscv/lib/strncmp.S                 |  41 ++++
+>  arch/riscv/lib/strncmp_zbb.S             | 112 +++++++++
+>  drivers/firmware/efi/libstub/Makefile    |   2 +-
+>  23 files changed, 982 insertions(+), 301 deletions(-)
+>  create mode 100644 arch/riscv/include/asm/insn.h
+>  delete mode 100644 arch/riscv/include/asm/parse_asm.h
+>  create mode 100644 arch/riscv/lib/strcmp.S
+>  create mode 100644 arch/riscv/lib/strcmp_zbb.S
+>  create mode 100644 arch/riscv/lib/strlen.S
+>  create mode 100644 arch/riscv/lib/strlen_zbb.S
+>  create mode 100644 arch/riscv/lib/strncmp.S
+>  create mode 100644 arch/riscv/lib/strncmp_zbb.S
+> 
+> --
+> 2.35.1
+> 
+> 
+> _______________________________________________
+> linux-riscv mailing list
+> linux-riscv@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-riscv
 
