@@ -2,486 +2,148 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5DC42C4332F
-	for <linux-efi@archiver.kernel.org>; Mon,  5 Dec 2022 15:32:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CCA11C4332F
+	for <linux-efi@archiver.kernel.org>; Mon,  5 Dec 2022 20:05:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231327AbiLEPcN (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 5 Dec 2022 10:32:13 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36706 "EHLO
+        id S230381AbiLEUFM (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 5 Dec 2022 15:05:12 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47282 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231602AbiLEPbh (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 5 Dec 2022 10:31:37 -0500
-Received: from mail-ed1-x535.google.com (mail-ed1-x535.google.com [IPv6:2a00:1450:4864:20::535])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0EC381A208
-        for <linux-efi@vger.kernel.org>; Mon,  5 Dec 2022 07:30:30 -0800 (PST)
-Received: by mail-ed1-x535.google.com with SMTP id f7so16277205edc.6
-        for <linux-efi@vger.kernel.org>; Mon, 05 Dec 2022 07:30:29 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ventanamicro.com; s=google;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=yuLNXksnCiOj0gcRynfZuf0vnp4nHhaDBoV6r3j89ZI=;
-        b=Yma+2IL39iCa1fkmIHS8bBDhyNDsM/4jWtCtGMIQOi7da4MS/fcU7OgNn71TbsUYbV
-         8eFGAJIsvPullFUJMAfjvzQGRph7YVhuEHmKqBwYScrOb37/rCnkKYl6uqyjgUtIwmh7
-         uCXUZ1X5DmFk8twBWYrpeyxDI9Zb+u30otkaedzbhKpX5LCrHitbLROszIg5nJA56q5b
-         0N/dypMVF52E5ahazmU28ZY/FKayzzPXSgrpwi6CHroJTYPddV70QGoMtBYTasWqaTJ+
-         df4J4Ow7D9Jaf9iGlgoaiZyPxgJ4X2FNLlS9EybbYFe4uvdltw1eBmDoT6lKbDz9E6hM
-         O2EA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=yuLNXksnCiOj0gcRynfZuf0vnp4nHhaDBoV6r3j89ZI=;
-        b=vTMh0HJFIbq3IqaRy4nrmF2z3WSpYfOejy9F0/VAE1wSFjufpMu9crmx6e737xnM5t
-         LIMUwA5TsTVN8Z7zoV4n3OKnJd5aZ1EjhSSSBA6XTl3fw9cSRrhSpVOeVLa6CRKSQZMk
-         wy5+HTxAp75ESR4wjW4pVXHQ3lBSz4SdP+2AqnamKV3xv/k38nJPxyq2M1gg2JvoSQje
-         m2bxDm0f+fjnvPVOzDVon1qkESuT9feOac6dbdnQNGHsLl/gBQX59yudVYP7NrJ3SHA/
-         OPEd0dS4T4860AazhXmjn1YXaeaQRSGZpKI1SyAO9sTgCCPSckdH0ZpmERXb53Ys77LF
-         vy+A==
-X-Gm-Message-State: ANoB5pkhFVmAYz6RjK50A44L8FUf3VnQmLKcXxeTdzRjssTocURv4ZQV
-        fK+zg9KYbKr8dmJlyod+/9tLgw==
-X-Google-Smtp-Source: AA0mqf59C+Fb5LlQfE/u3P9GmnFt+9HfXqCUkJGKMWswh3/AqgHckh0cwX7ZNtnsgd30+6YIXCeFpA==
-X-Received: by 2002:aa7:dd4b:0:b0:467:65a2:f635 with SMTP id o11-20020aa7dd4b000000b0046765a2f635mr61788240edw.106.1670254228514;
-        Mon, 05 Dec 2022 07:30:28 -0800 (PST)
-Received: from localhost (2001-1ae9-1c2-4c00-748-2a9a-a2a6-1362.ip6.tmcz.cz. [2001:1ae9:1c2:4c00:748:2a9a:a2a6:1362])
-        by smtp.gmail.com with ESMTPSA id v18-20020a170906293200b007b9269a0423sm6353787ejd.172.2022.12.05.07.30.27
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 05 Dec 2022 07:30:28 -0800 (PST)
-Date:   Mon, 5 Dec 2022 16:30:27 +0100
-From:   Andrew Jones <ajones@ventanamicro.com>
-To:     Heiko Stuebner <heiko@sntech.de>
-Cc:     linux-riscv@lists.infradead.org, palmer@dabbelt.com,
-        christoph.muellner@vrull.eu, prabhakar.csengg@gmail.com,
-        conor@kernel.org, philipp.tomsich@vrull.eu,
-        emil.renner.berthing@canonical.com, ardb@kernel.org,
-        linux-efi@vger.kernel.org,
-        Heiko Stuebner <heiko.stuebner@vrull.eu>,
-        Conor Dooley <conor.dooley@microchip.com>
-Subject: Re: [PATCH v3 02/14] RISC-V: add prefix to all constants/macros in
- parse_asm.h
-Message-ID: <20221205153027.vfvia6dxgghtxu4d@kamzik>
-References: <20221130225614.1594256-1-heiko@sntech.de>
- <20221130225614.1594256-3-heiko@sntech.de>
- <20221205140057.gxsegkbgszfust4y@kamzik>
- <20221205145323.l2dro6dt7muumqpn@kamzik>
+        with ESMTP id S232037AbiLEUFM (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 5 Dec 2022 15:05:12 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 475DF1E3E5
+        for <linux-efi@vger.kernel.org>; Mon,  5 Dec 2022 12:05:10 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id F1472B8120C
+        for <linux-efi@vger.kernel.org>; Mon,  5 Dec 2022 20:05:08 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5FCCAC433C1;
+        Mon,  5 Dec 2022 20:05:06 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1670270707;
+        bh=Oc39xjpYngzrLZzPeKqSOHCEh0T+bl346k4NirLoWHE=;
+        h=From:To:Cc:Subject:Date:From;
+        b=HepGbTwgQmBEHqt7cfI8KHwKx4OtxELIiNduPphrd+gOIKMIQiiEmzSsG9x3VutBY
+         FYvZN1QF0lCQFaSh1jL1e5/Z7SwI6N2WdOzvfBVts1fTsPb/XwRgr3IlkNfdqDCrtc
+         ILCas34cTxsgFrq1T/qiJP/6+0PRyAm7SWr8V0EKmC5IVWWe/BkLwct2cQ5jr1jqw1
+         /KqC8pKWjfEVqbKexy0Vn0/1luBCJ2Q1M48viNf8V/3IJsg2J2YsWtVokXsclCYGz1
+         6QoC88sNHFwoq7x1ursA3qyjLmo/zSNgVG4UzGsQiB5Z12ACD/dJclLOq1DAC2P+64
+         nPstakdE2GsXA==
+From:   Ard Biesheuvel <ardb@kernel.org>
+To:     linux-efi@vger.kernel.org
+Cc:     linux-arm-kernel@lists.infradead.org, mark.rutland@arm.com,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Samer El-Haj-Mahmoud <Samer.El-Haj-Mahmoud@arm.com>,
+        Jose Marinho <Jose.Marinho@arm.com>
+Subject: [PATCH] arm64: efi: Limit allocations to 48-bit addressable physical region
+Date:   Mon,  5 Dec 2022 21:05:00 +0100
+Message-Id: <20221205200500.463661-1-ardb@kernel.org>
+X-Mailer: git-send-email 2.35.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20221205145323.l2dro6dt7muumqpn@kamzik>
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3897; i=ardb@kernel.org; h=from:subject; bh=Oc39xjpYngzrLZzPeKqSOHCEh0T+bl346k4NirLoWHE=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjjk7rORs+EFGXjOWAwQIBPSSMvC2Wfb8HZ2XwWJnq 45Zk1gaJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCY45O6wAKCRDDTyI5ktmPJLbtC/ 4iG/Wke/VEbD7+F/lRAk3uQew+N2CrySYRnR3m0BN9LJA1oNyOiQLoN+NXxip0h8iZ4xmiAcqoZBz0 fY5Gvffejr2BSbNm/Gf7ik/lHS6Pm3khMDXcWIPMLhrPXUG0zZQiOqpUYfiQv8DV6+OATzKo/abI95 rMkM2udNtQtZ2YgLyvb8SQ5NJJXdAXweTIPclJ88U7e7/aHsUXyhTjfWZOZuwjp4DnNhR+Sy+1lCLi r3oF3/OPqNF+1D4dRCe504a/ioJ5+N768SKQC+aJirzBtsEtBLbxfK9lfYnvAtgjK12LYPhaR+4lTk fgooAd0ETpIaPVt8uu+DWoJFvf3o4LOkC33FwNdKfeOA4Io4pFwHEm9vrZebX8zbdnC5EodRZ6HYi4 FqMH5atwVDp9JdsMBGvLbjEhvNEnFdPtOLpfegTZTnzccDEPclP/0dQQ2bjoRMZaa62V4gfTKI2QPo 0EHxebacLRNjh0TYMPGh7SCLaR9GuQLB0g8E1zxiX5Wxw=
+X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Mon, Dec 05, 2022 at 03:53:23PM +0100, Andrew Jones wrote:
-> On Mon, Dec 05, 2022 at 03:00:57PM +0100, Andrew Jones wrote:
-> > On Wed, Nov 30, 2022 at 11:56:02PM +0100, Heiko Stuebner wrote:
-> > > From: Heiko Stuebner <heiko.stuebner@vrull.eu>
-> > > 
-> > > Some of the constants and macros already have suitable RV_, RVG_ or
-> > > RVC_ prefixes.
-> > > 
-> > > Extend this to the rest of the file as well, as we want to use these
-> > > things in a broader scope soon.
-> > > 
-> > > Reviewed-by: Conor Dooley <conor.dooley@microchip.com>
-> > > Reviewed-by: Andrew Jones <ajones@ventanamicro.com>
-> > > Signed-off-by: Heiko Stuebner <heiko.stuebner@vrull.eu>
-> > > ---
-> > >  arch/riscv/include/asm/parse_asm.h | 194 ++++++++++++++---------------
-> > >  arch/riscv/kernel/kgdb.c           |  40 +++---
-> > >  2 files changed, 117 insertions(+), 117 deletions(-)
-> > > 
-> > > diff --git a/arch/riscv/include/asm/parse_asm.h b/arch/riscv/include/asm/parse_asm.h
-> > > index 7fee806805c1..ea51542e0c65 100644
-> > > --- a/arch/riscv/include/asm/parse_asm.h
-> > > +++ b/arch/riscv/include/asm/parse_asm.h
-> > > @@ -6,37 +6,37 @@
-> > >  #include <linux/bits.h>
-> > >  
-> > >  /* The bit field of immediate value in I-type instruction */
-> > > -#define I_IMM_SIGN_OPOFF	31
-> > > -#define I_IMM_11_0_OPOFF	20
-> > > -#define I_IMM_SIGN_OFF		12
-> > > -#define I_IMM_11_0_OFF		0
-> > > -#define I_IMM_11_0_MASK		GENMASK(11, 0)
-> > > +#define RV_I_IMM_SIGN_OPOFF	31
-> > > +#define RV_I_IMM_11_0_OPOFF	20
-> > > +#define RV_I_IMM_SIGN_OFF	12
-> > > +#define RV_I_IMM_11_0_OFF	0
-> > > +#define RV_I_IMM_11_0_MASK	GENMASK(11, 0)
-> > >  
-> > >  /* The bit field of immediate value in J-type instruction */
-> > > -#define J_IMM_SIGN_OPOFF	31
-> > > -#define J_IMM_10_1_OPOFF	21
-> > > -#define J_IMM_11_OPOFF		20
-> > > -#define J_IMM_19_12_OPOFF	12
-> > > -#define J_IMM_SIGN_OFF		20
-> > > -#define J_IMM_10_1_OFF		1
-> > > -#define J_IMM_11_OFF		11
-> > > -#define J_IMM_19_12_OFF		12
-> > > -#define J_IMM_10_1_MASK		GENMASK(9, 0)
-> > > -#define J_IMM_11_MASK		GENMASK(0, 0)
-> > > -#define J_IMM_19_12_MASK	GENMASK(7, 0)
-> > > +#define RV_J_IMM_SIGN_OPOFF	31
-> > > +#define RV_J_IMM_10_1_OPOFF	21
-> > > +#define RV_J_IMM_11_OPOFF	20
-> > > +#define RV_J_IMM_19_12_OPOFF	12
-> > > +#define RV_J_IMM_SIGN_OFF	20
-> > > +#define RV_J_IMM_10_1_OFF	1
-> > > +#define RV_J_IMM_11_OFF		11
-> > > +#define RV_J_IMM_19_12_OFF	12
-> > > +#define RV_J_IMM_10_1_MASK	GENMASK(9, 0)
-> > > +#define RV_J_IMM_11_MASK	GENMASK(0, 0)
-> > > +#define RV_J_IMM_19_12_MASK	GENMASK(7, 0)
-> > 
-> > Looking at the macros below which shift down, mask, and then shift
-> > back up, and how these macros are used in the later alternative patching
-> > patches, both in this series and Jisheng's, make me think it'd be better
-> > to define them already shifted, e.g.
-> > 
-> > #define RV_J_IMM_10_1_MASK	GENMASK(30, 21)
-> > #define RV_J_IMM_11_MASK	GENMASK(20, 20)
-> > #define RV_J_IMM_19_12_MASK 	GENMASK(19, 12)
-> 
-> Eh, never mind, I momentarily lost track of _OFF vs. _OPOFF. These
-> macro names are hard to read/track. Maybe what we really need are
-> extract() (which we already have, but as macros) and deposit().
-> And just put the shifts and masks directly in the extract and deposit
-> functions. Taking J-type for example,
-> 
-> static inline s32 rv_insn_imm_sign(u32 x)
-> {
-> 	return -((x >> 31) & 1);
-> }
-> 
-> static inline s32 rv_insn_extract_j_imm(u32 insn)
-> {
-> 	return (rv_insn_imm_sign(insn & BIT(31)) << 20)	|
-> 	       ((insn & GENMASK(19, 12)) << 12)		|
-> 	       ((insn & BIT(20)) << 11)			|
-> 	       ((insn & GENMASK(30, 25)) << 5)		|
-> 	       ((insn & GENMASK(24, 21)) << 1);
-> }
->   
-> static inline void rv_insn_deposit_j_imm(u32 *insn, s32 imm)
-> {
-> 	*insn &= GENMASK(11, 7) | GENMASK(6, 0);
-> 
-> 	*insn |= ((imm & BIT(20)) << 31)	|
-> 		 ((imm & GENMASK(10, 1)) << 21)	|
-> 		 ((imm & BIT(11)) << 20)	|
-> 		 ((imm & GENMASK(19, 12)) << 12);
-> }
-> 
-> A pair of static inlines like those for each type would be easier to
-> read and use, IMHO.
+The UEFI spec does not mention or reason about the configured size of
+the virtual address space at all, but it does mention that all memory
+should be identity mapped using a page size of 4 KiB.
 
-BTW, it looks like arch/riscv/kernel/module.c might be another place
-we could apply deposit functions.
+This means that a LPA2 capable system that has any system memory outside
+of the 48-bit addressable physical range and follows the spec to the
+letter may serve page allocation requests from regions of memory that
+the kernel cannot access unless it was built with LPA2 support and
+enables it at runtime.
 
-Thanks,
-drew
+So let's ensure that all page allocations are limited to the 48-bit
+range.
 
-> 
-> Thanks,
-> drew
-> 
-> 
-> > 
-> > Thanks,
-> > drew
-> > 
-> > >  
-> > >  /* The bit field of immediate value in B-type instruction */
-> > > -#define B_IMM_SIGN_OPOFF	31
-> > > -#define B_IMM_10_5_OPOFF	25
-> > > -#define B_IMM_4_1_OPOFF		8
-> > > -#define B_IMM_11_OPOFF		7
-> > > -#define B_IMM_SIGN_OFF		12
-> > > -#define B_IMM_10_5_OFF		5
-> > > -#define B_IMM_4_1_OFF		1
-> > > -#define B_IMM_11_OFF		11
-> > > -#define B_IMM_10_5_MASK		GENMASK(5, 0)
-> > > -#define B_IMM_4_1_MASK		GENMASK(3, 0)
-> > > -#define B_IMM_11_MASK		GENMASK(0, 0)
-> > > +#define RV_B_IMM_SIGN_OPOFF	31
-> > > +#define RV_B_IMM_10_5_OPOFF	25
-> > > +#define RV_B_IMM_4_1_OPOFF	8
-> > > +#define RV_B_IMM_11_OPOFF	7
-> > > +#define RV_B_IMM_SIGN_OFF	12
-> > > +#define RV_B_IMM_10_5_OFF	5
-> > > +#define RV_B_IMM_4_1_OFF	1
-> > > +#define RV_B_IMM_11_OFF		11
-> > > +#define RV_B_IMM_10_5_MASK	GENMASK(5, 0)
-> > > +#define RV_B_IMM_4_1_MASK	GENMASK(3, 0)
-> > > +#define RV_B_IMM_11_MASK	GENMASK(0, 0)
-> > >  
-> > >  /* The register offset in RVG instruction */
-> > >  #define RVG_RS1_OPOFF		15
-> > > @@ -100,71 +100,71 @@
-> > >  #define RVC_C2_RD_OPOFF		7
-> > >  
-> > >  /* parts of opcode for RVG*/
-> > > -#define OPCODE_BRANCH		0x63
-> > > -#define OPCODE_JALR		0x67
-> > > -#define OPCODE_JAL		0x6f
-> > > -#define OPCODE_SYSTEM		0x73
-> > > +#define RVG_OPCODE_BRANCH	0x63
-> > > +#define RVG_OPCODE_JALR		0x67
-> > > +#define RVG_OPCODE_JAL		0x6f
-> > > +#define RVG_OPCODE_SYSTEM	0x73
-> > >  
-> > >  /* parts of opcode for RVC*/
-> > > -#define OPCODE_C_0		0x0
-> > > -#define OPCODE_C_1		0x1
-> > > -#define OPCODE_C_2		0x2
-> > > +#define RVC_OPCODE_C0		0x0
-> > > +#define RVC_OPCODE_C1		0x1
-> > > +#define RVC_OPCODE_C2		0x2
-> > >  
-> > >  /* parts of funct3 code for I, M, A extension*/
-> > > -#define FUNCT3_JALR		0x0
-> > > -#define FUNCT3_BEQ		0x0
-> > > -#define FUNCT3_BNE		0x1000
-> > > -#define FUNCT3_BLT		0x4000
-> > > -#define FUNCT3_BGE		0x5000
-> > > -#define FUNCT3_BLTU		0x6000
-> > > -#define FUNCT3_BGEU		0x7000
-> > > +#define RVG_FUNCT3_JALR		0x0
-> > > +#define RVG_FUNCT3_BEQ		0x0
-> > > +#define RVG_FUNCT3_BNE		0x1000
-> > > +#define RVG_FUNCT3_BLT		0x4000
-> > > +#define RVG_FUNCT3_BGE		0x5000
-> > > +#define RVG_FUNCT3_BLTU		0x6000
-> > > +#define RVG_FUNCT3_BGEU		0x7000
-> > >  
-> > >  /* parts of funct3 code for C extension*/
-> > > -#define FUNCT3_C_BEQZ		0xc000
-> > > -#define FUNCT3_C_BNEZ		0xe000
-> > > -#define FUNCT3_C_J		0xa000
-> > > -#define FUNCT3_C_JAL		0x2000
-> > > -#define FUNCT4_C_JR		0x8000
-> > > -#define FUNCT4_C_JALR		0x9000
-> > > -
-> > > -#define FUNCT12_SRET		0x10200000
-> > > -
-> > > -#define MATCH_JALR		(FUNCT3_JALR | OPCODE_JALR)
-> > > -#define MATCH_JAL		(OPCODE_JAL)
-> > > -#define MATCH_BEQ		(FUNCT3_BEQ | OPCODE_BRANCH)
-> > > -#define MATCH_BNE		(FUNCT3_BNE | OPCODE_BRANCH)
-> > > -#define MATCH_BLT		(FUNCT3_BLT | OPCODE_BRANCH)
-> > > -#define MATCH_BGE		(FUNCT3_BGE | OPCODE_BRANCH)
-> > > -#define MATCH_BLTU		(FUNCT3_BLTU | OPCODE_BRANCH)
-> > > -#define MATCH_BGEU		(FUNCT3_BGEU | OPCODE_BRANCH)
-> > > -#define MATCH_SRET		(FUNCT12_SRET | OPCODE_SYSTEM)
-> > > -#define MATCH_C_BEQZ		(FUNCT3_C_BEQZ | OPCODE_C_1)
-> > > -#define MATCH_C_BNEZ		(FUNCT3_C_BNEZ | OPCODE_C_1)
-> > > -#define MATCH_C_J		(FUNCT3_C_J | OPCODE_C_1)
-> > > -#define MATCH_C_JAL		(FUNCT3_C_JAL | OPCODE_C_1)
-> > > -#define MATCH_C_JR		(FUNCT4_C_JR | OPCODE_C_2)
-> > > -#define MATCH_C_JALR		(FUNCT4_C_JALR | OPCODE_C_2)
-> > > -
-> > > -#define MASK_JALR		0x707f
-> > > -#define MASK_JAL		0x7f
-> > > -#define MASK_C_JALR		0xf07f
-> > > -#define MASK_C_JR		0xf07f
-> > > -#define MASK_C_JAL		0xe003
-> > > -#define MASK_C_J		0xe003
-> > > -#define MASK_BEQ		0x707f
-> > > -#define MASK_BNE		0x707f
-> > > -#define MASK_BLT		0x707f
-> > > -#define MASK_BGE		0x707f
-> > > -#define MASK_BLTU		0x707f
-> > > -#define MASK_BGEU		0x707f
-> > > -#define MASK_C_BEQZ		0xe003
-> > > -#define MASK_C_BNEZ		0xe003
-> > > -#define MASK_SRET		0xffffffff
-> > > +#define RVC_FUNCT3_C_BEQZ	0xc000
-> > > +#define RVC_FUNCT3_C_BNEZ	0xe000
-> > > +#define RVC_FUNCT3_C_J		0xa000
-> > > +#define RVC_FUNCT3_C_JAL	0x2000
-> > > +#define RVC_FUNCT4_C_JR		0x8000
-> > > +#define RVC_FUNCT4_C_JALR	0x9000
-> > > +
-> > > +#define RVG_FUNCT12_SRET	0x10200000
-> > > +
-> > > +#define RVG_MATCH_JALR		(RVG_FUNCT3_JALR | RVG_OPCODE_JALR)
-> > > +#define RVG_MATCH_JAL		(RVG_OPCODE_JAL)
-> > > +#define RVG_MATCH_BEQ		(RVG_FUNCT3_BEQ | RVG_OPCODE_BRANCH)
-> > > +#define RVG_MATCH_BNE		(RVG_FUNCT3_BNE | RVG_OPCODE_BRANCH)
-> > > +#define RVG_MATCH_BLT		(RVG_FUNCT3_BLT | RVG_OPCODE_BRANCH)
-> > > +#define RVG_MATCH_BGE		(RVG_FUNCT3_BGE | RVG_OPCODE_BRANCH)
-> > > +#define RVG_MATCH_BLTU		(RVG_FUNCT3_BLTU | RVG_OPCODE_BRANCH)
-> > > +#define RVG_MATCH_BGEU		(RVG_FUNCT3_BGEU | RVG_OPCODE_BRANCH)
-> > > +#define RVG_MATCH_SRET		(RVG_FUNCT12_SRET | RVG_OPCODE_SYSTEM)
-> > > +#define RVC_MATCH_C_BEQZ	(RVC_FUNCT3_C_BEQZ | RVC_OPCODE_C1)
-> > > +#define RVC_MATCH_C_BNEZ	(RVC_FUNCT3_C_BNEZ | RVC_OPCODE_C1)
-> > > +#define RVC_MATCH_C_J		(RVC_FUNCT3_C_J | RVC_OPCODE_C1)
-> > > +#define RVC_MATCH_C_JAL		(RVC_FUNCT3_C_JAL | RVC_OPCODE_C1)
-> > > +#define RVC_MATCH_C_JR		(RVC_FUNCT4_C_JR | RVC_OPCODE_C2)
-> > > +#define RVC_MATCH_C_JALR	(RVC_FUNCT4_C_JALR | RVC_OPCODE_C2)
-> > > +
-> > > +#define RVG_MASK_JALR		0x707f
-> > > +#define RVG_MASK_JAL		0x7f
-> > > +#define RVC_MASK_C_JALR		0xf07f
-> > > +#define RVC_MASK_C_JR		0xf07f
-> > > +#define RVC_MASK_C_JAL		0xe003
-> > > +#define RVC_MASK_C_J		0xe003
-> > > +#define RVG_MASK_BEQ		0x707f
-> > > +#define RVG_MASK_BNE		0x707f
-> > > +#define RVG_MASK_BLT		0x707f
-> > > +#define RVG_MASK_BGE		0x707f
-> > > +#define RVG_MASK_BLTU		0x707f
-> > > +#define RVG_MASK_BGEU		0x707f
-> > > +#define RVC_MASK_C_BEQZ		0xe003
-> > > +#define RVC_MASK_C_BNEZ		0xe003
-> > > +#define RVG_MASK_SRET		0xffffffff
-> > >  
-> > >  #define __INSN_LENGTH_MASK	_UL(0x3)
-> > >  #define __INSN_LENGTH_GE_32	_UL(0x3)
-> > >  #define __INSN_OPCODE_MASK	_UL(0x7F)
-> > > -#define __INSN_BRANCH_OPCODE	_UL(OPCODE_BRANCH)
-> > > +#define __INSN_BRANCH_OPCODE	_UL(RVG_OPCODE_BRANCH)
-> > >  
-> > >  /* Define a series of is_XXX_insn functions to check if the value INSN
-> > >   * is an instance of instruction XXX.
-> > > @@ -180,26 +180,26 @@ static inline bool is_ ## INSN_NAME ## _insn(long insn) \
-> > >  #define RV_X(X, s, mask)  (((X) >> (s)) & (mask))
-> > >  #define RVC_X(X, s, mask) RV_X(X, s, mask)
-> > >  
-> > > -#define EXTRACT_JTYPE_IMM(x) \
-> > > +#define RV_EXTRACT_JTYPE_IMM(x) \
-> > >  	({typeof(x) x_ = (x); \
-> > > -	(RV_X(x_, J_IMM_10_1_OPOFF, J_IMM_10_1_MASK) << J_IMM_10_1_OFF) | \
-> > > -	(RV_X(x_, J_IMM_11_OPOFF, J_IMM_11_MASK) << J_IMM_11_OFF) | \
-> > > -	(RV_X(x_, J_IMM_19_12_OPOFF, J_IMM_19_12_MASK) << J_IMM_19_12_OFF) | \
-> > > -	(RV_IMM_SIGN(x_) << J_IMM_SIGN_OFF); })
-> > > +	(RV_X(x_, RV_J_IMM_10_1_OPOFF, RV_J_IMM_10_1_MASK) << RV_J_IMM_10_1_OFF) | \
-> > > +	(RV_X(x_, RV_J_IMM_11_OPOFF, RV_J_IMM_11_MASK) << RV_J_IMM_11_OFF) | \
-> > > +	(RV_X(x_, RV_J_IMM_19_12_OPOFF, RV_J_IMM_19_12_MASK) << RV_J_IMM_19_12_OFF) | \
-> > > +	(RV_IMM_SIGN(x_) << RV_J_IMM_SIGN_OFF); })
-> > >  
-> > > -#define EXTRACT_ITYPE_IMM(x) \
-> > > +#define RV_EXTRACT_ITYPE_IMM(x) \
-> > >  	({typeof(x) x_ = (x); \
-> > > -	(RV_X(x_, I_IMM_11_0_OPOFF, I_IMM_11_0_MASK)) | \
-> > > -	(RV_IMM_SIGN(x_) << I_IMM_SIGN_OFF); })
-> > > +	(RV_X(x_, RV_I_IMM_11_0_OPOFF, RV_I_IMM_11_0_MASK)) | \
-> > > +	(RV_IMM_SIGN(x_) << RV_I_IMM_SIGN_OFF); })
-> > >  
-> > > -#define EXTRACT_BTYPE_IMM(x) \
-> > > +#define RV_EXTRACT_BTYPE_IMM(x) \
-> > >  	({typeof(x) x_ = (x); \
-> > > -	(RV_X(x_, B_IMM_4_1_OPOFF, B_IMM_4_1_MASK) << B_IMM_4_1_OFF) | \
-> > > -	(RV_X(x_, B_IMM_10_5_OPOFF, B_IMM_10_5_MASK) << B_IMM_10_5_OFF) | \
-> > > -	(RV_X(x_, B_IMM_11_OPOFF, B_IMM_11_MASK) << B_IMM_11_OFF) | \
-> > > -	(RV_IMM_SIGN(x_) << B_IMM_SIGN_OFF); })
-> > > +	(RV_X(x_, RV_B_IMM_4_1_OPOFF, RV_B_IMM_4_1_MASK) << RV_B_IMM_4_1_OFF) | \
-> > > +	(RV_X(x_, RV_B_IMM_10_5_OPOFF, RV_B_IMM_10_5_MASK) << RV_B_IMM_10_5_OFF) | \
-> > > +	(RV_X(x_, RV_B_IMM_11_OPOFF, RV_B_IMM_11_MASK) << RV_B_IMM_11_OFF) | \
-> > > +	(RV_IMM_SIGN(x_) << RV_B_IMM_SIGN_OFF); })
-> > >  
-> > > -#define EXTRACT_RVC_J_IMM(x) \
-> > > +#define RVC_EXTRACT_JTYPE_IMM(x) \
-> > >  	({typeof(x) x_ = (x); \
-> > >  	(RVC_X(x_, RVC_J_IMM_3_1_OPOFF, RVC_J_IMM_3_1_MASK) << RVC_J_IMM_3_1_OFF) | \
-> > >  	(RVC_X(x_, RVC_J_IMM_4_OPOFF, RVC_J_IMM_4_MASK) << RVC_J_IMM_4_OFF) | \
-> > > @@ -210,7 +210,7 @@ static inline bool is_ ## INSN_NAME ## _insn(long insn) \
-> > >  	(RVC_X(x_, RVC_J_IMM_10_OPOFF, RVC_J_IMM_10_MASK) << RVC_J_IMM_10_OFF) | \
-> > >  	(RVC_IMM_SIGN(x_) << RVC_J_IMM_SIGN_OFF); })
-> > >  
-> > > -#define EXTRACT_RVC_B_IMM(x) \
-> > > +#define RVC_EXTRACT_BTYPE_IMM(x) \
-> > >  	({typeof(x) x_ = (x); \
-> > >  	(RVC_X(x_, RVC_B_IMM_2_1_OPOFF, RVC_B_IMM_2_1_MASK) << RVC_B_IMM_2_1_OFF) | \
-> > >  	(RVC_X(x_, RVC_B_IMM_4_3_OPOFF, RVC_B_IMM_4_3_MASK) << RVC_B_IMM_4_3_OFF) | \
-> > > diff --git a/arch/riscv/kernel/kgdb.c b/arch/riscv/kernel/kgdb.c
-> > > index 963ed7edcff2..137c6d870d58 100644
-> > > --- a/arch/riscv/kernel/kgdb.c
-> > > +++ b/arch/riscv/kernel/kgdb.c
-> > > @@ -29,20 +29,20 @@ DECLARE_INSN(c_jal, MATCH_C_JAL, MASK_C_JAL)
-> > >  #else
-> > >  #define is_c_jal_insn(opcode) 0
-> > >  #endif
-> > > -DECLARE_INSN(jalr, MATCH_JALR, MASK_JALR)
-> > > -DECLARE_INSN(jal, MATCH_JAL, MASK_JAL)
-> > > -DECLARE_INSN(c_jr, MATCH_C_JR, MASK_C_JR)
-> > > -DECLARE_INSN(c_jalr, MATCH_C_JALR, MASK_C_JALR)
-> > > -DECLARE_INSN(c_j, MATCH_C_J, MASK_C_J)
-> > > -DECLARE_INSN(beq, MATCH_BEQ, MASK_BEQ)
-> > > -DECLARE_INSN(bne, MATCH_BNE, MASK_BNE)
-> > > -DECLARE_INSN(blt, MATCH_BLT, MASK_BLT)
-> > > -DECLARE_INSN(bge, MATCH_BGE, MASK_BGE)
-> > > -DECLARE_INSN(bltu, MATCH_BLTU, MASK_BLTU)
-> > > -DECLARE_INSN(bgeu, MATCH_BGEU, MASK_BGEU)
-> > > -DECLARE_INSN(c_beqz, MATCH_C_BEQZ, MASK_C_BEQZ)
-> > > -DECLARE_INSN(c_bnez, MATCH_C_BNEZ, MASK_C_BNEZ)
-> > > -DECLARE_INSN(sret, MATCH_SRET, MASK_SRET)
-> > > +DECLARE_INSN(jalr, RVG_MATCH_JALR, RVG_MASK_JALR)
-> > > +DECLARE_INSN(jal, RVG_MATCH_JAL, RVG_MASK_JAL)
-> > > +DECLARE_INSN(c_jr, RVC_MATCH_C_JR, RVC_MASK_C_JR)
-> > > +DECLARE_INSN(c_jalr, RVC_MATCH_C_JALR, RVC_MASK_C_JALR)
-> > > +DECLARE_INSN(c_j, RVC_MATCH_C_J, RVC_MASK_C_J)
-> > > +DECLARE_INSN(beq, RVG_MATCH_BEQ, RVG_MASK_BEQ)
-> > > +DECLARE_INSN(bne, RVG_MATCH_BNE, RVG_MASK_BNE)
-> > > +DECLARE_INSN(blt, RVG_MATCH_BLT, RVG_MASK_BLT)
-> > > +DECLARE_INSN(bge, RVG_MATCH_BGE, RVG_MASK_BGE)
-> > > +DECLARE_INSN(bltu, RVG_MATCH_BLTU, RVG_MASK_BLTU)
-> > > +DECLARE_INSN(bgeu, RVG_MATCH_BGEU, RVG_MASK_BGEU)
-> > > +DECLARE_INSN(c_beqz, RVC_MATCH_C_BEQZ, RVC_MASK_C_BEQZ)
-> > > +DECLARE_INSN(c_bnez, RVC_MATCH_C_BNEZ, RVC_MASK_C_BNEZ)
-> > > +DECLARE_INSN(sret, RVG_MATCH_SRET, RVG_MASK_SRET)
-> > >  
-> > >  static int decode_register_index(unsigned long opcode, int offset)
-> > >  {
-> > > @@ -69,19 +69,19 @@ static int get_step_address(struct pt_regs *regs, unsigned long *next_addr)
-> > >  			rs1_num = decode_register_index(op_code, RVC_C2_RS1_OPOFF);
-> > >  			*next_addr = regs_ptr[rs1_num];
-> > >  		} else if (is_c_j_insn(op_code) || is_c_jal_insn(op_code)) {
-> > > -			*next_addr = EXTRACT_RVC_J_IMM(op_code) + pc;
-> > > +			*next_addr = RVC_EXTRACT_JTYPE_IMM(op_code) + pc;
-> > >  		} else if (is_c_beqz_insn(op_code)) {
-> > >  			rs1_num = decode_register_index_short(op_code,
-> > >  							      RVC_C1_RS1_OPOFF);
-> > >  			if (!rs1_num || regs_ptr[rs1_num] == 0)
-> > > -				*next_addr = EXTRACT_RVC_B_IMM(op_code) + pc;
-> > > +				*next_addr = RVC_EXTRACT_BTYPE_IMM(op_code) + pc;
-> > >  			else
-> > >  				*next_addr = pc + 2;
-> > >  		} else if (is_c_bnez_insn(op_code)) {
-> > >  			rs1_num =
-> > >  			    decode_register_index_short(op_code, RVC_C1_RS1_OPOFF);
-> > >  			if (rs1_num && regs_ptr[rs1_num] != 0)
-> > > -				*next_addr = EXTRACT_RVC_B_IMM(op_code) + pc;
-> > > +				*next_addr = RVC_EXTRACT_BTYPE_IMM(op_code) + pc;
-> > >  			else
-> > >  				*next_addr = pc + 2;
-> > >  		} else {
-> > > @@ -90,7 +90,7 @@ static int get_step_address(struct pt_regs *regs, unsigned long *next_addr)
-> > >  	} else {
-> > >  		if ((op_code & __INSN_OPCODE_MASK) == __INSN_BRANCH_OPCODE) {
-> > >  			bool result = false;
-> > > -			long imm = EXTRACT_BTYPE_IMM(op_code);
-> > > +			long imm = RV_EXTRACT_BTYPE_IMM(op_code);
-> > >  			unsigned long rs1_val = 0, rs2_val = 0;
-> > >  
-> > >  			rs1_num = decode_register_index(op_code, RVG_RS1_OPOFF);
-> > > @@ -121,12 +121,12 @@ static int get_step_address(struct pt_regs *regs, unsigned long *next_addr)
-> > >  			else
-> > >  				*next_addr = pc + 4;
-> > >  		} else if (is_jal_insn(op_code)) {
-> > > -			*next_addr = EXTRACT_JTYPE_IMM(op_code) + pc;
-> > > +			*next_addr = RV_EXTRACT_JTYPE_IMM(op_code) + pc;
-> > >  		} else if (is_jalr_insn(op_code)) {
-> > >  			rs1_num = decode_register_index(op_code, RVG_RS1_OPOFF);
-> > >  			if (rs1_num)
-> > >  				*next_addr = ((unsigned long *)regs)[rs1_num];
-> > > -			*next_addr += EXTRACT_ITYPE_IMM(op_code);
-> > > +			*next_addr += RV_EXTRACT_ITYPE_IMM(op_code);
-> > >  		} else if (is_sret_insn(op_code)) {
-> > >  			*next_addr = pc;
-> > >  		} else {
-> > > -- 
-> > > 2.35.1
-> > > 
+Cc: Samer El-Haj-Mahmoud <Samer.El-Haj-Mahmoud@arm.com>
+Cc: Jose Marinho <Jose.Marinho@arm.com>
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+---
+ arch/arm64/include/asm/efi.h              | 1 +
+ drivers/firmware/efi/libstub/alignedmem.c | 2 ++
+ drivers/firmware/efi/libstub/arm64-stub.c | 5 +++--
+ drivers/firmware/efi/libstub/efistub.h    | 4 ++++
+ drivers/firmware/efi/libstub/mem.c        | 2 ++
+ 5 files changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
+index 108b115dbf5b7436..7c12e01c2b312e7b 100644
+--- a/arch/arm64/include/asm/efi.h
++++ b/arch/arm64/include/asm/efi.h
+@@ -92,6 +92,7 @@ static inline unsigned long efi_get_kimg_min_align(void)
+ }
+ 
+ #define EFI_ALLOC_ALIGN		SZ_64K
++#define EFI_ALLOC_LIMIT		((1UL << 48) - 1)
+ 
+ /*
+  * On ARM systems, virtually remapped UEFI runtime services are set up in two
+diff --git a/drivers/firmware/efi/libstub/alignedmem.c b/drivers/firmware/efi/libstub/alignedmem.c
+index 174832661251e846..6b83c492c3b8260d 100644
+--- a/drivers/firmware/efi/libstub/alignedmem.c
++++ b/drivers/firmware/efi/libstub/alignedmem.c
+@@ -29,6 +29,8 @@ efi_status_t efi_allocate_pages_aligned(unsigned long size, unsigned long *addr,
+ 	efi_status_t status;
+ 	int slack;
+ 
++	max = min(max, EFI_ALLOC_LIMIT);
++
+ 	if (align < EFI_ALLOC_ALIGN)
+ 		align = EFI_ALLOC_ALIGN;
+ 
+diff --git a/drivers/firmware/efi/libstub/arm64-stub.c b/drivers/firmware/efi/libstub/arm64-stub.c
+index 7f0aab3a8ab302d6..7327b98d8e3fe961 100644
+--- a/drivers/firmware/efi/libstub/arm64-stub.c
++++ b/drivers/firmware/efi/libstub/arm64-stub.c
+@@ -113,10 +113,11 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
+ 	if (status != EFI_SUCCESS) {
+ 		if (!check_image_region((u64)_text, kernel_memsize)) {
+ 			efi_err("FIRMWARE BUG: Image BSS overlaps adjacent EFI memory region\n");
+-		} else if (IS_ALIGNED((u64)_text, min_kimg_align)) {
++		} else if (IS_ALIGNED((u64)_text, min_kimg_align) &&
++			   (u64)_end < EFI_ALLOC_LIMIT) {
+ 			/*
+ 			 * Just execute from wherever we were loaded by the
+-			 * UEFI PE/COFF loader if the alignment is suitable.
++			 * UEFI PE/COFF loader if the placement is suitable.
+ 			 */
+ 			*image_addr = (u64)_text;
+ 			*reserve_size = 0;
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index ed405f8d09a83765..5b8f2c411ed82be5 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -29,6 +29,10 @@
+ #define EFI_ALLOC_ALIGN		EFI_PAGE_SIZE
+ #endif
+ 
++#ifndef EFI_ALLOC_LIMIT
++#define EFI_ALLOC_LIMIT		ULONG_MAX
++#endif
++
+ extern bool efi_nochunk;
+ extern bool efi_nokaslr;
+ extern int efi_loglevel;
+diff --git a/drivers/firmware/efi/libstub/mem.c b/drivers/firmware/efi/libstub/mem.c
+index 03d147f17185b329..4f1fa302234d880f 100644
+--- a/drivers/firmware/efi/libstub/mem.c
++++ b/drivers/firmware/efi/libstub/mem.c
+@@ -89,6 +89,8 @@ efi_status_t efi_allocate_pages(unsigned long size, unsigned long *addr,
+ 	efi_physical_addr_t alloc_addr;
+ 	efi_status_t status;
+ 
++	max = min(max, EFI_ALLOC_LIMIT);
++
+ 	if (EFI_ALLOC_ALIGN > EFI_PAGE_SIZE)
+ 		return efi_allocate_pages_aligned(size, addr, max,
+ 						  EFI_ALLOC_ALIGN,
+-- 
+2.35.1
+
