@@ -2,175 +2,215 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 525B5C4321E
-	for <linux-efi@archiver.kernel.org>; Mon,  5 Dec 2022 20:12:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D740DC352A1
+	for <linux-efi@archiver.kernel.org>; Tue,  6 Dec 2022 09:57:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232724AbiLEUM0 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 5 Dec 2022 15:12:26 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52972 "EHLO
+        id S232060AbiLFJ54 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 6 Dec 2022 04:57:56 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38920 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232788AbiLEUMY (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 5 Dec 2022 15:12:24 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9883F275E8
-        for <linux-efi@vger.kernel.org>; Mon,  5 Dec 2022 12:12:23 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 50D60B81212
-        for <linux-efi@vger.kernel.org>; Mon,  5 Dec 2022 20:12:22 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6C4C4C433D7;
-        Mon,  5 Dec 2022 20:12:19 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1670271141;
-        bh=YmexWb2wA2VRGsLRvQxNTHg2UZC1lXNmFZOrLUB5d4E=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Dd50h/1iawL+iuPA6ZwAzWdr/7HqiDAWWwRuDCtUq3+XmupQJQchpExGHgtd9qRcA
-         517T5kzcgGEu+h8vuaR7m5IdXxbWmfFhpKk/b6dSClEEvksq1FUxGxeyCawW1oV84y
-         HrMv6EuXL7otNd2Gr7q9Wx6W9ScEdZxl0dC0YraglkLBjvRwlD+EOFFVR0WPPz4GLv
-         18yfNtFZi4bmVNL6zGg6E/UpmcaZMwiOvGii3PnwATJdRB9qMNEniq6BKMm1Wo0kXi
-         36NESD9h6LYxlY4NIB80mNt/xsIdSb1bD38KemYv/a6xHgR4XxTSqOYVwwRxFQQo6a
-         8v5DsBF0WvkCA==
-From:   Ard Biesheuvel <ardb@kernel.org>
-To:     linux-efi@vger.kernel.org
-Cc:     linux-arm-kernel@lists.infradead.org, will@kernel.org,
-        catalin.marinas@arm.com, mark.rutland@arm.com,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Sami Tolvanen <samitolvanen@google.com>,
-        Kees Cook <keescook@chromium.org>
-Subject: [PATCH 1/2] arm64: efi: Execute runtime services from a dedicated stack
-Date:   Mon,  5 Dec 2022 21:12:09 +0100
-Message-Id: <20221205201210.463781-2-ardb@kernel.org>
-X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20221205201210.463781-1-ardb@kernel.org>
-References: <20221205201210.463781-1-ardb@kernel.org>
+        with ESMTP id S235510AbiLFJ4p (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 6 Dec 2022 04:56:45 -0500
+Received: from mail-pl1-x635.google.com (mail-pl1-x635.google.com [IPv6:2607:f8b0:4864:20::635])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AF1C123BE3
+        for <linux-efi@vger.kernel.org>; Tue,  6 Dec 2022 01:52:27 -0800 (PST)
+Received: by mail-pl1-x635.google.com with SMTP id m4so6475749pls.4
+        for <linux-efi@vger.kernel.org>; Tue, 06 Dec 2022 01:52:27 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=atishpatra.org; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=uKFNU1drlDzzo2Glt7CSqF/E/XUOsjXB/mbXpcJbYZg=;
+        b=Kj9ZIu5jdhO4savvug0c131uDt7Yg8oeemgdn7fAwN/LzS1iEJeWF9KFffDhh/WN8K
+         zESG0d/jgsZ0jwby9Vy9iHrhqeiTsjDUQyc6qM3+a/wRisO3T0g1CEfEBjuDSFeXAQPt
+         M7JS7ZQmIelfoIlHbQSO8fZC/k60lexQRnppc=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=uKFNU1drlDzzo2Glt7CSqF/E/XUOsjXB/mbXpcJbYZg=;
+        b=ZtVfcPBDv3w9v8O2dzNAR8eadxUCfcfWDWbKGH9kSCTsVCDVSvz7jiCZldG392b/oK
+         YPLSc9FZYWFp6N9KApyiDddWFIDlDAyxbKDBh9yoijX/oVl0tWSxLYllfsYv/C0kXGum
+         EnG72oiSCXS1piUFHeFSc5juyQG5sqMRUB0DdwqxkbToxfmDQRdvpXT7g3vXqmk8nnTV
+         E/PkoBC2QUilctThVhbNZq/HjPwwbcEKmozf9ypXtTpf55z9WtGKGgKU+VxAsmiehnN5
+         z0Fa5hmOy3QI1jDS3781njL11DujvZw4jb5oq4NbGWOXJsTyXBug1oqAdr9ECXqGzAlZ
+         w+YQ==
+X-Gm-Message-State: ANoB5pnk0Sdi7iXnNmSQOBUDLHFu6h5/sIq6geQVdiV8FErzEl7Oh4Qy
+        5xJWVHZNJ7fORae9HBIAtR3Mxp0OV3SbfBXNt9K0
+X-Google-Smtp-Source: AA0mqf56FPnQWEpJiz3fb/KMOjPdaC0n8tthqYCC49KfoSKV9onZy2okjB4/ksNhYSIUSOmoUfnLEi2NI/7ggUDxzts=
+X-Received: by 2002:a17:902:6b85:b0:187:3c62:582c with SMTP id
+ p5-20020a1709026b8500b001873c62582cmr68702749plk.114.1670320336759; Tue, 06
+ Dec 2022 01:52:16 -0800 (PST)
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=4194; i=ardb@kernel.org; h=from:subject; bh=YmexWb2wA2VRGsLRvQxNTHg2UZC1lXNmFZOrLUB5d4E=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjjlCY1HWUzLnlv1k1WgzcWLtByrBOxwVGaGSKc3jy YHObtZGJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCY45QmAAKCRDDTyI5ktmPJItwC/ 9zrnYKpLdJRUJ2wAfoKuizXY17XfFCrE+7N2OpM4xp60KHwK0mYEXHX8cMfZtbyKfuonoRsaQjTbDf gpwop6siIzgdl5/k/w3KcCiQvaTlFLPSkZjq67UgP1JPi2bUhU2cUVO34NaQlX0TNKarkqazfG9yWS g9DHjeLbL4ELm58g+VbLmZmc+eK1uHGrqSRxCr6KqSVHRF44yVU0EpUgueKHJjT+XRjmLlCst9958f Zup4SWlK/4+ybaLMvzIGeM1iNTZQjgutDyslF6CvCFPlxhib3oj5KGzi2UE1Daf/nh2P3d4pXtbm8p HPcNESya6K7+9E7hpf3v1TkirtcgzcK7MEnmHRelXC0l999qfIuSPb5H07jzSYK9M7E4DtYqDfOh0I iAnCwfXFALtESRq5yvoqmUC4LM3P3bIfm6kDUvN3p8eBKp1pJtCURISg7tsKkC9+yKg2zOxGYPcxaT dTLEt2vQRmEAmcIQHbmcLtcUx1Y1TNbrsmj845tPJC6+A=
-X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-Content-Transfer-Encoding: 8bit
+References: <20221129175616.2089294-1-ardb@kernel.org> <20221129175616.2089294-3-ardb@kernel.org>
+ <Y4i6YExOV80rxdhq@tomti.i.net-space.pl>
+In-Reply-To: <Y4i6YExOV80rxdhq@tomti.i.net-space.pl>
+From:   Atish Patra <atishp@atishpatra.org>
+Date:   Tue, 6 Dec 2022 01:52:04 -0800
+Message-ID: <CAOnJCUJ-oPeuRPHFZOkMMYAt=wnnspNnHaQMpa1Fa1odiazbBA@mail.gmail.com>
+Subject: Re: [PATCH v2 2/2] efi: Put Linux specific magic number in the DOS header
+To:     Daniel Kiper <daniel.kiper@oracle.com>
+Cc:     Ard Biesheuvel <ardb@kernel.org>, linux-efi@vger.kernel.org,
+        grub-devel@gnu.org, Huacai Chen <chenhuacai@kernel.org>,
+        Atish Patra <atishp@rivosinc.com>,
+        Heinrich Schuchardt <heinrich.schuchardt@canonical.com>,
+        Leif Lindholm <quic_llindhol@quicinc.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-With the introduction of PRMT in the ACPI subsystem, the EFI rts
-workqueue is no longer the only caller of efi_call_virt_pointer() in the
-kernel. This means the EFI runtime services lock is no longer sufficient
-to manage concurrent calls into firmware, but also that firmware calls
-may occur that are not marshalled via the workqueue mechanism, but
-originate directly from the caller context.
+On Thu, Dec 1, 2022 at 6:30 AM Daniel Kiper <daniel.kiper@oracle.com> wrote:
+>
+> On Tue, Nov 29, 2022 at 06:56:16PM +0100, Ard Biesheuvel wrote:
+> > GRUB currently relies on the magic number in the image header of ARM and
+> > arm64 EFI kernel images to decide whether or not the image in question
+> > is a bootable kernel.
+> >
+> > However, the purpose of the magic number is to identify the image as one
+> > that implements the bare metal boot protocol, and so GRUB, which only
+> > does EFI boot, can only boot images that could potentially be booted in
+> > a non-EFI manner as well.
+> >
+> > This is problematic for the new zboot decompressor image format, as it
+> > can only boot in EFI mode, and must therefore not use the bare metal
+> > boot magic number in its header.
+> >
+> > For this reason, the strict magic number was dropped from GRUB, to
+> > permit essentially any kind of EFI executable to be booted via the
+> > 'linux' command, blurring the line between the linux loader and the
+> > chainloader.
+> >
+> > So let's use the same field in the DOS header that RISC-V and arm64
+> > already use for their 'bare metal' magic numbers to store a 'generic
+> > Linux kernel' magic number, which can be used to identify bootable
+> > kernel images in PE format which don't necessarily implement a bare
+> > metal boot protocol in the same binary. Note that, in the context of
+> > EFI, the MSDOS header is only described in terms of the fields that it
+>
+> s/MSDOS/MS-DOS/ to be consistent with other places in the patch...
+>
+> > shares with the hybrid PE/COFF image format, (i.e., the magic number at
+> > offset #0 and the PE header offset at byte offset #0x3c). Since we aim
+>
+> s/the magic number at offset #0/MS-DOS EXE magic number at offset #0/?
+>
+> "the magic number at offset #0" itself is confusing in the context of
+> number of "magic number" phrases in the patch... :-)
+>
+> > for compatibility with EFI only, and not with MS-DOS or MS-Windows, we
+> > can use the remaining space in the MS-DOS header however we want.
+> >
+> > Let's set the generic magic number for x86 images as well: existing
+> > bootloaders already have their own methods to identify x86 Linux images
+> > that can be booted in a non-EFI manner, and having the magic number in
+> > place there will ease any future transitions in loader implementations
+> > to merge the x86 and non-x86 EFI boot paths.
+> >
+> > Note that 32-bit ARM already uses the same location in the header for a
+> > different purpose, but the ARM support is already widely implemented and
+> > the EFI zboot decompressor is not available on ARM anyway, so we just
+> > disregard it here.
+> >
+> > Cc: Huacai Chen <chenhuacai@kernel.org>
+> > Cc: Atish Patra <atishp@rivosinc.com>
+> > Cc: Heinrich Schuchardt <heinrich.schuchardt@canonical.com>
+> > Cc: Daniel Kiper <daniel.kiper@oracle.com>
+> > Cc: Leif Lindholm <quic_llindhol@quicinc.com>
+> > Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+> > ---
+> >  arch/loongarch/kernel/head.S                | 3 ++-
+> >  arch/x86/boot/header.S                      | 3 ++-
+> >  drivers/firmware/efi/libstub/zboot-header.S | 3 ++-
+> >  include/linux/pe.h                          | 7 +++++++
+> >  4 files changed, 13 insertions(+), 3 deletions(-)
+> >
+> > diff --git a/arch/loongarch/kernel/head.S b/arch/loongarch/kernel/head.S
+> > index 84970e2666588963..caa74439700eee93 100644
+> > --- a/arch/loongarch/kernel/head.S
+> > +++ b/arch/loongarch/kernel/head.S
+> > @@ -25,7 +25,8 @@ _head:
+> >       .dword  kernel_entry            /* Kernel entry point */
+> >       .dword  _end - _text            /* Kernel image effective size */
+> >       .quad   0                       /* Kernel image load offset from start of RAM */
+> > -     .org    0x3c                    /* 0x20 ~ 0x3b reserved */
+> > +     .org    0x38                    /* 0x20 ~ 0x38 reserved */
+> > +     .long   LINUX_PE_MAGIC
+> >       .long   pe_header - _head       /* Offset to the PE header */
+> >
+> >  pe_header:
+> > diff --git a/arch/x86/boot/header.S b/arch/x86/boot/header.S
+> > index f912d777013052ea..be8f78a7ee325475 100644
+> > --- a/arch/x86/boot/header.S
+> > +++ b/arch/x86/boot/header.S
+> > @@ -80,10 +80,11 @@ bs_die:
+> >       ljmp    $0xf000,$0xfff0
+> >
+> >  #ifdef CONFIG_EFI_STUB
+> > -     .org    0x3c
+> > +     .org    0x38
+> >       #
+> >       # Offset to the PE header.
+> >       #
+> > +     .long   LINUX_PE_MAGIC
+> >       .long   pe_header
+> >  #endif /* CONFIG_EFI_STUB */
+> >
+> > diff --git a/drivers/firmware/efi/libstub/zboot-header.S b/drivers/firmware/efi/libstub/zboot-header.S
+> > index bc2d7750d7f14174..ec4525d40e0cf6d6 100644
+> > --- a/drivers/firmware/efi/libstub/zboot-header.S
+> > +++ b/drivers/firmware/efi/libstub/zboot-header.S
+> > @@ -20,7 +20,8 @@ __efistub_efi_zboot_header:
+> >       .long           __efistub__gzdata_size - 12             // payload size
+> >       .long           0, 0                                    // reserved
+> >       .asciz          COMP_TYPE                               // compression type
+> > -     .org            .Ldoshdr + 0x3c
+> > +     .org            .Ldoshdr + 0x38
+> > +     .long           LINUX_PE_MAGIC
+> >       .long           .Lpehdr - .Ldoshdr                      // PE header offset
+> >
+> >  .Lpehdr:
+> > diff --git a/include/linux/pe.h b/include/linux/pe.h
+> > index 056a1762de904fc1..1db4c944efd78f51 100644
+> > --- a/include/linux/pe.h
+> > +++ b/include/linux/pe.h
+> > @@ -31,6 +31,13 @@
+> >  #define LINUX_EFISTUB_MAJOR_VERSION          0x1
+> >  #define LINUX_EFISTUB_MINOR_VERSION          0x1
+> >
+> > +/*
+> > + * LINUX_PE_MAGIC appears at offset 0x38 into the MSDOS header of EFI bootable
+>
+> s/MSDOS/MS-DOS/
+>
+> > + * Linux kernel images that target the architecture as specified by the PE/COFF
+> > + * header machine type field.
+> > + */
+> > +#define LINUX_PE_MAGIC       0x818223cd
+> > +
+> >  #define MZ_MAGIC     0x5a4d  /* "MZ" */
+> >
+> >  #define PE_MAGIC             0x00004550      /* "PE\0\0" */
+>
+> If you take into account these minor things mentioned above you can add
+> Reviewed-by: Daniel Kiper <daniel.kiper@oracle.com> to your both patches.
+>
+> Atish, could you respin your GRUB "Unify ARM64 & RISC-V Linux Loader"
+> patch set when both Ard's patches are in at least "efi" Linux kernel
+> branch? Hmmm... I am not sure it will go through "efi" branch. Ard?
+>
 
-For added robustness, and to ensure that the runtime services have 8 KiB
-of stack space available as per the EFI spec, introduce a spinlock
-protected EFI runtime stack of 8 KiB, where the spinlock also ensures
-serialization between the EFI rts workqueue (which itself serializes EFI
-runtime calls) and other callers of efi_call_virt_pointer().
+Sure. We need to remove the arch specific header files in the next
+version as well.
+I am planning to revise the series before/during the holidays. Hope
+that's fine w.r.t Grub release.
+Otherwise, please let me know.
 
-While at it, use the stack pivot to avoid reloading the shadow call
-stack pointer from the ordinary stack, as doing so could produce a
-gadget to defeat it.
+> Daniel
 
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
----
- arch/arm64/include/asm/efi.h       |  3 +++
- arch/arm64/kernel/efi-rt-wrapper.S | 13 +++++++++-
- arch/arm64/kernel/efi.c            | 25 ++++++++++++++++++++
- 3 files changed, 40 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
-index 7c12e01c2b312e7b..1c408ec3c8b3a883 100644
---- a/arch/arm64/include/asm/efi.h
-+++ b/arch/arm64/include/asm/efi.h
-@@ -25,6 +25,7 @@ int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
- ({									\
- 	efi_virtmap_load();						\
- 	__efi_fpsimd_begin();						\
-+	spin_lock(&efi_rt_lock);					\
- })
- 
- #undef arch_efi_call_virt
-@@ -33,10 +34,12 @@ int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
- 
- #define arch_efi_call_virt_teardown()					\
- ({									\
-+	spin_unlock(&efi_rt_lock);					\
- 	__efi_fpsimd_end();						\
- 	efi_virtmap_unload();						\
- })
- 
-+extern spinlock_t efi_rt_lock;
- efi_status_t __efi_rt_asm_wrapper(void *, const char *, ...);
- 
- #define ARCH_EFI_IRQ_FLAGS_MASK (PSR_D_BIT | PSR_A_BIT | PSR_I_BIT | PSR_F_BIT)
-diff --git a/arch/arm64/kernel/efi-rt-wrapper.S b/arch/arm64/kernel/efi-rt-wrapper.S
-index 75691a2641c1c0f8..b2786b968fee68dd 100644
---- a/arch/arm64/kernel/efi-rt-wrapper.S
-+++ b/arch/arm64/kernel/efi-rt-wrapper.S
-@@ -16,6 +16,12 @@ SYM_FUNC_START(__efi_rt_asm_wrapper)
- 	 */
- 	stp	x1, x18, [sp, #16]
- 
-+	ldr_l	x16, efi_rt_stack_top
-+	mov	sp, x16
-+#ifdef CONFIG_SHADOW_CALL_STACK
-+	str	x18, [sp, #-16]!
-+#endif
-+
- 	/*
- 	 * We are lucky enough that no EFI runtime services take more than
- 	 * 5 arguments, so all are passed in registers rather than via the
-@@ -29,6 +35,7 @@ SYM_FUNC_START(__efi_rt_asm_wrapper)
- 	mov	x4, x6
- 	blr	x8
- 
-+	mov	sp, x29
- 	ldp	x1, x2, [sp, #16]
- 	cmp	x2, x18
- 	ldp	x29, x30, [sp], #32
-@@ -42,6 +49,10 @@ SYM_FUNC_START(__efi_rt_asm_wrapper)
- 	 * called with preemption disabled and a separate shadow stack is used
- 	 * for interrupts.
- 	 */
--	mov	x18, x2
-+#ifdef CONFIG_SHADOW_CALL_STACK
-+	ldr_l	x18, efi_rt_stack_top
-+	ldr	x18, [x18, #-16]
-+#endif
-+
- 	b	efi_handle_corrupted_x18	// tail call
- SYM_FUNC_END(__efi_rt_asm_wrapper)
-diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-index a908a37f03678b6b..8cb2e005f8aca589 100644
---- a/arch/arm64/kernel/efi.c
-+++ b/arch/arm64/kernel/efi.c
-@@ -144,3 +144,28 @@ asmlinkage efi_status_t efi_handle_corrupted_x18(efi_status_t s, const char *f)
- 	pr_err_ratelimited(FW_BUG "register x18 corrupted by EFI %s\n", f);
- 	return s;
- }
-+
-+DEFINE_SPINLOCK(efi_rt_lock);
-+
-+asmlinkage u64 *efi_rt_stack_top __ro_after_init;
-+
-+/* required by the EFI spec */
-+static_assert(THREAD_SIZE >= SZ_8K);
-+
-+int __init arm64_efi_rt_init(void)
-+{
-+	void *p = __vmalloc_node_range(THREAD_SIZE, THREAD_ALIGN,
-+				       VMALLOC_START, VMALLOC_END, GFP_KERNEL,
-+				       PAGE_KERNEL, 0, NUMA_NO_NODE,
-+				       __builtin_return_address(0));
-+
-+	if (!p) {
-+		pr_warn("Failed to allocate EFI runtime stack\n");
-+		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
-+		return -ENOMEM;
-+	}
-+
-+	efi_rt_stack_top = p + THREAD_SIZE;
-+	return 0;
-+}
-+core_initcall(arm64_efi_rt_init);
+
 -- 
-2.35.1
-
+Regards,
+Atish
