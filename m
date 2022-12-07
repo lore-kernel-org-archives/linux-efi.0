@@ -2,43 +2,43 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 50FF4C63707
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BF0F0C63709
 	for <linux-efi@archiver.kernel.org>; Wed,  7 Dec 2022 01:49:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229799AbiLGBtz (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        id S229823AbiLGBtz (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
         Tue, 6 Dec 2022 20:49:55 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60394 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60402 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229679AbiLGBtx (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 6 Dec 2022 20:49:53 -0500
+        with ESMTP id S229704AbiLGBty (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 6 Dec 2022 20:49:54 -0500
 Received: from mga04.intel.com (mga04.intel.com [192.55.52.120])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7AD8D528AB;
-        Tue,  6 Dec 2022 17:49:52 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6A9D15289F;
+        Tue,  6 Dec 2022 17:49:53 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1670377792; x=1701913792;
+  t=1670377793; x=1701913793;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=u+bYwyFm4XjH9XBhSQUvtr3jzM1TLHyKc0CMjo+kLEU=;
-  b=XVQJLrRaUd5neqrX2yVzjILOLK/KWr25vuIzqj6+2JP/dk1dr7loSULx
-   XRo8aK9CwgqRNpdAz0ENxQvc44yvIeWtxlABOJrOXiWnK4Iutm8J7xwoM
-   pFkYe1TwrT9RZ4+CxGfIWF32fmqd/49lFGOQuIn7kFM2SzAaviTcBzQqs
-   MzuhzvUqM2qyvFLSjGNlUwHT2c8ay1WKkDRKXdhV5u87UFbNtytOjIIM9
-   1UminUgMO2lrDiHRUJOhJK9QEYKvMUW6gWnx/rTbT5QjS2ZxQsSEi/rGa
-   yG74sdN2oU4gsSjG2NZNNrwwvUUt81hVgabDOadog6PAfKVPIT5ve08Ce
-   g==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10553"; a="315494434"
+  bh=wTnYWmM1Z8lnXpkf3CCIP9h4eff3UeEwYWr89BwyTuQ=;
+  b=h+/TP1vQM72IKetOdmHNO7dLaaAB/ZfiTzIEWYJk64r18gktSYqvaotZ
+   8shMTYTWjEuz+yVV+Ar1Wb9/eJ4S4BFKWJR4NZ0lv8jonYmOvd7wlplf9
+   yxfR6ThOTOqlGHMeCJTD2idi3Q45N7pgWr5+XeEaAQgKnAdE41QdJB4ca
+   GsvN3iOwewViuCfhCPFlNEXrDIiarPNQJiVwnNlvsqo6XZylHeDTCcKfO
+   wo2YnV5DGCNvkWV8AnfFejtWlYEltRfgUqW7orOavzicpij6NOiId1Jtz
+   kdc9X2hD2RZQSnfyWuySHY1j2DzIIIoAuTcGGAdGCG6jyHOMrQXAZ4kQu
+   w==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10553"; a="315494468"
 X-IronPort-AV: E=Sophos;i="5.96,223,1665471600"; 
-   d="scan'208";a="315494434"
+   d="scan'208";a="315494468"
 Received: from orsmga002.jf.intel.com ([10.7.209.21])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Dec 2022 17:49:50 -0800
-X-IronPort-AV: E=McAfee;i="6500,9779,10553"; a="646427593"
+  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Dec 2022 17:49:51 -0800
+X-IronPort-AV: E=McAfee;i="6500,9779,10553"; a="646427602"
 X-IronPort-AV: E=Sophos;i="5.96,223,1665471600"; 
-   d="scan'208";a="646427593"
+   d="scan'208";a="646427602"
 Received: from puneets1-mobl.ger.corp.intel.com (HELO box.shutemov.name) ([10.252.38.123])
   by orsmga002-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Dec 2022 17:49:41 -0800
 Received: by box.shutemov.name (Postfix, from userid 1000)
-        id 4782B109C87; Wed,  7 Dec 2022 04:49:39 +0300 (+03)
+        id 35405109C85; Wed,  7 Dec 2022 04:49:39 +0300 (+03)
 From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
 To:     Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>,
         Sean Christopherson <seanjc@google.com>,
@@ -65,10 +65,12 @@ Cc:     Andi Kleen <ak@linux.intel.com>,
         aarcange@redhat.com, peterx@redhat.com, x86@kernel.org,
         linux-mm@kvack.org, linux-coco@lists.linux.dev,
         linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
-        "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-Subject: [PATCHv8 03/14] mm: Report unaccepted memory in meminfo
-Date:   Wed,  7 Dec 2022 04:49:22 +0300
-Message-Id: <20221207014933.8435-4-kirill.shutemov@linux.intel.com>
+        "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
+        Mike Rapoport <rppt@linux.ibm.com>,
+        Dave Hansen <dave.hansen@linux.intel.com>
+Subject: [PATCHv8 01/14] x86/boot: Centralize __pa()/__va() definitions
+Date:   Wed,  7 Dec 2022 04:49:20 +0300
+Message-Id: <20221207014933.8435-2-kirill.shutemov@linux.intel.com>
 X-Mailer: git-send-email 2.38.0
 In-Reply-To: <20221207014933.8435-1-kirill.shutemov@linux.intel.com>
 References: <20221207014933.8435-1-kirill.shutemov@linux.intel.com>
@@ -78,105 +80,71 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Track amount of unaccepted memory and report it in /proc/meminfo and in
-node meminfo.
+Replace multiple __pa()/__va() definitions with a single one in misc.h.
 
 Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
+Reviewed-by: David Hildenbrand <david@redhat.com>
+Reviewed-by: Mike Rapoport <rppt@linux.ibm.com>
+Reviewed-by: Dave Hansen <dave.hansen@linux.intel.com>
 ---
- drivers/base/node.c    | 7 +++++++
- fs/proc/meminfo.c      | 5 +++++
- include/linux/mmzone.h | 3 +++
- mm/page_alloc.c        | 2 ++
- mm/vmstat.c            | 1 +
- 5 files changed, 18 insertions(+)
+ arch/x86/boot/compressed/ident_map_64.c | 8 --------
+ arch/x86/boot/compressed/misc.h         | 9 +++++++++
+ arch/x86/boot/compressed/sev.c          | 2 --
+ 3 files changed, 9 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/base/node.c b/drivers/base/node.c
-index faf3597a96da..ca6f0590be21 100644
---- a/drivers/base/node.c
-+++ b/drivers/base/node.c
-@@ -448,6 +448,9 @@ static ssize_t node_read_meminfo(struct device *dev,
- 			     "Node %d ShmemPmdMapped: %8lu kB\n"
- 			     "Node %d FileHugePages: %8lu kB\n"
- 			     "Node %d FilePmdMapped: %8lu kB\n"
-+#endif
-+#ifdef CONFIG_UNACCEPTED_MEMORY
-+			     "Node %d Unaccepted:     %8lu kB\n"
- #endif
- 			     ,
- 			     nid, K(node_page_state(pgdat, NR_FILE_DIRTY)),
-@@ -477,6 +480,10 @@ static ssize_t node_read_meminfo(struct device *dev,
- 			     nid, K(node_page_state(pgdat, NR_SHMEM_PMDMAPPED)),
- 			     nid, K(node_page_state(pgdat, NR_FILE_THPS)),
- 			     nid, K(node_page_state(pgdat, NR_FILE_PMDMAPPED))
-+#endif
-+#ifdef CONFIG_UNACCEPTED_MEMORY
-+			     ,
-+			     nid, K(node_page_state(pgdat, NR_UNACCEPTED))
- #endif
- 			    );
- 	len += hugetlb_report_node_meminfo(buf, len, nid);
-diff --git a/fs/proc/meminfo.c b/fs/proc/meminfo.c
-index 440960110a42..789b77c7b6df 100644
---- a/fs/proc/meminfo.c
-+++ b/fs/proc/meminfo.c
-@@ -155,6 +155,11 @@ static int meminfo_proc_show(struct seq_file *m, void *v)
- 		    global_zone_page_state(NR_FREE_CMA_PAGES));
- #endif
+diff --git a/arch/x86/boot/compressed/ident_map_64.c b/arch/x86/boot/compressed/ident_map_64.c
+index d4a314cc50d6..56550f289118 100644
+--- a/arch/x86/boot/compressed/ident_map_64.c
++++ b/arch/x86/boot/compressed/ident_map_64.c
+@@ -8,14 +8,6 @@
+  * Copyright (C)      2016  Kees Cook
+  */
  
-+#ifdef CONFIG_UNACCEPTED_MEMORY
-+	show_val_kb(m, "Unaccepted:     ",
-+		    global_node_page_state(NR_UNACCEPTED));
-+#endif
+-/*
+- * Since we're dealing with identity mappings, physical and virtual
+- * addresses are the same, so override these defines which are ultimately
+- * used by the headers in misc.h.
+- */
+-#define __pa(x)  ((unsigned long)(x))
+-#define __va(x)  ((void *)((unsigned long)(x)))
+-
+ /* No PAGE_TABLE_ISOLATION support needed either: */
+ #undef CONFIG_PAGE_TABLE_ISOLATION
+ 
+diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
+index 62208ec04ca4..d37d612a6390 100644
+--- a/arch/x86/boot/compressed/misc.h
++++ b/arch/x86/boot/compressed/misc.h
+@@ -19,6 +19,15 @@
+ /* cpu_feature_enabled() cannot be used this early */
+ #define USE_EARLY_PGTABLE_L5
+ 
++/*
++ * Boot stub deals with identity mappings, physical and virtual addresses are
++ * the same, so override these defines.
++ *
++ * <asm/page.h> will not define them if they are already defined.
++ */
++#define __pa(x)  ((unsigned long)(x))
++#define __va(x)  ((void *)((unsigned long)(x)))
 +
- 	hugetlb_report_meminfo(m);
+ #include <linux/linkage.h>
+ #include <linux/screen_info.h>
+ #include <linux/elf.h>
+diff --git a/arch/x86/boot/compressed/sev.c b/arch/x86/boot/compressed/sev.c
+index c93930d5ccbd..e4d3a2da2eb9 100644
+--- a/arch/x86/boot/compressed/sev.c
++++ b/arch/x86/boot/compressed/sev.c
+@@ -104,9 +104,7 @@ static enum es_result vc_read_mem(struct es_em_ctxt *ctxt,
+ }
  
- 	arch_report_meminfo(m);
-diff --git a/include/linux/mmzone.h b/include/linux/mmzone.h
-index da335381e63f..9c762e8175fc 100644
---- a/include/linux/mmzone.h
-+++ b/include/linux/mmzone.h
-@@ -198,6 +198,9 @@ enum node_stat_item {
- 	NR_FOLL_PIN_ACQUIRED,	/* via: pin_user_page(), gup flag: FOLL_PIN */
- 	NR_FOLL_PIN_RELEASED,	/* pages returned via unpin_user_page() */
- 	NR_KERNEL_STACK_KB,	/* measured in KiB */
-+#ifdef CONFIG_UNACCEPTED_MEMORY
-+	NR_UNACCEPTED,
-+#endif
- #if IS_ENABLED(CONFIG_SHADOW_CALL_STACK)
- 	NR_KERNEL_SCS_KB,	/* measured in KiB */
- #endif
-diff --git a/mm/page_alloc.c b/mm/page_alloc.c
-index 6d597e833a73..e80e8d398863 100644
---- a/mm/page_alloc.c
-+++ b/mm/page_alloc.c
-@@ -1779,6 +1779,7 @@ static bool try_to_accept_memory(struct zone *zone)
+ #undef __init
+-#undef __pa
+ #define __init
+-#define __pa(x)	((unsigned long)(x))
  
- 	migratetype = get_pfnblock_migratetype(page, page_to_pfn(page));
- 	__mod_zone_freepage_state(zone, -1 << order, migratetype);
-+	__mod_node_page_state(page_pgdat(page), NR_UNACCEPTED, -1 << order);
- 	spin_unlock_irqrestore(&zone->lock, flags);
+ #define __BOOT_COMPRESSED
  
- 	if (last)
-@@ -1807,6 +1808,7 @@ static void __free_unaccepted(struct page *page, unsigned int order)
- 	migratetype = get_pfnblock_migratetype(page, page_to_pfn(page));
- 	list_add_tail(&page->lru, &zone->unaccepted_pages);
- 	__mod_zone_freepage_state(zone, 1 << order, migratetype);
-+	__mod_node_page_state(page_pgdat(page), NR_UNACCEPTED, 1 << order);
- 	spin_unlock_irqrestore(&zone->lock, flags);
- 
- 	if (first)
-diff --git a/mm/vmstat.c b/mm/vmstat.c
-index b2371d745e00..fb15213be374 100644
---- a/mm/vmstat.c
-+++ b/mm/vmstat.c
-@@ -1230,6 +1230,7 @@ const char * const vmstat_text[] = {
- 	"nr_foll_pin_acquired",
- 	"nr_foll_pin_released",
- 	"nr_kernel_stack",
-+	"nr_unaccepted",
- #if IS_ENABLED(CONFIG_SHADOW_CALL_STACK)
- 	"nr_shadow_call_stack",
- #endif
 -- 
 2.38.0
 
