@@ -2,43 +2,43 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 67E0DC352A1
-	for <linux-efi@archiver.kernel.org>; Wed,  7 Dec 2022 01:50:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 682F7C352A1
+	for <linux-efi@archiver.kernel.org>; Wed,  7 Dec 2022 01:50:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229970AbiLGBuT (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 6 Dec 2022 20:50:19 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60860 "EHLO
+        id S229991AbiLGBuW (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 6 Dec 2022 20:50:22 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60804 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229726AbiLGBuJ (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 6 Dec 2022 20:50:09 -0500
+        with ESMTP id S229967AbiLGBuS (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 6 Dec 2022 20:50:18 -0500
 Received: from mga14.intel.com (mga14.intel.com [192.55.52.115])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E1722532C6;
-        Tue,  6 Dec 2022 17:49:59 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 847B4532C9;
+        Tue,  6 Dec 2022 17:50:01 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1670377799; x=1701913799;
+  t=1670377801; x=1701913801;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=oBiSIOxE3eoLPk40ExcpaFUWqTkEiCbV0j2bGnDI4n8=;
-  b=dJ6Kf+p7pq7OVLXdCIMJbKhO9G4PToMylfvLhXRMcImC4dSLwgiQDvhd
-   Z0seE+3buo/iSbVFIOo/gZeLrKziE4t137pa1bvvaiyO7P9x45Y0ONGUY
-   096PCQQJMYEgrstWbWbk0GKICCr0FclPRydatuMaUMKl8zLrlQjhY2xBD
-   qy9TIy3BMD97sdAFUHwW1vejSQGKz+ooqfBJ+gscqzvoJRfMMxuoms13N
-   NZJ0djf7YePuHBTCulncAjGncCgFVhDU0JRFHWQjjFAFHjUIEP+wLDFWh
-   QUAlV4yXyz9Ag9d60Cjd/UY86bXGc8zIutJZtQisCM+36Q6ZFW88i4hhz
+  bh=4ZWHE8KNs9LD2gK29L+GSS8ovmdLBSodlS7K4yGoZwg=;
+  b=b+tzc5iWH+w2K98w/pM61E3YYVoOZb81+1vo73SQNiZ2yMGzTmfuHtd/
+   Pn14Ce8FY1LUUvp8GRDS0BdlZ7pDYz5bnTvb5LQ54kmiowrpC2Zf4seQE
+   jCAFW+E7m44jf3j3ejGHBn1WLC6IsTd8qGHJhUqHUfnB/F/XpjsoaFaZG
+   8f9reMzXbNLKAS5ZxzCI+UPaJMVokJYRQr4GbdSNE7M3poobqJtE14+bv
+   7lQBfa2WwubxGmfH8Uc7aB4JxCJnn2rfdzCHdaf+yqnFv7MyfP/kHEAiP
+   apo2GaSaOhALmu6Ppeud5in7vrCLyHGXK1HSeAfWCb8PtJrijWnYa6U5r
    Q==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10553"; a="316794419"
+X-IronPort-AV: E=McAfee;i="6500,9779,10553"; a="316794452"
 X-IronPort-AV: E=Sophos;i="5.96,223,1665471600"; 
-   d="scan'208";a="316794419"
+   d="scan'208";a="316794452"
 Received: from orsmga007.jf.intel.com ([10.7.209.58])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Dec 2022 17:49:59 -0800
-X-IronPort-AV: E=McAfee;i="6500,9779,10553"; a="640082279"
+  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Dec 2022 17:50:01 -0800
+X-IronPort-AV: E=McAfee;i="6500,9779,10553"; a="640082289"
 X-IronPort-AV: E=Sophos;i="5.96,223,1665471600"; 
-   d="scan'208";a="640082279"
+   d="scan'208";a="640082289"
 Received: from puneets1-mobl.ger.corp.intel.com (HELO box.shutemov.name) ([10.252.38.123])
-  by orsmga007-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Dec 2022 17:49:51 -0800
+  by orsmga007-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Dec 2022 17:49:53 -0800
 Received: by box.shutemov.name (Postfix, from userid 1000)
-        id 814A0109C8C; Wed,  7 Dec 2022 04:49:39 +0300 (+03)
+        id A268A109C8F; Wed,  7 Dec 2022 04:49:39 +0300 (+03)
 From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
 To:     Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>,
         Sean Christopherson <seanjc@google.com>,
@@ -65,11 +65,10 @@ Cc:     Andi Kleen <ak@linux.intel.com>,
         aarcange@redhat.com, peterx@redhat.com, x86@kernel.org,
         linux-mm@kvack.org, linux-coco@lists.linux.dev,
         linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
-        "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
-        Mike Rapoport <rppt@linux.ibm.com>
-Subject: [PATCHv8 08/14] x86/mm: Reserve unaccepted memory bitmap
-Date:   Wed,  7 Dec 2022 04:49:27 +0300
-Message-Id: <20221207014933.8435-9-kirill.shutemov@linux.intel.com>
+        "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
+Subject: [PATCHv8 11/14] x86: Disable kexec if system has unaccepted memory
+Date:   Wed,  7 Dec 2022 04:49:30 +0300
+Message-Id: <20221207014933.8435-12-kirill.shutemov@linux.intel.com>
 X-Mailer: git-send-email 2.38.0
 In-Reply-To: <20221207014933.8435-1-kirill.shutemov@linux.intel.com>
 References: <20221207014933.8435-1-kirill.shutemov@linux.intel.com>
@@ -79,60 +78,116 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-A given page of memory can only be accepted once. The kernel has to
-accept memory both in the early decompression stage and during normal
-runtime.
+On kexec, the target kernel has to know what memory has been accepted.
+Information in EFI map is out of date and cannot be used.
 
-A bitmap is used to communicate the acceptance state of each page
-between the decompression stage and normal runtime.
+boot_params.unaccepted_memory can be used to pass the bitmap between two
+kernels on kexec, but the use-case is not yet implemented.
 
-boot_params is used to communicate location of the bitmap throughout
-the boot. The bitmap is allocated and initially populated in EFI stub.
-Decompression stage accepts pages required for kernel/initrd and marks
-these pages accordingly in the bitmap. The main kernel picks up the
-bitmap from the same boot_params and uses it to determine what has to
-be accepted on allocation.
-
-In the runtime kernel, reserve the bitmap's memory to ensure nothing
-overwrites it.
-
-The size of bitmap is determined with e820__end_of_ram_pfn() which
-relies on setup_e820() marking unaccepted memory as E820_TYPE_RAM.
+Disable kexec on machines with unaccepted memory for now.
 
 Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
-Acked-by: Mike Rapoport <rppt@linux.ibm.com>
 ---
- arch/x86/kernel/e820.c | 17 +++++++++++++++++
- 1 file changed, 17 insertions(+)
+ arch/x86/include/asm/kexec.h    |  5 +++++
+ arch/x86/mm/unaccepted_memory.c | 16 ++++++++++++++++
+ include/linux/kexec.h           |  7 +++++++
+ kernel/kexec.c                  |  4 ++++
+ kernel/kexec_file.c             |  4 ++++
+ 5 files changed, 36 insertions(+)
 
-diff --git a/arch/x86/kernel/e820.c b/arch/x86/kernel/e820.c
-index 9dac24680ff8..62068956bb76 100644
---- a/arch/x86/kernel/e820.c
-+++ b/arch/x86/kernel/e820.c
-@@ -1316,6 +1316,23 @@ void __init e820__memblock_setup(void)
- 	int i;
- 	u64 end;
+diff --git a/arch/x86/include/asm/kexec.h b/arch/x86/include/asm/kexec.h
+index a3760ca796aa..87abab578154 100644
+--- a/arch/x86/include/asm/kexec.h
++++ b/arch/x86/include/asm/kexec.h
+@@ -189,6 +189,11 @@ extern void arch_kexec_pre_free_pages(void *vaddr, unsigned int pages);
+ void arch_kexec_protect_crashkres(void);
+ #define arch_kexec_protect_crashkres arch_kexec_protect_crashkres
  
++#ifdef CONFIG_UNACCEPTED_MEMORY
++int arch_kexec_load(void);
++#define arch_kexec_load arch_kexec_load
++#endif
++
+ void arch_kexec_unprotect_crashkres(void);
+ #define arch_kexec_unprotect_crashkres arch_kexec_unprotect_crashkres
+ 
+diff --git a/arch/x86/mm/unaccepted_memory.c b/arch/x86/mm/unaccepted_memory.c
+index a0a58486eb74..1745e6a65024 100644
+--- a/arch/x86/mm/unaccepted_memory.c
++++ b/arch/x86/mm/unaccepted_memory.c
+@@ -1,4 +1,5 @@
+ // SPDX-License-Identifier: GPL-2.0-only
++#include <linux/kexec.h>
+ #include <linux/memblock.h>
+ #include <linux/mm.h>
+ #include <linux/pfn.h>
+@@ -98,3 +99,18 @@ bool range_contains_unaccepted_memory(phys_addr_t start, phys_addr_t end)
+ 
+ 	return ret;
+ }
++
++#ifdef CONFIG_KEXEC_CORE
++int arch_kexec_load(void)
++{
++	if (!boot_params.unaccepted_memory)
++		return 0;
++
 +	/*
-+	 * Mark unaccepted memory bitmap reserved.
-+	 *
-+	 * This kind of reservation usually done from early_reserve_memory(),
-+	 * but early_reserve_memory() called before e820__memory_setup(), so
-+	 * e820_table is not finalized and e820__end_of_ram_pfn() cannot be
-+	 * used to get correct RAM size.
++	 * TODO: Information on memory acceptance status has to be communicated
++	 * between kernel.
 +	 */
-+	if (boot_params.unaccepted_memory) {
-+		unsigned long size;
++	pr_warn_once("Disable kexec: not yet supported on systems with unaccepted memory\n");
++	return -EOPNOTSUPP;
++}
++#endif
+diff --git a/include/linux/kexec.h b/include/linux/kexec.h
+index 41a686996aaa..6b75051d5271 100644
+--- a/include/linux/kexec.h
++++ b/include/linux/kexec.h
+@@ -444,6 +444,13 @@ static inline void arch_kexec_protect_crashkres(void) { }
+ static inline void arch_kexec_unprotect_crashkres(void) { }
+ #endif
+ 
++#ifndef arch_kexec_load
++static inline int arch_kexec_load(void)
++{
++	return 0;
++}
++#endif
 +
-+		/* One bit per 2MB */
-+		size = DIV_ROUND_UP(e820__end_of_ram_pfn() * PAGE_SIZE,
-+				    PMD_SIZE * BITS_PER_BYTE);
-+		memblock_reserve(boot_params.unaccepted_memory, size);
-+	}
+ #ifndef page_to_boot_pfn
+ static inline unsigned long page_to_boot_pfn(struct page *page)
+ {
+diff --git a/kernel/kexec.c b/kernel/kexec.c
+index cb8e6e6f983c..65dff44b487f 100644
+--- a/kernel/kexec.c
++++ b/kernel/kexec.c
+@@ -192,6 +192,10 @@ static inline int kexec_load_check(unsigned long nr_segments,
+ {
+ 	int result;
+ 
++	result = arch_kexec_load();
++	if (result)
++		return result;
 +
- 	/*
- 	 * The bootstrap memblock region count maximum is 128 entries
- 	 * (INIT_MEMBLOCK_REGIONS), but EFI might pass us more E820 entries
+ 	/* We only trust the superuser with rebooting the system. */
+ 	if (!capable(CAP_SYS_BOOT) || kexec_load_disabled)
+ 		return -EPERM;
+diff --git a/kernel/kexec_file.c b/kernel/kexec_file.c
+index 45637511e0de..8f1454c3776a 100644
+--- a/kernel/kexec_file.c
++++ b/kernel/kexec_file.c
+@@ -329,6 +329,10 @@ SYSCALL_DEFINE5(kexec_file_load, int, kernel_fd, int, initrd_fd,
+ 	int ret = 0, i;
+ 	struct kimage **dest_image, *image;
+ 
++	ret = arch_kexec_load();
++	if (ret)
++		return ret;
++
+ 	/* We only trust the superuser with rebooting the system. */
+ 	if (!capable(CAP_SYS_BOOT) || kexec_load_disabled)
+ 		return -EPERM;
 -- 
 2.38.0
 
