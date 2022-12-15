@@ -2,29 +2,29 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96E62C4332F
-	for <linux-efi@archiver.kernel.org>; Thu, 15 Dec 2022 12:42:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C9089C4708D
+	for <linux-efi@archiver.kernel.org>; Thu, 15 Dec 2022 12:42:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229945AbiLOMlr (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        id S229536AbiLOMlr (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
         Thu, 15 Dec 2022 07:41:47 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54858 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54874 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229852AbiLOMlZ (ORCPT
+        with ESMTP id S229864AbiLOMlZ (ORCPT
         <rfc822;linux-efi@vger.kernel.org>); Thu, 15 Dec 2022 07:41:25 -0500
 Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 722C92F012;
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C83772EF72;
         Thu, 15 Dec 2022 04:40:25 -0800 (PST)
 Received: from localhost.localdomain (unknown [83.149.199.65])
-        by mail.ispras.ru (Postfix) with ESMTPSA id 6C47840737B0;
+        by mail.ispras.ru (Postfix) with ESMTPSA id CB0EE40737B7;
         Thu, 15 Dec 2022 12:40:23 +0000 (UTC)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 6C47840737B0
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru CB0EE40737B7
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ispras.ru;
         s=default; t=1671108023;
-        bh=Lr7vqi88OzPlVYDVIQBfNNl3J3sAxYJi2taZgNJS0rU=;
+        bh=YZLBKi5atbE79r0OhfBp+FPqRZS5KbzmsCzVBLMh54A=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=H4zCw8oSc5R49z2GYNnAbNbQJuClVbU9t/0oEeu4VyNiB+FEDUYY7ovYtnRUthMDH
-         hpdobOWHGs2aWuInWjQE9HlyTbbDJnEvZCgW/t6pNKkwS7y6weIWfWgRIH+aYvBbB9
-         i1LwxCsbDO38Wnd6dD0OgupSyQHPEtUtwAEfMDyQ=
+        b=Xe854cXQN4N3pVUpu5n7YlSxABuuNSRH0u8MVb6fa9RBpO/a17/qV7xYh8hMFlvgz
+         iybW6E7PCiDUuHEtD4Ze7rLQbi0cpgkbRvNCjSEM63CX/nkDhEoneHwaxWeEq6fMef
+         hCbqr6SilUlaQvVADQ9CkwWXhOSPu0SBz6J02lSk=
 From:   Evgeniy Baskov <baskov@ispras.ru>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
@@ -39,9 +39,9 @@ Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
         joeyli <jlee@suse.com>, lvc-project@linuxtesting.org,
         x86@kernel.org, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org
-Subject: [PATCH v4 10/26] efi/libstub: Move helper function to related file
-Date:   Thu, 15 Dec 2022 15:38:01 +0300
-Message-Id: <d656651d1bec03fc527e116bf2a786588fdde16a.1671098103.git.baskov@ispras.ru>
+Subject: [PATCH v4 12/26] x86/boot: Make kernel_add_identity_map() a pointer
+Date:   Thu, 15 Dec 2022 15:38:03 +0300
+Message-Id: <2ebefd395ecadb2b2605bc52a8ac223392c0c153.1671098103.git.baskov@ispras.ru>
 X-Mailer: git-send-email 2.37.4
 In-Reply-To: <cover.1671098103.git.baskov@ispras.ru>
 References: <cover.1671098103.git.baskov@ispras.ru>
@@ -51,242 +51,111 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-efi_adjust_memory_range_protection() can be useful outside x86-stub.c.
-
-Move it to mem.c, where memory related code resides and make it
-non-static.
-
-Change its behavior to setup exact attributes and disallow making
-memory regions readable and writable simultaneously for supported
-configurations.
+Convert kernel_add_identity_map() into a function pointer to be able
+to provide alternative implementations of this function. Required
+to enable calling the code using this function from EFI environment.
 
 Tested-by: Mario Limonciello <mario.limonciello@amd.com>
 Tested-by: Peter Jones <pjones@redhat.com>
 Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
 ---
- drivers/firmware/efi/libstub/efistub.h  |   4 +
- drivers/firmware/efi/libstub/mem.c      | 102 ++++++++++++++++++++++++
- drivers/firmware/efi/libstub/x86-stub.c |  66 ++-------------
- 3 files changed, 112 insertions(+), 60 deletions(-)
+ arch/x86/boot/compressed/ident_map_64.c |  7 ++++---
+ arch/x86/boot/compressed/misc.c         | 24 ++++++++++++++++++++++++
+ arch/x86/boot/compressed/misc.h         | 15 +++------------
+ 3 files changed, 31 insertions(+), 15 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-index 5b8f2c411ed8..c55325f829e7 100644
---- a/drivers/firmware/efi/libstub/efistub.h
-+++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -975,6 +975,10 @@ efi_status_t efi_relocate_kernel(unsigned long *image_addr,
- 				 unsigned long alignment,
- 				 unsigned long min_addr);
- 
-+efi_status_t efi_adjust_memory_range_protection(unsigned long start,
-+						unsigned long size,
-+						unsigned long attributes);
-+
- efi_status_t efi_parse_options(char const *cmdline);
- 
- void efi_parse_option_graphics(char *option);
-diff --git a/drivers/firmware/efi/libstub/mem.c b/drivers/firmware/efi/libstub/mem.c
-index 4f1fa302234d..3e47e5931f04 100644
---- a/drivers/firmware/efi/libstub/mem.c
-+++ b/drivers/firmware/efi/libstub/mem.c
-@@ -128,3 +128,105 @@ void efi_free(unsigned long size, unsigned long addr)
- 	nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
- 	efi_bs_call(free_pages, addr, nr_pages);
- }
-+
-+/**
-+ * efi_adjust_memory_range_protection() - change memory range protection attributes
-+ * @start:	memory range start address
-+ * @size:	memory range size
-+ *
-+ * Actual memory range for which memory attributes are modified is
-+ * the smallest ranged with start address and size aligned to EFI_PAGE_SIZE
-+ * that includes [start, start + size].
-+ *
-+ * @return: status code
-+ */
-+efi_status_t efi_adjust_memory_range_protection(unsigned long start,
-+						unsigned long size,
-+						unsigned long attributes)
-+{
-+	efi_status_t status;
-+	efi_gcd_memory_space_desc_t desc;
-+	efi_physical_addr_t end, next;
-+	efi_physical_addr_t rounded_start, rounded_end;
-+	efi_physical_addr_t unprotect_start, unprotect_size;
-+
-+	if (efi_dxe_table == NULL)
-+		return EFI_UNSUPPORTED;
-+
-+	/*
-+	 * This function should not be used to modify attributes
-+	 * other than writable/executable.
-+	 */
-+
-+	if ((attributes & ~(EFI_MEMORY_RO | EFI_MEMORY_XP)) != 0)
-+		return EFI_INVALID_PARAMETER;
-+
-+	/*
-+	 * Disallow simultaniously executable and writable memory
-+	 * to inforce W^X policy if direct extraction code is enabled.
-+	 */
-+
-+	if ((attributes & (EFI_MEMORY_RO | EFI_MEMORY_XP)) == 0) {
-+		efi_warn("W^X violation at [%08lx,%08lx]\n",
-+			 (unsigned long)rounded_start,
-+			 (unsigned long)rounded_end);
-+	}
-+
-+	rounded_start = rounddown(start, EFI_PAGE_SIZE);
-+	rounded_end = roundup(start + size, EFI_PAGE_SIZE);
-+
-+	/*
-+	 * Don't modify memory region attributes, they are
-+	 * already suitable, to lower the possibility to
-+	 * encounter firmware bugs.
-+	 */
-+
-+	for (end = start + size; start < end; start = next) {
-+
-+		status = efi_dxe_call(get_memory_space_descriptor,
-+				      start, &desc);
-+
-+		if (status != EFI_SUCCESS) {
-+			efi_warn("Unable to get memory descriptor at %lx\n",
-+				 start);
-+			return status;
-+		}
-+
-+		next = desc.base_address + desc.length;
-+
-+		/*
-+		 * Only system memory is suitable for trampoline/kernel image
-+		 * placement, so only this type of memory needs its attributes
-+		 * to be modified.
-+		 */
-+
-+		if (desc.gcd_memory_type != EfiGcdMemoryTypeSystemMemory) {
-+			efi_warn("Attempted to change protection of special memory range\n");
-+			return EFI_UNSUPPORTED;
-+		}
-+
-+		if (((desc.attributes ^ attributes) &
-+		     (EFI_MEMORY_RO | EFI_MEMORY_XP)) == 0)
-+			continue;
-+
-+		desc.attributes &= ~(EFI_MEMORY_RO | EFI_MEMORY_XP);
-+		desc.attributes |= attributes;
-+
-+		unprotect_start = max(rounded_start, desc.base_address);
-+		unprotect_size = min(rounded_end, next) - unprotect_start;
-+
-+		status = efi_dxe_call(set_memory_space_attributes,
-+				      unprotect_start, unprotect_size,
-+				      desc.attributes);
-+
-+		if (status != EFI_SUCCESS) {
-+			efi_warn("Unable to unprotect memory range [%08lx,%08lx]: %lx\n",
-+				 (unsigned long)unprotect_start,
-+				 (unsigned long)(unprotect_start + unprotect_size),
-+				 status);
-+			return status;
-+		}
-+	}
-+
-+	return EFI_SUCCESS;
-+}
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index a0bfd31358ba..7fb1eff88a18 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -212,61 +212,6 @@ static void retrieve_apple_device_properties(struct boot_params *boot_params)
- 	}
- }
- 
--static void
--adjust_memory_range_protection(unsigned long start, unsigned long size)
--{
--	efi_status_t status;
--	efi_gcd_memory_space_desc_t desc;
--	unsigned long end, next;
--	unsigned long rounded_start, rounded_end;
--	unsigned long unprotect_start, unprotect_size;
--
--	if (efi_dxe_table == NULL)
--		return;
--
--	rounded_start = rounddown(start, EFI_PAGE_SIZE);
--	rounded_end = roundup(start + size, EFI_PAGE_SIZE);
--
--	/*
--	 * Don't modify memory region attributes, they are
--	 * already suitable, to lower the possibility to
--	 * encounter firmware bugs.
--	 */
--
--	for (end = start + size; start < end; start = next) {
--
--		status = efi_dxe_call(get_memory_space_descriptor, start, &desc);
--
--		if (status != EFI_SUCCESS)
--			return;
--
--		next = desc.base_address + desc.length;
--
--		/*
--		 * Only system memory is suitable for trampoline/kernel image placement,
--		 * so only this type of memory needs its attributes to be modified.
--		 */
--
--		if (desc.gcd_memory_type != EfiGcdMemoryTypeSystemMemory ||
--		    (desc.attributes & (EFI_MEMORY_RO | EFI_MEMORY_XP)) == 0)
--			continue;
--
--		unprotect_start = max(rounded_start, (unsigned long)desc.base_address);
--		unprotect_size = min(rounded_end, next) - unprotect_start;
--
--		status = efi_dxe_call(set_memory_space_attributes,
--				      unprotect_start, unprotect_size,
--				      EFI_MEMORY_WB);
--
--		if (status != EFI_SUCCESS) {
--			efi_warn("Unable to unprotect memory range [%08lx,%08lx]: %lx\n",
--				 unprotect_start,
--				 unprotect_start + unprotect_size,
--				 status);
--		}
--	}
--}
--
+diff --git a/arch/x86/boot/compressed/ident_map_64.c b/arch/x86/boot/compressed/ident_map_64.c
+index ba5108c58a4e..1aee524d3c2b 100644
+--- a/arch/x86/boot/compressed/ident_map_64.c
++++ b/arch/x86/boot/compressed/ident_map_64.c
+@@ -92,9 +92,9 @@ bool has_nx; /* set in head_64.S */
  /*
-  * Trampoline takes 2 pages and can be loaded in first megabyte of memory
-  * with its end placed between 128k and 640k where BIOS might start.
-@@ -290,12 +235,12 @@ setup_memory_protection(unsigned long image_base, unsigned long image_size)
- 	 * and relocated kernel image.
- 	 */
+  * Adds the specified range to the identity mappings.
+  */
+-unsigned long kernel_add_identity_map(unsigned long start,
+-				      unsigned long end,
+-				      unsigned int flags)
++unsigned long kernel_add_identity_map_(unsigned long start,
++				       unsigned long end,
++				       unsigned int flags)
+ {
+ 	int ret;
  
--	adjust_memory_range_protection(TRAMPOLINE_PLACEMENT_BASE,
--				       TRAMPOLINE_PLACEMENT_SIZE);
-+	efi_adjust_memory_range_protection(TRAMPOLINE_PLACEMENT_BASE,
-+					   TRAMPOLINE_PLACEMENT_SIZE, 0);
+@@ -142,6 +142,7 @@ void initialize_identity_maps(void *rmode)
+ 	struct setup_data *sd;
  
- #ifdef CONFIG_64BIT
- 	if (image_base != (unsigned long)startup_32)
--		adjust_memory_range_protection(image_base, image_size);
-+		efi_adjust_memory_range_protection(image_base, image_size, 0);
- #else
- 	/*
- 	 * Clear protection flags on a whole range of possible
-@@ -305,8 +250,9 @@ setup_memory_protection(unsigned long image_base, unsigned long image_size)
- 	 * need to remove possible protection on relocated image
- 	 * itself disregarding further relocations.
- 	 */
--	adjust_memory_range_protection(LOAD_PHYSICAL_ADDR,
--				       KERNEL_IMAGE_SIZE - LOAD_PHYSICAL_ADDR);
-+	efi_adjust_memory_range_protection(LOAD_PHYSICAL_ADDR,
-+					   KERNEL_IMAGE_SIZE - LOAD_PHYSICAL_ADDR,
-+					   0);
- #endif
+ 	boot_params = rmode;
++	kernel_add_identity_map = kernel_add_identity_map_;
+ 
+ 	/* Exclude the encryption mask from __PHYSICAL_MASK */
+ 	physical_mask &= ~sme_me_mask;
+diff --git a/arch/x86/boot/compressed/misc.c b/arch/x86/boot/compressed/misc.c
+index aa4a22bc9cf9..c9c235d65d16 100644
+--- a/arch/x86/boot/compressed/misc.c
++++ b/arch/x86/boot/compressed/misc.c
+@@ -275,6 +275,22 @@ static void parse_elf(void *output, unsigned long output_len,
+ 	free(phdrs);
  }
+ 
++/*
++ * This points to actual implementation of mapping function
++ * for current environment: either EFI API wrapper,
++ * own implementation or dummy implementation below.
++ */
++unsigned long (*kernel_add_identity_map)(unsigned long start,
++					 unsigned long end,
++					 unsigned int flags);
++
++static inline unsigned long kernel_add_identity_map_dummy(unsigned long start,
++							  unsigned long end,
++							  unsigned int flags)
++{
++	return start;
++}
++
+ /*
+  * The compressed kernel image (ZO), has been moved so that its position
+  * is against the end of the buffer used to hold the uncompressed kernel
+@@ -312,6 +328,14 @@ asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
+ 
+ 	init_default_io_ops();
+ 
++	/*
++	 * On 64-bit this pointer is set during page table uninitialization,
++	 * but on 32-bit it remains uninitialized, since paging is disabled.
++	 */
++	if (IS_ENABLED(CONFIG_X86_32))
++		kernel_add_identity_map = kernel_add_identity_map_dummy;
++
++
+ 	/*
+ 	 * Detect TDX guest environment.
+ 	 *
+diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
+index 38d31bec062d..0076b2845b4b 100644
+--- a/arch/x86/boot/compressed/misc.h
++++ b/arch/x86/boot/compressed/misc.h
+@@ -180,18 +180,9 @@ static inline int count_immovable_mem_regions(void) { return 0; }
+ #ifdef CONFIG_X86_5LEVEL
+ extern unsigned int __pgtable_l5_enabled, pgdir_shift, ptrs_per_p4d;
+ #endif
+-#ifdef CONFIG_X86_64
+-extern unsigned long kernel_add_identity_map(unsigned long start,
+-					     unsigned long end,
+-					     unsigned int flags);
+-#else
+-static inline unsigned long kernel_add_identity_map(unsigned long start,
+-						    unsigned long end,
+-						    unsigned int flags)
+-{
+-	return start;
+-}
+-#endif
++extern unsigned long (*kernel_add_identity_map)(unsigned long start,
++						unsigned long end,
++						unsigned int flags);
+ /* Used by PAGE_KERN* macros: */
+ extern pteval_t __default_kernel_pte_mask;
  
 -- 
 2.37.4
