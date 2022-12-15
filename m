@@ -2,29 +2,29 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E55DCC3DA6E
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0134CC46467
 	for <linux-efi@archiver.kernel.org>; Thu, 15 Dec 2022 12:43:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229944AbiLOMnD (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 15 Dec 2022 07:43:03 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58184 "EHLO
+        id S229741AbiLOMnE (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 15 Dec 2022 07:43:04 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58174 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229806AbiLOMm2 (ORCPT
+        with ESMTP id S229748AbiLOMm2 (ORCPT
         <rfc822;linux-efi@vger.kernel.org>); Thu, 15 Dec 2022 07:42:28 -0500
 Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1D03DF06;
-        Thu, 15 Dec 2022 04:42:28 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6379B1D0;
+        Thu, 15 Dec 2022 04:42:27 -0800 (PST)
 Received: from localhost.localdomain (unknown [83.149.199.65])
-        by mail.ispras.ru (Postfix) with ESMTPSA id 365E140737A3;
-        Thu, 15 Dec 2022 12:42:26 +0000 (UTC)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 365E140737A3
+        by mail.ispras.ru (Postfix) with ESMTPSA id 90DF0419E9F5;
+        Thu, 15 Dec 2022 12:42:25 +0000 (UTC)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 90DF0419E9F5
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ispras.ru;
-        s=default; t=1671108146;
-        bh=IpU0tjNymTHz9fJiOLjTQ5CfC4DkOKpdBU+NiXX6lIQ=;
+        s=default; t=1671108145;
+        bh=gF+96E5JTgrvHRcDjbxcP61k8A382eQNOZhWeXF2seY=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=cEKjvhTiUKC/j3Emhuk9OQ4EdoQy7BjYYNtoIQbwX1GYrPCES0YmjcPMs/QlaqLTk
-         yiffNspkkAAfp10zvnOms8EKuT/YwiYDDytk+5TO1hiWIvTjerfrP5EoZM7YMsQmhC
-         Czbs+fvh7m+unlip1AyPmssh7gW2kpmQTdWwvtFU=
+        b=CqLexxMnDM3uxPp51qoR6KnPBwVfRvIaNK5x/O+BGh7o6Ud+K3zEHPANp8CM7b2pd
+         q7g117zqC5dDkd0tts30DUKb5jGGoFuG9qPkhx7FumCgQAo04Rlj8LdKVFG0Vm/kPi
+         SEauNKVHyRlQ+bn1JGTrLjfIqB03gokqOiX2PLYw=
 From:   Evgeniy Baskov <baskov@ispras.ru>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
@@ -39,9 +39,9 @@ Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
         joeyli <jlee@suse.com>, lvc-project@linuxtesting.org,
         x86@kernel.org, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org
-Subject: [PATCH v4 21/26] efi/x86: Explicitly set sections memory attributes
-Date:   Thu, 15 Dec 2022 15:38:12 +0300
-Message-Id: <c38ad7a1b89aff743d4a29882a7022d97d4fea58.1671098103.git.baskov@ispras.ru>
+Subject: [PATCH v4 18/26] tools/include: Add simplified version of pe.h
+Date:   Thu, 15 Dec 2022 15:38:09 +0300
+Message-Id: <3f48e8bb2232220153b353d0f43cb6d96139b2da.1671098103.git.baskov@ispras.ru>
 X-Mailer: git-send-email 2.37.4
 In-Reply-To: <cover.1671098103.git.baskov@ispras.ru>
 References: <cover.1671098103.git.baskov@ispras.ru>
@@ -51,97 +51,173 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Explicitly change sections memory attributes in efi_pe_entry in case
-of incorrect EFI implementations and to reduce access rights to
-compressed kernel blob. By default it is set executable due to
-restriction in maximum number of sections that can fit before zero
-page.
+This is needed to remove magic numbers from x86 bzImage building tool
+(arch/x86/boot/tools/build.c).
 
+Tested-by: Mario Limonciello <mario.limonciello@amd.com>
 Tested-by: Peter Jones <pjones@redhat.com>
 Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
 ---
- drivers/firmware/efi/libstub/x86-stub.c | 54 +++++++++++++++++++++++++
- 1 file changed, 54 insertions(+)
+ tools/include/linux/pe.h | 150 +++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 150 insertions(+)
+ create mode 100644 tools/include/linux/pe.h
 
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index 1f0a2e7075c3..60697fcd8950 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -27,6 +27,12 @@ const efi_dxe_services_table_t *efi_dxe_table;
- u32 image_offset __section(".data");
- static efi_loaded_image_t *image __section(".data");
- 
-+extern char _head[], _ehead[];
-+extern char _compressed[], _ecompressed[];
-+extern char _text[], _etext[];
-+extern char _rodata[], _erodata[];
-+extern char _data[];
-+
- static efi_status_t
- preserve_pci_rom_image(efi_pci_io_protocol_t *pci, struct pci_setup_rom **__rom)
- {
-@@ -343,6 +349,52 @@ void __noreturn efi_exit(efi_handle_t handle, efi_status_t status)
- 		asm("hlt");
- }
- 
-+
+diff --git a/tools/include/linux/pe.h b/tools/include/linux/pe.h
+new file mode 100644
+index 000000000000..41c09ec371d8
+--- /dev/null
++++ b/tools/include/linux/pe.h
+@@ -0,0 +1,150 @@
++/* SPDX-License-Identifier: GPL-2.0-only */
 +/*
-+ * Manually setup memory protection attributes for each ELF section
-+ * since we cannot do it properly by using PE sections.
++ * Simplified version of include/linux/pe.h:
++ *  Copyright 2011 Red Hat, Inc. All rights reserved.
++ *  Author(s): Peter Jones <pjones@redhat.com>
 + */
-+static void setup_sections_memory_protection(unsigned long image_base)
-+{
-+#ifdef CONFIG_EFI_DXE_MEM_ATTRIBUTES
-+	efi_dxe_table = get_efi_config_table(EFI_DXE_SERVICES_TABLE_GUID);
++#ifndef __LINUX_PE_H
++#define __LINUX_PE_H
 +
-+	if (!efi_dxe_table ||
-+	    efi_dxe_table->hdr.signature != EFI_DXE_SERVICES_TABLE_SIGNATURE) {
-+		efi_warn("Unable to locate EFI DXE services table\n");
-+		efi_dxe_table = NULL;
-+		return;
-+	}
++#include <linux/types.h>
 +
-+	/* .setup [image_base, _head] */
-+	efi_adjust_memory_range_protection(image_base,
-+					   (unsigned long)_head - image_base,
-+					   EFI_MEMORY_RO | EFI_MEMORY_XP);
-+	/* .head.text [_head, _ehead] */
-+	efi_adjust_memory_range_protection((unsigned long)_head,
-+					   (unsigned long)_ehead - (unsigned long)_head,
-+					   EFI_MEMORY_RO);
-+	/* .rodata..compressed [_compressed, _ecompressed] */
-+	efi_adjust_memory_range_protection((unsigned long)_compressed,
-+					   (unsigned long)_ecompressed - (unsigned long)_compressed,
-+					   EFI_MEMORY_RO | EFI_MEMORY_XP);
-+	/* .text [_text, _etext] */
-+	efi_adjust_memory_range_protection((unsigned long)_text,
-+					   (unsigned long)_etext - (unsigned long)_text,
-+					   EFI_MEMORY_RO);
-+	/* .rodata [_rodata, _erodata] */
-+	efi_adjust_memory_range_protection((unsigned long)_rodata,
-+					   (unsigned long)_erodata - (unsigned long)_rodata,
-+					   EFI_MEMORY_RO | EFI_MEMORY_XP);
-+	/* .data, .bss [_data, _end] */
-+	efi_adjust_memory_range_protection((unsigned long)_data,
-+					   (unsigned long)_end - (unsigned long)_data,
-+					   EFI_MEMORY_XP);
-+#else
-+	(void)image_base;
-+#endif
-+}
++#define	IMAGE_FILE_MACHINE_I386		0x014c
 +
- void __noreturn efi_stub_entry(efi_handle_t handle,
- 			       efi_system_table_t *sys_table_arg,
- 			       struct boot_params *boot_params);
-@@ -687,6 +739,8 @@ asmlinkage unsigned long efi_main(efi_handle_t handle,
- 		efi_dxe_table = NULL;
- 	}
- 
-+	setup_sections_memory_protection(bzimage_addr - image_offset);
++#define IMAGE_SCN_CNT_CODE	0x00000020 /* .text */
++#define IMAGE_SCN_CNT_INITIALIZED_DATA 0x00000040 /* .data */
++#define IMAGE_SCN_ALIGN_4096BYTES 0x00d00000
++#define IMAGE_SCN_MEM_DISCARDABLE 0x02000000 /* scn can be discarded */
++#define IMAGE_SCN_MEM_EXECUTE	0x20000000 /* can be executed as code */
++#define IMAGE_SCN_MEM_READ	0x40000000 /* readable */
++#define IMAGE_SCN_MEM_WRITE	0x80000000 /* writeable */
 +
- #ifdef CONFIG_CMDLINE_BOOL
- 	status = efi_parse_options(CONFIG_CMDLINE);
- 	if (status != EFI_SUCCESS) {
++#define MZ_HEADER_PEADDR_OFFSET 0x3c
++
++struct pe_hdr {
++	uint32_t magic;		/* PE magic */
++	uint16_t machine;	/* machine type */
++	uint16_t sections;	/* number of sections */
++	uint32_t timestamp;	/* time_t */
++	uint32_t symbol_table;	/* symbol table offset */
++	uint32_t symbols;	/* number of symbols */
++	uint16_t opt_hdr_size;	/* size of optional header */
++	uint16_t flags;		/* flags */
++};
++
++/* the fact that pe32 isn't padded where pe32+ is 64-bit means union won't
++ * work right.  vomit. */
++struct pe32_opt_hdr {
++	/* "standard" header */
++	uint16_t magic;		/* file type */
++	uint8_t  ld_major;	/* linker major version */
++	uint8_t  ld_minor;	/* linker minor version */
++	uint32_t text_size;	/* size of text section(s) */
++	uint32_t data_size;	/* size of data section(s) */
++	uint32_t bss_size;	/* size of bss section(s) */
++	uint32_t entry_point;	/* file offset of entry point */
++	uint32_t code_base;	/* relative code addr in ram */
++	uint32_t data_base;	/* relative data addr in ram */
++	/* "windows" header */
++	uint32_t image_base;	/* preferred load address */
++	uint32_t section_align;	/* alignment in bytes */
++	uint32_t file_align;	/* file alignment in bytes */
++	uint16_t os_major;	/* major OS version */
++	uint16_t os_minor;	/* minor OS version */
++	uint16_t image_major;	/* major image version */
++	uint16_t image_minor;	/* minor image version */
++	uint16_t subsys_major;	/* major subsystem version */
++	uint16_t subsys_minor;	/* minor subsystem version */
++	uint32_t win32_version;	/* reserved, must be 0 */
++	uint32_t image_size;	/* image size */
++	uint32_t header_size;	/* header size rounded up to
++				   file_align */
++	uint32_t csum;		/* checksum */
++	uint16_t subsys;	/* subsystem */
++	uint16_t dll_flags;	/* more flags! */
++	uint32_t stack_size_req;/* amt of stack requested */
++	uint32_t stack_size;	/* amt of stack required */
++	uint32_t heap_size_req;	/* amt of heap requested */
++	uint32_t heap_size;	/* amt of heap required */
++	uint32_t loader_flags;	/* reserved, must be 0 */
++	uint32_t data_dirs;	/* number of data dir entries */
++};
++
++struct pe32plus_opt_hdr {
++	uint16_t magic;		/* file type */
++	uint8_t  ld_major;	/* linker major version */
++	uint8_t  ld_minor;	/* linker minor version */
++	uint32_t text_size;	/* size of text section(s) */
++	uint32_t data_size;	/* size of data section(s) */
++	uint32_t bss_size;	/* size of bss section(s) */
++	uint32_t entry_point;	/* file offset of entry point */
++	uint32_t code_base;	/* relative code addr in ram */
++	/* "windows" header */
++	uint64_t image_base;	/* preferred load address */
++	uint32_t section_align;	/* alignment in bytes */
++	uint32_t file_align;	/* file alignment in bytes */
++	uint16_t os_major;	/* major OS version */
++	uint16_t os_minor;	/* minor OS version */
++	uint16_t image_major;	/* major image version */
++	uint16_t image_minor;	/* minor image version */
++	uint16_t subsys_major;	/* major subsystem version */
++	uint16_t subsys_minor;	/* minor subsystem version */
++	uint32_t win32_version;	/* reserved, must be 0 */
++	uint32_t image_size;	/* image size */
++	uint32_t header_size;	/* header size rounded up to
++				   file_align */
++	uint32_t csum;		/* checksum */
++	uint16_t subsys;	/* subsystem */
++	uint16_t dll_flags;	/* more flags! */
++	uint64_t stack_size_req;/* amt of stack requested */
++	uint64_t stack_size;	/* amt of stack required */
++	uint64_t heap_size_req;	/* amt of heap requested */
++	uint64_t heap_size;	/* amt of heap required */
++	uint32_t loader_flags;	/* reserved, must be 0 */
++	uint32_t data_dirs;	/* number of data dir entries */
++};
++
++struct data_dirent {
++	uint32_t virtual_address;	/* relative to load address */
++	uint32_t size;
++};
++
++struct data_directory {
++	struct data_dirent exports;		/* .edata */
++	struct data_dirent imports;		/* .idata */
++	struct data_dirent resources;		/* .rsrc */
++	struct data_dirent exceptions;		/* .pdata */
++	struct data_dirent certs;		/* certs */
++	struct data_dirent base_relocations;	/* .reloc */
++	struct data_dirent debug;		/* .debug */
++	struct data_dirent arch;		/* reservered */
++	struct data_dirent global_ptr;		/* global pointer reg. Size=0 */
++	struct data_dirent tls;			/* .tls */
++	struct data_dirent load_config;		/* load configuration structure */
++	struct data_dirent bound_imports;	/* no idea */
++	struct data_dirent import_addrs;	/* import address table */
++	struct data_dirent delay_imports;	/* delay-load import table */
++	struct data_dirent clr_runtime_hdr;	/* .cor (object only) */
++	struct data_dirent reserved;
++};
++
++struct section_header {
++	char name[8];			/* name or "/12\0" string tbl offset */
++	uint32_t virtual_size;		/* size of loaded section in ram */
++	uint32_t virtual_address;	/* relative virtual address */
++	uint32_t raw_data_size;		/* size of the section */
++	uint32_t data_addr;		/* file pointer to first page of sec */
++	uint32_t relocs;		/* file pointer to relocation entries */
++	uint32_t line_numbers;		/* line numbers! */
++	uint16_t num_relocs;		/* number of relocations */
++	uint16_t num_lin_numbers;	/* srsly. */
++	uint32_t flags;
++};
++
++struct coff_reloc {
++	uint32_t virtual_address;
++	uint32_t symbol_table_index;
++	uint16_t data;
++};
++
++#endif /* __LINUX_PE_H */
 -- 
 2.37.4
 
