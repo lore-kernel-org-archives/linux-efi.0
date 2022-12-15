@@ -2,29 +2,29 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D8D95C3DA78
-	for <linux-efi@archiver.kernel.org>; Thu, 15 Dec 2022 12:42:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0B221C4332F
+	for <linux-efi@archiver.kernel.org>; Thu, 15 Dec 2022 12:42:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230044AbiLOMls (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 15 Dec 2022 07:41:48 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54882 "EHLO
+        id S230117AbiLOMmS (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 15 Dec 2022 07:42:18 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54870 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229869AbiLOMl0 (ORCPT
+        with ESMTP id S229906AbiLOMl0 (ORCPT
         <rfc822;linux-efi@vger.kernel.org>); Thu, 15 Dec 2022 07:41:26 -0500
 Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9CBC12F013;
-        Thu, 15 Dec 2022 04:40:25 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3BE792F01A;
+        Thu, 15 Dec 2022 04:40:26 -0800 (PST)
 Received: from localhost.localdomain (unknown [83.149.199.65])
-        by mail.ispras.ru (Postfix) with ESMTPSA id 9F25340737B6;
-        Thu, 15 Dec 2022 12:40:23 +0000 (UTC)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 9F25340737B6
+        by mail.ispras.ru (Postfix) with ESMTPSA id 421B540737A3;
+        Thu, 15 Dec 2022 12:40:24 +0000 (UTC)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 421B540737A3
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ispras.ru;
-        s=default; t=1671108023;
-        bh=SXfOuN4XhQqZecp0fAbo/2/1GUdhrCJYeFoo3/yqXus=;
+        s=default; t=1671108024;
+        bh=M3naYL3GGl+5q+XfB9vebSxsQoc+3D3N13eyKPThq2o=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=g1V5BjU/RdhYXl0WPUCtk9+RvlC1h2yphrk3zLRjpreEEROQoyPuVupJC/D9WZ1OC
-         k7aTmzCBfhDlAUXNZ7V3TbQnS1j3y902gW6/BuG0Y9jief23Yx0syXPQshh4mdK/wg
-         q3Tn84RUxuckMAEKiwneBYNVvtjh3KMmzZoDN9R8=
+        b=IWyIGJFBnzJsQIQrSjOaeMbZjo7sAJtUMyNo3yquaylA6gq0bJVAr4PeNJJC3Jf0Q
+         URAETK1ahqEnAouSJpMiIC15NDt4Iz03atawHNbkIDkRhcOds6fkCvObHGM7TMrytA
+         OrSu2IqbhBN+5RdqIF3TUrfTF9ihM+NdoLGTvBVo=
 From:   Evgeniy Baskov <baskov@ispras.ru>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
@@ -39,9 +39,9 @@ Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
         joeyli <jlee@suse.com>, lvc-project@linuxtesting.org,
         x86@kernel.org, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org
-Subject: [PATCH v4 11/26] x86/boot: Make console interface more abstract
-Date:   Thu, 15 Dec 2022 15:38:02 +0300
-Message-Id: <3827032b3688e111428a9e727782d2b2712c7e34.1671098103.git.baskov@ispras.ru>
+Subject: [PATCH v4 13/26] x86/boot: Split trampoline and pt init code
+Date:   Thu, 15 Dec 2022 15:38:04 +0300
+Message-Id: <9f951d6332eea6e46ebd46ca919ed5b1b85c0ba3.1671098103.git.baskov@ispras.ru>
 X-Mailer: git-send-email 2.37.4
 In-Reply-To: <cover.1671098103.git.baskov@ispras.ru>
 References: <cover.1671098103.git.baskov@ispras.ru>
@@ -51,340 +51,127 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-To be able to extract kernel from EFI, console output functions
-need to be replaceable by alternative implementations.
+When allocating trampoline from libstub trampoline allocation is
+performed separately, so it needs to be skipped.
 
-Make all of those functions pointers.
-Move serial console code to separate file.
+Split trampoline initialization and allocation code into two
+functions to make them invokable separately.
 
 Tested-by: Mario Limonciello <mario.limonciello@amd.com>
 Tested-by: Peter Jones <pjones@redhat.com>
 Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
 ---
- arch/x86/boot/compressed/Makefile |   2 +-
- arch/x86/boot/compressed/misc.c   | 109 +------------------------
- arch/x86/boot/compressed/misc.h   |   9 ++-
- arch/x86/boot/compressed/putstr.c | 130 ++++++++++++++++++++++++++++++
- 4 files changed, 139 insertions(+), 111 deletions(-)
- create mode 100644 arch/x86/boot/compressed/putstr.c
+ arch/x86/boot/compressed/pgtable_64.c | 73 +++++++++++++++++----------
+ 1 file changed, 46 insertions(+), 27 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
-index 4dcab38f5a38..4b1524446875 100644
---- a/arch/x86/boot/compressed/Makefile
-+++ b/arch/x86/boot/compressed/Makefile
-@@ -93,7 +93,7 @@ $(obj)/misc.o: $(obj)/../voffset.h
+diff --git a/arch/x86/boot/compressed/pgtable_64.c b/arch/x86/boot/compressed/pgtable_64.c
+index c7cf5a1059a8..1f7169248612 100644
+--- a/arch/x86/boot/compressed/pgtable_64.c
++++ b/arch/x86/boot/compressed/pgtable_64.c
+@@ -106,12 +106,8 @@ static unsigned long find_trampoline_placement(void)
+ 	return bios_start - TRAMPOLINE_32BIT_SIZE;
+ }
  
- vmlinux-objs-y := $(obj)/vmlinux.lds $(obj)/kernel_info.o $(obj)/head_$(BITS).o \
- 	$(obj)/misc.o $(obj)/string.o $(obj)/cmdline.o $(obj)/error.o \
--	$(obj)/piggy.o $(obj)/cpuflags.o
-+	$(obj)/piggy.o $(obj)/cpuflags.o $(obj)/putstr.o
- 
- vmlinux-objs-$(CONFIG_EARLY_PRINTK) += $(obj)/early_serial_console.o
- vmlinux-objs-$(CONFIG_RANDOMIZE_BASE) += $(obj)/kaslr.o
-diff --git a/arch/x86/boot/compressed/misc.c b/arch/x86/boot/compressed/misc.c
-index 0c7ec290044d..aa4a22bc9cf9 100644
---- a/arch/x86/boot/compressed/misc.c
-+++ b/arch/x86/boot/compressed/misc.c
-@@ -53,13 +53,6 @@ struct port_io_ops pio_ops;
- memptr free_mem_ptr;
- memptr free_mem_end_ptr;
- 
--static char *vidmem;
--static int vidport;
+-struct paging_config paging_prepare(void *rmode)
++bool trampoline_pgtable_init(struct boot_params *boot_params)
+ {
+-	struct paging_config paging_config = {};
 -
--/* These might be accessed before .bss is cleared, so use .data instead. */
--static int lines __section(".data");
--static int cols __section(".data");
--
- #ifdef CONFIG_KERNEL_GZIP
- #include "../../../../lib/decompress_inflate.c"
- #endif
-@@ -92,95 +85,6 @@ static int cols __section(".data");
-  * ../header.S.
-  */
- 
--static void scroll(void)
--{
--	int i;
--
--	memmove(vidmem, vidmem + cols * 2, (lines - 1) * cols * 2);
--	for (i = (lines - 1) * cols * 2; i < lines * cols * 2; i += 2)
--		vidmem[i] = ' ';
--}
--
--#define XMTRDY          0x20
--
--#define TXR             0       /*  Transmit register (WRITE) */
--#define LSR             5       /*  Line Status               */
--static void serial_putchar(int ch)
--{
--	unsigned timeout = 0xffff;
--
--	while ((inb(early_serial_base + LSR) & XMTRDY) == 0 && --timeout)
--		cpu_relax();
--
--	outb(ch, early_serial_base + TXR);
--}
--
--void __putstr(const char *s)
--{
--	int x, y, pos;
--	char c;
--
--	if (early_serial_base) {
--		const char *str = s;
--		while (*str) {
--			if (*str == '\n')
--				serial_putchar('\r');
--			serial_putchar(*str++);
--		}
--	}
--
--	if (lines == 0 || cols == 0)
--		return;
--
--	x = boot_params->screen_info.orig_x;
--	y = boot_params->screen_info.orig_y;
--
--	while ((c = *s++) != '\0') {
--		if (c == '\n') {
--			x = 0;
--			if (++y >= lines) {
--				scroll();
--				y--;
--			}
--		} else {
--			vidmem[(x + cols * y) * 2] = c;
--			if (++x >= cols) {
--				x = 0;
--				if (++y >= lines) {
--					scroll();
--					y--;
--				}
--			}
--		}
--	}
--
--	boot_params->screen_info.orig_x = x;
--	boot_params->screen_info.orig_y = y;
--
--	pos = (x + cols * y) * 2;	/* Update cursor position */
--	outb(14, vidport);
--	outb(0xff & (pos >> 9), vidport+1);
--	outb(15, vidport);
--	outb(0xff & (pos >> 1), vidport+1);
--}
--
--void __puthex(unsigned long value)
--{
--	char alpha[2] = "0";
--	int bits;
--
--	for (bits = sizeof(value) * 8 - 4; bits >= 0; bits -= 4) {
--		unsigned long digit = (value >> bits) & 0xf;
--
--		if (digit < 0xA)
--			alpha[0] = '0' + digit;
--		else
--			alpha[0] = 'a' + (digit - 0xA);
--
--		__putstr(alpha);
--	}
--}
--
- #ifdef CONFIG_X86_NEED_RELOCS
- static void handle_relocations(void *output, unsigned long output_len,
- 			       unsigned long virt_addr)
-@@ -406,17 +310,6 @@ asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
- 
- 	sanitize_boot_params(boot_params);
- 
--	if (boot_params->screen_info.orig_video_mode == 7) {
--		vidmem = (char *) 0xb0000;
--		vidport = 0x3b4;
--	} else {
--		vidmem = (char *) 0xb8000;
--		vidport = 0x3d4;
--	}
--
--	lines = boot_params->screen_info.orig_video_lines;
--	cols = boot_params->screen_info.orig_video_cols;
--
- 	init_default_io_ops();
+-	/* Initialize boot_params. Required for cmdline_find_option_bool(). */
+-	boot_params = rmode;
  
  	/*
-@@ -427,7 +320,7 @@ asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
+ 	 * Check if LA57 is desired and supported.
+@@ -125,26 +121,10 @@ struct paging_config paging_prepare(void *rmode)
+ 	 *
+ 	 * That's substitute for boot_cpu_has() in early boot code.
  	 */
- 	early_tdx_detect();
- 
--	console_init();
-+	init_bare_console();
+-	if (IS_ENABLED(CONFIG_X86_5LEVEL) &&
+-			!cmdline_find_option_bool("no5lvl") &&
+-			native_cpuid_eax(0) >= 7 &&
+-			(native_cpuid_ecx(7) & (1 << (X86_FEATURE_LA57 & 31)))) {
+-		paging_config.l5_required = 1;
+-	}
+-
+-	paging_config.trampoline_start = find_trampoline_placement();
+-
+-	trampoline_32bit = (unsigned long *)paging_config.trampoline_start;
+-
+-	/* Preserve trampoline memory */
+-	memcpy(trampoline_save, trampoline_32bit, TRAMPOLINE_32BIT_SIZE);
+-
+-	/* Clear trampoline memory first */
+-	memset(trampoline_32bit, 0, TRAMPOLINE_32BIT_SIZE);
+-
+-	/* Copy trampoline code in place */
+-	memcpy(trampoline_32bit + TRAMPOLINE_32BIT_CODE_OFFSET / sizeof(unsigned long),
+-			&trampoline_32bit_src, TRAMPOLINE_32BIT_CODE_SIZE);
++	bool l5_required = IS_ENABLED(CONFIG_X86_5LEVEL) &&
++			   !cmdline_find_option_bool("no5lvl") &&
++			   native_cpuid_eax(0) >= 7 &&
++			   (native_cpuid_ecx(7) & (1 << (X86_FEATURE_LA57 & 31)));
  
  	/*
- 	 * Save RSDP address for later use. Have this after console_init()
-diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
-index 033db9b536e6..38d31bec062d 100644
---- a/arch/x86/boot/compressed/misc.h
-+++ b/arch/x86/boot/compressed/misc.h
-@@ -57,8 +57,8 @@ extern memptr free_mem_end_ptr;
- void *malloc(int size);
- void free(void *where);
- extern struct boot_params *boot_params;
--void __putstr(const char *s);
--void __puthex(unsigned long value);
-+extern void (*__putstr)(const char *s);
-+extern void (*__puthex)(unsigned long value);
- #define error_putstr(__x)  __putstr(__x)
- #define error_puthex(__x)  __puthex(__x)
+ 	 * The code below prepares page table in trampoline memory.
+@@ -160,10 +140,10 @@ struct paging_config paging_prepare(void *rmode)
+ 	 * We are not going to use the page table in trampoline memory if we
+ 	 * are already in the desired paging mode.
+ 	 */
+-	if (paging_config.l5_required == !!(native_read_cr4() & X86_CR4_LA57))
++	if (l5_required == !!(native_read_cr4() & X86_CR4_LA57))
+ 		goto out;
  
-@@ -128,6 +128,11 @@ static inline void console_init(void)
- { }
- #endif
+-	if (paging_config.l5_required) {
++	if (l5_required) {
+ 		/*
+ 		 * For 4- to 5-level paging transition, set up current CR3 as
+ 		 * the first and the only entry in a new top-level page table.
+@@ -185,6 +165,45 @@ struct paging_config paging_prepare(void *rmode)
+ 		       (void *)src, PAGE_SIZE);
+ 	}
  
-+/* putstr.c */
-+void init_bare_console(void);
-+void init_console_func(void (*putstr_)(const char *),
-+		       void (*puthex_)(unsigned long));
-+
- #ifdef CONFIG_AMD_MEM_ENCRYPT
- void sev_enable(struct boot_params *bp);
- void sev_es_shutdown_ghcb(void);
-diff --git a/arch/x86/boot/compressed/putstr.c b/arch/x86/boot/compressed/putstr.c
-new file mode 100644
-index 000000000000..44a4c3dacec5
---- /dev/null
-+++ b/arch/x86/boot/compressed/putstr.c
-@@ -0,0 +1,130 @@
-+// SPDX-License-Identifier: GPL-2.0
-+#include "misc.h"
-+
-+/* These might be accessed before .bss is cleared, so use .data instead. */
-+static char *vidmem __section(".data");
-+static int vidport __section(".data");
-+static int lines __section(".data");
-+static int cols __section(".data");
-+
-+void (*__putstr)(const char *s);
-+void (*__puthex)(unsigned long value);
-+
-+static void putstr(const char *s);
-+static void puthex(unsigned long value);
-+
-+void init_console_func(void (*putstr_)(const char *),
-+		       void (*puthex_)(unsigned long))
-+{
-+	__putstr = putstr_;
-+	__puthex = puthex_;
++out:
++	return l5_required;
 +}
 +
-+void init_bare_console(void)
++struct paging_config paging_prepare(void *rmode)
 +{
-+	init_console_func(putstr, puthex);
++	struct paging_config paging_config = {};
++	bool early_trampoline_alloc = 0;
 +
-+	if (boot_params->screen_info.orig_video_mode == 7) {
-+		vidmem = (char *) 0xb0000;
-+		vidport = 0x3b4;
-+	} else {
-+		vidmem = (char *) 0xb8000;
-+		vidport = 0x3d4;
-+	}
++	/* Initialize boot_params. Required for cmdline_find_option_bool(). */
++	boot_params = rmode;
 +
-+	lines = boot_params->screen_info.orig_video_lines;
-+	cols = boot_params->screen_info.orig_video_cols;
++	/*
++	 * We only need to find trampoline placement, if we have
++	 * not already done it from libstub.
++	 */
 +
-+	console_init();
-+}
++	paging_config.trampoline_start = find_trampoline_placement();
++	trampoline_32bit = (unsigned long *)paging_config.trampoline_start;
++	early_trampoline_alloc = 0;
 +
-+static void scroll(void)
-+{
-+	int i;
++	/*
++	 * Preserve trampoline memory.
++	 * When trampoline is located in memory
++	 * owned by us, i.e. allocated in EFISTUB,
++	 * we don't care about previous contents
++	 * of this memory so copying can also be skipped.
++	 */
++	memcpy(trampoline_save, trampoline_32bit, TRAMPOLINE_32BIT_SIZE);
 +
-+	memmove(vidmem, vidmem + cols * 2, (lines - 1) * cols * 2);
-+	for (i = (lines - 1) * cols * 2; i < lines * cols * 2; i += 2)
-+		vidmem[i] = ' ';
-+}
++	/* Clear trampoline memory first */
++	memset(trampoline_32bit, 0, TRAMPOLINE_32BIT_SIZE);
 +
-+#define XMTRDY          0x20
++	/* Copy trampoline code in place */
++	memcpy(trampoline_32bit + TRAMPOLINE_32BIT_CODE_OFFSET / sizeof(unsigned long),
++			&trampoline_32bit_src, TRAMPOLINE_32BIT_CODE_SIZE);
 +
-+#define TXR             0       /*  Transmit register (WRITE) */
-+#define LSR             5       /*  Line Status               */
++	paging_config.l5_required = trampoline_pgtable_init(boot_params);
 +
-+static void serial_putchar(int ch)
-+{
-+	unsigned int timeout = 0xffff;
-+
-+	while ((inb(early_serial_base + LSR) & XMTRDY) == 0 && --timeout)
-+		cpu_relax();
-+
-+	outb(ch, early_serial_base + TXR);
-+}
-+
-+static void putstr(const char *s)
-+{
-+	int x, y, pos;
-+	char c;
-+
-+	if (early_serial_base) {
-+		const char *str = s;
-+
-+		while (*str) {
-+			if (*str == '\n')
-+				serial_putchar('\r');
-+			serial_putchar(*str++);
-+		}
-+	}
-+
-+	if (lines == 0 || cols == 0)
-+		return;
-+
-+	x = boot_params->screen_info.orig_x;
-+	y = boot_params->screen_info.orig_y;
-+
-+	while ((c = *s++) != '\0') {
-+		if (c == '\n') {
-+			x = 0;
-+			if (++y >= lines) {
-+				scroll();
-+				y--;
-+			}
-+		} else {
-+			vidmem[(x + cols * y) * 2] = c;
-+			if (++x >= cols) {
-+				x = 0;
-+				if (++y >= lines) {
-+					scroll();
-+					y--;
-+				}
-+			}
-+		}
-+	}
-+
-+	boot_params->screen_info.orig_x = x;
-+	boot_params->screen_info.orig_y = y;
-+
-+	pos = (x + cols * y) * 2;	/* Update cursor position */
-+	outb(14, vidport);
-+	outb(0xff & (pos >> 9), vidport+1);
-+	outb(15, vidport);
-+	outb(0xff & (pos >> 1), vidport+1);
-+}
-+
-+static void puthex(unsigned long value)
-+{
-+	char alpha[2] = "0";
-+	int bits;
-+
-+	for (bits = sizeof(value) * 8 - 4; bits >= 0; bits -= 4) {
-+		unsigned long digit = (value >> bits) & 0xf;
-+
-+		if (digit < 0xA)
-+			alpha[0] = '0' + digit;
-+		else
-+			alpha[0] = 'a' + (digit - 0xA);
-+
-+		putstr(alpha);
-+	}
-+}
+ out:
+ 	return paging_config;
+ }
 -- 
 2.37.4
 
