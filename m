@@ -2,29 +2,29 @@ Return-Path: <linux-efi-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0B221C4332F
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 924B0C3DA6E
 	for <linux-efi@archiver.kernel.org>; Thu, 15 Dec 2022 12:42:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230117AbiLOMmS (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 15 Dec 2022 07:42:18 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54870 "EHLO
+        id S229983AbiLOMmZ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 15 Dec 2022 07:42:25 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54940 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229906AbiLOMl0 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 15 Dec 2022 07:41:26 -0500
+        with ESMTP id S229915AbiLOMl2 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 15 Dec 2022 07:41:28 -0500
 Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3BE792F01A;
-        Thu, 15 Dec 2022 04:40:26 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1F5532F02C;
+        Thu, 15 Dec 2022 04:40:28 -0800 (PST)
 Received: from localhost.localdomain (unknown [83.149.199.65])
-        by mail.ispras.ru (Postfix) with ESMTPSA id 421B540737A3;
-        Thu, 15 Dec 2022 12:40:24 +0000 (UTC)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 421B540737A3
+        by mail.ispras.ru (Postfix) with ESMTPSA id 1DFCD400CBDC;
+        Thu, 15 Dec 2022 12:40:25 +0000 (UTC)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 1DFCD400CBDC
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ispras.ru;
-        s=default; t=1671108024;
-        bh=M3naYL3GGl+5q+XfB9vebSxsQoc+3D3N13eyKPThq2o=;
+        s=default; t=1671108025;
+        bh=oJrp1q8lTiiWjPIUAQspoypZPG+SdjrTnu5JNDfc4sk=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=IWyIGJFBnzJsQIQrSjOaeMbZjo7sAJtUMyNo3yquaylA6gq0bJVAr4PeNJJC3Jf0Q
-         URAETK1ahqEnAouSJpMiIC15NDt4Iz03atawHNbkIDkRhcOds6fkCvObHGM7TMrytA
-         OrSu2IqbhBN+5RdqIF3TUrfTF9ihM+NdoLGTvBVo=
+        b=Qb1Arfhd/4C5zhNb9vvUwaM+UFsgx/jGZ34fdhfGupEJX8YsLQT2QV7uhYo37qP7J
+         NZpY79EHgMeLMqGJmx0GMO7J+9ArdTrJ96ez2lxcEdDqbLJVnNRXU2a3avnZKJSEe+
+         Ha8JxsNsdOlaRM2oKBopyv7u3CLntMhx7lqkmcJw=
 From:   Evgeniy Baskov <baskov@ispras.ru>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
@@ -39,9 +39,9 @@ Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
         joeyli <jlee@suse.com>, lvc-project@linuxtesting.org,
         x86@kernel.org, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org
-Subject: [PATCH v4 13/26] x86/boot: Split trampoline and pt init code
-Date:   Thu, 15 Dec 2022 15:38:04 +0300
-Message-Id: <9f951d6332eea6e46ebd46ca919ed5b1b85c0ba3.1671098103.git.baskov@ispras.ru>
+Subject: [PATCH v4 16/26] x86/boot: Reduce lower limit of physical KASLR
+Date:   Thu, 15 Dec 2022 15:38:07 +0300
+Message-Id: <672320297f9d8860ddafbfa90933f8df7b537a5d.1671098103.git.baskov@ispras.ru>
 X-Mailer: git-send-email 2.37.4
 In-Reply-To: <cover.1671098103.git.baskov@ispras.ru>
 References: <cover.1671098103.git.baskov@ispras.ru>
@@ -51,127 +51,41 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-When allocating trampoline from libstub trampoline allocation is
-performed separately, so it needs to be skipped.
+Set lower limit of physical KASLR to 64M.
 
-Split trampoline initialization and allocation code into two
-functions to make them invokable separately.
+Previously is was set to 512M when kernel is loaded higher than that.
+That prevented physical KASLR from being performed on x86_32, where
+upper limit is also set to 512M. The limit is pretty arbitrary, and the
+most important is to set it above the ISA hole, i.e. higher than 16M.
+
+It was not that important before, but now kernel is not getting
+relocated to the lower address when booting via EFI, exposing the
+KASLR failures.
 
 Tested-by: Mario Limonciello <mario.limonciello@amd.com>
 Tested-by: Peter Jones <pjones@redhat.com>
 Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
 ---
- arch/x86/boot/compressed/pgtable_64.c | 73 +++++++++++++++++----------
- 1 file changed, 46 insertions(+), 27 deletions(-)
+ arch/x86/boot/compressed/kaslr.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/pgtable_64.c b/arch/x86/boot/compressed/pgtable_64.c
-index c7cf5a1059a8..1f7169248612 100644
---- a/arch/x86/boot/compressed/pgtable_64.c
-+++ b/arch/x86/boot/compressed/pgtable_64.c
-@@ -106,12 +106,8 @@ static unsigned long find_trampoline_placement(void)
- 	return bios_start - TRAMPOLINE_32BIT_SIZE;
- }
- 
--struct paging_config paging_prepare(void *rmode)
-+bool trampoline_pgtable_init(struct boot_params *boot_params)
- {
--	struct paging_config paging_config = {};
--
--	/* Initialize boot_params. Required for cmdline_find_option_bool(). */
--	boot_params = rmode;
+diff --git a/arch/x86/boot/compressed/kaslr.c b/arch/x86/boot/compressed/kaslr.c
+index c0ee116c4fa2..74d1327adbba 100644
+--- a/arch/x86/boot/compressed/kaslr.c
++++ b/arch/x86/boot/compressed/kaslr.c
+@@ -852,10 +852,10 @@ void choose_random_location(unsigned long input,
  
  	/*
- 	 * Check if LA57 is desired and supported.
-@@ -125,26 +121,10 @@ struct paging_config paging_prepare(void *rmode)
- 	 *
- 	 * That's substitute for boot_cpu_has() in early boot code.
+ 	 * Low end of the randomization range should be the
+-	 * smaller of 512M or the initial kernel image
++	 * smaller of 64M or the initial kernel image
+ 	 * location:
  	 */
--	if (IS_ENABLED(CONFIG_X86_5LEVEL) &&
--			!cmdline_find_option_bool("no5lvl") &&
--			native_cpuid_eax(0) >= 7 &&
--			(native_cpuid_ecx(7) & (1 << (X86_FEATURE_LA57 & 31)))) {
--		paging_config.l5_required = 1;
--	}
--
--	paging_config.trampoline_start = find_trampoline_placement();
--
--	trampoline_32bit = (unsigned long *)paging_config.trampoline_start;
--
--	/* Preserve trampoline memory */
--	memcpy(trampoline_save, trampoline_32bit, TRAMPOLINE_32BIT_SIZE);
--
--	/* Clear trampoline memory first */
--	memset(trampoline_32bit, 0, TRAMPOLINE_32BIT_SIZE);
--
--	/* Copy trampoline code in place */
--	memcpy(trampoline_32bit + TRAMPOLINE_32BIT_CODE_OFFSET / sizeof(unsigned long),
--			&trampoline_32bit_src, TRAMPOLINE_32BIT_CODE_SIZE);
-+	bool l5_required = IS_ENABLED(CONFIG_X86_5LEVEL) &&
-+			   !cmdline_find_option_bool("no5lvl") &&
-+			   native_cpuid_eax(0) >= 7 &&
-+			   (native_cpuid_ecx(7) & (1 << (X86_FEATURE_LA57 & 31)));
+-	min_addr = min(*output, 512UL << 20);
++	min_addr = min(*output, 64UL << 20);
+ 	/* Make sure minimum is aligned. */
+ 	min_addr = ALIGN(min_addr, CONFIG_PHYSICAL_ALIGN);
  
- 	/*
- 	 * The code below prepares page table in trampoline memory.
-@@ -160,10 +140,10 @@ struct paging_config paging_prepare(void *rmode)
- 	 * We are not going to use the page table in trampoline memory if we
- 	 * are already in the desired paging mode.
- 	 */
--	if (paging_config.l5_required == !!(native_read_cr4() & X86_CR4_LA57))
-+	if (l5_required == !!(native_read_cr4() & X86_CR4_LA57))
- 		goto out;
- 
--	if (paging_config.l5_required) {
-+	if (l5_required) {
- 		/*
- 		 * For 4- to 5-level paging transition, set up current CR3 as
- 		 * the first and the only entry in a new top-level page table.
-@@ -185,6 +165,45 @@ struct paging_config paging_prepare(void *rmode)
- 		       (void *)src, PAGE_SIZE);
- 	}
- 
-+out:
-+	return l5_required;
-+}
-+
-+struct paging_config paging_prepare(void *rmode)
-+{
-+	struct paging_config paging_config = {};
-+	bool early_trampoline_alloc = 0;
-+
-+	/* Initialize boot_params. Required for cmdline_find_option_bool(). */
-+	boot_params = rmode;
-+
-+	/*
-+	 * We only need to find trampoline placement, if we have
-+	 * not already done it from libstub.
-+	 */
-+
-+	paging_config.trampoline_start = find_trampoline_placement();
-+	trampoline_32bit = (unsigned long *)paging_config.trampoline_start;
-+	early_trampoline_alloc = 0;
-+
-+	/*
-+	 * Preserve trampoline memory.
-+	 * When trampoline is located in memory
-+	 * owned by us, i.e. allocated in EFISTUB,
-+	 * we don't care about previous contents
-+	 * of this memory so copying can also be skipped.
-+	 */
-+	memcpy(trampoline_save, trampoline_32bit, TRAMPOLINE_32BIT_SIZE);
-+
-+	/* Clear trampoline memory first */
-+	memset(trampoline_32bit, 0, TRAMPOLINE_32BIT_SIZE);
-+
-+	/* Copy trampoline code in place */
-+	memcpy(trampoline_32bit + TRAMPOLINE_32BIT_CODE_OFFSET / sizeof(unsigned long),
-+			&trampoline_32bit_src, TRAMPOLINE_32BIT_CODE_SIZE);
-+
-+	paging_config.l5_required = trampoline_pgtable_init(boot_params);
-+
- out:
- 	return paging_config;
- }
 -- 
 2.37.4
 
