@@ -2,130 +2,173 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 04AAFC3DA7D
-	for <linux-efi@archiver.kernel.org>; Wed, 28 Dec 2022 14:04:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1012FC46467
+	for <linux-efi@archiver.kernel.org>; Mon,  2 Jan 2023 10:47:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229740AbiL1OEM (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 28 Dec 2022 09:04:12 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51464 "EHLO
+        id S232049AbjABKr1 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 2 Jan 2023 05:47:27 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50102 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229630AbiL1OEL (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 28 Dec 2022 09:04:11 -0500
-Received: from mga02.intel.com (mga02.intel.com [134.134.136.20])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EC2E11099;
-        Wed, 28 Dec 2022 06:04:08 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1672236249; x=1703772249;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=Lg126dF0ZRB51ZzT/H9t/6uTcxQgkla19QDrEd0Bge0=;
-  b=c2iP/ZA0uWkDdxNpHAOp0YCPyjxlv8h7aQGjKTZMRR6SF9YaM3bfiYBo
-   znnuls8vYhO1gaLI8oWuZ0LS1uu7CDIFWchzA0Bm52jf8k1gXX5ukVRGS
-   yQjFCK/Uyg1WSsPnfwkU1I6ZkA2N0fP+v7wT7LJci5FMbxPvNgbNBQ3Sb
-   trJLLyHX6b08mMxFr3/IEyVreRUFb8JhUOZscI71WMkXsnHO3DCKYLE6h
-   MhiDvWFxat86ZuPres05zdP8WimKmqBfpkojgFFT29JBeuJ4L8HEUyf0f
-   RzMhpsKGuVkrBKvQjXmNvZlxeTh770iy7IgB4+Iowwg9wednRPRO6uk59
-   Q==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10574"; a="308631762"
-X-IronPort-AV: E=Sophos;i="5.96,280,1665471600"; 
-   d="scan'208";a="308631762"
-Received: from fmsmga007.fm.intel.com ([10.253.24.52])
-  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 Dec 2022 06:03:21 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6500,9779,10574"; a="655320885"
-X-IronPort-AV: E=Sophos;i="5.96,280,1665471600"; 
-   d="scan'208";a="655320885"
-Received: from smile.fi.intel.com ([10.237.72.54])
-  by fmsmga007.fm.intel.com with ESMTP; 28 Dec 2022 06:03:13 -0800
-Received: from andy by smile.fi.intel.com with local (Exim 4.96)
-        (envelope-from <andriy.shevchenko@linux.intel.com>)
-        id 1pAX1S-000cPm-1R;
-        Wed, 28 Dec 2022 16:03:10 +0200
-Date:   Wed, 28 Dec 2022 16:03:10 +0200
-From:   Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     Markuss Broks <markuss.broks@gmail.com>,
-        linux-kernel@vger.kernel.org,
-        Jami Kettunen <jami.kettunen@protonmail.com>,
-        Jonathan Corbet <corbet@lwn.net>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Jiri Slaby <jirislaby@kernel.org>,
-        Helge Deller <deller@gmx.de>, Borislav Petkov <bp@suse.de>,
-        "Paul E. McKenney" <paulmck@kernel.org>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Will Deacon <will@kernel.org>,
-        Randy Dunlap <rdunlap@infradead.org>,
-        Muchun Song <muchun.song@linux.dev>,
-        Damien Le Moal <damien.lemoal@opensource.wdc.com>,
-        Kim Phillips <kim.phillips@amd.com>, linux-doc@vger.kernel.org,
-        linux-efi@vger.kernel.org, linux-serial@vger.kernel.org,
-        linux-fbdev@vger.kernel.org, dri-devel@lists.freedesktop.org
-Subject: Re: [PATCH v3 0/3] Add generic framebuffer support to EFI earlycon
- driver
-Message-ID: <Y6xMnuMqpThmFn1q@smile.fi.intel.com>
-References: <20221221105402.6598-1-markuss.broks@gmail.com>
- <CAMj1kXGUC7dsSwVEUsAMeAoqDYtbqrM7SDOJTXbPfi-LrcSk9g@mail.gmail.com>
+        with ESMTP id S229470AbjABKr0 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 2 Jan 2023 05:47:26 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7D422BF9;
+        Mon,  2 Jan 2023 02:47:25 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 18BA660F24;
+        Mon,  2 Jan 2023 10:47:25 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 75214C433F0;
+        Mon,  2 Jan 2023 10:47:24 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1672656444;
+        bh=NNLP/vZpHU+PfmdYh2ChIRutfy40ix9EsAAO6zT8okM=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=SXIwWe8D29pCqSG8a5My/ezyADOXWvTOmkQXd1W76hwOcZN9jCqc8nGGg+O7/PjJZ
+         miCrdP5gFreWlZhkstHX5w7FB9/2MHj67TGyK5SFJwC/C9wJctxpU1Xxwf8tJXn/ME
+         dlOD6J49sIZKCLnh0Jca58RsHJflbrQCgFg86eFycr7t3AA9RFuiye2JgaeipGazMZ
+         ioaejg2C8b8w619R0xcwKxRxFjxcpTrGHxKmjkonyYjyLP839EJGh+XgntjdQMmJRw
+         B6mR81HEgTYBmn/TSZx2g9AafD47n/fDG2GCmTc/sG439rewS/0uzIWJo+ggDPmSmO
+         zvzjXtprhdoDg==
+Received: by mail-lf1-f49.google.com with SMTP id bp15so41074706lfb.13;
+        Mon, 02 Jan 2023 02:47:24 -0800 (PST)
+X-Gm-Message-State: AFqh2koulzhqpcpFY+z33v+fta8WciZP3g0+UuhLIcc0KOnzyucBmFcy
+        OCgKMvF86231b1AODf9/XRCIiSelo8xBejxCMAM=
+X-Google-Smtp-Source: AMrXdXtWDHlASI4f5M+PVE+/cTHXGxLZaLL/htM9ePTQtpm3kxfpYjYJmSBfBJXwcde8wUb8ps2z7WzNjgqBxjTg/4s=
+X-Received: by 2002:ac2:4a72:0:b0:4b6:f37c:c123 with SMTP id
+ q18-20020ac24a72000000b004b6f37cc123mr2805183lfp.539.1672656442482; Mon, 02
+ Jan 2023 02:47:22 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAMj1kXGUC7dsSwVEUsAMeAoqDYtbqrM7SDOJTXbPfi-LrcSk9g@mail.gmail.com>
-Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
+References: <20221227040925.1619833-1-sdonthineni@nvidia.com>
+In-Reply-To: <20221227040925.1619833-1-sdonthineni@nvidia.com>
+From:   Ard Biesheuvel <ardb@kernel.org>
+Date:   Mon, 2 Jan 2023 11:47:11 +0100
+X-Gmail-Original-Message-ID: <CAMj1kXG79-MxGJEwvnekqbVyeEMVHBfhNjwZkz91mMwv4-vT3Q@mail.gmail.com>
+Message-ID: <CAMj1kXG79-MxGJEwvnekqbVyeEMVHBfhNjwZkz91mMwv4-vT3Q@mail.gmail.com>
+Subject: Re: [PATCH 1/1] efi: rtc: Enable SET/GET WAKEUP services as optional
+To:     Shanker Donthineni <sdonthineni@nvidia.com>
+Cc:     Alessandro Zummo <a.zummo@towertech.it>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        linux-rtc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-efi@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Fri, Dec 23, 2022 at 03:42:33PM +0100, Ard Biesheuvel wrote:
-> (cc Andy)
+On Tue, 27 Dec 2022 at 05:09, Shanker Donthineni <sdonthineni@nvidia.com> wrote:
+>
+> The current implementation of rtc-efi is expecting all the 4
+> time services GET{SET}_TIME{WAKEUP} must be supported by UEFI
+> firmware. As per the EFI_RT_PROPERTIES_TABLE, the platform
+> specific implementations can choose to enable selective time
+> services based on the RTC device capabilities.
+>
+> This patch does the following changes to provide GET/SET RTC
+> services on platforms that do not support the WAKEUP feature.
+>
+> 1) Relax time services cap check when creating a platform device.
+> 2) Clear RTC_FEATURE_ALARM bit in the absence of WAKEUP services.
+> 3) Conditional alarm entries in '/proc/driver/rtc'.
+>
+> Signed-off-by: Shanker Donthineni <sdonthineni@nvidia.com>
 
-I believe there are two reasons I'm Cc'ed now:
-- the Cc was forgotten. because I remember reviewing some parts
-  of this contribution
-- this conflicts (to some extent) with my patch that speeds up
-  the scrolling
-
-For the first it's obvious what to do, I think Markuss can include me
-in his v4.
-
-For the second I don't see the functional clash. The scrolling in this
-series is not anyhow optimized. I think my patch should go first as
-- it is less intrusive
-- it has been tested, or can be tested easily
-
-Tell me if I'm missing something here.
-
-> On Wed, 21 Dec 2022 at 11:54, Markuss Broks <markuss.broks@gmail.com> wrote:
-> >
-> > Make the EFI earlycon driver be suitable for any linear framebuffers.
-> > This should be helpful for early porting of boards with no other means of
-> > output, like smartphones/tablets. There seems to be an issue with early_ioremap
-> > function on ARM32, but I am unable to find the exact cause. It appears the mappings
-> > returned by it are somehow incorrect, thus the driver is disabled on ARM.
-> 
-> The reason that this driver is disabled on ARM is because the struct
-> screen_info is not populated early enough, as it is retrieved from a
-> UEFI configuration table.
-> 
-> early_ioremap() works fine on ARM as long as they mapping is torn down
-> before paging_init()
-> 
-> > EFI early
-> > console was disabled on IA64 previously because of missing early_memremap_prot,
-> > and this is inherited to this driver.
-> >
-> > This patch also changes
-> 
-> "This patch also changes ..." is usually a strong hint to self that
-> the patches need to be split up.
-> 
-> > behavior on EFI systems, by selecting the mapping type
-> > based on if the framebuffer region intersects with system RAM. If it does, it's
-> > common sense that it should be in RAM as a whole, and so the system RAM mapping is
-> > used. It was tested to be working on my PC (Intel Z490 platform), as well as several
-> > ARM64 boards (Samsung Galaxy S9 (Exynos), iPad Air 2, Xiaomi Mi Pad 4, ...).
-
--- 
-With Best Regards,
-Andy Shevchenko
+Queued as a fix in efi/urgent, thanks.
 
 
+> ---
+>  drivers/rtc/rtc-efi.c | 48 ++++++++++++++++++++++++-------------------
+>  include/linux/efi.h   |  3 ++-
+>  2 files changed, 29 insertions(+), 22 deletions(-)
+>
+> diff --git a/drivers/rtc/rtc-efi.c b/drivers/rtc/rtc-efi.c
+> index e991cccdb6e9c..1e8bc6cc1e12d 100644
+> --- a/drivers/rtc/rtc-efi.c
+> +++ b/drivers/rtc/rtc-efi.c
+> @@ -188,9 +188,10 @@ static int efi_set_time(struct device *dev, struct rtc_time *tm)
+>
+>  static int efi_procfs(struct device *dev, struct seq_file *seq)
+>  {
+> -       efi_time_t      eft, alm;
+> -       efi_time_cap_t  cap;
+> -       efi_bool_t      enabled, pending;
+> +       efi_time_t        eft, alm;
+> +       efi_time_cap_t    cap;
+> +       efi_bool_t        enabled, pending;
+> +       struct rtc_device *rtc = dev_get_drvdata(dev);
+>
+>         memset(&eft, 0, sizeof(eft));
+>         memset(&alm, 0, sizeof(alm));
+> @@ -213,23 +214,25 @@ static int efi_procfs(struct device *dev, struct seq_file *seq)
+>                 /* XXX fixme: convert to string? */
+>                 seq_printf(seq, "Timezone\t: %u\n", eft.timezone);
+>
+> -       seq_printf(seq,
+> -                  "Alarm Time\t: %u:%u:%u.%09u\n"
+> -                  "Alarm Date\t: %u-%u-%u\n"
+> -                  "Alarm Daylight\t: %u\n"
+> -                  "Enabled\t\t: %s\n"
+> -                  "Pending\t\t: %s\n",
+> -                  alm.hour, alm.minute, alm.second, alm.nanosecond,
+> -                  alm.year, alm.month, alm.day,
+> -                  alm.daylight,
+> -                  enabled == 1 ? "yes" : "no",
+> -                  pending == 1 ? "yes" : "no");
+> -
+> -       if (eft.timezone == EFI_UNSPECIFIED_TIMEZONE)
+> -               seq_puts(seq, "Timezone\t: unspecified\n");
+> -       else
+> -               /* XXX fixme: convert to string? */
+> -               seq_printf(seq, "Timezone\t: %u\n", alm.timezone);
+> +       if (test_bit(RTC_FEATURE_ALARM, rtc->features)) {
+> +               seq_printf(seq,
+> +                          "Alarm Time\t: %u:%u:%u.%09u\n"
+> +                          "Alarm Date\t: %u-%u-%u\n"
+> +                          "Alarm Daylight\t: %u\n"
+> +                          "Enabled\t\t: %s\n"
+> +                          "Pending\t\t: %s\n",
+> +                          alm.hour, alm.minute, alm.second, alm.nanosecond,
+> +                          alm.year, alm.month, alm.day,
+> +                          alm.daylight,
+> +                          enabled == 1 ? "yes" : "no",
+> +                          pending == 1 ? "yes" : "no");
+> +
+> +               if (eft.timezone == EFI_UNSPECIFIED_TIMEZONE)
+> +                       seq_puts(seq, "Timezone\t: unspecified\n");
+> +               else
+> +                       /* XXX fixme: convert to string? */
+> +                       seq_printf(seq, "Timezone\t: %u\n", alm.timezone);
+> +       }
+>
+>         /*
+>          * now prints the capabilities
+> @@ -269,7 +272,10 @@ static int __init efi_rtc_probe(struct platform_device *dev)
+>
+>         rtc->ops = &efi_rtc_ops;
+>         clear_bit(RTC_FEATURE_UPDATE_INTERRUPT, rtc->features);
+> -       set_bit(RTC_FEATURE_ALARM_WAKEUP_ONLY, rtc->features);
+> +       if (efi_rt_services_supported(EFI_RT_SUPPORTED_WAKEUP_SERVICES))
+> +               set_bit(RTC_FEATURE_ALARM_WAKEUP_ONLY, rtc->features);
+> +       else
+> +               clear_bit(RTC_FEATURE_ALARM, rtc->features);
+>
+>         device_init_wakeup(&dev->dev, true);
+>
+> diff --git a/include/linux/efi.h b/include/linux/efi.h
+> index 4b27519143f56..98598bd1d2fa5 100644
+> --- a/include/linux/efi.h
+> +++ b/include/linux/efi.h
+> @@ -668,7 +668,8 @@ extern struct efi {
+>
+>  #define EFI_RT_SUPPORTED_ALL                                   0x3fff
+>
+> -#define EFI_RT_SUPPORTED_TIME_SERVICES                         0x000f
+> +#define EFI_RT_SUPPORTED_TIME_SERVICES                         0x0003
+> +#define EFI_RT_SUPPORTED_WAKEUP_SERVICES                       0x000c
+>  #define EFI_RT_SUPPORTED_VARIABLE_SERVICES                     0x0070
+>
+>  extern struct mm_struct efi_mm;
+> --
+> 2.25.1
+>
