@@ -2,35 +2,38 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6DD4EC3DA7A
-	for <linux-efi@archiver.kernel.org>; Thu,  5 Jan 2023 04:17:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A1CD8C3DA7D
+	for <linux-efi@archiver.kernel.org>; Thu,  5 Jan 2023 04:41:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229535AbjAEERo (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 4 Jan 2023 23:17:44 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40670 "EHLO
+        id S229682AbjAEEl4 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 4 Jan 2023 23:41:56 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47892 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229924AbjAEERe (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 4 Jan 2023 23:17:34 -0500
-Received: from a48-122.smtp-out.amazonses.com (a48-122.smtp-out.amazonses.com [54.240.48.122])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D0B622F78A;
-        Wed,  4 Jan 2023 20:17:32 -0800 (PST)
+        with ESMTP id S229441AbjAEElz (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 4 Jan 2023 23:41:55 -0500
+X-Greylist: delayed 1520 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 04 Jan 2023 20:41:52 PST
+Received: from a27-43.smtp-out.us-west-2.amazonses.com (a27-43.smtp-out.us-west-2.amazonses.com [54.240.27.43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7FD632035;
+        Wed,  4 Jan 2023 20:41:49 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
-        s=zp2ap7btoiiow65hultmctjebh3tse7g; d=aaront.org; t=1672892252;
-        h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:MIME-Version:Content-Transfer-Encoding;
-        bh=7x0zcYTnDW/0V3YX6tNEC/SbTk6ln4b3Dz3YfT/7uzw=;
-        b=AiYjSxo4S6yHni5Hq7iJXcrI5XfwhbOZlmmJk4b3KK08GolCaWK7nCoU0/e1ceuo
-        e78R6JhUMRT//OAXyXCQwF8TVUa+JzLH6mzRM1M5GkFWu7EMnplW5sMAMxtn7LXRNZk
-        +iIxc/IKOvGxJxllOw9dooLGAg9DT+RMR58bC6ww=
+        s=ude52klaz7ukvnrchdbsicqdl2lnui6h; d=aaront.org; t=1672891368;
+        h=MIME-Version:Date:From:To:Cc:Subject:In-Reply-To:References:Message-ID:Content-Type:Content-Transfer-Encoding;
+        bh=UaVZxhaholgYXRv1rnjX2lEzJ1yj5wIkBR8OS8N2qdE=;
+        b=A2eIR5Z+ZuwTZpmlUW6p3X7w1442qVqEfxphxcVa4f8BWgZS0GCAeSQGiy9WoZnw
+        mcQpE4Qu9yWk9uVQ5MWvV4mNWWf+rDULMlHvYdFTRmabXYTd4L0gws9010zGZxX5hin
+        fPHaRGjS4NAX5B1Yl9o/wrTepjvNri3mgKf3dvH0=
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
-        s=6gbrjpgwjskckoa6a5zn6fwqkn67xbtw; d=amazonses.com; t=1672892252;
-        h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:MIME-Version:Content-Transfer-Encoding:Feedback-ID;
-        bh=7x0zcYTnDW/0V3YX6tNEC/SbTk6ln4b3Dz3YfT/7uzw=;
-        b=b9UFfezr/R0asCAnF0VSnGmlOUkAMKNqwaIZTTuaUSSBuIRecMn6B3yxLvCpr0CO
-        1lYQAlygiBJZKneRg3V5fnlpqQfhWor6otDp4qqA6WsAaSCwJbmIjBYafPzQxxsgwG4
-        Hp51zYedEnZYoY5NFmMGi+J60sFditLaVibBQ0DA=
+        s=gdwg2y3kokkkj5a55z2ilkup5wp5hhxx; d=amazonses.com; t=1672891368;
+        h=MIME-Version:Date:From:To:Cc:Subject:In-Reply-To:References:Message-ID:Content-Type:Content-Transfer-Encoding:Feedback-ID;
+        bh=UaVZxhaholgYXRv1rnjX2lEzJ1yj5wIkBR8OS8N2qdE=;
+        b=BsiWU+dJSpdLMh9mVDhNN5url3xV6w8RpkkvzVRJJjx8wL3BwOJJl5m7wmd1ikJZ
+        zu9baddo9xz4TCGrCiVOvr5I7X9kChQH+9haBjHMpUFWMNW064IG+KHd5YgBxTUfIdJ
+        EO1D4OH5rLYYcS/x4VpkzScGIMFt3SzjPuZFTMRY=
+MIME-Version: 1.0
+Date:   Thu, 5 Jan 2023 04:02:47 +0000
 From:   Aaron Thompson <dev@aaront.org>
-To:     Mike Rapoport <rppt@kernel.org>, linux-mm@kvack.org
-Cc:     "H. Peter Anvin" <hpa@zytor.com>,
+To:     Mike Rapoport <rppt@kernel.org>
+Cc:     linux-mm@kvack.org, "H. Peter Anvin" <hpa@zytor.com>,
         Alexander Potapenko <glider@google.com>,
         Andrew Morton <akpm@linux-foundation.org>,
         Andy Shevchenko <andy@infradead.org>,
@@ -38,124 +41,141 @@ Cc:     "H. Peter Anvin" <hpa@zytor.com>,
         Borislav Petkov <bp@alien8.de>,
         Darren Hart <dvhart@infradead.org>,
         Dave Hansen <dave.hansen@linux.intel.com>,
-        David Rientjes <rientjes@google.com>,
         Dmitry Vyukov <dvyukov@google.com>,
         Ingo Molnar <mingo@redhat.com>, Marco Elver <elver@google.com>,
         Thomas Gleixner <tglx@linutronix.de>,
         kasan-dev@googlegroups.com, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org, platform-driver-x86@vger.kernel.org,
-        x86@kernel.org, Aaron Thompson <dev@aaront.org>
-Subject: [PATCH v2 1/1] mm: Always release pages to the buddy allocator in memblock_free_late().
-Date:   Thu, 5 Jan 2023 04:17:31 +0000
-Message-ID: <010001858025fc22-e619988e-c0a5-4545-bd93-783890b9ad14-000000@email.amazonses.com>
-X-Mailer: git-send-email 2.30.2
-In-Reply-To: <20230105041650.1485-1-dev@aaront.org>
-References: <010101857bbc3a41-173240b3-9064-42ef-93f3-482081126ec2-000000@us-west-2.amazonses.com>
- <20230105041650.1485-1-dev@aaront.org>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Feedback-ID: 1.us-east-1.8/56jQl+KfkRukJqWjlnf+MtEL0x/NchId1fC0q616g=:AmazonSES
-X-SES-Outgoing: 2023.01.05-54.240.48.122
+        x86@kernel.org
+Subject: Re: [PATCH 1/1] mm: Always release pages to the buddy allocator in
+ memblock_free_late().
+In-Reply-To: <Y7XU4Wf2ohArLtvs@kernel.org>
+References: <20230104074215.2621-1-dev@aaront.org>
+ <010101857bbc4d26-d9683bb4-c4f0-465b-aea6-5314dbf0aa01-000000@us-west-2.amazonses.com>
+ <Y7XU4Wf2ohArLtvs@kernel.org>
+User-Agent: Roundcube Webmail/1.4.13
+Message-ID: <01010185801881b4-2dd5c952-d967-414b-9dc6-7edb04436342-000000@us-west-2.amazonses.com>
+X-Sender: dev@aaront.org
+Content-Type: text/plain; charset=US-ASCII;
+ format=flowed
+Content-Transfer-Encoding: 7bit
+Feedback-ID: 1.us-west-2.OwdjDcIoZWY+bZWuVZYzryiuW455iyNkDEZFeL97Dng=:AmazonSES
+X-SES-Outgoing: 2023.01.05-54.240.27.43
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-If CONFIG_DEFERRED_STRUCT_PAGE_INIT is enabled, memblock_free_pages()
-only releases pages to the buddy allocator if they are not in the
-deferred range. This is correct for free pages (as defined by
-for_each_free_mem_pfn_range_in_zone()) because free pages in the
-deferred range will be initialized and released as part of the deferred
-init process. memblock_free_pages() is called by memblock_free_late(),
-which is used to free reserved ranges after memblock_free_all() has
-run. All pages in reserved ranges have been initialized at that point,
-and accordingly, those pages are not touched by the deferred init
-process. This means that currently, if the pages that
-memblock_free_late() intends to release are in the deferred range, they
-will never be released to the buddy allocator. They will forever be
-reserved.
+Hi Mike,
 
-In addition, memblock_free_pages() calls kmsan_memblock_free_pages(),
-which is also correct for free pages but is not correct for reserved
-pages. KMSAN metadata for reserved pages is initialized by
-kmsan_init_shadow(), which runs shortly before memblock_free_all().
+On 2023-01-04 11:34, Mike Rapoport wrote:
+> Hi,
+> 
+> On Wed, Jan 04, 2023 at 07:43:36AM +0000, Aaron Thompson wrote:
+>> If CONFIG_DEFERRED_STRUCT_PAGE_INIT is enabled, memblock_free_pages()
+>> only releases pages to the buddy allocator if they are not in the
+>> deferred range. This is correct for free pages (as defined by
+>> for_each_free_mem_pfn_range_in_zone()) because free pages in the
+>> deferred range will be initialized and released as part of the 
+>> deferred
+>> init process. memblock_free_pages() is called by memblock_free_late(),
+>> which is used to free reserved ranges after memblock_free_all() has
+>> run. memblock_free_all() initializes all pages in reserved ranges, and
+> 
+> To be precise, memblock_free_all() frees pages, or releases them to the
+> pages allocator, rather than initializes.
 
-For both of these reasons, memblock_free_pages() should only be called
-for free pages, and memblock_free_late() should call __free_pages_core()
-directly instead.
+As you mentioned in the comment below, whether memblock_free_all() does 
+any
+initializing depends on the particular deferred init situation.
+memblock_free_all() does ultimately call init_reserved_page() for every 
+reserved
+page (via reserve_bootmem_region()), but that only actually initializes 
+the page
+if it's in the deferred range. In either case, all I was trying to say 
+here is
+that we can be certain that all reserved pages have been initialized 
+after
+memblock_free_all() has run, so I'll rephrase that.
 
-One case where this issue can occur in the wild is EFI boot on
-x86_64. The x86 EFI code reserves all EFI boot services memory ranges
-via memblock_reserve() and frees them later via memblock_free_late()
-(efi_reserve_boot_services() and efi_free_boot_services(),
-respectively). If any of those ranges happen to fall within the deferred
-init range, the pages will not be released and that memory will be
-unavailable.
+>> accordingly, those pages are not touched by the deferred init
+>> process. This means that currently, if the pages that
+>> memblock_free_late() intends to release are in the deferred range, 
+>> they
+>> will never be released to the buddy allocator. They will forever be
+>> reserved.
+>> 
+>> In addition, memblock_free_pages() calls kmsan_memblock_free_pages(),
+>> which is also correct for free pages but is not correct for reserved
+>> pages. KMSAN metadata for reserved pages is initialized by
+>> kmsan_init_shadow(), which runs shortly before memblock_free_all().
+>> 
+>> For both of these reasons, memblock_free_pages() should only be called
+>> for free pages, and memblock_free_late() should call 
+>> __free_pages_core()
+>> directly instead.
+> 
+> Overall looks fine to me and I couldn't spot potential issues.
+> 
+> I'd appreciate if you add a paragraph about the actual issue with EFI 
+> boot
+> you described in the cover letter to the commit message.
 
-For example, on an Amazon EC2 t3.micro VM (1 GB) booting via EFI:
+Sure, will do.
 
-v6.2-rc2:
-  # grep -E 'Node|spanned|present|managed' /proc/zoneinfo
-  Node 0, zone      DMA
-          spanned  4095
-          present  3999
-          managed  3840
-  Node 0, zone    DMA32
-          spanned  246652
-          present  245868
-          managed  178867
+>> Fixes: 3a80a7fa7989 ("mm: meminit: initialise a subset of struct pages 
+>> if CONFIG_DEFERRED_STRUCT_PAGE_INIT is set")
+>> Signed-off-by: Aaron Thompson <dev@aaront.org>
+>> ---
+>>  mm/memblock.c                     | 2 +-
+>>  tools/testing/memblock/internal.h | 4 ++++
+>>  2 files changed, 5 insertions(+), 1 deletion(-)
+>> 
+>> diff --git a/mm/memblock.c b/mm/memblock.c
+>> index 511d4783dcf1..56a5b6086c50 100644
+>> --- a/mm/memblock.c
+>> +++ b/mm/memblock.c
+>> @@ -1640,7 +1640,7 @@ void __init memblock_free_late(phys_addr_t base, 
+>> phys_addr_t size)
+>>  	end = PFN_DOWN(base + size);
+>> 
+>>  	for (; cursor < end; cursor++) {
+>> -		memblock_free_pages(pfn_to_page(cursor), cursor, 0);
+>> +		__free_pages_core(pfn_to_page(cursor), 0);
+> 
+> Please add a comment that explains why it is safe to call
+> __free_pages_core() here.
+> Something like
+> 
+> 	/*
+> 	 * Reserved pages are always initialized by the end of
+> 	 * memblock_free_all() either during memmap_init() or, with deferred
+> 	 * initialization if struct page in reserve_bootmem_region()
+> 	 */
 
-v6.2-rc2 + patch:
-  # grep -E 'Node|spanned|present|managed' /proc/zoneinfo
-  Node 0, zone      DMA
-          spanned  4095
-          present  3999
-          managed  3840
-  Node 0, zone    DMA32
-          spanned  246652
-          present  245868
-          managed  222816
+Will do. Thanks for the review.
 
-Fixes: 3a80a7fa7989 ("mm: meminit: initialise a subset of struct pages if CONFIG_DEFERRED_STRUCT_PAGE_INIT is set")
-Signed-off-by: Aaron Thompson <dev@aaront.org>
----
- mm/memblock.c                     | 8 +++++++-
- tools/testing/memblock/internal.h | 4 ++++
- 2 files changed, 11 insertions(+), 1 deletion(-)
+>>  		totalram_pages_inc();
+>>  	}
+>>  }
+>> diff --git a/tools/testing/memblock/internal.h 
+>> b/tools/testing/memblock/internal.h
+>> index fdb7f5db7308..85973e55489e 100644
+>> --- a/tools/testing/memblock/internal.h
+>> +++ b/tools/testing/memblock/internal.h
+>> @@ -15,6 +15,10 @@ bool mirrored_kernelcore = false;
+>> 
+>>  struct page {};
+>> 
+>> +void __free_pages_core(struct page *page, unsigned int order)
+>> +{
+>> +}
+>> +
+>>  void memblock_free_pages(struct page *page, unsigned long pfn,
+>>  			 unsigned int order)
+>>  {
+>> --
+>> 2.30.2
+>> 
 
-diff --git a/mm/memblock.c b/mm/memblock.c
-index 511d4783dcf1..fc3d8fbd2060 100644
---- a/mm/memblock.c
-+++ b/mm/memblock.c
-@@ -1640,7 +1640,13 @@ void __init memblock_free_late(phys_addr_t base, phys_addr_t size)
- 	end = PFN_DOWN(base + size);
- 
- 	for (; cursor < end; cursor++) {
--		memblock_free_pages(pfn_to_page(cursor), cursor, 0);
-+		/*
-+		 * Reserved pages are always initialized by the end of
-+		 * memblock_free_all() (by memmap_init() and, if deferred
-+		 * initialization is enabled, memmap_init_reserved_pages()), so
-+		 * these pages can be released directly to the buddy allocator.
-+		 */
-+		__free_pages_core(pfn_to_page(cursor), 0);
- 		totalram_pages_inc();
- 	}
- }
-diff --git a/tools/testing/memblock/internal.h b/tools/testing/memblock/internal.h
-index fdb7f5db7308..85973e55489e 100644
---- a/tools/testing/memblock/internal.h
-+++ b/tools/testing/memblock/internal.h
-@@ -15,6 +15,10 @@ bool mirrored_kernelcore = false;
- 
- struct page {};
- 
-+void __free_pages_core(struct page *page, unsigned int order)
-+{
-+}
-+
- void memblock_free_pages(struct page *page, unsigned long pfn,
- 			 unsigned int order)
- {
--- 
-2.30.2
-
+Thanks,
+-- Aaron
