@@ -2,144 +2,160 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E09F1C63707
-	for <linux-efi@archiver.kernel.org>; Fri,  6 Jan 2023 17:47:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 22B75C54EBD
+	for <linux-efi@archiver.kernel.org>; Fri,  6 Jan 2023 22:27:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235450AbjAFRrq (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 6 Jan 2023 12:47:46 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40962 "EHLO
+        id S229995AbjAFW1A (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 6 Jan 2023 17:27:00 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52324 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235815AbjAFRre (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 6 Jan 2023 12:47:34 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3D82765BA
-        for <linux-efi@vger.kernel.org>; Fri,  6 Jan 2023 09:47:33 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id F2A2CB81E43
-        for <linux-efi@vger.kernel.org>; Fri,  6 Jan 2023 17:47:31 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 36A69C43396;
-        Fri,  6 Jan 2023 17:47:29 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1673027250;
-        bh=BseEePZnqnWaZL4ayqR2kOwTtRp2TnxAyINkH5Yjn8g=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=u4XzZ8UzLec9KIhNtHgnQK3dx3ixV+aBcrCqAz0bIeVGF740ZKLBQYE8cbRAkd/CY
-         FAcemDbVxzP9OJa/DoWMaj0t5kBFPfY7N3x1jnlUfXR52ZW7ki515kI9hM0bFpvPx4
-         dzUHVglVDkNk15S2pdsaOJjlVKzFtknKOdlle0VuauurwRg5tjLUxBYZ9TGnBOfCFU
-         ozJzzs1m3azojdQrrTxsbZaw+p9Wzv9uztFdvRBzIbG1IdFlYIoNkZ5t/TCDpdmzUf
-         v1gc7BUkxJipYYUfadaNSj2hlsXdta6D3lB8HmcQHMBHg8Cdt95DrLjk7D7faw5mgq
-         o6W7m2xOb7Q+A==
-From:   Ard Biesheuvel <ardb@kernel.org>
-To:     linux-efi@vger.kernel.org
-Cc:     linux-arm-kernel@lists.infradead.org, will@kernel.org,
-        catalin.marinas@arm.com, Ard Biesheuvel <ardb@kernel.org>,
-        Mark Rutland <mark.rutland@arm.com>, Lee Jones <lee@kernel.org>
-Subject: [PATCH v3 1/2] arm64: efi: Avoid workqueue to check whether EFI runtime is live
-Date:   Fri,  6 Jan 2023 18:47:02 +0100
-Message-Id: <20230106174703.1883495-2-ardb@kernel.org>
-X-Mailer: git-send-email 2.39.0
-In-Reply-To: <20230106174703.1883495-1-ardb@kernel.org>
-References: <20230106174703.1883495-1-ardb@kernel.org>
+        with ESMTP id S232530AbjAFW07 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 6 Jan 2023 17:26:59 -0500
+X-Greylist: delayed 251 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Fri, 06 Jan 2023 14:26:56 PST
+Received: from a27-189.smtp-out.us-west-2.amazonses.com (a27-189.smtp-out.us-west-2.amazonses.com [54.240.27.189])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E1C4484BC9;
+        Fri,  6 Jan 2023 14:26:56 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
+        s=ude52klaz7ukvnrchdbsicqdl2lnui6h; d=aaront.org; t=1673043764;
+        h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:MIME-Version:Content-Transfer-Encoding;
+        bh=IAkFUGfi9w2afJOCyL3pooFYYZISSP9VHYGQ+Y9eV2o=;
+        b=OYQCLSIch6DOwmPX2K8Ll7OHaE8uo0iDC49rm1Yz5s67bjhmmLXll+DnrBIPUbQF
+        yF6MFuIP7nRN58Hj4oHw2yg8uGnKs2pETEnoRfv9mrfj7+tO9mQTTvu0nt4Uv3ENJOc
+        wVohCO1FxB/IYTPURz8yt+ObzVM9XF2ofJ+437uA=
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
+        s=gdwg2y3kokkkj5a55z2ilkup5wp5hhxx; d=amazonses.com; t=1673043764;
+        h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:MIME-Version:Content-Transfer-Encoding:Feedback-ID;
+        bh=IAkFUGfi9w2afJOCyL3pooFYYZISSP9VHYGQ+Y9eV2o=;
+        b=ASqI4DHBxjBX+v7OS/nDhaunCTOVvrcIal3o7kqmS2TofWDDH2qGUpW5nv4C6rmv
+        XjjbRxOlJG5rMtAAehcz5SVXpQeV4X9qHHQiBEyLVq89Pq4fI2z0JP1ofB92pgrN1w0
+        lK7AbBwXoQb+X/FlaDBhg0HRZq7FYYRyff50IwN4=
+From:   Aaron Thompson <dev@aaront.org>
+To:     Mike Rapoport <rppt@kernel.org>, linux-mm@kvack.org
+Cc:     "H. Peter Anvin" <hpa@zytor.com>,
+        Alexander Potapenko <glider@google.com>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Andy Shevchenko <andy@infradead.org>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Borislav Petkov <bp@alien8.de>,
+        Darren Hart <dvhart@infradead.org>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        David Rientjes <rientjes@google.com>,
+        Dmitry Vyukov <dvyukov@google.com>,
+        Ingo Molnar <mingo@redhat.com>, Marco Elver <elver@google.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        kasan-dev@googlegroups.com, linux-efi@vger.kernel.org,
+        linux-kernel@vger.kernel.org, platform-driver-x86@vger.kernel.org,
+        x86@kernel.org, Aaron Thompson <dev@aaront.org>
+Subject: [PATCH v3 1/1] mm: Always release pages to the buddy allocator in memblock_free_late().
+Date:   Fri, 6 Jan 2023 22:22:44 +0000
+Message-ID: <01010185892de53e-e379acfb-7044-4b24-b30a-e2657c1ba989-000000@us-west-2.amazonses.com>
+X-Mailer: git-send-email 2.30.2
+In-Reply-To: <20230106222222.1024-1-dev@aaront.org>
+References: <20230106222222.1024-1-dev@aaront.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=3353; i=ardb@kernel.org; h=from:subject; bh=BseEePZnqnWaZL4ayqR2kOwTtRp2TnxAyINkH5Yjn8g=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjuF6V8rda77TfbpvagjLK6TQra2+V4zTrZXhVO9Nx mw2rT6qJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCY7helQAKCRDDTyI5ktmPJKHEDA CcMsgAcS8y6z7ZbnxUSJlieeI4pM+JMUodo7n+9GkaZBltKeY/EOwzQNcujAgDLelhiLiJ19zh2ggP +WF7oNBRhoXd33YBsC0XM0/nTcnCeT/FIOfbfLiAeAhOAeZKfdWDe7TBRfqAJntiI8Q6K5fy6I45n3 JUh0ZlUiEhEeL76cjCL4ts3WHtgCV2RPlDJIY+1nHVQh02mRaynPc7SCaBAfnPTXi4R8BQBiFnOgO0 sJeC/AgbZqj6rAx/0BmdXIFGrIp/b/4dMmgU4o5UtBpr5ErcMZXDJjSJuD5aaI9dP6mL77VKjsyTA0 7n6NNScF4RhG/LD7zVr1W+KRnl54ZXgrDKD7EMZ2eQaJvst6V7QzYqeymMAj1LCyvajDj4PsV6m5Hg v8nAJ2RQE+8Y8Kl9NdZCQLOg80KcR0ElwkmksB8eEpUEe2drh3TdgKXoX/8caZeGmyW4cj3hCvukKb eO88+fiwg/EHmu9hSwVsXz6v1uCkX4TCmJeQHhwegpd1c=
-X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
+Feedback-ID: 1.us-west-2.OwdjDcIoZWY+bZWuVZYzryiuW455iyNkDEZFeL97Dng=:AmazonSES
+X-SES-Outgoing: 2023.01.06-54.240.27.189
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Comparing current_work() against efi_rts_work.work is sufficient to
-decide whether current is currently running EFI runtime services code at
-any level in its call stack.
+If CONFIG_DEFERRED_STRUCT_PAGE_INIT is enabled, memblock_free_pages()
+only releases pages to the buddy allocator if they are not in the
+deferred range. This is correct for free pages (as defined by
+for_each_free_mem_pfn_range_in_zone()) because free pages in the
+deferred range will be initialized and released as part of the deferred
+init process. memblock_free_pages() is called by memblock_free_late(),
+which is used to free reserved ranges after memblock_free_all() has
+run. All pages in reserved ranges have been initialized at that point,
+and accordingly, those pages are not touched by the deferred init
+process. This means that currently, if the pages that
+memblock_free_late() intends to release are in the deferred range, they
+will never be released to the buddy allocator. They will forever be
+reserved.
 
-However, there are other potential users of the EFI runtime stack, such
-as the ACPI subsystem, which may invoke efi_call_virt_pointer()
-directly, and so any sync exceptions occurring in firmware during those
-calls are currently misidentified.
+In addition, memblock_free_pages() calls kmsan_memblock_free_pages(),
+which is also correct for free pages but is not correct for reserved
+pages. KMSAN metadata for reserved pages is initialized by
+kmsan_init_shadow(), which runs shortly before memblock_free_all().
 
-So instead, let's check whether 'current' has preemption disabled, and
-whether the stashed value of the thread stack pointer points into
-current's thread stack. This can only be the case if current was
-interrupted while running EFI runtime code. This implies that we should
-clear the stashed value after switching back, to avoid false positives.
+For both of these reasons, memblock_free_pages() should only be called
+for free pages, and memblock_free_late() should call __free_pages_core()
+directly instead.
 
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+One case where this issue can occur in the wild is EFI boot on
+x86_64. The x86 EFI code reserves all EFI boot services memory ranges
+via memblock_reserve() and frees them later via memblock_free_late()
+(efi_reserve_boot_services() and efi_free_boot_services(),
+respectively). If any of those ranges happens to fall within the
+deferred init range, the pages will not be released and that memory will
+be unavailable.
+
+For example, on an Amazon EC2 t3.micro VM (1 GB) booting via EFI:
+
+v6.2-rc2:
+  # grep -E 'Node|spanned|present|managed' /proc/zoneinfo
+  Node 0, zone      DMA
+          spanned  4095
+          present  3999
+          managed  3840
+  Node 0, zone    DMA32
+          spanned  246652
+          present  245868
+          managed  178867
+
+v6.2-rc2 + patch:
+  # grep -E 'Node|spanned|present|managed' /proc/zoneinfo
+  Node 0, zone      DMA
+          spanned  4095
+          present  3999
+          managed  3840
+  Node 0, zone    DMA32
+          spanned  246652
+          present  245868
+          managed  222816   # +43,949 pages
+
+Fixes: 3a80a7fa7989 ("mm: meminit: initialise a subset of struct pages if CONFIG_DEFERRED_STRUCT_PAGE_INIT is set")
+Signed-off-by: Aaron Thompson <dev@aaront.org>
 ---
- arch/arm64/include/asm/efi.h       | 9 +++++++++
- arch/arm64/kernel/efi-rt-wrapper.S | 6 ++++++
- arch/arm64/kernel/efi.c            | 3 ++-
- 3 files changed, 17 insertions(+), 1 deletion(-)
+ mm/memblock.c                     | 8 +++++++-
+ tools/testing/memblock/internal.h | 4 ++++
+ 2 files changed, 11 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
-index 31d13a6001df49c4..f68d13c3a44e7bb2 100644
---- a/arch/arm64/include/asm/efi.h
-+++ b/arch/arm64/include/asm/efi.h
-@@ -48,8 +48,17 @@ int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
- })
+diff --git a/mm/memblock.c b/mm/memblock.c
+index 511d4783dcf1..fc3d8fbd2060 100644
+--- a/mm/memblock.c
++++ b/mm/memblock.c
+@@ -1640,7 +1640,13 @@ void __init memblock_free_late(phys_addr_t base, phys_addr_t size)
+ 	end = PFN_DOWN(base + size);
  
- extern spinlock_t efi_rt_lock;
-+extern u64 *efi_rt_stack_top;
- efi_status_t __efi_rt_asm_wrapper(void *, const char *, ...);
+ 	for (; cursor < end; cursor++) {
+-		memblock_free_pages(pfn_to_page(cursor), cursor, 0);
++		/*
++		 * Reserved pages are always initialized by the end of
++		 * memblock_free_all() (by memmap_init() and, if deferred
++		 * initialization is enabled, memmap_init_reserved_pages()), so
++		 * these pages can be released directly to the buddy allocator.
++		 */
++		__free_pages_core(pfn_to_page(cursor), 0);
+ 		totalram_pages_inc();
+ 	}
+ }
+diff --git a/tools/testing/memblock/internal.h b/tools/testing/memblock/internal.h
+index fdb7f5db7308..85973e55489e 100644
+--- a/tools/testing/memblock/internal.h
++++ b/tools/testing/memblock/internal.h
+@@ -15,6 +15,10 @@ bool mirrored_kernelcore = false;
  
-+/*
-+ * efi_rt_stack_top[-1] contains the value the stack pointer had before
-+ * switching to the EFI runtime stack.
-+ */
-+#define current_in_efi()						\
-+	(!preemptible() &&						\
-+	 on_task_stack(current, READ_ONCE(efi_rt_stack_top[-1]), 1))
+ struct page {};
+ 
++void __free_pages_core(struct page *page, unsigned int order)
++{
++}
 +
- #define ARCH_EFI_IRQ_FLAGS_MASK (PSR_D_BIT | PSR_A_BIT | PSR_I_BIT | PSR_F_BIT)
- 
- /*
-diff --git a/arch/arm64/kernel/efi-rt-wrapper.S b/arch/arm64/kernel/efi-rt-wrapper.S
-index a00886410537d6a6..11f3ec9f09e86de6 100644
---- a/arch/arm64/kernel/efi-rt-wrapper.S
-+++ b/arch/arm64/kernel/efi-rt-wrapper.S
-@@ -45,7 +45,10 @@ SYM_FUNC_START(__efi_rt_asm_wrapper)
- 	mov	x4, x6
- 	blr	x8
- 
-+	mov	x16, sp
- 	mov	sp, x29
-+	str	xzr, [x16, #8]			// clear recorded task SP value
-+
- 	ldp	x1, x2, [sp, #16]
- 	cmp	x2, x18
- 	ldp	x29, x30, [sp], #112
-@@ -70,6 +73,9 @@ SYM_FUNC_END(__efi_rt_asm_wrapper)
- SYM_CODE_START(__efi_rt_asm_recover)
- 	mov	sp, x30
- 
-+	ldr_l	x16, efi_rt_stack_top		// clear recorded task SP value
-+	str	xzr, [x16, #-8]
-+
- 	ldp	x19, x20, [sp, #32]
- 	ldp	x21, x22, [sp, #48]
- 	ldp	x23, x24, [sp, #64]
-diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-index fab05de2e12dd5d8..b273900f45668587 100644
---- a/arch/arm64/kernel/efi.c
-+++ b/arch/arm64/kernel/efi.c
-@@ -11,6 +11,7 @@
- #include <linux/init.h>
- 
- #include <asm/efi.h>
-+#include <asm/stacktrace.h>
- 
- static bool region_is_misaligned(const efi_memory_desc_t *md)
+ void memblock_free_pages(struct page *page, unsigned long pfn,
+ 			 unsigned int order)
  {
-@@ -154,7 +155,7 @@ asmlinkage efi_status_t __efi_rt_asm_recover(void);
- bool efi_runtime_fixup_exception(struct pt_regs *regs, const char *msg)
- {
- 	 /* Check whether the exception occurred while running the firmware */
--	if (current_work() != &efi_rts_work.work || regs->pc >= TASK_SIZE_64)
-+	if (!current_in_efi() || regs->pc >= TASK_SIZE_64)
- 		return false;
- 
- 	pr_err(FW_BUG "Unable to handle %s in EFI runtime service\n", msg);
 -- 
-2.39.0
+2.30.2
 
