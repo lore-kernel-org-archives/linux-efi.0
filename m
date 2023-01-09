@@ -2,141 +2,100 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 41EF5C67871
-	for <linux-efi@archiver.kernel.org>; Mon,  9 Jan 2023 13:26:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F23BFC5479D
+	for <linux-efi@archiver.kernel.org>; Mon,  9 Jan 2023 13:46:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233330AbjAIN0x (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 9 Jan 2023 08:26:53 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42370 "EHLO
+        id S229715AbjAINqR (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 9 Jan 2023 08:46:17 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59088 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230005AbjAIN0x (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 9 Jan 2023 08:26:53 -0500
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 52AFC8FE2
-        for <linux-efi@vger.kernel.org>; Mon,  9 Jan 2023 05:26:51 -0800 (PST)
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id E3D7DC14;
-        Mon,  9 Jan 2023 05:27:32 -0800 (PST)
-Received: from FVFF77S0Q05N (unknown [10.57.46.123])
-        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id D5C833F23F;
-        Mon,  9 Jan 2023 05:26:49 -0800 (PST)
-Date:   Mon, 9 Jan 2023 13:26:43 +0000
-From:   Mark Rutland <mark.rutland@arm.com>
-To:     Ard Biesheuvel <ardb@kernel.org>
+        with ESMTP id S233067AbjAINqQ (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 9 Jan 2023 08:46:16 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3B56618E2A
+        for <linux-efi@vger.kernel.org>; Mon,  9 Jan 2023 05:46:16 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id EADA3B80C9C
+        for <linux-efi@vger.kernel.org>; Mon,  9 Jan 2023 13:46:14 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A1EECC433F2
+        for <linux-efi@vger.kernel.org>; Mon,  9 Jan 2023 13:46:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1673271973;
+        bh=EWIDLHaJ6MtuiTFHAfhWEiMc23gHVVdToeibVDc/oZE=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=gnTHXFfVBf86Evf0Rjxa+dg8vVKRNvR/3HIUvqQhxPZb5wy+j9mjJ+GJ3muzcR6ES
+         Tsj0a+sbvS6l2mUtpbnHFUm3/WXFyWc7Wt/ZxboGvlxnrjB8SVd8q7bsbunqz9YlYT
+         PMbazx0k1ErTTaQoGVK1g6hMmDuVgDIob66F+eY00zYTkdq0nMomPmTrr1b9hKgL22
+         Ei+AOZkSMJ4/ZWyFned/CC+zQRQMRp7yTpeIwmyiH5LY09B4tzu72bqTdy6fCaB4gh
+         XtdghBaAD8cZNFXtHFbpPpEUM7t1E9WaNubzdprSYTk7vntpaGI5fyQLaSltr6vtpg
+         idZs8zdbM3c5g==
+Received: by mail-lj1-f181.google.com with SMTP id p25so2711828ljn.12
+        for <linux-efi@vger.kernel.org>; Mon, 09 Jan 2023 05:46:13 -0800 (PST)
+X-Gm-Message-State: AFqh2krkUdKYrpRyYjR1BDo8GPQcK8vBH7unS5CWFvIzVRCZya2A7fWP
+        uzG3rQ1LU8DvO5ZE4iFba/YQWrG+ZyFxoj3C9Yo=
+X-Google-Smtp-Source: AMrXdXsJRH36wVlbKH5XAq7tjjPJdTC7IeJiT3AoKqNRZOA12PUWXcDFe5Rk3Hs7Vood83vankPCCGnVSmarcP2ziMA=
+X-Received: by 2002:a2e:bd0c:0:b0:27f:bc58:3924 with SMTP id
+ n12-20020a2ebd0c000000b0027fbc583924mr3929174ljq.352.1673271971656; Mon, 09
+ Jan 2023 05:46:11 -0800 (PST)
+MIME-Version: 1.0
+References: <20230106174703.1883495-1-ardb@kernel.org> <Y7vuobjqmoyT+MPB@google.com>
+In-Reply-To: <Y7vuobjqmoyT+MPB@google.com>
+From:   Ard Biesheuvel <ardb@kernel.org>
+Date:   Mon, 9 Jan 2023 14:46:00 +0100
+X-Gmail-Original-Message-ID: <CAMj1kXHUdWBZGZBXfukw++RCr6WpALjw-v1Oazs6JFJ5wP2diA@mail.gmail.com>
+Message-ID: <CAMj1kXHUdWBZGZBXfukw++RCr6WpALjw-v1Oazs6JFJ5wP2diA@mail.gmail.com>
+Subject: Re: [PATCH v3 0/2] efi: Follow-up fixes for EFI runtime stack
+To:     Lee Jones <lee@kernel.org>
 Cc:     linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         will@kernel.org, catalin.marinas@arm.com,
-        Lee Jones <lee@kernel.org>
-Subject: Re: [PATCH v3 1/2] arm64: efi: Avoid workqueue to check whether EFI
- runtime is live
-Message-ID: <Y7wWEwHR2RDU/KD3@FVFF77S0Q05N>
-References: <20230106174703.1883495-1-ardb@kernel.org>
- <20230106174703.1883495-2-ardb@kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230106174703.1883495-2-ardb@kernel.org>
+        Mark Rutland <mark.rutland@arm.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Fri, Jan 06, 2023 at 06:47:02PM +0100, Ard Biesheuvel wrote:
-> Comparing current_work() against efi_rts_work.work is sufficient to
-> decide whether current is currently running EFI runtime services code at
-> any level in its call stack.
-> 
-> However, there are other potential users of the EFI runtime stack, such
-> as the ACPI subsystem, which may invoke efi_call_virt_pointer()
-> directly, and so any sync exceptions occurring in firmware during those
-> calls are currently misidentified.
-> 
-> So instead, let's check whether 'current' has preemption disabled, and
-> whether the stashed value of the thread stack pointer points into
-> current's thread stack. This can only be the case if current was
-> interrupted while running EFI runtime code. This implies that we should
-> clear the stashed value after switching back, to avoid false positives.
-> 
-> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+On Mon, 9 Jan 2023 at 11:38, Lee Jones <lee@kernel.org> wrote:
+>
+> On Fri, 06 Jan 2023, Ard Biesheuvel wrote:
+>
+> > Commit ff7a167961d1b ("arm64: efi: Execute runtime services from a
+> > dedicated stack") introduced a dedicated stack for EFI runtime services,
+> > in an attempt to make the execution of EFI runtime services more robust,
+> > given that they execute at the same privilege level as the kernel.
+> >
+> > However, this stack needs to be declared to the stacktrace machinery,
+> > which is careful not to walk the stack when it leads into memory regions
+> > that are not known to be allocated for stack use.
+> >
+> > Also, given that the ACPI code may invoke the low-level EFI runtime call
+> > wrapper without using the dedicated kernel thread and workqueue, we
+> > should take this into account when trying to gracefully handle
+> > synchronous exceptions.
+> >
+> > Changes since v2:
+> > - clear efi_rt_stack_top[-1] from asm code, and use READ_ONCE() to read
+> >   its value when not holding the spinlock, to ensure that all accesses
+> >   are safe under concurrency;
+> > - add Mark's ack to patch #2
+> >
+> > Cc: Mark Rutland <mark.rutland@arm.com>
+> > Cc: Lee Jones <lee@kernel.org>
+> >
+> > Ard Biesheuvel (2):
+> >   arm64: efi: Avoid workqueue to check whether EFI runtime is live
+> >   arm64: efi: Account for the EFI runtime stack in stack unwinder
+>
+> Should either / both of these be routed to Stable?
+>
+> If so, we should probably Cc: them.
+>
 
-Reviewed-by: Mark Rutland <mark.rutland@arm.com>
+I'll forward them to -stable by hand once all the bits and pieces land
+in Linus's tree.
 
-Thanks for this!
+Feel free to remind in a week or so, though.
 
-Mark.
-
-> ---
->  arch/arm64/include/asm/efi.h       | 9 +++++++++
->  arch/arm64/kernel/efi-rt-wrapper.S | 6 ++++++
->  arch/arm64/kernel/efi.c            | 3 ++-
->  3 files changed, 17 insertions(+), 1 deletion(-)
-> 
-> diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
-> index 31d13a6001df49c4..f68d13c3a44e7bb2 100644
-> --- a/arch/arm64/include/asm/efi.h
-> +++ b/arch/arm64/include/asm/efi.h
-> @@ -48,8 +48,17 @@ int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
->  })
->  
->  extern spinlock_t efi_rt_lock;
-> +extern u64 *efi_rt_stack_top;
->  efi_status_t __efi_rt_asm_wrapper(void *, const char *, ...);
->  
-> +/*
-> + * efi_rt_stack_top[-1] contains the value the stack pointer had before
-> + * switching to the EFI runtime stack.
-> + */
-> +#define current_in_efi()						\
-> +	(!preemptible() &&						\
-> +	 on_task_stack(current, READ_ONCE(efi_rt_stack_top[-1]), 1))
-> +
->  #define ARCH_EFI_IRQ_FLAGS_MASK (PSR_D_BIT | PSR_A_BIT | PSR_I_BIT | PSR_F_BIT)
->  
->  /*
-> diff --git a/arch/arm64/kernel/efi-rt-wrapper.S b/arch/arm64/kernel/efi-rt-wrapper.S
-> index a00886410537d6a6..11f3ec9f09e86de6 100644
-> --- a/arch/arm64/kernel/efi-rt-wrapper.S
-> +++ b/arch/arm64/kernel/efi-rt-wrapper.S
-> @@ -45,7 +45,10 @@ SYM_FUNC_START(__efi_rt_asm_wrapper)
->  	mov	x4, x6
->  	blr	x8
->  
-> +	mov	x16, sp
->  	mov	sp, x29
-> +	str	xzr, [x16, #8]			// clear recorded task SP value
-> +
->  	ldp	x1, x2, [sp, #16]
->  	cmp	x2, x18
->  	ldp	x29, x30, [sp], #112
-> @@ -70,6 +73,9 @@ SYM_FUNC_END(__efi_rt_asm_wrapper)
->  SYM_CODE_START(__efi_rt_asm_recover)
->  	mov	sp, x30
->  
-> +	ldr_l	x16, efi_rt_stack_top		// clear recorded task SP value
-> +	str	xzr, [x16, #-8]
-> +
->  	ldp	x19, x20, [sp, #32]
->  	ldp	x21, x22, [sp, #48]
->  	ldp	x23, x24, [sp, #64]
-> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-> index fab05de2e12dd5d8..b273900f45668587 100644
-> --- a/arch/arm64/kernel/efi.c
-> +++ b/arch/arm64/kernel/efi.c
-> @@ -11,6 +11,7 @@
->  #include <linux/init.h>
->  
->  #include <asm/efi.h>
-> +#include <asm/stacktrace.h>
->  
->  static bool region_is_misaligned(const efi_memory_desc_t *md)
->  {
-> @@ -154,7 +155,7 @@ asmlinkage efi_status_t __efi_rt_asm_recover(void);
->  bool efi_runtime_fixup_exception(struct pt_regs *regs, const char *msg)
->  {
->  	 /* Check whether the exception occurred while running the firmware */
-> -	if (current_work() != &efi_rts_work.work || regs->pc >= TASK_SIZE_64)
-> +	if (!current_in_efi() || regs->pc >= TASK_SIZE_64)
->  		return false;
->  
->  	pr_err(FW_BUG "Unable to handle %s in EFI runtime service\n", msg);
-> -- 
-> 2.39.0
-> 
+Thanks,
+Ard.
