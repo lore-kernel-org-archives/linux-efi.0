@@ -2,72 +2,106 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F33B6C63797
-	for <linux-efi@archiver.kernel.org>; Mon,  9 Jan 2023 13:46:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 19351C54EBD
+	for <linux-efi@archiver.kernel.org>; Mon,  9 Jan 2023 15:11:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229740AbjAINq0 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 9 Jan 2023 08:46:26 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55842 "EHLO
+        id S236456AbjAIPLz (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 9 Jan 2023 10:11:55 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56016 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237072AbjAINoQ (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 9 Jan 2023 08:44:16 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 89B5E321B6
-        for <linux-efi@vger.kernel.org>; Mon,  9 Jan 2023 05:44:15 -0800 (PST)
+        with ESMTP id S234146AbjAIPL1 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 9 Jan 2023 10:11:27 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 197F525C5;
+        Mon,  9 Jan 2023 07:11:02 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 42E80B80DE3
-        for <linux-efi@vger.kernel.org>; Mon,  9 Jan 2023 13:44:14 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0DFDCC433EF;
-        Mon,  9 Jan 2023 13:44:11 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id A902561184;
+        Mon,  9 Jan 2023 15:11:01 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7380BC433EF;
+        Mon,  9 Jan 2023 15:10:59 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1673271852;
-        bh=HWuqgpyBMMyFQaBtxvp5rPBhFSpvCu5gDaP3GKtMO60=;
-        h=From:To:Cc:Subject:Date:From;
-        b=Z3co8LuQUi72+m0bzGE9V/zq4NQKAhrrXR8xsSL7R7pFAHnJUWZiAwQV13uFHsQeA
-         AnAZ+D4SU3ee0/q4tDiJJN4MXwN7VU6Ta3gPP05UoG0rGhH6qkhdSzEHs26iNpqlkZ
-         knXbMMTBuozoj912VKP/GdaHGKc9A07ltttMLOMll3Y7XjutgbKA8RBVPgr3jkilMe
-         du3+HKfdbWK/Fmw2o9FJDCW6Zpa8/sbu3BaDlCG3FKswySktRBu/l8A9xQgeOhoVYS
-         z9hWfhZCfVg7gw5K3dnYhknn18Zbr5Tr+o6yLVLThXeaNemotcyhf2j4hGaNqFD3r3
-         BdFaiMBKB52WA==
-From:   Ard Biesheuvel <ardb@kernel.org>
-To:     linux-efi@vger.kernel.org
-Cc:     linux-arm-kernel@lists.infradead.org,
-        Ard Biesheuvel <ardb@kernel.org>
-Subject: [PATCH] efi: rt-wrapper: Add missing include
-Date:   Mon,  9 Jan 2023 14:44:04 +0100
-Message-Id: <20230109134404.2485721-1-ardb@kernel.org>
-X-Mailer: git-send-email 2.39.0
+        s=k20201202; t=1673277061;
+        bh=odY6QjAbOvpE7fHaT+Q/JFKRR8E2t90LcaafBvzc4W0=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=mw5vM2quubu22s1JORyeWyqPGh+IFo4df8FnVD/XVuM8TLGCIEtEg1uCfjTh2i3U5
+         Bh5uotDxycU8iB52xJvp2faVd4CA8ije0kWNxCuIdA6ZnBfxFjsUqxBrNAZMKwcJyO
+         bJVetnpOW/JOGsv9T0gFfiolE3NLJKgeUV2qKezr3oJzMe3wCuTISpnqBeyVyKIQpo
+         nNElhF3/fGT5kCW7p1GfADdvVj2WOG7arQkzt6ezno4PkjudnK+qE/saeLk0NRymuG
+         VhUzuZ8kOwILOHwbecS+oJLnfpRPg35TrEusfOX4+PrTgqUGpXf/zmVdCKf/uLCz+Y
+         hJ2iwjIWGTRZg==
+Date:   Mon, 9 Jan 2023 15:10:55 +0000
+From:   Will Deacon <will@kernel.org>
+To:     Ard Biesheuvel <ardb@kernel.org>
+Cc:     linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org,
+        catalin.marinas@arm.com, stable@vger.kernel.org,
+        Peter Jones <pjones@redhat.com>,
+        Jarkko Sakkinen <jarkko@kernel.org>,
+        Matthew Garrett <mjg59@srcf.ucam.org>,
+        Nathan Chancellor <nathan@kernel.org>
+Subject: Re: [PATCH] efi: tpm: Avoid READ_ONCE() for accessing the event log
+Message-ID: <20230109151054.GA7817@willie-the-truck>
+References: <20230109095948.2471205-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=701; i=ardb@kernel.org; h=from:subject; bh=HWuqgpyBMMyFQaBtxvp5rPBhFSpvCu5gDaP3GKtMO60=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjvBojjn4FaqrqIetl0MTva+rN/H2F3KOh6Pzrv4vd P6/ZeOCJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCY7waIwAKCRDDTyI5ktmPJPRlDA Cb0ksGfTD6LyTt7BKNJXOBb7csWare6fyyTo1k12aJfs5uO7G3gHD49A55nzxrYSGNUux+xDHqHLOu gqDAH3AtHGUE4jUas6V/VJVZY77GaguQtLEZjiYZCxD/pLpLuQrVQ9VVqwYyHpbYvBri23KkLbcAGN uE42xA+vPlG+cT1H6yNFNWbnrNOmesKv6VsW7dkrVhBYjQqAesVL0pHAwRPrNdEGxoyh4eK749Mj91 aHJdEqCFX3xJchmg19Tx4YzcFgKkXqJ1/fhe+xiwPKfsdfdESneENRtF3U4jwliJMRBb+RAmRHkbwb 4FzEsPyYzcP0wzuF3EWPbsA3ek722RyMIHNoHKCVm1jq3kIyS0J5ELUHNrHyNcGz0lCLgZmhLTtiHT 9GWnIWoaYT87iJ+GJQB+73iVDlu/WdZUZRAh0w6jRib2HF1aEOuHMN7nMuDXbFLQkAX+g+oG6iipSr JHKsX1sDQywGw3OBfPTS4XTENfQvT5DM6d8xoWQLkZ3y0=
-X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230109095948.2471205-1-ardb@kernel.org>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Add the missing #include of asm/assembler.h, which is where the ldr_l
-macro is defined.
+On Mon, Jan 09, 2023 at 10:59:48AM +0100, Ard Biesheuvel wrote:
+> Nathan reports that recent kernels built with LTO will crash when doing
+> EFI boot using Fedora's GRUB and SHIM. The culprit turns out to be a
+> misaligned load from the TPM event log, which is annotated with
+> READ_ONCE(), and under LTO, this gets translated into a LDAR instruction
+> which does not tolerate misaligned accesses.
 
-Fixes: ff7a167961d1b97e ("arm64: efi: Execute runtime services from a dedicated stack")
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
----
- arch/arm64/kernel/efi-rt-wrapper.S | 1 +
- 1 file changed, 1 insertion(+)
+Interesting, that's a funny change in behaviour. READ_ONCE() of an unaligned
+address is pretty sketchy, but if this ends up tripping lots of folks up
+then I suppose we could use a plain load and a DMB LD as an alternative.
+It's likely to be more expensive in the LDAPR case, though.
 
-diff --git a/arch/arm64/kernel/efi-rt-wrapper.S b/arch/arm64/kernel/efi-rt-wrapper.S
-index a00886410537d6a6..d872d18101d83750 100644
---- a/arch/arm64/kernel/efi-rt-wrapper.S
-+++ b/arch/arm64/kernel/efi-rt-wrapper.S
-@@ -4,6 +4,7 @@
-  */
- 
- #include <linux/linkage.h>
-+#include <asm/assembler.h>
- 
- SYM_FUNC_START(__efi_rt_asm_wrapper)
- 	stp	x29, x30, [sp, #-112]!
--- 
-2.39.0
+> Interestingly, this does not happen when booting the same kernel
+> straight from the UEFI shell, and so the fact that the event log may
+> appear misaligned in memory may be caused by a bug in GRUB or SHIM.
+> 
+> However, using READ_ONCE() to access firmware tables is slightly unusual
+> in any case, and here, we only need to ensure that 'event' is not
+> dereferenced again after it gets unmapped, so a compiler barrier should
+> be sufficient, and works around the reported issue.
+> 
+> Cc: <stable@vger.kernel.org>
+> Cc: Peter Jones <pjones@redhat.com>
+> Cc: Jarkko Sakkinen <jarkko@kernel.org>
+> Cc: Matthew Garrett <mjg59@srcf.ucam.org>
+> Reported-by: Nathan Chancellor <nathan@kernel.org>
+> Link: https://github.com/ClangBuiltLinux/linux/issues/1782
+> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+> ---
+>  include/linux/tpm_eventlog.h | 6 ++++--
+>  1 file changed, 4 insertions(+), 2 deletions(-)
+> 
+> diff --git a/include/linux/tpm_eventlog.h b/include/linux/tpm_eventlog.h
+> index 20c0ff54b7a0d313..0abcc85904cba874 100644
+> --- a/include/linux/tpm_eventlog.h
+> +++ b/include/linux/tpm_eventlog.h
+> @@ -198,8 +198,10 @@ static __always_inline int __calc_tpm2_event_size(struct tcg_pcr_event2_head *ev
+>  	 * The loop below will unmap these fields if the log is larger than
+>  	 * one page, so save them here for reference:
+>  	 */
+> -	count = READ_ONCE(event->count);
+> -	event_type = READ_ONCE(event->event_type);
+> +	count = event->count;
+> +	event_type = event->event_type;
+> +
+> +	barrier();
 
+It would be handy to have a comment here, but when I started thinking about
+what that would say, it occurred to me that the unmap operation should
+already have a barrier inside it due to the TLB invalidation, so I'm not
+sure why this is needed at all.
+
+Will
