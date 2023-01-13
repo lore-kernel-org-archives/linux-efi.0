@@ -2,102 +2,100 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DCDBFC54EBC
-	for <linux-efi@archiver.kernel.org>; Thu, 12 Jan 2023 13:33:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BE8FAC61DB3
+	for <linux-efi@archiver.kernel.org>; Fri, 13 Jan 2023 11:53:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230027AbjALNdn (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 12 Jan 2023 08:33:43 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37430 "EHLO
+        id S241166AbjAMLxe (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 13 Jan 2023 06:53:34 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36452 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233502AbjALNdb (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 12 Jan 2023 08:33:31 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 979A848CD7;
-        Thu, 12 Jan 2023 05:33:27 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 2A88C61F1C;
-        Thu, 12 Jan 2023 13:33:27 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 306EAC433D2;
-        Thu, 12 Jan 2023 13:33:25 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1673530406;
-        bh=n0NRV/gQw0nEZmS2n3APRi2+VgzBWVgwAhTfyRlzfsU=;
-        h=From:To:Cc:Subject:Date:From;
-        b=nDfCd2GNtAMorYb4yjLeRIab11aZO+4bAEKjATUWJbegZsGZPOSNIa6ne9pp0gOcG
-         SpoF0sW5WqStu0DQNkPIWJmGEyqj8JnVCTr/rJ5HF1KRwo/xB2O9s6frAeVB24UNyi
-         5XMcM2Rkf7Suldg7nLfna/i4DfnTDDEyIbj77npIuBaN590vv9xjkV8woz7vrtUhV+
-         DubgVaYQfR/d/aR19yewLTnxyE01yK6kyl57ErST1bo7RnKHvBmgfPpenS78ROlOKY
-         k26ubVk5AuUcNoBa3PvqYsHgyoPrOBAcQesyLseStqYDXC5y+PfIncqBEIBcwfeM+C
-         kQQMmk+9t4Xpw==
-From:   Ard Biesheuvel <ardb@kernel.org>
-To:     linux-efi@vger.kernel.org
-Cc:     Ard Biesheuvel <ardb@kernel.org>, stable@vger.kernel.org,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Len Brown <lenb@kernel.org>, linux-acpi@vger.kernel.org
-Subject: [PATCH v2] ACPI: PRM: Check whether EFI runtime is available
-Date:   Thu, 12 Jan 2023 14:33:19 +0100
-Message-Id: <20230112133319.3615177-1-ardb@kernel.org>
-X-Mailer: git-send-email 2.39.0
+        with ESMTP id S241439AbjAMLw2 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 13 Jan 2023 06:52:28 -0500
+Received: from mail-ej1-x631.google.com (mail-ej1-x631.google.com [IPv6:2a00:1450:4864:20::631])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8F64633D43;
+        Fri, 13 Jan 2023 03:50:18 -0800 (PST)
+Received: by mail-ej1-x631.google.com with SMTP id cf18so45369957ejb.5;
+        Fri, 13 Jan 2023 03:50:18 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=cc:to:subject:message-id:date:from:mime-version:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=eh75YM8Wx2vhFwI4QM9022rUL2tROqk3pc2ccwWrbOg=;
+        b=TTxPBPbEbN4NRDQbM6q7Yhj4lLB/TbIlowtMioAV14gnrNCrGcdW19KUEBIA6z7oxQ
+         yklMWTT1q8dPBjBRu+uEMMvDZ+rGGNhSSbS3NUR9IDSzXOpaNDfdFGYqpJzmDyiKoSPY
+         9tDFSTU/q+8zmfinGoBRHaqmLabAa+ce6QPAhkIajBOlAtllOfHcfO2Cjb5erGMJuEBk
+         zMVM/XHegsSBcMHTddwyqdHbQYOyJD5AxRAfTKn8eBDOKWj8ApePLkpovT8IoGSSE4uF
+         F/Q/ZKxkmxd6WgdLH6H286cT2h3KNZ/B4R4cT37tpDzJXyQz/yMHodZVEJY6IUrgMmDh
+         igQQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:mime-version:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=eh75YM8Wx2vhFwI4QM9022rUL2tROqk3pc2ccwWrbOg=;
+        b=lBhfb/AlZBbSMIQBQleb2e9YEl3bqNNZ53PyOdPE4m9vmGiKQY7ghDwS5uvEIVgesF
+         POMc6UcBpcj185l0+1hCHq9cmBwm1BDjWQYhQCzg9tZYm1sXRmPHlVTB9gV/8qneAlNZ
+         8wJoRkgmZy/cI/zpBIiXxp7p8VHyAiAGHBUfHuJjShD8M0c6c3adUjS9T19Jc07reKHJ
+         tRu5xCwK/Flsodz+K8nbgmFXXjTbG5hMSnhLBqyQzjiMWk1nHZfW9/PYJYir5E5WMh4T
+         zlBalySxsHzxDZQg92g0bfnBsNmIQsxRvXc6GrC1mDLXfvZnuJNphHPtvqoiZp7B0NkH
+         DPSg==
+X-Gm-Message-State: AFqh2koVEsh5aHTlF2x5uE7saO2zHoat3OHHpYlZ0mCZx7Fhm5yOgKID
+        GJKfkSbRLzCMLBb7ADIv37dxtGnduBPIdvCNmm6qIpsNr5E=
+X-Google-Smtp-Source: AMrXdXumAaAidXnRQ5QImabpR44eWRbTasirYGR4k1yl7DlfFNRO5iSIVq+aMzns2swXM50Wn0TK4g+lhqdPIsl1g1M=
+X-Received: by 2002:a17:907:20fa:b0:7c1:6f86:ec4 with SMTP id
+ rh26-20020a17090720fa00b007c16f860ec4mr9447298ejb.621.1673610616559; Fri, 13
+ Jan 2023 03:50:16 -0800 (PST)
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1906; i=ardb@kernel.org; h=from:subject; bh=n0NRV/gQw0nEZmS2n3APRi2+VgzBWVgwAhTfyRlzfsU=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjwAweHXz+wZutlvT8AmkNpNhME+0PhkT2sZDOYnh0 QYOTvuuJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCY8AMHgAKCRDDTyI5ktmPJCvLC/ 40+93VWNq6Cf7jk//UbE3TFBu4YHvsgYoFFiIk3V56RyUokjt5IVcQy1A65vs9d/icuED26lSI5udC bvzCqJ1iW4y4E6gs/rVoC35feJSOIHerSw0RyJRGU4jnbDWYWRkFnmqkiLlqsCbtStLLTElFKiJGxT qz28nZZo2HYVXlk0FnFB/kNn58rRkH9VPtpeFW1B1SsOZc0nIOXVF1AYi+mLecYC+8DlWD0LcOb9Wc /nzkdfY2+0+FHWmP16FRK37tXHuSjWZgF5bgstroSD8ZqGlML44zw29tZ/pfbc/fFOkWHIUAh2x/gN lRgjzIkVBgqATq75ZdTal9jDU3c1iErULyFPSA2+nc8bIPV4ZKilOrpiEgAuDuGuM2saozbWaMtCA1 OkrPISBRZbE2EKBGQpL24fsiDc3i9XvG9zFFsrewYhVO/4vGFUUakP1TSJlTqaBg6zySFgH/d4YZql 4+Hjvyk1ScSPF1lN5REVSgxF1vo+xGS6Yn6QNEd7NAcZw=
-X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-Content-Transfer-Encoding: 8bit
+From:   Lukas Bulwahn <lukas.bulwahn@gmail.com>
+Date:   Fri, 13 Jan 2023 12:50:05 +0100
+Message-ID: <CAKXUXMxNc4iObjL+8RyJN=Kcy5X1r21ez_05oAuy93J=gQ2gZw@mail.gmail.com>
+Subject: linker problem with Ubuntu 18.04 tool chain: unknown architecture of
+ input file `arch/arm64/boot/vmlinuz.o' is incompatible with aarch64 output
+To:     linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>
+Cc:     Catalin Marinas <catalin.marinas@arm.com>,
+        Jeremy Linton <jeremy.linton@arm.com>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The ACPI PRM address space handler calls efi_call_virt_pointer() to
-execute PRM firmware code, but doing so is only permitted when the EFI
-runtime environment is available. Otherwise, such calls are guaranteed
-to result in a crash, and must therefore be avoided.
+Dear Ard,
 
-Given that the EFI runtime services may become unavailable after a crash
-occurring in the firmware, we need to check this each time the PRM
-address space handler is invoked. If the EFI runtime services were not
-available at registration time to being with, don't install the address
-space handler at all.
+with my Ubuntu 18.04 arm gcc tool chain, I encounter this linker error
+in my allyesconfig build:
 
-Cc: <stable@vger.kernel.org>
-Cc: "Rafael J. Wysocki" <rafael@kernel.org>
-Cc: Len Brown <lenb@kernel.org>
-Cc: linux-acpi@vger.kernel.org
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
----
-v2: check both at registration and at invocation time
+ LD      arch/arm64/boot/vmlinuz.efi.elf
+aarch64-linux-gnu-ld: unknown architecture of input file
+`arch/arm64/boot/vmlinuz.o' is incompatible with aarch64 output
+drivers/firmware/efi/libstub/Makefile.zboot:41: recipe for target
+'arch/arm64/boot/vmlinuz.efi.elf' failed
+make[1]: *** [arch/arm64/boot/vmlinuz.efi.elf] Error 1
+arch/arm64/Makefile:173: recipe for target 'vmlinuz.efi' failed
+make: *** [vmlinuz.efi] Error 2
 
- drivers/acpi/prmt.c | 10 ++++++++++
- 1 file changed, 10 insertions(+)
+I bisected it back to happen since commit c37b830fef13 ("arm64: efi:
+enable generic EFI compressed boot"), and it still appears with the
+latest next-20230113 (on linux-next, I have to remove DRM_MSM as it
+currently comes with a build error).
 
-diff --git a/drivers/acpi/prmt.c b/drivers/acpi/prmt.c
-index 998101cf16e47145..3d4c4620f9f95309 100644
---- a/drivers/acpi/prmt.c
-+++ b/drivers/acpi/prmt.c
-@@ -236,6 +236,11 @@ static acpi_status acpi_platformrt_space_handler(u32 function,
- 	efi_status_t status;
- 	struct prm_context_buffer context;
- 
-+	if (!efi_enabled(EFI_RUNTIME_SERVICES)) {
-+		pr_err_ratelimited("PRM: EFI runtime services no longer available\n");
-+		return AE_NO_HANDLER;
-+	}
-+
- 	/*
- 	 * The returned acpi_status will always be AE_OK. Error values will be
- 	 * saved in the first byte of the PRM message buffer to be used by ASL.
-@@ -325,6 +330,11 @@ void __init init_prmt(void)
- 
- 	pr_info("PRM: found %u modules\n", mc);
- 
-+	if (!efi_enabled(EFI_RUNTIME_SERVICES)) {
-+		pr_err("PRM: EFI runtime services unavailable\n");
-+		return;
-+	}
-+
- 	status = acpi_install_address_space_handler(ACPI_ROOT_OBJECT,
- 						    ACPI_ADR_SPACE_PLATFORM_RT,
- 						    &acpi_platformrt_space_handler,
--- 
-2.39.0
+The specific compiler and linker versions on my system are:
 
+$ aarch64-linux-gnu-ld --version
+GNU ld (GNU Binutils for Ubuntu) 2.30
+
+$ aarch64-linux-gnu-gcc --version
+aarch64-linux-gnu-gcc (Ubuntu/Linaro 7.5.0-3ubuntu1~18.04) 7.5.0
+
+
+IMHO, I run pretty standard commands:
+make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j 32 mrproper
+make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j 32 allyesconfig
+make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j 32 all
+
+Let me know if you need more information.
+
+
+Best regards,
+
+Lukas
