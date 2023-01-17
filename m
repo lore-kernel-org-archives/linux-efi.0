@@ -2,35 +2,35 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E5744C677F1
-	for <linux-efi@archiver.kernel.org>; Tue, 17 Jan 2023 14:29:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 87E75C678D7
+	for <linux-efi@archiver.kernel.org>; Tue, 17 Jan 2023 14:29:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229968AbjAQO3C (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 17 Jan 2023 09:29:02 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48608 "EHLO
+        id S230349AbjAQO3D (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 17 Jan 2023 09:29:03 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47698 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232682AbjAQO2b (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 17 Jan 2023 09:28:31 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0EF4D7EFE
-        for <linux-efi@vger.kernel.org>; Tue, 17 Jan 2023 06:27:35 -0800 (PST)
+        with ESMTP id S232707AbjAQO2d (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 17 Jan 2023 09:28:33 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 396FD305E7
+        for <linux-efi@vger.kernel.org>; Tue, 17 Jan 2023 06:27:38 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id C2A7CB81646
-        for <linux-efi@vger.kernel.org>; Tue, 17 Jan 2023 14:27:33 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C7F1AC433D2;
-        Tue, 17 Jan 2023 14:27:30 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id C9B5C6144E
+        for <linux-efi@vger.kernel.org>; Tue, 17 Jan 2023 14:27:37 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 93081C43392;
+        Tue, 17 Jan 2023 14:27:35 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1673965652;
-        bh=frMaMPiQkCkfpk+aLJFZL8Ueto1dVpQns0bzs5KnRls=;
-        h=From:To:Cc:Subject:Date:From;
-        b=uUPvXOtK3Bpcoixgdj4zUqgDoPyXYkKkkf42/Pe4fOLoL7nir/IANa4g06Gijs277
-         MywcWVoieqK8E4f6XZ1GXGmn+pGvCqitXJ4qwOTYaT3KcYNgXJzH33I/k8qG32gUj+
-         vBxu2nQ+2Z6LjrRefB8LBkDJY75WUdEKnYL/HMTJ/XY9a8Y13llQzUh4MKdVTj4Tyr
-         jWs3dzKeSoWbDv1BeTDmwuBL5pmUx9FZtSmdo2zsD3+VxXI8YLyDi4d2Iqml5NxZC3
-         QgqvxKV7e+zJFaLspRjeC9ofD/Md7tPn0iQaYnpQU7wV38NFGL94pU6+u5x8hoKmYY
-         zkY/rGltlQVHQ==
+        s=k20201202; t=1673965657;
+        bh=Wrp3SuN2sf33gurMiIx27fDLuT7yPVKXHH1EzZKlC4o=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=qO6UZKm85lxdidHzRIBlEmzabel00R6fT+epRLagkglI9c324eFQl24LKV6Ys7xr2
+         pxzMg0EXzd4Wh6S+apqPFFDf4RFzXM2/GF5pvorIzQ1aw5OUhMtRqvwcADmASrEpRI
+         LVM4tgZdlnFUf+JAz/uaPVTfXBDbkIO/HVzaPE48oNKVc+JSif3YXg4p/59BDefRWy
+         JZPp3193gnm4ox5QK/omEFu9PGsg3Hfuu+savxQGIHi76hjL4Qs8RWJUzepdWPaBOT
+         d3VvO+3ophnb4v28xgTqzGsUdZli8ADalukiKkL5D16eXgRQWWGuSe2K9J2zdk4OWI
+         XQwXFzv+ffPOw==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-arm-kernel@lists.infradead.org,
@@ -40,67 +40,51 @@ Cc:     linux-arm-kernel@lists.infradead.org,
         Nathan Chancellor <nathan@kernel.org>,
         Steev Klimaszewski <steev@kali.org>,
         Shawn Guo <shawn.guo@linaro.org>
-Subject: [RFT PATCH 0/2] arm64: efi: Call SetVaMap() with a 1:1 mapping
-Date:   Tue, 17 Jan 2023 15:27:16 +0100
-Message-Id: <20230117142718.564299-1-ardb@kernel.org>
+Subject: [RFT PATCH 2/2] arm64: efi: Force use of SetVirtualAddressMap() on MS Surface
+Date:   Tue, 17 Jan 2023 15:27:18 +0100
+Message-Id: <20230117142718.564299-3-ardb@kernel.org>
 X-Mailer: git-send-email 2.39.0
+In-Reply-To: <20230117142718.564299-1-ardb@kernel.org>
+References: <20230117142718.564299-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2088; i=ardb@kernel.org; h=from:subject; bh=frMaMPiQkCkfpk+aLJFZL8Ueto1dVpQns0bzs5KnRls=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjxrBClj6w9F1o/JsCvEP4WELlpTSSvs7iUvuFa7h8 VRaF3wKJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCY8awQgAKCRDDTyI5ktmPJCHGDA C7b/YUWdeP9E7lgDK0018Ku2/nsjfDwBmzWrrTYvlUV2aoWO9pRZ4yqVFB7j0BBUJbuC3s09MXwaT7 /CsiYSqZPTLC66OtIwjaS0spOErg3hQTZehkk/NcKM6beC0emL9/HkzOYLIf5q3uiGTWq72Bfu4/U+ Aiv8CnrCudDUsr+jsKiIr4l3kZZodPFaprVFmaLPP4lFsfgoadn+yc00ySPlrUokmLK4QSepKzkhy5 MkUp+0N2tthf6uSKlYd09TTshD5Pjt04G9prF90864JjQQkvNHoY8pxmjzUUsRc28KW2VBKvA9y92Q FgfFZafZvYDCkAbjsV7duQYpg9VvIV0VDHPnb00fIpAD/9s0v2Q8UKnMoTkUFZVBOmuDOKiO5zfBUD TQnKjYMLhbofyhOv8AGi+53Xb9hWefeyjT0hwWfxYcywckmwWz22P50mR+EG5jV7DIfWMREAnxQkfY 3vMmWkYPWjZU4jij3BqDtlREAV/gLtL8R+7xsSeVgUldI=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1374; i=ardb@kernel.org; h=from:subject; bh=Wrp3SuN2sf33gurMiIx27fDLuT7yPVKXHH1EzZKlC4o=; b=owEB7QES/pANAwAKAcNPIjmS2Y8kAcsmYgBjxrBFK4LKNEyKO1VtL2pr9bayyhVzwVhz3steIhq1 N9crJECJAbMEAAEKAB0WIQT72WJ8QGnJQhU3VynDTyI5ktmPJAUCY8awRQAKCRDDTyI5ktmPJD7wDA CtuOFuG44iYE/4fcehhVRuxvJyzfsCG8MPJP42IX+GpJ4W/3BdRV6nmp4H4y52itZcDQc13yDxrRuk tP/Xjhtt7bcIgdS88R4Uvv1tzjZnmKaAeW/I6xYuRmzPT70ka6hAbWe7cRSsrSLFXpf1MBqZk0uzho 1BKac/OLexVJWMZ4cZL2MqSnbzNQSfIcU367p7NKgbKjuTEPjNOzp+oB05tahotW7FOerYyN1PIw75 u1xtxfHxptcaEBHk2FPs2a9tvrqaoSK93b9cupSeGBPWNcC/RX2mKkZcIRzDNqVkmeogcRmIs4HC7B fpfvFCE8MJETCZuuQ/2KVO5qacEraQGmlTotiIYJnZSPinIOLTbJ8LVcw4hwO1Yepvfh9Wz9fkDASu NC+75IMnH6PP4sOZUDKeqUCIbMyEacKaXtbioSswxJPIg6FPLgevddQ+Rgbnt8YKwrWD/k7rSGDJjx AD56fzaj80Cx9FMZRQPlwglje0ejLXopO7qQkvKS7C/sY=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Linux on arm64 is now in the same boat as x86, where supporting laptops
-that were built to run Windows and never tested beyond what is required
-for the Windows Logo certification need workarounds for all kinds of
-bizarre behaviors.
+Qualcomm Snapdragon based Surface machines crash in the ResetSystem()
+EFI runtime service if SetVirtualAddressMap() has not been called prior.
 
-On Snapdragon laptops, we cannot call SetVirtualAddressMap() from the
-stub, because the firmware will crash while trying to access memory via
-the virtual addresses being installed, which is explicitly unsupported
-by the EFI spec.
+Unfortunately, SetVirtualAddressMap() itself crashes at boot time unless
+the mapping being installed is a 1:1 mapping, as these firmware
+implementations violate the EFI spec by accessing the new mapping before
+SetVirtualAddressMap() completes.
 
-However, not calling SetVirtualAddressMap() results in other problems:
-on Ampere Altra, it causes SetTime() to crash. On Surface and Flex5g
-Windows-on-ARM laptops, it causes ResetSystem() to crash.
+Now that we have worked around the latter issue by always using a 1:1
+map when the size of the VA space permits it, we can safely call
+SetVirtualAddressMap() in such cases.
 
-So let's try to work around this while not making too much of a mess.
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+---
+ drivers/firmware/efi/libstub/arm64.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-First of all, install a 1:1 mapping instead of avoiding SetVaMap()
-altogether - from the EFI spec pov, this should amount to the same
-thing.
-
-Then, given that we already use a SMBIOS based hack for Altra to force
-the use of SetVirtualAddressMap(), let's check for Surface systems in
-the same way.
-
-Please test, and please report the SMBIOS type 1 family field for which
-this workaround is needed.
-
-Also, note that these changes will not make a difference if the
-EFI_RT_PROPERTIES_TABLE lists SetVirtualAddressMap() as not implemented.
-
-Nathan, I would appreciate it if you could give this a spin on your
-Altra box (only patch #1 should make a difference), and for good
-measure, double check that hwclock still works as it should.
-
-Cc: Johan Hovold <johan+linaro@kernel.org>
-Cc: Maximilian Luz <luzmaximilian@gmail.com>
-Cc: Nathan Chancellor <nathan@kernel.org>
-Cc: Steev Klimaszewski <steev@kali.org>
-Cc: Shawn Guo <shawn.guo@linaro.org>
-
-Ard Biesheuvel (2):
-  arm64: efi: Prefer a flat virtual mapping of the runtime services
-  arm64: efi: Force use of SetVirtualAddressMap() on MS Surface
-
- arch/arm64/include/asm/efi.h            | 2 ++
- drivers/firmware/efi/libstub/arm64.c    | 3 ++-
- drivers/firmware/efi/libstub/efi-stub.c | 6 +++++-
- 3 files changed, 9 insertions(+), 2 deletions(-)
-
+diff --git a/drivers/firmware/efi/libstub/arm64.c b/drivers/firmware/efi/libstub/arm64.c
+index ff2d18c42ee74979..cc3757fc29bdda24 100644
+--- a/drivers/firmware/efi/libstub/arm64.c
++++ b/drivers/firmware/efi/libstub/arm64.c
+@@ -22,7 +22,8 @@ static bool system_needs_vamap(void)
+ 	 * Ampere Altra machines crash in SetTime() if SetVirtualAddressMap()
+ 	 * has not been called prior.
+ 	 */
+-	if (!type1_family || strcmp(type1_family, "Altra"))
++	if (!type1_family ||
++	    (strcmp(type1_family, "Altra") && strcmp(type1_family, "Surface")))
+ 		return false;
+ 
+ 	efi_warn("Working around broken SetVirtualAddressMap()\n");
 -- 
 2.39.0
 
