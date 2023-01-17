@@ -2,113 +2,197 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 67514C3DA78
-	for <linux-efi@archiver.kernel.org>; Tue, 17 Jan 2023 12:29:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B8C1C3DA78
+	for <linux-efi@archiver.kernel.org>; Tue, 17 Jan 2023 12:46:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236467AbjAQM3e (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 17 Jan 2023 07:29:34 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53446 "EHLO
+        id S236869AbjAQMqP (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 17 Jan 2023 07:46:15 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34334 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236237AbjAQM3d (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 17 Jan 2023 07:29:33 -0500
-Received: from mail-ej1-f48.google.com (mail-ej1-f48.google.com [209.85.218.48])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 74E6C3864D;
-        Tue, 17 Jan 2023 04:29:32 -0800 (PST)
-Received: by mail-ej1-f48.google.com with SMTP id ud5so75000615ejc.4;
-        Tue, 17 Jan 2023 04:29:32 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=XvL/LegkvK9EKnxy8A3MR7YAU6rBsnrI3W2QeGatsPI=;
-        b=JNWAAEInJ4C3rhzOkCxkFaOWtVPJV+LYAGVYG5NJgqxUeJouGzF6L8PKxMUJYmucL4
-         jVXmFL6XEipqWIUQdKXmUvfga0sSCBpjvpJ2DK39ke7dRUQAv9RarLEX95Amj08kokuK
-         6k691oxqfQzbNrWr7v7qKkRjozVi97trW7sAAVFzI/XxbB38YoWy0a3PZlzxs5nQMQZD
-         BPH6DPrulS9ek2ibHwY0tDDrpeL9d9AF+kwVeUkE1elU8KTySZLPpt8Fi0xA1SLkHoN4
-         ZgfLhXx8okSpEFNoQbOJlQ1wDYus3Jg2uCmS7T4TmzBYuXakj/xCRqR7aYVWnN64D/DG
-         s7OQ==
-X-Gm-Message-State: AFqh2kpHpOLuF4TnXlM8e5OST5JcElsoy2/RLMTdOfyNvpqwjLeOyPBv
-        0LW+NSWIHa9nSR72lVNJm9BrjYx4HkQ4c14HfC+dL/gb6Vo=
-X-Google-Smtp-Source: AMrXdXsQWqHCS3/TtVDjli00woZEy+CSyJpI9QvNFxvnRdUDZbgiQ/lqyWwO/YWAa5w9evS8i1VBpGNbCzXdsf0Yr7A=
-X-Received: by 2002:a17:906:d971:b0:84d:381c:bdaa with SMTP id
- rp17-20020a170906d97100b0084d381cbdaamr269463ejb.79.1673958570951; Tue, 17
- Jan 2023 04:29:30 -0800 (PST)
-MIME-Version: 1.0
-References: <20230112133319.3615177-1-ardb@kernel.org>
-In-Reply-To: <20230112133319.3615177-1-ardb@kernel.org>
-From:   "Rafael J. Wysocki" <rafael@kernel.org>
-Date:   Tue, 17 Jan 2023 13:29:14 +0100
-Message-ID: <CAJZ5v0iuwwDjDQDsdP3uvAO18EOcWXzCS6Yu0g62q40Em0vSOA@mail.gmail.com>
-Subject: Re: [PATCH v2] ACPI: PRM: Check whether EFI runtime is available
+        with ESMTP id S236871AbjAQMqC (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 17 Jan 2023 07:46:02 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 95707BB86;
+        Tue, 17 Jan 2023 04:46:00 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 2B3BE6130E;
+        Tue, 17 Jan 2023 12:46:00 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 87980C433D2;
+        Tue, 17 Jan 2023 12:45:59 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1673959559;
+        bh=nfaUQ9f/qaL/KRjoDGEKTPz6nI6/U2ME9FXRoaJ2ljE=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=s33xb2oj34xuXbqCthHoT3wFRhsIC/zlVgWFXku7b5BS855uVKD/knDzdGTfLIqsa
+         pysxNMosSNqykDag6j662+HcUI38mXOwcjj0QCWCCvOCCqn1IJBG+16mAp97W+bB90
+         0WRkiJmq/MU3Po6+WYd2XSOBpfZAycR4hvRJRUYDmMjeMp9PPgSCK1bKvSzMrqY/9M
+         QYATjO5tTqFGBpgV8KVT/7MoaS9/tAiR5nBvRIUr+6RUeOi/5/W/GPdSZJYkoIPGhQ
+         lNS8dzDwETK3tK9YSom04joN++cWhTE/f21uWzqgSZPzoqtGeBgEJMyRhVBqrq2oy9
+         1qwd7YtNAdsBQ==
+Received: from johan by xi.lan with local (Exim 4.94.2)
+        (envelope-from <johan+linaro@kernel.org>)
+        id 1pHlM5-0004Mn-GG; Tue, 17 Jan 2023 13:46:21 +0100
+From:   Johan Hovold <johan+linaro@kernel.org>
 To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     linux-efi@vger.kernel.org, stable@vger.kernel.org,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Len Brown <lenb@kernel.org>, linux-acpi@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Cc:     Matthew Garrett <matthew.garrett@nebula.com>,
+        Jeremy Kerr <jk@ozlabs.org>,
+        Maximilian Luz <luzmaximilian@gmail.com>,
+        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Johan Hovold <johan+linaro@kernel.org>
+Subject: [PATCH 1/2] efi: efivars: drop kobject from efivars_register()
+Date:   Tue, 17 Jan 2023 13:43:09 +0100
+Message-Id: <20230117124310.16594-2-johan+linaro@kernel.org>
+X-Mailer: git-send-email 2.38.2
+In-Reply-To: <20230117124310.16594-1-johan+linaro@kernel.org>
+References: <20230117124310.16594-1-johan+linaro@kernel.org>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Thu, Jan 12, 2023 at 2:33 PM Ard Biesheuvel <ardb@kernel.org> wrote:
->
-> The ACPI PRM address space handler calls efi_call_virt_pointer() to
-> execute PRM firmware code, but doing so is only permitted when the EFI
-> runtime environment is available. Otherwise, such calls are guaranteed
-> to result in a crash, and must therefore be avoided.
->
-> Given that the EFI runtime services may become unavailable after a crash
-> occurring in the firmware, we need to check this each time the PRM
-> address space handler is invoked. If the EFI runtime services were not
-> available at registration time to being with, don't install the address
-> space handler at all.
->
-> Cc: <stable@vger.kernel.org>
-> Cc: "Rafael J. Wysocki" <rafael@kernel.org>
-> Cc: Len Brown <lenb@kernel.org>
-> Cc: linux-acpi@vger.kernel.org
-> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
-> ---
-> v2: check both at registration and at invocation time
->
->  drivers/acpi/prmt.c | 10 ++++++++++
->  1 file changed, 10 insertions(+)
->
-> diff --git a/drivers/acpi/prmt.c b/drivers/acpi/prmt.c
-> index 998101cf16e47145..3d4c4620f9f95309 100644
-> --- a/drivers/acpi/prmt.c
-> +++ b/drivers/acpi/prmt.c
-> @@ -236,6 +236,11 @@ static acpi_status acpi_platformrt_space_handler(u32 function,
->         efi_status_t status;
->         struct prm_context_buffer context;
->
-> +       if (!efi_enabled(EFI_RUNTIME_SERVICES)) {
-> +               pr_err_ratelimited("PRM: EFI runtime services no longer available\n");
-> +               return AE_NO_HANDLER;
+Since commit 0f5b2c69a4cb ("efi: vars: Remove deprecated 'efivars' sysfs
+interface") and the removal of the sysfs interface there are no users of
+the efivars kobject.
 
-This error code is only used in GPE handling ATM.
+Drop the kobject argument from efivars_register() and add a new
+efivar_is_available() helper in favour of the old efivars_kobject().
 
-The one that actually causes ACPICA to log a "no handler" error (in
-acpi_ex_access_region()) is AE_NOT_EXIST.  Should it be used here?
+Note that the new helper uses the prefix 'efivar' (i.e. without an 's')
+for consistency with efivar_supports_writes() and the rest of the
+interface (except the registration functions).
 
+For the benefit of drivers with optional EFI support, also provide a
+dummy implementation of efivar_is_available().
 
-> +       }
-> +
->         /*
->          * The returned acpi_status will always be AE_OK. Error values will be
->          * saved in the first byte of the PRM message buffer to be used by ASL.
-> @@ -325,6 +330,11 @@ void __init init_prmt(void)
->
->         pr_info("PRM: found %u modules\n", mc);
->
-> +       if (!efi_enabled(EFI_RUNTIME_SERVICES)) {
-> +               pr_err("PRM: EFI runtime services unavailable\n");
-> +               return;
-> +       }
-> +
->         status = acpi_install_address_space_handler(ACPI_ROOT_OBJECT,
->                                                     ACPI_ADR_SPACE_PLATFORM_RT,
->                                                     &acpi_platformrt_space_handler,
-> --
-> 2.39.0
->
+Signed-off-by: Johan Hovold <johan+linaro@kernel.org>
+---
+ drivers/firmware/efi/efi.c     |  2 +-
+ drivers/firmware/efi/vars.c    | 19 ++++++-------------
+ drivers/firmware/google/gsmi.c |  2 +-
+ fs/efivarfs/super.c            |  2 +-
+ include/linux/efi.h            | 11 +++++++----
+ 5 files changed, 16 insertions(+), 20 deletions(-)
+
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 5aa8cd510bc0..a7f1a32537f1 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -197,7 +197,7 @@ static int generic_ops_register(void)
+ 		generic_ops.set_variable = efi.set_variable;
+ 		generic_ops.set_variable_nonblocking = efi.set_variable_nonblocking;
+ 	}
+-	return efivars_register(&generic_efivars, &generic_ops, efi_kobj);
++	return efivars_register(&generic_efivars, &generic_ops);
+ }
+ 
+ static void generic_ops_unregister(void)
+diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
+index 0ba9f18312f5..d6b2c4f9a575 100644
+--- a/drivers/firmware/efi/vars.c
++++ b/drivers/firmware/efi/vars.c
+@@ -40,37 +40,30 @@ static efi_status_t check_var_size(bool nonblocking, u32 attributes,
+ }
+ 
+ /**
+- * efivars_kobject - get the kobject for the registered efivars
++ * efivar_is_available - check if efivars is available
+  *
+- * If efivars_register() has not been called we return NULL,
+- * otherwise return the kobject used at registration time.
++ * @return true iff evivars is currently registered
+  */
+-struct kobject *efivars_kobject(void)
++bool efivar_is_available(void)
+ {
+-	if (!__efivars)
+-		return NULL;
+-
+-	return __efivars->kobject;
++	return __efivars != NULL;
+ }
+-EXPORT_SYMBOL_GPL(efivars_kobject);
++EXPORT_SYMBOL_GPL(efivar_is_available);
+ 
+ /**
+  * efivars_register - register an efivars
+  * @efivars: efivars to register
+  * @ops: efivars operations
+- * @kobject: @efivars-specific kobject
+  *
+  * Only a single efivars can be registered at any time.
+  */
+ int efivars_register(struct efivars *efivars,
+-		     const struct efivar_operations *ops,
+-		     struct kobject *kobject)
++		     const struct efivar_operations *ops)
+ {
+ 	if (down_interruptible(&efivars_lock))
+ 		return -EINTR;
+ 
+ 	efivars->ops = ops;
+-	efivars->kobject = kobject;
+ 
+ 	__efivars = efivars;
+ 
+diff --git a/drivers/firmware/google/gsmi.c b/drivers/firmware/google/gsmi.c
+index 4e2575dfeb90..60054a5d5de7 100644
+--- a/drivers/firmware/google/gsmi.c
++++ b/drivers/firmware/google/gsmi.c
+@@ -1029,7 +1029,7 @@ static __init int gsmi_init(void)
+ 	}
+ 
+ #ifdef CONFIG_EFI
+-	ret = efivars_register(&efivars, &efivar_ops, gsmi_kobj);
++	ret = efivars_register(&efivars, &efivar_ops);
+ 	if (ret) {
+ 		printk(KERN_INFO "gsmi: Failed to register efivars\n");
+ 		sysfs_remove_files(gsmi_kobj, gsmi_attrs);
+diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
+index 07e82e246666..f72c529c8ec3 100644
+--- a/fs/efivarfs/super.c
++++ b/fs/efivarfs/super.c
+@@ -256,7 +256,7 @@ static struct file_system_type efivarfs_type = {
+ 
+ static __init int efivarfs_init(void)
+ {
+-	if (!efivars_kobject())
++	if (!efivar_is_available())
+ 		return -ENODEV;
+ 
+ 	return register_filesystem(&efivarfs_type);
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 4b27519143f5..2124e55c02d6 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1039,7 +1039,6 @@ struct efivar_operations {
+ 
+ struct efivars {
+ 	struct kset *kset;
+-	struct kobject *kobject;
+ 	const struct efivar_operations *ops;
+ };
+ 
+@@ -1053,10 +1052,14 @@ struct efivars {
+ #define EFI_VAR_NAME_LEN	1024
+ 
+ int efivars_register(struct efivars *efivars,
+-		     const struct efivar_operations *ops,
+-		     struct kobject *kobject);
++		     const struct efivar_operations *ops);
+ int efivars_unregister(struct efivars *efivars);
+-struct kobject *efivars_kobject(void);
++
++#ifdef CONFIG_EFI
++bool efivar_is_available(void);
++#else
++static inline bool efivar_is_available(void) { return false; }
++#endif
+ 
+ int efivar_supports_writes(void);
+ 
+-- 
+2.38.2
+
