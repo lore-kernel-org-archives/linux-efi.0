@@ -2,85 +2,87 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 99033C6FA99
-	for <linux-efi@archiver.kernel.org>; Fri, 24 Feb 2023 13:06:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BDA99C6FA8E
+	for <linux-efi@archiver.kernel.org>; Mon, 27 Feb 2023 03:09:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229456AbjBXNGZ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 24 Feb 2023 08:06:25 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37368 "EHLO
+        id S230109AbjB0DJu (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sun, 26 Feb 2023 22:09:50 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47172 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229518AbjBXNGZ (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 24 Feb 2023 08:06:25 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9FB21F959
-        for <linux-efi@vger.kernel.org>; Fri, 24 Feb 2023 05:06:24 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 570DAB81C76
-        for <linux-efi@vger.kernel.org>; Fri, 24 Feb 2023 13:06:23 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 55114C433D2;
-        Fri, 24 Feb 2023 13:06:20 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1677243981;
-        bh=1mGz+w0RjzaG/ZEeVR8AXX1W9VVWkhRGaVyM0jSyMNw=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=VWZP9WcxaG4nTafTfsWQTl7wNK88LprQhbeokcox21v+J8XEpXXZ7zRhAAAVEUZsi
-         KPcONO0PJrWsELCj4fFC+JGixnka+df1bNaBQaCJ0xo7QwJCcMKKiRdeZzhulWPWbX
-         DAIpRWjP031t3k/LqEwl2rCfDP/x3pKDlu3x0fJnIkCSFFyBK2CpijG3ykrc4RSrND
-         wJurxbApF9ODqqtpFfaEL2kyWqxfUtkv4Tf2Sue6lAplUAD0DBN1wlDfQmu9vzScqm
-         MBdi12E/soWquoA0ARgnwcebUaodg+Qshq5l0abSWpxVNHELWGTwHPDcVkCJ4xz2gT
-         i+0x0BoxPi+8w==
-Date:   Fri, 24 Feb 2023 13:06:16 +0000
-From:   Mark Brown <broonie@kernel.org>
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org,
-        will@kernel.org, catalin.marinas@arm.com, mark.rutland@arm.com,
-        maz@kernel.org
-Subject: Re: [PATCH] arm64: kaslr: don't pretend KASLR is enabled if offset <
- MIN_KIMG_ALIGN
-Message-ID: <Y/i2SH+a7aXZM1pa@sirena.org.uk>
-References: <20230223204101.1500373-1-ardb@kernel.org>
+        with ESMTP id S230460AbjB0DJt (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sun, 26 Feb 2023 22:09:49 -0500
+Received: from todd.t-8ch.de (todd.t-8ch.de [IPv6:2a01:4f8:c010:41de::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3972F1ABE2;
+        Sun, 26 Feb 2023 19:09:41 -0800 (PST)
+From:   =?utf-8?q?Thomas_Wei=C3=9Fschuh?= <linux@weissschuh.net>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=weissschuh.net;
+        s=mail; t=1677467379;
+        bh=M96BHr6D8PREKeYkC4HEQ3Rau29GrZ2n9RtbMYx//sY=;
+        h=From:Date:Subject:To:Cc:From;
+        b=kr5DzsxoEKmWimZcCDEoTW2gduowwC96E5oSb+YYbPerKR58/PqPz7qLJ0WcEvhcV
+         9riPJA65WjuJhmEYw483yNe49eA+9I3wkc1lGowGFfYxdWL+UkMgyWfJ/bpFggjWkk
+         9Qk2GAvaxwSXIcatMh0HCAT3DI5VnmlLCrcvBmmc=
+Date:   Mon, 27 Feb 2023 03:09:36 +0000
+Subject: [PATCH] efi: x86: make kobj_type structure constant
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="186QMZB+iBK+ct7K"
-Content-Disposition: inline
-In-Reply-To: <20230223204101.1500373-1-ardb@kernel.org>
-X-Cookie: The early worm gets the bird.
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+Message-Id: <20230227-kobj_type-x86-efi-v1-1-a335952d2536@weissschuh.net>
+X-B4-Tracking: v=1; b=H4sIAO8e/GMC/x2N6wqCQBBGX0XmdwN7yUu9SkTs6JhTsspuhSG+u
+ 4M/z+E7fCtkTsIZrsUKiX+SZYoK9lRAO4T4ZJROGZxx3jhX43ui1+PznxmXpkLuBevyYsn6syf
+ TgHYUMiOlENtBy/gdR5Vz0ulyHN3u27YDbLDhfXgAAAA=
+To:     Ard Biesheuvel <ardb@kernel.org>,
+        Darren Hart <dvhart@infradead.org>,
+        Andy Shevchenko <andy@infradead.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
+        Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org,
+        "H. Peter Anvin" <hpa@zytor.com>
+Cc:     linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org,
+        linux-kernel@vger.kernel.org,
+        =?utf-8?q?Thomas_Wei=C3=9Fschuh?= <linux@weissschuh.net>
+X-Mailer: b4 0.12.1
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1677467377; l=1069;
+ i=linux@weissschuh.net; s=20221212; h=from:subject:message-id;
+ bh=M96BHr6D8PREKeYkC4HEQ3Rau29GrZ2n9RtbMYx//sY=;
+ b=hjHjN4C4yK57HVHj9bFzkPD3hnpxM4psSwDftz37HChSVdWAwLGzp6NBw79dZkDBZdDbNOfU0
+ EWRAXD8qeSTAvRkrY0gwOSehaFtD7Wy5QsOSFMw6VflvmSh0HUjFdiX
+X-Developer-Key: i=linux@weissschuh.net; a=ed25519;
+ pk=KcycQgFPX2wGR5azS7RhpBqedglOZVgRPfdFSPB1LNw=
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
+Since commit ee6d3dd4ed48 ("driver core: make kobj_type constant.")
+the driver core allows the usage of const struct kobj_type.
 
---186QMZB+iBK+ct7K
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Take advantage of this to constify the structure definition to prevent
+modification at runtime.
 
-On Thu, Feb 23, 2023 at 09:41:01PM +0100, Ard Biesheuvel wrote:
+Signed-off-by: Thomas Weißschuh <linux@weissschuh.net>
+---
+ arch/x86/platform/efi/runtime-map.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-> This means that a KASLR offset of less than 2 MiB is simply the product
-> of this physical displacement, and no randomization has actually taken
-> place. Currently, we use 'kaslr_offset() > 0' to decide whether or not
-> randomization has occurred, and so we misidentify this case.
+diff --git a/arch/x86/platform/efi/runtime-map.c b/arch/x86/platform/efi/runtime-map.c
+index bbee682ef8cd..a6f02cef3ca2 100644
+--- a/arch/x86/platform/efi/runtime-map.c
++++ b/arch/x86/platform/efi/runtime-map.c
+@@ -93,7 +93,7 @@ static void map_release(struct kobject *kobj)
+ 	kfree(entry);
+ }
+ 
+-static struct kobj_type __refdata map_ktype = {
++static const struct kobj_type __refconst map_ktype = {
+ 	.sysfs_ops	= &map_attr_ops,
+ 	.default_groups	= def_groups,
+ 	.release	= map_release,
 
-Making an explicit function to check if we've enabled KASLR is also a
-nice cleanup in itself.
+---
+base-commit: 2fcd07b7ccd5fd10b2120d298363e4e6c53ccf9c
+change-id: 20230227-kobj_type-x86-efi-7591b1343b08
 
-Reviewed-by: Mark Brown <broonie@kernel.org>
+Best regards,
+-- 
+Thomas Weißschuh <linux@weissschuh.net>
 
---186QMZB+iBK+ct7K
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmP4tkgACgkQJNaLcl1U
-h9BQbwf8DZ42+KG92TbIQZLbQHG59r9vI2kydLs0U+py+/fsaC9uEZamb5jp7uqv
-sQHCUWmd6MFn2Jz5PlwJaszYIkhc7e2aR91IIHH4z7cZzU0L5zpEYH/4I9bcBwpa
-+2LdnWVBwPc1USd3l1oOJeTm5dwZEkKFGMDqMqJ4MPcuV9M3ftq/4UJNh5/XHXeY
-Q006j1Smhf0bVEg7iNxqtsjEW+b6fOPqCQZEfh5RXmxOLxJZ0f+u4f/FKouEWfeu
-PuSs+CNbF6TOLmxpQ034YnQttKvhRc87kJIWXIXS+dxi8HF4s/pBU5UzdrozSHk4
-UFT7sqiPlWF+bls2j79t5lNHlK4E9w==
-=gF8I
------END PGP SIGNATURE-----
-
---186QMZB+iBK+ct7K--
