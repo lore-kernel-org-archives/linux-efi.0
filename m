@@ -2,51 +2,51 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D4E2AC64EC4
-	for <linux-efi@archiver.kernel.org>; Fri, 10 Mar 2023 15:10:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 80DB5C74A44
+	for <linux-efi@archiver.kernel.org>; Fri, 10 Mar 2023 15:14:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233975AbjCJPKh (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 10 Mar 2023 10:10:37 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43790 "EHLO
+        id S234046AbjCJPOd (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 10 Mar 2023 10:14:33 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47244 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233930AbjCJPKQ (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 10 Mar 2023 10:10:16 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8FD5512D422;
-        Fri, 10 Mar 2023 07:02:37 -0800 (PST)
+        with ESMTP id S232910AbjCJPOL (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 10 Mar 2023 10:14:11 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3C4D5763D2;
+        Fri, 10 Mar 2023 07:05:31 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 0AEA7B82321;
-        Fri, 10 Mar 2023 15:01:39 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C583FC433A8;
-        Fri, 10 Mar 2023 15:01:37 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 50C86B822F3;
+        Fri, 10 Mar 2023 14:49:31 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EA022C433AA;
+        Fri, 10 Mar 2023 14:49:29 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1678460497;
-        bh=yON7LGAb64Jf/3zP7cUy3KK1qwd5R+K7iJV4bFwjS1g=;
+        s=k20201202; t=1678459770;
+        bh=2usUCEXzMy3dWey/bDPkNZ2hDlmy3ilAfwwyoTRfCgI=;
         h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=LqZVMb4GiAcWW+zNNjDkC4MllYc8ouFZiojNKyNwjwIx9TB/+VFxMJZ/pje2Zr228
-         EeCxIw8bgy9TrOU8giQGpvH9GEJWDMgsbXmRNTbn06GhRhqr283V+67dW8A1MGJVcs
-         lUfTnAhWWhiLpcbxwAGqnzyEpGLGHxwjx7wFZVtNO8OEl+UbGnhOyNiJAtnRVELVni
-         8CWhCrEQenkPwejjn7J+GwwI/8EZ/5sSzx3n6kvKZUV8Cg3+dBDizkKJew/BlZ9g0V
-         1PvdHezaF+Tfka/YgQvkRnw+zviF7MH9/H54TgEV/v9/8ft27quwPhchZ0U0W7MSbq
-         S+PuApNVyKcMA==
-Received: by mail-lj1-f169.google.com with SMTP id y14so5597393ljq.4;
-        Fri, 10 Mar 2023 07:01:37 -0800 (PST)
-X-Gm-Message-State: AO0yUKWh+xVFqdxmmuiEUbATxIB/W7fMBuxqACgryNhDpFIrBfzN6iFY
-        Avzq9pzPOZje8U9/7H1xM3AqGXHwF2ba10k7FyI=
-X-Google-Smtp-Source: AK7set+HJqzLUwrQjKCjGI1AkMC8LsLBR0lUC+HDKlUEEMRPbsvO907mPQEIvBr7Y6wBBsGpdCTZhUZ052YXIXvZNhU=
-X-Received: by 2002:a05:651c:11c6:b0:295:d460:5a2d with SMTP id
- z6-20020a05651c11c600b00295d4605a2dmr8043803ljo.2.1678460495691; Fri, 10 Mar
- 2023 07:01:35 -0800 (PST)
+        b=dAhabvXIwYHV1UuvRjV9l0nTTvse8EZU11qwlYefmz+AWq0n1WzYBLXmrhOEcFiH5
+         OQI5VatyEtIKjfyecxF9VOg40VhkVUVBE41Oapn8pV9ZxohFQPtImAFtQHxCRZ1UPz
+         JZ31drRQ/2PEmygtUTNB4D1BNkdvT2oA3C+Zug571P6lfQO+SqfnOhREbVaZp++j6/
+         nlqXa9k75so08TRhKrmagk0m57SrhUsFB8Y7LNHmtEDl4DzqMbZ2Rxvq92n9v4dmPO
+         MLgp7avR8FJDFXxFDSipthXO6rBaZHdyculwzjFTjo720zUDNTCG6YF++fhDXvpvUQ
+         rkpbZ3/DR7d7Q==
+Received: by mail-lj1-f171.google.com with SMTP id z5so5534073ljc.8;
+        Fri, 10 Mar 2023 06:49:29 -0800 (PST)
+X-Gm-Message-State: AO0yUKVNjY+xNN09v6wOmWaPNRQmgDx5LzIrewnurYfOn8OxwMoX0z29
+        s6jzmtGEcznrGSIPiLpCATcAOWdsCn4rtJjKR1M=
+X-Google-Smtp-Source: AK7set/l4eR+hmEvLnp41KxXlyIdYAyB7mETDP/AT8qJNWVv6ZmRgtv4KaA6m45VJZQtn1Rr9nCf+Hl6w8Q8aoG1iec=
+X-Received: by 2002:a2e:a912:0:b0:293:4ba5:f626 with SMTP id
+ j18-20020a2ea912000000b002934ba5f626mr961387ljq.2.1678459768031; Fri, 10 Mar
+ 2023 06:49:28 -0800 (PST)
 MIME-Version: 1.0
-References: <cover.1671098103.git.baskov@ispras.ru> <3f48e8bb2232220153b353d0f43cb6d96139b2da.1671098103.git.baskov@ispras.ru>
-In-Reply-To: <3f48e8bb2232220153b353d0f43cb6d96139b2da.1671098103.git.baskov@ispras.ru>
+References: <cover.1671098103.git.baskov@ispras.ru> <dd39dfd18bcae4e5116597d4e9c186249aa15850.1671098103.git.baskov@ispras.ru>
+In-Reply-To: <dd39dfd18bcae4e5116597d4e9c186249aa15850.1671098103.git.baskov@ispras.ru>
 From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Fri, 10 Mar 2023 16:01:24 +0100
-X-Gmail-Original-Message-ID: <CAMj1kXHc9jXzWFB6_p92Q=qHOe=J22t1mrtnTZ_f-=mAv2CiRw@mail.gmail.com>
-Message-ID: <CAMj1kXHc9jXzWFB6_p92Q=qHOe=J22t1mrtnTZ_f-=mAv2CiRw@mail.gmail.com>
-Subject: Re: [PATCH v4 18/26] tools/include: Add simplified version of pe.h
+Date:   Fri, 10 Mar 2023 15:49:16 +0100
+X-Gmail-Original-Message-ID: <CAMj1kXHA_Zmd2T6fCyUZ=MYt5-dTmk7a2wH9Dp2QvjFYYpCiQQ@mail.gmail.com>
+Message-ID: <CAMj1kXHA_Zmd2T6fCyUZ=MYt5-dTmk7a2wH9Dp2QvjFYYpCiQQ@mail.gmail.com>
+Subject: Re: [PATCH v4 09/26] x86/boot: Remove mapping from page fault handler
 To:     Evgeniy Baskov <baskov@ispras.ru>
 Cc:     Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>,
         Dave Hansen <dave.hansen@linux.intel.com>,
@@ -64,178 +64,65 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Thu, 15 Dec 2022 at 13:42, Evgeniy Baskov <baskov@ispras.ru> wrote:
+On Thu, 15 Dec 2022 at 13:40, Evgeniy Baskov <baskov@ispras.ru> wrote:
 >
-> This is needed to remove magic numbers from x86 bzImage building tool
-> (arch/x86/boot/tools/build.c).
+> After every implicit mapping is removed, this code is no longer needed.
+>
+> Remove memory mapping from page fault handler to ensure that there are
+> no hidden invalid memory accesses.
 >
 > Tested-by: Mario Limonciello <mario.limonciello@amd.com>
 > Tested-by: Peter Jones <pjones@redhat.com>
 > Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
 
-Acked-by: Ard Biesheuvel <ardb@kernel.org>
+Reviewed-by: Ard Biesheuvel <ardb@kernel.org>
 
 > ---
->  tools/include/linux/pe.h | 150 +++++++++++++++++++++++++++++++++++++++
->  1 file changed, 150 insertions(+)
->  create mode 100644 tools/include/linux/pe.h
+>  arch/x86/boot/compressed/ident_map_64.c | 26 ++++++++++---------------
+>  1 file changed, 10 insertions(+), 16 deletions(-)
 >
-> diff --git a/tools/include/linux/pe.h b/tools/include/linux/pe.h
-> new file mode 100644
-> index 000000000000..41c09ec371d8
-> --- /dev/null
-> +++ b/tools/include/linux/pe.h
-> @@ -0,0 +1,150 @@
-> +/* SPDX-License-Identifier: GPL-2.0-only */
-> +/*
-> + * Simplified version of include/linux/pe.h:
-> + *  Copyright 2011 Red Hat, Inc. All rights reserved.
-> + *  Author(s): Peter Jones <pjones@redhat.com>
-> + */
-> +#ifndef __LINUX_PE_H
-> +#define __LINUX_PE_H
-> +
-> +#include <linux/types.h>
-> +
-> +#define        IMAGE_FILE_MACHINE_I386         0x014c
-> +
-> +#define IMAGE_SCN_CNT_CODE     0x00000020 /* .text */
-> +#define IMAGE_SCN_CNT_INITIALIZED_DATA 0x00000040 /* .data */
-> +#define IMAGE_SCN_ALIGN_4096BYTES 0x00d00000
-> +#define IMAGE_SCN_MEM_DISCARDABLE 0x02000000 /* scn can be discarded */
-> +#define IMAGE_SCN_MEM_EXECUTE  0x20000000 /* can be executed as code */
-> +#define IMAGE_SCN_MEM_READ     0x40000000 /* readable */
-> +#define IMAGE_SCN_MEM_WRITE    0x80000000 /* writeable */
-> +
-> +#define MZ_HEADER_PEADDR_OFFSET 0x3c
-> +
-> +struct pe_hdr {
-> +       uint32_t magic;         /* PE magic */
-> +       uint16_t machine;       /* machine type */
-> +       uint16_t sections;      /* number of sections */
-> +       uint32_t timestamp;     /* time_t */
-> +       uint32_t symbol_table;  /* symbol table offset */
-> +       uint32_t symbols;       /* number of symbols */
-> +       uint16_t opt_hdr_size;  /* size of optional header */
-> +       uint16_t flags;         /* flags */
-> +};
-> +
-> +/* the fact that pe32 isn't padded where pe32+ is 64-bit means union won't
-> + * work right.  vomit. */
-> +struct pe32_opt_hdr {
-> +       /* "standard" header */
-> +       uint16_t magic;         /* file type */
-> +       uint8_t  ld_major;      /* linker major version */
-> +       uint8_t  ld_minor;      /* linker minor version */
-> +       uint32_t text_size;     /* size of text section(s) */
-> +       uint32_t data_size;     /* size of data section(s) */
-> +       uint32_t bss_size;      /* size of bss section(s) */
-> +       uint32_t entry_point;   /* file offset of entry point */
-> +       uint32_t code_base;     /* relative code addr in ram */
-> +       uint32_t data_base;     /* relative data addr in ram */
-> +       /* "windows" header */
-> +       uint32_t image_base;    /* preferred load address */
-> +       uint32_t section_align; /* alignment in bytes */
-> +       uint32_t file_align;    /* file alignment in bytes */
-> +       uint16_t os_major;      /* major OS version */
-> +       uint16_t os_minor;      /* minor OS version */
-> +       uint16_t image_major;   /* major image version */
-> +       uint16_t image_minor;   /* minor image version */
-> +       uint16_t subsys_major;  /* major subsystem version */
-> +       uint16_t subsys_minor;  /* minor subsystem version */
-> +       uint32_t win32_version; /* reserved, must be 0 */
-> +       uint32_t image_size;    /* image size */
-> +       uint32_t header_size;   /* header size rounded up to
-> +                                  file_align */
-> +       uint32_t csum;          /* checksum */
-> +       uint16_t subsys;        /* subsystem */
-> +       uint16_t dll_flags;     /* more flags! */
-> +       uint32_t stack_size_req;/* amt of stack requested */
-> +       uint32_t stack_size;    /* amt of stack required */
-> +       uint32_t heap_size_req; /* amt of heap requested */
-> +       uint32_t heap_size;     /* amt of heap required */
-> +       uint32_t loader_flags;  /* reserved, must be 0 */
-> +       uint32_t data_dirs;     /* number of data dir entries */
-> +};
-> +
-> +struct pe32plus_opt_hdr {
-> +       uint16_t magic;         /* file type */
-> +       uint8_t  ld_major;      /* linker major version */
-> +       uint8_t  ld_minor;      /* linker minor version */
-> +       uint32_t text_size;     /* size of text section(s) */
-> +       uint32_t data_size;     /* size of data section(s) */
-> +       uint32_t bss_size;      /* size of bss section(s) */
-> +       uint32_t entry_point;   /* file offset of entry point */
-> +       uint32_t code_base;     /* relative code addr in ram */
-> +       /* "windows" header */
-> +       uint64_t image_base;    /* preferred load address */
-> +       uint32_t section_align; /* alignment in bytes */
-> +       uint32_t file_align;    /* file alignment in bytes */
-> +       uint16_t os_major;      /* major OS version */
-> +       uint16_t os_minor;      /* minor OS version */
-> +       uint16_t image_major;   /* major image version */
-> +       uint16_t image_minor;   /* minor image version */
-> +       uint16_t subsys_major;  /* major subsystem version */
-> +       uint16_t subsys_minor;  /* minor subsystem version */
-> +       uint32_t win32_version; /* reserved, must be 0 */
-> +       uint32_t image_size;    /* image size */
-> +       uint32_t header_size;   /* header size rounded up to
-> +                                  file_align */
-> +       uint32_t csum;          /* checksum */
-> +       uint16_t subsys;        /* subsystem */
-> +       uint16_t dll_flags;     /* more flags! */
-> +       uint64_t stack_size_req;/* amt of stack requested */
-> +       uint64_t stack_size;    /* amt of stack required */
-> +       uint64_t heap_size_req; /* amt of heap requested */
-> +       uint64_t heap_size;     /* amt of heap required */
-> +       uint32_t loader_flags;  /* reserved, must be 0 */
-> +       uint32_t data_dirs;     /* number of data dir entries */
-> +};
-> +
-> +struct data_dirent {
-> +       uint32_t virtual_address;       /* relative to load address */
-> +       uint32_t size;
-> +};
-> +
-> +struct data_directory {
-> +       struct data_dirent exports;             /* .edata */
-> +       struct data_dirent imports;             /* .idata */
-> +       struct data_dirent resources;           /* .rsrc */
-> +       struct data_dirent exceptions;          /* .pdata */
-> +       struct data_dirent certs;               /* certs */
-> +       struct data_dirent base_relocations;    /* .reloc */
-> +       struct data_dirent debug;               /* .debug */
-> +       struct data_dirent arch;                /* reservered */
-> +       struct data_dirent global_ptr;          /* global pointer reg. Size=0 */
-> +       struct data_dirent tls;                 /* .tls */
-> +       struct data_dirent load_config;         /* load configuration structure */
-> +       struct data_dirent bound_imports;       /* no idea */
-> +       struct data_dirent import_addrs;        /* import address table */
-> +       struct data_dirent delay_imports;       /* delay-load import table */
-> +       struct data_dirent clr_runtime_hdr;     /* .cor (object only) */
-> +       struct data_dirent reserved;
-> +};
-> +
-> +struct section_header {
-> +       char name[8];                   /* name or "/12\0" string tbl offset */
-> +       uint32_t virtual_size;          /* size of loaded section in ram */
-> +       uint32_t virtual_address;       /* relative virtual address */
-> +       uint32_t raw_data_size;         /* size of the section */
-> +       uint32_t data_addr;             /* file pointer to first page of sec */
-> +       uint32_t relocs;                /* file pointer to relocation entries */
-> +       uint32_t line_numbers;          /* line numbers! */
-> +       uint16_t num_relocs;            /* number of relocations */
-> +       uint16_t num_lin_numbers;       /* srsly. */
-> +       uint32_t flags;
-> +};
-> +
-> +struct coff_reloc {
-> +       uint32_t virtual_address;
-> +       uint32_t symbol_table_index;
-> +       uint16_t data;
-> +};
-> +
-> +#endif /* __LINUX_PE_H */
+> diff --git a/arch/x86/boot/compressed/ident_map_64.c b/arch/x86/boot/compressed/ident_map_64.c
+> index fec795a4ce23..ba5108c58a4e 100644
+> --- a/arch/x86/boot/compressed/ident_map_64.c
+> +++ b/arch/x86/boot/compressed/ident_map_64.c
+> @@ -386,27 +386,21 @@ void do_boot_page_fault(struct pt_regs *regs, unsigned long error_code)
+>  {
+>         unsigned long address = native_read_cr2();
+>         unsigned long end;
+> -       bool ghcb_fault;
+> +       char *msg;
+>
+> -       ghcb_fault = sev_es_check_ghcb_fault(address);
+> +       if (sev_es_check_ghcb_fault(address))
+> +               msg = "Page-fault on GHCB page:";
+> +       else
+> +               msg = "Unexpected page-fault:";
+>
+>         address   &= PMD_MASK;
+>         end        = address + PMD_SIZE;
+>
+>         /*
+> -        * Check for unexpected error codes. Unexpected are:
+> -        *      - Faults on present pages
+> -        *      - User faults
+> -        *      - Reserved bits set
+> -        */
+> -       if (error_code & (X86_PF_PROT | X86_PF_USER | X86_PF_RSVD))
+> -               do_pf_error("Unexpected page-fault:", error_code, address, regs->ip);
+> -       else if (ghcb_fault)
+> -               do_pf_error("Page-fault on GHCB page:", error_code, address, regs->ip);
+> -
+> -       /*
+> -        * Error code is sane - now identity map the 2M region around
+> -        * the faulting address.
+> +        * Since all memory allocations are made explicit
+> +        * now, every page fault at this stage is an
+> +        * error and the error handler is there only
+> +        * for debug purposes.
+>          */
+> -       kernel_add_identity_map(address, end, MAP_WRITE);
+> +       do_pf_error(msg, error_code, address, regs->ip);
+>  }
 > --
 > 2.37.4
 >
