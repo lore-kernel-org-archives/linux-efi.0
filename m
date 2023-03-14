@@ -2,78 +2,110 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D2B45C6FD1D
-	for <linux-efi@archiver.kernel.org>; Tue, 14 Mar 2023 10:25:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7AEBEC6FD1C
+	for <linux-efi@archiver.kernel.org>; Tue, 14 Mar 2023 10:37:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231300AbjCNKZS (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 14 Mar 2023 06:25:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53088 "EHLO
+        id S229755AbjCNKhF (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 14 Mar 2023 06:37:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53372 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229949AbjCNKYp (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 14 Mar 2023 06:24:45 -0400
-Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 26BAD5FE94;
-        Tue, 14 Mar 2023 03:24:18 -0700 (PDT)
-Received: from localhost.localdomain (unknown [83.149.199.65])
-        by mail.ispras.ru (Postfix) with ESMTPSA id 3AEEF40755C6;
-        Tue, 14 Mar 2023 10:23:25 +0000 (UTC)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 3AEEF40755C6
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ispras.ru;
-        s=default; t=1678789405;
-        bh=+Rs2iCTiek3yYBbmemqEMQIzt9ito44oHZ0zp2gqc10=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=YIY13fl2vX+jnARjSEo+Jv4ClNtCdXk4Pb/VJtM+8ZvDtbZgMkT8CnMO0Ah0uRMCh
-         EOva3BjomKBhR5fGAuUY6HWaCaBouOUtq33ZsGbwBST0QntXMNxWXIFx2EJIIWcl8y
-         Sp1t4Pjeb6CQWgnhTvv22eHB2np7MU6/5q4HTYuk=
-From:   Evgeniy Baskov <baskov@ispras.ru>
+        with ESMTP id S231201AbjCNKgR (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 14 Mar 2023 06:36:17 -0400
+Received: from mga02.intel.com (mga02.intel.com [134.134.136.20])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9A26096F08
+        for <linux-efi@vger.kernel.org>; Tue, 14 Mar 2023 03:35:45 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1678790145; x=1710326145;
+  h=date:from:to:cc:subject:message-id:mime-version;
+  bh=JUQDA6TG6hIGar/jOmGUqSnBrRrJxJwAaYIdkBRf45o=;
+  b=KBeGC/8lan3vZCjeJS/pZ/giv8tFgit5YaPMzVIecYXVGsuskI1Wfnpt
+   dw5ikhiaBleiIvAGjxdJOE6xPT/w/mprSnVocR7BpPBPbZwiM9ZWKexX7
+   RvRmFC59iyRqCONaoHymS/NImUYI6dcFOWuWHjRDggJ3ZFpl3iTpZ2nya
+   y++xwjn2e4491DCx9Kg6jwrwySROs9bol2qAlKw0xxryCwa0WR7KwPLCs
+   ZNKVMrnmNjZ6hmIL0BNDsuEPY4+5O7OBOowbBeDDMWgc7DhOiA1NPo3H2
+   xGvzvPE4DWJMaD0LbY3tjdCZnAkqNAZkJaA27/Aps9mY2AuGI0hBG5f55
+   Q==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10648"; a="325751332"
+X-IronPort-AV: E=Sophos;i="5.98,259,1673942400"; 
+   d="scan'208";a="325751332"
+Received: from orsmga007.jf.intel.com ([10.7.209.58])
+  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Mar 2023 03:35:32 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6500,9779,10648"; a="672283326"
+X-IronPort-AV: E=Sophos;i="5.98,259,1673942400"; 
+   d="scan'208";a="672283326"
+Received: from lkp-server01.sh.intel.com (HELO b613635ddfff) ([10.239.97.150])
+  by orsmga007.jf.intel.com with ESMTP; 14 Mar 2023 03:35:30 -0700
+Received: from kbuild by b613635ddfff with local (Exim 4.96)
+        (envelope-from <lkp@intel.com>)
+        id 1pc20A-0006pU-0o;
+        Tue, 14 Mar 2023 10:35:30 +0000
+Date:   Tue, 14 Mar 2023 18:35:08 +0800
+From:   kernel test robot <lkp@intel.com>
 To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
-        Andy Lutomirski <luto@kernel.org>,
-        Dave Hansen <dave.hansen@linux.intel.com>,
-        Ingo Molnar <mingo@redhat.com>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Alexey Khoroshilov <khoroshilov@ispras.ru>,
-        Peter Jones <pjones@redhat.com>,
-        Gerd Hoffmann <kraxel@redhat.com>,
-        "Limonciello, Mario" <mario.limonciello@amd.com>,
-        joeyli <jlee@suse.com>, lvc-project@linuxtesting.org,
-        x86@kernel.org, linux-efi@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org
-Subject: [PATCH v5 22/27] x86/build: set type_of_loader for EFISTUB
-Date:   Tue, 14 Mar 2023 13:13:49 +0300
-Message-Id: <111d4120936d23e6023619660778444eb226a22f.1678785672.git.baskov@ispras.ru>
-X-Mailer: git-send-email 2.39.2
-In-Reply-To: <cover.1678785672.git.baskov@ispras.ru>
-References: <cover.1678785672.git.baskov@ispras.ru>
+Cc:     llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
+        linux-efi@vger.kernel.org
+Subject: [efi:urgent 5/5] ld.lld: error: undefined hidden symbol:
+ __efistub__text
+Message-ID: <202303141842.XIdIOihn-lkp@intel.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-After switching to the local copy of boot_params, EFISTUB stopped
-setting type_of_loader, using the default value of 0. Restore that
-behavior by assigning the right value at the build time.
+tree:   https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git urgent
+head:   7949368e93e48a15ac5976405def16f8c84c837b
+commit: 7949368e93e48a15ac5976405def16f8c84c837b [5/5] efi: libstub: Use relocated version of kernel's struct screen_info
+config: arm64-randconfig-r001-20230312 (https://download.01.org/0day-ci/archive/20230314/202303141842.XIdIOihn-lkp@intel.com/config)
+compiler: clang version 17.0.0 (https://github.com/llvm/llvm-project 67409911353323ca5edf2049ef0df54132fa1ca7)
+reproduce (this is a W=1 build):
+        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
+        chmod +x ~/bin/make.cross
+        # install arm64 cross compiling tool for clang build
+        # apt-get install binutils-aarch64-linux-gnu
+        # https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git/commit/?id=7949368e93e48a15ac5976405def16f8c84c837b
+        git remote add efi https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git
+        git fetch --no-tags efi urgent
+        git checkout 7949368e93e48a15ac5976405def16f8c84c837b
+        # save the config file
+        mkdir build_dir && cp config build_dir/.config
+        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=clang make.cross W=1 O=build_dir ARCH=arm64 olddefconfig
+        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=clang make.cross W=1 O=build_dir ARCH=arm64 SHELL=/bin/bash
 
-Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
----
- arch/x86/boot/tools/build.c | 2 ++
- 1 file changed, 2 insertions(+)
+If you fix the issue, kindly add following tag where applicable
+| Reported-by: kernel test robot <lkp@intel.com>
+| Link: https://lore.kernel.org/oe-kbuild-all/202303141842.XIdIOihn-lkp@intel.com/
 
-diff --git a/arch/x86/boot/tools/build.c b/arch/x86/boot/tools/build.c
-index 476ef05f16fb..5ac4f08ed923 100644
---- a/arch/x86/boot/tools/build.c
-+++ b/arch/x86/boot/tools/build.c
-@@ -588,6 +588,8 @@ int main(int argc, char **argv)
- 	memcpy(output + setup_size + efi_boot_params + SETUP_HEADER_OFFSET,
- 	       setup_header, 0x290 - SETUP_HEADER_OFFSET
- 	       /* == max possible sizeof(struct setup_header) */);
-+	/* Set type_of_loader to the one that EFISTUB uses for the local copy */
-+	output[setup_size + efi_boot_params + SETUP_HEADER_OFFSET + 0x1F] = 0x21;
- #endif
- 
- 	/* Calculate and write kernel checksum. */
+All errors (new ones prefixed by >>):
+
+>> ld.lld: error: undefined hidden symbol: __efistub__text
+   >>> referenced by arm64-stub.c:88 (drivers/firmware/efi/libstub/arm64-stub.c:88)
+   >>>               arm64-stub.stub.o:(__efistub_handle_kernel_image) in archive drivers/firmware/efi/libstub/lib.a
+   >>> referenced by arm64-stub.c:88 (drivers/firmware/efi/libstub/arm64-stub.c:88)
+   >>>               arm64-stub.stub.o:(__efistub_handle_kernel_image) in archive drivers/firmware/efi/libstub/lib.a
+   >>> referenced by arm64-stub.c:158 (drivers/firmware/efi/libstub/arm64-stub.c:158)
+   >>>               arm64-stub.stub.o:(__efistub_primary_entry_offset) in archive drivers/firmware/efi/libstub/lib.a
+   >>> referenced 1 more times
+--
+>> ld.lld: error: undefined hidden symbol: __efistub___inittext_end
+   >>> referenced by arm64-stub.c:141 (drivers/firmware/efi/libstub/arm64-stub.c:141)
+   >>>               arm64-stub.stub.o:(__efistub_handle_kernel_image) in archive drivers/firmware/efi/libstub/lib.a
+   >>> referenced by arm64-stub.c:141 (drivers/firmware/efi/libstub/arm64-stub.c:141)
+   >>>               arm64-stub.stub.o:(__efistub_handle_kernel_image) in archive drivers/firmware/efi/libstub/lib.a
+--
+>> ld.lld: error: undefined hidden symbol: __efistub_caches_clean_inval_pou
+   >>> referenced by arm64-stub.c:141 (drivers/firmware/efi/libstub/arm64-stub.c:141)
+   >>>               arm64-stub.stub.o:(__efistub_handle_kernel_image) in archive drivers/firmware/efi/libstub/lib.a
+--
+>> ld.lld: error: undefined hidden symbol: __efistub_primary_entry
+   >>> referenced by arm64-stub.c:158 (drivers/firmware/efi/libstub/arm64-stub.c:158)
+   >>>               arm64-stub.stub.o:(__efistub_primary_entry_offset) in archive drivers/firmware/efi/libstub/lib.a
+   >>> referenced by arm64-stub.c:158 (drivers/firmware/efi/libstub/arm64-stub.c:158)
+   >>>               arm64-stub.stub.o:(__efistub_primary_entry_offset) in archive drivers/firmware/efi/libstub/lib.a
+
 -- 
-2.39.2
-
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests
