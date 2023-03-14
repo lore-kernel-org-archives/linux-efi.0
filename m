@@ -2,29 +2,29 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C91EAC6FD1D
-	for <linux-efi@archiver.kernel.org>; Tue, 14 Mar 2023 11:02:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2DAD7C7618B
+	for <linux-efi@archiver.kernel.org>; Tue, 14 Mar 2023 11:02:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230227AbjCNLCY (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 14 Mar 2023 07:02:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53506 "EHLO
+        id S230261AbjCNLCZ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 14 Mar 2023 07:02:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53504 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230117AbjCNLCT (ORCPT
+        with ESMTP id S229997AbjCNLCT (ORCPT
         <rfc822;linux-efi@vger.kernel.org>); Tue, 14 Mar 2023 07:02:19 -0400
 Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0ABB395E1A;
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1A33E97496;
         Tue, 14 Mar 2023 04:02:02 -0700 (PDT)
 Received: from localhost.localdomain (unknown [83.149.199.65])
-        by mail.ispras.ru (Postfix) with ESMTPSA id 6E10A40755D2;
+        by mail.ispras.ru (Postfix) with ESMTPSA id 08C8F40737D3;
         Tue, 14 Mar 2023 10:23:25 +0000 (UTC)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 6E10A40755D2
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 08C8F40737D3
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ispras.ru;
         s=default; t=1678789405;
-        bh=h+bkgqPm7b7uPEaroJgzVv9itrgVunPxx6RhvF4UiD0=;
+        bh=/G8EQcMuvoVva9B2NhxYrS7VpQJwJ20TsfMLy4yHCGA=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=LllV8BRJ4K+NnkNRyF8DlukEoGrApXJeih+vpRc/nGWBLcqSAAajZRaoP7HKrLI3O
-         jH7ukC0VE8qSvCoJlTCXmhgXJ2qsh9FcgiNs1gzBGl++zm2eLTR7id94S3tc2zvyHi
-         fXASBwRFAO+bDu9KAS9q/E72xBJs7RNnXvV9d0JA=
+        b=EsQPifEkxWI0lhr8YJW1z0mKcjtHOfMworR2rAhyguUaQK0XDCHu7j7z3f3onPrCN
+         rou8zOZC2nl94G7DoWdNi7+JWZqbyeMyqqqrl9ka0j/TDMUNkzJVIbafDDnWWJu+It
+         izKgBPvz6UM2I58hWctjYUyQAryxA9Bu9TEBfS/A=
 From:   Evgeniy Baskov <baskov@ispras.ru>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
@@ -40,9 +40,9 @@ Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
         joeyli <jlee@suse.com>, lvc-project@linuxtesting.org,
         x86@kernel.org, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org
-Subject: [PATCH v5 23/27] efi/libstub: Don't set ramdisk_image/ramdisk_size
-Date:   Tue, 14 Mar 2023 13:13:50 +0300
-Message-Id: <f89c9b4d5d1ed9a95a51b63b196e45e4263a6da5.1678785672.git.baskov@ispras.ru>
+Subject: [PATCH v5 21/27] x86/build: Add SETUP_HEADER_OFFSET constant
+Date:   Tue, 14 Mar 2023 13:13:48 +0300
+Message-Id: <100717e1adf0cb3ca27d4305df48ea5ce385022c.1678785672.git.baskov@ispras.ru>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <cover.1678785672.git.baskov@ispras.ru>
 References: <cover.1678785672.git.baskov@ispras.ru>
@@ -52,31 +52,97 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The local copy of the boot_params made during build time is used now,
-so setting ramdisk_image/ramdisk_size fields is no longer needed,
-since they are already set to 0.
-
-Remove no longer required assignments.
+Add and use SETUP_HEADER_OFFSET constant in tools/build.c for
+readability purposes. It equals to the struct boot_params offset in
+kernel image.
 
 Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
 ---
- drivers/firmware/efi/libstub/x86-stub.c | 3 ---
- 1 file changed, 3 deletions(-)
+ arch/x86/boot/tools/build.c | 25 +++++++++++++++----------
+ 1 file changed, 15 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index 5dbc9c7a4aa3..7c5561aaba71 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -389,9 +389,6 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
- 	efi_set_u64_split((unsigned long)cmdline_ptr, &hdr->cmd_line_ptr,
- 			  &efi_boot_params.ext_cmd_line_ptr);
+diff --git a/arch/x86/boot/tools/build.c b/arch/x86/boot/tools/build.c
+index 84d5a5cc7756..476ef05f16fb 100644
+--- a/arch/x86/boot/tools/build.c
++++ b/arch/x86/boot/tools/build.c
+@@ -51,6 +51,8 @@ typedef unsigned int   u32;
+ #define SETUP_SECT_MIN 5
+ #define SETUP_SECT_MAX 64
  
--	hdr->ramdisk_image = 0;
--	hdr->ramdisk_size = 0;
--
- 	efi_stub_entry(handle, sys_table_arg, &efi_boot_params);
- 	/* not reached */
++#define SETUP_HEADER_OFFSET 0x1f1
++
+ #define PARAGRAPH_SIZE 16
+ #define SECTOR_SIZE 512
+ #define FILE_ALIGNMENT 512
+@@ -473,7 +475,7 @@ static unsigned int read_setup(char *path)
+ 	if (file_size < 2 * SECTOR_SIZE)
+ 		die("The setup must be at least 1024 bytes");
  
+-	if (get_unaligned_le16(&buf[SECTOR_SIZE - 2]) != 0xAA55)
++	if (get_unaligned_le16(&buf[SETUP_HEADER_OFFSET + 0xD]) != 0xAA55)
+ 		die("Boot block hasn't got boot flag (0xAA55)");
+ 
+ 	fclose(file);
+@@ -509,6 +511,7 @@ int main(int argc, char **argv)
+ 	unsigned int kern_size;
+ 	void *kernel;
+ 	u32 crc = 0xffffffffUL;
++	u8 *setup_header;
+ 	u8 *output;
+ 
+ 	if (argc != 5)
+@@ -520,9 +523,10 @@ int main(int argc, char **argv)
+ 	setup_size = read_setup(argv[1]);
+ 
+ 	setup_sectors = setup_size/SECTOR_SIZE;
++	setup_header = buf + SETUP_HEADER_OFFSET;
+ 
+ 	/* Set the default root device */
+-	put_unaligned_le16(DEFAULT_ROOT_DEV, &buf[508]);
++	put_unaligned_le16(DEFAULT_ROOT_DEV, &setup_header[0xB]);
+ 
+ 	/* Map kernel file to memory */
+ 	kernel = map_file(argv[2], &kern_file_size);
+@@ -537,13 +541,13 @@ int main(int argc, char **argv)
+ #endif
+ 
+ 	/* Patch the setup code with the appropriate size parameters */
+-	buf[0x1f1] = setup_sectors - 1;
+-	put_unaligned_le32(kern_size/PARAGRAPH_SIZE, &buf[0x1f4]);
++	setup_header[0] = setup_sectors - 1;
++	put_unaligned_le32(kern_size/PARAGRAPH_SIZE, &setup_header[3]);
+ 
+-	/* Update kernel_info offset. */
+-	put_unaligned_le32(kernel_info, &buf[0x268]);
++	/* Update kernel_info_offset. */
++	put_unaligned_le32(kernel_info, &setup_header[0x77]);
+ 
+-	init_size = get_unaligned_le32(&buf[0x260]);
++	init_size = get_unaligned_le32(&setup_header[0x6F]);
+ 
+ #ifdef CONFIG_EFI_STUB
+ 	/*
+@@ -562,7 +566,7 @@ int main(int argc, char **argv)
+ 
+ 	if (init_size - _end < setup_size + _ehead) {
+ 		init_size = round_up(setup_size + _ehead + _end, SECTION_ALIGNMENT);
+-		put_unaligned_le32(init_size, &buf[0x260]);
++		put_unaligned_le32(init_size, &setup_header[0x6F]);
+ 	}
+ 
+ 	total_size = update_pecoff_sections(setup_size, kern_size, init_size);
+@@ -581,8 +585,9 @@ int main(int argc, char **argv)
+ 
+ #ifdef CONFIG_EFI_STUB
+ 	/* Copy the setup header */
+-	memcpy(output + setup_size + efi_boot_params + 0x1f1, &buf[0x1f1],
+-	       0x290 - 0x1f1 /* == max possible sizeof(struct setup_header) */);
++	memcpy(output + setup_size + efi_boot_params + SETUP_HEADER_OFFSET,
++	       setup_header, 0x290 - SETUP_HEADER_OFFSET
++	       /* == max possible sizeof(struct setup_header) */);
+ #endif
+ 
+ 	/* Calculate and write kernel checksum. */
 -- 
 2.39.2
 
