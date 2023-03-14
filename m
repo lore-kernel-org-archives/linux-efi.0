@@ -2,29 +2,29 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AA2B3C6FD1D
-	for <linux-efi@archiver.kernel.org>; Tue, 14 Mar 2023 10:16:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C8B0C74A44
+	for <linux-efi@archiver.kernel.org>; Tue, 14 Mar 2023 10:16:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230416AbjCNKQ4 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 14 Mar 2023 06:16:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40096 "EHLO
+        id S230516AbjCNKQ6 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 14 Mar 2023 06:16:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39206 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230422AbjCNKQa (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 14 Mar 2023 06:16:30 -0400
+        with ESMTP id S230445AbjCNKQe (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 14 Mar 2023 06:16:34 -0400
 Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8C36A62B50;
-        Tue, 14 Mar 2023 03:16:03 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3AED392F0C;
+        Tue, 14 Mar 2023 03:16:04 -0700 (PDT)
 Received: from localhost.localdomain (unknown [83.149.199.65])
-        by mail.ispras.ru (Postfix) with ESMTPSA id 030A94076B4A;
+        by mail.ispras.ru (Postfix) with ESMTPSA id 759B94076B51;
         Tue, 14 Mar 2023 10:16:02 +0000 (UTC)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 030A94076B4A
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 759B94076B51
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ispras.ru;
         s=default; t=1678788962;
-        bh=2TBk4UGNyfMdd8W/1cZbwwWp3e8vekyx8UYv/A/vm5c=;
+        bh=KQX50IDaA6jZ2kthtK8SXDuugyihF8jwWgQGjoDSXQ0=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=n7Aqkk4PHxxjuE63bO4ZIRC9Y0AVo/LT7B+S7ULrj9n9YXFKMslgpX/pqQKSCFWBA
-         P/v4Um3LkciXoZZoy02NoCHPn62b/8Zj/4Pv/QsB5vENyGQ0e5TuBIYu2Uy0JeR+ov
-         2giwLsVCTjAUow1JZXXnhYFJ1SZyjHVmz4HIsd0I=
+        b=KjQYisjfZxZMV6h4m+SHY/QIVeA5iWeLKlreyZ85e4KK9cIyEmIPmZQyE654zZ1CU
+         m61kYU1rLJ4noPb5EZpmpeIFyD6fr/Q0K/v9kn1xDsZsxdwDVjBj+DQAIzYG/Y7hhe
+         wSsXQ2o3Afrd6yrxTnu+4zpucAJtk+9SLq9+olis=
 From:   Evgeniy Baskov <baskov@ispras.ru>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
@@ -40,9 +40,9 @@ Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
         joeyli <jlee@suse.com>, lvc-project@linuxtesting.org,
         x86@kernel.org, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org
-Subject: [PATCH v5 07/27] x86/build: Check W^X of vmlinux during build
-Date:   Tue, 14 Mar 2023 13:13:34 +0300
-Message-Id: <79fbb728535596eea7b429fc3ed39adc3c775c8a.1678785672.git.baskov@ispras.ru>
+Subject: [PATCH v5 09/27] x86/boot: Remove mapping from page fault handler
+Date:   Tue, 14 Mar 2023 13:13:36 +0300
+Message-Id: <dab948690a74db1bb75d95aa7e0362deeca6dbf4.1678785672.git.baskov@ispras.ru>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <cover.1678785672.git.baskov@ispras.ru>
 References: <cover.1678785672.git.baskov@ispras.ru>
@@ -52,40 +52,59 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Check if there are simultaneously writable and executable
-program segments in vmlinux ELF image and fail build if there are any.
+After every implicit mapping is removed, this code is no longer needed.
 
-This would prevent accidental introduction of RWX segments.
+Remove memory mapping from page fault handler to ensure that there are
+no hidden invalid memory accesses.
 
 Tested-by: Mario Limonciello <mario.limonciello@amd.com>
 Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
 ---
- arch/x86/boot/compressed/Makefile | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
+ arch/x86/boot/compressed/ident_map_64.c | 26 ++++++++++---------------
+ 1 file changed, 10 insertions(+), 16 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
-index 6b6cfe607bdb..0c6e25279ec1 100644
---- a/arch/x86/boot/compressed/Makefile
-+++ b/arch/x86/boot/compressed/Makefile
-@@ -112,12 +112,17 @@ vmlinux-objs-$(CONFIG_EFI) += $(obj)/efi.o
- vmlinux-objs-$(CONFIG_EFI_MIXED) += $(obj)/efi_mixed.o
- vmlinux-objs-$(CONFIG_EFI_STUB) += $(objtree)/drivers/firmware/efi/libstub/lib.a
+diff --git a/arch/x86/boot/compressed/ident_map_64.c b/arch/x86/boot/compressed/ident_map_64.c
+index eb28ce9812c5..378f99b1d7e8 100644
+--- a/arch/x86/boot/compressed/ident_map_64.c
++++ b/arch/x86/boot/compressed/ident_map_64.c
+@@ -393,27 +393,21 @@ void do_boot_page_fault(struct pt_regs *regs, unsigned long error_code)
+ {
+ 	unsigned long address = native_read_cr2();
+ 	unsigned long end;
+-	bool ghcb_fault;
++	char *msg;
  
-+quiet_cmd_objcopy_and_wx_check = $(quiet_cmd_objcopy)
-+cmd_objcopy_and_wx_check = if $(OBJDUMP) -p $< | grep "flags .wx" > /dev/null; then \
-+				   (echo >&2 "$<: Simultaneously writable and executable sections are prohibited"; \
-+				    /bin/false); else $(cmd_objcopy); fi
-+
- $(obj)/vmlinux: $(vmlinux-objs-y) FORCE
- 	$(call if_changed,ld)
+-	ghcb_fault = sev_es_check_ghcb_fault(address);
++	if (sev_es_check_ghcb_fault(address))
++		msg = "Page-fault on GHCB page:";
++	else
++		msg = "Unexpected page-fault:";
  
- OBJCOPYFLAGS_vmlinux.bin :=  -R .comment -S
- $(obj)/vmlinux.bin: vmlinux FORCE
--	$(call if_changed,objcopy)
-+	$(call if_changed,objcopy_and_wx_check)
+ 	address   &= PMD_MASK;
+ 	end        = address + PMD_SIZE;
  
- targets += $(patsubst $(obj)/%,%,$(vmlinux-objs-y)) vmlinux.bin.all vmlinux.relocs
- 
+ 	/*
+-	 * Check for unexpected error codes. Unexpected are:
+-	 *	- Faults on present pages
+-	 *	- User faults
+-	 *	- Reserved bits set
+-	 */
+-	if (error_code & (X86_PF_PROT | X86_PF_USER | X86_PF_RSVD))
+-		do_pf_error("Unexpected page-fault:", error_code, address, regs->ip);
+-	else if (ghcb_fault)
+-		do_pf_error("Page-fault on GHCB page:", error_code, address, regs->ip);
+-
+-	/*
+-	 * Error code is sane - now identity map the 2M region around
+-	 * the faulting address.
++	 * Since all memory allocations are made explicit
++	 * now, every page fault at this stage is an
++	 * error and the error handler is there only
++	 * for debug purposes.
+ 	 */
+-	kernel_add_identity_map(address, end, MAP_WRITE);
++	do_pf_error(msg, error_code, address, regs->ip);
+ }
 -- 
 2.39.2
 
