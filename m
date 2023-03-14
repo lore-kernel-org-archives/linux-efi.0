@@ -2,29 +2,29 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 68627C76195
-	for <linux-efi@archiver.kernel.org>; Tue, 14 Mar 2023 11:02:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F0BEC6FD1C
+	for <linux-efi@archiver.kernel.org>; Tue, 14 Mar 2023 11:08:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230194AbjCNLC0 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 14 Mar 2023 07:02:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53520 "EHLO
+        id S230373AbjCNLIP (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 14 Mar 2023 07:08:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36994 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230152AbjCNLCU (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 14 Mar 2023 07:02:20 -0400
+        with ESMTP id S230420AbjCNLH7 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 14 Mar 2023 07:07:59 -0400
 Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0A51B94F5B;
-        Tue, 14 Mar 2023 04:02:02 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BE4C121966;
+        Tue, 14 Mar 2023 04:07:24 -0700 (PDT)
 Received: from localhost.localdomain (unknown [83.149.199.65])
-        by mail.ispras.ru (Postfix) with ESMTPSA id D041C4076B3C;
-        Tue, 14 Mar 2023 10:23:25 +0000 (UTC)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru D041C4076B3C
+        by mail.ispras.ru (Postfix) with ESMTPSA id 7411340770A0;
+        Tue, 14 Mar 2023 10:18:04 +0000 (UTC)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 7411340770A0
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ispras.ru;
-        s=default; t=1678789405;
-        bh=W7RIeiPY/1nYhAqUQ2PD++Zu/1fYKwFh/VoL3avJIPE=;
+        s=default; t=1678789084;
+        bh=gY7YuhexK8zA7ymGalqZTA6VC8xKe5VEjs7ijrvoUiY=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=gZ+k5zQYqqcIUJhod9buz85HCbr/RKLYAB19J82N2f+pTaxl30mI/ZsOPeK8dJgBX
-         ZSn8WSyVh7iWd8qWBJHBYCWPg9fNwZUA+4/mWmuaVwEG0YT92Mfuai8ZQl4Rps1H6g
-         uGWBmnJFt1PPge52MROvxJf0uKVRcf5DEj54sIAs=
+        b=ohWjO9fDPgEw2qcmZJ4bIY3upe0Ghf4TKGUTLgtwAp5Qeh4Bp2kcq0ufPBB0brSwh
+         M1RCHdLkvpyWJfGPBIna+0nz3uh72UiJfBfaSn/NWvSHnFMWsp7/KjFlSTbUEZZAjv
+         U6T5iRszIL2Ui3wEeG5tAmoYK+5tB10I0IffiaiQ=
 From:   Evgeniy Baskov <baskov@ispras.ru>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
@@ -39,12 +39,10 @@ Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
         "Limonciello, Mario" <mario.limonciello@amd.com>,
         joeyli <jlee@suse.com>, lvc-project@linuxtesting.org,
         x86@kernel.org, linux-efi@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org,
-        kernel test robot <lkp@intel.com>,
-        Dan Carpenter <error27@gmail.com>
-Subject: [PATCH v5 25/27] efi/libstub: Use memory attribute protocol
-Date:   Tue, 14 Mar 2023 13:13:52 +0300
-Message-Id: <704ee1f04864f0bf10586d58e64acd924588ee0a.1678785672.git.baskov@ispras.ru>
+        linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org
+Subject: [PATCH v5 18/27] tools/include: Add simplified version of pe.h
+Date:   Tue, 14 Mar 2023 13:13:45 +0300
+Message-Id: <b6811d01fe0f5777d759184ebba29d30a3412e29.1678785672.git.baskov@ispras.ru>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <cover.1678785672.git.baskov@ispras.ru>
 References: <cover.1678785672.git.baskov@ispras.ru>
@@ -54,280 +52,172 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Add EFI_MEMORY_ATTRIBUTE_PROTOCOL as preferred alternative to DXE
-services for changing memory attributes in the EFISTUB.
-
-Use DXE services only as a fallback in case aforementioned protocol
-is not supported by UEFI implementation. DXE services are still not
-used for applying stricter attributes, only more relaxed ones, unlike
-the EFI_MEMORY_ATTRIBUTE_PROTOCOL which, when available, is also used
-or applying restricted attributes.
-
-Move DXE services initialization code closer to the place they are used
-to match EFI_MEMORY_ATTRIBUTE_PROTOCOL initialization code.
+This is needed to remove magic numbers from x86 bzImage building tool
+(arch/x86/boot/tools/build.c).
 
 Tested-by: Mario Limonciello <mario.limonciello@amd.com>
 Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
-
-Warnings in the previous version were
-Reported-by: kernel test robot <lkp@intel.com>
-Reported-by: Dan Carpenter <error27@gmail.com>
-Link: https://lore.kernel.org/r/202303090050.RhPPJRPD-lkp@intel.com/
 ---
- drivers/firmware/efi/libstub/efistub.h  |   5 +-
- drivers/firmware/efi/libstub/mem.c      | 170 ++++++++++++++++++------
- drivers/firmware/efi/libstub/x86-stub.c |   8 --
- 3 files changed, 133 insertions(+), 50 deletions(-)
+ tools/include/linux/pe.h | 150 +++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 150 insertions(+)
+ create mode 100644 tools/include/linux/pe.h
 
-diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-index 01ae165731a5..d679d881647b 100644
---- a/drivers/firmware/efi/libstub/efistub.h
-+++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -40,9 +40,6 @@ extern bool efi_novamap;
- 
- extern const efi_system_table_t *efi_system_table;
- 
--typedef union efi_dxe_services_table efi_dxe_services_table_t;
--extern const efi_dxe_services_table_t *efi_dxe_table;
--
- efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
- 				   efi_system_table_t *sys_table_arg);
- 
-@@ -392,6 +389,8 @@ typedef struct {
- 	void *device_handle;
- } efi_gcd_memory_space_desc_t;
- 
-+typedef union efi_dxe_services_table efi_dxe_services_table_t;
-+
- /*
-  * EFI DXE Services table
-  */
-diff --git a/drivers/firmware/efi/libstub/mem.c b/drivers/firmware/efi/libstub/mem.c
-index 134f17d078d1..77cf745ade0d 100644
---- a/drivers/firmware/efi/libstub/mem.c
-+++ b/drivers/firmware/efi/libstub/mem.c
-@@ -5,6 +5,9 @@
- 
- #include "efistub.h"
- 
-+static const efi_dxe_services_table_t *efi_dxe_table;
-+static efi_memory_attribute_protocol_t *efi_mem_attrib_proto;
-+
- /**
-  * efi_get_memory_map() - get memory map
-  * @map:		pointer to memory map pointer to which to assign the
-@@ -129,53 +132,33 @@ void efi_free(unsigned long size, unsigned long addr)
- 	efi_bs_call(free_pages, addr, nr_pages);
- }
- 
--/**
-- * efi_adjust_memory_range_protection() - change memory range protection attributes
-- * @start:	memory range start address
-- * @size:	memory range size
-- *
-- * Actual memory range for which memory attributes are modified is
-- * the smallest ranged with start address and size aligned to EFI_PAGE_SIZE
-- * that includes [start, start + size].
-- *
-- * @return: status code
-- */
--efi_status_t efi_adjust_memory_range_protection(unsigned long start,
--						unsigned long size,
--						unsigned long attributes)
-+static void retrieve_dxe_table(void)
-+{
-+	efi_dxe_table = get_efi_config_table(EFI_DXE_SERVICES_TABLE_GUID);
-+	if (efi_dxe_table &&
-+	    efi_dxe_table->hdr.signature != EFI_DXE_SERVICES_TABLE_SIGNATURE) {
-+		efi_warn("Ignoring DXE services table: invalid signature\n");
-+		efi_dxe_table = NULL;
-+	}
-+}
-+
-+static efi_status_t adjust_mem_attrib_dxe(efi_physical_addr_t rounded_start,
-+					  efi_physical_addr_t rounded_end,
-+					  unsigned long attributes)
- {
- 	efi_status_t status;
- 	efi_gcd_memory_space_desc_t desc;
--	efi_physical_addr_t end, next;
--	efi_physical_addr_t rounded_start, rounded_end;
-+	efi_physical_addr_t end, next, start;
- 	efi_physical_addr_t unprotect_start, unprotect_size;
- 
--	if (efi_dxe_table == NULL)
--		return EFI_UNSUPPORTED;
-+	if (!efi_dxe_table) {
-+		retrieve_dxe_table();
- 
--	/*
--	 * This function should not be used to modify attributes
--	 * other than writable/executable.
--	 */
--
--	if ((attributes & ~(EFI_MEMORY_RO | EFI_MEMORY_XP)) != 0)
--		return EFI_INVALID_PARAMETER;
--
--	rounded_start = rounddown(start, EFI_PAGE_SIZE);
--	rounded_end = roundup(start + size, EFI_PAGE_SIZE);
--
--	/*
--	 * Disallow simultaniously executable and writable memory
--	 * to inforce W^X policy if direct extraction code is enabled.
--	 */
--
--	if ((attributes & (EFI_MEMORY_RO | EFI_MEMORY_XP)) == 0) {
--		efi_warn("W^X violation at [%08lx,%08lx]\n",
--			 (unsigned long)rounded_start,
--			 (unsigned long)rounded_end);
-+		if (!efi_dxe_table)
-+			return EFI_UNSUPPORTED;
- 	}
- 
--	for (end = start + size; start < end; start = next) {
-+	for (start = rounded_start, end = rounded_end; start < end; start = next) {
- 
- 		status = efi_dxe_call(get_memory_space_descriptor,
- 				      start, &desc);
-@@ -227,3 +210,112 @@ efi_status_t efi_adjust_memory_range_protection(unsigned long start,
- 
- 	return EFI_SUCCESS;
- }
-+
-+static void retrieve_memory_attributes_proto(void)
-+{
-+	efi_status_t status;
-+	efi_guid_t guid = EFI_MEMORY_ATTRIBUTE_PROTOCOL_GUID;
-+
-+	status = efi_bs_call(locate_protocol, &guid, NULL,
-+			     (void **)&efi_mem_attrib_proto);
-+	if (status != EFI_SUCCESS)
-+		efi_mem_attrib_proto = NULL;
-+}
-+
-+/**
-+ * efi_adjust_memory_range_protection() - change memory range protection attributes
-+ * @start:	memory range start address
-+ * @size:	memory range size
-+ * @size:	memory range attributes
-+ *
-+ * The only supported memory attributes are EFI_MEMORY_RO and EFI_MEMORY_XP.
-+ *
-+ * Actual memory range for which memory attributes are modified is
-+ * the smallest ranged with start address and size aligned to EFI_PAGE_SIZE
-+ * that includes [start, start + size].
-+ *
-+ * This function first attempts to use EFI_MEMORY_ATTRIBUTE_PROTOCOL,
-+ * that is a part of UEFI Specification since version 2.10.
-+ *
-+ * If the protocol is unavailable it falls back to DXE services functions,
-+ * in which case it does not apply stricter memory attributes, only relaxed
-+ * ones.
-+ *
-+ * @return: status code
+diff --git a/tools/include/linux/pe.h b/tools/include/linux/pe.h
+new file mode 100644
+index 000000000000..41c09ec371d8
+--- /dev/null
++++ b/tools/include/linux/pe.h
+@@ -0,0 +1,150 @@
++/* SPDX-License-Identifier: GPL-2.0-only */
++/*
++ * Simplified version of include/linux/pe.h:
++ *  Copyright 2011 Red Hat, Inc. All rights reserved.
++ *  Author(s): Peter Jones <pjones@redhat.com>
 + */
-+efi_status_t efi_adjust_memory_range_protection(unsigned long start,
-+						unsigned long size,
-+						unsigned long attributes)
-+{
-+	efi_status_t status;
-+	efi_physical_addr_t rounded_start, rounded_end;
-+	unsigned long attr_clear;
++#ifndef __LINUX_PE_H
++#define __LINUX_PE_H
 +
-+	/*
-+	 * This function should not be used to modify attributes
-+	 * other than writable/executable.
-+	 */
++#include <linux/types.h>
 +
-+	if ((attributes & ~(EFI_MEMORY_RO | EFI_MEMORY_XP)) != 0)
-+		return EFI_INVALID_PARAMETER;
++#define	IMAGE_FILE_MACHINE_I386		0x014c
 +
-+	rounded_start = rounddown(start, EFI_PAGE_SIZE);
-+	rounded_end = roundup(start + size, EFI_PAGE_SIZE);
++#define IMAGE_SCN_CNT_CODE	0x00000020 /* .text */
++#define IMAGE_SCN_CNT_INITIALIZED_DATA 0x00000040 /* .data */
++#define IMAGE_SCN_ALIGN_4096BYTES 0x00d00000
++#define IMAGE_SCN_MEM_DISCARDABLE 0x02000000 /* scn can be discarded */
++#define IMAGE_SCN_MEM_EXECUTE	0x20000000 /* can be executed as code */
++#define IMAGE_SCN_MEM_READ	0x40000000 /* readable */
++#define IMAGE_SCN_MEM_WRITE	0x80000000 /* writeable */
 +
-+	/*
-+	 * Warn if requested to make memory simultaneously
-+	 * executable and writable to enforce W^X policy.
-+	 */
++#define MZ_HEADER_PEADDR_OFFSET 0x3c
 +
-+	if ((attributes & (EFI_MEMORY_RO | EFI_MEMORY_XP)) == 0) {
-+		efi_warn("W^X violation at  [%08lx,%08lx]",
-+			 (unsigned long)rounded_start,
-+			 (unsigned long)rounded_end);
-+	}
++struct pe_hdr {
++	uint32_t magic;		/* PE magic */
++	uint16_t machine;	/* machine type */
++	uint16_t sections;	/* number of sections */
++	uint32_t timestamp;	/* time_t */
++	uint32_t symbol_table;	/* symbol table offset */
++	uint32_t symbols;	/* number of symbols */
++	uint16_t opt_hdr_size;	/* size of optional header */
++	uint16_t flags;		/* flags */
++};
 +
-+	if (!efi_mem_attrib_proto) {
-+		retrieve_memory_attributes_proto();
++/* the fact that pe32 isn't padded where pe32+ is 64-bit means union won't
++ * work right.  vomit. */
++struct pe32_opt_hdr {
++	/* "standard" header */
++	uint16_t magic;		/* file type */
++	uint8_t  ld_major;	/* linker major version */
++	uint8_t  ld_minor;	/* linker minor version */
++	uint32_t text_size;	/* size of text section(s) */
++	uint32_t data_size;	/* size of data section(s) */
++	uint32_t bss_size;	/* size of bss section(s) */
++	uint32_t entry_point;	/* file offset of entry point */
++	uint32_t code_base;	/* relative code addr in ram */
++	uint32_t data_base;	/* relative data addr in ram */
++	/* "windows" header */
++	uint32_t image_base;	/* preferred load address */
++	uint32_t section_align;	/* alignment in bytes */
++	uint32_t file_align;	/* file alignment in bytes */
++	uint16_t os_major;	/* major OS version */
++	uint16_t os_minor;	/* minor OS version */
++	uint16_t image_major;	/* major image version */
++	uint16_t image_minor;	/* minor image version */
++	uint16_t subsys_major;	/* major subsystem version */
++	uint16_t subsys_minor;	/* minor subsystem version */
++	uint32_t win32_version;	/* reserved, must be 0 */
++	uint32_t image_size;	/* image size */
++	uint32_t header_size;	/* header size rounded up to
++				   file_align */
++	uint32_t csum;		/* checksum */
++	uint16_t subsys;	/* subsystem */
++	uint16_t dll_flags;	/* more flags! */
++	uint32_t stack_size_req;/* amt of stack requested */
++	uint32_t stack_size;	/* amt of stack required */
++	uint32_t heap_size_req;	/* amt of heap requested */
++	uint32_t heap_size;	/* amt of heap required */
++	uint32_t loader_flags;	/* reserved, must be 0 */
++	uint32_t data_dirs;	/* number of data dir entries */
++};
 +
-+		/* Fall back to DXE services if unsupported */
-+		if (!efi_mem_attrib_proto) {
-+			return adjust_mem_attrib_dxe(rounded_start,
-+						     rounded_end,
-+						     attributes);
-+		}
-+	}
++struct pe32plus_opt_hdr {
++	uint16_t magic;		/* file type */
++	uint8_t  ld_major;	/* linker major version */
++	uint8_t  ld_minor;	/* linker minor version */
++	uint32_t text_size;	/* size of text section(s) */
++	uint32_t data_size;	/* size of data section(s) */
++	uint32_t bss_size;	/* size of bss section(s) */
++	uint32_t entry_point;	/* file offset of entry point */
++	uint32_t code_base;	/* relative code addr in ram */
++	/* "windows" header */
++	uint64_t image_base;	/* preferred load address */
++	uint32_t section_align;	/* alignment in bytes */
++	uint32_t file_align;	/* file alignment in bytes */
++	uint16_t os_major;	/* major OS version */
++	uint16_t os_minor;	/* minor OS version */
++	uint16_t image_major;	/* major image version */
++	uint16_t image_minor;	/* minor image version */
++	uint16_t subsys_major;	/* major subsystem version */
++	uint16_t subsys_minor;	/* minor subsystem version */
++	uint32_t win32_version;	/* reserved, must be 0 */
++	uint32_t image_size;	/* image size */
++	uint32_t header_size;	/* header size rounded up to
++				   file_align */
++	uint32_t csum;		/* checksum */
++	uint16_t subsys;	/* subsystem */
++	uint16_t dll_flags;	/* more flags! */
++	uint64_t stack_size_req;/* amt of stack requested */
++	uint64_t stack_size;	/* amt of stack required */
++	uint64_t heap_size_req;	/* amt of heap requested */
++	uint64_t heap_size;	/* amt of heap required */
++	uint32_t loader_flags;	/* reserved, must be 0 */
++	uint32_t data_dirs;	/* number of data dir entries */
++};
 +
-+	/*
-+	 * Unlike DXE services, EFI_MEMORY_ATTRIBUTE_PROTOCOL does not clear
-+	 * unset protection bit, so it needs to be cleared explcitly.
-+	 */
++struct data_dirent {
++	uint32_t virtual_address;	/* relative to load address */
++	uint32_t size;
++};
 +
-+	attr_clear = ~attributes &
-+		     (EFI_MEMORY_RO | EFI_MEMORY_XP | EFI_MEMORY_RP);
++struct data_directory {
++	struct data_dirent exports;		/* .edata */
++	struct data_dirent imports;		/* .idata */
++	struct data_dirent resources;		/* .rsrc */
++	struct data_dirent exceptions;		/* .pdata */
++	struct data_dirent certs;		/* certs */
++	struct data_dirent base_relocations;	/* .reloc */
++	struct data_dirent debug;		/* .debug */
++	struct data_dirent arch;		/* reservered */
++	struct data_dirent global_ptr;		/* global pointer reg. Size=0 */
++	struct data_dirent tls;			/* .tls */
++	struct data_dirent load_config;		/* load configuration structure */
++	struct data_dirent bound_imports;	/* no idea */
++	struct data_dirent import_addrs;	/* import address table */
++	struct data_dirent delay_imports;	/* delay-load import table */
++	struct data_dirent clr_runtime_hdr;	/* .cor (object only) */
++	struct data_dirent reserved;
++};
 +
-+	status = efi_call_proto(efi_mem_attrib_proto,
-+				clear_memory_attributes,
-+				rounded_start,
-+				rounded_end - rounded_start,
-+				attr_clear);
-+	if (status != EFI_SUCCESS) {
-+		efi_warn("Failed to clear memory attributes at [%08lx,%08lx]: %lx",
-+			 (unsigned long)rounded_start,
-+			 (unsigned long)rounded_end,
-+			 status);
-+		return status;
-+	}
++struct section_header {
++	char name[8];			/* name or "/12\0" string tbl offset */
++	uint32_t virtual_size;		/* size of loaded section in ram */
++	uint32_t virtual_address;	/* relative virtual address */
++	uint32_t raw_data_size;		/* size of the section */
++	uint32_t data_addr;		/* file pointer to first page of sec */
++	uint32_t relocs;		/* file pointer to relocation entries */
++	uint32_t line_numbers;		/* line numbers! */
++	uint16_t num_relocs;		/* number of relocations */
++	uint16_t num_lin_numbers;	/* srsly. */
++	uint32_t flags;
++};
 +
-+	status = efi_call_proto(efi_mem_attrib_proto,
-+				set_memory_attributes,
-+				rounded_start,
-+				rounded_end - rounded_start,
-+				attributes);
-+	if (status != EFI_SUCCESS) {
-+		efi_warn("Failed to set memory attributes at [%08lx,%08lx]: %lx",
-+			 (unsigned long)rounded_start,
-+			 (unsigned long)rounded_end,
-+			 status);
-+	}
++struct coff_reloc {
++	uint32_t virtual_address;
++	uint32_t symbol_table_index;
++	uint16_t data;
++};
 +
-+	return status;
-+}
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index 7c5561aaba71..9394ac319d18 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -23,7 +23,6 @@
- #define MAXMEM_X86_64_4LEVEL (1ull << 46)
- 
- const efi_system_table_t *efi_system_table;
--const efi_dxe_services_table_t *efi_dxe_table;
- u32 image_offset __section(".data");
- static efi_loaded_image_t *image __section(".data");
- 
-@@ -643,13 +642,6 @@ asmlinkage unsigned long efi_main(efi_handle_t handle,
- 	if (efi_system_table->hdr.signature != EFI_SYSTEM_TABLE_SIGNATURE)
- 		efi_exit(handle, EFI_INVALID_PARAMETER);
- 
--	efi_dxe_table = get_efi_config_table(EFI_DXE_SERVICES_TABLE_GUID);
--	if (efi_dxe_table &&
--	    efi_dxe_table->hdr.signature != EFI_DXE_SERVICES_TABLE_SIGNATURE) {
--		efi_warn("Ignoring DXE services table: invalid signature\n");
--		efi_dxe_table = NULL;
--	}
--
- #ifdef CONFIG_CMDLINE_BOOL
- 	status = efi_parse_options(CONFIG_CMDLINE);
- 	if (status != EFI_SUCCESS) {
++#endif /* __LINUX_PE_H */
 -- 
 2.39.2
 
