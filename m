@@ -2,29 +2,29 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 10629C6FD1C
-	for <linux-efi@archiver.kernel.org>; Tue, 14 Mar 2023 10:23:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D2B45C6FD1D
+	for <linux-efi@archiver.kernel.org>; Tue, 14 Mar 2023 10:25:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230460AbjCNKXQ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 14 Mar 2023 06:23:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52410 "EHLO
+        id S231300AbjCNKZS (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 14 Mar 2023 06:25:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53088 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230396AbjCNKWn (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 14 Mar 2023 06:22:43 -0400
+        with ESMTP id S229949AbjCNKYp (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 14 Mar 2023 06:24:45 -0400
 Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A841B93D7;
-        Tue, 14 Mar 2023 03:22:17 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 26BAD5FE94;
+        Tue, 14 Mar 2023 03:24:18 -0700 (PDT)
 Received: from localhost.localdomain (unknown [83.149.199.65])
-        by mail.ispras.ru (Postfix) with ESMTPSA id 431324076B3C;
-        Tue, 14 Mar 2023 10:14:01 +0000 (UTC)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 431324076B3C
+        by mail.ispras.ru (Postfix) with ESMTPSA id 3AEEF40755C6;
+        Tue, 14 Mar 2023 10:23:25 +0000 (UTC)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 3AEEF40755C6
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ispras.ru;
-        s=default; t=1678788841;
-        bh=cFWBUuzFVvbMswZ9kJ4Z4Ih3xSnlu+Hxv2+4lFZbnHc=;
+        s=default; t=1678789405;
+        bh=+Rs2iCTiek3yYBbmemqEMQIzt9ito44oHZ0zp2gqc10=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=n5rFFQU+Q7LukU1VZJbrAiymnkGlmrNvnMb+ciFh+N/qDexZb2DcC1Ldo7d4lQ048
-         g9suTTvlVA9H/oHRN8L/QLkjQsnPM42oafXHw8YLa7QXUWeWZ2lB6WgkhY39S5ARr1
-         0hFa3eTdXJLcB2gJA/jvNPJMgeShOklNZnFU+dNs=
+        b=YIY13fl2vX+jnARjSEo+Jv4ClNtCdXk4Pb/VJtM+8ZvDtbZgMkT8CnMO0Ah0uRMCh
+         EOva3BjomKBhR5fGAuUY6HWaCaBouOUtq33ZsGbwBST0QntXMNxWXIFx2EJIIWcl8y
+         Sp1t4Pjeb6CQWgnhTvv22eHB2np7MU6/5q4HTYuk=
 From:   Evgeniy Baskov <baskov@ispras.ru>
 To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
@@ -40,9 +40,9 @@ Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
         joeyli <jlee@suse.com>, lvc-project@linuxtesting.org,
         x86@kernel.org, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org
-Subject: [PATCH v5 04/27] x86/boot: Increase boot page table size
-Date:   Tue, 14 Mar 2023 13:13:31 +0300
-Message-Id: <92dcca146e54c6d2093be399261bb5c38d37c9be.1678785672.git.baskov@ispras.ru>
+Subject: [PATCH v5 22/27] x86/build: set type_of_loader for EFISTUB
+Date:   Tue, 14 Mar 2023 13:13:49 +0300
+Message-Id: <111d4120936d23e6023619660778444eb226a22f.1678785672.git.baskov@ispras.ru>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <cover.1678785672.git.baskov@ispras.ru>
 References: <cover.1678785672.git.baskov@ispras.ru>
@@ -52,64 +52,28 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Previous upper limit ignored pages implicitly mapped from #PF handler
-by code accessing ACPI tables (boot/compressed/{acpi.c,efi.c}),
-so theoretical upper limit is higher than it was set.
+After switching to the local copy of boot_params, EFISTUB stopped
+setting type_of_loader, using the default value of 0. Restore that
+behavior by assigning the right value at the build time.
 
-Using 4KB pages is desirable for better memory protection granularity.
-Approximately twice as much memory is required for those.
-
-Increase initial page table size to 64 4KB page tables.
-
-Tested-by: Mario Limonciello <mario.limonciello@amd.com>
 Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
 ---
- arch/x86/include/asm/boot.h | 28 ++++++++++++++++------------
- 1 file changed, 16 insertions(+), 12 deletions(-)
+ arch/x86/boot/tools/build.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/arch/x86/include/asm/boot.h b/arch/x86/include/asm/boot.h
-index 9191280d9ea3..88836067f88c 100644
---- a/arch/x86/include/asm/boot.h
-+++ b/arch/x86/include/asm/boot.h
-@@ -41,22 +41,26 @@
- # define BOOT_STACK_SIZE	0x4000
+diff --git a/arch/x86/boot/tools/build.c b/arch/x86/boot/tools/build.c
+index 476ef05f16fb..5ac4f08ed923 100644
+--- a/arch/x86/boot/tools/build.c
++++ b/arch/x86/boot/tools/build.c
+@@ -588,6 +588,8 @@ int main(int argc, char **argv)
+ 	memcpy(output + setup_size + efi_boot_params + SETUP_HEADER_OFFSET,
+ 	       setup_header, 0x290 - SETUP_HEADER_OFFSET
+ 	       /* == max possible sizeof(struct setup_header) */);
++	/* Set type_of_loader to the one that EFISTUB uses for the local copy */
++	output[setup_size + efi_boot_params + SETUP_HEADER_OFFSET + 0x1F] = 0x21;
+ #endif
  
- # define BOOT_INIT_PGT_SIZE	(6*4096)
--# ifdef CONFIG_RANDOMIZE_BASE
- /*
-  * Assuming all cross the 512GB boundary:
-  * 1 page for level4
-- * (2+2)*4 pages for kernel, param, cmd_line, and randomized kernel
-- * 2 pages for first 2M (video RAM: CONFIG_X86_VERBOSE_BOOTUP).
-- * Total is 19 pages.
-+ * (3+3)*2 pages for param and cmd_line
-+ * (2+2+S)*2 pages for kernel and randomized kernel, where S is total number
-+ *     of sections of kernel. Explanation: 2+2 are upper level page tables.
-+ *     We can have only S unaligned parts of section: 1 at the end of the kernel
-+ *     and (S-1) at the section borders. The start address of the kernel is
-+ *     aligned, so an extra page table. There are at most S=6 sections in
-+ *     vmlinux ELF image.
-+ * 3 pages for first 2M (video RAM: CONFIG_X86_VERBOSE_BOOTUP).
-+ * Total is 36 pages.
-+ *
-+ * Some number of page tables is also required for the ACPI and UEFI table
-+ * mappings, so we round up 36 to 64. Since ACPI tables are generally getting
-+ * allocated in a few contiguous regions of memory, they are very unlikely to be
-+ * spread out enough to require more than 28 extra page tables and this
-+ * would work fine in all more or less sane environments.
-  */
--#  ifdef CONFIG_X86_VERBOSE_BOOTUP
--#   define BOOT_PGT_SIZE	(19*4096)
--#  else /* !CONFIG_X86_VERBOSE_BOOTUP */
--#   define BOOT_PGT_SIZE	(17*4096)
--#  endif
--# else /* !CONFIG_RANDOMIZE_BASE */
--#  define BOOT_PGT_SIZE		BOOT_INIT_PGT_SIZE
--# endif
-+# define BOOT_PGT_SIZE		(64*4096)
- 
- #else /* !CONFIG_X86_64 */
- # define BOOT_STACK_SIZE	0x1000
+ 	/* Calculate and write kernel checksum. */
 -- 
 2.39.2
 
