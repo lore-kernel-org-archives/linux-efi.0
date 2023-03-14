@@ -2,33 +2,32 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 89ABEC6FD1C
-	for <linux-efi@archiver.kernel.org>; Tue, 14 Mar 2023 10:20:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5192BC74A44
+	for <linux-efi@archiver.kernel.org>; Tue, 14 Mar 2023 10:20:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229454AbjCNKUV (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 14 Mar 2023 06:20:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40704 "EHLO
+        id S229757AbjCNKUW (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 14 Mar 2023 06:20:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45696 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229797AbjCNKTo (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 14 Mar 2023 06:19:44 -0400
+        with ESMTP id S230054AbjCNKTp (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 14 Mar 2023 06:19:45 -0400
 Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 38C617A917;
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D59887F00A;
         Tue, 14 Mar 2023 03:19:11 -0700 (PDT)
 Received: from localhost.localdomain (unknown [83.149.199.65])
-        by mail.ispras.ru (Postfix) with ESMTPSA id 8ECE84076B4A;
-        Tue, 14 Mar 2023 10:18:03 +0000 (UTC)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 8ECE84076B4A
+        by mail.ispras.ru (Postfix) with ESMTPSA id 3DBBE4076B53;
+        Tue, 14 Mar 2023 10:18:04 +0000 (UTC)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 3DBBE4076B53
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ispras.ru;
-        s=default; t=1678789083;
-        bh=NKickpgUaD8tibH5xFyKu4KWqgRZ3RSyVuaxOysglBg=;
+        s=default; t=1678789084;
+        bh=j2kZQmzUqdi3zhtw0tkhtxK/VKJCq3JmQiY/uVoEKHM=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=g8pvNCk0uqZzZtzis6YvdDA3h/SybG5FqttFB2cDzZ8n7y+I+4h2KKoi6qLNozpMM
-         nQg1uWUEfe/aeRF52UJYsae2i/yAgoh9PEHWMyHu+lu7/kKWlIMEjZ7oL4DNh30xPK
-         pUywr4pkZPzRswBts1U8wIBzyPiFaW21Cm3srcSg=
+        b=NpFrixFWG1iFqDpPLr7f263x9c1RhgWCRKZiOh99sBVmdfKSyHAgUpasPXp33Jw1X
+         Z/zjd2Gy6Efx3eraPCF4Re9w6WSvcSuL7kKsiwWZF90iX7ZadfIQrwBUSQOzVOAOUf
+         CR0qRWQABkxTAwmmQ/rXmqJFR+Fu5/gQ4shfpFHU=
 From:   Evgeniy Baskov <baskov@ispras.ru>
 To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
-        Andy Lutomirski <luto@kernel.org>,
+Cc:     Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>,
         Dave Hansen <dave.hansen@linux.intel.com>,
         Ingo Molnar <mingo@redhat.com>,
         Peter Zijlstra <peterz@infradead.org>,
@@ -40,9 +39,9 @@ Cc:     Evgeniy Baskov <baskov@ispras.ru>, Borislav Petkov <bp@alien8.de>,
         joeyli <jlee@suse.com>, lvc-project@linuxtesting.org,
         x86@kernel.org, linux-efi@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org
-Subject: [PATCH v5 14/27] x86/boot: Add EFI kernel extraction interface
-Date:   Tue, 14 Mar 2023 13:13:41 +0300
-Message-Id: <ffff76dfeae014df8affad23982a2bba940ed101.1678785672.git.baskov@ispras.ru>
+Subject: [PATCH v5 17/27] x86: decompressor: Remove the 'bugger off' message
+Date:   Tue, 14 Mar 2023 13:13:44 +0300
+Message-Id: <805cba4e05928d1ec9c661ac8a750a6c4871132c.1678785672.git.baskov@ispras.ru>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <cover.1678785672.git.baskov@ispras.ru>
 References: <cover.1678785672.git.baskov@ispras.ru>
@@ -52,243 +51,122 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-To enable extraction of kernel image from EFI stub code directly
-extraction code needs to have separate interface that avoid part
-of low level initialization logic, i.e. serial port setup.
+From: Ard Biesheuvel <ardb@kernel.org>
 
-Add kernel extraction function callable from libstub as a part
-of preparation for extracting the kernel directly from EFI environment.
+Ancient (pre-2003) x86 kernels could boot from a floppy disk straight from
+the BIOS, using a small real mode boot stub at the start of the image
+where the BIOS would expect the boot record (or boot block) to appear.
 
-Tested-by: Mario Limonciello <mario.limonciello@amd.com>
-Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
+Due to its limitations (kernel size < 1 MiB, no support for IDE, USB or
+El Torito floppy emulation), this support was dropped, and a Linux aware
+bootloader is now always required to boot the kernel.
+
+To smoothen this transition, the boot stub was not removed entirely, but
+replaced with one that just prints an error message telling you to
+install a bootloader.
+
+As it is unlikely that anyone doing direct floppy boot with such an
+ancient kernel is going to upgrade to v6.4+ and expect that this boot
+method still works, printing this message is kind of pointless, and so
+we should be able to remove the logic that emits it.
+
+Let's free up this space so we can use it to expand the PE header in a
+subsequent patch.
+
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/boot/compressed/head_32.S    |   3 +-
- arch/x86/boot/compressed/head_64.S    |   2 +-
- arch/x86/boot/compressed/misc.c       | 100 +++++++++++++++++---------
- arch/x86/boot/compressed/misc.h       |   1 +
- arch/x86/include/asm/shared/extract.h |  26 +++++++
- 5 files changed, 96 insertions(+), 36 deletions(-)
- create mode 100644 arch/x86/include/asm/shared/extract.h
+ arch/x86/boot/header.S | 49 ------------------------------------------
+ arch/x86/boot/setup.ld |  7 +++---
+ 2 files changed, 4 insertions(+), 52 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
-index 987ae727cf9f..15545781ea48 100644
---- a/arch/x86/boot/compressed/head_32.S
-+++ b/arch/x86/boot/compressed/head_32.S
-@@ -213,8 +213,7 @@ SYM_DATA_END_LABEL(gdt, SYM_L_LOCAL, gdt_end)
-  */
- 	.bss
- 	.balign 4
--boot_heap:
--	.fill BOOT_HEAP_SIZE, 1, 0
-+SYM_DATA(boot_heap,	.fill BOOT_HEAP_SIZE, 1, 0)
- boot_stack:
- 	.fill BOOT_STACK_SIZE, 1, 0
- boot_stack_end:
-diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
-index 7774daf90a19..8af7835de3b1 100644
---- a/arch/x86/boot/compressed/head_64.S
-+++ b/arch/x86/boot/compressed/head_64.S
-@@ -747,7 +747,7 @@ SYM_DATA_END_LABEL(boot_idt, SYM_L_GLOBAL, boot_idt_end)
-  */
- 	.bss
- 	.balign 4
--SYM_DATA_LOCAL(boot_heap,	.fill BOOT_HEAP_SIZE, 1, 0)
-+SYM_DATA(boot_heap,	.fill BOOT_HEAP_SIZE, 1, 0)
+diff --git a/arch/x86/boot/header.S b/arch/x86/boot/header.S
+index 9338c68e7413..d4e16edf1198 100644
+--- a/arch/x86/boot/header.S
++++ b/arch/x86/boot/header.S
+@@ -38,64 +38,15 @@ SYSSEG		= 0x1000		/* historical load address >> 4 */
  
- SYM_DATA_START_LOCAL(boot_stack)
- 	.fill BOOT_STACK_SIZE, 1, 0
-diff --git a/arch/x86/boot/compressed/misc.c b/arch/x86/boot/compressed/misc.c
-index 74f028cf2dfd..925774d0288f 100644
---- a/arch/x86/boot/compressed/misc.c
-+++ b/arch/x86/boot/compressed/misc.c
-@@ -310,11 +310,11 @@ static unsigned long kernel_add_identity_map_dummy(unsigned long start,
-  *             |-------uncompressed kernel image---------|
-  *
-  */
--asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
--				  unsigned char *input_data,
--				  unsigned long input_len,
--				  unsigned char *output,
--				  unsigned long output_len)
-+static void *do_extract_kernel(void *rmode,
-+			       unsigned char *input_data,
-+			       unsigned long input_len,
-+			       unsigned char *output,
-+			       unsigned long output_len)
+ 	.code16
+ 	.section ".bstext", "ax"
+-
+-	.global bootsect_start
+-bootsect_start:
+ #ifdef CONFIG_EFI_STUB
+ 	# "MZ", MS-DOS header
+ 	.word	MZ_MAGIC
+-#endif
+-
+-	# Normalize the start address
+-	ljmp	$BOOTSEG, $start2
+-
+-start2:
+-	movw	%cs, %ax
+-	movw	%ax, %ds
+-	movw	%ax, %es
+-	movw	%ax, %ss
+-	xorw	%sp, %sp
+-	sti
+-	cld
+-
+-	movw	$bugger_off_msg, %si
+-
+-msg_loop:
+-	lodsb
+-	andb	%al, %al
+-	jz	bs_die
+-	movb	$0xe, %ah
+-	movw	$7, %bx
+-	int	$0x10
+-	jmp	msg_loop
+-
+-bs_die:
+-	# Allow the user to press a key, then reboot
+-	xorw	%ax, %ax
+-	int	$0x16
+-	int	$0x19
+-
+-	# int 0x19 should never return.  In case it does anyway,
+-	# invoke the BIOS reset code...
+-	ljmp	$0xf000,$0xfff0
+-
+-#ifdef CONFIG_EFI_STUB
+ 	.org	0x38
+ 	#
+ 	# Offset to the PE header.
+ 	#
+ 	.long	LINUX_PE_MAGIC
+ 	.long	pe_header
+-#endif /* CONFIG_EFI_STUB */
+-
+-	.section ".bsdata", "a"
+-bugger_off_msg:
+-	.ascii	"Use a boot loader.\r\n"
+-	.ascii	"\n"
+-	.ascii	"Remove disk and press any key to reboot...\r\n"
+-	.byte	0
+-
+-#ifdef CONFIG_EFI_STUB
+ pe_header:
+ 	.long	PE_MAGIC
+ 
+diff --git a/arch/x86/boot/setup.ld b/arch/x86/boot/setup.ld
+index 49546c247ae2..31419b7c9c3f 100644
+--- a/arch/x86/boot/setup.ld
++++ b/arch/x86/boot/setup.ld
+@@ -10,10 +10,11 @@ ENTRY(_start)
+ SECTIONS
  {
- 	const unsigned long kernel_total_size = VO__end - VO__text;
- 	unsigned long virt_addr = LOAD_PHYSICAL_ADDR;
-@@ -329,26 +329,6 @@ asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
+ 	. = 0;
+-	.bstext		: { *(.bstext) }
+-	.bsdata		: { *(.bsdata) }
++	.bstext	: {
++		*(.bstext)
++		. = 495;
++	} =0xff
  
- 	sanitize_boot_params(boot_params);
- 
--	init_default_io_ops();
--
--	/*
--	 * On 64-bit this pointer is set during page table uninitialization,
--	 * but on 32-bit it remains uninitialized, since paging is disabled.
--	 */
--	if (IS_ENABLED(CONFIG_X86_32))
--		kernel_add_identity_map = kernel_add_identity_map_dummy;
--
--
--	/*
--	 * Detect TDX guest environment.
--	 *
--	 * It has to be done before console_init() in order to use
--	 * paravirtualized port I/O operations if needed.
--	 */
--	early_tdx_detect();
--
--	init_bare_console();
--
- 	/*
- 	 * Save RSDP address for later use. Have this after console_init()
- 	 * so that early debugging output from the RSDP parsing code can be
-@@ -356,11 +336,6 @@ asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
- 	 */
- 	boot_params->acpi_rsdp_addr = get_rsdp_addr();
- 
--	debug_putstr("early console in extract_kernel\n");
--
--	free_mem_ptr     = heap;	/* Heap */
--	free_mem_end_ptr = heap + BOOT_HEAP_SIZE;
--
- 	/*
- 	 * The memory hole needed for the kernel is the larger of either
- 	 * the entire decompressed kernel plus relocation table, or the
-@@ -418,12 +393,12 @@ asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
- 	if (virt_addr & (MIN_KERNEL_ALIGN - 1))
- 		error("Destination virtual address inappropriately aligned");
- #ifdef CONFIG_X86_64
--	if (heap > 0x3fffffffffffUL)
-+	if (phys_addr > 0x3fffffffffffUL)
- 		error("Destination address too large");
- 	if (virt_addr + max(output_len, kernel_total_size) > KERNEL_IMAGE_SIZE)
- 		error("Destination virtual address is beyond the kernel mapping area");
- #else
--	if (heap > ((-__PAGE_OFFSET-(128<<20)-1) & 0x7fffffff))
-+	if (phys_addr > ((-__PAGE_OFFSET-(128<<20)-1) & 0x7fffffff))
- 		error("Destination address too large");
- #endif
- #ifndef CONFIG_RELOCATABLE
-@@ -440,12 +415,71 @@ asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
- 	debug_puthex(entry_offset);
- 	debug_putstr(").\n");
- 
-+	return output + entry_offset;
-+}
-+
-+asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
-+				  unsigned char *input_data,
-+				  unsigned long input_len,
-+				  unsigned char *output,
-+				  unsigned long output_len)
-+{
-+	void *entry;
-+
-+	init_default_io_ops();
-+
-+	/*
-+	 * On 64-bit this pointer is set during page table uninitialization,
-+	 * but on 32-bit it remains uninitialized, since paging is disabled.
-+	 */
-+	if (IS_ENABLED(CONFIG_X86_32))
-+		kernel_add_identity_map = kernel_add_identity_map_dummy;
-+
-+	/*
-+	 * Detect TDX guest environment.
-+	 *
-+	 * It has to be done before console_init() in order to use
-+	 * paravirtualized port I/O operations if needed.
-+	 */
-+	early_tdx_detect();
-+
-+	init_bare_console();
-+
-+	debug_putstr("early console in extract_kernel\n");
-+
-+	free_mem_ptr     = heap;	/* Heap */
-+	free_mem_end_ptr = heap + BOOT_HEAP_SIZE;
-+
-+	entry = do_extract_kernel(rmode, input_data,
-+				  input_len, output, output_len);
-+
- 	/* Disable exception handling before booting the kernel */
- 	cleanup_exception_handling();
- 
--	return output + entry_offset;
-+	return entry;
- }
- 
-+void *efi_extract_kernel(struct boot_params *rmode,
-+			 struct efi_extract_callbacks *cb,
-+			 unsigned char *input_data,
-+			 unsigned long input_len,
-+			 unsigned long output_len)
-+{
-+	extern char boot_heap[BOOT_HEAP_SIZE];
-+
-+	free_mem_ptr     = (unsigned long)boot_heap;	/* Heap */
-+	free_mem_end_ptr = (unsigned long)boot_heap + BOOT_HEAP_SIZE;
-+
-+	init_console_func(cb->putstr, cb->puthex);
-+	kernel_add_identity_map = cb->map_range;
-+
-+	return do_extract_kernel(rmode, input_data,
-+				 input_len, (void *)LOAD_PHYSICAL_ADDR, output_len);
-+}
-+
-+
-+
-+
- void fortify_panic(const char *name)
- {
- 	error("detected buffer overflow");
-diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
-index fe201b45b038..6c67152c862d 100644
---- a/arch/x86/boot/compressed/misc.h
-+++ b/arch/x86/boot/compressed/misc.h
-@@ -26,6 +26,7 @@
- #include <asm/boot.h>
- #include <asm/bootparam.h>
- #include <asm/desc_defs.h>
-+#include <asm/shared/extract.h>
- 
- #include "tdx.h"
- 
-diff --git a/arch/x86/include/asm/shared/extract.h b/arch/x86/include/asm/shared/extract.h
-new file mode 100644
-index 000000000000..46bf56348a86
---- /dev/null
-+++ b/arch/x86/include/asm/shared/extract.h
-@@ -0,0 +1,26 @@
-+/* SPDX-License-Identifier: GPL-2.0 */
-+#ifndef ASM_SHARED_EXTRACT_H
-+#define ASM_SHARED_EXTRACT_H
-+
-+#include <asm/bootparam.h>
-+
-+#define MAP_WRITE	0x02 /* Writable memory */
-+#define MAP_EXEC	0x04 /* Executable memory */
-+#define MAP_ALLOC	0x10 /* Range needs to be allocated */
-+#define MAP_PROTECT	0x20 /* Set exact memory attributes for memory range */
-+
-+struct efi_extract_callbacks {
-+	void (*putstr)(const char *msg);
-+	void (*puthex)(unsigned long x);
-+	unsigned long (*map_range)(unsigned long start,
-+				   unsigned long end,
-+				   unsigned int flags);
-+};
-+
-+void *efi_extract_kernel(struct boot_params *rmode,
-+			 struct efi_extract_callbacks *cb,
-+			 unsigned char *input_data,
-+			 unsigned long input_len,
-+			 unsigned long output_len);
-+
-+#endif /* ASM_SHARED_EXTRACT_H */
+-	. = 495;
+ 	.header		: { *(.header) }
+ 	.entrytext	: { *(.entrytext) }
+ 	.inittext	: { *(.inittext) }
 -- 
 2.39.2
 
