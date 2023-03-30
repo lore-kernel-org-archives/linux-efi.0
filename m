@@ -2,44 +2,44 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 463BDC761A6
-	for <linux-efi@archiver.kernel.org>; Thu, 30 Mar 2023 11:51:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CD379C6FD1D
+	for <linux-efi@archiver.kernel.org>; Thu, 30 Mar 2023 11:51:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231664AbjC3LvZ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 30 Mar 2023 07:51:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44646 "EHLO
+        id S231702AbjC3Lv2 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 30 Mar 2023 07:51:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44818 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231702AbjC3LvA (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 30 Mar 2023 07:51:00 -0400
+        with ESMTP id S231924AbjC3LvC (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 30 Mar 2023 07:51:02 -0400
 Received: from mga09.intel.com (mga09.intel.com [134.134.136.24])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6C20D93E1;
-        Thu, 30 Mar 2023 04:50:37 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C07B0B465;
+        Thu, 30 Mar 2023 04:50:39 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1680177037; x=1711713037;
+  t=1680177039; x=1711713039;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=d4/KfDFRLyY7sMUS/zMPpAEAi7ubl+P+2mX+6hzyiNg=;
-  b=HEaNTLXkEQvLPiwN7l4iWi5nZmb18tGj7151ZUd4Elj7oYZBJedOnkKh
-   Q+0b0IOrx4b9r/BnPfK7VM9WxsNI437J8dWtMQPUFe5Z1CHGPRtCfscHC
-   6v1t10Tk79ZVHUECmo8RqnDYuWuft/EK2Z+hHe7nn6t1EFSXYIDct0fjr
-   PP8ZVtoAmHfMMRULVHCh7eQsBk7fBao4JNwjmTN8htXMSIoOYZaKLRAUa
-   uvMsoOZcegItKKxW/MGLsuBR5+jI5MjD1dFN0sGwKLOhprrYm9V9OXQCN
-   pUgdCJmkNPzzebgwlKCh9w5MR7kg0ujU234ZZ6A84waNnZT/EWB6l+ymW
-   w==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10664"; a="342756789"
+  bh=wDfbjNCC+5BxiTtoxByvPaljGaBvwiQ8TKW6aMXMCQY=;
+  b=WBN+yqjPrwKcOt7gLbOU0E1+xBy7hUOt4UxTzyAj6vBS46pHbLL1b88Y
+   Ern03CBqHKIGRf/ZD2SYnpoeuQSRvINoq8xwBGfTh0fXPMM8spWOT1GCY
+   cVhAvo3ug5zBT5xf4XsqCr08mxe5YmSTr+VBgLFT2oSzrQDHn+Ju1/R50
+   blhxjRZfceCSK51TTFeEVN0SFBEukl/p87TJTW8+QYMK//KthkA34wp0Z
+   nHTcv09xoWzToWZtuw4ORlHAGaC9KfV3Ob76RIzPifX4DwhhPgG/kT9nv
+   RhoGDkM0YY/jY10dUzvtn3S+NtRa7QqBEzGAYEbVBRTzBoZ6ncH7xTXuU
+   A==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10664"; a="342756818"
 X-IronPort-AV: E=Sophos;i="5.98,303,1673942400"; 
-   d="scan'208";a="342756789"
+   d="scan'208";a="342756818"
 Received: from orsmga003.jf.intel.com ([10.7.209.27])
   by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Mar 2023 04:50:32 -0700
 X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10664"; a="634856504"
+X-IronPort-AV: E=McAfee;i="6600,9927,10664"; a="634856514"
 X-IronPort-AV: E=Sophos;i="5.98,303,1673942400"; 
-   d="scan'208";a="634856504"
+   d="scan'208";a="634856514"
 Received: from ngreburx-mobl.ger.corp.intel.com (HELO box.shutemov.name) ([10.251.209.91])
-  by orsmga003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Mar 2023 04:50:16 -0700
+  by orsmga003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Mar 2023 04:50:18 -0700
 Received: by box.shutemov.name (Postfix, from userid 1000)
-        id 3E8F41044F3; Thu, 30 Mar 2023 14:50:00 +0300 (+03)
+        id 60182104788; Thu, 30 Mar 2023 14:50:00 +0300 (+03)
 From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
 To:     Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>,
         Sean Christopherson <seanjc@google.com>,
@@ -66,10 +66,11 @@ Cc:     Andi Kleen <ak@linux.intel.com>,
         aarcange@redhat.com, peterx@redhat.com, x86@kernel.org,
         linux-mm@kvack.org, linux-coco@lists.linux.dev,
         linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
-        "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-Subject: [PATCHv9 08/14] x86/boot/compressed: Handle unaccepted memory
-Date:   Thu, 30 Mar 2023 14:49:50 +0300
-Message-Id: <20230330114956.20342-9-kirill.shutemov@linux.intel.com>
+        "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
+        Dave Hansen <dave.hansen@linux.intel.com>
+Subject: [PATCHv9 11/14] x86/mm: Avoid load_unaligned_zeropad() stepping into unaccepted memory
+Date:   Thu, 30 Mar 2023 14:49:53 +0300
+Message-Id: <20230330114956.20342-12-kirill.shutemov@linux.intel.com>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230330114956.20342-1-kirill.shutemov@linux.intel.com>
 References: <20230330114956.20342-1-kirill.shutemov@linux.intel.com>
@@ -79,188 +80,124 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The firmware will pre-accept the memory used to run the stub. But, the
-stub is responsible for accepting the memory into which it decompresses
-the main kernel. Accept memory just before decompression starts.
+load_unaligned_zeropad() can lead to unwanted loads across page boundaries.
+The unwanted loads are typically harmless. But, they might be made to
+totally unrelated or even unmapped memory. load_unaligned_zeropad()
+relies on exception fixup (#PF, #GP and now #VE) to recover from these
+unwanted loads.
 
-The stub is also responsible for choosing a physical address in which to
-place the decompressed kernel image. The KASLR mechanism will randomize
-this physical address. Since the unaccepted memory region is relatively
-small, KASLR would be quite ineffective if it only used the pre-accepted
-area (EFI_CONVENTIONAL_MEMORY). Ensure that KASLR randomizes among the
-entire physical address space by also including EFI_UNACCEPTED_MEMORY.
+But, this approach does not work for unaccepted memory. For TDX, a load
+from unaccepted memory will not lead to a recoverable exception within
+the guest. The guest will exit to the VMM where the only recourse is to
+terminate the guest.
+
+There are three parts to fix this issue and comprehensively avoid access
+to unaccepted memory. Together these ensure that an extra "guard" page
+is accepted in addition to the memory that needs to be used.
+
+1. Implicitly extend the range_contains_unaccepted_memory(start, end)
+   checks up to end+2M if 'end' is aligned on a 2M boundary. It may
+   require checking 2M chunk beyond end of RAM. The bitmap allocation is
+   modified to accommodate this.
+2. Implicitly extend accept_memory(start, end) to end+2M if 'end' is
+   aligned on a 2M boundary.
+3. Set PageUnaccepted() on both memory that itself needs to be accepted
+   *and* memory where the next page needs to be accepted. Essentially,
+   make PageUnaccepted(page) a marker for whether work needs to be done
+   to make 'page' usable. That work might include accepting pages in
+   addition to 'page' itself.
+
+Side note: This leads to something strange. Pages which were accepted
+	   at boot, marked by the firmware as accepted and will never
+	   _need_ to be accepted might have PageUnaccepted() set on
+	   them. PageUnaccepted(page) is a cue to ensure that the next
+	   page is accepted before 'page' can be used.
+
+This is an actual, real-world problem which was discovered during TDX
+testing.
 
 Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
+Reviewed-by: Dave Hansen <dave.hansen@linux.intel.com>
 ---
- arch/x86/boot/compressed/Makefile        |  2 +-
- arch/x86/boot/compressed/efi.h           |  1 +
- arch/x86/boot/compressed/kaslr.c         | 35 ++++++++++++++++--------
- arch/x86/boot/compressed/mem.c           | 18 ++++++++++++
- arch/x86/boot/compressed/misc.c          |  6 ++++
- arch/x86/boot/compressed/misc.h          |  6 ++++
- arch/x86/include/asm/unaccepted_memory.h |  2 ++
- 7 files changed, 57 insertions(+), 13 deletions(-)
+ arch/x86/mm/unaccepted_memory.c         | 39 +++++++++++++++++++++++++
+ drivers/firmware/efi/libstub/x86-stub.c |  7 +++++
+ 2 files changed, 46 insertions(+)
 
-diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
-index f62c02348f9a..74f7adee46ad 100644
---- a/arch/x86/boot/compressed/Makefile
-+++ b/arch/x86/boot/compressed/Makefile
-@@ -107,7 +107,7 @@ endif
+diff --git a/arch/x86/mm/unaccepted_memory.c b/arch/x86/mm/unaccepted_memory.c
+index 1df918b21469..a0a58486eb74 100644
+--- a/arch/x86/mm/unaccepted_memory.c
++++ b/arch/x86/mm/unaccepted_memory.c
+@@ -23,6 +23,38 @@ void accept_memory(phys_addr_t start, phys_addr_t end)
+ 	bitmap = __va(boot_params.unaccepted_memory);
+ 	range_start = start / PMD_SIZE;
  
- vmlinux-objs-$(CONFIG_ACPI) += $(obj)/acpi.o
- vmlinux-objs-$(CONFIG_INTEL_TDX_GUEST) += $(obj)/tdx.o $(obj)/tdcall.o
--vmlinux-objs-$(CONFIG_UNACCEPTED_MEMORY) += $(obj)/bitmap.o $(obj)/mem.o
-+vmlinux-objs-$(CONFIG_UNACCEPTED_MEMORY) += $(obj)/bitmap.o $(obj)/find.o $(obj)/mem.o
- 
- vmlinux-objs-$(CONFIG_EFI) += $(obj)/efi.o
- vmlinux-objs-$(CONFIG_EFI_MIXED) += $(obj)/efi_mixed.o
-diff --git a/arch/x86/boot/compressed/efi.h b/arch/x86/boot/compressed/efi.h
-index 7db2f41b54cd..cf475243b6d5 100644
---- a/arch/x86/boot/compressed/efi.h
-+++ b/arch/x86/boot/compressed/efi.h
-@@ -32,6 +32,7 @@ typedef	struct {
- } efi_table_hdr_t;
- 
- #define EFI_CONVENTIONAL_MEMORY		 7
-+#define EFI_UNACCEPTED_MEMORY		15
- 
- #define EFI_MEMORY_MORE_RELIABLE \
- 				((u64)0x0000000000010000ULL)	/* higher reliability */
-diff --git a/arch/x86/boot/compressed/kaslr.c b/arch/x86/boot/compressed/kaslr.c
-index 454757fbdfe5..749f0fe7e446 100644
---- a/arch/x86/boot/compressed/kaslr.c
-+++ b/arch/x86/boot/compressed/kaslr.c
-@@ -672,6 +672,28 @@ static bool process_mem_region(struct mem_vector *region,
- }
- 
- #ifdef CONFIG_EFI
++	/*
++	 * load_unaligned_zeropad() can lead to unwanted loads across page
++	 * boundaries. The unwanted loads are typically harmless. But, they
++	 * might be made to totally unrelated or even unmapped memory.
++	 * load_unaligned_zeropad() relies on exception fixup (#PF, #GP and now
++	 * #VE) to recover from these unwanted loads.
++	 *
++	 * But, this approach does not work for unaccepted memory. For TDX, a
++	 * load from unaccepted memory will not lead to a recoverable exception
++	 * within the guest. The guest will exit to the VMM where the only
++	 * recourse is to terminate the guest.
++	 *
++	 * There are three parts to fix this issue and comprehensively avoid
++	 * access to unaccepted memory. Together these ensure that an extra
++	 * "guard" page is accepted in addition to the memory that needs to be
++	 * used:
++	 *
++	 * 1. Implicitly extend the range_contains_unaccepted_memory(start, end)
++	 *    checks up to end+2M if 'end' is aligned on a 2M boundary.
++	 *
++	 * 2. Implicitly extend accept_memory(start, end) to end+2M if 'end' is
++	 *    aligned on a 2M boundary. (immediately following this comment)
++	 *
++	 * 3. Set PageUnaccepted() on both memory that itself needs to be
++	 *    accepted *and* memory where the next page needs to be accepted.
++	 *    Essentially, make PageUnaccepted(page) a marker for whether work
++	 *    needs to be done to make 'page' usable. That work might include
++	 *    accepting pages in addition to 'page' itself.
++	 */
++	if (!(end % PMD_SIZE))
++		end += PMD_SIZE;
 +
-+/*
-+ * Only EFI_CONVENTIONAL_MEMORY and EFI_UNACCEPTED_MEMORY (if supported) are
-+ * guaranteed to be free.
-+ *
-+ * It is more conservative in picking free memory than the EFI spec allows:
-+ *
-+ * According to the spec, EFI_BOOT_SERVICES_{CODE|DATA} are also free memory
-+ * and thus available to place the kernel image into, but in practice there's
-+ * firmware where using that memory leads to crashes.
-+ */
-+static inline bool memory_type_is_free(efi_memory_desc_t *md)
-+{
-+	if (md->type == EFI_CONVENTIONAL_MEMORY)
-+		return true;
-+
-+	if (md->type == EFI_UNACCEPTED_MEMORY)
-+		return IS_ENABLED(CONFIG_UNACCEPTED_MEMORY);
-+
-+	return false;
-+}
-+
- /*
-  * Returns true if we processed the EFI memmap, which we prefer over the E820
-  * table if it is available.
-@@ -716,18 +738,7 @@ process_efi_entries(unsigned long minimum, unsigned long image_size)
- 	for (i = 0; i < nr_desc; i++) {
- 		md = efi_early_memdesc_ptr(pmap, e->efi_memdesc_size, i);
+ 	spin_lock_irqsave(&unaccepted_memory_lock, flags);
+ 	for_each_set_bitrange_from(range_start, range_end, bitmap,
+ 				   DIV_ROUND_UP(end, PMD_SIZE)) {
+@@ -46,6 +78,13 @@ bool range_contains_unaccepted_memory(phys_addr_t start, phys_addr_t end)
  
--		/*
--		 * Here we are more conservative in picking free memory than
--		 * the EFI spec allows:
--		 *
--		 * According to the spec, EFI_BOOT_SERVICES_{CODE|DATA} are also
--		 * free memory and thus available to place the kernel image into,
--		 * but in practice there's firmware where using that memory leads
--		 * to crashes.
--		 *
--		 * Only EFI_CONVENTIONAL_MEMORY is guaranteed to be free.
--		 */
--		if (md->type != EFI_CONVENTIONAL_MEMORY)
-+		if (!memory_type_is_free(md))
- 			continue;
+ 	bitmap = __va(boot_params.unaccepted_memory);
  
- 		if (efi_soft_reserve_enabled() &&
-diff --git a/arch/x86/boot/compressed/mem.c b/arch/x86/boot/compressed/mem.c
-index 6b15a0ed8b54..de858a5180b6 100644
---- a/arch/x86/boot/compressed/mem.c
-+++ b/arch/x86/boot/compressed/mem.c
-@@ -3,12 +3,15 @@
- #include "../cpuflags.h"
- #include "bitmap.h"
- #include "error.h"
-+#include "find.h"
- #include "math.h"
++	/*
++	 * Also consider the unaccepted state of the *next* page. See fix #1 in
++	 * the comment on load_unaligned_zeropad() in accept_memory().
++	 */
++	if (!(end % PMD_SIZE))
++		end += PMD_SIZE;
++
+ 	spin_lock_irqsave(&unaccepted_memory_lock, flags);
+ 	while (start < end) {
+ 		if (test_bit(start / PMD_SIZE, bitmap)) {
+diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
+index 1643ddbde249..1afe7b5b02e1 100644
+--- a/drivers/firmware/efi/libstub/x86-stub.c
++++ b/drivers/firmware/efi/libstub/x86-stub.c
+@@ -715,6 +715,13 @@ static efi_status_t allocate_unaccepted_bitmap(struct boot_params *params,
+ 		return EFI_SUCCESS;
+ 	}
  
- #define PMD_SHIFT	21
- #define PMD_SIZE	(_AC(1, UL) << PMD_SHIFT)
- #define PMD_MASK	(~(PMD_SIZE - 1))
- 
-+extern struct boot_params *boot_params;
++	/*
++	 * range_contains_unaccepted_memory() may need to check one 2M chunk
++	 * beyond the end of RAM to deal with load_unaligned_zeropad(). Make
++	 * sure that the bitmap is large enough handle it.
++	 */
++	max_addr += PMD_SIZE;
 +
- static inline void __accept_memory(phys_addr_t start, phys_addr_t end)
- {
- 	/* Platform-specific memory-acceptance call goes here */
-@@ -71,3 +74,18 @@ void process_unaccepted_memory(struct boot_params *params, u64 start, u64 end)
- 	bitmap_set((unsigned long *)params->unaccepted_memory,
- 		   start / PMD_SIZE, (end - start) / PMD_SIZE);
- }
-+
-+void accept_memory(phys_addr_t start, phys_addr_t end)
-+{
-+	unsigned long range_start, range_end;
-+	unsigned long *bitmap, bitmap_size;
-+
-+	bitmap = (unsigned long *)boot_params->unaccepted_memory;
-+	range_start = start / PMD_SIZE;
-+	bitmap_size = DIV_ROUND_UP(end, PMD_SIZE);
-+
-+	for_each_set_bitrange_from(range_start, range_end, bitmap, bitmap_size) {
-+		__accept_memory(range_start * PMD_SIZE, range_end * PMD_SIZE);
-+		bitmap_clear(bitmap, range_start, range_end - range_start);
-+	}
-+}
-diff --git a/arch/x86/boot/compressed/misc.c b/arch/x86/boot/compressed/misc.c
-index 014ff222bf4b..186bfd53e042 100644
---- a/arch/x86/boot/compressed/misc.c
-+++ b/arch/x86/boot/compressed/misc.c
-@@ -455,6 +455,12 @@ asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
- #endif
- 
- 	debug_putstr("\nDecompressing Linux... ");
-+
-+	if (boot_params->unaccepted_memory) {
-+		debug_putstr("Accepting memory... ");
-+		accept_memory(__pa(output), __pa(output) + needed_size);
-+	}
-+
- 	__decompress(input_data, input_len, NULL, NULL, output, output_len,
- 			NULL, error);
- 	entry_offset = parse_elf(output);
-diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
-index 2f155a0e3041..9663d1839f54 100644
---- a/arch/x86/boot/compressed/misc.h
-+++ b/arch/x86/boot/compressed/misc.h
-@@ -247,4 +247,10 @@ static inline unsigned long efi_find_vendor_table(struct boot_params *bp,
- }
- #endif /* CONFIG_EFI */
- 
-+#ifdef CONFIG_UNACCEPTED_MEMORY
-+void accept_memory(phys_addr_t start, phys_addr_t end);
-+#else
-+static inline void accept_memory(phys_addr_t start, phys_addr_t end) {}
-+#endif
-+
- #endif /* BOOT_COMPRESSED_MISC_H */
-diff --git a/arch/x86/include/asm/unaccepted_memory.h b/arch/x86/include/asm/unaccepted_memory.h
-index df0736d32858..41fbfc798100 100644
---- a/arch/x86/include/asm/unaccepted_memory.h
-+++ b/arch/x86/include/asm/unaccepted_memory.h
-@@ -7,4 +7,6 @@ struct boot_params;
- 
- void process_unaccepted_memory(struct boot_params *params, u64 start, u64 num);
- 
-+void accept_memory(phys_addr_t start, phys_addr_t end);
-+
- #endif
+ 	/*
+ 	 * If unaccepted memory is present, allocate a bitmap to track what
+ 	 * memory has to be accepted before access.
 -- 
 2.39.2
 
