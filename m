@@ -2,44 +2,44 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F97BC77B6D
-	for <linux-efi@archiver.kernel.org>; Thu, 30 Mar 2023 11:50:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 52C2AC761A6
+	for <linux-efi@archiver.kernel.org>; Thu, 30 Mar 2023 11:51:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229640AbjC3Luv (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 30 Mar 2023 07:50:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43822 "EHLO
+        id S231921AbjC3LvC (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 30 Mar 2023 07:51:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43726 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231182AbjC3Lub (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 30 Mar 2023 07:50:31 -0400
-Received: from mga04.intel.com (mga04.intel.com [192.55.52.120])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A2924AD25;
-        Thu, 30 Mar 2023 04:50:28 -0700 (PDT)
+        with ESMTP id S231727AbjC3Luk (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 30 Mar 2023 07:50:40 -0400
+Received: from mga09.intel.com (mga09.intel.com [134.134.136.24])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DB87F8A5B;
+        Thu, 30 Mar 2023 04:50:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1680177028; x=1711713028;
+  t=1680177031; x=1711713031;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=MmsAbUP+stG7qEWYYDNAAzwlLkIUGBDyKypaxDlWzw4=;
-  b=gixM1Vv/IWcSlPvQWBV6n8Uxde6NK5DZ8oMoyDzCXsc/h68FHi+JKgVP
-   rFQ78xSh5JFWf9icQ/y7jhGe90REKnG84CxoYQAcK7FYUTUNnoR3T5rO6
-   f7v3JKq9R6jWr7mehIYVCZHNY1obCxBoG02QH52RRTSbU2ljPgeldJu3P
-   cS5Q/0FrMqM3ns6bim24f8sKTN2cVUbaa33t6Criy+Mnr6REBUMzNIQUV
-   HdYm/EhjAUWRrqOertVPR9sJY3L9PxpL/mokhu0pabfz8k6tTxL6IJQsN
-   dPJr69GmO4EYw76iGCiaBQHclc/u88Y/439lj2B8/I07nkxc1ojo3LoRA
+  bh=j9rCoZtseVkMxXJK20bhOG6vjoCUVN6BwYUe9lsjGyo=;
+  b=jJl+1eQBQQejUCWSPKVgpFg5Jv+fiP9ujTka/dwPCrfhnD91l75vC2V8
+   lYfxcAbCGvzB38MWhmthHwv9kTLOW4E3jqrYUwkMOCobSZNZOMLBvGbUC
+   C3PTnNzbh+zxpI2FkevBtvAZUwgHoD/jnoo6Lh6nSqBh3LRU8O/TMQOsB
+   KZB0g/YoOI8GMZMBrY7j32QTX13PuynkQPl7ZFTHRi7nY+5TnkWePUzL7
+   gTeQ8IytE/wF2ZgtFjGm80AIpuo00av31vjZ84psxZaeqNmgAfpfPny0g
+   tCMn6OoqodBOJ6BwqxAWgOkaHisvCpK3HJVZb4hVuzhooVm0I+WHHYzYH
    Q==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10664"; a="339868533"
+X-IronPort-AV: E=McAfee;i="6600,9927,10664"; a="342756723"
 X-IronPort-AV: E=Sophos;i="5.98,303,1673942400"; 
-   d="scan'208";a="339868533"
-Received: from fmsmga005.fm.intel.com ([10.253.24.32])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Mar 2023 04:50:25 -0700
+   d="scan'208";a="342756723"
+Received: from orsmga003.jf.intel.com ([10.7.209.27])
+  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Mar 2023 04:50:30 -0700
 X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10664"; a="1014401458"
+X-IronPort-AV: E=McAfee;i="6600,9927,10664"; a="634856482"
 X-IronPort-AV: E=Sophos;i="5.98,303,1673942400"; 
-   d="scan'208";a="1014401458"
+   d="scan'208";a="634856482"
 Received: from ngreburx-mobl.ger.corp.intel.com (HELO box.shutemov.name) ([10.251.209.91])
-  by fmsmga005-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Mar 2023 04:50:18 -0700
+  by orsmga003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Mar 2023 04:50:02 -0700
 Received: by box.shutemov.name (Postfix, from userid 1000)
-        id 75D41104D1D; Thu, 30 Mar 2023 14:50:00 +0300 (+03)
+        id 0612B10438E; Thu, 30 Mar 2023 14:50:00 +0300 (+03)
 From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
 To:     Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>,
         Sean Christopherson <seanjc@google.com>,
@@ -66,11 +66,10 @@ Cc:     Andi Kleen <ak@linux.intel.com>,
         aarcange@redhat.com, peterx@redhat.com, x86@kernel.org,
         linux-mm@kvack.org, linux-coco@lists.linux.dev,
         linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
-        "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
-        Dave Hansen <dave.hansen@linux.intel.com>
-Subject: [PATCHv9 13/14] x86/tdx: Refactor try_accept_one()
-Date:   Thu, 30 Mar 2023 14:49:55 +0300
-Message-Id: <20230330114956.20342-14-kirill.shutemov@linux.intel.com>
+        "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
+Subject: [PATCHv9 03/14] mm/page_alloc: Fake unaccepted memory
+Date:   Thu, 30 Mar 2023 14:49:45 +0300
+Message-Id: <20230330114956.20342-4-kirill.shutemov@linux.intel.com>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230330114956.20342-1-kirill.shutemov@linux.intel.com>
 References: <20230330114956.20342-1-kirill.shutemov@linux.intel.com>
@@ -80,97 +79,68 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Rework try_accept_one() to return accepted size instead of modifying
-'start' inside the helper. It makes 'start' in-only argument and
-streamlines code on the caller side.
+For testing purposes, it is useful to fake unaccepted memory in the
+system. It helps to understand unaccepted memory overhead to the page
+allocator.
+
+The patch allows to treat memory above the specified physical memory
+address as unaccepted.
+
+The change only fakes unaccepted memory for page allocator. Memblock is
+not affected.
+
+It also assumes that arch-provided accept_memory() on already accepted
+memory is a nop.
 
 Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
-Suggested-by: Borislav Petkov <bp@alien8.de>
-Reviewed-by: Dave Hansen <dave.hansen@linux.intel.com>
 ---
- arch/x86/coco/tdx/tdx.c | 38 +++++++++++++++++++-------------------
- 1 file changed, 19 insertions(+), 19 deletions(-)
+ mm/page_alloc.c | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
 
-diff --git a/arch/x86/coco/tdx/tdx.c b/arch/x86/coco/tdx/tdx.c
-index a9893f44288f..9e6557d7514c 100644
---- a/arch/x86/coco/tdx/tdx.c
-+++ b/arch/x86/coco/tdx/tdx.c
-@@ -713,18 +713,18 @@ static bool tdx_cache_flush_required(void)
- 	return true;
- }
+diff --git a/mm/page_alloc.c b/mm/page_alloc.c
+index d62fcb2f28bd..509a93b7e5af 100644
+--- a/mm/page_alloc.c
++++ b/mm/page_alloc.c
+@@ -7213,6 +7213,8 @@ static DEFINE_STATIC_KEY_FALSE(zones_with_unaccepted_pages);
  
--static bool try_accept_one(phys_addr_t *start, unsigned long len,
--			  enum pg_level pg_level)
-+static unsigned long try_accept_one(phys_addr_t start, unsigned long len,
-+				    enum pg_level pg_level)
+ static bool lazy_accept = true;
+ 
++static unsigned long fake_unaccepted_start = -1UL;
++
+ static int __init accept_memory_parse(char *p)
  {
- 	unsigned long accept_size = page_level_size(pg_level);
- 	u64 tdcall_rcx;
- 	u8 page_size;
+ 	if (!strcmp(p, "lazy")) {
+@@ -7227,11 +7229,30 @@ static int __init accept_memory_parse(char *p)
+ }
+ early_param("accept_memory", accept_memory_parse);
  
--	if (!IS_ALIGNED(*start, accept_size))
--		return false;
-+	if (!IS_ALIGNED(start, accept_size))
-+		return 0;
++static int __init fake_unaccepted_start_parse(char *p)
++{
++	if (!p)
++		return -EINVAL;
++
++	fake_unaccepted_start = memparse(p, &p);
++
++	if (*p != '\0') {
++		fake_unaccepted_start = -1UL;
++		return -EINVAL;
++	}
++
++	return 0;
++}
++early_param("fake_unaccepted_start", fake_unaccepted_start_parse);
++
+ static bool page_contains_unaccepted(struct page *page, unsigned int order)
+ {
+ 	phys_addr_t start = page_to_phys(page);
+ 	phys_addr_t end = start + (PAGE_SIZE << order);
  
- 	if (len < accept_size)
--		return false;
-+		return 0;
- 
- 	/*
- 	 * Pass the page physical address to the TDX module to accept the
-@@ -743,15 +743,14 @@ static bool try_accept_one(phys_addr_t *start, unsigned long len,
- 		page_size = 2;
- 		break;
- 	default:
--		return false;
-+		return 0;
- 	}
- 
--	tdcall_rcx = *start | page_size;
-+	tdcall_rcx = start | page_size;
- 	if (__tdx_module_call(TDX_ACCEPT_PAGE, tdcall_rcx, 0, 0, 0, NULL))
--		return false;
-+		return 0;
- 
--	*start += accept_size;
--	return true;
-+	return accept_size;
++	if (start >= fake_unaccepted_start)
++		return true;
++
+ 	return range_contains_unaccepted_memory(start, end);
  }
  
- /*
-@@ -788,21 +787,22 @@ static bool tdx_enc_status_changed(unsigned long vaddr, int numpages, bool enc)
- 	 */
- 	while (start < end) {
- 		unsigned long len = end - start;
-+		unsigned long accept_size;
- 
- 		/*
- 		 * Try larger accepts first. It gives chance to VMM to keep
--		 * 1G/2M SEPT entries where possible and speeds up process by
--		 * cutting number of hypercalls (if successful).
-+		 * 1G/2M Secure EPT entries where possible and speeds up
-+		 * process by cutting number of hypercalls (if successful).
- 		 */
- 
--		if (try_accept_one(&start, len, PG_LEVEL_1G))
--			continue;
--
--		if (try_accept_one(&start, len, PG_LEVEL_2M))
--			continue;
--
--		if (!try_accept_one(&start, len, PG_LEVEL_4K))
-+		accept_size = try_accept_one(start, len, PG_LEVEL_1G);
-+		if (!accept_size)
-+			accept_size = try_accept_one(start, len, PG_LEVEL_2M);
-+		if (!accept_size)
-+			accept_size = try_accept_one(start, len, PG_LEVEL_4K);
-+		if (!accept_size)
- 			return false;
-+		start += accept_size;
- 	}
- 
- 	return true;
 -- 
 2.39.2
 
