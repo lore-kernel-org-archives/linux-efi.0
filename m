@@ -2,56 +2,90 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 72F2EC76196
-	for <linux-efi@archiver.kernel.org>; Fri, 31 Mar 2023 08:28:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 472BDC77B61
+	for <linux-efi@archiver.kernel.org>; Sat,  1 Apr 2023 01:42:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229877AbjCaI26 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 31 Mar 2023 04:28:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50360 "EHLO
+        id S233532AbjDABmM (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 31 Mar 2023 21:42:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45796 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230059AbjCaI25 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 31 Mar 2023 04:28:57 -0400
-X-Greylist: delayed 1546 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Fri, 31 Mar 2023 01:28:44 PDT
-Received: from mail.arnisdale.pl (mail.arnisdale.pl [151.80.133.87])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BCA4611E9E
-        for <linux-efi@vger.kernel.org>; Fri, 31 Mar 2023 01:28:44 -0700 (PDT)
-Received: by mail.arnisdale.pl (Postfix, from userid 1002)
-        id 560D2297D1; Fri, 31 Mar 2023 07:46:42 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=arnisdale.pl; s=mail;
-        t=1680248834; bh=6DhEsVYOGxxfetVY3oiVeew+7Cm34ArcvgDq2WQYIRw=;
-        h=Date:From:To:Subject:From;
-        b=nxhxJpHC5eLGtQZEMT/YZNmto/NIeEgsZAcYvvX7QxZiEH1j/3u6o0Uzh5kZT1xeM
-         Gz3Lxthv5e6tn1QV+v0gm+rZ+Np4+cUzlevIyWCV1lk9oJ+C0FJAMewlWFo6UKPi/u
-         7CkbthhCqaeMZYTzHKPVu1rGQeIAGJrt4AS6b+IReiWnczNum9X8HoIeJQwf/FG0AD
-         U5kFCm51ycEZY+U2ka+Ju8PKrTclDaTFgxDOS5IxPBPtSHzWKqASJuAjmowRhZdOho
-         xP3DsC+DEYPLbrEfEMMITbEW3SN+KI46+GYl5KecgYLpXbjWtIEJkEVvO2kOposeN6
-         54FoWKr/2kfbQ==
-Received: by mail.arnisdale.pl for <linux-efi@vger.kernel.org>; Fri, 31 Mar 2023 07:45:40 GMT
-Message-ID: <20230331064501-0.1.3o.181wq.0.fb3w3d4l9l@arnisdale.pl>
-Date:   Fri, 31 Mar 2023 07:45:40 GMT
-From:   "Maciej Telka" <maciej.telka@arnisdale.pl>
-To:     <linux-efi@vger.kernel.org>
-Subject: =?UTF-8?Q?Nawi=C4=85zanie_wsp=C3=B3=C5=82pracy?=
-X-Mailer: mail.arnisdale.pl
+        with ESMTP id S233534AbjDABmI (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 31 Mar 2023 21:42:08 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F1CA321A83;
+        Fri, 31 Mar 2023 18:41:48 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id B07E662CE8;
+        Sat,  1 Apr 2023 01:41:47 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 70FF6C433EF;
+        Sat,  1 Apr 2023 01:41:46 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1680313307;
+        bh=x5wyPMzvshtOqGQQDm3KVUPh6zsQSerG4WW+h3kXnMY=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=MW2N5OH5tlo3WJYFvH1vCbV8QNmWqICG9zZrIj1BViu+ymXIo36a/TmnAMcAtJf3d
+         WQJlm1AT5sc62mQo2IE+zD9XeSA1/K4ZDGK37JPwpmL/vXfWfiDLpCm5lP4gmPjNog
+         Pq4/sIF1I9VHRz3/paZZOSDtKS1VTSxvQIaTgfG2Sn8spYFNAuewzs3/3XqWk941RL
+         7IUt+p3OC1/a7shbiIiZJ0f5ohNAEhk2/J3lfDvlJRJ1H5/dtxPpxuEk2x6xae6FmV
+         xrh4s1fO68mHKRPL7zxFZchxCb2nUnBXu+w+xR67OGK5kr63V+ZXCmuxpCHJFhmlfQ
+         6EUyb7cJp92TQ==
+From:   Sasha Levin <sashal@kernel.org>
+To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc:     Hans de Goede <hdegoede@redhat.com>,
+        Javier Martinez Canillas <javierm@redhat.com>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Sasha Levin <sashal@kernel.org>, linux-efi@vger.kernel.org
+Subject: [PATCH AUTOSEL 6.2 11/25] efi: sysfb_efi: Add quirk for Lenovo Yoga Book X91F/L
+Date:   Fri, 31 Mar 2023 21:41:09 -0400
+Message-Id: <20230401014126.3356410-11-sashal@kernel.org>
+X-Mailer: git-send-email 2.39.2
+In-Reply-To: <20230401014126.3356410-1-sashal@kernel.org>
+References: <20230401014126.3356410-1-sashal@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+X-stable: review
+X-Patchwork-Hint: Ignore
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Dzie=C5=84 dobry,
+From: Hans de Goede <hdegoede@redhat.com>
 
-Czy jest mo=C5=BCliwo=C5=9B=C4=87 nawi=C4=85zania wsp=C3=B3=C5=82pracy z =
-Pa=C5=84stwem?
+[ Upstream commit 5ed213dd64681f84a01ceaa82fb336cf7d59ddcf ]
 
-Z ch=C4=99ci=C4=85 porozmawiam z osob=C4=85 zajmuj=C4=85c=C4=85 si=C4=99 =
-dzia=C5=82aniami zwi=C4=85zanymi ze sprzeda=C5=BC=C4=85.
+Another Lenovo convertable which reports a landscape resolution of
+1920x1200 with a pitch of (1920 * 4) bytes, while the actual framebuffer
+has a resolution of 1200x1920 with a pitch of (1200 * 4) bytes.
 
-Pomagamy skutecznie pozyskiwa=C4=87 nowych klient=C3=B3w.
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+Reviewed-by: Javier Martinez Canillas <javierm@redhat.com>
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ drivers/firmware/efi/sysfb_efi.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-Zapraszam do kontaktu.
+diff --git a/drivers/firmware/efi/sysfb_efi.c b/drivers/firmware/efi/sysfb_efi.c
+index e76d6803bdd08..456d0e5eaf78b 100644
+--- a/drivers/firmware/efi/sysfb_efi.c
++++ b/drivers/firmware/efi/sysfb_efi.c
+@@ -272,6 +272,14 @@ static const struct dmi_system_id efifb_dmi_swap_width_height[] __initconst = {
+ 					"IdeaPad Duet 3 10IGL5"),
+ 		},
+ 	},
++	{
++		/* Lenovo Yoga Book X91F / X91L */
++		.matches = {
++			DMI_EXACT_MATCH(DMI_SYS_VENDOR, "LENOVO"),
++			/* Non exact match to match F + L versions */
++			DMI_MATCH(DMI_PRODUCT_NAME, "Lenovo YB1-X91"),
++		},
++	},
+ 	{},
+ };
+ 
+-- 
+2.39.2
 
-
-Pozdrawiam serdecznie
-Maciej Telka
