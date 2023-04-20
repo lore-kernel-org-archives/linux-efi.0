@@ -2,52 +2,45 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A340C6FD18
-	for <linux-efi@archiver.kernel.org>; Wed, 19 Apr 2023 14:45:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CC6ABC77B73
+	for <linux-efi@archiver.kernel.org>; Thu, 20 Apr 2023 06:08:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233352AbjDSOpy (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 19 Apr 2023 10:45:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47716 "EHLO
+        id S233806AbjDTGIn (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 20 Apr 2023 02:08:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57286 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232784AbjDSOpx (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 19 Apr 2023 10:45:53 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 79936D317;
-        Wed, 19 Apr 2023 07:45:08 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S229496AbjDTGIm (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 20 Apr 2023 02:08:42 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1405440C2
+        for <linux-efi@vger.kernel.org>; Wed, 19 Apr 2023 23:07:55 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1681970875;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=wSFuSvux7VnCbOpwwSFApJu6KXSS6fzL4QItxFfANDg=;
+        b=KQi2dS95YYbcmpqogjewDwYdeoCz0kh8DK++YDzLn47yJcrr09JOHcb4ZYLOo8ReUjvl7o
+        K6fhUQNeOsWMD41ep84S8uC7b1pO5oahH0FUIWwuNXcJuKHof/YQ/UDLkf5vhZ9GiYhUuT
+        YQ3ucX/bEA6nOe9J4Jq9wd7jF49zqfU=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-609-Q6NMGBi1NumcfzANwCxDWQ-1; Thu, 20 Apr 2023 02:07:52 -0400
+X-MC-Unique: Q6NMGBi1NumcfzANwCxDWQ-1
+Received: from smtp.corp.redhat.com (int-mx09.intmail.prod.int.rdu2.redhat.com [10.11.54.9])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 2267263851;
-        Wed, 19 Apr 2023 14:44:58 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 83DC9C433A8;
-        Wed, 19 Apr 2023 14:44:57 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1681915497;
-        bh=wWkzRl1bal72Ksstv2NW9WU1+ZfobVIm+Keq4QJzHOM=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=AW1ycGEg70wqx4sbMR5KKjxHpdpWo8ojboJjJXNi1+UhU2HzrVi6iBk2smkaSETGN
-         nCU1KMdD8zN8DgWQkEGFvx0nVXQfqYhkjpzVGxsfVXkQE+gvB2U319PbXWbXu0BkFD
-         A70H2Gl8qq9kmQklhtU0iwS0q8/YQxgiJ2qUSQ6WJWK2BCupLW7WB5/w256Cl0Vw6s
-         fnSqiT01FAVr6uSbeGGChXferxHjiR7tQ26YhoiJP+74D3C19Ovs9Ysfz4TAURTJy1
-         gQImPbbwGDHu1e5nszzeRdl2ld0cFuclN/jWyOc6VWQM5PHUJB6/S6gf9jL/Kj8gC+
-         Ey8xngZ6NM97Q==
-Received: by mail-lj1-f175.google.com with SMTP id k15so16578630ljq.4;
-        Wed, 19 Apr 2023 07:44:57 -0700 (PDT)
-X-Gm-Message-State: AAQBX9f7E/HyJGz4mmkCvx7fj76NMLcpwG8G1hevg/XhWWGAGeIy1zpT
-        pmTn6UT5NRoNuUHXBYcfwQJkMu8nLLvMdXDVpqI=
-X-Google-Smtp-Source: AKy350bCMi+LROSXgZOTDyz9U+/dbBjR1BGsAJxbDf18an2K6nxd2pTYEyUVm0Dl7Z3tqnheaAXp16510oSO8ply7uE=
-X-Received: by 2002:a05:651c:238:b0:2a7:a638:d2a1 with SMTP id
- z24-20020a05651c023800b002a7a638d2a1mr862694ljn.18.1681915495467; Wed, 19 Apr
- 2023 07:44:55 -0700 (PDT)
-MIME-Version: 1.0
-References: <20230416120729.2470762-1-ardb@kernel.org> <jwvybt4sro56aiqvddn6jxdjpdelasdhl747c25kzv4vbjr7ph@fbtheokrtxce>
-In-Reply-To: <jwvybt4sro56aiqvddn6jxdjpdelasdhl747c25kzv4vbjr7ph@fbtheokrtxce>
-From:   Ard Biesheuvel <ardb@kernel.org>
-Date:   Wed, 19 Apr 2023 16:44:44 +0200
-X-Gmail-Original-Message-ID: <CAMj1kXE4xF9RJbaR0H6uuFxxroUJxQFo8WThb=SUa7H0OpDxUg@mail.gmail.com>
-Message-ID: <CAMj1kXE4xF9RJbaR0H6uuFxxroUJxQFo8WThb=SUa7H0OpDxUg@mail.gmail.com>
-Subject: Re: [RFC PATCH 0/3] efi: Implement generic zboot support
-To:     Gerd Hoffmann <kraxel@redhat.com>
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 56C01185A78F;
+        Thu, 20 Apr 2023 06:07:51 +0000 (UTC)
+Received: from sirius.home.kraxel.org (unknown [10.39.192.59])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id B727F492B05;
+        Thu, 20 Apr 2023 06:07:50 +0000 (UTC)
+Received: by sirius.home.kraxel.org (Postfix, from userid 1000)
+        id 84C6D18009A9; Thu, 20 Apr 2023 08:07:49 +0200 (CEST)
+Date:   Thu, 20 Apr 2023 08:07:49 +0200
+From:   Gerd Hoffmann <kraxel@redhat.com>
+To:     Ard Biesheuvel <ardb@kernel.org>
 Cc:     linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
         Evgeniy Baskov <baskov@ispras.ru>,
         Borislav Petkov <bp@alien8.de>,
@@ -64,72 +57,50 @@ Cc:     linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
         Tom Lendacky <thomas.lendacky@amd.com>,
         "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>,
         Linus Torvalds <torvalds@linux-foundation.org>
-Content-Type: text/plain; charset="UTF-8"
+Subject: Re: [RFC PATCH 0/3] efi: Implement generic zboot support
+Message-ID: <3zm36sbx4enlqaumxxz2gp3f6etwzhlfotqrqxsus2r6xulwvm@saqniauxenmi>
+References: <20230416120729.2470762-1-ardb@kernel.org>
+ <jwvybt4sro56aiqvddn6jxdjpdelasdhl747c25kzv4vbjr7ph@fbtheokrtxce>
+ <CAMj1kXE4xF9RJbaR0H6uuFxxroUJxQFo8WThb=SUa7H0OpDxUg@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAMj1kXE4xF9RJbaR0H6uuFxxroUJxQFo8WThb=SUa7H0OpDxUg@mail.gmail.com>
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.9
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Wed, 19 Apr 2023 at 07:54, Gerd Hoffmann <kraxel@redhat.com> wrote:
->
-> On Sun, Apr 16, 2023 at 02:07:26PM +0200, Ard Biesheuvel wrote:
-> > This series is a proof-of-concept that implements support for the EFI
-> > zboot decompressor for x86. It replaces the ordinary decompressor, and
-> > instead, performs the decompression, KASLR randomization and the 4/5
-> > level paging switch while running in the execution context of EFI.
+  Hi,
+
+> > Realistically, the second option is unlikely to ever be used on x86,
 > >
-> > This simplifies things substantially, and makes it straight-forward to
-> > abide by stricter future requirements related to the use of writable and
-> > executable memory under EFI, which will come into effect on x86 systems
-> > that are certified as being 'more secure', and ship with an even shinier
-> > Windows sticker.
-> >
-> > This is an alternative approach to the work being proposed by Evgeny [0]
-> > that makes rather radical changes to the existing decompressor, which
-> > has accumulated too many features already, e.g., related to confidential
-> > compute etc.
-> >
-> > EFI zboot images can be booted in two ways:
-> > - by EFI firmware, which loads and starts it as an ordinary EFI
-> >   application, just like the existing EFI stub (with which it shares
-> >   most of its code);
-> > - by a non-EFI loader that parses the image header for the compression
-> >   metadata, and decompresses the image into memory and boots it.
->
-> I like the idea to have all EFI archs handle compressed kernels the same
-> way.
->
-> But given that going EFI-only on x86 isn't a realistic option for
-> distros today this isn't really an alternative for Evgeny's patch
-> series, we have to fix the existing bzImage decompressor too.
->
+> > What would be needed to do so?  Teach kexec-tools and grub2 parse and
+> > load zboot kernels I guess?
+> 
+> I already implemented this for mach-virt here, so we can load Fedora
+> kernels without firmware:
+> 
+> https://gitlab.com/qemu-project/qemu/-/commit/ff11422804cd03494cc98691eecd3909ea09ab6f
+> 
+> On arm64, this is probably more straight-forward, as the bare metal
+> image is already intended to be booted directly like that. However,
+> the x86 uncompressed image requires surprisingly little from all the
+> boot_params/setup_header cruft to actually boot, so perhaps there it
+> is easy too.
 
-I tend to agree, although some clarification would be helpful
-regarding what is being fixed and why? I *think* I know, but I have
-not been involved as deeply as some of the distro folks in getting
-these requirements explicit.
+For existing boot loaders like grub I'd expect it being easy
+to code up, all the setup header code exists already, grub also
+has support for uncompressing stuff, so it should really be only
+zboot header parsing and some plumbing to get things going (i.e.
+have grub boot efi zboot kernels in bios mode).
 
-> Realistically, the second option is unlikely to ever be used on x86,
->
-> What would be needed to do so?  Teach kexec-tools and grub2 parse and
-> load zboot kernels I guess?
->
+Disclaimer: didn't actually check grub source code.
 
-I already implemented this for mach-virt here, so we can load Fedora
-kernels without firmware:
+I suspect the bigger problem wrt. grub is that getting patches merged
+upstream is extremely slow and every distro carries a huge stack of
+patches ...
 
-https://gitlab.com/qemu-project/qemu/-/commit/ff11422804cd03494cc98691eecd3909ea09ab6f
+take care,
+  Gerd
 
-On arm64, this is probably more straight-forward, as the bare metal
-image is already intended to be booted directly like that. However,
-the x86 uncompressed image requires surprisingly little from all the
-boot_params/setup_header cruft to actually boot, so perhaps there it
-is easy too.
-
-There is an unresolved issue related to kexec_load_file(), where only
-the compressed image is signed, but the uncompressed image is what
-ultimately gets booted, which either needs the decompression to occur
-in the kernel, or a secondary signature that the kernel can verify
-after the decompression happens in user space.
-
-Dave and I have generated several ideas here, but there hasn't been
-any progress towards a solution that seems palatable for upstream.
