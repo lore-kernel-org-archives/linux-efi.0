@@ -2,162 +2,150 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5687DC77B75
-	for <linux-efi@archiver.kernel.org>; Mon,  8 May 2023 07:06:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 986D5C77B7F
+	for <linux-efi@archiver.kernel.org>; Mon,  8 May 2023 07:20:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233284AbjEHHGs (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 8 May 2023 03:06:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46922 "EHLO
+        id S229852AbjEHHT7 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 8 May 2023 03:19:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35378 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233316AbjEHHGC (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 8 May 2023 03:06:02 -0400
+        with ESMTP id S233217AbjEHHTy (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 8 May 2023 03:19:54 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 392DF1CFD0;
-        Mon,  8 May 2023 00:05:15 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A6A55E56;
+        Mon,  8 May 2023 00:19:52 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 1A64261F88;
-        Mon,  8 May 2023 07:05:01 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BCCD0C4339C;
-        Mon,  8 May 2023 07:04:56 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 323FD61FED;
+        Mon,  8 May 2023 07:19:52 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7E252C43444;
+        Mon,  8 May 2023 07:19:51 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1683529500;
-        bh=cGAUD8iNyl2Jp4BQzqmRm+7QurWozlRhbNmhWh1rRE4=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=absfKyJLjfGHwejOEeDaiioXiSZMY0rzsRpNFBFNAQWOx4H1Tv/L5PwA9Pkd36Ger
-         2xnNBOLrkmdCzT4r9WgZvPg3s/1MDPHkK9puNlgMdkFHlxs/1bpinhKcpBs3EVbH11
-         vAKYQODpq1s8IWUoMapM4s9WX9pDfmklMV7FV6GERpAqFBuUwux6pYp+WOJS5+VoSh
-         Y1QzfVo+uktl6J3iMaEdh79mH7ymtBga6Ud2WxmJhCJmxREqSIkhGSmBLg1jKwnAof
-         I2gwkhoEF0MZT0+eR3GUTsZYjLmDh60Hz3SKy2V0hWjboO1y5EdTtsFIoEUqwkEJBq
-         JhNqMxM+wJaiQ==
-From:   Ard Biesheuvel <ardb@kernel.org>
-To:     linux-efi@vger.kernel.org
-Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
-        Evgeniy Baskov <baskov@ispras.ru>,
-        Borislav Petkov <bp@alien8.de>,
-        Andy Lutomirski <luto@kernel.org>,
-        Dave Hansen <dave.hansen@linux.intel.com>,
-        Ingo Molnar <mingo@redhat.com>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Alexey Khoroshilov <khoroshilov@ispras.ru>,
-        Peter Jones <pjones@redhat.com>,
-        Gerd Hoffmann <kraxel@redhat.com>,
-        Dave Young <dyoung@redhat.com>,
-        Mario Limonciello <mario.limonciello@amd.com>,
-        Kees Cook <keescook@chromium.org>,
-        Tom Lendacky <thomas.lendacky@amd.com>,
-        "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>,
-        Linus Torvalds <torvalds@linux-foundation.org>
-Subject: [PATCH v2 19/20] x86: efistub: Clear BSS in EFI handover protocol entrypoint
-Date:   Mon,  8 May 2023 09:03:29 +0200
-Message-Id: <20230508070330.582131-20-ardb@kernel.org>
-X-Mailer: git-send-email 2.39.2
-In-Reply-To: <20230508070330.582131-1-ardb@kernel.org>
-References: <20230508070330.582131-1-ardb@kernel.org>
+        s=k20201202; t=1683530391;
+        bh=6rOQ5NbJZcxzZSxkaCY+XurJ69PAlQjGw84WzWS8G1Q=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=AVS+L7/pJIeUn0n9W87kFXUcETAPzGxN1m4r3j+rxHh93FZ+1kjOn8qxRwvpgwW4D
+         kQdYGkurJwrrrIlYczUphQq37LlzvhJp/N5CMEzYZVmiGUkfe7q0l6C0xEH5dUlpl1
+         kPrXbyapvWYUWgJwTrrcklDJEpiQseQNMtwdBv/tFCepoMTAUIsBZpGAs1/2BF8wQO
+         ACqilnqVQBBkMBURdaWjbNl7U32u7zfWQlyHqe2MBNzNg79/030jTKztqI9qQz3+jt
+         TVK8xaCXS/KfhhE2LChb/9+HDLoIrXSJuwkeNIDEa2rR5XEQLkHHFKMVTozoFdzN6C
+         F0mWb9E/MAZ7Q==
+Received: by mail-lf1-f54.google.com with SMTP id 2adb3069b0e04-4ec8149907aso4782500e87.1;
+        Mon, 08 May 2023 00:19:51 -0700 (PDT)
+X-Gm-Message-State: AC+VfDz2PZELH03i0EN5RAdrfSSNtuxuXi09EEZ0cSMNdxQ01VaX2+7g
+        6wJDU8N1lBQxDmvNfboXfXYEc5YQJRcfdO97p5Y=
+X-Google-Smtp-Source: ACHHUZ6Lr2KTv0yM1wNOHpOdrJL0IajT8cMul1NTtl5PaGquY5kQh44lWRaZjtVgvX94CbeoAVX2DSx6ApFYn5Q9v1Q=
+X-Received: by 2002:ac2:511d:0:b0:4f1:4040:8143 with SMTP id
+ q29-20020ac2511d000000b004f140408143mr2574670lfb.60.1683530389163; Mon, 08
+ May 2023 00:19:49 -0700 (PDT)
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=3719; i=ardb@kernel.org; h=from:subject; bh=cGAUD8iNyl2Jp4BQzqmRm+7QurWozlRhbNmhWh1rRE4=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JISVi3kEJLX/JTguLyJS0j8f/LFn797D8j7X6fK2TLOf+e bs69PKbjlIWBjEOBlkxRRaB2X/f7Tw9UarWeZYszBxWJpAhDFycAjCR7iuMDC+K319wWrO2uVju 3+XzecsOd5ezMdfNOqJnH/hy60xBO0uG/3mqC/RPJRV0++mZH3m/2GbqLtMQsZnlmmozOdqfX31 7ngEA
-X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-Content-Transfer-Encoding: 8bit
+References: <20230507234618.18067-1-kirill.shutemov@linux.intel.com> <20230507234618.18067-3-kirill.shutemov@linux.intel.com>
+In-Reply-To: <20230507234618.18067-3-kirill.shutemov@linux.intel.com>
+From:   Ard Biesheuvel <ardb@kernel.org>
+Date:   Mon, 8 May 2023 09:19:37 +0200
+X-Gmail-Original-Message-ID: <CAMj1kXFNXMmAsnQovWq18LrOnNL4=3Puamvz7p1ufynJfVEOug@mail.gmail.com>
+Message-ID: <CAMj1kXFNXMmAsnQovWq18LrOnNL4=3Puamvz7p1ufynJfVEOug@mail.gmail.com>
+Subject: Re: [PATCHv10 02/11] efi/x86: Get full memory map in allocate_e820()
+To:     "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
+Cc:     Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>,
+        Dave Hansen <dave.hansen@intel.com>,
+        Sean Christopherson <seanjc@google.com>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Joerg Roedel <jroedel@suse.de>,
+        Andi Kleen <ak@linux.intel.com>,
+        Kuppuswamy Sathyanarayanan 
+        <sathyanarayanan.kuppuswamy@linux.intel.com>,
+        David Rientjes <rientjes@google.com>,
+        Vlastimil Babka <vbabka@suse.cz>,
+        Tom Lendacky <thomas.lendacky@amd.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Paolo Bonzini <pbonzini@redhat.com>,
+        Ingo Molnar <mingo@redhat.com>,
+        Dario Faggioli <dfaggioli@suse.com>,
+        Mike Rapoport <rppt@kernel.org>,
+        David Hildenbrand <david@redhat.com>,
+        Mel Gorman <mgorman@techsingularity.net>,
+        marcelo.cerri@canonical.com, tim.gardner@canonical.com,
+        khalid.elmously@canonical.com, philip.cox@canonical.com,
+        aarcange@redhat.com, peterx@redhat.com, x86@kernel.org,
+        linux-mm@kvack.org, linux-coco@lists.linux.dev,
+        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Borislav Petkov <bp@suse.de>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The so-called EFI handover protocol is value-add from the distros that
-permits a loader to simply copy a PE kernel image into memory and call
-an alternative entrypoint that is described by an embedded boot_params
-structure.
+On Mon, 8 May 2023 at 01:46, Kirill A. Shutemov
+<kirill.shutemov@linux.intel.com> wrote:
+>
+> Currently allocate_e820() is only interested in the size of map and size
+> of memory descriptor to determine how many e820 entries the kernel
+> needs.
+>
+> UEFI Specification version 2.9 introduces a new memory type --
+> unaccepted memory. To track unaccepted memory kernel needs to allocate
+> a bitmap. The size of the bitmap is dependent on the maximum physical
+> address present in the system. A full memory map is required to find
+> the maximum address.
+>
+> Modify allocate_e820() to get a full memory map.
+>
+> Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
+> Reviewed-by: Borislav Petkov <bp@suse.de>
 
-Most implementations of this protocol do not bother to check the PE
-header for minimum alignment, section placement, etc, and therefore also
-don't clear the image's BSS, or even allocate enough memory for it.
+Acked-by: Ard Biesheuvel <ardb@kernel.org>
 
-Allocating more memory on the fly is rather difficult, but let's at
-least clear the BSS explicitly when entering in this manner, so that the
-decompressor's pseudo-malloc() does not get confused by global variables
-that were not zero-initialized correctly.
-
-Note that we shouldn't clear BSS before calling efi_main() if we are not
-booting via the handover protocol, but this entrypoint is no longer
-shared with the pure EFI entrypoint so we can ignore that case here.
-
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
----
- arch/x86/boot/compressed/head_32.S      |  6 -----
- arch/x86/boot/compressed/head_64.S      |  2 +-
- drivers/firmware/efi/libstub/x86-stub.c | 24 +++++++++++++++++---
- 3 files changed, 22 insertions(+), 10 deletions(-)
-
-diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
-index 3f9b80726070a8e7..cd9587fcd5084f22 100644
---- a/arch/x86/boot/compressed/head_32.S
-+++ b/arch/x86/boot/compressed/head_32.S
-@@ -137,12 +137,6 @@ SYM_FUNC_START(startup_32)
- 	jmp	*%eax
- SYM_FUNC_END(startup_32)
- 
--#ifdef CONFIG_EFI_HANDOVER_PROTOCOL
--SYM_FUNC_START(efi32_stub_entry)
--	jmp	efi_main
--SYM_FUNC_END(efi32_stub_entry)
--#endif
--
- 	.text
- SYM_FUNC_START_LOCAL_NOALIGN(.Lrelocated)
- 
-diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
-index 320e2825ff0b32da..b7599cbbd2ea1136 100644
---- a/arch/x86/boot/compressed/head_64.S
-+++ b/arch/x86/boot/compressed/head_64.S
-@@ -458,7 +458,7 @@ SYM_CODE_END(startup_64)
- 	.org 0x390
- SYM_FUNC_START(efi64_stub_entry)
- 	and	$~0xf, %rsp			/* realign the stack */
--	call	efi_main
-+	call	efi_handover_entry
- SYM_FUNC_END(efi64_stub_entry)
- #endif
- 
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index 59076e16c1ac11ee..0528db3e36cf636b 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -891,9 +891,9 @@ static void __noreturn enter_kernel(unsigned long kernel_addr,
-  * On success, we jump to the relocated kernel directly and never return.
-  * On failure, we exit to the firmware via efi_exit instead of returning.
-  */
--asmlinkage void __noreturn efi_main(efi_handle_t handle,
--				    efi_system_table_t *sys_table_arg,
--				    struct boot_params *boot_params)
-+static void __noreturn efi_main(efi_handle_t handle,
-+				efi_system_table_t *sys_table_arg,
-+				struct boot_params *boot_params)
- {
- 	efi_guid_t guid = EFI_MEMORY_ATTRIBUTE_PROTOCOL_GUID;
- 	struct setup_header *hdr = &boot_params->hdr;
-@@ -1002,3 +1002,21 @@ asmlinkage void __noreturn efi_main(efi_handle_t handle,
- 
- 	efi_exit(handle, status);
- }
-+
-+#ifdef CONFIG_EFI_HANDOVER_PROTOCOL
-+void efi_handover_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg,
-+			struct boot_params *boot_params)
-+{
-+	extern char _bss[], _ebss[];
-+
-+	/* Ensure that BSS is zeroed when booting via the handover protocol */
-+	memset(_bss, 0, _ebss - _bss);
-+	efi_main(handle, sys_table_arg, boot_params);
-+}
-+
-+#ifdef CONFIG_X86_32
-+extern __alias(efi_handover_entry)
-+void efi32_stub_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg,
-+		      struct boot_params *boot_params);
-+#endif
-+#endif
--- 
-2.39.2
-
+> ---
+>  drivers/firmware/efi/libstub/x86-stub.c | 26 +++++++++++--------------
+>  1 file changed, 11 insertions(+), 15 deletions(-)
+>
+> diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
+> index a0bfd31358ba..fff81843169c 100644
+> --- a/drivers/firmware/efi/libstub/x86-stub.c
+> +++ b/drivers/firmware/efi/libstub/x86-stub.c
+> @@ -681,28 +681,24 @@ static efi_status_t allocate_e820(struct boot_params *params,
+>                                   struct setup_data **e820ext,
+>                                   u32 *e820ext_size)
+>  {
+> -       unsigned long map_size, desc_size, map_key;
+> +       struct efi_boot_memmap *map;
+>         efi_status_t status;
+> -       __u32 nr_desc, desc_version;
+> +       __u32 nr_desc;
+>
+> -       /* Only need the size of the mem map and size of each mem descriptor */
+> -       map_size = 0;
+> -       status = efi_bs_call(get_memory_map, &map_size, NULL, &map_key,
+> -                            &desc_size, &desc_version);
+> -       if (status != EFI_BUFFER_TOO_SMALL)
+> -               return (status != EFI_SUCCESS) ? status : EFI_UNSUPPORTED;
+> +       status = efi_get_memory_map(&map, false);
+> +       if (status != EFI_SUCCESS)
+> +               return status;
+>
+> -       nr_desc = map_size / desc_size + EFI_MMAP_NR_SLACK_SLOTS;
+> -
+> -       if (nr_desc > ARRAY_SIZE(params->e820_table)) {
+> -               u32 nr_e820ext = nr_desc - ARRAY_SIZE(params->e820_table);
+> +       nr_desc = map->map_size / map->desc_size;
+> +       if (nr_desc > ARRAY_SIZE(params->e820_table) - EFI_MMAP_NR_SLACK_SLOTS) {
+> +               u32 nr_e820ext = nr_desc - ARRAY_SIZE(params->e820_table) +
+> +                       EFI_MMAP_NR_SLACK_SLOTS;
+>
+>                 status = alloc_e820ext(nr_e820ext, e820ext, e820ext_size);
+> -               if (status != EFI_SUCCESS)
+> -                       return status;
+>         }
+>
+> -       return EFI_SUCCESS;
+> +       efi_bs_call(free_pool, map);
+> +       return status;
+>  }
+>
+>  struct exit_boot_struct {
+> --
+> 2.39.3
+>
