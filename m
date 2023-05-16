@@ -2,280 +2,137 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ADD95C77B7F
-	for <linux-efi@archiver.kernel.org>; Tue, 16 May 2023 12:07:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5FEC8C77B7A
+	for <linux-efi@archiver.kernel.org>; Tue, 16 May 2023 16:07:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232995AbjEPMHH (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 16 May 2023 08:07:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33344 "EHLO
+        id S233831AbjEPQG7 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 16 May 2023 12:06:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58646 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232384AbjEPMHH (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 16 May 2023 08:07:07 -0400
-Received: from mga04.intel.com (mga04.intel.com [192.55.52.120])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B1022213A;
-        Tue, 16 May 2023 05:07:04 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1684238824; x=1715774824;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=TzWOm3Mewv0PjnBqLlqHuGcExnpl6kTEJiKYo8/CWf0=;
-  b=SjkKdDdMLKlpOIyZG1BMmOgLWAm2V6mYY9CStjMe3mtcMxChaYdzElVg
-   z5lcq99I25RYtw+MLmjJ/EoFvHxuNTWZ8ZvYbQDslEBN4DhokwQRp72K2
-   uphPOPFrYkeCO2i4mLbq+Twa8qZmkS1evemADS4umcFQfpVIt479sC7oe
-   ihGeLOLLISVTSAGD6jNkMoidfv12CxjigksYBhdhWNMsetHXHm18XjOpK
-   +0U8GvdgOm1UYIv2u3oulFwGsOaq8wJqSkdfblzngVgIshgW9Unh3qP+b
-   NnJpLaY90kmQcGod7A/LXG7HFzGOimsxqTKDz/0I3LF6Zx9Oqzfjcn3/p
-   Q==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10711"; a="350294644"
-X-IronPort-AV: E=Sophos;i="5.99,278,1677571200"; 
-   d="scan'208";a="350294644"
-Received: from orsmga006.jf.intel.com ([10.7.209.51])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 May 2023 05:07:03 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10711"; a="678828131"
-X-IronPort-AV: E=Sophos;i="5.99,278,1677571200"; 
-   d="scan'208";a="678828131"
-Received: from unisar-mobl.ger.corp.intel.com (HELO box.shutemov.name) ([10.251.219.243])
-  by orsmga006-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 May 2023 05:06:56 -0700
-Received: by box.shutemov.name (Postfix, from userid 1000)
-        id 9DA9310DF0F; Tue, 16 May 2023 15:06:53 +0300 (+03)
-From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-To:     kirill.shutemov@linux.intel.com
-Cc:     aarcange@redhat.com, ak@linux.intel.com, akpm@linux-foundation.org,
-        ardb@kernel.org, bp@alien8.de, dave.hansen@intel.com,
-        david@redhat.com, dfaggioli@suse.com, jroedel@suse.de,
-        khalid.elmously@canonical.com, linux-coco@lists.linux.dev,
-        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mm@kvack.org, luto@kernel.org, marcelo.cerri@canonical.com,
-        mgorman@techsingularity.net, mingo@redhat.com, pbonzini@redhat.com,
-        peterx@redhat.com, peterz@infradead.org, philip.cox@canonical.com,
-        rientjes@google.com, rppt@kernel.org,
-        sathyanarayanan.kuppuswamy@linux.intel.com, seanjc@google.com,
-        tglx@linutronix.de, thomas.lendacky@amd.com,
-        tim.gardner@canonical.com, vbabka@suse.cz, x86@kernel.org
-Subject: [PATCHv11.1 5/9] efi: Add unaccepted memory support
-Date:   Tue, 16 May 2023 15:06:46 +0300
-Message-Id: <20230516120646.31195-1-kirill.shutemov@linux.intel.com>
-X-Mailer: git-send-email 2.39.3
-In-Reply-To: <20230513220418.19357-6-kirill.shutemov@linux.intel.com>
-References: <20230513220418.19357-6-kirill.shutemov@linux.intel.com>
+        with ESMTP id S234100AbjEPQG6 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 16 May 2023 12:06:58 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 70CBA10FA;
+        Tue, 16 May 2023 09:06:57 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 0E4AE632E4;
+        Tue, 16 May 2023 16:06:57 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B8143C433D2;
+        Tue, 16 May 2023 16:06:52 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1684253216;
+        bh=8HcNSfxmpWpIs1lFwEOw18x/wQfzM+YqaT6AxhudRyk=;
+        h=From:To:Cc:Subject:Date:From;
+        b=G9bvLv12GxvOE8xwKHj1jJBgw2cqEOTCsWdkgFCYbx21nU08VqqPMEdcbJAmdEua/
+         ll9u5r2DLzDVsQCRC8nbvMJv90oOzo/i0D4IDbAbktftEBC0oGczCWGqAGxVLIemKP
+         L0HG6k8IAqY86XzrGsZfiNe2z52IAlkbwrI5LT52dJONLxYmpFalCkW1p4Cg/SPehQ
+         UqLZ3rFbRcoNL3Pd1lQLhoau2RAoANPeayPWFZu0x97vtKtbqv7Ikc66R9kl684f0A
+         YbyVQ7/4IyUmESWqir8zrIrjuuhbztqDMjC4WHLe1j7DkHVshG3WBmfjQ7LEt3h1DF
+         iIHIJDkfbYnUA==
+From:   Arnd Bergmann <arnd@kernel.org>
+To:     Catalin Marinas <catalin.marinas@arm.com>,
+        Will Deacon <will@kernel.org>
+Cc:     Arnd Bergmann <arnd@arndb.de>, Ard Biesheuvel <ardb@kernel.org>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Marc Zyngier <maz@kernel.org>,
+        Oliver Upton <oliver.upton@linux.dev>,
+        James Morse <james.morse@arm.com>,
+        Suzuki K Poulose <suzuki.poulose@arm.com>,
+        Zenghui Yu <yuzenghui@huawei.com>,
+        Anshuman Khandual <anshuman.khandual@arm.com>,
+        Kees Cook <keescook@chromium.org>,
+        Suren Baghdasaryan <surenb@google.com>,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-efi@vger.kernel.org, kvmarm@lists.linux.dev
+Subject: [PATCH 00/15] arm64: address -Wmissing-prototype warnings
+Date:   Tue, 16 May 2023 18:06:27 +0200
+Message-Id: <20230516160642.523862-1-arnd@kernel.org>
+X-Mailer: git-send-email 2.39.2
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-efi_config_parse_tables() reserves memory that holds unaccepted memory
-configuration table so it won't be reused by page allocator.
+From: Arnd Bergmann <arnd@arndb.de>
 
-Core-mm requires few helpers to support unaccepted memory:
+This addresses all arm64 specific protype warnings. As with the arm32
+patches, the majority of them  should be straightforward, either adding
+an #include statement to get the right header, or ensuring that an unused
+global function is left out of the build when the prototype is hidden.
 
- - accept_memory() checks the range of addresses against the bitmap and
-   accept memory if needed.
+The ones that are a bit awkward are those that just add a prototype to
+shut up the warning, but the prototypes are never used for calling the
+function because the only caller is in assembler code. I tried to come
+up with other ways to shut up the compiler, and ideally this would be
+triggered by the 'asmlinkage' keyword as Ard suggested in the past, but
+I could not come up with a way to do this.
 
- - range_contains_unaccepted_memory() checks if anything within the
-   range requires acceptance.
+All of the warnings have to be addressed in some form before the
+warning can be enabled by default.
 
-Architectural code has to provide efi_get_unaccepted_table() that
-returns pointer to the unaccepted memory configuration table.
+    Arnd
 
-arch_accept_memory() handles arch-specific part of memory acceptance.
+Link: https://people.kernel.org/arnd/missing-prototype-warnings-in-the-kernel
 
-Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
 
-v11.1:
- - Add missing memblock_reserve() for the unaccepted memory
-   configuration table.
+Arnd Bergmann (15):
+  arm64: xor-neon: mark xor_arm64_neon_*() static
+  arm64: add scs_patch_vmlinux prototype
+  arm64: avoid prototype warnings for syscalls
+  arm64: move cpu_suspend_set_dbg_restorer() prototype to header
+  arm64: spectre: provide prototypes for internal functions
+  arm64: kvm: add prototypes for functions called in asm
+  arm64: cpuidle: fix #ifdef for acpi functions
+  arm64: efi: add efi_handle_corrupted_x18 prototype
+  arm64: hide unused is_valid_bugaddr()
+  arm64: module-plts: inline linux/moduleloader.h
+  arm64: flush: include linux/libnvdimm.h
+  arm64: kaslr: add kaslr_early_init() declaration
+  arm64: signal: include asm/exception.h
+  arm64: move early_brk64 prototype to header
+  arm64: add alt_cb_patch_nops prototype
 
----
- drivers/firmware/efi/Makefile            |   1 +
- drivers/firmware/efi/efi.c               |  25 ++++++
- drivers/firmware/efi/unaccepted_memory.c | 103 +++++++++++++++++++++++
- include/linux/efi.h                      |   1 +
- 4 files changed, 130 insertions(+)
- create mode 100644 drivers/firmware/efi/unaccepted_memory.c
+ arch/arm64/include/asm/alternative.h     |  3 +++
+ arch/arm64/include/asm/archrandom.h      |  2 ++
+ arch/arm64/include/asm/compat.h          |  2 ++
+ arch/arm64/include/asm/efi.h             |  2 ++
+ arch/arm64/include/asm/hw_breakpoint.h   |  8 ++++++++
+ arch/arm64/include/asm/kvm_asm.h         | 18 ++++++++++++++++++
+ arch/arm64/include/asm/scs.h             |  1 +
+ arch/arm64/include/asm/spectre.h         | 16 ++++++++++++++++
+ arch/arm64/include/asm/syscall_wrapper.h |  4 ++++
+ arch/arm64/include/asm/traps.h           |  2 ++
+ arch/arm64/kernel/cpuidle.c              |  2 +-
+ arch/arm64/kernel/hw_breakpoint.c        |  8 --------
+ arch/arm64/kernel/module-plts.c          |  1 +
+ arch/arm64/kernel/signal.c               |  1 +
+ arch/arm64/kernel/traps.c                |  3 ++-
+ arch/arm64/lib/xor-neon.c                |  8 ++++----
+ arch/arm64/mm/fault.c                    |  3 ---
+ arch/arm64/mm/flush.c                    |  1 +
+ 18 files changed, 68 insertions(+), 17 deletions(-)
 
-diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-index b51f2a4c821e..e489fefd23da 100644
---- a/drivers/firmware/efi/Makefile
-+++ b/drivers/firmware/efi/Makefile
-@@ -41,3 +41,4 @@ obj-$(CONFIG_EFI_CAPSULE_LOADER)	+= capsule-loader.o
- obj-$(CONFIG_EFI_EARLYCON)		+= earlycon.o
- obj-$(CONFIG_UEFI_CPER_ARM)		+= cper-arm.o
- obj-$(CONFIG_UEFI_CPER_X86)		+= cper-x86.o
-+obj-$(CONFIG_UNACCEPTED_MEMORY)		+= unaccepted_memory.o
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 7dce06e419c5..d817e7afd266 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -50,6 +50,9 @@ struct efi __read_mostly efi = {
- #ifdef CONFIG_EFI_COCO_SECRET
- 	.coco_secret		= EFI_INVALID_TABLE_ADDR,
- #endif
-+#ifdef CONFIG_UNACCEPTED_MEMORY
-+	.unaccepted		= EFI_INVALID_TABLE_ADDR,
-+#endif
- };
- EXPORT_SYMBOL(efi);
- 
-@@ -605,6 +608,9 @@ static const efi_config_table_type_t common_tables[] __initconst = {
- #ifdef CONFIG_EFI_COCO_SECRET
- 	{LINUX_EFI_COCO_SECRET_AREA_GUID,	&efi.coco_secret,	"CocoSecret"	},
- #endif
-+#ifdef CONFIG_UNACCEPTED_MEMORY
-+	{LINUX_EFI_UNACCEPTED_MEM_TABLE_GUID,	&efi.unaccepted,	"Unaccepted"	},
-+#endif
- #ifdef CONFIG_EFI_GENERIC_STUB
- 	{LINUX_EFI_SCREEN_INFO_TABLE_GUID,	&screen_info_table			},
- #endif
-@@ -759,6 +765,25 @@ int __init efi_config_parse_tables(const efi_config_table_t *config_tables,
- 		}
- 	}
- 
-+	if (IS_ENABLED(CONFIG_UNACCEPTED_MEMORY) &&
-+	    efi.unaccepted != EFI_INVALID_TABLE_ADDR) {
-+		struct efi_unaccepted_memory *unaccepted;
-+
-+		unaccepted = early_memremap(efi.unaccepted, sizeof(*unaccepted));
-+		if (unaccepted) {
-+			unsigned long size;
-+
-+			if (unaccepted->version == 1) {
-+				size = sizeof(*unaccepted) + unaccepted->size;
-+				memblock_reserve(efi.unaccepted, size);
-+			} else {
-+				efi.unaccepted = EFI_INVALID_TABLE_ADDR;
-+			}
-+
-+			early_memunmap(unaccepted, sizeof(*unaccepted));
-+		}
-+	}
-+
- 	return 0;
- }
- 
-diff --git a/drivers/firmware/efi/unaccepted_memory.c b/drivers/firmware/efi/unaccepted_memory.c
-new file mode 100644
-index 000000000000..bb91c41f76fb
---- /dev/null
-+++ b/drivers/firmware/efi/unaccepted_memory.c
-@@ -0,0 +1,103 @@
-+// SPDX-License-Identifier: GPL-2.0-only
-+
-+#include <linux/efi.h>
-+#include <linux/memblock.h>
-+#include <linux/spinlock.h>
-+#include <asm/unaccepted_memory.h>
-+
-+/* Protects unaccepted memory bitmap */
-+static DEFINE_SPINLOCK(unaccepted_memory_lock);
-+
-+void accept_memory(phys_addr_t start, phys_addr_t end)
-+{
-+	struct efi_unaccepted_memory *unaccepted;
-+	unsigned long range_start, range_end;
-+	unsigned long flags;
-+	u64 unit_size;
-+
-+	if (efi.unaccepted == EFI_INVALID_TABLE_ADDR)
-+		return;
-+
-+	unaccepted = efi_get_unaccepted_table();
-+	if (!unaccepted)
-+		return;
-+
-+	unit_size = unaccepted->unit_size;
-+
-+	/*
-+	 * Only care for the part of the range that is represented
-+	 * in the bitmap.
-+	 */
-+	if (start < unaccepted->phys_base)
-+		start = unaccepted->phys_base;
-+	if (end < unaccepted->phys_base)
-+		return;
-+
-+	/* Translate to offsets from the beginning of the bitmap */
-+	start -= unaccepted->phys_base;
-+	end -= unaccepted->phys_base;
-+
-+	/* Make sure not to overrun the bitmap */
-+	if (end > unaccepted->size * unit_size * BITS_PER_BYTE)
-+		end = unaccepted->size * unit_size * BITS_PER_BYTE;
-+
-+	range_start = start / unit_size;
-+
-+	spin_lock_irqsave(&unaccepted_memory_lock, flags);
-+	for_each_set_bitrange_from(range_start, range_end, unaccepted->bitmap,
-+				   DIV_ROUND_UP(end, unit_size)) {
-+		unsigned long phys_start, phys_end;
-+		unsigned long len = range_end - range_start;
-+
-+		phys_start = range_start * unit_size + unaccepted->phys_base;
-+		phys_end = range_end * unit_size + unaccepted->phys_base;
-+
-+		arch_accept_memory(phys_start, phys_end);
-+		bitmap_clear(unaccepted->bitmap, range_start, len);
-+	}
-+	spin_unlock_irqrestore(&unaccepted_memory_lock, flags);
-+}
-+
-+bool range_contains_unaccepted_memory(phys_addr_t start, phys_addr_t end)
-+{
-+	struct efi_unaccepted_memory *unaccepted;
-+	unsigned long flags;
-+	bool ret = false;
-+	u64 unit_size;
-+
-+	unaccepted = efi_get_unaccepted_table();
-+	if (!unaccepted)
-+		return false;
-+
-+	unit_size = unaccepted->unit_size;
-+
-+	/*
-+	 * Only care for the part of the range that is represented
-+	 * in the bitmap.
-+	 */
-+	if (start < unaccepted->phys_base)
-+		start = unaccepted->phys_base;
-+	if (end < unaccepted->phys_base)
-+		return false;
-+
-+	/* Translate to offsets from the beginning of the bitmap */
-+	start -= unaccepted->phys_base;
-+	end -= unaccepted->phys_base;
-+
-+	/* Make sure not to overrun the bitmap */
-+	if (end > unaccepted->size * unit_size * BITS_PER_BYTE)
-+		end = unaccepted->size * unit_size * BITS_PER_BYTE;
-+
-+	spin_lock_irqsave(&unaccepted_memory_lock, flags);
-+	while (start < end) {
-+		if (test_bit(start / unit_size, unaccepted->bitmap)) {
-+			ret = true;
-+			break;
-+		}
-+
-+		start += unit_size;
-+	}
-+	spin_unlock_irqrestore(&unaccepted_memory_lock, flags);
-+
-+	return ret;
-+}
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 29cc622910da..9864f9c00da2 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -646,6 +646,7 @@ extern struct efi {
- 	unsigned long			tpm_final_log;		/* TPM2 Final Events Log table */
- 	unsigned long			mokvar_table;		/* MOK variable config table */
- 	unsigned long			coco_secret;		/* Confidential computing secret table */
-+	unsigned long			unaccepted;		/* Unaccepted memory table */
- 
- 	efi_get_time_t			*get_time;
- 	efi_set_time_t			*set_time;
 -- 
-2.39.3
+2.39.2
+
+Cc: Catalin Marinas <catalin.marinas@arm.com>
+Cc: Will Deacon <will@kernel.org>
+Cc: Ard Biesheuvel <ardb@kernel.org>
+Cc: Mark Rutland <mark.rutland@arm.com>
+Cc: Marc Zyngier <maz@kernel.org>
+Cc: Oliver Upton <oliver.upton@linux.dev>
+Cc: James Morse <james.morse@arm.com>
+Cc: Suzuki K Poulose <suzuki.poulose@arm.com>
+Cc: Zenghui Yu <yuzenghui@huawei.com>
+Cc: Arnd Bergmann <arnd@arndb.de>
+Cc: Anshuman Khandual <anshuman.khandual@arm.com>
+Cc: Kees Cook <keescook@chromium.org>
+Cc: Suren Baghdasaryan <surenb@google.com>
+Cc: linux-arm-kernel@lists.infradead.org
+Cc: linux-kernel@vger.kernel.org
+Cc: linux-efi@vger.kernel.org
+Cc: kvmarm@lists.linux.dev
 
