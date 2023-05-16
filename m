@@ -2,35 +2,35 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 99145C77B7F
-	for <linux-efi@archiver.kernel.org>; Tue, 16 May 2023 16:08:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2430DC77B7F
+	for <linux-efi@archiver.kernel.org>; Tue, 16 May 2023 16:09:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233489AbjEPQIf (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 16 May 2023 12:08:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60538 "EHLO
+        id S234265AbjEPQJP (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 16 May 2023 12:09:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60696 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234462AbjEPQIL (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 16 May 2023 12:08:11 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 70712869A;
-        Tue, 16 May 2023 09:07:51 -0700 (PDT)
+        with ESMTP id S234418AbjEPQIk (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 16 May 2023 12:08:40 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E64411BF2;
+        Tue, 16 May 2023 09:08:18 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 9466D632E4;
-        Tue, 16 May 2023 16:07:45 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6B98AC4339E;
-        Tue, 16 May 2023 16:07:41 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id B70A763BEB;
+        Tue, 16 May 2023 16:07:53 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8C92CC433D2;
+        Tue, 16 May 2023 16:07:49 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1684253265;
-        bh=UcWVdIx6eUNRqB58lvyqa00FuN14YMlQl7kvQIYp62I=;
+        s=k20201202; t=1684253273;
+        bh=h0fpkbLAOr0hALEk6kCEy5MAyU8tR08UpwZWaWzGWr8=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=uwck9pxebUmJ5elwV8JbBowvzYFpqDcwvO+VjLC6ovtT5Zh8jbQn59jRACTo+f4Y/
-         7l0M8zxg2Np+BaiSbNSH14j2nYQP/XRbMAn93yj7xQ3SkvKIuntJt8KoZfrVTT9IU/
-         MrUn/2xa8+GbgCJmL4EeOBlFYppKePkdIq+DGQVbhNF9sV3i3DvsgPCXWTSQ3132uP
-         U9qPFdkImKIqjVSrHZY9q2gitN64HJoDSwj18p/c6zu6y7Xt91mTG1f26mBIVvC4MW
-         BwCIVuj2VVBxhDnJK+je2EjtBEQR6sCFizppprMVkDM36HeKFb3xDDRpH89RmhM2hJ
-         Ps4L3KXuhyDNw==
+        b=G2YspC5jTHUuOJUI4EhhBUyFCOOKFZLkbqD8w9Riw21cTSw3fKo729EaQIG7drJkp
+         s7H4r1X18FAn3mK3PbP6eGqd4lmiZwH8emoPTvUbYIZ2yHGKzhg02SuTVrMl6NxFDu
+         Qw5IHyESKe0mBsXwq4sFHGZpnlkrHlm99GnnwZa5monJzLE/ojsflhI390GG4PsKWP
+         aYtkKc/WJRhJc101pMIaAlg60JJ3KO2ri2eJNR19r0Ynt/YelPVvaVbL6CM4fGm1Gn
+         g+KT47Tvzsd/OhDaHS3u7Ruhw4FIwYik84yYUKg/MixP7GzLkx60SAFQuHfrUiphCG
+         DHPcVcgCM29iA==
 From:   Arnd Bergmann <arnd@kernel.org>
 To:     Catalin Marinas <catalin.marinas@arm.com>,
         Will Deacon <will@kernel.org>
@@ -46,9 +46,9 @@ Cc:     Arnd Bergmann <arnd@arndb.de>, Ard Biesheuvel <ardb@kernel.org>,
         Suren Baghdasaryan <surenb@google.com>,
         linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
         linux-efi@vger.kernel.org, kvmarm@lists.linux.dev
-Subject: [PATCH 12/15] arm64: kaslr: add kaslr_early_init() declaration
-Date:   Tue, 16 May 2023 18:06:39 +0200
-Message-Id: <20230516160642.523862-13-arnd@kernel.org>
+Subject: [PATCH 14/15] arm64: move early_brk64 prototype to header
+Date:   Tue, 16 May 2023 18:06:41 +0200
+Message-Id: <20230516160642.523862-15-arnd@kernel.org>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230516160642.523862-1-arnd@kernel.org>
 References: <20230516160642.523862-1-arnd@kernel.org>
@@ -60,28 +60,46 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Arnd Bergmann <arnd@arndb.de>
 
-kaslr_early_init() is called from assembler code and does not
-need a declaration to work, but adding one anyway shuts up
-this W=1 warning:
+The prototype used for calling early_brk64() is in the file that calls
+it, which is the wrong place, as it is not included for the definition:
 
-arch/arm64/kernel/pi/kaslr_early.c:88:16: error: no previous prototype for 'kaslr_early_init' [-Werror=missing-prototypes]
+arch/arm64/kernel/traps.c:1100:12: error: no previous prototype for 'early_brk64' [-Werror=missing-prototypes]
+
+Move it to an appropriate header instead.
 
 Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 ---
- arch/arm64/include/asm/archrandom.h | 2 ++
- 1 file changed, 2 insertions(+)
+ arch/arm64/include/asm/traps.h | 2 ++
+ arch/arm64/mm/fault.c          | 3 ---
+ 2 files changed, 2 insertions(+), 3 deletions(-)
 
-diff --git a/arch/arm64/include/asm/archrandom.h b/arch/arm64/include/asm/archrandom.h
-index 2f5f3da34782..b0abc64f86b0 100644
---- a/arch/arm64/include/asm/archrandom.h
-+++ b/arch/arm64/include/asm/archrandom.h
-@@ -129,4 +129,6 @@ static inline bool __init __early_cpu_has_rndr(void)
- 	return (ftr >> ID_AA64ISAR0_EL1_RNDR_SHIFT) & 0xf;
- }
+diff --git a/arch/arm64/include/asm/traps.h b/arch/arm64/include/asm/traps.h
+index 1f361e2da516..d66dfb3a72dd 100644
+--- a/arch/arm64/include/asm/traps.h
++++ b/arch/arm64/include/asm/traps.h
+@@ -29,6 +29,8 @@ void arm64_force_sig_fault(int signo, int code, unsigned long far, const char *s
+ void arm64_force_sig_mceerr(int code, unsigned long far, short lsb, const char *str);
+ void arm64_force_sig_ptrace_errno_trap(int errno, unsigned long far, const char *str);
  
-+u64 kaslr_early_init(void *fdt);
++int early_brk64(unsigned long addr, unsigned long esr, struct pt_regs *regs);
 +
- #endif /* _ASM_ARCHRANDOM_H */
+ /*
+  * Move regs->pc to next instruction and do necessary setup before it
+  * is executed.
+diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
+index 5ccdba7132ca..940391ec5e1e 100644
+--- a/arch/arm64/mm/fault.c
++++ b/arch/arm64/mm/fault.c
+@@ -886,9 +886,6 @@ void do_sp_pc_abort(unsigned long addr, unsigned long esr, struct pt_regs *regs)
+ }
+ NOKPROBE_SYMBOL(do_sp_pc_abort);
+ 
+-int __init early_brk64(unsigned long addr, unsigned long esr,
+-		       struct pt_regs *regs);
+-
+ /*
+  * __refdata because early_brk64 is __init, but the reference to it is
+  * clobbered at arch_initcall time.
 -- 
 2.39.2
 
