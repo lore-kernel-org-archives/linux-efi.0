@@ -2,107 +2,191 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 730B2C77B73
-	for <linux-efi@archiver.kernel.org>; Mon, 22 May 2023 06:48:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0A04FC7EE2F
+	for <linux-efi@archiver.kernel.org>; Mon, 22 May 2023 07:15:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232160AbjEVGsN (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 22 May 2023 02:48:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51664 "EHLO
+        id S231928AbjEVHPH (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 22 May 2023 03:15:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41636 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231978AbjEVGrr (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 22 May 2023 02:47:47 -0400
-Received: from mail-pj1-x102f.google.com (mail-pj1-x102f.google.com [IPv6:2607:f8b0:4864:20::102f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 98879189;
-        Sun, 21 May 2023 23:45:37 -0700 (PDT)
-Received: by mail-pj1-x102f.google.com with SMTP id 98e67ed59e1d1-2532d6c7ef2so2206845a91.0;
-        Sun, 21 May 2023 23:45:37 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1684737932; x=1687329932;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=LjDrbtvTn67xGfPbBeqbRLDQjDn4H8fCj2S01FROHyU=;
-        b=g/EFfzC9Z7HcAGAWKjt+aUgy6W0DPQMT+1xjQg5SPiT/Msoht7eDsHNHRYEAj4/crL
-         XOCzG8Y/DbjXMeSeLDfOmZAoC4q6cfQV3/rZzFwBLCLcYSnu0hUosCqhrqeoJs5wO+b7
-         7OKpQi66Td6/2/GnVUs7ljyJqUUBLkytW796W93fcp0+dSMfpLAGOkoH46dCevRr+Ey2
-         LOr59k8DA5SigJdzK+7SDr3e7mg6kSSJ96WmLSOsh1rVoS59N/X0EPRwWM2BGQQYzjaf
-         P488HrDSntk5LQxa4fmanQZYwyT6xuauZHWPn9MW8mitawxUt0LBYzQvaOpEFZwmtl/T
-         JtnA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1684737932; x=1687329932;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=LjDrbtvTn67xGfPbBeqbRLDQjDn4H8fCj2S01FROHyU=;
-        b=CglWl7zEQ4yDupSdOBFhsLVKAO/bJw0TQaJZISJWu6K4Cyz0WeFF5VQpA43VSUrXv4
-         PF1marU2VEF135a7Qimdm3lqIhyZLNqlQj2Nq6Dm5c0hP3y2T9P38bXWrDJovcetn/0z
-         7BYGJgkzr3ZCf3yFJ0ejXwSCsKCYgrMXgVqL+tT8N+BFswoO1Ta11N2EizT6rsTai/dN
-         WwOQpkjnMNxbb1cN0dol245d3R0N6gbwFagELwLeNjZ8kfJTy/2CQDFm/Odzbq8WkjCJ
-         omk5NuY0blljIR2lQ01k+tYly4OUHnx4JzhPh+lTW7ZY7KnzlnGyj9OT6ns0oxSZu9QV
-         +WSA==
-X-Gm-Message-State: AC+VfDwGU4KzIALZP1sh58ZvAuPc7pPUYpxxtZgtXZ6EOkPBNpUV9G1q
-        2NqVPGRH+PUIGmzzZIogSTg=
-X-Google-Smtp-Source: ACHHUZ6hVR2GnXu1H1lD10qc8nxDW2RagqhHiOIeBdBCoqAFkjve7R17MHzRR8hknZmiBFsNFsXi4w==
-X-Received: by 2002:a17:90a:db16:b0:250:1b4c:d861 with SMTP id g22-20020a17090adb1600b002501b4cd861mr10934788pjv.13.1684737932055;
-        Sun, 21 May 2023 23:45:32 -0700 (PDT)
-Received: from debian.me (subs09a-223-255-225-68.three.co.id. [223.255.225.68])
-        by smtp.gmail.com with ESMTPSA id ha11-20020a17090af3cb00b0025368c90773sm5207523pjb.34.2023.05.21.23.45.31
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 21 May 2023 23:45:31 -0700 (PDT)
-Received: by debian.me (Postfix, from userid 1000)
-        id D225F106ABB; Mon, 22 May 2023 13:45:28 +0700 (WIB)
-Date:   Mon, 22 May 2023 13:45:28 +0700
-From:   Bagas Sanjaya <bagasdotme@gmail.com>
-To:     Ard Biesheuvel <ardb@kernel.org>,
-        Pedro Falcato <pedro.falcato@gmail.com>
-Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Build System <linux-kbuild@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Linux Regressions <regressions@lists.linux.dev>,
-        Linux EFI <linux-efi@vger.kernel.org>,
-        Masahiro Yamada <masahiroy@kernel.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Alan Bartlett <ajb@elrepo.org>
-Subject: Re: Regression. -6.3.X Good. -6.4-rcY Bad.
-Message-ID: <ZGsPiEq/yE1taACL@debian.me>
-References: <8a79151b-ef75-08ad-ae3d-f6cdabfeaa47@gmail.com>
- <CAKbZUD3FBiaLGWq=TipfevqXP0SBz8F+=L6JSO+FMZOv0QQ9AQ@mail.gmail.com>
- <CAMj1kXEJj4+CFX3YfCZZu7RwxoVf=5PHZcZ8tG7x8xO3x4KPAw@mail.gmail.com>
+        with ESMTP id S232545AbjEVHPA (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 22 May 2023 03:15:00 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EF9ECA1;
+        Mon, 22 May 2023 00:14:59 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 8671261DD4;
+        Mon, 22 May 2023 07:14:59 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 41F97C433D2;
+        Mon, 22 May 2023 07:14:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1684739699;
+        bh=XH7auhXZovyO0ZjhIGuK6rXf321+XRWDmJGikLNf51o=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=a7KdTq8PPZcLUMpaFnJwt9owjwLIw/qIfHVEF5sSQogAuB/WRsIxrAn774VuPIUJx
+         N+FSlb/Akd4n2Us5eUEVyTfgY8jJChhAa7cRZWByVDu8c6ITJzdfi43CIiuM6/M1cs
+         m00dGG46N2zKKp8HsTzugxFheiOff5FDccKpsUy2aqnG5Q1eoc5LSPnek94UTWhMmp
+         9VKR9uoZd59smBJfAndQiWoU5VfTupBjJ0IL6/buDPYmBOkayLh3NNaRtJr0/yj/ON
+         FK1Z9YPDHdQjueJlsRk4sP9wHGA/L/SbfXFGUZ62SJoZsCvacM8D5SsQJbADTMeWeu
+         cx6Xd2E5oTOAw==
+From:   Ard Biesheuvel <ardb@kernel.org>
+To:     linux-efi@vger.kernel.org
+Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
+        Evgeniy Baskov <baskov@ispras.ru>,
+        Borislav Petkov <bp@alien8.de>,
+        Andy Lutomirski <luto@kernel.org>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        Ingo Molnar <mingo@redhat.com>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Alexey Khoroshilov <khoroshilov@ispras.ru>,
+        Peter Jones <pjones@redhat.com>,
+        Gerd Hoffmann <kraxel@redhat.com>,
+        Dave Young <dyoung@redhat.com>,
+        Mario Limonciello <mario.limonciello@amd.com>,
+        Kees Cook <keescook@chromium.org>,
+        Tom Lendacky <thomas.lendacky@amd.com>,
+        "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>,
+        Linus Torvalds <torvalds@linux-foundation.org>
+Subject: [PATCH v3 06/21] x86/decompressor: Store boot_params pointer in callee save register
+Date:   Mon, 22 May 2023 09:14:00 +0200
+Message-Id: <20230522071415.501717-7-ardb@kernel.org>
+X-Mailer: git-send-email 2.39.2
+In-Reply-To: <20230522071415.501717-1-ardb@kernel.org>
+References: <20230522071415.501717-1-ardb@kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="U1fv8V3wsTFbNp5O"
-Content-Disposition: inline
-In-Reply-To: <CAMj1kXEJj4+CFX3YfCZZu7RwxoVf=5PHZcZ8tG7x8xO3x4KPAw@mail.gmail.com>
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3619; i=ardb@kernel.org; h=from:subject; bh=XH7auhXZovyO0ZjhIGuK6rXf321+XRWDmJGikLNf51o=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JISVbzGRRpJHd1RnWG0UnzPsfEPSq6/POZO+LSS9tdY8IO KjNVzfuKGVhEONgkBVTZBGY/ffdztMTpWqdZ8nCzGFlAhnCwMUpABPZns3wzzbrXmbQ4X5Z9d5l m5nnXFj09m1EGWfxTRVXHwEJ9ax57owMPTt+Bh8LX35oLePmrOvs7veDBQ5ubGK1rRRLPtwsIbu FBwA=
+X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
+Instead of pushing and popping %RSI several times to preserve the struct
+boot_params pointer across the execution of the startup code, move it
+into a callee save register before the first call into C, and copy it
+back when needed.
 
---U1fv8V3wsTFbNp5O
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+---
+ arch/x86/boot/compressed/head_64.S | 34 +++++++-------------
+ 1 file changed, 11 insertions(+), 23 deletions(-)
 
-On Mon, May 22, 2023 at 08:33:47AM +0200, Ard Biesheuvel wrote:
-> I've sent this out as a patch and queued it up as a EFI fix. Thanks!
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index 9f90661744741210..2d1b0ee94929f7ec 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -405,10 +405,14 @@ SYM_CODE_START(startup_64)
+ 	lretq
+ 
+ .Lon_kernel_cs:
++	/*
++	 * RSI holds a pointer to a boot_params structure provided by the
++	 * loader, and this needs to be preserved across C function calls. So
++	 * move it into a callee saved register.
++	 */
++	movq	%rsi, %r15
+ 
+-	pushq	%rsi
+ 	call	load_stage1_idt
+-	popq	%rsi
+ 
+ #ifdef CONFIG_AMD_MEM_ENCRYPT
+ 	/*
+@@ -421,10 +425,8 @@ SYM_CODE_START(startup_64)
+ 	 * detection/setup to ensure that has been done in advance of any dependent
+ 	 * code.
+ 	 */
+-	pushq	%rsi
+-	movq	%rsi, %rdi		/* real mode address */
++	movq	%r15, %rdi		/* pass struct boot_params pointer */
+ 	call	sev_enable
+-	popq	%rsi
+ #endif
+ 
+ 	/*
+@@ -437,13 +439,9 @@ SYM_CODE_START(startup_64)
+ 	 *   - Non zero RDX means trampoline needs to enable 5-level
+ 	 *     paging.
+ 	 *
+-	 * RSI holds real mode data and needs to be preserved across
+-	 * this function call.
+ 	 */
+-	pushq	%rsi
+-	movq	%rsi, %rdi		/* real mode address */
++	movq	%r15, %rdi		/* pass struct boot_params pointer */
+ 	call	paging_prepare
+-	popq	%rsi
+ 
+ 	/* Save the trampoline address in RCX */
+ 	movq	%rax, %rcx
+@@ -468,14 +466,9 @@ trampoline_return:
+ 	 *
+ 	 * RDI is address of the page table to use instead of page table
+ 	 * in trampoline memory (if required).
+-	 *
+-	 * RSI holds real mode data and needs to be preserved across
+-	 * this function call.
+ 	 */
+-	pushq	%rsi
+ 	leaq	rva(top_pgtable)(%rbx), %rdi
+ 	call	cleanup_trampoline
+-	popq	%rsi
+ 
+ 	/* Zero EFLAGS */
+ 	pushq	$0
+@@ -485,7 +478,6 @@ trampoline_return:
+  * Copy the compressed kernel to the end of our buffer
+  * where decompression in place becomes safe.
+  */
+-	pushq	%rsi
+ 	leaq	(_bss-8)(%rip), %rsi
+ 	leaq	rva(_bss-8)(%rbx), %rdi
+ 	movl	$(_bss - startup_32), %ecx
+@@ -493,7 +485,6 @@ trampoline_return:
+ 	std
+ 	rep	movsq
+ 	cld
+-	popq	%rsi
+ 
+ 	/*
+ 	 * The GDT may get overwritten either during the copy we just did or
+@@ -525,30 +516,27 @@ SYM_FUNC_START_LOCAL_NOALIGN(.Lrelocated)
+ 	shrq	$3, %rcx
+ 	rep	stosq
+ 
+-	pushq	%rsi
+ 	call	load_stage2_idt
+ 
+ 	/* Pass boot_params to initialize_identity_maps() */
+-	movq	(%rsp), %rdi
++	movq	%r15, %rdi		/* pass struct boot_params pointer */
+ 	call	initialize_identity_maps
+-	popq	%rsi
+ 
+ /*
+  * Do the extraction, and jump to the new kernel..
+  */
+-	pushq	%rsi			/* Save the real mode argument */
+-	movq	%rsi, %rdi		/* real mode address */
++	movq	%r15, %rdi		/* pass struct boot_params pointer */
+ 	leaq	boot_heap(%rip), %rsi	/* malloc area for uncompression */
+ 	leaq	input_data(%rip), %rdx  /* input_data */
+ 	movl	input_len(%rip), %ecx	/* input_len */
+ 	movq	%rbp, %r8		/* output target address */
+ 	movl	output_len(%rip), %r9d	/* decompressed length, end of relocs */
+ 	call	extract_kernel		/* returns kernel entry point in %rax */
+-	popq	%rsi
+ 
+ /*
+  * Jump to the decompressed kernel.
+  */
++	movq	%r15, %rsi
+ 	jmp	*%rax
+ SYM_FUNC_END(.Lrelocated)
+ 
+-- 
+2.39.2
 
-Telling regzbot about the fix since Ard forgot to add required tags:
-
-#regzbot fix: 3610dc36f4fd76
-
-Thanks.
-
---=20
-An old man doll... just what I always wanted! - Clara
-
---U1fv8V3wsTFbNp5O
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iHUEABYKAB0WIQSSYQ6Cy7oyFNCHrUH2uYlJVVFOowUCZGsPiAAKCRD2uYlJVVFO
-o7IkAQCfW5qyntrvODsBdWvQiLtt3bRqaM3rk/LVflVoxmAF9QEAjEkECq63YpYO
-cKqqQjSu7Gqa7Naz0QTnCTXte8DzDwA=
-=KFm8
------END PGP SIGNATURE-----
-
---U1fv8V3wsTFbNp5O--
