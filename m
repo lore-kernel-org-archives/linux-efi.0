@@ -2,35 +2,35 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B6FBCC77B73
-	for <linux-efi@archiver.kernel.org>; Mon, 22 May 2023 07:15:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D9033C77B75
+	for <linux-efi@archiver.kernel.org>; Mon, 22 May 2023 07:15:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229647AbjEVHPM (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 22 May 2023 03:15:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42382 "EHLO
+        id S232283AbjEVHPO (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 22 May 2023 03:15:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45314 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232523AbjEVHOx (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 22 May 2023 03:14:53 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A882594;
-        Mon, 22 May 2023 00:14:51 -0700 (PDT)
+        with ESMTP id S229987AbjEVHPF (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 22 May 2023 03:15:05 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 204D791;
+        Mon, 22 May 2023 00:15:04 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 3BF3961DC4;
-        Mon, 22 May 2023 07:14:51 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EA4DBC4339E;
-        Mon, 22 May 2023 07:14:46 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id AE44761DD3;
+        Mon, 22 May 2023 07:15:03 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 670A6C4339B;
+        Mon, 22 May 2023 07:14:59 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1684739690;
-        bh=GI53KZcq3ZI3RxFd9aG0XytLXRdQ1EhHXwVomNHohgI=;
+        s=k20201202; t=1684739703;
+        bh=4Bh3UcI6mBb60v5tgLvoAeGffUld7BrhFCXiRmmP3sE=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=otLwxEON9iJ+ZI6BCN9YAbKtZnBDHq6IdNPb/4XDqFwgee1+vXR5i5ac88qs0acoQ
-         G67JEC/bGL1GStjgIDfG9HAmyx/PR1byEARlw3pScOH7bG8LkUxtPAtzLpTHfM+qWP
-         Y26SWLmoKv2OwL7OrRwGQZELJUsfsCyHSTS6tX1nndOOdQCDfJ8DQWQo4kND9djWVG
-         lWWWGEHVsvp8cRhPBspQpkgCys9yZyJRXJcA3Xqs3KzmNwViA/BXoZAH5kvrvQtWEz
-         Y2Yf1PkKKKMebsw9TzPo+SEJrokn+xLLvF9LhcKe6zeq1EOXk8HhnsXVHxlM5MIWC+
-         0jUyU+BU7vyjA==
+        b=B8PFMI8j/D51LvwF865+aX+iv+KDHkvt8iC4EiQ0I5a5plkeEOGknXXGhlLSVCdBk
+         VejQ45+yCQrtU4u/hGOoy1OuEhq0NmMSI0i8QdnnFfkAz8UNd9WpBLADjT12WaVSvd
+         RRlX1XYUOOVEafN9pN1wTvSXiJOJp/7tfJUmHb9pIiGrOGSufq1ANncvuh8eubQiQP
+         08jLV5QPB+HNvBkF3CEIBrmDfEqhFjKun10kvVrQ94fWodKSsFzt0sdh8Ksp2p6uzl
+         uOLwsHkHT44yvjrvzsjDZQ4J5TiXTfhbORKXoRieGKBGmJtBrf4tRGlejT/W1VCGap
+         u1DFoz+N1jZiA==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -50,103 +50,95 @@ Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         Tom Lendacky <thomas.lendacky@amd.com>,
         "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>,
         Linus Torvalds <torvalds@linux-foundation.org>
-Subject: [PATCH v3 04/21] x86/efistub: Clear BSS in EFI handover protocol entrypoint
-Date:   Mon, 22 May 2023 09:13:58 +0200
-Message-Id: <20230522071415.501717-5-ardb@kernel.org>
+Subject: [PATCH v3 07/21] x86/decompressor: Call trampoline as a normal function
+Date:   Mon, 22 May 2023 09:14:01 +0200
+Message-Id: <20230522071415.501717-8-ardb@kernel.org>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230522071415.501717-1-ardb@kernel.org>
 References: <20230522071415.501717-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2971; i=ardb@kernel.org; h=from:subject; bh=GI53KZcq3ZI3RxFd9aG0XytLXRdQ1EhHXwVomNHohgI=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JISVbzCh+k2N2zVP21WnK71riE97Oi5L3ShPeM9esfPuSx i2fDRM7SlkYxDgYZMUUWQRm/3238/REqVrnWbIwc1iZQIYwcHEKwET2GTIyXFu947S07Bq/pJS9 RRvOWewM0mj2ynzyvyB8ooh2R2fKX4b/LlJ2N3KZDJw8xXJT7Go7di1Kfdu/efIK3oNZKcf57H7 wAAA=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2554; i=ardb@kernel.org; h=from:subject; bh=4Bh3UcI6mBb60v5tgLvoAeGffUld7BrhFCXiRmmP3sE=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JISVbzPTyXcGvbvdk7s59zjTFLSjIQEnfS8e2IGX29+utW 1ncSkI6SlkYxDgYZMUUWQRm/3238/REqVrnWbIwc1iZQIYwcHEKwEQWPmX4X/zz6beN5SwCHx4L CT6Of3pzfUzP73c+guvUTitru/p8LWD4H64gNdtP63XgnDXiXh8fGXM4Lv4sUl68o3Hh5Tg7x91 xLAA=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The so-called EFI handover protocol is value-add from the distros that
-permits a loader to simply copy a PE kernel image into memory and call
-an alternative entrypoint that is described by an embedded boot_params
-structure.
+Move the long return to switch to 32-bit mode into the trampoline code
+so it can be called as an ordinary function. This will allow it to be
+called directly from C code in a subsequent patch.
 
-Most implementations of this protocol do not bother to check the PE
-header for minimum alignment, section placement, etc, and therefore also
-don't clear the image's BSS, or even allocate enough memory for it.
-
-Allocating more memory on the fly is rather difficult, but at least
-clear the BSS region explicitly when entering in this manner, so that
-the EFI stub code does not get confused by global variables that were
-not zero-initialized correctly.
-
-When booting in mixed mode, this BSS clearing must occur before any
-global state is created, so clear it in the 32-bit asm entry point.
-
+Acked-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/boot/compressed/efi_mixed.S    | 14 +++++++++++++-
- drivers/firmware/efi/libstub/x86-stub.c | 13 +++++++++++--
- 2 files changed, 24 insertions(+), 3 deletions(-)
+ arch/x86/boot/compressed/head_64.S | 25 +++++++++-----------
+ arch/x86/boot/compressed/pgtable.h |  2 +-
+ 2 files changed, 12 insertions(+), 15 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/efi_mixed.S b/arch/x86/boot/compressed/efi_mixed.S
-index 9308b595f6f0a5de..8a02a151806df14c 100644
---- a/arch/x86/boot/compressed/efi_mixed.S
-+++ b/arch/x86/boot/compressed/efi_mixed.S
-@@ -142,6 +142,18 @@ SYM_FUNC_END(__efi64_thunk)
- 	.code32
- #ifdef CONFIG_EFI_HANDOVER_PROTOCOL
- SYM_FUNC_START(efi32_stub_entry)
-+	call	1f
-+1:	popl	%ecx
-+
-+	/* Clear BSS */
-+	xorl	%eax, %eax
-+	leal	(_bss - 1b)(%ecx), %edi
-+	leal	(_ebss - 1b)(%ecx), %ecx
-+	subl	%edi, %ecx
-+	shrl	$2, %ecx
-+	cld
-+	rep	stosl
-+
- 	add	$0x4, %esp		/* Discard return address */
- 	popl	%ecx
- 	popl	%edx
-@@ -334,7 +346,7 @@ SYM_FUNC_END(efi32_pe_entry)
- 	.org	efi32_stub_entry + 0x200
- 	.code64
- SYM_FUNC_START_NOALIGN(efi64_stub_entry)
--	jmp	efi_stub_entry
-+	jmp	efi_handover_entry
- SYM_FUNC_END(efi64_stub_entry)
- #endif
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index 2d1b0ee94929f7ec..af45ddd8297a4a07 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -446,18 +446,9 @@ SYM_CODE_START(startup_64)
+ 	/* Save the trampoline address in RCX */
+ 	movq	%rax, %rcx
  
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index d6a376e52cbe1399..d010448dffb12cb8 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -934,12 +934,21 @@ void __noreturn efi_stub_entry(efi_handle_t handle,
- }
- 
- #ifdef CONFIG_EFI_HANDOVER_PROTOCOL
-+void efi_handover_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg,
-+			struct boot_params *boot_params)
-+{
-+	extern char _bss[], _ebss[];
+-	/*
+-	 * Load the address of trampoline_return() into RDI.
+-	 * It will be used by the trampoline to return to the main code.
+-	 */
+-	leaq	trampoline_return(%rip), %rdi
+-
+-	/* Switch to compatibility mode (CS.L = 0 CS.D = 1) via far return */
+-	pushq	$__KERNEL32_CS
+ 	leaq	TRAMPOLINE_32BIT_CODE_OFFSET(%rax), %rax
+-	pushq	%rax
+-	lretq
+-trampoline_return:
++	call	*%rax
 +
-+	memset(_bss, 0, _ebss - _bss);
-+	efi_stub_entry(handle, sys_table_arg, boot_params);
-+}
-+
- #ifndef CONFIG_EFI_MIXED
--extern __alias(efi_stub_entry)
-+extern __alias(efi_handover_entry)
- void efi32_stub_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg,
- 		      struct boot_params *boot_params);
+ 	/* Restore the stack, the 32-bit trampoline uses its own stack */
+ 	leaq	rva(boot_stack_end)(%rbx), %rsp
  
--extern __alias(efi_stub_entry)
-+extern __alias(efi_handover_entry)
- void efi64_stub_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg,
- 		      struct boot_params *boot_params);
- #endif
+@@ -540,16 +531,22 @@ SYM_FUNC_START_LOCAL_NOALIGN(.Lrelocated)
+ 	jmp	*%rax
+ SYM_FUNC_END(.Lrelocated)
+ 
+-	.code32
+ /*
+  * This is the 32-bit trampoline that will be copied over to low memory.
+  *
+- * RDI contains the return address (might be above 4G).
+  * ECX contains the base address of the trampoline memory.
+  * Non zero RDX means trampoline needs to enable 5-level paging.
+  */
+ SYM_CODE_START(trampoline_32bit_src)
+-	/* Set up data and stack segments */
++	popq	%rdi
++	/* Switch to compatibility mode (CS.L = 0 CS.D = 1) via far return */
++	pushq	$__KERNEL32_CS
++	leaq	0f(%rip), %rax
++	pushq	%rax
++	lretq
++
++	.code32
++0:	/* Set up data and stack segments */
+ 	movl	$__KERNEL_DS, %eax
+ 	movl	%eax, %ds
+ 	movl	%eax, %ss
+diff --git a/arch/x86/boot/compressed/pgtable.h b/arch/x86/boot/compressed/pgtable.h
+index cc9b2529a08634b4..91dbb99203fbce2d 100644
+--- a/arch/x86/boot/compressed/pgtable.h
++++ b/arch/x86/boot/compressed/pgtable.h
+@@ -6,7 +6,7 @@
+ #define TRAMPOLINE_32BIT_PGTABLE_OFFSET	0
+ 
+ #define TRAMPOLINE_32BIT_CODE_OFFSET	PAGE_SIZE
+-#define TRAMPOLINE_32BIT_CODE_SIZE	0x80
++#define TRAMPOLINE_32BIT_CODE_SIZE	0xA0
+ 
+ #define TRAMPOLINE_32BIT_STACK_END	TRAMPOLINE_32BIT_SIZE
+ 
 -- 
 2.39.2
 
