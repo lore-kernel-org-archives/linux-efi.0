@@ -2,35 +2,35 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D207C7EE23
-	for <linux-efi@archiver.kernel.org>; Mon, 22 May 2023 07:15:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 55D2AC7EE2E
+	for <linux-efi@archiver.kernel.org>; Mon, 22 May 2023 07:15:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231867AbjEVHPF (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 22 May 2023 03:15:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42372 "EHLO
+        id S232198AbjEVHPI (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 22 May 2023 03:15:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43080 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231516AbjEVHOh (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 22 May 2023 03:14:37 -0400
+        with ESMTP id S232537AbjEVHO4 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 22 May 2023 03:14:56 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1563FDB;
-        Mon, 22 May 2023 00:14:35 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C7113BA;
+        Mon, 22 May 2023 00:14:55 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 908D8611D8;
-        Mon, 22 May 2023 07:14:34 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 46544C433D2;
-        Mon, 22 May 2023 07:14:30 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 61DBF61DDD;
+        Mon, 22 May 2023 07:14:55 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1C3BFC4339C;
+        Mon, 22 May 2023 07:14:50 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1684739674;
-        bh=CjSCvDWcQBxQkZsL21LxJVhDu4xITVayciFCwfaHC9Q=;
-        h=From:To:Cc:Subject:Date:From;
-        b=ZrWUNt+j/tYfHoD7I1yr1VjZ9ZoWzeQJ86QpXtgCcg5106JHsf1wmmg9dBfMOKy/L
-         EEP84jrX/0VHwEtyr6MDmioPL0+8YNsbc2sE3jj17YE2ZoHGplOY3YW8queB/aVV5k
-         o+1i7CeeINHa+GA4sySpgSlYWTNcJwMYWASQyoRgTxbt0Y+H2NLFnbauSag7FczEmI
-         EDN6n4VNwLMDIIHbjAe+fdUofW6vXuTrx4qXOw9F1iEX7VT17Tj5YQJ6fgSxAILB2N
-         WlrUGda6BOz0yPNi872TPcAHUMIEAkdezPcw8P/ixNiS9t6QOK7/5qi0knsZrkjuPe
-         LoAGr0Hes4nBw==
+        s=k20201202; t=1684739694;
+        bh=ygI81p6SqewQoIn6tCgoZLUH2Qo5tPVgo3BNvwGSS3U=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=ahdZuLYw1TmYdmQL7lxGHEBiiBSANf79+lkAs61O4z58clTFkmUWH58Fsbdo33R3z
+         f1fMye2kQbMk8gjq+efFzOBdtG5qIi9Ea8qvj08KORTxU9WKJePL9KJleO948dlGdd
+         1Q2JtizxxQVY0RkrEFWjyvwxepYUgaEaWVEH5w+BwdLHBpLNBkCSAGQ3YOS9BBBXND
+         t1aep4slelOSfi3wf6U0TVJzig67BQfHew9FDQm0MMUJENIwTpNCZq9ILKsv1tu+7O
+         bmRmAg52hOVvDqquTz9yxja6QwMK8OKV/WL0VdvLNQOEFNTWlhyGyXccFgxOoALZpG
+         IlAcnhCBhUjBg==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -50,167 +50,58 @@ Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         Tom Lendacky <thomas.lendacky@amd.com>,
         "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>,
         Linus Torvalds <torvalds@linux-foundation.org>
-Subject: [PATCH v3 00/21] efi/x86: Avoid bare metal decompressor during EFI boot
-Date:   Mon, 22 May 2023 09:13:54 +0200
-Message-Id: <20230522071415.501717-1-ardb@kernel.org>
+Subject: [PATCH v3 05/21] x86/decompressor: Use proper sequence to take the address of the GOT
+Date:   Mon, 22 May 2023 09:13:59 +0200
+Message-Id: <20230522071415.501717-6-ardb@kernel.org>
 X-Mailer: git-send-email 2.39.2
+In-Reply-To: <20230522071415.501717-1-ardb@kernel.org>
+References: <20230522071415.501717-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=7991; i=ardb@kernel.org; h=from:subject; bh=CjSCvDWcQBxQkZsL21LxJVhDu4xITVayciFCwfaHC9Q=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JISVbTPemslerNFPWvqW/Lk+tW65xWZjbrPLitMeTFxwyO iN3+ejDjlIWBjEOBlkxRRaB2X/f7Tw9UarWeZYszBxWJpAhDFycAjCRJzMZ/grfPHl1zdzZR1SC irK/adq1XElty7Cw2aE0dd2RuJjdoRqMDL1yG0wmGB2KyE4OlT/jYnlPwfhQjpLlq8wzWTW54WZ /OQE=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1770; i=ardb@kernel.org; h=from:subject; bh=ygI81p6SqewQoIn6tCgoZLUH2Qo5tPVgo3BNvwGSS3U=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JISVbzHhfjGz12WInw7ydqfPDJ7Ukb5i9b7FGVn2Z7oyqH cdfVGp0lLIwiHEwyIopsgjM/vtu5+mJUrXOs2Rh5rAygQxh4OIUgIm0KTIyrF17+9OtoPo3ZXV+ 0yM+ap06MX1Rjqd/vtzOzMsersb9IYwMX2Pv6k44LDOnZ8bi5ZeDUs/EP/19p29RxDaZCRYi8/q LmAE=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Update the x86 boot path to avoid the bare metal decompressor when
-booting via the EFI stub. The bare metal decompressor inherits the
-loader's 1:1 mapping of DRAM when entering in 64-bit mode, and assumes
-that all of it is mapped read/write/execute, which will no longer be the
-case on systems built to comply with recently tightened logo
-requirements (*).
+The 32-bit decompressor does not actually use a global offset table
+(GOT), but as is common for 32-bit position independent code, it uses
+the magic symbol _GLOBAL_OFFSET_TABLE_ as an anchor from which to derive
+the actual runtime addresses of other symbols, using special @GOTOFF
+symbol references that are resolved at link time, and populated with the
+distance between the address of the magic _GLOBAL_OFFSET_TABLE_ anchor
+and the address of the symbol in question.
 
-Changes since v2 [4]:
-- update prose style to comply with -tip guidelines
-- rebased onto Kirill's unaccepted memory series [3]
-- add Kirill's ack to 4/5-level paging changes
-- perform SEV init and SNP feature check after ExitBootServices(), to
-  avoid corrupting the firmware's own SEV state
-- split out preparatory refactor of handover entry code and BSS clearing
-  (patches #1 to #4)
+This means _GLOBAL_OFFSET_TABLE_ is the only symbol whose actual runtime
+address needs to be determined explicitly, which is one of the first
+things that happens in startup_32. However, it does so by taking the
+absolute address via the immediate field of an ADD instruction (plus a
+small offset), which seems to defeat the point.
 
-Changes since v1 [2]:
-- streamline existing 4/5 level switching code and call it directly from
-  the EFI stub - this is covered by the first 9 patches, which can be
-  applied in isolation, if desired;
-- deal with SEV/SNP init explicitly;
-- clear BSS when booting via the 'handover protocol'
-- switch to kernel CS before calling SEV init code in kernel proper.
+Fortunately, the assembler knows that _GLOBAL_OFFSET_TABLE_ is magic,
+and emits a special relative relocation instead, and so the resulting
+code works as expected. However, this is not obvious for someone reading
+the code, and the use of LEA with an explicit relative addend is more
+idiomatic so use that instead.
 
----- v1 cover letter follows ----
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+---
+ arch/x86/boot/compressed/head_32.S | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-This series is conceptually a combination of Evgeny's series [0] and
-mine [1], both of which attempt to make the early decompressor code more
-amenable to executing in the EFI environment with stricter handling of
-memory permissions.
-
-My series [1] implemented zboot for x86, by getting rid of the entire
-x86 decompressor, and replacing it with existing EFI code that does the
-same but in a generic way. The downside of this is that only EFI boot is
-supported, making it unviable for distros, which need to support BIOS
-boot and hybrid EFI boot modes that omit the EFI stub.
-
-Evgeny's series [0] adapted the entire decompressor code flow to allow
-it to execute in the EFI context as well as the bare metal context, and
-this involves changes to the 1:1 mapping code and the page fault
-handlers etc, none of which are really needed when doing EFI boot in the
-first place.
-
-So this series attempts to occupy the middle ground here: it makes
-minimal changes to the existing decompressor so some of it can be called
-from the EFI stub. Then, it reimplements the EFI boot flow to decompress
-the kernel and boot it directly, without relying on the trampoline
-allocation code, page table code or page fault handling code. This
-allows us to get rid of quite a bit of unsavory EFI stub code, and
-replace it with two clear invocations of the EFI firmware APIs to clear
-NX restrictions from allocations that have been populated with
-executable code.
-
-The only code that is being reused is the decompression library itself,
-along with the minimal ELF parsing that is required to copy the ELF
-segments in place, and the relocation processing that fixes up absolute
-symbol references to refer to the correct virtual addresses.
-
-Note that some of Evgeny's changes to clean up the PE/COFF header
-generation will still be needed, but I've omitted those here for
-brevity.
-
-(*) IMHO the following developments are likely to occur:
-- the Windows boot chain (along with 3rd party drivers) is cleaned up so
-  that it never relies on memory being writable and executable at the
-  same time when running under the EFI boot services;
-- the EFI reference implementation gets updated to map all memory NX by
-  default, and to require read-only permissions for executable mappings;
-- BIOS vendors incorporate these changes into their codebases, and
-  deploy it more widely than just the 'secure' SKUs;
-- OEMs only care about the Windows sticker [5], so they only boot test
-  Windows, which works fine in this more restricted context;
-- Linux boot no longer works reliably on new hardware built for Windows
-  unless we clean up our boot chain as well.
-
-Cc: Evgeniy Baskov <baskov@ispras.ru>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Andy Lutomirski <luto@kernel.org>
-Cc: Dave Hansen <dave.hansen@linux.intel.com>
-Cc: Ingo Molnar <mingo@redhat.com>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Alexey Khoroshilov <khoroshilov@ispras.ru>
-Cc: Peter Jones <pjones@redhat.com>
-Cc: Gerd Hoffmann <kraxel@redhat.com>
-Cc: Dave Young <dyoung@redhat.com>
-Cc: Mario Limonciello <mario.limonciello@amd.com>
-Cc: Kees Cook <keescook@chromium.org>
-Cc: Tom Lendacky <thomas.lendacky@amd.com>
-Cc: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-
-[0] https://lore.kernel.org/all/cover.1678785672.git.baskov@ispras.ru/
-[1] https://lore.kernel.org/all/20230416120729.2470762-1-ardb@kernel.org/
-[2] https://lore.kernel.org/all/20230424165726.2245548-1-ardb@kernel.org/
-[3] https://lore.kernel.org/all/20230518231434.26080-1-kirill.shutemov@linux.intel.com/
-[4] https://lore.kernel.org/all/20230508070330.582131-1-ardb@kernel.org/
-[5] https://techcommunity.microsoft.com/t5/hardware-dev-center/new-uefi-ca-memory-mitigation-requirements-for-signing/ba-p/3608714
-
-Ard Biesheuvel (21):
-  x86/efistub: Branch straight to kernel entry point from C code
-  x86/efistub: Simplify and clean up handover entry code
-  x86/decompressor: Avoid magic offsets for EFI handover entrypoint
-  x86/efistub: Clear BSS in EFI handover protocol entrypoint
-  x86/decompressor: Use proper sequence to take the address of the GOT
-  x86/decompressor: Store boot_params pointer in callee save register
-  x86/decompressor: Call trampoline as a normal function
-  x86/decompressor: Use standard calling convention for trampoline
-  x86/decompressor: Avoid the need for a stack in the 32-bit trampoline
-  x86/decompressor: Call trampoline directly from C code
-  x86/decompressor: Only call the trampoline when changing paging levels
-  x86/decompressor: Merge trampoline cleanup with switching code
-  x86/efistub: Perform 4/5 level paging switch from the stub
-  x86/efistub: Prefer EFI memory attributes protocol over DXE services
-  decompress: Use 8 byte alignment
-  x86/decompressor: Move global symbol references to C code
-  x86/decompressor: Factor out kernel decompression and relocation
-  x86/head_64: Store boot_params pointer in callee-preserved register
-  efi/libstub: Add limit argument to efi_random_alloc()
-  x86/efistub: Check SEV/SNP support while running in the firmware
-  x86/efistub: Avoid legacy decompressor when doing EFI boot
-
- Documentation/arch/x86/boot.rst                |   2 +-
- arch/x86/boot/compressed/Makefile              |   5 +
- arch/x86/boot/compressed/efi_mixed.S           | 107 +++-----
- arch/x86/boot/compressed/head_32.S             |  34 +--
- arch/x86/boot/compressed/head_64.S             | 219 ++++------------
- arch/x86/boot/compressed/misc.c                |  44 +++-
- arch/x86/boot/compressed/pgtable.h             |   6 +-
- arch/x86/boot/compressed/pgtable_64.c          |  72 +++---
- arch/x86/boot/compressed/sev.c                 |  19 +-
- arch/x86/include/asm/boot.h                    |   8 +
- arch/x86/include/asm/efi.h                     |   7 +-
- arch/x86/include/asm/sev.h                     |   6 +
- arch/x86/kernel/head_64.S                      |  15 +-
- drivers/firmware/efi/libstub/Makefile          |   1 +
- drivers/firmware/efi/libstub/arm64-stub.c      |   2 +-
- drivers/firmware/efi/libstub/efi-stub-helper.c |   2 +
- drivers/firmware/efi/libstub/efistub.h         |   3 +-
- drivers/firmware/efi/libstub/randomalloc.c     |  10 +-
- drivers/firmware/efi/libstub/x86-5lvl.c        |  94 +++++++
- drivers/firmware/efi/libstub/x86-stub.c        | 269 +++++++++++---------
- drivers/firmware/efi/libstub/x86-stub.h        |  12 +
- drivers/firmware/efi/libstub/zboot.c           |   2 +-
- include/linux/decompress/mm.h                  |   2 +-
- 23 files changed, 468 insertions(+), 473 deletions(-)
- create mode 100644 drivers/firmware/efi/libstub/x86-5lvl.c
- create mode 100644 drivers/firmware/efi/libstub/x86-stub.h
-
+diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
+index 8876ffe30e9a4819..3530465b5b85ccf3 100644
+--- a/arch/x86/boot/compressed/head_32.S
++++ b/arch/x86/boot/compressed/head_32.S
+@@ -58,7 +58,7 @@ SYM_FUNC_START(startup_32)
+ 	leal	(BP_scratch+4)(%esi), %esp
+ 	call	1f
+ 1:	popl	%edx
+-	addl	$_GLOBAL_OFFSET_TABLE_+(.-1b), %edx
++	leal	(_GLOBAL_OFFSET_TABLE_ - 1b)(%edx), %edx
+ 
+ 	/* Load new GDT */
+ 	leal	gdt@GOTOFF(%edx), %eax
 -- 
 2.39.2
 
