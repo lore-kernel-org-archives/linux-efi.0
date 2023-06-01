@@ -2,175 +2,94 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9FD45C7EE2E
-	for <linux-efi@archiver.kernel.org>; Thu,  1 Jun 2023 18:26:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0862BC77B7E
+	for <linux-efi@archiver.kernel.org>; Thu,  1 Jun 2023 20:47:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232222AbjFAS0f (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 1 Jun 2023 14:26:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59886 "EHLO
+        id S229884AbjFAUrp (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 1 Jun 2023 16:47:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34390 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232496AbjFAS0a (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 1 Jun 2023 14:26:30 -0400
-Received: from mga12.intel.com (mga12.intel.com [192.55.52.136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 36921E40;
-        Thu,  1 Jun 2023 11:26:21 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1685643981; x=1717179981;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=ZRWbbgKJS3P7pe8ruC5AYEzSpFJMHJrlR+e2/skszlg=;
-  b=ViqbFaTqk69w6fwdLIvIUaQsoutSpujAdAf5MRMjlW9DkxbzJPeRcFqn
-   dTRG+AUr8booV/46nk/3Op2keKWHa/h8xzFD5UpJI/JnGPbghnFa2fY8A
-   cYV1lUE1IgS+X+cDkqJtGkdAm/x9nQj2gneEh96ikdbrCHTGyIGlU36yq
-   Y7IwiEKUm2umu++x+mo8JnO2tppJ2XXNY7Zdj/zWCW7xKHsoFPv3kk9bn
-   2WHYrPQuHvPdbIfjQepBT9UbGDu/5Opstw3VOYOH9M6bLvU+41iGodpPx
-   WyCQxSdVOhAgrmJDwxtTtc4kb/xDz+VnjVYU1RAVH0JZ4vIIrzAZUrPa/
-   Q==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10728"; a="335266306"
-X-IronPort-AV: E=Sophos;i="6.00,210,1681196400"; 
-   d="scan'208";a="335266306"
-Received: from fmsmga004.fm.intel.com ([10.253.24.48])
-  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Jun 2023 11:26:11 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10728"; a="777329805"
-X-IronPort-AV: E=Sophos;i="6.00,210,1681196400"; 
-   d="scan'208";a="777329805"
-Received: from fmaislin-mobl1.ger.corp.intel.com (HELO box.shutemov.name) ([10.252.47.213])
-  by fmsmga004-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Jun 2023 11:26:04 -0700
-Received: by box.shutemov.name (Postfix, from userid 1000)
-        id A336F10B6AF; Thu,  1 Jun 2023 21:25:52 +0300 (+03)
-From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-To:     Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>,
-        Dave Hansen <dave.hansen@intel.com>,
-        Sean Christopherson <seanjc@google.com>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Joerg Roedel <jroedel@suse.de>,
-        Ard Biesheuvel <ardb@kernel.org>
-Cc:     Andi Kleen <ak@linux.intel.com>,
-        Kuppuswamy Sathyanarayanan 
-        <sathyanarayanan.kuppuswamy@linux.intel.com>,
-        David Rientjes <rientjes@google.com>,
-        Vlastimil Babka <vbabka@suse.cz>,
-        Tom Lendacky <thomas.lendacky@amd.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Paolo Bonzini <pbonzini@redhat.com>,
-        Ingo Molnar <mingo@redhat.com>,
-        Dario Faggioli <dfaggioli@suse.com>,
-        Mike Rapoport <rppt@kernel.org>,
-        David Hildenbrand <david@redhat.com>,
-        Mel Gorman <mgorman@techsingularity.net>,
-        marcelo.cerri@canonical.com, tim.gardner@canonical.com,
-        khalid.elmously@canonical.com, philip.cox@canonical.com,
-        aarcange@redhat.com, peterx@redhat.com, x86@kernel.org,
-        linux-mm@kvack.org, linux-coco@lists.linux.dev,
-        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
-        "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
-        Dave Hansen <dave.hansen@linux.intel.com>
-Subject: [PATCHv13 8/9] x86/tdx: Refactor try_accept_one()
-Date:   Thu,  1 Jun 2023 21:25:42 +0300
-Message-Id: <20230601182543.19036-9-kirill.shutemov@linux.intel.com>
-X-Mailer: git-send-email 2.39.3
-In-Reply-To: <20230601182543.19036-1-kirill.shutemov@linux.intel.com>
-References: <20230601182543.19036-1-kirill.shutemov@linux.intel.com>
+        with ESMTP id S231710AbjFAUro (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 1 Jun 2023 16:47:44 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2DBA91A2
+        for <linux-efi@vger.kernel.org>; Thu,  1 Jun 2023 13:47:36 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id B785A649B0
+        for <linux-efi@vger.kernel.org>; Thu,  1 Jun 2023 20:47:35 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 46D6AC433D2;
+        Thu,  1 Jun 2023 20:47:34 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1685652455;
+        bh=y4fG1Fq12ofevVd8ulrOJv3XYMKXMliRAsK+yTjrx1I=;
+        h=From:To:Cc:Subject:Date:From;
+        b=HL1hDtFLurTtaSlQjAociYEyKMB2KRXNtU9Vee+4Q9NoHnS/9adBgZk/HpU3jpoCQ
+         asxvaV/wGAH8CzmQaUHlGCRYrXrTBHe1RJZmKVM5xl6SRqrU7Wh8d1VQyESGFkXQSW
+         AJMvek+tFdvErPLrUnZE7zF3sNV4g+rU/JrHqFgCen1jKZrloAw1BD1cJcj6OqNGZc
+         8Liaho87Yzt+V2ilfzpaC9yjzBWNOC9eLhogQTGL4YV3mb9dnMM+i0h/kwkrEuLhdv
+         wyFgQORt7LXW6loALy5i0UPJJV6BcvaXIae93972YiG0/p1WMC91ndIIf9YVu0oLsN
+         uZJNxT+BHt88w==
+From:   Ard Biesheuvel <ardb@kernel.org>
+To:     torvalds@linux-foundation.org
+Cc:     linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>
+Subject: [GIT PULL] EFI fixes for v6.4 #1
+Date:   Thu,  1 Jun 2023 22:47:15 +0200
+Message-Id: <20230601204715.3368380-1-ardb@kernel.org>
+X-Mailer: git-send-email 2.39.2
 MIME-Version: 1.0
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1678; i=ardb@kernel.org; h=from:subject; bh=y4fG1Fq12ofevVd8ulrOJv3XYMKXMliRAsK+yTjrx1I=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIaWS+dLr7WEXt/LHhOaxhng/bL5p8+lUDdeet48u3K3eY fZ9/TnWjlIWBjEOBlkxRRaB2X/f7Tw9UarWeZYszBxWJpAhDFycAjCRVTwM/1TYWmdwKE+5EuKU dTPB9qTkzIlGdl1KcxJdFZJ7th/3WMTw3yt+y+bo9MLX99/NNNRT2MGevzZ1ufKLaZdPuCRF+85 gZwIA
+X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Rework try_accept_one() to return accepted size instead of modifying
-'start' inside the helper. It makes 'start' in-only argument and
-streamlines code on the caller side.
+Hello Linus,
 
-Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
-Suggested-by: Borislav Petkov <bp@alien8.de>
-Reviewed-by: Dave Hansen <dave.hansen@linux.intel.com>
----
- arch/x86/coco/tdx/tdx.c | 38 +++++++++++++++++++-------------------
- 1 file changed, 19 insertions(+), 19 deletions(-)
+A few minor fixes for EFI, one of which fixes the reported boot regression when
+booting x86 kernels using the BIOS based loader built into the hypervisor
+framework on macOS.
 
-diff --git a/arch/x86/coco/tdx/tdx.c b/arch/x86/coco/tdx/tdx.c
-index e6f4c2758a68..0d5fe6e24e45 100644
---- a/arch/x86/coco/tdx/tdx.c
-+++ b/arch/x86/coco/tdx/tdx.c
-@@ -713,18 +713,18 @@ static bool tdx_cache_flush_required(void)
- 	return true;
- }
- 
--static bool try_accept_one(phys_addr_t *start, unsigned long len,
--			  enum pg_level pg_level)
-+static unsigned long try_accept_one(phys_addr_t start, unsigned long len,
-+				    enum pg_level pg_level)
- {
- 	unsigned long accept_size = page_level_size(pg_level);
- 	u64 tdcall_rcx;
- 	u8 page_size;
- 
--	if (!IS_ALIGNED(*start, accept_size))
--		return false;
-+	if (!IS_ALIGNED(start, accept_size))
-+		return 0;
- 
- 	if (len < accept_size)
--		return false;
-+		return 0;
- 
- 	/*
- 	 * Pass the page physical address to the TDX module to accept the
-@@ -743,15 +743,14 @@ static bool try_accept_one(phys_addr_t *start, unsigned long len,
- 		page_size = 2;
- 		break;
- 	default:
--		return false;
-+		return 0;
- 	}
- 
--	tdcall_rcx = *start | page_size;
-+	tdcall_rcx = start | page_size;
- 	if (__tdx_module_call(TDX_ACCEPT_PAGE, tdcall_rcx, 0, 0, 0, NULL))
--		return false;
-+		return 0;
- 
--	*start += accept_size;
--	return true;
-+	return accept_size;
- }
- 
- /*
-@@ -788,21 +787,22 @@ static bool tdx_enc_status_changed(unsigned long vaddr, int numpages, bool enc)
- 	 */
- 	while (start < end) {
- 		unsigned long len = end - start;
-+		unsigned long accept_size;
- 
- 		/*
- 		 * Try larger accepts first. It gives chance to VMM to keep
--		 * 1G/2M SEPT entries where possible and speeds up process by
--		 * cutting number of hypercalls (if successful).
-+		 * 1G/2M Secure EPT entries where possible and speeds up
-+		 * process by cutting number of hypercalls (if successful).
- 		 */
- 
--		if (try_accept_one(&start, len, PG_LEVEL_1G))
--			continue;
--
--		if (try_accept_one(&start, len, PG_LEVEL_2M))
--			continue;
--
--		if (!try_accept_one(&start, len, PG_LEVEL_4K))
-+		accept_size = try_accept_one(start, len, PG_LEVEL_1G);
-+		if (!accept_size)
-+			accept_size = try_accept_one(start, len, PG_LEVEL_2M);
-+		if (!accept_size)
-+			accept_size = try_accept_one(start, len, PG_LEVEL_4K);
-+		if (!accept_size)
- 			return false;
-+		start += accept_size;
- 	}
- 
- 	return true;
--- 
-2.39.3
+Please pull.
 
+
+The following changes since commit ac9a78681b921877518763ba0e89202254349d1b:
+
+  Linux 6.4-rc1 (2023-05-07 13:34:35 -0700)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-fixes-for-v6.4-1
+
+for you to fetch changes up to 36e4fc57fc1619f462e669e939209c45763bc8f5:
+
+  efi: Bump stub image version for macOS HVF compatibility (2023-05-28 20:45:46 +0200)
+
+----------------------------------------------------------------
+First batch of EFI fixes for v6.4:
+
+- fix harmless warning in zboot code on 'make clean'
+- add some missing prototypes
+- fix boot regressions triggered by PE/COFF header image minor version
+  bump
+
+----------------------------------------------------------------
+Akihiro Suda (1):
+      efi: Bump stub image version for macOS HVF compatibility
+
+Ard Biesheuvel (1):
+      efi/libstub: zboot: Avoid eager evaluation of objcopy flags
+
+Arnd Bergmann (1):
+      efi: fix missing prototype warnings
+
+ drivers/acpi/apei/apei-internal.h           |  6 ------
+ drivers/acpi/apei/bert.c                    |  1 +
+ drivers/firmware/efi/libstub/Makefile.zboot |  3 ++-
+ drivers/firmware/efi/libstub/efistub.h      |  3 +++
+ include/linux/cper.h                        |  6 ++++++
+ include/linux/efi.h                         |  2 ++
+ include/linux/pe.h                          | 25 +++++++++++++------------
+ 7 files changed, 27 insertions(+), 19 deletions(-)
