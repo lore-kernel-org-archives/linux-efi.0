@@ -2,179 +2,148 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AF907C7EE2E
-	for <linux-efi@archiver.kernel.org>; Thu,  1 Jun 2023 14:30:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4920EC7EE2E
+	for <linux-efi@archiver.kernel.org>; Thu,  1 Jun 2023 18:26:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233879AbjFAOaB (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 1 Jun 2023 10:30:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47432 "EHLO
+        id S232197AbjFAS0I (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 1 Jun 2023 14:26:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59568 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234334AbjFAO3w (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 1 Jun 2023 10:29:52 -0400
-Received: from mx0b-001b2d01.pphosted.com (mx0b-001b2d01.pphosted.com [148.163.158.5])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 29ED998;
-        Thu,  1 Jun 2023 07:29:51 -0700 (PDT)
-Received: from pps.filterd (m0353722.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 351ESGQA002486;
-        Thu, 1 Jun 2023 14:29:31 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=message-id : subject :
- from : reply-to : to : cc : date : in-reply-to : references : content-type
- : mime-version : content-transfer-encoding; s=pp1;
- bh=CcPfCzY8208PdCOnE1aO6P15WOICSUETE+4+BuarsJ4=;
- b=glePTwE33g12AqTcQp4b5bnMaxXtrd5xg2kPD1vJknFsnN2IIsVVBRHlJvun7/jKDi9Z
- hWWMlfMXTk0j1gTbo1iBvWVL/Y6cPX00ORLM8ywqcXOz6dZSCNovDBKy4Y2D6CBiEFOO
- 3imgXNaWcdgUEOvUY0VpdavdJAI2hGtxsfkY/8r/1/S8R++jMP+7ybT3IklCtE3+I/Qh
- 2zfAU5TeB1VJU0+Qraacmr8CeQ4R1wZrd9ykrpQPb12jZ/H1lZLLmbBAhQkDYXS3xWL6
- bYtaQYZMzyFDap6YeMcsjhKnslMsagN8LedS0BUekyOv75K6CK31kjgCGho9F4K9uxQF 4Q== 
-Received: from ppma05wdc.us.ibm.com (1b.90.2fa9.ip4.static.sl-reverse.com [169.47.144.27])
-        by mx0a-001b2d01.pphosted.com (PPS) with ESMTPS id 3qxw4fg0wg-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 01 Jun 2023 14:29:30 +0000
-Received: from pps.filterd (ppma05wdc.us.ibm.com [127.0.0.1])
-        by ppma05wdc.us.ibm.com (8.17.1.19/8.17.1.19) with ESMTP id 351C6hSo012658;
-        Thu, 1 Jun 2023 14:29:30 GMT
-Received: from smtprelay02.wdc07v.mail.ibm.com ([9.208.129.120])
-        by ppma05wdc.us.ibm.com (PPS) with ESMTPS id 3qu9g625tr-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 01 Jun 2023 14:29:29 +0000
-Received: from smtpav05.dal12v.mail.ibm.com (smtpav05.dal12v.mail.ibm.com [10.241.53.104])
-        by smtprelay02.wdc07v.mail.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 351ETSAT57737500
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 1 Jun 2023 14:29:28 GMT
-Received: from smtpav05.dal12v.mail.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 8577358067;
-        Thu,  1 Jun 2023 14:29:28 +0000 (GMT)
-Received: from smtpav05.dal12v.mail.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 4E82A5805D;
-        Thu,  1 Jun 2023 14:29:28 +0000 (GMT)
-Received: from rhel-laptop.ibm.com (unknown [9.61.58.163])
-        by smtpav05.dal12v.mail.ibm.com (Postfix) with ESMTP;
-        Thu,  1 Jun 2023 14:29:28 +0000 (GMT)
-Message-ID: <9a752cf0b1e1d6f4ee2744fa3979f323b863dbbd.camel@linux.vnet.ibm.com>
-Subject: Re: [PATCH 1/4] block:sed-opal: SED Opal keystore
-From:   Greg Joyce <gjoyce@linux.vnet.ibm.com>
-Reply-To: gjoyce@linux.vnet.ibm.com
-To:     Jarkko Sakkinen <jarkko@kernel.org>, linux-block@vger.kernel.org
-Cc:     linuxppc-dev@lists.ozlabs.org, jonathan.derrick@linux.dev,
-        brking@linux.vnet.ibm.com, msuchanek@suse.de, mpe@ellerman.id.au,
-        axboe@kernel.dk, akpm@linux-foundation.org,
-        linux-efi@vger.kernel.org, keyrings@vger.kernel.org,
-        me@benboeckel.net, elliott@hpe.com, andonnel@au1.ibm.com
-Date:   Thu, 01 Jun 2023 09:29:28 -0500
-In-Reply-To: <CSIYR76Z8U02.30IIQJ49LMY05@suppilovahvero>
-References: <20230505194402.2079010-1-gjoyce@linux.vnet.ibm.com>
-         <20230505194402.2079010-2-gjoyce@linux.vnet.ibm.com>
-         <CSIYR76Z8U02.30IIQJ49LMY05@suppilovahvero>
-Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.28.5 (3.28.5-18.el8) 
-Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: DlyEBDRksE0zBECYKv0_QIgClff7ChD6
-X-Proofpoint-ORIG-GUID: DlyEBDRksE0zBECYKv0_QIgClff7ChD6
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.573,FMLib:17.11.176.26
- definitions=2023-06-01_08,2023-05-31_03,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 suspectscore=0 spamscore=0
- lowpriorityscore=0 priorityscore=1501 bulkscore=0 mlxscore=0
- mlxlogscore=984 clxscore=1011 adultscore=0 phishscore=0 malwarescore=0
- impostorscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2304280000 definitions=main-2306010124
+        with ESMTP id S230220AbjFAS0H (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 1 Jun 2023 14:26:07 -0400
+Received: from mga01.intel.com (mga01.intel.com [192.55.52.88])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4DA501A5;
+        Thu,  1 Jun 2023 11:26:05 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1685643965; x=1717179965;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=LJWuKaqvYOvqAXDR1TKqUlI78Dny7nmmQ0aMOVcXkCg=;
+  b=iaqofVfnhAxH0atcMbBkimsj1IZ0/eN5GGPyv3qcQV7cBGeXaplh/e8G
+   K20byEF6SJFRoeZx/met/0guifEtxQaDX5CArPw6G52iUQxjjnII8XkMC
+   HK/whp7++DhpyIXVALKJMDq/Zsnu80bX+GRdgjIZBKA7ZidauwcK9lxNt
+   X3iHw5KZiCAEIVB2HfGvkl6y/Bo7y0HU0SiyZX7wo5SuTZNzCtKtHe117
+   WUTHdL40XUMro17DT5rfraj2GDcsEP96k487AYNy/o5fKB4a8Iv4kC10t
+   EySrRegKk4g1XGugUuP5hRURfQNcWqjBYZOkrpw+6CFA2KOgzB3QuOqiL
+   g==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10728"; a="383920491"
+X-IronPort-AV: E=Sophos;i="6.00,210,1681196400"; 
+   d="scan'208";a="383920491"
+Received: from fmsmga008.fm.intel.com ([10.253.24.58])
+  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Jun 2023 11:26:02 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10728"; a="772539902"
+X-IronPort-AV: E=Sophos;i="6.00,210,1681196400"; 
+   d="scan'208";a="772539902"
+Received: from fmaislin-mobl1.ger.corp.intel.com (HELO box.shutemov.name) ([10.252.47.213])
+  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Jun 2023 11:25:54 -0700
+Received: by box.shutemov.name (Postfix, from userid 1000)
+        id 5E20C10B6A9; Thu,  1 Jun 2023 21:25:52 +0300 (+03)
+From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
+To:     Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>,
+        Dave Hansen <dave.hansen@intel.com>,
+        Sean Christopherson <seanjc@google.com>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Joerg Roedel <jroedel@suse.de>,
+        Ard Biesheuvel <ardb@kernel.org>
+Cc:     Andi Kleen <ak@linux.intel.com>,
+        Kuppuswamy Sathyanarayanan 
+        <sathyanarayanan.kuppuswamy@linux.intel.com>,
+        David Rientjes <rientjes@google.com>,
+        Vlastimil Babka <vbabka@suse.cz>,
+        Tom Lendacky <thomas.lendacky@amd.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Paolo Bonzini <pbonzini@redhat.com>,
+        Ingo Molnar <mingo@redhat.com>,
+        Dario Faggioli <dfaggioli@suse.com>,
+        Mike Rapoport <rppt@kernel.org>,
+        David Hildenbrand <david@redhat.com>,
+        Mel Gorman <mgorman@techsingularity.net>,
+        marcelo.cerri@canonical.com, tim.gardner@canonical.com,
+        khalid.elmously@canonical.com, philip.cox@canonical.com,
+        aarcange@redhat.com, peterx@redhat.com, x86@kernel.org,
+        linux-mm@kvack.org, linux-coco@lists.linux.dev,
+        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
+        "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
+        Borislav Petkov <bp@suse.de>
+Subject: [PATCHv13 2/9] efi/x86: Get full memory map in allocate_e820()
+Date:   Thu,  1 Jun 2023 21:25:36 +0300
+Message-Id: <20230601182543.19036-3-kirill.shutemov@linux.intel.com>
+X-Mailer: git-send-email 2.39.3
+In-Reply-To: <20230601182543.19036-1-kirill.shutemov@linux.intel.com>
+References: <20230601182543.19036-1-kirill.shutemov@linux.intel.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Thu, 2023-05-11 at 01:50 +0300, Jarkko Sakkinen wrote:
-> On Fri May 5, 2023 at 10:43 PM EEST,  wrote:
-> > From: Greg Joyce <gjoyce@linux.vnet.ibm.com>
-> > 
-> > Add read and write functions that allow SED Opal keys to stored
-> > in a permanent keystore.
-> 
-> Please be more verbose starting from "Self-Encrypting Drive (SED)",
-> instead of just "SED", and take time to explain what these keys are.
+Currently allocate_e820() is only interested in the size of map and size
+of memory descriptor to determine how many e820 entries the kernel
+needs.
 
-A further elaboration of SED and the keys will be in the next patchset.
+UEFI Specification version 2.9 introduces a new memory type --
+unaccepted memory. To track unaccepted memory kernel needs to allocate
+a bitmap. The size of the bitmap is dependent on the maximum physical
+address present in the system. A full memory map is required to find
+the maximum address.
 
-> 
-> > Signed-off-by: Greg Joyce <gjoyce@linux.vnet.ibm.com>
-> > Reviewed-by: Jonathan Derrick <jonathan.derrick@linux.dev>
-> > ---
-> >  block/Makefile               |  2 +-
-> >  block/sed-opal-key.c         | 24 ++++++++++++++++++++++++
-> >  include/linux/sed-opal-key.h | 15 +++++++++++++++
-> >  3 files changed, 40 insertions(+), 1 deletion(-)
-> >  create mode 100644 block/sed-opal-key.c
-> >  create mode 100644 include/linux/sed-opal-key.h
-> > 
-> > diff --git a/block/Makefile b/block/Makefile
-> > index 4e01bb71ad6e..464a9f209552 100644
-> > --- a/block/Makefile
-> > +++ b/block/Makefile
-> > @@ -35,7 +35,7 @@ obj-$(CONFIG_BLK_DEV_ZONED)	+= blk-zoned.o
-> >  obj-$(CONFIG_BLK_WBT)		+= blk-wbt.o
-> >  obj-$(CONFIG_BLK_DEBUG_FS)	+= blk-mq-debugfs.o
-> >  obj-$(CONFIG_BLK_DEBUG_FS_ZONED)+= blk-mq-debugfs-zoned.o
-> > -obj-$(CONFIG_BLK_SED_OPAL)	+= sed-opal.o
-> > +obj-$(CONFIG_BLK_SED_OPAL)	+= sed-opal.o sed-opal-key.o
-> >  obj-$(CONFIG_BLK_PM)		+= blk-pm.o
-> >  obj-$(CONFIG_BLK_INLINE_ENCRYPTION)	+= blk-crypto.o blk-
-> > crypto-profile.o \
-> >  					   blk-crypto-sysfs.o
-> > diff --git a/block/sed-opal-key.c b/block/sed-opal-key.c
-> > new file mode 100644
-> > index 000000000000..16f380164c44
-> > --- /dev/null
-> > +++ b/block/sed-opal-key.c
-> > @@ -0,0 +1,24 @@
-> > +// SPDX-License-Identifier: GPL-2.0-only
-> > +/*
-> > + * SED key operations.
-> > + *
-> > + * Copyright (C) 2022 IBM Corporation
-> > + *
-> > + * These are the accessor functions (read/write) for SED Opal
-> > + * keys. Specific keystores can provide overrides.
-> > + *
-> > + */
-> > +
-> > +#include <linux/kernel.h>
-> > +#include <linux/errno.h>
-> > +#include <linux/sed-opal-key.h>
-> > +
-> > +int __weak sed_read_key(char *keyname, char *key, u_int *keylen)
-> > +{
-> > +	return -EOPNOTSUPP;
-> > +}
-> > +
-> > +int __weak sed_write_key(char *keyname, char *key, u_int keylen)
-> > +{
-> > +	return -EOPNOTSUPP;
-> > +}
-> > diff --git a/include/linux/sed-opal-key.h b/include/linux/sed-opal-
-> > key.h
-> > new file mode 100644
-> > index 000000000000..c9b1447986d8
-> > --- /dev/null
-> > +++ b/include/linux/sed-opal-key.h
-> > @@ -0,0 +1,15 @@
-> > +/* SPDX-License-Identifier: GPL-2.0 */
-> > +/*
-> > + * SED key operations.
-> > + *
-> > + * Copyright (C) 2022 IBM Corporation
-> > + *
-> > + * These are the accessor functions (read/write) for SED Opal
-> > + * keys. Specific keystores can provide overrides.
-> > + *
-> > + */
-> > +
-> > +#include <linux/kernel.h>
-> > +
-> > +int sed_read_key(char *keyname, char *key, u_int *keylen);
-> > +int sed_write_key(char *keyname, char *key, u_int keylen);
-> > -- 
-> > gjoyce@linux.vnet.ibm.com
-> 
-> BR, Jarkko
+Modify allocate_e820() to get a full memory map.
+
+Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
+Reviewed-by: Borislav Petkov <bp@suse.de>
+Acked-by: Ard Biesheuvel <ardb@kernel.org>
+Reviewed-by: Tom Lendacky <thomas.lendacky@amd.com>
+---
+ drivers/firmware/efi/libstub/x86-stub.c | 26 +++++++++++--------------
+ 1 file changed, 11 insertions(+), 15 deletions(-)
+
+diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
+index a0bfd31358ba..fff81843169c 100644
+--- a/drivers/firmware/efi/libstub/x86-stub.c
++++ b/drivers/firmware/efi/libstub/x86-stub.c
+@@ -681,28 +681,24 @@ static efi_status_t allocate_e820(struct boot_params *params,
+ 				  struct setup_data **e820ext,
+ 				  u32 *e820ext_size)
+ {
+-	unsigned long map_size, desc_size, map_key;
++	struct efi_boot_memmap *map;
+ 	efi_status_t status;
+-	__u32 nr_desc, desc_version;
++	__u32 nr_desc;
+ 
+-	/* Only need the size of the mem map and size of each mem descriptor */
+-	map_size = 0;
+-	status = efi_bs_call(get_memory_map, &map_size, NULL, &map_key,
+-			     &desc_size, &desc_version);
+-	if (status != EFI_BUFFER_TOO_SMALL)
+-		return (status != EFI_SUCCESS) ? status : EFI_UNSUPPORTED;
++	status = efi_get_memory_map(&map, false);
++	if (status != EFI_SUCCESS)
++		return status;
+ 
+-	nr_desc = map_size / desc_size + EFI_MMAP_NR_SLACK_SLOTS;
+-
+-	if (nr_desc > ARRAY_SIZE(params->e820_table)) {
+-		u32 nr_e820ext = nr_desc - ARRAY_SIZE(params->e820_table);
++	nr_desc = map->map_size / map->desc_size;
++	if (nr_desc > ARRAY_SIZE(params->e820_table) - EFI_MMAP_NR_SLACK_SLOTS) {
++		u32 nr_e820ext = nr_desc - ARRAY_SIZE(params->e820_table) +
++			EFI_MMAP_NR_SLACK_SLOTS;
+ 
+ 		status = alloc_e820ext(nr_e820ext, e820ext, e820ext_size);
+-		if (status != EFI_SUCCESS)
+-			return status;
+ 	}
+ 
+-	return EFI_SUCCESS;
++	efi_bs_call(free_pool, map);
++	return status;
+ }
+ 
+ struct exit_boot_struct {
+-- 
+2.39.3
 
