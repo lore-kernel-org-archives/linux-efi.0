@@ -2,63 +2,120 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9EC0DC7EE24
-	for <linux-efi@archiver.kernel.org>; Sat,  3 Jun 2023 10:41:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F3DFC77B7A
+	for <linux-efi@archiver.kernel.org>; Sat,  3 Jun 2023 10:50:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235612AbjFCKk6 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 3 Jun 2023 06:40:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51728 "EHLO
+        id S229609AbjFCKux (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 3 Jun 2023 06:50:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55452 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235667AbjFCKkz (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sat, 3 Jun 2023 06:40:55 -0400
-X-Greylist: delayed 4233 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Sat, 03 Jun 2023 03:40:27 PDT
-Received: from mail.webtopbits.pl (mail.webtopbits.pl [195.231.64.176])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6995310DE
-        for <linux-efi@vger.kernel.org>; Sat,  3 Jun 2023 03:40:26 -0700 (PDT)
-Received: by mail.webtopbits.pl (Postfix, from userid 1001)
-        id B5D0CA396C; Fri,  2 Jun 2023 09:51:00 +0100 (BST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=webtopbits.pl;
-        s=mail; t=1685695863;
-        bh=Eh8ECMiYd4baGAwPAzhz8mhJACXX7NSRkYjh+plaY18=;
-        h=Date:From:To:Subject:From;
-        b=MhjfnuChNyBAgYHexeE6sV/fADlFo9XN4J8I1ogQjNGCM3V4jhk0n8q2/oUxT40w1
-         yxk0iiEbf0iM5CpweGlwl8f+EUCoC6gSS+XzL7Y27h7h9SDv7sUJtlCvUeSAFImxQC
-         zv1CVJhnJiniayL5Np2xoWa8gQ1kHb8eXzVnHCiYkckMkZZL9YOD/H7jAyc9VSj9KK
-         HPVIrNGQ3P8200MUiRln5q0pfauVqcKDv4dTyXMiVTL9VCKkt6thCeSVbsz/+mpbLZ
-         HLGQ/TqzfR5lRanesjdFEJRQfX4qP26HesvB+Y0FOintJe3ysFpNatoOFGU+iirSA3
-         sjBPZAt6MnOyw==
-Received: by mail.webtopbits.pl for <linux-efi@vger.kernel.org>; Fri,  2 Jun 2023 08:50:56 GMT
-Message-ID: <20230602085530-0.1.8w.5krb.0.gd4e0xqhlh@webtopbits.pl>
-Date:   Fri,  2 Jun 2023 08:50:56 GMT
-From:   "Kamil Durjasz" <kamil.durjasz@webtopbits.pl>
-To:     <linux-efi@vger.kernel.org>
-Subject: =?UTF-8?Q?Wy=C5=BCsza_konwersja_w_e-sklepie_?=
-X-Mailer: mail.webtopbits.pl
+        with ESMTP id S234630AbjFCKuw (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 3 Jun 2023 06:50:52 -0400
+Received: from mail-yw1-x112c.google.com (mail-yw1-x112c.google.com [IPv6:2607:f8b0:4864:20::112c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6EFA3E72;
+        Sat,  3 Jun 2023 03:50:27 -0700 (PDT)
+Received: by mail-yw1-x112c.google.com with SMTP id 00721157ae682-568ba7abc11so34332937b3.3;
+        Sat, 03 Jun 2023 03:50:27 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1685789426; x=1688381426;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=qhk+FTHFrBmjng1l4FaLO0XbEr20/z5NnN2R+/a0y9I=;
+        b=WICmglInHtpq/+1zPVqjaftbQw+OxUIfaE4lJknx8UhWFdMk6shN0NrIdXU6wol1rv
+         LdMhT11VDRynM0gW526UFDGKPRH3zdh/pbkWN8sbGQBOcMksFL5jKDtX7pZZKke3yrmd
+         MStDArC2bBafPEXIHm+U2HECM8/+ZSAPiU4YJrvwELU7JCCzYh+J+gW26DdPIZIqA6J0
+         Uq96vdv+939hFTIik/g7vydyar8M1XrJiHXVMSQCTOB2kSJkG3e72mfoPPbxRXuOMRfh
+         uJyTxMZ5TG2Mjo6N3Pu/ZkaAV9UGP0t6MQ/5Lg3RbVFM0kEYlxOB02Y0GHxSuLm0d2v5
+         UsJQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1685789426; x=1688381426;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=qhk+FTHFrBmjng1l4FaLO0XbEr20/z5NnN2R+/a0y9I=;
+        b=XsxTxvXJStF/9+v0R56FVw1uKPIeQ5FjLFf9SMBjZYOpywIBdUKeGXa6cstdJCTA3A
+         qpbpkYu+YvSUYbBdbeHKpD5upvFxSB9mLwhZICiaGBDb+PkKOHl9+PqyQCKWJGs3BNJm
+         ARxT8C/Pypf76nLGxMDnFxbu8SEnFX7u7PnWCjztaqehXmyQV1hRCaZg5sWf2oglOIzx
+         +nLNYmP9bVKnemw3RPqIN8tIGiZTsf9uGV28aWRbqeQfJdLlVtV8ipluqbz8EZHpS1Wt
+         O2l3jPaaJ6sI5nsmAB+6hqFVii3A8kA7RABGrysKgY9I823WL7IfXRYZWuqrwO2uomH8
+         XGGQ==
+X-Gm-Message-State: AC+VfDz1oOnXzf4aClG5EkH3vAlUu+Szl7UqDDGc781It6dJrrIwRwcF
+        yDU/W3ecgy+iZWVBq1NOXcK6HQfndrEnRRg0KPM=
+X-Google-Smtp-Source: ACHHUZ6Vd6CnsBPqP7aYagxKWt3Oc7qkiNmhBQY7PH9Ghde129d1hiugljj6y4m1+yZwz56Pmb5G1R9sGTjbFd8a6b8=
+X-Received: by 2002:a81:d34d:0:b0:565:9a3d:a3f9 with SMTP id
+ d13-20020a81d34d000000b005659a3da3f9mr4329111ywl.9.1685789426424; Sat, 03 Jun
+ 2023 03:50:26 -0700 (PDT)
 MIME-Version: 1.0
+References: <CAG8fp8Te=oT1JJhTpOZvgWJrgcTq2DXan8UOVZ=KYCYNa8cKog@mail.gmail.com>
+ <CAMj1kXG0q-pJEnvqJxxpecVqJcB2jk3rj7S4KNp728THM=de3Q@mail.gmail.com>
+ <CAG8fp8Tnfb5tt3Eea4+=zznZLxBfqwha_wkQcPDvU4QhcSckEw@mail.gmail.com>
+ <CAG8fp8QbQqDVxEvzeyijbkfU5HoAwbRH0VptMK4-oPnJ7-0Ljg@mail.gmail.com> <CAMj1kXHAt69QqFdZDOTFKNLvAYuY9cwrVFgE+eDNZ8FSQA-45w@mail.gmail.com>
+In-Reply-To: <CAMj1kXHAt69QqFdZDOTFKNLvAYuY9cwrVFgE+eDNZ8FSQA-45w@mail.gmail.com>
+From:   Akihiro Suda <suda.kyoto@gmail.com>
+Date:   Sat, 3 Jun 2023 19:50:15 +0900
+Message-ID: <CAG8fp8TXA2UG+tS8F5KhSW7Xi1o7oHk0kQTs=Z8JpDU5VStjfQ@mail.gmail.com>
+Subject: Re: [PATCH] efi: bump efistub version from 1.1 to 3.0 for
+ VZLinuxBootLoader compatibility
+To:     Ard Biesheuvel <ardb@kernel.org>
+Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-efi@vger.kernel.org, Linux x86 <x86@kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Dzie=C5=84 dobry,
+> > > On x86, it incorporates a BIOS style loader that does not implement o=
+r expose EFI to the loaded kernel.
+> >
+> > AFAICS, it does not seem to use real mode BIOS.
+> >
+>
+> I never mentioned real mode, did I?
 
-w jaki spos=C3=B3b docieraj=C4=85 Pa=C5=84stwo do odbiorc=C3=B3w?
+Sorry, I just misinterpreted "BIOS style loader".
 
-Tworzymy pot=C4=99=C5=BCne narz=C4=99dzia sprzeda=C5=BCy, kt=C3=B3re pozw=
-alaj=C4=85 kompleksowo rozwi=C4=85za=C4=87 problemy potencjalnych klient=C3=
-=B3w i skutecznie wp=C5=82yn=C4=85=C4=87 na ich decyzje zakupowe.=20
-
-Skupiamy si=C4=99 na Pa=C5=84stwa potrzebach zwi=C4=85zanych z obs=C5=82u=
-g=C4=85 sklepu, oczekiwaniach i planach sprzeda=C5=BCowych. Szczeg=C3=B3=C5=
-=82owo dopasowujemy grafik=C4=99, funkcjonalno=C5=9Bci, struktur=C4=99 i =
-mikrointerakcje do Pa=C5=84stwa grupy docelowej, co przek=C5=82ada si=C4=99=
- na oczekiwane rezultaty.
-
-Ch=C4=99tnie przedstawi=C4=99 dotychczasowe realizacje, aby mogli Pa=C5=84=
-stwo przekona=C4=87 si=C4=99 o naszych mo=C5=BCliwo=C5=9Bciach. Mog=C4=99=
- si=C4=99 skontaktowa=C4=87?
-
-
-Pozdrawiam
-Kamil Durjasz
+2023=E5=B9=B46=E6=9C=883=E6=97=A5(=E5=9C=9F) 7:52 Ard Biesheuvel <ardb@kern=
+el.org>:
+>
+> On Fri, 2 Jun 2023 at 22:30, Akihiro Suda <suda.kyoto@gmail.com> wrote:
+> >
+> > > > I'll queue this as a fix, but I'm going to tweak the comment (and t=
+he
+> > > > commit log) a bit, if you don't mind
+> >
+> > Thank you for rewriting my comments, but the new comments seem
+> > slightly incorrect:
+> > https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/comm=
+it/?id=3D36e4fc57fc1619f462e669e939209c45763bc8f5
+> >
+> > > efi: Bump stub image version for macOS HVF compatibility
+> >
+> > The commit is about Virtualization.framework, not about
+> > Hypervisor.framework (HVF).
+> >
+> > Virtualization.framework =3D high-level VMM, similar to QEMU
+> > (/usr/bin/qemu-system-*)
+> > Hypervisor.framework     =3D low-level  VMM, similar to kvm.ko
+> >
+> > > The macOS hypervisor framework includes a host-side VMM called VZLinu=
+xBootLoader
+> >
+> > VZLinuxBootLoader is a part of Virtualization.framework, not
+> > Hypervisor.framework.
+> > Also, VZLinuxBootLoader is not a VMM; it is just an API for loading
+> > vmlinuz into Virtualization.framework.
+> > (similar to the `-kernel` and the `-initrd` flags of QEMU)
+> >
+>
+> Apologies for these mistakes. Unfortunately, this patch has been
+> merged now so there is nothing we can do about it.
+>
+> > > On x86, it incorporates a BIOS style loader that does not implement o=
+r expose EFI to the loaded kernel.
+> >
+> > AFAICS, it does not seem to use real mode BIOS.
+> >
+>
+> I never mentioned real mode, did I?
