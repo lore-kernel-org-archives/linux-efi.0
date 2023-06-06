@@ -2,44 +2,44 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F3B6AC77B73
-	for <linux-efi@archiver.kernel.org>; Tue,  6 Jun 2023 14:27:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 16120C7EE24
+	for <linux-efi@archiver.kernel.org>; Tue,  6 Jun 2023 14:27:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236403AbjFFO1t (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        id S237536AbjFFO1t (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
         Tue, 6 Jun 2023 10:27:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32800 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33102 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237625AbjFFO1h (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 6 Jun 2023 10:27:37 -0400
+        with ESMTP id S237929AbjFFO1i (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 6 Jun 2023 10:27:38 -0400
 Received: from mga09.intel.com (mga09.intel.com [134.134.136.24])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E0672170F;
-        Tue,  6 Jun 2023 07:27:30 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9769C170B;
+        Tue,  6 Jun 2023 07:27:32 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1686061651; x=1717597651;
+  t=1686061652; x=1717597652;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=ZRWbbgKJS3P7pe8ruC5AYEzSpFJMHJrlR+e2/skszlg=;
-  b=jh0o0hSsBcyChqCU65b0OAV/xHFc87ivBOLdEjKMlz4t6pJ9Hl12+j5i
-   RwaQURJqGbxr7Nd5CsyyKLrwJeMtR5e07xlbaYQQEX55cvKXUoFm5d7WR
-   HEJ4u1IApRDezu7adp371IJme3GAmiAuzUOssxiTUTnB4uQVmyqt9hXOO
-   +EPuHQJnXyNoknC2F3RH+8ZqCF7X3B8zCtdvaQO2kCQz9jWYD3L1A6ejc
-   FtmNLlqj87z5RlLgxqfPsIpIlU7vVbYYWBhiHUQ9Lz9irmpvctlU9+XJs
-   9fxE1exYYJdkDpvlkR57LxXDs6N8lNiZvW6TRhQr1ze/30IEhZN5YEk9e
-   Q==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10732"; a="359147243"
+  bh=JjnS0Brxqu2i7phm89Mj2mgUrvnNs0XsgqzO3HIBqfU=;
+  b=OjyDS5hv05l5MUJhCol7vscb7+rYF6L5QTE5oM1mIEc56jF/TexiJyk5
+   m9MnceRbw8e4rM1gjkG85mPzOjJQhgnZZeCotNh/S6K5KZXI42QhnLdcL
+   UhJCz9R02cZxk31bIMI5qAe9XWvWKBirdY9tdFbTslHSRRnXWxeh4yCjq
+   iwuA7R5wu/7sQ0VAW42EbhwSlqNx1rNyuHDk6xHC7uh2Y4wppW14Hdo1S
+   0iB0ncKefucAUFiezG50B2l8UGs/ACcxOevsBb5tcHp/vC9W3Ux5EZZpZ
+   LCU/7qhlwN4nvo5GLM1rKIIua1AuNwEBingJuqRozAShCLLKPw2fyMb5S
+   A==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10732"; a="359147260"
 X-IronPort-AV: E=Sophos;i="6.00,221,1681196400"; 
-   d="scan'208";a="359147243"
+   d="scan'208";a="359147260"
 Received: from orsmga003.jf.intel.com ([10.7.209.27])
   by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Jun 2023 07:27:11 -0700
 X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10733"; a="659543356"
+X-IronPort-AV: E=McAfee;i="6600,9927,10733"; a="659543354"
 X-IronPort-AV: E=Sophos;i="6.00,221,1681196400"; 
-   d="scan'208";a="659543356"
+   d="scan'208";a="659543354"
 Received: from rgraefe-mobl1.ger.corp.intel.com (HELO box.shutemov.name) ([10.252.58.173])
   by orsmga003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Jun 2023 07:26:54 -0700
 Received: by box.shutemov.name (Postfix, from userid 1000)
-        id 7395310DB52; Tue,  6 Jun 2023 17:26:42 +0300 (+03)
+        id 5F41F10DA12; Tue,  6 Jun 2023 17:26:42 +0300 (+03)
 From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
 To:     Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@kernel.org>,
         Dave Hansen <dave.hansen@intel.com>,
@@ -68,9 +68,9 @@ Cc:     Andi Kleen <ak@linux.intel.com>,
         linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
         "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
         Dave Hansen <dave.hansen@linux.intel.com>
-Subject: [PATCHv14 8/9] x86/tdx: Refactor try_accept_one()
-Date:   Tue,  6 Jun 2023 17:26:36 +0300
-Message-Id: <20230606142637.5171-9-kirill.shutemov@linux.intel.com>
+Subject: [PATCHv14 6/9] efi/unaccepted: Avoid load_unaligned_zeropad() stepping into unaccepted memory
+Date:   Tue,  6 Jun 2023 17:26:34 +0300
+Message-Id: <20230606142637.5171-7-kirill.shutemov@linux.intel.com>
 X-Mailer: git-send-email 2.39.3
 In-Reply-To: <20230606142637.5171-1-kirill.shutemov@linux.intel.com>
 References: <20230606142637.5171-1-kirill.shutemov@linux.intel.com>
@@ -80,97 +80,97 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Rework try_accept_one() to return accepted size instead of modifying
-'start' inside the helper. It makes 'start' in-only argument and
-streamlines code on the caller side.
+load_unaligned_zeropad() can lead to unwanted loads across page boundaries.
+The unwanted loads are typically harmless. But, they might be made to
+totally unrelated or even unmapped memory. load_unaligned_zeropad()
+relies on exception fixup (#PF, #GP and now #VE) to recover from these
+unwanted loads.
+
+But, this approach does not work for unaccepted memory. For TDX, a load
+from unaccepted memory will not lead to a recoverable exception within
+the guest. The guest will exit to the VMM where the only recourse is to
+terminate the guest.
+
+There are two parts to fix this issue and comprehensively avoid access
+to unaccepted memory. Together these ensure that an extra "guard" page
+is accepted in addition to the memory that needs to be used.
+
+1. Implicitly extend the range_contains_unaccepted_memory(start, end)
+   checks up to end+unit_size if 'end' is aligned on a unit_size
+   boundary.
+2. Implicitly extend accept_memory(start, end) to end+unit_size if 'end'
+   is aligned on a unit_size boundary.
+
+Side note: This leads to something strange. Pages which were accepted
+	   at boot, marked by the firmware as accepted and will never
+	   _need_ to be accepted might be on unaccepted_pages list
+	   This is a cue to ensure that the next page is accepted
+	   before 'page' can be used.
+
+This is an actual, real-world problem which was discovered during TDX
+testing.
 
 Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
-Suggested-by: Borislav Petkov <bp@alien8.de>
 Reviewed-by: Dave Hansen <dave.hansen@linux.intel.com>
+Reviewed-by: Ard Biesheuvel <ardb@kernel.org>
+Reviewed-by: Tom Lendacky <thomas.lendacky@amd.com>
 ---
- arch/x86/coco/tdx/tdx.c | 38 +++++++++++++++++++-------------------
- 1 file changed, 19 insertions(+), 19 deletions(-)
+ drivers/firmware/efi/unaccepted_memory.c | 35 ++++++++++++++++++++++++
+ 1 file changed, 35 insertions(+)
 
-diff --git a/arch/x86/coco/tdx/tdx.c b/arch/x86/coco/tdx/tdx.c
-index e6f4c2758a68..0d5fe6e24e45 100644
---- a/arch/x86/coco/tdx/tdx.c
-+++ b/arch/x86/coco/tdx/tdx.c
-@@ -713,18 +713,18 @@ static bool tdx_cache_flush_required(void)
- 	return true;
- }
+diff --git a/drivers/firmware/efi/unaccepted_memory.c b/drivers/firmware/efi/unaccepted_memory.c
+index 08a9a843550a..853f7dc3c21d 100644
+--- a/drivers/firmware/efi/unaccepted_memory.c
++++ b/drivers/firmware/efi/unaccepted_memory.c
+@@ -46,6 +46,34 @@ void accept_memory(phys_addr_t start, phys_addr_t end)
+ 	start -= unaccepted->phys_base;
+ 	end -= unaccepted->phys_base;
  
--static bool try_accept_one(phys_addr_t *start, unsigned long len,
--			  enum pg_level pg_level)
-+static unsigned long try_accept_one(phys_addr_t start, unsigned long len,
-+				    enum pg_level pg_level)
- {
- 	unsigned long accept_size = page_level_size(pg_level);
- 	u64 tdcall_rcx;
- 	u8 page_size;
++	/*
++	 * load_unaligned_zeropad() can lead to unwanted loads across page
++	 * boundaries. The unwanted loads are typically harmless. But, they
++	 * might be made to totally unrelated or even unmapped memory.
++	 * load_unaligned_zeropad() relies on exception fixup (#PF, #GP and now
++	 * #VE) to recover from these unwanted loads.
++	 *
++	 * But, this approach does not work for unaccepted memory. For TDX, a
++	 * load from unaccepted memory will not lead to a recoverable exception
++	 * within the guest. The guest will exit to the VMM where the only
++	 * recourse is to terminate the guest.
++	 *
++	 * There are two parts to fix this issue and comprehensively avoid
++	 * access to unaccepted memory. Together these ensure that an extra
++	 * "guard" page is accepted in addition to the memory that needs to be
++	 * used:
++	 *
++	 * 1. Implicitly extend the range_contains_unaccepted_memory(start, end)
++	 *    checks up to end+unit_size if 'end' is aligned on a unit_size
++	 *    boundary.
++	 *
++	 * 2. Implicitly extend accept_memory(start, end) to end+unit_size if
++	 *    'end' is aligned on a unit_size boundary. (immediately following
++	 *    this comment)
++	 */
++	if (!(end % unit_size))
++		end += unit_size;
++
+ 	/* Make sure not to overrun the bitmap */
+ 	if (end > unaccepted->size * unit_size * BITS_PER_BYTE)
+ 		end = unaccepted->size * unit_size * BITS_PER_BYTE;
+@@ -93,6 +121,13 @@ bool range_contains_unaccepted_memory(phys_addr_t start, phys_addr_t end)
+ 	start -= unaccepted->phys_base;
+ 	end -= unaccepted->phys_base;
  
--	if (!IS_ALIGNED(*start, accept_size))
--		return false;
-+	if (!IS_ALIGNED(start, accept_size))
-+		return 0;
- 
- 	if (len < accept_size)
--		return false;
-+		return 0;
- 
- 	/*
- 	 * Pass the page physical address to the TDX module to accept the
-@@ -743,15 +743,14 @@ static bool try_accept_one(phys_addr_t *start, unsigned long len,
- 		page_size = 2;
- 		break;
- 	default:
--		return false;
-+		return 0;
- 	}
- 
--	tdcall_rcx = *start | page_size;
-+	tdcall_rcx = start | page_size;
- 	if (__tdx_module_call(TDX_ACCEPT_PAGE, tdcall_rcx, 0, 0, 0, NULL))
--		return false;
-+		return 0;
- 
--	*start += accept_size;
--	return true;
-+	return accept_size;
- }
- 
- /*
-@@ -788,21 +787,22 @@ static bool tdx_enc_status_changed(unsigned long vaddr, int numpages, bool enc)
- 	 */
- 	while (start < end) {
- 		unsigned long len = end - start;
-+		unsigned long accept_size;
- 
- 		/*
- 		 * Try larger accepts first. It gives chance to VMM to keep
--		 * 1G/2M SEPT entries where possible and speeds up process by
--		 * cutting number of hypercalls (if successful).
-+		 * 1G/2M Secure EPT entries where possible and speeds up
-+		 * process by cutting number of hypercalls (if successful).
- 		 */
- 
--		if (try_accept_one(&start, len, PG_LEVEL_1G))
--			continue;
--
--		if (try_accept_one(&start, len, PG_LEVEL_2M))
--			continue;
--
--		if (!try_accept_one(&start, len, PG_LEVEL_4K))
-+		accept_size = try_accept_one(start, len, PG_LEVEL_1G);
-+		if (!accept_size)
-+			accept_size = try_accept_one(start, len, PG_LEVEL_2M);
-+		if (!accept_size)
-+			accept_size = try_accept_one(start, len, PG_LEVEL_4K);
-+		if (!accept_size)
- 			return false;
-+		start += accept_size;
- 	}
- 
- 	return true;
++	/*
++	 * Also consider the unaccepted state of the *next* page. See fix #1 in
++	 * the comment on load_unaligned_zeropad() in accept_memory().
++	 */
++	if (!(end % unit_size))
++		end += unit_size;
++
+ 	/* Make sure not to overrun the bitmap */
+ 	if (end > unaccepted->size * unit_size * BITS_PER_BYTE)
+ 		end = unaccepted->size * unit_size * BITS_PER_BYTE;
 -- 
 2.39.3
 
