@@ -2,35 +2,35 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CA06EC7EE43
-	for <linux-efi@archiver.kernel.org>; Wed,  7 Jun 2023 07:26:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 09F8DC77B7A
+	for <linux-efi@archiver.kernel.org>; Wed,  7 Jun 2023 07:26:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238911AbjFGH0Y (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 7 Jun 2023 03:26:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53866 "EHLO
+        id S238974AbjFGH0o (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 7 Jun 2023 03:26:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53990 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239160AbjFGHZx (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 7 Jun 2023 03:25:53 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B4B891FED;
-        Wed,  7 Jun 2023 00:24:45 -0700 (PDT)
+        with ESMTP id S238923AbjFGH0H (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 7 Jun 2023 03:26:07 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6C9482712;
+        Wed,  7 Jun 2023 00:25:01 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 2A0ED63542;
-        Wed,  7 Jun 2023 07:24:01 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BE859C433A0;
-        Wed,  7 Jun 2023 07:23:56 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 8FE3A63B5E;
+        Wed,  7 Jun 2023 07:25:00 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2F7C3C433EF;
+        Wed,  7 Jun 2023 07:24:56 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1686122640;
-        bh=0wgPR8cosROASbxhizaWEh3zQ4j+H/DEB9t5hilAPDo=;
+        s=k20201202; t=1686122700;
+        bh=TDhagb7/1BjVNI9fsBOdvguiTH1+pJKnlE7Km5AKGt0=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=pWwvL1E8pkq/VHu7SKqTWzB5IsBgx4UbU58H2oaGOtkSndAPzouOdgkZ46eMTGO8L
-         gekBQ9RF8fjOVy+m7hXAmWVgYCLKNQyFbVaddTwSCU5Iaw78exac+o0Fxrngck8VEc
-         ikpqE/Jx6aG9KdVljqYBO3V6TQm5FPF23NdVe/IpMZup1d7Ce1xg267r9l4UuhH1ve
-         JOk8S+A0T/E87x2VpzCaDSSvkKaJ0UE9KIbtkoN29JU27f2wOxKpkaa+FK/0zdfSwT
-         OFsElmTqK0gQOdinmyHj8imQUwnxS4YL8LGxYnmZX2cbT+5mZFO2boaudaPomPzhfY
-         gaDmlKOTzxHwg==
+        b=lI7VBfh3FTa+/2DGIQjc1gr3ILzC2t6Ms0aGwGTwrUtF4VPlbF1RALiGUY0dH0QRD
+         A3ggROvDAfMP5yaR3Cf5kue7TsSvwVOR//bIpbHe4ZzAPU2gB3rt6RnuFeQAyzA5st
+         O9PN3yhOwKJVjdCNZKObitd6C5vcBlDidZVw4xrll42+QvQHFHsNlANBGeQa4XFLDC
+         GCz95IjoX0p2HVE/XT19Lt3pYrTsAgEbXVg+au5gnMLwe3VM4lPvqgNRRZNoULc20H
+         xeGe82bRE7yfX9H/j9PMHg6L4Xjf06k8iPP1zi7gU7+cD/qn8ILEGjMTYQ8ru27Euv
+         oeQ8cSu29UZOQ==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -51,71 +51,41 @@ Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>,
         Linus Torvalds <torvalds@linux-foundation.org>,
         Joerg Roedel <jroedel@suse.de>
-Subject: [PATCH v5 01/20] x86/efistub: Branch straight to kernel entry point from C code
-Date:   Wed,  7 Jun 2023 09:23:23 +0200
-Message-Id: <20230607072342.4054036-2-ardb@kernel.org>
+Subject: [PATCH v5 15/20] decompress: Use 8 byte alignment
+Date:   Wed,  7 Jun 2023 09:23:37 +0200
+Message-Id: <20230607072342.4054036-16-ardb@kernel.org>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230607072342.4054036-1-ardb@kernel.org>
 References: <20230607072342.4054036-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1927; i=ardb@kernel.org; h=from:subject; bh=0wgPR8cosROASbxhizaWEh3zQ4j+H/DEB9t5hilAPDo=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIaXBILVkwumLTU3H5j/cIH/66+vkV6UeBj/PLN5wZM6TP 89vcTMLdpSyMIhxMMiKKbIIzP77bufpiVK1zrNkYeawMoEMYeDiFICJ3GRi+B+p8rz94KHqOPOD idd2cLMx/C6+sVndsE9l34VujQ92byMZ/inqvZv5UkxSInIp75QN//crGk/65nbjcTpnhXpMZYS cITcA
+X-Developer-Signature: v=1; a=openpgp-sha256; l=737; i=ardb@kernel.org; h=from:subject; bh=TDhagb7/1BjVNI9fsBOdvguiTH1+pJKnlE7Km5AKGt0=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIaXBoNwx+Byz1Ywd4vxs4ZLqct3rK24U3ZBefYk5ou4gx 1T+gDsdpSwMYhwMsmKKLAKz/77beXqiVK3zLFmYOaxMIEMYuDgFYCICJxj+CpbPu3D/CcsitZol Eht9De+3R/xcu7zg3NfQn78EuLIeHWP4p/9kduedmXcF1pc/XPt+lnXrSbsHZ6b/7W+++l7v19z Lp7gA
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Instead of returning to the calling code in assembler that does nothing
-more than perform an indirect call with the boot_params pointer in
-register ESI/RSI, perform the jump directly from the EFI stub C code.
-This will allow the asm entrypoint code to be dropped entirely in
-subsequent patches.
+The ZSTD decompressor requires malloc() allocations to be 8 byte
+aligned, so ensure that this the case.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/firmware/efi/libstub/x86-stub.c | 21 ++++++++++++++++----
- 1 file changed, 17 insertions(+), 4 deletions(-)
+ include/linux/decompress/mm.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index 220be75a5cdc1f4c..d4a730f053bdcbfa 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -803,10 +803,19 @@ static efi_status_t exit_boot(struct boot_params *boot_params, void *handle)
- 	return EFI_SUCCESS;
- }
+diff --git a/include/linux/decompress/mm.h b/include/linux/decompress/mm.h
+index 9192986b1a731323..ac862422df158bef 100644
+--- a/include/linux/decompress/mm.h
++++ b/include/linux/decompress/mm.h
+@@ -48,7 +48,7 @@ MALLOC_VISIBLE void *malloc(int size)
+ 	if (!malloc_ptr)
+ 		malloc_ptr = free_mem_ptr;
  
-+static void __noreturn enter_kernel(unsigned long kernel_addr,
-+				    struct boot_params *boot_params)
-+{
-+	/* enter decompressed kernel with boot_params pointer in RSI/ESI */
-+	asm("jmp *%0"::"r"(kernel_addr), "S"(boot_params));
-+
-+	unreachable();
-+}
-+
- /*
-- * On success, we return the address of startup_32, which has potentially been
-- * relocated by efi_relocate_kernel.
-- * On failure, we exit to the firmware via efi_exit instead of returning.
-+ * On success, this routine will jump to the relocated image directly and never
-+ * return.  On failure, it will exit to the firmware via efi_exit() instead of
-+ * returning.
-  */
- asmlinkage unsigned long efi_main(efi_handle_t handle,
- 				  efi_system_table_t *sys_table_arg,
-@@ -950,7 +959,11 @@ asmlinkage unsigned long efi_main(efi_handle_t handle,
- 		goto fail;
- 	}
+-	malloc_ptr = (malloc_ptr + 3) & ~3;     /* Align */
++	malloc_ptr = (malloc_ptr + 7) & ~7;     /* Align */
  
--	return bzimage_addr;
-+	if (IS_ENABLED(CONFIG_X86_64))
-+		/* add offset of startup_64() */
-+		bzimage_addr += 0x200;
-+
-+	enter_kernel(bzimage_addr, boot_params);
- fail:
- 	efi_err("efi_main() failed!\n");
- 
+ 	p = (void *)malloc_ptr;
+ 	malloc_ptr += size;
 -- 
 2.39.2
 
