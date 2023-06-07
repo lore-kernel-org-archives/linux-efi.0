@@ -2,35 +2,35 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CF8C3C7EE29
-	for <linux-efi@archiver.kernel.org>; Wed,  7 Jun 2023 07:26:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A449CC77B7A
+	for <linux-efi@archiver.kernel.org>; Wed,  7 Jun 2023 07:26:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239054AbjFGH0H (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 7 Jun 2023 03:26:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53966 "EHLO
+        id S235440AbjFGH0P (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 7 Jun 2023 03:26:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53026 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238984AbjFGHZn (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 7 Jun 2023 03:25:43 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BC82119BA;
-        Wed,  7 Jun 2023 00:24:53 -0700 (PDT)
+        with ESMTP id S237868AbjFGHZs (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 7 Jun 2023 03:25:48 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 307D926B8;
+        Wed,  7 Jun 2023 00:24:48 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 1979663B59;
-        Wed,  7 Jun 2023 07:24:52 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AF8E5C4339E;
-        Wed,  7 Jun 2023 07:24:47 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 65A5F61158;
+        Wed,  7 Jun 2023 07:24:05 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 05BD3C433D2;
+        Wed,  7 Jun 2023 07:24:00 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1686122691;
-        bh=VwNUPlSJTEZ1Nu/b8lVG8H0h0GBUJ6Yb+ifMNnx28Zw=;
+        s=k20201202; t=1686122644;
+        bh=CkxTuOnRk4Y7C4ZgcPNao1u1GfsuntANuWAV4i13qLA=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=fKDpVR5jLbnX8a+137NAPmMCbjLYBt9XjKgffVppjqYgpoYfrmjr501HOvXaGFHc1
-         VSqH/bjCdPadhGNU6QKGo/V/89F5bddoNMySymTCEEpQDLdVy+K/5PbwwtaV+7MHON
-         Yiufyx3NcBlj0ku0Ni5OTl5qNUGRiqzq6utRBR++h5QGK/8/h2xgijyoktT6lwLBXl
-         yBRMYYSyEOqX6fq5DsihyrD2gHJ7iCtMQjZv6uwILEzhp0NKXo0h+DDvNnY4qVAMyt
-         1zjJjm/oXBp7kLC/T7pnwF1G0U0ntGNUl3jJP9lcpnzPxrfAGH5MacREs6p2tmq/aW
-         mPk+yb+PBvqJw==
+        b=PMy25v4GG9+Ja9Bb96Nluii5OIwk55WuuQX7qDg7t5jFS0Hx5+OX7Jw4xm+TFgG0/
+         EK5cbd5c5sNCpSKZ8ThwMv9L53yizemFCeFm8x9yLPLeG8b/D8zOMqdLySdclP2Ya4
+         5OERtCbemLyLAy6CxaB608eNBsFazsyIQIz8i3kfeMalc70ufng3srHT/gyvLyNsCV
+         w0FVKboMBo6uWFt/klHQGLGZgrlF7Dw2mmTQeag1uUAhb9Yk1FB5XXD+Weowj7HmhX
+         TrjTY503vQrUytexJAArVadYvR3eZjMeFrrppDqhjoz32ETsi1dH/yzz7sSc+Pd0qc
+         9wd11LoAP8ZFQ==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -51,297 +51,187 @@ Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>,
         Linus Torvalds <torvalds@linux-foundation.org>,
         Joerg Roedel <jroedel@suse.de>
-Subject: [PATCH v5 13/20] x86/efistub: Perform 4/5 level paging switch from the stub
-Date:   Wed,  7 Jun 2023 09:23:35 +0200
-Message-Id: <20230607072342.4054036-14-ardb@kernel.org>
+Subject: [PATCH v5 02/20] x86/efistub: Simplify and clean up handover entry code
+Date:   Wed,  7 Jun 2023 09:23:24 +0200
+Message-Id: <20230607072342.4054036-3-ardb@kernel.org>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230607072342.4054036-1-ardb@kernel.org>
 References: <20230607072342.4054036-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=10131; i=ardb@kernel.org; h=from:subject; bh=VwNUPlSJTEZ1Nu/b8lVG8H0h0GBUJ6Yb+ifMNnx28Zw=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIaXBoOTteaUlqp+vs726cO3IwuMzTxwL2yBypuPzFqmQy 3u/fV+5saOUhUGMg0FWTJFFYPbfdztPT5SqdZ4lCzOHlQlkCAMXpwDcZDNGhil9z75HB2R0iSW0 y+R09/+NljUJign7cVg9yOLSfMO1yxkZtixSeJ/Es3cZh8Om/fn2V9+LTF5fGdY9XfzjlNp+1Y/ L2QA=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=7453; i=ardb@kernel.org; h=from:subject; bh=CkxTuOnRk4Y7C4ZgcPNao1u1GfsuntANuWAV4i13qLA=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIaXBIG1xdWG85es/hlI6M/Z1RGYpx0vedDecdulYdWP4r YN3zr/uKGVhEONgkBVTZBGY/ffdztMTpWqdZ8nCzGFlAhnCwMUpABP5eIqRodP0FQNjOP9v89I0 zdSmhrNcL2/Z7dj8mfcI+88dT+cxnGZk2HlIO35xrvZZq7Wn/+rc6/ql/9B+n7TI0hJ3j9naHp/ reAA=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-In preparation for updating the EFI stub boot flow to avoid the bare
-metal decompressor code altogether, implement the support code for
-switching between 4 and 5 levels of paging before jumping to the kernel
-proper.
+Now that the EFI entry code in assembler is only used by the optional
+and deprecated EFI handover protocol, and given that the EFI stub C code
+no longer returns to it, most of it can simply be dropped.
 
-This reuses the newly refactored trampoline that the bare metal
-decompressor uses, but relies on EFI APIs to allocate 32-bit addressable
-memory and remap it with the appropriate permissions. Given that the
-bare metal decompressor will no longer call into the trampoline if the
-number of paging levels is already set correctly, it is no longer needed
-to remove NX restrictions from the memory range where this trampoline
-may end up.
+While at it, clarify the symbol naming, by merging efi_main() and
+efi_stub_entry(), making the latter the shared entry point for all
+different boot modes that enter via the EFI stub.
 
-Acked-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
+The efi32_stub_entry() and efi64_stub_entry() names are referenced
+explicitly by the tooling that populates the setup header, so these must
+be retained, but can be emitted as aliases of efi_stub_entry() where
+appropriate.
+
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/firmware/efi/libstub/Makefile          |  1 +
- drivers/firmware/efi/libstub/efi-stub-helper.c |  2 +
- drivers/firmware/efi/libstub/efistub.h         |  1 +
- drivers/firmware/efi/libstub/x86-5lvl.c        | 95 ++++++++++++++++++++
- drivers/firmware/efi/libstub/x86-stub.c        | 40 +++------
- drivers/firmware/efi/libstub/x86-stub.h        | 17 ++++
- 6 files changed, 130 insertions(+), 26 deletions(-)
+ Documentation/arch/x86/boot.rst         |  2 +-
+ arch/x86/boot/compressed/efi_mixed.S    | 22 +++++++++++---------
+ arch/x86/boot/compressed/head_32.S      | 11 ----------
+ arch/x86/boot/compressed/head_64.S      | 12 ++---------
+ drivers/firmware/efi/libstub/x86-stub.c | 20 ++++++++++++++----
+ 5 files changed, 31 insertions(+), 36 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index 16d64a34d1e19465..ae8874401a9f1490 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -88,6 +88,7 @@ lib-$(CONFIG_EFI_GENERIC_STUB)	+= efi-stub.o string.o intrinsics.o systable.o \
- lib-$(CONFIG_ARM)		+= arm32-stub.o
- lib-$(CONFIG_ARM64)		+= arm64.o arm64-stub.o smbios.o
- lib-$(CONFIG_X86)		+= x86-stub.o
-+lib-$(CONFIG_X86_64)		+= x86-5lvl.o
- lib-$(CONFIG_RISCV)		+= riscv.o riscv-stub.o
- lib-$(CONFIG_LOONGARCH)		+= loongarch.o loongarch-stub.o
+diff --git a/Documentation/arch/x86/boot.rst b/Documentation/arch/x86/boot.rst
+index 33520ecdb37abfda..cdbca15a4fc23833 100644
+--- a/Documentation/arch/x86/boot.rst
++++ b/Documentation/arch/x86/boot.rst
+@@ -1417,7 +1417,7 @@ execution context provided by the EFI firmware.
  
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index 1e0203d74691ffcc..51779279fbff21b5 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -73,6 +73,8 @@ efi_status_t efi_parse_options(char const *cmdline)
- 			efi_loglevel = CONSOLE_LOGLEVEL_QUIET;
- 		} else if (!strcmp(param, "noinitrd")) {
- 			efi_noinitrd = true;
-+		} else if (IS_ENABLED(CONFIG_X86_64) && !strcmp(param, "no5lvl")) {
-+			efi_no5lvl = true;
- 		} else if (!strcmp(param, "efi") && val) {
- 			efi_nochunk = parse_option_str(val, "nochunk");
- 			efi_novamap |= parse_option_str(val, "novamap");
-diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-index 6aa38a1bf1265d83..06b7abc92ced9e18 100644
---- a/drivers/firmware/efi/libstub/efistub.h
-+++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -33,6 +33,7 @@
- #define EFI_ALLOC_LIMIT		ULONG_MAX
+ The function prototype for the handover entry point looks like this::
+ 
+-    efi_main(void *handle, efi_system_table_t *table, struct boot_params *bp)
++    efi_stub_entry(void *handle, efi_system_table_t *table, struct boot_params *bp)
+ 
+ 'handle' is the EFI image handle passed to the boot loader by the EFI
+ firmware, 'table' is the EFI system table - these are the first two
+diff --git a/arch/x86/boot/compressed/efi_mixed.S b/arch/x86/boot/compressed/efi_mixed.S
+index 4ca70bf93dc0bdcd..dcc562c8f7f35162 100644
+--- a/arch/x86/boot/compressed/efi_mixed.S
++++ b/arch/x86/boot/compressed/efi_mixed.S
+@@ -26,8 +26,8 @@
+  * When booting in 64-bit mode on 32-bit EFI firmware, startup_64_mixed_mode()
+  * is the first thing that runs after switching to long mode. Depending on
+  * whether the EFI handover protocol or the compat entry point was used to
+- * enter the kernel, it will either branch to the 64-bit EFI handover
+- * entrypoint at offset 0x390 in the image, or to the 64-bit EFI PE/COFF
++ * enter the kernel, it will either branch to the common 64-bit EFI stub
++ * entrypoint efi_stub_entry() directly, or via the 64-bit EFI PE/COFF
+  * entrypoint efi_pe_entry(). In the former case, the bootloader must provide a
+  * struct bootparams pointer as the third argument, so the presence of such a
+  * pointer is used to disambiguate.
+@@ -37,21 +37,23 @@
+  *  | efi32_pe_entry   |---->|            |            |       +-----------+--+
+  *  +------------------+     |            |     +------+----------------+  |
+  *                           | startup_32 |---->| startup_64_mixed_mode |  |
+- *  +------------------+     |            |     +------+----------------+  V
+- *  | efi32_stub_entry |---->|            |            |     +------------------+
+- *  +------------------+     +------------+            +---->| efi64_stub_entry |
+- *                                                           +-------------+----+
+- *                           +------------+     +----------+               |
+- *                           | startup_64 |<----| efi_main |<--------------+
+- *                           +------------+     +----------+
++ *  +------------------+     |            |     +------+----------------+  |
++ *  | efi32_stub_entry |---->|            |            |                   |
++ *  +------------------+     +------------+            |                   |
++ *                                                     V                   |
++ *                           +------------+     +----------------+         |
++ *                           | startup_64 |<----| efi_stub_entry |<--------+
++ *                           +------------+     +----------------+
+  */
+ SYM_FUNC_START(startup_64_mixed_mode)
+ 	lea	efi32_boot_args(%rip), %rdx
+ 	mov	0(%rdx), %edi
+ 	mov	4(%rdx), %esi
++#ifdef CONFIG_EFI_HANDOVER_PROTOCOL
+ 	mov	8(%rdx), %edx		// saved bootparams pointer
+ 	test	%edx, %edx
+-	jnz	efi64_stub_entry
++	jnz	efi_stub_entry
++#endif
+ 	/*
+ 	 * efi_pe_entry uses MS calling convention, which requires 32 bytes of
+ 	 * shadow space on the stack even if all arguments are passed in
+diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
+index 987ae727cf9f0d04..8876ffe30e9a4819 100644
+--- a/arch/x86/boot/compressed/head_32.S
++++ b/arch/x86/boot/compressed/head_32.S
+@@ -150,17 +150,6 @@ SYM_FUNC_START(startup_32)
+ 	jmp	*%eax
+ SYM_FUNC_END(startup_32)
+ 
+-#ifdef CONFIG_EFI_STUB
+-SYM_FUNC_START(efi32_stub_entry)
+-	add	$0x4, %esp
+-	movl	8(%esp), %esi	/* save boot_params pointer */
+-	call	efi_main
+-	/* efi_main returns the possibly relocated address of startup_32 */
+-	jmp	*%eax
+-SYM_FUNC_END(efi32_stub_entry)
+-SYM_FUNC_ALIAS(efi_stub_entry, efi32_stub_entry)
+-#endif
+-
+ 	.text
+ SYM_FUNC_START_LOCAL_NOALIGN(.Lrelocated)
+ 
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index 03c4328a88cbd5d0..71c1f40a7ac067b9 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -523,19 +523,11 @@ trampoline_return:
+ 	jmp	*%rax
+ SYM_CODE_END(startup_64)
+ 
+-#ifdef CONFIG_EFI_STUB
+-#ifdef CONFIG_EFI_HANDOVER_PROTOCOL
++#if IS_ENABLED(CONFIG_EFI_MIXED) && IS_ENABLED(CONFIG_EFI_HANDOVER_PROTOCOL)
+ 	.org 0x390
+-#endif
+ SYM_FUNC_START(efi64_stub_entry)
+-	and	$~0xf, %rsp			/* realign the stack */
+-	movq	%rdx, %rbx			/* save boot_params pointer */
+-	call	efi_main
+-	movq	%rbx,%rsi
+-	leaq	rva(startup_64)(%rax), %rax
+-	jmp	*%rax
++	jmp	efi_stub_entry
+ SYM_FUNC_END(efi64_stub_entry)
+-SYM_FUNC_ALIAS(efi_stub_entry, efi64_stub_entry)
  #endif
  
-+extern bool efi_no5lvl;
- extern bool efi_nochunk;
- extern bool efi_nokaslr;
- extern int efi_loglevel;
-diff --git a/drivers/firmware/efi/libstub/x86-5lvl.c b/drivers/firmware/efi/libstub/x86-5lvl.c
-new file mode 100644
-index 0000000000000000..2428578a3ae08be7
---- /dev/null
-+++ b/drivers/firmware/efi/libstub/x86-5lvl.c
-@@ -0,0 +1,95 @@
-+// SPDX-License-Identifier: GPL-2.0-only
-+#include <linux/efi.h>
-+
-+#include <asm/boot.h>
-+#include <asm/desc.h>
-+#include <asm/efi.h>
-+
-+#include "efistub.h"
-+#include "x86-stub.h"
-+
-+bool efi_no5lvl;
-+
-+static void (*la57_toggle)(void *trampoline, bool enable_5lvl);
-+
-+static const struct desc_struct gdt[] = {
-+	[GDT_ENTRY_KERNEL32_CS] = GDT_ENTRY_INIT(0xc09b, 0, 0xfffff),
-+	[GDT_ENTRY_KERNEL_CS]   = GDT_ENTRY_INIT(0xa09b, 0, 0xfffff),
-+};
-+
-+/*
-+ * Enabling (or disabling) 5 level paging is tricky, because it can only be
-+ * done from 32-bit mode with paging disabled. This means not only that the
-+ * code itself must be running from 32-bit addressable physical memory, but
-+ * also that the root page table must be 32-bit addressable, as programming
-+ * a 64-bit value into CR3 when running in 32-bit mode is not supported.
-+ */
-+efi_status_t efi_setup_5level_paging(void)
-+{
-+	u8 tmpl_size = (u8 *)&trampoline_ljmp_imm_offset - (u8 *)&trampoline_32bit_src;
-+	efi_status_t status;
-+	u8 *la57_code;
-+
-+	if (!efi_is_64bit())
-+		return EFI_SUCCESS;
-+
-+	/* check for 5 level paging support */
-+	if (native_cpuid_eax(0) < 7 ||
-+	    !(native_cpuid_ecx(7) & (1 << (X86_FEATURE_LA57 & 31))))
-+		return EFI_SUCCESS;
-+
-+	/* allocate some 32-bit addressable memory for code and a page table */
-+	status = efi_allocate_pages(2 * PAGE_SIZE, (unsigned long *)&la57_code,
-+				    U32_MAX);
-+	if (status != EFI_SUCCESS)
-+		return status;
-+
-+	la57_toggle = memcpy(la57_code, trampoline_32bit_src, tmpl_size);
-+	memset(la57_code + tmpl_size, 0x90, PAGE_SIZE - tmpl_size);
-+
-+	/*
-+	 * To avoid the need to allocate a 32-bit addressable stack, the
-+	 * trampoline uses a LJMP instruction to switch back to long mode.
-+	 * LJMP takes an absolute destination address, which needs to be
-+	 * fixed up at runtime.
-+	 */
-+	*(u32 *)&la57_code[trampoline_ljmp_imm_offset] += (unsigned long)la57_code;
-+
-+	efi_adjust_memory_range_protection((unsigned long)la57_toggle, PAGE_SIZE);
-+
-+	return EFI_SUCCESS;
-+}
-+
-+void efi_5level_switch(void)
-+{
-+	bool want_la57 = IS_ENABLED(CONFIG_X86_5LEVEL) && !efi_no5lvl;
-+	bool have_la57 = native_read_cr4() & X86_CR4_LA57;
-+	bool need_toggle = want_la57 ^ have_la57;
-+	u64 *pgt = (void *)la57_toggle + PAGE_SIZE;
-+	u64 *cr3 = (u64 *)__native_read_cr3();
-+	u64 *new_cr3;
-+
-+	if (!la57_toggle || !need_toggle)
-+		return;
-+
-+	if (!have_la57) {
-+		/*
-+		 * 5 level paging will be enabled, so a root level page needs
-+		 * to be allocated from the 32-bit addressable physical region,
-+		 * with its first entry referring to the existing hierarchy.
-+		 */
-+		new_cr3 = memset(pgt, 0, PAGE_SIZE);
-+		new_cr3[0] = (u64)cr3 | _PAGE_TABLE_NOENC;
-+	} else {
-+		/* take the new root table pointer from the current entry #0 */
-+		new_cr3 = (u64 *)(cr3[0] & PAGE_MASK);
-+
-+		/* copy the new root table if it is not 32-bit addressable */
-+		if ((u64)new_cr3 > U32_MAX)
-+			new_cr3 = memcpy(pgt, new_cr3, PAGE_SIZE);
-+	}
-+
-+	native_load_gdt(&(struct desc_ptr){ sizeof(gdt) - 1, (u64)gdt });
-+
-+	la57_toggle(new_cr3, want_la57);
-+}
+ 	.text
 diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index 517cd68ea86cb7f4..f48a2e795d885af8 100644
+index d4a730f053bdcbfa..4e01278c3f3d55f3 100644
 --- a/drivers/firmware/efi/libstub/x86-stub.c
 +++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -17,6 +17,7 @@
- #include <asm/boot.h>
- 
- #include "efistub.h"
-+#include "x86-stub.h"
- 
- /* Maximum physical address for 64-bit kernel with 4-level paging */
- #define MAXMEM_X86_64_4LEVEL (1ull << 46)
-@@ -223,8 +224,8 @@ static void retrieve_apple_device_properties(struct boot_params *boot_params)
- 	}
- }
- 
--static void
--adjust_memory_range_protection(unsigned long start, unsigned long size)
-+void efi_adjust_memory_range_protection(unsigned long start,
-+					unsigned long size)
+@@ -817,9 +817,9 @@ static void __noreturn enter_kernel(unsigned long kernel_addr,
+  * return.  On failure, it will exit to the firmware via efi_exit() instead of
+  * returning.
+  */
+-asmlinkage unsigned long efi_main(efi_handle_t handle,
+-				  efi_system_table_t *sys_table_arg,
+-				  struct boot_params *boot_params)
++void __noreturn efi_stub_entry(efi_handle_t handle,
++			       efi_system_table_t *sys_table_arg,
++			       struct boot_params *boot_params)
  {
- 	efi_status_t status;
- 	efi_gcd_memory_space_desc_t desc;
-@@ -278,35 +279,14 @@ adjust_memory_range_protection(unsigned long start, unsigned long size)
- 	}
+ 	unsigned long bzimage_addr = (unsigned long)startup_32;
+ 	unsigned long buffer_start, buffer_end;
+@@ -965,7 +965,19 @@ asmlinkage unsigned long efi_main(efi_handle_t handle,
+ 
+ 	enter_kernel(bzimage_addr, boot_params);
+ fail:
+-	efi_err("efi_main() failed!\n");
++	efi_err("efi_stub_entry() failed!\n");
+ 
+ 	efi_exit(handle, status);
  }
- 
--/*
-- * Trampoline takes 2 pages and can be loaded in first megabyte of memory
-- * with its end placed between 128k and 640k where BIOS might start.
-- * (see arch/x86/boot/compressed/pgtable_64.c)
-- *
-- * We cannot find exact trampoline placement since memory map
-- * can be modified by UEFI, and it can alter the computed address.
-- */
--
--#define TRAMPOLINE_PLACEMENT_BASE ((128 - 8)*1024)
--#define TRAMPOLINE_PLACEMENT_SIZE (640*1024 - (128 - 8)*1024)
--
- void startup_32(struct boot_params *boot_params);
- 
- static void
- setup_memory_protection(unsigned long image_base, unsigned long image_size)
- {
--	/*
--	 * Allow execution of possible trampoline used
--	 * for switching between 4- and 5-level page tables
--	 * and relocated kernel image.
--	 */
--
--	adjust_memory_range_protection(TRAMPOLINE_PLACEMENT_BASE,
--				       TRAMPOLINE_PLACEMENT_SIZE);
--
- #ifdef CONFIG_64BIT
- 	if (image_base != (unsigned long)startup_32)
--		adjust_memory_range_protection(image_base, image_size);
-+		efi_adjust_memory_range_protection(image_base, image_size);
- #else
- 	/*
- 	 * Clear protection flags on a whole range of possible
-@@ -316,8 +296,8 @@ setup_memory_protection(unsigned long image_base, unsigned long image_size)
- 	 * need to remove possible protection on relocated image
- 	 * itself disregarding further relocations.
- 	 */
--	adjust_memory_range_protection(LOAD_PHYSICAL_ADDR,
--				       KERNEL_IMAGE_SIZE - LOAD_PHYSICAL_ADDR);
-+	efi_adjust_memory_range_protection(LOAD_PHYSICAL_ADDR,
-+					   KERNEL_IMAGE_SIZE - LOAD_PHYSICAL_ADDR);
- #endif
- }
- 
-@@ -839,6 +819,12 @@ void __noreturn efi_stub_entry(efi_handle_t handle,
- 		efi_dxe_table = NULL;
- 	}
- 
-+	status = efi_setup_5level_paging();
-+	if (status != EFI_SUCCESS) {
-+		efi_err("efi_setup_5level_paging() failed!\n");
-+		goto fail;
-+	}
 +
- 	/*
- 	 * If the kernel isn't already loaded at a suitable address,
- 	 * relocate it.
-@@ -959,6 +945,8 @@ void __noreturn efi_stub_entry(efi_handle_t handle,
- 		goto fail;
- 	}
- 
-+	efi_5level_switch();
++#ifdef CONFIG_EFI_HANDOVER_PROTOCOL
++#ifndef CONFIG_EFI_MIXED
++extern __alias(efi_stub_entry)
++void efi32_stub_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg,
++		      struct boot_params *boot_params);
 +
- 	if (IS_ENABLED(CONFIG_X86_64))
- 		/* add offset of startup_64() */
- 		bzimage_addr += 0x200;
-diff --git a/drivers/firmware/efi/libstub/x86-stub.h b/drivers/firmware/efi/libstub/x86-stub.h
-new file mode 100644
-index 0000000000000000..37c5a36b9d8cf9b2
---- /dev/null
-+++ b/drivers/firmware/efi/libstub/x86-stub.h
-@@ -0,0 +1,17 @@
-+/* SPDX-License-Identifier: GPL-2.0-only */
-+
-+#include <linux/efi.h>
-+
-+extern void trampoline_32bit_src(void *, bool);
-+extern const u16 trampoline_ljmp_imm_offset;
-+
-+void efi_adjust_memory_range_protection(unsigned long start,
-+					unsigned long size);
-+
-+#ifdef CONFIG_X86_64
-+efi_status_t efi_setup_5level_paging(void);
-+void efi_5level_switch(void);
-+#else
-+static inline efi_status_t efi_setup_5level_paging(void) { return EFI_SUCCESS; }
-+static inline void efi_5level_switch(void) {}
++extern __alias(efi_stub_entry)
++void efi64_stub_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg,
++		      struct boot_params *boot_params);
++#endif
 +#endif
 -- 
 2.39.2
