@@ -2,267 +2,150 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EE575C7EE29
-	for <linux-efi@archiver.kernel.org>; Wed,  7 Jun 2023 07:29:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 84BA2C7EE29
+	for <linux-efi@archiver.kernel.org>; Wed,  7 Jun 2023 07:29:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239270AbjFGH26 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 7 Jun 2023 03:28:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53568 "EHLO
+        id S239293AbjFGH3V (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 7 Jun 2023 03:29:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53862 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239273AbjFGH1I (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 7 Jun 2023 03:27:08 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B925D2D79;
-        Wed,  7 Jun 2023 00:25:17 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 86BC6633D6;
-        Wed,  7 Jun 2023 07:25:17 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2BBD6C433D2;
-        Wed,  7 Jun 2023 07:25:13 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1686122717;
-        bh=FifYFQbUgsc3xafluaKb/KA+ANrpnvv0InNGmp59Xxo=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=HLobFQI3nq61lNAKvAy0REEflUflfwMGrkYDtNrNYQR2B3eGyqA9Ieaxh95UNDqpE
-         uFedpF9qe2WaEr+c3U9zmy8N6JI3IkQWa7IjP1xLF+/tZtDK5+isuFGO6FO1+FX6Uo
-         WnxtZybrW6vIFDvmFHY3qH1rlav3huINWl+ndrCQFDJ4amPviqu0OnxIxZFzllilS6
-         9FjDm2R6lK3KpTWumt1jqP98UfNgKsvlzElLn/sOX2kUu7crVJAIS54vrsF2onqa+u
-         DdDFP3+/Fv2JngSKHdNvY24HuW1eoDJ3ptYGOwsAFnrPvGUG5q+2EwoWJiL0cKhWRq
-         y2XZiClpN6wWA==
-From:   Ard Biesheuvel <ardb@kernel.org>
-To:     linux-efi@vger.kernel.org
-Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
-        Evgeniy Baskov <baskov@ispras.ru>,
-        Borislav Petkov <bp@alien8.de>,
-        Andy Lutomirski <luto@kernel.org>,
-        Dave Hansen <dave.hansen@linux.intel.com>,
-        Ingo Molnar <mingo@redhat.com>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Alexey Khoroshilov <khoroshilov@ispras.ru>,
-        Peter Jones <pjones@redhat.com>,
-        Gerd Hoffmann <kraxel@redhat.com>,
-        Dave Young <dyoung@redhat.com>,
-        Mario Limonciello <mario.limonciello@amd.com>,
-        Kees Cook <keescook@chromium.org>,
-        Tom Lendacky <thomas.lendacky@amd.com>,
-        "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>,
-        Linus Torvalds <torvalds@linux-foundation.org>,
-        Joerg Roedel <jroedel@suse.de>
-Subject: [PATCH v5 19/20] x86/efistub: Perform SNP feature test while running in the firmware
-Date:   Wed,  7 Jun 2023 09:23:41 +0200
-Message-Id: <20230607072342.4054036-20-ardb@kernel.org>
-X-Mailer: git-send-email 2.39.2
-In-Reply-To: <20230607072342.4054036-1-ardb@kernel.org>
-References: <20230607072342.4054036-1-ardb@kernel.org>
+        with ESMTP id S238932AbjFGH2V (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 7 Jun 2023 03:28:21 -0400
+Received: from mail-vs1-xe36.google.com (mail-vs1-xe36.google.com [IPv6:2607:f8b0:4864:20::e36])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7EB3730DD
+        for <linux-efi@vger.kernel.org>; Wed,  7 Jun 2023 00:25:31 -0700 (PDT)
+Received: by mail-vs1-xe36.google.com with SMTP id ada2fe7eead31-43b3b30bd55so849546137.3
+        for <linux-efi@vger.kernel.org>; Wed, 07 Jun 2023 00:25:31 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1686122730; x=1688714730;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=ZbZsMTtgivDoJEuH3IaNChHHrvk2Q0PtcwAfQDF1PA8=;
+        b=P+xL9+U37Z+N4Mg9/jK1h93OPPuF7gNd5e682jUXmulyGnYN7E2Lt1E0pV3vImjW6i
+         E+JGjPeeSkHP8lHcNLCr8FpcXhdFn63NHO3RRD9Uw58Rm8TX3nWeC0ypMRI7EQkHmcKg
+         kskP06M+dRD2l41gqVSq+ToUSy/qs/4jcme5Kw6bZbXm4ViBSiUP7+mcI667Q7ddZ3GF
+         h8Www7jgcJBNIIFrnpj8wOAzwHTqfKbAT+KMDzQjHnmfEzFOHVwF/QwwEjPzhHBoskeW
+         sshaKLWse0H+qPYbgIuRvS35+lpdvSzaAvxWmeStc+QJFjSiUQE8AViznEohsbl1zNBc
+         Tlxw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1686122730; x=1688714730;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=ZbZsMTtgivDoJEuH3IaNChHHrvk2Q0PtcwAfQDF1PA8=;
+        b=GPF3umicpD+7g33g/IUZ5corJvYmERawm++4Im+rUgSGT8Li1FhC6t1OuFlhDz0MGn
+         2KTrnuBSwQGIA8JbiP4a5xPJVeCNY1EOck5VpAp/208+/2exHEWqPwYU9QNLBNB9BiZe
+         I5J+Utv9sErNa1sxoeSYjr83ygAS0TiyUh3plG4Lr2AYGr/CkE4mDXOLpibutk1fmEdF
+         iAGQWaL78gXX8MHQHzMiXwUCDhV4v9MxSBQpLcfPNC1vSDFGN2q6I803DgLCov12Ehvb
+         /sCq0U8Xz+hkd3QPloCGtexY7FIkQSKHGCe35DXrOMCNGWrcvedUSPIT93o+W05MI3eT
+         kpqg==
+X-Gm-Message-State: AC+VfDzXj74w75bhyvIiFlzIkKr4dMJT1T/pzupLQqYveIBxAutLuxQD
+        6l6kdpUeW1LM6qo16vLqyv2IiNjcPAtCFmEtiDo0Vg==
+X-Google-Smtp-Source: ACHHUZ7lv+GHV6l5ITHPctjVPOJkZIdheJ4gOyp3YHUlRvjuZo0mxUxrjHyb3hadANufXU4xhlBUxp357jZhrj1AJB0=
+X-Received: by 2002:a67:bd09:0:b0:426:b2d8:17e9 with SMTP id
+ y9-20020a67bd09000000b00426b2d817e9mr634816vsq.20.1686122730438; Wed, 07 Jun
+ 2023 00:25:30 -0700 (PDT)
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=6538; i=ardb@kernel.org; h=from:subject; bh=FifYFQbUgsc3xafluaKb/KA+ANrpnvv0InNGmp59Xxo=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIaXBoOYn5601kzxYG7UMTh7aM2n1ZmUxsVVueuHZ/1Ofc 3Idu5PeUcrCIMbBICumyCIw+++7nacnStU6z5KFmcPKBDKEgYtTACbysYvhD5fxtouPBN57/ps0 c5+VQuzRmWoTthY6+BqVuHzvPbPohBUjw7UXuhZLynKXmhnMkDl9vpg1Woo/f6HW8jLJoP7yAy2 fOAE=
-X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-Content-Transfer-Encoding: 8bit
+References: <20230526010748.1222-1-masahisa.kojima@linaro.org>
+ <20230526010748.1222-4-masahisa.kojima@linaro.org> <0d3e0370-eb76-010f-3d30-9acc9b59645c@siemens.com>
+ <CAFA6WYPnWJNPvhT2JDkO-qXRUaJoxBGZEvSfhxcRynV7=VSdQA@mail.gmail.com>
+ <CAMj1kXFM45PCTU--+CCed6Cq_N5XqDG6tTu6fnQTSCpW2BWA5A@mail.gmail.com>
+ <4ff09002-e871-38b9-43ec-227a64bac731@siemens.com> <CAC_iWjJJ5E9Q1or5yTiDynzv_WAYH-g+N24aRdu9rvcsbWqnrg@mail.gmail.com>
+In-Reply-To: <CAC_iWjJJ5E9Q1or5yTiDynzv_WAYH-g+N24aRdu9rvcsbWqnrg@mail.gmail.com>
+From:   Sumit Garg <sumit.garg@linaro.org>
+Date:   Wed, 7 Jun 2023 12:55:19 +0530
+Message-ID: <CAFA6WYNFYB1LiOFB_iwTsdD5PmnDdSbtDSH2J4FVFPx3uik8rQ@mail.gmail.com>
+Subject: Re: [PATCH v5 3/3] efi: Add tee-based EFI variable driver
+To:     Ilias Apalodimas <ilias.apalodimas@linaro.org>
+Cc:     Jan Kiszka <jan.kiszka@siemens.com>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Masahisa Kojima <masahisa.kojima@linaro.org>,
+        Jens Wiklander <jens.wiklander@linaro.org>,
+        linux-kernel@vger.kernel.org, op-tee@lists.trustedfirmware.org,
+        Johan Hovold <johan+linaro@kernel.org>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        linux-efi@vger.kernel.org,
+        linux-stm32@st-md-mailman.stormreply.com,
+        linux-arm-kernel@lists.infradead.org,
+        "Su, Bao Cheng (RC-CN DF FA R&D)" <baocheng.su@siemens.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Before refactoring the EFI stub boot flow to avoid the legacy bare metal
-decompressor, duplicate the SNP feature check in the EFI stub before
-handing over to the kernel proper.
+Hi Ilias,
 
-The SNP feature check can be performed while running under the EFI boot
-services, which means we can fail gracefully and return an error to the
-bootloader if the loaded kernel does not implement support for all the
-features that the hypervisor enabled.
+On Wed, 7 Jun 2023 at 12:05, Ilias Apalodimas
+<ilias.apalodimas@linaro.org> wrote:
+>
+> Hi Jan,
+>
+> [...]
+>
+> > >>>>
+> > > ...
+> > >>>
+> > >>> I think we have a probe ordering issue with this driver:
+> > >>> efivarfs_fill_super() may be called before the TEE bus was probed, thus
+> > >>> with the default efivar ops still registered. And that means
+> > >>> efivar_supports_writes() will return false, and the fs declares itself
+> > >>> as readonly. I've seen systemd mounting it r/o initialling, and you need
+> > >>> to remount the fs to enable writability.
+> > >>>
+> > >>> Is there anything that could be done to re-order things reliably, probe
+> > >>> the tee bus earlier etc.?
+> > >>
+> > >> This driver has a dependency on user-space daemon: tee-supplicant to
+> > >> be running for RPMB access. So once you start that daemon the
+> > >> corresponding device will be enumerated on the TEE bus and this driver
+> > >> probe will be invoked. So I would suggest you to load this daemon very
+> > >> early in the boot process or better to make it a part of initramfs.
+> > >>
+> > >
+> > > That is not the point, really.
+> > >
+> > > If this dependency exists, the code should be aware of that, and made
+> > > to work correctly in spite of it. Requiring a module to be part of
+> > > initramfs is not a reasonable fix.
+> >
+> > In fact, I've tested a non-modularized build as well, just to exclude
+> > that issue. The daemon dependency is more likely the problem here.
+> >
+> > >
+> > > IIUC, this also means that the efivar ops are updated while there is
+> > > already a client. This seems less than ideal as well
+>
+> As Sumit pointed out, the 'device' won't be available from OP-TEE
+> until the supplicant is up and running and as a result, the module
+> _probe() function won't run.  Unfortunately, this isn't something we
+> can avoid since the supplicant is responsible for the RPMB writes.
+> The only thing I can think of is moving parts of the supplicant to the
+> kernel and wiring up the RPC calls for reading/writing data to the
+> eMMC subsystem.  There was another discussion here [0] requesting the
+> same thing for different reasons. But unless I am missing something
+> this won't solve the problem completely either.  You still have a
+> timing dependency of "when did the RT callbacks change" -- "when was
+> my efivarfs mounted".
 
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
----
- arch/x86/boot/compressed/sev.c          | 71 +++++++++++---------
- arch/x86/include/asm/sev.h              |  4 ++
- drivers/firmware/efi/libstub/x86-stub.c | 17 +++++
- 3 files changed, 62 insertions(+), 30 deletions(-)
+With the RPMB writes wired through the kernel [1], the only dependency
+left is when do you load the tee-stmm-efi driver to have real EFI
+runtime variables support. IMO, tee-stmm-efi driver should be built-in
+to support systems without initramfs. The distro installers may choose
+to bundle it in initramfs. Do you still see a timing dependency with
+this approach?
 
-diff --git a/arch/x86/boot/compressed/sev.c b/arch/x86/boot/compressed/sev.c
-index 09dc8c187b3cc752..9593bc80c9c6b89d 100644
---- a/arch/x86/boot/compressed/sev.c
-+++ b/arch/x86/boot/compressed/sev.c
-@@ -367,6 +367,11 @@ static void enforce_vmpl0(void)
-  */
- #define SNP_FEATURES_PRESENT (0)
- 
-+u64 snp_get_unsupported_features(u64 status)
-+{
-+	return status & SNP_FEATURES_IMPL_REQ & ~SNP_FEATURES_PRESENT;
-+}
-+
- void snp_check_features(void)
- {
- 	u64 unsupported;
-@@ -380,7 +385,7 @@ void snp_check_features(void)
- 	 * EXIT_INFO_2 of the GHCB protocol so that those features can be reported
- 	 * as part of the guest boot failure.
- 	 */
--	unsupported = sev_status & SNP_FEATURES_IMPL_REQ & ~SNP_FEATURES_PRESENT;
-+	unsupported = snp_get_unsupported_features(sev_status);
- 	if (unsupported) {
- 		if (ghcb_version < 2 || (!boot_ghcb && !early_setup_ghcb()))
- 			sev_es_terminate(SEV_TERM_SET_GEN, GHCB_SNP_UNSUPPORTED);
-@@ -390,10 +395,42 @@ void snp_check_features(void)
- 	}
- }
- 
--void sev_enable(struct boot_params *bp)
-+u64 sev_get_status(void)
- {
- 	unsigned int eax, ebx, ecx, edx;
- 	struct msr m;
-+
-+	/* Check for the SME/SEV support leaf */
-+	eax = 0x80000000;
-+	ecx = 0;
-+	native_cpuid(&eax, &ebx, &ecx, &edx);
-+	if (eax < 0x8000001f)
-+		return 0;
-+
-+	/*
-+	 * Check for the SME/SEV feature:
-+	 *   CPUID Fn8000_001F[EAX]
-+	 *   - Bit 0 - Secure Memory Encryption support
-+	 *   - Bit 1 - Secure Encrypted Virtualization support
-+	 *   CPUID Fn8000_001F[EBX]
-+	 *   - Bits 5:0 - Pagetable bit position used to indicate encryption
-+	 */
-+	eax = 0x8000001f;
-+	ecx = 0;
-+	native_cpuid(&eax, &ebx, &ecx, &edx);
-+	/* Check whether SEV is supported */
-+	if (!(eax & BIT(1)))
-+		return 0;
-+
-+	/* Set the SME mask if this is an SEV guest. */
-+	sme_me_mask = BIT_ULL(ebx & 0x3f);
-+
-+	boot_rdmsr(MSR_AMD64_SEV, &m);
-+	return m.q;
-+}
-+
-+void sev_enable(struct boot_params *bp)
-+{
- 	bool snp;
- 
- 	/*
-@@ -410,37 +447,13 @@ void sev_enable(struct boot_params *bp)
- 	 */
- 	snp = snp_init(bp);
- 
--	/* Check for the SME/SEV support leaf */
--	eax = 0x80000000;
--	ecx = 0;
--	native_cpuid(&eax, &ebx, &ecx, &edx);
--	if (eax < 0x8000001f)
--		return;
--
--	/*
--	 * Check for the SME/SEV feature:
--	 *   CPUID Fn8000_001F[EAX]
--	 *   - Bit 0 - Secure Memory Encryption support
--	 *   - Bit 1 - Secure Encrypted Virtualization support
--	 *   CPUID Fn8000_001F[EBX]
--	 *   - Bits 5:0 - Pagetable bit position used to indicate encryption
--	 */
--	eax = 0x8000001f;
--	ecx = 0;
--	native_cpuid(&eax, &ebx, &ecx, &edx);
--	/* Check whether SEV is supported */
--	if (!(eax & BIT(1))) {
-+	sev_status = sev_get_status();
-+	if (!(sev_status & MSR_AMD64_SEV_ENABLED)) {
- 		if (snp)
- 			error("SEV-SNP support indicated by CC blob, but not CPUID.");
- 		return;
- 	}
- 
--	/* Set the SME mask if this is an SEV guest. */
--	boot_rdmsr(MSR_AMD64_SEV, &m);
--	sev_status = m.q;
--	if (!(sev_status & MSR_AMD64_SEV_ENABLED))
--		return;
--
- 	/* Negotiate the GHCB protocol version. */
- 	if (sev_status & MSR_AMD64_SEV_ES_ENABLED) {
- 		if (!sev_es_negotiate_protocol())
-@@ -460,8 +473,6 @@ void sev_enable(struct boot_params *bp)
- 
- 	if (snp && !(sev_status & MSR_AMD64_SEV_SNP_ENABLED))
- 		error("SEV-SNP supported indicated by CC blob, but not SEV status MSR.");
--
--	sme_me_mask = BIT_ULL(ebx & 0x3f);
- }
- 
- /* Search for Confidential Computing blob in the EFI config table. */
-diff --git a/arch/x86/include/asm/sev.h b/arch/x86/include/asm/sev.h
-index 86e1296e87f513b7..081c39b0e8d0d208 100644
---- a/arch/x86/include/asm/sev.h
-+++ b/arch/x86/include/asm/sev.h
-@@ -207,6 +207,8 @@ bool snp_init(struct boot_params *bp);
- void __init __noreturn snp_abort(void);
- int snp_issue_guest_request(u64 exit_code, struct snp_req_data *input, struct snp_guest_request_ioctl *rio);
- void snp_accept_memory(phys_addr_t start, phys_addr_t end);
-+u64 snp_get_unsupported_features(u64 status);
-+u64 sev_get_status(void);
- #else
- static inline void sev_es_ist_enter(struct pt_regs *regs) { }
- static inline void sev_es_ist_exit(void) { }
-@@ -232,6 +234,8 @@ static inline int snp_issue_guest_request(u64 exit_code, struct snp_req_data *in
- }
- 
- static inline void snp_accept_memory(phys_addr_t start, phys_addr_t end) { }
-+static inline u64 snp_get_unsupported_features(u64 status) { return 0; }
-+static inline u64 sev_get_status(void) { return 0; }
- #endif
- 
- #endif
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index abcd5703e9f3f980..1015ef883f5850a4 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -15,6 +15,7 @@
- #include <asm/setup.h>
- #include <asm/desc.h>
- #include <asm/boot.h>
-+#include <asm/sev.h>
- 
- #include "efistub.h"
- #include "x86-stub.h"
-@@ -790,6 +791,19 @@ static efi_status_t exit_boot(struct boot_params *boot_params, void *handle)
- 	return EFI_SUCCESS;
- }
- 
-+static bool have_unsupported_snp_features(void)
-+{
-+	u64 unsupported;
-+
-+	unsupported = snp_get_unsupported_features(sev_get_status());
-+	if (unsupported) {
-+		efi_err("Unsupported SEV-SNP features detected: 0x%llx\n",
-+			unsupported);
-+		return true;
-+	}
-+	return false;
-+}
-+
- static void __noreturn enter_kernel(unsigned long kernel_addr,
- 				    struct boot_params *boot_params)
- {
-@@ -820,6 +834,9 @@ void __noreturn efi_stub_entry(efi_handle_t handle,
- 	if (efi_system_table->hdr.signature != EFI_SYSTEM_TABLE_SIGNATURE)
- 		efi_exit(handle, EFI_INVALID_PARAMETER);
- 
-+	if (have_unsupported_snp_features())
-+		efi_exit(handle, EFI_UNSUPPORTED);
-+
- 	if (IS_ENABLED(CONFIG_EFI_DXE_MEM_ATTRIBUTES)) {
- 		efi_dxe_table = get_efi_config_table(EFI_DXE_SERVICES_TABLE_GUID);
- 		if (efi_dxe_table &&
--- 
-2.39.2
+[1] Of Course here we need the eMMC and TEE/OPTEE drivers to be built-in too.
 
+-Sumit
+
+>
+> Thanks
+> /Ilias
+> >
+> > Jan
+> >
+> > --
+> > Siemens AG, Technology
+> > Competence Center Embedded Linux
+> >
