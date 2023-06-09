@@ -2,35 +2,35 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 50FAFC88C83
-	for <linux-efi@archiver.kernel.org>; Fri,  9 Jun 2023 12:51:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D8DE6C88CBF
+	for <linux-efi@archiver.kernel.org>; Fri,  9 Jun 2023 12:51:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241119AbjFIMvP (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 9 Jun 2023 08:51:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52586 "EHLO
+        id S241019AbjFIMvL (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 9 Jun 2023 08:51:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52414 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240930AbjFIMu4 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 9 Jun 2023 08:50:56 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A41CBDD;
-        Fri,  9 Jun 2023 05:50:55 -0700 (PDT)
+        with ESMTP id S240709AbjFIMuj (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 9 Jun 2023 08:50:39 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0C7D6210A;
+        Fri,  9 Jun 2023 05:50:39 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 3C293657CE;
-        Fri,  9 Jun 2023 12:50:55 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 95034C433D2;
-        Fri,  9 Jun 2023 12:50:51 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 95D58657CE;
+        Fri,  9 Jun 2023 12:50:38 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EFCFFC4339B;
+        Fri,  9 Jun 2023 12:50:34 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1686315054;
-        bh=sciXKJTuFnUY9nWrxAAZ1qAJ1Cp4ErdvEEiDAODqg/U=;
+        s=k20201202; t=1686315038;
+        bh=LSV/nyUG8bcrL2oEySUmyLQ2HTPvjddC7F+/lUs3jEU=;
         h=From:To:Subject:Date:In-Reply-To:References:From;
-        b=upjyEocqQzinZ+OVD6Khhwt5MbyOvuFlp/sJ6q2j6RvVpNlRvipHKI/hIrIMqgYBh
-         l0EIrvQ8CVdV7O7ucm8ag0cZDr4zw8NGa2wTrjrkUxskKo/cb+oqW8dI3ZvsQ++u5z
-         hqGm/E6z5CoM1hJrIgICg4S7HJvHENSxp9LYAfwLva2tkkBqJjgQ+eRfpH7K76TpjX
-         fkancV079fcU3zROG4KRpBxdmlFg8fJdHC+A8HJdEXMylLCuj+qceg9W78aFJ5KfAL
-         wJc5U12Ra6wom5m6Zq4maYyF2JafYOD8LtC23iIBSL+R6yE7LtMCyziYVObahi/C63
-         rjGOk8B2rKEwg==
+        b=bVReiO8hTnvm8VGrn95dIHsOOPSUJZ8yz9Jc2I7oSveR9pcduDeqYC7J3MCwL0mKh
+         c7oGLr72mXGrKJMJlDzJ6kb3ko2jD5qJ5+jn0ss3X2YSDIv4R+YM/0jMeXi1d/kpew
+         Yv2azGxiKqZez+S/oE/51u+VLNyShKTAN+cKhd3GubmVXALno8rS6IrQURqI9eRE4o
+         o4Q0+JftweyHht3vESfSDB584px9d5fIw2xXaTNGxcixgI27n6XryQSISQrxgPM28w
+         wjMLSlExZFxWDbnW1EFP/RVPfJPqw4sNYJnfgyKbEEj7l/qqXv62+yTTX3FDLaifRq
+         OmgBrefuE7OCA==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     Christian Brauner <brauner@kernel.org>,
         Al Viro <viro@zeniv.linux.org.uk>,
@@ -63,9 +63,9 @@ To:     Christian Brauner <brauner@kernel.org>,
         linux-fsdevel@vger.kernel.org, cluster-devel@redhat.com,
         linux-cifs@vger.kernel.org, samba-technical@lists.samba.org,
         apparmor@lists.ubuntu.com, linux-security-module@vger.kernel.org
-Subject: [PATCH 8/9] apparmor: update ctime whenever the mtime changes on an inode
-Date:   Fri,  9 Jun 2023 08:50:22 -0400
-Message-Id: <20230609125023.399942-9-jlayton@kernel.org>
+Subject: [PATCH 3/9] autofs: set ctime as well when mtime changes on a dir
+Date:   Fri,  9 Jun 2023 08:50:17 -0400
+Message-Id: <20230609125023.399942-4-jlayton@kernel.org>
 X-Mailer: git-send-email 2.40.1
 In-Reply-To: <20230609125023.399942-1-jlayton@kernel.org>
 References: <20230609125023.399942-1-jlayton@kernel.org>
@@ -77,50 +77,40 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
- security/apparmor/apparmorfs.c    |  7 +++++--
- security/apparmor/policy_unpack.c | 11 +++++++----
- 2 files changed, 12 insertions(+), 6 deletions(-)
+ fs/autofs/root.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/security/apparmor/apparmorfs.c b/security/apparmor/apparmorfs.c
-index db7a51acf9db..c06053718836 100644
---- a/security/apparmor/apparmorfs.c
-+++ b/security/apparmor/apparmorfs.c
-@@ -1554,8 +1554,11 @@ void __aafs_profile_migrate_dents(struct aa_profile *old,
+diff --git a/fs/autofs/root.c b/fs/autofs/root.c
+index 6baf90b08e0e..93046c9dc461 100644
+--- a/fs/autofs/root.c
++++ b/fs/autofs/root.c
+@@ -600,7 +600,7 @@ static int autofs_dir_symlink(struct mnt_idmap *idmap,
+ 	p_ino = autofs_dentry_ino(dentry->d_parent);
+ 	p_ino->count++;
  
- 	for (i = 0; i < AAFS_PROF_SIZEOF; i++) {
- 		new->dents[i] = old->dents[i];
--		if (new->dents[i])
--			new->dents[i]->d_inode->i_mtime = current_time(new->dents[i]->d_inode);
-+		if (new->dents[i]) {
-+			struct inode *inode = d_inode(new->dents[i]);
-+
-+			inode->i_mtime = inode->i_ctime = current_time(inode);
-+		}
- 		old->dents[i] = NULL;
- 	}
+-	dir->i_mtime = current_time(dir);
++	dir->i_mtime = dir->i_ctime = current_time(dir);
+ 
+ 	return 0;
  }
-diff --git a/security/apparmor/policy_unpack.c b/security/apparmor/policy_unpack.c
-index cf2ceec40b28..48a97c1800b9 100644
---- a/security/apparmor/policy_unpack.c
-+++ b/security/apparmor/policy_unpack.c
-@@ -86,10 +86,13 @@ void __aa_loaddata_update(struct aa_loaddata *data, long revision)
+@@ -633,7 +633,7 @@ static int autofs_dir_unlink(struct inode *dir, struct dentry *dentry)
+ 	d_inode(dentry)->i_size = 0;
+ 	clear_nlink(d_inode(dentry));
  
- 	data->revision = revision;
- 	if ((data->dents[AAFS_LOADDATA_REVISION])) {
--		d_inode(data->dents[AAFS_LOADDATA_DIR])->i_mtime =
--			current_time(d_inode(data->dents[AAFS_LOADDATA_DIR]));
--		d_inode(data->dents[AAFS_LOADDATA_REVISION])->i_mtime =
--			current_time(d_inode(data->dents[AAFS_LOADDATA_REVISION]));
-+		struct inode *inode;
-+
-+		inode = d_inode(data->dents[AAFS_LOADDATA_DIR]);
-+		inode->i_mtime = inode->i_ctime = current_time(inode);
-+
-+		inode = d_inode(data->dents[AAFS_LOADDATA_REVISION]);
-+		inode->i_mtime = inode->i_ctime = current_time(inode);
- 	}
+-	dir->i_mtime = current_time(dir);
++	dir->i_mtime = dir->i_ctime = current_time(dir);
+ 
+ 	spin_lock(&sbi->lookup_lock);
+ 	__autofs_add_expiring(dentry);
+@@ -749,7 +749,7 @@ static int autofs_dir_mkdir(struct mnt_idmap *idmap,
+ 	p_ino = autofs_dentry_ino(dentry->d_parent);
+ 	p_ino->count++;
+ 	inc_nlink(dir);
+-	dir->i_mtime = current_time(dir);
++	dir->i_mtime = dir->i_ctime = current_time(dir);
+ 
+ 	return 0;
  }
- 
 -- 
 2.40.1
 
