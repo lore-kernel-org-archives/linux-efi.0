@@ -2,35 +2,35 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 37293C83003
-	for <linux-efi@archiver.kernel.org>; Fri,  9 Jun 2023 12:51:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3A407C7EE29
+	for <linux-efi@archiver.kernel.org>; Fri,  9 Jun 2023 12:51:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240252AbjFIMui (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 9 Jun 2023 08:50:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52384 "EHLO
+        id S240991AbjFIMvJ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 9 Jun 2023 08:51:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52408 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240758AbjFIMua (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 9 Jun 2023 08:50:30 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1446E272A;
-        Fri,  9 Jun 2023 05:50:29 -0700 (PDT)
+        with ESMTP id S240763AbjFIMug (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 9 Jun 2023 08:50:36 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A9A74210A;
+        Fri,  9 Jun 2023 05:50:35 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id A053B65489;
-        Fri,  9 Jun 2023 12:50:28 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 04CB9C433EF;
-        Fri,  9 Jun 2023 12:50:24 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 4630165489;
+        Fri,  9 Jun 2023 12:50:35 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A1EB0C433A0;
+        Fri,  9 Jun 2023 12:50:31 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1686315028;
-        bh=gIZwlLvY4sTdkvZELuapNhoOFzzZExwAnWiPWsxbXHo=;
-        h=From:To:Subject:Date:From;
-        b=dcwqOrVfEIufAkx9HYctn0bCPuNyn/IoA3qeRLEf0QBZaM2ZxNK4fITHocjWjP+BS
-         ArXA2HvHcNMCbQoCJLgk3YNktWjq5smDP0btfPqHdZkDkaNlMvMKacJZXz5oGbyybS
-         Seh3kB1aYVkF1EaQIzj0KMYE2IM8/UE/RnW4K8gKxJc+5U/2OtM1xACvDi/T8P0Pdc
-         Xkm13/IgUo3Vr5PsmuoEohjK9wBWC2RLrPIKKbIGloomJhioPPXWTe43kEqN5X837K
-         nGxIOrekLqpwpPCILVczWkex/Sm2OoMe1QXBZj99WR32Ho0RhbyqroHBCWw41oCA3r
-         Vj6GOBo2c2fNw==
+        s=k20201202; t=1686315034;
+        bh=yUgO0XnKI1BbTfLGM0bCDn9qpGeiaXMDR0HU5CRWhAE=;
+        h=From:To:Subject:Date:In-Reply-To:References:From;
+        b=OsfdjrHcHty7OLY/KeXT8tTjMzBp/v/UFPT3HeXd2rL2d2bPqHofhYemos4x86pSA
+         erf6NOWo/X2/RzN25PZphi8WmWHmyXXgbPmQhPPz6PDyBGK5QqCcDKetJoaRMcH2r7
+         R8nqpIwb2tKNk3CPbpPCHf04ebtNiB53pwoSaST7t24XwcBcigXvTIDc3/UTvCzF+v
+         sk71YpnyIcuzVMf+Cadazp7/WcrCWdKB8RCwVM8+FWTl7pYxjLOxdEf2MUk0qU9rnu
+         +WfcEM8N4jDGZgE1F53TxLU+5Wo/zZ7eQJT9NlVcnzpRFF+1VxBmnV1S+0Az4/6wQo
+         iEtm52+AU8/TA==
 From:   Jeff Layton <jlayton@kernel.org>
 To:     Christian Brauner <brauner@kernel.org>,
         Al Viro <viro@zeniv.linux.org.uk>,
@@ -63,52 +63,96 @@ To:     Christian Brauner <brauner@kernel.org>,
         linux-fsdevel@vger.kernel.org, cluster-devel@redhat.com,
         linux-cifs@vger.kernel.org, samba-technical@lists.samba.org,
         apparmor@lists.ubuntu.com, linux-security-module@vger.kernel.org
-Subject: [PATCH 0/9] fs: add some missing ctime updates
-Date:   Fri,  9 Jun 2023 08:50:14 -0400
-Message-Id: <20230609125023.399942-1-jlayton@kernel.org>
+Subject: [PATCH 2/9] usb: update the ctime as well when updating mtime after an ioctl
+Date:   Fri,  9 Jun 2023 08:50:16 -0400
+Message-Id: <20230609125023.399942-3-jlayton@kernel.org>
 X-Mailer: git-send-email 2.40.1
+In-Reply-To: <20230609125023.399942-1-jlayton@kernel.org>
+References: <20230609125023.399942-1-jlayton@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-While working on a patch series to change how we handle the ctime, I
-found a number of places that update the mtime without a corresponding
-ctime update. POSIX requires that when the mtime is updated that the
-ctime also be updated.
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
+---
+ drivers/usb/core/devio.c | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
 
-Note that these are largely untested other than for compilation, so
-please review carefully. These are a preliminary set for the upcoming
-rework of how we handle the ctime.
-
-None of these seem to be very crucial, but it would be nice if
-various maintainers could pick these up for v6.5. Please let me know if
-you do.
-
-Jeff Layton (9):
-  ibmvmc: update ctime in conjunction with mtime on write
-  usb: update the ctime as well when updating mtime after an ioctl
-  autofs: set ctime as well when mtime changes on a dir
-  bfs: update ctime in addition to mtime when adding entries
-  efivarfs: update ctime when mtime changes on a write
-  exfat: ensure that ctime is updated whenever the mtime is
-  gfs2: update ctime when quota is updated
-  apparmor: update ctime whenever the mtime changes on an inode
-  cifs: update the ctime on a partial page write
-
- drivers/misc/ibmvmc.c             |  2 +-
- drivers/usb/core/devio.c          | 16 ++++++++--------
- fs/autofs/root.c                  |  6 +++---
- fs/bfs/dir.c                      |  2 +-
- fs/efivarfs/file.c                |  2 +-
- fs/exfat/namei.c                  |  8 ++++----
- fs/gfs2/quota.c                   |  2 +-
- fs/smb/client/file.c              |  2 +-
- security/apparmor/apparmorfs.c    |  7 +++++--
- security/apparmor/policy_unpack.c | 11 +++++++----
- 10 files changed, 32 insertions(+), 26 deletions(-)
-
+diff --git a/drivers/usb/core/devio.c b/drivers/usb/core/devio.c
+index fcf68818e999..1268d313a8df 100644
+--- a/drivers/usb/core/devio.c
++++ b/drivers/usb/core/devio.c
+@@ -2640,21 +2640,21 @@ static long usbdev_do_ioctl(struct file *file, unsigned int cmd,
+ 		snoop(&dev->dev, "%s: CONTROL\n", __func__);
+ 		ret = proc_control(ps, p);
+ 		if (ret >= 0)
+-			inode->i_mtime = current_time(inode);
++			inode->i_mtime = inode->i_ctime = current_time(inode);
+ 		break;
+ 
+ 	case USBDEVFS_BULK:
+ 		snoop(&dev->dev, "%s: BULK\n", __func__);
+ 		ret = proc_bulk(ps, p);
+ 		if (ret >= 0)
+-			inode->i_mtime = current_time(inode);
++			inode->i_mtime = inode->i_ctime = current_time(inode);
+ 		break;
+ 
+ 	case USBDEVFS_RESETEP:
+ 		snoop(&dev->dev, "%s: RESETEP\n", __func__);
+ 		ret = proc_resetep(ps, p);
+ 		if (ret >= 0)
+-			inode->i_mtime = current_time(inode);
++			inode->i_mtime = inode->i_ctime = current_time(inode);
+ 		break;
+ 
+ 	case USBDEVFS_RESET:
+@@ -2666,7 +2666,7 @@ static long usbdev_do_ioctl(struct file *file, unsigned int cmd,
+ 		snoop(&dev->dev, "%s: CLEAR_HALT\n", __func__);
+ 		ret = proc_clearhalt(ps, p);
+ 		if (ret >= 0)
+-			inode->i_mtime = current_time(inode);
++			inode->i_mtime = inode->i_ctime = current_time(inode);
+ 		break;
+ 
+ 	case USBDEVFS_GETDRIVER:
+@@ -2693,7 +2693,7 @@ static long usbdev_do_ioctl(struct file *file, unsigned int cmd,
+ 		snoop(&dev->dev, "%s: SUBMITURB\n", __func__);
+ 		ret = proc_submiturb(ps, p);
+ 		if (ret >= 0)
+-			inode->i_mtime = current_time(inode);
++			inode->i_mtime = inode->i_ctime = current_time(inode);
+ 		break;
+ 
+ #ifdef CONFIG_COMPAT
+@@ -2701,14 +2701,14 @@ static long usbdev_do_ioctl(struct file *file, unsigned int cmd,
+ 		snoop(&dev->dev, "%s: CONTROL32\n", __func__);
+ 		ret = proc_control_compat(ps, p);
+ 		if (ret >= 0)
+-			inode->i_mtime = current_time(inode);
++			inode->i_mtime = inode->i_ctime = current_time(inode);
+ 		break;
+ 
+ 	case USBDEVFS_BULK32:
+ 		snoop(&dev->dev, "%s: BULK32\n", __func__);
+ 		ret = proc_bulk_compat(ps, p);
+ 		if (ret >= 0)
+-			inode->i_mtime = current_time(inode);
++			inode->i_mtime = inode->i_ctime = current_time(inode);
+ 		break;
+ 
+ 	case USBDEVFS_DISCSIGNAL32:
+@@ -2720,7 +2720,7 @@ static long usbdev_do_ioctl(struct file *file, unsigned int cmd,
+ 		snoop(&dev->dev, "%s: SUBMITURB32\n", __func__);
+ 		ret = proc_submiturb_compat(ps, p);
+ 		if (ret >= 0)
+-			inode->i_mtime = current_time(inode);
++			inode->i_mtime = inode->i_ctime = current_time(inode);
+ 		break;
+ 
+ 	case USBDEVFS_IOCTL32:
 -- 
 2.40.1
 
