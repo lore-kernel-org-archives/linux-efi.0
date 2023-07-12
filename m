@@ -2,147 +2,62 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 29BEAEB64DC
-	for <linux-efi@archiver.kernel.org>; Mon, 17 Jul 2023 17:15:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D1150C001DE
+	for <linux-efi@archiver.kernel.org>; Wed, 12 Jul 2023 15:33:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229819AbjGQRPZ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 17 Jul 2023 13:15:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36328 "EHLO
+        id S233543AbjGLPdA (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 12 Jul 2023 11:33:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48898 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229798AbjGQRPZ (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 17 Jul 2023 13:15:25 -0400
-Received: from bedivere.hansenpartnership.com (bedivere.hansenpartnership.com [IPv6:2607:fcd0:100:8a00::2])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0A23D18C;
-        Mon, 17 Jul 2023 10:15:23 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-        d=hansenpartnership.com; s=20151216; t=1689614123;
-        bh=t2CvEbHEtJOfQbnv6B7KOOw/16eZp8A7w4FgNzGKoBs=;
-        h=Message-ID:Subject:From:To:Date:In-Reply-To:References:From;
-        b=Sg0LVlf4wlWK7y06XnkN75VcH9O18A1YWdRSNWvLVkUPeOi7nMr8Lc1v0Fz5za8rO
-         lthLDHyuDGTVb1uS0K4Rba5SURy0V4K0X2hC1BKsm6KcFmIgMFXuFxPMzFupqCoaGv
-         TLhbw/kynnKJ9dAW7GE/Mkh7o8FVIp18R8hD7yBc=
-Received: from localhost (localhost [127.0.0.1])
-        by bedivere.hansenpartnership.com (Postfix) with ESMTP id 5B5D0128171B;
-        Mon, 17 Jul 2023 13:15:23 -0400 (EDT)
-Received: from bedivere.hansenpartnership.com ([127.0.0.1])
- by localhost (bedivere.hansenpartnership.com [127.0.0.1]) (amavis, port 10024)
- with ESMTP id tzxoBTS866Qv; Mon, 17 Jul 2023 13:15:23 -0400 (EDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-        d=hansenpartnership.com; s=20151216; t=1689614123;
-        bh=t2CvEbHEtJOfQbnv6B7KOOw/16eZp8A7w4FgNzGKoBs=;
-        h=Message-ID:Subject:From:To:Date:In-Reply-To:References:From;
-        b=Sg0LVlf4wlWK7y06XnkN75VcH9O18A1YWdRSNWvLVkUPeOi7nMr8Lc1v0Fz5za8rO
-         lthLDHyuDGTVb1uS0K4Rba5SURy0V4K0X2hC1BKsm6KcFmIgMFXuFxPMzFupqCoaGv
-         TLhbw/kynnKJ9dAW7GE/Mkh7o8FVIp18R8hD7yBc=
-Received: from lingrow.int.hansenpartnership.com (unknown [IPv6:2601:5c4:4302:c21::c14])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange ECDHE (prime256v1) server-signature RSA-PSS (2048 bits) server-digest SHA256)
-        (Client did not present a certificate)
-        by bedivere.hansenpartnership.com (Postfix) with ESMTPSA id 70E0B12816B5;
-        Mon, 17 Jul 2023 13:15:21 -0400 (EDT)
-Message-ID: <0aa647f719103e8620d7209cbde40f04a7334749.camel@HansenPartnership.com>
-Subject: Re: [RFC PATCH v2] x86/boot: add .sbat section to the bzImage
-From:   James Bottomley <James.Bottomley@HansenPartnership.com>
-To:     "Daniel P." =?ISO-8859-1?Q?Berrang=E9?= <berrange@redhat.com>
-Cc:     Ard Biesheuvel <ardb@kernel.org>,
-        Emanuele Giuseppe Esposito <eesposit@redhat.com>,
-        x86@kernel.org, Thomas Gleixner <tglx@linutronix.de>,
-        bluca@debian.org, lennart@poettering.net,
-        Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
-        Dave Hansen <dave.hansen@linux.intel.com>,
-        "H. Peter Anvin" <hpa@zytor.com>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Masahiro Yamada <masahiroy@kernel.org>,
-        Alexander Potapenko <glider@google.com>,
-        Nick Desaulniers <ndesaulniers@google.com>,
-        Vitaly Kuznetsov <vkuznets@redhat.com>,
-        linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
-Date:   Mon, 17 Jul 2023 13:15:19 -0400
-In-Reply-To: <ZLVyvAXwtemx1I6p@redhat.com>
-References: <20230711154449.1378385-1-eesposit@redhat.com>
-         <ZK/9MlTh435FP5Ji@gambale.home> <ZLABozIRVGmwuIBf@gambale.home>
-         <ba2354dc63fd741d2d351b18d4312d0771c0935d.camel@HansenPartnership.com>
-         <ZLVyvAXwtemx1I6p@redhat.com>
-Content-Type: text/plain; charset="UTF-8"
-User-Agent: Evolution 3.42.4 
+        with ESMTP id S232884AbjGLPc6 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 12 Jul 2023 11:32:58 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 70720C2;
+        Wed, 12 Jul 2023 08:32:56 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+        Content-Type:In-Reply-To:From:References:To:Subject:MIME-Version:Date:
+        Message-ID:Sender:Reply-To:Cc:Content-ID:Content-Description;
+        bh=689SEK0ciFY8KgDlRHFBreHHAC2z+cvH0wQ011Q2aMI=; b=df/VKiT91ZqRa0x7ofoJaXGlph
+        PM7CRP4KkwoXZKNJlvYdkig+/LLrQ9LVGVf40H6Qaywx20JwTqHlizlUxF15FF/hdi7QMcfJ88rOM
+        Tk9o3z44pMTcermnTCrLWAF39fzqRsD0ms+1lMmZtzToJzTD0SUcPG6eXBFgIigvbDeEBrSIYXiW/
+        GnykGmmqxl8DWPpBQb6tfrtLGgdO7lnddHDuy7SXW0bC9E1PhpCLadB/V3QSWJPX+bNFvOifeRdsy
+        3Vg5gSGOgGr74Cyg+9z9dxsezgnvq5bViTggfgF6K6g7cj7jT1ssxpJXUEt4gBcr4IJbEN74vqTce
+        EZsIkLBg==;
+Received: from [2601:1c2:980:9ec0::2764]
+        by bombadil.infradead.org with esmtpsa (Exim 4.96 #2 (Red Hat Linux))
+        id 1qJboy-000MRl-20;
+        Wed, 12 Jul 2023 15:32:04 +0000
+Message-ID: <03e153ce-328b-f279-2a40-4074bea2bc8f@infradead.org>
+Date:   Wed, 12 Jul 2023 08:31:55 -0700
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.12.0
+Subject: Re: [PATCH 01/79] fs: add ctime accessors infrastructure
+Content-Language: en-US
+To:     Jeff Layton <jlayton@kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        Linux FS-devel Mailing List <linux-fsdevel@vger.kernel.org>,
+        linux-um <linux-um@lists.infradead.org>
+References: <20230621144507.55591-1-jlayton@kernel.org>
+ <20230621144507.55591-2-jlayton@kernel.org>
+From:   Randy Dunlap <rdunlap@infradead.org>
+In-Reply-To: <20230621144507.55591-2-jlayton@kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Mon, 2023-07-17 at 17:56 +0100, Daniel P. Berrangé wrote:
-> On Mon, Jul 17, 2023 at 12:08:26PM -0400, James Bottomley wrote:
-> > On Thu, 2023-07-13 at 15:52 +0200, Ard Biesheuvel wrote:
-> > > (add linux-efi@ cc)
-> > 
-> > Thanks for that, since this is really EFI related rather than x86.
-> 
-> snip
-> 
-> > The problem, as I see it, is if the distros give the kernel an
-> > .sbat section, that means any vanilla kernel that's built by a user
-> > and signed by their key now won't work (even if their key is in
-> > MoK) because it won't have an sbat section ... and the sbat
-> > mechanism is component specific, not key specific, so the signer
-> > has no choice but to adopt it.
-> 
-> AFAICT, that problem only exists for binaries directly invoked
-> from shim. So that would be a problem for the boot loader (grub),
-> or a kernel image being booted directly without a bootloader
-> present.
+Hi Jeff,
 
-Well, currently, yes; that's the in_protocol check in
-shim.c:verify_sbat_section().  However, I was assuming based on this
-thread, that that was being tightened up (either because people are
-moving away from grub or because the shim verifier protocol would
-enforce it) as you imply below.
+On arch/um/, (subarch i386 or x86_64), hostfs build fails with:
 
-> For kernel binaries invoked indirectly by the boot loader, the
-> use of SBAT is currently optional. ie missing SBAT record would
-> be treated as success.
-> 
-> This was a pragmatic way to introduce SBAT support as it only
-> impacted grub at that time.
-> 
-> Once a distro starts adding SBAT to their kenrels too though, we
-> can forsee that they would like to enforce SBAT for the whole
-> boot chain, to prevent rollback to previously signed binaries
-> that lacked SBAT info.
-> 
-> This policy could be enforced per key though. eg require SBAT
-> for anything verified against the vendor key that's compiled into
-> shim, but not require SBAT for binaries verified with the MoK
-> entries.
+../fs/hostfs/hostfs_kern.c:520:36: error: incompatible type for arg
+ument 2 of 'inode_set_ctime_to_ts'
+../include/linux/fs.h:1499:73: note: expected 'struct timespec64' b
+ut argument is of type 'const struct hostfs_timespec *'
 
-That might work, but it's not currently in the shim code base.  It also
-wouldn't work for SUSE I suspect: they actually put all of their distro
-keys into MokList (so the machine owner has to approve any SUSE key
-update), so how can shim tell the difference between my key and their
-key?
 
-> The user specific MoK entries don't have such a compelling use
-> case for SBAT, since if they need to revoke old binaries, the
-> end users always have the easy fallback option of just rotating
-> their signing keys and switching out the enrolled key in MoK.
-> 
-> The choice of whether to mandate SBAT for binaries signed with
-> a MoK entry, could be set by the end user themselves at the time
-> their enroll their signing cert in the MoK DB.
-
-Well, I agree with this, since it was my original point.  However, a
-key observation still seems to be that none of this exception proposal
-is actually coded anywhere, so if shim does tighten up sbat
-verification, everyone currently gets caught by it (and if it doesn't
-then the kernel doesn't need an sbat section).
-
-I really think if this exception proposal is what everyone is planning,
-then you can simply leave the upstream kernel alone, since it won't
-require sbat information unless incorporated into a distro.
-
-So the direction forward seems to be to get this exception proposal
-coded up and agreed and then we can decide based on that whether the
-upstream kernel needs to care.
-
-James
-
+-- 
+~Randy
