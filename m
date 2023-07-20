@@ -2,239 +2,383 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C525EB64DA
-	for <linux-efi@archiver.kernel.org>; Thu, 20 Jul 2023 18:11:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 58BAEC04A94
+	for <linux-efi@archiver.kernel.org>; Thu, 20 Jul 2023 19:09:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230389AbjGTSLP (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 20 Jul 2023 14:11:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52484 "EHLO
+        id S230143AbjGTTJN (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 20 Jul 2023 15:09:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56314 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229563AbjGTSLO (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 20 Jul 2023 14:11:14 -0400
-Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B11CF13E;
-        Thu, 20 Jul 2023 11:11:12 -0700 (PDT)
-Received: from pps.filterd (m0246629.ppops.net [127.0.0.1])
-        by mx0b-00069f02.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 36KFEjUA020459;
-        Thu, 20 Jul 2023 18:10:41 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
- subject : date : message-id : references : in-reply-to : content-type :
- content-id : content-transfer-encoding : mime-version; s=corp-2023-03-30;
- bh=+tzbD7A5cF9FxZxMjj862SqET9q2gu/849Uv0dba8G8=;
- b=U7Loynun24Tt5HgMcreb9yeC16DNfLtMOzND8HHvYuYbOrzCuzax04btMOajvA0tuoZW
- phBwXSYDFCOkdJ+IrSYtyezGmbkvB/rC//fofPfFhx5e0+jVJ9FtQnJGnFUlSdgVYGW5
- X89b0923iwLiv42q9gFKoIcGIz80iAKhPxrlvzKVygQ1m6/8p4SxpbBtv0KuMZoV31z8
- 8UObODAvr0n6SRXoQrNXlAQ833ntK0vfV0niQur31Xl++CR1cm/O/VHv1KsLYCr+GJKQ
- Y8HmVfbZ8h0hmRM2DCzdr7GP3+O8qKSbyWbsFvFhxcp4ZktifV72KRu8nKSg3zhfHtFA DQ== 
-Received: from iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta01.appoci.oracle.com [130.35.100.223])
-        by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3run782cxm-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 20 Jul 2023 18:10:40 +0000
-Received: from pps.filterd (iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
-        by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (8.17.1.19/8.17.1.19) with ESMTP id 36KHMlSj000815;
-        Thu, 20 Jul 2023 18:10:39 GMT
-Received: from nam12-dm6-obe.outbound.protection.outlook.com (mail-dm6nam12lp2176.outbound.protection.outlook.com [104.47.59.176])
-        by iadpaimrmta01.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 3ruhw91nsc-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 20 Jul 2023 18:10:39 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=i06ygyjmUQy3FcKP/ic/IvacbIXwUdEz7eWwSGxplG6GJy8z9PVXWFKOhPZL6Vs3kTQzImkifeLSJOEmaCH7bc6zwAnBhGNAcfp2jz+UyiunQpbBbbV6J1RFKa4b84v9I/vK7c3RVU60rqHj/JdyHy9tLFtwawdzHJIBXOQjlnWid7N7jdHr8vhFz4nXVi6WpME+MDFtybIReCvn4tblDY2H+piqDSoPJFPrwjVcXR0i+HEUAefMrjcKpUbADMMnysOmm5qLfupxGEafDQ+b4erwclTRevhUrfkEHq8w6Wn+SipFcOsdsD/R7mOypGXyARBihGY4TP+Zf9B8mdfeXg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=+tzbD7A5cF9FxZxMjj862SqET9q2gu/849Uv0dba8G8=;
- b=mE51jRa6CamR/DLR/LdmJMSkvr6IugWaSmQaOgW0qLtTahp6kqSwbDWs2lxFgGPkGKQ8WSdxqZIfX/hfUlKrbONasQtiLok9iLrhZmxIyEMBx/+6gegMmqaXKNHg4o5a8FB4fYyAnPsMJHJjImPp6bB5qO2ofVltFCPxVccox0ly+KcFzwK0I7EmaXPyDmZkagY2TynXZnP3ALk0i66ln95UoofVE/dqk3Y8JelElkwocI9lMc/f54m/XAS2IOI1x2ucUfRSxbPY4lJeWBY7OQ48hP3sa1ukmeTar5XfHTu2RcneZI5FM3GnG4gwZefLxv7V054IBvRCYNvkBe3Rhw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=+tzbD7A5cF9FxZxMjj862SqET9q2gu/849Uv0dba8G8=;
- b=o39qRWjWe8iGIVamTeY1dk5bgnX4/pOIViZI7QsEpA9/PRaRR5EJ0xt6ywrnzizwH98GtzTFo9gnxMxk3iEh+5ST/WbvQgFTmHf/2gyLtNW0SvJjt/eitAkPm3mL2BajuWU+lTb21O6k49klVhRB/dwjFAFc8I0jgpXv4ssPkLE=
-Received: from CH2PR10MB4150.namprd10.prod.outlook.com (2603:10b6:610:ac::13)
- by DS0PR10MB7478.namprd10.prod.outlook.com (2603:10b6:8:166::14) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6588.31; Thu, 20 Jul
- 2023 18:10:36 +0000
-Received: from CH2PR10MB4150.namprd10.prod.outlook.com
- ([fe80::9beb:8c8f:3c09:a965]) by CH2PR10MB4150.namprd10.prod.outlook.com
- ([fe80::9beb:8c8f:3c09:a965%5]) with mapi id 15.20.6588.031; Thu, 20 Jul 2023
- 18:10:36 +0000
-From:   Eric Snowberg <eric.snowberg@oracle.com>
-To:     James Bottomley <James.Bottomley@HansenPartnership.com>
-CC:     Ard Biesheuvel <ardb@kernel.org>,
-        =?utf-8?B?RGFuaWVsIFAuIEJlcnJhbmfDqQ==?= <berrange@redhat.com>,
-        Emanuele Giuseppe Esposito <eesposit@redhat.com>,
-        "x86@kernel.org" <x86@kernel.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        "bluca@debian.org" <bluca@debian.org>,
-        "lennart@poettering.net" <lennart@poettering.net>,
-        Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
-        Dave Hansen <dave.hansen@linux.intel.com>,
-        "H. Peter Anvin" <hpa@zytor.com>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Masahiro Yamada <masahiroy@kernel.org>,
-        Alexander Potapenko <glider@google.com>,
-        Nick Desaulniers <ndesaulniers@google.com>,
-        Vitaly Kuznetsov <vkuznets@redhat.com>,
-        open list <linux-kernel@vger.kernel.org>,
-        "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>,
-        "keyrings@vger.kernel.org" <keyrings@vger.kernel.org>,
-        Jarkko Sakkinen <jarkko@kernel.org>
-Subject: Re: [RFC PATCH v2] x86/boot: add .sbat section to the bzImage
-Thread-Topic: [RFC PATCH v2] x86/boot: add .sbat section to the bzImage
-Thread-Index: AQHZtZFPNdQ9vtMEUEOriR3uv4Pj06++JrMAgAANbACAAAVEgIAEruoAgAAF6gCAABGZgA==
-Date:   Thu, 20 Jul 2023 18:10:36 +0000
-Message-ID: <186450BA-9C7F-41C7-9F97-BA1277AEC9FD@oracle.com>
-References: <20230711154449.1378385-1-eesposit@redhat.com>
- <ZK/9MlTh435FP5Ji@gambale.home> <ZLABozIRVGmwuIBf@gambale.home>
- <ba2354dc63fd741d2d351b18d4312d0771c0935d.camel@HansenPartnership.com>
- <ZLVyvAXwtemx1I6p@redhat.com>
- <0aa647f719103e8620d7209cbde40f04a7334749.camel@HansenPartnership.com>
- <FBDC67DD-856F-429B-8E91-B0CA8B0F24B9@oracle.com>
- <d67ac07c71097a4c97c8792c7c1fac9f4d5850dd.camel@HansenPartnership.com>
-In-Reply-To: <d67ac07c71097a4c97c8792c7c1fac9f4d5850dd.camel@HansenPartnership.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-mailer: Apple Mail (2.3696.120.41.1.1)
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: CH2PR10MB4150:EE_|DS0PR10MB7478:EE_
-x-ms-office365-filtering-correlation-id: b3ea46a6-3da0-4bb9-1e2a-08db894c9e3f
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: ReYMaO5usiIz1ST1LLXyUZlJ2KHMCHYO4diWFubYd2lqtgfqiIcB/VanlUs/bQYoLlBWtQnydLqLjIdFo3bF7sZu2d4XvzPzycMWECiiuPG2yIBu9isCKY1xmwGW+uJBD7r78LRsDwf1SZ1wIQb7zmhTssMMRuMZof89ET7PQEjLrhfL39lFsuOK/1VmYwg6fm6AqnTEXrGOyUksQa7dpvL/SI0LdwmLJOxEM4mNuXDhYOZxiqfj5+dFBk/4D12V0HmMQIle/kOc3Yzih8ld7ZoHgTA/1PMcOtgzafpvxZ9futXkctYwy6i5rHmjT/F2SozLxehO99sPfHDdUgNcjGIaqIRnxlr7f5sbq9qGGqlCxA1aMANnpY984k2o3SODbIH1TXmKU7iCdCn0bpw7BItcLD8oplJDDuO3Y9WR9FYdfJ1ECB9A8wb276Jd0x7RQKUR5/r4x8YgbL2XfmyGcLsGHry01b1XpxymH5Db9MpPBpdkgioVNsTdcs/w7gg8yit4Ze5imf3dKtrZcctB4FHaNLg1nxiN+zOIvBYJxWP0JEWLXWIBZ2H4/YHL4HjsQk01iF6G6nsljRclIp1TBQnNPFOC/prVEHy1kiioo4XN8LJxSWi/ELLfewC1ws5JbwLAaium6rvEqH1+RrkoQS1M9xz/yRqA1jnOZJ6R12PD8CPKrfZ6l3lUU1TqAeqe
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CH2PR10MB4150.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230028)(39860400002)(346002)(376002)(366004)(396003)(136003)(451199021)(71200400001)(478600001)(2906002)(122000001)(6512007)(86362001)(83380400001)(26005)(38070700005)(6506007)(2616005)(33656002)(38100700002)(53546011)(5660300002)(7416002)(54906003)(66556008)(44832011)(36756003)(8676002)(6486002)(66476007)(64756008)(76116006)(66446008)(66946007)(6916009)(8936002)(316002)(4326008)(91956017)(41300700001)(186003)(142923001)(45980500001);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?utf-8?B?bFlFREVaTkgvbVZ6Y0VYZUpMOVhPU21LYTd2QzY1TE12UGhpZW9ESjRzWHd6?=
- =?utf-8?B?Rm5WWThLVElPVzcvb0RiL0xkNjlxY3MzUTZiVlFBMC9zdmROQzJvVHRjUVJy?=
- =?utf-8?B?SXB6cERneUJOWjBFdU1CbEplekNWa2ZhejdRQ2t1UTMvT1RLdFJxSkl2QS9P?=
- =?utf-8?B?T01VVFZxVHB2bU5OV09UL2dzRU1pMUkrTDAyQTE5djJVVWJiQ2hGSStBN3VE?=
- =?utf-8?B?OWVNa2pEUXdIMzZqK0FUZVZ5QXRIWWR1MWZyOUR4cG1zVTRxNms0S2FCVW1H?=
- =?utf-8?B?MktXNVJTR3JZejJJdStPWmpHdnN3bEFvVk1YTTJuT3dmTStHSzI1blBXcjJW?=
- =?utf-8?B?UTRzTm9EYzZlS0hwNVVtZEZacnJSbEpldERtM0VyaUd3TlgrT1RrejdNOVVm?=
- =?utf-8?B?TmZ2cVBQL1NqYkM5cmpZdlNlN2pkY255V1VmVWI5ZS8xKzJweHh6bFlRNjBY?=
- =?utf-8?B?TmhpeXM0ZktRc1UxNFhoMzJWUHFlYXlUR2NXdlFMV0UvQ0dmTnRkT2V3QU8z?=
- =?utf-8?B?eWQ5V3VZSWNjb0NGNk9XUFovU1dWak4xMGJmK2RIK2RYT21ObWRuRlMzK2ZI?=
- =?utf-8?B?eU5LaVl3TGNqYzZYSk5HNWZES0NkNHhxTVZLNWtsZVlmZUdkenNMSDkxc1Vo?=
- =?utf-8?B?bGFuV3RUcFFRbTV4UzlxWldiSWkyZ2I3bDB5bVVqY0pDMDM4blVBblNsLzNJ?=
- =?utf-8?B?RzA4bkdQRlNRNVd0K1NoTFAxeFljSjFJWUdlQWlLUGd5TU1PSFQ4Qzk1SXov?=
- =?utf-8?B?V2ZxZDUrYkhScWlBdjZnWXVlQlZOUTdoYVlBNktLTUlucGpNYjcyUGVaczkx?=
- =?utf-8?B?MGJCTTBaOU4zcFR6K3dpQlQrSnJZcENtbjZhL2N0VEtMbmNJSTFuWnRxdmZZ?=
- =?utf-8?B?WFA5aDZDbEJHaThGU0JzTWlPTS81QzV1NDBhc0RjbFp1Z0g3dU5QV0l1bDNo?=
- =?utf-8?B?TmllSVdNQ2FOZnJCd3Q1YkxZNEpLMlBsMjZYNTFKSHZ2a2FLdkhsV0lCNms4?=
- =?utf-8?B?RTNURzUwdk1nTUtMUFlpZE9oNFA5a3hUUFJia1ZLTHBPMmN5UllpK1FkSy9j?=
- =?utf-8?B?VUJ6ZThOOTg2UkF1Yi9nUzZBdmhOR3h0dXpwQVl6a1Q1Zm05Q2poL3FENzVa?=
- =?utf-8?B?ZzRPM0R5cXZ5WCtGY1VYR2doWk12dEpJa3hvdWNONmc4YU9VeTVueTFvVjhw?=
- =?utf-8?B?aUhId2NSMTY3VzV4NnAwWGpsYnRTL1BGY2x6M0szaWtNakVGeGRXUmJuaG5N?=
- =?utf-8?B?ZFVMZEFMS0pmeHJ4aUQ3dnVSNUNvSWI3a0U3ZEp5dTY1M1VyT0IxWnZXUkJl?=
- =?utf-8?B?em5KVmxtWkdTbndVcG05RDhZeEdDMlpyTUJRNUlSU2pybW5TSzNhUERNZHVS?=
- =?utf-8?B?ZUVyZGszaFhmdWQrUU9ESW9nd0gwWDliajRIZ01XZE42Q0lWQ1NIaE5sVWps?=
- =?utf-8?B?UXRKUHQ4S0Z5K2FKd0tiYnJuUVVoR3Y0c0xBTytFbERicXBsQThVZ011U21W?=
- =?utf-8?B?NVlROHlFMTBrcldFNzFGUGh1MXRwMTFYdUlKRDF4dThqdVpOa2NHRzJ6T1dP?=
- =?utf-8?B?L1ZUMHlOMm1MbDluMy8rRERGM3JjNFM5bisyZzZSdkc4UjV2emlIRVhiUFMx?=
- =?utf-8?B?Q3JzSW1OWG13NEJ5SG5QTUNjZFU0YkorcG5EYXMzVEVod0JDNGdlTzdKMDlY?=
- =?utf-8?B?WWVMTG1vZWhMUmNhbXZpdVg5aFpJQVZjWHRaQ2FJSlZHUEttckkzVWg1OE5I?=
- =?utf-8?B?dG15UU1pVkJnZVUzdHh2S3BGcms5VEJvaDZIQmkwOWVsQ2RrNVZ5M1Z6WVBN?=
- =?utf-8?B?L1VWRGxlOFpCV0haQU1kajFGeDlmdjllSGZjekdKSGx6d0x1bVpkVFFLWG40?=
- =?utf-8?B?MlkxN0JFeTZhZHhKVWpZMnZEMFlNSzgvcjZvZHJzenlSQm12Y2ZDZzl2eUxT?=
- =?utf-8?B?QTdBTnZyeXdEcXRmWEh4N0dQZEdHdlBLSnZERXRQTEloQ3pORDc4b3RaQWNK?=
- =?utf-8?B?M0hhWGp6R3JYMWhUczBKVDhIMnFlNS9PN2gvV0lWVEZ4ekJ2eFJ2bTl0U0NY?=
- =?utf-8?B?OHVFbjVtZ21VbzhiV2EwSlhVK2lYdnA0K1kweitPNjU3UU5TNVk3bW1HUWJo?=
- =?utf-8?B?RVZUdG1kSHZzYW1ZVk1Hd0t2cFdQNnk5dFZpWEs3S0l2ZzlEZ1lId0Q5eVNK?=
- =?utf-8?B?emc9PQ==?=
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <A14AE782107D7044B826E2B2DBC78256@namprd10.prod.outlook.com>
-Content-Transfer-Encoding: base64
+        with ESMTP id S230140AbjGTTJM (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 20 Jul 2023 15:09:12 -0400
+X-Greylist: delayed 300 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Thu, 20 Jul 2023 12:09:10 PDT
+Received: from mailout.easymail.ca (mailout.easymail.ca [64.68.200.34])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D3C2810E5;
+        Thu, 20 Jul 2023 12:09:09 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+        by mailout.easymail.ca (Postfix) with ESMTP id C590A620B6;
+        Thu, 20 Jul 2023 18:51:38 +0000 (UTC)
+X-Virus-Scanned: Debian amavisd-new at emo09-pco.easydns.vpn
+Received: from mailout.easymail.ca ([127.0.0.1])
+        by localhost (emo09-pco.easydns.vpn [127.0.0.1]) (amavisd-new, port 10024)
+        with ESMTP id xdAW74Bt-UdA; Thu, 20 Jul 2023 18:51:38 +0000 (UTC)
+Received: from mail.gonehiking.org (unknown [38.15.45.1])
+        by mailout.easymail.ca (Postfix) with ESMTPA id F357A61E5F;
+        Thu, 20 Jul 2023 18:51:37 +0000 (UTC)
+Received: from [192.168.1.4] (internal [192.168.1.4])
+        by mail.gonehiking.org (Postfix) with ESMTP id D5A1F3EED6;
+        Thu, 20 Jul 2023 12:51:35 -0600 (MDT)
+Message-ID: <2517a38e-9a3b-07b1-85ff-270601d52c45@gonehiking.org>
+Date:   Thu, 20 Jul 2023 12:51:35 -0600
 MIME-Version: 1.0
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: =?utf-8?B?UmtWb1Z1VEQwSkZYUFNnanJoWDd1YzdTWndvb3FOVzh0TUR5cEhsVHFqNSs0?=
- =?utf-8?B?NWQ3MGh0U1RBeGwyZUE0dVpUSnYxTDVVN2x4UFNHQkhSMlU4YjhENzc3UUl6?=
- =?utf-8?B?TEJwV29UWXBLMzhNU0M2b2pTbmVHWlN2ZUM2MFVXOGJRNUdkbkxKZkg3MkQv?=
- =?utf-8?B?cG1ReFNIZDhhTjhXN3l6V0RYbngvOW1Palg2NmR0NjlQRVlGQi84WkYxVzFx?=
- =?utf-8?B?R0czWGhJdW9VUEVqTWlDcmZCV3NtVy8zcWtIU2J0SE9yQWIxemV6TFBQbTN1?=
- =?utf-8?B?bFBFeWgvWE0rSXJNRzNBNWhvV2RaY3FiMGpkTjBocndQaDU3SURYWFVGeG9m?=
- =?utf-8?B?Myt6UHpYWUpZV29yVjJZZEJSVVhGbUpKbVoxdzJUZ1dUVkRhYVhXZU5WMXpK?=
- =?utf-8?B?ZEVFNngxRThDVGxwaWI4V09UMG9kNW8vZ2MrZWhFditweGVSU3JUYUEvMTJ0?=
- =?utf-8?B?aWtERGJWMWcrclpwWVI4NGh4UmprWjlWTjZKSGdzOENnRDRYZ3VRdENLdDNv?=
- =?utf-8?B?dmtCY3ZnaUNxbXJRS3Z4cmhwZkVWbUgxSFV0VHB6bDIxWm5YdzFtLzJ1TnVF?=
- =?utf-8?B?eTZ3OWtOclIvUjhjV0JUVVE1Z0tsOEhvQjYyOFVKMGJUa0tBT1FQelNmckx3?=
- =?utf-8?B?MTRVNGwrdmg4cHcrMXhlWDRRQk53dkxFZU9EOXNIdldXdW5TcmdzWGhmMkpP?=
- =?utf-8?B?STdKcWdpb2Vnc1dOY2Nub2tVdWNVbElhVTUyeEc1QzZ4RmtIeWRiWnp2ZTZM?=
- =?utf-8?B?bGl3VW1rYmsyVFpWQXRHQ2lmeWx2R1pzTEQ0TnQrdnY2cFB5dWZKYVNlblJ4?=
- =?utf-8?B?SEVpdzJoTS9KZVNyZVhSbjg1bUNoVW5WL1NpUUozUElpVUl0QWtpUWt4cFIw?=
- =?utf-8?B?cWwvOEVPZlJPVVpGL0NjTURmNXFKUnhwV0RvbmZDUGlBYTNwbXJFNHhGRi9t?=
- =?utf-8?B?SEtJNHRqRy9WTTdhZ0JZZ0paSEx0VFd4S2ppMzVVQ0VhTTU4cEtMbCtsN0Fs?=
- =?utf-8?B?ZFlSc0hlR0lBNk9XblVSOE52eldMQjVBaG1PN3pnV2NSUk14V09PRFArajBy?=
- =?utf-8?B?ZjhPM25hZmplMVEwbEF2Rm90YXdaVDJJMTBUdHgwZFFXRXkrK0lyZWJMa2No?=
- =?utf-8?B?SnFacndNK3BBd3Zybm9OOWwxYzFkOFRESXNMbWxkZGRtWVhCUEQvV2xqL0Js?=
- =?utf-8?B?b1I1SnZDd2dlVWlsaXJpb1Z3UVNhZjJVeGZCVVUzYmNTYWRKK3hrcEI0NEZF?=
- =?utf-8?B?R3ZGaStnMHVid0ZrOVYrRDRiUmptMlZVNWFFeGdvdGZMYThXalNnTXFkU0JN?=
- =?utf-8?B?dUhWM01zU3dKTW5ZVzZ0TnBYako5eHZsWENhQW9Bdk5UWklNYkV5RkdTcEtV?=
- =?utf-8?B?VThvT0dMWElVdWZGWGhqdkQyNE5wZVBMekRLMnlkZ0tGQnFaSE1vNlloc0dt?=
- =?utf-8?B?UytxK3pOb2QrTDkwanRySWphQXBLc3FKWFdSOFNyOHZ6Y3lLUm0vU2xDcmRh?=
- =?utf-8?B?Z0tSKzRTTmZkeFpKR3c2dGFiZTEweXlkZW5mQWJqRXNmTXhwMnI1TmJ3SDQz?=
- =?utf-8?Q?s0+j+FOHsjOZhKtG2WkPU1UxY=3D?=
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: CH2PR10MB4150.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: b3ea46a6-3da0-4bb9-1e2a-08db894c9e3f
-X-MS-Exchange-CrossTenant-originalarrivaltime: 20 Jul 2023 18:10:36.8314
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: D52ZHupuPRPu1FUEsx1elMARH5mWFBcJbxZUEFuSOC49ibrHsqwzw/1QemiKnwG/Tzg4mz1neHcoZgJfhpXwgAn3CC9bovmH/j8AUY316P4=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS0PR10MB7478
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.591,FMLib:17.11.176.26
- definitions=2023-07-20_09,2023-07-20_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 mlxlogscore=636
- suspectscore=0 phishscore=0 bulkscore=0 mlxscore=0 malwarescore=0
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2306200000 definitions=main-2307200152
-X-Proofpoint-GUID: N6o2IqRA4Q6T-0ktVEXj19RhnGG0IwyN
-X-Proofpoint-ORIG-GUID: N6o2IqRA4Q6T-0ktVEXj19RhnGG0IwyN
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.11.0
+Reply-To: khalid@gonehiking.org
+Subject: Re: [PATCH v2 5/9] vgacon: remove screen_info dependency
+Content-Language: en-US
+To:     Arnd Bergmann <arnd@kernel.org>, linux-fbdev@vger.kernel.org,
+        Thomas Zimmermann <tzimmermann@suse.de>,
+        Helge Deller <deller@gmx.de>,
+        Javier Martinez Canillas <javierm@redhat.com>
+Cc:     Arnd Bergmann <arnd@arndb.de>,
+        "David S. Miller" <davem@davemloft.net>,
+        "K. Y. Srinivasan" <kys@microsoft.com>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Borislav Petkov <bp@alien8.de>, Brian Cain <bcain@quicinc.com>,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        Christophe Leroy <christophe.leroy@csgroup.eu>,
+        Daniel Vetter <daniel@ffwll.ch>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        David Airlie <airlied@gmail.com>,
+        Deepak Rawat <drawat.floss@gmail.com>,
+        Dexuan Cui <decui@microsoft.com>,
+        Dinh Nguyen <dinguyen@kernel.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Guo Ren <guoren@kernel.org>,
+        Haiyang Zhang <haiyangz@microsoft.com>,
+        Huacai Chen <chenhuacai@kernel.org>,
+        Ingo Molnar <mingo@redhat.com>,
+        John Paul Adrian Glaubitz <glaubitz@physik.fu-berlin.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Matt Turner <mattst88@gmail.com>,
+        Max Filippov <jcmvbkbc@gmail.com>,
+        Michael Ellerman <mpe@ellerman.id.au>,
+        Nicholas Piggin <npiggin@gmail.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Russell King <linux@armlinux.org.uk>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        WANG Xuerui <kernel@xen0n.name>, Wei Liu <wei.liu@kernel.org>,
+        Will Deacon <will@kernel.org>, x86@kernel.org,
+        linux-alpha@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org,
+        linux-csky@vger.kernel.org, linux-hexagon@vger.kernel.org,
+        linux-ia64@vger.kernel.org, loongarch@lists.linux.dev,
+        linux-mips@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
+        linux-riscv@lists.infradead.org, linux-sh@vger.kernel.org,
+        sparclinux@vger.kernel.org, linux-hyperv@vger.kernel.org,
+        dri-devel@lists.freedesktop.org
+References: <20230719123944.3438363-1-arnd@kernel.org>
+ <20230719123944.3438363-6-arnd@kernel.org>
+From:   Khalid Aziz <khalid@gonehiking.org>
+In-Reply-To: <20230719123944.3438363-6-arnd@kernel.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-DQoNCj4gT24gSnVsIDIwLCAyMDIzLCBhdCAxMTowNyBBTSwgSmFtZXMgQm90dG9tbGV5IDxKYW1l
-cy5Cb3R0b21sZXlASGFuc2VuUGFydG5lcnNoaXAuY29tPiB3cm90ZToNCj4gDQo+IE9uIFRodSwg
-MjAyMy0wNy0yMCBhdCAxNjo0NiArMDAwMCwgRXJpYyBTbm93YmVyZyB3cm90ZToNCj4+IElmIGEg
-ZGlzdHJvIGFkZHMgYSBTQkFUIHNlY3Rpb24gdG8gZWl0aGVyIHRoZWlyIFVLSSwgb3IgaWYga2Vy
-bmVsDQo+PiBTQkFUIGVuZm9yY2VtZW50IGlzIHR1cm5lZCBvbiBmcm9tIEdSVUIyIGJ5IGRlZmF1
-bHQsIHRoZXJlIGlzIG9uZQ0KPj4gcGllY2UgbWlzc2luZyB0aGF0IHdvdWxkIG5lZWQgIHRvIGJl
-IGhhbmRsZWQgYnkgdGhlIG1haW5saW5lIGtlcm5lbA0KPj4gd2hpY2ggaXMgU0JBVCBlbmZvcmNl
-bWVudCBmb3Iga2V4ZWMuIFRoaXMgIHdvdWxkIG1lYW4gdGhlIHJldm9jYXRpb25zDQo+PiBTQkFU
-IHByb3RlY3QgYWdhaW5zdCB3b3VsZCBuZWVkIHRvIGJlIHJlZmVyZW5jZWQgIGJlZm9yZSBkb2lu
-ZyB0aGUNCj4+IHNpZ25hdHVyZSB2YWxpZGF0aW9uIGluIGtleGVjLiBJZiB0aGlzIGlzIG5vdCBh
-ZGRlZCwgYW55IGRpc3RybyB0aGF0IA0KPj4gYWxsb3dzIGtleGVjIHJlYWxseSBkb2VzbuKAmXQg
-aGF2ZSBhIFNCQVQgcHJvdGVjdGVkIGtlcm5lbC4NCj4gDQo+IFVtLCBhY3R1YWxseSwgdGhpcyBp
-cyBhY3R1YWxseSBvbmUgb2YgdGhlIG1pc3VuZGVyc3RhbmRpbmdzIG9mIHRoZQ0KPiB3aG9sZSB0
-aHJlYWQ6IHNiYXQgaXMgYSByZXZvY2F0aW9uIG1lY2hhbmlzbSBmb3IgcHJvdGVjdGluZyBFRkkg
-Ym9vdA0KPiBzZWN1cml0eS4gIEl0J3MgZGVzaWduIGlzIHRvIHByZXZlbnQgbWFsaWNpb3VzIGFj
-dG9ycyBleHBsb2l0aW5nIGJ1Z2d5DQo+IGNvZGUgdG8gZ2V0IGludG8gdGhlIEVGSSBib290IHN5
-c3RlbSBiZWZvcmUgRXhpdEJvb3RTZXJ2aWNlcyBpcyBjYWxsZWQNCj4gYW5kIG5vdGhpbmcgbW9y
-ZS4gIFRoZSBrZXJuZWwncyBpbnRydXNpb24gaW50byBFRkkgYm9vdCBzZWN1cml0eSBpcw0KPiB0
-aW55OiBpdCdzIGJhc2ljYWxseSB0aGUgRUZJIHN0dWIgdXAgdG8gRXhpdEJvb3RTZXJ2aWNlcywg
-c28gZXZlbiBpZg0KPiB0aGUga2VybmVsIHdlcmUgdG8gaGF2ZSBhbiBzYmF0IG51bWJlciBpdCB3
-b3VsZCBvYnZpb3VzbHkgYmUgdW5kZXIgdGhlDQo+IGNvbnRyb2wgb2YgdGhlIG1haW50YWluZXJz
-IG9mIG9ubHkgdGhhdCBjb2RlIChpLmUuIEFyZCkgYW5kIGl0IHdvdWxkDQo+IG9ubHkgcmV2IGlm
-IHdlIGFjdHVhbGx5IGZvdW5kIGEgdXNhYmxlIGV4cGxvaXQgaW4gdGhlIGVmaSBzdHViLg0KPiAN
-Cj4gQXMgZmFyIGFzIGtleGVjIGlzIGNvbmNlcm5lZCwgRXhpdEJvb3RTZXJ2aWNlcyBpcyBsb25n
-IGdvbmUgYW5kIG5vdGhpbmcNCj4gYSBmdXR1cmUga2V4ZWMnZCBrZXJuZWwgY2FuIGRvIGNhbiBh
-bHRlciB0aGF0LCBzbyB0aGVyZSdzIG5vIEVGSQ0KPiBzZWN1cml0eSBiZW5lZml0IHRvIG1ha2lu
-ZyBrZXhlYyBzYmF0IGF3YXJlLCBhbmQgdGh1cyBpdCBzZWVtcyB0aGVyZSdzDQo+IG5vIG5lZWQg
-dG8gZG8gYW55dGhpbmcgYWJvdXQgaXQgZm9yIGtleGVjLiAgTm93IGlmIHdlJ3JlIGludGVyZXN0
-ZWQgaW4NCj4gc2JhdCBhcyBhIG1vcmUgZ2VuZXJhbCByZXZvY2F0aW9uIG1lY2hhbmlzbSwgdGhh
-dCBtaWdodCBjaGFuZ2UsIGJ1dCBJDQo+IHRoaW5rIHNiYXQgaXMgdG9vIHRpZ2h0bHkgZGVzaWdu
-ZWQgZm9yIHRoZSBwcm9ibGVtcyBvZiBFRkkgdmFyaWFibGVzIHRvDQo+IGJlIG1vcmUgZ2VuZXJh
-bGx5IHVzZWZ1bC4NCg0KSWYgdGhlIGxpbmUgb2YgcHJvdGVjdGlvbiBTQkFUIHByb3ZpZGVzIGVu
-ZHMgYXQgRUJTIHRoZW4gSSBhZ3JlZSwga2V4ZWMgDQpzdXBwb3J0IHdvdWxkIG5vdCBiZSBuZWVk
-ZWQuICBXaGlsZSByZWFkaW5nIHRoZSBTQkFUIHNwZWMsIEkgZ290IHRoZSANCmltcHJlc3Npb24g
-dGhlIHJldm9jYXRpb24gbWVjaGFuaXNtIGl0IHByb3ZpZGVzIHdvdWxkIGdvIGJleW9uZCB0aGUg
-DQpFQlMgbGluZS4gIEkgZ3Vlc3MgdGhhdCBuZWVkcyB0byBiZSBjbGFyaWZpZWQuDQoNCg==
+On 7/19/23 6:39 AM, Arnd Bergmann wrote:
+> From: Arnd Bergmann <arnd@arndb.de>
+> 
+> The vga console driver is fairly self-contained, and only used by
+> architectures that explicitly initialize the screen_info settings.
+> 
+> Chance every instance that picks the vga console by setting conswitchp
+> to call a function instead, and pass a reference to the screen_info
+> there.
+> 
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+
+PCDP and ia64 changes look good to me.
+
+Acked-by: Khalid Azzi <khalid@gonehiking.org>
+
+> ---
+>   arch/alpha/kernel/setup.c      |  2 +-
+>   arch/arm/kernel/setup.c        |  2 +-
+>   arch/ia64/kernel/setup.c       |  2 +-
+>   arch/mips/kernel/setup.c       |  2 +-
+>   arch/x86/kernel/setup.c        |  2 +-
+>   drivers/firmware/pcdp.c        |  2 +-
+>   drivers/video/console/vgacon.c | 68 ++++++++++++++++++++--------------
+>   include/linux/console.h        |  7 ++++
+>   8 files changed, 53 insertions(+), 34 deletions(-)
+> 
+> diff --git a/arch/alpha/kernel/setup.c b/arch/alpha/kernel/setup.c
+> index b4d2297765c02..d73b685fe9852 100644
+> --- a/arch/alpha/kernel/setup.c
+> +++ b/arch/alpha/kernel/setup.c
+> @@ -655,7 +655,7 @@ setup_arch(char **cmdline_p)
+>   
+>   #ifdef CONFIG_VT
+>   #if defined(CONFIG_VGA_CONSOLE)
+> -	conswitchp = &vga_con;
+> +	vgacon_register_screen(&screen_info);
+>   #endif
+>   #endif
+>   
+> diff --git a/arch/arm/kernel/setup.c b/arch/arm/kernel/setup.c
+> index 40326a35a179b..5d8a7fb3eba45 100644
+> --- a/arch/arm/kernel/setup.c
+> +++ b/arch/arm/kernel/setup.c
+> @@ -1192,7 +1192,7 @@ void __init setup_arch(char **cmdline_p)
+>   
+>   #ifdef CONFIG_VT
+>   #if defined(CONFIG_VGA_CONSOLE)
+> -	conswitchp = &vga_con;
+> +	vgacon_register_screen(&screen_info);
+>   #endif
+>   #endif
+>   
+> diff --git a/arch/ia64/kernel/setup.c b/arch/ia64/kernel/setup.c
+> index d2c66efdde560..2c9283fcd3759 100644
+> --- a/arch/ia64/kernel/setup.c
+> +++ b/arch/ia64/kernel/setup.c
+> @@ -619,7 +619,7 @@ setup_arch (char **cmdline_p)
+>   		 * memory so we can avoid this problem.
+>   		 */
+>   		if (efi_mem_type(0xA0000) != EFI_CONVENTIONAL_MEMORY)
+> -			conswitchp = &vga_con;
+> +			vgacon_register_screen(&screen_info);
+>   # endif
+>   	}
+>   #endif
+> diff --git a/arch/mips/kernel/setup.c b/arch/mips/kernel/setup.c
+> index 1aba7dc95132c..6c3fae62a9f6b 100644
+> --- a/arch/mips/kernel/setup.c
+> +++ b/arch/mips/kernel/setup.c
+> @@ -794,7 +794,7 @@ void __init setup_arch(char **cmdline_p)
+>   
+>   #if defined(CONFIG_VT)
+>   #if defined(CONFIG_VGA_CONSOLE)
+> -	conswitchp = &vga_con;
+> +	vgacon_register_screen(&screen_info);
+>   #endif
+>   #endif
+>   
+> diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
+> index fd975a4a52006..b1ea77d504615 100644
+> --- a/arch/x86/kernel/setup.c
+> +++ b/arch/x86/kernel/setup.c
+> @@ -1293,7 +1293,7 @@ void __init setup_arch(char **cmdline_p)
+>   #ifdef CONFIG_VT
+>   #if defined(CONFIG_VGA_CONSOLE)
+>   	if (!efi_enabled(EFI_BOOT) || (efi_mem_type(0xa0000) != EFI_CONVENTIONAL_MEMORY))
+> -		conswitchp = &vga_con;
+> +		vgacon_register_screen(&screen_info);
+>   #endif
+>   #endif
+>   	x86_init.oem.banner();
+> diff --git a/drivers/firmware/pcdp.c b/drivers/firmware/pcdp.c
+> index 715a45442d1cf..667a595373b2d 100644
+> --- a/drivers/firmware/pcdp.c
+> +++ b/drivers/firmware/pcdp.c
+> @@ -72,7 +72,7 @@ setup_vga_console(struct pcdp_device *dev)
+>   		return -ENODEV;
+>   	}
+>   
+> -	conswitchp = &vga_con;
+> +	vgacon_register_screen(&screen_info);
+>   	printk(KERN_INFO "PCDP: VGA console\n");
+>   	return 0;
+>   #else
+> diff --git a/drivers/video/console/vgacon.c b/drivers/video/console/vgacon.c
+> index e25ba523892e5..3d7fedf27ffc1 100644
+> --- a/drivers/video/console/vgacon.c
+> +++ b/drivers/video/console/vgacon.c
+> @@ -97,6 +97,8 @@ static int 		vga_video_font_height;
+>   static int 		vga_scan_lines		__read_mostly;
+>   static unsigned int 	vga_rolled_over; /* last vc_origin offset before wrap */
+>   
+> +static struct screen_info *vga_si;
+> +
+>   static bool vga_hardscroll_enabled;
+>   static bool vga_hardscroll_user_enable = true;
+>   
+> @@ -161,8 +163,9 @@ static const char *vgacon_startup(void)
+>   	u16 saved1, saved2;
+>   	volatile u16 *p;
+>   
+> -	if (screen_info.orig_video_isVGA == VIDEO_TYPE_VLFB ||
+> -	    screen_info.orig_video_isVGA == VIDEO_TYPE_EFI) {
+> +	if (!vga_si ||
+> +	    vga_si->orig_video_isVGA == VIDEO_TYPE_VLFB ||
+> +	    vga_si->orig_video_isVGA == VIDEO_TYPE_EFI) {
+>   	      no_vga:
+>   #ifdef CONFIG_DUMMY_CONSOLE
+>   		conswitchp = &dummy_con;
+> @@ -172,29 +175,29 @@ static const char *vgacon_startup(void)
+>   #endif
+>   	}
+>   
+> -	/* boot_params.screen_info reasonably initialized? */
+> -	if ((screen_info.orig_video_lines == 0) ||
+> -	    (screen_info.orig_video_cols  == 0))
+> +	/* vga_si reasonably initialized? */
+> +	if ((vga_si->orig_video_lines == 0) ||
+> +	    (vga_si->orig_video_cols  == 0))
+>   		goto no_vga;
+>   
+>   	/* VGA16 modes are not handled by VGACON */
+> -	if ((screen_info.orig_video_mode == 0x0D) ||	/* 320x200/4 */
+> -	    (screen_info.orig_video_mode == 0x0E) ||	/* 640x200/4 */
+> -	    (screen_info.orig_video_mode == 0x10) ||	/* 640x350/4 */
+> -	    (screen_info.orig_video_mode == 0x12) ||	/* 640x480/4 */
+> -	    (screen_info.orig_video_mode == 0x6A))	/* 800x600/4 (VESA) */
+> +	if ((vga_si->orig_video_mode == 0x0D) ||	/* 320x200/4 */
+> +	    (vga_si->orig_video_mode == 0x0E) ||	/* 640x200/4 */
+> +	    (vga_si->orig_video_mode == 0x10) ||	/* 640x350/4 */
+> +	    (vga_si->orig_video_mode == 0x12) ||	/* 640x480/4 */
+> +	    (vga_si->orig_video_mode == 0x6A))	/* 800x600/4 (VESA) */
+>   		goto no_vga;
+>   
+> -	vga_video_num_lines = screen_info.orig_video_lines;
+> -	vga_video_num_columns = screen_info.orig_video_cols;
+> +	vga_video_num_lines = vga_si->orig_video_lines;
+> +	vga_video_num_columns = vga_si->orig_video_cols;
+>   	vgastate.vgabase = NULL;
+>   
+> -	if (screen_info.orig_video_mode == 7) {
+> +	if (vga_si->orig_video_mode == 7) {
+>   		/* Monochrome display */
+>   		vga_vram_base = 0xb0000;
+>   		vga_video_port_reg = VGA_CRT_IM;
+>   		vga_video_port_val = VGA_CRT_DM;
+> -		if ((screen_info.orig_video_ega_bx & 0xff) != 0x10) {
+> +		if ((vga_si->orig_video_ega_bx & 0xff) != 0x10) {
+>   			static struct resource ega_console_resource =
+>   			    { .name	= "ega",
+>   			      .flags	= IORESOURCE_IO,
+> @@ -231,12 +234,12 @@ static const char *vgacon_startup(void)
+>   		vga_vram_base = 0xb8000;
+>   		vga_video_port_reg = VGA_CRT_IC;
+>   		vga_video_port_val = VGA_CRT_DC;
+> -		if ((screen_info.orig_video_ega_bx & 0xff) != 0x10) {
+> +		if ((vga_si->orig_video_ega_bx & 0xff) != 0x10) {
+>   			int i;
+>   
+>   			vga_vram_size = 0x8000;
+>   
+> -			if (!screen_info.orig_video_isVGA) {
+> +			if (!vga_si->orig_video_isVGA) {
+>   				static struct resource ega_console_resource =
+>   				    { .name	= "ega",
+>   				      .flags	= IORESOURCE_IO,
+> @@ -327,14 +330,14 @@ static const char *vgacon_startup(void)
+>   	    || vga_video_type == VIDEO_TYPE_VGAC
+>   	    || vga_video_type == VIDEO_TYPE_EGAM) {
+>   		vga_hardscroll_enabled = vga_hardscroll_user_enable;
+> -		vga_default_font_height = screen_info.orig_video_points;
+> -		vga_video_font_height = screen_info.orig_video_points;
+> +		vga_default_font_height = vga_si->orig_video_points;
+> +		vga_video_font_height = vga_si->orig_video_points;
+>   		/* This may be suboptimal but is a safe bet - go with it */
+>   		vga_scan_lines =
+>   		    vga_video_font_height * vga_video_num_lines;
+>   	}
+>   
+> -	vgacon_xres = screen_info.orig_video_cols * VGA_FONTWIDTH;
+> +	vgacon_xres = vga_si->orig_video_cols * VGA_FONTWIDTH;
+>   	vgacon_yres = vga_scan_lines;
+>   
+>   	return display_desc;
+> @@ -379,7 +382,7 @@ static void vgacon_init(struct vc_data *c, int init)
+>   	/* Only set the default if the user didn't deliberately override it */
+>   	if (global_cursor_default == -1)
+>   		global_cursor_default =
+> -			!(screen_info.flags & VIDEO_FLAGS_NOCURSOR);
+> +			!(vga_si->flags & VIDEO_FLAGS_NOCURSOR);
+>   }
+>   
+>   static void vgacon_deinit(struct vc_data *c)
+> @@ -607,7 +610,7 @@ static int vgacon_switch(struct vc_data *c)
+>   {
+>   	int x = c->vc_cols * VGA_FONTWIDTH;
+>   	int y = c->vc_rows * c->vc_cell_height;
+> -	int rows = screen_info.orig_video_lines * vga_default_font_height/
+> +	int rows = vga_si->orig_video_lines * vga_default_font_height/
+>   		c->vc_cell_height;
+>   	/*
+>   	 * We need to save screen size here as it's the only way
+> @@ -627,7 +630,7 @@ static int vgacon_switch(struct vc_data *c)
+>   
+>   		if ((vgacon_xres != x || vgacon_yres != y) &&
+>   		    (!(vga_video_num_columns % 2) &&
+> -		     vga_video_num_columns <= screen_info.orig_video_cols &&
+> +		     vga_video_num_columns <= vga_si->orig_video_cols &&
+>   		     vga_video_num_lines <= rows))
+>   			vgacon_doresize(c, c->vc_cols, c->vc_rows);
+>   	}
+> @@ -1074,13 +1077,13 @@ static int vgacon_resize(struct vc_data *c, unsigned int width,
+>   		 * Ho ho!  Someone (svgatextmode, eh?) may have reprogrammed
+>   		 * the video mode!  Set the new defaults then and go away.
+>   		 */
+> -		screen_info.orig_video_cols = width;
+> -		screen_info.orig_video_lines = height;
+> +		vga_si->orig_video_cols = width;
+> +		vga_si->orig_video_lines = height;
+>   		vga_default_font_height = c->vc_cell_height;
+>   		return 0;
+>   	}
+> -	if (width % 2 || width > screen_info.orig_video_cols ||
+> -	    height > (screen_info.orig_video_lines * vga_default_font_height)/
+> +	if (width % 2 || width > vga_si->orig_video_cols ||
+> +	    height > (vga_si->orig_video_lines * vga_default_font_height)/
+>   	    c->vc_cell_height)
+>   		return -EINVAL;
+>   
+> @@ -1110,8 +1113,8 @@ static void vgacon_save_screen(struct vc_data *c)
+>   		 * console initialization routines.
+>   		 */
+>   		vga_bootup_console = 1;
+> -		c->state.x = screen_info.orig_x;
+> -		c->state.y = screen_info.orig_y;
+> +		c->state.x = vga_si->orig_x;
+> +		c->state.y = vga_si->orig_y;
+>   	}
+>   
+>   	/* We can't copy in more than the size of the video buffer,
+> @@ -1204,4 +1207,13 @@ const struct consw vga_con = {
+>   };
+>   EXPORT_SYMBOL(vga_con);
+>   
+> +void vgacon_register_screen(struct screen_info *si)
+> +{
+> +	if (!si || vga_si)
+> +		return;
+> +
+> +	conswitchp = &vga_con;
+> +	vga_si = si;
+> +}
+> +
+>   MODULE_LICENSE("GPL");
+> diff --git a/include/linux/console.h b/include/linux/console.h
+> index d3195664baa5a..5f900210e689e 100644
+> --- a/include/linux/console.h
+> +++ b/include/linux/console.h
+> @@ -101,6 +101,13 @@ extern const struct consw dummy_con;	/* dummy console buffer */
+>   extern const struct consw vga_con;	/* VGA text console */
+>   extern const struct consw newport_con;	/* SGI Newport console  */
+>   
+> +struct screen_info;
+> +#ifdef CONFIG_VGA_CONSOLE
+> +void vgacon_register_screen(struct screen_info *si);
+> +#else
+> +static inline void vgacon_register_screen(struct screen_info *si) { }
+> +#endif
+> +
+>   int con_is_bound(const struct consw *csw);
+>   int do_unregister_con_driver(const struct consw *csw);
+>   int do_take_over_console(const struct consw *sw, int first, int last, int deflt);
+
