@@ -2,36 +2,36 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 234B2C0015E
-	for <linux-efi@archiver.kernel.org>; Fri, 28 Jul 2023 09:13:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 10E03C00528
+	for <linux-efi@archiver.kernel.org>; Fri, 28 Jul 2023 09:13:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235161AbjG1JNb (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 28 Jul 2023 05:13:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34226 "EHLO
+        id S235192AbjG1JNc (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 28 Jul 2023 05:13:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34228 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234637AbjG1JMm (ORCPT
+        with ESMTP id S235349AbjG1JMm (ORCPT
         <rfc822;linux-efi@vger.kernel.org>); Fri, 28 Jul 2023 05:12:42 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2F3EE44BF;
-        Fri, 28 Jul 2023 02:10:48 -0700 (PDT)
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AB60A3A9F;
+        Fri, 28 Jul 2023 02:10:56 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id BD7EE62062;
-        Fri, 28 Jul 2023 09:10:47 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 71CFDC433CB;
-        Fri, 28 Jul 2023 09:10:43 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 292BC62065;
+        Fri, 28 Jul 2023 09:10:56 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CE4D7C433CB;
+        Fri, 28 Jul 2023 09:10:51 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1690535447;
-        bh=hibE7jKtrMux83Pvwk9QstVTuiv7CM3Jzai9eRpuEP8=;
+        s=k20201202; t=1690535455;
+        bh=cnIFjVPlRuij4fslmOFx/et3lCiQLNIXYxYzvqFRV/o=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=qI4tofurHWpj9gd8uKwBmHSebcXG++apCwLKaBZQ13xB/1aew+iMV7SlWluBXpteI
-         1FPHHuIOuhjAK1Npjtu6v8NwEEnc0AH9vueorM+6jy19HKvYfhDwkqep66dS+X03RO
-         SiDb94nW7exxNrhM8gKbzRqSUHKJBwhyjjjybAOaRNWwml8GLMhh8p6o07WKnVzTFJ
-         feWeSysdqrft1KqMrFhX089fM1XaOZdyPBMcrBppZEKHo/c5xtqZ5QkW82Lkh1SPK/
-         u4nC1WYY0jYqxgxI31VufQs74QFNaBhXKpXnby8JZ4ATU451Th4ZjE4TPAmX9qGwgs
-         FW0P+o06KDofg==
+        b=NmWI9oIl2fQVGb+U5t+NW5jpiJ5DOuC+pIcrCgc50GOPoau92ZulpPKdo58Cz/MgC
+         J6x77G2hDLaEkKh66x/DjEs/UTMb8HH32I0I+pKjW9Sz0ZO4eK5XZ++zSAsPSp1ke6
+         AxqyN/XliTjZ6oCfQzoR3XisdC5cIdEai2hR7tiTcoT7+WAciCXVblh70gn9qGJGw3
+         guL823nc4GDMH3dbrAsB+r5AblCqoLmKXIHsoC3M43u+saU7DJ78PgPxnUofuPzGzR
+         XQ5nLmbBfFRkZKB7b9FCgjsqtgqRXFo9+GbgJkkG05ZkqA/AvQC5/mcUvXXVJf8lth
+         SSwrqiUUkMp4Q==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -52,96 +52,79 @@ Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>,
         Linus Torvalds <torvalds@linux-foundation.org>,
         Joerg Roedel <jroedel@suse.de>
-Subject: [PATCH v7 01/22] x86/decompressor: Don't rely on upper 32 bits of GPRs being preserved
-Date:   Fri, 28 Jul 2023 11:08:55 +0200
-Message-Id: <20230728090916.1538550-2-ardb@kernel.org>
+Subject: [PATCH v7 03/22] x86/efistub: Branch straight to kernel entry point from C code
+Date:   Fri, 28 Jul 2023 11:08:57 +0200
+Message-Id: <20230728090916.1538550-4-ardb@kernel.org>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230728090916.1538550-1-ardb@kernel.org>
 References: <20230728090916.1538550-1-ardb@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2755; i=ardb@kernel.org; h=from:subject; bh=hibE7jKtrMux83Pvwk9QstVTuiv7CM3Jzai9eRpuEP8=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeVw6yKWquMJUu4nXVxDzcuZrs58vFdA8P0dxq5LbMasj V/+rmTpKGVhEONgkBVTZBGY/ffdztMTpWqdZ8nCzGFlAhnCwMUpABORSmZkOCt+59vVK08b99ke 25BSHxxf4rHpX3fnjwUB/0/N7DR1O8jI0PKo8t//d/F32rg2KJ9Lb9CUuN8+R5ZrTSy/k5W32sG NnAA=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2316; i=ardb@kernel.org; h=from:subject; bh=cnIFjVPlRuij4fslmOFx/et3lCiQLNIXYxYzvqFRV/o=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeVw6xIzkcU6N3d885t/yXpv6mHmaUYrs3U5Pxr/2idrb +vJF8DVUcrCIMbBICumyCIw+++7nacnStU6z5KFmcPKBDKEgYtTACZS+YiRYVoxv4LxGf65tXzL He6kZNT8llwT/0eStUaKp0UzVq85ieGfzu48o0/6j+Q1/9gbPvzC7T/Hu5d36X3e+zNiZS7zrWf mBwA=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The 4-to-5 level mode switch trampoline disables long mode and paging in
-order to be able to flick the LA57 bit. According to section 3.4.1.1 of
-the x86 architecture manual [0], we should not rely on 64-bit GPRs
-retaining the upper 32 bits of their contents across such a mode switch.
+Instead of returning to the calling code in assembler that does nothing
+more than perform an indirect call with the boot_params pointer in
+register ESI/RSI, perform the jump directly from the EFI stub C code.
+This will allow the asm entrypoint code to be dropped entirely in
+subsequent patches.
 
-Given that RBP, RBX and RSI are live at this point, let's preserve them
-on the stack, along with the return address that might be above 4G as
-well.
-
-[0] Intel® 64 and IA-32 Architectures Software Developer’s Manual, Volume 1: Basic Architecture
-
-  "Because the upper 32 bits of 64-bit general-purpose registers are
-   undefined in 32-bit modes, the upper 32 bits of any general-purpose
-   register are not preserved when switching from 64-bit mode to a 32-bit
-   mode (to protected mode or compatibility mode). Software must not
-   depend on these bits to maintain a value after a 64-bit to 32-bit
-   mode switch."
-
-Fixes: 194a9749c73d650c ("x86/boot/compressed/64: Handle 5-level paging boot if kernel is above 4G")
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/boot/compressed/head_64.S | 23 +++++++++++++++-----
- 1 file changed, 17 insertions(+), 6 deletions(-)
+ drivers/firmware/efi/libstub/x86-stub.c | 22 +++++++++++++++-----
+ 1 file changed, 17 insertions(+), 5 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
-index 03c4328a88cbd5d0..f7c11a0018477de8 100644
---- a/arch/x86/boot/compressed/head_64.S
-+++ b/arch/x86/boot/compressed/head_64.S
-@@ -459,11 +459,22 @@ SYM_CODE_START(startup_64)
- 	/* Save the trampoline address in RCX */
- 	movq	%rax, %rcx
+diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
+index 220be75a5cdc1f4c..09c4210e4ef33864 100644
+--- a/drivers/firmware/efi/libstub/x86-stub.c
++++ b/drivers/firmware/efi/libstub/x86-stub.c
+@@ -290,7 +290,7 @@ adjust_memory_range_protection(unsigned long start, unsigned long size)
+ #define TRAMPOLINE_PLACEMENT_BASE ((128 - 8)*1024)
+ #define TRAMPOLINE_PLACEMENT_SIZE (640*1024 - (128 - 8)*1024)
  
-+	/* Set up 32-bit addressable stack */
-+	leaq	TRAMPOLINE_32BIT_STACK_END(%rcx), %rsp
+-void startup_32(struct boot_params *boot_params);
++extern const char startup_32[], startup_64[];
+ 
+ static void
+ setup_memory_protection(unsigned long image_base, unsigned long image_size)
+@@ -803,10 +803,19 @@ static efi_status_t exit_boot(struct boot_params *boot_params, void *handle)
+ 	return EFI_SUCCESS;
+ }
+ 
++static void __noreturn enter_kernel(unsigned long kernel_addr,
++				    struct boot_params *boot_params)
++{
++	/* enter decompressed kernel with boot_params pointer in RSI/ESI */
++	asm("jmp *%0"::"r"(kernel_addr), "S"(boot_params));
 +
- 	/*
--	 * Load the address of trampoline_return() into RDI.
--	 * It will be used by the trampoline to return to the main code.
-+	 * Load the address of trampoline_return() into RDI and push it onto
-+	 * the stack so it will survive 32-bit truncation due to the 32-bit
-+	 * protected mode switch. It will be used by the trampoline to return
-+	 * to the main code.
- 	 */
- 	leaq	trampoline_return(%rip), %rdi
-+	pushq	%rdi
++	unreachable();
++}
 +
-+	/* Preserve other live 64-bit registers */
-+	pushq	%rbp
-+	pushq	%rbx
-+	pushq	%rsi
+ /*
+- * On success, we return the address of startup_32, which has potentially been
+- * relocated by efi_relocate_kernel.
+- * On failure, we exit to the firmware via efi_exit instead of returning.
++ * On success, this routine will jump to the relocated image directly and never
++ * return.  On failure, it will exit to the firmware via efi_exit() instead of
++ * returning.
+  */
+ asmlinkage unsigned long efi_main(efi_handle_t handle,
+ 				  efi_system_table_t *sys_table_arg,
+@@ -950,7 +959,10 @@ asmlinkage unsigned long efi_main(efi_handle_t handle,
+ 		goto fail;
+ 	}
  
- 	/* Switch to compatibility mode (CS.L = 0 CS.D = 1) via far return */
- 	pushq	$__KERNEL32_CS
-@@ -592,9 +603,6 @@ SYM_CODE_START(trampoline_32bit_src)
- 	movl	%eax, %ds
- 	movl	%eax, %ss
+-	return bzimage_addr;
++	if (IS_ENABLED(CONFIG_X86_64))
++		bzimage_addr += startup_64 - startup_32;
++
++	enter_kernel(bzimage_addr, boot_params);
+ fail:
+ 	efi_err("efi_main() failed!\n");
  
--	/* Set up new stack */
--	leal	TRAMPOLINE_32BIT_STACK_END(%ecx), %esp
--
- 	/* Disable paging */
- 	movl	%cr0, %eax
- 	btrl	$X86_CR0_PG_BIT, %eax
-@@ -671,7 +679,10 @@ SYM_CODE_END(trampoline_32bit_src)
- 	.code64
- SYM_FUNC_START_LOCAL_NOALIGN(.Lpaging_enabled)
- 	/* Return from the trampoline */
--	jmp	*%rdi
-+	popq	%rsi
-+	popq	%rbx
-+	popq	%rbp
-+	retq
- SYM_FUNC_END(.Lpaging_enabled)
- 
- 	/*
 -- 
 2.39.2
 
