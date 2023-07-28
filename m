@@ -2,36 +2,36 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 11944C04FDF
-	for <linux-efi@archiver.kernel.org>; Fri, 28 Jul 2023 09:13:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D361AC0015E
+	for <linux-efi@archiver.kernel.org>; Fri, 28 Jul 2023 09:13:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234534AbjG1JN0 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 28 Jul 2023 05:13:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34004 "EHLO
+        id S234398AbjG1JNZ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 28 Jul 2023 05:13:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33430 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234044AbjG1JMm (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 28 Jul 2023 05:12:42 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 618FB3AA9;
-        Fri, 28 Jul 2023 02:10:52 -0700 (PDT)
+        with ESMTP id S234922AbjG1JMo (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 28 Jul 2023 05:12:44 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 917B33AB1;
+        Fri, 28 Jul 2023 02:11:17 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id F142F62065;
-        Fri, 28 Jul 2023 09:10:51 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9F004C433CA;
-        Fri, 28 Jul 2023 09:10:47 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 2552462086;
+        Fri, 28 Jul 2023 09:11:17 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C4D61C433CA;
+        Fri, 28 Jul 2023 09:11:12 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1690535451;
-        bh=GiCy7yIiezNP9O3s2voCLFojzJjs56vFwR7z8S7pXpQ=;
+        s=k20201202; t=1690535476;
+        bh=xM6E+o+gqTcjujhtlo5FJ3wiOXU3YYAUj9BM3Rb4ExY=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=ejm2ZqqV2sV+JVX0EmkKX6NmyvVhfNnNfjDfMG8QzrqsepyoZFerNUozj0v4F8sUs
-         keBHZBco8bL+Tt/kFAEpUYYXvHDF9rJocmkFqQYa7vsfAWeNpN/UBu8o2o+KwVywME
-         gr2aw+KeHlFD9k+JQb36WFR03e46s6eCbUEKteI9KV4GiKS/BTafVoVJLZzcWRoUsW
-         unj5cVKwKck6RDFIdUmhiIEzbH79TSMIivnUCMSV46mF7470IGned26agJ7LSLGN20
-         edGEic9x/JmLDkQ2xzJDwMLD9ylX2WSLbQKQGfjB1XsltBR8UkWYpbeGN3iaZiB9fi
-         N+i/hToNeWPEQ==
+        b=quYWRlcA0de48wcuyoVCBeZSbCV0nbkgmP7mHqKOTNA34UVeqBg8dRYNT5WLSL64A
+         PD2J4HbkSyMTSQgXkCmhLwgLdcWcoPCMMz5BN3eCkXkbL+3pSjtNIrubNA6bNGsSVb
+         UBFrzKKtkZx6gEihLXXR+M0Fs17R7yEhH21P895framYxBzvJkuhFOsHDtu3mbd0YX
+         KbpYlq0YFg1L0AMzPF2ac+COilAgTifv1uKz237RPtxAVxR9Vtgzo148it69XUp7oY
+         PXF6zsYDLrJ2WvA9MBOHSsbPi0tMg8kDY0uVfvL3UBvALv3sXcyKi33QGzfRA9jg8Y
+         VPdOd1ONtYrUQ==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -52,126 +52,165 @@ Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>,
         Linus Torvalds <torvalds@linux-foundation.org>,
         Joerg Roedel <jroedel@suse.de>
-Subject: [PATCH v7 02/22] x86/head_64: Store boot_params pointer in callee save register
-Date:   Fri, 28 Jul 2023 11:08:56 +0200
-Message-Id: <20230728090916.1538550-3-ardb@kernel.org>
+Subject: [PATCH v7 08/22] x86/decompressor: Store boot_params pointer in callee save register
+Date:   Fri, 28 Jul 2023 11:09:02 +0200
+Message-Id: <20230728090916.1538550-9-ardb@kernel.org>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230728090916.1538550-1-ardb@kernel.org>
 References: <20230728090916.1538550-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=3436; i=ardb@kernel.org; h=from:subject; bh=GiCy7yIiezNP9O3s2voCLFojzJjs56vFwR7z8S7pXpQ=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeVw6+IPHMILpyvPdZAR4xXfPqdcweD8jAeMGRFMfDc2P 5L9yc7bUcrCIMbBICumyCIw+++7nacnStU6z5KFmcPKBDKEgYtTACbC2cTIsEh6Y3PpqoUiW1M2 VrauKlkZ/HDy6pqrXlf7+iZoebSLfWD4K8i6St9L4iHbNi71ZfIz9liws5y6Ej7dodx7osm3Ze2 S3AA=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=4134; i=ardb@kernel.org; h=from:subject; bh=xM6E+o+gqTcjujhtlo5FJ3wiOXU3YYAUj9BM3Rb4ExY=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeVw6ypTjx+uea7f3USiOCbKtWnZGspLLrHyddqqs+rYi jdaAYwdpSwMYhwMsmKKLAKz/77beXqiVK3zLFmYOaxMIEMYuDgFYCL57xn+mVbvuPFXtTLtd6Xe dR3XuY+WdRyLse2ZIhHMEm8yTyyqhJGh/Yze815XQ+6TWTs77GOCFspcjyoTPXFrrV7gepeOeQX sAA==
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Instead of pushing/popping %RSI to/from the stack every time a function
-is called from startup_64(), store it in a callee preserved register
-and grab it from there when its value is actually needed.
+Instead of pushing and popping %RSI several times to preserve the struct
+boot_params pointer across the execution of the startup code, move it
+into a callee save register before the first call into C, and copy it
+back when needed.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/kernel/head_64.S | 23 +++++---------------
- 1 file changed, 5 insertions(+), 18 deletions(-)
+ arch/x86/boot/compressed/head_64.S | 38 +++++++-------------
+ 1 file changed, 13 insertions(+), 25 deletions(-)
 
-diff --git a/arch/x86/kernel/head_64.S b/arch/x86/kernel/head_64.S
-index c5b9289837dcbad2..dbc80fe098f86860 100644
---- a/arch/x86/kernel/head_64.S
-+++ b/arch/x86/kernel/head_64.S
-@@ -62,6 +62,7 @@ SYM_CODE_START_NOALIGN(startup_64)
- 	 * compiled to run at we first fixup the physical addresses in our page
- 	 * tables and then reload them.
- 	 */
-+	mov	%rsi, %r15		/* Preserve boot_params pointer */
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index b1367f34e2881fc7..2ccddec2220ce914 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -405,10 +405,14 @@ SYM_CODE_START(startup_64)
+ 	lretq
  
- 	/* Set up the stack for verify_cpu() */
- 	leaq	(__end_init_task - PTREGS_SIZE)(%rip), %rsp
-@@ -75,9 +76,7 @@ SYM_CODE_START_NOALIGN(startup_64)
- 	shrq	$32,  %rdx
- 	wrmsr
+ .Lon_kernel_cs:
++	/*
++	 * RSI holds a pointer to a boot_params structure provided by the
++	 * loader, and this needs to be preserved across C function calls. So
++	 * move it into a callee saved register.
++	 */
++	movq	%rsi, %r15
  
 -	pushq	%rsi
- 	call	startup_64_setup_env
+ 	call	load_stage1_idt
 -	popq	%rsi
  
- 	/* Now switch to __KERNEL_CS so IRET works reliably */
- 	pushq	$__KERNEL_CS
-@@ -95,10 +94,8 @@ SYM_CODE_START_NOALIGN(startup_64)
- 	 * which needs to be done before any CPUID instructions are executed in
- 	 * subsequent code.
+ #ifdef CONFIG_AMD_MEM_ENCRYPT
+ 	/*
+@@ -421,10 +425,8 @@ SYM_CODE_START(startup_64)
+ 	 * detection/setup to ensure that has been done in advance of any dependent
+ 	 * code.
  	 */
--	movq	%rsi, %rdi
 -	pushq	%rsi
-+	movq	%r15, %rdi		/* Pass boot_params pointer */
- 	call	sme_enable
+-	movq	%rsi, %rdi		/* real mode address */
++	movq	%r15, %rdi		/* pass struct boot_params pointer */
+ 	call	sev_enable
 -	popq	%rsi
  #endif
  
- 	/* Sanitize CPU configuration */
-@@ -111,9 +108,7 @@ SYM_CODE_START_NOALIGN(startup_64)
- 	 * programmed into CR3.
+ 	/*
+@@ -437,13 +439,9 @@ SYM_CODE_START(startup_64)
+ 	 *   - Non zero RDX means trampoline needs to enable 5-level
+ 	 *     paging.
+ 	 *
+-	 * RSI holds real mode data and needs to be preserved across
+-	 * this function call.
  	 */
- 	leaq	_text(%rip), %rdi
 -	pushq	%rsi
- 	call	__startup_64
+-	movq	%rsi, %rdi		/* real mode address */
++	movq	%r15, %rdi		/* pass struct boot_params pointer */
+ 	call	paging_prepare
 -	popq	%rsi
  
- 	/* Form the CR3 value being sure to include the CR3 modifier */
- 	addq	$(early_top_pgt - __START_KERNEL_map), %rax
-@@ -127,8 +122,6 @@ SYM_CODE_START(secondary_startup_64)
- 	 * At this point the CPU runs in 64bit mode CS.L = 1 CS.D = 0,
- 	 * and someone has loaded a mapped page table.
+ 	/* Save the trampoline address in RCX */
+ 	movq	%rax, %rcx
+@@ -461,9 +459,9 @@ SYM_CODE_START(startup_64)
+ 	pushq	%rdi
+ 
+ 	/* Preserve other live 64-bit registers */
++	pushq	%r15
+ 	pushq	%rbp
+ 	pushq	%rbx
+-	pushq	%rsi
+ 
+ 	/* Switch to compatibility mode (CS.L = 0 CS.D = 1) via far return */
+ 	pushq	$__KERNEL32_CS
+@@ -479,14 +477,9 @@ trampoline_return:
  	 *
--	 * %rsi holds a physical pointer to real_mode_data.
+ 	 * RDI is address of the page table to use instead of page table
+ 	 * in trampoline memory (if required).
 -	 *
- 	 * We come here either from startup_64 (using physical addresses)
- 	 * or from trampoline.S (using virtual addresses).
- 	 *
-@@ -153,6 +146,8 @@ SYM_INNER_LABEL(secondary_startup_64_no_verify, SYM_L_GLOBAL)
- 	UNWIND_HINT_END_OF_STACK
- 	ANNOTATE_NOENDBR
- 
-+	xorq	%r15, %r15		/* Clear boot_params pointer */
-+
- 	/*
- 	 * Retrieve the modifier (SME encryption mask if SME is active) to be
- 	 * added to the initial pgdir entry that will be programmed into CR3.
-@@ -199,13 +194,9 @@ SYM_INNER_LABEL(secondary_startup_64_no_verify, SYM_L_GLOBAL)
- 	 * hypervisor could lie about the C-bit position to perform a ROP
- 	 * attack on the guest by writing to the unencrypted stack and wait for
- 	 * the next RET instruction.
--	 * %rsi carries pointer to realmode data and is callee-clobbered. Save
--	 * and restore it.
+-	 * RSI holds real mode data and needs to be preserved across
+-	 * this function call.
  	 */
 -	pushq	%rsi
- 	movq	%rax, %rdi
- 	call	sev_verify_cbit
+ 	leaq	rva(top_pgtable)(%rbx), %rdi
+ 	call	cleanup_trampoline
 -	popq	%rsi
  
- 	/*
- 	 * Switch to new page-table
-@@ -365,9 +356,7 @@ SYM_INNER_LABEL(secondary_startup_64_no_verify, SYM_L_GLOBAL)
- 	wrmsr
- 
- 	/* Setup and Load IDT */
+ 	/* Zero EFLAGS */
+ 	pushq	$0
+@@ -496,7 +489,6 @@ trampoline_return:
+  * Copy the compressed kernel to the end of our buffer
+  * where decompression in place becomes safe.
+  */
 -	pushq	%rsi
- 	call	early_setup_idt
+ 	leaq	(_bss-8)(%rip), %rsi
+ 	leaq	rva(_bss-8)(%rbx), %rdi
+ 	movl	$(_bss - startup_32), %ecx
+@@ -504,7 +496,6 @@ trampoline_return:
+ 	std
+ 	rep	movsq
+ 	cld
 -	popq	%rsi
  
- 	/* Check if nx is implemented */
- 	movl	$0x80000001, %eax
-@@ -403,9 +392,7 @@ SYM_INNER_LABEL(secondary_startup_64_no_verify, SYM_L_GLOBAL)
- 	pushq $0
- 	popfq
- 
--	/* rsi is pointer to real mode structure with interesting info.
--	   pass it to C */
--	movq	%rsi, %rdi
-+	movq	%r15, %rdi		/* Pass boot_params pointer */
- 
- .Ljump_to_C_code:
  	/*
+ 	 * The GDT may get overwritten either during the copy we just did or
+@@ -536,30 +527,27 @@ SYM_FUNC_START_LOCAL_NOALIGN(.Lrelocated)
+ 	shrq	$3, %rcx
+ 	rep	stosq
+ 
+-	pushq	%rsi
+ 	call	load_stage2_idt
+ 
+ 	/* Pass boot_params to initialize_identity_maps() */
+-	movq	(%rsp), %rdi
++	movq	%r15, %rdi		/* pass struct boot_params pointer */
+ 	call	initialize_identity_maps
+-	popq	%rsi
+ 
+ /*
+  * Do the extraction, and jump to the new kernel..
+  */
+-	pushq	%rsi			/* Save the real mode argument */
+-	movq	%rsi, %rdi		/* real mode address */
++	movq	%r15, %rdi		/* pass struct boot_params pointer */
+ 	leaq	boot_heap(%rip), %rsi	/* malloc area for uncompression */
+ 	leaq	input_data(%rip), %rdx  /* input_data */
+ 	movl	input_len(%rip), %ecx	/* input_len */
+ 	movq	%rbp, %r8		/* output target address */
+ 	movl	output_len(%rip), %r9d	/* decompressed length, end of relocs */
+ 	call	extract_kernel		/* returns kernel entry point in %rax */
+-	popq	%rsi
+ 
+ /*
+  * Jump to the decompressed kernel.
+  */
++	movq	%r15, %rsi
+ 	jmp	*%rax
+ SYM_FUNC_END(.Lrelocated)
+ 
+@@ -653,9 +641,9 @@ SYM_CODE_END(trampoline_32bit_src)
+ 	.code64
+ SYM_FUNC_START_LOCAL_NOALIGN(.Lpaging_enabled)
+ 	/* Return from the trampoline */
+-	popq	%rsi
+ 	popq	%rbx
+ 	popq	%rbp
++	popq	%r15
+ 	retq
+ SYM_FUNC_END(.Lpaging_enabled)
+ 
 -- 
 2.39.2
 
