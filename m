@@ -2,36 +2,36 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 762BFC0015E
-	for <linux-efi@archiver.kernel.org>; Fri, 28 Jul 2023 09:14:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E5107C001E0
+	for <linux-efi@archiver.kernel.org>; Fri, 28 Jul 2023 09:14:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235103AbjG1JOL (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 28 Jul 2023 05:14:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33448 "EHLO
+        id S233756AbjG1JOt (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 28 Jul 2023 05:14:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34304 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235513AbjG1JNL (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 28 Jul 2023 05:13:11 -0400
+        with ESMTP id S235312AbjG1JMp (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 28 Jul 2023 05:12:45 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A279F4C08;
-        Fri, 28 Jul 2023 02:11:55 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C20BB3590;
+        Fri, 28 Jul 2023 02:11:21 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id E06D062089;
-        Fri, 28 Jul 2023 09:11:54 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 93609C433CB;
-        Fri, 28 Jul 2023 09:11:50 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 5F30462062;
+        Fri, 28 Jul 2023 09:11:21 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 03377C433CB;
+        Fri, 28 Jul 2023 09:11:16 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1690535514;
-        bh=TDhagb7/1BjVNI9fsBOdvguiTH1+pJKnlE7Km5AKGt0=;
+        s=k20201202; t=1690535480;
+        bh=Fowt+T1f7j1SkaFRI5qxgj5A61yqdrfzCYAzIxm5GW0=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=CKOJowta5FUOIflXVpspuzZIa6PG5tbpOFguKlaekjPrRnTAWIbLelXKq/rxfVjwo
-         RQss3W9lcppxRyjC8rc6ONth/SnV1rIT64xKHX195k4B27prBOayzYqVWHDbI7zG8O
-         zEyqctVvXbFKisaMPWlGwHAXmYIbF56FG76pIlIDhg794np66tM2NjqNWJz7jMh3M5
-         pHHWUQyXbqZ0QlWQEUU6OPDAWJDCx+NOXr7Kr4UheeAh27ClLvwWcBB49HF+NEKlYa
-         DZBfIM1/4HUHOBeXQO/vltoRHZc1hv2CRK9Vn18Dh9/FgLZkEmOkcP751vasap09sn
-         itCvh4QnyTGEQ==
+        b=LQZgrPErweMj88AIwSA9ggneHAOluYdPbt2FEV3fwM/BZFx7fmLOsLNyYXHnt5hFt
+         GIZ+kRbuQPHDktMxf4kvhHfeSWcbufsRE66+3hd4nu8Locsw47ZyP8ZdIsrJw5Od5M
+         lkB+EBfw7Si5DZ6WQBAgCzu8dCfOFb7+dZUfWZM1SRb6fIdrPEZQvX9Neil0vQuoln
+         e+WOp9FbbLuiHqb5IhiEzB1EIE2NIP2wpdT95hdEhcDxK0voNE2xbyt+2vMiXCpUr6
+         2ftWMPCVctQR9OP4dAQLZ1EO8TOS/ZqQySzFdcrg7YrRyK9uetmgk56Ora/DiA9heO
+         /O31fONVSZJKQ==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -52,41 +52,116 @@ Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>,
         Linus Torvalds <torvalds@linux-foundation.org>,
         Joerg Roedel <jroedel@suse.de>
-Subject: [PATCH v7 17/22] decompress: Use 8 byte alignment
-Date:   Fri, 28 Jul 2023 11:09:11 +0200
-Message-Id: <20230728090916.1538550-18-ardb@kernel.org>
+Subject: [PATCH v7 09/22] x86/decompressor: Call trampoline as a normal function
+Date:   Fri, 28 Jul 2023 11:09:03 +0200
+Message-Id: <20230728090916.1538550-10-ardb@kernel.org>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230728090916.1538550-1-ardb@kernel.org>
 References: <20230728090916.1538550-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=737; i=ardb@kernel.org; h=from:subject; bh=TDhagb7/1BjVNI9fsBOdvguiTH1+pJKnlE7Km5AKGt0=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeVw61bH4HPMVjN2iPOzhUuqy3Wvr7hRdEN69SXmiLqDH FP5A+50lLIwiHEwyIopsgjM/vtu5+mJUrXOs2Rh5rAygQxh4OIUgImwn2VkeNydmfxAInKm2TGB aJXQB1GHQjJ1FO+YTsh3a95g89MukpFh008jt9sLfSQiVrF1iUunNZjn5uvlMiTtuFKrdcPP/Q0 LAA==
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3066; i=ardb@kernel.org; h=from:subject; bh=Fowt+T1f7j1SkaFRI5qxgj5A61yqdrfzCYAzIxm5GW0=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeVw6xqWuhpLK93PC16fXdvjdC9siviqHXovfWyZL6/Ib F2xKE+mo5SFQYyDQVZMkUVg9t93O09PlKp1niULM4eVCWQIAxenAExkSS7DP3OZV0H1bfPVQ/Q8 Hn25zHzm/CV15SeXmmPftk3anWD92JWRYYWGSkW4sbJT8lEr3WfnT7yw12Gp2LWsbV+/neFZ1+g djAA=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The ZSTD decompressor requires malloc() allocations to be 8 byte
-aligned, so ensure that this the case.
+Move the long return to switch to 32-bit mode into the trampoline code
+so it can be called as an ordinary function. This will allow it to be
+called directly from C code in a subsequent patch.
 
+Acked-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- include/linux/decompress/mm.h | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ arch/x86/boot/compressed/head_64.S | 46 ++++++++++----------
+ arch/x86/boot/compressed/pgtable.h |  2 +-
+ 2 files changed, 23 insertions(+), 25 deletions(-)
 
-diff --git a/include/linux/decompress/mm.h b/include/linux/decompress/mm.h
-index 9192986b1a731323..ac862422df158bef 100644
---- a/include/linux/decompress/mm.h
-+++ b/include/linux/decompress/mm.h
-@@ -48,7 +48,7 @@ MALLOC_VISIBLE void *malloc(int size)
- 	if (!malloc_ptr)
- 		malloc_ptr = free_mem_ptr;
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index 2ccddec2220ce914..1892679be2b6897a 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -446,29 +446,9 @@ SYM_CODE_START(startup_64)
+ 	/* Save the trampoline address in RCX */
+ 	movq	%rax, %rcx
  
--	malloc_ptr = (malloc_ptr + 3) & ~3;     /* Align */
-+	malloc_ptr = (malloc_ptr + 7) & ~7;     /* Align */
+-	/* Set up 32-bit addressable stack */
+-	leaq	TRAMPOLINE_32BIT_STACK_END(%rcx), %rsp
+-
+-	/*
+-	 * Load the address of trampoline_return() into RDI and push it onto
+-	 * the stack so it will survive 32-bit truncation due to the 32-bit
+-	 * protected mode switch. It will be used by the trampoline to return
+-	 * to the main code.
+-	 */
+-	leaq	trampoline_return(%rip), %rdi
+-	pushq	%rdi
+-
+-	/* Preserve other live 64-bit registers */
+-	pushq	%r15
+-	pushq	%rbp
+-	pushq	%rbx
+-
+-	/* Switch to compatibility mode (CS.L = 0 CS.D = 1) via far return */
+-	pushq	$__KERNEL32_CS
+ 	leaq	TRAMPOLINE_32BIT_CODE_OFFSET(%rax), %rax
+-	pushq	%rax
+-	lretq
+-trampoline_return:
++	call	*%rax
++
+ 	/* Restore the stack, the 32-bit trampoline uses its own stack */
+ 	leaq	rva(boot_stack_end)(%rbx), %rsp
  
- 	p = (void *)malloc_ptr;
- 	malloc_ptr += size;
+@@ -551,15 +531,33 @@ SYM_FUNC_START_LOCAL_NOALIGN(.Lrelocated)
+ 	jmp	*%rax
+ SYM_FUNC_END(.Lrelocated)
+ 
+-	.code32
+ /*
+  * This is the 32-bit trampoline that will be copied over to low memory.
+  *
+- * RDI contains the return address (might be above 4G).
+  * ECX contains the base address of the trampoline memory.
+  * Non zero RDX means trampoline needs to enable 5-level paging.
+  */
+ SYM_CODE_START(trampoline_32bit_src)
++	/* Grab return address */
++	movq	(%rsp), %rax
++
++	/* Set up 32-bit addressable stack */
++	leaq	TRAMPOLINE_32BIT_STACK_END(%rcx), %rsp
++
++	/* Preserve return address and other live 64-bit registers */
++	pushq	%rax
++	pushq	%r15
++	pushq	%rbp
++	pushq	%rbx
++
++	/* Switch to compatibility mode (CS.L = 0 CS.D = 1) via far return */
++	pushq	$__KERNEL32_CS
++	leaq	0f(%rip), %rax
++	pushq	%rax
++	lretq
++
++	.code32
++0:
+ 	/* Set up data and stack segments */
+ 	movl	$__KERNEL_DS, %eax
+ 	movl	%eax, %ds
+diff --git a/arch/x86/boot/compressed/pgtable.h b/arch/x86/boot/compressed/pgtable.h
+index cc9b2529a08634b4..91dbb99203fbce2d 100644
+--- a/arch/x86/boot/compressed/pgtable.h
++++ b/arch/x86/boot/compressed/pgtable.h
+@@ -6,7 +6,7 @@
+ #define TRAMPOLINE_32BIT_PGTABLE_OFFSET	0
+ 
+ #define TRAMPOLINE_32BIT_CODE_OFFSET	PAGE_SIZE
+-#define TRAMPOLINE_32BIT_CODE_SIZE	0x80
++#define TRAMPOLINE_32BIT_CODE_SIZE	0xA0
+ 
+ #define TRAMPOLINE_32BIT_STACK_END	TRAMPOLINE_32BIT_SIZE
+ 
 -- 
 2.39.2
 
