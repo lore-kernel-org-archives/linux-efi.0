@@ -2,36 +2,36 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BDFE1C00528
-	for <linux-efi@archiver.kernel.org>; Fri, 28 Jul 2023 09:13:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DC9C8C04A94
+	for <linux-efi@archiver.kernel.org>; Fri, 28 Jul 2023 09:13:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234250AbjG1JNX (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 28 Jul 2023 05:13:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34264 "EHLO
+        id S234081AbjG1JNV (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 28 Jul 2023 05:13:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33428 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235216AbjG1JMo (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 28 Jul 2023 05:12:44 -0400
+        with ESMTP id S235353AbjG1JMn (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 28 Jul 2023 05:12:43 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 58B9B3AAF;
-        Fri, 28 Jul 2023 02:11:13 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EB3023AA5;
+        Fri, 28 Jul 2023 02:11:04 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id E9BF362086;
-        Fri, 28 Jul 2023 09:11:12 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 95B85C433CB;
-        Fri, 28 Jul 2023 09:11:08 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 8783162065;
+        Fri, 28 Jul 2023 09:11:04 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 38832C433C8;
+        Fri, 28 Jul 2023 09:11:00 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1690535472;
-        bh=zBQnolwjGWOFrzM6wjiy++8kSbbyRGDO2Rsd3pLzB7M=;
+        s=k20201202; t=1690535464;
+        bh=xUjiZ9CTB36hToIiK/jDOw5AzOSt60/p72hz0Htkw5Y=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=L1aLycPW7CvFhFTw5MZP8oN9kg9Uv+8u0C/1+9rljlD3FXtiwhokexo/7V97Kenwh
-         ns+2xFfJNd1xPY1ZT4e9/A7ix6oHUv6j23bkNSi18sROGv+yNjpbKZi8ahLW5lWP6V
-         hQU/JaFX7oXsb8I5pPAqTOGYGugiouIlBIQhb4/CbS2Gy68pTVlEIH62I+UHlzb7Fu
-         3sKT663jMxwSWDa/5TyUpe0GA5FvPq3mIX4vNZEXp/QVEoGPms+8ZgEtNuIY3pc1qS
-         9b8z8wZclf9J65cec/hNOCOmUReSIRq9J6DlJPgJMvuf9i0B5sCCWggzaRtDO/ruoE
-         NXkBsabfnV+7w==
+        b=O5QYVuov01U/jIMdXbjCIO8LLEdSk8MDlLuwOOnRFAjdPXQK6u9SNMk6m1jxnmYtR
+         dj7ZNHaLj5+xrrkH14OijSyOEOFx1XFCfgDA63+EyqO4IaW+TYQf7luh7Zl6KdyQov
+         YaO5WZj9T3TrJSmwJ/s5gIgN4rBk0YkQ9RX7kEU5b2txHkWX/uKNbDHBxU5+y1m3XQ
+         Ua4oBM1txODP4P/K8FeClVgoDUYYS5EVroT2T6Y4aKjKhwLfWdKbSaRd3ddaMlxLd3
+         vcwtmohVxsqcnupr3Zwo1yQGatvx0e8Oc85NQ9QcAXNgaik950bh/v3BZOBtMjux69
+         Y+HLZKBT7hJUQ==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -52,58 +52,125 @@ Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>,
         Linus Torvalds <torvalds@linux-foundation.org>,
         Joerg Roedel <jroedel@suse.de>
-Subject: [PATCH v7 07/22] x86/decompressor: Use proper sequence to take the address of the GOT
-Date:   Fri, 28 Jul 2023 11:09:01 +0200
-Message-Id: <20230728090916.1538550-8-ardb@kernel.org>
+Subject: [PATCH v7 05/22] x86/decompressor: Avoid magic offsets for EFI handover entrypoint
+Date:   Fri, 28 Jul 2023 11:08:59 +0200
+Message-Id: <20230728090916.1538550-6-ardb@kernel.org>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230728090916.1538550-1-ardb@kernel.org>
 References: <20230728090916.1538550-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1782; i=ardb@kernel.org; h=from:subject; bh=zBQnolwjGWOFrzM6wjiy++8kSbbyRGDO2Rsd3pLzB7M=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeVw68prT2YcUdzpPvnZl6dGzcfCTMuutpabHf4u2b2F+ XuCx8tFHaUsDGIcDLJiiiwCs/++23l6olSt8yxZmDmsTCBDGLg4BWAiDY4M/12udfY1iKo9U9Xe 9EODS0hn+vQkU7X/yxP2v31XIWO+yYuR4cGpmmVeuU88L4onhDP39PP/qy/e3f3q74TWlDn+F6a 0MgMA
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3376; i=ardb@kernel.org; h=from:subject; bh=xUjiZ9CTB36hToIiK/jDOw5AzOSt60/p72hz0Htkw5Y=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeVw6/J18nZ/HfJLHRd1OH9TS3DZ0nZ0R7PDo1/vhGfIq 7CvTt7ZUcrCIMbBICumyCIw+++7nacnStU6z5KFmcPKBDKEgYtTACaS68fw34HzzbwXb6bPdLJZ zbBafNKEDdWXhW/M9LnAvHJa5ZUPMnsZ/vtcmJaddVb2qk9U0p9Hwt8Z//fYrbomkr/UVEe1qt9 kHhMA
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The 32-bit decompressor does not actually use a global offset table
-(GOT), but as is common for 32-bit position independent code, it uses
-the magic symbol _GLOBAL_OFFSET_TABLE_ as an anchor from which to derive
-the actual runtime addresses of other symbols, using special @GOTOFF
-symbol references that are resolved at link time, and populated with the
-distance between the address of the magic _GLOBAL_OFFSET_TABLE_ anchor
-and the address of the symbol in question.
+The native 32-bit or 64-bit EFI handover protocol entrypoint offset
+relative to the respective startup_32/64 address is described in
+boot_params as handover_offset, so that the special Linux/x86 aware EFI
+loader can find it there.
 
-This means _GLOBAL_OFFSET_TABLE_ is the only symbol whose actual runtime
-address needs to be determined explicitly, which is one of the first
-things that happens in startup_32. However, it does so by taking the
-absolute address via the immediate field of an ADD instruction (plus a
-small offset), which seems to defeat the point.
+When mixed mode is enabled, this single field has to describe this
+offset for both the 32-bit and 64-bit entrypoints, so their respective
+relative offsets have to be identical. Given that startup_32 and
+startup_64 are 0x200 bytes apart, and the EFI handover entrypoint
+resides at a fixed offset, the 32-bit and 64-bit versions of those
+entrypoints must be exactly 0x200 bytes apart as well.
 
-Fortunately, the assembler knows that _GLOBAL_OFFSET_TABLE_ is magic,
-and emits a special relative R_386_GOTPC relocation instead, and so the
-resulting code works as expected. However, this is not obvious for
-someone reading the code, and the use of LEA with an explicit relative
-addend is more idiomatic so use that instead.
+Currently, hard-coded fixed offsets are used to ensure this, but it is
+sufficient to emit the 64-bit entrypoint 0x200 bytes after the 32-bit
+one, wherever it happens to reside. This allows this code (which is now
+EFI mixed mode specific) to be moved into efi_mixed.S and out of the
+startup code in head_64.S.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/boot/compressed/head_32.S | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ arch/x86/boot/compressed/efi_mixed.S | 20 +++++++++++++++++++-
+ arch/x86/boot/compressed/head_64.S   | 18 ------------------
+ 2 files changed, 19 insertions(+), 19 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
-index 8876ffe30e9a4819..3530465b5b85ccf3 100644
---- a/arch/x86/boot/compressed/head_32.S
-+++ b/arch/x86/boot/compressed/head_32.S
-@@ -58,7 +58,7 @@ SYM_FUNC_START(startup_32)
- 	leal	(BP_scratch+4)(%esi), %esp
- 	call	1f
- 1:	popl	%edx
--	addl	$_GLOBAL_OFFSET_TABLE_+(.-1b), %edx
-+	leal	(_GLOBAL_OFFSET_TABLE_ - 1b)(%edx), %edx
+diff --git a/arch/x86/boot/compressed/efi_mixed.S b/arch/x86/boot/compressed/efi_mixed.S
+index dcc562c8f7f35162..9308b595f6f0a5de 100644
+--- a/arch/x86/boot/compressed/efi_mixed.S
++++ b/arch/x86/boot/compressed/efi_mixed.S
+@@ -140,6 +140,16 @@ SYM_FUNC_START(__efi64_thunk)
+ SYM_FUNC_END(__efi64_thunk)
  
- 	/* Load new GDT */
- 	leal	gdt@GOTOFF(%edx), %eax
+ 	.code32
++#ifdef CONFIG_EFI_HANDOVER_PROTOCOL
++SYM_FUNC_START(efi32_stub_entry)
++	add	$0x4, %esp		/* Discard return address */
++	popl	%ecx
++	popl	%edx
++	popl	%esi
++	jmp	efi32_entry
++SYM_FUNC_END(efi32_stub_entry)
++#endif
++
+ /*
+  * EFI service pointer must be in %edi.
+  *
+@@ -220,7 +230,7 @@ SYM_FUNC_END(efi_enter32)
+  * stub may still exit and return to the firmware using the Exit() EFI boot
+  * service.]
+  */
+-SYM_FUNC_START(efi32_entry)
++SYM_FUNC_START_LOCAL(efi32_entry)
+ 	call	1f
+ 1:	pop	%ebx
+ 
+@@ -320,6 +330,14 @@ SYM_FUNC_START(efi32_pe_entry)
+ 	RET
+ SYM_FUNC_END(efi32_pe_entry)
+ 
++#ifdef CONFIG_EFI_HANDOVER_PROTOCOL
++	.org	efi32_stub_entry + 0x200
++	.code64
++SYM_FUNC_START_NOALIGN(efi64_stub_entry)
++	jmp	efi_stub_entry
++SYM_FUNC_END(efi64_stub_entry)
++#endif
++
+ 	.section ".rodata"
+ 	/* EFI loaded image protocol GUID */
+ 	.balign 4
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index 279c2675883c6a0f..b1367f34e2881fc7 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -294,17 +294,6 @@ SYM_FUNC_START(startup_32)
+ 	lret
+ SYM_FUNC_END(startup_32)
+ 
+-#if IS_ENABLED(CONFIG_EFI_MIXED) && IS_ENABLED(CONFIG_EFI_HANDOVER_PROTOCOL)
+-	.org 0x190
+-SYM_FUNC_START(efi32_stub_entry)
+-	add	$0x4, %esp		/* Discard return address */
+-	popl	%ecx
+-	popl	%edx
+-	popl	%esi
+-	jmp	efi32_entry
+-SYM_FUNC_END(efi32_stub_entry)
+-#endif
+-
+ 	.code64
+ 	.org 0x200
+ SYM_CODE_START(startup_64)
+@@ -534,13 +523,6 @@ trampoline_return:
+ 	jmp	*%rax
+ SYM_CODE_END(startup_64)
+ 
+-#if IS_ENABLED(CONFIG_EFI_MIXED) && IS_ENABLED(CONFIG_EFI_HANDOVER_PROTOCOL)
+-	.org 0x390
+-SYM_FUNC_START(efi64_stub_entry)
+-	jmp	efi_stub_entry
+-SYM_FUNC_END(efi64_stub_entry)
+-#endif
+-
+ 	.text
+ SYM_FUNC_START_LOCAL_NOALIGN(.Lrelocated)
+ 
 -- 
 2.39.2
 
