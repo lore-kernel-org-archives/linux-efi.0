@@ -2,189 +2,173 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 45A5FC0015E
-	for <linux-efi@archiver.kernel.org>; Thu, 27 Jul 2023 11:13:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 05E4EC0015E
+	for <linux-efi@archiver.kernel.org>; Fri, 28 Jul 2023 09:13:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233296AbjG0LN1 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 27 Jul 2023 07:13:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48010 "EHLO
+        id S233517AbjG1JNU (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 28 Jul 2023 05:13:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34326 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232913AbjG0LNL (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 27 Jul 2023 07:13:11 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 664C7A2
-        for <linux-efi@vger.kernel.org>; Thu, 27 Jul 2023 04:12:12 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1690456331;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=KzR/29ssKHTlIDAdd/Fjb9KFzV0w37Bkt3676oqfegA=;
-        b=ZSDfOrWg9b1QZgSlDgFtaaciqYKFEeBWV7QQb96r287hm38qws1KxldBPswz3U8ch1IzM7
-        eZYK5l6CZGE5C4W4wWKYUfz3HNRtF5oo/WfD7b5UDc1takYmPok08H0Ie8zWaer1DH8EHd
-        G2EATmBdRpBGhzKP8ggm2uvRMelVxK0=
-Received: from mail-lf1-f69.google.com (mail-lf1-f69.google.com
- [209.85.167.69]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-317-9TR7fiOaPwygUZ1Iyw9U-Q-1; Thu, 27 Jul 2023 07:12:07 -0400
-X-MC-Unique: 9TR7fiOaPwygUZ1Iyw9U-Q-1
-Received: by mail-lf1-f69.google.com with SMTP id 2adb3069b0e04-4fdde274729so770434e87.3
-        for <linux-efi@vger.kernel.org>; Thu, 27 Jul 2023 04:12:07 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1690456326; x=1691061126;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=KzR/29ssKHTlIDAdd/Fjb9KFzV0w37Bkt3676oqfegA=;
-        b=GWndE7+eOrNXINHZ26Rlh2XapdnjUwpl/kD2g2K4BIfNgB/o74mrln4Q1aJnq0sv6u
-         yKbufrYx+tPrk2dC3aj3DHjBLbs9+TWeqoJdrNnVi6HzAhxzftuN/KSfqF+JKgHATfr1
-         4D9z70vH0ocSrYLMCTNdweyRPlltze61q6aSFSgU6zbCzn2I97z+B4VgcSxTdQXRUgZe
-         uUJKW3IcxG/PUpUTyadjpeL6eupBGLNL6JPihBoU96LQ0bnBLtNgZKTrTezd312q7hkw
-         FolAgZqi1VJooGk7Q+VYOM5MCJZnvfmZsZwZPE3jwDccvMFVZn4lLoMBE+YJFCPhhXX3
-         eqKQ==
-X-Gm-Message-State: ABy/qLYT1K0wWsomj0RCCOq9zjQ/4Tf6/VWYK8ZbweMsPYFK/K2dlYfS
-        g3DrJ4OU2uczh2rZme0F9ErDVUMi77nhbEkRoe+opMMdKiqWQz2ioCZeOsNC/YdfLSlaa/FuNP/
-        8PMj5qbNYp4g8Z1C0f8z7l75o+d/qTwRsqx79
-X-Received: by 2002:a05:6512:2386:b0:4fb:821e:2241 with SMTP id c6-20020a056512238600b004fb821e2241mr2053304lfv.23.1690456325978;
-        Thu, 27 Jul 2023 04:12:05 -0700 (PDT)
-X-Google-Smtp-Source: APBJJlHVcSXFbTNHvChrljnKmKfUt/IbSL9KtTtcftDFpfX3hleE49JbqtNOhURn54n+68XPYFw909b0goEvLHGOH5s=
-X-Received: by 2002:a05:6512:2386:b0:4fb:821e:2241 with SMTP id
- c6-20020a056512238600b004fb821e2241mr2053291lfv.23.1690456325651; Thu, 27 Jul
- 2023 04:12:05 -0700 (PDT)
+        with ESMTP id S235380AbjG1JMu (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 28 Jul 2023 05:12:50 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 959C83C0A;
+        Fri, 28 Jul 2023 02:11:38 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 266B762080;
+        Fri, 28 Jul 2023 09:11:38 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C9A56C433CB;
+        Fri, 28 Jul 2023 09:11:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1690535497;
+        bh=x7sq9MvecxCTDjHprBemwXOtByORtVHSFTMbKWRJUyo=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=KHfSKeDgIe+oX5c+31tp/kKxwQSI0AFG6hP+MTiJz/VtBXwwZwkRxmwIvahn8HvYR
+         iNOwf1zyRTlD0f9nIBr77BDaHWz3v7LbcVdg0NWs3lEUb80X3Y7TDOVi3U3rANmAjE
+         XQ0U/ZZplSofrLmiyA2aedQHOiSnNpwROjVDMiQykqZcI3N6CrTtMAeh1Z36Mg/Sgq
+         BJMrDYbPqw5p0Y9apMR5ixq/JANyTnLeAWRBOxyIXu7z4nLcmLCeyzF2DIbC2SYgAF
+         Hb+oDz7X5jv7/W3hUl4oKuPYvfW2YLb4nCVWnSt0QCH0uH093UqSeULrGRJ8hhdytP
+         ItZtcWBYe0AlA==
+From:   Ard Biesheuvel <ardb@kernel.org>
+To:     linux-efi@vger.kernel.org
+Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
+        Evgeniy Baskov <baskov@ispras.ru>,
+        Borislav Petkov <bp@alien8.de>,
+        Andy Lutomirski <luto@kernel.org>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        Ingo Molnar <mingo@redhat.com>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Alexey Khoroshilov <khoroshilov@ispras.ru>,
+        Peter Jones <pjones@redhat.com>,
+        Gerd Hoffmann <kraxel@redhat.com>,
+        Dave Young <dyoung@redhat.com>,
+        Mario Limonciello <mario.limonciello@amd.com>,
+        Kees Cook <keescook@chromium.org>,
+        Tom Lendacky <thomas.lendacky@amd.com>,
+        "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>,
+        Linus Torvalds <torvalds@linux-foundation.org>,
+        Joerg Roedel <jroedel@suse.de>
+Subject: [PATCH v7 13/22] x86/decompressor: Only call the trampoline when changing paging levels
+Date:   Fri, 28 Jul 2023 11:09:07 +0200
+Message-Id: <20230728090916.1538550-14-ardb@kernel.org>
+X-Mailer: git-send-email 2.39.2
+In-Reply-To: <20230728090916.1538550-1-ardb@kernel.org>
+References: <20230728090916.1538550-1-ardb@kernel.org>
 MIME-Version: 1.0
-References: <20230601072043.24439-1-ltao@redhat.com> <20230713100459.GEZK/MS69XbphJa+tN@fat_crate.local>
- <CAO7dBbVMNKTSDi5eP4BseEUexsk0Mo0GWJpyHfOcp+tHs6cSUw@mail.gmail.com>
- <CAMj1kXGEFr+E3pKLrJJq=FXv9ZhDg0zSEw7sewumPZkwtd3P5Q@mail.gmail.com> <CAO7dBbXhF36vCgVMOM2H83H34OqsA6J3KmsBMvYcs_p9_5pa4Q@mail.gmail.com>
-In-Reply-To: <CAO7dBbXhF36vCgVMOM2H83H34OqsA6J3KmsBMvYcs_p9_5pa4Q@mail.gmail.com>
-From:   Tao Liu <ltao@redhat.com>
-Date:   Thu, 27 Jul 2023 19:11:29 +0800
-Message-ID: <CAO7dBbXN6hTbJVH8V5UCAxcOM4+-f0qACbd9n9HaP19F4mPEqw@mail.gmail.com>
-Subject: Re: [PATCH v2] x86/kexec: Add EFI config table identity mapping for
- kexec kernel
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     Borislav Petkov <bp@alien8.de>, tglx@linutronix.de,
-        mingo@redhat.com, dave.hansen@linux.intel.com, x86@kernel.org,
-        hpa@zytor.com, linux-kernel@vger.kernel.org, bhe@redhat.com,
-        dyoung@redhat.com, kexec@lists.infradead.org,
-        linux-efi@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3740; i=ardb@kernel.org; h=from:subject; bh=x7sq9MvecxCTDjHprBemwXOtByORtVHSFTMbKWRJUyo=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeVw64Ys35j1/Bsl/k/aFeF/q//Z6Y15ngpxS8WOenDss qxza73VUcrCIMbBICumyCIw+++7nacnStU6z5KFmcPKBDKEgYtTACYyaxvDb/Y/hl8WR/GuW3Mi SfiGiHr9wiOOp97O7RUqTL12ca50kwQjwx6OXQyJM0p3botyEO0zEfkfcndLpX6Dkyab8mnNA3+ y2AA=
+X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Hi Ard,
+Since the current and desired number of paging levels are known when the
+trampoline is being prepared, avoid calling the trampoline at all if it
+is clear that calling it is not going to result in a change to the
+number of paging levels. Given that the CPU is already running in long
+mode, the PAE and LA57 settings are necessarily consistent with the
+currently active page tables - the only difference is that CR4.MCE will
+always be preserved in this case, but it will be cleared by the real
+kernel startup code if CONFIG_X86_MCE is not enabled.
 
-On Mon, Jul 17, 2023 at 11:11=E2=80=AFPM Tao Liu <ltao@redhat.com> wrote:
->
-> On Mon, Jul 17, 2023 at 10:57=E2=80=AFPM Ard Biesheuvel <ardb@kernel.org>=
- wrote:
-> >
-> > On Mon, 17 Jul 2023 at 15:53, Tao Liu <ltao@redhat.com> wrote:
-> > >
-> > > Hi Borislav,
-> > >
-> > > On Thu, Jul 13, 2023 at 6:05=E2=80=AFPM Borislav Petkov <bp@alien8.de=
-> wrote:
-> > > >
-> > > > On Thu, Jun 01, 2023 at 03:20:44PM +0800, Tao Liu wrote:
-> > > > >  arch/x86/kernel/machine_kexec_64.c | 35 ++++++++++++++++++++++++=
-++----
-> > > > >  1 file changed, 31 insertions(+), 4 deletions(-)
-> > > >
-> > > > Ok, pls try this totally untested thing.
-> > > >
-> > > > Thx.
-> > > >
-> > > > ---
-> > > > diff --git a/arch/x86/boot/compressed/sev.c b/arch/x86/boot/compres=
-sed/sev.c
-> > > > index 09dc8c187b3c..fefe27b2af85 100644
-> > > > --- a/arch/x86/boot/compressed/sev.c
-> > > > +++ b/arch/x86/boot/compressed/sev.c
-> > > > @@ -404,13 +404,20 @@ void sev_enable(struct boot_params *bp)
-> > > >         if (bp)
-> > > >                 bp->cc_blob_address =3D 0;
-> > > >
-> > > > +       /* Check for the SME/SEV support leaf */
-> > > > +       eax =3D 0x80000000;
-> > > > +       ecx =3D 0;
-> > > > +       native_cpuid(&eax, &ebx, &ecx, &edx);
-> > > > +       if (eax < 0x8000001f)
-> > > > +               return;
-> > > > +
-> > > >         /*
-> > > >          * Setup/preliminary detection of SNP. This will be sanity-=
-checked
-> > > >          * against CPUID/MSR values later.
-> > > >          */
-> > > >         snp =3D snp_init(bp);
-> > > >
-> > > > -       /* Check for the SME/SEV support leaf */
-> > > > +       /* Recheck the SME/SEV support leaf */
-> > > >         eax =3D 0x80000000;
-> > > >         ecx =3D 0;
-> > > >         native_cpuid(&eax, &ebx, &ecx, &edx);
-> > > >
-> > > Thanks a lot for the patch above! Sorry for the late response. I have
-> > > compiled and tested it locally against 6.5.0-rc1, though it can pass
-> > > the early stage of kexec kernel bootup,
-> >
-> > OK, so that proves that the cc_blob table access is the culprit here.
-> > That still means that kexec on SEV is likely to explode in the exact
-> > same way should anyone attempt that.
-> >
-> >
-> > > however the kernel will panic
-> > > occasionally later. The test machine is the one with Intel Atom
-> > > x6425RE cpu which encountered the page fault issue of missing efi
-> > > config table.
-> > >
-> >
-> > Agree with Boris that this seems entirely unrelated.
->
-> Agree, I will have a retest based on Boris's suggestions.
->
-> >
-> > > ...snip...
-> > > [   21.360763]  nvme0n1: p1 p2 p3
-> > > [   21.364207] igc 0000:03:00.0: PTM enabled, 4ns granularity
-> > > [   21.421097] pps pps1: new PPS source ptp1
-> > > [   21.425396] igc 0000:03:00.0 (unnamed net_device) (uninitialized):=
- PHC added
-> > > [   21.457005] igc 0000:03:00.0: 4.000 Gb/s available PCIe bandwidth
-> > > (5.0 GT/s PCIe x1 link)
-> > > [   21.465210] igc 0000:03:00.0 eth1: MAC: ...snip...
-> > > [   21.473424] igc 0000:03:00.0 enp3s0: renamed from eth1
-> > > [   21.479446] BUG: kernel NULL pointer dereference, address: 0000000=
-000000008
-> > > [   21.486405] #PF: supervisor read access in kernel mode
-> > > [   21.491519] mmc1: Failed to initialize a non-removable card
-> > > [   21.491538] #PF: error_code(0x0000) - not-present page
-> > > [   21.502229] PGD 0 P4D 0
-> > > [   21.504773] Oops: 0000 [#1] PREEMPT SMP NOPTI
-> > > [   21.509133] CPU: 3 PID: 402 Comm: systemd-udevd Not tainted 6.5.0-=
-rc1+ #1
-> > > [   21.515905] Hardware name: ...snip...
-> >
-> >
-> > Why are you snipping the hardware name?
->
+Acked-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+---
+ arch/x86/boot/compressed/head_64.S    | 21 +-------------------
+ arch/x86/boot/compressed/pgtable_64.c | 18 +++++++----------
+ 2 files changed, 8 insertions(+), 31 deletions(-)
 
-Our partner said it is OK to discuss in public, so the hardware is:
-Hardware name: LENOVO 11KL0FVT06/3334, BIOS M4XKT14A 05/17/2023
-
-The machine is Lenovo ThinkEdge SE10.
-
-Thanks,
-Tao Liu
-
-> Sorry for the inconvenience here... The machine is borrowed from our
-> partner, which may not be officially released to the market. I haven't
-> discussed the legal issue with them. In addition, I think the stack
-> trace is more useful, so I snipped the hardware name. Sorry about
-> that...
->
-> >
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index 3f38db557112c155..88b5e45b8ecb490b 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -387,10 +387,6 @@ SYM_CODE_START(startup_64)
+ 	 * For the trampoline, we need the top page table to reside in lower
+ 	 * memory as we don't have a way to load 64-bit values into CR3 in
+ 	 * 32-bit mode.
+-	 *
+-	 * We go though the trampoline even if we don't have to: if we're
+-	 * already in a desired paging mode. This way the trampoline code gets
+-	 * tested on every boot.
+ 	 */
+ 
+ 	/* Make sure we have GDT with 32-bit code segment */
+@@ -564,25 +560,10 @@ SYM_CODE_START(trampoline_32bit_src)
+ 	btrl	$X86_CR0_PG_BIT, %eax
+ 	movl	%eax, %cr0
+ 
+-	/* Check what paging mode we want to be in after the trampoline */
+-	testl	%esi, %esi
+-	jz	1f
+-
+-	/* We want 5-level paging: don't touch CR3 if it already points to 5-level page tables */
+-	movl	%cr4, %eax
+-	testl	$X86_CR4_LA57, %eax
+-	jnz	3f
+-	jmp	2f
+-1:
+-	/* We want 4-level paging: don't touch CR3 if it already points to 4-level page tables */
+-	movl	%cr4, %eax
+-	testl	$X86_CR4_LA57, %eax
+-	jz	3f
+-2:
+ 	/* Point CR3 to the trampoline's new top level page table */
+ 	leal	TRAMPOLINE_32BIT_PGTABLE_OFFSET(%edi), %eax
+ 	movl	%eax, %cr3
+-3:
++
+ 	/* Set EFER.LME=1 as a precaution in case hypervsior pulls the rug */
+ 	movl	$MSR_EFER, %ecx
+ 	rdmsr
+diff --git a/arch/x86/boot/compressed/pgtable_64.c b/arch/x86/boot/compressed/pgtable_64.c
+index 649c51935fdec7ef..4016444e6788304f 100644
+--- a/arch/x86/boot/compressed/pgtable_64.c
++++ b/arch/x86/boot/compressed/pgtable_64.c
+@@ -128,6 +128,13 @@ asmlinkage void set_paging_levels(void *rmode)
+ 		l5_required = true;
+ 	}
+ 
++	/*
++	 * The trampoline will not be used if the paging mode is already set to
++	 * the desired one.
++	 */
++	if (l5_required == !!(native_read_cr4() & X86_CR4_LA57))
++		return;
++
+ 	trampoline_32bit = (unsigned long *)find_trampoline_placement();
+ 
+ 	/* Preserve trampoline memory */
+@@ -155,18 +162,8 @@ asmlinkage void set_paging_levels(void *rmode)
+ 	 *
+ 	 * The new page table will be used by trampoline code for switching
+ 	 * from 4- to 5-level paging or vice versa.
+-	 *
+-	 * If switching is not required, the page table is unused: trampoline
+-	 * code wouldn't touch CR3.
+ 	 */
+ 
+-	/*
+-	 * We are not going to use the page table in trampoline memory if we
+-	 * are already in the desired paging mode.
+-	 */
+-	if (l5_required == !!(native_read_cr4() & X86_CR4_LA57))
+-		goto out;
+-
+ 	if (l5_required) {
+ 		/*
+ 		 * For 4- to 5-level paging transition, set up current CR3 as
+@@ -189,7 +186,6 @@ asmlinkage void set_paging_levels(void *rmode)
+ 		       (void *)src, PAGE_SIZE);
+ 	}
+ 
+-out:
+ 	toggle_la57(trampoline_32bit, l5_required);
+ }
+ 
+-- 
+2.39.2
 
