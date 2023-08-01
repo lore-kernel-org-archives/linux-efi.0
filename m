@@ -2,94 +2,176 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 65424C001DC
-	for <linux-efi@archiver.kernel.org>; Mon, 31 Jul 2023 15:05:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 387E9C001E0
+	for <linux-efi@archiver.kernel.org>; Tue,  1 Aug 2023 10:30:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231566AbjGaPF1 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 31 Jul 2023 11:05:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60244 "EHLO
+        id S231454AbjHAKak (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 1 Aug 2023 06:30:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49446 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229483AbjGaPF0 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 31 Jul 2023 11:05:26 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0D92D10DD;
-        Mon, 31 Jul 2023 08:05:25 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-        Content-Type:In-Reply-To:From:References:Cc:To:Subject:MIME-Version:Date:
-        Message-ID:Sender:Reply-To:Content-ID:Content-Description;
-        bh=0+kFd0PeLKGw7bCHBy4dn6TcM2mrgGMssJUohhcTcA0=; b=K8xAm8d84ZvAl6tQ0q8q3Xrfw9
-        jzmMF7NG3Idujlq0AT6Rt2ArZwBhnJV3iNneG0vsF0uEVWgnt8TsZC/e+8R4zJ0c9AvFSCM2p5heh
-        fLh1v88Fwx2Ff0v4gxerNhyojk3Go/acQuGmE1eaUWh3gOozCa//gT3/uR21xcZWKgHQmIVViaKsX
-        E/ly9B1HPJqJGDjQU+4IRR1/EECWiTtSd+uSnrI1gKBfOuj3sXVF7twJdgj35Tfz94xSmgfUKDCAe
-        4tczCaJd8HbQOHF9pA9cjFMkiZZS+hQuGyqkNdotAPSSLa1NsR6d0Lske76wByU19CCuzzpmaHUiB
-        FMHQSTSw==;
-Received: from [2601:1c2:980:9ec0::2764]
-        by bombadil.infradead.org with esmtpsa (Exim 4.96 #2 (Red Hat Linux))
-        id 1qQUSX-00GFIi-2e;
-        Mon, 31 Jul 2023 15:05:21 +0000
-Message-ID: <a6d9857c-fcbd-74d0-bc97-fc86a8c1b820@infradead.org>
-Date:   Mon, 31 Jul 2023 08:05:18 -0700
+        with ESMTP id S230294AbjHAKaj (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 1 Aug 2023 06:30:39 -0400
+Received: from mail.skyhub.de (mail.skyhub.de [5.9.137.197])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CB35392;
+        Tue,  1 Aug 2023 03:30:37 -0700 (PDT)
+Received: from mail.alien8.de (mail.alien8.de [IPv6:2a01:4f9:3051:3f93::2])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id CFFBC1EC00D9;
+        Tue,  1 Aug 2023 12:30:35 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alien8.de; s=dkim;
+        t=1690885835;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:in-reply-to:in-reply-to:  references:references;
+        bh=ZYNCvFLvMTTU8HwtmFrgwvUT3pozsFpio1F/DyX1K4Q=;
+        b=TcaBAy2FqGCFnc7VcnwDyN5hs+JI6sNUu5edOiZR6AIMlbOTD+Yc6lde7rQS1rjp7FdBmc
+        ZDh8qJR+nktNWKoGhBkDC1yoSLwUlpKTMTMg7tcjrAufxgJB6Q9GA+tY9mpywmqaM6pc2x
+        ELTJ9e8Iy7SP+FU0cPc5AvsldQ5QI+k=
+X-Virus-Scanned: Debian amavisd-new at mail.alien8.de
+Authentication-Results: mail.alien8.de (amavisd-new); dkim=pass (4096-bit key)
+        header.d=alien8.de
+Received: from mail.alien8.de ([127.0.0.1])
+        by localhost (mail.alien8.de [127.0.0.1]) (amavisd-new, port 10026)
+        with ESMTP id VFYORMvHGobl; Tue,  1 Aug 2023 10:30:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alien8.de; s=alien8;
+        t=1690885832; bh=ZYNCvFLvMTTU8HwtmFrgwvUT3pozsFpio1F/DyX1K4Q=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=Lqg6DtCNlzgvD5D2M8FY0aQfvDqMog5dIQmezHrROoBvwVYa+363P4mg5mTK3k2lj
+         ZcFj0Es78CA0BytRh8PkcuEYq8Bh8JMljFLhm21EvCJRV3Tbjcy0xKbpwDP37UXpiM
+         PESlkktECcbCp+It8GHgbrf7oxmsV9yZzj3JdEW+4GVBAFdKkc17+j7qGHflWcBtNW
+         bFdUPQC8Zd8xaqcqFCpamQPhRE9hz8SVixfc9JyiGJoT2/i8TE4Q1uvYQyy7ZmEsUg
+         xPsaNhVwc94A62KID6rTUkQZ4dY9nqaKpMkVelCTDL0O9k39It1ogBdn7TxcmZkdFA
+         Zs5fjdLTdM58U7xi1+e0MbYuG3EFZS5QtZnvW1YYswNgkC4MsoTSXYnLENKYqEVGuI
+         cu0wWD6ep7yt1pxfZ3rQ5x6lDB/tPNn6na3OWAh1McBsFIRtXQHoHtz9iqkq+S6rB1
+         yDKD54+frpGE3gy4BYESOYdIH1mmrB2pZA4nkQVp67r3CyIwivahyJeO65l0uQhJPB
+         THe4es56gK+zJRrWXkwCUZp81hh7SUQKYciVHacfHw3D0l27bgyP0BK1FzURw3B4BN
+         Pt4qvnC8SqFXqROuWzWfC09+uQ+bNo9mBIkC17soB7pjxLsmiNb9h4Slzc+4F3Eqs0
+         SlcpUPAnvMgxuwpG9cyAJS4U=
+Received: from zn.tnic (pd9530d32.dip0.t-ipconnect.de [217.83.13.50])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange ECDHE (P-256) server-signature ECDSA (P-256) server-digest SHA256)
+        (No client certificate requested)
+        by mail.alien8.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id EFE7540E0184;
+        Tue,  1 Aug 2023 10:30:12 +0000 (UTC)
+Date:   Tue, 1 Aug 2023 12:30:08 +0200
+From:   Borislav Petkov <bp@alien8.de>
+To:     Ard Biesheuvel <ardb@kernel.org>
+Cc:     linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Evgeniy Baskov <baskov@ispras.ru>,
+        Andy Lutomirski <luto@kernel.org>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        Ingo Molnar <mingo@redhat.com>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Alexey Khoroshilov <khoroshilov@ispras.ru>,
+        Peter Jones <pjones@redhat.com>,
+        Gerd Hoffmann <kraxel@redhat.com>,
+        Dave Young <dyoung@redhat.com>,
+        Mario Limonciello <mario.limonciello@amd.com>,
+        Kees Cook <keescook@chromium.org>,
+        Tom Lendacky <thomas.lendacky@amd.com>,
+        "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>,
+        Linus Torvalds <torvalds@linux-foundation.org>,
+        Joerg Roedel <jroedel@suse.de>
+Subject: Re: [PATCH v7 11/22] x86/decompressor: Avoid the need for a stack in
+ the 32-bit trampoline
+Message-ID: <20230801103008.GCZMjesHuwb3IKCh2D@fat_crate.local>
+References: <20230728090916.1538550-1-ardb@kernel.org>
+ <20230728090916.1538550-12-ardb@kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.13.0
-Subject: Re: [PATCH v7 3/5] efi: Add tee-based EFI variable driver
-Content-Language: en-US
-To:     Masahisa Kojima <masahisa.kojima@linaro.org>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Jens Wiklander <jens.wiklander@linaro.org>,
-        Jan Kiszka <jan.kiszka@siemens.com>,
-        Sumit Garg <sumit.garg@linaro.org>,
-        linux-kernel@vger.kernel.org, op-tee@lists.trustedfirmware.org
-Cc:     Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-        Johan Hovold <johan+linaro@kernel.org>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        linux-efi@vger.kernel.org,
-        linux-stm32@st-md-mailman.stormreply.com,
-        linux-arm-kernel@lists.infradead.org
-References: <20230731065041.1447-1-masahisa.kojima@linaro.org>
- <20230731065041.1447-4-masahisa.kojima@linaro.org>
-From:   Randy Dunlap <rdunlap@infradead.org>
-In-Reply-To: <20230731065041.1447-4-masahisa.kojima@linaro.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20230728090916.1538550-12-ardb@kernel.org>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
+On Fri, Jul 28, 2023 at 11:09:05AM +0200, Ard Biesheuvel wrote:
+> The 32-bit trampoline no longer uses the stack for anything except
+> performing a far return back to long mode. Currently, this stack is
+> placed in the same page that carries the trampoline code, which means
+> this page must be mapped writable and executable, and the stack is
+> therefore executable as well.
+> 
+> Replace the far return with a far jump, so that the return address can
+> be pre-calculated and patched into the code before it is called. This
+> removes the need for a stack entirely, and in a later patch, this will
+> be taken advantage of by removing writable permissions from (and adding
+> executable permissions to) this code page explicitly when booting via
+> the EFI stub.
+> 
+> Not touching the stack pointer also makes it more straight-forward to
+> call the trampoline code as an ordinary 64-bit function from C code.
+> 
+> Note that we need to preserve the value of RSP across the switch into
+	    ^^
 
+Passive voice pls.
 
-On 7/30/23 23:50, Masahisa Kojima wrote:
-> diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-> index 043ca31c114e..aa38089d1e4a 100644
-> --- a/drivers/firmware/efi/Kconfig
-> +++ b/drivers/firmware/efi/Kconfig
-> @@ -287,3 +287,18 @@ config UEFI_CPER_X86
->  	bool
->  	depends on UEFI_CPER && X86
->  	default y
+> compatibility mode: the stack pointer may get truncated to 32 bits.
+> 
+> Acked-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
+> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+> ---
+>  arch/x86/boot/compressed/head_64.S    | 64 ++++++++++----------
+>  arch/x86/boot/compressed/pgtable.h    |  4 +-
+>  arch/x86/boot/compressed/pgtable_64.c | 12 +++-
+>  3 files changed, 44 insertions(+), 36 deletions(-)
+> 
+> diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+> index 491d985be75fd5b0..1b0c61d1b389fd37 100644
+> --- a/arch/x86/boot/compressed/head_64.S
+> +++ b/arch/x86/boot/compressed/head_64.S
+> @@ -449,9 +449,6 @@ SYM_CODE_START(startup_64)
+>  	leaq	TRAMPOLINE_32BIT_CODE_OFFSET(%rax), %rax
+>  	call	*%rax
+>  
+> -	/* Restore the stack, the 32-bit trampoline uses its own stack */
+> -	leaq	rva(boot_stack_end)(%rbx), %rsp
+> -
+>  	/*
+>  	 * cleanup_trampoline() would restore trampoline memory.
+>  	 *
+> @@ -537,32 +534,37 @@ SYM_FUNC_END(.Lrelocated)
+>   * EDI contains the base address of the trampoline memory.
+>   * Non-zero ESI means trampoline needs to enable 5-level paging.
+>   */
+> +	.section ".rodata", "a", @progbits
+>  SYM_CODE_START(trampoline_32bit_src)
+> -	/* Grab return address */
+> -	movq	(%rsp), %rax
+> -
+> -	/* Set up 32-bit addressable stack */
+> -	leaq	TRAMPOLINE_32BIT_STACK_END(%rdi), %rsp
+> -
+> -	/* Preserve return address and other live 64-bit registers */
+> -	pushq	%rax
+> +	/* Preserve live 64-bit registers */
+>  	pushq	%r15
+>  	pushq	%rbp
+>  	pushq	%rbx
+>  
+> +	/* Preserve top half of RSP in a legacy mode GPR to avoid truncation */
+> +	movq	%rsp, %rbx
+> +	shrq	$32, %rbx
 > +
-> +config TEE_STMM_EFI
-> +	tristate "TEE based EFI runtime variable service driver"
+>  	/* Switch to compatibility mode (CS.L = 0 CS.D = 1) via far return */
+>  	pushq	$__KERNEL32_CS
+>  	leaq	0f(%rip), %rax
+>  	pushq	%rax
+>  	lretq
+>  
+> +	/*
+> +	 * The 32-bit code below will do a far jump back to long mode and end
+> +	 * up here after reconfiguring the number of paging levels.
+> +	 */
+> +.Lret:	shlq	$32, %rbx		// Reconstruct stack pointer
 
-	          TEE-based
-
-> +	depends on EFI && OPTEE && !EFI_VARS_PSTORE
-> +	help
-> +	  Select this config option if TEE is compiled to include StandAloneMM
-> +	  as a separate secure partition it has the ability to check and store
-
-	                       partition. It has the ability
-
-> +	  EFI variables on an RPMB or any other non-volatile medium used by
-> +	  StandAloneMM.
-> +
-> +	  Enabling this will change the EFI runtime services from the firmware
-> +	  provided functions to TEE calls.
-> +
-> +	  To compile this driver as a module, choose M here: the module
-> +	  will be called tee_stmm_efi.
+No side comments pls.
 
 -- 
-~Randy
+Regards/Gruss,
+    Boris.
+
+https://people.kernel.org/tglx/notes-about-netiquette
