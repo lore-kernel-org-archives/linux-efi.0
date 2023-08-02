@@ -2,36 +2,36 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BD639C001E0
-	for <linux-efi@archiver.kernel.org>; Wed,  2 Aug 2023 15:51:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 84BA4C001E0
+	for <linux-efi@archiver.kernel.org>; Wed,  2 Aug 2023 15:51:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234716AbjHBPvF (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 2 Aug 2023 11:51:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38724 "EHLO
+        id S235352AbjHBPvS (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 2 Aug 2023 11:51:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39278 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235350AbjHBPuh (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 2 Aug 2023 11:50:37 -0400
+        with ESMTP id S235281AbjHBPuo (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 2 Aug 2023 11:50:44 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8D0663C02;
-        Wed,  2 Aug 2023 08:50:02 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ECA4F2D5F;
+        Wed,  2 Aug 2023 08:50:06 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 6AF9C61A46;
-        Wed,  2 Aug 2023 15:50:02 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EC52FC433CA;
-        Wed,  2 Aug 2023 15:49:57 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id B865E619CB;
+        Wed,  2 Aug 2023 15:49:53 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 443C3C433C8;
+        Wed,  2 Aug 2023 15:49:49 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1690991401;
-        bh=on4oJHsaFxtlOUkWB52ZfPaIV+tu+e+8BwRYCENHELI=;
+        s=k20201202; t=1690991393;
+        bh=cXimVZzbiEeKDzOb+3rdwKc74jiS3qDnOSBCjuTw9HY=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Sx8WwJ4YyEucHpqNjgLRPCnVIEUgSAND+GiUEXiMVHvcBqWS3KeKIjoEdkUD7/3wm
-         zcqbn2k6w0/c+LPhVMMhF7gN3IhqhBfqzBwdxhIZ5pdKLgzxE5L0MoI1Zz0WpHY8pb
-         D66jT4eIhwgRG35rPTeRZesFp6EAD8qM1V42mKPeLaIIM5t2NnKSutlDGLwdUZZW0A
-         7VN104W6ZXwAuxPyeC3HU4MTZtqAyMmsdEBVa+rptTIm/9ytVPqauhzN8Q3qs2RAQv
-         P6Ysp3OkOXKHldExpBYRZNeyFXr9WY68Y325dSL5LtscZgEcm4CjoYTJh5ihX2gYu4
-         gbso16zrcvG/Q==
+        b=t6yNvnZMK2O11mTQy/73zdpQa4C+85lGVxLY6RXd99+J2Bf53xMMt1d7VE3uyxUMx
+         ttcM21gQs/k432aXy4HZ55nBlonEU4VAgpRk4Fmu7oELCvnUbV+unnNoMvDiwhVTmI
+         7IMnJMTTBCm2SntOXxhzNugDbEt4W4b8P9eBdEOQC9eR7qO0Ec7hEFMNaIO/Z80g27
+         v/kX9xVwbUEYFDc67EKQu/Dg2hJOORnXxIYk0kfKPWB+hkJ0jFkjiQbAqe+DIzHdXI
+         8LCyL1FP4g3a541Oqe4mhgdmk77IVMOhB0qCB+QyTsDKvf2zVZ04CBByhaYQiMQ/Fz
+         5kwukpVodT0MA==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -52,298 +52,115 @@ Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>,
         Linus Torvalds <torvalds@linux-foundation.org>,
         Joerg Roedel <jroedel@suse.de>
-Subject: [PATCH v8 16/23] x86/efistub: Perform 4/5 level paging switch from the stub
-Date:   Wed,  2 Aug 2023 17:48:24 +0200
-Message-Id: <20230802154831.2147855-17-ardb@kernel.org>
+Subject: [PATCH v8 14/23] x86/decompressor: Pass pgtable address to trampoline directly
+Date:   Wed,  2 Aug 2023 17:48:22 +0200
+Message-Id: <20230802154831.2147855-15-ardb@kernel.org>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230802154831.2147855-1-ardb@kernel.org>
 References: <20230802154831.2147855-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=10073; i=ardb@kernel.org; h=from:subject; bh=on4oJHsaFxtlOUkWB52ZfPaIV+tu+e+8BwRYCENHELI=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeVU1VGuRaLn7vkzGZcyNtSd3HzldaqIiKa+YKu7b8f1r cv7SzQ7SlkYxDgYZMUUWQRm/3238/REqVrnWbIwc1iZQIYwcHEKwES+tjP84ZksmD79wYMl4bzL NA6EuTLtWFOjOb3s5bYw/sBz05Mj/zD8lTl88mDE9Pr6jXdOamx5vanl6sxd/dFvGCVWxUxs/fT 7OQ8A
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3817; i=ardb@kernel.org; h=from:subject; bh=cXimVZzbiEeKDzOb+3rdwKc74jiS3qDnOSBCjuTw9HY=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeVU1eFjzKxMYqdZFm1f+k4i+fIkiy1s0Z3tXw5fjzgzx ZTtxeY5HaUsDGIcDLJiiiwCs/++23l6olSt8yxZmDmsTCBDGLg4BWAinusYGVY0r9/N//z7j8/K t+w3KKtLax5Xj+hbEtjhZ3niX6aNnRAjw9V/19PZr9c9KjIUu/Z4t6zD8vf+a7/6SVz3VFu3zFi skgEA
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-In preparation for updating the EFI stub boot flow to avoid the bare
-metal decompressor code altogether, implement the support code for
-switching between 4 and 5 levels of paging before jumping to the kernel
-proper.
+The only remaining use of the trampoline address by the trampoline
+itself is deriving the page table address from it, and this involves
+adding an offset of 0x0. So simplify this, and pass the new CR3 value
+directly.
 
-This reuses the newly refactored trampoline that the bare metal
-decompressor uses, but relies on EFI APIs to allocate 32-bit addressable
-memory and remap it with the appropriate permissions. Given that the
-bare metal decompressor will no longer call into the trampoline if the
-number of paging levels is already set correctly, it is no longer needed
-to remove NX restrictions from the memory range where this trampoline
-may end up.
+This makes the fact that the page table happens to be at the start of
+the trampoline allocation an implementation detail of the caller.
 
-Acked-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/firmware/efi/libstub/Makefile          |  1 +
- drivers/firmware/efi/libstub/efi-stub-helper.c |  2 +
- drivers/firmware/efi/libstub/efistub.h         |  1 +
- drivers/firmware/efi/libstub/x86-5lvl.c        | 95 ++++++++++++++++++++
- drivers/firmware/efi/libstub/x86-stub.c        | 40 +++------
- drivers/firmware/efi/libstub/x86-stub.h        | 17 ++++
- 6 files changed, 130 insertions(+), 26 deletions(-)
+ arch/x86/boot/compressed/head_64.S    | 8 ++++----
+ arch/x86/boot/compressed/pgtable.h    | 2 --
+ arch/x86/boot/compressed/pgtable_64.c | 9 ++++-----
+ 3 files changed, 8 insertions(+), 11 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index 16d64a34d1e19465..ae8874401a9f1490 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -88,6 +88,7 @@ lib-$(CONFIG_EFI_GENERIC_STUB)	+= efi-stub.o string.o intrinsics.o systable.o \
- lib-$(CONFIG_ARM)		+= arm32-stub.o
- lib-$(CONFIG_ARM64)		+= arm64.o arm64-stub.o smbios.o
- lib-$(CONFIG_X86)		+= x86-stub.o
-+lib-$(CONFIG_X86_64)		+= x86-5lvl.o
- lib-$(CONFIG_RISCV)		+= riscv.o riscv-stub.o
- lib-$(CONFIG_LOONGARCH)		+= loongarch.o loongarch-stub.o
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index 8730b1d58e2b0825..afdaf8cb8bb98694 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -521,8 +521,9 @@ SYM_FUNC_END(.Lrelocated)
+  * running in 64-bit mode.
+  *
+  * Return address is at the top of the stack (might be above 4G).
+- * The first argument (EDI) contains the 32-bit addressable base of the
+- * trampoline memory.
++ * The first argument (EDI) contains the address of the temporary PGD level
++ * page table in 32-bit addressable memory which will be programmed into
++ * register CR3.
+  */
+ 	.section ".rodata", "a", @progbits
+ SYM_CODE_START(trampoline_32bit_src)
+@@ -575,8 +576,7 @@ SYM_CODE_START(trampoline_32bit_src)
+ 	movl	%eax, %cr0
  
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index 732984295295fb6d..bfa30625f5d03167 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -73,6 +73,8 @@ efi_status_t efi_parse_options(char const *cmdline)
- 			efi_loglevel = CONSOLE_LOGLEVEL_QUIET;
- 		} else if (!strcmp(param, "noinitrd")) {
- 			efi_noinitrd = true;
-+		} else if (IS_ENABLED(CONFIG_X86_64) && !strcmp(param, "no5lvl")) {
-+			efi_no5lvl = true;
- 		} else if (!strcmp(param, "efi") && val) {
- 			efi_nochunk = parse_option_str(val, "nochunk");
- 			efi_novamap |= parse_option_str(val, "novamap");
-diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-index 6aa38a1bf1265d83..06b7abc92ced9e18 100644
---- a/drivers/firmware/efi/libstub/efistub.h
-+++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -33,6 +33,7 @@
- #define EFI_ALLOC_LIMIT		ULONG_MAX
- #endif
+ 	/* Point CR3 to the trampoline's new top level page table */
+-	leal	TRAMPOLINE_32BIT_PGTABLE_OFFSET(%edi), %eax
+-	movl	%eax, %cr3
++	movl	%edi, %cr3
  
-+extern bool efi_no5lvl;
- extern bool efi_nochunk;
- extern bool efi_nokaslr;
- extern int efi_loglevel;
-diff --git a/drivers/firmware/efi/libstub/x86-5lvl.c b/drivers/firmware/efi/libstub/x86-5lvl.c
-new file mode 100644
-index 0000000000000000..479dd445acdcff8d
---- /dev/null
-+++ b/drivers/firmware/efi/libstub/x86-5lvl.c
-@@ -0,0 +1,95 @@
-+// SPDX-License-Identifier: GPL-2.0-only
-+#include <linux/efi.h>
-+
-+#include <asm/boot.h>
-+#include <asm/desc.h>
-+#include <asm/efi.h>
-+
-+#include "efistub.h"
-+#include "x86-stub.h"
-+
-+bool efi_no5lvl;
-+
-+static void (*la57_toggle)(void *cr3);
-+
-+static const struct desc_struct gdt[] = {
-+	[GDT_ENTRY_KERNEL32_CS] = GDT_ENTRY_INIT(0xc09b, 0, 0xfffff),
-+	[GDT_ENTRY_KERNEL_CS]   = GDT_ENTRY_INIT(0xa09b, 0, 0xfffff),
-+};
-+
-+/*
-+ * Enabling (or disabling) 5 level paging is tricky, because it can only be
-+ * done from 32-bit mode with paging disabled. This means not only that the
-+ * code itself must be running from 32-bit addressable physical memory, but
-+ * also that the root page table must be 32-bit addressable, as programming
-+ * a 64-bit value into CR3 when running in 32-bit mode is not supported.
-+ */
-+efi_status_t efi_setup_5level_paging(void)
-+{
-+	u8 tmpl_size = (u8 *)&trampoline_ljmp_imm_offset - (u8 *)&trampoline_32bit_src;
-+	efi_status_t status;
-+	u8 *la57_code;
-+
-+	if (!efi_is_64bit())
-+		return EFI_SUCCESS;
-+
-+	/* check for 5 level paging support */
-+	if (native_cpuid_eax(0) < 7 ||
-+	    !(native_cpuid_ecx(7) & (1 << (X86_FEATURE_LA57 & 31))))
-+		return EFI_SUCCESS;
-+
-+	/* allocate some 32-bit addressable memory for code and a page table */
-+	status = efi_allocate_pages(2 * PAGE_SIZE, (unsigned long *)&la57_code,
-+				    U32_MAX);
-+	if (status != EFI_SUCCESS)
-+		return status;
-+
-+	la57_toggle = memcpy(la57_code, trampoline_32bit_src, tmpl_size);
-+	memset(la57_code + tmpl_size, 0x90, PAGE_SIZE - tmpl_size);
-+
-+	/*
-+	 * To avoid the need to allocate a 32-bit addressable stack, the
-+	 * trampoline uses a LJMP instruction to switch back to long mode.
-+	 * LJMP takes an absolute destination address, which needs to be
-+	 * fixed up at runtime.
-+	 */
-+	*(u32 *)&la57_code[trampoline_ljmp_imm_offset] += (unsigned long)la57_code;
-+
-+	efi_adjust_memory_range_protection((unsigned long)la57_toggle, PAGE_SIZE);
-+
-+	return EFI_SUCCESS;
-+}
-+
-+void efi_5level_switch(void)
-+{
-+	bool want_la57 = IS_ENABLED(CONFIG_X86_5LEVEL) && !efi_no5lvl;
-+	bool have_la57 = native_read_cr4() & X86_CR4_LA57;
-+	bool need_toggle = want_la57 ^ have_la57;
-+	u64 *pgt = (void *)la57_toggle + PAGE_SIZE;
-+	u64 *cr3 = (u64 *)__native_read_cr3();
-+	u64 *new_cr3;
-+
-+	if (!la57_toggle || !need_toggle)
-+		return;
-+
-+	if (!have_la57) {
-+		/*
-+		 * 5 level paging will be enabled, so a root level page needs
-+		 * to be allocated from the 32-bit addressable physical region,
-+		 * with its first entry referring to the existing hierarchy.
-+		 */
-+		new_cr3 = memset(pgt, 0, PAGE_SIZE);
-+		new_cr3[0] = (u64)cr3 | _PAGE_TABLE_NOENC;
-+	} else {
-+		/* take the new root table pointer from the current entry #0 */
-+		new_cr3 = (u64 *)(cr3[0] & PAGE_MASK);
-+
-+		/* copy the new root table if it is not 32-bit addressable */
-+		if ((u64)new_cr3 > U32_MAX)
-+			new_cr3 = memcpy(pgt, new_cr3, PAGE_SIZE);
-+	}
-+
-+	native_load_gdt(&(struct desc_ptr){ sizeof(gdt) - 1, (u64)gdt });
-+
-+	la57_toggle(new_cr3);
-+}
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index 9247dbc7dbbd12ef..af5f50617a5b4c59 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -17,6 +17,7 @@
- #include <asm/boot.h>
+ 	/* Set EFER.LME=1 as a precaution in case hypervsior pulls the rug */
+ 	movl	$MSR_EFER, %ecx
+diff --git a/arch/x86/boot/compressed/pgtable.h b/arch/x86/boot/compressed/pgtable.h
+index c6b0903aded05a07..6d595abe06b34d63 100644
+--- a/arch/x86/boot/compressed/pgtable.h
++++ b/arch/x86/boot/compressed/pgtable.h
+@@ -3,8 +3,6 @@
  
- #include "efistub.h"
-+#include "x86-stub.h"
+ #define TRAMPOLINE_32BIT_SIZE		(2 * PAGE_SIZE)
  
- /* Maximum physical address for 64-bit kernel with 4-level paging */
- #define MAXMEM_X86_64_4LEVEL (1ull << 46)
-@@ -223,8 +224,8 @@ static void retrieve_apple_device_properties(struct boot_params *boot_params)
- 	}
- }
+-#define TRAMPOLINE_32BIT_PGTABLE_OFFSET	0
+-
+ #define TRAMPOLINE_32BIT_CODE_OFFSET	PAGE_SIZE
+ #define TRAMPOLINE_32BIT_CODE_SIZE	0xA0
  
--static void
--adjust_memory_range_protection(unsigned long start, unsigned long size)
-+void efi_adjust_memory_range_protection(unsigned long start,
-+					unsigned long size)
+diff --git a/arch/x86/boot/compressed/pgtable_64.c b/arch/x86/boot/compressed/pgtable_64.c
+index 4213473ae54883c8..eab4e6b568ae05c4 100644
+--- a/arch/x86/boot/compressed/pgtable_64.c
++++ b/arch/x86/boot/compressed/pgtable_64.c
+@@ -103,7 +103,7 @@ static unsigned long find_trampoline_placement(void)
+ 
+ asmlinkage void configure_5level_paging(struct boot_params *bp)
  {
- 	efi_status_t status;
- 	efi_gcd_memory_space_desc_t desc;
-@@ -278,35 +279,14 @@ adjust_memory_range_protection(unsigned long start, unsigned long size)
+-	void (*toggle_la57)(void *trampoline);
++	void (*toggle_la57)(void *cr3);
+ 	bool l5_required = false;
+ 
+ 	/* Initialize boot_params. Required for cmdline_find_option_bool(). */
+@@ -174,7 +174,7 @@ asmlinkage void configure_5level_paging(struct boot_params *bp)
+ 		 * For 4- to 5-level paging transition, set up current CR3 as
+ 		 * the first and the only entry in a new top-level page table.
+ 		 */
+-		trampoline_32bit[TRAMPOLINE_32BIT_PGTABLE_OFFSET] = __native_read_cr3() | _PAGE_TABLE_NOENC;
++		*trampoline_32bit = __native_read_cr3() | _PAGE_TABLE_NOENC;
+ 	} else {
+ 		unsigned long src;
+ 
+@@ -187,8 +187,7 @@ asmlinkage void configure_5level_paging(struct boot_params *bp)
+ 		 * may be above 4G.
+ 		 */
+ 		src = *(unsigned long *)__native_read_cr3() & PAGE_MASK;
+-		memcpy(trampoline_32bit + TRAMPOLINE_32BIT_PGTABLE_OFFSET / sizeof(unsigned long),
+-		       (void *)src, PAGE_SIZE);
++		memcpy(trampoline_32bit, (void *)src, PAGE_SIZE);
  	}
- }
  
--/*
-- * Trampoline takes 2 pages and can be loaded in first megabyte of memory
-- * with its end placed between 128k and 640k where BIOS might start.
-- * (see arch/x86/boot/compressed/pgtable_64.c)
-- *
-- * We cannot find exact trampoline placement since memory map
-- * can be modified by UEFI, and it can alter the computed address.
-- */
--
--#define TRAMPOLINE_PLACEMENT_BASE ((128 - 8)*1024)
--#define TRAMPOLINE_PLACEMENT_SIZE (640*1024 - (128 - 8)*1024)
--
- extern const u8 startup_32[], startup_64[];
- 
- static void
- setup_memory_protection(unsigned long image_base, unsigned long image_size)
+ 	toggle_la57(trampoline_32bit);
+@@ -198,7 +197,7 @@ void cleanup_trampoline(void *pgtable)
  {
--	/*
--	 * Allow execution of possible trampoline used
--	 * for switching between 4- and 5-level page tables
--	 * and relocated kernel image.
--	 */
--
--	adjust_memory_range_protection(TRAMPOLINE_PLACEMENT_BASE,
--				       TRAMPOLINE_PLACEMENT_SIZE);
--
- #ifdef CONFIG_64BIT
- 	if (image_base != (unsigned long)startup_32)
--		adjust_memory_range_protection(image_base, image_size);
-+		efi_adjust_memory_range_protection(image_base, image_size);
- #else
+ 	void *trampoline_pgtable;
+ 
+-	trampoline_pgtable = trampoline_32bit + TRAMPOLINE_32BIT_PGTABLE_OFFSET / sizeof(unsigned long);
++	trampoline_pgtable = trampoline_32bit;
+ 
  	/*
- 	 * Clear protection flags on a whole range of possible
-@@ -316,8 +296,8 @@ setup_memory_protection(unsigned long image_base, unsigned long image_size)
- 	 * need to remove possible protection on relocated image
- 	 * itself disregarding further relocations.
- 	 */
--	adjust_memory_range_protection(LOAD_PHYSICAL_ADDR,
--				       KERNEL_IMAGE_SIZE - LOAD_PHYSICAL_ADDR);
-+	efi_adjust_memory_range_protection(LOAD_PHYSICAL_ADDR,
-+					   KERNEL_IMAGE_SIZE - LOAD_PHYSICAL_ADDR);
- #endif
- }
- 
-@@ -839,6 +819,12 @@ void __noreturn efi_stub_entry(efi_handle_t handle,
- 		efi_dxe_table = NULL;
- 	}
- 
-+	status = efi_setup_5level_paging();
-+	if (status != EFI_SUCCESS) {
-+		efi_err("efi_setup_5level_paging() failed!\n");
-+		goto fail;
-+	}
-+
- 	/*
- 	 * If the kernel isn't already loaded at a suitable address,
- 	 * relocate it.
-@@ -959,6 +945,8 @@ void __noreturn efi_stub_entry(efi_handle_t handle,
- 		goto fail;
- 	}
- 
-+	efi_5level_switch();
-+
- 	if (IS_ENABLED(CONFIG_X86_64))
- 		bzimage_addr += startup_64 - startup_32;
- 
-diff --git a/drivers/firmware/efi/libstub/x86-stub.h b/drivers/firmware/efi/libstub/x86-stub.h
-new file mode 100644
-index 0000000000000000..37c5a36b9d8cf9b2
---- /dev/null
-+++ b/drivers/firmware/efi/libstub/x86-stub.h
-@@ -0,0 +1,17 @@
-+/* SPDX-License-Identifier: GPL-2.0-only */
-+
-+#include <linux/efi.h>
-+
-+extern void trampoline_32bit_src(void *, bool);
-+extern const u16 trampoline_ljmp_imm_offset;
-+
-+void efi_adjust_memory_range_protection(unsigned long start,
-+					unsigned long size);
-+
-+#ifdef CONFIG_X86_64
-+efi_status_t efi_setup_5level_paging(void);
-+void efi_5level_switch(void);
-+#else
-+static inline efi_status_t efi_setup_5level_paging(void) { return EFI_SUCCESS; }
-+static inline void efi_5level_switch(void) {}
-+#endif
+ 	 * Move the top level page table out of trampoline memory,
 -- 
 2.39.2
 
