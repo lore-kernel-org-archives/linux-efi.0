@@ -2,36 +2,36 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 41B24C001E0
-	for <linux-efi@archiver.kernel.org>; Wed,  2 Aug 2023 15:51:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 46D17C04A6A
+	for <linux-efi@archiver.kernel.org>; Wed,  2 Aug 2023 15:51:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231751AbjHBPvU (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 2 Aug 2023 11:51:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39346 "EHLO
+        id S235275AbjHBPvg (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 2 Aug 2023 11:51:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38678 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235402AbjHBPuq (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 2 Aug 2023 11:50:46 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CEE4A3596;
-        Wed,  2 Aug 2023 08:50:07 -0700 (PDT)
+        with ESMTP id S235418AbjHBPvA (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 2 Aug 2023 11:51:00 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0AD343C2B;
+        Wed,  2 Aug 2023 08:50:19 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id BDB9D61A10;
-        Wed,  2 Aug 2023 15:50:06 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4B040C433D9;
-        Wed,  2 Aug 2023 15:50:02 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id C592A619D9;
+        Wed,  2 Aug 2023 15:50:19 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 50933C433CB;
+        Wed,  2 Aug 2023 15:50:15 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1690991406;
-        bh=Fk0lLfubzCQVs/j9K2oCq55VjZoVRLPQJNzwiQAW0qQ=;
+        s=k20201202; t=1690991419;
+        bh=35ydgYIIKoLxZL2vz2F8XVJhO0j9D3mjWHEuMrtQ7Ck=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=pM2dh/VqIQP2foHklYhi2bz1N/K1e/kApDhtEK6uWahoySFf6DH+bIBmYtveEJQPZ
-         SQMnRKw/1zg5frs8h77kxJhY55Z0Fxut199fn56+qQOjxgQmwuugf0bLFVaVoHRCd6
-         eT6Kzs4vNxOo9GvyS4fNMLiINxvAsLFOATnpW3oiyZZji9Yjl5qnQFIs5Xh4TCXlow
-         9AVbL/XK9oZ8ZCw3wmTMhTH25t8gRmh5BWA6hT1xV8Bu005BfTXXZ8nqhqwctjfqoS
-         KCGmXmzfgxAue6FXEXLEsYP1v4HNXJ2D26fT9OX/IDnQaTgtzUfRIOF9uGGxs6zyDC
-         Ro+nAcq46OC7w==
+        b=TBGV7KlefXGHmsD+HOTcRqgYHCSof4BZcFbVEH5gszSi4zld41ZqILqjGWia2vxOh
+         w4gvqeYcttH5A6M3OyV4HRNbCMzNlKIe2wEiy0LXbquTUk+Be9RgImv7nl2Pl9nL5w
+         BPemBTmbR6g3Ndy1Kmc0/sYO5ltuR0I3Z/ChM1SVNbFzv8FQt581nXFpaEbsN9mlEU
+         2nS0RJu6AZG0p8WvndJIsgNt0vbY65NPwDLunld+2PcWbQ5yzG+LR4sSHrXuhU8ieJ
+         oYQaD76Aj6AIFlijAP3KKZRcwCoTCQ74vvq4L9zv/N+XX6L/zw6mIra99lZN7Bghhy
+         NFhNT6y+sJeDw==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -52,100 +52,105 @@ Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>,
         Linus Torvalds <torvalds@linux-foundation.org>,
         Joerg Roedel <jroedel@suse.de>
-Subject: [PATCH v8 17/23] x86/efistub: Prefer EFI memory attributes protocol over DXE services
-Date:   Wed,  2 Aug 2023 17:48:25 +0200
-Message-Id: <20230802154831.2147855-18-ardb@kernel.org>
+Subject: [PATCH v8 20/23] x86/decompressor: Factor out kernel decompression and relocation
+Date:   Wed,  2 Aug 2023 17:48:28 +0200
+Message-Id: <20230802154831.2147855-21-ardb@kernel.org>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230802154831.2147855-1-ardb@kernel.org>
 References: <20230802154831.2147855-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=3324; i=ardb@kernel.org; h=from:subject; bh=Fk0lLfubzCQVs/j9K2oCq55VjZoVRLPQJNzwiQAW0qQ=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeVU1XGjg1fOWCn3NX05sEWyV9qN9/0Xz8bHhkyeG3S7f Y0nel/pKGVhEONgkBVTZBGY/ffdztMTpWqdZ8nCzGFlAhnCwMUpABPRzGP4w7OwMJnFZJbhzrkl JgGVa1ad2xlTssymR/nR2+5ivrQrfxkZ/nPsaPrwcxrjYrX2Rd4deZ58npNfr8nw+ZEv3/3+1MW XHAA=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2968; i=ardb@kernel.org; h=from:subject; bh=35ydgYIIKoLxZL2vz2F8XVJhO0j9D3mjWHEuMrtQ7Ck=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeVU1ekFc9wUapLUD1QecUzquslXIul15lj76WX1V3vWf b4Y4fmpo5SFQYyDQVZMkUVg9t93O09PlKp1niULM4eVCWQIAxenAExk3hWG/zHrFpx4tv7Vtf6H oiLNjIePBMXc/ZpTu8yx7qWSavLsJRoM/0MW+0/1k7DhY558Xqhs++GYSSUfJqh+XiN73SZK/Z2 vCi8A
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Currently, the EFI stub relies on DXE services in some cases to clear
-non-execute restrictions from page allocations that need to be
-executable. This is dodgy, because DXE services are not specified by
-UEFI but by PI, and they are not intended for consumption by OS loaders.
-However, no alternative existed at the time.
-
-Now, there is a new UEFI protocol that should be used instead, so if it
-exists, prefer it over the DXE services calls.
+Factor out the decompressor sequence that invokes the decompressor,
+parses the ELF and applies the relocations so that it can be called
+directly from the EFI stub.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/firmware/efi/libstub/x86-stub.c | 29 ++++++++++++++------
- 1 file changed, 21 insertions(+), 8 deletions(-)
+ arch/x86/boot/compressed/misc.c | 28 ++++++++++++++++----
+ arch/x86/include/asm/boot.h     |  8 ++++++
+ 2 files changed, 31 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index af5f50617a5b4c59..acb1c65bf8ac6fb3 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -26,6 +26,7 @@ const efi_system_table_t *efi_system_table;
- const efi_dxe_services_table_t *efi_dxe_table;
- u32 image_offset __section(".data");
- static efi_loaded_image_t *image = NULL;
-+static efi_memory_attribute_protocol_t *memattr;
+diff --git a/arch/x86/boot/compressed/misc.c b/arch/x86/boot/compressed/misc.c
+index 2d91d56b59e1af93..f711f2a85862e9ef 100644
+--- a/arch/x86/boot/compressed/misc.c
++++ b/arch/x86/boot/compressed/misc.c
+@@ -330,11 +330,33 @@ static size_t parse_elf(void *output)
+ 	return ehdr.e_entry - LOAD_PHYSICAL_ADDR;
+ }
  
- typedef union sev_memory_acceptance_protocol sev_memory_acceptance_protocol_t;
- union sev_memory_acceptance_protocol {
-@@ -233,12 +234,18 @@ void efi_adjust_memory_range_protection(unsigned long start,
- 	unsigned long rounded_start, rounded_end;
- 	unsigned long unprotect_start, unprotect_size;
++const unsigned long kernel_total_size = VO__end - VO__text;
++
+ static u8 boot_heap[BOOT_HEAP_SIZE] __aligned(4);
  
--	if (efi_dxe_table == NULL)
--		return;
--
- 	rounded_start = rounddown(start, EFI_PAGE_SIZE);
- 	rounded_end = roundup(start + size, EFI_PAGE_SIZE);
+ extern unsigned char input_data[];
+ extern unsigned int input_len, output_len;
  
-+	if (memattr != NULL) {
-+		efi_call_proto(memattr, clear_memory_attributes, rounded_start,
-+			       rounded_end - rounded_start, EFI_MEMORY_XP);
-+		return;
++unsigned long decompress_kernel(unsigned char *outbuf, unsigned long virt_addr,
++				void (*error)(char *x))
++{
++	unsigned long entry;
++
++	if (!free_mem_ptr) {
++		free_mem_ptr     = (unsigned long)boot_heap;
++		free_mem_end_ptr = (unsigned long)boot_heap + sizeof(boot_heap);
 +	}
 +
-+	if (efi_dxe_table == NULL)
-+		return;
++	if (__decompress(input_data, input_len, NULL, NULL, outbuf, output_len,
++			 NULL, error) < 0)
++		return ULONG_MAX;
 +
- 	/*
- 	 * Don't modify memory region attributes, they are
- 	 * already suitable, to lower the possibility to
-@@ -801,6 +808,7 @@ void __noreturn efi_stub_entry(efi_handle_t handle,
- 			       efi_system_table_t *sys_table_arg,
- 			       struct boot_params *boot_params)
++	entry = parse_elf(outbuf);
++	handle_relocations(outbuf, output_len, virt_addr);
++
++	return entry;
++}
++
+ /*
+  * The compressed kernel image (ZO), has been moved so that its position
+  * is against the end of the buffer used to hold the uncompressed kernel
+@@ -354,7 +376,6 @@ extern unsigned int input_len, output_len;
+  */
+ asmlinkage __visible void *extract_kernel(void *rmode, unsigned char *output)
  {
-+	efi_guid_t guid = EFI_MEMORY_ATTRIBUTE_PROTOCOL_GUID;
- 	unsigned long bzimage_addr = (unsigned long)startup_32;
- 	unsigned long buffer_start, buffer_end;
- 	struct setup_header *hdr = &boot_params->hdr;
-@@ -812,13 +820,18 @@ void __noreturn efi_stub_entry(efi_handle_t handle,
- 	if (efi_system_table->hdr.signature != EFI_SYSTEM_TABLE_SIGNATURE)
- 		efi_exit(handle, EFI_INVALID_PARAMETER);
- 
--	efi_dxe_table = get_efi_config_table(EFI_DXE_SERVICES_TABLE_GUID);
--	if (efi_dxe_table &&
--	    efi_dxe_table->hdr.signature != EFI_DXE_SERVICES_TABLE_SIGNATURE) {
--		efi_warn("Ignoring DXE services table: invalid signature\n");
--		efi_dxe_table = NULL;
-+	if (IS_ENABLED(CONFIG_EFI_DXE_MEM_ATTRIBUTES)) {
-+		efi_dxe_table = get_efi_config_table(EFI_DXE_SERVICES_TABLE_GUID);
-+		if (efi_dxe_table &&
-+		    efi_dxe_table->hdr.signature != EFI_DXE_SERVICES_TABLE_SIGNATURE) {
-+			efi_warn("Ignoring DXE services table: invalid signature\n");
-+			efi_dxe_table = NULL;
-+		}
+-	const unsigned long kernel_total_size = VO__end - VO__text;
+ 	unsigned long virt_addr = LOAD_PHYSICAL_ADDR;
+ 	memptr heap = (memptr)boot_heap;
+ 	unsigned long needed_size;
+@@ -463,10 +484,7 @@ asmlinkage __visible void *extract_kernel(void *rmode, unsigned char *output)
+ 		accept_memory(__pa(output), __pa(output) + needed_size);
  	}
  
-+	/* grab the memory attributes protocol if it exists */
-+	efi_bs_call(locate_protocol, &guid, NULL, (void **)&memattr);
+-	__decompress(input_data, input_len, NULL, NULL, output, output_len,
+-			NULL, error);
+-	entry_offset = parse_elf(output);
+-	handle_relocations(output, output_len, virt_addr);
++	entry_offset = decompress_kernel(output, virt_addr, error);
+ 
+ 	debug_putstr("done.\nBooting the kernel (entry_offset: 0x");
+ 	debug_puthex(entry_offset);
+diff --git a/arch/x86/include/asm/boot.h b/arch/x86/include/asm/boot.h
+index 9191280d9ea3160d..4ae14339cb8cc72d 100644
+--- a/arch/x86/include/asm/boot.h
++++ b/arch/x86/include/asm/boot.h
+@@ -62,4 +62,12 @@
+ # define BOOT_STACK_SIZE	0x1000
+ #endif
+ 
++#ifndef __ASSEMBLY__
++extern unsigned int output_len;
++extern const unsigned long kernel_total_size;
 +
- 	status = efi_setup_5level_paging();
- 	if (status != EFI_SUCCESS) {
- 		efi_err("efi_setup_5level_paging() failed!\n");
++unsigned long decompress_kernel(unsigned char *outbuf, unsigned long virt_addr,
++				void (*error)(char *x));
++#endif
++
+ #endif /* _ASM_X86_BOOT_H */
 -- 
 2.39.2
 
