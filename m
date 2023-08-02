@@ -2,36 +2,36 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 84BA4C001E0
-	for <linux-efi@archiver.kernel.org>; Wed,  2 Aug 2023 15:51:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 41B24C001E0
+	for <linux-efi@archiver.kernel.org>; Wed,  2 Aug 2023 15:51:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235352AbjHBPvS (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 2 Aug 2023 11:51:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39278 "EHLO
+        id S231751AbjHBPvU (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 2 Aug 2023 11:51:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39346 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235281AbjHBPuo (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 2 Aug 2023 11:50:44 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ECA4F2D5F;
-        Wed,  2 Aug 2023 08:50:06 -0700 (PDT)
+        with ESMTP id S235402AbjHBPuq (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 2 Aug 2023 11:50:46 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CEE4A3596;
+        Wed,  2 Aug 2023 08:50:07 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id B865E619CB;
-        Wed,  2 Aug 2023 15:49:53 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 443C3C433C8;
-        Wed,  2 Aug 2023 15:49:49 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id BDB9D61A10;
+        Wed,  2 Aug 2023 15:50:06 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4B040C433D9;
+        Wed,  2 Aug 2023 15:50:02 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1690991393;
-        bh=cXimVZzbiEeKDzOb+3rdwKc74jiS3qDnOSBCjuTw9HY=;
+        s=k20201202; t=1690991406;
+        bh=Fk0lLfubzCQVs/j9K2oCq55VjZoVRLPQJNzwiQAW0qQ=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=t6yNvnZMK2O11mTQy/73zdpQa4C+85lGVxLY6RXd99+J2Bf53xMMt1d7VE3uyxUMx
-         ttcM21gQs/k432aXy4HZ55nBlonEU4VAgpRk4Fmu7oELCvnUbV+unnNoMvDiwhVTmI
-         7IMnJMTTBCm2SntOXxhzNugDbEt4W4b8P9eBdEOQC9eR7qO0Ec7hEFMNaIO/Z80g27
-         v/kX9xVwbUEYFDc67EKQu/Dg2hJOORnXxIYk0kfKPWB+hkJ0jFkjiQbAqe+DIzHdXI
-         8LCyL1FP4g3a541Oqe4mhgdmk77IVMOhB0qCB+QyTsDKvf2zVZ04CBByhaYQiMQ/Fz
-         5kwukpVodT0MA==
+        b=pM2dh/VqIQP2foHklYhi2bz1N/K1e/kApDhtEK6uWahoySFf6DH+bIBmYtveEJQPZ
+         SQMnRKw/1zg5frs8h77kxJhY55Z0Fxut199fn56+qQOjxgQmwuugf0bLFVaVoHRCd6
+         eT6Kzs4vNxOo9GvyS4fNMLiINxvAsLFOATnpW3oiyZZji9Yjl5qnQFIs5Xh4TCXlow
+         9AVbL/XK9oZ8ZCw3wmTMhTH25t8gRmh5BWA6hT1xV8Bu005BfTXXZ8nqhqwctjfqoS
+         KCGmXmzfgxAue6FXEXLEsYP1v4HNXJ2D26fT9OX/IDnQaTgtzUfRIOF9uGGxs6zyDC
+         Ro+nAcq46OC7w==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -52,115 +52,100 @@ Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>,
         Linus Torvalds <torvalds@linux-foundation.org>,
         Joerg Roedel <jroedel@suse.de>
-Subject: [PATCH v8 14/23] x86/decompressor: Pass pgtable address to trampoline directly
-Date:   Wed,  2 Aug 2023 17:48:22 +0200
-Message-Id: <20230802154831.2147855-15-ardb@kernel.org>
+Subject: [PATCH v8 17/23] x86/efistub: Prefer EFI memory attributes protocol over DXE services
+Date:   Wed,  2 Aug 2023 17:48:25 +0200
+Message-Id: <20230802154831.2147855-18-ardb@kernel.org>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230802154831.2147855-1-ardb@kernel.org>
 References: <20230802154831.2147855-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=3817; i=ardb@kernel.org; h=from:subject; bh=cXimVZzbiEeKDzOb+3rdwKc74jiS3qDnOSBCjuTw9HY=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeVU1eFjzKxMYqdZFm1f+k4i+fIkiy1s0Z3tXw5fjzgzx ZTtxeY5HaUsDGIcDLJiiiwCs/++23l6olSt8yxZmDmsTCBDGLg4BWAinusYGVY0r9/N//z7j8/K t+w3KKtLax5Xj+hbEtjhZ3niX6aNnRAjw9V/19PZr9c9KjIUu/Z4t6zD8vf+a7/6SVz3VFu3zFi skgEA
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3324; i=ardb@kernel.org; h=from:subject; bh=Fk0lLfubzCQVs/j9K2oCq55VjZoVRLPQJNzwiQAW0qQ=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeVU1XGjg1fOWCn3NX05sEWyV9qN9/0Xz8bHhkyeG3S7f Y0nel/pKGVhEONgkBVTZBGY/ffdztMTpWqdZ8nCzGFlAhnCwMUpABPRzGP4w7OwMJnFZJbhzrkl JgGVa1ad2xlTssymR/nR2+5ivrQrfxkZ/nPsaPrwcxrjYrX2Rd4deZ58npNfr8nw+ZEv3/3+1MW XHAA=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The only remaining use of the trampoline address by the trampoline
-itself is deriving the page table address from it, and this involves
-adding an offset of 0x0. So simplify this, and pass the new CR3 value
-directly.
+Currently, the EFI stub relies on DXE services in some cases to clear
+non-execute restrictions from page allocations that need to be
+executable. This is dodgy, because DXE services are not specified by
+UEFI but by PI, and they are not intended for consumption by OS loaders.
+However, no alternative existed at the time.
 
-This makes the fact that the page table happens to be at the start of
-the trampoline allocation an implementation detail of the caller.
+Now, there is a new UEFI protocol that should be used instead, so if it
+exists, prefer it over the DXE services calls.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/boot/compressed/head_64.S    | 8 ++++----
- arch/x86/boot/compressed/pgtable.h    | 2 --
- arch/x86/boot/compressed/pgtable_64.c | 9 ++++-----
- 3 files changed, 8 insertions(+), 11 deletions(-)
+ drivers/firmware/efi/libstub/x86-stub.c | 29 ++++++++++++++------
+ 1 file changed, 21 insertions(+), 8 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
-index 8730b1d58e2b0825..afdaf8cb8bb98694 100644
---- a/arch/x86/boot/compressed/head_64.S
-+++ b/arch/x86/boot/compressed/head_64.S
-@@ -521,8 +521,9 @@ SYM_FUNC_END(.Lrelocated)
-  * running in 64-bit mode.
-  *
-  * Return address is at the top of the stack (might be above 4G).
-- * The first argument (EDI) contains the 32-bit addressable base of the
-- * trampoline memory.
-+ * The first argument (EDI) contains the address of the temporary PGD level
-+ * page table in 32-bit addressable memory which will be programmed into
-+ * register CR3.
-  */
- 	.section ".rodata", "a", @progbits
- SYM_CODE_START(trampoline_32bit_src)
-@@ -575,8 +576,7 @@ SYM_CODE_START(trampoline_32bit_src)
- 	movl	%eax, %cr0
+diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
+index af5f50617a5b4c59..acb1c65bf8ac6fb3 100644
+--- a/drivers/firmware/efi/libstub/x86-stub.c
++++ b/drivers/firmware/efi/libstub/x86-stub.c
+@@ -26,6 +26,7 @@ const efi_system_table_t *efi_system_table;
+ const efi_dxe_services_table_t *efi_dxe_table;
+ u32 image_offset __section(".data");
+ static efi_loaded_image_t *image = NULL;
++static efi_memory_attribute_protocol_t *memattr;
  
- 	/* Point CR3 to the trampoline's new top level page table */
--	leal	TRAMPOLINE_32BIT_PGTABLE_OFFSET(%edi), %eax
--	movl	%eax, %cr3
-+	movl	%edi, %cr3
+ typedef union sev_memory_acceptance_protocol sev_memory_acceptance_protocol_t;
+ union sev_memory_acceptance_protocol {
+@@ -233,12 +234,18 @@ void efi_adjust_memory_range_protection(unsigned long start,
+ 	unsigned long rounded_start, rounded_end;
+ 	unsigned long unprotect_start, unprotect_size;
  
- 	/* Set EFER.LME=1 as a precaution in case hypervsior pulls the rug */
- 	movl	$MSR_EFER, %ecx
-diff --git a/arch/x86/boot/compressed/pgtable.h b/arch/x86/boot/compressed/pgtable.h
-index c6b0903aded05a07..6d595abe06b34d63 100644
---- a/arch/x86/boot/compressed/pgtable.h
-+++ b/arch/x86/boot/compressed/pgtable.h
-@@ -3,8 +3,6 @@
- 
- #define TRAMPOLINE_32BIT_SIZE		(2 * PAGE_SIZE)
- 
--#define TRAMPOLINE_32BIT_PGTABLE_OFFSET	0
+-	if (efi_dxe_table == NULL)
+-		return;
 -
- #define TRAMPOLINE_32BIT_CODE_OFFSET	PAGE_SIZE
- #define TRAMPOLINE_32BIT_CODE_SIZE	0xA0
+ 	rounded_start = rounddown(start, EFI_PAGE_SIZE);
+ 	rounded_end = roundup(start + size, EFI_PAGE_SIZE);
  
-diff --git a/arch/x86/boot/compressed/pgtable_64.c b/arch/x86/boot/compressed/pgtable_64.c
-index 4213473ae54883c8..eab4e6b568ae05c4 100644
---- a/arch/x86/boot/compressed/pgtable_64.c
-+++ b/arch/x86/boot/compressed/pgtable_64.c
-@@ -103,7 +103,7 @@ static unsigned long find_trampoline_placement(void)
- 
- asmlinkage void configure_5level_paging(struct boot_params *bp)
++	if (memattr != NULL) {
++		efi_call_proto(memattr, clear_memory_attributes, rounded_start,
++			       rounded_end - rounded_start, EFI_MEMORY_XP);
++		return;
++	}
++
++	if (efi_dxe_table == NULL)
++		return;
++
+ 	/*
+ 	 * Don't modify memory region attributes, they are
+ 	 * already suitable, to lower the possibility to
+@@ -801,6 +808,7 @@ void __noreturn efi_stub_entry(efi_handle_t handle,
+ 			       efi_system_table_t *sys_table_arg,
+ 			       struct boot_params *boot_params)
  {
--	void (*toggle_la57)(void *trampoline);
-+	void (*toggle_la57)(void *cr3);
- 	bool l5_required = false;
++	efi_guid_t guid = EFI_MEMORY_ATTRIBUTE_PROTOCOL_GUID;
+ 	unsigned long bzimage_addr = (unsigned long)startup_32;
+ 	unsigned long buffer_start, buffer_end;
+ 	struct setup_header *hdr = &boot_params->hdr;
+@@ -812,13 +820,18 @@ void __noreturn efi_stub_entry(efi_handle_t handle,
+ 	if (efi_system_table->hdr.signature != EFI_SYSTEM_TABLE_SIGNATURE)
+ 		efi_exit(handle, EFI_INVALID_PARAMETER);
  
- 	/* Initialize boot_params. Required for cmdline_find_option_bool(). */
-@@ -174,7 +174,7 @@ asmlinkage void configure_5level_paging(struct boot_params *bp)
- 		 * For 4- to 5-level paging transition, set up current CR3 as
- 		 * the first and the only entry in a new top-level page table.
- 		 */
--		trampoline_32bit[TRAMPOLINE_32BIT_PGTABLE_OFFSET] = __native_read_cr3() | _PAGE_TABLE_NOENC;
-+		*trampoline_32bit = __native_read_cr3() | _PAGE_TABLE_NOENC;
- 	} else {
- 		unsigned long src;
- 
-@@ -187,8 +187,7 @@ asmlinkage void configure_5level_paging(struct boot_params *bp)
- 		 * may be above 4G.
- 		 */
- 		src = *(unsigned long *)__native_read_cr3() & PAGE_MASK;
--		memcpy(trampoline_32bit + TRAMPOLINE_32BIT_PGTABLE_OFFSET / sizeof(unsigned long),
--		       (void *)src, PAGE_SIZE);
-+		memcpy(trampoline_32bit, (void *)src, PAGE_SIZE);
+-	efi_dxe_table = get_efi_config_table(EFI_DXE_SERVICES_TABLE_GUID);
+-	if (efi_dxe_table &&
+-	    efi_dxe_table->hdr.signature != EFI_DXE_SERVICES_TABLE_SIGNATURE) {
+-		efi_warn("Ignoring DXE services table: invalid signature\n");
+-		efi_dxe_table = NULL;
++	if (IS_ENABLED(CONFIG_EFI_DXE_MEM_ATTRIBUTES)) {
++		efi_dxe_table = get_efi_config_table(EFI_DXE_SERVICES_TABLE_GUID);
++		if (efi_dxe_table &&
++		    efi_dxe_table->hdr.signature != EFI_DXE_SERVICES_TABLE_SIGNATURE) {
++			efi_warn("Ignoring DXE services table: invalid signature\n");
++			efi_dxe_table = NULL;
++		}
  	}
  
- 	toggle_la57(trampoline_32bit);
-@@ -198,7 +197,7 @@ void cleanup_trampoline(void *pgtable)
- {
- 	void *trampoline_pgtable;
- 
--	trampoline_pgtable = trampoline_32bit + TRAMPOLINE_32BIT_PGTABLE_OFFSET / sizeof(unsigned long);
-+	trampoline_pgtable = trampoline_32bit;
- 
- 	/*
- 	 * Move the top level page table out of trampoline memory,
++	/* grab the memory attributes protocol if it exists */
++	efi_bs_call(locate_protocol, &guid, NULL, (void **)&memattr);
++
+ 	status = efi_setup_5level_paging();
+ 	if (status != EFI_SUCCESS) {
+ 		efi_err("efi_setup_5level_paging() failed!\n");
 -- 
 2.39.2
 
