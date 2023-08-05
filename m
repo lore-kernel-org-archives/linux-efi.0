@@ -2,167 +2,88 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D0D7DC04A6A
-	for <linux-efi@archiver.kernel.org>; Fri,  4 Aug 2023 16:04:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5EE99C001DB
+	for <linux-efi@archiver.kernel.org>; Sat,  5 Aug 2023 09:20:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232326AbjHDQEa (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 4 Aug 2023 12:04:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55900 "EHLO
+        id S229542AbjHEJUC (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 5 Aug 2023 05:20:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38402 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232283AbjHDQEW (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 4 Aug 2023 12:04:22 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C52449CC;
-        Fri,  4 Aug 2023 09:04:18 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        with ESMTP id S229473AbjHEJUB (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 5 Aug 2023 05:20:01 -0400
+X-Greylist: delayed 102 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Sat, 05 Aug 2023 02:19:53 PDT
+Received: from mail.alien8.de (mail.alien8.de [65.109.113.108])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3D5C6E6A;
+        Sat,  5 Aug 2023 02:19:53 -0700 (PDT)
+Received: from localhost (localhost.localdomain [127.0.0.1])
+        by mail.alien8.de (SuperMail on ZX Spectrum 128k) with ESMTP id 7F3DC40E01E4;
+        Sat,  5 Aug 2023 09:19:51 +0000 (UTC)
+X-Virus-Scanned: Debian amavisd-new at mail.alien8.de
+Received: from mail.alien8.de ([127.0.0.1])
+        by localhost (mail.alien8.de [127.0.0.1]) (amavisd-new, port 10026)
+        with ESMTP id FxuIhAfWEWJ5; Sat,  5 Aug 2023 09:19:49 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alien8.de; s=alien8;
+        t=1691227188; bh=0KFUQzNILwHYJVuVO2OkbW+CwKxvhp7nvWv004pXK4c=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=JkjdPqV8GhK/nNO5lGRvdoFb9dHjqLw7unrUCOtvRSsX/1XfZs/K1iEpVk94RKMbI
+         a21RQA0i/gKZpQH19Dpu/8GYKZ/uYh1tvTobYW4jdKMgDb6rNOKUP+fOnN313nx/g4
+         dsY8YKxheQzD6sfE0O3FVD98Y6ctikUywx2VmYcK/InStVUod5THtMbgdO20Re8B7W
+         eJjldXPCg0bWfNqY85galDd9ZhVJzGf5wPwmWM4NsWROagIjqeGwCpLjfqPnvbQXNb
+         z2cyZB3Sg6VmN5Fm4SHWih7+lhmtexJg1/r/rvEse9gUDqTkjP5mY76Os1bAPkP3GX
+         v2nXmpr4UGkYYlVFLyqdEIY1X3eHKGwL4jwlwyO7VYaLKXPaSDOEm1P6xwA5wexITl
+         jy/TscbELmGbX4/31fGYCKujKzqmnNheK3eR/y7H82gbvKUAc9u8Eu3E4HDo24m0Ho
+         qWSt0ctXqwXo6+Z+iaQ0bAMEubBkeoSM7qlfZG4z/pE3CVVH3Sdew5l2lEMIQIO7o0
+         b2gHvqCUyBOIH4yXq9EoymfgyQa7GYR1VEcdVjBuqX8tYfk4QfANTYVv6C2hk6GSMf
+         F/Q4R8pwbI9f5BQNgUdVDGO0BK8elxbTdMkGCD4DkqMRR33bj6+oSw/Y9eIurOQ38X
+         yVdTEzfXpoFRZOhqRsfXT284=
+Received: from zn.tnic (pd9530d32.dip0.t-ipconnect.de [217.83.13.50])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
+         key-exchange ECDHE (P-256) server-signature ECDSA (P-256) server-digest SHA256)
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 18F5862098;
-        Fri,  4 Aug 2023 16:04:18 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4C429C433C7;
-        Fri,  4 Aug 2023 16:04:16 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1691165057;
-        bh=IfMv8SHx+JE9F5RRuZsyY+MA4Vr/mLYztl2bV87OWao=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=ZTSIpMfFwqAjzti3fG7cNPMQKVf20hyv8c1fhensEU0gOkuL/ZQOcPhTVrOUdAJEa
-         BuxR+az0iauZo5lumo1MGQjVg86kRd4rkg8KIv5G2CRMjZZXI7V5sCIHkO2DnGm6GQ
-         QVAm7cqrOIj9TvUxYQLb5osvaycK5TN8gwJCI361KGfQiw8FIZjZBu6dnMqlTiELIB
-         xrkSCfyOkiUKmJyGhFjTBh73JPfbXauZCq6UCVq1mXsQSFqFjYSe9bhVFo2V1RY9ZD
-         t9+Ppt9/XcKzOzLT6UIAgusRoCr8WsFVPYVVsr78zAei//4XQotwC5Qhsgq1BH0/I6
-         rQmT9/8xdyEJA==
-From:   Ard Biesheuvel <ardb@kernel.org>
-To:     linux-efi@vger.kernel.org
-Cc:     linux-acpi@vger.kernel.org, rafael@kernel.org, lenb@kernel.org,
-        Ard Biesheuvel <ardb@kernel.org>
-Subject: [PATCH 4/4] acpi/prmt: Use EFI runtime sandbox to invoke PRM handlers
-Date:   Fri,  4 Aug 2023 18:03:59 +0200
-Message-Id: <20230804160359.228901-5-ardb@kernel.org>
-X-Mailer: git-send-email 2.39.2
-In-Reply-To: <20230804160359.228901-1-ardb@kernel.org>
-References: <20230804160359.228901-1-ardb@kernel.org>
+        by mail.alien8.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id 5048940E019D;
+        Sat,  5 Aug 2023 09:19:33 +0000 (UTC)
+Date:   Sat, 5 Aug 2023 11:19:32 +0200
+From:   Borislav Petkov <bp@alien8.de>
+To:     Ard Biesheuvel <ardb@kernel.org>
+Cc:     =?utf-8?B?SsO2cmcgUsO2ZGVs?= <joro@8bytes.org>,
+        Tom Lendacky <thomas.lendacky@amd.com>,
+        Tao Liu <ltao@redhat.com>, Michael Roth <michael.roth@amd.com>,
+        tglx@linutronix.de, mingo@redhat.com, dave.hansen@linux.intel.com,
+        x86@kernel.org, hpa@zytor.com, linux-kernel@vger.kernel.org,
+        bhe@redhat.com, dyoung@redhat.com, kexec@lists.infradead.org,
+        linux-efi@vger.kernel.org
+Subject: Re: [PATCH v2] x86/kexec: Add EFI config table identity mapping for
+ kexec kernel
+Message-ID: <20230805091932.GBZM4UJC2wL4S2y2Jc@fat_crate.local>
+References: <CAO7dBbXJv9JzDbSa-DLT03+osYCQXNUXFwz63gbq=NGDxEVyEA@mail.gmail.com>
+ <20230728165535.GDZMPzB/ek5QM+xJqA@fat_crate.local>
+ <CAO7dBbVyuLHH6RfdVQkU5ThXaJ-F4yvFAYD1PDNGkOpph9xvnA@mail.gmail.com>
+ <20230802093927.GAZMokT57anC5jBISK@fat_crate.local>
+ <99cb3813-1737-9d10-1f24-77565e460c55@amd.com>
+ <20230802135856.GBZMphIHHLa3dXRRVe@fat_crate.local>
+ <CAMj1kXEM5hGknVGwHh_w99D4L8yrYrTFycwGHZ0CQun70CLipw@mail.gmail.com>
+ <20230802155146.GCZMp7ksDdN2ETVzKV@fat_crate.local>
+ <CAMj1kXHnSzdQw5CMAVXU7EzpnrdRvAqKZVgA+EV35kHmwVULgQ@mail.gmail.com>
+ <CAMj1kXESuCScMLLAS4tSDcYxA3JTb24RuF7ipcKGd65tBvOBWQ@mail.gmail.com>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=4104; i=ardb@kernel.org; h=from:subject; bh=IfMv8SHx+JE9F5RRuZsyY+MA4Vr/mLYztl2bV87OWao=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeWsYp7u/lka9zhrmHKNO6TusVSde/xnDQdL74HCmebh0 fM33ZvXUcLCIMbBICumyCIw+++7nacnStU6z5KFmcPKBDKEgYtTACbSsZ/hD9dur6/nnXd/eCPT cJPT6NnKZVJfMtlPtQTfb+Rkr9Wsus3wzWztloalmZc6mHmdCibnc2Q3zxUJPLNy1bGNerfOi1/ hBgA=
-X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <CAMj1kXESuCScMLLAS4tSDcYxA3JTb24RuF7ipcKGd65tBvOBWQ@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Instead of bypassing the kernel's adaptation layer for performing EFI
-runtime calls, wire up ACPI PRM handling into it. This means these calls
-can no longer occur concurrently with EFI runtime calls, and will be
-made from the EFI runtime workqueue. It also means any page faults
-occurring during PRM handling will be identified correctly as
-originating in firmware code.
+On Thu, Aug 03, 2023 at 04:27:41PM +0200, Ard Biesheuvel wrote:
+> https://lists.gnu.org/archive/html/grub-devel/2023-08/msg00005.html
+> 
+> Coming to your distro any decade now!
 
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
----
- drivers/acpi/prmt.c                     |  8 ++++----
- drivers/firmware/efi/runtime-wrappers.c | 20 ++++++++++++++++++++
- include/linux/efi.h                     | 13 +++++++++++++
- 3 files changed, 37 insertions(+), 4 deletions(-)
+Cool. The less 32-bit crap we have to deal with, the better.
 
-diff --git a/drivers/acpi/prmt.c b/drivers/acpi/prmt.c
-index 3d4c4620f9f95309..95be1c80db387faa 100644
---- a/drivers/acpi/prmt.c
-+++ b/drivers/acpi/prmt.c
-@@ -53,7 +53,7 @@ static LIST_HEAD(prm_module_list);
- 
- struct prm_handler_info {
- 	guid_t guid;
--	void *handler_addr;
-+	efi_acpi_prm_handler_t *handler_addr;
- 	u64 static_data_buffer_addr;
- 	u64 acpi_param_buffer_addr;
- 
-@@ -260,9 +260,9 @@ static acpi_status acpi_platformrt_space_handler(u32 function,
- 		context.static_data_buffer = handler->static_data_buffer_addr;
- 		context.mmio_ranges = module->mmio_info;
- 
--		status = efi_call_virt_pointer(handler, handler_addr,
--					       handler->acpi_param_buffer_addr,
--					       &context);
-+		status = efi_call_acpi_prm_handler(handler->handler_addr,
-+						   handler->acpi_param_buffer_addr,
-+						   &context);
- 		if (status == EFI_SUCCESS) {
- 			buffer->prm_status = PRM_HANDLER_SUCCESS;
- 		} else {
-diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
-index b3ef208299ae591e..ce306cd1efdfda21 100644
---- a/drivers/firmware/efi/runtime-wrappers.c
-+++ b/drivers/firmware/efi/runtime-wrappers.c
-@@ -212,6 +212,12 @@ static void efi_call_rts(struct work_struct *work)
- 				       efi_rts_work.QUERY_CAPSULE_CAPS.max_size,
- 				       efi_rts_work.QUERY_CAPSULE_CAPS.reset_type);
- 		break;
-+	case EFI_ACPI_PRM_HANDLER:
-+		status = efi_call_virt_pointer(&efi_rts_work.ACPI_PRM_HANDLER,
-+					       handler_addr,
-+					       efi_rts_work.ACPI_PRM_HANDLER.param_buffer_addr,
-+					       efi_rts_work.ACPI_PRM_HANDLER.context);
-+		break;
- 	default:
- 		/*
- 		 * Ideally, we should never reach here because a caller of this
-@@ -475,3 +481,17 @@ void __init efi_native_runtime_setup(void)
- 	efi.update_capsule = virt_efi_update_capsule;
- 	efi.query_capsule_caps = virt_efi_query_capsule_caps;
- }
-+
-+efi_status_t efi_call_acpi_prm_handler(efi_acpi_prm_handler_t *handler_addr,
-+				       efi_physical_addr_t param_buffer_addr,
-+				       void *context)
-+{
-+	efi_status_t status;
-+
-+	if (down_interruptible(&efi_runtime_lock))
-+		return EFI_ABORTED;
-+	status = efi_queue_work(ACPI_PRM_HANDLER, handler_addr,
-+				param_buffer_addr, context);
-+	up(&efi_runtime_lock);
-+	return status;
-+}
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index c72715821016851b..065af735d90a411c 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1230,6 +1230,12 @@ extern int efi_tpm_final_log_size;
- 
- extern unsigned long rci2_table_phys;
- 
-+typedef efi_status_t (__efiapi efi_acpi_prm_handler_t)(efi_physical_addr_t, void *);
-+
-+efi_status_t efi_call_acpi_prm_handler(efi_acpi_prm_handler_t *handler_addr,
-+				       efi_physical_addr_t param_buffer_addr,
-+				       void *context);
-+
- /*
-  * efi_runtime_service() function identifiers.
-  * "NONE" is used by efi_recover_from_page_fault() to check if the page
-@@ -1249,6 +1255,7 @@ enum efi_rts_ids {
- 	EFI_RESET_SYSTEM,
- 	EFI_UPDATE_CAPSULE,
- 	EFI_QUERY_CAPSULE_CAPS,
-+	EFI_ACPI_PRM_HANDLER,
- };
- 
- /*
-@@ -1324,6 +1331,12 @@ struct efi_runtime_work {
- 			u64		*max_size;
- 			int		*reset_type;
- 		} QUERY_CAPSULE_CAPS;
-+
-+		struct {
-+			efi_acpi_prm_handler_t	*handler_addr;
-+			efi_physical_addr_t	param_buffer_addr;
-+			void			*context;
-+		} ACPI_PRM_HANDLER;
- 	};
- 	efi_status_t status;
- 	struct work_struct work;
+Thx.
+
 -- 
-2.39.2
+Regards/Gruss,
+    Boris.
 
+https://people.kernel.org/tglx/notes-about-netiquette
