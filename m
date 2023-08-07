@@ -2,159 +2,162 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B3FCC001DB
-	for <linux-efi@archiver.kernel.org>; Mon,  7 Aug 2023 16:28:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 37B3FC04FE0
+	for <linux-efi@archiver.kernel.org>; Mon,  7 Aug 2023 16:28:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231593AbjHGQ2S (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 7 Aug 2023 12:28:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34512 "EHLO
+        id S231599AbjHGQ2T (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 7 Aug 2023 12:28:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34128 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231751AbjHGQ2L (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 7 Aug 2023 12:28:11 -0400
+        with ESMTP id S231574AbjHGQ1y (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 7 Aug 2023 12:27:54 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9319F10DE;
-        Mon,  7 Aug 2023 09:28:03 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4718D1730;
+        Mon,  7 Aug 2023 09:27:53 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 0F36061F1F;
-        Mon,  7 Aug 2023 16:28:03 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BC914C433C7;
-        Mon,  7 Aug 2023 16:28:00 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id D3AD261EE4;
+        Mon,  7 Aug 2023 16:27:52 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B9F93C433BC;
+        Mon,  7 Aug 2023 16:27:50 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1691425682;
-        bh=o3w6/K1bZDjt5Qe6bPiZnYXVVaPATRaZ4q8AqRzBKd0=;
+        s=k20201202; t=1691425672;
+        bh=xRhTT2+byAfO6pNmqeeH4nhZlxaMSyvvxIeRonTKD/w=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=mykU4xhB0ZjxNHD6N6Yqwz5yOIoJyELiNSXokYk7eWKTqSvAuUADcu2V+s5X/CGnb
-         ntcu7w7Votczz1erdaJwCTSGvp0VjwtzdsyiNBkcGPdxHaJUDzABIHKCowBJERR5wu
-         06ypU/a1cIXD8LassbLFk1OJcLmSNVmAxAPEnNomBKB0VGZDbYq1MFjX4+la55CtFk
-         5jVl26o2rFAJMerZxgljttgchZV1+yw5pVPQOtFgeo4d9Kd/yWPjTBNGxX/irpMHzC
-         zaqzFMG5JcLDT87xhasP0eu7YQnhmNCKZVcXC76c4delhrexmVh0oIHaZD5SN59yhN
-         tK27a+/Lzf9Fg==
+        b=U9pve1407ZOK2AakSLMJBz+xOiFgTxHsJneVfIzW9DgxwOKUcRjQTmc1fGpO9BaO+
+         D7jRNzJ6OhBL1kvA7R6bRvKttcp8r/0m4MKuuJeMnyF3tXTDRK07FtKEtsMIrIur2S
+         Vx+knj49DplqRt2qP3w0Szi2I1qqxhifGYKtZOnRYvs/oWgRvKfpjBjEnC/rgLC45P
+         wNWBrcfbG7HQ9IVzhWsSw6dEEoDtZxCIx+KFRaIaagwNJ9wbMioqBS4w5QA1DkI/Qk
+         cud3bW8ulu+7byAbFPt/wdbBlny2XIFVWNf3aYPUhGuL/c7+hJyPYYGebgJYz+iaDD
+         J6ATDl5RfD0xg==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         Borislav Petkov <bp@alien8.de>,
         Dave Hansen <dave.hansen@linux.intel.com>,
         Ingo Molnar <mingo@redhat.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>
-Subject: [PATCH v9 10/23] x86/decompressor: Use standard calling convention for trampoline
-Date:   Mon,  7 Aug 2023 18:27:07 +0200
-Message-Id: <20230807162720.545787-11-ardb@kernel.org>
+        Thomas Gleixner <tglx@linutronix.de>
+Subject: [PATCH v9 05/23] x86/decompressor: Avoid magic offsets for EFI handover entrypoint
+Date:   Mon,  7 Aug 2023 18:27:02 +0200
+Message-Id: <20230807162720.545787-6-ardb@kernel.org>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230807162720.545787-1-ardb@kernel.org>
 References: <20230807162720.545787-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=3491; i=ardb@kernel.org; h=from:subject; bh=o3w6/K1bZDjt5Qe6bPiZnYXVVaPATRaZ4q8AqRzBKd0=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeWidDh3psX++ecWdE2bdX+VvOrM1Q19ykI7/63+GeW3a F9XoveEjlIWBjEOBlkxRRaB2X/f7Tw9UarWeZYszBxWJpAhDFycAjARpp2MDBeXn/uvWPjz8vU1 p0wfc+w48kE41+HKFMtvPxbOES18w2bFyHCJyWT5jGsuLhJLRZxjF7Ot/97yMInhztsKe3nPZSZ rDvAAAA==
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3376; i=ardb@kernel.org; h=from:subject; bh=xRhTT2+byAfO6pNmqeeH4nhZlxaMSyvvxIeRonTKD/w=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeWidMBNkVCxP7rM9nl+Zz4wi+bMdvs6M3Fx4GupK42LJ t8LXva8o5SFQYyDQVZMkUVg9t93O09PlKp1niULM4eVCWQIAxenAEzEaTfD/5zSv38LlIqEVsb9 mTmnL7ND6/eci6/OPX/hZPPpzc892/8z/M+M7jZc5Xp6o/prs4wv+cl8f8KnS+6aWrFGQeikyc2 1rgwA
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Update the trampoline code so its arguments are passed via RDI and RSI,
-which matches the ordinary SysV calling convention for x86_64. This will
-allow this code to be called directly from C.
+The native 32-bit or 64-bit EFI handover protocol entrypoint offset
+relative to the respective startup_32/64 address is described in
+boot_params as handover_offset, so that the special Linux/x86 aware EFI
+loader can find it there.
 
-Acked-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
+When mixed mode is enabled, this single field has to describe this
+offset for both the 32-bit and 64-bit entrypoints, so their respective
+relative offsets have to be identical. Given that startup_32 and
+startup_64 are 0x200 bytes apart, and the EFI handover entrypoint
+resides at a fixed offset, the 32-bit and 64-bit versions of those
+entrypoints must be exactly 0x200 bytes apart as well.
+
+Currently, hard-coded fixed offsets are used to ensure this, but it is
+sufficient to emit the 64-bit entrypoint 0x200 bytes after the 32-bit
+one, wherever it happens to reside. This allows this code (which is now
+EFI mixed mode specific) to be moved into efi_mixed.S and out of the
+startup code in head_64.S.
+
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/boot/compressed/head_64.S | 27 ++++++++++----------
- arch/x86/boot/compressed/pgtable.h |  2 +-
- 2 files changed, 14 insertions(+), 15 deletions(-)
+ arch/x86/boot/compressed/efi_mixed.S | 20 +++++++++++++++++++-
+ arch/x86/boot/compressed/head_64.S   | 18 ------------------
+ 2 files changed, 19 insertions(+), 19 deletions(-)
 
+diff --git a/arch/x86/boot/compressed/efi_mixed.S b/arch/x86/boot/compressed/efi_mixed.S
+index dcc562c8f7f35162..9308b595f6f0a5de 100644
+--- a/arch/x86/boot/compressed/efi_mixed.S
++++ b/arch/x86/boot/compressed/efi_mixed.S
+@@ -140,6 +140,16 @@ SYM_FUNC_START(__efi64_thunk)
+ SYM_FUNC_END(__efi64_thunk)
+ 
+ 	.code32
++#ifdef CONFIG_EFI_HANDOVER_PROTOCOL
++SYM_FUNC_START(efi32_stub_entry)
++	add	$0x4, %esp		/* Discard return address */
++	popl	%ecx
++	popl	%edx
++	popl	%esi
++	jmp	efi32_entry
++SYM_FUNC_END(efi32_stub_entry)
++#endif
++
+ /*
+  * EFI service pointer must be in %edi.
+  *
+@@ -220,7 +230,7 @@ SYM_FUNC_END(efi_enter32)
+  * stub may still exit and return to the firmware using the Exit() EFI boot
+  * service.]
+  */
+-SYM_FUNC_START(efi32_entry)
++SYM_FUNC_START_LOCAL(efi32_entry)
+ 	call	1f
+ 1:	pop	%ebx
+ 
+@@ -320,6 +330,14 @@ SYM_FUNC_START(efi32_pe_entry)
+ 	RET
+ SYM_FUNC_END(efi32_pe_entry)
+ 
++#ifdef CONFIG_EFI_HANDOVER_PROTOCOL
++	.org	efi32_stub_entry + 0x200
++	.code64
++SYM_FUNC_START_NOALIGN(efi64_stub_entry)
++	jmp	efi_stub_entry
++SYM_FUNC_END(efi64_stub_entry)
++#endif
++
+ 	.section ".rodata"
+ 	/* EFI loaded image protocol GUID */
+ 	.balign 4
 diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
-index 91b5eee306148f9a..c47504208105d7d3 100644
+index e6880208b9a1b90a..a3f764daf3a3adbc 100644
 --- a/arch/x86/boot/compressed/head_64.S
 +++ b/arch/x86/boot/compressed/head_64.S
-@@ -444,9 +444,9 @@ SYM_CODE_START(startup_64)
- 	movq	%r15, %rdi
- 	call	paging_prepare
+@@ -294,17 +294,6 @@ SYM_FUNC_START(startup_32)
+ 	lret
+ SYM_FUNC_END(startup_32)
  
--	/* Save the trampoline address in RCX */
--	movq	%rax, %rcx
--
-+	/* Pass the trampoline address and boolean flag as args #1 and #2 */
-+	movq	%rax, %rdi
-+	movq	%rdx, %rsi
- 	leaq	TRAMPOLINE_32BIT_CODE_OFFSET(%rax), %rax
- 	call	*%rax
- 
-@@ -531,11 +531,14 @@ SYM_FUNC_START_LOCAL_NOALIGN(.Lrelocated)
- SYM_FUNC_END(.Lrelocated)
- 
- /*
-- * This is the 32-bit trampoline that will be copied over to low memory.
-+ * This is the 32-bit trampoline that will be copied over to low memory. It
-+ * will be called using the ordinary 64-bit calling convention from code
-+ * running in 64-bit mode.
-  *
-  * Return address is at the top of the stack (might be above 4G).
-- * ECX contains the base address of the trampoline memory.
-- * Non zero RDX means trampoline needs to enable 5-level paging.
-+ * The first argument (EDI) contains the 32-bit addressable base of the
-+ * trampoline memory. A non-zero second argument (ESI) means that the
-+ * trampoline needs to enable 5-level paging.
-  */
- SYM_CODE_START(trampoline_32bit_src)
- 	/*
-@@ -582,7 +585,7 @@ SYM_CODE_START(trampoline_32bit_src)
- 	movl	%eax, %cr0
- 
- 	/* Check what paging mode we want to be in after the trampoline */
--	testl	%edx, %edx
-+	testl	%esi, %esi
- 	jz	1f
- 
- 	/* We want 5-level paging: don't touch CR3 if it already points to 5-level page tables */
-@@ -597,21 +600,17 @@ SYM_CODE_START(trampoline_32bit_src)
- 	jz	3f
- 2:
- 	/* Point CR3 to the trampoline's new top level page table */
--	leal	TRAMPOLINE_32BIT_PGTABLE_OFFSET(%ecx), %eax
-+	leal	TRAMPOLINE_32BIT_PGTABLE_OFFSET(%edi), %eax
- 	movl	%eax, %cr3
- 3:
- 	/* Set EFER.LME=1 as a precaution in case hypervsior pulls the rug */
--	pushl	%ecx
--	pushl	%edx
- 	movl	$MSR_EFER, %ecx
- 	rdmsr
- 	btsl	$_EFER_LME, %eax
- 	/* Avoid writing EFER if no change was made (for TDX guest) */
- 	jc	1f
- 	wrmsr
--1:	popl	%edx
+-#if IS_ENABLED(CONFIG_EFI_MIXED) && IS_ENABLED(CONFIG_EFI_HANDOVER_PROTOCOL)
+-	.org 0x190
+-SYM_FUNC_START(efi32_stub_entry)
+-	add	$0x4, %esp		/* Discard return address */
 -	popl	%ecx
+-	popl	%edx
+-	popl	%esi
+-	jmp	efi32_entry
+-SYM_FUNC_END(efi32_stub_entry)
+-#endif
 -
-+1:
- #ifdef CONFIG_X86_MCE
- 	/*
- 	 * Preserve CR4.MCE if the kernel will enable #MC support.
-@@ -628,7 +627,7 @@ SYM_CODE_START(trampoline_32bit_src)
+ 	.code64
+ 	.org 0x200
+ SYM_CODE_START(startup_64)
+@@ -542,13 +531,6 @@ trampoline_return:
+ 	jmp	*%rax
+ SYM_CODE_END(startup_64)
  
- 	/* Enable PAE and LA57 (if required) paging modes */
- 	orl	$X86_CR4_PAE, %eax
--	testl	%edx, %edx
-+	testl	%esi, %esi
- 	jz	1f
- 	orl	$X86_CR4_LA57, %eax
- 1:
-diff --git a/arch/x86/boot/compressed/pgtable.h b/arch/x86/boot/compressed/pgtable.h
-index 91dbb99203fbce2d..4e8cef135226bcbb 100644
---- a/arch/x86/boot/compressed/pgtable.h
-+++ b/arch/x86/boot/compressed/pgtable.h
-@@ -14,7 +14,7 @@
+-#if IS_ENABLED(CONFIG_EFI_MIXED) && IS_ENABLED(CONFIG_EFI_HANDOVER_PROTOCOL)
+-	.org 0x390
+-SYM_FUNC_START(efi64_stub_entry)
+-	jmp	efi_stub_entry
+-SYM_FUNC_END(efi64_stub_entry)
+-#endif
+-
+ 	.text
+ SYM_FUNC_START_LOCAL_NOALIGN(.Lrelocated)
  
- extern unsigned long *trampoline_32bit;
- 
--extern void trampoline_32bit_src(void *return_ptr);
-+extern void trampoline_32bit_src(void *trampoline, bool enable_5lvl);
- 
- #endif /* __ASSEMBLER__ */
- #endif /* BOOT_COMPRESSED_PAGETABLE_H */
 -- 
 2.39.2
 
