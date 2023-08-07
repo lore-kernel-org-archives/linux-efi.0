@@ -2,140 +2,239 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0B8B0C00528
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6ABF6C04FE1
 	for <linux-efi@archiver.kernel.org>; Mon,  7 Aug 2023 16:28:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231566AbjHGQ2U (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 7 Aug 2023 12:28:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34258 "EHLO
+        id S229715AbjHGQ2V (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 7 Aug 2023 12:28:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34570 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231623AbjHGQ17 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 7 Aug 2023 12:27:59 -0400
+        with ESMTP id S231205AbjHGQ2P (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 7 Aug 2023 12:28:15 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3748E172D;
-        Mon,  7 Aug 2023 09:27:55 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D29031701;
+        Mon,  7 Aug 2023 09:28:07 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id CAF0D61F1F;
-        Mon,  7 Aug 2023 16:27:54 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B0EB2C433C8;
-        Mon,  7 Aug 2023 16:27:52 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 4D66461EE4;
+        Mon,  7 Aug 2023 16:28:07 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0C768C433CA;
+        Mon,  7 Aug 2023 16:28:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1691425674;
-        bh=usQB03nvoiZEOQomH9z1zpnfhZCXgY7eC83YRzvcdlw=;
+        s=k20201202; t=1691425686;
+        bh=1leImSL0GIXC+stm+qJDUcS1s2kkKXwvVrWLvnoMRrI=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=bn8BIJ0d+9krhWq2KpSnVjIPOS9kgIQTte9yZPzGQeIMDB+lszT+dAaA2B/rAmTKn
-         Ab1AnXVwQSiyxp0XkoQuywk7xcZoU/TNHPQPO5hCiMi9eK8IfDyJjIx66Znl0LuBym
-         /tiqhkQuSpDcBkOwnRFff/mujgq3fB4YxIAhGwvomxU7XFeyiRJANq1V2zdEJQcDO1
-         7gEgzRS1lJW4C1Hct3ruf6lyzHAXp+wiJnuDljDWXVLla67DbOqwSie9pHjdVJ8tx9
-         XR8B95nafoskoueX10nxtCOs6T4m8JgVrQqUyVPl3AU7NCSSTMWMryu9BdA3G+0Bh1
-         ms8M346wWys3A==
+        b=oNO+asru/o9IAzB9Rz0aHThLy1VSYOkXyPdXCJcrcvmGKMIGu3UiuL+rhw+IYMch+
+         n0H58JAZl4/8xpTvSXbiXlIoG2+2bZf973Smtb9Okuix0OTdZDz7E72qOdbwhwsY36
+         dFR43pQ4IXDfGjYhm86q6Jtbsy89CJJVjDck8BpkC8Byke4Hhu1lWdCGPItft9nn+v
+         6yfftwl8cgQvDWhNAigiyUUU9EToJgl10JVKl0ANLdugXTwC1fQOZo27oVzhUTjVrM
+         GqjN3e3uLsZZDQDx5bD4p+hoV2ZtJuxWz3HIi3Y4qMjmb4TjKdb6QPEDSPudeLyrG2
+         g/AfSOIMAK6iw==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         Borislav Petkov <bp@alien8.de>,
         Dave Hansen <dave.hansen@linux.intel.com>,
         Ingo Molnar <mingo@redhat.com>,
-        Thomas Gleixner <tglx@linutronix.de>
-Subject: [PATCH v9 06/23] x86/efistub: Clear BSS in EFI handover protocol entrypoint
-Date:   Mon,  7 Aug 2023 18:27:03 +0200
-Message-Id: <20230807162720.545787-7-ardb@kernel.org>
+        Thomas Gleixner <tglx@linutronix.de>,
+        "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>
+Subject: [PATCH v9 12/23] x86/decompressor: Call trampoline directly from C code
+Date:   Mon,  7 Aug 2023 18:27:09 +0200
+Message-Id: <20230807162720.545787-13-ardb@kernel.org>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230807162720.545787-1-ardb@kernel.org>
 References: <20230807162720.545787-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2971; i=ardb@kernel.org; h=from:subject; bh=usQB03nvoiZEOQomH9z1zpnfhZCXgY7eC83YRzvcdlw=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeWidFCT0N6j88sMEla93JvuMOncrp0FO/IZtW3EV4mUv L4cHcjbUcLCIMbBICumyCIw+++7nacnStU6z5KFmcPKBDKEgYtTACYydTfDjx1ZtS0l4sk+tvt8 ZlfPyPZZWXzvxuWtztEbnoWESGx+zchw7X1r5uSD/obXEn8rrJl6dsbzruzsF2XM+isf/k5Jsop gAAA=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=6565; i=ardb@kernel.org; h=from:subject; bh=1leImSL0GIXC+stm+qJDUcS1s2kkKXwvVrWLvnoMRrI=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeWidOT5H5vWP+VUOMlyvnDP++939Auj2f9+X3Z/svOUT /qyznd6OkpZGMQ4GGTFFFkEZv99t/P0RKla51myMHNYmUCGMHBxCsBEVBYyMnT9Uz9sdFjmHat5 04f13OtsdA4+akpf+HfL+cPfXx2/cmwjw/9kg7hTHUbq9/rz5edeeF70nL3EwLZ0VafJ4tKd1zt 9v7MBAA==
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-The so-called EFI handover protocol is value-add from the distros that
-permits a loader to simply copy a PE kernel image into memory and call
-an alternative entrypoint that is described by an embedded boot_params
-structure.
+Instead of returning to the asm calling code to invoke the trampoline,
+call it straight from the C code that sets it up. That way, the struct
+return type is no longer needed for returning two values, and the call
+can be made conditional more cleanly in a subsequent patch.
 
-Most implementations of this protocol do not bother to check the PE
-header for minimum alignment, section placement, etc, and therefore also
-don't clear the image's BSS, or even allocate enough memory for it.
+This means that all callee save 64-bit registers need to be preserved
+and restored, as their contents may not survive the legacy mode switch.
 
-Allocating more memory on the fly is rather difficult, but at least
-clear the BSS region explicitly when entering in this manner, so that
-the EFI stub code does not get confused by global variables that were
-not zero-initialized correctly.
-
-When booting in mixed mode, this BSS clearing must occur before any
-global state is created, so clear it in the 32-bit asm entry point.
-
+Acked-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/boot/compressed/efi_mixed.S    | 14 +++++++++++++-
- drivers/firmware/efi/libstub/x86-stub.c | 13 +++++++++++--
- 2 files changed, 24 insertions(+), 3 deletions(-)
+ arch/x86/boot/compressed/head_64.S    | 31 ++++++++-----------
+ arch/x86/boot/compressed/pgtable_64.c | 32 ++++++++------------
+ 2 files changed, 26 insertions(+), 37 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/efi_mixed.S b/arch/x86/boot/compressed/efi_mixed.S
-index 9308b595f6f0a5de..8a02a151806df14c 100644
---- a/arch/x86/boot/compressed/efi_mixed.S
-+++ b/arch/x86/boot/compressed/efi_mixed.S
-@@ -142,6 +142,18 @@ SYM_FUNC_END(__efi64_thunk)
- 	.code32
- #ifdef CONFIG_EFI_HANDOVER_PROTOCOL
- SYM_FUNC_START(efi32_stub_entry)
-+	call	1f
-+1:	popl	%ecx
-+
-+	/* Clear BSS */
-+	xorl	%eax, %eax
-+	leal	(_bss - 1b)(%ecx), %edi
-+	leal	(_ebss - 1b)(%ecx), %ecx
-+	subl	%edi, %ecx
-+	shrl	$2, %ecx
-+	cld
-+	rep	stosl
-+
- 	add	$0x4, %esp		/* Discard return address */
- 	popl	%ecx
- 	popl	%edx
-@@ -334,7 +346,7 @@ SYM_FUNC_END(efi32_pe_entry)
- 	.org	efi32_stub_entry + 0x200
- 	.code64
- SYM_FUNC_START_NOALIGN(efi64_stub_entry)
--	jmp	efi_stub_entry
-+	jmp	efi_handover_entry
- SYM_FUNC_END(efi64_stub_entry)
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index 37fd7b7d683d696c..cd6e3e175389aa6b 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -430,25 +430,14 @@ SYM_CODE_START(startup_64)
  #endif
  
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index 3f3b3edf7a387d7c..9247dbc7dbbd12ef 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -970,12 +970,21 @@ void __noreturn efi_stub_entry(efi_handle_t handle,
+ 	/*
+-	 * paging_prepare() sets up the trampoline and checks if we need to
+-	 * enable 5-level paging.
+-	 *
+-	 * paging_prepare() returns a two-quadword structure which lands
+-	 * into RDX:RAX:
+-	 *   - Address of the trampoline is returned in RAX.
+-	 *   - Non zero RDX means trampoline needs to enable 5-level
+-	 *     paging.
++	 * configure_5level_paging() updates the number of paging levels using
++	 * a trampoline in 32-bit addressable memory if the current number does
++	 * not match the desired number.
+ 	 *
+ 	 * Pass the boot_params pointer as the first argument.
+ 	 */
+ 	movq	%r15, %rdi
+-	call	paging_prepare
+-
+-	/* Pass the trampoline address and boolean flag as args #1 and #2 */
+-	movq	%rax, %rdi
+-	movq	%rdx, %rsi
+-	leaq	TRAMPOLINE_32BIT_CODE_OFFSET(%rax), %rax
+-	call	*%rax
++	call	configure_5level_paging
+ 
+ 	/*
+ 	 * cleanup_trampoline() would restore trampoline memory.
+@@ -543,11 +532,14 @@ SYM_FUNC_END(.Lrelocated)
+ 	.section ".rodata", "a", @progbits
+ SYM_CODE_START(trampoline_32bit_src)
+ 	/*
+-	 * Preserve live 64-bit registers on the stack: this is necessary
+-	 * because the architecture does not guarantee that GPRs will retain
+-	 * their full 64-bit values across a 32-bit mode switch.
++	 * Preserve callee save 64-bit registers on the stack: this is
++	 * necessary because the architecture does not guarantee that GPRs will
++	 * retain their full 64-bit values across a 32-bit mode switch.
+ 	 */
+ 	pushq	%r15
++	pushq	%r14
++	pushq	%r13
++	pushq	%r12
+ 	pushq	%rbp
+ 	pushq	%rbx
+ 
+@@ -574,6 +566,9 @@ SYM_CODE_START(trampoline_32bit_src)
+ 	/* Restore the preserved 64-bit registers */
+ 	popq	%rbx
+ 	popq	%rbp
++	popq	%r12
++	popq	%r13
++	popq	%r14
+ 	popq	%r15
+ 	retq
+ 
+diff --git a/arch/x86/boot/compressed/pgtable_64.c b/arch/x86/boot/compressed/pgtable_64.c
+index 5198a05aefa8d14a..f9cc86b2ee55ca80 100644
+--- a/arch/x86/boot/compressed/pgtable_64.c
++++ b/arch/x86/boot/compressed/pgtable_64.c
+@@ -16,11 +16,6 @@ unsigned int __section(".data") pgdir_shift = 39;
+ unsigned int __section(".data") ptrs_per_p4d = 1;
+ #endif
+ 
+-struct paging_config {
+-	unsigned long trampoline_start;
+-	unsigned long l5_required;
+-};
+-
+ /* Buffer to preserve trampoline memory */
+ static char trampoline_save[TRAMPOLINE_32BIT_SIZE];
+ 
+@@ -29,7 +24,7 @@ static char trampoline_save[TRAMPOLINE_32BIT_SIZE];
+  * purposes.
+  *
+  * Avoid putting the pointer into .bss as it will be cleared between
+- * paging_prepare() and extract_kernel().
++ * configure_5level_paging() and extract_kernel().
+  */
+ unsigned long *trampoline_32bit __section(".data");
+ 
+@@ -106,13 +101,13 @@ static unsigned long find_trampoline_placement(void)
+ 	return bios_start - TRAMPOLINE_32BIT_SIZE;
  }
  
- #ifdef CONFIG_EFI_HANDOVER_PROTOCOL
-+void efi_handover_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg,
-+			struct boot_params *boot_params)
-+{
-+	extern char _bss[], _ebss[];
-+
-+	memset(_bss, 0, _ebss - _bss);
-+	efi_stub_entry(handle, sys_table_arg, boot_params);
-+}
-+
- #ifndef CONFIG_EFI_MIXED
--extern __alias(efi_stub_entry)
-+extern __alias(efi_handover_entry)
- void efi32_stub_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg,
- 		      struct boot_params *boot_params);
+-struct paging_config paging_prepare(void *rmode)
++asmlinkage void configure_5level_paging(struct boot_params *bp)
+ {
+-	struct paging_config paging_config = {};
+-	void *tramp_code;
++	void (*toggle_la57)(void *trampoline, bool enable_5lvl);
++	bool l5_required = false;
  
--extern __alias(efi_stub_entry)
-+extern __alias(efi_handover_entry)
- void efi64_stub_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg,
- 		      struct boot_params *boot_params);
- #endif
+ 	/* Initialize boot_params. Required for cmdline_find_option_bool(). */
+-	boot_params = rmode;
++	boot_params = bp;
+ 
+ 	/*
+ 	 * Check if LA57 is desired and supported.
+@@ -130,7 +125,7 @@ struct paging_config paging_prepare(void *rmode)
+ 			!cmdline_find_option_bool("no5lvl") &&
+ 			native_cpuid_eax(0) >= 7 &&
+ 			(native_cpuid_ecx(7) & (1 << (X86_FEATURE_LA57 & 31)))) {
+-		paging_config.l5_required = 1;
++		l5_required = true;
+ 
+ 		/* Initialize variables for 5-level paging */
+ 		__pgtable_l5_enabled = 1;
+@@ -138,9 +133,7 @@ struct paging_config paging_prepare(void *rmode)
+ 		ptrs_per_p4d = 512;
+ 	}
+ 
+-	paging_config.trampoline_start = find_trampoline_placement();
+-
+-	trampoline_32bit = (unsigned long *)paging_config.trampoline_start;
++	trampoline_32bit = (unsigned long *)find_trampoline_placement();
+ 
+ 	/* Preserve trampoline memory */
+ 	memcpy(trampoline_save, trampoline_32bit, TRAMPOLINE_32BIT_SIZE);
+@@ -149,7 +142,7 @@ struct paging_config paging_prepare(void *rmode)
+ 	memset(trampoline_32bit, 0, TRAMPOLINE_32BIT_SIZE);
+ 
+ 	/* Copy trampoline code in place */
+-	tramp_code = memcpy(trampoline_32bit +
++	toggle_la57 = memcpy(trampoline_32bit +
+ 			TRAMPOLINE_32BIT_CODE_OFFSET / sizeof(unsigned long),
+ 			&trampoline_32bit_src, TRAMPOLINE_32BIT_CODE_SIZE);
+ 
+@@ -159,7 +152,8 @@ struct paging_config paging_prepare(void *rmode)
+ 	 * immediate absolute address, which needs to be adjusted based on the
+ 	 * placement of the trampoline.
+ 	 */
+-	*(u32 *)(tramp_code + trampoline_ljmp_imm_offset) += (unsigned long)tramp_code;
++	*(u32 *)((u8 *)toggle_la57 + trampoline_ljmp_imm_offset) +=
++						(unsigned long)toggle_la57;
+ 
+ 	/*
+ 	 * The code below prepares page table in trampoline memory.
+@@ -175,10 +169,10 @@ struct paging_config paging_prepare(void *rmode)
+ 	 * We are not going to use the page table in trampoline memory if we
+ 	 * are already in the desired paging mode.
+ 	 */
+-	if (paging_config.l5_required == !!(native_read_cr4() & X86_CR4_LA57))
++	if (l5_required == !!(native_read_cr4() & X86_CR4_LA57))
+ 		goto out;
+ 
+-	if (paging_config.l5_required) {
++	if (l5_required) {
+ 		/*
+ 		 * For 4- to 5-level paging transition, set up current CR3 as
+ 		 * the first and the only entry in a new top-level page table.
+@@ -201,7 +195,7 @@ struct paging_config paging_prepare(void *rmode)
+ 	}
+ 
+ out:
+-	return paging_config;
++	toggle_la57(trampoline_32bit, l5_required);
+ }
+ 
+ void cleanup_trampoline(void *pgtable)
 -- 
 2.39.2
 
