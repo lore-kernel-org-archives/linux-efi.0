@@ -2,126 +2,199 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F360DC27C41
-	for <linux-efi@archiver.kernel.org>; Wed, 16 Aug 2023 21:25:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 35859C2FC20
+	for <linux-efi@archiver.kernel.org>; Thu, 17 Aug 2023 13:12:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346455AbjHPVYr (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 16 Aug 2023 17:24:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60780 "EHLO
+        id S1350227AbjHQNLp (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 17 Aug 2023 09:11:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37278 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1346494AbjHPVYc (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 16 Aug 2023 17:24:32 -0400
-Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.100])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D4DA61BE8
-        for <linux-efi@vger.kernel.org>; Wed, 16 Aug 2023 14:24:31 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1692221071; x=1723757071;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=YaJcwdfsbT/u6tJs5uRbj4NUFmy4HkVgm/EwY5jjC6U=;
-  b=VZ5ru0HFMbxZYJC5EjK0ukNJC9k5IBiXwxXRvRdRHdKIySSaxJf5U50E
-   +K3oPQevAtGYZCsFZBzvXD2dDaFqJFfizOrYSCk8ur1vVlunLmn4Ovli+
-   /ucmWAYgRGSfJcmm2nI+N2MUsMTJM0UaZ3/kthPpkES8+ljLPa0FSF583
-   RTNaQq9Ul6ybOu0Q7oRFe9vbhUtzNeMqB5hZKopEOLIN8E78utifIkLl9
-   InNcckzFVnUX7ZzZrgQfQcc9QLhx1g7dzGtvy8uUPRsLDDdMTkJcmpCaD
-   wTTA30lEjp+owXR077J974/QmmKHAgL9VPSTCoxYwiEFiyN/1jyKeg6UY
-   g==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10803"; a="438996880"
-X-IronPort-AV: E=Sophos;i="6.01,178,1684825200"; 
-   d="scan'208";a="438996880"
-Received: from orsmga005.jf.intel.com ([10.7.209.41])
-  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Aug 2023 14:24:31 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10803"; a="908144440"
-X-IronPort-AV: E=Sophos;i="6.01,178,1684825200"; 
-   d="scan'208";a="908144440"
-Received: from vmusin-mobl1.ger.corp.intel.com (HELO box.shutemov.name) ([10.252.42.205])
-  by orsmga005-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Aug 2023 14:24:29 -0700
-Received: by box.shutemov.name (Postfix, from userid 1000)
-        id F2B8810A348; Thu, 17 Aug 2023 00:24:26 +0300 (+03)
-From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-To:     ardb@kernel.org, dave.hansen@linux.intel.com
-Cc:     kirill.shutemov@linux.intel.com, linux-efi@vger.kernel.org,
-        x86@kernel.org
-Subject: [PATCH] x86/mm: Make e820_end_ram_pfn() cover E820_TYPE_ACPI ranges
-Date:   Thu, 17 Aug 2023 00:24:18 +0300
-Message-ID: <20230816212418.25069-1-kirill.shutemov@linux.intel.com>
-X-Mailer: git-send-email 2.41.0
-In-Reply-To: <20230816190557.3738-1-ardb@kernel.org>
-References: <20230816190557.3738-1-ardb@kernel.org>
+        with ESMTP id S1351382AbjHQNLe (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 17 Aug 2023 09:11:34 -0400
+Received: from mail-wr1-x434.google.com (mail-wr1-x434.google.com [IPv6:2a00:1450:4864:20::434])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EF08E30F6
+        for <linux-efi@vger.kernel.org>; Thu, 17 Aug 2023 06:10:58 -0700 (PDT)
+Received: by mail-wr1-x434.google.com with SMTP id ffacd0b85a97d-307d58b3efbso6654467f8f.0
+        for <linux-efi@vger.kernel.org>; Thu, 17 Aug 2023 06:10:58 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=rivosinc-com.20221208.gappssmtp.com; s=20221208; t=1692277841; x=1692882641;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=jzN7VvOx2pOtfSykr4IQN9EePpmfh/Zdn2JH7WehQ2o=;
+        b=IHSO36skH/bMYgiJDH9KcoL19NQpaagMOUWh4c0+dhcp2tFiXiMCCz1gkDv2Iw16OW
+         jCE0LqO6DuEScgqeLbF6VMmtPt7MLFUyVcjvpupP/8IPUBB1bTW08SrdPV6gvPKGyDHJ
+         z22zUT3HeapF3yjCfiw2drxclyCQFexMi7XbW6Zwog43Xd8881pEwhyRWWLaC9G03Lr6
+         l7dz8zHDhGaAHdoL/Q/u0GvGpkxNMEvD0hDZ1bId3LjddXUjGybzaY/HsyOAZzEYK+Vb
+         /woi6gVqNQlqPLmDNXedmJfDvMfO56cY4pjZ1bDslEx783lOa3pmexadyJJQfa0E5lRM
+         xJLA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1692277841; x=1692882641;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=jzN7VvOx2pOtfSykr4IQN9EePpmfh/Zdn2JH7WehQ2o=;
+        b=XoHvCKcAwcSBTo+5LSgiUCuhgvr3G1yxK/g+e5ppId6O754qHojnUV3T25AfmLqiv7
+         8TfMe0TAcKR/6e2/2hx+c4IaWEWrHjHE9IlsWYiuJjuAdFOMKC7sCcRgfSGfNYvY04hw
+         ym/y1uaiQkrwOJBuO3SwpNMC7A3ySnBnma6T8eafNBO2M7A+sEXh72s/NtmPQPGVj7z/
+         lnBVzJReodUC8S04gAaMx3pnIuXsrbCUGUQ6ZEq+0Evo8caqudtDhYoBDMvzq5GWnzrY
+         9af+RlpSGo3YAShtCp6c2bqYZAfxzp2ZxezwnAiFSP0QCUh3NbYXYzQyu9u/0lCQT9S4
+         rMXQ==
+X-Gm-Message-State: AOJu0YyScf/9NqFnJkWb9UtG8Lp8UHz24d2d6o4jVydHDMXO/LH2vI5z
+        x1fJHE425IZJD9FqmOMeifRQn+FkOmO/1sCynT3TowtJTIrXmFck
+X-Google-Smtp-Source: AGHT+IFhv2YZNQHMkPrHfKZ67eNLYD+0DLYyhEUdRhXGXP9pubmPKzBPoU6KC9pirkR92BjYQ/tVTC2Oxal1J/cCNhc=
+X-Received: by 2002:adf:e78d:0:b0:317:e68f:e1b2 with SMTP id
+ n13-20020adfe78d000000b00317e68fe1b2mr3559836wrm.28.1692277840899; Thu, 17
+ Aug 2023 06:10:40 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20230722123850.634544-1-alexghiti@rivosinc.com> <C172F31D25F5ED6E+034cc389-f02c-b681-a989-8592c5dac35e@tinylab.org>
+In-Reply-To: <C172F31D25F5ED6E+034cc389-f02c-b681-a989-8592c5dac35e@tinylab.org>
+From:   Alexandre Ghiti <alexghiti@rivosinc.com>
+Date:   Thu, 17 Aug 2023 15:10:30 +0200
+Message-ID: <CAHVXubhD2r2OYQKRcBUfA+3h4SdejkUhVDD2Gx6WJ6pqBzSKpw@mail.gmail.com>
+Subject: Re: [PATCH v6 0/5] riscv: Introduce KASLR
+To:     Song Shuai <songshuaishuai@tinylab.org>
+Cc:     Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Kees Cook <keescook@chromium.org>,
+        linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        Albert Ou <aou@eecs.berkeley.edu>, zong.li@sifive.com,
+        conor.dooley@microchip.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-e820__end_of_ram_pfn() is used to calculate max_pfn which, among other
-things, guides where direct mapping ends. Any memory above max_pfn is
-not going to be present in the direct mapping.
+Hi Song,
 
-e820__end_of_ram_pfn() finds the end of the ram based on the highest
-E820_TYPE_RAM range. But it doesn't includes E820_TYPE_ACPI ranges into
-calculation.
+On Tue, Aug 15, 2023 at 1:24=E2=80=AFPM Song Shuai <songshuaishuai@tinylab.=
+org> wrote:
+>
+>
+> Hi, Alex:
+>
+> =E5=9C=A8 2023/7/22 20:38, Alexandre Ghiti =E5=86=99=E9=81=93:
+> > The following KASLR implementation allows to randomize the kernel mappi=
+ng:
+> >
+> > - virtually: we expect the bootloader to provide a seed in the device-t=
+ree
+> > - physically: only implemented in the EFI stub, it relies on the firmwa=
+re to
+> >    provide a seed using EFI_RNG_PROTOCOL. arm64 has a similar implement=
+ation
+> >    hence the patch 3 factorizes KASLR related functions for riscv to ta=
+ke
+> >    advantage.
+> >
+> > The new virtual kernel location is limited by the early page table that=
+ only
+> > has one PUD and with the PMD alignment constraint, the kernel can only =
+take
+> > < 512 positions.
+> >
+>
+> I have gone through the code and tested this series with RiscVVirt edk2.
+> All seems good to me, you can add :
+>
+> Tested-by: Song Shuai <songshuaishuai@tinylab.org>
+>
+> And a few questions about patch 2 ("riscv: Dump out kernel offset
+> information on panic"):
+>
+> 1. The dump_kernel_offset() function would output "Kernel Offset: 0x0
+> from 0xffffffff80000000" when booting with "nokaslr" option.
+>
+> How about disabling the registration of "kernel_offset_notifier" with
+> "nokaslr" option?
 
-Despite the name, E820_TYPE_ACPI covers not only ACPI data, but also EFI
-tables and might be required by kernel to function properly.
+I'd rather keep it as it shows the "nokaslr" flag was taken into account.
 
-Usually the problem is hidden because there is some E820_TYPE_RAM memory
-above E820_TYPE_ACPI. But crashkernel only presents pre-allocated crash
-memory as E820_TYPE_RAM on boot. If the preallocated range is small, it
-can fit under the last E820_TYPE_ACPI range.
+>
+> 2. Inspired by patch 2, I added the Crash KASLR support based on this
+> series [1].
+> So is it necessary to keep this patch if we have Crash KASLR support?
 
-Modify e820__end_of_ram_pfn() and e820__end_of_low_ram_pfn() to cover
-E820_TYPE_ACPI memory.
+I don't understand your question here
 
-The problem was discovered during debugging kexec for TDX guest. TDX
-guest uses E820_TYPE_ACPI to store the unaccepted memory bitmap and pass
-it between the kernels on kexec.
+>
+>
+> [1]:
+> https://lore.kernel.org/linux-riscv/20230815104800.705753-1-songshuaishua=
+i@tinylab.org/T/#u
+>
+> > base-commit-tag: v6.5-rc1
+> >
+> > Changes in v6:
+> >    * Fix reintroduced build failures by compiling kaslr.c only for arm6=
+4
+> >      and riscv, as suggested by Ard
+> >
+> > Changes in v5:
+> >    * Renamed efi-stub-kaslr.c into kaslr.c and fix commit log of patch =
+3,
+> >      as suggested by Ard
+> >    * Removed stubs since the kaslr functions were moved to their own fi=
+le
+> >      (and then does not trigger any build failure for architectures tha=
+t do
+> >      not call those functions since they are in their own compilation u=
+nit)
+> >
+> > Changes in v4:
+> >    * Fix efi_get_kimg macro that returned nothing
+> >    * Moved new kaslr functions into their own files to avoid zboot link
+> >      failures, as suggested by Ard
+> >
+> > Changes in v3:
+> >    * Rebase on top of 6.4-rc2
+> >    * Make RANDOMIZE_BASE depend on 64bit
+> >    * Fix efi_icache_sync and efi_get_kimg_min_align which were undefine=
+d
+> >      in x86 (and certainly other archs)
+> >    * Add patch 4 to fix warning on rv32
+> >
+> > Changes in v2:
+> >    * Rebase on top of 6.3-rc1
+> >    * Add a riscv cache sync after memcpying the kernel
+> >    * Add kaslr_offset implementation for KCOV
+> >    * Add forward declaration to quiet LLVM
+> >
+> > Alexandre Ghiti (5):
+> >    riscv: Introduce virtual kernel mapping KASLR
+> >    riscv: Dump out kernel offset information on panic
+> >    arm64: libstub: Move KASLR handling functions to kaslr.c
+> >    libstub: Fix compilation warning for rv32
+> >    riscv: libstub: Implement KASLR by using generic functions
+> >
+> >   arch/arm64/include/asm/efi.h              |   2 +
+> >   arch/riscv/Kconfig                        |  19 +++
+> >   arch/riscv/include/asm/efi.h              |   2 +
+> >   arch/riscv/include/asm/page.h             |   3 +
+> >   arch/riscv/kernel/image-vars.h            |   1 +
+> >   arch/riscv/kernel/pi/Makefile             |   2 +-
+> >   arch/riscv/kernel/pi/cmdline_early.c      |  13 ++
+> >   arch/riscv/kernel/pi/fdt_early.c          |  30 ++++
+> >   arch/riscv/kernel/setup.c                 |  25 ++++
+> >   arch/riscv/mm/init.c                      |  36 ++++-
+> >   drivers/firmware/efi/libstub/Makefile     |   4 +-
+> >   drivers/firmware/efi/libstub/arm64-stub.c | 117 ++--------------
+> >   drivers/firmware/efi/libstub/efistub.h    |   8 ++
+> >   drivers/firmware/efi/libstub/kaslr.c      | 159 +++++++++++++++++++++=
++
+> >   drivers/firmware/efi/libstub/riscv-stub.c |  33 ++---
+> >   15 files changed, 328 insertions(+), 126 deletions(-)
+> >   create mode 100644 arch/riscv/kernel/pi/fdt_early.c
+> >   create mode 100644 drivers/firmware/efi/libstub/kaslr.c
+> >
+>
+> --
+> Thanks
+> Song Shuai
 
-Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
----
- arch/x86/kernel/e820.c | 9 +++++----
- 1 file changed, 5 insertions(+), 4 deletions(-)
+Thanks for testing this and your suggestions!
 
-diff --git a/arch/x86/kernel/e820.c b/arch/x86/kernel/e820.c
-index fb8cf953380d..99c80680dc9e 100644
---- a/arch/x86/kernel/e820.c
-+++ b/arch/x86/kernel/e820.c
-@@ -827,7 +827,7 @@ u64 __init e820__memblock_alloc_reserved(u64 size, u64 align)
- /*
-  * Find the highest page frame number we have available
-  */
--static unsigned long __init e820_end_pfn(unsigned long limit_pfn, enum e820_type type)
-+static unsigned long __init e820_end_ram_pfn(unsigned long limit_pfn)
- {
- 	int i;
- 	unsigned long last_pfn = 0;
-@@ -838,7 +838,8 @@ static unsigned long __init e820_end_pfn(unsigned long limit_pfn, enum e820_type
- 		unsigned long start_pfn;
- 		unsigned long end_pfn;
- 
--		if (entry->type != type)
-+		if (entry->type != E820_TYPE_RAM &&
-+		    entry->type != E820_TYPE_ACPI)
- 			continue;
- 
- 		start_pfn = entry->addr >> PAGE_SHIFT;
-@@ -864,12 +865,12 @@ static unsigned long __init e820_end_pfn(unsigned long limit_pfn, enum e820_type
- 
- unsigned long __init e820__end_of_ram_pfn(void)
- {
--	return e820_end_pfn(MAX_ARCH_PFN, E820_TYPE_RAM);
-+	return e820_end_ram_pfn(MAX_ARCH_PFN);
- }
- 
- unsigned long __init e820__end_of_low_ram_pfn(void)
- {
--	return e820_end_pfn(1UL << (32 - PAGE_SHIFT), E820_TYPE_RAM);
-+	return e820_end_ram_pfn(1UL << (32 - PAGE_SHIFT));
- }
- 
- static void __init early_panic(char *msg)
--- 
-2.41.0
-
+Alex
