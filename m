@@ -2,191 +2,104 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BBDBCC71140
-	for <linux-efi@archiver.kernel.org>; Fri, 18 Aug 2023 11:38:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1D9D1C71153
+	for <linux-efi@archiver.kernel.org>; Fri, 18 Aug 2023 13:45:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1376706AbjHRLiU (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 18 Aug 2023 07:38:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46340 "EHLO
+        id S1377259AbjHRNov (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 18 Aug 2023 09:44:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55126 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1376707AbjHRLiD (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 18 Aug 2023 07:38:03 -0400
+        with ESMTP id S1348157AbjHRNor (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 18 Aug 2023 09:44:47 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 173BF2112
-        for <linux-efi@vger.kernel.org>; Fri, 18 Aug 2023 04:38:02 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 018BE3589;
+        Fri, 18 Aug 2023 06:44:45 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 9D0C1611F0
-        for <linux-efi@vger.kernel.org>; Fri, 18 Aug 2023 11:38:01 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1BBCFC433CD;
-        Fri, 18 Aug 2023 11:37:57 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 90AC5668D0;
+        Fri, 18 Aug 2023 13:44:45 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 269E3C433C7;
+        Fri, 18 Aug 2023 13:44:41 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1692358681;
-        bh=h29N0feBCav5r5bx0a4iK0yWxYcrWfDbXT4psaOKqR8=;
+        s=k20201202; t=1692366285;
+        bh=Bdt3dnT3PkezZZXx7wU43uaGt0Ad+1xDJCxtNTUmhhs=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=NbkpZNYei9X+OpHern2zrvsSUsfRucH3f1ylsg07jLvAVE0koW2TOHXEkB7BcdCqX
-         luNxc3/mfZv4tHLuQgwEAkK3cfsgfB9mL1xvB+suvYyQKjeBeNDCDa7XR49XzeVLMn
-         yQE6lSwbgRzf9y5L1whs8fLzECjlnM1JDg63Zfq2IBKuy1cXmCqfrDgjAH5ERpna6p
-         7lKkSB1PVGkiTQ91HQ5uvl27Q+mJvWa5tFHrkLvi2C7Zy9u/S2vh0AMKwJMEhLbmRJ
-         OIL+O5qn7bwIbrc1LjohkFjnj28Cr+59lfeekAZIj9ATYLbFbMOTCwBY/JtRelewTS
-         D0iUxiJSXh23A==
+        b=jxQCnCm35VHvjJdE7inNoatr+9zM6kr5y/tyhEqHGTkpXig54SOHXPWcTv3H08vz9
+         mJb7JEljiE63xypdH5gJ2t3LuUOPF/WGjLMwCJMazwpFsot9ml21BYOyMaZ1t9sYMn
+         YnEyyrhBuGBD4BThYV50hSYLz0hHYMoMG535iRNHFFbuanSFkRmdI601RBVUBilK6f
+         p5B8ghF5x5uc6mYSyliO4NAbwz+O3wbluHnqL1f4UKqL5+RMAmAmDO4cJAznoGvQfS
+         EO8QZOVOVXKzKivNzf6+/ALlARo0I6sog1mPeF4SdTbf3CAR8TNOJvzrCAJFS6aZfn
+         K4Yl6DfvxHG+w==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
-Cc:     Ard Biesheuvel <ardb@kernel.org>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Will Deacon <will@kernel.org>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
+Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
+        Evgeniy Baskov <baskov@ispras.ru>,
+        Borislav Petkov <bp@alien8.de>,
         Dave Hansen <dave.hansen@linux.intel.com>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Nathan Chancellor <nathan@kernel.org>,
-        Nick Desaulniers <ndesaulniers@google.com>,
-        "Rafael J . Wysocki" <rafael.j.wysocki@intel.com>
-Subject: [PATCH v2 08/11] acpi/prmt: Use EFI runtime sandbox to invoke PRM handlers
-Date:   Fri, 18 Aug 2023 13:37:21 +0200
-Message-Id: <20230818113724.368492-9-ardb@kernel.org>
+        Ingo Molnar <mingo@redhat.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Peter Jones <pjones@redhat.com>,
+        Matthew Garrett <mjg59@srcf.ucam.org>,
+        Gerd Hoffmann <kraxel@redhat.com>,
+        Kees Cook <keescook@chromium.org>,
+        "H. Peter Anvin" <hpa@zytor.com>,
+        =?UTF-8?q?Marvin=20H=C3=A4user?= <mhaeuser@posteo.de>
+Subject: [PATCH 01/17] x86/efi: Drop EFI stub .bss from .data section
+Date:   Fri, 18 Aug 2023 15:44:06 +0200
+Message-Id: <20230818134422.380032-2-ardb@kernel.org>
 X-Mailer: git-send-email 2.39.2
-In-Reply-To: <20230818113724.368492-1-ardb@kernel.org>
-References: <20230818113724.368492-1-ardb@kernel.org>
+In-Reply-To: <20230818134422.380032-1-ardb@kernel.org>
+References: <20230818134422.380032-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=4465; i=ardb@kernel.org; h=from:subject; bh=h29N0feBCav5r5bx0a4iK0yWxYcrWfDbXT4psaOKqR8=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeV++MevzoGn1iSu2tCTdqFzi9XRJz8mveVPr1yQ6a44O 45n2cwlHaUsDGIcDLJiiiwCs/++23l6olSt8yxZmDmsTCBDGLg4BWAic2wZ/ul6Z8WeN7n00ycy duPO3j9Bm5qy1nr8PfHCrueG+dr3ezYzMvxT+evL8XzxoU/1foJ3L6hXGjwsW6y3NmRWiUFW/Rl LUyYA
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1658; i=ardb@kernel.org; h=from:subject; bh=Bdt3dnT3PkezZZXx7wU43uaGt0Ad+1xDJCxtNTUmhhs=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeV+6bSi3LqslkvT5PemxwrP0Mq4wlqurPd5zelui7dlN 9re8bB3lLIwiHEwyIopsgjM/vtu5+mJUrXOs2Rh5rAygQxh4OIUgIlsYGNk+DR/QYbLjYv9QtLb rWr/rPPkShKoENbqmH/sBvfbgiiNDwz//eJO68vqaSuVc7Y//vdXbGFy9MFNVj8vS86tE5629v0 2dgA=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Instead of bypassing the kernel's adaptation layer for performing EFI
-runtime calls, wire up ACPI PRM handling into it. This means these calls
-can no longer occur concurrently with EFI runtime calls, and will be
-made from the EFI runtime workqueue. It also means any page faults
-occurring during PRM handling will be identified correctly as
-originating in firmware code.
+Now that the EFI stub always zero inits its BSS section upon entry,
+there is no longer a need to place the BSS symbols carried by the stub
+into the .data section.
 
-While at it, give the function pointer struct member a more descriptive
-name so it will stand out in diagnostic messages if any issues do occur.
-
-Acked-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/acpi/Kconfig                    |  2 +-
- drivers/acpi/prmt.c                     |  6 ++--
- drivers/firmware/efi/runtime-wrappers.c | 32 ++++++++++++++++++++
- include/linux/efi.h                     |  5 +++
- 4 files changed, 41 insertions(+), 4 deletions(-)
+ arch/x86/boot/compressed/vmlinux.lds.S | 1 -
+ drivers/firmware/efi/libstub/Makefile  | 7 -------
+ 2 files changed, 8 deletions(-)
 
-diff --git a/drivers/acpi/Kconfig b/drivers/acpi/Kconfig
-index 00dd309b66828182..cee82b473dc50921 100644
---- a/drivers/acpi/Kconfig
-+++ b/drivers/acpi/Kconfig
-@@ -581,7 +581,7 @@ config ACPI_VIOT
+diff --git a/arch/x86/boot/compressed/vmlinux.lds.S b/arch/x86/boot/compressed/vmlinux.lds.S
+index b22f34b8684a725b..4ff6ab1b67d9b336 100644
+--- a/arch/x86/boot/compressed/vmlinux.lds.S
++++ b/arch/x86/boot/compressed/vmlinux.lds.S
+@@ -47,7 +47,6 @@ SECTIONS
+ 		_data = . ;
+ 		*(.data)
+ 		*(.data.*)
+-		*(.bss.efistub)
+ 		_edata = . ;
+ 	}
+ 	. = ALIGN(L1_CACHE_BYTES);
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index ae8874401a9f1490..8302ba66ef0b3d45 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -108,13 +108,6 @@ lib-y				:= $(patsubst %.o,%.stub.o,$(lib-y))
+ # https://bugs.llvm.org/show_bug.cgi?id=46480
+ STUBCOPY_FLAGS-y		+= --remove-section=.note.gnu.property
  
- config ACPI_PRMT
- 	bool "Platform Runtime Mechanism Support"
--	depends on EFI && (X86_64 || ARM64)
-+	depends on EFI_RUNTIME_WRAPPERS && (X86_64 || ARM64)
- 	default y
- 	help
- 	  Platform Runtime Mechanism (PRM) is a firmware interface exposing a
-diff --git a/drivers/acpi/prmt.c b/drivers/acpi/prmt.c
-index 71b9adaaf33b93cf..7020584096bfaaaf 100644
---- a/drivers/acpi/prmt.c
-+++ b/drivers/acpi/prmt.c
-@@ -260,9 +260,9 @@ static acpi_status acpi_platformrt_space_handler(u32 function,
- 		context.static_data_buffer = handler->static_data_buffer_addr;
- 		context.mmio_ranges = module->mmio_info;
+-#
+-# For x86, bootloaders like systemd-boot or grub-efi do not zero-initialize the
+-# .bss section, so the .bss section of the EFI stub needs to be included in the
+-# .data section of the compressed kernel to ensure initialization. Rename the
+-# .bss section here so it's easy to pick out in the linker script.
+-#
+-STUBCOPY_FLAGS-$(CONFIG_X86)	+= --rename-section .bss=.bss.efistub,load,alloc
+ STUBCOPY_RELOC-$(CONFIG_X86_32)	:= R_386_32
+ STUBCOPY_RELOC-$(CONFIG_X86_64)	:= R_X86_64_64
  
--		status = efi_call_virt_pointer(handler, handler_addr,
--					       handler->acpi_param_buffer_addr,
--					       &context);
-+		status = efi_call_acpi_prm_handler(handler->handler_addr,
-+						   handler->acpi_param_buffer_addr,
-+						   &context);
- 		if (status == EFI_SUCCESS) {
- 			buffer->prm_status = PRM_HANDLER_SUCCESS;
- 		} else {
-diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
-index afe9248cc5bc61ba..71d3c70f0705e1b9 100644
---- a/drivers/firmware/efi/runtime-wrappers.c
-+++ b/drivers/firmware/efi/runtime-wrappers.c
-@@ -108,6 +108,12 @@ union efi_rts_args {
- 		u64		*max_size;
- 		int		*reset_type;
- 	} QUERY_CAPSULE_CAPS;
-+
-+	struct {
-+		efi_status_t	(__efiapi *acpi_prm_handler)(u64, void *);
-+		u64		param_buffer_addr;
-+		void		*context;
-+	} ACPI_PRM_HANDLER;
- };
- 
- struct efi_runtime_work efi_rts_work;
-@@ -283,6 +289,14 @@ static void efi_call_rts(struct work_struct *work)
- 				       args->QUERY_CAPSULE_CAPS.max_size,
- 				       args->QUERY_CAPSULE_CAPS.reset_type);
- 		break;
-+	case EFI_ACPI_PRM_HANDLER:
-+#ifdef CONFIG_ACPI_PRMT
-+		status = arch_efi_call_virt(&args->ACPI_PRM_HANDLER,
-+					    acpi_prm_handler,
-+					    args->ACPI_PRM_HANDLER.param_buffer_addr,
-+					    args->ACPI_PRM_HANDLER.context);
-+		break;
-+#endif
- 	default:
- 		/*
- 		 * Ideally, we should never reach here because a caller of this
-@@ -560,3 +574,21 @@ void efi_native_runtime_setup(void)
- 	efi.update_capsule = virt_efi_update_capsule;
- 	efi.query_capsule_caps = virt_efi_query_capsule_caps;
- }
-+
-+#ifdef CONFIG_ACPI_PRMT
-+
-+efi_status_t
-+efi_call_acpi_prm_handler(efi_status_t (__efiapi *handler_addr)(u64, void *),
-+			  u64 param_buffer_addr, void *context)
-+{
-+	efi_status_t status;
-+
-+	if (down_interruptible(&efi_runtime_lock))
-+		return EFI_ABORTED;
-+	status = efi_queue_work(ACPI_PRM_HANDLER, handler_addr,
-+				param_buffer_addr, context);
-+	up(&efi_runtime_lock);
-+	return status;
-+}
-+
-+#endif
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index cf450b6fbfd20aa5..15b94dad5091b406 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1229,6 +1229,10 @@ extern int efi_tpm_final_log_size;
- 
- extern unsigned long rci2_table_phys;
- 
-+efi_status_t
-+efi_call_acpi_prm_handler(efi_status_t (__efiapi *handler_addr)(u64, void *),
-+			  u64 param_buffer_addr, void *context);
-+
- /*
-  * efi_runtime_service() function identifiers.
-  * "NONE" is used by efi_recover_from_page_fault() to check if the page
-@@ -1248,6 +1252,7 @@ enum efi_rts_ids {
- 	EFI_RESET_SYSTEM,
- 	EFI_UPDATE_CAPSULE,
- 	EFI_QUERY_CAPSULE_CAPS,
-+	EFI_ACPI_PRM_HANDLER,
- };
- 
- union efi_rts_args;
 -- 
 2.39.2
 
