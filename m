@@ -2,36 +2,36 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 86D2AC71157
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4980DC71149
 	for <linux-efi@archiver.kernel.org>; Fri, 18 Aug 2023 13:46:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1348447AbjHRNp7 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 18 Aug 2023 09:45:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49154 "EHLO
+        id S1377306AbjHRNp5 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 18 Aug 2023 09:45:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49232 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1377337AbjHRNpe (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 18 Aug 2023 09:45:34 -0400
+        with ESMTP id S1377311AbjHRNpc (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 18 Aug 2023 09:45:32 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 51B404220;
-        Fri, 18 Aug 2023 06:45:25 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E4B723590;
+        Fri, 18 Aug 2023 06:45:18 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id E3C9A61B66;
-        Fri, 18 Aug 2023 13:45:24 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 80A1FC433CB;
-        Fri, 18 Aug 2023 13:45:21 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 62B5D61977;
+        Fri, 18 Aug 2023 13:45:18 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id F0744C433C8;
+        Fri, 18 Aug 2023 13:45:14 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1692366324;
-        bh=2tNYvCTQETnYKJxzTWyBNXcGaf0lQQ9jGnUVDVr3vNI=;
+        s=k20201202; t=1692366317;
+        bh=U1EXI1fzEpmikIDVB6kaNJZr9EWOdxZEAwrcc4mhTpc=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=f+aJPIvqFwCwaewVyyYQRfsdJYX4ak8lcaMhVlpT35Xer857YFF4dsXSH57MS+kje
-         nt7umP7spkcxjXMyggtRV3HCV+grUyogv3D+rEJRA65Wmixyc6RfE0b9EPcA9pjLZE
-         yGZ0/u2mk6zvFF28oNpyxDF98A5V221w4wRFOBnCSUX+JsKHtIrwcEYqKrA1Sh2QHB
-         ImvGma7PDDOAERURNTcSnke+HRgn82bQDmNhgh2vhP+lxhc8bvzKLjteXJyk4xiY5T
-         B8Yw/qwFCSU1X/SZVfQY3VJpcsfvKUStluPvDKJ4qPjsiWvgFYASX0H94B7NL9JSl5
-         vMBXUqNsbMQ5A==
+        b=B9CXjW7xm4GPt9Z3Gjyswa+vSpbINSA+YIBP+6fV8XFe4YJgPRZ7v02fpm8NmHszg
+         ACubY0UzAHAtakw/q7oDtjMA7WIkKgiDxySMIjsURvXVUYYQAwFsIP1/H5HezByta0
+         pmJpYv+QM7CCAACATMJTk9BnCMLI/hO5LGLhuWigMr3tdg80SevEtmmKLpDmkQfGpW
+         aV99/eZiHpcT4C4/B/tvjswSu0hB09SXHJZoSDRn2jSUA6w8PBOmJ/SG6TJBxTsdbq
+         QELtduhjdeo6kUBtS7qHpnPer2QB0SGje39saNCmOD4Z+u5iv3YF8YEZ2yT73k/+vs
+         g7JN/g51Df/Tw==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -46,191 +46,138 @@ Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         Kees Cook <keescook@chromium.org>,
         "H. Peter Anvin" <hpa@zytor.com>,
         =?UTF-8?q?Marvin=20H=C3=A4user?= <mhaeuser@posteo.de>
-Subject: [PATCH 13/17] x86/boot: Construct PE/COFF .text section from assembler
-Date:   Fri, 18 Aug 2023 15:44:18 +0200
-Message-Id: <20230818134422.380032-14-ardb@kernel.org>
+Subject: [PATCH 11/17] x86/boot: Use fixed size of 16k for setup block
+Date:   Fri, 18 Aug 2023 15:44:16 +0200
+Message-Id: <20230818134422.380032-12-ardb@kernel.org>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230818134422.380032-1-ardb@kernel.org>
 References: <20230818134422.380032-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=5082; i=ardb@kernel.org; h=from:subject; bh=2tNYvCTQETnYKJxzTWyBNXcGaf0lQQ9jGnUVDVr3vNI=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeV+6RqH2xp9W+Z3zdk8uVjXpV4z84p8intW/Ovje/suT fP9J3Oyo5SFQYyDQVZMkUVg9t93O09PlKp1niULM4eVCWQIAxenAEyk+jjDf/8DhTOTX1mWr1m/ ulr6YPtUH4l1diY94TdVznnOLH0R+oORYdUOxV1/T/++cUBZpPTDGuuUi0krVv5e7vvfWGXhlY+ TD3IAAA==
+X-Developer-Signature: v=1; a=openpgp-sha256; l=4435; i=ardb@kernel.org; h=from:subject; bh=U1EXI1fzEpmikIDVB6kaNJZr9EWOdxZEAwrcc4mhTpc=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeV+6cqOpIkaCi5H2BZMWCXEI5SrEOvosyOk5oXnmvX2q dwa9sUdpSwMYhwMsmKKLAKz/77beXqiVK3zLFmYOaxMIEMYuDgFYCIGNgz/VDKV1yxKvnzrUOVX gaB1If/fmS5PF6mdfcB/7q5HbqKX3zMy7Fm2cMJe45szvNbINRV+WiFhaiTg2Vkz4dTZFYuju3N WcAAA
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Now that the size of the setup block is fixed and visible to the
-assembler, it is possible to populate the PE/COFF header fields from the
-asm code directly, instead of poking the values into the binary using
-the build tool. This will make it easier to reorganize the section
-layout without having to tweak the build tool in lockstep.
+The setup block contains the real mode startup code that is used when
+booting from a legacy BIOS, along with the boot_params/setup_data that
+is used by legacy x86 bootloaders to pass the command line and initial
+ramdisk parameters, among other things.
 
-Note that this change results in no differences in the resulting bzImage
-binary.
+The setup block also contains the PE/COFF header of the entire combined
+image, which includes the compressed kernel image, the decompressor and
+the EFI stub.
+
+This PE header describes the layout of the executable image in memory,
+and currently, the fact that the setup block precedes it makes it rather
+fiddly to get the right values into the right place in the final image.
+
+One complicating factor here is the variable setup block size, and given
+that we will need to round up the setup block size to page size anyway
+in a subsequent patch (in order to be able to use different permissions
+for .text and .data), let's round it up to a fixed size of 16 KiB and be
+done with it.
+
+Note that Clang does not optimize for size as aggressively as GCC when
+using the -Os option, but it supports -Oz for this purpose, so pass that
+if the compiler supports it.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/boot/header.S      | 22 +++------
- arch/x86/boot/tools/build.c | 47 --------------------
- 2 files changed, 7 insertions(+), 62 deletions(-)
+ arch/x86/boot/Makefile      |  1 +
+ arch/x86/boot/header.S      |  6 +++++-
+ arch/x86/boot/setup.ld      |  1 +
+ arch/x86/boot/tools/build.c | 12 +++++-------
+ 4 files changed, 12 insertions(+), 8 deletions(-)
 
+diff --git a/arch/x86/boot/Makefile b/arch/x86/boot/Makefile
+index 0e98bc5036994715..be1e8b94c93afa4a 100644
+--- a/arch/x86/boot/Makefile
++++ b/arch/x86/boot/Makefile
+@@ -69,6 +69,7 @@ KBUILD_CFLAGS	:= $(REALMODE_CFLAGS) -D_SETUP
+ KBUILD_AFLAGS	:= $(KBUILD_CFLAGS) -D__ASSEMBLY__
+ KBUILD_CFLAGS	+= $(call cc-option,-fmacro-prefix-map=$(srctree)/=)
+ KBUILD_CFLAGS	+= -fno-asynchronous-unwind-tables
++KBUILD_CFLAGS	+= $(call cc-option,-Oz)
+ GCOV_PROFILE := n
+ UBSAN_SANITIZE := n
+ 
 diff --git a/arch/x86/boot/header.S b/arch/x86/boot/header.S
-index f1fdffc9d2ca984b..c23c5feef37e55ed 100644
+index 72744ba440f6ea09..bef9265173757a5a 100644
 --- a/arch/x86/boot/header.S
 +++ b/arch/x86/boot/header.S
-@@ -79,14 +79,12 @@ optional_header:
- 	.byte	0x02				# MajorLinkerVersion
- 	.byte	0x14				# MinorLinkerVersion
- 
--	# Filled in by build.c
--	.long	0				# SizeOfCode
-+	.long	setup_size + ZO__end - 0x200	# SizeOfCode
- 
- 	.long	0				# SizeOfInitializedData
- 	.long	0				# SizeOfUninitializedData
- 
--	# Filled in by build.c
--	.long	0x0000				# AddressOfEntryPoint
-+	.long	setup_size + ZO_efi_pe_entry	# AddressOfEntryPoint
- 
- 	.long	0x0200				# BaseOfCode
- #ifdef CONFIG_X86_32
-@@ -109,10 +107,7 @@ extra_header_fields:
- 	.word	0				# MinorSubsystemVersion
- 	.long	0				# Win32VersionValue
- 
--	#
--	# The size of the bzImage is written in tools/build.c
--	#
--	.long	0				# SizeOfImage
-+	.long	setup_size + ZO__end 		# SizeOfImage
- 
- 	.long	0x200				# SizeOfHeaders
- 	.long	0				# CheckSum
-@@ -203,18 +198,15 @@ section_table:
- 		IMAGE_SCN_MEM_DISCARDABLE	# Characteristics
+@@ -36,6 +36,10 @@ SYSSEG		= 0x1000		/* historical load address >> 4 */
+ #define ROOT_RDONLY 1
  #endif
  
--	#
--	# The offset & size fields are filled in by build.c.
--	#
- 	.ascii	".text"
- 	.byte	0
- 	.byte	0
- 	.byte	0
--	.long	0
--	.long	0x0				# startup_{32,64}
--	.long	0				# Size of initialized data
-+	.long	ZO__end
-+	.long	setup_size
-+	.long	ZO__edata			# Size of initialized data
- 						# on disk
--	.long	0x0				# startup_{32,64}
-+	.long	setup_size
- 	.long	0				# PointerToRelocations
- 	.long	0				# PointerToLineNumbers
- 	.word	0				# NumberOfRelocations
++	/* The setup block has a fixed size: 32 * 512 == 16k */
++	.globl	setup_size
++	.set	setup_size, 0x4000
++
+ 	.code16
+ 	.section ".bstext", "ax"
+ #ifdef CONFIG_EFI_STUB
+@@ -231,7 +235,7 @@ sentinel:	.byte 0xff, 0xff        /* Used to detect broken loaders */
+ 
+ 	.globl	hdr
+ hdr:
+-setup_sects:	.byte 0			/* Filled in by build.c */
++setup_sects:	.byte (setup_size / 512) - 1
+ root_flags:	.word ROOT_RDONLY
+ syssize:	.long 0			/* Filled in by build.c */
+ ram_size:	.word 0			/* Obsolete */
+diff --git a/arch/x86/boot/setup.ld b/arch/x86/boot/setup.ld
+index a05dcaa4b74cd9f8..f1c14616cd80390d 100644
+--- a/arch/x86/boot/setup.ld
++++ b/arch/x86/boot/setup.ld
+@@ -57,6 +57,7 @@ SECTIONS
+ 	}
+ 
+ 	ASSERT(_end <= 0x8000, "Setup too big!")
++	ASSERT(__bss_start <= setup_size, "Setup image size too big!")
+ 	ASSERT(hdr == 0x1f1, "The setup header has the wrong offset!")
+ 	/* Necessary for the very-old-loader check to work... */
+ 	ASSERT(__end_init <= 5*512, "init sections too big!")
 diff --git a/arch/x86/boot/tools/build.c b/arch/x86/boot/tools/build.c
-index 082c38a097713a2d..6b6282a96c6ab24d 100644
+index 06949754316458ce..665ce7241542e475 100644
 --- a/arch/x86/boot/tools/build.c
 +++ b/arch/x86/boot/tools/build.c
-@@ -53,10 +53,8 @@ u8 buf[(SETUP_SECT_NUM+1)*512];
- #define PECOFF_COMPAT_RESERVE 0x0
+@@ -40,12 +40,10 @@ typedef unsigned char  u8;
+ typedef unsigned short u16;
+ typedef unsigned int   u32;
+ 
+-/* Minimal number of setup sectors */
+-#define SETUP_SECT_MIN 5
+-#define SETUP_SECT_MAX 64
++#define SETUP_SECT_NUM 32
+ 
+ /* This must be large enough to hold the entire setup */
+-u8 buf[SETUP_SECT_MAX*512];
++u8 buf[(SETUP_SECT_NUM+1)*512];
+ 
+ #define PECOFF_RELOC_RESERVE 0x20
+ 
+@@ -360,8 +358,9 @@ int main(int argc, char ** argv)
+ 
+ 	/* Pad unused space with zeros */
+ 	setup_sectors = (c + 511) / 512;
+-	if (setup_sectors < SETUP_SECT_MIN)
+-		setup_sectors = SETUP_SECT_MIN;
++	if (setup_sectors > SETUP_SECT_NUM)
++		die("setup size exceeds maximum");
++	setup_sectors = SETUP_SECT_NUM;
+ 	i = setup_sectors*512;
+ 	memset(buf+c, 0, i-c);
+ 
+@@ -388,7 +387,6 @@ int main(int argc, char ** argv)
  #endif
  
--static unsigned long efi_pe_entry;
- static unsigned long efi32_pe_entry;
- static unsigned long _edata;
--static unsigned long _end;
+ 	/* Patch the setup code with the appropriate size parameters */
+-	buf[0x1f1] = setup_sectors-1;
+ 	put_unaligned_le32(sys_size, &buf[0x1f4]);
  
- /*----------------------------------------------------------------------*/
- 
-@@ -219,32 +217,6 @@ static void update_pecoff_setup_and_reloc(unsigned int size)
- #endif
- }
- 
--static void update_pecoff_text(unsigned int text_start, unsigned int file_sz)
--{
--	unsigned int pe_header;
--	unsigned int text_sz = file_sz - text_start;
--	unsigned int bss_sz = _end - text_sz;
--
--	pe_header = get_unaligned_le32(&buf[0x3c]);
--
--	/*
--	 * Size of code: Subtract the size of the first sector (512 bytes)
--	 * which includes the header.
--	 */
--	put_unaligned_le32(file_sz - 512 + bss_sz, &buf[pe_header + 0x1c]);
--
--	/* Size of image */
--	put_unaligned_le32(file_sz + bss_sz, &buf[pe_header + 0x50]);
--
--	/*
--	 * Address of entry point for PE/COFF executable
--	 */
--	put_unaligned_le32(text_start + efi_pe_entry, &buf[pe_header + 0x28]);
--
--	update_pecoff_section_header_fields(".text", text_start, text_sz + bss_sz,
--					    text_sz, text_start);
--}
--
- static int reserve_pecoff_reloc_section(int c)
- {
- 	/* Reserve 0x20 bytes for .reloc section */
-@@ -252,22 +224,9 @@ static int reserve_pecoff_reloc_section(int c)
- 	return PECOFF_RELOC_RESERVE;
- }
- 
--static void efi_stub_defaults(void)
--{
--	/* Defaults for old kernel */
--#ifdef CONFIG_X86_32
--	efi_pe_entry = 0x10;
--#else
--	efi_pe_entry = 0x210;
--#endif
--}
--
- #else
- 
- static inline void update_pecoff_setup_and_reloc(unsigned int size) {}
--static inline void update_pecoff_text(unsigned int text_start,
--				      unsigned int file_sz) {}
--static inline void efi_stub_defaults(void) {}
- 
- static inline int reserve_pecoff_reloc_section(int c)
- {
-@@ -310,10 +269,8 @@ static void parse_zoffset(char *fname)
- 	p = (char *)buf;
- 
- 	while (p && *p) {
--		PARSE_ZOFS(p, efi_pe_entry);
- 		PARSE_ZOFS(p, efi32_pe_entry);
- 		PARSE_ZOFS(p, _edata);
--		PARSE_ZOFS(p, _end);
- 
- 		p = strchr(p, '\n');
- 		while (p && (*p == '\r' || *p == '\n'))
-@@ -331,8 +288,6 @@ int main(int argc, char ** argv)
- 	void *kernel;
- 	u32 crc = 0xffffffffUL;
- 
--	efi_stub_defaults();
--
- 	if (argc != 5)
- 		usage();
- 	parse_zoffset(argv[3]);
-@@ -380,8 +335,6 @@ int main(int argc, char ** argv)
- 	kernel = mmap(NULL, sz, PROT_READ, MAP_SHARED, fd, 0);
- 	if (kernel == MAP_FAILED)
- 		die("Unable to mmap '%s': %m", argv[2]);
--	update_pecoff_text(setup_sectors * 512, i + _edata);
--
- 
- 	crc = partial_crc32(buf, i, crc);
- 	if (fwrite(buf, 1, i, dest) != i)
+ 	update_pecoff_text(setup_sectors * 512, i + (sys_size * 16));
 -- 
 2.39.2
 
