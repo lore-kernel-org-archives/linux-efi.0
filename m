@@ -2,36 +2,36 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 724D9C7113D
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 83A97C7113C
 	for <linux-efi@archiver.kernel.org>; Fri, 18 Aug 2023 11:38:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1376705AbjHRLiT (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 18 Aug 2023 07:38:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48310 "EHLO
+        id S1376709AbjHRLiV (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 18 Aug 2023 07:38:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38814 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1376706AbjHRLh7 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 18 Aug 2023 07:37:59 -0400
+        with ESMTP id S1376710AbjHRLiM (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 18 Aug 2023 07:38:12 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9E6AF2112
-        for <linux-efi@vger.kernel.org>; Fri, 18 Aug 2023 04:37:58 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BBE4F2112
+        for <linux-efi@vger.kernel.org>; Fri, 18 Aug 2023 04:38:11 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 3D45361DD9
-        for <linux-efi@vger.kernel.org>; Fri, 18 Aug 2023 11:37:58 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D6AFCC433C7;
-        Fri, 18 Aug 2023 11:37:54 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 585AF63FB9
+        for <linux-efi@vger.kernel.org>; Fri, 18 Aug 2023 11:38:11 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id ED03CC433C8;
+        Fri, 18 Aug 2023 11:38:07 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1692358677;
-        bh=gupJBs1lJenWEdQdfCpvOfI2K/VV4o0bjxCM20K6qUY=;
+        s=k20201202; t=1692358690;
+        bh=u2Qe/DFQYFdROgabTymAKmhbaOyvbe9/hjLZEwEHzOA=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=OJkOj5K/UbTDWb+vX79Qbk0rA0RdXRE61Sw14IUSg/YX4nZwz9sn5agwCAadr4voY
-         k/c10UqHjMxVCRHrrcNxrlFQswE0sALDHXb2Liecfs4Zvs/Y8Eh+/CRtKFUGLG/7qO
-         P2/UfwglOlm0T098bQx08FJKx/jYXgGSJSLZzf6HXgZ3+lhnm1mXAv9ONza5ylU3uy
-         uk4nSWgGncoV+fiwlZvwrclJpFM9CmEvKl42f2Q4Z2edao65lTQmXDMR2g40tlpDoC
-         whlp0sFpfVRSBazcZNxJY5hUoNk+54imDull+kJS/RDkXCzN5z9DwE2k9pDJhc+0+H
-         gYKazAcwMfLDA==
+        b=dAbm6Jo/ESvka3uLylNsmVQoyUrwgTT2OoHXiucAtOgm1aeilJtoKX2ZrGiEpRizU
+         0mHs+CPBX9iel8JWZRIlUrYI7QdEwl7y3UUCygYJ9TUOlQnUtlx8eESRdxtb1NGTPH
+         dyuRGSfUCOAzLX9pn1SWkC2SD8Bk2Sjx0rDNbYbguLV7Im4SnX/d0P4SyBoxWPIcEx
+         rxXl4S/+qQZO0AyQn7WdVvJ95JM0G72rUQGJZgGBXXQbGNpejaBfxSpnja2q6fpk6o
+         xy3REHqp0tr1PgGuOj3gLPH/Qm99pHBWtUCmFolTmoV42cF1620INgQ6wqhDQ7dX4i
+         5vxnp3UtlxdXQ==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     Ard Biesheuvel <ardb@kernel.org>,
@@ -46,155 +46,122 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>,
         "Rafael J. Wysocki" <rafael@kernel.org>,
         Nathan Chancellor <nathan@kernel.org>,
         Nick Desaulniers <ndesaulniers@google.com>
-Subject: [PATCH v2 07/11] efi/runtime-wrappers: Don't duplicate setup/teardown code
-Date:   Fri, 18 Aug 2023 13:37:20 +0200
-Message-Id: <20230818113724.368492-8-ardb@kernel.org>
+Subject: [RFC PATCH v2 11/11] efi/x86: Rely on compiler to emit MS ABI calls
+Date:   Fri, 18 Aug 2023 13:37:24 +0200
+Message-Id: <20230818113724.368492-12-ardb@kernel.org>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230818113724.368492-1-ardb@kernel.org>
 References: <20230818113724.368492-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=4983; i=ardb@kernel.org; h=from:subject; bh=gupJBs1lJenWEdQdfCpvOfI2K/VV4o0bjxCM20K6qUY=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeV++Iec064Z5ff2LBHO3T3LKuoNZ/JR/zWTjzjmcOSXs xw0CmLvKGVhEONgkBVTZBGY/ffdztMTpWqdZ8nCzGFlAhnCwMUpABPJNGD4Z/6ytuBQWkBP0qE7 6z1+2713FRNW8T9693tn7PYtz91/ZzP84Uy3nSju3f3KVOlMp/8LvSslE50+rGC15/dyWiB+xnE WOwA=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3659; i=ardb@kernel.org; h=from:subject; bh=u2Qe/DFQYFdROgabTymAKmhbaOyvbe9/hjLZEwEHzOA=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeV++Jd/oToLY3XPr5ZgPLVzcoWNVNO7+UwqAr9zpqUfd ttSazupo5SFQYyDQVZMkUVg9t93O09PlKp1niULM4eVCWQIAxenAExE1Ybhv4N5Wtb6eSabFWZ+ OVHo+NHwcOwnrnaHVXmSUi/TRSN1+hj+x8494HRhusez14asjN5/HnldeuB05tFfpdk8bS39r0r W8QIA
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Avoid duplicating the EFI arch setup and teardown routine calls numerous
-times in efi_call_rts(). Instead, expand the efi_call_virt_pointer()
-macro into efi_call_rts(), taking the pre and post parts out of the
-switch.
+When EFI support was added to the x86_64 port originally, GCC did not
+implement support for emitting procedure calls using the MS calling
+convention, which deviates from the SysV one used in Linux.
+
+However, this support has been added a long time ago, and the EFI stub
+(which runs in a different execution context) has already been updated
+to simply rely on the __attribute__((ms_abi)) annotations of the EFI
+function pointers, resulting in both GCC and Clang doing the right
+thing, as long as the correct stack alignment is being used.
+
+The EFI stub runs on the stack provided by the firmware, and maintains
+16 byte alignment internally, but the core x86_64 code does not, so
+explicit stack realignment is needed, and this has been dealt with in
+a previous patch. So the asm wrapper has become redundant, and can be
+dropped.
+
+Note that one of the EFI runtime services returns void so a trick is
+needed to make the compiler ignore the return value in that case, or an
+error will be triggered.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- drivers/firmware/efi/runtime-wrappers.c | 26 ++++++++++++++------
- include/linux/efi.h                     |  6 +++--
- 2 files changed, 22 insertions(+), 10 deletions(-)
+ arch/x86/include/asm/efi.h          | 11 +++-----
+ arch/x86/platform/efi/Makefile      |  4 +--
+ arch/x86/platform/efi/efi_stub_64.S | 27 --------------------
+ 3 files changed, 5 insertions(+), 37 deletions(-)
 
-diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
-index c5e0c73cc000ed25..afe9248cc5bc61ba 100644
---- a/drivers/firmware/efi/runtime-wrappers.c
-+++ b/drivers/firmware/efi/runtime-wrappers.c
-@@ -40,7 +40,7 @@
-  * code doesn't get too cluttered:
-  */
- #define efi_call_virt(f, args...)   \
--	efi_call_virt_pointer(efi.runtime, f, args)
-+	arch_efi_call_virt(efi.runtime, f, args)
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index c47f2d49e6bc6a09..f5ac4dbecafe7f37 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -94,19 +94,14 @@ static inline void efi_fpu_end(void)
+ #else /* !CONFIG_X86_32 */
+ #define EFI_X86_KERNEL_ALLOC_LIMIT		EFI_ALLOC_LIMIT
  
- union efi_rts_args {
- 	struct {
-@@ -139,7 +139,7 @@ unsigned long efi_call_virt_save_flags(void)
- 	return flags;
- }
+-extern asmlinkage u64 __efi_call(void *fp, ...);
+-
+ extern bool efi_disable_ibt_for_runtime;
  
--void efi_call_virt_check_flags(unsigned long flags, const char *call)
-+void efi_call_virt_check_flags(unsigned long flags, const void *caller)
- {
- 	unsigned long cur_flags, mismatch;
+-#define efi_call(...) ({						\
+-	__efi_nargs_check(efi_call, 7, __VA_ARGS__);			\
+-	__efi_call(__VA_ARGS__);					\
+-})
+-
+ #undef arch_efi_call_virt
+ #define arch_efi_call_virt(p, f, args...) ({				\
+ 	u64 ret, ibt = ibt_save(efi_disable_ibt_for_runtime);		\
+-	ret = efi_call((void *)p->f, args);				\
++	ret = __builtin_choose_expr(					\
++		__builtin_types_compatible_p(typeof((p)->f(args)),void),\
++			((p)->f(args), EFI_ABORTED), (p)->f(args));	\
+ 	ibt_restore(ibt);						\
+ 	ret;								\
+ })
+diff --git a/arch/x86/platform/efi/Makefile b/arch/x86/platform/efi/Makefile
+index 684ac27cdf7cabfe..6dbd9533c4ce088c 100644
+--- a/arch/x86/platform/efi/Makefile
++++ b/arch/x86/platform/efi/Makefile
+@@ -2,8 +2,8 @@
+ KASAN_SANITIZE := n
+ GCOV_PROFILE := n
  
-@@ -150,8 +150,8 @@ void efi_call_virt_check_flags(unsigned long flags, const char *call)
- 		return;
- 
- 	add_taint(TAINT_FIRMWARE_WORKAROUND, LOCKDEP_NOW_UNRELIABLE);
--	pr_err_ratelimited(FW_BUG "IRQ flags corrupted (0x%08lx=>0x%08lx) by EFI %s\n",
--			   flags, cur_flags, call);
-+	pr_err_ratelimited(FW_BUG "IRQ flags corrupted (0x%08lx=>0x%08lx) by EFI call from %pS\n",
-+			   flags, cur_flags, caller ?: __builtin_return_address(0));
- 	arch_efi_restore_flags(flags);
- }
- 
-@@ -211,6 +211,10 @@ static void efi_call_rts(struct work_struct *work)
- {
- 	const union efi_rts_args *args = efi_rts_work.args;
- 	efi_status_t status = EFI_NOT_FOUND;
-+	unsigned long flags;
-+
-+	arch_efi_call_virt_setup();
-+	flags = efi_call_virt_save_flags();
- 
- 	switch (efi_rts_work.efi_rts_id) {
- 	case EFI_GET_TIME:
-@@ -287,6 +291,10 @@ static void efi_call_rts(struct work_struct *work)
- 		 */
- 		pr_err("Requested executing invalid EFI Runtime Service.\n");
- 	}
-+
-+	efi_call_virt_check_flags(flags, efi_rts_work.caller);
-+	arch_efi_call_virt_teardown();
-+
- 	efi_rts_work.status = status;
- 	complete(&efi_rts_work.efi_rts_comp);
- }
-@@ -296,6 +304,7 @@ static efi_status_t __efi_queue_work(enum efi_rts_ids id,
- {
- 	efi_rts_work.efi_rts_id = id;
- 	efi_rts_work.args = args;
-+	efi_rts_work.caller = __builtin_return_address(0);
- 	efi_rts_work.status = EFI_ABORTED;
- 
- 	if (!efi_enabled(EFI_RUNTIME_SERVICES)) {
-@@ -423,8 +432,8 @@ virt_efi_set_variable_nonblocking(efi_char16_t *name, efi_guid_t *vendor,
- 	if (down_trylock(&efi_runtime_lock))
- 		return EFI_NOT_READY;
- 
--	status = efi_call_virt(set_variable, name, vendor, attr, data_size,
--			       data);
-+	status = efi_call_virt_pointer(efi.runtime, set_variable, name, vendor,
-+				       attr, data_size, data);
- 	up(&efi_runtime_lock);
- 	return status;
- }
-@@ -462,8 +471,9 @@ virt_efi_query_variable_info_nonblocking(u32 attr,
- 	if (down_trylock(&efi_runtime_lock))
- 		return EFI_NOT_READY;
- 
--	status = efi_call_virt(query_variable_info, attr, storage_space,
--			       remaining_space, max_variable_size);
-+	status = efi_call_virt_pointer(efi.runtime, query_variable_info, attr,
-+				       storage_space, remaining_space,
-+				       max_variable_size);
- 	up(&efi_runtime_lock);
- 	return status;
- }
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index ebb9671ed15ee3cb..cf450b6fbfd20aa5 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1130,7 +1130,7 @@ extern bool efi_runtime_disabled(void);
- static inline bool efi_runtime_disabled(void) { return true; }
- #endif
- 
--extern void efi_call_virt_check_flags(unsigned long flags, const char *call);
-+extern void efi_call_virt_check_flags(unsigned long flags, const void *caller);
- extern unsigned long efi_call_virt_save_flags(void);
- 
- enum efi_secureboot_mode {
-@@ -1197,7 +1197,7 @@ static inline void efi_check_for_embedded_firmwares(void) { }
- 									\
- 	__flags = efi_call_virt_save_flags();				\
- 	__s = arch_efi_call_virt(p, f, args);				\
--	efi_call_virt_check_flags(__flags, __stringify(f));		\
-+	efi_call_virt_check_flags(__flags, NULL);			\
- 									\
- 	arch_efi_call_virt_teardown();					\
- 									\
-@@ -1258,6 +1258,7 @@ union efi_rts_args;
-  * @status:		Status of executing EFI Runtime Service
-  * @efi_rts_id:		EFI Runtime Service function identifier
-  * @efi_rts_comp:	Struct used for handling completions
-+ * @caller:		The caller of the runtime service
-  */
- struct efi_runtime_work {
- 	union efi_rts_args	*args;
-@@ -1265,6 +1266,7 @@ struct efi_runtime_work {
- 	struct work_struct	work;
- 	enum efi_rts_ids	efi_rts_id;
- 	struct completion	efi_rts_comp;
-+	const void		*caller;
- };
- 
- extern struct efi_runtime_work efi_rts_work;
+-obj-$(CONFIG_EFI) 		+= memmap.o quirks.o efi.o efi_$(BITS).o \
+-				   efi_stub_$(BITS).o
++obj-$(CONFIG_EFI) 		+= memmap.o quirks.o efi.o efi_$(BITS).o
++obj-$(CONFIG_X86_32)		+= efi_stub_32.o
+ obj-$(CONFIG_EFI_MIXED)		+= efi_thunk_$(BITS).o
+ obj-$(CONFIG_EFI_FAKE_MEMMAP)	+= fake_mem.o
+ obj-$(CONFIG_EFI_RUNTIME_MAP)	+= runtime-map.o
+diff --git a/arch/x86/platform/efi/efi_stub_64.S b/arch/x86/platform/efi/efi_stub_64.S
+deleted file mode 100644
+index 2206b8bc47b8a757..0000000000000000
+--- a/arch/x86/platform/efi/efi_stub_64.S
++++ /dev/null
+@@ -1,27 +0,0 @@
+-/* SPDX-License-Identifier: GPL-2.0 */
+-/*
+- * Function calling ABI conversion from Linux to EFI for x86_64
+- *
+- * Copyright (C) 2007 Intel Corp
+- *	Bibo Mao <bibo.mao@intel.com>
+- *	Huang Ying <ying.huang@intel.com>
+- */
+-
+-#include <linux/linkage.h>
+-#include <asm/nospec-branch.h>
+-
+-SYM_FUNC_START(__efi_call)
+-	pushq %rbp
+-	movq %rsp, %rbp
+-	and $~0xf, %rsp
+-	mov 16(%rbp), %rax
+-	subq $48, %rsp
+-	mov %r9, 32(%rsp)
+-	mov %rax, 40(%rsp)
+-	mov %r8, %r9
+-	mov %rcx, %r8
+-	mov %rsi, %rcx
+-	CALL_NOSPEC rdi
+-	leave
+-	RET
+-SYM_FUNC_END(__efi_call)
 -- 
 2.39.2
 
