@@ -2,36 +2,36 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 910C9C71156
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7AD7BC71150
 	for <linux-efi@archiver.kernel.org>; Fri, 18 Aug 2023 13:45:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1377281AbjHRNpY (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 18 Aug 2023 09:45:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59404 "EHLO
+        id S1377275AbjHRNpX (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 18 Aug 2023 09:45:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41790 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1377356AbjHRNpP (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 18 Aug 2023 09:45:15 -0400
+        with ESMTP id S1377289AbjHRNo5 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 18 Aug 2023 09:44:57 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A8DDD3C35;
-        Fri, 18 Aug 2023 06:45:05 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CF5A33C2F;
+        Fri, 18 Aug 2023 06:44:55 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 438CC6377E;
-        Fri, 18 Aug 2023 13:45:05 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CD2FBC433C7;
-        Fri, 18 Aug 2023 13:45:01 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 6E1B966DF3;
+        Fri, 18 Aug 2023 13:44:55 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 036D1C433C8;
+        Fri, 18 Aug 2023 13:44:51 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1692366304;
-        bh=2RDy+W/bBz8r/G8wx1n/R7eiKUx6glvcr3j1Qzz9c44=;
+        s=k20201202; t=1692366294;
+        bh=7AgmzUMEbQ4q0yWpLInOQxXscQWeFd85vyZx1/xzwk4=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=nZMC3I9RTRSpEMY6srqglIe7t//9k7QF0ztFy0LN5qdkdG0roZrpLklM6PJV1wEAI
-         H78c2U+UGJN2D2UhgiT9VdHGGd3/9NssZudGoXYmbB2yBa7vqY++Bu1a+TDrelkSCA
-         0Pls3tpGVqEhJJ73VOR0eztM8nWdOA0FVmmpOVARGFBzvaXDqHReYHbhG0gnTPSd/z
-         MFRMRmcZodd1CH/ZG9M6r9NQvy/HEzLgC7eMPaUfn8dv6zJDtD9si8uxj6r6kIptqX
-         KuebsCionpHdJmoHgfexfWcrUH0CBTsKUSQin4t7s9K2gl2rK2rtGuAem4L7RN5lCq
-         +1erXE0NioIaA==
+        b=C0CB4lSRoUdKRQc1mqOdIZLJwdcCx/fBMjF813KLDJneWPNDkTDMPnx5HJH5j7Kkw
+         JVRmTD3FpRiIXcyTu0hKouFR4M9YdDFGDqPkcseZk4/VZkAJT4YwIZPrf3Er3I84Oh
+         +DPPdstkV12Ym8PGAM1QzP4ajIhRSahGSHQ5pxuM9OUmiBxveWMDHbaivyg7FEnraO
+         R451STsbKBKupthOluGN8TqVCUS3F2h/8y2K2b+ouhGHV0U8valqscuWLaj15C7iEh
+         AGv3+rKMSpi0HJ3mB++RioNF0Mq/l1OflH8huN/H++djHKEnWrta6CE7vAb+8dtQLm
+         W6lBZWo9B8oEA==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -46,72 +46,134 @@ Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         Kees Cook <keescook@chromium.org>,
         "H. Peter Anvin" <hpa@zytor.com>,
         =?UTF-8?q?Marvin=20H=C3=A4user?= <mhaeuser@posteo.de>
-Subject: [PATCH 07/17] x86/boot: Grab kernel_info offset from zoffset header directly
-Date:   Fri, 18 Aug 2023 15:44:12 +0200
-Message-Id: <20230818134422.380032-8-ardb@kernel.org>
+Subject: [PATCH 04/17] x86/boot: Remove the 'bugger off' message
+Date:   Fri, 18 Aug 2023 15:44:09 +0200
+Message-Id: <20230818134422.380032-5-ardb@kernel.org>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230818134422.380032-1-ardb@kernel.org>
 References: <20230818134422.380032-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1967; i=ardb@kernel.org; h=from:subject; bh=2RDy+W/bBz8r/G8wx1n/R7eiKUx6glvcr3j1Qzz9c44=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeV+6eKQvl3RMq6L3yTPWfc2U9yA48aPqXIsc1lTny6Xv eh//FtxRykLgxgHg6yYIovA7L/vdp6eKFXrPEsWZg4rE8gQBi5OAZjItK0M/5NaeMJ+3N7Lccmc Q+Oalsu8mkfzcsXYPG/sXvl9S9u30O0M/10/PFn3wtY4rUPRtcrv1US5O2oP5eu902a+Ern5vjv YlQ0A
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2992; i=ardb@kernel.org; h=from:subject; bh=7AgmzUMEbQ4q0yWpLInOQxXscQWeFd85vyZx1/xzwk4=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeV+6Tzz+5EtxvJ5KyctFXv7Yp3ej++sWpVTpi1sv/F76 mt/JvatHaUsDGIcDLJiiiwCs/++23l6olSt8yxZmDmsTCBDGLg4BWAi6rIM/2yvtK18c6+zx+D5 rOlc6tmr1BM3/88JP90fpxP1c4kWy1qGfzqH7zHyzIst//ytTn7BVfPpqt+MFt5dfet5kBzLzW9 mkqwA
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Instead of parsing zoffset.h and poking the kernel_info offset value
-into the header from the build tool, just grab the value directly in the
-asm file that describes this header.
+Ancient (pre-2003) x86 kernels could boot from a floppy disk straight from
+the BIOS, using a small real mode boot stub at the start of the image
+where the BIOS would expect the boot record (or boot block) to appear.
+
+Due to its limitations (kernel size < 1 MiB, no support for IDE, USB or
+El Torito floppy emulation), this support was dropped, and a Linux aware
+bootloader is now always required to boot the kernel from a legacy BIOS.
+
+To smoothen this transition, the boot stub was not removed entirely, but
+replaced with one that just prints an error message telling the user to
+install a bootloader.
+
+As it is unlikely that anyone doing direct floppy boot with such an
+ancient kernel is going to upgrade to v6.5+ and expect that this boot
+method still works, printing this message is kind of pointless, and so
+it should be possible to remove the logic that emits it.
+
+Let's free up this space so it can be used to expand the PE header in a
+subsequent patch.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/boot/header.S      | 2 +-
- arch/x86/boot/tools/build.c | 4 ----
- 2 files changed, 1 insertion(+), 5 deletions(-)
+ arch/x86/boot/header.S | 49 --------------------
+ arch/x86/boot/setup.ld |  7 +--
+ 2 files changed, 4 insertions(+), 52 deletions(-)
 
 diff --git a/arch/x86/boot/header.S b/arch/x86/boot/header.S
-index 6059f87b159d0e14..5575d0f06bab1918 100644
+index 8c8148d751c6d22b..b24fa50a98986945 100644
 --- a/arch/x86/boot/header.S
 +++ b/arch/x86/boot/header.S
-@@ -526,7 +526,7 @@ pref_address:		.quad LOAD_PHYSICAL_ADDR	# preferred load addr
+@@ -38,64 +38,15 @@ SYSSEG		= 0x1000		/* historical load address >> 4 */
  
- init_size:		.long INIT_SIZE		# kernel initialization size
- handover_offset:	.long 0			# Filled in by build.c
--kernel_info_offset:	.long 0			# Filled in by build.c
-+kernel_info_offset:	.long ZO_kernel_info
+ 	.code16
+ 	.section ".bstext", "ax"
+-
+-	.global bootsect_start
+-bootsect_start:
+ #ifdef CONFIG_EFI_STUB
+ 	# "MZ", MS-DOS header
+ 	.word	MZ_MAGIC
+-#endif
+-
+-	# Normalize the start address
+-	ljmp	$BOOTSEG, $start2
+-
+-start2:
+-	movw	%cs, %ax
+-	movw	%ax, %ds
+-	movw	%ax, %es
+-	movw	%ax, %ss
+-	xorw	%sp, %sp
+-	sti
+-	cld
+-
+-	movw	$bugger_off_msg, %si
+-
+-msg_loop:
+-	lodsb
+-	andb	%al, %al
+-	jz	bs_die
+-	movb	$0xe, %ah
+-	movw	$7, %bx
+-	int	$0x10
+-	jmp	msg_loop
+-
+-bs_die:
+-	# Allow the user to press a key, then reboot
+-	xorw	%ax, %ax
+-	int	$0x16
+-	int	$0x19
+-
+-	# int 0x19 should never return.  In case it does anyway,
+-	# invoke the BIOS reset code...
+-	ljmp	$0xf000,$0xfff0
+-
+-#ifdef CONFIG_EFI_STUB
+ 	.org	0x38
+ 	#
+ 	# Offset to the PE header.
+ 	#
+ 	.long	LINUX_PE_MAGIC
+ 	.long	pe_header
+-#endif /* CONFIG_EFI_STUB */
+-
+-	.section ".bsdata", "a"
+-bugger_off_msg:
+-	.ascii	"Use a boot loader.\r\n"
+-	.ascii	"\n"
+-	.ascii	"Remove disk and press any key to reboot...\r\n"
+-	.byte	0
+-
+-#ifdef CONFIG_EFI_STUB
+ pe_header:
+ 	.long	PE_MAGIC
  
- # End of setup header #####################################################
+diff --git a/arch/x86/boot/setup.ld b/arch/x86/boot/setup.ld
+index 49546c247ae25e97..b11c45b9e51ed90e 100644
+--- a/arch/x86/boot/setup.ld
++++ b/arch/x86/boot/setup.ld
+@@ -10,10 +10,11 @@ ENTRY(_start)
+ SECTIONS
+ {
+ 	. = 0;
+-	.bstext		: { *(.bstext) }
+-	.bsdata		: { *(.bsdata) }
++	.bstext	: {
++		*(.bstext)
++		. = 495;
++	} =0xffffffff
  
-diff --git a/arch/x86/boot/tools/build.c b/arch/x86/boot/tools/build.c
-index efa4e9c7d7135ba7..660627ea6cbb46f5 100644
---- a/arch/x86/boot/tools/build.c
-+++ b/arch/x86/boot/tools/build.c
-@@ -59,7 +59,6 @@ static unsigned long efi32_stub_entry;
- static unsigned long efi64_stub_entry;
- static unsigned long efi_pe_entry;
- static unsigned long efi32_pe_entry;
--static unsigned long kernel_info;
- static unsigned long startup_64;
- static unsigned long _end;
- 
-@@ -339,7 +338,6 @@ static void parse_zoffset(char *fname)
- 		PARSE_ZOFS(p, efi64_stub_entry);
- 		PARSE_ZOFS(p, efi_pe_entry);
- 		PARSE_ZOFS(p, efi32_pe_entry);
--		PARSE_ZOFS(p, kernel_info);
- 		PARSE_ZOFS(p, startup_64);
- 		PARSE_ZOFS(p, _end);
- 
-@@ -422,8 +420,6 @@ int main(int argc, char ** argv)
- 	update_pecoff_text(setup_sectors * 512, i + (sys_size * 16));
- 
- 	efi_stub_entry_update();
--	/* Update kernel_info offset. */
--	put_unaligned_le32(kernel_info, &buf[0x268]);
- 
- 	crc = partial_crc32(buf, i, crc);
- 	if (fwrite(buf, 1, i, dest) != i)
+-	. = 495;
+ 	.header		: { *(.header) }
+ 	.entrytext	: { *(.entrytext) }
+ 	.inittext	: { *(.inittext) }
 -- 
 2.39.2
 
