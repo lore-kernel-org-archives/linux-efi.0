@@ -2,36 +2,36 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3FC1DC001DE
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 724D9C7113D
 	for <linux-efi@archiver.kernel.org>; Fri, 18 Aug 2023 11:38:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1376703AbjHRLiR (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 18 Aug 2023 07:38:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35504 "EHLO
+        id S1376705AbjHRLiT (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 18 Aug 2023 07:38:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48310 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1376695AbjHRLhq (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 18 Aug 2023 07:37:46 -0400
+        with ESMTP id S1376706AbjHRLh7 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 18 Aug 2023 07:37:59 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A76F92112
-        for <linux-efi@vger.kernel.org>; Fri, 18 Aug 2023 04:37:45 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9E6AF2112
+        for <linux-efi@vger.kernel.org>; Fri, 18 Aug 2023 04:37:58 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 46E2861182
-        for <linux-efi@vger.kernel.org>; Fri, 18 Aug 2023 11:37:45 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E4AEFC433CB;
-        Fri, 18 Aug 2023 11:37:41 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 3D45361DD9
+        for <linux-efi@vger.kernel.org>; Fri, 18 Aug 2023 11:37:58 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D6AFCC433C7;
+        Fri, 18 Aug 2023 11:37:54 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1692358664;
-        bh=AlXtUSfmgQDJEeIgIXVb9iOmWqjJa0RzB4mpyp7T7lM=;
+        s=k20201202; t=1692358677;
+        bh=gupJBs1lJenWEdQdfCpvOfI2K/VV4o0bjxCM20K6qUY=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=FrGmOczGoissiN/pI1DaGIsRVgfXqWev0Y+jtQ4l9nsIx3ad2Pka3iS9FQkAw64Ar
-         VmqUhvc8NOcbnGe4tkvSOUjDgDSA8pjbRn1r1NW58CY2AgrEgiIcE5iIk6Fe/j00eC
-         7f5o0F+d2UOHuEeDSse0xmyOBIb7b2pQYOU3CsDtD0fs1lbkF0oXV/W+uQ3E3MzFy3
-         IR5uwwskiNWP0I+NlHkoEGivE8TTPE3EtSNNEnyD1iFX+wlMc1ILIh5pSjyGNsdHJU
-         ZsBJZhi44FLaKb97hg2P9UrDXfMqlMsSlp7b/glSLtEhTYO+uq76y1G55L/QEs3v41
-         cUg8Jcbgi2IUg==
+        b=OJkOj5K/UbTDWb+vX79Qbk0rA0RdXRE61Sw14IUSg/YX4nZwz9sn5agwCAadr4voY
+         k/c10UqHjMxVCRHrrcNxrlFQswE0sALDHXb2Liecfs4Zvs/Y8Eh+/CRtKFUGLG/7qO
+         P2/UfwglOlm0T098bQx08FJKx/jYXgGSJSLZzf6HXgZ3+lhnm1mXAv9ONza5ylU3uy
+         uk4nSWgGncoV+fiwlZvwrclJpFM9CmEvKl42f2Q4Z2edao65lTQmXDMR2g40tlpDoC
+         whlp0sFpfVRSBazcZNxJY5hUoNk+54imDull+kJS/RDkXCzN5z9DwE2k9pDJhc+0+H
+         gYKazAcwMfLDA==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     Ard Biesheuvel <ardb@kernel.org>,
@@ -46,94 +46,155 @@ Cc:     Ard Biesheuvel <ardb@kernel.org>,
         "Rafael J. Wysocki" <rafael@kernel.org>,
         Nathan Chancellor <nathan@kernel.org>,
         Nick Desaulniers <ndesaulniers@google.com>
-Subject: [PATCH v2 03/11] efi/riscv: Move EFI runtime call setup/teardown helpers out of line
-Date:   Fri, 18 Aug 2023 13:37:16 +0200
-Message-Id: <20230818113724.368492-4-ardb@kernel.org>
+Subject: [PATCH v2 07/11] efi/runtime-wrappers: Don't duplicate setup/teardown code
+Date:   Fri, 18 Aug 2023 13:37:20 +0200
+Message-Id: <20230818113724.368492-8-ardb@kernel.org>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230818113724.368492-1-ardb@kernel.org>
 References: <20230818113724.368492-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2494; i=ardb@kernel.org; h=from:subject; bh=AlXtUSfmgQDJEeIgIXVb9iOmWqjJa0RzB4mpyp7T7lM=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeV++NsN17ikehRWH1t32K3rpZOlx/pVgpaui5oi/26Re 6uU9pG5o5SFQYyDQVZMkUVg9t93O09PlKp1niULM4eVCWQIAxenAEzk+15GhlW/VOM/sQk/jtr7 8ej02PIQx+rCU+opJuWLo/+c0lXgSmNkeHZojekzZUlrl9l746V6PBgqXzKdXh/9vofR/DdnrvY cNgA=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=4983; i=ardb@kernel.org; h=from:subject; bh=gupJBs1lJenWEdQdfCpvOfI2K/VV4o0bjxCM20K6qUY=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeV++Iec064Z5ff2LBHO3T3LKuoNZ/JR/zWTjzjmcOSXs xw0CmLvKGVhEONgkBVTZBGY/ffdztMTpWqdZ8nCzGFlAhnCwMUpABPJNGD4Z/6ytuBQWkBP0qE7 6z1+2713FRNW8T9693tn7PYtz91/ZzP84Uy3nSju3f3KVOlMp/8LvSslE50+rGC15/dyWiB+xnE WOwA=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Only the arch_efi_call_virt() macro that some architectures override
-needs to be a macro, given that it is variadic and encapsulates calls
-via function pointers that have different prototypes.
-
-The associated setup and teardown code are not special in this regard,
-and don't need to be instantiated at each call site. So turn them into
-ordinary C functions and move them out of line.
+Avoid duplicating the EFI arch setup and teardown routine calls numerous
+times in efi_call_rts(). Instead, expand the efi_call_virt_pointer()
+macro into efi_call_rts(), taking the pre and post parts out of the
+switch.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/riscv/include/asm/efi.h         | 10 ++--------
- drivers/firmware/efi/riscv-runtime.c | 15 +++++++++++++--
- 2 files changed, 15 insertions(+), 10 deletions(-)
+ drivers/firmware/efi/runtime-wrappers.c | 26 ++++++++++++++------
+ include/linux/efi.h                     |  6 +++--
+ 2 files changed, 22 insertions(+), 10 deletions(-)
 
-diff --git a/arch/riscv/include/asm/efi.h b/arch/riscv/include/asm/efi.h
-index 29e9a0d84b16682f..8a6a128ec57fc02b 100644
---- a/arch/riscv/include/asm/efi.h
-+++ b/arch/riscv/include/asm/efi.h
-@@ -21,12 +21,6 @@ extern void efi_init(void);
- int efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md);
- int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md, bool);
+diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
+index c5e0c73cc000ed25..afe9248cc5bc61ba 100644
+--- a/drivers/firmware/efi/runtime-wrappers.c
++++ b/drivers/firmware/efi/runtime-wrappers.c
+@@ -40,7 +40,7 @@
+  * code doesn't get too cluttered:
+  */
+ #define efi_call_virt(f, args...)   \
+-	efi_call_virt_pointer(efi.runtime, f, args)
++	arch_efi_call_virt(efi.runtime, f, args)
  
--#define arch_efi_call_virt_setup()      ({		\
--		sync_kernel_mappings(efi_mm.pgd);	\
--		efi_virtmap_load();			\
--	})
--#define arch_efi_call_virt_teardown()   efi_virtmap_unload()
--
- #define ARCH_EFI_IRQ_FLAGS_MASK (SR_IE | SR_SPIE)
- 
- /* Load initrd anywhere in system RAM */
-@@ -46,8 +40,8 @@ static inline unsigned long efi_get_kimg_min_align(void)
- 
- #define EFI_KIMG_PREFERRED_ADDRESS	efi_get_kimg_min_align()
- 
--void efi_virtmap_load(void);
--void efi_virtmap_unload(void);
-+void arch_efi_call_virt_setup(void);
-+void arch_efi_call_virt_teardown(void);
- 
- unsigned long stext_offset(void);
- 
-diff --git a/drivers/firmware/efi/riscv-runtime.c b/drivers/firmware/efi/riscv-runtime.c
-index d0daacd2c903f182..09525fb5c240e668 100644
---- a/drivers/firmware/efi/riscv-runtime.c
-+++ b/drivers/firmware/efi/riscv-runtime.c
-@@ -130,14 +130,25 @@ static int __init riscv_enable_runtime_services(void)
+ union efi_rts_args {
+ 	struct {
+@@ -139,7 +139,7 @@ unsigned long efi_call_virt_save_flags(void)
+ 	return flags;
  }
- early_initcall(riscv_enable_runtime_services);
  
--void efi_virtmap_load(void)
-+static void efi_virtmap_load(void)
+-void efi_call_virt_check_flags(unsigned long flags, const char *call)
++void efi_call_virt_check_flags(unsigned long flags, const void *caller)
  {
- 	preempt_disable();
- 	switch_mm(current->active_mm, &efi_mm, NULL);
+ 	unsigned long cur_flags, mismatch;
+ 
+@@ -150,8 +150,8 @@ void efi_call_virt_check_flags(unsigned long flags, const char *call)
+ 		return;
+ 
+ 	add_taint(TAINT_FIRMWARE_WORKAROUND, LOCKDEP_NOW_UNRELIABLE);
+-	pr_err_ratelimited(FW_BUG "IRQ flags corrupted (0x%08lx=>0x%08lx) by EFI %s\n",
+-			   flags, cur_flags, call);
++	pr_err_ratelimited(FW_BUG "IRQ flags corrupted (0x%08lx=>0x%08lx) by EFI call from %pS\n",
++			   flags, cur_flags, caller ?: __builtin_return_address(0));
+ 	arch_efi_restore_flags(flags);
  }
  
--void efi_virtmap_unload(void)
-+static void efi_virtmap_unload(void)
+@@ -211,6 +211,10 @@ static void efi_call_rts(struct work_struct *work)
  {
- 	switch_mm(&efi_mm, current->active_mm, NULL);
- 	preempt_enable();
+ 	const union efi_rts_args *args = efi_rts_work.args;
+ 	efi_status_t status = EFI_NOT_FOUND;
++	unsigned long flags;
++
++	arch_efi_call_virt_setup();
++	flags = efi_call_virt_save_flags();
+ 
+ 	switch (efi_rts_work.efi_rts_id) {
+ 	case EFI_GET_TIME:
+@@ -287,6 +291,10 @@ static void efi_call_rts(struct work_struct *work)
+ 		 */
+ 		pr_err("Requested executing invalid EFI Runtime Service.\n");
+ 	}
++
++	efi_call_virt_check_flags(flags, efi_rts_work.caller);
++	arch_efi_call_virt_teardown();
++
+ 	efi_rts_work.status = status;
+ 	complete(&efi_rts_work.efi_rts_comp);
  }
-+
-+void arch_efi_call_virt_setup(void)
-+{
-+	sync_kernel_mappings(efi_mm.pgd);
-+	efi_virtmap_load();
-+}
-+
-+void arch_efi_call_virt_teardown(void)
-+{
-+	efi_virtmap_unload();
-+}
+@@ -296,6 +304,7 @@ static efi_status_t __efi_queue_work(enum efi_rts_ids id,
+ {
+ 	efi_rts_work.efi_rts_id = id;
+ 	efi_rts_work.args = args;
++	efi_rts_work.caller = __builtin_return_address(0);
+ 	efi_rts_work.status = EFI_ABORTED;
+ 
+ 	if (!efi_enabled(EFI_RUNTIME_SERVICES)) {
+@@ -423,8 +432,8 @@ virt_efi_set_variable_nonblocking(efi_char16_t *name, efi_guid_t *vendor,
+ 	if (down_trylock(&efi_runtime_lock))
+ 		return EFI_NOT_READY;
+ 
+-	status = efi_call_virt(set_variable, name, vendor, attr, data_size,
+-			       data);
++	status = efi_call_virt_pointer(efi.runtime, set_variable, name, vendor,
++				       attr, data_size, data);
+ 	up(&efi_runtime_lock);
+ 	return status;
+ }
+@@ -462,8 +471,9 @@ virt_efi_query_variable_info_nonblocking(u32 attr,
+ 	if (down_trylock(&efi_runtime_lock))
+ 		return EFI_NOT_READY;
+ 
+-	status = efi_call_virt(query_variable_info, attr, storage_space,
+-			       remaining_space, max_variable_size);
++	status = efi_call_virt_pointer(efi.runtime, query_variable_info, attr,
++				       storage_space, remaining_space,
++				       max_variable_size);
+ 	up(&efi_runtime_lock);
+ 	return status;
+ }
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index ebb9671ed15ee3cb..cf450b6fbfd20aa5 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1130,7 +1130,7 @@ extern bool efi_runtime_disabled(void);
+ static inline bool efi_runtime_disabled(void) { return true; }
+ #endif
+ 
+-extern void efi_call_virt_check_flags(unsigned long flags, const char *call);
++extern void efi_call_virt_check_flags(unsigned long flags, const void *caller);
+ extern unsigned long efi_call_virt_save_flags(void);
+ 
+ enum efi_secureboot_mode {
+@@ -1197,7 +1197,7 @@ static inline void efi_check_for_embedded_firmwares(void) { }
+ 									\
+ 	__flags = efi_call_virt_save_flags();				\
+ 	__s = arch_efi_call_virt(p, f, args);				\
+-	efi_call_virt_check_flags(__flags, __stringify(f));		\
++	efi_call_virt_check_flags(__flags, NULL);			\
+ 									\
+ 	arch_efi_call_virt_teardown();					\
+ 									\
+@@ -1258,6 +1258,7 @@ union efi_rts_args;
+  * @status:		Status of executing EFI Runtime Service
+  * @efi_rts_id:		EFI Runtime Service function identifier
+  * @efi_rts_comp:	Struct used for handling completions
++ * @caller:		The caller of the runtime service
+  */
+ struct efi_runtime_work {
+ 	union efi_rts_args	*args;
+@@ -1265,6 +1266,7 @@ struct efi_runtime_work {
+ 	struct work_struct	work;
+ 	enum efi_rts_ids	efi_rts_id;
+ 	struct completion	efi_rts_comp;
++	const void		*caller;
+ };
+ 
+ extern struct efi_runtime_work efi_rts_work;
 -- 
 2.39.2
 
