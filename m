@@ -2,36 +2,36 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 08740C71148
-	for <linux-efi@archiver.kernel.org>; Fri, 18 Aug 2023 13:45:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DCCD8C71148
+	for <linux-efi@archiver.kernel.org>; Fri, 18 Aug 2023 13:45:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239028AbjHRNou (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 18 Aug 2023 09:44:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55100 "EHLO
+        id S1377383AbjHRNpV (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 18 Aug 2023 09:45:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41642 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1357417AbjHRNoo (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 18 Aug 2023 09:44:44 -0400
+        with ESMTP id S1377257AbjHRNou (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 18 Aug 2023 09:44:50 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B58CB3589;
-        Fri, 18 Aug 2023 06:44:42 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3D9F130F5;
+        Fri, 18 Aug 2023 06:44:49 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 5473666572;
-        Fri, 18 Aug 2023 13:44:42 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CAC4BC433C8;
-        Fri, 18 Aug 2023 13:44:38 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id D02016687F;
+        Fri, 18 Aug 2023 13:44:48 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6CCDEC433C8;
+        Fri, 18 Aug 2023 13:44:45 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1692366281;
-        bh=m4kdhoIm71fqmT8MrBnTq3U3pdgSRr+oKh3NxokiMAc=;
-        h=From:To:Cc:Subject:Date:From;
-        b=X54fwvXA11/su1VMB+pIIHIaiTlfQa+hG4io26pTGccAhG7M8zkzpGZSZVKJD9DeL
-         679APaqelPYvNZxQWb5c/MNee+eILwVO5A9RZtnLJTJDfpXsxH4T3XlowLmDcaL7fA
-         J43j0DlQ5T4RIhwc8iq/dp5L1zEtLP8UZm1WYyhcICK4jd+A6NVkrywhoPLF0mBvk2
-         bSkOxlHv335ClkS9ls/Dyn/LP7CPgmL1ZLOG4DnKgQ5H8t4BUG3N0wks45VGiCp9tA
-         lCSVcO3EguFwdz0yDT9aDpts3Ow8LK+eATBkK1DndOXMOwcx2cAsyAmp3MWoiec09E
-         32TVNpMU2hnxQ==
+        s=k20201202; t=1692366288;
+        bh=/TH1+90pH64HBFEuEuDip40MoxEIi2uzjH3CIAJlUhQ=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=O2aZN6k6ifpVgiyLLLkirZmYOBYHExAVmjiJ3TVbF+e8XpbbiKK6PznjpvMJyuA5N
+         Zm5r1MclWklUgxLW/FKBGKTyYjRFS83V5lSNyFOu+EcyCYScjUPvc2Hh9MLfg0IO/2
+         dkyVfAlT9diSFnqlPZ9Ei0NId9KmJl61R/qfCLh0qyaxekxe5vpVUforK0Bd6FuCnL
+         VCKHPd+wQi88Nm9KUiKt95ihknGWY5ULPoexeJ/j/H2pqZQys/hKmOshvwa4XpUuNK
+         obbad1N3JZDf6ewcCl0f5AgZy5AMEkctoR/Ed+hG+hv5/5D5b8HYBqZQvutYv1bwE0
+         qhjudeZmKCR5w==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -46,104 +46,132 @@ Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         Kees Cook <keescook@chromium.org>,
         "H. Peter Anvin" <hpa@zytor.com>,
         =?UTF-8?q?Marvin=20H=C3=A4user?= <mhaeuser@posteo.de>
-Subject: [PATCH 00/17] x86/boot: Rework PE header generation
-Date:   Fri, 18 Aug 2023 15:44:05 +0200
-Message-Id: <20230818134422.380032-1-ardb@kernel.org>
+Subject: [PATCH 02/17] x86/efi: Disregard setup header of loaded image
+Date:   Fri, 18 Aug 2023 15:44:07 +0200
+Message-Id: <20230818134422.380032-3-ardb@kernel.org>
 X-Mailer: git-send-email 2.39.2
+In-Reply-To: <20230818134422.380032-1-ardb@kernel.org>
+References: <20230818134422.380032-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=4106; i=ardb@kernel.org; h=from:subject; bh=m4kdhoIm71fqmT8MrBnTq3U3pdgSRr+oKh3NxokiMAc=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeV+6ZQ/+w5YTjl2+95+u2sXM5nteLyTPzxj7xO8xce0b auN8Iy0jlIWBjEOBlkxRRaB2X/f7Tw9UarWeZYszBxWJpAhDFycAjCRPSEM/xPEptc+KnzStkiX uS8t9kPql+33P/JovXbIZpX6VzT5pQojw/3zQmkqoVl5i5+LVq+e9fXE0tI7Uz7XJeQn6/znlQ5 +wAcA
+X-Developer-Signature: v=1; a=openpgp-sha256; l=4519; i=ardb@kernel.org; h=from:subject; bh=/TH1+90pH64HBFEuEuDip40MoxEIi2uzjH3CIAJlUhQ=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeV+6YyeHP+cPzu+P58+z2umrYmJWZXbmctPdT74KHnLL yjkFZ/bUcrCIMbBICumyCIw+++7nacnStU6z5KFmcPKBDKEgYtTACZSL8vIsNw/WP7rpb1brZeE NAVFzdHOz16XEsxQznA1NiZVPsxfh5HhsyDbLAajXe9Yzk07V5FSvNt2v7Jtb/BOx/bfU1mkKuZ xAgA=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Now that the EFI stub boot flow no longer relies on memory that is
-executable and writable at the same time, we can reorganize the PE/COFF
-view of the kernel image and expose the decompressor binary's code and
-r/o data as a .text section and data/bss as a .data section, using 4k
-alignment and limited permissions.
+The native EFI entrypoint does not take a struct boot_params from the
+loader, but instead, it constructs one from scratch, using the setup
+header data placed at the start of the image.
 
-Doing so is necessary for compatibility with hardening measures that are
-being rolled out on x86 PCs built to run Windows (i.e., the majority of
-them). The EFI boot environment that the Linux EFI stub executes in is
-especially sensitive to safety issues, given that a vulnerability in the
-loader of one OS can be abused to attack another.
+This setup header is placed in a way that permits legacy loaders to
+manipulate the contents (i.e., to pass the kernel command line or the
+address and size of an initial ramdisk), but EFI boot does not use it in
+that way - it only copies the contents that were placed there at build
+time, but EFI loaders will not (and should not) manipulate the setup
+header to configure the boot. (Commit 63bf28ceb3ebbe76 "efi: x86: Wipe
+setup_data on pure EFI boot" deals with some of the fallout of using
+setup_data in a way that breaks EFI boot.)
 
-In true x86 fashion, this is more complicated than on other
-architectures, which have implemented this code/data split with 4k
-alignment from the beginning. The complicating factor here is that the
-boot image consists of two different parts, which are stitched together
-and fixed up using a special build tool.
+As it turns out, there is another reason why copying this header is
+slightly problematic: it is placed at a fixed offset of 0x1f1 bytes into
+the image, and this means the PE/COFF view of the image payload has to
+start there as the setup header is consumed by the program and therefore
+part of the payload, and this leaves little space to describe all the
+sections of the image. The only reason to describe the setup header is
+that the EFI stub may copy this setup header at boot time, but beyond
+that, none of the contents of this header section are needed by the
+running code. If the setup header does not need to be accessed at
+runtime, there is no need to describe it in the first place, freeing up
+a slot in the section header array.
 
-The first three patches simplify the x86 EFI stub code so it does not
-even bother reading the setup header from the image - passing arguments
-this way is not supported by EFI boot anyway.
+And actually, none of the non-zero values that are copied from the
+setup header into the EFI stub's struct boot_params are relevant to the
+boot now that the EFI stub no longer enters via the legacy decompressor.
+So omit the copy altogether.
 
-Then, the bzImage is simplified and reorganized, primarily by:
-- dropping the ancient 'bugger off' message occupying much of the header
-  space
-- using a fixed size of 16k for the setup block
-- setting header values from asm instead of via the build tool
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+---
+ drivers/firmware/efi/libstub/x86-stub.c | 46 +++-----------------
+ 1 file changed, 6 insertions(+), 40 deletions(-)
 
-Finally, the payload is split into .text and .data, and the section and
-file alignment increased to 4k/512 respectively.
-
-The only remaining task performed by the build tool is generating the
-CRC-32 that is fundamentally broken in practice and never used, so that
-is dropped entirely at the end.
-
-This supersedes the work proposed by Evgeniy last year, which did a
-major rewrite of the build tool in order to clean it up, before updating
-it to generate the new 4k aligned image layout. As this series proves,
-the build tool is mostly unnecessary, and we have too many of those
-already.
-
-Cc: Evgeniy Baskov <baskov@ispras.ru>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Dave Hansen <dave.hansen@linux.intel.com>
-Cc: Ingo Molnar <mingo@redhat.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Peter Jones <pjones@redhat.com>
-Cc: Matthew Garrett <mjg59@srcf.ucam.org>
-Cc: Gerd Hoffmann <kraxel@redhat.com>
-Cc: Kees Cook <keescook@chromium.org>
-Cc: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Marvin Häuser <mhaeuser@posteo.de>
-
-Ard Biesheuvel (17):
-  x86/efi: Drop EFI stub .bss from .data section
-  x86/efi: Disregard setup header of loaded image
-  x86/efi: Drop alignment flags from PE section headers
-  x86/boot: Remove the 'bugger off' message
-  x86/boot: Omit compression buffer from PE/COFF image memory footprint
-  x86/boot: Drop redundant code setting the root device
-  x86/boot: Grab kernel_info offset from zoffset header directly
-  x86/boot: Drop references to startup_64
-  x86/boot: Set EFI handover offset directly in header asm
-  x86/boot: Drop workaround for binutils 2.14 in linker script ASSERTs
-  x86/boot: Use fixed size of 16k for setup block
-  x86/boot: Derive file size from _edata symbol
-  x86/boot: Construct PE/COFF .text section from assembler
-  x86/boot: Drop PE/COFF .reloc section
-  x86/boot: Split off PE/COFF .data section
-  x86/boot: Increase section and file alignment to 4k/512
-  x86/boot: Drop CRC-32 checksum and the build tool that generates it
-
- Documentation/arch/x86/boot.rst         |  10 -
- arch/x86/boot/Makefile                  |  12 +-
- arch/x86/boot/compressed/vmlinux.lds.S  |   5 +-
- arch/x86/boot/header.S                  | 217 ++++-----
- arch/x86/boot/setup.ld                  |  21 +-
- arch/x86/boot/tools/.gitignore          |   2 -
- arch/x86/boot/tools/build.c             | 502 --------------------
- drivers/firmware/efi/libstub/Makefile   |   7 -
- drivers/firmware/efi/libstub/x86-stub.c |  46 +-
- 9 files changed, 113 insertions(+), 709 deletions(-)
- delete mode 100644 arch/x86/boot/tools/.gitignore
- delete mode 100644 arch/x86/boot/tools/build.c
-
+diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
+index e976288728e975f1..d35cc47d195debcf 100644
+--- a/drivers/firmware/efi/libstub/x86-stub.c
++++ b/drivers/firmware/efi/libstub/x86-stub.c
+@@ -449,9 +449,8 @@ void __noreturn efi_stub_entry(efi_handle_t handle,
+ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
+ 				   efi_system_table_t *sys_table_arg)
+ {
+-	struct boot_params *boot_params;
+-	struct setup_header *hdr;
+-	void *image_base;
++	static struct boot_params boot_params __page_aligned_bss;
++	struct setup_header *hdr = &boot_params.hdr;
+ 	efi_guid_t proto = LOADED_IMAGE_PROTOCOL_GUID;
+ 	int options_size = 0;
+ 	efi_status_t status;
+@@ -469,30 +468,9 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
+ 		efi_exit(handle, status);
+ 	}
+ 
+-	image_base = efi_table_attr(image, image_base);
+-
+-	status = efi_allocate_pages(sizeof(struct boot_params),
+-				    (unsigned long *)&boot_params, ULONG_MAX);
+-	if (status != EFI_SUCCESS) {
+-		efi_err("Failed to allocate lowmem for boot params\n");
+-		efi_exit(handle, status);
+-	}
+-
+-	memset(boot_params, 0x0, sizeof(struct boot_params));
+-
+-	hdr = &boot_params->hdr;
+-
+-	/* Copy the setup header from the second sector to boot_params */
+-	memcpy(&hdr->jump, image_base + 512,
+-	       sizeof(struct setup_header) - offsetof(struct setup_header, jump));
+-
+-	/*
+-	 * Fill out some of the header fields ourselves because the
+-	 * EFI firmware loader doesn't load the first sector.
+-	 */
++	/* assign the setup_header fields that the kernel actually cares about */
+ 	hdr->root_flags	= 1;
+ 	hdr->vid_mode	= 0xffff;
+-	hdr->boot_flag	= 0xAA55;
+ 
+ 	hdr->type_of_loader = 0x21;
+ 
+@@ -501,25 +479,13 @@ efi_status_t __efiapi efi_pe_entry(efi_handle_t handle,
+ 	if (!cmdline_ptr)
+ 		goto fail;
+ 
+-	efi_set_u64_split((unsigned long)cmdline_ptr,
+-			  &hdr->cmd_line_ptr, &boot_params->ext_cmd_line_ptr);
++	efi_set_u64_split((unsigned long)cmdline_ptr, &hdr->cmd_line_ptr,
++			  &boot_params.ext_cmd_line_ptr);
+ 
+-	hdr->ramdisk_image = 0;
+-	hdr->ramdisk_size = 0;
+-
+-	/*
+-	 * Disregard any setup data that was provided by the bootloader:
+-	 * setup_data could be pointing anywhere, and we have no way of
+-	 * authenticating or validating the payload.
+-	 */
+-	hdr->setup_data = 0;
+-
+-	efi_stub_entry(handle, sys_table_arg, boot_params);
++	efi_stub_entry(handle, sys_table_arg, &boot_params);
+ 	/* not reached */
+ 
+ fail:
+-	efi_free(sizeof(struct boot_params), (unsigned long)boot_params);
+-
+ 	efi_exit(handle, status);
+ }
+ 
 -- 
 2.39.2
 
