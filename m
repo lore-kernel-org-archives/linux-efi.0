@@ -2,36 +2,36 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7AD7BC71150
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A0455C71159
 	for <linux-efi@archiver.kernel.org>; Fri, 18 Aug 2023 13:45:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1377275AbjHRNpX (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 18 Aug 2023 09:45:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41790 "EHLO
+        id S1377279AbjHRNpY (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 18 Aug 2023 09:45:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49732 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1377289AbjHRNo5 (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 18 Aug 2023 09:44:57 -0400
+        with ESMTP id S1377318AbjHRNpJ (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 18 Aug 2023 09:45:09 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CF5A33C2F;
-        Fri, 18 Aug 2023 06:44:55 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6912A35A1;
+        Fri, 18 Aug 2023 06:45:02 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 6E1B966DF3;
-        Fri, 18 Aug 2023 13:44:55 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 036D1C433C8;
-        Fri, 18 Aug 2023 13:44:51 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id ED2806687F;
+        Fri, 18 Aug 2023 13:45:01 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 89F9CC433C8;
+        Fri, 18 Aug 2023 13:44:58 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1692366294;
-        bh=7AgmzUMEbQ4q0yWpLInOQxXscQWeFd85vyZx1/xzwk4=;
+        s=k20201202; t=1692366301;
+        bh=KXwq9TIexKeoFJMf73ZZ2z1OlZnYPznYgRrnV6bXa4k=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=C0CB4lSRoUdKRQc1mqOdIZLJwdcCx/fBMjF813KLDJneWPNDkTDMPnx5HJH5j7Kkw
-         JVRmTD3FpRiIXcyTu0hKouFR4M9YdDFGDqPkcseZk4/VZkAJT4YwIZPrf3Er3I84Oh
-         +DPPdstkV12Ym8PGAM1QzP4ajIhRSahGSHQ5pxuM9OUmiBxveWMDHbaivyg7FEnraO
-         R451STsbKBKupthOluGN8TqVCUS3F2h/8y2K2b+ouhGHV0U8valqscuWLaj15C7iEh
-         AGv3+rKMSpi0HJ3mB++RioNF0Mq/l1OflH8huN/H++djHKEnWrta6CE7vAb+8dtQLm
-         W6lBZWo9B8oEA==
+        b=qLC5PM2/bd0Na10cgxrtTKAf60DSaGbvPSENzA4JufqgeFKnbPlBPep2ohHyXsnjt
+         NMoruYnpibsCo1qZivVfHLWQBgoFifPqmmOlUD3Bs/GKgQsHr93S5aOmV+ebDMREqC
+         Y+qT+Rwe1GDsPdxorep9HcVw3f4g57ToogKZBzZdUMETk2Nwox2H9cGcRy8hlbXjCP
+         BsNZcOl1fZqWae4nf27aBDLtSAii9YMOduA/2BC1zPbfZj8duOF+Kp53I/KPluGB1E
+         XIbkvf2PqZpl5KnTltr3IxBbx8LXkgNaAfO8M/CNeCjRswXNdQ2DIK8EJkSFTzM7rN
+         n8k4uDkIsheJg==
 From:   Ard Biesheuvel <ardb@kernel.org>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -46,134 +46,70 @@ Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
         Kees Cook <keescook@chromium.org>,
         "H. Peter Anvin" <hpa@zytor.com>,
         =?UTF-8?q?Marvin=20H=C3=A4user?= <mhaeuser@posteo.de>
-Subject: [PATCH 04/17] x86/boot: Remove the 'bugger off' message
-Date:   Fri, 18 Aug 2023 15:44:09 +0200
-Message-Id: <20230818134422.380032-5-ardb@kernel.org>
+Subject: [PATCH 06/17] x86/boot: Drop redundant code setting the root device
+Date:   Fri, 18 Aug 2023 15:44:11 +0200
+Message-Id: <20230818134422.380032-7-ardb@kernel.org>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230818134422.380032-1-ardb@kernel.org>
 References: <20230818134422.380032-1-ardb@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2992; i=ardb@kernel.org; h=from:subject; bh=7AgmzUMEbQ4q0yWpLInOQxXscQWeFd85vyZx1/xzwk4=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeV+6Tzz+5EtxvJ5KyctFXv7Yp3ej++sWpVTpi1sv/F76 mt/JvatHaUsDGIcDLJiiiwCs/++23l6olSt8yxZmDmsTCBDGLg4BWAi6rIM/2yvtK18c6+zx+D5 rOlc6tmr1BM3/88JP90fpxP1c4kWy1qGfzqH7zHyzIst//ytTn7BVfPpqt+MFt5dfet5kBzLzW9 mkqwA
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1741; i=ardb@kernel.org; h=from:subject; bh=KXwq9TIexKeoFJMf73ZZ2z1OlZnYPznYgRrnV6bXa4k=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeV+6UKb7y/004Qcrdsz5D5VJLf6Pe7U/rXmwwINuUh76 W3z5n/oKGVhEONgkBVTZBGY/ffdztMTpWqdZ8nCzGFlAhnCwMUpABM528TwP6184/+gw+me9U4+ N/YdP9Vcb/XBY9H/muPWDAlrn1hKPGP4Z/+z8fvy84w1YdeK9/mbWTZ2J3THLfGScl4oEb0u0+Q /LwA=
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Ancient (pre-2003) x86 kernels could boot from a floppy disk straight from
-the BIOS, using a small real mode boot stub at the start of the image
-where the BIOS would expect the boot record (or boot block) to appear.
+The root device defaults to 0,0 and is no longer configurable at build
+time [0], so there is no need for the build tool to ever write to this
+field.
 
-Due to its limitations (kernel size < 1 MiB, no support for IDE, USB or
-El Torito floppy emulation), this support was dropped, and a Linux aware
-bootloader is now always required to boot the kernel from a legacy BIOS.
-
-To smoothen this transition, the boot stub was not removed entirely, but
-replaced with one that just prints an error message telling the user to
-install a bootloader.
-
-As it is unlikely that anyone doing direct floppy boot with such an
-ancient kernel is going to upgrade to v6.5+ and expect that this boot
-method still works, printing this message is kind of pointless, and so
-it should be possible to remove the logic that emits it.
-
-Let's free up this space so it can be used to expand the PE header in a
-subsequent patch.
+[0] 079f85e624189292 ("x86, build: Do not set the root_dev field in bzImage")
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/boot/header.S | 49 --------------------
- arch/x86/boot/setup.ld |  7 +--
- 2 files changed, 4 insertions(+), 52 deletions(-)
+ arch/x86/boot/header.S      | 2 +-
+ arch/x86/boot/tools/build.c | 7 -------
+ 2 files changed, 1 insertion(+), 8 deletions(-)
 
 diff --git a/arch/x86/boot/header.S b/arch/x86/boot/header.S
-index 8c8148d751c6d22b..b24fa50a98986945 100644
+index a87d9133384b0986..6059f87b159d0e14 100644
 --- a/arch/x86/boot/header.S
 +++ b/arch/x86/boot/header.S
-@@ -38,64 +38,15 @@ SYSSEG		= 0x1000		/* historical load address >> 4 */
+@@ -236,7 +236,7 @@ root_flags:	.word ROOT_RDONLY
+ syssize:	.long 0			/* Filled in by build.c */
+ ram_size:	.word 0			/* Obsolete */
+ vid_mode:	.word SVGA_MODE
+-root_dev:	.word 0			/* Filled in by build.c */
++root_dev:	.word 0			/* Default to major/minor 0/0 */
+ boot_flag:	.word 0xAA55
  
- 	.code16
- 	.section ".bstext", "ax"
--
--	.global bootsect_start
--bootsect_start:
- #ifdef CONFIG_EFI_STUB
- 	# "MZ", MS-DOS header
- 	.word	MZ_MAGIC
--#endif
--
--	# Normalize the start address
--	ljmp	$BOOTSEG, $start2
--
--start2:
--	movw	%cs, %ax
--	movw	%ax, %ds
--	movw	%ax, %es
--	movw	%ax, %ss
--	xorw	%sp, %sp
--	sti
--	cld
--
--	movw	$bugger_off_msg, %si
--
--msg_loop:
--	lodsb
--	andb	%al, %al
--	jz	bs_die
--	movb	$0xe, %ah
--	movw	$7, %bx
--	int	$0x10
--	jmp	msg_loop
--
--bs_die:
--	# Allow the user to press a key, then reboot
--	xorw	%ax, %ax
--	int	$0x16
--	int	$0x19
--
--	# int 0x19 should never return.  In case it does anyway,
--	# invoke the BIOS reset code...
--	ljmp	$0xf000,$0xfff0
--
--#ifdef CONFIG_EFI_STUB
- 	.org	0x38
- 	#
- 	# Offset to the PE header.
- 	#
- 	.long	LINUX_PE_MAGIC
- 	.long	pe_header
--#endif /* CONFIG_EFI_STUB */
--
--	.section ".bsdata", "a"
--bugger_off_msg:
--	.ascii	"Use a boot loader.\r\n"
--	.ascii	"\n"
--	.ascii	"Remove disk and press any key to reboot...\r\n"
--	.byte	0
--
--#ifdef CONFIG_EFI_STUB
- pe_header:
- 	.long	PE_MAGIC
+ 	# offset 512, entry point
+diff --git a/arch/x86/boot/tools/build.c b/arch/x86/boot/tools/build.c
+index 0354c223e35492b6..efa4e9c7d7135ba7 100644
+--- a/arch/x86/boot/tools/build.c
++++ b/arch/x86/boot/tools/build.c
+@@ -40,10 +40,6 @@ typedef unsigned char  u8;
+ typedef unsigned short u16;
+ typedef unsigned int   u32;
  
-diff --git a/arch/x86/boot/setup.ld b/arch/x86/boot/setup.ld
-index 49546c247ae25e97..b11c45b9e51ed90e 100644
---- a/arch/x86/boot/setup.ld
-+++ b/arch/x86/boot/setup.ld
-@@ -10,10 +10,11 @@ ENTRY(_start)
- SECTIONS
- {
- 	. = 0;
--	.bstext		: { *(.bstext) }
--	.bsdata		: { *(.bsdata) }
-+	.bstext	: {
-+		*(.bstext)
-+		. = 495;
-+	} =0xffffffff
+-#define DEFAULT_MAJOR_ROOT 0
+-#define DEFAULT_MINOR_ROOT 0
+-#define DEFAULT_ROOT_DEV (DEFAULT_MAJOR_ROOT << 8 | DEFAULT_MINOR_ROOT)
+-
+ /* Minimal number of setup sectors */
+ #define SETUP_SECT_MIN 5
+ #define SETUP_SECT_MAX 64
+@@ -399,9 +395,6 @@ int main(int argc, char ** argv)
  
--	. = 495;
- 	.header		: { *(.header) }
- 	.entrytext	: { *(.entrytext) }
- 	.inittext	: { *(.inittext) }
+ 	update_pecoff_setup_and_reloc(i);
+ 
+-	/* Set the default root device */
+-	put_unaligned_le16(DEFAULT_ROOT_DEV, &buf[508]);
+-
+ 	/* Open and stat the kernel file */
+ 	fd = open(argv[2], O_RDONLY);
+ 	if (fd < 0)
 -- 
 2.39.2
 
