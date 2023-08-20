@@ -2,102 +2,86 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2DA50C7115A
-	for <linux-efi@archiver.kernel.org>; Fri, 18 Aug 2023 15:17:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A2DE7EE49A6
+	for <linux-efi@archiver.kernel.org>; Sun, 20 Aug 2023 02:40:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1357204AbjHRPQy (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 18 Aug 2023 11:16:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51610 "EHLO
+        id S229853AbjHTCkG (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 19 Aug 2023 22:40:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38082 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1378095AbjHRPQf (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 18 Aug 2023 11:16:35 -0400
-Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.120])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 732C63A9C
-        for <linux-efi@vger.kernel.org>; Fri, 18 Aug 2023 08:16:33 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1692371793; x=1723907793;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=zdNpbh5ASGJ1eeGtp9D+iPY0KTvXBC4CzeSOZ0e1hxY=;
-  b=jex+166AV2LvJvIjk0dFqFuhHP+1zgiMV1TLaCwMrdgRfEC4G3/zjlQ+
-   Wm1siY0s7bN79xkd9mTjPd5Aq44aQZjtiLQgH+eNrLyBG3SAe15iGvWX+
-   ZX0Ryv/vx4RrvQac5r31TTKHpryIC74MUo7eiifJM9YbBLJrtJ5YnJnuF
-   g28MsDwG7AL5RkHk1xVb1kcz3yVpg6/Q6f7GnFsSk5iTm3FyJjybUNNiE
-   EE9M/jgUefJz0iu4g4k6iz8QfqjCmAN+2gQV2JA14yi/MLblVTJ0qkXej
-   pSp2eg0tWh8+zXG9P4tc1XBpAlHDLK9OQbxgZqFkWNP7cdmk9N1gd/MJK
-   A==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10806"; a="372023529"
-X-IronPort-AV: E=Sophos;i="6.01,183,1684825200"; 
-   d="scan'208";a="372023529"
-Received: from fmsmga003.fm.intel.com ([10.253.24.29])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Aug 2023 08:16:32 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10806"; a="825145828"
-X-IronPort-AV: E=Sophos;i="6.01,183,1684825200"; 
-   d="scan'208";a="825145828"
-Received: from hleonha-mobl.ger.corp.intel.com (HELO box.shutemov.name) ([10.251.212.190])
-  by fmsmga003-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Aug 2023 08:16:31 -0700
-Received: by box.shutemov.name (Postfix, from userid 1000)
-        id B548D109E16; Fri, 18 Aug 2023 18:16:28 +0300 (+03)
-Date:   Fri, 18 Aug 2023 18:16:28 +0300
-From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     dave.hansen@linux.intel.com, linux-efi@vger.kernel.org,
-        x86@kernel.org
-Subject: Re: [PATCH] x86/mm: Make e820_end_ram_pfn() cover E820_TYPE_ACPI
- ranges
-Message-ID: <20230818151628.d7srn5k73vms7dcf@box.shutemov.name>
-References: <20230816190557.3738-1-ardb@kernel.org>
- <20230816212418.25069-1-kirill.shutemov@linux.intel.com>
- <CAMj1kXHQh7HEuZMiJ5zQtVre1vY+Q1xAHfQSDh1-WibAL02mXA@mail.gmail.com>
+        with ESMTP id S229878AbjHTCjz (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 19 Aug 2023 22:39:55 -0400
+Received: from mail.zytor.com (unknown [IPv6:2607:7c80:54:3::138])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 36F32381EF;
+        Sat, 19 Aug 2023 18:04:01 -0700 (PDT)
+Received: from [172.27.2.41] ([73.231.166.163])
+        (authenticated bits=0)
+        by mail.zytor.com (8.17.1/8.17.1) with ESMTPSA id 37K12dkW2217952
+        (version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NO);
+        Sat, 19 Aug 2023 18:02:39 -0700
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.zytor.com 37K12dkW2217952
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=zytor.com;
+        s=2023081101; t=1692493374;
+        bh=Kn+YwMsGGBaii7cfbRQ8m922QywiwBH4TdkaZAGSsBg=;
+        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+        b=aK/Qcy8rxC1aMdVJ8Tqc7ChMDPhvWFI/YXESanf2dYPfJCObTwI76kfavi1IpsVdO
+         QXqhG4vZjz0pPud3UqGeZbY8+7NPQNijzbEk7dtq9lpbxgyH12/cuSc/MVR5EeAOoP
+         eJ42lifPHCSKiU5eGtT8/mnMO5FP5pdRFq9xO6XQcbSeCJBTKfVBB++crbMh4I85sZ
+         OMnbUYPh+NLiuPHEl++1+cYBWphslfcWKN5Q13td1miMt2Vmjayk6TYifUP/oeODt0
+         j2W0vTP3DvOKtXe1+n4DQZOibqPWsNFKoUdSdiqKIvv1KcDd0vlPa+jf3d2A7oSx8K
+         7GtP8HhRluZxA==
+Message-ID: <583bf766-5351-24b6-dbd6-fc5db6a7b2f8@zytor.com>
+Date:   Sat, 19 Aug 2023 18:02:40 -0700
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAMj1kXHQh7HEuZMiJ5zQtVre1vY+Q1xAHfQSDh1-WibAL02mXA@mail.gmail.com>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.13.0
+Subject: Re: [PATCH 04/17] x86/boot: Remove the 'bugger off' message
+To:     Ard Biesheuvel <ardb@kernel.org>, linux-efi@vger.kernel.org
+Cc:     linux-kernel@vger.kernel.org, Evgeniy Baskov <baskov@ispras.ru>,
+        Borislav Petkov <bp@alien8.de>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        Ingo Molnar <mingo@redhat.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Peter Jones <pjones@redhat.com>,
+        Matthew Garrett <mjg59@srcf.ucam.org>,
+        Gerd Hoffmann <kraxel@redhat.com>,
+        Kees Cook <keescook@chromium.org>,
+        =?UTF-8?Q?Marvin_H=c3=a4user?= <mhaeuser@posteo.de>
+References: <20230818134422.380032-1-ardb@kernel.org>
+ <20230818134422.380032-5-ardb@kernel.org>
+Content-Language: en-US
+From:   "H. Peter Anvin" <hpa@zytor.com>
+In-Reply-To: <20230818134422.380032-5-ardb@kernel.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Thu, Aug 17, 2023 at 10:25:56PM +0200, Ard Biesheuvel wrote:
-> On Wed, 16 Aug 2023 at 23:24, Kirill A. Shutemov
-> <kirill.shutemov@linux.intel.com> wrote:
-> >
-> > e820__end_of_ram_pfn() is used to calculate max_pfn which, among other
-> > things, guides where direct mapping ends. Any memory above max_pfn is
-> > not going to be present in the direct mapping.
-> >
-> > e820__end_of_ram_pfn() finds the end of the ram based on the highest
-> > E820_TYPE_RAM range. But it doesn't includes E820_TYPE_ACPI ranges into
-> > calculation.
-> >
-> > Despite the name, E820_TYPE_ACPI covers not only ACPI data, but also EFI
-> > tables and might be required by kernel to function properly.
-> >
-> > Usually the problem is hidden because there is some E820_TYPE_RAM memory
-> > above E820_TYPE_ACPI. But crashkernel only presents pre-allocated crash
-> > memory as E820_TYPE_RAM on boot. If the preallocated range is small, it
-> > can fit under the last E820_TYPE_ACPI range.
-> >
-> > Modify e820__end_of_ram_pfn() and e820__end_of_low_ram_pfn() to cover
-> > E820_TYPE_ACPI memory.
-> >
-> > The problem was discovered during debugging kexec for TDX guest. TDX
-> > guest uses E820_TYPE_ACPI to store the unaccepted memory bitmap and pass
-> > it between the kernels on kexec.
-> >
-> > Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
+On 8/18/23 06:44, Ard Biesheuvel wrote:
+> Ancient (pre-2003) x86 kernels could boot from a floppy disk straight from
+> the BIOS, using a small real mode boot stub at the start of the image
+> where the BIOS would expect the boot record (or boot block) to appear.
 > 
-> No objections to this, but we might also simply drop E820_TYPE_ACPI
-> altogether: it is only used for EFI_ACPI_RECLAIM_MEMORY, which is
-> memory that can be used by the OS as ordinary RAM if it is not
-> interested in the contents (or has already consumed them). So this
-> could arguably be classified as E820_TYPE_RAM too.
+> Due to its limitations (kernel size < 1 MiB, no support for IDE, USB or
+> El Torito floppy emulation), this support was dropped, and a Linux aware
+> bootloader is now always required to boot the kernel from a legacy BIOS.
+> 
+> To smoothen this transition, the boot stub was not removed entirely, but
+> replaced with one that just prints an error message telling the user to
+> install a bootloader.
+> 
+> As it is unlikely that anyone doing direct floppy boot with such an
+> ancient kernel is going to upgrade to v6.5+ and expect that this boot
+> method still works, printing this message is kind of pointless, and so
+> it should be possible to remove the logic that emits it.
+> 
+> Let's free up this space so it can be used to expand the PE header in a
+> subsequent patch.
+> 
+> Signed-off-by: Ard Biesheuvel <ardb@kernel.org
+>
 
-Hm. I'm not sure about this. E820_TYPE_ACPI also get tracked as
-IORES_DESC_ACPI_TABLES resource and get passed to the next kernel on
-kexec, regardless if it is crash kernel or not. I'm not sure we would not
-break anything.
+Good riddance.
 
--- 
-  Kiryl Shutsemau / Kirill A. Shutemov
+Acked-by: H. Peter Anvin (Intel) <hpa@zytor.com>
