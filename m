@@ -2,120 +2,68 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 27805C83F14
-	for <linux-efi@archiver.kernel.org>; Mon, 28 Aug 2023 11:13:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 86773C71153
+	for <linux-efi@archiver.kernel.org>; Tue, 29 Aug 2023 00:24:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232086AbjH1LMz (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 28 Aug 2023 07:12:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56108 "EHLO
+        id S234592AbjH2AX4 (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 28 Aug 2023 20:23:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57308 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232443AbjH1LMj (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 28 Aug 2023 07:12:39 -0400
+        with ESMTP id S234666AbjH2AXp (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 28 Aug 2023 20:23:45 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 08A3AB0
-        for <linux-efi@vger.kernel.org>; Mon, 28 Aug 2023 04:12:37 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1B5CE107
+        for <linux-efi@vger.kernel.org>; Mon, 28 Aug 2023 17:23:43 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 9BD0F6118F
-        for <linux-efi@vger.kernel.org>; Mon, 28 Aug 2023 11:12:36 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 13A9CC433C7;
-        Mon, 28 Aug 2023 11:12:34 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id AE3BA62FF0
+        for <linux-efi@vger.kernel.org>; Tue, 29 Aug 2023 00:23:42 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 1D5D1C433C7;
+        Tue, 29 Aug 2023 00:23:42 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1693221156;
-        bh=LxY+jFnL+dqeUUoOxCSW0bAmgoq9YmhSBnju7998mVA=;
-        h=From:To:Cc:Subject:Date:From;
-        b=Q5ciJmB7GtxYaJA+wuieEf6y9ydKAzdbsJxt651SD3PuQZCBGSBqKs9O09T3khPae
-         p7cXzyTWjj8de3UEa88vnseSl8sWuT52Pvkrd/Wn1nkT5oX3nJFL4sKJXx/G8Cjz5W
-         WY7zqMYanU7sQOfU/9swA4b0rgBzO42wmzMJqqlksP52YZnLnrG9ouNJ82qAdg4ELL
-         LHYTD9xFKcnBmu3C948GRTBbYRT43vbtbQeFb4I35rec6EhBpGeYIBSYkAT5j0SOGK
-         Bil53mYNtk2QHb4qg2U+4H6zsoCilDNIKaLzFnISoIbZrLS1+PoKqGMnlRILfODuDv
-         94B6j4LA2+VFw==
-From:   Ard Biesheuvel <ardb@kernel.org>
-To:     torvalds@linux-foundation.org
-Cc:     linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>
-Subject: [GIT PULL] EFI updates for v6.6
-Date:   Mon, 28 Aug 2023 13:12:29 +0200
-Message-Id: <20230828111229.107143-1-ardb@kernel.org>
-X-Mailer: git-send-email 2.39.2
-MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=3005; i=ardb@kernel.org; h=from:subject; bh=LxY+jFnL+dqeUUoOxCSW0bAmgoq9YmhSBnju7998mVA=; b=owGbwMvMwCFmkMcZplerG8N4Wi2JIeVNo4xYieGxa83PYg1Marf5zIn4O4O9MMrz6yseI+dTm T6WS4w7SlkYxDgYZMUUWQRm/3238/REqVrnWbIwc1iZQIYwcHEKwERCaxgZHrx+KKrCb2SXdv5n 2pHiXS3hEx4uClL5tOIcOxvr4sg6G4Z/6nuOxNtOneGiGfjbab4ZY52unzSH7NNM796zT8OO2bv wAwA=
-X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-Content-Transfer-Encoding: 8bit
+        s=k20201202; t=1693268622;
+        bh=YEQC4t73Sm+p7mB2sTyJIf4N5lCrV9CioaSKMvPNyWI=;
+        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
+        b=W/23mJipZW4yJPApNhLtCh3l/Y1Hl6qfX7fcEizKLZo5k239ehjuMIpkugry4CDo/
+         w18b8v/x8lzVwJo31qGb7l3DWDs9KbPo5rvnaCghLkFD8GkJMg5r/DECNraZrSSz+k
+         hkPFTYBmCBs2JWmESJ6vPSDdnQZiEcxDysKmykCNE4RkcSS9o3XFm+cbIyBIMmWTYx
+         zZm5kz6WK0523wYCxGckgkQIXC3lfQ4jMWREwahT0HjdiS8eutsA8C56ulMxffTbev
+         QLFm3pWECx/NpXOMsKdYVoDwVCeqWQzVBPbNEeboBwXrrWzl8r9dL5sy84CchVKgsU
+         nzDPbmusttLHg==
+Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
+        by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id 03E0AC3274C;
+        Tue, 29 Aug 2023 00:23:42 +0000 (UTC)
+Subject: Re: [GIT PULL] EFI updates for v6.6
+From:   pr-tracker-bot@kernel.org
+In-Reply-To: <20230828111229.107143-1-ardb@kernel.org>
+References: <20230828111229.107143-1-ardb@kernel.org>
+X-PR-Tracked-List-Id: <linux-efi.vger.kernel.org>
+X-PR-Tracked-Message-Id: <20230828111229.107143-1-ardb@kernel.org>
+X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next-for-v6.6
+X-PR-Tracked-Commit-Id: b691118f2c44d16b84fc65b8147b33620eb18cac
+X-PR-Merge-Tree: torvalds/linux.git
+X-PR-Merge-Refname: refs/heads/master
+X-PR-Merge-Commit-Id: d7dd9b449fac8616bafe9afb9c20948797d6a0ad
+Message-Id: <169326862200.9848.9553024853412735911.pr-tracker-bot@kernel.org>
+Date:   Tue, 29 Aug 2023 00:23:42 +0000
+To:     Ard Biesheuvel <ardb@kernel.org>
+Cc:     torvalds@linux-foundation.org, linux-efi@vger.kernel.org,
+        Ard Biesheuvel <ardb@kernel.org>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Hello Linus,
+The pull request you sent on Mon, 28 Aug 2023 13:12:29 +0200:
 
-Most of the EFI work this cycle will be arriving via the -tip tree, given that
-it is closely tied to the x86 decompressor.
+> git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next-for-v6.6
 
-This PR primarily covers some cleanup work on the EFI runtime wrappers, which
-are shared between all EFI architectures except Itanium, and which provide some
-level of isolation to prevent faults occurring in the firmware code (which
-runs at the same privilege level as the kernel) from bringing down the system.
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/d7dd9b449fac8616bafe9afb9c20948797d6a0ad
 
-Beyond that, there is a fix that did not make it into v6.5, and some doc fixes
-and dead code cleanup.
+Thank you!
 
-Please pull.
-
-
-The following changes since commit 06c2afb862f9da8dc5efa4b6076a0e48c3fbaaa5:
-
-  Linux 6.5-rc1 (2023-07-09 13:53:13 -0700)
-
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next-for-v6.6
-
-for you to fetch changes up to b691118f2c44d16b84fc65b8147b33620eb18cac:
-
-  Merge remote-tracking branch 'linux-efi/urgent' into efi/next (2023-08-28 12:57:05 +0200)
-
-----------------------------------------------------------------
-EFI updates for v6.6
-
-- one bugfix for x86 mixed mode that did not make it into v6.5
-- first pass of cleanup for the EFI runtime wrappers
-- some cosmetic touchups
-
-----------------------------------------------------------------
-Ard Biesheuvel (9):
-      efi/arm64: Move EFI runtime call setup/teardown helpers out of line
-      efi/riscv: Move EFI runtime call setup/teardown helpers out of line
-      efi/runtime-wrappers: Use type safe encapsulation of call arguments
-      efi/runtime-wrapper: Move workqueue manipulation out of line
-      efi/runtime-wrappers: Remove duplicated macro for service returning void
-      efi/runtime-wrappers: Don't duplicate setup/teardown code
-      acpi/prmt: Use EFI runtime sandbox to invoke PRM handlers
-      efi/runtime-wrappers: Clean up white space and add __init annotation
-      Merge remote-tracking branch 'linux-efi/urgent' into efi/next
-
-Mikel Rychliski (1):
-      x86/efistub: Fix PCI ROM preservation in mixed mode
-
-Xiao Wang (1):
-      efi/riscv: libstub: Fix comment about absolute relocation
-
-YueHaibing (1):
-      efi: Remove unused extern declaration efi_lookup_mapped_addr()
-
-Zhu Wang (1):
-      efi: memmap: Remove kernel-doc warnings
-
- arch/arm64/include/asm/efi.h            |  18 +-
- arch/arm64/kernel/efi.c                 |  16 +-
- arch/riscv/include/asm/efi.h            |  10 +-
- arch/x86/include/asm/uv/bios.h          |   4 +-
- arch/x86/platform/efi/memmap.c          |   2 +-
- drivers/acpi/Kconfig                    |   2 +-
- drivers/acpi/prmt.c                     |   8 +-
- drivers/firmware/efi/libstub/Makefile   |   2 +-
- drivers/firmware/efi/libstub/x86-stub.c |   2 +-
- drivers/firmware/efi/riscv-runtime.c    |  15 +-
- drivers/firmware/efi/runtime-wrappers.c | 358 +++++++++++++++++++++-----------
- include/linux/efi.h                     |  53 ++---
- 12 files changed, 299 insertions(+), 191 deletions(-)
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/prtracker.html
