@@ -2,158 +2,117 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F7C5C83F1A
-	for <linux-efi@archiver.kernel.org>; Wed, 30 Aug 2023 18:33:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4A8C6C83F14
+	for <linux-efi@archiver.kernel.org>; Wed, 30 Aug 2023 21:32:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232920AbjH3SdR (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 30 Aug 2023 14:33:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48018 "EHLO
+        id S241549AbjH3Vco (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 30 Aug 2023 17:32:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53898 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1343987AbjH3Rvj (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 30 Aug 2023 13:51:39 -0400
-Received: from mail-oa1-x4a.google.com (mail-oa1-x4a.google.com [IPv6:2001:4860:4864:20::4a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D5B19198
-        for <linux-efi@vger.kernel.org>; Wed, 30 Aug 2023 10:51:34 -0700 (PDT)
-Received: by mail-oa1-x4a.google.com with SMTP id 586e51a60fabf-1c8c1f34aadso6931386fac.3
-        for <linux-efi@vger.kernel.org>; Wed, 30 Aug 2023 10:51:34 -0700 (PDT)
+        with ESMTP id S241565AbjH3Vcm (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 30 Aug 2023 17:32:42 -0400
+Received: from mail-qv1-xf2c.google.com (mail-qv1-xf2c.google.com [IPv6:2607:f8b0:4864:20::f2c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 10CA2CEE
+        for <linux-efi@vger.kernel.org>; Wed, 30 Aug 2023 14:32:14 -0700 (PDT)
+Received: by mail-qv1-xf2c.google.com with SMTP id 6a1803df08f44-64a5f9a165eso1144466d6.1
+        for <linux-efi@vger.kernel.org>; Wed, 30 Aug 2023 14:32:14 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20221208; t=1693417893; x=1694022693; darn=vger.kernel.org;
-        h=cc:to:from:subject:message-id:mime-version:date:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=EYjQFc4xOJMLhqSY/15Eo/bkP9OF+XNV2qczMiBYtL4=;
-        b=aw9dPjDYPDyipNtu8Wxx18Dx9m/0Xd2cYgG3isygHJfTvcaiF7aSiPVrgFXiAdlEHI
-         MOl7xQcITcqAi8kEmkQZeVP9JhUFBg0Y2hDCV9jZsq8cACSTmPMEraSRDXAbcmMqdY2i
-         WIxR+ba/wJ6bZ4wyPiOW4TzGS8jBpZLI0frOzSqPgjKqtpiZ5C6LI5lBoE9vfLzV13aj
-         E4lG7ZDx8vddONjM/G4VsainecpOjvLzRVKLEvsU3WJDk6FNp5aQKPJ92qu7r95VTCNW
-         9e/ENAlk22sgytAuyCk8508oyLXZ9kbfQeWujtLs4VjfCSWOuyAW6qgMT+vSnUCqFzcu
-         fGQw==
+        d=google.com; s=20221208; t=1693431068; x=1694035868; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=KrR3h31lbTk9xkTFf3cxnvH3CTKI0f+A5tILf14Z9rU=;
+        b=gamCyvBVEajnCc8WkAh2xdKXgoOS/4ApS7ZU/ieo26ezcxY6beKXdYbnMcMgbbZfEQ
+         ydTsO9EFzap/O57r2WUGilMJpUkWxD+pCRFLryMa/1Y6+tumhBxfMBlwWYQ9lpVOpRpm
+         0OtwUVsxanYVv5WUAy9OSx+lD4siOBKztNCj5Ew36gjeR57om9TNbGxH+DuVfsE0AAnf
+         UQXp9BWNK903VhDz/cgTjIyFXXh/jUq0otCd8srVcMFS00vhRscObUgZ30P6x6Xm3zoU
+         rcqKqEkI2f25oosahcSR5eXN/CI11Pn78kfdOuTRTzgMLzxRQg3UwLAu3itbGOvJX4oL
+         5aUA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1693417893; x=1694022693;
-        h=cc:to:from:subject:message-id:mime-version:date:x-gm-message-state
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=EYjQFc4xOJMLhqSY/15Eo/bkP9OF+XNV2qczMiBYtL4=;
-        b=B0oYHedvzNm9W1u8QlBmC+dAGa75va0Aq0lrUQgPl/yein+wHWY6/GIQCjdid93X8Q
-         LfKwY7ctX4ExkXEDpS4r2KrbFTVJxmw6VaTzQ/E0NHAnsRbX4YKg9dZHFKH8MNLqDdv6
-         1E3VW8sJQEJkdxd5B1jEBDIg41XZFJSCucl/Af/yegQGiOQUEc/rMkRzZNu65JJ7TRoC
-         JpnrSmnnAZcT7ah5+tSG2R1Ok4Y4jzH6OcdNBoyghTO7EC9nqat1jOh3TBeahyvNSv7Y
-         pra41afMeZv056zlggW+WSfFYCz4Hs4Nd2Dip1rHVyX+D5X/D7iV0BLaMT0wGXjps2is
-         T3qg==
-X-Gm-Message-State: AOJu0Yz2jMcVtx0MDCqu8v/HzphQOpbmrzbITREwCYEB+kKQZwIVZ05M
-        rg3IFJ78g6KwR6XuHEmoVV3EEzT8JqGBtZ+Qsg==
-X-Google-Smtp-Source: AGHT+IGL/3lcQ6hwMvsl4p1gk/LCm0paBP0RD6v6Kz3Tt1iisx7fE8BgSUyT/0wksBkGcJvZoAMVnrwDfWF9o8Lg1w==
-X-Received: from jstitt-linux1.c.googlers.com ([fda3:e722:ac3:cc00:2b:ff92:c0a8:23b5])
- (user=justinstitt job=sendgmr) by 2002:a05:6870:5b1b:b0:1c0:e9e9:ae91 with
- SMTP id ds27-20020a0568705b1b00b001c0e9e9ae91mr137879oab.3.1693417893238;
- Wed, 30 Aug 2023 10:51:33 -0700 (PDT)
-Date:   Wed, 30 Aug 2023 17:51:29 +0000
-Mime-Version: 1.0
-X-B4-Tracking: v=1; b=H4sIAKCB72QC/32NTQrCMBSEr1Le2kh+TLWuvId0EZLX9EGblESCU
- nJ3Yw8gs/oG5psdMibCDPduh4SFMsXQQJ46sLMJHhm5xiC5VPwmB7ZSzhR8McmhXRhOxPSgeG+
- MndBdoA231Nr3IX2OjWfKr5g+x0cRv/avrgjWohzX2mgtrv3Dx+gXPNu4wlhr/QIVCrnRtQAAA A==
-X-Developer-Key: i=justinstitt@google.com; a=ed25519; pk=tC3hNkJQTpNX/gLKxTNQKDmiQl6QjBNCGKJINqAdJsE=
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1693417892; l=3644;
- i=justinstitt@google.com; s=20230717; h=from:subject:message-id;
- bh=+vRGVRwlIjkmcXJXBfhvIJnVrDxDHX9+bhatyE7XQZE=; b=tEmNmV0Gd9vM2MDL3PKKkeIiRgAoxL8apKcKfw1CvhU6tPKZlGnans1x4nL4cCT6uVZeVgfd6
- lVCgmhdzg/wB7MReF69x2zwkmSByyHgiMvfwCsafFz90SSsJqUm4woN
-X-Mailer: b4 0.12.3
-Message-ID: <20230830-missingvardecl-efi-v2-1-818081a204d2@google.com>
-Subject: [PATCH v2] efi: fix -Wmissing-variable-declarations warning
-From:   Justin Stitt <justinstitt@google.com>
-To:     Ard Biesheuvel <ardb@kernel.org>,
-        Darren Hart <dvhart@infradead.org>,
-        Andy Shevchenko <andy@infradead.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
-        Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org,
-        "H. Peter Anvin" <hpa@zytor.com>,
-        Nathan Chancellor <nathan@kernel.org>,
-        Nick Desaulniers <ndesaulniers@google.com>,
-        Tom Rix <trix@redhat.com>
-Cc:     linux-efi@vger.kernel.org, platform-driver-x86@vger.kernel.org,
-        linux-kernel@vger.kernel.org, llvm@lists.linux.dev,
-        Justin Stitt <justinstitt@google.com>
-Content-Type: text/plain; charset="utf-8"
+        d=1e100.net; s=20221208; t=1693431068; x=1694035868;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=KrR3h31lbTk9xkTFf3cxnvH3CTKI0f+A5tILf14Z9rU=;
+        b=CPofoPMvRPmK/3N+wVt3yFJNk1aS13iMfged4O8ZmBNg+sPT3MPHs/HwsK5DH21leL
+         oZIfrd/f2uF7VKJWZ6JBk6QSgipaQFbbFrHrT6vKLtuy5fn9s2d591kEsOOLEbrOAIHQ
+         uRvnmgX3ULvjC4YUgeKKyEz3e59fY98lx2Tl4b+2LDHqwKxL5WOek3LnDa6tefajClXM
+         nzh0Bnu3Kq+d7gQFxeeLz6pPW6JDxUXrim/s9+U2T9j71SrgXHDtc9Ep4cY3jMFrTNSW
+         r+OnFkrSQmhfth0lcOYpoYLN6Sh05i1K5slO6KPCxb65msDuoA8CUGsXZh27l73hboYk
+         6i5A==
+X-Gm-Message-State: AOJu0Yw/B3MIesWO21H6Zq/Dd/Fb1FcxjH2G48gtkJ4GWC7cjcLylbQT
+        uSJn7eL+IOR8a3HfbL2aeFw5kpbBV/5bZLWj/hQWcQ==
+X-Google-Smtp-Source: AGHT+IGrjJEwv2qzVN9QCDg++IKj/hIoaTc9P6YamyZpMeXxSw8x87Z+YFRb68fzXttUiOA1D22LxFIYohGyo3SEQJU=
+X-Received: by 2002:a0c:cc13:0:b0:641:8ba9:68ab with SMTP id
+ r19-20020a0ccc13000000b006418ba968abmr1039748qvk.42.1693431068402; Wed, 30
+ Aug 2023 14:31:08 -0700 (PDT)
+MIME-Version: 1.0
+References: <20230722123850.634544-1-alexghiti@rivosinc.com>
+In-Reply-To: <20230722123850.634544-1-alexghiti@rivosinc.com>
+From:   Sami Tolvanen <samitolvanen@google.com>
+Date:   Wed, 30 Aug 2023 14:30:31 -0700
+Message-ID: <CABCJKucj78p4TBtXYmMdJ=vYK69XC=XU06uB+_fyfZLRnC4h0A@mail.gmail.com>
+Subject: Re: [PATCH v6 0/5] riscv: Introduce KASLR
+To:     Alexandre Ghiti <alexghiti@rivosinc.com>,
+        Conor Dooley <conor.dooley@microchip.com>
+Cc:     Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        Kees Cook <keescook@chromium.org>,
+        linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-When building x86/defconfig with Clang-18 I encounter the following warnings:
-| arch/x86/platform/efi/efi.c:934:23: warning: no previous extern declaration for non-static variable 'efi_attr_fw_vendor' [-Wmissing-variable-declarations]
-|   934 | struct kobj_attribute efi_attr_fw_vendor = __ATTR_RO(fw_vendor);
-| arch/x86/platform/efi/efi.c:935:23: warning: no previous extern declaration for non-static variable 'efi_attr_runtime' [-Wmissing-variable-declarations]
-|   935 | struct kobj_attribute efi_attr_runtime = __ATTR_RO(runtime);
-| arch/x86/platform/efi/efi.c:936:23: warning: no previous extern declaration for non-static variable 'efi_attr_config_table' [-Wmissing-variable-declarations]
-|   936 | struct kobj_attribute efi_attr_config_table = __ATTR_RO(config_table);
+Hi Alexandre,
 
-These symbols are declared extern in drivers/firmware/efi/efi.c. Move
-the declarations to linux/efi.h to resolve these warnings.
+On Sat, Jul 22, 2023 at 5:39=E2=80=AFAM Alexandre Ghiti <alexghiti@rivosinc=
+.com> wrote:
+>
+> The following KASLR implementation allows to randomize the kernel mapping=
+:
+>
+> - virtually: we expect the bootloader to provide a seed in the device-tre=
+e
+> - physically: only implemented in the EFI stub, it relies on the firmware=
+ to
+>   provide a seed using EFI_RNG_PROTOCOL. arm64 has a similar implementati=
+on
+>   hence the patch 3 factorizes KASLR related functions for riscv to take
+>   advantage.
+>
+> The new virtual kernel location is limited by the early page table that o=
+nly
+> has one PUD and with the PMD alignment constraint, the kernel can only ta=
+ke
+> < 512 positions.
+>
+> base-commit-tag: v6.5-rc1
 
-Also, trim a trailing space from efi_set_variable_t typedef.
+Thanks for continuing to work on this!
 
-Link: https://github.com/ClangBuiltLinux/linux/issues/1920
-Suggested-by: Ard Biesheuvel <ardb@kernel.org>
-Signed-off-by: Justin Stitt <justinstitt@google.com>
----
-Changes in v2:
-- Don't use static. Instead move symbols to header file (thanks Ard)
-- Remove duplicated warnings output from b4 (thanks Ard)
-- Link to v1: https://lore.kernel.org/r/20230829-missingvardecl-efi-v1-1-13d055a55176@google.com
----
-Note: build-tested.
+I reviewed the patches and the code looks correct to me. I also
+applied the series on top of v6.5 and after patching qemu to provide a
+kaslr-seed, I confirmed that the virtual offset appears to be random
+and is printed out when I panic the machine:
 
-Also, a question: Why does the compiler warn at all? The extern
-declarations _do_ exist as Ard points out [1].
+# echo PANIC > /sys/kernel/debug/provoke-crash/DIRECT
+[   17.510012] lkdtm: Performing direct entry PANIC
+[   17.510411] Kernel panic - not syncing: dumptest
+[...]
+[   17.518693] Kernel Offset: 0x32c00000 from 0xffffffff80000000
 
-[1]: https://lore.kernel.org/all/CAMj1kXE_xs+wWno4G4U+6CFCOwO7JWcmNv4et5=W=ZRrQatWnQ@mail.gmail.com/
----
- drivers/firmware/efi/efi.c | 3 ---
- include/linux/efi.h        | 6 +++++-
- 2 files changed, 5 insertions(+), 4 deletions(-)
+For the series:
+Reviewed-by: Sami Tolvanen <samitolvanen@google.com>
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 1599f1176842..7b4e59ccf09e 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -161,9 +161,6 @@ static ssize_t fw_platform_size_show(struct kobject *kobj,
- 	return sprintf(buf, "%d\n", efi_enabled(EFI_64BIT) ? 64 : 32);
- }
- 
--extern __weak struct kobj_attribute efi_attr_fw_vendor;
--extern __weak struct kobj_attribute efi_attr_runtime;
--extern __weak struct kobj_attribute efi_attr_config_table;
- static struct kobj_attribute efi_attr_fw_platform_size =
- 	__ATTR_RO(fw_platform_size);
- 
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index ab088c662e88..32f7ca60b0e9 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -287,7 +287,7 @@ typedef efi_status_t efi_get_variable_t (efi_char16_t *name, efi_guid_t *vendor,
- 					 unsigned long *data_size, void *data);
- typedef efi_status_t efi_get_next_variable_t (unsigned long *name_size, efi_char16_t *name,
- 					      efi_guid_t *vendor);
--typedef efi_status_t efi_set_variable_t (efi_char16_t *name, efi_guid_t *vendor, 
-+typedef efi_status_t efi_set_variable_t (efi_char16_t *name, efi_guid_t *vendor,
- 					 u32 attr, unsigned long data_size,
- 					 void *data);
- typedef efi_status_t efi_get_next_high_mono_count_t (u32 *count);
-@@ -632,6 +632,10 @@ typedef struct {
- 
- extern unsigned long __ro_after_init efi_rng_seed;		/* RNG Seed table */
- 
-+extern __weak struct kobj_attribute efi_attr_fw_vendor;
-+extern __weak struct kobj_attribute efi_attr_runtime;
-+extern __weak struct kobj_attribute efi_attr_config_table;
-+
- /*
-  * All runtime access to EFI goes through this structure:
-  */
+I didn't test the EFI bits, but the rest of the series:
+Tested-by: Sami Tolvanen <samitolvanen@google.com>
 
----
-base-commit: 706a741595047797872e669b3101429ab8d378ef
-change-id: 20230829-missingvardecl-efi-59306aacfed4
+Conor, in another reply you mentioned you're planning on reviewing the
+patches as well. Did you have any feedback or concerns?
 
-Best regards,
---
-Justin Stitt <justinstitt@google.com>
-
+Sami
