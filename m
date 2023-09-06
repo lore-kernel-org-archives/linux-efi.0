@@ -2,213 +2,245 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 415ECC83F2C
-	for <linux-efi@archiver.kernel.org>; Tue,  5 Sep 2023 16:34:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 64C5EEB8FAD
+	for <linux-efi@archiver.kernel.org>; Wed,  6 Sep 2023 07:06:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344815AbjIEQev (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 5 Sep 2023 12:34:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35372 "EHLO
+        id S229651AbjIFHGs (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 6 Sep 2023 03:06:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60736 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1354281AbjIEKbv (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 5 Sep 2023 06:31:51 -0400
-Received: from mail-ej1-x642.google.com (mail-ej1-x642.google.com [IPv6:2a00:1450:4864:20::642])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AAD82E8
-        for <linux-efi@vger.kernel.org>; Tue,  5 Sep 2023 03:31:47 -0700 (PDT)
-Received: by mail-ej1-x642.google.com with SMTP id a640c23a62f3a-9a21b6d105cso338517866b.3
-        for <linux-efi@vger.kernel.org>; Tue, 05 Sep 2023 03:31:47 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ventanamicro.com; s=google; t=1693909906; x=1694514706; darn=vger.kernel.org;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=S35RjLtTeUiL0oK4WaMu3773GIHLmxuJ99VNH62qR3I=;
-        b=QrzMNPFUg9LSi8GQnuGc0hR4eANbZzNr3iUKsbWQ4Txo5WCMstfky91Br/5+QJV7CE
-         WRCktZidvpTLsLDxTimIew5iG5LXE6uNts1MM+zAnkvPMkXhuK+8uCiTgJRTZ1DneP1u
-         UNvf2h/V8eMTww+QYCM/9YeZu2ppURyR65XzWYu65pul+uJODHDraWkxwRbsx0+Vu1OP
-         ixhiBjPQvv5qV6IDanq+n9lgvjn0BuD7npJ0AgPRXLlCYeyunW4mjeVJ3me6ESNs1P+E
-         PEXORthZ9ZncD7NJXw+2ycZYYX9MMyPlLeXVTb7rXonLAllWC4T/g6U3eumrahBH0vvs
-         tVJA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1693909906; x=1694514706;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=S35RjLtTeUiL0oK4WaMu3773GIHLmxuJ99VNH62qR3I=;
-        b=Nd7Fco7/XJ86rjAc8z+PmKcyYbR+IPfqmWOX6iHNreEpmXl9cpbUUC4bsRcYaysOJQ
-         b4mbAnYtpl40sE40DpiPqSFhX6PPQcjLT3boWr3ZQDb8Yi6rUSzGjTvr/yXSkV9RXovx
-         oFRL7vKTvnv6JJb0vLWCbE45aCSAOKkHrE7yhsTQTQr1o+WLQeJGl0xOWc2DBrDzYcVF
-         jr5o7cwd6Z7EIBYgZFyOCc6JBwknTNenEpMk76eZSl6feeua1UE9T9pysrF1cMhk4sAu
-         15HYbR4AyiVzR2vBHMTeEJlPpLJtQrZ93AzTRCwPhfitESQ/Hep1sxJj41A3bOsBtKY1
-         zOGA==
-X-Gm-Message-State: AOJu0Yx64bkJmeGiZ3TjpuSULOwjNUNVqDnJNKKmK6GkqVha3XQ1MgQk
-        LPcbE/JCc8T9rakUgdjg07tcATOon5X466KmbcF8aNRg
-X-Google-Smtp-Source: AGHT+IHXiMYQ0dzTcFvGucvEc9/hoAyHyfOVwPGQSUHueN8hnJX8qAOgE5kuEmsUExIqJ9+lbjSNqw==
-X-Received: by 2002:a17:906:319b:b0:9a1:fcd7:b825 with SMTP id 27-20020a170906319b00b009a1fcd7b825mr9273316ejy.71.1693909905990;
-        Tue, 05 Sep 2023 03:31:45 -0700 (PDT)
-Received: from localhost (2001-1ae9-1c2-4c00-20f-c6b4-1e57-7965.ip6.tmcz.cz. [2001:1ae9:1c2:4c00:20f:c6b4:1e57:7965])
-        by smtp.gmail.com with ESMTPSA id i7-20020a170906850700b00993664a9987sm7371811ejx.103.2023.09.05.03.31.43
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 05 Sep 2023 03:31:44 -0700 (PDT)
-Date:   Tue, 5 Sep 2023 12:31:42 +0200
-From:   Andrew Jones <ajones@ventanamicro.com>
-To:     "Wang, Xiao W" <xiao.w.wang@intel.com>
-Cc:     Anup Patel <apatel@ventanamicro.com>,
-        Conor Dooley <conor.dooley@microchip.com>,
-        Anup Patel <anup@brainfault.org>,
-        "paul.walmsley@sifive.com" <paul.walmsley@sifive.com>,
-        "palmer@dabbelt.com" <palmer@dabbelt.com>,
-        "aou@eecs.berkeley.edu" <aou@eecs.berkeley.edu>,
-        "ardb@kernel.org" <ardb@kernel.org>,
-        "Li, Haicheng" <haicheng.li@intel.com>,
-        "linux-riscv@lists.infradead.org" <linux-riscv@lists.infradead.org>,
-        "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH] RISC-V: Optimize bitops with Zbb extension
-Message-ID: <20230905-d4d7b1944ac3487156ce4f5c@orel>
-References: <20230806024715.3061589-1-xiao.w.wang@intel.com>
- <CAAhSdy2_djw2JX+8tmF2V190+x9KLvt7u8rCX-TaGCKQrUVOYQ@mail.gmail.com>
- <DM8PR11MB57512001CAFA07EC58203A7BB8E6A@DM8PR11MB5751.namprd11.prod.outlook.com>
- <20230830-breeze-washboard-ef496d5c9d5a@wendy>
- <DM8PR11MB575116E5EE183D7D41361B74B8E5A@DM8PR11MB5751.namprd11.prod.outlook.com>
- <CAK9=C2XTS539ew_rty6_MOwyZkdBBbGBCzxp33u1UpMP5STAqQ@mail.gmail.com>
- <20230831-f0f847c5703875f1e67635c1@orel>
- <DM8PR11MB5751CDA12CB037C678F1B829B8E8A@DM8PR11MB5751.namprd11.prod.outlook.com>
+        with ESMTP id S229445AbjIFHGq (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 6 Sep 2023 03:06:46 -0400
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1E5D183;
+        Wed,  6 Sep 2023 00:06:43 -0700 (PDT)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B7F5DC433C7;
+        Wed,  6 Sep 2023 07:06:42 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1693984002;
+        bh=QlKqOiuJcXJ+UJetTjnpr9pfdN0x0FuCwfVIo5GBkBs=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=KK4BDgGIlXB8No81pdYiryeL5qSOuHM8UAEsMZ15KODIa4tk0ksko4ZINc6iuSlQr
+         Q7KjjPWJSXq1MHoNb/bU8xEe3qTkoONvukVR9b4pQiph4fPYkE0hW2VmmFP2CYsese
+         0j30XdQybX1QPbw5M0wkV81FLXedOwQZYZGsL6KY/ixYEgfN+Bd1jPS5e7UAu/vnfq
+         5h71ZPj4dcidFJcw4oBpDXPVSg9wRx9k4kXx3eoDefQZm8ct3E6e6PEkg/h+eWhrPw
+         k0/WoreWZzpibWgeYCR2LpXMg5sRCVZGg0QTBxIP4/Tw+yZQzOFF/okf+G4pstOCXe
+         7h7mEqORy3LaA==
+Received: by mail-lf1-f48.google.com with SMTP id 2adb3069b0e04-5008d16cc36so5546403e87.2;
+        Wed, 06 Sep 2023 00:06:42 -0700 (PDT)
+X-Gm-Message-State: AOJu0YzT7Is/r8pLjy+HkhVHYfdMF+TUREpYeN1Pua6gFlBsoaAJED5L
+        VoIC3tBGHNmKgkyIDzSAjdnIiJrZt8k//aobS54=
+X-Google-Smtp-Source: AGHT+IE841z3r8oL+9aJtgeVSdQWFQn+moBKacdcuvomzpmaDTDBpnpeNr+fPTUhJfMtvvPI04QZFav6gQMzTsLegXg=
+X-Received: by 2002:a05:6512:220f:b0:4fb:7cea:882a with SMTP id
+ h15-20020a056512220f00b004fb7cea882amr1943544lfu.3.1693984000686; Wed, 06 Sep
+ 2023 00:06:40 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <DM8PR11MB5751CDA12CB037C678F1B829B8E8A@DM8PR11MB5751.namprd11.prod.outlook.com>
+References: <20230831153108.2021554-1-jiaozhou@google.com> <20230904-erben-coachen-7ca9a30cdc05@brauner>
+ <CAFyYRf0xyZSLypcHvpzCXQ5dUztTXbE4Ea1xAcQLfbP4+9N9sQ@mail.gmail.com>
+In-Reply-To: <CAFyYRf0xyZSLypcHvpzCXQ5dUztTXbE4Ea1xAcQLfbP4+9N9sQ@mail.gmail.com>
+From:   Ard Biesheuvel <ardb@kernel.org>
+Date:   Wed, 6 Sep 2023 09:06:29 +0200
+X-Gmail-Original-Message-ID: <CAMj1kXFRaMgPi1X-WRMkunBhBqfVFyDZu6f7CdCh6mU5Mtqh1A@mail.gmail.com>
+Message-ID: <CAMj1kXFRaMgPi1X-WRMkunBhBqfVFyDZu6f7CdCh6mU5Mtqh1A@mail.gmail.com>
+Subject: Re: [PATCH] kernel: Add Mount Option For Efivarfs
+To:     Jiao Zhou <jiaozhou@google.com>
+Cc:     Christian Brauner <brauner@kernel.org>,
+        Linux FS Development <linux-fsdevel@vger.kernel.org>,
+        Jeremy Kerr <jk@ozlabs.org>, linux-efi@vger.kernel.org,
+        linux-kernel@vger.kernel.org,
+        kernel test robot <oliver.sang@intel.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
+On Tue, 5 Sept 2023 at 20:05, Jiao Zhou <jiaozhou@google.com> wrote:
+>
+> Hi Christian,
+>
+> Thanks for your reply, will adding a guid and uid check like the below be=
+ sufficient? I saw this is how most file systems check their gid and uid. I=
+ am not quite sure about how to send fd back to init_user_ns. Can you pleas=
+e clarify a little bit? Thank you so much.
+...
 
-Hi Xiao,
+>
 
-On Tue, Sep 05, 2023 at 09:46:20AM +0000, Wang, Xiao W wrote:
-> 
-> 
-> > -----Original Message-----
-> > From: Andrew Jones <ajones@ventanamicro.com>
-> > Sent: Friday, September 1, 2023 1:00 AM
-> > To: Anup Patel <apatel@ventanamicro.com>
-> > Cc: Wang, Xiao W <xiao.w.wang@intel.com>; Conor Dooley
-> > <conor.dooley@microchip.com>; Anup Patel <anup@brainfault.org>;
-> > paul.walmsley@sifive.com; palmer@dabbelt.com; aou@eecs.berkeley.edu;
-> > ardb@kernel.org; Li, Haicheng <haicheng.li@intel.com>; linux-
-> > riscv@lists.infradead.org; linux-efi@vger.kernel.org; linux-
-> > kernel@vger.kernel.org
-> > Subject: Re: [PATCH] RISC-V: Optimize bitops with Zbb extension
-> > 
-> > On Thu, Aug 31, 2023 at 09:37:30PM +0530, Anup Patel wrote:
-> > > +Andrew
-> > >
-> > > On Thu, Aug 31, 2023 at 9:29 PM Wang, Xiao W <xiao.w.wang@intel.com>
-> > wrote:
-> > > >
-> > > >
-> > > > > -----Original Message-----
-> > > > > From: Conor Dooley <conor.dooley@microchip.com>
-> > > > > Sent: Wednesday, August 30, 2023 2:59 PM
-> > > > > To: Wang, Xiao W <xiao.w.wang@intel.com>
-> > > > > Cc: Anup Patel <anup@brainfault.org>; paul.walmsley@sifive.com;
-> > > > > palmer@dabbelt.com; aou@eecs.berkeley.edu; ardb@kernel.org; Li,
-> > Haicheng
-> > > > > <haicheng.li@intel.com>; linux-riscv@lists.infradead.org; linux-
-> > > > > efi@vger.kernel.org; linux-kernel@vger.kernel.org
-> > > > > Subject: Re: [PATCH] RISC-V: Optimize bitops with Zbb extension
-> > > > >
-> > > > > On Wed, Aug 30, 2023 at 06:14:12AM +0000, Wang, Xiao W wrote:
-> > > > > > Hi,
-> > > > > >
-> > > > > > > -----Original Message-----
-> > > > > > > From: Anup Patel <anup@brainfault.org>
-> > > > > > > Sent: Tuesday, August 29, 2023 7:08 PM
-> > > > > > > To: Wang, Xiao W <xiao.w.wang@intel.com>
-> > > > > > > Cc: paul.walmsley@sifive.com; palmer@dabbelt.com;
-> > > > > > > aou@eecs.berkeley.edu; ardb@kernel.org; Li, Haicheng
-> > > > > > > <haicheng.li@intel.com>; linux-riscv@lists.infradead.org; linux-
-> > > > > > > efi@vger.kernel.org; linux-kernel@vger.kernel.org
-> > > > > > > Subject: Re: [PATCH] RISC-V: Optimize bitops with Zbb extension
-> > > > > > >
-> > > > > > > On Sun, Aug 6, 2023 at 8:09 AM Xiao Wang
-> > <xiao.w.wang@intel.com>
-> > > > > wrote:
-> > > > > > > >
-> > > > > > > > This patch leverages the alternative mechanism to dynamically
-> > optimize
-> > > > > > > > bitops (including __ffs, __fls, ffs, fls) with Zbb instructions. When
-> > > > > > > > Zbb ext is not supported by the runtime CPU, legacy implementation
-> > is
-> > > > > > > > used. If Zbb is supported, then the optimized variants will be
-> > selected
-> > > > > > > > via alternative patching.
-> > > > > > > >
-> > > > > > > > The legacy bitops support is taken from the generic C
-> > implementation as
-> > > > > > > > fallback.
-> > > > > > > >
-> > > > > > > > If the parameter is a build-time constant, we leverage compiler
-> > builtin to
-> > > > > > > > calculate the result directly, this approach is inspired by x86 bitops
-> > > > > > > > implementation.
-> > > > > > > >
-> > > > > > > > EFI stub runs before the kernel, so alternative mechanism should not
-> > be
-> > > > > > > > used there, this patch introduces a macro EFI_NO_ALTERNATIVE for
-> > this
-> > > > > > > > purpose.
-> > > > > > >
-> > > > > > > I am getting the following compile error with this patch:
-> > > > > > >
-> > > > > > >   GEN     Makefile
-> > > > > > >   UPD     include/config/kernel.release
-> > > > > > >   UPD     include/generated/utsrelease.h
-> > > > > > >   CC      kernel/bounds.s
-> > > > > > > In file included from /home/anup/Work/riscv-
-> > > > > > > test/linux/include/linux/bitmap.h:9,
-> > > > > > >                  from
-> > > > > > > /home/anup/Work/riscv-
-> > > > > test/linux/arch/riscv/include/asm/cpufeature.h:9,
-> > > > > > >                  from
-> > > > > > > /home/anup/Work/riscv-
-> > test/linux/arch/riscv/include/asm/hwcap.h:90,
-> > > > > >
-> > > > > >
-> > > > > > It looks there's a cyclic header including, which leads to this build error.
-> > > > > > I checked https://github.com/kvm-riscv/linux/tree/master and
-> > > > > > https://github.com/torvalds/linux/tree/master, but I don't see
-> > > > > > "asm/cpufeature.h" is included in asm/hwcap.h:90, maybe I miss
-> > > > > something,
-> > > > > > could you help point me to the repo/branch I should work on?
-> > > > >
-> > > > > From MAINTAINERS:
-> > > > >       RISC-V ARCHITECTURE
-> > > > >       ...
-> > > > >       T:      git git://git.kernel.org/pub/scm/linux/kernel/git/riscv/linux.git
-> > > > >
-> > > > > The for-next branch there is what you should be basing work on top of.
-> > > > > AFAICT, you've made bitops.h include hwcap.h while cpufeature.h
-> > includes
-> > > > > both bitops.h (indirectly) and hwcap.h.
-> > > >
-> > > > Thanks for the info, but I can't reproduce Anup's build error with this for-
-> > next branch, cpufeature.h is not included by hwcap.h there.
-> > > > Maybe Anup could help double check the test environment?
-> > >
-> > > I figured that cpufeature.h included in hwcap.h is added by
-> > > Drew's patch "RISC-V: Enable cbo.zero in usermode"
-> > 
-> > I think we should probably split hwcap.h into two parts. The defines stay
-> > and the rest can move to cpufeature.h
-> 
-> OK, I will base on your cbo.zero enabling patch series to make a new version. Will move some contents from hwcap.h into cpufeature.h so that we can remove the including of cpufeature.h in hwcap.h.
-> 
+Please don't top post and please only send plaintext email to the mailing l=
+ists.
 
-I just realized I forgot to CC you on my v3 posting of the cbo.zero
-series[1] yesterday. Sorry about that.
-
-[1] https://lore.kernel.org/all/20230904170220.167816-8-ajones@ventanamicro.com/
+Please consult Documentation/process/submitting-patches.rst in the
+Linux source tree if you are unfamiliar with the upstream contribution
+process (and since you appear to be at Google, you might want to
+consult go/kernel-upstream as well)
 
 Thanks,
-drew
+Ard.
+
+
+>
+>
+> On Mon, Sep 4, 2023 at 1:17=E2=80=AFPM Christian Brauner <brauner@kernel.=
+org> wrote:
+>>
+>> On Thu, Aug 31, 2023 at 03:31:07PM +0000, Jiao Zhou wrote:
+>> > Add uid and gid in efivarfs's mount option, so that
+>> > we can mount the file system with ownership. This approach
+>> >  is used by a number of other filesystems that don't have
+>> > native support for ownership.
+>> >
+>> > TEST=3DFEATURES=3Dtest emerge-reven chromeos-kernel-5_15
+>> >
+>> > Signed-off-by: Jiao Zhou <jiaozhou@google.com>
+>> > Reported-by: kernel test robot <oliver.sang@intel.com>
+>> > Closes: https://lore.kernel.org/oe-lkp/202308291443.ea96ac66-oliver.sa=
+ng@intel.com
+>> > ---
+>> >  fs/efivarfs/inode.c    |  4 +++
+>> >  fs/efivarfs/internal.h |  9 ++++++
+>> >  fs/efivarfs/super.c    | 65 +++++++++++++++++++++++++++++++++++++++++=
++
+>> >  3 files changed, 78 insertions(+)
+>> >
+>> > diff --git a/fs/efivarfs/inode.c b/fs/efivarfs/inode.c
+>> > index 939e5e242b98..de57fb6c28e1 100644
+>> > --- a/fs/efivarfs/inode.c
+>> > +++ b/fs/efivarfs/inode.c
+>> > @@ -20,9 +20,13 @@ struct inode *efivarfs_get_inode(struct super_block=
+ *sb,
+>> >                               const struct inode *dir, int mode,
+>> >                               dev_t dev, bool is_removable)
+>> >  {
+>> > +     struct efivarfs_fs_info *fsi =3D sb->s_fs_info;
+>> >       struct inode *inode =3D new_inode(sb);
+>> > +     struct efivarfs_mount_opts *opts =3D &fsi->mount_opts;
+>> >
+>> >       if (inode) {
+>> > +             inode->i_uid =3D opts->uid;
+>> > +             inode->i_gid =3D opts->gid;
+>> >               inode->i_ino =3D get_next_ino();
+>> >               inode->i_mode =3D mode;
+>> >               inode->i_atime =3D inode->i_mtime =3D inode->i_ctime =3D=
+ current_time(inode);
+>> > diff --git a/fs/efivarfs/internal.h b/fs/efivarfs/internal.h
+>> > index 30ae44cb7453..57deaf56d8e2 100644
+>> > --- a/fs/efivarfs/internal.h
+>> > +++ b/fs/efivarfs/internal.h
+>> > @@ -8,6 +8,15 @@
+>> >
+>> >  #include <linux/list.h>
+>> >
+>> > +struct efivarfs_mount_opts {
+>> > +     kuid_t uid;
+>> > +     kgid_t gid;
+>> > +};
+>> > +
+>> > +struct efivarfs_fs_info {
+>> > +     struct efivarfs_mount_opts mount_opts;
+>> > +};
+>> > +
+>> >  extern const struct file_operations efivarfs_file_operations;
+>> >  extern const struct inode_operations efivarfs_dir_inode_operations;
+>> >  extern bool efivarfs_valid_name(const char *str, int len);
+>> > diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
+>> > index 15880a68faad..d67b0d157ff5 100644
+>> > --- a/fs/efivarfs/super.c
+>> > +++ b/fs/efivarfs/super.c
+>> > @@ -8,6 +8,7 @@
+>> >  #include <linux/efi.h>
+>> >  #include <linux/fs.h>
+>> >  #include <linux/fs_context.h>
+>> > +#include <linux/fs_parser.h>
+>> >  #include <linux/module.h>
+>> >  #include <linux/pagemap.h>
+>> >  #include <linux/ucs2_string.h>
+>> > @@ -23,10 +24,27 @@ static void efivarfs_evict_inode(struct inode *ino=
+de)
+>> >       clear_inode(inode);
+>> >  }
+>> >
+>> > +static int efivarfs_show_options(struct seq_file *m, struct dentry *r=
+oot)
+>> > +{
+>> > +     struct super_block *sb =3D root->d_sb;
+>> > +     struct efivarfs_fs_info *sbi =3D sb->s_fs_info;
+>> > +     struct efivarfs_mount_opts *opts =3D &sbi->mount_opts;
+>> > +
+>> > +     /* Show partition info */
+>> > +     if (!uid_eq(opts->uid, GLOBAL_ROOT_UID))
+>> > +             seq_printf(m, ",uid=3D%u",
+>> > +                             from_kuid_munged(&init_user_ns, opts->ui=
+d));
+>> > +     if (!gid_eq(opts->gid, GLOBAL_ROOT_GID))
+>> > +             seq_printf(m, ",gid=3D%u",
+>> > +                             from_kgid_munged(&init_user_ns, opts->gi=
+d));
+>> > +     return 0;
+>> > +}
+>> > +
+>> >  static const struct super_operations efivarfs_ops =3D {
+>> >       .statfs =3D simple_statfs,
+>> >       .drop_inode =3D generic_delete_inode,
+>> >       .evict_inode =3D efivarfs_evict_inode,
+>> > +     .show_options   =3D efivarfs_show_options,
+>> >  };
+>> >
+>> >  /*
+>> > @@ -190,6 +208,41 @@ static int efivarfs_destroy(struct efivar_entry *=
+entry, void *data)
+>> >       return 0;
+>> >  }
+>> >
+>> > +enum {
+>> > +     Opt_uid, Opt_gid,
+>> > +};
+>> > +
+>> > +static const struct fs_parameter_spec efivarfs_parameters[] =3D {
+>> > +     fsparam_u32("uid",                      Opt_uid),
+>> > +     fsparam_u32("gid",                      Opt_gid),
+>> > +     {},
+>> > +};
+>> > +
+>> > +static int efivarfs_parse_param(struct fs_context *fc, struct fs_para=
+meter *param)
+>> > +{
+>> > +     struct efivarfs_fs_info *sbi =3D fc->s_fs_info;
+>> > +     struct efivarfs_mount_opts *opts =3D &sbi->mount_opts;
+>> > +     struct fs_parse_result result;
+>> > +     int opt;
+>> > +
+>> > +     opt =3D fs_parse(fc, efivarfs_parameters, param, &result);
+>> > +     if (opt < 0)
+>> > +             return opt;
+>> > +
+>> > +     switch (opt) {
+>> > +     case Opt_uid:
+>> > +             opts->uid =3D make_kuid(current_user_ns(), result.uint_3=
+2);
+>> > +             break;
+>> > +     case Opt_gid:
+>> > +             opts->gid =3D make_kgid(current_user_ns(), result.uint_3=
+2);
+>> > +             break;
+>>
+>> This will allow the following:
+>>
+>> # initial user namespace
+>> fd_fs =3D fsopen("efivarfs")
+>>
+>> # switch to some unprivileged userns
+>> fsconfig(fd_fs, FSCONFIG_SET_STRING, "uid", "1000")
+>> =3D=3D> This now resolves within the caller's user namespace which might
+>>     have an idmapping where 1000 cannot be resolved causing sb->{g,u}id
+>>     to be set to INVALID_{G,U}ID.
+>>
+>>     In fact this is also possible in your patch right now without the
+>>     namespace switching. The caller could just pass -1 and that would
+>>     cause inodes with INVALID_{G,U}ID to be created.
+>>     So you want a check for {g,u}id_valid().
+>>
+>> # send fd back to init_user_ns
+>> fsconfig(fd_fs, FSCONFIG_CMD_CREATE)
+>> fd_mnt =3D fsmount(fd_fs, ...)
+>> move_mount(fd_fs, "", -EBADF, "/somehwere", ...)
