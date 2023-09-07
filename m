@@ -2,54 +2,54 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BC6CEEC8741
-	for <linux-efi@archiver.kernel.org>; Thu,  7 Sep 2023 16:18:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 36530EC8744
+	for <linux-efi@archiver.kernel.org>; Thu,  7 Sep 2023 16:24:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239083AbjIGQSz (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 7 Sep 2023 12:18:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52090 "EHLO
+        id S231599AbjIGQYU (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 7 Sep 2023 12:24:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55212 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243249AbjIGQSV (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 7 Sep 2023 12:18:21 -0400
-Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.88])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B60B37A89;
-        Thu,  7 Sep 2023 08:54:37 -0700 (PDT)
+        with ESMTP id S242796AbjIGQWx (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 7 Sep 2023 12:22:53 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 309BD6194;
+        Thu,  7 Sep 2023 09:20:32 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1694102077; x=1725638077;
+  t=1694103632; x=1725639632;
   h=message-id:date:mime-version:subject:to:cc:references:
    from:in-reply-to:content-transfer-encoding;
-  bh=6EsGUJGhX1zT+Uyl+vPXWvJ0hitAvo76hypLco20y4Y=;
-  b=QAVH/3JsotwOgGZF9bAzPXDf12AHmfMFwMmPk+104kEl7ohFKdMdpjaF
-   Zsw0D3ZSNVOscn9h6giEbwnbsztAAecKcrNWUrNwHovBt413ss0DUA9uy
-   Ngwn7ztm1dO2W8UmY5peCg2BCfjCdNp+iEE7+aNk2OyjRnN9pYprAqsjh
-   F0TMB+gK1sS82REhttldmKTHIFZJgr8IbFtR7mCBSv3MPcLzzM+8dlQSU
-   w9XnFEtGssVVImkXVapKO/5HF2wsl4PsslwiDNAJH1E++s93vGqmSy6/y
-   Z5ufdmP0JtX613TLqB1eTnd1plcdXGnewI/LOS9teGC+nFFjEeTFRp0li
-   A==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10826"; a="408388049"
+  bh=QrIByt2sivOlThJJJuIm95tWasheU6Saudv9SUBPsTs=;
+  b=WjvgFgQXWEPcAc2ETpIDyNS++ukCOrY1L3t9RubhePtbNagh8EdAE6lx
+   GRRKzFHul8N+V+s3v+QVeRSSuLCoi5jA+HFi5cLDMOrHfQOYdlQb2i6V0
+   frnCN+GVnMoZlg1/nZt95lP0EZaEQZOve2aY8ZM+BEjAsiO2kzEhTslLR
+   uah6bcYkWm4PrCMSIkQZiRSQeboNz7uAquj5NOTcXlTgdynyo03Z2Yzaw
+   ccWOyFoaGe3Yvp8+5tvUSXqBbQ7gBtO8+5Fc/Rr3Lo6uYUDPk/aUWmOgq
+   l8f6sg9BEAcwYz+qFlvopB/k0ARsd7WpbDz7lS4BXc2muNhlxG9VCgAkr
+   g==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10826"; a="441379006"
 X-IronPort-AV: E=Sophos;i="6.02,235,1688454000"; 
-   d="scan'208";a="408388049"
-Received: from orsmga005.jf.intel.com ([10.7.209.41])
-  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Sep 2023 08:51:07 -0700
+   d="scan'208";a="441379006"
+Received: from fmsmga002.fm.intel.com ([10.253.24.26])
+  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Sep 2023 07:46:57 -0700
 X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10826"; a="915793424"
+X-IronPort-AV: E=McAfee;i="6600,9927,10826"; a="856885283"
 X-IronPort-AV: E=Sophos;i="6.02,235,1688454000"; 
-   d="scan'208";a="915793424"
+   d="scan'208";a="856885283"
 Received: from ningle-mobl2.amr.corp.intel.com (HELO [10.209.13.77]) ([10.209.13.77])
-  by orsmga005-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Sep 2023 08:51:06 -0700
-Message-ID: <5a188bb6-add4-0522-069f-18fbd34aff16@intel.com>
-Date:   Thu, 7 Sep 2023 08:51:06 -0700
+  by fmsmga002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Sep 2023 07:46:55 -0700
+Message-ID: <7a50d04f-63ee-a901-6f39-7d341e423a77@intel.com>
+Date:   Thu, 7 Sep 2023 07:46:54 -0700
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Thunderbird/102.15.0
-Subject: Re: [PATCH 1/3] proc/vmcore: Do not map unaccepted memory
+Subject: Re: [PATCH 3/3] /dev/mem: Do not map unaccepted memory
 Content-Language: en-US
-To:     Adrian Hunter <adrian.hunter@intel.com>,
-        "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
+To:     "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
         Borislav Petkov <bp@alien8.de>,
-        Andrew Morton <akpm@linux-foundation.org>
-Cc:     Vlastimil Babka <vbabka@suse.cz>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Vlastimil Babka <vbabka@suse.cz>,
         Mike Rapoport <rppt@linux.ibm.com>,
         Lorenzo Stoakes <lstoakes@gmail.com>,
         Tom Lendacky <thomas.lendacky@amd.com>,
@@ -59,39 +59,55 @@ Cc:     Vlastimil Babka <vbabka@suse.cz>,
         linux-coco@lists.linux.dev, linux-efi@vger.kernel.org,
         kexec@lists.infradead.org
 References: <20230906073902.4229-1-adrian.hunter@intel.com>
- <20230906073902.4229-2-adrian.hunter@intel.com>
- <21bf2e44-3316-2372-44cb-1488f88650f5@intel.com>
- <30d0cebb-13f9-572e-9baa-b7450fec9108@intel.com>
+ <20230906073902.4229-4-adrian.hunter@intel.com>
+ <9ffb7a3b-cf20-617a-e4f1-8a6a8a2c5972@intel.com>
+ <20230907142510.vcj57cvnewqt4m37@box.shutemov.name>
 From:   Dave Hansen <dave.hansen@intel.com>
-In-Reply-To: <30d0cebb-13f9-572e-9baa-b7450fec9108@intel.com>
+In-Reply-To: <20230907142510.vcj57cvnewqt4m37@box.shutemov.name>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On 9/7/23 08:44, Adrian Hunter wrote:
-> On 7/09/23 18:39, Dave Hansen wrote:
+On 9/7/23 07:25, Kirill A. Shutemov wrote:
+> On Thu, Sep 07, 2023 at 07:15:21AM -0700, Dave Hansen wrote:
 >> On 9/6/23 00:39, Adrian Hunter wrote:
->>> @@ -559,7 +567,8 @@ static int vmcore_remap_oldmem_pfn(struct vm_area_struct *vma,
->>>  	 * pages without a reason.
->>>  	 */
->>>  	idx = srcu_read_lock(&vmcore_cb_srcu);
->>> -	if (!list_empty(&vmcore_cb_list))
->>> +	if (!list_empty(&vmcore_cb_list) ||
->>> +	    range_contains_unaccepted_memory(paddr, paddr + size))
->>>  		ret = remap_oldmem_pfn_checked(vma, from, pfn, size, prot);
->>>  	else
->>>  		ret = remap_oldmem_pfn_range(vma, from, pfn, size, prot);
->> The whole callback mechanism which fs/proc/vmcore.c::pfn_is_ram()
->> implements seems to be in place to ensure that there aren't a billion
->> different "ram" checks in here.
->>
->> Is there a reason you can't register_vmcore_cb() a callback to check for
->> unaccepted memory?
-> Someone asked for the change to be in arch-independent code... 😉
+>>> Support for unaccepted memory was added recently, refer commit
+>>> dcdfdd40fa82 ("mm: Add support for unaccepted memory"), whereby
+>>> a virtual machine may need to accept memory before it can be used.
+>>>
+>>> Do not map unaccepted memory because it can cause the guest to fail.
+>> Doesn't /dev/mem already provide a billion ways for someone to shoot
+>> themselves in the foot?  TDX seems to have added the 1,000,000,001st.
+>> Is this really worth patching?
+> Is it better to let TD die silently? I don't think so.
 
-That doesn't really answer my question.  virtio_mem_init_kdump(), for
-instance, is in arch-independent code.
+First, let's take a look at all of the distro kernels that folks will
+run under TDX.  Do they have STRICT_DEVMEM set?
 
+> config STRICT_DEVMEM
+...
+>           If this option is switched on, and IO_STRICT_DEVMEM=n, the /dev/mem
+>           file only allows userspace access to PCI space and the BIOS code and
+>           data regions.  This is sufficient for dosemu and X and all common
+>           users of /dev/mem.
 
+Can a line of code in this patch even run in the face of IO_STRICT_DEVMEM=y?
+
+I think basically everybody sets that option and has for over a decade.
+If there are any distros out there _not_ setting this, we should
+probably have a chat with them to find out more.
+
+I suspect any practical use of this patch is limited to folks who:
+
+1. Compile sensible security-related options out of their kernel
+2. Go and reads random pages with /dev/mem in their "secure" VM
+
+They get to hold the pieces, and they can and will get a notification
+from their VMM that the VM did something nasty.
+
+BTW, Ubuntu at least also sets HARDENED_USERCOPY which will *also*
+enable STRICT_DEVMEM.  So someone would have to _really_ go to some
+trouble to shoot themselves in the foot here.  If they're _that_
+determined, it would be a shame to thwart their efforts with this patch.
