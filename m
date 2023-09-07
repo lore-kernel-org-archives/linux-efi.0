@@ -2,51 +2,53 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 66F2DEC874B
-	for <linux-efi@archiver.kernel.org>; Thu,  7 Sep 2023 17:58:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 65194EC874D
+	for <linux-efi@archiver.kernel.org>; Thu,  7 Sep 2023 18:02:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245424AbjIGR6c (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 7 Sep 2023 13:58:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50584 "EHLO
+        id S245685AbjIGSCC (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 7 Sep 2023 14:02:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38652 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241898AbjIGR6b (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 7 Sep 2023 13:58:31 -0400
-Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.20])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 239B81FEA;
-        Thu,  7 Sep 2023 10:58:01 -0700 (PDT)
+        with ESMTP id S245675AbjIGSB6 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 7 Sep 2023 14:01:58 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.100])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E4A16170C;
+        Thu,  7 Sep 2023 11:01:40 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1694109481; x=1725645481;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=vslREB8ROsaiDtOyMM59OVIoUOD6oP12DWv5XlYD9Hw=;
-  b=M0VE7YQC25Ks1mypgyD1WmpSak9G4ioignoFyuOs812B9QYxp/3V88OY
-   Tfg3XWyI8cYHTm1ThqcMDPK6TBsskx5tFJA3BVFzMNh1qUra8SCEDbjwF
-   NnaRJ2JK8a2reDgLVf0ZoLKQc0QvvMvCvDFfMjvP8zQVWER8XLH5wdp6v
-   b9KO0a2e1YIwi98vk33qghlDyR4wsePcEVjxi6gXFR86BTiWylcHag7Uj
-   qOpCPKImmSVO1McYlww5DL/8CljYfsMz8t1Z5nGAwTYFH/cJ7L0zJmohR
-   fTeSYDY2gCnnfLPfDG39zphSm5nxHniNHSL2RLzsj7b8hZaW5JD7vHDNz
-   Q==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10825"; a="367538843"
-X-IronPort-AV: E=Sophos;i="6.02,234,1688454000"; 
-   d="scan'208";a="367538843"
-Received: from orsmga003.jf.intel.com ([10.7.209.27])
-  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Sep 2023 03:07:54 -0700
+  t=1694109700; x=1725645700;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=fFdJWlOfOQFNWE/wQ1sARfEDpEEqtJd3bE+CeaqxZ+s=;
+  b=i67LFL18l3seX2OcweH4aewbX8SBcqeifMMiMOmveyMaA+lfEtrO0Cr7
+   Y8ksE4t5DmkPaEIbemG1w95Kx1zOZl32L8oZJ2X73Miw0aMgnh7icdhv5
+   XpmubasZvnDAZcAXyzeVlv7ijAJK5tcx3f0vMdr5i8GXzOGmNlu2XqyOJ
+   uZ7QvIDPgJ1STBEY2wwuwdHNceJHqMlFy/2IeXKaQ0mNHn9xW9RtkBGq1
+   OgzI58x3MjqOA/vQx48wvoeLYw53p5u1wCFyt+3rI5NaLztuzLj0V3IVm
+   nvMrJgM771gQih1C1SHu5jYv1Zjpe3Xk8J+dMQM/2znYdX17n9VsK84/E
+   A==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10826"; a="443807581"
+X-IronPort-AV: E=Sophos;i="6.02,235,1688454000"; 
+   d="scan'208";a="443807581"
+Received: from fmsmga006.fm.intel.com ([10.253.24.20])
+  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Sep 2023 08:44:16 -0700
 X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10825"; a="691725586"
-X-IronPort-AV: E=Sophos;i="6.02,234,1688454000"; 
-   d="scan'208";a="691725586"
-Received: from rbhaumik-mobl2.ger.corp.intel.com (HELO box.shutemov.name) ([10.249.44.38])
-  by orsmga003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Sep 2023 03:07:49 -0700
-Received: by box.shutemov.name (Postfix, from userid 1000)
-        id C66861042C5; Thu,  7 Sep 2023 13:07:46 +0300 (+03)
-Date:   Thu, 7 Sep 2023 13:07:46 +0300
-From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Borislav Petkov <bp@alien8.de>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Dave Hansen <dave.hansen@intel.com>,
-        Vlastimil Babka <vbabka@suse.cz>,
+X-IronPort-AV: E=McAfee;i="6600,9927,10826"; a="988818775"
+X-IronPort-AV: E=Sophos;i="6.02,235,1688454000"; 
+   d="scan'208";a="988818775"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.34.181])
+  by fmsmga006-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Sep 2023 08:44:11 -0700
+Message-ID: <30d0cebb-13f9-572e-9baa-b7450fec9108@intel.com>
+Date:   Thu, 7 Sep 2023 18:44:05 +0300
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.15.0
+Subject: Re: [PATCH 1/3] proc/vmcore: Do not map unaccepted memory
+To:     Dave Hansen <dave.hansen@intel.com>,
+        "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
+        Borislav Petkov <bp@alien8.de>,
+        Andrew Morton <akpm@linux-foundation.org>
+Cc:     Vlastimil Babka <vbabka@suse.cz>,
         Mike Rapoport <rppt@linux.ibm.com>,
         Lorenzo Stoakes <lstoakes@gmail.com>,
         Tom Lendacky <thomas.lendacky@amd.com>,
@@ -55,30 +57,39 @@ Cc:     Borislav Petkov <bp@alien8.de>,
         linux-fsdevel@vger.kernel.org, linux-mm@kvack.org,
         linux-coco@lists.linux.dev, linux-efi@vger.kernel.org,
         kexec@lists.infradead.org
-Subject: Re: [PATCH 0/3] Do not map unaccepted memory
-Message-ID: <20230907100746.42ujuj7brawxw322@box.shutemov.name>
 References: <20230906073902.4229-1-adrian.hunter@intel.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230906073902.4229-1-adrian.hunter@intel.com>
+ <20230906073902.4229-2-adrian.hunter@intel.com>
+ <21bf2e44-3316-2372-44cb-1488f88650f5@intel.com>
+Content-Language: en-US
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <21bf2e44-3316-2372-44cb-1488f88650f5@intel.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Wed, Sep 06, 2023 at 10:38:59AM +0300, Adrian Hunter wrote:
-> Hi
+On 7/09/23 18:39, Dave Hansen wrote:
+> On 9/6/23 00:39, Adrian Hunter wrote:
+>> @@ -559,7 +567,8 @@ static int vmcore_remap_oldmem_pfn(struct vm_area_struct *vma,
+>>  	 * pages without a reason.
+>>  	 */
+>>  	idx = srcu_read_lock(&vmcore_cb_srcu);
+>> -	if (!list_empty(&vmcore_cb_list))
+>> +	if (!list_empty(&vmcore_cb_list) ||
+>> +	    range_contains_unaccepted_memory(paddr, paddr + size))
+>>  		ret = remap_oldmem_pfn_checked(vma, from, pfn, size, prot);
+>>  	else
+>>  		ret = remap_oldmem_pfn_range(vma, from, pfn, size, prot);
 > 
-> Support for unaccepted memory was added recently, refer commit
-> dcdfdd40fa82 ("mm: Add support for unaccepted memory"), whereby
-> a virtual machine may need to accept memory before it can be used.
+> The whole callback mechanism which fs/proc/vmcore.c::pfn_is_ram()
+> implements seems to be in place to ensure that there aren't a billion
+> different "ram" checks in here.
 > 
-> Plug a few gaps where RAM is exposed without checking if it is
-> unaccepted memory.
+> Is there a reason you can't register_vmcore_cb() a callback to check for
+> unaccepted memory?
 
-Thanks for catching this. Looks good to me.
+Someone asked for the change to be in arch-independent code... ;-)
 
-Reviewed-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
-
--- 
-  Kiryl Shutsemau / Kirill A. Shutemov
