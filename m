@@ -2,131 +2,85 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 078ABEE14C3
-	for <linux-efi@archiver.kernel.org>; Wed,  6 Sep 2023 23:28:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 270E8EC873F
+	for <linux-efi@archiver.kernel.org>; Thu,  7 Sep 2023 15:47:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232862AbjIFX2G (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 6 Sep 2023 19:28:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60538 "EHLO
+        id S233774AbjIGPrG (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 7 Sep 2023 11:47:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35756 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236954AbjIFX2F (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 6 Sep 2023 19:28:05 -0400
-Received: from mail-il1-x133.google.com (mail-il1-x133.google.com [IPv6:2607:f8b0:4864:20::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 72C351BC2
-        for <linux-efi@vger.kernel.org>; Wed,  6 Sep 2023 16:28:00 -0700 (PDT)
-Received: by mail-il1-x133.google.com with SMTP id e9e14a558f8ab-34e1ddc38c6so1341665ab.3
-        for <linux-efi@vger.kernel.org>; Wed, 06 Sep 2023 16:28:00 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=rivosinc-com.20230601.gappssmtp.com; s=20230601; t=1694042880; x=1694647680; darn=vger.kernel.org;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=AFyiC8eHkWIMwsI59KIjZiFw1+6YiNLMABtanoGSqWg=;
-        b=i5dHf90djM/djmRS79tLCLXD2yHi/5Nhl46wTerHlOfM0iuwYXQ9+2iC40NwnDhUx7
-         DusysM9RNAfC5mNyfAsdlREc6PWSx50WLAqp4UXyNueqOmY68j6uFyeM2zgOt0vfXaMF
-         nTDuJ9EQaHYGbdIiM/vKTGCXq1A2tVf5AMtOBMNT7dTZYQBi4mSovyQpJAAZdWbjYFTp
-         W6KOg+Yvqk8Z0D7fwbea63KMBx10uGQWOyfz5JIUDQ+4DfJ18oMoCSODncNClDlm5209
-         vsdJ3p7sv5PTDJgpVOJZUMcvoQHe1t8KtVx+yXbVS6GJar5xDb4KCWbSpqHRP100G6nK
-         k24w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1694042880; x=1694647680;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=AFyiC8eHkWIMwsI59KIjZiFw1+6YiNLMABtanoGSqWg=;
-        b=ZnyqTpx6K0Prl8U9kkHA5FowhGLNoRv637rzQ5mJ+t6bQTBp7wGDGV22Wsww63FW9s
-         IdMrBUxRiQGdyjb38zKGxjwP6KTh/NHNKKibpsqZmN0zgrD7uGvQE2oqSEmr0765dofO
-         vpSlAUN3vNixO5aFSIq0tDBR6NkU/3oLUI8VQh0p9BCxBBcwUPfH1z8kGOtqwU4iLPC8
-         f5kiCvYXUjNieoFKQXb6uVsK6SKk3Ka1+wP1K5QRI4/9fVO4Akxdv3pr21IO+GP6UEMi
-         tesDPNRvY3M3DGhRVHHm4gOVlpFOXJkElif/hPXCgyk888wyVtSMk14CdM945A2cSEb0
-         0UKg==
-X-Gm-Message-State: AOJu0Ywcu+AjTg+lEpx740PMcBMrjmzN+2Z2jJPRGNoJ+sfNYgqxU6rO
-        jopNTnWLwsjtUXAQO3wGi4A3tw==
-X-Google-Smtp-Source: AGHT+IEW3bEf1qwaoHwHqiJ2ntB4DNfwsVgOuUsOTx0tFEGdDUuCnEPdyg3nAaGE1emGXhAqinGv/Q==
-X-Received: by 2002:a05:6e02:cb1:b0:34c:dd54:10c6 with SMTP id 17-20020a056e020cb100b0034cdd5410c6mr17981765ilg.12.1694042879889;
-        Wed, 06 Sep 2023 16:27:59 -0700 (PDT)
-Received: from ghost ([50.221.140.188])
-        by smtp.gmail.com with ESMTPSA id ca1-20020a17090af30100b00260a5ecd273sm296537pjb.1.2023.09.06.16.27.57
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 06 Sep 2023 16:27:59 -0700 (PDT)
-Date:   Wed, 6 Sep 2023 16:27:56 -0700
-From:   Charlie Jenkins <charlie@rivosinc.com>
-To:     Sami Tolvanen <samitolvanen@google.com>
-Cc:     Alexandre Ghiti <alexghiti@rivosinc.com>,
-        Conor Dooley <conor.dooley@microchip.com>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Kees Cook <keescook@chromium.org>,
-        linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Subject: Re: [PATCH v6 0/5] riscv: Introduce KASLR
-Message-ID: <ZPkK/MNGKZIW2mvc@ghost>
-References: <20230722123850.634544-1-alexghiti@rivosinc.com>
- <CABCJKucj78p4TBtXYmMdJ=vYK69XC=XU06uB+_fyfZLRnC4h0A@mail.gmail.com>
+        with ESMTP id S245730AbjIGPaP (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 7 Sep 2023 11:30:15 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.151])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 56AE0E45;
+        Thu,  7 Sep 2023 08:29:54 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1694100594; x=1725636594;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=lLkgQjdozZeu2blgME5D5x7Y7mxXeqbdwxTIXoD6yOY=;
+  b=HuSt7vXerTav1SVECOWGjx1WQRHwY9vXDokWeDddzmvx+oHdvYunDkfq
+   06De1hnvJOtDkeogmC3UpNLeVWXQ93UgNxkprqjUftfwgYuFMSGQWKTF4
+   oszRYEK00qtQC1tW1B6TZuHbH87dC8NqEBV0y1+jspLMJO1kODwQMHs4H
+   kk269B8v6woEI4yNRzx0zDC6DDYZVhCJ74eHVF5FWtj0KNTJn42FPaczt
+   G3qZ47kzD4KOY+5fUr3fm0DIa/OR1nwtFqmP6SLqCqP8gtAhGG0oxcsvG
+   69RT9msT9uZo8zA6QuVsb/18Faa1jFIyBuWCvqzpifYrg4/34s3k4j4VV
+   Q==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10826"; a="357679642"
+X-IronPort-AV: E=Sophos;i="6.02,235,1688454000"; 
+   d="scan'208";a="357679642"
+Received: from orsmga007.jf.intel.com ([10.7.209.58])
+  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Sep 2023 07:25:18 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10826"; a="735520927"
+X-IronPort-AV: E=Sophos;i="6.02,235,1688454000"; 
+   d="scan'208";a="735520927"
+Received: from oshragax-mobl1.ger.corp.intel.com (HELO box.shutemov.name) ([10.251.215.248])
+  by orsmga007-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Sep 2023 07:25:14 -0700
+Received: by box.shutemov.name (Postfix, from userid 1000)
+        id 7882D104860; Thu,  7 Sep 2023 17:25:10 +0300 (+03)
+Date:   Thu, 7 Sep 2023 17:25:10 +0300
+From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
+To:     Dave Hansen <dave.hansen@intel.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Borislav Petkov <bp@alien8.de>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Vlastimil Babka <vbabka@suse.cz>,
+        Mike Rapoport <rppt@linux.ibm.com>,
+        Lorenzo Stoakes <lstoakes@gmail.com>,
+        Tom Lendacky <thomas.lendacky@amd.com>,
+        Baoquan He <bhe@redhat.com>, Vivek Goyal <vgoyal@redhat.com>,
+        Dave Young <dyoung@redhat.com>, linux-kernel@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org, linux-mm@kvack.org,
+        linux-coco@lists.linux.dev, linux-efi@vger.kernel.org,
+        kexec@lists.infradead.org
+Subject: Re: [PATCH 3/3] /dev/mem: Do not map unaccepted memory
+Message-ID: <20230907142510.vcj57cvnewqt4m37@box.shutemov.name>
+References: <20230906073902.4229-1-adrian.hunter@intel.com>
+ <20230906073902.4229-4-adrian.hunter@intel.com>
+ <9ffb7a3b-cf20-617a-e4f1-8a6a8a2c5972@intel.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CABCJKucj78p4TBtXYmMdJ=vYK69XC=XU06uB+_fyfZLRnC4h0A@mail.gmail.com>
+In-Reply-To: <9ffb7a3b-cf20-617a-e4f1-8a6a8a2c5972@intel.com>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Wed, Aug 30, 2023 at 02:30:31PM -0700, Sami Tolvanen wrote:
-> Hi Alexandre,
+On Thu, Sep 07, 2023 at 07:15:21AM -0700, Dave Hansen wrote:
+> On 9/6/23 00:39, Adrian Hunter wrote:
+> > Support for unaccepted memory was added recently, refer commit
+> > dcdfdd40fa82 ("mm: Add support for unaccepted memory"), whereby
+> > a virtual machine may need to accept memory before it can be used.
+> > 
+> > Do not map unaccepted memory because it can cause the guest to fail.
 > 
-> On Sat, Jul 22, 2023 at 5:39 AM Alexandre Ghiti <alexghiti@rivosinc.com> wrote:
-> >
-> > The following KASLR implementation allows to randomize the kernel mapping:
-> >
-> > - virtually: we expect the bootloader to provide a seed in the device-tree
-> > - physically: only implemented in the EFI stub, it relies on the firmware to
-> >   provide a seed using EFI_RNG_PROTOCOL. arm64 has a similar implementation
-> >   hence the patch 3 factorizes KASLR related functions for riscv to take
-> >   advantage.
-> >
-> > The new virtual kernel location is limited by the early page table that only
-> > has one PUD and with the PMD alignment constraint, the kernel can only take
-> > < 512 positions.
-> >
-> > base-commit-tag: v6.5-rc1
-> 
-> Thanks for continuing to work on this!
-> 
-> I reviewed the patches and the code looks correct to me. I also
-> applied the series on top of v6.5 and after patching qemu to provide a
-> kaslr-seed, I confirmed that the virtual offset appears to be random
-> and is printed out when I panic the machine:
-> 
-> # echo PANIC > /sys/kernel/debug/provoke-crash/DIRECT
-> [   17.510012] lkdtm: Performing direct entry PANIC
-> [   17.510411] Kernel panic - not syncing: dumptest
-> [...]
-> [   17.518693] Kernel Offset: 0x32c00000 from 0xffffffff80000000
-> 
-> For the series:
-> Reviewed-by: Sami Tolvanen <samitolvanen@google.com>
-> 
-> I didn't test the EFI bits, but the rest of the series:
-> Tested-by: Sami Tolvanen <samitolvanen@google.com>
-> 
-> Conor, in another reply you mentioned you're planning on reviewing the
-> patches as well. Did you have any feedback or concerns?
-> 
-> Sami
-> 
-> _______________________________________________
-> linux-riscv mailing list
-> linux-riscv@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-riscv
+> Doesn't /dev/mem already provide a billion ways for someone to shoot
+> themselves in the foot?  TDX seems to have added the 1,000,000,001st.
+> Is this really worth patching?
 
-In addition to testing this patch in QEMU by patching like Sami did, I
-also booted this with a Debian kernel and tested it with EFI. I was able
-to use lkdtm as Sami did to force a panic and see the kernel offset
-changing in both scenarios.
+Is it better to let TD die silently? I don't think so.
 
-Tested-by: Charlie Jenkins <charlie@rivosinc.com>
-
-- Charlie
+-- 
+  Kiryl Shutsemau / Kirill A. Shutemov
