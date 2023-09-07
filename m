@@ -2,257 +2,83 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B2953EC8743
-	for <linux-efi@archiver.kernel.org>; Thu,  7 Sep 2023 17:03:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 66F2DEC874B
+	for <linux-efi@archiver.kernel.org>; Thu,  7 Sep 2023 17:58:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233766AbjIGRDN (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 7 Sep 2023 13:03:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44000 "EHLO
+        id S245424AbjIGR6c (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 7 Sep 2023 13:58:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50584 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238086AbjIGRDM (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 7 Sep 2023 13:03:12 -0400
-Received: from mail-yw1-x1149.google.com (mail-yw1-x1149.google.com [IPv6:2607:f8b0:4864:20::1149])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C44521BF
-        for <linux-efi@vger.kernel.org>; Thu,  7 Sep 2023 10:02:45 -0700 (PDT)
-Received: by mail-yw1-x1149.google.com with SMTP id 00721157ae682-59b50b45481so3407727b3.1
-        for <linux-efi@vger.kernel.org>; Thu, 07 Sep 2023 10:02:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20221208; t=1694106108; x=1694710908; darn=vger.kernel.org;
-        h=cc:to:from:subject:message-id:mime-version:date:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=T/WqaSkwJ/wvgxciY6xG5yXoKMXUwDNF7ZMhyjAl3dg=;
-        b=Zoy6/8frpbrylGHHAyT4djGKi0qnFo0jUZd2+XPWBD6z1XIyolDLfvBNphbUkBNANE
-         it/PHT39kDqyUKMwB68VeEhJwCGAenL62FVbSK6LxTMrhA+X4DdkD2ZuXInRW2Aa2Lpl
-         QQDoo+9uB26925ngpVkriw93BfD84r/jud5y27t1IPCacek0N5V31eS1T1PifUfyBiy0
-         9qsVO3v9/ey4x1rhxyZzbJ7p9uOqNQiT8gXjmyAPzQu9isDDZ4dPWYQukNAluUqSnVur
-         86bFn5cYF87NQ5TPtWLCZfT5w4lk1UoIvaMhnKldED1n8rDHKY1qXCfemfVvpm2FD38v
-         lEUQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1694106108; x=1694710908;
-        h=cc:to:from:subject:message-id:mime-version:date:x-gm-message-state
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=T/WqaSkwJ/wvgxciY6xG5yXoKMXUwDNF7ZMhyjAl3dg=;
-        b=SHwxAAjPf1exB0X/8ySBIckelb6gLS9Q4EhZQ1zixU/DkMxlPZSSMj28MEsL870m4a
-         3QOx0tKdI9mDDbSlOrskmFY0JCoh3VWHQdB3iPgCZ/QrF8yuR4Ax2tyK2HfbQoGQdDVP
-         e5PFc1f6hJ0rRj3+WVFfWiHIfyPRC+A2eEg62K+mF4SYeMVlu+CNJOodqavZGL+JxAzm
-         DqOWTyKlSjVEBJ74BoLRlvoZkA6Wb2NxfWkmf5KGh+KXzB/O6ndoDibtxdAiasSC1jo/
-         tjy1bvKbpTrJz1/zvM3WPbpqKsip5rAQS1ObaA7TeClCnblMt8h61dzdroA4jqnzH/8I
-         z4wA==
-X-Gm-Message-State: AOJu0YwJJSl/jdfVb9TrOEfhQKcU6FCVNf8h/r56RkmriGRigfy6fuEC
-        CVL1q6pqXf0RQTd6Wes+gQsKNyu1tmcvRg==
-X-Google-Smtp-Source: AGHT+IE2Uit7N3S9SR5qftU0oDHFbdy+GAjL3k4RaTzFuKFUAbWpfVTvea/hgEAbk4PmwL4jjFvknP/BCQlIsg==
-X-Received: from jiao.c.googlers.com ([fda3:e722:ac3:cc00:2b:7d90:c0a8:10f3])
- (user=jiaozhou job=sendgmr) by 2002:a81:b708:0:b0:573:8316:8d04 with SMTP id
- v8-20020a81b708000000b0057383168d04mr5076ywh.4.1694106108565; Thu, 07 Sep
- 2023 10:01:48 -0700 (PDT)
-Date:   Thu,  7 Sep 2023 17:01:46 +0000
-Mime-Version: 1.0
-X-Mailer: git-send-email 2.42.0.283.g2d96d420d3-goog
-Message-ID: <20230907170146.1055954-1-jiaozhou@google.com>
-Subject: [PATCH v5] efivarfs: Add uid/gid mount options
-From:   Jiao Zhou <jiaozhou@google.com>
-To:     Linux FS Development <linux-fsdevel@vger.kernel.org>
-Cc:     Jiao Zhou <jiaozhou@google.com>, Ard Biesheuvel <ardb@kernel.org>,
-        Jeremy Kerr <jk@ozlabs.org>, linux-efi@vger.kernel.org,
-        linux-kernel@vger.kernel.org, mjg59@srcf.ucam.org,
-        Matthew Garrett <mgarrett@aurora.tech>
-Content-Type: text/plain; charset="UTF-8"
+        with ESMTP id S241898AbjIGR6b (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 7 Sep 2023 13:58:31 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.20])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 239B81FEA;
+        Thu,  7 Sep 2023 10:58:01 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1694109481; x=1725645481;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=vslREB8ROsaiDtOyMM59OVIoUOD6oP12DWv5XlYD9Hw=;
+  b=M0VE7YQC25Ks1mypgyD1WmpSak9G4ioignoFyuOs812B9QYxp/3V88OY
+   Tfg3XWyI8cYHTm1ThqcMDPK6TBsskx5tFJA3BVFzMNh1qUra8SCEDbjwF
+   NnaRJ2JK8a2reDgLVf0ZoLKQc0QvvMvCvDFfMjvP8zQVWER8XLH5wdp6v
+   b9KO0a2e1YIwi98vk33qghlDyR4wsePcEVjxi6gXFR86BTiWylcHag7Uj
+   qOpCPKImmSVO1McYlww5DL/8CljYfsMz8t1Z5nGAwTYFH/cJ7L0zJmohR
+   fTeSYDY2gCnnfLPfDG39zphSm5nxHniNHSL2RLzsj7b8hZaW5JD7vHDNz
+   Q==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10825"; a="367538843"
+X-IronPort-AV: E=Sophos;i="6.02,234,1688454000"; 
+   d="scan'208";a="367538843"
+Received: from orsmga003.jf.intel.com ([10.7.209.27])
+  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Sep 2023 03:07:54 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10825"; a="691725586"
+X-IronPort-AV: E=Sophos;i="6.02,234,1688454000"; 
+   d="scan'208";a="691725586"
+Received: from rbhaumik-mobl2.ger.corp.intel.com (HELO box.shutemov.name) ([10.249.44.38])
+  by orsmga003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Sep 2023 03:07:49 -0700
+Received: by box.shutemov.name (Postfix, from userid 1000)
+        id C66861042C5; Thu,  7 Sep 2023 13:07:46 +0300 (+03)
+Date:   Thu, 7 Sep 2023 13:07:46 +0300
+From:   "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Borislav Petkov <bp@alien8.de>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Dave Hansen <dave.hansen@intel.com>,
+        Vlastimil Babka <vbabka@suse.cz>,
+        Mike Rapoport <rppt@linux.ibm.com>,
+        Lorenzo Stoakes <lstoakes@gmail.com>,
+        Tom Lendacky <thomas.lendacky@amd.com>,
+        Baoquan He <bhe@redhat.com>, Vivek Goyal <vgoyal@redhat.com>,
+        Dave Young <dyoung@redhat.com>, linux-kernel@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org, linux-mm@kvack.org,
+        linux-coco@lists.linux.dev, linux-efi@vger.kernel.org,
+        kexec@lists.infradead.org
+Subject: Re: [PATCH 0/3] Do not map unaccepted memory
+Message-ID: <20230907100746.42ujuj7brawxw322@box.shutemov.name>
+References: <20230906073902.4229-1-adrian.hunter@intel.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230906073902.4229-1-adrian.hunter@intel.com>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Allow UEFI variables to be modified by non-root processes
-in order to run sandboxed code. This doesn't change the behavior 
-of mounting efivarfs unless uid/gid are specified; 
-by default both are set to root.
+On Wed, Sep 06, 2023 at 10:38:59AM +0300, Adrian Hunter wrote:
+> Hi
+> 
+> Support for unaccepted memory was added recently, refer commit
+> dcdfdd40fa82 ("mm: Add support for unaccepted memory"), whereby
+> a virtual machine may need to accept memory before it can be used.
+> 
+> Plug a few gaps where RAM is exposed without checking if it is
+> unaccepted memory.
 
-Signed-off-by: Jiao Zhou <jiaozhou@google.com>
-Acked-by: Matthew Garrett <mgarrett@aurora.tech>
----
-Changelog since v1:
-- Add missing sentinel entry in fs_parameter_spec[] array.
-- Fix a NULL pointer dereference.
+Thanks for catching this. Looks good to me.
 
-Changelog since v2:
-- Format the patch description.
+Reviewed-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
 
-Changelog since v3:
-- Add gid and uid check to make sure that ids are valid.
-- Drop the indentation for one block.
-- Use sizeof(*sfi) to allocate memory to avoids future problems if sfi ever changes type.
-
-Changelog since v4:
-- Fix the use of sizeof.
-
----
- fs/efivarfs/inode.c    |  4 +++
- fs/efivarfs/internal.h |  9 +++++
- fs/efivarfs/super.c    | 74 ++++++++++++++++++++++++++++++++++++++++--
- 3 files changed, 84 insertions(+), 3 deletions(-)
-
-diff --git a/fs/efivarfs/inode.c b/fs/efivarfs/inode.c
-index db9231f0e77b..06dfc73fda04 100644
---- a/fs/efivarfs/inode.c
-+++ b/fs/efivarfs/inode.c
-@@ -20,9 +20,13 @@ struct inode *efivarfs_get_inode(struct super_block *sb,
- 				const struct inode *dir, int mode,
- 				dev_t dev, bool is_removable)
- {
-+	struct efivarfs_fs_info *fsi = sb->s_fs_info;
- 	struct inode *inode = new_inode(sb);
-+	struct efivarfs_mount_opts *opts = &fsi->mount_opts;
- 
- 	if (inode) {
-+		inode->i_uid = opts->uid;
-+		inode->i_gid = opts->gid;
- 		inode->i_ino = get_next_ino();
- 		inode->i_mode = mode;
- 		inode->i_atime = inode->i_mtime = inode_set_ctime_current(inode);
-diff --git a/fs/efivarfs/internal.h b/fs/efivarfs/internal.h
-index 8ebf3a6a8aa2..c66647f5c0bd 100644
---- a/fs/efivarfs/internal.h
-+++ b/fs/efivarfs/internal.h
-@@ -9,6 +9,15 @@
- #include <linux/list.h>
- #include <linux/efi.h>
- 
-+struct efivarfs_mount_opts {
-+	kuid_t uid;
-+	kgid_t gid;
-+};
-+
-+struct efivarfs_fs_info {
-+	struct efivarfs_mount_opts mount_opts;
-+};
-+
- struct efi_variable {
- 	efi_char16_t  VariableName[EFI_VAR_NAME_LEN/sizeof(efi_char16_t)];
- 	efi_guid_t    VendorGuid;
-diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
-index e028fafa04f3..ba14736ebae0 100644
---- a/fs/efivarfs/super.c
-+++ b/fs/efivarfs/super.c
-@@ -8,6 +8,7 @@
- #include <linux/efi.h>
- #include <linux/fs.h>
- #include <linux/fs_context.h>
-+#include <linux/fs_parser.h>
- #include <linux/module.h>
- #include <linux/pagemap.h>
- #include <linux/ucs2_string.h>
-@@ -24,6 +25,21 @@ static void efivarfs_evict_inode(struct inode *inode)
- 	clear_inode(inode);
- }
- 
-+static int efivarfs_show_options(struct seq_file *m, struct dentry *root)
-+{
-+	struct super_block *sb = root->d_sb;
-+	struct efivarfs_fs_info *sbi = sb->s_fs_info;
-+	struct efivarfs_mount_opts *opts = &sbi->mount_opts;
-+
-+	if (!uid_eq(opts->uid, GLOBAL_ROOT_UID))
-+		seq_printf(m, ",uid=%u",
-+				from_kuid_munged(&init_user_ns, opts->uid));
-+	if (!gid_eq(opts->gid, GLOBAL_ROOT_GID))
-+		seq_printf(m, ",gid=%u",
-+				from_kgid_munged(&init_user_ns, opts->gid));
-+	return 0;
-+}
-+
- static int efivarfs_statfs(struct dentry *dentry, struct kstatfs *buf)
- {
- 	const u32 attr = EFI_VARIABLE_NON_VOLATILE |
-@@ -64,6 +80,7 @@ static const struct super_operations efivarfs_ops = {
- 	.statfs = efivarfs_statfs,
- 	.drop_inode = generic_delete_inode,
- 	.evict_inode = efivarfs_evict_inode,
-+	.show_options = efivarfs_show_options,
- };
- 
- /*
-@@ -225,6 +242,45 @@ static int efivarfs_destroy(struct efivar_entry *entry, void *data)
- 	return 0;
- }
- 
-+enum {
-+	Opt_uid, Opt_gid,
-+};
-+
-+static const struct fs_parameter_spec efivarfs_parameters[] = {
-+	fsparam_u32("uid",			Opt_uid),
-+	fsparam_u32("gid",			Opt_gid),
-+	{},
-+};
-+
-+static int efivarfs_parse_param(struct fs_context *fc, struct fs_parameter *param)
-+{
-+	struct efivarfs_fs_info *sbi = fc->s_fs_info;
-+	struct efivarfs_mount_opts *opts = &sbi->mount_opts;
-+	struct fs_parse_result result;
-+	int opt;
-+
-+	opt = fs_parse(fc, efivarfs_parameters, param, &result);
-+	if (opt < 0)
-+		return opt;
-+
-+	switch (opt) {
-+	case Opt_uid:
-+		opts->uid = make_kuid(current_user_ns(), result.uint_32);
-+		if (!uid_valid(opts->uid))
-+			return -EINVAL;
-+		break;
-+	case Opt_gid:
-+		opts->gid = make_kgid(current_user_ns(), result.uint_32);
-+		if (!gid_valid(opts->gid))
-+			return -EINVAL;
-+		break;
-+	default:
-+		return -EINVAL;
-+	}
-+
-+	return 0;
-+}
-+
- static int efivarfs_fill_super(struct super_block *sb, struct fs_context *fc)
- {
- 	struct inode *inode = NULL;
-@@ -270,11 +326,22 @@ static int efivarfs_get_tree(struct fs_context *fc)
- }
- 
- static const struct fs_context_operations efivarfs_context_ops = {
--	.get_tree	= efivarfs_get_tree,
-+	.get_tree = efivarfs_get_tree,
-+	.parse_param = efivarfs_parse_param,
- };
- 
- static int efivarfs_init_fs_context(struct fs_context *fc)
- {
-+	struct efivarfs_fs_info *sfi;
-+
-+	sfi = kzalloc(sizeof(*sfi), GFP_KERNEL);
-+	if (!sfi)
-+		return -ENOMEM;
-+
-+	sfi->mount_opts.uid = GLOBAL_ROOT_UID;
-+	sfi->mount_opts.gid = GLOBAL_ROOT_GID;
-+
-+	fc->s_fs_info = sfi;
- 	fc->ops = &efivarfs_context_ops;
- 	return 0;
- }
-@@ -291,10 +358,11 @@ static void efivarfs_kill_sb(struct super_block *sb)
- }
- 
- static struct file_system_type efivarfs_type = {
--	.owner   = THIS_MODULE,
--	.name    = "efivarfs",
-+	.owner = THIS_MODULE,
-+	.name = "efivarfs",
- 	.init_fs_context = efivarfs_init_fs_context,
- 	.kill_sb = efivarfs_kill_sb,
-+	.parameters	= efivarfs_parameters,
- };
- 
- static __init int efivarfs_init(void)
 -- 
-2.42.0.283.g2d96d420d3-goog
+  Kiryl Shutsemau / Kirill A. Shutemov
