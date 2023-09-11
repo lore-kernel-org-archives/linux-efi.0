@@ -2,182 +2,144 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B0DD8EE57DF
-	for <linux-efi@archiver.kernel.org>; Mon, 11 Sep 2023 08:14:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1DDCCCA0EC5
+	for <linux-efi@archiver.kernel.org>; Mon, 11 Sep 2023 21:26:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231670AbjIKIOw (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 11 Sep 2023 04:14:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56928 "EHLO
+        id S241643AbjIKVRq (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 11 Sep 2023 17:17:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37566 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229788AbjIKIOv (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 11 Sep 2023 04:14:51 -0400
-Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D347897
-        for <linux-efi@vger.kernel.org>; Mon, 11 Sep 2023 01:14:46 -0700 (PDT)
-Received: by mail-lf1-x134.google.com with SMTP id 2adb3069b0e04-501bd164fbfso6657586e87.0
-        for <linux-efi@vger.kernel.org>; Mon, 11 Sep 2023 01:14:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1694420085; x=1695024885; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=Db9bU8/uuocihWjg7sGwKKLFZB9mNNDCw6o833i29ZU=;
-        b=YbUIB45hc+PnKv3acF1YTSMw7vhYpxb8w4loc/Vx7NZ+PGPT/Da9CSgoySX1Zg+a9U
-         5IySAL594o7qEz9qlNMv2oBOHfZOgYaacRijEmZYQaDpOYMXzfpTQFVy423yP5pZUuZe
-         BMZKxJhI/ewH6Ftsr06lTVWW1tkNyGvAh7v2IUWSyFZGeUq79YKwYd1mEU6ImPRYZr78
-         VMl851pNjcY+qv3RUCn9h+ub4D4WXl29cMbMtivWId46pHqj6GUP8678S6jzUtVvi142
-         3Eon2QE1FAtJQgPBcjZt7EMiomAEB+YqEvnkVljyyVnz7CpQrgYMzAogg9aTmGGXcsgM
-         dTzQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694420085; x=1695024885;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=Db9bU8/uuocihWjg7sGwKKLFZB9mNNDCw6o833i29ZU=;
-        b=E+usiQ+Ns19sXpRmJaJNkFFppNtgZX6vckmige3xUfeh4QBgQgBMrp+dtF8cfcGaSc
-         2LoCdsdNTUvo0igNEta0cM8+9wZq/K8kaJ3chL0AkonnJOCzJA039MU6I5jIdgTYc0bA
-         KKrcwudX9RKouj1a3oVKUmE9vawXYyZJRC038EKBpJimQ+HaapxoP2GHriRC98ZgYuRv
-         SDGoUCLKUxMq5iWdH6ISY7LPiXkYgkwHEFXsrlhjVpT6N9K8cmj/VsNPrNfMI2rNNjlh
-         6Ut0BAjp37sN/YGCJxBm4LVfRNyPT6S/Hg/AwViPCflLzek7TiS5gSkQsLbrNDnWp/qR
-         DdUg==
-X-Gm-Message-State: AOJu0YxEK6GULLfvFx5NktguqD/8dD6w0WzGI1O+7sNi0wMstfGUf421
-        +Sk/TM9SuHHOozYSUbHi5cTB755fWxJnUuKFCCTK1Q==
-X-Google-Smtp-Source: AGHT+IHhbzjbUWOcSU0Pfb6mIoabKQEQsdwvsBt81bWC5rn1iMb7zHW7wrHZfK5uiaxHoN0oV5qWl64lYeODRzqVstA=
-X-Received: by 2002:ac2:4c48:0:b0:500:c765:bbe with SMTP id
- o8-20020ac24c48000000b00500c7650bbemr8772240lfk.0.1694420084938; Mon, 11 Sep
- 2023 01:14:44 -0700 (PDT)
+        with ESMTP id S236758AbjIKLVj (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 11 Sep 2023 07:21:39 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.151])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9EE45CDD;
+        Mon, 11 Sep 2023 04:21:35 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1694431295; x=1725967295;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=Zw3TazwdjRU8wNvK9+zXRRn6LyFt0jKcjaf9En8Up90=;
+  b=DuBiQy9DYCe4DWIdG2Lq52ezZL8iy+a50JRM43SHBwqKCiSjPS1vkmNG
+   px4jq/V36rnvtz4kE2f/iLmxaBpyz728tH9SFRSOvh7dmm1KaX72jRDbJ
+   c6rjuB/jy2LiA6CbqyLEi29Y6Qkn9989LFgWr5hSI/kEAsVGffpx20fn5
+   yD+m8p86AnRtGhIJU6GtT3IeOxm86q/XdrBhhz/+wcrGk/3l6rHCJkE9f
+   QSt32wZkZ2gOqrCXaiHjTRm9EwsQCC2eaCmQE5/9ZPsNYphU8zbn+taUL
+   Y4CvRBthIYVG1teV41WtazKXKdcOSGwtSfZ+NEpUwQUBH2gUJ7h/xmQ12
+   w==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10829"; a="358358414"
+X-IronPort-AV: E=Sophos;i="6.02,243,1688454000"; 
+   d="scan'208";a="358358414"
+Received: from orsmga001.jf.intel.com ([10.7.209.18])
+  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Sep 2023 04:21:35 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10829"; a="778356397"
+X-IronPort-AV: E=Sophos;i="6.02,243,1688454000"; 
+   d="scan'208";a="778356397"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO ahunter-VirtualBox.home\044ger.corp.intel.com) ([10.251.216.218])
+  by orsmga001-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Sep 2023 04:21:30 -0700
+From:   Adrian Hunter <adrian.hunter@intel.com>
+To:     "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
+        Borislav Petkov <bp@alien8.de>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Ard Biesheuvel <ardb@kernel.org>
+Cc:     Dave Hansen <dave.hansen@intel.com>,
+        Vlastimil Babka <vbabka@suse.cz>,
+        Mike Rapoport <rppt@linux.ibm.com>,
+        Lorenzo Stoakes <lstoakes@gmail.com>,
+        Tom Lendacky <thomas.lendacky@amd.com>,
+        Baoquan He <bhe@redhat.com>, Vivek Goyal <vgoyal@redhat.com>,
+        Dave Young <dyoung@redhat.com>, linux-kernel@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org, linux-mm@kvack.org,
+        linux-coco@lists.linux.dev, linux-efi@vger.kernel.org,
+        kexec@lists.infradead.org
+Subject: [PATCH V2 1/2] efi/unaccepted: Do not let /proc/vmcore try to access unaccepted memory
+Date:   Mon, 11 Sep 2023 14:21:13 +0300
+Message-Id: <20230911112114.91323-2-adrian.hunter@intel.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20230911112114.91323-1-adrian.hunter@intel.com>
+References: <20230911112114.91323-1-adrian.hunter@intel.com>
 MIME-Version: 1.0
-References: <20230910045445.41632-1-heinrich.schuchardt@canonical.com>
- <ZP4QEvhzO5cOt6lT@gpdmax> <1bc137b6-6006-42cd-9f6d-c523fc753d63@canonical.com>
- <CAMj1kXGChp5TOk5h1EC9R7TBn=QDVo_FU5VhHjp8nSz2GJ6wtA@mail.gmail.com>
- <CAC_iWjLdA=gFkdB2LhOe9J-d_G=estenCWgYyCenqOYfZSFd+A@mail.gmail.com> <CAMj1kXEdb-76+ywfHK2zvchQqwMFi8HvG0O33A73d6-9AH=wDA@mail.gmail.com>
-In-Reply-To: <CAMj1kXEdb-76+ywfHK2zvchQqwMFi8HvG0O33A73d6-9AH=wDA@mail.gmail.com>
-From:   Ilias Apalodimas <ilias.apalodimas@linaro.org>
-Date:   Mon, 11 Sep 2023 11:14:09 +0300
-Message-ID: <CAC_iWjL0ishwsLw+uqwLTMy3eNbaR6Tr5LZ9xUwqWG66amNOvg@mail.gmail.com>
-Subject: Re: [PATCH v2 1/1] efivarfs: fix statfs() on efivarfs
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     Heinrich Schuchardt <heinrich.schuchardt@canonical.com>,
-        Anisse Astier <anisse@astier.eu>, Jeremy Kerr <jk@ozlabs.org>,
-        Anisse Astier <an.astier@criteo.com>,
-        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Christian Brauner <brauner@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki, Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Mon, 11 Sept 2023 at 11:06, Ard Biesheuvel <ardb@kernel.org> wrote:
->
-> On Mon, 11 Sept 2023 at 10:04, Ilias Apalodimas
-> <ilias.apalodimas@linaro.org> wrote:
-> >
-> > Hi Ard,
-> >
-> > On Mon, 11 Sept 2023 at 09:45, Ard Biesheuvel <ardb@kernel.org> wrote:
-> > >
-> > > On Sun, 10 Sept 2023 at 22:42, Heinrich Schuchardt
-> > > <heinrich.schuchardt@canonical.com> wrote:
-> > > >
-> > > > On 9/10/23 20:53, Anisse Astier wrote:
-> > > > > Hi Heinrich,
-> > > > >
-> > > > > On Sun, Sep 10, 2023 at 06:54:45AM +0200, Heinrich Schuchardt wrote:
-> > > > >> Some firmware (notably U-Boot) provides GetVariable() and
-> > > > >> GetNextVariableName() but not QueryVariableInfo().
-> > > > >
-> > > > >  From a quick search, it seems u-boot, does support QueryVariableInfo, is
-> > > > > it on a given version ?
-> > > > >
-> > > > > https://elixir.bootlin.com/u-boot/v2023.07.02/source/lib/efi_loader/efi_variable.c#L391
-> > > >
-> > > > QueryVariableInfo() and SetVariable() are available before
-> > > > ExitBootServices(), i.e. in Linux' EFI stub.
-> > > >
-> > > > ExitBootServices() results in calling efi_variables_boot_exit_notify()
-> > > > which disables these services during the UEFI runtime.
-> > > >
-> > > > >
-> > > > >>
-> > > > >> With commit d86ff3333cb1 ("efivarfs: expose used and total size") the
-> > > > >> statfs syscall was broken for such firmware.
-> > > > >
-> > > > > Could you be more specific ? What breaks, and what regressed ? I imagine
-> > > > > it could be some scripts running df, but maybe you had something else in
-> > > > > mind ?
-> > > >
-> > > > Some more details can be found in
-> > > > https://bugs.launchpad.net/ubuntu/+source/linux-meta-riscv/+bug/2034705.
-> > > >
-> > > > Though EFI variables are exposed via GetVariable() and
-> > > > GetNextVariableName() the efivar command refuses to display variables
-> > > > when statfs() reports an error.
-> > > >
-> > > > >
-> > > > >>
-> > > > >> If QueryVariableInfo() does not exist or returns an error, just report the
-> > > > >> file-system size as 0 as statfs_simple() previously did.
-> > > > >
-> > > > > I considered doing this [2] , but we settled on returning an error
-> > > > > instead for clarity:
-> > > > > https://lore.kernel.org/linux-efi/20230515-vorgaben-portrait-bb1b4255d31a@brauner/
-> > > > >
-> > > > > I still think it would be a good idea if necessary.
-> > > >
-> > > > We should never break user APIs.
-> > > >
-> > >
-> > > Indeed.
-> > >
-> > > > >
-> > > > > On the approach, I prefer what Ard proposed, to fall back to the old
-> > > > > approach. I think the difference in block size could also be a good
-> > > > > marker that something wrong is happening:
-> > > > > https://lore.kernel.org/linux-efi/CAMj1kXEkNSoqG4zWfCZ8Ytte5b2SzwXggZp21Xt17Pszd-q0dg@mail.gmail.com/
-> > > >
-> > > > This will allow user code making assumptions based on block size:
-> > > > If block size > 1, assume setting variables is possible.
-> > > >
-> > > > We should really avoid this.
-> > > >
-> > >
-> > > I agree that having different block sizes depending on which code path
-> > > is taken is not great. But that is the situation we are already in,
-> > > given that older kernels will always report PAGE_SIZE. And actually,
-> > > PAGE_SIZE does not make sense either - PAGE_SIZE could be larger than
-> > > 4k on ARM for instance, so the efivarfs block size will be dependent
-> > > on the page size of the kernel you happened to boot.
-> > >
-> > > So I think we should go with the below:
-> > >
-> > > --- a/fs/efivarfs/super.c
-> > > +++ b/fs/efivarfs/super.c
-> > > @@ -32,10 +32,16 @@ static int efivarfs_statfs(struct dentry *dentry,
-> > > struct kstatfs *buf)
-> > >         u64 storage_space, remaining_space, max_variable_size;
-> > >         efi_status_t status;
-> > >
-> > > -       status = efivar_query_variable_info(attr, &storage_space,
-> > > &remaining_space,
-> > > -                                           &max_variable_size);
-> > > -       if (status != EFI_SUCCESS)
-> > > -               return efi_status_to_err(status);
-> > > +       /* Some UEFI firmware does not implement QueryVariableInfo() */
-> > > +       storage_space = remaining_space = 0;
-> > > +       if (efi_rt_services_supported(EFI_RT_SUPPORTED_QUERY_VARIABLE_INFO)) {
-> > > +               status = efivar_query_variable_info(attr, &storage_space,
-> > > +                                                   &remaining_space,
-> > > +                                                   &max_variable_size);
-> > > +               if (status != EFI_SUCCESS && status != EFI_UNSUPPORTED)
-> > > +                       pr_warn_ratelimited("query_variable_info()
-> > > failed: 0x%lx\n",
-> > > +                                           status);
-> > > +       }
-> >
-> > I think this is better, but shouldn't we initialize the status
-> > variable now? Or is there more code following that I am missing?
-> >
->
-> status is not referenced again after this.
+Support for unaccepted memory was added recently, refer commit dcdfdd40fa82
+("mm: Add support for unaccepted memory"), whereby a virtual machine may
+need to accept memory before it can be used.
 
-Ah fair enough. I'd still initialize it for sanity, but with or without
-Reviewed-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+Do not let /proc/vmcore try to access unaccepted memory because it can
+cause the guest to fail.
+
+For /proc/vmcore, which is read-only, this means a read or mmap of
+unaccepted memory will return zeros.
+
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/firmware/efi/unaccepted_memory.c | 20 ++++++++++++++++++++
+ include/linux/mm.h                       |  7 +++++++
+ 2 files changed, 27 insertions(+)
+
+
+Changes in V2:
+
+          Change patch subject and commit message
+          Use vmcore_cb->.pfn_is_ram() instead of changing vmcore.c
+
+
+diff --git a/drivers/firmware/efi/unaccepted_memory.c b/drivers/firmware/efi/unaccepted_memory.c
+index 853f7dc3c21d..79ba576b22e3 100644
+--- a/drivers/firmware/efi/unaccepted_memory.c
++++ b/drivers/firmware/efi/unaccepted_memory.c
+@@ -3,6 +3,7 @@
+ #include <linux/efi.h>
+ #include <linux/memblock.h>
+ #include <linux/spinlock.h>
++#include <linux/crash_dump.h>
+ #include <asm/unaccepted_memory.h>
+ 
+ /* Protects unaccepted memory bitmap */
+@@ -145,3 +146,22 @@ bool range_contains_unaccepted_memory(phys_addr_t start, phys_addr_t end)
+ 
+ 	return ret;
+ }
++
++#ifdef CONFIG_PROC_VMCORE
++static bool unaccepted_memory_vmcore_pfn_is_ram(struct vmcore_cb *cb,
++						unsigned long pfn)
++{
++	return !pfn_is_unaccepted_memory(pfn);
++}
++
++static struct vmcore_cb vmcore_cb = {
++	.pfn_is_ram = unaccepted_memory_vmcore_pfn_is_ram,
++};
++
++static int __init unaccepted_memory_init_kdump(void)
++{
++	register_vmcore_cb(&vmcore_cb);
++	return 0;
++}
++core_initcall(unaccepted_memory_init_kdump);
++#endif /* CONFIG_PROC_VMCORE */
+diff --git a/include/linux/mm.h b/include/linux/mm.h
+index bf5d0b1b16f4..86511150f1d4 100644
+--- a/include/linux/mm.h
++++ b/include/linux/mm.h
+@@ -4062,4 +4062,11 @@ static inline void accept_memory(phys_addr_t start, phys_addr_t end)
+ 
+ #endif
+ 
++static inline bool pfn_is_unaccepted_memory(unsigned long pfn)
++{
++	phys_addr_t paddr = pfn << PAGE_SHIFT;
++
++	return range_contains_unaccepted_memory(paddr, paddr + PAGE_SIZE);
++}
++
+ #endif /* _LINUX_MM_H */
+-- 
+2.34.1
+
