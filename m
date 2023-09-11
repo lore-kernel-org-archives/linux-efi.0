@@ -2,62 +2,62 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AD218CA0EC9
-	for <linux-efi@archiver.kernel.org>; Mon, 11 Sep 2023 21:27:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 81A6BCA0EC2
+	for <linux-efi@archiver.kernel.org>; Mon, 11 Sep 2023 21:27:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242198AbjIKVSF (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 11 Sep 2023 17:18:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59578 "EHLO
+        id S237882AbjIKVSI (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 11 Sep 2023 17:18:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38410 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240030AbjIKOei (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 11 Sep 2023 10:34:38 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id A07C6CF0
-        for <linux-efi@vger.kernel.org>; Mon, 11 Sep 2023 07:33:54 -0700 (PDT)
+        with ESMTP id S236136AbjIKJv3 (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 11 Sep 2023 05:51:29 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 281AFE51
+        for <linux-efi@vger.kernel.org>; Mon, 11 Sep 2023 02:50:37 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1694442833;
+        s=mimecast20190719; t=1694425836;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=R6fgHbS8D+uTD08GSlTthpp2bLqas6LD5jQg3oM+vXs=;
-        b=XuG8yRgOLuHKZ7uMVPBxl2NfhEulcpA6jT87jpGC9q8EoqYKf62L86l6S6ClEL88A2mot5
-        W3rflnSKT2C7E7//Q5dqlz8GM28QuvgfHVizcbJwm1IYejZg0fLIiYEFzy6HmyaNduGBWW
-        33mJK55g2uLZ9jgRLXS0hIdjyaAwqok=
+        bh=3hI7Q7HmJLGnvJ6TWSuqo/D2NRHYvfG0p6wZ2y0ko6s=;
+        b=YhXu0nK7mwCQWzxiDBSHYtg/wYz8g1lg0Y/2s8KiClw7tmLXhGjjfnqUNK/DX5jAsAVGOW
+        awea7Jh4vWhSRqOFbWDSr3esL6mQXwsDbWtZ6vhfn7wjrWdavx/331kRQTk+JW0DgQs1Ut
+        Tv0Sl6oXAo1DiMLsuz7ngxuA+yBTjXM=
 Received: from mail-wm1-f70.google.com (mail-wm1-f70.google.com
  [209.85.128.70]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-128-KJ7CHx3SMbqHWn1S2B6JVw-1; Mon, 11 Sep 2023 10:33:52 -0400
-X-MC-Unique: KJ7CHx3SMbqHWn1S2B6JVw-1
-Received: by mail-wm1-f70.google.com with SMTP id 5b1f17b1804b1-4005f0a53c5so36339695e9.3
-        for <linux-efi@vger.kernel.org>; Mon, 11 Sep 2023 07:33:52 -0700 (PDT)
+ us-mta-325-aZID6K2TNJqP83i8PCZAqQ-1; Mon, 11 Sep 2023 05:50:34 -0400
+X-MC-Unique: aZID6K2TNJqP83i8PCZAqQ-1
+Received: by mail-wm1-f70.google.com with SMTP id 5b1f17b1804b1-3fe1521678fso30840205e9.1
+        for <linux-efi@vger.kernel.org>; Mon, 11 Sep 2023 02:50:34 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694442831; x=1695047631;
+        d=1e100.net; s=20230601; t=1694425833; x=1695030633;
         h=content-transfer-encoding:in-reply-to:organization:from:references
          :cc:to:content-language:subject:user-agent:mime-version:date
          :message-id:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=R6fgHbS8D+uTD08GSlTthpp2bLqas6LD5jQg3oM+vXs=;
-        b=fjZMG+iGSfKar+l0m7ZBECu74+yaF9QtfVVyWPG1yN8evS2tveM0i4oflhz+RXwGdf
-         jqnCPNw1KOsdeXmeAZ+QpWEsZxbKAQkGS0kj1ZejZ1liePwUmUB/z5QlMVT9XI5a7NV6
-         HlcbGxkeXuV/2zcSv+ZjlBsxkzJxHk3GCMrtdjLkRJht8MUsvTQVnxGlRiW1uCANHhMs
-         mC0BnXuvzenZiTA7fObVAIb3wf2cI3iWeoJrCm1rv38ho7x7ZNKVWXvlQokYDmQfTDPr
-         L6exuqKqcixvY479A9vVYtdoCxBLlSoy+ih7nl4mTu5rXvoteXJOAQBamgT3CzcMtWcU
-         3ntg==
-X-Gm-Message-State: AOJu0YwYSGG3ZpuhtHE+RUeece83KQYoBDfzkB3OrMgQnPBcMf+79ApX
-        SlX/M5mGH2znCg1AvKUTl4t+DyWdxJ2AD7JmtGWhKEI6aKNufZEyK93rF72xfRziGIe4WiEJMVl
-        dL/Ji8Ejsf9/V2kTHjlWx
-X-Received: by 2002:a05:600c:5120:b0:402:f517:9c07 with SMTP id o32-20020a05600c512000b00402f5179c07mr7985426wms.0.1694442831134;
-        Mon, 11 Sep 2023 07:33:51 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IG5pMvmXX0+VW9KHCfmQiDyHsdxBecmD9teUi0kfSkwDsZ1VNAU+o/EeDi3ry3+F0HnO2KLxQ==
-X-Received: by 2002:a05:600c:5120:b0:402:f517:9c07 with SMTP id o32-20020a05600c512000b00402f5179c07mr7985407wms.0.1694442830722;
-        Mon, 11 Sep 2023 07:33:50 -0700 (PDT)
+        bh=3hI7Q7HmJLGnvJ6TWSuqo/D2NRHYvfG0p6wZ2y0ko6s=;
+        b=CDN0A8dmbLcWwhAxkogIU77eriNXuwEkSGObnS815552FLA/c9P4gDGubMWvGo3q/z
+         Eovy3dL/nlNAUBO5coyjcRRT66PmZd1t9xRrDGsyc56FsEHmI+8C13IIE9VZze+hP96+
+         EEaAd7fXWYphYDUGd1JGzTIlcSNlLn5qADLTDltV8UNO8QeFyCrvDLmgdKigpku/QinA
+         1AzfOVBLDPL3inVk0n0Rws/PVPpzcXSansBPIH5LV7dCvF2JUdsKFDcqFABKBO/3+Z8t
+         0H9rFMLqN/iXyUAlhfu9PiBsuqTlnUa8OZt4caW44dJDCHC2+yxsHUkmM/0FEHp+J47a
+         xHoQ==
+X-Gm-Message-State: AOJu0YwcVyRYxspspextvY4p+BN9dfWOYVfRv61achtHNx6WiOXCSrSp
+        rN0ImOMRiNAuBZd//W4wxZ3rfLmul28YtFDI96ns69itYJXAdYcORPFSouGn9W995BZdJOam2PS
+        dzCoPM/BcxX1bFYmyi3at
+X-Received: by 2002:a05:600c:ad2:b0:3fe:1871:1826 with SMTP id c18-20020a05600c0ad200b003fe18711826mr8233501wmr.27.1694425833710;
+        Mon, 11 Sep 2023 02:50:33 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IEj8YJrIUf0UCqWXG8KH6oM4Y88u3/pmtlr2wHp0tLZ2zrPuhEBzJbkMb9F1qoq/xPMcrqORA==
+X-Received: by 2002:a05:600c:ad2:b0:3fe:1871:1826 with SMTP id c18-20020a05600c0ad200b003fe18711826mr8233473wmr.27.1694425833313;
+        Mon, 11 Sep 2023 02:50:33 -0700 (PDT)
 Received: from ?IPV6:2003:cb:c743:5500:a9bd:94ab:74e9:782f? (p200300cbc7435500a9bd94ab74e9782f.dip0.t-ipconnect.de. [2003:cb:c743:5500:a9bd:94ab:74e9:782f])
-        by smtp.gmail.com with ESMTPSA id b13-20020a5d634d000000b0031c5e9c2ed7sm10238812wrw.92.2023.09.11.07.33.49
+        by smtp.gmail.com with ESMTPSA id n8-20020a7bcbc8000000b003fe29f6b61bsm9506299wmi.46.2023.09.11.02.50.32
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 11 Sep 2023 07:33:50 -0700 (PDT)
-Message-ID: <f05056e6-77a7-d0f5-615e-36efaab3ff05@redhat.com>
-Date:   Mon, 11 Sep 2023 16:33:48 +0200
+        Mon, 11 Sep 2023 02:50:32 -0700 (PDT)
+Message-ID: <476456e1-ac50-8e48-260d-5cbe5e8b085e@redhat.com>
+Date:   Mon, 11 Sep 2023 11:50:31 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Thunderbird/102.13.0
@@ -83,57 +83,48 @@ References: <20230906073902.4229-1-adrian.hunter@intel.com>
  <20230911084148.l6han7jxob42rdvm@box.shutemov.name>
  <49ab74c8-553b-b3d0-6a72-2d259a2b5bdf@redhat.com>
  <20230911092712.2ps55mylf7elfqp6@box.shutemov.name>
- <476456e1-ac50-8e48-260d-5cbe5e8b085e@redhat.com>
- <20230911100555.mjjnx3ujnjlaxgsy@box.shutemov.name>
 From:   David Hildenbrand <david@redhat.com>
 Organization: Red Hat
-In-Reply-To: <20230911100555.mjjnx3ujnjlaxgsy@box.shutemov.name>
+In-Reply-To: <20230911092712.2ps55mylf7elfqp6@box.shutemov.name>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On 11.09.23 12:05, Kirill A. Shutemov wrote:
-> On Mon, Sep 11, 2023 at 11:50:31AM +0200, David Hildenbrand wrote:
->> On 11.09.23 11:27, Kirill A. Shutemov wrote:
->>> On Mon, Sep 11, 2023 at 10:42:51AM +0200, David Hildenbrand wrote:
->>>> On 11.09.23 10:41, Kirill A. Shutemov wrote:
->>>>> On Mon, Sep 11, 2023 at 10:03:36AM +0200, David Hildenbrand wrote:
->>>>>> On 06.09.23 09:39, Adrian Hunter wrote:
->>>>>>> Support for unaccepted memory was added recently, refer commit
->>>>>>> dcdfdd40fa82 ("mm: Add support for unaccepted memory"), whereby
->>>>>>> a virtual machine may need to accept memory before it can be used.
->>>>>>>
->>>>>>> Do not map unaccepted memory because it can cause the guest to fail.
->>>>>>>
->>>>>>> For /proc/vmcore, which is read-only, this means a read or mmap of
->>>>>>> unaccepted memory will return zeros.
->>>>>>
->>>>>> Does a second (kdump) kernel that exposes /proc/vmcore reliably get access
->>>>>> to the information whether memory of the first kernel is unaccepted (IOW,
->>>>>> not its memory, but the memory of the first kernel it is supposed to expose
->>>>>> via /proc/vmcore)?
+On 11.09.23 11:27, Kirill A. Shutemov wrote:
+> On Mon, Sep 11, 2023 at 10:42:51AM +0200, David Hildenbrand wrote:
+>> On 11.09.23 10:41, Kirill A. Shutemov wrote:
+>>> On Mon, Sep 11, 2023 at 10:03:36AM +0200, David Hildenbrand wrote:
+>>>> On 06.09.23 09:39, Adrian Hunter wrote:
+>>>>> Support for unaccepted memory was added recently, refer commit
+>>>>> dcdfdd40fa82 ("mm: Add support for unaccepted memory"), whereby
+>>>>> a virtual machine may need to accept memory before it can be used.
 >>>>>
->>>>> There are few patches in my queue to few related issue, but generally,
->>>>> yes, the information is available to the target kernel via EFI
->>>>> configuration table.
+>>>>> Do not map unaccepted memory because it can cause the guest to fail.
+>>>>>
+>>>>> For /proc/vmcore, which is read-only, this means a read or mmap of
+>>>>> unaccepted memory will return zeros.
 >>>>
->>>> I assume that table provided by the first kernel, and not read directly from
->>>> HW, correct?
+>>>> Does a second (kdump) kernel that exposes /proc/vmcore reliably get access
+>>>> to the information whether memory of the first kernel is unaccepted (IOW,
+>>>> not its memory, but the memory of the first kernel it is supposed to expose
+>>>> via /proc/vmcore)?
 >>>
->>> The table is constructed by the EFI stub in the first kernel based on EFI
->>> memory map.
->>>
+>>> There are few patches in my queue to few related issue, but generally,
+>>> yes, the information is available to the target kernel via EFI
+>>> configuration table.
 >>
->> Okay, should work then once that's done by the first kernel.
->>
->> Maybe include this patch in your series?
+>> I assume that table provided by the first kernel, and not read directly from
+>> HW, correct?
 > 
-> Can do. But the other two patches are not related to kexec. Hm.
+> The table is constructed by the EFI stub in the first kernel based on EFI
+> memory map.
+> 
 
-Yes, the others can go in separately. But this here really needs other 
-kexec/kdump changes.
+Okay, should work then once that's done by the first kernel.
+
+Maybe include this patch in your series?
 
 -- 
 Cheers,
