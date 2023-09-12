@@ -2,63 +2,63 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0A967CA0ED4
-	for <linux-efi@archiver.kernel.org>; Tue, 12 Sep 2023 09:02:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 81408CA0ECA
+	for <linux-efi@archiver.kernel.org>; Tue, 12 Sep 2023 09:02:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233444AbjILJCQ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Tue, 12 Sep 2023 05:02:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59488 "EHLO
+        id S233143AbjILJCT (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Tue, 12 Sep 2023 05:02:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41998 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233592AbjILJBj (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Tue, 12 Sep 2023 05:01:39 -0400
-Received: from mail-yw1-x1149.google.com (mail-yw1-x1149.google.com [IPv6:2607:f8b0:4864:20::1149])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0226E10EB
-        for <linux-efi@vger.kernel.org>; Tue, 12 Sep 2023 02:01:35 -0700 (PDT)
-Received: by mail-yw1-x1149.google.com with SMTP id 00721157ae682-58fc7afa4beso63289427b3.2
-        for <linux-efi@vger.kernel.org>; Tue, 12 Sep 2023 02:01:35 -0700 (PDT)
+        with ESMTP id S233626AbjILJBp (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Tue, 12 Sep 2023 05:01:45 -0400
+Received: from mail-wr1-x44a.google.com (mail-wr1-x44a.google.com [IPv6:2a00:1450:4864:20::44a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 373D8AA
+        for <linux-efi@vger.kernel.org>; Tue, 12 Sep 2023 02:01:41 -0700 (PDT)
+Received: by mail-wr1-x44a.google.com with SMTP id ffacd0b85a97d-2f2981b8364so3555181f8f.1
+        for <linux-efi@vger.kernel.org>; Tue, 12 Sep 2023 02:01:41 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20230601; t=1694509295; x=1695114095; darn=vger.kernel.org;
+        d=google.com; s=20230601; t=1694509299; x=1695114099; darn=vger.kernel.org;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:from:to:cc:subject:date:message-id:reply-to;
-        bh=U9NX1eydLNVgshySZmGjlq5b77lgR7szWd7VFgL+D3U=;
-        b=C0xPLuufuvl7kiWJRzV3g+tm2SoPvFQh/KPjCEK+pHQGsnBwa7MiOcpYAndaj6NozO
-         jMzGALPMLhL6Y3t5zqj1aCnNhrh4w7QMh+Zimza6f8E5rg+IF8WOLVrxFazXT8P5YV2/
-         5smX4Par+98w1Oyp90elBxJ5vYYXrBdsFtaEtTMjmPVJcZfWJnHFiYw48S6ZvynPL2Fh
-         r8RtOX7Iwvr/8GU1yzsv2Bllv9pSTsJIkMqNpW6DkglK9XkZy9HDnXzWaeWsg+TehOa2
-         Kn26O8/Z6pDuI8R5bf8RVfza47vqFlaHTzjUxdVAAwvFEl0YO3MydhLS0QCk8Hw4PILz
-         lVAA==
+        bh=AlDjqAuNn+SPHq8xKGkJiI8M+/8xOHIEwhHGCoqKsJ8=;
+        b=kMlJmNURDQo7xhbIwQc0RneC9X1i4R3TrAWMz2IXJLGphXOIKDmLIpTVo0AVFlDMbO
+         5KqG+ZW8HDUSdzG4I2Yc0hmBEJLDF2fOSLgnKrBpdMEiA6AAZTqqCmcitcC4lO7I+sRX
+         ACwedzFZ3fqHq98/RURoYsTKIUhnmWxc0XO/N0WyxH7kbor3Ni3eO5GOthkvEfcgXlvZ
+         bZipmYiCFtXUCTyATwUnnTgAQIisAeCyNOFBZZ2GgIZYH8O5MGb7A5to91bwHNA7yU9/
+         Z1h9H7E+ZbgZ89cdszj6tiHoZVMnk8ELvMmdDi36hwiYmT1EX/MmCOWNR87qQPxgV5Hy
+         BoFQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1694509295; x=1695114095;
+        d=1e100.net; s=20230601; t=1694509299; x=1695114099;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=U9NX1eydLNVgshySZmGjlq5b77lgR7szWd7VFgL+D3U=;
-        b=T5NCKL8mmTfmFOeBWqYySmBzgWC6fA+dBwnFr6hpn6IG+GZyhYoFGIVtgMBtIVhKS3
-         U3/ognckJLOQSgIdH4eP6gVWDV+kID4sX2P2kdib3LAX1JOXHlBpw0wK1lZtdvgCY/1x
-         STtnXlYj56jWZg77P/eiIBbJnTiDalgfe4jTWpIw8wza5DbeV/U2GOH1DBawljOt68ji
-         hEFXFwXFoBLckrjiKcG9ZqdQuVMrIE64DzLtn+IPsEVDRxhif8s3d8R+abJZlahj6fQ5
-         c1AZy9yt7uBpntNuoeCYjoT2N/5OCwypqACUyfhLLVCjMZBXmL1TXaqhk6ZXdgXyDZS3
-         0BAQ==
-X-Gm-Message-State: AOJu0YyRkD/JEpDRcLM3e8Ilo9Fbuzy1dAT0RxOE3bImtMOtMrDNbcS0
-        kj0OFKjzC/Grlv6E3dETO1PgakcY4du4ECNorGF8cOTB5sLBAdOmPNWYBURTXnO78YqW3lqNQ+d
-        Tq++6G4Jl6JmpAQFkFMpihb0JLrA3wdQ16UXmXwbmnK0yCwHnlmVBc44R8w8w
-X-Google-Smtp-Source: AGHT+IEnERJWZjy5mzckGIkwIDZUhD120pg3gqwSReHPT0G1jRnLKEsjoPrumVHoHlPZ1296s7AtPZYr
+        bh=AlDjqAuNn+SPHq8xKGkJiI8M+/8xOHIEwhHGCoqKsJ8=;
+        b=pxtjGttNkUPHCfpce+7xIP2X5TgqFqrLE5xNc+glsZ4pyRA/ptLQ1ZyzeBlOUdr85G
+         oA8126VwdPDvh2XYIiLeI0vjQUOaqccURa6nH7chilQr+gDhH2j1QR7QKBxvnrwG68yj
+         lkZroTfJGReyQsvhR/w/kUVVdd3192DVaJI8j3Zw9osQMQLWM28Qz8bVSanutqOypZnZ
+         xH20U+GuT/2q1dPtSibZcLvr+ojlcSruIRs2NaoKIeW2ZfWBIGz7UIvxBOdKOLHPwKsS
+         J4XrBJWVJxeoRfbV/E/ocP5gSE7OkMt4RvtD6IBPNUT6/ngQhK33wMnTyIMtNI2ie4K1
+         HANw==
+X-Gm-Message-State: AOJu0YzZPyN+rMWCahlAsQDJbmY4A2Sw+A/jQ1kehQ8hqBtTyJ/Z0iXh
+        fb5AkM9j6OvfLxmm+4ZekBCXyLKcLXuNEvCHA+uR+U4Lu5+hw8NxHfFTSYsnBPDygpsJQCp585a
+        f3avqPLycEcTcBcK1oij8APgELXxf0ye2/c7VROEYBDl5aTh7P1UHBQOvGttc
+X-Google-Smtp-Source: AGHT+IEFlFIMLNCJvhtnVvKAf+9hxBg4ZXdihbvjUd2emNqt13lwsGioEe+khkAhcvYcB47WAdv3/g67
 X-Received: from palermo.c.googlers.com ([fda3:e722:ac3:cc00:28:9cb1:c0a8:118a])
- (user=ardb job=sendgmr) by 2002:a25:bb88:0:b0:d7b:8acc:beb8 with SMTP id
- y8-20020a25bb88000000b00d7b8accbeb8mr283729ybg.2.1694509294977; Tue, 12 Sep
- 2023 02:01:34 -0700 (PDT)
-Date:   Tue, 12 Sep 2023 09:00:55 +0000
+ (user=ardb job=sendgmr) by 2002:a5d:6ace:0:b0:313:eb28:602 with SMTP id
+ u14-20020a5d6ace000000b00313eb280602mr133683wrw.13.1694509299606; Tue, 12 Sep
+ 2023 02:01:39 -0700 (PDT)
+Date:   Tue, 12 Sep 2023 09:00:57 +0000
 In-Reply-To: <20230912090051.4014114-17-ardb@google.com>
 Mime-Version: 1.0
 References: <20230912090051.4014114-17-ardb@google.com>
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-X-Developer-Signature: v=1; a=openpgp-sha256; l=3047; i=ardb@kernel.org;
- h=from:subject; bh=C3Y0JXoFsDu7p0NCuFXkHN3nsg72k1sfp0MTO1muukQ=;
- b=owGbwMvMwCFmkMcZplerG8N4Wi2JIZVB40ToruN3lO8c3lF80q2mY/G0N02PllxzCJiv0bv5X
- +iFLx9ed5SyMIhxMMiKKbIIzP77bufpiVK1zrNkYeawMoEMYeDiFICJzPFl+Gfy0+pN1D1OT3vG
- pI1rZ3gpH1fYGxL8aPp8nYvCHivOvFnH8E/9oP+PaWwn7OKPfm96br+6X4FD6Yvq1Jl6nG/nlC6 crMwBAA==
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1808; i=ardb@kernel.org;
+ h=from:subject; bh=AfG+aUI7K/0L+mw64Lzpmg/Sf5R/K8tGxwHtjeLluJ0=;
+ b=owGbwMvMwCFmkMcZplerG8N4Wi2JIZVB4/QE0Se3uP0dg7Nfrdy/Q4lfxrhW8IHbVubuDr/VW
+ vFXEl90lLIwiHEwyIopsgjM/vtu5+mJUrXOs2Rh5rAygQxh4OIUgIlsvcvwz/LLsTYr7cDyzLIg
+ 0cN80ifDzpWsE96YJv9m9YRTL7Xy2xj+KSzWt4rY92el6NI5v49OUtwQsn/JjyM279tyjhjpmG+ pZwQA
 X-Mailer: git-send-email 2.42.0.283.g2d96d420d3-goog
-Message-ID: <20230912090051.4014114-21-ardb@google.com>
-Subject: [PATCH v2 04/15] x86/boot: Remove the 'bugger off' message
+Message-ID: <20230912090051.4014114-23-ardb@google.com>
+Subject: [PATCH v2 06/15] x86/boot: Drop redundant code setting the root device
 From:   Ard Biesheuvel <ardb@google.com>
 To:     linux-efi@vger.kernel.org
 Cc:     linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>,
@@ -79,121 +79,58 @@ X-Mailing-List: linux-efi@vger.kernel.org
 
 From: Ard Biesheuvel <ardb@kernel.org>
 
-Ancient (pre-2003) x86 kernels could boot from a floppy disk straight from
-the BIOS, using a small real mode boot stub at the start of the image
-where the BIOS would expect the boot record (or boot block) to appear.
+The root device defaults to 0,0 and is no longer configurable at build
+time [0], so there is no need for the build tool to ever write to this
+field.
 
-Due to its limitations (kernel size < 1 MiB, no support for IDE, USB or
-El Torito floppy emulation), this support was dropped, and a Linux aware
-bootloader is now always required to boot the kernel from a legacy BIOS.
+[0] 079f85e624189292 ("x86, build: Do not set the root_dev field in bzImage")
 
-To smoothen this transition, the boot stub was not removed entirely, but
-replaced with one that just prints an error message telling the user to
-install a bootloader.
+This change has no impact on the resulting bzImage binary.
 
-As it is unlikely that anyone doing direct floppy boot with such an
-ancient kernel is going to upgrade to v6.5+ and expect that this boot
-method still works, printing this message is kind of pointless, and so
-it should be possible to remove the logic that emits it.
-
-Let's free up this space so it can be used to expand the PE header in a
-subsequent patch.
-
-Acked-by: H. Peter Anvin (Intel) <hpa@zytor.com>
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/boot/header.S | 49 --------------------
- arch/x86/boot/setup.ld |  7 +--
- 2 files changed, 4 insertions(+), 52 deletions(-)
+ arch/x86/boot/header.S      | 2 +-
+ arch/x86/boot/tools/build.c | 7 -------
+ 2 files changed, 1 insertion(+), 8 deletions(-)
 
 diff --git a/arch/x86/boot/header.S b/arch/x86/boot/header.S
-index 8c8148d751c6..b24fa50a9898 100644
+index a87d9133384b..6059f87b159d 100644
 --- a/arch/x86/boot/header.S
 +++ b/arch/x86/boot/header.S
-@@ -38,64 +38,15 @@ SYSSEG		= 0x1000		/* historical load address >> 4 */
+@@ -236,7 +236,7 @@ root_flags:	.word ROOT_RDONLY
+ syssize:	.long 0			/* Filled in by build.c */
+ ram_size:	.word 0			/* Obsolete */
+ vid_mode:	.word SVGA_MODE
+-root_dev:	.word 0			/* Filled in by build.c */
++root_dev:	.word 0			/* Default to major/minor 0/0 */
+ boot_flag:	.word 0xAA55
  
- 	.code16
- 	.section ".bstext", "ax"
--
--	.global bootsect_start
--bootsect_start:
- #ifdef CONFIG_EFI_STUB
- 	# "MZ", MS-DOS header
- 	.word	MZ_MAGIC
--#endif
--
--	# Normalize the start address
--	ljmp	$BOOTSEG, $start2
--
--start2:
--	movw	%cs, %ax
--	movw	%ax, %ds
--	movw	%ax, %es
--	movw	%ax, %ss
--	xorw	%sp, %sp
--	sti
--	cld
--
--	movw	$bugger_off_msg, %si
--
--msg_loop:
--	lodsb
--	andb	%al, %al
--	jz	bs_die
--	movb	$0xe, %ah
--	movw	$7, %bx
--	int	$0x10
--	jmp	msg_loop
--
--bs_die:
--	# Allow the user to press a key, then reboot
--	xorw	%ax, %ax
--	int	$0x16
--	int	$0x19
--
--	# int 0x19 should never return.  In case it does anyway,
--	# invoke the BIOS reset code...
--	ljmp	$0xf000,$0xfff0
--
--#ifdef CONFIG_EFI_STUB
- 	.org	0x38
- 	#
- 	# Offset to the PE header.
- 	#
- 	.long	LINUX_PE_MAGIC
- 	.long	pe_header
--#endif /* CONFIG_EFI_STUB */
--
--	.section ".bsdata", "a"
--bugger_off_msg:
--	.ascii	"Use a boot loader.\r\n"
--	.ascii	"\n"
--	.ascii	"Remove disk and press any key to reboot...\r\n"
--	.byte	0
--
--#ifdef CONFIG_EFI_STUB
- pe_header:
- 	.long	PE_MAGIC
+ 	# offset 512, entry point
+diff --git a/arch/x86/boot/tools/build.c b/arch/x86/boot/tools/build.c
+index 0354c223e354..efa4e9c7d713 100644
+--- a/arch/x86/boot/tools/build.c
++++ b/arch/x86/boot/tools/build.c
+@@ -40,10 +40,6 @@ typedef unsigned char  u8;
+ typedef unsigned short u16;
+ typedef unsigned int   u32;
  
-diff --git a/arch/x86/boot/setup.ld b/arch/x86/boot/setup.ld
-index 49546c247ae2..b11c45b9e51e 100644
---- a/arch/x86/boot/setup.ld
-+++ b/arch/x86/boot/setup.ld
-@@ -10,10 +10,11 @@ ENTRY(_start)
- SECTIONS
- {
- 	. = 0;
--	.bstext		: { *(.bstext) }
--	.bsdata		: { *(.bsdata) }
-+	.bstext	: {
-+		*(.bstext)
-+		. = 495;
-+	} =0xffffffff
+-#define DEFAULT_MAJOR_ROOT 0
+-#define DEFAULT_MINOR_ROOT 0
+-#define DEFAULT_ROOT_DEV (DEFAULT_MAJOR_ROOT << 8 | DEFAULT_MINOR_ROOT)
+-
+ /* Minimal number of setup sectors */
+ #define SETUP_SECT_MIN 5
+ #define SETUP_SECT_MAX 64
+@@ -399,9 +395,6 @@ int main(int argc, char ** argv)
  
--	. = 495;
- 	.header		: { *(.header) }
- 	.entrytext	: { *(.entrytext) }
- 	.inittext	: { *(.inittext) }
+ 	update_pecoff_setup_and_reloc(i);
+ 
+-	/* Set the default root device */
+-	put_unaligned_le16(DEFAULT_ROOT_DEV, &buf[508]);
+-
+ 	/* Open and stat the kernel file */
+ 	fd = open(argv[2], O_RDONLY);
+ 	if (fd < 0)
 -- 
 2.42.0.283.g2d96d420d3-goog
 
