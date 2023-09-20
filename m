@@ -2,58 +2,85 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B3776CE79AC
-	for <linux-efi@archiver.kernel.org>; Wed, 20 Sep 2023 07:52:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B2A83CE79AB
+	for <linux-efi@archiver.kernel.org>; Wed, 20 Sep 2023 08:29:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231948AbjITHwu (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 20 Sep 2023 03:52:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35886 "EHLO
+        id S229534AbjITI3P (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 20 Sep 2023 04:29:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46070 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229988AbjITHws (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 20 Sep 2023 03:52:48 -0400
-X-Greylist: delayed 374 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 20 Sep 2023 00:52:42 PDT
-Received: from mail.venturelinkage.com (mail.venturelinkage.com [80.211.143.151])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8AD139D
-        for <linux-efi@vger.kernel.org>; Wed, 20 Sep 2023 00:52:42 -0700 (PDT)
-Received: by mail.venturelinkage.com (Postfix, from userid 1002)
-        id C411882822; Wed, 20 Sep 2023 09:46:20 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=venturelinkage.com;
-        s=mail; t=1695195986;
-        bh=7iowqdzve/IIiUUjcEwx8j3uMrVqqiE7R9zbOCKRV9Q=;
-        h=Date:From:To:Subject:From;
-        b=YqusbNBuLIPi4wMZbMiXUbQgpqDvFzrex3HVikXB/d/0YZHAVSIc6rnGG7NRhWbM9
-         EacoIib1YvTQpl9yxErgLL6029kC3Xf1ZMVgNj/rMgFV2YfB4xtm7zAk/9ziXO3i+Q
-         tgQTl9ws8RkC2VJxsO9e+RWuStJnOPhDeKGJVrztFisearoMO0jQQsHn5AeT1G/x2c
-         wxTu0V3nsZIWtYDvK/tslpoTpyg4BDz1Hfb5BdWgSNraNoi0TkJsG2lqibHyq8u2w6
-         urpfx5Uou2Fw96vVNQBbsJjUkUcpN0OjcizILwGoWSyVrpWXL8WEb8clwi12eFKxf3
-         WlSLt3t+vJ7lg==
-Received: by mail.venturelinkage.com for <linux-efi@vger.kernel.org>; Wed, 20 Sep 2023 07:46:15 GMT
-Message-ID: <20230920084500-0.1.l.1200.0.votegagww3@venturelinkage.com>
-Date:   Wed, 20 Sep 2023 07:46:15 GMT
-From:   "Lukas Varga" <lukas.varga@venturelinkage.com>
-To:     <linux-efi@vger.kernel.org>
-Subject: =?UTF-8?Q?Popt=C3=A1vka?=
-X-Mailer: mail.venturelinkage.com
+        with ESMTP id S231929AbjITI3O (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 20 Sep 2023 04:29:14 -0400
+Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F109490
+        for <linux-efi@vger.kernel.org>; Wed, 20 Sep 2023 01:29:08 -0700 (PDT)
+Received: by mail-lf1-x134.google.com with SMTP id 2adb3069b0e04-50307759b65so6468162e87.0
+        for <linux-efi@vger.kernel.org>; Wed, 20 Sep 2023 01:29:08 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=ventanamicro.com; s=google; t=1695198547; x=1695803347; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=k0MfWcAb3Afp2pYNnti4RmJ1Qs6ejpeucHp6Vo3y+PE=;
+        b=CTUhqUFZgVsJRTyiL2L8O+HMboJUBiN+GE4SVkORlhB631Q74UH5lw2LbT1bzCvZGF
+         WSDez2EvOfLVOdxiEmmK3tCabA8m7z5dVXi7tsY5aw68c/8JpMWwL57h4gwOjkGDrZ3W
+         EiiUNQ1qUIopAoCY5v/b7F0pneH+DDIN+1AlbPK0cLsLxd2RpsspVmPwFX+66y1p7zoN
+         a1VXkznAakGQAh+H6AKzZDb5PWYhwp418/6Vz1vz5evH/kunelVjex6Jl++TlgY0Otfa
+         Y32kZw7UVUAfZ3CROQ20noADvCREZd0+WAFRgJ21AbFVJpHqC9RZeeLI4YgO5MfR6O4v
+         MZWQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1695198547; x=1695803347;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=k0MfWcAb3Afp2pYNnti4RmJ1Qs6ejpeucHp6Vo3y+PE=;
+        b=DPxjDGXZrLoOtYHvUHOFskVx7T/dVAJUdv8+XJegRvYu5JM/tZ2SPYCyP9YtEPL+8d
+         SpC7x9Ti9in0RN1O+1qFmriA+BCmc6/B97S4WemkEMJCd0DiXT9h/HgDn5zctHAqnZZF
+         pVxjzGn5a+Yszfb2RP5cijlq3JCpVjnPpCqbVwlnNRFzYk70g++O3xlPpbv7fiDG/hJh
+         j1TgiytIBcOQuOzc3PrxeymDua0gYEO2n+0qI107YJoqafJ0ClxzZEpwinYXlLBtUMqU
+         EtlaaS1KeTzFwir709iKUuC1Pc18AQLdW0N7+piBQA3SqUWRbwEdubvlmuiVolIiOmHp
+         hYKQ==
+X-Gm-Message-State: AOJu0Ywg9Auuyafu6DZzNIHBBk4elBau4quFGWImBuzuOgUtNsIltAN4
+        2UMeEZX0pzcjrq8+ImTBfsU21A==
+X-Google-Smtp-Source: AGHT+IFBXEnma4H6oseO/7HjER06wVXo70jAGnZqCu1JYR1l5pH2Rsc0xFBFHAXJ7nG8F9xDVJ9kUw==
+X-Received: by 2002:a19:6905:0:b0:503:26b0:e126 with SMTP id e5-20020a196905000000b0050326b0e126mr1159365lfc.59.1695198547026;
+        Wed, 20 Sep 2023 01:29:07 -0700 (PDT)
+Received: from localhost (cst2-173-16.cust.vodafone.cz. [31.30.173.16])
+        by smtp.gmail.com with ESMTPSA id z11-20020a1c4c0b000000b003fc06169ab3sm1292246wmf.20.2023.09.20.01.29.06
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 20 Sep 2023 01:29:06 -0700 (PDT)
+Date:   Wed, 20 Sep 2023 10:29:05 +0200
+From:   Andrew Jones <ajones@ventanamicro.com>
+To:     Xiao Wang <xiao.w.wang@intel.com>
+Cc:     paul.walmsley@sifive.com, palmer@dabbelt.com,
+        aou@eecs.berkeley.edu, ardb@kernel.org, anup@brainfault.org,
+        haicheng.li@intel.com, linux-riscv@lists.infradead.org,
+        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2 1/2] riscv: Rearrange hwcap.h and cpufeature.h
+Message-ID: <20230920-645cd4e9612d83768e596514@orel>
+References: <20230920074653.2509631-1-xiao.w.wang@intel.com>
+ <20230920074653.2509631-2-xiao.w.wang@intel.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230920074653.2509631-2-xiao.w.wang@intel.com>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Dobr=C3=A9 r=C3=A1no,
-
-Dovolil jsem si V=C3=A1s kontaktovat, proto=C5=BEe m=C3=A1m z=C3=A1jem ov=
-=C4=9B=C5=99it mo=C5=BEnost nav=C3=A1z=C3=A1n=C3=AD spolupr=C3=A1ce.
-
-Podporujeme firmy p=C5=99i z=C3=ADsk=C3=A1v=C3=A1n=C3=AD nov=C3=BDch obch=
-odn=C3=ADch z=C3=A1kazn=C3=ADk=C5=AF.
-
-M=C5=AF=C5=BEeme si promluvit a poskytnout podrobnosti?
-
-V p=C5=99=C3=ADpad=C4=9B z=C3=A1jmu V=C3=A1s bude kontaktovat n=C3=A1=C5=A1=
- anglicky mluv=C3=ADc=C3=AD z=C3=A1stupce.
+On Wed, Sep 20, 2023 at 03:46:52PM +0800, Xiao Wang wrote:
+> Now hwcap.h and cpufeature.h are mutually including each other, and most of
+> the variable/API declarations in hwcap.h are implemented in cpufeature.c,
+> so, it's better to move them into cpufeature.h and leave only macros for
+> ISA extension logical IDs in hwcap.h.
+> 
+> BTW, the riscv_isa_extension_mask macro is not used now, so this patch
+> removes it.
+> 
+> Signed-off-by: Xiao Wang <xiao.w.wang@intel.com>
 
 
-Pozdravy
-Lukas Varga
+Suggested-by: Andrew Jones <ajones@ventanamicro.com>
+Reviewed-by: Andrew Jones <ajones@ventanamicro.com>
+
+Thanks,
+drew
