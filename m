@@ -2,114 +2,256 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 94C65E7D0A6
-	for <linux-efi@archiver.kernel.org>; Thu, 21 Sep 2023 20:13:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 79231E7D0AD
+	for <linux-efi@archiver.kernel.org>; Thu, 21 Sep 2023 21:11:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231465AbjIUUNN (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 21 Sep 2023 16:13:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45886 "EHLO
+        id S231620AbjIUVLH (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 21 Sep 2023 17:11:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35852 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229972AbjIUUNB (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 21 Sep 2023 16:13:01 -0400
-Received: from mail-pf1-x42b.google.com (mail-pf1-x42b.google.com [IPv6:2607:f8b0:4864:20::42b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7804F58C10
-        for <linux-efi@vger.kernel.org>; Thu, 21 Sep 2023 10:28:26 -0700 (PDT)
-Received: by mail-pf1-x42b.google.com with SMTP id d2e1a72fcca58-68fb98745c1so964272b3a.1
-        for <linux-efi@vger.kernel.org>; Thu, 21 Sep 2023 10:28:26 -0700 (PDT)
+        with ESMTP id S233425AbjIUVKt (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 21 Sep 2023 17:10:49 -0400
+Received: from mail-yw1-x114a.google.com (mail-yw1-x114a.google.com [IPv6:2607:f8b0:4864:20::114a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D36AB4F39F
+        for <linux-efi@vger.kernel.org>; Thu, 21 Sep 2023 13:39:35 -0700 (PDT)
+Received: by mail-yw1-x114a.google.com with SMTP id 00721157ae682-59c29d6887cso20082457b3.0
+        for <linux-efi@vger.kernel.org>; Thu, 21 Sep 2023 13:39:35 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1695317305; x=1695922105; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=s3PFsk9RxawxfMXOtaSCxuM4N0nVN4fYpqcnCn3pjAc=;
-        b=lBK7XmEYpPIyrxRtQDhUHLbh4Tmb0jNbm5c2xzpZrNBGfB7OMciZGvHvaxByhFJQuI
-         q45MoK61w1INInaJBzz/A9Twexl3UJOrzWGzsogkfHjgV/c04MMWpkqA44NMwhBrs88s
-         jrtPXEFAzsk4VEebkiWegF6P5O9tLMqeOGVxPrJ4a6UA184s+Y8Jpdzbg+dr14qEgcXS
-         RTP41UZg1Tk9O9cMRwVmNK05rL0X4x8qUV75+17C/tddazG3prwXwrWN2HdFL21vjziI
-         iETuuAXwOk0a3eqcpggj+bGVtS/Lz4LxK5MUlUEBVW01rZt29tWffTTufPIkBA4nbL9o
-         gYhw==
+        d=google.com; s=20230601; t=1695328775; x=1695933575; darn=vger.kernel.org;
+        h=cc:to:from:subject:message-id:mime-version:date:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=53C5bYHRVvtfaBkaBalp4MSsxoJFtnNkxLHzl72a4MI=;
+        b=MrioYhGlDlWfQ19Wfhor+SI/eIoi/YEZxvwwZSBCFCw9+T4yTvnEyvSLlXngnZaXMX
+         TQrc6Gs7/oAFXkpUYrSM8WlBVft8aWi1t2bj05DbKAGOrGjdh7pjxIdwew3GhVzejldV
+         2B8Hsr8N8iVqjyG4MtT0PYZdZOBoYlTDaMjZvA1rpqQFoIKmYKLNMDz5v2sUqWQQyk09
+         xKhcms1AO6WIFgmkIQ3x/7+YmiVx8ZNOQ27ogk8tzoadB4TCeoHEn2+teyWhvF870YBm
+         U9hiJMB6+KvyUuDq7ty21TX6oS1QkD/nuYWJxleil3C51729oHU8kQdk4fXJxQC5itkn
+         Z2pg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695317305; x=1695922105;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=s3PFsk9RxawxfMXOtaSCxuM4N0nVN4fYpqcnCn3pjAc=;
-        b=WE6U9L1M3N5CYw0PveVOyfe1EVCLn8hAz2L3WtoNwRouYl1hyef0yvgLv9nsbzyXN/
-         d3yiFc4uFi4ZDBWOb0bRxGgy+n0TLHMCzlkDBWfzEU7rYpluaBIxP04U2HFy8ICY7tHj
-         vvwwNkxV0kOF/pO1l/EzLzy4nfrq4KP+zoFp217GRwZ+ZdS5D208ysZ+7yIPohyrrnnQ
-         M3KT1yQxTyNPYukgYUk4gQMdlM19DsAA2A9jqoR3haERprQDcxFSVx5DnxXk2RW1JKzu
-         9UqAzcTY5g92jDZEaFpieSZLAqq97jwvXzghGlYGb6ZWDg7ys6oykMq0h+yu1JIbuRP6
-         p9VQ==
-X-Gm-Message-State: AOJu0YwUzXUJgB96veFp5e7i/3SWg38IWiVTPVkHIFUivsZqu9wrjltU
-        ik7Ck/q7wg8VWgCD1PSyklHvlrTtVzGf
-X-Google-Smtp-Source: AGHT+IHqBOWg1F4PKaT/rGEtmyVHAKj64PV6vA12DXK8x2GnhLUghr0fvSUmo/QuxpPBpHJLSaljVg==
-X-Received: by 2002:a05:6a20:3d91:b0:14c:a53c:498c with SMTP id s17-20020a056a203d9100b0014ca53c498cmr6514454pzi.10.1695303443117;
-        Thu, 21 Sep 2023 06:37:23 -0700 (PDT)
-Received: from piliu.users.ipa.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d24-20020aa78158000000b00690188b124esm1389785pfn.174.2023.09.21.06.37.19
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 21 Sep 2023 06:37:22 -0700 (PDT)
-From:   Pingfan Liu <kernelfans@gmail.com>
-To:     linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org,
-        kexec@lists.infradead.org
-Cc:     Pingfan Liu <piliu@redhat.com>,
-        "Jan Hendrik Farr" <kernel@jfarr.cc>,
-        "Baoquan He" <bhe@redhat.com>, "Dave Young" <dyoung@redhat.com>,
-        "Philipp Rudo" <prudo@redhat.com>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Will Deacon <will@kernel.org>
-Subject: [PATCH 0/2] Sign the Image which is zboot's payload
-Date:   Thu, 21 Sep 2023 21:37:01 +0800
-Message-Id: <20230921133703.39042-1-kernelfans@gmail.com>
-X-Mailer: git-send-email 2.31.1
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+        d=1e100.net; s=20230601; t=1695328775; x=1695933575;
+        h=cc:to:from:subject:message-id:mime-version:date:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=53C5bYHRVvtfaBkaBalp4MSsxoJFtnNkxLHzl72a4MI=;
+        b=DBxK6o3W8f/OtYXNEP9wCM8AK/7ebCOIB5WPXTPuVivcZXzM3kKwKSVxNg+mAePFss
+         FDm+ZkxBqM+FWf1YlHkn2VdaWJqCMBte7UotEfhZhUQlzk6vNBzStIMLlsosq/mRWq7d
+         kd5v1/r5v6vjMhzoOCA7xRJh2eg2UT1YRJoNnFYHdDRLTFnC4B8+A6yNMz0NRUzf59pd
+         O9em5jK8m6LmNTjORGNBDCDqmo9Yb7Y/iGhUrMaU4/92AFD43ZhPchEcjUn2LOXLgOPf
+         q9vRD0ifOcF1GKKj3yJfHVQZGRSfSehcWb4i9Lq8KF/eXmmlIsXBEvnIllYCnWMEQXwo
+         NOgg==
+X-Gm-Message-State: AOJu0Yz3dVvwXYOy0wmoNSp/IsDRDYKTleNEHYSrjgSScOLiPG9epLth
+        kl94rXtZjzRtqla94FM4LaqRw7yL9jcAgw==
+X-Google-Smtp-Source: AGHT+IFnzA1PPjjHCv+rFU1xeQb/JiyOfldzqfMRHM+kpIZhGOiHWakS4NTdUkQIaObKosWTAf1IG2bu2eiupQ==
+X-Received: from jiao.c.googlers.com ([fda3:e722:ac3:cc00:2b:7d90:c0a8:10f3])
+ (user=jiaozhou job=sendgmr) by 2002:a81:aa4d:0:b0:59b:e97e:f7e3 with SMTP id
+ z13-20020a81aa4d000000b0059be97ef7e3mr97116ywk.2.1695328774980; Thu, 21 Sep
+ 2023 13:39:34 -0700 (PDT)
+Date:   Thu, 21 Sep 2023 20:39:29 +0000
+Mime-Version: 1.0
+X-Mailer: git-send-email 2.42.0.515.g380fc7ccd1-goog
+Message-ID: <20230921203929.1505179-1-jiaozhou@google.com>
+Subject: [PATCH v5 RESEND] efivarfs: Add uid/gid mount options
+From:   Jiao Zhou <jiaozhou@google.com>
+To:     Linux FS Development <linux-fsdevel@vger.kernel.org>
+Cc:     Jiao Zhou <jiaozhou@google.com>, Ard Biesheuvel <ardb@kernel.org>,
+        Jeremy Kerr <jk@ozlabs.org>, linux-efi@vger.kernel.org,
+        linux-kernel@vger.kernel.org, mjg59@srcf.ucam.org,
+        Matthew Garrett <mgarrett@aurora.tech>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Pingfan Liu <piliu@redhat.com>
+Allow UEFI variables to be modified by non-root processes
+in order to run sandboxed code. This doesn't change the behavior 
+of mounting efivarfs unless uid/gid are specified; 
+by default both are set to root.
 
-I hesitate to post this series, since Ard has recommended using an
-emulated UEFI boot service to resolve the UKI kexec load problem [1].
-since on aarch64, vmlinuz.efi has faced the similar issue at present.
-But anyway, I have a crude outline of it and am sending it out for
-discussion.
+Signed-off-by: Jiao Zhou <jiaozhou@google.com>
+Acked-by: Matthew Garrett <mgarrett@aurora.tech>
+---
+Changelog since v1:
+- Add missing sentinel entry in fs_parameter_spec[] array.
+- Fix a NULL pointer dereference.
 
-For security boot, the vmlinuz.efi will be signed so UEFI boot loader
-can check against it. But at present, there is no signature for kexec
-file load, this series makes a signature on the zboot's payload -- Image
-before it is compressed. As a result, the kexec-tools parses and
-decompresses the Image.gz to get the Image, which has signature and can
-be checked against during kexec file load
+Changelog since v2:
+- Format the patch description.
 
-[1]: https://lore.kernel.org/lkml/20230918173607.421d2616@rotkaeppchen/T/#mc60aa591cb7616ceb39e1c98f352383f9ba6e985
+Changelog since v3:
+- Add gid and uid check to make sure that ids are valid.
+- Drop the indentation for one block.
+- Use sizeof(*sfi) to allocate memory to avoids future problems if sfi ever changes type.
 
-Cc: "Ard Biesheuvel <ardb@kernel.org>"
-Cc: "Jan Hendrik Farr" <kernel@jfarr.cc>
-Cc: "Baoquan He" <bhe@redhat.com>
-Cc: "Dave Young" <dyoung@redhat.com>
-Cc: "Philipp Rudo" <prudo@redhat.com>
-Cc: Ard Biesheuvel <ardb@kernel.org>
-Cc: Mark Rutland <mark.rutland@arm.com>
-Cc: Catalin Marinas <catalin.marinas@arm.com>
-Cc: Will Deacon <will@kernel.org>
-To: linux-arm-kernel@lists.infradead.org
-To: linux-efi@vger.kernel.org
-To: kexec@lists.infradead.org
+Changelog since v4:
+- Fix the use of sizeof.
 
+ fs/efivarfs/inode.c    |  4 +++
+ fs/efivarfs/internal.h |  9 +++++
+ fs/efivarfs/super.c    | 74 ++++++++++++++++++++++++++++++++++++++++--
+ 3 files changed, 84 insertions(+), 3 deletions(-)
 
-Pingfan Liu (2):
-  zboot: Signing the payload
-  arm64: Enable signing on the kernel image loaded by kexec file load
-
- arch/arm64/Kconfig                          |  2 +
- drivers/firmware/efi/libstub/Makefile.zboot | 23 +++++++--
- kernel/Kconfig.kexec_sign                   | 54 +++++++++++++++++++++
- 3 files changed, 76 insertions(+), 3 deletions(-)
- create mode 100644 kernel/Kconfig.kexec_sign
-
+diff --git a/fs/efivarfs/inode.c b/fs/efivarfs/inode.c
+index db9231f0e77b..06dfc73fda04 100644
+--- a/fs/efivarfs/inode.c
++++ b/fs/efivarfs/inode.c
+@@ -20,9 +20,13 @@ struct inode *efivarfs_get_inode(struct super_block *sb,
+ 				const struct inode *dir, int mode,
+ 				dev_t dev, bool is_removable)
+ {
++	struct efivarfs_fs_info *fsi = sb->s_fs_info;
+ 	struct inode *inode = new_inode(sb);
++	struct efivarfs_mount_opts *opts = &fsi->mount_opts;
+ 
+ 	if (inode) {
++		inode->i_uid = opts->uid;
++		inode->i_gid = opts->gid;
+ 		inode->i_ino = get_next_ino();
+ 		inode->i_mode = mode;
+ 		inode->i_atime = inode->i_mtime = inode_set_ctime_current(inode);
+diff --git a/fs/efivarfs/internal.h b/fs/efivarfs/internal.h
+index 8ebf3a6a8aa2..c66647f5c0bd 100644
+--- a/fs/efivarfs/internal.h
++++ b/fs/efivarfs/internal.h
+@@ -9,6 +9,15 @@
+ #include <linux/list.h>
+ #include <linux/efi.h>
+ 
++struct efivarfs_mount_opts {
++	kuid_t uid;
++	kgid_t gid;
++};
++
++struct efivarfs_fs_info {
++	struct efivarfs_mount_opts mount_opts;
++};
++
+ struct efi_variable {
+ 	efi_char16_t  VariableName[EFI_VAR_NAME_LEN/sizeof(efi_char16_t)];
+ 	efi_guid_t    VendorGuid;
+diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
+index e028fafa04f3..ba14736ebae0 100644
+--- a/fs/efivarfs/super.c
++++ b/fs/efivarfs/super.c
+@@ -8,6 +8,7 @@
+ #include <linux/efi.h>
+ #include <linux/fs.h>
+ #include <linux/fs_context.h>
++#include <linux/fs_parser.h>
+ #include <linux/module.h>
+ #include <linux/pagemap.h>
+ #include <linux/ucs2_string.h>
+@@ -24,6 +25,21 @@ static void efivarfs_evict_inode(struct inode *inode)
+ 	clear_inode(inode);
+ }
+ 
++static int efivarfs_show_options(struct seq_file *m, struct dentry *root)
++{
++	struct super_block *sb = root->d_sb;
++	struct efivarfs_fs_info *sbi = sb->s_fs_info;
++	struct efivarfs_mount_opts *opts = &sbi->mount_opts;
++
++	if (!uid_eq(opts->uid, GLOBAL_ROOT_UID))
++		seq_printf(m, ",uid=%u",
++				from_kuid_munged(&init_user_ns, opts->uid));
++	if (!gid_eq(opts->gid, GLOBAL_ROOT_GID))
++		seq_printf(m, ",gid=%u",
++				from_kgid_munged(&init_user_ns, opts->gid));
++	return 0;
++}
++
+ static int efivarfs_statfs(struct dentry *dentry, struct kstatfs *buf)
+ {
+ 	const u32 attr = EFI_VARIABLE_NON_VOLATILE |
+@@ -64,6 +80,7 @@ static const struct super_operations efivarfs_ops = {
+ 	.statfs = efivarfs_statfs,
+ 	.drop_inode = generic_delete_inode,
+ 	.evict_inode = efivarfs_evict_inode,
++	.show_options = efivarfs_show_options,
+ };
+ 
+ /*
+@@ -225,6 +242,45 @@ static int efivarfs_destroy(struct efivar_entry *entry, void *data)
+ 	return 0;
+ }
+ 
++enum {
++	Opt_uid, Opt_gid,
++};
++
++static const struct fs_parameter_spec efivarfs_parameters[] = {
++	fsparam_u32("uid",			Opt_uid),
++	fsparam_u32("gid",			Opt_gid),
++	{},
++};
++
++static int efivarfs_parse_param(struct fs_context *fc, struct fs_parameter *param)
++{
++	struct efivarfs_fs_info *sbi = fc->s_fs_info;
++	struct efivarfs_mount_opts *opts = &sbi->mount_opts;
++	struct fs_parse_result result;
++	int opt;
++
++	opt = fs_parse(fc, efivarfs_parameters, param, &result);
++	if (opt < 0)
++		return opt;
++
++	switch (opt) {
++	case Opt_uid:
++		opts->uid = make_kuid(current_user_ns(), result.uint_32);
++		if (!uid_valid(opts->uid))
++			return -EINVAL;
++		break;
++	case Opt_gid:
++		opts->gid = make_kgid(current_user_ns(), result.uint_32);
++		if (!gid_valid(opts->gid))
++			return -EINVAL;
++		break;
++	default:
++		return -EINVAL;
++	}
++
++	return 0;
++}
++
+ static int efivarfs_fill_super(struct super_block *sb, struct fs_context *fc)
+ {
+ 	struct inode *inode = NULL;
+@@ -270,11 +326,22 @@ static int efivarfs_get_tree(struct fs_context *fc)
+ }
+ 
+ static const struct fs_context_operations efivarfs_context_ops = {
+-	.get_tree	= efivarfs_get_tree,
++	.get_tree = efivarfs_get_tree,
++	.parse_param = efivarfs_parse_param,
+ };
+ 
+ static int efivarfs_init_fs_context(struct fs_context *fc)
+ {
++	struct efivarfs_fs_info *sfi;
++
++	sfi = kzalloc(sizeof(*sfi), GFP_KERNEL);
++	if (!sfi)
++		return -ENOMEM;
++
++	sfi->mount_opts.uid = GLOBAL_ROOT_UID;
++	sfi->mount_opts.gid = GLOBAL_ROOT_GID;
++
++	fc->s_fs_info = sfi;
+ 	fc->ops = &efivarfs_context_ops;
+ 	return 0;
+ }
+@@ -291,10 +358,11 @@ static void efivarfs_kill_sb(struct super_block *sb)
+ }
+ 
+ static struct file_system_type efivarfs_type = {
+-	.owner   = THIS_MODULE,
+-	.name    = "efivarfs",
++	.owner = THIS_MODULE,
++	.name = "efivarfs",
+ 	.init_fs_context = efivarfs_init_fs_context,
+ 	.kill_sb = efivarfs_kill_sb,
++	.parameters	= efivarfs_parameters,
+ };
+ 
+ static __init int efivarfs_init(void)
 -- 
-2.31.1
-
+2.42.0.283.g2d96d420d3-goog
