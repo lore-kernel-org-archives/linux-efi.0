@@ -2,140 +2,168 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 684B4E7D0AD
-	for <linux-efi@archiver.kernel.org>; Thu, 21 Sep 2023 21:17:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D5937E7D0B4
+	for <linux-efi@archiver.kernel.org>; Fri, 22 Sep 2023 05:19:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232662AbjIUVRQ (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Thu, 21 Sep 2023 17:17:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46190 "EHLO
+        id S230254AbjIVFTv (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Fri, 22 Sep 2023 01:19:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42974 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232691AbjIUVQN (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Thu, 21 Sep 2023 17:16:13 -0400
-Received: from mail-vs1-xe35.google.com (mail-vs1-xe35.google.com [IPv6:2607:f8b0:4864:20::e35])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E00B8AC3F6
-        for <linux-efi@vger.kernel.org>; Thu, 21 Sep 2023 11:01:56 -0700 (PDT)
-Received: by mail-vs1-xe35.google.com with SMTP id ada2fe7eead31-4526d872941so671649137.1
-        for <linux-efi@vger.kernel.org>; Thu, 21 Sep 2023 11:01:56 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1695319316; x=1695924116; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=V/sF+QqiplgSBso/5vnIDx564mKj+3dahN17Ytb8x4c=;
-        b=a2YteJb9WNkUbm7crxrTBS+cnkJ3m/AE7Zg+BTp2Cfxa/82OZISZ/ptzmbnbudlgNZ
-         dZ0x33SLrytDbNsLcWqvV2MQggRsH1bRfA025Iu7bUDC0Yn3+hQZ0/Q27qUR5HXwPLkN
-         Bh2hxelKaapQLHX7m+c5EA8RaBfd9cDrbt/rcn9B4oRryEI8xm37JtTURlgyXbnqPgWW
-         pcW+FsjP6r/Gd00AtKvc5T+VVnBbtz/tSKzxFYywUcztPZUrXcEe3A3ZxmukLC3XaNJ0
-         i+vOkjIJqxcsPcHGyjoOFIhCDdBs4D6QSDQ9OoDz5NLeY1yT4/xwyDJPEfcRtSMDTQlS
-         fQIA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1695319316; x=1695924116;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=V/sF+QqiplgSBso/5vnIDx564mKj+3dahN17Ytb8x4c=;
-        b=HG4ujjy8nBl2ynx5uBLKVQH+cXYhqw7+OdSoyIR0sIj1geu5BBZQeaSwE9yuICD42F
-         XJdsfaaGa12YI6AlFIKaQ57tNzyt2S171PVoHfqRAIO7u0fCfCeWjQHyviByPxk90SSO
-         KQ8JEjKMNbh0ke90s8BIwUl4jPvYilxjw1fKNT1Hyq/sc0FD5EoPUx5ifZM0iqdLYLbg
-         Qsc9laQC8FBPayYGXtPlHuuw19oAD8orK78lzhmdU2IDzvInfYOL1trYyua/jR6NtHt+
-         dU7vu2oByGRCxod0sMhIpD2e1lLJ2ks1HF0Q1+oH0J1tQ4ghKt14NBID3uFgjEsFFIgF
-         qw+A==
-X-Gm-Message-State: AOJu0Yw3KMDVAcCN1vbj56E8xYVKNocA90AcUodJjRHsKHs9Q8eomMCO
-        RPFQsM0/2x2LAMSbQVOc7ezgso5Pl1O5
-X-Google-Smtp-Source: AGHT+IFYH/I9kqNhfmStNK/TQjvWgoMG9nLTrTw4wEL3FMorBwBtH3/8wSbZzWlFfAXyGMUCUPjboA==
-X-Received: by 2002:a05:6a00:2d08:b0:68e:2cc4:c720 with SMTP id fa8-20020a056a002d0800b0068e2cc4c720mr6153219pfb.12.1695303447480;
-        Thu, 21 Sep 2023 06:37:27 -0700 (PDT)
-Received: from piliu.users.ipa.redhat.com ([43.228.180.230])
-        by smtp.gmail.com with ESMTPSA id d24-20020aa78158000000b00690188b124esm1389785pfn.174.2023.09.21.06.37.23
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 21 Sep 2023 06:37:26 -0700 (PDT)
-From:   Pingfan Liu <kernelfans@gmail.com>
-To:     linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org,
-        kexec@lists.infradead.org
-Cc:     Pingfan Liu <piliu@redhat.com>,
-        "Jan Hendrik Farr" <kernel@jfarr.cc>,
-        "Baoquan He" <bhe@redhat.com>, "Dave Young" <dyoung@redhat.com>,
-        "Philipp Rudo" <prudo@redhat.com>,
+        with ESMTP id S229887AbjIVFTv (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Fri, 22 Sep 2023 01:19:51 -0400
+Received: from out1-smtp.messagingengine.com (out1-smtp.messagingengine.com [66.111.4.25])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1BF01192;
+        Thu, 21 Sep 2023 22:19:45 -0700 (PDT)
+Received: from compute6.internal (compute6.nyi.internal [10.202.2.47])
+        by mailout.nyi.internal (Postfix) with ESMTP id DF86A5C021D;
+        Fri, 22 Sep 2023 01:19:41 -0400 (EDT)
+Received: from mailfrontend2 ([10.202.2.163])
+  by compute6.internal (MEProxy); Fri, 22 Sep 2023 01:19:41 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=jfarr.cc; h=cc
+        :cc:content-type:content-type:date:date:from:from:in-reply-to
+        :in-reply-to:message-id:mime-version:references:reply-to:sender
+        :subject:subject:to:to; s=fm1; t=1695359981; x=1695446381; bh=sI
+        mZwawhrAlSAj9rqR6mD9oRS9gtqddfHemubwEJhpQ=; b=UDpnI/8mmlayVHLf4l
+        m4/3gUF7uj7omy6k4ElJUy7kaedsiQK2G+KLjdnJPz5BvxqKX5Zv7UXZ/yAB9gIT
+        C8AhvX+rF6zYoK2cQq0hTkuMoimVo2piGEzU8Ex9ldUBbMJuU3hwzNh9pTm3zAGr
+        9TtXINNzgKK1UmNE8NdlL+FL8WkVS00xpgdiRIGo9gR1W91I0tH2ZgPPiJ1RQV3a
+        FR6x9Q37pL+xgSjcDRh+MtRPI0FMD7Sj1UjP5iFpL91vsea7tjRIx9ICNI/VeRIu
+        o5bUJar+5lmDOarTmN8dvFOEIzw66bfF9nTclIRfTbLia3XyZZPxh5WItJ21od0/
+        7avA==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:cc:content-type:content-type:date:date
+        :feedback-id:feedback-id:from:from:in-reply-to:in-reply-to
+        :message-id:mime-version:references:reply-to:sender:subject
+        :subject:to:to:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender
+        :x-sasl-enc; s=fm2; t=1695359981; x=1695446381; bh=sImZwawhrAlSA
+        j9rqR6mD9oRS9gtqddfHemubwEJhpQ=; b=Ca+52/0T1ttXgBWJ149du7KE2simN
+        flPwcv7AuBKThqVk3cbbDD4ulrwPqmDQOgVRXV+Q/cKX7cCMxVoZejyzXsi23lOV
+        7rglRfNpLcwMKZRwGwQo9txpDKQZpW/QzqfNePgZxkoIzzMfMNUPjDRRI+tJ9CPj
+        sEhRFTW9dIWydA6g0bh66V/97F/hSV6AcKa6+5UsoKXTQNnjTwmUPHwmJCK7KrKg
+        raQcnEs9dbjxjo8m1T061ZHbzZ+wDZhICzNiwsunec17MszjKU4InXP8dOvjpYML
+        ybQhSxFK0txWyAJRQlpVqCdAP9revo3K3sU0O4adCcV+z7wr8Lie8FPXg==
+X-ME-Sender: <xms:7SMNZbSKZYdBbPKLuDBcwGe0Rb78gbgTbNPGLvcyjGW89vrVcRrIjA>
+    <xme:7SMNZczivx6RZ1a-Wue-RUncrJaSwItjoQqqcqplOj_U2aAkQSwJfsVE7gLaKuPbb
+    xPQNEMuVJOFOoOI8n8>
+X-ME-Received: <xmr:7SMNZQ0x53Caj-6dCgL0WSHUpz47vB-7yZghDjkeiMGWtzzU2ibesQ8hsopY0PjejJ8ZW7GwwDJ1VXBlyE5ot9OlDw>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedviedrudekjedgledtucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+    gfrhhlucfvnfffucdluddtmdenucfjughrpeffhffvvefukfhfgggtuggjsehttdertddt
+    tddvnecuhfhrohhmpeflrghnucfjvghnughrihhkucfhrghrrhcuoehkvghrnhgvlhesjh
+    hfrghrrhdrtggtqeenucggtffrrghtthgvrhhnpeehgeefffejveeuleekueeguefftdef
+    hefgtedtieeghefhtefgiefhiefhtdetheenucffohhmrghinhepkhgvrhhnvghlrdhorh
+    hgnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomhepkhgv
+    rhhnvghlsehjfhgrrhhrrdgttg
+X-ME-Proxy: <xmx:7SMNZbD8YIuRD_AooZ6bAE5jgsJAsZUYkFBlqVy-y2u_JPeGHHg0Bw>
+    <xmx:7SMNZUh71Uk48BslAAQw-dkeZ6UrzSexw4yb1Tp2WwCp5u1x14QHvg>
+    <xmx:7SMNZfrJ7tM1-HQRbxW7EH-oXOoo6Udc79IBAEVQr3KIOlBPQzcE5w>
+    <xmx:7SMNZdZ9IB3bBaTU5JbU9kDaqqLPemtOSuHUowrJlD7h9jdnKXFrmw>
+Feedback-ID: i01d149f8:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Fri,
+ 22 Sep 2023 01:19:39 -0400 (EDT)
+Date:   Fri, 22 Sep 2023 07:19:36 +0200
+From:   Jan Hendrik Farr <kernel@jfarr.cc>
+To:     Pingfan Liu <kernelfans@gmail.com>
+Cc:     linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org,
+        kexec@lists.infradead.org, Pingfan Liu <piliu@redhat.com>,
+        Baoquan He <bhe@redhat.com>, Dave Young <dyoung@redhat.com>,
+        Philipp Rudo <prudo@redhat.com>,
         Ard Biesheuvel <ardb@kernel.org>,
         Mark Rutland <mark.rutland@arm.com>,
         Catalin Marinas <catalin.marinas@arm.com>,
-        Will Deacon <will@kernel.org>
-Subject: [PATCH 1/2] zboot: Signing the payload
-Date:   Thu, 21 Sep 2023 21:37:02 +0800
-Message-Id: <20230921133703.39042-2-kernelfans@gmail.com>
-X-Mailer: git-send-email 2.31.1
-In-Reply-To: <20230921133703.39042-1-kernelfans@gmail.com>
+        Will Deacon <will@kernel.org>, keyrings@vger.kernel.org,
+        Luca Boccassi <bluca@debian.org>, lennart@poettering.net,
+        Jarkko Sakkinen <jarkko@kernel.org>,
+        linux-integrity@vger.kernel.org,
+        linux-security-module@vger.kernel.org, mjg59@google.com,
+        James.Bottomley@hansenpartnership.com
+Subject: Re: [PATCH 0/2] Sign the Image which is zboot's payload
+Message-ID: <ZQ0j6Es88aR8cjRv@desktop>
 References: <20230921133703.39042-1-kernelfans@gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230921133703.39042-1-kernelfans@gmail.com>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-From: Pingfan Liu <piliu@redhat.com>
+Hi Pingfan!
 
-Emulate the scheme of module signing to sign the zboot's payload i.e.
-Image before it is compressed.
+On 21 21:37:01, Pingfan Liu wrote:
+> From: Pingfan Liu <piliu@redhat.com>
+> 
 
-And overall, the signature on vmlinuz.efi will be used by UEFI boot
-loader and the signature on Image will be used by kexec file load.
+> For security boot, the vmlinuz.efi will be signed so UEFI boot loader
+> can check against it. But at present, there is no signature for kexec
+> file load, this series makes a signature on the zboot's payload -- Image
+> before it is compressed. As a result, the kexec-tools parses and
+> decompresses the Image.gz to get the Image, which has signature and can
+> be checked against during kexec file load
 
-Signed-off-by: Pingfan Liu <piliu@redhat.com>
-Cc: "Ard Biesheuvel <ardb@kernel.org>"
-Cc: "Jan Hendrik Farr" <kernel@jfarr.cc>
-Cc: "Baoquan He" <bhe@redhat.com>
-Cc: "Dave Young" <dyoung@redhat.com>
-Cc: "Philipp Rudo" <prudo@redhat.com>
-Cc: Ard Biesheuvel <ardb@kernel.org>
-Cc: Mark Rutland <mark.rutland@arm.com>
-Cc: Catalin Marinas <catalin.marinas@arm.com>
-Cc: Will Deacon <will@kernel.org>
-To: linux-arm-kernel@lists.infradead.org
-To: linux-efi@vger.kernel.org
-To: kexec@lists.infradead.org
+I missed some of the earlier discussion about this zboot kexec support.
+So just let me know if I'm missing something here. You were exploring
+these two options in getting this supported:
 
----
- drivers/firmware/efi/libstub/Makefile.zboot | 23 ++++++++++++++++++---
- 1 file changed, 20 insertions(+), 3 deletions(-)
+1. Making kexec_file_load do all the work.
 
-diff --git a/drivers/firmware/efi/libstub/Makefile.zboot b/drivers/firmware/efi/libstub/Makefile.zboot
-index 2c489627a807..fd4305a4ebbd 100644
---- a/drivers/firmware/efi/libstub/Makefile.zboot
-+++ b/drivers/firmware/efi/libstub/Makefile.zboot
-@@ -4,13 +4,30 @@
- # EFI_ZBOOT_PAYLOAD, EFI_ZBOOT_BFD_TARGET, EFI_ZBOOT_MACH_TYPE and
- # EFI_ZBOOT_FORWARD_CFI
- 
--quiet_cmd_copy_and_pad = PAD     $@
--      cmd_copy_and_pad = cp $< $@ && \
-+
-+#
-+# Signing
-+#
-+ifeq ($(CONFIG_KEXEC_ZBOOT_SIG),y)
-+ifeq ($(filter pkcs11:%, $(CONFIG_KEXEC_ZBOOT_SIG_KEY)),)
-+sig-key := $(if $(wildcard $(CONFIG_KEXEC_ZBOOT_SIG_KEY)),,$(srctree)/)$(CONFIG_KEXEC_ZBOOT_SIG_KEY)
-+else
-+sig-key := $(CONFIG_KEXEC_ZBOOT_SIG_KEY)
-+endif
-+cmd_sign = scripts/sign-file $(CONFIG_KEXEC_ZBOOT_SIG_HASH) "$(sig-key)" certs/signing_key.x509 $@
-+else
-+      cmd_sign := :
-+endif
-+
-+cmd_copy_and_pad = cp $< $@ && \
- 			 truncate -s $(shell hexdump -s16 -n4 -e '"%u"' $<) $@
- 
-+quiet_cmd_copy_and_pad_sign = PAD and SIGN     $@
-+      cmd_copy_and_pad_sign = $(cmd_copy_and_pad) && $(cmd_sign)
-+
- # Pad the file to the size of the uncompressed image in memory, including BSS
- $(obj)/vmlinux.bin: $(obj)/$(EFI_ZBOOT_PAYLOAD) FORCE
--	$(call if_changed,copy_and_pad)
-+	$(call if_changed,copy_and_pad_sign)
- 
- comp-type-$(CONFIG_KERNEL_GZIP)		:= gzip
- comp-type-$(CONFIG_KERNEL_LZ4)		:= lz4
--- 
-2.31.1
+This option makes the signature verification easy. kexec_file_load
+checks the signature on the pe file and then extracts it and does the
+kexec.
+
+This is similar to how I'm approaching UKI support in [1].
+
+2. Extract in userspace and pass decompressed kernel to kexec_file_load
+
+This options requires the decompressed kernel to have a valid signature on
+it. That's why this patch adds the ability to add that signature to the
+kernel contained inside the zboot image.
+
+This option would not make sense for UKI support as it would not
+validate the signature with respect to the initrd and cmdline that it
+contains. Am I correct in thinking that there is no similar issue with
+zboot images? They don't contain any more information besides the kernel
+that is intended to be securely signed, right? Do you have a reference
+for the zboot image layout somewhere?
+
+> I hesitate to post this series, 
+
+I appreciate you sending it, it's helping the discussion along.
+
+> [...] since Ard has recommended using an
+> emulated UEFI boot service to resolve the UKI kexec load problem [1].
+> since on aarch64, vmlinuz.efi has faced the similar issue at present.
+> But anyway, I have a crude outline of it and am sending it out for
+> discussion.
+
+The more I'm thinking about it, the more I like Ard's idea. There's now
+already two different formats trying to be added to kexec that are
+pretty different from each other, yet they both have the UEFI interface
+in common. I think if the kernel supported kexec'ing EFI applications
+that would be a more flexible and forward-looking approach. It's a
+standard that both zboot and UKI as well as all future formats for UEFI
+platforms will support anyways. So while it's more work right now to
+implement, I think it'll likely pay off.
+
+It is significantly more work than the other options though. So I think
+before work is started on it, it would be nice to get some type of
+consensus on these things (not an exhaustive list, please feel free to
+add to it):
+
+1. Is it the right approach? It adds a significant amount of userspace
+API.
+2. What subset of the UEFI spec needs/should to be supported?
+3. Can we let runtime services still be handled by the firmware after
+exiting boot services?
+4. How can we debug the stubs that are being invoked?
+5. Can we let the EFI binary know that this is a kexec and not a normal
+bootup. Potentially systemd-stub would want to change how/if it does TPM
+PCR measurements.
+...
+
+
+[1] https://lore.kernel.org/kexec/20230911052535.335770-2-kernel@jfarr.cc/T/
+
+Added some more CCs.
 
