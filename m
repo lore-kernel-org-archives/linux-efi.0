@@ -2,22 +2,22 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 174C5CE7A99
-	for <linux-efi@archiver.kernel.org>; Mon, 25 Sep 2023 07:44:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BCC86CE7A95
+	for <linux-efi@archiver.kernel.org>; Mon, 25 Sep 2023 07:44:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232412AbjIYHor (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Mon, 25 Sep 2023 03:44:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57400 "EHLO
+        id S232486AbjIYHow (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Mon, 25 Sep 2023 03:44:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57488 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232426AbjIYHoq (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Mon, 25 Sep 2023 03:44:46 -0400
-Received: from out30-101.freemail.mail.aliyun.com (out30-101.freemail.mail.aliyun.com [115.124.30.101])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DD800103;
-        Mon, 25 Sep 2023 00:44:38 -0700 (PDT)
-X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R101e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=ay29a033018045192;MF=xueshuai@linux.alibaba.com;NM=1;PH=DS;RN=22;SR=0;TI=SMTPD_---0Vsmvsyw_1695627874;
-Received: from localhost.localdomain(mailfrom:xueshuai@linux.alibaba.com fp:SMTPD_---0Vsmvsyw_1695627874)
+        with ESMTP id S232462AbjIYHou (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Mon, 25 Sep 2023 03:44:50 -0400
+Received: from out30-133.freemail.mail.aliyun.com (out30-133.freemail.mail.aliyun.com [115.124.30.133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E97B9EE;
+        Mon, 25 Sep 2023 00:44:42 -0700 (PDT)
+X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R121e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=ay29a033018046051;MF=xueshuai@linux.alibaba.com;NM=1;PH=DS;RN=22;SR=0;TI=SMTPD_---0Vsmvt.C_1695627878;
+Received: from localhost.localdomain(mailfrom:xueshuai@linux.alibaba.com fp:SMTPD_---0Vsmvt.C_1695627878)
           by smtp.aliyun-inc.com;
-          Mon, 25 Sep 2023 15:44:35 +0800
+          Mon, 25 Sep 2023 15:44:39 +0800
 From:   Shuai Xue <xueshuai@linux.alibaba.com>
 To:     keescook@chromium.org, tony.luck@intel.com, gpiccoli@igalia.com,
         rafael@kernel.org, lenb@kernel.org, james.morse@arm.com,
@@ -28,9 +28,9 @@ Cc:     linux-hardening@vger.kernel.org, linux-acpi@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-edac@vger.kernel.org,
         linux-efi@vger.kernel.org, acpica-devel@lists.linuxfoundation.org,
         xueshuai@linux.alibaba.com, baolin.wang@linux.alibaba.com
-Subject: [RFC PATCH v2 2/9] ACPI: APEI: Use common ERST struct to read/write serialized MCE record
-Date:   Mon, 25 Sep 2023 15:44:19 +0800
-Message-Id: <20230925074426.97856-3-xueshuai@linux.alibaba.com>
+Subject: [RFC PATCH v2 4/9] ACPI: tables: change section_type of generic error data as guid_t
+Date:   Mon, 25 Sep 2023 15:44:21 +0800
+Message-Id: <20230925074426.97856-5-xueshuai@linux.alibaba.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20230925074426.97856-1-xueshuai@linux.alibaba.com>
 References: <20230925074426.97856-1-xueshuai@linux.alibaba.com>
@@ -40,136 +40,90 @@ Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-It is confusing to define two creator IDs with the same GUID number, and
-unnecessary to define the same data structure twice.
+The section_type of generic error data is now an array of u8. It is a
+burden to perform explicit type casting from u8[] to guid_t, and to copy
+the guid_t values to u8[] using memcpy.
 
-Use common ERST struct to read/write MCE record.
+To alleviate this issue, change the section_type from an array to the
+type guid_t, which is also consistent with the cper_section_descriptor.
 
 Signed-off-by: Shuai Xue <xueshuai@linux.alibaba.com>
 ---
- arch/x86/kernel/cpu/mce/apei.c | 82 +++++++++++++++-------------------
- 1 file changed, 35 insertions(+), 47 deletions(-)
+ drivers/acpi/acpi_extlog.c  | 2 +-
+ drivers/acpi/apei/ghes.c    | 2 +-
+ drivers/firmware/efi/cper.c | 2 +-
+ include/acpi/actbl1.h       | 5 +++--
+ 4 files changed, 6 insertions(+), 5 deletions(-)
 
-diff --git a/arch/x86/kernel/cpu/mce/apei.c b/arch/x86/kernel/cpu/mce/apei.c
-index 8ed341714686..f732f8902c86 100644
---- a/arch/x86/kernel/cpu/mce/apei.c
-+++ b/arch/x86/kernel/cpu/mce/apei.c
-@@ -20,6 +20,7 @@
- #include <linux/kernel.h>
- #include <linux/acpi.h>
- #include <linux/cper.h>
-+#include <linux/pstore.h>
- #include <acpi/apei.h>
- #include <acpi/ghes.h>
- #include <asm/mce.h>
-@@ -124,58 +125,45 @@ int apei_smca_report_x86_error(struct cper_ia_proc_ctx *ctx_info, u64 lapic_id)
- 	return 0;
- }
+diff --git a/drivers/acpi/acpi_extlog.c b/drivers/acpi/acpi_extlog.c
+index e120a96e1eae..d46435792d64 100644
+--- a/drivers/acpi/acpi_extlog.c
++++ b/drivers/acpi/acpi_extlog.c
+@@ -170,7 +170,7 @@ static int extlog_print(struct notifier_block *nb, unsigned long val,
+ 			fru_text = gdata->fru_text;
+ 		else
+ 			fru_text = "";
+-		sec_type = (guid_t *)gdata->section_type;
++		sec_type = &gdata->section_type;
+ 		if (guid_equal(sec_type, &CPER_SEC_PLATFORM_MEM)) {
+ 			struct cper_sec_mem_err *mem = acpi_hest_get_payload(gdata);
  
--#define CPER_CREATOR_MCE						\
--	GUID_INIT(0x75a574e3, 0x5052, 0x4b29, 0x8a, 0x8e, 0xbe, 0x2c,	\
--		  0x64, 0x90, 0xb8, 0x9d)
--#define CPER_SECTION_TYPE_MCE						\
--	GUID_INIT(0xfe08ffbe, 0x95e4, 0x4be7, 0xbc, 0x73, 0x40, 0x96,	\
--		  0x04, 0x4a, 0x38, 0xfc)
--
--/*
-- * CPER specification (in UEFI specification 2.3 appendix N) requires
-- * byte-packed.
-- */
--struct cper_mce_record {
--	struct cper_record_header hdr;
--	struct cper_section_descriptor sec_hdr;
--	struct mce mce;
--} __packed;
--
- int apei_write_mce(struct mce *m)
+diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+index ef59d6ea16da..d14e00751161 100644
+--- a/drivers/acpi/apei/ghes.c
++++ b/drivers/acpi/apei/ghes.c
+@@ -648,7 +648,7 @@ static bool ghes_do_proc(struct ghes *ghes,
+ 
+ 	sev = ghes_severity(estatus->error_severity);
+ 	apei_estatus_for_each_section(estatus, gdata) {
+-		sec_type = (guid_t *)gdata->section_type;
++		sec_type = &gdata->section_type;
+ 		sec_sev = ghes_severity(gdata->error_severity);
+ 		if (gdata->validation_bits & CPER_SEC_VALID_FRU_ID)
+ 			fru_id = (guid_t *)gdata->fru_id;
+diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+index 35c37f667781..a2ba70aa928f 100644
+--- a/drivers/firmware/efi/cper.c
++++ b/drivers/firmware/efi/cper.c
+@@ -527,7 +527,7 @@ static void
+ cper_estatus_print_section(const char *pfx, struct acpi_hest_generic_data *gdata,
+ 			   int sec_no)
  {
--	struct cper_mce_record rcd;
--
--	memset(&rcd, 0, sizeof(rcd));
--	memcpy(rcd.hdr.signature, CPER_SIG_RECORD, CPER_SIG_SIZE);
--	rcd.hdr.revision = CPER_RECORD_REV;
--	rcd.hdr.signature_end = CPER_SIG_END;
--	rcd.hdr.section_count = 1;
--	rcd.hdr.error_severity = CPER_SEV_FATAL;
-+	struct cper_pstore_record *rcd;
-+	int record_len = sizeof(*m) + sizeof(*rcd);
-+	int data_len = sizeof(*m);
-+
-+	rcd = kmalloc(record_len, GFP_KERNEL);
-+	memset(rcd, 0, sizeof(*rcd));
-+
-+	memcpy(rcd->hdr.signature, CPER_SIG_RECORD, CPER_SIG_SIZE);
-+	rcd->hdr.revision = CPER_RECORD_REV;
-+	rcd->hdr.signature_end = CPER_SIG_END;
-+	rcd->hdr.section_count = 1;
-+	rcd->hdr.error_severity = CPER_SEV_FATAL;
- 	/* timestamp, platform_id, partition_id are all invalid */
--	rcd.hdr.validation_bits = 0;
--	rcd.hdr.record_length = sizeof(rcd);
--	rcd.hdr.creator_id = CPER_CREATOR_MCE;
--	rcd.hdr.notification_type = CPER_NOTIFY_MCE;
--	rcd.hdr.record_id = cper_next_record_id();
--	rcd.hdr.flags = CPER_HW_ERROR_FLAGS_PREVERR;
--
--	rcd.sec_hdr.section_offset = (void *)&rcd.mce - (void *)&rcd;
--	rcd.sec_hdr.section_length = sizeof(rcd.mce);
--	rcd.sec_hdr.revision = CPER_SEC_REV;
--	/* fru_id and fru_text is invalid */
--	rcd.sec_hdr.validation_bits = 0;
--	rcd.sec_hdr.flags = CPER_SEC_PRIMARY;
--	rcd.sec_hdr.section_type = CPER_SECTION_TYPE_MCE;
--	rcd.sec_hdr.section_severity = CPER_SEV_FATAL;
--
--	memcpy(&rcd.mce, m, sizeof(*m));
--
--	return erst_write(&rcd.hdr);
-+	rcd->hdr.validation_bits = 0;
-+	rcd->hdr.record_length = record_len;
-+	rcd->hdr.creator_id = CPER_CREATOR_PSTORE;
-+	rcd->hdr.notification_type = CPER_NOTIFY_MCE;
-+	rcd->hdr.record_id = cper_next_record_id();
-+	rcd->hdr.flags = CPER_HW_ERROR_FLAGS_PREVERR;
-+
-+	rcd->sec_hdr.section_offset = (void *)&rcd->data - (void *)&rcd;
-+	rcd->sec_hdr.section_length = data_len;
-+	rcd->sec_hdr.revision = CPER_SEC_REV;
-+	/* ->ru_id and fru_text is invalid */
-+	rcd->sec_hdr.validation_bits = 0;
-+	rcd->sec_hdr.flags = CPER_SEC_PRIMARY;
-+	rcd->sec_hdr.section_type = CPER_SECTION_TYPE_MCE;
-+	rcd->sec_hdr.section_severity = CPER_SEV_FATAL;
-+
-+	memcpy(rcd->data, m, data_len);
-+
-+	return erst_write(&rcd->hdr);
- }
+-	guid_t *sec_type = (guid_t *)gdata->section_type;
++	guid_t *sec_type = &gdata->section_type;
+ 	__u16 severity;
+ 	char newpfx[64];
  
- ssize_t apei_read_mce(struct mce *m, u64 *record_id)
- {
--	struct cper_mce_record rcd;
-+	struct cper_pstore_record rcd;
- 	int rc, pos;
+diff --git a/include/acpi/actbl1.h b/include/acpi/actbl1.h
+index 8d5572ad48cb..ab25a8495a43 100644
+--- a/include/acpi/actbl1.h
++++ b/include/acpi/actbl1.h
+@@ -19,6 +19,7 @@
+  *
+  ******************************************************************************/
  
- 	rc = erst_get_record_id_begin(&pos);
-@@ -189,14 +177,14 @@ ssize_t apei_read_mce(struct mce *m, u64 *record_id)
- 	if (*record_id == APEI_ERST_INVALID_RECORD_ID)
- 		goto out;
- 	rc = erst_read_record(*record_id, &rcd.hdr, sizeof(rcd), sizeof(rcd),
--			&CPER_CREATOR_MCE);
-+			&CPER_CREATOR_PSTORE);
- 	/* someone else has cleared the record, try next one */
- 	if (rc == -ENOENT)
- 		goto retry;
- 	else if (rc < 0)
- 		goto out;
++#include <linux/uuid.h>
+ /*
+  * Values for description table header signatures for tables defined in this
+  * file. Useful because they make it more difficult to inadvertently type in
+@@ -1637,7 +1638,7 @@ struct acpi_hest_generic_status {
+ /* Generic Error Data entry */
  
--	memcpy(m, &rcd.mce, sizeof(*m));
-+	memcpy(m, &rcd.data, sizeof(*m));
- 	rc = sizeof(*m);
- out:
- 	erst_get_record_id_end();
+ struct acpi_hest_generic_data {
+-	u8 section_type[16];
++	guid_t section_type;
+ 	u32 error_severity;
+ 	u16 revision;
+ 	u8 validation_bits;
+@@ -1650,7 +1651,7 @@ struct acpi_hest_generic_data {
+ /* Extension for revision 0x0300 */
+ 
+ struct acpi_hest_generic_data_v300 {
+-	u8 section_type[16];
++	guid_t section_type;
+ 	u32 error_severity;
+ 	u16 revision;
+ 	u8 validation_bits;
 -- 
 2.41.0
 
