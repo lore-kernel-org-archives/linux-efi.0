@@ -2,167 +2,515 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F5A2E7F14F
-	for <linux-efi@archiver.kernel.org>; Wed, 27 Sep 2023 23:46:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1DD79E732C3
+	for <linux-efi@archiver.kernel.org>; Thu, 28 Sep 2023 11:03:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229593AbjI0XqR (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 27 Sep 2023 19:46:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39200 "EHLO
+        id S231864AbjI1LDV (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Thu, 28 Sep 2023 07:03:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35948 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229445AbjI0XqQ (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 27 Sep 2023 19:46:16 -0400
-Received: from out3-smtp.messagingengine.com (out3-smtp.messagingengine.com [66.111.4.27])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EB9D4F4;
-        Wed, 27 Sep 2023 16:46:14 -0700 (PDT)
-Received: from compute4.internal (compute4.nyi.internal [10.202.2.44])
-        by mailout.nyi.internal (Postfix) with ESMTP id C2A775C25C4;
-        Wed, 27 Sep 2023 19:46:11 -0400 (EDT)
-Received: from mailfrontend2 ([10.202.2.163])
-  by compute4.internal (MEProxy); Wed, 27 Sep 2023 19:46:11 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=jfarr.cc; h=cc
-        :cc:content-type:content-type:date:date:from:from:in-reply-to
-        :in-reply-to:message-id:mime-version:references:reply-to:sender
-        :subject:subject:to:to; s=fm1; t=1695858371; x=1695944771; bh=G6
-        UCu/TfSXHA2VOhzGvLxdM7gLocfJLCtB0VrZapTnA=; b=gkrf6LLSJ4W6bIbZAg
-        RzRrvqvIMGENAZfJ2MuWXpjgmu3CDKFxyE+BUpA6eI0v3xoVi/7f82fM6Q8L1jyE
-        LuyTdQnTd4Z5C9oBPclRNfpOwVe2iuPmeAKumst+04vq4YaUT0Mkoz11P9D4I3BW
-        tKv1F8THI8SihsqqM6c8WLXpG32JuEjvxMiE8i2A+DYOuN3mTTpPuRjXOSgHyGp5
-        Q/E9/lxRTWLNuvrAVLGvn+XgXLP87DYLhgoBzhXvskZ7HoNFFFPdkN7KjT/NqwjD
-        kheq+mSyZZrd9CDjqPVbOlGteB1dFrZcaaaQKSQvTHGJgPOhHteExVIOZFPGBAYH
-        guTw==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:cc:content-type:content-type:date:date
-        :feedback-id:feedback-id:from:from:in-reply-to:in-reply-to
-        :message-id:mime-version:references:reply-to:sender:subject
-        :subject:to:to:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender
-        :x-sasl-enc; s=fm2; t=1695858371; x=1695944771; bh=G6UCu/TfSXHA2
-        VOhzGvLxdM7gLocfJLCtB0VrZapTnA=; b=Hmm9fUuXDcXY0zLBnAEMqUgWwdkrA
-        rm5nPnXd8wmybWfO5FfyDR7VseP1xVciL1FmdrCIbhJRKZ1npjJKOpySufVgilJ+
-        vwAvpA70ByYJ+MYfT0v8uVhF6mL6M9+SVRM85ZKZrEu76LxDSbowR4Hn6+aOoCVF
-        FgP4zK5KVpZgNpkyX1+n/pcyCl5QbqC0CKflTmOr9HkiCY6MuMwPqJFoGRSlq3E5
-        mZs9v/uKVOCQbsDYjo0SCp7WzTFmB1eeyqkUuYRN1pgPO+5myu6m/Qwjxh9xEw1m
-        zdVM0T0joL1gdyL8WLzgufoRRJKU3IU2gICpoo8+gseEP36h7DU67lqjQ==
-X-ME-Sender: <xms:w74UZUGHeKWbHFUQ89FiZrSRFLRZgQ-TJf_NlDR79AgyrHqcNN9x-Q>
-    <xme:w74UZdUYuBN8owHxwAIabVQK0zonvgI4gL4fnFW2KXKp-mToXsCdEAEB6dU4Y5GdH
-    8wXITcsSbXJb7xpDJ8>
-X-ME-Received: <xmr:w74UZeJIbl2ZOqSzTq-XWIlwSFZdRHCcggijAa1m8saJbUhACg9mg9qXilOJrJjua3JJT_ZMjqlleeAGlWuW54N_Hg>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvjedrtdehgddviecutefuodetggdotefrodftvf
-    curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
-    uegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenfg
-    hrlhcuvffnffculdduhedmnecujfgurhepfffhvfevuffkfhggtggujgesthdtredttddt
-    vdenucfhrhhomheplfgrnhcujfgvnhgurhhikhcuhfgrrhhruceokhgvrhhnvghlsehjfh
-    grrhhrrdgttgeqnecuggftrfgrthhtvghrnhepffefjeffveegjeduieevkedtieevfeeg
-    gffhffevueejfefhfeffvddvgfeivdehnecuffhomhgrihhnpehgihhthhhusgdrtghomh
-    enucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpehkvghr
-    nhgvlhesjhhfrghrrhdrtggt
-X-ME-Proxy: <xmx:w74UZWGAq05zu-YoceKhnkzl4U5tslkxAnBjpJegOjNxpcwLBoMDew>
-    <xmx:w74UZaWTDEhuxjVOt4aNPiS2RhoTYoTZeQuk1cd8ksjD09bFkUokRQ>
-    <xmx:w74UZZO3A61IEoE9FBL_xddZMINYhIenZVs51JsmrwM0RsMBDthseg>
-    <xmx:w74UZRMeebJ4ohThUUrTJUPsvLE1Mj2QR6myIGaKI0MsCML3ZWUvKw>
-Feedback-ID: i01d149f8:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Wed,
- 27 Sep 2023 19:46:08 -0400 (EDT)
-Date:   Thu, 28 Sep 2023 01:46:06 +0200
-From:   Jan Hendrik Farr <kernel@jfarr.cc>
-To:     Ard Biesheuvel <ardb@kernel.org>
-Cc:     Pingfan Liu <piliu@redhat.com>, Pingfan Liu <kernelfans@gmail.com>,
-        linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org,
-        kexec@lists.infradead.org, Baoquan He <bhe@redhat.com>,
-        Dave Young <dyoung@redhat.com>,
-        Philipp Rudo <prudo@redhat.com>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Will Deacon <will@kernel.org>, keyrings@vger.kernel.org,
-        Luca Boccassi <bluca@debian.org>, lennart@poettering.net,
-        Jarkko Sakkinen <jarkko@kernel.org>,
-        linux-integrity@vger.kernel.org,
-        linux-security-module@vger.kernel.org, mjg59@google.com,
-        James.Bottomley@hansenpartnership.com
-Subject: Re: [PATCH 0/2] Sign the Image which is zboot's payload
-Message-ID: <ZRS-vnMyjZRKRLhT@desktop>
-References: <20230921133703.39042-1-kernelfans@gmail.com>
- <ZQ0j6Es88aR8cjRv@desktop>
- <CAF+s44R0ty0-aV+Amw2pL58YGa4JHt_y0WpiDMzehULPiC_aJw@mail.gmail.com>
- <CAMj1kXF0rZ0Ej-+x__E9=Ca8Mesb+N+35etqiUzEMzhRR6trCg@mail.gmail.com>
+        with ESMTP id S231778AbjI1LDT (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Thu, 28 Sep 2023 07:03:19 -0400
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CACF319B;
+        Thu, 28 Sep 2023 04:03:16 -0700 (PDT)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E6261C433C7;
+        Thu, 28 Sep 2023 11:03:01 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1695898996;
+        bh=P/ji0vPUFbCbMgRaXGuX+mvLtN5yOsTM92SNHS8Fueo=;
+        h=From:To:Cc:Subject:Date:From;
+        b=ajA8TqmoJHDxZZXJB7u7BMot+JbXkx4s2BucffEwH263YJ1rAl5f3kOGlSugrXpmt
+         enCVyE8I76GPL/4IwNc6Xbqia5TJMQJMD0b6VI10w4v7eGGGrt78TCsyNOegv/F9Uj
+         iW/9CtFBkFT2tmshJ5jLV46fOQDVQrsOik9OnfKq3kLgtaU5yGkVbFFKWwj7owPjN5
+         uKY70w3//pT9DL9Vb4zHyLQxEjU2ccCDoLvTNb0KR95R/azkiP4Qv5k+R06xTjnj5w
+         k30XWG81ek4EZ/ysaVPoNTqidztW9RMKRExEC41IRtMuKvo/5O4MhdApjUIRFWMG+e
+         viZeUgPDfZseg==
+From:   Jeff Layton <jlayton@kernel.org>
+To:     Alexander Viro <viro@zeniv.linux.org.uk>,
+        Christian Brauner <brauner@kernel.org>,
+        Linus Torvalds <torvalds@linux-foundation.org>,
+        David Sterba <dsterba@suse.cz>,
+        Amir Goldstein <amir73il@gmail.com>,
+        Theodore Ts'o <tytso@mit.edu>,
+        Eric Biederman <ebiederm@xmission.com>,
+        Kees Cook <keescook@chromium.org>, Jeremy Kerr <jk@ozlabs.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Michael Ellerman <mpe@ellerman.id.au>,
+        Nicholas Piggin <npiggin@gmail.com>,
+        Christophe Leroy <christophe.leroy@csgroup.eu>,
+        Heiko Carstens <hca@linux.ibm.com>,
+        Vasily Gorbik <gor@linux.ibm.com>,
+        Alexander Gordeev <agordeev@linux.ibm.com>,
+        Christian Borntraeger <borntraeger@linux.ibm.com>,
+        Sven Schnelle <svens@linux.ibm.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        =?UTF-8?q?Arve=20Hj=C3=B8nnev=C3=A5g?= <arve@android.com>,
+        Todd Kjos <tkjos@android.com>,
+        Martijn Coenen <maco@android.com>,
+        Joel Fernandes <joel@joelfernandes.org>,
+        Carlos Llamas <cmllamas@google.com>,
+        Suren Baghdasaryan <surenb@google.com>,
+        Mattia Dongili <malattia@linux.it>,
+        Dennis Dalessandro <dennis.dalessandro@cornelisnetworks.com>,
+        Jason Gunthorpe <jgg@ziepe.ca>,
+        Leon Romanovsky <leon@kernel.org>,
+        Brad Warrum <bwarrum@linux.ibm.com>,
+        Ritu Agarwal <rituagar@linux.ibm.com>,
+        Hans de Goede <hdegoede@redhat.com>,
+        =?UTF-8?q?Ilpo=20J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>,
+        Mark Gross <markgross@kernel.org>,
+        Jiri Slaby <jirislaby@kernel.org>,
+        Eric Van Hensbergen <ericvh@kernel.org>,
+        Latchesar Ionkov <lucho@ionkov.net>,
+        Dominique Martinet <asmadeus@codewreck.org>,
+        Christian Schoenebeck <linux_oss@crudebyte.com>,
+        David Sterba <dsterba@suse.com>,
+        David Howells <dhowells@redhat.com>,
+        Marc Dionne <marc.dionne@auristor.com>,
+        Ian Kent <raven@themaw.net>,
+        Luis de Bethencourt <luisbg@kernel.org>,
+        Salah Triki <salah.triki@gmail.com>,
+        "Tigran A. Aivazian" <aivazian.tigran@gmail.com>,
+        Chris Mason <clm@fb.com>, Josef Bacik <josef@toxicpanda.com>,
+        Xiubo Li <xiubli@redhat.com>,
+        Ilya Dryomov <idryomov@gmail.com>,
+        Jan Harkes <jaharkes@cs.cmu.edu>, coda@cs.cmu.edu,
+        Joel Becker <jlbec@evilplan.org>,
+        Christoph Hellwig <hch@lst.de>,
+        Nicolas Pitre <nico@fluxnic.net>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Ard Biesheuvel <ardb@kernel.org>, Gao Xiang <xiang@kernel.org>,
+        Chao Yu <chao@kernel.org>, Yue Hu <huyue2@coolpad.com>,
+        Jeffle Xu <jefflexu@linux.alibaba.com>,
+        Namjae Jeon <linkinjeon@kernel.org>,
+        Sungjong Seo <sj1557.seo@samsung.com>,
+        Jan Kara <jack@suse.com>,
+        Andreas Dilger <adilger.kernel@dilger.ca>,
+        Jaegeuk Kim <jaegeuk@kernel.org>,
+        OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>,
+        Christoph Hellwig <hch@infradead.org>,
+        Miklos Szeredi <miklos@szeredi.hu>,
+        Bob Peterson <rpeterso@redhat.com>,
+        Andreas Gruenbacher <agruenba@redhat.com>,
+        Richard Weinberger <richard@nod.at>,
+        Anton Ivanov <anton.ivanov@cambridgegreys.com>,
+        Johannes Berg <johannes@sipsolutions.net>,
+        Mikulas Patocka <mikulas@artax.karlin.mff.cuni.cz>,
+        Mike Kravetz <mike.kravetz@oracle.com>,
+        Muchun Song <muchun.song@linux.dev>, Jan Kara <jack@suse.cz>,
+        David Woodhouse <dwmw2@infradead.org>,
+        Dave Kleikamp <shaggy@kernel.org>, Tejun Heo <tj@kernel.org>,
+        Trond Myklebust <trond.myklebust@hammerspace.com>,
+        Anna Schumaker <anna@kernel.org>,
+        Chuck Lever <chuck.lever@oracle.com>,
+        Neil Brown <neilb@suse.de>,
+        Olga Kornievskaia <kolga@netapp.com>,
+        Dai Ngo <Dai.Ngo@oracle.com>, Tom Talpey <tom@talpey.com>,
+        Ryusuke Konishi <konishi.ryusuke@gmail.com>,
+        Anton Altaparmakov <anton@tuxera.com>,
+        Konstantin Komarov <almaz.alexandrovich@paragon-software.com>,
+        Mark Fasheh <mark@fasheh.com>,
+        Joseph Qi <joseph.qi@linux.alibaba.com>,
+        Bob Copeland <me@bobcopeland.com>,
+        Mike Marshall <hubcap@omnibond.com>,
+        Martin Brandenburg <martin@omnibond.com>,
+        Luis Chamberlain <mcgrof@kernel.org>,
+        Iurii Zaikin <yzaikin@google.com>,
+        Tony Luck <tony.luck@intel.com>,
+        "Guilherme G. Piccoli" <gpiccoli@igalia.com>,
+        Anders Larsen <al@alarsen.net>,
+        Steve French <sfrench@samba.org>,
+        Paulo Alcantara <pc@manguebit.com>,
+        Ronnie Sahlberg <lsahlber@redhat.com>,
+        Shyam Prasad N <sprasad@microsoft.com>,
+        Sergey Senozhatsky <senozhatsky@chromium.org>,
+        Phillip Lougher <phillip@squashfs.org.uk>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        Masami Hiramatsu <mhiramat@kernel.org>,
+        Evgeniy Dushistov <dushistov@mail.ru>,
+        Chandan Babu R <chandan.babu@oracle.com>,
+        "Darrick J. Wong" <djwong@kernel.org>,
+        Damien Le Moal <dlemoal@kernel.org>,
+        Naohiro Aota <naohiro.aota@wdc.com>,
+        Johannes Thumshirn <jth@kernel.org>,
+        Alexei Starovoitov <ast@kernel.org>,
+        Daniel Borkmann <daniel@iogearbox.net>,
+        Andrii Nakryiko <andrii@kernel.org>,
+        Martin KaFai Lau <martin.lau@linux.dev>,
+        Song Liu <song@kernel.org>,
+        Yonghong Song <yonghong.song@linux.dev>,
+        John Fastabend <john.fastabend@gmail.com>,
+        KP Singh <kpsingh@kernel.org>,
+        Stanislav Fomichev <sdf@google.com>,
+        Hao Luo <haoluo@google.com>, Jiri Olsa <jolsa@kernel.org>,
+        Hugh Dickins <hughd@google.com>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        Eric Dumazet <edumazet@google.com>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Paolo Abeni <pabeni@redhat.com>,
+        John Johansen <john.johansen@canonical.com>,
+        Paul Moore <paul@paul-moore.com>,
+        James Morris <jmorris@namei.org>,
+        "Serge E. Hallyn" <serge@hallyn.com>,
+        Stephen Smalley <stephen.smalley.work@gmail.com>,
+        Eric Paris <eparis@parisplace.org>
+Cc:     linux-fsdevel@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mm@kvack.org, linuxppc-dev@lists.ozlabs.org,
+        linux-s390@vger.kernel.org, platform-driver-x86@vger.kernel.org,
+        linux-rdma@vger.kernel.org, linux-serial@vger.kernel.org,
+        linux-usb@vger.kernel.org, v9fs@lists.linux.dev,
+        linux-afs@lists.infradead.org, autofs@vger.kernel.org,
+        linux-btrfs@vger.kernel.org, ceph-devel@vger.kernel.org,
+        codalist@coda.cs.cmu.edu, linux-efi@vger.kernel.org,
+        linux-erofs@lists.ozlabs.org, linux-ext4@vger.kernel.org,
+        linux-f2fs-devel@lists.sourceforge.net, gfs2@lists.linux.dev,
+        linux-um@lists.infradead.org, linux-mtd@lists.infradead.org,
+        jfs-discussion@lists.sourceforge.net, linux-nfs@vger.kernel.org,
+        linux-nilfs@vger.kernel.org, linux-ntfs-dev@lists.sourceforge.net,
+        ntfs3@lists.linux.dev, ocfs2-devel@lists.linux.dev,
+        linux-karma-devel@lists.sourceforge.net, devel@lists.orangefs.org,
+        linux-unionfs@vger.kernel.org, linux-hardening@vger.kernel.org,
+        reiserfs-devel@vger.kernel.org, linux-cifs@vger.kernel.org,
+        samba-technical@lists.samba.org,
+        linux-trace-kernel@vger.kernel.org, linux-xfs@vger.kernel.org,
+        bpf@vger.kernel.org, netdev@vger.kernel.org,
+        apparmor@lists.ubuntu.com, linux-security-module@vger.kernel.org,
+        selinux@vger.kernel.org
+Subject: [PATCH 00/87] fs: new accessor methods for atime and mtime
+Date:   Thu, 28 Sep 2023 07:02:59 -0400
+Message-ID: <20230928110300.32891-1-jlayton@kernel.org>
+X-Mailer: git-send-email 2.41.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAMj1kXF0rZ0Ej-+x__E9=Ca8Mesb+N+35etqiUzEMzhRR6trCg@mail.gmail.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On 25 08:55:46, Ard Biesheuvel wrote:
-> On Mon, 25 Sept 2023 at 03:01, Pingfan Liu <piliu@redhat.com> wrote:
->
-> [...]
->
-> > > 4. How can we debug the stubs that are being invoked?
-> > > 5. Can we let the EFI binary know that this is a kexec and not a normal
-> > > bootup. Potentially systemd-stub would want to change how/if it does TPM
-> > > PCR measurements.
-> > > ...
-> > >
-> >
-> 
-> Not sure whether this matters. The TPM logic is exposed via EFI
-> protocols, and the kernel could either expose them or not. If it does,
-> and we execute the EFI stub (sytemd-stub) code all the way through to
-> ExitBootServices() while executing in the old kernel, we could even
-> take PCR measurements and display them, giving us secure and measured
-> boot for kexec.
-> 
+While working on the multigrain timestamp changes, Linus suggested
+adding some similar wrappers for accessing the atime and mtime that we
+have for the ctime. With that, we could then move to using discrete
+integers instead of timespec64 in struct inode, and shrink it.
 
-I think we should definitely delay any of the measurements until
-ExitBootServices(). We don't wan't measurements of a kernel that is not
-running and might even get unloaded before being kexec'ed to make their
-way into the TPM.
+Linus suggested using macros for the new accessors, but the existing
+ctime wrappers were static inlines and since there are only 3 different
+timestamps, I didn't see that trying to fiddle with macros would gain us
+anything.
 
-> > Besides these questions, I wonder whether a highly configured EDK2 can
-> > be used as the stub (ArmVirtQemuKernel.dsc can be the start point).
-> > But there should be efforts to exclude the drivers which have the MMIO
-> > access. I saw Ard is active in EDK2, maybe that is the reason why he
-> > did not pick up EDK2 to serve the stub.
-> >
-> 
-> I don't think EDK2 is suitable for this - the code style is different,
-> the license is different and it is simply a lot of code.
-> 
-> What I would prefer is to define a subset of the EFI boot services
-> that we actually rely on, and perhaps even introduce some other
-> constraints on the EFI code, e.g., allow it to run unprivileged.
-> 
-> That way, kexec could execute the EFI stub as an ordinary user process
-> (to some extent), including allocations for the decompressed kernel,
-> initrd, etc. Finally, the only thing purgatory would need to do is
-> linearize the populated regions in the VA space and copy them to
-> physical memory.
-> 
-> This all sounds very high-level, and there may be some difficulties
-> down the road, but I think this deserves a proper look because it is
-> an appealing way to make EFI execution idempotent in the context of
-> kexec, and also reduces the arch-specific logic substantially.
+The first patches start with some new infrastructure, and then we move
+to converting different subsystems to use it. The second to last patch
+makes the conversion to discrete integers, which shaves 8 bytes off of
+struct inode on my x86_64 kernel. The last patch reshuffles things a
+bit more, to keep the i_lock in the same cacheline as the fields it
+protects (at least on x86_64).
 
-I just started work on a proof-of-concept implementation of this [1]. It's
-kinda unorganized and early right now though. Currently just testing with
-executing a bzimage with the normal EFI stub on x86. At this point it starts
-executing the EFI stub which checks efi_system_table->hdr.signature for the
-correct signature (which I have not set yet). That causes the EFI stub to
-exit. It does correctly call the exit function from my provided boot services
-table and the correct ExitStatus gets logged in dmesg. So it's able to call
-into my boot services correctly.
+About 75% of this conversion was done with coccinelle, with the rest
+done by hand with vim.
 
-This is definitly the most low level code I've ever written though, so
-I'm just learning this stuff.
+Jeff Layton (87):
+  fs: new accessor methods for atime and mtime
+  fs: convert core infrastructure to new {a,m}time accessors
+  arch/powerpc/platforms/cell/spufs: convert to new inode {a,m}time
+    accessors
+  arch/s390/hypfs: convert to new inode {a,m}time accessors
+  drivers/android: convert to new inode {a,m}time accessors
+  drivers/char: convert to new inode {a,m}time accessors
+  drivers/infiniband/hw/qib: convert to new inode {a,m}time accessors
+  drivers/misc/ibmasm: convert to new inode {a,m}time accessors
+  drivers/misc: convert to new inode {a,m}time accessors
+  drivers/platform/x86: convert to new inode {a,m}time accessors
+  drivers/tty: convert to new inode {a,m}time accessors
+  drivers/usb/core: convert to new inode {a,m}time accessors
+  drivers/usb/gadget/function: convert to new inode {a,m}time accessors
+  drivers/usb/gadget/legacy: convert to new inode {a,m}time accessors
+  fs/9p: convert to new inode {a,m}time accessors
+  fs/adfs: convert to new inode {a,m}time accessors
+  fs/affs: convert to new inode {a,m}time accessors
+  fs/afs: convert to new inode {a,m}time accessors
+  fs/autofs: convert to new inode {a,m}time accessors
+  fs/befs: convert to new inode {a,m}time accessors
+  fs/bfs: convert to new inode {a,m}time accessors
+  fs/btrfs: convert to new inode {a,m}time accessors
+  fs/ceph: convert to new inode {a,m}time accessors
+  fs/coda: convert to new inode {a,m}time accessors
+  fs/configfs: convert to new inode {a,m}time accessors
+  fs/cramfs: convert to new inode {a,m}time accessors
+  fs/debugfs: convert to new inode {a,m}time accessors
+  fs/devpts: convert to new inode {a,m}time accessors
+  fs/efivarfs: convert to new inode {a,m}time accessors
+  fs/efs: convert to new inode {a,m}time accessors
+  fs/erofs: convert to new inode {a,m}time accessors
+  fs/exfat: convert to new inode {a,m}time accessors
+  fs/ext2: convert to new inode {a,m}time accessors
+  fs/ext4: convert to new inode {a,m}time accessors
+  fs/f2fs: convert to new inode {a,m}time accessors
+  fs/fat: convert to new inode {a,m}time accessors
+  fs/freevxfs: convert to new inode {a,m}time accessors
+  fs/fuse: convert to new inode {a,m}time accessors
+  fs/gfs2: convert to new inode {a,m}time accessors
+  fs/hfs: convert to new inode {a,m}time accessors
+  fs/hfsplus: convert to new inode {a,m}time accessors
+  fs/hostfs: convert to new inode {a,m}time accessors
+  fs/hpfs: convert to new inode {a,m}time accessors
+  fs/hugetlbfs: convert to new inode {a,m}time accessors
+  fs/isofs: convert to new inode {a,m}time accessors
+  fs/jffs2: convert to new inode {a,m}time accessors
+  fs/jfs: convert to new inode {a,m}time accessors
+  fs/kernfs: convert to new inode {a,m}time accessors
+  fs/minix: convert to new inode {a,m}time accessors
+  fs/nfs: convert to new inode {a,m}time accessors
+  fs/nfsd: convert to new inode {a,m}time accessors
+  fs/nilfs2: convert to new inode {a,m}time accessors
+  fs/ntfs: convert to new inode {a,m}time accessors
+  fs/ntfs3: convert to new inode {a,m}time accessors
+  fs/ocfs2: convert to new inode {a,m}time accessors
+  fs/omfs: convert to new inode {a,m}time accessors
+  fs/openpromfs: convert to new inode {a,m}time accessors
+  fs/orangefs: convert to new inode {a,m}time accessors
+  fs/overlayfs: convert to new inode {a,m}time accessors
+  fs/proc: convert to new inode {a,m}time accessors
+  fs/pstore: convert to new inode {a,m}time accessors
+  fs/qnx4: convert to new inode {a,m}time accessors
+  fs/qnx6: convert to new inode {a,m}time accessors
+  fs/ramfs: convert to new inode {a,m}time accessors
+  fs/reiserfs: convert to new inode {a,m}time accessors
+  fs/romfs: convert to new inode {a,m}time accessors
+  fs/smb/client: convert to new inode {a,m}time accessors
+  fs/smb/server: convert to new inode {a,m}time accessors
+  fs/squashfs: convert to new inode {a,m}time accessors
+  fs/sysv: convert to new inode {a,m}time accessors
+  fs/tracefs: convert to new inode {a,m}time accessors
+  fs/ubifs: convert to new inode {a,m}time accessors
+  fs/udf: convert to new inode {a,m}time accessors
+  fs/ufs: convert to new inode {a,m}time accessors
+  fs/vboxsf: convert to new inode {a,m}time accessors
+  fs/xfs: convert to new inode {a,m}time accessors
+  fs/zonefs: convert to new inode {a,m}time accessors
+  ipc: convert to new inode {a,m}time accessors
+  kernel/bpf: convert to new inode {a,m}time accessors
+  mm: convert to new inode {a,m}time accessors
+  net/sunrpc: convert to new inode {a,m}time accessors
+  security/apparmor: convert to new inode {a,m}time accessors
+  security/selinux: convert to new inode {a,m}time accessors
+  security: convert to new inode {a,m}time accessors
+  fs: rename i_atime and i_mtime fields to __i_atime and __i_mtime
+  fs: switch timespec64 fields in inode to discrete integers
+  fs: move i_blocks up a few places in struct inode
 
-Next I'll work on setting up a proper memory mapping for the EFI
-application.
+ arch/powerpc/platforms/cell/spufs/inode.c |  2 +-
+ arch/s390/hypfs/inode.c                   |  4 +-
+ drivers/android/binderfs.c                |  8 +--
+ drivers/char/sonypi.c                     |  2 +-
+ drivers/infiniband/hw/qib/qib_fs.c        |  4 +-
+ drivers/misc/ibmasm/ibmasmfs.c            |  2 +-
+ drivers/misc/ibmvmc.c                     |  2 +-
+ drivers/platform/x86/sony-laptop.c        |  2 +-
+ drivers/tty/tty_io.c                      | 10 +++-
+ drivers/usb/core/devio.c                  | 26 ++++++---
+ drivers/usb/gadget/function/f_fs.c        |  4 +-
+ drivers/usb/gadget/legacy/inode.c         |  2 +-
+ fs/9p/vfs_inode.c                         |  6 +-
+ fs/9p/vfs_inode_dotl.c                    | 16 +++---
+ fs/adfs/inode.c                           | 13 +++--
+ fs/affs/amigaffs.c                        |  4 +-
+ fs/affs/inode.c                           | 17 +++---
+ fs/afs/dynroot.c                          |  2 +-
+ fs/afs/inode.c                            |  8 +--
+ fs/afs/write.c                            |  2 +-
+ fs/attr.c                                 |  4 +-
+ fs/autofs/inode.c                         |  2 +-
+ fs/autofs/root.c                          |  6 +-
+ fs/bad_inode.c                            |  2 +-
+ fs/befs/linuxvfs.c                        | 10 ++--
+ fs/bfs/dir.c                              |  9 +--
+ fs/bfs/inode.c                            | 10 ++--
+ fs/binfmt_misc.c                          |  2 +-
+ fs/btrfs/delayed-inode.c                  | 16 +++---
+ fs/btrfs/file.c                           | 18 +++---
+ fs/btrfs/inode.c                          | 39 ++++++-------
+ fs/btrfs/reflink.c                        |  2 +-
+ fs/btrfs/transaction.c                    |  3 +-
+ fs/btrfs/tree-log.c                       |  8 +--
+ fs/ceph/addr.c                            | 10 ++--
+ fs/ceph/caps.c                            |  4 +-
+ fs/ceph/file.c                            |  2 +-
+ fs/ceph/inode.c                           | 60 +++++++++++---------
+ fs/ceph/mds_client.c                      |  8 ++-
+ fs/ceph/snap.c                            |  4 +-
+ fs/coda/coda_linux.c                      |  6 +-
+ fs/coda/dir.c                             |  2 +-
+ fs/coda/file.c                            |  2 +-
+ fs/configfs/inode.c                       |  8 +--
+ fs/cramfs/inode.c                         |  4 +-
+ fs/debugfs/inode.c                        |  2 +-
+ fs/devpts/inode.c                         |  6 +-
+ fs/efivarfs/file.c                        |  2 +-
+ fs/efivarfs/inode.c                       |  2 +-
+ fs/efs/inode.c                            |  5 +-
+ fs/erofs/inode.c                          |  3 +-
+ fs/exfat/exfat_fs.h                       |  1 +
+ fs/exfat/file.c                           |  7 +--
+ fs/exfat/inode.c                          | 31 ++++++-----
+ fs/exfat/misc.c                           |  8 +++
+ fs/exfat/namei.c                          | 31 ++++++-----
+ fs/exfat/super.c                          |  4 +-
+ fs/ext2/dir.c                             |  6 +-
+ fs/ext2/ialloc.c                          |  2 +-
+ fs/ext2/inode.c                           | 11 ++--
+ fs/ext2/super.c                           |  2 +-
+ fs/ext4/ext4.h                            | 20 +++++--
+ fs/ext4/extents.c                         | 11 ++--
+ fs/ext4/ialloc.c                          |  4 +-
+ fs/ext4/inline.c                          |  4 +-
+ fs/ext4/inode.c                           | 19 ++++---
+ fs/ext4/ioctl.c                           | 13 ++++-
+ fs/ext4/namei.c                           | 10 ++--
+ fs/ext4/super.c                           |  2 +-
+ fs/ext4/xattr.c                           |  6 +-
+ fs/f2fs/dir.c                             |  6 +-
+ fs/f2fs/f2fs.h                            | 10 ++--
+ fs/f2fs/file.c                            | 14 ++---
+ fs/f2fs/inline.c                          |  2 +-
+ fs/f2fs/inode.c                           | 20 +++----
+ fs/f2fs/namei.c                           |  4 +-
+ fs/f2fs/recovery.c                        |  8 +--
+ fs/f2fs/super.c                           |  2 +-
+ fs/fat/inode.c                            | 25 ++++++---
+ fs/fat/misc.c                             |  6 +-
+ fs/freevxfs/vxfs_inode.c                  |  6 +-
+ fs/fuse/control.c                         |  2 +-
+ fs/fuse/dir.c                             |  6 +-
+ fs/fuse/inode.c                           | 25 ++++-----
+ fs/fuse/readdir.c                         |  6 +-
+ fs/gfs2/bmap.c                            | 10 ++--
+ fs/gfs2/dir.c                             | 10 ++--
+ fs/gfs2/glops.c                           | 11 ++--
+ fs/gfs2/inode.c                           |  7 ++-
+ fs/gfs2/quota.c                           |  2 +-
+ fs/gfs2/super.c                           |  8 +--
+ fs/hfs/catalog.c                          |  8 +--
+ fs/hfs/inode.c                            | 16 +++---
+ fs/hfs/sysdep.c                           | 10 ++--
+ fs/hfsplus/catalog.c                      |  8 +--
+ fs/hfsplus/inode.c                        | 22 ++++----
+ fs/hostfs/hostfs_kern.c                   | 12 ++--
+ fs/hpfs/dir.c                             | 10 ++--
+ fs/hpfs/inode.c                           | 12 ++--
+ fs/hpfs/namei.c                           | 20 +++----
+ fs/hpfs/super.c                           | 10 ++--
+ fs/hugetlbfs/inode.c                      | 10 ++--
+ fs/inode.c                                | 35 +++++++-----
+ fs/isofs/inode.c                          |  4 +-
+ fs/isofs/rock.c                           | 18 +++---
+ fs/jffs2/dir.c                            | 35 +++++++-----
+ fs/jffs2/file.c                           |  4 +-
+ fs/jffs2/fs.c                             | 20 +++----
+ fs/jffs2/os-linux.h                       |  4 +-
+ fs/jfs/inode.c                            |  2 +-
+ fs/jfs/jfs_imap.c                         | 16 +++---
+ fs/jfs/jfs_inode.c                        |  2 +-
+ fs/jfs/namei.c                            | 20 ++++---
+ fs/jfs/super.c                            |  2 +-
+ fs/kernfs/inode.c                         |  6 +-
+ fs/libfs.c                                | 41 ++++++++++----
+ fs/minix/bitmap.c                         |  2 +-
+ fs/minix/dir.c                            |  6 +-
+ fs/minix/inode.c                          | 15 +++--
+ fs/minix/itree_common.c                   |  2 +-
+ fs/nfs/callback_proc.c                    |  2 +-
+ fs/nfs/fscache.h                          |  4 +-
+ fs/nfs/inode.c                            | 30 +++++-----
+ fs/nfsd/blocklayout.c                     |  3 +-
+ fs/nfsd/nfs3proc.c                        |  4 +-
+ fs/nfsd/nfs4proc.c                        |  8 +--
+ fs/nfsd/nfsctl.c                          |  2 +-
+ fs/nilfs2/dir.c                           |  6 +-
+ fs/nilfs2/inode.c                         | 16 +++---
+ fs/nsfs.c                                 |  2 +-
+ fs/ntfs/inode.c                           | 25 +++++----
+ fs/ntfs/mft.c                             |  2 +-
+ fs/ntfs3/file.c                           |  6 +-
+ fs/ntfs3/frecord.c                        | 11 ++--
+ fs/ntfs3/inode.c                          | 22 +++++---
+ fs/ntfs3/namei.c                          |  4 +-
+ fs/ocfs2/alloc.c                          |  2 +-
+ fs/ocfs2/aops.c                           |  6 +-
+ fs/ocfs2/dir.c                            |  5 +-
+ fs/ocfs2/dlmfs/dlmfs.c                    |  4 +-
+ fs/ocfs2/dlmglue.c                        | 29 +++++-----
+ fs/ocfs2/file.c                           | 26 +++++----
+ fs/ocfs2/inode.c                          | 24 ++++----
+ fs/ocfs2/namei.c                          |  8 +--
+ fs/ocfs2/refcounttree.c                   |  4 +-
+ fs/omfs/inode.c                           |  8 +--
+ fs/openpromfs/inode.c                     |  4 +-
+ fs/orangefs/orangefs-utils.c              | 16 +++---
+ fs/overlayfs/file.c                       |  9 ++-
+ fs/overlayfs/inode.c                      |  3 +-
+ fs/overlayfs/util.c                       |  4 +-
+ fs/pipe.c                                 |  2 +-
+ fs/proc/base.c                            |  2 +-
+ fs/proc/inode.c                           |  2 +-
+ fs/proc/proc_sysctl.c                     |  2 +-
+ fs/proc/self.c                            |  2 +-
+ fs/proc/thread_self.c                     |  2 +-
+ fs/pstore/inode.c                         |  5 +-
+ fs/qnx4/inode.c                           |  6 +-
+ fs/qnx6/inode.c                           |  6 +-
+ fs/ramfs/inode.c                          |  7 ++-
+ fs/reiserfs/inode.c                       | 22 +++-----
+ fs/reiserfs/namei.c                       |  8 +--
+ fs/reiserfs/stree.c                       |  5 +-
+ fs/reiserfs/super.c                       |  2 +-
+ fs/romfs/super.c                          |  3 +-
+ fs/smb/client/file.c                      | 18 +++---
+ fs/smb/client/fscache.h                   |  6 +-
+ fs/smb/client/inode.c                     | 17 +++---
+ fs/smb/client/smb2ops.c                   |  6 +-
+ fs/smb/server/smb2pdu.c                   |  8 +--
+ fs/squashfs/inode.c                       |  6 +-
+ fs/stack.c                                |  4 +-
+ fs/stat.c                                 |  4 +-
+ fs/sysv/dir.c                             |  6 +-
+ fs/sysv/ialloc.c                          |  2 +-
+ fs/sysv/inode.c                           | 10 ++--
+ fs/sysv/itree.c                           |  2 +-
+ fs/tracefs/inode.c                        |  2 +-
+ fs/ubifs/debug.c                          |  8 +--
+ fs/ubifs/dir.c                            | 23 +++++---
+ fs/ubifs/file.c                           | 16 +++---
+ fs/ubifs/journal.c                        |  8 +--
+ fs/ubifs/super.c                          |  8 +--
+ fs/udf/ialloc.c                           |  4 +-
+ fs/udf/inode.c                            | 38 +++++++------
+ fs/udf/namei.c                            | 16 +++---
+ fs/ufs/dir.c                              |  6 +-
+ fs/ufs/ialloc.c                           |  2 +-
+ fs/ufs/inode.c                            | 36 +++++++-----
+ fs/vboxsf/utils.c                         | 15 ++---
+ fs/xfs/libxfs/xfs_inode_buf.c             | 10 ++--
+ fs/xfs/libxfs/xfs_rtbitmap.c              |  6 +-
+ fs/xfs/libxfs/xfs_trans_inode.c           |  2 +-
+ fs/xfs/xfs_bmap_util.c                    |  7 ++-
+ fs/xfs/xfs_inode.c                        |  4 +-
+ fs/xfs/xfs_inode_item.c                   |  4 +-
+ fs/xfs/xfs_iops.c                         |  8 +--
+ fs/xfs/xfs_itable.c                       |  8 +--
+ fs/xfs/xfs_rtalloc.c                      | 30 +++++-----
+ fs/zonefs/super.c                         | 10 ++--
+ include/linux/fs.h                        | 68 +++++++++++++++++++++--
+ include/linux/fs_stack.h                  |  6 +-
+ ipc/mqueue.c                              | 19 ++++---
+ kernel/bpf/inode.c                        |  5 +-
+ mm/shmem.c                                | 20 +++----
+ net/sunrpc/rpc_pipe.c                     |  2 +-
+ security/apparmor/apparmorfs.c            |  7 ++-
+ security/apparmor/policy_unpack.c         |  4 +-
+ security/inode.c                          |  2 +-
+ security/selinux/selinuxfs.c              |  2 +-
+ 211 files changed, 1115 insertions(+), 906 deletions(-)
 
-After that I'll work on implementing the needed boot services and
-protocols.
+-- 
+2.41.0
 
-[1] https://github.com/Cydox/linux/commits/kexec-uefi
-
---
-
-Jan
