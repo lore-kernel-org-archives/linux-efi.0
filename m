@@ -2,70 +2,58 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C288BC4332F
-	for <linux-efi@archiver.kernel.org>; Fri,  3 Nov 2023 22:58:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EE998C0018A
+	for <linux-efi@archiver.kernel.org>; Sat,  4 Nov 2023 04:58:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230343AbjKCW6q (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Fri, 3 Nov 2023 18:58:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44454 "EHLO
+        id S234316AbjKDE6W (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 4 Nov 2023 00:58:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44914 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230145AbjKCW6q (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Fri, 3 Nov 2023 18:58:46 -0400
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 970CFD50
-        for <linux-efi@vger.kernel.org>; Fri,  3 Nov 2023 15:58:43 -0700 (PDT)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A6CF2C433C7;
-        Fri,  3 Nov 2023 22:58:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1699052322;
-        bh=AyxVpE/wYNI6pbf4HImX1P3REBkDBorADg+dXzFnWCA=;
-        h=From:To:Cc:Subject:Date:From;
-        b=moozylg1iIPhAyJ6A17f9CC3sgnzXNTA8Eosi2JtNa0Y6xrmI3yevzoJocbYUzlw4
-         nochf+gjMfnjZubk89vubmaQTctIP/jKo/mRcrMQWe7GWnD/oa3psWWr5yWTHNWl7b
-         7f3lC2kR/+W3Hlf1FCwqi8aVvwSp0F5QLxNz4pGZCKRDcCsr5nV1cQJLrx27pj37td
-         326S3A96Gp3IY4Q4H71K3wlIOhqEJhBlgjr0HJF8TMCFxm+8Ed5pEQsi55IMyIbGPB
-         e0Lqkzwn594C+BMuJ753akErSX2BZofZqLC8hsm+/b0DQ2HidaLex5+kfOIfutQtka
-         /ifUGZxrAEttw==
-From:   Ard Biesheuvel <ardb@kernel.org>
-To:     torvalds@linux-foundation.org
-Cc:     linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>
-Subject: [GIT PULL] EFI update for v6.7
-Date:   Fri,  3 Nov 2023 23:58:28 +0100
-Message-ID: <20231103225829.427073-1-ardb@kernel.org>
-X-Mailer: git-send-email 2.42.0.869.gea05f2083d-goog
+        with ESMTP id S234396AbjKDE6Q (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 4 Nov 2023 00:58:16 -0400
+X-Greylist: delayed 4287 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Fri, 03 Nov 2023 21:58:12 PDT
+Received: from mail.profitpathwaygo.com (mail.profitpathwaygo.com [141.94.21.238])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A7784125
+        for <linux-efi@vger.kernel.org>; Fri,  3 Nov 2023 21:58:12 -0700 (PDT)
+Received: by mail.profitpathwaygo.com (Postfix, from userid 1002)
+        id 2C3E348DB6; Tue, 31 Oct 2023 08:30:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=profitpathwaygo.com;
+        s=mail; t=1698741271;
+        bh=qp3Ofokho6Ql+WtI8ZPVilyHYhskXL7fod7u9CWs8W4=;
+        h=Date:From:To:Subject:From;
+        b=BZtlcRjj4Xiiln/jGu7V5b37Ir502FfTdmEb8nHczWMs6xG0bxf/DWo/0ZVY51L41
+         vlFiL2vYkZ2yquJ3S8lWOpqfahs1SOBf2bovZIq72vvWIU3lnvi90qcC4hcurzg6Q6
+         jENZz7oKD7wUt1j/d0phwfmZ6ojJqvCdgkj0edKr8ZiSZO9ptfcRyrs63P3vSZg7TN
+         NfiigwbN/30WF+1SHCdv4msjrDxYdNJR9oHjH2kPeavuBL2GC8EgymPEgg4Fi1L64P
+         mjuXwICSec41FbruODBtzmux/6AyR5Kh50gFoRrRh9PY8dAOpTmArxBj2uhXx9P3T8
+         rU0AiTvr0mRBg==
+Received: by mail.profitpathwaygo.com for <linux-efi@vger.kernel.org>; Tue, 31 Oct 2023 08:30:48 GMT
+Message-ID: <20231031074500-0.1.2t.15rfh.0.akb55r32qc@profitpathwaygo.com>
+Date:   Tue, 31 Oct 2023 08:30:48 GMT
+From:   "Adam Charachuta" <adam.charachuta@profitpathwaygo.com>
+To:     <linux-efi@vger.kernel.org>
+Subject: =?UTF-8?Q?S=C5=82owa_kluczowe_do_wypozycjonowania_?=
+X-Mailer: mail.profitpathwaygo.com
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Hello Linus,
+Dzie=C5=84 dobry,
 
-Please pull the EFI update below. This is the only remaining EFI change, as
-everything else was taken via -tip this cycle.
+zapozna=C5=82em si=C4=99 z Pa=C5=84stwa ofert=C4=85 i z przyjemno=C5=9Bci=
+=C4=85 przyznaj=C4=99, =C5=BCe przyci=C4=85ga uwag=C4=99 i zach=C4=99ca d=
+o dalszych rozm=C3=B3w.=20
 
-The following changes since commit 0bb80ecc33a8fb5a682236443c1e740d5c917d1d:
+Pomy=C5=9Bla=C5=82em, =C5=BCe mo=C5=BCe m=C3=B3g=C5=82bym mie=C4=87 sw=C3=
+=B3j wk=C5=82ad w Pa=C5=84stwa rozw=C3=B3j i pom=C3=B3c dotrze=C4=87 z t=C4=
+=85 ofert=C4=85 do wi=C4=99kszego grona odbiorc=C3=B3w. Pozycjonuj=C4=99 =
+strony www, dzi=C4=99ki czemu generuj=C4=85 =C5=9Bwietny ruch w sieci.
 
-  Linux 6.6-rc1 (2023-09-10 16:28:41 -0700)
+Mo=C5=BCemy porozmawia=C4=87 w najbli=C5=BCszym czasie?
 
-are available in the Git repository at:
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next-for-v6.7
-
-for you to fetch changes up to 5329aa5101f73c451bcd48deaf3f296685849d9c:
-
-  efivarfs: Add uid/gid mount options (2023-10-20 00:47:18 +0200)
-
-----------------------------------------------------------------
-EFI update for v6.7
-
-- implement uid/gid mount options for efivarfs
-
-----------------------------------------------------------------
-Jiao Zhou (1):
-      efivarfs: Add uid/gid mount options
-
- fs/efivarfs/inode.c    |  4 +++
- fs/efivarfs/internal.h |  9 +++++++
- fs/efivarfs/super.c    | 68 ++++++++++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 81 insertions(+)
+Pozdrawiam serdecznie
+Adam Charachuta
