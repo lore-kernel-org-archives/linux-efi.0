@@ -2,116 +2,143 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 87BC7C4332F
-	for <linux-efi@archiver.kernel.org>; Wed,  1 Nov 2023 17:36:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5950FC4167B
+	for <linux-efi@archiver.kernel.org>; Wed,  1 Nov 2023 21:11:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344405AbjKARgI (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 1 Nov 2023 13:36:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51276 "EHLO
+        id S232380AbjKAVLu (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 1 Nov 2023 17:11:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34832 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344449AbjKARgH (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 1 Nov 2023 13:36:07 -0400
-Received: from frasgout.his.huawei.com (frasgout.his.huawei.com [185.176.79.56])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6D926C1;
-        Wed,  1 Nov 2023 10:36:03 -0700 (PDT)
-Received: from lhrpeml500005.china.huawei.com (unknown [172.18.147.226])
-        by frasgout.his.huawei.com (SkyGuard) with ESMTP id 4SLDfh1WTxz6K8xG;
-        Thu,  2 Nov 2023 01:35:08 +0800 (CST)
-Received: from localhost (10.202.227.76) by lhrpeml500005.china.huawei.com
- (7.191.163.240) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.31; Wed, 1 Nov
- 2023 17:36:00 +0000
-Date:   Wed, 1 Nov 2023 17:35:59 +0000
-From:   Jonathan Cameron <Jonathan.Cameron@Huawei.com>
-To:     Ira Weiny <ira.weiny@intel.com>
-CC:     Dan Williams <dan.j.williams@intel.com>,
-        Smita Koralahalli <Smita.KoralahalliChannabasappa@amd.com>,
-        Yazen Ghannam <yazen.ghannam@amd.com>,
+        with ESMTP id S234386AbjKAVLu (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 1 Nov 2023 17:11:50 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.126])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 722E6110;
+        Wed,  1 Nov 2023 14:11:44 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1698873104; x=1730409104;
+  h=from:date:subject:mime-version:content-transfer-encoding:
+   message-id:references:in-reply-to:to:cc;
+  bh=Z3OBKKkRMMaSem4VSOoq00VvInmdMq8Rf23oYoVlUe8=;
+  b=iNfHGEnc3B5S6YsVQi2a7Z+5AClieTa5g150ZmVSEnNo81xZQP/E751h
+   RCUaWeECl+VXXbkDNhZia7p/lEnbj3ch1aQYZLS24DBkYlJELlzOfJI3p
+   7mXMHChu1SPZUOFq6nrB2Ujm/qKIxI9rVLrqelcFjMJg1dudDMg7ERQp5
+   qLN1VQk+VwDQdRaq5g/HNxovvhIrfYT/Q3hmT3e9UA27i2nkK9hBx0l7j
+   poKJDOpnKZbwmt7DsI8cvpFQ1JnUsE7oeFhNFS8B/MVHL9w4MvOZNJfvU
+   P44NMdzx+nO0s5oFaYHSNvRadhUfOF59/QAmdC/p1J9FFAZBbbCqS2wrI
+   w==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10881"; a="373625196"
+X-IronPort-AV: E=Sophos;i="6.03,269,1694761200"; 
+   d="scan'208";a="373625196"
+Received: from orsmga006.jf.intel.com ([10.7.209.51])
+  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Nov 2023 14:11:43 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10881"; a="737533779"
+X-IronPort-AV: E=Sophos;i="6.03,269,1694761200"; 
+   d="scan'208";a="737533779"
+Received: from iweiny-desk3.amr.corp.intel.com (HELO localhost) ([10.212.80.64])
+  by orsmga006-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Nov 2023 14:11:42 -0700
+From:   Ira Weiny <ira.weiny@intel.com>
+Date:   Wed, 01 Nov 2023 14:11:18 -0700
+Subject: [PATCH RFC v3 1/6] cxl/trace: Remove uuid from event trace known
+ events
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20230601-cxl-cper-v3-1-0189d61f7956@intel.com>
+References: <20230601-cxl-cper-v3-0-0189d61f7956@intel.com>
+In-Reply-To: <20230601-cxl-cper-v3-0-0189d61f7956@intel.com>
+To:     Dan Williams <dan.j.williams@intel.com>,
+        Jonathan Cameron <jonathan.cameron@huawei.com>,
+        Smita Koralahalli <Smita.KoralahalliChannabasappa@amd.com>
+Cc:     Yazen Ghannam <yazen.ghannam@amd.com>,
         Davidlohr Bueso <dave@stgolabs.net>,
         Dave Jiang <dave.jiang@intel.com>,
         Alison Schofield <alison.schofield@intel.com>,
         Vishal Verma <vishal.l.verma@intel.com>,
-        Ard Biesheuvel <ardb@kernel.org>, <linux-efi@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-cxl@vger.kernel.org>
-Subject: Re: [PATCH RFC v2 3/3] cxl/memdev: Register for and process CPER
- events
-Message-ID: <20231101173559.0000112c@Huawei.com>
-In-Reply-To: <654135c4f3e0_2e75b2949e@iweiny-mobl.notmuch>
-References: <20230601-cxl-cper-v2-0-314d9c36ab02@intel.com>
-        <20230601-cxl-cper-v2-3-314d9c36ab02@intel.com>
-        <653aee8ad2717_780ef29418@dwillia2-xfh.jf.intel.com.notmuch>
-        <654135c4f3e0_2e75b2949e@iweiny-mobl.notmuch>
-Organization: Huawei Technologies Research and Development (UK) Ltd.
-X-Mailer: Claws Mail 4.1.0 (GTK 3.24.33; x86_64-w64-mingw32)
-MIME-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.202.227.76]
-X-ClientProxiedBy: lhrpeml100001.china.huawei.com (7.191.160.183) To
- lhrpeml500005.china.huawei.com (7.191.163.240)
-X-CFilter-Loop: Reflected
+        Ard Biesheuvel <ardb@kernel.org>, linux-efi@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-cxl@vger.kernel.org,
+        Ira Weiny <ira.weiny@intel.com>
+X-Mailer: b4 0.13-dev-0f7f0
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1698873100; l=2689;
+ i=ira.weiny@intel.com; s=20221222; h=from:subject:message-id;
+ bh=Z3OBKKkRMMaSem4VSOoq00VvInmdMq8Rf23oYoVlUe8=;
+ b=W6rZ4NV3L6dkTs5n/OYwXjiE6wLnRRDRiDv0PclR75UyqaRoS0MJ0Kj5RlXD/UllnT+Es7BeS
+ oNQ2N+Zgke9DjTLNWbFObg5RX55vmrwceHbLgMsvOnVtxxj0qLF0sNa
+X-Developer-Key: i=ira.weiny@intel.com; a=ed25519;
+ pk=brwqReAJklzu/xZ9FpSsMPSQ/qkSalbg6scP3w809Ec=
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-On Tue, 31 Oct 2023 10:13:40 -0700
-Ira Weiny <ira.weiny@intel.com> wrote:
+The uuid printed in the well known events is redundant.  The uuid
+defines what the event was.
 
-> Dan Williams wrote:
-> > Ira Weiny wrote:  
-> > > If the firmware has configured CXL event support to be firmware first
-> > > the OS can process those events through CPER records.  Matching memory
-> > > devices to the CPER records can be done via the serial number which is
-> > > part of the CPER record header.
-> > > 
-> > > Detect firmware first, register a notifier callback for each memdev, and
-> > > trace events when they match a device registered.
-> > > 
-> > > Signed-off-by: Ira Weiny <ira.weiny@intel.com>
-> > >   
-> > [..]
-> > 
-> > The changes requested in patch2 cover all of the comments I currently
-> > have on this patch, just one more cleanup below:
-> >   
-> > > +#define CXL_EVENT_HDR_FLAGS_REC_SEVERITY GENMASK(1, 0)
-> > > +int cxl_cper_event_call(struct notifier_block *nb, unsigned long action, void *data)
-> > > +{
-> > > +	struct cxl_cper_notifier_data *nd = data;
-> > > +	struct cxl_event_record_raw record = (struct cxl_event_record_raw) {
-> > > +		.hdr.id = UUID_INIT(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-> > > +	};  
-> > 
-> > Just do:
-> > 
-> > 	struct cxl_event_record_raw record = { 0 };
+Remove the uuid from the known events and only report it in the generic
+event as it remains informative there.
 
-FWIW (I'm in a pedantic mood), unless you care about that specific 0
-= {};
-equally valid.
-c99
+Reviewed-by: Davidlohr Bueso <dave@stgolabs.net>
+Reviewed-by: Dan Williams <dan.j.williams@intel.com>
+Signed-off-by: Ira Weiny <ira.weiny@intel.com>
+---
+ drivers/cxl/core/trace.h | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
-"If there are fewer initializers in a brace-enclosed list than there
-are elements or members of an aggregate ...  the remainder of the
-aggregate shall be initiali\ed implicitly the same as objects
-that have static storage duration."
+diff --git a/drivers/cxl/core/trace.h b/drivers/cxl/core/trace.h
+index a0b5819bc70b..79ed03637604 100644
+--- a/drivers/cxl/core/trace.h
++++ b/drivers/cxl/core/trace.h
+@@ -189,7 +189,6 @@ TRACE_EVENT(cxl_overflow,
+ 	__string(memdev, dev_name(&cxlmd->dev))			\
+ 	__string(host, dev_name(cxlmd->dev.parent))		\
+ 	__field(int, log)					\
+-	__field_struct(uuid_t, hdr_uuid)			\
+ 	__field(u64, serial)					\
+ 	__field(u32, hdr_flags)					\
+ 	__field(u16, hdr_handle)				\
+@@ -203,7 +202,6 @@ TRACE_EVENT(cxl_overflow,
+ 	__assign_str(host, dev_name((cxlmd)->dev.parent));			\
+ 	__entry->log = (l);							\
+ 	__entry->serial = (cxlmd)->cxlds->serial;				\
+-	memcpy(&__entry->hdr_uuid, &(hdr).id, sizeof(uuid_t));			\
+ 	__entry->hdr_length = (hdr).length;					\
+ 	__entry->hdr_flags = get_unaligned_le24((hdr).flags);			\
+ 	__entry->hdr_handle = le16_to_cpu((hdr).handle);			\
+@@ -212,12 +210,12 @@ TRACE_EVENT(cxl_overflow,
+ 	__entry->hdr_maint_op_class = (hdr).maint_op_class
+ 
+ #define CXL_EVT_TP_printk(fmt, ...) \
+-	TP_printk("memdev=%s host=%s serial=%lld log=%s : time=%llu uuid=%pUb "	\
++	TP_printk("memdev=%s host=%s serial=%lld log=%s : time=%llu "		\
+ 		"len=%d flags='%s' handle=%x related_handle=%x "		\
+ 		"maint_op_class=%u : " fmt,					\
+ 		__get_str(memdev), __get_str(host), __entry->serial,		\
+ 		cxl_event_log_type_str(__entry->log),				\
+-		__entry->hdr_timestamp, &__entry->hdr_uuid, __entry->hdr_length,\
++		__entry->hdr_timestamp, __entry->hdr_length,			\
+ 		show_hdr_flags(__entry->hdr_flags), __entry->hdr_handle,	\
+ 		__entry->hdr_related_handle, __entry->hdr_maint_op_class,	\
+ 		##__VA_ARGS__)
+@@ -231,15 +229,17 @@ TRACE_EVENT(cxl_generic_event,
+ 
+ 	TP_STRUCT__entry(
+ 		CXL_EVT_TP_entry
++		__field_struct(uuid_t, hdr_uuid)
+ 		__array(u8, data, CXL_EVENT_RECORD_DATA_LENGTH)
+ 	),
+ 
+ 	TP_fast_assign(
+ 		CXL_EVT_TP_fast_assign(cxlmd, log, rec->hdr);
++		memcpy(&__entry->hdr_uuid, &rec->hdr.id, sizeof(uuid_t));
+ 		memcpy(__entry->data, &rec->data, CXL_EVENT_RECORD_DATA_LENGTH);
+ 	),
+ 
+-	CXL_EVT_TP_printk("%s",
++	CXL_EVT_TP_printk("uuid=%pUb %s", &__entry->hdr_uuid,
+ 		__print_hex(__entry->data, CXL_EVENT_RECORD_DATA_LENGTH))
+ );
+ 
 
-i.e. to 0.
-
-Nothing says that fewer != 0 ;)
-
-
-> > 
-> > ...and the compiler will take care of the rest as initializing any field
-> > automatically initializes everything else to zero.  
-> 
-> Not quite sure what I was thinking.
-> 
-> This works better but I think I can avoid needing this initialization all
-> together by reworking the structures.  For now I have made the change and
-> I'll see how it falls out.
-> 
-> Thanks,
-> Ira
-> 
+-- 
+2.41.0
 
