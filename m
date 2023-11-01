@@ -2,50 +2,49 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 65827C4167D
-	for <linux-efi@archiver.kernel.org>; Wed,  1 Nov 2023 21:11:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 652B7C4332F
+	for <linux-efi@archiver.kernel.org>; Wed,  1 Nov 2023 21:11:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344208AbjKAVLw (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Wed, 1 Nov 2023 17:11:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34838 "EHLO
+        id S1344519AbjKAVLz (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Wed, 1 Nov 2023 17:11:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34848 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1343820AbjKAVLv (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Wed, 1 Nov 2023 17:11:51 -0400
-Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.126])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C14BE10E;
-        Wed,  1 Nov 2023 14:11:45 -0700 (PDT)
+        with ESMTP id S1344340AbjKAVLx (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Wed, 1 Nov 2023 17:11:53 -0400
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.7])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 709B8111;
+        Wed,  1 Nov 2023 14:11:46 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1698873105; x=1730409105;
+  t=1698873106; x=1730409106;
   h=from:date:subject:mime-version:content-transfer-encoding:
    message-id:references:in-reply-to:to:cc;
-  bh=hgEl8sCpn6bAU3nVGPf/3KX87bpb2BxzZOHlBI851lE=;
-  b=aZNJPi66wSYAZOnmuFYbqtMiXMICji0iB4G1x8dk1BSjEb7UHfH+oCRB
-   QbgAZkcRWQzSRkn/rlJoFQoB1xMvEdzACQOaMQLO3mSYEqH/QtJd9k/QQ
-   qAEJgMFv12y+vWZiq6bXZTyIueKcT+iHdVuEFMy1fUz67vRFC2BXszbvd
-   9qEqneEKebS90c7qC30HoHfYGRhZuWhxm82+D5oNI//n05WJOZXBgeXY+
-   02o5JfkKPcyKSxdRhBd4dXNcXhbetpghihUm8GcXZxBVfzPPbX+vKG+cy
-   EYwS4yuHaR8RHXxCPdeJ8bhlGlcMHHkfV3F+qIOGhnqIremwcTDUKrXj+
-   A==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10881"; a="373625205"
+  bh=ZEFbbYepN1TDRPwicNxKX/v/WvX1obzlRNocbU9ta3g=;
+  b=cfp27LPKGyVG3GOKvf28z/Tf+qBCeCGUwiCswwYFOtsdh8llshR3VT2n
+   EA2n5gdVa2DMjsys6Hl/tYmTBA3js/qO9f8UMJKYKBgx1Ckgr59wR7dcG
+   Ue7ow252J1CYi69b9nU0d/GLG9RTSyFkC4l2sYNML7q8nbAHR10KRNQ31
+   3fvitYNBortuqR5tra6FRtAZnHyx/xiWuTOVPEk9cnYZL6dp/yrsl4iR3
+   DZi8Dx7TUqwIjhV0UVn1p5lPzXgWO5lBzpg9Ylfbl1qeQ7uwa7yx9QW+K
+   M0eq/IKH/LXIm6FpedMM01n2fUM6dtdL6XbPLFGIeVwOwLil19SAP00ca
+   g==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10881"; a="10120107"
 X-IronPort-AV: E=Sophos;i="6.03,269,1694761200"; 
-   d="scan'208";a="373625205"
-Received: from orsmga006.jf.intel.com ([10.7.209.51])
-  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Nov 2023 14:11:44 -0700
+   d="scan'208";a="10120107"
+Received: from fmsmga005.fm.intel.com ([10.253.24.32])
+  by fmvoesa101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Nov 2023 14:11:46 -0700
 X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10881"; a="737533782"
+X-IronPort-AV: E=McAfee;i="6600,9927,10881"; a="1092482756"
 X-IronPort-AV: E=Sophos;i="6.03,269,1694761200"; 
-   d="scan'208";a="737533782"
+   d="scan'208";a="1092482756"
 Received: from iweiny-desk3.amr.corp.intel.com (HELO localhost) ([10.212.80.64])
-  by orsmga006-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Nov 2023 14:11:43 -0700
+  by fmsmga005-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Nov 2023 14:11:45 -0700
 From:   Ira Weiny <ira.weiny@intel.com>
-Date:   Wed, 01 Nov 2023 14:11:19 -0700
-Subject: [PATCH RFC v3 2/6] cxl/events: Promote CXL event structures to a
- core header
+Date:   Wed, 01 Nov 2023 14:11:21 -0700
+Subject: [PATCH RFC v3 4/6] cxl/events: Create a CXL event union
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20230601-cxl-cper-v3-2-0189d61f7956@intel.com>
+Message-Id: <20230601-cxl-cper-v3-4-0189d61f7956@intel.com>
 References: <20230601-cxl-cper-v3-0-0189d61f7956@intel.com>
 In-Reply-To: <20230601-cxl-cper-v3-0-0189d61f7956@intel.com>
 To:     Dan Williams <dan.j.williams@intel.com>,
@@ -60,253 +59,208 @@ Cc:     Yazen Ghannam <yazen.ghannam@amd.com>,
         linux-kernel@vger.kernel.org, linux-cxl@vger.kernel.org,
         Ira Weiny <ira.weiny@intel.com>
 X-Mailer: b4 0.13-dev-0f7f0
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1698873100; l=5661;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1698873100; l=6616;
  i=ira.weiny@intel.com; s=20221222; h=from:subject:message-id;
- bh=hgEl8sCpn6bAU3nVGPf/3KX87bpb2BxzZOHlBI851lE=;
- b=hKsBShs5xgKGjbvl0GY12T3PnimzgYlg1oyDzG0jNUMcKyA5Uq/6O/HYxYcEixQadBXIWObG8
- T8HdXwGdB4vBF7QW2xCXh83pUVIjtvevtU2z6Wy0mnCOFCopyyfanZG
+ bh=ZEFbbYepN1TDRPwicNxKX/v/WvX1obzlRNocbU9ta3g=;
+ b=l7HilFkq2da9GEE1Ny3HbqiGuBnV/ljDeVq5+Y1c1VEl6LYFjoL0DikJMalQQy9LIA9gZ1AKC
+ fkTX7qGmpsFDdVN14xGtHdpJF7E2O1bDphHJJk1a8HAOHsNqL1RrhGn
 X-Developer-Key: i=ira.weiny@intel.com; a=ed25519;
  pk=brwqReAJklzu/xZ9FpSsMPSQ/qkSalbg6scP3w809Ec=
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-EFI code can process CXL events through CPER records.  Those records use
-almost the same format as the CXL events.
+The CXL CPER and event log records share everything but a UUID/GUID in
+their structures.
 
-Lift the CXL event structures to a core header to be shared.
+Define a cxl_event union without the UUID/GUID to be shared between the
+CPER and event log record formats.  Adjust the code to use this union
+after the record type is determined.
 
 Signed-off-by: Ira Weiny <ira.weiny@intel.com>
 
 ---
 Changes from RFC v2:
-[djbw: new patch]
+[iweiny: new patch]
 ---
- drivers/cxl/cxlmem.h      |  90 +----------------------------------------
- include/linux/cxl-event.h | 100 ++++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 101 insertions(+), 89 deletions(-)
+ drivers/cxl/core/mbox.c      | 23 +++++++++--------------
+ drivers/cxl/core/trace.h     | 10 +++++-----
+ include/linux/cxl-event.h    | 23 +++++++++++++++++------
+ tools/testing/cxl/test/mem.c | 31 ++++++++++++++++++-------------
+ 4 files changed, 49 insertions(+), 38 deletions(-)
 
-diff --git a/drivers/cxl/cxlmem.h b/drivers/cxl/cxlmem.h
-index 706f8a6d1ef4..d694820ce8f5 100644
---- a/drivers/cxl/cxlmem.h
-+++ b/drivers/cxl/cxlmem.h
-@@ -6,6 +6,7 @@
- #include <linux/cdev.h>
- #include <linux/uuid.h>
- #include <linux/rcuwait.h>
-+#include <linux/cxl-event.h>
- #include "cxl.h"
+diff --git a/drivers/cxl/core/mbox.c b/drivers/cxl/core/mbox.c
+index f27c409f9034..bb40b844e3bd 100644
+--- a/drivers/cxl/core/mbox.c
++++ b/drivers/cxl/core/mbox.c
+@@ -864,25 +864,17 @@ static void cxl_event_trace_record(const struct cxl_memdev *cxlmd,
+ 				   enum cxl_event_log_type type,
+ 				   struct cxl_event_record_raw *record)
+ {
++	union cxl_event *evt = &record->event;
+ 	uuid_t *id = &record->id;
  
- /* CXL 2.0 8.2.8.5.1.1 Memory Device Status Register */
-@@ -576,27 +577,6 @@ struct cxl_mbox_identify {
- 	u8 qos_telemetry_caps;
+ 	if (uuid_equal(id, &gen_media_event_uuid)) {
+-		struct cxl_event_gen_media *rec =
+-				(struct cxl_event_gen_media *)record;
+-
+-		trace_cxl_general_media(cxlmd, type, rec);
++		trace_cxl_general_media(cxlmd, type, &evt->gen_media);
+ 	} else if (uuid_equal(id, &dram_event_uuid)) {
+-		struct cxl_event_dram *rec = (struct cxl_event_dram *)record;
+-
+-		trace_cxl_dram(cxlmd, type, rec);
++		trace_cxl_dram(cxlmd, type, &evt->dram);
+ 	} else if (uuid_equal(id, &mem_mod_event_uuid)) {
+-		struct cxl_event_mem_module *rec =
+-				(struct cxl_event_mem_module *)record;
+-
+-		trace_cxl_memory_module(cxlmd, type, rec);
++		trace_cxl_memory_module(cxlmd, type, &evt->mem_module);
+ 	} else {
+-		/* For unknown record types print just the header */
+-		trace_cxl_generic_event(cxlmd, type, record);
++		trace_cxl_generic_event(cxlmd, type, id, &evt->generic);
+ 	}
+ }
+ 
+@@ -926,7 +918,10 @@ static int cxl_clear_event_record(struct cxl_memdev_state *mds,
+ 	 */
+ 	i = 0;
+ 	for (cnt = 0; cnt < total; cnt++) {
+-		payload->handles[i++] = get_pl->records[cnt].hdr.handle;
++		struct cxl_event_record_raw *raw = &get_pl->records[cnt];
++		struct cxl_event_generic *gen = &raw->event.generic;
++
++		payload->handles[i++] = gen->hdr.handle;
+ 		dev_dbg(mds->cxlds.dev, "Event log '%d': Clearing %u\n", log,
+ 			le16_to_cpu(payload->handles[i]));
+ 
+diff --git a/drivers/cxl/core/trace.h b/drivers/cxl/core/trace.h
+index 72c620597708..be0bda68f80f 100644
+--- a/drivers/cxl/core/trace.h
++++ b/drivers/cxl/core/trace.h
+@@ -223,9 +223,9 @@ TRACE_EVENT(cxl_overflow,
+ TRACE_EVENT(cxl_generic_event,
+ 
+ 	TP_PROTO(const struct cxl_memdev *cxlmd, enum cxl_event_log_type log,
+-		 struct cxl_event_record_raw *rec),
++		 uuid_t *uuid, struct cxl_event_generic *gen_rec),
+ 
+-	TP_ARGS(cxlmd, log, rec),
++	TP_ARGS(cxlmd, log, uuid, gen_rec),
+ 
+ 	TP_STRUCT__entry(
+ 		CXL_EVT_TP_entry
+@@ -234,9 +234,9 @@ TRACE_EVENT(cxl_generic_event,
+ 	),
+ 
+ 	TP_fast_assign(
+-		CXL_EVT_TP_fast_assign(cxlmd, log, rec->hdr);
+-		memcpy(&__entry->hdr_uuid, &rec->id, sizeof(uuid_t));
+-		memcpy(__entry->data, &rec->data, CXL_EVENT_RECORD_DATA_LENGTH);
++		CXL_EVT_TP_fast_assign(cxlmd, log, gen_rec->hdr);
++		memcpy(&__entry->hdr_uuid, uuid, sizeof(uuid_t));
++		memcpy(__entry->data, gen_rec->data, CXL_EVENT_RECORD_DATA_LENGTH);
+ 	),
+ 
+ 	CXL_EVT_TP_printk("uuid=%pUb %s", &__entry->hdr_uuid,
+diff --git a/include/linux/cxl-event.h b/include/linux/cxl-event.h
+index ebb00ead1496..6b689e1efc78 100644
+--- a/include/linux/cxl-event.h
++++ b/include/linux/cxl-event.h
+@@ -18,13 +18,8 @@ struct cxl_event_record_hdr {
+ 	u8 reserved[15];
  } __packed;
  
 -/*
 - * Common Event Record Format
 - * CXL rev 3.0 section 8.2.9.2.1; Table 8-42
 - */
--struct cxl_event_record_hdr {
--	uuid_t id;
--	u8 length;
--	u8 flags[3];
--	__le16 handle;
--	__le16 related_handle;
--	__le64 timestamp;
--	u8 maint_op_class;
--	u8 reserved[15];
--} __packed;
--
--#define CXL_EVENT_RECORD_DATA_LENGTH 0x50
+ #define CXL_EVENT_RECORD_DATA_LENGTH 0x50
 -struct cxl_event_record_raw {
--	struct cxl_event_record_hdr hdr;
--	u8 data[CXL_EVENT_RECORD_DATA_LENGTH];
--} __packed;
--
- /*
-  * Get Event Records output payload
-  * CXL rev 3.0 section 8.2.9.2.2; Table 8-50
-@@ -638,74 +618,6 @@ struct cxl_mbox_clear_event_payload {
+-	uuid_t id;
++struct cxl_event_generic {
+ 	struct cxl_event_record_hdr hdr;
+ 	u8 data[CXL_EVENT_RECORD_DATA_LENGTH];
  } __packed;
- #define CXL_CLEAR_EVENT_MAX_HANDLES U8_MAX
+@@ -97,4 +92,20 @@ struct cxl_event_mem_module {
+ 	u8 reserved[0x3d];
+ } __packed;
  
--/*
-- * General Media Event Record
-- * CXL rev 3.0 Section 8.2.9.2.1.1; Table 8-43
-- */
--#define CXL_EVENT_GEN_MED_COMP_ID_SIZE	0x10
--struct cxl_event_gen_media {
--	struct cxl_event_record_hdr hdr;
--	__le64 phys_addr;
--	u8 descriptor;
--	u8 type;
--	u8 transaction_type;
--	u8 validity_flags[2];
--	u8 channel;
--	u8 rank;
--	u8 device[3];
--	u8 component_id[CXL_EVENT_GEN_MED_COMP_ID_SIZE];
--	u8 reserved[46];
--} __packed;
--
--/*
-- * DRAM Event Record - DER
-- * CXL rev 3.0 section 8.2.9.2.1.2; Table 3-44
-- */
--#define CXL_EVENT_DER_CORRECTION_MASK_SIZE	0x20
--struct cxl_event_dram {
--	struct cxl_event_record_hdr hdr;
--	__le64 phys_addr;
--	u8 descriptor;
--	u8 type;
--	u8 transaction_type;
--	u8 validity_flags[2];
--	u8 channel;
--	u8 rank;
--	u8 nibble_mask[3];
--	u8 bank_group;
--	u8 bank;
--	u8 row[3];
--	u8 column[2];
--	u8 correction_mask[CXL_EVENT_DER_CORRECTION_MASK_SIZE];
--	u8 reserved[0x17];
--} __packed;
--
--/*
-- * Get Health Info Record
-- * CXL rev 3.0 section 8.2.9.8.3.1; Table 8-100
-- */
--struct cxl_get_health_info {
--	u8 health_status;
--	u8 media_status;
--	u8 add_status;
--	u8 life_used;
--	u8 device_temp[2];
--	u8 dirty_shutdown_cnt[4];
--	u8 cor_vol_err_cnt[4];
--	u8 cor_per_err_cnt[4];
--} __packed;
--
--/*
-- * Memory Module Event Record
-- * CXL rev 3.0 section 8.2.9.2.1.3; Table 8-45
-- */
--struct cxl_event_mem_module {
--	struct cxl_event_record_hdr hdr;
--	u8 event_type;
--	struct cxl_get_health_info info;
--	u8 reserved[0x3d];
--} __packed;
--
- struct cxl_mbox_get_partition_info {
- 	__le64 active_volatile_cap;
- 	__le64 active_persistent_cap;
-diff --git a/include/linux/cxl-event.h b/include/linux/cxl-event.h
-new file mode 100644
-index 000000000000..1c94e8fdd227
---- /dev/null
-+++ b/include/linux/cxl-event.h
-@@ -0,0 +1,100 @@
-+/* SPDX-License-Identifier: GPL-2.0 */
-+#ifndef _LINUX_CXL_EVENT_H
-+#define _LINUX_CXL_EVENT_H
++union cxl_event {
++	struct cxl_event_generic generic;
++	struct cxl_event_gen_media gen_media;
++	struct cxl_event_dram dram;
++	struct cxl_event_mem_module mem_module;
++};
 +
 +/*
-+ * CXL event records; CXL rev 3.0
-+ *
-+ * Copyright(c) 2023 Intel Corporation.
-+ */
-+
-+/*
-+ * Common Event Record Format
++ * Common Event Record Format; in event logs
 + * CXL rev 3.0 section 8.2.9.2.1; Table 8-42
 + */
-+struct cxl_event_record_hdr {
-+	uuid_t id;
-+	u8 length;
-+	u8 flags[3];
-+	__le16 handle;
-+	__le16 related_handle;
-+	__le64 timestamp;
-+	u8 maint_op_class;
-+	u8 reserved[15];
-+} __packed;
-+
-+#define CXL_EVENT_RECORD_DATA_LENGTH 0x50
 +struct cxl_event_record_raw {
-+	struct cxl_event_record_hdr hdr;
-+	u8 data[CXL_EVENT_RECORD_DATA_LENGTH];
++	uuid_t id;
++	union cxl_event event;
 +} __packed;
 +
-+/*
-+ * General Media Event Record
-+ * CXL rev 3.0 Section 8.2.9.2.1.1; Table 8-43
-+ */
-+#define CXL_EVENT_GEN_MED_COMP_ID_SIZE	0x10
-+struct cxl_event_gen_media {
-+	struct cxl_event_record_hdr hdr;
-+	__le64 phys_addr;
-+	u8 descriptor;
-+	u8 type;
-+	u8 transaction_type;
-+	u8 validity_flags[2];
-+	u8 channel;
-+	u8 rank;
-+	u8 device[3];
-+	u8 component_id[CXL_EVENT_GEN_MED_COMP_ID_SIZE];
-+	u8 reserved[46];
-+} __packed;
-+
-+/*
-+ * DRAM Event Record - DER
-+ * CXL rev 3.0 section 8.2.9.2.1.2; Table 3-44
-+ */
-+#define CXL_EVENT_DER_CORRECTION_MASK_SIZE	0x20
-+struct cxl_event_dram {
-+	struct cxl_event_record_hdr hdr;
-+	__le64 phys_addr;
-+	u8 descriptor;
-+	u8 type;
-+	u8 transaction_type;
-+	u8 validity_flags[2];
-+	u8 channel;
-+	u8 rank;
-+	u8 nibble_mask[3];
-+	u8 bank_group;
-+	u8 bank;
-+	u8 row[3];
-+	u8 column[2];
-+	u8 correction_mask[CXL_EVENT_DER_CORRECTION_MASK_SIZE];
-+	u8 reserved[0x17];
-+} __packed;
-+
-+/*
-+ * Get Health Info Record
-+ * CXL rev 3.0 section 8.2.9.8.3.1; Table 8-100
-+ */
-+struct cxl_get_health_info {
-+	u8 health_status;
-+	u8 media_status;
-+	u8 add_status;
-+	u8 life_used;
-+	u8 device_temp[2];
-+	u8 dirty_shutdown_cnt[4];
-+	u8 cor_vol_err_cnt[4];
-+	u8 cor_per_err_cnt[4];
-+} __packed;
-+
-+/*
-+ * Memory Module Event Record
-+ * CXL rev 3.0 section 8.2.9.2.1.3; Table 8-45
-+ */
-+struct cxl_event_mem_module {
-+	struct cxl_event_record_hdr hdr;
-+	u8 event_type;
-+	struct cxl_get_health_info info;
-+	u8 reserved[0x3d];
-+} __packed;
-+
-+#endif /* _LINUX_CXL_EVENT_H */
+ #endif /* _LINUX_CXL_EVENT_H */
+diff --git a/tools/testing/cxl/test/mem.c b/tools/testing/cxl/test/mem.c
+index 85862be00c48..2535eb182ece 100644
+--- a/tools/testing/cxl/test/mem.c
++++ b/tools/testing/cxl/test/mem.c
+@@ -244,7 +244,8 @@ static int mock_get_event(struct device *dev, struct cxl_mbox_cmd *cmd)
+ 	for (i = 0; i < CXL_TEST_EVENT_CNT && !event_log_empty(log); i++) {
+ 		memcpy(&pl->records[i], event_get_current(log),
+ 		       sizeof(pl->records[i]));
+-		pl->records[i].hdr.handle = event_get_cur_event_handle(log);
++		pl->records[i].event.generic.hdr.handle =
++				event_get_cur_event_handle(log);
+ 		log->cur_idx++;
+ 	}
+ 
+@@ -332,25 +333,29 @@ static void cxl_mock_event_trigger(struct device *dev)
+ struct cxl_event_record_raw maint_needed = {
+ 	.id = UUID_INIT(0xBA5EBA11, 0xABCD, 0xEFEB,
+ 			0xa5, 0x5a, 0xa5, 0x5a, 0xa5, 0xa5, 0x5a, 0xa5),
+-	.hdr = {
+-		.length = sizeof(struct cxl_event_record_raw),
+-		.flags[0] = CXL_EVENT_RECORD_FLAG_MAINT_NEEDED,
+-		/* .handle = Set dynamically */
+-		.related_handle = cpu_to_le16(0xa5b6),
++	.event.generic = {
++		.hdr = {
++			.length = sizeof(struct cxl_event_record_raw),
++			.flags[0] = CXL_EVENT_RECORD_FLAG_MAINT_NEEDED,
++			/* .handle = Set dynamically */
++			.related_handle = cpu_to_le16(0xa5b6),
++		},
++		.data = { 0xDE, 0xAD, 0xBE, 0xEF },
+ 	},
+-	.data = { 0xDE, 0xAD, 0xBE, 0xEF },
+ };
+ 
+ struct cxl_event_record_raw hardware_replace = {
+ 	.id = UUID_INIT(0xABCDEFEB, 0xBA11, 0xBA5E,
+ 			0xa5, 0x5a, 0xa5, 0x5a, 0xa5, 0xa5, 0x5a, 0xa5),
+-	.hdr = {
+-		.length = sizeof(struct cxl_event_record_raw),
+-		.flags[0] = CXL_EVENT_RECORD_FLAG_HW_REPLACE,
+-		/* .handle = Set dynamically */
+-		.related_handle = cpu_to_le16(0xb6a5),
++	.event.generic = {
++		.hdr = {
++			.length = sizeof(struct cxl_event_record_raw),
++			.flags[0] = CXL_EVENT_RECORD_FLAG_HW_REPLACE,
++			/* .handle = Set dynamically */
++			.related_handle = cpu_to_le16(0xb6a5),
++		},
++		.data = { 0xDE, 0xAD, 0xBE, 0xEF },
+ 	},
+-	.data = { 0xDE, 0xAD, 0xBE, 0xEF },
+ };
+ 
+ struct cxl_test_gen_media {
 
 -- 
 2.41.0
