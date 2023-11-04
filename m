@@ -2,58 +2,62 @@ Return-Path: <linux-efi-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EE998C0018A
-	for <linux-efi@archiver.kernel.org>; Sat,  4 Nov 2023 04:58:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 62E9AC4332F
+	for <linux-efi@archiver.kernel.org>; Sat,  4 Nov 2023 19:01:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234316AbjKDE6W (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
-        Sat, 4 Nov 2023 00:58:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44914 "EHLO
+        id S230428AbjKDTBh (ORCPT <rfc822;linux-efi@archiver.kernel.org>);
+        Sat, 4 Nov 2023 15:01:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50478 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234396AbjKDE6Q (ORCPT
-        <rfc822;linux-efi@vger.kernel.org>); Sat, 4 Nov 2023 00:58:16 -0400
-X-Greylist: delayed 4287 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Fri, 03 Nov 2023 21:58:12 PDT
-Received: from mail.profitpathwaygo.com (mail.profitpathwaygo.com [141.94.21.238])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A7784125
-        for <linux-efi@vger.kernel.org>; Fri,  3 Nov 2023 21:58:12 -0700 (PDT)
-Received: by mail.profitpathwaygo.com (Postfix, from userid 1002)
-        id 2C3E348DB6; Tue, 31 Oct 2023 08:30:57 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=profitpathwaygo.com;
-        s=mail; t=1698741271;
-        bh=qp3Ofokho6Ql+WtI8ZPVilyHYhskXL7fod7u9CWs8W4=;
-        h=Date:From:To:Subject:From;
-        b=BZtlcRjj4Xiiln/jGu7V5b37Ir502FfTdmEb8nHczWMs6xG0bxf/DWo/0ZVY51L41
-         vlFiL2vYkZ2yquJ3S8lWOpqfahs1SOBf2bovZIq72vvWIU3lnvi90qcC4hcurzg6Q6
-         jENZz7oKD7wUt1j/d0phwfmZ6ojJqvCdgkj0edKr8ZiSZO9ptfcRyrs63P3vSZg7TN
-         NfiigwbN/30WF+1SHCdv4msjrDxYdNJR9oHjH2kPeavuBL2GC8EgymPEgg4Fi1L64P
-         mjuXwICSec41FbruODBtzmux/6AyR5Kh50gFoRrRh9PY8dAOpTmArxBj2uhXx9P3T8
-         rU0AiTvr0mRBg==
-Received: by mail.profitpathwaygo.com for <linux-efi@vger.kernel.org>; Tue, 31 Oct 2023 08:30:48 GMT
-Message-ID: <20231031074500-0.1.2t.15rfh.0.akb55r32qc@profitpathwaygo.com>
-Date:   Tue, 31 Oct 2023 08:30:48 GMT
-From:   "Adam Charachuta" <adam.charachuta@profitpathwaygo.com>
-To:     <linux-efi@vger.kernel.org>
-Subject: =?UTF-8?Q?S=C5=82owa_kluczowe_do_wypozycjonowania_?=
-X-Mailer: mail.profitpathwaygo.com
-MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+        with ESMTP id S230358AbjKDTBg (ORCPT
+        <rfc822;linux-efi@vger.kernel.org>); Sat, 4 Nov 2023 15:01:36 -0400
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7F1B8184
+        for <linux-efi@vger.kernel.org>; Sat,  4 Nov 2023 12:01:33 -0700 (PDT)
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 26552C433C8;
+        Sat,  4 Nov 2023 19:01:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1699124493;
+        bh=FzHwVwA4vRgqfUktqzK7Wbra3zxB+sWCMEx683ImGPQ=;
+        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
+        b=P4hRWF6p9K4EuCiBra2ftRe8ct//FXd/Dh2TEhXAfytPimxo3Eby4On0BN0KAZTMA
+         zcfnSLQvWF2dRAUgdN+PgUOHBaG+v4ef7zTHQBo+R6Dy+cfww2zsskP2j1JswXehCz
+         86yy8RqVUVzxkXpjXgg/Q5D1b38WRvN0vC/hpOL3wm9s0yYwtNrSLYpDYhmOX/Me/b
+         zMUr3rT4yl6mCgVvgrZ38OxawYFyOCkSiF7RYoXBlo3eCcLvS4n/rFGKgKnDyjps/g
+         ZYerKr4uywTMfUfAbU1qg2jBImZK9OmAGhtQt+hyUi0H/47oWJGyvNYSk+3DADnlg8
+         dojVOjNXQdCIQ==
+Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
+        by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id 0BF38C4316B;
+        Sat,  4 Nov 2023 19:01:33 +0000 (UTC)
+Subject: Re: [GIT PULL] EFI update for v6.7
+From:   pr-tracker-bot@kernel.org
+In-Reply-To: <20231103225829.427073-1-ardb@kernel.org>
+References: <20231103225829.427073-1-ardb@kernel.org>
+X-PR-Tracked-List-Id: <linux-efi.vger.kernel.org>
+X-PR-Tracked-Message-Id: <20231103225829.427073-1-ardb@kernel.org>
+X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next-for-v6.7
+X-PR-Tracked-Commit-Id: 5329aa5101f73c451bcd48deaf3f296685849d9c
+X-PR-Merge-Tree: torvalds/linux.git
+X-PR-Merge-Refname: refs/heads/master
+X-PR-Merge-Commit-Id: 4c975a43fa380676828321ebe5b662c743c14d9e
+Message-Id: <169912449303.2096.3794161734218779054.pr-tracker-bot@kernel.org>
+Date:   Sat, 04 Nov 2023 19:01:33 +0000
+To:     Ard Biesheuvel <ardb@kernel.org>
+Cc:     torvalds@linux-foundation.org, linux-efi@vger.kernel.org,
+        Ard Biesheuvel <ardb@kernel.org>
 Precedence: bulk
 List-ID: <linux-efi.vger.kernel.org>
 X-Mailing-List: linux-efi@vger.kernel.org
 
-Dzie=C5=84 dobry,
+The pull request you sent on Fri,  3 Nov 2023 23:58:28 +0100:
 
-zapozna=C5=82em si=C4=99 z Pa=C5=84stwa ofert=C4=85 i z przyjemno=C5=9Bci=
-=C4=85 przyznaj=C4=99, =C5=BCe przyci=C4=85ga uwag=C4=99 i zach=C4=99ca d=
-o dalszych rozm=C3=B3w.=20
+> git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next-for-v6.7
 
-Pomy=C5=9Bla=C5=82em, =C5=BCe mo=C5=BCe m=C3=B3g=C5=82bym mie=C4=87 sw=C3=
-=B3j wk=C5=82ad w Pa=C5=84stwa rozw=C3=B3j i pom=C3=B3c dotrze=C4=87 z t=C4=
-=85 ofert=C4=85 do wi=C4=99kszego grona odbiorc=C3=B3w. Pozycjonuj=C4=99 =
-strony www, dzi=C4=99ki czemu generuj=C4=85 =C5=9Bwietny ruch w sieci.
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/4c975a43fa380676828321ebe5b662c743c14d9e
 
-Mo=C5=BCemy porozmawia=C4=87 w najbli=C5=BCszym czasie?
+Thank you!
 
-
-Pozdrawiam serdecznie
-Adam Charachuta
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/prtracker.html
