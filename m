@@ -1,85 +1,82 @@
-Authentication-Results: smtp.subspace.kernel.org; dkim=none
-Received: from smtpbgsg1.qq.com (smtpbgsg1.qq.com [54.254.200.92])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E3D38198
-	for <linux-efi@vger.kernel.org>; Wed, 22 Nov 2023 00:50:20 -0800 (PST)
-X-QQ-mid: bizesmtp85t1700642948tx7gpque
-Received: from localhost.localdomain ( [222.92.8.138])
-	by bizesmtp.qq.com (ESMTP) with 
-	id ; Wed, 22 Nov 2023 16:49:07 +0800 (CST)
-X-QQ-SSF: 01400000000000F0W000000A0000000
-X-QQ-FEAT: cvpDInk2tjUSz/CLefbREwnv7FUNP/GZytj+ox3ViHxjM3/htuGGpovxfA4m4
-	jsMZE4ISEXUKywEDoof7+NqNMm/ZCxWh34ModylygZ9wNnBxbpWvkliNj6EyjCFpOTVJelR
-	RZxeUegmrvcgi9IlRQS+7H465UOmdxCJRiOupKiUWHOApGL/J3suuL/UOyA4d0/dBKSH9u8
-	d95Fzgnl1VQj/8KBv3zGviuM1tBgcoXJww6HHfksMsjZQU4r4hNBih97F9B6cjKBmHJ9F03
-	Sq1kKel/bQ2T+Xh6TeqFo6zOC7NDUgx0oESmmp8oH0MDCA2K5OqXjmGKwGniSG/oGjjJ4n2
-	sk6r9tfBMmy8btvyg/21+siu+i40ln8FIn9+WZ3riGULLElwfUgQ8yFlOGYU30DpFcsN13J
-	i4Rpw6z81Lg=
-X-QQ-GoodBg: 2
-X-BIZMAIL-ID: 8641457709918031096
-From: wangyao@lemote.com
-To: ardb@kernel.org,
-	chenhuacai@kernel.org,
-	wangrui@loongson.cn
-Cc: linux-efi@vger.kernel.org,
-	ainux.wang@gmail.com,
-	Wang Yao <wangyao@lemote.com>
-Subject: [PATCH] efi/loongarch: Change MMU translation mode
-Date: Wed, 22 Nov 2023 16:49:06 +0800
-Message-Id: <20231122084906.12476-1-wangyao@lemote.com>
-X-Mailer: git-send-email 2.27.0
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="mUZKtBcH"
+Received: from mgamail.intel.com (mgamail.intel.com [134.134.136.65])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTP id 3778E112;
+	Wed, 22 Nov 2023 02:12:09 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1700647929; x=1732183929;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:content-transfer-encoding:in-reply-to;
+  bh=ekVyR2LTJTYq3ZM1BPKwRkdTVcMVyNkfXXO7GdIDxpQ=;
+  b=mUZKtBcHFbuzBYKXkL7haGA/QKAXCprwNPULGH5lD2zgcDuCDM8UNf5V
+   x5y/zSwJNeOAGXbV0cK6RuXcVUHA0y9JscECMZwviVxt43tKCOAfY5HTx
+   qHsI/vAQqO8ZFoHLqdspP7u4+MMPfAZ/CWVJXDhLDF2qVaEjhjeKsA57p
+   wTKuBdKa4Vv/7Q6BGLMozqgBVX6Vcp97F7f3+ULPU8S5iRa6P62w0c3vm
+   5DjGIW7bdgSTq6jUqLpFivrfmPVFaDFw/3a1kG4NVMD7/mNC2XuK7JJPa
+   q4JGmJuAiG6efQg0cJOg2/uc8kHQROOtq2iBD3tBG9X5BMFneThfvceUk
+   w==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10901"; a="395945573"
+X-IronPort-AV: E=Sophos;i="6.04,218,1695711600"; 
+   d="scan'208";a="395945573"
+Received: from fmsmga008.fm.intel.com ([10.253.24.58])
+  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Nov 2023 02:12:08 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10901"; a="832958152"
+X-IronPort-AV: E=Sophos;i="6.04,218,1695711600"; 
+   d="scan'208";a="832958152"
+Received: from smile.fi.intel.com ([10.237.72.54])
+  by fmsmga008.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Nov 2023 02:12:04 -0800
+Received: from andy by smile.fi.intel.com with local (Exim 4.97)
+	(envelope-from <andriy.shevchenko@linux.intel.com>)
+	id 1r5kDB-0000000G3jf-2eSS;
+	Wed, 22 Nov 2023 12:12:01 +0200
+Date: Wed, 22 Nov 2023 12:12:01 +0200
+From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+To: "Rafael J. Wysocki" <rafael@kernel.org>
+Cc: Raag Jadav <raag.jadav@intel.com>, mika.westerberg@linux.intel.com,
+	lenb@kernel.org, robert.moore@intel.com, ardb@kernel.org,
+	will@kernel.org, mark.rutland@arm.com, linux-acpi@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	acpica-devel@lists.linuxfoundation.org, linux-efi@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	mallikarjunappa.sangannavar@intel.com, bala.senthil@intel.com
+Subject: Re: [PATCH v2 2/6] ACPI: bus: update acpi_dev_uid_match() to support
+ multiple types
+Message-ID: <ZV3T8c_1L77h5CsA@smile.fi.intel.com>
+References: <20231121103829.10027-1-raag.jadav@intel.com>
+ <20231121103829.10027-3-raag.jadav@intel.com>
+ <CAJZ5v0jmaRQWfO_mM4GZ8mEFftuSNgt36=tJ5vC2Uw7MAcpYJg@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-X-QQ-SENDSIZE: 520
-Feedback-ID: bizesmtp:lemote.com:qybglogicsvrgz:qybglogicsvrgz5a-2
+In-Reply-To: <CAJZ5v0jmaRQWfO_mM4GZ8mEFftuSNgt36=tJ5vC2Uw7MAcpYJg@mail.gmail.com>
+Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
 
-From: Wang Yao <wangyao@lemote.com>
+On Tue, Nov 21, 2023 at 08:25:20PM +0100, Rafael J. Wysocki wrote:
+> On Tue, Nov 21, 2023 at 11:38 AM Raag Jadav <raag.jadav@intel.com> wrote:
+> >
+> > According to ACPI specification, a _UID object can evaluate to either
+> > a numeric value or a string. Update acpi_dev_uid_match() helper to
+> > support _UID matching for both integer and string types.
+> >
+> > Suggested-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+> > Suggested-by: Mika Westerberg <mika.westerberg@linux.intel.com>
+> > Suggested-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+> 
+> You need to be careful with using this.  There are some things below
+> that go beyond what I have suggested.
 
-Refer ot UEFI spec v2.10 section 2.3.8 LoongArch Platforms:
+Same to me and actually I've asked several times to remove this tag of mine!
 
-The processor is in the following execution mode during boot service:
-    ...
-    The memory is in physical addressing mode. LoongArch architecture
-    defines two memory access mode, namely direct address translation
-    mode and mapped address translation mode.
-
-So need to change MMU translation mode before config direct mapping.
-
-Signed-off-by: Wang Yao <wangyao@lemote.com>
----
- drivers/firmware/efi/libstub/loongarch.c | 8 +++++++-
- 1 file changed, 7 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/firmware/efi/libstub/loongarch.c b/drivers/firmware/efi/libstub/loongarch.c
-index 807cba2693fc..4c0a84c58f5b 100644
---- a/drivers/firmware/efi/libstub/loongarch.c
-+++ b/drivers/firmware/efi/libstub/loongarch.c
-@@ -49,7 +49,7 @@ efi_status_t efi_boot_kernel(void *handle, efi_loaded_image_t *image,
- 	struct exit_boot_struct priv;
- 	unsigned long desc_size;
- 	efi_status_t status;
--	u32 desc_ver;
-+	u32 desc_ver, val;
- 
- 	status = efi_alloc_virtmap(&priv.runtime_map, &desc_size, &desc_ver);
- 	if (status != EFI_SUCCESS) {
-@@ -69,6 +69,12 @@ efi_status_t efi_boot_kernel(void *handle, efi_loaded_image_t *image,
- 		    priv.runtime_entry_count * desc_size, desc_size,
- 		    desc_ver, priv.runtime_map);
- 
-+	/* Change address translation mode */
-+	val = csr_read32(LOONGARCH_CSR_CRMD);
-+	val &= ~CSR_CRMD_DA;
-+	val |= CSR_CRMD_PG;
-+	csr_write32(val, LOONGARCH_CSR_CRMD);
-+
- 	/* Config Direct Mapping */
- 	csr_write64(CSR_DMW0_INIT, LOONGARCH_CSR_DMWIN0);
- 	csr_write64(CSR_DMW1_INIT, LOONGARCH_CSR_DMWIN1);
 -- 
-2.27.0
+With Best Regards,
+Andy Shevchenko
+
 
