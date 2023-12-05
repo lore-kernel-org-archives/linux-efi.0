@@ -1,20 +1,20 @@
-Received: from smtpbgsg2.qq.com (smtpbgsg2.qq.com [54.254.200.128])
-	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 03040C3
-	for <linux-efi@vger.kernel.org>; Mon,  4 Dec 2023 22:04:36 -0800 (PST)
-X-QQ-mid: bizesmtp80t1701756249tk40rfpc
+Received: from smtpbgbr1.qq.com (smtpbgbr1.qq.com [54.207.19.206])
+	by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CFFC2C3
+	for <linux-efi@vger.kernel.org>; Mon,  4 Dec 2023 22:04:40 -0800 (PST)
+X-QQ-mid: bizesmtp80t1701756245twljyij2
 Received: from localhost.localdomain ( [222.92.8.138])
 	by bizesmtp.qq.com (ESMTP) with 
-	id ; Tue, 05 Dec 2023 14:04:08 +0800 (CST)
+	id ; Tue, 05 Dec 2023 14:04:04 +0800 (CST)
 X-QQ-SSF: 01400000000000F0W000000A0000000
-X-QQ-FEAT: TVZM0Uoyj02Jtpt3OrhyruiQYo8m/4BZ+fWxZOa46FVml++gP8ceQQ0X9mRXy
-	qGmd7eG0AJC8PxMS8BzzwU5HeWHG2tc0Pc7R6Cho7j/xnN2/POaF1/KBH/MeUQizLGIu4Qv
-	J0JQNeLcusNn+wBmvpRnVK3zhh+owvLqlyyD6PFOi4GK8XkUOe/MQeOUppex5DYorgTM3cO
-	7gDSh59IkZEY5AVz9GrHjaZ4xLTC8lfMncLPhu5nmK0m9JfHLWhN8ozNVPEWUNiCxMvzbjD
-	Bl6QheujRUYYoAiT4GNk/bIzAPEl/kpcaDmQf67Q2dyV+TO06DNKsg2iywwHOzNk7V0ibtG
-	xndBrXwb+a2D8MVdgyj+UxQ2/Mg1980eCkxPrtxP64y4SnZVt3Hntpm8ulhJa9ceOWISQxY
-	J4ojPU8Fvbca8pw5J1O6yQ==
+X-QQ-FEAT: +ynUkgUhZJlf78YvOoVV/84aGlZNXinW4AgexECViYawbvJaomPBNKuWNSnRL
+	iEhzwkcoOfcJHQGZsAGkqY9aNfBMH+DK5zKcUAF3mUWDN5rGAQNSQaIiKk/5v7kU3xi2+HS
+	7nAidKRn8DI9yqURQ/BKY+W9falMTv8Z2w10zP1jZLxj3pI4QrVaazctrduXv+4mTrtAWB8
+	xoGCygQByJiMdcTqEckyOZjc/YezQGQtCb3v/1rxWSSs603ALm8bJZeslQg/fY+4Mfdy5Br
+	a818AkD4a4KGQ98j9fhBfshfT2dKTH+WlUIcvOoCR5WXZRDHK3ELleMxr9h2CYDvF7fny3r
+	g3P6cGEdwG/AJayjs2EXlJDAGWwUzW0KNcKBEdJ7Pl5i7a+xWTgi28OYy6a9bGHzIjSyDPT
+	zTd9PcgSgrc=
 X-QQ-GoodBg: 2
-X-BIZMAIL-ID: 4996889953417864215
+X-BIZMAIL-ID: 3284024087540081101
 From: wangyao@lemote.com
 To: ardb@kernel.org,
 	chenhuacai@kernel.org,
@@ -22,9 +22,9 @@ To: ardb@kernel.org,
 Cc: linux-efi@vger.kernel.org,
 	ainux.wang@gmail.com,
 	Wang Yao <wangyao@lemote.com>
-Subject: [PATCH v3 2/2] efi/loongarch: load address is not equal to link address
-Date: Tue,  5 Dec 2023 14:03:45 +0800
-Message-Id: <20231205060345.7742-3-wangyao@lemote.com>
+Subject: [PATCH v3 1/2] efi/loongarch: Use load address to calculate kernel entry address
+Date: Tue,  5 Dec 2023 14:03:44 +0800
+Message-Id: <20231205060345.7742-2-wangyao@lemote.com>
 X-Mailer: git-send-email 2.27.0
 In-Reply-To: <20231205060345.7742-1-wangyao@lemote.com>
 References: <20231205060345.7742-1-wangyao@lemote.com>
@@ -40,42 +40,78 @@ Feedback-ID: bizesmtp:lemote.com:qybglogicsvrgz:qybglogicsvrgz5a-2
 
 From: Wang Yao <wangyao@lemote.com>
 
-This is a test patch for PIE kernel that load address is not equal to
-link address.
+The efi_relocate_kernel() may load the PIE kernel to anywhere, the loaded
+address may not be equal to link address or EFI_KIMG_PREFERRED_ADDRESS.
 
 Signed-off-by: Wang Yao <wangyao@lemote.com>
 ---
- drivers/firmware/efi/libstub/loongarch-stub.c | 12 +++++++++++-
- 1 file changed, 11 insertions(+), 1 deletion(-)
 
+v2->v3:
+Dropped TO_CACHE:
+kernel_addr may be DA/PG address, both access kernel entry.
+
+v1->v2:
+Use link address that from DOS header to calculate kernel entry,
+corrected by Huacai Chen.
+
+ arch/loongarch/include/asm/efi.h              | 2 +-
+ drivers/firmware/efi/libstub/loongarch-stub.c | 4 ++--
+ drivers/firmware/efi/libstub/loongarch.c      | 6 +++---
+ 3 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/arch/loongarch/include/asm/efi.h b/arch/loongarch/include/asm/efi.h
+index 091897d40b03..91d81f9730ab 100644
+--- a/arch/loongarch/include/asm/efi.h
++++ b/arch/loongarch/include/asm/efi.h
+@@ -32,6 +32,6 @@ static inline unsigned long efi_get_kimg_min_align(void)
+ 
+ #define EFI_KIMG_PREFERRED_ADDRESS	PHYSADDR(VMLINUX_LOAD_ADDRESS)
+ 
+-unsigned long kernel_entry_address(void);
++unsigned long kernel_entry_address(unsigned long kernel_addr);
+ 
+ #endif /* _ASM_LOONGARCH_EFI_H */
 diff --git a/drivers/firmware/efi/libstub/loongarch-stub.c b/drivers/firmware/efi/libstub/loongarch-stub.c
-index d6ec5d4b8dbe..c13c022d18cf 100644
+index 72c71ae201f0..d6ec5d4b8dbe 100644
 --- a/drivers/firmware/efi/libstub/loongarch-stub.c
 +++ b/drivers/firmware/efi/libstub/loongarch-stub.c
-@@ -22,12 +22,22 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
- 				 efi_handle_t image_handle)
+@@ -35,9 +35,9 @@ efi_status_t handle_kernel_image(unsigned long *image_addr,
+ 	return status;
+ }
+ 
+-unsigned long kernel_entry_address(void)
++unsigned long kernel_entry_address(unsigned long kernel_addr)
  {
- 	efi_status_t status;
--	unsigned long kernel_addr = 0;
-+	unsigned long kernel_addr = 0, tmp_addr = 0;
+ 	unsigned long base = (unsigned long)&kernel_offset - kernel_offset;
  
- 	kernel_addr = (unsigned long)&kernel_offset - kernel_offset;
+-	return (unsigned long)&kernel_entry - base + VMLINUX_LOAD_ADDRESS;
++	return (unsigned long)&kernel_entry - base + kernel_addr;
+ }
+diff --git a/drivers/firmware/efi/libstub/loongarch.c b/drivers/firmware/efi/libstub/loongarch.c
+index 807cba2693fc..0e0aa6cda73f 100644
+--- a/drivers/firmware/efi/libstub/loongarch.c
++++ b/drivers/firmware/efi/libstub/loongarch.c
+@@ -37,9 +37,9 @@ static efi_status_t exit_boot_func(struct efi_boot_memmap *map, void *priv)
+ 	return EFI_SUCCESS;
+ }
  
-+	/*
-+	 * Allocate 2M space at 0x200000(EFI_KIMG_PREFERRED_ADDRESS) for
-+	 * test, this will lead to the kernel be loaded at 0x4000000.
-+	 */
-+	status = efi_relocate_kernel(&tmp_addr, 0x100000, 0x200000,
-+		     EFI_KIMG_PREFERRED_ADDRESS, efi_get_kimg_min_align(), 0x0);
-+	efi_info("@@@[%s] tmp_addr: 0x%lx\n", __func__, tmp_addr);
-+
-+	/* kernel_addr == 0x400000 */
- 	status = efi_relocate_kernel(&kernel_addr, kernel_fsize, kernel_asize,
- 		     EFI_KIMG_PREFERRED_ADDRESS, efi_get_kimg_min_align(), 0x0);
-+	efi_info("@@@[%s] kernel_addr: 0x%lx\n", __func__, kernel_addr);
+-unsigned long __weak kernel_entry_address(void)
++unsigned long __weak kernel_entry_address(unsigned long kernel_addr)
+ {
+-	return *(unsigned long *)(PHYSADDR(VMLINUX_LOAD_ADDRESS) + 8);
++	return *(unsigned long *)(kernel_addr + 8) - VMLINUX_LOAD_ADDRESS + kernel_addr;
+ }
  
- 	*image_addr = kernel_addr;
- 	*image_size = kernel_asize;
+ efi_status_t efi_boot_kernel(void *handle, efi_loaded_image_t *image,
+@@ -73,7 +73,7 @@ efi_status_t efi_boot_kernel(void *handle, efi_loaded_image_t *image,
+ 	csr_write64(CSR_DMW0_INIT, LOONGARCH_CSR_DMWIN0);
+ 	csr_write64(CSR_DMW1_INIT, LOONGARCH_CSR_DMWIN1);
+ 
+-	real_kernel_entry = (void *)kernel_entry_address();
++	real_kernel_entry = (void *)kernel_entry_address(kernel_addr);
+ 
+ 	real_kernel_entry(true, (unsigned long)cmdline_ptr,
+ 			  (unsigned long)efi_system_table);
 -- 
 2.27.0
 
