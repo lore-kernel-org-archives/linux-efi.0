@@ -1,59 +1,67 @@
 Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0275C28E0D;
-	Fri, 15 Dec 2023 12:26:18 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EAF222C6A9;
+	Fri, 15 Dec 2023 12:26:19 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="cjUlkx06";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="7c3nAJds";
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="shzlDVD2";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="UDml0Zja"
-Received: from imap2.dmz-prg2.suse.org (imap2.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:98])
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="X/7I8fRr";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="JCPzv0rT";
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="X/7I8fRr";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="JCPzv0rT"
+Received: from imap2.dmz-prg2.suse.org (imap2.dmz-prg2.suse.org [10.150.64.98])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id E26BA22018;
-	Fri, 15 Dec 2023 12:26:16 +0000 (UTC)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id 01A46220D6;
+	Fri, 15 Dec 2023 12:26:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1702643177; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=KqD1KC9XZSP4L8dzgJw0+F9VPRBQ4UFcAI+KfVQOw7c=;
-	b=cjUlkx06BUesajNAo6xtnYGPY1VVmLWsbPrC1XCNDyqCzrBzBIJrYSpfOgqkRMKU/7Lxns
-	Ms9svf17QGrflk7yI1NmG8hHn44jlonIsbnjJ6HC5eoha7cgaJXxJSH1Ge4HCsS6arVY7U
-	/PwTQFvK8m5ql7a38EfXdFE3o9dUJnI=
+	t=1702643178; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=wIKNTENIo3WMFUa1p7gLGW1/C1ipjjdUcxT2AmkwTno=;
+	b=X/7I8fRryaEc8HSxjBRqjkSOkZ2vOmwM0RwlzqCtKCqcTYiRWUMx8zpO09Bk678SwRml81
+	G6df7QWcFeoR5+SGZISyuGiMEMkOvgfD2+qhJtQKQ/HjjnnNjRE9t6SNFTxaoSkYP92/G0
+	VguBAJ13XAtF64jIFbuFB7duWj57p+U=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1702643177;
+	s=susede2_ed25519; t=1702643178;
 	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=KqD1KC9XZSP4L8dzgJw0+F9VPRBQ4UFcAI+KfVQOw7c=;
-	b=7c3nAJdsbXcqaVIyseZ/vbfDHIeUz067v+1KAD89dNHvSk9ri2UBhEYwoM+nj3Cy3GFbHt
-	/rVKJLqJJIyBPwBg==
+	 mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=wIKNTENIo3WMFUa1p7gLGW1/C1ipjjdUcxT2AmkwTno=;
+	b=JCPzv0rTI4f8Ny5kjCMdBmJMNcx546v7M5ueqkgVoZXpnP1DW12ed5AnYfLGxx+1idtRob
+	zRlMpDWh6clhFuBg==
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1702643176; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=KqD1KC9XZSP4L8dzgJw0+F9VPRBQ4UFcAI+KfVQOw7c=;
-	b=shzlDVD2svSNH59bqqPkWnAodpJaIXOYeYW5yD+9qfdesY9Q8vVomqQsUnpUOlxb/7BrfS
-	Qq5deKnxrHbjgZ7lIm9TGH/Z3YxzVbsEN/J6z/leqIoHYDknFYS8CWxdfCK1L1cw3CXdun
-	QRBLhzlGPHfYPh3DszRGOKRfTVyfFF0=
+	t=1702643178; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=wIKNTENIo3WMFUa1p7gLGW1/C1ipjjdUcxT2AmkwTno=;
+	b=X/7I8fRryaEc8HSxjBRqjkSOkZ2vOmwM0RwlzqCtKCqcTYiRWUMx8zpO09Bk678SwRml81
+	G6df7QWcFeoR5+SGZISyuGiMEMkOvgfD2+qhJtQKQ/HjjnnNjRE9t6SNFTxaoSkYP92/G0
+	VguBAJ13XAtF64jIFbuFB7duWj57p+U=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1702643176;
+	s=susede2_ed25519; t=1702643178;
 	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
-	bh=KqD1KC9XZSP4L8dzgJw0+F9VPRBQ4UFcAI+KfVQOw7c=;
-	b=UDml0ZjaLtv19cqheIHTnwsZ9nK+ZMRfHJo/36H5DWvjGgUhffmEyt1i8AmMlobkY749VH
-	E+xIh4TIbRKsUEBw==
+	 mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=wIKNTENIo3WMFUa1p7gLGW1/C1ipjjdUcxT2AmkwTno=;
+	b=JCPzv0rTI4f8Ny5kjCMdBmJMNcx546v7M5ueqkgVoZXpnP1DW12ed5AnYfLGxx+1idtRob
+	zRlMpDWh6clhFuBg==
 Received: from imap2.dmz-prg2.suse.org (localhost [127.0.0.1])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
-	by imap2.dmz-prg2.suse.org (Postfix) with ESMTPS id 6195113A08;
-	Fri, 15 Dec 2023 12:26:16 +0000 (UTC)
+	by imap2.dmz-prg2.suse.org (Postfix) with ESMTPS id 7E31213A08;
+	Fri, 15 Dec 2023 12:26:17 +0000 (UTC)
 Received: from dovecot-director2.suse.de ([10.150.64.162])
 	by imap2.dmz-prg2.suse.org with ESMTPSA
-	id FqyeFuhFfGVIRwAAn2gu4w
-	(envelope-from <tzimmermann@suse.de>); Fri, 15 Dec 2023 12:26:16 +0000
+	id 2BmqHelFfGVIRwAAn2gu4w
+	(envelope-from <tzimmermann@suse.de>); Fri, 15 Dec 2023 12:26:17 +0000
 From: Thomas Zimmermann <tzimmermann@suse.de>
 To: ardb@kernel.org,
 	tglx@linutronix.de,
@@ -77,10 +85,12 @@ Cc: linux-arch@vger.kernel.org,
 	linux-integrity@vger.kernel.org,
 	linux-security-module@vger.kernel.org,
 	Thomas Zimmermann <tzimmermann@suse.de>
-Subject: [PATCH v2 0/3] arch/x86: Remove unnecessary dependencies on bootparam.h
-Date: Fri, 15 Dec 2023 13:18:11 +0100
-Message-ID: <20231215122614.5481-1-tzimmermann@suse.de>
+Subject: [PATCH v2 2/3] arch/x86: Add <asm/ima-efi.h> for arch_ima_efi_boot_mode
+Date: Fri, 15 Dec 2023 13:18:13 +0100
+Message-ID: <20231215122614.5481-3-tzimmermann@suse.de>
 X-Mailer: git-send-email 2.43.0
+In-Reply-To: <20231215122614.5481-1-tzimmermann@suse.de>
+References: <20231215122614.5481-1-tzimmermann@suse.de>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -88,127 +98,150 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Spam-Level: *******
-X-Spam-Level: 
-X-Spamd-Bar: /
+X-Spam-Score: 2.23
+X-Spam-Flag: NO
 Authentication-Results: smtp-out1.suse.de;
-	dkim=pass header.d=suse.de header.s=susede2_rsa header.b=shzlDVD2;
-	dkim=pass header.d=suse.de header.s=susede2_ed25519 header.b=UDml0Zja
-X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
-X-Spamd-Result: default: False [-0.00 / 50.00];
-	 RCVD_VIA_SMTP_AUTH(0.00)[];
-	 SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:98:from];
-	 TO_DN_SOME(0.00)[];
-	 R_MISSING_CHARSET(2.50)[];
-	 BROKEN_CONTENT_TYPE(1.50)[];
-	 R_RATELIMIT(0.00)[to_ip_from(RL8bnzzinbm939qqjaserdumcx)];
-	 RCVD_COUNT_THREE(0.00)[3];
-	 DKIM_TRACE(0.00)[suse.de:+];
-	 MX_GOOD(-0.01)[];
-	 NEURAL_HAM_SHORT(-0.19)[-0.962];
-	 FREEMAIL_TO(0.00)[kernel.org,linutronix.de,redhat.com,alien8.de,linux.intel.com,zytor.com,google.com,arndb.de,linux.ibm.com,gmail.com,paul-moore.com,namei.org,hallyn.com];
-	 FROM_EQ_ENVFROM(0.00)[];
-	 MIME_TRACE(0.00)[0:+];
-	 BAYES_HAM(-3.00)[100.00%];
+	none
+X-Spam-Level: **
+X-Spam-Score: 2.23
+X-Spamd-Result: default: False [2.23 / 50.00];
 	 ARC_NA(0.00)[];
-	 R_DKIM_ALLOW(-0.20)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	 RCVD_VIA_SMTP_AUTH(0.00)[];
+	 BAYES_HAM(-3.00)[100.00%];
 	 FROM_HAS_DN(0.00)[];
-	 DWL_DNSWL_MED(-2.00)[suse.de:dkim];
+	 TO_DN_SOME(0.00)[];
 	 FREEMAIL_ENVRCPT(0.00)[gmail.com];
-	 TO_MATCH_ENVRCPT_ALL(0.00)[];
+	 R_MISSING_CHARSET(2.50)[];
 	 TAGGED_RCPT(0.00)[];
 	 MIME_GOOD(-0.10)[text/plain];
+	 BROKEN_CONTENT_TYPE(1.50)[];
+	 TO_MATCH_ENVRCPT_ALL(0.00)[];
 	 NEURAL_HAM_LONG(-1.00)[-1.000];
+	 R_RATELIMIT(0.00)[to_ip_from(RLthqzz6q5hnubohss7ffybi86)];
+	 RCVD_COUNT_THREE(0.00)[3];
 	 DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	 NEURAL_HAM_SHORT(-0.17)[-0.833];
 	 RCPT_COUNT_TWELVE(0.00)[22];
 	 MID_CONTAINS_FROM(1.00)[];
-	 DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:dkim];
+	 DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:email];
+	 FREEMAIL_TO(0.00)[kernel.org,linutronix.de,redhat.com,alien8.de,linux.intel.com,zytor.com,google.com,arndb.de,linux.ibm.com,gmail.com,paul-moore.com,namei.org,hallyn.com];
 	 FUZZY_BLOCKED(0.00)[rspamd.com];
+	 FROM_EQ_ENVFROM(0.00)[];
+	 MIME_TRACE(0.00)[0:+];
 	 RCVD_TLS_ALL(0.00)[];
-	 SUSPICIOUS_RECIPS(1.50)[];
-	 RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:98:from]
-X-Spam-Score: -0.00
-X-Rspamd-Queue-Id: E26BA22018
+	 SUSPICIOUS_RECIPS(1.50)[]
 X-Spam-Flag: NO
 
-Reduce built time in some cases by removing unnecessary include statements
-for <asm/bootparam.h>. Reorganize some header files accordingly.
+The header file <asm/efi.h> contains the macro arch_ima_efi_boot_mode,
+which expands to use struct boot_params from <asm/bootparams.h>. Many
+drivers include <linux/efi.h>, but do not use boot parameters. Changes
+to bootparam.h or its included headers can easily trigger large,
+unnessary rebuilds of the kernel.
 
-While working on the kernel's boot-up graphics, I noticed that touching
-include/linux/screen_info.h triggers a complete rebuild of the kernel
-on x86. It turns out that the architecture's PCI and EFI headers include
-<asm/bootparam.h>, which depends on <linux/screen_info.h>. But none of
-the drivers have any business with boot parameters or the screen_info
-state.
+Moving x86's arch_ima_efi_boot_mode to <asm/ima-efi.h> and including
+<asm/setup.h> separates that dependency from the rest of the EFI
+interfaces. The only user is in ima_efi.c. As the file already declares
+a default value for arch_ima_efi_boot_mode, move this define into
+asm-generic for all other architectures.
 
-The patchset moves code from bootparam.h and efi.h into separate header
-files and removes obsolete include statements on x86. I did
-
-  make allmodconfig
-  make -j28
-  touch include/linus/screen_info.h
-  time make -j28
-
-to measure the time it takes to rebuild. Results without the patchset
-are around 20 minutes.
-
-  real    20m46,705s
-  user    354m29,166s
-  sys     28m27,359s
-
-And with the patchset applied it goes down to less than one minute.
-
-  real    0m56,643s
-  user    4m0,661s
-  sys     0m32,956s
-
-The test system is an Intel i5-13500.
+With arch_ima_efi_boot_mode removed from efi.h, <asm/bootparam.h> can
+later be removed from further x86 header files.
 
 v2:
-	* only keep struct boot_params in bootparam.h (Ard)
-	* simplify arch_ima_efi_boot_mode define (Ard)
-	* updated cover letter
+	* remove extra declaration of boot_params (Ard)
 
-Thomas Zimmermann (3):
-  arch/x86: Move UAPI setup structures into setup_data.h
-  arch/x86: Add <asm/ima-efi.h> for arch_ima_efi_boot_mode
-  arch/x86: Do not include <asm/bootparam.h> in several header files
-
- arch/x86/boot/compressed/acpi.c        |   2 +
- arch/x86/boot/compressed/cmdline.c     |   2 +
- arch/x86/boot/compressed/efi.c         |   2 +
- arch/x86/boot/compressed/misc.h        |   3 +-
- arch/x86/boot/compressed/pgtable_64.c  |   1 +
- arch/x86/boot/compressed/sev.c         |   1 +
- arch/x86/include/asm/e820/types.h      |   2 +-
- arch/x86/include/asm/efi.h             |   3 -
- arch/x86/include/asm/ima-efi.h         |  11 ++
- arch/x86/include/asm/kexec.h           |   1 -
- arch/x86/include/asm/mem_encrypt.h     |   2 +-
- arch/x86/include/asm/pci.h             |   2 +-
- arch/x86/include/asm/sev.h             |   3 +-
- arch/x86/include/asm/x86_init.h        |   2 -
- arch/x86/include/uapi/asm/bootparam.h  | 218 +----------------------
- arch/x86/include/uapi/asm/setup_data.h | 229 +++++++++++++++++++++++++
- arch/x86/kernel/crash.c                |   1 +
- arch/x86/kernel/sev-shared.c           |   2 +
- arch/x86/platform/pvh/enlighten.c      |   1 +
- arch/x86/xen/enlighten_pvh.c           |   1 +
- arch/x86/xen/vga.c                     |   1 -
- include/asm-generic/Kbuild             |   1 +
- include/asm-generic/ima-efi.h          |  16 ++
- security/integrity/ima/ima_efi.c       |   5 +-
- 24 files changed, 279 insertions(+), 233 deletions(-)
+Signed-off-by: Thomas Zimmermann <tzimmermann@suse.de>
+---
+ arch/x86/include/asm/efi.h       |  3 ---
+ arch/x86/include/asm/ima-efi.h   | 11 +++++++++++
+ include/asm-generic/Kbuild       |  1 +
+ include/asm-generic/ima-efi.h    | 16 ++++++++++++++++
+ security/integrity/ima/ima_efi.c |  5 +----
+ 5 files changed, 29 insertions(+), 7 deletions(-)
  create mode 100644 arch/x86/include/asm/ima-efi.h
- create mode 100644 arch/x86/include/uapi/asm/setup_data.h
  create mode 100644 include/asm-generic/ima-efi.h
 
-
-base-commit: 961ef418705ac5808345e883acd91f8ce167e00b
-prerequisite-patch-id: 0aa359f6144c4015c140c8a6750be19099c676fb
-prerequisite-patch-id: c67e5d886a47b7d0266d81100837557fda34cb24
-prerequisite-patch-id: cbc453ee02fae02af22fbfdce56ab732c7a88c36
-prerequisite-patch-id: e7a5405fb48608e0c8e3b41bf983fefa2c8bd1f3
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index c4555b269a1b..99f31176c892 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -418,9 +418,6 @@ extern int __init efi_memmap_split_count(efi_memory_desc_t *md,
+ extern void __init efi_memmap_insert(struct efi_memory_map *old_memmap,
+ 				     void *buf, struct efi_mem_range *mem);
+ 
+-#define arch_ima_efi_boot_mode	\
+-	({ extern struct boot_params boot_params; boot_params.secure_boot; })
+-
+ #ifdef CONFIG_EFI_RUNTIME_MAP
+ int efi_get_runtime_map_size(void);
+ int efi_get_runtime_map_desc_size(void);
+diff --git a/arch/x86/include/asm/ima-efi.h b/arch/x86/include/asm/ima-efi.h
+new file mode 100644
+index 000000000000..b4d904e66b39
+--- /dev/null
++++ b/arch/x86/include/asm/ima-efi.h
+@@ -0,0 +1,11 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++#ifndef _ASM_X86_IMA_EFI_H
++#define _ASM_X86_IMA_EFI_H
++
++#include <asm/setup.h>
++
++#define arch_ima_efi_boot_mode boot_params.secure_boot
++
++#include <asm-generic/ima-efi.h>
++
++#endif /* _ASM_X86_IMA_EFI_H */
+diff --git a/include/asm-generic/Kbuild b/include/asm-generic/Kbuild
+index def242528b1d..4fd16e71e8cd 100644
+--- a/include/asm-generic/Kbuild
++++ b/include/asm-generic/Kbuild
+@@ -26,6 +26,7 @@ mandatory-y += ftrace.h
+ mandatory-y += futex.h
+ mandatory-y += hardirq.h
+ mandatory-y += hw_irq.h
++mandatory-y += ima-efi.h
+ mandatory-y += io.h
+ mandatory-y += irq.h
+ mandatory-y += irq_regs.h
+diff --git a/include/asm-generic/ima-efi.h b/include/asm-generic/ima-efi.h
+new file mode 100644
+index 000000000000..f87f5edef440
+--- /dev/null
++++ b/include/asm-generic/ima-efi.h
+@@ -0,0 +1,16 @@
++/* SPDX-License-Identifier: GPL-2.0+ */
++
++#ifndef __ASM_GENERIC_IMA_EFI_H_
++#define __ASM_GENERIC_IMA_EFI_H_
++
++#include <linux/efi.h>
++
++/*
++ * Only include this header file from your architecture's <asm/ima-efi.h>.
++ */
++
++#ifndef arch_ima_efi_boot_mode
++#define arch_ima_efi_boot_mode efi_secureboot_mode_unset
++#endif
++
++#endif /* __ASM_GENERIC_FB_H_ */
+diff --git a/security/integrity/ima/ima_efi.c b/security/integrity/ima/ima_efi.c
+index 138029bfcce1..56bbee271cec 100644
+--- a/security/integrity/ima/ima_efi.c
++++ b/security/integrity/ima/ima_efi.c
+@@ -6,10 +6,7 @@
+ #include <linux/module.h>
+ #include <linux/ima.h>
+ #include <asm/efi.h>
+-
+-#ifndef arch_ima_efi_boot_mode
+-#define arch_ima_efi_boot_mode efi_secureboot_mode_unset
+-#endif
++#include <asm/ima-efi.h>
+ 
+ static enum efi_secureboot_mode get_sb_mode(void)
+ {
 -- 
 2.43.0
 
