@@ -1,39 +1,39 @@
 Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B3D70290E;
-	Thu, 21 Dec 2023 00:24:46 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DE92D5CB0;
+	Thu, 21 Dec 2023 00:24:47 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="GhxiK8gQ"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="J38KJWBr"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1703118286; x=1734654286;
+  t=1703118288; x=1734654288;
   h=from:date:subject:mime-version:content-transfer-encoding:
    message-id:references:in-reply-to:to:cc;
-  bh=zIWhIRcV76GfackzOVRO6PLFxmhAI6EHp2TzwnX1E/4=;
-  b=GhxiK8gQy+GPFb6XHVB1WlGqbkxOYNGGD8wrBCWivGe+S8Fu3rTOu4bb
-   2vtlIfTUtN+TdZHQmpWbzwdLVvxIt2G0gisy/XqUOm0V8GNOoecoDhKdj
-   fiE9L3TcKrVPE0ZVtjzWRUdFTSApKivsRdj7r4Ei7eT5XtxgOT+XLfPqt
-   dDwZDRdYsOcUkbFDhjozjghG986JynBPTFOJq5AP06OFJXeLm2G7jNpF+
-   6OccJXjZNo9Adprc5YwNlv4ffB4tfYpFQbf9t8xetIRWVAGwFtg7rfdEh
-   xIVg7nl2rte+W9mcknckBbvX+BqEW1NpIXUJflbiyixFk99rm87R2xg6r
+  bh=N2E+XqjGpnp5wSMKK1QhwJx7oXQI3n2Jb8mKT2WB0Jk=;
+  b=J38KJWBrKwUAAuAdihCokLofSIbf8qqOPv7OIaIl0UEraPHYQwyAV8Qv
+   CsnGzEBkZwH+cdPkO+QHHsgtIoSYco7O8C+eDhqP30pW9Nu9k5IXI8Zgf
+   4oxT8IOKlBAYe9RxgjB3WE2BN58PvcGNFUQXzzApboeShQ8GpAeCyuZC3
+   vMmz2bPzHbwpEphmNJ+vKV4qmuCgWhd7iSppZD4cggXdsN9wR+lZZBYc2
+   kOeRfY8UtS9p9wGyc4uhM0umkDfDPbiR/GrODdiYu92dfwQwoQ8Z+N6Xy
+   iY6jGE0UhEk/H73bTA+cXOXOwTQatJ8HpTJYQ04v4jiNER7Keyne3sLYL
    w==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10930"; a="2730075"
+X-IronPort-AV: E=McAfee;i="6600,9927,10930"; a="2730089"
 X-IronPort-AV: E=Sophos;i="6.04,292,1695711600"; 
-   d="scan'208";a="2730075"
+   d="scan'208";a="2730089"
 Received: from fmsmga006.fm.intel.com ([10.253.24.20])
-  by orvoesa103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Dec 2023 16:24:42 -0800
+  by orvoesa103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Dec 2023 16:24:43 -0800
 X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10930"; a="1023661632"
+X-IronPort-AV: E=McAfee;i="6600,9927,10930"; a="1023661638"
 X-IronPort-AV: E=Sophos;i="6.04,292,1695711600"; 
-   d="scan'208";a="1023661632"
+   d="scan'208";a="1023661638"
 Received: from iweiny-desk3.amr.corp.intel.com (HELO localhost) ([10.212.30.219])
-  by fmsmga006-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Dec 2023 16:24:41 -0800
+  by fmsmga006-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Dec 2023 16:24:42 -0800
 From: Ira Weiny <ira.weiny@intel.com>
-Date: Wed, 20 Dec 2023 16:17:34 -0800
-Subject: [PATCH v5 7/9] acpi/ghes: Process CXL Component Events
+Date: Wed, 20 Dec 2023 16:17:36 -0800
+Subject: [PATCH v5 9/9] cxl/pci: Register for and process CPER events
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -42,7 +42,7 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20231220-cxl-cper-v5-7-1bb8a4ca2c7a@intel.com>
+Message-Id: <20231220-cxl-cper-v5-9-1bb8a4ca2c7a@intel.com>
 References: <20231220-cxl-cper-v5-0-1bb8a4ca2c7a@intel.com>
 In-Reply-To: <20231220-cxl-cper-v5-0-1bb8a4ca2c7a@intel.com>
 To: Dan Williams <dan.j.williams@intel.com>, 
@@ -54,228 +54,217 @@ Cc: Yazen Ghannam <yazen.ghannam@amd.com>,
  Alison Schofield <alison.schofield@intel.com>, 
  Vishal Verma <vishal.l.verma@intel.com>, Ard Biesheuvel <ardb@kernel.org>, 
  linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, 
- linux-cxl@vger.kernel.org, Ira Weiny <ira.weiny@intel.com>, 
- "Rafael J. Wysocki" <rafael@kernel.org>
+ linux-cxl@vger.kernel.org, Ira Weiny <ira.weiny@intel.com>
 X-Mailer: b4 0.13-dev-2539e
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1703118276; l=6682;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1703118276; l=7019;
  i=ira.weiny@intel.com; s=20221222; h=from:subject:message-id;
- bh=zIWhIRcV76GfackzOVRO6PLFxmhAI6EHp2TzwnX1E/4=;
- b=kzwveYs9u8kMzJVr08jIAxsoGQU5jtLN8qMJHQByo21XnjKJy4fbZJITYT/sWD9zYjWYJOi9y
- kJssL1T9j9uCjg4bVPugooEY0vQrFYPeAaWA6WUOEShWTpPB8fULSx3
+ bh=N2E+XqjGpnp5wSMKK1QhwJx7oXQI3n2Jb8mKT2WB0Jk=;
+ b=t+Uj4uCd8zoHdRNz3XoTEQSndDRLGtOqg9MDncjf36jHTmddMAO3wDdY7qt1VvrKkeEyKGxSx
+ K8y8r6AbFgqBzXbrB3PmaUaOZV67ykEVcevs4dF58M3qGUHEuyARiSA
 X-Developer-Key: i=ira.weiny@intel.com; a=ed25519;
  pk=brwqReAJklzu/xZ9FpSsMPSQ/qkSalbg6scP3w809Ec=
 
-BIOS can configure memory devices as firmware first.  This will send CXL
-events to the firmware instead of the OS.  The firmware can then send
-these events to the OS via UEFI.
+If the firmware has configured CXL event support to be firmware first
+the OS can process those events through CPER records.  The CXL layer has
+unique DPA to HPA knowledge and standard event trace parsing in place.
 
-UEFI v2.10 section N.2.14 defines a Common Platform Error Record (CPER)
-format for CXL Component Events.  The format is mostly the same as the
-CXL Common Event Record Format.  The difference is the use of a GUID in
-the Section Type rather than a UUID as part of the event itself.
+CPER records contain Bus, Device, Function information which can be used
+to identify the PCI device which is sending the event.
 
-Add GHES support to detect CXL CPER records and call a registered
-callback with the event.
+Change the PCI driver registration to include registration of a CXL
+CPER callback to process events through the trace subsystem.
 
-A notifier chain was considered for the callback but the complexity did
-not justify the use case as only the CXL subsystem requires this event.
-Enforce that only one callback can be registered at any time.
+Use new scoped based management to simplify the handling of the PCI
+device object.
 
-Cc: Ard Biesheuvel <ardb@kernel.org>
-Cc: "Rafael J. Wysocki" <rafael@kernel.org>
-Signed-off-by: Ira Weiny <ira.weiny@intel.com>
+NOTE this patch depends on Dan's addition of a device guard[1].
+
+[1] https://lore.kernel.org/all/170250854466.1522182.17555361077409628655.stgit@dwillia2-xfh.jf.intel.com/
 
 ---
-Ard, Due to Dan's feedback[1] the code is moved to ghes which is
-entirely in Rafael's subsystem.  That said I have left you on the CC so
-you know what is going on.
-
-Changes for v5
-[Smita/djbw: move section type parsing and callback to ghes_do_proc()]
-[Smita/djbw: Fix __packed usage]
-[djbw/Jonathan: s/notifier/callback/]
-[Jonathan: fix typo]
-[iweiny: Eliminate parsing the section type a 2nd time]
-[iweiny: update error messages]
-
-[1] https://lore.kernel.org/all/6580b21723b2c_269bd294f8@dwillia2-mobl3.amr.corp.intel.com.notmuch/
+Changes for v5:
+[Smita/djbw: trace a generic UUID if the type is unknown]
+[Jonathan: clean up pci and device state error handling]
+[iweiny: consolidate the trace function]
 ---
- drivers/acpi/apei/ghes.c  | 88 +++++++++++++++++++++++++++++++++++++++++++++++
- include/linux/cxl-event.h | 50 +++++++++++++++++++++++++++
- 2 files changed, 138 insertions(+)
+ drivers/cxl/core/mbox.c   | 49 ++++++++++++++++++++++++++++-----------
+ drivers/cxl/cxlmem.h      |  4 ++++
+ drivers/cxl/pci.c         | 58 ++++++++++++++++++++++++++++++++++++++++++++++-
+ include/linux/cxl-event.h |  1 +
+ 4 files changed, 98 insertions(+), 14 deletions(-)
 
-diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-index 63ad0541db38..aed465d2fd68 100644
---- a/drivers/acpi/apei/ghes.c
-+++ b/drivers/acpi/apei/ghes.c
-@@ -26,6 +26,7 @@
- #include <linux/interrupt.h>
- #include <linux/timer.h>
- #include <linux/cper.h>
-+#include <linux/cxl-event.h>
- #include <linux/platform_device.h>
- #include <linux/mutex.h>
- #include <linux/ratelimit.h>
-@@ -657,6 +658,78 @@ static void ghes_defer_non_standard_event(struct acpi_hest_generic_data *gdata,
- 	schedule_work(&entry->work);
+diff --git a/drivers/cxl/core/mbox.c b/drivers/cxl/core/mbox.c
+index 06957696247b..b801faaccd45 100644
+--- a/drivers/cxl/core/mbox.c
++++ b/drivers/cxl/core/mbox.c
+@@ -836,21 +836,44 @@ int cxl_enumerate_cmds(struct cxl_memdev_state *mds)
+ }
+ EXPORT_SYMBOL_NS_GPL(cxl_enumerate_cmds, CXL);
+ 
+-static void cxl_event_trace_record(const struct cxl_memdev *cxlmd,
+-				   enum cxl_event_log_type type,
+-				   struct cxl_event_record_raw *record)
++void cxl_event_trace_record(const struct cxl_memdev *cxlmd,
++			    enum cxl_event_log_type type,
++			    enum cxl_event_type event_type,
++			    const uuid_t *uuid, union cxl_event *evt)
+ {
+-	union cxl_event *evt = &record->event;
+-	uuid_t *id = &record->id;
+-
+-	if (uuid_equal(id, &CXL_EVENT_GEN_MEDIA_UUID))
++	switch (event_type) {
++	case CXL_CPER_EVENT_GEN_MEDIA:
+ 		trace_cxl_general_media(cxlmd, type, &evt->gen_media);
+-	else if (uuid_equal(id, &CXL_EVENT_DRAM_UUID))
++		break;
++	case CXL_CPER_EVENT_DRAM:
+ 		trace_cxl_dram(cxlmd, type, &evt->dram);
+-	else if (uuid_equal(id, &CXL_EVENT_MEM_MODULE_UUID))
++		break;
++	case CXL_CPER_EVENT_MEM_MODULE:
+ 		trace_cxl_memory_module(cxlmd, type, &evt->mem_module);
+-	else
+-		trace_cxl_generic_event(cxlmd, type, id, &evt->generic);
++		break;
++	case CXL_CPER_EVENT_GENERIC:
++	default:
++		trace_cxl_generic_event(cxlmd, type, uuid, &evt->generic);
++		break;
++	}
++}
++EXPORT_SYMBOL_NS_GPL(cxl_event_trace_record, CXL);
++
++static void __cxl_event_trace_record(const struct cxl_memdev *cxlmd,
++				     enum cxl_event_log_type type,
++				     struct cxl_event_record_raw *record)
++{
++	enum cxl_event_type ev_type = CXL_CPER_EVENT_GENERIC;
++	const uuid_t *uuid = &record->id;
++
++	if (uuid_equal(uuid, &CXL_EVENT_GEN_MEDIA_UUID))
++		ev_type = CXL_CPER_EVENT_GEN_MEDIA;
++	else if (uuid_equal(uuid, &CXL_EVENT_DRAM_UUID))
++		ev_type = CXL_CPER_EVENT_DRAM;
++	else if (uuid_equal(uuid, &CXL_EVENT_MEM_MODULE_UUID))
++		ev_type = CXL_CPER_EVENT_MEM_MODULE;
++
++	cxl_event_trace_record(cxlmd, type, ev_type, uuid, &record->event);
  }
  
-+/*
-+ * Only a single callback can be registered for CXL CPER events.
-+ */
-+static DECLARE_RWSEM(cxl_cper_rw_sem);
-+static cxl_cper_callback cper_callback;
-+
-+/* CXL Event record UUIDs are formated as GUIDs and reported in section type */
-+
-+/*
-+ * General Media Event Record
-+ * CXL rev 3.0 Section 8.2.9.2.1.1; Table 8-43
-+ */
-+#define CPER_SEC_CXL_GEN_MEDIA_GUID					\
-+	GUID_INIT(0xfbcd0a77, 0xc260, 0x417f,				\
-+		  0x85, 0xa9, 0x08, 0x8b, 0x16, 0x21, 0xeb, 0xa6)
-+
-+/*
-+ * DRAM Event Record
-+ * CXL rev 3.0 section 8.2.9.2.1.2; Table 8-44
-+ */
-+#define CPER_SEC_CXL_DRAM_GUID						\
-+	GUID_INIT(0x601dcbb3, 0x9c06, 0x4eab,				\
-+		  0xb8, 0xaf, 0x4e, 0x9b, 0xfb, 0x5c, 0x96, 0x24)
-+
-+/*
-+ * Memory Module Event Record
-+ * CXL rev 3.0 section 8.2.9.2.1.3; Table 8-45
-+ */
-+#define CPER_SEC_CXL_MEM_MODULE_GUID					\
-+	GUID_INIT(0xfe927475, 0xdd59, 0x4339,				\
-+		  0xa5, 0x86, 0x79, 0xba, 0xb1, 0x13, 0xb7, 0x74)
-+
-+static void cxl_cper_post_event(enum cxl_event_type event_type,
+ static int cxl_clear_event_record(struct cxl_memdev_state *mds,
+@@ -961,8 +984,8 @@ static void cxl_mem_get_records_log(struct cxl_memdev_state *mds,
+ 			break;
+ 
+ 		for (i = 0; i < nr_rec; i++)
+-			cxl_event_trace_record(cxlmd, type,
+-					       &payload->records[i]);
++			__cxl_event_trace_record(cxlmd, type,
++						 &payload->records[i]);
+ 
+ 		if (payload->flags & CXL_GET_EVENT_FLAG_OVERFLOW)
+ 			trace_cxl_overflow(cxlmd, type, payload);
+diff --git a/drivers/cxl/cxlmem.h b/drivers/cxl/cxlmem.h
+index e5d770e26e02..80076c235073 100644
+--- a/drivers/cxl/cxlmem.h
++++ b/drivers/cxl/cxlmem.h
+@@ -802,6 +802,10 @@ void set_exclusive_cxl_commands(struct cxl_memdev_state *mds,
+ void clear_exclusive_cxl_commands(struct cxl_memdev_state *mds,
+ 				  unsigned long *cmds);
+ void cxl_mem_get_event_records(struct cxl_memdev_state *mds, u32 status);
++void cxl_event_trace_record(const struct cxl_memdev *cxlmd,
++			    enum cxl_event_log_type type,
++			    enum cxl_event_type event_type,
++			    const uuid_t *uuid, union cxl_event *evt);
+ int cxl_set_timestamp(struct cxl_memdev_state *mds);
+ int cxl_poison_state_init(struct cxl_memdev_state *mds);
+ int cxl_mem_get_poison(struct cxl_memdev *cxlmd, u64 offset, u64 len,
+diff --git a/drivers/cxl/pci.c b/drivers/cxl/pci.c
+index 0155fb66b580..b14237f824cf 100644
+--- a/drivers/cxl/pci.c
++++ b/drivers/cxl/pci.c
+@@ -1,5 +1,6 @@
+ // SPDX-License-Identifier: GPL-2.0-only
+ /* Copyright(c) 2020 Intel Corporation. All rights reserved. */
++#include <asm-generic/unaligned.h>
+ #include <linux/io-64-nonatomic-lo-hi.h>
+ #include <linux/moduleparam.h>
+ #include <linux/module.h>
+@@ -969,6 +970,61 @@ static struct pci_driver cxl_pci_driver = {
+ 	},
+ };
+ 
++#define CXL_EVENT_HDR_FLAGS_REC_SEVERITY GENMASK(1, 0)
++static void cxl_cper_event_call(enum cxl_event_type ev_type,
 +				struct cxl_cper_event_rec *rec)
 +{
-+	if (rec->hdr.length <= sizeof(rec->hdr) ||
-+	    rec->hdr.length > sizeof(*rec)) {
-+		pr_err(FW_WARN "CXL CPER Invalid section length (%u)\n",
-+		       rec->hdr.length);
++	struct cper_cxl_event_devid *device_id = &rec->hdr.device_id;
++	struct pci_dev *pdev __free(pci_dev_put) = NULL;
++	enum cxl_event_log_type log_type;
++	struct cxl_dev_state *cxlds;
++	unsigned int devfn;
++	u32 hdr_flags;
++
++	devfn = PCI_DEVFN(device_id->device_num, device_id->func_num);
++	pdev = pci_get_domain_bus_and_slot(device_id->segment_num,
++					   device_id->bus_num, devfn);
++	if (!pdev)
 +		return;
-+	}
 +
-+	if (!(rec->hdr.validation_bits & CPER_CXL_COMP_EVENT_LOG_VALID)) {
-+		pr_err(FW_WARN "CXL CPER invalid event\n");
++	guard(device)(&pdev->dev);
++	if (pdev->driver != &cxl_pci_driver)
 +		return;
-+	}
 +
-+	guard(rwsem_read)(&cxl_cper_rw_sem);
-+	if (cper_callback)
-+		cper_callback(event_type, rec);
++	cxlds = pci_get_drvdata(pdev);
++	if (!cxlds)
++		return;
++
++	/* Fabricate a log type */
++	hdr_flags = get_unaligned_le24(rec->event.generic.hdr.flags);
++	log_type = FIELD_GET(CXL_EVENT_HDR_FLAGS_REC_SEVERITY, hdr_flags);
++
++	cxl_event_trace_record(cxlds->cxlmd, log_type, ev_type,
++			       &uuid_null, &rec->event);
 +}
 +
-+int cxl_cper_register_callback(cxl_cper_callback callback)
++static int __init cxl_pci_driver_init(void)
 +{
-+	guard(rwsem_write)(&cxl_cper_rw_sem);
-+	if (cper_callback)
-+		return -EINVAL;
-+	cper_callback = callback;
-+	return 0;
-+}
-+EXPORT_SYMBOL_NS_GPL(cxl_cper_register_callback, CXL);
++	int rc;
 +
-+int cxl_cper_unregister_callback(cxl_cper_callback callback)
++	rc = pci_register_driver(&cxl_pci_driver);
++	if (rc)
++		return rc;
++
++	rc = cxl_cper_register_callback(cxl_cper_event_call);
++	if (rc)
++		pci_unregister_driver(&cxl_pci_driver);
++
++	return rc;
++}
++
++static void __exit cxl_pci_driver_exit(void)
 +{
-+	guard(rwsem_write)(&cxl_cper_rw_sem);
-+	if (callback != cper_callback)
-+		return -EINVAL;
-+	cper_callback = NULL;
-+	return 0;
++	cxl_cper_unregister_callback(cxl_cper_event_call);
++	pci_unregister_driver(&cxl_pci_driver);
 +}
-+EXPORT_SYMBOL_NS_GPL(cxl_cper_unregister_callback, CXL);
 +
- static bool ghes_do_proc(struct ghes *ghes,
- 			 const struct acpi_hest_generic_status *estatus)
- {
-@@ -690,6 +763,21 @@ static bool ghes_do_proc(struct ghes *ghes,
- 		}
- 		else if (guid_equal(sec_type, &CPER_SEC_PROC_ARM)) {
- 			queued = ghes_handle_arm_hw_error(gdata, sev);
-+		}
-+		else if (guid_equal(sec_type, &CPER_SEC_CXL_GEN_MEDIA_GUID)) {
-+			struct cxl_cper_event_rec *rec = acpi_hest_get_payload(gdata);
-+
-+			cxl_cper_post_event(CXL_CPER_EVENT_GEN_MEDIA, rec);
-+		}
-+		else if (guid_equal(sec_type, &CPER_SEC_CXL_DRAM_GUID)) {
-+			struct cxl_cper_event_rec *rec = acpi_hest_get_payload(gdata);
-+
-+			cxl_cper_post_event(CXL_CPER_EVENT_DRAM, rec);
-+		}
-+		else if (guid_equal(sec_type, &CPER_SEC_CXL_MEM_MODULE_GUID)) {
-+			struct cxl_cper_event_rec *rec = acpi_hest_get_payload(gdata);
-+
-+			cxl_cper_post_event(CXL_CPER_EVENT_MEM_MODULE, rec);
- 		} else {
- 			void *err = acpi_hest_get_payload(gdata);
- 
++module_init(cxl_pci_driver_init);
++module_exit(cxl_pci_driver_exit);
+ MODULE_LICENSE("GPL v2");
+-module_pci_driver(cxl_pci_driver);
+ MODULE_IMPORT_NS(CXL);
 diff --git a/include/linux/cxl-event.h b/include/linux/cxl-event.h
-index 18dab4d90dc8..71e3646f7569 100644
+index 71e3646f7569..17eadee819b6 100644
 --- a/include/linux/cxl-event.h
 +++ b/include/linux/cxl-event.h
-@@ -108,4 +108,54 @@ struct cxl_event_record_raw {
- 	union cxl_event event;
+@@ -109,6 +109,7 @@ struct cxl_event_record_raw {
  } __packed;
  
-+enum cxl_event_type {
-+	CXL_CPER_EVENT_GEN_MEDIA,
-+	CXL_CPER_EVENT_DRAM,
-+	CXL_CPER_EVENT_MEM_MODULE,
-+};
-+
-+#define CPER_CXL_DEVICE_ID_VALID		BIT(0)
-+#define CPER_CXL_DEVICE_SN_VALID		BIT(1)
-+#define CPER_CXL_COMP_EVENT_LOG_VALID		BIT(2)
-+struct cxl_cper_event_rec {
-+	struct {
-+		u32 length;
-+		u64 validation_bits;
-+		struct cper_cxl_event_devid {
-+			u16 vendor_id;
-+			u16 device_id;
-+			u8 func_num;
-+			u8 device_num;
-+			u8 bus_num;
-+			u16 segment_num;
-+			u16 slot_num; /* bits 2:0 reserved */
-+			u8 reserved;
-+		} __packed device_id;
-+		struct cper_cxl_event_sn {
-+			u32 lower_dw;
-+			u32 upper_dw;
-+		} __packed dev_serial_num;
-+	} __packed hdr;
-+
-+	union cxl_event event;
-+} __packed;
-+
-+typedef void (*cxl_cper_callback)(enum cxl_event_type type,
-+				  struct cxl_cper_event_rec *rec);
-+
-+#ifdef CONFIG_ACPI_APEI_GHES
-+int cxl_cper_register_callback(cxl_cper_callback callback);
-+int cxl_cper_unregister_callback(cxl_cper_callback callback);
-+#else
-+static inline int cxl_cper_register_callback(cxl_cper_callback callback)
-+{
-+	return 0;
-+}
-+
-+static inline int cxl_cper_unregister_callback(cxl_cper_callback callback)
-+{
-+	return 0;
-+}
-+#endif
-+
- #endif /* _LINUX_CXL_EVENT_H */
+ enum cxl_event_type {
++	CXL_CPER_EVENT_GENERIC,
+ 	CXL_CPER_EVENT_GEN_MEDIA,
+ 	CXL_CPER_EVENT_DRAM,
+ 	CXL_CPER_EVENT_MEM_MODULE,
 
 -- 
 2.43.0
