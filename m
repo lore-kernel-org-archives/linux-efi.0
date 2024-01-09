@@ -1,41 +1,41 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.10])
+Received: from mgamail.intel.com (mgamail.intel.com [192.55.52.120])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B19AD5644D;
-	Mon,  8 Jan 2024 21:46:23 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 70E20370;
+	Tue,  9 Jan 2024 00:29:26 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="BTlo9Odg"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="nVN9XmnH"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1704750384; x=1736286384;
+  t=1704760166; x=1736296166;
   h=date:from:to:cc:subject:message-id:references:
    mime-version:in-reply-to;
-  bh=vL2CfUljdFe7w0t2AJp2MOgIOpmNHhRLVOLT7Dr6oi4=;
-  b=BTlo9Odgr6VfkxsteR3eP9+xE+OgzbYmYwMhfLaio0Y7hMGW2CkPK458
-   nLA7H0szO6Q5jnNHoc18v4+hyUmc+ZZp+QogbW9/WbR0UcU+EeyxitPQ+
-   DrQFAwhGJGbyiAZhUErm/AIrIdJptbKgJKXWGNoqiWI7+VwwiBWMQU9sM
-   NHzl8qo1ZsaVgCuOVujTOD+EktKJbryzEOhFfn4tW2sb8GnpTEv0HwMKn
-   eFRBNnkFOdWdDa3ks6ndFTRPnPOOlA4OUlh0w987DyLBSXAKda3MJ+8bH
-   LN1YRQnVLrK3mdHzIeiI/9Q7rRj58+woYOfjAvwrITYaiQvD6Q6RN97o8
+  bh=2+RHqZFLG1LFHYWdUL8HJxFLdTqp/dv6VkqJQHfJKAc=;
+  b=nVN9XmnHfrevFuWMBFczRX9gbtKE79g81DxaZ0RAMOkK7XLivq6HEfeH
+   3ASgt0a5/a8GHkXR7m+tjQtSet7n81EZ72bJdQWTNstzyaZD9i6hjBYFw
+   3y7IQ97ijsO+vTfBdnj1kPtYLBu3mlI1Hfj5c7ycjMkP9dLBHcIQ2iPL6
+   5d5ESl/gUELjYsMsq95oEfUH9yjq3AYyfwfHPCKqDg7m+kU0jFZXWfRWG
+   lpyhcnCW535ryxUXeZvQH+OHWpIURFcvk5gASFKLmuRt8RKm+qZQYI3qh
+   9Qxep9KJ6TVOA/j/PdyMxeOJEAkrRt0HU0/ulnoz9m665XElMQHRS5+BW
    g==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10947"; a="11359337"
-X-IronPort-AV: E=Sophos;i="6.04,180,1695711600"; 
-   d="scan'208";a="11359337"
-Received: from fmsmga003.fm.intel.com ([10.253.24.29])
-  by orvoesa102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Jan 2024 13:46:23 -0800
+X-IronPort-AV: E=McAfee;i="6600,9927,10947"; a="396911406"
+X-IronPort-AV: E=Sophos;i="6.04,181,1695711600"; 
+   d="scan'208";a="396911406"
+Received: from fmsmga002.fm.intel.com ([10.253.24.26])
+  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Jan 2024 16:29:25 -0800
 X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10947"; a="872007229"
-X-IronPort-AV: E=Sophos;i="6.04,180,1695711600"; 
-   d="scan'208";a="872007229"
+X-IronPort-AV: E=McAfee;i="6600,9927,10947"; a="900547475"
+X-IronPort-AV: E=Sophos;i="6.04,181,1695711600"; 
+   d="scan'208";a="900547475"
 Received: from lkp-server02.sh.intel.com (HELO b07ab15da5fe) ([10.239.97.151])
-  by FMSMGA003.fm.intel.com with ESMTP; 08 Jan 2024 13:46:17 -0800
+  by fmsmga002.fm.intel.com with ESMTP; 08 Jan 2024 16:29:19 -0800
 Received: from kbuild by b07ab15da5fe with local (Exim 4.96)
 	(envelope-from <lkp@intel.com>)
-	id 1rMxQw-00057e-0T;
-	Mon, 08 Jan 2024 21:45:31 +0000
-Date: Tue, 9 Jan 2024 05:44:48 +0800
+	id 1rMzzZ-0005G8-2G;
+	Tue, 09 Jan 2024 00:29:17 +0000
+Date: Tue, 9 Jan 2024 08:29:01 +0800
 From: kernel test robot <lkp@intel.com>
 To: Thomas Zimmermann <tzimmermann@suse.de>, ardb@kernel.org,
 	tglx@linutronix.de, mingo@redhat.com, bp@alien8.de,
@@ -43,15 +43,14 @@ To: Thomas Zimmermann <tzimmermann@suse.de>, ardb@kernel.org,
 	bhelgaas@google.com, arnd@arndb.de, zohar@linux.ibm.com,
 	dmitry.kasatkin@gmail.com, paul@paul-moore.com, jmorris@namei.org,
 	serge@hallyn.com, javierm@redhat.com
-Cc: llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
-	linux-arch@vger.kernel.org, linux-efi@vger.kernel.org,
-	linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org,
-	linux-integrity@vger.kernel.org,
+Cc: oe-kbuild-all@lists.linux.dev, linux-arch@vger.kernel.org,
+	linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-pci@vger.kernel.org, linux-integrity@vger.kernel.org,
 	linux-security-module@vger.kernel.org,
 	Thomas Zimmermann <tzimmermann@suse.de>
 Subject: Re: [PATCH v4 4/4] arch/x86: Do not include <asm/bootparam.h> in
  several files
-Message-ID: <202401090541.atvQk6V7-lkp@intel.com>
+Message-ID: <202401090850.YMrW5H2K-lkp@intel.com>
 References: <20240108095903.8427-5-tzimmermann@suse.de>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -77,61 +76,58 @@ url:    https://github.com/intel-lab-lkp/linux/commits/Thomas-Zimmermann/arch-x8
 base:   tip/x86/core
 patch link:    https://lore.kernel.org/r/20240108095903.8427-5-tzimmermann%40suse.de
 patch subject: [PATCH v4 4/4] arch/x86: Do not include <asm/bootparam.h> in several files
-config: i386-allnoconfig (https://download.01.org/0day-ci/archive/20240109/202401090541.atvQk6V7-lkp@intel.com/config)
-compiler: ClangBuiltLinux clang version 17.0.6 (https://github.com/llvm/llvm-project 6009708b4367171ccdbf4b5905cb6a803753fe18)
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20240109/202401090541.atvQk6V7-lkp@intel.com/reproduce)
+config: x86_64-allnoconfig (https://download.01.org/0day-ci/archive/20240109/202401090850.YMrW5H2K-lkp@intel.com/config)
+compiler: gcc-12 (Debian 12.2.0-14) 12.2.0
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20240109/202401090850.YMrW5H2K-lkp@intel.com/reproduce)
 
 If you fix the issue in a separate patch/commit (i.e. not just a new version of
 the same patch/commit), kindly add following tags
 | Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202401090541.atvQk6V7-lkp@intel.com/
+| Closes: https://lore.kernel.org/oe-kbuild-all/202401090850.YMrW5H2K-lkp@intel.com/
 
 All errors (new ones prefixed by >>):
 
    In file included from arch/x86/boot/compressed/cmdline.c:2:
->> arch/x86/boot/compressed/misc.h:154:5: error: incomplete definition of type 'struct boot_params'
+   arch/x86/boot/compressed/misc.h: In function 'sev_enable':
+>> arch/x86/boot/compressed/misc.h:154:19: error: invalid use of undefined type 'struct boot_params'
      154 |                 bp->cc_blob_address = 0;
-         |                 ~~^
-   arch/x86/include/asm/mem_encrypt.h:18:8: note: forward declaration of 'struct boot_params'
-      18 | struct boot_params;
-         |        ^
-   1 error generated.
+         |                   ^~
 
 
 vim +154 arch/x86/boot/compressed/misc.h
 
-cec49df9d331fe Joe Millenbach    2012-07-19  135  
-597cfe48212a3f Joerg Roedel      2020-09-07  136  #ifdef CONFIG_AMD_MEM_ENCRYPT
-ec1c66af3a30d4 Michael Roth      2022-02-09  137  void sev_enable(struct boot_params *bp);
-8c29f016540532 Nikunj A Dadhania 2023-01-18  138  void snp_check_features(void);
-597cfe48212a3f Joerg Roedel      2020-09-07  139  void sev_es_shutdown_ghcb(void);
-69add17a7c1992 Joerg Roedel      2020-09-07  140  extern bool sev_es_check_ghcb_fault(unsigned long address);
-4f9c403e44e5e8 Brijesh Singh     2022-02-09  141  void snp_set_page_private(unsigned long paddr);
-4f9c403e44e5e8 Brijesh Singh     2022-02-09  142  void snp_set_page_shared(unsigned long paddr);
-76f61e1e89b32f Michael Roth      2022-02-24  143  void sev_prep_identity_maps(unsigned long top_level_pgt);
-597cfe48212a3f Joerg Roedel      2020-09-07  144  #else
-4b1c742407571e Michael Roth      2022-08-23  145  static inline void sev_enable(struct boot_params *bp)
-4b1c742407571e Michael Roth      2022-08-23  146  {
-4b1c742407571e Michael Roth      2022-08-23  147  	/*
-4b1c742407571e Michael Roth      2022-08-23  148  	 * bp->cc_blob_address should only be set by boot/compressed kernel.
-4b1c742407571e Michael Roth      2022-08-23  149  	 * Initialize it to 0 unconditionally (thus here in this stub too) to
-4b1c742407571e Michael Roth      2022-08-23  150  	 * ensure that uninitialized values from buggy bootloaders aren't
-4b1c742407571e Michael Roth      2022-08-23  151  	 * propagated.
-4b1c742407571e Michael Roth      2022-08-23  152  	 */
-4b1c742407571e Michael Roth      2022-08-23  153  	if (bp)
-4b1c742407571e Michael Roth      2022-08-23 @154  		bp->cc_blob_address = 0;
-4b1c742407571e Michael Roth      2022-08-23  155  }
-8c29f016540532 Nikunj A Dadhania 2023-01-18  156  static inline void snp_check_features(void) { }
-597cfe48212a3f Joerg Roedel      2020-09-07  157  static inline void sev_es_shutdown_ghcb(void) { }
-69add17a7c1992 Joerg Roedel      2020-09-07  158  static inline bool sev_es_check_ghcb_fault(unsigned long address)
-69add17a7c1992 Joerg Roedel      2020-09-07  159  {
-69add17a7c1992 Joerg Roedel      2020-09-07  160  	return false;
-69add17a7c1992 Joerg Roedel      2020-09-07  161  }
-4f9c403e44e5e8 Brijesh Singh     2022-02-09  162  static inline void snp_set_page_private(unsigned long paddr) { }
-4f9c403e44e5e8 Brijesh Singh     2022-02-09  163  static inline void snp_set_page_shared(unsigned long paddr) { }
-76f61e1e89b32f Michael Roth      2022-02-24  164  static inline void sev_prep_identity_maps(unsigned long top_level_pgt) { }
-597cfe48212a3f Joerg Roedel      2020-09-07  165  #endif
-597cfe48212a3f Joerg Roedel      2020-09-07  166  
+cec49df9d331fea Joe Millenbach    2012-07-19  135  
+597cfe48212a3f1 Joerg Roedel      2020-09-07  136  #ifdef CONFIG_AMD_MEM_ENCRYPT
+ec1c66af3a30d45 Michael Roth      2022-02-09  137  void sev_enable(struct boot_params *bp);
+8c29f0165405325 Nikunj A Dadhania 2023-01-18  138  void snp_check_features(void);
+597cfe48212a3f1 Joerg Roedel      2020-09-07  139  void sev_es_shutdown_ghcb(void);
+69add17a7c19925 Joerg Roedel      2020-09-07  140  extern bool sev_es_check_ghcb_fault(unsigned long address);
+4f9c403e44e5e88 Brijesh Singh     2022-02-09  141  void snp_set_page_private(unsigned long paddr);
+4f9c403e44e5e88 Brijesh Singh     2022-02-09  142  void snp_set_page_shared(unsigned long paddr);
+76f61e1e89b32f3 Michael Roth      2022-02-24  143  void sev_prep_identity_maps(unsigned long top_level_pgt);
+597cfe48212a3f1 Joerg Roedel      2020-09-07  144  #else
+4b1c742407571ef Michael Roth      2022-08-23  145  static inline void sev_enable(struct boot_params *bp)
+4b1c742407571ef Michael Roth      2022-08-23  146  {
+4b1c742407571ef Michael Roth      2022-08-23  147  	/*
+4b1c742407571ef Michael Roth      2022-08-23  148  	 * bp->cc_blob_address should only be set by boot/compressed kernel.
+4b1c742407571ef Michael Roth      2022-08-23  149  	 * Initialize it to 0 unconditionally (thus here in this stub too) to
+4b1c742407571ef Michael Roth      2022-08-23  150  	 * ensure that uninitialized values from buggy bootloaders aren't
+4b1c742407571ef Michael Roth      2022-08-23  151  	 * propagated.
+4b1c742407571ef Michael Roth      2022-08-23  152  	 */
+4b1c742407571ef Michael Roth      2022-08-23  153  	if (bp)
+4b1c742407571ef Michael Roth      2022-08-23 @154  		bp->cc_blob_address = 0;
+4b1c742407571ef Michael Roth      2022-08-23  155  }
+8c29f0165405325 Nikunj A Dadhania 2023-01-18  156  static inline void snp_check_features(void) { }
+597cfe48212a3f1 Joerg Roedel      2020-09-07  157  static inline void sev_es_shutdown_ghcb(void) { }
+69add17a7c19925 Joerg Roedel      2020-09-07  158  static inline bool sev_es_check_ghcb_fault(unsigned long address)
+69add17a7c19925 Joerg Roedel      2020-09-07  159  {
+69add17a7c19925 Joerg Roedel      2020-09-07  160  	return false;
+69add17a7c19925 Joerg Roedel      2020-09-07  161  }
+4f9c403e44e5e88 Brijesh Singh     2022-02-09  162  static inline void snp_set_page_private(unsigned long paddr) { }
+4f9c403e44e5e88 Brijesh Singh     2022-02-09  163  static inline void snp_set_page_shared(unsigned long paddr) { }
+76f61e1e89b32f3 Michael Roth      2022-02-24  164  static inline void sev_prep_identity_maps(unsigned long top_level_pgt) { }
+597cfe48212a3f1 Joerg Roedel      2020-09-07  165  #endif
+597cfe48212a3f1 Joerg Roedel      2020-09-07  166  
 
 -- 
 0-DAY CI Kernel Test Service
