@@ -1,64 +1,44 @@
-Received: from bedivere.hansenpartnership.com (bedivere.hansenpartnership.com [96.44.175.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail.ispras.ru (mail.ispras.ru [83.149.199.84])
+	(using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C06FD1118A;
-	Mon,  5 Feb 2024 08:20:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=96.44.175.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8B2CE33CF6
+	for <linux-efi@vger.kernel.org>; Mon,  5 Feb 2024 14:44:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=83.149.199.84
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707121234; cv=none; b=CtKSHLDYdaUdU0+ZWuHsLeixyBpLekIfZmvX16z/f8HxlMVu/tdN2HuljUyh+mKZmoY3eBZKFf8E61mavvPd3mKu3orJhSml0s3YVcm52D68umsubUJmrZGZ1X69j1uMp1ii6PcTRvBrRpchXbJHLRWRFeWOJ1yqwcOP+5G5OEk=
+	t=1707144292; cv=none; b=BTtwCRqodYfsdW6nKlt79D6nGTDwJWbRqVc770fUJgLBeEihR3JJ5TZ3J7aUMhXDBC0L87r9iqOcMpN1dRM5tLD59RtcKLLXAt0DetSW5cxCyQcQIIU/GbR4aWlkPz3s/2Wa2kY3dD7fhVyl/vCnrDoLi4OdlBy78UDmysXT9PU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707121234; c=relaxed/simple;
-	bh=eu/BwH8FT7BImKJToQrnKLcDXyUO2zgZpz9MD25cU7c=;
-	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=fKXY3ftXWrYoRyjKqqrV4nIlmOawikbUgK+jWxNzmqnSnyRDIKs5liVFHxjz4f/YDLYJAhmQOC1455J2WemRpxJX/8Gp/LiCSBwEyycHnY7pDXUVvxC/BRJlEEBnG0rmhaeXyYWaQgG9RtAteFaQ+BbnKHj/epARxX9er8mSdKk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=HansenPartnership.com; spf=pass smtp.mailfrom=HansenPartnership.com; dkim=pass (1024-bit key) header.d=hansenpartnership.com header.i=@hansenpartnership.com header.b=JO8W1Dpu; dkim=pass (1024-bit key) header.d=hansenpartnership.com header.i=@hansenpartnership.com header.b=JO8W1Dpu; arc=none smtp.client-ip=96.44.175.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=HansenPartnership.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=HansenPartnership.com
+	s=arc-20240116; t=1707144292; c=relaxed/simple;
+	bh=RaAzTD1j6njZTi7drPJQ3UKECyzc5Iqh9j0aj8NquIw=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=GAjr21KsxlfK0h8hhXZF9sH4Cg/TIZs1Cj+1vlZUFu8pDr/Gg84jzzym53Ibgu2j9wco4nfdM9r8o7w5/qN0HxodiAtc8OaEJf+HUkZHr3Wwr3l3Fb86Zx94Y1/Qok8Rgi0Zbm0fSVAU+nWMmzwmWPWdO4jDL3Xp3nnvyXyc08g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ispras.ru; spf=pass smtp.mailfrom=ispras.ru; dkim=pass (1024-bit key) header.d=ispras.ru header.i=@ispras.ru header.b=HtS79BL8; arc=none smtp.client-ip=83.149.199.84
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ispras.ru
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ispras.ru
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=hansenpartnership.com header.i=@hansenpartnership.com header.b="JO8W1Dpu";
-	dkim=pass (1024-bit key) header.d=hansenpartnership.com header.i=@hansenpartnership.com header.b="JO8W1Dpu"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-	d=hansenpartnership.com; s=20151216; t=1707121231;
-	bh=eu/BwH8FT7BImKJToQrnKLcDXyUO2zgZpz9MD25cU7c=;
-	h=Message-ID:Subject:From:To:Date:In-Reply-To:References:From;
-	b=JO8W1DpurgTMXtNTCNU8J4q0FM0xnYE3RKeCmnYYjfmQctLVTu2DwSjh7fUrjZlF4
-	 SNdHlHvxdgviuQHj9v1NAIsErUxsmDK4pLIK9aziX8UXYD7k2oD0zwmJqkFuBgq6yq
-	 6k+3M22sZN3Dz+0UIn+qBvSSHc7tQQxUvrojYU9w=
-Received: from localhost (localhost [127.0.0.1])
-	by bedivere.hansenpartnership.com (Postfix) with ESMTP id A05DD12868CE;
-	Mon,  5 Feb 2024 03:20:31 -0500 (EST)
-Received: from bedivere.hansenpartnership.com ([127.0.0.1])
- by localhost (bedivere.hansenpartnership.com [127.0.0.1]) (amavis, port 10024)
- with ESMTP id UQll_wppCcMJ; Mon,  5 Feb 2024 03:20:31 -0500 (EST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-	d=hansenpartnership.com; s=20151216; t=1707121231;
-	bh=eu/BwH8FT7BImKJToQrnKLcDXyUO2zgZpz9MD25cU7c=;
-	h=Message-ID:Subject:From:To:Date:In-Reply-To:References:From;
-	b=JO8W1DpurgTMXtNTCNU8J4q0FM0xnYE3RKeCmnYYjfmQctLVTu2DwSjh7fUrjZlF4
-	 SNdHlHvxdgviuQHj9v1NAIsErUxsmDK4pLIK9aziX8UXYD7k2oD0zwmJqkFuBgq6yq
-	 6k+3M22sZN3Dz+0UIn+qBvSSHc7tQQxUvrojYU9w=
-Received: from [172.20.9.170] (62-244-190-9.cust.exponential-e.net [62.244.190.9])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange ECDHE (prime256v1) server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(Client did not present a certificate)
-	by bedivere.hansenpartnership.com (Postfix) with ESMTPSA id 04A2C1286899;
-	Mon,  5 Feb 2024 03:20:29 -0500 (EST)
-Message-ID: <7357618f02b87786f06f3e10b50f1247f328f07a.camel@HansenPartnership.com>
-Subject: Re: [PATCH v1] efi/libstub: Add Confidential Computing (CC)
- measurement support
-From: James Bottomley <James.Bottomley@HansenPartnership.com>
-To: Kuppuswamy Sathyanarayanan <sathyanarayanan.kuppuswamy@linux.intel.com>,
-  Ard Biesheuvel <ardb@kernel.org>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, "Yao, Jiewen"
-	 <jiewen.yao@intel.com>, "Lu, Ken" <ken.lu@intel.com>
-Date: Mon, 05 Feb 2024 08:20:27 +0000
-In-Reply-To: <6a696340-b57c-4fa5-bb2e-b3a0257453bc@linux.intel.com>
-References: 
-	<20240203075736.3982371-1-sathyanarayanan.kuppuswamy@linux.intel.com>
-	 <82a84e769875c70279348179c1b2b63a16770c8e.camel@HansenPartnership.com>
-	 <6a696340-b57c-4fa5-bb2e-b3a0257453bc@linux.intel.com>
-Content-Type: text/plain; charset="UTF-8"
-User-Agent: Evolution 3.42.4 
+	dkim=pass (1024-bit key) header.d=ispras.ru header.i=@ispras.ru header.b="HtS79BL8"
+Received: from localhost.localdomain (unknown [80.240.223.29])
+	by mail.ispras.ru (Postfix) with ESMTPSA id 79E3040755DE;
+	Mon,  5 Feb 2024 14:44:48 +0000 (UTC)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.ispras.ru 79E3040755DE
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ispras.ru;
+	s=default; t=1707144288;
+	bh=T/OfrlQsZKHRZkF4NQnHU8K2Q74rrNfKQBTV4x0Kb5U=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+	b=HtS79BL8+MrwDerHLlzsG9WGCBVDPBRfxcJiKxJIzOl8XZk/IQj6/DJDIifOn8uUe
+	 cLM0wKAedsYashAapL6FV7oq62zyPKF5Cvx44gqjrxVNnoY/Ino96JXhBKOeMu51QV
+	 U5Wty5MGr79b5k0MmqVv9AD+Qbl7q8upW6RM4itc=
+From: Evgeniy Baskov <baskov@ispras.ru>
+To: Ard Biesheuvel <ardb@kernel.org>
+Cc: Evgeniy Baskov <baskov@ispras.ru>,
+	Mike Beaton <mjsbeaton@gmail.com>,
+	Alexey Khoroshilov <khoroshilov@ispras.ru>,
+	linux-efi@vger.kernel.org
+Subject: [PATCH 1/2] x86/boot: Order sections by their RVAs
+Date: Mon,  5 Feb 2024 17:44:00 +0300
+Message-ID: <82e66a8c9ae70e416eb8ae5229cf5a93f17921b9.1707141974.git.baskov@ispras.ru>
+X-Mailer: git-send-email 2.43.0
+In-Reply-To: <cover.1707141974.git.baskov@ispras.ru>
+References: <cover.1707141974.git.baskov@ispras.ru>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -67,63 +47,90 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-On Sun, 2024-02-04 at 12:27 -0800, Kuppuswamy Sathyanarayanan wrote:
-> +Jiewen & Ken (RTMR firmware owner)
-> 
-> On 2/3/24 10:46 PM, James Bottomley wrote:
-> > On Sat, 2024-02-03 at 07:57 +0000, Kuppuswamy Sathyanarayanan
-> > wrote:
-> > > If the virtual firmware implements TPM support, TCG2 protocol
-> > > will be used for kernel measurements and event logging support.
-> > > But in CC environment, not all platforms support or enable the
-> > > TPM feature. UEFI specification [1] exposes protocol and
-> > > interfaces used for kernel measurements in CC platforms without
-> > > TPM support.
-> > > 
-> > > Currently, the efi-stub only supports the kernel related
-> > > measurements for the platform that supports TCG2 protocol. So,
-> > > extend it add CC measurement protocol
-> > > (EFI_CC_MEASUREMENT_PROTOCOL) and event logging support. Event
-> > > logging format in the CC environment is the same as TCG2.
-> >  
-> > Why do we have to do this anymore?  Given that you're already
-> > pushing patches that map RTMRs to TPM PCRs:
-> > 
-> > https://lore.kernel.org/lkml/20240128212532.2754325-4-sameo@rivosinc.com/
-> 
-> IMHO, I am not sure whether we need this mapping support . I have
-> already mentioned the same comment in [1]. If we support extension
-> and logging via configFS ABI, why again support PCR mapping?
-> 
-> https://lore.kernel.org/lkml/2bd7c80b-9cd8-4450-a410-c3739d224167@linux.intel.com/
+Image loaders which check the contiguity of executable images consider
+sections adjacent in the section table to be adjacent in virtual memory.
 
-Well, the point is if it can be done, you can push the measurement and
-logging all the way down into the TCG driver and not have to modify any
-upper layer code at all (so less chance of introducing bugs).  It would
-be a single change instead of patching everywhere there's a
-measurement.
+Sort sections by their RVAs in PE section table.
 
-> > Can't you just add a stub TCG2 driver to EFI that exposes only the
-> > ability to log and measure using this mapping?  That way all our
-> > existing code will "just work" without the need to understand
-> > anything about confidential computing or add new code to do the
-> > measurement?
-> 
-> I am not familiar with the EFI implementation, but I think a new
-> protocol is added to handle future CC extensions (which could deviate
-> from TCG2)
+Signed-off-by: Evgeniy Baskov <baskov@ispras.ru>
+---
+ arch/x86/boot/header.S | 56 +++++++++++++++++++++---------------------
+ 1 file changed, 28 insertions(+), 28 deletions(-)
 
-OK, but you could add a new driver for just that functionality only
-when you actually deviate and handle all of the current functionality
-in the non-deviating TCG driver.  Nothing forbids a feature from having
-multiple driver attachments.
-
-James
-
->  and to support platforms that does not support or enable TPM
-> feature. So modifying the TCG2 driver in EFI may not work for the
-> above-mentioned cases. I think the EFI driver part of this support
-> is already merged.
-> 
-> Jiewen/Ken may have more comments about this proposal.
+diff --git a/arch/x86/boot/header.S b/arch/x86/boot/header.S
+index b2771710ed98..097b84ab288c 100644
+--- a/arch/x86/boot/header.S
++++ b/arch/x86/boot/header.S
+@@ -153,6 +153,34 @@ section_table:
+ 		IMAGE_SCN_MEM_READ		| \
+ 		IMAGE_SCN_MEM_DISCARDABLE	# Characteristics
+ 
++	.ascii	".text"
++	.byte	0
++	.byte	0
++	.byte	0
++	.long	ZO__data
++	.long	setup_size
++	.long	ZO__data			# Size of initialized data
++						# on disk
++	.long	setup_size
++	.long	0				# PointerToRelocations
++	.long	0				# PointerToLineNumbers
++	.word	0				# NumberOfRelocations
++	.word	0				# NumberOfLineNumbers
++	.long	IMAGE_SCN_CNT_CODE		| \
++		IMAGE_SCN_MEM_READ		| \
++		IMAGE_SCN_MEM_EXECUTE		# Characteristics
++
++	.ascii	".data\0\0\0"
++	.long	ZO__end - ZO__data		# VirtualSize
++	.long	setup_size + ZO__data		# VirtualAddress
++	.long	ZO__edata - ZO__data		# SizeOfRawData
++	.long	setup_size + ZO__data		# PointerToRawData
++
++	.long	0, 0, 0
++	.long	IMAGE_SCN_CNT_INITIALIZED_DATA	| \
++		IMAGE_SCN_MEM_READ		| \
++		IMAGE_SCN_MEM_WRITE		# Characteristics
++
+ #ifdef CONFIG_EFI_MIXED
+ 	.asciz	".compat"
+ 
+@@ -185,34 +213,6 @@ pecompat_fstart:
+ 	.set	pecompat_vsize, 0
+ 	.set	pecompat_fstart, setup_size
+ #endif
+-	.ascii	".text"
+-	.byte	0
+-	.byte	0
+-	.byte	0
+-	.long	ZO__data
+-	.long	setup_size
+-	.long	ZO__data			# Size of initialized data
+-						# on disk
+-	.long	setup_size
+-	.long	0				# PointerToRelocations
+-	.long	0				# PointerToLineNumbers
+-	.word	0				# NumberOfRelocations
+-	.word	0				# NumberOfLineNumbers
+-	.long	IMAGE_SCN_CNT_CODE		| \
+-		IMAGE_SCN_MEM_READ		| \
+-		IMAGE_SCN_MEM_EXECUTE		# Characteristics
+-
+-	.ascii	".data\0\0\0"
+-	.long	ZO__end - ZO__data		# VirtualSize
+-	.long	setup_size + ZO__data		# VirtualAddress
+-	.long	ZO__edata - ZO__data		# SizeOfRawData
+-	.long	setup_size + ZO__data		# PointerToRawData
+-
+-	.long	0, 0, 0
+-	.long	IMAGE_SCN_CNT_INITIALIZED_DATA	| \
+-		IMAGE_SCN_MEM_READ		| \
+-		IMAGE_SCN_MEM_WRITE		# Characteristics
+-
+ 	.set	section_count, (. - section_table) / 40
+ #endif /* CONFIG_EFI_STUB */
+ 
+-- 
+2.43.0
 
