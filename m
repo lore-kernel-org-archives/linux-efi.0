@@ -1,148 +1,325 @@
-Received: from mx0a-00069f02.pphosted.com (mx0a-00069f02.pphosted.com [205.220.165.32])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qt1-f181.google.com (mail-qt1-f181.google.com [209.85.160.181])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 961B5145B0B;
-	Wed, 14 Feb 2024 22:36:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.165.32
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4B3A92E62F
+	for <linux-efi@vger.kernel.org>; Wed, 14 Feb 2024 23:33:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1707950210; cv=none; b=ZFFRwwgosNg1O0WfpBAX3Gewa6riicHpnAJRC5r+5h17YLspZXsNkJqYslwdo3zN4ugDla89hB2gyDyen+inBtiHoZvHYr7nbyfYRQ7qgZuHpa+SMDq6OEXEaWB2TUE23ikN13ONDEu94cC9drEPSHns8IotMTVh3VgwZGJ2sBI=
+	t=1707953601; cv=none; b=mEnfW2DxvnFTqNTPYdczgkL8lR+X7l8Y72GYWP06Bpi7owMuEof7mV/mXj2kpERlzL9MB4xxMVC4uNzetMmBdPL48W8BGyVnY1omUMR9vgr4Hsy9Mq9Yys0DcNn/DPjd5iXiG17Kr5pTKxZtMUEKRCp66QjAeQO47JoHSqqRlZU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1707950210; c=relaxed/simple;
-	bh=MNl7hgcOP5vxEvVNCEzBNGyFwxzXBCb8aF9uo9XJndM=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=ClxwTzw9jUFHIv5FmTWCUz79nwgtpI6jBMRx5xUAfKcc+j3Rpx3fGmlL4aAP3vmMd6zweuk1/F1rw0O1VLtm5vZ9ui+Ebt0Rqwv5c1XlU2fURFQcxKoOYj/Ma3W1u29KGjkjZGyAM9L5fsBzbz0gRAmxY2Q6vrGI1HtfIT96k+0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=CSM/NBTh; arc=none smtp.client-ip=205.220.165.32
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oracle.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
+	s=arc-20240116; t=1707953601; c=relaxed/simple;
+	bh=lNniGJRWqs5vkdggTeOdCVtP1zQiJDAGENzRNbCCrRQ=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=Ai8+Mblf2qefyIZQe9OOKD+3AO93Zvm0XNgl4wNamsWLqbE4rgk49oNv/vpcQcXoeCpygb2GBNBWXNehw8MO2u2zePH+zWYefcPNoAq/cZBh2PCjDD0rCXFFMz+unXarxjNU4Ni/tE46ro2MLJCIBdw6DFFkzHd4LpJ75mx6ZZM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=JT9ibqn5; arc=none smtp.client-ip=209.85.160.181
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="CSM/NBTh"
-Received: from pps.filterd (m0246627.ppops.net [127.0.0.1])
-	by mx0b-00069f02.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 41ELiWL1022704;
-	Wed, 14 Feb 2024 22:31:47 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
- subject : date : message-id : in-reply-to : references : mime-version :
- content-transfer-encoding; s=corp-2023-11-20;
- bh=beF73PhQOvafRvxMrE9SGfQcxB3UIdpTP6nEGkw+3vc=;
- b=CSM/NBTh3VceRVKHqcI17YhS46VV9GwoWB+I6DTJIkkGTxP+cjuP84HeG0F10IwfYrUY
- 9xF1eBonh+nhFmrcYvMVHwWgXZkONcLPc32kXIFd/NOpxhXB9KFlzF3P7+dFatZYdAai
- gF8ro+Y7ZvhXs2V/APYGFRSDQrmdADRuicJJ8yp3d+hjOEE7WE17wDOMpVnoHI+kbM9B
- IzZwgdrdkylbRK/+efZWyYG4QeSckHFg6RceBEJqwjW55ZAFI67RQ0H291zBHsEVx+zq
- b8EIrorETHx8I8XybbwRrps6hHNmLylR5yxf2FIlkWWCPxHhjUhLcfUpHUidG4JCgp/J nQ== 
-Received: from iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta02.appoci.oracle.com [147.154.18.20])
-	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 3w92ppghka-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Wed, 14 Feb 2024 22:31:46 +0000
-Received: from pps.filterd (iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
-	by iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (8.17.1.19/8.17.1.19) with ESMTP id 41EM9iB8000639;
-	Wed, 14 Feb 2024 22:31:45 GMT
-Received: from pps.reinject (localhost [127.0.0.1])
-	by iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 3w5yk9n7ft-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NO);
-	Wed, 14 Feb 2024 22:31:45 +0000
-Received: from iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com [127.0.0.1])
-	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 41EMVTVK004281;
-	Wed, 14 Feb 2024 22:31:44 GMT
-Received: from bur-virt-x6-2-100.us.oracle.com (bur-virt-x6-2-100.us.oracle.com [10.153.92.40])
-	by iadpaimrmta02.imrmtpd1.prodappiadaev1.oraclevcn.com (PPS) with ESMTPS id 3w5yk9n72r-14
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NO);
-	Wed, 14 Feb 2024 22:31:44 +0000
-From: Ross Philipson <ross.philipson@oracle.com>
-To: linux-kernel@vger.kernel.org, x86@kernel.org,
-        linux-integrity@vger.kernel.org, linux-doc@vger.kernel.org,
-        linux-crypto@vger.kernel.org, kexec@lists.infradead.org,
-        linux-efi@vger.kernel.org
-Cc: ross.philipson@oracle.com, dpsmith@apertussolutions.com,
-        tglx@linutronix.de, mingo@redhat.com, bp@alien8.de, hpa@zytor.com,
-        dave.hansen@linux.intel.com, ardb@kernel.org, mjg59@srcf.ucam.org,
-        James.Bottomley@hansenpartnership.com, peterhuewe@gmx.de,
-        jarkko@kernel.org, jgg@ziepe.ca, luto@amacapital.net,
-        nivedita@alum.mit.edu, herbert@gondor.apana.org.au,
-        davem@davemloft.net, kanth.ghatraju@oracle.com,
-        trenchboot-devel@googlegroups.com
-Subject: [PATCH v8 13/15] tpm: Add sysfs interface to allow setting and querying the preferred locality
-Date: Wed, 14 Feb 2024 14:18:45 -0800
-Message-Id: <20240214221847.2066632-14-ross.philipson@oracle.com>
-X-Mailer: git-send-email 2.39.3
-In-Reply-To: <20240214221847.2066632-1-ross.philipson@oracle.com>
-References: <20240214221847.2066632-1-ross.philipson@oracle.com>
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="JT9ibqn5"
+Received: by mail-qt1-f181.google.com with SMTP id d75a77b69052e-42db1baff53so56341cf.0
+        for <linux-efi@vger.kernel.org>; Wed, 14 Feb 2024 15:33:18 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20230601; t=1707953597; x=1708558397; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=oWVOuj4rMvhSLFWAyEWK0L/EZU9RsmUUAUz5wQ+DXOg=;
+        b=JT9ibqn53dRKfmOEdnKPGH2NnhgyEfSS2aQVKMgSqfgZLAhy0ws2l4S5e9gR+MuEso
+         8VXT0OdaNXjtjFp1rv7vmu1/NPW3zNbvOwSXUwYatjR3wGgrTOgqHRhyj7OPspd7pXdS
+         fJVRYl69wHV7p5UJaa5tcAC97HUtHpR4GhHd9wCD5eHgNuXXOAHWB001RDpFqsNEbLr5
+         R8/nikApEf80NAAtvxzKN3qPK29TRtl2ak+z8Q4oFsAMFkXWQb8V/uXR7Cer39pcmFif
+         SkcdlzKmr7PEojp1YxdRdoUA/eg/h6IIFN3tiTNK2MC5hT6mkBL1i2nGusmrZihL3jG+
+         y+AA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1707953597; x=1708558397;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=oWVOuj4rMvhSLFWAyEWK0L/EZU9RsmUUAUz5wQ+DXOg=;
+        b=vtearVotGDrDcuhhMSeWZXZTbn68K4cQybxe59qGlF9uk8rGQKCn9nefEzs91PxOkA
+         kEki3DCTShvMtO5uJfHnQx1sZL43m7c4jpHZdwvN2CsTwmif8gqAYrtwn1XWJ8VMpsjR
+         CB/0x99brMyzk1ORCGCv+E5p0Rw8UUJ1nFoaCfKxp60GA2IscmS/Axw4fFvqpkT50dWU
+         3wdHnmfkWty/WShssz4a6p2aSI8VsSLYFUP/GHfBOqH6Ksp3O50QftS0YEy2miLC0Elv
+         ZBZ1COEhWI7Ii/A9dsOES7lQ3/fZD8P2sLYXXA3NAqUaXPHo3nVWB+hJZRUHkRlrHo+U
+         Qv2g==
+X-Forwarded-Encrypted: i=1; AJvYcCXRbZ3RSTemOA92O2UBcL/tITDlIqRbgW+U3c9jkv8+EOwumgyh3yE/KzcOw0xi0jkBgfR1UKBl++2JSxCrZQuuxVJaveNbGNxM
+X-Gm-Message-State: AOJu0YwfxI6g4AjITWU3cfdVgvmztvbaDjKaMYVQ1p8NQ2wNG3+fWv6A
+	/vrXgbkBFxzSmOR2Z9rY6yaCgtI0CDd4/tFeAs08mOTszPQY01lAnRnMql2bpVoJC1aEQWWhWPQ
+	tFtPKPJzcsH96UVeIaFY7cK1skZKD6PrTsHhl
+X-Google-Smtp-Source: AGHT+IECnRFS3Tun1wI7WB58zzwXAljD8tU5Rk8kG3Biy3kLhdVu7WmMzEwtevTLy/jxlgfm7mjMfgk9rNK0K90YwDw=
+X-Received: by 2002:ac8:5916:0:b0:42c:59b3:31d5 with SMTP id
+ 22-20020ac85916000000b0042c59b331d5mr515930qty.17.1707953596990; Wed, 14 Feb
+ 2024 15:33:16 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.272,Aquarius:18.0.1011,Hydra:6.0.619,FMLib:17.11.176.26
- definitions=2024-02-14_14,2024-02-14_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxlogscore=999 phishscore=0 mlxscore=0
- bulkscore=0 spamscore=0 malwarescore=0 adultscore=0 suspectscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2311290000
- definitions=main-2402140170
-X-Proofpoint-ORIG-GUID: tT6BUrEPGTkbAvCJEEglQruin3qInev6
-X-Proofpoint-GUID: tT6BUrEPGTkbAvCJEEglQruin3qInev6
+References: <20240212213147.489377-1-saravanak@google.com> <20240212213147.489377-4-saravanak@google.com>
+ <20240214-stable-anytime-b51b898d87af@spud>
+In-Reply-To: <20240214-stable-anytime-b51b898d87af@spud>
+From: Saravana Kannan <saravanak@google.com>
+Date: Wed, 14 Feb 2024 15:32:31 -0800
+Message-ID: <CAGETcx-tBjfaLQqmGW=ap2N5FLK_gvTzxskA6sVsr_SUEpvomA@mail.gmail.com>
+Subject: Re: [PATCH v2 3/4] dt-bindings: Add post-init-supplier property
+To: Conor Dooley <conor@kernel.org>
+Cc: Rob Herring <robh+dt@kernel.org>, 
+	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Rafael J. Wysocki" <rafael@kernel.org>, 
+	Ard Biesheuvel <ardb@kernel.org>, Frank Rowand <frowand.list@gmail.com>, Len Brown <lenb@kernel.org>, 
+	Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Daniel Scally <djrscally@gmail.com>, 
+	Heikki Krogerus <heikki.krogerus@linux.intel.com>, 
+	Sakari Ailus <sakari.ailus@linux.intel.com>, kernel-team@android.com, 
+	linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Expose a sysfs interface to allow user mode to set and query the preferred
-locality for the TPM chip.
+Hi Conon,
 
-Signed-off-by: Ross Philipson <ross.philipson@oracle.com>
----
- drivers/char/tpm/tpm-sysfs.c | 30 ++++++++++++++++++++++++++++++
- 1 file changed, 30 insertions(+)
+On Wed, Feb 14, 2024 at 10:49=E2=80=AFAM Conor Dooley <conor@kernel.org> wr=
+ote:
+>
+> On Mon, Feb 12, 2024 at 01:31:44PM -0800, Saravana Kannan wrote:
+> > The post-init-supplier property can be used to break a dependency cycle=
+ by
+> > marking some supplier(s) as a post device initialization supplier(s). T=
+his
+> > allows an OS to do a better job at ordering initialization and
+> > suspend/resume of the devices in a dependency cycle.
+> >
+> > Signed-off-by: Saravana Kannan <saravanak@google.com>
+> > ---
+> >  .../bindings/post-init-supplier.yaml          | 101 ++++++++++++++++++
+> >  MAINTAINERS                                   |  13 +--
+> >  2 files changed, 108 insertions(+), 6 deletions(-)
+> >  create mode 100644 Documentation/devicetree/bindings/post-init-supplie=
+r.yaml
+> >
+> > diff --git a/Documentation/devicetree/bindings/post-init-supplier.yaml =
+b/Documentation/devicetree/bindings/post-init-supplier.yaml
+> > new file mode 100644
+> > index 000000000000..aab75b667259
+> > --- /dev/null
+> > +++ b/Documentation/devicetree/bindings/post-init-supplier.yaml
+> > @@ -0,0 +1,101 @@
+> > +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+> > +# Copyright (c) 2020, Google LLC. All rights reserved.
+> > +%YAML 1.2
+> > +---
+> > +$id: http://devicetree.org/schemas/post-init-supplier.yaml#
+> > +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> > +
+> > +title: Post device initialization supplier
+> > +
+> > +maintainers:
+> > +  - Saravana Kannan <saravanak@google.com>
+> > +
+> > +description: |
+> > +  This property is used to indicate that the device(s) pointed to by t=
+he
+> > +  property are not needed for the initialization of the device that li=
+sts this
+> > +  property.
+>
+> > This property is meaningful only when pointing to direct suppliers
+> > +  of a device that are pointed to by other properties in the device.
+>
+> I don't think this sentence makes sense, or at least it is not easy to
+> parse. It implies that it can "point to" other properties too
 
-diff --git a/drivers/char/tpm/tpm-sysfs.c b/drivers/char/tpm/tpm-sysfs.c
-index 54c71473aa29..c43630d0996e 100644
---- a/drivers/char/tpm/tpm-sysfs.c
-+++ b/drivers/char/tpm/tpm-sysfs.c
-@@ -309,6 +309,34 @@ static ssize_t tpm_version_major_show(struct device *dev,
- }
- static DEVICE_ATTR_RO(tpm_version_major);
- 
-+static ssize_t preferred_locality_show(struct device *dev,
-+				       struct device_attribute *attr, char *buf)
-+{
-+	struct tpm_chip *chip = to_tpm_chip(dev);
-+
-+	return sprintf(buf, "%d\n", chip->pref_locality);
-+}
-+
-+static ssize_t preferred_locality_store(struct device *dev, struct device_attribute *attr,
-+					const char *buf, size_t count)
-+{
-+	struct tpm_chip *chip = to_tpm_chip(dev);
-+	unsigned int locality;
-+
-+	if (kstrtouint(buf, 0, &locality))
-+		return -ERANGE;
-+
-+	if (locality >= TPM_MAX_LOCALITY)
-+		return -ERANGE;
-+
-+	if (tpm_chip_preferred_locality(chip, (int)locality))
-+		return count;
-+	else
-+		return 0;
-+}
-+
-+static DEVICE_ATTR_RW(preferred_locality);
-+
- static struct attribute *tpm1_dev_attrs[] = {
- 	&dev_attr_pubek.attr,
- 	&dev_attr_pcrs.attr,
-@@ -321,11 +349,13 @@ static struct attribute *tpm1_dev_attrs[] = {
- 	&dev_attr_durations.attr,
- 	&dev_attr_timeouts.attr,
- 	&dev_attr_tpm_version_major.attr,
-+	&dev_attr_preferred_locality.attr,
- 	NULL,
- };
- 
- static struct attribute *tpm2_dev_attrs[] = {
- 	&dev_attr_tpm_version_major.attr,
-+	&dev_attr_preferred_locality.attr,
- 	NULL
- };
- 
--- 
-2.39.3
+I don't see how this sentence implies this. But open to suggestions on
+how to reword it. I don't want to drop this line entirely though
+because I'm trying to make it clear that this doesn't make a device
+(that's not previously a supplier) into a supplier. It only down
+grades an existing supplier to a post device initialization supplier.
 
+> - but
+> that's not the case. It is only valid to "point to" these suppliers.
+> I'd drop this entirely.
+
+>
+> > +
+> > +  A device can list its suppliers in devicetree using one or more of t=
+he
+> > +  standard devicetree bindings. By default, it would be safe to assume=
+ the
+> > +  supplier device can be initialized before the consumer device is ini=
+tialized.
+>
+> "it would be safe to assume" seems odd wording to me - I feel like the
+> default is stronger than "safe to assume". I'd just drop the "would be
+> safe to assume and replace with "is assumed".
+
+Sounds good.
+
+>
+> > +
+> > +  However, that assumption cannot be made when there are cyclic depend=
+encies
+> > +  between devices. Since each device is a supplier (directly or indire=
+ctly) of
+> > +  the others in the cycle, there is no guaranteed safe order for initi=
+alizing
+> > +  the devices in a cycle. We can try to initialize them in an arbitrar=
+y order
+> > +  and eventually successfully initialize all of them, but that doesn't=
+ always
+> > +  work well.
+> > +
+> > +  For example, say,
+> > +  * The device tree has the following cyclic dependency X -> Y -> Z ->=
+ X (where
+> > +    -> denotes "depends on").
+> > +  * But X is not needed to fully initialize Z (X might be needed only =
+when a
+> > +    specific functionality is requested post initialization).
+> > +
+> > +  If all the other -> are mandatory initialization dependencies, then =
+trying to
+> > +  initialize the devices in a loop (or arbitrarily) will always eventu=
+ally end
+> > +  up with the devices being initialized in the order Z, Y and X.
+> > +
+> > +  However, if Y is an optional supplier for X (where X provides limite=
+d
+> > +  functionality when Y is not initialized and providing its services),=
+ then
+> > +  trying to initialize the devices in a loop (or arbitrarily) could en=
+d up with
+> > +  the devices being initialized in the following order:
+> > +
+> > +  * Z, Y and X - All devices provide full functionality
+> > +  * Z, X and Y - X provides partial functionality
+> > +  * X, Z and Y - X provides partial functionality
+> > +
+> > +  However, we always want to initialize the devices in the order Z, Y =
+and X
+> > +  since that provides the full functionality without interruptions.
+> > +
+> > +  One alternate option that might be suggested is to have the driver f=
+or X
+> > +  notice that Y became available at a later point and adjust the funct=
+ionality
+> > +  it provides. However, other userspace applications could have starte=
+d using X
+> > +  with the limited functionality before Y was available and it might n=
+ot be
+> > +  possible to transparently transition X or the users of X to full
+> > +  functionality while X is in use.
+> > +
+> > +  Similarly, when it comes to suspend (resume) ordering, it's unclear =
+which
+> > +  device in a dependency cycle needs to be suspended/resumed first and=
+ trying
+> > +  arbitrary orders can result in system crashes or instability.
+> > +
+> > +  Explicitly calling out which link in a cycle needs to be broken when
+> > +  determining the order, simplifies things a lot, improves efficiency,=
+ makes
+> > +  the behavior more deterministic and maximizes the functionality that=
+ can be
+> > +  provided without interruption.
+> > +
+> > +  This property is used to provide this additional information between=
+ devices
+> > +  in a cycle by telling which supplier(s) is not needed for initializi=
+ng the
+> > +  device that lists this property.
+> > +
+> > +  In the example above, Z would list X as a post-init-supplier and the
+> > +  initialization dependency would become X -> Y -> Z -/-> X. So the be=
+st order
+> > +  to initialize them become clear: Z, Y and then X.
+>
+> Otherwise, I think this is a great description, describing the use case
+> well :)
+
+Thanks! I always spend more time writing documentation and commit text
+than the time I spend writing code.
+
+>
+> > +
+> > +select: true
+> > +properties:
+> > +  post-init-supplier:
+
+[Merging your other email here]
+
+> Also, this should likely be pluralised, to match "clocks" "resets"
+> "interrupts" etc.
+
+Good point. Done.
+
+> > +    # One or more suppliers can be marked as post initialization suppl=
+ier
+> > +    description:
+> > +      List of phandles to suppliers that are not needed for initializi=
+ng or
+> > +      resuming this device.
+> > +    $ref: /schemas/types.yaml#/definitions/phandle-array
+> > +      items:
+> > +        maxItems: 1
+>
+> Rob's bot rightfully complains here about invalid syntax.
+
+I added these two lines based on Rob's feedback. Is the indentation
+that's wrong?
+
+Yeah, I'm trying to run the dts checker, but I haven't be able to get
+it to work on my end. See my email to Rob on the v1 series about this.
+
+$ make DT_CHECKER_FLAGS=3D-m dt_binding_check
+
+The best I could get out of it is a bunch of error reports on other
+files and then:
+...
+<snip>/Documentation/devicetree/bindings/post-init-suppliers.yaml:
+ignoring, error parsing file
+...
+
+I also tried to use DT_SCHEMA_FILES so I can only test this one file,
+but that wasn't working either:
+
+$ make DT_CHECKER_FLAGS=3D-m dt_binding_check
+DT_SCHEMA_FILES=3DDocumentation/devicetree/bindings/post-init-suppliers.yam=
+l
+or
+$ make DT_CHECKER_FLAGS=3D-m dt_binding_check DT_SCHEMA_FILES=3D<path to
+the .patch file>
+
+Results in this error early on in the output:
+...
+usage: yamllint [-h] [-] [-c CONFIG_FILE | -d CONFIG_DATA]
+[--list-files] [-f {parsable,standard,colored,github,auto}] [-s]
+[--no-warnings] [-v] [FILE_OR_DIR ...]
+yamllint: error: one of the arguments FILE_OR_DIR - is required
+...
+/mnt/android/linus-tree/Documentation/devicetree/bindings/post-init-supplie=
+rs.yaml:
+ignoring, error parsing file
+...
+
+> What you
+> actually want to enforce here is any number of device phandles, but
+> these phandles all contain only the label and no indices etc, right?
+
+Correct.
+
+>
+> > +
+> > +examples:
+> > +  - |
+> > +    gcc: clock-controller@1000 {
+> > +        compatible =3D "vendor,soc4-gcc", "vendor,soc1-gcc";
+> > +        reg =3D <0x1000 0x80>;
+> > +        clocks =3D <&dispcc 0x1>
+>
+> This clearly was never tested, Rob's bot warnings aside. You're missing
+> a ; at EOL here and with the other clock below.
+
+Yup. I'm unable to get the test to run.
+
+Thanks,
+Saravana
