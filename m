@@ -1,48 +1,48 @@
-Received: from mx0a-00823401.pphosted.com (mx0a-00823401.pphosted.com [148.163.148.104])
+Received: from mx0b-00823401.pphosted.com (mx0b-00823401.pphosted.com [148.163.152.46])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7BD7D2DF9F;
-	Tue, 20 Feb 2024 20:33:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.148.104
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E426E69D10;
+	Tue, 20 Feb 2024 20:33:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.152.46
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708461224; cv=none; b=bodX2moI5aZH8Q5cfJRhqqku9fLIByVLfgR9ClrEvyvKhtYuO9Ug4YCM06u1d5mJwZq8E9mU9toOJsxtpEfmOWIfMuHReIT/gnwJtsJfs8BT0LCB4bqL7KR9FncvyfO+50kAwNhGyJoSdhxa9KhINDtJ70GEtoAoWZIBrbu9K54=
+	t=1708461225; cv=none; b=CdX9j/OPLFznpaahddYFbNpl80Zr8DlhcxXmnxIS59L7jzEdFTrAWpSD6HDNPi80eLMKvYY/xrK3vMEYL7fZFNw6NVuqrq1FkoLF0Wcn8NQL6CBNxsaYgTrS29wC7NalwMfCxvoPV69SWYp60Z2nZ39KeBJP9I6hStnP8qTsduY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708461224; c=relaxed/simple;
-	bh=dIsqkuQOXZDTAHt9tEvRQ+VzkukP9xhHmaGKEFmYWwM=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=uwJQKZ5lSsnJprsILvai6yRFftJbOnnjBUhxGrsN0RqIV/ULakizlaBVI3p6Qqh3kPViyHpunwZopoKqUYySA0N8VF9p3dWdcnP+PHMiBJXVF8IghGp/43dQIFCvXM3uNbB9hj/IbEMCC/HZ67haHtFEyvVQri0f0NDp/aCxOgw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=motorola.com; spf=pass smtp.mailfrom=motorola.com; dkim=pass (2048-bit key) header.d=motorola.com header.i=@motorola.com header.b=ElSgGv+K; arc=none smtp.client-ip=148.163.148.104
+	s=arc-20240116; t=1708461225; c=relaxed/simple;
+	bh=5fyrpL6I35oXbQ79JL+OMciY0wUkV8Hs5J/Gm9DAExw=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=Esn3ERIaTK7klEhKDQMe3hOzgksO7Nl+CNIf7IyxneyjzbjE93haTcvy5Q34FYAB5H5EqBLElPW28QdRtZIf8rGYRxpCaxgAZ6/WU07n/I52RrqHD/hBcO5C/rp/Kb6Zu6vT2NoQJxydHB5K6GIiSExFhLgYzXIfQ+XB8TR08sU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=motorola.com; spf=pass smtp.mailfrom=motorola.com; dkim=pass (2048-bit key) header.d=motorola.com header.i=@motorola.com header.b=3DviofDb; arc=none smtp.client-ip=148.163.152.46
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=motorola.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=motorola.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=motorola.com header.i=@motorola.com header.b="ElSgGv+K"
-Received: from pps.filterd (m0355087.ppops.net [127.0.0.1])
-	by mx0a-00823401.pphosted.com (8.17.1.24/8.17.1.24) with ESMTP id 41KJD95s024286;
-	Tue, 20 Feb 2024 20:33:20 GMT
+	dkim=pass (2048-bit key) header.d=motorola.com header.i=@motorola.com header.b="3DviofDb"
+Received: from pps.filterd (m0355089.ppops.net [127.0.0.1])
+	by mx0b-00823401.pphosted.com (8.17.1.24/8.17.1.24) with ESMTP id 41KJFBgl020507;
+	Tue, 20 Feb 2024 20:33:23 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=motorola.com; h=
 	from:to:cc:subject:date:message-id:in-reply-to:references; s=
-	DKIM202306; bh=lwi3HRNY78hVZA0tkjf7HxRAkL6o9c683flfMjEmlDw=; b=E
-	lSgGv+KqoOf5uoj86cmnKJHlpO8dh3somQfJMLfScSNqsu6w2yerKMo4dfeFFdjc
-	ac0NUN5+TdUJgTX/l98WxBM2B2g9h4agUt2h5xsTdnQM3W5+KVeo4VL+5TT1Ih/A
-	28MoIHA57HPmOmTXO2DDqDVDP/tktkt/rWfWggdoPMwsl1gv/kFDWTT8Lmmu8h8E
-	4WSK0ZZkUD0mbRcWeNuLl5MTFmyj4fWznK/5Z8Fs6+RzBDvb9vO+uhnPmXpO5bWZ
-	Wpec6+tkdY03l9oWiYDuUUeH70qYhoL90l7Yg9SbclAwfFkO/NUPP8i9FbLKVX4k
-	wF0RW4+b/UsQdUbrND77w==
-Received: from ilclpfpp01.lenovo.com ([144.188.128.67])
-	by mx0a-00823401.pphosted.com (PPS) with ESMTPS id 3wd22085c8-1
+	DKIM202306; bh=yYaZ6KkZCfPgvE7ldRLRah8LlOxOAhyoW4Oo9vMYLI4=; b=3
+	DviofDb9pzniwChbEs283Q/nhrnZBOGxIjIbYC1Xij4+lyhygZxJPN3GIzERfFUn
+	FRqnViLZyoLn8VtqSCE6yax3k1cyJkMzduys1f9K06sujdOQdyJ5v8X4aLSf7YQv
+	DJpHBVfe55tafJqy9d0n6/2snEve64mdY1j6Ao9A4r/vZEWTvqGph4TEb0IydBJV
+	29uSUIr0Bz33FEtALIf1RFGASoSx7cTH2Mlm/csy1VwndF+H5rvB0gZI1BGaao9K
+	uo4ExG1esCF3SuXWz284KarBuUKzF8ywJu6hJwimy2/BNJtTjQCKyOnRt9V1ibg4
+	196bpTuBMlRupJNonffFg==
+Received: from va32lpfpp02.lenovo.com ([104.232.228.22])
+	by mx0b-00823401.pphosted.com (PPS) with ESMTPS id 3wd22x86fy-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Tue, 20 Feb 2024 20:33:20 +0000 (GMT)
+	Tue, 20 Feb 2024 20:33:23 +0000 (GMT)
 Received: from ilclmmrp01.lenovo.com (ilclmmrp01.mot.com [100.65.83.165])
 	(using TLSv1.2 with cipher ADH-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by ilclpfpp01.lenovo.com (Postfix) with ESMTPS id 4TfWM34D5FzfBZq;
-	Tue, 20 Feb 2024 20:33:19 +0000 (UTC)
+	by va32lpfpp02.lenovo.com (Postfix) with ESMTPS id 4TfWM709tKz50TkW;
+	Tue, 20 Feb 2024 20:33:23 +0000 (UTC)
 Received: from ilclasset01.mot.com (ilclasset01.mot.com [100.64.7.105])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
 	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
 	(Authenticated sender: mbland)
-	by ilclmmrp01.lenovo.com (Postfix) with ESMTPSA id 4TfWM33V0nz3n3fr;
-	Tue, 20 Feb 2024 20:33:19 +0000 (UTC)
+	by ilclmmrp01.lenovo.com (Postfix) with ESMTPSA id 4TfWM65bfHz3n3fr;
+	Tue, 20 Feb 2024 20:33:22 +0000 (UTC)
 From: Maxwell Bland <mbland@motorola.com>
 To: linux-arm-kernel@lists.infradead.org
 Cc: gregkh@linuxfoundation.org, agordeev@linux.ibm.com,
@@ -72,21 +72,21 @@ Cc: gregkh@linuxfoundation.org, agordeev@linux.ibm.com,
         vincenzo.frascino@arm.com, will@kernel.org, wuqiang.matt@bytedance.com,
         yonghong.song@linux.dev, zlim.lnx@gmail.com, mbland@motorola.com,
         awheeler@motorola.com
-Subject: [PATCH 2/4] mm: pgalloc: support address-conditional pmd allocation
-Date: Tue, 20 Feb 2024 14:32:54 -0600
-Message-Id: <20240220203256.31153-3-mbland@motorola.com>
+Subject: [PATCH 4/4] arm64: dynamic enforcement of pmd-level PXNTable
+Date: Tue, 20 Feb 2024 14:32:56 -0600
+Message-Id: <20240220203256.31153-5-mbland@motorola.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20240220203256.31153-1-mbland@motorola.com>
 References: <20240220203256.31153-1-mbland@motorola.com>
-X-Proofpoint-GUID: 2FTPwLLxVF_PmOE_sZo-Tr78eaAtLsFQ
-X-Proofpoint-ORIG-GUID: 2FTPwLLxVF_PmOE_sZo-Tr78eaAtLsFQ
+X-Proofpoint-ORIG-GUID: IdOVOSFTH5OwTQnHH7fAIQBlI2JoJAu-
+X-Proofpoint-GUID: IdOVOSFTH5OwTQnHH7fAIQBlI2JoJAu-
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.272,Aquarius:18.0.1011,Hydra:6.0.619,FMLib:17.11.176.26
  definitions=2024-02-20_06,2024-02-20_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 suspectscore=0
- priorityscore=1501 bulkscore=0 phishscore=0 lowpriorityscore=0
- malwarescore=0 mlxlogscore=781 spamscore=0 clxscore=1015 impostorscore=0
- adultscore=0 mlxscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 lowpriorityscore=0
+ phishscore=0 mlxlogscore=766 spamscore=0 malwarescore=0 adultscore=0
+ suspectscore=0 impostorscore=0 priorityscore=1501 bulkscore=0 mlxscore=0
+ clxscore=1015 classifier=spam adjust=0 reason=mlx scancount=1
  engine=8.19.0-2402120000 definitions=main-2402200146
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -94,233 +94,90 @@ List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 
-While other descriptors (e.g. pud) allow allocations conditional on
-which virtual address is allocated, pmd descriptor allocations do not.
-However, adding support for this is straightforward and is beneficial to
-future kernel development targeting the PMD memory granularity.
+In an attempt to protect against write-then-execute attacks wherein an
+adversary stages malicious code into a data page and then later uses a
+write gadget to mark the data page executable, arm64 enforces PXNTable
+when allocating pmd descriptors during the init process. However, these
+protections are not maintained for dynamic memory allocations, creating
+an extensive threat surface to write-then-execute attacks targeting
+pages allocated through the vmalloc interface.
 
-As many architectures already implement pmd_populate_kernel in an
-address-generic manner, it is necessary to roll out support
-incrementally. For this purpose a preprocessor flag,
-__HAVE_ARCH_ADDR_COND_PMD is introduced to capture whether the
-architecture supports some feature requiring PMD allocation conditional
-on virtual address. Some microarchitectures (e.g. arm64) support
-configurations for table descriptors, for example to enforce Privilege
-eXecute Never, which benefit from knowing the virtual memory addresses
-referenced by PMDs.
+Straightforward modifications to the pgalloc interface allow for the
+dynamic enforcement of PXNTable, restricting writable and
+privileged-executable code pages to known kernel text, bpf-allocated
+programs, and kprobe-allocated pages, all of which have more extensive
+verification interfaces than the generic vmalloc region.
 
-Thus two major arguments in favor of this change are (1) unformity of
-allocation between PMD and other table descriptor types and (2) the
-capability of address-specific PMD allocation.
+This patch adds a preprocessor define to check whether a pmd is
+allocated by vmalloc and exists outside of a known code region, and if
+so, marks the pmd as PXNTable, protecting over 100 last-level page
+tables from manipulation in the process.
 
 Signed-off-by: Maxwell Bland <mbland@motorola.com>
 ---
- include/asm-generic/pgalloc.h | 18 ++++++++++++++++++
- include/linux/mm.h            |  4 ++--
- mm/hugetlb_vmemmap.c          |  4 ++--
- mm/kasan/init.c               | 22 +++++++++++++---------
- mm/memory.c                   |  4 ++--
- mm/percpu.c                   |  2 +-
- mm/pgalloc-track.h            |  3 ++-
- mm/sparse-vmemmap.c           |  2 +-
- 8 files changed, 41 insertions(+), 18 deletions(-)
+ arch/arm64/include/asm/pgalloc.h | 11 +++++++++--
+ arch/arm64/include/asm/vmalloc.h |  5 +++++
+ arch/arm64/mm/trans_pgd.c        |  2 +-
+ 3 files changed, 15 insertions(+), 3 deletions(-)
 
-diff --git a/include/asm-generic/pgalloc.h b/include/asm-generic/pgalloc.h
-index 879e5f8aa5e9..e5cdce77c6e4 100644
---- a/include/asm-generic/pgalloc.h
-+++ b/include/asm-generic/pgalloc.h
-@@ -142,6 +142,24 @@ static inline pmd_t *pmd_alloc_one(struct mm_struct *mm, unsigned long addr)
- }
- #endif
+diff --git a/arch/arm64/include/asm/pgalloc.h b/arch/arm64/include/asm/pgalloc.h
+index 237224484d0f..5e9262241e8b 100644
+--- a/arch/arm64/include/asm/pgalloc.h
++++ b/arch/arm64/include/asm/pgalloc.h
+@@ -13,6 +13,7 @@
+ #include <asm/cacheflush.h>
+ #include <asm/tlbflush.h>
  
-+#ifdef __HAVE_ARCH_ADDR_COND_PMD
-+static inline void pmd_populate_kernel(struct mm_struct *mm, pmd_t *pmdp,
-+			pte_t *ptep, unsigned long address);
-+#else
-+static inline void pmd_populate_kernel(struct mm_struct *mm, pmd_t *pmdp,
-+			pte_t *ptep);
-+#endif
-+
-+static inline void pmd_populate_kernel_at(struct mm_struct *mm, pmd_t *pmdp,
-+			pte_t *ptep, unsigned long address)
-+{
-+#ifdef __HAVE_ARCH_ADDR_COND_PMD
-+	pmd_populate_kernel(mm, pmdp, ptep, address);
-+#else
-+	pmd_populate_kernel(mm, pmdp, ptep);
-+#endif
-+}
-+
- #ifndef __HAVE_ARCH_PMD_FREE
- static inline void pmd_free(struct mm_struct *mm, pmd_t *pmd)
++#define __HAVE_ARCH_ADDR_COND_PMD
+ #define __HAVE_ARCH_PGD_FREE
+ #include <asm-generic/pgalloc.h>
+ 
+@@ -74,10 +75,16 @@ static inline void __pmd_populate(pmd_t *pmdp, phys_addr_t ptep,
+  * of the mm address space.
+  */
+ static inline void
+-pmd_populate_kernel(struct mm_struct *mm, pmd_t *pmdp, pte_t *ptep)
++pmd_populate_kernel(struct mm_struct *mm, pmd_t *pmdp, pte_t *ptep,
++			unsigned long address)
  {
-diff --git a/include/linux/mm.h b/include/linux/mm.h
-index f5a97dec5169..6a9d5ded428d 100644
---- a/include/linux/mm.h
-+++ b/include/linux/mm.h
-@@ -2782,7 +2782,7 @@ static inline void mm_dec_nr_ptes(struct mm_struct *mm) {}
- #endif
++	pmdval_t pmd = PMD_TYPE_TABLE | PMD_TABLE_UXN;
+ 	VM_BUG_ON(mm && mm != &init_mm);
+-	__pmd_populate(pmdp, __pa(ptep), PMD_TYPE_TABLE | PMD_TABLE_UXN);
++	if (IS_DATA_VMALLOC_ADDR(address) &&
++		IS_DATA_VMALLOC_ADDR(address + PMD_SIZE)) {
++		pmd |= PMD_TABLE_PXN;
++	}
++	__pmd_populate(pmdp, __pa(ptep), pmd);
+ }
  
- int __pte_alloc(struct mm_struct *mm, pmd_t *pmd);
--int __pte_alloc_kernel(pmd_t *pmd);
-+int __pte_alloc_kernel(pmd_t *pmd, unsigned long address);
+ static inline void
+diff --git a/arch/arm64/include/asm/vmalloc.h b/arch/arm64/include/asm/vmalloc.h
+index dbcf8ad20265..6f254ab83f4a 100644
+--- a/arch/arm64/include/asm/vmalloc.h
++++ b/arch/arm64/include/asm/vmalloc.h
+@@ -34,4 +34,9 @@ static inline pgprot_t arch_vmap_pgprot_tagged(pgprot_t prot)
+ extern unsigned long code_region_start __ro_after_init;
+ extern unsigned long code_region_end __ro_after_init;
  
- #if defined(CONFIG_MMU)
- 
-@@ -2977,7 +2977,7 @@ pte_t *pte_offset_map_nolock(struct mm_struct *mm, pmd_t *pmd,
- 		 NULL : pte_offset_map_lock(mm, pmd, address, ptlp))
- 
- #define pte_alloc_kernel(pmd, address)			\
--	((unlikely(pmd_none(*(pmd))) && __pte_alloc_kernel(pmd))? \
-+	((unlikely(pmd_none(*(pmd))) && __pte_alloc_kernel(pmd, address)) ? \
- 		NULL: pte_offset_kernel(pmd, address))
- 
- #if USE_SPLIT_PMD_PTLOCKS
-diff --git a/mm/hugetlb_vmemmap.c b/mm/hugetlb_vmemmap.c
-index da177e49d956..1f5664b656f1 100644
---- a/mm/hugetlb_vmemmap.c
-+++ b/mm/hugetlb_vmemmap.c
-@@ -58,7 +58,7 @@ static int vmemmap_split_pmd(pmd_t *pmd, struct page *head, unsigned long start,
- 	if (!pgtable)
++#define IS_DATA_VMALLOC_ADDR(vaddr) (((vaddr) < code_region_start || \
++				      (vaddr) > code_region_end) && \
++				      ((vaddr) >= VMALLOC_START && \
++				       (vaddr) < VMALLOC_END))
++
+ #endif /* _ASM_ARM64_VMALLOC_H */
+diff --git a/arch/arm64/mm/trans_pgd.c b/arch/arm64/mm/trans_pgd.c
+index 7b14df3c6477..7f903c51e1eb 100644
+--- a/arch/arm64/mm/trans_pgd.c
++++ b/arch/arm64/mm/trans_pgd.c
+@@ -69,7 +69,7 @@ static int copy_pte(struct trans_pgd_info *info, pmd_t *dst_pmdp,
+ 	dst_ptep = trans_alloc(info);
+ 	if (!dst_ptep)
  		return -ENOMEM;
+-	pmd_populate_kernel(NULL, dst_pmdp, dst_ptep);
++	pmd_populate_kernel_at(NULL, dst_pmdp, dst_ptep, addr);
+ 	dst_ptep = pte_offset_kernel(dst_pmdp, start);
  
--	pmd_populate_kernel(&init_mm, &__pmd, pgtable);
-+	pmd_populate_kernel_at(&init_mm, &__pmd, pgtable, addr);
- 
- 	for (i = 0; i < PTRS_PER_PTE; i++, addr += PAGE_SIZE) {
- 		pte_t entry, *pte;
-@@ -81,7 +81,7 @@ static int vmemmap_split_pmd(pmd_t *pmd, struct page *head, unsigned long start,
- 
- 		/* Make pte visible before pmd. See comment in pmd_install(). */
- 		smp_wmb();
--		pmd_populate_kernel(&init_mm, pmd, pgtable);
-+		pmd_populate_kernel_at(&init_mm, pmd, pgtable, addr);
- 		if (!(walk->flags & VMEMMAP_SPLIT_NO_TLB_FLUSH))
- 			flush_tlb_kernel_range(start, start + PMD_SIZE);
- 	} else {
-diff --git a/mm/kasan/init.c b/mm/kasan/init.c
-index 89895f38f722..1e31d965a14e 100644
---- a/mm/kasan/init.c
-+++ b/mm/kasan/init.c
-@@ -116,8 +116,9 @@ static int __ref zero_pmd_populate(pud_t *pud, unsigned long addr,
- 		next = pmd_addr_end(addr, end);
- 
- 		if (IS_ALIGNED(addr, PMD_SIZE) && end - addr >= PMD_SIZE) {
--			pmd_populate_kernel(&init_mm, pmd,
--					lm_alias(kasan_early_shadow_pte));
-+			pmd_populate_kernel_at(&init_mm, pmd,
-+					lm_alias(kasan_early_shadow_pte),
-+					addr);
- 			continue;
- 		}
- 
-@@ -131,7 +132,7 @@ static int __ref zero_pmd_populate(pud_t *pud, unsigned long addr,
- 			if (!p)
- 				return -ENOMEM;
- 
--			pmd_populate_kernel(&init_mm, pmd, p);
-+			pmd_populate_kernel_at(&init_mm, pmd, p, addr);
- 		}
- 		zero_pte_populate(pmd, addr, next);
- 	} while (pmd++, addr = next, addr != end);
-@@ -157,8 +158,9 @@ static int __ref zero_pud_populate(p4d_t *p4d, unsigned long addr,
- 			pud_populate(&init_mm, pud,
- 					lm_alias(kasan_early_shadow_pmd));
- 			pmd = pmd_offset(pud, addr);
--			pmd_populate_kernel(&init_mm, pmd,
--					lm_alias(kasan_early_shadow_pte));
-+			pmd_populate_kernel_at(&init_mm, pmd,
-+					lm_alias(kasan_early_shadow_pte),
-+					addr);
- 			continue;
- 		}
- 
-@@ -203,8 +205,9 @@ static int __ref zero_p4d_populate(pgd_t *pgd, unsigned long addr,
- 			pud_populate(&init_mm, pud,
- 					lm_alias(kasan_early_shadow_pmd));
- 			pmd = pmd_offset(pud, addr);
--			pmd_populate_kernel(&init_mm, pmd,
--					lm_alias(kasan_early_shadow_pte));
-+			pmd_populate_kernel_at(&init_mm, pmd,
-+					lm_alias(kasan_early_shadow_pte),
-+					addr);
- 			continue;
- 		}
- 
-@@ -266,8 +269,9 @@ int __ref kasan_populate_early_shadow(const void *shadow_start,
- 			pud_populate(&init_mm, pud,
- 					lm_alias(kasan_early_shadow_pmd));
- 			pmd = pmd_offset(pud, addr);
--			pmd_populate_kernel(&init_mm, pmd,
--					lm_alias(kasan_early_shadow_pte));
-+			pmd_populate_kernel_at(&init_mm, pmd,
-+					lm_alias(kasan_early_shadow_pte),
-+					addr);
- 			continue;
- 		}
- 
-diff --git a/mm/memory.c b/mm/memory.c
-index 15f8b10ea17c..15702822d904 100644
---- a/mm/memory.c
-+++ b/mm/memory.c
-@@ -447,7 +447,7 @@ int __pte_alloc(struct mm_struct *mm, pmd_t *pmd)
- 	return 0;
- }
- 
--int __pte_alloc_kernel(pmd_t *pmd)
-+int __pte_alloc_kernel(pmd_t *pmd, unsigned long address)
- {
- 	pte_t *new = pte_alloc_one_kernel(&init_mm);
- 	if (!new)
-@@ -456,7 +456,7 @@ int __pte_alloc_kernel(pmd_t *pmd)
- 	spin_lock(&init_mm.page_table_lock);
- 	if (likely(pmd_none(*pmd))) {	/* Has another populated it ? */
- 		smp_wmb(); /* See comment in pmd_install() */
--		pmd_populate_kernel(&init_mm, pmd, new);
-+		pmd_populate_kernel_at(&init_mm, pmd, new, address);
- 		new = NULL;
- 	}
- 	spin_unlock(&init_mm.page_table_lock);
-diff --git a/mm/percpu.c b/mm/percpu.c
-index 4e11fc1e6def..7312e584c1b5 100644
---- a/mm/percpu.c
-+++ b/mm/percpu.c
-@@ -3238,7 +3238,7 @@ void __init __weak pcpu_populate_pte(unsigned long addr)
- 		new = memblock_alloc(PTE_TABLE_SIZE, PTE_TABLE_SIZE);
- 		if (!new)
- 			goto err_alloc;
--		pmd_populate_kernel(&init_mm, pmd, new);
-+		pmd_populate_kernel_at(&init_mm, pmd, new, addr);
- 	}
- 
- 	return;
-diff --git a/mm/pgalloc-track.h b/mm/pgalloc-track.h
-index e9e879de8649..0984681c03d4 100644
---- a/mm/pgalloc-track.h
-+++ b/mm/pgalloc-track.h
-@@ -45,7 +45,8 @@ static inline pmd_t *pmd_alloc_track(struct mm_struct *mm, pud_t *pud,
- 
- #define pte_alloc_kernel_track(pmd, address, mask)			\
- 	((unlikely(pmd_none(*(pmd))) &&					\
--	  (__pte_alloc_kernel(pmd) || ({*(mask)|=PGTBL_PMD_MODIFIED;0;})))?\
-+	  (__pte_alloc_kernel(pmd, address) ||				\
-+		({*(mask) |= PGTBL_PMD_MODIFIED; 0; }))) ?		\
- 		NULL: pte_offset_kernel(pmd, address))
- 
- #endif /* _LINUX_PGALLOC_TRACK_H */
-diff --git a/mm/sparse-vmemmap.c b/mm/sparse-vmemmap.c
-index a2cbe44c48e1..d876cc4dc700 100644
---- a/mm/sparse-vmemmap.c
-+++ b/mm/sparse-vmemmap.c
-@@ -191,7 +191,7 @@ pmd_t * __meminit vmemmap_pmd_populate(pud_t *pud, unsigned long addr, int node)
- 		void *p = vmemmap_alloc_block_zero(PAGE_SIZE, node);
- 		if (!p)
- 			return NULL;
--		pmd_populate_kernel(&init_mm, pmd, p);
-+		pmd_populate_kernel_at(&init_mm, pmd, p, addr);
- 	}
- 	return pmd;
- }
+ 	src_ptep = pte_offset_kernel(src_pmdp, start);
 -- 
 2.39.2
 
