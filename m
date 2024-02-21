@@ -1,281 +1,223 @@
-Received: from mx0a-00823401.pphosted.com (mx0a-00823401.pphosted.com [148.163.148.104])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f50.google.com (mail-ed1-f50.google.com [209.85.208.50])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A05A14F9E7;
-	Tue, 20 Feb 2024 20:37:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.148.104
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2C14E38DE6
+	for <linux-efi@vger.kernel.org>; Wed, 21 Feb 2024 04:08:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1708461462; cv=none; b=FPM8EQ9W8C7X/Mp8q1B0nde4gCorspvGvpzBDAb12PohjZ8H3YRqvBgxPrx7LXhIsW7zm317y28qFfWro2lHYuT5pmLmaFPEBBH7IEKshLuegnrmfOoV5DRVm6H/6WQPEbc7XpVaS3A1b6Z+GaaEH3xyhRXBeXKCIy7Y0dClBLI=
+	t=1708488513; cv=none; b=lqrsPVOityh42Hwlcuws3ayNk9DhIzjURjcmIIquDAFoqsmLKp4Z5D3R0wswbVo7wjFVv3goFhplqbyr+q1t12gXt35hOvWvrppo80ZWZh17/UVP7Imr81kkU72czBmcAAVcSubaIgIwYq9KUjdiD4CoxbjviUS/QfNXAlPUwwk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1708461462; c=relaxed/simple;
-	bh=uBERHdw2LAkX/ox0xE0bEhdCEdWfMV2K3mU7Jp07W8M=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=Tet8q4tByhb+4cUmUwhHuw6olJtc+N7+mNBOJg0LnigN8Isf/zvzO7QqxfLi0EsCc3SY/tthveewi1QyUa2lI5ANkoY7cfcFhWdQcccV3GU9QykOryFY/qv5Td2lXkXk8g4f7fyXNXTCpjIAOxB+remxh8SIGpHbQSZOs4nUIO0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=motorola.com; spf=pass smtp.mailfrom=motorola.com; dkim=pass (2048-bit key) header.d=motorola.com header.i=@motorola.com header.b=G8c3FTHW; arc=none smtp.client-ip=148.163.148.104
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=motorola.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=motorola.com
+	s=arc-20240116; t=1708488513; c=relaxed/simple;
+	bh=VMnZZMlvZpAbCe/9PN4y8l6fqn6fzCdYpCLaJwhENmQ=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=Xi4PxULwqy6zBDaNl5zH7vVkCSHJxJZH3uSzM7ap+Th9ErP8K1+zIQtyjQleBBebcKF1n2J1GGZmcdOE2mAFat7y6osQhziEfFxwi2ZGUTw/BspL/Vo5wHfP571X4ChYwLy1KRG77zt7bKC5T2sKkDc40okMunoTAnqyaamq/CQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=xMyMoqWJ; arc=none smtp.client-ip=209.85.208.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=motorola.com header.i=@motorola.com header.b="G8c3FTHW"
-Received: from pps.filterd (m0355088.ppops.net [127.0.0.1])
-	by m0355088.ppops.net (8.17.1.24/8.17.1.24) with ESMTP id 41KJD1Po003877;
-	Tue, 20 Feb 2024 20:33:23 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=motorola.com; h=
-	from:to:cc:subject:date:message-id:in-reply-to:references; s=
-	DKIM202306; bh=bbMfJLfH6G5a4s+Z0cFe2wOzrCFA0lQFMo+SQbxfAvI=; b=G
-	8c3FTHWyfPhIWnn3QaQguVptC48Uy9lbb+BcoCWa1nlQvoc+woWLCowBjoFNI/ix
-	dF3dTPLkKuRe51BCEWpmjjyoWUwOEeG1JP3K+L03xl7q88Lz8LruYRC/RRB3CTwB
-	VoNx/lEOcTE6WiCIHXgg5dkPsrrUKhnkMwA9g0o57GM1rcm1QJ1bJzqn4LBPaSvJ
-	5aZqXa8byiN8r8QcOQjWXqu7qO8ypNwY4E1F+FiRQQ8X2r4skIxi7eqpl2aUyNPQ
-	uI7mEb5ULBOlIP5YUGkeqB8pHq9Ly3Cnsty72nkRlu5/CiR5/fmbdecAA2NZSgUu
-	DRWYGLwsYmIHKfHyKYEXQ==
-Received: from va32lpfpp03.lenovo.com ([104.232.228.23])
-	by m0355088.ppops.net (PPS) with ESMTPS id 3wd21x05ua-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Tue, 20 Feb 2024 20:33:22 +0000 (GMT)
-Received: from ilclmmrp01.lenovo.com (ilclmmrp01.mot.com [100.65.83.165])
-	(using TLSv1.2 with cipher ADH-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by va32lpfpp03.lenovo.com (Postfix) with ESMTPS id 4TfWM54k8jz4ygs4;
-	Tue, 20 Feb 2024 20:33:21 +0000 (UTC)
-Received: from ilclasset01.mot.com (ilclasset01.mot.com [100.64.7.105])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	(Authenticated sender: mbland)
-	by ilclmmrp01.lenovo.com (Postfix) with ESMTPSA id 4TfWM52tFkz3n3fr;
-	Tue, 20 Feb 2024 20:33:21 +0000 (UTC)
-From: Maxwell Bland <mbland@motorola.com>
-To: linux-arm-kernel@lists.infradead.org
-Cc: gregkh@linuxfoundation.org, agordeev@linux.ibm.com,
-        akpm@linux-foundation.org, andreyknvl@gmail.com, andrii@kernel.org,
-        aneesh.kumar@kernel.org, aou@eecs.berkeley.edu, ardb@kernel.org,
-        arnd@arndb.de, ast@kernel.org, borntraeger@linux.ibm.com,
-        bpf@vger.kernel.org, brauner@kernel.org, catalin.marinas@arm.com,
-        christophe.leroy@csgroup.eu, cl@linux.com, daniel@iogearbox.net,
-        dave.hansen@linux.intel.com, david@redhat.com, dennis@kernel.org,
-        dvyukov@google.com, glider@google.com, gor@linux.ibm.com,
-        guoren@kernel.org, haoluo@google.com, hca@linux.ibm.com,
-        hch@infradead.org, john.fastabend@gmail.com, jolsa@kernel.org,
-        kasan-dev@googlegroups.com, kpsingh@kernel.org,
-        linux-arch@vger.kernel.org, linux@armlinux.org.uk,
-        linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mm@kvack.org, linuxppc-dev@lists.ozlabs.org,
-        linux-riscv@lists.infradead.org, linux-s390@vger.kernel.org,
-        lstoakes@gmail.com, mark.rutland@arm.com, martin.lau@linux.dev,
-        meted@linux.ibm.com, michael.christie@oracle.com, mjguzik@gmail.com,
-        mpe@ellerman.id.au, mst@redhat.com, muchun.song@linux.dev,
-        naveen.n.rao@linux.ibm.com, npiggin@gmail.com, palmer@dabbelt.com,
-        paul.walmsley@sifive.com, quic_nprakash@quicinc.com,
-        quic_pkondeti@quicinc.com, rick.p.edgecombe@intel.com,
-        ryabinin.a.a@gmail.com, ryan.roberts@arm.com, samitolvanen@google.com,
-        sdf@google.com, song@kernel.org, surenb@google.com,
-        svens@linux.ibm.com, tj@kernel.org, urezki@gmail.com,
-        vincenzo.frascino@arm.com, will@kernel.org, wuqiang.matt@bytedance.com,
-        yonghong.song@linux.dev, zlim.lnx@gmail.com, mbland@motorola.com,
-        awheeler@motorola.com
-Subject: [PATCH 3/4] arm64: separate code and data virtual memory allocation
-Date: Tue, 20 Feb 2024 14:32:55 -0600
-Message-Id: <20240220203256.31153-4-mbland@motorola.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20240220203256.31153-1-mbland@motorola.com>
-References: <20240220203256.31153-1-mbland@motorola.com>
-X-Proofpoint-ORIG-GUID: FwETS-WEm85ynHN23cNJXJC1VUZpgnFr
-X-Proofpoint-GUID: FwETS-WEm85ynHN23cNJXJC1VUZpgnFr
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.272,Aquarius:18.0.1011,Hydra:6.0.619,FMLib:17.11.176.26
- definitions=2024-02-20_06,2024-02-20_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
- mlxlogscore=999 clxscore=1015 suspectscore=0 phishscore=0 mlxscore=0
- malwarescore=0 adultscore=0 bulkscore=0 impostorscore=0 spamscore=0
- lowpriorityscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.19.0-2402120000 definitions=main-2402200146
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="xMyMoqWJ"
+Received: by mail-ed1-f50.google.com with SMTP id 4fb4d7f45d1cf-564e4477b7cso4696a12.1
+        for <linux-efi@vger.kernel.org>; Tue, 20 Feb 2024 20:08:30 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20230601; t=1708488509; x=1709093309; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=1vYLUdRHnLOuE5GlvVy5mmDzCcmYulWt5UKno2mI/Ts=;
+        b=xMyMoqWJWUh+y/Z7mD1swhWNCdspx5wwLL/H6thBwHhdCxoeo5NL9HnfVoYpll3wQR
+         FBi23f/6ITJisMLOy/rh/cmGA9ExQLxygiZQwu5Tksbwy264juz64oMyLem1Yts9EJgo
+         lMg+2fsgnmtK+tRuLpxdngmnJQpEvV6bj/aIdqFQPqnV8yai+zFjK34GJqkSKLsRHbtc
+         hE+ZWHamJbUevirArV2knhqefRIezkM8M9v1IBwVydOVRRRkXmoEQWGFoLJylxpen5/N
+         F1PnQbBWEyaPyT2QuCkLfOUAyC3Nr39tCg0gcjiXzOGC/ZX2QOsIql3Qwb894CkvIbvV
+         1zmA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1708488509; x=1709093309;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=1vYLUdRHnLOuE5GlvVy5mmDzCcmYulWt5UKno2mI/Ts=;
+        b=aynMKqQIQB68gMtA+UlUUmyozzEbkxr2jQ/O8oYzW9c/9Z62lH0x+y82QKfe2x0Buy
+         syRcmStu4vAJVTwVYbiO4SiMAiN7bz4ekwABsjUcumZvYYzlxqLKBF8BfbSTl5EH3Agq
+         Mei1C3gvImzcUrVhPjbvdjTPHmwx1kFjXzuFgeefNNZuUSdN8fHVnG6ADkNckygYnQ0/
+         2NIZGlI+UuTJ0m9ZhzoOFxoe9AsiwbEQPi8Dd/vlk2skBcUUJNGF+jYuzq3YC1drvYL8
+         9Z2RmtZda8w2FHSNM4SYLObuznfC68ig92QgHZbggHYGoZDTbYkC8e31naJy/bLmkgoj
+         MAJw==
+X-Forwarded-Encrypted: i=1; AJvYcCWNSQc+Jx7TEQvVRnKxeIskaQ7q5Nxf3BUP3TSupGC44ZHrMLOxLXJZJb/hIsGvtLath9iHRrcIO7fU3VJsx3lJMrBMcoXUk+a6
+X-Gm-Message-State: AOJu0Yz+TXTm76Whqb9ezenKFhEHAbwHYcPEFYVl75H7BEerxh2Qzp1F
+	9/Zv8bTPw7WOxRuGlFesSEDfZzREA2spJRj60/10pOaKRaITDSTNcgH2XazdlTsGV1V3uLgUKtU
+	LQwCd0QW5I48iN5BW77MfPlxrG0pIaStg1RFb
+X-Google-Smtp-Source: AGHT+IHmgqd6Xu5JQrE9v4Rhsl5MKM0/pejNdb3HvU+7d2flqEB0yhf6jyU2v+sB5FmKxqZFYTO435nbWJ8DHnQHhOM=
+X-Received: by 2002:a50:d5d9:0:b0:563:f48f:a5bc with SMTP id
+ g25-20020a50d5d9000000b00563f48fa5bcmr47442edj.5.1708488509288; Tue, 20 Feb
+ 2024 20:08:29 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+References: <20240212213147.489377-1-saravanak@google.com> <20240212213147.489377-4-saravanak@google.com>
+ <20240214-stable-anytime-b51b898d87af@spud> <CAGETcx-tBjfaLQqmGW=ap2N5FLK_gvTzxskA6sVsr_SUEpvomA@mail.gmail.com>
+ <b7fcb71a-e3bf-4f50-89d6-caff9f3303dc@linaro.org>
+In-Reply-To: <b7fcb71a-e3bf-4f50-89d6-caff9f3303dc@linaro.org>
+From: Saravana Kannan <saravanak@google.com>
+Date: Tue, 20 Feb 2024 20:07:48 -0800
+Message-ID: <CAGETcx8XBj=vh_e3vyXuj8oQYA3UC4uy9h9K2OmwBxZ2G_ms9Q@mail.gmail.com>
+Subject: Re: [PATCH v2 3/4] dt-bindings: Add post-init-supplier property
+To: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Cc: Conor Dooley <conor@kernel.org>, Rob Herring <robh+dt@kernel.org>, 
+	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Rafael J. Wysocki" <rafael@kernel.org>, 
+	Ard Biesheuvel <ardb@kernel.org>, Frank Rowand <frowand.list@gmail.com>, Len Brown <lenb@kernel.org>, 
+	Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Daniel Scally <djrscally@gmail.com>, 
+	Heikki Krogerus <heikki.krogerus@linux.intel.com>, 
+	Sakari Ailus <sakari.ailus@linux.intel.com>, kernel-team@android.com, 
+	linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Current BPF and kprobe instruction allocation interfaces do not match
-the base kernel and intermingle code and data pages within the same
-sections. In the case of BPF, this appears to be a result of code
-duplication between the kernel's JIT compiler and arm64's JIT.  However,
-This is no longer necessary given the possibility of overriding vmalloc
-wrapper functions.
+On Sat, Feb 17, 2024 at 2:27=E2=80=AFAM Krzysztof Kozlowski
+<krzysztof.kozlowski@linaro.org> wrote:
+>
+> On 15/02/2024 00:32, Saravana Kannan wrote:
+> >
+> > Good point. Done.
+> >
+> >>> +    # One or more suppliers can be marked as post initialization sup=
+plier
+> >>> +    description:
+> >>> +      List of phandles to suppliers that are not needed for initiali=
+zing or
+> >>> +      resuming this device.
+> >>> +    $ref: /schemas/types.yaml#/definitions/phandle-array
+> >>> +      items:
+> >>> +        maxItems: 1
+> >>
+> >> Rob's bot rightfully complains here about invalid syntax.
+> >
+> > I added these two lines based on Rob's feedback. Is the indentation
+> > that's wrong?
+> >
+> > Yeah, I'm trying to run the dts checker, but I haven't be able to get
+> > it to work on my end. See my email to Rob on the v1 series about this.
+> >
+> > $ make DT_CHECKER_FLAGS=3D-m dt_binding_check
+> >
+> > The best I could get out of it is a bunch of error reports on other
+> > files and then:
+> > ...
+> > <snip>/Documentation/devicetree/bindings/post-init-suppliers.yaml:
+> > ignoring, error parsing file
+> > ...
+> >
+> > I also tried to use DT_SCHEMA_FILES so I can only test this one file,
+> > but that wasn't working either:
+>
+> I see the errors immediately during testing, no special arguments needed:
+>
+> crosc64_dt_binding_check post-init-supplier.yaml
+> make[1]: Entering directory '/home/krzk/dev/linux/linux/out'
+>   LINT    Documentation/devicetree/bindings
+>   DTEX    Documentation/devicetree/bindings/post-init-supplier.example.dt=
+s
+> ../Documentation/devicetree/bindings/post-init-supplier.yaml:84:12:
+> [error] syntax error: mapping values are not allowed here (syntax)
+>   CHKDT   Documentation/devicetree/bindings/processed-schema.json
+> ../Documentation/devicetree/bindings/post-init-supplier.yaml:84:12:
+> mapping values are not allowed in this context
+> make[3]: *** [../Documentation/devicetree/bindings/Makefile:26:
+> Documentation/devicetree/bindings/post-init-supplier.example.dts] Error 1
+> make[3]: *** Deleting file
+> 'Documentation/devicetree/bindings/post-init-supplier.example.dts'
+> make[3]: *** Waiting for unfinished jobs....
+> ../Documentation/devicetree/bindings/post-init-supplier.yaml:84:12:
+> mapping values are not allowed in this context
+>   SCHEMA  Documentation/devicetree/bindings/processed-schema.json
+> /home/krzk/dev/linux/linux/Documentation/devicetree/bindings/post-init-su=
+pplier.yaml:
+> ignoring, error parsing file
+> make[2]: *** [/home/krzk/dev/linux/linux/Makefile:1424:
+> dt_binding_check] Error 2
+> make[1]: *** [/home/krzk/dev/linux/linux/Makefile:240: __sub-make] Error =
+2
+> make[1]: Leaving directory '/home/krzk/dev/linux/linux/out'
+> make: *** [Makefile:240: __sub-make] Error 2
 
-arm64's vmalloc_node routines now include a layer of indirection which
-splits the vmalloc region into two segments surrounding the middle
-module_alloc region determined by ASLR. To support this,
-code_region_start and code_region_end are defined to match the 2GB
-boundary chosen by the kernel module ASLR initialization routine.
+I think I was just getting overwhelmed with the sea of error logs I
+saw (for unrelated files). If I don't use the flags it's way too noisy
+and it's not always the first thing that's reported.
 
-The result is a large benefits to overall kernel security, as code pages
-now remain protected by this ASLR routine and protections can be defined
-linearly for code regions rather than through PTE-level tracking.
+This is what I see now and I think I now understand what to look for.
 
-Signed-off-by: Maxwell Bland <mbland@motorola.com>
----
- arch/arm64/include/asm/vmalloc.h   |  3 ++
- arch/arm64/kernel/module.c         |  7 ++++
- arch/arm64/kernel/probes/kprobes.c |  2 +-
- arch/arm64/mm/Makefile             |  3 +-
- arch/arm64/mm/vmalloc.c            | 57 ++++++++++++++++++++++++++++++
- arch/arm64/net/bpf_jit_comp.c      |  5 +--
- 6 files changed, 73 insertions(+), 4 deletions(-)
- create mode 100644 arch/arm64/mm/vmalloc.c
+$ make DT_CHECKER_FLAGS=3D-m dt_binding_check
+DT_SCHEMA_FILES=3DDocumentation/devicetree/bindings/post-init-suppliers.yam=
+l
+  LINT    Documentation/devicetree/bindings
+./Documentation/devicetree/bindings/post-init-suppliers.yaml:84:12:
+[error] syntax error: mapping values are not allowed here (syntax)
+  CHKDT   Documentation/devicetree/bindings/processed-schema.json
+./Documentation/devicetree/bindings/post-init-suppliers.yaml:84:12:
+mapping values are not allowed in this context
+  SCHEMA  Documentation/devicetree/bindings/processed-schema.json
+/mnt/android/linus-tree/Documentation/devicetree/bindings/tpm/ibm,vtpm.yaml=
+:
+ignoring, error in schema: properties
+/mnt/android/linus-tree/Documentation/devicetree/bindings/post-init-supplie=
+rs.yaml:
+ignoring, error parsing file
+/mnt/android/linus-tree/Documentation/devicetree/bindings/soc/tegra/nvidia,=
+tegra20-pmc.yaml:
+ignoring, error in schema: allOf: 0: then: properties: pinmux
+/mnt/android/linus-tree/Documentation/devicetree/bindings/net/lantiq,pef225=
+6.yaml:
+ignoring, error in schema: properties: lantiq,data-rate-bps
+/mnt/android/linus-tree/Documentation/devicetree/bindings/iio/pressure/hone=
+ywell,mprls0025pa.yaml:
+ignoring, error in schema: properties: honeywell,pmin-pascal
+/mnt/android/linus-tree/Documentation/devicetree/bindings/iio/pressure/hone=
+ywell,hsc030pa.yaml:
+ignoring, error in schema: properties: honeywell,pmax-pascal
+  DTEX    Documentation/devicetree/bindings/post-init-suppliers.example.dts
+Documentation/devicetree/bindings/post-init-suppliers.yaml:84:12:
+mapping values are not allowed in this context
+make[2]: *** [Documentation/devicetree/bindings/Makefile:26:
+Documentation/devicetree/bindings/post-init-suppliers.example.dts]
+Error 1
+make[2]: *** Deleting file
+'Documentation/devicetree/bindings/post-init-suppliers.example.dts'
+make[1]: *** [/mnt/android/linus-tree/Makefile:1432: dt_binding_check] Erro=
+r 2
+make: *** [Makefile:240: __sub-make] Error 2
 
-diff --git a/arch/arm64/include/asm/vmalloc.h b/arch/arm64/include/asm/vmalloc.h
-index 38fafffe699f..dbcf8ad20265 100644
---- a/arch/arm64/include/asm/vmalloc.h
-+++ b/arch/arm64/include/asm/vmalloc.h
-@@ -31,4 +31,7 @@ static inline pgprot_t arch_vmap_pgprot_tagged(pgprot_t prot)
- 	return pgprot_tagged(prot);
- }
- 
-+extern unsigned long code_region_start __ro_after_init;
-+extern unsigned long code_region_end __ro_after_init;
-+
- #endif /* _ASM_ARM64_VMALLOC_H */
-diff --git a/arch/arm64/kernel/module.c b/arch/arm64/kernel/module.c
-index dd851297596e..c4fe753a71a9 100644
---- a/arch/arm64/kernel/module.c
-+++ b/arch/arm64/kernel/module.c
-@@ -29,6 +29,10 @@
- static u64 module_direct_base __ro_after_init = 0;
- static u64 module_plt_base __ro_after_init = 0;
- 
-+/* For pre-init vmalloc, assume the worst-case code range */
-+unsigned long code_region_start __ro_after_init = (u64) (_end - SZ_2G);
-+unsigned long code_region_end __ro_after_init = (u64) (_text + SZ_2G);
-+
- /*
-  * Choose a random page-aligned base address for a window of 'size' bytes which
-  * entirely contains the interval [start, end - 1].
-@@ -101,6 +105,9 @@ static int __init module_init_limits(void)
- 		module_plt_base = random_bounding_box(SZ_2G, min, max);
- 	}
- 
-+	code_region_start = module_plt_base;
-+	code_region_end = module_plt_base + SZ_2G;
-+
- 	pr_info("%llu pages in range for non-PLT usage",
- 		module_direct_base ? (SZ_128M - kernel_size) / PAGE_SIZE : 0);
- 	pr_info("%llu pages in range for PLT usage",
-diff --git a/arch/arm64/kernel/probes/kprobes.c b/arch/arm64/kernel/probes/kprobes.c
-index 70b91a8c6bb3..c9e109d6c8bc 100644
---- a/arch/arm64/kernel/probes/kprobes.c
-+++ b/arch/arm64/kernel/probes/kprobes.c
-@@ -131,7 +131,7 @@ int __kprobes arch_prepare_kprobe(struct kprobe *p)
- 
- void *alloc_insn_page(void)
- {
--	return __vmalloc_node_range(PAGE_SIZE, 1, VMALLOC_START, VMALLOC_END,
-+	return __vmalloc_node_range(PAGE_SIZE, 1, code_region_start, code_region_end,
- 			GFP_KERNEL, PAGE_KERNEL_ROX, VM_FLUSH_RESET_PERMS,
- 			NUMA_NO_NODE, __builtin_return_address(0));
- }
-diff --git a/arch/arm64/mm/Makefile b/arch/arm64/mm/Makefile
-index dbd1bc95967d..730b805d8388 100644
---- a/arch/arm64/mm/Makefile
-+++ b/arch/arm64/mm/Makefile
-@@ -2,7 +2,8 @@
- obj-y				:= dma-mapping.o extable.o fault.o init.o \
- 				   cache.o copypage.o flush.o \
- 				   ioremap.o mmap.o pgd.o mmu.o \
--				   context.o proc.o pageattr.o fixmap.o
-+				   context.o proc.o pageattr.o fixmap.o \
-+				   vmalloc.o
- obj-$(CONFIG_HUGETLB_PAGE)	+= hugetlbpage.o
- obj-$(CONFIG_PTDUMP_CORE)	+= ptdump.o
- obj-$(CONFIG_PTDUMP_DEBUGFS)	+= ptdump_debugfs.o
-diff --git a/arch/arm64/mm/vmalloc.c b/arch/arm64/mm/vmalloc.c
-new file mode 100644
-index 000000000000..b6d2fa841f90
---- /dev/null
-+++ b/arch/arm64/mm/vmalloc.c
-@@ -0,0 +1,57 @@
-+// SPDX-License-Identifier: GPL-2.0-only
-+
-+#include <linux/vmalloc.h>
-+#include <linux/mm.h>
-+
-+static void *__vmalloc_node_range_split(unsigned long size, unsigned long align,
-+			unsigned long start, unsigned long end,
-+			unsigned long exclusion_start, unsigned long exclusion_end, gfp_t gfp_mask,
-+			pgprot_t prot, unsigned long vm_flags, int node,
-+			const void *caller)
-+{
-+	void *res = NULL;
-+
-+	res = __vmalloc_node_range(size, align, start, exclusion_start,
-+				gfp_mask, prot, vm_flags, node, caller);
-+	if (!res)
-+		res = __vmalloc_node_range(size, align, exclusion_end, end,
-+				gfp_mask, prot, vm_flags, node, caller);
-+
-+	return res;
-+}
-+
-+void *__vmalloc_node(unsigned long size, unsigned long align,
-+			    gfp_t gfp_mask, unsigned long vm_flags, int node,
-+			    const void *caller)
-+{
-+	return __vmalloc_node_range_split(size, align, VMALLOC_START,
-+				VMALLOC_END, code_region_start, code_region_end,
-+				gfp_mask, PAGE_KERNEL, vm_flags, node, caller);
-+}
-+
-+void *vmalloc_huge(unsigned long size, gfp_t gfp_mask)
-+{
-+	return __vmalloc_node_range_split(size, 1, VMALLOC_START, VMALLOC_END,
-+				code_region_start, code_region_end,
-+				gfp_mask, PAGE_KERNEL, VM_ALLOW_HUGE_VMAP,
-+				NUMA_NO_NODE, __builtin_return_address(0));
-+}
-+
-+void *vmalloc_user(unsigned long size)
-+{
-+	return __vmalloc_node_range_split(size, SHMLBA,  VMALLOC_START, VMALLOC_END,
-+				code_region_start, code_region_end,
-+				GFP_KERNEL | __GFP_ZERO, PAGE_KERNEL,
-+				VM_USERMAP, NUMA_NO_NODE,
-+				__builtin_return_address(0));
-+}
-+
-+void *vmalloc_32_user(unsigned long size)
-+{
-+	return __vmalloc_node_range_split(size, SHMLBA,  VMALLOC_START, VMALLOC_END,
-+				code_region_start, code_region_end,
-+				GFP_VMALLOC32 | __GFP_ZERO, PAGE_KERNEL,
-+				VM_USERMAP, NUMA_NO_NODE,
-+				__builtin_return_address(0));
-+}
-+
-diff --git a/arch/arm64/net/bpf_jit_comp.c b/arch/arm64/net/bpf_jit_comp.c
-index 8955da5c47cf..40426f3a9bdf 100644
---- a/arch/arm64/net/bpf_jit_comp.c
-+++ b/arch/arm64/net/bpf_jit_comp.c
-@@ -13,6 +13,7 @@
- #include <linux/memory.h>
- #include <linux/printk.h>
- #include <linux/slab.h>
-+#include <linux/moduleloader.h>
- 
- #include <asm/asm-extable.h>
- #include <asm/byteorder.h>
-@@ -1690,12 +1691,12 @@ u64 bpf_jit_alloc_exec_limit(void)
- void *bpf_jit_alloc_exec(unsigned long size)
- {
- 	/* Memory is intended to be executable, reset the pointer tag. */
--	return kasan_reset_tag(vmalloc(size));
-+	return kasan_reset_tag(module_alloc(size));
- }
- 
- void bpf_jit_free_exec(void *addr)
- {
--	return vfree(addr);
-+	return module_memfree(addr);
- }
- 
- /* Indicate the JIT backend supports mixing bpf2bpf and tailcalls. */
--- 
-2.39.2
+>
+>
+> https://www.linaro.org/blog/tips-and-tricks-for-validating-devicetree-sou=
+rces-with-the-devicetree-schema/
+>
+> I assume you develop on some older trees, because both next and v6.8-rc1
+> work... or standard issues: old dtschema, old yamllint.
+>
+> I am afraid you do it for some old Android kernel... :(
 
+No, I always develop on Linus's tree and test it on an android kernel
+that's behind Linus's tree by a month or so.
+
+My yamllint version is 1.32.0, but until 2 weeks ago the latest
+yamllint version was 1.33.0.
+
+And dt-schema is  2022.08.2-5 and I had to revert this from Linus's
+tree to get it to work:
+b32dcf23a03e dt-bindings: Drop kernel copy of common reserved-memory bindin=
+gs
+
+Unfortunately, AFAIK, I don't have permissions to change the package
+repo, so can't really install a newer version.
+
+Thanks for the tips.
+
+-Saravana
+
+
+
+-Saravana
