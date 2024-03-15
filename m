@@ -1,47 +1,46 @@
 Received: from mout.gmx.net (mout.gmx.net [212.227.15.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E9F38635
-	for <linux-efi@vger.kernel.org>; Fri, 15 Mar 2024 00:27:23 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C52E7635;
+	Fri, 15 Mar 2024 00:27:27 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.15.19
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1710462446; cv=none; b=bFMvGHXYvmfA9nKuBl1wCOQyjVv/yunLTH+Cx7DVzBcfWc3IJWaMG7R4ZtnP0waly/TimtJooM6CU/Vrco+Iz4awgBYVzWnbc2Q6RO7xksKh6oDTECCGkFgTTTy+r/DmbJxBZAAkKH6qxyDP58CzPsj9tUw127spK8VHeUmqhnA=
+	t=1710462449; cv=none; b=JOoEx0tFWlb99FyjT9L9T8NcTEhwnsI9uN1TY759E8DigR2ytUYdutQ+lqxGbGjWb4QhIsTw8poSqutfgF+2YhMwJeTiCd5juzP8q/F4LP/SWDDxiYe/CMsxjE8n/6FweE3n2oThO6/ENrnMi2eFcn9n0tVRrCcM5h/m7KpdEsI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1710462446; c=relaxed/simple;
-	bh=xPDbkryWxiDnUwFYvhMFevb3S4af5j72e5RarYjwX6g=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=Hswq1MqpXSi+jcwsswvP1U//vB3KYcdxqJOWZLKcFKZRRNTPIimMoiDFbYHEgQcaBtunGpCkaGBxxKutar59VP0HdzukG3Bj9C08Bu3jdbosLWiMNj7V/VPmGt9b7A4utB8RUiLMZ/Uu+WgixutQhmhQObXRgkG8Mi7VdOjp0Ks=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.de; spf=pass smtp.mailfrom=gmx.de; dkim=pass (2048-bit key) header.d=gmx.de header.i=timschumi@gmx.de header.b=r9i+WBaE; arc=none smtp.client-ip=212.227.15.19
+	s=arc-20240116; t=1710462449; c=relaxed/simple;
+	bh=f8E8aUsLYhx+wLVyVfWO0R+ZhEJFEDlP2NW5WWjxZjo=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=qZwjF/KopP4tXVk+GC2oPIr5gaGV6vfgSSDc5mfK7KJ3X8wnKDW2fwO1aqFTQq4K34fjMLwgjsMr+PkzKf7bIgR7Fpwb/wKTHtflG7FhUWEqgXorerh3lbaZqi9s31dtlc3FRZiI9t+EDhYrobM5R4RyOAbbdBZmNTSsnvGGd2I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.de; spf=pass smtp.mailfrom=gmx.de; dkim=pass (2048-bit key) header.d=gmx.de header.i=timschumi@gmx.de header.b=N8MKBEZv; arc=none smtp.client-ip=212.227.15.19
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.de
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.de header.i=timschumi@gmx.de header.b="r9i+WBaE"
+	dkim=pass (2048-bit key) header.d=gmx.de header.i=timschumi@gmx.de header.b="N8MKBEZv"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.de;
-	s=s31663417; t=1710462437; x=1711067237; i=timschumi@gmx.de;
-	bh=STGrPfJB80j4RRfwb7NE9gGbjlU6Yd9gsmoXUO1Ln/I=;
-	h=X-UI-Sender-Class:From:To:Cc:Subject:Date:In-Reply-To:
-	 References;
-	b=r9i+WBaEfLIdwMVMRJPVgN5FUQ0QWTcK6/O2X+9E2gCSSL5kJfPLfrW4TCm5EnAO
-	 B2sIM2zXZ08NiDZonZSCfd6BvWRXhzdQvFqNDuhet3irZBfWLzcmxUt6ICMNeTg/1
-	 AiH0FMKKpSPMUsldd5tMOtp7QFeF7MXiIw6/1AgDh9M2jbVcGltMsS+BwqaN8A87/
-	 3elvagGziACRMVSEuC763R4tUh7us9HCayuAs3gipTJXih4293Nr6oUv1AdLaFNXK
-	 dfx+Pp9exavBTa7Dk26/XI5Wp+gIr9R5ZA6oaP3Fa/34BV/jd3vDndjmJUk2NeG4j
-	 zaOvmo8gDmYtuBnzog==
+	s=s31663417; t=1710462429; x=1711067229; i=timschumi@gmx.de;
+	bh=B52cazKgtP+V6ttkF6KV1d6LbmJl83GGXxXlPh901dI=;
+	h=X-UI-Sender-Class:From:To:Cc:Subject:Date;
+	b=N8MKBEZvdC4W5nNstoYGkCyuOmxOJdZgM5b1WznJH0flqyCuaDj3ZTg0+o1eLSgf
+	 sLlphXSEcjXv49bqP8urm4QaI8t0aYpeEZMDXC7muIQeYIfbPKBeCV0DOswQpDYuN
+	 QmQxb2hdle4n00W4zvDaazJBusiD3j7Vs+XPB3tjz+0ht27tL7KK8J5+hPApqBWk0
+	 XhgFs8tHLoJn2gteeK5U1/ygc7gwqTuuf8ynALBu0kXcr9DtpmDjod+X0yeTT2zIM
+	 wX50ADp1RokSbAYVOggN1E3BZBCOG2SNR76/AVQUNad9x1PHREqI3iC8phPFaFy+p
+	 yYEMkbC4bC0ig7Hh8g==
 X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
 Received: from localhost.localdomain ([93.218.98.241]) by mail.gmx.net
  (mrgmx005 [212.227.17.190]) with ESMTPSA (Nemesis) id
- 1N7zBR-1qg3La3E3P-01545K; Fri, 15 Mar 2024 01:27:17 +0100
+ 1MpDJd-1r0t5W0CdT-00qhX4; Fri, 15 Mar 2024 01:27:09 +0100
 From: Tim Schumacher <timschumi@gmx.de>
 To: linux-efi@vger.kernel.org
 Cc: Tim Schumacher <timschumi@gmx.de>,
+	Kees Cook <keescook@chromium.org>,
+	Tony Luck <tony.luck@intel.com>,
+	"Guilherme G. Piccoli" <gpiccoli@igalia.com>,
 	Ard Biesheuvel <ardb@kernel.org>,
-	Jeremy Kerr <jk@ozlabs.org>
-Subject: [PATCH 3/3] efi: Clear up misconceptions about a maximum variable name size
-Date: Fri, 15 Mar 2024 01:26:00 +0100
-Message-ID: <20240315002616.422802-3-timschumi@gmx.de>
+	linux-hardening@vger.kernel.org
+Subject: [PATCH 1/3] efi: pstore: Request at most 512 bytes for variable names
+Date: Fri, 15 Mar 2024 01:25:58 +0100
+Message-ID: <20240315002616.422802-1-timschumi@gmx.de>
 X-Mailer: git-send-email 2.44.0
-In-Reply-To: <20240315002616.422802-1-timschumi@gmx.de>
-References: <20240315002616.422802-1-timschumi@gmx.de>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -49,110 +48,68 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:JbPOD9SZDPPe7pRzqLwnZEYn+rHBC6frmgE7ccUmFG4NsjD3+NE
- 2zQ3csPkF0F1/bSzcqQDj73po8ZNXVy0IxHZ/mStzu8Uw3CI2TxLOT079YLa3Js/t3h9sKR
- zyRU2uLIdFlfwRyOcWxvJHlJyIN8XGIL+edDP/ux26h/EzaQMWfug5BjSucfQSvzgSqUh6H
- vxVdy9dA25AH9MrwBDgoA==
+X-Provags-ID: V03:K1:BdGRQjVfhDgGvU6FYHwpw57XdbVkpjF/zzzddOP3cnpwcRXYO0q
+ clEaraNK1RntHRqD8lNxHJlWXyNEu9tTt0fDol+Mk/9Jgi5S9F/iUVVSHnvUhVz53n0dWJg
+ l3XW6+Y08xisQMHGbEMPmGD5j6ilbS9VNaZy4Y2VHEYujorXsdA/bmgXNDZOsobewuBsDh3
+ k3mdefY7OxBLkyE6MwaAA==
 X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:4S6D5Su/eEQ=;gFtLV07hE/mkAjRxDcrFg/HCoOL
- 43ZtwCrGNrKSQhlpBSs0n2oARldbnEdzxRgymQ6KN5UaEoX71fBFO1DRZtEHELxQ2yuSJ1OyR
- e7IxAhjineH0VlaZVpOd2TbySR6AxQovhuo7X2U52gVJRo3wcinHrB3fN3hRl76kkui/8hIIb
- 4FzzdY0w1S+bwKjJnPu/Bjb91mLBC7yG6ZFHoVKfIlYiQ3j0YH+fj9F9ZYVmrULd3ylKQ1CM+
- SE9sBiL+Ku7ga+cxwCfZP41EAWqqjwhPSPPhwBHVEQNkbTX1oHsDF4BBHXspcp8e1TVgFLSYO
- 4ZAlYAw6NwFo5Pe/h1noM8diFafsHPvhQNOHSlk2BTRQNzEppN4Hh0fREnpbTA+QTYSNLCjo6
- oaI0rGpS2NWaCsPMdXHrwTa+zY6dzjiibtzcwEBdJuX3Z20Q+XXMTiIrpWP7WQFU6tE/djs6Z
- QYiSp6dlCSZJsfhJ6qW+X2Tq//oaVMZ6e/v58JDlSald9vmjhWblngDsJbDuElo0m4HZ6rQkU
- DLRuc3K1YpvO40I70XhJANF1HRccQrMJ/nLwlqm5b0eufa+fg1VS89HTTOzYMtrnvc6c8aSfY
- 2jtesWSKpIFVeJIX/Mcu4dgXSekl48Z7hXUVrGhV7lJfrjVjqZWMsOyX+0WwBmuJRHq1MWyPl
- zdxpS475R0k1w3kcVgp+6kRteRKZvnCboHR1qw0JtQznOei7gM05Tlns70n6GCeDOeQIOZAj3
- Qld5jVQiUHZLPncumfDKoss7k86g5+EKcmSiahFmTnrTvo4s4WmR8Cu7ItuaUM0nway9ucNWq
- eOqN/bTPB2wbOL9JD17l+vSBrtPE+pO3mxeghLszPrE5Q=
+UI-OutboundReport: notjunk:1;M01:P0:Oj7maLOLCHk=;IYDuQlWqLMVRi5Wi3A8fBgRJ9Ai
+ /cYPPkmA3/S74JFkCcTOo1e0cjcshIXXE/2Z4Jd8oTu3vwqXdOw01rExio41yNuZwN98qucvJ
+ tnr1Zv7Ghq4gOO6J9xIck7vk6VEcydg7ufQVJfhEx8NrmuUqBU4Qj4y+9ec8vVAJ+qbmKChY6
+ K7BFdRPwo7nb3KAcEbulP6Aq23xh6rnzGzSaMPdI6l4Iv7KvHRkrrMTlQD+bk/76j8rBFRIg4
+ AZLPt/eeoWA8jSOF0uZQe3l/a5euMm4ncoHkBnZ+xPLwFYsoeSVZ6SIxERrqOIhP+v+qcKYGs
+ GONuSd89AXvjy16ZDC6KA0WL7Kgx6mOty5YqUgOrmZx3QnW20kWdsNwkX8NY6JiPKqtswHh6e
+ OueC9t8Scdox8g/AQ0SNgnGrDx/pntwcKiJyO4z+WBj1zY8CNGyz1d8K9Xdr6ojupvNeqYrDZ
+ G+y7u1QfD1WKaKeKp4VWNLnYGaw7LT9VWGo4AafO58d0QOLcvCni0g3dmMfOoTQaAhfrC893+
+ f9uWwYl6Ufv0c69EgH6Sm+IbT7/v13vzt/QRPRHMKHQFgHi9vdWPkwkSbPlOs2zhZA/EzXk91
+ EHkXxPf0gQ79KlPIDL3FFsi/KGqefibZSneqN2mNwI8GNl/22OUkdGCv7mqteLCokSFtPZaRL
+ K/mLHZ05BpAGvKI8KUAAs20UswcG7NrSPi1pA0/XtzofYrILFXezZ1GlEdkmRj7LCZBw9Ue6/
+ zwEiJsaJHVfKfmjYn/KCsUMfN/pQUjq12Yy6Olc6N03xxeT3dIsrEpnuKplsiiJhGUTYgCXbB
+ wAoSgA4IeDkadqh1nzWli6rveHHXDnGPuAUocLSCXJvVk=
 
-The UEFI specification does not make any mention of a maximum variable
-name size, so the headers and implementation shouldn't claim that one
-exists either.
+Work around a quirk in a few old (2011-ish) UEFI implementations, where
+a call to `GetNextVariableName` with a buffer size larger than 512 bytes
+will always return EFI_INVALID_PARAMETER.
 
-Comments referring to this limit have been removed or rewritten, as this
-is an implementation detail local to the Linux kernel.
-
-Where appropriate, the magic value of 1024 has been replaced with
-EFI_VAR_NAME_LEN, as this is used for the efi_variable struct
-definition. This in itself does not change any behavior, but should
-serve as points of interest when making future changes in the same area.
-
-A related build-time check has been added to ensure that the special
-512 byte sized buffer will not overflow with a potentially decreased
-EFI_VAR_NAME_LEN.
+This was already done to efivarfs in f45812cc23fb ("efivarfs: Request at
+most 512 bytes for variable names"), but the second copy of the variable
+iteration implementation was overlooked.
 
 Signed-off-by: Tim Schumacher <timschumi@gmx.de>
 =2D--
- drivers/firmware/efi/vars.c | 2 +-
- fs/efivarfs/vars.c          | 5 +++--
- include/linux/efi.h         | 9 ++++-----
- 3 files changed, 8 insertions(+), 8 deletions(-)
+I CC'd the pstore people and linux-hardening mailing list because
+get_maintainer.pl suggested to do so. Apologies in case this was the
+incorrect decision, this is a very non-pstore-specific patch after all.
 
-diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
-index f654e6f6af87..4056ba7f3440 100644
-=2D-- a/drivers/firmware/efi/vars.c
-+++ b/drivers/firmware/efi/vars.c
-@@ -215,7 +215,7 @@ efi_status_t efivar_set_variable_locked(efi_char16_t *=
-name, efi_guid_t *vendor,
+I have taken the liberty of adding a TODO for the future, the actual
+refactor can follow at some point down the line.
+=2D--
+ drivers/firmware/efi/efi-pstore.c | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
 
- 	if (data_size > 0) {
- 		status =3D check_var_size(nonblocking, attr,
--					data_size + ucs2_strsize(name, 1024));
-+					data_size + ucs2_strsize(name, EFI_VAR_NAME_LEN));
- 		if (status !=3D EFI_SUCCESS)
- 			return status;
- 	}
-diff --git a/fs/efivarfs/vars.c b/fs/efivarfs/vars.c
-index 4d722af1014f..3cc89bb624f0 100644
-=2D-- a/fs/efivarfs/vars.c
-+++ b/fs/efivarfs/vars.c
-@@ -295,9 +295,9 @@ static bool variable_is_present(efi_char16_t *variable=
-_name, efi_guid_t *vendor,
- 	unsigned long strsize1, strsize2;
- 	bool found =3D false;
+diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-=
+pstore.c
+index e7b9ec6f8a86..f0ceb5702d21 100644
+=2D-- a/drivers/firmware/efi/efi-pstore.c
++++ b/drivers/firmware/efi/efi-pstore.c
+@@ -135,7 +135,15 @@ static ssize_t efi_pstore_read(struct pstore_record *=
+record)
+ 	efi_status_t status;
 
--	strsize1 =3D ucs2_strsize(variable_name, 1024);
-+	strsize1 =3D ucs2_strsize(variable_name, EFI_VAR_NAME_LEN);
- 	list_for_each_entry_safe(entry, n, head, list) {
--		strsize2 =3D ucs2_strsize(entry->var.VariableName, 1024);
-+		strsize2 =3D ucs2_strsize(entry->var.VariableName, EFI_VAR_NAME_LEN);
- 		if (strsize1 =3D=3D strsize2 &&
- 			!memcmp(variable_name, &(entry->var.VariableName),
- 				strsize2) &&
-@@ -396,6 +396,7 @@ int efivar_init(int (*func)(efi_char16_t *, efi_guid_t=
-, unsigned long, void *,
+ 	for (;;) {
+-		varname_size =3D 1024;
++		/*
++		 * A small set of old UEFI implementations reject sizes
++		 * above a certain threshold, the lowest seen in the wild
++		 * is 512.
++		 *
++		 * TODO: Commonize with the iteration implementation in
++		 *       fs/efivarfs to keep all the quirks in one place.
++		 */
++		varname_size =3D 512;
 
- 	do {
- 		variable_name_size =3D 512;
-+		BUILD_BUG_ON(EFI_VAR_NAME_LEN < 512);
-
- 		status =3D efivar_get_next_variable(&variable_name_size,
- 						  variable_name,
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index c74f47711f0b..62f552057b06 100644
-=2D-- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1065,12 +1065,11 @@ static inline u64 efivar_reserved_space(void) { re=
-turn 0; }
- #endif
-
- /*
-- * The maximum size of VariableName + Data =3D 1024
-- * Therefore, it's reasonable to save that much
-- * space in each part of the structure,
-- * and we use a page for reading/writing.
-+ * There is no actual upper limit specified for the variable name size.
-+ *
-+ * This limit exists only for practical purposes, since name conversions
-+ * are bounds-checked and name data is occasionally stored in-line.
-  */
--
- #define EFI_VAR_NAME_LEN	1024
-
- int efivars_register(struct efivars *efivars,
+ 		/*
+ 		 * If this is the first read() call in the pstore enumeration,
 =2D-
 2.44.0
 
