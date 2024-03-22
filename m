@@ -1,114 +1,158 @@
-Received: from mail.zytor.com (terminus.zytor.com [198.137.202.136])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f201.google.com (mail-yw1-f201.google.com [209.85.128.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7677F47A40;
-	Fri, 22 Mar 2024 14:20:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.136
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 150CB482F3
+	for <linux-efi@vger.kernel.org>; Fri, 22 Mar 2024 16:18:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1711117230; cv=none; b=IacdUQx7ES+57nRtm/z9neZiz/c7rSG2bb7B22vsxsezqV31n3E6CLu8FyWGRtZ+XSwB0VOz3aLjRCqxvonFBb5J8voaMbRwiE81Li+FhlhZ8HJMmOjydMDiPNym2ze/64bMRhZKAA+AbCR3R0omuPxNfEo1vGmsUTDctNgRhE8=
+	t=1711124283; cv=none; b=dlbu3ktyXa84TFTZthKwNXU78B56eN82E+h/1J1J9H4eHErtog0QFTkglzVT2FZ+cdufBw9zRt2HP2eGoIt0p5j8qVh+US9FJy30Rztk4bJFlXMpJbH1g6vqYuhZbCptecIxsLh9La+9yaqzYunvvbys0anxVKoUyoYAy83d290=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1711117230; c=relaxed/simple;
-	bh=aB18poa/nAuHxUYgK7CDuG4N2UPsaq85ox+8DKB04kM=;
-	h=Date:From:To:CC:Subject:In-Reply-To:References:Message-ID:
-	 MIME-Version:Content-Type; b=ZJ+2ARzZvPrEJtKp42hi9o199C43WE5O3bG38jAkRnDy38hxBtXyT1G3Okb89VUUhit58kcvUHSgPbcPMiIjZ1VxyYTUl85XM0eA5EY5WJmWeiQaG0gHS1NtWpIrHWDwAuGY+ZPR2tkDmOpyHaIBLx+74MtgkbmjFSK6uJhMr8A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zytor.com; spf=pass smtp.mailfrom=zytor.com; dkim=pass (2048-bit key) header.d=zytor.com header.i=@zytor.com header.b=ZETGE8z3; arc=none smtp.client-ip=198.137.202.136
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zytor.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=zytor.com
+	s=arc-20240116; t=1711124283; c=relaxed/simple;
+	bh=KDgSKuf5jsTvODdbosLQnDzjM8pa6OCJZw23Vg3NwQ4=;
+	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
+	 To:Cc:Content-Type; b=MsFjljIVteuNlu+03f9lr9MlBHE2AWAODSXMglimXUiiWHpk8fFim9VOnzMB1NFrRgXi0v2kOdG7LuZNdBhh38Kjyb+7Aecfsoyo+3lUarKeRIr7AwnPUMilA8cnZ2wf1uygVtXD2HFplytcfgojV6xUI+Rebhy9ad7qC+EGcu8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=lYDd4VbJ; arc=none smtp.client-ip=209.85.128.201
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=zytor.com header.i=@zytor.com header.b="ZETGE8z3"
-Received: from [127.0.0.1] ([76.133.66.138])
-	(authenticated bits=0)
-	by mail.zytor.com (8.17.2/8.17.1) with ESMTPSA id 42MEJ2ZV3496390
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NO);
-	Fri, 22 Mar 2024 07:19:03 -0700
-DKIM-Filter: OpenDKIM Filter v2.11.0 mail.zytor.com 42MEJ2ZV3496390
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=zytor.com;
-	s=2024031401; t=1711117149;
-	bh=aB18poa/nAuHxUYgK7CDuG4N2UPsaq85ox+8DKB04kM=;
-	h=Date:From:To:CC:Subject:In-Reply-To:References:From;
-	b=ZETGE8z3u9I9yJvR5e/CQUJ9GmkJb4wq8snvbhDmH/87Lzwf+k/ZGo1AYaXFYl9nd
-	 uETOnzCevSP6x3/Jys4AjBwWIYxjN9AYiGaZOvlyuMh07rolz2MUbUQq4v4IpcmfbH
-	 XaZ2kjkRbA92EYSzRvO14ZBO4HfRYvjEeGadQEOmjwCnKNtbWI9V4I8BadIyN7/QVt
-	 DeVXQnWkfk815Zq/7e7UNEjKO+YrQ5XnPO0G5EbeTFGaD7lwA438bf/x93wt39mE9f
-	 IPdJFoxWZE023tvibiGtBG/M2k5vMMP30t9IEatLMPA/6G+NKk1Qm1CeXy3mgZtMya
-	 5XnVwvHOIMJMQ==
-Date: Fri, 22 Mar 2024 07:18:58 -0700
-From: "H. Peter Anvin" <hpa@zytor.com>
-To: "Daniel P. Smith" <dpsmith@apertussolutions.com>,
-        Ard Biesheuvel <ardb@kernel.org>,
-        Ross Philipson <ross.philipson@oracle.com>
-CC: linux-kernel@vger.kernel.org, x86@kernel.org,
-        linux-integrity@vger.kernel.org, linux-doc@vger.kernel.org,
-        linux-crypto@vger.kernel.org, kexec@lists.infradead.org,
-        linux-efi@vger.kernel.org, tglx@linutronix.de, mingo@redhat.com,
-        bp@alien8.de, dave.hansen@linux.intel.com, mjg59@srcf.ucam.org,
-        James.Bottomley@hansenpartnership.com, peterhuewe@gmx.de,
-        jarkko@kernel.org, jgg@ziepe.ca, luto@amacapital.net,
-        nivedita@alum.mit.edu, herbert@gondor.apana.org.au,
-        davem@davemloft.net, kanth.ghatraju@oracle.com,
-        trenchboot-devel@googlegroups.com
-Subject: Re: [PATCH v8 01/15] x86/boot: Place kernel_info at a fixed offset
-User-Agent: K-9 Mail for Android
-In-Reply-To: <9d01a6d2-4dd9-4331-8fc9-b01c07cfdbb5@apertussolutions.com>
-References: <20240214221847.2066632-1-ross.philipson@oracle.com> <20240214221847.2066632-2-ross.philipson@oracle.com> <CAMj1kXH3Gvr3vDRLDdXuc0s7ZAQYE6+D7tmCRBjJWwWt2fn4-w@mail.gmail.com> <9d01a6d2-4dd9-4331-8fc9-b01c07cfdbb5@apertussolutions.com>
-Message-ID: <32FDA47A-C87F-406F-A0B9-3AA1BB2EBAFB@zytor.com>
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="lYDd4VbJ"
+Received: by mail-yw1-f201.google.com with SMTP id 00721157ae682-60ccc3cfa39so34483417b3.2
+        for <linux-efi@vger.kernel.org>; Fri, 22 Mar 2024 09:18:01 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20230601; t=1711124281; x=1711729081; darn=vger.kernel.org;
+        h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
+         :date:from:to:cc:subject:date:message-id:reply-to;
+        bh=bnQftzsxfuYjCdhXSIw10rBhXkr1xEqK5KDlXaV9zBE=;
+        b=lYDd4VbJbfUP5XA+rBkUsVQs9izk3PdZUWLL1VzLMwWx9LAJ2WVmt225aTiyoA4F6T
+         F7Xg7XDhD+YyPF7GWoWicfXRxGK3oGu03sYIxxU5+QR10+jAkAtS+xHs27YksZCBkd/c
+         R9Up0gX/O6m0pkmGqYL90dXst1A4q9WYj8E3T0uwrgwHvcWI/RwFy70OXsMwm1d/vdM8
+         QcKKQ3HHJSP5icVuWP/5VeOCqLMxr4Ds1W9PXde2C9pGoEmWTnpPA9yBO06++x0KouKq
+         xFrhe64uFc0ZVnFyUareDVVn8DSxKGiKUqADqBmLgdBtPhgytLQituJL4Ijq9xP/V7mW
+         FG+w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1711124281; x=1711729081;
+        h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
+         :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=bnQftzsxfuYjCdhXSIw10rBhXkr1xEqK5KDlXaV9zBE=;
+        b=FLGUMTaey+iGi1qWu9FQWvNgIr3Pv0oA0SqMePJNpg6kwRTTDl9cVLp3KvtTOXOjPe
+         k5UFVyVt0+uL2Mz2vMySiGWgOVW/t4q3dy1Tez9TWc+8CL5ZCPZf8Lm5mhXrGxiluBHS
+         Cl3kk5wXlVPKgzj/v7rEnK7/r++qN5vns1T0VBJcZYiUzFUMfqU90XIesEOoXS7aCytP
+         msHVjB27yxUSrjCVVgt+kwn6EYXZn+WBmk7ck4g2caoWKCmBq/GEro6cV/aFIay9eINK
+         62CaOwVNrHH2+kJmdmrvFxGGoOoyruycDzenQguqEhVMFf2pQFyzx+UaWO07v/p9y32j
+         rDEQ==
+X-Gm-Message-State: AOJu0YxHsga3n+BdJ2Kws/V18zWtnoXXAMY+Ht8GX9G2xcsw6VhB2JiW
+	TnM2dRfcsWbg6ehyWokfzYP9n7YewLfxEs6msfmLpC288G07F6b+jUg7StOM/2cwmwm+pR2QQSZ
+	p9nRDHCfykOPfHgws+UynbhdqOTlEpsUX58XwUaHdhwPFrqirwneHXqTzb3FXg8t8mZOBug0hdV
+	+efumBRUIeP/xU4IstnUkOMP47YA==
+X-Google-Smtp-Source: AGHT+IH8bNQPE9w9IgOi6tZJGBFASylyELWhmbh1FIC2Y4LDfkiD2LwqdvyQ+4pb5OqSDxAJBlJjrb1W
+X-Received: from palermo.c.googlers.com ([fda3:e722:ac3:cc00:28:9cb1:c0a8:118a])
+ (user=ardb job=sendgmr) by 2002:a05:6902:1b8d:b0:dcb:b9d7:2760 with SMTP id
+ ei13-20020a0569021b8d00b00dcbb9d72760mr790731ybb.13.1711124280944; Fri, 22
+ Mar 2024 09:18:00 -0700 (PDT)
+Date: Fri, 22 Mar 2024 17:17:53 +0100
+In-Reply-To: <20240322161751.3046943-4-ardb+git@google.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Mime-Version: 1.0
+References: <20240322161751.3046943-4-ardb+git@google.com>
+X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2941; i=ardb@kernel.org;
+ h=from:subject; bh=+b7B6W3cE7froQr7wlC6YEOPK254Pa6C+qhwajlp0aA=;
+ b=owGbwMvMwCFmkMcZplerG8N4Wi2JIfXvesMdmetK/yzpf7DWTf+f/sm8HW8yHoec9Zhe7vCmM
+ DQw6eH7jlIWBjEOBlkxRRaB2X/f7Tw9UarWeZYszBxWJpAhDFycAjCRSG9Ghp3LN7FvkFQ/klfg
+ LTbz35SgHW1FOxkTikOcdzTpTta4+ZHhf4HVT4WLvfKnjwpKXnsSH2grV6gUeOS6XVvWwRNntmR uYgAA
+X-Mailer: git-send-email 2.44.0.396.g6e790dbe36-goog
+Message-ID: <20240322161751.3046943-5-ardb+git@google.com>
+Subject: [PATCH 1/2] x86/efistub: Call mixed mode boot services on the
+ firmware's stack
+From: Ard Biesheuvel <ardb+git@google.com>
+To: linux-efi@vger.kernel.org
+Cc: x86@kernel.org, Ard Biesheuvel <ardb@kernel.org>, Clayton Craft <clayton@craftyguy.net>, 
+	stable@kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-On March 21, 2024 6:45:48 AM PDT, "Daniel P=2E Smith" <dpsmith@apertussolut=
-ions=2Ecom> wrote:
->Hi Ard!
->
->On 2/15/24 02:56, Ard Biesheuvel wrote:
->> On Wed, 14 Feb 2024 at 23:31, Ross Philipson <ross=2Ephilipson@oracle=
-=2Ecom> wrote:
->>>=20
->>> From: Arvind Sankar <nivedita@alum=2Emit=2Eedu>
->>>=20
->>> There are use cases for storing the offset of a symbol in kernel_info=
-=2E
->>> For example, the trenchboot series [0] needs to store the offset of th=
-e
->>> Measured Launch Environment header in kernel_info=2E
->>>=20
->>=20
->> Why? Is this information consumed by the bootloader?
->
->Yes, the bootloader needs a standardized means to find the offset of the =
-MLE header, which communicates a set of meta-data needed by the DCE in orde=
-r to set up for and start the loaded kernel=2E Arm will also need to provid=
-e a similar metadata structure and alternative entry point (or a complete r=
-ewrite of the existing entry point), as the current Arm entry point is in d=
-irect conflict with Arm DRTM specification=2E
->
->> I'd like to get away from x86 specific hacks for boot code and boot
->> images, so I would like to explore if we can avoid kernel_info, or at
->> least expose it in a generic way=2E We might just add a 32-bit offset
->> somewhere in the first 64 bytes of the bootable image: this could
->> co-exist with EFI bootable images, and can be implemented on arm64,
->> RISC-V and LoongArch as well=2E
->
->With all due respect, I would not refer to boot params and the kern_info =
-extension designed by the x86 maintainers as a hack=2E It is the well-defin=
-ed boot protocol for x86, just as Arm has its own boot protocol around Devi=
-ce Tree=2E
->
->We would gladly adopt a cross arch/cross image type, zImage and bzImage, =
-means to embedded meta-data about the kernel that can be discovered by a bo=
-otloader=2E Otherwise, we are relegated to doing a per arch/per image type =
-discovery mechanism=2E If you have any suggestions that are cross arch/cros=
-s image type that we could explore, we would be grateful and willing to inv=
-estigate how to adopt such a method=2E
->
->V/r,
->Daniel
+From: Ard Biesheuvel <ardb@kernel.org>
 
-To be fair, the way things are going UEFI, i=2Ee=2E PE/COFF, is becoming t=
-he new standard format=2E Yes, ELF would have been better, but=2E=2E=2E
+Normally, the EFI stub calls into the EFI boot services using the stack
+that was live when the stub was entered. According to the UEFI spec,
+this stack needs to be at least 128k in size - this might seem large but
+all asynchronous processing and event handling in EFI runs from the same
+stack and so quite a lot of space may be used in practice.
+
+In mixed mode, the situation is a bit different: the bootloader calls
+the 32-bit EFI stub entry point, which calls the decompressor's 32-bit
+entry point, where the boot stack is set up, using a fixed allocation
+of 16k. This stack is still in use when the EFI stub is started in
+64-bit mode, and so all calls back into the EFI firmware will be using
+the decompressor's limited boot stack.
+
+Due to the placement of the boot stack right after the boot heap, any
+stack overruns have gone unnoticed. However, commit
+
+  5c4feadb0011983b ("x86/decompressor: Move global symbol references to C code")
+
+moved the definition of the boot heap into C code, and now the boot
+stack is placed right at the base of BSS, where any overruns will
+corrupt the end of the .data section.
+
+While it would be possible to work around this by increasing the size of
+the boot stack, doing so would affect all x86 systems, and mixed mode
+systems are a tiny (and shrinking) fraction of the x86 installed base.
+
+So instead, record the firmware stack pointer value when entering from
+the 32-bit firmware, and switch to this stack every time a EFI boot
+service call is made.
+
+Cc: <stable@kernel.org> # v6.1+
+Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+---
+ arch/x86/boot/compressed/efi_mixed.S | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/arch/x86/boot/compressed/efi_mixed.S b/arch/x86/boot/compressed/efi_mixed.S
+index f4e22ef774ab..c21afc9c84f1 100644
+--- a/arch/x86/boot/compressed/efi_mixed.S
++++ b/arch/x86/boot/compressed/efi_mixed.S
+@@ -83,6 +83,10 @@ SYM_FUNC_START(__efi64_thunk)
+ 	movq	0x38(%rsp), %rbx
+ 	movq	0x40(%rsp), %rax
+ 
++	/* Switch to the firmware's stack */
++	movq	%rsp, %r11
++	movl	efi32_boot_sp(%rip), %esp
++
+ 	/*
+ 	 * Convert x86-64 ABI params to i386 ABI
+ 	 */
+@@ -120,7 +124,7 @@ SYM_FUNC_START(__efi64_thunk)
+ 	pushq	%rax
+ 	lretq
+ 
+-1:	addq	$64, %rsp
++1:	movq	%r11, %rsp
+ 	movq	%rdi, %rax
+ 
+ 	pop	%rbx
+@@ -254,6 +258,9 @@ SYM_FUNC_START_LOCAL(efi32_entry)
+ 	/* Store firmware IDT descriptor */
+ 	sidtl	(efi32_boot_idt - 1b)(%ebx)
+ 
++	/* Store firmware stack pointer */
++	movl	%esp, (efi32_boot_sp - 1b)(%ebx)
++
+ 	/* Store boot arguments */
+ 	leal	(efi32_boot_args - 1b)(%ebx), %ebx
+ 	movl	%ecx, 0(%ebx)
+@@ -318,5 +325,6 @@ SYM_DATA_END(efi32_boot_idt)
+ 
+ SYM_DATA_LOCAL(efi32_boot_cs, .word 0)
+ SYM_DATA_LOCAL(efi32_boot_ds, .word 0)
++SYM_DATA_LOCAL(efi32_boot_sp, .long 0)
+ SYM_DATA_LOCAL(efi32_boot_args, .long 0, 0, 0)
+ SYM_DATA(efi_is64, .byte 1)
+-- 
+2.44.0.396.g6e790dbe36-goog
+
