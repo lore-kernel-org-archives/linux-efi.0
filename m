@@ -1,137 +1,123 @@
-Received: from mx0b-00190b01.pphosted.com (mx0b-00190b01.pphosted.com [67.231.157.127])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 14BB9158845;
-	Wed, 15 May 2024 18:05:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=67.231.157.127
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E716A40858;
+	Wed, 15 May 2024 18:30:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1715796327; cv=none; b=JuwNcGlRPTb1uVePeO4u4OmvZaEQ3dzwnhIJ0y0uxaq7ozoANk06Ehsl9+PGFZ0ExHyIuh/YmuNgg0mBOqTjSkQVt+U+vhrdPMCMEXZmdNESY+ZQfbPxrAwrfG1FhCA0rPg5UleiSKLxWWgfOFnQ7tlHdrNXxu/yiDag5FuVrr8=
+	t=1715797807; cv=none; b=qc5Z8XZfsPKziWKm939+ktqu3jGTcNOnmJtNBz+krmhKXG7kEwDQkVMRqRqcQEOP0XiiPz+AzZH0B69bhlCLsMDTRio+3DRxebvN2SoxZeWZ8a38a6TvwENIbieGRrzgEyAi6jIGOxQHbrLBi9IBTt5AyajKYdxWv3wYG2kcnLw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1715796327; c=relaxed/simple;
-	bh=NOWeMdSAMU8+1sNAkP8Nr6iomJ7DvwEXpGNc1eKDk9Q=;
-	h=From:To:CC:Subject:Date:Message-ID:Content-Type:MIME-Version; b=OcV7nxzdvIan6z7EVg2W0X3V9jjvA7KFnMOWZVcWNekrk75Ada4uOukraqohxkt7NbtkwqeLOGrk9diCil4RUWYHzbks31hXSkDYPIK66VKaHZSH4dIIlansdgluCjy+gUxH5ENQbnWtM/VD2Ho6o/uHmqEf4a9a8REgvNohzSs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=akamai.com; spf=pass smtp.mailfrom=akamai.com; dkim=pass (2048-bit key) header.d=akamai.com header.i=@akamai.com header.b=fru98BVI; arc=none smtp.client-ip=67.231.157.127
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=akamai.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=akamai.com
+	s=arc-20240116; t=1715797807; c=relaxed/simple;
+	bh=1H4ESRp4n7R82qzwLK63TMRqXzG39WJ6h6WdXq5tn0s=;
+	h=Date:From:To:CC:Subject:In-Reply-To:References:Message-ID:
+	 MIME-Version:Content-Type; b=jMGATuMuxe7H+Ef7KFJSoFBNBJf2iZoD7HgXEJUfcBH/VTQYEwIuduj1C5ny5VQ0ysNj0OBm8R4zCEEAes/3uKmkinu3HOKQAbrcIcGc9/F/oFOrYePAw85917gyfbgT/vMjMjgf3O9DbmxjtD9V10Y6sLB79ZH9Cfp4zmx+oI8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=vGG8OjSI; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=akamai.com header.i=@akamai.com header.b="fru98BVI"
-Received: from pps.filterd (m0122330.ppops.net [127.0.0.1])
-	by mx0b-00190b01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 44F9vZnB018902;
-	Wed, 15 May 2024 18:32:28 +0100
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=akamai.com; h=
-	from:to:cc:subject:date:message-id:content-type:content-id
-	:content-transfer-encoding:mime-version; s=jan2016.eng; bh=NOWeM
-	dSAMU8+1sNAkP8Nr6iomJ7DvwEXpGNc1eKDk9Q=; b=fru98BVI8LqPFgxPVZr0T
-	UpEDpwuLFY0WCgmofI7PZbh5AzTAte7ft1TRxW7a1P33qdEgpF9d4KDN6CdCEUGS
-	VBk5Kkl4uHUX8dYl4R4q375W2oGwBYvovyRY3p0cOc7IwN0xjQPBY7Hh9wpiUm2m
-	5oxYMpT8thcwz+rcU4Yuy9vMyCldMi8VMK50O7U+WDXuATLLxxMcuSL+JDXPVzak
-	LbLQqODiBelzl7e3Khk1RtAlV2BKA1/2ds5IXk/uPc8VC3w6l8ZksrnOYqlNNfGa
-	DVazoQ3VH2H6r/YfAQ2I7VXdOSyQL1ciO6H9EUk1B4EHzCH7dusP/U92F9+GpN/Q
-	w==
-Received: from prod-mail-ppoint1 (prod-mail-ppoint1.akamai.com [184.51.33.18] (may be forged))
-	by mx0b-00190b01.pphosted.com (PPS) with ESMTPS id 3y20b56v7e-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 15 May 2024 18:32:28 +0100 (BST)
-Received: from pps.filterd (prod-mail-ppoint1.akamai.com [127.0.0.1])
-	by prod-mail-ppoint1.akamai.com (8.17.1.19/8.17.1.19) with ESMTP id 44FCjiDj026173;
-	Wed, 15 May 2024 13:32:27 -0400
-Received: from email.msg.corp.akamai.com ([172.27.91.27])
-	by prod-mail-ppoint1.akamai.com (PPS) with ESMTPS id 3y240y4u9f-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 15 May 2024 13:32:27 -0400
-Received: from usma1ex-dag4mb1.msg.corp.akamai.com (172.27.91.20) by
- usma1ex-dag4mb8.msg.corp.akamai.com (172.27.91.27) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1258.28; Wed, 15 May 2024 13:32:27 -0400
-Received: from usma1ex-dag4mb1.msg.corp.akamai.com ([172.27.91.20]) by
- usma1ex-dag4mb1.msg.corp.akamai.com ([172.27.91.20]) with mapi id
- 15.02.1258.028; Wed, 15 May 2024 13:32:27 -0400
-From: "Chaney, Ben" <bchaney@akamai.com>
-To: "ardb@kernel.org" <ardb@kernel.org>,
-        "gregkh@linuxfoundation.org"
-	<gregkh@linuxfoundation.org>,
-        "linux-efi@vger.kernel.org"
-	<linux-efi@vger.kernel.org>,
-        "stable@vger.kernel.org"
-	<stable@vger.kernel.org>
-CC: "bp@alien8.de" <bp@alien8.de>,
-        "dave.hansen@linux.intel.com"
-	<dave.hansen@linux.intel.com>,
-        "linux-kernel@vger.kernel.org"
-	<linux-kernel@vger.kernel.org>,
-        "mingo@redhat.com" <mingo@redhat.com>,
-        "tglx@linutronix.de" <tglx@linutronix.de>,
-        "Tottenham, Max"
-	<mtottenh@akamai.com>,
-        "Hunt, Joshua" <johunt@akamai.com>,
-        "Galaxy, Michael"
-	<mgalaxy@akamai.com>
-Subject: Regression in 6.1.81: Missing memory in pmem device
-Thread-Topic: Regression in 6.1.81: Missing memory in pmem device
-Thread-Index: AQHapu3aAXNBspXH5EmfViMgDx95dw==
-Date: Wed, 15 May 2024 17:32:27 +0000
-Message-ID: <FA5F6719-8824-4B04-803E-82990E65E627@akamai.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <0D238261143F6D46B9677A1E174E540D@akamai.com>
-Content-Transfer-Encoding: base64
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="vGG8OjSI"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4E794C116B1;
+	Wed, 15 May 2024 18:30:06 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1715797806;
+	bh=1H4ESRp4n7R82qzwLK63TMRqXzG39WJ6h6WdXq5tn0s=;
+	h=Date:From:To:CC:Subject:In-Reply-To:References:From;
+	b=vGG8OjSIeW781V5I1Mq1XjN20oayTbfZUcvX7gFmSBIIuMekeMdERoqa1JMDoOIgE
+	 xrftDrj7q8wQI5PJ6WPuR7cQ0BEYYhG2d1NgrIBgTLFYLnMCsyGjc76CjoWgbbsP2T
+	 aPD2hmz3zViJSH2iwzvzuYtAvB7j/9BaH3xYsrgqtAdT+jn8iBzXx7DdEXgcrw8KWR
+	 ykTrGGn6/oOtyOAR8Mm+QB5zQ2U07ttTk5Y4FJoj9ZwyqJAAWtAmGXSIsRXjxNKfum
+	 9naBJ+n07qxnNyK/y3DGPwI5aDiLGKwQjySQoaYYTdKR2eK97QjUnEaEtndpfNqyln
+	 xFM+cuR17Cm9Q==
+Date: Wed, 15 May 2024 11:30:06 -0700
+From: Kees Cook <kees@kernel.org>
+To: Ard Biesheuvel <ardb@kernel.org>, "Chaney, Ben" <bchaney@akamai.com>,
+ Kees Cook <keescook@chromium.org>
+CC: "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>,
+ "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>,
+ "stable@vger.kernel.org" <stable@vger.kernel.org>,
+ "bp@alien8.de" <bp@alien8.de>,
+ "dave.hansen@linux.intel.com" <dave.hansen@linux.intel.com>,
+ "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+ "mingo@redhat.com" <mingo@redhat.com>,
+ "tglx@linutronix.de" <tglx@linutronix.de>,
+ "Tottenham, Max" <mtottenh@akamai.com>, "Hunt, Joshua" <johunt@akamai.com>,
+ "Galaxy, Michael" <mgalaxy@akamai.com>
+Subject: Re: Regression in 6.1.81: Missing memory in pmem device
+User-Agent: K-9 Mail for Android
+In-Reply-To: <CAMj1kXE2ZvaKout=nSfv08Hn5yvf8SRGhQeTikZcUeQOmyDgnw@mail.gmail.com>
+References: <FA5F6719-8824-4B04-803E-82990E65E627@akamai.com> <CAMj1kXE2ZvaKout=nSfv08Hn5yvf8SRGhQeTikZcUeQOmyDgnw@mail.gmail.com>
+Message-ID: <742E72A5-4792-4B72-B556-22929BBB1AD9@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.650,FMLib:17.11.176.26
- definitions=2024-05-15_10,2024-05-15_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 mlxlogscore=598
- phishscore=0 bulkscore=0 spamscore=0 suspectscore=0 mlxscore=0
- malwarescore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2405010000 definitions=main-2405150122
-X-Proofpoint-ORIG-GUID: 2KyqGTvCdGd3uUwnnZ2PZHER5km1icai
-X-Proofpoint-GUID: 2KyqGTvCdGd3uUwnnZ2PZHER5km1icai
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.650,FMLib:17.11.176.26
- definitions=2024-05-15_10,2024-05-15_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 priorityscore=1501
- lowpriorityscore=0 mlxscore=0 impostorscore=0 malwarescore=0 clxscore=1011
- bulkscore=0 suspectscore=0 mlxlogscore=434 spamscore=0 adultscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.19.0-2405010000
- definitions=main-2405150124
+Content-Type: text/plain;
+ charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-SGVsbG8sDQogICAgICAgICAgICAgICAgSSBlbmNvdW50ZXJlZCBhbiBpc3N1ZSB3aGVuIHVwZ3Jh
-ZGluZyB0byA2LjEuODkgZnJvbSA2LjEuNzcuIFRoaXMgdXBncmFkZSBjYXVzZWQgYSBicmVha2Fn
-ZSBpbiBlbXVsYXRlZCBwZXJzaXN0ZW50IG1lbW9yeS4gU2lnbmlmaWNhbnQgYW1vdW50cyBvZiBt
-ZW1vcnkgYXJlIG1pc3NpbmcgZnJvbSBhIHBtZW0gZGV2aWNlOg0KDQpmZGlzayAtbCAvZGV2L3Bt
-ZW0qDQpEaXNrIC9kZXYvcG1lbTA6IDM1NS45IEdpQiwgMzgyMTE3ODcxNjE2IGJ5dGVzLCA3NDYz
-MjM5Njggc2VjdG9ycw0KVW5pdHM6IHNlY3RvcnMgb2YgMSAqIDUxMiA9IDUxMiBieXRlcw0KU2Vj
-dG9yIHNpemUgKGxvZ2ljYWwvcGh5c2ljYWwpOiA1MTIgYnl0ZXMgLyA0MDk2IGJ5dGVzDQpJL08g
-c2l6ZSAobWluaW11bS9vcHRpbWFsKTogNDA5NiBieXRlcyAvIDQwOTYgYnl0ZXMNCg0KRGlzayAv
-ZGV2L3BtZW0xOiAyNS4zOCBHaUIsIDI3MjQ2MTk4Nzg0IGJ5dGVzLCA1MzIxNTIzMiBzZWN0b3Jz
-DQpVbml0czogc2VjdG9ycyBvZiAxICogNTEyID0gNTEyIGJ5dGVzDQpTZWN0b3Igc2l6ZSAobG9n
-aWNhbC9waHlzaWNhbCk6IDUxMiBieXRlcyAvIDQwOTYgYnl0ZXMNCkkvTyBzaXplIChtaW5pbXVt
-L29wdGltYWwpOiA0MDk2IGJ5dGVzIC8gNDA5NiBieXRlcw0KDQoJVGhlIG1lbW1hcCBwYXJhbWV0
-ZXIgdGhhdCBjcmVhdGVkIHRoZXNlIHBtZW0gZGV2aWNlcyBpcyDigJxtZW1tYXA9MzY0NDE2TSEy
-ODY3Mk0sMzY3NDg4TSE0MTk4NDBN4oCdLCB3aGljaCBzaG91bGQgY2F1c2UgYSBtdWNoIGxhcmdl
-ciBhbW91bnQgb2YgbWVtb3J5IHRvIGJlIGFsbG9jYXRlZCB0byAvZGV2L3BtZW0xLiBUaGUgYW1v
-dW50IG9mIG1pc3NpbmcgbWVtb3J5IGFuZCB0aGUgZGV2aWNlIGl0IGlzIG1pc3NpbmcgZnJvbSBp
-cyByYW5kb21pemVkIG9uIGVhY2ggcmVib290LiBUaGVyZSBpcyBzb21lIGFtb3VudCBvZiBtZW1v
-cnkgbWlzc2luZyBpbiBhbG1vc3QgYWxsIGNhc2VzLCBidXQgbm90IDEwMCUgb2YgdGhlIHRpbWUu
-IE5vdGFibHksIHRoZSBtZW1vcnkgdGhhdCBpcyBtaXNzaW5nIGZyb20gdGhlc2UgZGV2aWNlcyBp
-cyBub3QgcmVjbGFpbWVkIGJ5IHRoZSBzeXN0ZW0gZm9yIGdlbmVyYWwgdXNlLiBUaGlzIHN5c3Rl
-bSBpbiBxdWVzdGlvbiBoYXMgNzY4R0Igb2YgbWVtb3J5IHNwbGl0IGV2ZW5seSBhY3Jvc3MgdHdv
-IE5VTUEgbm9kZXMuDQoNCglXaGVuIHRoZSBlcnJvciBvY2N1cnMsIHRoZXJlIGFyZSBhbHNvIHRo
-ZSBmb2xsb3dpbmcgZXJyb3IgbWVzc2FnZXMgc2hvd2luZyB1cCBpbiBkbWVzZzoNCg0KWyAgICA1
-LjMxODMxN10gbmRfcG1lbSBuYW1lc3BhY2UxLjA6IFttZW0gMHg1YzIwNDJjMDAwLTB4NWZmN2Zm
-ZmZmZiBmbGFncyAweDIwMF0gbWlzYWxpZ25lZCwgdW5hYmxlIHRvIG1hcA0KWyAgICA1LjMzNTA3
-M10gbmRfcG1lbTogcHJvYmUgb2YgbmFtZXNwYWNlMS4wIGZhaWxlZCB3aXRoIGVycm9yIC05NQ0K
-DQoJQmlzZWN0aW9uIGltcGxpY2F0ZXMgMmRmYWVhYzNmMzhlNGU1NTBkMjE1MjA0ZWVkZDk3YTA2
-MWZkYzExOCBhcyB0aGUgcGF0Y2ggdGhhdCBmaXJzdCBjYXVzZWQgdGhlIGlzc3VlLiBJIGJlbGll
-dmUgdGhlIGNhdXNlIG9mIHRoZSBpc3N1ZSBpcyB0aGF0IHRoZSBFRkkgc3R1YiBpcyByYW5kb21p
-emluZyB0aGUgbG9jYXRpb24gb2YgdGhlIGRlY29tcHJlc3NlZCBrZXJuZWwgd2l0aG91dCBhY2Nv
-dW50aW5nIGZvciB0aGUgbWVtb3J5IG1hcCwgYW5kIGl0IGlzIGNsb2JiZXJpbmcgc29tZSBvZiB0
-aGUgbWVtb3J5IHRoYXQgaGFzIGJlZW4gcmVzZXJ2ZWQgZm9yIHBtZW0uDQoNClRoYW5rIHlvdSwN
-CglCZW4gQ2hhbmV5DQoNCg0KDQoNCg==
+
+
+On May 15, 2024 10:42:49 AM PDT, Ard Biesheuvel <ardb@kernel=2Eorg> wrote:
+>(cc Kees)
+>
+>On Wed, 15 May 2024 at 19:32, Chaney, Ben <bchaney@akamai=2Ecom> wrote:
+>>
+>> Hello,
+>>                 I encountered an issue when upgrading to 6=2E1=2E89 fro=
+m 6=2E1=2E77=2E This upgrade caused a breakage in emulated persistent memor=
+y=2E Significant amounts of memory are missing from a pmem device:
+>>
+>> fdisk -l /dev/pmem*
+>> Disk /dev/pmem0: 355=2E9 GiB, 382117871616 bytes, 746323968 sectors
+>> Units: sectors of 1 * 512 =3D 512 bytes
+>> Sector size (logical/physical): 512 bytes / 4096 bytes
+>> I/O size (minimum/optimal): 4096 bytes / 4096 bytes
+>>
+>> Disk /dev/pmem1: 25=2E38 GiB, 27246198784 bytes, 53215232 sectors
+>> Units: sectors of 1 * 512 =3D 512 bytes
+>> Sector size (logical/physical): 512 bytes / 4096 bytes
+>> I/O size (minimum/optimal): 4096 bytes / 4096 bytes
+>>
+>>         The memmap parameter that created these pmem devices is =E2=80=
+=9Cmemmap=3D364416M!28672M,367488M!419840M=E2=80=9D, which should cause a m=
+uch larger amount of memory to be allocated to /dev/pmem1=2E The amount of =
+missing memory and the device it is missing from is randomized on each rebo=
+ot=2E There is some amount of memory missing in almost all cases, but not 1=
+00% of the time=2E Notably, the memory that is missing from these devices i=
+s not reclaimed by the system for general use=2E This system in question ha=
+s 768GB of memory split evenly across two NUMA nodes=2E
+>>
+>>         When the error occurs, there are also the following error messa=
+ges showing up in dmesg:
+>>
+>> [    5=2E318317] nd_pmem namespace1=2E0: [mem 0x5c2042c000-0x5ff7ffffff=
+ flags 0x200] misaligned, unable to map
+>> [    5=2E335073] nd_pmem: probe of namespace1=2E0 failed with error -95
+>>
+>>         Bisection implicates 2dfaeac3f38e4e550d215204eedd97a061fdc118 a=
+s the patch that first caused the issue=2E I believe the cause of the issue=
+ is that the EFI stub is randomizing the location of the decompressed kerne=
+l without accounting for the memory map, and it is clobbering some of the m=
+emory that has been reserved for pmem=2E
+>>
+>
+>Does using 'nokaslr' on the kernel command line work around this?
+>
+>I think in this particular case, we could just disable physical KASLR
+>(but retain virtual KASLR) if memmap=3D appears on the kernel command
+>line, on the basis that emulated persistent memory is somewhat of a
+>niche use case, and physical KASLR is not as important as virtual
+>KASLR (which shouldn't be implicated in this)=2E
+
+Yeah, that seems reasonable to me=2E As long as we put a notice to dmesg t=
+hat physical ASLR was disabled due to memmap's physical reservation=2E If t=
+his usage becomes more common, we should find a better way, though=2E=20
+
+This reminds me a bit of the work Steve has been exploring:
+https://lore=2Ekernel=2Eorg/all/20240509163310=2E2aa0b2e1@rorschach=2Eloca=
+l=2Ehome/
+
+
+
+--=20
+Kees Cook
