@@ -1,207 +1,165 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.18])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f175.google.com (mail-pl1-f175.google.com [209.85.214.175])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1A82A160865;
-	Fri, 21 Jun 2024 16:44:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8E5DB17BB32
+	for <linux-efi@vger.kernel.org>; Fri, 21 Jun 2024 22:10:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718988268; cv=none; b=tLmL61a0/ucwYtioza0Bfy+P1qKv/14qiJjsaifkbc82DW1CifZ2VrurfyPoOnmC30MNYx783iBRNNDoyH1TXVjm1iKs+a4/pWwTUeHGKpuL1vaAgD6bukxBs4KTRzjlkbPe8L/pCE08LYu2i+UW0azBrdWizJjrO/AWBKmmePo=
+	t=1719007848; cv=none; b=pxY3F89aa5r6jETwYapfaNMJVy9NVHGxAe7F68a9mBXixG1qpaN+F8VvK/S9i6wmmhRxt14jI/DKoDIxZNJRZ/t1GN4LquYh9Rq1LmJiv4ajhqHnv9mb8K65Y09gheZvfbvvv1Kp2NjZct4k7qFJQ5d0J63867wIbctUHmAq90k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718988268; c=relaxed/simple;
-	bh=vQhv6zBl+J5Tnsr+ly6iaE4iRU0OCteyzIdlEzGRYuI=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=uxaT7CIGyw/2AWbgC+LWVFhCperlikG3+00kF61EDpRuPmftIlRAtFCNkYWwJ1uhhZk4tXlWQjh6WV6c2cCD5BpR7fMpAU4doaEiM7+SU1Hbd0lpNLqqZCct2l2xFy1lT+phIw444O/LYWc2n3tvqJLSn7baJYQZw2aEItbqbJU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.helo=mgamail.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=lCuy782g; arc=none smtp.client-ip=192.198.163.18
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.helo=mgamail.intel.com
+	s=arc-20240116; t=1719007848; c=relaxed/simple;
+	bh=ZEyjg1DGdHfvMHVyn3oiXgYoAsPB9kPjfgjytYscvC8=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Fe01hW8UKTcexk5Gyw5dNomfjyMihOkgwI3YnUdvCjB68g2OYTJLa7gWX+v7srZTeW1w6/qDGJ9XHp7jEVfjjGhOhs9vFjh58THI1cj3Y1u60qC0xMO9m3TiYHs1RQVSeSbo8kqUlYQWesFzar/sxKXrro5gBFdRFHCWQNhRjhc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=rivosinc.com; spf=pass smtp.mailfrom=rivosinc.com; dkim=pass (2048-bit key) header.d=rivosinc-com.20230601.gappssmtp.com header.i=@rivosinc-com.20230601.gappssmtp.com header.b=HXM3+qjX; arc=none smtp.client-ip=209.85.214.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=rivosinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rivosinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="lCuy782g"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1718988267; x=1750524267;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=vQhv6zBl+J5Tnsr+ly6iaE4iRU0OCteyzIdlEzGRYuI=;
-  b=lCuy782gOhNJ889ttFhuYVq20H7XkMAT6IlUGLm+zGnm+JQeef6mRrsT
-   86sCalfdqswI65wc1U36uvu5TMKsyZwrt4rjafTAgO/TRKpOgedgUn7vl
-   VeG0pL+dueNeJqDM2csS/8O53lIhOeBy7+jvQzW+V7Enu6FSK60BzIy7d
-   R3RF0Rf1bxBfAjInWhY3vapu/nbUWM1Rz+dREX3132siPMPaCPm8jP3m3
-   zrYxJ+ZyB1s42HF6cRQuYZjLQa0px9Aoxg2xTUz9trmisfmdEJ6vqRkxd
-   JD0v7I7GC2xp1uksPuOeI+40lOXhgd2Iktem5VQ6q4jVrtGRnF60RyA8d
-   A==;
-X-CSE-ConnectionGUID: Z3C/CHeARVOYpQXFBIuzbQ==
-X-CSE-MsgGUID: h36VyECMSpGQ5c3puvEqkQ==
-X-IronPort-AV: E=McAfee;i="6700,10204,11110"; a="15727182"
-X-IronPort-AV: E=Sophos;i="6.08,255,1712646000"; 
-   d="scan'208";a="15727182"
-Received: from fmviesa010.fm.intel.com ([10.60.135.150])
-  by fmvoesa112.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 Jun 2024 09:44:24 -0700
-X-CSE-ConnectionGUID: irTw7mS5TLWlF9ye/qQdGg==
-X-CSE-MsgGUID: s2D0gDk6ReGQKZ1Ozj6i6A==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.08,255,1712646000"; 
-   d="scan'208";a="42745631"
-Received: from black.fi.intel.com ([10.237.72.28])
-  by fmviesa010.fm.intel.com with ESMTP; 21 Jun 2024 09:44:18 -0700
-Received: by black.fi.intel.com (Postfix, from userid 1000)
-	id 42799122; Fri, 21 Jun 2024 19:44:17 +0300 (EEST)
-From: "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-To: Thomas Gleixner <tglx@linutronix.de>,
-	Ingo Molnar <mingo@redhat.com>,
-	Borislav Petkov <bp@alien8.de>,
-	Dave Hansen <dave.hansen@linux.intel.com>,
-	x86@kernel.org,
-	"H. Peter Anvin" <hpa@zytor.com>
-Cc: Jonathan Corbet <corbet@lwn.net>,
-	Andy Lutomirski <luto@kernel.org>,
-	Peter Zijlstra <peterz@infradead.org>,
-	Ard Biesheuvel <ardb@kernel.org>,
-	Jan Kiszka <jan.kiszka@siemens.com>,
-	Kieran Bingham <kbingham@kernel.org>,
-	"Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
-	Michael Roth <michael.roth@amd.com>,
-	Rick Edgecombe <rick.p.edgecombe@intel.com>,
-	Brijesh Singh <brijesh.singh@amd.com>,
-	Sandipan Das <sandipan.das@amd.com>,
-	Juergen Gross <jgross@suse.com>,
-	Tom Lendacky <thomas.lendacky@amd.com>,
-	linux-kernel@vger.kernel.org,
-	linux-doc@vger.kernel.org,
-	linux-efi@vger.kernel.org,
-	linux-mm@kvack.org
-Subject: [PATCH 1/3] x86/64/mm: Always use dynamic memory layout
-Date: Fri, 21 Jun 2024 19:44:04 +0300
-Message-ID: <20240621164406.256314-2-kirill.shutemov@linux.intel.com>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20240621164406.256314-1-kirill.shutemov@linux.intel.com>
-References: <20240621164406.256314-1-kirill.shutemov@linux.intel.com>
+	dkim=pass (2048-bit key) header.d=rivosinc-com.20230601.gappssmtp.com header.i=@rivosinc-com.20230601.gappssmtp.com header.b="HXM3+qjX"
+Received: by mail-pl1-f175.google.com with SMTP id d9443c01a7336-1f4a5344ec7so17317655ad.1
+        for <linux-efi@vger.kernel.org>; Fri, 21 Jun 2024 15:10:46 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=rivosinc-com.20230601.gappssmtp.com; s=20230601; t=1719007846; x=1719612646; darn=vger.kernel.org;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=W6zNTGp1aTwOtvLdnUXPrvSqBQrllJdVcW2FVVgDB5g=;
+        b=HXM3+qjXxtXZ59+HmVscZ/hJS6if3zHHfXT84Pi+RsoH+Vteq9ece+6LBs+pm4XXDN
+         ZqN5p91ivkN4iEO2UWDal+H9R/nkwhF0mnrNCZegFNcKlXvD6q+7wyRPnyXVge7W0HIx
+         vG8rGq8j+Mq3qFbRKFaYO0RHGB5NYVAA4r+g5dafKAZbK8smEUBlUV63fPJHD61+BNZQ
+         RxLqQvVIcISTeoWD1MsVcsPqDM+IpX1wtkws2YOeDnlInOjMIOlDMHE1x/PQRogVHsFL
+         IhDVGv0Sd0oGzHWkaA6tpLOWLK+V105PqUmeputuqWPzU4aUBjR5qVSIZaP1Ab3tQta3
+         JSlg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1719007846; x=1719612646;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=W6zNTGp1aTwOtvLdnUXPrvSqBQrllJdVcW2FVVgDB5g=;
+        b=wNfYIXZzujjvgiP3jw6AuFA+6Zn79ZqY3AFV9zjce5tIHG/ET7e2TDoHlljtBCrwsJ
+         xvtdO6YZuiPNWkJFqMvrF/tVsmI8E2mgBKk0zkgxV5g4LZkovofjDoZ9mrqNebCuIZIA
+         Bi0pNg3H+9AwpAFFLANmaPAERkvL9K8R3r11ucWpSUX6RMvj2bxesRTpsnGtilDY7/id
+         oNPbkw1J7a7W5iBp1N/AB7QffWp/xchbltOgC+1e/nKelcvY8tQyzoMogWeNFWMoMvni
+         TyDHMlONn2+YTu9FPgIwbgKzYFPAGGuQOyz0fnEONSE0bLLMCxIA/Qe6BcqGobl5iRlm
+         cOMg==
+X-Forwarded-Encrypted: i=1; AJvYcCVaG6QGwSDVONje11BcvNI7htj2S5C+dAgKFemvPjjeNtXtT4i1e2ddWksAes3tOx4rRUjYrO34pEmW70i9NAEHW+sO2tjIqHfV
+X-Gm-Message-State: AOJu0YzOWKivrVuD3ZQ4wwoPGOQ08Pl9BpT/vVSXkidvWnUyPO0fbkhM
+	/JjCIKONbFndgtUW3gxtPgbdA+EznYk8j0tMupGq/tuCenQ+g0viOTXljA1TsLQ=
+X-Google-Smtp-Source: AGHT+IFodC/KHmQCg2O0jJBVOPuXhUN5lF51VkVlsO14ggFbC93W0YN4q838joM1PZnjh/NG3CSEVg==
+X-Received: by 2002:a17:902:e84d:b0:1f9:f906:9082 with SMTP id d9443c01a7336-1fa04a42126mr12275615ad.7.1719007845678;
+        Fri, 21 Jun 2024 15:10:45 -0700 (PDT)
+Received: from ghost ([2601:647:5700:6860:e8dd:a296:71d5:2490])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-1f9eb5e030dsm18868865ad.218.2024.06.21.15.10.44
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 21 Jun 2024 15:10:45 -0700 (PDT)
+Date: Fri, 21 Jun 2024 15:10:42 -0700
+From: Charlie Jenkins <charlie@rivosinc.com>
+To: Jisheng Zhang <jszhang@kernel.org>
+Cc: Paul Walmsley <paul.walmsley@sifive.com>,
+	Palmer Dabbelt <palmer@dabbelt.com>,
+	Albert Ou <aou@eecs.berkeley.edu>, Ard Biesheuvel <ardb@kernel.org>,
+	linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org,
+	linux-efi@vger.kernel.org
+Subject: Re: [PATCH] riscv: enable HAVE_ARCH_STACKLEAK
+Message-ID: <ZnX6YtFGfXd0ixwR@ghost>
+References: <20240617123029.723-1-jszhang@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
+In-Reply-To: <20240617123029.723-1-jszhang@kernel.org>
 
-Dynamic memory layout is used by KASLR and 5-level paging.
+On Mon, Jun 17, 2024 at 08:30:29PM +0800, Jisheng Zhang wrote:
+> Add support for the stackleak feature. Whenever the kernel returns to user
+> space the kernel stack is filled with a poison value.
+> 
+> At the same time, disables the plugin in EFI stub code because EFI stub
+> is out of scope for the protection.
+> 
+> Tested on qemu and milkv duo:
+> / # echo STACKLEAK_ERASING > /sys/kernel/debug/provoke-crash/DIRECT
+> [   38.675575] lkdtm: Performing direct entry STACKLEAK_ERASING
+> [   38.678448] lkdtm: stackleak stack usage:
+> [   38.678448]   high offset: 288 bytes
+> [   38.678448]   current:     496 bytes
+> [   38.678448]   lowest:      1328 bytes
+> [   38.678448]   tracked:     1328 bytes
+> [   38.678448]   untracked:   448 bytes
+> [   38.678448]   poisoned:    14312 bytes
+> [   38.678448]   low offset:  8 bytes
+> [   38.689887] lkdtm: OK: the rest of the thread stack is properly erased
+> 
+> Signed-off-by: Jisheng Zhang <jszhang@kernel.org>
+> ---
+>  arch/riscv/Kconfig                    | 1 +
+>  arch/riscv/kernel/entry.S             | 4 ++++
+>  drivers/firmware/efi/libstub/Makefile | 3 ++-
+>  3 files changed, 7 insertions(+), 1 deletion(-)
+> 
+> diff --git a/arch/riscv/Kconfig b/arch/riscv/Kconfig
+> index 0525ee2d63c7..9cbfdffec96c 100644
+> --- a/arch/riscv/Kconfig
+> +++ b/arch/riscv/Kconfig
+> @@ -118,6 +118,7 @@ config RISCV
+>  	select HAVE_ARCH_MMAP_RND_COMPAT_BITS if COMPAT
+>  	select HAVE_ARCH_RANDOMIZE_KSTACK_OFFSET
+>  	select HAVE_ARCH_SECCOMP_FILTER
+> +	select HAVE_ARCH_STACKLEAK
 
-CONFIG_X86_5LEVEL is going to be removed, making 5-level paging support
-unconditional which requires unconditional support of dynamic memory
-layout.
+When this is selected, stackleak.h include
+arch/riscv/include/asm/thread_info.h without sizes.h and I hit:
 
-Remove CONFIG_DYNAMIC_MEMORY_LAYOUT.
+./arch/riscv/include/asm/thread_info.h:30:33: error: ‘SZ_4K’ undeclared here (not in a function)
+   30 | #define OVERFLOW_STACK_SIZE     SZ_4K
+      |                                 ^~~~~
 
-Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
----
- arch/x86/Kconfig                        | 8 --------
- arch/x86/include/asm/page_64_types.h    | 4 ----
- arch/x86/include/asm/pgtable_64_types.h | 6 ------
- arch/x86/kernel/head64.c                | 2 --
- scripts/gdb/linux/pgtable.py            | 4 +---
- 5 files changed, 1 insertion(+), 23 deletions(-)
+Adding "#include <linux/sizes.h>" to thread_info.h resolves the issue.
+I am testing this based on 6.10-rc4. Did you encounter this?
 
-diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
-index e30ea4129d2c..827928680ed6 100644
---- a/arch/x86/Kconfig
-+++ b/arch/x86/Kconfig
-@@ -1501,7 +1501,6 @@ config X86_PAE
- config X86_5LEVEL
- 	bool "Enable 5-level page tables support"
- 	default y
--	select DYNAMIC_MEMORY_LAYOUT
- 	select SPARSEMEM_VMEMMAP
- 	depends on X86_64
- 	help
-@@ -2237,17 +2236,10 @@ config PHYSICAL_ALIGN
- 
- 	  Don't change this unless you know what you are doing.
- 
--config DYNAMIC_MEMORY_LAYOUT
--	bool
--	help
--	  This option makes base addresses of vmalloc and vmemmap as well as
--	  __PAGE_OFFSET movable during boot.
--
- config RANDOMIZE_MEMORY
- 	bool "Randomize the kernel memory sections"
- 	depends on X86_64
- 	depends on RANDOMIZE_BASE
--	select DYNAMIC_MEMORY_LAYOUT
- 	default RANDOMIZE_BASE
- 	help
- 	  Randomizes the base virtual address of kernel memory sections
-diff --git a/arch/x86/include/asm/page_64_types.h b/arch/x86/include/asm/page_64_types.h
-index 06ef25411d62..c2f3c50a2787 100644
---- a/arch/x86/include/asm/page_64_types.h
-+++ b/arch/x86/include/asm/page_64_types.h
-@@ -41,11 +41,7 @@
- #define __PAGE_OFFSET_BASE_L5	_AC(0xff11000000000000, UL)
- #define __PAGE_OFFSET_BASE_L4	_AC(0xffff888000000000, UL)
- 
--#ifdef CONFIG_DYNAMIC_MEMORY_LAYOUT
- #define __PAGE_OFFSET           page_offset_base
--#else
--#define __PAGE_OFFSET           __PAGE_OFFSET_BASE_L4
--#endif /* CONFIG_DYNAMIC_MEMORY_LAYOUT */
- 
- #define __START_KERNEL_map	_AC(0xffffffff80000000, UL)
- 
-diff --git a/arch/x86/include/asm/pgtable_64_types.h b/arch/x86/include/asm/pgtable_64_types.h
-index 9053dfe9fa03..09df8939b997 100644
---- a/arch/x86/include/asm/pgtable_64_types.h
-+++ b/arch/x86/include/asm/pgtable_64_types.h
-@@ -130,15 +130,9 @@ extern unsigned int ptrs_per_p4d;
- #define __VMEMMAP_BASE_L4	0xffffea0000000000UL
- #define __VMEMMAP_BASE_L5	0xffd4000000000000UL
- 
--#ifdef CONFIG_DYNAMIC_MEMORY_LAYOUT
- # define VMALLOC_START		vmalloc_base
- # define VMALLOC_SIZE_TB	(pgtable_l5_enabled() ? VMALLOC_SIZE_TB_L5 : VMALLOC_SIZE_TB_L4)
- # define VMEMMAP_START		vmemmap_base
--#else
--# define VMALLOC_START		__VMALLOC_BASE_L4
--# define VMALLOC_SIZE_TB	VMALLOC_SIZE_TB_L4
--# define VMEMMAP_START		__VMEMMAP_BASE_L4
--#endif /* CONFIG_DYNAMIC_MEMORY_LAYOUT */
- 
- /*
-  * End of the region for which vmalloc page tables are pre-allocated.
-diff --git a/arch/x86/kernel/head64.c b/arch/x86/kernel/head64.c
-index a817ed0724d1..ec36ad7117ae 100644
---- a/arch/x86/kernel/head64.c
-+++ b/arch/x86/kernel/head64.c
-@@ -60,14 +60,12 @@ unsigned int ptrs_per_p4d __ro_after_init = 1;
- EXPORT_SYMBOL(ptrs_per_p4d);
- #endif
- 
--#ifdef CONFIG_DYNAMIC_MEMORY_LAYOUT
- unsigned long page_offset_base __ro_after_init = __PAGE_OFFSET_BASE_L4;
- EXPORT_SYMBOL(page_offset_base);
- unsigned long vmalloc_base __ro_after_init = __VMALLOC_BASE_L4;
- EXPORT_SYMBOL(vmalloc_base);
- unsigned long vmemmap_base __ro_after_init = __VMEMMAP_BASE_L4;
- EXPORT_SYMBOL(vmemmap_base);
--#endif
- 
- static inline bool check_la57_support(void)
- {
-diff --git a/scripts/gdb/linux/pgtable.py b/scripts/gdb/linux/pgtable.py
-index 30d837f3dfae..09aac2421fb8 100644
---- a/scripts/gdb/linux/pgtable.py
-+++ b/scripts/gdb/linux/pgtable.py
-@@ -29,11 +29,9 @@ def page_mask(level=1):
-         raise Exception(f'Unknown page level: {level}')
- 
- 
--#page_offset_base in case CONFIG_DYNAMIC_MEMORY_LAYOUT is disabled
--POB_NO_DYNAMIC_MEM_LAYOUT = '0xffff888000000000'
- def _page_offset_base():
-     pob_symbol = gdb.lookup_global_symbol('page_offset_base')
--    pob = pob_symbol.name if pob_symbol else POB_NO_DYNAMIC_MEM_LAYOUT
-+    pob = pob_symbol.name
-     return gdb.parse_and_eval(pob)
- 
- 
--- 
-2.43.0
+- Charlie
 
+>  	select HAVE_ARCH_THREAD_STRUCT_WHITELIST
+>  	select HAVE_ARCH_TRACEHOOK
+>  	select HAVE_ARCH_TRANSPARENT_HUGEPAGE if 64BIT && MMU
+> diff --git a/arch/riscv/kernel/entry.S b/arch/riscv/kernel/entry.S
+> index 68a24cf9481a..80ff55a26d13 100644
+> --- a/arch/riscv/kernel/entry.S
+> +++ b/arch/riscv/kernel/entry.S
+> @@ -130,6 +130,10 @@ SYM_CODE_START_NOALIGN(ret_from_exception)
+>  #endif
+>  	bnez s0, 1f
+>  
+> +#ifdef CONFIG_GCC_PLUGIN_STACKLEAK
+> +	call	stackleak_erase_on_task_stack
+> +#endif
+> +
+>  	/* Save unwound kernel stack pointer in thread_info */
+>  	addi s0, sp, PT_SIZE_ON_STACK
+>  	REG_S s0, TASK_TI_KERNEL_SP(tp)
+> diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+> index 06f0428a723c..3a9521c57641 100644
+> --- a/drivers/firmware/efi/libstub/Makefile
+> +++ b/drivers/firmware/efi/libstub/Makefile
+> @@ -28,7 +28,8 @@ cflags-$(CONFIG_ARM)		+= -DEFI_HAVE_STRLEN -DEFI_HAVE_STRNLEN \
+>  				   -DEFI_HAVE_MEMCHR -DEFI_HAVE_STRRCHR \
+>  				   -DEFI_HAVE_STRCMP -fno-builtin -fpic \
+>  				   $(call cc-option,-mno-single-pic-base)
+> -cflags-$(CONFIG_RISCV)		+= -fpic -DNO_ALTERNATIVE -mno-relax
+> +cflags-$(CONFIG_RISCV)		+= -fpic -DNO_ALTERNATIVE -mno-relax \
+> +				   $(DISABLE_STACKLEAK_PLUGIN)
+>  cflags-$(CONFIG_LOONGARCH)	+= -fpie
+>  
+>  cflags-$(CONFIG_EFI_PARAMS_FROM_FDT)	+= -I$(srctree)/scripts/dtc/libfdt
+> -- 
+> 2.43.0
+> 
+> 
+> _______________________________________________
+> linux-riscv mailing list
+> linux-riscv@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-riscv
