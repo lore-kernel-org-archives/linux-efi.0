@@ -1,34 +1,34 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5AC9412FF8C;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5AC1C4962B;
 	Mon, 24 Jun 2024 09:19:50 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719220790; cv=none; b=kRJ4qnp4/4FOzYfMu1ufGjbpMIHJuNODkKwpoTXttPKkes4J4TnR1PfacDEiE9gcJEp5HTGzAKxHrLjd8PDAtkffcD3RocgyW4pdVQvTxyIwu4B8b4lYdFgoN5YQhx5+8HMiSOgnKO9YUHWCUSapGuH29ln90H+CmnK+FPxLn3g=
+	t=1719220790; cv=none; b=R2qPvwiTkBHgWWIUD/5h/lCLsayvfk3tNGbcDlj549inPGEs/TI9j6b/Jpz6Vlyaw58IUqqaay7h9c1iMvo0N8jipsXGWUTZmV29QyzXzLJlK8PFll1cCt9Ad/7E/eSwG89qmX3GkpZX8bdbR7ZN6frLJVv1xnaNOTvqWXk2H0Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1719220790; c=relaxed/simple;
-	bh=MiJu506E02sUqMejKu5a4CpTEW7a3bv6SgfhjAqtNZM=;
+	bh=ueKAZu/ar61RH+7+SVha6r9QoHpXIuCXEquxTHmjDy8=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=pnS/Xj03BY+9+n3wFp2MGxfpWdNnqBSzFz/hUEj1FqMjRTZbU7inGD5fQZ2EipGCxFJ7Q43bKhJN8IN0fwuHeY0FLCGqVUeAP6fLYFMdP24XTEeKWwVcwpVtVi2UWQVs8jvaN/MrmAYNVp9b5M979nLZKXe+Y8TsTwu/geqpMFo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=tGYP9MFX; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=Cw4bR03qMI1GnjgBcbRcQpb1sc6t0/BiDgSzF3DUIjRcY0j1FUcBV4o0nROh1x1gLRV5dMWeXDcEvb2BSiPG21i7etd7cYLuIZK1ICewcq77zZYYB54HhDK91Z6w7ohrruU6xW5OkPfBrAC6GRKZ7MlTeAFPXkHL7MX+vZ6kdbQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=DQl9hJ1f; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="tGYP9MFX"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0936CC32782;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="DQl9hJ1f"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0B65FC4AF0A;
 	Mon, 24 Jun 2024 09:19:50 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=k20201202; t=1719220790;
-	bh=MiJu506E02sUqMejKu5a4CpTEW7a3bv6SgfhjAqtNZM=;
+	bh=ueKAZu/ar61RH+7+SVha6r9QoHpXIuCXEquxTHmjDy8=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=tGYP9MFXOpjlu+0DM1dR1AdDd1EIvzeJ4btWbao7hqc2LxltXn0sLcJYhNUEr6Mwq
-	 548Ptdnx09TP1zDcwf8ot2vLOXmzc+XsfW87qDZJ9XyTfh2Y+CqgWAReyjT7jtnD+j
-	 HTUEwLg8PQKYOGXUyn3xcDmJc/VSJ4wxSuhjCf35pRr4TP/yGMaphDlcvhlV9FHxl6
-	 Z7H+J5xaMFEcDtN9+hk+Z7TEU7KdBdGcIASdwOIoYX6vfg7D9s98IIYgDG0FmlX1WV
-	 EAdlaemWJCagRjpA3E0UTHCzHWTqWVuk2PozvT1zROqQHnZmdwdrQfKCgD+1NOvOzd
-	 CFz0N1MZ5YWUw==
+	b=DQl9hJ1fKghiq9MwhsYzEd3OPju43qMtQZqFVba1+dc/YYg3vbhEJGQ0M2Vnc+RHS
+	 bSvzLEeiz6v3VQO970GB0JMALPfNe/5CBQn6rLji3tfKa7b7aCbP3kHP1glYN+nM+n
+	 c6si/OcXorTEL68dH4eK/czp2WUx0hF11HjLBkHdJzLf6FftFTPc35Ii+q57RtS6Jf
+	 7cBsl3l33TIvowngFXwOUeUaBKpXMXs/qHE7W27n0FwcwJDAjbxkR9kda7LHWZo4C6
+	 3KttKQqA7Xpfrq3WytiVd3ImILwnATwJk0SjEYlkyNHWzNN9xDfA2qgVvGNpqhVCK3
+	 KAss1erx/qE6Q==
 Received: from mchehab by mail.kernel.org with local (Exim 4.97.1)
 	(envelope-from <mchehab@kernel.org>)
-	id 1sLfrX-000000085bi-1s15;
+	id 1sLfrX-000000085br-2FWa;
 	Mon, 24 Jun 2024 11:19:47 +0200
 From: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
 To: 
@@ -38,16 +38,15 @@ Cc: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>,
 	"Jonathan Cameron" <Jonathan.Cameron@huawei.com>,
 	"Shiju Jose" <shiju.jose@huawei.com>,
 	"Tony Luck" <tony.luck@intel.com>,
-	Alison Schofield <alison.schofield@intel.com>,
 	Ard Biesheuvel <ardb@kernel.org>,
-	Dave Jiang <dave.jiang@intel.com>,
-	Ira Weiny <ira.weiny@intel.com>,
+	Jonathan Corbet <corbet@lwn.net>,
+	linux-doc@vger.kernel.org,
 	linux-edac@vger.kernel.org,
 	linux-efi@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH v5 2/4] efi/cper: Add a new helper function to print bitmasks
-Date: Mon, 24 Jun 2024 11:19:19 +0200
-Message-ID: <b5a425bd61f211a17a2b296a3c9ac251b3c3a20b.1719219886.git.mchehab+huawei@kernel.org>
+Subject: [PATCH v5 4/4] docs: efi: add CPER functions to driver-api
+Date: Mon, 24 Jun 2024 11:19:21 +0200
+Message-ID: <c159ef52241b263ffdc15140d7f3195b389b9166.1719219886.git.mchehab+huawei@kernel.org>
 X-Mailer: git-send-email 2.45.2
 In-Reply-To: <cover.1719219886.git.mchehab+huawei@kernel.org>
 References: <cover.1719219886.git.mchehab+huawei@kernel.org>
@@ -60,80 +59,78 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: Mauro Carvalho Chehab <mchehab@kernel.org>
 
-Sometimes it is desired to produce a single log line for errors.
-Add a new helper function for such purpose.
+There are two kernel-doc like descriptions at cper, which is used
+by other parts of cper and on ghes driver. They both have kernel-doc
+like descriptions.
+
+Change the tags for them to be actual kernel-doc tags and add them
+to the driver-api documentaion at the UEFI section.
 
 Signed-off-by: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
 ---
- drivers/firmware/efi/cper.c | 41 +++++++++++++++++++++++++++++++++++++
- include/linux/cper.h        |  2 ++
- 2 files changed, 43 insertions(+)
+ Documentation/driver-api/firmware/efi/index.rst | 11 ++++++++---
+ drivers/firmware/efi/cper.c                     | 10 ++++------
+ 2 files changed, 12 insertions(+), 9 deletions(-)
 
+diff --git a/Documentation/driver-api/firmware/efi/index.rst b/Documentation/driver-api/firmware/efi/index.rst
+index 4fe8abba9fc6..5a6b6229592c 100644
+--- a/Documentation/driver-api/firmware/efi/index.rst
++++ b/Documentation/driver-api/firmware/efi/index.rst
+@@ -1,11 +1,16 @@
+ .. SPDX-License-Identifier: GPL-2.0
+ 
+-============
+-UEFI Support
+-============
++====================================================
++Unified Extensible Firmware Interface (UEFI) Support
++====================================================
+ 
+ UEFI stub library functions
+ ===========================
+ 
+ .. kernel-doc:: drivers/firmware/efi/libstub/mem.c
+    :internal:
++
++UEFI Common Platform Error Record (CPER) functions
++==================================================
++
++.. kernel-doc:: drivers/firmware/efi/cper.c
 diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-index 7d2cdd9e2227..4cf56657afde 100644
+index 4cf56657afde..c8a432c5cb5d 100644
 --- a/drivers/firmware/efi/cper.c
 +++ b/drivers/firmware/efi/cper.c
-@@ -106,6 +106,47 @@ void cper_print_bits(const char *pfx, unsigned int bits,
+@@ -69,7 +69,7 @@ const char *cper_severity_str(unsigned int severity)
+ }
+ EXPORT_SYMBOL_GPL(cper_severity_str);
+ 
+-/*
++/**
+  * cper_print_bits - print strings for set bits
+  * @pfx: prefix for each line, including log level and prefix string
+  * @bits: bit mask
+@@ -106,18 +106,16 @@ void cper_print_bits(const char *pfx, unsigned int bits,
  		printk("%s\n", buf);
  }
  
-+/*
-+ * cper_bits_to_str - return a string for set bits
-+ * @buf: buffer to store the output string
-+ * @buf_size: size of the output string buffer
-+ * @bits: bit mask
-+ * @strs: string array, indexed by bit position
-+ * @strs_size: size of the string array: @strs
-+ * @mask: a continuous bitmask used to detect the first valid bit of the
-+ *        bitmap.
-+ *
-+ * Add to @buf the bitmask in hexadecimal. Then, for each set bit in @bits
-+ * mask, add the corresponding string describing the bit in @strs to @buf.
-+ */
-+char *cper_bits_to_str(char *buf, int buf_size, unsigned long bits,
-+		       const char * const strs[], unsigned int strs_size)
-+{
-+	int len = buf_size;
-+	char *str = buf;
-+	int i, size;
-+
-+	for_each_set_bit(i, &bits, strs_size) {
-+		if (!(bits & (1U << (i))))
-+			continue;
-+
-+		if (*buf && len > 0) {
-+			*str = '|';
-+			len--;
-+			str++;
-+		}
-+
-+		size = strscpy(str, strs[i], len);
-+		if (size < 0)
-+			break;
-+
-+		len -= size;
-+		str += size;
-+	}
-+	return buf;
-+}
-+EXPORT_SYMBOL_GPL(cper_bits_to_str);
-+
- static const char * const proc_type_strs[] = {
- 	"IA32/X64",
- 	"IA64",
-diff --git a/include/linux/cper.h b/include/linux/cper.h
-index 265b0f8fc0b3..c2f14b916bfb 100644
---- a/include/linux/cper.h
-+++ b/include/linux/cper.h
-@@ -584,6 +584,8 @@ const char *cper_mem_err_type_str(unsigned int);
- const char *cper_mem_err_status_str(u64 status);
- void cper_print_bits(const char *prefix, unsigned int bits,
- 		     const char * const strs[], unsigned int strs_size);
-+char *cper_bits_to_str(char *buf, int buf_size, unsigned long bits,
-+		       const char * const strs[], unsigned int strs_size);
- void cper_mem_err_pack(const struct cper_sec_mem_err *,
- 		       struct cper_mem_err_compact *);
- const char *cper_mem_err_unpack(struct trace_seq *,
+-/*
++/**
+  * cper_bits_to_str - return a string for set bits
+  * @buf: buffer to store the output string
+  * @buf_size: size of the output string buffer
+  * @bits: bit mask
+  * @strs: string array, indexed by bit position
+  * @strs_size: size of the string array: @strs
+- * @mask: a continuous bitmask used to detect the first valid bit of the
+- *        bitmap.
+  *
+- * Add to @buf the bitmask in hexadecimal. Then, for each set bit in @bits
+- * mask, add the corresponding string describing the bit in @strs to @buf.
++ * Add to @buf the bitmask in hexadecimal. Then, for each set bit in @bits,
++ * add the corresponding string describing the bit in @strs to @buf.
+  */
+ char *cper_bits_to_str(char *buf, int buf_size, unsigned long bits,
+ 		       const char * const strs[], unsigned int strs_size)
 -- 
 2.45.2
 
