@@ -1,118 +1,95 @@
-Received: from mail-lf1-f51.google.com (mail-lf1-f51.google.com [209.85.167.51])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2F86F31A89
-	for <linux-efi@vger.kernel.org>; Mon, 24 Jun 2024 07:30:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5ABDA2C95;
+	Mon, 24 Jun 2024 09:19:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719214215; cv=none; b=V61AJgecpQ9Hu33NboYYDtRJCm98EOXTYx6Xy/bHVyPPdQwV51Z+Aqhvlaq0ps6E7p+eboy/gfsYj7cwzsGXDVv/2ZrFyVKLq3PSoz/IR5zx2K6WWeXkE47jrjPGsP+SdltcX0arTXtwXnjWlbAqEIOZiePU2+g6wTxyxw/nr6c=
+	t=1719220790; cv=none; b=bjirFwS+tigke7ugxTlyuM28ROM48L7e8GNZ1jOxXQ0Jc4lds6v392S4fOn0FUbEzwkftDDvz0GUyg8vjEwUiY9zRVWKhh35/WyfbzFrXh7ZjQ3Cg+uNmQ34FN2j9TtWscmQ/NgxCi0DMjmbKiyaJosiD8T1+ZQqdmTaUU7lDvY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719214215; c=relaxed/simple;
-	bh=M8cE6CbrRSk+zbBBYOvmEABXXWGImsiVjoJ15IPiQ9E=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=YUSR/D0qZFB58bZw2/u0Ybx2YwDNNX01FGS9E44RqbGoCFxFPuJ2E996twAVkm8mLYMkpR49YdEovBvy44RuyRpX77BpOyKaBRiFKF22T29rUbotIFPC8XMroEZwImjTSFB8/2kOcHEFxdz6wfFjJoY/TvAHuO5BvnUm8019Uic=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=x0SNrOUF; arc=none smtp.client-ip=209.85.167.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1719220790; c=relaxed/simple;
+	bh=LayJjNlHt7RdDKs2eSpJizuqfyzjoPSkSmmLznNH6CU=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=aG9kZcpI12kkFV4EG8g2apUx3HcZDzdeH2ybDsp8CPuUnCZDCRJMK4kDR4YKX9uq4RdbvvjQFRN/LFzgS8h2Fb8eKKt+EXNfbBL6e3/txaIltEYsDGMr3FgZnoyFvgq0jImc9o5cm/0oRhw29chHMtMb1Nv40UhRwjzckGHkJO0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=pSOfEdae; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="x0SNrOUF"
-Received: by mail-lf1-f51.google.com with SMTP id 2adb3069b0e04-52cdebf9f53so1381922e87.2
-        for <linux-efi@vger.kernel.org>; Mon, 24 Jun 2024 00:30:13 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1719214212; x=1719819012; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=c2wEfoJfSxKz/sP5VFQXU0+BbBfrArIiP6A90WvdI4U=;
-        b=x0SNrOUFIhOeee7pnT4+LMKAWKS2XFGoqMp0/gIMBFzHuj7oslGlfZyLt4/vKSMqag
-         ig2d9Uxvja/nlq0MlgmejjV5t2/3gFBS9CiMBfCPoZEAX4JUVehKsknZyW7mNpSkO03P
-         6sc+jCMs/51y7bw4kWpHsXdIQPGn7mQNZd4zdh58V0U2kQiGuq3HYGCKFH4FE6MLnxHy
-         8hDG0a18VzCan5rKW3qGkKzy5Z7JJFdYFfCNpWZwbLjfSBaQSWY6MkvC7o3CiLnJzHOK
-         2b0T34famoVkHZ6Q8NBWnPSBdaCNQ/k4SLRzbCSgduZsyq8ZY9LAgrzz5Br6ql4BabYw
-         g5bw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1719214212; x=1719819012;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=c2wEfoJfSxKz/sP5VFQXU0+BbBfrArIiP6A90WvdI4U=;
-        b=FDm472rngcOiEp2uERdLDUiVQa1HZcyLlvuP/t0THS3789+4fzAg53EXVQHpW1EVFD
-         HckF6EzSWRUNSOrEKKTt5SQFG9w32NLC14ERAsngrTTLqu+tmq5o0eTzclDAG+fyEI36
-         cH2wRVGrnOb8iBGWzb3QgYqzBtSH1ESxvpiDRcVOr03hVkU4zm9p+jGtOvaWb4ftwBiX
-         NPR2MlI9yb1S3RgVaKQoErp63EMRyfiqzGsGSZ+SBDoSnfZlhBkw/SG92Mqi34nMkgTF
-         jSujqcA0sqdVbGHem7qRsLN2AcOTtu4M0LsvAiWfYuqyeGr87sq//f2rO+9sK2VEyEHQ
-         qpdQ==
-X-Forwarded-Encrypted: i=1; AJvYcCWLbqbB8+5q1hZ3IoRcOjnJPnNyn3VVWn6+shj1NV3iIX6Ssi53YWW4bFWOrF8KJP2rHA4AJsbMhYKqvKFzrIDz+8sYWv/jaEkP
-X-Gm-Message-State: AOJu0YyeL8TlHflZ/yxHtlKUqcAZMJshvnfNVLm5UpZe9o0jjMJnEaG5
-	LErm3BNH12DRwxfSpRibYKAUjEaTGePXnCvX0GhfqoBScQfLSCjieI6zaA/fAf3eHlGgz0bqG3B
-	iFHW+FwKnbP5Th63xXK8g2064RTqw7/stc3yfmQ==
-X-Google-Smtp-Source: AGHT+IF3tAjzNOGGkT0tQNH/0umUeC6Wa2jKs0yWwYAUPb4y9n4wxhkW/20v+RSive8xdIdFYTIgYUauHnzqgbb41co=
-X-Received: by 2002:a05:6512:715:b0:52c:b008:3db8 with SMTP id
- 2adb3069b0e04-52ce064f483mr1977415e87.38.1719214212126; Mon, 24 Jun 2024
- 00:30:12 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="pSOfEdae"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 060F8C32781;
+	Mon, 24 Jun 2024 09:19:50 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1719220790;
+	bh=LayJjNlHt7RdDKs2eSpJizuqfyzjoPSkSmmLznNH6CU=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+	b=pSOfEdaeKFIRCtOcdsfBo0VpFuDm9gEnDpyYbJbvxYqEsZOshyZwigQbbgx7fkDyo
+	 R15v3iGvG2UY8qSObyAJFfabsuSv47Hc8VKPSVQlL9LAxuG0gQr5Gu15h09vmIEJqT
+	 ehbqkKCy3EluS20YRYIWsZTF+h59YrGBzR5pjPkd2YIdl/C2meL9fEW85CnB4EBTY1
+	 jVLSCrgP1drLQKynDf+1UPZ4Ah/WAsEWbKcy6Jq0lXpn81py2ENpCgywt5zLglGTZY
+	 zrEr5Dw1CiQMAVbw8e+JsyUT36QxJF2NvppmGEbQj5INFACjDIzDh3cQqOBekt0ZBi
+	 gGNpyPEw+f6XA==
+Received: from mchehab by mail.kernel.org with local (Exim 4.97.1)
+	(envelope-from <mchehab@kernel.org>)
+	id 1sLfrX-000000085bf-1gZ6;
+	Mon, 24 Jun 2024 11:19:47 +0200
+From: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
+To: 
+Cc: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>,
+	"Borislav Petkov" <bp@alien8.de>,
+	"James Morse" <james.morse@arm.com>,
+	"Jonathan Cameron" <Jonathan.Cameron@huawei.com>,
+	"Shiju Jose" <shiju.jose@huawei.com>,
+	"Tony Luck" <tony.luck@intel.com>,
+	Ard Biesheuvel <ardb@kernel.org>,
+	linux-edac@vger.kernel.org,
+	linux-efi@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v5 1/4] efi/cper: Adjust infopfx size to accept an extra space
+Date: Mon, 24 Jun 2024 11:19:18 +0200
+Message-ID: <665a5626bea1c13538fef09d2120343eeae04553.1719219886.git.mchehab+huawei@kernel.org>
+X-Mailer: git-send-email 2.45.2
+In-Reply-To: <cover.1719219886.git.mchehab+huawei@kernel.org>
+References: <cover.1719219886.git.mchehab+huawei@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240624023612.2134144-1-ruanjinjie@huawei.com>
-In-Reply-To: <20240624023612.2134144-1-ruanjinjie@huawei.com>
-From: Linus Walleij <linus.walleij@linaro.org>
-Date: Mon, 24 Jun 2024 09:30:00 +0200
-Message-ID: <CACRpkda-FZmyEyMJrKTdic4t8Zq_VSW8AVrvw6t=B25fiUZNKw@mail.gmail.com>
-Subject: Re: [PATCH v2] ARM: Add support for STACKLEAK gcc plugin
-To: Jinjie Ruan <ruanjinjie@huawei.com>
-Cc: linux@armlinux.org.uk, ardb@kernel.org, arnd@arndb.de, afd@ti.com, 
-	akpm@linux-foundation.org, rmk+kernel@armlinux.org.uk, 
-	eric.devolder@oracle.com, robh@kernel.org, kees@kernel.org, 
-	masahiroy@kernel.org, palmer@rivosinc.com, samitolvanen@google.com, 
-	xiao.w.wang@intel.com, alexghiti@rivosinc.com, nathan@kernel.org, 
-	jan.kiszka@siemens.com, linux-arm-kernel@lists.infradead.org, 
-	linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Sender: Mauro Carvalho Chehab <mchehab@kernel.org>
 
-On Mon, Jun 24, 2024 at 4:33=E2=80=AFAM Jinjie Ruan <ruanjinjie@huawei.com>=
- wrote:
+Compiling with W=1 with werror enabled produces an error:
 
-> Add the STACKLEAK gcc plugin to arm32 by adding the helper used by
-> stackleak common code: on_thread_stack(). It initialize the stack with th=
-e
-> poison value before returning from system calls which improves the kernel
-> security. Additionally, this disables the plugin in EFI stub code and
-> decompress code, which are out of scope for the protection.
->
-> Before the test on Qemu versatilepb board:
->         # echo STACKLEAK_ERASING  > /sys/kernel/debug/provoke-crash/DIREC=
-T
->         lkdtm: Performing direct entry STACKLEAK_ERASING
->         lkdtm: XFAIL: stackleak is not supported on this arch (HAVE_ARCH_=
-STACKLEAK=3Dn)
->
-> After:
->         # echo STACKLEAK_ERASING  > /sys/kernel/debug/provoke-crash/DIREC=
-T
->         lkdtm: Performing direct entry STACKLEAK_ERASING
->         lkdtm: stackleak stack usage:
->           high offset: 80 bytes
->           current:     280 bytes
->           lowest:      696 bytes
->           tracked:     696 bytes
->           untracked:   192 bytes
->           poisoned:    7220 bytes
->           low offset:  4 bytes
->         lkdtm: OK: the rest of the thread stack is properly erased
->
-> Signed-off-by: Jinjie Ruan <ruanjinjie@huawei.com>
-> Acked-by: Ard Biesheuvel <ardb@kernel.org>
+drivers/firmware/efi/cper-arm.c: In function ‘cper_print_proc_arm’:
+drivers/firmware/efi/cper-arm.c:298:64: error: ‘snprintf’ output may be truncated before the last format character [-Werror=format-truncation=]
+  298 |                         snprintf(infopfx, sizeof(infopfx), "%s ", newpfx);
+      |                                                                ^
+drivers/firmware/efi/cper-arm.c:298:25: note: ‘snprintf’ output between 2 and 65 bytes into a destination of size 64
+  298 |                         snprintf(infopfx, sizeof(infopfx), "%s ", newpfx);
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+As the logic there adds an space at the end of infopx buffer.
+Add an extra space to avoid such warning.
 
-I was digging around to see if this would interfere with BPF
-trampolines, but the
-BPF code seems so generic that I assume it already takes stackleak into acc=
-ount.
+Signed-off-by: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
+Reviewed-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
+---
+ drivers/firmware/efi/cper-arm.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Yours,
-Linus Walleij
+diff --git a/drivers/firmware/efi/cper-arm.c b/drivers/firmware/efi/cper-arm.c
+index fa9c1c3bf168..eb7ee6af55f2 100644
+--- a/drivers/firmware/efi/cper-arm.c
++++ b/drivers/firmware/efi/cper-arm.c
+@@ -240,7 +240,7 @@ void cper_print_proc_arm(const char *pfx,
+ 	int i, len, max_ctx_type;
+ 	struct cper_arm_err_info *err_info;
+ 	struct cper_arm_ctx_info *ctx_info;
+-	char newpfx[64], infopfx[64];
++	char newpfx[64], infopfx[ARRAY_SIZE(newpfx) + 1];
+ 
+ 	printk("%sMIDR: 0x%016llx\n", pfx, proc->midr);
+ 
+-- 
+2.45.2
+
