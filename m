@@ -1,101 +1,80 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2CFFA18040;
-	Thu, 27 Jun 2024 17:02:21 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EC4CC19AD58;
+	Thu, 27 Jun 2024 17:50:56 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719507742; cv=none; b=Ja+TTpAyPCt2ZNpkurqcPdC1YG72Wd4ZXCquo+OV1P4MSi0vQf1T46cu1uewUBPJCk35BsvlBdxj2X8udTorWT2h6ESJYmvNSZrwBnb9WwnaEF5q+zjM2uU5D5m4bOdjha6A2CD78w7cc22X0MCQ0eTUlInMZkyfs8+CqHDR2zw=
+	t=1719510657; cv=none; b=rqpVxhQZcsTFedfYd4ok2dc4ud5wW4Q1QwPwNSLmabyu4aAwrmmWAl5FXTZLlAvq4LVcc9Q236ULyljuGIfcTiVYAAGMeAS6wZ5lMyb9C/iadm4OggWZ/4gWfa5GT8kIEHfHRK85GPhP8aghkmKXAXT8mERN8odMaEi+jnzsiN0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719507742; c=relaxed/simple;
-	bh=SjeeyRQwE/Gd/xv/dHmc+00VP8GHf3kSuSkKYxNX2cY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=DDqRmBtuaVBt8U4CWOiddfKwNkiABUGtnROwp1r4ffD+/2tT/HMU4wYgTRzApILw6LTkJW0hVQV6Pez/wENcFSM32B8G2ck6UMoP8KyV5qapR/lUr0btsRyrTa7qzMC5riTIz+W7EXwWwHHwENYIqfJiMyauDBn3ytNvT0Remw8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=DoBUZh3S; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1719510657; c=relaxed/simple;
+	bh=YUjyg0q4v3BZyzysolzPu/T8WS3EYTPzZ+otN37RtXA=;
+	h=Content-Type:MIME-Version:Subject:From:Message-Id:Date:References:
+	 In-Reply-To:To:Cc; b=Nrb1GTlKXi9k+ztzpSU3FEjzHlfiqRQOM1vuRrmtUJHor55JRLA/BUfMv61GndYmXi55Vn2im1KrUVku5ykk0qYJRSmv3m4yvjDkXwuCHpRJuH+SxiIyjwc+bGa2lzfCu7LZexOAWM1Be0o+t4+eHCq6QWyrFkSaAiqczXUI5+I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=N2nrl5Ds; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="DoBUZh3S"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B29EDC2BBFC;
-	Thu, 27 Jun 2024 17:02:21 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="N2nrl5Ds"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id C66C2C4AF0B;
+	Thu, 27 Jun 2024 17:50:56 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1719507741;
-	bh=SjeeyRQwE/Gd/xv/dHmc+00VP8GHf3kSuSkKYxNX2cY=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=DoBUZh3SmyCAVqjkIKH98iruRgLZjNlsFfGG5ghtoGgun3ornA28W7v3tOecwcE/X
-	 ZthwgQP7wsf3WMvm2jY5bL+S7ssUDTQzsGRE1kafdVNIPSZmhuiGOlUr5EDEOXsfK+
-	 hGj6x8lJFoHOnq7kyp2cgPOVyj1RnfZ6Euus/sxeaLrzHayNx8JFlKq8Z1VTyjVrT3
-	 5KTWSsvlrKiC9R/qU+JDLDv+wYo6LfQZALUCEbKgZDSqmVllclAZCUoTDr+PgYTYkt
-	 FPMhvXCi8Dl57paU3l9+YfGpAJBlkis2ki25kPd0qruY8oy/fK8XJnt3F9HpwbXzb4
-	 RhSZcRt7HcpMQ==
-Date: Thu, 27 Jun 2024 10:02:21 -0700
-From: Kees Cook <kees@kernel.org>
-To: Jinjie Ruan <ruanjinjie@huawei.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>, linux@armlinux.org.uk,
-	ardb@kernel.org, arnd@arndb.de, afd@ti.com,
-	akpm@linux-foundation.org, rmk+kernel@armlinux.org.uk,
-	eric.devolder@oracle.com, robh@kernel.org, masahiroy@kernel.org,
-	palmer@rivosinc.com, samitolvanen@google.com, xiao.w.wang@intel.com,
-	alexghiti@rivosinc.com, nathan@kernel.org, jan.kiszka@siemens.com,
-	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-	linux-efi@vger.kernel.org
-Subject: Re: [PATCH v2] ARM: Add support for STACKLEAK gcc plugin
-Message-ID: <202406271001.67295EE@keescook>
-References: <20240624023612.2134144-1-ruanjinjie@huawei.com>
- <CACRpkda-FZmyEyMJrKTdic4t8Zq_VSW8AVrvw6t=B25fiUZNKw@mail.gmail.com>
- <ee44c444-ab5e-b9c2-087b-5db627a72749@huawei.com>
+	s=k20201202; t=1719510656;
+	bh=YUjyg0q4v3BZyzysolzPu/T8WS3EYTPzZ+otN37RtXA=;
+	h=Subject:From:Date:References:In-Reply-To:To:Cc:From;
+	b=N2nrl5DseeenBGaeHfDLdEjo4/BG92v3NRt3x1NnXe6DxoxFD0JrT9SfThyrOF3qk
+	 fTexPLpWMIcX00TfMNpyR9FGFm2dRthpim4bB/WKcas0F6hF3u4Cyy59Lygl0I0Nte
+	 ImeWjAtKzA8sForbwTZ9YzyoTAlTwHlYGr9Q1DyDOPxl1sl9oGiaQQ7hipBe7NV8Nb
+	 8L8hr69PEUERGq2MXhshdyS4RqosypRU5mUVWfkoxX03fz7nMTbpgbBpfbQ5cRK85U
+	 pMfPII7jfFpCUW/fhA+4jTInUnnAxnDzIkazRxYJ02hQQa6xgOJRlaJa8fH/0AAxcL
+	 +5pRHMl3AuNuA==
+Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
+	by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id 91B0FC433A2;
+	Thu, 27 Jun 2024 17:50:56 +0000 (UTC)
+Content-Type: text/plain; charset="utf-8"
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <ee44c444-ab5e-b9c2-087b-5db627a72749@huawei.com>
+Subject: Re: [PATCH v3] riscv: dmi: Add SMBIOS/DMI support
+From: patchwork-bot+linux-riscv@kernel.org
+Message-Id: 
+ <171951065659.6762.4551986079431885211.git-patchwork-notify@kernel.org>
+Date: Thu, 27 Jun 2024 17:50:56 +0000
+References: <20240613065507.287577-1-haibo1.xu@intel.com>
+In-Reply-To: <20240613065507.287577-1-haibo1.xu@intel.com>
+To: Haibo Xu <haibo1.xu@intel.com>
+Cc: linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org,
+ linux-efi@vger.kernel.org, aou@eecs.berkeley.edu, atishp@rivosinc.com,
+ palmer@dabbelt.com, paul.walmsley@sifive.com, xiaobo55x@gmail.com,
+ ardb@kernel.org
 
-On Thu, Jun 27, 2024 at 03:53:14PM +0800, Jinjie Ruan wrote:
+Hello:
+
+This patch was applied to riscv/linux.git (for-next)
+by Palmer Dabbelt <palmer@rivosinc.com>:
+
+On Thu, 13 Jun 2024 14:55:07 +0800 you wrote:
+> Enable the dmi driver for riscv which would allow access the
+> SMBIOS info through some userspace file(/sys/firmware/dmi/*).
 > 
+> The change was based on that of arm64 and has been verified
+> by dmidecode tool.
 > 
-> On 2024/6/24 15:30, Linus Walleij wrote:
-> > On Mon, Jun 24, 2024 at 4:33 AM Jinjie Ruan <ruanjinjie@huawei.com> wrote:
-> > 
-> >> Add the STACKLEAK gcc plugin to arm32 by adding the helper used by
-> >> stackleak common code: on_thread_stack(). It initialize the stack with the
-> >> poison value before returning from system calls which improves the kernel
-> >> security. Additionally, this disables the plugin in EFI stub code and
-> >> decompress code, which are out of scope for the protection.
-> >>
-> >> Before the test on Qemu versatilepb board:
-> >>         # echo STACKLEAK_ERASING  > /sys/kernel/debug/provoke-crash/DIRECT
-> >>         lkdtm: Performing direct entry STACKLEAK_ERASING
-> >>         lkdtm: XFAIL: stackleak is not supported on this arch (HAVE_ARCH_STACKLEAK=n)
-> >>
-> >> After:
-> >>         # echo STACKLEAK_ERASING  > /sys/kernel/debug/provoke-crash/DIRECT
-> >>         lkdtm: Performing direct entry STACKLEAK_ERASING
-> >>         lkdtm: stackleak stack usage:
-> >>           high offset: 80 bytes
-> >>           current:     280 bytes
-> >>           lowest:      696 bytes
-> >>           tracked:     696 bytes
-> >>           untracked:   192 bytes
-> >>           poisoned:    7220 bytes
-> >>           low offset:  4 bytes
-> >>         lkdtm: OK: the rest of the thread stack is properly erased
-> >>
-> >> Signed-off-by: Jinjie Ruan <ruanjinjie@huawei.com>
-> >> Acked-by: Ard Biesheuvel <ardb@kernel.org>
-> > 
-> > Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
-> > 
-> > I was digging around to see if this would interfere with BPF
-> > trampolines, but the
-> > BPF code seems so generic that I assume it already takes stackleak into account.
-> > 
-> Thank you very much, as Kees said, can this patch go via
-> rmk's patch tracker now?
+> Signed-off-by: Haibo Xu <haibo1.xu@intel.com>
+> Reviewed-by: Ard Biesheuvel <ardb@kernel.org>
+> Reviewed-by: Atish Patra <atishp@rivosinc.com>
+> 
+> [...]
 
-Probably yes (we have some reviews now). Please go ahead and add it there.
+Here is the summary with links:
+  - [v3] riscv: dmi: Add SMBIOS/DMI support
+    https://git.kernel.org/riscv/c/d6ecd188937f
 
+You are awesome, thank you!
 -- 
-Kees Cook
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/patchwork/pwbot.html
+
+
