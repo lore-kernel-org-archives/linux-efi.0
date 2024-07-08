@@ -1,58 +1,54 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5B46A79B99;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5B4AB7A715;
 	Mon,  8 Jul 2024 11:19:14 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1720437554; cv=none; b=Ge8UloQQxdPN7YESdkNrCgSW4B43ehlMSVbXEHjst/Go5KIC9EFxe7e3w1em8UvEA+DFWq/K/8gbqplpuX/83mqLqfsZTYbdgwzMYM71O0rR/XZp4bKquUtr++KraQbA6Fdohfdt9iecmSaylpcWzr4Ow6U0dp5e8W1UJdYHYHo=
+	t=1720437554; cv=none; b=pzC8QDLw84t4FWXd7X3uXgV5waCuhNTjTVQEwjPk3wcumJfSPGqkI7vAqh2HN8Ma8EcIcMjYZ+oj33Sg05QGuTdYT1X3P/5lQtzWV7YHXwmN6Nl7hDerq1BgAp6mr09EQxLqt72iQrSIs3+fap4ksThAZBtD6c0pgpgBPRoNZLQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1720437554; c=relaxed/simple;
-	bh=JWDF3uYI/wZ37tgeaDZgy9qmXzyOCRUzF9V3nIAkQKQ=;
+	bh=SghajJ93+iIxp1CCEYJcx9SzDpum+6rkVLD7R4JlgPU=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=moceSbInNBpgSXTW7NEwEfODNlCxmYZ4v1v0LFh566sH6YPjEaXtAEn6WcR7PhI2rHTm7+26eVqhkDVvgs/NjLyynTyafnEtcxLpormoc9sRWiqKyxvdfP10c6fY+qKuFchLeNgtqF8WMvjkj9mfnd2uwzXJMAgf1mZAQ5GBvAQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=uqnjomc/; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=rr3/KYAVGZWYNgpYzKAUvVi75aruJbARKqygcZm91EGufEFTXjhc1Kskum1Z9JAkUrjrR0y2q+t1F7KuLG1Lu5hICqljPx76pkP4gHCbt/N5WMY3vsLrqn/o/tp58CQ08jvFLffAoW4hBqaRAH99I+2EsJk38I6m54uVjiENmi4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Fhs5TBEz; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="uqnjomc/"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 09B2BC4AF0E;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Fhs5TBEz"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id F2508C116B1;
 	Mon,  8 Jul 2024 11:19:13 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=k20201202; t=1720437554;
-	bh=JWDF3uYI/wZ37tgeaDZgy9qmXzyOCRUzF9V3nIAkQKQ=;
+	bh=SghajJ93+iIxp1CCEYJcx9SzDpum+6rkVLD7R4JlgPU=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=uqnjomc/HoOLZmpDetAlgAqPTNWzFNB5H6+GGvWxjZC09QQmeFEdWsmuZNS5P9og0
-	 9usjO/l0OkjCZq5vy6mjtNI0X0pzy+bGlAfmosepEfwfQhvJRJQhMzLyYnGqwbrXLf
-	 azKPZQbACKqpyruGDAFMJbYGvl5/DBFhqc5T3SZUNQfahLZ8b0+s8hX0wGWog2ESVP
-	 l5Vrc3YvLIue6Yc8+Hjm/9VRWRIEDZcN8+tSmg97gKsy3lXXt2223+DqeSCelrhRs0
-	 mBv4yZoGTWtwXCBL4mk8YD37kdBDVVWIFV1fHyH1/lXTM0Ssy0+KaJq4Y26Z7cFFds
-	 ShvBgtTqDvApA==
+	b=Fhs5TBEz2JYV0lD8FKDqRKZhZmtCaLbzHlQgRf34jJzjM1eNk2yFwAnNv0AQkG6g0
+	 YazbqT+fHQ+ZjkWucYkTCnLkcz22a3IjoFCXFsQ98Poe6LoNqRUkZqGwYsYQIAYCbG
+	 tvY9LoyMsXSr1LY5iR+oHOZp1LhAeZbJu+eO2Jny6paEqmm2fKM3xmPH8ljTEWqdFh
+	 f15paEdtYMe4ZCLuAmtSqu12nNJx1lXsUK1t5p2j30pueGUGLHxhTlWjoO6LGH6fkW
+	 kpSnP2j+Vgg8cN6b/Z4yyw9MVMNOSaQV6XUuquKKq09DFvFqYBF1zXgx8JEq/SCUeR
+	 Poq8jQE/qM6xQ==
 Received: from mchehab by mail.kernel.org with local (Exim 4.97.1)
 	(envelope-from <mchehab@kernel.org>)
-	id 1sQmOl-00000001SQZ-2GDO;
+	id 1sQmOl-00000001SQt-2qde;
 	Mon, 08 Jul 2024 13:19:11 +0200
 From: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
 To: Borislav Petkov <bp@alien8.de>,
 	Tony Luck <tony.luck@intel.com>
-Cc: Daniel Ferguson <danielf@os.amperecomputing.com>,
+Cc: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>,
 	"Ard Biesheuvel" <ardb@kernel.org>,
 	"James Morse" <james.morse@arm.com>,
 	"Jonathan Cameron" <Jonathan.Cameron@huawei.com>,
 	"Len Brown" <lenb@kernel.org>,
 	"Rafael J. Wysocki" <rafael@kernel.org>,
 	"Shiju Jose" <shiju.jose@huawei.com>,
-	=?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>,
-	Dan Williams <dan.j.williams@intel.com>,
-	Dave Jiang <dave.jiang@intel.com>,
-	Ira Weiny <ira.weiny@intel.com>,
-	Shuai Xue <xueshuai@linux.alibaba.com>,
+	Jonathan Corbet <corbet@lwn.net>,
 	linux-acpi@vger.kernel.org,
+	linux-doc@vger.kernel.org,
 	linux-edac@vger.kernel.org,
 	linux-efi@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
-Subject: [PATCH 1/6] RAS: ACPI: APEI: add conditional compilation to ARM error report functions
-Date: Mon,  8 Jul 2024 13:18:10 +0200
-Message-ID: <f520f2529bb27d452a2dee762b6968939df42f45.1720436039.git.mchehab+huawei@kernel.org>
+	linux-kernel@vger.kernel.org
+Subject: [PATCH 6/6] docs: efi: add CPER functions to driver-api
+Date: Mon,  8 Jul 2024 13:18:15 +0200
+Message-ID: <2d0e11752d2bde41b61822b04b5b6f839d46b998.1720436039.git.mchehab+huawei@kernel.org>
 X-Mailer: git-send-email 2.45.2
 In-Reply-To: <cover.1720436039.git.mchehab+huawei@kernel.org>
 References: <cover.1720436039.git.mchehab+huawei@kernel.org>
@@ -65,75 +61,78 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: Mauro Carvalho Chehab <mchehab@kernel.org>
 
-From: Daniel Ferguson <danielf@os.amperecomputing.com>
+There are two kernel-doc like descriptions at cper, which is used
+by other parts of cper and on ghes driver. They both have kernel-doc
+like descriptions.
 
-This prevents the unnecessary inclusion of ARM specific RAS error
-handling routines in non-ARM platforms.
+Change the tags for them to be actual kernel-doc tags and add them
+to the driver-api documentaion at the UEFI section.
 
-[mchehab: avoid unneeded ifdefs and fix coding style issues]
-Signed-off-by: Daniel Ferguson <danielf@os.amperecomputing.com>
 Signed-off-by: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
 ---
- drivers/acpi/apei/ghes.c | 13 ++++++-------
- drivers/ras/ras.c        |  2 ++
- 2 files changed, 8 insertions(+), 7 deletions(-)
+ Documentation/driver-api/firmware/efi/index.rst | 11 ++++++++---
+ drivers/firmware/efi/cper.c                     | 10 ++++------
+ 2 files changed, 12 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-index 623cc0cb4a65..2589a3536d91 100644
---- a/drivers/acpi/apei/ghes.c
-+++ b/drivers/acpi/apei/ghes.c
-@@ -529,11 +529,12 @@ static bool ghes_handle_memory_failure(struct acpi_hest_generic_data *gdata,
+diff --git a/Documentation/driver-api/firmware/efi/index.rst b/Documentation/driver-api/firmware/efi/index.rst
+index 4fe8abba9fc6..5a6b6229592c 100644
+--- a/Documentation/driver-api/firmware/efi/index.rst
++++ b/Documentation/driver-api/firmware/efi/index.rst
+@@ -1,11 +1,16 @@
+ .. SPDX-License-Identifier: GPL-2.0
+ 
+-============
+-UEFI Support
+-============
++====================================================
++Unified Extensible Firmware Interface (UEFI) Support
++====================================================
+ 
+ UEFI stub library functions
+ ===========================
+ 
+ .. kernel-doc:: drivers/firmware/efi/libstub/mem.c
+    :internal:
++
++UEFI Common Platform Error Record (CPER) functions
++==================================================
++
++.. kernel-doc:: drivers/firmware/efi/cper.c
+diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+index f8c8a15cd527..2785c8ea8ad8 100644
+--- a/drivers/firmware/efi/cper.c
++++ b/drivers/firmware/efi/cper.c
+@@ -69,7 +69,7 @@ const char *cper_severity_str(unsigned int severity)
+ }
+ EXPORT_SYMBOL_GPL(cper_severity_str);
+ 
+-/*
++/**
+  * cper_print_bits - print strings for set bits
+  * @pfx: prefix for each line, including log level and prefix string
+  * @bits: bit mask
+@@ -106,18 +106,16 @@ void cper_print_bits(const char *pfx, unsigned int bits,
+ 		printk("%s\n", buf);
  }
  
- static bool ghes_handle_arm_hw_error(struct acpi_hest_generic_data *gdata,
--				       int sev, bool sync)
-+				     int sev, bool sync)
- {
-+	bool queued = false;
-+#if defined(CONFIG_ARM) || defined (CONFIG_ARM64)
- 	struct cper_sec_proc_arm *err = acpi_hest_get_payload(gdata);
- 	int flags = sync ? MF_ACTION_REQUIRED : 0;
--	bool queued = false;
- 	int sec_sev, i;
- 	char *p;
- 
-@@ -570,7 +571,7 @@ static bool ghes_handle_arm_hw_error(struct acpi_hest_generic_data *gdata,
- 				    error_type);
- 		p += err_info->length;
- 	}
--
-+#endif
- 	return queued;
- }
- 
-@@ -773,11 +774,9 @@ static bool ghes_do_proc(struct ghes *ghes,
- 
- 			arch_apei_report_mem_error(sev, mem_err);
- 			queued = ghes_handle_memory_failure(gdata, sev, sync);
--		}
--		else if (guid_equal(sec_type, &CPER_SEC_PCIE)) {
-+		} else if (guid_equal(sec_type, &CPER_SEC_PCIE)) {
- 			ghes_handle_aer(gdata);
--		}
--		else if (guid_equal(sec_type, &CPER_SEC_PROC_ARM)) {
-+		} else if (guid_equal(sec_type, &CPER_SEC_PROC_ARM)) {
- 			queued = ghes_handle_arm_hw_error(gdata, sev, sync);
- 		} else if (guid_equal(sec_type, &CPER_SEC_CXL_GEN_MEDIA_GUID)) {
- 			struct cxl_cper_event_rec *rec = acpi_hest_get_payload(gdata);
-diff --git a/drivers/ras/ras.c b/drivers/ras/ras.c
-index a6e4792a1b2e..5d94ab79c8c3 100644
---- a/drivers/ras/ras.c
-+++ b/drivers/ras/ras.c
-@@ -54,7 +54,9 @@ void log_non_standard_event(const guid_t *sec_type, const guid_t *fru_id,
- 
- void log_arm_hw_error(struct cper_sec_proc_arm *err)
- {
-+#if defined(CONFIG_ARM) || defined(CONFIG_ARM64)
- 	trace_arm_event(err);
-+#endif
- }
- 
- static int __init ras_init(void)
+-/*
++/**
+  * cper_bits_to_str - return a string for set bits
+  * @buf: buffer to store the output string
+  * @buf_size: size of the output string buffer
+  * @bits: bit mask
+  * @strs: string array, indexed by bit position
+  * @strs_size: size of the string array: @strs
+- * @mask: a continuous bitmask used to detect the first valid bit of the
+- *        bitmap.
+  *
+- * Add to @buf the bitmask in hexadecimal. Then, for each set bit in @bits
+- * mask, add the corresponding string describing the bit in @strs to @buf.
++ * Add to @buf the bitmask in hexadecimal. Then, for each set bit in @bits,
++ * add the corresponding string describing the bit in @strs to @buf.
+  */
+ char *cper_bits_to_str(char *buf, int buf_size, unsigned long bits,
+ 		       const char * const strs[], unsigned int strs_size)
 -- 
 2.45.2
 
