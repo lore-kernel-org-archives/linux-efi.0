@@ -1,277 +1,279 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B142626ACC;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B145C55C08;
 	Thu, 11 Jul 2024 06:31:09 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1720679469; cv=none; b=BeDS+SdkyGAI+Ey1yj3b1+Ns/STZpBdaRQE947aD8MoF0Iml6rjfvtoNSVifWI7wHCl6KhASWm/2ESXZXHXY/ZF5hOvR0Xm7EcQbnci0d9qKtOxa4gXBCL4GQWFVTGavJUn4PnzJ6eis9RdiI8gDyCWHunve7uraNV2QN7Q4hsA=
+	t=1720679469; cv=none; b=Y3WfKz1isBoxe0f/4/RCwhB7UsTo0tT3ycjln3ALB9rA5iaLBBjgugSKJayCIoNhCLj3MPWaL5jNdfvXSR1oM8U7KDGfzjR9kk1f2kWpSKS7XYe7zSp57uLHMnhkaFmqT5B5eaZ659Gw16ChytY8Hpt9rm2lUZ4jiAFwNjA30GA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1720679469; c=relaxed/simple;
-	bh=qvrl/9oyuQCy8rh63h+2SLCQP0eGNCvXSDn8ZBYMvGc=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=ROSRt9cwFIsmNMShQmjehZojL3ur20hb9UDYCONbiYDVyWlpt1VNEP+ugk2VCYfQOaLHUhR64LKZTWw28jN2NUtxUy/dcG4lM2jvStV0EhFtp9X8/QzSUoaUrEgTyAWTkBl5yxSh/AwUoXGU0t5cgIdIF/QsmkFVM6H6c8NtQlA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=deqj7DrV; arc=none smtp.client-ip=10.30.226.201
+	bh=H9Jo/lswhPifjqpyYOQ7Iu6s++FZSqM6T+tAx/ll7ic=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=sPlqV5I2GzCiElCd0HaWbWp/jC1rsuBfK8alAoqnJ7tnZBWlxGEq5GVKwAohVdfBZ67VrIZu9WZd9QvstOOBjK8y1ZlGqmrGGbuX2VFFLGz5mU5XMTiYYgeHA/wRJYq/588DKYPPF1AbBnAdFmKaQhMp7+bbcz3YGW+VZV/2Vr8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rw3NCHVQ; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="deqj7DrV"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2893CC32782;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rw3NCHVQ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 37439C4AF0C;
 	Thu, 11 Jul 2024 06:31:09 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=k20201202; t=1720679469;
-	bh=qvrl/9oyuQCy8rh63h+2SLCQP0eGNCvXSDn8ZBYMvGc=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=deqj7DrVesfHQkvHBeRLTMMlPPfVbfJN16ocg6PVHns0qRN+CnfOK24iZ9ZE22Q/X
-	 d2lJyQvaY2Z7HwlA6ZzFa/xcg63WmyT3OSIJE2qy515y/oWBR+BmM9fmEsLawg/2Ko
-	 4D81qo7Wq8n+NCr1SGbAX88wbiGaUIjx7J+ROhdlTZFtQw4Ao9/nag0nJhtMAjtwQV
-	 dSOw9fG7V4IqqLJTluZsEFI9I8hlp1b7nCbPV12A8o4DkGl0Ki9B2SHPoPvISU3jgK
-	 3IIAqoonOwm6IrInAFqtTyV5Lc2R50igysOpC8vPlcEQGpQe8qLmXDbZyXyD5W+Yrf
-	 rhyHCkg5o1ZJw==
+	bh=H9Jo/lswhPifjqpyYOQ7Iu6s++FZSqM6T+tAx/ll7ic=;
+	h=From:To:Cc:Subject:Date:From;
+	b=rw3NCHVQOohmkxABNcLqpkIPmS9q1tud3vlgFYdMsFJY8Yo2n87heO0xJq8rBBixX
+	 F3xj6es1oC73EcE5NBbei+SfITtOrl06zKgrQtpdE7ysqwdKX6G3KXTItddv6FPv2w
+	 hXBZ+ZFk5+lAJcGIgOk4iqwbEV2h+U4Q7fsMumFOv7h8qmRnAdY/G5OLgJ8YNuzFvL
+	 Q+e3VP4O2uH6TEzrEEDdm4EHL+d73tzo6H/FRXU8hQP3XiE8iHr40NLHCR/JNlNyT2
+	 IzAmW+Ja/iBLfirXSwAaoAZhPZXaAlfGVRhWVHN1inZ24FnU2QfkC5LZgsKsTilbEY
+	 FIb0fjuDwrXlQ==
 Received: from mchehab by mail.kernel.org with local (Exim 4.97.1)
 	(envelope-from <mchehab@kernel.org>)
-	id 1sRnKc-00000002b5d-1Tcs;
+	id 1sRnKc-00000002b5O-0ziH;
 	Thu, 11 Jul 2024 08:31:06 +0200
 From: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
 To: Borislav Petkov <bp@alien8.de>,
 	Tony Luck <tony.luck@intel.com>
 Cc: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>,
-	"Ard Biesheuvel" <ardb@kernel.org>,
-	"James Morse" <james.morse@arm.com>,
-	"Jonathan Cameron" <Jonathan.Cameron@huawei.com>,
-	"Len Brown" <lenb@kernel.org>,
-	"Rafael J. Wysocki" <rafael@kernel.org>,
-	"Shiju Jose" <shiju.jose@huawei.com>,
-	Alison Schofield <alison.schofield@intel.com>,
-	Dan Williams <dan.j.williams@intel.com>,
-	Daniel Ferguson <danielf@os.amperecomputing.com>,
-	Dave Jiang <dave.jiang@intel.com>,
-	Ira Weiny <ira.weiny@intel.com>,
-	Shuai Xue <xueshuai@linux.alibaba.com>,
-	linux-acpi@vger.kernel.org,
-	linux-edac@vger.kernel.org,
+	Ard Biesheuvel <ardb@kernel.org>,
+	James Morse <james.morse@arm.com>,
+	Jonathan Cameron <Jonathan.Cameron@huawei.com>,
+	Shiju Jose <shiju.jose@huawei.com>,
 	linux-efi@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH v2 4/5] efi/cper: align ARM CPER type with UEFI 2.9A/2.10 specs
-Date: Thu, 11 Jul 2024 08:28:55 +0200
-Message-ID: <1ca1274f57fac69eda2f193de53077e8254a70fe.1720679234.git.mchehab+huawei@kernel.org>
+	linux-kernel@vger.kernel.org,
+	linux-edac@vger.kernel.org,
+	Len Brown <lenb@kernel.org>,
+	linux-acpi@vger.kernel.org,
+	"Rafael J. Wysocki" <rafael@kernel.org>,
+	Jonathan Corbet <corbet@lwn.net>,
+	linux-doc@vger.kernel.org
+Subject: [PATCH v2 0/5] Fix issues with ARM Processor CPER records
+Date: Thu, 11 Jul 2024 08:28:51 +0200
+Message-ID: <cover.1720678576.git.mchehab+huawei@kernel.org>
 X-Mailer: git-send-email 2.45.2
-In-Reply-To: <cover.1720679234.git.mchehab+huawei@kernel.org>
-References: <cover.1720679234.git.mchehab+huawei@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Sender: Mauro Carvalho Chehab <mchehab@kernel.org>
 
-Up to UEFI spec 2.9, the type byte of CPER struct for ARM processor
-was defined simply as:
+This is needed for both kernelspace and userspace properly handle
+ARM processor CPER events.
 
-Type at byte offset 4:
+Patch 1 of this series fix the UEFI 2.6+ implementation of the ARM
+trace event, as the original implementation was incomplete.
+Changeset e9279e83ad1f ("trace, ras: add ARM processor error trace event")
+added such event, but it reports only some fields of the CPER record
+defined on UEFI 2.6+ appendix N, table N.16.  Those are not enough
+actually parse such events on userspace, as not even the event type
+is exported.
 
-	- Cache error
-	- TLB Error
-	- Bus Error
-	- Micro-architectural Error
-	All other values are reserved
+Patch 2 fixes a compilation breakage when W=1;
 
-Yet, there was no information about how this would be encoded.
+Patch 3 adds a new helper function to be used by cper and ghes drivers to
+display CPER bitmaps;
 
-Spec 2.9A errata corrected it by defining:
+Patch 4 fixes CPER logic according with UEFI 2.9A errata. Before it, there
+was no description about how processor type field was encoded. The errata
+defines it as a bitmask, and provides the information about how it should
+be encoded.
 
-	- Bit 1 - Cache Error
-	- Bit 2 - TLB Error
-	- Bit 3 - Bus Error
-	- Bit 4 - Micro-architectural Error
-	All other values are reserved
+Patch 5 adds CPER functions to Kernel-doc.
 
-That actually aligns with the values already defined on older
-versions at N.2.4.1. Generic Processor Error Section.
+This series was validated with the help of an ARM EINJ code for QEMU:
 
-Spec 2.10 also preserve the same encoding as 2.9A.
+	https://github.com/mchehab/rasdaemon/wiki/error-injection
 
-Adjust CPER and GHES handling code for both generic and ARM
-processors to properly handle UEFI 2.9A and 2.10 encoding.
+Using the QEMU injection code at:
 
-Link: https://uefi.org/specs/UEFI/2.10/Apx_N_Common_Platform_Error_Record.html#arm-processor-error-information
-Signed-off-by: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
-Reviewed-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
+   https://gitlab.com/mchehab_kernel/qemu/-/commits/arm-error-inject-v2?ref_type=heads
+
+Running it on QEMU and sending those commands via QEMU QMP interface:
+
+    { "execute": "qmp_capabilities" } 
+    { "execute": "arm-inject-error", "arguments": {
+	"validation": ["mpidr-valid", "affinity-valid",
+		       "running-state-valid", "vendor-specific-valid"],
+	"running-state": [], "psci-state": 1229279264, "error": [
+	{"type": ["tlb-error", "bus-error", "micro-arch-error"],
+		  "multiple-error": 2},
+	{"type": ["micro-arch-error"]},
+	{"type": ["tlb-error"]},
+	{"type": ["bus-error"]},
+	{"type": ["cache-error"]}]} }
+
+The CPER event is now properly handled:
+
+[   53.223383] {1}[Hardware Error]: event severity: recoverable
+[   53.223690] {1}[Hardware Error]:  Error 0, type: recoverable
+[   53.224073] {1}[Hardware Error]:   section_type: ARM processor error
+[   53.224419] {1}[Hardware Error]:   MIDR: 0x0000000000000000
+[   53.224694] {1}[Hardware Error]:   Multiprocessor Affinity Register (MPIDR): 0x0000000080000000
+[   53.225029] {1}[Hardware Error]:   error affinity level: 2
+[   53.225266] {1}[Hardware Error]:   running state: 0x0
+[   53.225516] {1}[Hardware Error]:   Power State Coordination Interface state: 1229279264
+[   53.225857] {1}[Hardware Error]:   Error info structure 0:
+[   53.226094] {1}[Hardware Error]:   num errors: 3
+[   53.226317] {1}[Hardware Error]:    first error captured
+[   53.226548] {1}[Hardware Error]:    propagated error captured
+[   53.226806] {1}[Hardware Error]:    overflow occurred, error info is incomplete
+[   53.227180] {1}[Hardware Error]:    error_type: 0x1c: TLB error|bus error|micro-architectural error
+[   53.227549] {1}[Hardware Error]:    error_info: 0x000000000054007f
+[   53.227819] {1}[Hardware Error]:    virtual fault address: 0x0000000067320230
+[   53.228106] {1}[Hardware Error]:    physical fault address: 0x000000005cdfd492
+[   53.228403] {1}[Hardware Error]:   Error info structure 1:
+[   53.228636] {1}[Hardware Error]:   num errors: 3
+[   53.228840] {1}[Hardware Error]:    first error captured
+[   53.229061] {1}[Hardware Error]:    propagated error captured
+[   53.229296] {1}[Hardware Error]:    overflow occurred, error info is incomplete
+[   53.229577] {1}[Hardware Error]:    error_type: 0x10: micro-architectural error
+[   53.229873] {1}[Hardware Error]:    error_info: 0x0000000078da03ff
+[   53.230130] {1}[Hardware Error]:    virtual fault address: 0x0000000067320230
+[   53.230412] {1}[Hardware Error]:    physical fault address: 0x000000005cdfd492
+[   53.230694] {1}[Hardware Error]:   Error info structure 2:
+[   53.230924] {1}[Hardware Error]:   num errors: 3
+[   53.231128] {1}[Hardware Error]:    first error captured
+[   53.231349] {1}[Hardware Error]:    propagated error captured
+[   53.231582] {1}[Hardware Error]:    overflow occurred, error info is incomplete
+[   53.231863] {1}[Hardware Error]:    error_type: 0x04: TLB error
+[   53.232116] {1}[Hardware Error]:    error_info: 0x000000000054007f
+[   53.232396] {1}[Hardware Error]:     transaction type: Instruction
+[   53.232686] {1}[Hardware Error]:     TLB error, operation type: Instruction fetch
+[   53.232998] {1}[Hardware Error]:     TLB level: 1
+[   53.233215] {1}[Hardware Error]:     processor context not corrupted
+[   53.233479] {1}[Hardware Error]:     the error has not been corrected
+[   53.233740] {1}[Hardware Error]:     PC is imprecise
+[   53.233974] {1}[Hardware Error]:    virtual fault address: 0x0000000067320230
+[   53.234264] {1}[Hardware Error]:    physical fault address: 0x000000005cdfd492
+[   53.234547] {1}[Hardware Error]:   Error info structure 3:
+[   53.234776] {1}[Hardware Error]:   num errors: 3
+[   53.234980] {1}[Hardware Error]:    first error captured
+[   53.235199] {1}[Hardware Error]:    propagated error captured
+[   53.235433] {1}[Hardware Error]:    overflow occurred, error info is incomplete
+[   53.235714] {1}[Hardware Error]:    error_type: 0x08: bus error
+[   53.235966] {1}[Hardware Error]:    error_info: 0x00000080d6460fff
+[   53.236223] {1}[Hardware Error]:     transaction type: Generic
+[   53.236478] {1}[Hardware Error]:     bus error, operation type: Generic read (type of instruction or data request cannot be determined)
+[   53.236923] {1}[Hardware Error]:     affinity level at which the bus error occurred: 1
+[   53.237234] {1}[Hardware Error]:     processor context corrupted
+[   53.237481] {1}[Hardware Error]:     the error has been corrected
+[   53.237728] {1}[Hardware Error]:     PC is imprecise
+[   53.237937] {1}[Hardware Error]:     Program execution can be restarted reliably at the PC associated with the error.
+[   53.238329] {1}[Hardware Error]:     participation type: Local processor observed
+[   53.238627] {1}[Hardware Error]:     request timed out
+[   53.238851] {1}[Hardware Error]:     address space: External Memory Access
+[   53.239129] {1}[Hardware Error]:     memory access attributes:0x20
+[   53.239393] {1}[Hardware Error]:     access mode: secure
+[   53.239613] {1}[Hardware Error]:    virtual fault address: 0x0000000067320230
+[   53.239890] {1}[Hardware Error]:    physical fault address: 0x000000005cdfd492
+[   53.240168] {1}[Hardware Error]:   Error info structure 4:
+[   53.240396] {1}[Hardware Error]:   num errors: 3
+[   53.240601] {1}[Hardware Error]:    first error captured
+[   53.240816] {1}[Hardware Error]:    propagated error captured
+[   53.241048] {1}[Hardware Error]:    overflow occurred, error info is incomplete
+[   53.241332] {1}[Hardware Error]:    error_type: 0x02: cache error
+[   53.241589] {1}[Hardware Error]:    error_info: 0x000000000091000f
+[   53.241843] {1}[Hardware Error]:     transaction type: Data Access
+[   53.242101] {1}[Hardware Error]:     cache error, operation type: Data write
+[   53.242385] {1}[Hardware Error]:     cache level: 2
+[   53.242596] {1}[Hardware Error]:     processor context not corrupted
+[   53.242847] {1}[Hardware Error]:    virtual fault address: 0x0000000067320230
+[   53.243125] {1}[Hardware Error]:    physical fault address: 0x000000005cdfd492
+[   53.243426] {1}[Hardware Error]:   Context info structure 0:
+[   53.243675] {1}[Hardware Error]:    register context type: AArch64 EL1 context registers
+[   53.244185] {1}[Hardware Error]:    00000000: 12abde67 00000000 00000000 00000000
+[   53.244540] {1}[Hardware Error]:    00000010: 00000000 00000000 00000000 00000000
+[   53.244864] {1}[Hardware Error]:    00000020: 00000000 00000000 00000000 00000000
+[   53.245183] {1}[Hardware Error]:    00000030: 00000000 00000000 00000000 00000000
+[   53.245504] {1}[Hardware Error]:    00000040: 00000000 00000000 00000000 00000000
+[   53.245828] {1}[Hardware Error]:    00000050: 00000000 00000000 00000000 00000000
+[   53.246149] {1}[Hardware Error]:    00000060: 00000000 00000000 00000000 00000000
+[   53.246475] {1}[Hardware Error]:    00000070: 00000000 00000000 00000000 00000000
+[   53.246799] {1}[Hardware Error]:    00000080: 00000000 00000000 00000000 00000000
+[   53.247122] {1}[Hardware Error]:    00000090: 00000000 00000000 00000000 00000000
+[   53.247446] {1}[Hardware Error]:    000000a0: 00000000 00000000 00000000 00000000
+[   53.247767] {1}[Hardware Error]:    000000b0: 00000000 00000000 00000000 00000000
+[   53.248090] {1}[Hardware Error]:    000000c0: 00000000 00000000 00000000 00000000
+[   53.248415] {1}[Hardware Error]:    000000d0: 00000000 00000000 00000000 00000000
+[   53.248739] {1}[Hardware Error]:    000000e0: 00000000 00000000 00000000 00000000
+[   53.249064] {1}[Hardware Error]:    000000f0: 00000000 00000000 00000000 00000000
+[   53.249398] {1}[Hardware Error]:    00000100: 00000000 00000000 00000000 00000000
+[   53.249727] {1}[Hardware Error]:    00000110: 00000000 00000000 00000000 00000000
+[   53.250053] {1}[Hardware Error]:    00000120: 00000000 00000000 00000000 00000000
+[   53.250377] {1}[Hardware Error]:    00000130: 00000000 00000000 00000000 00000000
+[   53.250700] {1}[Hardware Error]:    00000140: 00000000 00000000 00000000 00000000
+[   53.251038] {1}[Hardware Error]:    00000150: 00000000 00000000 00000000 00000000
+[   53.251368] {1}[Hardware Error]:    00000160: 00000000 00000000 00000000 00000000
+[   53.251694] {1}[Hardware Error]:    00000170: 00000000 00000000 00000000 00000000
+[   53.252017] {1}[Hardware Error]:    00000180: 00000000 00000000 00000000 00000000
+[   53.252342] {1}[Hardware Error]:    00000190: 00000000 00000000 00000000 00000000
+[   53.252664] {1}[Hardware Error]:    000001a0: 00000000 00000000 00000000 00000000
+[   53.252984] {1}[Hardware Error]:    000001b0: 00000000 00000000 00000000 00000000
+[   53.253309] {1}[Hardware Error]:    000001c0: 00000000 00000000 00000000 00000000
+[   53.253630] {1}[Hardware Error]:    000001d0: 00000000 00000000 00000000 00000000
+[   53.253949] {1}[Hardware Error]:    000001e0: 00000000 00000000 00000000 00000000
+[   53.254273] {1}[Hardware Error]:    000001f0: 00000000 00000000 00000000 00000000
+[   53.254595] {1}[Hardware Error]:    00000200: 00000000 00000000 00000000 00000000
+[   53.254917] {1}[Hardware Error]:    00000210: 00000000 00000000 00000000 00000000
+[   53.255245] {1}[Hardware Error]:    00000220: 00000000 00000000 00000000 00000000
+[   53.255569] {1}[Hardware Error]:    00000230: 00000000 00000000 00000000 00000000
+[   53.255890] {1}[Hardware Error]:    00000240: 00000000 00000000 00000000 00000000
+[   53.256794] [Firmware Warn]: GHES: Unhandled processor error type 0x1c: TLB error|bus error|micro-architectural error
+[   53.257203] [Firmware Warn]: GHES: Unhandled processor error type 0x10: micro-architectural error
+[   53.257543] [Firmware Warn]: GHES: Unhandled processor error type 0x04: TLB error
+[   53.257842] [Firmware Warn]: GHES: Unhandled processor error type 0x08: bus error
+
+- 
+
+I also tested the ghes and cper reports both with and without this
+change, using different versions of rasdaemon, with and without
+support for the extended trace event. Those are a summary of the
+test results:
+
+- adding more fields to the trace events didn't break userspace API:
+  both versions of rasdaemon handled it;
+
+- the rasdaemon patches to handle the new trace report was missing
+  a backward-compatibility logic. I fixed already. So, rasdaemon
+  can now handle both old and new trace events.
+
+Btw, rasdaemon has gained support for the extended trace since its
+version 0.5.8 (released in 2021). I didn't saw any issues there
+complain about troubles on it, so either distros used on ARM servers
+are using an old version of rasdaemon, or they're carrying on the trace
+event changes as well.
+
 ---
- drivers/acpi/apei/ghes.c        | 15 ++++++----
- drivers/firmware/efi/cper-arm.c | 50 ++++++++++++++++-----------------
- include/linux/cper.h            | 10 +++----
- 3 files changed, 38 insertions(+), 37 deletions(-)
 
-diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-index 06d9351a9abc..d7d78d546f68 100644
---- a/drivers/acpi/apei/ghes.c
-+++ b/drivers/acpi/apei/ghes.c
-@@ -533,6 +533,7 @@ static bool ghes_handle_arm_hw_error(struct acpi_hest_generic_data *gdata,
- {
- 	struct cper_sec_proc_arm *err = acpi_hest_get_payload(gdata);
- 	int flags = sync ? MF_ACTION_REQUIRED : 0;
-+	char error_type[120];
- 	bool queued = false;
- 	int sec_sev, i;
- 	char *p;
-@@ -545,9 +546,8 @@ static bool ghes_handle_arm_hw_error(struct acpi_hest_generic_data *gdata,
- 	p = (char *)(err + 1);
- 	for (i = 0; i < err->err_info_num; i++) {
- 		struct cper_arm_err_info *err_info = (struct cper_arm_err_info *)p;
--		bool is_cache = (err_info->type == CPER_ARM_CACHE_ERROR);
-+		bool is_cache = err_info->type & CPER_ARM_CACHE_ERROR;
- 		bool has_pa = (err_info->validation_bits & CPER_ARM_INFO_VALID_PHYSICAL_ADDR);
--		const char *error_type = "unknown error";
- 
- 		/*
- 		 * The field (err_info->error_info & BIT(26)) is fixed to set to
-@@ -561,12 +561,15 @@ static bool ghes_handle_arm_hw_error(struct acpi_hest_generic_data *gdata,
- 			continue;
- 		}
- 
--		if (err_info->type < ARRAY_SIZE(cper_proc_error_type_strs))
--			error_type = cper_proc_error_type_strs[err_info->type];
-+		cper_bits_to_str(error_type, sizeof(error_type),
-+				 FIELD_GET(CPER_ARM_ERR_TYPE_MASK, err_info->type),
-+				 cper_proc_error_type_strs,
-+				 ARRAY_SIZE(cper_proc_error_type_strs));
- 
- 		pr_warn_ratelimited(FW_WARN GHES_PFX
--				    "Unhandled processor error type: %s\n",
--				    error_type);
-+				    "Unhandled processor error type 0x%02x: %s%s\n",
-+				    err_info->type, error_type,
-+				    (err_info->type & ~CPER_ARM_ERR_TYPE_MASK) ? " with reserved bit(s)" : "");
- 		p += err_info->length;
- 	}
- 
-diff --git a/drivers/firmware/efi/cper-arm.c b/drivers/firmware/efi/cper-arm.c
-index eb7ee6af55f2..52d18490b59e 100644
---- a/drivers/firmware/efi/cper-arm.c
-+++ b/drivers/firmware/efi/cper-arm.c
-@@ -93,15 +93,11 @@ static void cper_print_arm_err_info(const char *pfx, u32 type,
- 	bool proc_context_corrupt, corrected, precise_pc, restartable_pc;
- 	bool time_out, access_mode;
- 
--	/* If the type is unknown, bail. */
--	if (type > CPER_ARM_MAX_TYPE)
--		return;
--
- 	/*
- 	 * Vendor type errors have error information values that are vendor
- 	 * specific.
- 	 */
--	if (type == CPER_ARM_VENDOR_ERROR)
-+	if (type & CPER_ARM_VENDOR_ERROR)
- 		return;
- 
- 	if (error_info & CPER_ARM_ERR_VALID_TRANSACTION_TYPE) {
-@@ -116,43 +112,38 @@ static void cper_print_arm_err_info(const char *pfx, u32 type,
- 	if (error_info & CPER_ARM_ERR_VALID_OPERATION_TYPE) {
- 		op_type = ((error_info >> CPER_ARM_ERR_OPERATION_SHIFT)
- 			   & CPER_ARM_ERR_OPERATION_MASK);
--		switch (type) {
--		case CPER_ARM_CACHE_ERROR:
-+		if (type & CPER_ARM_CACHE_ERROR) {
- 			if (op_type < ARRAY_SIZE(arm_cache_err_op_strs)) {
--				printk("%soperation type: %s\n", pfx,
-+				printk("%scache error, operation type: %s\n", pfx,
- 				       arm_cache_err_op_strs[op_type]);
- 			}
--			break;
--		case CPER_ARM_TLB_ERROR:
-+		}
-+		if (type & CPER_ARM_TLB_ERROR) {
- 			if (op_type < ARRAY_SIZE(arm_tlb_err_op_strs)) {
--				printk("%soperation type: %s\n", pfx,
-+				printk("%sTLB error, operation type: %s\n", pfx,
- 				       arm_tlb_err_op_strs[op_type]);
- 			}
--			break;
--		case CPER_ARM_BUS_ERROR:
-+		}
-+		if (type & CPER_ARM_BUS_ERROR) {
- 			if (op_type < ARRAY_SIZE(arm_bus_err_op_strs)) {
--				printk("%soperation type: %s\n", pfx,
-+				printk("%sbus error, operation type: %s\n", pfx,
- 				       arm_bus_err_op_strs[op_type]);
- 			}
--			break;
- 		}
- 	}
- 
- 	if (error_info & CPER_ARM_ERR_VALID_LEVEL) {
- 		level = ((error_info >> CPER_ARM_ERR_LEVEL_SHIFT)
- 			 & CPER_ARM_ERR_LEVEL_MASK);
--		switch (type) {
--		case CPER_ARM_CACHE_ERROR:
-+		if (type & CPER_ARM_CACHE_ERROR)
- 			printk("%scache level: %d\n", pfx, level);
--			break;
--		case CPER_ARM_TLB_ERROR:
-+
-+		if (type & CPER_ARM_TLB_ERROR)
- 			printk("%sTLB level: %d\n", pfx, level);
--			break;
--		case CPER_ARM_BUS_ERROR:
-+
-+		if (type & CPER_ARM_BUS_ERROR)
- 			printk("%saffinity level at which the bus error occurred: %d\n",
- 			       pfx, level);
--			break;
--		}
- 	}
- 
- 	if (error_info & CPER_ARM_ERR_VALID_PROC_CONTEXT_CORRUPT) {
-@@ -241,6 +232,7 @@ void cper_print_proc_arm(const char *pfx,
- 	struct cper_arm_err_info *err_info;
- 	struct cper_arm_ctx_info *ctx_info;
- 	char newpfx[64], infopfx[ARRAY_SIZE(newpfx) + 1];
-+	char error_type[120];
- 
- 	printk("%sMIDR: 0x%016llx\n", pfx, proc->midr);
- 
-@@ -289,9 +281,15 @@ void cper_print_proc_arm(const char *pfx,
- 				       newpfx);
- 		}
- 
--		printk("%serror_type: %d, %s\n", newpfx, err_info->type,
--			err_info->type < ARRAY_SIZE(cper_proc_error_type_strs) ?
--			cper_proc_error_type_strs[err_info->type] : "unknown");
-+		cper_bits_to_str(error_type, sizeof(error_type),
-+				 FIELD_GET(CPER_ARM_ERR_TYPE_MASK, err_info->type),
-+				 cper_proc_error_type_strs,
-+				 ARRAY_SIZE(cper_proc_error_type_strs));
-+
-+		printk("%serror_type: 0x%02x: %s%s\n", newpfx, err_info->type,
-+		       error_type,
-+		       (err_info->type & ~CPER_ARM_ERR_TYPE_MASK) ? " with reserved bit(s)" : "");
-+
- 		if (err_info->validation_bits & CPER_ARM_INFO_VALID_ERR_INFO) {
- 			printk("%serror_info: 0x%016llx\n", newpfx,
- 			       err_info->error_info);
-diff --git a/include/linux/cper.h b/include/linux/cper.h
-index 25858a7608b7..3670b866ac11 100644
---- a/include/linux/cper.h
-+++ b/include/linux/cper.h
-@@ -293,11 +293,11 @@ enum {
- #define CPER_ARM_INFO_FLAGS_PROPAGATED		BIT(2)
- #define CPER_ARM_INFO_FLAGS_OVERFLOW		BIT(3)
- 
--#define CPER_ARM_CACHE_ERROR			0
--#define CPER_ARM_TLB_ERROR			1
--#define CPER_ARM_BUS_ERROR			2
--#define CPER_ARM_VENDOR_ERROR			3
--#define CPER_ARM_MAX_TYPE			CPER_ARM_VENDOR_ERROR
-+#define CPER_ARM_ERR_TYPE_MASK			GENMASK(4,1)
-+#define CPER_ARM_CACHE_ERROR			BIT(1)
-+#define CPER_ARM_TLB_ERROR			BIT(2)
-+#define CPER_ARM_BUS_ERROR			BIT(3)
-+#define CPER_ARM_VENDOR_ERROR			BIT(4)
- 
- #define CPER_ARM_ERR_VALID_TRANSACTION_TYPE	BIT(0)
- #define CPER_ARM_ERR_VALID_OPERATION_TYPE	BIT(1)
+v2:
+  - removed an uneeded patch adding #ifdef for CONFIG_ARM/ARM64;
+  - cper_bits_to_str() now returns the number of chars filled at the buffer;
+  - did a cosmetic (blank lines) improvement at include/linux/ras.h;
+  - arm_event trace dynamic arrays renamed to pei_buf/ctx_buf/oem_buf.
+    
+Daniel Ferguson (1):
+  RAS: Report all ARM processor CPER information to userspace
+
+Mauro Carvalho Chehab (4):
+  efi/cper: Adjust infopfx size to accept an extra space
+  efi/cper: Add a new helper function to print bitmasks
+  efi/cper: align ARM CPER type with UEFI 2.9A/2.10 specs
+  docs: efi: add CPER functions to driver-api
+
+ .../driver-api/firmware/efi/index.rst         | 11 ++--
+ drivers/acpi/apei/ghes.c                      | 26 +++++-----
+ drivers/firmware/efi/cper-arm.c               | 52 +++++++++----------
+ drivers/firmware/efi/cper.c                   | 45 +++++++++++++++-
+ drivers/ras/ras.c                             | 45 +++++++++++++++-
+ include/linux/cper.h                          | 12 +++--
+ include/linux/ras.h                           | 16 ++++--
+ include/ras/ras_event.h                       | 48 +++++++++++++++--
+ 8 files changed, 196 insertions(+), 59 deletions(-)
+
 -- 
 2.45.2
+
+
 
