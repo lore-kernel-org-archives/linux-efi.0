@@ -1,127 +1,97 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5CBE420E3;
-	Thu, 11 Jul 2024 06:05:56 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8AC4D79CC;
+	Thu, 11 Jul 2024 06:31:09 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1720677956; cv=none; b=bkPy1Sdq9Wk2YD0JVqMhB5SnRwfe93ODdlDUKMPNibKXK5OTQf9CZ+TlQw4uqPWZ9WRjf7+3d/BCnYA5tsmWZF31cBBbrnTxtAGJKVZ+MITvw3PqLf0mCafaCJr+Zku8FVqEnvvlzxcSh4NcTwBvZdP5vKwAIGA9TBK7JiqwAYI=
+	t=1720679469; cv=none; b=GgEyQfWxfS5OoHnGBvHyKgVRfw5/y+6S70f5yKiq0A6/TbRLrdQ55RDlNnPXJTFqv91V7lQ3IGzw4JR1szZSaqN3TC5lKT3ag/IYfmET0t2Eh+2vkPaYDU1KxA5vOLd8YFfp4egH/Et4X2eNOoyS30aYbqNGACafQ6C5mNhft+I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1720677956; c=relaxed/simple;
-	bh=yQ8vc/mTO1yzL6nySZ9wEfYYL0O1XltTsf+4qKABHt0=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=hVsQgwrS9+M33fNgR66ml7hP8NgI+aK7/VgXlk5Wu4HT4zTKqbB8Eomc/A6TI4FjTDq1MZik9VHJp1SdWtS5oorvZ7QoskTcyzL1lE++810rCFLiAjccqtVvlO3ifi2BAJ9C47rLc+4Ac+aKs6adVE99wjP4pf7B2/8I8tesjM0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fAwacWNy; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1720679469; c=relaxed/simple;
+	bh=LayJjNlHt7RdDKs2eSpJizuqfyzjoPSkSmmLznNH6CU=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=ChSr/osEPT+EY0Cvst0Gu2ylDZ0Wxp81W+ionW9PP8agGym6Eiec67NZCM7bhLQkxnAXLoPY3f5jX2O9SQy4k7FFpIELJTFLYQmLeRDZcpMXe9IOizdzfBb181WwLOPdrIUYh4By4wd4G5nBbrChd5eYQ9U35YkkFpYwmtoFHBA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=G6p/fCI1; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fAwacWNy"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D8209C4AF0A;
-	Thu, 11 Jul 2024 06:05:55 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="G6p/fCI1"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2E607C4AF0B;
+	Thu, 11 Jul 2024 06:31:09 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1720677955;
-	bh=yQ8vc/mTO1yzL6nySZ9wEfYYL0O1XltTsf+4qKABHt0=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=fAwacWNyNnUJhyaz6kTzFC+aQN9FW3nHkMDgB633KRoqtSwyIWMFMKvEdMPSyq09g
-	 drgzutwkAQSHJWG+YgIeG2Kd50z2p4ujjjHaSLi9O89LDAwgQmVZnPqdrUavMFHIi9
-	 83E5FFti1UKtTmne8OiZ0hX+TVoAvQ8/sBz7CrqoUqrSYShseBeFfvDVgvFKVKlPT9
-	 ST7jGwblLeLlbkQcy5Ufyu3VnSGifJE3mAOE3XYrzyIF0lR02tns31tsyyYRXuNUzp
-	 g+bkiO1SB02YMZ04TywWdqFb0lrMzMtCw9FrEqRTAa5Hbs8eJLBq4a/0cLuK8pwGCN
-	 Q/RgQnscu62Jw==
-Received: by mail-lf1-f42.google.com with SMTP id 2adb3069b0e04-52ea3e499b1so525471e87.3;
-        Wed, 10 Jul 2024 23:05:55 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCXbgJo7oAM3kbWj9QYN2E8jBQOEbjz2S6gC7h+7eQv7nRbbIlzojPGdHNLsvx1Q2tcjx5lr0ivsa/aipXCkPBWHADHKm+MtfOUHVBqKcMjT+wO96PHmIcwp+4IRqS9jsstqPwtMofEU13O9YIFHakKd6QGOQNDyKfIJ8zhjdwGkCG4LKN988OoP
-X-Gm-Message-State: AOJu0Yw01Tz6C75+hfgbdJ93yVuSpmnLJ21FZvZALHOjit5YhT+mnD/z
-	Ru8RymxsKnDDzQjj3oihAth7VTpM8dk/NimzpQRu01kmUDEeKjEyYnYlTRqr8+VXXHvYdNTnlJ+
-	UIR21ZOrwHH9oU+NZun0VuzOs6cg=
-X-Google-Smtp-Source: AGHT+IF9yNz2aZVjovoxsbcGl9/km3XbnRfQHzNtIdc766X8nKOwNyd0Y83MS7zEjdEFUPGw5A4bGuBWSzUDXrLVDgM=
-X-Received: by 2002:ac2:58e8:0:b0:52e:9b87:233c with SMTP id
- 2adb3069b0e04-52eb99a3116mr3674073e87.36.1720677954106; Wed, 10 Jul 2024
- 23:05:54 -0700 (PDT)
+	s=k20201202; t=1720679469;
+	bh=LayJjNlHt7RdDKs2eSpJizuqfyzjoPSkSmmLznNH6CU=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+	b=G6p/fCI1Xwjdz9VtJR5h0uLoLArpORl2wmbBdel2djAHQ5xla9ppGAZs6asRBdN+R
+	 BJRECSj7KTS1v6zaB11YhhnxNY9CKax3VeLz34/lM+crMM5pMRg+R7OF3UORAaOdUT
+	 Xl4mceFzcjqz9X2rHhLBFm/qx4qJYIIydUjQqmKOK0CpXIRXXSSvVZyRyUfhbMpwl7
+	 yyBB4qQ7sIO7Tg/DMEpr6uwA2YKY4GVRTgLjrst/MMKd+OpLHBQiYJHLSJpR1gdNm9
+	 5RD5vwYWyu2+eymXAJ3CPA9lmaUFoQYqJqy9yy7Bq5aTFG1yAdmTvqfY3viwDzOch4
+	 99fSeYtMJ9nDQ==
+Received: from mchehab by mail.kernel.org with local (Exim 4.97.1)
+	(envelope-from <mchehab@kernel.org>)
+	id 1sRnKc-00000002b5U-1F3c;
+	Thu, 11 Jul 2024 08:31:06 +0200
+From: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
+To: Borislav Petkov <bp@alien8.de>,
+	Tony Luck <tony.luck@intel.com>
+Cc: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>,
+	"Ard Biesheuvel" <ardb@kernel.org>,
+	"James Morse" <james.morse@arm.com>,
+	"Jonathan Cameron" <Jonathan.Cameron@huawei.com>,
+	"Len Brown" <lenb@kernel.org>,
+	"Rafael J. Wysocki" <rafael@kernel.org>,
+	"Shiju Jose" <shiju.jose@huawei.com>,
+	linux-acpi@vger.kernel.org,
+	linux-edac@vger.kernel.org,
+	linux-efi@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v2 2/5] efi/cper: Adjust infopfx size to accept an extra space
+Date: Thu, 11 Jul 2024 08:28:53 +0200
+Message-ID: <11aa9d2944bdc9b21ce7af7599bef431ccce508e.1720679234.git.mchehab+huawei@kernel.org>
+X-Mailer: git-send-email 2.45.2
+In-Reply-To: <cover.1720679234.git.mchehab+huawei@kernel.org>
+References: <cover.1720679234.git.mchehab+huawei@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240710225538.work.224-kees@kernel.org> <d2b9e11a-749b-47cd-9cc2-0734ec5849b0@embeddedor.com>
- <175fc58f-b12a-4bc7-bc74-3365e5b0ee3e@embeddedor.com>
-In-Reply-To: <175fc58f-b12a-4bc7-bc74-3365e5b0ee3e@embeddedor.com>
-From: Ard Biesheuvel <ardb@kernel.org>
-Date: Thu, 11 Jul 2024 08:05:43 +0200
-X-Gmail-Original-Message-ID: <CAMj1kXEyDjH0uu3Z4eBesV3PEnKGi5ArXXMp7R-hn8HdRytiPg@mail.gmail.com>
-Message-ID: <CAMj1kXEyDjH0uu3Z4eBesV3PEnKGi5ArXXMp7R-hn8HdRytiPg@mail.gmail.com>
-Subject: Re: [PATCH] efi: Replace efi_memory_attributes_table_t 0-sized array
- with flexible array
-To: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
-Cc: Kees Cook <kees@kernel.org>, linux-efi@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Sender: Mauro Carvalho Chehab <mchehab@kernel.org>
 
-On Thu, 11 Jul 2024 at 01:34, Gustavo A. R. Silva
-<gustavo@embeddedor.com> wrote:
->
->
->
-> On 10/07/24 17:32, Gustavo A. R. Silva wrote:
-> >
-> >
-> > On 10/07/24 16:55, Kees Cook wrote:
-> >> While efi_memory_attributes_table_t::entry isn't used directly as an
-> >> array, it is used as a base for pointer arithmetic. The type is wrong
-> >> as it's not technically an array of efi_memory_desc_t's; they could be
-> >> larger. Regardless, leave the type unchanged and remove the old style
-> >> "0" array size. Additionally replace the open-coded entry offset code
-> >> with the existing efi_early_memdesc_ptr() helper.
-> >>
-> >> Signed-off-by: Kees Cook <kees@kernel.org>
-> >> ---
-> >> Cc: Ard Biesheuvel <ardb@kernel.org>
-> >> Cc: linux-efi@vger.kernel.org
-> >> ---
-> >>   drivers/firmware/efi/memattr.c | 2 +-
-> >>   include/linux/efi.h            | 6 +++++-
-> >>   2 files changed, 6 insertions(+), 2 deletions(-)
-> >>
-> >> diff --git a/drivers/firmware/efi/memattr.c b/drivers/firmware/efi/memattr.c
-> >> index ab85bf8e165a..01142604e8df 100644
-> >> --- a/drivers/firmware/efi/memattr.c
-> >> +++ b/drivers/firmware/efi/memattr.c
-> >> @@ -164,7 +164,7 @@ int __init efi_memattr_apply_permissions(struct mm_struct *mm,
-> >>           bool valid;
-> >>           char buf[64];
-> >> -        valid = entry_is_valid((void *)tbl->entry + i * tbl->desc_size,
-> >> +        valid = entry_is_valid(efi_early_memdesc_ptr(tbl->entry, tbl->desc_size, i),
-> >>                          &md);
-> >>           size = md.num_pages << EFI_PAGE_SHIFT;
-> >>           if (efi_enabled(EFI_DBG) || !valid)
-> >> diff --git a/include/linux/efi.h b/include/linux/efi.h
-> >> index 418e555459da..b06639c4f6a5 100644
-> >> --- a/include/linux/efi.h
-> >> +++ b/include/linux/efi.h
-> >> @@ -607,7 +607,11 @@ typedef struct {
-> >>       u32 num_entries;
-> >>       u32 desc_size;
-> >>       u32 flags;
-> >> -    efi_memory_desc_t entry[0];
-> >> +    /*
-> >> +     * There are @num_entries following, each of size @desc_size bytes,
-> >> +     * including an efi_memory_desc_t header.
-> >> +     */
-> >> +    efi_memory_desc_t entry[];
-> >
-> > a candidate for future __counted_by(num_entries * desc_size) ? :p
->
-> ah no, this rather be something more like __sized_by(num_entries * desc_size).
->
-> --
-> Gustavo
->
-> >
-> > Reviewed-by: Gustavo A. R. Silva <gustavoars@kernel.org>
-> >
+Compiling with W=1 with werror enabled produces an error:
 
-Thanks. I'll take this for the next cycle, but would you mind adding a
-preceding patch that drops the 'early' from the macro name and updates
-the existing users (not the ones in arch/x88/boot, which has its own
-private copy for some reason). The 'early' is kind of irrelevant, and
-no longer accurate now that we use the macro for the memory attributes
-table as well as the memory map.
+drivers/firmware/efi/cper-arm.c: In function ‘cper_print_proc_arm’:
+drivers/firmware/efi/cper-arm.c:298:64: error: ‘snprintf’ output may be truncated before the last format character [-Werror=format-truncation=]
+  298 |                         snprintf(infopfx, sizeof(infopfx), "%s ", newpfx);
+      |                                                                ^
+drivers/firmware/efi/cper-arm.c:298:25: note: ‘snprintf’ output between 2 and 65 bytes into a destination of size 64
+  298 |                         snprintf(infopfx, sizeof(infopfx), "%s ", newpfx);
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As the logic there adds an space at the end of infopx buffer.
+Add an extra space to avoid such warning.
+
+Signed-off-by: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
+Reviewed-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
+---
+ drivers/firmware/efi/cper-arm.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/firmware/efi/cper-arm.c b/drivers/firmware/efi/cper-arm.c
+index fa9c1c3bf168..eb7ee6af55f2 100644
+--- a/drivers/firmware/efi/cper-arm.c
++++ b/drivers/firmware/efi/cper-arm.c
+@@ -240,7 +240,7 @@ void cper_print_proc_arm(const char *pfx,
+ 	int i, len, max_ctx_type;
+ 	struct cper_arm_err_info *err_info;
+ 	struct cper_arm_ctx_info *ctx_info;
+-	char newpfx[64], infopfx[64];
++	char newpfx[64], infopfx[ARRAY_SIZE(newpfx) + 1];
+ 
+ 	printk("%sMIDR: 0x%016llx\n", pfx, proc->midr);
+ 
+-- 
+2.45.2
+
