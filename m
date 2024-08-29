@@ -1,190 +1,123 @@
-Received: from the.earth.li (the.earth.li [93.93.131.124])
+Received: from sender4-of-o51.zoho.com (sender4-of-o51.zoho.com [136.143.188.51])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D67C61AE024;
-	Thu, 29 Aug 2024 13:52:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=93.93.131.124
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724939582; cv=none; b=Ua0XUBMVdzwYAV5OaUbmpZWoCIF8G9NAKwEGzHyz9UP7NCgVcIEmv40xTP1AW0dsOXDT0VeCxzednkvvxad2QT4bqgEOTJSsaa8ixvPKl1azLdG9VQQpMqQWVydOuvrtqq3MFnAZfZLuBOTB0Sc2iyEPxSYJjRk5ljDaAoNPMOE=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724939582; c=relaxed/simple;
-	bh=TS8/vjAK45qFX9WJoJ/dilPjrHp5NM1aNV5VZoirYWo=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=AND3lPaOCJqGAgcAi3c4Fez6N2PJebhTl4oMoqiNDegwpXfN1bBoSx2dqtnWW+f6Vo2rqHScUzx6MDPyVSC8tLFdvLAd6Bt51Z5Nfm7svTZkyQFLTFTNQswxW+Jspudlkf2Ri9IkPR8cYym+mKeO4cHHt+MUgsT1gYht/KeJzvo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=earth.li; spf=pass smtp.mailfrom=earth.li; dkim=pass (2048-bit key) header.d=earth.li header.i=@earth.li header.b=SpXzNTJw; arc=none smtp.client-ip=93.93.131.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=earth.li
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=earth.li
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9034E1A3BDD;
+	Thu, 29 Aug 2024 14:12:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=136.143.188.51
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1724940747; cv=pass; b=MbqgQEZK5Xk+2D+sOpjtK2h+HFdl+0bfkj37W1K1Uds1NxXSt78iZyNW93HJ2rFrgcJzjKZMxgYrhyvsJpTZ87TKTGpadfQfoTBwhTaexdPGBv5T7SB1uCKGR37iXhBTzW/4zZHknpr67Vv3YwgMiqf/Ah8ym8wJMIiAo15+A/o=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1724940747; c=relaxed/simple;
+	bh=7hB/1UOJaiqQ99Joa1DObT9nogjXVp6w2U15f4FVo3Y=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=Lxb0veOerT8BEIzmJq9Tk7r/EASVTsWNexoWFtVdf0MxZOZfnpPtwQ+VtE1GHfeH/V3xMNoD2tNr8GuK6Y7VWRCRCJgqDLDOKK6CpYcj5wwtUJWS9N4ED2EpPwtwequwRmLlVNfxbsu3UpsA0DFVu51hnzxJ/y8gQzsIfBRX+jA=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=apertussolutions.com; spf=pass smtp.mailfrom=apertussolutions.com; dkim=pass (1024-bit key) header.d=apertussolutions.com header.i=dpsmith@apertussolutions.com header.b=fRJYXpXL; arc=pass smtp.client-ip=136.143.188.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=apertussolutions.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=apertussolutions.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=earth.li header.i=@earth.li header.b="SpXzNTJw"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=earth.li;
-	s=the; h=In-Reply-To:Content-Type:MIME-Version:References:Message-ID:Subject:
-	Cc:To:From:Date:Sender:Reply-To:Content-Transfer-Encoding:Content-ID:
-	Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
-	:Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:List-Subscribe:
-	List-Post:List-Owner:List-Archive;
-	bh=4SsUxAHHD2XiSfMK9a212e44ANeEU+e+fE9aWYn+bJE=; b=SpXzNTJw16lQvy4BiXl4M+gO1C
-	X/YJoIDkFgrEqq5d8KnaDYzUPu/62gk0yYm0gxbcTncsHvpJqc9JLwd4JFlqCPah1H+So/oi4HnOg
-	dmqJAIZfYwV8dZdQKqDev1dK+qHEsmGi2dKR0ha1UxnwMdi9dA1dCsR7GLquKrGGsZy24oZqVVMZD
-	78RtG2CnBczWuj57uGcmkjy7nqpfrR0T2CZBNiSzxCThAftLWAUSz6S/Yq9U+21Fe0DSNYMCZ9n9I
-	psZThcU/wEKQ4w5K/cFHaE970E8T/NnaDHK/ncPwoSSz4b41lqdcDOct1rqa7jk9DqW3dl8sGpuww
-	prZbRpdw==;
-Received: from noodles by the.earth.li with local (Exim 4.96)
-	(envelope-from <noodles@earth.li>)
-	id 1sjf80-00BZY2-0U;
-	Thu, 29 Aug 2024 14:23:56 +0100
-Date: Thu, 29 Aug 2024 14:23:56 +0100
-From: Jonathan McDowell <noodles@earth.li>
-To: ross.philipson@oracle.com
-Cc: Ard Biesheuvel <ardb@kernel.org>, kernel test robot <lkp@intel.com>,
-	linux-kernel@vger.kernel.org, x86@kernel.org,
-	linux-integrity@vger.kernel.org, linux-doc@vger.kernel.org,
-	linux-crypto@vger.kernel.org, kexec@lists.infradead.org,
-	linux-efi@vger.kernel.org, iommu@lists.linux-foundation.org,
-	oe-kbuild-all@lists.linux.dev, dpsmith@apertussolutions.com,
-	tglx@linutronix.de, mingo@redhat.com, bp@alien8.de, hpa@zytor.com,
-	dave.hansen@linux.intel.com, mjg59@srcf.ucam.org,
-	James.Bottomley@hansenpartnership.com, peterhuewe@gmx.de,
-	jarkko@kernel.org, jgg@ziepe.ca, luto@amacapital.net,
-	nivedita@alum.mit.edu, herbert@gondor.apana.org.au,
-	davem@davemloft.net, corbet@lwn.net, ebiederm@xmission.com,
-	dwmw2@infradead.org, baolu.lu@linux.intel.com,
-	kanth.ghatraju@oracle.com
-Subject: Re: [PATCH v10 20/20] x86/efi: EFI stub DRTM launch support for
- Secure Launch
-Message-ID: <ZtB2bP1Mx3zTr9e5@earth.li>
-References: <20240826223835.3928819-21-ross.philipson@oracle.com>
- <202408290030.FEbUhHbr-lkp@intel.com>
- <CAMj1kXGVn85ht_srwhYXDnKffPFX=B2+Cnv-8EAocwoHi__OoQ@mail.gmail.com>
- <6b214ad2-d448-4f5f-85e9-93cd38e0e035@oracle.com>
+	dkim=pass (1024-bit key) header.d=apertussolutions.com header.i=dpsmith@apertussolutions.com header.b="fRJYXpXL"
+ARC-Seal: i=1; a=rsa-sha256; t=1724940676; cv=none; 
+	d=zohomail.com; s=zohoarc; 
+	b=E7EusWO6er6F2xI1Zxfssj17795cFIrBU9nS7H5PyLGs+6UWBCNXAkfV+JQpsvkn4X6QnDjZg59GcAbdwpZwp541+ugqTaxP6T/nv6M351s7VISQpTXJZegJ/QpLmHKW8PhIgd5ObyYNwREe1/OqSZxAHGA/WYAAlVOJLcXTMDk=
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
+	t=1724940676; h=Content-Type:Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
+	bh=HgDBKtReaNoT627XPwozc8cV/1MN4aAoTtHPOciy3pM=; 
+	b=F8+Ieta99m9Sb6grjg5r5Hse1Vt8cQANARXzRz4E2JRoFdXjGYznYWVRmMvi/k0t3GJxjfgkNXCi7mbnz93mta8ovG1WRwOCa2szi73evgpHYzIgytv1sd3soamVZ71SpJYmuyZoaySGKcb25OExw2BJMSP43syvz3OmqKbf23o=
+ARC-Authentication-Results: i=1; mx.zohomail.com;
+	dkim=pass  header.i=apertussolutions.com;
+	spf=pass  smtp.mailfrom=dpsmith@apertussolutions.com;
+	dmarc=pass header.from=<dpsmith@apertussolutions.com>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1724940676;
+	s=zoho; d=apertussolutions.com; i=dpsmith@apertussolutions.com;
+	h=Message-ID:Date:Date:MIME-Version:Subject:Subject:To:To:Cc:Cc:References:From:From:In-Reply-To:Content-Type:Content-Transfer-Encoding:Message-Id:Reply-To;
+	bh=HgDBKtReaNoT627XPwozc8cV/1MN4aAoTtHPOciy3pM=;
+	b=fRJYXpXL9J45pXy0RROxungza/op8PLpbcAgBCB2imI/b3vHv4nw02sEX8neAivz
+	PPiCX2FneFCwIi7K74vsx1xZ2NcmUIkgDl+v3rZoRF1EkHBouBvTymaYqasGUoGZL83
+	itV4OEfBmfm1uvXSAhidcGZMH/LIAtY/V/1UW3+4=
+Received: by mx.zohomail.com with SMTPS id 1724940674239491.862092879441;
+	Thu, 29 Aug 2024 07:11:14 -0700 (PDT)
+Message-ID: <e3194ad1-e976-40a6-a8f3-98081b0b07ea@apertussolutions.com>
+Date: Thu, 29 Aug 2024 10:11:11 -0400
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <6b214ad2-d448-4f5f-85e9-93cd38e0e035@oracle.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v8 01/15] x86/boot: Place kernel_info at a fixed offset
+To: Ard Biesheuvel <ardb@kernel.org>, Stuart Yoder <stuart.yoder@arm.com>
+Cc: Ross Philipson <ross.philipson@oracle.com>, linux-kernel@vger.kernel.org,
+ x86@kernel.org, linux-integrity@vger.kernel.org, linux-doc@vger.kernel.org,
+ linux-crypto@vger.kernel.org, kexec@lists.infradead.org,
+ linux-efi@vger.kernel.org, tglx@linutronix.de, mingo@redhat.com,
+ bp@alien8.de, hpa@zytor.com, dave.hansen@linux.intel.com,
+ mjg59@srcf.ucam.org, James.Bottomley@hansenpartnership.com,
+ peterhuewe@gmx.de, jarkko@kernel.org, jgg@ziepe.ca, luto@amacapital.net,
+ nivedita@alum.mit.edu, herbert@gondor.apana.org.au, davem@davemloft.net,
+ kanth.ghatraju@oracle.com, trenchboot-devel@googlegroups.com
+References: <20240214221847.2066632-1-ross.philipson@oracle.com>
+ <20240214221847.2066632-2-ross.philipson@oracle.com>
+ <CAMj1kXH3Gvr3vDRLDdXuc0s7ZAQYE6+D7tmCRBjJWwWt2fn4-w@mail.gmail.com>
+ <9d01a6d2-4dd9-4331-8fc9-b01c07cfdbb5@apertussolutions.com>
+ <CAMj1kXHn6xeAskWiDLvvA4oG3j9_tqx+iMYJXMqmgvyX4pMzgg@mail.gmail.com>
+Content-Language: en-US
+From: "Daniel P. Smith" <dpsmith@apertussolutions.com>
+In-Reply-To: <CAMj1kXHn6xeAskWiDLvvA4oG3j9_tqx+iMYJXMqmgvyX4pMzgg@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-ZohoMailClient: External
 
-On Wed, Aug 28, 2024 at 01:19:16PM -0700, ross.philipson@oracle.com wrote:
-> On 8/28/24 10:14 AM, Ard Biesheuvel wrote:
-> > On Wed, 28 Aug 2024 at 19:09, kernel test robot <lkp@intel.com> wrote:
-> > > 
-> > > Hi Ross,
-> > > 
-> > > kernel test robot noticed the following build warnings:
-> > > 
-> > > [auto build test WARNING on tip/x86/core]
-> > > [also build test WARNING on char-misc/char-misc-testing char-misc/char-misc-next char-misc/char-misc-linus herbert-cryptodev-2.6/master efi/next linus/master v6.11-rc5]
-> > > [cannot apply to herbert-crypto-2.6/master next-20240828]
-> > > [If your patch is applied to the wrong git tree, kindly drop us a note.
-> > > And when submitting patch, we suggest to use '--base' as documented in
-> > > https://urldefense.com/v3/__https://git-scm.com/docs/git-format-patch*_base_tree_information__;Iw!!ACWV5N9M2RV99hQ!KhkZK77BXRIR4F24tKkUeIlIrdqXtUW2vcnDV74c_5BmrQBQaQ4FqcDKKv9LB3HQUocTGkrmIxuz-LAC$ ]
-> > > 
-> > > url:    https://urldefense.com/v3/__https://github.com/intel-lab-lkp/linux/commits/Ross-Philipson/Documentation-x86-Secure-Launch-kernel-documentation/20240827-065225__;!!ACWV5N9M2RV99hQ!KhkZK77BXRIR4F24tKkUeIlIrdqXtUW2vcnDV74c_5BmrQBQaQ4FqcDKKv9LB3HQUocTGkrmI7Z6SQKy$
-> > > base:   tip/x86/core
-> > > patch link:    https://urldefense.com/v3/__https://lore.kernel.org/r/20240826223835.3928819-21-ross.philipson*40oracle.com__;JQ!!ACWV5N9M2RV99hQ!KhkZK77BXRIR4F24tKkUeIlIrdqXtUW2vcnDV74c_5BmrQBQaQ4FqcDKKv9LB3HQUocTGkrmIzWfs1XZ$
-> > > patch subject: [PATCH v10 20/20] x86/efi: EFI stub DRTM launch support for Secure Launch
-> > > config: i386-randconfig-062-20240828 (https://urldefense.com/v3/__https://download.01.org/0day-ci/archive/20240829/202408290030.FEbUhHbr-lkp@intel.com/config__;!!ACWV5N9M2RV99hQ!KhkZK77BXRIR4F24tKkUeIlIrdqXtUW2vcnDV74c_5BmrQBQaQ4FqcDKKv9LB3HQUocTGkrmIwkYG0TY$ )
-> > 
-> > 
-> > This is a i386 32-bit build, which makes no sense: this stuff should
-> > just declare 'depends on 64BIT'
+On 8/28/24 13:45, Ard Biesheuvel wrote:
+> (cc Stuart)
 > 
-> Our config entry already has 'depends on X86_64' which in turn depends on
-> 64BIT. I would think that would be enough. Do you think it needs an explicit
-> 'depends on 64BIT' in our entry as well?
-
-The error is in x86-stub.c, which is pre-existing and compiled for 32
-bit as well, so you need more than a "depends" here.
-
-> > > compiler: clang version 18.1.5 (https://urldefense.com/v3/__https://github.com/llvm/llvm-project__;!!ACWV5N9M2RV99hQ!KhkZK77BXRIR4F24tKkUeIlIrdqXtUW2vcnDV74c_5BmrQBQaQ4FqcDKKv9LB3HQUocTGkrmI2SDLdTN$  617a15a9eac96088ae5e9134248d8236e34b91b1)
-> > > reproduce (this is a W=1 build): (https://urldefense.com/v3/__https://download.01.org/0day-ci/archive/20240829/202408290030.FEbUhHbr-lkp@intel.com/reproduce__;!!ACWV5N9M2RV99hQ!KhkZK77BXRIR4F24tKkUeIlIrdqXtUW2vcnDV74c_5BmrQBQaQ4FqcDKKv9LB3HQUocTGkrmI5MJDdIG$ )
-> > > 
-> > > If you fix the issue in a separate patch/commit (i.e. not just a new version of
-> > > the same patch/commit), kindly add following tags
-> > > | Reported-by: kernel test robot <lkp@intel.com>
-> > > | Closes: https://urldefense.com/v3/__https://lore.kernel.org/oe-kbuild-all/202408290030.FEbUhHbr-lkp@intel.com/__;!!ACWV5N9M2RV99hQ!KhkZK77BXRIR4F24tKkUeIlIrdqXtUW2vcnDV74c_5BmrQBQaQ4FqcDKKv9LB3HQUocTGkrmI-MitiqR$
-> > > 
-> > > sparse warnings: (new ones prefixed by >>)
-> > > > > drivers/firmware/efi/libstub/x86-stub.c:945:41: sparse: sparse: non size-preserving pointer to integer cast
-> > >     drivers/firmware/efi/libstub/x86-stub.c:953:65: sparse: sparse: non size-preserving pointer to integer cast
-> > > > > drivers/firmware/efi/libstub/x86-stub.c:980:70: sparse: sparse: non size-preserving integer to pointer cast
-> > >     drivers/firmware/efi/libstub/x86-stub.c:1014:45: sparse: sparse: non size-preserving integer to pointer cast
-> > > 
-> > > vim +945 drivers/firmware/efi/libstub/x86-stub.c
-> > > 
-> > >     927
-> > >     928  static bool efi_secure_launch_update_boot_params(struct slr_table *slrt,
-> > >     929                                                   struct boot_params *boot_params)
-> > >     930  {
-> > >     931          struct slr_entry_intel_info *txt_info;
-> > >     932          struct slr_entry_policy *policy;
-> > >     933          struct txt_os_mle_data *os_mle;
-> > >     934          bool updated = false;
-> > >     935          int i;
-> > >     936
-> > >     937          txt_info = slr_next_entry_by_tag(slrt, NULL, SLR_ENTRY_INTEL_INFO);
-> > >     938          if (!txt_info)
-> > >     939                  return false;
-> > >     940
-> > >     941          os_mle = txt_os_mle_data_start((void *)txt_info->txt_heap);
-> > >     942          if (!os_mle)
-> > >     943                  return false;
-> > >     944
-> > >   > 945          os_mle->boot_params_addr = (u64)boot_params;
-> > >     946
-> > >     947          policy = slr_next_entry_by_tag(slrt, NULL, SLR_ENTRY_ENTRY_POLICY);
-> > >     948          if (!policy)
-> > >     949                  return false;
-> > >     950
-> > >     951          for (i = 0; i < policy->nr_entries; i++) {
-> > >     952                  if (policy->policy_entries[i].entity_type == SLR_ET_BOOT_PARAMS) {
-> > >     953                          policy->policy_entries[i].entity = (u64)boot_params;
-> > >     954                          updated = true;
-> > >     955                          break;
-> > >     956                  }
-> > >     957          }
-> > >     958
-> > >     959          /*
-> > >     960           * If this is a PE entry into EFI stub the mocked up boot params will
-> > >     961           * be missing some of the setup header data needed for the second stage
-> > >     962           * of the Secure Launch boot.
-> > >     963           */
-> > >     964          if (image) {
-> > >     965                  struct setup_header *hdr = (struct setup_header *)((u8 *)image->image_base +
-> > >     966                                              offsetof(struct boot_params, hdr));
-> > >     967                  u64 cmdline_ptr;
-> > >     968
-> > >     969                  boot_params->hdr.setup_sects = hdr->setup_sects;
-> > >     970                  boot_params->hdr.syssize = hdr->syssize;
-> > >     971                  boot_params->hdr.version = hdr->version;
-> > >     972                  boot_params->hdr.loadflags = hdr->loadflags;
-> > >     973                  boot_params->hdr.kernel_alignment = hdr->kernel_alignment;
-> > >     974                  boot_params->hdr.min_alignment = hdr->min_alignment;
-> > >     975                  boot_params->hdr.xloadflags = hdr->xloadflags;
-> > >     976                  boot_params->hdr.init_size = hdr->init_size;
-> > >     977                  boot_params->hdr.kernel_info_offset = hdr->kernel_info_offset;
-> > >     978                  efi_set_u64_form(boot_params->hdr.cmd_line_ptr, boot_params->ext_cmd_line_ptr,
-> > >     979                                   &cmdline_ptr);
-> > >   > 980                  boot_params->hdr.cmdline_size = strlen((const char *)cmdline_ptr);
-> > >     981          }
-> > >     982
-> > >     983          return updated;
-> > >     984  }
-> > >     985
-> > > 
-> > > --
-> > > 0-DAY CI Kernel Test Service
-> > > https://urldefense.com/v3/__https://github.com/intel/lkp-tests/wiki__;!!ACWV5N9M2RV99hQ!KhkZK77BXRIR4F24tKkUeIlIrdqXtUW2vcnDV74c_5BmrQBQaQ4FqcDKKv9LB3HQUocTGkrmIy5kGTJf$
-> > > 
+> On Thu, 21 Mar 2024 at 15:46, Daniel P. Smith
+> <dpsmith@apertussolutions.com> wrote:
+>>
+>> Hi Ard!
+>>
+>> On 2/15/24 02:56, Ard Biesheuvel wrote:
+>>> On Wed, 14 Feb 2024 at 23:31, Ross Philipson <ross.philipson@oracle.com> wrote:
+>>>>
+>>>> From: Arvind Sankar <nivedita@alum.mit.edu>
+>>>>
+>>>> There are use cases for storing the offset of a symbol in kernel_info.
+>>>> For example, the trenchboot series [0] needs to store the offset of the
+>>>> Measured Launch Environment header in kernel_info.
+>>>>
+>>>
+>>> Why? Is this information consumed by the bootloader?
+>>
+>> Yes, the bootloader needs a standardized means to find the offset of the
+>> MLE header, which communicates a set of meta-data needed by the DCE in
+>> order to set up for and start the loaded kernel. Arm will also need to
+>> provide a similar metadata structure and alternative entry point (or a
+>> complete rewrite of the existing entry point), as the current Arm entry
+>> point is in direct conflict with Arm DRTM specification.
+>>
 > 
-> 
+> Digging up an old thread here: could you elaborate on this? What do
+> you mean by 'Arm entry point' and how does it conflict directly with
+> the Arm DRTM specification? The Linux/arm64 port predates that spec by
+> about 10 years, so I would expect the latter to take the former into
+> account. If that failed to happen, we should fix the spec while we
+> still can.
 
-J.
+Yes, we have been working with Stuart regarding the specification and 
+crafting a compliant implementation approach. It is still very early 
+days, we are attempting to draft a plan around the specification with no 
+physical implementation to validate against. After some discussion, the 
+concern that a separate entry point may be needed has faded and in fact 
+it likely will not be needed. As always, the devil is in the details, 
+and until we have a hardware that has implemented the specification, and 
+we attempt to light it up, we won't know what will be needed for the 
+implementation.
 
--- 
-   101 things you can't have too   |  .''`.  Debian GNU/Linux Developer
-     much of : 23 - Red Dwarf.     | : :' :  Happy to accept PGP signed
-                                   | `. `'   or encrypted mail - RSA
-                                   |   `-    key on the keyservers.
+In short, at this point it was determined no update to the DRTM spec is 
+needed. As hardware becomes available, and we do battle with it, Stuart 
+will be kept up to date. We will work with him to ensure any changes are 
+captured that will help reduce chances that vendors and developers do 
+not misinterpret the spec.
+
+V/r,
+Daniel P. Smith
