@@ -1,172 +1,90 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 54EEB522F;
-	Wed,  4 Sep 2024 05:24:42 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 66DE784A39;
+	Wed,  4 Sep 2024 06:07:44 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725427483; cv=none; b=MprRD1/YiiOwo2T5AJuVetF1AQV9XnuJ2+c4iDfK6t9M8H8skjHeq8RqQx1Rz81bUdYGwScKqE9P2ZrqpEQWLfY1OW4QAzGnMEWYdNL1X9F8o16o1OyWMuAHKC3rUJuGn1hkN7bQWdfmaYBdX8BawdG4Z0XL/YIgA2g+j4TjoM8=
+	t=1725430064; cv=none; b=Yw1KqvoZ/iwMriIzDHShD2KmxLCetpxhT8kIAJAXC35T5fPayzAtTnuhz06L9W60Zpc4AOwo/TxSMHiUIBlvV7i898f7M2mrrAYvyw72EbOSCPHIlQamm5kQw10dfW3Wz4sKq+PXuC6S8foGA93he8pmZYfArI05zy5lyLBAiEg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725427483; c=relaxed/simple;
-	bh=PLczOOovhKela6g7hCR38D9+jRUN17hhMoTicA+UvX0=;
-	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=kCdxzlZTu5I1itNzK04qR6+XXm7lFzBUpjFOXi4Jc6sZB1shBCx84p9Sznrj9PSFHUivgzV+FCETYJGRqeI32Y3xYrPe/SrypN78l0BYEBYVf5HYQ5PKD1R7yir0Mcpt0f0IWhefumUToxGb6cAst72i1KBsWCdXomIDOL2Chmk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=AQxh9Xy6; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1725430064; c=relaxed/simple;
+	bh=YMlq9QoUoCLoMxst/4NMlo33uzF4F4yQHY7Nvhg0G6U=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=j1rmMHU3QW7MpwnIIjRWlR1USxgcRAqGcMYzPiEJwma23Pk3Fzg+HXtu78QiAyIxqYcSgJRFP+i0siIIfXRO3MPBTG6jFbeKPazUFKUmZNq+8ouhQtZFivpssrunJ6YGrfzcruwMICBGTGb4HFsXyHJrjWW1GuuwgStB3n55AAg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=VRSZAUpH; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="AQxh9Xy6"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A33EBC4CEC2;
-	Wed,  4 Sep 2024 05:24:39 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="VRSZAUpH"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 19488C4CEC9;
+	Wed,  4 Sep 2024 06:07:44 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1725427482;
-	bh=PLczOOovhKela6g7hCR38D9+jRUN17hhMoTicA+UvX0=;
-	h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
-	b=AQxh9Xy6kx8LzFJJtfRUfhsEGhjAhkuYS8b10FCVvbrDf+UMjws+gu0iyzmEHmVqb
-	 jeEcv5tchrl9LEQ3Cy1jhez/6biJABWwRqJcYPOa3ea3GsNncphqfv3jsC8/ySFj6Z
-	 9Hmtkm86PCxiXUCjcJd79YX2DjQahWkKctyaLP4FeCnx4NSsPwGQpKG8+yof2ypvbC
-	 riaFuAbGrq8Z03oEFoADVx5ezJRFj8ct11Kv0yi+0xoGKIY63OdFbnnWxThRNmyzdW
-	 QGuKxHBmLtg9QpNHfJiKzy4D9dmMMFTAURbOTdEIQZrFV+yplTq6xAUV59oq3nsueO
-	 Lo+Ny/yZe8rrQ==
-Date: Wed, 4 Sep 2024 07:24:36 +0200
+	s=k20201202; t=1725430064;
+	bh=YMlq9QoUoCLoMxst/4NMlo33uzF4F4yQHY7Nvhg0G6U=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+	b=VRSZAUpH/AIJi5QwiTsM0Mw5bpNYrwtGB1YyEvFjMJNqr3bk8qJJWJuJLZw0sTcLt
+	 7DyLfNdpZMM2Mk/9vgRRBHueHQTA6DSoX3a5wnCgQ7Vt4lFJEEkC752l40pRMezTf+
+	 nPDJut6K6wFuzwtmNK4ELszm2W+51orj1K9VhSoIrJiTBNBLbTkiK8Bt8+4GKVaWUU
+	 4sMuKcXouPV7h0/CqR/qrbUlR6t3rVfv3mqEc8EROnqnLZIM2mKc+j8K5CyiSHq+xM
+	 Q63TdD0NV1PO+GBi00NLNVeIEWeoDEZrjqLGBP9OtmDOeRCzSgd9Nq2PNN01HiaRMM
+	 shZ7HeMNPrSXQ==
+Received: from mchehab by mail.kernel.org with local (Exim 4.98)
+	(envelope-from <mchehab+huawei@kernel.org>)
+	id 1sljB8-00000006Itk-0KWm;
+	Wed, 04 Sep 2024 08:07:42 +0200
 From: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
 To: Borislav Petkov <bp@alien8.de>
-Cc: Tony Luck <tony.luck@intel.com>, Ard Biesheuvel <ardb@kernel.org>, James
- Morse <james.morse@arm.com>, Jonathan Cameron
- <Jonathan.Cameron@huawei.com>, Len Brown <lenb@kernel.org>, "Rafael J.
- Wysocki" <rafael@kernel.org>, Shiju Jose <shiju.jose@huawei.com>, Alison
- Schofield <alison.schofield@intel.com>, Dave Jiang <dave.jiang@intel.com>,
- Ira Weiny <ira.weiny@intel.com>, linux-acpi@vger.kernel.org,
- linux-edac@vger.kernel.org, linux-efi@vger.kernel.org,
- linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2 3/5] efi/cper: Add a new helper function to print
- bitmasks
-Message-ID: <20240904072436.59ee50e7@foz.lan>
-In-Reply-To: <20240902112429.GEZtWgbSo0EVe0EyWE@fat_crate.local>
-References: <cover.1720679234.git.mchehab+huawei@kernel.org>
-	<5bb5f806a763b295401972fdff17bb455bee2e82.1720679234.git.mchehab+huawei@kernel.org>
-	<20240902112429.GEZtWgbSo0EVe0EyWE@fat_crate.local>
-X-Mailer: Claws Mail 4.3.0 (GTK 3.24.43; x86_64-redhat-linux-gnu)
+Cc: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>,
+	Ard Biesheuvel <mchehab+huawei@kernel.org>,
+	linux-efi@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Jonathan Cameron <Jonathan.Cameron@huawei.com>
+Subject: [PATCH v3 2/5] efi/cper: Adjust infopfx size to accept an extra space
+Date: Wed,  4 Sep 2024 08:07:15 +0200
+Message-ID: <1f92a7f3ceaba7ef877afdb53d3a7bbac58995ce.1725429659.git.mchehab+huawei@kernel.org>
+X-Mailer: git-send-email 2.46.0
+In-Reply-To: <cover.1725429659.git.mchehab+huawei@kernel.org>
+References: <cover.1725429659.git.mchehab+huawei@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Sender: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
 
-Em Mon, 2 Sep 2024 13:24:29 +0200
-Borislav Petkov <bp@alien8.de> escreveu:
+Compiling with W=1 with werror enabled produces an error:
 
-> On Thu, Jul 11, 2024 at 08:28:54AM +0200, Mauro Carvalho Chehab wrote:
-> > Sometimes it is desired to produce a single log line for errors.
-> > Add a new helper function for such purpose.  
-> 
-> How does this have anything to do with the below function?
+drivers/firmware/efi/cper-arm.c: In function ‘cper_print_proc_arm’:
+drivers/firmware/efi/cper-arm.c:298:64: error: ‘snprintf’ output may be truncated before the last format character [-Werror=format-truncation=]
+  298 |                         snprintf(infopfx, sizeof(infopfx), "%s ", newpfx);
+      |                                                                ^
+drivers/firmware/efi/cper-arm.c:298:25: note: ‘snprintf’ output between 2 and 65 bytes into a destination of size 64
+  298 |                         snprintf(infopfx, sizeof(infopfx), "%s ", newpfx);
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-There is a variant at cper.c that creates a multi-line output
-for bitmaps.
+As the logic there adds an space at the end of infopx buffer.
+Add an extra space to avoid such warning.
 
-> Example?
-> 
-> Why isn't anything in lib/bitmap-str.c not useful for this?
+Signed-off-by: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
+Reviewed-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
+---
+ drivers/firmware/efi/cper-arm.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-I took a look there. I wasn't able to find anything remotely
-close to convert a bitmap into their correspondent bit names.
+diff --git a/drivers/firmware/efi/cper-arm.c b/drivers/firmware/efi/cper-arm.c
+index fa9c1c3bf168..eb7ee6af55f2 100644
+--- a/drivers/firmware/efi/cper-arm.c
++++ b/drivers/firmware/efi/cper-arm.c
+@@ -240,7 +240,7 @@ void cper_print_proc_arm(const char *pfx,
+ 	int i, len, max_ctx_type;
+ 	struct cper_arm_err_info *err_info;
+ 	struct cper_arm_ctx_info *ctx_info;
+-	char newpfx[64], infopfx[64];
++	char newpfx[64], infopfx[ARRAY_SIZE(newpfx) + 1];
+ 
+ 	printk("%sMIDR: 0x%016llx\n", pfx, proc->midr);
+ 
+-- 
+2.46.0
 
-See, the intended usage for this function is to convert ACPI
-bitmasks into the field names. On ARM Processor Error, this is
-used to properly parse the type field, as described at:
-
-	https://uefi.org/specs/UEFI/2.10/Apx_N_Common_Platform_Error_Record.html#arm-processor-error-information
-
-The definition for this specific bitmask starts on bit 1,
-so the logic to parse it uses a FIELD_GET to apply the
-proper bitmask. This is how it is used (see patch 4/5):
-
-	const char * const cper_proc_error_type_strs[] = {
-		"cache error",
-		"TLB error",
-		"bus error",
-		"micro-architectural error",
-	};
-
-	#define CPER_ARM_ERR_TYPE_MASK                     GENMASK(4,1)
-
-	char error_type[120];
-
-	cper_bits_to_str(error_type, sizeof(error_type),
-			 FIELD_GET(CPER_ARM_ERR_TYPE_MASK, err_info->type),
-			 cper_proc_error_type_strs,
-			 ARRAY_SIZE(cper_proc_error_type_strs));
-
-I'll add an example similar to it to kernel-doc comment.
-
-> 
-> > Signed-off-by: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
-> > ---
-> >  drivers/firmware/efi/cper.c | 43 +++++++++++++++++++++++++++++++++++++
-> >  include/linux/cper.h        |  2 ++
-> >  2 files changed, 45 insertions(+)
-> > 
-> > diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-> > index 7d2cdd9e2227..462d739e8dd1 100644
-> > --- a/drivers/firmware/efi/cper.c
-> > +++ b/drivers/firmware/efi/cper.c
-> > @@ -106,6 +106,49 @@ void cper_print_bits(const char *pfx, unsigned int bits,
-> >  		printk("%s\n", buf);
-> >  }
-> >  
-> > +/**
-> > + * cper_bits_to_str - return a string for set bits
-> > + * @buf: buffer to store the output string
-> > + * @buf_size: size of the output string buffer
-> > + * @bits: bit mask
-> > + * @strs: string array, indexed by bit position
-> > + * @strs_size: size of the string array: @strs
-> > + *
-
-> > + * Add to @buf the bitmask in hexadecimal.   
-> 
-> Where does it do that?
-
-Legacy comment from the past version. Will drop it.
-
-> > Then, for each set bit in @bits,
-> > + * add the corresponding string describing the bit in @strs to @buf.
-> > + *
-> > + * Return: number of bytes stored or an error code if lower than zero.
-> > + */
-> > +int cper_bits_to_str(char *buf, int buf_size, unsigned long bits,
-> > +		     const char * const strs[], unsigned int strs_size)
-> > +{
-> > +	int len = buf_size;
-> > +	char *str = buf;
-> > +	int i, size;
-> > +
-> > +	*buf = '\0';
-> > +
-> > +	for_each_set_bit(i, &bits, strs_size) {
-> > +		if (!(bits & (1U << (i))))  
-> 
-> BIT_UL()
-> 
-> > +			continue;
-> > +
-> > +		if (*buf && len > 0) {  
-> 
-> Uff, this is testing the first char in buf and it gets copied in below in
-> strscpy() through the str pointer.
-> 
-> So this function converts a set of set bits to their corresponding *names*
-> from strs[].
-
-Yes.
-
-> This name doesn't even begin to explain what this function does - it converts
-> a bitmap to the corresponding names of the bits in @strs. If anything, the
-> above comment needs an example and the function needs to be named properly.
-
-I'll add an example.
-
-Thanks,
-Mauro
