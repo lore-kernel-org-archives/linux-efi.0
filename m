@@ -1,169 +1,119 @@
-Received: from ma-mailsvcp-mx-lapp03.apple.com (ma-mailsvcp-mx-lapp03.apple.com [17.32.222.24])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from out01.mta.xmission.com (out01.mta.xmission.com [166.70.13.231])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA2711A0718
-	for <linux-efi@vger.kernel.org>; Tue, 10 Sep 2024 16:45:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=17.32.222.24
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 633F261FE1
+	for <linux-efi@vger.kernel.org>; Tue, 10 Sep 2024 17:50:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=166.70.13.231
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725986725; cv=none; b=kXF3ampYbHoFYzNZAppR70uNBjtWFHU1CMja5heHmGm9H//F6f9EtnRtF1JIWF3Gy+SDc6H5tWRJjgo/AMJ5gdgOzWtVVMXAqfBu84DvcZjfejHdlE7lZrvyHIgr0GMb1TcNZfO42004Cdvbw58Boa1zji2Ja96ZzPLJpfRzrDo=
+	t=1725990653; cv=none; b=cVn2g//7WPjhkL+CRrnPI6EupkuSZ5YtQrQiOIqqC/yQzKh63uCljV8Iao+YsRWcQHfHuo7Eo4LFkYUSFcV5W67tJ3uiE0K6qnUMnBRCKoWzHCkgGB5IKiu9+1xBNeZHwXg0z6nzx0ddY5OGyZ0wueSgqRToCbjmbaPOjPG0qlg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725986725; c=relaxed/simple;
-	bh=P27R41PukbdRF3Yev7N3i7hMblzc97GWNrnAQCAeA6M=;
-	h=Content-type:MIME-version:Subject:From:In-reply-to:Date:Cc:
-	 Message-id:References:To; b=etXrTCAI+NZVyt5Dz3W1aJmJ9QetJnQUReqiSwmdW98cPXkwFUVEEdwbhsafsNqIaMJHF0yRal720ggDfdVjZbQT0B3Jthow9vhAMIXyWy3c8Rp3hQYIqDSxZMF4ia3hkquIFjYdnogUgXjD/d9AQ6n1CJSxCr9beHaFm1n6fQk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=apple.com; spf=pass smtp.mailfrom=apple.com; dkim=pass (2048-bit key) header.d=apple.com header.i=@apple.com header.b=frhRX/Ru; arc=none smtp.client-ip=17.32.222.24
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=apple.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=apple.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=apple.com header.i=@apple.com header.b="frhRX/Ru"
-Received: from rn-mailsvcp-mta-lapp03.rno.apple.com
- (rn-mailsvcp-mta-lapp03.rno.apple.com [10.225.203.151])
- by ma-mailsvcp-mx-lapp03.apple.com
- (Oracle Communications Messaging Server 8.1.0.23.20230328 64bit (built Mar 28
- 2023)) with ESMTPS id <0SJL00RFST2PN430@ma-mailsvcp-mx-lapp03.apple.com> for
- linux-efi@vger.kernel.org; Tue, 10 Sep 2024 08:44:54 -0700 (PDT)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
- definitions=2024-09-10_04,2024-09-09_02,2024-09-02_01
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=apple.com; h=cc :
- content-transfer-encoding : content-type : date : from : in-reply-to :
- message-id : mime-version : references : subject : to; s=20180706;
- bh=kUOJZ7tUncMAJzkdVFaOCPtKthzEaNpQ7rDNkyZ+1Wc=;
- b=frhRX/RuST2AmW2DzT6mZuezJf/y9aGo3gTGB3mIdaIKjLug8HOZ2PkfQDuZ/q9a+w3R
- Zw49iuTowacbVsj8Cz1Gp6kpI25YR2FeE11z9QyHDitpje5wwvaeaCRtMopl42fLRmr6
- Ba6lC14fQVSCSuc9Dx5QmPNJXFKYcPkeqaloXlvzhiQ9I+/3OFZtHSORh5BguQMhZbeZ
- INw8/XIAJY/qdMu10ISiixB7PIsIrr186qa52PdrP1T0BeiZSWxHJfYJ9RcgLNRppRGP
- 3uFTxdlI3i6opRhMVPc53jYb6BFMQ2soALt/CKymktcMqaV8A9cF7h82leD2tEj2Gl9N gA==
-Received: from mr55p01nt-mmpp01.apple.com
- (mr55p01nt-mmpp01.apple.com [10.170.185.219])
- by rn-mailsvcp-mta-lapp03.rno.apple.com
- (Oracle Communications Messaging Server 8.1.0.23.20230328 64bit (built Mar 28
- 2023)) with ESMTPS id <0SJL00RP2T2R82P0@rn-mailsvcp-mta-lapp03.rno.apple.com>;
- Tue, 10 Sep 2024 08:44:52 -0700 (PDT)
-Received: from process_milters-daemon.mr55p01nt-mmpp01.apple.com by
- mr55p01nt-mmpp01.apple.com
- (Oracle Communications Messaging Server 8.1.0.23.20230328 64bit (built Mar 28
- 2023)) id <0SJL0VP00T1AQK00@mr55p01nt-mmpp01.apple.com>; Tue,
- 10 Sep 2024 15:44:51 +0000 (GMT)
-X-Va-A:
-X-Va-T-CD: 4c3984f1f823aa50c40fcb2a43cca4c1
-X-Va-E-CD: c40cdd13cd530915072e8c6f5b81c115
-X-Va-R-CD: cb226b3d113575e0c7ead9a62b61fc48
-X-Va-ID: 90868364-5703-4c93-92da-456d47eec033
-X-Va-CD: 0
-X-V-A:
-X-V-T-CD: 4c3984f1f823aa50c40fcb2a43cca4c1
-X-V-E-CD: c40cdd13cd530915072e8c6f5b81c115
-X-V-R-CD: cb226b3d113575e0c7ead9a62b61fc48
-X-V-ID: 923be45a-1c50-47dd-afa8-a23aa1b228b2
-X-V-CD: 0
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
- definitions=2024-09-10_04,2024-09-09_02,2024-09-02_01
-Received: from smtpclient.apple (unknown [17.11.88.207])
- by mr55p01nt-mmpp01.apple.com
- (Oracle Communications Messaging Server 8.1.0.23.20230328 64bit (built Mar 28
- 2023)) with ESMTPSA id <0SJL0V0AXT2QG900@mr55p01nt-mmpp01.apple.com>; Tue,
- 10 Sep 2024 15:44:51 +0000 (GMT)
-Content-type: text/plain; charset=utf-8
+	s=arc-20240116; t=1725990653; c=relaxed/simple;
+	bh=aMBxF3p7MzwTwIwO9q9FRbxST9y9GM7O6z8v6L0xQTY=;
+	h=From:To:Cc:References:Date:In-Reply-To:Message-ID:MIME-Version:
+	 Content-Type:Subject; b=HJtBA4QAT2NZl4pYwy36gcr9FXLWnGFNzVtuOhiOoaUk8eDH+5Zu0vBKTt/9OK1xAGoqrz40UEUaNjOwmTec9oxFWbuiDIjV5VqUZSuWqnwQzizteNfFK8ehUOjaQeAOhiFBzbTpjYQqBvdd5i7E41r2Wtystug1i/LE7jLH+U0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=xmission.com; spf=pass smtp.mailfrom=xmission.com; arc=none smtp.client-ip=166.70.13.231
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=xmission.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=xmission.com
+Received: from in01.mta.xmission.com ([166.70.13.51]:55468)
+	by out01.mta.xmission.com with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+	(Exim 4.93)
+	(envelope-from <ebiederm@xmission.com>)
+	id 1so4Iw-0092sG-Ob; Tue, 10 Sep 2024 11:05:26 -0600
+Received: from ip68-227-165-127.om.om.cox.net ([68.227.165.127]:46314 helo=email.froward.int.ebiederm.org.xmission.com)
+	by in01.mta.xmission.com with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+	(Exim 4.93)
+	(envelope-from <ebiederm@xmission.com>)
+	id 1so4Iv-005kJH-SY; Tue, 10 Sep 2024 11:05:26 -0600
+From: "Eric W. Biederman" <ebiederm@xmission.com>
+To: Breno Leitao <leitao@debian.org>
+Cc: ardb@kernel.org,  linux-efi@vger.kernel.org,  kexec@lists.infradead.org,
+  bhe@redhat.com,  vgoyal@redhat.com,  devel@edk2.groups.io,
+  rppt@kernel.org,  usamaarif642@gmail.com,  gourry@gourry.net,
+  rmikey@meta.com
+References: <20240910-juicy-festive-sambar-9ad23a@devvm32600>
+	<87ed5rd1qf.fsf@email.froward.int.ebiederm.org>
+	<20240910-uppish-gopher-of-spirit-f14f0e@devvm32600>
+Date: Tue, 10 Sep 2024 12:05:19 -0500
+In-Reply-To: <20240910-uppish-gopher-of-spirit-f14f0e@devvm32600> (Breno
+	Leitao's message of "Tue, 10 Sep 2024 08:13:44 -0700")
+Message-ID: <87seu7a180.fsf@email.froward.int.ebiederm.org>
+User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/28.2 (gnu/linux)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
-MIME-version: 1.0 (Mac OS X Mail 16.0 \(3818.100.11.1.3\))
-Subject: Re: [edk2-devel] EFI table being corrupted during Kexec
-From: "Andrew (EFI) Fish" <afish@apple.com>
-In-reply-to: <20240910-juicy-festive-sambar-9ad23a@devvm32600>
-Date: Tue, 10 Sep 2024 08:44:40 -0700
-Cc: ardb@kernel.org, linux-efi@vger.kernel.org, kexec@lists.infradead.org,
- bhe@redhat.com, vgoyal@redhat.com, ebiederm@xmission.com, rppt@kernel.org,
- usamaarif642@gmail.com, gourry@gourry.net, rmikey@meta.com
-Content-transfer-encoding: quoted-printable
-Message-id: <BABE4F07-DF49-48C5-BAB7-B5986C035C8E@apple.com>
-References: <20240910-juicy-festive-sambar-9ad23a@devvm32600>
-To: devel@edk2.groups.io, leitao@debian.org
-X-Mailer: Apple Mail (2.3818.100.11.1.3)
+MIME-Version: 1.0
+Content-Type: text/plain
+X-XM-SPF: eid=1so4Iv-005kJH-SY;;;mid=<87seu7a180.fsf@email.froward.int.ebiederm.org>;;;hst=in01.mta.xmission.com;;;ip=68.227.165.127;;;frm=ebiederm@xmission.com;;;spf=pass
+X-XM-AID: U2FsdGVkX19JOxRHwKLUZUCY1QPm1gfN+KbZ5kGU+nk=
+X-Spam-Level: 
+X-Spam-Report: 
+	* -1.0 ALL_TRUSTED Passed through trusted hosts only via SMTP
+	*  0.8 BAYES_50 BODY: Bayes spam probability is 40 to 60%
+	*      [score: 0.4994]
+	*  0.0 T_TM2_M_HEADER_IN_MSG BODY: No description available.
+	* -0.0 DCC_CHECK_NEGATIVE Not listed in DCC
+	*      [sa08 1397; Body=1 Fuz1=1 Fuz2=1]
+	* -0.0 T_SCC_BODY_TEXT_LINE No description available.
+X-Spam-DCC: XMission; sa08 1397; Body=1 Fuz1=1 Fuz2=1 
+X-Spam-Combo: ;Breno Leitao <leitao@debian.org>
+X-Spam-Relay-Country: 
+X-Spam-Timing: total 333 ms - load_scoreonly_sql: 0.03 (0.0%),
+	signal_user_changed: 11 (3.4%), b_tie_ro: 10 (3.0%), parse: 0.74
+	(0.2%), extract_message_metadata: 2.8 (0.8%), get_uri_detail_list:
+	0.99 (0.3%), tests_pri_-2000: 15 (4.6%), tests_pri_-1000: 2.4 (0.7%),
+	tests_pri_-950: 1.37 (0.4%), tests_pri_-900: 1.18 (0.4%),
+	tests_pri_-90: 100 (29.9%), check_bayes: 98 (29.4%), b_tokenize: 6
+	(1.7%), b_tok_get_all: 8 (2.4%), b_comp_prob: 2.2 (0.6%),
+	b_tok_touch_all: 70 (20.9%), b_finish: 1.12 (0.3%), tests_pri_0: 182
+	(54.6%), check_dkim_signature: 0.43 (0.1%), check_dkim_adsp: 2.9
+	(0.9%), poll_dns_idle: 1.08 (0.3%), tests_pri_10: 2.2 (0.7%),
+	tests_pri_500: 7 (2.1%), rewrite_mail: 0.00 (0.0%)
+Subject: Re: EFI table being corrupted during Kexec
+X-SA-Exim-Connect-IP: 166.70.13.51
+X-SA-Exim-Rcpt-To: rmikey@meta.com, gourry@gourry.net, usamaarif642@gmail.com, rppt@kernel.org, devel@edk2.groups.io, vgoyal@redhat.com, bhe@redhat.com, kexec@lists.infradead.org, linux-efi@vger.kernel.org, ardb@kernel.org, leitao@debian.org
+X-SA-Exim-Mail-From: ebiederm@xmission.com
+X-SA-Exim-Scanned: No (on out01.mta.xmission.com); SAEximRunCond expanded to false
 
+Breno Leitao <leitao@debian.org> writes:
 
+> Hello Eric,
+>
+> On Tue, Sep 10, 2024 at 09:26:00AM -0500, Eric W. Biederman wrote:
+>> > I am wondering if that memory region/range should be part of e820 table that is
+>> > passed by EFI firmware to kernel, and if it is not passed (as it is not being
+>> > passed today), then the kernel doesn't need to respect it, and it is free to
+>> > overwrite (as it does today). In other words, this is a firmware bug and not a
+>> > kernel bug.
+>> >
+>> > Am I missing something?
+>> 
+>> I agree that this appears to be a firmware bug.  This memory is reserved
+>> in one location and not in another location.
+>
+> That was is our current understanding also, but, having the same issue
+> in EDK2 and on a real machine firmware was surprising.
+>
+> Anyway, I've CCed the EDK2 mailing list in this thread as well, let's
+> see if someone has any comment.
+>
+>> As I recall the memblock allocator is the bootstrap memory allocator
+>> used when bringing up the kernel.  So I don't see reserving something
+>> in the memblock allocator as being authoritative as to how the firmware
+>> has setup memory.
+>> 
+>> I would suggest writing a patch to update whatever is calling
+>> memblock_reserve to also, or perhaps in preference to update the e820
+>> map.  If the code is not x86 specific I would suggest using ACPI's
+>> arch_reserve_mem_area call.
+>
+> Should all memblock_reserve() memory ranges be mapped to e820 table, or,
+> just specific cases where we see problems?
 
-> On Sep 10, 2024, at 6:58=E2=80=AFAM, Breno Leitao <leitao@debian.org> =
-wrote:
->=20
->=20
-> We've seen a problem in upstream kernel kexec, where a EFI TPM log =
-event table
-> is being overwritten.  This problem happen on real machine, as well as =
-in a
-> recent EDK2 qemu VM.
->=20
-> Digging deep, the table is being overwritten during kexec, more =
-precisely when
-> relocating kernel (relocate_kernel() function).
->=20
-> I've also found that the table is being properly reserved using
-> memblock_reserve() early in the boot, and that range gets overwritten =
-later in
-> by relocate_kernel(). In other words, kexec is overwriting a memory =
-that was
-> previously reserved (as memblock_reserve()).
->=20
-> Usama found that kexec only honours memory reservations from =
-/sys/firmware/memmap
-> which comes from e820_table_firmware table.
->=20
+Just specific cases.  There could be other linux specific reasons to
+tell the memblock allocator not to allocation from a specific range
+of memory.
 
-The E820 table is not part of the UEFI standard and it is produced by a =
-library in the OvmfPkg for =E2=80=9Cspecial cases=E2=80=9D so I guess =
-that lib could have a bug?
-
-> Looking at the TPM spec, I found the following part:
->=20
-> 	If the ACPI TPM2 table contains the address and size of the =
-Platform Firmware TCG log,
-> 	firmware =E2=80=9Cpins=E2=80=9D the memory associated with the =
-Platform Firmware TCG log, and reports
-> 	this memory as =E2=80=9CReserved=E2=80=9D memory via the INT =
-15h/E820 interface.
->=20
-
-INT 15h is Legacy BIOS not UEFI. For UEFI there is just the UEFI memory =
-map and ACPI.=20
-
-Thanks,
-
-Andrew Fish
-
-
->=20
-> From: =
-https://trustedcomputinggroup.org/wp-content/uploads/PC-ClientPlatform_Pro=
-file_for_TPM_2p0_Systems_v49_161114_public-review.pdf
->=20
-> I am wondering if that memory region/range should be part of e820 =
-table that is
-> passed by EFI firmware to kernel, and if it is not passed (as it is =
-not being
-> passed today), then the kernel doesn't need to respect it, and it is =
-free to
-> overwrite (as it does today). In other words, this is a firmware bug =
-and not a
-> kernel bug.
->=20
-> Am I missing something?
->=20
-> Thanks
-> --breno
->=20
->=20
-> -=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-
-> Groups.io Links: You receive all messages sent to this group.
-> View/Reply Online (#120541): =
-https://edk2.groups.io/g/devel/message/120541
-> Mute This Topic: https://groups.io/mt/108376671/1755084
-> Group Owner: devel+owner@edk2.groups.io
-> Unsubscribe: https://edk2.groups.io/g/devel/unsub [afish@apple.com]
-> -=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-=3D-
->=20
->=20
+Eric
 
