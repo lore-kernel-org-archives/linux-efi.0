@@ -1,54 +1,54 @@
-Received: from mail-wr1-f73.google.com (mail-wr1-f73.google.com [209.85.221.73])
+Received: from mail-yb1-f202.google.com (mail-yb1-f202.google.com [209.85.219.202])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6AC93192D6A
-	for <linux-efi@vger.kernel.org>; Wed, 25 Sep 2024 15:02:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.73
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1AFA8194AEF
+	for <linux-efi@vger.kernel.org>; Wed, 25 Sep 2024 15:02:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.202
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727276564; cv=none; b=SoY5PC4nEyF0r5hQADWbG2k/IsG24vhv2fISRfGxdmXLwvpZPuBu9i96GKPeY7ksaCDSjlUVhzWWbt4vFNjQEdJyIk/qslKMBEW6PKZZcbcfXtB/U7hX3rpAqKpBmgOkuv0wHKEKQNwbSBTVv1mYP2zK8n3UDwawZ3h0Pd983/k=
+	t=1727276567; cv=none; b=cVvPy6w/S5oNSLsMCUBt+MyufPUAD9pzM3zA5rYh9RGMsE8R6d8C+H2fTNS8AgMfA/h70XLKOar7nKTmZpABrxx/Z07NoREH+nNupJN+8HZodHXPVQJI79YTPWzCDjjJhYiz0Bl6eCwO5hKj1Z4UrBAOXs7XvcdEKp5MiutTHtg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727276564; c=relaxed/simple;
-	bh=jP/irMOJlRaYkkcw0c6zTUJt0fVtAuXqgia734+CBv4=;
+	s=arc-20240116; t=1727276567; c=relaxed/simple;
+	bh=3JGT0Gp6Mz6RRG9jsRwcVhBESThd+LENzWfNaIpsWgo=;
 	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=hD62Z56J60e47z1wJlAVhXM0HnqydFENNujdIz58xR8im2P2PZaZ8uYrdDgxUaIuKR8RrNFAHFxaIuYp/60JmFfQGZWRGYrtFQsItHfB7Q5GkFs/F6MmWci1X5avAk02mgyzEJyEkh8IMPoPqrbH/4AIl37h9IybQGiPiY8OLxc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=Wb3LCK7b; arc=none smtp.client-ip=209.85.221.73
+	 To:Cc:Content-Type; b=rhOFc74mKODSLVsUMKw8PYR7WRtGkTR66ob2ttLfSstGMmVRKrR1c4HD0psqlKhJ/ZphufKoFu7p6IgPEDJQLqE/KH5Lmf2lEDi3J8dp7LVJOQCOj1a3olJHI0nn1R861vLyidUOylR2Z3Up61portQyp1Mx86EJCiyCqN75iLk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=TsAdLtYA; arc=none smtp.client-ip=209.85.219.202
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="Wb3LCK7b"
-Received: by mail-wr1-f73.google.com with SMTP id ffacd0b85a97d-37ccc21ceb1so214421f8f.2
-        for <linux-efi@vger.kernel.org>; Wed, 25 Sep 2024 08:02:40 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="TsAdLtYA"
+Received: by mail-yb1-f202.google.com with SMTP id 3f1490d57ef6-e0b3d35ccfbso9719126276.3
+        for <linux-efi@vger.kernel.org>; Wed, 25 Sep 2024 08:02:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20230601; t=1727276558; x=1727881358; darn=vger.kernel.org;
+        d=google.com; s=20230601; t=1727276564; x=1727881364; darn=vger.kernel.org;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:from:to:cc:subject:date:message-id:reply-to;
-        bh=If2fzGYCGwBnqYyJZ9PtA7MpTD5EDRXIER0Mmi+qoTw=;
-        b=Wb3LCK7ba3HMiyiqoZoWtKhuoZSMqXPKUYnmqyXbXA8sc9bQ7g1Ayt1Hi3pfkhMzDY
-         eXWJNLau0OwPd2pT27ntqDg1AIpkhE4ir33pSpotvLQ6C2zQbBT8gzCzBJ0Jyd9cKdov
-         9efhTkRNel+3uw17iMxB4v/jEbepMyDxWS22XCw71TJCVYSOvZBAlbU0ggK8hwbrKHz6
-         UE9d6To4UXIs9nQVln1jcy7+FEhGH1trXfiP/m/GlyiPVRZ+XLlHynakSskC5XJGA/lM
-         D1Af4Ib0poxC1uf/z+7EVimyDRdO+1jymWnke+Qi/CC+dy1RnzBaoi8BjuJ3gzejYLNH
-         mvEg==
+        bh=EvnpcmFQxcsGZvvXdDVNifJH/U/gKUWuX4k9X0rnjWY=;
+        b=TsAdLtYAaeJGU3uxeCnFRgjYC3zywHtu6kW+6MWpOyRNzrSw08zUCHdh6CU0oPm8gr
+         54tOTeHyOuanpEbdNRoeq8LiHt0Ly0sdjAsUk0tK4vAtiLDvGVLI4ChjS1/H1NP68DS/
+         wSfZ51QMisCY3gLGmgurQEDRdSja9nk83ak8rOou2KXBBOUOMoZvo6HyUrCUqmKGFclq
+         X79FiB7c9maDv32TWuRLLqa01GBzHCXym8JqphMQrvk/vyTCKLoJG/bfAtxBkbCui/JW
+         prbpIXqx2mZ0S0rjKfDQ90v+oF35A3ySYc1z/4V/6oMFpYVBD7CNN2WPxnCQcpMGvSPl
+         uaDQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1727276558; x=1727881358;
+        d=1e100.net; s=20230601; t=1727276564; x=1727881364;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=If2fzGYCGwBnqYyJZ9PtA7MpTD5EDRXIER0Mmi+qoTw=;
-        b=UZsUvTZs4UmVZXuUcMMo+u9z40H3y6vgXTTEAv5gcsJ+lM2sB60bg5uLis5d9k4nYw
-         TgdSmZhyT9rdrUStTJbz5RIi74/IBWzYQKuk6txKirYmo+FRfq0Dv72l2libNp0YGNnO
-         nOMJm4LZRtwe/JkPkbQfG6dnAP32hwqeMUuLFs6faLuLFmxWk/wTtUXz5BKPPmCa0OiO
-         10hWCQ6jsUDmD8pnZwKvGalJaWybkrnm9vu/PjdbzNw1p1iSVhAdn3+tuRdZSZCbRLSq
-         OD9z5rDfKQ3+C0A7Sh+T13T4P922sotcWJGF/SX64REOghgy/b4+BD1F1xwLR85eDL0T
-         swuQ==
-X-Forwarded-Encrypted: i=1; AJvYcCUxlZZ628/eaEtuBap/EHkD9+BWkKWLsvl+y+gImfR4lcGmg4Zyzqa7piqOBrsGPI81icGUmQI5/rY=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxSDWzMFU9jhb2F141OQ4tnHcjuuH2cAv+KjM8mZ1R+aMUoOUFQ
-	oTdQpSUxLEaMe5ainEog/C58bzYb7K+/cTgOBU1yzvygcNdyXrvWYfHnihKcv4RfNdaT0g==
-X-Google-Smtp-Source: AGHT+IGkF5zmfUWW4O6+9JFmmh7xBD2vdGsjZEUVC3p8TPU+fzBQ5QlHTxnNWj2zBWn7gVrNU3EsN2Rx
+        bh=EvnpcmFQxcsGZvvXdDVNifJH/U/gKUWuX4k9X0rnjWY=;
+        b=iX+L0Z5krPJRcz9qPsCd5PY4vSKnI2nVFo7dONRJJcOb7oc4zJgt5iOFf4swHF4iJt
+         iQF0j7Lv0c9BvRXTlDMG+OZlHK5oecdkKVZfF8uUnDAdR0kKL+j+JFXiEAcrNxp5TYbr
+         Eo7u/L2E0i3RqCAd1RI2PdPel3++/Q2Ze2/MXDCugHMqAjVzBnaosQ1ytNJurX1zKGjj
+         GuJij3E/bKwtSO0ULhURGKv0gCoekplgp9HyuideKrx0UWR+eDyBxm5hUhJfO4f8d2wo
+         u2g7DXrvVzN8GjEy2aKNWWYyxRpixRJcHQHc6K4jNmUWpQ0ldtr8t4Ht+97/6IEpX/aD
+         Pxhg==
+X-Forwarded-Encrypted: i=1; AJvYcCWVJDVVh25At6PUQPTsNIXV9lKLK53x4X85Bi8CzMxdEO1iX2jqBX8/iLNGOiJ4ZxgpILMoa/IMX2Q=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyYMOXop6Fa6uI+CMIa2aDSJYp/ju0xOEEb2t5DJaqIaeVBxjP/
+	4l2Hbu5bA+ObGaLeLjieoQ/uQ6tpDhEacJlhxwkwbQ6r3gVUd5Kt4i6ZhBUOOyG2HKuhzQ==
+X-Google-Smtp-Source: AGHT+IG8l7xPrwiQoCJNQ/ba3EMloi9V99YK0VEhh/KbnKIqVODzSQX4+kTe9p6XHA3xEE581cvXY/7/
 X-Received: from palermo.c.googlers.com ([fda3:e722:ac3:cc00:7b:198d:ac11:8138])
- (user=ardb job=sendgmr) by 2002:a5d:5547:0:b0:378:89be:1826 with SMTP id
- ffacd0b85a97d-37cc2473cc2mr1714f8f.4.1727276557999; Wed, 25 Sep 2024 08:02:37
+ (user=ardb job=sendgmr) by 2002:a25:fc20:0:b0:e25:17cb:352e with SMTP id
+ 3f1490d57ef6-e2517cb37ebmr1573276.9.1727276563646; Wed, 25 Sep 2024 08:02:43
  -0700 (PDT)
-Date: Wed, 25 Sep 2024 17:01:19 +0200
+Date: Wed, 25 Sep 2024 17:01:21 +0200
 In-Reply-To: <20240925150059.3955569-30-ardb+git@google.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -58,15 +58,15 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 References: <20240925150059.3955569-30-ardb+git@google.com>
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-X-Developer-Signature: v=1; a=openpgp-sha256; l=4681; i=ardb@kernel.org;
- h=from:subject; bh=1WKyFOMOSweUVoFxWBVIeZQGadqaqXWeT1GGGyj8jAA=;
- b=owGbwMvMwCFmkMcZplerG8N4Wi2JIe2L6jGPaQaG+1hu3Z0QvW9R+99QHb2J68ydL88WzUpdH
- Hf1+4blHaUsDGIcDLJiiiwCs/++23l6olSt8yxZmDmsTCBDGLg4BWAiex8y/GZ5P9H2XQc705Yd
- pyrK5txZNU1B4+0LjklBfTe9r2ed6mlhZNiZU/rz52b9K88lGacbreAU2ufVkfLX5bhxnpO8ivb mR0wA
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2665; i=ardb@kernel.org;
+ h=from:subject; bh=aFznGPhrIJfcYbFW/zJm7PxtyN4XPqpBJvJpRLs7DOQ=;
+ b=owGbwMvMwCFmkMcZplerG8N4Wi2JIe2L6smrOU/sUlwy2LTW237rV4pUONJ8T3XtdLO2DQ3bj
+ 80/F1nfUcrCIMbBICumyCIw+++7nacnStU6z5KFmcPKBDKEgYtTACYyyZHhn8LWprti0g+tdKf9
+ /bStUjGJXy/+qc4H120n962eP03h1yKG/wHHj7aK75zgynumw7x0V1PPmh2muXNy98WcvvZ74cO kJi4A
 X-Mailer: git-send-email 2.46.0.792.g87dc391469-goog
-Message-ID: <20240925150059.3955569-49-ardb+git@google.com>
-Subject: [RFC PATCH 19/28] x86/boot/64: Avoid intentional absolute symbol
- references in .head.text
+Message-ID: <20240925150059.3955569-51-ardb+git@google.com>
+Subject: [RFC PATCH 21/28] x86/head: Use PIC-compatible symbol references in
+ startup code
 From: Ard Biesheuvel <ardb+git@google.com>
 To: linux-kernel@vger.kernel.org
 Cc: Ard Biesheuvel <ardb@kernel.org>, x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, 
@@ -91,120 +91,85 @@ Content-Type: text/plain; charset="UTF-8"
 
 From: Ard Biesheuvel <ardb@kernel.org>
 
-The code in .head.text executes from a 1:1 mapping and cannot generally
-refer to global variables using their kernel virtual addresses. However,
-there are some occurrences of such references that are valid: the kernel
-virtual addresses of _text and _end are needed to populate the page
-tables correctly, and some other section markers are used in a similar
-way.
-
-To avoid the need for making exceptions to the rule that .head.text must
-not contain any absolute symbol references, derive these addresses from
-the RIP-relative 1:1 mapped physical addresses, which can be safely
-determined using RIP_REL_REF().
+Use RIP-relative symbol references to make them compatible with running
+the linker in PIE mode.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/kernel/head64.c | 30 ++++++++++++--------
- 1 file changed, 18 insertions(+), 12 deletions(-)
+ arch/x86/kernel/head_64.S            | 14 +++++++++-----
+ arch/x86/kernel/relocate_kernel_64.S |  6 ++++--
+ 2 files changed, 13 insertions(+), 7 deletions(-)
 
-diff --git a/arch/x86/kernel/head64.c b/arch/x86/kernel/head64.c
-index de33ac34773c..49e8ba1c0d34 100644
---- a/arch/x86/kernel/head64.c
-+++ b/arch/x86/kernel/head64.c
-@@ -91,9 +91,11 @@ static inline bool check_la57_support(void)
- 	return true;
- }
+diff --git a/arch/x86/kernel/head_64.S b/arch/x86/kernel/head_64.S
+index db71cf64204b..cc2fec3de4b7 100644
+--- a/arch/x86/kernel/head_64.S
++++ b/arch/x86/kernel/head_64.S
+@@ -182,8 +182,9 @@ SYM_INNER_LABEL(secondary_startup_64_no_verify, SYM_L_GLOBAL)
+ 	xorl	%r15d, %r15d
  
--static unsigned long __head sme_postprocess_startup(struct boot_params *bp, pmdval_t *pmd)
-+static unsigned long __head sme_postprocess_startup(struct boot_params *bp,
-+						    pmdval_t *pmd,
-+						    unsigned long p2v_offset)
- {
--	unsigned long vaddr, vaddr_end;
-+	unsigned long paddr, paddr_end;
- 	int i;
+ 	/* Derive the runtime physical address of init_top_pgt[] */
+-	movq	phys_base(%rip), %rax
+-	addq	$(init_top_pgt - __START_KERNEL_map), %rax
++	leaq	init_top_pgt(%rip), %rax
++	subq	$__START_KERNEL_map, %rax
++	addq	phys_base(%rip), %rax
  
- 	/* Encrypt the kernel and related (if SME is active) */
-@@ -106,10 +108,10 @@ static unsigned long __head sme_postprocess_startup(struct boot_params *bp, pmdv
- 	 * attribute.
+ 	/*
+ 	 * Retrieve the modifier (SME encryption mask if SME is active) to be
+@@ -314,7 +315,8 @@ SYM_INNER_LABEL(common_startup_64, SYM_L_LOCAL)
+ 
+ .Lsetup_cpu:
+ 	/* Get the per cpu offset for the given CPU# which is in ECX */
+-	movq	__per_cpu_offset(,%rcx,8), %rdx
++	leaq	__per_cpu_offset(%rip), %rdx
++	movq	(%rdx,%rcx,8), %rdx
+ #else
+ 	xorl	%edx, %edx /* zero-extended to clear all of RDX */
+ #endif /* CONFIG_SMP */
+@@ -325,7 +327,8 @@ SYM_INNER_LABEL(common_startup_64, SYM_L_LOCAL)
+ 	 *
+ 	 * RDX contains the per-cpu offset
  	 */
- 	if (sme_get_me_mask()) {
--		vaddr = (unsigned long)__start_bss_decrypted;
--		vaddr_end = (unsigned long)__end_bss_decrypted;
-+		paddr = (unsigned long)&RIP_REL_REF(__start_bss_decrypted);
-+		paddr_end = (unsigned long)&RIP_REL_REF(__end_bss_decrypted);
+-	movq	pcpu_hot + X86_current_task(%rdx), %rax
++	leaq	pcpu_hot + X86_current_task(%rip), %rax
++	movq	(%rax,%rdx), %rax
+ 	movq	TASK_threadsp(%rax), %rsp
  
--		for (; vaddr < vaddr_end; vaddr += PMD_SIZE) {
-+		for (; paddr < paddr_end; paddr += PMD_SIZE) {
- 			/*
- 			 * On SNP, transition the page to shared in the RMP table so that
- 			 * it is consistent with the page table attribute change.
-@@ -118,11 +120,11 @@ static unsigned long __head sme_postprocess_startup(struct boot_params *bp, pmdv
- 			 * mapping (kernel .text). PVALIDATE, by way of
- 			 * early_snp_set_memory_shared(), requires a valid virtual
- 			 * address but the kernel is currently running off of the identity
--			 * mapping so use __pa() to get a *currently* valid virtual address.
-+			 * mapping so use the PA to get a *currently* valid virtual address.
- 			 */
--			early_snp_set_memory_shared(__pa(vaddr), __pa(vaddr), PTRS_PER_PMD);
-+			early_snp_set_memory_shared(paddr, paddr, PTRS_PER_PMD);
+ 	/*
+@@ -346,7 +349,8 @@ SYM_INNER_LABEL(common_startup_64, SYM_L_LOCAL)
+ 	 */
+ 	subq	$16, %rsp
+ 	movw	$(GDT_SIZE-1), (%rsp)
+-	leaq	gdt_page(%rdx), %rax
++	leaq	gdt_page(%rip), %rax
++	addq	%rdx, %rax
+ 	movq	%rax, 2(%rsp)
+ 	lgdt	(%rsp)
+ 	addq	$16, %rsp
+diff --git a/arch/x86/kernel/relocate_kernel_64.S b/arch/x86/kernel/relocate_kernel_64.S
+index e9e88c342f75..cbfd0227ea3e 100644
+--- a/arch/x86/kernel/relocate_kernel_64.S
++++ b/arch/x86/kernel/relocate_kernel_64.S
+@@ -106,6 +106,9 @@ SYM_CODE_START_NOALIGN(relocate_kernel)
+ 	/* setup a new stack at the end of the physical control page */
+ 	lea	PAGE_SIZE(%r8), %rsp
  
--			i = pmd_index(vaddr);
-+			i = pmd_index(paddr - p2v_offset);
- 			pmd[i] -= sme_get_me_mask();
- 		}
- 	}
-@@ -146,6 +148,7 @@ unsigned long __head __startup_64(unsigned long p2v_offset,
- {
- 	pmd_t (*early_pgts)[PTRS_PER_PMD] = RIP_REL_REF(early_dynamic_pgts);
- 	unsigned long physaddr = (unsigned long)&RIP_REL_REF(_text);
-+	unsigned long va_text, va_end;
- 	unsigned long pgtable_flags;
- 	unsigned long load_delta;
- 	pgdval_t *pgd;
-@@ -172,6 +175,9 @@ unsigned long __head __startup_64(unsigned long p2v_offset,
- 	if (load_delta & ~PMD_MASK)
- 		for (;;);
- 
-+	va_text = physaddr - p2v_offset;
-+	va_end  = (unsigned long)&RIP_REL_REF(_end) - p2v_offset;
++	/* take the virtual address of virtual_mapped() before jumping */
++	leaq	virtual_mapped(%rip), %r14
 +
- 	/* Include the SME encryption mask in the fixup value */
- 	load_delta += sme_get_me_mask();
- 
-@@ -232,7 +238,7 @@ unsigned long __head __startup_64(unsigned long p2v_offset,
- 	pmd_entry += sme_get_me_mask();
- 	pmd_entry +=  physaddr;
- 
--	for (i = 0; i < DIV_ROUND_UP(_end - _text, PMD_SIZE); i++) {
-+	for (i = 0; i < DIV_ROUND_UP(va_end - va_text, PMD_SIZE); i++) {
- 		int idx = i + (physaddr >> PMD_SHIFT);
- 
- 		pmd[idx % PTRS_PER_PMD] = pmd_entry + i * PMD_SIZE;
-@@ -257,11 +263,11 @@ unsigned long __head __startup_64(unsigned long p2v_offset,
- 	pmd = &RIP_REL_REF(level2_kernel_pgt)->pmd;
- 
- 	/* invalidate pages before the kernel image */
--	for (i = 0; i < pmd_index((unsigned long)_text); i++)
-+	for (i = 0; i < pmd_index(va_text); i++)
- 		pmd[i] &= ~_PAGE_PRESENT;
- 
- 	/* fixup pages that are part of the kernel image */
--	for (; i <= pmd_index((unsigned long)_end); i++)
-+	for (; i <= pmd_index(va_end); i++)
- 		if (pmd[i] & _PAGE_PRESENT)
- 			pmd[i] += load_delta;
- 
-@@ -269,7 +275,7 @@ unsigned long __head __startup_64(unsigned long p2v_offset,
- 	for (; i < PTRS_PER_PMD; i++)
- 		pmd[i] &= ~_PAGE_PRESENT;
- 
--	return sme_postprocess_startup(bp, pmd);
-+	return sme_postprocess_startup(bp, pmd, p2v_offset);
- }
- 
- /* Wipe all early page tables except for the kernel symbol map */
+ 	/* jump to identity mapped page */
+ 	addq	$(identity_mapped - relocate_kernel), %r8
+ 	pushq	%r8
+@@ -225,8 +228,7 @@ SYM_CODE_START_LOCAL_NOALIGN(identity_mapped)
+ 	movq	%rax, %cr3
+ 	lea	PAGE_SIZE(%r8), %rsp
+ 	call	swap_pages
+-	movq	$virtual_mapped, %rax
+-	pushq	%rax
++	pushq	%r14
+ 	ANNOTATE_UNRET_SAFE
+ 	ret
+ 	int3
 -- 
 2.46.0.792.g87dc391469-goog
 
