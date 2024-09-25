@@ -1,77 +1,57 @@
-Received: from mail-ej1-f43.google.com (mail-ej1-f43.google.com [209.85.218.43])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 822516A357
-	for <linux-efi@vger.kernel.org>; Wed, 25 Sep 2024 16:47:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 35D6C13B287;
+	Wed, 25 Sep 2024 17:43:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727282865; cv=none; b=EFH+XtMRKXhqeRWFTclMExXnSR/HXoXsZ2Q6kQdoTC+Ba++J02aKF5CP+xaXFdDLkw6QfyhQJpaLolsi7aXX7lx6Y75frA4feKezZ0hHlmt8D61XC+B9Nlw9EfMxSlX77EJCrt5wlocqPUAOXb47Bgg611j7V+8SxJncF7tGV9g=
+	t=1727286195; cv=none; b=Tf/2mauNsd/MV244xJL1sfYz1OYA4x3maSQNHoNkaM8pbGCdxgtL4xAPrFReqh6+QIDe9d4WueCfFLhV31UP01Z+RYiSrt21vngQNnBr61IGcAvu7+m6efwIFloJo5pT4nnkO/PzrObw/HntNZzxA2dbWaiRRKg+WQrPIDdNe2o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727282865; c=relaxed/simple;
-	bh=/t+YSp2gvbsBW9hsAIIEsn2fOHY2XQVupxHXFI22op4=;
+	s=arc-20240116; t=1727286195; c=relaxed/simple;
+	bh=F9RWq/rXxSYntRpuJCLCsbi4j1kIhMfwU6j+9oqCDbQ=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=TWy1xhC5QIgVJSSUQeOyO1GQViMHnQ3QvJhjib5MSuCEgV36lr/QmJQ9Obma8V2aES1BTS0V7mXBiPYjppWbDHIiiW2mstNbPUGueoUj9B6QG2K3lMPw8uMrpz1ciP1gglqGfDibEzVc7UFbkcCJluLaMI0MiJBsRqZVxA3epSU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org; spf=pass smtp.mailfrom=linuxfoundation.org; dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b=D99dvrX6; arc=none smtp.client-ip=209.85.218.43
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-foundation.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linuxfoundation.org
+	 To:Cc:Content-Type; b=ncNRihlKL8WJ3bYrXGEn1b89jEGMdBcDJMaF4Seeyg4CpF2JyAQx7SsHreZpAFrjAbZcHFKsaAAsrXItMZ5FuIRAHPgTyW5nxI39GNougXjiyPVEwYjNCxF6J3orxv5BfWaFb0o157+GvyqA3bzcWNvG5DekLUPjXmTHGzWaxVQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XSCNkXh6; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="D99dvrX6"
-Received: by mail-ej1-f43.google.com with SMTP id a640c23a62f3a-a8d4979b843so6425266b.3
-        for <linux-efi@vger.kernel.org>; Wed, 25 Sep 2024 09:47:43 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google; t=1727282862; x=1727887662; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=nj8+qG2S/Bk0hHBrSluJoVQqRkgSfLVqxLrwhmmQqfQ=;
-        b=D99dvrX6DktbRoqB9B/v533rxL+jqzPpZkdTCZkhlXx8HvBAcocKmu8aewevKhTv5E
-         y/VnJPUgXkMbYwVLpNUeM+i1svw66UfJUs5fXfg+MBv0txo7ZFg+SwYvtX0g2AF5v/QN
-         OYfGXyKoC4/LuGvYtEOT8Hut4JZaeGwkmWDTw=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1727282862; x=1727887662;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=nj8+qG2S/Bk0hHBrSluJoVQqRkgSfLVqxLrwhmmQqfQ=;
-        b=iSriW8B/27hlIWmgqfEV7fTEf6MXowcAyhhPBRqV8ueQVMNW6tf4+QsVZX8yu8f5nM
-         Gy3kiBkrV2kf4IeOD8YXvTdr/lwmgjdGm/BVWfYM7h5i8D4GLX57SiUUTNSnWl9KOerx
-         sWdyRGd4a9/nlbyhUviHXvYdB6ipgRYAmwVOUGyXioBXy6IA1fsAthzEXQ+6kxHuzTNI
-         9oYtlkHupRhojw28/zEMb+BJitlLpSKy2QPCDtc4Skvp9jM6AzQkZ55WrerI25kHgFUH
-         3bTsZvag2SYd0Fqjn/TsxE2KWN+cprvVx17guuTrcLD9CC12kFBWqWkYALIri9Y3bvMy
-         vxBw==
-X-Forwarded-Encrypted: i=1; AJvYcCVNbHulbfKj21ue5S3n3OpZcTzUvu63akmxM73o4qqOhqE4KGp6Su20N11sabaaYqKJsqS7B2TaOuw=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxlGBhTaJyr7VD/QgXV2L263ym7S0ChsqAcP6VRP4w1JaMvFbjf
-	uvvY2ZmW3heRlHfoTIlaKhLZ0plXB+Cqafxk+wriI7NVf7LBQMnavQfLnaaQe7HkrPJSNEjAoaE
-	T4Ejh/w==
-X-Google-Smtp-Source: AGHT+IHJEt3DpnN7yq6vd17xrWdn/OH+8ZhLbaBJR67egZPBdLyhAehDfkOTtgIQxMJ+OiEu7YakLA==
-X-Received: by 2002:a17:907:c891:b0:a8d:5351:bb22 with SMTP id a640c23a62f3a-a93a06e2792mr299425966b.65.1727282861571;
-        Wed, 25 Sep 2024 09:47:41 -0700 (PDT)
-Received: from mail-ej1-f44.google.com (mail-ej1-f44.google.com. [209.85.218.44])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-a93930f7ba4sm229454466b.159.2024.09.25.09.47.40
-        for <linux-efi@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 25 Sep 2024 09:47:41 -0700 (PDT)
-Received: by mail-ej1-f44.google.com with SMTP id a640c23a62f3a-a8d29b7edc2so7486266b.1
-        for <linux-efi@vger.kernel.org>; Wed, 25 Sep 2024 09:47:40 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCVSVmxZhIOeMAPcNnknitTK0Z4IT7vX53URI24gPnXW6KUVa7Nx5OQ9UGuBbDiPOEuLnGDYQ0nCjUg=@vger.kernel.org
-X-Received: by 2002:a17:906:f5a9:b0:a86:9d39:a2a with SMTP id
- a640c23a62f3a-a93a0330c37mr309689066b.8.1727282382886; Wed, 25 Sep 2024
- 09:39:42 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XSCNkXh6"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D95DFC4CEC9;
+	Wed, 25 Sep 2024 17:43:14 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1727286194;
+	bh=F9RWq/rXxSYntRpuJCLCsbi4j1kIhMfwU6j+9oqCDbQ=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=XSCNkXh6Nl50YIGnJnoFX/5doL7AaTWE4fzrWVW0hSaX6cA89l8hRUPk0oOxn0/0a
+	 7wc981hmfdlzSpnQY9sbk8hjpbuMbi04gUV4NOBjSxdcCRv0l+9U93iqbaEjA7uRhU
+	 mKtjlR2QJTTICDfJYJBjgq/4Of69bkzakvzTKnEkZPXKAUWDroeMGQqp7mYfMFud4z
+	 uQ0NYsGBrrIejc9vp+uWBUcVTSKskJLtavBZiLaEDucMz7IKhONgqP809zorLVgWwD
+	 pZlBp4L5B0EYbSgxxe/GU/Rb8Xjee15oLOBozXq0EZiQYQCQOu5KSgugF3iAd1kCu0
+	 d9ygt3KDerlZg==
+Received: by mail-lj1-f170.google.com with SMTP id 38308e7fff4ca-2f75c6ed397so918571fa.2;
+        Wed, 25 Sep 2024 10:43:14 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCU0NZguSYRaESNaMLCxRnrnJBujIGWqp5RSwdEDBVFl1iZ6uxtaZDi3oGZDsBXrkwU5CuUl8Ho9pDnMVj/t@vger.kernel.org, AJvYcCU4rkrjglJdW6N/3Tn4CviyNkRnvcgek2M9ZvK3wixQjwZgiWeZL6mMOi/iVe3ajP0TVYRCDZem4P4Afvgx@vger.kernel.org, AJvYcCUB4gs1GDhVtdjY3yokCK6y2Mgfy+PrxOEWttNewzfDgaameMoAAhb8MbZJau4jU22bNWg=@vger.kernel.org, AJvYcCUXqqGfM9kEoabAXq2UFW69UprDDHfZ9t6Xx1hWC+z4fHTxOk118xgYFV07Lk0yzAwUCm/4mRovB04245+rVso=@vger.kernel.org, AJvYcCUZWD5pNGaRoLvjvqs4+YguaYVh1mp5YtOhJAbfOmk1OVUMWKRFPG2kJwUgqlq3huNb0a/WyHY3sz7h@vger.kernel.org, AJvYcCV2JhnMQ1eMwtgl9w5nyULw9XiHzHBf+b5ynFnpEqItN2vODXdrAn7SZsGOmIjab6+770+RNBaLbv0=@vger.kernel.org, AJvYcCVPAf3T4PLp45gATMgqSOItD7FjcPMvRMkqFrkXjgFs0qZBRalArhgeYFNksP02KvxhVX6t2ObpfyFhag==@vger.kernel.org, AJvYcCVgvSe7X2bfsHYoKn4QERQRqami54TlaGT3X+HKpxzfiNzbdVKALpHoMr436/g2uGxlA+00wRPoCEqv@vger.kernel.org, AJvYcCWmfYSzVKmxZYYq7DzySb+Ar/wVAXL23NPMPIyRThI0KJwXh7txuEr7akcDCitfXLRgqM6490aoXpSAveult5Zp1g==@vger.kernel.org, AJvYcCWtTb3O21Ie4t0MKjEk3TQq4Ulnn7rzsckBX1+eLPIT/G9+I4zRUx6U7IFC5JwQuoVSr7NONcSMrEE9q60z@vger.kernel.org
+X-Gm-Message-State: AOJu0YzU54WlhGCv2KZbv0ekJIVdl33DEHGM70dlZvYCaxwjNa0P5XbN
+	n4cDTL8XpI0Q7MVlaXf5LPM7qW1kWersdyft8s7ViN+Pa9Jc5/mKzoBKgqzSxZ581vJOFpRfxqh
+	0TrMWsb4TBnv1zxSWMzN9OtxcoV4=
+X-Google-Smtp-Source: AGHT+IE+in2ujKNOqfeviyH74B95luqIkWPFYLgeNJlVInDDisJWQsgCamgzHX+iXC0QURdLGLDiXb1g2DagGfPNhfo=
+X-Received: by 2002:a05:651c:1504:b0:2f6:5f7b:e5e0 with SMTP id
+ 38308e7fff4ca-2f915ff58a0mr23471981fa.21.1727286193113; Wed, 25 Sep 2024
+ 10:43:13 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240925150059.3955569-30-ardb+git@google.com> <20240925150059.3955569-44-ardb+git@google.com>
-In-Reply-To: <20240925150059.3955569-44-ardb+git@google.com>
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Date: Wed, 25 Sep 2024 09:39:23 -0700
-X-Gmail-Original-Message-ID: <CAHk-=wiLYCoGSnqqPq+7fHWgmyf5DpO4SLDJ4kF=EGZVVZOX4A@mail.gmail.com>
-Message-ID: <CAHk-=wiLYCoGSnqqPq+7fHWgmyf5DpO4SLDJ4kF=EGZVVZOX4A@mail.gmail.com>
-Subject: Re: [RFC PATCH 14/28] x86/rethook: Use RIP-relative reference for
- return address
-To: Ard Biesheuvel <ardb+git@google.com>
-Cc: linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>, x86@kernel.org, 
+References: <20240925150059.3955569-30-ardb+git@google.com>
+ <20240925150059.3955569-35-ardb+git@google.com> <CAP-5=fXw1rcgWgMeDSVqiDYh2XYApyaJpNvukvJ7vMs7ZPMr6g@mail.gmail.com>
+In-Reply-To: <CAP-5=fXw1rcgWgMeDSVqiDYh2XYApyaJpNvukvJ7vMs7ZPMr6g@mail.gmail.com>
+From: Ard Biesheuvel <ardb@kernel.org>
+Date: Wed, 25 Sep 2024 19:43:01 +0200
+X-Gmail-Original-Message-ID: <CAMj1kXEmssrOhu20aLW4v88YVdkCfbeRg6arkgUoDNHm-4vbMA@mail.gmail.com>
+Message-ID: <CAMj1kXEmssrOhu20aLW4v88YVdkCfbeRg6arkgUoDNHm-4vbMA@mail.gmail.com>
+Subject: Re: [RFC PATCH 05/28] x86: Define the stack protector guard symbol explicitly
+To: Ian Rogers <irogers@google.com>
+Cc: Ard Biesheuvel <ardb+git@google.com>, linux-kernel@vger.kernel.org, x86@kernel.org, 
 	"H. Peter Anvin" <hpa@zytor.com>, Andy Lutomirski <luto@kernel.org>, Peter Zijlstra <peterz@infradead.org>, 
 	Uros Bizjak <ubizjak@gmail.com>, Dennis Zhou <dennis@kernel.org>, Tejun Heo <tj@kernel.org>, 
 	Christoph Lameter <cl@linux.com>, Mathieu Desnoyers <mathieu.desnoyers@efficios.com>, 
@@ -82,39 +62,81 @@ Cc: linux-kernel@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>, x86@kernel.o
 	Nathan Chancellor <nathan@kernel.org>, Keith Packard <keithp@keithp.com>, 
 	Justin Stitt <justinstitt@google.com>, Josh Poimboeuf <jpoimboe@kernel.org>, 
 	Arnaldo Carvalho de Melo <acme@kernel.org>, Namhyung Kim <namhyung@kernel.org>, Jiri Olsa <jolsa@kernel.org>, 
-	Ian Rogers <irogers@google.com>, Adrian Hunter <adrian.hunter@intel.com>, 
-	Kan Liang <kan.liang@linux.intel.com>, linux-doc@vger.kernel.org, 
-	linux-pm@vger.kernel.org, kvm@vger.kernel.org, xen-devel@lists.xenproject.org, 
-	linux-efi@vger.kernel.org, linux-arch@vger.kernel.org, 
-	linux-sparse@vger.kernel.org, linux-kbuild@vger.kernel.org, 
-	linux-perf-users@vger.kernel.org, rust-for-linux@vger.kernel.org, 
-	llvm@lists.linux.dev
+	Adrian Hunter <adrian.hunter@intel.com>, Kan Liang <kan.liang@linux.intel.com>, 
+	linux-doc@vger.kernel.org, linux-pm@vger.kernel.org, kvm@vger.kernel.org, 
+	xen-devel@lists.xenproject.org, linux-efi@vger.kernel.org, 
+	linux-arch@vger.kernel.org, linux-sparse@vger.kernel.org, 
+	linux-kbuild@vger.kernel.org, linux-perf-users@vger.kernel.org, 
+	rust-for-linux@vger.kernel.org, llvm@lists.linux.dev
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Wed, 25 Sept 2024 at 08:16, Ard Biesheuvel <ardb+git@google.com> wrote:
+On Wed, 25 Sept 2024 at 17:54, Ian Rogers <irogers@google.com> wrote:
 >
-> Instead of pushing an immediate absolute address, which is incompatible
-> with PIE codegen or linking, use a LEA instruction to take the address
-> into a register.
+> On Wed, Sep 25, 2024 at 8:02=E2=80=AFAM Ard Biesheuvel <ardb+git@google.c=
+om> wrote:
+> >
+> > From: Ard Biesheuvel <ardb@kernel.org>
+> >
+> > Specify the guard symbol for the stack cookie explicitly, rather than
+> > positioning it exactly 40 bytes into the per-CPU area. Doing so removes
+> > the need for the per-CPU region to be absolute rather than relative to
+> > the placement of the per-CPU template region in the kernel image, and
+> > this allows the special handling for absolute per-CPU symbols to be
+> > removed entirely.
+> >
+> > This is a worthwhile cleanup in itself, but it is also a prerequisite
+> > for PIE codegen and PIE linking, which can replace our bespoke and
+> > rather clunky runtime relocation handling.
+> >
+> > Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+> > ---
+> >  arch/x86/Makefile                     |  4 ++++
+> >  arch/x86/include/asm/init.h           |  2 +-
+> >  arch/x86/include/asm/processor.h      | 11 +++--------
+> >  arch/x86/include/asm/stackprotector.h |  4 ----
+> >  tools/perf/util/annotate.c            |  4 ++--
+> >  5 files changed, 10 insertions(+), 15 deletions(-)
+> >
+...
+> > diff --git a/tools/perf/util/annotate.c b/tools/perf/util/annotate.c
+> > index 37ce43c4eb8f..7ecfedf5edb9 100644
+> > --- a/tools/perf/util/annotate.c
+> > +++ b/tools/perf/util/annotate.c
+> > @@ -2485,10 +2485,10 @@ static bool is_stack_operation(struct arch *arc=
+h, struct disasm_line *dl)
+> >
+> >  static bool is_stack_canary(struct arch *arch, struct annotated_op_loc=
+ *loc)
+> >  {
+> > -       /* On x86_64, %gs:40 is used for stack canary */
+> > +       /* On x86_64, %gs:0 is used for stack canary */
+> >         if (arch__is(arch, "x86")) {
+> >                 if (loc->segment =3D=3D INSN_SEG_X86_GS && loc->imm &&
+> > -                   loc->offset =3D=3D 40)
+> > +                   loc->offset =3D=3D 0)
+>
+> As a new perf tool  can run on old kernels we may need to have this be
+> something like:
+> (loc->offset =3D=3D 40 /* pre v6.xx kernels */ || loc->offset =3D=3D 0 /*
+> v6.xx and later */ )
+>
+> We could make this dependent on the kernel by processing the os_release s=
+tring:
+> https://git.kernel.org/pub/scm/linux/kernel/git/perf/perf-tools-next.git/=
+tree/tools/perf/util/env.h#n55
+> but that could well be more trouble than it is worth.
+>
 
-I don't think you can do this - it corrupts %rdi.
+Yeah. I also wonder what the purpose of this feature is. At the end of
+this series, the stack cookie will no longer be at a fixed offset of
+%GS anyway, and so perf will not be able to identify it in the same
+manner. So it is probably better to just leave this in place, as the
+%gs:0 case will not exist in the field (assuming that the series lands
+all at once).
 
-Yes, the code uses  %rdi later, but that's inside the SAVE_REGS_STRING
-/ RESTORE_REGS_STRING area.
-
-And we do have special calling conventions that aren't the regular
-ones, so %rdi might actually be used elsewhere. For example,
-__get_user_X and __put_user_X all have magical calling conventions:
-they don't actually use %rdi, but part of the calling convention is
-that the unused registers aren't modified.
-
-Of course, I'm not actually sure you can probe those and trigger this
-issue, but it all makes me think it's broken.
-
-And it's entirely possible that I'm wrong for some reason, but this
-just _looks_ very very wrong to me.
-
-I think you can do this with a "pushq mem" instead, and put the
-relocation into the memory location.
-
-                 Linus
+Any idea why this deviates from other architectures? Is x86_64 the
+only arch that needs to identify stack canary accesses in perf? We
+could rename the symbol to something identifiable, and do it across
+all architectures, if this really serves a need (and assuming that
+perf has insight into the symbol table).
