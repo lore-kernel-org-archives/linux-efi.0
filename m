@@ -1,159 +1,113 @@
-Received: from fout-a4-smtp.messagingengine.com (fout-a4-smtp.messagingengine.com [103.168.172.147])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EB8AA18637;
-	Wed, 25 Sep 2024 15:59:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.147
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5CF7247A62;
+	Wed, 25 Sep 2024 16:45:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727279955; cv=none; b=sa3WV09dVjCJIafIgmJk2N19Jdlj4pASEe6ccIBr1YJXkX3hNuCqg7AjFjdfe2bdAKGjK+yIDFR38IXi9HzjCfvohiUX7s10aexaOah4ORmy7e9hMhJgfDeIrmBrhkTjXcsnj6qll1LUBcsqPZuuDVTiKuRpPbGAJgK/2MJsMrg=
+	t=1727282719; cv=none; b=Ax++ce/B/oySvRIQ5nNSLv1xLmd2gmeRbkO20AHZYA7/jjTlQI3BXMIL+eDgIyWm0jJGJDy6tDHBdjWtc7k2knWycQrNGHNcwlGIrGmI+U/di1fcl3nwbdo1SvEeN4dYZp4O0kdbABUvK8imneP4dXGqecuGPIuVIf9/PIe3HJs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727279955; c=relaxed/simple;
-	bh=yaiCoyV8POwmw8mOFb1CvfBnHJKh54ULmKz45sixybQ=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=sR6mKxNyUsHZ9p8KwYp6mnBXK+81DWVn8SWXpavv2Kfhigs1vRNqgAt7l6GYZup1UB0DQC04k5mMJeeeQLoAw1XRJk2rOwz7nt/xwgXFm9ux6fDmqlGt6CeV1rURVK2DCI1b0ys5pWTf9Xwi6sAluwk/cqqE/TOHSxCJa5BneWs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de; spf=pass smtp.mailfrom=arndb.de; dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b=UVKMXiTj; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=VkQkxhzM; arc=none smtp.client-ip=103.168.172.147
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arndb.de
+	s=arc-20240116; t=1727282719; c=relaxed/simple;
+	bh=qgOwvX93MJaNEr7OQzS/TNQMPiUPOBpt0ph4xzwCx1w=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=AziAgYNVvwboynEcgkaYY5LVkkFiI1lr6p5Is101RhyjKuqts3xxLYLa41S01kO6fJ8mdW0Xa0Ug7aF9dOnBIfnBuW81mtuCeJm3X9MMEK748Bm6A2R2Z+qA8AKIp3mKu6FzMX4dpftl5EnHXQVMo0cz3ITpUsjkoeuoXy+AMHs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=onMHF/g0; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b="UVKMXiTj";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="VkQkxhzM"
-Received: from phl-compute-10.internal (phl-compute-10.phl.internal [10.202.2.50])
-	by mailfout.phl.internal (Postfix) with ESMTP id ECD7113803AA;
-	Wed, 25 Sep 2024 11:59:10 -0400 (EDT)
-Received: from phl-imap-11 ([10.202.2.101])
-  by phl-compute-10.internal (MEProxy); Wed, 25 Sep 2024 11:59:10 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
-	:cc:content-transfer-encoding:content-type:content-type:date
-	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to; s=fm1; t=1727279950;
-	 x=1727366350; bh=3HZx7sec5GV7f3nA3v8u1Fjv7A5gsnEaqY5PBAiqOkk=; b=
-	UVKMXiTjaRWc30bxZNATVWbRhgICrxpyR1x16ghxJOAQTl5BOunfXp9FwWV9WhlV
-	+aUa/RGQh0Kyz4py6ifpIJ0+eLmjwMyTDfXsi0XWrcC8RcdTOOgH0YZTuBZbucr/
-	z2c10MA43k2yciVzwTab6t6eXgWSHOOzeHnWuiGcynxher7cWBmML1U9Sevdd5iI
-	uzvkVwSmr0CDT4xYR/kN0N6RZhrsVcoWwgNNDis6Dv19wAKQhSHm5ns+KjaDg8od
-	S9wcHRzFhbGHOVeS9mXFTuId4wpU9p1MK04NIfi1O27zhlWafosj7W3qPNzL6+H+
-	DB2IwVwmKjOI85hzhAEKpQ==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-transfer-encoding
-	:content-type:content-type:date:date:feedback-id:feedback-id
-	:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to:x-me-proxy:x-me-proxy
-	:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; t=1727279950; x=
-	1727366350; bh=3HZx7sec5GV7f3nA3v8u1Fjv7A5gsnEaqY5PBAiqOkk=; b=V
-	kQkxhzMWnh9soxOXto4eo35XEnniTH4Wu+9ZskAHzs93bDP7LBa6DgPrj6HceGdo
-	8YKYsjg/9l4PP68f+e9rStsWE3nv4yrfFwW9zxVUxAAoxu92B7DwkCnMDEB5z++5
-	B2Uj+lbSbXt+XIWbOH6RMp3gHONT6vsyJTj7kIzfZlBMjfQMJfIdjyljGakAIjbV
-	dxtEToc/zuQB6+/68rKtO42kB6GLy1P4svOtLC8opNfW/Ibh4Rj6RfYs1tmv6qEF
-	/xMtI7xZqb2slX9RiE52KgOWpCCVFgL5Cu2jlVC9WPk3512KFFuAVu9ynYuhKCE0
-	r2M9NYYjcQEpvrsJmEDGg==
-X-ME-Sender: <xms:TTP0ZqmgT4Iz-DjvOhb6TEsmbNcedL4jv-HXEBZ14JusRndh8E3guQ>
-    <xme:TTP0Zh1aAfi2-W_sHtCvZrcYc2NMKYejucSvVVwIJzXQiogHFgrFj3dCt8w6MAvoP
-    d41cQblQb2fa8wiyNo>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeeftddrvddthedgleehucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdggtfgfnhhsuhgsshgtrhhisggvpdfu
-    rfetoffkrfgpnffqhgenuceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnh
-    htshculddquddttddmnecujfgurhepofggfffhvfevkfgjfhfutgfgsehtjeertdertddt
-    necuhfhrohhmpedftehrnhguuceuvghrghhmrghnnhdfuceorghrnhgusegrrhhnuggsrd
-    guvgeqnecuggftrfgrthhtvghrnhepfefhheetffduvdfgieeghfejtedvkeetkeejfeek
-    keelffejteevvdeghffhiefhnecuffhomhgrihhnpehkvghrnhgvlhdrohhrghenucevlh
-    hushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegrrhhnugesrghr
-    nhgusgdruggvpdhnsggprhgtphhtthhopeegtddpmhhouggvpehsmhhtphhouhhtpdhrtg
-    hpthhtohepmhgrthhhihgvuhdruggvshhnohihvghrshesvghffhhitghiohhsrdgtohhm
-    pdhrtghpthhtohepuhgsihiijhgrkhesghhmrghilhdrtghomhdprhgtphhtthhopegrrh
-    gusgdoghhithesghhoohhglhgvrdgtohhmpdhrtghpthhtohepihhrohhgvghrshesghho
-    ohhglhgvrdgtohhmpdhrtghpthhtohepjhhushhtihhnshhtihhtthesghhoohhglhgvrd
-    gtohhmpdhrtghpthhtohepphgvthgvrhiisehinhhfrhgruggvrggurdhorhhgpdhrtghp
-    thhtoheprggurhhirghnrdhhuhhnthgvrhesihhnthgvlhdrtghomhdprhgtphhtthhope
-    hkvghithhhpheskhgvihhthhhprdgtohhmpdhrtghpthhtoheprggtmhgvsehkvghrnhgv
-    lhdrohhrgh
-X-ME-Proxy: <xmx:TTP0ZorEpf8uhg8h7KUOuuyxmkFTuOqd8M-ijgxDXgHXHnEsCAqn1A>
-    <xmx:TTP0ZukWROg85Ojj1n7scTnPh_o5BOn4tFS4d6Wlg35ADB7gm5yxxQ>
-    <xmx:TTP0Zo3bonoZfA7r9k_xttbCf96LxvWQCw6nio7M3wIvLzzRaNhFBA>
-    <xmx:TTP0ZlvFerWdcwY5EIw3orvEavM3V7Yt9LqH5F0Xmjy4Y5rHiisqdQ>
-    <xmx:TjP0ZmWuFxpdl1lIuEttTBR3BrOqJ-pJA32wqZmkpWVgyRHgKyKtEXao>
-Feedback-ID: i56a14606:Fastmail
-Received: by mailuser.phl.internal (Postfix, from userid 501)
-	id 792C62220071; Wed, 25 Sep 2024 11:59:09 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="onMHF/g0"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A5925C4CECE;
+	Wed, 25 Sep 2024 16:45:18 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1727282718;
+	bh=qgOwvX93MJaNEr7OQzS/TNQMPiUPOBpt0ph4xzwCx1w=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=onMHF/g0D43HW6aMXQhcIu1A27RFbkhoDeVTu1IsE3Dr45prf9Gt/b9XTbLxkLRdc
+	 tp+sKb+2tVL2RKsH7zt7pedqKxbxASz7T6hHTvkigsDpqXaREORqbOHeHr1WNosC80
+	 8oqjuX47b/9IC6c9ciSn6WciiPIOmDd4sLFsDQ49EcS7F2y6hlJlFootPDIZyx6tV1
+	 nZWbOIv6XsJEj83cV3qJkPJFVqvvPhr7TNk6o6VoBEYUa0GNLZHRv55RTy27voXKfL
+	 S1kfkqExZO+yREPbbJkOthV308A1sBbwWyv5+7Rufb9Ltpojr4m1MeoarzGHGNAwS0
+	 hJW9ST3pclReg==
+Received: by mail-lj1-f171.google.com with SMTP id 38308e7fff4ca-2f75129b3a3so192291fa.2;
+        Wed, 25 Sep 2024 09:45:18 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCUZrVQFyfp3OROznK55Rykut0Vq4VzJw2zcFPgidFv6NsTIp5igjymbOi7x1ALJHZNX8dOA5JfLR94CsQ==@vger.kernel.org, AJvYcCUz+23C1CHv7iFrXAI2PEAOlsl3nKy4zCkgdpCzjVR+PZG/lT5iVlyfrYYV9edM8i+u5iKA7NZGYK+3MmbD@vger.kernel.org, AJvYcCVDkfKF4Wf1/S72iFv6+6GmsbTOzeH0z7QS2u4HE/mUpjgxlqabatrtoHE5damQ3TxOLgU=@vger.kernel.org, AJvYcCVv+ineSpy35ISvR/o04URA/heKwgTJwY6lwUmkbod4vH2jws/WdAr65sQcYJlRJ12uqvuvjxdiHDpM@vger.kernel.org, AJvYcCWJTF2NgETPwYnZC1l04iimVEYaciRTWWIYCqoca1IKqvoQthkXc4epr2xaSNGnA3pGtjbGYhBfxPN5@vger.kernel.org, AJvYcCWy+l3uwmBwVhKoQ6/pF6D3xkpICniLemWxfUq5kfXXMwCDkVtPh5Lhh5ALyLRylrh2TQCx1ZjWSYGfSytIJzpOpw==@vger.kernel.org, AJvYcCX2J8m9RLcuSRmneFctGBeIMH74AifQm5JUDjOfc6yxZKtYnNuLp3FgjZK0yTB/JPnYnhbm6XjfzZj48YLW@vger.kernel.org, AJvYcCXEjsV+TRobG1afondrysMpUh2I+xFjlDATIRV3KSx8PO6QqDEHMgTdTCXFuUizAKxBmZWbK162qUz9p2vy@vger.kernel.org, AJvYcCXMOrBwLsF12s7wQCENUNmqXoDWgmdI17sBCmGlAqja+tWcQOVOBNzH9VglDke1UwZ7ifo5UVf/oA8=@vger.kernel.org, AJvYcCXgNLhP3y+nNGHVlPY1jLREbsxBYjNh9qop0QTGyGMESUJ8dlVFgH1pgDGtuFrK2DfuZYNhfWM/Q8HWL3eDwxU=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxONOvlF79P2t0wIUAmL20ZGykKkiWT5lNNd+sBvz9HZ7Inrfys
+	4TcpN3U4YNbgn8s2N1quoivpCJkA1bc6Ev5v0LTEwAS5YynzrkOT+4Va4bACVxalIE8l8Yug4qT
+	aAC7qlbvbMKu8ISAB34QPfGJ2e6A=
+X-Google-Smtp-Source: AGHT+IHztXYzAiMagygAhzDxKwnY8wOFDul9cLbEROanbEnmGDGU1AJFUfvHaHhmJ6jyIhgnmNtdOygZ3lKoSkpCLq0=
+X-Received: by 2002:a2e:702:0:b0:2ef:20ae:d113 with SMTP id
+ 38308e7fff4ca-2f91ca64507mr16954501fa.40.1727282716715; Wed, 25 Sep 2024
+ 09:45:16 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Date: Wed, 25 Sep 2024 15:58:38 +0000
-From: "Arnd Bergmann" <arnd@arndb.de>
-To: "Ard Biesheuvel" <ardb+git@google.com>, linux-kernel@vger.kernel.org
-Cc: "Ard Biesheuvel" <ardb@kernel.org>, x86@kernel.org,
- "H. Peter Anvin" <hpa@zytor.com>, "Andy Lutomirski" <luto@kernel.org>,
- "Peter Zijlstra" <peterz@infradead.org>,
- "Uros Bizjak" <ubizjak@gmail.com>, "Dennis Zhou" <dennis@kernel.org>,
- "Tejun Heo" <tj@kernel.org>, "Christoph Lameter" <cl@linux.com>,
- "Mathieu Desnoyers" <mathieu.desnoyers@efficios.com>,
- "Paolo Bonzini" <pbonzini@redhat.com>,
- "Vitaly Kuznetsov" <vkuznets@redhat.com>,
- "Juergen Gross" <jgross@suse.com>,
- "Boris Ostrovsky" <boris.ostrovsky@oracle.com>,
- "Greg Kroah-Hartman" <gregkh@linuxfoundation.org>,
- "Masahiro Yamada" <masahiroy@kernel.org>, "Kees Cook" <kees@kernel.org>,
- "Nathan Chancellor" <nathan@kernel.org>,
- "Keith Packard" <keithp@keithp.com>,
- "Justin Stitt" <justinstitt@google.com>,
- "Josh Poimboeuf" <jpoimboe@kernel.org>,
- "Arnaldo Carvalho de Melo" <acme@kernel.org>,
- "Namhyung Kim" <namhyung@kernel.org>, "Jiri Olsa" <jolsa@kernel.org>,
- "Ian Rogers" <irogers@google.com>,
- "Adrian Hunter" <adrian.hunter@intel.com>,
- "Kan Liang" <kan.liang@linux.intel.com>, linux-doc@vger.kernel.org,
- linux-pm@vger.kernel.org, kvm@vger.kernel.org,
- xen-devel@lists.xenproject.org, linux-efi@vger.kernel.org,
- Linux-Arch <linux-arch@vger.kernel.org>, linux-sparse@vger.kernel.org,
- linux-kbuild@vger.kernel.org, linux-perf-users@vger.kernel.org,
- rust-for-linux@vger.kernel.org, llvm@lists.linux.dev
-Message-Id: <c4868f63-b688-4489-a112-05bf04280bde@app.fastmail.com>
-In-Reply-To: <20240925150059.3955569-32-ardb+git@google.com>
 References: <20240925150059.3955569-30-ardb+git@google.com>
- <20240925150059.3955569-32-ardb+git@google.com>
-Subject: Re: [RFC PATCH 02/28] Documentation: Bump minimum GCC version to 8.1
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+ <20240925150059.3955569-44-ardb+git@google.com> <CAHk-=wiLYCoGSnqqPq+7fHWgmyf5DpO4SLDJ4kF=EGZVVZOX4A@mail.gmail.com>
+In-Reply-To: <CAHk-=wiLYCoGSnqqPq+7fHWgmyf5DpO4SLDJ4kF=EGZVVZOX4A@mail.gmail.com>
+From: Ard Biesheuvel <ardb@kernel.org>
+Date: Wed, 25 Sep 2024 18:45:05 +0200
+X-Gmail-Original-Message-ID: <CAMj1kXH1xqYwhG16XxoBpoedTkBvt72xBjO259174jHirdf47A@mail.gmail.com>
+Message-ID: <CAMj1kXH1xqYwhG16XxoBpoedTkBvt72xBjO259174jHirdf47A@mail.gmail.com>
+Subject: Re: [RFC PATCH 14/28] x86/rethook: Use RIP-relative reference for
+ return address
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Ard Biesheuvel <ardb+git@google.com>, linux-kernel@vger.kernel.org, x86@kernel.org, 
+	"H. Peter Anvin" <hpa@zytor.com>, Andy Lutomirski <luto@kernel.org>, Peter Zijlstra <peterz@infradead.org>, 
+	Uros Bizjak <ubizjak@gmail.com>, Dennis Zhou <dennis@kernel.org>, Tejun Heo <tj@kernel.org>, 
+	Christoph Lameter <cl@linux.com>, Mathieu Desnoyers <mathieu.desnoyers@efficios.com>, 
+	Paolo Bonzini <pbonzini@redhat.com>, Vitaly Kuznetsov <vkuznets@redhat.com>, 
+	Juergen Gross <jgross@suse.com>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Arnd Bergmann <arnd@arndb.de>, 
+	Masahiro Yamada <masahiroy@kernel.org>, Kees Cook <kees@kernel.org>, 
+	Nathan Chancellor <nathan@kernel.org>, Keith Packard <keithp@keithp.com>, 
+	Justin Stitt <justinstitt@google.com>, Josh Poimboeuf <jpoimboe@kernel.org>, 
+	Arnaldo Carvalho de Melo <acme@kernel.org>, Namhyung Kim <namhyung@kernel.org>, Jiri Olsa <jolsa@kernel.org>, 
+	Ian Rogers <irogers@google.com>, Adrian Hunter <adrian.hunter@intel.com>, 
+	Kan Liang <kan.liang@linux.intel.com>, linux-doc@vger.kernel.org, 
+	linux-pm@vger.kernel.org, kvm@vger.kernel.org, xen-devel@lists.xenproject.org, 
+	linux-efi@vger.kernel.org, linux-arch@vger.kernel.org, 
+	linux-sparse@vger.kernel.org, linux-kbuild@vger.kernel.org, 
+	linux-perf-users@vger.kernel.org, rust-for-linux@vger.kernel.org, 
+	llvm@lists.linux.dev
+Content-Type: text/plain; charset="UTF-8"
 
-On Wed, Sep 25, 2024, at 15:01, Ard Biesheuvel wrote:
-> From: Ard Biesheuvel <ardb@kernel.org>
+On Wed, 25 Sept 2024 at 18:39, Linus Torvalds
+<torvalds@linux-foundation.org> wrote:
 >
-> Bump the minimum GCC version to 8.1 to gain unconditional support for
-> referring to the per-task stack cookie using a symbol rather than
-> relying on the fixed offset of 40 bytes from %GS, which requires
-> elaborate hacks to support.
+> On Wed, 25 Sept 2024 at 08:16, Ard Biesheuvel <ardb+git@google.com> wrote:
+> >
+> > Instead of pushing an immediate absolute address, which is incompatible
+> > with PIE codegen or linking, use a LEA instruction to take the address
+> > into a register.
 >
-> Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
-> ---
->  Documentation/admin-guide/README.rst | 2 +-
->  Documentation/process/changes.rst    | 2 +-
->  2 files changed, 2 insertions(+), 2 deletions(-)
+> I don't think you can do this - it corrupts %rdi.
+>
+> Yes, the code uses  %rdi later, but that's inside the SAVE_REGS_STRING
+> / RESTORE_REGS_STRING area.
+>
 
-Acked-by: Arnd Bergmann <arnd@arndb.de>
+Oops, I missed that.
 
-As we discussed during plumbers, I think this is reasonable,
-both the gcc-8.1 version and the timing after the 6.12-LTS
-kernel.
+> And we do have special calling conventions that aren't the regular
+> ones, so %rdi might actually be used elsewhere. For example,
+> __get_user_X and __put_user_X all have magical calling conventions:
+> they don't actually use %rdi, but part of the calling convention is
+> that the unused registers aren't modified.
+>
+> Of course, I'm not actually sure you can probe those and trigger this
+> issue, but it all makes me think it's broken.
+>
+> And it's entirely possible that I'm wrong for some reason, but this
+> just _looks_ very very wrong to me.
+>
+> I think you can do this with a "pushq mem" instead, and put the
+> relocation into the memory location.
+>
 
-We obviously need to go through all the other version checks
-to see what else can be cleaned up. I would suggest we also
-raise the binutils version to 2.30+, which is what RHEL8
-shipped alongside gcc-8. I have not found other distros that
-use older binutils in combination with gcc-8 or higher,
-Debian 10 uses binutils-2.31.
-I don't think we want to combine the additional cleanup with
-your series, but if we can agree on the version, we can do that
-in parallel.
+I'll change this into
 
-FWIW, here are links to the last few times we discussed this,
-and there are already has a few other things that would
-benefit from more modern compilers:
+  pushq arch_rethook_trampoline@GOTPCREL(%rip)
 
-https://lore.kernel.org/lkml/dca5b082-90d1-40ab-954f-8b3b6f51138c@app.fastmail.com/
-https://lore.kernel.org/lkml/CAFULd4biN8FPRtU54Q0QywfBFvvWV-s1M3kWF9YOmozyAX9+ZQ@mail.gmail.com/
-https://lore.kernel.org/lkml/CAK8P3a1Vt17Yry_gTQ0dwr7_tEoFhuec+mQzzKzFvZGD5Hrnow@mail.gmail.com/
-
-     Arnd
+which I had originally. I was trying to avoid the load from memory,
+but that obviously only works if the register is not live.
