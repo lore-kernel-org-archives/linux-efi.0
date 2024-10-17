@@ -1,34 +1,34 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4C8F31C1AA5;
-	Thu, 17 Oct 2024 16:16:37 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E61C21E04A5;
+	Thu, 17 Oct 2024 16:51:02 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729181797; cv=none; b=FST2IDHlRVQw4lz3x2Rf148yKQMraPOEFSgljJAbSbSzp99SaVTS0Vdxbv5Vj6YskuOuShTV55gZfUWpETHkWcYm2wDpLkgcIzrSGd+qAv6uArnwS3ZK7xrS6LD+8NtTzOTWfqGNJIaNpmThRv2wO3RDIAPa0tgV+7wLO5b3X3s=
+	t=1729183863; cv=none; b=KyrRzMzUDPx45EdbRy9U431JrwZm62nNd4JGsogwFbYUSEHGrMokhkOzOuI6w3nasX+f0mWoHBGT0jOIMDyU+YdDdJCCOVyexd4QeA2xrKgjz5qapPqSqZXFgc0bU12I9G3DycbtVM6Gh69BoCuE7GUczDXT5SDnW674aKFpd/c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729181797; c=relaxed/simple;
-	bh=hfI6iabp4PPWvqyvmjXc0F77R4JdfswrHfMqi0ZFT4I=;
+	s=arc-20240116; t=1729183863; c=relaxed/simple;
+	bh=nu+/YY2gR1ZzMVmhhVOVpo55R32dWjS/8gyLH+/tacE=;
 	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=ELs30T+i6WEpJorS6Mekn58o7qyBbHu4TOasPT7KOJGTXjL6eOH1D73LqsP4dzDyermN1dohQODRbGog7wVmpRA4zXB+rnQYJDUMe9yqZBHIl0rose2KRSyigFKEUvdxdetUmCyKSy4QmXkW6b84+9458fwlp0fwn8sopkB7hP8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=qRBXnamz; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:MIME-Version; b=PGX53718/RWKgSlCL9M4ccPBb7uE9UD79LwZ6RVGWO2QLe6QBENTgP+MJa7lul/qAKkHKDrNgC5ui+US8AOSpCGCd4H9obhaYuTl9pMDPpm4ia0YDi8vg5WFR9hTGkqgCB4AdZ5y7pT+yZMJu7zi1FuPi2taQmR9k2mqFvzlVMY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=iICARHoM; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="qRBXnamz"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 32DA1C4CEC3;
-	Thu, 17 Oct 2024 16:16:36 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="iICARHoM"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 21EB0C4CED0;
+	Thu, 17 Oct 2024 16:51:01 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1729181796;
-	bh=hfI6iabp4PPWvqyvmjXc0F77R4JdfswrHfMqi0ZFT4I=;
+	s=k20201202; t=1729183862;
+	bh=nu+/YY2gR1ZzMVmhhVOVpo55R32dWjS/8gyLH+/tacE=;
 	h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
-	b=qRBXnamznV90WcZD8OYvzNujY++b0mmEa3C9GotNIdOfGhLfkY4EKmbWuPd87g6Lk
-	 iAEJwTZ2R+ror6LuBaBvf3leOBXwKH706FsJ+kJz2GOhjY5yBzaf3Y3LbjZ10YS/c8
-	 EXBydRZqjBnTYvFsIGkFsgHO74iqxcxDp6JOTdEq8/hday1otzr0EduWstW3qlE57u
-	 E4+DPf3X5+voaqQUw7DanTn4gAa3tnpABW2onjyD+5ShJkaYsOktYUXKLWj6KfvnOG
-	 rvLz2gmZRrWSYqv4XkFUDdx2LykVXTl68SrsRpyVryTLB+2wjllovlZj3yqhSmsyb3
-	 Xx38eeNU4M1HA==
-Message-ID: <cc7e23de36edb50999cfd9c8dd6acc9d5962a479.camel@kernel.org>
-Subject: Re: [RFC PATCH v3 02/13] certs: Introduce ability to link to a
- system key
+	b=iICARHoM8EgPqapQHoINNY0ekt+qzjg1CjSVDrIVOjf2hK6MJ47ONuiS21GKhOA1M
+	 VMwSp8wJ6Yo6UJ6A3kch7OgcsEb4XGHW5VK2v1BVZxbid9qor8LUIM1LQxN7i1LAhI
+	 tjjG+Qcv5cUGDm5D72px83isytUA02K0Fp8YJz5dfIoK88s+Lt+oimaugi68HJKsrx
+	 j8I9uubSdds4qf0Pixbs07UM+Pk7bkHSQBjGh4uYi0svsDZnDlqU+roUMoYYHAOZ9F
+	 u7QrXom4Gl7VFAid/4CWPymwVxYFiyEtAVfbb/GPn08YkwIWbcxqn4Ht/AiFZ+IdEt
+	 a9KLZ+LE7WpEw==
+Message-ID: <30308614a1229870d205c33deba193f3d6732bef.camel@kernel.org>
+Subject: Re: [RFC PATCH v3 03/13] clavis: Introduce a new system keyring
+ called clavis
 From: Jarkko Sakkinen <jarkko@kernel.org>
 To: Eric Snowberg <eric.snowberg@oracle.com>, 
 	linux-security-module@vger.kernel.org
@@ -40,10 +40,10 @@ Cc: dhowells@redhat.com, dwmw2@infradead.org, herbert@gondor.apana.org.au,
  rdunlap@infradead.org,  linux-kernel@vger.kernel.org,
  keyrings@vger.kernel.org,  linux-crypto@vger.kernel.org,
  linux-efi@vger.kernel.org,  linux-integrity@vger.kernel.org
-Date: Thu, 17 Oct 2024 19:16:32 +0300
-In-Reply-To: <20241017155516.2582369-3-eric.snowberg@oracle.com>
+Date: Thu, 17 Oct 2024 19:50:58 +0300
+In-Reply-To: <20241017155516.2582369-4-eric.snowberg@oracle.com>
 References: <20241017155516.2582369-1-eric.snowberg@oracle.com>
-	 <20241017155516.2582369-3-eric.snowberg@oracle.com>
+	 <20241017155516.2582369-4-eric.snowberg@oracle.com>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 User-Agent: Evolution 3.52.4 (3.52.4-1.fc40) 
@@ -55,48 +55,30 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
 On Thu, 2024-10-17 at 09:55 -0600, Eric Snowberg wrote:
-> Introduce system_key_link(), a new function to allow a keyring to
-> link
-> to a key contained within one of the system keyrings (builtin,
-> secondary,
-> or platform). Depending on how the kernel is built, if the machine
-> keyring is available, it will be checked as well, since it is linked
-> to
-> the secondary keyring. If the asymmetric key id matches a key within
-> one
-> of these system keyrings, the matching key is linked into the passed
-> in
-> keyring.
->=20
-> Signed-off-by: Eric Snowberg <eric.snowberg@oracle.com>
-> ---
-> =C2=A0certs/system_keyring.c=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 | =
-30 ++++++++++++++++++++++++++++++
-> =C2=A0include/keys/system_keyring.h |=C2=A0 7 ++++++-
-> =C2=A02 files changed, 36 insertions(+), 1 deletion(-)
->=20
-> diff --git a/certs/system_keyring.c b/certs/system_keyring.c
-> index e344cee10d28..4abee7514442 100644
-> --- a/certs/system_keyring.c
-> +++ b/certs/system_keyring.c
-> @@ -20,6 +20,9 @@
-> =C2=A0static struct key *builtin_trusted_keys;
-> =C2=A0#ifdef CONFIG_SECONDARY_TRUSTED_KEYRING
-> =C2=A0static struct key *secondary_trusted_keys;
+> +static struct asymmetric_key_id *clavis_parse_boot_param(char *kid,
+> struct asymmetric_key_id *akid,
+> +							 int
+> akid_max_len)
+> +{
+> +	int error, hex_len;
+> +
+> +	if (!kid)
+> +		return 0;
+> +
+> +	hex_len =3D strlen(kid) / 2;
 
-/*
- * Explain system_trusted_keys (nothing too detailed, only the gist)
- */
+Hmmm... I'd consider sanity checking this:
 
-> +#define system_trusted_keys secondary_trusted_keys
-> +#else
-> +#define system_trusted_keys builtin_trusted_keys
-> =C2=A0#endif
-> =C2=A0#ifdef CONFIG_INTEGRITY_MACHINE_KEYRING
-> =C2=A0static struct key *machine_trusted_keys;
+	size_t len;
 
-We have enough these to make this quite convoluted so let's put some
-helpful reminders. I would forget this in no time ;-) So if it comes
-down to that, please put something because I have a goldfish memory.
+	/* ... */
 
+	len =3D strlen(kid);
+	if (len % 2) {
+		pr_err("Clavis key id has invalid length %lu\n", len);
+		return 0;
+	}
+
+	hex_len =3D len / 2;
+=09
 BR, Jarkko
