@@ -1,39 +1,39 @@
 Received: from mail.zytor.com (terminus.zytor.com [198.137.202.136])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7285E20B1E1;
-	Tue, 29 Oct 2024 23:03:45 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2DEC920C010;
+	Tue, 29 Oct 2024 23:06:59 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.136
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730243027; cv=none; b=mcVL+s4dXxOr2MB8fRvDl0qvmN5+93qU4RnhvAhK9mBDAdGDp9KFExCMQrjPz1XqwBDaAPfyeAwIDKmseS6X45mooo9RMkMj55Irdzt8qQTqnD4NF0FxJQKhuJaXYEpdrUZo+aJIvSmjZwRbjltdyf6FuvsuEnHMeHR01o9gxvU=
+	t=1730243222; cv=none; b=hhrrITLKFfNrvWL0RvAZ5p+Fw6tJNFmj/trs2DFfcRUWYXPcncMlujW1/kQNiiYCqOY2CAZw3LTzRG6lpx4ETO9T377XiT1emWuXGvGmJECw8K+jFO6ydZz9oKUtqKC4Slh1iFt9V7cVWIJEY1W7TbLKS4oIrmgm7O1WEeDgZPg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730243027; c=relaxed/simple;
-	bh=f50WIGB6k8MKzfsAMf7r8sByA9LZjnrApaTM0Y6lrmI=;
+	s=arc-20240116; t=1730243222; c=relaxed/simple;
+	bh=SZfWRojPKRj/QMHbVbiZftAEiOO0Fj7sz5Cu5qZPY9w=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=DDaa1Npn89i7nbLca1575pMoXzNunJGfAFoic55Znu1ObrXJhkceKksn1NlVppAKOZjp/xbR3TJ1FMrVtMtWjeZ0Lg8AbAnhedoc54aX2rMcybga39VTnjs0jc3WXn7x+F8/KgjTUdL3SzziApjk9qMMMLRz5UvDBhCehCCZMC0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zytor.com; spf=pass smtp.mailfrom=zytor.com; dkim=pass (2048-bit key) header.d=zytor.com header.i=@zytor.com header.b=aJTIJb8M; arc=none smtp.client-ip=198.137.202.136
+	 In-Reply-To:Content-Type; b=ZfXavvd1RNB1ew2ZGQ6kMV8sT9yHE7Gk2b3eL+5E0pqWdYOSub+d+nek6205pSaFy66iaC8mRtN/Q/tIS1KNGm83KGkwEff21tZCM+Uqm8l9/0ZjzFkm14f1KJgsTtoRK/ENJtxWRbnLa1JZevBelSpQmYcs/K+94IghGPflifI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zytor.com; spf=pass smtp.mailfrom=zytor.com; dkim=pass (2048-bit key) header.d=zytor.com header.i=@zytor.com header.b=JNg0BgvT; arc=none smtp.client-ip=198.137.202.136
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zytor.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=zytor.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=zytor.com header.i=@zytor.com header.b="aJTIJb8M"
+	dkim=pass (2048-bit key) header.d=zytor.com header.i=@zytor.com header.b="JNg0BgvT"
 Received: from [172.27.3.244] ([76.133.66.138])
 	(authenticated bits=0)
-	by mail.zytor.com (8.18.1/8.17.1) with ESMTPSA id 49TN2P7E576167
+	by mail.zytor.com (8.18.1/8.17.1) with ESMTPSA id 49TN5w1H579040
 	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NO);
-	Tue, 29 Oct 2024 16:02:25 -0700
-DKIM-Filter: OpenDKIM Filter v2.11.0 mail.zytor.com 49TN2P7E576167
+	Tue, 29 Oct 2024 16:05:59 -0700
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.zytor.com 49TN5w1H579040
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=zytor.com;
-	s=2024101701; t=1730242949;
-	bh=QkS6mIcMvK7AV9IhJUXopZimVR3qjiZ+/eJ25ztftAQ=;
+	s=2024101701; t=1730243162;
+	bh=JhctH8JV5OEarLmfDsY60GKnKpJkPqEFlwdBmGsg578=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=aJTIJb8MolXNM4Ur8fRnW/NKuzEbzfOjeSmli0QgYXf0nbD3QCkLFuq9iBg9Fty98
-	 6n7BfcdA9ff8F60jIm356PeSOum9AuRok/6gFZQxNLess6Z6tU7jH5uZIw/xmh0RC4
-	 vAYzZzj5/EdpbzeojU35mljKRWRksi2cGhFd5/4TLF6aVqsYFmvyHH9vJihvwcMpGE
-	 0VnsDZkViUbUeh+QJiHYpZt/4h0eAT+mThHezR6lLhuKS93RBXSobLVfEyfv+UOFiv
-	 5mykH7paFCgrebLadQ2iNXYFa8+n+ywyYTzxqqdocVqk9P3xSO5eKzXtY2f/UBr1IT
-	 yAGpxHwvnrPIw==
-Message-ID: <ae1ce014-cf09-4e92-8d93-282042975aee@zytor.com>
-Date: Tue, 29 Oct 2024 16:02:24 -0700
+	b=JNg0BgvTe5Iy1C4piQZT+QrNk7KVzqcucI2N5oTTMhPIwvuTxVXIGi8FFnuE9dkmf
+	 NtSdgtbWZNIKaAcfLeE/9sPVwXw56lu0bhlJqEqvzwmIlIQ9Zn9ND74+o5877R+npw
+	 qR/mYaooYZBsbPXHyeHTP0n3h4To82so9Ueq4T7dj8cnjtqJGk9fA+evqhMBrd6Q9H
+	 rXekf6omKcdgijjksg+KF/z8+o+o11kYVTSnecROknQKzI4+pqtDNZPJqUuMcaqcN9
+	 rsIGwMtEhaww1qs8bFm8nNaca/UBhltEWatrsVY0TaYdwlNdvYdCjCKVu7SGe9xmvG
+	 LTbU0JTQB1hAw==
+Message-ID: <aa3dc7dd-8939-4042-9e02-96dd29e45095@zytor.com>
+Date: Tue, 29 Oct 2024 16:05:58 -0700
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -43,9 +43,7 @@ MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
 Subject: Re: [PATCH v5 05/16] x86/cpu: Defer CR pinning setup until after EFI
  initialization
-To: "Luck, Tony" <tony.luck@intel.com>,
-        "Hansen, Dave"
- <dave.hansen@intel.com>,
+To: Dave Hansen <dave.hansen@intel.com>, "Luck, Tony" <tony.luck@intel.com>,
         "Mehta, Sohil" <sohil.mehta@intel.com>,
         Alexander Shishkin <alexander.shishkin@linux.intel.com>,
         Andy Lutomirski <luto@kernel.org>,
@@ -94,23 +92,27 @@ References: <20241028160917.1380714-1-alexander.shishkin@linux.intel.com>
  <SJ1PR11MB6083B9854320176B6301C530FC4B2@SJ1PR11MB6083.namprd11.prod.outlook.com>
  <34dd023d-3ed5-4655-88be-14a7a300b91e@intel.com>
  <SJ1PR11MB6083CA923D92CD70AE6C5FB9FC4B2@SJ1PR11MB6083.namprd11.prod.outlook.com>
+ <869c1545-8c94-4820-a861-fbc563056597@intel.com>
 Content-Language: en-US
 From: "H. Peter Anvin" <hpa@zytor.com>
-In-Reply-To: <SJ1PR11MB6083CA923D92CD70AE6C5FB9FC4B2@SJ1PR11MB6083.namprd11.prod.outlook.com>
+In-Reply-To: <869c1545-8c94-4820-a861-fbc563056597@intel.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 
-On 10/29/24 15:59, Luck, Tony wrote:
->> *IF* we switched things to do text poking in the upper half of the
->> address space, we'd probably want to find a completely unused PGD entry.
->>   I'm not sure off the top of my head if we have a good one for that or
->> if it's worth the trouble.
+On 10/29/24 16:03, Dave Hansen wrote:
+> On 10/29/24 15:59, Luck, Tony wrote:
+>>> *IF* we switched things to do text poking in the upper half of the
+>>> address space, we'd probably want to find a completely unused PGD entry.
+>>>   I'm not sure off the top of my head if we have a good one for that or
+>>> if it's worth the trouble.
+>> I expect that would be easy on 64-bit (no way the kernel needs all the
+>> PGD entries from 256..511) but hard for 32-bit (where kernel address
+>> space is in critically short supply on any machine with >1GB RAM).
 > 
-> I expect that would be easy on 64-bit (no way the kernel needs all the
-> PGD entries from 256..511) but hard for 32-bit (where kernel address
-> space is in critically short supply on any machine with >1GB RAM).
+> Yeah, I was talking about 64-bit only.  On 32-bit PAE a PGD maps 1/4 of
+> the address space which is totally unworkable for stealing.
 
-No LASS on 32 bits...
+But it is also not necessary.
 
 	-hpa
 
