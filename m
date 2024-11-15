@@ -1,453 +1,171 @@
-Received: from mail-pg1-f181.google.com (mail-pg1-f181.google.com [209.85.215.181])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from sender3-of-o57.zoho.com (sender3-of-o57.zoho.com [136.143.184.57])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B0221219E23
-	for <linux-efi@vger.kernel.org>; Tue, 12 Nov 2024 19:21:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.181
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731439308; cv=none; b=t2WyzoR6jt1K2ZOXl5F61EygzqD1mtWbi7gUNqJXjRDpFiVIMtdM4nOVo2u51C1WUrVX7jTBaz2wjGCkWcD7mG99+0k7IFMArHjfop6em2oGheWp243sCGHAnBH90r8Lulv4iUmSaK3hHftkPzEwAsEAhyodIxDffClryCG+zwA=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731439308; c=relaxed/simple;
-	bh=GHzaBYuHOU+ykK86bYoizo+ip8yRn07DOvalhHIjFWQ=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Dtvmcu4Ea4+UcGIsmxkysvfBaOa3RLCSBS0Uz35nT8Ok5FKcNfhwEaPAbqM8Lgf1CwEHXYdVAs3BfxEebsRKCk9NRiTXuhXtwME46+yPSK04MUUMct8ibyJk+wfaw8+VejiKEQa6UAdzIrNyaydFbZDjmpVx6tqXFntrNkAzAoE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=PZgxswnj; arc=none smtp.client-ip=209.85.215.181
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D09C91EA73;
+	Fri, 15 Nov 2024 01:18:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=136.143.184.57
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1731633513; cv=pass; b=SXD/GjqD/6tx+lJWyjKCpmiA486OuXliQMHvQumrvOvXfa4H/QVRjgTE6aXUojbsB7fexPi9xFTkcbWLR8aw/XkVTCAQUT0GDf6P89Lf//gQB5mzSbOybyboz1Ey8fuboYXJF9vOsInoc1V/7dXMPVCh/2/28e51JamEJPLebSU=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1731633513; c=relaxed/simple;
+	bh=FwqvCAt8Zg5L5tpyZOWp/OWDGqTnQXf5GTPksiCqOzE=;
+	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
+	 In-Reply-To:Content-Type; b=QqDu4tmSEOJYbzAk3Zz0gjVyRw52NlSYaWcYaK03LFetbbN1id5m3AO3PBJepLGHjXRE+9Owe2GVpTnsmaL8EsmckX5tPJrZ8r2INJIsxiXkb1GZab4Jf+a0CGm0cVZvAM4LhNc0Ys3ZaPftFkOgr2KdR1b8Wa8Mx339Um/UyD4=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=apertussolutions.com; spf=pass smtp.mailfrom=apertussolutions.com; dkim=pass (1024-bit key) header.d=apertussolutions.com header.i=dpsmith@apertussolutions.com header.b=mhpPy1pk; arc=pass smtp.client-ip=136.143.184.57
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=apertussolutions.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=apertussolutions.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="PZgxswnj"
-Received: by mail-pg1-f181.google.com with SMTP id 41be03b00d2f7-7ea8c4ce232so5370594a12.0
-        for <linux-efi@vger.kernel.org>; Tue, 12 Nov 2024 11:21:43 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1731439303; x=1732044103; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=W8E8hvRUbANQxvdQA+FQn+tu9MYQOb26X7vdR/xDtMY=;
-        b=PZgxswnjkeJFIFbNS1cZhBP/4JPP4Msb7eWm/Oi0m/z60KjwvzAZgkbbRwpb3gWWpU
-         Vcu9syUNDCqIA77dB/kATpNI8viQSr0lyqnz3lFs1hoyajnwooEs+Gj/FM7O03Rfy4y3
-         R22Sor90ShLHMaOaJJnr8uWfDKZzlR5J9WAfX3C1Sea828aYul6+d6pS9jLihcGKUbUA
-         3sHFYEe1+lUidI+vqDiZXAW54pj3BvLU6MAHTlW2ttwxYSr3JLSoriqjrkarzdpFsLhs
-         ebWMjQMAe4qbBVwhvRd2jHFfztkuVkk0CvQummoYjtdD5ZWOLYZ21/8NkfmnBu+vbiDs
-         mCQg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1731439303; x=1732044103;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=W8E8hvRUbANQxvdQA+FQn+tu9MYQOb26X7vdR/xDtMY=;
-        b=GKVMxNOXQ4wdnhZJ5/V2ABuTtsdfcPPUd3+1MSCcwrC3OqUGuzrcgtufrRVEIc/lSl
-         jaHm4LzdNKoKEJLaAM2ZK/47Ngkiju1gRCdIvSqBR/9sFD8KJTTnkfj09s8+UPjSKtnS
-         IDNzjDxIl32r9ZPEokk4fbhYI22NCs6WoXF9yyPigU9sIlH3/p9+0EpIJ65/zGQHbzgG
-         y2x6knw99HCp8dnv0cTIczXPjaXoMhBsXQ6K771wGlw933xE0bsBH22R4T7DFfVU54/f
-         UEcrcrq+YlLDgl80MkONK+cvrwW17+yMZB1GZAkxSsajkHfmKetYv74cF/rnLKlJ8A7X
-         pdoQ==
-X-Forwarded-Encrypted: i=1; AJvYcCU8UhMxyQj9PVE14dSge665VJNw0T/RdH03Wkxv52QaZ6Pv4Fbjrdei2TeQuMxYk+dvIyVC0lno7AI=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwVlGA5APNmDd2iC3mfOrYCReF8Wm5NK5kbcVxfMdkuo4OSK+nh
-	oizxOz53T4sGLezR0Y1N11rl6OP5mboZXxltrLNoRpZsBw+EX7RGXisg1pUOc0wxq+ZtFhXzVcS
-	MptA2WCrPf2/cfS9hBWR3Kz+xGEaYIkVk4xfAzA==
-X-Google-Smtp-Source: AGHT+IFxvsUZbRq6EBtiU4eI2evzjD88r74nk+AjKhdkZj9oL44QuKfvXT1iJBItUh7aJXP7Hr1lnN3+lnV2Bq1t860=
-X-Received: by 2002:a17:90b:2dcc:b0:2e2:e6bf:cd64 with SMTP id
- 98e67ed59e1d1-2e9b16e66fcmr21666806a91.5.1731439302973; Tue, 12 Nov 2024
- 11:21:42 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=apertussolutions.com header.i=dpsmith@apertussolutions.com header.b="mhpPy1pk"
+ARC-Seal: i=1; a=rsa-sha256; t=1731633431; cv=none; 
+	d=zohomail.com; s=zohoarc; 
+	b=HApsMMSmRc9YCIaxMUkJe0zltVO0dOBTierobYTK3H1mctcHyww8DwqrhC8w5GdZf6NC6DwbwZDAJuMEzTVPRXUDUItxS4QJ17p/tV6kz7j1fgbEhr8ZBdLd8f9rsImU1GTYB1rvqkSEOIBYrchHSHD98NeO+p2CChpRfgw9q+0=
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
+	t=1731633431; h=Content-Type:Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
+	bh=MuBQEpSeYrVW5P897dVbSdSSTy2uYjy7xShRezu7W2k=; 
+	b=NpTuHv2RsFDLRF/2wLyPkQne8P5SbtKMElKK6Mr5iJgBiuu2V4yPF9Z9chpk5y9Yvy8MDQ1Pa+WqJm05Zpoq80TqWZz9rvgv17S6yueVCyrfcfBfvdFXBCYpIw8BcQJ6BwJRUuiTQOscs6oC/s5UJQEOrazWXDEjNLfVjQQF5lY=
+ARC-Authentication-Results: i=1; mx.zohomail.com;
+	dkim=pass  header.i=apertussolutions.com;
+	spf=pass  smtp.mailfrom=dpsmith@apertussolutions.com;
+	dmarc=pass header.from=<dpsmith@apertussolutions.com>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1731633431;
+	s=zoho; d=apertussolutions.com; i=dpsmith@apertussolutions.com;
+	h=Message-ID:Date:Date:MIME-Version:From:From:Subject:Subject:To:To:Cc:Cc:References:In-Reply-To:Content-Type:Content-Transfer-Encoding:Message-Id:Reply-To;
+	bh=MuBQEpSeYrVW5P897dVbSdSSTy2uYjy7xShRezu7W2k=;
+	b=mhpPy1pkZZfw9Xv4SsFNA73xYZM58AZ6T6tnXjLz41i0gpDvH/DTN0MVOimmT0jg
+	EcAnCMDvMFWGfBpMmBnd8Y0PXCoNXN70fIVZFTLqOQzvtCt9J8vlcAhAJn3RJvwzjba
+	YugFNZ3m4CvIQbbEqIXJl+Kd1FYcuZb6NcWxOiz0=
+Received: by mx.zohomail.com with SMTPS id 173163342863043.69850969601737;
+	Thu, 14 Nov 2024 17:17:08 -0800 (PST)
+Message-ID: <5d1e41d6-b467-4013-a0d0-45f9511c15c6@apertussolutions.com>
+Date: Thu, 14 Nov 2024 20:17:04 -0500
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CALE0LRvJ-n77oU=O9__NdSLw2v33zMK+WYkn2LcwWMwHCbohQw@mail.gmail.com>
- <CAC_iWjJEXU+dodjvWQYM9ohPa3P2p0bFG=exGoi-iYFrLLbCTA@mail.gmail.com>
- <CALE0LRtUz8hd4pdR9sX2Sb6tOn=K4wkRnGG9B7f72qU8JFQSYQ@mail.gmail.com>
- <CAC_iWjJLSSTO0Ca7rgOWAHfWzbkBkKHkQedRUbcwsoU0dtrsGA@mail.gmail.com>
- <CALE0LRvN3tYgWig1XnCiAZvdzE8x=cdLanGxbUvpPr5nfexSPQ@mail.gmail.com>
- <CAC_iWjL4mp-sTsp5a+yFkUauXuMvZ1yoTAk_60nm-CCKUgwayw@mail.gmail.com>
- <CALE0LRsYXXaao2uCUMFkd8Y6f5Mxgoc-Qpft_y8wWW3ZiekbbA@mail.gmail.com>
- <CAC_iWjL+J9tNxEdh0AoYD19h013N4nk=KmaT=RACo4-oVwuRCA@mail.gmail.com>
- <CALE0LRu2oDSo6KOhO2fTDMiqX7iqjqNjNGD_67MJFS7BJWqT_w@mail.gmail.com>
- <CALE0LRvFT3fDdoBLXHK2e47cibD02pxXAuZ83rTqEfrzU3HnKA@mail.gmail.com>
- <CAC_iWj+STZib+VOZrQtZk95skWzyLqe7_HpNM60G6axNa3Lnnw@mail.gmail.com>
- <CALE0LRsqc6L9EunhOyvyOR_KgG28zb10YBR1qN2qgZ9iJvaHEw@mail.gmail.com>
- <CAC_iWjKLqDFb1wSUQ1uMqOfbeRtzGNX9gyTHtQy5-71WvBiiLA@mail.gmail.com>
- <CALE0LRt7cwwwQ0Rh+0qJsUzTsNULEQSYgAoviQp5F5SXeJk8LQ@mail.gmail.com>
- <CAC_iWjKkdS71Fh3LZ0CJR-vnC+PwGKGndxjU3WjjUPnZ84DYWg@mail.gmail.com>
- <CALE0LRt2ct8onNyPvTNzy3Ps1kqduqx-OMmnQse-SXsk5M451Q@mail.gmail.com> <CALE0LRsA==Art8xqRQfPQq0HP6ebtYTuQ677t-BV7fDZB3grWg@mail.gmail.com>
-In-Reply-To: <CALE0LRsA==Art8xqRQfPQq0HP6ebtYTuQ677t-BV7fDZB3grWg@mail.gmail.com>
-From: Ilias Apalodimas <ilias.apalodimas@linaro.org>
-Date: Tue, 12 Nov 2024 21:21:06 +0200
-Message-ID: <CAC_iWj+4G3LG0XpsygS+MYJU9+oPhftOnPAfkOnEgn+GgTp2OA@mail.gmail.com>
-Subject: Re: optee-based efi runtime variable service on TI j784s4 platforms
-To: Enric Balletbo i Serra <eballetb@redhat.com>
-Cc: Ard Biesheuvel <ardb@kernel.org>, Sumit Garg <sumit.garg@linaro.org>, linux-efi@vger.kernel.org, 
-	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, 
-	op-tee@lists.trustedfirmware.org, Manorit Chawdhry <m-chawdhry@ti.com>, 
-	Udit Kumar <u-kumar1@ti.com>, "Menon, Nishanth" <nm@ti.com>, 
-	Masahisa Kojima <kojima.masahisa@socionext.com>
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla Thunderbird
+From: "Daniel P. Smith" <dpsmith@apertussolutions.com>
+Subject: Re: [PATCH v9 06/19] x86: Add early SHA-1 support for Secure Launch
+ early measurements
+To: James Bottomley <James.Bottomley@HansenPartnership.com>,
+ Andy Lutomirski <luto@amacapital.net>
+Cc: Thomas Gleixner <tglx@linutronix.de>,
+ "Eric W. Biederman" <ebiederm@xmission.com>,
+ Eric Biggers <ebiggers@kernel.org>,
+ Ross Philipson <ross.philipson@oracle.com>, linux-kernel@vger.kernel.org,
+ x86@kernel.org, linux-integrity@vger.kernel.org, linux-doc@vger.kernel.org,
+ linux-crypto@vger.kernel.org, kexec@lists.infradead.org,
+ linux-efi@vger.kernel.org, iommu@lists.linux-foundation.org,
+ mingo@redhat.com, bp@alien8.de, hpa@zytor.com, dave.hansen@linux.intel.com,
+ ardb@kernel.org, mjg59@srcf.ucam.org, peterhuewe@gmx.de, jarkko@kernel.org,
+ jgg@ziepe.ca, nivedita@alum.mit.edu, herbert@gondor.apana.org.au,
+ davem@davemloft.net, corbet@lwn.net, dwmw2@infradead.org,
+ baolu.lu@linux.intel.com, kanth.ghatraju@oracle.com,
+ andrew.cooper3@citrix.com, trenchboot-devel@googlegroups.com
+References: <20240531010331.134441-1-ross.philipson@oracle.com>
+ <20240531010331.134441-7-ross.philipson@oracle.com>
+ <20240531021656.GA1502@sol.localdomain>
+ <874jaegk8i.fsf@email.froward.int.ebiederm.org>
+ <5b1ce8d3-516d-4dfd-a976-38e5cee1ef4e@apertussolutions.com>
+ <87ttflli09.ffs@tglx>
+ <CALCETrXQ7rChWLDqTG0+KY7rsfajSPguMnHO1G4VJi_mgwN9Zw@mail.gmail.com>
+ <1a1f0c41-70de-4f46-b91d-6dc7176893ee@apertussolutions.com>
+ <8a0b59a4-a5a2-42ae-bc1c-1ddc8f2aad16@apertussolutions.com>
+ <CALCETrX8caT5qvCUu24hQfxUF_wUC2XdGpS2YFP6SR++7FiM3Q@mail.gmail.com>
+ <c466ed57-35a8-41c0-9647-c70e588ad1d3@apertussolutions.com>
+ <CALCETrW9WNNGh1dEPKfQoeU+m5q6_m97d0_bzRkZsv2LxqB_ew@mail.gmail.com>
+ <ff0c8eed-8981-48c4-81d9-56b040ef1c7b@apertussolutions.com>
+ <446cf9c70184885e4cec6dd4514ae8daf7accdcb.camel@HansenPartnership.com>
+Content-Language: en-US
+In-Reply-To: <446cf9c70184885e4cec6dd4514ae8daf7accdcb.camel@HansenPartnership.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-ZohoMailClient: External
 
-Hi Enric
+On 11/2/24 12:04, James Bottomley wrote:
+> On Sat, 2024-11-02 at 10:53 -0400, Daniel P. Smith wrote:
+>> Hi Luto,
+>>
+>> My apologies, I missed this response and the active on v11 cause me
+>> to
+>> get an inquiry why I hadn't responded.
+>>
+>> On 9/21/24 18:40, Andy Lutomirski wrote:
+> [...]
+>>> I assumed that "deliberately cap" meant that there was an actual
+>>> feature where you write something to the event log (if applicable)
+>>> and extend the PCR in a special way that *turns that PCR off*.
+>>> That is, it does something such that later-loaded software *can't*
+>>> use that PCR to attest or unseal anything, etc.
+>>>
+>>> But it sounds like you're saying that no such feature exists.  And
+>>> a quick skim of the specs doesn't come up with anything.  And the
+>>> SHA1 banks may well be susceptible to a collision attack.
+>>
+>> Correct, the only entity that can disable PCR banks is the firmware.
+> 
+> No, that's not correct.  Any user can use TPM_PCR_Allocate to activate
+> or deactivate individual banks.  The caveat is the change is not
+> implemented until the next TPM reset (which should involve a reboot).
+> BIOS also gets to the TPM before the kernel does, so it can, in theory,
+> check what banks a TPM has and call TPM_PCR_Allocate to change them.
+> In practice, because this requires a reboot, this is usually only done
+> from the BIOS menus not on a direct boot ... so you can be reasonably
+> sure that whatever changes were made will stick.
 
-[...]
+Okay, since there is a desire for exactness. Any system software can 
+send the TPM_PCR_Allocate command, specifying which PCRs should be 
+activated on next _TPM_init. There are restrictions such that if 
+DRTM_PCR is defined, then at least one bank must have a D-RTM PCR 
+allocation. In agreement with my statement, this is the mechanism used 
+by firmware to select the banks. Depending on the firmware 
+implementation, the firmware request will likely override the request 
+sent by the system software.
 
-> > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > ... stuck here ... traces indicates never outs from the efi_setup, so
-> > > > looks like hungs
-> > > >
-> > > > Let me try with BeaglePlay and read a bit more, as I feel I'm a bit
-> > > > lost right now.
-> > >
-> > > Sure, let me know if you need anything else.
-> > >
-> >
-> > Same behaviour on BeaglePlay, so either it's currently broken or I'm
-> > making the same mistake in my process on both boards.
-> >
-> > Ilias, by chance, do you have in which versions did you test?
-> >
->
-> So it looks like it is a problem with edk2 and/or edk2-platform, since
-> reverting those repositories back to September, things started to look
-> a lot better and I'm able to see en UEFI variables programmed.
->
-> FWIW I just found this project [1] from you, thank you for it. Turns
-> out that it is easy to reproduce the issue I'm facing even with qemu.
-> I'll try to bisect what's the problem and report properly.
+This brings us back to an earlier point, if one disables the SHA1 banks 
+in BIOS menu, then TXT will not use them and thus neither will Secure 
+Launch. Secure Launch will only use the algorithms used by the CPU and 
+the ACM.
 
-There were recently some patches in EDK2 changing some aspects and you
-also have to update edk2-platforms & OP-TEE [0] to test this, but this
-is not merged yet.  I did try those changes and they worked fine. When
-you bisect why EDK2 is broken please let me know otherwise I'll have a
-look.
+>> When it initializes the TPM, it can disable banks/algorithms. After
+>> that, when an extend operation is done, the TPM is expecting an entry
+>> for all active PCR banks and the TPM itself does the extend hash that
+>> is stored into the PCRs.
+> 
+> This, also, is not quite correct: an extend is allowed to specify banks
+> that don't exist (in which case nothing happens and no error is
+> reported) and miss banks that do (in which case no extend is done to
+> that bank).  In the early days of TPM2, some BIOS implementations only
+> extended sha1 for instance, meaning the sha256 banks were all zero when
+> the kernel started.
+> 
+> Even today, if you activate a bank the BIOS doesn't know about, it
+> likely won't extend it.  You can see this in VM boots with OVMF and
+> software TPMs having esoteric banks like SM3.
 
->
-> Thank you very much for your guidance and support.
+Let me correct myself here and again be extremely precise. When an 
+extend operation is done, the TPM driver expects to receive an array of 
+digests that is the same size as the number of allocated/active banks. 
+Specifically, it loops from 0 to chip->nr_allocated_banks, filling 
+TPML_DIGEST_VALUES with an entry for all the active banks, to include 
+SHA1 if it is active. Coming back to my response to Luto, we can either 
+populate it with 0 or a well-known value for each extend we send. 
+Regardless of what the value is, the TPM will use its implementation of 
+SHA1 to calculate the resulting extend value.
 
-You're welcome.
-Keep in mind that [1] is _very_ hacky and it's just testing variable
-accesses in the firmware since U-Boot emulates the RPMB, not QEMU. IOW
-it's fine to use it and test U-Boot but the changes won't survive
-ExitBootServris and won't work in Linux.
+Even with these clarifications, the conclusion does not change. If the 
+firmware enables SHA1, there is nothing that can be done to disable or 
+block its usage from the user. Linux Secure Launch sending measurements 
+to all the banks that the hardware used to start the DRTM chain does not 
+create a vulnerability in and of itself. The user is free to leverage 
+the SHA1 bank in any of the TPM's Integrity Collection suite of 
+operations, regardless of what Secure Launch sends for the SHA1 hash. 
+Whereas, neutering the solution of SHA1 breaks the ability for it to 
+support any hardware that has a TPM1.2, of which there are still many in 
+use.
 
->
-> Cheers,
->   Enric
->
-> [1] https://git.linaro.org/people/ilias.apalodimas/efi_optee_variables.git/
+V/r,
+Daniel P. Smith
 
-[0] https://github.com/tianocore/edk2/pull/6116
-[1] https://git.linaro.org/people/ilias.apalodimas/efi_optee_variables.git/
 
-Cheers
-/Ilias
->
->
-> > Thanks,
-> >   Enric
-> > > /Ilias
-> > > >
-> > > > > >
-> > > > > > => optee_rpmb read test 4
-> > > > > > D/TC:? 0 tee_ta_init_pseudo_ta_session:303 Lookup pseudo TA
-> > > > > > 023f8f1a-292a-432b-8fc4-de8471358067
-> > > > > > D/TC:? 0 ldelf_load_ldelf:110 ldelf load address 0x40007000
-> > > > > > D/LD:  ldelf:142 Loading TS 023f8f1a-292a-432b-8fc4-de8471358067
-> > > > > > F/TC:? 0 trace_syscall:147 syscall #3 (syscall_get_property)
-> > > > > > F/TC:? 0 trace_syscall:147 syscall #5 (syscall_open_ta_session)
-> > > > > > D/TC:? 0 ldelf_syscall_open_bin:135 > ldelf_syscall_open_bin
-> > > > > > D/TC:? 0 ldelf_syscall_open_bin:164 Lookup user TA ELF
-> > > > > > 023f8f1a-292a-432b-8fc4-de8471358067 (early TA)
-> > > > > > D/TC:? 0 ldelf_syscall_open_bin:168 res=0
-> > > > > > F/TC:? 0 trace_syscall:147 syscall #7 (syscall_invoke_ta_command)
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 trace_syscall:147 syscall #11 (syscall_mask_cancellation)
-> > > > > > F/TC:? 0 trace_syscall:147 syscall #7 (syscall_invoke_ta_command)
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 492 bytes
-> > > > > > F/TC:? 0 trace_syscall:147 syscall #3 (syscall_get_property)
-> > > > > > F/TC:? 0 trace_syscall:147 syscall #8 (syscall_check_access_rights)
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > F/TC:? 0 read_compressed:178 532 bytes
-> > > > > > F/TC:? 0 read_compressed:178 924 bytes
-> > > > > > F/TC:? 0 trace_syscall:147 syscall #8 (syscall_check_access_rights)
-> > > > > > F/TC:? 0 read_compressed:178 248 bytes
-> > > > > > F/TC:? 0 read_compressed:178 760 bytes
-> > > > > > F/TC:? 0 trace_syscall:147 syscall #6 (syscall_close_ta_session)
-> > > > > > F/TC:? 0 trace_syscall:147 syscall #3 (syscall_get_property)
-> > > > > > D/LD:  ldelf:176 ELF (023f8f1a-292a-432b-8fc4-de8471358067) at 0x40048000
-> > > > > > F/TC:? 0 trace_syscall:147 syscall #33 (syscall_cryp_random_number_generate)
-> > > > > > F/TC:? 0 trace_syscall:147 syscall #8 (syscall_check_access_rights)
-> > > > > > F/TC:? 0 trace_syscall:147 syscall #8 (syscall_check_access_rights)
-> > > > > > F/TC:? 0 trace_syscall:147 syscall #4 (syscall_get_property_name_to_index)
-> > > > > > F/TC:? 0 trace_syscall:147 syscall #8 (syscall_check_access_rights)
-> > > > > > F/TC:? 0 trace_syscall:147 syscall #41 (syscall_storage_obj_open)
-> > > > > > D/TC:? 0 rpmb_fs_open_internal:2356 >>> rpmb_fs_open_internal
-> > > > > > D/TC:? 0 tee_rpmb_init:1205 >>> core/tee/tee_rpmb_fs.c:1205
-> > > > > > D/TC:? 0 tee_rpmb_init:1214 >>> core/tee/tee_rpmb_fs.c:1214
-> > > > > > D/TC:? 0 tee_rpmb_init:1253 >>> core/tee/tee_rpmb_fs.c:1253
-> > > > > > D/TC:? 0 legacy_rpmb_init:1142 Trying legacy RPMB init
-> > > > > > D/TC:? 0 rpmb_set_dev_info:1111 RPMB: Syncing device information
-> > > > > > D/TC:? 0 rpmb_set_dev_info:1113 RPMB: RPMB size is 32*128 KB
-> > > > > > D/TC:? 0 rpmb_set_dev_info:1114 RPMB: Reliable Write Sector Count is 1
-> > > > > > D/TC:? 0 rpmb_set_dev_info:1116 RPMB: CID
-> > > > > > D/TC:? 0 rpmb_set_dev_info:1117 000000009e93ab30  13 01 4e 47 31 4d 31
-> > > > > > 35  4c 10 27 91 28 07 a9 00
-> > > > > > D/TC:? 0 legacy_rpmb_init:1162 RPMB INIT: Deriving key
-> > > > > > D/TC:? 0 tee_rpmb_key_gen:308 RPMB: Using test key
-> > > > > > D/TC:? 0 legacy_rpmb_init:1176 RPMB INIT: Verifying Key
-> > > > > > F/TC:? 0 plat_prng_add_jitter_entropy:68 0x61
-> > > > > > D/TC:? 0 legacy_rpmb_init:1180 Found working RPMB device
-> > > > > > D/TC:? 0 tee_rpmb_init:1205 >>> core/tee/tee_rpmb_fs.c:1205
-> > > > > > D/TC:? 0 tee_rpmb_init:1214 >>> core/tee/tee_rpmb_fs.c:1214
-> > > > > > D/TC:? 0 tee_rpmb_read:1362 Read 1 block at index 0
-> > > > > > D/TC:? 0 tee_rpmb_write_blk:1494 Write 1 block at index 0
-> > > > > > D/TC:? 0 tee_rpmb_init:1205 >>> core/tee/tee_rpmb_fs.c:1205
-> > > > > > D/TC:? 0 tee_rpmb_init:1214 >>> core/tee/tee_rpmb_fs.c:1214
-> > > > > > D/TC:? 0 tee_rpmb_init:1205 >>> core/tee/tee_rpmb_fs.c:1205
-> > > > > > D/TC:? 0 tee_rpmb_init:1214 >>> core/tee/tee_rpmb_fs.c:1214
-> > > > > > D/TC:? 0 tee_rpmb_read:1362 Read 1 block at index 0
-> > > > > > E/TC:? 0 rpmb_fs_setup:2143 **** Clearing Storage ****
-> > > > > > D/TC:? 0 tee_rpmb_write_blk:1494 Write 1 block at index 2
-> > > > > > F/TC:? 0 plat_prng_add_jitter_entropy:68 0xD3
-> > > > > > D/TC:? 0 tee_rpmb_read:1362 Read 1 block at index 0
-> > > > > > D/TC:? 0 tee_rpmb_write_blk:1494 Write 1 block at index 0
-> > > > > > D/TC:? 0 tee_rpmb_read:1362 Read 8 blocks at index 2
-> > > > > > F/TC:? 0 dump_fat:1951 flags 0x2, size 0, address 0, filename ''
-> > > > > > D/TC:? 0 read_fat:2221 fat_address 0
-> > > > > > D/TC:? 0 tee_rpmb_read:1362 Read 8 blocks at index 2
-> > > > > > F/TC:? 0 plat_prng_add_jitter_entropy:68 0x18
-> > > > > > E/TA:  read_persist_value:338 Can't open named object value, res = 0xffff0008
-> > > > > > D/TC:? 0 tee_ta_invoke_command:798 Error: ffff0008 of 4
-> > > > > > D/TC:? 0 tee_ta_close_session:460 csess 0x9e925a50 id 1
-> > > > > > D/TC:? 0 tee_ta_close_session:479 Destroy session
-> > > > > > D/TC:? 0 destroy_context:318 Destroy TA ctx (0x9e9259f0)
-> > > > > > Failed to read persistent value
-> > > > > >
-> > > > > >
-> > > > > >
-> > > > > >
-> > > > > >
-> > > > > >
-> > > > > >
-> > > > > > > Cheers
-> > > > > > > /Ilias
-> > > > > > >
-> > > > > > > > => optee_rpmb read test 4
-> > > > > > > > D/TC:? 0 tee_ta_init_pseudo_ta_session:303 Lookup pseudo TA
-> > > > > > > > 023f8f1a-292a-432b-8fc4-de8471358067
-> > > > > > > > D/TC:? 0 ldelf_load_ldelf:110 ldelf load address 0x40007000
-> > > > > > > > D/LD:  ldelf:142 Loading TS 023f8f1a-292a-432b-8fc4-de8471358067
-> > > > > > > > F/TC:? 0 trace_syscall:147 syscall #3 (syscall_get_property)
-> > > > > > > > F/TC:? 0 trace_syscall:147 syscall #5 (syscall_open_ta_session)
-> > > > > > > > D/TC:? 0 ldelf_syscall_open_bin:163 Lookup user TA ELF
-> > > > > > > > 023f8f1a-292a-432b-8fc4-de8471358067 (early TA)
-> > > > > > > > D/TC:? 0 ldelf_syscall_open_bin:167 res=0
-> > > > > > > > F/TC:? 0 trace_syscall:147 syscall #7 (syscall_invoke_ta_command)
-> > > > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > > > F/TC:? 0 read_compressed:178 1024 bytes
-> > > > > > > > F/TC:? 0 trace_syscall:147 syscall #11 (syscall_mask_cancellation)
-> > > > > > > > F/TC:? 0 trace_syscall:147 syscall #7 (syscall_invoke_ta_command)
-> > > > > > > >
-> > > > > > > > => efidebug query -bs -rt -nv
-> > > > > > > > MMC: no card present
-> > > > > > > > mmc_init: -123, time 2002
-> > > > > > > > D/TC:? 0 load_stmm:297 stmm load address 0x40004000
-> > > > > > > > D/TC:? 0 spm_handle_scall:859 Received FFA version
-> > > > > > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > > > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > > > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > > > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > > > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > > > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > > > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > > > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > > > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > > > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > > > > >
-> > > > > > > >
-> > > > > > > >
-> > > > > > > > >
-> > > > > > > > > > Thanks
-> > > > > > > > > > /Ilias
-> > > > > > > > > > >
-> > > > > > > > > > > => efidebug query -bs -rt -nv
-> > > > > > > > > > > D/TC:? 0 load_stmm:297 stmm load address 0x40004000
-> > > > > > > > > > > D/TC:? 0 spm_handle_scall:859 Received FFA version
-> > > > > > > > > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > > > > > > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > > > > > > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > > > > > > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > > > > > > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > > > > > > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > > > > > > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > > > > > > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > > > > > > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > > > > > > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > > > > > > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > > > > > > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > > > > > > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > > > > > > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > > > > > > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > > > > > > > > D/TC:? 0 spm_handle_scall:867 Received FFA direct request
-> > > > > > > > > > > ... stuck here ... I need to reset the board
-> > > > > > > > > > >
-> > > > > > > > > > > Will continue to see if I can get more useful messages
-> > > > > > > > > > >
-> > > > > > > > > > > Thanks,
-> > > > > > > > > > >   Enric
-> > > > > > > > > > >
-> > > > > > > > > > > > Thanks
-> > > > > > > > > > > > /Ilias
-> > > > > > > > > > > > >
-> > > > > > > > > > > > > I'll try to add some more prints to verify if REE is used as a store
-> > > > > > > > > > > > > system, I assume this should say something about RPMB. Am I right with
-> > > > > > > > > > > > > this?
-> > > > > > > > > > > >
-> > > > > > > > > > > >
-> > > > > > > > > > > > >
-> > > > > > > > > > > > > > > > >
-> > > > > > > > > > > > > > > > > And tracing the function calls gives me that:
-> > > > > > > > > > > > > > > > >
-> > > > > > > > > > > > > > > > >       tee_stmm_efi_probe() {
-> > > > > > > > > > > > > > > > >              tee_client_open_context() {
-> > > > > > > > > > > > > > > > >                optee_get_version() {
-> > > > > > > > > > > > > > > > >                  tee_get_drvdata(); (ret=0xffff000002e55800)
-> > > > > > > > > > > > > > > > >                } (ret=0xd)
-> > > > > > > > > > > > > > > > >                tee_ctx_match(); (ret=0x1)
-> > > > > > > > > > > > > > > > >                optee_smc_open() {
-> > > > > > > > > > > > > > > > >                  tee_get_drvdata(); (ret=0xffff000002e55800)
-> > > > > > > > > > > > > > > > >                  optee_open() {
-> > > > > > > > > > > > > > > > >                    tee_get_drvdata(); (ret=0xffff000002e55800)
-> > > > > > > > > > > > > > > > >                  } (ret=0x0)
-> > > > > > > > > > > > > > > > >                } (ret=0x0)
-> > > > > > > > > > > > > > > > >              } (ret=0xffff000004e71c80)
-> > > > > > > > > > > > > > > > >              tee_client_open_session() {
-> > > > > > > > > > > > > > > > >                optee_open_session() {
-> > > > > > > > > > > > > > > > >                  tee_get_drvdata(); (ret=0xffff000002e55800)
-> > > > > > > > > > > > > > > > >                  optee_get_msg_arg() {
-> > > > > > > > > > > > > > > > >                    tee_get_drvdata(); (ret=0xffff000002e55800)
-> > > > > > > > > > > > > > > > >                    tee_shm_get_va(); (ret=0xffff000002909000)
-> > > > > > > > > > > > > > > > >                  } (ret=0xffff000002909000)
-> > > > > > > > > > > > > > > > >                  tee_session_calc_client_uuid(); (ret=0x0)
-> > > > > > > > > > > > > > > > >                  optee_to_msg_param(); (ret=0x0)
-> > > > > > > > > > > > > > > > >                  optee_smc_do_call_with_arg() {
-> > > > > > > > > > > > > > > > >                    tee_get_drvdata(); (ret=0xffff000002e55800)
-> > > > > > > > > > > > > > > > >                    tee_shm_get_va(); (ret=0xffff000002909000)
-> > > > > > > > > > > > > > > > >                    tee_shm_get_va(); (ret=0xffff000002909060)
-> > > > > > > > > > > > > > > > >                    optee_cq_wait_init(); (ret=0xffff000002e55910)
-> > > > > > > > > > > > > > > > >                    optee_smccc_smc(); (ret=0xffff0004)
-> > > > > > > > > > > > > > > > >                    tee_get_drvdata(); (ret=0xffff000002e55800)
-> > > > > > > > > > > > > > > > >                    optee_smccc_smc(); (ret=0xffff0004)
-> > > > > > > > > > > > > > > > >                    tee_get_drvdata(); (ret=0xffff000002e55800)
-> > > > > > > > > > > > > > > > >                    optee_smccc_smc(); (ret=0xffff0004)
-> > > > > > > > > > > > > > > > >                    tee_get_drvdata(); (ret=0xffff000002e55800)
-> > > > > > > > > > > > > > > > >                    optee_smccc_smc(); (ret=0xffff0004)
-> > > > > > > > > > > > > > > > >                    tee_get_drvdata(); (ret=0xffff000002e55800)
-> > > > > > > > > > > > > > > > >                    optee_smccc_smc(); (ret=0xffff0004)
-> > > > > > > > > > > > > > > > >      ... continues sending this forever ...
-> > > > > > > > > > > > > > > > >      ... Hit ^C to stop recording ...
-> > > > > > > > > > > > > > > > >                    tee_get_drvdata(); (ret=0xffff000002e55800)
-> > > > > > > > > > > > > > > > >                    optee_smccc_smc() {
-> > > > > > > > > > > > > > > > >
-> > > > > > > > > > > > > > > > > [1] https://docs.u-boot.org/en/latest/develop/uefi/uefi.html#using-op-tee-for-efi-variables
-> > > > > > > > > > > > > > > > >
-> > > > > > > > > > > > > > > > > Thanks in advance,
-> > > > > > > > > > > > > > > >
-> > > > > > > > > > > > > > > > The most common problem with this is miscompiling the tee_supplicant
-> > > > > > > > > > > > > > > > application.
-> > > > > > > > > > > > > > > > Since we don't know if the system has an RPMB, we emulate it in the
-> > > > > > > > > > > > > > > > tee_supplicant. How did you get the supplicant and can you check if it
-> > > > > > > > > > > > > > > > was compiled with RPMB_EMU=0 or 1?
-> > > > > > > > > > > > > > > >
-> > > > > > > > > > > > > > >
-> > > > > > > > > > > > > > > I'm using the tee-supplicant provided by the fedora package which is
-> > > > > > > > > > > > > > > built with ` -DRPMB_EMU=0`, I think that's correct, right?
-> > > > > > > > > > > > > > >
-> > > > > > > > > > > > > >
-> > > > > > > > > > > > > > Yes, this is correct. We fixed the Fedora package to compile the
-> > > > > > > > > > > > > > supplicant correctly a while back.
-> > > > > > > > > > > > > >
-> > > > > > > > > > > > > > [0] https://www.linaro.org/blog/uefi-secureboot-in-u-boot/
-> > > > > > > > > > > > > > [1] https://apalos.github.io/Protected%20UEFI%20variables%20with%20U-Boot.html#Protected%20UEFI%20variables%20with%20U-Boot
-> > > > > > > > > > > > > >
-> > > > > > > > > > > > > >
-> > > > > > > > > > > > > > Regards
-> > > > > > > > > > > > > > /Ilias
-> > > > > > > > > > > > > > > Thanks,
-> > > > > > > > > > > > > > >    Enric
-> > > > > > > > > > > > > > >
-> > > > > > > > > > > > > > > > Thanks
-> > > > > > > > > > > > > > > > /Ilias
-> > > > > > > > > > > > > > > >
-> > > > > > > > > > > > > > > > >    Enric
-> > > > > > > > > > > > > > > > >
-> > > > > > > > > > > > > > > >
-> > > > > > > > > > > > > > >
-> > > > > > > > > > > > > >
-> > > > > > > > > > > > >
-> > > > > > > > > > > >
-> > > > > > > > > > >
-> > > > > > > > > >
-> > > > > > > >
-> > > > > > >
-> > > > > >
-> > > > >
-> > > >
-> > >
->
