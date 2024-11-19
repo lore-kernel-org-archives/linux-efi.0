@@ -1,234 +1,150 @@
-Received: from NAM10-DM6-obe.outbound.protection.outlook.com (mail-dm6nam10on2053.outbound.protection.outlook.com [40.107.93.53])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f202.google.com (mail-yw1-f202.google.com [209.85.128.202])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF1C4137750;
-	Tue, 19 Nov 2024 00:39:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.93.53
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731976780; cv=fail; b=ZUh+8qIKuN7nNCuJ8WshMqHz1gcJIawykE7XxHfoz74kc2rLw8aHgYQICtwDz5c1Him+v/RDeq3nP91BZerkvoS06hO8KVY3GbxSg/EvveajSm8cAGijtXh420g9XTsZOKRoK11fqp3ir8ORkN1ogdNjqgE3hU6Miv4KMxkQL7o=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731976780; c=relaxed/simple;
-	bh=eI2RxorsISW2gvo0IHk8IE5HzKi9kPQYotwHNSH/0CE=;
-	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=fkp20ituNYUUTSfoYo1swe1i69oEOrRgK/pVSLJH7az5OTmp8d2hGwdW4D+0Uin8cl5H9pkDfYoozdPLtaqQ3DPfqb3qc3O7VodEBIJBWSNpsjFZ7wxyqz7SKtqJIeuhVHVCsQK5ZB3/lt6rPYzUAGL9bu6lBVYw142RppZs2bk=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amd.com; spf=fail smtp.mailfrom=amd.com; dkim=pass (1024-bit key) header.d=amd.com header.i=@amd.com header.b=OefkgQVo; arc=fail smtp.client-ip=40.107.93.53
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amd.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=amd.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0ACC2198E63
+	for <linux-efi@vger.kernel.org>; Tue, 19 Nov 2024 20:12:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.202
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1732047164; cv=none; b=PYfeOSYDD+WkjZfmU0GXLSDkGtcMx3VTfIv8ReRLPAcbjfiQADjY4hw3GU6VxFc0/NeNb0mojZpOpuFY9+0EpeXJzwjF3zdOlytvUGHJmFLsISXu88Mqz2+65TqcISupXsyKwR4nhunujG6bTpWXJ4jwFwMQ+bsc8psSFsNJtwo=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1732047164; c=relaxed/simple;
+	bh=qW+lnzdqjtS9NQj9yk51kdFASp6pNDH4gps3Hj72ZaI=;
+	h=Date:Mime-Version:Message-ID:Subject:From:To:Cc:Content-Type; b=LaYZ7hqMkLKt8tZOHqDTf9GyGyAanl3XWGDn5ND2BV8hqiQozYCaHIW6wzopYwsgW/S9wWIqi4iTSBNuN33K2q3mSlS0X84/ORFEMz6280lDPL2YpoHtylMAA7tAnhpcWcb6+fISvfpkBCJ2a0012UJIRMW03pWUPql3qCGVR2M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=Jhx5OVXM; arc=none smtp.client-ip=209.85.128.202
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=amd.com header.i=@amd.com header.b="OefkgQVo"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=eGaY9xdUf9In0mM+anBHvItyVuqBamU5YaXUTcMfp3dbMzD3Umb7JkfU5pNLY0hgn38sEt2kiWRoaPidKeKJkRJib6BSyKREkYiJ9e5QlByESCxH2xbY7r4i1sEOm3E77gIiIMcZsUe6VcK3tF3yR/sfjyqKvYJ746390flSG6ZSoK6RospLfXLiY3h+URqOim23BXrTvu9WSe3W/RYRAqCxhlCXTVMYh4Qg739pT+nPAT8bvoeJtUzIuMoEd3KfBVu6mJsjCv9YowgXQGIO7NsqUjdUv1ADZp0V6wVk5YBa0dkrasVaY77OQpVkLWQM5jd2DEl4rvkrGTg8oEUfmw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=R59fQdZTGIEMq/jvL0lLNzgH4fY3E1rfQySjzSVj9K8=;
- b=JoUxm8MDt6OZFG/fi8tTew9iYyrgallntSoCHjhoqOUdpgg45jJoyaOxYGTRBkdqFXZLEWcoZYN8igJIQ6w78QdqsaGTGURLZbV2hvjVaMiyCmuiDvNDSdcV+Pkj/K1+aW3DPgSCvx6oScAsnc+XS5+XVg8aDPReVTQ1wxBOKLutytJvcC8zeub9bPljjmqBY7rpbmC8oe4+wmPA78EFH0s5B5QVfTRiEHh4ie0YCGT7EXXnfox+3x07l/aoUEtY6w+o/Avj7KIY6dPyl2gGhGfCBaB10rhC9MTDa4qBkfhFIFc1AFOx7nJ4/keKta2yiM3zLttjM3OJbskqkRYl2w==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 165.204.84.12) smtp.rcpttodomain=vger.kernel.org smtp.mailfrom=amd.com;
- dmarc=pass (p=quarantine sp=quarantine pct=100) action=none
- header.from=amd.com; dkim=none (message not signed); arc=none (0)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=R59fQdZTGIEMq/jvL0lLNzgH4fY3E1rfQySjzSVj9K8=;
- b=OefkgQVomG+QAluvUnjoQqdBvvVDnwVkc4TpTTP/cy3aa7pPPq6OWFqyYZDJBhfUURF6VsI2sSbDVC0QmTZPgLCK6BSzr3d7gYfDY6EWTtayvBJVBVE7wp1t5CgtVSuwcCGl2ds9Q0E+KUVfCKCcsZuulGaUM0tXxsK4liOa7k8=
-Received: from DM6PR10CA0003.namprd10.prod.outlook.com (2603:10b6:5:60::16) by
- SJ2PR12MB8652.namprd12.prod.outlook.com (2603:10b6:a03:53a::18) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8158.20; Tue, 19 Nov
- 2024 00:39:33 +0000
-Received: from DS1PEPF0001709B.namprd05.prod.outlook.com
- (2603:10b6:5:60:cafe::34) by DM6PR10CA0003.outlook.office365.com
- (2603:10b6:5:60::16) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8158.24 via Frontend
- Transport; Tue, 19 Nov 2024 00:39:30 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.12)
- smtp.mailfrom=amd.com; dkim=none (message not signed)
- header.d=none;dmarc=pass action=none header.from=amd.com;
-Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
- 165.204.84.12 as permitted sender) receiver=protection.outlook.com;
- client-ip=165.204.84.12; helo=SATLEXMB04.amd.com; pr=C
-Received: from SATLEXMB04.amd.com (165.204.84.12) by
- DS1PEPF0001709B.mail.protection.outlook.com (10.167.18.105) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.8158.14 via Frontend Transport; Tue, 19 Nov 2024 00:39:30 +0000
-Received: from ethanolx50f7host.amd.com (10.180.168.240) by SATLEXMB04.amd.com
- (10.181.40.145) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.39; Mon, 18 Nov
- 2024 18:39:27 -0600
-From: Smita Koralahalli <Smita.KoralahalliChannabasappa@amd.com>
-To: <linux-efi@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-	<linux-cxl@vger.kernel.org>
-CC: Ard Biesheuvel <ardb@kernel.org>, Alison Schofield
-	<alison.schofield@intel.com>, Vishal Verma <vishal.l.verma@intel.com>, "Ira
- Weiny" <ira.weiny@intel.com>, Dan Williams <dan.j.williams@intel.com>,
-	Jonathan Cameron <Jonathan.Cameron@huawei.com>, Yazen Ghannam
-	<yazen.ghannam@amd.com>, Terry Bowman <terry.bowman@amd.com>, "Smita
- Koralahalli" <Smita.KoralahalliChannabasappa@amd.com>
-Subject: [PATCH v3 6/7] acpi/ghes, cper: Recognize and cache CXL Protocol errors
-Date: Tue, 19 Nov 2024 00:39:14 +0000
-Message-ID: <20241119003915.174386-7-Smita.KoralahalliChannabasappa@amd.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20241119003915.174386-1-Smita.KoralahalliChannabasappa@amd.com>
-References: <20241119003915.174386-1-Smita.KoralahalliChannabasappa@amd.com>
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="Jhx5OVXM"
+Received: by mail-yw1-f202.google.com with SMTP id 00721157ae682-6eeb5ee73f0so12374117b3.3
+        for <linux-efi@vger.kernel.org>; Tue, 19 Nov 2024 12:12:41 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20230601; t=1732047161; x=1732651961; darn=vger.kernel.org;
+        h=cc:to:from:subject:message-id:mime-version:date:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=HRKeOFovcZVCuKyilU+rXAKb4WtWzJb7w/eFRD32RFc=;
+        b=Jhx5OVXMFS938mgyOVHWFcf7lhf4Ezx9zdDiB4QOeUE5p/KEkGoG7tbRgOw8G9TAXl
+         +5RCfNsw28aWZCTmeqwuo+consq/hUYr497YtNemyc3V1jg8FOLyitI7ZyHyipzpda7O
+         lLN5W88hyU8XnA3fkRSvHebf1JxdP4gshN9K+RQJf3+OvFsAvo7xulYGB7Iv0mg48p9S
+         YnHA7QmISpf6234sHyE9Ucr7M9fwc2FnoOo8wzye+s7mKmtOIsksoahYI1DL6slIuiyZ
+         jUBnSpNVdZK2uWrvdJ55ZAVHkuyDkC041UaGvX0ojZqWlZW+ZP+02FhgmBP3XukaqapO
+         vvTA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1732047161; x=1732651961;
+        h=cc:to:from:subject:message-id:mime-version:date:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=HRKeOFovcZVCuKyilU+rXAKb4WtWzJb7w/eFRD32RFc=;
+        b=d+/nuC02GsJLpbbAz4fXXh+FIaK+nsGJqPMEx927ktjPrydE/isSnury8229g5Mls7
+         wyHYo8paL/RZgorlrxqBAEzdGfOeDQ3EVYnlFP6l60cSvLGF+DvOV/c6Np5mjdOVJYhI
+         IUDM/6NzcUsAfzzkeqrE2bormDBpozPigUqFyOR02qRkLupMnS3oFo8t34NHYXbZh7kz
+         /V+LVyYBDUUBrXqI7xdrjpDTwdtgv7zwSYg8+II19J8ODYgcLYTR8ZncNur9CFXX506w
+         K6mouZYL9iJLSlhN4o6kltYeZDR3W7JTmw+JIK9VYGli9Hfluc6BdxlneOIvcAoD3fqw
+         auOQ==
+X-Gm-Message-State: AOJu0YxgcjdRIB5qKQdxwOxMVwcjNu+BArBT5iNEVBvEWeDetJNaSQLe
+	fXVxYdFnQLHkuAZbC6dSJIk6B2K1QYruIoIpYgP346dxh/Q9pKGhl2ufwnBEWGB3yWjJ/g==
+X-Google-Smtp-Source: AGHT+IGkRb0olXy0ZNAlaUuZ2GPVWL3qfg1msLzVLkJ2rQ8xEgQEB32Bcg+8+BMr/ehhNQLGwoj/YydJ
+X-Received: from palermo.c.googlers.com ([fda3:e722:ac3:cc00:7b:198d:ac11:8138])
+ (user=ardb job=sendgmr) by 2002:a05:690c:2b06:b0:6ee:3b47:59a3 with SMTP id
+ 00721157ae682-6eebd12b0e2mr687b3.2.1732047161006; Tue, 19 Nov 2024 12:12:41
+ -0800 (PST)
+Date: Tue, 19 Nov 2024 21:11:43 +0100
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain
-X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB04.amd.com
- (10.181.40.145)
-X-EOPAttributedMessage: 0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: DS1PEPF0001709B:EE_|SJ2PR12MB8652:EE_
-X-MS-Office365-Filtering-Correlation-Id: 4501131e-541e-4fe5-4da3-08dd0832a189
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|376014|1800799024|82310400026|36860700013;
-X-Microsoft-Antispam-Message-Info:
-	=?us-ascii?Q?KIUimBHukhIAQ6QLGzlKSxNPcwMTjhQ9tnRY5k0Z+w2RS5cxYVHVsLToP17h?=
- =?us-ascii?Q?/3GtqduYOoaTZmnTrhymESVBnO0KTJnog1FfRhKzlVYawmmQvkCGR7tgePBl?=
- =?us-ascii?Q?rRZQEl2ZqiCxfzP8AjbdczV8ZdDIOEY2D4VJk30/zTQuwsciZlFuO0RQtIMv?=
- =?us-ascii?Q?xAG6uFdb2LrWBf4nLioDCMI8+/bowfLdO/vbdRR+S9AiqiVJqvS9siuGQ4S5?=
- =?us-ascii?Q?GJ1xFkOnPtBe2QWdHlfzJqqlo+Xxiqc/iMhVGW4f1IlSr6+Mqws8qHa+jMB3?=
- =?us-ascii?Q?1rPqw8aqIB971MrbiaIkuYFdHC68H8n9s2msEArjlYwkhKPzLw7Qwt+pBcc1?=
- =?us-ascii?Q?hLOKICoPWirVH8asYAqKclQOLlT6GOmg20vQqJ0DuBTVIS+tizB1HRYYMqVq?=
- =?us-ascii?Q?lqj3/cVm6VEH9ItnNF+usqr/hznSpMu/24Bq6zaFGgIkvHOBOimYlDgUwvW5?=
- =?us-ascii?Q?u/vagKpXN+zVQ7JqwsJv9wPbUMW2aNWHxa8aFX+95ouJiEsOaET9IExMPuBS?=
- =?us-ascii?Q?DU9yMJmhCbjAvTqlpGoYBy7xu8braIxAha2GCGkkdwuE/g7leYyQvQRz30j0?=
- =?us-ascii?Q?6PQT5Aj9d1xJAbeO8Qevg5H1n8sXLqz1JfQFuBVrQjQ9pyOmhFatBZ7+IHs0?=
- =?us-ascii?Q?ZPvvExabnLhEQp7kgyZDa8WhyK1zIG+4okwJkG8jQ94t71hWjlgDlooHOSL5?=
- =?us-ascii?Q?yA7O0ZB43q0xiTWWeGW3o7lSkdF9EtOZwbOYHl7CypunjQAOUj2MW/vEsH4e?=
- =?us-ascii?Q?9zEh8RbYMYNgtnwVyTHfACVBYg6cURJojBgV11lEydYnqzzgi1UUn/6wVPEe?=
- =?us-ascii?Q?UZH/eOJ4Q7vTeSw1CNLQ3Wx52VutGa782T6PiAR3VrW3i7HQs0Baih+zMUDr?=
- =?us-ascii?Q?x23Ax1R5T5RPd/fsYPYNPlDeIjncOE1baOxAXxUdRCTuHZh5eBSaQXIHJ+CS?=
- =?us-ascii?Q?Do77+WNFLubjztCfW2TxzU0Tf1gBp2OA3Hlcn18f3xhv3OQAzJH/Fl+5/Vty?=
- =?us-ascii?Q?P2ZwZtjk5m3+zWvZNZR2OTYynvuJZTtVt46z/pfjBgijUnKlSdNf6d06F0By?=
- =?us-ascii?Q?1rdpdgHrMOzuYnWIuOlVFxtJo4+sNTTnAm2/AceQGh9T4+WFHM3uqru25FA4?=
- =?us-ascii?Q?j9LffaVVV9J+9842NXuJkaFHNx028uaMjpUXUza7cQvZCDuS30mCtraP5PnK?=
- =?us-ascii?Q?dRgVdObZSoeJR1yIwA6p6BHHZ6v8hlDsTKhetExOW3ePiiKxCo+XgqW3XY7I?=
- =?us-ascii?Q?FnYVrzZUjSNsvUuFicUzIrd9aoERg6HTVehcg0pQupFQ0///HQKA5sr3a0hT?=
- =?us-ascii?Q?NGT/9IZ3XQYxJSO2cbX1VU9HYjsJySaKBAa1bd/iaEiAubi3fBWqr+Z3iSh+?=
- =?us-ascii?Q?V/9bI5qYp0XjuCVEepXn6hiLT39IrC0Ed88JwvmUnjTYbpt6Tg=3D=3D?=
-X-Forefront-Antispam-Report:
-	CIP:165.204.84.12;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:atlvpn-bp.amd.com;CAT:NONE;SFS:(13230040)(376014)(1800799024)(82310400026)(36860700013);DIR:OUT;SFP:1101;
-X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 19 Nov 2024 00:39:30.6901
- (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 4501131e-541e-4fe5-4da3-08dd0832a189
-X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.12];Helo=[SATLEXMB04.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource:
-	DS1PEPF0001709B.namprd05.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Anonymous
-X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SJ2PR12MB8652
+Mime-Version: 1.0
+X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3168; i=ardb@kernel.org;
+ h=from:subject; bh=qcswWGi17DLzONr6gyxRCAeaur5RYeypzAkeRi6dc0Y=;
+ b=owGbwMvMwCFmkMcZplerG8N4Wi2JId3mw7+LwVaiUgLay+IqHAS/ewX84b4V/PWJ1ttZi37af
+ gv2T3reUcrCIMbBICumyCIw+++7nacnStU6z5KFmcPKBDKEgYtTACbyag8jw65XChpbI79NKj8s
+ n6Lq/NdrfV6I8+fiZcZPp23RZ+4p3cbIsPVbBaN7jJZ2aJHn+qyfmgamWziS3hXUxiw8UZ68IZK fGwA=
+X-Mailer: git-send-email 2.47.0.371.ga323438b13-goog
+Message-ID: <20241119201142.1339434-2-ardb+git@google.com>
+Subject: [GIT PULL] EFI updates for v6.13
+From: Ard Biesheuvel <ardb+git@google.com>
+To: torvalds@linux-foundation.org
+Cc: linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 
-Add support in GHES to detect and process CXL CPER Protocol errors, as
-defined in UEFI v2.10, section N.2.13.
+From: Ard Biesheuvel <ardb@kernel.org>
 
-Define struct cxl_cper_prot_err_work_data to cache CXL protocol error
-information, including RAS capabilities and severity, for further
-handling.
+Hi Linus,
 
-These cached CXL CPER records will later be processed by workqueues
-within the CXL subsystem.
+Just some cleanups and bug fixes this time around.
 
-Signed-off-by: Smita Koralahalli <Smita.KoralahalliChannabasappa@amd.com>
----
- drivers/acpi/apei/ghes.c | 52 ++++++++++++++++++++++++++++++++++++++++
- include/cxl/event.h      |  6 +++++
- 2 files changed, 58 insertions(+)
+Please pull,
 
-diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-index 62ffe6eb5503..6cd9d5375d7c 100644
---- a/drivers/acpi/apei/ghes.c
-+++ b/drivers/acpi/apei/ghes.c
-@@ -676,6 +676,54 @@ static void ghes_defer_non_standard_event(struct acpi_hest_generic_data *gdata,
- 	schedule_work(&entry->work);
- }
- 
-+static void cxl_cper_post_prot_err(struct cxl_cper_sec_prot_err *prot_err,
-+				   int severity)
-+{
-+	struct cxl_cper_prot_err_work_data wd;
-+	u8 *dvsec_start, *cap_start;
-+
-+	if (!(prot_err->valid_bits & PROT_ERR_VALID_AGENT_ADDRESS)) {
-+		pr_err_ratelimited("CXL CPER invalid agent type\n");
-+		return;
-+	}
-+
-+	if (!(prot_err->valid_bits & PROT_ERR_VALID_ERROR_LOG)) {
-+		pr_err_ratelimited("CXL CPER invalid protocol error log\n");
-+		return;
-+	}
-+
-+	if (prot_err->err_len != sizeof(struct cxl_ras_capability_regs)) {
-+		pr_err_ratelimited("CXL CPER invalid RAS Cap size (%u)\n",
-+				   prot_err->err_len);
-+		return;
-+	}
-+
-+	if (!(prot_err->valid_bits & PROT_ERR_VALID_SERIAL_NUMBER))
-+		pr_warn(FW_WARN "CXL CPER no device serial number\n");
-+
-+	switch (prot_err->agent_type) {
-+	case RCD:
-+	case DEVICE:
-+	case LD:
-+	case FMLD:
-+	case RP:
-+	case DSP:
-+	case USP:
-+		memcpy(&wd.prot_err, prot_err, sizeof(wd.prot_err));
-+
-+		dvsec_start = (u8 *)(prot_err + 1);
-+		cap_start = dvsec_start + prot_err->dvsec_len;
-+
-+		wd.ras_cap = *(struct cxl_ras_capability_regs *)cap_start;
-+		wd.severity = cper_severity_to_aer(severity);
-+		break;
-+	default:
-+		pr_err_ratelimited("CXL CPER invalid agent type: %d\n",
-+				   prot_err->agent_type);
-+		return;
-+	}
-+}
-+
- /* Room for 8 entries for each of the 4 event log queues */
- #define CXL_CPER_FIFO_DEPTH 32
- DEFINE_KFIFO(cxl_cper_fifo, struct cxl_cper_work_data, CXL_CPER_FIFO_DEPTH);
-@@ -795,6 +843,10 @@ static bool ghes_do_proc(struct ghes *ghes,
- 		}
- 		else if (guid_equal(sec_type, &CPER_SEC_PROC_ARM)) {
- 			queued = ghes_handle_arm_hw_error(gdata, sev, sync);
-+		} else if (guid_equal(sec_type, &CPER_SEC_CXL_PROT_ERR)) {
-+			struct cxl_cper_sec_prot_err *prot_err = acpi_hest_get_payload(gdata);
-+
-+			cxl_cper_post_prot_err(prot_err, gdata->error_severity);
- 		} else if (guid_equal(sec_type, &CPER_SEC_CXL_GEN_MEDIA_GUID)) {
- 			struct cxl_cper_event_rec *rec = acpi_hest_get_payload(gdata);
- 
-diff --git a/include/cxl/event.h b/include/cxl/event.h
-index 992568b35455..c9a38ebaf207 100644
---- a/include/cxl/event.h
-+++ b/include/cxl/event.h
-@@ -232,6 +232,12 @@ struct cxl_ras_capability_regs {
- 	u32 header_log[16];
- };
- 
-+struct cxl_cper_prot_err_work_data {
-+	struct cxl_cper_sec_prot_err prot_err;
-+	struct cxl_ras_capability_regs ras_cap;
-+	int severity;
-+};
-+
- #ifdef CONFIG_ACPI_APEI_GHES
- int cxl_cper_register_event_work(struct work_struct *work);
- int cxl_cper_unregister_event_work(struct work_struct *work);
--- 
-2.17.1
 
+
+The following changes since commit 8e929cb546ee42c9a61d24fae60605e9e3192354:
+
+  Linux 6.12-rc3 (2024-10-13 14:33:32 -0700)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git tags/efi-next-for-v6.13
+
+for you to fetch changes up to c5d91b16f525ea8c98b3fd8efc5105106d17fe9a:
+
+  efi: Fix memory leak in efivar_ssdt_load (2024-11-17 08:54:02 +0100)
+
+----------------------------------------------------------------
+EFI updates for v6.13
+
+- Align handling of the compiled-in command line with the core kernel
+
+- Measure the initrd into the TPM also when it was loaded via the EFI
+  file I/O protocols
+
+- Clean up TPM event log handling
+
+- Sanity check the EFI memory attributes table, and apply it after kexec
+  too
+
+- Assorted other fixes
+
+----------------------------------------------------------------
+Ard Biesheuvel (6):
+      efi/libstub: Free correct pointer on failure
+      efi/zboot: Fix outdated comment about using LoadImage/StartImage
+      efi/memattr: Ignore table if the size is clearly bogus
+      efi/libstub: Parse builtin command line after bootloader provided one
+      efi/libstub: Fix command line fallback handling when loading files
+      efi/libstub: Take command line overrides into account for loaded files
+
+Cyrill Gorcunov (1):
+      efi: Fix memory leak in efivar_ssdt_load
+
+Gregory Price (4):
+      tpm: fix signed/unsigned bug when checking event logs
+      tpm: do not ignore memblock_reserve return value
+      tpm: fix unsigned/signed mismatch errors related to __calc_tpm2_event_size
+      libstub,tpm: do not ignore failure case when reading final event log
+
+Jeremy Linton (1):
+      efi/libstub: measure initrd to PCR9 independent of source
+
+Jonathan Marek (2):
+      efi/libstub: fix efi_parse_options() ignoring the default command line
+      efi/libstub: remove unnecessary cmd_line_len from efi_convert_cmdline()
+
+Nicolas Saenz Julienne (2):
+      x86/efi: Drop support for the EFI_PROPERTIES_TABLE
+      x86/efi: Apply EFI Memory Attributes after kexec
+
+ arch/x86/platform/efi/efi.c                    | 20 +-----------
+ arch/x86/platform/efi/efi_64.c                 | 42 --------------------------
+ drivers/firmware/efi/Kconfig                   | 10 +++---
+ drivers/firmware/efi/efi.c                     | 41 +++++++++++++++++--------
+ drivers/firmware/efi/libstub/efi-stub-helper.c | 12 ++++----
+ drivers/firmware/efi/libstub/efi-stub.c        | 26 +++++++---------
+ drivers/firmware/efi/libstub/efistub.h         |  2 +-
+ drivers/firmware/efi/libstub/file.c            | 22 ++++++++++++++
+ drivers/firmware/efi/libstub/tpm.c             |  9 ++++--
+ drivers/firmware/efi/libstub/x86-stub.c        |  3 +-
+ drivers/firmware/efi/memattr.c                 | 18 ++++++++++-
+ drivers/firmware/efi/tpm.c                     | 26 ++++++++++------
+ include/linux/efi.h                            | 17 ++---------
+ include/linux/tpm_eventlog.h                   |  2 +-
+ 14 files changed, 117 insertions(+), 133 deletions(-)
