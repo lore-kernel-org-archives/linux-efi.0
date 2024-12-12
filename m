@@ -1,88 +1,73 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0AADF5674E;
-	Fri, 13 Dec 2024 07:45:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+Received: from cmccmta1.chinamobile.com (cmccmta2.chinamobile.com [111.22.67.135])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 44F961AE005;
+	Fri, 13 Dec 2024 09:48:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=111.22.67.135
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1734075923; cv=none; b=UzS+kZxErl6oMjfndae1bXFWJ0ip+Y7IGkU3C5sU4u54YBn3d4iT4woy9K0XSzxzb3QUpDZG0Dho7zwo+GwwYEUOYOi/9AQtJ0bw/dvb8nJHEQtUiOo3N4I+IbOF/hJG6r4PwoGF56AhnBBvCtrJRJIhii3/NEVEBiOlzs65BJw=
+	t=1734083342; cv=none; b=iFUYybASmEekrfxORJ+o3m34S0ScUbrFUqJUtBXkzut44jQjbwE9T5G5sFFkvG5cFez3GjqZbrXN/jl1RjpoXNxWa7NpYNwCwRv2PTT/AIArz3mTGzryX9ydbhf6WJ2E/3hm1GRP4H0COkFqgGgyP52+s0NiQBxSkP1LLPMfxqU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1734075923; c=relaxed/simple;
-	bh=29mSkljf80/3VXg/1SndyIxNTzC/9V2ignAhRGmnIPA=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=M9BuOUb3fR83SCK6bKdTrBilaRp82yIJwRIItH1JpEPmArWJjtGiSRx8QmKBaHHBgc7TtyZ9EaaiIGxRbrkVfyBCa6LAUoUbfwXdYjZHQnGBAaG9bkuICc9Hb6rvM7HdpNs5xKBZIrqb1DDlzRUckLmlK2wckvzn4E9QV4uGiUU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=aqBdTNMj; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="aqBdTNMj"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 83362C4CED6;
-	Fri, 13 Dec 2024 07:45:22 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1734075922;
-	bh=29mSkljf80/3VXg/1SndyIxNTzC/9V2ignAhRGmnIPA=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=aqBdTNMjm0Bgmzn5pKZQcUdct+tgO6yjiDQv7Xn0NJ9Ql2Q0TaNpfd2lsuRAOYMYt
-	 ZicQj6x2Wd2yHoJRdDi/WdkGCNlrp7Xq+5WJz9N51XZHt2dxB2rn+bHnLp7ijsguRc
-	 0sisYIEL57JLoZ4wOf/4dw6I02ujZfqkar5CybSF4GPnna2qqiRm9YKX75JywxNyVJ
-	 COAuUBBWZL6D/q54165BagFuxq5cranKwr1bSlGHlOJhMM12UpoAcaV8AcRG4mExW0
-	 MXNsqee4oL5l2y01+ppk8U50FWRVK0eygHYI+O5v4coevyWVC4FFAKWW50Cd/8ZuX5
-	 K0QtiYUNuDIGg==
-Received: by mail-lj1-f172.google.com with SMTP id 38308e7fff4ca-30033e07ef3so15467871fa.0;
-        Thu, 12 Dec 2024 23:45:22 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCVJpqiwPl5jlyKmBcnBxAD/5JzsN/SWa7dGgjHqkgo75XdjXUiYNkOhcedXsYksr6KXi46C/WJGP2mMus4=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwXSwFj14cWwmQeQbyy/Q2kVaPpRUHu3N0q6AmlGaeOf0Kd40OB
-	oMYPk/6fqPDoEByTPJJh1FwiqpqQhzmMImxKYgtaU3dsN/GjtVd+nQAJl2X9yqqP6L62ipF48TG
-	toQWTrHcysuz58ErK7yf2/Ev0/oA=
-X-Google-Smtp-Source: AGHT+IGdyR1ZJBKwUQ5FZNz4n4ZpDnaZMlIxrFUn9O9uDUh3/i2FqU0yGeR0jvqwsu3DnIjtiGTUvfjnx/hZi/OlD5k=
-X-Received: by 2002:a05:651c:1547:b0:2ff:bc33:b6d6 with SMTP id
- 38308e7fff4ca-30251acc130mr11288761fa.0.1734075920894; Thu, 12 Dec 2024
- 23:45:20 -0800 (PST)
+	s=arc-20240116; t=1734083342; c=relaxed/simple;
+	bh=EohcMsvPiuOLpdxAi+0XNpLKVBcA1aQjf3X9xIKNa+Y=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=vA9khxaWdORcXxOmGg6MdC0JKSkfIJ+PbzYPjqYALP3p3lbY5X5fJa9v6EDo2D9WE7x1xJs6xXXXdfq9KsbCYrujUeQL/HB5ty7z1Xel43D0mhOMzbz8rKgxnOz2a5asvDAEqZj/tonvZIAyXnJ+sKyPoN/sfF2I6mJx4ZWy2Gk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=cmss.chinamobile.com; spf=pass smtp.mailfrom=cmss.chinamobile.com; arc=none smtp.client-ip=111.22.67.135
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=cmss.chinamobile.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=cmss.chinamobile.com
+X-RM-TagInfo: emlType=0                                       
+X-RM-SPAM-FLAG:00000000
+Received:from spf.mail.chinamobile.com (unknown[10.188.0.87])
+	by rmmx-syy-dmz-app03-12003 (RichMail) with SMTP id 2ee3675c03011a3-eb9e3;
+	Fri, 13 Dec 2024 17:48:53 +0800 (CST)
+X-RM-TRANSID:2ee3675c03011a3-eb9e3
+X-RM-TagInfo: emlType=0                                       
+X-RM-SPAM-FLAG:00000000
+Received:from localhost.localdomain (unknown[223.108.79.96])
+	by rmsmtp-syy-appsvr10-12010 (RichMail) with SMTP id 2eea675c02fdbdd-9e0a7;
+	Fri, 13 Dec 2024 17:48:52 +0800 (CST)
+X-RM-TRANSID:2eea675c02fdbdd-9e0a7
+From: Zhou Ding <zhouding@cmss.chinamobile.com>
+To: Ard Biesheuvel <ardb@kernel.org>
+Cc: Zhou Ding <zhouding@cmss.chinamobile.com>,
+	linux-efi@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH] efi: Fix missing `efi_handover_entry` prototype
+Date: Fri, 13 Dec 2024 00:15:17 +0800
+Message-Id: <20241212161517.443855-1-zhouding@cmss.chinamobile.com>
+X-Mailer: git-send-email 2.33.0
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241211070503.87386-1-jirislaby@kernel.org>
-In-Reply-To: <20241211070503.87386-1-jirislaby@kernel.org>
-From: Ard Biesheuvel <ardb@kernel.org>
-Date: Fri, 13 Dec 2024 08:45:08 +0100
-X-Gmail-Original-Message-ID: <CAMj1kXHJi0_yuNWWOUefAqyha3usH5b32C1xVgnA9vnO+y-ZBw@mail.gmail.com>
-Message-ID: <CAMj1kXHJi0_yuNWWOUefAqyha3usH5b32C1xVgnA9vnO+y-ZBw@mail.gmail.com>
-Subject: Re: [PATCH] efi/esrt: remove esre_attribute::store()
-To: "Jiri Slaby (SUSE)" <jirislaby@kernel.org>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-On Wed, 11 Dec 2024 at 08:05, Jiri Slaby (SUSE) <jirislaby@kernel.org> wrote:
->
-> esre_attribute::store() is not needed since commit af97a77bc01c (efi:
-> Move some sysfs files to be read-only by root). Drop it.
->
-> Found by https://github.com/jirislaby/clang-struct.
->
-> Signed-off-by: Jiri Slaby (SUSE) <jirislaby@kernel.org>
-> Cc: Ard Biesheuvel <ardb@kernel.org>
-> Cc: linux-efi@vger.kernel.org
+We get 1 error when building kernel withW=1:
+drivers/firmware/efi/libstub/x86-stub.c:1068:6: error: no previous prototype for ‘efi_handover_entry’ [-Werror=missing-prototypes]
+ 1068 | void efi_handover_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg,
+      |      ^~~~~~~~~~~~~~~~~~
 
-Queued up, thanks.
+As this function is only used in the file, mark it as 'static'.
 
-> ---
->  drivers/firmware/efi/esrt.c | 2 --
->  1 file changed, 2 deletions(-)
->
-> diff --git a/drivers/firmware/efi/esrt.c b/drivers/firmware/efi/esrt.c
-> index 7a81c0ce4780..4bb7b0584bc9 100644
-> --- a/drivers/firmware/efi/esrt.c
-> +++ b/drivers/firmware/efi/esrt.c
-> @@ -75,8 +75,6 @@ static LIST_HEAD(entry_list);
->  struct esre_attribute {
->         struct attribute attr;
->         ssize_t (*show)(struct esre_entry *entry, char *buf);
-> -       ssize_t (*store)(struct esre_entry *entry,
-> -                        const char *buf, size_t count);
->  };
->
->  static struct esre_entry *to_entry(struct kobject *kobj)
-> --
-> 2.47.1
->
+Signed-off-by: Zhou Ding <zhouding@cmss.chinamobile.com>
+---
+ drivers/firmware/efi/libstub/x86-stub.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
+index 188c8000d245..4d152b0df59d 100644
+--- a/drivers/firmware/efi/libstub/x86-stub.c
++++ b/drivers/firmware/efi/libstub/x86-stub.c
+@@ -1065,7 +1065,7 @@ void __noreturn efi_stub_entry(efi_handle_t handle,
+ }
+ 
+ #ifdef CONFIG_EFI_HANDOVER_PROTOCOL
+-void efi_handover_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg,
++static void  efi_handover_entry(efi_handle_t handle, efi_system_table_t *sys_table_arg,
+ 			struct boot_params *boot_params)
+ {
+ 	memset(_bss, 0, _ebss - _bss);
+-- 
+2.33.0
+
+
+
