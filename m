@@ -1,140 +1,116 @@
-Received: from bedivere.hansenpartnership.com (bedivere.hansenpartnership.com [96.44.175.130])
+Received: from pv50p00im-tydg10011801.me.com (pv50p00im-tydg10011801.me.com [17.58.6.52])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5DE3A1DE2DC;
-	Tue, 24 Dec 2024 13:07:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=96.44.175.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD64C1C3BFD
+	for <linux-efi@vger.kernel.org>; Tue, 24 Dec 2024 13:07:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=17.58.6.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1735045673; cv=none; b=fsCtG+gNYDPVpJvYjF2bB2Hxm4sonA9Wjrgs/S6rO2Pp+4JEsicexDcxZq8wC1i3F/2aFcANI77tdjdwKLCZPJVSeISTeghqjy0WYlteJE843znJzPrFHo0B1pSOhyKkLaGFxkHrfIDwm95IkHa/4GD9G4MnlwLRtXqpOqvPrPg=
+	t=1735045681; cv=none; b=pkLNLF6AN7+InoCq4aWdRVNXZXKff0R/5NeUVRGEsFqa9Vd3Qocizov9KTjFSH/uu80OjUDsrBZ3U6y+QOoVoaujHvrZbM85OUeMKlx3OxtyTDPc7nQKYxtKDrbo1Fo2IV6UBju7RlFSrhfJyBcJhQL9BYBLCsOIIOMBRiOeuK8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1735045673; c=relaxed/simple;
-	bh=n84+6xWU0uogUdj8ByX8UIibexG/2zROUe0yTaKdnm0=;
-	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=YnfI6+RT3v7qlfdKEw2BhP2QFfCH0ZwkWD0PAg/8P0jlEcXsJoUB4WqeXURC/Y1JoS+7lLVOvyVNRpDgQjelSxwRWVJLt4+LfoGJ3uu5qAYjStHMrdksJS139tvkbIJbw/YAmUdQ6/JdvYN3eyttQ/c51IQCqtx97wxqFgOrbck=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=HansenPartnership.com; spf=pass smtp.mailfrom=HansenPartnership.com; dkim=pass (1024-bit key) header.d=hansenpartnership.com header.i=@hansenpartnership.com header.b=p8QGvG4K; dkim=pass (1024-bit key) header.d=hansenpartnership.com header.i=@hansenpartnership.com header.b=p8QGvG4K; arc=none smtp.client-ip=96.44.175.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=HansenPartnership.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=HansenPartnership.com
+	s=arc-20240116; t=1735045681; c=relaxed/simple;
+	bh=DYeVw/hwvCUJayebntCAsHcBgKf0+XhIP/c9hEfatOI=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
+	 In-Reply-To:To:Cc; b=QfC2khPPpUtEuSXCQSDvcwQeAQEMjZEacs+O4qv6P7lC25y4ybExquEgUnJAhGv++pbReji+91/4xZDIfBATKSH3LKQ+A2ldFdbYAANcu6KmmnuU5AU7NxMYN+zmjBBj4kMTIQBxLVS35emt4ysSIhT3Yt9G5NnAAMcyTJfbMYY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=icloud.com; spf=pass smtp.mailfrom=icloud.com; dkim=pass (2048-bit key) header.d=icloud.com header.i=@icloud.com header.b=02HJWJQW; arc=none smtp.client-ip=17.58.6.52
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=icloud.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=icloud.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=hansenpartnership.com header.i=@hansenpartnership.com header.b="p8QGvG4K";
-	dkim=pass (1024-bit key) header.d=hansenpartnership.com header.i=@hansenpartnership.com header.b="p8QGvG4K"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-	d=hansenpartnership.com; s=20151216; t=1735045670;
-	bh=n84+6xWU0uogUdj8ByX8UIibexG/2zROUe0yTaKdnm0=;
-	h=Message-ID:Subject:From:To:Date:In-Reply-To:References:From;
-	b=p8QGvG4K6nBej8b68CHiOZZNHrpNt5YWamE1A7sVPHKPMAIN+PzTha/VcFJbK84At
-	 LrOXDGHOVSwX0dck3c6ImaSnL8jo8eWlPwXPHsKjbtCndxSyK2dfwZo9WPNGPDTNSR
-	 qbN6EK9pkDtggpoEKQGNG+r/b0+OTETipYgiv5o8=
-Received: from localhost (localhost [127.0.0.1])
-	by bedivere.hansenpartnership.com (Postfix) with ESMTP id 9F5631281383;
-	Tue, 24 Dec 2024 08:07:50 -0500 (EST)
-Received: from bedivere.hansenpartnership.com ([127.0.0.1])
- by localhost (bedivere.hansenpartnership.com [127.0.0.1]) (amavis, port 10024)
- with ESMTP id JAl_eYcWDTPq; Tue, 24 Dec 2024 08:07:50 -0500 (EST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-	d=hansenpartnership.com; s=20151216; t=1735045670;
-	bh=n84+6xWU0uogUdj8ByX8UIibexG/2zROUe0yTaKdnm0=;
-	h=Message-ID:Subject:From:To:Date:In-Reply-To:References:From;
-	b=p8QGvG4K6nBej8b68CHiOZZNHrpNt5YWamE1A7sVPHKPMAIN+PzTha/VcFJbK84At
-	 LrOXDGHOVSwX0dck3c6ImaSnL8jo8eWlPwXPHsKjbtCndxSyK2dfwZo9WPNGPDTNSR
-	 qbN6EK9pkDtggpoEKQGNG+r/b0+OTETipYgiv5o8=
-Received: from lingrow.int.hansenpartnership.com (unknown [IPv6:2601:5c4:4302:c21::a774])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(Client did not present a certificate)
-	by bedivere.hansenpartnership.com (Postfix) with ESMTPSA id E01401280EDD;
-	Tue, 24 Dec 2024 08:07:49 -0500 (EST)
-Message-ID: <25eadec2e46a5f0d452fd1b3d4902f67aeb39360.camel@HansenPartnership.com>
-Subject: Re: [PATCH 6/6] efivarfs: fix error on write to new variable
- leaving remnants
-From: James Bottomley <James.Bottomley@HansenPartnership.com>
-To: Al Viro <viro@zeniv.linux.org.uk>
-Cc: Christian Brauner <brauner@kernel.org>, linux-fsdevel@vger.kernel.org, 
-	linux-efi@vger.kernel.org, Ard Biesheuvel <ardb@kernel.org>, Jeremy Kerr
-	 <jk@ozlabs.org>
-Date: Tue, 24 Dec 2024 08:07:47 -0500
-In-Reply-To: <20241224044414.GR1977892@ZenIV>
-References: <20241210170224.19159-1-James.Bottomley@HansenPartnership.com>
-	 <20241210170224.19159-7-James.Bottomley@HansenPartnership.com>
-	 <20241211-krabben-tresor-9f9c504e5bd7@brauner>
-	 <049209daadc928ecbf3bdb17d80634fa55842263.camel@HansenPartnership.com>
-	 <f9690563fe9d7ae4db31dd37650777e02580b332.camel@HansenPartnership.com>
-	 <20241223200513.GO1977892@ZenIV>
-	 <72a3f304b895084a1da0a8a326690a57fce541b7.camel@HansenPartnership.com>
-	 <20241223231218.GQ1977892@ZenIV>
-	 <41df6ecc304101b688f4b23040859d6b21ed15d8.camel@HansenPartnership.com>
-	 <20241224044414.GR1977892@ZenIV>
-Content-Type: text/plain; charset="UTF-8"
-User-Agent: Evolution 3.42.4 
+	dkim=pass (2048-bit key) header.d=icloud.com header.i=@icloud.com header.b="02HJWJQW"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=icloud.com;
+	s=1a1hai; t=1735045678;
+	bh=Xdmd4GC6rhW/Uh7S3n+f8KzvWTUMO/RUgVVrfahbelc=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:
+	 x-icloud-hme;
+	b=02HJWJQW/isBieKHc4lHuOWm0sE6RVt3AnvajvFm1yFol+F4wqT/akMphrNu6cO3O
+	 tRStEjxXnbWSoE4MlKkFF7vYy3xf35+66BCGJyh2Du1ZUMNZ2EacwYkZJ4u5ypP965
+	 v/AH2LZy1yRwa6xJOA1V1Bv+jP1ShdU0I6IHd2xxKji7Wu2pUn7pj2WnGI8dygTnL9
+	 2QBDyVZyjAndJfmvYtBeu2fpOfpZbM1DThemmGYeK+N4Bu588vmwl+0aPMmrAHUPUZ
+	 RvxYwutbA+1plmvUG7dL5X+KLXh13AO6kFEqayP+A4O1R/VsH1T5Cm5RYkg+Av6Nna
+	 gt+0DUgzWfvLQ==
+Received: from [192.168.1.25] (pv50p00im-dlb-asmtp-mailmevip.me.com [17.56.9.10])
+	by pv50p00im-tydg10011801.me.com (Postfix) with ESMTPSA id EFF298002E7;
+	Tue, 24 Dec 2024 13:07:43 +0000 (UTC)
+From: Zijun Hu <zijun_hu@icloud.com>
+Date: Tue, 24 Dec 2024 21:05:04 +0800
+Subject: [PATCH v5 05/12] driver core: Simplify API
+ device_find_child_by_name() implementation
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20241224-const_dfc_done-v5-5-6623037414d4@quicinc.com>
+References: <20241224-const_dfc_done-v5-0-6623037414d4@quicinc.com>
+In-Reply-To: <20241224-const_dfc_done-v5-0-6623037414d4@quicinc.com>
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Linus Walleij <linus.walleij@linaro.org>, 
+ Bartosz Golaszewski <brgl@bgdev.pl>, 
+ =?utf-8?q?Uwe_Kleine-K=C3=B6nig?= <ukleinek@kernel.org>, 
+ James Bottomley <James.Bottomley@HansenPartnership.com>, 
+ =?utf-8?q?Thomas_Wei=C3=9Fschuh?= <thomas@t-8ch.de>, 
+ Zijun Hu <zijun_hu@icloud.com>, linux-kernel@vger.kernel.org, 
+ nvdimm@lists.linux.dev, linux-sound@vger.kernel.org, 
+ sparclinux@vger.kernel.org, linux-block@vger.kernel.org, 
+ linux-cxl@vger.kernel.org, linux1394-devel@lists.sourceforge.net, 
+ arm-scmi@vger.kernel.org, linux-efi@vger.kernel.org, 
+ linux-gpio@vger.kernel.org, dri-devel@lists.freedesktop.org, 
+ linux-mediatek@lists.infradead.org, linux-hwmon@vger.kernel.org, 
+ linux-media@vger.kernel.org, linux-pwm@vger.kernel.org, 
+ linux-remoteproc@vger.kernel.org, linux-scsi@vger.kernel.org, 
+ linux-usb@vger.kernel.org, linux-serial@vger.kernel.org, 
+ netdev@vger.kernel.org, Zijun Hu <quic_zijuhu@quicinc.com>, 
+ Jonathan Cameron <Jonathan.Cameron@huawei.com>
+X-Mailer: b4 0.14.2
+X-Proofpoint-GUID: P4Ll-ia_XA5Ds8VjlM-P50WHH2PaNMoE
+X-Proofpoint-ORIG-GUID: P4Ll-ia_XA5Ds8VjlM-P50WHH2PaNMoE
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.272,Aquarius:18.0.1057,Hydra:6.0.680,FMLib:17.12.68.34
+ definitions=2024-12-24_05,2024-12-24_01,2024-11-22_01
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 clxscore=1015 mlxscore=0
+ spamscore=0 mlxlogscore=866 malwarescore=0 suspectscore=0 phishscore=0
+ bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2308100000 definitions=main-2412240113
+X-Apple-Remote-Links: v=1;h=KCk=;charset=UTF-8
 
-On Tue, 2024-12-24 at 04:44 +0000, Al Viro wrote:
-> On Mon, Dec 23, 2024 at 11:04:58PM -0500, James Bottomley wrote:
-> 
-> > +static int efivarfs_file_release(struct inode *inode, struct file
-> > *file)
-> > +{
-> > +       if (i_size_read(inode) == 0)
-> > +               simple_recursive_removal(file->f_path.dentry,
-> > NULL);
-> > +
-> > +       return 0;
-> > +}
-> 
-> What happens if you have
-> 
->         fd = creat(name, 0700);
->         fd2 = open(name, O_RDONLY);
->         close(fd2);
->         write(fd, "barf", 4);
-> 
-> or, better yet, if open()/close() pair happens in an unrelated thread
-> poking around?
+From: Zijun Hu <quic_zijuhu@quicinc.com>
 
-According to my tests you get -EIO to the last write.  I could be glib
-and point out that a write of "barf" would return EINVAL anyway, but
-assuming it's correctly formatted, you'll get -EIO from the d_unhashed
-check before the variable gets created.  If you want to check this
-yourself, useful writes that will create a variable are:
+Simplify device_find_child_by_name() implementation by both existing
+API device_find_child() and device_match_name().
 
-echo 0700000054|xxd -r -p > name
+Reviewed-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
+Signed-off-by: Zijun Hu <quic_zijuhu@quicinc.com>
+---
+ drivers/base/core.c | 13 +------------
+ 1 file changed, 1 insertion(+), 12 deletions(-)
 
-And to delete it:
+diff --git a/drivers/base/core.c b/drivers/base/core.c
+index bc3b523a4a6366080c3c9fd190e54c7fd13c8ded..8116bc8dd6e9eba0653ca686a90c7008de9e2840 100644
+--- a/drivers/base/core.c
++++ b/drivers/base/core.c
+@@ -4110,18 +4110,7 @@ EXPORT_SYMBOL_GPL(device_find_child);
+ struct device *device_find_child_by_name(struct device *parent,
+ 					 const char *name)
+ {
+-	struct klist_iter i;
+-	struct device *child;
+-
+-	if (!parent)
+-		return NULL;
+-
+-	klist_iter_init(&parent->p->klist_children, &i);
+-	while ((child = next_device(&i)))
+-		if (sysfs_streq(dev_name(child), name) && get_device(child))
+-			break;
+-	klist_iter_exit(&i);
+-	return child;
++	return device_find_child(parent, name, device_match_name);
+ }
+ EXPORT_SYMBOL_GPL(device_find_child_by_name);
+ 
 
-echo 07000000|xxd -r -p > name
-
-You can check your above scenario from a shell with
-
-{ sleep 10; echo 0700000054|xxd -r -p; } > name &
-cat name  
-
-> I mean, having that logics in ->release() feels very awkward...
-> 
-> For that matter, what about
->         fd = creat(name, 0700);
->         fd2 = open(name, O_RDWR);
->         close(fd);
->         write(fd2, "barf", 4);
-
-Same thing: -EIO to last write.
-
-> I'm not asking about the implementation; what behaviour do you want
-> to see in userland?
-
-Given the fact that very few things actually manipulate efi variables
-and when they do they perform open/write/close in quick succession to
-set or remove variables, I think the above behaviour is consistent with
-the use and gets rid of the ghost files problem and won't cause any
-additional issues.  On the other hand the most intuitive thing would be
-to remove zero length files on last close, not first, so if you have a
-thought on how to do that easily, I'm all ears.
-
-Regards,
-
-James
+-- 
+2.34.1
 
