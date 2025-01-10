@@ -1,55 +1,55 @@
-Received: from mail-wm1-f73.google.com (mail-wm1-f73.google.com [209.85.128.73])
+Received: from mail-lj1-f202.google.com (mail-lj1-f202.google.com [209.85.208.202])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7419621516E
-	for <linux-efi@vger.kernel.org>; Fri, 10 Jan 2025 18:42:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.73
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8E1AE28DB1E
+	for <linux-efi@vger.kernel.org>; Fri, 10 Jan 2025 18:47:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.202
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736534547; cv=none; b=aTC+n9oKtGZvMJ/zRGLxT9U1PKmjZvpzolblwzpBtnVWk66Bj5HcLs1hCzPFXzTWE/qNVFZGS6HLV/9/h+Q7pMXDS6/5I6lnehz+diIQxQnrc79EvZUoTqSudyVi/2lbF488tLYgpN5FB6G3EFqeF876TmxGKzIJ+WM6neHGGBo=
+	t=1736534880; cv=none; b=uXpHZCBWy8K7RCNrFrHVBry6NM0qolaaTnKOr0AoUFA+liFGPB1J+tjdQRADHF0cmOK6WRv3OvIcF0SNwHX/L79yklZkA3ytyDi+Vylvhc6pNeV1j7RnGtYLY3jVkjZ48So6FA3oiBMfklg+S5XY+F2K2WGorwcbEDOatZZvOHo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736534547; c=relaxed/simple;
-	bh=yFE2RvhsdHiuE5lhdo52Dzo1ojzSWSiC8Ss1voWwr0o=;
+	s=arc-20240116; t=1736534880; c=relaxed/simple;
+	bh=qC2aC8eAp33KA8O+Z6LlsHyIL/uhbg4PRbpKGbN5hWc=;
 	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=CGricWcdAzLBaKkDBlzO/BYJaxlRKamW9wo+mYX5lVmUfGUcODxGnYrECjIuvcyCUIW9X+HE30a/VjPCiWwU5nCgP+kc7L7UflZa7qoco65CMv+0b+8Z3jHGPbudxXzMrZDgsRIAi4EduXm4co+t2olOBD5hgonOypyc99FOsOA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--jackmanb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=4qXm0akH; arc=none smtp.client-ip=209.85.128.73
+	 To:Cc:Content-Type; b=jeCMtlruOclVPohEQA70Ay55C8UBykVOBEVCa8wW3SWHmZ9SCPhZOP+IzNZRCtSCXNGoSS51KRNu1S3yGY4H+QDwnthXXBehHDsmolIyo82WDP+rNsTzMnjsT0nvCYpSSrE/6KTPUPJC4zsedBuaxWFtYBeqRdbZiV6wdGXWZ6g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--jackmanb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=z+Qzw6SL; arc=none smtp.client-ip=209.85.208.202
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--jackmanb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="4qXm0akH"
-Received: by mail-wm1-f73.google.com with SMTP id 5b1f17b1804b1-43651b1ba8aso16459715e9.1
-        for <linux-efi@vger.kernel.org>; Fri, 10 Jan 2025 10:42:02 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="z+Qzw6SL"
+Received: by mail-lj1-f202.google.com with SMTP id 38308e7fff4ca-3023de5b71bso14073091fa.0
+        for <linux-efi@vger.kernel.org>; Fri, 10 Jan 2025 10:47:58 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20230601; t=1736534511; x=1737139311; darn=vger.kernel.org;
+        d=google.com; s=20230601; t=1736534877; x=1737139677; darn=vger.kernel.org;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:from:to:cc:subject:date:message-id:reply-to;
-        bh=t56obMWOlMyKyO7q6Si1cnEbfn2qyXwrpnzxR+4ONcI=;
-        b=4qXm0akHB0cuC/EDQ8VuOoCpDXwtoPfxrekyuf3Jr5mxf6WGp7rbhmhHeDIXklqxd6
-         T9lxWQyVYIV47B5OJUReQPTb2cO2OVBUtcNSPlShJjCRvFudrMBkxkEdOt7YD8B8s+2v
-         Xr3EQaZc/p07fpcwbTqNiK+qV7HY0Toaji/thgJjB5yEeJhTxg1FeoYSHEY8Jfy2/8EZ
-         jiZa5Ti+Lb8moW5SGa97W3jyG6bI8MyoEEfqB2DFyV9BFxFzztzkYfBsUkAjDJ+UDd9H
-         nFSU4xK+FYnLvbOSILO7311XYQqvF516GEImEec3eyOp+/ymIWgUdw/GtFKY2TxOmoyN
-         vLJw==
+        bh=HFKS9He99X0lK3xnnbI99ZyULyVP6qmX2/a79HHV3Mw=;
+        b=z+Qzw6SLSzzOhtQmg+Vrms/uMhgSKUbqBb7I0ogFQyBKmTrFWr81HXf1zRKD8Qkytg
+         pbI9PzQ16YLXo5NS7gaZhkPFX47MccU+iLxL73OMhKQkUMYdZNf+BpUSuwEdyMcP0Ted
+         whq+o6RWM3OgxNVhEraIwDJHTAFDMHkxJ0GVPGnZmnxtmC4Brj1M7Hu7b7iXR0GVy0Ox
+         wxSyuF1ipDpp+zGwv+0Ig4+LV/PHDBp9iuXeEvl/zcxsVzg5xw6iCiF5p7Qmpwwdbfkm
+         zmIpwAHKhwTkKc6QVVd4PPcLaRA4dWsHYScP5wtoehjQaffgnK/gNTwEncf8zJyLqgiL
+         yrHQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1736534511; x=1737139311;
+        d=1e100.net; s=20230601; t=1736534877; x=1737139677;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=t56obMWOlMyKyO7q6Si1cnEbfn2qyXwrpnzxR+4ONcI=;
-        b=cI1GV9XvPM8o5HzLs6L6UdhPqVBOXIAw/ZCrREhUAng7AdkrnT2Fl6EklUBbuxrpmW
-         BIrF7SvCuDelZv/CC1YCdglsbfAdisbJOHG9dOB7214Pt/xOVrV5dpbDJApFkbRT8iAA
-         sM8AgvlleNmbN/81heHe0Y5ICz5i24BwXZpHku7/YL4SB0q+/hMA6uu0FDL4sIpS5Spq
-         KFPo5OrAUMJMDFkNqVufwRHs3PzDoK1QYWdiVM5Zr5rplXbdFgyNbHmSe0WYixvDI2rO
-         UACxXHmJMO+vfrDPh5JFDkhpCUemM7bbl6y6RORd3dCHFsOMBY1d1s3iVQA1j/6BzKMn
-         bKjQ==
-X-Forwarded-Encrypted: i=1; AJvYcCWrAlV15F8rvEVoBxJRaVe73A2Fbzc4muS3RfNi+d5yuRUMnERCfxZPBmcv5rxqGeMsSUfWIW9wBpM=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yy1W2uKw6w9P+sBVa/BtfA7qu9Fs3inj27ltVOjFFiHA8qZ/+NZ
-	z4ls/LZ8MSafWd5MUrmigBlnVjy0GabeBBDlS14glmeRUvqcz32x8pqavv9UYva0CoLteuLFRET
-	qMlQVYRslkg==
-X-Google-Smtp-Source: AGHT+IHNze04KHr3mNrPu4oWzk1uJr6kUgfUG8uUPvBwU8SZTj2uxyjbDaOwELGdGilpgEGrHE3bExV1JNVQyA==
-X-Received: from wmba16.prod.google.com ([2002:a05:600c:6dd0:b0:434:f350:9fc])
+        bh=HFKS9He99X0lK3xnnbI99ZyULyVP6qmX2/a79HHV3Mw=;
+        b=VAgzqQ2kQ6SFpp8HNcr2/rB9AoIYkGX5OCgfoO/qXYwlz3LYwBQ1CQX5mOdHPJrbnC
+         gTDWqdveviSP9C3mCC9B4TUTIFdcXBTs4LCCB1VbWeZ+Lz+ZLlKOR6Ke8/bklrK15yl+
+         PoRsMECXHf/uHuwKV7qqNYEbPcHJytCA5eBLP9DTCw2l51Iq7lZUgIfq9FLarCRZa1O1
+         6az8eXLwrEKXvaq/oGHS5uVnI6oBbZPPI+gdMq1Gu0JU+cB6+hg7G0CBwzliQX/MM0gn
+         WmKQwaKNH5//2IDcEnCRrixOyGkuCeFiysZ6c5iqGDwWgz870dT+XJVGn/ISB2zH4/p+
+         cPKg==
+X-Forwarded-Encrypted: i=1; AJvYcCUUfyU6aLQIjNO8NKHK7ZgKLRe0hz52HAAerHsxosEJW4gqq6haOIShZ1y/+kRpgU5MpKnfExoDN3U=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyamnQVP034w1yokEd/UAfuKJaRYssJ3Iz1hGqGaBBG08JLVUvu
+	DD+jNV4C0L3tmRlQIsQPd1pvA2QOopPOESomq0p3KueHolOo6aeozSpoEsq1klZoR3QEoL3UQ4P
+	3hl2l0ltEWw==
+X-Google-Smtp-Source: AGHT+IHb2tLJeEj/nhEIcvCueP11HP0tzz903p60s9RvGJF27LFwQlQKr5YD0ey6aPDR1IvAD0AJ740K8RZlJQ==
+X-Received: from wmbbh20.prod.google.com ([2002:a05:600c:3d14:b0:434:fd4d:ffad])
  (user=jackmanb job=prod-delivery.src-stubby-dispatcher) by
- 2002:a05:6000:70a:b0:38a:4184:1519 with SMTP id ffacd0b85a97d-38a873051e1mr10550801f8f.23.1736534511095;
- Fri, 10 Jan 2025 10:41:51 -0800 (PST)
-Date: Fri, 10 Jan 2025 18:40:55 +0000
+ 2002:a05:600c:3c85:b0:436:18d0:aa6e with SMTP id 5b1f17b1804b1-436e2679a7cmr125832515e9.5.1736534484149;
+ Fri, 10 Jan 2025 10:41:24 -0800 (PST)
+Date: Fri, 10 Jan 2025 18:40:43 +0000
 In-Reply-To: <20250110-asi-rfc-v2-v2-0-8419288bc805@google.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -59,8 +59,8 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 References: <20250110-asi-rfc-v2-v2-0-8419288bc805@google.com>
 X-Mailer: b4 0.15-dev
-Message-ID: <20250110-asi-rfc-v2-v2-29-8419288bc805@google.com>
-Subject: [PATCH RFC v2 29/29] mm: asi: Stop ignoring asi=on cmdline flag
+Message-ID: <20250110-asi-rfc-v2-v2-17-8419288bc805@google.com>
+Subject: [PATCH RFC v2 17/29] mm: asi: Map vmalloc/vmap data as nonsensitive
 From: Brendan Jackman <jackmanb@google.com>
 To: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
 	Dave Hansen <dave.hansen@linux.intel.com>, "H. Peter Anvin" <hpa@zytor.com>, 
@@ -114,35 +114,113 @@ Cc: x86@kernel.org, linux-kernel@vger.kernel.org, linux-alpha@vger.kernel.org,
 	Brendan Jackman <jackmanb@google.com>
 Content-Type: text/plain; charset="utf-8"
 
-At this point the minimum requirements are in place for the kernel to
-operate correctly with ASI enabled.
+We add new VM flags for sensitive and global-nonsensitive, parallel to
+the corresponding GFP flags.
+
+__get_vm_area_node and friends will default to creating
+global-nonsensitive VM areas, and vmap then calls asi_map as necessary.
+
+__vmalloc_node_range has additional logic to check and set defaults for
+the sensitivity of the underlying page allocation. It does this via an
+initial __set_asi_flags call - note that it then calls
+__get_vm_area_node which also calls __set_asi_flags. This second call
+is a NOP.
+
+By default, we mark the underlying page allocation as sensitive, even
+if the VM area is global-nonsensitive. This is just an optimization to
+avoid unnecessary asi_map etc, since presumably most code has no reason
+to access vmalloc'd data through the direct map.
+
+There are some details of the GFP-flag/VM-flag interaction that are not
+really obvious, for example: what should happen when callers of
+__vmalloc explicitly set GFP sensitivity flags? (That function has no VM
+flags argument). For the moment let's just not block on that and focus
+on adding the infrastructure, though.
+
+At the moment, the high-level vmalloc APIs doesn't actually provide a
+way to configure sensitivity, this commit just adds the infrastructure.
+We'll have to decide how to expose this to allocation sites as we
+implement more denylist logic. vmap does already allow configuring vm
+flags.
 
 Signed-off-by: Brendan Jackman <jackmanb@google.com>
 ---
- arch/x86/mm/asi.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ mm/vmalloc.c | 21 +++++++++++++++++----
+ 1 file changed, 17 insertions(+), 4 deletions(-)
 
-diff --git a/arch/x86/mm/asi.c b/arch/x86/mm/asi.c
-index f10f6614b26148e5ba423d8a44f640674573ee40..3e3956326936ea8550308ad004dbbb3738546f9f 100644
---- a/arch/x86/mm/asi.c
-+++ b/arch/x86/mm/asi.c
-@@ -207,14 +207,14 @@ void __init asi_check_boottime_disable(void)
- 		pr_info("ASI disabled through kernel command line.\n");
- 	} else if (ret == 2 && !strncmp(arg, "on", 2)) {
- 		enabled = true;
--		pr_info("Ignoring asi=on param while ASI implementation is incomplete.\n");
-+		pr_info("ASI enabled through kernel command line.\n");
- 	} else {
- 		pr_info("ASI %s by default.\n",
- 			enabled ? "enabled" : "disabled");
+diff --git a/mm/vmalloc.c b/mm/vmalloc.c
+index 8d260f2174fe664b54dcda054cb9759ae282bf03..00745edf0b2c5f4c769a46bdcf0872223de5299d 100644
+--- a/mm/vmalloc.c
++++ b/mm/vmalloc.c
+@@ -3210,6 +3210,7 @@ struct vm_struct *remove_vm_area(const void *addr)
+ {
+ 	struct vmap_area *va;
+ 	struct vm_struct *vm;
++	unsigned long vm_addr;
+ 
+ 	might_sleep();
+ 
+@@ -3221,6 +3222,7 @@ struct vm_struct *remove_vm_area(const void *addr)
+ 	if (!va || !va->vm)
+ 		return NULL;
+ 	vm = va->vm;
++	vm_addr = (unsigned long) READ_ONCE(vm->addr);
+ 
+ 	debug_check_no_locks_freed(vm->addr, get_vm_area_size(vm));
+ 	debug_check_no_obj_freed(vm->addr, get_vm_area_size(vm));
+@@ -3352,6 +3354,7 @@ void vfree(const void *addr)
+ 				addr);
+ 		return;
+ 	}
++	asi_unmap(ASI_GLOBAL_NONSENSITIVE, vm->addr, get_vm_area_size(vm));
+ 
+ 	if (unlikely(vm->flags & VM_FLUSH_RESET_PERMS))
+ 		vm_reset_perms(vm);
+@@ -3397,6 +3400,7 @@ void vunmap(const void *addr)
+ 				addr);
+ 		return;
+ 	}
++	asi_unmap(ASI_GLOBAL_NONSENSITIVE, vm->addr, get_vm_area_size(vm));
+ 	kfree(vm);
+ }
+ EXPORT_SYMBOL(vunmap);
+@@ -3445,16 +3449,21 @@ void *vmap(struct page **pages, unsigned int count,
+ 
+ 	addr = (unsigned long)area->addr;
+ 	if (vmap_pages_range(addr, addr + size, pgprot_nx(prot),
+-				pages, PAGE_SHIFT) < 0) {
+-		vunmap(area->addr);
+-		return NULL;
+-	}
++				pages, PAGE_SHIFT) < 0)
++		goto err;
++
++	if (asi_map(ASI_GLOBAL_NONSENSITIVE, area->addr,
++		    get_vm_area_size(area)))
++		goto err; /* The necessary asi_unmap() is in vunmap. */
+ 
+ 	if (flags & VM_MAP_PUT_PAGES) {
+ 		area->pages = pages;
+ 		area->nr_pages = count;
+ 	}
+ 	return area->addr;
++err:
++	vunmap(area->addr);
++	return NULL;
+ }
+ EXPORT_SYMBOL(vmap);
+ 
+@@ -3711,6 +3720,10 @@ static void *__vmalloc_area_node(struct vm_struct *area, gfp_t gfp_mask,
+ 		goto fail;
  	}
  
- 	if (enabled)
--		pr_info("ASI enablement ignored due to incomplete implementation.\n");
-+		setup_force_cpu_cap(X86_FEATURE_ASI);
- }
++	if (asi_map(ASI_GLOBAL_NONSENSITIVE, area->addr,
++		    get_vm_area_size(area)))
++		goto fail; /* The necessary asi_unmap() is in vfree. */
++
+ 	return area->addr;
  
- /*
+ fail:
 
 -- 
 2.47.1.613.gc27f4b7a9f-goog
