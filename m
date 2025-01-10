@@ -1,55 +1,55 @@
 Received: from mail-lj1-f202.google.com (mail-lj1-f202.google.com [209.85.208.202])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8E1AE28DB1E
-	for <linux-efi@vger.kernel.org>; Fri, 10 Jan 2025 18:47:58 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5D6E124B22C
+	for <linux-efi@vger.kernel.org>; Fri, 10 Jan 2025 18:49:10 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.202
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736534880; cv=none; b=uXpHZCBWy8K7RCNrFrHVBry6NM0qolaaTnKOr0AoUFA+liFGPB1J+tjdQRADHF0cmOK6WRv3OvIcF0SNwHX/L79yklZkA3ytyDi+Vylvhc6pNeV1j7RnGtYLY3jVkjZ48So6FA3oiBMfklg+S5XY+F2K2WGorwcbEDOatZZvOHo=
+	t=1736534952; cv=none; b=j2owqYRlR+E4c2mgigkUEvRbv+ryZTg10COz3BGao+Y6iHKbBEVg+k06m2LLA42izuAnEkSSDrsLqYi63If43mBHINtJ/QZn+nh1qO8+cDOy3yPKTWZT5qUO+vAesF8z2lHyeNAC+3Nux9JMAiIlS9vG515tvCFsdkOYMSfoIkU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736534880; c=relaxed/simple;
-	bh=qC2aC8eAp33KA8O+Z6LlsHyIL/uhbg4PRbpKGbN5hWc=;
+	s=arc-20240116; t=1736534952; c=relaxed/simple;
+	bh=gGBo/k79fltK/LiW8yEcfC3C6FkuDBayaBiJeug/v8c=;
 	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=jeCMtlruOclVPohEQA70Ay55C8UBykVOBEVCa8wW3SWHmZ9SCPhZOP+IzNZRCtSCXNGoSS51KRNu1S3yGY4H+QDwnthXXBehHDsmolIyo82WDP+rNsTzMnjsT0nvCYpSSrE/6KTPUPJC4zsedBuaxWFtYBeqRdbZiV6wdGXWZ6g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--jackmanb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=z+Qzw6SL; arc=none smtp.client-ip=209.85.208.202
+	 To:Cc:Content-Type; b=NIbOlCg5e1dBdcIgZ6sJVnyNWvlvMVDYCtTZHZMNPs+i+yPO+ilVOSrCHy9oihFyQT9YfD6KVQm0vChyQwB+Yiw06bu/+aRq2J8feHkFdCNt1u6CnQIPqVxfwNrBIry3358kk/hbiQdlE6Y44Lox0lsqTtsS4b1fVgtRn8FyY4w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--jackmanb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=ON8t+2UE; arc=none smtp.client-ip=209.85.208.202
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--jackmanb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="z+Qzw6SL"
-Received: by mail-lj1-f202.google.com with SMTP id 38308e7fff4ca-3023de5b71bso14073091fa.0
-        for <linux-efi@vger.kernel.org>; Fri, 10 Jan 2025 10:47:58 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="ON8t+2UE"
+Received: by mail-lj1-f202.google.com with SMTP id 38308e7fff4ca-30244e95199so16023961fa.2
+        for <linux-efi@vger.kernel.org>; Fri, 10 Jan 2025 10:49:10 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20230601; t=1736534877; x=1737139677; darn=vger.kernel.org;
+        d=google.com; s=20230601; t=1736534948; x=1737139748; darn=vger.kernel.org;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:from:to:cc:subject:date:message-id:reply-to;
-        bh=HFKS9He99X0lK3xnnbI99ZyULyVP6qmX2/a79HHV3Mw=;
-        b=z+Qzw6SLSzzOhtQmg+Vrms/uMhgSKUbqBb7I0ogFQyBKmTrFWr81HXf1zRKD8Qkytg
-         pbI9PzQ16YLXo5NS7gaZhkPFX47MccU+iLxL73OMhKQkUMYdZNf+BpUSuwEdyMcP0Ted
-         whq+o6RWM3OgxNVhEraIwDJHTAFDMHkxJ0GVPGnZmnxtmC4Brj1M7Hu7b7iXR0GVy0Ox
-         wxSyuF1ipDpp+zGwv+0Ig4+LV/PHDBp9iuXeEvl/zcxsVzg5xw6iCiF5p7Qmpwwdbfkm
-         zmIpwAHKhwTkKc6QVVd4PPcLaRA4dWsHYScP5wtoehjQaffgnK/gNTwEncf8zJyLqgiL
-         yrHQ==
+        bh=49F9KmkByYRspQkaSYzsGBFq+GnQYA+RnfOGnAD1TNs=;
+        b=ON8t+2UE7/islfJtSiy2q+ELr5b5u+ozG57Lj+nF7ZsrhvxkNw2nz2NTu7i1zq1sWs
+         5o+DnUwaCyly1FnjCldXczc0DfkblssPIH7TjXXlgVZsj3gUzTzIYcDl7fZW9vm4RJM7
+         NE8w6OnwTCqX1FR3ZA/yVQb5pVcXeoMrLBhnTVeHGBTnxMCZai9NGCAEK7pKb+vbxAJ9
+         b1vb57fUs0+GiZXKnnV31vxn89G1U5powoPIEuVyVmxF6puvK72HYxtQA61JTPIUoHsj
+         OGAuG+lXRejXXtu+QFtTK0HmiJXp2fWzdlo0kYvHkwnvrnVTdmtP4trYZV8Et5AQmvU4
+         PDDw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1736534877; x=1737139677;
+        d=1e100.net; s=20230601; t=1736534948; x=1737139748;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=HFKS9He99X0lK3xnnbI99ZyULyVP6qmX2/a79HHV3Mw=;
-        b=VAgzqQ2kQ6SFpp8HNcr2/rB9AoIYkGX5OCgfoO/qXYwlz3LYwBQ1CQX5mOdHPJrbnC
-         gTDWqdveviSP9C3mCC9B4TUTIFdcXBTs4LCCB1VbWeZ+Lz+ZLlKOR6Ke8/bklrK15yl+
-         PoRsMECXHf/uHuwKV7qqNYEbPcHJytCA5eBLP9DTCw2l51Iq7lZUgIfq9FLarCRZa1O1
-         6az8eXLwrEKXvaq/oGHS5uVnI6oBbZPPI+gdMq1Gu0JU+cB6+hg7G0CBwzliQX/MM0gn
-         WmKQwaKNH5//2IDcEnCRrixOyGkuCeFiysZ6c5iqGDwWgz870dT+XJVGn/ISB2zH4/p+
-         cPKg==
-X-Forwarded-Encrypted: i=1; AJvYcCUUfyU6aLQIjNO8NKHK7ZgKLRe0hz52HAAerHsxosEJW4gqq6haOIShZ1y/+kRpgU5MpKnfExoDN3U=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyamnQVP034w1yokEd/UAfuKJaRYssJ3Iz1hGqGaBBG08JLVUvu
-	DD+jNV4C0L3tmRlQIsQPd1pvA2QOopPOESomq0p3KueHolOo6aeozSpoEsq1klZoR3QEoL3UQ4P
-	3hl2l0ltEWw==
-X-Google-Smtp-Source: AGHT+IHb2tLJeEj/nhEIcvCueP11HP0tzz903p60s9RvGJF27LFwQlQKr5YD0ey6aPDR1IvAD0AJ740K8RZlJQ==
-X-Received: from wmbbh20.prod.google.com ([2002:a05:600c:3d14:b0:434:fd4d:ffad])
+        bh=49F9KmkByYRspQkaSYzsGBFq+GnQYA+RnfOGnAD1TNs=;
+        b=ndjQoVu2OW2+jmuWpX7zeG5Ezsootk4dOkzaI8eqq7Vg1kr+31gcVrK9qknRhoXVYg
+         nOINL5ZW8KnmTT+QyLSHlhj3JKM+WypUlZlb16iFvHCRUYxQXwXo2FUbZZjcfZHD/5ng
+         wxn1B+nlDmKLsXBEZhd1iAX0GQ/LYNGW5SnEQAwT0p4nMIDqqrlv7QBMXUTEekql2jhR
+         1RJA9FjP0dGBU1Vxl/llCRtZmWicX1eu7rQXFOr1s4tBidOZCbwt7JoVmfLEzfFuewWk
+         i4UyyZEkL5xn3l357yc3ZXaZpNC6APStc1fY6RRcI5ghYNQxp7iqx5Owp6110lxnpT+7
+         +qDw==
+X-Forwarded-Encrypted: i=1; AJvYcCXP8fUJ5ncoDsYl8hZWSEmRrcOCI6NujhsxZWkLJE6BDoi8zl4G52KhSwOWMgFNa7a9mpuUmhYORFM=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyUII/7XSNQTwpW76RgoejYYDDEtdz65l2bJH0XERq0jGOlmoqp
+	1izfdz50vJoTcRrx1ho1I8ZUHIvG4tXtkFLj6kTLC+blFZTTm7YDOybEab38O37/9vsj+K3Lfvv
+	MnLRplMuwug==
+X-Google-Smtp-Source: AGHT+IFKWz0raFavEVPdqLi0m3c/SgK/uJNRKjAz6M2EuA2Ei6coxzOA0we1XFhGSIskVPMsumh+r4On/rf0kg==
+X-Received: from wmrn35.prod.google.com ([2002:a05:600c:5023:b0:434:f2eb:aa72])
  (user=jackmanb job=prod-delivery.src-stubby-dispatcher) by
- 2002:a05:600c:3c85:b0:436:18d0:aa6e with SMTP id 5b1f17b1804b1-436e2679a7cmr125832515e9.5.1736534484149;
- Fri, 10 Jan 2025 10:41:24 -0800 (PST)
-Date: Fri, 10 Jan 2025 18:40:43 +0000
+ 2002:a05:600c:1d07:b0:434:fa73:a907 with SMTP id 5b1f17b1804b1-436e269a5f5mr112362055e9.13.1736534508901;
+ Fri, 10 Jan 2025 10:41:48 -0800 (PST)
+Date: Fri, 10 Jan 2025 18:40:54 +0000
 In-Reply-To: <20250110-asi-rfc-v2-v2-0-8419288bc805@google.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -59,8 +59,8 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 References: <20250110-asi-rfc-v2-v2-0-8419288bc805@google.com>
 X-Mailer: b4 0.15-dev
-Message-ID: <20250110-asi-rfc-v2-v2-17-8419288bc805@google.com>
-Subject: [PATCH RFC v2 17/29] mm: asi: Map vmalloc/vmap data as nonsensitive
+Message-ID: <20250110-asi-rfc-v2-v2-28-8419288bc805@google.com>
+Subject: [PATCH RFC v2 28/29] x86/pti: Disable PTI when ASI is on
 From: Brendan Jackman <jackmanb@google.com>
 To: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
 	Dave Hansen <dave.hansen@linux.intel.com>, "H. Peter Anvin" <hpa@zytor.com>, 
@@ -114,113 +114,95 @@ Cc: x86@kernel.org, linux-kernel@vger.kernel.org, linux-alpha@vger.kernel.org,
 	Brendan Jackman <jackmanb@google.com>
 Content-Type: text/plain; charset="utf-8"
 
-We add new VM flags for sensitive and global-nonsensitive, parallel to
-the corresponding GFP flags.
+Now that ASI has support for sandboxing userspace, although userspace
+now has much more mapped than it would under KPTI, in theory none of
+that data is important to protect.
 
-__get_vm_area_node and friends will default to creating
-global-nonsensitive VM areas, and vmap then calls asi_map as necessary.
+Note that one particular impact of this is it makes locally defeating
+KASLR easier. I don't think this is a great loss given [1] etc.
 
-__vmalloc_node_range has additional logic to check and set defaults for
-the sensitivity of the underlying page allocation. It does this via an
-initial __set_asi_flags call - note that it then calls
-__get_vm_area_node which also calls __set_asi_flags. This second call
-is a NOP.
+Why do we pass in an argument instead of just having
+pti_check_boottime_disable() check boot_cpu_has(X86_FEATURE_ASI)? Just
+for clarity: I wanted it to be at least _sort of_ visible that it would
+break if you reordered asi_check_boottime_disable() afterwards.
 
-By default, we mark the underlying page allocation as sensitive, even
-if the VM area is global-nonsensitive. This is just an optimization to
-avoid unnecessary asi_map etc, since presumably most code has no reason
-to access vmalloc'd data through the direct map.
-
-There are some details of the GFP-flag/VM-flag interaction that are not
-really obvious, for example: what should happen when callers of
-__vmalloc explicitly set GFP sensitivity flags? (That function has no VM
-flags argument). For the moment let's just not block on that and focus
-on adding the infrastructure, though.
-
-At the moment, the high-level vmalloc APIs doesn't actually provide a
-way to configure sensitivity, this commit just adds the infrastructure.
-We'll have to decide how to expose this to allocation sites as we
-implement more denylist logic. vmap does already allow configuring vm
-flags.
+[1]:  https://gruss.cc/files/prefetch.pdf
+      and https://dl.acm.org/doi/pdf/10.1145/3623652.3623669
 
 Signed-off-by: Brendan Jackman <jackmanb@google.com>
 ---
- mm/vmalloc.c | 21 +++++++++++++++++----
- 1 file changed, 17 insertions(+), 4 deletions(-)
+ arch/x86/include/asm/pti.h |  6 ++++--
+ arch/x86/mm/init.c         |  2 +-
+ arch/x86/mm/pti.c          | 14 +++++++++++++-
+ 3 files changed, 18 insertions(+), 4 deletions(-)
 
-diff --git a/mm/vmalloc.c b/mm/vmalloc.c
-index 8d260f2174fe664b54dcda054cb9759ae282bf03..00745edf0b2c5f4c769a46bdcf0872223de5299d 100644
---- a/mm/vmalloc.c
-+++ b/mm/vmalloc.c
-@@ -3210,6 +3210,7 @@ struct vm_struct *remove_vm_area(const void *addr)
+diff --git a/arch/x86/include/asm/pti.h b/arch/x86/include/asm/pti.h
+index ab167c96b9ab474b33d778453db0bb550f42b0ac..79b9ba927db9b76ac3cc72cdda6f8b5fc413d352 100644
+--- a/arch/x86/include/asm/pti.h
++++ b/arch/x86/include/asm/pti.h
+@@ -3,12 +3,14 @@
+ #define _ASM_X86_PTI_H
+ #ifndef __ASSEMBLY__
+ 
++#include <linux/types.h>
++
+ #ifdef CONFIG_MITIGATION_PAGE_TABLE_ISOLATION
+ extern void pti_init(void);
+-extern void pti_check_boottime_disable(void);
++extern void pti_check_boottime_disable(bool asi_enabled);
+ extern void pti_finalize(void);
+ #else
+-static inline void pti_check_boottime_disable(void) { }
++static inline void pti_check_boottime_disable(bool asi_enabled) { }
+ #endif
+ 
+ #endif /* __ASSEMBLY__ */
+diff --git a/arch/x86/mm/init.c b/arch/x86/mm/init.c
+index ded3a47f2a9c1f554824d4ad19f3b48bce271274..4ccf6d60705652805342abefc5e71cd00c563207 100644
+--- a/arch/x86/mm/init.c
++++ b/arch/x86/mm/init.c
+@@ -754,8 +754,8 @@ void __init init_mem_mapping(void)
  {
- 	struct vmap_area *va;
- 	struct vm_struct *vm;
-+	unsigned long vm_addr;
+ 	unsigned long end;
  
- 	might_sleep();
+-	pti_check_boottime_disable();
+ 	asi_check_boottime_disable();
++	pti_check_boottime_disable(boot_cpu_has(X86_FEATURE_ASI));
+ 	probe_page_size_mask();
+ 	setup_pcid();
  
-@@ -3221,6 +3222,7 @@ struct vm_struct *remove_vm_area(const void *addr)
- 	if (!va || !va->vm)
- 		return NULL;
- 	vm = va->vm;
-+	vm_addr = (unsigned long) READ_ONCE(vm->addr);
+diff --git a/arch/x86/mm/pti.c b/arch/x86/mm/pti.c
+index 851ec8f1363a8b389ea4579cc68bf3300a4df27c..b7132080d3c9b6962a0252383190335e171bafa6 100644
+--- a/arch/x86/mm/pti.c
++++ b/arch/x86/mm/pti.c
+@@ -76,7 +76,7 @@ static enum pti_mode {
+ 	PTI_FORCE_ON
+ } pti_mode;
  
- 	debug_check_no_locks_freed(vm->addr, get_vm_area_size(vm));
- 	debug_check_no_obj_freed(vm->addr, get_vm_area_size(vm));
-@@ -3352,6 +3354,7 @@ void vfree(const void *addr)
- 				addr);
+-void __init pti_check_boottime_disable(void)
++void __init pti_check_boottime_disable(bool asi_enabled)
+ {
+ 	if (hypervisor_is_type(X86_HYPER_XEN_PV)) {
+ 		pti_mode = PTI_FORCE_OFF;
+@@ -91,6 +91,18 @@ void __init pti_check_boottime_disable(void)
  		return;
  	}
-+	asi_unmap(ASI_GLOBAL_NONSENSITIVE, vm->addr, get_vm_area_size(vm));
  
- 	if (unlikely(vm->flags & VM_FLUSH_RESET_PERMS))
- 		vm_reset_perms(vm);
-@@ -3397,6 +3400,7 @@ void vunmap(const void *addr)
- 				addr);
- 		return;
- 	}
-+	asi_unmap(ASI_GLOBAL_NONSENSITIVE, vm->addr, get_vm_area_size(vm));
- 	kfree(vm);
- }
- EXPORT_SYMBOL(vunmap);
-@@ -3445,16 +3449,21 @@ void *vmap(struct page **pages, unsigned int count,
- 
- 	addr = (unsigned long)area->addr;
- 	if (vmap_pages_range(addr, addr + size, pgprot_nx(prot),
--				pages, PAGE_SHIFT) < 0) {
--		vunmap(area->addr);
--		return NULL;
--	}
-+				pages, PAGE_SHIFT) < 0)
-+		goto err;
++	if (asi_enabled) {
++		/*
++		 * Having both ASI and PTI enabled is not a totally ridiculous
++		 * thing to do; if you want ASI but you are not confident in the
++		 * sensitivity annotations then it provides useful
++		 * defence-in-depth. But, the implementation doesn't support it.
++		 */
++		if (pti_mode != PTI_FORCE_OFF)
++			pti_print_if_insecure("disabled by ASI");
++		return;
++	}
 +
-+	if (asi_map(ASI_GLOBAL_NONSENSITIVE, area->addr,
-+		    get_vm_area_size(area)))
-+		goto err; /* The necessary asi_unmap() is in vunmap. */
+ 	if (pti_mode == PTI_FORCE_ON)
+ 		pti_print_if_secure("force enabled on command line.");
  
- 	if (flags & VM_MAP_PUT_PAGES) {
- 		area->pages = pages;
- 		area->nr_pages = count;
- 	}
- 	return area->addr;
-+err:
-+	vunmap(area->addr);
-+	return NULL;
- }
- EXPORT_SYMBOL(vmap);
- 
-@@ -3711,6 +3720,10 @@ static void *__vmalloc_area_node(struct vm_struct *area, gfp_t gfp_mask,
- 		goto fail;
- 	}
- 
-+	if (asi_map(ASI_GLOBAL_NONSENSITIVE, area->addr,
-+		    get_vm_area_size(area)))
-+		goto fail; /* The necessary asi_unmap() is in vfree. */
-+
- 	return area->addr;
- 
- fail:
 
 -- 
 2.47.1.613.gc27f4b7a9f-goog
