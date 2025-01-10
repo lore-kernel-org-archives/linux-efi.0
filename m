@@ -1,55 +1,55 @@
 Received: from mail-wr1-f74.google.com (mail-wr1-f74.google.com [209.85.221.74])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9639D225785
-	for <linux-efi@vger.kernel.org>; Fri, 10 Jan 2025 18:41:38 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C82C722540F
+	for <linux-efi@vger.kernel.org>; Fri, 10 Jan 2025 18:41:32 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.74
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736534515; cv=none; b=nGFnfKCRcxMTauxF+oQWI/5fJLTycUUqkbmI1CrHUnTHhpdEIK779JBUeSpeXA25+9KPKLuAr3fH/sIazIK7GUHvjS7X66zeCv4VcUerRqhNztdUB5cBQbHZKy3v0rjlVvfjLvsCWWcY0NAhkPrk+oay+yMB0mKxSJiCDZ8vDbc=
+	t=1736534522; cv=none; b=Gcm/qw3rmyDHZp3w+Zu4+6mPTZFdObMP9gIpSh9xJoyBX+QlP87cXDwWkZdZOzsfsKKDAJAYaiBkKQXq1Hj0+KwTL+Bfd/I/I+APO0FqAvqvOxpHt+N76oOo5bTel9Ef/Ft1Tbwp3xQhCHRUMAR/ohJVuEIehoEVphnxlfQz4ZY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736534515; c=relaxed/simple;
-	bh=kGzuSX53lHwpbQyPS7sz1yo/F9Y/VcabtEWf2Y1h4vY=;
+	s=arc-20240116; t=1736534522; c=relaxed/simple;
+	bh=4d7pidGbvdIp8iHsT7YACeXpM+11EgA5LY+ovyRSffk=;
 	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=AHHLLEcPn5VF2GGT+YaA6f/AR8NuPdgGlmt9hUV8T0ejV2z8msfIFx+mKakK+re/DQQWyfReEZDYN2B9CDOebzmKrHkolke1VPK6KoVmXtT0uK6NYgyddznuRNzavmmTYZzr4X0ANK/zKNsAVHITn63BEUNEa4bHvInxtJ0xLAU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--jackmanb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=CYy/My5o; arc=none smtp.client-ip=209.85.221.74
+	 To:Cc:Content-Type; b=HERU82qwQgZ+omsdrmk1j8n8wiAqgvV7sgxzcLZJglJqZ8byDLaGRzQeh4x2kjuy252qncmvV6y52iyA84u3xn+9gdqxq6wu58PYSp6oAVDLPFc8I2jqbk137cG0sfSFtgCreFDjURFgNwVirGDC+lULAExLpgQ67TH5Uu7aPO8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--jackmanb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=x/fetZE9; arc=none smtp.client-ip=209.85.221.74
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--jackmanb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="CYy/My5o"
-Received: by mail-wr1-f74.google.com with SMTP id ffacd0b85a97d-385d7611ad3so1373002f8f.2
-        for <linux-efi@vger.kernel.org>; Fri, 10 Jan 2025 10:41:37 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="x/fetZE9"
+Received: by mail-wr1-f74.google.com with SMTP id ffacd0b85a97d-386333ea577so964915f8f.1
+        for <linux-efi@vger.kernel.org>; Fri, 10 Jan 2025 10:41:32 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20230601; t=1736534491; x=1737139291; darn=vger.kernel.org;
+        d=google.com; s=20230601; t=1736534486; x=1737139286; darn=vger.kernel.org;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:from:to:cc:subject:date:message-id:reply-to;
-        bh=z5b6fu2IPJ4vMWdeJyvKaXZwCsIFdjwPZGonrVH8VuY=;
-        b=CYy/My5odBGanUx9mJU448Z1FppXeL+BCJYcZBer9Hi3Ylw9Y3F31R6YtnmO/CvnJr
-         YIlR3o2jdCU2FFCKXcJlsCKlT+NH163A8E1XnR6zQsRSAsWcYQHXgnD+oCR5pbrhH2FL
-         uwolnqS5smZbHt4uLtRCyHgCjVnljI8Oo85sv/Kn+g0Zkm31xTSV4ajxMqZvPgRORD3+
-         mxzHiZjq8FUBv71L72jBXhJ1CQt+r9iLMpFUP0Sw/Mo+Ic2VxYNLanMom0NlPpHQf4su
-         luM10YHPmsYXcGhc4e3RKmpY7tpw/RKXVqZkS80gOOVVaS4eqbviVv96Wf7/ybSyeTQe
-         bZQQ==
+        bh=+fqV4f6s/Eo+EZ+PE2OCyE0kBm/vfnsLcFKRz+1otrE=;
+        b=x/fetZE9fqENNHA/TK7J3oNSgvGr+mTjENc36PJ4rqxoixGMSS2It48gQWpx5s1gLQ
+         Q1bsI0nE5oPMsCrnK07kvVUSVDiVdcnQz0NDggu7QBOA49tfKncNEEKcZ+tcwl35q1iB
+         ZW7Tq5/dKeWJMGEMwbIsEwh8eqNEPfjCaU15NIF/lDZc/wXJB2vS5oM+kKLEbmWg4eTH
+         FDOIZ8zuvDv/Sit/wd2xrxF+AyAShMGCcD3ko6RY2pPVMsItRF+lXGxNuvVyg5XVlQBO
+         8Nlrte9RJKZ5VdXMsskcV/p46JPYnucaAu8MnqMqBS0QbQzJ2h+yOejkpfafbu2lbMQe
+         STZA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1736534491; x=1737139291;
+        d=1e100.net; s=20230601; t=1736534486; x=1737139286;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=z5b6fu2IPJ4vMWdeJyvKaXZwCsIFdjwPZGonrVH8VuY=;
-        b=pQtosnspW63ST8uDD+nq2sIfDHNPQUd+J1rTHPyLly82xxe2+fCxz1bWrkNiuRSFB9
-         zcHoqeALLGK1fpk0iAxMQAvBhDdftQnrf3ykxyeNrImlFfkFUsnc3AVYsfP79wmnEkxr
-         8BWOYnHyqcO18s3FjzeKgbhRR3LYQAy05zxKXFEM+Aud2acj5N5+o///ViziLIc5IcKZ
-         WbauCZbpXS7Xm/41hUz1uZ/UtMKPSRn3F09FlWbPwZBeCOO0PIhaDoLDYJrtcfYRgY3h
-         SDhAwydQE6zF86jk1NaT9S7j6nGnGQl0Gcyi72IP25dDb+h8TGFHw6xS98QYDJoHy6y8
-         ONJw==
-X-Forwarded-Encrypted: i=1; AJvYcCX7N3hFW/+rTvVw15wLzdgKJB/RAFK8BQ2Vsr6wvkzuqS/A2u1W1EKMe01eSbtWz0k0fwjAA4vjylw=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yzwc82WZQY472lbY05fwh5L9z9YCMpEA5AYsoTmKEydWYNOQgjh
-	/2Bsx8pd/A55Pqe7lASaAyJqwJzR7Q9eiqScg2yY3L7nzUqw+zP9xFXcFVcy0hD0hWNRA1EEnkh
-	WGkBRGEYFfQ==
-X-Google-Smtp-Source: AGHT+IEE74PFwgraC6zRNOcME3rOW4swKtJd/bKE4AIl8MRowFtdpWNq19ZBTTKPz5sLGPxmEc1GHABVlwipiQ==
-X-Received: from wmjv9.prod.google.com ([2002:a7b:cb49:0:b0:434:f173:a51])
+        bh=+fqV4f6s/Eo+EZ+PE2OCyE0kBm/vfnsLcFKRz+1otrE=;
+        b=MkmNH/iDnA6cTY8p22xlUM0FQKE3Iulxa5B0jvsPmdOmwlOrbX+hKKrERCdQ1Pgf0q
+         ONswac4eG1JvBDBUZWuqfyZku8aILycV9g7UZPDNvx23cG1ie7onuXKm/i/2D9rZ7gHb
+         Sm0PY1ZCtomBcr8pspdY04JbnC59Kk90HIT1QhMfdz2+ad6i6VhNt+4KpuJJ6B/a4pr7
+         ZcfldcxT7RXuOLrG0n9Tt6Ai5KU1VjsE/1oufTGhhI9Z35YClQHh3PX+S1isVb2yDpyL
+         uJe85ayIMsp4pFAxe4Ju+8c7o26TcpgP8h9wczlefZFnIPnZG3tHL0ggTBWyHledgZSO
+         agEA==
+X-Forwarded-Encrypted: i=1; AJvYcCVTIXwru2sTPfh9Y0gj6Yz0GHs2Q5JLV/3pX0o064ItH5gV/eDqdaf9PHzLWrqEpKZphOT1Al1vnwE=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwZgxDVKmrh2lVOCXOzngGPIWdR8AjMgicuooERgugJELsdCR1D
+	U77CQvaS0AuEc/Ckuftu2GzkgwPTRB8sIGghdsuV3kS39XokEpkguGBEOVvt6lQDQeb0QsVcz3R
+	dc7UoYNPhrg==
+X-Google-Smtp-Source: AGHT+IFgJUpClA++DtJe4xQ45Yc9kKsVSyJCXKqF0cxpPlCBfuMButRzIe/JLM7ynzshFcOsnG5hhjluySNsEA==
+X-Received: from wrbeh5.prod.google.com ([2002:a05:6000:4105:b0:382:4235:c487])
  (user=jackmanb job=prod-delivery.src-stubby-dispatcher) by
- 2002:a05:6000:1a85:b0:38a:4184:1520 with SMTP id ffacd0b85a97d-38a872eb1eamr9947778f8f.27.1736534490587;
- Fri, 10 Jan 2025 10:41:30 -0800 (PST)
-Date: Fri, 10 Jan 2025 18:40:46 +0000
+ 2002:adf:8b5b:0:b0:38a:88bc:aea4 with SMTP id ffacd0b85a97d-38a88bcaebfmr7355114f8f.30.1736534486264;
+ Fri, 10 Jan 2025 10:41:26 -0800 (PST)
+Date: Fri, 10 Jan 2025 18:40:44 +0000
 In-Reply-To: <20250110-asi-rfc-v2-v2-0-8419288bc805@google.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -59,8 +59,8 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 References: <20250110-asi-rfc-v2-v2-0-8419288bc805@google.com>
 X-Mailer: b4 0.15-dev
-Message-ID: <20250110-asi-rfc-v2-v2-20-8419288bc805@google.com>
-Subject: [PATCH RFC v2 20/29] mm: asi: Make TLB flushing correct under ASI
+Message-ID: <20250110-asi-rfc-v2-v2-18-8419288bc805@google.com>
+Subject: [PATCH RFC v2 18/29] mm: asi: Map dynamic percpu memory as nonsensitive
 From: Brendan Jackman <jackmanb@google.com>
 To: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
 	Dave Hansen <dave.hansen@linux.intel.com>, "H. Peter Anvin" <hpa@zytor.com>, 
@@ -111,110 +111,160 @@ Cc: x86@kernel.org, linux-kernel@vger.kernel.org, linux-alpha@vger.kernel.org,
 	linux-um@lists.infradead.org, linux-arch@vger.kernel.org, linux-mm@kvack.org, 
 	linux-trace-kernel@vger.kernel.org, linux-perf-users@vger.kernel.org, 
 	kvm@vger.kernel.org, linux-efi@vger.kernel.org, 
-	Brendan Jackman <jackmanb@google.com>
+	Brendan Jackman <jackmanb@google.com>, Reiji Watanabe <reijiw@google.com>, 
+	Junaid Shahid <junaids@google.com>
 Content-Type: text/plain; charset="utf-8"
 
-This is the absolute minimum change for TLB flushing to be correct under
-ASI. There are two arguably orthogonal changes in here but they feel
-small enough for a single commit.
+From: Reiji Watanabe <reijiw@google.com>
 
-.:: CR3 stabilization
+Currently, all dynamic percpu memory is implicitly (and
+unintentionally) treated as sensitive memory.
 
-As noted in the comment ASI can destabilize CR3, but we can stabilize it
-again by calling asi_exit, this makes it safe to read CR3 and write it
-back.
+Unconditionally map pages for dynamically allocated percpu
+memory as global nonsensitive memory, other than pages that
+are allocated for pcpu_{first,reserved}_chunk during early
+boot via memblock allocator (these will be taken care by the
+following patch).
 
-This is enough to be correct - we don't have to worry about invalidating
-the other ASI address space (i.e. we don't need to invalidate the
-restricted address space if we are currently unrestricted / vice versa)
-because we currently never set the noflush bit in CR3 for ASI
-transitions.
+We don't support sensitive percpu memory allocation yet.
 
-Even without using CR3's noflush bit there are trivial optimizations
-still on the table here: on where invpcid_flush_single_context is
-available (i.e. with the INVPCID_SINGLE feature) we can use that in lieu
-of the CR3 read/write, and avoid the extremely costly asi_exit.
-
-.:: Invalidating kernel mappings
-
-Before ASI, with KPTI off we always either disable PCID or use global
-mappings for kernel memory. However ASI disables global kernel mappings
-regardless of factors. So we need to invalidate other address spaces to
-trigger a flush when we switch into them.
-
-Note that there is currently a pointless write of
-cpu_tlbstate.invalidate_other in the case of KPTI and !PCID. We've added
-another case of that (ASI, !KPTI and !PCID). I think that's preferable
-to expanding the conditional in flush_tlb_one_kernel.
-
+Co-developed-by: Junaid Shahid <junaids@google.com>
+Signed-off-by: Junaid Shahid <junaids@google.com>
+Signed-off-by: Reiji Watanabe <reijiw@google.com>
 Signed-off-by: Brendan Jackman <jackmanb@google.com>
----
- arch/x86/mm/tlb.c | 27 ++++++++++++++++++++-------
- 1 file changed, 20 insertions(+), 7 deletions(-)
 
-diff --git a/arch/x86/mm/tlb.c b/arch/x86/mm/tlb.c
-index ce5598f96ea7a84dc0e8623022ab5bfbba401b48..07b1657bee8e4cf17452ea57c838823e76f482c0 100644
---- a/arch/x86/mm/tlb.c
-+++ b/arch/x86/mm/tlb.c
-@@ -231,7 +231,7 @@ static void clear_asid_other(void)
- 	 * This is only expected to be set if we have disabled
- 	 * kernel _PAGE_GLOBAL pages.
- 	 */
--	if (!static_cpu_has(X86_FEATURE_PTI)) {
-+	if (!static_cpu_has(X86_FEATURE_PTI) && !static_asi_enabled()) {
- 		WARN_ON_ONCE(1);
- 		return;
- 	}
-@@ -1040,7 +1040,6 @@ static void put_flush_tlb_info(void)
- noinstr u16 asi_pcid(struct asi *asi, u16 asid)
+WIP: Drop VM_SENSITIVE checks from percpu code
+---
+ mm/percpu-vm.c | 50 ++++++++++++++++++++++++++++++++++++++++++++------
+ mm/percpu.c    |  4 ++--
+ 2 files changed, 46 insertions(+), 8 deletions(-)
+
+diff --git a/mm/percpu-vm.c b/mm/percpu-vm.c
+index cd69caf6aa8d8eded2395eb4bc4051b78ec6aa33..2935d7fbac41548819a94dcc60566bd18cde819a 100644
+--- a/mm/percpu-vm.c
++++ b/mm/percpu-vm.c
+@@ -132,11 +132,20 @@ static void pcpu_pre_unmap_flush(struct pcpu_chunk *chunk,
+ 		pcpu_chunk_addr(chunk, pcpu_high_unit_cpu, page_end));
+ }
+ 
+-static void __pcpu_unmap_pages(unsigned long addr, int nr_pages)
++static void ___pcpu_unmap_pages(unsigned long addr, int nr_pages)
  {
- 	return kern_pcid(asid) | ((asi->class_id + 1) << X86_CR3_ASI_PCID_BITS_SHIFT);
--	// return kern_pcid(asid) | ((asi->index + 1) << X86_CR3_ASI_PCID_BITS_SHIFT);
+ 	vunmap_range_noflush(addr, addr + (nr_pages << PAGE_SHIFT));
  }
  
- void asi_flush_tlb_range(struct asi *asi, void *addr, size_t len)
-@@ -1192,15 +1191,19 @@ void flush_tlb_one_kernel(unsigned long addr)
- 	 * use PCID if we also use global PTEs for the kernel mapping, and
- 	 * INVLPG flushes global translations across all address spaces.
- 	 *
--	 * If PTI is on, then the kernel is mapped with non-global PTEs, and
--	 * __flush_tlb_one_user() will flush the given address for the current
--	 * kernel address space and for its usermode counterpart, but it does
--	 * not flush it for other address spaces.
-+	 * If PTI or ASI is on, then the kernel is mapped with non-global PTEs,
-+	 * and __flush_tlb_one_user() will flush the given address for the
-+	 * current kernel address space and, if PTI is on, for its usermode
-+	 * counterpart, but it does not flush it for other address spaces.
- 	 */
- 	flush_tlb_one_user(addr);
- 
--	if (!static_cpu_has(X86_FEATURE_PTI))
-+	/* Nothing more to do if PTI and ASI are completely off. */
-+	if (!static_cpu_has(X86_FEATURE_PTI) && !static_asi_enabled()) {
-+		VM_WARN_ON_ONCE(static_cpu_has(X86_FEATURE_PCID) &&
-+				!(__default_kernel_pte_mask & _PAGE_GLOBAL));
- 		return;
-+	}
- 
- 	/*
- 	 * See above.  We need to propagate the flush to all other address
-@@ -1289,6 +1292,16 @@ STATIC_NOPV void native_flush_tlb_local(void)
- 
- 	invalidate_user_asid(this_cpu_read(cpu_tlbstate.loaded_mm_asid));
- 
-+	/*
-+	 * Restricted ASI CR3 is unstable outside of critical section, so we
-+	 * couldn't flush via a CR3 read/write. asi_exit() stabilizes it.
-+	 * We don't expect any flushes in a critical section.
-+	 */
-+	if (WARN_ON(asi_in_critical_section()))
-+		native_flush_tlb_global();
-+	else
-+		asi_exit();
++static void __pcpu_unmap_pages(unsigned long addr, int nr_pages,
++			       unsigned long vm_flags)
++{
++	unsigned long size = nr_pages << PAGE_SHIFT;
 +
- 	/* If current->mm == NULL then the read_cr3() "borrows" an mm */
- 	native_write_cr3(__native_read_cr3());
++	asi_unmap(ASI_GLOBAL_NONSENSITIVE, (void *)addr, size);
++	___pcpu_unmap_pages(addr, nr_pages);
++}
++
+ /**
+  * pcpu_unmap_pages - unmap pages out of a pcpu_chunk
+  * @chunk: chunk of interest
+@@ -153,6 +162,8 @@ static void __pcpu_unmap_pages(unsigned long addr, int nr_pages)
+ static void pcpu_unmap_pages(struct pcpu_chunk *chunk,
+ 			     struct page **pages, int page_start, int page_end)
+ {
++	struct vm_struct **vms = (struct vm_struct **)chunk->data;
++	unsigned long vm_flags = vms ? vms[0]->flags : VM_ALLOC;
+ 	unsigned int cpu;
+ 	int i;
+ 
+@@ -165,7 +176,7 @@ static void pcpu_unmap_pages(struct pcpu_chunk *chunk,
+ 			pages[pcpu_page_idx(cpu, i)] = page;
+ 		}
+ 		__pcpu_unmap_pages(pcpu_chunk_addr(chunk, cpu, page_start),
+-				   page_end - page_start);
++				   page_end - page_start, vm_flags);
+ 	}
  }
+ 
+@@ -190,13 +201,38 @@ static void pcpu_post_unmap_tlb_flush(struct pcpu_chunk *chunk,
+ 		pcpu_chunk_addr(chunk, pcpu_high_unit_cpu, page_end));
+ }
+ 
+-static int __pcpu_map_pages(unsigned long addr, struct page **pages,
+-			    int nr_pages)
++/*
++ * __pcpu_map_pages() should not be called during the percpu initialization,
++ * as asi_map() depends on the page allocator (which isn't available yet
++ * during percpu initialization).  Instead, ___pcpu_map_pages() can be used
++ * during the percpu initialization. But, any pages that are mapped with
++ * ___pcpu_map_pages() will be treated as sensitive memory, unless
++ * they are explicitly mapped with asi_map() later.
++ */
++static int ___pcpu_map_pages(unsigned long addr, struct page **pages,
++			     int nr_pages)
+ {
+ 	return vmap_pages_range_noflush(addr, addr + (nr_pages << PAGE_SHIFT),
+ 					PAGE_KERNEL, pages, PAGE_SHIFT);
+ }
+ 
++static int __pcpu_map_pages(unsigned long addr, struct page **pages,
++			    int nr_pages, unsigned long vm_flags)
++{
++	unsigned long size = nr_pages << PAGE_SHIFT;
++	int err;
++
++	err = ___pcpu_map_pages(addr, pages, nr_pages);
++	if (err)
++		return err;
++
++	/*
++	 * If this fails, pcpu_map_pages()->__pcpu_unmap_pages() will call
++	 * asi_unmap() and clean up any partial mappings.
++	 */
++	return asi_map(ASI_GLOBAL_NONSENSITIVE, (void *)addr, size);
++}
++
+ /**
+  * pcpu_map_pages - map pages into a pcpu_chunk
+  * @chunk: chunk of interest
+@@ -214,13 +250,15 @@ static int __pcpu_map_pages(unsigned long addr, struct page **pages,
+ static int pcpu_map_pages(struct pcpu_chunk *chunk,
+ 			  struct page **pages, int page_start, int page_end)
+ {
++	struct vm_struct **vms = (struct vm_struct **)chunk->data;
++	unsigned long vm_flags = vms ? vms[0]->flags : VM_ALLOC;
+ 	unsigned int cpu, tcpu;
+ 	int i, err;
+ 
+ 	for_each_possible_cpu(cpu) {
+ 		err = __pcpu_map_pages(pcpu_chunk_addr(chunk, cpu, page_start),
+ 				       &pages[pcpu_page_idx(cpu, page_start)],
+-				       page_end - page_start);
++				       page_end - page_start, vm_flags);
+ 		if (err < 0)
+ 			goto err;
+ 
+@@ -232,7 +270,7 @@ static int pcpu_map_pages(struct pcpu_chunk *chunk,
+ err:
+ 	for_each_possible_cpu(tcpu) {
+ 		__pcpu_unmap_pages(pcpu_chunk_addr(chunk, tcpu, page_start),
+-				   page_end - page_start);
++				   page_end - page_start, vm_flags);
+ 		if (tcpu == cpu)
+ 			break;
+ 	}
+diff --git a/mm/percpu.c b/mm/percpu.c
+index da21680ff294cb53dfb42bf0d3b3bbd2654d2cfa..c2d913c579bf07892957ac7f601a6a71defadc4b 100644
+--- a/mm/percpu.c
++++ b/mm/percpu.c
+@@ -3273,8 +3273,8 @@ int __init pcpu_page_first_chunk(size_t reserved_size, pcpu_fc_cpu_to_node_fn_t
+ 			pcpu_populate_pte(unit_addr + (i << PAGE_SHIFT));
+ 
+ 		/* pte already populated, the following shouldn't fail */
+-		rc = __pcpu_map_pages(unit_addr, &pages[unit * unit_pages],
+-				      unit_pages);
++		rc = ___pcpu_map_pages(unit_addr, &pages[unit * unit_pages],
++				       unit_pages);
+ 		if (rc < 0)
+ 			panic("failed to map percpu area, err=%d\n", rc);
+ 
 
 -- 
 2.47.1.613.gc27f4b7a9f-goog
