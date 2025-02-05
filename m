@@ -1,28 +1,28 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 664EC14A088;
-	Wed,  5 Feb 2025 14:25:48 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 201C21FECDE;
+	Wed,  5 Feb 2025 14:50:43 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738765548; cv=none; b=Vle5LTFt/LilEEDSX1UoDG9Qa01bSTUZ0EHopbFfU/xKZkeQswVEwGY1byEqstDarK/aE6XG0AbimBQa4Gs+wTkrE2PYEUdQVtc87Youj7czuPqyYfKcWUV5aRydpjo4RYy80vGxjrk8S7hopAPWEIHPALYIY7XpjGJvQmSqoE4=
+	t=1738767043; cv=none; b=dytpzuRAU0ifRGFP4qbe53isG0yDVsEQ28RAZV/N7wU+x12424T/HptZlB2AKMsQbkRssSipfM22oAmFR5a6zYmATEmuxAtwhPe/GAamUnRrGA7UOwmLKbVEQUM3n+hsxxR4/dWUMmt/SnxM31/GM1A+Mn9G58jmZjnZOoZrFJE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738765548; c=relaxed/simple;
-	bh=rdBayyIqClqn3YDOp73mHJxCK+7YHwhsrxLB5hBfjvY=;
+	s=arc-20240116; t=1738767043; c=relaxed/simple;
+	bh=EiDiHVKGVKihCLw/ynfiI+HRdO0MjsopBlOybUIb9xY=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=PEPD2I0WgLL5aUN3tA+zAZcDpwkf6x2SR7hSWOpALys2nMyXXA/U5nnvV1195mnnPqIygTiF39mU7hH2b2f6o9KX4wx9aGrUKwIbW2pdqVd3RM+7PpvKdjJNixkMXKRGXnxQbP4phR4kSLJxpND9AfVPIhu9a1vLwy6LdYGZdwU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b=pN/jtu/i; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version:Content-Type; b=FNfAQQ4aTSBzveSus6S0ZhLrgRiHNq9Ji0iJme2giXflbOvyX9MdIgFWS55lNCVNmQge0VD4hu1Ht/K6zyQr74J4+h8QTjKLDWr4jpMtPv4EzUmPFgEgWBmyuTX+aHoENvC9VN6Bu7ITbSy6mshlHaFzF95SYiohz5tuL1eNDA4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b=AewFRTd0; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="pN/jtu/i"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B6E8FC4CED1;
-	Wed,  5 Feb 2025 14:25:47 +0000 (UTC)
+	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="AewFRTd0"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5FD3CC4CED1;
+	Wed,  5 Feb 2025 14:50:42 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-	s=korg; t=1738765548;
-	bh=rdBayyIqClqn3YDOp73mHJxCK+7YHwhsrxLB5hBfjvY=;
+	s=korg; t=1738767043;
+	bh=EiDiHVKGVKihCLw/ynfiI+HRdO0MjsopBlOybUIb9xY=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=pN/jtu/iReUKZyiqTbiu+JRJDzGgnbO70J7P3ABgGNgq6wHZmeYoiEbzQC0h2+kUk
-	 WosCq+1UxFXD2clFpruKpjpNYxeXXHsqW20fzjWZxch6FL7jOcMdSmk9dZvT2kJoxo
-	 D3YX8oKMF+8fG4wy6Gc2RCGm+MMZszLq64J6+okg=
+	b=AewFRTd09E3uDRuVwHvHGjfFy3xEtB1n5yJNnkz5hbIm5Opq37p7BwocngsVZM7rT
+	 aFONYvJjcR8mLgDcXQuagKjPuwyrWei+feVWiedr1mdLaIU3cZPttSMyLrMSoi/Q+u
+	 DavowmQCpPkJiZWgxAdR199KcgtUOTDfcj5/Ppyg=
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 To: stable@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
@@ -39,12 +39,12 @@ Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
 	linux-efi@vger.kernel.org,
 	Thomas Zimmermann <tzimmermann@suse.de>,
 	Sasha Levin <sashal@kernel.org>
-Subject: [PATCH 6.6 277/393] efi: sysfb_efi: fix W=1 warnings when EFI is not set
-Date: Wed,  5 Feb 2025 14:43:16 +0100
-Message-ID: <20250205134430.908148811@linuxfoundation.org>
+Subject: [PATCH 6.12 398/590] efi: sysfb_efi: fix W=1 warnings when EFI is not set
+Date: Wed,  5 Feb 2025 14:42:33 +0100
+Message-ID: <20250205134510.491722943@linuxfoundation.org>
 X-Mailer: git-send-email 2.48.1
-In-Reply-To: <20250205134420.279368572@linuxfoundation.org>
-References: <20250205134420.279368572@linuxfoundation.org>
+In-Reply-To: <20250205134455.220373560@linuxfoundation.org>
+References: <20250205134455.220373560@linuxfoundation.org>
 User-Agent: quilt/0.68
 X-stable: review
 X-Patchwork-Hint: ignore
@@ -57,7 +57,7 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-6.6-stable review patch.  If anyone has any objections, please let me know.
+6.12-stable review patch.  If anyone has any objections, please let me know.
 
 ------------------
 
@@ -101,7 +101,7 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/firmware/efi/sysfb_efi.c b/drivers/firmware/efi/sysfb_efi.c
-index 456d0e5eaf78b..f479680299838 100644
+index cc807ed35aedf..1e509595ac034 100644
 --- a/drivers/firmware/efi/sysfb_efi.c
 +++ b/drivers/firmware/efi/sysfb_efi.c
 @@ -91,6 +91,7 @@ void efifb_setup_from_dmi(struct screen_info *si, const char *opt)
