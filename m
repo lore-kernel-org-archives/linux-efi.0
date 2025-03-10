@@ -1,127 +1,138 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A072C231A2A;
-	Mon, 10 Mar 2025 17:49:39 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9BA871C3F34;
+	Mon, 10 Mar 2025 18:22:06 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741628979; cv=none; b=PJO814MmQbYs4/QdnPZLvvshg6F7SgxIotzXFjwD3Bo4fTYaqxCZTFnDaX6M4KUhjqtjHVMLNDqMLH2kIpoFx+9p1xt99H+pcu/nJG7EYsfflVh2LXhCKW8pbJcWCEExs3cqchjf/xiH/Sqi90KHR4KjnWrF5Us8yWfDdXHLhZk=
+	t=1741630926; cv=none; b=pGfD8l+qyXuUePiCoi1E/GuZx3te7Nx5dDIyVkxJSCyaHRFbIlSpdmdRy5S5kMZzWJCQwAVDAAEs0De7Yp2tVK46okzefZQcn6sfdL1lCQQoItSedqI+AkcgbuuusqlYJN4CXNkH4n3UwE9XmrVcphH39fHB6CVDJcZwvzoF8uA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741628979; c=relaxed/simple;
-	bh=3HQIqiPox20f6ZFesR6hdcDmhwIoQclAyy1RW5TS5KM=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=haPseEMTdYo/GMmngZuFKNtc6j+HONJMhGeZG2eJv0ZC1BltlBY/GEDh8yU6T9twuowxP8iDp/uGdls1qfLAlPAgTHWfr74z1nRoOzKtir6u3GXmqVWj3FnxT8wQhbOv/P3yDnh/KvwLZxw+Dz6ujy6tCIhaAN5o/5wZMMtXg+A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b=etdAqgtJ; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1741630926; c=relaxed/simple;
+	bh=SkjOumrPZ8pqrIzJ1V5CWQluO4ng3WvoP3slVoeW3oo=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=UWCdOY4FMrd61/npqd4D5pCxSWV9c9AKKclE6/6OCJ1v6e0qYZbGwVJs/TgnSYHqQ5/R6NHXjyHAeQnFE3FAywdQypJvlNIiGqgjPThaTq+CJSGE93NcKZKrCtnzmUTjcLpyn8M3txTPCq/UCsFK4qsi3urDOzeflAijnKH1CTM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=HxIi/1Wm; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="etdAqgtJ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id ECE25C4CEE5;
-	Mon, 10 Mar 2025 17:49:38 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-	s=korg; t=1741628979;
-	bh=3HQIqiPox20f6ZFesR6hdcDmhwIoQclAyy1RW5TS5KM=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=etdAqgtJ+LUX3O59e5KxNVaX6qWbGVkSvOucA7mU4xGG8UzTC5Ho9upxCK32+cOM4
-	 IfZfitwJBJY8XVZrFehW8vVnl7ow+0p96i4CXLRvSMVADsPZOLVRAatmKdzONc8Gva
-	 9MWsI89I0g52lqLD31UaOwtOvSt4esKtK7YOXM14=
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To: stable@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	patches@lists.linux.dev,
-	Randy Dunlap <rdunlap@infradead.org>,
-	kernel test robot <lkp@intel.com>,
-	David Rheinsberg <david@readahead.eu>,
-	Hans de Goede <hdegoede@redhat.com>,
-	Javier Martinez Canillas <javierm@redhat.com>,
-	Peter Jones <pjones@redhat.com>,
-	Simona Vetter <simona@ffwll.ch>,
-	linux-fbdev@vger.kernel.org,
-	Ard Biesheuvel <ardb@kernel.org>,
-	linux-efi@vger.kernel.org,
-	Thomas Zimmermann <tzimmermann@suse.de>,
-	Sasha Levin <sashal@kernel.org>
-Subject: [PATCH 5.15 135/620] efi: sysfb_efi: fix W=1 warnings when EFI is not set
-Date: Mon, 10 Mar 2025 17:59:41 +0100
-Message-ID: <20250310170550.928406417@linuxfoundation.org>
-X-Mailer: git-send-email 2.48.1
-In-Reply-To: <20250310170545.553361750@linuxfoundation.org>
-References: <20250310170545.553361750@linuxfoundation.org>
-User-Agent: quilt/0.68
-X-stable: review
-X-Patchwork-Hint: ignore
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="HxIi/1Wm"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 226E6C4CEEE;
+	Mon, 10 Mar 2025 18:22:06 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1741630926;
+	bh=SkjOumrPZ8pqrIzJ1V5CWQluO4ng3WvoP3slVoeW3oo=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=HxIi/1Wm03gmXfbzvtISFLsBvvMmetPAt7JCEgwfvNoUzzLDa3+BP9lJGcUMokP4q
+	 RdQJ2Tl9dTM0bT69Z0dDvbOArqtmgpsH8pBpn0NULzDOJIA3K6O/ZsNRAumVqIYfNr
+	 eBe2NpfkqSeve02qTaKaWuzSuRrJ7wLGUc4GKxsm5MExMBnPSrq9y74PTgWgf0A13g
+	 ENgga/+BHraI2lPfLeev3b+en4iA5flMP5OEAVrMiu1P7FgQktLlpdI5tMGJD0ptcD
+	 Pv13FGAvCSA0n7YPSpatPKhw+MaM68+nDRq3Nxe3vkaqM00oBB9k8/j6D6F5icuQfB
+	 9dXLxcY9RhJ4A==
+Received: by mail-lf1-f42.google.com with SMTP id 2adb3069b0e04-54943bb8006so5118691e87.0;
+        Mon, 10 Mar 2025 11:22:06 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCVdsfrFssH/M8nNjTo7PCKnMBVXR69v5o+Qc84TnJ7/JGqQ+uUYVhf5S8WxcCwSO/SJJMrX6maeb+Y=@vger.kernel.org, AJvYcCWD9aV4MVfa3aTwHJtFJse7G0g1nOxUXmL4SsMyloX4o4XFAJY42HT23j5mw7LnEkEfKG7+g88Wo/N1tmJkMw==@vger.kernel.org, AJvYcCWwIgH5oU00PJuvDOqsI9wXcck+IX7HCl/uwGR0MEW4zJNn0tzIPi+LbgaI5lTxnsD5bmLw6J+Y/v7fm11A@vger.kernel.org
+X-Gm-Message-State: AOJu0YwRJC/IRaHu7U48LPg2cvkJeNnnc+aFSOdmeDib3iCdfpGDEQoW
+	hGobT09OV1Jcfm3Dhfp5uxY5FByW4Wyi7T7AK2s1aolpcQRjW4+0vg8YExaKYvJrhwE9lx78xXQ
+	4b0Dt1qXRcYRPzEbcvXpn1GPYVYM=
+X-Google-Smtp-Source: AGHT+IF7GoDCUbQdzcJ6DIyWWAIySKv+qn9qgrauGfCi9A1X9uKn03VlhxmcPGNsWa43LGR/2J4P1S95NSjRQdBl51Q=
+X-Received: by 2002:a05:6512:b14:b0:545:532:fd2f with SMTP id
+ 2adb3069b0e04-54990e5da2cmr4479337e87.12.1741630924469; Mon, 10 Mar 2025
+ 11:22:04 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+References: <67cd0276.050a0220.14db68.006c.GAE@google.com> <8cf7d7efdc069772d69f913b02e5f67feadce18e.camel@HansenPartnership.com>
+In-Reply-To: <8cf7d7efdc069772d69f913b02e5f67feadce18e.camel@HansenPartnership.com>
+From: Ard Biesheuvel <ardb@kernel.org>
+Date: Mon, 10 Mar 2025 19:21:53 +0100
+X-Gmail-Original-Message-ID: <CAMj1kXH0Myy3bV-hFNWnoUk6ZAa6MAd1zFTM-X6dXiJPx==w0A@mail.gmail.com>
+X-Gm-Features: AQ5f1JrLbe1rn0WB5HUKTnGtdoEau4kOg9QVT7Mpm8s0v1YpGXXtA4_W0dv3ECE
+Message-ID: <CAMj1kXH0Myy3bV-hFNWnoUk6ZAa6MAd1zFTM-X6dXiJPx==w0A@mail.gmail.com>
+Subject: Re: [syzbot] [efi?] [fs?] possible deadlock in efivarfs_actor
+To: James Bottomley <James.Bottomley@hansenpartnership.com>
+Cc: syzbot <syzbot+019072ad24ab1d948228@syzkaller.appspotmail.com>, jk@ozlabs.org, 
+	linux-efi@vger.kernel.org, linux-fsdevel@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, syzkaller-bugs@googlegroups.com
+Content-Type: text/plain; charset="UTF-8"
 
-5.15-stable review patch.  If anyone has any objections, please let me know.
+On Mon, 10 Mar 2025 at 17:50, James Bottomley
+<James.Bottomley@hansenpartnership.com> wrote:
+>
+> On Sat, 2025-03-08 at 18:52 -0800, syzbot wrote:
+> > Hello,
+> >
+> > syzbot found the following issue on:
+> >
+> > HEAD commit:    e056da87c780 Merge remote-tracking branch 'will/for-
+> > next/p..
+> > git tree:
+> > git://git.kernel.org/pub/scm/linux/kernel/git/arm64/linux.git for-
+> > kernelci
+> > console output:
+> > https://syzkaller.appspot.com/x/log.txt?x=14ce9c64580000
+> > kernel config:
+> > https://syzkaller.appspot.com/x/.config?x=d6b7e15dc5b5e776
+> > dashboard link:
+> > https://syzkaller.appspot.com/bug?extid=019072ad24ab1d948228
+> > compiler:       Debian clang version 15.0.6, GNU ld (GNU Binutils for
+> > Debian) 2.40
+> > userspace arch: arm64
+> > syz repro:
+> > https://syzkaller.appspot.com/x/repro.syz?x=111ed7a0580000
+> > C reproducer:
+> > https://syzkaller.appspot.com/x/repro.c?x=13b97c64580000
+> >
+> > Downloadable assets:
+> > disk image:
+> > https://storage.googleapis.com/syzbot-assets/3d8b1b7cc4c0/disk-e056da87.raw.xz
+> > vmlinux:
+> > https://storage.googleapis.com/syzbot-assets/b84c04cff235/vmlinux-e056da87.xz
+> > kernel image:
+> > https://storage.googleapis.com/syzbot-assets/2ae4d0525881/Image-e056da87.gz.xz
+> >
+> > IMPORTANT: if you fix the issue, please add the following tag to the
+> > commit:
+> > Reported-by: syzbot+019072ad24ab1d948228@syzkaller.appspotmail.com
+> >
+> > efivarfs: resyncing variable state
+> > ============================================
+> > WARNING: possible recursive locking detected
+> > 6.14.0-rc4-syzkaller-ge056da87c780 #0 Not tainted
+> > --------------------------------------------
+> > syz-executor772/6443 is trying to acquire lock:
+> > ffff0000c6826558 (&sb->s_type->i_mutex_key#16){++++}-{4:4}, at:
+> > inode_lock include/linux/fs.h:877 [inline]
+> > ffff0000c6826558 (&sb->s_type->i_mutex_key#16):4}, at:
+> > iterate_dir+0x3b4/0x5f4 fs/readdir.c:101
+> >
+> > other info that might help us debug this:
+> >  Possible unsafe locking scenario:
+> >
+> >        CPU0
+> >        ----
+> >   lock(&sb->s_type->i_mutex_key#16);
+> >   lock(&sb->s_type->i_mutex_key#16);
+> >
+> >  *** DEADLOCK ***
+>
+> I can't figure out how you got here.  the shared lock in readdir.c is
+> on the directory and the inode_lock in the actor is on the files within
+> the directory.  The only way to get those to be the same is if the
+> actor gets called on the '.' element, which efivarfs_pm_notify is
+> supposed to skip with the
+>
+>         file->f_pos = 2;        /* skip . and .. */
+>
+> line.  Emitting the '.' and '..' in positions 0 and 1 is hard coded
+> into libfs.c:dcache_readdir() unless you're also applying a patch that
+> alters that behaviour?
+>
 
-------------------
+The repro log also has
 
-From: Randy Dunlap <rdunlap@infradead.org>
+program crashed: BUG: unable to handle kernel paging request in
+efivarfs_pm_notify
 
-[ Upstream commit 19fdc68aa7b90b1d3d600e873a3e050a39e7663d ]
-
-A build with W=1 fails because there are code and data that are not
-needed or used when CONFIG_EFI is not set. Move the "#ifdef CONFIG_EFI"
-block to earlier in the source file so that the unused code/data are
-not built.
-
-drivers/firmware/efi/sysfb_efi.c:345:39: warning: ‘efifb_fwnode_ops’ defined but not used [-Wunused-const-variable=]
-  345 | static const struct fwnode_operations efifb_fwnode_ops = {
-      |                                       ^~~~~~~~~~~~~~~~
-drivers/firmware/efi/sysfb_efi.c:238:35: warning: ‘efifb_dmi_swap_width_height’ defined but not used [-Wunused-const-variable=]
-  238 | static const struct dmi_system_id efifb_dmi_swap_width_height[] __initconst = {
-      |                                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~
-drivers/firmware/efi/sysfb_efi.c:188:35: warning: ‘efifb_dmi_system_table’ defined but not used [-Wunused-const-variable=]
-  188 | static const struct dmi_system_id efifb_dmi_system_table[] __initconst = {
-      |                                   ^~~~~~~~~~~~~~~~~~~~~~
-
-Fixes: 15d27b15de96 ("efi: sysfb_efi: fix build when EFI is not set")
-Signed-off-by: Randy Dunlap <rdunlap@infradead.org>
-Reported-by: kernel test robot <lkp@intel.com>
-Closes: https://lore.kernel.org/oe-kbuild-all/202501071933.20nlmJJt-lkp@intel.com/
-Cc: David Rheinsberg <david@readahead.eu>
-Cc: Hans de Goede <hdegoede@redhat.com>
-Cc: Javier Martinez Canillas <javierm@redhat.com>
-Cc: Peter Jones <pjones@redhat.com>
-Cc: Simona Vetter <simona@ffwll.ch>
-Cc: linux-fbdev@vger.kernel.org
-Cc: Ard Biesheuvel <ardb@kernel.org>
-Cc: linux-efi@vger.kernel.org
-Reviewed-by: Thomas Zimmermann <tzimmermann@suse.de>
-Reviewed-by: Javier Martinez Canillas <javierm@redhat.com>
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- drivers/firmware/efi/sysfb_efi.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/firmware/efi/sysfb_efi.c b/drivers/firmware/efi/sysfb_efi.c
-index 24d6f6e08df8b..816b2b05fe487 100644
---- a/drivers/firmware/efi/sysfb_efi.c
-+++ b/drivers/firmware/efi/sysfb_efi.c
-@@ -93,6 +93,7 @@ void efifb_setup_from_dmi(struct screen_info *si, const char *opt)
- 		_ret_;						\
- 	})
- 
-+#ifdef CONFIG_EFI
- static int __init efifb_set_system(const struct dmi_system_id *id)
- {
- 	struct efifb_dmi_info *info = id->driver_data;
-@@ -348,7 +349,6 @@ static const struct fwnode_operations efifb_fwnode_ops = {
- 	.add_links = efifb_add_links,
- };
- 
--#ifdef CONFIG_EFI
- static struct fwnode_handle efifb_fwnode;
- 
- __init void sysfb_apply_efi_quirks(void)
--- 
-2.39.5
-
-
-
+preceding the other log output regarding the locks, so the deadlock
+might be a symptom of another problem.
