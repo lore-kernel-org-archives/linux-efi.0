@@ -1,51 +1,52 @@
 Received: from galois.linutronix.de (Galois.linutronix.de [193.142.43.55])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CBC681DFED;
-	Sat, 12 Apr 2025 14:33:42 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E21261EBA0D;
+	Sat, 12 Apr 2025 14:33:44 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=193.142.43.55
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744468425; cv=none; b=LSg31UZEcXhEcw6on65wIckZCjfEYveeR9a39KneuK4fI4NIjo3N6m+uhcD5MD2yH72WCDHbPby9JoPABmvM8IbztkGh8+MwAT581e0YfnWY4rKPIO7K1Of6dKH5Z9CWWmEqw2OoVMVows1MqXNXgCisnCwQBg6qbn0ykFEllNc=
+	t=1744468426; cv=none; b=KpHcQ8HT+tjtRB7qfw2s+q3PjUn3F7mYnhv4d0b+OeO201EV2fiduuTlw3mWu4DNL1EhGkuHgpj7MF21maC2NPIQdGSwPaE5eqNMk/HitT2KYK1QQM2sWX3T+K9t+0WCf1HFLjdEfi1k5AkVMVTgsrOnLHxnEd0rryq5HeQzFAM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744468425; c=relaxed/simple;
-	bh=ehy2ooeiOvRFJldsTYOMq4qE39SKheYTqIYDT8FM5Qs=;
+	s=arc-20240116; t=1744468426; c=relaxed/simple;
+	bh=yDIG5w4leIboy5enAqg6d/rAmPG67l1fGT2+ENjGKDY=;
 	h=Date:From:To:Subject:Cc:In-Reply-To:References:MIME-Version:
-	 Message-ID:Content-Type; b=P4904PoeSVH9+bw1QQTDAoDiMGExok5hX1QNdEQWDjyVtxiYNT1PMxBnqujY7X3JOnfm9wAcm802MIeUBdXfe/96DxmOdTSAMC7RiuK+PJM/PE90K8W4lF5OlOWbRuaXTSQGQYsGnlDR4nSnPmBXOxY3WLO8adx7vwdSzkA/RAc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de; spf=pass smtp.mailfrom=linutronix.de; dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=bHNKDPbX; dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=T0gTcUKQ; arc=none smtp.client-ip=193.142.43.55
+	 Message-ID:Content-Type; b=h1R+v28MELxIqihdouoZON/ILcxHDC1d5gjFgSTn54tgWtj9fB4iUr56zcTs/kjIr+0PL0PUkohMwqzpBZBfzL1GD51GtyL7Tij+uC2wk54L4Hl6854x8MDC7UNG/Nl49Xjd4CGlq0PQFm/4YOoL9bloikn3gxK1uBYnimcZZCU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de; spf=pass smtp.mailfrom=linutronix.de; dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=ZkqJGgwP; dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=NHNHUboF; arc=none smtp.client-ip=193.142.43.55
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linutronix.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="bHNKDPbX";
-	dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="T0gTcUKQ"
-Date: Sat, 12 Apr 2025 14:33:28 -0000
+	dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="ZkqJGgwP";
+	dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="NHNHUboF"
+Date: Sat, 12 Apr 2025 14:33:36 -0000
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linutronix.de;
-	s=2020; t=1744468415;
+	s=2020; t=1744468417;
 	h=from:from:sender:sender:reply-to:reply-to:subject:subject:date:date:
 	 message-id:message-id:to:to:cc:cc:mime-version:mime-version:
 	 content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=0qYMl2FgX4KNrUXJNWA90KwMjcQLGwMx6/QmOw37B54=;
-	b=bHNKDPbXh3eZICHoMr5lkIKCGDRNmp0ZOFwkgHSk4Vn6fN4pYTlKb9zYzDkZWux6FMVRX9
-	mjBTsYI48Xol0zSjMI91R5rxJDJgqu/p3dUMumXNqg6jWn09WVrhmIBn2/pyoFUjKLz3n1
-	rDcVdF3Q0csDbd5P1tonM7efSoUmnu/jizxkhg8vqRby+ox8FjM/LPj9yU+Cvs7pnfofql
-	PqbWvXiPlt2sJoo0wbEF+7tWT9aKuiIz0c/JXPh8ktx0J+raZnjpkGuU/xCPkTnmdsKUDm
-	HTpBzuRw53u+eWcJNJNfM9+BR/oW5nWe3H30Sh8EA0Ibv9e/Yblb6FVk/W1yXw==
+	bh=nFrKfWCwCndvyiDN3ZxxHu4GHDOnq9R9xFvgU74knoY=;
+	b=ZkqJGgwPD517m5USDcER1qHrmcwVutJ+VQgblOx9OAAVcnmbjwfIFtsztctvXGHn4VYyLv
+	aJuOZ7iERI7nZ7lGp4SCM5Bh20888czYGIP6dJjvREjOixLrEK8dlc+wMSrRETosoLNgIV
+	QPF46edrpwB7uqIdQX1mWSum4h/uTBTuoaA2+1NMdZFyglZ3zRPsBDSJw6AXY54gQ2US83
+	X8tD0VbdTgZw+Xs5HT6LmUWSwgjPd9E/gYGghSN0QPbJe8ellIYE0prukzS25TAQ8h6QdM
+	mphIA4eSTDG5Av4NB4/NPnR7SHw8dklqVXBPy/mL6cFOol6I4YfiBWkCyfq/oQ==
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=linutronix.de;
-	s=2020e; t=1744468415;
+	s=2020e; t=1744468417;
 	h=from:from:sender:sender:reply-to:reply-to:subject:subject:date:date:
 	 message-id:message-id:to:to:cc:cc:mime-version:mime-version:
 	 content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=0qYMl2FgX4KNrUXJNWA90KwMjcQLGwMx6/QmOw37B54=;
-	b=T0gTcUKQc3VTHnsw175Xti2T2YGB3j5b4r1EQoPrRo1S8jWg0SSC4W61x7XNRKHk0d3p2k
-	CrfDESb74FUHYmDg==
+	bh=nFrKfWCwCndvyiDN3ZxxHu4GHDOnq9R9xFvgU74knoY=;
+	b=NHNHUboFHNb9JBK4pim547HGh7uGAfsigWH+mH6LNTvHyvIUAxdQtgl0CrDMIZZtyefz+0
+	Gx6V4bTgZ+Go26AQ==
 From: "tip-bot2 for Ard Biesheuvel" <tip-bot2@linutronix.de>
 Sender: tip-bot2@linutronix.de
 Reply-to: linux-kernel@vger.kernel.org
 To: linux-tip-commits@vger.kernel.org
-Subject: [tip: x86/boot] x86/sev: Prepare for splitting off early SEV code
+Subject:
+ [tip: x86/boot] x86/boot: Drop RIP_REL_REF() uses from early mapping code
 Cc: Ard Biesheuvel <ardb@kernel.org>, Ingo Molnar <mingo@kernel.org>,
  Dionna Amalie Glaze <dionnaglaze@google.com>,
  "H. Peter Anvin" <hpa@zytor.com>, Kees Cook <keescook@chromium.org>,
@@ -53,15 +54,15 @@ Cc: Ard Biesheuvel <ardb@kernel.org>, Ingo Molnar <mingo@kernel.org>,
  Linus Torvalds <torvalds@linux-foundation.org>,
  Tom Lendacky <thomas.lendacky@amd.com>, linux-efi@vger.kernel.org,
  x86@kernel.org, linux-kernel@vger.kernel.org
-In-Reply-To: <20250410134117.3713574-20-ardb+git@google.com>
-References: <20250410134117.3713574-20-ardb+git@google.com>
+In-Reply-To: <20250410134117.3713574-17-ardb+git@google.com>
+References: <20250410134117.3713574-17-ardb+git@google.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Message-ID: <174446840910.31282.4561336297241642732.tip-bot2@tip-bot2>
+Message-ID: <174446841639.31282.17436694406609905553.tip-bot2@tip-bot2>
 Robot-ID: <tip-bot2@linutronix.de>
 Robot-Unsubscribe:
  Contact <mailto:tglx@linutronix.de> to get blacklisted from these emails
@@ -71,24 +72,21 @@ Content-Transfer-Encoding: 7bit
 
 The following commit has been merged into the x86/boot branch of tip:
 
-Commit-ID:     221df25fdf827b1fe5b904c6a396af06461a32f6
-Gitweb:        https://git.kernel.org/tip/221df25fdf827b1fe5b904c6a396af06461a32f6
+Commit-ID:     dafb26f4271b9cc9cad07d9abf3c71c492e14f4c
+Gitweb:        https://git.kernel.org/tip/dafb26f4271b9cc9cad07d9abf3c71c492e14f4c
 Author:        Ard Biesheuvel <ardb@kernel.org>
-AuthorDate:    Thu, 10 Apr 2025 15:41:25 +02:00
+AuthorDate:    Thu, 10 Apr 2025 15:41:22 +02:00
 Committer:     Ingo Molnar <mingo@kernel.org>
 CommitterDate: Sat, 12 Apr 2025 11:13:05 +02:00
 
-x86/sev: Prepare for splitting off early SEV code
+x86/boot: Drop RIP_REL_REF() uses from early mapping code
 
-Prepare for splitting off parts of the SEV core.c source file into a
-file that carries code that must tolerate being called from the early
-1:1 mapping. This will allow special build-time handling of thise code,
-to ensure that it gets generated in a way that is compatible with the
-early execution context.
+Now that __startup_64() is built using -fPIC, RIP_REL_REF() has become a
+NOP and can be removed. Only some occurrences of rip_rel_ptr() will
+remain, to explicitly take the address of certain global structures in
+the 1:1 mapping of memory.
 
-So create a de-facto internal SEV API and put the definitions into
-sev-internal.h. No attempt is made to allow this header file to be
-included in arbitrary other sources - this is explicitly not the intent.
+While at it, update the code comment to describe why this is needed.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
@@ -99,561 +97,101 @@ Cc: Kevin Loughlin <kevinloughlin@google.com>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>
 Cc: Tom Lendacky <thomas.lendacky@amd.com>
 Cc: linux-efi@vger.kernel.org
-Link: https://lore.kernel.org/r/20250410134117.3713574-20-ardb+git@google.com
+Link: https://lore.kernel.org/r/20250410134117.3713574-17-ardb+git@google.com
 ---
- arch/x86/boot/compressed/sev.c      |  15 ++-
- arch/x86/coco/sev/core.c            | 108 ++----------------------
- arch/x86/coco/sev/shared.c          |  64 ++------------
- arch/x86/include/asm/sev-internal.h | 122 +++++++++++++++++++++++++++-
- arch/x86/include/asm/sev.h          |  37 ++++++++-
- 5 files changed, 194 insertions(+), 152 deletions(-)
- create mode 100644 arch/x86/include/asm/sev-internal.h
+ arch/x86/boot/startup/map_kernel.c | 41 ++++++++++++++---------------
+ 1 file changed, 21 insertions(+), 20 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/sev.c b/arch/x86/boot/compressed/sev.c
-index bb55934..6eadd79 100644
---- a/arch/x86/boot/compressed/sev.c
-+++ b/arch/x86/boot/compressed/sev.c
-@@ -126,20 +126,25 @@ static bool fault_in_kernel_space(unsigned long address)
- #include "../../lib/inat.c"
- #include "../../lib/insn.c"
+diff --git a/arch/x86/boot/startup/map_kernel.c b/arch/x86/boot/startup/map_kernel.c
+index 5f1b7e0..0eac3f1 100644
+--- a/arch/x86/boot/startup/map_kernel.c
++++ b/arch/x86/boot/startup/map_kernel.c
+@@ -26,12 +26,12 @@ static inline bool check_la57_support(void)
+ 	if (!(native_read_cr4() & X86_CR4_LA57))
+ 		return false;
  
--/* Include code for early handlers */
--#include "../../coco/sev/shared.c"
-+extern struct svsm_ca *boot_svsm_caa;
-+extern u64 boot_svsm_caa_pa;
+-	RIP_REL_REF(__pgtable_l5_enabled)	= 1;
+-	RIP_REL_REF(pgdir_shift)		= 48;
+-	RIP_REL_REF(ptrs_per_p4d)		= 512;
+-	RIP_REL_REF(page_offset_base)		= __PAGE_OFFSET_BASE_L5;
+-	RIP_REL_REF(vmalloc_base)		= __VMALLOC_BASE_L5;
+-	RIP_REL_REF(vmemmap_base)		= __VMEMMAP_BASE_L5;
++	__pgtable_l5_enabled	= 1;
++	pgdir_shift		= 48;
++	ptrs_per_p4d		= 512;
++	page_offset_base	= __PAGE_OFFSET_BASE_L5;
++	vmalloc_base		= __VMALLOC_BASE_L5;
++	vmemmap_base		= __VMEMMAP_BASE_L5;
  
--static struct svsm_ca *svsm_get_caa(void)
-+struct svsm_ca *svsm_get_caa(void)
- {
- 	return boot_svsm_caa;
+ 	return true;
+ }
+@@ -81,12 +81,14 @@ static unsigned long __head sme_postprocess_startup(struct boot_params *bp,
+ 	return sme_get_me_mask();
  }
  
--static u64 svsm_get_caa_pa(void)
-+u64 svsm_get_caa_pa(void)
- {
- 	return boot_svsm_caa_pa;
- }
- 
--static int svsm_perform_call_protocol(struct svsm_call *call)
-+int svsm_perform_call_protocol(struct svsm_call *call);
-+
-+/* Include code for early handlers */
-+#include "../../coco/sev/shared.c"
-+
-+int svsm_perform_call_protocol(struct svsm_call *call)
- {
- 	struct ghcb *ghcb;
- 	int ret;
-diff --git a/arch/x86/coco/sev/core.c b/arch/x86/coco/sev/core.c
-index 832f7a7..aeb7731 100644
---- a/arch/x86/coco/sev/core.c
-+++ b/arch/x86/coco/sev/core.c
-@@ -31,6 +31,7 @@
- #include <asm/cpu_entry_area.h>
- #include <asm/stacktrace.h>
- #include <asm/sev.h>
-+#include <asm/sev-internal.h>
- #include <asm/insn-eval.h>
- #include <asm/fpu/xcr.h>
- #include <asm/processor.h>
-@@ -44,8 +45,6 @@
- #include <asm/cpuid.h>
- #include <asm/cmdline.h>
- 
--#define DR7_RESET_VALUE        0x400
--
- /* AP INIT values as documented in the APM2  section "Processor Initialization State" */
- #define AP_INIT_CS_LIMIT		0xffff
- #define AP_INIT_DS_LIMIT		0xffff
-@@ -82,16 +81,16 @@ static const char * const sev_status_feat_names[] = {
- };
- 
- /* For early boot hypervisor communication in SEV-ES enabled guests */
--static struct ghcb boot_ghcb_page __bss_decrypted __aligned(PAGE_SIZE);
-+struct ghcb boot_ghcb_page __bss_decrypted __aligned(PAGE_SIZE);
- 
- /*
-  * Needs to be in the .data section because we need it NULL before bss is
-  * cleared
+-/* Code in __startup_64() can be relocated during execution, but the compiler
+- * doesn't have to generate PC-relative relocations when accessing globals from
+- * that function. Clang actually does not generate them, which leads to
+- * boot-time crashes. To work around this problem, every global pointer must
+- * be accessed using RIP_REL_REF(). Kernel virtual addresses can be determined
+- * by subtracting p2v_offset from the RIP-relative address.
++/*
++ * This code is compiled using PIC codegen because it will execute from the
++ * early 1:1 mapping of memory, which deviates from the mapping expected by the
++ * linker. Due to this deviation, taking the address of a global variable will
++ * produce an ambiguous result when using the plain & operator.  Instead,
++ * rip_rel_ptr() must be used, which will return the RIP-relative address in
++ * the 1:1 mapping of memory. Kernel virtual addresses can be determined by
++ * subtracting p2v_offset from the RIP-relative address.
   */
--static struct ghcb *boot_ghcb __section(".data");
-+struct ghcb *boot_ghcb __section(".data");
+ unsigned long __head __startup_64(unsigned long p2v_offset,
+ 				  struct boot_params *bp)
+@@ -113,8 +115,7 @@ unsigned long __head __startup_64(unsigned long p2v_offset,
+ 	 * Compute the delta between the address I am compiled to run at
+ 	 * and the address I am actually running at.
+ 	 */
+-	load_delta = __START_KERNEL_map + p2v_offset;
+-	RIP_REL_REF(phys_base) = load_delta;
++	phys_base = load_delta = __START_KERNEL_map + p2v_offset;
  
- /* Bitmap of SEV features supported by the hypervisor */
--static u64 sev_hv_features __ro_after_init;
-+u64 sev_hv_features __ro_after_init;
- 
- /* Secrets page physical address from the CC blob */
- static u64 secrets_pa __ro_after_init;
-@@ -105,54 +104,14 @@ static u64 snp_tsc_scale __ro_after_init;
- static u64 snp_tsc_offset __ro_after_init;
- static u64 snp_tsc_freq_khz __ro_after_init;
- 
--/* #VC handler runtime per-CPU data */
--struct sev_es_runtime_data {
--	struct ghcb ghcb_page;
--
--	/*
--	 * Reserve one page per CPU as backup storage for the unencrypted GHCB.
--	 * It is needed when an NMI happens while the #VC handler uses the real
--	 * GHCB, and the NMI handler itself is causing another #VC exception. In
--	 * that case the GHCB content of the first handler needs to be backed up
--	 * and restored.
--	 */
--	struct ghcb backup_ghcb;
--
--	/*
--	 * Mark the per-cpu GHCBs as in-use to detect nested #VC exceptions.
--	 * There is no need for it to be atomic, because nothing is written to
--	 * the GHCB between the read and the write of ghcb_active. So it is safe
--	 * to use it when a nested #VC exception happens before the write.
--	 *
--	 * This is necessary for example in the #VC->NMI->#VC case when the NMI
--	 * happens while the first #VC handler uses the GHCB. When the NMI code
--	 * raises a second #VC handler it might overwrite the contents of the
--	 * GHCB written by the first handler. To avoid this the content of the
--	 * GHCB is saved and restored when the GHCB is detected to be in use
--	 * already.
--	 */
--	bool ghcb_active;
--	bool backup_ghcb_active;
--
--	/*
--	 * Cached DR7 value - write it on DR7 writes and return it on reads.
--	 * That value will never make it to the real hardware DR7 as debugging
--	 * is currently unsupported in SEV-ES guests.
--	 */
--	unsigned long dr7;
--};
--
--struct ghcb_state {
--	struct ghcb *ghcb;
--};
- 
- /* For early boot SVSM communication */
--static struct svsm_ca boot_svsm_ca_page __aligned(PAGE_SIZE);
-+struct svsm_ca boot_svsm_ca_page __aligned(PAGE_SIZE);
- 
--static DEFINE_PER_CPU(struct sev_es_runtime_data*, runtime_data);
--static DEFINE_PER_CPU(struct sev_es_save_area *, sev_vmsa);
--static DEFINE_PER_CPU(struct svsm_ca *, svsm_caa);
--static DEFINE_PER_CPU(u64, svsm_caa_pa);
-+DEFINE_PER_CPU(struct sev_es_runtime_data*, runtime_data);
-+DEFINE_PER_CPU(struct sev_es_save_area *, sev_vmsa);
-+DEFINE_PER_CPU(struct svsm_ca *, svsm_caa);
-+DEFINE_PER_CPU(u64, svsm_caa_pa);
- 
- static __always_inline bool on_vc_stack(struct pt_regs *regs)
- {
-@@ -231,7 +190,7 @@ void noinstr __sev_es_ist_exit(void)
-  *
-  * Callers must disable local interrupts around it.
-  */
--static noinstr struct ghcb *__sev_get_ghcb(struct ghcb_state *state)
-+noinstr struct ghcb *__sev_get_ghcb(struct ghcb_state *state)
- {
- 	struct sev_es_runtime_data *data;
- 	struct ghcb *ghcb;
-@@ -274,21 +233,6 @@ static noinstr struct ghcb *__sev_get_ghcb(struct ghcb_state *state)
- 	return ghcb;
- }
- 
--static inline u64 sev_es_rd_ghcb_msr(void)
--{
--	return __rdmsr(MSR_AMD64_SEV_ES_GHCB);
--}
--
--static __always_inline void sev_es_wr_ghcb_msr(u64 val)
--{
--	u32 low, high;
--
--	low  = (u32)(val);
--	high = (u32)(val >> 32);
--
--	native_wrmsr(MSR_AMD64_SEV_ES_GHCB, low, high);
--}
--
- static int vc_fetch_insn_kernel(struct es_em_ctxt *ctxt,
- 				unsigned char *buffer)
- {
-@@ -601,33 +545,7 @@ static __always_inline void vc_forward_exception(struct es_em_ctxt *ctxt)
- /* Include code shared with pre-decompression boot stage */
- #include "shared.c"
- 
--static inline struct svsm_ca *svsm_get_caa(void)
--{
--	/*
--	 * Use rIP-relative references when called early in the boot. If
--	 * ->use_cas is set, then it is late in the boot and no need
--	 * to worry about rIP-relative references.
--	 */
--	if (RIP_REL_REF(sev_cfg).use_cas)
--		return this_cpu_read(svsm_caa);
--	else
--		return RIP_REL_REF(boot_svsm_caa);
--}
--
--static u64 svsm_get_caa_pa(void)
--{
--	/*
--	 * Use rIP-relative references when called early in the boot. If
--	 * ->use_cas is set, then it is late in the boot and no need
--	 * to worry about rIP-relative references.
--	 */
--	if (RIP_REL_REF(sev_cfg).use_cas)
--		return this_cpu_read(svsm_caa_pa);
--	else
--		return RIP_REL_REF(boot_svsm_caa_pa);
--}
--
--static noinstr void __sev_put_ghcb(struct ghcb_state *state)
-+noinstr void __sev_put_ghcb(struct ghcb_state *state)
- {
- 	struct sev_es_runtime_data *data;
- 	struct ghcb *ghcb;
-@@ -652,7 +570,7 @@ static noinstr void __sev_put_ghcb(struct ghcb_state *state)
+ 	/* Is the address not 2M aligned? */
+ 	if (load_delta & ~PMD_MASK)
+@@ -138,11 +139,11 @@ unsigned long __head __startup_64(unsigned long p2v_offset,
+ 		pgd[pgd_index(__START_KERNEL_map)] = (pgdval_t)p4d | _PAGE_TABLE;
  	}
- }
  
--static int svsm_perform_call_protocol(struct svsm_call *call)
-+int svsm_perform_call_protocol(struct svsm_call *call)
- {
- 	struct ghcb_state state;
- 	unsigned long flags;
-@@ -761,7 +679,7 @@ static u64 __init get_jump_table_addr(void)
- 	return ret;
- }
+-	RIP_REL_REF(level3_kernel_pgt)[PTRS_PER_PUD - 2].pud += load_delta;
+-	RIP_REL_REF(level3_kernel_pgt)[PTRS_PER_PUD - 1].pud += load_delta;
++	level3_kernel_pgt[PTRS_PER_PUD - 2].pud += load_delta;
++	level3_kernel_pgt[PTRS_PER_PUD - 1].pud += load_delta;
  
--static void __head
-+void __head
- early_set_pages_state(unsigned long vaddr, unsigned long paddr,
- 		      unsigned long npages, enum psc_op op)
- {
-diff --git a/arch/x86/coco/sev/shared.c b/arch/x86/coco/sev/shared.c
-index 04982d3..a7c9402 100644
---- a/arch/x86/coco/sev/shared.c
-+++ b/arch/x86/coco/sev/shared.c
-@@ -38,12 +38,8 @@
-  */
- u8 snp_vmpl __ro_after_init;
- EXPORT_SYMBOL_GPL(snp_vmpl);
--static struct svsm_ca *boot_svsm_caa __ro_after_init;
--static u64 boot_svsm_caa_pa __ro_after_init;
--
--static struct svsm_ca *svsm_get_caa(void);
--static u64 svsm_get_caa_pa(void);
--static int svsm_perform_call_protocol(struct svsm_call *call);
-+struct svsm_ca *boot_svsm_caa __ro_after_init;
-+u64 boot_svsm_caa_pa __ro_after_init;
+ 	for (i = FIXMAP_PMD_TOP; i > FIXMAP_PMD_TOP - FIXMAP_PMD_NUM; i--)
+-		RIP_REL_REF(level2_fixmap_pgt)[i].pmd += load_delta;
++		level2_fixmap_pgt[i].pmd += load_delta;
  
- /* I/O parameters for CPUID-related helpers */
- struct cpuid_leaf {
-@@ -56,36 +52,6 @@ struct cpuid_leaf {
- };
+ 	/*
+ 	 * Set up the identity mapping for the switchover.  These
+@@ -153,12 +154,12 @@ unsigned long __head __startup_64(unsigned long p2v_offset,
  
- /*
-- * Individual entries of the SNP CPUID table, as defined by the SNP
-- * Firmware ABI, Revision 0.9, Section 7.1, Table 14.
-- */
--struct snp_cpuid_fn {
--	u32 eax_in;
--	u32 ecx_in;
--	u64 xcr0_in;
--	u64 xss_in;
--	u32 eax;
--	u32 ebx;
--	u32 ecx;
--	u32 edx;
--	u64 __reserved;
--} __packed;
--
--/*
-- * SNP CPUID table, as defined by the SNP Firmware ABI, Revision 0.9,
-- * Section 8.14.2.6. Also noted there is the SNP firmware-enforced limit
-- * of 64 entries per CPUID table.
-- */
--#define SNP_CPUID_COUNT_MAX 64
--
--struct snp_cpuid_table {
--	u32 count;
--	u32 __reserved1;
--	u64 __reserved2;
--	struct snp_cpuid_fn fn[SNP_CPUID_COUNT_MAX];
--} __packed;
--
--/*
-  * Since feature negotiation related variables are set early in the boot
-  * process they must reside in the .data section so as not to be zeroed
-  * out when the .bss section is later cleared.
-@@ -107,7 +73,7 @@ static u32 cpuid_std_range_max __ro_after_init;
- static u32 cpuid_hyp_range_max __ro_after_init;
- static u32 cpuid_ext_range_max __ro_after_init;
+ 	pud = &early_pgts[0]->pmd;
+ 	pmd = &early_pgts[1]->pmd;
+-	RIP_REL_REF(next_early_pgt) = 2;
++	next_early_pgt = 2;
  
--static bool __init sev_es_check_cpu_features(void)
-+bool __init sev_es_check_cpu_features(void)
- {
- 	if (!has_cpuflag(X86_FEATURE_RDRAND)) {
- 		error("RDRAND instruction not supported - no trusted source of randomness available\n");
-@@ -117,7 +83,7 @@ static bool __init sev_es_check_cpu_features(void)
- 	return true;
- }
+ 	pgtable_flags = _KERNPG_TABLE_NOENC + sme_get_me_mask();
  
--static void __head __noreturn
-+void __head __noreturn
- sev_es_terminate(unsigned int set, unsigned int reason)
- {
- 	u64 val = GHCB_MSR_TERM_REQ;
-@@ -136,7 +102,7 @@ sev_es_terminate(unsigned int set, unsigned int reason)
- /*
-  * The hypervisor features are available from GHCB version 2 onward.
-  */
--static u64 get_hv_features(void)
-+u64 get_hv_features(void)
- {
- 	u64 val;
+ 	if (la57) {
+-		p4d = &early_pgts[RIP_REL_REF(next_early_pgt)++]->pmd;
++		p4d = &early_pgts[next_early_pgt++]->pmd;
  
-@@ -153,7 +119,7 @@ static u64 get_hv_features(void)
- 	return GHCB_MSR_HV_FT_RESP_VAL(val);
- }
+ 		i = (physaddr >> PGDIR_SHIFT) % PTRS_PER_PGD;
+ 		pgd[i + 0] = (pgdval_t)p4d + pgtable_flags;
+@@ -179,7 +180,7 @@ unsigned long __head __startup_64(unsigned long p2v_offset,
  
--static void snp_register_ghcb_early(unsigned long paddr)
-+void snp_register_ghcb_early(unsigned long paddr)
- {
- 	unsigned long pfn = paddr >> PAGE_SHIFT;
- 	u64 val;
-@@ -169,7 +135,7 @@ static void snp_register_ghcb_early(unsigned long paddr)
- 		sev_es_terminate(SEV_TERM_SET_LINUX, GHCB_TERM_REGISTER);
- }
+ 	pmd_entry = __PAGE_KERNEL_LARGE_EXEC & ~_PAGE_GLOBAL;
+ 	/* Filter out unsupported __PAGE_KERNEL_* bits: */
+-	pmd_entry &= RIP_REL_REF(__supported_pte_mask);
++	pmd_entry &= __supported_pte_mask;
+ 	pmd_entry += sme_get_me_mask();
+ 	pmd_entry +=  physaddr;
  
--static bool sev_es_negotiate_protocol(void)
-+bool sev_es_negotiate_protocol(void)
- {
- 	u64 val;
- 
-@@ -190,12 +156,6 @@ static bool sev_es_negotiate_protocol(void)
- 	return true;
- }
- 
--static __always_inline void vc_ghcb_invalidate(struct ghcb *ghcb)
--{
--	ghcb->save.sw_exit_code = 0;
--	__builtin_memset(ghcb->save.valid_bitmap, 0, sizeof(ghcb->save.valid_bitmap));
--}
--
- static bool vc_decoding_needed(unsigned long exit_code)
- {
- 	/* Exceptions don't require to decode the instruction */
-@@ -371,10 +331,10 @@ static int svsm_perform_ghcb_protocol(struct ghcb *ghcb, struct svsm_call *call)
- 	return svsm_process_result_codes(call);
- }
- 
--static enum es_result sev_es_ghcb_hv_call(struct ghcb *ghcb,
--					  struct es_em_ctxt *ctxt,
--					  u64 exit_code, u64 exit_info_1,
--					  u64 exit_info_2)
-+enum es_result sev_es_ghcb_hv_call(struct ghcb *ghcb,
-+				   struct es_em_ctxt *ctxt,
-+				   u64 exit_code, u64 exit_info_1,
-+				   u64 exit_info_2)
- {
- 	/* Fill in protocol and format specifiers */
- 	ghcb->protocol_version = ghcb_version;
-@@ -473,7 +433,7 @@ static int sev_cpuid_hv(struct ghcb *ghcb, struct es_em_ctxt *ctxt, struct cpuid
-  * while running with the initial identity mapping as well as the
-  * switch-over to kernel virtual addresses later.
-  */
--static const struct snp_cpuid_table *snp_cpuid_get_table(void)
-+const struct snp_cpuid_table *snp_cpuid_get_table(void)
- {
- 	return rip_rel_ptr(&cpuid_table_copy);
- }
-diff --git a/arch/x86/include/asm/sev-internal.h b/arch/x86/include/asm/sev-internal.h
-new file mode 100644
-index 0000000..73cb774
---- /dev/null
-+++ b/arch/x86/include/asm/sev-internal.h
-@@ -0,0 +1,122 @@
-+/* SPDX-License-Identifier: GPL-2.0 */
-+
-+#define DR7_RESET_VALUE        0x400
-+
-+extern struct ghcb boot_ghcb_page;
-+extern struct ghcb *boot_ghcb;
-+extern u64 sev_hv_features;
-+
-+/* #VC handler runtime per-CPU data */
-+struct sev_es_runtime_data {
-+	struct ghcb ghcb_page;
-+
-+	/*
-+	 * Reserve one page per CPU as backup storage for the unencrypted GHCB.
-+	 * It is needed when an NMI happens while the #VC handler uses the real
-+	 * GHCB, and the NMI handler itself is causing another #VC exception. In
-+	 * that case the GHCB content of the first handler needs to be backed up
-+	 * and restored.
-+	 */
-+	struct ghcb backup_ghcb;
-+
-+	/*
-+	 * Mark the per-cpu GHCBs as in-use to detect nested #VC exceptions.
-+	 * There is no need for it to be atomic, because nothing is written to
-+	 * the GHCB between the read and the write of ghcb_active. So it is safe
-+	 * to use it when a nested #VC exception happens before the write.
-+	 *
-+	 * This is necessary for example in the #VC->NMI->#VC case when the NMI
-+	 * happens while the first #VC handler uses the GHCB. When the NMI code
-+	 * raises a second #VC handler it might overwrite the contents of the
-+	 * GHCB written by the first handler. To avoid this the content of the
-+	 * GHCB is saved and restored when the GHCB is detected to be in use
-+	 * already.
-+	 */
-+	bool ghcb_active;
-+	bool backup_ghcb_active;
-+
-+	/*
-+	 * Cached DR7 value - write it on DR7 writes and return it on reads.
-+	 * That value will never make it to the real hardware DR7 as debugging
-+	 * is currently unsupported in SEV-ES guests.
-+	 */
-+	unsigned long dr7;
-+};
-+
-+struct ghcb_state {
-+	struct ghcb *ghcb;
-+};
-+
-+extern struct svsm_ca boot_svsm_ca_page;
-+
-+struct ghcb *__sev_get_ghcb(struct ghcb_state *state);
-+void __sev_put_ghcb(struct ghcb_state *state);
-+
-+DECLARE_PER_CPU(struct sev_es_runtime_data*, runtime_data);
-+DECLARE_PER_CPU(struct sev_es_save_area *, sev_vmsa);
-+
-+void early_set_pages_state(unsigned long vaddr, unsigned long paddr,
-+			   unsigned long npages, enum psc_op op);
-+
-+void __noreturn sev_es_terminate(unsigned int set, unsigned int reason);
-+
-+DECLARE_PER_CPU(struct svsm_ca *, svsm_caa);
-+DECLARE_PER_CPU(u64, svsm_caa_pa);
-+
-+extern struct svsm_ca *boot_svsm_caa;
-+extern u64 boot_svsm_caa_pa;
-+
-+static __always_inline struct svsm_ca *svsm_get_caa(void)
-+{
-+	/*
-+	 * Use rIP-relative references when called early in the boot. If
-+	 * ->use_cas is set, then it is late in the boot and no need
-+	 * to worry about rIP-relative references.
-+	 */
-+	if (RIP_REL_REF(sev_cfg).use_cas)
-+		return this_cpu_read(svsm_caa);
-+	else
-+		return RIP_REL_REF(boot_svsm_caa);
-+}
-+
-+static __always_inline u64 svsm_get_caa_pa(void)
-+{
-+	/*
-+	 * Use rIP-relative references when called early in the boot. If
-+	 * ->use_cas is set, then it is late in the boot and no need
-+	 * to worry about rIP-relative references.
-+	 */
-+	if (RIP_REL_REF(sev_cfg).use_cas)
-+		return this_cpu_read(svsm_caa_pa);
-+	else
-+		return RIP_REL_REF(boot_svsm_caa_pa);
-+}
-+
-+int svsm_perform_call_protocol(struct svsm_call *call);
-+
-+static inline u64 sev_es_rd_ghcb_msr(void)
-+{
-+	return __rdmsr(MSR_AMD64_SEV_ES_GHCB);
-+}
-+
-+static __always_inline void sev_es_wr_ghcb_msr(u64 val)
-+{
-+	u32 low, high;
-+
-+	low  = (u32)(val);
-+	high = (u32)(val >> 32);
-+
-+	native_wrmsr(MSR_AMD64_SEV_ES_GHCB, low, high);
-+}
-+
-+enum es_result sev_es_ghcb_hv_call(struct ghcb *ghcb,
-+				   struct es_em_ctxt *ctxt,
-+				   u64 exit_code, u64 exit_info_1,
-+				   u64 exit_info_2);
-+
-+void snp_register_ghcb_early(unsigned long paddr);
-+bool sev_es_negotiate_protocol(void);
-+bool sev_es_check_cpu_features(void);
-+u64 get_hv_features(void);
-+
-+const struct snp_cpuid_table *snp_cpuid_get_table(void);
-diff --git a/arch/x86/include/asm/sev.h b/arch/x86/include/asm/sev.h
-index ba7999f..a8661df 100644
---- a/arch/x86/include/asm/sev.h
-+++ b/arch/x86/include/asm/sev.h
-@@ -15,6 +15,7 @@
- #include <asm/sev-common.h>
- #include <asm/coco.h>
- #include <asm/set_memory.h>
-+#include <asm/svm.h>
- 
- #define GHCB_PROTOCOL_MIN	1ULL
- #define GHCB_PROTOCOL_MAX	2ULL
-@@ -83,6 +84,36 @@ extern void vc_no_ghcb(void);
- extern void vc_boot_ghcb(void);
- extern bool handle_vc_boot_ghcb(struct pt_regs *regs);
- 
-+/*
-+ * Individual entries of the SNP CPUID table, as defined by the SNP
-+ * Firmware ABI, Revision 0.9, Section 7.1, Table 14.
-+ */
-+struct snp_cpuid_fn {
-+	u32 eax_in;
-+	u32 ecx_in;
-+	u64 xcr0_in;
-+	u64 xss_in;
-+	u32 eax;
-+	u32 ebx;
-+	u32 ecx;
-+	u32 edx;
-+	u64 __reserved;
-+} __packed;
-+
-+/*
-+ * SNP CPUID table, as defined by the SNP Firmware ABI, Revision 0.9,
-+ * Section 8.14.2.6. Also noted there is the SNP firmware-enforced limit
-+ * of 64 entries per CPUID table.
-+ */
-+#define SNP_CPUID_COUNT_MAX 64
-+
-+struct snp_cpuid_table {
-+	u32 count;
-+	u32 __reserved1;
-+	u64 __reserved2;
-+	struct snp_cpuid_fn fn[SNP_CPUID_COUNT_MAX];
-+} __packed;
-+
- /* PVALIDATE return codes */
- #define PVALIDATE_FAIL_SIZEMISMATCH	6
- 
-@@ -484,6 +515,12 @@ int snp_send_guest_request(struct snp_msg_desc *mdesc, struct snp_guest_req *req
- void __init snp_secure_tsc_prepare(void);
- void __init snp_secure_tsc_init(void);
- 
-+static __always_inline void vc_ghcb_invalidate(struct ghcb *ghcb)
-+{
-+	ghcb->save.sw_exit_code = 0;
-+	__builtin_memset(ghcb->save.valid_bitmap, 0, sizeof(ghcb->save.valid_bitmap));
-+}
-+
- #else	/* !CONFIG_AMD_MEM_ENCRYPT */
- 
- #define snp_vmpl 0
