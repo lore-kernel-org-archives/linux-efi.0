@@ -1,52 +1,51 @@
 Received: from galois.linutronix.de (Galois.linutronix.de [193.142.43.55])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 599AB1EDA22;
-	Sat, 12 Apr 2025 14:33:45 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E3A93198E77;
+	Sat, 12 Apr 2025 14:33:43 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=193.142.43.55
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744468427; cv=none; b=RT6iIqK7SGANpwXruAkEysy1yWjwR3Uh/Vf4qA4gbPLsmdiyEk2EKZbWSBo4h7SnLtzHfFX/q7KeCtXx1ONlRh9U9SCyd5zw4f38QVrz3xQ4MMm8Q1xiB84xU5gSosrofihs62N4+r3CxjNQhORrxQ8IaX/9/gP0u5HmFdfkq/s=
+	t=1744468428; cv=none; b=lOBWfcWGbhTn3Yf1p9syRoqYIuyJZZXwDGSY2d7/1rMEjQQ50P0Q7d4pVYqUDBKzFPtuJFPqwdjicSyO+SlH5pF1Ht5Foy4Lvja1kTYWMW42SayAk54PG4bxhspJEiUNW8TKr0/ItK3dCmmrKbxw67muH1TRLS27lJWjNEfeQhQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744468427; c=relaxed/simple;
-	bh=WlgZJ0vX7LqWvBDaDKxcBSkriCXQGOWYEDSUxh4HSQk=;
+	s=arc-20240116; t=1744468428; c=relaxed/simple;
+	bh=XCpIcqnyEWDpPhURVq2aaXna553pBPno93KDwIgIAzo=;
 	h=Date:From:To:Subject:Cc:In-Reply-To:References:MIME-Version:
-	 Message-ID:Content-Type; b=KRkJm2RrNc/XoM0DeMEBsp7QYG0OhqPV0IiV1aJFCB1kmJBU0eE4WtPGdq0rhBw/mvsPoKEW+1DDhe+AzputeH6XmxVjXhO7tfQ4cCaBE3NrTMQG+3nL2WDfAeX6N+bwJxzNOTskyASNlNatIfENkN4zu4nL3lmrEEfPfovcbAs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de; spf=pass smtp.mailfrom=linutronix.de; dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=2ap0qhEk; dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=JExnEhX2; arc=none smtp.client-ip=193.142.43.55
+	 Message-ID:Content-Type; b=MQzFx9bJ2R1i7prr3hvqbyuuzw7iK1HG0+Ngad0ex7Am5Tgb3wxqXh8V3rG3DdYJI72detaOSxYjK4uyGyvVMChoN+wDgJG+Z97DyZlLYzEROdKtQRstPD1XYmpx976rCXypYSGCPHROLAEAJu277VnxZ9zyO4EackWV1SbJuNE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de; spf=pass smtp.mailfrom=linutronix.de; dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=onZi5FIO; dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b=rrXOos4h; arc=none smtp.client-ip=193.142.43.55
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linutronix.de
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linutronix.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="2ap0qhEk";
-	dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="JExnEhX2"
-Date: Sat, 12 Apr 2025 14:33:37 -0000
+	dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="onZi5FIO";
+	dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="rrXOos4h"
+Date: Sat, 12 Apr 2025 14:33:35 -0000
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linutronix.de;
-	s=2020; t=1744468418;
+	s=2020; t=1744468416;
 	h=from:from:sender:sender:reply-to:reply-to:subject:subject:date:date:
 	 message-id:message-id:to:to:cc:cc:mime-version:mime-version:
 	 content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=7xTiFDspZOPxWDJmtpIoMRpjjtSswyTbsylDF6QhlZc=;
-	b=2ap0qhEkY353C9V0sSjTCkJfhoQVsF3GvyMOhoFphPiwwa+pJfyS1vdFTOhm+oBaosEuEW
-	YqMweTWNtLq+rjRm2jxeLJcuLuiDIEksdg9EQXZBdVuejp6GL7imiuSzWR6V/WdNzdpDwf
-	Ob6+L2UcqE5dUtNSLvLyqEOUJhFw4D4sASrsOAIGBeA/NPROCUuAfNTqh8eB9WMdHhRRZV
-	qIhnchlGhdn+E7mstJWb8yHPHuqA/s6V/8/FfFyzInu9kOT6n/lxYqyx8AvDmTDgtbRBMm
-	LyqSP34VJC8qIixpj3Z4IAW0E3RonXHNRASw3W5ahAonhrgdhcwntkwzbBXbWw==
+	bh=A3XQf8dUaT4uuiEzZkZ01volT4TfyCEmXmYQeNwCPi8=;
+	b=onZi5FIOkVEm3f2eopzQP/3lD6koC4NE3Ew2ltQsQS5yWQrA5P3KBju14arDUEhP/MI4kg
+	8xXqNn3KvmTwV0LJgScHagxjlQQ8eCq+8Y/Sr6rya1Ts0YcGDdd/aUCng25fXwnDIAvj/O
+	6nM7CVN9Ayo4gv1aoe6h0UnOz6tOKcUFwur/UHT/1gl9D0dqcIyUE+bguoNDW8BlK17g2R
+	iIoIw5YkA5TlIcgt4TynHNdXr5t26MySyGo2ixfIN/WG2zHFzn7rxg13/iWQ8ZRZppoICs
+	ALwEXJMO4hNzj4Ux++FqmEjwIJsESPmLToWZtP7tSN8+rrYZxp+NM/7fuver2w==
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=linutronix.de;
-	s=2020e; t=1744468418;
+	s=2020e; t=1744468416;
 	h=from:from:sender:sender:reply-to:reply-to:subject:subject:date:date:
 	 message-id:message-id:to:to:cc:cc:mime-version:mime-version:
 	 content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=7xTiFDspZOPxWDJmtpIoMRpjjtSswyTbsylDF6QhlZc=;
-	b=JExnEhX2C/TZve0xONPEkA5K06hfZqBU1tdNDJI03AfJUqGnoGqk7ELnSWCNE1LwrWXom8
-	33XwfAw5M2bdYGBA==
+	bh=A3XQf8dUaT4uuiEzZkZ01volT4TfyCEmXmYQeNwCPi8=;
+	b=rrXOos4heMSJqCptlzVE53RSRT+4gnTJjasU5NsxcAnFKlRDB55zUYvXodVUi5+UTnnnob
+	s6xNJOV4uZZrscAA==
 From: "tip-bot2 for Ard Biesheuvel" <tip-bot2@linutronix.de>
 Sender: tip-bot2@linutronix.de
 Reply-to: linux-kernel@vger.kernel.org
 To: linux-tip-commits@vger.kernel.org
-Subject:
- [tip: x86/boot] x86/boot: Move early kernel mapping code into startup/
+Subject: [tip: x86/boot] x86/boot: Move early SME init code into startup/
 Cc: Ard Biesheuvel <ardb@kernel.org>, Ingo Molnar <mingo@kernel.org>,
  Dionna Amalie Glaze <dionnaglaze@google.com>,
  "H. Peter Anvin" <hpa@zytor.com>, Kees Cook <keescook@chromium.org>,
@@ -54,15 +53,15 @@ Cc: Ard Biesheuvel <ardb@kernel.org>, Ingo Molnar <mingo@kernel.org>,
  Linus Torvalds <torvalds@linux-foundation.org>,
  Tom Lendacky <thomas.lendacky@amd.com>, linux-efi@vger.kernel.org,
  x86@kernel.org, linux-kernel@vger.kernel.org
-In-Reply-To: <20250410134117.3713574-16-ardb+git@google.com>
-References: <20250410134117.3713574-16-ardb+git@google.com>
+In-Reply-To: <20250410134117.3713574-18-ardb+git@google.com>
+References: <20250410134117.3713574-18-ardb+git@google.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Message-ID: <174446841726.31282.8524035661562839300.tip-bot2@tip-bot2>
+Message-ID: <174446841554.31282.7082585342786313160.tip-bot2@tip-bot2>
 Robot-ID: <tip-bot2@linutronix.de>
 Robot-Unsubscribe:
  Contact <mailto:tglx@linutronix.de> to get blacklisted from these emails
@@ -72,20 +71,19 @@ Content-Transfer-Encoding: 7bit
 
 The following commit has been merged into the x86/boot branch of tip:
 
-Commit-ID:     dbe0ad775cbbd614583409d96abbc8ea7edb5eb4
-Gitweb:        https://git.kernel.org/tip/dbe0ad775cbbd614583409d96abbc8ea7edb5eb4
+Commit-ID:     7ae089ee75f3c77b94ff23204b41ea06da9f0193
+Gitweb:        https://git.kernel.org/tip/7ae089ee75f3c77b94ff23204b41ea06da9f0193
 Author:        Ard Biesheuvel <ardb@kernel.org>
-AuthorDate:    Thu, 10 Apr 2025 15:41:21 +02:00
+AuthorDate:    Thu, 10 Apr 2025 15:41:23 +02:00
 Committer:     Ingo Molnar <mingo@kernel.org>
 CommitterDate: Sat, 12 Apr 2025 11:13:05 +02:00
 
-x86/boot: Move early kernel mapping code into startup/
+x86/boot: Move early SME init code into startup/
 
-The startup code that constructs the kernel virtual mapping runs from
-the 1:1 mapping of memory itself, and therefore, cannot use absolute
-symbol references. Before making changes in subsequent patches, move
-this code into a separate source file under arch/x86/boot/startup/ where
-all such code will be kept from now on.
+Move the SME initialization code, which runs from the 1:1 mapping of
+memory as it operates on the kernel virtual mapping, into the new
+sub-directory arch/x86/boot/startup/ where all startup code will reside
+that needs to tolerate executing from the 1:1 mapping.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 Signed-off-by: Ingo Molnar <mingo@kernel.org>
@@ -96,483 +94,1217 @@ Cc: Kevin Loughlin <kevinloughlin@google.com>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>
 Cc: Tom Lendacky <thomas.lendacky@amd.com>
 Cc: linux-efi@vger.kernel.org
-Link: https://lore.kernel.org/r/20250410134117.3713574-16-ardb+git@google.com
+Link: https://lore.kernel.org/r/20250410134117.3713574-18-ardb+git@google.com
 ---
- arch/x86/boot/startup/Makefile     |   2 +-
- arch/x86/boot/startup/map_kernel.c | 224 ++++++++++++++++++++++++++++-
- arch/x86/kernel/head64.c           | 211 +--------------------------
- 3 files changed, 226 insertions(+), 211 deletions(-)
- create mode 100644 arch/x86/boot/startup/map_kernel.c
+ arch/x86/boot/startup/Makefile     |   1 +-
+ arch/x86/boot/startup/sme.c        | 567 ++++++++++++++++++++++++++++-
+ arch/x86/mm/Makefile               |   6 +-
+ arch/x86/mm/mem_encrypt_identity.c | 569 +----------------------------
+ 4 files changed, 568 insertions(+), 575 deletions(-)
+ create mode 100644 arch/x86/boot/startup/sme.c
+ delete mode 100644 arch/x86/mm/mem_encrypt_identity.c
 
 diff --git a/arch/x86/boot/startup/Makefile b/arch/x86/boot/startup/Makefile
-index 1beb5de..10319ae 100644
+index 10319ae..ccdfc42 100644
 --- a/arch/x86/boot/startup/Makefile
 +++ b/arch/x86/boot/startup/Makefile
-@@ -15,7 +15,7 @@ KMSAN_SANITIZE	:= n
- UBSAN_SANITIZE	:= n
+@@ -16,6 +16,7 @@ UBSAN_SANITIZE	:= n
  KCOV_INSTRUMENT	:= n
  
--obj-$(CONFIG_X86_64)		+= gdt_idt.o
-+obj-$(CONFIG_X86_64)		+= gdt_idt.o map_kernel.o
+ obj-$(CONFIG_X86_64)		+= gdt_idt.o map_kernel.o
++obj-$(CONFIG_AMD_MEM_ENCRYPT)	+= sme.o
  
  lib-$(CONFIG_X86_64)		+= la57toggle.o
  lib-$(CONFIG_EFI_MIXED)		+= efi-mixed.o
-diff --git a/arch/x86/boot/startup/map_kernel.c b/arch/x86/boot/startup/map_kernel.c
+diff --git a/arch/x86/boot/startup/sme.c b/arch/x86/boot/startup/sme.c
 new file mode 100644
-index 0000000..5f1b7e0
+index 0000000..23d10cd
 --- /dev/null
-+++ b/arch/x86/boot/startup/map_kernel.c
-@@ -0,0 +1,224 @@
-+// SPDX-License-Identifier: GPL-2.0
++++ b/arch/x86/boot/startup/sme.c
+@@ -0,0 +1,567 @@
++// SPDX-License-Identifier: GPL-2.0-only
++/*
++ * AMD Memory Encryption Support
++ *
++ * Copyright (C) 2016 Advanced Micro Devices, Inc.
++ *
++ * Author: Tom Lendacky <thomas.lendacky@amd.com>
++ */
 +
-+#include <linux/init.h>
-+#include <linux/linkage.h>
-+#include <linux/types.h>
++/*
++ * Since we're dealing with identity mappings, physical and virtual
++ * addresses are the same, so override these defines which are ultimately
++ * used by the headers in misc.h.
++ */
++#define __pa(x)  ((unsigned long)(x))
++#define __va(x)  ((void *)((unsigned long)(x)))
++
++/*
++ * Special hack: we have to be careful, because no indirections are
++ * allowed here, and paravirt_ops is a kind of one. As it will only run in
++ * baremetal anyway, we just keep it from happening. (This list needs to
++ * be extended when new paravirt and debugging variants are added.)
++ */
++#undef CONFIG_PARAVIRT
++#undef CONFIG_PARAVIRT_XXL
++#undef CONFIG_PARAVIRT_SPINLOCKS
++
++/*
++ * This code runs before CPU feature bits are set. By default, the
++ * pgtable_l5_enabled() function uses bit X86_FEATURE_LA57 to determine if
++ * 5-level paging is active, so that won't work here. USE_EARLY_PGTABLE_L5
++ * is provided to handle this situation and, instead, use a variable that
++ * has been set by the early boot code.
++ */
++#define USE_EARLY_PGTABLE_L5
++
 +#include <linux/kernel.h>
-+#include <linux/pgtable.h>
++#include <linux/mm.h>
++#include <linux/mem_encrypt.h>
++#include <linux/cc_platform.h>
 +
 +#include <asm/init.h>
-+#include <asm/sections.h>
 +#include <asm/setup.h>
++#include <asm/sections.h>
++#include <asm/coco.h>
 +#include <asm/sev.h>
 +
-+extern pmd_t early_dynamic_pgts[EARLY_DYNAMIC_PAGE_TABLES][PTRS_PER_PMD];
-+extern unsigned int next_early_pgt;
++#define PGD_FLAGS		_KERNPG_TABLE_NOENC
++#define P4D_FLAGS		_KERNPG_TABLE_NOENC
++#define PUD_FLAGS		_KERNPG_TABLE_NOENC
++#define PMD_FLAGS		_KERNPG_TABLE_NOENC
 +
-+static inline bool check_la57_support(void)
-+{
-+	if (!IS_ENABLED(CONFIG_X86_5LEVEL))
-+		return false;
++#define PMD_FLAGS_LARGE		(__PAGE_KERNEL_LARGE_EXEC & ~_PAGE_GLOBAL)
 +
-+	/*
-+	 * 5-level paging is detected and enabled at kernel decompression
-+	 * stage. Only check if it has been enabled there.
-+	 */
-+	if (!(native_read_cr4() & X86_CR4_LA57))
-+		return false;
++#define PMD_FLAGS_DEC		PMD_FLAGS_LARGE
++#define PMD_FLAGS_DEC_WP	((PMD_FLAGS_DEC & ~_PAGE_LARGE_CACHE_MASK) | \
++				 (_PAGE_PAT_LARGE | _PAGE_PWT))
 +
-+	RIP_REL_REF(__pgtable_l5_enabled)	= 1;
-+	RIP_REL_REF(pgdir_shift)		= 48;
-+	RIP_REL_REF(ptrs_per_p4d)		= 512;
-+	RIP_REL_REF(page_offset_base)		= __PAGE_OFFSET_BASE_L5;
-+	RIP_REL_REF(vmalloc_base)		= __VMALLOC_BASE_L5;
-+	RIP_REL_REF(vmemmap_base)		= __VMEMMAP_BASE_L5;
++#define PMD_FLAGS_ENC		(PMD_FLAGS_LARGE | _PAGE_ENC)
 +
-+	return true;
-+}
++#define PTE_FLAGS		(__PAGE_KERNEL_EXEC & ~_PAGE_GLOBAL)
 +
-+static unsigned long __head sme_postprocess_startup(struct boot_params *bp,
-+						    pmdval_t *pmd,
-+						    unsigned long p2v_offset)
-+{
-+	unsigned long paddr, paddr_end;
-+	int i;
++#define PTE_FLAGS_DEC		PTE_FLAGS
++#define PTE_FLAGS_DEC_WP	((PTE_FLAGS_DEC & ~_PAGE_CACHE_MASK) | \
++				 (_PAGE_PAT | _PAGE_PWT))
 +
-+	/* Encrypt the kernel and related (if SME is active) */
-+	sme_encrypt_kernel(bp);
++#define PTE_FLAGS_ENC		(PTE_FLAGS | _PAGE_ENC)
 +
-+	/*
-+	 * Clear the memory encryption mask from the .bss..decrypted section.
-+	 * The bss section will be memset to zero later in the initialization so
-+	 * there is no need to zero it after changing the memory encryption
-+	 * attribute.
-+	 */
-+	if (sme_get_me_mask()) {
-+		paddr = (unsigned long)rip_rel_ptr(__start_bss_decrypted);
-+		paddr_end = (unsigned long)rip_rel_ptr(__end_bss_decrypted);
++struct sme_populate_pgd_data {
++	void    *pgtable_area;
++	pgd_t   *pgd;
 +
-+		for (; paddr < paddr_end; paddr += PMD_SIZE) {
-+			/*
-+			 * On SNP, transition the page to shared in the RMP table so that
-+			 * it is consistent with the page table attribute change.
-+			 *
-+			 * __start_bss_decrypted has a virtual address in the high range
-+			 * mapping (kernel .text). PVALIDATE, by way of
-+			 * early_snp_set_memory_shared(), requires a valid virtual
-+			 * address but the kernel is currently running off of the identity
-+			 * mapping so use the PA to get a *currently* valid virtual address.
-+			 */
-+			early_snp_set_memory_shared(paddr, paddr, PTRS_PER_PMD);
++	pmdval_t pmd_flags;
++	pteval_t pte_flags;
++	unsigned long paddr;
 +
-+			i = pmd_index(paddr - p2v_offset);
-+			pmd[i] -= sme_get_me_mask();
-+		}
-+	}
++	unsigned long vaddr;
++	unsigned long vaddr_end;
++};
 +
-+	/*
-+	 * Return the SME encryption mask (if SME is active) to be used as a
-+	 * modifier for the initial pgdir entry programmed into CR3.
-+	 */
-+	return sme_get_me_mask();
-+}
-+
-+/* Code in __startup_64() can be relocated during execution, but the compiler
-+ * doesn't have to generate PC-relative relocations when accessing globals from
-+ * that function. Clang actually does not generate them, which leads to
-+ * boot-time crashes. To work around this problem, every global pointer must
-+ * be accessed using RIP_REL_REF(). Kernel virtual addresses can be determined
-+ * by subtracting p2v_offset from the RIP-relative address.
++/*
++ * This work area lives in the .init.scratch section, which lives outside of
++ * the kernel proper. It is sized to hold the intermediate copy buffer and
++ * more than enough pagetable pages.
++ *
++ * By using this section, the kernel can be encrypted in place and it
++ * avoids any possibility of boot parameters or initramfs images being
++ * placed such that the in-place encryption logic overwrites them.  This
++ * section is 2MB aligned to allow for simple pagetable setup using only
++ * PMD entries (see vmlinux.lds.S).
 + */
-+unsigned long __head __startup_64(unsigned long p2v_offset,
-+				  struct boot_params *bp)
++static char sme_workarea[2 * PMD_SIZE] __section(".init.scratch");
++
++static void __head sme_clear_pgd(struct sme_populate_pgd_data *ppd)
 +{
-+	pmd_t (*early_pgts)[PTRS_PER_PMD] = rip_rel_ptr(early_dynamic_pgts);
-+	unsigned long physaddr = (unsigned long)rip_rel_ptr(_text);
-+	unsigned long va_text, va_end;
-+	unsigned long pgtable_flags;
-+	unsigned long load_delta;
-+	pgdval_t *pgd;
-+	p4dval_t *p4d;
-+	pudval_t *pud;
-+	pmdval_t *pmd, pmd_entry;
-+	bool la57;
-+	int i;
++	unsigned long pgd_start, pgd_end, pgd_size;
++	pgd_t *pgd_p;
 +
-+	la57 = check_la57_support();
++	pgd_start = ppd->vaddr & PGDIR_MASK;
++	pgd_end = ppd->vaddr_end & PGDIR_MASK;
 +
-+	/* Is the address too large? */
-+	if (physaddr >> MAX_PHYSMEM_BITS)
-+		for (;;);
++	pgd_size = (((pgd_end - pgd_start) / PGDIR_SIZE) + 1) * sizeof(pgd_t);
 +
-+	/*
-+	 * Compute the delta between the address I am compiled to run at
-+	 * and the address I am actually running at.
-+	 */
-+	load_delta = __START_KERNEL_map + p2v_offset;
-+	RIP_REL_REF(phys_base) = load_delta;
++	pgd_p = ppd->pgd + pgd_index(ppd->vaddr);
 +
-+	/* Is the address not 2M aligned? */
-+	if (load_delta & ~PMD_MASK)
-+		for (;;);
-+
-+	va_text = physaddr - p2v_offset;
-+	va_end  = (unsigned long)rip_rel_ptr(_end) - p2v_offset;
-+
-+	/* Include the SME encryption mask in the fixup value */
-+	load_delta += sme_get_me_mask();
-+
-+	/* Fixup the physical addresses in the page table */
-+
-+	pgd = rip_rel_ptr(early_top_pgt);
-+	pgd[pgd_index(__START_KERNEL_map)] += load_delta;
-+
-+	if (IS_ENABLED(CONFIG_X86_5LEVEL) && la57) {
-+		p4d = (p4dval_t *)rip_rel_ptr(level4_kernel_pgt);
-+		p4d[MAX_PTRS_PER_P4D - 1] += load_delta;
-+
-+		pgd[pgd_index(__START_KERNEL_map)] = (pgdval_t)p4d | _PAGE_TABLE;
-+	}
-+
-+	RIP_REL_REF(level3_kernel_pgt)[PTRS_PER_PUD - 2].pud += load_delta;
-+	RIP_REL_REF(level3_kernel_pgt)[PTRS_PER_PUD - 1].pud += load_delta;
-+
-+	for (i = FIXMAP_PMD_TOP; i > FIXMAP_PMD_TOP - FIXMAP_PMD_NUM; i--)
-+		RIP_REL_REF(level2_fixmap_pgt)[i].pmd += load_delta;
-+
-+	/*
-+	 * Set up the identity mapping for the switchover.  These
-+	 * entries should *NOT* have the global bit set!  This also
-+	 * creates a bunch of nonsense entries but that is fine --
-+	 * it avoids problems around wraparound.
-+	 */
-+
-+	pud = &early_pgts[0]->pmd;
-+	pmd = &early_pgts[1]->pmd;
-+	RIP_REL_REF(next_early_pgt) = 2;
-+
-+	pgtable_flags = _KERNPG_TABLE_NOENC + sme_get_me_mask();
-+
-+	if (la57) {
-+		p4d = &early_pgts[RIP_REL_REF(next_early_pgt)++]->pmd;
-+
-+		i = (physaddr >> PGDIR_SHIFT) % PTRS_PER_PGD;
-+		pgd[i + 0] = (pgdval_t)p4d + pgtable_flags;
-+		pgd[i + 1] = (pgdval_t)p4d + pgtable_flags;
-+
-+		i = physaddr >> P4D_SHIFT;
-+		p4d[(i + 0) % PTRS_PER_P4D] = (pgdval_t)pud + pgtable_flags;
-+		p4d[(i + 1) % PTRS_PER_P4D] = (pgdval_t)pud + pgtable_flags;
-+	} else {
-+		i = (physaddr >> PGDIR_SHIFT) % PTRS_PER_PGD;
-+		pgd[i + 0] = (pgdval_t)pud + pgtable_flags;
-+		pgd[i + 1] = (pgdval_t)pud + pgtable_flags;
-+	}
-+
-+	i = physaddr >> PUD_SHIFT;
-+	pud[(i + 0) % PTRS_PER_PUD] = (pudval_t)pmd + pgtable_flags;
-+	pud[(i + 1) % PTRS_PER_PUD] = (pudval_t)pmd + pgtable_flags;
-+
-+	pmd_entry = __PAGE_KERNEL_LARGE_EXEC & ~_PAGE_GLOBAL;
-+	/* Filter out unsupported __PAGE_KERNEL_* bits: */
-+	pmd_entry &= RIP_REL_REF(__supported_pte_mask);
-+	pmd_entry += sme_get_me_mask();
-+	pmd_entry +=  physaddr;
-+
-+	for (i = 0; i < DIV_ROUND_UP(va_end - va_text, PMD_SIZE); i++) {
-+		int idx = i + (physaddr >> PMD_SHIFT);
-+
-+		pmd[idx % PTRS_PER_PMD] = pmd_entry + i * PMD_SIZE;
-+	}
-+
-+	/*
-+	 * Fixup the kernel text+data virtual addresses. Note that
-+	 * we might write invalid pmds, when the kernel is relocated
-+	 * cleanup_highmap() fixes this up along with the mappings
-+	 * beyond _end.
-+	 *
-+	 * Only the region occupied by the kernel image has so far
-+	 * been checked against the table of usable memory regions
-+	 * provided by the firmware, so invalidate pages outside that
-+	 * region. A page table entry that maps to a reserved area of
-+	 * memory would allow processor speculation into that area,
-+	 * and on some hardware (particularly the UV platform) even
-+	 * speculative access to some reserved areas is caught as an
-+	 * error, causing the BIOS to halt the system.
-+	 */
-+
-+	pmd = rip_rel_ptr(level2_kernel_pgt);
-+
-+	/* invalidate pages before the kernel image */
-+	for (i = 0; i < pmd_index(va_text); i++)
-+		pmd[i] &= ~_PAGE_PRESENT;
-+
-+	/* fixup pages that are part of the kernel image */
-+	for (; i <= pmd_index(va_end); i++)
-+		if (pmd[i] & _PAGE_PRESENT)
-+			pmd[i] += load_delta;
-+
-+	/* invalidate pages after the kernel image */
-+	for (; i < PTRS_PER_PMD; i++)
-+		pmd[i] &= ~_PAGE_PRESENT;
-+
-+	return sme_postprocess_startup(bp, pmd, p2v_offset);
++	memset(pgd_p, 0, pgd_size);
 +}
-diff --git a/arch/x86/kernel/head64.c b/arch/x86/kernel/head64.c
-index 9b2ffec..6b68a20 100644
---- a/arch/x86/kernel/head64.c
-+++ b/arch/x86/kernel/head64.c
-@@ -47,7 +47,7 @@
-  * Manage page tables very early on.
-  */
- extern pmd_t early_dynamic_pgts[EARLY_DYNAMIC_PAGE_TABLES][PTRS_PER_PMD];
--static unsigned int __initdata next_early_pgt;
-+unsigned int __initdata next_early_pgt;
- pmdval_t early_pmd_flags = __PAGE_KERNEL_LARGE & ~(_PAGE_GLOBAL | _PAGE_NX);
++
++static pud_t __head *sme_prepare_pgd(struct sme_populate_pgd_data *ppd)
++{
++	pgd_t *pgd;
++	p4d_t *p4d;
++	pud_t *pud;
++	pmd_t *pmd;
++
++	pgd = ppd->pgd + pgd_index(ppd->vaddr);
++	if (pgd_none(*pgd)) {
++		p4d = ppd->pgtable_area;
++		memset(p4d, 0, sizeof(*p4d) * PTRS_PER_P4D);
++		ppd->pgtable_area += sizeof(*p4d) * PTRS_PER_P4D;
++		set_pgd(pgd, __pgd(PGD_FLAGS | __pa(p4d)));
++	}
++
++	p4d = p4d_offset(pgd, ppd->vaddr);
++	if (p4d_none(*p4d)) {
++		pud = ppd->pgtable_area;
++		memset(pud, 0, sizeof(*pud) * PTRS_PER_PUD);
++		ppd->pgtable_area += sizeof(*pud) * PTRS_PER_PUD;
++		set_p4d(p4d, __p4d(P4D_FLAGS | __pa(pud)));
++	}
++
++	pud = pud_offset(p4d, ppd->vaddr);
++	if (pud_none(*pud)) {
++		pmd = ppd->pgtable_area;
++		memset(pmd, 0, sizeof(*pmd) * PTRS_PER_PMD);
++		ppd->pgtable_area += sizeof(*pmd) * PTRS_PER_PMD;
++		set_pud(pud, __pud(PUD_FLAGS | __pa(pmd)));
++	}
++
++	if (pud_leaf(*pud))
++		return NULL;
++
++	return pud;
++}
++
++static void __head sme_populate_pgd_large(struct sme_populate_pgd_data *ppd)
++{
++	pud_t *pud;
++	pmd_t *pmd;
++
++	pud = sme_prepare_pgd(ppd);
++	if (!pud)
++		return;
++
++	pmd = pmd_offset(pud, ppd->vaddr);
++	if (pmd_leaf(*pmd))
++		return;
++
++	set_pmd(pmd, __pmd(ppd->paddr | ppd->pmd_flags));
++}
++
++static void __head sme_populate_pgd(struct sme_populate_pgd_data *ppd)
++{
++	pud_t *pud;
++	pmd_t *pmd;
++	pte_t *pte;
++
++	pud = sme_prepare_pgd(ppd);
++	if (!pud)
++		return;
++
++	pmd = pmd_offset(pud, ppd->vaddr);
++	if (pmd_none(*pmd)) {
++		pte = ppd->pgtable_area;
++		memset(pte, 0, sizeof(*pte) * PTRS_PER_PTE);
++		ppd->pgtable_area += sizeof(*pte) * PTRS_PER_PTE;
++		set_pmd(pmd, __pmd(PMD_FLAGS | __pa(pte)));
++	}
++
++	if (pmd_leaf(*pmd))
++		return;
++
++	pte = pte_offset_kernel(pmd, ppd->vaddr);
++	if (pte_none(*pte))
++		set_pte(pte, __pte(ppd->paddr | ppd->pte_flags));
++}
++
++static void __head __sme_map_range_pmd(struct sme_populate_pgd_data *ppd)
++{
++	while (ppd->vaddr < ppd->vaddr_end) {
++		sme_populate_pgd_large(ppd);
++
++		ppd->vaddr += PMD_SIZE;
++		ppd->paddr += PMD_SIZE;
++	}
++}
++
++static void __head __sme_map_range_pte(struct sme_populate_pgd_data *ppd)
++{
++	while (ppd->vaddr < ppd->vaddr_end) {
++		sme_populate_pgd(ppd);
++
++		ppd->vaddr += PAGE_SIZE;
++		ppd->paddr += PAGE_SIZE;
++	}
++}
++
++static void __head __sme_map_range(struct sme_populate_pgd_data *ppd,
++				   pmdval_t pmd_flags, pteval_t pte_flags)
++{
++	unsigned long vaddr_end;
++
++	ppd->pmd_flags = pmd_flags;
++	ppd->pte_flags = pte_flags;
++
++	/* Save original end value since we modify the struct value */
++	vaddr_end = ppd->vaddr_end;
++
++	/* If start is not 2MB aligned, create PTE entries */
++	ppd->vaddr_end = ALIGN(ppd->vaddr, PMD_SIZE);
++	__sme_map_range_pte(ppd);
++
++	/* Create PMD entries */
++	ppd->vaddr_end = vaddr_end & PMD_MASK;
++	__sme_map_range_pmd(ppd);
++
++	/* If end is not 2MB aligned, create PTE entries */
++	ppd->vaddr_end = vaddr_end;
++	__sme_map_range_pte(ppd);
++}
++
++static void __head sme_map_range_encrypted(struct sme_populate_pgd_data *ppd)
++{
++	__sme_map_range(ppd, PMD_FLAGS_ENC, PTE_FLAGS_ENC);
++}
++
++static void __head sme_map_range_decrypted(struct sme_populate_pgd_data *ppd)
++{
++	__sme_map_range(ppd, PMD_FLAGS_DEC, PTE_FLAGS_DEC);
++}
++
++static void __head sme_map_range_decrypted_wp(struct sme_populate_pgd_data *ppd)
++{
++	__sme_map_range(ppd, PMD_FLAGS_DEC_WP, PTE_FLAGS_DEC_WP);
++}
++
++static unsigned long __head sme_pgtable_calc(unsigned long len)
++{
++	unsigned long entries = 0, tables = 0;
++
++	/*
++	 * Perform a relatively simplistic calculation of the pagetable
++	 * entries that are needed. Those mappings will be covered mostly
++	 * by 2MB PMD entries so we can conservatively calculate the required
++	 * number of P4D, PUD and PMD structures needed to perform the
++	 * mappings.  For mappings that are not 2MB aligned, PTE mappings
++	 * would be needed for the start and end portion of the address range
++	 * that fall outside of the 2MB alignment.  This results in, at most,
++	 * two extra pages to hold PTE entries for each range that is mapped.
++	 * Incrementing the count for each covers the case where the addresses
++	 * cross entries.
++	 */
++
++	/* PGDIR_SIZE is equal to P4D_SIZE on 4-level machine. */
++	if (PTRS_PER_P4D > 1)
++		entries += (DIV_ROUND_UP(len, PGDIR_SIZE) + 1) * sizeof(p4d_t) * PTRS_PER_P4D;
++	entries += (DIV_ROUND_UP(len, P4D_SIZE) + 1) * sizeof(pud_t) * PTRS_PER_PUD;
++	entries += (DIV_ROUND_UP(len, PUD_SIZE) + 1) * sizeof(pmd_t) * PTRS_PER_PMD;
++	entries += 2 * sizeof(pte_t) * PTRS_PER_PTE;
++
++	/*
++	 * Now calculate the added pagetable structures needed to populate
++	 * the new pagetables.
++	 */
++
++	if (PTRS_PER_P4D > 1)
++		tables += DIV_ROUND_UP(entries, PGDIR_SIZE) * sizeof(p4d_t) * PTRS_PER_P4D;
++	tables += DIV_ROUND_UP(entries, P4D_SIZE) * sizeof(pud_t) * PTRS_PER_PUD;
++	tables += DIV_ROUND_UP(entries, PUD_SIZE) * sizeof(pmd_t) * PTRS_PER_PMD;
++
++	return entries + tables;
++}
++
++void __head sme_encrypt_kernel(struct boot_params *bp)
++{
++	unsigned long workarea_start, workarea_end, workarea_len;
++	unsigned long execute_start, execute_end, execute_len;
++	unsigned long kernel_start, kernel_end, kernel_len;
++	unsigned long initrd_start, initrd_end, initrd_len;
++	struct sme_populate_pgd_data ppd;
++	unsigned long pgtable_area_len;
++	unsigned long decrypted_base;
++
++	/*
++	 * This is early code, use an open coded check for SME instead of
++	 * using cc_platform_has(). This eliminates worries about removing
++	 * instrumentation or checking boot_cpu_data in the cc_platform_has()
++	 * function.
++	 */
++	if (!sme_get_me_mask() ||
++	    RIP_REL_REF(sev_status) & MSR_AMD64_SEV_ENABLED)
++		return;
++
++	/*
++	 * Prepare for encrypting the kernel and initrd by building new
++	 * pagetables with the necessary attributes needed to encrypt the
++	 * kernel in place.
++	 *
++	 *   One range of virtual addresses will map the memory occupied
++	 *   by the kernel and initrd as encrypted.
++	 *
++	 *   Another range of virtual addresses will map the memory occupied
++	 *   by the kernel and initrd as decrypted and write-protected.
++	 *
++	 *     The use of write-protect attribute will prevent any of the
++	 *     memory from being cached.
++	 */
++
++	kernel_start = (unsigned long)rip_rel_ptr(_text);
++	kernel_end = ALIGN((unsigned long)rip_rel_ptr(_end), PMD_SIZE);
++	kernel_len = kernel_end - kernel_start;
++
++	initrd_start = 0;
++	initrd_end = 0;
++	initrd_len = 0;
++#ifdef CONFIG_BLK_DEV_INITRD
++	initrd_len = (unsigned long)bp->hdr.ramdisk_size |
++		     ((unsigned long)bp->ext_ramdisk_size << 32);
++	if (initrd_len) {
++		initrd_start = (unsigned long)bp->hdr.ramdisk_image |
++			       ((unsigned long)bp->ext_ramdisk_image << 32);
++		initrd_end = PAGE_ALIGN(initrd_start + initrd_len);
++		initrd_len = initrd_end - initrd_start;
++	}
++#endif
++
++	/*
++	 * Calculate required number of workarea bytes needed:
++	 *   executable encryption area size:
++	 *     stack page (PAGE_SIZE)
++	 *     encryption routine page (PAGE_SIZE)
++	 *     intermediate copy buffer (PMD_SIZE)
++	 *   pagetable structures for the encryption of the kernel
++	 *   pagetable structures for workarea (in case not currently mapped)
++	 */
++	execute_start = workarea_start = (unsigned long)rip_rel_ptr(sme_workarea);
++	execute_end = execute_start + (PAGE_SIZE * 2) + PMD_SIZE;
++	execute_len = execute_end - execute_start;
++
++	/*
++	 * One PGD for both encrypted and decrypted mappings and a set of
++	 * PUDs and PMDs for each of the encrypted and decrypted mappings.
++	 */
++	pgtable_area_len = sizeof(pgd_t) * PTRS_PER_PGD;
++	pgtable_area_len += sme_pgtable_calc(execute_end - kernel_start) * 2;
++	if (initrd_len)
++		pgtable_area_len += sme_pgtable_calc(initrd_len) * 2;
++
++	/* PUDs and PMDs needed in the current pagetables for the workarea */
++	pgtable_area_len += sme_pgtable_calc(execute_len + pgtable_area_len);
++
++	/*
++	 * The total workarea includes the executable encryption area and
++	 * the pagetable area. The start of the workarea is already 2MB
++	 * aligned, align the end of the workarea on a 2MB boundary so that
++	 * we don't try to create/allocate PTE entries from the workarea
++	 * before it is mapped.
++	 */
++	workarea_len = execute_len + pgtable_area_len;
++	workarea_end = ALIGN(workarea_start + workarea_len, PMD_SIZE);
++
++	/*
++	 * Set the address to the start of where newly created pagetable
++	 * structures (PGDs, PUDs and PMDs) will be allocated. New pagetable
++	 * structures are created when the workarea is added to the current
++	 * pagetables and when the new encrypted and decrypted kernel
++	 * mappings are populated.
++	 */
++	ppd.pgtable_area = (void *)execute_end;
++
++	/*
++	 * Make sure the current pagetable structure has entries for
++	 * addressing the workarea.
++	 */
++	ppd.pgd = (pgd_t *)native_read_cr3_pa();
++	ppd.paddr = workarea_start;
++	ppd.vaddr = workarea_start;
++	ppd.vaddr_end = workarea_end;
++	sme_map_range_decrypted(&ppd);
++
++	/* Flush the TLB - no globals so cr3 is enough */
++	native_write_cr3(__native_read_cr3());
++
++	/*
++	 * A new pagetable structure is being built to allow for the kernel
++	 * and initrd to be encrypted. It starts with an empty PGD that will
++	 * then be populated with new PUDs and PMDs as the encrypted and
++	 * decrypted kernel mappings are created.
++	 */
++	ppd.pgd = ppd.pgtable_area;
++	memset(ppd.pgd, 0, sizeof(pgd_t) * PTRS_PER_PGD);
++	ppd.pgtable_area += sizeof(pgd_t) * PTRS_PER_PGD;
++
++	/*
++	 * A different PGD index/entry must be used to get different
++	 * pagetable entries for the decrypted mapping. Choose the next
++	 * PGD index and convert it to a virtual address to be used as
++	 * the base of the mapping.
++	 */
++	decrypted_base = (pgd_index(workarea_end) + 1) & (PTRS_PER_PGD - 1);
++	if (initrd_len) {
++		unsigned long check_base;
++
++		check_base = (pgd_index(initrd_end) + 1) & (PTRS_PER_PGD - 1);
++		decrypted_base = max(decrypted_base, check_base);
++	}
++	decrypted_base <<= PGDIR_SHIFT;
++
++	/* Add encrypted kernel (identity) mappings */
++	ppd.paddr = kernel_start;
++	ppd.vaddr = kernel_start;
++	ppd.vaddr_end = kernel_end;
++	sme_map_range_encrypted(&ppd);
++
++	/* Add decrypted, write-protected kernel (non-identity) mappings */
++	ppd.paddr = kernel_start;
++	ppd.vaddr = kernel_start + decrypted_base;
++	ppd.vaddr_end = kernel_end + decrypted_base;
++	sme_map_range_decrypted_wp(&ppd);
++
++	if (initrd_len) {
++		/* Add encrypted initrd (identity) mappings */
++		ppd.paddr = initrd_start;
++		ppd.vaddr = initrd_start;
++		ppd.vaddr_end = initrd_end;
++		sme_map_range_encrypted(&ppd);
++		/*
++		 * Add decrypted, write-protected initrd (non-identity) mappings
++		 */
++		ppd.paddr = initrd_start;
++		ppd.vaddr = initrd_start + decrypted_base;
++		ppd.vaddr_end = initrd_end + decrypted_base;
++		sme_map_range_decrypted_wp(&ppd);
++	}
++
++	/* Add decrypted workarea mappings to both kernel mappings */
++	ppd.paddr = workarea_start;
++	ppd.vaddr = workarea_start;
++	ppd.vaddr_end = workarea_end;
++	sme_map_range_decrypted(&ppd);
++
++	ppd.paddr = workarea_start;
++	ppd.vaddr = workarea_start + decrypted_base;
++	ppd.vaddr_end = workarea_end + decrypted_base;
++	sme_map_range_decrypted(&ppd);
++
++	/* Perform the encryption */
++	sme_encrypt_execute(kernel_start, kernel_start + decrypted_base,
++			    kernel_len, workarea_start, (unsigned long)ppd.pgd);
++
++	if (initrd_len)
++		sme_encrypt_execute(initrd_start, initrd_start + decrypted_base,
++				    initrd_len, workarea_start,
++				    (unsigned long)ppd.pgd);
++
++	/*
++	 * At this point we are running encrypted.  Remove the mappings for
++	 * the decrypted areas - all that is needed for this is to remove
++	 * the PGD entry/entries.
++	 */
++	ppd.vaddr = kernel_start + decrypted_base;
++	ppd.vaddr_end = kernel_end + decrypted_base;
++	sme_clear_pgd(&ppd);
++
++	if (initrd_len) {
++		ppd.vaddr = initrd_start + decrypted_base;
++		ppd.vaddr_end = initrd_end + decrypted_base;
++		sme_clear_pgd(&ppd);
++	}
++
++	ppd.vaddr = workarea_start + decrypted_base;
++	ppd.vaddr_end = workarea_end + decrypted_base;
++	sme_clear_pgd(&ppd);
++
++	/* Flush the TLB - no globals so cr3 is enough */
++	native_write_cr3(__native_read_cr3());
++}
++
++void __head sme_enable(struct boot_params *bp)
++{
++	unsigned int eax, ebx, ecx, edx;
++	unsigned long feature_mask;
++	unsigned long me_mask;
++	bool snp_en;
++	u64 msr;
++
++	snp_en = snp_init(bp);
++
++	/* Check for the SME/SEV support leaf */
++	eax = 0x80000000;
++	ecx = 0;
++	native_cpuid(&eax, &ebx, &ecx, &edx);
++	if (eax < 0x8000001f)
++		return;
++
++#define AMD_SME_BIT	BIT(0)
++#define AMD_SEV_BIT	BIT(1)
++
++	/*
++	 * Check for the SME/SEV feature:
++	 *   CPUID Fn8000_001F[EAX]
++	 *   - Bit 0 - Secure Memory Encryption support
++	 *   - Bit 1 - Secure Encrypted Virtualization support
++	 *   CPUID Fn8000_001F[EBX]
++	 *   - Bits 5:0 - Pagetable bit position used to indicate encryption
++	 */
++	eax = 0x8000001f;
++	ecx = 0;
++	native_cpuid(&eax, &ebx, &ecx, &edx);
++	/* Check whether SEV or SME is supported */
++	if (!(eax & (AMD_SEV_BIT | AMD_SME_BIT)))
++		return;
++
++	me_mask = 1UL << (ebx & 0x3f);
++
++	/* Check the SEV MSR whether SEV or SME is enabled */
++	RIP_REL_REF(sev_status) = msr = __rdmsr(MSR_AMD64_SEV);
++	feature_mask = (msr & MSR_AMD64_SEV_ENABLED) ? AMD_SEV_BIT : AMD_SME_BIT;
++
++	/*
++	 * Any discrepancies between the presence of a CC blob and SNP
++	 * enablement abort the guest.
++	 */
++	if (snp_en ^ !!(msr & MSR_AMD64_SEV_SNP_ENABLED))
++		snp_abort();
++
++	/* Check if memory encryption is enabled */
++	if (feature_mask == AMD_SME_BIT) {
++		if (!(bp->hdr.xloadflags & XLF_MEM_ENCRYPTION))
++			return;
++
++		/*
++		 * No SME if Hypervisor bit is set. This check is here to
++		 * prevent a guest from trying to enable SME. For running as a
++		 * KVM guest the MSR_AMD64_SYSCFG will be sufficient, but there
++		 * might be other hypervisors which emulate that MSR as non-zero
++		 * or even pass it through to the guest.
++		 * A malicious hypervisor can still trick a guest into this
++		 * path, but there is no way to protect against that.
++		 */
++		eax = 1;
++		ecx = 0;
++		native_cpuid(&eax, &ebx, &ecx, &edx);
++		if (ecx & BIT(31))
++			return;
++
++		/* For SME, check the SYSCFG MSR */
++		msr = __rdmsr(MSR_AMD64_SYSCFG);
++		if (!(msr & MSR_AMD64_SYSCFG_MEM_ENCRYPT))
++			return;
++	}
++
++	RIP_REL_REF(sme_me_mask) = me_mask;
++	RIP_REL_REF(physical_mask) &= ~me_mask;
++	RIP_REL_REF(cc_vendor) = CC_VENDOR_AMD;
++	cc_set_mask(me_mask);
++}
+diff --git a/arch/x86/mm/Makefile b/arch/x86/mm/Makefile
+index 32035d5..3faa60f 100644
+--- a/arch/x86/mm/Makefile
++++ b/arch/x86/mm/Makefile
+@@ -3,12 +3,10 @@
+ KCOV_INSTRUMENT_tlb.o			:= n
+ KCOV_INSTRUMENT_mem_encrypt.o		:= n
+ KCOV_INSTRUMENT_mem_encrypt_amd.o	:= n
+-KCOV_INSTRUMENT_mem_encrypt_identity.o	:= n
+ KCOV_INSTRUMENT_pgprot.o		:= n
  
- #ifdef CONFIG_X86_5LEVEL
-@@ -67,215 +67,6 @@ unsigned long vmemmap_base __ro_after_init = __VMEMMAP_BASE_L4;
- EXPORT_SYMBOL(vmemmap_base);
- #endif
+ KASAN_SANITIZE_mem_encrypt.o		:= n
+ KASAN_SANITIZE_mem_encrypt_amd.o	:= n
+-KASAN_SANITIZE_mem_encrypt_identity.o	:= n
+ KASAN_SANITIZE_pgprot.o		:= n
  
--static inline bool check_la57_support(void)
--{
--	if (!IS_ENABLED(CONFIG_X86_5LEVEL))
--		return false;
--
--	/*
--	 * 5-level paging is detected and enabled at kernel decompression
--	 * stage. Only check if it has been enabled there.
--	 */
--	if (!(native_read_cr4() & X86_CR4_LA57))
--		return false;
--
--	RIP_REL_REF(__pgtable_l5_enabled)	= 1;
--	RIP_REL_REF(pgdir_shift)		= 48;
--	RIP_REL_REF(ptrs_per_p4d)		= 512;
--	RIP_REL_REF(page_offset_base)		= __PAGE_OFFSET_BASE_L5;
--	RIP_REL_REF(vmalloc_base)		= __VMALLOC_BASE_L5;
--	RIP_REL_REF(vmemmap_base)		= __VMEMMAP_BASE_L5;
--
--	return true;
--}
--
--static unsigned long __head sme_postprocess_startup(struct boot_params *bp,
--						    pmdval_t *pmd,
--						    unsigned long p2v_offset)
--{
--	unsigned long paddr, paddr_end;
--	int i;
--
--	/* Encrypt the kernel and related (if SME is active) */
--	sme_encrypt_kernel(bp);
--
--	/*
--	 * Clear the memory encryption mask from the .bss..decrypted section.
--	 * The bss section will be memset to zero later in the initialization so
--	 * there is no need to zero it after changing the memory encryption
--	 * attribute.
--	 */
--	if (sme_get_me_mask()) {
--		paddr = (unsigned long)rip_rel_ptr(__start_bss_decrypted);
--		paddr_end = (unsigned long)rip_rel_ptr(__end_bss_decrypted);
--
--		for (; paddr < paddr_end; paddr += PMD_SIZE) {
--			/*
--			 * On SNP, transition the page to shared in the RMP table so that
--			 * it is consistent with the page table attribute change.
--			 *
--			 * __start_bss_decrypted has a virtual address in the high range
--			 * mapping (kernel .text). PVALIDATE, by way of
--			 * early_snp_set_memory_shared(), requires a valid virtual
--			 * address but the kernel is currently running off of the identity
--			 * mapping so use the PA to get a *currently* valid virtual address.
--			 */
--			early_snp_set_memory_shared(paddr, paddr, PTRS_PER_PMD);
--
--			i = pmd_index(paddr - p2v_offset);
--			pmd[i] -= sme_get_me_mask();
--		}
--	}
--
--	/*
--	 * Return the SME encryption mask (if SME is active) to be used as a
--	 * modifier for the initial pgdir entry programmed into CR3.
--	 */
--	return sme_get_me_mask();
--}
--
--/* Code in __startup_64() can be relocated during execution, but the compiler
-- * doesn't have to generate PC-relative relocations when accessing globals from
-- * that function. Clang actually does not generate them, which leads to
-- * boot-time crashes. To work around this problem, every global pointer must
-- * be accessed using RIP_REL_REF(). Kernel virtual addresses can be determined
-- * by subtracting p2v_offset from the RIP-relative address.
+ # Disable KCSAN entirely, because otherwise we get warnings that some functions
+@@ -16,12 +14,10 @@ KASAN_SANITIZE_pgprot.o		:= n
+ KCSAN_SANITIZE := n
+ # Avoid recursion by not calling KMSAN hooks for CEA code.
+ KMSAN_SANITIZE_cpu_entry_area.o := n
+-KMSAN_SANITIZE_mem_encrypt_identity.o := n
+ 
+ ifdef CONFIG_FUNCTION_TRACER
+ CFLAGS_REMOVE_mem_encrypt.o		= -pg
+ CFLAGS_REMOVE_mem_encrypt_amd.o		= -pg
+-CFLAGS_REMOVE_mem_encrypt_identity.o	= -pg
+ CFLAGS_REMOVE_pgprot.o			= -pg
+ endif
+ 
+@@ -32,7 +28,6 @@ obj-y				+= pat/
+ 
+ # Make sure __phys_addr has no stackprotector
+ CFLAGS_physaddr.o		:= -fno-stack-protector
+-CFLAGS_mem_encrypt_identity.o	:= -fno-stack-protector
+ 
+ CFLAGS_fault.o := -I $(src)/../include/asm/trace
+ 
+@@ -63,5 +58,4 @@ obj-$(CONFIG_MITIGATION_PAGE_TABLE_ISOLATION)	+= pti.o
+ obj-$(CONFIG_X86_MEM_ENCRYPT)	+= mem_encrypt.o
+ obj-$(CONFIG_AMD_MEM_ENCRYPT)	+= mem_encrypt_amd.o
+ 
+-obj-$(CONFIG_AMD_MEM_ENCRYPT)	+= mem_encrypt_identity.o
+ obj-$(CONFIG_AMD_MEM_ENCRYPT)	+= mem_encrypt_boot.o
+diff --git a/arch/x86/mm/mem_encrypt_identity.c b/arch/x86/mm/mem_encrypt_identity.c
+deleted file mode 100644
+index e7fb377..0000000
+--- a/arch/x86/mm/mem_encrypt_identity.c
++++ /dev/null
+@@ -1,569 +0,0 @@
+-// SPDX-License-Identifier: GPL-2.0-only
+-/*
+- * AMD Memory Encryption Support
+- *
+- * Copyright (C) 2016 Advanced Micro Devices, Inc.
+- *
+- * Author: Tom Lendacky <thomas.lendacky@amd.com>
 - */
--unsigned long __head __startup_64(unsigned long p2v_offset,
--				  struct boot_params *bp)
+-
+-/*
+- * Since we're dealing with identity mappings, physical and virtual
+- * addresses are the same, so override these defines which are ultimately
+- * used by the headers in misc.h.
+- */
+-#define __pa(x)  ((unsigned long)(x))
+-#define __va(x)  ((void *)((unsigned long)(x)))
+-
+-/*
+- * Special hack: we have to be careful, because no indirections are
+- * allowed here, and paravirt_ops is a kind of one. As it will only run in
+- * baremetal anyway, we just keep it from happening. (This list needs to
+- * be extended when new paravirt and debugging variants are added.)
+- */
+-#undef CONFIG_PARAVIRT
+-#undef CONFIG_PARAVIRT_XXL
+-#undef CONFIG_PARAVIRT_SPINLOCKS
+-
+-/*
+- * This code runs before CPU feature bits are set. By default, the
+- * pgtable_l5_enabled() function uses bit X86_FEATURE_LA57 to determine if
+- * 5-level paging is active, so that won't work here. USE_EARLY_PGTABLE_L5
+- * is provided to handle this situation and, instead, use a variable that
+- * has been set by the early boot code.
+- */
+-#define USE_EARLY_PGTABLE_L5
+-
+-#include <linux/kernel.h>
+-#include <linux/mm.h>
+-#include <linux/mem_encrypt.h>
+-#include <linux/cc_platform.h>
+-
+-#include <asm/init.h>
+-#include <asm/setup.h>
+-#include <asm/sections.h>
+-#include <asm/coco.h>
+-#include <asm/sev.h>
+-
+-#include "mm_internal.h"
+-
+-#define PGD_FLAGS		_KERNPG_TABLE_NOENC
+-#define P4D_FLAGS		_KERNPG_TABLE_NOENC
+-#define PUD_FLAGS		_KERNPG_TABLE_NOENC
+-#define PMD_FLAGS		_KERNPG_TABLE_NOENC
+-
+-#define PMD_FLAGS_LARGE		(__PAGE_KERNEL_LARGE_EXEC & ~_PAGE_GLOBAL)
+-
+-#define PMD_FLAGS_DEC		PMD_FLAGS_LARGE
+-#define PMD_FLAGS_DEC_WP	((PMD_FLAGS_DEC & ~_PAGE_LARGE_CACHE_MASK) | \
+-				 (_PAGE_PAT_LARGE | _PAGE_PWT))
+-
+-#define PMD_FLAGS_ENC		(PMD_FLAGS_LARGE | _PAGE_ENC)
+-
+-#define PTE_FLAGS		(__PAGE_KERNEL_EXEC & ~_PAGE_GLOBAL)
+-
+-#define PTE_FLAGS_DEC		PTE_FLAGS
+-#define PTE_FLAGS_DEC_WP	((PTE_FLAGS_DEC & ~_PAGE_CACHE_MASK) | \
+-				 (_PAGE_PAT | _PAGE_PWT))
+-
+-#define PTE_FLAGS_ENC		(PTE_FLAGS | _PAGE_ENC)
+-
+-struct sme_populate_pgd_data {
+-	void    *pgtable_area;
+-	pgd_t   *pgd;
+-
+-	pmdval_t pmd_flags;
+-	pteval_t pte_flags;
+-	unsigned long paddr;
+-
+-	unsigned long vaddr;
+-	unsigned long vaddr_end;
+-};
+-
+-/*
+- * This work area lives in the .init.scratch section, which lives outside of
+- * the kernel proper. It is sized to hold the intermediate copy buffer and
+- * more than enough pagetable pages.
+- *
+- * By using this section, the kernel can be encrypted in place and it
+- * avoids any possibility of boot parameters or initramfs images being
+- * placed such that the in-place encryption logic overwrites them.  This
+- * section is 2MB aligned to allow for simple pagetable setup using only
+- * PMD entries (see vmlinux.lds.S).
+- */
+-static char sme_workarea[2 * PMD_SIZE] __section(".init.scratch");
+-
+-static void __head sme_clear_pgd(struct sme_populate_pgd_data *ppd)
 -{
--	pmd_t (*early_pgts)[PTRS_PER_PMD] = rip_rel_ptr(early_dynamic_pgts);
--	unsigned long physaddr = (unsigned long)rip_rel_ptr(_text);
--	unsigned long va_text, va_end;
--	unsigned long pgtable_flags;
--	unsigned long load_delta;
--	pgdval_t *pgd;
--	p4dval_t *p4d;
--	pudval_t *pud;
--	pmdval_t *pmd, pmd_entry;
--	bool la57;
--	int i;
+-	unsigned long pgd_start, pgd_end, pgd_size;
+-	pgd_t *pgd_p;
 -
--	la57 = check_la57_support();
+-	pgd_start = ppd->vaddr & PGDIR_MASK;
+-	pgd_end = ppd->vaddr_end & PGDIR_MASK;
 -
--	/* Is the address too large? */
--	if (physaddr >> MAX_PHYSMEM_BITS)
--		for (;;);
+-	pgd_size = (((pgd_end - pgd_start) / PGDIR_SIZE) + 1) * sizeof(pgd_t);
 -
--	/*
--	 * Compute the delta between the address I am compiled to run at
--	 * and the address I am actually running at.
--	 */
--	load_delta = __START_KERNEL_map + p2v_offset;
--	RIP_REL_REF(phys_base) = load_delta;
+-	pgd_p = ppd->pgd + pgd_index(ppd->vaddr);
 -
--	/* Is the address not 2M aligned? */
--	if (load_delta & ~PMD_MASK)
--		for (;;);
--
--	va_text = physaddr - p2v_offset;
--	va_end  = (unsigned long)rip_rel_ptr(_end) - p2v_offset;
--
--	/* Include the SME encryption mask in the fixup value */
--	load_delta += sme_get_me_mask();
--
--	/* Fixup the physical addresses in the page table */
--
--	pgd = rip_rel_ptr(early_top_pgt);
--	pgd[pgd_index(__START_KERNEL_map)] += load_delta;
--
--	if (IS_ENABLED(CONFIG_X86_5LEVEL) && la57) {
--		p4d = (p4dval_t *)rip_rel_ptr(level4_kernel_pgt);
--		p4d[MAX_PTRS_PER_P4D - 1] += load_delta;
--
--		pgd[pgd_index(__START_KERNEL_map)] = (pgdval_t)p4d | _PAGE_TABLE;
--	}
--
--	RIP_REL_REF(level3_kernel_pgt)[PTRS_PER_PUD - 2].pud += load_delta;
--	RIP_REL_REF(level3_kernel_pgt)[PTRS_PER_PUD - 1].pud += load_delta;
--
--	for (i = FIXMAP_PMD_TOP; i > FIXMAP_PMD_TOP - FIXMAP_PMD_NUM; i--)
--		RIP_REL_REF(level2_fixmap_pgt)[i].pmd += load_delta;
--
--	/*
--	 * Set up the identity mapping for the switchover.  These
--	 * entries should *NOT* have the global bit set!  This also
--	 * creates a bunch of nonsense entries but that is fine --
--	 * it avoids problems around wraparound.
--	 */
--
--	pud = &early_pgts[0]->pmd;
--	pmd = &early_pgts[1]->pmd;
--	RIP_REL_REF(next_early_pgt) = 2;
--
--	pgtable_flags = _KERNPG_TABLE_NOENC + sme_get_me_mask();
--
--	if (la57) {
--		p4d = &early_pgts[RIP_REL_REF(next_early_pgt)++]->pmd;
--
--		i = (physaddr >> PGDIR_SHIFT) % PTRS_PER_PGD;
--		pgd[i + 0] = (pgdval_t)p4d + pgtable_flags;
--		pgd[i + 1] = (pgdval_t)p4d + pgtable_flags;
--
--		i = physaddr >> P4D_SHIFT;
--		p4d[(i + 0) % PTRS_PER_P4D] = (pgdval_t)pud + pgtable_flags;
--		p4d[(i + 1) % PTRS_PER_P4D] = (pgdval_t)pud + pgtable_flags;
--	} else {
--		i = (physaddr >> PGDIR_SHIFT) % PTRS_PER_PGD;
--		pgd[i + 0] = (pgdval_t)pud + pgtable_flags;
--		pgd[i + 1] = (pgdval_t)pud + pgtable_flags;
--	}
--
--	i = physaddr >> PUD_SHIFT;
--	pud[(i + 0) % PTRS_PER_PUD] = (pudval_t)pmd + pgtable_flags;
--	pud[(i + 1) % PTRS_PER_PUD] = (pudval_t)pmd + pgtable_flags;
--
--	pmd_entry = __PAGE_KERNEL_LARGE_EXEC & ~_PAGE_GLOBAL;
--	/* Filter out unsupported __PAGE_KERNEL_* bits: */
--	pmd_entry &= RIP_REL_REF(__supported_pte_mask);
--	pmd_entry += sme_get_me_mask();
--	pmd_entry +=  physaddr;
--
--	for (i = 0; i < DIV_ROUND_UP(va_end - va_text, PMD_SIZE); i++) {
--		int idx = i + (physaddr >> PMD_SHIFT);
--
--		pmd[idx % PTRS_PER_PMD] = pmd_entry + i * PMD_SIZE;
--	}
--
--	/*
--	 * Fixup the kernel text+data virtual addresses. Note that
--	 * we might write invalid pmds, when the kernel is relocated
--	 * cleanup_highmap() fixes this up along with the mappings
--	 * beyond _end.
--	 *
--	 * Only the region occupied by the kernel image has so far
--	 * been checked against the table of usable memory regions
--	 * provided by the firmware, so invalidate pages outside that
--	 * region. A page table entry that maps to a reserved area of
--	 * memory would allow processor speculation into that area,
--	 * and on some hardware (particularly the UV platform) even
--	 * speculative access to some reserved areas is caught as an
--	 * error, causing the BIOS to halt the system.
--	 */
--
--	pmd = rip_rel_ptr(level2_kernel_pgt);
--
--	/* invalidate pages before the kernel image */
--	for (i = 0; i < pmd_index(va_text); i++)
--		pmd[i] &= ~_PAGE_PRESENT;
--
--	/* fixup pages that are part of the kernel image */
--	for (; i <= pmd_index(va_end); i++)
--		if (pmd[i] & _PAGE_PRESENT)
--			pmd[i] += load_delta;
--
--	/* invalidate pages after the kernel image */
--	for (; i < PTRS_PER_PMD; i++)
--		pmd[i] &= ~_PAGE_PRESENT;
--
--	return sme_postprocess_startup(bp, pmd, p2v_offset);
+-	memset(pgd_p, 0, pgd_size);
 -}
 -
- /* Wipe all early page tables except for the kernel symbol map */
- static void __init reset_early_page_tables(void)
- {
+-static pud_t __head *sme_prepare_pgd(struct sme_populate_pgd_data *ppd)
+-{
+-	pgd_t *pgd;
+-	p4d_t *p4d;
+-	pud_t *pud;
+-	pmd_t *pmd;
+-
+-	pgd = ppd->pgd + pgd_index(ppd->vaddr);
+-	if (pgd_none(*pgd)) {
+-		p4d = ppd->pgtable_area;
+-		memset(p4d, 0, sizeof(*p4d) * PTRS_PER_P4D);
+-		ppd->pgtable_area += sizeof(*p4d) * PTRS_PER_P4D;
+-		set_pgd(pgd, __pgd(PGD_FLAGS | __pa(p4d)));
+-	}
+-
+-	p4d = p4d_offset(pgd, ppd->vaddr);
+-	if (p4d_none(*p4d)) {
+-		pud = ppd->pgtable_area;
+-		memset(pud, 0, sizeof(*pud) * PTRS_PER_PUD);
+-		ppd->pgtable_area += sizeof(*pud) * PTRS_PER_PUD;
+-		set_p4d(p4d, __p4d(P4D_FLAGS | __pa(pud)));
+-	}
+-
+-	pud = pud_offset(p4d, ppd->vaddr);
+-	if (pud_none(*pud)) {
+-		pmd = ppd->pgtable_area;
+-		memset(pmd, 0, sizeof(*pmd) * PTRS_PER_PMD);
+-		ppd->pgtable_area += sizeof(*pmd) * PTRS_PER_PMD;
+-		set_pud(pud, __pud(PUD_FLAGS | __pa(pmd)));
+-	}
+-
+-	if (pud_leaf(*pud))
+-		return NULL;
+-
+-	return pud;
+-}
+-
+-static void __head sme_populate_pgd_large(struct sme_populate_pgd_data *ppd)
+-{
+-	pud_t *pud;
+-	pmd_t *pmd;
+-
+-	pud = sme_prepare_pgd(ppd);
+-	if (!pud)
+-		return;
+-
+-	pmd = pmd_offset(pud, ppd->vaddr);
+-	if (pmd_leaf(*pmd))
+-		return;
+-
+-	set_pmd(pmd, __pmd(ppd->paddr | ppd->pmd_flags));
+-}
+-
+-static void __head sme_populate_pgd(struct sme_populate_pgd_data *ppd)
+-{
+-	pud_t *pud;
+-	pmd_t *pmd;
+-	pte_t *pte;
+-
+-	pud = sme_prepare_pgd(ppd);
+-	if (!pud)
+-		return;
+-
+-	pmd = pmd_offset(pud, ppd->vaddr);
+-	if (pmd_none(*pmd)) {
+-		pte = ppd->pgtable_area;
+-		memset(pte, 0, sizeof(*pte) * PTRS_PER_PTE);
+-		ppd->pgtable_area += sizeof(*pte) * PTRS_PER_PTE;
+-		set_pmd(pmd, __pmd(PMD_FLAGS | __pa(pte)));
+-	}
+-
+-	if (pmd_leaf(*pmd))
+-		return;
+-
+-	pte = pte_offset_kernel(pmd, ppd->vaddr);
+-	if (pte_none(*pte))
+-		set_pte(pte, __pte(ppd->paddr | ppd->pte_flags));
+-}
+-
+-static void __head __sme_map_range_pmd(struct sme_populate_pgd_data *ppd)
+-{
+-	while (ppd->vaddr < ppd->vaddr_end) {
+-		sme_populate_pgd_large(ppd);
+-
+-		ppd->vaddr += PMD_SIZE;
+-		ppd->paddr += PMD_SIZE;
+-	}
+-}
+-
+-static void __head __sme_map_range_pte(struct sme_populate_pgd_data *ppd)
+-{
+-	while (ppd->vaddr < ppd->vaddr_end) {
+-		sme_populate_pgd(ppd);
+-
+-		ppd->vaddr += PAGE_SIZE;
+-		ppd->paddr += PAGE_SIZE;
+-	}
+-}
+-
+-static void __head __sme_map_range(struct sme_populate_pgd_data *ppd,
+-				   pmdval_t pmd_flags, pteval_t pte_flags)
+-{
+-	unsigned long vaddr_end;
+-
+-	ppd->pmd_flags = pmd_flags;
+-	ppd->pte_flags = pte_flags;
+-
+-	/* Save original end value since we modify the struct value */
+-	vaddr_end = ppd->vaddr_end;
+-
+-	/* If start is not 2MB aligned, create PTE entries */
+-	ppd->vaddr_end = ALIGN(ppd->vaddr, PMD_SIZE);
+-	__sme_map_range_pte(ppd);
+-
+-	/* Create PMD entries */
+-	ppd->vaddr_end = vaddr_end & PMD_MASK;
+-	__sme_map_range_pmd(ppd);
+-
+-	/* If end is not 2MB aligned, create PTE entries */
+-	ppd->vaddr_end = vaddr_end;
+-	__sme_map_range_pte(ppd);
+-}
+-
+-static void __head sme_map_range_encrypted(struct sme_populate_pgd_data *ppd)
+-{
+-	__sme_map_range(ppd, PMD_FLAGS_ENC, PTE_FLAGS_ENC);
+-}
+-
+-static void __head sme_map_range_decrypted(struct sme_populate_pgd_data *ppd)
+-{
+-	__sme_map_range(ppd, PMD_FLAGS_DEC, PTE_FLAGS_DEC);
+-}
+-
+-static void __head sme_map_range_decrypted_wp(struct sme_populate_pgd_data *ppd)
+-{
+-	__sme_map_range(ppd, PMD_FLAGS_DEC_WP, PTE_FLAGS_DEC_WP);
+-}
+-
+-static unsigned long __head sme_pgtable_calc(unsigned long len)
+-{
+-	unsigned long entries = 0, tables = 0;
+-
+-	/*
+-	 * Perform a relatively simplistic calculation of the pagetable
+-	 * entries that are needed. Those mappings will be covered mostly
+-	 * by 2MB PMD entries so we can conservatively calculate the required
+-	 * number of P4D, PUD and PMD structures needed to perform the
+-	 * mappings.  For mappings that are not 2MB aligned, PTE mappings
+-	 * would be needed for the start and end portion of the address range
+-	 * that fall outside of the 2MB alignment.  This results in, at most,
+-	 * two extra pages to hold PTE entries for each range that is mapped.
+-	 * Incrementing the count for each covers the case where the addresses
+-	 * cross entries.
+-	 */
+-
+-	/* PGDIR_SIZE is equal to P4D_SIZE on 4-level machine. */
+-	if (PTRS_PER_P4D > 1)
+-		entries += (DIV_ROUND_UP(len, PGDIR_SIZE) + 1) * sizeof(p4d_t) * PTRS_PER_P4D;
+-	entries += (DIV_ROUND_UP(len, P4D_SIZE) + 1) * sizeof(pud_t) * PTRS_PER_PUD;
+-	entries += (DIV_ROUND_UP(len, PUD_SIZE) + 1) * sizeof(pmd_t) * PTRS_PER_PMD;
+-	entries += 2 * sizeof(pte_t) * PTRS_PER_PTE;
+-
+-	/*
+-	 * Now calculate the added pagetable structures needed to populate
+-	 * the new pagetables.
+-	 */
+-
+-	if (PTRS_PER_P4D > 1)
+-		tables += DIV_ROUND_UP(entries, PGDIR_SIZE) * sizeof(p4d_t) * PTRS_PER_P4D;
+-	tables += DIV_ROUND_UP(entries, P4D_SIZE) * sizeof(pud_t) * PTRS_PER_PUD;
+-	tables += DIV_ROUND_UP(entries, PUD_SIZE) * sizeof(pmd_t) * PTRS_PER_PMD;
+-
+-	return entries + tables;
+-}
+-
+-void __head sme_encrypt_kernel(struct boot_params *bp)
+-{
+-	unsigned long workarea_start, workarea_end, workarea_len;
+-	unsigned long execute_start, execute_end, execute_len;
+-	unsigned long kernel_start, kernel_end, kernel_len;
+-	unsigned long initrd_start, initrd_end, initrd_len;
+-	struct sme_populate_pgd_data ppd;
+-	unsigned long pgtable_area_len;
+-	unsigned long decrypted_base;
+-
+-	/*
+-	 * This is early code, use an open coded check for SME instead of
+-	 * using cc_platform_has(). This eliminates worries about removing
+-	 * instrumentation or checking boot_cpu_data in the cc_platform_has()
+-	 * function.
+-	 */
+-	if (!sme_get_me_mask() ||
+-	    RIP_REL_REF(sev_status) & MSR_AMD64_SEV_ENABLED)
+-		return;
+-
+-	/*
+-	 * Prepare for encrypting the kernel and initrd by building new
+-	 * pagetables with the necessary attributes needed to encrypt the
+-	 * kernel in place.
+-	 *
+-	 *   One range of virtual addresses will map the memory occupied
+-	 *   by the kernel and initrd as encrypted.
+-	 *
+-	 *   Another range of virtual addresses will map the memory occupied
+-	 *   by the kernel and initrd as decrypted and write-protected.
+-	 *
+-	 *     The use of write-protect attribute will prevent any of the
+-	 *     memory from being cached.
+-	 */
+-
+-	kernel_start = (unsigned long)rip_rel_ptr(_text);
+-	kernel_end = ALIGN((unsigned long)rip_rel_ptr(_end), PMD_SIZE);
+-	kernel_len = kernel_end - kernel_start;
+-
+-	initrd_start = 0;
+-	initrd_end = 0;
+-	initrd_len = 0;
+-#ifdef CONFIG_BLK_DEV_INITRD
+-	initrd_len = (unsigned long)bp->hdr.ramdisk_size |
+-		     ((unsigned long)bp->ext_ramdisk_size << 32);
+-	if (initrd_len) {
+-		initrd_start = (unsigned long)bp->hdr.ramdisk_image |
+-			       ((unsigned long)bp->ext_ramdisk_image << 32);
+-		initrd_end = PAGE_ALIGN(initrd_start + initrd_len);
+-		initrd_len = initrd_end - initrd_start;
+-	}
+-#endif
+-
+-	/*
+-	 * Calculate required number of workarea bytes needed:
+-	 *   executable encryption area size:
+-	 *     stack page (PAGE_SIZE)
+-	 *     encryption routine page (PAGE_SIZE)
+-	 *     intermediate copy buffer (PMD_SIZE)
+-	 *   pagetable structures for the encryption of the kernel
+-	 *   pagetable structures for workarea (in case not currently mapped)
+-	 */
+-	execute_start = workarea_start = (unsigned long)rip_rel_ptr(sme_workarea);
+-	execute_end = execute_start + (PAGE_SIZE * 2) + PMD_SIZE;
+-	execute_len = execute_end - execute_start;
+-
+-	/*
+-	 * One PGD for both encrypted and decrypted mappings and a set of
+-	 * PUDs and PMDs for each of the encrypted and decrypted mappings.
+-	 */
+-	pgtable_area_len = sizeof(pgd_t) * PTRS_PER_PGD;
+-	pgtable_area_len += sme_pgtable_calc(execute_end - kernel_start) * 2;
+-	if (initrd_len)
+-		pgtable_area_len += sme_pgtable_calc(initrd_len) * 2;
+-
+-	/* PUDs and PMDs needed in the current pagetables for the workarea */
+-	pgtable_area_len += sme_pgtable_calc(execute_len + pgtable_area_len);
+-
+-	/*
+-	 * The total workarea includes the executable encryption area and
+-	 * the pagetable area. The start of the workarea is already 2MB
+-	 * aligned, align the end of the workarea on a 2MB boundary so that
+-	 * we don't try to create/allocate PTE entries from the workarea
+-	 * before it is mapped.
+-	 */
+-	workarea_len = execute_len + pgtable_area_len;
+-	workarea_end = ALIGN(workarea_start + workarea_len, PMD_SIZE);
+-
+-	/*
+-	 * Set the address to the start of where newly created pagetable
+-	 * structures (PGDs, PUDs and PMDs) will be allocated. New pagetable
+-	 * structures are created when the workarea is added to the current
+-	 * pagetables and when the new encrypted and decrypted kernel
+-	 * mappings are populated.
+-	 */
+-	ppd.pgtable_area = (void *)execute_end;
+-
+-	/*
+-	 * Make sure the current pagetable structure has entries for
+-	 * addressing the workarea.
+-	 */
+-	ppd.pgd = (pgd_t *)native_read_cr3_pa();
+-	ppd.paddr = workarea_start;
+-	ppd.vaddr = workarea_start;
+-	ppd.vaddr_end = workarea_end;
+-	sme_map_range_decrypted(&ppd);
+-
+-	/* Flush the TLB - no globals so cr3 is enough */
+-	native_write_cr3(__native_read_cr3());
+-
+-	/*
+-	 * A new pagetable structure is being built to allow for the kernel
+-	 * and initrd to be encrypted. It starts with an empty PGD that will
+-	 * then be populated with new PUDs and PMDs as the encrypted and
+-	 * decrypted kernel mappings are created.
+-	 */
+-	ppd.pgd = ppd.pgtable_area;
+-	memset(ppd.pgd, 0, sizeof(pgd_t) * PTRS_PER_PGD);
+-	ppd.pgtable_area += sizeof(pgd_t) * PTRS_PER_PGD;
+-
+-	/*
+-	 * A different PGD index/entry must be used to get different
+-	 * pagetable entries for the decrypted mapping. Choose the next
+-	 * PGD index and convert it to a virtual address to be used as
+-	 * the base of the mapping.
+-	 */
+-	decrypted_base = (pgd_index(workarea_end) + 1) & (PTRS_PER_PGD - 1);
+-	if (initrd_len) {
+-		unsigned long check_base;
+-
+-		check_base = (pgd_index(initrd_end) + 1) & (PTRS_PER_PGD - 1);
+-		decrypted_base = max(decrypted_base, check_base);
+-	}
+-	decrypted_base <<= PGDIR_SHIFT;
+-
+-	/* Add encrypted kernel (identity) mappings */
+-	ppd.paddr = kernel_start;
+-	ppd.vaddr = kernel_start;
+-	ppd.vaddr_end = kernel_end;
+-	sme_map_range_encrypted(&ppd);
+-
+-	/* Add decrypted, write-protected kernel (non-identity) mappings */
+-	ppd.paddr = kernel_start;
+-	ppd.vaddr = kernel_start + decrypted_base;
+-	ppd.vaddr_end = kernel_end + decrypted_base;
+-	sme_map_range_decrypted_wp(&ppd);
+-
+-	if (initrd_len) {
+-		/* Add encrypted initrd (identity) mappings */
+-		ppd.paddr = initrd_start;
+-		ppd.vaddr = initrd_start;
+-		ppd.vaddr_end = initrd_end;
+-		sme_map_range_encrypted(&ppd);
+-		/*
+-		 * Add decrypted, write-protected initrd (non-identity) mappings
+-		 */
+-		ppd.paddr = initrd_start;
+-		ppd.vaddr = initrd_start + decrypted_base;
+-		ppd.vaddr_end = initrd_end + decrypted_base;
+-		sme_map_range_decrypted_wp(&ppd);
+-	}
+-
+-	/* Add decrypted workarea mappings to both kernel mappings */
+-	ppd.paddr = workarea_start;
+-	ppd.vaddr = workarea_start;
+-	ppd.vaddr_end = workarea_end;
+-	sme_map_range_decrypted(&ppd);
+-
+-	ppd.paddr = workarea_start;
+-	ppd.vaddr = workarea_start + decrypted_base;
+-	ppd.vaddr_end = workarea_end + decrypted_base;
+-	sme_map_range_decrypted(&ppd);
+-
+-	/* Perform the encryption */
+-	sme_encrypt_execute(kernel_start, kernel_start + decrypted_base,
+-			    kernel_len, workarea_start, (unsigned long)ppd.pgd);
+-
+-	if (initrd_len)
+-		sme_encrypt_execute(initrd_start, initrd_start + decrypted_base,
+-				    initrd_len, workarea_start,
+-				    (unsigned long)ppd.pgd);
+-
+-	/*
+-	 * At this point we are running encrypted.  Remove the mappings for
+-	 * the decrypted areas - all that is needed for this is to remove
+-	 * the PGD entry/entries.
+-	 */
+-	ppd.vaddr = kernel_start + decrypted_base;
+-	ppd.vaddr_end = kernel_end + decrypted_base;
+-	sme_clear_pgd(&ppd);
+-
+-	if (initrd_len) {
+-		ppd.vaddr = initrd_start + decrypted_base;
+-		ppd.vaddr_end = initrd_end + decrypted_base;
+-		sme_clear_pgd(&ppd);
+-	}
+-
+-	ppd.vaddr = workarea_start + decrypted_base;
+-	ppd.vaddr_end = workarea_end + decrypted_base;
+-	sme_clear_pgd(&ppd);
+-
+-	/* Flush the TLB - no globals so cr3 is enough */
+-	native_write_cr3(__native_read_cr3());
+-}
+-
+-void __head sme_enable(struct boot_params *bp)
+-{
+-	unsigned int eax, ebx, ecx, edx;
+-	unsigned long feature_mask;
+-	unsigned long me_mask;
+-	bool snp_en;
+-	u64 msr;
+-
+-	snp_en = snp_init(bp);
+-
+-	/* Check for the SME/SEV support leaf */
+-	eax = 0x80000000;
+-	ecx = 0;
+-	native_cpuid(&eax, &ebx, &ecx, &edx);
+-	if (eax < 0x8000001f)
+-		return;
+-
+-#define AMD_SME_BIT	BIT(0)
+-#define AMD_SEV_BIT	BIT(1)
+-
+-	/*
+-	 * Check for the SME/SEV feature:
+-	 *   CPUID Fn8000_001F[EAX]
+-	 *   - Bit 0 - Secure Memory Encryption support
+-	 *   - Bit 1 - Secure Encrypted Virtualization support
+-	 *   CPUID Fn8000_001F[EBX]
+-	 *   - Bits 5:0 - Pagetable bit position used to indicate encryption
+-	 */
+-	eax = 0x8000001f;
+-	ecx = 0;
+-	native_cpuid(&eax, &ebx, &ecx, &edx);
+-	/* Check whether SEV or SME is supported */
+-	if (!(eax & (AMD_SEV_BIT | AMD_SME_BIT)))
+-		return;
+-
+-	me_mask = 1UL << (ebx & 0x3f);
+-
+-	/* Check the SEV MSR whether SEV or SME is enabled */
+-	RIP_REL_REF(sev_status) = msr = __rdmsr(MSR_AMD64_SEV);
+-	feature_mask = (msr & MSR_AMD64_SEV_ENABLED) ? AMD_SEV_BIT : AMD_SME_BIT;
+-
+-	/*
+-	 * Any discrepancies between the presence of a CC blob and SNP
+-	 * enablement abort the guest.
+-	 */
+-	if (snp_en ^ !!(msr & MSR_AMD64_SEV_SNP_ENABLED))
+-		snp_abort();
+-
+-	/* Check if memory encryption is enabled */
+-	if (feature_mask == AMD_SME_BIT) {
+-		if (!(bp->hdr.xloadflags & XLF_MEM_ENCRYPTION))
+-			return;
+-
+-		/*
+-		 * No SME if Hypervisor bit is set. This check is here to
+-		 * prevent a guest from trying to enable SME. For running as a
+-		 * KVM guest the MSR_AMD64_SYSCFG will be sufficient, but there
+-		 * might be other hypervisors which emulate that MSR as non-zero
+-		 * or even pass it through to the guest.
+-		 * A malicious hypervisor can still trick a guest into this
+-		 * path, but there is no way to protect against that.
+-		 */
+-		eax = 1;
+-		ecx = 0;
+-		native_cpuid(&eax, &ebx, &ecx, &edx);
+-		if (ecx & BIT(31))
+-			return;
+-
+-		/* For SME, check the SYSCFG MSR */
+-		msr = __rdmsr(MSR_AMD64_SYSCFG);
+-		if (!(msr & MSR_AMD64_SYSCFG_MEM_ENCRYPT))
+-			return;
+-	}
+-
+-	RIP_REL_REF(sme_me_mask) = me_mask;
+-	RIP_REL_REF(physical_mask) &= ~me_mask;
+-	RIP_REL_REF(cc_vendor) = CC_VENDOR_AMD;
+-	cc_set_mask(me_mask);
+-}
