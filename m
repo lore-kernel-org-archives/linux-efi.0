@@ -1,53 +1,53 @@
-Received: from mail-wm1-f73.google.com (mail-wm1-f73.google.com [209.85.128.73])
+Received: from mail-wm1-f74.google.com (mail-wm1-f74.google.com [209.85.128.74])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 19324188A0E
-	for <linux-efi@vger.kernel.org>; Fri, 18 Apr 2025 14:14:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.73
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0979219259F
+	for <linux-efi@vger.kernel.org>; Fri, 18 Apr 2025 14:14:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.74
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744985654; cv=none; b=U7vJ02nHW83O00Cbj6/VN3RKyr4OoP6WZVZhn1V9c+SSXNvdL4blzozCUNovCwkyfM44OKrtzrzRqNYIKgmoW8IAb4tUzw1yoWPnmV1sDtVDHXlpjIHIgZVlhz5E5zJpFEob+aiymlhvJhmgs8yjUI3BDyO4QzDWfwUo3V0zWGg=
+	t=1744985656; cv=none; b=bTtaRuQ/flLNrO+lAT3FyGLPKtzxxK5McpZrCdCRnW7FSyHHnCj+qJlMcEqtCA3sFgRiWdAz9pyZVsoRblfi5nSCMfen2InyMwL5fEYM/CdIzrFaPSHgWDLDt21ihgwtoJ0m3YtzvWJRUg948v4f2Euk4xFdjkjjQdyX3FW35/o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744985654; c=relaxed/simple;
-	bh=P4ReMggSVxgS5Vaej7zC7A2LjPP05pRzz7Af2bUsxWI=;
+	s=arc-20240116; t=1744985656; c=relaxed/simple;
+	bh=7KW1MA75CA/KauhN0nHPzECShpbQ3n1/ZA/5yvl3k1o=;
 	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=SQSk9llnUe7/T/wBZC94ajOsW8McMAR6mYMbtoPQ1wiI1zTgcCAmJ8U107yI5N5KiSbzn5dmNnTs0hFVwryrrdj6zoX4o2zuNbRqkn1DihhybeVeklA7APMYTbPiETrZbw5aelfjKvDKyk8bSq6elSagarbE7JaFvlisHloWK3E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=3ecfmuN7; arc=none smtp.client-ip=209.85.128.73
+	 To:Cc:Content-Type; b=Wo4Gn0DH9iDBUKBmBKBE9GGirDy5zKk9IoPPqLMDKGdMLUQPNFR3pcbpeTjIBpdAqpH9qe/jQGyRShRpon4x3taiMkJpINgsaBvwQsj/8SjKQl+Erqc8eTTUGhHS+J1dsSaVhkoBhkae4/Ju6jRUh2VK26CcfVBVvvfEmwvxgXA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=Z4axJ8u2; arc=none smtp.client-ip=209.85.128.74
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="3ecfmuN7"
-Received: by mail-wm1-f73.google.com with SMTP id 5b1f17b1804b1-43d01024089so12025625e9.1
-        for <linux-efi@vger.kernel.org>; Fri, 18 Apr 2025 07:14:10 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="Z4axJ8u2"
+Received: by mail-wm1-f74.google.com with SMTP id 5b1f17b1804b1-43f405810b4so9488885e9.1
+        for <linux-efi@vger.kernel.org>; Fri, 18 Apr 2025 07:14:14 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20230601; t=1744985649; x=1745590449; darn=vger.kernel.org;
+        d=google.com; s=20230601; t=1744985653; x=1745590453; darn=vger.kernel.org;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:from:to:cc:subject:date:message-id:reply-to;
-        bh=jXd59l21V7PNNqBzm0kcxDQJSFNdozFPYvjRwM+USt4=;
-        b=3ecfmuN7oYJIPwQj9XCS+RHDViKNBa29/x+2mZ7zaq5iOisXGHY+u1uEP7nANqBchr
-         fmX7TkF17bmGughZKYdTSpl/N7JUk8DdQz0THssByG3skT1SMDGUswv5QQhuEAggzP+O
-         fbmDIA5C0AtLGhCnxOVTSfNSGEyr6f4iUrr97AnqANKYAwzmA0cOY7WHPKxLuGvRH4CH
-         5QRY6Gh5fdZcbmljvaUftxkgpEgF4lrpmpEybYylQb5d4inOHOdLSrI/zCjISHYRwoUW
-         j/26ipFW3Ju51McExDL80w1IIRB1s7n+eSyoMtVPCjSM4MTllhRkkEXT/13QfdN/Vyak
-         rWwA==
+        bh=zHhe4J2kf97grySB1dghcoGwgwMgdWDWarBIG3W8Zrs=;
+        b=Z4axJ8u2+r/noJOjHDXs87luiU336OO6XJIC1HqDKAsQzVhTxfUrLBOC83QriYOKUt
+         IdeRItHpKjzKnHdL0FAT+d4ArtH3e7DlMvqr9rXsUFFTBa4pkfR7aV2KTKhbhTryxqZu
+         yyzAFlXPzcSv7IrXX/o3hrcMPyrsq/kyoSIZsjA3x2WwfVKH9WHslfL99uBTLBmexRsT
+         3OPE43F/9LVBgId9Z57b6HsRMpNAU3EYJBJA8du//wXrynaozgGwZmmR5HDTqz6SwIH5
+         Yr1G5QjqhEArBI2ps3P7EPZUvx/w2BwAQFGxTPYRidKfFn0+pSUNN1iekhQwJOm9fQfL
+         AszQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1744985649; x=1745590449;
+        d=1e100.net; s=20230601; t=1744985653; x=1745590453;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=jXd59l21V7PNNqBzm0kcxDQJSFNdozFPYvjRwM+USt4=;
-        b=oWT9kf42wxXvVaulouqyW+ey6rmMUA4eMjxc6XudplNV+a3onQDg9cfYiMBh+bsuH+
-         ckXvmCk4QCaHaI++jFpZsmtSV7Zve32GOvWVDqiI2XvXGRozhFW1UKeMz7K62Az0KmsK
-         kuHa1bDFb+rxyjOBSXpC/hvbfnrNRdLrY2et6S4imo793KPxMzAkWIWA6TsVYBmFvohj
-         ZsF8JLnw6uadyQGy/fpmGvjtC7n1he8xhhjKK64TXFX/qU0gvdS386agiCgPLpcxRHTm
-         GBSOHl2viXDCRoJ1VuskeX7d6lsTzks1QQp2gyVXOhdSidzj0Fu1QjAZ1F5bn0J/t+gZ
-         OG0w==
-X-Gm-Message-State: AOJu0YxvRCHum/3VNggCvNZ2u1c4F0IkIlUce6YxSWURY83wUpNZFmE7
-	3NirolVPamiNxRG2b2GKipzFNT5UoTbFBNz645mo5BTgyBenQPk/IA/cWTiMTrs6QA4HOg==
-X-Google-Smtp-Source: AGHT+IF2Os+Q4lirfKb2ZMNmyGCgzprXEbyokqVYMB/YOCMtJInLeS/aR1gGboA+s1hKKCUVBHKDUEBh
-X-Received: from wmqi4.prod.google.com ([2002:a05:600c:3544:b0:43c:fcfd:1ce5])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:6000:4284:b0:39c:2678:302e
- with SMTP id ffacd0b85a97d-39efbae5c77mr2450141f8f.45.1744985649382; Fri, 18
- Apr 2025 07:14:09 -0700 (PDT)
-Date: Fri, 18 Apr 2025 16:12:56 +0200
+        bh=zHhe4J2kf97grySB1dghcoGwgwMgdWDWarBIG3W8Zrs=;
+        b=iJrCS6drEtZ8yOEyTzXXcdNMJS0bCp1RuSdu66jsOhJ17qbUvIyqCzUavJC7N5Fhbb
+         gtPPU1//sZUe+JTd7YoKIluojj9Mw45GHn57IE65CaXKyedC6qw1x/50n3A3WvomJ400
+         2uRNyiZJqWtnbOEacexI6ZVO52AlqLo73WQsBvXi+XvKz6Kx6zFmsVgFlxOmzrRLa8GQ
+         5U5uCRdqV1arzgA1Qs/wSS9dIRRY6Ocp3dn0oJA+NQzHOKEvTsgp+0pRdhZe0JaDC2HP
+         bGlY5mLiV2aFYi/gxUxtd4arqjdcp8gf6jxahNSYTUZOlOZQdgf2Z2iSYRfopiCVPcge
+         +iTQ==
+X-Gm-Message-State: AOJu0YxlaXg5lnO9acgO83EWf+tLYsllYZJmGBPulCQWVE5Fq/SaWqz5
+	HHD+GkGUD8X50GVqy8z2SUeHIdQr/w0i7DilnMVUHU0N5fxa9ey71QbdbIkg0x3Hle2n7g==
+X-Google-Smtp-Source: AGHT+IH2fs985NL9syEJxmzfaYzLtkZ8+tgwTx0XfOUAbx2HPO9MARD8qBLS6xHwxCgPFrviPb5dIaP1
+X-Received: from wmbes11.prod.google.com ([2002:a05:600c:810b:b0:440:5d4e:87])
+ (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:1990:b0:43d:4e9:27ff
+ with SMTP id 5b1f17b1804b1-4406ab679famr21119115e9.7.1744985653442; Fri, 18
+ Apr 2025 07:14:13 -0700 (PDT)
+Date: Fri, 18 Apr 2025 16:12:58 +0200
 In-Reply-To: <20250418141253.2601348-8-ardb+git@google.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -57,15 +57,14 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 References: <20250418141253.2601348-8-ardb+git@google.com>
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-X-Developer-Signature: v=1; a=openpgp-sha256; l=7890; i=ardb@kernel.org;
- h=from:subject; bh=cJ3U0lA1Ib1lwgVLvqMQocit3+qnzqMUPs9O4svCI9s=;
- b=owGbwMvMwCFmkMcZplerG8N4Wi2JIYMp9oXNdiaBhC3feT+5XbKNcBDrk/t3Z3aAwJNaUd7mI
- MkVi1M6SlkYxDgYZMUUWQRm/3238/REqVrnWbIwc1iZQIYwcHEKwESE2xn+R/wy2HdpwUK/gMQJ
- Vgsu2VvVd6cdZj1tr/B1tlFM8KxCPYb/MQt92cMeLPux5LXkmoOXtilKvL7alXn1/rzoaLmpe/9 PZwQA
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3498; i=ardb@kernel.org;
+ h=from:subject; bh=bksQ60B3uxdkOeoY7TfN+ieztWUBJigc7E5EyOzeidw=;
+ b=owGbwMvMwCFmkMcZplerG8N4Wi2JIYMp9rXhoj0JLUvYM38Ua5euSBarYl3AJ8NUNun23fcVc
+ Y0x/L4dpSwMYhwMsmKKLAKz/77beXqiVK3zLFmYOaxMIEMYuDgFYCIndzD8lVz/XuL4i+JnG/7f
+ T7+ZX8cy3aN1Cbf6m3LX0C1c7UGnuBj+JzCu4BcKKc4RZfYV6JxydaHuN+HGV56l13uP3+V09/P lBgA=
 X-Mailer: git-send-email 2.49.0.805.g082f7c87e0-goog
-Message-ID: <20250418141253.2601348-10-ardb+git@google.com>
-Subject: [PATCH v5 2/6] x86/sev: Move noinstr NMI handling code into separate
- source file
+Message-ID: <20250418141253.2601348-12-ardb+git@google.com>
+Subject: [PATCH v5 4/6] x86/boot: Move SEV startup code into startup/
 From: Ard Biesheuvel <ardb+git@google.com>
 To: linux-kernel@vger.kernel.org
 Cc: linux-efi@vger.kernel.org, x86@kernel.org, mingo@kernel.org, 
@@ -75,261 +74,97 @@ Content-Type: text/plain; charset="UTF-8"
 
 From: Ard Biesheuvel <ardb@kernel.org>
 
-GCC may ignore the __no_sanitize_address function attribute when
-inlining, resulting in KASAN instrumentation in code tagged as
-'noinstr'.
-
-Move the SEV NMI handling code, which is noinstr, into a separate source
-file so KASAN can be disabled on the whole file without losing coverage
-of other SEV core code, once the startup code is split off from it too.
+Move the SEV startup code into arch/x86/boot/startup/, where it will
+reside along with other code that executes extremely early, and
+therefore needs to be built in a special manner.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/coco/sev/Makefile  |   5 +-
- arch/x86/coco/sev/core.c    |  89 ----------------
- arch/x86/coco/sev/sev-nmi.c | 108 ++++++++++++++++++++
- 3 files changed, 112 insertions(+), 90 deletions(-)
+ arch/x86/boot/compressed/sev.c                              |  2 +-
+ arch/x86/boot/startup/Makefile                              |  2 +-
+ arch/x86/{coco/sev/shared.c => boot/startup/sev-shared.c}   |  0
+ arch/x86/{coco/sev/startup.c => boot/startup/sev-startup.c} |  2 +-
+ arch/x86/coco/sev/Makefile                                  | 20 ++------------------
+ 5 files changed, 5 insertions(+), 21 deletions(-)
 
-diff --git a/arch/x86/coco/sev/Makefile b/arch/x86/coco/sev/Makefile
-index dcb06dc8b5ae..bc4baa400c55 100644
---- a/arch/x86/coco/sev/Makefile
-+++ b/arch/x86/coco/sev/Makefile
-@@ -1,6 +1,6 @@
- # SPDX-License-Identifier: GPL-2.0
+diff --git a/arch/x86/boot/compressed/sev.c b/arch/x86/boot/compressed/sev.c
+index 714e30c66eae..478c65149cf0 100644
+--- a/arch/x86/boot/compressed/sev.c
++++ b/arch/x86/boot/compressed/sev.c
+@@ -144,7 +144,7 @@ int svsm_perform_call_protocol(struct svsm_call *call);
+ u8 snp_vmpl;
  
--obj-y += core.o
-+obj-y += core.o sev-nmi.o
+ /* Include code for early handlers */
+-#include "../../coco/sev/shared.c"
++#include "../../boot/startup/sev-shared.c"
  
- # jump tables are emitted using absolute references in non-PIC code
- # so they cannot be used in the early SEV startup code
-@@ -20,3 +20,6 @@ KCSAN_SANITIZE		:= n
+ int svsm_perform_call_protocol(struct svsm_call *call)
+ {
+diff --git a/arch/x86/boot/startup/Makefile b/arch/x86/boot/startup/Makefile
+index bb7c826e586c..21d911b61459 100644
+--- a/arch/x86/boot/startup/Makefile
++++ b/arch/x86/boot/startup/Makefile
+@@ -17,7 +17,7 @@ UBSAN_SANITIZE	:= n
+ KCOV_INSTRUMENT	:= n
  
- # Clang 14 and older may fail to respect __no_sanitize_undefined when inlining
- UBSAN_SANITIZE		:= n
-+
-+# GCC may fail to respect __no_sanitize_address when inlining
-+KASAN_SANITIZE_sev-nmi.o	:= n
-diff --git a/arch/x86/coco/sev/core.c b/arch/x86/coco/sev/core.c
-index aeb7731862c0..c7a0f3a2f4ac 100644
---- a/arch/x86/coco/sev/core.c
-+++ b/arch/x86/coco/sev/core.c
-@@ -113,77 +113,6 @@ DEFINE_PER_CPU(struct sev_es_save_area *, sev_vmsa);
- DEFINE_PER_CPU(struct svsm_ca *, svsm_caa);
- DEFINE_PER_CPU(u64, svsm_caa_pa);
+ obj-$(CONFIG_X86_64)		+= gdt_idt.o map_kernel.o
+-obj-$(CONFIG_AMD_MEM_ENCRYPT)	+= sme.o
++obj-$(CONFIG_AMD_MEM_ENCRYPT)	+= sme.o sev-startup.o
  
--static __always_inline bool on_vc_stack(struct pt_regs *regs)
--{
--	unsigned long sp = regs->sp;
--
--	/* User-mode RSP is not trusted */
--	if (user_mode(regs))
--		return false;
--
--	/* SYSCALL gap still has user-mode RSP */
--	if (ip_within_syscall_gap(regs))
--		return false;
--
--	return ((sp >= __this_cpu_ist_bottom_va(VC)) && (sp < __this_cpu_ist_top_va(VC)));
--}
--
--/*
-- * This function handles the case when an NMI is raised in the #VC
-- * exception handler entry code, before the #VC handler has switched off
-- * its IST stack. In this case, the IST entry for #VC must be adjusted,
-- * so that any nested #VC exception will not overwrite the stack
-- * contents of the interrupted #VC handler.
-- *
-- * The IST entry is adjusted unconditionally so that it can be also be
-- * unconditionally adjusted back in __sev_es_ist_exit(). Otherwise a
-- * nested sev_es_ist_exit() call may adjust back the IST entry too
-- * early.
-- *
-- * The __sev_es_ist_enter() and __sev_es_ist_exit() functions always run
-- * on the NMI IST stack, as they are only called from NMI handling code
-- * right now.
-- */
--void noinstr __sev_es_ist_enter(struct pt_regs *regs)
--{
--	unsigned long old_ist, new_ist;
--
--	/* Read old IST entry */
--	new_ist = old_ist = __this_cpu_read(cpu_tss_rw.x86_tss.ist[IST_INDEX_VC]);
--
--	/*
--	 * If NMI happened while on the #VC IST stack, set the new IST
--	 * value below regs->sp, so that the interrupted stack frame is
--	 * not overwritten by subsequent #VC exceptions.
--	 */
--	if (on_vc_stack(regs))
--		new_ist = regs->sp;
--
--	/*
--	 * Reserve additional 8 bytes and store old IST value so this
--	 * adjustment can be unrolled in __sev_es_ist_exit().
--	 */
--	new_ist -= sizeof(old_ist);
--	*(unsigned long *)new_ist = old_ist;
--
--	/* Set new IST entry */
--	this_cpu_write(cpu_tss_rw.x86_tss.ist[IST_INDEX_VC], new_ist);
--}
--
--void noinstr __sev_es_ist_exit(void)
--{
--	unsigned long ist;
--
--	/* Read IST entry */
--	ist = __this_cpu_read(cpu_tss_rw.x86_tss.ist[IST_INDEX_VC]);
--
--	if (WARN_ON(ist == __this_cpu_ist_top_va(VC)))
--		return;
--
--	/* Read back old IST entry and write it to the TSS */
--	this_cpu_write(cpu_tss_rw.x86_tss.ist[IST_INDEX_VC], *(unsigned long *)ist);
--}
--
- /*
-  * Nothing shall interrupt this code path while holding the per-CPU
-  * GHCB. The backup GHCB is only for NMIs interrupting this path.
-@@ -608,24 +537,6 @@ int svsm_perform_call_protocol(struct svsm_call *call)
- 	return ret;
+ lib-$(CONFIG_X86_64)		+= la57toggle.o
+ lib-$(CONFIG_EFI_MIXED)		+= efi-mixed.o
+diff --git a/arch/x86/coco/sev/shared.c b/arch/x86/boot/startup/sev-shared.c
+similarity index 100%
+rename from arch/x86/coco/sev/shared.c
+rename to arch/x86/boot/startup/sev-shared.c
+diff --git a/arch/x86/coco/sev/startup.c b/arch/x86/boot/startup/sev-startup.c
+similarity index 99%
+rename from arch/x86/coco/sev/startup.c
+rename to arch/x86/boot/startup/sev-startup.c
+index 9f5dc70cfb44..10b636009d1c 100644
+--- a/arch/x86/coco/sev/startup.c
++++ b/arch/x86/boot/startup/sev-startup.c
+@@ -422,7 +422,7 @@ static __always_inline void vc_forward_exception(struct es_em_ctxt *ctxt)
  }
  
--void noinstr __sev_es_nmi_complete(void)
--{
--	struct ghcb_state state;
--	struct ghcb *ghcb;
--
--	ghcb = __sev_get_ghcb(&state);
--
--	vc_ghcb_invalidate(ghcb);
--	ghcb_set_sw_exit_code(ghcb, SVM_VMGEXIT_NMI_COMPLETE);
--	ghcb_set_sw_exit_info_1(ghcb, 0);
--	ghcb_set_sw_exit_info_2(ghcb, 0);
--
--	sev_es_wr_ghcb_msr(__pa_nodebug(ghcb));
--	VMGEXIT();
--
--	__sev_put_ghcb(&state);
--}
--
- static u64 __init get_snp_jump_table_addr(void)
+ /* Include code shared with pre-decompression boot stage */
+-#include "shared.c"
++#include "sev-shared.c"
+ 
+ noinstr void __sev_put_ghcb(struct ghcb_state *state)
  {
- 	struct snp_secrets_page *secrets;
-diff --git a/arch/x86/coco/sev/sev-nmi.c b/arch/x86/coco/sev/sev-nmi.c
-new file mode 100644
-index 000000000000..d8dfaddfb367
---- /dev/null
-+++ b/arch/x86/coco/sev/sev-nmi.c
-@@ -0,0 +1,108 @@
-+// SPDX-License-Identifier: GPL-2.0-only
-+/*
-+ * AMD Memory Encryption Support
-+ *
-+ * Copyright (C) 2019 SUSE
-+ *
-+ * Author: Joerg Roedel <jroedel@suse.de>
-+ */
-+
-+#define pr_fmt(fmt)	"SEV: " fmt
-+
-+#include <linux/bug.h>
-+#include <linux/kernel.h>
-+
-+#include <asm/cpu_entry_area.h>
-+#include <asm/msr.h>
-+#include <asm/ptrace.h>
-+#include <asm/sev.h>
-+#include <asm/sev-internal.h>
-+
-+static __always_inline bool on_vc_stack(struct pt_regs *regs)
-+{
-+	unsigned long sp = regs->sp;
-+
-+	/* User-mode RSP is not trusted */
-+	if (user_mode(regs))
-+		return false;
-+
-+	/* SYSCALL gap still has user-mode RSP */
-+	if (ip_within_syscall_gap(regs))
-+		return false;
-+
-+	return ((sp >= __this_cpu_ist_bottom_va(VC)) && (sp < __this_cpu_ist_top_va(VC)));
-+}
-+
-+/*
-+ * This function handles the case when an NMI is raised in the #VC
-+ * exception handler entry code, before the #VC handler has switched off
-+ * its IST stack. In this case, the IST entry for #VC must be adjusted,
-+ * so that any nested #VC exception will not overwrite the stack
-+ * contents of the interrupted #VC handler.
-+ *
-+ * The IST entry is adjusted unconditionally so that it can be also be
-+ * unconditionally adjusted back in __sev_es_ist_exit(). Otherwise a
-+ * nested sev_es_ist_exit() call may adjust back the IST entry too
-+ * early.
-+ *
-+ * The __sev_es_ist_enter() and __sev_es_ist_exit() functions always run
-+ * on the NMI IST stack, as they are only called from NMI handling code
-+ * right now.
-+ */
-+void noinstr __sev_es_ist_enter(struct pt_regs *regs)
-+{
-+	unsigned long old_ist, new_ist;
-+
-+	/* Read old IST entry */
-+	new_ist = old_ist = __this_cpu_read(cpu_tss_rw.x86_tss.ist[IST_INDEX_VC]);
-+
-+	/*
-+	 * If NMI happened while on the #VC IST stack, set the new IST
-+	 * value below regs->sp, so that the interrupted stack frame is
-+	 * not overwritten by subsequent #VC exceptions.
-+	 */
-+	if (on_vc_stack(regs))
-+		new_ist = regs->sp;
-+
-+	/*
-+	 * Reserve additional 8 bytes and store old IST value so this
-+	 * adjustment can be unrolled in __sev_es_ist_exit().
-+	 */
-+	new_ist -= sizeof(old_ist);
-+	*(unsigned long *)new_ist = old_ist;
-+
-+	/* Set new IST entry */
-+	this_cpu_write(cpu_tss_rw.x86_tss.ist[IST_INDEX_VC], new_ist);
-+}
-+
-+void noinstr __sev_es_ist_exit(void)
-+{
-+	unsigned long ist;
-+
-+	/* Read IST entry */
-+	ist = __this_cpu_read(cpu_tss_rw.x86_tss.ist[IST_INDEX_VC]);
-+
-+	if (WARN_ON(ist == __this_cpu_ist_top_va(VC)))
-+		return;
-+
-+	/* Read back old IST entry and write it to the TSS */
-+	this_cpu_write(cpu_tss_rw.x86_tss.ist[IST_INDEX_VC], *(unsigned long *)ist);
-+}
-+
-+void noinstr __sev_es_nmi_complete(void)
-+{
-+	struct ghcb_state state;
-+	struct ghcb *ghcb;
-+
-+	ghcb = __sev_get_ghcb(&state);
-+
-+	vc_ghcb_invalidate(ghcb);
-+	ghcb_set_sw_exit_code(ghcb, SVM_VMGEXIT_NMI_COMPLETE);
-+	ghcb_set_sw_exit_info_1(ghcb, 0);
-+	ghcb_set_sw_exit_info_2(ghcb, 0);
-+
-+	sev_es_wr_ghcb_msr(__pa_nodebug(ghcb));
-+	VMGEXIT();
-+
-+	__sev_put_ghcb(&state);
-+}
+diff --git a/arch/x86/coco/sev/Makefile b/arch/x86/coco/sev/Makefile
+index 57e25f946663..2919dcfc4b02 100644
+--- a/arch/x86/coco/sev/Makefile
++++ b/arch/x86/coco/sev/Makefile
+@@ -1,25 +1,9 @@
+ # SPDX-License-Identifier: GPL-2.0
+ 
+-obj-y += core.o sev-nmi.o startup.o
+-
+-# jump tables are emitted using absolute references in non-PIC code
+-# so they cannot be used in the early SEV startup code
+-CFLAGS_startup.o += -fno-jump-tables
+-
+-ifdef CONFIG_FUNCTION_TRACER
+-CFLAGS_REMOVE_startup.o = -pg
+-endif
+-
+-KASAN_SANITIZE_startup.o	:= n
+-KMSAN_SANITIZE_startup.o	:= n
+-KCOV_INSTRUMENT_startup.o	:= n
+-
+-# With some compiler versions the generated code results in boot hangs, caused
+-# by several compilation units. To be safe, disable all instrumentation.
+-KCSAN_SANITIZE		:= n
++obj-y += core.o sev-nmi.o
+ 
+ # Clang 14 and older may fail to respect __no_sanitize_undefined when inlining
+-UBSAN_SANITIZE		:= n
++UBSAN_SANITIZE_sev-nmi.o	:= n
+ 
+ # GCC may fail to respect __no_sanitize_address when inlining
+ KASAN_SANITIZE_sev-nmi.o	:= n
 -- 
 2.49.0.805.g082f7c87e0-goog
 
