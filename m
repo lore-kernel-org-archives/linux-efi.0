@@ -1,247 +1,109 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5DEB5284B3C;
-	Wed, 23 Apr 2025 15:01:43 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D6BC26A082;
+	Wed, 23 Apr 2025 15:01:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745420503; cv=none; b=G+qb5C4q1UPSysIfh5zcmFRwHfD3fYxSLIB1hLyoJ2SJhRn9Nd4OiPwOAacn1tkFH1SNxVTn15IEipIm/QhU2T2Zb8BJc6+2KbnrdA8KaoIyRxTjz7bePDikCqFyl5vSuAvU0FpN5PJ61464qqQUXZeHAi30Q4NJIFdg/YV3kPQ=
+	t=1745420517; cv=none; b=qB7YNcUXXJywqXZbtM7Dtlw2ryXuqVdztym6Xnffok4pSNHL/As2a6elFkmmI8Do7T1Xt1m1NnC9Ll8inATWi81sl5W8X22oyMgymPQ3k95JY6IKjZ9nxjjk1tQsLTnm2UuSmhoRW+voKDpzLkB9nCk5eTn+8b71t/OWBGIR078=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745420503; c=relaxed/simple;
-	bh=ikUX+5dRI43jhLdlpNz85QaCliiix733dv2T3vzs7vM=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=Fk7Na4768jRxaWmTdcg//hkOwWnjLt/waCYzoZFzI58lhwLyHsTp6S9QkPPcylM0jXWta4TwHD0poFjNUga+dj8vqtc6YF2OnJ6e786VtM+crBLoHHjXCW0M1xDH5ZpMdM8QKyGD1FrYAyEjbP8vcGWIq0HLO6EerPd4Jzr+n3Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b=ela+yqU2; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1745420517; c=relaxed/simple;
+	bh=tQ5WuliRJvwcD2ksGop6yO+1sA09407P6BEmUGUWq6k=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=UkLxneXKuHLB7SojBonmVl6plW12QuX/dcv8yRI6C4yWsEqFGF4T4d6dU1kjoSXKAZzGcZodXnTi6G6drm+x8RaQLpqNCi/Uh9tUOD0TiqdYbyEaYv1wXhN8ffGxBjCIfPSnS2g+xUNBAl0P/35AbcuSOc8Qh7TQM9zx50n30+A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ouW/wBxa; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="ela+yqU2"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E201DC4CEE3;
-	Wed, 23 Apr 2025 15:01:42 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-	s=korg; t=1745420503;
-	bh=ikUX+5dRI43jhLdlpNz85QaCliiix733dv2T3vzs7vM=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=ela+yqU2tJjGQO+UjDVBmAJ7HCHlsFjTJQyoZ0ncD1z+2edwZExxCdq5c2oaIjS8A
-	 WLoNMPIA56uvCTAYiYJ12YASeanA3Z1KiDcrFgBlXBELZuESKw6L9FgqX81mQ/jR0R
-	 olmn8fdZVSoAn/L2CJHZY2269L3zCIioR1F54p9Q=
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To: stable@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	patches@lists.linux.dev,
-	Tom Lendacky <thomas.lendacky@amd.com>,
-	Ard Biesheuvel <ardb@kernel.org>,
-	Ingo Molnar <mingo@kernel.org>,
-	Dionna Amalie Glaze <dionnaglaze@google.com>,
-	Kevin Loughlin <kevinloughlin@google.com>,
-	"Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
-	Linus Torvalds <torvalds@linux-foundation.org>,
-	linux-efi@vger.kernel.org
-Subject: [PATCH 6.12 137/223] x86/boot/sev: Avoid shared GHCB page for early memory acceptance
-Date: Wed, 23 Apr 2025 16:43:29 +0200
-Message-ID: <20250423142622.670717163@linuxfoundation.org>
-X-Mailer: git-send-email 2.49.0
-In-Reply-To: <20250423142617.120834124@linuxfoundation.org>
-References: <20250423142617.120834124@linuxfoundation.org>
-User-Agent: quilt/0.68
-X-stable: review
-X-Patchwork-Hint: ignore
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ouW/wBxa"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2566FC4CEE3;
+	Wed, 23 Apr 2025 15:01:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1745420515;
+	bh=tQ5WuliRJvwcD2ksGop6yO+1sA09407P6BEmUGUWq6k=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=ouW/wBxaeKMwR+BAXHBjp5BVlj55baRrrgszNZrGVrX/kM6VVON224jd5YIUIEHgg
+	 7jmVxxS0JK7d9CrLm2vgvIqapsdckKNdSOXwcsVOWiTZYdVjIARRgS59otjCgHtEaz
+	 zRJZD6TeZwHsfFq46GPZoh6O5eMeuzCJ5/X4Of8LyYsJmxK67jhRoMWcU5JrGOFCv8
+	 Z1geBlk/c2zmSlcaB9rMbbOImOuoER6okmb3Lb1LeXMgVu5cYNRw+ogLypNaW5Lo5F
+	 +F24d/CFcsQyrINp2P6JZpX+4lI+5Eo3AmJELd3IDlBh03jDJMi2f7GeYcn/rU6QIr
+	 YqNr0trcKyBuw==
+Received: by mail-lj1-f169.google.com with SMTP id 38308e7fff4ca-30bf1d48843so56600271fa.2;
+        Wed, 23 Apr 2025 08:01:55 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCVhKO8b8tu6q3gOa36jaBQ319Zc43E8T7HtDQOMujMwecGqTeJqCQ6fkjr4msMboqGCLjUSFHqInQaEOoBSWsAGaHQ=@vger.kernel.org, AJvYcCVwle+dMfq2Zo3H25AHTnOvC5n7koUV4B0PWa1S5KF1KkSwyBV/VTKLbS/aMNTqxNlVDLPU35465xcNG5eY@vger.kernel.org, AJvYcCVxjWgVqnmRjsz7tMKWhBzphAfeaLHceYLtNa1VamWHq7bxiU4WjBYgB6JwiA5qdexHoZ6MnIi4oYg=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzwcYDzkxMJztmEoPzrhnCzbaSRY1Dnmnq+K5q6FYSrYoV0v1PW
+	mPG6KQf5m1pg7iCwlZdEGpxELIJ5MDAVs2MtffKGxY5rkmUfRX9X9BddhiWibpEdhgG/McSPBTF
+	1JwBg6Rt6W33S9791UwYNFbRtOy4=
+X-Google-Smtp-Source: AGHT+IG2CDF+UodCIQHaafpJRyR/ccpNZb7CjOiGJ6oVpwDftbX6t5n1A8Nk9bWvGYjTETNxukRBteMmCOyyzvR34NQ=
+X-Received: by 2002:a05:651c:1592:b0:30b:ed8c:b1e7 with SMTP id
+ 38308e7fff4ca-310904f0efbmr53117761fa.18.1745420513361; Wed, 23 Apr 2025
+ 08:01:53 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-
-6.12-stable review patch.  If anyone has any objections, please let me know.
-
-------------------
-
+References: <20250422210510.600354-2-ardb+git@google.com> <174539448176.31282.2929835259793717594.tip-bot2@tip-bot2>
+ <odoambb32hnupncbqfisrlqih2b2ggthhebcrg42e5fg25uxol@xe5veqq52xif>
+In-Reply-To: <odoambb32hnupncbqfisrlqih2b2ggthhebcrg42e5fg25uxol@xe5veqq52xif>
 From: Ard Biesheuvel <ardb@kernel.org>
+Date: Wed, 23 Apr 2025 17:01:42 +0200
+X-Gmail-Original-Message-ID: <CAMj1kXFpE=P0_a3fTAnb7qQmXLt19dCtuEcd5U8xwYzAcO=ufQ@mail.gmail.com>
+X-Gm-Features: ATxdqUEFwtCb4nqIi7NO0Py2cAxP4hjMqkFdrhvexGPyj24fTTWcg1ZgiO_bY9E
+Message-ID: <CAMj1kXFpE=P0_a3fTAnb7qQmXLt19dCtuEcd5U8xwYzAcO=ufQ@mail.gmail.com>
+Subject: Re: [tip: x86/boot] x86/boot: Disable jump tables in PIC code
+To: Josh Poimboeuf <jpoimboe@kernel.org>
+Cc: tip-bot2 for Ard Biesheuvel <tip-bot2@linutronix.de>, linux-tip-commits@vger.kernel.org, 
+	Ingo Molnar <mingo@kernel.org>, Peter Zijlstra <peterz@infradead.org>, linux-efi@vger.kernel.org, 
+	x86@kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-commit d54d610243a4508183978871e5faff5502786cd4 upstream.
+On Wed, 23 Apr 2025 at 16:55, Josh Poimboeuf <jpoimboe@kernel.org> wrote:
+>
+> On Wed, Apr 23, 2025 at 07:48:01AM +0000, tip-bot2 for Ard Biesheuvel wrote:
+> > The following commit has been merged into the x86/boot branch of tip:
+> >
+> > Commit-ID:     121c335b36e02d6aefb72501186e060474fdf33c
+> > Gitweb:        https://git.kernel.org/tip/121c335b36e02d6aefb72501186e060474fdf33c
+> > Author:        Ard Biesheuvel <ardb@kernel.org>
+> > AuthorDate:    Tue, 22 Apr 2025 23:05:11 +02:00
+> > Committer:     Ingo Molnar <mingo@kernel.org>
+> > CommitterDate: Wed, 23 Apr 2025 09:30:57 +02:00
+> >
+> > x86/boot: Disable jump tables in PIC code
+> >
+> > objtool already struggles to identify jump tables correctly in non-PIC
+> > code, where the idiom is something like
+> >
+> >   jmpq  *table(,%idx,8)
+> >
+> > and the table is a list of absolute addresses of jump targets.
+> >
+> > When using -fPIC, both the table reference as well as the jump targets
+> > are emitted in a RIP-relative manner, resulting in something like
+> >
+> >   leaq    table(%rip), %tbl
+> >   movslq  (%tbl,%idx,4), %offset
+> >   addq    %offset, %tbl
+> >   jmpq    *%tbl
+> >
+> > and the table is a list of offsets of the jump targets relative to the
+> > start of the entire table.
+> >
+> > Considering that this sequence of instructions can be interleaved with
+> > other instructions that have nothing to do with the jump table in
+> > question, it is extremely difficult to infer the control flow by
+> > deriving the jump targets from the indirect jump, the location of the
+> > table and the relative offsets it contains.
+> >
+> > So let's not bother and disable jump tables for code built with -fPIC
+> > under arch/x86/boot/startup.
+>
+> Hm, does objtool even run on boot code?
+>
 
-Communicating with the hypervisor using the shared GHCB page requires
-clearing the C bit in the mapping of that page. When executing in the
-context of the EFI boot services, the page tables are owned by the
-firmware, and this manipulation is not possible.
-
-So switch to a different API for accepting memory in SEV-SNP guests, one
-which is actually supported at the point during boot where the EFI stub
-may need to accept memory, but the SEV-SNP init code has not executed
-yet.
-
-For simplicity, also switch the memory acceptance carried out by the
-decompressor when not booting via EFI - this only involves the
-allocation for the decompressed kernel, and is generally only called
-after kexec, as normal boot will jump straight into the kernel from the
-EFI stub.
-
-Fixes: 6c3211796326 ("x86/sev: Add SNP-specific unaccepted memory support")
-Tested-by: Tom Lendacky <thomas.lendacky@amd.com>
-Co-developed-by: Tom Lendacky <thomas.lendacky@amd.com>
-Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Cc: <stable@vger.kernel.org>
-Cc: Dionna Amalie Glaze <dionnaglaze@google.com>
-Cc: Kevin Loughlin <kevinloughlin@google.com>
-Cc: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-efi@vger.kernel.org
-Link: https://lore.kernel.org/r/20250404082921.2767593-8-ardb+git@google.com # discussion thread #1
-Link: https://lore.kernel.org/r/20250410132850.3708703-2-ardb+git@google.com # discussion thread #2
-Link: https://lore.kernel.org/r/20250417202120.1002102-2-ardb+git@google.com # final submission
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
----
- arch/x86/boot/compressed/mem.c |    5 ++-
- arch/x86/boot/compressed/sev.c |   67 +++++++++--------------------------------
- arch/x86/boot/compressed/sev.h |    2 +
- 3 files changed, 21 insertions(+), 53 deletions(-)
-
---- a/arch/x86/boot/compressed/mem.c
-+++ b/arch/x86/boot/compressed/mem.c
-@@ -34,11 +34,14 @@ static bool early_is_tdx_guest(void)
- 
- void arch_accept_memory(phys_addr_t start, phys_addr_t end)
- {
-+	static bool sevsnp;
-+
- 	/* Platform-specific memory-acceptance call goes here */
- 	if (early_is_tdx_guest()) {
- 		if (!tdx_accept_memory(start, end))
- 			panic("TDX: Failed to accept memory\n");
--	} else if (sev_snp_enabled()) {
-+	} else if (sevsnp || (sev_get_status() & MSR_AMD64_SEV_SNP_ENABLED)) {
-+		sevsnp = true;
- 		snp_accept_memory(start, end);
- 	} else {
- 		error("Cannot accept memory: unknown platform\n");
---- a/arch/x86/boot/compressed/sev.c
-+++ b/arch/x86/boot/compressed/sev.c
-@@ -164,10 +164,7 @@ bool sev_snp_enabled(void)
- 
- static void __page_state_change(unsigned long paddr, enum psc_op op)
- {
--	u64 val;
--
--	if (!sev_snp_enabled())
--		return;
-+	u64 val, msr;
- 
- 	/*
- 	 * If private -> shared then invalidate the page before requesting the
-@@ -176,6 +173,9 @@ static void __page_state_change(unsigned
- 	if (op == SNP_PAGE_STATE_SHARED)
- 		pvalidate_4k_page(paddr, paddr, false);
- 
-+	/* Save the current GHCB MSR value */
-+	msr = sev_es_rd_ghcb_msr();
-+
- 	/* Issue VMGEXIT to change the page state in RMP table. */
- 	sev_es_wr_ghcb_msr(GHCB_MSR_PSC_REQ_GFN(paddr >> PAGE_SHIFT, op));
- 	VMGEXIT();
-@@ -185,6 +185,9 @@ static void __page_state_change(unsigned
- 	if ((GHCB_RESP_CODE(val) != GHCB_MSR_PSC_RESP) || GHCB_MSR_PSC_RESP_VAL(val))
- 		sev_es_terminate(SEV_TERM_SET_LINUX, GHCB_TERM_PSC);
- 
-+	/* Restore the GHCB MSR value */
-+	sev_es_wr_ghcb_msr(msr);
-+
- 	/*
- 	 * Now that page state is changed in the RMP table, validate it so that it is
- 	 * consistent with the RMP entry.
-@@ -195,11 +198,17 @@ static void __page_state_change(unsigned
- 
- void snp_set_page_private(unsigned long paddr)
- {
-+	if (!sev_snp_enabled())
-+		return;
-+
- 	__page_state_change(paddr, SNP_PAGE_STATE_PRIVATE);
- }
- 
- void snp_set_page_shared(unsigned long paddr)
- {
-+	if (!sev_snp_enabled())
-+		return;
-+
- 	__page_state_change(paddr, SNP_PAGE_STATE_SHARED);
- }
- 
-@@ -223,56 +232,10 @@ static bool early_setup_ghcb(void)
- 	return true;
- }
- 
--static phys_addr_t __snp_accept_memory(struct snp_psc_desc *desc,
--				       phys_addr_t pa, phys_addr_t pa_end)
--{
--	struct psc_hdr *hdr;
--	struct psc_entry *e;
--	unsigned int i;
--
--	hdr = &desc->hdr;
--	memset(hdr, 0, sizeof(*hdr));
--
--	e = desc->entries;
--
--	i = 0;
--	while (pa < pa_end && i < VMGEXIT_PSC_MAX_ENTRY) {
--		hdr->end_entry = i;
--
--		e->gfn = pa >> PAGE_SHIFT;
--		e->operation = SNP_PAGE_STATE_PRIVATE;
--		if (IS_ALIGNED(pa, PMD_SIZE) && (pa_end - pa) >= PMD_SIZE) {
--			e->pagesize = RMP_PG_SIZE_2M;
--			pa += PMD_SIZE;
--		} else {
--			e->pagesize = RMP_PG_SIZE_4K;
--			pa += PAGE_SIZE;
--		}
--
--		e++;
--		i++;
--	}
--
--	if (vmgexit_psc(boot_ghcb, desc))
--		sev_es_terminate(SEV_TERM_SET_LINUX, GHCB_TERM_PSC);
--
--	pvalidate_pages(desc);
--
--	return pa;
--}
--
- void snp_accept_memory(phys_addr_t start, phys_addr_t end)
- {
--	struct snp_psc_desc desc = {};
--	unsigned int i;
--	phys_addr_t pa;
--
--	if (!boot_ghcb && !early_setup_ghcb())
--		sev_es_terminate(SEV_TERM_SET_LINUX, GHCB_TERM_PSC);
--
--	pa = start;
--	while (pa < end)
--		pa = __snp_accept_memory(&desc, pa, end);
-+	for (phys_addr_t pa = start; pa < end; pa += PAGE_SIZE)
-+		__page_state_change(pa, SNP_PAGE_STATE_PRIVATE);
- }
- 
- void sev_es_shutdown_ghcb(void)
---- a/arch/x86/boot/compressed/sev.h
-+++ b/arch/x86/boot/compressed/sev.h
-@@ -12,11 +12,13 @@
- 
- bool sev_snp_enabled(void);
- void snp_accept_memory(phys_addr_t start, phys_addr_t end);
-+u64 sev_get_status(void);
- 
- #else
- 
- static inline bool sev_snp_enabled(void) { return false; }
- static inline void snp_accept_memory(phys_addr_t start, phys_addr_t end) { }
-+static inline u64 sev_get_status(void) { return 0; }
- 
- #endif
- 
-
-
+This is about startup code, not boot code. This is code that is part
+of vmlinux, but runs from a different mapping of memory than the one
+the linker assumes, and so it needs to be built with -fPIC to
+discourage the compiler and linker from inserting symbol references
+via the kernel virtual mapping, which may not be up yet when this code
+runs.
