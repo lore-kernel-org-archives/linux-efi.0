@@ -1,247 +1,89 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1F26C284692;
-	Wed, 23 Apr 2025 15:33:27 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B7C0928B4E6;
+	Wed, 23 Apr 2025 15:50:13 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745422407; cv=none; b=J6Rp1gK7uCXm7+tzhhHcC0z34ISHMgHQXUXbWp95FZ3JCUEMLvLOBxOKDPdetO3ohUxTEa72eR6NXCR8v3ZPpe57TGEjP0ugp7u8Lwk6az9oDZ9zO1otLB8qVxaQfN1K2H9yjrQ1KNjhoUC9oqfwrDcgAhtF+m0EAxZ8IapMmbQ=
+	t=1745423413; cv=none; b=S59gZvBPcNtU/hs9oLhshomZUDSmpymIoFNwW/Jd7rFb75KZML4LuVxD6+gxii5oII/h54/ijFQr59dLmyWo2Di7L4ZirzYOV6GTmr9x+56hIJbQqSEPAvd/GUYM3huekGX9VW0QgVnxEwP26eaBa8Cm39/yTSMTukGcGmkbooc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745422407; c=relaxed/simple;
-	bh=3qK+e7XRzOuOELogCqGqcT31l9mp+GR5fCKHDKkpa6c=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=HMpsa0iau8gTXpzZj/T/ly+YIaztb08CNmoUXyscyzY33KKRcPG2dYoOF8XDkMk8kUSkZ2QUZv0K5CIrgA1ukUdnzrT1q4JvdhQLNRah5tvdf3VkQQeccndB1QAyJ66D+FheInjstfRKj0tJoeILGw2GuGMvaquwnyABWa+P2Y8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b=pNn5b2zR; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1745423413; c=relaxed/simple;
+	bh=Fa+PXibvXrxCCcV4W6GLI93MbvVmhGXd8DSbkWF71F8=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=eCDqpc3GnLUGaFHw7tz3jWNSkl2NxZbv0Dtn9Iuz5wWhHFqUiAPD6LnSKUZoTXJnOoJkyOYiHuSe0eOflEqMucmKqhENK+MtWuvj2gsWGY+C/xdUW3JNh2Hrsz1rpPx7fh+UZJUTCSLyHccevSYtq+EGCSDQL6SjVS1AuPxE2P4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=IM3VirT1; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="pNn5b2zR"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9F873C4CEE2;
-	Wed, 23 Apr 2025 15:33:26 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-	s=korg; t=1745422407;
-	bh=3qK+e7XRzOuOELogCqGqcT31l9mp+GR5fCKHDKkpa6c=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=pNn5b2zRnOYXYA6jPmakQ8tb5HIcLHegzWcryF0ERshq5HEkrbIFrR4eyddeDNICi
-	 8h/idmUmWegOII8TGH8YmoGAHACbndbToOQP2VBu+5FP3VpAK6TIGCXHaaqpQkxl46
-	 cV54oE3SSwP/v7Iq7pnNfWJ0xwQFiePCJJ2dWLzI=
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To: stable@vger.kernel.org
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	patches@lists.linux.dev,
-	Tom Lendacky <thomas.lendacky@amd.com>,
-	Ard Biesheuvel <ardb@kernel.org>,
-	Ingo Molnar <mingo@kernel.org>,
-	Dionna Amalie Glaze <dionnaglaze@google.com>,
-	Kevin Loughlin <kevinloughlin@google.com>,
-	"Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
-	Linus Torvalds <torvalds@linux-foundation.org>,
-	linux-efi@vger.kernel.org
-Subject: [PATCH 6.6 338/393] x86/boot/sev: Avoid shared GHCB page for early memory acceptance
-Date: Wed, 23 Apr 2025 16:43:54 +0200
-Message-ID: <20250423142657.294437350@linuxfoundation.org>
-X-Mailer: git-send-email 2.49.0
-In-Reply-To: <20250423142643.246005366@linuxfoundation.org>
-References: <20250423142643.246005366@linuxfoundation.org>
-User-Agent: quilt/0.68
-X-stable: review
-X-Patchwork-Hint: ignore
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="IM3VirT1"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 31C73C4CEE8;
+	Wed, 23 Apr 2025 15:50:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1745423413;
+	bh=Fa+PXibvXrxCCcV4W6GLI93MbvVmhGXd8DSbkWF71F8=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=IM3VirT1GCLdpUWumjiEIQBBP6rEFB0Qkq8Nrq/DxatvqXR2/nHyjfCjvRd3OIrAJ
+	 g1QLm8T11TqC6QWNzIRojs5wcE80r6maY82RhYQhN2bhfbHoax2HQStzzOsn848I7c
+	 Qg5HM+7K+/uEe+e2ky383M530lHz2zQofT+v8e+mZGe2X/axgEfwviMCjWsuK5Gfj/
+	 8olmnuXWJtkMDX3XrHfnKpqJOEKv2sTiVOa1nngV9UM4hRUb3gGcy7Zi15CYO6eaV1
+	 4hTixLiM5MXXYX8MAnZe5GFlu/2W/UEHLkEuHFlE1bpMTtRXeMdwHEL9wXAxT5QZB7
+	 9c+ZZIkU6xXYQ==
+Received: by mail-lj1-f174.google.com with SMTP id 38308e7fff4ca-30dd5a93b49so692471fa.0;
+        Wed, 23 Apr 2025 08:50:13 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCUJxnyY+YPMdMbD4lfmAVInh6BtNDMIqxH239FDCmLfPnxUlHPGffB7mugPKGCjx03SAKW6fjH05RES/r+s@vger.kernel.org, AJvYcCVG7i27uVlfwwuNQsvnHWSX1bW1ObklvSCjMGvgDBVv9E4TIV25/KRJahxp7aJn5PkFRa1Ryxxwbys=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yyonft45XlerO/69w6Q4ewsuoDXcpgAmsNMn9a3QkIxSRmTRERP
+	9BnmYdgLdprmt3KQOHQGCLdez7m1uuo9bZ+QWMH21aDa3Y14uz86Pi9Aq0SvaUwT1d5C6pT7L4y
+	fcv5gk4YptGrQzn/mFnxn5sjCYl4=
+X-Google-Smtp-Source: AGHT+IGVwIf9+lBNVcSQ5X7gdZBSr7LfTa4BLGGADmZZiuPVg72vW71YQfuhY0ZP6YfYdzgScoBjHf5DE11HEX6F/ww=
+X-Received: by 2002:a2e:b892:0:b0:308:f4cc:9519 with SMTP id
+ 38308e7fff4ca-310904b8545mr50500811fa.5.1745423411571; Wed, 23 Apr 2025
+ 08:50:11 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-
-6.6-stable review patch.  If anyone has any objections, please let me know.
-
-------------------
-
+References: <20250418141253.2601348-8-ardb+git@google.com> <20250418141253.2601348-11-ardb+git@google.com>
+ <cf878810-81ed-3017-52c6-ce6aa41b5f01@amd.com>
+In-Reply-To: <cf878810-81ed-3017-52c6-ce6aa41b5f01@amd.com>
 From: Ard Biesheuvel <ardb@kernel.org>
+Date: Wed, 23 Apr 2025 17:50:00 +0200
+X-Gmail-Original-Message-ID: <CAMj1kXGDyM-W1umDsBGO17+UqczhODBcb73StPELfOAQN2_V2A@mail.gmail.com>
+X-Gm-Features: ATxdqUGXliD83dE5faxOPvQJQzy9RCZaO4k0iC9l4w0xrGgHzIW_T4_87Kjf41s
+Message-ID: <CAMj1kXGDyM-W1umDsBGO17+UqczhODBcb73StPELfOAQN2_V2A@mail.gmail.com>
+Subject: Re: [PATCH v5 3/6] x86/sev: Split off startup code from core code
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: Ard Biesheuvel <ardb+git@google.com>, linux-kernel@vger.kernel.org, 
+	linux-efi@vger.kernel.org, x86@kernel.org, mingo@kernel.org, 
+	Dionna Amalie Glaze <dionnaglaze@google.com>, Kevin Loughlin <kevinloughlin@google.com>
+Content-Type: text/plain; charset="UTF-8"
 
-commit d54d610243a4508183978871e5faff5502786cd4 upstream.
+On Wed, 23 Apr 2025 at 17:22, Tom Lendacky <thomas.lendacky@amd.com> wrote:
+>
+> On 4/18/25 09:12, Ard Biesheuvel wrote:
+> > From: Ard Biesheuvel <ardb@kernel.org>
+> >
+> > Disentangle the SEV core code and the SEV code that is called during
+> > early boot. The latter piece will be moved into startup/ in a subsequent
+> > patch.
+> >
+> > Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
+>
+> This patch breaks SNP guests. The SNP guest boots, but no longer has
+> access to the VMPCK keys needed to communicate with the ASP, which is
+> used, for example, to obtain an attestation report.
+>
+> It looks like the secrets_pa is defined as static in both startup.c and
+> core.c. It is set by a function in startup.c and so when used in core.c
+> its value will be 0.
+>
+> The following fixed the issue for me. Let me know if it can be squashed
+> in or a full patch is needed. Although, it likely should be named
+> sev_secrets_pa since it is no longer static.
+>
 
-Communicating with the hypervisor using the shared GHCB page requires
-clearing the C bit in the mapping of that page. When executing in the
-context of the EFI boot services, the page tables are owned by the
-firmware, and this manipulation is not possible.
+Thanks for the fix, and apologies for using you as a guinea pig - I've
+been struggling to get access to SEV-SNP capable hardware, although a
+suitable EPYC based machine should be arriving in a month or 2.
 
-So switch to a different API for accepting memory in SEV-SNP guests, one
-which is actually supported at the point during boot where the EFI stub
-may need to accept memory, but the SEV-SNP init code has not executed
-yet.
-
-For simplicity, also switch the memory acceptance carried out by the
-decompressor when not booting via EFI - this only involves the
-allocation for the decompressed kernel, and is generally only called
-after kexec, as normal boot will jump straight into the kernel from the
-EFI stub.
-
-Fixes: 6c3211796326 ("x86/sev: Add SNP-specific unaccepted memory support")
-Tested-by: Tom Lendacky <thomas.lendacky@amd.com>
-Co-developed-by: Tom Lendacky <thomas.lendacky@amd.com>
-Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
-Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Cc: <stable@vger.kernel.org>
-Cc: Dionna Amalie Glaze <dionnaglaze@google.com>
-Cc: Kevin Loughlin <kevinloughlin@google.com>
-Cc: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-efi@vger.kernel.org
-Link: https://lore.kernel.org/r/20250404082921.2767593-8-ardb+git@google.com # discussion thread #1
-Link: https://lore.kernel.org/r/20250410132850.3708703-2-ardb+git@google.com # discussion thread #2
-Link: https://lore.kernel.org/r/20250417202120.1002102-2-ardb+git@google.com # final submission
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
----
- arch/x86/boot/compressed/mem.c |    5 ++-
- arch/x86/boot/compressed/sev.c |   67 +++++++++--------------------------------
- arch/x86/boot/compressed/sev.h |    2 +
- 3 files changed, 21 insertions(+), 53 deletions(-)
-
---- a/arch/x86/boot/compressed/mem.c
-+++ b/arch/x86/boot/compressed/mem.c
-@@ -34,11 +34,14 @@ static bool early_is_tdx_guest(void)
- 
- void arch_accept_memory(phys_addr_t start, phys_addr_t end)
- {
-+	static bool sevsnp;
-+
- 	/* Platform-specific memory-acceptance call goes here */
- 	if (early_is_tdx_guest()) {
- 		if (!tdx_accept_memory(start, end))
- 			panic("TDX: Failed to accept memory\n");
--	} else if (sev_snp_enabled()) {
-+	} else if (sevsnp || (sev_get_status() & MSR_AMD64_SEV_SNP_ENABLED)) {
-+		sevsnp = true;
- 		snp_accept_memory(start, end);
- 	} else {
- 		error("Cannot accept memory: unknown platform\n");
---- a/arch/x86/boot/compressed/sev.c
-+++ b/arch/x86/boot/compressed/sev.c
-@@ -135,10 +135,7 @@ bool sev_snp_enabled(void)
- 
- static void __page_state_change(unsigned long paddr, enum psc_op op)
- {
--	u64 val;
--
--	if (!sev_snp_enabled())
--		return;
-+	u64 val, msr;
- 
- 	/*
- 	 * If private -> shared then invalidate the page before requesting the
-@@ -147,6 +144,9 @@ static void __page_state_change(unsigned
- 	if (op == SNP_PAGE_STATE_SHARED && pvalidate(paddr, RMP_PG_SIZE_4K, 0))
- 		sev_es_terminate(SEV_TERM_SET_LINUX, GHCB_TERM_PVALIDATE);
- 
-+	/* Save the current GHCB MSR value */
-+	msr = sev_es_rd_ghcb_msr();
-+
- 	/* Issue VMGEXIT to change the page state in RMP table. */
- 	sev_es_wr_ghcb_msr(GHCB_MSR_PSC_REQ_GFN(paddr >> PAGE_SHIFT, op));
- 	VMGEXIT();
-@@ -156,6 +156,9 @@ static void __page_state_change(unsigned
- 	if ((GHCB_RESP_CODE(val) != GHCB_MSR_PSC_RESP) || GHCB_MSR_PSC_RESP_VAL(val))
- 		sev_es_terminate(SEV_TERM_SET_LINUX, GHCB_TERM_PSC);
- 
-+	/* Restore the GHCB MSR value */
-+	sev_es_wr_ghcb_msr(msr);
-+
- 	/*
- 	 * Now that page state is changed in the RMP table, validate it so that it is
- 	 * consistent with the RMP entry.
-@@ -166,11 +169,17 @@ static void __page_state_change(unsigned
- 
- void snp_set_page_private(unsigned long paddr)
- {
-+	if (!sev_snp_enabled())
-+		return;
-+
- 	__page_state_change(paddr, SNP_PAGE_STATE_PRIVATE);
- }
- 
- void snp_set_page_shared(unsigned long paddr)
- {
-+	if (!sev_snp_enabled())
-+		return;
-+
- 	__page_state_change(paddr, SNP_PAGE_STATE_SHARED);
- }
- 
-@@ -194,56 +203,10 @@ static bool early_setup_ghcb(void)
- 	return true;
- }
- 
--static phys_addr_t __snp_accept_memory(struct snp_psc_desc *desc,
--				       phys_addr_t pa, phys_addr_t pa_end)
--{
--	struct psc_hdr *hdr;
--	struct psc_entry *e;
--	unsigned int i;
--
--	hdr = &desc->hdr;
--	memset(hdr, 0, sizeof(*hdr));
--
--	e = desc->entries;
--
--	i = 0;
--	while (pa < pa_end && i < VMGEXIT_PSC_MAX_ENTRY) {
--		hdr->end_entry = i;
--
--		e->gfn = pa >> PAGE_SHIFT;
--		e->operation = SNP_PAGE_STATE_PRIVATE;
--		if (IS_ALIGNED(pa, PMD_SIZE) && (pa_end - pa) >= PMD_SIZE) {
--			e->pagesize = RMP_PG_SIZE_2M;
--			pa += PMD_SIZE;
--		} else {
--			e->pagesize = RMP_PG_SIZE_4K;
--			pa += PAGE_SIZE;
--		}
--
--		e++;
--		i++;
--	}
--
--	if (vmgexit_psc(boot_ghcb, desc))
--		sev_es_terminate(SEV_TERM_SET_LINUX, GHCB_TERM_PSC);
--
--	pvalidate_pages(desc);
--
--	return pa;
--}
--
- void snp_accept_memory(phys_addr_t start, phys_addr_t end)
- {
--	struct snp_psc_desc desc = {};
--	unsigned int i;
--	phys_addr_t pa;
--
--	if (!boot_ghcb && !early_setup_ghcb())
--		sev_es_terminate(SEV_TERM_SET_LINUX, GHCB_TERM_PSC);
--
--	pa = start;
--	while (pa < end)
--		pa = __snp_accept_memory(&desc, pa, end);
-+	for (phys_addr_t pa = start; pa < end; pa += PAGE_SIZE)
-+		__page_state_change(pa, SNP_PAGE_STATE_PRIVATE);
- }
- 
- void sev_es_shutdown_ghcb(void)
---- a/arch/x86/boot/compressed/sev.h
-+++ b/arch/x86/boot/compressed/sev.h
-@@ -12,11 +12,13 @@
- 
- bool sev_snp_enabled(void);
- void snp_accept_memory(phys_addr_t start, phys_addr_t end);
-+u64 sev_get_status(void);
- 
- #else
- 
- static inline bool sev_snp_enabled(void) { return false; }
- static inline void snp_accept_memory(phys_addr_t start, phys_addr_t end) { }
-+static inline u64 sev_get_status(void) { return 0; }
- 
- #endif
- 
-
-
+I'd assume a proper patch is better, and renaming it to sev_secrets_pa
+doesn't seem that intrusive. But it is ultimately Ingo's call.
