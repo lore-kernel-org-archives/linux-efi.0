@@ -1,64 +1,76 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D91621E7C05;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D91CD28937E;
 	Wed,  7 May 2025 18:16:18 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746641779; cv=none; b=tZfKGP7s2aXdhah5aYbv7CKy1ctca/TSigjdDOk26Ed4MqAJZ5KfGvkPD2LVXX9asRYHY1QUmPNKQm24knDmrKTuJswg+9tq55fzI2yGs3rnIpCfaF8y2nJVMLw/dk2XaphUeK64GqGF0TBIybJpABUABu1EIzAFSAG2zPK2bKA=
+	t=1746641779; cv=none; b=JTXv10zWUqCut3uhGZxhvgFTqlOBTeqhh8dLDyG6j0AGKA/gCuWyO843BKO3IGoH1k9TyZeIzKb7pBAAaU/FsqrA5gEx3bzTBXP3yr3vJwmT4nt2IPRK59GvEdbG7r95A9rq2tkVrB1IagfXhUmAo4PYpcchK68emFhfmm024T4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1746641779; c=relaxed/simple;
-	bh=6Q9uh62q6SkNNJk0VXiSTm2HMDshuMHoXOhVSBim3Js=;
+	bh=6rPKdmTAkNXJoVHpXuZmVez15fxfVheZEKRm8PRLszw=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=GrFNMSS29xWTo5QiNOmdS+db0yE7WsQ6PgZb0PWwgWu/DWmqTDW1nQ/J4wIpThLPXZnER94SBLXBRxyOre0PPd5M1DqmzvWSAFaNFQlcLYge3XwPNepXCJACbcyhKEXqDVGJaRrBj/Ovf/rIzbeCrWc7iFYiw+XeQv1gkEf7OYo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=u1u0pSpD; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=Pz23SZq4UcDLQhPkRMyrhSl7Ykyjq8b1DsI/jpql+pzzzPvGi5+Wt9gfRvZ8vPq3FkywR4hKAwnRP+b5RSWa++DQEDgTy0P74t2oXrko8CadJL/oBpwiXHhSPVRLaLrExtlvNAENvyfLn2xlsUM1N9b1AODU8TODMg/apDzQZK0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=VAzZdzFh; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="u1u0pSpD"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3C685C4CEE9;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="VAzZdzFh"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 45EB2C4CEEE;
 	Wed,  7 May 2025 18:16:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=k20201202; t=1746641778;
-	bh=6Q9uh62q6SkNNJk0VXiSTm2HMDshuMHoXOhVSBim3Js=;
+	bh=6rPKdmTAkNXJoVHpXuZmVez15fxfVheZEKRm8PRLszw=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=u1u0pSpD+WsbK3ZVOw5BJBowU1AI3hOtGYCUezAch+IxZ2IHV87f9P3UbBtNVEw6W
-	 j+3xPYErXvab8lyHGGm1sEnaAE9hjBLFQj4LOx/vS90sxfOyuYrdCKf36TEpjGDQHg
-	 q8ukXKr4V+ZWTVQ7ViryWiL06XHu9rh64OWjQnHThKsZaXugToGKr3hQducP91k675
-	 c/yr7bbd617iNEdTQ60lh76LZzx7CcWVkVyv3QULjJENB/zyR95zXhS4EBYvpcLoJ1
-	 mMKBzjligZ45rFYRl3gN4Rga+6WJUhrTJ6uoO3dZ471a4kHVTN+QX+7qW9jHor1/rW
-	 bPGZ3BRsR+WNg==
+	b=VAzZdzFhyHK4hcYMx6h4ckMTSI+LlhSKdAtwFvjz9tbhT0nBTr5KJFgWlhi2wtZW/
+	 ZzGxndt5dvrv00FL5R15AI1le3EUu9V88krt5z14PpQMWgd+L30/QUDzBqofcmrIgl
+	 yxpJqJbdVkT2LinqfQHV62UV6AQafZKnP3k3QlBcIjQGFePWBeJekzdtgna8DoiOQ/
+	 +Nh47SJz4O6J/weH9MlaBma8jtuS5N4n+8CtMkcM9sBYa5GwiBdMIZVmE4P9hSAzZY
+	 TaSOCwfdoTaWqWcAkblT7sxQ9LCysQFg11kYlLPMizueE96aREtxnfaLBY1vYuxwI8
+	 UZYfJy+RQWs6A==
 From: Kees Cook <kees@kernel.org>
 To: Arnd Bergmann <arnd@arndb.de>
 Cc: Kees Cook <kees@kernel.org>,
-	linux-hardening@vger.kernel.org,
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>,
-	Christoph Hellwig <hch@lst.de>,
 	Marco Elver <elver@google.com>,
 	Andrey Konovalov <andreyknvl@gmail.com>,
 	Andrey Ryabinin <ryabinin.a.a@gmail.com>,
+	Thomas Gleixner <tglx@linutronix.de>,
+	Ingo Molnar <mingo@redhat.com>,
+	Borislav Petkov <bp@alien8.de>,
+	Dave Hansen <dave.hansen@linux.intel.com>,
+	x86@kernel.org,
+	"H. Peter Anvin" <hpa@zytor.com>,
 	Ard Biesheuvel <ardb@kernel.org>,
+	"Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
+	Hou Wenlong <houwenlong.hwl@antgroup.com>,
+	Andrew Morton <akpm@linux-foundation.org>,
 	Masahiro Yamada <masahiroy@kernel.org>,
+	"Peter Zijlstra (Intel)" <peterz@infradead.org>,
+	Luis Chamberlain <mcgrof@kernel.org>,
+	Sami Tolvanen <samitolvanen@google.com>,
+	Christophe Leroy <christophe.leroy@csgroup.eu>,
+	kasan-dev@googlegroups.com,
+	"Gustavo A. R. Silva" <gustavoars@kernel.org>,
+	Christoph Hellwig <hch@lst.de>,
 	Nathan Chancellor <nathan@kernel.org>,
 	Nicolas Schier <nicolas.schier@linux.dev>,
 	Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
 	Bill Wendling <morbo@google.com>,
 	Justin Stitt <justinstitt@google.com>,
 	linux-kernel@vger.kernel.org,
-	x86@kernel.org,
-	kasan-dev@googlegroups.com,
 	linux-doc@vger.kernel.org,
 	linux-arm-kernel@lists.infradead.org,
 	kvmarm@lists.linux.dev,
 	linux-riscv@lists.infradead.org,
 	linux-s390@vger.kernel.org,
 	linux-efi@vger.kernel.org,
+	linux-hardening@vger.kernel.org,
 	linux-kbuild@vger.kernel.org,
 	linux-security-module@vger.kernel.org,
 	linux-kselftest@vger.kernel.org,
 	sparclinux@vger.kernel.org,
 	llvm@lists.linux.dev
-Subject: [PATCH 4/8] stackleak: Rename stackleak_track_stack to __sanitizer_cov_stack_depth
-Date: Wed,  7 May 2025 11:16:10 -0700
-Message-Id: <20250507181615.1947159-4-kees@kernel.org>
+Subject: [PATCH 2/8] init.h: Disable sanitizer coverage for __init and __head
+Date: Wed,  7 May 2025 11:16:08 -0700
+Message-Id: <20250507181615.1947159-2-kees@kernel.org>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20250507180852.work.231-kees@kernel.org>
 References: <20250507180852.work.231-kees@kernel.org>
@@ -68,264 +80,76 @@ List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=11429; i=kees@kernel.org; h=from:subject; bh=6Q9uh62q6SkNNJk0VXiSTm2HMDshuMHoXOhVSBim3Js=; b=owGbwMvMwCVmps19z/KJym7G02pJDBnSi3MENts7tXm5z7rDvWBm5prEstc7xQ49040UXbNwl 2Pm5mvBHaUsDGJcDLJiiixBdu5xLh5v28Pd5yrCzGFlAhnCwMUpABP52szIcHHStinFM79Mm9M/ O+x3cEx83y/m5hy3xIfPryo1blgofZeR4UxS5zpfB9dppxRKuC1yXzQsFys7vj1mYbnhujfpDUf 2cQIA
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2847; i=kees@kernel.org; h=from:subject; bh=6rPKdmTAkNXJoVHpXuZmVez15fxfVheZEKRm8PRLszw=; b=owGbwMvMwCVmps19z/KJym7G02pJDBnSi7MPFhcujE1p83GNUj2Vetl/6Q7ju5xS7tumPJN5t DQ2USaro5SFQYyLQVZMkSXIzj3OxeNte7j7XEWYOaxMIEMYuDgFYCKXJBgZ/igUKc35wvT3UdQu sR4u1YLZi59d21ljXfz+Qtf5bvnJmowMzbyyqauq9ef6NGj9Et9r9GSFGxfTTW/fIBMRRfdvObL 8AA==
 X-Developer-Key: i=kees@kernel.org; a=openpgp; fpr=A5C3F68F229DD60F723E6E138972F4DFDC6DC026
 Content-Transfer-Encoding: 8bit
 
-The Clang stack depth tracking implementation has a fixed name for the
-stack depth tracking callback, "__sanitizer_cov_stack_depth", so rename
-the GCC plugin function to match since it has no external dependencies.
+While __noinstr already contained __no_sanitize_coverage, it needs to
+be added to __init and __head section markings to support the Clang
+implementation of CONFIG_STACKLEAK. This is to make sure the stack depth
+tracking callback is not executed in unsupported contexts.
 
+The other sanitizer coverage options (trace-pc and trace-cmp) aren't
+needed in __head nor __init either ("We are interested in code coverage
+as a function of a syscall inputs"[1]), so this appears safe to disable
+for them as well.
+
+Link: https://web.git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/kernel/kcov.c?h=v6.14#n179 [1]
 Signed-off-by: Kees Cook <kees@kernel.org>
 ---
+Cc: Marco Elver <elver@google.com>
+Cc: Andrey Konovalov <andreyknvl@gmail.com>
+Cc: Andrey Ryabinin <ryabinin.a.a@gmail.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Ingo Molnar <mingo@redhat.com>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Dave Hansen <dave.hansen@linux.intel.com>
+Cc: <x86@kernel.org>
+Cc: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Ard Biesheuvel <ardb@kernel.org>
+Cc: "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
+Cc: Hou Wenlong <houwenlong.hwl@antgroup.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>
+Cc: Masahiro Yamada <masahiroy@kernel.org>
+Cc: "Peter Zijlstra (Intel)" <peterz@infradead.org>
+Cc: Luis Chamberlain <mcgrof@kernel.org>
+Cc: Sami Tolvanen <samitolvanen@google.com>
 Cc: Arnd Bergmann <arnd@arndb.de>
-Cc: <linux-hardening@vger.kernel.org>
+Cc: Christophe Leroy <christophe.leroy@csgroup.eu>
+Cc: <kasan-dev@googlegroups.com>
 ---
- security/Kconfig.hardening             |  4 +-
- scripts/gcc-plugins/stackleak_plugin.c | 52 +++++++++++++-------------
- include/linux/stackleak.h              |  2 +-
- kernel/stackleak.c                     |  4 +-
- tools/objtool/check.c                  |  2 +-
- 5 files changed, 32 insertions(+), 32 deletions(-)
+ arch/x86/include/asm/init.h | 2 +-
+ include/linux/init.h        | 4 +++-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
 
-diff --git a/security/Kconfig.hardening b/security/Kconfig.hardening
-index 2d5852676991..2be6aed71c92 100644
---- a/security/Kconfig.hardening
-+++ b/security/Kconfig.hardening
-@@ -205,8 +205,8 @@ config STACKLEAK_TRACK_MIN_SIZE
- 	help
- 	  The STACKLEAK options instruments the kernel code for tracking
- 	  the lowest border of the kernel stack (and for some other purposes).
--	  It inserts the stackleak_track_stack() call for the functions with
--	  a stack frame size greater than or equal to this parameter.
-+	  It inserts the __sanitizer_cov_stack_depth() call for the functions
-+	  with a stack frame size greater than or equal to this parameter.
- 	  If unsure, leave the default value 100.
+diff --git a/arch/x86/include/asm/init.h b/arch/x86/include/asm/init.h
+index 8b1b1abcef15..6bfdaeddbae8 100644
+--- a/arch/x86/include/asm/init.h
++++ b/arch/x86/include/asm/init.h
+@@ -5,7 +5,7 @@
+ #if defined(CONFIG_CC_IS_CLANG) && CONFIG_CLANG_VERSION < 170000
+ #define __head	__section(".head.text") __no_sanitize_undefined __no_stack_protector
+ #else
+-#define __head	__section(".head.text") __no_sanitize_undefined
++#define __head	__section(".head.text") __no_sanitize_undefined __no_sanitize_coverage
+ #endif
  
- config STACKLEAK_METRICS
-diff --git a/scripts/gcc-plugins/stackleak_plugin.c b/scripts/gcc-plugins/stackleak_plugin.c
-index d20c47d21ad8..e486488c867d 100644
---- a/scripts/gcc-plugins/stackleak_plugin.c
-+++ b/scripts/gcc-plugins/stackleak_plugin.c
-@@ -9,7 +9,7 @@
-  * any of the gcc libraries
-  *
-  * This gcc plugin is needed for tracking the lowest border of the kernel stack.
-- * It instruments the kernel code inserting stackleak_track_stack() calls:
-+ * It instruments the kernel code inserting __sanitizer_cov_stack_depth() calls:
-  *  - after alloca();
-  *  - for the functions with a stack frame size greater than or equal
-  *     to the "track-min-size" plugin parameter.
-@@ -33,7 +33,7 @@ __visible int plugin_is_GPL_compatible;
+ struct x86_mapping_info {
+diff --git a/include/linux/init.h b/include/linux/init.h
+index ee1309473bc6..c65a050d52a7 100644
+--- a/include/linux/init.h
++++ b/include/linux/init.h
+@@ -49,7 +49,9 @@
  
- static int track_frame_size = -1;
- static bool build_for_x86 = false;
--static const char track_function[] = "stackleak_track_stack";
-+static const char track_function[] = "__sanitizer_cov_stack_depth";
- static bool disable = false;
- static bool verbose = false;
- 
-@@ -58,7 +58,7 @@ static void add_stack_tracking_gcall(gimple_stmt_iterator *gsi, bool after)
- 	cgraph_node_ptr node;
- 	basic_block bb;
- 
--	/* Insert calling stackleak_track_stack() */
-+	/* Insert calling __sanitizer_cov_stack_depth() */
- 	stmt = gimple_build_call(track_function_decl, 0);
- 	gimple_call = as_a_gcall(stmt);
- 	if (after)
-@@ -120,12 +120,12 @@ static void add_stack_tracking_gasm(gimple_stmt_iterator *gsi, bool after)
- 	gcc_assert(build_for_x86);
- 
- 	/*
--	 * Insert calling stackleak_track_stack() in asm:
--	 *   asm volatile("call stackleak_track_stack"
-+	 * Insert calling __sanitizer_cov_stack_depth() in asm:
-+	 *   asm volatile("call __sanitizer_cov_stack_depth"
- 	 *		  :: "r" (current_stack_pointer))
- 	 * Use ASM_CALL_CONSTRAINT trick from arch/x86/include/asm/asm.h.
- 	 * This constraint is taken into account during gcc shrink-wrapping
--	 * optimization. It is needed to be sure that stackleak_track_stack()
-+	 * optimization. It is needed to be sure that __sanitizer_cov_stack_depth()
- 	 * call is inserted after the prologue of the containing function,
- 	 * when the stack frame is prepared.
- 	 */
-@@ -137,7 +137,7 @@ static void add_stack_tracking_gasm(gimple_stmt_iterator *gsi, bool after)
- 	input = build_tree_list(NULL_TREE, build_const_char_string(2, "r"));
- 	input = chainon(NULL_TREE, build_tree_list(input, sp_decl));
- 	vec_safe_push(inputs, input);
--	asm_call = gimple_build_asm_vec("call stackleak_track_stack",
-+	asm_call = gimple_build_asm_vec("call __sanitizer_cov_stack_depth",
- 					inputs, NULL, NULL, NULL);
- 	gimple_asm_set_volatile(asm_call, true);
- 	if (after)
-@@ -151,11 +151,11 @@ static void add_stack_tracking(gimple_stmt_iterator *gsi, bool after)
- {
- 	/*
- 	 * The 'no_caller_saved_registers' attribute is used for
--	 * stackleak_track_stack(). If the compiler supports this attribute for
--	 * the target arch, we can add calling stackleak_track_stack() in asm.
-+	 * __sanitizer_cov_stack_depth(). If the compiler supports this attribute for
-+	 * the target arch, we can add calling __sanitizer_cov_stack_depth() in asm.
- 	 * That improves performance: we avoid useless operations with the
- 	 * caller-saved registers in the functions from which we will remove
--	 * stackleak_track_stack() call during the stackleak_cleanup pass.
-+	 * __sanitizer_cov_stack_depth() call during the stackleak_cleanup pass.
- 	 */
- 	if (lookup_attribute_spec(get_identifier("no_caller_saved_registers")))
- 		add_stack_tracking_gasm(gsi, after);
-@@ -165,7 +165,7 @@ static void add_stack_tracking(gimple_stmt_iterator *gsi, bool after)
- 
- /*
-  * Work with the GIMPLE representation of the code. Insert the
-- * stackleak_track_stack() call after alloca() and into the beginning
-+ * __sanitizer_cov_stack_depth() call after alloca() and into the beginning
-  * of the function if it is not instrumented.
-  */
- static unsigned int stackleak_instrument_execute(void)
-@@ -205,7 +205,7 @@ static unsigned int stackleak_instrument_execute(void)
- 					DECL_NAME_POINTER(current_function_decl));
- 			}
- 
--			/* Insert stackleak_track_stack() call after alloca() */
-+			/* Insert __sanitizer_cov_stack_depth() call after alloca() */
- 			add_stack_tracking(&gsi, true);
- 			if (bb == entry_bb)
- 				prologue_instrumented = true;
-@@ -241,7 +241,7 @@ static unsigned int stackleak_instrument_execute(void)
- 		return 0;
- 	}
- 
--	/* Insert stackleak_track_stack() call at the function beginning */
-+	/* Insert __sanitizer_cov_stack_depth() call at the function beginning */
- 	bb = entry_bb;
- 	if (!single_pred_p(bb)) {
- 		/* gcc_assert(bb_loop_depth(bb) ||
-@@ -270,15 +270,15 @@ static void remove_stack_tracking_gcall(void)
- 	rtx_insn *insn, *next;
- 
- 	/*
--	 * Find stackleak_track_stack() calls. Loop through the chain of insns,
-+	 * Find __sanitizer_cov_stack_depth() calls. Loop through the chain of insns,
- 	 * which is an RTL representation of the code for a function.
- 	 *
- 	 * The example of a matching insn:
--	 *  (call_insn 8 4 10 2 (call (mem (symbol_ref ("stackleak_track_stack")
--	 *  [flags 0x41] <function_decl 0x7f7cd3302a80 stackleak_track_stack>)
--	 *  [0 stackleak_track_stack S1 A8]) (0)) 675 {*call} (expr_list
--	 *  (symbol_ref ("stackleak_track_stack") [flags 0x41] <function_decl
--	 *  0x7f7cd3302a80 stackleak_track_stack>) (expr_list (0) (nil))) (nil))
-+	 *  (call_insn 8 4 10 2 (call (mem (symbol_ref ("__sanitizer_cov_stack_depth")
-+	 *  [flags 0x41] <function_decl 0x7f7cd3302a80 __sanitizer_cov_stack_depth>)
-+	 *  [0 __sanitizer_cov_stack_depth S1 A8]) (0)) 675 {*call} (expr_list
-+	 *  (symbol_ref ("__sanitizer_cov_stack_depth") [flags 0x41] <function_decl
-+	 *  0x7f7cd3302a80 __sanitizer_cov_stack_depth>) (expr_list (0) (nil))) (nil))
- 	 */
- 	for (insn = get_insns(); insn; insn = next) {
- 		rtx body;
-@@ -318,7 +318,7 @@ static void remove_stack_tracking_gcall(void)
- 		if (SYMBOL_REF_DECL(body) != track_function_decl)
- 			continue;
- 
--		/* Delete the stackleak_track_stack() call */
-+		/* Delete the __sanitizer_cov_stack_depth() call */
- 		delete_insn_and_edges(insn);
- #if BUILDING_GCC_VERSION < 8000
- 		if (GET_CODE(next) == NOTE &&
-@@ -340,12 +340,12 @@ static bool remove_stack_tracking_gasm(void)
- 	gcc_assert(build_for_x86);
- 
- 	/*
--	 * Find stackleak_track_stack() asm calls. Loop through the chain of
-+	 * Find __sanitizer_cov_stack_depth() asm calls. Loop through the chain of
- 	 * insns, which is an RTL representation of the code for a function.
- 	 *
- 	 * The example of a matching insn:
- 	 *  (insn 11 5 12 2 (parallel [ (asm_operands/v
--	 *  ("call stackleak_track_stack") ("") 0
-+	 *  ("call __sanitizer_cov_stack_depth") ("") 0
- 	 *  [ (reg/v:DI 7 sp [ current_stack_pointer ]) ]
- 	 *  [ (asm_input:DI ("r")) ] [])
- 	 *  (clobber (reg:CC 17 flags)) ]) -1 (nil))
-@@ -375,7 +375,7 @@ static bool remove_stack_tracking_gasm(void)
- 			continue;
- 
- 		if (strcmp(ASM_OPERANDS_TEMPLATE(body),
--						"call stackleak_track_stack")) {
-+						"call __sanitizer_cov_stack_depth")) {
- 			continue;
- 		}
- 
-@@ -389,7 +389,7 @@ static bool remove_stack_tracking_gasm(void)
- 
- /*
-  * Work with the RTL representation of the code.
-- * Remove the unneeded stackleak_track_stack() calls from the functions
-+ * Remove the unneeded __sanitizer_cov_stack_depth() calls from the functions
-  * which don't call alloca() and don't have a large enough stack frame size.
-  */
- static unsigned int stackleak_cleanup_execute(void)
-@@ -474,13 +474,13 @@ static bool stackleak_gate(void)
- 	return track_frame_size >= 0;
- }
- 
--/* Build the function declaration for stackleak_track_stack() */
-+/* Build the function declaration for __sanitizer_cov_stack_depth() */
- static void stackleak_start_unit(void *gcc_data __unused,
- 				 void *user_data __unused)
- {
- 	tree fntype;
- 
--	/* void stackleak_track_stack(void) */
-+	/* void __sanitizer_cov_stack_depth(void) */
- 	fntype = build_function_type_list(void_type_node, NULL_TREE);
- 	track_function_decl = build_fn_decl(track_function, fntype);
- 	DECL_ASSEMBLER_NAME(track_function_decl); /* for LTO */
-diff --git a/include/linux/stackleak.h b/include/linux/stackleak.h
-index 71e8242fd8f2..a669574a3562 100644
---- a/include/linux/stackleak.h
-+++ b/include/linux/stackleak.h
-@@ -80,7 +80,7 @@ static inline void stackleak_task_init(struct task_struct *t)
- asmlinkage void noinstr stackleak_erase(void);
- asmlinkage void noinstr stackleak_erase_on_task_stack(void);
- asmlinkage void noinstr stackleak_erase_off_task_stack(void);
--void __no_caller_saved_registers noinstr stackleak_track_stack(void);
-+void __no_caller_saved_registers noinstr __sanitizer_cov_stack_depth(void);
- 
- #else /* !CONFIG_STACKLEAK */
- static inline void stackleak_task_init(struct task_struct *t) { }
-diff --git a/kernel/stackleak.c b/kernel/stackleak.c
-index bb65321761b4..5158468968e2 100644
---- a/kernel/stackleak.c
-+++ b/kernel/stackleak.c
-@@ -156,7 +156,7 @@ asmlinkage void noinstr stackleak_erase_off_task_stack(void)
- 	__stackleak_erase(false);
- }
- 
--void __used __no_caller_saved_registers noinstr stackleak_track_stack(void)
-+void __used __no_caller_saved_registers noinstr __sanitizer_cov_stack_depth(void)
- {
- 	unsigned long sp = current_stack_pointer;
- 
-@@ -174,4 +174,4 @@ void __used __no_caller_saved_registers noinstr stackleak_track_stack(void)
- 		current->lowest_stack = sp;
- 	}
- }
--EXPORT_SYMBOL(stackleak_track_stack);
-+EXPORT_SYMBOL(__sanitizer_cov_stack_depth);
-diff --git a/tools/objtool/check.c b/tools/objtool/check.c
-index 3a411064fa34..05d0095c1384 100644
---- a/tools/objtool/check.c
-+++ b/tools/objtool/check.c
-@@ -1191,7 +1191,7 @@ static const char *uaccess_safe_builtin[] = {
- 	"__ubsan_handle_shift_out_of_bounds",
- 	"__ubsan_handle_load_invalid_value",
- 	/* STACKLEAK */
--	"stackleak_track_stack",
-+	"__sanitizer_cov_stack_depth",
- 	/* TRACE_BRANCH_PROFILING */
- 	"ftrace_likely_update",
- 	/* STACKPROTECTOR */
+ /* These are for everybody (although not all archs will actually
+    discard it in modules) */
+-#define __init		__section(".init.text") __cold  __latent_entropy __noinitretpoline
++#define __init		__section(".init.text") __cold __latent_entropy	\
++						__noinitretpoline	\
++						__no_sanitize_coverage
+ #define __initdata	__section(".init.data")
+ #define __initconst	__section(".init.rodata")
+ #define __exitdata	__section(".exit.data")
 -- 
 2.34.1
 
