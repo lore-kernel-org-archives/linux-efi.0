@@ -1,110 +1,115 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.11])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C735619E819;
-	Wed, 18 Jun 2025 08:33:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.11
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB7F94EB38
+	for <linux-efi@vger.kernel.org>; Wed, 18 Jun 2025 12:20:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750235617; cv=none; b=R3M7C/CvdfD9x9+JHLysaZ0iPZXB75ucdDD9vTPi4/wj8KVzaHkCmB9L5BxJ8L5Srwv7DH4/GeCIrFfCSzkn+/67eERhekLtYVkHDdqwU9REDEoWfhq2PH8GWHdkcG994xx0Vd6mLOvIqWwxi88t5tp3fMUuxCO6X7SB/S3NIyA=
+	t=1750249221; cv=none; b=pOt0JSUv3KvS9cnVlsmURZ9WWh27UgtKXvO/zdkVvwJABydf8Vacb2bXyNYAsH8DEFWTli6OwlYJNHcCPGcS9S5sdsgYNcGF0A3PwKHYoMM1c6yTE4kt1pd72mqfT31qRsy3yQNyFFJ/Qp37o98dSFY7ySFXApvQ5SaMksac3nw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750235617; c=relaxed/simple;
-	bh=fIu3H0X1ir+ab5DgfWZw8Zxf2egqeIQlXSOMOU+My5c=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=i4VIhubzAJEKUAe+BobFLMmBSY0E5svDZQc0+jTUXKt1joy07bh6JgkMFo8q7lLLbnSMTRUI/nRb1z6oCi4k0919pJGi3CPvHnt2uAzPBi6mQrxGGwPZvgk3J7DlygJi3hp4kaP18QY4RxNEWVEq+XYQyemEW7S6btFScuXMVvs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=TZo+Qjfz; arc=none smtp.client-ip=192.198.163.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux.intel.com
+	s=arc-20240116; t=1750249221; c=relaxed/simple;
+	bh=yj6XDEI0c/leEStzGKY33blMwFsgVYk4D3HOjU1TB08=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=a5x8pXpgIZN3dOPfBgySEMjHYGsk3X3GJkur1FLp1vyLagT6E2J25iVXXePi+XsRK3g+Z7+X9PiIAfe0lEKjxiv0XT3gbdz7Z5Q2zVHAZ9Zp0+u7KRqAk2C/IqcRx+Wr17Ss35QbJ2BYCBjQbEltk8sUrOO1HnMRBo4C0I6aius=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=M1Z/tgcZ; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="TZo+Qjfz"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1750235616; x=1781771616;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=fIu3H0X1ir+ab5DgfWZw8Zxf2egqeIQlXSOMOU+My5c=;
-  b=TZo+Qjfzi4wCLHB/11wruSp9VA8QxlGISaG66w533v1WSxc0plEdsYs+
-   hkjO9HgyUl/JUZyJm3wc2EovJu+JzqMcKAhEriaMtjq67akzMNj1KIHmD
-   JkdU1/Zk3puJlDlHVqjsZgY9Ayzk1ORsS+CYrkwVbuWk0h4oqiEZ/6f0c
-   BPbxaD9Mt41TjdHdZrN5BBXjIMYvS757sd07ljxPsHwNSZx13Wury3aLx
-   LMpgMVpttEdIn61q9L4rTT8bwABNHd/zfZjr9givGPHYZX+S9VHV98hrO
-   EL0tpav7TZTcKGQoiCIVBa9ecXgQUiSwlNg7rGuD7WIXrCrQAsQyEj5Lc
-   A==;
-X-CSE-ConnectionGUID: m3aupNNSTI222TTctr1y+Q==
-X-CSE-MsgGUID: kOfACOHfRR6RwtxVlSIOCA==
-X-IronPort-AV: E=McAfee;i="6800,10657,11467"; a="63048642"
-X-IronPort-AV: E=Sophos;i="6.16,245,1744095600"; 
-   d="scan'208";a="63048642"
-Received: from fmviesa010.fm.intel.com ([10.60.135.150])
-  by fmvoesa105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Jun 2025 01:32:27 -0700
-X-CSE-ConnectionGUID: XdbUQy3CRfOUfn7iOGHy+w==
-X-CSE-MsgGUID: HBtqD8F8So280xiJlFKgkg==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.16,245,1744095600"; 
-   d="scan'208";a="149986926"
-Received: from mmowka-mobl.ger.corp.intel.com (HELO [10.245.101.212]) ([10.245.101.212])
-  by fmviesa010-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Jun 2025 01:32:20 -0700
-Message-ID: <231e4cef-2e44-4e25-9169-f298e72e8e07@linux.intel.com>
-Date: Wed, 18 Jun 2025 10:32:04 +0200
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="M1Z/tgcZ"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1750249217;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=hFe+rPDX96ojkb7TEirKpA4zOH706+y0bje5dKVQll4=;
+	b=M1Z/tgcZUWTag4c77SQICFvg/SHl1EWb0hcJogk/aXmo22IhgxIlwuqWUq8zpmhX5Z+h9c
+	ySHFh3fplIXrcW3WanwSc+oePI5CRBCKLNBMt9svAG9APd6Y4m9saNoPLI1Ubx1660sBIG
+	NCyqPdagLRxT16e3Ptu6lXbWSgqbq5o=
+Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-262-al53DCeKMbCd84UoKQ3-3Q-1; Wed,
+ 18 Jun 2025 08:20:14 -0400
+X-MC-Unique: al53DCeKMbCd84UoKQ3-3Q-1
+X-Mimecast-MFC-AGG-ID: al53DCeKMbCd84UoKQ3-3Q_1750249213
+Received: from mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.111])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 166A019560B1;
+	Wed, 18 Jun 2025 12:20:13 +0000 (UTC)
+Received: from fedora.redhat.com (unknown [10.44.34.43])
+	by mx-prod-int-08.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id 66C5E18003FC;
+	Wed, 18 Jun 2025 12:20:10 +0000 (UTC)
+From: Vitaly Kuznetsov <vkuznets@redhat.com>
+To: linux-efi@vger.kernel.org,
+	Ard Biesheuvel <ardb@kernel.org>
+Cc: Peter Jones <pjones@redhat.com>,
+	Gerd Hoffmann <kraxel@redhat.com>,
+	Heinrich Schuchardt <heinrich.schuchardt@gmx.de>
+Subject: [PATCH] efi: Fix .data section size calculations when .sbat is present
+Date: Wed, 18 Jun 2025 14:20:08 +0200
+Message-ID: <20250618122008.264294-1-vkuznets@redhat.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v14 02/19] x86: Secure Launch Kconfig
-To: Ross Philipson <ross.philipson@oracle.com>, linux-kernel@vger.kernel.org,
- x86@kernel.org, linux-integrity@vger.kernel.org, linux-doc@vger.kernel.org,
- linux-crypto@vger.kernel.org, kexec@lists.infradead.org,
- linux-efi@vger.kernel.org, iommu@lists.linux.dev
-Cc: dpsmith@apertussolutions.com, tglx@linutronix.de, mingo@redhat.com,
- bp@alien8.de, hpa@zytor.com, dave.hansen@linux.intel.com, ardb@kernel.org,
- mjg59@srcf.ucam.org, James.Bottomley@hansenpartnership.com,
- peterhuewe@gmx.de, jarkko@kernel.org, jgg@ziepe.ca, luto@amacapital.net,
- nivedita@alum.mit.edu, herbert@gondor.apana.org.au, davem@davemloft.net,
- corbet@lwn.net, ebiederm@xmission.com, dwmw2@infradead.org,
- baolu.lu@linux.intel.com, kanth.ghatraju@oracle.com,
- andrew.cooper3@citrix.com, trenchboot-devel@googlegroups.com
-References: <20250421162712.77452-1-ross.philipson@oracle.com>
- <20250421162712.77452-3-ross.philipson@oracle.com>
-Content-Language: pl
-From: "Mowka, Mateusz" <mateusz.mowka@linux.intel.com>
-In-Reply-To: <20250421162712.77452-3-ross.philipson@oracle.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.111
 
+Commit 0f9a1739dd0e ("efi: zboot specific mechanism for embedding SBAT
+section") neglected to adjust the sizes of the .data section when
+CONFIG_EFI_SBAT_FILE is set. As the result, the produced PE binary is
+incorrect and some tools complain about it. E.g. 'sbsign' reports:
 
-On 21-Apr-25 6:26 PM, Ross Philipson wrote:
-> Initial bits to bring in Secure Launch functionality. Add Kconfig
-> options for compiling in/out the Secure Launch code.
->
-> Signed-off-by: Ross Philipson <ross.philipson@oracle.com>
+ # sbsign --key my.key --cert my.crt arch/arm64/boot/vmlinuz.efi
+ warning: file-aligned section .data extends beyond end of file
+ warning: checksum areas are greater than image size. Invalid section table?
 
-Acked-by: Mateusz Mowka <mateusz.mowka@linux.intel.com>
+Note, '__data_size' was also used in the PE optional header. The field is
+supposed to reflect "The size of the initialized data section, or the sum
+of all such sections if there are multiple data sections.". While OVMF
+based firmware doesn't seem to care much about what's there, it sounds like
+including .sbat in the calculation is more correct.
 
-> ---
->   arch/x86/Kconfig | 11 +++++++++++
->   1 file changed, 11 insertions(+)
->
-> diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
-> index 4b9f378e05f6..badde1e9742e 100644
-> --- a/arch/x86/Kconfig
-> +++ b/arch/x86/Kconfig
-> @@ -2001,6 +2001,17 @@ config EFI_RUNTIME_MAP
->   
->   	  See also Documentation/ABI/testing/sysfs-firmware-efi-runtime-map.
->   
-> +config SECURE_LAUNCH
-> +	bool "Secure Launch support"
-> +	depends on X86_64 && X86_X2APIC && TCG_TIS && TCG_CRB && CRYPTO_LIB_SHA1 && CRYPTO_LIB_SHA256
-> +	help
-> +	   The Secure Launch feature allows a kernel to be loaded
-> +	   directly through an Intel TXT measured launch. Intel TXT
-> +	   establishes a Dynamic Root of Trust for Measurement (DRTM)
-> +	   where the CPU measures the kernel image. This feature then
-> +	   continues the measurement chain over kernel configuration
-> +	   information and init images.
-> +
->   source "kernel/Kconfig.hz"
->   
->   config ARCH_SUPPORTS_KEXEC
+Fixes: 0f9a1739dd0e ("efi: zboot specific mechanism for embedding SBAT section")
+Reported-by: Heinrich Schuchardt <heinrich.schuchardt@gmx.de>
+Signed-off-by: Vitaly Kuznetsov <vkuznets@redhat.com>
+---
+ drivers/firmware/efi/libstub/zboot-header.S | 2 +-
+ drivers/firmware/efi/libstub/zboot.lds      | 6 ++++--
+ 2 files changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/firmware/efi/libstub/zboot-header.S b/drivers/firmware/efi/libstub/zboot-header.S
+index b6431edd0fc9..65df5f52e138 100644
+--- a/drivers/firmware/efi/libstub/zboot-header.S
++++ b/drivers/firmware/efi/libstub/zboot-header.S
+@@ -41,7 +41,7 @@ __efistub_efi_zboot_header:
+ 	.short		.Lpe_opt_magic
+ 	.byte		0, 0
+ 	.long		_etext - .Lefi_header_end
+-	.long		__data_size
++	.long		__all_data_size
+ 	.long		0
+ 	.long		__efistub_efi_zboot_entry - .Ldoshdr
+ 	.long		.Lefi_header_end - .Ldoshdr
+diff --git a/drivers/firmware/efi/libstub/zboot.lds b/drivers/firmware/efi/libstub/zboot.lds
+index 4b8d5cd3dfa2..f423204fba0f 100644
+--- a/drivers/firmware/efi/libstub/zboot.lds
++++ b/drivers/firmware/efi/libstub/zboot.lds
+@@ -58,6 +58,8 @@ SECTIONS
+ PROVIDE(__efistub__gzdata_size =
+ 		ABSOLUTE(__efistub__gzdata_end - __efistub__gzdata_start));
+ 
+-PROVIDE(__data_rawsize = ABSOLUTE(_edata - _etext));
+-PROVIDE(__data_size = ABSOLUTE(_end - _etext));
++PROVIDE(__data_rawsize = ABSOLUTE(_edata - _data));
++PROVIDE(__data_size = ABSOLUTE(_end - _data));
++/* The sum of all data sections, i.e. .data and .sbat */
++PROVIDE(__all_data_size = ABSOLUTE(_end - _etext));
+ PROVIDE(__sbat_size = ABSOLUTE(_esbat - _sbat));
+-- 
+2.49.0
+
