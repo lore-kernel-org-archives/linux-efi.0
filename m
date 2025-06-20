@@ -1,50 +1,50 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.18])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.13])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6940A29DB79;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 44DF829CB54;
 	Fri, 20 Jun 2025 13:53:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.18
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.13
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750427635; cv=none; b=ZNdacZa9cjF+8kkbZBt6ONbjCBarcJcPxqGWIrG/JxFBOnJ/gzGz7DiQLb1srPgc2iupDalZGM3LJB3Fz0J339rYrqFOossMfDc/cWDMF29msmNh+tJ/cs1XEtKSimqFnPwRyJ7Vkye4ZPIiY+ikaXSe4bFKCWEXmXbumPaXsyI=
+	t=1750427635; cv=none; b=TyS6uTAkl5B8/PsLQV00oFDwrkOjbBSCec1OGltJwekKI/+9Wv4AWPvosxnfgCnh0S2XIjMzi0WwC/SIu86RiWa/VK1aveRbefHxpkz27gmgLKXFQp+h4dnrmp5o4B/s+hkimbbALhIv/sUX0QTg/yRdD39NDyJ+Xtt/lxwyfzI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1750427635; c=relaxed/simple;
-	bh=y/CedaaKlFdbrxkql8ztvuaZ9CW/pvTqK0EU0vlRN80=;
+	bh=Wf5LnwgPh51NONUMTDjIXfOczEpk4ohRwoXhQNal+5U=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=MHkGEFp9h5JKvqlDNP9pkrPDR2NogjDrJmElKXrUDtB78V8O7bIhwjuHek+7JNUJzyHwWJng2qOxph16MABnhsvQdXfq0AAC0auTFLAxQaHfFrtV29cnyXb5a8Odk9Z3rdzNeBYkv9JvSbHkWTqxIoQvBUqHQlrMz0720Uqz5zo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.helo=mgamail.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=aP70DChs; arc=none smtp.client-ip=192.198.163.18
+	 MIME-Version; b=Ogmt69FwIVJcDYcvAFeyWbENZPfx/mS8kMMh6DKFyTbO/ai9/5CquD9+1fuypqq6cQqRp1dqiNLAVZWsNhYVpA9CR/spdS4nQQnoEoAosTiBiuG7MdKUJh85FyPyRX8KFhHJhjsrZn4JG7MxY27g/RcO+UMqF2pPii5E95bdD5U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.helo=mgamail.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=GuvfEWTs; arc=none smtp.client-ip=192.198.163.13
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.helo=mgamail.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="aP70DChs"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="GuvfEWTs"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
   t=1750427633; x=1781963633;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=y/CedaaKlFdbrxkql8ztvuaZ9CW/pvTqK0EU0vlRN80=;
-  b=aP70DChseWzeO3JOair9unG9XIH4WFwupv+a3qNwYJv0ieuL8sQb2RgV
-   RLfmTxKf6GSH+VkIfaVDRnu6jJMLmkz3gH/k3l2npie4dZFl6nAre03ST
-   snnkQ9djI/BMRwgDal9zXcqTnDnC/FJvMoKX1Tk6B0UO7lcazPuFBJPO/
-   vbF2ryEESAirgdEUGmL2Zuo0I5Db2UUAhacdrwxWnv2rZyprGPqdkurnX
-   onKO4j6++TfqTFc+lkEVksFFLRUGY000B0uOZe4ziAakbggIlmrKP+SPW
-   fhKW9MFx1u49AO6ZPiKPiEmraM3kpIoE4tariJldmLV6fIfuQBG5tz3hb
-   Q==;
-X-CSE-ConnectionGUID: t1ruuPZLQtytOc0m6+DtyA==
-X-CSE-MsgGUID: XiikWXU3T3WZXZXW7lSlKg==
-X-IronPort-AV: E=McAfee;i="6800,10657,11469"; a="51919436"
+  bh=Wf5LnwgPh51NONUMTDjIXfOczEpk4ohRwoXhQNal+5U=;
+  b=GuvfEWTsRYXLm4eOAK1k2PTBEFRkG2wWPmVMAhQTgSDAm5gtPBm0DMrS
+   PGqONoGZeMO1wx6QTJa9vFIKxd3xpjSzA6KO9q/RH/ujTdyAJ2aCXcIue
+   x7V4eNnVDfD/8bh0K2wA+iLsHM4H+8Rz/B0AlF+BKhwg/0OnVnU74wpnE
+   18+6l1qBZngiNdUk6VNjyLIQhGu+Xezv9Q+Tk6WZBJ5sBRDG0Zt3TtySj
+   YaBvqg2t6FFihVRkZR0EPesJO1ZKfcA8HCygsgr8laeSF6ZIOnrnzuyGf
+   HIondmPm8Hv8sR0/PkU/wg8iTqI63iHuvGzd79YG4ZGgt9Wx5AxAPPDYA
+   A==;
+X-CSE-ConnectionGUID: KpmdLmVZQWybs94jsVlvLw==
+X-CSE-MsgGUID: m7SrUC3QSVuj6nPB0zmwGg==
+X-IronPort-AV: E=McAfee;i="6800,10657,11469"; a="55326138"
 X-IronPort-AV: E=Sophos;i="6.16,251,1744095600"; 
-   d="scan'208";a="51919436"
-Received: from orviesa003.jf.intel.com ([10.64.159.143])
-  by fmvoesa112.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Jun 2025 06:53:52 -0700
-X-CSE-ConnectionGUID: dVzB+ju+T0SgPREksYDMcg==
-X-CSE-MsgGUID: EXKdu1V+RAiqUbBS+1zHgg==
+   d="scan'208";a="55326138"
+Received: from fmviesa009.fm.intel.com ([10.60.135.149])
+  by fmvoesa107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Jun 2025 06:53:53 -0700
+X-CSE-ConnectionGUID: 0EPZ5y38TeaWglgkQY+3qA==
+X-CSE-MsgGUID: 3Jv13A/vTum7/8l551nJUQ==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.16,251,1744095600"; 
-   d="scan'208";a="155292158"
+   d="scan'208";a="151227096"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by orviesa003.jf.intel.com with ESMTP; 20 Jun 2025 06:53:39 -0700
+  by fmviesa009.fm.intel.com with ESMTP; 20 Jun 2025 06:53:42 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1000)
-	id 181AC7DA; Fri, 20 Jun 2025 16:53:29 +0300 (EEST)
+	id 4404BA65; Fri, 20 Jun 2025 16:53:29 +0300 (EEST)
 From: "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
 To: Andy Lutomirski <luto@kernel.org>,
 	Thomas Gleixner <tglx@linutronix.de>,
@@ -98,9 +98,9 @@ Cc: Jonathan Corbet <corbet@lwn.net>,
 	linux-efi@vger.kernel.org,
 	linux-mm@kvack.org,
 	"Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-Subject: [PATCHv6 13/16] x86/traps: Handle LASS thrown #SS
-Date: Fri, 20 Jun 2025 16:53:21 +0300
-Message-ID: <20250620135325.3300848-14-kirill.shutemov@linux.intel.com>
+Subject: [PATCHv6 16/16] x86: Re-enable Linear Address Masking
+Date: Fri, 20 Jun 2025 16:53:24 +0300
+Message-ID: <20250620135325.3300848-17-kirill.shutemov@linux.intel.com>
 X-Mailer: git-send-email 2.47.2
 In-Reply-To: <20250620135325.3300848-1-kirill.shutemov@linux.intel.com>
 References: <20250620135325.3300848-1-kirill.shutemov@linux.intel.com>
@@ -112,70 +112,54 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-From: Alexander Shishkin <alexander.shishkin@linux.intel.com>
+This reverts commit 3267cb6d3a174ff83d6287dcd5b0047bbd912452.
 
-LASS throws a #GP for any violations except for stack register accesses,
-in which case it throws a #SS instead. Handle this similarly to how other
-LASS violations are handled.
+LASS mitigates the Spectre based on LAM (SLAM) [1] and the previous
+commit made LAM depend on LASS, so we no longer need to disable LAM at
+compile time, so revert the commit that disables LAM.
 
-Signed-off-by: Alexander Shishkin <alexander.shishkin@linux.intel.com>
+Adjust USER_PTR_MAX if LAM enabled, allowing tag bits to be set for
+userspace pointers. The value for the constant is defined in a way to
+avoid overflow compiler warning on 32-bit config.
+
+[1] https://download.vusec.net/papers/slam_sp24.pdf
+
 Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
+Cc: Pawan Gupta <pawan.kumar.gupta@linux.intel.com>
 ---
- arch/x86/kernel/traps.c | 34 ++++++++++++++++++++++++++++------
- 1 file changed, 28 insertions(+), 6 deletions(-)
+ arch/x86/Kconfig             | 1 -
+ arch/x86/kernel/cpu/common.c | 5 +----
+ 2 files changed, 1 insertion(+), 5 deletions(-)
 
-diff --git a/arch/x86/kernel/traps.c b/arch/x86/kernel/traps.c
-index 0f558d3369a3..bd8f7e72b238 100644
---- a/arch/x86/kernel/traps.c
-+++ b/arch/x86/kernel/traps.c
-@@ -418,12 +418,6 @@ DEFINE_IDTENTRY_ERRORCODE(exc_segment_not_present)
- 		      SIGBUS, 0, NULL);
- }
+diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
+index 71019b3b54ea..2b48e916b754 100644
+--- a/arch/x86/Kconfig
++++ b/arch/x86/Kconfig
+@@ -2181,7 +2181,6 @@ config RANDOMIZE_MEMORY_PHYSICAL_PADDING
+ config ADDRESS_MASKING
+ 	bool "Linear Address Masking support"
+ 	depends on X86_64
+-	depends on COMPILE_TEST || !CPU_MITIGATIONS # wait for LASS
+ 	help
+ 	  Linear Address Masking (LAM) modifies the checking that is applied
+ 	  to 64-bit linear addresses, allowing software to use of the
+diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
+index edb342214328..0adf1b4722b8 100644
+--- a/arch/x86/kernel/cpu/common.c
++++ b/arch/x86/kernel/cpu/common.c
+@@ -2565,11 +2565,8 @@ void __init arch_cpu_finalize_init(void)
+ 	if (IS_ENABLED(CONFIG_X86_64)) {
+ 		unsigned long USER_PTR_MAX = TASK_SIZE_MAX;
  
--DEFINE_IDTENTRY_ERRORCODE(exc_stack_segment)
--{
--	do_error_trap(regs, error_code, "stack segment", X86_TRAP_SS, SIGBUS,
--		      0, NULL);
--}
--
- DEFINE_IDTENTRY_ERRORCODE(exc_alignment_check)
- {
- 	char *str = "alignment check";
-@@ -866,6 +860,34 @@ DEFINE_IDTENTRY_ERRORCODE(exc_general_protection)
- 	cond_local_irq_disable(regs);
- }
+-		/*
+-		 * Enable this when LAM is gated on LASS support
+ 		if (cpu_feature_enabled(X86_FEATURE_LAM))
+-			USER_PTR_MAX = (1ul << 63) - PAGE_SIZE;
+-		 */
++			USER_PTR_MAX = (-1UL >> 1) & PAGE_MASK;
+ 		runtime_const_init(ptr, USER_PTR_MAX);
  
-+DEFINE_IDTENTRY_ERRORCODE(exc_stack_segment)
-+{
-+	if (cpu_feature_enabled(X86_FEATURE_LASS)) {
-+		enum kernel_gp_hint hint = GP_NO_HINT;
-+		unsigned long gp_addr;
-+
-+		if (user_mode(regs)) {
-+			gp_user_force_sig_segv(regs, X86_TRAP_GP, error_code, GPFSTR);
-+			return;
-+		}
-+
-+		hint = get_kernel_gp_address(regs, &gp_addr);
-+		if (hint != GP_NO_HINT) {
-+			printk(GPFSTR ", %s 0x%lx", kernel_gp_hint_help[hint],
-+			       gp_addr);
-+		}
-+
-+		if (hint != GP_NON_CANONICAL)
-+			gp_addr = 0;
-+
-+		die_addr(GPFSTR, regs, error_code, gp_addr);
-+		return;
-+	}
-+
-+	do_error_trap(regs, error_code, "stack segment", X86_TRAP_SS, SIGBUS,
-+		0, NULL);
-+}
-+
- static bool do_int3(struct pt_regs *regs)
- {
- 	int res;
+ 		/*
 -- 
 2.47.2
 
