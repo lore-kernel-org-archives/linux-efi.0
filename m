@@ -1,50 +1,50 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.10])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.13])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A611728C2AC;
-	Fri, 20 Jun 2025 13:53:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.10
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 64F0028A3FA;
+	Fri, 20 Jun 2025 13:53:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.13
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750427625; cv=none; b=cLx5/Zp/8alRHAp93B2+D29tVw+R+JubyHx7A1JdYLQihUuMB4QgoQ98wRqkWWNN77p5p7l5RqYaGauRPjOf1kL7cta5hmZkv71giGZu/R10bDWFTi6AfLMTKFFXScqKDoijX3xLJlFYuloOdX+45/hNiXTGimyWSgxzdOae0U4=
+	t=1750427625; cv=none; b=iTofMtt/gfeN9wn4gkCo33Ak3OOdnuoiAX/tvn3xVnp1uYen9BCd8i+9rJ6NvnL2C9qXG0ldHuMzhZ8bat/JKfZkfS2qSaXYG8dDmtj0iizfN4DeDbPFF+YTJ4MQAe0fqUmcELcBxHtp6GTqfNHszd5KWT0Q6d+S+aUDh6zipOo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1750427625; c=relaxed/simple;
-	bh=hBguH5HKy6qvaWcEryNxH+ubaULuT1r46czj/O7PFco=;
+	bh=N62kbho1jMdeETBlPvgpq8U6Bw47E8U+afNewvipmRc=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=Gi33oDq4EpsZX1trGhD0wXWqWBJ4JNO399cT9SmgxBlGxIhC5Sm/7sTODpzDb0U3A90EcKBzIiRnAkXQBZpxwIwJlevri1hVNRLhr4eZp2n363X5A+MvXJphE20XibcM+RZXcj4+4kR7KZbngv8mRW8L8EMy7hGyWKERgJUnJNE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.helo=mgamail.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=nx1YbC3u; arc=none smtp.client-ip=192.198.163.10
+	 MIME-Version; b=EuLfxxmrKaI0f/kL/nsCKX/YhKA2kwr/JJGY6jL0/PXOSypdP7HzAAVQiql/ba7lvOfzJ2SX06+l+CLI/V1oq8KfFCVsqSPr/Hf51veHwyE6B2xYHREDv+IlGXD0z5wAIb7LSx5i1RXm07MGdEakFh/nykzdTNSelOpx4CoPVOQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.helo=mgamail.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=OJ8fkJ3N; arc=none smtp.client-ip=192.198.163.13
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.helo=mgamail.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="nx1YbC3u"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="OJ8fkJ3N"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1750427623; x=1781963623;
+  t=1750427624; x=1781963624;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=hBguH5HKy6qvaWcEryNxH+ubaULuT1r46czj/O7PFco=;
-  b=nx1YbC3ueZVteFfjUuyLfFWxwPraMio2bv/3ZRnlcLNwtfFQUkKGVXgg
-   dGox+Wn+eljg7FxS5MKk6VAXKFL1RN0QCyXNnPtWCW3+jxEsgQZ+JPoJh
-   eYGynYhyfmux+SZvGEmXQvDd6GYekENaI63cfTWdL9bJr6mdNp69+D0Nj
-   swxXB/SJJjvbo+NMPCYRXYhIJbcu9DqprxUuonP4g9V7kCrfWVn08su1l
-   jVI9xNjWPRQCKMR6Y4Gm6rt4G+h3KPhdhFRZ2Dm5wYu/Jf8RWzwH/bJiy
-   X2vHsnFfbvTpjwKrtN4F+bQp/RB5Kl+LmuTxPxgzQHu9vBBojKAAcLPdQ
-   w==;
-X-CSE-ConnectionGUID: P8h7opJUQ2CF/QJb1LC6Lw==
-X-CSE-MsgGUID: 3/Nn2zmvQl6O5NIFNoZ1Hw==
-X-IronPort-AV: E=McAfee;i="6800,10657,11469"; a="64047006"
+  bh=N62kbho1jMdeETBlPvgpq8U6Bw47E8U+afNewvipmRc=;
+  b=OJ8fkJ3NX7dYDn2XvXISfaCad6xUASl2b1swVdO125LV7eH5ei1bXmtM
+   RJlYeKAGFfZjFjTVx8V1ModBFgF+o52e1EZsYXfRsa2vxDkV1y+krBpQG
+   XDBA99dtP0E/6XZd9lnofvgW0/jFoCjcdl+Mgsfhg89J8lpY2iiijTLz1
+   8EOIGJU7yrOQwLJwPgh5J6QA7GK7/120SlxIUcQ3itWJE7anaeKNi32H5
+   FkQChxf3caZrmuYQ32SiLukrJoq0NKW8fSoerPY615mGfMrus4sJNY3La
+   MCc081uRFax+LhCj532tL7RYkVLCnE6CWXeJyZ5HPdGTJcfDxXGh47rJZ
+   Q==;
+X-CSE-ConnectionGUID: waY6nITTR8isX2HNIhYFOg==
+X-CSE-MsgGUID: L8OLEa3mR6+vuaW3mqCB5A==
+X-IronPort-AV: E=McAfee;i="6800,10657,11469"; a="55326060"
 X-IronPort-AV: E=Sophos;i="6.16,251,1744095600"; 
-   d="scan'208";a="64047006"
-Received: from orviesa006.jf.intel.com ([10.64.159.146])
-  by fmvoesa104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Jun 2025 06:53:42 -0700
-X-CSE-ConnectionGUID: CUmkhyVxSLO2jeEuBWPjNA==
-X-CSE-MsgGUID: Hg2dxZkKQnWtzjMi6WgRnA==
+   d="scan'208";a="55326060"
+Received: from fmviesa009.fm.intel.com ([10.60.135.149])
+  by fmvoesa107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Jun 2025 06:53:43 -0700
+X-CSE-ConnectionGUID: VmCNAmhNQ3GnZINpICb0UQ==
+X-CSE-MsgGUID: EhLoZQRUTZGUkYJvmk4JQg==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.16,251,1744095600"; 
-   d="scan'208";a="150411986"
+   d="scan'208";a="151227074"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by orviesa006.jf.intel.com with ESMTP; 20 Jun 2025 06:53:30 -0700
+  by fmviesa009.fm.intel.com with ESMTP; 20 Jun 2025 06:53:33 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1000)
-	id 5CC3A131; Fri, 20 Jun 2025 16:53:28 +0300 (EEST)
+	id 8CA742C0; Fri, 20 Jun 2025 16:53:28 +0300 (EEST)
 From: "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
 To: Andy Lutomirski <luto@kernel.org>,
 	Thomas Gleixner <tglx@linutronix.de>,
@@ -98,9 +98,9 @@ Cc: Jonathan Corbet <corbet@lwn.net>,
 	linux-efi@vger.kernel.org,
 	linux-mm@kvack.org,
 	"Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-Subject: [PATCHv6 02/16] x86/asm: Introduce inline memcpy and memset
-Date: Fri, 20 Jun 2025 16:53:10 +0300
-Message-ID: <20250620135325.3300848-3-kirill.shutemov@linux.intel.com>
+Subject: [PATCHv6 05/16] x86/cpu: Defer CR pinning setup until after EFI initialization
+Date: Fri, 20 Jun 2025 16:53:13 +0300
+Message-ID: <20250620135325.3300848-6-kirill.shutemov@linux.intel.com>
 X-Mailer: git-send-email 2.47.2
 In-Reply-To: <20250620135325.3300848-1-kirill.shutemov@linux.intel.com>
 References: <20250620135325.3300848-1-kirill.shutemov@linux.intel.com>
@@ -112,175 +112,56 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Extract memcpy and memset functions from copy_user_generic() and
-__clear_user().
+From: Alexander Shishkin <alexander.shishkin@linux.intel.com>
 
-They can be used as inline memcpy and memset instead of the GCC builtins
-whenever necessary. LASS requires them to handle text_poke.
+In order to map the EFI runtime services, set_virtual_address_map()
+needs to be called, which resides in the lower half of the address
+space. This means that LASS needs to be temporarily disabled around
+this call. This can only be done before the CR pinning is set up.
 
-Originally-by: Peter Zijlstra <peterz@infradead.org>
-Link: https://lore.kernel.org/all/20241029184840.GJ14555@noisy.programming.kicks-ass.net/
+Move CR pinning setup behind the EFI initialization.
+
+Signed-off-by: Alexander Shishkin <alexander.shishkin@linux.intel.com>
+Suggested-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
 Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
 ---
- arch/x86/include/asm/string.h     | 45 +++++++++++++++++++++++++++++++
- arch/x86/include/asm/uaccess_64.h | 37 +++++++------------------
- arch/x86/lib/clear_page_64.S      | 10 +++++--
- 3 files changed, 62 insertions(+), 30 deletions(-)
+ arch/x86/kernel/cpu/common.c | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
 
-diff --git a/arch/x86/include/asm/string.h b/arch/x86/include/asm/string.h
-index c3c2c1914d65..d75e965d1ce4 100644
---- a/arch/x86/include/asm/string.h
-+++ b/arch/x86/include/asm/string.h
-@@ -1,6 +1,51 @@
- /* SPDX-License-Identifier: GPL-2.0 */
-+#ifndef _ASM_X86_STRING_H
-+#define _ASM_X86_STRING_H
-+
-+#include <asm/asm.h>
-+#include <asm/alternative.h>
-+
- #ifdef CONFIG_X86_32
- # include <asm/string_32.h>
- #else
- # include <asm/string_64.h>
+diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
+index 4f430be285de..1a779e302872 100644
+--- a/arch/x86/kernel/cpu/common.c
++++ b/arch/x86/kernel/cpu/common.c
+@@ -2081,7 +2081,6 @@ static __init void identify_boot_cpu(void)
+ 	enable_sep_cpu();
  #endif
-+
-+#ifdef CONFIG_X86_64
-+#define ALT_64(orig, alt, feat) ALTERNATIVE(orig, alt, feat)
-+#else
-+#define ALT_64(orig, alt, feat) orig
-+#endif
-+
-+static __always_inline void *__inline_memcpy(void *to, const void *from, size_t len)
-+{
-+	void *ret = to;
-+
-+	asm volatile("1:\n\t"
-+		     ALT_64("rep movsb",
-+			    "call rep_movs_alternative", ALT_NOT(X86_FEATURE_FSRM))
-+		     "2:\n\t"
-+		     _ASM_EXTABLE_UA(1b, 2b)
-+		     :"+c" (len), "+D" (to), "+S" (from), ASM_CALL_CONSTRAINT
-+		     : : "memory", _ASM_AX);
-+
-+	return ret + len;
-+}
-+
-+static __always_inline void *__inline_memset(void *addr, int v, size_t len)
-+{
-+	void *ret = addr;
-+
-+	asm volatile("1:\n\t"
-+		     ALT_64("rep stosb",
-+			    "call rep_stos_alternative", ALT_NOT(X86_FEATURE_FSRM))
-+		     "2:\n\t"
-+		     _ASM_EXTABLE_UA(1b, 2b)
-+		     : "+c" (len), "+D" (addr), ASM_CALL_CONSTRAINT
-+		     : "a" ((uint8_t)v)
-+		     : "memory", _ASM_SI);
-+
-+	return ret + len;
-+}
-+
-+#endif /* _ASM_X86_STRING_H */
-diff --git a/arch/x86/include/asm/uaccess_64.h b/arch/x86/include/asm/uaccess_64.h
-index c8a5ae35c871..30cc318eb3ed 100644
---- a/arch/x86/include/asm/uaccess_64.h
-+++ b/arch/x86/include/asm/uaccess_64.h
-@@ -13,6 +13,7 @@
- #include <asm/page.h>
- #include <asm/percpu.h>
- #include <asm/runtime-const.h>
-+#include <asm/string.h>
+ 	cpu_detect_tlb(&boot_cpu_data);
+-	setup_cr_pinning();
  
- /*
-  * Virtual variable: there's no actual backing store for this,
-@@ -118,21 +119,12 @@ rep_movs_alternative(void *to, const void *from, unsigned len);
- static __always_inline __must_check unsigned long
- copy_user_generic(void *to, const void *from, unsigned long len)
- {
-+	void *ret;
+ 	tsx_init();
+ 	tdx_init();
+@@ -2532,10 +2531,21 @@ void __init arch_cpu_finalize_init(void)
+ 
+ 	/*
+ 	 * This needs to follow the FPU initializtion, since EFI depends on it.
++	 *
++	 * It also needs to precede the CR pinning setup, because the CR4.LASS
++	 * bit has to be cleared temporarily in order to execute the
++	 * set_virtual_address_map() EFI call, which resides in lower addresses
++	 * and would trip LASS if enabled.
++	 *
++	 * Wrapping efi_enter_virtual_mode() into lass_stac()/clac() is not
++	 * enough because AC flag gates data accesses, but not instruction
++	 * fetch. Clearing the CR4 bit is required.
+ 	 */
+ 	if (efi_enabled(EFI_RUNTIME_SERVICES))
+ 		efi_enter_virtual_mode();
+ 
++	setup_cr_pinning();
 +
- 	stac();
--	/*
--	 * If CPU has FSRM feature, use 'rep movs'.
--	 * Otherwise, use rep_movs_alternative.
--	 */
--	asm volatile(
--		"1:\n\t"
--		ALTERNATIVE("rep movsb",
--			    "call rep_movs_alternative", ALT_NOT(X86_FEATURE_FSRM))
--		"2:\n"
--		_ASM_EXTABLE_UA(1b, 2b)
--		:"+c" (len), "+D" (to), "+S" (from), ASM_CALL_CONSTRAINT
--		: : "memory", "rax");
-+	ret = __inline_memcpy(to, from, len);
- 	clac();
--	return len;
-+	return ret - to;
- }
- 
- static __always_inline __must_check unsigned long
-@@ -178,25 +170,14 @@ rep_stos_alternative(void __user *addr, unsigned long len);
- 
- static __always_inline __must_check unsigned long __clear_user(void __user *addr, unsigned long size)
- {
-+	void *ret;
-+
- 	might_fault();
- 	stac();
--
--	/*
--	 * No memory constraint because it doesn't change any memory gcc
--	 * knows about.
--	 */
--	asm volatile(
--		"1:\n\t"
--		ALTERNATIVE("rep stosb",
--			    "call rep_stos_alternative", ALT_NOT(X86_FEATURE_FSRS))
--		"2:\n"
--	       _ASM_EXTABLE_UA(1b, 2b)
--	       : "+c" (size), "+D" (addr), ASM_CALL_CONSTRAINT
--	       : "a" (0));
--
-+	ret = __inline_memset(addr, 0, size);
- 	clac();
- 
--	return size;
-+	return ret - addr;
- }
- 
- static __always_inline unsigned long clear_user(void __user *to, unsigned long n)
-diff --git a/arch/x86/lib/clear_page_64.S b/arch/x86/lib/clear_page_64.S
-index a508e4a8c66a..ca94828def62 100644
---- a/arch/x86/lib/clear_page_64.S
-+++ b/arch/x86/lib/clear_page_64.S
-@@ -55,17 +55,23 @@ SYM_FUNC_END(clear_page_erms)
- EXPORT_SYMBOL_GPL(clear_page_erms)
- 
- /*
-- * Default clear user-space.
-+ * Default memset.
-  * Input:
-  * rdi destination
-+ * rsi scratch
-  * rcx count
-- * rax is zero
-+ * al is value
-  *
-  * Output:
-  * rcx: uncleared bytes or 0 if successful.
-  */
- SYM_FUNC_START(rep_stos_alternative)
- 	ANNOTATE_NOENDBR
-+
-+	movzbq %al, %rsi
-+	movabs $0x0101010101010101, %rax
-+	mulq %rsi
-+
- 	cmpq $64,%rcx
- 	jae .Lunrolled
- 
+ 	/*
+ 	 * Ensure that access to the per CPU representation has the initial
+ 	 * boot CPU configuration.
 -- 
 2.47.2
 
