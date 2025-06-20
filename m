@@ -1,102 +1,173 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.13])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C5B90289E1B;
-	Fri, 20 Jun 2025 11:39:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B4DC528DEE2;
+	Fri, 20 Jun 2025 13:53:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.13
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750419551; cv=none; b=VdxFMnNzGgn9yKIe/aKiRr5s8h4S6/vj29xpylCPy8HR2yi6cSfY7WtDJZ6VOuMISAW1ez2NxuaQcCNTXtINswxU1vn0E0WGESdW+UKBX5BZ+zP7FkNpgdx9KPCMjK8Dlx6OtmIEs85gpi5osJpW0ZPV3zpsh4tGSKW08F8KSvQ=
+	t=1750427624; cv=none; b=iSsglfokh8g2KmzOQVvBtWuHQRrrQTfnFIvv1EwbPU3SBoxMKwOKPt+5MKhE+yvQ6bM2rAUAN5nTG0MgkEhQyHVeSmTgprcDt1oXNRO3R8OI2ZgvSo4cKp8Jr8WFYk4nDUY1QtSBw3WxaBBHZGS1vOTYBB32kPSzGDzCYdUjgt4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750419551; c=relaxed/simple;
-	bh=wlMSg2riugAfkN85IR0d+QwxYeOTHn4R4XxsXr3+82I=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=q8iqsvbYY+QJeAP+h5FE6ho85yV0hM5viyO6RMv/1bUuPMTYS/DJS6P+yy9n3ZMaaP8LlB8WRLTrwOSbZOYRnAgMGWeKVKNF3G1LyDgzG0DlDckVO39zQesNjkBFYXBTWtGLrh+zn5G8vTLvuNCqXP22QrYZQHnB8AqjQmximOk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=tfhSYPMu; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1750427624; c=relaxed/simple;
+	bh=h40PihXpB9iHOwNDiJJbUFtLgaN/sYMLV1i+eEZYFIo=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=GiIiksG77A+a+fdd1ANyGB1Swzat3Ckzx2zAi/d8U8xYNfJIzTHcxoiGSU18EZHowwQthyd7VirkeORb4Kd+OIDlOodplPuh+0JWsQcWUHu5VZWEr2Emh2yJ+crExcNwJ0bjuyJWZnrvAbfZmlQ8EjTsPgKc9YFpzBDV7QO5iJw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.helo=mgamail.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=ma6T2s/i; arc=none smtp.client-ip=192.198.163.13
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.helo=mgamail.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="tfhSYPMu"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9C154C4CEE3;
-	Fri, 20 Jun 2025 11:39:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1750419551;
-	bh=wlMSg2riugAfkN85IR0d+QwxYeOTHn4R4XxsXr3+82I=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=tfhSYPMufvABKiFV/9fY8FJUQu2RGHa7314EGdcvwvKRV/HR+kLV5fuf90UfIJWYc
-	 7ST7sXuTt2cEKvHPBW5j04HroR54BA2sxX5YTzDS8pV5MY22yooE3AKwP77SKVmal4
-	 jXy67ke1l/6C2+fIxU+suWkeh9g6LyAu8uDpTxj9Ib9LkHApjLL/f+EBwpu/rPLfSp
-	 6sIyokJrHWKcdEdUGgt4CBF0VxOITrk3sdYHx52XxB7ARX3FzvcePHwThFaG2J7lNE
-	 gF4aaN9i9z9+CdhyiGglZtKL/ZXDXHs4JW1XiEPb3C3pk2UYt4ViwGlv6w60MhuFm7
-	 QbdVHbuj64tpw==
-Received: by mail-lj1-f173.google.com with SMTP id 38308e7fff4ca-32b435ef653so15905741fa.2;
-        Fri, 20 Jun 2025 04:39:11 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCVgw7MCv818aVSXCBh/F3veBTGGaPaIfloShQxTAto6JJe/fdUPtLKUVEtaSplIpn7NEnUDtph/JhdquWU=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yy0d8DI8Iqi1bTTAM5SUdJ9RTIS9x3zcrvHeayBZnvDZzXBk/UY
-	ENmbieoSfiUSwf4qQ4E16LrZGPuNbM/T7notvMhFqOrK/5PThoCimd2eauVP/E1yNiVO7G1WjHF
-	tMxYCgxQIxElCxoV3Nz7E04WMkabnjYk=
-X-Google-Smtp-Source: AGHT+IFS6pYf1hoEDVGPVtohGNV2l8Me/be+PTgIC1679iU9mPhI9K4uWXdozzPLGEskHfgZ0nrLVH9A8nSFOVSp7/I=
-X-Received: by 2002:a05:6512:3f10:b0:553:522f:61bb with SMTP id
- 2adb3069b0e04-553e3b9a494mr1057793e87.12.1750419549990; Fri, 20 Jun 2025
- 04:39:09 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="ma6T2s/i"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1750427623; x=1781963623;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=h40PihXpB9iHOwNDiJJbUFtLgaN/sYMLV1i+eEZYFIo=;
+  b=ma6T2s/i7SAHriKhPHluT134caMbX7mgQL/yyAYkejzPOd15UezI7v9Z
+   bepSRs30gHWkWR9V3CDws3KbHCev4M2CcFYpF13QUAMbNrRXDnnNn3622
+   JF6MKkZFSlZz+UUgH037nAws5hISDE4wKqLPeWprhhhYz7lEPPdJpPQAA
+   w6kf+jXLTxxm6KI2PDukWRaV7FjZ1wzOsPI5Z68YGMvNz5vBgmBggPO/S
+   +VcWp2JkLa1cb/Q5fstlr47TXZtktr7X4GUZG3QR98vhGEEWYzudcxfmp
+   MO4oK/Lr4w59jY0e+abK5a+Kiq0IkWvMJSUgHkrPQ8SMG2jh8ABnJFtlM
+   g==;
+X-CSE-ConnectionGUID: ovwq3ew3T6S5sd31dfC4Ag==
+X-CSE-MsgGUID: notcJf6rRv+lDL75VpN8SA==
+X-IronPort-AV: E=McAfee;i="6800,10657,11469"; a="55326036"
+X-IronPort-AV: E=Sophos;i="6.16,251,1744095600"; 
+   d="scan'208";a="55326036"
+Received: from fmviesa009.fm.intel.com ([10.60.135.149])
+  by fmvoesa107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Jun 2025 06:53:42 -0700
+X-CSE-ConnectionGUID: x0qZTSbeT1yoykLIkNVsYg==
+X-CSE-MsgGUID: Q6PjjxAGR2uAPZDdxXUW/w==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.16,251,1744095600"; 
+   d="scan'208";a="151227068"
+Received: from black.fi.intel.com ([10.237.72.28])
+  by fmviesa009.fm.intel.com with ESMTP; 20 Jun 2025 06:53:31 -0700
+Received: by black.fi.intel.com (Postfix, from userid 1000)
+	id 6B31F1F8; Fri, 20 Jun 2025 16:53:28 +0300 (EEST)
+From: "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
+To: Andy Lutomirski <luto@kernel.org>,
+	Thomas Gleixner <tglx@linutronix.de>,
+	Ingo Molnar <mingo@redhat.com>,
+	Borislav Petkov <bp@alien8.de>,
+	Dave Hansen <dave.hansen@linux.intel.com>,
+	x86@kernel.org,
+	"H. Peter Anvin" <hpa@zytor.com>,
+	Peter Zijlstra <peterz@infradead.org>,
+	Ard Biesheuvel <ardb@kernel.org>,
+	"Paul E. McKenney" <paulmck@kernel.org>,
+	Josh Poimboeuf <jpoimboe@kernel.org>,
+	Xiongwei Song <xiongwei.song@windriver.com>,
+	Xin Li <xin3.li@intel.com>,
+	"Mike Rapoport (IBM)" <rppt@kernel.org>,
+	Brijesh Singh <brijesh.singh@amd.com>,
+	Michael Roth <michael.roth@amd.com>,
+	Tony Luck <tony.luck@intel.com>,
+	Alexey Kardashevskiy <aik@amd.com>,
+	Alexander Shishkin <alexander.shishkin@linux.intel.com>
+Cc: Jonathan Corbet <corbet@lwn.net>,
+	Sohil Mehta <sohil.mehta@intel.com>,
+	Ingo Molnar <mingo@kernel.org>,
+	Pawan Gupta <pawan.kumar.gupta@linux.intel.com>,
+	Daniel Sneddon <daniel.sneddon@linux.intel.com>,
+	Kai Huang <kai.huang@intel.com>,
+	Sandipan Das <sandipan.das@amd.com>,
+	Breno Leitao <leitao@debian.org>,
+	Rick Edgecombe <rick.p.edgecombe@intel.com>,
+	Alexei Starovoitov <ast@kernel.org>,
+	Hou Tao <houtao1@huawei.com>,
+	Juergen Gross <jgross@suse.com>,
+	Vegard Nossum <vegard.nossum@oracle.com>,
+	Kees Cook <kees@kernel.org>,
+	Eric Biggers <ebiggers@google.com>,
+	Jason Gunthorpe <jgg@ziepe.ca>,
+	"Masami Hiramatsu (Google)" <mhiramat@kernel.org>,
+	Andrew Morton <akpm@linux-foundation.org>,
+	Luis Chamberlain <mcgrof@kernel.org>,
+	Yuntao Wang <ytcoode@gmail.com>,
+	Rasmus Villemoes <linux@rasmusvillemoes.dk>,
+	Christophe Leroy <christophe.leroy@csgroup.eu>,
+	Tejun Heo <tj@kernel.org>,
+	Changbin Du <changbin.du@huawei.com>,
+	Huang Shijie <shijie@os.amperecomputing.com>,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Namhyung Kim <namhyung@kernel.org>,
+	Arnaldo Carvalho de Melo <acme@redhat.com>,
+	linux-doc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	linux-efi@vger.kernel.org,
+	linux-mm@kvack.org,
+	"Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
+Subject: [PATCHv6 03/16] x86/alternatives: Disable LASS when patching kernel alternatives
+Date: Fri, 20 Jun 2025 16:53:11 +0300
+Message-ID: <20250620135325.3300848-4-kirill.shutemov@linux.intel.com>
+X-Mailer: git-send-email 2.47.2
+In-Reply-To: <20250620135325.3300848-1-kirill.shutemov@linux.intel.com>
+References: <20250620135325.3300848-1-kirill.shutemov@linux.intel.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250620111607.984534-1-vkuznets@redhat.com>
-In-Reply-To: <20250620111607.984534-1-vkuznets@redhat.com>
-From: Ard Biesheuvel <ardb@kernel.org>
-Date: Fri, 20 Jun 2025 13:38:56 +0200
-X-Gmail-Original-Message-ID: <CAMj1kXESncEk_gtG_CV7XnMJTnZWEOs+Dj8jMHzsvuFvyOsLLw@mail.gmail.com>
-X-Gm-Features: AX0GCFuuhr8MQbjwRSlAcE07yepOSaP-QcfzpK6ASqV62EM63LWxHnwJ05Z9SqQ
-Message-ID: <CAMj1kXESncEk_gtG_CV7XnMJTnZWEOs+Dj8jMHzsvuFvyOsLLw@mail.gmail.com>
-Subject: Re: [PATCH v2] efi: Fix .data section size calculations when .sbat is present
-To: Vitaly Kuznetsov <vkuznets@redhat.com>
-Cc: linux-efi@vger.kernel.org, Peter Jones <pjones@redhat.com>, 
-	Gerd Hoffmann <kraxel@redhat.com>, Heinrich Schuchardt <heinrich.schuchardt@gmx.de>, 
-	linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 
-On Fri, 20 Jun 2025 at 13:16, Vitaly Kuznetsov <vkuznets@redhat.com> wrote:
->
-> Commit 0f9a1739dd0e ("efi: zboot specific mechanism for embedding SBAT
-> section") neglected to adjust the sizes of the .data section when
-> CONFIG_EFI_SBAT_FILE is set. As the result, the produced PE binary is
-> incorrect and some tools complain about it. E.g. 'sbsign' reports:
->
->  # sbsign --key my.key --cert my.crt arch/arm64/boot/vmlinuz.efi
->  warning: file-aligned section .data extends beyond end of file
->  warning: checksum areas are greater than image size. Invalid section table?
->
-> Note, '__data_size' is also used in the PE optional header and it is not
-> entirely clear whether .sbat needs to be accounted as part of
-> SizeOfInitializedData or not. As the header seems to be unused by the real
-> world firmware, keeping the field equal to __data_size.
->
-> Fixes: 0f9a1739dd0e ("efi: zboot specific mechanism for embedding SBAT section")
-> Reported-by: Heinrich Schuchardt <heinrich.schuchardt@gmx.de>
-> Signed-off-by: Vitaly Kuznetsov <vkuznets@redhat.com>
-> ---
-> Changes in v2: drop PE optional header adjustment [Ard]
-> ---
->  drivers/firmware/efi/libstub/zboot.lds | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/firmware/efi/libstub/zboot.lds b/drivers/firmware/efi/libstub/zboot.lds
-> index 4b8d5cd3dfa2..367907eb7d86 100644
-> --- a/drivers/firmware/efi/libstub/zboot.lds
-> +++ b/drivers/firmware/efi/libstub/zboot.lds
-> @@ -58,6 +58,6 @@ SECTIONS
->  PROVIDE(__efistub__gzdata_size =
->                 ABSOLUTE(__efistub__gzdata_end - __efistub__gzdata_start));
->
-> -PROVIDE(__data_rawsize = ABSOLUTE(_edata - _etext));
-> -PROVIDE(__data_size = ABSOLUTE(_end - _etext));
-> +PROVIDE(__data_rawsize = ABSOLUTE(_edata - _data));
-> +PROVIDE(__data_size = ABSOLUTE(_end - _data));
->  PROVIDE(__sbat_size = ABSOLUTE(_esbat - _sbat));
-> --
-> 2.49.0
->
->
+From: Sohil Mehta <sohil.mehta@intel.com>
 
-Thanks, I've queued this up now.
+For patching, the kernel initializes a temporary mm area in the lower
+half of the address range. See commit 4fc19708b165 ("x86/alternatives:
+Initialize temporary mm for patching").
+
+Disable LASS enforcement during patching using the stac()/clac()
+instructions to avoid triggering a #GP fault.
+
+The objtool warns due to a call to a non-allowed function that exists
+outside of the stac/clac guard, or references to any function with a
+dynamic function pointer inside the guard. See the Objtool warnings
+section #9 in the document tools/objtool/Documentation/objtool.txt.
+
+Considering that patching is usually small, replace the memcpy and
+memset functions in the text poking functions with their inline versions
+respectively.
+
+Signed-off-by: Sohil Mehta <sohil.mehta@intel.com>
+Signed-off-by: Alexander Shishkin <alexander.shishkin@linux.intel.com>
+Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
+---
+ arch/x86/kernel/alternative.c | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/arch/x86/kernel/alternative.c b/arch/x86/kernel/alternative.c
+index 9ae80fa904a2..0b9f41ed6af7 100644
+--- a/arch/x86/kernel/alternative.c
++++ b/arch/x86/kernel/alternative.c
+@@ -2447,16 +2447,24 @@ void __init_or_module text_poke_early(void *addr, const void *opcode,
+ __ro_after_init struct mm_struct *text_poke_mm;
+ __ro_after_init unsigned long text_poke_mm_addr;
+ 
++/*
++ * poking_init() initializes the text poking address from the lower half of the
++ * address space. Relax LASS enforcement when accessing the poking address.
++ */
+ static void text_poke_memcpy(void *dst, const void *src, size_t len)
+ {
+-	memcpy(dst, src, len);
++	lass_stac();
++	__inline_memcpy(dst, src, len);
++	lass_clac();
+ }
+ 
+ static void text_poke_memset(void *dst, const void *src, size_t len)
+ {
+ 	int c = *(const int *)src;
+ 
+-	memset(dst, c, len);
++	lass_stac();
++	__inline_memset(dst, c, len);
++	lass_clac();
+ }
+ 
+ typedef void text_poke_f(void *dst, const void *src, size_t len);
+-- 
+2.47.2
+
