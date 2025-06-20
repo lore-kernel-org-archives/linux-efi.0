@@ -1,50 +1,50 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.13])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 336D628EA5A;
-	Fri, 20 Jun 2025 13:53:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.13
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DC67A291861;
+	Fri, 20 Jun 2025 13:53:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750427630; cv=none; b=IV7jzYhHqqnU4M8NF08dUegCSD3TpbJFfgv9rDL4+JJkojGefhzUBGPmmJ3DGmCLXrt3CRmzTcC9wIyCKvHDHEDH7ZcrK/aCWmj8ryjbSPBrkvzID1Nc3yUyitNl5vZoahGxmeUzLyT4/lUL5bZklgEqZt/6MAtNGZ4uosmdlys=
+	t=1750427631; cv=none; b=UKLYsz0Q3SXqeL9s5z6+GBHp7F4L6FHtncckeAJAd5FKdIyB/sjs5DGCLFl6PVfL9H6AarLHzM6YenFz8noozU59vo6MPin+km/PJCP47wyLI+KXJR7ycrcu+nkrojhDyOhzX0w4p1jL+oZBcPu4E/Gq9/5kcAvCYxSt0tyAnqc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750427630; c=relaxed/simple;
-	bh=4PFZxKTpNpzNJDCl49djdZirWvVdQr6nAlUlQcGtCn0=;
+	s=arc-20240116; t=1750427631; c=relaxed/simple;
+	bh=HbPmwi8AshufdSIx8XTVcQlvNsvbbzDCxbhzFZVS0Ew=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=pbaCrtT3Y3T77B8EZ5Y8w+e5UkafJeBWYShsmNV+horNBYsfCvTpdxpMeaMa07MBISL6VPTwfdDPo7BvDdpvQ6SGYXHyZgVzZxc3MB//jjZk4RWlFMGItvsEmcsAxWSAJYkPAlWtNPvPNfra+e8E/wfl7NrYvuzDqw94L69GLN0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.helo=mgamail.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=BOFxkk6f; arc=none smtp.client-ip=192.198.163.13
+	 MIME-Version; b=f7avFc0hoyibA5lzaTRVEMFW/FilPyeteIgWCAjGaONSGAp9Nj5fESQKaza3do95MCgtL1Rq+o1NBym1hjl8S1Gi7sqsWcdoEvfhMViNtttQHpkK93FX+RnvDwcxrHBzxF6UTVSz3ZGSj6R3o9mQD9NnosWVAHVjCGKkWxYBdmo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.helo=mgamail.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=RJ6+G6Vg; arc=none smtp.client-ip=192.198.163.18
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.helo=mgamail.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="BOFxkk6f"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="RJ6+G6Vg"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1750427629; x=1781963629;
+  t=1750427630; x=1781963630;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=4PFZxKTpNpzNJDCl49djdZirWvVdQr6nAlUlQcGtCn0=;
-  b=BOFxkk6fXC6ymWb9DbrZ7HG76Et7rvoeOu4w+7HZMdwP8ZlQ+HMpNhw7
-   5X0NF8bpuByXQ3lk+FnWXLgjB8bZdacSlDu00W6zPh7u8lAndGdjPaiWl
-   fWJNH1BUEkftr3DeEedRjvaRSn9W3nhdauPVdgoSBe5hnbXFzikexxT4z
-   sF/4E7e+TXspKQNs3d3vcBZXQgL3DKg3Z9O/27q9gNujnvagl0YeSgP65
-   zpEKfx8H0MgtcJF+UMZUhqVVXcB2D4tPeUXdl9iHQrMgDiJRH22WWcN0m
-   728/9weIDxNE5zs5d19ijjGHPbh9Hg+Lu/L1ZxBuCuOcdrxy5gza4mJdD
-   w==;
-X-CSE-ConnectionGUID: LEoLt5yARaq3jaSOecgQ4w==
-X-CSE-MsgGUID: My8KiDGFQ0yJOsJw3FkX9w==
-X-IronPort-AV: E=McAfee;i="6800,10657,11469"; a="55326116"
+  bh=HbPmwi8AshufdSIx8XTVcQlvNsvbbzDCxbhzFZVS0Ew=;
+  b=RJ6+G6VgXzkWAwpOGPAZNzitzMxP/DO8/tXAwpYJwCKSfjbRFqbt7+1M
+   ivrZbNk0w36dmy5yA7fIpqZseH4orbu/+OfZuDvzoQFBH5QBuFiG32zCb
+   UfezpqzDdrSCpdmiwbYIz5ZqN7PsyH615yBHC1hLWgCawWm2ZTC7eBPPV
+   5JPpe98Dy6hS4aMOwt0lw41u5nJ1WM3imzoTbOiwDGArdxwBV27dCsREM
+   qwFpzGcnBSb1NSgMtYLPJNO2tYWmlDI3sfQSRBm/f0xFqKp6cEJNuW2K2
+   8Ov3qtamt6bGi9XDWkZAnOPd+5WLD37E8usSlOxKCxkzsDawfnXThdKGB
+   g==;
+X-CSE-ConnectionGUID: ZRekWSnGQ7uzhcNxUMA4xw==
+X-CSE-MsgGUID: VttFcapAThiWOp23Ec+0Cw==
+X-IronPort-AV: E=McAfee;i="6800,10657,11469"; a="51919340"
 X-IronPort-AV: E=Sophos;i="6.16,251,1744095600"; 
-   d="scan'208";a="55326116"
-Received: from fmviesa009.fm.intel.com ([10.60.135.149])
-  by fmvoesa107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Jun 2025 06:53:48 -0700
-X-CSE-ConnectionGUID: cyvBDv2VTXqUIQ2U+oyT2w==
-X-CSE-MsgGUID: 0sM6kXFaREetfj8ba4f3Ew==
+   d="scan'208";a="51919340"
+Received: from orviesa003.jf.intel.com ([10.64.159.143])
+  by fmvoesa112.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Jun 2025 06:53:48 -0700
+X-CSE-ConnectionGUID: lmSPR2CqQAG/m/9rn5rcXQ==
+X-CSE-MsgGUID: +uQSGnp/TxW1FZ48fNmRlQ==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.16,251,1744095600"; 
-   d="scan'208";a="151227085"
+   d="scan'208";a="155292142"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by fmviesa009.fm.intel.com with ESMTP; 20 Jun 2025 06:53:38 -0700
+  by orviesa003.jf.intel.com with ESMTP; 20 Jun 2025 06:53:34 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1000)
-	id F0AAC70C; Fri, 20 Jun 2025 16:53:28 +0300 (EEST)
+	id C1DF141C; Fri, 20 Jun 2025 16:53:28 +0300 (EEST)
 From: "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
 To: Andy Lutomirski <luto@kernel.org>,
 	Thomas Gleixner <tglx@linutronix.de>,
@@ -97,11 +97,11 @@ Cc: Jonathan Corbet <corbet@lwn.net>,
 	linux-kernel@vger.kernel.org,
 	linux-efi@vger.kernel.org,
 	linux-mm@kvack.org,
-	Yian Chen <yian.chen@intel.com>,
+	Dave Hansen <dave.hansen@intel.com>,
 	"Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-Subject: [PATCHv6 11/16] x86/cpu: Set LASS CR4 bit as pinning sensitive
-Date: Fri, 20 Jun 2025 16:53:19 +0300
-Message-ID: <20250620135325.3300848-12-kirill.shutemov@linux.intel.com>
+Subject: [PATCHv6 08/16] x86/traps: Consolidate user fixups in exc_general_protection()
+Date: Fri, 20 Jun 2025 16:53:16 +0300
+Message-ID: <20250620135325.3300848-9-kirill.shutemov@linux.intel.com>
 X-Mailer: git-send-email 2.47.2
 In-Reply-To: <20250620135325.3300848-1-kirill.shutemov@linux.intel.com>
 References: <20250620135325.3300848-1-kirill.shutemov@linux.intel.com>
@@ -113,33 +113,48 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-From: Yian Chen <yian.chen@intel.com>
+From: Sohil Mehta <sohil.mehta@intel.com>
 
-Security features such as LASS are not expected to be disabled once
-initialized. Add LASS to the CR4 pinned mask.
+Move the UMIP exception fixup along with the other user mode fixups,
+that is, under the common "if (user_mode(regs))" condition where the
+rest of the fixups reside.
 
-Signed-off-by: Yian Chen <yian.chen@intel.com>
+No functional change intended.
+
+Suggested-by: Dave Hansen <dave.hansen@intel.com>
+Signed-off-by: Sohil Mehta <sohil.mehta@intel.com>
 Signed-off-by: Alexander Shishkin <alexander.shishkin@linux.intel.com>
-Reviewed-by: Tony Luck <tony.luck@intel.com>
 Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
 ---
- arch/x86/kernel/cpu/common.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ arch/x86/kernel/traps.c | 8 +++-----
+ 1 file changed, 3 insertions(+), 5 deletions(-)
 
-diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
-index 1a779e302872..d12ce36a76f5 100644
---- a/arch/x86/kernel/cpu/common.c
-+++ b/arch/x86/kernel/cpu/common.c
-@@ -403,7 +403,8 @@ static __always_inline void setup_umip(struct cpuinfo_x86 *c)
+diff --git a/arch/x86/kernel/traps.c b/arch/x86/kernel/traps.c
+index c5c897a86418..3eb2ef46f733 100644
+--- a/arch/x86/kernel/traps.c
++++ b/arch/x86/kernel/traps.c
+@@ -800,11 +800,6 @@ DEFINE_IDTENTRY_ERRORCODE(exc_general_protection)
  
- /* These bits should not change their value after CPU init is finished. */
- static const unsigned long cr4_pinned_mask = X86_CR4_SMEP | X86_CR4_SMAP | X86_CR4_UMIP |
--					     X86_CR4_FSGSBASE | X86_CR4_CET | X86_CR4_FRED;
-+					     X86_CR4_FSGSBASE | X86_CR4_CET | X86_CR4_FRED |
-+					     X86_CR4_LASS;
- static DEFINE_STATIC_KEY_FALSE_RO(cr_pinning);
- static unsigned long cr4_pinned_bits __ro_after_init;
+ 	cond_local_irq_enable(regs);
  
+-	if (static_cpu_has(X86_FEATURE_UMIP)) {
+-		if (user_mode(regs) && fixup_umip_exception(regs))
+-			goto exit;
+-	}
+-
+ 	if (v8086_mode(regs)) {
+ 		local_irq_enable();
+ 		handle_vm86_fault((struct kernel_vm86_regs *) regs, error_code);
+@@ -819,6 +814,9 @@ DEFINE_IDTENTRY_ERRORCODE(exc_general_protection)
+ 		if (fixup_vdso_exception(regs, X86_TRAP_GP, error_code, 0))
+ 			goto exit;
+ 
++		if (cpu_feature_enabled(X86_FEATURE_UMIP) && fixup_umip_exception(regs))
++			goto exit;
++
+ 		gp_user_force_sig_segv(regs, X86_TRAP_GP, error_code, desc);
+ 		goto exit;
+ 	}
 -- 
 2.47.2
 
