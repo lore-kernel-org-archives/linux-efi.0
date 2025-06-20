@@ -1,50 +1,50 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.18])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.13])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8A17F298264;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 336D628EA5A;
 	Fri, 20 Jun 2025 13:53:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.18
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.13
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750427630; cv=none; b=p131z1qQznQIU/d1EC4uNbOXdaZkfdOYGXzxTv5cc2TYnpen0pyfm9JIQ+X0E21AVrsQi1jdmR9T3g1R+6DtR+ODsW7o96LkUHe3ChAEh744QxpfVVOikWWQoZ7njU1IENX2bQ6mqilJ/AhJR3S6SdxPSKkphggCoqTIHlxHUr8=
+	t=1750427630; cv=none; b=IV7jzYhHqqnU4M8NF08dUegCSD3TpbJFfgv9rDL4+JJkojGefhzUBGPmmJ3DGmCLXrt3CRmzTcC9wIyCKvHDHEDH7ZcrK/aCWmj8ryjbSPBrkvzID1Nc3yUyitNl5vZoahGxmeUzLyT4/lUL5bZklgEqZt/6MAtNGZ4uosmdlys=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1750427630; c=relaxed/simple;
-	bh=KLHzuunjVF20It9CsStNlBhnWQ8hFQOuNQygPo2X/zg=;
+	bh=4PFZxKTpNpzNJDCl49djdZirWvVdQr6nAlUlQcGtCn0=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=Iw6QeDI5DZjbQQOztkSggE2N5R8BFZxecqJltiBEi5P5oJepgSQVh+7MPy1wex8YWvowDgS/m6h4QA5XV8AEL6HTM0xqaHO8pSvbPKn33IeE2aZ+JXNKWe8cGSwOjrmiBuN+4gw45U0sbOXq/RcVyuVONZbLdWcOkvKUYiZxOlk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.helo=mgamail.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=k67QWP90; arc=none smtp.client-ip=192.198.163.18
+	 MIME-Version; b=pbaCrtT3Y3T77B8EZ5Y8w+e5UkafJeBWYShsmNV+horNBYsfCvTpdxpMeaMa07MBISL6VPTwfdDPo7BvDdpvQ6SGYXHyZgVzZxc3MB//jjZk4RWlFMGItvsEmcsAxWSAJYkPAlWtNPvPNfra+e8E/wfl7NrYvuzDqw94L69GLN0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.helo=mgamail.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=BOFxkk6f; arc=none smtp.client-ip=192.198.163.13
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.helo=mgamail.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="k67QWP90"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="BOFxkk6f"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1750427628; x=1781963628;
+  t=1750427629; x=1781963629;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=KLHzuunjVF20It9CsStNlBhnWQ8hFQOuNQygPo2X/zg=;
-  b=k67QWP90+N0kG4lgptxWbKtV6uIOo68h6c0BJSpdMzCqwAx3IxE4SQrY
-   FvIRkJQvrRXL9EE7MJZ6wwAw5HuM7hojIBT/6LwInMruhvNrdYhti2dli
-   wBT+2LIZPUSThvwCVQe0dwN8tCIBqgf4AHu4DHMGABYkplFbOyu/y7pNJ
-   qn1QeR0A6p1P/a74tv61Y4tJnadxCYqNkjV1jnmGe2ge643elH1BEn9I0
-   qarnET4vPH4jFjDp2DzU6E/Th3bC8wT/m24JG5ATlrXwKSq6evEmyMTZk
-   7tX2kkwtTCQZJU00BGXGCCL5rbIEhezGNOgi8PgA6DWfUuMirbGf7+vBG
-   Q==;
-X-CSE-ConnectionGUID: JffBJPapREWU4bj/LcBW1g==
-X-CSE-MsgGUID: XIVRp/ByTdydPOtaehUkWg==
-X-IronPort-AV: E=McAfee;i="6800,10657,11469"; a="51919317"
+  bh=4PFZxKTpNpzNJDCl49djdZirWvVdQr6nAlUlQcGtCn0=;
+  b=BOFxkk6fXC6ymWb9DbrZ7HG76Et7rvoeOu4w+7HZMdwP8ZlQ+HMpNhw7
+   5X0NF8bpuByXQ3lk+FnWXLgjB8bZdacSlDu00W6zPh7u8lAndGdjPaiWl
+   fWJNH1BUEkftr3DeEedRjvaRSn9W3nhdauPVdgoSBe5hnbXFzikexxT4z
+   sF/4E7e+TXspKQNs3d3vcBZXQgL3DKg3Z9O/27q9gNujnvagl0YeSgP65
+   zpEKfx8H0MgtcJF+UMZUhqVVXcB2D4tPeUXdl9iHQrMgDiJRH22WWcN0m
+   728/9weIDxNE5zs5d19ijjGHPbh9Hg+Lu/L1ZxBuCuOcdrxy5gza4mJdD
+   w==;
+X-CSE-ConnectionGUID: LEoLt5yARaq3jaSOecgQ4w==
+X-CSE-MsgGUID: My8KiDGFQ0yJOsJw3FkX9w==
+X-IronPort-AV: E=McAfee;i="6800,10657,11469"; a="55326116"
 X-IronPort-AV: E=Sophos;i="6.16,251,1744095600"; 
-   d="scan'208";a="51919317"
-Received: from orviesa003.jf.intel.com ([10.64.159.143])
-  by fmvoesa112.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Jun 2025 06:53:48 -0700
-X-CSE-ConnectionGUID: yBZb9zvBRyCtqfZeK8tztg==
-X-CSE-MsgGUID: KfKEqQL6TW2sTfKtzfPLbg==
+   d="scan'208";a="55326116"
+Received: from fmviesa009.fm.intel.com ([10.60.135.149])
+  by fmvoesa107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Jun 2025 06:53:48 -0700
+X-CSE-ConnectionGUID: cyvBDv2VTXqUIQ2U+oyT2w==
+X-CSE-MsgGUID: 0sM6kXFaREetfj8ba4f3Ew==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.16,251,1744095600"; 
-   d="scan'208";a="155292134"
+   d="scan'208";a="151227085"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by orviesa003.jf.intel.com with ESMTP; 20 Jun 2025 06:53:34 -0700
+  by fmviesa009.fm.intel.com with ESMTP; 20 Jun 2025 06:53:38 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1000)
-	id AE6EE3F4; Fri, 20 Jun 2025 16:53:28 +0300 (EEST)
+	id F0AAC70C; Fri, 20 Jun 2025 16:53:28 +0300 (EEST)
 From: "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
 To: Andy Lutomirski <luto@kernel.org>,
 	Thomas Gleixner <tglx@linutronix.de>,
@@ -97,10 +97,11 @@ Cc: Jonathan Corbet <corbet@lwn.net>,
 	linux-kernel@vger.kernel.org,
 	linux-efi@vger.kernel.org,
 	linux-mm@kvack.org,
+	Yian Chen <yian.chen@intel.com>,
 	"Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-Subject: [PATCHv6 07/16] x86/vsyscall: Reorganize the #PF emulation code
-Date: Fri, 20 Jun 2025 16:53:15 +0300
-Message-ID: <20250620135325.3300848-8-kirill.shutemov@linux.intel.com>
+Subject: [PATCHv6 11/16] x86/cpu: Set LASS CR4 bit as pinning sensitive
+Date: Fri, 20 Jun 2025 16:53:19 +0300
+Message-ID: <20250620135325.3300848-12-kirill.shutemov@linux.intel.com>
 X-Mailer: git-send-email 2.47.2
 In-Reply-To: <20250620135325.3300848-1-kirill.shutemov@linux.intel.com>
 References: <20250620135325.3300848-1-kirill.shutemov@linux.intel.com>
@@ -112,122 +113,33 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-From: Sohil Mehta <sohil.mehta@intel.com>
+From: Yian Chen <yian.chen@intel.com>
 
-Separate out the actual vsyscall emulation from the page fault specific
-handling in preparation for the upcoming #GP fault emulation.
+Security features such as LASS are not expected to be disabled once
+initialized. Add LASS to the CR4 pinned mask.
 
-No functional change intended.
-
-Signed-off-by: Sohil Mehta <sohil.mehta@intel.com>
+Signed-off-by: Yian Chen <yian.chen@intel.com>
 Signed-off-by: Alexander Shishkin <alexander.shishkin@linux.intel.com>
+Reviewed-by: Tony Luck <tony.luck@intel.com>
 Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
 ---
- arch/x86/entry/vsyscall/vsyscall_64.c | 42 +++++++++++++++------------
- arch/x86/include/asm/vsyscall.h       |  8 ++---
- arch/x86/mm/fault.c                   |  2 +-
- 3 files changed, 29 insertions(+), 23 deletions(-)
+ arch/x86/kernel/cpu/common.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/arch/x86/entry/vsyscall/vsyscall_64.c b/arch/x86/entry/vsyscall/vsyscall_64.c
-index c9103a6fa06e..f18b08c03553 100644
---- a/arch/x86/entry/vsyscall/vsyscall_64.c
-+++ b/arch/x86/entry/vsyscall/vsyscall_64.c
-@@ -112,30 +112,13 @@ static bool write_ok_or_segv(unsigned long ptr, size_t size)
- 	}
- }
+diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
+index 1a779e302872..d12ce36a76f5 100644
+--- a/arch/x86/kernel/cpu/common.c
++++ b/arch/x86/kernel/cpu/common.c
+@@ -403,7 +403,8 @@ static __always_inline void setup_umip(struct cpuinfo_x86 *c)
  
--bool emulate_vsyscall(unsigned long error_code,
--		      struct pt_regs *regs, unsigned long address)
-+static bool __emulate_vsyscall(struct pt_regs *regs, unsigned long address)
- {
- 	unsigned long caller;
- 	int vsyscall_nr, syscall_nr, tmp;
- 	long ret;
- 	unsigned long orig_dx;
+ /* These bits should not change their value after CPU init is finished. */
+ static const unsigned long cr4_pinned_mask = X86_CR4_SMEP | X86_CR4_SMAP | X86_CR4_UMIP |
+-					     X86_CR4_FSGSBASE | X86_CR4_CET | X86_CR4_FRED;
++					     X86_CR4_FSGSBASE | X86_CR4_CET | X86_CR4_FRED |
++					     X86_CR4_LASS;
+ static DEFINE_STATIC_KEY_FALSE_RO(cr_pinning);
+ static unsigned long cr4_pinned_bits __ro_after_init;
  
--	/* Write faults or kernel-privilege faults never get fixed up. */
--	if ((error_code & (X86_PF_WRITE | X86_PF_USER)) != X86_PF_USER)
--		return false;
--
--	if (!(error_code & X86_PF_INSTR)) {
--		/* Failed vsyscall read */
--		if (vsyscall_mode == EMULATE)
--			return false;
--
--		/*
--		 * User code tried and failed to read the vsyscall page.
--		 */
--		warn_bad_vsyscall(KERN_INFO, regs, "vsyscall read attempt denied -- look up the vsyscall kernel parameter if you need a workaround");
--		return false;
--	}
--
- 	/*
- 	 * No point in checking CS -- the only way to get here is a user mode
- 	 * trap to a high address, which means that we're in 64-bit user code.
-@@ -270,6 +253,29 @@ bool emulate_vsyscall(unsigned long error_code,
- 	return true;
- }
- 
-+bool emulate_vsyscall_pf(unsigned long error_code, struct pt_regs *regs,
-+			 unsigned long address)
-+{
-+	/* Write faults or kernel-privilege faults never get fixed up. */
-+	if ((error_code & (X86_PF_WRITE | X86_PF_USER)) != X86_PF_USER)
-+		return false;
-+
-+	if (!(error_code & X86_PF_INSTR)) {
-+		/* Failed vsyscall read */
-+		if (vsyscall_mode == EMULATE)
-+			return false;
-+
-+		/*
-+		 * User code tried and failed to read the vsyscall page.
-+		 */
-+		warn_bad_vsyscall(KERN_INFO, regs,
-+				  "vsyscall read attempt denied -- look up the vsyscall kernel parameter if you need a workaround");
-+		return false;
-+	}
-+
-+	return __emulate_vsyscall(regs, address);
-+}
-+
- /*
-  * A pseudo VMA to allow ptrace access for the vsyscall page.  This only
-  * covers the 64bit vsyscall page now. 32bit has a real VMA now and does
-diff --git a/arch/x86/include/asm/vsyscall.h b/arch/x86/include/asm/vsyscall.h
-index 472f0263dbc6..214977f4fa11 100644
---- a/arch/x86/include/asm/vsyscall.h
-+++ b/arch/x86/include/asm/vsyscall.h
-@@ -14,12 +14,12 @@ extern void set_vsyscall_pgtable_user_bits(pgd_t *root);
-  * Called on instruction fetch fault in vsyscall page.
-  * Returns true if handled.
-  */
--extern bool emulate_vsyscall(unsigned long error_code,
--			     struct pt_regs *regs, unsigned long address);
-+extern bool emulate_vsyscall_pf(unsigned long error_code,
-+				struct pt_regs *regs, unsigned long address);
- #else
- static inline void map_vsyscall(void) {}
--static inline bool emulate_vsyscall(unsigned long error_code,
--				    struct pt_regs *regs, unsigned long address)
-+static inline bool emulate_vsyscall_pf(unsigned long error_code,
-+				       struct pt_regs *regs, unsigned long address)
- {
- 	return false;
- }
-diff --git a/arch/x86/mm/fault.c b/arch/x86/mm/fault.c
-index 998bd807fc7b..fbcc2da75fd6 100644
---- a/arch/x86/mm/fault.c
-+++ b/arch/x86/mm/fault.c
-@@ -1316,7 +1316,7 @@ void do_user_addr_fault(struct pt_regs *regs,
- 	 * to consider the PF_PK bit.
- 	 */
- 	if (is_vsyscall_vaddr(address)) {
--		if (emulate_vsyscall(error_code, regs, address))
-+		if (emulate_vsyscall_pf(error_code, regs, address))
- 			return;
- 	}
- #endif
 -- 
 2.47.2
 
