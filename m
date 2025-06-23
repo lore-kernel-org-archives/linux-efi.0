@@ -1,61 +1,61 @@
-Received: from mail-ed1-f41.google.com (mail-ed1-f41.google.com [209.85.208.41])
+Received: from mail-ej1-f50.google.com (mail-ej1-f50.google.com [209.85.218.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3F0D21D6DA9;
-	Mon, 23 Jun 2025 08:17:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8B4FF211F;
+	Mon, 23 Jun 2025 08:18:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750666664; cv=none; b=dQ104kMBdhwxuiE6hOqfG1lKV0Kf4JQU+USZbh0cMU3uHSAZzwbw4vkN/yCzIc+bk88mPW3jWLnJKdetPWlDD+X2MfMLvJk805a2QCR6sNIJxvXthyFgU4hi4biaPMuM1kEsUefuwQqCUBu7djXrdChRTUWktcmRHrGHZr3Ovhc=
+	t=1750666732; cv=none; b=Y7BDjN8GBf9sZhVgOk5KtM5LflRxhp6hG+otYyPLk2ENVWM+1sDHKdXmx8hioWTyQgDzs/RW3Jf7RyQqCPl8b26oDdfFDrG+zJqC5qIvapbULNKIu18cjlZPJgoGniSKmYl451xoz0HjTyKVkkZbQ5mEQfN4pFoNG9gpmU9gipg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750666664; c=relaxed/simple;
-	bh=xABlpFKCI7tvbKgSAmn4BEyY09ekpiP8IizGsmnqo1w=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=tJqCO4iM3fHr9x7R15zyLKCCfK+W+BoVEw48rW73ZWRyS7MX2zNWsnBAMdHJAWkudb2ir6zO2zWRajsOztsf48uNQzSDGOCj8btnYBkay47nxbsxkGJQ3CUl92LyIZ77Locl4LxLtBZFNGRyxpUF7oggLyZg1qTAZqSDOtiq2hg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=XhWhxhLx; arc=none smtp.client-ip=209.85.208.41
+	s=arc-20240116; t=1750666732; c=relaxed/simple;
+	bh=lCK854TgRqv39ZVQ7Izhf1FWljjyyVyW8qjFDJ2regY=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=qbjOG/OwE4x7hE3rIYUI3c15lTIQN5atPUFB/Su+wf6SKfDh7eUrWcZwj3+m4Cs+IaDcWO2NKcUnYFEnq8cDJvwowVyKy5AQut8uksVFK6M6yh6K7eWH/FDXi/WTmtT9NsONeWQZiHA06TH3GwVXhXEbBrGda45c7tXgId/oris=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=RDfO1x/A; arc=none smtp.client-ip=209.85.218.50
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="XhWhxhLx"
-Received: by mail-ed1-f41.google.com with SMTP id 4fb4d7f45d1cf-609c6afade7so9068137a12.1;
-        Mon, 23 Jun 2025 01:17:42 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="RDfO1x/A"
+Received: by mail-ej1-f50.google.com with SMTP id a640c23a62f3a-ad8a8da2376so609596066b.3;
+        Mon, 23 Jun 2025 01:18:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1750666661; x=1751271461; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1750666729; x=1751271529; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=Q0ldZjivV1lpUZD2fqgWNSEgeUozCBiIx7NicXZLPzM=;
-        b=XhWhxhLxab+7722d7MeHkcAjXYxvjY16oBS5WBoSJLfhf1iXvflhATc5PXpfb9niUl
-         H9k7uANVNaqAy3JRB8aLyyz1pBjhkvjLEaTcccsRDsASGnoZadCE7UUu1fsVsNBeNH1J
-         xRSyXdZyQ0tzsIZyIDx096F++x64zJS+RCoKlMMjzNF7VHwrW8ONdGmbebdoyITRwEM7
-         j+mToQIdg3MVwi8OJxnso2qrGItoyDg8k/rbdISNHYZ4W+MZciYKVovg371EFaxyUqCm
-         x+0i4CE2NFCT6Y88HVYipmhFw0CSM2BTW2PB1cP/OGkskHxyafhfJPRwm9lptx8phFp5
-         UMQA==
+        bh=Gwx8N1prAjZlb2ymIsmsbUe/fl2ghoNiNQjIjRYyjWA=;
+        b=RDfO1x/AEljEzhgDjHWFG9lPS2VhewfdT+Y69CQ+blJqxCKO9Sfg1xD5mDeutY1uzJ
+         asu1EpriX3x4PRt+AQOyE4OAPl4CEn/Lmf2/BNT6AEwlB4CqR5XpU6nLAr25bvd0Yfsl
+         ZA+vxFh/2xlLj/YeWAQLsWIxnzClrAbHLQbTs8qsshLik7YTk1i8e3/1K/vl3imp6SpA
+         1uk24m9NtgOVVLbBQ5Y2hWcdUmtliurkr+YXl1QVTc6rN5ptDWZjGMII9k8S1H3pCYJ8
+         nZTjnfNMSTK642QEkXv4nnqz/YaE0Xod+n04t+mkzPO5yCYfxyWpjzwpUtqPllh/2Asj
+         yVBw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1750666661; x=1751271461;
+        d=1e100.net; s=20230601; t=1750666729; x=1751271529;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=Q0ldZjivV1lpUZD2fqgWNSEgeUozCBiIx7NicXZLPzM=;
-        b=giqJElPHuXGX/VCJZKrPDyA9XlZfaIJg/L7/HmieSmTpqIX5vh0mBY/rRWGl6EflPd
-         bVQwgNImsBgOYS4w29NERvlLtpb1Y8smcYop7Aacq6Wpj2IyrlU4qtXmvDmHQzfNKqE1
-         +wy2gY9W6S/S+Qs0wIWbRYxsHMQJjT80tyAc4KHlx4lGKDAEo+IXrVj5erDFbDSIR/Qy
-         CxAurKrTvsj924cRQK5+v5KED0KNyTmWWYm+8KDFy8k8lyHLshbCSY4u91XZ2ktfpjF2
-         bknr+z88xirQVsw1lkF5fyg45FOZr1hsZMQ0lt8ggsWGZmNbhNe02z4M7KpxBxKln7WU
-         mByg==
-X-Forwarded-Encrypted: i=1; AJvYcCWOR6TUebhj8cWTgVdZ3Vv9QUOsL92qEixRGBBWIHQ7TjuCL09AWMRq/xAgmSl3M362lga71ADkWaRYNqaD@vger.kernel.org, AJvYcCWSBSveamSlXkqn2Tpi4dtq5P8ucEAci3xuAHBIhFHFJ3gHhfVEmQNg1EVFAk38QGM13tsM6i7zWYU=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxXd1a34Cvrefihe9iORm6vX9LS4ZVrdCldiac4zxnVKmsoriA+
-	561+8v6BSPLw31cJvDCKaEwc9QhwICqRq03M/S5rAjoZMyMaVCt90J9X
-X-Gm-Gg: ASbGncslH8GNKTT4i0MKTxFTTb8r2rNMKruxtGLLsq9sTZiA0HXWw/hVWciMQP+a7pV
-	KvOrZl3efMsaRDbO3P9zXRXI/y/A6tab4C1rGrKG/U1uFn/0uhSdkK6qpxeqaz+ZEsXFBCCbzak
-	Ki5r9bVtx6U7QDL/avSINgCKHXW/tqjiPlepRExu6JaEJUJb1vao6UDt1MnxUlSk4Jx2akpvHn+
-	8vq6JfKiT79/DWGBMyvukT2f2fRngkOyaGj3p1OwArIOxgTlnE8ZMUK8ts/2o0/C0C+gKFh9EaO
-	zFZqoIvUnhfpm2lQEDOvMM7m/TUy6HW1RClCSxj/2I+gkXcNdTW6WX+UR8sGqJ17kDpexciSe+Z
-	v
-X-Google-Smtp-Source: AGHT+IGygq4BgBIH/An5jrlMX4bO2TbpXKrBaZx0SApj+U+km9rMpRWoZwUu6E6qBZXhz9adheWngQ==
-X-Received: by 2002:a17:907:1c95:b0:ade:44da:d2cf with SMTP id a640c23a62f3a-ae05afc1bacmr1232128866b.18.1750666661183;
-        Mon, 23 Jun 2025 01:17:41 -0700 (PDT)
+        bh=Gwx8N1prAjZlb2ymIsmsbUe/fl2ghoNiNQjIjRYyjWA=;
+        b=s+5bLJ5pphjNeN4kVehMlkMtysopwhMS4AUn4rxe9MVjUOCwtPI5BDVHD0OF8Luh2F
+         t2BoNFOYfML/N0tAtQJvD/A2QhDSUUxhDSWcNOFraYSA/bz2gKNjE3VTz2PCUcty1WBl
+         2lSvJe2IthXTgc3dwp7EKpNVodqWs3aSt8vyF7y951PSNSx9Re5HhDXsDheIzl/6ozq6
+         E2DJdiEGG76diNjKQOF646I2q7NJ6X1X3vRqETX11AOiS7Rt4w3ON3iYJSBRyaHsav2p
+         OlbeZXMJ0zpEymXS0NDtPUNb2h3atSvsZ6rMtn5/XlOfW/sWvOmZtqHBuqbP1dKvnvvl
+         g2dw==
+X-Forwarded-Encrypted: i=1; AJvYcCUb8xAQrCiA3Scu7ItspCPnNfu4jP1r5PpdnulQd9DCSUCyV/NhzLbdk7r7wMtQQ7zD/sGQjqEQfEQ=@vger.kernel.org, AJvYcCVX61tr6qJ4853OVHE4GA329hWT0mLNUbpfPySV7kMXl4FeNJSDXVnqbs6S9diXfngq1MpA5G5KHZXuxFYd@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw9DBqtlFYtAPTmylAi8hsNMVNTVZPgp+1rOHA2QrDdr86pxr1s
+	w9XID5CxcP00A/Azb2yrb/mJy+PccO43kjvKSP4hgT8xeYnPRcs3UIYo
+X-Gm-Gg: ASbGncuA86QxuU9O1LmJniJNOZrQxYlG2hQhPyR9FlEoIuzALmQcUb33vCS3LhO5iNb
+	w/snRD1Q9I1TBTs7gszTBDm8jK1CJPbAKVXWNgU5wp0MR4BhZT9iw6lnK5DqAy6aHhm84TZAfm1
+	SyIN/wzJEqERvFLNH4WCVKyUzZ2WtbUGEtcy6bRSwn2x2BeumZwQG276XC85iasCiuPlGD2t7DI
+	mJFKF+YzA/k395LihyqFrAZ1dA1UAeK/Xeip6uUlTP+khHNyuCJ1JdIb0kquIHRW2rSa1cmRqdE
+	Vd92RfkioqFPHfpklCQhcVyiu3oPJDxl3mGu08t9zOlwLBfyOZX4uIxTZ4+pDDSkQP54qLBSPzx
+	0
+X-Google-Smtp-Source: AGHT+IGnko2iUfz77f98BBimqLt0TFCYQBHgyYvKFbjRTMvtzWLPW4CMLACqj3r7KnSwqczuloUYVw==
+X-Received: by 2002:a17:907:3f8b:b0:ad8:a515:767f with SMTP id a640c23a62f3a-ae057ca667amr995584766b.51.1750666728427;
+        Mon, 23 Jun 2025 01:18:48 -0700 (PDT)
 Received: from localhost.localdomain ([41.79.198.24])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-ae0540833fasm674982766b.103.2025.06.23.01.17.39
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-ae053e7f2cesm680467166b.10.2025.06.23.01.18.46
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 23 Jun 2025 01:17:40 -0700 (PDT)
+        Mon, 23 Jun 2025 01:18:48 -0700 (PDT)
 From: Khalid Ali <khaliidcaliy@gmail.com>
 X-Google-Original-From: Khalid Ali <khaliidcaliy@gmail.com
 To: tglx@linutronix.de,
@@ -68,9 +68,9 @@ Cc: x86@kernel.org,
 	linux-efi@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
 	Khalid Ali <khaliidcaliy@gmail.com>
-Subject: [PATCH v1 3/3] efi/efistub: Make libstub to supply boot_param from RDI
-Date: Mon, 23 Jun 2025 08:16:39 +0000
-Message-ID: <20250623081656.1303-1-khaliidcaliy@gmail.com>
+Subject: [PATCH v1 1/3] x86/boot: Recieve boot_param from RDI Instead of RSI
+Date: Mon, 23 Jun 2025 08:17:50 +0000
+Message-ID: <20250623081803.1340-1-khaliidcaliy@gmail.com>
 X-Mailer: git-send-email 2.49.0
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -82,28 +82,36 @@ Content-Transfer-Encoding: 8bit
 
 From: Khalid Ali <khaliidcaliy@gmail.com>
 
-This adjusts the libstub to supply argument from RDI instead of RSI.
+Adjust the kernel entry point to recieve arguments from RDI instead of
+RSI.
 
 Signed-off-by: Khalid Ali <khaliidcaliy@gmail.com>
 ---
- drivers/firmware/efi/libstub/x86-stub.c | 4 ++--
+ arch/x86/kernel/head_64.S | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/x86-stub.c b/drivers/firmware/efi/libstub/x86-stub.c
-index 09ed1c122106..9da9b6295b1d 100644
---- a/drivers/firmware/efi/libstub/x86-stub.c
-+++ b/drivers/firmware/efi/libstub/x86-stub.c
-@@ -794,8 +794,8 @@ static efi_status_t efi_decompress_kernel(unsigned long *kernel_entry,
- static void __noreturn enter_kernel(unsigned long kernel_addr,
- 				    struct boot_params *boot_params)
- {
--	/* enter decompressed kernel with boot_params pointer in RSI/ESI */
--	asm("jmp *%0"::"r"(kernel_addr), "S"(boot_params));
-+	/* enter decompressed kernel with boot_params pointer in RDI/EDI */
-+	asm("jmp *%0"::"r"(kernel_addr), "D"(boot_params));
+diff --git a/arch/x86/kernel/head_64.S b/arch/x86/kernel/head_64.S
+index dfb5390e5c9a..d24fea15b6a6 100644
+--- a/arch/x86/kernel/head_64.S
++++ b/arch/x86/kernel/head_64.S
+@@ -43,7 +43,7 @@ SYM_CODE_START_NOALIGN(startup_64)
+ 	 * for us.  These identity mapped page tables map all of the
+ 	 * kernel pages and possibly all of memory.
+ 	 *
+-	 * %RSI holds the physical address of the boot_params structure
++	 * %RDI holds the physical address of the boot_params structure
+ 	 * provided by the bootloader. Preserve it in %R15 so C function calls
+ 	 * will not clobber it.
+ 	 *
+@@ -56,7 +56,7 @@ SYM_CODE_START_NOALIGN(startup_64)
+ 	 * compiled to run at we first fixup the physical addresses in our page
+ 	 * tables and then reload them.
+ 	 */
+-	mov	%rsi, %r15
++	mov	%rdi, %r15
  
- 	unreachable();
- }
+ 	/* Set up the stack for verify_cpu() */
+ 	leaq	__top_init_kernel_stack(%rip), %rsp
 -- 
 2.49.0
 
