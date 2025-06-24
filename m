@@ -1,112 +1,86 @@
-Received: from mail.zytor.com (terminus.zytor.com [198.137.202.136])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.9])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B11E42571DD;
-	Tue, 24 Jun 2025 08:27:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.136
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E1101248F64;
+	Tue, 24 Jun 2025 08:49:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.9
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750753658; cv=none; b=f19qqcjhDp1opw2781nsVZ2oCqJdbSp90tLtCHPkQ5Ds2Ow9sprZPmnG2LDOn0PCSz+kmlCAN/hh40u05T7ZibWNWhwbKF9py0teLI4zTAiY62yGT751xlaEDZgX7HnqlI0le9aAaF7Qk6kjLGfNmdj4s1v6r0ZYtuFtp+TgN2A=
+	t=1750754994; cv=none; b=LAaFx24i1TP91IgCD4aj58culE9lSM1cMJZttxsnTcNAM1im96LOkzm7SkVvutOVAxIuPaxHS5li8/djsXNLBSAsPqUjdMNCrXlgYcMPIPx6HrRHk20ozKz0NpQGF4FKr7tzYAHYMy8LIvqA8f1PzMKg6OvTafmVhCTCK1LHNP4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750753658; c=relaxed/simple;
-	bh=H9y34vir+9nirPEjwoiMIfT3bIIQ67ZyNybg+nCN+Vs=;
-	h=Date:From:To:CC:Subject:In-Reply-To:References:Message-ID:
-	 MIME-Version:Content-Type; b=FOnKJSRmCa1XRZoT9N6Yj9MU2phgh9D+B8tff0nfKJRSxcuTpYXonBCTuBq24kzSGetxDXlo50Lw4mlwaxH0foZhl5kXIWJZaBtj20FPCwElGAKEynYnzHVBdGVfOJI7+JOQNlIviN91WcvS56/lZGked53NT+RqBBb9w656w80=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zytor.com; spf=pass smtp.mailfrom=zytor.com; dkim=pass (2048-bit key) header.d=zytor.com header.i=@zytor.com header.b=ntiLKVGj; arc=none smtp.client-ip=198.137.202.136
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zytor.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=zytor.com
+	s=arc-20240116; t=1750754994; c=relaxed/simple;
+	bh=YW6HmDpuHGkqkfv8nhM6MCfMIQCl8pDzgCgyTV+Z5sI=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=lV8iE6/u8IsKixX/cZpA53GEHOPw0NICSfSBZjHLhBnCLtPu0jYIyHUII19rT/5gZGrCrUtzDZqCKdDvTHPj80m+xwmUxowjU0cr/nX1st+1QGHOHJPn18EcDbrfGKqci0S1UyVNydI85JRpLKiKs8aa1ogWMgKuCQu0HbiJSZI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=knexF1x0; arc=none smtp.client-ip=198.175.65.9
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=zytor.com header.i=@zytor.com header.b="ntiLKVGj"
-Received: from [127.0.0.1] (c-76-133-66-138.hsd1.ca.comcast.net [76.133.66.138])
-	(authenticated bits=0)
-	by mail.zytor.com (8.18.1/8.17.1) with ESMTPSA id 55O8M1nR1268415
-	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NO);
-	Tue, 24 Jun 2025 01:22:02 -0700
-DKIM-Filter: OpenDKIM Filter v2.11.0 mail.zytor.com 55O8M1nR1268415
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=zytor.com;
-	s=2025062101; t=1750753324;
-	bh=/GcMmlSpVmJGdK70vVLdVq+WGghRjcWXQ50iTcyNOcA=;
-	h=Date:From:To:CC:Subject:In-Reply-To:References:From;
-	b=ntiLKVGj72JidONcwsNyF7DiOUmQsTszeaPpNemwiXD6CPdpKiW9vohotZJ/Uypgh
-	 1g5A/YBi/YEX1VbFBd5znZPwQ71z8MhTOIB9sgTundppHmWvz2rpdGfYCcZ8tJO9u+
-	 OoIEreNgnqijK49eia3xSxorTmqUuEiQr65WeF+uVFzQmzEdrfC5ZDMACjjVumZyLS
-	 dKFSVjbOay6ynxoXAyfVIUCOsknfeZJ4Qyr7DJ+7+5ZZy5uSJ2aUlTLPc/BCDyVwUs
-	 ojq2ITfPl9h3690j9i1ylwg3seoaa3MSTMp99lLAi4NM34mJTXaK7RnV+YEBN6fACC
-	 I5SNz2Sn1RArw==
-Date: Tue, 24 Jun 2025 01:22:00 -0700
-From: "H. Peter Anvin" <hpa@zytor.com>
-To: Khalid Ali <khaliidcaliy@gmail.com>, tglx@linutronix.de, mingo@redhat.com,
-        bp@alien8.de, dave.hansen@linux.intel.com, corbet@lwn.net
-CC: luto@kernel.org, peterz@infradead.org, ardb@kernel.org,
-        jan.kiszka@siemens.com, kbingham@kernel.org,
-        kirill.shutemov@linux.intel.com, michael.roth@amd.com,
-        rick.p.edgecombe@intel.com, brijesh.singh@amd.com,
-        sandipan.das@amd.com, jgross@suse.com, thomas.lendacky@amd.com,
-        linux-kernel@vger.kernel.org, linux-doc@vger.kernel.org,
-        linux-efi@vger.kernel.org, linux-mm@kvack.org
-Subject: =?US-ASCII?Q?Re=3A_=5BPATCHv2_0/3=5D_x86=3A_Make_5-level_p?=
- =?US-ASCII?Q?aging_support_unconditional_for_x86-64?=
-User-Agent: K-9 Mail for Android
-In-Reply-To: <20250624081400.2284-1-khaliidcaliy@gmail.com>
-References:  <20250624081400.2284-1-khaliidcaliy@gmail.com>
-Message-ID: <3EB75889-2194-402F-AF85-2CC96DA5D8F2@zytor.com>
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="knexF1x0"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1750754994; x=1782290994;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=YW6HmDpuHGkqkfv8nhM6MCfMIQCl8pDzgCgyTV+Z5sI=;
+  b=knexF1x061mUllfCld8EekyqEU9/It3TKasVL3XNoAhctdZ/H1x+f3A/
+   8UF0vOYvwtSGEV/YDQMmQx879Vv8zxjAtJq57xgsKiDY0WR27iXcf8NOh
+   LP2ICtDOkCQMJg5Ldb6ub7QWVZ57kNAu86WPxhok5rlwdm9IAYMg7cFVw
+   oMpkKbWsqd9TjPZks/CorB+DrbSmJ9aA00wG8Q4v9Nj82dZMsW1TUcdcS
+   eSDk385acX7S0FJYraK164kYD/kQ2GG/Fc2WVO93kOAG8f12b2OV4EO8+
+   7NQtW0G3sSGhMk4d0sG4DBMRkTj0jbJ4z20295McjPftfQdhv5medKBWd
+   g==;
+X-CSE-ConnectionGUID: YLOiH5d/RqaUyuvF/fB6GQ==
+X-CSE-MsgGUID: xT71BtvvRN+W+/MnyuhcfA==
+X-IronPort-AV: E=McAfee;i="6800,10657,11473"; a="75524517"
+X-IronPort-AV: E=Sophos;i="6.16,261,1744095600"; 
+   d="scan'208";a="75524517"
+Received: from orviesa003.jf.intel.com ([10.64.159.143])
+  by orvoesa101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Jun 2025 01:49:53 -0700
+X-CSE-ConnectionGUID: 5pZhCsH7R2u5jNP7KLc8/w==
+X-CSE-MsgGUID: fmBM3rclSY+nZBFzSDNmCg==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.16,261,1744095600"; 
+   d="scan'208";a="156237993"
+Received: from black.fi.intel.com ([10.237.72.28])
+  by orviesa003.jf.intel.com with ESMTP; 24 Jun 2025 01:49:48 -0700
+Received: by black.fi.intel.com (Postfix, from userid 1000)
+	id 8D246138; Tue, 24 Jun 2025 11:49:45 +0300 (EEST)
+Date: Tue, 24 Jun 2025 11:49:45 +0300
+From: "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
+To: Khalid Ali <khaliidcaliy@gmail.com>
+Cc: tglx@linutronix.de, mingo@redhat.com, bp@alien8.de, 
+	dave.hansen@linux.intel.com, hpa@zytor.com, corbet@lwn.net, luto@kernel.org, 
+	peterz@infradead.org, ardb@kernel.org, jan.kiszka@siemens.com, kbingham@kernel.org, 
+	michael.roth@amd.com, rick.p.edgecombe@intel.com, brijesh.singh@amd.com, 
+	sandipan.das@amd.com, jgross@suse.com, thomas.lendacky@amd.com, 
+	linux-kernel@vger.kernel.org, linux-doc@vger.kernel.org, linux-efi@vger.kernel.org, 
+	linux-mm@kvack.org
+Subject: Re: [PATCHv2 0/3] x86: Make 5-level paging support unconditional for
+ x86-64
+Message-ID: <m3i4z5ell2lhtpverw5slnxidd32lmtqcdpwcljtr5betki6s5@kiq2bibj5lt2>
+References: <20250516091534.3414310-1-kirill.shutemov@linux.intel.com>
+ <20250624081400.2284-1-khaliidcaliy@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250624081400.2284-1-khaliidcaliy@gmail.com>
 
-On June 24, 2025 1:11:15 AM PDT, Khalid Ali <khaliidcaliy@gmail=2Ecom> wrot=
-e:
->>Both Intel and AMD CPUs support 5-level paging, which is expected to
->>become more widely adopted in the future=2E
->>
->>Remove CONFIG_X86_5LEVEL=2E
->>
->>In preparation to that remove CONFIG_DYNAMIC_MEMORY_LAYOUT and make
->>SPARSEMEM_VMEMMAP the only memory model=2E
->>
->>v2:
->> - Fix 32-bit build by wrapping p4d_set_huge() and p4d_clear_huge() in
->>   #if CONFIG_PGTABLE_LEVELS > 4;
->> - Rebased onto current tip/master;
->>
->>Kirill A=2E Shutemov (3):
->>  x86/64/mm: Always use dynamic memory layout
->>  x86/64/mm: Make SPARSEMEM_VMEMMAP the only memory model
->>  x86/64/mm: Make 5-level paging support unconditional
->>
->> Documentation/arch/x86/cpuinfo=2Erst            |  8 ++---
->> =2E=2E=2E/arch/x86/x86_64/5level-paging=2Erst         |  9 ------
->> arch/x86/Kconfig                              | 32 ++-----------------
->> arch/x86/Kconfig=2Ecpufeatures                  |  4 ---
->> arch/x86/boot/compressed/pgtable_64=2Ec         | 11 ++-----
->> arch/x86/boot/header=2ES                        |  4 ---
->> arch/x86/boot/startup/map_kernel=2Ec            |  5 +--
->> arch/x86/include/asm/page_64=2Eh                |  2 --
->> arch/x86/include/asm/page_64_types=2Eh          | 11 -------
->> arch/x86/include/asm/pgtable_64_types=2Eh       | 24 --------------
->> arch/x86/kernel/alternative=2Ec                 |  2 +-
->> arch/x86/kernel/head64=2Ec                      |  4 ---
->> arch/x86/kernel/head_64=2ES                     |  2 --
->> arch/x86/mm/init=2Ec                            |  4 ---
->> arch/x86/mm/init_64=2Ec                         |  9 +-----
->> arch/x86/mm/pgtable=2Ec                         |  2 +-
->> drivers/firmware/efi/libstub/x86-5lvl=2Ec       |  2 +-
->> scripts/gdb/linux/pgtable=2Epy                  |  4 +--
->> 18 files changed, 13 insertions(+), 126 deletions(-)
->
->I think i am too late, however this is completely wrong=2E There are stil=
-l processors that doesn't support
->5-level paging which is mordern=2E We may call those processors old, howe=
-ver they are still common and used=2E
->
->So this patch seem too early for that=2E Some intel core-i5 and core-i7 d=
-oesn't support 5-level paging at all=2E
->
->This will break x86_64 cpus that doesn't support 5-level paging=2E
+On Tue, Jun 24, 2025 at 08:11:15AM +0000, Khalid Ali wrote:
+> This will break x86_64 cpus that doesn't support 5-level paging.
 
-Uh, no=2E Kernels compiled with 5-level support also support 4 levels=2E
+No, it won't.
+
+The patchset removes compile-time config option to disable 5-level paging.
+After tha patchset all kernels will be built with 5-level paging *support*.
+
+The actual paging mode is chosen at boot time based on machine
+capabilities and kernel command line. Older HW will boot in 4-level paging
+mode just fine.
+
+-- 
+  Kiryl Shutsemau / Kirill A. Shutemov
