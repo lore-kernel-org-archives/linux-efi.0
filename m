@@ -1,214 +1,179 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+Received: from mail.zytor.com (terminus.zytor.com [198.137.202.136])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0620124468D
-	for <linux-efi@vger.kernel.org>; Tue, 24 Jun 2025 02:14:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ED254170826;
+	Tue, 24 Jun 2025 04:58:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.136
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750731263; cv=none; b=mvnmeOhTML3pLVTzHbSdjFI+n6qejp8XRWJT6RywId9iYDfqPH7L860eChk7X89bwntegB6hNu7p5C6oQi/X/VNZZSFZDO33Hpp7RTlYX/Wu4VCAtEeOWdDn9zjqATW1YzjmaT8E2xBGeFK44+FvrIhl41E/B3ujaxj8cHN6nHM=
+	t=1750741120; cv=none; b=fY3z2DgmB7RAn+zLF7kSoEWKeLyEfTlEXFpA9re3nWJn3fz3oYSxBOh5pO5DjzT6tgidB+7HdAStXTnnnASmh+AurL5MlQRnwDvpvYcerolhu+7JEUqs434UNunGaU4FlUlsW30DVgOGyaPo+zpIzKN9E/A0uzsxJQhQZlQ/oLM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750731263; c=relaxed/simple;
-	bh=s2o+RnAnwuuTYdNz0c1fk/UXp0JDkRHvl3NhwSnxORg=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=V5MR3fFBB+aevrK925BXBqu6cJO3w5ib21I9WwEd3sHisyMLsoxRvIneSQUZAd1BnDa4muUMf4/UmUu5hExkcO8d2oaBs+cWwy+t3strZ4AB8jP6/gwWWBERgP7gVa8uMJMbupdl39vFNYZrsJGmAblfwyvCISilFqV71BZArKA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=mTbTcNjo; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	s=arc-20240116; t=1750741120; c=relaxed/simple;
+	bh=uiYEwAB9cJ4a1HFd9UcbqZI4ko1OZt9aIPA1GF5UrKQ=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=s0S88r2RwhOrGBB2XpiOpQjD0e8Miwy0FNVriOSR6LbNpSGGtyuY7B4/V2vN/jA04bO0MvmeE8haLhSMI4Mj7KT829xLrHOAxTzQ/PhTCD6FtAOR/ipPyQzV24FXagtfvd3R/6tj/FumL23Y5q+BG+1/dGzlRoenJa8dcdOEcQQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zytor.com; spf=pass smtp.mailfrom=zytor.com; dkim=pass (2048-bit key) header.d=zytor.com header.i=@zytor.com header.b=DufJ0HSn; arc=none smtp.client-ip=198.137.202.136
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=zytor.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=zytor.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="mTbTcNjo"
-Received: from pps.filterd (m0279868.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 55NDRrEK017016
-	for <linux-efi@vger.kernel.org>; Tue, 24 Jun 2025 02:14:20 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	rXsS7jxuGefUn2n4a2PcfVZg4ooOKFqRyiTGh+plE6Q=; b=mTbTcNjoFIMpupY3
-	M9nf6M0iO7jrbBzOGCTzmv3I2kNdXddeHZRe0dd0S5f+z8qnJv1CHG0J8AoxAZk7
-	IOrfelL6P9VYacCnzrgEJgoXHNMv60fcBq+41/cSO47ZY6TS8TcW/FkmPBPfEErX
-	kVaX4UR9oF/IDnupDcV3/1+gtp+UheDaCCwSjESMwRiDOY2DrEJHP6R8r4wMgNrw
-	N+lqT1YympUowDsgf7W9iGveMmU5bISNygHLS0U9i9vV5K7nN4e4j1zXhXUSNgEn
-	3tvuiPf8En5fSQZmNmtewgJaiGNpuqB8HZU/eaMW/NOaiXxSn17UROsd53gXvhFs
-	M7DviA==
-Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com [209.85.222.198])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 47f7ttspwq-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
-	for <linux-efi@vger.kernel.org>; Tue, 24 Jun 2025 02:14:20 +0000 (GMT)
-Received: by mail-qk1-f198.google.com with SMTP id af79cd13be357-7c5e2872e57so745975985a.0
-        for <linux-efi@vger.kernel.org>; Mon, 23 Jun 2025 19:14:20 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1750731260; x=1751336060;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=rXsS7jxuGefUn2n4a2PcfVZg4ooOKFqRyiTGh+plE6Q=;
-        b=hAsMPoQMe7sQfVUKTmeD9R/pdUHsglZo1rw0Aw/bOmrSfb3Zx+z3zRMgUVkBSCCRAa
-         0p9GYTWnDU9mJZPtuaOTNTECDmMFsJDGjH1kmQkZN5Vgv/5Al6sDb96yaG2EwfGZeEp+
-         NC/GGfeBBi1P0XwEEBhjq1XEPUoV7Kpfoel4AbjVNydD+rhT8yS6nxk8PFO6Y0sVxaxV
-         zJYc4RXTTzBtUns4rZ6U148f6r3JHHAIZkBX4zCLfq/VAVkhfJXwGYkBFKqBHgrrxtmZ
-         0I7HAtuWZyEFU/1FWmSdvMgFUgJZzskGuGXFLjEr5vppTpUAK5rc5EgTeb8LRbuQu0z6
-         jNkA==
-X-Forwarded-Encrypted: i=1; AJvYcCUR2SHQS4dMFMZ8Sk/FJ6Y225mU1DqWQ+eIwvSVH3BYu4NPx7u6+fEq9PRcddGY4lib0Ek0rOUIT48=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwpzOvmizuwjdtuPLPjjrlGDmnkHNcm8lbbPwWXWpR9BN/sGFwe
-	3HV0zJ9IoToO5pr4mKtHoV2fPJ6XP0WL7P4GVUfu6o2/ufgokhpKNI5QXsdtSq3QJ4dw1kwSmrn
-	XyMI4sSIqX98KOqiiZBsifDN10L6BeHBxTzyFNSC4159hDj1WbwJR4OVeEegqWzM=
-X-Gm-Gg: ASbGncsgwlYNdTimr9QqjGGab+pdRIQJzRWWbX7tYTlDphsaMFmf3zpZ6mQIHyfobYP
-	xXRO+2KqtoULP1/JZiIYJeLa0CEMAMK+naGdTRAC0cBKOY5FB2gjqw16XynopyuhzefKVwumz+W
-	1J3ejEzAa4e8r8NAsmlZ1BCOmUani3V+AyYaJnO0gAnG5cvpBL83yqwdPAu1JSDgkKDqj+bvwkD
-	zlcWuUvp+S/yzL9Gy/VdDmiVLkpK6mYoaJvuZVfeASHMyasbevPJXTn2rewO7djMSPD52yzmnzg
-	i3VzZso6zskmaPOB8OTCHsH23lkaQ98dQDJBioKdj0aMlYva1OCqsQTxlUlPdibcD17I52wh14G
-	nykwxv/dviYBkpQtPlBN6aIZ1BZpgLZheET4=
-X-Received: by 2002:a05:620a:1922:b0:7cd:331d:bb3e with SMTP id af79cd13be357-7d3f9935e7emr2022904385a.32.1750731254912;
-        Mon, 23 Jun 2025 19:14:14 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHPRQEcxIl/1tKf9CY1/kqMs19qtzRY7gdh2XwyltdEkmnKpY5wXHxxDtB4ZK5neoLM+qrbsg==
-X-Received: by 2002:a05:620a:1922:b0:7cd:331d:bb3e with SMTP id af79cd13be357-7d3f9935e7emr2022901985a.32.1750731254441;
-        Mon, 23 Jun 2025 19:14:14 -0700 (PDT)
-Received: from umbar.lan (2001-14ba-a0c3-3a00-264b-feff-fe8b-be8a.rev.dnainternet.fi. [2001:14ba:a0c3:3a00:264b:feff:fe8b:be8a])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-553e41446e2sm1637764e87.32.2025.06.23.19.14.12
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 23 Jun 2025 19:14:12 -0700 (PDT)
-From: Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>
-Date: Tue, 24 Jun 2025 05:13:57 +0300
-Subject: [PATCH v3 6/8] firmware: qcom: scm: add modparam to control
- QSEECOM enablement
+	dkim=pass (2048-bit key) header.d=zytor.com header.i=@zytor.com header.b="DufJ0HSn"
+Received: from [192.168.7.202] ([71.202.166.45])
+	(authenticated bits=0)
+	by mail.zytor.com (8.18.1/8.17.1) with ESMTPSA id 55O4vDcL1209887
+	(version=TLSv1.3 cipher=TLS_AES_128_GCM_SHA256 bits=128 verify=NO);
+	Mon, 23 Jun 2025 21:57:14 -0700
+DKIM-Filter: OpenDKIM Filter v2.11.0 mail.zytor.com 55O4vDcL1209887
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=zytor.com;
+	s=2025062101; t=1750741040;
+	bh=RQWFXZn55IDLcAzi/4t23/ePhe2+5/YuMa6ZBUgri8g=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=DufJ0HSnnI/VmqZ9MtVQWe12S9oxvVJkv/WoG4RbVmP8dSoehrd5lfFT1fYUd/RgQ
+	 39P7j45TDDng6pr8TinxXfX+WZpb98WCxHCB4fNqtfuPyQBTtzadPny2HxoS+5fKDx
+	 +oPMwA/EIZboEvIlP1Uk3KvchHRgcTUlLu/euDhHaFgC7J49UjcjQfLUDHQskGgpAe
+	 25k7w9xCFOBiQ/D9J58DgZs8R1GUS746ktKBPhto6UYlL7THkOee6wfk5cNVyUD90h
+	 6Gq22UY1TpDqmwI1A4rzzRTULs/EaKzIMdxhNx3x9i92C96EBn5pPBFyG5tYlvnhh3
+	 +oBUeU3Dc8lFw==
+Message-ID: <5529aa92-191d-4120-a005-28fe5c209a4f@zytor.com>
+Date: Mon, 23 Jun 2025 21:57:13 -0700
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20250624-more-qseecom-v3-6-95205cd88cc2@oss.qualcomm.com>
-References: <20250624-more-qseecom-v3-0-95205cd88cc2@oss.qualcomm.com>
-In-Reply-To: <20250624-more-qseecom-v3-0-95205cd88cc2@oss.qualcomm.com>
-To: Bjorn Andersson <andersson@kernel.org>,
-        Maximilian Luz <luzmaximilian@gmail.com>,
-        Konrad Dybcio <konradybcio@kernel.org>, Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>, Ard Biesheuvel <ardb@kernel.org>,
-        Konrad Dybcio <konradybcio@kernel.org>
-Cc: Johan Hovold <johan@kernel.org>, Steev Klimaszewski <steev@kali.org>,
-        linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-efi@vger.kernel.org,
-        Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-X-Mailer: b4 0.14.2
-X-Developer-Signature: v=1; a=openpgp-sha256; l=3235;
- i=dmitry.baryshkov@oss.qualcomm.com; h=from:subject:message-id;
- bh=l/2vDz7zeLnp6OwntquJZV6YAtUYQ1dSv5z/W2j9Xfw=;
- b=owGbwMvMwMXYbdNlx6SpcZXxtFoSQ0YU57MOZyPTF/dlmU/ODlc/cNRYcel5y538c/YknT9vr
- KZ4qP5cJ6MxCwMjF4OsmCKLT0HL1JhNyWEfdkythxnEygQyhYGLUwAmMp+N/Z+NbJ3txjX7GioD
- /sdFlzMbu/ieiEotK///rsihPOJijY/1k4+bL22pOzPdPkiM629qs5+N0VG7X2tSfUulSiPflqZ
- l7tml6dJ9Pn+Hw/IeuSOn+H79nNe0ZEbNWen5n+/GKUcEJi0X/JI+J65Ecb4ot0yh4AH7om8MtU
- FLD0yNbcuQ3OVw/OSG8ss3Dbse90spqpXvPqpZsJl54b7bTpXSonahWyZ9Yr7Tk9fNl/M8vU1a4
- TVzTVb+f6bLM9Y3bUyV1I3eU51z1b/0v873JzHz/t/VSBSU2NTxYbXVtB/3/qlMaS1hWcYgv7lb
- Uu6nROf8g5y5jA+N2ZSKU/WvfTy1k7m34nP1nQsHFNIcAQ==
-X-Developer-Key: i=dmitry.baryshkov@oss.qualcomm.com; a=openpgp;
- fpr=8F88381DD5C873E4AE487DA5199BF1243632046A
-X-Authority-Analysis: v=2.4 cv=QINoRhLL c=1 sm=1 tr=0 ts=685a09fc cx=c_pps
- a=qKBjSQ1v91RyAK45QCPf5w==:117 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
- a=6IFa9wvqVegA:10 a=KKAkSRfTAAAA:8 a=EUspDBNiAAAA:8 a=JMKUWE_9wimnfyHsXasA:9
- a=QEXdDO2ut3YA:10 a=NFOGd7dJGGMPyQGDc5-O:22 a=cvBusfyB2V15izCimMoJ:22
-X-Proofpoint-ORIG-GUID: a9tWinRbgYBJJvGDOS7oipoFDtF8ZkjC
-X-Proofpoint-GUID: a9tWinRbgYBJJvGDOS7oipoFDtF8ZkjC
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNjI0MDAxNiBTYWx0ZWRfX8Bl6jxJngM21
- PKeHbUtA4sTczY3OQ41S8isK60jY4BICfwOrAzQqwb5WYM2iLbsdh0yx+Sm5KtRwOIo+AdQSiYn
- EBV39WRzfHFaozRDe2oiDz9pv0t3RPN1kHIP0VhGI8YC7HPwdouzsrAMGUuoTD7/lnWJHjlYOOs
- ljshrNIqw5TPmSJdUX80U074p1Cjxk2k0aBNnQRAs3oPKdj6gEJvSHjCPDWo91r+kVPl5rV0QK0
- rD0O9KIehKPl5z+BxYcasuRPYJAMU2nysZEnAFFCRXHk8HParqJDDKxpqiZ3nvNB1czENHT7u+M
- cmVjQYBtpJAaL3V8DooUObs3B00b04vVxD3MlCh2aI36BK/Ehu9XzqT6fkmK5XivWvYaHjBfKOn
- YifDHoJ2eC9YfiOaEhA/4wP0afMSi7fmOYpkhVP+/tn+jB/tI7oFD6eRh2eNVP3mtWhKQLTF
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.7,FMLib:17.12.80.40
- definitions=2025-06-24_01,2025-06-23_07,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- spamscore=0 priorityscore=1501 malwarescore=0 adultscore=0 mlxscore=0
- clxscore=1015 mlxlogscore=999 bulkscore=0 suspectscore=0 phishscore=0
- impostorscore=0 lowpriorityscore=0 classifier=spam authscore=0 authtc=n/a
- authcc= route=outbound adjust=0 reason=mlx scancount=1
- engine=8.19.0-2505280000 definitions=main-2506240016
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCHv6 01/16] x86/cpu: Enumerate the LASS feature bits
+To: "H. Peter Anvin" <hpa@zytor.com>,
+        "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
+Cc: Andy Lutomirski <luto@kernel.org>, Thomas Gleixner <tglx@linutronix.de>,
+        Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
+        Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org,
+        Peter Zijlstra <peterz@infradead.org>,
+        Ard Biesheuvel <ardb@kernel.org>,
+        "Paul E. McKenney" <paulmck@kernel.org>,
+        Josh Poimboeuf
+ <jpoimboe@kernel.org>,
+        Xiongwei Song <xiongwei.song@windriver.com>,
+        Xin Li <xin3.li@intel.com>, "Mike Rapoport (IBM)" <rppt@kernel.org>,
+        Brijesh Singh <brijesh.singh@amd.com>,
+        Michael Roth <michael.roth@amd.com>, Tony Luck <tony.luck@intel.com>,
+        Alexey Kardashevskiy <aik@amd.com>,
+        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
+        Jonathan Corbet <corbet@lwn.net>, Sohil Mehta <sohil.mehta@intel.com>,
+        Ingo Molnar <mingo@kernel.org>,
+        Pawan Gupta <pawan.kumar.gupta@linux.intel.com>,
+        Daniel Sneddon <daniel.sneddon@linux.intel.com>,
+        Kai Huang <kai.huang@intel.com>, Sandipan Das <sandipan.das@amd.com>,
+        Breno Leitao <leitao@debian.org>,
+        Rick Edgecombe
+ <rick.p.edgecombe@intel.com>,
+        Alexei Starovoitov <ast@kernel.org>, Hou Tao <houtao1@huawei.com>,
+        Juergen Gross <jgross@suse.com>,
+        Vegard Nossum <vegard.nossum@oracle.com>, Kees Cook <kees@kernel.org>,
+        Eric Biggers <ebiggers@google.com>, Jason Gunthorpe <jgg@ziepe.ca>,
+        "Masami Hiramatsu (Google)" <mhiramat@kernel.org>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Luis Chamberlain <mcgrof@kernel.org>, Yuntao Wang <ytcoode@gmail.com>,
+        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
+        Christophe Leroy <christophe.leroy@csgroup.eu>,
+        Tejun Heo <tj@kernel.org>, Changbin Du <changbin.du@huawei.com>,
+        Huang Shijie <shijie@os.amperecomputing.com>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Namhyung Kim <namhyung@kernel.org>,
+        Arnaldo Carvalho de Melo <acme@redhat.com>, linux-doc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
+        linux-mm@kvack.org, Yian Chen <yian.chen@intel.com>
+References: <20250620135325.3300848-1-kirill.shutemov@linux.intel.com>
+ <20250620135325.3300848-2-kirill.shutemov@linux.intel.com>
+ <d3055288-c640-4df3-978e-abb97b1610e7@zytor.com>
+ <tfpekzid4hu4xguq3fetosyltg3owjy2cactqklohfohalhbza@hx7qdrpcymrn>
+ <aa91aadb-758e-42db-86ab-451384e466ed@zytor.com>
+ <D8783A84-119A-4981-9EB1-12C21BB34714@zytor.com>
+ <f04936b7-e1e1-4a63-a907-33315af0dd8f@zytor.com>
+ <73796800-819b-4433-b0ef-db852336d7a4@zytor.com>
+ <0A71C898-B587-4292-AB05-6CA46BBD6F88@zytor.com>
+Content-Language: en-US
+From: Xin Li <xin@zytor.com>
+Autocrypt: addr=xin@zytor.com; keydata=
+ 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
+ l75w1xInsg==
+In-Reply-To: <0A71C898-B587-4292-AB05-6CA46BBD6F88@zytor.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-From: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+On 6/23/2025 7:04 PM, H. Peter Anvin wrote:
+> On June 23, 2025 10:40:59 AM PDT, Xin Li <xin@zytor.com> wrote:
+>> On 6/20/2025 5:50 PM, H. Peter Anvin wrote:
+>>> On 2025-06-20 17:45, H. Peter Anvin wrote:
+>>>>>
+>>>>> But I simply hate adding a disabled feature that depends on !X86_64;
+>>>>> x86_64 has a broad scope, and new CPU features are often intentionally
+>>>>> not enabled for 32-bit.
+>>>>>
+>>>>> (X86_DISABLED_FEATURE_PCID is the only one before LASS)
+>>>>
+>>>> More importantly, it is wrong.
+>>>>
+>>>> The 32-bit build can depend on this feature not existing, therefore it SHOULD be listed as a disabled feature.
+>>>>
+>>>
+>>> Ok, that was word salad. What I meant was that the original patch is correct, and we SHOULD have this as a disabled feature.
+>>
+>> Agreed!
+>>
+>>> The reason is that it reduces the need to explicitly test for 32/64 bits for features that don't exist on 32 bits. When they are flagged as disabled, they get filtered out *at compile time*.
+>>
+>> It's better to make it depend on X86_32 directly rather than !X86_64:
+>>
+>> config X86_DISABLED_FEATURE_LASS
+>> 	def_bool y
+>> 	depends on X86_32
+>>
+>>
+>> But the disabled feature list due to lack of 32-bit enabling will keep
+>> growing until we remove 32-bit kernel code.
+>>
+>> Wondering should we bother enforcing cpuid_deps[] on 32-bit?
+>>
+>> IOW, turn off the feature when its dependency isn’t satisfied on 32b-it;
+>> don’t just throw a warning and hope for the best.
+>>
+>> Thanks!
+>>     Xin
+>>
+> 
+> We should have the dependencies enforced; in fact, preferably we would enforce them at build time as well.
+> 
+> 
 
-In preparation to enabling QSEECOM for the platforms rather than
-individual machines provide a mechanism for the user to override default
-selection. Allow users to use qcom_scm.qseecom modparam.
-
-Setting it to 'force' will enable QSEECOM even if it disabled or not
-handled by the allowlist.
-
-Setting it to 'off' will forcibly disable the QSEECOM interface,
-allowing incompatible machines to function.
-
-Setting it to 'roefivars' will enable the QSEECOM interface, making UEFI
-variables read-only.
-
-All other values mean 'auto', trusting the allowlist in the module.
-
-Signed-off-by: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-Signed-off-by: Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>
----
- drivers/firmware/qcom/qcom_scm.c | 27 ++++++++++++++++++++++++---
- 1 file changed, 24 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/firmware/qcom/qcom_scm.c b/drivers/firmware/qcom/qcom_scm.c
-index 27ef2497089e11b5a902d949de2e16b7443a2ca4..5bf59eba2a863ba16e59df7fa2de1c50b0a218d0 100644
---- a/drivers/firmware/qcom/qcom_scm.c
-+++ b/drivers/firmware/qcom/qcom_scm.c
-@@ -1983,9 +1983,14 @@ EXPORT_SYMBOL_GPL(qcom_scm_qseecom_app_send);
- 
- static unsigned long qcom_qseecom_ro_uefi = QCOM_QSEECOM_QUIRK_RO_UEFIVARS;
- 
-+static char *qseecom = "auto";
-+MODULE_PARM_DESC(qseecom, "Enable QSEECOM interface (force | roefivars | off | auto)");
-+module_param(qseecom, charp, 0);
-+
- /*
-  * We do not yet support re-entrant calls via the qseecom interface. To prevent
-- + any potential issues with this, only allow validated machines for now.
-+ * any potential issues with this, only allow validated machines for now. Users
-+ * still can manually enable or disable it via the qcom_scm.qseecom modparam.
-  */
- static const struct of_device_id qcom_scm_qseecom_allowlist[] __maybe_unused = {
- 	{ .compatible = "asus,vivobook-s15" },
-@@ -2013,11 +2018,27 @@ static const struct of_device_id qcom_scm_qseecom_allowlist[] __maybe_unused = {
- 	{ }
- };
- 
--static bool qcom_scm_qseecom_machine_is_allowed(unsigned long *quirks)
-+static bool qcom_scm_qseecom_machine_is_allowed(struct device *scm_dev,
-+						unsigned long *quirks)
- {
- 	const struct of_device_id *match;
- 	struct device_node *np;
- 
-+	if (!strcmp(qseecom, "off")) {
-+		dev_info(scm_dev, "qseecom: disabled by modparam\n");
-+		return false;
-+	} else if (!strcmp(qseecom, "force")) {
-+		dev_info(scm_dev, "qseecom: forcibly enabled\n");
-+		*quirks = 0;
-+		return true;
-+	} else if (!strcmp(qseecom, "roefivars")) {
-+		dev_info(scm_dev, "qseecom: enabling with R/O UEFI variables\n");
-+		*quirks = QCOM_QSEECOM_QUIRK_RO_UEFIVARS;
-+		return true;
-+	} else if (strcmp(qseecom, "auto")) {
-+		dev_warn(scm_dev, "qseecom: invalid value for the modparam, ignoring\n");
-+	}
-+
- 	np = of_find_node_by_path("/");
- 	if (!np)
- 		return false;
-@@ -2065,7 +2086,7 @@ static int qcom_scm_qseecom_init(struct qcom_scm *scm)
- 
- 	dev_info(scm->dev, "qseecom: found qseecom with version 0x%x\n", version);
- 
--	if (!qcom_scm_qseecom_machine_is_allowed(&quirks)) {
-+	if (!qcom_scm_qseecom_machine_is_allowed(scm->dev, &quirks)) {
- 		dev_info(scm->dev, "qseecom: untested machine, skipping\n");
- 		return 0;
- 	}
-
--- 
-2.39.5
-
+Yeah, sounds something we can do later :)
