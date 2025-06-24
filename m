@@ -1,36 +1,93 @@
-Received: from mail.loongson.cn (mail.loongson.cn [114.242.206.163])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 8879223BCFF;
-	Tue, 24 Jun 2025 08:18:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=114.242.206.163
+Received: from mail-ed1-f47.google.com (mail-ed1-f47.google.com [209.85.208.47])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5EDEE86347;
+	Tue, 24 Jun 2025 08:23:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750753140; cv=none; b=XPMBh8gYtyiigPWfJ4cCbAjHPYj32r8rXEaKOWHhRQeT8Fk0eyIgGwGg8cw9GucgL8G5MoqiQytX7OpWyky9R6rIi39qqieX9g3qQnECMYFXNXxkUjGzNz4bQqJia3p+eu4bixZ+kqVV5rQ0FDSpQWy+ZVOc4eOPiOzz0kD8T6E=
+	t=1750753436; cv=none; b=kuv7NYz3LvwUX1HcXLEMt8QnJ9vRxuZyHiYVl1oMhP+WwBh2UMQ1dnqmWIOEAqNUFo15OHbUMi7tXcNGDhCy6wkLUyXgQ0m1auYJZb2H1CyoNM/lGXJXBeF754Cu8iAcWmx1CiDwg8WhpQS7yYZEh/ZW39nnJwHqAUuVoQZTLNY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750753140; c=relaxed/simple;
-	bh=z34k/rz5oU4KRhHSyCwlYWpvC4hE0GFChAVXhYLHPqs=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=G3LfUu8VgmxSeDAv5m5v8bBMluyaIgAslXsbBX7M2qBZ6CmlhJrzuSM2JcGsbsob4a1OtzA3tkT7O3VG7/zsZUnXWXUxI04ntMI+od7zUy75tY3O6TnpnPaG9ICxdjRML1PbtB5yTxPBiraRv82o/V057vYnCipUDZ1qNotyZhc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn; spf=pass smtp.mailfrom=loongson.cn; arc=none smtp.client-ip=114.242.206.163
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=loongson.cn
-Received: from loongson.cn (unknown [111.207.111.194])
-	by gateway (Coremail) with SMTP id _____8Axx2ltX1poxxYcAQ--.28731S3;
-	Tue, 24 Jun 2025 16:18:54 +0800 (CST)
-Received: from ubuntu.. (unknown [111.207.111.194])
-	by front1 (Coremail) with SMTP id qMiowMCxbsVsX1po5oYoAQ--.60731S2;
-	Tue, 24 Jun 2025 16:18:53 +0800 (CST)
-From: Ming Wang <wangming01@loongson.cn>
-To: Ard Biesheuvel <ardb@kernel.org>,
-	Huacai Chen <chenhuacai@kernel.org>,
-	WANG Xuerui <kernel@xen0n.name>,
+	s=arc-20240116; t=1750753436; c=relaxed/simple;
+	bh=0DRoBk7a+ONA+bOlmOa0vOv2EeXtSy0ZwgcOZn/WSpk=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=AtABd4X42IgFTnfJrQvMlPaxpyNn9bHMV2NEMZ5kP/Iv19oLD8CrhfUUjkCSiH4wQHisXSTeDYM1O0VDFMRyCu3Rpvv8h6xy75KX9JYhj/t8uOdVrZt14Yb9C29H7NQNi16hC9fzCIKRc5UpB8f82+Hs+xDRK3GMMnQORDVbIco=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Q1a64fpg; arc=none smtp.client-ip=209.85.208.47
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Q1a64fpg"
+Received: by mail-ed1-f47.google.com with SMTP id 4fb4d7f45d1cf-6077dea37easo9602970a12.3;
+        Tue, 24 Jun 2025 01:23:54 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1750753433; x=1751358233; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=2H7FVeT03BXWcr+Xp7XmzKQpCwCD96qmn55NwEfYCg4=;
+        b=Q1a64fpgVglQwckG0B0D31EwaQG/F5hrRItQ6rKNSLUIKLtJZl2s4L+w/9vQI2c4qc
+         cGVmv2aMfv3ktx4nddCGSH0O7JpZ9DOxr5epv75jIqiRsRD4KBLOeAAJNrzLlRfLU5S5
+         ymz2vSGkuvCR0UEca32U1LC02BvmAeOszLoSjpc2RLVQ4HRB38b2oNZSkyiH9sy8XC8E
+         KsTdZC/KxlLZ+tFL2/5rn4HCuP5eltw4Fg00qMciCStbc3TOhZci2UXwycXjz1ZWuK5r
+         nMh7IfYl8mHpYbzY+qUPckQbbxfuuqvzwfJm8ybvZHdDG5GCHnk3JrpHy3w3fqGgTlnd
+         NGgQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1750753433; x=1751358233;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=2H7FVeT03BXWcr+Xp7XmzKQpCwCD96qmn55NwEfYCg4=;
+        b=lbNKEiK5azPfZNkABwm+LMj9PBV5QgZcXnsblE6MVYmXGgNSZfYZ2bbLUp72ZuQ9s2
+         S1W+slVf2zmCn7tqXf7bq8X1yZbmVgcpZRbSyCw1afAhPTKiQvKEcHM4UL/YEhXW5H4L
+         l84Da5P9QO4Qwmjb1JbjG5kKGyTm+4e/+W6KbFUdTAbi4VOs3kwz4VS5WINZby9pdGE7
+         FdN2T4In0hSj2YIcGIyP9JiK0fqZyzsdtCFfhWYV4j38/1lee4UJfJhIYWQRHxCp2iTx
+         9fPiyh4lhZGolOL5IQrOMpoyEyQva6gcrfU0oDHQ38CloqeaTbq4rthlw80Pmw/CGqq3
+         jjpQ==
+X-Forwarded-Encrypted: i=1; AJvYcCV6TS4SZOBFmTKDoPIn5FkhrDQKmi4jFzRbdkKhmz5P1K14cbRGcK8nzse07R2MlEm3jq1h3t7mUvs=@vger.kernel.org, AJvYcCVrM4NQK9XEH6ZGRubmCongv856PUSQY91BzF5v7st0al4p5JnCUpU/D+x3BZ3jMU86LaKpW9Az8ENS@vger.kernel.org, AJvYcCX8Fs/IcWD8IuYBG4iH5V4mXfxaKSspFD/iYgu/EdKikyA3AtHcAzYjWsNc+AtixHnw4AZGg8T7iRLrSGT+@vger.kernel.org
+X-Gm-Message-State: AOJu0YwcJwebTMdMrbhl6+f0gqvGsNFahbLcejHG7z8fOENUm1jMz+S6
+	fJ5IF8Cl9sLWeq0FuEFRxqiao1UJwuZalg7J2NMC/02mVvOlND3hK5q2
+X-Gm-Gg: ASbGnctGUYoxtfXi3Lm9Tetm5ZqAfRlXtFhqZDU8cKqvYE89p2BThTcuHDEZTdwCmae
+	Fk894vEzhOhAfhsLj3bUvqgzdE2VOodPZU5LtGDNGkC9LgAc/8vg8QJ8abMee2c3Ysf4yrEXqAL
+	dR4iZhfJZIhPOYjBZ4KmrgQruaBQgOHIu8szBIybH+v3g9/d0XgO9pFFnyn4YSpS2Id9JtFkbBH
+	sKsOvAroKyh7EmQ3oxlYKFvhLnqvvmpAy9t0o6aXJEZa4V0VOrOw2yJTLoRqcwCg/XjMghpx0Rj
+	hA5yJnQHaKDXcTuq8fMgqJ9gd6W9kBRLdhPrUfZi3P9QcC/N+e92f9ERqDvYvpzYknF4dKDywLZ
+	s
+X-Google-Smtp-Source: AGHT+IE6uFBShvRtJlJrHnQfSTfKaDchryVCXm3Xlc5jSRa7ZBWQ78xrOHfYewZsoH8M4NZdRafhDg==
+X-Received: by 2002:a17:907:9816:b0:ad8:9b24:9d16 with SMTP id a640c23a62f3a-ae0579cd970mr1424596366b.6.1750753432204;
+        Tue, 24 Jun 2025 01:23:52 -0700 (PDT)
+Received: from localhost.localdomain ([41.79.198.24])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-ae053e7c6fdsm829165466b.3.2025.06.24.01.23.49
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 24 Jun 2025 01:23:52 -0700 (PDT)
+From: Khalid Ali <khaliidcaliy@gmail.com>
+X-Google-Original-From: Khalid Ali <khaliidcaliy@gmail.com
+To: tglx@linutronix.de,
+	mingo@redhat.com,
+	bp@alien8.de,
+	dave.hansen@linux.intel.com,
+	hpa@zytor.com,
+	corbet@lwn.net
+Cc: luto@kernel.org,
+	peterz@infradead.org,
+	ardb@kernel.org,
+	jan.kiszka@siemens.com,
+	kbingham@kernel.org,
+	kirill.shutemov@linux.intel.com,
+	michael.roth@amd.com,
+	rick.p.edgecombe@intel.com,
+	brijesh.singh@amd.com,
+	sandipan.das@amd.com,
+	jgross@suse.com,
+	thomas.lendacky@amd.com,
+	linux-kernel@vger.kernel.org,
+	linux-doc@vger.kernel.org,
 	linux-efi@vger.kernel.org,
-	loongarch@lists.linux.dev,
-	linux-kernel@vger.kernel.org
-Cc: lixuefeng@loongson.cn,
-	chenhuacai@loongson.cn,
-	gaojuxin@loongson.cn
-Subject: [PATCH] efi/loongarch: Reserve EFI memory map region
-Date: Tue, 24 Jun 2025 16:18:52 +0800
-Message-ID: <20250624081852.1563985-1-wangming01@loongson.cn>
-X-Mailer: git-send-email 2.43.0
+	linux-mm@kvack.org
+Subject: Re: [PATCHv2 0/3] x86: Make 5-level paging support unconditional for x86-64
+Date: Tue, 24 Jun 2025 08:23:03 +0000
+Message-ID: <20250624082305.2351-1-khaliidcaliy@gmail.com>
+X-Mailer: git-send-email 2.49.0
+In-Reply-To: <20250516123306.3812286-1-kirill.shutemov@linux.intel.com>
+References: <20250516123306.3812286-1-kirill.shutemov@linux.intel.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -38,79 +95,60 @@ List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:qMiowMCxbsVsX1po5oYoAQ--.60731S2
-X-CM-SenderInfo: 5zdqwzxlqjiio6or00hjvr0hdfq/1tbiAgEDEmhZ3+0IvAAAsl
-X-Coremail-Antispam: 1Uk129KBj93XoW7CF1kuF1rCr4UXr48Aw4UWrX_yoW8Kr17p3
-	4xAr4kKrs5AFn3X34xG3y8uF45ua93K34fWF9Iyr909ws8AF1xZr4ftFyY9ay2qr4kGw1j
-	gFn8Ca4Iva1DJabCm3ZEXasCq-sJn29KB7ZKAUJUUUUr529EdanIXcx71UUUUU7KY7ZEXa
-	sCq-sGcSsGvfJ3Ic02F40EFcxC0VAKzVAqx4xG6I80ebIjqfuFe4nvWSU5nxnvy29KBjDU
-	0xBIdaVrnRJUUUBjb4IE77IF4wAFF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2
-	IYs7xG6rWj6s0DM7CIcVAFz4kK6r1j6r18M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48v
-	e4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_Xr0_Ar1l84ACjcxK6xIIjxv20xvEc7CjxVAFwI
-	0_Gr0_Cr1l84ACjcxK6I8E87Iv67AKxVW0oVCq3wA2z4x0Y4vEx4A2jsIEc7CjxVAFwI0_
-	GcCE3s1ln4kS14v26r1Y6r17M2vYz4IE04k24VAvwVAKI4IrM2AIxVAIcxkEcVAq07x20x
-	vEncxIr21l57IF6xkI12xvs2x26I8E6xACxx1l5I8CrVACY4xI64kE6c02F40Ex7xfMcIj
-	6xIIjxv20xvE14v26r1Y6r17McIj6I8E87Iv67AKxVWUJVW8JwAm72CE4IkC6x0Yz7v_Jr
-	0_Gr1lF7xvr2IYc2Ij64vIr41l42xK82IYc2Ij64vIr41l4I8I3I0E4IkC6x0Yz7v_Jr0_
-	Gr1l4IxYO2xFxVAFwI0_Jrv_JF1lx2IqxVAqx4xG67AKxVWUJVWUGwC20s026x8GjcxK67
-	AKxVWUGVWUWwC2zVAF1VAY17CE14v26r1q6r43MIIYrxkI7VAKI48JMIIF0xvE2Ix0cI8I
-	cVAFwI0_Jr0_JF4lIxAIcVC0I7IYx2IY6xkF7I0E14v26r1j6r4UMIIF0xvE42xK8VAvwI
-	8IcIk0rVWUJVWUCwCI42IY6I8E87Iv67AKxVWUJVW8JwCI42IY6I8E87Iv6xkF7I0E14v2
-	6r1j6r4UYxBIdaVFxhVjvjDU0xZFpf9x07jbYFAUUUUU=
 
-The EFI memory map at 'boot_memmap' is crucial for kdump to understand
-the primary kernel's memory layout. This memory region, typically part
-of EFI Boot Services (BS) data, can be overwritten after ExitBootServices
-if not explicitly preserved by the kernel.
+>Both Intel and AMD CPUs support 5-level paging, which is expected to
+>become more widely adopted in the future.
+>
+>Remove CONFIG_X86_5LEVEL.
+>
+>In preparation to that remove CONFIG_DYNAMIC_MEMORY_LAYOUT and make
+>SPARSEMEM_VMEMMAP the only memory model.
+>
+>v3:
+> - Drop few "#if CONFIG_PGTABLE_LEVELS >= 5";
+> - Make PARAVIRT_XXL 64-bit explicitly and drop ifdefs
+>   to support PGTABLE_LEVELS < 5;
+> - Add Reviewed-by tags from Ard;
+>v2:
+> - Fix 32-bit build by wrapping p4d_set_huge() and p4d_clear_huge() in
+>   #if CONFIG_PGTABLE_LEVELS > 4;
+> - Rebased onto current tip/master;
+>
+>Kirill A. Shutemov (4):
+>  x86/64/mm: Always use dynamic memory layout
+>  x86/64/mm: Make SPARSEMEM_VMEMMAP the only memory model
+>  x86/64/mm: Make 5-level paging support unconditional
+>  x86/paravirt: Restrict PARAVIRT_XXL to 64-bit only
+>
+> Documentation/arch/x86/cpuinfo.rst            |  8 ++---
+> .../arch/x86/x86_64/5level-paging.rst         |  9 -----
+> arch/x86/Kconfig                              | 33 ++-----------------
+> arch/x86/Kconfig.cpufeatures                  |  4 ---
+> arch/x86/boot/compressed/pgtable_64.c         | 11 ++-----
+> arch/x86/boot/header.S                        |  4 ---
+> arch/x86/boot/startup/map_kernel.c            |  5 +--
+> arch/x86/entry/vsyscall/vsyscall_64.c         |  2 --
+> arch/x86/include/asm/page_64.h                |  2 --
+> arch/x86/include/asm/page_64_types.h          | 11 -------
+> arch/x86/include/asm/paravirt.h               |  4 ---
+> arch/x86/include/asm/paravirt_types.h         |  2 --
+> arch/x86/include/asm/pgtable_64.h             |  2 --
+> arch/x86/include/asm/pgtable_64_types.h       | 24 --------------
+> arch/x86/kernel/alternative.c                 |  2 +-
+> arch/x86/kernel/head64.c                      |  4 ---
+> arch/x86/kernel/head_64.S                     |  2 --
+> arch/x86/kernel/paravirt.c                    |  2 --
+> arch/x86/mm/init.c                            |  4 ---
+> arch/x86/mm/init_64.c                         |  9 +----
+> arch/x86/mm/pgtable.c                         |  2 +-
+> arch/x86/xen/mmu_pv.c                         |  4 ---
+> drivers/firmware/efi/libstub/x86-5lvl.c       |  2 +-
+> scripts/gdb/linux/pgtable.py                  |  4 +--
+> 24 files changed, 14 insertions(+), 142 deletions(-)
 
-This commit addresses this by:
-1. Calling memblock_reserve() to reserve the entire physical region
-   occupied by the EFI memory map (header + descriptors). This prevents
-   the primary kernel from reallocating and corrupting this area.
-2. Setting the EFI_PRESERVE_BS_REGIONS flag in efi.flags. This indicates
-   that efforts have been made to preserve critical BS data regions,
-   which can be useful for other kernel subsystems or debugging.
+I think i am too late, however this is completely wrong. There are still processors that doesn't support
+5-level paging which is mordern. We may call those processors old, however they are still common and used.
 
-These changes ensure the original EFI memory map data remains intact,
-improving kdump reliability and potentially aiding other EFI-related
-functionalities that might rely on preserved BS data.
+So this patch seem too early for that. Some intel core-i5 and core-i7 doesn't support 5-level paging at all.
 
-Signed-off-by: Ming Wang <wangming01@loongson.cn>
----
- arch/loongarch/kernel/efi.c | 13 +++++++++++++
- 1 file changed, 13 insertions(+)
-
-diff --git a/arch/loongarch/kernel/efi.c b/arch/loongarch/kernel/efi.c
-index de21e72759ee..98b1f0c030fc 100644
---- a/arch/loongarch/kernel/efi.c
-+++ b/arch/loongarch/kernel/efi.c
-@@ -135,6 +135,7 @@ void __init efi_init(void)
- 	tbl = early_memremap_ro(boot_memmap, sizeof(*tbl));
- 	if (tbl) {
- 		struct efi_memory_map_data data;
-+		phys_addr_t reserve_size = sizeof(*tbl) + tbl->map_size;
- 
- 		data.phys_map		= boot_memmap + sizeof(*tbl);
- 		data.size		= tbl->map_size;
-@@ -144,6 +145,18 @@ void __init efi_init(void)
- 		if (efi_memmap_init_early(&data) < 0)
- 			panic("Unable to map EFI memory map.\n");
- 
-+		/*
-+		 * Reserve the physical memory region occupied by the EFI
-+		 * memory map table (header + descriptors). This is crucial
-+		 * for kdump, as the kdump kernel relies on this original
-+		 * memmap passed by the bootloader. Without reservation,
-+		 * this region could be overwritten by the primary kernel.
-+		 * Also, set the EFI_PRESERVE_BS_REGIONS flag to indicate that
-+		 * critical boot services data regions like this are preserved.
-+		 */
-+		memblock_reserve((phys_addr_t)boot_memmap, reserve_size);
-+		set_bit(EFI_PRESERVE_BS_REGIONS, &efi.flags);
-+
- 		early_memunmap(tbl, sizeof(*tbl));
- 	}
- 
--- 
-2.43.0
-
+This will break x86_64 cpus that doesn't support 5-level paging.
