@@ -1,50 +1,50 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.14])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.14])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8680A26A0F2;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 59E04267B7F;
 	Wed, 25 Jun 2025 12:51:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.14
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.14
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750855898; cv=none; b=krnxnNdMli3vL/+c9ywz3UVg0a95ZRiMPeVcpoeSBlje2yu06z8OFHb54tXsjPPuVpmhjtINBV7527UjzSG6xFOnCKAmL/y0QZreFP71kViyWd7v/htu2+zFqXP3jkbWXB5IEoLEXEEdPVxySVzhFEAZpxNzxZoKfmyOQjZ5Md8=
+	t=1750855898; cv=none; b=FEwyH+4NzBAAImzAjy9elsM4Fti79/Eb3KJdOeFg3NnKiJbWOsP1sgoG42SJ5vVhrl/sVJnxkxTFi/AEk5UvudDC1+NVcvdETSN5jV/uKCabudlR8lpuiFCJ3Fn3js9JhgCfJ4gCDufs2cd6LBi/RxmzkZf50iufqV9t8xr0JTE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1750855898; c=relaxed/simple;
-	bh=gDZAIaId/LE+Cg3g34PHSl3JoHL8xvSE+GTgwe6XlKg=;
+	bh=UXQro1nhuXHnLN9WvBTrdf+zqqavYnpmltBFM1Abf3w=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=gACQ1j288OR1y8FC2Dc+jUbzthJEm+Ujma2fvcNM2963spynHnKOshbLvQ4IV8cbVU4VHgw7+n2ldJTrOLeQ7VqqzC1vnIMwWXXgBnjIwU29Xza2NP1z1jl8yCCCG4b/EZM2CZHnLozUz9N6YQJivBPiLHnTKSn8GDGKdXs7Eyc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.helo=mgamail.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Z4ZYli/o; arc=none smtp.client-ip=198.175.65.14
+	 MIME-Version; b=cEEU71N+LRv4VRGpdF1Ji+GP/Y++EJN9YpdWwL7SqC+ZKaFZyT+32CJDoiqCyDWQw9sFNCBRbnGxD8NfNGOANS4mqgJ+vvtVQIHExnDkIWLBz6GlCiil5Z+Aon+sbaHWXn9epwaAtg0FLuve8CL33siHpVcS/MssF/YWc70mPbo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.helo=mgamail.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=PeKpUjDR; arc=none smtp.client-ip=192.198.163.14
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.helo=mgamail.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Z4ZYli/o"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="PeKpUjDR"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1750855896; x=1782391896;
+  t=1750855897; x=1782391897;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=gDZAIaId/LE+Cg3g34PHSl3JoHL8xvSE+GTgwe6XlKg=;
-  b=Z4ZYli/oIFvsVqCOdrR6LaG3tkrApxKCdKBvpImOfokXnGhDwmm7wDV8
-   RGiyrCdKqY0MLilR7FY+uchVsVBMcLfWJWgW+HEg+S2voZ1NXq8t89vxT
-   rHT3d3vY9YAXcvp24WWuGwD5jcGui91GP3g4SKeJByXglJqfWAohvP6xd
-   hWvz4KWEhfQtQSS7VWy6B5NiO7NlbggBpSTEkiay2gtS54RFZcfU2ODDn
-   xMkIwCSSrf/M3WBf0GKAoCNE2VSsmdwzgvJmbNGNjxYP0qSIvsVWGFGfa
-   EOjaONH+MAeu+GGC8jQYXv2DkavKBmVrlohBECl4Ut5RKnpysyWsiGgja
-   w==;
-X-CSE-ConnectionGUID: WbdQy+/VRI6Wnosw+WwtHQ==
-X-CSE-MsgGUID: 4Xp0zkwLQBuCPLcVfk9zLQ==
-X-IronPort-AV: E=McAfee;i="6800,10657,11474"; a="56908374"
+  bh=UXQro1nhuXHnLN9WvBTrdf+zqqavYnpmltBFM1Abf3w=;
+  b=PeKpUjDRBAqmu/+zP9mLeYlkWMMpvTrfKpg8Bj3Ugz37y4M5U45JkGem
+   99n2wvKsWZGqro5yuhxht/DuNSXLgCFSqeNg1heG18d6qqF2qki+DpTR7
+   ljblUBiywsWKAUmIyhmDt3UIPntG+GW5P64+vQiVLpmmEOXxQ8zI7s1OB
+   fWNCuNrkn3rNqmEJLU4iXu2X+UuW0irww9Q9FOboZpxWtlQdMEOMq+tvo
+   NxwbDV3OEAB56K9bUOHTUt02Rp/Xj0YyorCLw5BltDfED2IGNzVc66Qo4
+   mgGV1GaAkLTAUFdtNG8dtcQhk9736uQuAZVyZvfuE3K7WrWktoGflWonk
+   g==;
+X-CSE-ConnectionGUID: t8Gmlj1OQ4GoI1NLFQRfHg==
+X-CSE-MsgGUID: xevJyp7eSLWQHisoET+q4A==
+X-IronPort-AV: E=McAfee;i="6800,10657,11474"; a="53189677"
 X-IronPort-AV: E=Sophos;i="6.16,264,1744095600"; 
-   d="scan'208";a="56908374"
-Received: from fmviesa010.fm.intel.com ([10.60.135.150])
-  by orvoesa106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Jun 2025 05:51:36 -0700
-X-CSE-ConnectionGUID: PuC99ST/SMezEVXWAKvk2g==
-X-CSE-MsgGUID: vtZJnGSOR+mfXpIQU3xILw==
+   d="scan'208";a="53189677"
+Received: from fmviesa007.fm.intel.com ([10.60.135.147])
+  by fmvoesa108.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Jun 2025 05:51:35 -0700
+X-CSE-ConnectionGUID: RMGteUxqQ/CYn3tiM3llaQ==
+X-CSE-MsgGUID: 13ncQLpfTTKgVxgxDKLEGg==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.16,264,1744095600"; 
-   d="scan'208";a="152919817"
+   d="scan'208";a="151830984"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by fmviesa010.fm.intel.com with ESMTP; 25 Jun 2025 05:51:25 -0700
+  by fmviesa007.fm.intel.com with ESMTP; 25 Jun 2025 05:51:24 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1000)
-	id 518C6862; Wed, 25 Jun 2025 15:51:13 +0300 (EEST)
+	id 32CCD7A8; Wed, 25 Jun 2025 15:51:13 +0300 (EEST)
 From: "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
 To: Andy Lutomirski <luto@kernel.org>,
 	Thomas Gleixner <tglx@linutronix.de>,
@@ -98,9 +98,9 @@ Cc: Jonathan Corbet <corbet@lwn.net>,
 	linux-efi@vger.kernel.org,
 	linux-mm@kvack.org,
 	"Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-Subject: [PATCHv7 16/16] x86: Re-enable Linear Address Masking
-Date: Wed, 25 Jun 2025 15:51:09 +0300
-Message-ID: <20250625125112.3943745-18-kirill.shutemov@linux.intel.com>
+Subject: [PATCHv7 14/16] x86/cpu: Make LAM depend on LASS
+Date: Wed, 25 Jun 2025 15:51:07 +0300
+Message-ID: <20250625125112.3943745-16-kirill.shutemov@linux.intel.com>
 X-Mailer: git-send-email 2.47.2
 In-Reply-To: <20250625125112.3943745-1-kirill.shutemov@linux.intel.com>
 References: <20250625125112.3943745-1-kirill.shutemov@linux.intel.com>
@@ -112,54 +112,32 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-This reverts commit 3267cb6d3a174ff83d6287dcd5b0047bbd912452.
+From: Alexander Shishkin <alexander.shishkin@linux.intel.com>
 
-LASS mitigates the Spectre based on LAM (SLAM) [1] and the previous
-commit made LAM depend on LASS, so we no longer need to disable LAM at
-compile time, so revert the commit that disables LAM.
-
-Adjust USER_PTR_MAX if LAM enabled, allowing tag bits to be set for
-userspace pointers. The value for the constant is defined in a way to
-avoid overflow compiler warning on 32-bit config.
+To prevent exploits for Spectre based on LAM as demonstrated by the
+whitepaper [1], make LAM depend on LASS, which avoids this type of
+vulnerability.
 
 [1] https://download.vusec.net/papers/slam_sp24.pdf
 
+Signed-off-by: Alexander Shishkin <alexander.shishkin@linux.intel.com>
 Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
-Cc: Pawan Gupta <pawan.kumar.gupta@linux.intel.com>
 ---
- arch/x86/Kconfig             | 1 -
- arch/x86/kernel/cpu/common.c | 5 +----
- 2 files changed, 1 insertion(+), 5 deletions(-)
+ arch/x86/kernel/cpu/cpuid-deps.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
-index 71019b3b54ea..2b48e916b754 100644
---- a/arch/x86/Kconfig
-+++ b/arch/x86/Kconfig
-@@ -2181,7 +2181,6 @@ config RANDOMIZE_MEMORY_PHYSICAL_PADDING
- config ADDRESS_MASKING
- 	bool "Linear Address Masking support"
- 	depends on X86_64
--	depends on COMPILE_TEST || !CPU_MITIGATIONS # wait for LASS
- 	help
- 	  Linear Address Masking (LAM) modifies the checking that is applied
- 	  to 64-bit linear addresses, allowing software to use of the
-diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
-index 97a228f917a9..6f2ae9e702bc 100644
---- a/arch/x86/kernel/cpu/common.c
-+++ b/arch/x86/kernel/cpu/common.c
-@@ -2558,11 +2558,8 @@ void __init arch_cpu_finalize_init(void)
- 	if (IS_ENABLED(CONFIG_X86_64)) {
- 		unsigned long USER_PTR_MAX = TASK_SIZE_MAX;
+diff --git a/arch/x86/kernel/cpu/cpuid-deps.c b/arch/x86/kernel/cpu/cpuid-deps.c
+index 98d0cdd82574..11bb9ed40140 100644
+--- a/arch/x86/kernel/cpu/cpuid-deps.c
++++ b/arch/x86/kernel/cpu/cpuid-deps.c
+@@ -90,6 +90,7 @@ static const struct cpuid_dep cpuid_deps[] = {
+ 	{ X86_FEATURE_FRED,			X86_FEATURE_LKGS      },
+ 	{ X86_FEATURE_SPEC_CTRL_SSBD,		X86_FEATURE_SPEC_CTRL },
+ 	{ X86_FEATURE_LASS,			X86_FEATURE_SMAP      },
++	{ X86_FEATURE_LAM,			X86_FEATURE_LASS      },
+ 	{}
+ };
  
--		/*
--		 * Enable this when LAM is gated on LASS support
- 		if (cpu_feature_enabled(X86_FEATURE_LAM))
--			USER_PTR_MAX = (1ul << 63) - PAGE_SIZE;
--		 */
-+			USER_PTR_MAX = (-1UL >> 1) & PAGE_MASK;
- 		runtime_const_init(ptr, USER_PTR_MAX);
- 
- 		/*
 -- 
 2.47.2
 
