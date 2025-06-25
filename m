@@ -1,50 +1,50 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.15])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.14])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 374AB262808;
-	Wed, 25 Jun 2025 12:51:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.15
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 74F94262FEA;
+	Wed, 25 Jun 2025 12:51:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.14
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750855888; cv=none; b=lHfWSctFZS03nCRsiR5yTxGu3a1eShGD85zv5WQLochrq75QUZCpmxCXvVvnedCKoDKTHrYRqeSEXHgA4YEgM1LmOImlyYXU9t7W1+Fmo1mq7O0iv39JEUd+jFcXbUgs9T73nr2AZoUMQziYK8Q7MwDQQI17F4JxF1WmIRgCuQE=
+	t=1750855889; cv=none; b=UavY6QrfnAMn0ztAh/q57xwp2oADa/GkInr5DJxTPJYrAikcxPUWUhClLFpAQBIg2Fm8tFdfufR9BORDpiK5sCL9HDrfKZKVOaTUwfPKXB8Z07cJlazlauxQ3ung0L7MNzX0tvxKKWXipVb13S2m+m0DV6AdFO6i7ctY0XCA4ys=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750855888; c=relaxed/simple;
-	bh=Xzzfhu4lsneCUqevfiSwo4Dmq9+LRc6Pryq8VsUgiU4=;
+	s=arc-20240116; t=1750855889; c=relaxed/simple;
+	bh=Ez5xqFTgC8B3+ZN4o8+XV1fj3upuly3wYyotwavnCxE=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=emasUWC26D3V183RPtGL99l7yPocTsyjrRqq9xACNMQ2v3Riog8vwC62kpQIYo9yfitPmK2uyrPoNG0Cqkq5GvTceR1uedHYM52Sof8nFzQXAsDFIR3fvKQRG1x+2Rp7X4SJcsVDP7U1V8sAOjxr0lCHl2lcMEyVgq5Gm1XQ9ks=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.helo=mgamail.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=JtD83uXo; arc=none smtp.client-ip=192.198.163.15
+	 MIME-Version; b=dxGw0xJyrefiosc7Ukmpf34HAM75q+pR1KgteBPxSKUKIZstIQP7CCIOeiIdE8lCJo3f6RV7fj4/uXRgm8ETRZxU54IRQXtB3UIdTc+kwS7S+Q6+9MPJ0gkpdTfJUgmn6ykF39ThKOh4+E+dpqH5TszGZuflzwZBp8pvECMG+xI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.helo=mgamail.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=lzF1dxf2; arc=none smtp.client-ip=198.175.65.14
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.helo=mgamail.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="JtD83uXo"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="lzF1dxf2"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1750855886; x=1782391886;
+  t=1750855888; x=1782391888;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=Xzzfhu4lsneCUqevfiSwo4Dmq9+LRc6Pryq8VsUgiU4=;
-  b=JtD83uXoKJlOGYqfwybdhJsJIhOIsN/FVdssnU4EZM8TxQ3O06nhZ549
-   lX0k0wiwJH9p4wZuKAtFF7fjmxb/gnAxUUYLFvWMy6N4/YJOKcvM1tzaD
-   hTyJ4tTcKHq31Ly4fEfaJHl5pDHzBz2Ao/peUCX6v4d0kss4blMAZEjuc
-   HEAwWJ72a0pz5fzuLGAv3BR71YjkwULv81o+7bpLgB7FfvGsYaWio0Y3I
-   uzCV1mXsc3KIR7mxCgZzhOkR+SIpXwH8lOMoQsMH+v+XXQHgYAFaSWne9
-   hzSbnvVlX1bFR5OsthafYJVHcMlrCKywUYtCkGLppgBEsPAMYMqGMZSsz
-   g==;
-X-CSE-ConnectionGUID: fJATbmCeSZ2W60wOZ6lz1Q==
-X-CSE-MsgGUID: o5IIQOBdSAK/lm0Ewkiusg==
-X-IronPort-AV: E=McAfee;i="6800,10657,11474"; a="53263553"
+  bh=Ez5xqFTgC8B3+ZN4o8+XV1fj3upuly3wYyotwavnCxE=;
+  b=lzF1dxf2qYhoesRaZRXgltfXJdtI1cZC017iFG4hpzBHSk69RHPjCfK2
+   FsPGpYyPk0U5adMLpSloRJWzjviWc3bvBID29jzK3ETNUmNoIqmR2UTK/
+   TVlbY2YeH15chx/TTl8rmawPA+v9E7uhHXjSepBq6xsbn8S6jSmvO+dan
+   1WWc79gcTH/CRLc42C0IDNqSMZOBAARD6VuTCduvml+rerpCQNBTgfXrR
+   bbQeNZGK5CbQc6Fekie0ObwVrczfR4at4o3Os0q8Zn8fw8gzBEgTKu/uY
+   dRozKU/k3KaNCzqKklZFjV0b9MIxGtsWPs6/6UIQFekQ5wVN+5Cbi/yWr
+   w==;
+X-CSE-ConnectionGUID: fqOUN3OXToiLD+mvIDxGUw==
+X-CSE-MsgGUID: 0NWE2PT/QQS6LvdfcfL9WA==
+X-IronPort-AV: E=McAfee;i="6800,10657,11474"; a="56908272"
 X-IronPort-AV: E=Sophos;i="6.16,264,1744095600"; 
-   d="scan'208";a="53263553"
-Received: from orviesa005.jf.intel.com ([10.64.159.145])
-  by fmvoesa109.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Jun 2025 05:51:25 -0700
-X-CSE-ConnectionGUID: jw3JSwXSQh2ZPqFr9ESfWQ==
-X-CSE-MsgGUID: SEss1ZnmSjCRe7LmgG67fQ==
+   d="scan'208";a="56908272"
+Received: from fmviesa010.fm.intel.com ([10.60.135.150])
+  by orvoesa106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Jun 2025 05:51:27 -0700
+X-CSE-ConnectionGUID: ildg6nNESPafyH/w4EEi/Q==
+X-CSE-MsgGUID: 7gUjpDp8SOG67axUlLGgQQ==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.16,264,1744095600"; 
-   d="scan'208";a="157976884"
+   d="scan'208";a="152919775"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by orviesa005.jf.intel.com with ESMTP; 25 Jun 2025 05:51:14 -0700
+  by fmviesa010.fm.intel.com with ESMTP; 25 Jun 2025 05:51:16 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1000)
-	id 5361912D; Wed, 25 Jun 2025 15:51:12 +0300 (EEST)
+	id 86C7E3F9; Wed, 25 Jun 2025 15:51:12 +0300 (EEST)
 From: "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
 To: Andy Lutomirski <luto@kernel.org>,
 	Thomas Gleixner <tglx@linutronix.de>,
@@ -98,9 +98,9 @@ Cc: Jonathan Corbet <corbet@lwn.net>,
 	linux-efi@vger.kernel.org,
 	linux-mm@kvack.org,
 	"Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-Subject: [PATCHv7 01/16] x86/cpu: Enumerate the LASS feature bits
-Date: Wed, 25 Jun 2025 15:50:53 +0300
-Message-ID: <20250625125112.3943745-2-kirill.shutemov@linux.intel.com>
+Subject: [PATCHv7 03/16] x86/alternatives: Disable LASS when patching kernel alternatives
+Date: Wed, 25 Jun 2025 15:50:56 +0300
+Message-ID: <20250625125112.3943745-5-kirill.shutemov@linux.intel.com>
 X-Mailer: git-send-email 2.47.2
 In-Reply-To: <20250625125112.3943745-1-kirill.shutemov@linux.intel.com>
 References: <20250625125112.3943745-1-kirill.shutemov@linux.intel.com>
@@ -114,123 +114,111 @@ Content-Transfer-Encoding: 8bit
 
 From: Sohil Mehta <sohil.mehta@intel.com>
 
-Linear Address Space Separation (LASS) is a security feature that
-intends to prevent malicious virtual address space accesses across
-user/kernel mode.
+For patching, the kernel initializes a temporary mm area in the lower
+half of the address range. See commit 4fc19708b165 ("x86/alternatives:
+Initialize temporary mm for patching").
 
-Such mode based access protection already exists today with paging and
-features such as SMEP and SMAP. However, to enforce these protections,
-the processor must traverse the paging structures in memory.  Malicious
-software can use timing information resulting from this traversal to
-determine details about the paging structures, and these details may
-also be used to determine the layout of the kernel memory.
+Disable LASS enforcement during patching to avoid triggering a #GP
+fault.
 
-The LASS mechanism provides the same mode-based protections as paging
-but without traversing the paging structures. Because the protections
-enforced by LASS are applied before paging, software will not be able to
-derive paging-based timing information from the various caching
-structures such as the TLBs, mid-level caches, page walker, data caches,
-etc.
+The objtool warns due to a call to a non-allowed function that exists
+outside of the stac/clac guard, or references to any function with a
+dynamic function pointer inside the guard. See the Objtool warnings
+section #9 in the document tools/objtool/Documentation/objtool.txt.
 
-LASS enforcement relies on the typical kernel implementation to divide
-the 64-bit virtual address space into two halves:
-  Addr[63]=0 -> User address space
-  Addr[63]=1 -> Kernel address space
+Considering that patching is usually small, replace the memcpy and
+memset functions in the text poking functions with their inline versions
+respectively.
 
-Any data access or code execution across address spaces typically
-results in a #GP fault.
-
-The LASS enforcement for kernel data access is dependent on CR4.SMAP
-being set. The enforcement can be disabled by toggling the RFLAGS.AC bit
-similar to SMAP.
-
-Define the CPU feature bits to enumerate this feature and include
-feature dependencies to reflect the same.
-
-LASS provides protection against a class of speculative attacks, such as
-SLAM[1]. Add the "lass" flag to /proc/cpuinfo to indicate that the feature
-is supported by hardware and enabled by the kernel. This allows userspace
-to determine if the setup is secure against such attacks.
-
-[1] https://download.vusec.net/papers/slam_sp24.pdf
-
-Co-developed-by: Yian Chen <yian.chen@intel.com>
-Signed-off-by: Yian Chen <yian.chen@intel.com>
 Signed-off-by: Sohil Mehta <sohil.mehta@intel.com>
 Signed-off-by: Alexander Shishkin <alexander.shishkin@linux.intel.com>
 Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
 ---
- arch/x86/Kconfig.cpufeatures                | 4 ++++
- arch/x86/include/asm/cpufeatures.h          | 1 +
- arch/x86/include/uapi/asm/processor-flags.h | 2 ++
- arch/x86/kernel/cpu/cpuid-deps.c            | 1 +
- tools/arch/x86/include/asm/cpufeatures.h    | 1 +
- 5 files changed, 9 insertions(+)
+ arch/x86/include/asm/smap.h   | 27 +++++++++++++++++++++++++--
+ arch/x86/kernel/alternative.c | 14 ++++++++++++--
+ 2 files changed, 37 insertions(+), 4 deletions(-)
 
-diff --git a/arch/x86/Kconfig.cpufeatures b/arch/x86/Kconfig.cpufeatures
-index 250c10627ab3..733d5aff2456 100644
---- a/arch/x86/Kconfig.cpufeatures
-+++ b/arch/x86/Kconfig.cpufeatures
-@@ -124,6 +124,10 @@ config X86_DISABLED_FEATURE_PCID
- 	def_bool y
- 	depends on !X86_64
+diff --git a/arch/x86/include/asm/smap.h b/arch/x86/include/asm/smap.h
+index 4f84d421d1cf..2bb7f3808e51 100644
+--- a/arch/x86/include/asm/smap.h
++++ b/arch/x86/include/asm/smap.h
+@@ -23,18 +23,41 @@
  
-+config X86_DISABLED_FEATURE_LASS
-+	def_bool y
-+	depends on X86_32
+ #else /* __ASSEMBLER__ */
+ 
++/*
++ * The CLAC/STAC instructions toggle the enforcement of X86_FEATURE_SMAP and
++ * X86_FEATURE_LASS.
++ *
++ * SMAP enforcement is based on the _PAGE_BIT_USER bit in the page tables: the
++ * kernel is not allowed to touch pages with the bit set unless the AC bit is
++ * set.
++ *
++ * LASS enforcement is based on bit 63 of the virtual address. The kernel is
++ * not allowed to touch memory in the lower half of the virtual address space
++ * unless the AC bit is set.
++ *
++ * Note: a barrier is implicit in alternative().
++ */
 +
- config X86_DISABLED_FEATURE_PKU
- 	def_bool y
- 	depends on !X86_INTEL_MEMORY_PROTECTION_KEYS
-diff --git a/arch/x86/include/asm/cpufeatures.h b/arch/x86/include/asm/cpufeatures.h
-index b78af55aa22e..8eef1ad7aca2 100644
---- a/arch/x86/include/asm/cpufeatures.h
-+++ b/arch/x86/include/asm/cpufeatures.h
-@@ -313,6 +313,7 @@
- #define X86_FEATURE_SM4			(12*32+ 2) /* SM4 instructions */
- #define X86_FEATURE_AVX_VNNI		(12*32+ 4) /* "avx_vnni" AVX VNNI instructions */
- #define X86_FEATURE_AVX512_BF16		(12*32+ 5) /* "avx512_bf16" AVX512 BFLOAT16 instructions */
-+#define X86_FEATURE_LASS		(12*32+ 6) /* "lass" Linear Address Space Separation */
- #define X86_FEATURE_CMPCCXADD           (12*32+ 7) /* CMPccXADD instructions */
- #define X86_FEATURE_ARCH_PERFMON_EXT	(12*32+ 8) /* Intel Architectural PerfMon Extension */
- #define X86_FEATURE_FZRM		(12*32+10) /* Fast zero-length REP MOVSB */
-diff --git a/arch/x86/include/uapi/asm/processor-flags.h b/arch/x86/include/uapi/asm/processor-flags.h
-index f1a4adc78272..81d0c8bf1137 100644
---- a/arch/x86/include/uapi/asm/processor-flags.h
-+++ b/arch/x86/include/uapi/asm/processor-flags.h
-@@ -136,6 +136,8 @@
- #define X86_CR4_PKE		_BITUL(X86_CR4_PKE_BIT)
- #define X86_CR4_CET_BIT		23 /* enable Control-flow Enforcement Technology */
- #define X86_CR4_CET		_BITUL(X86_CR4_CET_BIT)
-+#define X86_CR4_LASS_BIT	27 /* enable Linear Address Space Separation support */
-+#define X86_CR4_LASS		_BITUL(X86_CR4_LASS_BIT)
- #define X86_CR4_LAM_SUP_BIT	28 /* LAM for supervisor pointers */
- #define X86_CR4_LAM_SUP		_BITUL(X86_CR4_LAM_SUP_BIT)
+ static __always_inline void clac(void)
+ {
+-	/* Note: a barrier is implicit in alternative() */
+ 	alternative("", "clac", X86_FEATURE_SMAP);
+ }
  
-diff --git a/arch/x86/kernel/cpu/cpuid-deps.c b/arch/x86/kernel/cpu/cpuid-deps.c
-index 46efcbd6afa4..98d0cdd82574 100644
---- a/arch/x86/kernel/cpu/cpuid-deps.c
-+++ b/arch/x86/kernel/cpu/cpuid-deps.c
-@@ -89,6 +89,7 @@ static const struct cpuid_dep cpuid_deps[] = {
- 	{ X86_FEATURE_SHSTK,			X86_FEATURE_XSAVES    },
- 	{ X86_FEATURE_FRED,			X86_FEATURE_LKGS      },
- 	{ X86_FEATURE_SPEC_CTRL_SSBD,		X86_FEATURE_SPEC_CTRL },
-+	{ X86_FEATURE_LASS,			X86_FEATURE_SMAP      },
- 	{}
- };
+ static __always_inline void stac(void)
+ {
+-	/* Note: a barrier is implicit in alternative() */
+ 	alternative("", "stac", X86_FEATURE_SMAP);
+ }
  
-diff --git a/tools/arch/x86/include/asm/cpufeatures.h b/tools/arch/x86/include/asm/cpufeatures.h
-index ee176236c2be..4473a6f7800b 100644
---- a/tools/arch/x86/include/asm/cpufeatures.h
-+++ b/tools/arch/x86/include/asm/cpufeatures.h
-@@ -313,6 +313,7 @@
- #define X86_FEATURE_SM4			(12*32+ 2) /* SM4 instructions */
- #define X86_FEATURE_AVX_VNNI		(12*32+ 4) /* "avx_vnni" AVX VNNI instructions */
- #define X86_FEATURE_AVX512_BF16		(12*32+ 5) /* "avx512_bf16" AVX512 BFLOAT16 instructions */
-+#define X86_FEATURE_LASS		(12*32+ 6) /* "lass" Linear Address Space Separation */
- #define X86_FEATURE_CMPCCXADD           (12*32+ 7) /* CMPccXADD instructions */
- #define X86_FEATURE_ARCH_PERFMON_EXT	(12*32+ 8) /* Intel Architectural PerfMon Extension */
- #define X86_FEATURE_FZRM		(12*32+10) /* Fast zero-length REP MOVSB */
++static __always_inline void lass_enable_enforcement(void)
++{
++	alternative("", "clac", X86_FEATURE_LASS);
++}
++
++static __always_inline void lass_disable_enforcement(void)
++{
++	alternative("", "stac", X86_FEATURE_LASS);
++}
++
+ static __always_inline unsigned long smap_save(void)
+ {
+ 	unsigned long flags;
+diff --git a/arch/x86/kernel/alternative.c b/arch/x86/kernel/alternative.c
+index ea1d984166cd..ed75892590ee 100644
+--- a/arch/x86/kernel/alternative.c
++++ b/arch/x86/kernel/alternative.c
+@@ -2447,16 +2447,26 @@ void __init_or_module text_poke_early(void *addr, const void *opcode,
+ __ro_after_init struct mm_struct *text_poke_mm;
+ __ro_after_init unsigned long text_poke_mm_addr;
+ 
++/*
++ * Text poking creates and uses a mapping in the lower half of the
++ * address space. Relax LASS enforcement when accessing the poking
++ * address.
++ */
++
+ static void text_poke_memcpy(void *dst, const void *src, size_t len)
+ {
+-	memcpy(dst, src, len);
++	lass_disable_enforcement();
++	__inline_memcpy(dst, src, len);
++	lass_enable_enforcement();
+ }
+ 
+ static void text_poke_memset(void *dst, const void *src, size_t len)
+ {
+ 	int c = *(const int *)src;
+ 
+-	memset(dst, c, len);
++	lass_disable_enforcement();
++	__inline_memset(dst, c, len);
++	lass_enable_enforcement();
+ }
+ 
+ typedef void text_poke_f(void *dst, const void *src, size_t len);
 -- 
 2.47.2
 
