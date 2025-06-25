@@ -1,50 +1,50 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.14])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.14])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E2DAB2690D9;
-	Wed, 25 Jun 2025 12:51:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.14
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8680A26A0F2;
+	Wed, 25 Jun 2025 12:51:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.14
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750855897; cv=none; b=FlK8S5EPf7X7iEH8MO3Mzya7wyez21mZxpGIQyMR4HSs0llANdxix7fT1VJYZVDuC1fJriRTAEAZmiq0ljhvjwL+xNBlv5ZkyIb/bUEVjp8j8sgK/7GNAKZUOi6DPQXxWSTK6VfV/MlCRbE/8WnMWm0KiyFUlHzZuJsaQA+yDwk=
+	t=1750855898; cv=none; b=krnxnNdMli3vL/+c9ywz3UVg0a95ZRiMPeVcpoeSBlje2yu06z8OFHb54tXsjPPuVpmhjtINBV7527UjzSG6xFOnCKAmL/y0QZreFP71kViyWd7v/htu2+zFqXP3jkbWXB5IEoLEXEEdPVxySVzhFEAZpxNzxZoKfmyOQjZ5Md8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750855897; c=relaxed/simple;
-	bh=JBGJGaeeS2Xh+9NuK95zkFteMkIrn0EoxQT+TmlJxJw=;
+	s=arc-20240116; t=1750855898; c=relaxed/simple;
+	bh=gDZAIaId/LE+Cg3g34PHSl3JoHL8xvSE+GTgwe6XlKg=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=cONbAwR20mwaYe440PvVGBVg4/enyGIm4HohIYTdDW3ybquT4ZH02WfV65+ODrW+v/d1ZwPkUlJfqkmYgG0cQA4YKP50eIVpBThoHyl4QQZXYKi/3mthRgwk3djR+vW4L/K4InWNTv5BhTDwiktSUf5+xrCID5zPPOqfItt9c8o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.helo=mgamail.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=OGf3flOo; arc=none smtp.client-ip=192.198.163.14
+	 MIME-Version; b=gACQ1j288OR1y8FC2Dc+jUbzthJEm+Ujma2fvcNM2963spynHnKOshbLvQ4IV8cbVU4VHgw7+n2ldJTrOLeQ7VqqzC1vnIMwWXXgBnjIwU29Xza2NP1z1jl8yCCCG4b/EZM2CZHnLozUz9N6YQJivBPiLHnTKSn8GDGKdXs7Eyc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.helo=mgamail.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Z4ZYli/o; arc=none smtp.client-ip=198.175.65.14
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.helo=mgamail.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="OGf3flOo"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Z4ZYli/o"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1750855895; x=1782391895;
+  t=1750855896; x=1782391896;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=JBGJGaeeS2Xh+9NuK95zkFteMkIrn0EoxQT+TmlJxJw=;
-  b=OGf3flOotByhWvHsaA8W7eaCA+31beF3DtQOXdxZKJqOTSj+qSHYX6rD
-   PWTCY5IMRcIo+INV8wzrw32Gf+xxMIEzQroysKAT6LjoCmLvgIi9D/LSb
-   IKpUw/u48pTApceYKj/p13ECL6eUrCRwqS1jQXWZ+3UKB5IVaFhw3oQN4
-   wdVbX365cV9sWb/eFnikkvbZ2tRUVG5mBSxHoLPpObBbOZX8fXysiieHF
-   /c0WAb1mDDjZ54t9WG8jeGmVmlMXuBlM+W2STY9IGx4Aqrd4Uh7SV5ots
-   VihYJMtfCCWfZ/WiKaOGeuBBgsskoSKLxShnzbsJ+R1tHVM1cb/vIY9zX
-   A==;
-X-CSE-ConnectionGUID: oXDHpOEjTjqzuPqI1fHiNA==
-X-CSE-MsgGUID: /KDpINrSTseSrU8KIHmcmQ==
-X-IronPort-AV: E=McAfee;i="6800,10657,11474"; a="53189653"
+  bh=gDZAIaId/LE+Cg3g34PHSl3JoHL8xvSE+GTgwe6XlKg=;
+  b=Z4ZYli/oIFvsVqCOdrR6LaG3tkrApxKCdKBvpImOfokXnGhDwmm7wDV8
+   RGiyrCdKqY0MLilR7FY+uchVsVBMcLfWJWgW+HEg+S2voZ1NXq8t89vxT
+   rHT3d3vY9YAXcvp24WWuGwD5jcGui91GP3g4SKeJByXglJqfWAohvP6xd
+   hWvz4KWEhfQtQSS7VWy6B5NiO7NlbggBpSTEkiay2gtS54RFZcfU2ODDn
+   xMkIwCSSrf/M3WBf0GKAoCNE2VSsmdwzgvJmbNGNjxYP0qSIvsVWGFGfa
+   EOjaONH+MAeu+GGC8jQYXv2DkavKBmVrlohBECl4Ut5RKnpysyWsiGgja
+   w==;
+X-CSE-ConnectionGUID: WbdQy+/VRI6Wnosw+WwtHQ==
+X-CSE-MsgGUID: 4Xp0zkwLQBuCPLcVfk9zLQ==
+X-IronPort-AV: E=McAfee;i="6800,10657,11474"; a="56908374"
 X-IronPort-AV: E=Sophos;i="6.16,264,1744095600"; 
-   d="scan'208";a="53189653"
-Received: from fmviesa007.fm.intel.com ([10.60.135.147])
-  by fmvoesa108.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Jun 2025 05:51:34 -0700
-X-CSE-ConnectionGUID: L1tUn7Q9TjGwT50+hm6f4g==
-X-CSE-MsgGUID: 3EBtIhOgQVmo93lCwbOuXQ==
+   d="scan'208";a="56908374"
+Received: from fmviesa010.fm.intel.com ([10.60.135.150])
+  by orvoesa106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Jun 2025 05:51:36 -0700
+X-CSE-ConnectionGUID: PuC99ST/SMezEVXWAKvk2g==
+X-CSE-MsgGUID: vtZJnGSOR+mfXpIQU3xILw==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.16,264,1744095600"; 
-   d="scan'208";a="151830982"
+   d="scan'208";a="152919817"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by fmviesa007.fm.intel.com with ESMTP; 25 Jun 2025 05:51:23 -0700
+  by fmviesa010.fm.intel.com with ESMTP; 25 Jun 2025 05:51:25 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1000)
-	id 26D4F79C; Wed, 25 Jun 2025 15:51:13 +0300 (EEST)
+	id 518C6862; Wed, 25 Jun 2025 15:51:13 +0300 (EEST)
 From: "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
 To: Andy Lutomirski <luto@kernel.org>,
 	Thomas Gleixner <tglx@linutronix.de>,
@@ -98,9 +98,9 @@ Cc: Jonathan Corbet <corbet@lwn.net>,
 	linux-efi@vger.kernel.org,
 	linux-mm@kvack.org,
 	"Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-Subject: [PATCHv7 13/16] x86/traps: Handle LASS thrown #SS
-Date: Wed, 25 Jun 2025 15:51:06 +0300
-Message-ID: <20250625125112.3943745-15-kirill.shutemov@linux.intel.com>
+Subject: [PATCHv7 16/16] x86: Re-enable Linear Address Masking
+Date: Wed, 25 Jun 2025 15:51:09 +0300
+Message-ID: <20250625125112.3943745-18-kirill.shutemov@linux.intel.com>
 X-Mailer: git-send-email 2.47.2
 In-Reply-To: <20250625125112.3943745-1-kirill.shutemov@linux.intel.com>
 References: <20250625125112.3943745-1-kirill.shutemov@linux.intel.com>
@@ -112,79 +112,54 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-LASS throws a #GP for any violations except for stack register accesses,
-in which case it throws a #SS instead. Handle this similarly to how other
-LASS violations are handled.
+This reverts commit 3267cb6d3a174ff83d6287dcd5b0047bbd912452.
 
-In case of FRED, before handling #SS as LASS violation, kernel has to
-check if there's a fixup for the exception. It can address #SS due to
-invalid user context on ERETU[1]. See 5105e7687ad3 ("x86/fred: Fixup
-fault on ERETU by jumping to fred_entrypoint_user") for more details.
+LASS mitigates the Spectre based on LAM (SLAM) [1] and the previous
+commit made LAM depend on LASS, so we no longer need to disable LAM at
+compile time, so revert the commit that disables LAM.
 
-Co-developed-by: Alexander Shishkin <alexander.shishkin@linux.intel.com>
-Signed-off-by: Alexander Shishkin <alexander.shishkin@linux.intel.com>
+Adjust USER_PTR_MAX if LAM enabled, allowing tag bits to be set for
+userspace pointers. The value for the constant is defined in a way to
+avoid overflow compiler warning on 32-bit config.
+
+[1] https://download.vusec.net/papers/slam_sp24.pdf
+
 Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
+Cc: Pawan Gupta <pawan.kumar.gupta@linux.intel.com>
 ---
- arch/x86/kernel/traps.c | 39 +++++++++++++++++++++++++++++++++------
- 1 file changed, 33 insertions(+), 6 deletions(-)
+ arch/x86/Kconfig             | 1 -
+ arch/x86/kernel/cpu/common.c | 5 +----
+ 2 files changed, 1 insertion(+), 5 deletions(-)
 
-diff --git a/arch/x86/kernel/traps.c b/arch/x86/kernel/traps.c
-index e2ad760b17ea..f1f92e1ba524 100644
---- a/arch/x86/kernel/traps.c
-+++ b/arch/x86/kernel/traps.c
-@@ -418,12 +418,6 @@ DEFINE_IDTENTRY_ERRORCODE(exc_segment_not_present)
- 		      SIGBUS, 0, NULL);
- }
+diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
+index 71019b3b54ea..2b48e916b754 100644
+--- a/arch/x86/Kconfig
++++ b/arch/x86/Kconfig
+@@ -2181,7 +2181,6 @@ config RANDOMIZE_MEMORY_PHYSICAL_PADDING
+ config ADDRESS_MASKING
+ 	bool "Linear Address Masking support"
+ 	depends on X86_64
+-	depends on COMPILE_TEST || !CPU_MITIGATIONS # wait for LASS
+ 	help
+ 	  Linear Address Masking (LAM) modifies the checking that is applied
+ 	  to 64-bit linear addresses, allowing software to use of the
+diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
+index 97a228f917a9..6f2ae9e702bc 100644
+--- a/arch/x86/kernel/cpu/common.c
++++ b/arch/x86/kernel/cpu/common.c
+@@ -2558,11 +2558,8 @@ void __init arch_cpu_finalize_init(void)
+ 	if (IS_ENABLED(CONFIG_X86_64)) {
+ 		unsigned long USER_PTR_MAX = TASK_SIZE_MAX;
  
--DEFINE_IDTENTRY_ERRORCODE(exc_stack_segment)
--{
--	do_error_trap(regs, error_code, "stack segment", X86_TRAP_SS, SIGBUS,
--		      0, NULL);
--}
--
- DEFINE_IDTENTRY_ERRORCODE(exc_alignment_check)
- {
- 	char *str = "alignment check";
-@@ -866,6 +860,39 @@ DEFINE_IDTENTRY_ERRORCODE(exc_general_protection)
- 	cond_local_irq_disable(regs);
- }
+-		/*
+-		 * Enable this when LAM is gated on LASS support
+ 		if (cpu_feature_enabled(X86_FEATURE_LAM))
+-			USER_PTR_MAX = (1ul << 63) - PAGE_SIZE;
+-		 */
++			USER_PTR_MAX = (-1UL >> 1) & PAGE_MASK;
+ 		runtime_const_init(ptr, USER_PTR_MAX);
  
-+#define SSFSTR "stack segment fault"
-+
-+DEFINE_IDTENTRY_ERRORCODE(exc_stack_segment)
-+{
-+	if (user_mode(regs))
-+		goto error_trap;
-+
-+	if (cpu_feature_enabled(X86_FEATURE_FRED) &&
-+	    fixup_exception(regs, X86_TRAP_SS, error_code, 0))
-+		return;
-+
-+	if (cpu_feature_enabled(X86_FEATURE_LASS)) {
-+		enum kernel_gp_hint hint;
-+		unsigned long gp_addr;
-+
-+		hint = get_kernel_gp_address(regs, &gp_addr);
-+		if (hint != GP_NO_HINT) {
-+			printk(SSFSTR ", %s 0x%lx", kernel_gp_hint_help[hint],
-+			       gp_addr);
-+		}
-+
-+		if (hint != GP_NON_CANONICAL)
-+			gp_addr = 0;
-+
-+		die_addr(SSFSTR, regs, error_code, gp_addr);
-+		return;
-+	}
-+
-+error_trap:
-+	do_error_trap(regs, error_code, "stack segment", X86_TRAP_SS, SIGBUS,
-+		0, NULL);
-+}
-+
- static bool do_int3(struct pt_regs *regs)
- {
- 	int res;
+ 		/*
 -- 
 2.47.2
 
