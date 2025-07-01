@@ -1,50 +1,50 @@
 Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.10])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A75F327145B;
-	Tue,  1 Jul 2025 09:59:09 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 70DEC272E44;
+	Tue,  1 Jul 2025 09:59:11 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.10
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751363951; cv=none; b=WZTYVUXkvV9WtnyNqzjA9pDEDv6Dy050MR1dxLACwdSw4l5SUchIhiX8L6euVjf7X5TDVYjdiL1K8Tq1wYDGGH7S+yHjCmMVXBQjJUi3+4/ki+26fY0C7fwRbExdC0w0qpn8LHsxuhbAXa5Jfak7+YX04OdD+vpXhGxfUHHu/wk=
+	t=1751363953; cv=none; b=Z638Vio0h0+uZeGnCDOwfeChkmotiQS6mclaqZxO6RLXSiKsXeuvHCtAtN6KYp2ncTk2Hyyyq/9M14cUIh85fZDbEYAI/MXMWcLSFM1wof69Ynj1U01lRFzWMc+FWE3gPGS+zX3pgICBzGNlpeUHEyerEVdwITAg3l0hNu7clOw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751363951; c=relaxed/simple;
-	bh=Y6wMD+f3zIu+lL8OF4jucYTQX8f5E+hJrr2IotIkhTA=;
+	s=arc-20240116; t=1751363953; c=relaxed/simple;
+	bh=r8+6XTFMer08iaSTrK7+AgP3gettkLSvH05lTk9iIws=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=qrgO1cBLxCo3ENU3bvDrPJqQLyHH2d4JwCyq7GozvhrOS2mCzk2eESlQ6kmmTijF3lFaIKCZy+QV0Qnj03jM1PGiI1wm/JTp8A44LwbCHNe/TS9RxTJCW29WaC3xdg9qkjQUzlXzPAtUviTKCPmeWl4WMcgwW7xvmpD2/JjyeaQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.helo=mgamail.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=kjeXVxIF; arc=none smtp.client-ip=198.175.65.10
+	 MIME-Version; b=tjFtZlXEyDVtZz8S02dvNmB4Q+IimZAHBN0rITVtE2zYJqs80DEyYXhG8bNq0UF4Ktk/qYNl1cGIdG81u4AfhhTZdpywtrLam9qEQrFiGVf8Xk/TC81r40NE+Iwi87vO2TUIhjHAuZeSOnbSavFUv2glNONGrsJq3ZIfOa2j2fU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.helo=mgamail.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=VxpPzHls; arc=none smtp.client-ip=198.175.65.10
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.helo=mgamail.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="kjeXVxIF"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="VxpPzHls"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1751363950; x=1782899950;
+  t=1751363952; x=1782899952;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=Y6wMD+f3zIu+lL8OF4jucYTQX8f5E+hJrr2IotIkhTA=;
-  b=kjeXVxIFkLTUtS9bLn+hbN+enwixkKQ9BlrDjic5pQWCvamV7TbLtdeQ
-   hsE3O6LM7Ayl8SHLw0No1Zx/K26RfH0bHVOuzOdmaAJfhyOA3uNYI9hs7
-   4ta2I4lboZZ9/4KZoo+wewHy4EwRDFJhDcpudRB0GdIXPckn9q5Uk9PAY
-   DX/VbaEMxuSyjwtJuHkxPoXuII30NIMRSBZ/5sOakluLC5Q9PppZPqCIz
-   OZI9YChpiMnh3qR4MZ8rqsc/RiHQCc7hT0tDM7jWqZHaIqrl3/VBRCttJ
-   suH/ESIXl5u6ViSjuTuoBZh+AJbQ2rdN/Mkq/DyNRHlNLFxo7irY5zJ/M
-   Q==;
-X-CSE-ConnectionGUID: L/cu2zDcT9mLlZxKdatVJA==
-X-CSE-MsgGUID: 86CEY7AiSOy4/CO02BvU0A==
-X-IronPort-AV: E=McAfee;i="6800,10657,11480"; a="71048670"
+  bh=r8+6XTFMer08iaSTrK7+AgP3gettkLSvH05lTk9iIws=;
+  b=VxpPzHlsEhPr3TKqrxcg1hZ104A+GdskIHCRklOiNM4kH9PDqHdmXMVj
+   GX6R1dl+VApXBM4VqMHG9THuZF0Yjth3SiKsQpFHG+ucaYoHZb9h1Ldo/
+   F2CPNo5RemUob/gUS5hemZgDC71q/H/kmAUsYTQ2tINK46/ogepnya4Gi
+   PsKSOXn4RUgPEWn0mXafgXnR3NDK8fgIoYmKQARtUTfFqhHZvz9EGan3y
+   +YfLqpDe48WW5bgUegYK/YA4o0n9x1gOYIQ6BHXGt5Ajr5fHgvgkL7UnR
+   wXGJ4LcGvWzDxDPT3sbM5Md1sr18y43tUHzQCJRLGFLniyzsv7ZoSZBkp
+   A==;
+X-CSE-ConnectionGUID: lGWuOh/PR06YmjArZo2AdA==
+X-CSE-MsgGUID: EWRCLhobQ7qHvTX/J9UFpw==
+X-IronPort-AV: E=McAfee;i="6800,10657,11480"; a="71048712"
 X-IronPort-AV: E=Sophos;i="6.16,279,1744095600"; 
-   d="scan'208";a="71048670"
+   d="scan'208";a="71048712"
 Received: from fmviesa002.fm.intel.com ([10.60.135.142])
-  by orvoesa102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Jul 2025 02:59:10 -0700
-X-CSE-ConnectionGUID: 50qUsqSFTjCgdkVjSs68gQ==
-X-CSE-MsgGUID: Vgf+hGwgSeeLMGPVR5qUIw==
+  by orvoesa102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Jul 2025 02:59:11 -0700
+X-CSE-ConnectionGUID: arooEZEwTHWXkcqynRtFQg==
+X-CSE-MsgGUID: tYpqEaW/R7mjeQ4zpLJpPQ==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.16,279,1744095600"; 
-   d="scan'208";a="177390828"
+   d="scan'208";a="177390834"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by fmviesa002.fm.intel.com with ESMTP; 01 Jul 2025 02:58:58 -0700
+  by fmviesa002.fm.intel.com with ESMTP; 01 Jul 2025 02:58:59 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1000)
-	id 9FBA1627; Tue, 01 Jul 2025 12:58:50 +0300 (EEST)
+	id B93C6778; Tue, 01 Jul 2025 12:58:50 +0300 (EEST)
 From: "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
 To: Andy Lutomirski <luto@kernel.org>,
 	Thomas Gleixner <tglx@linutronix.de>,
@@ -98,9 +98,9 @@ Cc: Jonathan Corbet <corbet@lwn.net>,
 	linux-efi@vger.kernel.org,
 	linux-mm@kvack.org,
 	"Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-Subject: [PATCHv8 09/17] x86/vsyscall: Add vsyscall emulation for #GP
-Date: Tue,  1 Jul 2025 12:58:38 +0300
-Message-ID: <20250701095849.2360685-10-kirill.shutemov@linux.intel.com>
+Subject: [PATCHv8 11/17] x86/cpu: Set LASS CR4 bit as pinning sensitive
+Date: Tue,  1 Jul 2025 12:58:40 +0300
+Message-ID: <20250701095849.2360685-12-kirill.shutemov@linux.intel.com>
 X-Mailer: git-send-email 2.47.2
 In-Reply-To: <20250701095849.2360685-1-kirill.shutemov@linux.intel.com>
 References: <20250701095849.2360685-1-kirill.shutemov@linux.intel.com>
@@ -112,109 +112,33 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-From: Sohil Mehta <sohil.mehta@intel.com>
+From: Yian Chen <yian.chen@intel.com>
 
-The legacy vsyscall page is mapped at a fixed address in the kernel
-address range 0xffffffffff600000-0xffffffffff601000. Prior to LASS being
-introduced, a legacy vsyscall page access from userspace would always
-generate a page fault. The kernel emulates the execute (XONLY) accesses
-in the page fault handler and returns back to userspace with the
-appropriate register values.
+Security features such as LASS are not expected to be disabled once
+initialized. Add LASS to the CR4 pinned mask.
 
-Since LASS intercepts these accesses before the paging structures are
-traversed it generates a general protection fault instead of a page
-fault. The #GP fault doesn't provide much information in terms of the
-error code. So, use the faulting RIP which is preserved in the user
-registers to emulate the vsyscall access without going through complex
-instruction decoding.
-
-Signed-off-by: Sohil Mehta <sohil.mehta@intel.com>
+Signed-off-by: Yian Chen <yian.chen@intel.com>
 Signed-off-by: Alexander Shishkin <alexander.shishkin@linux.intel.com>
+Reviewed-by: Tony Luck <tony.luck@intel.com>
 Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
 ---
- arch/x86/entry/vsyscall/vsyscall_64.c | 14 +++++++++++++-
- arch/x86/include/asm/vsyscall.h       |  6 ++++++
- arch/x86/kernel/traps.c               |  4 ++++
- 3 files changed, 23 insertions(+), 1 deletion(-)
+ arch/x86/kernel/cpu/common.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/arch/x86/entry/vsyscall/vsyscall_64.c b/arch/x86/entry/vsyscall/vsyscall_64.c
-index 25f94ac5fd35..be77385b311e 100644
---- a/arch/x86/entry/vsyscall/vsyscall_64.c
-+++ b/arch/x86/entry/vsyscall/vsyscall_64.c
-@@ -23,7 +23,7 @@
-  * soon be no new userspace code that will ever use a vsyscall.
-  *
-  * The code in this file emulates vsyscalls when notified of a page
-- * fault to a vsyscall address.
-+ * fault or a general protection fault to a vsyscall address.
-  */
+diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
+index 9918121e0adc..1552c7510380 100644
+--- a/arch/x86/kernel/cpu/common.c
++++ b/arch/x86/kernel/cpu/common.c
+@@ -403,7 +403,8 @@ static __always_inline void setup_umip(struct cpuinfo_x86 *c)
  
- #include <linux/kernel.h>
-@@ -278,6 +278,18 @@ bool emulate_vsyscall_pf(unsigned long error_code, struct pt_regs *regs,
- 	return false;
- }
+ /* These bits should not change their value after CPU init is finished. */
+ static const unsigned long cr4_pinned_mask = X86_CR4_SMEP | X86_CR4_SMAP | X86_CR4_UMIP |
+-					     X86_CR4_FSGSBASE | X86_CR4_CET | X86_CR4_FRED;
++					     X86_CR4_FSGSBASE | X86_CR4_CET | X86_CR4_FRED |
++					     X86_CR4_LASS;
+ static DEFINE_STATIC_KEY_FALSE_RO(cr_pinning);
+ static unsigned long cr4_pinned_bits __ro_after_init;
  
-+bool emulate_vsyscall_gp(struct pt_regs *regs)
-+{
-+	if (!cpu_feature_enabled(X86_FEATURE_LASS))
-+		return false;
-+
-+	/* Emulate only if the RIP points to the vsyscall address */
-+	if (!is_vsyscall_vaddr(regs->ip))
-+		return false;
-+
-+	return __emulate_vsyscall(regs, regs->ip);
-+}
-+
- /*
-  * A pseudo VMA to allow ptrace access for the vsyscall page.  This only
-  * covers the 64bit vsyscall page now. 32bit has a real VMA now and does
-diff --git a/arch/x86/include/asm/vsyscall.h b/arch/x86/include/asm/vsyscall.h
-index 214977f4fa11..4eb8d3673223 100644
---- a/arch/x86/include/asm/vsyscall.h
-+++ b/arch/x86/include/asm/vsyscall.h
-@@ -16,6 +16,7 @@ extern void set_vsyscall_pgtable_user_bits(pgd_t *root);
-  */
- extern bool emulate_vsyscall_pf(unsigned long error_code,
- 				struct pt_regs *regs, unsigned long address);
-+extern bool emulate_vsyscall_gp(struct pt_regs *regs);
- #else
- static inline void map_vsyscall(void) {}
- static inline bool emulate_vsyscall_pf(unsigned long error_code,
-@@ -23,6 +24,11 @@ static inline bool emulate_vsyscall_pf(unsigned long error_code,
- {
- 	return false;
- }
-+
-+static inline bool emulate_vsyscall_gp(struct pt_regs *regs)
-+{
-+	return false;
-+}
- #endif
- 
- /*
-diff --git a/arch/x86/kernel/traps.c b/arch/x86/kernel/traps.c
-index 10856e0ac46c..40e34bb66d7c 100644
---- a/arch/x86/kernel/traps.c
-+++ b/arch/x86/kernel/traps.c
-@@ -69,6 +69,7 @@
- #include <asm/tdx.h>
- #include <asm/cfi.h>
- #include <asm/msr.h>
-+#include <asm/vsyscall.h>
- 
- #ifdef CONFIG_X86_64
- #include <asm/x86_init.h>
-@@ -817,6 +818,9 @@ DEFINE_IDTENTRY_ERRORCODE(exc_general_protection)
- 		if (fixup_umip_exception(regs))
- 			goto exit;
- 
-+		if (emulate_vsyscall_gp(regs))
-+			goto exit;
-+
- 		gp_user_force_sig_segv(regs, X86_TRAP_GP, error_code, desc);
- 		goto exit;
- 	}
 -- 
 2.47.2
 
