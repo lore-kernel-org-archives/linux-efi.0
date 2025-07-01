@@ -1,50 +1,50 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.12])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.10])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E7B7B26E71A;
-	Tue,  1 Jul 2025 09:59:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.12
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 889BA26FA59;
+	Tue,  1 Jul 2025 09:59:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.10
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751363947; cv=none; b=OoY8ttTBE9XT5LNA4ZdSNzTIQ6I1zxdjPrT/clW4eaw7O7/mzwGgMA4+slH5IHzswg5n2XoG0rfq70OC0Vp/OtyvU1KtpBHKjfhoC9l7hPY4OLc/7v90PPcFguf9Til2Q21QckL68g3Q3xF/f0utjw3ETnK/W+rlPs5Ap/nbdy0=
+	t=1751363948; cv=none; b=a863aFmyy5bG+s6joJqfmJ4PewOf+OPHV3YHmROY8zzLxNRJ7hjqQZJzmRhV79IFGb5/FFBZt+Ypms9uNe8L+HlHp8cd3E5Fj/vA/4pqgQSDuZBVz27YILW93Cvhvn/venlg4paxpnkL7CT+g+wU7djY2gtoG5SxZgdB6QAXn9k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751363947; c=relaxed/simple;
-	bh=KVi1SbCxLhPwipXkfMiClroXvuKW+0f0MpKQ0MUg/MY=;
+	s=arc-20240116; t=1751363948; c=relaxed/simple;
+	bh=TQ5RCfOQ/5tuZqESL8hi2WCyzYpg/ALQ/w3Eenbo4Ow=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=EmY6Qni2dP750sXLVM7YEklZh9sWHC3CvYn8odvHA/KluI4IW3lFM0D4M2Gp7uuYd1TSAdhjICT9eqfyvKTP2gyxwzIBXgyQcIJzRVDNOoEwpf0Fh8+V7+sQkIiD/Z9K1xc3eWtwUxUvOYVfbQ6ONeeh4DBbwP+0v04SyuXa1PM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.helo=mgamail.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Qd1AipEd; arc=none smtp.client-ip=192.198.163.12
+	 MIME-Version; b=BUJuMGn7HEeBj8ecycG2FtSCBAtAdGCSbZsIaCHg5d2q3gAgozF+tMukD9ahYkgh+kjxG07hAGBSs/0tgbVa8zT1eFrcPIvW7F6/BWh2ECRLH4ld/15ndHG9X7xMDqYwKXuc0mVThaVYuY1hS98pN0DbWOwJ4Ug+dR9d1pF5SgU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.helo=mgamail.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=WhJDZRRT; arc=none smtp.client-ip=198.175.65.10
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.helo=mgamail.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Qd1AipEd"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="WhJDZRRT"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1751363946; x=1782899946;
+  t=1751363947; x=1782899947;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=KVi1SbCxLhPwipXkfMiClroXvuKW+0f0MpKQ0MUg/MY=;
-  b=Qd1AipEd3Xi0LD0w8LvZC9Sm57jwEsg3vQjDgG53PUy1nBqDejMpgs5b
-   5v+OXWwNN1KzQG+KNso1/n+s0ki9A4Xe27/zAYlbtPbp/nqQ+kAxynxbr
-   Yl2/zBL4BejIPV4fsT44D37LCKxPi/x3b72OcB9nmZPKG11CfZA7wYd2l
-   4JgDlyGQUk3EOIgtVO3mvVfMQh2FYOsw1PT9mMNjnpzb2wCNta4lju1dn
-   +IZ6DuawAlKKlA5MpUJlTVIZsmvxqzLm4hwmNiwAIben5F+55OVTH6Ru1
-   Ur5Tr/VpSS5y8HSGrWVx7xJWMoYgzgN5S2jmsUWERwErLnFqHWg927Q4f
-   Q==;
-X-CSE-ConnectionGUID: R9KsAzu1SDKgaTDELFnl5g==
-X-CSE-MsgGUID: KNw+4+q0S9+1SedtSTcHKA==
-X-IronPort-AV: E=McAfee;i="6800,10657,11480"; a="57428008"
+  bh=TQ5RCfOQ/5tuZqESL8hi2WCyzYpg/ALQ/w3Eenbo4Ow=;
+  b=WhJDZRRTqqAbzW/GY3lIx0eFqekyRkc7f/JOlzhxuEKS/pBWqqUY2MUM
+   V0pwiJNxmgTd1bXYjVvzhJo2K3xLZAspm0TikqfEfUpFuuuk0WeT4eYfH
+   P5qsGjN8svtRHitVcStkccIH/MZDg7aAA3CqKya6Aa2FT0PixbAWfJuj7
+   q4Qcop9rbpsJvf2THrXALhC8FigX/5eNLtCGaz5Dir7E05Ju631gttaRY
+   5k1VYUvq6ftM6rdPiZPm6wn58ZQ6gyeShJZL94hS3HGULfLdSw+2b6Hkl
+   iD65z8WvuCDjxWb4+8XFoKqVUEKm5rLmMtrhICaLV3CHyiGG2c4VRHMSM
+   A==;
+X-CSE-ConnectionGUID: So6E2Nw/TnyAQQ+27VsnEA==
+X-CSE-MsgGUID: HeZ5O2Q4StasPOcy0F+trA==
+X-IronPort-AV: E=McAfee;i="6800,10657,11480"; a="71048649"
 X-IronPort-AV: E=Sophos;i="6.16,279,1744095600"; 
-   d="scan'208";a="57428008"
-Received: from orviesa001.jf.intel.com ([10.64.159.141])
-  by fmvoesa106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Jul 2025 02:59:05 -0700
-X-CSE-ConnectionGUID: t/+qn6kkRnqxouZqA5qu+g==
-X-CSE-MsgGUID: nXMyxAdjQnWehTndjUuilA==
+   d="scan'208";a="71048649"
+Received: from fmviesa002.fm.intel.com ([10.60.135.142])
+  by orvoesa102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Jul 2025 02:59:07 -0700
+X-CSE-ConnectionGUID: ulSrwC4NR46aDPQOLhrZ5Q==
+X-CSE-MsgGUID: kv43OEAgSp+0GwwuAzuZkw==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.16,279,1744095600"; 
-   d="scan'208";a="190896400"
+   d="scan'208";a="177390811"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by orviesa001.jf.intel.com with ESMTP; 01 Jul 2025 02:58:53 -0700
+  by fmviesa002.fm.intel.com with ESMTP; 01 Jul 2025 02:58:55 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1000)
-	id 5690B3F5; Tue, 01 Jul 2025 12:58:50 +0300 (EEST)
+	id 744944B1; Tue, 01 Jul 2025 12:58:50 +0300 (EEST)
 From: "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
 To: Andy Lutomirski <luto@kernel.org>,
 	Thomas Gleixner <tglx@linutronix.de>,
@@ -98,9 +98,9 @@ Cc: Jonathan Corbet <corbet@lwn.net>,
 	linux-efi@vger.kernel.org,
 	linux-mm@kvack.org,
 	"Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-Subject: [PATCHv8 04/17] x86/cpu: Defer CR pinning setup until after EFI initialization
-Date: Tue,  1 Jul 2025 12:58:33 +0300
-Message-ID: <20250701095849.2360685-5-kirill.shutemov@linux.intel.com>
+Subject: [PATCHv8 06/17] x86/vsyscall: Do not require X86_PF_INSTR to emulate vsyscall
+Date: Tue,  1 Jul 2025 12:58:35 +0300
+Message-ID: <20250701095849.2360685-7-kirill.shutemov@linux.intel.com>
 X-Mailer: git-send-email 2.47.2
 In-Reply-To: <20250701095849.2360685-1-kirill.shutemov@linux.intel.com>
 References: <20250701095849.2360685-1-kirill.shutemov@linux.intel.com>
@@ -112,53 +112,61 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-From: Alexander Shishkin <alexander.shishkin@linux.intel.com>
+emulate_vsyscall() expects to see X86_PF_INSTR in PFEC on a vsyscall
+page fault, but the CPU does not report X86_PF_INSTR if neither
+X86_FEATURE_NX nor X86_FEATURE_SMEP are enabled.
 
-In order to map the EFI runtime services, set_virtual_address_map()
-needs to be called, which resides in the lower half of the address
-space. This means that LASS needs to be temporarily disabled around
-this call. This can only be done before the CR pinning is set up.
+X86_FEATURE_NX should be enabled on nearly all 64-bit CPUs, except for
+early P4 processors that did not support this feature.
 
-Move CR pinning setup behind the EFI initialization.
+Instead of explicitly checking for X86_PF_INSTR, compare the fault
+address against RIP.
 
-Wrapping efi_enter_virtual_mode() into lass_disable/enable_enforcement()
-is not enough because AC flag gates data accesses, but not instruction
-fetch. Clearing the CR4 bit is required.
+On machines with X86_FEATURE_NX enabled, issue a warning if RIP is equal
+to fault address but X86_PF_INSTR is absent.
 
-Signed-off-by: Alexander Shishkin <alexander.shishkin@linux.intel.com>
-Suggested-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
+Originally-by: Dave Hansen <dave.hansen@intel.com>
+Link: https://lore.kernel.org/all/bd81a98b-f8d4-4304-ac55-d4151a1a77ab@intel.com
 Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
+Reported-by: Andrew Cooper <andrew.cooper3@citrix.com>
+Reviewed-by: Andrew Cooper <andrew.cooper3@citrix.com>
 ---
- arch/x86/kernel/cpu/common.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ arch/x86/entry/vsyscall/vsyscall_64.c | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
 
-diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
-index 4f430be285de..9918121e0adc 100644
---- a/arch/x86/kernel/cpu/common.c
-+++ b/arch/x86/kernel/cpu/common.c
-@@ -2081,7 +2081,6 @@ static __init void identify_boot_cpu(void)
- 	enable_sep_cpu();
- #endif
- 	cpu_detect_tlb(&boot_cpu_data);
--	setup_cr_pinning();
+diff --git a/arch/x86/entry/vsyscall/vsyscall_64.c b/arch/x86/entry/vsyscall/vsyscall_64.c
+index c9103a6fa06e..0b0e0283994f 100644
+--- a/arch/x86/entry/vsyscall/vsyscall_64.c
++++ b/arch/x86/entry/vsyscall/vsyscall_64.c
+@@ -124,7 +124,8 @@ bool emulate_vsyscall(unsigned long error_code,
+ 	if ((error_code & (X86_PF_WRITE | X86_PF_USER)) != X86_PF_USER)
+ 		return false;
  
- 	tsx_init();
- 	tdx_init();
-@@ -2532,10 +2531,14 @@ void __init arch_cpu_finalize_init(void)
+-	if (!(error_code & X86_PF_INSTR)) {
++	/* Avoid emulation unless userspace was executing from vsyscall page: */
++	if (address != regs->ip) {
+ 		/* Failed vsyscall read */
+ 		if (vsyscall_mode == EMULATE)
+ 			return false;
+@@ -136,13 +137,16 @@ bool emulate_vsyscall(unsigned long error_code,
+ 		return false;
+ 	}
  
- 	/*
- 	 * This needs to follow the FPU initializtion, since EFI depends on it.
-+	 *
-+	 * EFI twiddles CR4.LASS. Do it before CR pinning.
- 	 */
- 	if (efi_enabled(EFI_RUNTIME_SERVICES))
- 		efi_enter_virtual_mode();
- 
-+	setup_cr_pinning();
++
++	/* X86_PF_INSTR is only set when NX is supported: */
++	if (cpu_feature_enabled(X86_FEATURE_NX))
++		WARN_ON_ONCE(!(error_code & X86_PF_INSTR));
 +
  	/*
- 	 * Ensure that access to the per CPU representation has the initial
- 	 * boot CPU configuration.
+ 	 * No point in checking CS -- the only way to get here is a user mode
+ 	 * trap to a high address, which means that we're in 64-bit user code.
+ 	 */
+ 
+-	WARN_ON_ONCE(address != regs->ip);
+-
+ 	if (vsyscall_mode == NONE) {
+ 		warn_bad_vsyscall(KERN_INFO, regs,
+ 				  "vsyscall attempted with vsyscall=none");
 -- 
 2.47.2
 
