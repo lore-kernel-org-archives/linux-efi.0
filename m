@@ -1,136 +1,103 @@
-Received: from mail-qk1-f180.google.com (mail-qk1-f180.google.com [209.85.222.180])
+Received: from mail-ej1-f42.google.com (mail-ej1-f42.google.com [209.85.218.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 58D3D22DA1C;
-	Mon,  7 Jul 2025 16:01:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 535691E25FA;
+	Mon,  7 Jul 2025 16:08:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751904082; cv=none; b=EGrt2gwKSJHnDZGi9fOw1P0pcTxPJM9kthoZ3y03EAPA4A+gdb3E0w/9xUqPFzjUCyPdMOhRg0s0vov+iSK/ErtmOCtQ1rS9Q2c99A3kQLU6tyqqGsfeWJXM2yC0zD13+bZ3GSLWnb7B4QF102YQD+iSPeoNcgk7wxbtdE8Jg/M=
+	t=1751904539; cv=none; b=fpRS66zEYm1ecJP+9UrcqGHzC1qcxSJO1hyodLHUgFigQOG75/KAwDXrrtPDrhS8uZ/bEQuu1k99/DCbc/egycbExaPReo03clZVixqslvMi4voIHss8bpTeuV0+NOGOFwpKStOwT9S4iXwr2UZi7rKmo2WtSYXJbsED/vdfgc0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751904082; c=relaxed/simple;
-	bh=XwtnCAizPM4mNONRdmM+LWN86wthex6fymK/baD6ebY=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=i7b7o8qKeJLHolGSQ3w99KosL4uBL3aeTh9q9HvPi43bvs3mC1guAOtUg/RBVYM+r73O05Rif4WlkvAQALdRzerF4f/KgzGZc0KBizIDq2lU6kITgWrgVw1uUC4KnaV2uqbdaUk8tNRJSrPJtUh8/gA4kNdkswOSJexqFZD9PKk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=debian.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.222.180
+	s=arc-20240116; t=1751904539; c=relaxed/simple;
+	bh=hGAL0RAlsyh7P8ZqSXpWzyJtAQXtSCnscC0y+VSp0nI=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=gX0fNvftFmI6irlD4l2eK8LdVUhkAMWFdvpR78GZL6pySP9mcVW19oc7SUu/CC7ONOTT69RGhAiNiypUeCxTchhoAUYrE8U0kVOmyy0lHN/sI67PMhBmDoGYH1OD+BrhRvjKv0cRtMP3tuQW88HJcKWwBwcw/G1v5omeS7gBAxs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=debian.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.218.42
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=debian.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-qk1-f180.google.com with SMTP id af79cd13be357-7d9e2f85b77so1802885a.2;
-        Mon, 07 Jul 2025 09:01:21 -0700 (PDT)
+Received: by mail-ej1-f42.google.com with SMTP id a640c23a62f3a-acb5ec407b1so553185066b.1;
+        Mon, 07 Jul 2025 09:08:57 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1751904080; x=1752508880;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=NUXQYJBwA1uXvCLtyUP2xQTMFYJ+RrG3hsh4utkJxmY=;
-        b=t8ITvL1oezzFKA1SXud64ck7+4ziyzmdAzN8i3cbtJSvxkSZb6+ZL4luku3WqAI+2u
-         ErkiY3oU0ksUP/neem+RD4r08MWvRyDk5v0zc35Ql86Mnd60g92ihs4i5VO1WyeLj0uz
-         CAYb4EslfHbS6xBOCymJ2puHYrfntB/WKGETPLzIl3ko0xxLrggphu8LcLb8JIDEblhX
-         4JyC8dA7OvsMR1VSGfXsMfxIrC6JhDxCRu2Xfr2wyhdX6ifKR4uBSsiebsqVD7aEH5dc
-         Tshs8vO+nBXJAS9j/NW5tHTWnEnXBJctU+7Dp4PQqfmvMyEj0LMWPyPT94u0PVDvgini
-         7+Zw==
-X-Forwarded-Encrypted: i=1; AJvYcCXLE65/nPN6CGngEb3lOAryjL6IObegfBVWMM5e5kbmp0cwYXLbLJKVWWUnYj/lewlY7etLgZkBNirkLPGQ@vger.kernel.org, AJvYcCXv4/9tE1eJHin1Tc5tIsrqY5CYE92M1EC8cK3WCSZ+QiV+rIWRQ2uqvWtl/+SH9vTldprlOiYjDg4=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwXhofEgGJ2qpPQL+s7MWWIYXM+PoBnm/U2tEpLq4sY4d3IL1wz
-	gfW4Kdp1guf6cesNotw0/QRDNP+oMfiZzeSfoB2ZhVQ0XXyvEMlG3muu9IoSDJKX+wI=
-X-Gm-Gg: ASbGnctbJSWVt0HiSw720bPxBEBIkrF+5CG9FSyWh8YQP8TRxwwMxkG6su1N+BY319u
-	GXunIC3D3UDIXYGkAaX41ADHbQ3dvv8N16c7ULXWeM9370zSuovi6BtEFNopCB25m6t0zTdX2bA
-	KGVhT7Rl05qYk+uWpiclTLcJS775vyH750ExfQDU++cxOifWpXajtni/zp9KVW4zG1fkPZnET5i
-	SHQVxxjHGwnM5byjE6vZbR58ZdSSeQuhUEYoGAsmNZTHc18rwLUDe6muEvupt6x2m/XgrOxOado
-	uuE89nSaA/bfkW/uBR10R2hUNyNvG9jryXeqm1qzCr18auRcMcwh4g==
-X-Google-Smtp-Source: AGHT+IEYTHvTkTF6zJvYOnCbSBqGLN3AcGqauqLf5dj2dNagR9TYhmsTSLG+AMquAUaI9gWUZKIT4g==
-X-Received: by 2002:a05:620a:40d3:b0:7d5:e3e9:72ef with SMTP id af79cd13be357-7d5ef4e251dmr1463325585a.2.1751904075735;
-        Mon, 07 Jul 2025 09:01:15 -0700 (PDT)
-Received: from localhost ([2a03:2880:20ff:71::])
-        by smtp.gmail.com with ESMTPSA id af79cd13be357-7d5dbd93f73sm631776185a.4.2025.07.07.09.01.15
+        d=1e100.net; s=20230601; t=1751904536; x=1752509336;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=ukbvHzZfhwx6533qERNgaNRmfc+1+i0ljL79gEDoL88=;
+        b=ujiMjUU3LLg5+DNrpWRnQCC3vSVITQp4tHWdjbPcRMYN6BdDr5oNwzbSg83GsgqQIn
+         4Dqgdh9OOGeUmtOk3+IECzl+OFEl3+2SkpUopYJ3NPbrluENm9HYOna0RgZvAJhiA98S
+         KXQrn1IPFDlwyg8qWi1y39LTHnZSww4qL019TX8+1+kll5D1y+X+RwOda6hOLd6TtYNS
+         88Rrw7w+SqQekfQ9jGD16LET92SpmPDRfT7fG0tG6guKJm5vRjYTPs2bokowK0aZclYE
+         VDZqeshmf1/mzhqk94TuD/mzu8p6C5JMKf5r5hbKocd9lX9UeaL0qF+hhmxW3CINKvps
+         a6oA==
+X-Forwarded-Encrypted: i=1; AJvYcCW7zePZjP5PLbU7zoKU/UgQfxKIeBve1xWqekXj952f/QAMsn0OCInOCFOL3A5xRHTFGxB4qi8NN5Q=@vger.kernel.org, AJvYcCWkEXPMPpVYaSOLvHBvwZlGgmHanJdx+r7rOZkMBwQpSG3+PUD7HyfDrKTPOTzc+yJIuqbKC1jdVHL+s0ld@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw2+4Vs2Q4hE0unNNYN/9CeEbnmt1V2hUh0un8Be4Vmca8EdtcF
+	zTO0eezyApTugH5mI+QWqkLfY7P9TceIlUfd9DePf9pLOHNRhUEY5pPE
+X-Gm-Gg: ASbGncv9K2hkkhBeERNHVmvjd9uJ1ifUjdTmT/Kq/AcsYjV+GopqmfDXzF3yXJNNd3P
+	zmI1+I8PnVJRwqS3hm26RWogcpI6qWRHOXOfdgkXpUunEDZZgclHPEHdwEi9+icHO6Mf9TFXohA
+	ePqfAJfaYRAtKoDerjmxH53mFavc/47S7q8kd/EWd5/GiFFZrW44uHyxn/CPhY14RfQpsWCjR15
+	5jZw8Cl7fXUMWNatyNhEM3jVHyAw0Mz1r59mli3PpwWoHXZD42noGJIV7KWCWTigZwR60goL1JM
+	U6mW0Tcdu8sfCGAmS92BbcGrh6T03+Y5BCUI92PZcZFCONAxn7MA5w==
+X-Google-Smtp-Source: AGHT+IFRCwe+M2LN1raXwbrfTy1qnj/eKSyDlwd2ZulMHGxXV5lbkUCyxCU9OUDf418Cp2+/qD3ZbQ==
+X-Received: by 2002:a17:906:2412:b0:ae0:bdc2:9957 with SMTP id a640c23a62f3a-ae3fbdea236mr1001311166b.61.1751904536006;
+        Mon, 07 Jul 2025 09:08:56 -0700 (PDT)
+Received: from gmail.com ([2a03:2880:30ff:70::])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-ae3f6abfadbsm729371066b.80.2025.07.07.09.08.54
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 07 Jul 2025 09:01:15 -0700 (PDT)
+        Mon, 07 Jul 2025 09:08:55 -0700 (PDT)
+Date: Mon, 7 Jul 2025 09:08:49 -0700
 From: Breno Leitao <leitao@debian.org>
-Date: Mon, 07 Jul 2025 09:01:07 -0700
-Subject: [PATCH 7/8] arm64: remove CONFIG_VMAP_STACK checks from SDEI stack
- handling
+To: Catalin Marinas <catalin.marinas@arm.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, Will Deacon <will@kernel.org>,
+	Ard Biesheuvel <ardb@kernel.org>, usamaarif642@gmail.com,
+	rmikey@meta.com, andreyknvl@gmail.com, kasan-dev@googlegroups.com,
+	linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+	linux-kernel@vger.kernel.org, kernel-team@meta.com
+Subject: Re: [PATCH] arm64: efi: Fix KASAN false positive for EFI runtime
+ stack
+Message-ID: <aGvxEYDP8pVlalaz@gmail.com>
+References: <20250624-arm_kasan-v1-1-21e80eab3d70@debian.org>
+ <aGaxZHLnDQc_kSur@arm.com>
+ <CAMj1kXFadibWLnhFv3cOk-7Ah2MmPz8RqDuQjGr-3gmq+hEnMg@mail.gmail.com>
+ <aGfK2N6po39zyVIp@gmail.com>
+ <aGfYL8eXjTA9puQr@willie-the-truck>
+ <aGfZwTCNO_10Ceng@J2N7QTR9R3>
+ <aGsYkFnHEkn0dBsW@arm.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20250707-arm64_vmap-v1-7-8de98ca0f91c@debian.org>
-References: <20250707-arm64_vmap-v1-0-8de98ca0f91c@debian.org>
-In-Reply-To: <20250707-arm64_vmap-v1-0-8de98ca0f91c@debian.org>
-To: Catalin Marinas <catalin.marinas@arm.com>, 
- Will Deacon <will@kernel.org>, Ard Biesheuvel <ardb@kernel.org>
-Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, 
- linux-efi@vger.kernel.org, Breno Leitao <leitao@debian.org>, 
- leo.yan@arm.com, kernel-team@meta.com, mark.rutland@arm.com
-X-Mailer: b4 0.15-dev-42535
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1801; i=leitao@debian.org;
- h=from:subject:message-id; bh=XwtnCAizPM4mNONRdmM+LWN86wthex6fymK/baD6ebY=;
- b=owEBbQKS/ZANAwAIATWjk5/8eHdtAcsmYgBoa+9Dn4x8YaJSTfJb7G6Cqhkv+jOC8ONk9zFsQ
- iJ/WqLC2JeJAjMEAAEIAB0WIQSshTmm6PRnAspKQ5s1o5Of/Hh3bQUCaGvvQwAKCRA1o5Of/Hh3
- bdBaD/0WnjGPnhJAL5zph1bBb1N+rPYW83xmPGrHb/uE8ea/eHdf9sjhMixTh4XIS2rWn+BoJIJ
- yrzVYU9b1GCCy7EKVnZR57WdC2QjLYLIy+06DrLmMFP9w/HgXYBNyZlqkgrLySg/0iLeSe5YITF
- ZtoyaK89w3z4ZWgZHxssNnOU+CtqEpWGAdr7ABlGRK+tMTWtX+OWgkXsJ7YlgLusVoCF+Q3BQnM
- 0/kceN+nBMjFrTcHcFdR51pHofMZWp52FXcLcME03j8CQPL9v4T29LSXMix2fthIGSt9k7xnQBM
- pRsh5Yl61agtI3jd9uyaIX39pp/T/+XP1pncmXsIISPjH7b0NJ/zK4grwB4pn/EwNHCsNAPCVDx
- OBMC/JXUq37wv3Kh+g33WR5IVJAD0dVIW4gqayr/eZsYfmaN0ZLcJlwfyCz94gbA+FlhSQ3AyMr
- epM20hCAWFByqbyBUdbtztTy1GvCqfkds1S3zU2KRNO9Y2gsLfaoj+6JM1tMxc/xau43Bn9CB2D
- D+pRSiXs4WoXkXdpxN/khuJeTxOAmFRvwSqtLX9uN91LTS3FPLjhubLBMogjtKnxBhCI+P8st2A
- ZnTYEoi0LeqOBkd2WB5VHzThRHEg4nsWc03pJbFqs5oqrHMAUIuRjaKe8ll+6fsTvBztX/qR2YY
- oSuXfvD7AMaGXmQ==
-X-Developer-Key: i=leitao@debian.org; a=openpgp;
- fpr=AC8539A6E8F46702CA4A439B35A3939FFC78776D
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <aGsYkFnHEkn0dBsW@arm.com>
 
-With VMAP_STACK now always enabled on arm64, remove all
-CONFIG_VMAP_STACK conditionals from SDEI stack allocation and
-initialization in arch/arm64/kernel/sdei.c.
 
-This change unconditionally defines the SDEI stack pointers and replaces
-runtime checks with BUILD_BUG_ON() assertions, ensuring that the code is
-only built when VMAP_STACK is enabled. This simplifies the logic and
-reflects the mandatory use of VMAP_STACK for all arm64 kernel builds.
+On Sun, Jul 06, 2025 at 07:45:04PM -0500, Catalin Marinas wrote:
+> On Fri, Jul 04, 2025 at 02:40:17PM +0100, Mark Rutland wrote:
+> > On Fri, Jul 04, 2025 at 02:33:35PM +0100, Will Deacon wrote:
+> > > I would actually like to select VMAP_STACK unconditionally for arm64.
+> > > Historically, we were held back waiting for all the various KASAN modes
+> > > to support vmalloc properly, but I _think_ that's fixed now...
+> > > 
+> > > The VMAP_STACK dependency is:
+> > > 
+> > > 	depends on !KASAN || KASAN_HW_TAGS || KASAN_VMALLOC
+> > > 
+> > > and in arm64 we have:
+> > > 
+> > > 	select KASAN_VMALLOC if KASAN
+> > > 
+> > > so it should be fine to select it afaict.
+> > > 
+> > > Any reason not to do that?
+> > 
+> > Not that I am aware of.
+> > 
+> > I'm also in favour of unconditionally selecting VMAP_STACK.
+> 
+> So am I.
 
-Signed-off-by: Breno Leitao <leitao@debian.org>
----
- arch/arm64/kernel/sdei.c | 8 ++------
- 1 file changed, 2 insertions(+), 6 deletions(-)
+Thanks. I've played a bit with it, and did some mechanical work, and
+send a v1.
 
-diff --git a/arch/arm64/kernel/sdei.c b/arch/arm64/kernel/sdei.c
-index 255d12f881c2..6f24a0251e18 100644
---- a/arch/arm64/kernel/sdei.c
-+++ b/arch/arm64/kernel/sdei.c
-@@ -34,10 +34,8 @@ unsigned long sdei_exit_mode;
- DECLARE_PER_CPU(unsigned long *, sdei_stack_normal_ptr);
- DECLARE_PER_CPU(unsigned long *, sdei_stack_critical_ptr);
- 
--#ifdef CONFIG_VMAP_STACK
- DEFINE_PER_CPU(unsigned long *, sdei_stack_normal_ptr);
- DEFINE_PER_CPU(unsigned long *, sdei_stack_critical_ptr);
--#endif
- 
- DECLARE_PER_CPU(unsigned long *, sdei_shadow_call_stack_normal_ptr);
- DECLARE_PER_CPU(unsigned long *, sdei_shadow_call_stack_critical_ptr);
-@@ -65,8 +63,7 @@ static void free_sdei_stacks(void)
- {
- 	int cpu;
- 
--	if (!IS_ENABLED(CONFIG_VMAP_STACK))
--		return;
-+	BUILD_BUG_ON(!IS_ENABLED(CONFIG_VMAP_STACK));
- 
- 	for_each_possible_cpu(cpu) {
- 		_free_sdei_stack(&sdei_stack_normal_ptr, cpu);
-@@ -91,8 +88,7 @@ static int init_sdei_stacks(void)
- 	int cpu;
- 	int err = 0;
- 
--	if (!IS_ENABLED(CONFIG_VMAP_STACK))
--		return 0;
-+	BUILD_BUG_ON(!IS_ENABLED(CONFIG_VMAP_STACK));
- 
- 	for_each_possible_cpu(cpu) {
- 		err = _init_sdei_stack(&sdei_stack_normal_ptr, cpu);
-
--- 
-2.47.1
-
+https://lore.kernel.org/all/20250707-arm64_vmap-v1-0-8de98ca0f91c@debian.org/
