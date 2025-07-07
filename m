@@ -1,50 +1,50 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.12])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.13])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 102022797AB;
-	Mon,  7 Jul 2025 08:03:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.12
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3CDFE290BC8;
+	Mon,  7 Jul 2025 08:03:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.13
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751875421; cv=none; b=izJnW2QGnEzK6oi7R8oRxAozIbGrCkG7lt88XWIPaFaR8io4Y4WJ+haaXyNbe7hcwUBawbmHm+ZX4hZOhEAD5MfTPZHnDVIGta3TlimEBTpyfk0VRIDs+gEIe5gHvYgEkgNkokmB/uujExWPcc9K5DMaJkVvIhs4iZJ8Y5zpB1M=
+	t=1751875423; cv=none; b=fzJewD5mah+aL0WTJ3F8+pl/Igp0jbtpMtCF0KKnMq6MrdSm2cc/9avVYsOBKYHEqKTf2YopLBE+65dmAQ296LQ6rq2V+WXrdyCO4tawKqez/qYKUhBNyHdCW2nu8MACjOrdbZT6KqA+xBiKqSp37Lo/+bsIBfzN5BPO+HvJqcg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751875421; c=relaxed/simple;
-	bh=JeSkJUV3cdv7bNcvYQkT6zLEZGmKlSxMDoJgLXtp5FU=;
+	s=arc-20240116; t=1751875423; c=relaxed/simple;
+	bh=gRYbIS7Dgh1noZwFu/j8FTMijwGvmqKuvAcfA8tsGH0=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=iN5p2csRgYejpPVT5lluQLUtRnAQ2ct/6jM/hFZBudKA7nzdukS6LQeZmCEeEKpPGejlsNpVbaPqdI4dxRUMJ5LYBP2a8s0lZU02yoY6z80guz5/HHaVupkkX6IexTPz/vi85EOYhI48i8HSpeVcBwIE/opKVlEjid0AOWIAITI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.helo=mgamail.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=O3QzUPH6; arc=none smtp.client-ip=192.198.163.12
+	 MIME-Version; b=l9v5YgFdhF5T9jvzzk16cEBpDluIO8Mz024Kp0Pf+VckG5Tg8AgxwIyME3iAKvz+cIAW22fU3Ry1ZL8901Ma/+J/2JZNgabmI4wLziqKXJFaBaLCqPpW8gPZ4NWYf/wG5iRRKOz+rmUblOLdEEBQQ9QNey3c2K/Ea4ojzNrLf3U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.helo=mgamail.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=UBaYF03F; arc=none smtp.client-ip=198.175.65.13
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.helo=mgamail.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="O3QzUPH6"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="UBaYF03F"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1751875420; x=1783411420;
+  t=1751875422; x=1783411422;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=JeSkJUV3cdv7bNcvYQkT6zLEZGmKlSxMDoJgLXtp5FU=;
-  b=O3QzUPH699LY85K/Y4Ll5b6hYDR1ny9pz2VibqwSJpacXkkb/lDxgjwn
-   DvfgXioRwMPQc1vdovmjGeASmNMp9UhFLSuv5Fb4R8VAIlfXtIO3pYtt8
-   4rIwVtuzKMhsoVSzGJkYCj6BVjPE11bZ+8QKSWqfPK1ozF1JGJHmrrELG
-   FLVqN6e93BRAvMuuz/yHEhZlbwMkPAq3qYuc61vErIfm27KewXgs8n5SK
-   VZAgTCxVIkB9tM53wjTsahRjzZd+ppTO19kHiuptLMr80cLa3iBL+6Ign
-   DyPk35BSx6GzbsQcgZIxG1rLqZRsVLICTar2kZzi75VLbXn7loNhRm3uV
-   Q==;
-X-CSE-ConnectionGUID: cjL3D1CrSEadWlxHH/mnzg==
-X-CSE-MsgGUID: InMQzxUFSGO4qOKZqAISfg==
-X-IronPort-AV: E=McAfee;i="6800,10657,11486"; a="57891128"
+  bh=gRYbIS7Dgh1noZwFu/j8FTMijwGvmqKuvAcfA8tsGH0=;
+  b=UBaYF03F0NjysC9skS3mKBS6yaJd3ckwmJjiiczgKhE3wgx3s3LJgLb+
+   fJ5qIFNcuUB8QHawGNQ5K95bld692yvTrcEV7sHpk/ud+zWv1jXLnTlyq
+   HR3B+3o53lxEuyf+p1QKRyxXiYv75eaFULPB/6IrxamJwrwG3hKeafjjj
+   20gUzwEZX8BlxgZIAB827OF4YsLBVyAiBJtoY6+0FLBrgKMfBvquHbVJz
+   oOEbazX7I7a5N5QncoZe0nPYk6V2WpH5YQfTXsObIALX+TkG6w/mNxgvU
+   xfF7XeBNhpfmG1IxrVKXB40xqsHYVEjnl+zX0wKoK4G3mtEKiU/P3Ot4b
+   A==;
+X-CSE-ConnectionGUID: jPQlUIbARMCorxELFIJkRA==
+X-CSE-MsgGUID: 9s1d+18mTFmgF2fKbfWfKA==
+X-IronPort-AV: E=McAfee;i="6800,10657,11486"; a="65151926"
 X-IronPort-AV: E=Sophos;i="6.16,293,1744095600"; 
-   d="scan'208";a="57891128"
-Received: from orviesa002.jf.intel.com ([10.64.159.142])
-  by fmvoesa106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Jul 2025 01:03:39 -0700
-X-CSE-ConnectionGUID: WKwvMiHoQbqZAzVx9c7oRQ==
-X-CSE-MsgGUID: 1odox0lWS0iLMEK0BglNLw==
+   d="scan'208";a="65151926"
+Received: from orviesa010.jf.intel.com ([10.64.159.150])
+  by orvoesa105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Jul 2025 01:03:40 -0700
+X-CSE-ConnectionGUID: amRPvkuCSDWD/XznO18OUw==
+X-CSE-MsgGUID: TTwuPwcbSx6N7+L7HeOoXw==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.16,293,1744095600"; 
-   d="scan'208";a="186171982"
+   d="scan'208";a="154573894"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by orviesa002.jf.intel.com with ESMTP; 07 Jul 2025 01:03:28 -0700
+  by orviesa010.jf.intel.com with ESMTP; 07 Jul 2025 01:03:26 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1000)
-	id 394C6983; Mon, 07 Jul 2025 11:03:18 +0300 (EEST)
+	id 22C2C8E9; Mon, 07 Jul 2025 11:03:18 +0300 (EEST)
 From: "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
 To: Andy Lutomirski <luto@kernel.org>,
 	Thomas Gleixner <tglx@linutronix.de>,
@@ -98,9 +98,9 @@ Cc: Jonathan Corbet <corbet@lwn.net>,
 	linux-efi@vger.kernel.org,
 	linux-mm@kvack.org,
 	"Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
-Subject: [PATCHv9 12/16] x86/traps: Generalize #GP address decode and hint code
-Date: Mon,  7 Jul 2025 11:03:12 +0300
-Message-ID: <20250707080317.3791624-13-kirill.shutemov@linux.intel.com>
+Subject: [PATCHv9 10/16] x86/vsyscall: Disable LASS if vsyscall mode is set to EMULATE
+Date: Mon,  7 Jul 2025 11:03:10 +0300
+Message-ID: <20250707080317.3791624-11-kirill.shutemov@linux.intel.com>
 X-Mailer: git-send-email 2.47.2
 In-Reply-To: <20250707080317.3791624-1-kirill.shutemov@linux.intel.com>
 References: <20250707080317.3791624-1-kirill.shutemov@linux.intel.com>
@@ -112,175 +112,66 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-In most cases, an access causing a LASS violation results in a general
-protection exception (#GP); for stack accesses (those due to
-stack-oriented instructions, as well as accesses that implicitly or
-explicitly use the SS segment register), a stack fault (#SS) is
-generated.
+From: Sohil Mehta <sohil.mehta@intel.com>
 
-Handlers for #GP and #SS will now share code to decode the exception
-address and retrieve the exception hint string.
+The EMULATE mode of vsyscall maps the vsyscall page into user address
+space which can be read directly by the user application. This mode has
+been deprecated recently and can only be enabled from a special command
+line parameter vsyscall=emulate. See commit bf00745e7791 ("x86/vsyscall:
+Remove CONFIG_LEGACY_VSYSCALL_EMULATE")
 
-The helper, enum, and array should be renamed as they are no longer
-specific to #GP.
+Fixing the LASS violations during the EMULATE mode would need complex
+instruction decoding since the resulting #GP fault does not include any
+useful error information and the vsyscall address is not readily
+available in the RIP.
 
-No functional change intended.
+At this point, no one is expected to be using the insecure and
+deprecated EMULATE mode. The rare usages that need support probably
+don't care much about security anyway. Disable LASS when EMULATE mode is
+requested during command line parsing to avoid breaking user software.
+LASS will be supported if vsyscall mode is set to XONLY or NONE.
 
+Signed-off-by: Sohil Mehta <sohil.mehta@intel.com>
+Signed-off-by: Alexander Shishkin <alexander.shishkin@linux.intel.com>
 Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
 ---
- arch/x86/kernel/dumpstack.c |  6 ++--
- arch/x86/kernel/traps.c     | 58 ++++++++++++++++++-------------------
- 2 files changed, 32 insertions(+), 32 deletions(-)
+ Documentation/admin-guide/kernel-parameters.txt | 4 +++-
+ arch/x86/entry/vsyscall/vsyscall_64.c           | 7 +++++++
+ 2 files changed, 10 insertions(+), 1 deletion(-)
 
-diff --git a/arch/x86/kernel/dumpstack.c b/arch/x86/kernel/dumpstack.c
-index 71ee20102a8a..e0f85214e92f 100644
---- a/arch/x86/kernel/dumpstack.c
-+++ b/arch/x86/kernel/dumpstack.c
-@@ -441,14 +441,14 @@ void die(const char *str, struct pt_regs *regs, long err)
- 	oops_end(flags, regs, sig);
- }
+diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
+index f1f2c0874da9..796c987372df 100644
+--- a/Documentation/admin-guide/kernel-parameters.txt
++++ b/Documentation/admin-guide/kernel-parameters.txt
+@@ -7926,7 +7926,9 @@
  
--void die_addr(const char *str, struct pt_regs *regs, long err, long gp_addr)
-+void die_addr(const char *str, struct pt_regs *regs, long err, long addr)
- {
- 	unsigned long flags = oops_begin();
- 	int sig = SIGSEGV;
+ 			emulate     Vsyscalls turn into traps and are emulated
+ 			            reasonably safely.  The vsyscall page is
+-				    readable.
++				    readable.  This disables the Linear
++				    Address Space Separation (LASS) security
++				    feature and makes the system less secure.
  
- 	__die_header(str, regs, err);
--	if (gp_addr)
--		kasan_non_canonical_hook(gp_addr);
-+	if (addr)
-+		kasan_non_canonical_hook(addr);
- 	if (__die_body(str, regs, err))
- 		sig = 0;
- 	oops_end(flags, regs, sig);
-diff --git a/arch/x86/kernel/traps.c b/arch/x86/kernel/traps.c
-index 4a4194e1d119..f75d6a8dcf20 100644
---- a/arch/x86/kernel/traps.c
-+++ b/arch/x86/kernel/traps.c
-@@ -633,28 +633,28 @@ DEFINE_IDTENTRY(exc_bounds)
- 	cond_local_irq_disable(regs);
- }
+ 			xonly       [default] Vsyscalls turn into traps and are
+ 			            emulated reasonably safely.  The vsyscall
+diff --git a/arch/x86/entry/vsyscall/vsyscall_64.c b/arch/x86/entry/vsyscall/vsyscall_64.c
+index be77385b311e..d37df40bfb26 100644
+--- a/arch/x86/entry/vsyscall/vsyscall_64.c
++++ b/arch/x86/entry/vsyscall/vsyscall_64.c
+@@ -63,6 +63,13 @@ static int __init vsyscall_setup(char *str)
+ 		else
+ 			return -EINVAL;
  
--enum kernel_gp_hint {
--	GP_NO_HINT,
--	GP_NON_CANONICAL,
--	GP_CANONICAL,
--	GP_LASS_VIOLATION,
--	GP_NULL_POINTER,
-+enum kernel_exc_hint {
-+	EXC_NO_HINT,
-+	EXC_NON_CANONICAL,
-+	EXC_CANONICAL,
-+	EXC_LASS_VIOLATION,
-+	EXC_NULL_POINTER,
- };
- 
--static const char * const kernel_gp_hint_help[] = {
--	[GP_NON_CANONICAL]	= "probably for non-canonical address",
--	[GP_CANONICAL]		= "maybe for address",
--	[GP_LASS_VIOLATION]	= "LASS prevented access to address",
--	[GP_NULL_POINTER]	= "kernel NULL pointer dereference",
-+static const char * const kernel_exc_hint_help[] = {
-+	[EXC_NON_CANONICAL]	= "probably for non-canonical address",
-+	[EXC_CANONICAL]		= "maybe for address",
-+	[EXC_LASS_VIOLATION]	= "LASS prevented access to address",
-+	[EXC_NULL_POINTER]	= "kernel NULL pointer dereference",
- };
- 
- /*
-- * When an uncaught #GP occurs, try to determine the memory address accessed by
-- * the instruction and return that address to the caller. Also, try to figure
-- * out whether any part of the access to that address was non-canonical.
-+ * When an uncaught #GP/#SS occurs, try to determine the memory address accessed
-+ * by  the instruction and return that address to the caller. Also, try to
-+ * figure out whether any part of the access to that address was non-canonical.
-  */
--static enum kernel_gp_hint get_kernel_gp_address(struct pt_regs *regs,
--						 unsigned long *addr)
-+static enum kernel_exc_hint get_kernel_exc_address(struct pt_regs *regs,
-+						   unsigned long *addr)
- {
- 	u8 insn_buf[MAX_INSN_SIZE];
- 	struct insn insn;
-@@ -662,37 +662,37 @@ static enum kernel_gp_hint get_kernel_gp_address(struct pt_regs *regs,
- 
- 	if (copy_from_kernel_nofault(insn_buf, (void *)regs->ip,
- 			MAX_INSN_SIZE))
--		return GP_NO_HINT;
-+		return EXC_NO_HINT;
- 
- 	ret = insn_decode_kernel(&insn, insn_buf);
- 	if (ret < 0)
--		return GP_NO_HINT;
-+		return EXC_NO_HINT;
- 
- 	*addr = (unsigned long)insn_get_addr_ref(&insn, regs);
- 	if (*addr == -1UL)
--		return GP_NO_HINT;
-+		return EXC_NO_HINT;
- 
- #ifdef CONFIG_X86_64
- 	/* Operand is in the kernel half */
- 	if (*addr >= ~__VIRTUAL_MASK)
--		return GP_CANONICAL;
-+		return EXC_CANONICAL;
- 
- 	/* The last byte of the operand is not in the user canonical half */
- 	if (*addr + insn.opnd_bytes - 1 > __VIRTUAL_MASK)
--		return GP_NON_CANONICAL;
-+		return EXC_NON_CANONICAL;
- 
- 	/*
- 	 * If LASS is enabled, NULL pointer dereference generates
- 	 * #GP instead of #PF.
- 	 */
- 	if (*addr < PAGE_SIZE)
--		return GP_NULL_POINTER;
-+		return EXC_NULL_POINTER;
- 
- 	if (cpu_feature_enabled(X86_FEATURE_LASS))
--		return GP_LASS_VIOLATION;
-+		return EXC_LASS_VIOLATION;
- #endif
- 
--	return GP_CANONICAL;
-+	return EXC_CANONICAL;
- }
- 
- #define GPFSTR "general protection fault"
-@@ -811,7 +811,7 @@ static void gp_user_force_sig_segv(struct pt_regs *regs, int trapnr,
- DEFINE_IDTENTRY_ERRORCODE(exc_general_protection)
- {
- 	char desc[sizeof(GPFSTR) + 50 + 2*sizeof(unsigned long) + 1] = GPFSTR;
--	enum kernel_gp_hint hint = GP_NO_HINT;
-+	enum kernel_exc_hint hint = EXC_NO_HINT;
- 	unsigned long gp_addr;
- 
- 	if (user_mode(regs) && try_fixup_enqcmd_gp())
-@@ -849,18 +849,18 @@ DEFINE_IDTENTRY_ERRORCODE(exc_general_protection)
- 	if (error_code)
- 		snprintf(desc, sizeof(desc), "segment-related " GPFSTR);
- 	else
--		hint = get_kernel_gp_address(regs, &gp_addr);
-+		hint = get_kernel_exc_address(regs, &gp_addr);
- 
--	if (hint != GP_NO_HINT) {
-+	if (hint != EXC_NO_HINT) {
- 		snprintf(desc, sizeof(desc), GPFSTR ", %s 0x%lx",
--			 kernel_gp_hint_help[hint], gp_addr);
-+			 kernel_exc_hint_help[hint], gp_addr);
++		if (cpu_feature_enabled(X86_FEATURE_LASS) &&
++		    vsyscall_mode == EMULATE) {
++			cr4_clear_bits(X86_CR4_LASS);
++			setup_clear_cpu_cap(X86_FEATURE_LASS);
++			pr_warn_once("x86/cpu: Disabling LASS support due to vsyscall=emulate\n");
++		}
++
+ 		return 0;
  	}
  
- 	/*
- 	 * KASAN is interested only in the non-canonical case, clear it
- 	 * otherwise.
- 	 */
--	if (hint != GP_NON_CANONICAL)
-+	if (hint != EXC_NON_CANONICAL)
- 		gp_addr = 0;
- 
- 	die_addr(desc, regs, error_code, gp_addr);
 -- 
 2.47.2
 
