@@ -1,51 +1,51 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.13])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.15])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 66B5C286405;
-	Wed,  9 Jul 2025 09:36:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.13
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D6D53286D55;
+	Wed,  9 Jul 2025 09:38:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.15
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752053773; cv=none; b=nDwsMFA57Wab/8cut7EnjNfnngwkT6Z/6ZF4B7mxgf0O+4sHhjJUqS50Oe1iYJ3dbsjH7OCgJY1mqT9wq8mv5c0E5AzwRJxW9+ipEJw8opLS3RNOGPyo/ygoomInO+ttBEBCk25GzQzp17q+m6RQF1Qa/9LXH3Z0dICgqJLpyos=
+	t=1752053934; cv=none; b=RC01uiIKrs4KL+jfYHy4WWomEYQ0pMycAWrkQZfHXv3bkdzeWyzwxt7LA+MnpziHQc35z2ddxr5gzXloaRu68UbAARWSyhwzNFw0ihymvCuwQAXHRCQJ1m9E0p4rzeNB7jaM3AENJ4fcKOD/dP9Z1p1ga1YD53ZtFYPu9ErOmL0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1752053773; c=relaxed/simple;
-	bh=57HpAVIBYUev31ZQjRb5VYE7UT3RT7/5h4EqYhfyAyM=;
+	s=arc-20240116; t=1752053934; c=relaxed/simple;
+	bh=xYZjRqgkPOL2LqzqY+U3wd+rmN7x/AzvRlTH/XIY5I8=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=EvaJSL7m2RtpiGTYE5UWHa8+A6ICm5Qfkb77nRo9zU+Rok7oiTVxQ8u3UkP0C6sRoiLgtoBksNbBd6zC1wTnSYkyopAsTpd8Jg6rKDCnVbvLIwGX+k1zcB71TdIda7k+YyLs3PeQ/oQQY0YU02/gkYcKuI7iqOaG3XmlPV8Odb0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=ZcyDWdmk; arc=none smtp.client-ip=192.198.163.13
+	 Content-Type:Content-Disposition:In-Reply-To; b=lOfmkCbBfrTNJH/CEaFL44If5hTrSqb8fv1lgCmtPc1lik16Dx/6to6RtmKkUVPeOaS1W9HQINzikO0H40H9eCh+TN/9CN8btAnqu7lmOW6NZIUiqW0BssOlAaSnd+CBctgCFA3H4hbRBjuA4lyZ06DUy21ymnw+RKJbS/TmrXg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=IOC7Xf5x; arc=none smtp.client-ip=192.198.163.15
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="ZcyDWdmk"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="IOC7Xf5x"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1752053771; x=1783589771;
+  t=1752053932; x=1783589932;
   h=date:from:to:cc:subject:message-id:references:
    mime-version:in-reply-to;
-  bh=57HpAVIBYUev31ZQjRb5VYE7UT3RT7/5h4EqYhfyAyM=;
-  b=ZcyDWdmkmG0BQ+R7kBobL5wjvqk4wgKxnsuqIascgYvfMl3SuiueW0rB
-   etFjPimesTmP65SpGJusu3tvt/8Khr2YGA6MSsaE43937d1AhL+YbPwVh
-   IDKwdacK1Cps8wbaNVLUcihQaXavTv9j8r8aSoqp0DYoAQ9mbU24784ti
-   ajC6b6pPxYMwj6dz6IEARI5VPqurDl8u6AuHhFOyaJM1ySvo1Sa9DapES
-   xqSqfsXn8s/G59UMgvbTE18FuqMnAQ4z1m17tB+QFP5ginTZZt3YfGA6I
-   jTrAyAkOTbp5bGKTkf406rYvMuzWdztUCWXDhs12R6PURSHRW3v1sDYAS
+  bh=xYZjRqgkPOL2LqzqY+U3wd+rmN7x/AzvRlTH/XIY5I8=;
+  b=IOC7Xf5xyeeefm9zHEl2YQCtWFXiAHrhsZAXyMzPu2ACTziIh5RAx8UT
+   +FN2m93yv0YJT0Em3N7M22V2b6cOw3NfeuE2ZCl/5WhpjDPTFm8wn4XVc
+   UoZ/ELYfdz4ygoGCByF6J5iRfr565KJfmZkhHmtcf9j125fBGaBD7a85V
+   YzQV2w56Weqtmbc3xekATzcPC4SnUCMPBFUjnBM8XZBvpBLHmn3VClbp8
+   HOCrX58qJRSzuVYKgRbrCYBvl2iD3jB7AVsoydhPH5qgrSqe84c21EBb7
+   fC9p8AMn2tUq8g6YI/1/1hQTak+ANrgFvm01hy5Fh1+aTh3Mjr+lDeFgT
    A==;
-X-CSE-ConnectionGUID: NGf3LoUXRDa9MGivH/7W1g==
-X-CSE-MsgGUID: AFD8xtq9SgmnVfZ5Bi6Pig==
-X-IronPort-AV: E=McAfee;i="6800,10657,11487"; a="56913868"
+X-CSE-ConnectionGUID: EiNw8QaYSU6sihzdUCi+PQ==
+X-CSE-MsgGUID: 1PUAINd3Q3Oc9ZftSDQEfA==
+X-IronPort-AV: E=McAfee;i="6800,10657,11487"; a="54452029"
 X-IronPort-AV: E=Sophos;i="6.16,298,1744095600"; 
-   d="scan'208";a="56913868"
-Received: from orviesa009.jf.intel.com ([10.64.159.149])
-  by fmvoesa107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Jul 2025 02:35:56 -0700
-X-CSE-ConnectionGUID: XOJPCdnTS0u1auLG4BTfSg==
-X-CSE-MsgGUID: GwG8U9/ITr+FQool+KFrhQ==
+   d="scan'208";a="54452029"
+Received: from fmviesa007.fm.intel.com ([10.60.135.147])
+  by fmvoesa109.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Jul 2025 02:38:52 -0700
+X-CSE-ConnectionGUID: gXEO+CXSSgqC5YZ2O8fG+g==
+X-CSE-MsgGUID: 8CthuCcFTnOtmJIMMxE+9g==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.16,298,1744095600"; 
-   d="scan'208";a="155464607"
+   d="scan'208";a="155366162"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by orviesa009.jf.intel.com with ESMTP; 09 Jul 2025 02:35:44 -0700
+  by fmviesa007.fm.intel.com with ESMTP; 09 Jul 2025 02:38:41 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1000)
-	id 0CF1F1B7; Wed, 09 Jul 2025 12:35:42 +0300 (EEST)
-Date: Wed, 9 Jul 2025 12:35:42 +0300
+	id D42A01B7; Wed, 09 Jul 2025 12:38:39 +0300 (EEST)
+Date: Wed, 9 Jul 2025 12:38:39 +0300
 From: "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
 To: Sohil Mehta <sohil.mehta@intel.com>
 Cc: Andy Lutomirski <luto@kernel.org>, 
@@ -71,12 +71,12 @@ Cc: Andy Lutomirski <luto@kernel.org>,
 	Namhyung Kim <namhyung@kernel.org>, Arnaldo Carvalho de Melo <acme@redhat.com>, 
 	linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, 
 	linux-mm@kvack.org
-Subject: Re: [PATCHv9 02/16] x86/alternatives: Disable LASS when patching
- kernel alternatives
-Message-ID: <iebitnv533feb5axuf4jtgetajwmwgvaocmanw6swejv5cfxrd@numffxr7uj4p>
+Subject: Re: [PATCHv9 04/16] x86/cpu: Defer CR pinning setup until core
+ initcall
+Message-ID: <aa4sycdhtxlerad6a7xucf6icjyioydu7oefvsdvwnoozqd2kh@lhtkexpqjebn>
 References: <20250707080317.3791624-1-kirill.shutemov@linux.intel.com>
- <20250707080317.3791624-3-kirill.shutemov@linux.intel.com>
- <53b8d516-5d19-4b3b-b7fa-99f1066f79fe@intel.com>
+ <20250707080317.3791624-5-kirill.shutemov@linux.intel.com>
+ <9340dc9e-bd4d-450e-aa9b-b6b6829eab32@intel.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -85,36 +85,44 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <53b8d516-5d19-4b3b-b7fa-99f1066f79fe@intel.com>
+In-Reply-To: <9340dc9e-bd4d-450e-aa9b-b6b6829eab32@intel.com>
 
-On Tue, Jul 08, 2025 at 06:08:18PM -0700, Sohil Mehta wrote:
+On Tue, Jul 08, 2025 at 06:19:03PM -0700, Sohil Mehta wrote:
 > On 7/7/2025 1:03 AM, Kirill A. Shutemov wrote:
-> > From: Sohil Mehta <sohil.mehta@intel.com>
+> > From: Alexander Shishkin <alexander.shishkin@linux.intel.com>
 > > 
-> > For patching, the kernel initializes a temporary mm area in the lower
-> > half of the address range. See commit 4fc19708b165 ("x86/alternatives:
-> > Initialize temporary mm for patching").
+> > In order to map the EFI runtime services, set_virtual_address_map()
+> > needs to be called, which resides in the lower half of the address
+> > space. This means that LASS needs to be temporarily disabled around
+> > this call. This can only be done before the CR pinning is set up.
 > > 
-> > Disable LASS enforcement during patching to avoid triggering a #GP
-> > fault.
+> > Instead of moving setup_cr_pinning() below efi_enter_virtual_mode() in
+> > arch_cpu_finalize_init(), defer it until core initcall.
 > > 
-> > The objtool warns due to a call to a non-allowed function that exists
-> > outside of the stac/clac guard, or references to any function with a
-> > dynamic function pointer inside the guard. See the Objtool warnings
-> > section #9 in the document tools/objtool/Documentation/objtool.txt.
+> > Wrapping efi_enter_virtual_mode() into lass_stac()/clac() is not enough
+> > because AC flag gates data accesses, but not instruction fetch. Clearing
+> > the CR4 bit is required.
 > > 
-> > Considering that patching is usually small, replace the memcpy() and
-> > memset() functions in the text poking functions with their open coded
-> > versions.
-> > 
-> > Signed-off-by: Sohil Mehta <sohil.mehta@intel.com>
-> > Signed-off-by: Alexander Shishkin <alexander.shishkin@linux.intel.com>
-> > Signed-off-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
 > 
-> Kirill, it might be worth adding your co-developed-by tag. The patch has
-> more changes than I can claim credit for.
+> I think the wording might need to be reordered. How about?
+> 
+> In order to map the EFI runtime services, set_virtual_address_map()
+> needs to be called, which resides in the lower half of the address
+> space. This means that LASS needs to be temporarily disabled around
+> this call.
+> 
+> Wrapping efi_enter_virtual_mode() into lass_stac()/clac() is not enough
+> because AC flag gates data accesses, but not instruction fetch. Clearing
+> the CR4 bit is required.
+> 
+> However, this must be done before the CR pinning is set up. Instead of
+> arbitrarily moving setup_cr_pinning() after efi_enter_virtual_mode() in
+> arch_cpu_finalize_init(), defer it until core initcall.
+> 
+> Other than that,
+> Reviewed-by: Sohil Mehta <sohil.mehta@intel.com>
 
-Okay. Will do.
+Okay, looks good, thanks!
 
 -- 
   Kiryl Shutsemau / Kirill A. Shutemov
