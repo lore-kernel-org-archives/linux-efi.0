@@ -1,120 +1,115 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E7B6C2C15B7;
-	Wed,  9 Jul 2025 10:42:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0F1C72580D7;
+	Wed,  9 Jul 2025 11:00:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752057758; cv=none; b=FWUI5KTuSkqvi6OsjZGDkKhj+43uYacOKs9V2VHS2TqvoEPJPXOtFG4rEy2gXeHbcQergoe0SUyMfu2PAgYG/OKV2eVWYAHLLm0GicqMyDp0oTUp5YXSusbtQbErLV4t3YDVR3U+qa6BhBpyUF0ewyTGb7dIDR5bg/xYAcHBCBA=
+	t=1752058861; cv=none; b=lF+dA+gKGKLf3LWwJh6grnGTKU6+Olr5CSCipa1khf4icDsxUIYR5+ZSx49PvETXsLLryZpFPoXYD2h40q/FUGTIiMmHqUodfYQjpW/ifELYGgbuGaHNN/aDN6Izgg6R5Y2NbPWtmXTiyXGt5CrvvIpWyHAl98Z60vcjakVvQAw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1752057758; c=relaxed/simple;
-	bh=sBRCZngRfe6dRj1UrXu3RD6/ZzAbgtyPm4EePZudNv8=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=p9O9S9ow9F7oqz3Pv14RO5p3A0puzlBxzGqFHcPKnTKcbkLuiu5N1SNg30+XHE3k4/lSbBpP+xVR8OhAjr6rEVnn8yqm5OQzRUhNS6JeIfZG9Kioc9gVLNITtH1J1Wui+++Gj9vsIXAKLQWBiPbF0Q23VeFoLYx7MgCY9n7lbhc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fk1G6/ad; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1752058861; c=relaxed/simple;
+	bh=6TBIbA4ulMG/TLeMgkUTWPxfeTzSZcIp8A8wki7/tbM=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=HeEoMDphtDVw1VFMUhrsMp3phwyup7EnVAi/c1KW/zEW/9qF6T5VdV2jOUYq35iR4R7v2HCmFgpl7bszhiaKy6okms58QcmpYIDKzbtJm6nZuc1BSIH/+knxC5c9i8zqDzZ+5PGmovKjyO2zoPAzvmnYjLNLfjGWyUyb/O/ibT4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=DwKaLuZC; arc=none smtp.client-ip=198.175.65.18
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fk1G6/ad"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BED00C4CEF6;
-	Wed,  9 Jul 2025 10:42:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1752057757;
-	bh=sBRCZngRfe6dRj1UrXu3RD6/ZzAbgtyPm4EePZudNv8=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=fk1G6/adhsEYGvG8soZ6E/2YNcjbAgUWyU7Zxg7RlHgIzYt5RtbPij+lmTCTnpZu8
-	 7u7rooPYsgY3kjbHP7OK+MHgaoHUCVL4Holo2eXd+835meah8Xw3wNoQHDnXbXf5t7
-	 tLX/qgI4HZUJA/nE0HaOhFmzvJ4xLsroXfC4xB4DmYgqEAVS7P0PptwtgdX+c+lcW+
-	 P4Ov4HDCufgwShLIVwDHK3071BX+ajpOZC/MucmVbaBOmgeGFyQdgPC6kFIGVIW7gP
-	 6i3dlpZjtMKx9S5lYJaFsUUhGPAurW9YAXW1g2+D0nTxhUySJkuRmKxkYDJ2RnV1mO
-	 OI48OtRL97/vA==
-Received: by mail-lj1-f169.google.com with SMTP id 38308e7fff4ca-32ce1b2188dso50933971fa.3;
-        Wed, 09 Jul 2025 03:42:37 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCW4GawfGmZJIv3P9umYO0iuvEVFFhf2VForxAsnsZ2JoO2AqLUNkufSnkok1nLko/JEXuvZKxuVfAhUSMU=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzsJbTTbCCvbaEuUeh1sJns/2/eFAMkMb1gu+WHKcCdptEyOK14
-	9KUhn3AHExQRb9R/Z/uuzFncVkNcYAqWsfkHWWwP4tzVEXi8h41sh9LUSzCLFwbadFCKq8jGQFb
-	cVMyWAw6Xlwzo+HRmJxgpclJwjQHObYQ=
-X-Google-Smtp-Source: AGHT+IGWnw6v+oWs8UVNAhgRmhN+MIznxbITpm0slRODpzWHfcIdpjJWY7BfGRIBieQjpqU2UT34QCQweiOss5dZjMI=
-X-Received: by 2002:a05:6512:2394:b0:553:522f:61bb with SMTP id
- 2adb3069b0e04-558fa877a72mr718213e87.12.1752057756131; Wed, 09 Jul 2025
- 03:42:36 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="DwKaLuZC"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1752058860; x=1783594860;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=6TBIbA4ulMG/TLeMgkUTWPxfeTzSZcIp8A8wki7/tbM=;
+  b=DwKaLuZC+oQSqxHlI5Fwck2Z8UYZBDxXbVQ6P19ARxgDuG3URBlogVG/
+   PMxqMzFqjkVNxKtJa/w6NsKb2s9jVwhU1jxkcMzNL9LBHZuFBeQqm1KYq
+   J3seHzVy3qF4lBRmaGaz3c4rTMhJWt78yJTNkdBqQxgqyD/yCQNRvxqM0
+   MWl+oOYzit98Mx8UyRIU/FcllzVFM2xKnuVN1gyDk4VyM/60/rHzJMJKW
+   n197KCutrQMso1B5p5Y3eB/OenkDHmDMWvpW/FtRPrpoTDrLEUney/gh5
+   6Nq+eGxmawbIVYKqb5HgzpqqPXFavT4ZC8eBlGrJmf+M0GfkG9I14YUDG
+   A==;
+X-CSE-ConnectionGUID: zTN22k08RCSsFp7ueIKM4w==
+X-CSE-MsgGUID: WqBuGawWQCeb6bggqnGpdg==
+X-IronPort-AV: E=McAfee;i="6800,10657,11487"; a="54441757"
+X-IronPort-AV: E=Sophos;i="6.16,298,1744095600"; 
+   d="scan'208";a="54441757"
+Received: from fmviesa010.fm.intel.com ([10.60.135.150])
+  by orvoesa110.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Jul 2025 04:00:59 -0700
+X-CSE-ConnectionGUID: kHqhUpj1Rbma1h24o/AiBA==
+X-CSE-MsgGUID: WflIntN1TGmJjVEMlY5zKA==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.16,298,1744095600"; 
+   d="scan'208";a="156475969"
+Received: from black.fi.intel.com ([10.237.72.28])
+  by fmviesa010.fm.intel.com with ESMTP; 09 Jul 2025 04:00:46 -0700
+Received: by black.fi.intel.com (Postfix, from userid 1000)
+	id 8D6C11B7; Wed, 09 Jul 2025 14:00:44 +0300 (EEST)
+Date: Wed, 9 Jul 2025 14:00:44 +0300
+From: "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
+To: Sohil Mehta <sohil.mehta@intel.com>
+Cc: Andy Lutomirski <luto@kernel.org>, 
+	Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
+	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, 
+	Peter Zijlstra <peterz@infradead.org>, Ard Biesheuvel <ardb@kernel.org>, 
+	"Paul E. McKenney" <paulmck@kernel.org>, Josh Poimboeuf <jpoimboe@kernel.org>, 
+	Xiongwei Song <xiongwei.song@windriver.com>, Xin Li <xin3.li@intel.com>, 
+	"Mike Rapoport (IBM)" <rppt@kernel.org>, Brijesh Singh <brijesh.singh@amd.com>, 
+	Michael Roth <michael.roth@amd.com>, Tony Luck <tony.luck@intel.com>, 
+	Alexey Kardashevskiy <aik@amd.com>, Alexander Shishkin <alexander.shishkin@linux.intel.com>, 
+	Jonathan Corbet <corbet@lwn.net>, Ingo Molnar <mingo@kernel.org>, 
+	Pawan Gupta <pawan.kumar.gupta@linux.intel.com>, Daniel Sneddon <daniel.sneddon@linux.intel.com>, 
+	Kai Huang <kai.huang@intel.com>, Sandipan Das <sandipan.das@amd.com>, 
+	Breno Leitao <leitao@debian.org>, Rick Edgecombe <rick.p.edgecombe@intel.com>, 
+	Alexei Starovoitov <ast@kernel.org>, Hou Tao <houtao1@huawei.com>, Juergen Gross <jgross@suse.com>, 
+	Vegard Nossum <vegard.nossum@oracle.com>, Kees Cook <kees@kernel.org>, Eric Biggers <ebiggers@google.com>, 
+	Jason Gunthorpe <jgg@ziepe.ca>, "Masami Hiramatsu (Google)" <mhiramat@kernel.org>, 
+	Andrew Morton <akpm@linux-foundation.org>, Luis Chamberlain <mcgrof@kernel.org>, 
+	Yuntao Wang <ytcoode@gmail.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, 
+	Christophe Leroy <christophe.leroy@csgroup.eu>, Tejun Heo <tj@kernel.org>, Changbin Du <changbin.du@huawei.com>, 
+	Huang Shijie <shijie@os.amperecomputing.com>, Geert Uytterhoeven <geert+renesas@glider.be>, 
+	Namhyung Kim <namhyung@kernel.org>, Arnaldo Carvalho de Melo <acme@redhat.com>, 
+	linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, 
+	linux-mm@kvack.org
+Subject: Re: [PATCHv9 16/16] x86: Re-enable Linear Address Masking
+Message-ID: <icjt25k4azqzkv5xlobcmlcubulohvfjakkb35dusiqe2xutq3@6jvha7chwwxd>
+References: <20250707080317.3791624-1-kirill.shutemov@linux.intel.com>
+ <20250707080317.3791624-17-kirill.shutemov@linux.intel.com>
+ <b1408df7-abb4-4ac5-aff7-c04fda7dec7c@intel.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250709103541.7268-1-feng.tang@linux.alibaba.com>
-In-Reply-To: <20250709103541.7268-1-feng.tang@linux.alibaba.com>
-From: Ard Biesheuvel <ardb@kernel.org>
-Date: Wed, 9 Jul 2025 20:42:24 +1000
-X-Gmail-Original-Message-ID: <CAMj1kXEvxPjFsqoMzZnb2zxSf9uyLVzuzKEeKD4fLEux3NbUhw@mail.gmail.com>
-X-Gm-Features: Ac12FXyF2Jaa_zw3OTWt2PHD6pHE8hXdWa3EGEfEiZpNWct9xDnM5Xi6ZjieDTM
-Message-ID: <CAMj1kXEvxPjFsqoMzZnb2zxSf9uyLVzuzKEeKD4fLEux3NbUhw@mail.gmail.com>
-Subject: Re: [PATCH] efi: remove the rtc-wakeup capability from default value
-To: Feng Tang <feng.tang@linux.alibaba.com>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <b1408df7-abb4-4ac5-aff7-c04fda7dec7c@intel.com>
 
-On Wed, 9 Jul 2025 at 20:35, Feng Tang <feng.tang@linux.alibaba.com> wrote:
->
-> The kernel selftest of rtc reported a error on an ARM server:
->
->         RUN           rtc.alarm_alm_set ...
->         rtctest.c:262:alarm_alm_set:Alarm time now set to 17:31:36.
->         rtctest.c:267:alarm_alm_set:Expected -1 (-1) != rc (-1)
->         alarm_alm_set: Test terminated by assertion
->                  FAIL  rtc.alarm_alm_set
->         not ok 5 rtc.alarm_alm_set
->
-> The root cause is, the unerlying EFI firmware doesn't support wakeup
-> service (get/set alarm), while it doesn't have the efi 'RT_PROP'
-> table either. The current code logic will claim efi supports these
-> runtime service capability by default, and let following 'RT_PROP'
-> table parsing to correct it, if that table exists.
->
-> This issue was reproduced on ARM server from another verndor, and not
-> reproudce on one x86 server (Icelake). All these 3 platforms don't have
-> 'RT_PROP' tables, so they are all claimed to support alarm service,
-> but x86 server uses real CMOS RTC device instead rtc-efi device, and
-> passes the test.
->
-> So remove the wakeup/alarm capability from default value, and setup
-> the capability bits according to the 'RT_PROP' table parsing.
->
+On Tue, Jul 08, 2025 at 10:31:05PM -0700, Sohil Mehta wrote:
+> On 7/7/2025 1:03 AM, Kirill A. Shutemov wrote:
+> > This reverts commit 3267cb6d3a174ff83d6287dcd5b0047bbd912452.
+> > 
+> > LASS mitigates the Spectre based on LAM (SLAM) [1] and the previous
+> > commit made LAM depend on LASS, so we no longer need to disable LAM at
+> > compile time, so revert the commit that disables LAM.
+> > 
+> 
+> Reviewed-by: Sohil Mehta <sohil.mehta@intel.com>
+> 
+> You may have missed my comments in the previous revision.
+> https://lore.kernel.org/all/af709ffa-eb11-4de5-9ae8-a179cb99750c@intel.com/
+> 
+> Mainly, x86 maintainers prefer imperative tone and references such as
+> "previous commit" can be confusing sometimes.
 
-What does this achieve? The test result is accurate, as the platform
-violates the spec by not implementing the RTC wakeup services, and not
-setting the RT_PROP table bits accordingly.
+Indeed, missed. My bad.
 
-What do we gain by pretending that the platform is not broken, and
-lying about it?
+I've merged last two patches and updated the commit message:
 
-> Signed-off-by: Feng Tang <feng.tang@linux.alibaba.com>
-> ---
->  drivers/firmware/efi/efi.c | 11 +++++++++++
->  1 file changed, 11 insertions(+)
->
-> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-> index e57bff702b5f..7cf35376a2f7 100644
-> --- a/drivers/firmware/efi/efi.c
-> +++ b/drivers/firmware/efi/efi.c
-> @@ -789,6 +789,17 @@ int __init efi_config_parse_tables(const efi_config_table_t *config_tables,
->                 }
->         }
->
-> +       /*
-> +        * After bootup, the runtime_supported_mask was set to be capable of
-> +        * all features, which could be kind of too optimistici. In real
-> +        * world, many platforms don't support advanced RTC wakeup runtime
-> +        * service, while they don't provide RT_PROPERTY table either, which
-> +        * led to rtc-wakeup capability being worngly claimed.
-> +        *
-> +        * So remove the wakeup capbility from default value, and let the
-> +        * RT_PROPERTY do the judge.
-> +        */
-> +       efi.runtime_supported_mask &= ~EFI_RT_SUPPORTED_WAKEUP_SERVICES;
->         if (rt_prop != EFI_INVALID_TABLE_ADDR) {
->                 efi_rt_properties_table_t *tbl;
->
+https://git.kernel.org/pub/scm/linux/kernel/git/kas/linux.git/commit/?h=x86/lass
 
-Doesn't this break the RTC wakeup services on platforms that do
-implement them, and don't expose a RT_PROP table?
+I hope it is still okay to use your Reviewed-by tag.
+
+-- 
+  Kiryl Shutsemau / Kirill A. Shutemov
