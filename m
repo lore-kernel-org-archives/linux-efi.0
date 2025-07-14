@@ -1,167 +1,131 @@
-Received: from smtp-relay-internal-1.canonical.com (smtp-relay-internal-1.canonical.com [185.125.188.123])
+Received: from desiato.infradead.org (desiato.infradead.org [90.155.92.199])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 30B7D23956E
-	for <linux-efi@vger.kernel.org>; Mon, 14 Jul 2025 08:11:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.125.188.123
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B813E1FDA94;
+	Mon, 14 Jul 2025 10:45:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=90.155.92.199
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752480668; cv=none; b=iMmBAoHH6ah00NcaTLhdSDrDFZIUkSIgByqimPvLmbn6kYeyHxhlhlDpk/f0mdTgkZA4SZZ6HMrd1brcgVvZd2757PYCLTOGiVKfwvocWdLMmpYojMVg1lDrhN2MvrzWJIR2w+Hh6krKqpiVpc7Lh4acXoW4+k8XDF7Qn53B6fo=
+	t=1752489907; cv=none; b=ekIyuIJK+CpSxuVJQL50Q6IiMcG9B5MgDObz0lRbCsgMY7Ejgwe2ljIgpVJop+jV0mMC24h80pJ8buNMGFbld6uvHAT8rMFWP2/NHK3D7YaAA/Z1FQ1Ewo3CnU7Jy/C5Np5+Rv9lO646Q1jdhznI9Mj64iyFHkPx2KwLA99sxHI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1752480668; c=relaxed/simple;
-	bh=EwmAdiBY6IxdYC6thxEag7Sg4d0A23f83h0plUfjyMw=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=ni90c8b7wyfjR58YpP+mF16DqLst13PcE1POObhXtszbrge/DZ0wlek7Cz9m+9IrnhNJl22JvZgnvQRVYB6agPiGoOvU/FAOjyWmfZJ8QL3q3bsR7tgQhxHflzZCM4NyVUiN8w3s455mweNIVFK3oqraPvLJKMWoa1h0dJXdB40=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=canonical.com; spf=pass smtp.mailfrom=canonical.com; dkim=pass (2048-bit key) header.d=canonical.com header.i=@canonical.com header.b=dN4DmX0D; arc=none smtp.client-ip=185.125.188.123
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=canonical.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=canonical.com
+	s=arc-20240116; t=1752489907; c=relaxed/simple;
+	bh=laH8zvY2NdqgddV1uxCUdzQgi9ZK8xvb1p3SXlHj50A=;
+	h=Message-ID:Date:From:To:Cc:Subject:References:MIME-Version:
+	 Content-Type; b=ii7Q7Q8aXUIOClMhppq/bJUX2hE45XM86TkXt8UXxteSdnlvwnF7+ur81HsH8aByvrPrhetl/b1+LPLmdTJzGIFIiPGJoQLxb4EDWZ/h5PX1AbpcjBpTVE9ubuxPjmNwNvxANw8qI/3kBlpWv26BesblrdRnPUbggbVMKhBU/Qk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=I3ByvgNl; arc=none smtp.client-ip=90.155.92.199
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=canonical.com header.i=@canonical.com header.b="dN4DmX0D"
-Received: from mail-ej1-f69.google.com (mail-ej1-f69.google.com [209.85.218.69])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id 5C6F33F674
-	for <linux-efi@vger.kernel.org>; Mon, 14 Jul 2025 08:10:59 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-	s=20210705; t=1752480659;
-	bh=nqw+Zq4IYXJ5LysW9CQUZGqMpjh9E9bB5LqggaTSXJc=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type;
-	b=dN4DmX0DLUqKv1ro/VkcSZ9jYhJ4VpK4hCWo8mLw6Yq8lstvkdGZWF9rB/FkGpDuU
-	 FJdfSeqKPPn8QpEgthzmHd41uHYNzPxUIU8uQMTYY60XglXSwhWVc2lPh6vnfByPIV
-	 15oA/0Fhq1M6ikg/3OxqGcS+Ad1UBqnbJEWYRaHZMYgbH1y5SDfxnYr+2Ene5K01WT
-	 bH6InG3dqPrvkN+k6MeDA5kfZaHtX23f0iM3d4EjYzfCzkFWoH7Y3QNcle5G6iu3//
-	 rkxCBIig0HlKpyEmI/ovydri/zyYQLxzm9ZYDOKdSp1QUoZc32HMmFrwL7KPssGgAx
-	 zThu4L+n/ySoA==
-Received: by mail-ej1-f69.google.com with SMTP id a640c23a62f3a-ae371f9e3f5so476720566b.1
-        for <linux-efi@vger.kernel.org>; Mon, 14 Jul 2025 01:10:59 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1752480659; x=1753085459;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=nqw+Zq4IYXJ5LysW9CQUZGqMpjh9E9bB5LqggaTSXJc=;
-        b=VAJGkXYcXv5upRotaigRjVd7XNvHF/MtYVNU7SJ5X2SuuC9t0za4ybAdzMd6cJs/D9
-         trMcl9qW7Ep3xch3PTHFjElsi9op2K+UIUg7+1pKynsSYKjTBp14ZA1zhQyRLkpqlfcn
-         SpK03HFqVO3YfWHnBmVF30rWAcXMZS/fcs35zm9f0JLyNFPc2W4rl4gBj39d8bF0wNU3
-         dmp3hEhIz4he42H0jUAJ6v5QbKnUeTKl3910mb12XzdwhvEGpMpSFLjgoHRxCzd2cua+
-         UwRihP+TDbQHR7tzRu389xGzYQF9hJ0Khw++jlST2qTVv7rF8CNrn8dQyfJ++Ho932vv
-         uOHw==
-X-Forwarded-Encrypted: i=1; AJvYcCVGsfs0yN01b8ZhRAXUDSHBGYlf/nOoPUonvVq9AWbBdQaz3Tb6Z6zr1n9fu5yIFFIItadn/gvGu1A=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzdsE3G+K1gxjCHERZBjHuiXsjP9F/ShhuLowbwD1ZrT2AWYYww
-	xn6fBn+wwL5PwadOog6og8a7TrHVY/BWMVaBvgXNGcbKrjI1QcvKQiSThHeQkSL1SKnEUlrWoPT
-	mP2fxMM6U3o6y8ZLPIgnhDHiXhxqhAydX9nB3sQHjJG5e4zO9xuuTEK37DwPmTJf7QWlSTs0bcK
-	HFaw==
-X-Gm-Gg: ASbGncvuY9Svnu+1afqV9i8F9P1eDIP7Dy0TzIuwsJtu8d8vEDbbc0vZsIpI/+Hd1i0
-	wOIyVEDDxI7KcSplntzUeZbhjrrGlbrROtKl1giatssivSLlVoZY/eMr22tSvmlZMEgkRY+l3PD
-	D9jgL11KBhsxNr0rgQVHii2drLrdcheS6YWi9D90pLpeHSxYh/VMGhz75nkEYgWfS0vRNegXLfC
-	LwD32DFO9n/rf6OZt0oQauAwBY7//XVdGutygnN2z0zZxjkTsgVIPOGAAxXgL/NEc74o0fkn43c
-	PKRnzs2djC1u3OBGk0RFnchXp0Y9c4Wg9hcEK+VmfSRNVdocoSwz/KvhXw8CuUQ=
-X-Received: by 2002:a17:907:9450:b0:ad8:adf3:7d6d with SMTP id a640c23a62f3a-ae6fb8a57eemr1155261666b.21.1752480658898;
-        Mon, 14 Jul 2025 01:10:58 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEVNG4cGhbgl6DZuAszmrlgOEZ5D4CwRcSMPsKcvD43UnpSt6BkYsm9BCpJ8sMqD6XmPCotBg==
-X-Received: by 2002:a17:907:9450:b0:ad8:adf3:7d6d with SMTP id a640c23a62f3a-ae6fb8a57eemr1155257866b.21.1752480658379;
-        Mon, 14 Jul 2025 01:10:58 -0700 (PDT)
-Received: from [10.27.73.177] ([212.144.242.210])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-ae6e7e90b09sm770592166b.25.2025.07.14.01.10.56
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 14 Jul 2025 01:10:57 -0700 (PDT)
-Message-ID: <422e2a72-972f-41f4-a0b3-d69a6cb0c2e2@canonical.com>
-Date: Mon, 14 Jul 2025 10:10:55 +0200
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="I3ByvgNl"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=desiato.20200630; h=Content-Type:MIME-Version:References:
+	Subject:Cc:To:From:Date:Message-ID:Sender:Reply-To:Content-Transfer-Encoding:
+	Content-ID:Content-Description:In-Reply-To;
+	bh=ewom6iS5EFylqeechOg2mSSAJjmRRMGPDBC4yQb3ICA=; b=I3ByvgNlQB8b9X1OcxuTh/ldip
+	iqAFgQ1nHpABs/r9QProbboIHdgRWlAmk7uEyA6ZaV465SWovxk+vJhs/+6ZykwDm3C3WL4rEdEdE
+	rXiR7exX0XoRUqL5WyRPS58q64mC37SssiuJ5gqYSur2ISIMDzo2hlYDVjc+pikxRpDJSUf3GX/Cs
+	KtdRB5uhH10lNtDc2Y3puNdkh1DI/9jPwIrwn10GevDi2WhMAjMQxzZlecpsvNNW/kIZ7kM2OPV39
+	G5UXw1uSS3s22EMpcPbe5L09ryZkBH5Jqhi6IB3i2vmqtgF1CeKIeah/apYAAue5aCII6wJJuS92i
+	UBl+PKCw==;
+Received: from 77-249-17-252.cable.dynamic.v4.ziggo.nl ([77.249.17.252] helo=noisy.programming.kicks-ass.net)
+	by desiato.infradead.org with esmtpsa (Exim 4.98.2 #2 (Red Hat Linux))
+	id 1ubGg1-00000009kcq-15Ba;
+	Mon, 14 Jul 2025 10:44:53 +0000
+Received: by noisy.programming.kicks-ass.net (Postfix, from userid 0)
+	id 2D485302DA9; Mon, 14 Jul 2025 12:44:51 +0200 (CEST)
+Message-ID: <20250714103441.381946911@infradead.org>
+User-Agent: quilt/0.68
+Date: Mon, 14 Jul 2025 12:20:26 +0200
+From: Peter Zijlstra <peterz@infradead.org>
+To: x86@kernel.org
+Cc: kys@microsoft.com,
+ haiyangz@microsoft.com,
+ wei.liu@kernel.org,
+ decui@microsoft.com,
+ tglx@linutronix.de,
+ mingo@redhat.com,
+ bp@alien8.de,
+ dave.hansen@linux.intel.com,
+ hpa@zytor.com,
+ seanjc@google.com,
+ pbonzini@redhat.com,
+ ardb@kernel.org,
+ kees@kernel.org,
+ Arnd Bergmann <arnd@arndb.de>,
+ gregkh@linuxfoundation.org,
+ jpoimboe@kernel.org,
+ peterz@infradead.org,
+ linux-hyperv@vger.kernel.org,
+ linux-kernel@vger.kernel.org,
+ kvm@vger.kernel.org,
+ linux-efi@vger.kernel.org,
+ samitolvanen@google.com,
+ ojeda@kernel.org
+Subject: [PATCH v3 15/16] x86/fred: KVM: VMX: Always use FRED for IRQs when CONFIG_X86_FRED=y
+References: <20250714102011.758008629@infradead.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [RFC PATCH 0/3] Remove unused EFI runtime APIs
-To: Ard Biesheuvel <ardb+git@google.com>
-Cc: linux-arm-kernel@lists.infradead.org, Ard Biesheuvel <ardb@kernel.org>,
- Feng Tang <feng.tang@linux.alibaba.com>,
- Alexandre Belloni <alexandre.belloni@bootlin.com>,
- Juergen Gross <jgross@suse.com>, Stefano Stabellini
- <sstabellini@kernel.org>,
- Oleksandr Tyshchenko <oleksandr_tyshchenko@epam.com>,
- Sunil V L <sunilvl@ventanamicro.com>, Bibo Mao <maobibo@loongson.cn>,
- linux-rtc@vger.kernel.org, linux-efi@vger.kernel.org,
- xen-devel@lists.xenproject.org, x86@kernel.org,
- linux-riscv@lists.infradead.org, loongarch@lists.linux.dev,
- linux-kernel@vger.kernel.org
-References: <20250714060843.4029171-5-ardb+git@google.com>
-Content-Language: en-US
-From: Heinrich Schuchardt <heinrich.schuchardt@canonical.com>
-In-Reply-To: <20250714060843.4029171-5-ardb+git@google.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 
-On 7/14/25 08:08, Ard Biesheuvel wrote:
-> From: Ard Biesheuvel <ardb@kernel.org>
-> 
-> Using EFI runtime services to program the RTC to wake up the system is
-> supported in theory, but rarely works in practice. Fortunately, this
-> functionality is rarely [if ever] used to begin with so we can just drop
-> it. (Note that the EFI rtc driver is not used by x86, which programs the
-> CMOS rtc directly)
+From: Sean Christopherson <seanjc@google.com>
 
-The main problem I see with firmware offering access to the RTC via UEFI 
-services is that two different drivers, the firmware one and the Linux 
-one might be trying to access the same busses or registers which might 
-lead to unexpected results.
+Now that FRED provides C-code entry points for handling IRQs, use the
+FRED infrastructure for forwarding IRQs even if FRED is fully
+disabled, e.g. isn't supported in hardware. Avoiding the non-FRED
+assembly trampolines into the IDT handlers for IRQs eliminates the
+associated non-CFI indirect call (KVM performs a CALL by doing a
+lookup on the IDT using the IRQ vector).
 
-Recently there was a discussion in the RISC-V technical group for the 
-server platform specification where the same issue was discussed 
-concerning SetTime().
+Keep NMIs on the legacy IDT path, as the FRED NMI entry code relies on
+FRED's architectural behavior with respect to NMI blocking, i.e. doesn't
+jump through the myriad hoops needed to deal with IRET "unexpectedly"
+unmasking NMIs.  KVM's NMI path already makes a direct CALL to C-code,
+i.e. isn't problematic for CFI.  KVM does make a short detour through
+assembly code to build the stack frame, but the "FRED entry from KVM"
+path does the same.
 
-As a UEFI firmware should not care which operating system is booted, it 
-should be up to the OS to disable EFI access to the RTC if it has native 
-access.
+Force FRED for 64-bit kernels if KVM_INTEL is enabled, as the benefits of
+eliminating the IRQ trampoline usage far outwieghts the code overhead for
+FRED.
 
-Could we disable all the EFI services for the RTC in Linux dynamically 
-when an RTC driver is successfully probed?
+Suggested-by: Peter Zijlstra <peterz@infradead.org>
+Signed-off-by: Sean Christopherson <seanjc@google.com>
+Signed-off-by: Peter Zijlstra (Intel) <peterz@infradead.org>
+---
+ arch/x86/kvm/Kconfig   |    1 +
+ arch/x86/kvm/vmx/vmx.c |    8 +++++++-
+ 2 files changed, 8 insertions(+), 1 deletion(-)
 
-Best regards
+--- a/arch/x86/kvm/Kconfig
++++ b/arch/x86/kvm/Kconfig
+@@ -97,6 +97,7 @@ config KVM_INTEL
+ 	depends on KVM && IA32_FEAT_CTL
+ 	select KVM_GENERIC_PRIVATE_MEM if INTEL_TDX_HOST
+ 	select KVM_GENERIC_MEMORY_ATTRIBUTES if INTEL_TDX_HOST
++	select X86_FRED if X86_64
+ 	help
+ 	  Provides support for KVM on processors equipped with Intel's VT
+ 	  extensions, a.k.a. Virtual Machine Extensions (VMX).
+--- a/arch/x86/kvm/vmx/vmx.c
++++ b/arch/x86/kvm/vmx/vmx.c
+@@ -6989,8 +6989,14 @@ static void handle_external_interrupt_ir
+ 	    "unexpected VM-Exit interrupt info: 0x%x", intr_info))
+ 		return;
+ 
++	/*
++	 * Invoke the kernel's IRQ handler for the vector.  Use the FRED path
++	 * when it's available even if FRED isn't fully enabled, e.g. even if
++	 * FRED isn't supported in hardware, in order to avoid the indirect
++	 * CALL in the non-FRED path.
++	 */
+ 	kvm_before_interrupt(vcpu, KVM_HANDLING_IRQ);
+-	if (cpu_feature_enabled(X86_FEATURE_FRED))
++	if (IS_ENABLED(CONFIG_X86_FRED))
+ 		fred_entry_from_kvm(EVENT_TYPE_EXTINT, vector);
+ 	else
+ 		vmx_do_interrupt_irqoff(gate_offset((gate_desc *)host_idt_base + vector));
 
-Heinrich
-
-> 
-> The same applies to GetNextHighMonoCount(), which, if implemented,
-> usually relies on SetVariable() under the hood *, which is often not
-> supported at runtime by non-x86 platforms. But it has no known users
-> either so let's drop support for it as well.
-> 
-> This means we need to drop the slightly pointless tests for it too.
-> 
-> * EDK2 based EFI implementations usually have a MTC variable carrying
->    the monotonic counter variable, which is therefore not truly
->    monotonic, given that SetVariable() will happily overwrite it.
-> 
-> Cc: Heinrich Schuchardt <heinrich.schuchardt@canonical.com>
-> Cc: Feng Tang <feng.tang@linux.alibaba.com>
-> Cc: Alexandre Belloni <alexandre.belloni@bootlin.com>
-> Cc: Juergen Gross <jgross@suse.com>
-> Cc: Stefano Stabellini <sstabellini@kernel.org>
-> Cc: Oleksandr Tyshchenko <oleksandr_tyshchenko@epam.com>
-> Cc: Sunil V L <sunilvl@ventanamicro.com>
-> Cc: Bibo Mao <maobibo@loongson.cn>
-> Cc: linux-rtc@vger.kernel.org
-> Cc: linux-efi@vger.kernel.org
-> Cc: xen-devel@lists.xenproject.org
-> Cc: x86@kernel.org
-> Cc: linux-riscv@lists.infradead.org
-> Cc: loongarch@lists.linux.dev
-> 
-> Ard Biesheuvel (3):
->    efi-rtc: Remove wakeup functionality
->    efi/test: Don't bother pseudo-testing unused EFI services
->    efi: Remove support for pointless, unused EFI services
-> 
->   arch/x86/platform/efi/efi_64.c          |  22 ----
->   drivers/firmware/efi/runtime-wrappers.c |  68 ------------
->   drivers/firmware/efi/test/efi_test.c    | 108 +-------------------
->   drivers/rtc/rtc-efi.c                   |  76 +-------------
->   drivers/xen/efi.c                       |  56 ----------
->   include/linux/efi.h                     |   6 --
->   6 files changed, 4 insertions(+), 332 deletions(-)
-> 
 
