@@ -1,66 +1,65 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 56EB125DD1C;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5F7F3260590;
 	Thu, 17 Jul 2025 23:25:21 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752794721; cv=none; b=uYejgms/uMdlS4T9KehWCIJqjLV7JCCdcnyz2KBiAVZd4daRCyOAGp8MxeG4jW4JiYXFsnCD4ACquB6DIHChWcQS+URHuvwbkGZNS69IuNNTv4Wx2mDRvXMZnMf/9WeJn7iUAabgN50+2YoMdwJXaSi/pPE8whTQvKSfgAyEJQY=
+	t=1752794721; cv=none; b=IpkaHnF0V9yKXgD4i+OWEw8EvZ24Px94kVpeZHyjKy/mhggJy4h4xyGYjWDVhJDIocHNQ9wxZo5KucI7XqQUYAW8UVUj0LTsZ1c2VhxzIBGIBtw3a/4vqE6ezcxxdCE9JdelzEmx49zbOBMypYc2k3TOz6cRdFvkYNUeN6SrlbE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1752794721; c=relaxed/simple;
-	bh=2ug/lH8nh3wdYXaBdZPOL2AvIMcZUPQ6EhDC2jpITSk=;
+	bh=p+7YUBTmffdnZ8pKAPuZ2rzC3Zvp9P0MFRgY7Xz1ydU=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=CLt9ZWDjSQnqG5JLeuiCbTlReGNNCa40eJEkCgiivrDkUABvEjkqLIsG1UYe/zJbR5bZaWrz9VospUonKoHP179Hf1jN+rVYz5T8LcvHPxLb7x9yIiURP0hIvBV3S1FVbNgOSMm1icDLOaXXrKkxKUuZbUMwjugcu6qyCz2P/l0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=NteDUBwa; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=smihGAOzxS6J2nh4HPdJjO27DV5zozehjyTkDuzzOM01lL3gFgXdqq9RUF3fweFkxP4fcDAvK8XmAEyrL1h9P4By+JiXkT1d6Ax613lyVtAKoY5oJBKYyuo2ybpM7sm+6HRQafsvzJOyj2ra+5SKyTk5Lxr6vj4FWlrl+Nsvb9o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=AUGKErrg; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="NteDUBwa"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9DBF8C2BCB1;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="AUGKErrg"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A4C60C2BCB2;
 	Thu, 17 Jul 2025 23:25:20 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=k20201202; t=1752794720;
-	bh=2ug/lH8nh3wdYXaBdZPOL2AvIMcZUPQ6EhDC2jpITSk=;
+	bh=p+7YUBTmffdnZ8pKAPuZ2rzC3Zvp9P0MFRgY7Xz1ydU=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=NteDUBwai+jItLwcpYckNP0xUiUtzclbkaFWn020YjQgwFVuyGGWrARl8Vn8ogjbU
-	 HA7N6JUbwARRKiomN6gJkMEtj3ziS/fItDI81YF+wfJMRXtKK3j0GP8SF0gvhoO51X
-	 oCI2fsMsgsVBz/v7awiAMsuOKmnfKRD72nOBmmxlXSV9CvjEStIWVUPEtq6gBKTXfH
-	 f9qwUWBwEQ3d6FAPVDsBxaPct1USs9Cn4jw01nkaUPzrxrGxP/fXlkew24VQuyaEGH
-	 PVVayYayn3gDzPIYcf1Hm8MivLp/HLHtpzhQm2HDSnwA74AgKf1aZYpvBe0CeBN0Zw
-	 F8AX99YLu6fsw==
+	b=AUGKErrg+Y6wyR8X016iAdX/CzHiD3Gvy8i4hRZiFL4Flb6LjgHgjJH+mJS2LnnDn
+	 8iX4D1Zu87uxViJ44NKTe4gXqYeRsMgik92PN+3S8V1Qs414+Lt739pD20Mi5QiHaH
+	 L2bCDQzwiWp66b54iXVkQl+1F9WXK9vm7ytOrB/hW0RC4iQszKomNouVqo3AyBkUiM
+	 c3HGwAV9yPXFs5e3GnC4+ol+dfrEfQLBb3QK+/uKV0wHJKw5mHkh9VGexADfLn42+K
+	 +5cS6zaY/wNKOz2vKLe9X2SSzFr5lTzT6HTGktZhjGTkI6hje+/MNZtXrHekOaxflN
+	 iHKD4XAIQijvQ==
 From: Kees Cook <kees@kernel.org>
 To: Arnd Bergmann <arnd@arndb.de>
 Cc: Kees Cook <kees@kernel.org>,
-	Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-	linux-mips@vger.kernel.org,
-	Ingo Molnar <mingo@kernel.org>,
-	"Gustavo A. R. Silva" <gustavoars@kernel.org>,
-	Christoph Hellwig <hch@lst.de>,
-	Andrey Konovalov <andreyknvl@gmail.com>,
-	Andrey Ryabinin <ryabinin.a.a@gmail.com>,
-	Ard Biesheuvel <ardb@kernel.org>,
 	Masahiro Yamada <masahiroy@kernel.org>,
 	Nathan Chancellor <nathan@kernel.org>,
 	Nicolas Schier <nicolas.schier@linux.dev>,
+	Marco Elver <elver@google.com>,
+	Andrey Konovalov <andreyknvl@gmail.com>,
+	Andrey Ryabinin <ryabinin.a.a@gmail.com>,
+	Ard Biesheuvel <ardb@kernel.org>,
+	"Gustavo A. R. Silva" <gustavoars@kernel.org>,
+	linux-kbuild@vger.kernel.org,
+	kasan-dev@googlegroups.com,
+	linux-hardening@vger.kernel.org,
+	Ingo Molnar <mingo@kernel.org>,
+	Christoph Hellwig <hch@lst.de>,
 	Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
 	Bill Wendling <morbo@google.com>,
 	Justin Stitt <justinstitt@google.com>,
 	linux-kernel@vger.kernel.org,
 	x86@kernel.org,
-	kasan-dev@googlegroups.com,
 	linux-doc@vger.kernel.org,
 	linux-arm-kernel@lists.infradead.org,
 	kvmarm@lists.linux.dev,
 	linux-riscv@lists.infradead.org,
 	linux-s390@vger.kernel.org,
 	linux-efi@vger.kernel.org,
-	linux-hardening@vger.kernel.org,
-	linux-kbuild@vger.kernel.org,
 	linux-security-module@vger.kernel.org,
 	linux-kselftest@vger.kernel.org,
 	sparclinux@vger.kernel.org,
 	llvm@lists.linux.dev
-Subject: [PATCH v3 09/13] mips: Handle KCOV __init vs inline mismatch
-Date: Thu, 17 Jul 2025 16:25:14 -0700
-Message-Id: <20250717232519.2984886-9-kees@kernel.org>
+Subject: [PATCH v3 11/13] kstack_erase: Support Clang stack depth tracking
+Date: Thu, 17 Jul 2025 16:25:16 -0700
+Message-Id: <20250717232519.2984886-11-kees@kernel.org>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20250717231756.make.423-kees@kernel.org>
 References: <20250717231756.make.423-kees@kernel.org>
@@ -70,38 +69,69 @@ List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1054; i=kees@kernel.org; h=from:subject; bh=2ug/lH8nh3wdYXaBdZPOL2AvIMcZUPQ6EhDC2jpITSk=; b=owGbwMvMwCVmps19z/KJym7G02pJDBmVbTEaTpwT/CqkP/gFhCj/XO54+7qYREShYs8l04cXr l6frm7XUcrCIMbFICumyBJk5x7n4vG2Pdx9riLMHFYmkCEMXJwCMBEtE4b/Xqd+XFyVnrjymfWn 4Kf1C05k68rFv26yrf/i2iH18eJ2SUaGV0lMd+enHioMXSjkm7z02hWe6SLiP1bPKvlVrXb+1vx GFgA=
+X-Developer-Signature: v=1; a=openpgp-sha256; l=2299; i=kees@kernel.org; h=from:subject; bh=p+7YUBTmffdnZ8pKAPuZ2rzC3Zvp9P0MFRgY7Xz1ydU=; b=owGbwMvMwCVmps19z/KJym7G02pJDBmVbbG7zxw1MKkM064+GM3V+Tde9mealUNMf2f76+qDy 8tCpi7qKGVhEONikBVTZAmyc49z8XjbHu4+VxFmDisTyBAGLk4BmMipUEaG5+yu528923yg/cGf LXo63TrVrF9WH93oLN82IVl472aLiYwMX8V2fuAxEd03U60q9AgTd2GJSKHMR3slK0ZZ/dXf71Y xAwA=
 X-Developer-Key: i=kees@kernel.org; a=openpgp; fpr=A5C3F68F229DD60F723E6E138972F4DFDC6DC026
 Content-Transfer-Encoding: 8bit
 
-When KCOV is enabled all functions get instrumented, unless
-the __no_sanitize_coverage attribute is used. To prepare for
-__no_sanitize_coverage being applied to __init functions, we
-have to handle differences in how GCC's inline optimizations get
-resolved. For mips this requires adding the __init annotation on
-init_mips_clocksource().
+Wire up CONFIG_KSTACK_ERASE to Clang 21's new stack depth tracking
+callback[1] option.
 
+Link: https://clang.llvm.org/docs/SanitizerCoverage.html#tracing-stack-depth [1]
 Signed-off-by: Kees Cook <kees@kernel.org>
 ---
-Cc: Thomas Bogendoerfer <tsbogend@alpha.franken.de>
-Cc: <linux-mips@vger.kernel.org>
+Cc: Arnd Bergmann <arnd@arndb.de>
+Cc: Masahiro Yamada <masahiroy@kernel.org>
+Cc: Nathan Chancellor <nathan@kernel.org>
+Cc: Nicolas Schier <nicolas.schier@linux.dev>
+Cc: Marco Elver <elver@google.com>
+Cc: Andrey Konovalov <andreyknvl@gmail.com>
+Cc: Andrey Ryabinin <ryabinin.a.a@gmail.com>
+Cc: Ard Biesheuvel <ardb@kernel.org>
+Cc: "Gustavo A. R. Silva" <gustavoars@kernel.org>
+Cc: <linux-kbuild@vger.kernel.org>
+Cc: <kasan-dev@googlegroups.com>
+Cc: <linux-hardening@vger.kernel.org>
 ---
- arch/mips/include/asm/time.h | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ security/Kconfig.hardening    | 5 ++++-
+ scripts/Makefile.kstack_erase | 6 ++++++
+ 2 files changed, 10 insertions(+), 1 deletion(-)
 
-diff --git a/arch/mips/include/asm/time.h b/arch/mips/include/asm/time.h
-index e855a3611d92..5e7193b759f3 100644
---- a/arch/mips/include/asm/time.h
-+++ b/arch/mips/include/asm/time.h
-@@ -55,7 +55,7 @@ static inline int mips_clockevent_init(void)
-  */
- extern int init_r4k_clocksource(void);
+diff --git a/security/Kconfig.hardening b/security/Kconfig.hardening
+index f7aa2024ab25..b9a5bc3430aa 100644
+--- a/security/Kconfig.hardening
++++ b/security/Kconfig.hardening
+@@ -82,10 +82,13 @@ choice
  
--static inline int init_mips_clocksource(void)
-+static inline __init int init_mips_clocksource(void)
- {
- #ifdef CONFIG_CSRC_R4K
- 	return init_r4k_clocksource();
+ endchoice
+ 
++config CC_HAS_SANCOV_STACK_DEPTH_CALLBACK
++	def_bool $(cc-option,-fsanitize-coverage-stack-depth-callback-min=1)
++
+ config KSTACK_ERASE
+ 	bool "Poison kernel stack before returning from syscalls"
+ 	depends on HAVE_ARCH_KSTACK_ERASE
+-	depends on GCC_PLUGINS
++	depends on GCC_PLUGINS || CC_HAS_SANCOV_STACK_DEPTH_CALLBACK
+ 	help
+ 	  This option makes the kernel erase the kernel stack before
+ 	  returning from system calls. This has the effect of leaving
+diff --git a/scripts/Makefile.kstack_erase b/scripts/Makefile.kstack_erase
+index 5223d3a35817..c7bc2379e113 100644
+--- a/scripts/Makefile.kstack_erase
++++ b/scripts/Makefile.kstack_erase
+@@ -8,6 +8,12 @@ kstack-erase-cflags-$(CONFIG_GCC_PLUGIN_STACKLEAK_VERBOSE) += -fplugin-arg-stack
+ DISABLE_KSTACK_ERASE := -fplugin-arg-stackleak_plugin-disable
+ endif
+ 
++ifdef CONFIG_CC_IS_CLANG
++kstack-erase-cflags-y += -fsanitize-coverage=stack-depth
++kstack-erase-cflags-y += -fsanitize-coverage-stack-depth-callback-min=$(CONFIG_KSTACK_ERASE_TRACK_MIN_SIZE)
++DISABLE_KSTACK_ERASE  := -fno-sanitize-coverage=stack-depth
++endif
++
+ KSTACK_ERASE_CFLAGS   := $(kstack-erase-cflags-y)
+ 
+ export STACKLEAK_CFLAGS DISABLE_KSTACK_ERASE
 -- 
 2.34.1
 
