@@ -1,44 +1,37 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1CCED2550CF;
-	Thu, 17 Jul 2025 23:25:20 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6562B262815;
+	Thu, 17 Jul 2025 23:25:21 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752794721; cv=none; b=X7cieHtf3UnRcugMr4rdvDFeEiw7hIb1aLo1LS6jNiGfV5DGtpMn98ujphqTNzYYc5jXy8NwSQPVzmW8nw+XOhSIf5hrGb6Vjfz1B6GLqru77nsVSsDcPph6MkFsZfWzoeaSJ3LuWTDCgTiszJlQIQjNyiZ55well8s4dDFcinM=
+	t=1752794721; cv=none; b=PiJRkhooH1afwxsGdRJtuJVFE3DqlgG7AI9TroXDp/yph8CMNKuju6ggm8ARMrrayQicXusKR0cds2LuGaBPaBITdLuDFTqWZH0sIJalo/+GUEcEplXK7bH2m9hbkozArmO03lB0uGlln1UZ7V4DXjmxi4TzNgwtRrQ1X0KPpwY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1752794721; c=relaxed/simple;
-	bh=w4dfSlEX1TBFugBqGp8JAUT2yBh6pSwtKD0mxGK1YQU=;
+	bh=hftQ+JwDBzI0zRNacsurrBG64kHnxlfHAL+GJc3UtlU=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=FmYT57sb6M1aNQ+p1ld2yePvwi/U+9LWqhALUZTCNV0MA+y8d4IvMO0GhRlfHN+RVHdM4t5FyQxpC0k/2gaEVZgwZIzDdlMBKDw2Xq3zn3ju9uQeBfSFMm5oBR8InBfl8FUVaT2WfU3J+jZwwQ5+40oRYOzS45QwxfKTCoTt5pc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=bCLGzgvX; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=pcPO4mDGdAafO2KAr6atUTCti74qydyxJ6nmOzgaMho8DxAcr78PKStlTjaAzOCcU/cECwuP1PqMOjaEuOEGX1fIKApCyMu6XWlMFAoEqCRgOGxwpR/kSqaGUaLTL3PNgJDt9Qqmsy0ssHkUbnKAro2cp/9wWK7ZkAW5IxVeAO8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=FsqjdsQS; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="bCLGzgvX"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8A518C19424;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FsqjdsQS"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B589AC4DDE4;
 	Thu, 17 Jul 2025 23:25:20 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
 	s=k20201202; t=1752794720;
-	bh=w4dfSlEX1TBFugBqGp8JAUT2yBh6pSwtKD0mxGK1YQU=;
+	bh=hftQ+JwDBzI0zRNacsurrBG64kHnxlfHAL+GJc3UtlU=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=bCLGzgvXVHsHkz8w3Y0Kb2UmtdjsIVjMDj9d4MbqlBY2vMFC06YtJ8ndKGIbuwa4T
-	 cTP6dtj6xqil4DQudwS8dDj06vEw0tdANDNY4YWGYpv9PBYCZV7PzKOyZ20A3DqmIk
-	 GoL2uVHjWuIIwUnzP5LSkfJEjV/ENP7/xGPvPrKD5vizLyb9mhYCmDeaooINsuO4xm
-	 unrjEQZvM3C5gvqrYkyStpgP4R+W5gIXbatg6wHTzD7uaZLrZVYwsHz9djIrXk1hCu
-	 dOEphjp1hPldDWw3cfeJYEoVkoG/ytzYmICpWeNgkb9M3gseDiqbCDsFjvUvuvY+6k
-	 VQE2gjmuFnegA==
+	b=FsqjdsQS75ijp4EewZkFNnZ7oGWM+bQuK2TZnkPG1i4tUtkePSQGvhT3cJzizICIP
+	 n7VsETLWXSDSuNlB4j5w4GFk77PgUesXjhwz6yMoT31mNWaWjswPyAxrArx7XoTrzv
+	 qwRQ4j9gCoTu0mZgFXm9mV43Qt0uBu3ieYyCdmQG53nX22891/8O+gwogWE5UBED26
+	 ScLxadVl8C+/OHTvTZH1MoVS2hlIEz8r+PE+d+h/fgLqGQh1uU2RoHTiTONCiUEx+a
+	 5pAsMwG5Sv8s6jqrUJ/cIcIw1BL4yue1cJRn64/wKIgKX5LH0prSsOZ29wNitGYIID
+	 IN144gC7uUisA==
 From: Kees Cook <kees@kernel.org>
 To: Arnd Bergmann <arnd@arndb.de>
 Cc: Kees Cook <kees@kernel.org>,
-	Heiko Carstens <hca@linux.ibm.com>,
-	Vasily Gorbik <gor@linux.ibm.com>,
-	Alexander Gordeev <agordeev@linux.ibm.com>,
-	Christian Borntraeger <borntraeger@linux.ibm.com>,
-	Sven Schnelle <svens@linux.ibm.com>,
-	Gerald Schaefer <gerald.schaefer@linux.ibm.com>,
-	Gaosheng Cui <cuigaosheng1@huawei.com>,
-	linux-s390@vger.kernel.org,
-	Ingo Molnar <mingo@kernel.org>,
 	"Gustavo A. R. Silva" <gustavoars@kernel.org>,
+	linux-hardening@vger.kernel.org,
+	Ingo Molnar <mingo@kernel.org>,
 	Christoph Hellwig <hch@lst.de>,
 	Andrey Konovalov <andreyknvl@gmail.com>,
 	Andrey Ryabinin <ryabinin.a.a@gmail.com>,
@@ -56,16 +49,16 @@ Cc: Kees Cook <kees@kernel.org>,
 	linux-arm-kernel@lists.infradead.org,
 	kvmarm@lists.linux.dev,
 	linux-riscv@lists.infradead.org,
+	linux-s390@vger.kernel.org,
 	linux-efi@vger.kernel.org,
-	linux-hardening@vger.kernel.org,
 	linux-kbuild@vger.kernel.org,
 	linux-security-module@vger.kernel.org,
 	linux-kselftest@vger.kernel.org,
 	sparclinux@vger.kernel.org,
 	llvm@lists.linux.dev
-Subject: [PATCH v3 07/13] s390: Handle KCOV __init vs inline mismatches
-Date: Thu, 17 Jul 2025 16:25:12 -0700
-Message-Id: <20250717232519.2984886-7-kees@kernel.org>
+Subject: [PATCH v3 12/13] configs/hardening: Enable CONFIG_KSTACK_ERASE
+Date: Thu, 17 Jul 2025 16:25:17 -0700
+Message-Id: <20250717232519.2984886-12-kees@kernel.org>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20250717231756.make.423-kees@kernel.org>
 References: <20250717231756.make.423-kees@kernel.org>
@@ -75,74 +68,35 @@ List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2371; i=kees@kernel.org; h=from:subject; bh=w4dfSlEX1TBFugBqGp8JAUT2yBh6pSwtKD0mxGK1YQU=; b=owGbwMvMwCVmps19z/KJym7G02pJDBmVbdG/2KY8Xu85O2j+4nWyVw/mC3Emf3168P7KWTN/x p5rPzPPrKOUhUGMi0FWTJElyM49zsXjbXu4+1xFmDmsTCBDGLg4BWAiD+QZGT4bhW+wyPBOq197 8b3pj39iU253eKhfucT7+XV+gIb17DkM/738av/xuz8z5jvAWfzMWOHsI8UljCZsWs2/wlaI/f6 Yzg0A
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1038; i=kees@kernel.org; h=from:subject; bh=hftQ+JwDBzI0zRNacsurrBG64kHnxlfHAL+GJc3UtlU=; b=owGbwMvMwCVmps19z/KJym7G02pJDBmVbbFBctklSlm/hUWtYmesmm/+4Mz/o2oveebseJx+3 f2N065JHaUsDGJcDLJiiixBdu5xLh5v28Pd5yrCzGFlAhnCwMUpABPZrM/wT/+s9b/zj2UjKz2d 0opOWQdaqM192v1qrb5mpnFiz/LKFYwMM5YFnp723f9/aP7hJMnrxuH6yRfrcxYbWx+zavrULTm NDwA=
 X-Developer-Key: i=kees@kernel.org; a=openpgp; fpr=A5C3F68F229DD60F723E6E138972F4DFDC6DC026
 Content-Transfer-Encoding: 8bit
 
-When KCOV is enabled all functions get instrumented, unless
-the __no_sanitize_coverage attribute is used. To prepare for
-__no_sanitize_coverage being applied to __init functions, we have to
-handle differences in how GCC's inline optimizations get resolved. For
-s390 this exposed a place where the __init annotation was missing but
-ended up being "accidentally correct". Fix this cases and force a couple
-functions to be inline with __always_inline.
+Since we can wipe the stack with both Clang and GCC plugins, enable this
+for the "hardening.config" for wider testing.
 
-Acked-by: Heiko Carstens <hca@linux.ibm.com>
 Signed-off-by: Kees Cook <kees@kernel.org>
 ---
-Cc: Heiko Carstens <hca@linux.ibm.com>
-Cc: Vasily Gorbik <gor@linux.ibm.com>
-Cc: Alexander Gordeev <agordeev@linux.ibm.com>
-Cc: Christian Borntraeger <borntraeger@linux.ibm.com>
-Cc: Sven Schnelle <svens@linux.ibm.com>
-Cc: Gerald Schaefer <gerald.schaefer@linux.ibm.com>
-Cc: Gaosheng Cui <cuigaosheng1@huawei.com>
-Cc: <linux-s390@vger.kernel.org>
+Cc: "Gustavo A. R. Silva" <gustavoars@kernel.org>
+Cc: <linux-hardening@vger.kernel.org>
 ---
- arch/s390/hypfs/hypfs.h      | 2 +-
- arch/s390/hypfs/hypfs_diag.h | 2 +-
- arch/s390/mm/init.c          | 2 +-
- 3 files changed, 3 insertions(+), 3 deletions(-)
+ kernel/configs/hardening.config | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/arch/s390/hypfs/hypfs.h b/arch/s390/hypfs/hypfs.h
-index 83ebf54cca6b..4dc2e068e0ff 100644
---- a/arch/s390/hypfs/hypfs.h
-+++ b/arch/s390/hypfs/hypfs.h
-@@ -48,7 +48,7 @@ void hypfs_sprp_exit(void);
+diff --git a/kernel/configs/hardening.config b/kernel/configs/hardening.config
+index dd7c32fb5ac1..d24c2772d04d 100644
+--- a/kernel/configs/hardening.config
++++ b/kernel/configs/hardening.config
+@@ -63,6 +63,9 @@ CONFIG_INIT_ON_ALLOC_DEFAULT_ON=y
+ # Initialize all stack variables to zero on function entry.
+ CONFIG_INIT_STACK_ALL_ZERO=y
  
- int __hypfs_fs_init(void);
- 
--static inline int hypfs_fs_init(void)
-+static __always_inline int hypfs_fs_init(void)
- {
- 	if (IS_ENABLED(CONFIG_S390_HYPFS_FS))
- 		return __hypfs_fs_init();
-diff --git a/arch/s390/hypfs/hypfs_diag.h b/arch/s390/hypfs/hypfs_diag.h
-index 7090eff27fef..b5218135b8fe 100644
---- a/arch/s390/hypfs/hypfs_diag.h
-+++ b/arch/s390/hypfs/hypfs_diag.h
-@@ -19,7 +19,7 @@ int diag204_store(void *buf, int pages);
- int __hypfs_diag_fs_init(void);
- void __hypfs_diag_fs_exit(void);
- 
--static inline int hypfs_diag_fs_init(void)
-+static __always_inline int hypfs_diag_fs_init(void)
- {
- 	if (IS_ENABLED(CONFIG_S390_HYPFS_FS))
- 		return __hypfs_diag_fs_init();
-diff --git a/arch/s390/mm/init.c b/arch/s390/mm/init.c
-index 074bf4fb4ce2..e4953453d254 100644
---- a/arch/s390/mm/init.c
-+++ b/arch/s390/mm/init.c
-@@ -142,7 +142,7 @@ bool force_dma_unencrypted(struct device *dev)
- }
- 
- /* protected virtualization */
--static void pv_init(void)
-+static void __init pv_init(void)
- {
- 	if (!is_prot_virt_guest())
- 		return;
++# Wipe kernel stack after syscall completion to reduce stale data lifetime.
++CONFIG_KSTACK_ERASE=y
++
+ # Wipe RAM at reboot via EFI. For more details, see:
+ # https://trustedcomputinggroup.org/resource/pc-client-work-group-platform-reset-attack-mitigation-specification/
+ # https://bugzilla.redhat.com/show_bug.cgi?id=1532058
 -- 
 2.34.1
 
