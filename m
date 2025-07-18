@@ -1,102 +1,120 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6562B262815;
-	Thu, 17 Jul 2025 23:25:21 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3D450EEDE;
+	Fri, 18 Jul 2025 08:36:53 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752794721; cv=none; b=PiJRkhooH1afwxsGdRJtuJVFE3DqlgG7AI9TroXDp/yph8CMNKuju6ggm8ARMrrayQicXusKR0cds2LuGaBPaBITdLuDFTqWZH0sIJalo/+GUEcEplXK7bH2m9hbkozArmO03lB0uGlln1UZ7V4DXjmxi4TzNgwtRrQ1X0KPpwY=
+	t=1752827814; cv=none; b=eyntYJaOy4gIbuISg5O630Y3+5gvaeJoIPU5cSsM1zFktkufsRKTpjqpx2pgpt+IPwN7XBU8WWtLt0tmjLElX0aObU4eKT+vhvg5ZmeV+wp+xWFYOduL2bGAPGrdT5VPR/k8Tp5GEKT31wuC57UESjfPK1YoN/M9qoGuEDP9WlU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1752794721; c=relaxed/simple;
-	bh=hftQ+JwDBzI0zRNacsurrBG64kHnxlfHAL+GJc3UtlU=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=pcPO4mDGdAafO2KAr6atUTCti74qydyxJ6nmOzgaMho8DxAcr78PKStlTjaAzOCcU/cECwuP1PqMOjaEuOEGX1fIKApCyMu6XWlMFAoEqCRgOGxwpR/kSqaGUaLTL3PNgJDt9Qqmsy0ssHkUbnKAro2cp/9wWK7ZkAW5IxVeAO8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=FsqjdsQS; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1752827814; c=relaxed/simple;
+	bh=HL/2nr+vhFKcEcF58riyFRNQttwiCB/9fGbm+q71Dgg=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=S+ghDL96vtdztCGorIA7DWIOOdf3DXo+Wqg5kLolqXr6ayiQzjOmRia/r8q4X1I14CjPThK4ekcYbFzW8537oqCW9rsqJ8wtvZcqT91ucl1IZaajfkMJtQqhTCr7hJw42ia2cDlSM1WIbLcEyX3ka6/I+xVulGxVk8ujaDDQRhE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=GmH8kuFD; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FsqjdsQS"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B589AC4DDE4;
-	Thu, 17 Jul 2025 23:25:20 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="GmH8kuFD"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4E585C4CEEB;
+	Fri, 18 Jul 2025 08:36:36 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1752794720;
-	bh=hftQ+JwDBzI0zRNacsurrBG64kHnxlfHAL+GJc3UtlU=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=FsqjdsQS75ijp4EewZkFNnZ7oGWM+bQuK2TZnkPG1i4tUtkePSQGvhT3cJzizICIP
-	 n7VsETLWXSDSuNlB4j5w4GFk77PgUesXjhwz6yMoT31mNWaWjswPyAxrArx7XoTrzv
-	 qwRQ4j9gCoTu0mZgFXm9mV43Qt0uBu3ieYyCdmQG53nX22891/8O+gwogWE5UBED26
-	 ScLxadVl8C+/OHTvTZH1MoVS2hlIEz8r+PE+d+h/fgLqGQh1uU2RoHTiTONCiUEx+a
-	 5pAsMwG5Sv8s6jqrUJ/cIcIw1BL4yue1cJRn64/wKIgKX5LH0prSsOZ29wNitGYIID
-	 IN144gC7uUisA==
-From: Kees Cook <kees@kernel.org>
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Kees Cook <kees@kernel.org>,
+	s=k20201202; t=1752827813;
+	bh=HL/2nr+vhFKcEcF58riyFRNQttwiCB/9fGbm+q71Dgg=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=GmH8kuFDP69wLkOjDvdpYL8g4oErm+tCxzSYFjNficaE3yVU2VDi2CVybyh3k2vzL
+	 ktrs4o3SmHh9+Ti01m0+zENfWaUVs3rPEOFccIDJ8JzUuMBm7vzDhfYqgJjGzyUfX2
+	 tzprzSBZDHn6R6ZCy1S+ooHnVTZn0aRQWwJVACdL/lb02WuONW5CmJoAQ+l6IEgvXV
+	 YUoaFOXIVofvTGsxJhTxgxblsj38dHI42GL2cErPbWSgZ0WyDVaDQIEbTqk0zRmB/4
+	 6UGfFtVoeLA7gIVsJdymOjI/f87nJMUh+D/2j397DUryS3KRRsJ57CDJHeSOO9dNdu
+	 VnRo0rjVmoxGg==
+Date: Fri, 18 Jul 2025 11:36:32 +0300
+From: Mike Rapoport <rppt@kernel.org>
+To: Kees Cook <kees@kernel.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, Thomas Gleixner <tglx@linutronix.de>,
+	Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
+	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org,
+	"H. Peter Anvin" <hpa@zytor.com>,
+	Paolo Bonzini <pbonzini@redhat.com>,
+	Vitaly Kuznetsov <vkuznets@redhat.com>,
+	Henrique de Moraes Holschuh <hmh@hmh.eng.br>,
+	Hans de Goede <hdegoede@redhat.com>,
+	Ilpo =?iso-8859-1?Q?J=E4rvinen?= <ilpo.jarvinen@linux.intel.com>,
+	"Rafael J. Wysocki" <rafael@kernel.org>,
+	Len Brown <lenb@kernel.org>, Masami Hiramatsu <mhiramat@kernel.org>,
+	Ard Biesheuvel <ardb@kernel.org>,
+	Michal Wilczynski <michal.wilczynski@intel.com>,
+	Juergen Gross <jgross@suse.com>,
+	Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+	"Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>,
+	Roger Pau Monne <roger.pau@citrix.com>,
+	David Woodhouse <dwmw@amazon.co.uk>,
+	Usama Arif <usama.arif@bytedance.com>,
+	"Guilherme G. Piccoli" <gpiccoli@igalia.com>,
+	Thomas Huth <thuth@redhat.com>, Brian Gerst <brgerst@gmail.com>,
+	kvm@vger.kernel.org, ibm-acpi-devel@lists.sourceforge.net,
+	platform-driver-x86@vger.kernel.org, linux-acpi@vger.kernel.org,
+	linux-trace-kernel@vger.kernel.org, linux-efi@vger.kernel.org,
+	linux-mm@kvack.org, Ingo Molnar <mingo@kernel.org>,
 	"Gustavo A. R. Silva" <gustavoars@kernel.org>,
-	linux-hardening@vger.kernel.org,
-	Ingo Molnar <mingo@kernel.org>,
 	Christoph Hellwig <hch@lst.de>,
 	Andrey Konovalov <andreyknvl@gmail.com>,
 	Andrey Ryabinin <ryabinin.a.a@gmail.com>,
-	Ard Biesheuvel <ardb@kernel.org>,
 	Masahiro Yamada <masahiroy@kernel.org>,
 	Nathan Chancellor <nathan@kernel.org>,
 	Nicolas Schier <nicolas.schier@linux.dev>,
 	Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
 	Bill Wendling <morbo@google.com>,
-	Justin Stitt <justinstitt@google.com>,
-	linux-kernel@vger.kernel.org,
-	x86@kernel.org,
-	kasan-dev@googlegroups.com,
-	linux-doc@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	kvmarm@lists.linux.dev,
-	linux-riscv@lists.infradead.org,
-	linux-s390@vger.kernel.org,
-	linux-efi@vger.kernel.org,
-	linux-kbuild@vger.kernel.org,
+	Justin Stitt <justinstitt@google.com>, linux-kernel@vger.kernel.org,
+	kasan-dev@googlegroups.com, linux-doc@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org, kvmarm@lists.linux.dev,
+	linux-riscv@lists.infradead.org, linux-s390@vger.kernel.org,
+	linux-hardening@vger.kernel.org, linux-kbuild@vger.kernel.org,
 	linux-security-module@vger.kernel.org,
-	linux-kselftest@vger.kernel.org,
-	sparclinux@vger.kernel.org,
+	linux-kselftest@vger.kernel.org, sparclinux@vger.kernel.org,
 	llvm@lists.linux.dev
-Subject: [PATCH v3 12/13] configs/hardening: Enable CONFIG_KSTACK_ERASE
-Date: Thu, 17 Jul 2025 16:25:17 -0700
-Message-Id: <20250717232519.2984886-12-kees@kernel.org>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20250717231756.make.423-kees@kernel.org>
+Subject: Re: [PATCH v3 04/13] x86: Handle KCOV __init vs inline mismatches
+Message-ID: <aHoHkDvvp4AHIzU1@kernel.org>
 References: <20250717231756.make.423-kees@kernel.org>
+ <20250717232519.2984886-4-kees@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
 List-Subscribe: <mailto:linux-efi+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1038; i=kees@kernel.org; h=from:subject; bh=hftQ+JwDBzI0zRNacsurrBG64kHnxlfHAL+GJc3UtlU=; b=owGbwMvMwCVmps19z/KJym7G02pJDBmVbbFBctklSlm/hUWtYmesmm/+4Mz/o2oveebseJx+3 f2N065JHaUsDGJcDLJiiixBdu5xLh5v28Pd5yrCzGFlAhnCwMUpABPZrM/wT/+s9b/zj2UjKz2d 0opOWQdaqM192v1qrb5mpnFiz/LKFYwMM5YFnp723f9/aP7hJMnrxuH6yRfrcxYbWx+zavrULTm NDwA=
-X-Developer-Key: i=kees@kernel.org; a=openpgp; fpr=A5C3F68F229DD60F723E6E138972F4DFDC6DC026
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250717232519.2984886-4-kees@kernel.org>
 
-Since we can wipe the stack with both Clang and GCC plugins, enable this
-for the "hardening.config" for wider testing.
+Hi Kees,
 
-Signed-off-by: Kees Cook <kees@kernel.org>
----
-Cc: "Gustavo A. R. Silva" <gustavoars@kernel.org>
-Cc: <linux-hardening@vger.kernel.org>
----
- kernel/configs/hardening.config | 3 +++
- 1 file changed, 3 insertions(+)
+On Thu, Jul 17, 2025 at 04:25:09PM -0700, Kees Cook wrote:
+> When KCOV is enabled all functions get instrumented, unless the
+> __no_sanitize_coverage attribute is used. To prepare for
+> __no_sanitize_coverage being applied to __init functions, we have to
+> handle differences in how GCC's inline optimizations get resolved. For
+> x86 this means forcing several functions to be inline with
+> __always_inline.
+> 
+> Signed-off-by: Kees Cook <kees@kernel.org>
 
-diff --git a/kernel/configs/hardening.config b/kernel/configs/hardening.config
-index dd7c32fb5ac1..d24c2772d04d 100644
---- a/kernel/configs/hardening.config
-+++ b/kernel/configs/hardening.config
-@@ -63,6 +63,9 @@ CONFIG_INIT_ON_ALLOC_DEFAULT_ON=y
- # Initialize all stack variables to zero on function entry.
- CONFIG_INIT_STACK_ALL_ZERO=y
- 
-+# Wipe kernel stack after syscall completion to reduce stale data lifetime.
-+CONFIG_KSTACK_ERASE=y
-+
- # Wipe RAM at reboot via EFI. For more details, see:
- # https://trustedcomputinggroup.org/resource/pc-client-work-group-platform-reset-attack-mitigation-specification/
- # https://bugzilla.redhat.com/show_bug.cgi?id=1532058
+...
+
+> diff --git a/include/linux/memblock.h b/include/linux/memblock.h
+> index bb19a2534224..b96746376e17 100644
+> --- a/include/linux/memblock.h
+> +++ b/include/linux/memblock.h
+> @@ -463,7 +463,7 @@ static inline void *memblock_alloc_raw(phys_addr_t size,
+>  					  NUMA_NO_NODE);
+>  }
+>  
+> -static inline void *memblock_alloc_from(phys_addr_t size,
+> +static __always_inline void *memblock_alloc_from(phys_addr_t size,
+>  						phys_addr_t align,
+>  						phys_addr_t min_addr)
+
+I'm curious why from all memblock_alloc* wrappers this is the only one that
+needs to be __always_inline?
+
 -- 
-2.34.1
-
+Sincerely yours,
+Mike.
