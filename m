@@ -1,54 +1,54 @@
-Received: from mail-ed1-f73.google.com (mail-ed1-f73.google.com [209.85.208.73])
+Received: from mail-wm1-f73.google.com (mail-wm1-f73.google.com [209.85.128.73])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6AB362DFA5C
-	for <linux-efi@vger.kernel.org>; Tue, 22 Jul 2025 07:30:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.73
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B612A2E041D
+	for <linux-efi@vger.kernel.org>; Tue, 22 Jul 2025 07:30:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.73
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753169408; cv=none; b=dJynFjb3j/7RXODFBUVSpL4RHJSF2Ye3JrDwH2EEk0xgRREJNf9HjUDB5ikOShofvppBTFRcceCLLbo+ejzo4BwdP6MEO1jW5iXFIRyyU6N/KFXFn+uikji5/lNagAhbfrHgEqodnvp/FhfO/OPlG0vfP/SSt4KPKoHCd61KSjg=
+	t=1753169410; cv=none; b=clIm0LkFXhPIpXJAAOvcRumG8fFLmp1Ag0qYqgDKMuy8vkUICNL1F/VHPuAm63oHAHdMj0k5oFJqvkJFSA/8ngQrT2r7iHcNeKb6qhr8Ae+cziBL45Q19lP9h3KUCTeJFJoz5ynfU/HB7HPh7Uluc/+VjyOfaVEGFzLMfiZroCQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753169408; c=relaxed/simple;
-	bh=m+AA9YnrLD0iUVWnbGpAkFXJWtq3QSsvd+u3h67S7DA=;
+	s=arc-20240116; t=1753169410; c=relaxed/simple;
+	bh=L0nuKM1iOS5J1LrRXwl6oFJ2k3UoNAHOTrQqnHSBepc=;
 	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=h2BcIjMPzbroCSB+nfQDamnm5z0/hj26sjQJ8q1eQ2iVD+0lNLXYI0WhJw9AL9J2+kl4y2sOB0B2MwoKNF+lExAnsOeXtKZlYcdqC9Ci33srMO8J05nHKc5Zv+TYMX0Vlf4pe4IcIdJ2/dprdcT4PazvFOOjJNhL5B9vB/IVibw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=sAJacNzu; arc=none smtp.client-ip=209.85.208.73
+	 To:Cc:Content-Type; b=Lb9fRR2ke8EaQmpVMiC0C97/PaCGSbsWQB8okYC+KPEJ54XB/pXPNhV7w5tFNSvCGV8CfX5I7245/N7HGkNh+MLiFSzoKWBLG/MrJwjp3eYSmsuaqSk/ttwTlmRmqcvizQDb+r3whaqCQQTxvM/Kp//VwNBYzNvHm2ux2XFuN5s=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=noD/b8ju; arc=none smtp.client-ip=209.85.128.73
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="sAJacNzu"
-Received: by mail-ed1-f73.google.com with SMTP id 4fb4d7f45d1cf-6083f613f0eso5437995a12.1
-        for <linux-efi@vger.kernel.org>; Tue, 22 Jul 2025 00:30:06 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="noD/b8ju"
+Received: by mail-wm1-f73.google.com with SMTP id 5b1f17b1804b1-451d7de4ae3so28901085e9.2
+        for <linux-efi@vger.kernel.org>; Tue, 22 Jul 2025 00:30:07 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20230601; t=1753169405; x=1753774205; darn=vger.kernel.org;
+        d=google.com; s=20230601; t=1753169406; x=1753774206; darn=vger.kernel.org;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:from:to:cc:subject:date:message-id:reply-to;
-        bh=joWJVM2i9LyAMlJmIbS+61T1iNRyCZpWQH9FF0KYFxg=;
-        b=sAJacNzuCWHCk+nmhbHQsDmjW60540vhAz/yTFm/FEbR5RuFLPdGArevtj75BuDTE4
-         WyWvKYibR7BsBvhf9h4IrHg6H1qdwQ5SI/K2byGfmjKmz/6Zlq/x3e/Q2Wykpt3vZB2N
-         DMSA2wu+K3y2zUQaP9hpzKuCebL0dsdvLoM4YIi0AYULzeTOaw0ZIUwD+3w08t+Q5xto
-         mtSSdYTjjiY1WWRrhiH2md9vOmL9CxhuAKc2vlMGsAkLklL1TLAvUXoth40WKckVPR9H
-         wgJjMoc6qsFVFkJ+OmBXfiYYtihAVJUAyG4IVdk9DkYYEKBQ4bc8rVcWzh/3VJyMO7NV
-         lxQA==
+        bh=AJj7BKcgkJOUpVILvlutzG3sQyBRFRydGJczKsiTn/M=;
+        b=noD/b8juAxSt6DvNWlan/K+IV1lw7QJKL0mDhBbeyQlyAP8Amed4BW/WJawuwCWgx2
+         Fapy2I21fOD8xIZja8uvR6MvrhxWvA87sNBJwn0LsZ38K+0hj9WvE1cQlIyPIQOLhJrg
+         5sXFvjW5soqygUZpdvw6Mxa/B6k76QJa09cdeVd46R0V9VtZPfi2KPTkvbp6cU3cDEpb
+         aoyOOaIkyziUef7BKJHN+b4teY1yoxFftX9bYMXmde6lrVScgfCE0BitoXWMxK0z1dam
+         ShlMaAPqRLY3eeZyguAV9PTBy70he9KYljz5xbCipcBnR1e1DalUUjP3YfYPjvU+KtkM
+         g8kQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1753169405; x=1753774205;
+        d=1e100.net; s=20230601; t=1753169406; x=1753774206;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=joWJVM2i9LyAMlJmIbS+61T1iNRyCZpWQH9FF0KYFxg=;
-        b=KCCP17eUMYtf0ui1AdZdX7sREm17D3L1rpHmxJgx7OHyEyQd+9lWfEHN825dIXXSGt
-         R/wzRixqUnJtbLtdLc78dM+qTB/RW2WD/2R/TKMLJaVoy9h3yB4lWSceNfVWLV6+w/ak
-         A7loTd0zenR1s+7sSyU4ZIYEts8qzwpWkdykf4rmVovfppoSW0LkBwhGi1gfN1kmRk78
-         D8aMyeqknA4BJZf1s9xv4zRS8nyzdxq2gvD3LK3rue4sW4j0a0q3GFJtZhtDw433+vQ+
-         3TQ9NsmG9jrv1bP87TX+iawABQFaV4zS7vtNOUCEUEgZCNC+CYud/kHFXrqxbd87YI2q
-         XrXw==
-X-Gm-Message-State: AOJu0YyGV/o6zPDB1/kw+fOSjzRjF2E4w3cQbK5vn4SZ+PAZs7vAr6op
-	+zoB+jTZLCjeGQxA1L4Hp0GJ7sKoVeGAIDB8z2ZCAZtlRfC4PPC9SLd0RrP0ijxsHBQk17Vfxw=
+        bh=AJj7BKcgkJOUpVILvlutzG3sQyBRFRydGJczKsiTn/M=;
+        b=VNJ7f4wpzvyfc1/oe0J5AEzIgjasxlfBEAhtzIH1RF+9Nh4C7HZ84vPJQ5+2z9z+XT
+         +oJvuDBc+T228l37vwX8npSPey72cbBdVOu+PMnTlWD4GfhpcvA4L2vIIS591O/kukPD
+         ufq11BSG6AMoF/VXlMquBD3/s4MjBndIdvZQvr4UnTZDpEHd3FPJgeWvDffwZRaMHpEA
+         oaDQVYZjlOoLfjFO46ZN/8BLH1VJuoZlKx6MA74sgTEGjsZgrbzWknzG/CGyS8fGRYLG
+         qq313ccqS+NEOgys4CClnCzEYNN7JMJw8ACXueZu4DBQbZdP3dj1DO7aclf5QKGeRWsE
+         Losw==
+X-Gm-Message-State: AOJu0YzEU80Gb2HZf1mjtMen6RDmrx4bYhJPiOxPAd3UIvCzoRsKhkoL
+	VPF+jR65ixKdZkjR1wMbVSNdxWzEwJmT86/Mk/iSR1dc6/5oYmf9k94BfMxxBXLVTHnMJwiaBQ=
 	=
-X-Google-Smtp-Source: AGHT+IHBFkra3DT9d/Jz54hyx9X9Sbb5UtTq/QCThPQD9dIL+tW4Ej2jMl0lcTj1D0bBSsI+igZS8dIu
-X-Received: from edbdh15.prod.google.com ([2002:a05:6402:1d2f:b0:612:bb19:6d36])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:6402:4407:b0:611:fdb4:1dc1
- with SMTP id 4fb4d7f45d1cf-612a4d17913mr19148358a12.7.1753169402910; Tue, 22
- Jul 2025 00:30:02 -0700 (PDT)
-Date: Tue, 22 Jul 2025 09:27:22 +0200
+X-Google-Smtp-Source: AGHT+IGLWlgWa6RzVmCAyoMlmr3VIPZ+jJqUabm06ARqHBLvdkCPayHMIQ+HOYsB4R8ZUt+WXLNEYOV1
+X-Received: from wmsp39.prod.google.com ([2002:a05:600c:1da7:b0:456:1ccb:7fbc])
+ (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:600c:a310:b0:450:d4a6:799e
+ with SMTP id 5b1f17b1804b1-4563c231876mr99156905e9.20.1753169406218; Tue, 22
+ Jul 2025 00:30:06 -0700 (PDT)
+Date: Tue, 22 Jul 2025 09:27:25 +0200
 In-Reply-To: <20250722072708.2079165-24-ardb+git@google.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -58,15 +58,14 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 References: <20250722072708.2079165-24-ardb+git@google.com>
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-X-Developer-Signature: v=1; a=openpgp-sha256; l=6028; i=ardb@kernel.org;
- h=from:subject; bh=VRS61oLaIqj8kKv/u+4je9bg+LB91FkrmM3QiYMrk/A=;
- b=owGbwMvMwCVmkMcZplerG8N4Wi2JIaPetndtuc28T9VbDA/9LDLdalZ0R/Dkasl9252F79rJP
- NnbnGvbUcrCIMbFICumyCIw+++7nacnStU6z5KFmcPKBDKEgYtTACZyqIiR4YPexKszT2+5EL2G
- ecOrwD7jA3nrV4UcXswZx/Xk/ymtc/4M/+NVIl47nDwjVHtDyG93fGB/wD2BFsM3rTO89J4LPpy 4ihUA
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1894; i=ardb@kernel.org;
+ h=from:subject; bh=L4jffg2+Vf1ZB+P16ZYKMMQDycf2VYvq95i2j0U/b58=;
+ b=owGbwMvMwCVmkMcZplerG8N4Wi2JIaPednaFo4ujna9JaX+z4FKNR2WPIq71tO+/tuedpeOpj
+ 6pP9vztKGVhEONikBVTZBGY/ffdztMTpWqdZ8nCzGFlAhnCwMUpABPZ58XIcHmWWlK2Q+uyqnM+
+ /7R1OkSimm8UsscYrC7U+HB+hhNLOSND07Ivx3ktG6qfL5EoD9oWlpvVXpO19jerp6G9rdmTnPe cAA==
 X-Mailer: git-send-email 2.50.0.727.gbf7dc18ff4-goog
-Message-ID: <20250722072708.2079165-37-ardb+git@google.com>
-Subject: [PATCH v6 13/22] x86/sev: Move __sev_[get|put]_ghcb() into separate
- noinstr object
+Message-ID: <20250722072708.2079165-40-ardb+git@google.com>
+Subject: [PATCH v6 16/22] x86/boot: Check startup code for absence of absolute relocations
 From: Ard Biesheuvel <ardb+git@google.com>
 To: linux-kernel@vger.kernel.org
 Cc: linux-efi@vger.kernel.org, x86@kernel.org, 
@@ -78,211 +77,47 @@ Content-Type: text/plain; charset="UTF-8"
 
 From: Ard Biesheuvel <ardb@kernel.org>
 
-Rename sev-nmi.c to noinstr.c, and move the get/put GHCB routines
-into it too, which are also annotated as 'noinstr' and suffer from the
-same problem as the NMI code, i.e., that GCC may ignore the
-__no_sanitize_address__ function attribute implied by 'noinstr' and
-insert KASAN instrumentation anyway.
+Invoke objtool on each startup code object individually to check for the
+absence of absolute relocations. This is needed because this code will
+be invoked from the 1:1 mapping of memory before those absolute virtual
+addresses (which are derived from the kernel virtual base address
+provided to the linker and possibly shifted at boot) are mapped.
+
+Only objects built under arch/x86/boot/startup/ have this restriction,
+and once they have been incorporated into vmlinux.o, this distinction is
+difficult to make. So force the invocation of objtool for each object
+file individually, even if objtool is deferred to vmlinux.o for the rest
+of the build. In the latter case, only pass --noabs and nothing else;
+otherwise, append it to the existing objtool command line.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/boot/startup/sev-startup.c        | 74 --------------------
- arch/x86/coco/sev/Makefile                 |  8 +--
- arch/x86/coco/sev/{sev-nmi.c => noinstr.c} | 74 ++++++++++++++++++++
- 3 files changed, 78 insertions(+), 78 deletions(-)
+ arch/x86/boot/startup/Makefile | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-diff --git a/arch/x86/boot/startup/sev-startup.c b/arch/x86/boot/startup/sev-startup.c
-index 76d40e381d41..2f7d21660cdf 100644
---- a/arch/x86/boot/startup/sev-startup.c
-+++ b/arch/x86/boot/startup/sev-startup.c
-@@ -41,83 +41,9 @@
- #include <asm/cpuid/api.h>
- #include <asm/cmdline.h>
+diff --git a/arch/x86/boot/startup/Makefile b/arch/x86/boot/startup/Makefile
+index b514f7e81332..32737f4ab5a8 100644
+--- a/arch/x86/boot/startup/Makefile
++++ b/arch/x86/boot/startup/Makefile
+@@ -19,6 +19,7 @@ KCOV_INSTRUMENT	:= n
  
--/*
-- * Nothing shall interrupt this code path while holding the per-CPU
-- * GHCB. The backup GHCB is only for NMIs interrupting this path.
-- *
-- * Callers must disable local interrupts around it.
-- */
--noinstr struct ghcb *__sev_get_ghcb(struct ghcb_state *state)
--{
--	struct sev_es_runtime_data *data;
--	struct ghcb *ghcb;
--
--	WARN_ON(!irqs_disabled());
--
--	data = this_cpu_read(runtime_data);
--	ghcb = &data->ghcb_page;
--
--	if (unlikely(data->ghcb_active)) {
--		/* GHCB is already in use - save its contents */
--
--		if (unlikely(data->backup_ghcb_active)) {
--			/*
--			 * Backup-GHCB is also already in use. There is no way
--			 * to continue here so just kill the machine. To make
--			 * panic() work, mark GHCBs inactive so that messages
--			 * can be printed out.
--			 */
--			data->ghcb_active        = false;
--			data->backup_ghcb_active = false;
--
--			instrumentation_begin();
--			panic("Unable to handle #VC exception! GHCB and Backup GHCB are already in use");
--			instrumentation_end();
--		}
--
--		/* Mark backup_ghcb active before writing to it */
--		data->backup_ghcb_active = true;
--
--		state->ghcb = &data->backup_ghcb;
--
--		/* Backup GHCB content */
--		*state->ghcb = *ghcb;
--	} else {
--		state->ghcb = NULL;
--		data->ghcb_active = true;
--	}
--
--	return ghcb;
--}
--
- /* Include code shared with pre-decompression boot stage */
- #include "sev-shared.c"
+ obj-$(CONFIG_X86_64)		+= gdt_idt.o map_kernel.o
+ obj-$(CONFIG_AMD_MEM_ENCRYPT)	+= sme.o sev-startup.o
++pi-objs				:= $(patsubst %.o,$(obj)/%.o,$(obj-y))
  
--noinstr void __sev_put_ghcb(struct ghcb_state *state)
--{
--	struct sev_es_runtime_data *data;
--	struct ghcb *ghcb;
--
--	WARN_ON(!irqs_disabled());
--
--	data = this_cpu_read(runtime_data);
--	ghcb = &data->ghcb_page;
--
--	if (state->ghcb) {
--		/* Restore GHCB from Backup */
--		*ghcb = *state->ghcb;
--		data->backup_ghcb_active = false;
--		state->ghcb = NULL;
--	} else {
--		/*
--		 * Invalidate the GHCB so a VMGEXIT instruction issued
--		 * from userspace won't appear to be valid.
--		 */
--		vc_ghcb_invalidate(ghcb);
--		data->ghcb_active = false;
--	}
--}
--
- void __head
- early_set_pages_state(unsigned long vaddr, unsigned long paddr,
- 		      unsigned long npages, enum psc_op op,
-diff --git a/arch/x86/coco/sev/Makefile b/arch/x86/coco/sev/Makefile
-index 342d79f0ab6a..3b8ae214a6a6 100644
---- a/arch/x86/coco/sev/Makefile
-+++ b/arch/x86/coco/sev/Makefile
-@@ -1,10 +1,10 @@
- # SPDX-License-Identifier: GPL-2.0
- 
--obj-y += core.o sev-nmi.o vc-handle.o
-+obj-y += core.o noinstr.o vc-handle.o
- 
- # Clang 14 and older may fail to respect __no_sanitize_undefined when inlining
--UBSAN_SANITIZE_sev-nmi.o	:= n
-+UBSAN_SANITIZE_noinstr.o	:= n
- 
- # GCC may fail to respect __no_sanitize_address or __no_kcsan when inlining
--KASAN_SANITIZE_sev-nmi.o	:= n
--KCSAN_SANITIZE_sev-nmi.o	:= n
-+KASAN_SANITIZE_noinstr.o	:= n
-+KCSAN_SANITIZE_noinstr.o	:= n
-diff --git a/arch/x86/coco/sev/sev-nmi.c b/arch/x86/coco/sev/noinstr.c
-similarity index 61%
-rename from arch/x86/coco/sev/sev-nmi.c
-rename to arch/x86/coco/sev/noinstr.c
-index d8dfaddfb367..b527eafb6312 100644
---- a/arch/x86/coco/sev/sev-nmi.c
-+++ b/arch/x86/coco/sev/noinstr.c
-@@ -106,3 +106,77 @@ void noinstr __sev_es_nmi_complete(void)
- 
- 	__sev_put_ghcb(&state);
- }
+ lib-$(CONFIG_X86_64)		+= la57toggle.o
+ lib-$(CONFIG_EFI_MIXED)		+= efi-mixed.o
+@@ -28,3 +29,10 @@ lib-$(CONFIG_EFI_MIXED)		+= efi-mixed.o
+ # to be linked into the decompressor or the EFI stub but not vmlinux
+ #
+ $(patsubst %.o,$(obj)/%.o,$(lib-y)): OBJECT_FILES_NON_STANDARD := y
 +
-+/*
-+ * Nothing shall interrupt this code path while holding the per-CPU
-+ * GHCB. The backup GHCB is only for NMIs interrupting this path.
-+ *
-+ * Callers must disable local interrupts around it.
-+ */
-+noinstr struct ghcb *__sev_get_ghcb(struct ghcb_state *state)
-+{
-+	struct sev_es_runtime_data *data;
-+	struct ghcb *ghcb;
-+
-+	WARN_ON(!irqs_disabled());
-+
-+	data = this_cpu_read(runtime_data);
-+	ghcb = &data->ghcb_page;
-+
-+	if (unlikely(data->ghcb_active)) {
-+		/* GHCB is already in use - save its contents */
-+
-+		if (unlikely(data->backup_ghcb_active)) {
-+			/*
-+			 * Backup-GHCB is also already in use. There is no way
-+			 * to continue here so just kill the machine. To make
-+			 * panic() work, mark GHCBs inactive so that messages
-+			 * can be printed out.
-+			 */
-+			data->ghcb_active        = false;
-+			data->backup_ghcb_active = false;
-+
-+			instrumentation_begin();
-+			panic("Unable to handle #VC exception! GHCB and Backup GHCB are already in use");
-+			instrumentation_end();
-+		}
-+
-+		/* Mark backup_ghcb active before writing to it */
-+		data->backup_ghcb_active = true;
-+
-+		state->ghcb = &data->backup_ghcb;
-+
-+		/* Backup GHCB content */
-+		*state->ghcb = *ghcb;
-+	} else {
-+		state->ghcb = NULL;
-+		data->ghcb_active = true;
-+	}
-+
-+	return ghcb;
-+}
-+
-+noinstr void __sev_put_ghcb(struct ghcb_state *state)
-+{
-+	struct sev_es_runtime_data *data;
-+	struct ghcb *ghcb;
-+
-+	WARN_ON(!irqs_disabled());
-+
-+	data = this_cpu_read(runtime_data);
-+	ghcb = &data->ghcb_page;
-+
-+	if (state->ghcb) {
-+		/* Restore GHCB from Backup */
-+		*ghcb = *state->ghcb;
-+		data->backup_ghcb_active = false;
-+		state->ghcb = NULL;
-+	} else {
-+		/*
-+		 * Invalidate the GHCB so a VMGEXIT instruction issued
-+		 * from userspace won't appear to be valid.
-+		 */
-+		vc_ghcb_invalidate(ghcb);
-+		data->ghcb_active = false;
-+	}
-+}
++#
++# Invoke objtool for each object individually to check for absolute
++# relocations, even if other objtool actions are being deferred.
++#
++$(pi-objs): objtool-enabled	= 1
++$(pi-objs): objtool-args	= $(if $(delay-objtool),,$(objtool-args-y)) --noabs
 -- 
 2.50.0.727.gbf7dc18ff4-goog
 
