@@ -1,54 +1,54 @@
 Received: from mail-wr1-f73.google.com (mail-wr1-f73.google.com [209.85.221.73])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B773C2DCF4F
-	for <linux-efi@vger.kernel.org>; Tue, 22 Jul 2025 07:30:02 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 533242DECA3
+	for <linux-efi@vger.kernel.org>; Tue, 22 Jul 2025 07:30:05 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.73
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753169405; cv=none; b=OVuf/Ocbh3R2veaean0mEDozDJIHURYLix1UnpnT7zrtsKJbZY3jym48EQiJtawK3yUxGGWQT7BPJMMxkuToucWoNWK9bPyXRWEEB8hljV3XT2EKNBaRKU75rmMJ3ZAKOFltpu223F+0ApRWSbty0SH6pujUt0XswOPcfIqN9g4=
+	t=1753169407; cv=none; b=gwSVAliDRvZqCFh0oBcfy0uPtpcSdwaCQ41VYZPkf7uey8OdkWbp6I/K5kfJtmGX+Z0YJIzDSJ3gzSKwsVIs3ntHbtuFjBn+RiCtn/3rnCEUIv6kcSLyI3g92t/flLjydSsnTi89qaugGDfx7zAAbKfG9n5ie+9vG8pn+rBVzaQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753169405; c=relaxed/simple;
-	bh=88wIbnPP1a1dLhlXMR2D52W04CjhXmRtjIuSBBT1WeQ=;
+	s=arc-20240116; t=1753169407; c=relaxed/simple;
+	bh=AziSCYrqEKp3iXhsTCzhbJczPEzyYFFzm0EbdakEq+k=;
 	h=Date:In-Reply-To:Mime-Version:References:Message-ID:Subject:From:
-	 To:Cc:Content-Type; b=q7lD0oy4qNMHaCNK70W5LknDcWWtD6qykZisiTNALGrMeOsygWeU4CbcIVb404h5X8sqBR7hieq/CMp+H072KEmKjBDrv6ZmrZ0nYaGna6SOxes6hp/tgKAXwTV77GoRromZ7KhpB8kUeylRR19J0Qh7+NPH+zCSRx9OABZKKQQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=OnNX+jio; arc=none smtp.client-ip=209.85.221.73
+	 To:Cc:Content-Type; b=jlUu09rN9ZH6R1fc4PWGWNiYeIITG5peHUC/1DvYe2jcyL9BM+J0iHjByySkp+v3oL795KFocEAh0azvn6jWu7+Yf3F+Gh58EDCS1RuILhcM5qkAZglhsgprvntFfCDUHHmpNyq7NbpI5anaPAptnKmARuu+IMxETNWQDySsMsA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com; dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b=xDQ4irDe; arc=none smtp.client-ip=209.85.221.73
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=google.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=flex--ardb.bounces.google.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="OnNX+jio"
-Received: by mail-wr1-f73.google.com with SMTP id ffacd0b85a97d-3a5058f9ef4so1915495f8f.2
-        for <linux-efi@vger.kernel.org>; Tue, 22 Jul 2025 00:30:02 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="xDQ4irDe"
+Received: by mail-wr1-f73.google.com with SMTP id ffacd0b85a97d-3b604541741so3876767f8f.3
+        for <linux-efi@vger.kernel.org>; Tue, 22 Jul 2025 00:30:05 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20230601; t=1753169401; x=1753774201; darn=vger.kernel.org;
+        d=google.com; s=20230601; t=1753169404; x=1753774204; darn=vger.kernel.org;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:from:to:cc:subject:date:message-id:reply-to;
-        bh=AgqR5avhQu9i9Y4o0xvmYEmE5OaurZWopQxiw2YEL3s=;
-        b=OnNX+jiokZaqpVdU1aKIN0BR4txptgQkcC1UbbEhuabFZvvq4OTIGbWS8Egu3C8R6j
-         8V5ySX9uHjJrXoaWthVQuG/qrcEIg7bKi8LARmxoV3Ge1VDdRxAoSkVppHjsCU8zK6bX
-         ix6FGs5rm8c4/goBi8Vou9aYTUXMNT11nSMrcD1Nf9eiOMhhLqTo3Fn/rC63LG0lyMTZ
-         vTprentHoy1Q5RIM0mcRQHpIHpBaWCkLL8nP5WMt3O98+G80gZaqcvJM2lGvXtmpTssR
-         6LOGgp++Jz+xtjGCkZ2wWv2oN2pzsRuTh6LOyIuv0tyG2UDea3/WE/HZehK+StWPavEK
-         BXmA==
+        bh=mW4f9PE0jE0e9wTTI8oFMDAAeEX2PGjVbeFJW21fiSw=;
+        b=xDQ4irDe6gaGiGIN1JIk73aO1qf4wT7LOnQUJm1cYtW0wqSe7akPvGjM16onzDcS9T
+         3owml4wx2yIJzREx6KcDQ22wHcgKuF6cMJLx3P/F8bmGMFFbaBNz9zmGCNszwcb6nh0H
+         fCC4dIghKtT9BgoXBCOw8ZGrYn9/miJsD+jVWVDUnLF1en3lv0WiTHsKELGJYGrFmY8u
+         LzFFK/t8fd/gUPq9uHze5VRMXpkF76bK6grhiCx6pnWqlZCmydx2NzDQ6WUjyWDlWkgV
+         SWvm8xhStLaF1sFG3KHJ+TP6awkY+ERidMB2MmOeYqc+dE7k/YZe3cdveX2l7Eck8QUH
+         4UrA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1753169401; x=1753774201;
+        d=1e100.net; s=20230601; t=1753169404; x=1753774204;
         h=cc:to:from:subject:message-id:references:mime-version:in-reply-to
          :date:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=AgqR5avhQu9i9Y4o0xvmYEmE5OaurZWopQxiw2YEL3s=;
-        b=uG6vI6Jm3LgLpAg4Z4hheG6Kv4fEgE3LjqHTB5onsk050uBYKlVidodQ9jjQBkITj4
-         kmpzSvnJvBCrlpxavhgKCCeaaEmfLlcR0P9ocm5fQRCFv5HFHAAncdIRg6jYgZFLMw2T
-         Mb/Zl7yB0ZSo0ZPwRjSNR4vIGa17J7NzM2uER+ul27G3+vVr9x6oMkcZ5a8EYa55leRZ
-         KzvNWXcBjcW4LHGiJ4lvy6KmG2BDjFNWpm+vIdccyWR2fkmaflcITJS52BbEb4T4yuzp
-         DGRE7LuBeLU/sxjIJeKvCH9jzmaRItmz+xZlSQ26oD+F7MupiamlNKf9fek2fraQt9Qo
-         /ghA==
-X-Gm-Message-State: AOJu0YwAM6qUXfGJzMyzeKI1USoyhCd0B5DPHkC6GKe4UilN2QmM1fFf
-	/K5fSx3GNYo5zG5G7zwkwqbPcu6TOCLnXzDtBU980Nk2stTvRORzOVAebRDALp/HIaDLYZ4pYg=
+        bh=mW4f9PE0jE0e9wTTI8oFMDAAeEX2PGjVbeFJW21fiSw=;
+        b=sQbJhEOeuxdN6pMkJUwgnVEp7myRz0D8XNyq5rt3dUvT0DYpS3mGGRhwZ+oQnH0trB
+         Q2QVdiYLHzk2WpvS6dKvwVcXXszpes8xXUtojzfsZTGZkCtYQHWv53n+3MMEDdnNqjgo
+         U09PL+Asony40C+rNz5KsW3AZNp/KrITs44OjvJ25KPiOSDfMlYxeBwNfI06ZhlgAADF
+         0OFrB4GqcpXsLHbbiF3mcU5ucTsuB6vzi7KjVC/cROiOpbwTEDKi1kov8rLkWGcTp05N
+         0vJCrwUmZXZwFsTc7vKtQAU2HisbStrkOu9O6f29H5Ny9nk7b1NvbJGcXU/rhFgkLQjr
+         nybA==
+X-Gm-Message-State: AOJu0Yw4W43LcOwPpfFijajbKcY5T1o/q5mX2L321oVutQaVe3STVgAh
+	27fHAP7Etx22Cp4Lbqbgse7XIW2M/e4vssaof6f9Se7OGZ215Ml2fGmkT8ptXOPAZyCVWUvvgw=
 	=
-X-Google-Smtp-Source: AGHT+IGCqMKG4sGv9H7gbMZ1XZ+2/FhEzlXHBTMD/rugj0ALKPXeNFjqm6AE32QViBixAzLnaDHRef5G
-X-Received: from wrsy4.prod.google.com ([2002:a5d:4ac4:0:b0:3a5:260b:656e])
- (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:a05:6000:18a4:b0:3aa:c95b:d1d9
- with SMTP id ffacd0b85a97d-3b60dd643f2mr15394927f8f.6.1753169400968; Tue, 22
- Jul 2025 00:30:00 -0700 (PDT)
-Date: Tue, 22 Jul 2025 09:27:20 +0200
+X-Google-Smtp-Source: AGHT+IEqIkZaOA4ogOixIf+RDEwpmHqpgza/utnNCA+SqSYOa7J9XOgt60L+JaEZqIQWwlBBUCl7IbnY
+X-Received: from wmbeq12.prod.google.com ([2002:a05:600c:848c:b0:456:2437:14d6])
+ (user=ardb job=prod-delivery.src-stubby-dispatcher) by 2002:adf:e19d:0:b0:3a6:f2d7:e22b
+ with SMTP id ffacd0b85a97d-3b60e4d2a3bmr14390472f8f.18.1753169403918; Tue, 22
+ Jul 2025 00:30:03 -0700 (PDT)
+Date: Tue, 22 Jul 2025 09:27:23 +0200
 In-Reply-To: <20250722072708.2079165-24-ardb+git@google.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
@@ -58,15 +58,14 @@ List-Unsubscribe: <mailto:linux-efi+unsubscribe@vger.kernel.org>
 Mime-Version: 1.0
 References: <20250722072708.2079165-24-ardb+git@google.com>
 X-Developer-Key: i=ardb@kernel.org; a=openpgp; fpr=F43D03328115A198C90016883D200E9CA6329909
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1051; i=ardb@kernel.org;
- h=from:subject; bh=/aZ0V2A8zhGGvGqcdFjf+IBZLj2TZ6Tesp02RBGOQMc=;
- b=owGbwMvMwCVmkMcZplerG8N4Wi2JIaPetnmSWNjG0OSpmodPnfpsJmdVO9v7Ro+IyR6mOx6pA
- ZbXUg93lLIwiHExyIopsgjM/vtu5+mJUrXOs2Rh5rAygQxh4OIUgImo3WL4n5ie0SD874F4qHnp
- nZi+R29O/5rpojvV9ejC+s0zlp6yqWT476lyaD57svt/k5YpbFcPHDweZp14d9bThI8V5cd/xK3 fyQ4A
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1696; i=ardb@kernel.org;
+ h=from:subject; bh=kOQMYaSiu+ZXQWR7MbRw268I2y+/O3YrdyRKP8LesAE=;
+ b=owGbwMvMwCVmkMcZplerG8N4Wi2JIaPedpKM88n9Sbzbf+1YeWOdnNHSbVutr83/+Jjr9Feb8
+ 59Mpy5m7ChlYRDjYpAVU2QRmP333c7TE6VqnWfJwsxhZQIZwsDFKQATabrH8E+VpXzK6RRBrWyV
+ R6k5uQELpfobyuznpr93imm7u+rhQVVGhvVucifUTC8oiDx+eULzbbNri2CBK/ODmzEpSgxZvFf r2AA=
 X-Mailer: git-send-email 2.50.0.727.gbf7dc18ff4-goog
-Message-ID: <20250722072708.2079165-35-ardb+git@google.com>
-Subject: [PATCH v6 11/22] x86/boot: Provide PIC aliases for 5-level paging
- related constants
+Message-ID: <20250722072708.2079165-38-ardb+git@google.com>
+Subject: [PATCH v6 14/22] x86/sev: Export startup routines for later use
 From: Ard Biesheuvel <ardb+git@google.com>
 To: linux-kernel@vger.kernel.org
 Cc: linux-efi@vger.kernel.org, x86@kernel.org, 
@@ -78,33 +77,45 @@ Content-Type: text/plain; charset="UTF-8"
 
 From: Ard Biesheuvel <ardb@kernel.org>
 
-Provide PIC aliases for the global variables related to 5-level paging,
-so that the startup code can access them in order to populate the kernel
-page tables.
+Create aliases that expose routines that are part of the startup code to
+other code in the core kernel, so that they can be called later as well.
 
 Signed-off-by: Ard Biesheuvel <ardb@kernel.org>
 ---
- arch/x86/kernel/head64.c | 3 +++
- 1 file changed, 3 insertions(+)
+ arch/x86/boot/startup/exports.h | 14 ++++++++++++++
+ arch/x86/kernel/vmlinux.lds.S   |  2 ++
+ 2 files changed, 16 insertions(+)
 
-diff --git a/arch/x86/kernel/head64.c b/arch/x86/kernel/head64.c
-index 533fcf5636fc..1bc40d0785ee 100644
---- a/arch/x86/kernel/head64.c
-+++ b/arch/x86/kernel/head64.c
-@@ -52,10 +52,13 @@ SYM_PIC_ALIAS(next_early_pgt);
- pmdval_t early_pmd_flags = __PAGE_KERNEL_LARGE & ~(_PAGE_GLOBAL | _PAGE_NX);
- 
- unsigned int __pgtable_l5_enabled __ro_after_init;
-+SYM_PIC_ALIAS(__pgtable_l5_enabled);
- unsigned int pgdir_shift __ro_after_init = 39;
- EXPORT_SYMBOL(pgdir_shift);
-+SYM_PIC_ALIAS(pgdir_shift);
- unsigned int ptrs_per_p4d __ro_after_init = 1;
- EXPORT_SYMBOL(ptrs_per_p4d);
-+SYM_PIC_ALIAS(ptrs_per_p4d);
- 
- unsigned long page_offset_base __ro_after_init = __PAGE_OFFSET_BASE_L4;
- EXPORT_SYMBOL(page_offset_base);
+diff --git a/arch/x86/boot/startup/exports.h b/arch/x86/boot/startup/exports.h
+new file mode 100644
+index 000000000000..01d2363dc445
+--- /dev/null
++++ b/arch/x86/boot/startup/exports.h
+@@ -0,0 +1,14 @@
++
++/*
++ * The symbols below are functions that are implemented by the startup code,
++ * but called at runtime by the SEV code residing in the core kernel.
++ */
++PROVIDE(early_set_pages_state		= __pi_early_set_pages_state);
++PROVIDE(early_snp_set_memory_private	= __pi_early_snp_set_memory_private);
++PROVIDE(early_snp_set_memory_shared	= __pi_early_snp_set_memory_shared);
++PROVIDE(get_hv_features			= __pi_get_hv_features);
++PROVIDE(sev_es_terminate		= __pi_sev_es_terminate);
++PROVIDE(snp_cpuid			= __pi_snp_cpuid);
++PROVIDE(snp_cpuid_get_table		= __pi_snp_cpuid_get_table);
++PROVIDE(svsm_issue_call			= __pi_svsm_issue_call);
++PROVIDE(svsm_process_result_codes	= __pi_svsm_process_result_codes);
+diff --git a/arch/x86/kernel/vmlinux.lds.S b/arch/x86/kernel/vmlinux.lds.S
+index 4fa0be732af1..5d5e3a95e1f9 100644
+--- a/arch/x86/kernel/vmlinux.lds.S
++++ b/arch/x86/kernel/vmlinux.lds.S
+@@ -535,3 +535,5 @@ xen_elfnote_entry_value =
+ xen_elfnote_phys32_entry_value =
+ 	ABSOLUTE(xen_elfnote_phys32_entry) + ABSOLUTE(pvh_start_xen - LOAD_OFFSET);
+ #endif
++
++#include "../boot/startup/exports.h"
 -- 
 2.50.0.727.gbf7dc18ff4-goog
 
