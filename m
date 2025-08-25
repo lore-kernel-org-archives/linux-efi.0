@@ -1,32 +1,33 @@
-Received: from mta-65-228.siemens.flowmailer.net (mta-65-228.siemens.flowmailer.net [185.136.65.228])
+Received: from mta-65-227.siemens.flowmailer.net (mta-65-227.siemens.flowmailer.net [185.136.65.227])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3EBC129E0F4
-	for <linux-efi@vger.kernel.org>; Mon, 25 Aug 2025 16:07:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.136.65.228
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3D92635965
+	for <linux-efi@vger.kernel.org>; Mon, 25 Aug 2025 16:07:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.136.65.227
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1756138044; cv=none; b=FwYKkMC7j+xSsQp6+aYpYeNUjeHtxr+4VupUN6cEIRDx14ZaYWNHCrDCfv/tmchy5vVaxSsqnPNQuHojHszA6xr0LXGQJue0h5tuOoISO9KP6pCSIB3kcT8Q+VrkI+8wyooE4ofUoww/ij50ezniLE9YwT3NgoJu0KeOBNkRMEA=
+	t=1756138045; cv=none; b=Rz8fiCWZDSi5egq0vvBPLUDl92JdktwFpG/tS0QBgUaIs+VmbCvPUcewbirL6fuhfK8rikoEsnBQKVWF8y3vsIyBT387okbnOfi68iznn4a801pamBZt0/VeRT+HoiY8I7hvtvP3oZMPS6vnYiSf7UHVf1PQemJRgktvaf04qco=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1756138044; c=relaxed/simple;
-	bh=2Dd39Z5VLNV8NHl8byVSZhxo6MEB4pLX7stKC85GgiA=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=PaiJzVgbD7rG78CtIrSjSfJm09I+ijTdZWn1yE/+F+/0+UMIp6lHGTZKwYfoR7fIhx5MRWG0h3wpGVr4/RsXkvX41Q8pVJed2lDUG4KZOBFly4FDPqwBYGFwZhe/bQNhLIuptlegEHy/mYDbJDc2u4OHjl0rAfEYHAyLpa4YwSM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=siemens.com; spf=pass smtp.mailfrom=rts-flowmailer.siemens.com; dkim=pass (2048-bit key) header.d=siemens.com header.i=jan.kiszka@siemens.com header.b=MvBwvLfA; arc=none smtp.client-ip=185.136.65.228
+	s=arc-20240116; t=1756138045; c=relaxed/simple;
+	bh=afEhyXcerRxJ2pUFrVuQ80HLCcLlpdreIpO7q+Efovc=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=P8YtXcLxHMjHllPN9O6ZUyrRgFSruEnhFBRG7/qndh+8mDwGfGLyaOBApDvmmY8eDsBVRFQsv1Ah2+3/m+LxcqILX4VzCUQ8QbMwEm51uTCkTZQNXut8O9/ZiLD8AOLRaDmJs9xQLMh9veFdwozm5bR7+gGURkYONfxJCEiR5Jk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=siemens.com; spf=pass smtp.mailfrom=rts-flowmailer.siemens.com; dkim=pass (2048-bit key) header.d=siemens.com header.i=jan.kiszka@siemens.com header.b=c711gE2+; arc=none smtp.client-ip=185.136.65.227
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=siemens.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rts-flowmailer.siemens.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=siemens.com header.i=jan.kiszka@siemens.com header.b="MvBwvLfA"
-Received: by mta-65-228.siemens.flowmailer.net with ESMTPSA id 20250825160713b668193a0adc3c482e
+	dkim=pass (2048-bit key) header.d=siemens.com header.i=jan.kiszka@siemens.com header.b="c711gE2+"
+Received: by mta-65-227.siemens.flowmailer.net with ESMTPSA id 20250825160714777ffac40f5057ca9c
         for <linux-efi@vger.kernel.org>;
-        Mon, 25 Aug 2025 18:07:13 +0200
+        Mon, 25 Aug 2025 18:07:14 +0200
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; s=fm2;
  d=siemens.com; i=jan.kiszka@siemens.com;
- h=Date:From:Subject:To:Message-ID:MIME-Version:Content-Type:Content-Transfer-Encoding:Cc;
- bh=op8QEMoJkTGO/bD4ByGq2ruh0tz1u/z+bRtk06GRpeg=;
- b=MvBwvLfAFzh1802zqugSzurNxZbE7JP9ga9wMgjMx5UaC2AEq9Lg5EtAl75/dWUDIbWZXQ
- nCl6aSqYL2R8hFw9T0xYOO1PYthHjUkVmqDbDsWp94JmGyEX8IuggLMh0WywbsE4Tj3ZVh4l
- TmNzfNbZnJk+/Xw9Gd3vuodvz/BtlSx6b4kFAZw7BInB2iRQxRoM07iV7ryFwEXly8xGwHym
- ooC2MHVPJayc/WzExcjkYofOp05+Yo3q6HeWpmskCZ1BDkDgyiK9n4D4yJrUpZXZm/PQjABW
- JcASNFjUV9u34uhsOm2hE3FosFobbi3QdvgCJAla2YIA1hZxOv+sDDhg==;
+ h=Date:From:Subject:To:Message-ID:MIME-Version:Content-Type:Content-Transfer-Encoding:Cc:References:In-Reply-To;
+ bh=9B4yx0Y9gMLMy4+y7N4u4X2Mzh1VO2RHXLHiQLJZ9As=;
+ b=c711gE2+yk5VvuqNyfW5+c93AyfEngpAFlCfSD+E+ScuDPwn3hmycBW4iCYp0zruY2NDgR
+ nv9RDpwfMdm1kAdbkbK/liXhxAdYHMr8YY2GhfiZxU80J2YziGW/qSgYc8tR4/PObW6KOPew
+ +RcCq5RfN//bNAZvobQG46cSdVDNMOPcPFxO1uMAasYCIZhokQcW9crie6+VUaculL1NVes9
+ Ek+YCHNYBOmxH9l2+FwMK+6vOVdbsgRivrLpeo+HT5+Wu/sypnSjzROevetCKGNNmisiA2oY
+ c2F8tvO48r1etP7vs5Y22gtuwGBFkewB6kt+sNeAHZWeDnC7YYMYg+kQ==;
 From: Jan Kiszka <jan.kiszka@siemens.com>
 To: Ard Biesheuvel <ardb@kernel.org>,
 	Masahisa Kojima <kojima.masahisa@socionext.com>,
@@ -36,9 +37,11 @@ Cc: linux-efi@vger.kernel.org,
 	Sumit Garg <sumit.garg@kernel.org>,
 	Jens Wiklander <jens.wiklander@linaro.org>,
 	Hua Qian Li <huaqian.li@siemens.com>
-Subject: [PATCH v3 0/4] efi: stmm: Fix for incorrect buffer allocation and cleanups
-Date: Mon, 25 Aug 2025 18:07:09 +0200
-Message-ID: <cover.1756138033.git.jan.kiszka@siemens.com>
+Subject: [PATCH v3 4/4] efi: stmm: Drop unneeded null pointer check
+Date: Mon, 25 Aug 2025 18:07:13 +0200
+Message-ID: <b273210fea6dfe139ee5457f3769afd535c184e5.1756138033.git.jan.kiszka@siemens.com>
+In-Reply-To: <cover.1756138033.git.jan.kiszka@siemens.com>
+References: <cover.1756138033.git.jan.kiszka@siemens.com>
 Precedence: bulk
 X-Mailing-List: linux-efi@vger.kernel.org
 List-Id: <linux-efi.vger.kernel.org>
@@ -49,33 +52,32 @@ Content-Transfer-Encoding: 8bit
 X-Flowmailer-Platform: Siemens
 Feedback-ID: 519:519-294854:519-21489:flowmailer
 
-Changes in v3:
- - improve description of patch 3
+From: Jan Kiszka <jan.kiszka@siemens.com>
 
-Changes in v2:
- - simplify page allocation approach
- - switch to returning EFI_DEVICE_ERROR on ENOMEM
- - drop efi return value argument from setup_mm_hdr
+The API documenation of setup_mm_hdr does not mention that dptr can be
+NULL, this is a local function, and no caller passes NULL. So drop the
+unneeded check.
 
-One critical fix for the EFI StMM driver, one error return code
-adjustment and two smaller cleanups.
+Signed-off-by: Jan Kiszka <jan.kiszka@siemens.com>
+Reviewed-by: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+---
+ drivers/firmware/efi/stmm/tee_stmm_efi.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
-Note that the suggestion to convert tee_shm_register_kernel_buf to take
-pages instead of buffer addresses is not forgotten, just in the backlog.
-I wanted to avoid that the critical fix has to wait for me finding time
-to refactor the API as well.
-
-Jan
-
-Jan Kiszka (4):
-  efi: stmm: Fix incorrect buffer allocation method
-  efi: stmm: Do not return EFI_OUT_OF_RESOURCES on internal errors
-  efi: stmm: Drop unused EFI error from setup_mm_hdr arguments
-  efi: stmm: Drop unneeded null pointer check
-
- drivers/firmware/efi/stmm/tee_stmm_efi.c | 61 +++++++++++-------------
- 1 file changed, 27 insertions(+), 34 deletions(-)
-
+diff --git a/drivers/firmware/efi/stmm/tee_stmm_efi.c b/drivers/firmware/efi/stmm/tee_stmm_efi.c
+index c2bc8467b099..65c0fe1ba275 100644
+--- a/drivers/firmware/efi/stmm/tee_stmm_efi.c
++++ b/drivers/firmware/efi/stmm/tee_stmm_efi.c
+@@ -185,8 +185,7 @@ static void *setup_mm_hdr(u8 **dptr, size_t payload_size, size_t func)
+ 
+ 	var_hdr = (struct smm_variable_communicate_header *)mm_hdr->data;
+ 	var_hdr->function = func;
+-	if (dptr)
+-		*dptr = comm_buf;
++	*dptr = comm_buf;
+ 
+ 	return var_hdr->data;
+ }
 -- 
 2.43.0
 
